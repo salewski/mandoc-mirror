@@ -3,23 +3,35 @@
 .\" The following requests are required for all man pages.
 .\"
 .\" Remove `\&' from the line below.
-.Dd $\&Mdocdate$
-.Dt NAME SECTION#
+.Dd $Mdocdate$
+.Dt mdocml 1
 .Os
 .Sh NAME
-.Nm program
-.Nd one line about what it does
+.Nm mdocml
+.Nd compile manpage source into mark-up language
 .Sh SYNOPSIS
-.\" For a program:  program [-abc] file ...
-.Nm program
-.Op Fl abc
-.Ar
+.Nm mdocml
+.Op Fl o Ar outfile
+.Op Ar infile
 .Sh DESCRIPTION
 The
 .Nm
-utility processes files ...
-something
-something.
+utility compiles manpage source into a mark-up language.  Its arguments
+are as follows:
+.Bl -tag -width "-o outfile"
+.It Fl o Ar outfile
+Place output in 
+.Ar outfile ,
+which may be
+.Qq -
+for standard output.  The default is standard output.
+.It Ar infile
+Read input from
+.Ar infile ,
+which may be 
+.Qq -
+for standard input.  The default is standard input.
+.El
 .\" The following requests should be uncommented and used where appropriate.
 .\" This next request is for sections 2, 3, and 9 function return values only.
 .\" .Sh RETURN VALUES
