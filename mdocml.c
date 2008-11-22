@@ -30,20 +30,23 @@
 
 #include "libmdocml.h"
 
-struct md_file {
+#define	BUFFER_IN_DEF	BUFSIZ
+#define	BUFFER_OUT_DEF	BUFSIZ
+#define	BUFFER_LINE	BUFSIZ
+
+struct md_rbuf {
 	int		 fd;
 	const char	*name;
-};
-
-struct md_buf {
-	struct md_file	*file;
 	char		*buf;
 	size_t		 bufsz;
 	size_t		 line;
 };
 
 struct md_mbuf {
-	struct md_buf	*buf;
+	int		 fd;
+	const char	*name;
+	char		*buf;
+	size_t		 bufsz;
 	size_t		 pos;
 };
 
@@ -51,12 +54,12 @@ static void		 usage(void);
 
 static int		 md_begin(const char *, const char *);
 static int		 md_begin_io(const char *, const char *);
-static int		 md_begin_bufs(struct md_file *, struct md_file *);
-static int		 md_run(struct md_buf *, struct md_buf *);
-static int		 md_line(struct md_mbuf *, const struct md_buf *,
+static int		 md_begin_bufs(struct md_mbuf *, struct md_rbuf *);
+static int		 md_run(struct md_mbuf *, struct md_rbuf *);
+static int		 md_line(struct md_mbuf *, const struct md_rbuf *,
 				const char *, size_t);
 
-static ssize_t		 md_buf_fill(struct md_buf *);
+static ssize_t		 md_buf_fill(struct md_rbuf *);
 static int		 md_buf_flush(struct md_mbuf *);
 
 static int		 md_buf_putchar(struct md_mbuf *, char);
@@ -122,7 +125,8 @@ static int
 md_begin_io(const char *out, const char *in)
 {
 	int		 c;
-	struct md_file	 fin, fout;
+	struct md_rbuf	 fin;
+	struct md_mbuf	 fout;
 
 	assert(out);
 	assert(in);
@@ -162,85 +166,73 @@ md_begin_io(const char *out, const char *in)
 
 
 static int
-md_begin_bufs(struct md_file *out, struct md_file *in)
+md_begin_bufs(struct md_mbuf *out, struct md_rbuf *in)
 {
 	struct stat	 stin, stout;
-	struct md_buf	 inbuf, outbuf;
 	int		 c;
 
 	assert(in);
 	assert(out);
 
 	if (-1 == fstat(in->fd, &stin)) {
-		warn("fstat: %s", in->name);
+		warn("%s", in->name);
 		return(1);
 	} else if (-1 == fstat(out->fd, &stout)) {
-		warn("fstat: %s", out->name);
+		warn("%s", out->name);
 		return(1);
 	}
 
-	inbuf.file = in;
-	inbuf.line = 1;
-	/*inbuf.bufsz = MAX(stin.st_blksize, BUFSIZ);*/
-	inbuf.bufsz = 256;
+	in->bufsz = MAX(stin.st_blksize, BUFFER_IN_DEF);
 
-	outbuf.file = out;
-	outbuf.line = 1;
-	/*outbuf.bufsz = MAX(stout.st_blksize, BUFSIZ);*/
-	outbuf.bufsz = 256;
+	out->bufsz = MAX(stout.st_blksize, BUFFER_OUT_DEF);
 
-	if (NULL == (inbuf.buf = malloc(inbuf.bufsz))) {
+	if (NULL == (in->buf = malloc(in->bufsz))) {
 		warn("malloc");
 		return(1);
-	} else if (NULL == (outbuf.buf = malloc(outbuf.bufsz))) {
+	} else if (NULL == (out->buf = malloc(out->bufsz))) {
 		warn("malloc");
-		free(inbuf.buf);
+		free(in->buf);
 		return(1);
 	}
 
-	c = md_run(&outbuf, &inbuf);
+	c = md_run(out, in);
 
-	free(inbuf.buf);
-	free(outbuf.buf);
+	free(in->buf);
+	free(out->buf);
 
 	return(c);
 }
 
 
 static ssize_t
-md_buf_fill(struct md_buf *in)
+md_buf_fill(struct md_rbuf *in)
 {
 	ssize_t		 ssz;
 
 	assert(in);
-	assert(in->file);
 	assert(in->buf);
 	assert(in->bufsz > 0);
-	assert(in->file->name);
+	assert(in->name);
 
-	if (-1 == (ssz = read(in->file->fd, in->buf, in->bufsz))) 
-		warn("%s", in->file->name);
-	else
-		(void)printf("%s: filled %zd bytes\n",
-				in->file->name, ssz);
+	if (-1 == (ssz = read(in->fd, in->buf, in->bufsz))) 
+		warn("%s", in->name);
 
 	return(ssz);
 }
 
 
 static int
-md_run(struct md_buf *out, struct md_buf *in)
+md_run(struct md_mbuf *out, struct md_rbuf *in)
 {
-	struct md_mbuf	 mbuf;
 	ssize_t		 sz, i;
-	char		 line[BUFSIZ];
+	char		 line[BUFFER_LINE];
 	size_t		 pos;
 
 	assert(in);
 	assert(out); 
 
-	mbuf.buf = out;
-	mbuf.pos = 0;
+	out->pos = 0;
+	in->line = 1;
 
 	/* LINTED */
 	for (pos = 0; ; ) {
@@ -251,29 +243,29 @@ md_run(struct md_buf *out, struct md_buf *in)
 
 		for (i = 0; i < sz; i++) {
 			if ('\n' == in->buf[i]) {
-				if (md_line(&mbuf, in, line, pos))
+				if (md_line(out, in, line, pos))
 					return(1);
 				in->line++;
 				pos = 0;
 				continue;
 			}
 
-			if (pos < BUFSIZ) {
+			if (pos < BUFFER_LINE) {
 				/* LINTED */
 				line[pos++] = in->buf[i];
 				continue;
 			}
 
 			warnx("%s: line %zu too long",
-					in->file->name, in->line);
+					in->name, in->line);
 			return(1);
 		}
 	}
 
-	if (0 != pos && md_line(&mbuf, in, line, pos))
+	if (0 != pos && md_line(out, in, line, pos))
 		return(1);
 
-	return(md_buf_flush(&mbuf) ? 0 : 1);
+	return(md_buf_flush(out) ? 0 : 1);
 }
 
 
@@ -284,23 +276,18 @@ md_buf_flush(struct md_mbuf *buf)
 
 	assert(buf);
 	assert(buf->buf);
-	assert(buf->buf->file);
-	assert(buf->buf->buf);
-	assert(buf->buf->file->name);
-
-	(void)printf("%s: flushing %zu bytes\n",
-			buf->buf->file->name, buf->pos);
+	assert(buf->name);
 
 	if (0 == buf->pos)
 		return(1);
 
-	sz = write(buf->buf->file->fd, buf->buf->buf, buf->pos);
+	sz = write(buf->fd, buf->buf, buf->pos);
 
 	if (-1 == sz) {
-		warn("%s", buf->buf->file->name);
+		warn("%s", buf->name);
 		return(0);
 	} else if ((size_t)sz != buf->pos) {
-		warnx("%s: short write", buf->buf->file->name);
+		warnx("%s: short write", buf->name);
 		return(0);
 	}
 
@@ -325,9 +312,9 @@ md_buf_puts(struct md_mbuf *buf, const char *p, size_t sz)
 	assert(buf);
 	assert(buf->buf);
 
-	while (buf->pos + sz > buf->buf->bufsz) {
-		ssz = buf->buf->bufsz - buf->pos;
-		(void)memcpy(buf->buf->buf + buf->pos, p, ssz);
+	while (buf->pos + sz > buf->bufsz) {
+		ssz = buf->bufsz - buf->pos;
+		(void)memcpy(buf->buf + buf->pos, p, ssz);
 		p += ssz;
 		sz -= ssz;
 		buf->pos += ssz;
@@ -336,16 +323,18 @@ md_buf_puts(struct md_mbuf *buf, const char *p, size_t sz)
 			return(0);
 	}
 
-	(void)memcpy(buf->buf->buf + buf->pos, p, sz);
+	(void)memcpy(buf->buf + buf->pos, p, sz);
 	buf->pos += sz;
 	return(1);
 }
 
 
 static int
-md_line(struct md_mbuf *out, const struct md_buf *in,
+md_line(struct md_mbuf *out, const struct md_rbuf *in,
 		const char *buf, size_t sz)
 {
+
+	/* FIXME: this is just a placeholder function. */
 
 	assert(buf);
 	assert(out);
