@@ -34,18 +34,21 @@
 #define	BUFFER_OUT_DEF	BUFSIZ
 
 static void		 usage(void);
-static int		 begin_io(const char *, const char *);
-static int		 leave_io(const struct md_mbuf *, 
-				const struct md_rbuf *, int);
-static int		 begin_bufs(struct md_mbuf *, struct md_rbuf *);
-static int		 leave_bufs(const struct md_mbuf *, 
-				const struct md_rbuf *, int);
+static int		 begin_io(const struct md_args *, 
+				char *, char *);
+static int		 leave_io(const struct md_buf *, 
+				const struct md_buf *, int);
+static int		 begin_bufs(const struct md_args *,
+				struct md_buf *, struct md_buf *);
+static int		 leave_bufs(const struct md_buf *, 
+				const struct md_buf *, int);
 
 int
 main(int argc, char *argv[])
 {
 	int		 c;
 	char		*out, *in;
+	struct md_args	 args;
 
 	extern char	*optarg;
 	extern int	 optind;
@@ -68,13 +71,15 @@ main(int argc, char *argv[])
 	if (1 == argc)
 		in = *argv++;
 
-	return(begin_io(out ? out : "-", in ? in : "-"));
+	args.type = MD_DUMMY;
+
+	return(begin_io(&args, out ? out : "-", in ? in : "-"));
 }
 
 
 static int
-leave_io(const struct md_mbuf *out, 
-		const struct md_rbuf *in, int c)
+leave_io(const struct md_buf *out, 
+		const struct md_buf *in, int c)
 {
 	assert(out);
 	assert(in);
@@ -96,19 +101,20 @@ leave_io(const struct md_mbuf *out,
 
 
 static int
-begin_io(const char *out, const char *in)
+begin_io(const struct md_args *args, char *out, char *in)
 {
-	struct md_rbuf	 fi;
-	struct md_mbuf	 fo;
+	struct md_buf	 fi;
+	struct md_buf	 fo;
 
 #define	FI_FL	O_RDONLY
 #define	FO_FL	O_WRONLY|O_CREAT|O_TRUNC
 
+	assert(args);
 	assert(out);
 	assert(in);
 
-	bzero(&fi, sizeof(struct md_rbuf));
-	bzero(&fo, sizeof(struct md_mbuf));
+	bzero(&fi, sizeof(struct md_buf));
+	bzero(&fo, sizeof(struct md_buf));
 
 	fi.fd = STDIN_FILENO;
 	fo.fd = STDOUT_FILENO;
@@ -128,13 +134,13 @@ begin_io(const char *out, const char *in)
 			return(leave_io(&fo, &fi, 1));
 		}
 
-	return(leave_io(&fo, &fi, begin_bufs(&fo, &fi)));
+	return(leave_io(&fo, &fi, begin_bufs(args, &fo, &fi)));
 }
 
 
 static int
-leave_bufs(const struct md_mbuf *out, 
-		const struct md_rbuf *in, int c)
+leave_bufs(const struct md_buf *out, 
+		const struct md_buf *in, int c)
 {
 	assert(out);
 	assert(in);
@@ -147,10 +153,13 @@ leave_bufs(const struct md_mbuf *out,
 
 
 static int
-begin_bufs(struct md_mbuf *out, struct md_rbuf *in)
+begin_bufs(const struct md_args *args, 
+		struct md_buf *out, struct md_buf *in)
 {
 	struct stat	 stin, stout;
+	int		 c;
 
+	assert(args);
 	assert(in);
 	assert(out);
 
@@ -173,7 +182,8 @@ begin_bufs(struct md_mbuf *out, struct md_rbuf *in)
 		return(leave_bufs(out, in, 1));
 	}
 
-	return(leave_bufs(out, in, md_run(MD_DUMMY, out, in)));
+	c = md_run(args, out, in);
+	return(leave_bufs(out, in, -1 == c ? 1 : 0));
 }
 
 

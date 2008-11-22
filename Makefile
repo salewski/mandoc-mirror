@@ -2,13 +2,13 @@ CFLAGS += -W -Wall -g
 
 LINTFLAGS += -c -e -f -u
 
-CLEAN = mdocml mdocml.o mdocml.ln libmdocml.o libmdocml.ln mdocml.tgz
+CLEAN = mdocml mdocml.o mdocml.ln libmdocml.o libmdocml.ln mdocml.tgz llib-lmdocml.ln
 
 INSTALL = Makefile libmdocml.h mdocml.c libmdocml.c mdocml.1
 
 all: mdocml
 
-lint: mdocml.ln libmdocml.ln
+lint: llib-lmdocml.ln
 
 dist: mdocml.tgz
 
@@ -23,6 +23,9 @@ mdocml.tgz: $(INSTALL)
 	install -m 0644 $(INSTALL) .dist/mdocml/
 	( cd .dist/ && tar zcf ../mdocml.tgz mdocml/ )
 	rm -rf .dist/
+
+llib-lmdocml.ln: mdocml.ln libmdocml.ln
+	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln libmdocml.ln
 
 mdocml.ln: mdocml.c 
 

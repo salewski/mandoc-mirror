@@ -28,12 +28,48 @@
 
 #define	BUFFER_LINE	 BUFSIZ
 
-typedef int (*md_line)	(struct md_mbuf *, const struct md_rbuf *,
-				const char *, size_t);
+struct	md_rbuf {
+	int		 fd;
+	char		*name;
+	char		*buf;
+	size_t		 bufsz;
+	size_t		 line;
+};
 
-static int		 md_line_dummy(struct md_mbuf *, 
+struct	md_mbuf {
+	int		 fd;
+	char		*name;
+	char		*buf;
+	size_t		 bufsz;
+	size_t		 pos;
+};
+
+typedef int (*md_line)	(const struct md_args *, struct md_mbuf *, 
 				const struct md_rbuf *,
 				const char *, size_t);
+typedef int (*md_init)	(const struct md_args *, struct md_mbuf *);
+typedef int (*md_exit)	(const struct md_args *, struct md_mbuf *);
+
+static int		 md_line_dummy(const struct md_args *,
+				struct md_mbuf *, 
+				const struct md_rbuf *, 
+				const char *, size_t);
+
+static int		 md_line_html4_strict(const struct md_args *,
+				struct md_mbuf *, 
+				const struct md_rbuf *,
+				const char *, size_t);
+static int		 md_init_html4_strict(const struct md_args *,
+				struct md_mbuf *);
+static int		 md_exit_html4_strict(const struct md_args *,
+				struct md_mbuf *);
+
+static int		 md_run_enter(const struct md_args *, 
+				struct md_mbuf *, struct md_rbuf *);
+static int		 md_run_leave(const struct md_args *, 
+				struct md_mbuf *, 
+				struct md_rbuf *, int);
+
 static ssize_t		 md_buf_fill(struct md_rbuf *);
 static int		 md_buf_flush(struct md_mbuf *);
 static int		 md_buf_putchar(struct md_mbuf *, char);
@@ -41,7 +77,7 @@ static int		 md_buf_puts(struct md_mbuf *,
 				const char *, size_t);
 
 
-ssize_t
+static ssize_t
 md_buf_fill(struct md_rbuf *in)
 {
 	ssize_t		 ssz;
@@ -58,7 +94,7 @@ md_buf_fill(struct md_rbuf *in)
 }
 
 
-int
+static int
 md_buf_flush(struct md_mbuf *buf)
 {
 	ssize_t		 sz;
@@ -85,14 +121,14 @@ md_buf_flush(struct md_mbuf *buf)
 }
 
 
-int
+static int
 md_buf_putchar(struct md_mbuf *buf, char c)
 {
 	return(md_buf_puts(buf, &c, 1));
 }
 
 
-int
+static int
 md_buf_puts(struct md_mbuf *buf, const char *p, size_t sz)
 {
 	size_t		 ssz;
@@ -121,73 +157,177 @@ md_buf_puts(struct md_mbuf *buf, const char *p, size_t sz)
 }
 
 
-int
-md_run(enum md_type type, struct md_mbuf *out, struct md_rbuf *in)
+static int
+md_run_leave(const struct md_args *args, 
+		struct md_mbuf *mbuf, struct md_rbuf *rbuf, int c)
+{
+	assert(args);
+	assert(mbuf);
+	assert(rbuf);
+
+	/* Run exiters. */
+	switch (args->type) {
+	case (MD_HTML4_STRICT):
+		if ( ! md_exit_html4_strict(args, mbuf))
+			return(-1);
+		break;
+	case (MD_DUMMY):
+		break;
+	default:
+		abort();
+	}
+
+	/* Make final flush of buffer. */
+	if ( ! md_buf_flush(mbuf))
+		return(-1);
+
+	return(c);
+}
+
+
+static int
+md_run_enter(const struct md_args *args, 
+		struct md_mbuf *mbuf, struct md_rbuf *rbuf)
 {
 	ssize_t		 sz, i;
 	char		 line[BUFFER_LINE];
 	size_t		 pos;
-	md_line		 func;
+	md_line		 fp;
 
-	assert(in);
-	assert(out); 
+	assert(args);
+	assert(mbuf);
+	assert(rbuf); 
 
-	out->pos = 0;
-	in->line = 1;
-
-	assert(MD_DUMMY == type);
-	func = md_line_dummy;
+	/* Function ptrs to line-parsers. */
+	switch (args->type) {
+	case (MD_HTML4_STRICT):
+		fp = md_line_html4_strict;
+		break;
+	case (MD_DUMMY):
+		fp = md_line_dummy;
+		break;
+	default:
+		abort();
+	}
 
 	/* LINTED */
 	for (pos = 0; ; ) {
-		if (-1 == (sz = md_buf_fill(in)))
-			return(1);
+		if (-1 == (sz = md_buf_fill(rbuf)))
+			return(-1);
 		else if (0 == sz)
 			break;
 
 		for (i = 0; i < sz; i++) {
-			if ('\n' == in->buf[i]) {
-				if ((*func)(out, in, line, pos))
-					return(1);
-				in->line++;
+			if ('\n' == rbuf->buf[i]) {
+				if ( ! (*fp)(args, mbuf, rbuf, line, pos))
+					return(-1);
+				rbuf->line++;
 				pos = 0;
 				continue;
 			}
 
 			if (pos < BUFFER_LINE) {
 				/* LINTED */
-				line[pos++] = in->buf[i];
+				line[pos++] = rbuf->buf[i];
 				continue;
 			}
 
 			warnx("%s: line %zu too long",
-					in->name, in->line);
-			return(1);
+					rbuf->name, rbuf->line);
+			return(-1);
 		}
 	}
 
-	if (0 != pos && (*func)(out, in, line, pos))
-		return(1);
+	if (0 != pos && ! (*fp)(args, mbuf, rbuf, line, pos))
+		return(-1);
 
-	return(md_buf_flush(out) ? 0 : 1);
+	return(md_run_leave(args, mbuf, rbuf, 0));
+}
+
+
+int
+md_run(const struct md_args *args,
+		const struct md_buf *out, const struct md_buf *in)
+{
+	struct md_mbuf	 mbuf;
+	struct md_rbuf	 rbuf;
+
+	assert(args);
+	assert(in);
+	assert(out); 
+
+	(void)memcpy(&mbuf, out, sizeof(struct md_buf));
+	(void)memcpy(&rbuf, in, sizeof(struct md_buf));
+
+	mbuf.pos = 0;
+	rbuf.line = 1;
+
+	/* Run initialisers. */
+	switch (args->type) {
+	case (MD_HTML4_STRICT):
+		if ( ! md_init_html4_strict(args, &mbuf))
+			return(-1);
+		break;
+	case (MD_DUMMY):
+		break;
+	default:
+		abort();
+	}
+
+	/* Go into mainline. */
+	return(md_run_enter(args, &mbuf, &rbuf));
 }
 
 
 static int
-md_line_dummy(struct md_mbuf *out, const struct md_rbuf *in,
-		const char *buf, size_t sz)
+md_line_dummy(const struct md_args *args, struct md_mbuf *out, 
+		const struct md_rbuf *in, const char *buf, size_t sz)
 {
 
 	assert(buf);
 	assert(out);
 	assert(in);
+	assert(args);
 
 	if ( ! md_buf_puts(out, buf, sz))
-		return(1);
+		return(0);
 	if ( ! md_buf_putchar(out, '\n'))
-		return(1);
+		return(0);
 
-	return(0);
+	return(1);
 }
 
 
+static int
+md_exit_html4_strict(const struct md_args *args, struct md_mbuf *p) 
+{
+
+	assert(p);
+	assert(args);
+	return(1);
+}
+
+
+static int
+md_init_html4_strict(const struct md_args *args, struct md_mbuf *p) 
+{
+
+	assert(p);
+	assert(args);
+	return(1);
+}
+
+
+static int
+md_line_html4_strict(const struct md_args *args, struct md_mbuf *out, 
+		const struct md_rbuf *in, const char *buf, size_t sz)
+{
+
+	assert(args);
+	assert(buf);
+	assert(out);
+	assert(in);
+	(void)sz;
+
+	return(1);
+}
