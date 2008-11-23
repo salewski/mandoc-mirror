@@ -27,12 +27,13 @@
 #include "libmdocml.h"
 #include "private.h"
 
-#define	BUFFER_LINE	 BUFSIZ
+#define	BUFFER_LINE	 BUFSIZ	/* Default line-buffer size. */
 
 static	int	 md_run_enter(const struct md_args *, 
 			struct md_mbuf *, struct md_rbuf *, void *);
 static	int	 md_run_leave(const struct md_args *, struct md_mbuf *,
 			struct md_rbuf *, int, void *);
+
 static	ssize_t	 md_buf_fill(struct md_rbuf *);
 static	int	 md_buf_flush(struct md_mbuf *);
 
@@ -170,46 +171,42 @@ md_run_enter(const struct md_args *args, struct md_mbuf *mbuf,
 	case (MD_HTML4_STRICT):
 		fp = md_line_html4_strict;
 		break;
-	case (MD_DUMMY):
+	default:
 		fp = md_line_dummy;
 		break;
-	default:
-		abort();
 	}
 
-	/* LINTED */
-	for (pos = 0; ; ) {
-		if (-1 == (sz = md_buf_fill(rbuf)))
-			return(md_run_leave(args, mbuf, rbuf, -1, p));
-		else if (0 == sz)
-			break;
+	pos = 0;
 
-		for (i = 0; i < sz; i++) {
-			if ('\n' == rbuf->buf[i]) {
-				if ( ! (*fp)(args, mbuf, rbuf, line, pos, p))
-					return(md_run_leave(args, mbuf, rbuf,
-								-1, p));
-				rbuf->line++;
-				pos = 0;
-				continue;
-			}
+again:
+	if (-1 == (sz = md_buf_fill(rbuf))) {
+		return(md_run_leave(args, mbuf, rbuf, -1, p));
+	} else if (0 == sz && 0 != pos) {
+		warnx("%s: no newline at end of file", rbuf->name);
+		return(md_run_leave(args, mbuf, rbuf, -1, p));
+	} else if (0 == sz)
+		return(md_run_leave(args, mbuf, rbuf, 0, p));
 
+	for (i = 0; i < sz; i++) {
+		if ('\n' != rbuf->buf[i]) {
 			if (pos < BUFFER_LINE) {
 				/* LINTED */
 				line[pos++] = rbuf->buf[i];
 				continue;
 			}
-
 			warnx("%s: line %zu too long",
 					rbuf->name, rbuf->line);
 			return(md_run_leave(args, mbuf, rbuf, -1, p));
 		}
+
+		if ( ! (*fp)(args, mbuf, rbuf, line, pos, p))
+			return(md_run_leave(args, mbuf, rbuf, -1, p));
+		rbuf->line++;
+		pos = 0;
 	}
 
-	if (0 != pos && ! (*fp)(args, mbuf, rbuf, line, pos, p))
-		return(md_run_leave(args, mbuf, rbuf, -1, p));
-
-	return(md_run_leave(args, mbuf, rbuf, 0, p));
+	goto again;
+	/* NOTREACHED */
 }
 
 

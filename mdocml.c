@@ -30,15 +30,16 @@
 
 #include "libmdocml.h"
 
-#define	BUFFER_IN_DEF	BUFSIZ
-#define	BUFFER_OUT_DEF	BUFSIZ
+#define	BUFFER_IN_DEF	BUFSIZ	 /* See begin_bufs. */
+#define	BUFFER_OUT_DEF	BUFSIZ	 /* See begin_bufs. */
 
-static void		 usage(void);
-static int		 begin_io(const struct md_args *, 
+static	void		 usage(void);
+
+static	int		 begin_io(const struct md_args *, 
 				char *, char *);
-static int		 leave_io(const struct md_buf *, 
+static	int		 leave_io(const struct md_buf *, 
 				const struct md_buf *, int);
-static int		 begin_bufs(const struct md_args *,
+static	int		 begin_bufs(const struct md_args *,
 				struct md_buf *, struct md_buf *);
 static int		 leave_bufs(const struct md_buf *, 
 				const struct md_buf *, int);
@@ -55,10 +56,13 @@ main(int argc, char *argv[])
 
 	out = in = NULL;
 	
-	while (-1 != (c = getopt(argc, argv, "o:")))
+	while (-1 != (c = getopt(argc, argv, "vo:")))
 		switch (c) {
 		case ('o'):
 			out = optarg;
+			break;
+		case ('v'):
+			args.dbg++;
 			break;
 		default:
 			usage();
@@ -72,12 +76,15 @@ main(int argc, char *argv[])
 		in = *argv++;
 
 	args.type = MD_HTML4_STRICT;
-	args.dbg = MD_DBG_TREE;
 
 	return(begin_io(&args, out ? out : "-", in ? in : "-"));
 }
 
 
+/* 
+ * Close out file descriptors opened in begin_io.  If the descriptor
+ * refers to stdin/stdout, then do nothing.
+ */
 static int
 leave_io(const struct md_buf *out, 
 		const struct md_buf *in, int c)
@@ -101,6 +108,10 @@ leave_io(const struct md_buf *out,
 }
 
 
+/*
+ * Open file descriptors or assign stdin/stdout, if dictated by the "-"
+ * token instead of a filename.
+ */
 static int
 begin_io(const struct md_args *args, char *out, char *in)
 {
@@ -139,6 +150,9 @@ begin_io(const struct md_args *args, char *out, char *in)
 }
 
 
+/*
+ * Free buffers allocated in begin_bufs.
+ */
 static int
 leave_bufs(const struct md_buf *out, 
 		const struct md_buf *in, int c)
@@ -153,6 +167,10 @@ leave_bufs(const struct md_buf *out,
 }
 
 
+/*
+ * Allocate buffers to the maximum of either the input file's blocksize
+ * or BUFFER_IN_DEF/BUFFER_OUT_DEF, which should be around BUFSIZE.
+ */
 static int
 begin_bufs(const struct md_args *args, 
 		struct md_buf *out, struct md_buf *in)
@@ -196,5 +214,6 @@ usage(void)
 {
 	extern char	*__progname;
 
-	(void)printf("usage: %s [-o outfile] [infile]\n", __progname);
+	(void)printf("usage: %s [-v] [-o outfile] [infile]\n", 
+			__progname);
 }

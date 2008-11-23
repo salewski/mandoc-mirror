@@ -39,12 +39,10 @@ enum	rofftype {
 	ROFF_LAYOUT 
 };
 
-#define	ROFFCALL_ARGS	  const struct md_args *arg,		\
-			  struct md_mbuf *out,			\
-			  const struct md_rbuf *in,		\
-			  const char *buf, size_t sz,		\
-			  size_t pos, enum roffd type,		\
-			  struct rofftree *tree
+#define	ROFFCALL_ARGS	  					\
+	const struct md_args *arg, struct md_mbuf *out,		\
+	const struct md_rbuf *in, const char *buf, size_t sz,	\
+	size_t pos, enum roffd type, struct rofftree *tree
 
 struct	rofftree;
 
@@ -54,9 +52,9 @@ struct	rofftok {
 	int		(*cb)(ROFFCALL_ARGS);
 	enum rofftype	  type;
 	int		  flags;
-#define	ROFF_NESTED	 (1 << 0) /* FIXME: test. */
-#define	ROFF_PARSED	 (1 << 1) /* FIXME: test. */
-#define	ROFF_CALLABLE	 (1 << 2) /* FIXME: test. */
+#define	ROFF_NESTED	 (1 << 0) 
+#define	ROFF_PARSED	 (1 << 1)
+#define	ROFF_CALLABLE	 (1 << 2)
 };
 
 struct	roffnode {
@@ -286,11 +284,13 @@ roffparse(const struct md_args *args, struct md_mbuf *out,
 			break;
 		}
 		assert(ROFF_PRELUDE & tree->state);
-		warnx("%s: text token `%s' in prelude (line %zu)",
+		warnx("%s: body token `%s' in prelude (line %zu)",
 				in->name, tokens[tokid].name, in->line);
 		return(0);
-	default:
+	case (ROFF_COMMENT):
 		return(1);
+	default:
+		abort();
 	}
 
 	/*
@@ -411,25 +411,42 @@ roffnode_free(int tokid, struct rofftree *tree)
 }
 
 
-static int dbg_lvl = 0; /* FIXME: de-globalise. */
+static int dbg_lvl = 0;
 
 
 static void
 dbg_enter(const struct md_args *args, int tokid)
 {
 	int		 i;
+	static char	 buf[72];
 
 	assert(args);
 	if ( ! (args->dbg & MD_DBG_TREE))
 		return;
-
 	assert(tokid >= 0 && tokid <= ROFF_Max);
+
+	buf[0] = 0;
+
+	switch (tokens[tokid].type) {
+	case (ROFF_LAYOUT):
+		/* FALLTHROUGH */
+	case (ROFF_TEXT):
+		(void)strlcat(buf, "body: ", sizeof(buf));
+		break;
+	case (ROFF_TITLE):
+		(void)strlcat(buf, "prelude: ", sizeof(buf));
+		break;
+	default:
+		abort();
+	}
 
 	/* LINTED */
 	for (i = 0; i < dbg_lvl; i++)
-		(void)printf("    ");
+		(void)strlcat(buf, "  ", sizeof(buf));
 
-	(void)printf("%s\n", tokens[tokid].name);
+	(void)strlcat(buf, tokens[tokid].name, sizeof(buf));
+
+	(void)printf("%s\n", buf);
 
 	if (ROFF_LAYOUT == tokens[tokid].type)
 		dbg_lvl++;
@@ -439,8 +456,6 @@ dbg_enter(const struct md_args *args, int tokid)
 static void
 dbg_leave(const struct md_args *args, int tokid)
 {
-	int		 i;
-
 	assert(args);
 	if ( ! (args->dbg & MD_DBG_TREE))
 		return;
@@ -449,14 +464,7 @@ dbg_leave(const struct md_args *args, int tokid)
 
 	assert(tokid >= 0 && tokid <= ROFF_Max);
 	assert(dbg_lvl > 0);
-
 	dbg_lvl--;
-
-	/* LINTED */
-	for (i = 0; i < dbg_lvl; i++) 
-		(void)printf("    ");
-
-	(void)printf("%s\n", tokens[tokid].name);
 }
 
 
@@ -467,7 +475,7 @@ roff_Dd(ROFFCALL_ARGS)
 	assert(ROFF_PRELUDE & tree->state);
 	if (ROFF_PRELUDE_Dt & tree->state ||
 			ROFF_PRELUDE_Dd & tree->state) {
-		warnx("%s: bad prelude ordering (line %zu)",
+		warnx("%s: prelude `Dd' out-of-order (line %zu)",
 				in->name, in->line);
 		return(0);
 	}
@@ -487,7 +495,7 @@ roff_Dt(ROFFCALL_ARGS)
 	assert(ROFF_PRELUDE & tree->state);
 	if ( ! (ROFF_PRELUDE_Dd & tree->state) ||
 			(ROFF_PRELUDE_Dt & tree->state)) {
-		warnx("%s: bad prelude ordering (line %zu)",
+		warnx("%s: prelude `Dt' out-of-order (line %zu)",
 				in->name, in->line);
 		return(0);
 	}
@@ -513,7 +521,7 @@ roff_Os(ROFFCALL_ARGS)
 	assert(ROFF_PRELUDE & tree->state);
 	if ( ! (ROFF_PRELUDE_Dt & tree->state) ||
 			! (ROFF_PRELUDE_Dd & tree->state)) {
-		warnx("%s: bad prelude ordering (line %zu)",
+		warnx("%s: prelude `Os' out-of-order (line %zu)",
 				in->name, in->line);
 		return(0);
 	}
