@@ -71,7 +71,7 @@ main(int argc, char *argv[])
 	if (1 == argc)
 		in = *argv++;
 
-	args.type = MD_DUMMY;
+	args.type = MD_HTML4_STRICT;
 
 	return(begin_io(&args, out ? out : "-", in ? in : "-"));
 }

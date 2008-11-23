@@ -73,6 +73,8 @@ static int		 md_run_leave(const struct md_args *,
 static ssize_t		 md_buf_fill(struct md_rbuf *);
 static int		 md_buf_flush(struct md_mbuf *);
 static int		 md_buf_putchar(struct md_mbuf *, char);
+static int		 md_buf_putstring(struct md_mbuf *, 
+				const char *);
 static int		 md_buf_puts(struct md_mbuf *, 
 				const char *, size_t);
 
@@ -125,6 +127,13 @@ static int
 md_buf_putchar(struct md_mbuf *buf, char c)
 {
 	return(md_buf_puts(buf, &c, 1));
+}
+
+
+static int
+md_buf_putstring(struct md_mbuf *buf, const char *p)
+{
+	return(md_buf_puts(buf, p, strlen(p)));
 }
 
 
@@ -299,22 +308,71 @@ md_line_dummy(const struct md_args *args, struct md_mbuf *out,
 
 
 static int
-md_exit_html4_strict(const struct md_args *args, struct md_mbuf *p) 
+md_exit_html4_strict(const struct md_args *args, struct md_mbuf *out) 
 {
+	char		*tail;
 
-	assert(p);
+	assert(out);
 	assert(args);
+
+	tail =	"		</pre>\n"
+		"	</body>\n"
+		"</html>\n";
+
+	if ( ! md_buf_putstring(out, tail))
+		return(0);
+
 	return(1);
 }
 
 
 static int
-md_init_html4_strict(const struct md_args *args, struct md_mbuf *p) 
+md_init_html4_strict(const struct md_args *args, struct md_mbuf *out) 
+{
+	char		*head;
+
+	assert(out);
+	assert(args);
+
+	head =	"<html>\n"
+		"	<head>\n"
+		"		<title>Manual Page</title>\n"
+		"	</head>\n"
+		"	<body>\n"
+		"		<pre>\n";
+
+	if ( ! md_buf_putstring(out, head))
+		return(0);
+
+	return(1);
+}
+
+
+struct md_roff_macro {
+	char		 name[2];
+	int		 flags;
+#define	MD_PARSED	(1 << 0)
+#define	MD_CALLABLE	(1 << 1)
+#define	MD_TITLE	(1 << 2)
+};
+
+struct md_roff_macro[] = {
+	{ "Dd",		MD_TITLE 	},
+	{ "Dt",		MD_TITLE 	},
+	{ "Os",		MD_TITLE 	},
+	{ "Sh",		MD_PARSED 	},
+};
+
+
+static int
+md_roff(struct md_mbuf *out, const struct md_rbuf *in, 
+		const char *buf, size_t sz)
 {
 
-	assert(p);
-	assert(args);
-	return(1);
+	assert(out);
+	assert(in);
+	assert(buf);
+	assert(sz >= 1);
 }
 
 
@@ -324,10 +382,16 @@ md_line_html4_strict(const struct md_args *args, struct md_mbuf *out,
 {
 
 	assert(args);
-	assert(buf);
-	assert(out);
 	assert(in);
-	(void)sz;
 
-	return(1);
+	if (0 == sz) {
+		warnx("%s: blank line (line %zu)", in->name, in->line);
+		return(0);
+	}
+
+	if ('.' == *buf) {
+		return(1);
+	}
+	
+	return(md_buf_puts(out, buf, sz));
 }
