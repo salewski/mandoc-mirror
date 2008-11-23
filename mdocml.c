@@ -167,6 +167,9 @@ begin_bufs(const struct md_args *args,
 	if (-1 == fstat(in->fd, &stin)) {
 		warn("%s", in->name);
 		return(1);
+	} else if (0 == stin.st_size) {
+		warnx("%s: empty file", in->name);
+		return(1);
 	} else if (-1 == fstat(out->fd, &stout)) {
 		warn("%s", out->name);
 		return(1);

@@ -135,7 +135,7 @@ md_run_leave(const struct md_args *args, struct md_mbuf *mbuf,
 	/* Run exiters. */
 	switch (args->type) {
 	case (MD_HTML4_STRICT):
-		if ( ! md_exit_html4_strict(args, mbuf, rbuf, data))
+		if ( ! md_exit_html4_strict(args, mbuf, rbuf, c, data))
 			return(-1);
 		break;
 	case (MD_DUMMY):
@@ -235,8 +235,7 @@ md_run(const struct md_args *args,
 	/* Run initialisers. */
 	switch (args->type) {
 	case (MD_HTML4_STRICT):
-		if ( ! md_init_html4_strict
-				(args, &mbuf, &rbuf, &data))
+		if ( ! md_init_html4_strict(args, &mbuf, &rbuf, &data))
 			return(-1);
 		break;
 	case (MD_DUMMY):

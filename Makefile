@@ -1,4 +1,4 @@
-CFLAGS += -W -Wall -g
+CFLAGS += -W -Wall -Wno-unused-parameter -g
 LINTFLAGS += -c -e -f -u
 
 LNS	= mdocml.ln html4_strict.ln dummy.ln libmdocml.ln
