@@ -472,6 +472,8 @@ static	int
 roff_Dd(ROFFCALL_ARGS)
 {
 
+	dbg_enter(arg, ROFF_Dd);
+
 	assert(ROFF_PRELUDE & tree->state);
 	if (ROFF_PRELUDE_Dt & tree->state ||
 			ROFF_PRELUDE_Dd & tree->state) {
@@ -483,7 +485,8 @@ roff_Dd(ROFFCALL_ARGS)
 	assert(NULL == tree->last);
 	tree->state |= ROFF_PRELUDE_Dd;
 
-	dbg_enter(arg, ROFF_Dd);
+	dbg_leave(arg, ROFF_Dd);
+
 	return(1);
 }
 
@@ -491,6 +494,8 @@ roff_Dd(ROFFCALL_ARGS)
 static	int
 roff_Dt(ROFFCALL_ARGS)
 {
+
+	dbg_enter(arg, ROFF_Dt);
 
 	assert(ROFF_PRELUDE & tree->state);
 	if ( ! (ROFF_PRELUDE_Dd & tree->state) ||
@@ -503,7 +508,8 @@ roff_Dt(ROFFCALL_ARGS)
 	assert(NULL == tree->last);
 	tree->state |= ROFF_PRELUDE_Dt;
 
-	dbg_enter(arg, ROFF_Dt);
+	dbg_leave(arg, ROFF_Dt);
+
 	return(1);
 }
 
@@ -517,6 +523,8 @@ roff_Os(ROFFCALL_ARGS)
 		dbg_leave(arg, ROFF_Os);
 		return(1);
 	} 
+
+	dbg_enter(arg, ROFF_Os);
 
 	assert(ROFF_PRELUDE & tree->state);
 	if ( ! (ROFF_PRELUDE_Dt & tree->state) ||
@@ -534,7 +542,6 @@ roff_Os(ROFFCALL_ARGS)
 	tree->state &= ~ROFF_PRELUDE;
 	tree->state |= ROFF_BODY;
 
-	dbg_enter(arg, ROFF_Os);
 	return(1);
 }
 
@@ -549,10 +556,13 @@ roff_Sh(ROFFCALL_ARGS)
 		return(1);
 	} 
 
+	dbg_enter(arg, ROFF_Sh);
+
 	if (NULL == roffnode_new(ROFF_Sh, in->line, tree))
 		return(0);
 
-	dbg_enter(arg, ROFF_Sh);
+	dbg_leave(arg, ROFF_Li);
+
 	return(1);
 }
 
@@ -561,13 +571,46 @@ static int
 roff_Li(ROFFCALL_ARGS) 
 {
 
+	dbg_enter(arg, ROFF_Li);
+	dbg_leave(arg, ROFF_Li);
+
 	return(1);
 }
+
+
+#if 0
+static int
+parse_args(void)
+{
+	skip_whitespace();
+
+	while (pos < sz) {
+
+		if (is_arg) {
+		} else if (parsable) {
+			if (is_callable_token()) {
+			}
+		} 
+
+		skip_whitespace();
+	}
+}
+#endif
 
 
 static int
 roff_An(ROFFCALL_ARGS) 
 {
+
+	dbg_enter(arg, ROFF_An);
+
+	/* Do our ML stuff. */
+
+	/*parse_args();*/
+
+	/* Do our trailing whitespace stuff. */
+
+	dbg_leave(arg, ROFF_An);
 
 	return(1);
 }
