@@ -72,6 +72,7 @@ main(int argc, char *argv[])
 		in = *argv++;
 
 	args.type = MD_HTML4_STRICT;
+	args.dbg = MD_DBG_TREE;
 
 	return(begin_io(&args, out ? out : "-", in ? in : "-"));
 }

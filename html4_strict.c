@@ -83,29 +83,29 @@ struct	roffnode {
 
 struct rofftree {
 	struct roffnode	 *last;
-
 	time_t		  date;
 	char		  title[256];
 	char		  section[256];
 	char		  volume[256];
-
 	int		  state;
-#define	ROFF_PRELUDE	 (1 << 0)
 #define	ROFF_PRELUDE_Os	 (1 << 1)
 #define	ROFF_PRELUDE_Dt	 (1 << 2)
 #define	ROFF_PRELUDE_Dd	 (1 << 3)
 };
 
-static int		  rofffind(const char *);
-static int 		  roffparse(const struct md_args *, 
+static	int		  rofffind(const char *);
+static	int 		  roffparse(const struct md_args *, 
 				struct md_mbuf *,
 				const struct md_rbuf *, 
 				const char *, size_t,
 				struct rofftree *);
-static int		  textparse(struct md_mbuf *, 
+static	int		  textparse(struct md_mbuf *, 
 				const struct md_rbuf *, 
 				const char *, size_t, 
 				const struct rofftree *);
+
+static	void		  dbg_enter(const struct md_args *, int);
+static	void		  dbg_leave(const struct md_args *, int);
 
 
 int
@@ -340,6 +340,9 @@ roff_Dd(ROFFCALL_ARGS)
 
 	tree->date = time(NULL);
 	tree->state |= ROFF_PRELUDE_Dd;
+
+	(void)printf("Dd\n");
+
 	return(1);
 }
 
@@ -374,6 +377,9 @@ roff_Dt(ROFFCALL_ARGS)
 	/* TODO: parse titles from buffer. */
 
 	tree->state |= ROFF_PRELUDE_Dt;
+
+	(void)printf("Dt\n");
+
 	return(1);
 }
 
@@ -396,6 +402,8 @@ roff_Os(ROFFCALL_ARGS)
 		node = tree->last;
 		tree->last = node->parent;
 		free(node);
+
+		dbg_leave(arg, ROFF_Os);
 
 		return(1);
 	} 
@@ -430,6 +438,8 @@ roff_Os(ROFFCALL_ARGS)
 	tree->state |= ROFF_PRELUDE_Os;
 	tree->last = node;
 
+	dbg_enter(arg, ROFF_Os);
+
 	return(1);
 }
 
@@ -437,15 +447,86 @@ roff_Os(ROFFCALL_ARGS)
 static	int
 roff_Sh(ROFFCALL_ARGS)
 {
+	struct roffnode	*node;
 
 	assert(arg);
-	/*assert(out);*/(void)out;
-	assert(in);
-	/*assert(buf);*/(void)buf;
-	(void)sz;
-	(void)pos;
-	(void)type;
 	assert(tree);
+	assert(tree->last);
+	assert(in);
+
+	if (ROFF_EXIT == type) {
+		assert(tree->last->tok == ROFF_Sh);
+
+		node = tree->last;
+		tree->last = node->parent;
+		free(node);
+
+		dbg_leave(arg, ROFF_Sh);
+
+		return(1);
+	} 
+
+	assert(out);
+	assert(buf);
+	assert(sz > 0);
+	assert(pos > 0);
+
+	node = malloc(sizeof(struct roffnode));
+	if (NULL == node) {
+		warn("malloc");
+		return(0);
+	}
+	node->tok = ROFF_Sh;
+	node->parent = tree->last;
+
+	tree->last = node;
+
+	dbg_enter(arg, ROFF_Sh);
+
 	return(1);
+}
+
+
+static int dbg_lvl = 0; /* FIXME: de-globalise. */
+
+
+static void
+dbg_enter(const struct md_args *args, int tokid)
+{
+	int		 i;
+
+	assert(args);
+	if ( ! (args->dbg & MD_DBG_TREE))
+		return;
+
+	assert(tokid >= 0 && tokid <= ROFF_Max);
+
+	for (i = 0; i < dbg_lvl; i++)
+		(void)printf(" ");
+
+	(void)printf("%s\n", tokens[tokid].name);
+
+	if (ROFF_LAYOUT == tokens[tokid].type)
+		dbg_lvl++;
+}
+
+
+static void
+dbg_leave(const struct md_args *args, int tokid)
+{
+	int		 i;
+
+	assert(args);
+	if ( ! (args->dbg & MD_DBG_TREE))
+		return;
+
+	assert(tokid >= 0 && tokid <= ROFF_Max);
+	assert(dbg_lvl > 0);
+
+	dbg_lvl--;
+	for (i = 0; i < dbg_lvl; i++) 
+		(void)printf(" ");
+
+	(void)printf("%s\n", tokens[tokid].name);
 }
 

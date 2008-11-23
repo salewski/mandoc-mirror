@@ -42,6 +42,8 @@ enum	md_type {
 struct	md_args {
 	union md_params	 params;/* Parameters for parser. */
 	enum md_type	 type;	/* Type of parser. */
+	int		 dbg;	/* Debug level. */
+#define	MD_DBG_TREE	(1 << 0)
 };
 
 struct	md_buf {
