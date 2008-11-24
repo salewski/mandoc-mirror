@@ -35,6 +35,26 @@ struct	md_mbuf {
 	size_t		 pos;
 };
 
+#define	ROFF___	 	 0
+#define	ROFF_Dd		 1
+#define	ROFF_Dt		 2
+#define	ROFF_Os		 3
+#define	ROFF_Sh		 4
+#define	ROFF_An		 5
+#define	ROFF_Li		 6
+#define	ROFF_MAX	 7
+
+#define	ROFF_Split	 0
+#define	ROFF_Nosplit	 1
+#define	ROFF_ARGMAX	 2
+
+/* FIXME: have a md_roff with all necessary parameters. */
+
+typedef	int	(*roffin)(int, int *, char **);
+typedef	int	(*roffout)(int);
+typedef	int	(*roffblkin)(int);
+typedef	int	(*roffblkout)(int);
+
 __BEGIN_DECLS
 
 typedef	void  (*(*md_init)(const struct md_args *, 
@@ -59,7 +79,9 @@ int	 	  md_buf_putstring(struct md_mbuf *, const char *);
 struct	rofftree;
 
 struct	rofftree *roff_alloc(const struct md_args *, 
-			struct md_mbuf *, const struct md_rbuf *);
+			struct md_mbuf *, const struct md_rbuf *,
+			const roffin *, const roffout *,
+			const roffblkin *, const roffblkout *);
 int		  roff_engine(struct rofftree *, char *, size_t);
 int		  roff_free(struct rofftree *, int);
 
