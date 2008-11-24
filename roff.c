@@ -34,6 +34,8 @@ enum	roffd {
 	ROFF_EXIT 
 };
 
+/* FIXME: prolog roffs can be text roffs, too. */
+
 enum	rofftype { 
 	ROFF_TITLE, 
 	ROFF_COMMENT, 
