@@ -199,6 +199,7 @@ again:
 			return(md_run_leave(args, mbuf, rbuf, -1, p));
 		}
 
+		line[pos] = 0;
 		if ( ! (*fp)(args, mbuf, rbuf, line, pos, p))
 			return(md_run_leave(args, mbuf, rbuf, -1, p));
 		rbuf->line++;

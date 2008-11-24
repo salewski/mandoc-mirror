@@ -26,7 +26,7 @@
 int
 md_line_dummy(const struct md_args *args, 
 		struct md_mbuf *out, const struct md_rbuf *in, 
-		const char *buf, size_t sz, void *data)
+		char *buf, size_t sz, void *data)
 {
 
 	assert(buf);

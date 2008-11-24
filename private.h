@@ -43,11 +43,11 @@ typedef	int	(*md_exit)(const struct md_args *, struct md_mbuf *,
 			const struct md_rbuf *, int, void *);
 typedef	int	(*md_line)(const struct md_args *, 
 			struct md_mbuf *, const struct md_rbuf *, 
-			const char *, size_t, void *);
+			char *, size_t, void *);
 
 int		  md_line_html4_strict(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *,
-			const char *, size_t, void *);
+			char *, size_t, void *);
 int		  md_init_html4_strict(const struct md_args *, 
 			struct md_mbuf *, const struct md_rbuf *,
 			void **);
@@ -57,7 +57,7 @@ int		  md_exit_html4_strict(const struct md_args *,
 
 int		  md_line_dummy(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *, 
-			const char *, size_t, void *);
+			char *, size_t, void *);
 
 int	 	  md_buf_puts(struct md_mbuf *, const char *, size_t);
 int	 	  md_buf_putchar(struct md_mbuf *, char);
