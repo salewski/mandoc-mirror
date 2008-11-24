@@ -17,28 +17,57 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 #include <assert.h>
+#include <err.h>
 #include <stdlib.h>
 
 #include "libmdocml.h"
 #include "private.h"
 
 
+struct	md_dummy {
+	struct rofftree	*tree;
+};
+
+
 int
-md_line_dummy(const struct md_args *args, 
-		struct md_mbuf *out, const struct md_rbuf *in, 
-		char *buf, size_t sz, void *data)
+md_line_dummy(void *arg, char *buf, size_t sz)
 {
+	struct md_dummy	*p;
 
-	assert(buf);
-	assert(out);
-	assert(in);
-	assert(args);
-	assert(NULL == data);
+	p = (struct md_dummy *)arg;
+	return(roff_engine(p->tree, buf, sz));
+}
 
-	if ( ! md_buf_puts(out, buf, sz))
-		return(0);
-	if ( ! md_buf_putchar(out, '\n'))
-		return(0);
 
-	return(1);
+int
+md_exit_dummy(void *data, int flush)
+{
+	int		 c;
+	struct md_dummy	*p;
+
+	p = (struct md_dummy *)data;
+	c = roff_free(p->tree, flush);
+	free(p);
+
+	return(c);
+}
+
+
+void *
+md_init_dummy(const struct md_args *args,
+		struct md_mbuf *mbuf, const struct md_rbuf *rbuf)
+{
+	struct md_dummy	*p;
+
+	if (NULL == (p = malloc(sizeof(struct md_dummy)))) {
+		warn("malloc");
+		return(NULL);
+	}
+
+	if (NULL == (p->tree = roff_alloc(args, mbuf, rbuf))) {
+		free(p);
+		return(NULL);
+	}
+
+	return(p);
 }

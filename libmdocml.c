@@ -136,13 +136,13 @@ md_run_leave(const struct md_args *args, struct md_mbuf *mbuf,
 	/* Run exiters. */
 	switch (args->type) {
 	case (MD_HTML4_STRICT):
-		if ( ! md_exit_html4_strict(args, mbuf, rbuf, c, data))
-			return(-1);
-		break;
-	case (MD_DUMMY):
+		if ( ! md_exit_html4_strict(data, -1 == c ? 0 : 1))
+			c = -1;
 		break;
 	default:
-		abort();
+		if ( ! md_exit_dummy(data, -1 == c ? 0 : 1))
+			c = -1;
+		break;
 	}
 
 	/* Make final flush of buffer. */
@@ -200,7 +200,7 @@ again:
 		}
 
 		line[pos] = 0;
-		if ( ! (*fp)(args, mbuf, rbuf, line, pos, p))
+		if ( ! (*fp)(p, line, pos))
 			return(md_run_leave(args, mbuf, rbuf, -1, p));
 		rbuf->line++;
 		pos = 0;
@@ -228,18 +228,17 @@ md_run(const struct md_args *args,
 
 	mbuf.pos = 0;
 	rbuf.line = 1;
-	data = NULL;
 
 	/* Run initialisers. */
 	switch (args->type) {
 	case (MD_HTML4_STRICT):
-		if ( ! md_init_html4_strict(args, &mbuf, &rbuf, &data))
-			return(-1);
-		break;
-	case (MD_DUMMY):
+		data = md_init_html4_strict
+			(args, &mbuf, &rbuf);
 		break;
 	default:
-		abort();
+		data = md_init_dummy
+			(args, &mbuf, &rbuf);
+		break;
 	}
 
 	/* Go into mainline. */

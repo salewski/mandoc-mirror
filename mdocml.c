@@ -55,6 +55,8 @@ main(int argc, char *argv[])
 	extern int	 optind;
 
 	out = in = NULL;
+
+	(void)memset(&args, 0, sizeof(struct md_args));
 	
 	while (-1 != (c = getopt(argc, argv, "vo:")))
 		switch (c) {
@@ -75,7 +77,7 @@ main(int argc, char *argv[])
 	if (1 == argc)
 		in = *argv++;
 
-	args.type = MD_HTML4_STRICT;
+	args.type = MD_DUMMY;
 
 	return(begin_io(&args, out ? out : "-", in ? in : "-"));
 }

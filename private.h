@@ -37,31 +37,31 @@ struct	md_mbuf {
 
 __BEGIN_DECLS
 
-typedef	int	(*md_init)(const struct md_args *, struct md_mbuf *,
-			const struct md_rbuf *, void **);
-typedef	int	(*md_exit)(const struct md_args *, struct md_mbuf *, 
-			const struct md_rbuf *, int, void *);
-typedef	int	(*md_line)(const struct md_args *, 
-			struct md_mbuf *, const struct md_rbuf *, 
-			char *, size_t, void *);
+typedef	void  (*(*md_init)(const struct md_args *, 
+			struct md_mbuf *, const struct md_rbuf *));
+typedef	int	(*md_line)(void *, char *, size_t);
+typedef	int	(*md_exit)(void *, int);
 
-int		  md_line_html4_strict(const struct md_args *,
-			struct md_mbuf *, const struct md_rbuf *,
-			char *, size_t, void *);
-int		  md_init_html4_strict(const struct md_args *, 
-			struct md_mbuf *, const struct md_rbuf *,
-			void **);
-int		  md_exit_html4_strict(const struct md_args *,
-			struct md_mbuf *, const struct md_rbuf *, 
-			int, void *);
+void		 *md_init_html4_strict(const struct md_args *,
+			struct md_mbuf *, const struct md_rbuf *);
+int		  md_line_html4_strict(void *, char *, size_t);
+int		  md_exit_html4_strict(void *, int);
 
-int		  md_line_dummy(const struct md_args *,
-			struct md_mbuf *, const struct md_rbuf *, 
-			char *, size_t, void *);
+void		 *md_init_dummy(const struct md_args *,
+			struct md_mbuf *, const struct md_rbuf *);
+int		  md_line_dummy(void *, char *, size_t);
+int		  md_exit_dummy(void *, int);
 
 int	 	  md_buf_puts(struct md_mbuf *, const char *, size_t);
 int	 	  md_buf_putchar(struct md_mbuf *, char);
 int	 	  md_buf_putstring(struct md_mbuf *, const char *);
+
+struct	rofftree;
+
+struct	rofftree *roff_alloc(const struct md_args *, 
+			struct md_mbuf *, const struct md_rbuf *);
+int		  roff_engine(struct rofftree *, char *, size_t);
+int		  roff_free(struct rofftree *, int);
 
 __END_DECLS
 
