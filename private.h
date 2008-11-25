@@ -40,13 +40,80 @@ struct	md_mbuf {
 #define	ROFF_Dt		 2
 #define	ROFF_Os		 3
 #define	ROFF_Sh		 4
-#define	ROFF_An		 5
-#define	ROFF_Li		 6
-#define	ROFF_MAX	 7
+#define	ROFF_Ss		 5
+#define	ROFF_Pp		 6
+#define	ROFF_D1		 7
+#define	ROFF_Dl		 8
+#define	ROFF_Bd		 9
+#define	ROFF_Ed		 10
+#define	ROFF_Bl		 11
+#define	ROFF_El		 12
+#define	ROFF_It		 13
+#define	ROFF_An		 14
+#define	ROFF_Li		 15
+#define	ROFF_MAX	 16
+
+#define	ROFF_NAMES			\
+	{				\
+	"\\\"",				\
+	"Dd",				\
+	"Dt",				\
+	"Os",				\
+	"Sh",				\
+	"Ss",				\
+	"Pp",				\
+	"D1",				\
+	"Dl",				\
+	"Bd",				\
+	"Ed",				\
+	"Bl",				\
+	"El",				\
+	"It",				\
+	"An",				\
+	"Li",				\
+	}
 
 #define	ROFF_Split	 0
 #define	ROFF_Nosplit	 1
-#define	ROFF_ARGMAX	 2
+#define	ROFF_Ragged	 2
+#define	ROFF_Unfilled	 3
+#define	ROFF_Literal	 4
+#define	ROFF_File	 5
+#define	ROFF_Offset	 6
+#define	ROFF_Bullet	 7
+#define	ROFF_Dash	 8
+#define	ROFF_Hyphen	 9
+#define	ROFF_Item	 10
+#define	ROFF_Enum	 11
+#define	ROFF_Tag	 12
+#define	ROFF_Diag	 13
+#define	ROFF_Hang	 14
+#define	ROFF_Ohang	 15
+#define	ROFF_Inset	 16
+#define	ROFF_Column	 17
+#define	ROFF_ARGMAX	 18
+
+#define	ROFF_ARGNAMES 			\
+	{ 				\
+	"split",			\
+	"nosplit",			\
+	"ragged",			\
+	"unfilled",			\
+	"literal",			\
+	"file",				\
+	"offset",			\
+	"bullet",			\
+	"dash",				\
+	"hyphen",			\
+	"item",				\
+	"enum",				\
+	"tag",				\
+	"diag",				\
+	"hang",				\
+	"ohang",			\
+	"inset",			\
+	"column",			\
+	}
 
 /* FIXME: have a md_roff with all necessary parameters. */
 
@@ -80,8 +147,7 @@ struct	rofftree;
 
 struct	rofftree *roff_alloc(const struct md_args *, 
 			struct md_mbuf *, const struct md_rbuf *,
-			const roffin *, const roffout *,
-			const roffblkin *, const roffblkout *);
+			roffin, roffout, roffblkin, roffblkout);
 int		  roff_engine(struct rofftree *, char *, size_t);
 int		  roff_free(struct rofftree *, int);
 

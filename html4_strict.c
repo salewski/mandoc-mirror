@@ -23,6 +23,7 @@
 #include "private.h"
 
 
+/* ARGSUSED */
 int
 md_line_html4_strict(void *data, char *buf, size_t sz)
 {
@@ -31,6 +32,7 @@ md_line_html4_strict(void *data, char *buf, size_t sz)
 }
 
 
+/* ARGSUSED */
 int
 md_exit_html4_strict(void *data, int flush)
 {
@@ -39,6 +41,7 @@ md_exit_html4_strict(void *data, int flush)
 }
 
 
+/* ARGSUSED */
 void *
 md_init_html4_strict(const struct md_args *args,
 		struct md_mbuf *mbuf, const struct md_rbuf *rbuf)
