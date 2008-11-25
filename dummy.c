@@ -25,7 +25,7 @@
 #include "libmdocml.h"
 #include "private.h"
 
-#ifdef	__Linux__
+#ifdef	__linux__
 #define	strlcat		strncat
 #endif
 
@@ -34,31 +34,35 @@ static	int		md_dummy_blk_out(int);
 static 	int		md_dummy_text_in(int, int *, char **);
 static	int		md_dummy_text_out(int);
 
-static	void		dbg_indent(void);
+static	void		dbg_prologue(const char *);
+static	void		dbg_epilogue(void);
 
 static	int		dbg_lvl = 0;
+static	char		dbg_line[72];
 
 struct	md_dummy {
 	struct rofftree	*tree;
 };
 
-static	const char *const toknames[ROFF_MAX] = ROFF_NAMES;
+static void
+dbg_prologue(const char *p)
+{
+	int		 i;
+
+	(void)snprintf(dbg_line, sizeof(dbg_line) - 1, "%6s", p);
+	(void)strlcat(dbg_line, ": ", sizeof(dbg_line) - 1);
+	/* LINTED */
+	for (i = 0; i < dbg_lvl; i++)
+		(void)strlcat(dbg_line, "    ", sizeof(dbg_line) - 1);
+}
 
 
 static void
-dbg_indent(void)
+dbg_epilogue(void)
 {
-	char		buf[128];
-	int		i;
 
-	*buf = 0;
-	assert(dbg_lvl >= 0);
-
-	/* LINTED */
-	for (i = 0; i < dbg_lvl; i++)
-		(void)strlcat(buf, "  ", sizeof(buf) - 1);
-
-	(void)printf("%s", buf);
+	assert(0 != dbg_line[0]);
+	(void)printf("%s\n", dbg_line);
 }
 
 
@@ -66,8 +70,10 @@ static int
 md_dummy_blk_in(int tok)
 {
 
-	dbg_indent();
-	(void)printf("%s\n", toknames[tok]);
+	dbg_prologue("blk");
+	(void)strlcat(dbg_line, toknames[tok], sizeof(dbg_line) - 1);
+	dbg_epilogue();
+
 	dbg_lvl++;
 	return(1);
 }
@@ -77,10 +83,7 @@ static int
 md_dummy_blk_out(int tok)
 {
 
-	assert(dbg_lvl > 0);
 	dbg_lvl--;
-	dbg_indent();
-	(void)printf("%s\n", toknames[tok]);
 	return(1);
 }
 
@@ -90,8 +93,26 @@ static int
 md_dummy_text_in(int tok, int *argcp, char **argvp)
 {
 
-	dbg_indent();
-	(void)printf("%s\n", toknames[tok]);
+	dbg_prologue("text");
+	(void)strlcat(dbg_line, toknames[tok], sizeof(dbg_line) - 1);
+	(void)strlcat(dbg_line, " ", sizeof(dbg_line) - 1);
+	while (ROFF_ARGMAX != *argcp) {
+		(void)strlcat(dbg_line, "[", sizeof(dbg_line) - 1);
+		(void)strlcat(dbg_line, tokargnames[*argcp], 
+				sizeof(dbg_line) - 1);
+		if (*argvp) {
+			(void)strlcat(dbg_line, " [", 
+					sizeof(dbg_line) - 1);
+			(void)strlcat(dbg_line, *argvp,
+					sizeof(dbg_line) - 1);
+			(void)strlcat(dbg_line, "]", 
+					sizeof(dbg_line) - 1);
+		}
+		(void)strlcat(dbg_line, "]", sizeof(dbg_line) - 1);
+		argcp++;
+		argvp++;
+	}
+	dbg_epilogue();
 	return(1);
 }
 
@@ -100,8 +121,6 @@ static int
 md_dummy_text_out(int tok)
 {
 
-	dbg_indent();
-	(void)printf("%s\n", toknames[tok]);
 	return(1);
 }
 
