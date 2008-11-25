@@ -17,6 +17,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 #include <assert.h>
+#include <ctype.h>
 #include <fcntl.h>
 #include <err.h>
 #include <stdio.h>
@@ -188,6 +189,11 @@ again:
 		return(md_run_leave(args, mbuf, rbuf, 0, p));
 
 	for (i = 0; i < sz; i++) {
+		if ( ! isascii(rbuf->buf[i])) {
+			warnx("%s: non-ascii char (line %zu, col %zu)",
+					rbuf->name, rbuf->line, pos);
+			return(md_run_leave(args, mbuf, rbuf, -1, p));
+		}
 		if ('\n' != rbuf->buf[i]) {
 			if (pos < BUFFER_LINE) {
 				/* LINTED */
