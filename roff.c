@@ -144,14 +144,16 @@ static 	const int roffarg_St[] = {
 	ROFF_xcurses4_2, ROFF_susv2, ROFF_susv3, ROFF_svid4,
 	ROFF_ARGMAX };
 
-static	const int roffchild_Oo[] = { ROFF_Op, ROFF_Oc, ROFF_MAX };
+static	const int roffchild_Bd[] = { ROFF_Ed, ROFF_MAX };
 static	const int roffchild_Bl[] = { ROFF_It, ROFF_El, ROFF_MAX };
 static	const int roffchild_Fo[] = { ROFF_Fa, ROFF_Fc, ROFF_MAX };
+static	const int roffchild_Oo[] = { ROFF_Op, ROFF_Oc, ROFF_MAX };
 
+static	const int roffparent_Ed[] = { ROFF_Bd, ROFF_MAX };
 static	const int roffparent_El[] = { ROFF_Bl, ROFF_It, ROFF_MAX };
 static	const int roffparent_Fc[] = { ROFF_Fo, ROFF_Fa, ROFF_MAX };
 static	const int roffparent_Oc[] = { ROFF_Oo, ROFF_Oc, ROFF_MAX };
-static	const int roffparent_It[] = { ROFF_Bl, ROFF_MAX };
+static	const int roffparent_It[] = { ROFF_Bl, ROFF_It, ROFF_MAX };
 
 /* Table of all known tokens. */
 static	const struct rofftok tokens[ROFF_MAX] = {
@@ -162,10 +164,10 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{ roff_layout, NULL, NULL, NULL, ROFF_Sh, ROFF_LAYOUT, ROFF_PARSED }, /* Sh */
 	{ roff_layout, NULL, NULL, NULL, ROFF_Ss, ROFF_LAYOUT, ROFF_PARSED }, /* Ss */ 
 	{   roff_text, NULL, NULL, NULL, ROFF_Pp, ROFF_TEXT, 0 }, /* Pp */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	 	/* D1 */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, 		/* Dl */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_LAYOUT, 0 }, 	/* Bd */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_LAYOUT, 0 }, 	/* Ed */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* D1 */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Dl */
+	{ roff_layout, NULL, NULL, roffchild_Bd, 0, ROFF_LAYOUT, 0 }, 	/* Bd */
+	{ roff_layout, NULL, roffparent_Ed, NULL, ROFF_Bd, ROFF_LAYOUT, 0 }, 	/* Ed */
 	{ roff_layout, roffarg_Bl, NULL, roffchild_Bl, 0, ROFF_LAYOUT, 0 }, /* Bl */
 	{ roff_layout, NULL, roffparent_El, NULL, ROFF_Bl, ROFF_LAYOUT, 0 }, /* El */
 	{ roff_layout, NULL, roffparent_It, NULL, ROFF_It, ROFF_LAYOUT, 0 }, /* It */
@@ -186,10 +188,10 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ic */ /* XXX needs arg */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* In */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Li */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Nd */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Nm */ /* FIXME */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Nd */ /* FIXME */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Nm */ /* FIXME */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Op */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ot */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Ot */ /* XXX deprecated */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pa */
 	{   roff_text, roffarg_Rv, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Rv */
 	{   roff_text, roffarg_St, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* St */
@@ -217,10 +219,10 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Bq */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bsx */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bx */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Db */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Db */ /* XXX */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dc */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Do */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dq */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dq */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ec */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Ef */ /* FIXME */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Em */ /* XXX needs arg */
@@ -232,22 +234,22 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Nx */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ox */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pc */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Pf */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Pf */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Po */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pq */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pq */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qc */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ql */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ql */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qo */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qq */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qq */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Re */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Rs */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sc */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* So */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sq */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sq */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Sm */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sx */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sy */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Tn */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sx */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_QUOTES }, /* Sy */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Tn */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ux */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xc */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xo */
@@ -283,168 +285,55 @@ static	const struct roffarg tokenargs[ROFF_ARGMAX] = {
 
 const	char *const toknamesp[ROFF_MAX] = 
 	{		 
-	"\\\"",		 
-	"Dd",	/* Title macros. */
-	"Dt",		 
-	"Os",		 
-	"Sh",	/* Layout macros */
-	"Ss",		 
-	"Pp",		 
-	"D1",		 
-	"Dl",		 
-	"Bd",		 
-	"Ed",		 
-	"Bl",		 
-	"El",		 
-	"It",		 
-	"Ad",	/* Text macros. */
-	"An",		 
-	"Ar",		 
-	"Cd",		 
-	"Cm",		 
-	"Dv",		 
-	"Er",		 
-	"Ev",		 
-	"Ex",		 
-	"Fa",		 
-	"Fd",		 
-	"Fl",		 
-	"Fn",		 
-	"Ft",		 
-	"Ic",		 
-	"In",		 
-	"Li",		 
-	"Nd",		 
-	"Nm",		 
-	"Op",		 
-	"Ot",		 
-	"Pa",		 
-	"Rv",		 
-	"St",		 
-	"Va",		 
-	"Vt",		 
-	"Xr",		 
-	"\%A",	/* General text macros. */
-	"\%B",
-	"\%D",
-	"\%I",
-	"\%J",
-	"\%N",
-	"\%O",
-	"\%P",
-	"\%R",
-	"\%T",
-	"\%V",
-	"Ac",
-	"Ao",
-	"Aq",
-	"At",
-	"Bc",
-	"Bf",
-	"Bo",
-	"Bq",
-	"Bsx",
-	"Bx",
-	"Db",
-	"Dc",
-	"Do",
-	"Dq",
-	"Ec",
-	"Ef",
-	"Em",
-	"Eo",
-	"Fx",
-	"Ms",
-	"No",
-	"Ns",
-	"Nx",
-	"Ox",
-	"Pc",
-	"Pf",
-	"Po",
-	"Pq",
-	"Qc",
-	"Ql",
-	"Qo",
-	"Qq",
-	"Re",
-	"Rs",
-	"Sc",
-	"So",
-	"Sq",
-	"Sm",
-	"Sx",
-	"Sy",
-	"Tn",
-	"Ux",
-	"Xc",	/* FIXME: do not support! */
-	"Xo",	/* FIXME: do not support! */
-	"Fo",
-	"Fc",
-	"Oo",
-	"Oc",
+	"\\\"",		"Dd",		"Dt",		"Os",
+	"Sh",		"Ss",		"Pp",		"D1",
+	"Dl",		"Bd",		"Ed",		"Bl",
+	"El",		"It",		"Ad",		"An",
+	"Ar",		"Cd",		"Cm",		"Dv",
+	"Er",		"Ev",		"Ex",		"Fa",
+	"Fd",		"Fl",		"Fn",		"Ft",
+	"Ic",		"In",		"Li",		"Nd",
+	"Nm",		"Op",		"Ot",		"Pa",
+	"Rv",		"St",		"Va",		"Vt",
+	"Xr",		"\%A",		"\%B",		"\%D",
+	"\%I",		"\%J",		"\%N",		"\%O",
+	"\%P",		"\%R",		"\%T",		"\%V",
+	"Ac",		"Ao",		"Aq",		"At",
+	"Bc",		"Bf",		"Bo",		"Bq",
+	"Bsx",		"Bx",		"Db",		"Dc",
+	"Do",		"Dq",		"Ec",		"Ef",
+	"Em",		"Eo",		"Fx",		"Ms",
+	"No",		"Ns",		"Nx",		"Ox",
+	"Pc",		"Pf",		"Po",		"Pq",
+	"Qc",		"Ql",		"Qo",		"Qq",
+	"Re",		"Rs",		"Sc",		"So",
+	"Sq",		"Sm",		"Sx",		"Sy",
+	"Tn",		"Ux",		"Xc",		"Xo",
+	"Fo",		"Fc",		"Oo",		"Oc"
 	};
 
 const	char *const tokargnamesp[ROFF_ARGMAX] = 
 	{		 
-	"split",	 
-	"nosplit",	 
-	"ragged",	 
-	"unfilled",	 
-	"literal",	 
-	"file",		 
-	"offset",	 
-	"bullet",	 
-	"dash",		 
-	"hyphen",	 
-	"item",		 
-	"enum",		 
-	"tag",		 
-	"diag",		 
-	"hang",		 
-	"ohang",	 
-	"inset",	 
-	"column",	 
-	"width",	 
-	"compact",	 
-	"std",	 
-	"-p1003.1-88",
-	"-p1003.1-90",
-	"-p1003.1-96",
-	"-p1003.1-2001",
-	"-p1003.1-2004",
-	"-p1003.1",
-	"-p1003.1b",
-	"-p1003.1b-93",
-	"-p1003.1c-95",
-	"-p1003.1g-2000",
-	"-p1003.2-92",
-	"-p1387.2-95",
-	"-p1003.2",
-	"-p1387.2",
-	"-isoC-90",
-	"-isoC-amd1",
-	"-isoC-tcor1",
-	"-isoC-tcor2",
-	"-isoC-99",
-	"-ansiC",
-	"-ansiC-89",
-	"-ansiC-99",
-	"-ieee754",
-	"-iso8802-3",
-	"-xpg3",
-	"-xpg4",
-	"-xpg4.2",
-	"-xpg4.3",
-	"-xbd5",
-	"-xcu5",
-	"-xsh5",
-	"-xns5",
-	"-xns5.2d2.0",
-	"-xcurses4.2",
-	"-susv2",
-	"-susv3",
-	"-svid4",
+	"split",	"nosplit",	"ragged",	 
+	"unfilled",	"literal",	"file",		 
+	"offset",	"bullet",	"dash",		 
+	"hyphen",	"item",		"enum",		 
+	"tag",		"diag",		"hang",		 
+	"ohang",	"inset",	"column",	 
+	"width",	"compact",	"std",	 
+	"-p1003.1-88",	"-p1003.1-90",	"-p1003.1-96",
+	"-p1003.1-2001", "-p1003.1-2004", "-p1003.1",
+	"-p1003.1b",	"-p1003.1b-93",	"-p1003.1c-95",
+	"-p1003.1g-2000", "-p1003.2-92", "-p1387.2-95",
+	"-p1003.2",	"-p1387.2",	"-isoC-90",
+	"-isoC-amd1",	"-isoC-tcor1",	"-isoC-tcor2",
+	"-isoC-99",	"-ansiC",	"-ansiC-89",
+	"-ansiC-99",	"-ieee754",	"-iso8802-3",
+	"-xpg3",	"-xpg4",	"-xpg4.2",
+	"-xpg4.3",	"-xbd5",	"-xcu5",
+	"-xsh5",	"-xns5",	"-xns5.2d2.0",
+	"-xcurses4.2",	"-susv2",	"-susv3",
+	"-svid4"
 	};
 
 const	char *const *toknames = toknamesp;
@@ -641,12 +530,6 @@ roffparse(struct rofftree *tree, char *buf, size_t sz)
 		return(0);
 	} 
 
-
-#if 0
-	(void)printf("parse: macro `%s' (%d), parent `%s' (%d)\n",
-			toknames[tok], tok, 
-			toknames[tree->last->tok], tree->last->tok);
-
 	if ( ! roffscan(tok, tokens[tree->last->tok].children)) {
 		warnx("%s: invalid child `%s' for `%s' (line %zu)",
 				tree->rbuf->name, toknames[tok], 
@@ -654,7 +537,6 @@ roffparse(struct rofftree *tree, char *buf, size_t sz)
 				tree->rbuf->line);
 		return(0);
 	}
-#endif
 
 	/*
 	 * Branch if we're not a layout token.
@@ -775,6 +657,7 @@ rofffindcallable(const char *name)
 
 	if (ROFF_MAX == (c = rofffindtok(name)))
 		return(ROFF_MAX);
+	assert(c >= 0 && c < ROFF_MAX);
 	return(ROFF_CALLABLE & tokens[c].flags ? c : ROFF_MAX);
 }
 
@@ -1023,12 +906,19 @@ roff_layout(ROFFCALL_ARGS)
 	}
 
 	while (*argv) {
-		if (2 >= strlen(*argv) && ROFF_MAX != 
-				(c = rofffindcallable(*argv)))
+		if (ROFF_MAX != (c = rofffindcallable(*argv))) {
+			if (NULL == tokens[c].cb) {
+				warnx("%s: macro `%s' not supported "
+						"(line %zu)",
+						tree->rbuf->name, 
+						toknames[c],
+						tree->rbuf->line);
+				return(0);
+			}
 			if ( ! (*tokens[c].cb)(c, tree, 
 						argv + 1, ROFF_ENTER))
 				return(0);
-
+		}
 		/* TODO: print token. */
 		argv++;
 	}
@@ -1083,12 +973,19 @@ roff_text(ROFFCALL_ARGS)
 	}
 
 	while (*argv) {
-		if (2 >= strlen(*argv) && ROFF_MAX != 
-				(c = rofffindcallable(*argv)))
+		if (ROFF_MAX != (c = rofffindcallable(*argv))) {
+			if (NULL == tokens[c].cb) {
+				warnx("%s: macro `%s' not supported "
+						"(line %zu)",
+						tree->rbuf->name, 
+						toknames[c],
+						tree->rbuf->line);
+				return(0);
+			}
 			if ( ! (*tokens[c].cb)(c, tree, 
 						argv + 1, ROFF_ENTER))
 				return(0);
-
+		}
 		/* TODO: print token. */
 		argv++;
 	}
