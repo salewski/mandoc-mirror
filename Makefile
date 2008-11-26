@@ -1,4 +1,4 @@
-CFLAGS += -W -Wall -Wno-unused-parameter -g
+CFLAGS += -W -Wall -Wno-unused-parameter -g 
 
 LINTFLAGS += -c -e -f -u
 
@@ -33,8 +33,8 @@ lint: llib-lmdocml.ln
 dist: mdocml.tgz
 
 regress: mdocml
-	@for f in $(FAIL); do ./mdocml $$f 2>/dev/null || continue ; done
-	@for f in $(SUCCEED); do ./mdocml $$f || exit 1 ; done
+	@for f in $(FAIL); do ./mdocml $$f 1>/dev/null 2>/dev/null || continue ; done
+	@for f in $(SUCCEED); do ./mdocml $$f 1>/dev/null || exit 1 ; done
 
 mdocml: mdocml.o libmdocml.a
 	$(CC) $(CFLAGS) -o $@ mdocml.o libmdocml.a
