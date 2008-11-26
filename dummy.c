@@ -42,6 +42,7 @@ static	char		dbg_line[72];
 
 struct	md_dummy {
 	struct rofftree	*tree;
+	struct roffcb	 cb;
 };
 
 static void
@@ -160,9 +161,14 @@ md_init_dummy(const struct md_args *args,
 		return(NULL);
 	}
 
-	p->tree = roff_alloc(args, mbuf, rbuf, 
-			md_dummy_text_in, md_dummy_text_out, 
-			md_dummy_blk_in, md_dummy_blk_out);
+	p->cb.roffhead = NULL;
+	p->cb.rofftail = NULL;
+	p->cb.roffin = md_dummy_text_in;
+	p->cb.roffout = md_dummy_text_out;
+	p->cb.roffblkin = md_dummy_blk_in;
+	p->cb.roffblkout = md_dummy_blk_out;
+
+	p->tree = roff_alloc(args, mbuf, rbuf, &p->cb);
 
 	if (NULL == p->tree) {
 		free(p);

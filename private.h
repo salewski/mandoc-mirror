@@ -162,10 +162,16 @@ extern	const char *const *tokargnames;
 
 /* FIXME: have a md_roff with all necessary parameters. */
 
-typedef	int	(*roffin)(int, int *, char **);
-typedef	int	(*roffout)(int);
-typedef	int	(*roffblkin)(int);
-typedef	int	(*roffblkout)(int);
+/* FIXME: have roffbegin and roffend for doc head/foot. */
+
+struct	roffcb {
+	int	(*roffhead)(void);
+	int	(*rofftail)(void);
+	int	(*roffin)(int, int *, char **);
+	int	(*roffout)(int);
+	int	(*roffblkin)(int);
+	int	(*roffblkout)(int);
+};
 
 __BEGIN_DECLS
 
@@ -192,7 +198,7 @@ struct	rofftree;
 
 struct	rofftree *roff_alloc(const struct md_args *, 
 			struct md_mbuf *, const struct md_rbuf *,
-			roffin, roffout, roffblkin, roffblkout);
+			const struct roffcb *);
 int		  roff_engine(struct rofftree *, char *, size_t);
 int		  roff_free(struct rofftree *, int);
 

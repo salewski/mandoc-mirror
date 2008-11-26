@@ -1,4 +1,5 @@
 CFLAGS += -W -Wall -Wno-unused-parameter -g
+
 LINTFLAGS += -c -e -f -u
 
 LNS	= mdocml.ln html4_strict.ln dummy.ln libmdocml.ln roff.ln
@@ -19,12 +20,21 @@ CLEAN	= mdocml mdocml.tgz $(LLNS) $(LNS) $(OBJS) $(LIBS)
 
 INSTALL	= Makefile $(HEADS) $(SRCS) $(MANS)
 
+FAIL	= test.0 test.1 test.2 test.3 test.4 test.5 test.6 \
+	  test.15
+
+SUCCEED	= test.7 test.8 test.9 test.10 test.11 test.12 test.13
+
 
 all: mdocml
 
 lint: llib-lmdocml.ln
 
 dist: mdocml.tgz
+
+regress: mdocml
+	@for f in $(FAIL); do ./mdocml $$f 2>/dev/null || continue ; done
+	@for f in $(SUCCEED); do ./mdocml $$f || exit 1 ; done
 
 mdocml: mdocml.o libmdocml.a
 	$(CC) $(CFLAGS) -o $@ mdocml.o libmdocml.a

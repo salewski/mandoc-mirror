@@ -27,34 +27,36 @@
 #include "libmdocml.h"
 #include "private.h"
 
+/* FIXME: warn if Pp occurs before/after Sh etc. (see mdoc.samples). */
+
+/* FIXME: warn about empty lists. */
+
 #define	ROFF_MAXARG	  10
 
-/* Whether we're entering or leaving a roff scope. */
 enum	roffd { 
 	ROFF_ENTER = 0, 
 	ROFF_EXIT 
 };
 
-/* The type of a macro (see mdoc(7) for more). */
 enum	rofftype { 
 	ROFF_COMMENT, 
 	ROFF_TEXT, 
 	ROFF_LAYOUT 
 };
 
-/* Arguments passed to a macro callback. */
 #define	ROFFCALL_ARGS \
 	int tok, struct rofftree *tree, \
 	const char *argv[], enum roffd type
 
 struct	rofftree;
 
-/* Describes a roff token (like D1 or Sh). */
 struct	rofftok {
 	int		(*cb)(ROFFCALL_ARGS);	/* Callback. */
 	const int	 *args;			/* Args (or NULL). */
+	const int	 *parents;
+	const int	 *children;
+	int		  ctx;
 	enum rofftype	  type;			/* Type of macro. */
-	int		  symm;			/* FIXME */
 	int		  flags;
 #define	ROFF_NESTED	 (1 << 0) 		/* Nested-layout. */
 #define	ROFF_PARSED	 (1 << 1)		/* "Parsed". */
@@ -62,22 +64,17 @@ struct	rofftok {
 #define	ROFF_QUOTES	 (1 << 3)		/* Quoted args. */
 };
 
-/* An argument to a roff token (like -split or -enum). */
 struct	roffarg {
 	int		  flags;
 #define	ROFF_VALUE	 (1 << 0)		/* Has a value. */
 };
 
-/* mdocml remembers only the current parse node and the chain leading to
- * the document root (scopes).
- */
 struct	roffnode {
 	int		  tok;			/* Token id. */
 	struct roffnode	 *parent;		/* Parent (or NULL). */
 	size_t		  line;			/* Parsed at line. */
 };
 
-/* State of file parse. */
 struct	rofftree {
 	struct roffnode	 *last;			/* Last parsed node. */
 	time_t		  date;			/* `Dd' results. */
@@ -92,20 +89,19 @@ struct	rofftree {
 #define	ROFF_PRELUDE_Dt	 (1 << 3)		/* `Dt' is parsed. */
 #define	ROFF_PRELUDE_Dd	 (1 << 4)		/* `Dd' is parsed. */
 #define	ROFF_BODY	 (1 << 5)		/* In roff body. */
-	roffin		 roffin;		/* Text-macro cb. */
-	roffblkin	 roffblkin;		/* Block-macro cb. */
-	roffout		 roffout;		/* Text-macro cb. */
-	roffblkout	 roffblkout;		/* Block-macro cb. */
 	struct md_mbuf		*mbuf;		/* Output (or NULL). */
 	const struct md_args	*args;		/* Global args. */
 	const struct md_rbuf	*rbuf;		/* Input. */
+	const struct roffcb	*cb;
 };
 
 static	int		  roff_Dd(ROFFCALL_ARGS);
 static	int		  roff_Dt(ROFFCALL_ARGS);
 static	int		  roff_Os(ROFFCALL_ARGS);
+
 static	int		  roff_layout(ROFFCALL_ARGS);
 static	int		  roff_text(ROFFCALL_ARGS);
+static	int		  roff_comment(ROFFCALL_ARGS);
 
 static	struct roffnode	 *roffnode_new(int, struct rofftree *);
 static	void		  roffnode_free(int, struct rofftree *);
@@ -120,141 +116,123 @@ static	int 		  roffparse(struct rofftree *, char *, size_t);
 static	int		  textparse(const struct rofftree *,
 				const char *, size_t);
 
-/* Arguments for `An' macro. */
+
 static	const int roffarg_An[] = { 
 	ROFF_Split, ROFF_Nosplit, ROFF_ARGMAX };
-/* Arguments for `Bd' macro. */
+
 static	const int roffarg_Bd[] = {
 	ROFF_Ragged, ROFF_Unfilled, ROFF_Literal, ROFF_File, 
 	ROFF_Offset, ROFF_ARGMAX };
-/* Arguments for `Bl' macro. */
+
 static 	const int roffarg_Bl[] = {
 	ROFF_Bullet, ROFF_Dash, ROFF_Hyphen, ROFF_Item, ROFF_Enum,
 	ROFF_Tag, ROFF_Diag, ROFF_Hang, ROFF_Ohang, ROFF_Inset,
 	ROFF_Column, ROFF_Offset, ROFF_ARGMAX };
 
-/* FIXME: a big list of fixes that must occur.
- *
- * (1) Distinction not between ROFF_TEXT and ROFF_LAYOUT, but instead
- *     ROFF_ATOM and ROFF_NODE, which designate line spacing.  If
- *     ROFF_ATOM, we need not remember any state.
- *
- * (2) Have a maybe-NULL list of possible subsequent children for each
- *     node.  Bl, e.g., can only have It children (roffparse).
- *
- * (3) Have a maybe-NULL list of possible parents for each node.  It,
- *     e.g., can only have Bl as a parent (roffparse).
- *
- *     (N.B. If (2) were complete, (3) wouldn't be necessary.)
- *
- * (4) Scope rules.  If Pp exists, it closes the scope out from the
- *     previous Pp (if it exists).  Same with Sh and Ss.  If El exists,
- *     it closes out Bl and interim It.
- *
- * (5) Nesting.  Sh cannot be any descendant of Sh.  Bl, however, can be
- *     nested within an It.
- *
- * Once that's done, we're golden.
- */
+static	const int roffchild_Bl[] = { ROFF_It, ROFF_El, ROFF_MAX };
+
+static	const int roffparent_El[] = { ROFF_Bl, ROFF_It, ROFF_MAX };
+
+static	const int roffparent_It[] = { ROFF_Bl, ROFF_MAX };
 
 /* Table of all known tokens. */
 static	const struct rofftok tokens[ROFF_MAX] = {
-	{        NULL,       NULL, 0, ROFF_COMMENT, 0 },	/* \" */
-	{     roff_Dd,       NULL, 0, ROFF_TEXT, 0 },	/* Dd */
-	{     roff_Dt,       NULL, 0, ROFF_TEXT, 0 },	/* Dt */
-	{     roff_Os,       NULL, 0, ROFF_TEXT, 0 },	/* Os */
-	{ roff_layout,       NULL, ROFF_Sh, ROFF_LAYOUT, ROFF_PARSED }, /* Sh */
-	{ roff_layout,       NULL, ROFF_Ss, ROFF_LAYOUT, ROFF_PARSED }, /* Ss */ 
-	{ roff_layout,       NULL, ROFF_Pp, ROFF_LAYOUT, 0 }, 	/* Pp */
-	{ roff_layout,       NULL, 0, ROFF_TEXT, 0 },	 	/* D1 */
-	{ roff_layout,       NULL, 0, ROFF_TEXT, 0 }, 		/* Dl */
-	{ roff_layout, roffarg_Bd, 0, ROFF_LAYOUT, 0 }, 	/* Bd */
-	{ roff_layout,       NULL, ROFF_Bd, ROFF_LAYOUT, 0 }, 	/* Ed */
-	{ roff_layout, roffarg_Bl, 0, ROFF_LAYOUT, 0 }, 	/* Bl */
-	{ roff_layout,       NULL, ROFF_Bl, ROFF_LAYOUT, 0 }, 	/* El */
-	{ roff_layout,       NULL, ROFF_It, ROFF_LAYOUT, 0 }, 	/* It */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ad */
-	{   roff_text, roffarg_An, 0, ROFF_TEXT, ROFF_PARSED }, /* An */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ar */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* Cd */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Cm */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dv */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Er */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ev */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ex */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Fa */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* Fd */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Fl */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Fn */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ft */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ic */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* In */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Li */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* Nd */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Nm */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Op */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ot */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pa */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* Rv */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* St */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Va */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Vt */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xr */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* %A */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE}, /* %B */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* %D */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE}, /* %I */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE}, /* %J */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* %N */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* %O */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* %P */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* %R */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* %T */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* %V */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ac */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ao */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Aq */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* At */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Bc */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* Bf */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Bo */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Bq */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bsx */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bx */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* Db */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dc */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Do */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dq */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ec */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* Ef */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Em */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Eo */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Fx */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ms */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* No */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ns */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Nx */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ox */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pc */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Pf */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Po */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pq */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qc */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ql */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qo */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qq */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* Re */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* Rs */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sc */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* So */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sq */
-	{   roff_text,       NULL, 0, ROFF_TEXT, 0 },	/* Sm */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sx */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sy */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Tn */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ux */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xc */
-	{   roff_text,       NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xo */
+	{roff_comment, NULL, NULL, NULL, 0, ROFF_COMMENT, 0 },	/* \" */
+	{     roff_Dd, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Dd */
+	{     roff_Dt, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Dt */
+	{     roff_Os, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Os */
+	{ roff_layout, NULL, NULL, NULL, ROFF_Sh, ROFF_LAYOUT, ROFF_PARSED }, /* Sh */
+	{ roff_layout, NULL, NULL, NULL, ROFF_Ss, ROFF_LAYOUT, ROFF_PARSED }, /* Ss */ 
+	{   roff_text, NULL, NULL, NULL, ROFF_Pp, ROFF_TEXT, 0 }, /* Pp */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	 	/* D1 */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, 		/* Dl */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_LAYOUT, 0 }, 	/* Bd */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_LAYOUT, 0 }, 	/* Ed */
+	{ roff_layout, roffarg_Bl, NULL, roffchild_Bl, 0, ROFF_LAYOUT, 0 }, 	/* Bl */
+	{ roff_layout, NULL, roffparent_El, NULL, ROFF_Bl, ROFF_LAYOUT, 0 }, 	/* El */
+	{ roff_layout, NULL, roffparent_It, NULL, ROFF_It, ROFF_LAYOUT, 0 }, 	/* It */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ad */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* An */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ar */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Cd */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Cm */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dv */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Er */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ev */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ex */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Fa */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Fd */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Fl */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Fn */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ft */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ic */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* In */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Li */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Nd */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Nm */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Op */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ot */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pa */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Rv */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* St */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Va */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Vt */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xr */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* %A */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE}, /* %B */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* %D */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE}, /* %I */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE}, /* %J */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* %N */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* %O */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* %P */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* %R */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* %T */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* %V */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ac */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ao */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Aq */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* At */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Bc */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Bf */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Bo */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Bq */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bsx */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bx */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Db */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dc */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Do */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dq */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ec */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Ef */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Em */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Eo */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Fx */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ms */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* No */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ns */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Nx */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ox */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pc */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Pf */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Po */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pq */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qc */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ql */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qo */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qq */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Re */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Rs */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sc */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* So */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sq */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Sm */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sx */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sy */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Tn */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ux */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xc */
+	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xo */
 };
 
 /* Table of all known token arguments. */
@@ -441,8 +419,7 @@ roff_free(struct rofftree *tree, int flush)
 
 struct rofftree *
 roff_alloc(const struct md_args *args, struct md_mbuf *out, 
-		const struct md_rbuf *in, roffin textin, 
-		roffout textout, roffblkin blkin, roffblkout blkout)
+		const struct md_rbuf *in, const struct roffcb *cb)
 {
 	struct rofftree	*tree;
 
@@ -455,10 +432,7 @@ roff_alloc(const struct md_args *args, struct md_mbuf *out,
 	tree->args = args;
 	tree->mbuf = out;
 	tree->rbuf = in;
-	tree->roffin = textin;
-	tree->roffout = textout;
-	tree->roffblkin = blkin;
-	tree->roffblkout = blkout;
+	tree->cb = cb;
 
 	return(tree);
 }
@@ -533,98 +507,136 @@ roffargs(int tok, char *buf, char **argv)
 }
 
 
+/* XXX */
+static int
+roffscan(int tok, const int *tokv)
+{
+	if (NULL == tokv)
+		return(1);
+
+	for ( ; ROFF_MAX != *tokv; tokv++)
+		if (tok == *tokv)
+			return(1);
+
+	return(0);
+}
+
+
 static int
 roffparse(struct rofftree *tree, char *buf, size_t sz)
 {
 	int		  tok, t;
-	struct roffnode	 *node;
+	struct roffnode	 *n;
 	char		 *argv[ROFF_MAXARG];
 	const char	**argvp;
 
 	assert(sz > 0);
 
-	/*
-	 * Extract the token identifier from the buffer.  If there's no
-	 * callback for the token (comment, etc.) then exit immediately.
-	 * We don't do any error handling (yet), so if the token doesn't
-	 * exist, die.
-	 */
-
-	if (3 > sz) {
-		warnx("%s: malformed line (line %zu)", 
-				tree->rbuf->name, 
+	if (ROFF_MAX == (tok = rofffindtok(buf + 1))) {
+		warnx("%s: unknown line macro (line %zu)",
+				tree->rbuf->name, tree->rbuf->line);
+		return(0);
+	} else if (NULL == tokens[tok].cb) {
+		warnx("%s: macro `%s' not supported (line %zu)",
+				tree->rbuf->name, toknames[tok],
 				tree->rbuf->line);
 		return(0);
-	
-	/* FIXME: .Bsx is three letters! */
-	} else if (ROFF_MAX == (tok = rofffindtok(buf + 1))) {
-		warnx("%s: unknown line token `%c%c' (line %zu)",
-				tree->rbuf->name, 
-				*(buf + 1), *(buf + 2), 
-				tree->rbuf->line);
-		return(0);
-	} else if (ROFF_COMMENT == tokens[tok].type) 
-		/* Ignore comment tokens. */
+	} else if (ROFF_COMMENT == tokens[tok].type)
 		return(1);
 	
 	if ( ! roffargs(tok, buf, argv)) {
-		warnx("%s: too many arguments to `%s' (line %zu)",
+		warnx("%s: too many args to `%s' (line %zu)",
 				tree->rbuf->name, toknames[tok], 
+				tree->rbuf->line);
+		return(0);
+	} else
+		argvp = (const char **)argv + 1;
+
+	/* 
+	 * Prelude macros break some assumptions: branch now. 
+	 */
+	
+	if (ROFF_PRELUDE & tree->state) {
+		assert(NULL == tree->last);
+		return((*tokens[tok].cb)(tok, tree, argvp, ROFF_ENTER));
+	} else 
+		assert(tree->last);
+
+	assert(ROFF_BODY & tree->state);
+
+	/* 
+	 * First check that our possible parents and parent's possible
+	 * children are satisfied.  
+	 */
+
+	if ( ! roffscan(tree->last->tok, tokens[tok].parents)) {
+		warnx("%s: invalid parent `%s' for `%s' (line %zu)",
+				tree->rbuf->name, 
+				toknames[tree->last->tok],
+				toknames[tok], tree->rbuf->line);
+		return(0);
+	} 
+
+	if ( ! roffscan(tok, tokens[tree->last->tok].children)) {
+		warnx("%s: invalid child `%s' for `%s' (line %zu)",
+				tree->rbuf->name, toknames[tok], 
+				toknames[tree->last->tok],
 				tree->rbuf->line);
 		return(0);
 	}
 
 	/*
-	 * If this is a non-nestable layout token and we're below a
-	 * token of the same type, then recurse upward to the token,
-	 * closing out the interim scopes.
-	 *
-	 * If there's a nested token on the chain, then raise an error
-	 * as nested tokens have corresponding "ending" tokens and we're
-	 * breaking their scope.
+	 * Branch if we're not a layout token.
 	 */
 
-	node = NULL;
+	if (ROFF_LAYOUT != tokens[tok].type)
+		return((*tokens[tok].cb)(tok, tree, argvp, ROFF_ENTER));
 
-	if (ROFF_LAYOUT == tokens[tok].type && 
-			! (ROFF_NESTED & tokens[tok].flags)) {
-		for (node = tree->last; node; node = node->parent) {
-			if (node->tok == tok)
+	/* 
+	 * Check our scope rules. 
+	 */
+
+	if (0 == tokens[tok].ctx)
+		return((*tokens[tok].cb)(tok, tree, argvp, ROFF_ENTER));
+
+	if (tok == tokens[tok].ctx) {
+		for (n = tree->last; n; n = n->parent) {
+			assert(0 == tokens[n->tok].ctx ||
+					n->tok == tokens[n->tok].ctx);
+			if (n->tok == tok)
 				break;
-
-			/* Don't break nested scope. */
-
-			if ( ! (ROFF_NESTED & tokens[node->tok].flags))
-				continue;
-			warnx("%s: scope of %s (line %zu) broken by "
-					"%s (line %zu)", 
-					tree->rbuf->name, 
-					toknames[tok], node->line, 
-					toknames[node->tok],
-					tree->rbuf->line);
-			return(0);
 		}
-	}
-
-	if (node) {
-		assert(ROFF_LAYOUT == tokens[tok].type);
-		assert( ! (ROFF_NESTED & tokens[tok].flags));
-		assert(node->tok == tok);
-
-		/* Clear up to last scoped token. */
-
-		/* LINTED */
+		if (NULL == n) {
+#ifdef DEBUG
+			(void)printf("scope: new `%s'\n",
+					toknames[tok]);
+#endif
+			return((*tokens[tok].cb)(tok, tree, argvp, ROFF_ENTER));
+		}
 		do {
 			t = tree->last->tok;
-			if ( ! (*tokens[tree->last->tok].cb)
-					(tree->last->tok, tree, NULL, ROFF_EXIT))
+#ifdef DEBUG
+		(void)printf("scope: closing `%s'\n", 
+				toknames[t]);
+#endif
+			if ( ! (*tokens[t].cb)(t, tree, NULL, ROFF_EXIT))
 				return(0);
 		} while (t != tok);
+
+		return((*tokens[tok].cb)(tok, tree, argvp, ROFF_ENTER));
 	}
 
-	/* Proceed with actual token processing. */
+	assert(tok != tokens[tok].ctx && 0 != tokens[tok].ctx);
 
-	argvp = (const char **)&argv[1];
+	do {
+		t = tree->last->tok;
+#ifdef DEBUG
+		(void)printf("scope: closing `%s'\n", toknames[t]);
+#endif
+		if ( ! (*tokens[t].cb)(t, tree, NULL, ROFF_EXIT))
+			return(0);
+	} while (t != tokens[tok].ctx);
+
 	return((*tokens[tok].cb)(tok, tree, argvp, ROFF_ENTER));
 }
 
@@ -647,16 +659,33 @@ rofffindarg(const char *name)
 
 
 static int
-rofffindtok(const char *name)
+rofffindtok(const char *buf)
 {
+	char		 token[4];
 	size_t		 i;
+
+	for (i = 0; *buf && ! isspace(*buf) && i < 3; i++, buf++)
+		token[i] = *buf;
+
+	if (i == 3) {
+#ifdef DEBUG
+		(void)printf("lookup: macro too long: `%s'\n", buf);
+#endif
+		return(ROFF_MAX);
+	}
+
+	token[i] = 0;
+
+#ifdef DEBUG
+	(void)printf("lookup: `%s'\n", token);
+#endif
 
 	/* FIXME: use a table, this is slow but ok for now. */
 
 	/* LINTED */
 	for (i = 0; i < ROFF_MAX; i++)
 		/* LINTED */
-		if (0 == strncmp(name, toknames[i], 2))
+		if (0 == strcmp(toknames[i], token))
 			return((int)i);
 	
 	return(ROFF_MAX);
@@ -722,6 +751,41 @@ roffnode_free(int tokid, struct rofftree *tree)
 }
 
 
+static int
+roffnextopt(int tok, const char ***in, char **val)
+{
+	const char	*arg, **argv;
+	int		 v;
+
+	*val = NULL;
+	argv = *in;
+	assert(argv);
+
+	if (NULL == (arg = *argv))
+		return(-1);
+	if ('-' != *arg)
+		return(-1);
+
+	/* FIXME: should we let this slide... ? */
+
+	if (ROFF_ARGMAX == (v = rofffindarg(&arg[1])))
+		return(-1);
+
+	/* FIXME: should we let this slide... ? */
+
+	if ( ! roffargok(tok, v))
+		return(-1);
+	if ( ! (ROFF_VALUE & tokenargs[v].flags))
+		return(v);
+
+	*in = ++argv;
+
+	/* FIXME: what if this looks like a roff token or argument? */
+
+	return(*argv ? v : ROFF_ARGMAX);
+}
+
+
 /* ARGSUSED */
 static	int
 roff_Dd(ROFFCALL_ARGS)
@@ -736,8 +800,11 @@ roff_Dd(ROFFCALL_ARGS)
 	assert(ROFF_PRELUDE & tree->state);
 	assert( ! (ROFF_BODY & tree->state));
 
-	if (ROFF_PRELUDE_Dd & tree->state ||
-			ROFF_PRELUDE_Dt & tree->state) {
+	if (ROFF_PRELUDE_Dd & tree->state) {
+		warnx("%s: prelude `Dd' repeated (line %zu)",
+				tree->rbuf->name, tree->rbuf->line);
+		return(0);
+	} else if (ROFF_PRELUDE_Dt & tree->state) {
 		warnx("%s: prelude `Dd' out-of-order (line %zu)",
 				tree->rbuf->name, tree->rbuf->line);
 		return(0);
@@ -766,9 +833,12 @@ roff_Dt(ROFFCALL_ARGS)
 	assert(ROFF_PRELUDE & tree->state);
 	assert( ! (ROFF_BODY & tree->state));
 
-	if ( ! (ROFF_PRELUDE_Dd & tree->state) ||
-			(ROFF_PRELUDE_Dt & tree->state)) {
+	if ( ! (ROFF_PRELUDE_Dd & tree->state)) {
 		warnx("%s: prelude `Dt' out-of-order (line %zu)",
+				tree->rbuf->name, tree->rbuf->line);
+		return(0);
+	} else if (ROFF_PRELUDE_Dt & tree->state) {
+		warnx("%s: prelude `Dt' repeated (line %zu)",
 				tree->rbuf->name, tree->rbuf->line);
 		return(0);
 	}
@@ -816,42 +886,6 @@ roff_Os(ROFFCALL_ARGS)
 }
 
 
-/* ARGUSED */
-static int
-roffnextopt(int tok, const char ***in, char **val)
-{
-	const char	*arg, **argv;
-	int		 v;
-
-	*val = NULL;
-	argv = *in;
-	assert(argv);
-
-	if (NULL == (arg = *argv))
-		return(-1);
-	if ('-' != *arg)
-		return(-1);
-
-	/* FIXME: should we let this slide... ? */
-
-	if (ROFF_ARGMAX == (v = rofffindarg(&arg[1])))
-		return(-1);
-
-	/* FIXME: should we let this slide... ? */
-
-	if ( ! roffargok(tok, v))
-		return(-1);
-	if ( ! (ROFF_VALUE & tokenargs[v].flags))
-		return(v);
-
-	*in = ++argv;
-
-	/* FIXME: what if this looks like a roff token or argument? */
-
-	return(*argv ? v : ROFF_ARGMAX);
-}
-
-
 /* ARGSUSED */
 static int
 roff_layout(ROFFCALL_ARGS) 
@@ -869,7 +903,7 @@ roff_layout(ROFFCALL_ARGS)
 
 	if (ROFF_EXIT == type) {
 		roffnode_free(tok, tree);
-		return((*tree->roffblkout)(tok));
+		return((*tree->cb->roffblkout)(tok));
 	} 
 
 	i = 0;
@@ -901,15 +935,15 @@ roff_layout(ROFFCALL_ARGS)
 	if (NULL == roffnode_new(tok, tree))
 		return(0);
 
-	if ( ! (*tree->roffin)(tok, argcp, argvp))
+	if ( ! (*tree->cb->roffin)(tok, argcp, argvp))
 		return(0);
 
 	if ( ! (ROFF_PARSED & tokens[tok].flags)) {
 		/* TODO: print all tokens. */
 
-		if ( ! ((*tree->roffout)(tok)))
+		if ( ! ((*tree->cb->roffout)(tok)))
 			return(0);
-		return((*tree->roffblkin)(tok));
+		return((*tree->cb->roffblkin)(tok));
 	}
 
 	while (*argv) {
@@ -923,10 +957,10 @@ roff_layout(ROFFCALL_ARGS)
 		argv++;
 	}
 
-	if ( ! ((*tree->roffout)(tok)))
+	if ( ! ((*tree->cb->roffout)(tok)))
 		return(0);
 
-	return((*tree->roffblkin)(tok));
+	return((*tree->cb->roffblkin)(tok));
 }
 
 
@@ -964,12 +998,12 @@ roff_text(ROFFCALL_ARGS)
 	argcp[i] = ROFF_ARGMAX;
 	argvp[i] = NULL;
 
-	if ( ! (*tree->roffin)(tok, argcp, argvp))
+	if ( ! (*tree->cb->roffin)(tok, argcp, argvp))
 		return(0);
 
 	if ( ! (ROFF_PARSED & tokens[tok].flags)) {
 		/* TODO: print all tokens. */
-		return((*tree->roffout)(tok));
+		return((*tree->cb->roffout)(tok));
 	}
 
 	while (*argv) {
@@ -983,5 +1017,14 @@ roff_text(ROFFCALL_ARGS)
 		argv++;
 	}
 
-	return((*tree->roffout)(tok));
+	return((*tree->cb->roffout)(tok));
+}
+
+
+/* ARGUSED */
+static int
+roff_comment(ROFFCALL_ARGS)
+{
+
+	return(1);
 }
