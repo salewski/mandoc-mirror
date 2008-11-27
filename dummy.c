@@ -33,6 +33,9 @@ static	int		md_dummy_blk_in(int);
 static	int		md_dummy_blk_out(int);
 static 	int		md_dummy_text_in(int, int *, char **);
 static	int		md_dummy_text_out(int);
+static	int		md_dummy_special(int);
+static	int		md_dummy_head(void);
+static	int		md_dummy_tail(void);
 
 static	void		dbg_prologue(const char *);
 static	void		dbg_epilogue(void);
@@ -44,6 +47,61 @@ struct	md_dummy {
 	struct rofftree	*tree;
 	struct roffcb	 cb;
 };
+
+
+int
+md_line_dummy(void *arg, char *buf, size_t sz)
+{
+	struct md_dummy	*p;
+
+	p = (struct md_dummy *)arg;
+	return(roff_engine(p->tree, buf, sz));
+}
+
+
+int
+md_exit_dummy(void *data, int flush)
+{
+	int		 c;
+	struct md_dummy	*p;
+
+	p = (struct md_dummy *)data;
+	c = roff_free(p->tree, flush);
+	free(p);
+
+	return(c);
+}
+
+
+void *
+md_init_dummy(const struct md_args *args,
+		struct md_mbuf *mbuf, const struct md_rbuf *rbuf)
+{
+	struct md_dummy	*p;
+
+	if (NULL == (p = malloc(sizeof(struct md_dummy)))) {
+		warn("malloc");
+		return(NULL);
+	}
+
+	p->cb.roffhead = md_dummy_head;
+	p->cb.rofftail = md_dummy_tail;
+	p->cb.roffin = md_dummy_text_in;
+	p->cb.roffout = md_dummy_text_out;
+	p->cb.roffblkin = md_dummy_blk_in;
+	p->cb.roffblkout = md_dummy_blk_out;
+	p->cb.roffspecial = md_dummy_special;
+
+	p->tree = roff_alloc(args, mbuf, rbuf, &p->cb);
+
+	if (NULL == p->tree) {
+		free(p);
+		return(NULL);
+	}
+
+	return(p);
+}
+
 
 static void
 dbg_prologue(const char *p)
@@ -64,6 +122,34 @@ dbg_epilogue(void)
 
 	assert(0 != dbg_line[0]);
 	(void)printf("%s\n", dbg_line);
+}
+
+
+static int
+md_dummy_head(void)
+{
+
+	return(1);
+}
+
+
+static int
+md_dummy_tail(void)
+{
+
+	return(1);
+}
+
+
+static int
+md_dummy_special(int tok)
+{
+
+	dbg_prologue("noop");
+	(void)strlcat(dbg_line, toknames[tok], sizeof(dbg_line) - 1);
+	dbg_epilogue();
+
+	return(1);
 }
 
 
@@ -123,57 +209,4 @@ md_dummy_text_out(int tok)
 {
 
 	return(1);
-}
-
-
-int
-md_line_dummy(void *arg, char *buf, size_t sz)
-{
-	struct md_dummy	*p;
-
-	p = (struct md_dummy *)arg;
-	return(roff_engine(p->tree, buf, sz));
-}
-
-
-int
-md_exit_dummy(void *data, int flush)
-{
-	int		 c;
-	struct md_dummy	*p;
-
-	p = (struct md_dummy *)data;
-	c = roff_free(p->tree, flush);
-	free(p);
-
-	return(c);
-}
-
-
-void *
-md_init_dummy(const struct md_args *args,
-		struct md_mbuf *mbuf, const struct md_rbuf *rbuf)
-{
-	struct md_dummy	*p;
-
-	if (NULL == (p = malloc(sizeof(struct md_dummy)))) {
-		warn("malloc");
-		return(NULL);
-	}
-
-	p->cb.roffhead = NULL;
-	p->cb.rofftail = NULL;
-	p->cb.roffin = md_dummy_text_in;
-	p->cb.roffout = md_dummy_text_out;
-	p->cb.roffblkin = md_dummy_blk_in;
-	p->cb.roffblkout = md_dummy_blk_out;
-
-	p->tree = roff_alloc(args, mbuf, rbuf, &p->cb);
-
-	if (NULL == p->tree) {
-		free(p);
-		return(NULL);
-	}
-
-	return(p);
 }

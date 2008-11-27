@@ -35,7 +35,9 @@
 
 /* FIXME: ; : } ) (etc.) after text macros? */
 
-#define	ROFF_MAXARG	  10
+/* FIXME: NAME section needs specific elements. */
+
+#define	ROFF_MAXARG	  32
 
 enum	roffd { 
 	ROFF_ENTER = 0, 
@@ -45,7 +47,8 @@ enum	roffd {
 enum	rofftype { 
 	ROFF_COMMENT, 
 	ROFF_TEXT, 
-	ROFF_LAYOUT 
+	ROFF_LAYOUT,
+	ROFF_SPECIAL
 };
 
 #define	ROFFCALL_ARGS \
@@ -107,6 +110,7 @@ static	int		  roff_layout(ROFFCALL_ARGS);
 static	int		  roff_text(ROFFCALL_ARGS);
 static	int		  roff_comment(ROFFCALL_ARGS);
 static	int		  roff_close(ROFFCALL_ARGS);
+static	int		  roff_special(ROFFCALL_ARGS);
 
 static	struct roffnode	 *roffnode_new(int, struct rofftree *);
 static	void		  roffnode_free(int, struct rofftree *);
@@ -224,7 +228,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Bq */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bsx */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bx */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Db */ /* XXX */
+	{roff_special, NULL, NULL, NULL, 0, ROFF_SPECIAL, 0 },	/* Db */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dc */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Do */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dq */
@@ -251,7 +255,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sc */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* So */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sq */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Sm */
+	{roff_special, NULL, NULL, NULL, 0, ROFF_SPECIAL, 0 }, /* Sm */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sx */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sy */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Tn */
@@ -1109,4 +1113,13 @@ roff_close(ROFFCALL_ARGS)
 {
 
 	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+roff_special(ROFFCALL_ARGS)
+{
+
+	return((*tree->cb->roffspecial)(tok));
 }

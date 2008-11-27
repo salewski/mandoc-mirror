@@ -215,6 +215,7 @@ struct	roffcb {
 	int	(*roffout)(int);
 	int	(*roffblkin)(int);
 	int	(*roffblkout)(int);
+	int	(*roffspecial)(int);
 };
 
 __BEGIN_DECLS
