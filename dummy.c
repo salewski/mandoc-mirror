@@ -29,10 +29,11 @@
 #define	strlcat		strncat
 #endif
 
-static	int		md_dummy_blk_in(int);
-static	int		md_dummy_blk_out(int);
-static 	int		md_dummy_text_in(int, int *, char **);
-static	int		md_dummy_text_out(int);
+static	int		md_dummy_blk_in(const struct md_args *, int);
+static	int		md_dummy_blk_out(const struct md_args *, int);
+static 	int		md_dummy_text_in(const struct md_args *, int,
+				int *, char **);
+static	int		md_dummy_text_out(const struct md_args *, int);
 static	int		md_dummy_special(int);
 static	int		md_dummy_head(void);
 static	int		md_dummy_tail(void);
@@ -159,8 +160,11 @@ md_dummy_special(int tok)
 
 
 static int
-md_dummy_blk_in(int tok)
+md_dummy_blk_in(const struct md_args *args, int tok)
 {
+
+	if (args->verbosity < 1)
+		return(1);
 
 	dbg_prologue("blk");
 	(void)strlcat(dbg_line, toknames[tok], sizeof(dbg_line) - 1);
@@ -172,18 +176,24 @@ md_dummy_blk_in(int tok)
 
 
 static int
-md_dummy_blk_out(int tok)
+md_dummy_blk_out(const struct md_args *args, int tok)
 {
+
+	if (args->verbosity < 1)
+		return(1);
 
 	dbg_lvl--;
 	return(1);
 }
 
 
-/* ARGSUSED */
 static int
-md_dummy_text_in(int tok, int *argcp, char **argvp)
+md_dummy_text_in(const struct md_args *args, 
+		int tok, int *argcp, char **argvp)
 {
+
+	if (args->verbosity < 1)
+		return(1);
 
 	dbg_prologue("text");
 	(void)strlcat(dbg_line, toknames[tok], sizeof(dbg_line) - 1);
@@ -210,7 +220,7 @@ md_dummy_text_in(int tok, int *argcp, char **argvp)
 
 
 static int
-md_dummy_text_out(int tok)
+md_dummy_text_out(const struct md_args *args, int tok)
 {
 
 	return(1);
@@ -226,6 +236,8 @@ md_dummy_msg(const struct md_args *args, enum roffmsg lvl,
 
 	switch (lvl) {
 	case (ROFF_WARN):
+		if ( ! (MD_WARN_ALL & args->warnings))
+			return;
 		p = "warning";
 		break;
 	case (ROFF_ERROR):
@@ -236,3 +248,4 @@ md_dummy_msg(const struct md_args *args, enum roffmsg lvl,
 	assert(pos >= buf);
 	(void)fprintf(stderr, "%s:%d: %s: %s\n", name, line, p, msg);
 }
+

@@ -42,6 +42,10 @@ enum	md_type {
 struct	md_args {
 	union md_params	 params;/* Parameters for parser. */
 	enum md_type	 type;	/* Type of parser. */
+
+	int		 warnings;
+#define	MD_WARN_ALL	(1 << 0)
+	int		 verbosity;
 };
 
 struct	md_buf {

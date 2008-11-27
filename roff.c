@@ -451,7 +451,7 @@ roffargs(const struct rofftree *tree,
 			while (*buf && '\"' != *buf)
 				buf++;
 			if (0 == *buf) {
-				roff_err(tree, p, argv[i], "unclosed "
+				roff_err(tree, argv[i], "unclosed "
 						"quote in argument "
 						"list for `%s'", 
 						toknames[tok]);
@@ -471,7 +471,7 @@ roffargs(const struct rofftree *tree,
 	
 	assert(i > 0);
 	if (ROFF_MAXARG == i && *buf) {
-		roff_err(tree, p, p, "too many arguments for `%s'", toknames
+		roff_err(tree, p, "too many arguments for `%s'", toknames
 				[tok]);
 		return(0);
 	}
@@ -898,7 +898,7 @@ roff_layout(ROFFCALL_ARGS)
 
 	if (ROFF_EXIT == type) {
 		roffnode_free(tok, tree);
-		return((*tree->cb->roffblkout)(tok));
+		return((*tree->cb->roffblkout)(tree->args, tok));
 	} 
 
 	i = 0;
@@ -920,16 +920,16 @@ roff_layout(ROFFCALL_ARGS)
 	if (NULL == roffnode_new(tok, tree))
 		return(0);
 
-	if ( ! (*tree->cb->roffin)(tok, argcp, argvp))
+	if ( ! (*tree->cb->roffin)(tree->args, tok, argcp, argvp))
 		return(0);
 
 	if ( ! (ROFF_PARSED & tokens[tok].flags)) {
 
 		/* TODO: print all tokens. */
 
-		if ( ! ((*tree->cb->roffout)(tok)))
+		if ( ! ((*tree->cb->roffout)(tree->args, tok)))
 			return(0);
-		return((*tree->cb->roffblkin)(tok));
+		return((*tree->cb->roffblkin)(tree->args, tok));
 	}
 
 	while (*argv) {
@@ -950,10 +950,10 @@ roff_layout(ROFFCALL_ARGS)
 		argv++;
 	}
 
-	if ( ! ((*tree->cb->roffout)(tok)))
+	if ( ! ((*tree->cb->roffout)(tree->args, tok)))
 		return(0);
 
-	return((*tree->cb->roffblkin)(tok));
+	return((*tree->cb->roffblkin)(tree->args, tok));
 }
 
 
@@ -986,14 +986,14 @@ roff_text(ROFFCALL_ARGS)
 	argcp[i] = ROFF_ARGMAX;
 	argvp[i] = NULL;
 
-	if ( ! (*tree->cb->roffin)(tok, argcp, argvp))
+	if ( ! (*tree->cb->roffin)(tree->args, tok, argcp, argvp))
 		return(0);
 
 	if ( ! (ROFF_PARSED & tokens[tok].flags)) {
 
 		/* TODO: print all tokens. */
 
-		return((*tree->cb->roffout)(tok));
+		return((*tree->cb->roffout)(tree->args, tok));
 	}
 
 	while (*argv) {
@@ -1014,7 +1014,7 @@ roff_text(ROFFCALL_ARGS)
 		argv++;
 	}
 
-	return((*tree->cb->roffout)(tok));
+	return((*tree->cb->roffout)(tree->args, tok));
 }
 
 

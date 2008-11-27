@@ -214,10 +214,10 @@ struct	roffcb {
 			int, char *);
 	int	(*roffhead)(void);
 	int	(*rofftail)(void);
-	int	(*roffin)(int, int *, char **);
-	int	(*roffout)(int);
-	int	(*roffblkin)(int);
-	int	(*roffblkout)(int);
+	int	(*roffin)(const struct md_args *, int, int *, char **);
+	int	(*roffout)(const struct md_args *, int);
+	int	(*roffblkin)(const struct md_args *, int);
+	int	(*roffblkout)(const struct md_args *, int);
 	int	(*roffspecial)(int);
 };
 

@@ -58,10 +58,16 @@ main(int argc, char *argv[])
 
 	(void)memset(&args, 0, sizeof(struct md_args));
 	
-	while (-1 != (c = getopt(argc, argv, "o:")))
+	while (-1 != (c = getopt(argc, argv, "o:vW")))
 		switch (c) {
 		case ('o'):
 			out = optarg;
+			break;
+		case ('v'):
+			args.verbosity++;
+			break;
+		case ('W'):
+			args.warnings |= MD_WARN_ALL;
 			break;
 		default:
 			usage();
@@ -213,5 +219,5 @@ usage(void)
 {
 	extern char	*__progname;
 
-	(void)printf("usage: %s [-o outfile] [infile]\n", __progname);
+	(void)printf("usage: %s [-vW] [-o outfile] [infile]\n", __progname);
 }
