@@ -1,4 +1,4 @@
-CFLAGS += -W -Wall -Wno-unused-parameter -g 
+CFLAGS += -W -Wall -Wno-unused-parameter -g -DDEBUG
 
 LINTFLAGS += -c -e -f -u
 

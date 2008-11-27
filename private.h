@@ -137,7 +137,9 @@ struct	md_mbuf {
 #define	ROFF_Fc		 97
 #define	ROFF_Oo		 98
 #define	ROFF_Oc		 99
-#define	ROFF_MAX	 100
+#define	ROFF_Bk		 100
+#define	ROFF_Ek		 101
+#define	ROFF_MAX	 102
 
 #define	ROFF_Split	 0
 #define	ROFF_Nosplit	 1
