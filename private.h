@@ -199,16 +199,19 @@ struct	md_mbuf {
 #define ROFF_susv2	 55
 #define ROFF_susv3	 56
 #define ROFF_svid4	 57
-#define	ROFF_ARGMAX	 58
+#define	ROFF_Filled	 58
+#define	ROFF_Words	 59
+#define	ROFF_ARGMAX	 60
 
 extern	const char *const *toknames;
 extern	const char *const *tokargnames;
 
-/* FIXME: have a md_roff with all necessary parameters. */
-
-/* FIXME: have roffbegin and roffend for doc head/foot. */
+enum	roffmsg { ROFF_WARN, ROFF_ERROR };
 
 struct	roffcb {
+	void	(*roffmsg)(const struct md_args *, enum roffmsg, 
+			const char *, const char *, const char *, 
+			int, char *);
 	int	(*roffhead)(void);
 	int	(*rofftail)(void);
 	int	(*roffin)(int, int *, char **);

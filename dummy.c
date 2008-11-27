@@ -36,6 +36,10 @@ static	int		md_dummy_text_out(int);
 static	int		md_dummy_special(int);
 static	int		md_dummy_head(void);
 static	int		md_dummy_tail(void);
+static	void		md_dummy_msg(const struct md_args *, 
+				enum roffmsg, const char *,
+				const char *, const char *,
+				int, char *);
 
 static	void		dbg_prologue(const char *);
 static	void		dbg_epilogue(void);
@@ -91,6 +95,7 @@ md_init_dummy(const struct md_args *args,
 	p->cb.roffblkin = md_dummy_blk_in;
 	p->cb.roffblkout = md_dummy_blk_out;
 	p->cb.roffspecial = md_dummy_special;
+	p->cb.roffmsg = md_dummy_msg;
 
 	p->tree = roff_alloc(args, mbuf, rbuf, &p->cb);
 
@@ -209,4 +214,25 @@ md_dummy_text_out(int tok)
 {
 
 	return(1);
+}
+
+
+static void
+md_dummy_msg(const struct md_args *args, enum roffmsg lvl, 
+		const char *buf, const char *pos, 
+		const char *name, int line, char *msg)
+{
+	char		*p;
+
+	switch (lvl) {
+	case (ROFF_WARN):
+		p = "warning";
+		break;
+	case (ROFF_ERROR):
+		p = "error";
+		break;
+	}
+
+	assert(pos >= buf);
+	(void)fprintf(stderr, "%s:%d: %s: %s\n", name, line, p, msg);
 }
