@@ -80,7 +80,6 @@ struct	roffarg {
 struct	roffnode {
 	int		  tok;			/* Token id. */
 	struct roffnode	 *parent;		/* Parent (or NULL). */
-	size_t		  line;			/* Parsed at line. */
 };
 
 struct	rofftree {
@@ -100,10 +99,8 @@ struct	rofftree {
 #define	ROFF_PRELUDE_Dd	 (1 << 4)		/* `Dd' is parsed. */
 #define	ROFF_BODY	 (1 << 5)		/* In roff body. */
 
-	struct md_mbuf		*mbuf;		/* Output (or NULL). */
-	const struct md_args	*args;		/* Global args. */
-	const struct md_rbuf	*rbuf;		/* Input. */
-	const struct roffcb	*cb;
+	struct roffcb	  cb;
+	void		 *arg;
 };
 
 static	int		  roff_Dd(ROFFCALL_ARGS);
@@ -117,7 +114,7 @@ static	int		  roff_close(ROFFCALL_ARGS);
 static	int		  roff_special(ROFFCALL_ARGS);
 
 static	struct roffnode	 *roffnode_new(int, struct rofftree *);
-static	void		  roffnode_free(int, struct rofftree *);
+static	void		  roffnode_free(struct rofftree *);
 
 static	void		  roff_warn(const struct rofftree *, 
 				const char *, char *, ...);
@@ -360,38 +357,25 @@ const	char *const *tokargnames = tokargnamesp;
 int
 roff_free(struct rofftree *tree, int flush)
 {
-	int		 error, tok;
+	int		 error;
+	struct roffnode	*n;
 
-	assert(tree->mbuf);
-	if ( ! flush)
-		tree->mbuf = NULL;
+	error = 0;
 
-	/* LINTED */
-	while (tree->last) {
-		if (tree->last->parent) {
-			tok = tree->last->tok;
-			if (tokens[tok].ctx == 0) {
-				warnx("%s: closing out explicit scope "
-						"of `%s' from line %zu",
-						tree->rbuf->name,
-						toknames[tok],
-						tree->last->line);
-				tree->mbuf = NULL;
-			}
+	for (n = tree->last; n->parent; n = n->parent)
+		if (tokens[n->tok].ctx == 0) {
+			roff_warn(tree, NULL, "closing explicit scope "
+					"of `%s'", toknames[n->tok]);
+			error = 1;
 		}
-		if ( ! (*tokens[tree->last->tok].cb)
-				(tree->last->tok, tree, NULL, ROFF_EXIT))
-			/* Disallow flushing. */
-			tree->mbuf = NULL;
-	}
 
-	error = tree->mbuf ? 0 : 1;
-
-	if (tree->mbuf && (ROFF_PRELUDE & tree->state)) {
-		warnx("%s: prelude never finished",
-				tree->rbuf->name);
+	if (0 == error && (ROFF_PRELUDE & tree->state)) {
+		roff_warn(tree, NULL, "prelude never finished");
 		error = 1;
 	}
+
+	while (tree->last) 
+		roffnode_free(tree);
 
 	free(tree);
 	return(error ? 0 : 1);
@@ -399,8 +383,7 @@ roff_free(struct rofftree *tree, int flush)
 
 
 struct rofftree *
-roff_alloc(const struct md_args *args, struct md_mbuf *out, 
-		const struct md_rbuf *in, const struct roffcb *cb)
+roff_alloc(const struct roffcb *cb, void *args)
 {
 	struct rofftree	*tree;
 
@@ -408,10 +391,9 @@ roff_alloc(const struct md_args *args, struct md_mbuf *out,
 		err(1, "calloc");
 
 	tree->state = ROFF_PRELUDE;
-	tree->args = args;
-	tree->mbuf = out;
-	tree->rbuf = in;
-	tree->cb = cb;
+	tree->arg = args;
+
+	(void)memcpy(&tree->cb, cb, sizeof(struct roffcb));
 
 	return(tree);
 }
@@ -550,18 +532,16 @@ roffparse(struct rofftree *tree, char *buf, size_t sz)
 	 */
 
 	if ( ! roffscan(tree->last->tok, tokens[tok].parents)) {
-		roff_err(tree, *argvp, "`%s' has invalid parent `%s' "
-				"from line %zu", toknames[tok], 
-				toknames[tree->rbuf->line],
-				tree->rbuf->line);
+		roff_err(tree, *argvp, "`%s' has invalid parent `%s'",
+				toknames[tok], 
+				toknames[tree->last->tok]);
 		return(0);
 	} 
 
 	if ( ! roffscan(tok, tokens[tree->last->tok].children)) {
-		roff_err(tree, *argvp, "`%s' is invalid child for "
-				"`%s' from line %zu", toknames[tok], 
-				toknames[tree->rbuf->line],
-				tree->rbuf->line);
+		roff_err(tree, *argvp, "`%s' is invalid child `%s'",
+				toknames[tree->last->tok],
+				toknames[tok]);
 		return(0);
 	}
 
@@ -717,7 +697,6 @@ roffnode_new(int tokid, struct rofftree *tree)
 	if (NULL == (p = malloc(sizeof(struct roffnode))))
 		err(1, "malloc");
 
-	p->line = tree->rbuf->line;
 	p->tok = tokid;
 	p->parent = tree->last;
 	tree->last = p;
@@ -743,12 +722,11 @@ roffargok(int tokid, int argid)
 
 
 static void
-roffnode_free(int tokid, struct rofftree *tree)
+roffnode_free(struct rofftree *tree)
 {
 	struct roffnode	*p;
 
 	assert(tree->last);
-	assert(tree->last->tok == tokid);
 
 	p = tree->last;
 	tree->last = tree->last->parent;
@@ -908,11 +886,9 @@ roff_layout(ROFFCALL_ARGS)
 	}
 
 	if (ROFF_EXIT == type) {
-		roffnode_free(tok, tree);
-		return((*tree->cb->roffblkout)(tree->args, tok));
+		roffnode_free(tree);
+		return((*tree->cb.roffblkout)(tree->arg, tok));
 	} 
-
-	assert(tree->mbuf);
 
 	i = 0;
 	argv++;
@@ -933,23 +909,19 @@ roff_layout(ROFFCALL_ARGS)
 	if (NULL == roffnode_new(tok, tree))
 		return(0);
 
-	if ( ! (*tree->cb->roffin)(tree->args, tok, argcp, argvp))
+	if ( ! (*tree->cb.roffin)(tree->arg, tok, argcp, argvp))
 		return(0);
 
 	if ( ! (ROFF_PARSED & tokens[tok].flags)) {
 		while (*argv) {
-			if ( ! md_buf_putstring(tree->mbuf, *argv++))
-				return(0);
-			if ( ! md_buf_putchar(tree->mbuf, ' '))
+			if ( ! (*tree->cb.roffdata)
+					(tree->arg, *argv++))
 				return(0);
 		}
 
-		if ( ! md_buf_putchar(tree->mbuf, '\n'))
+		if ( ! ((*tree->cb.roffout)(tree->arg, tok)))
 			return(0);
-
-		if ( ! ((*tree->cb->roffout)(tree->args, tok)))
-			return(0);
-		return((*tree->cb->roffblkin)(tree->args, tok));
+		return((*tree->cb.roffblkin)(tree->arg, tok));
 	}
 
 	while (*argv) {
@@ -965,18 +937,13 @@ roff_layout(ROFFCALL_ARGS)
 			break;
 		}
 
-		if ( ! md_buf_putstring(tree->mbuf, *argv++))
-			return(0);
-		if ( ! md_buf_putchar(tree->mbuf, ' '))
+		if ( ! (*tree->cb.roffdata)(tree->arg, *argv++))
 			return(0);
 	}
 
-	if (NULL == *argv && ! md_buf_putchar(tree->mbuf, '\n'))
+	if ( ! ((*tree->cb.roffout)(tree->arg, tok)))
 		return(0);
-
-	if ( ! ((*tree->cb->roffout)(tree->args, tok)))
-		return(0);
-	return((*tree->cb->roffblkin)(tree->args, tok));
+	return((*tree->cb.roffblkin)(tree->arg, tok));
 }
 
 
@@ -986,8 +953,6 @@ roff_text(ROFFCALL_ARGS)
 {
 	int		 i, c, argcp[ROFF_MAXARG];
 	char		*v, *argvp[ROFF_MAXARG];
-
-	assert(tree->mbuf);
 
 	if (ROFF_PRELUDE & tree->state) {
 		roff_err(tree, *argv, "`%s' disallowed in prelude", 
@@ -1011,19 +976,15 @@ roff_text(ROFFCALL_ARGS)
 	argcp[i] = ROFF_ARGMAX;
 	argvp[i] = NULL;
 
-	if ( ! (*tree->cb->roffin)(tree->args, tok, argcp, argvp))
+	if ( ! (*tree->cb.roffin)(tree->arg, tok, argcp, argvp))
 		return(0);
 
 	if ( ! (ROFF_PARSED & tokens[tok].flags)) {
 		while (*argv) {
-			if ( ! md_buf_putstring(tree->mbuf, *argv++))
-				return(0);
-			if ( ! md_buf_putchar(tree->mbuf, ' '))
+			if ( ! (*tree->cb.roffdata)(tree->arg, *argv++))
 				return(0);
 		}
-		if ( ! md_buf_putchar(tree->mbuf, '\n'))
-			return(0);
-		return((*tree->cb->roffout)(tree->args, tok));
+		return((*tree->cb.roffout)(tree->arg, tok));
 	}
 
 	while (*argv) {
@@ -1039,17 +1000,11 @@ roff_text(ROFFCALL_ARGS)
 				return(0);
 			break;
 		}
-
-		if ( ! md_buf_putstring(tree->mbuf, *argv++))
-			return(0);
-		if ( ! md_buf_putchar(tree->mbuf, ' '))
+		if ( ! (*tree->cb.roffdata)(tree->arg, *argv++))
 			return(0);
 	}
 
-	if (NULL == *argv && ! md_buf_putchar(tree->mbuf, '\n'))
-		return(0);
-
-	return((*tree->cb->roffout)(tree->args, tok));
+	return((*tree->cb.roffout)(tree->arg, tok));
 }
 
 
@@ -1076,7 +1031,7 @@ static int
 roff_special(ROFFCALL_ARGS)
 {
 
-	return((*tree->cb->roffspecial)(tree->args, tok));
+	return((*tree->cb.roffspecial)(tree->arg, tok));
 }
 
 
@@ -1090,8 +1045,8 @@ roff_warn(const struct rofftree *tree, const char *pos, char *fmt, ...)
 	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
-	(*tree->cb->roffmsg)(tree->args, ROFF_WARN, tree->cur, pos,
-			tree->rbuf->name, tree->rbuf->line, buf);
+	(*tree->cb.roffmsg)(tree->arg, 
+			ROFF_WARN, tree->cur, pos, buf);
 }
 
 
@@ -1105,6 +1060,6 @@ roff_err(const struct rofftree *tree, const char *pos, char *fmt, ...)
 	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
-	(*tree->cb->roffmsg)(tree->args, ROFF_ERROR, tree->cur, pos,
-			tree->rbuf->name, tree->rbuf->line, buf);
+	(*tree->cb.roffmsg)(tree->arg, 
+			ROFF_ERROR, tree->cur, pos, buf);
 }

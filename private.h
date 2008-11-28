@@ -209,16 +209,16 @@ extern	const char *const *tokargnames;
 enum	roffmsg { ROFF_WARN, ROFF_ERROR };
 
 struct	roffcb {
-	void	(*roffmsg)(const struct md_args *, enum roffmsg, 
-			const char *, const char *, const char *, 
-			int, char *);
-	int	(*roffhead)(const struct md_args *);
-	int	(*rofftail)(const struct md_args *);
-	int	(*roffin)(const struct md_args *, int, int *, char **);
-	int	(*roffout)(const struct md_args *, int);
-	int	(*roffblkin)(const struct md_args *, int);
-	int	(*roffblkout)(const struct md_args *, int);
-	int	(*roffspecial)(const struct md_args *, int);
+	void	(*roffmsg)(void *, enum roffmsg, 
+			const char *, const char *, char *);
+	int	(*roffhead)(void *);
+	int	(*rofftail)(void *);
+	int	(*roffin)(void *, int, int *, char **);
+	int	(*roffdata)(void *, const char *);
+	int	(*roffout)(void *, int);
+	int	(*roffblkin)(void *, int);
+	int	(*roffblkout)(void *, int);
+	int	(*roffspecial)(void *, int);
 };
 
 __BEGIN_DECLS
@@ -244,9 +244,7 @@ int	 	  md_buf_putstring(struct md_mbuf *, const char *);
 
 struct	rofftree;
 
-struct	rofftree *roff_alloc(const struct md_args *, 
-			struct md_mbuf *, const struct md_rbuf *,
-			const struct roffcb *);
+struct	rofftree *roff_alloc(const struct roffcb *, void *);
 int		  roff_engine(struct rofftree *, char *, size_t);
 int		  roff_free(struct rofftree *, int);
 

@@ -56,8 +56,7 @@ md_buf_fill(struct md_rbuf *in)
 }
 
 
-static int
-md_buf_flush(struct md_mbuf *buf)
+static int md_buf_flush(struct md_mbuf *buf)
 {
 	ssize_t		 sz;
 
