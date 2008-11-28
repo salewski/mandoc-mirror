@@ -7,22 +7,28 @@
 .Dt mdocml 1
 .Os
 .\"
-.Op foo
 .Sh NAME
 .Nm mdocml
 .Nd compile manpage source into mark-up language
 .\"
 .Sh SYNOPSIS
 .Nm mdocml
-.Op Fl W
+.Op Fl vW
+.Op Fl f Ar filter
 .Op Fl o Ar outfile
 .Op Ar infile
 .\"
 .Sh DESCRIPTION
 The
 .Nm
-utility compiles manpage source into a mark-up language.  Its arguments
-are as follows:
+utility parses
+.Xr mdoc
+formatted manual source and passes results into the output filter
+dictated by 
+.Fl f Ar filter .
+The only current output filter is
+.Ar validate ,
+the default.  The arguments are as follows:
 .Bl -tag -width "\-o outfile"
 .It Fl o Ar outfile
 Place output in 
@@ -36,9 +42,17 @@ Read input from
 which may be 
 .Qq \-
 for standard input.  The default is standard input.
+.It Fl v
+Print messages (output depends on filter).
 .It Fl W
-Print warnings.
+Print warnings (output depends on filter).
 .El
+.Ss Validate Filter
+The validate filter, specified by
+.Fl f Ar validate ,
+is the default filter.  It produces no output, so specifying
+.Fl o Ar outfile
+results in an empty file.
 .\" The following requests should be uncommented and used where appropriate.
 .\" This next request is for sections 2, 3, and 9 function return values only.
 .\" .Sh RETURN VALUES
@@ -63,14 +77,24 @@ utility was written by
 .An Kristaps Dzonsons Aq kristaps@kth.se .
 .\"
 .Sh CAVEATS
-The
+Most caveats of
 .Nm
-engine doesn't understand
+stem from ambiguities in 
+.Xr mdoc 7
+or the necessary limitations of converting an ad hoc language into
+structured ones:
+.Bl -enum -compact -offset indent
+.It 
+The engine doesn't understand
 .Sq \&Xo
 and
 .Sq \&Xc
 troff macros.
-.Pp
-.Em All
-macro arguments may be quoted, instead of only some.
+.It 
+All macro arguments may be quoted, instead of only some.
+.It 
+Blank lines raise warnings.
+.It 
+Non-ascii characters may cause issues.
+.El
 .\" .Sh BUGS

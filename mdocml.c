@@ -80,8 +80,6 @@ main(int argc, char *argv[])
 	if (1 == argc)
 		in = *argv++;
 
-	args.type = MD_DUMMY;
-
 	return(begin_io(&args, out ? out : "-", in ? in : "-"));
 }
 

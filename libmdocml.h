@@ -21,7 +21,7 @@
 
 #include <sys/types.h>
 
-struct 	md_params_dummy {
+struct 	md_params_valid {
 	int		 dummy;
 };
 
@@ -30,12 +30,12 @@ struct 	md_params_html4_strict {
 };
 
 union	md_params {
-	struct md_params_dummy dummy;
+	struct md_params_valid valid;
 	struct md_params_html4_strict html4_strict;
 };
 
 enum	md_type {
-	MD_DUMMY,		/* Dummy type echoes input. */
+	MD_VALID,		/* Validate input only. */
 	MD_HTML4_STRICT		/* HTML4.01-strict. */
 };
 

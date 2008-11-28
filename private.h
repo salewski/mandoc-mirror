@@ -212,13 +212,13 @@ struct	roffcb {
 	void	(*roffmsg)(const struct md_args *, enum roffmsg, 
 			const char *, const char *, const char *, 
 			int, char *);
-	int	(*roffhead)(void);
-	int	(*rofftail)(void);
+	int	(*roffhead)(const struct md_args *);
+	int	(*rofftail)(const struct md_args *);
 	int	(*roffin)(const struct md_args *, int, int *, char **);
 	int	(*roffout)(const struct md_args *, int);
 	int	(*roffblkin)(const struct md_args *, int);
 	int	(*roffblkout)(const struct md_args *, int);
-	int	(*roffspecial)(int);
+	int	(*roffspecial)(const struct md_args *, int);
 };
 
 __BEGIN_DECLS
@@ -233,10 +233,10 @@ void		 *md_init_html4_strict(const struct md_args *,
 int		  md_line_html4_strict(void *, char *, size_t);
 int		  md_exit_html4_strict(void *, int);
 
-void		 *md_init_dummy(const struct md_args *,
+void		 *md_init_valid(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *);
-int		  md_line_dummy(void *, char *, size_t);
-int		  md_exit_dummy(void *, int);
+int		  md_line_valid(void *, char *, size_t);
+int		  md_exit_valid(void *, int);
 
 int	 	  md_buf_puts(struct md_mbuf *, const char *, size_t);
 int	 	  md_buf_putchar(struct md_mbuf *, char);
