@@ -357,22 +357,39 @@ const	char *const *tokargnames = tokargnamesp;
 int
 roff_free(struct rofftree *tree, int flush)
 {
-	int		 error;
+	int		 error, t;
 	struct roffnode	*n;
+
+	if ( ! flush)
+		goto end;
+
+	error = 1;
+
+	if (ROFF_PRELUDE & tree->state) {
+		roff_warn(tree, NULL, "prelude never finished");
+		goto end;
+	} 
+
+	for (n = tree->last; n->parent; n = n->parent) {
+		if (0 != tokens[n->tok].ctx) 
+			break;
+		roff_warn(tree, NULL, "closing explicit scope `%s'", 
+				toknames[n->tok]);
+		goto end;
+	}
+
+	while (tree->last) {
+		t = tree->last->tok;
+		if ( ! (*tokens[t].cb)(t, tree, NULL, ROFF_EXIT))
+			goto end;
+	}
+
+	if ( ! (*tree->cb.roffhead)(tree->arg))
+		goto end;
 
 	error = 0;
 
-	for (n = tree->last; n->parent; n = n->parent)
-		if (tokens[n->tok].ctx == 0) {
-			roff_warn(tree, NULL, "closing explicit scope "
-					"of `%s'", toknames[n->tok]);
-			error = 1;
-		}
-
-	if (0 == error && (ROFF_PRELUDE & tree->state)) {
-		roff_warn(tree, NULL, "prelude never finished");
-		error = 1;
-	}
+end:
 
 	while (tree->last) 
 		roffnode_free(tree);
@@ -394,6 +411,11 @@ roff_alloc(const struct roffcb *cb, void *args)
 	tree->arg = args;
 
 	(void)memcpy(&tree->cb, cb, sizeof(struct roffcb));
+
+	if ( ! (*tree->cb.roffhead)(args)) {
+		free(tree);
+		return(NULL);
+	}
 
 	return(tree);
 }
