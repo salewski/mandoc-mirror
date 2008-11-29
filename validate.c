@@ -28,8 +28,10 @@
 #include "libmdocml.h"
 #include "private.h"
 
+#define	INDENT		 4
+
 #ifdef	__linux__ /* FIXME */
-#define	strlcat		strncat
+#define	strlcat		 strncat
 #endif
 
 struct	md_valid {
@@ -52,7 +54,7 @@ static	int		 rofftail(void *);
 static	int		 roffin(void *, int, int *, char **);
 static	int		 roffdata(void *, char *);
 static	int		 roffout(void *, int);
-static	int		 roffblkin(void *, int);
+static	int		 roffblkin(void *, int, int *, char **);
 static	int		 roffblkout(void *, int);
 static	int		 roffspecial(void *, int);
 
@@ -66,22 +68,14 @@ mbuf_indent(struct md_valid *p)
 {
 	size_t		 i;
 
-	assert(0 == p->pos);
+	assert(p->pos == 0);
 
-	for (i = 0; i < MIN(p->indent, 4); i++)
+	for (i = 0; i < MIN(p->indent, INDENT); i++)
 		if ( ! md_buf_putstring(p->mbuf, "    "))
 			return(0);
 
-	p->pos = i * 4;
+	p->pos += i * INDENT;
 	return(1);
-}
-
-
-static int
-mbuf_atnewline(struct md_valid *p)
-{
-
-	return(p->pos == MIN(4, p->indent));
 }
 
 
@@ -89,13 +83,11 @@ static int
 mbuf_newline(struct md_valid *p)
 {
 
-	if (mbuf_atnewline(p))
-		return(1);
 	if ( ! md_buf_putchar(p->mbuf, '\n'))
 		return(0);
 
 	p->pos = 0;
-	return(mbuf_indent(p));
+	return(1);
 }
 
 
@@ -110,14 +102,6 @@ mbuf_data(struct md_valid *p, char *buf)
 
 	if (MD_LITERAL & p->flags)
 		return(md_buf_putstring(p->mbuf, buf));
-
-	if (0 == p->pos)
-		mbuf_indent(p);
-
-	/*
-	 * Indent if we're at the beginning of a line.  Don't indent
-	 * more than 16 or so characters.
-	 */
 
 	while (*buf) {
 		while (*buf && isspace(*buf))
@@ -136,29 +120,38 @@ mbuf_data(struct md_valid *p, char *buf)
 		/* Process word. */
 
 		sz = strlen(bufp);
-		
-		if (sz + p->pos < 72) {
+
+		if (0 == p->pos) {
+			if ( ! mbuf_indent(p))
+				return(0);
 			if ( ! md_buf_putstring(p->mbuf, bufp))
 				return(0);
 
-			/* FIXME: check punctuation. */
+			if (p->indent * INDENT + sz >= 72) {
+				if ( ! mbuf_newline(p))
+					return(0);
+				continue;
+			}
 
 			if ( ! md_buf_putchar(p->mbuf, ' '))
 				return(0);
+
 			p->pos += sz + 1;
 			continue;
 		}
 
-		if ( ! mbuf_newline(p))
-			return(0);
+		if (sz + p->pos >= 72) {
+			if ( ! mbuf_newline(p))
+				return(0);
+			if ( ! mbuf_indent(p))
+				return(0);
+		}
 
 		if ( ! md_buf_putstring(p->mbuf, bufp))
 			return(0);
-
-		/* FIXME: check punctuation. */
-
 		if ( ! md_buf_putchar(p->mbuf, ' '))
 			return(0);
+
 		p->pos += sz + 1;
 	}
 
@@ -229,6 +222,16 @@ md_init_valid(const struct md_args *args,
 static int
 roffhead(void *arg)
 {
+	struct md_valid	*p;
+
+	assert(arg);
+	p = (struct md_valid *)arg;
+
+	if ( ! md_buf_putstring(p->mbuf, "BEGIN"))
+		return(0);
+	p->indent++;
+	if ( ! mbuf_newline(p))
+		return(0);
 
 	return(1);
 }
@@ -242,10 +245,12 @@ rofftail(void *arg)
 	assert(arg);
 	p = (struct md_valid *)arg;
 
-	if (mbuf_atnewline(p))
-		return(1);
+	if (0 != p->pos && ! mbuf_newline(p))
+		return(0);
 
-	return(md_buf_putchar(p->mbuf, '\n'));
+	if ( ! md_buf_putstring(p->mbuf, "END\n"))
+		return(0);
+	return(1);
 }
 
 
@@ -258,31 +263,32 @@ roffspecial(void *arg, int tok)
 
 
 static int
-roffblkin(void *arg, int tok)
+roffblkin(void *arg, int tok, int *argc, char **argv)
 {
 	struct md_valid	*p;
 
 	assert(arg);
 	p = (struct md_valid *)arg;
 
-	if ( ! mbuf_atnewline(p)) {
-		if ( ! md_buf_putchar(p->mbuf, '\n'))
+	if (0 != p->pos) {
+		if ( ! mbuf_newline(p))
 			return(0);
-		p->pos = 0;
 		if ( ! mbuf_indent(p))
 			return(0);
-	}
+	} else if ( ! mbuf_indent(p))
+		return(0);
 
+	if ( ! md_buf_putchar(p->mbuf, '<'))
+		return(0);
 	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
 		return(0);
-
-	if ( ! md_buf_putchar(p->mbuf, '\n'))
+	if ( ! md_buf_putchar(p->mbuf, '>'))
+		return(0);
+	if ( ! mbuf_newline(p))
 		return(0);
 
-	p->pos = 0;
 	p->indent++;
-
-	return(mbuf_indent(p));
+	return(1);
 }
 
 
@@ -294,19 +300,48 @@ roffblkout(void *arg, int tok)
 	assert(arg);
 	p = (struct md_valid *)arg;
 
-	if ( ! md_buf_putchar(p->mbuf, '\n'))
-		return(0);
-
-	p->pos = 0;
 	p->indent--;
 
-	return(mbuf_indent(p));
+	if (0 != p->pos) {
+		if ( ! mbuf_newline(p))
+			return(0);
+		if ( ! mbuf_indent(p))
+			return(0);
+	} else if ( ! mbuf_indent(p))
+		return(0);
+
+	if ( ! md_buf_putstring(p->mbuf, "</"))
+		return(0);
+	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
+		return(0);
+	if ( ! md_buf_putstring(p->mbuf, ">"))
+		return(0);
+	if ( ! mbuf_newline(p))
+		return(0);
+
+	return(1);
 }
 
 
 static int
 roffin(void *arg, int tok, int *argcp, char **argvp)
 {
+	struct md_valid	*p;
+
+	assert(arg);
+	p = (struct md_valid *)arg;
+
+	if (0 == p->pos && ! mbuf_indent(p))
+		return(0);
+
+	if ( ! md_buf_putstring(p->mbuf, "<"))
+		return(0);
+	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
+		return(0);
+	if ( ! md_buf_putstring(p->mbuf, ">"))
+		return(0);
+
+	p->pos += strlen(toknames[tok]) + 2;
 
 	return(1);
 }
@@ -315,6 +350,22 @@ roffin(void *arg, int tok, int *argcp, char **argvp)
 static int
 roffout(void *arg, int tok)
 {
+	struct md_valid	*p;
+
+	assert(arg);
+	p = (struct md_valid *)arg;
+
+	if (0 == p->pos && ! mbuf_indent(p))
+		return(0);
+
+	if ( ! md_buf_putstring(p->mbuf, "</"))
+		return(0);
+	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
+		return(0);
+	if ( ! md_buf_putstring(p->mbuf, "> "))
+		return(0);
+
+	p->pos += strlen(toknames[tok]) + 3;
 
 	return(1);
 }

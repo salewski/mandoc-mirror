@@ -216,7 +216,7 @@ struct	roffcb {
 	int	(*roffin)(void *, int, int *, char **);
 	int	(*roffdata)(void *, char *);
 	int	(*roffout)(void *, int);
-	int	(*roffblkin)(void *, int);
+	int	(*roffblkin)(void *, int, int *, char **);
 	int	(*roffblkout)(void *, int);
 	int	(*roffspecial)(void *, int);
 };
