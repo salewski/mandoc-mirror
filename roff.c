@@ -130,9 +130,8 @@ static	int		  roffargs(const struct rofftree *,
 static	int		  roffargok(int, int);
 static	int		  roffnextopt(const struct rofftree *,
 				int, const char ***, char **);
-static	int 		  roffparse(struct rofftree *, char *, size_t);
-static	int		  textparse(const struct rofftree *,
-				const char *, size_t);
+static	int 		  roffparse(struct rofftree *, char *);
+static	int		  textparse(const struct rofftree *, char *);
 
 
 static	const int roffarg_An[] = { ROFF_Split, ROFF_Nosplit, 
@@ -360,6 +359,8 @@ roff_free(struct rofftree *tree, int flush)
 	int		 error, t;
 	struct roffnode	*n;
 
+	error = 0;
+
 	if ( ! flush)
 		goto end;
 
@@ -372,7 +373,7 @@ roff_free(struct rofftree *tree, int flush)
 
 	for (n = tree->last; n->parent; n = n->parent) {
 		if (0 != tokens[n->tok].ctx) 
-			break;
+			continue;
 		roff_warn(tree, NULL, "closing explicit scope `%s'", 
 				toknames[n->tok]);
 		goto end;
@@ -384,7 +385,7 @@ roff_free(struct rofftree *tree, int flush)
 			goto end;
 	}
 
-	if ( ! (*tree->cb.roffhead)(tree->arg))
+	if ( ! (*tree->cb.rofftail)(tree->arg))
 		goto end;
 
 	error = 0;
@@ -395,6 +396,7 @@ end:
 		roffnode_free(tree);
 
 	free(tree);
+
 	return(error ? 0 : 1);
 }
 
@@ -403,6 +405,9 @@ struct rofftree *
 roff_alloc(const struct roffcb *cb, void *args)
 {
 	struct rofftree	*tree;
+
+	assert(args);
+	assert(cb);
 
 	if (NULL == (tree = calloc(1, sizeof(struct rofftree))))
 		err(1, "calloc");
@@ -422,27 +427,27 @@ roff_alloc(const struct roffcb *cb, void *args)
 
 
 int
-roff_engine(struct rofftree *tree, char *buf, size_t sz)
+roff_engine(struct rofftree *tree, char *buf)
 {
 
-	tree->cur = NULL;
+	tree->cur = buf;
+	assert(buf);
 
-	if (0 == sz) {
+	if (0 == *buf) {
 		roff_warn(tree, buf, "blank line");
 		return(0);
 	} else if ('.' != *buf)
-		return(textparse(tree, buf, sz));
+		return(textparse(tree, buf));
 
-	return(roffparse(tree, buf, sz));
+	return(roffparse(tree, buf));
 }
 
 
 static int
-textparse(const struct rofftree *tree, const char *buf, size_t sz)
+textparse(const struct rofftree *tree, char *buf)
 {
-	
-	/* Print text. */
-	return(1);
+
+	return((*tree->cb.roffdata)(tree->arg, buf));
 }
 
 
@@ -512,14 +517,12 @@ roffscan(int tok, const int *tokv)
 
 
 static int
-roffparse(struct rofftree *tree, char *buf, size_t sz)
+roffparse(struct rofftree *tree, char *buf)
 {
 	int		  tok, t;
 	struct roffnode	 *n;
 	char		 *argv[ROFF_MAXARG];
 	const char	**argvp;
-
-	assert(sz > 0);
 
 	if (ROFF_MAX == (tok = rofffindtok(buf + 1))) {
 		roff_err(tree, buf + 1, "bogus line macro");
@@ -959,6 +962,7 @@ roff_layout(ROFFCALL_ARGS)
 			break;
 		}
 
+		assert(tree->arg);
 		if ( ! (*tree->cb.roffdata)(tree->arg, *argv++))
 			return(0);
 	}

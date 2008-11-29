@@ -25,7 +25,7 @@
 
 /* ARGSUSED */
 int
-md_line_html4_strict(void *data, char *buf, size_t sz)
+md_line_html4_strict(void *data, char *buf)
 {
 
 	return(1);

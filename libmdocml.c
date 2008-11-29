@@ -85,6 +85,8 @@ static int md_buf_flush(struct md_mbuf *buf)
 int
 md_buf_putchar(struct md_mbuf *buf, char c)
 {
+
+	assert(buf);
 	return(md_buf_puts(buf, &c, 1));
 }
 
@@ -92,6 +94,8 @@ md_buf_putchar(struct md_mbuf *buf, char c)
 int
 md_buf_putstring(struct md_mbuf *buf, const char *p)
 {
+
+	assert(buf);
 	return(md_buf_puts(buf, p, strlen(p)));
 }
 
@@ -207,7 +211,7 @@ again:
 		}
 
 		line[pos] = 0;
-		if ( ! (*fp)(p, line, pos))
+		if ( ! (*fp)(p, line))
 			return(md_run_leave(args, mbuf, rbuf, -1, p));
 		rbuf->line++;
 		pos = 0;

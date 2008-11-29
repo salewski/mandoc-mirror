@@ -214,7 +214,7 @@ struct	roffcb {
 	int	(*roffhead)(void *);
 	int	(*rofftail)(void *);
 	int	(*roffin)(void *, int, int *, char **);
-	int	(*roffdata)(void *, const char *);
+	int	(*roffdata)(void *, char *);
 	int	(*roffout)(void *, int);
 	int	(*roffblkin)(void *, int);
 	int	(*roffblkout)(void *, int);
@@ -225,17 +225,17 @@ __BEGIN_DECLS
 
 typedef	void  (*(*md_init)(const struct md_args *, 
 			struct md_mbuf *, const struct md_rbuf *));
-typedef	int	(*md_line)(void *, char *, size_t);
+typedef	int	(*md_line)(void *, char *);
 typedef	int	(*md_exit)(void *, int);
 
 void		 *md_init_html4_strict(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *);
-int		  md_line_html4_strict(void *, char *, size_t);
+int		  md_line_html4_strict(void *, char *);
 int		  md_exit_html4_strict(void *, int);
 
 void		 *md_init_valid(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *);
-int		  md_line_valid(void *, char *, size_t);
+int		  md_line_valid(void *, char *);
 int		  md_exit_valid(void *, int);
 
 int	 	  md_buf_puts(struct md_mbuf *, const char *, size_t);
@@ -245,7 +245,7 @@ int	 	  md_buf_putstring(struct md_mbuf *, const char *);
 struct	rofftree;
 
 struct	rofftree *roff_alloc(const struct roffcb *, void *);
-int		  roff_engine(struct rofftree *, char *, size_t);
+int		  roff_engine(struct rofftree *, char *);
 int		  roff_free(struct rofftree *, int);
 
 __END_DECLS
