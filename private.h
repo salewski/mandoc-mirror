@@ -213,7 +213,7 @@ struct	roffcb {
 			const char *, const char *, char *);
 	int	(*roffhead)(void *);
 	int	(*rofftail)(void *);
-	int	(*roffin)(void *, int, int, int *, char **);
+	int	(*roffin)(void *, int, int *, char **);
 	int	(*roffdata)(void *, int, char *);
 	int	(*roffout)(void *, int);
 	int	(*roffblkin)(void *, int, int *, char **);
@@ -233,10 +233,10 @@ void		 *md_init_html4_strict(const struct md_args *,
 int		  md_line_html4_strict(void *, char *);
 int		  md_exit_html4_strict(void *, int);
 
-void		 *md_init_valid(const struct md_args *,
+void		 *md_init_xml(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *);
-int		  md_line_valid(void *, char *);
-int		  md_exit_valid(void *, int);
+int		  md_line_xml(void *, char *);
+int		  md_exit_xml(void *, int);
 
 int	 	  md_buf_puts(struct md_mbuf *, const char *, size_t);
 int	 	  md_buf_putchar(struct md_mbuf *, char);

@@ -979,7 +979,7 @@ roff_layout(ROFFCALL_ARGS)
 	if (NULL == *argv)
 		return(1);
 
-	if ( ! (*tree->cb.roffin)(tree->arg, tok, 0, argcp, argvp))
+	if ( ! (*tree->cb.roffin)(tree->arg, tok, argcp, argvp))
 		return(0);
 
 	if ( ! (ROFF_PARSED & tokens[tok].flags)) {
@@ -1075,7 +1075,7 @@ roff_text(ROFFCALL_ARGS)
 	argcp[i] = ROFF_ARGMAX;
 	argvp[i] = NULL;
 
-	if ( ! (*tree->cb.roffin)(tree->arg, tok, 1, argcp, argvp))
+	if ( ! (*tree->cb.roffin)(tree->arg, tok, argcp, argvp))
 		return(0);
 
 	if ( ! (ROFF_PARSED & tokens[tok].flags)) {

@@ -29,7 +29,7 @@
 #include "private.h"
 
 #define	INDENT		 4
-#define	COLUMNS		 72
+#define	COLUMNS		 60
 
 #ifdef	__linux__ /* FIXME */
 #define	strlcat		 strncat
@@ -43,7 +43,7 @@ enum	md_tok {
 	MD_TEXT
 };
 
-struct	md_valid {
+struct	md_xml {
 	const struct md_args	*args;
 	const struct md_rbuf	*rbuf;
 
@@ -60,24 +60,24 @@ static	void		 roffmsg(void *arg, enum roffmsg,
 				const char *, const char *, char *);
 static	int		 roffhead(void *);
 static	int		 rofftail(void *);
-static	int		 roffin(void *, int, int, int *, char **);
+static	int		 roffin(void *, int, int *, char **);
 static	int		 roffdata(void *, int, char *);
 static	int		 roffout(void *, int);
 static	int		 roffblkin(void *, int, int *, char **);
 static	int		 roffblkout(void *, int);
 static	int		 roffspecial(void *, int);
 
-static	int		 mbuf_newline(struct md_valid *);
-static	int		 mbuf_indent(struct md_valid *);
-static	int		 mbuf_data(struct md_valid *, int, char *);
-static	int		 mbuf_putstring(struct md_valid *, 
+static	int		 mbuf_newline(struct md_xml *);
+static	int		 mbuf_indent(struct md_xml *);
+static	int		 mbuf_data(struct md_xml *, int, char *);
+static	int		 mbuf_putstring(struct md_xml *, 
 				const char *);
-static	int		 mbuf_nputstring(struct md_valid *, 
+static	int		 mbuf_nputstring(struct md_xml *, 
 				const char *, size_t);
 
 
 static int
-mbuf_putstring(struct md_valid *p, const char *buf)
+mbuf_putstring(struct md_xml *p, const char *buf)
 {
 
 	return(mbuf_nputstring(p, buf, strlen(buf)));
@@ -85,7 +85,7 @@ mbuf_putstring(struct md_valid *p, const char *buf)
 
 
 static int
-mbuf_nputstring(struct md_valid *p, const char *buf, size_t sz)
+mbuf_nputstring(struct md_xml *p, const char *buf, size_t sz)
 {
 
 	p->pos += sz;
@@ -94,7 +94,7 @@ mbuf_nputstring(struct md_valid *p, const char *buf, size_t sz)
 
 
 static int
-mbuf_indent(struct md_valid *p)
+mbuf_indent(struct md_xml *p)
 {
 	size_t		 i;
 
@@ -111,7 +111,7 @@ mbuf_indent(struct md_valid *p)
 
 
 static int
-mbuf_newline(struct md_valid *p)
+mbuf_newline(struct md_xml *p)
 {
 
 	if ( ! md_buf_putchar(p->mbuf, '\n'))
@@ -123,18 +123,13 @@ mbuf_newline(struct md_valid *p)
 
 
 static int
-mbuf_data(struct md_valid *p, int space, char *buf)
+mbuf_data(struct md_xml *p, int space, char *buf)
 {
 	size_t		 sz;
 	char		*bufp;
 
 	assert(p->mbuf);
 	assert(0 != p->indent);
-
-	/* 
-	 * FIXME: punctuation/no-space stuff shouldn't have a newline
-	 * before it.
-	 */
 
 	if (MD_LITERAL & p->flags)
 		return(mbuf_putstring(p, buf));
@@ -168,17 +163,22 @@ mbuf_data(struct md_valid *p, int space, char *buf)
 			continue;
 		}
 
-		if (sz + p->pos >= COLUMNS) {
+		if (space && sz + p->pos >= COLUMNS) {
 			if ( ! mbuf_newline(p))
 				return(0);
 			if ( ! mbuf_indent(p))
 				return(0);
-		} else if (space) 
+		} else if (space) {
 			if ( ! mbuf_nputstring(p, " ", 1))
 				return(0);
+		}
 
 		if ( ! mbuf_nputstring(p, bufp, sz))
 			return(0);
+
+		if ( ! space && p->pos >= COLUMNS)
+			if ( ! mbuf_newline(p))
+				return(0);
 	}
 
 	return(1);
@@ -186,22 +186,22 @@ mbuf_data(struct md_valid *p, int space, char *buf)
 
 
 int
-md_line_valid(void *arg, char *buf)
+md_line_xml(void *arg, char *buf)
 {
-	struct md_valid	*p;
+	struct md_xml	*p;
 
-	p = (struct md_valid *)arg;
+	p = (struct md_xml *)arg;
 	return(roff_engine(p->tree, buf));
 }
 
 
 int
-md_exit_valid(void *data, int flush)
+md_exit_xml(void *data, int flush)
 {
 	int		 c;
-	struct md_valid	*p;
+	struct md_xml	*p;
 
-	p = (struct md_valid *)data;
+	p = (struct md_xml *)data;
 	c = roff_free(p->tree, flush);
 	free(p);
 
@@ -210,11 +210,11 @@ md_exit_valid(void *data, int flush)
 
 
 void *
-md_init_valid(const struct md_args *args,
+md_init_xml(const struct md_args *args,
 		struct md_mbuf *mbuf, const struct md_rbuf *rbuf)
 {
 	struct roffcb	 cb;
-	struct md_valid	*p;
+	struct md_xml	*p;
 
 	cb.roffhead = roffhead;
 	cb.rofftail = rofftail;
@@ -226,7 +226,7 @@ md_init_valid(const struct md_args *args,
 	cb.roffmsg = roffmsg;
 	cb.roffdata = roffdata;
 
-	if (NULL == (p = calloc(1, sizeof(struct md_valid))))
+	if (NULL == (p = calloc(1, sizeof(struct md_xml))))
 		err(1, "malloc");
 
 	p->args = args;
@@ -248,18 +248,19 @@ md_init_valid(const struct md_args *args,
 static int
 roffhead(void *arg)
 {
-	struct md_valid	*p;
+	struct md_xml	*p;
 
 	assert(arg);
-	p = (struct md_valid *)arg;
+	p = (struct md_xml *)arg;
 
 	if ( ! mbuf_putstring(p, "<?xml version=\"1.0\" "
 				"encoding=\"UTF-8\"?>\n"))
 		return(0);
-	if ( ! mbuf_nputstring(p, "<mdoc>", 6))
+	if ( ! mbuf_nputstring(p, "<block:mdoc>", 12))
 		return(0);
 
 	p->indent++;
+	p->last = MD_BLKIN;
 	return(mbuf_newline(p));
 }
 
@@ -267,16 +268,18 @@ roffhead(void *arg)
 static int
 rofftail(void *arg)
 {
-	struct md_valid	*p;
+	struct md_xml	*p;
 
 	assert(arg);
-	p = (struct md_valid *)arg;
+	p = (struct md_xml *)arg;
 
 	if (0 != p->pos && ! mbuf_newline(p))
 		return(0);
 
-	if ( ! mbuf_nputstring(p, "</mdoc>", 7))
+	if ( ! mbuf_nputstring(p, "</block:mdoc>", 13))
 		return(0);
+
+	p->last = MD_BLKOUT;
 	return(mbuf_newline(p));
 }
 
@@ -286,6 +289,7 @@ static int
 roffspecial(void *arg, int tok)
 {
 
+	/* FIXME */
 	return(1);
 }
 
@@ -293,11 +297,11 @@ roffspecial(void *arg, int tok)
 static int
 roffblkin(void *arg, int tok, int *argc, char **argv)
 {
-	struct md_valid	*p;
+	struct md_xml	*p;
 	int		 i;
 
 	assert(arg);
-	p = (struct md_valid *)arg;
+	p = (struct md_xml *)arg;
 
 	if (0 != p->pos) {
 		if ( ! mbuf_newline(p))
@@ -308,6 +312,8 @@ roffblkin(void *arg, int tok, int *argc, char **argv)
 		return(0);
 
 	if ( ! mbuf_nputstring(p, "<", 1))
+		return(0);
+	if ( ! mbuf_nputstring(p, "block:", 6))
 		return(0);
 	if ( ! mbuf_putstring(p, toknames[tok]))
 		return(0);
@@ -327,21 +333,20 @@ roffblkin(void *arg, int tok, int *argc, char **argv)
 
 	if ( ! mbuf_nputstring(p, ">", 1))
 		return(0);
-	if ( ! mbuf_newline(p))
-		return(0);
 
+	p->last = MD_BLKIN;
 	p->indent++;
-	return(1);
+	return(mbuf_newline(p));
 }
 
 
 static int
 roffblkout(void *arg, int tok)
 {
-	struct md_valid	*p;
+	struct md_xml	*p;
 
 	assert(arg);
-	p = (struct md_valid *)arg;
+	p = (struct md_xml *)arg;
 
 	p->indent--;
 
@@ -355,36 +360,56 @@ roffblkout(void *arg, int tok)
 
 	if ( ! mbuf_nputstring(p, "</", 2))
 		return(0);
+	if ( ! mbuf_nputstring(p, "block:", 6))
+		return(0);
 	if ( ! mbuf_putstring(p, toknames[tok]))
 		return(0);
 	if ( ! mbuf_nputstring(p, ">", 1))
 		return(0);
-	if ( ! mbuf_newline(p))
-		return(0);
 
-	return(1);
+	p->last = MD_BLKOUT;
+	return(mbuf_newline(p));
 }
 
 
 static int
-roffin(void *arg, int tok, int space, int *argc, char **argv)
+roffin(void *arg, int tok, int *argc, char **argv)
 {
-	struct md_valid	*p;
+	struct md_xml	*p;
 	int		 i;
 
 	assert(arg);
-	p = (struct md_valid *)arg;
-
-	if (0 == p->pos && ! mbuf_indent(p))
-		return(0);
+	p = (struct md_xml *)arg;
 
 	/* 
-	 * FIXME: put into a buffer before writing (check line length).
+	 * FIXME: put all of this in a buffer, then check the buffer
+	 * length versus the column width for nicer output.  This is a
+	 * bit hacky.
 	 */
 
-	if (space && ! mbuf_nputstring(p, " ", 1))
+	if (p->pos + 11 > COLUMNS) 
+		if ( ! mbuf_newline(p))
+			return(0);
+
+	if (0 != p->pos) {
+		switch (p->last) {
+		case (MD_TEXT):
+			/* FALLTHROUGH */
+		case (MD_OUT):
+			if ( ! mbuf_nputstring(p, " ", 1))
+				return(0);
+			break;
+		default:
+			break;
+		}
+	} else if ( ! mbuf_indent(p))
 		return(0);
+
+	p->last = MD_IN;
+
 	if ( ! mbuf_nputstring(p, "<", 1))
+		return(0);
+	if ( ! mbuf_nputstring(p, "inline:", 7))
 		return(0);
 	if ( ! mbuf_putstring(p, toknames[tok]))
 		return(0);
@@ -401,7 +426,6 @@ roffin(void *arg, int tok, int space, int *argc, char **argv)
 		if ( ! mbuf_nputstring(p, "\"", 1))
 			return(0);
 	}
-
 	return(mbuf_nputstring(p, ">", 1));
 }
 
@@ -409,15 +433,19 @@ roffin(void *arg, int tok, int space, int *argc, char **argv)
 static int
 roffout(void *arg, int tok)
 {
-	struct md_valid	*p;
+	struct md_xml	*p;
 
 	assert(arg);
-	p = (struct md_valid *)arg;
+	p = (struct md_xml *)arg;
 
 	if (0 == p->pos && ! mbuf_indent(p))
 		return(0);
 
+	p->last = MD_OUT;
+
 	if ( ! mbuf_nputstring(p, "</", 2))
+		return(0);
+	if ( ! mbuf_nputstring(p, "inline:", 7))
 		return(0);
 	if ( ! mbuf_putstring(p, toknames[tok]))
 		return(0);
@@ -430,10 +458,10 @@ roffmsg(void *arg, enum roffmsg lvl,
 		const char *buf, const char *pos, char *msg)
 {
 	char		*level;
-	struct md_valid	*p;
+	struct md_xml	*p;
 
 	assert(arg);
-	p = (struct md_valid *)arg;
+	p = (struct md_xml *)arg;
 
 	switch (lvl) {
 	case (ROFF_WARN):
@@ -462,9 +490,13 @@ roffmsg(void *arg, enum roffmsg lvl,
 static int
 roffdata(void *arg, int space, char *buf)
 {
-	struct md_valid	*p;
+	struct md_xml	*p;
 
 	assert(arg);
-	p = (struct md_valid *)arg;
-	return(mbuf_data(p, space, buf));
+	p = (struct md_xml *)arg;
+	if ( ! mbuf_data(p, space, buf))
+		return(0);
+
+	p->last = MD_TEXT;
+	return(1);
 }
