@@ -29,8 +29,8 @@ dictated by
 The only current output filter is
 .Ar validate ,
 the default.  The arguments are as follows:
-.Bl -tag -width "\-o outfile"
-.It Fl o Ar outfile
+.Bl -tag -width "\-o outfile,"
+.It Sq Fl o Ar outfile ,
 Place output in 
 .Ar outfile ,
 which may be
@@ -42,7 +42,7 @@ Read input from
 which may be 
 .Qq \-
 for standard input.  The default is standard input.
-.It Fl v
+.It Fl v 
 Print messages (output depends on filter).
 .It Fl W
 Print warnings (output depends on filter).
@@ -53,6 +53,10 @@ The validate filter, specified by
 is the default filter.  It produces no output, so specifying
 .Fl o Ar outfile
 results in an empty file.
+.Qq Op Op Fl a ) , Fl b ,
+.Bf Em
+.Qq Op Op Fl a ) , Fl b ,
+.Ef
 .\" The following requests should be uncommented and used where appropriate.
 .\" This next request is for sections 2, 3, and 9 function return values only.
 .\" .Sh RETURN VALUES

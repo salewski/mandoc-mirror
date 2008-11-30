@@ -94,8 +94,11 @@ mbuf_newline(struct md_valid *p)
 static int
 mbuf_data(struct md_valid *p, char *buf)
 {
+	int		 space;
 	size_t		 sz;
 	char		*bufp;
+
+	space = 1; /* FIXME */
 
 	assert(p->mbuf);
 	assert(0 != p->indent);
@@ -133,10 +136,7 @@ mbuf_data(struct md_valid *p, char *buf)
 				continue;
 			}
 
-			if ( ! md_buf_putchar(p->mbuf, ' '))
-				return(0);
-
-			p->pos += sz + 1;
+			p->pos += sz;
 			continue;
 		}
 
@@ -145,14 +145,14 @@ mbuf_data(struct md_valid *p, char *buf)
 				return(0);
 			if ( ! mbuf_indent(p))
 				return(0);
-		}
+		} else if (space) 
+			if ( ! md_buf_putchar(p->mbuf, ' '))
+				return(0);
 
 		if ( ! md_buf_putstring(p->mbuf, bufp))
 			return(0);
-		if ( ! md_buf_putchar(p->mbuf, ' '))
-			return(0);
 
-		p->pos += sz + 1;
+		p->pos += sz + (space ? 1 : 0);
 	}
 
 	return(1);
@@ -334,14 +334,14 @@ roffin(void *arg, int tok, int *argcp, char **argvp)
 	if (0 == p->pos && ! mbuf_indent(p))
 		return(0);
 
-	if ( ! md_buf_putstring(p->mbuf, "<"))
+	if ( ! md_buf_putstring(p->mbuf, " <"))
 		return(0);
 	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
 		return(0);
 	if ( ! md_buf_putstring(p->mbuf, ">"))
 		return(0);
 
-	p->pos += strlen(toknames[tok]) + 2;
+	p->pos += strlen(toknames[tok]) + 3;
 
 	return(1);
 }
@@ -362,10 +362,10 @@ roffout(void *arg, int tok)
 		return(0);
 	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
 		return(0);
-	if ( ! md_buf_putstring(p->mbuf, "> "))
+	if ( ! md_buf_putstring(p->mbuf, ">"))
 		return(0);
 
-	p->pos += strlen(toknames[tok]) + 3;
+	p->pos += strlen(toknames[tok]) + 2;
 
 	return(1);
 }
