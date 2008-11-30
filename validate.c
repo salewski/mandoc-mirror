@@ -70,6 +70,7 @@ mbuf_indent(struct md_valid *p)
 
 	assert(p->pos == 0);
 
+	/* LINTED */
 	for (i = 0; i < MIN(p->indent, INDENT); i++)
 		if ( ! md_buf_putstring(p->mbuf, "    "))
 			return(0);
@@ -137,6 +138,11 @@ mbuf_data(struct md_valid *p, int space, char *buf)
 			continue;
 		}
 
+		/* 
+		 * FIXME: punctuation shouldn't have a newline before
+		 * it! 
+		 */
+
 		if (sz + p->pos >= 72) {
 			if ( ! mbuf_newline(p))
 				return(0);
@@ -149,7 +155,7 @@ mbuf_data(struct md_valid *p, int space, char *buf)
 		if ( ! md_buf_putstring(p->mbuf, bufp))
 			return(0);
 
-		p->pos += sz + (space ? 1 : 0);
+		p->pos += sz + (size_t)(space ? 1 : 0);
 	}
 
 	return(1);
@@ -250,6 +256,7 @@ rofftail(void *arg)
 }
 
 
+/* ARGSUSED */
 static int
 roffspecial(void *arg, int tok)
 {
@@ -262,6 +269,7 @@ static int
 roffblkin(void *arg, int tok, int *argc, char **argv)
 {
 	struct md_valid	*p;
+	int		 i;
 
 	assert(arg);
 	p = (struct md_valid *)arg;
@@ -278,6 +286,21 @@ roffblkin(void *arg, int tok, int *argc, char **argv)
 		return(0);
 	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
 		return(0);
+
+	for (i = 0; ROFF_ARGMAX != argc[i]; i++) {
+		if ( ! md_buf_putchar(p->mbuf, ' '))
+			return(0);
+		if ( ! md_buf_putstring(p->mbuf, tokargnames[argc[i]]))
+			return(0);
+		if ( ! md_buf_putstring(p->mbuf, "=\""))
+			return(0);
+		if ( ! md_buf_putstring(p->mbuf, argv[i] ? 
+					argv[i] : "true"))
+			return(0);
+		if ( ! md_buf_putstring(p->mbuf, "\""))
+			return(0);
+	}
+
 	if ( ! md_buf_putchar(p->mbuf, '>'))
 		return(0);
 	if ( ! mbuf_newline(p))
@@ -320,9 +343,10 @@ roffblkout(void *arg, int tok)
 
 
 static int
-roffin(void *arg, int tok, int *argcp, char **argvp)
+roffin(void *arg, int tok, int *argc, char **argv)
 {
 	struct md_valid	*p;
+	int		 i;
 
 	assert(arg);
 	p = (struct md_valid *)arg;
@@ -330,11 +354,33 @@ roffin(void *arg, int tok, int *argcp, char **argvp)
 	if (0 == p->pos && ! mbuf_indent(p))
 		return(0);
 
+	/* FIXME: put into a buffer before writing (line length). */
+
 	/* FIXME: not always with a space... */
+
 	if ( ! md_buf_putstring(p->mbuf, " <"))
 		return(0);
 	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
 		return(0);
+
+	for (i = 0; ROFF_ARGMAX != argc[i]; i++) {
+		if ( ! md_buf_putchar(p->mbuf, ' '))
+			return(0);
+		if ( ! md_buf_putstring(p->mbuf, tokargnames[argc[i]]))
+			return(0);
+		if ( ! md_buf_putstring(p->mbuf, "=\""))
+			return(0);
+		if ( ! md_buf_putstring(p->mbuf, argv[i] ? 
+					argv[i] : "true"))
+			return(0);
+		if ( ! md_buf_putstring(p->mbuf, "\""))
+			return(0);
+
+		p->pos += strlen(toknames[tok]) + 4 +
+			strlen(tokargnames[argc[i]]) +
+			strlen(argv[i] ? argv[i] : "true");
+	}
+
 	if ( ! md_buf_putstring(p->mbuf, ">"))
 		return(0);
 
