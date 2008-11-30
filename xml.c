@@ -74,6 +74,9 @@ static	int		 mbuf_putstring(struct md_xml *,
 				const char *);
 static	int		 mbuf_nputstring(struct md_xml *, 
 				const char *, size_t);
+static	int		 mbuf_puts(struct md_xml *, const char *);
+static	int		 mbuf_nputs(struct md_xml *, 
+				const char *, size_t);
 
 
 static int
@@ -87,9 +90,45 @@ mbuf_putstring(struct md_xml *p, const char *buf)
 static int
 mbuf_nputstring(struct md_xml *p, const char *buf, size_t sz)
 {
+	size_t		 i;
+
+	for (i = 0; i < sz; i++) {
+		switch (buf[i]) {
+		case ('&'):
+			if ( ! md_buf_puts(p->mbuf, "&amp;", 5))
+				return(0);
+			p->pos += 5;
+			break;
+		case ('"'):
+			if ( ! md_buf_puts(p->mbuf, "&quot;", 6))
+				return(0);
+			p->pos += 6;
+			break;
+		default:
+			if ( ! md_buf_putchar(p->mbuf, buf[i]))
+				return(0);
+			p->pos++;
+			break;
+		}
+	}
+	return(1);
+}
+
+
+static int
+mbuf_nputs(struct md_xml *p, const char *buf, size_t sz)
+{
 
 	p->pos += sz;
 	return(md_buf_puts(p->mbuf, buf, sz));
+}
+
+
+static int
+mbuf_puts(struct md_xml *p, const char *buf)
+{
+
+	return(mbuf_nputs(p, buf, strlen(buf)));
 }
 
 
@@ -169,7 +208,7 @@ mbuf_data(struct md_xml *p, int space, char *buf)
 			if ( ! mbuf_indent(p))
 				return(0);
 		} else if (space) {
-			if ( ! mbuf_nputstring(p, " ", 1))
+			if ( ! mbuf_nputs(p, " ", 1))
 				return(0);
 		}
 
@@ -253,10 +292,12 @@ roffhead(void *arg)
 	assert(arg);
 	p = (struct md_xml *)arg;
 
-	if ( ! mbuf_putstring(p, "<?xml version=\"1.0\" "
+	if ( ! mbuf_puts(p, "<?xml version=\"1.0\" "
 				"encoding=\"UTF-8\"?>\n"))
 		return(0);
-	if ( ! mbuf_nputstring(p, "<block:mdoc>", 12))
+	if ( ! mbuf_puts(p, "<mdoc xmlns:block=\"block\" "
+				"xmlns:special=\"special\" "
+				"xmlns:inline=\"inline\">"))
 		return(0);
 
 	p->indent++;
@@ -276,7 +317,7 @@ rofftail(void *arg)
 	if (0 != p->pos && ! mbuf_newline(p))
 		return(0);
 
-	if ( ! mbuf_nputstring(p, "</block:mdoc>", 13))
+	if ( ! mbuf_puts(p, "</mdoc>"))
 		return(0);
 
 	p->last = MD_BLKOUT;
@@ -311,27 +352,29 @@ roffblkin(void *arg, int tok, int *argc, char **argv)
 	} else if ( ! mbuf_indent(p))
 		return(0);
 
-	if ( ! mbuf_nputstring(p, "<", 1))
+	if ( ! mbuf_nputs(p, "<", 1))
 		return(0);
-	if ( ! mbuf_nputstring(p, "block:", 6))
+	if ( ! mbuf_nputs(p, "block:", 6))
 		return(0);
-	if ( ! mbuf_putstring(p, toknames[tok]))
+	if ( ! mbuf_puts(p, toknames[tok]))
 		return(0);
 
+	/* FIXME: xml won't like standards args (e.g., p1003.1-90). */
+
 	for (i = 0; ROFF_ARGMAX != argc[i]; i++) {
-		if ( ! mbuf_nputstring(p, " ", 1))
+		if ( ! mbuf_nputs(p, " ", 1))
 			return(0);
-		if ( ! mbuf_putstring(p, tokargnames[argc[i]]))
+		if ( ! mbuf_puts(p, tokargnames[argc[i]]))
 			return(0);
-		if ( ! mbuf_nputstring(p, "=\"", 2))
+		if ( ! mbuf_nputs(p, "=\"", 2))
 			return(0);
 		if ( ! mbuf_putstring(p, argv[i] ? argv[i] : "true"))
 			return(0);
-		if ( ! mbuf_nputstring(p, "\"", 1))
+		if ( ! mbuf_nputs(p, "\"", 1))
 			return(0);
 	}
 
-	if ( ! mbuf_nputstring(p, ">", 1))
+	if ( ! mbuf_nputs(p, ">", 1))
 		return(0);
 
 	p->last = MD_BLKIN;
@@ -358,13 +401,13 @@ roffblkout(void *arg, int tok)
 	} else if ( ! mbuf_indent(p))
 		return(0);
 
-	if ( ! mbuf_nputstring(p, "</", 2))
+	if ( ! mbuf_nputs(p, "</", 2))
 		return(0);
-	if ( ! mbuf_nputstring(p, "block:", 6))
+	if ( ! mbuf_nputs(p, "block:", 6))
 		return(0);
-	if ( ! mbuf_putstring(p, toknames[tok]))
+	if ( ! mbuf_puts(p, toknames[tok]))
 		return(0);
-	if ( ! mbuf_nputstring(p, ">", 1))
+	if ( ! mbuf_nputs(p, ">", 1))
 		return(0);
 
 	p->last = MD_BLKOUT;
@@ -396,7 +439,7 @@ roffin(void *arg, int tok, int *argc, char **argv)
 		case (MD_TEXT):
 			/* FALLTHROUGH */
 		case (MD_OUT):
-			if ( ! mbuf_nputstring(p, " ", 1))
+			if ( ! mbuf_nputs(p, " ", 1))
 				return(0);
 			break;
 		default:
@@ -407,26 +450,26 @@ roffin(void *arg, int tok, int *argc, char **argv)
 
 	p->last = MD_IN;
 
-	if ( ! mbuf_nputstring(p, "<", 1))
+	if ( ! mbuf_nputs(p, "<", 1))
 		return(0);
-	if ( ! mbuf_nputstring(p, "inline:", 7))
+	if ( ! mbuf_nputs(p, "inline:", 7))
 		return(0);
-	if ( ! mbuf_putstring(p, toknames[tok]))
+	if ( ! mbuf_puts(p, toknames[tok]))
 		return(0);
 
 	for (i = 0; ROFF_ARGMAX != argc[i]; i++) {
-		if ( ! mbuf_nputstring(p, " ", 1))
+		if ( ! mbuf_nputs(p, " ", 1))
 			return(0);
-		if ( ! mbuf_putstring(p, tokargnames[argc[i]]))
+		if ( ! mbuf_puts(p, tokargnames[argc[i]]))
 			return(0);
-		if ( ! mbuf_nputstring(p, "=\"", 2))
+		if ( ! mbuf_nputs(p, "=\"", 2))
 			return(0);
 		if ( ! mbuf_putstring(p, argv[i] ? argv[i] : "true"))
 			return(0);
-		if ( ! mbuf_nputstring(p, "\"", 1))
+		if ( ! mbuf_nputs(p, "\"", 1))
 			return(0);
 	}
-	return(mbuf_nputstring(p, ">", 1));
+	return(mbuf_nputs(p, ">", 1));
 }
 
 
@@ -443,13 +486,13 @@ roffout(void *arg, int tok)
 
 	p->last = MD_OUT;
 
-	if ( ! mbuf_nputstring(p, "</", 2))
+	if ( ! mbuf_nputs(p, "</", 2))
 		return(0);
-	if ( ! mbuf_nputstring(p, "inline:", 7))
+	if ( ! mbuf_nputs(p, "inline:", 7))
 		return(0);
-	if ( ! mbuf_putstring(p, toknames[tok]))
+	if ( ! mbuf_puts(p, toknames[tok]))
 		return(0);
-	return(mbuf_nputstring(p, ">", 1));
+	return(mbuf_nputs(p, ">", 1));
 }
 
 
