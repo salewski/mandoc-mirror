@@ -1022,7 +1022,7 @@ roff_layout(ROFFCALL_ARGS)
 
 		assert(i > 0);
 		if ( ! roffispunct(argv[--i]))
-			return(1);
+			return((*tree->cb.roffout)(tree->arg, tok));
 
 		while (i >= 0 && roffispunct(argv[i]))
 			i--;
