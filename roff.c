@@ -307,8 +307,11 @@ const	char *const toknamesp[ROFF_MAX] = {
 	"Ic",		"In",		"Li",		"Nd",
 	"Nm",		"Op",		"Ot",		"Pa",
 	"Rv",		"St",		"Va",		"Vt",
+	/* LINTED */
 	"Xr",		"\%A",		"\%B",		"\%D",
+	/* LINTED */
 	"\%I",		"\%J",		"\%N",		"\%O",
+	/* LINTED */
 	"\%P",		"\%R",		"\%T",		"\%V",
 	"Ac",		"Ao",		"Aq",		"At",
 	"Bc",		"Bf",		"Bo",		"Bq",
@@ -671,7 +674,7 @@ static int
 rofffindtok(const char *buf)
 {
 	char		 token[4];
-	size_t		 i;
+	int		 i;
 
 	for (i = 0; *buf && ! isspace(*buf) && i < 3; i++, buf++)
 		token[i] = *buf;
@@ -976,7 +979,7 @@ roff_layout(ROFFCALL_ARGS)
 	if (NULL == *argv)
 		return(1);
 
-	if ( ! (*tree->cb.roffin)(tree->arg, tok, argcp, argvp))
+	if ( ! (*tree->cb.roffin)(tree->arg, tok, 0, argcp, argvp))
 		return(0);
 
 	if ( ! (ROFF_PARSED & tokens[tok].flags)) {
@@ -1030,6 +1033,7 @@ roff_layout(ROFFCALL_ARGS)
 		assert(0 != i);
 		i++;
 
+		/* LINTED */
 		while (argv[i])
 			if ( ! (*tree->cb.roffdata)(tree->arg, 0, argv[i++]))
 				return(0);
@@ -1071,7 +1075,7 @@ roff_text(ROFFCALL_ARGS)
 	argcp[i] = ROFF_ARGMAX;
 	argvp[i] = NULL;
 
-	if ( ! (*tree->cb.roffin)(tree->arg, tok, argcp, argvp))
+	if ( ! (*tree->cb.roffin)(tree->arg, tok, 1, argcp, argvp))
 		return(0);
 
 	if ( ! (ROFF_PARSED & tokens[tok].flags)) {
@@ -1148,6 +1152,7 @@ roff_text(ROFFCALL_ARGS)
 		assert(0 != i);
 		i++;
 
+		/* LINTED */
 		while (argv[i])
 			if ( ! (*tree->cb.roffdata)(tree->arg, 0, argv[i++]))
 				return(0);

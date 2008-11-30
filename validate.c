@@ -29,29 +29,38 @@
 #include "private.h"
 
 #define	INDENT		 4
+#define	COLUMNS		 72
 
 #ifdef	__linux__ /* FIXME */
 #define	strlcat		 strncat
 #endif
 
+enum	md_tok {
+	MD_BLKIN,
+	MD_BLKOUT,
+	MD_IN,
+	MD_OUT,
+	MD_TEXT
+};
+
 struct	md_valid {
 	const struct md_args	*args;
 	const struct md_rbuf	*rbuf;
+
 	struct md_mbuf	*mbuf;
 	struct rofftree	*tree;
-
 	size_t		 indent;
 	size_t		 pos;
-
+	enum md_tok	 last;
 	int		 flags;
-#define	MD_LITERAL	(1 << 0)
+#define	MD_LITERAL	(1 << 0) /* FIXME */
 };
 
 static	void		 roffmsg(void *arg, enum roffmsg, 
 				const char *, const char *, char *);
 static	int		 roffhead(void *);
 static	int		 rofftail(void *);
-static	int		 roffin(void *, int, int *, char **);
+static	int		 roffin(void *, int, int, int *, char **);
 static	int		 roffdata(void *, int, char *);
 static	int		 roffout(void *, int);
 static	int		 roffblkin(void *, int, int *, char **);
@@ -61,6 +70,27 @@ static	int		 roffspecial(void *, int);
 static	int		 mbuf_newline(struct md_valid *);
 static	int		 mbuf_indent(struct md_valid *);
 static	int		 mbuf_data(struct md_valid *, int, char *);
+static	int		 mbuf_putstring(struct md_valid *, 
+				const char *);
+static	int		 mbuf_nputstring(struct md_valid *, 
+				const char *, size_t);
+
+
+static int
+mbuf_putstring(struct md_valid *p, const char *buf)
+{
+
+	return(mbuf_nputstring(p, buf, strlen(buf)));
+}
+
+
+static int
+mbuf_nputstring(struct md_valid *p, const char *buf, size_t sz)
+{
+
+	p->pos += sz;
+	return(md_buf_puts(p->mbuf, buf, sz));
+}
 
 
 static int
@@ -101,8 +131,13 @@ mbuf_data(struct md_valid *p, int space, char *buf)
 	assert(p->mbuf);
 	assert(0 != p->indent);
 
+	/* 
+	 * FIXME: punctuation/no-space stuff shouldn't have a newline
+	 * before it.
+	 */
+
 	if (MD_LITERAL & p->flags)
-		return(md_buf_putstring(p->mbuf, buf));
+		return(mbuf_putstring(p, buf));
 
 	while (*buf) {
 		while (*buf && isspace(*buf))
@@ -118,44 +153,32 @@ mbuf_data(struct md_valid *p, int space, char *buf)
 		if (0 != *buf)
 			*buf++ = 0;
 
-		/* Process word. */
-
 		sz = strlen(bufp);
 
 		if (0 == p->pos) {
 			if ( ! mbuf_indent(p))
 				return(0);
-			if ( ! md_buf_putstring(p->mbuf, bufp))
+			if ( ! mbuf_nputstring(p, bufp, sz))
 				return(0);
-
-			if (p->indent * INDENT + sz >= 72) {
+			if (p->indent * INDENT + sz >= COLUMNS) {
 				if ( ! mbuf_newline(p))
 					return(0);
 				continue;
 			}
-
-			p->pos += sz;
 			continue;
 		}
 
-		/* 
-		 * FIXME: punctuation shouldn't have a newline before
-		 * it! 
-		 */
-
-		if (sz + p->pos >= 72) {
+		if (sz + p->pos >= COLUMNS) {
 			if ( ! mbuf_newline(p))
 				return(0);
 			if ( ! mbuf_indent(p))
 				return(0);
 		} else if (space) 
-			if ( ! md_buf_putchar(p->mbuf, ' '))
+			if ( ! mbuf_nputstring(p, " ", 1))
 				return(0);
 
-		if ( ! md_buf_putstring(p->mbuf, bufp))
+		if ( ! mbuf_nputstring(p, bufp, sz))
 			return(0);
-
-		p->pos += sz + (size_t)(space ? 1 : 0);
 	}
 
 	return(1);
@@ -230,14 +253,13 @@ roffhead(void *arg)
 	assert(arg);
 	p = (struct md_valid *)arg;
 
-	if ( ! md_buf_putstring(p->mbuf, "<?xml version=\"1.0\" "
+	if ( ! mbuf_putstring(p, "<?xml version=\"1.0\" "
 				"encoding=\"UTF-8\"?>\n"))
 		return(0);
-
-	if ( ! md_buf_putstring(p->mbuf, "<mdoc>"))
+	if ( ! mbuf_nputstring(p, "<mdoc>", 6))
 		return(0);
-	p->indent++;
 
+	p->indent++;
 	return(mbuf_newline(p));
 }
 
@@ -252,7 +274,10 @@ rofftail(void *arg)
 
 	if (0 != p->pos && ! mbuf_newline(p))
 		return(0);
-	return(md_buf_putstring(p->mbuf, "</mdoc>\n"));
+
+	if ( ! mbuf_nputstring(p, "</mdoc>", 7))
+		return(0);
+	return(mbuf_newline(p));
 }
 
 
@@ -282,26 +307,25 @@ roffblkin(void *arg, int tok, int *argc, char **argv)
 	} else if ( ! mbuf_indent(p))
 		return(0);
 
-	if ( ! md_buf_putchar(p->mbuf, '<'))
+	if ( ! mbuf_nputstring(p, "<", 1))
 		return(0);
-	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
+	if ( ! mbuf_putstring(p, toknames[tok]))
 		return(0);
 
 	for (i = 0; ROFF_ARGMAX != argc[i]; i++) {
-		if ( ! md_buf_putchar(p->mbuf, ' '))
+		if ( ! mbuf_nputstring(p, " ", 1))
 			return(0);
-		if ( ! md_buf_putstring(p->mbuf, tokargnames[argc[i]]))
+		if ( ! mbuf_putstring(p, tokargnames[argc[i]]))
 			return(0);
-		if ( ! md_buf_putstring(p->mbuf, "=\""))
+		if ( ! mbuf_nputstring(p, "=\"", 2))
 			return(0);
-		if ( ! md_buf_putstring(p->mbuf, argv[i] ? 
-					argv[i] : "true"))
+		if ( ! mbuf_putstring(p, argv[i] ? argv[i] : "true"))
 			return(0);
-		if ( ! md_buf_putstring(p->mbuf, "\""))
+		if ( ! mbuf_nputstring(p, "\"", 1))
 			return(0);
 	}
 
-	if ( ! md_buf_putchar(p->mbuf, '>'))
+	if ( ! mbuf_nputstring(p, ">", 1))
 		return(0);
 	if ( ! mbuf_newline(p))
 		return(0);
@@ -329,11 +353,11 @@ roffblkout(void *arg, int tok)
 	} else if ( ! mbuf_indent(p))
 		return(0);
 
-	if ( ! md_buf_putstring(p->mbuf, "</"))
+	if ( ! mbuf_nputstring(p, "</", 2))
 		return(0);
-	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
+	if ( ! mbuf_putstring(p, toknames[tok]))
 		return(0);
-	if ( ! md_buf_putstring(p->mbuf, ">"))
+	if ( ! mbuf_nputstring(p, ">", 1))
 		return(0);
 	if ( ! mbuf_newline(p))
 		return(0);
@@ -343,7 +367,7 @@ roffblkout(void *arg, int tok)
 
 
 static int
-roffin(void *arg, int tok, int *argc, char **argv)
+roffin(void *arg, int tok, int space, int *argc, char **argv)
 {
 	struct md_valid	*p;
 	int		 i;
@@ -354,39 +378,31 @@ roffin(void *arg, int tok, int *argc, char **argv)
 	if (0 == p->pos && ! mbuf_indent(p))
 		return(0);
 
-	/* FIXME: put into a buffer before writing (line length). */
+	/* 
+	 * FIXME: put into a buffer before writing (check line length).
+	 */
 
-	/* FIXME: not always with a space... */
-
-	if ( ! md_buf_putstring(p->mbuf, " <"))
+	if (space && ! mbuf_nputstring(p, " ", 1))
 		return(0);
-	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
+	if ( ! mbuf_nputstring(p, "<", 1))
+		return(0);
+	if ( ! mbuf_putstring(p, toknames[tok]))
 		return(0);
 
 	for (i = 0; ROFF_ARGMAX != argc[i]; i++) {
-		if ( ! md_buf_putchar(p->mbuf, ' '))
+		if ( ! mbuf_nputstring(p, " ", 1))
 			return(0);
-		if ( ! md_buf_putstring(p->mbuf, tokargnames[argc[i]]))
+		if ( ! mbuf_putstring(p, tokargnames[argc[i]]))
 			return(0);
-		if ( ! md_buf_putstring(p->mbuf, "=\""))
+		if ( ! mbuf_nputstring(p, "=\"", 2))
 			return(0);
-		if ( ! md_buf_putstring(p->mbuf, argv[i] ? 
-					argv[i] : "true"))
+		if ( ! mbuf_putstring(p, argv[i] ? argv[i] : "true"))
 			return(0);
-		if ( ! md_buf_putstring(p->mbuf, "\""))
+		if ( ! mbuf_nputstring(p, "\"", 1))
 			return(0);
-
-		p->pos += strlen(toknames[tok]) + 4 +
-			strlen(tokargnames[argc[i]]) +
-			strlen(argv[i] ? argv[i] : "true");
 	}
 
-	if ( ! md_buf_putstring(p->mbuf, ">"))
-		return(0);
-
-	p->pos += strlen(toknames[tok]) + 3;
-
-	return(1);
+	return(mbuf_nputstring(p, ">", 1));
 }
 
 
@@ -401,18 +417,12 @@ roffout(void *arg, int tok)
 	if (0 == p->pos && ! mbuf_indent(p))
 		return(0);
 
-	if ( ! md_buf_putstring(p->mbuf, "</"))
+	if ( ! mbuf_nputstring(p, "</", 2))
 		return(0);
-	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
+	if ( ! mbuf_putstring(p, toknames[tok]))
 		return(0);
-	if ( ! md_buf_putstring(p->mbuf, ">"))
-		return(0);
-
-	p->pos += strlen(toknames[tok]) + 2;
-
-	return(1);
+	return(mbuf_nputstring(p, ">", 1));
 }
-
 
 
 static void
@@ -439,8 +449,9 @@ roffmsg(void *arg, enum roffmsg lvl,
 	}
 	
 	if (pos)
-		(void)fprintf(stderr, "%s:%zu: %s: %s\n", 
-				p->rbuf->name, p->rbuf->line, level, msg);
+		(void)fprintf(stderr, "%s:%zu: %s: %s (column %zu)\n", 
+				p->rbuf->name, p->rbuf->line, level, 
+				msg, pos - buf);
 	else
 		(void)fprintf(stderr, "%s: %s: %s\n", 
 				p->rbuf->name, level, msg);

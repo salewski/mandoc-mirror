@@ -210,7 +210,7 @@ again:
 			return(md_run_leave(args, mbuf, rbuf, -1, p));
 		}
 
-		line[pos] = 0;
+		line[(int)pos] = 0;
 		if ( ! (*fp)(p, line))
 			return(md_run_leave(args, mbuf, rbuf, -1, p));
 		rbuf->line++;

@@ -213,7 +213,7 @@ struct	roffcb {
 			const char *, const char *, char *);
 	int	(*roffhead)(void *);
 	int	(*rofftail)(void *);
-	int	(*roffin)(void *, int, int *, char **);
+	int	(*roffin)(void *, int, int, int *, char **);
 	int	(*roffdata)(void *, int, char *);
 	int	(*roffout)(void *, int);
 	int	(*roffblkin)(void *, int, int *, char **);

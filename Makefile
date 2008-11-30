@@ -52,36 +52,25 @@ mdocml.tgz: $(INSTALL)
 llib-lmdocml.ln: mdocml.ln libmdocml.ln html4_strict.ln validate.ln roff.ln
 	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln libmdocml.ln html4_strict.ln validate.ln roff.ln
 
-mdocml.ln: mdocml.c 
+mdocml.ln: mdocml.c libmdocml.h
 
-mdocml.o: mdocml.c 
-
-mdocml.c: libmdocml.h
+mdocml.o: mdocml.c libmdocml.h
 
 libmdocml.a: libmdocml.o html4_strict.o validate.o roff.o
 	$(AR) rs $@ libmdocml.o html4_strict.o validate.o roff.o
 
-validate.ln: validate.c 
+validate.ln: validate.c private.h libmdocml.h
 
-validate.o: validate.c 
+validate.o: validate.c private.h libmdocml.h
 
-validate.c: private.h libmdocml.h
+html4_strict.ln: html4_strict.c private.h libmdocml.h
 
-html4_strict.ln: html4_strict.c 
+html4_strict.o: html4_strict.c private.h libmdocml.h
 
-html4_strict.o: html4_strict.c 
+roff.ln: roff.c private.h libmdocml.h
 
-html4_strict.c: private.h libmdocml.h
+roff.o: roff.c private.h libmdocml.h
 
-roff.ln: roff.c 
+libmdocml.ln: libmdocml.c private.h libmdocml.h
 
-roff.o: roff.c 
-
-roff.c: private.h libmdocml.h
-
-libmdocml.ln: libmdocml.c 
-
-libmdocml.o: libmdocml.c 
-
-libmdocml.c: private.h libmdocml.h
-
+libmdocml.o: libmdocml.c private.h libmdocml.h
