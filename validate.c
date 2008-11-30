@@ -52,7 +52,7 @@ static	void		 roffmsg(void *arg, enum roffmsg,
 static	int		 roffhead(void *);
 static	int		 rofftail(void *);
 static	int		 roffin(void *, int, int *, char **);
-static	int		 roffdata(void *, char *);
+static	int		 roffdata(void *, int, char *);
 static	int		 roffout(void *, int);
 static	int		 roffblkin(void *, int, int *, char **);
 static	int		 roffblkout(void *, int);
@@ -60,7 +60,7 @@ static	int		 roffspecial(void *, int);
 
 static	int		 mbuf_newline(struct md_valid *);
 static	int		 mbuf_indent(struct md_valid *);
-static	int		 mbuf_data(struct md_valid *, char *);
+static	int		 mbuf_data(struct md_valid *, int, char *);
 
 
 static int
@@ -92,13 +92,10 @@ mbuf_newline(struct md_valid *p)
 
 
 static int
-mbuf_data(struct md_valid *p, char *buf)
+mbuf_data(struct md_valid *p, int space, char *buf)
 {
-	int		 space;
 	size_t		 sz;
 	char		*bufp;
-
-	space = 1; /* FIXME */
 
 	assert(p->mbuf);
 	assert(0 != p->indent);
@@ -227,13 +224,15 @@ roffhead(void *arg)
 	assert(arg);
 	p = (struct md_valid *)arg;
 
-	if ( ! md_buf_putstring(p->mbuf, "BEGIN"))
-		return(0);
-	p->indent++;
-	if ( ! mbuf_newline(p))
+	if ( ! md_buf_putstring(p->mbuf, "<?xml version=\"1.0\" "
+				"encoding=\"UTF-8\"?>\n"))
 		return(0);
 
-	return(1);
+	if ( ! md_buf_putstring(p->mbuf, "<mdoc>"))
+		return(0);
+	p->indent++;
+
+	return(mbuf_newline(p));
 }
 
 
@@ -247,10 +246,7 @@ rofftail(void *arg)
 
 	if (0 != p->pos && ! mbuf_newline(p))
 		return(0);
-
-	if ( ! md_buf_putstring(p->mbuf, "END\n"))
-		return(0);
-	return(1);
+	return(md_buf_putstring(p->mbuf, "</mdoc>\n"));
 }
 
 
@@ -334,6 +330,7 @@ roffin(void *arg, int tok, int *argcp, char **argvp)
 	if (0 == p->pos && ! mbuf_indent(p))
 		return(0);
 
+	/* FIXME: not always with a space... */
 	if ( ! md_buf_putstring(p->mbuf, " <"))
 		return(0);
 	if ( ! md_buf_putstring(p->mbuf, toknames[tok]))
@@ -406,11 +403,11 @@ roffmsg(void *arg, enum roffmsg lvl,
 
 
 static int
-roffdata(void *arg, char *buf)
+roffdata(void *arg, int space, char *buf)
 {
 	struct md_valid	*p;
 
 	assert(arg);
 	p = (struct md_valid *)arg;
-	return(mbuf_data(p, buf));
+	return(mbuf_data(p, space, buf));
 }

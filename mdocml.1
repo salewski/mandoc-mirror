@@ -53,10 +53,6 @@ The validate filter, specified by
 is the default filter.  It produces no output, so specifying
 .Fl o Ar outfile
 results in an empty file.
-.Qq Op Op Fl a ) , Fl b ,
-.Bf Em
-.Qq Op Op Fl a ) , Fl b ,
-.Ef
 .\" The following requests should be uncommented and used where appropriate.
 .\" This next request is for sections 2, 3, and 9 function return values only.
 .\" .Sh RETURN VALUES
@@ -78,7 +74,7 @@ results in an empty file.
 The
 .Nm
 utility was written by 
-.An Kristaps Dzonsons Aq kristaps@kth.se .
+.An Em Kristaps Dzonsons Aq kristaps@kth.se .
 .\"
 .Sh CAVEATS
 Most caveats of
@@ -99,6 +95,9 @@ All macro arguments may be quoted, instead of only some.
 .It 
 Blank lines raise warnings.
 .It 
-Non-ascii characters may cause issues.
+If terminating punctuation is found, then 
+.Em all
+remaining tokens are flushed after line scope is closed, not just the
+last one.
 .El
 .\" .Sh BUGS

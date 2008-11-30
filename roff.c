@@ -34,11 +34,9 @@
 
 /* FIXME: warn about empty lists. */
 
-/* FIXME: ; : } ) (etc.) after text macros? */
+/* FIXME: roff_layout and roff_text have identical-ish lower bodies. */
 
 /* FIXME: NAME section needs specific elements. */
-
-/* FIXME: don't print Os, just do roffbegin. */
 
 #define	ROFF_MAXARG	  32
 
@@ -70,8 +68,7 @@ struct	rofftok {
 	int		  flags;
 #define	ROFF_PARSED	 (1 << 0)		/* "Parsed". */
 #define	ROFF_CALLABLE	 (1 << 1)		/* "Callable". */
-#define	ROFF_QUOTES	 (1 << 2)		/* Quoted args. */
-#define	ROFF_SHALLOW	 (1 << 3)		/* Nesting block. */
+#define	ROFF_SHALLOW	 (1 << 2)		/* Nesting block. */
 };
 
 struct	roffarg {
@@ -179,9 +176,9 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{roff_comment, NULL, NULL, NULL, 0, ROFF_COMMENT, 0 }, /* \" */
 	{     roff_Dd, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Dd */
 	{     roff_Dt, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Dt */
-	{     roff_Os, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_QUOTES }, /* Os */
-	{ roff_layout, NULL, NULL, NULL, ROFF_Sh, ROFF_LAYOUT, ROFF_PARSED }, /* Sh */
-	{ roff_layout, NULL, NULL, NULL, ROFF_Ss, ROFF_LAYOUT, ROFF_PARSED }, /* Ss */ 
+	{     roff_Os, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Os */
+	{ roff_layout, NULL, NULL, NULL, ROFF_Sh, ROFF_LAYOUT, 0 }, /* Sh */
+	{ roff_layout, NULL, NULL, NULL, ROFF_Ss, ROFF_LAYOUT, 0 }, /* Ss */ 
 	{   roff_text, NULL, NULL, NULL, ROFF_Pp, ROFF_TEXT, 0 }, /* Pp */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* D1 */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Dl */
@@ -189,11 +186,11 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{  roff_close, NULL, NULL, NULL, ROFF_Bd, ROFF_LAYOUT, 0 }, /* Ed */
 	{ roff_layout, roffarg_Bl, NULL, roffchild_Bl, 0, ROFF_LAYOUT, 0 }, /* Bl */
 	{  roff_close, NULL, roffparent_El, NULL, ROFF_Bl, ROFF_LAYOUT, 0 }, /* El */
-	{ roff_layout, NULL, roffparent_It, NULL, ROFF_It, ROFF_LAYOUT, ROFF_SHALLOW }, /* It */
+	{ roff_layout, NULL, roffparent_It, NULL, ROFF_It, ROFF_LAYOUT, ROFF_PARSED | ROFF_SHALLOW }, /* It */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ad */ /* FIXME */
 	{   roff_text, roffarg_An, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* An */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ar */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_QUOTES }, /* Cd */ /* XXX man.4 only */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Cd */ /* XXX man.4 only */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Cm */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dv */ /* XXX needs arg */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Er */ /* XXX needs arg */
@@ -207,7 +204,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ic */ /* XXX needs arg */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* In */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Li */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_QUOTES }, /* Nd */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Nd */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Nm */ /* FIXME */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Op */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Ot */ /* XXX deprecated */
@@ -441,7 +438,7 @@ static int
 textparse(const struct rofftree *tree, char *buf)
 {
 
-	return((*tree->cb.roffdata)(tree->arg, buf));
+	return((*tree->cb.roffdata)(tree->arg, 1, buf));
 }
 
 
@@ -696,7 +693,6 @@ rofffindtok(const char *buf)
 }
 
 
-#if notyet
 static int
 roffispunct(const char *p)
 {
@@ -737,7 +733,6 @@ roffispunct(const char *p)
 
 	return(0);
 }
-#endif
 
 
 static int
@@ -985,13 +980,16 @@ roff_layout(ROFFCALL_ARGS)
 		return(0);
 
 	if ( ! (ROFF_PARSED & tokens[tok].flags)) {
+		i = 0;
 		while (*argv) {
-			if ( ! (*tree->cb.roffdata)(tree->arg, *argv++))
+			if ( ! (*tree->cb.roffdata)(tree->arg, i, *argv++))
 				return(0);
+			i = 1;
 		}
 		return((*tree->cb.roffout)(tree->arg, tok));
 	}
 
+	i = 0;
 	while (*argv) {
 		if (ROFF_MAX != (c = rofffindcallable(*argv))) {
 			if (NULL == tokens[c].cb) {
@@ -1006,8 +1004,35 @@ roff_layout(ROFFCALL_ARGS)
 		}
 
 		assert(tree->arg);
-		if ( ! (*tree->cb.roffdata)(tree->arg, *argv++))
+		if ( ! (*tree->cb.roffdata)(tree->arg, i, *argv++))
 			return(0);
+		i = 1;
+	}
+
+	/* 
+	 * If we're the first parser (*argv == tree->cur) then purge out
+	 * any additional punctuation, should there be any remaining at
+	 * the end of line. 
+	 */
+
+	if (ROFF_PARSED & tokens[tok].flags && *argv) {
+		i = 0;
+		while (argv[i])
+			i++;
+
+		assert(i > 0);
+		if ( ! roffispunct(argv[--i]))
+			return(1);
+
+		while (i >= 0 && roffispunct(argv[i]))
+			i--;
+
+		assert(0 != i);
+		i++;
+
+		while (argv[i])
+			if ( ! (*tree->cb.roffdata)(tree->arg, 0, argv[i++]))
+				return(0);
 	}
 
 	return((*tree->cb.roffout)(tree->arg, tok));
@@ -1018,7 +1043,7 @@ roff_layout(ROFFCALL_ARGS)
 static int
 roff_text(ROFFCALL_ARGS) 
 {
-	int		 i, c, argcp[ROFF_MAXARG];
+	int		 i, j, first, c, argcp[ROFF_MAXARG];
 	char		*v, *argvp[ROFF_MAXARG];
 
 	if (ROFF_PRELUDE & tree->state) {
@@ -1026,6 +1051,9 @@ roff_text(ROFFCALL_ARGS)
 				toknames[tok]);
 		return(0);
 	}
+
+	/* FIXME: breaks if passed from roff_layout. */
+	first = *argv == tree->cur;
 
 	i = 0;
 	argv++;
@@ -1047,17 +1075,35 @@ roff_text(ROFFCALL_ARGS)
 		return(0);
 
 	if ( ! (ROFF_PARSED & tokens[tok].flags)) {
+		i = 0;
 		while (*argv) {
-			if ( ! (*tree->cb.roffdata)(tree->arg, *argv++))
+			if ( ! (*tree->cb.roffdata)(tree->arg, i, *argv++))
 				return(0);
+			i = 1;
 		}
 		return((*tree->cb.roffout)(tree->arg, tok));
 	}
 
+	i = 0;
 	while (*argv) {
 		if (ROFF_MAX == (c = rofffindcallable(*argv))) {
-			if ( ! (*tree->cb.roffdata)(tree->arg, *argv++))
+			/* 
+			 * If all that remains is roff punctuation, then
+			 * close out our scope and return.
+			 */
+			if (roffispunct(*argv)) {
+				for (j = 0; argv[j]; j++)
+					if ( ! roffispunct(argv[j]))
+						break;
+				if (NULL == argv[j])
+					break;
+				i = 1;
+			}
+			
+			if ( ! (*tree->cb.roffdata)(tree->arg, i, *argv++))
 				return(0);
+
+			i = 1;
 			continue;
 		}
 
@@ -1078,7 +1124,36 @@ roff_text(ROFFCALL_ARGS)
 		break;
 	}
 
-	return((*tree->cb.roffout)(tree->arg, tok));
+	if ( ! (*tree->cb.roffout)(tree->arg, tok))
+		return(0);
+
+	/* 
+	 * If we're the first parser (*argv == tree->cur) then purge out
+	 * any additional punctuation, should there be any remaining at
+	 * the end of line. 
+	 */
+
+	if (first && *argv) {
+		i = 0;
+		while (argv[i])
+			i++;
+
+		assert(i > 0);
+		if ( ! roffispunct(argv[--i]))
+			return(1);
+
+		while (i >= 0 && roffispunct(argv[i]))
+			i--;
+
+		assert(0 != i);
+		i++;
+
+		while (argv[i])
+			if ( ! (*tree->cb.roffdata)(tree->arg, 0, argv[i++]))
+				return(0);
+	}
+
+	return(1);
 }
 
 
