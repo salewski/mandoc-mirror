@@ -166,14 +166,13 @@ static 	const int roffarg_St[] = {
 
 static	const int roffchild_Bl[] = { ROFF_It, ROFF_El, ROFF_MAX };
 static	const int roffchild_Fo[] = { ROFF_Fa, ROFF_Fc, ROFF_MAX };
-static	const int roffchild_Oo[] = { ROFF_Op, ROFF_Oc, ROFF_MAX };
 static	const int roffchild_Rs[] = { ROFF_Re, ROFF__A, ROFF__B,
 	ROFF__D, ROFF__I, ROFF__J, ROFF__N, ROFF__O, ROFF__P,
 	ROFF__R, ROFF__T, ROFF__V, ROFF_MAX };
 
 static	const int roffparent_El[] = { ROFF_Bl, ROFF_It, ROFF_MAX };
 static	const int roffparent_Fc[] = { ROFF_Fo, ROFF_Fa, ROFF_MAX };
-static	const int roffparent_Oc[] = { ROFF_Oo, ROFF_Oc, ROFF_MAX };
+static	const int roffparent_Oc[] = { ROFF_Oo, ROFF_MAX };
 static	const int roffparent_It[] = { ROFF_Bl, ROFF_It, ROFF_MAX };
 static	const int roffparent_Re[] = { ROFF_Rs, ROFF_MAX };
 
@@ -277,7 +276,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xo */
 	{ roff_layout, NULL, NULL, roffchild_Fo, 0, ROFF_LAYOUT, 0 }, /* Fo */
 	{   roff_noop, NULL, roffparent_Fc, NULL, ROFF_Fo, ROFF_LAYOUT, 0 }, /* Fc */
-	{ roff_layout, NULL, NULL, roffchild_Oo, 0, ROFF_LAYOUT, 0 }, /* Oo */
+	{ roff_layout, NULL, NULL, NULL, 0, ROFF_LAYOUT, 0 }, /* Oo */
 	{   roff_noop, NULL, roffparent_Oc, NULL, ROFF_Oo, ROFF_LAYOUT, 0 }, /* Oc */
 	{ roff_layout, roffarg_Bk, NULL, NULL, 0, ROFF_LAYOUT, 0 }, /* Bk */
 	{   roff_noop, NULL, NULL, NULL, ROFF_Bk, ROFF_LAYOUT, 0 }, /* Ek */
@@ -439,7 +438,7 @@ roff_engine(struct rofftree *tree, char *buf)
 	assert(buf);
 
 	if (0 == *buf) {
-		roff_warn(tree, buf, "blank line");
+		roff_err(tree, buf, "blank line");
 		return(0);
 	} else if ('.' != *buf)
 		return(textparse(tree, buf));
