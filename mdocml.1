@@ -1,8 +1,4 @@
-.\"	$OpenBSD: mdoc.template,v 1.10 2007/05/31 22:10:19 jmc Exp $
 .\"
-.\" The following requests are required for all man pages.
-.\"
-.\" Remove `\&' from the line below.
 .Dd $Mdocdate$
 .Dt mdocml 1
 .Os
@@ -23,53 +19,49 @@ The
 .Nm
 utility parses
 .Xr mdoc
-formatted manual source and passes results into the output filter
-dictated by 
-.Fl f Ar filter .
-The only current output filter is
+formatted manual source and passes results into an output filter.  The
+only current output filter is
 .Ar xml ,
 the default.  The arguments are as follows:
 .Bl -tag -width "\-o outfile"
 .It Fl f Ar filter
-The output filter name, which defaults to
-.Ar xml .
+The output filter name.
 .It Fl o Ar outfile
-Place output in 
+Write output to 
 .Ar outfile ,
 which may be
 .Qq \-
-for stdout.  The default is stdout.
+for stdout.
 .It Fl W
-Print compiler warnings to stderr.
+Print warnings to stderr.
 .It Ar infile
 Read input from
 .Ar infile ,
 which may be 
 .Qq \-
-for stdin.  The default is stdin.
+for stdin.
 .El
+.Pp
+By default,
+.Nm
+reads from stdin and writes to stdout using the xml filter.
+.\"
 .Ss XML Filter
 The XML filter, specified by
 .Fl f Ar xml ,
 is the default filter.  It creates an XML document where element names are
 their respective roff macro names.  Each element name has an associated
 namespace, which is one of 
-.Qq block ,
-.Qq inline ,
+.Qq block 
 or
-.Qq special ,
-corresponding to the display mode of a node.
-.\" The following requests should be uncommented and used where appropriate.
-.\" This next request is for sections 2, 3, and 9 function return values only.
-.\" .Sh RETURN VALUES
+.Qq inline ,
+corresponding to the display mode of a node.  The document root is
+always the
+.Qq mdoc
+element, in the default namespace.
 .\" This next request is for sections 1, 6, 7 & 8 only.
 .\" .Sh ENVIRONMENT
-.\" .Sh FILES
-.\" .Sh EXAMPLES
-.\" This next request is for sections 1, 4, 6, and 8 only.
-.\" .Sh DIAGNOSTICS
-.\" The next request is for sections 2, 3, and 9 error and signal handling only.
-.\" .Sh ERRORS
+.\"
 .Sh SEE ALSO
 .Xr groff 1 ,
 .Xr mdoc.samples 7 ,
@@ -91,15 +83,21 @@ or the necessary limitations of converting an ad hoc language into
 structured ones:
 .Bl -enum -compact -offset indent
 .It 
-The engine doesn't understand
-.Sq \&Xo
+The engine doesn't understand the
+.Sq \&Xo ,
+.Sq \&Xc ,
+.Sq \&Ns ,
+.Sq \&No ,
+.Sq \&Db ,
+.Sq \&Sm ,
+.Sq \&Xc ,
 and
-.Sq \&Xc
-troff macros.
+.Sq \&Xo
+mdoc macros.
 .It 
 All macro arguments may be quoted, instead of only some.
 .It 
-Blank lines raise warnings.
+Blank lines raise errors.
 .It 
 If terminating punctuation is found, then 
 .Em all
