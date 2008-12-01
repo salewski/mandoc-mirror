@@ -16,6 +16,8 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+#include <sys/param.h>
+
 #include <assert.h>
 #include <ctype.h>
 #include <err.h>
@@ -90,7 +92,7 @@ struct	rofftree {
 	struct roffnode	 *last;			/* Last parsed node. */
 	char		 *cur;
 
-	time_t		  date;			/* `Dd' results. */
+	struct tm	  tm;			/* `Dd' results. */
 	char		  os[64];		/* `Os' results. */
 	char		  title[64];		/* `Dt' results. */
 	char		  section[64];		/* `Dt' results. */
@@ -397,6 +399,9 @@ roff_free(struct rofftree *tree, int flush)
 			goto end;
 	}
 
+	if ( ! (*tree->cb.rofftail)(tree->arg))
+		goto end;
+
 	error = 0;
 
 end:
@@ -451,6 +456,10 @@ static int
 textparse(const struct rofftree *tree, char *buf)
 {
 
+	if ( ! (ROFF_BODY & tree->state)) {
+		roff_err(tree, buf, "data not in body");
+		return(0);
+	}
 	return((*tree->cb.roffdata)(tree->arg, 1, buf));
 }
 
@@ -897,6 +906,8 @@ roffparseopts(struct rofftree *tree, int tok,
 static	int
 roff_Dd(ROFFCALL_ARGS)
 {
+	time_t		 t;
+	char		*p, buf[32];
 
 	if (ROFF_BODY & tree->state) {
 		assert( ! (ROFF_PRELUDE & tree->state));
@@ -915,11 +926,63 @@ roff_Dd(ROFFCALL_ARGS)
 		return(0);
 	}
 
-	/* TODO: parse date. */
-
 	assert(NULL == tree->last);
-	tree->state |= ROFF_PRELUDE_Dd;
 
+	argv++;
+
+	if (0 == strcmp(*argv, "$Mdocdate$")) {
+		t = time(NULL);
+		if (NULL == localtime_r(&t, &tree->tm))
+			err(1, "localtime_r");
+		tree->state |= ROFF_PRELUDE_Dd;
+		return(1);
+	} 
+
+	/* Build this from Mdocdate or raw date. */
+	
+	buf[0] = 0;
+	p = *argv;
+
+	if (0 != strcmp(*argv, "$Mdocdate:")) {
+		while (*argv) {
+			if (strlcat(buf, *argv++, sizeof(buf))
+					< sizeof(buf)) 
+				continue;
+			roff_err(tree, p, "bad `Dd' date");
+			return(0);
+		}
+		if (strptime(buf, "%b%d,%Y", &tree->tm)) {
+			tree->state |= ROFF_PRELUDE_Dd;
+			return(1);
+		}
+		roff_err(tree, *argv, "bad `Dd' date");
+		return(0);
+	}
+
+	argv++;
+	while (*argv && **argv != '$') {
+		if (strlcat(buf, *argv++, sizeof(buf))
+				>= sizeof(buf)) {
+			roff_err(tree, p, "bad `Dd' Mdocdate");
+			return(0);
+		} 
+		if (strlcat(buf, " ", sizeof(buf))
+				>= sizeof(buf)) {
+			roff_err(tree, p, "bad `Dd' Mdocdate");
+			return(0);
+		}
+	}
+	if (NULL == *argv) {
+		roff_err(tree, p, "bad `Dd' Mdocdate");
+		return(0);
+	}
+
+	if (NULL == strptime(buf, "%b %d %Y", &tree->tm)) {
+		roff_err(tree, *argv, "bad `Dd' Mdocdate");
+		return(0);
+	}
+
+	tree->state |= ROFF_PRELUDE_Dd;
 	return(1);
 }
 
@@ -946,7 +1009,34 @@ roff_Dt(ROFFCALL_ARGS)
 		return(0);
 	}
 
-	/* TODO: parse date. */
+	argv++;
+	if (NULL == *argv) {
+		roff_err(tree, *argv, "`Dt' needs document title");
+		return(0);
+	} else if (strlcpy(tree->title, *argv, sizeof(tree->title))
+			>= sizeof(tree->title)) {
+		roff_err(tree, *argv, "`Dt' document title too long");
+		return(0);
+	}
+
+	argv++;
+	if (NULL == *argv) {
+		roff_err(tree, *argv, "`Dt' needs section");
+		return(0);
+	} else if (strlcpy(tree->section, *argv, sizeof(tree->section))
+			>= sizeof(tree->section)) {
+		roff_err(tree, *argv, "`Dt' section too long");
+		return(0);
+	}
+
+	argv++;
+	if (NULL == *argv) {
+		tree->volume[0] = 0;
+	} else if (strlcpy(tree->volume, *argv, sizeof(tree->volume))
+			>= sizeof(tree->volume)) {
+		roff_err(tree, *argv, "`Dt' volume too long");
+		return(0);
+	}
 
 	assert(NULL == tree->last);
 	tree->state |= ROFF_PRELUDE_Dt;
@@ -959,10 +1049,9 @@ roff_Dt(ROFFCALL_ARGS)
 static	int
 roff_Os(ROFFCALL_ARGS)
 {
+	char		*p;
 
-	if (ROFF_EXIT == type) {
-		return((*tree->cb.rofftail)(tree->arg));
-	} else if (ROFF_BODY & tree->state) {
+	if (ROFF_BODY & tree->state) {
 		assert( ! (ROFF_PRELUDE & tree->state));
 		assert(ROFF_PRELUDE_Os & tree->state);
 		return(roff_text(tok, tree, argv, type));
@@ -975,7 +1064,24 @@ roff_Os(ROFFCALL_ARGS)
 		return(0);
 	}
 
-	/* TODO: extract OS. */
+	tree->os[0] = 0;
+
+	p = *++argv;
+
+	while (*argv) {
+		if (strlcat(tree->os, *argv++, sizeof(tree->os))
+				< sizeof(tree->os)) 
+			continue;
+		roff_err(tree, p, "`Os' value too long");
+		return(0);
+	}
+
+	if (0 == tree->os[0])
+		if (strlcpy(tree->os, "LOCAL", sizeof(tree->os))
+				>= sizeof(tree->os)) {
+			roff_err(tree, p, "`Os' value too long");
+			return(0);
+		}
 
 	tree->state |= ROFF_PRELUDE_Os;
 	tree->state &= ~ROFF_PRELUDE;
@@ -1093,7 +1199,6 @@ roff_layout(ROFFCALL_ARGS)
 	while (i >= 0 && roffispunct(argv[i]))
 		i--;
 
-	assert(0 != i);
 	i++;
 
 	/* LINTED */
@@ -1224,8 +1329,6 @@ roff_text(ROFFCALL_ARGS)
 
 	while (i >= 0 && roffispunct(argv[i]))
 		i--;
-
-	assert(0 != i);
 	i++;
 
 	/* LINTED */
