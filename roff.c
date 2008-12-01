@@ -236,7 +236,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Aq */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* At */ /* XXX at most 2 args */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Bc */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Bf */ /* FIXME */
+	{ roff_layout, NULL, NULL, NULL, 0, ROFF_LAYOUT, 0 }, /* Bf */ /* FIXME */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Bo */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Bq */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bsx */
@@ -246,7 +246,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Do */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Dq */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ec */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 },	/* Ef */ /* FIXME */
+	{   roff_noop, NULL, NULL, NULL, ROFF_Bf, ROFF_LAYOUT, 0 }, /* Ef */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Em */ /* XXX needs arg */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Eo */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Fx */
@@ -257,7 +257,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ox */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pc */
 	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Pf */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_LAYOUT, ROFF_PARSED | ROFF_CALLABLE }, /* Po */
+	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Po */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Pq */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qc */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ql */
@@ -380,14 +380,14 @@ roff_free(struct rofftree *tree, int flush)
 	error = 1;
 
 	if (ROFF_PRELUDE & tree->state) {
-		roff_warn(tree, NULL, "prelude never finished");
+		roff_err(tree, NULL, "prelude never finished");
 		goto end;
 	} 
 
-	for (n = tree->last; n->parent; n = n->parent) {
+	for (n = tree->last; n; n = n->parent) {
 		if (0 != tokens[n->tok].ctx) 
 			continue;
-		roff_warn(tree, NULL, "closing explicit scope `%s'", 
+		roff_err(tree, NULL, "closing explicit scope `%s'", 
 				toknames[n->tok]);
 		goto end;
 	}
@@ -554,8 +554,7 @@ roffparse(struct rofftree *tree, char *buf)
 	if (ROFF_PRELUDE & tree->state) {
 		assert(NULL == tree->last);
 		return((*tokens[tok].cb)(tok, tree, argvp, ROFF_ENTER));
-	} else 
-		assert(tree->last);
+	} 
 
 	assert(ROFF_BODY & tree->state);
 
@@ -564,14 +563,16 @@ roffparse(struct rofftree *tree, char *buf)
 	 * children are satisfied.  
 	 */
 
-	if ( ! roffscan(tree->last->tok, tokens[tok].parents)) {
+	if (tree->last && ! roffscan
+			(tree->last->tok, tokens[tok].parents)) {
 		roff_err(tree, *argvp, "`%s' has invalid parent `%s'",
 				toknames[tok], 
 				toknames[tree->last->tok]);
 		return(0);
 	} 
 
-	if ( ! roffscan(tok, tokens[tree->last->tok].children)) {
+	if (tree->last && ! roffscan
+			(tok, tokens[tree->last->tok].children)) {
 		roff_err(tree, *argvp, "`%s' is invalid child of `%s'",
 				toknames[tok],
 				toknames[tree->last->tok]);
@@ -614,6 +615,11 @@ roffparse(struct rofftree *tree, char *buf)
 				n = NULL;
 				break;
 			}
+			if (tokens[n->tok].ctx == n->tok)
+				continue;
+			roff_err(tree, *argv, "`%s' breaks `%s' scope",
+					toknames[tok], toknames[n->tok]);
+			return(0);
 		}
 
 		/*
@@ -647,8 +653,25 @@ roffparse(struct rofftree *tree, char *buf)
 	 * In this, the `El' tag closes out the scope of `Bl'.
 	 */
 
-	assert(tree->last);
 	assert(tok != tokens[tok].ctx && 0 != tokens[tok].ctx);
+
+	for (n = tree->last; n; n = n->parent)
+		if (n->tok != tokens[tok].ctx) {
+			if (n->tok == tokens[n->tok].ctx)
+				continue;
+			roff_err(tree, *argv, "`%s' breaks `%s' scope",
+					toknames[tok], toknames[n->tok]);
+			return(0);
+		} else
+			break;
+
+
+	if (NULL == n) {
+		roff_err(tree, *argv, "`%s' has no starting tag `%s'",
+				toknames[tok], 
+				toknames[tokens[tok].ctx]);
+		return(0);
+	}
 
 	/* LINTED */
 	do {
@@ -657,7 +680,6 @@ roffparse(struct rofftree *tree, char *buf)
 			return(0);
 	} while (t != tokens[tok].ctx);
 
-	assert(tree->last);
 	return(1);
 }
 
@@ -940,7 +962,6 @@ roff_Os(ROFFCALL_ARGS)
 {
 
 	if (ROFF_EXIT == type) {
-		roffnode_free(tree);
 		return((*tree->cb.rofftail)(tree->arg));
 	} else if (ROFF_BODY & tree->state) {
 		assert( ! (ROFF_PRELUDE & tree->state));
@@ -962,9 +983,6 @@ roff_Os(ROFFCALL_ARGS)
 	tree->state |= ROFF_BODY;
 
 	assert(NULL == tree->last);
-
-	if (NULL == roffnode_new(tok, tree))
-		return(0);
 
 	return((*tree->cb.roffhead)(tree->arg));
 }
