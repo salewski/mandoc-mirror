@@ -31,10 +31,6 @@
 #define	MAXINDENT	 8
 #define	COLUMNS		 72
 
-#ifdef	__linux__ /* FIXME */
-#define	strlcat		 strncat
-#endif
-
 enum	md_ns {
 	MD_NS_BLOCK,
 	MD_NS_INLINE,
@@ -42,12 +38,11 @@ enum	md_ns {
 };
 
 enum	md_tok {
-	MD_BLKIN,
+	MD_BLKIN,		/* Controls spacing. */
 	MD_BLKOUT,
 	MD_IN,
 	MD_OUT,
-	MD_TEXT,
-	MD_OVERRIDE
+	MD_TEXT
 };
 
 struct	md_xml {
@@ -60,7 +55,9 @@ struct	md_xml {
 	size_t		 pos;
 	enum md_tok	 last;
 	int		 flags;
-#define	MD_LITERAL	(1 << 0) /* FIXME */
+#define	MD_LITERAL	(1 << 0) /* TODO */
+#define	MD_OVERRIDE_ONE	(1 << 1)
+#define	MD_OVERRIDE_ALL	(1 << 2)
 };
 
 static	void		 roffmsg(void *arg, enum roffmsg, 
@@ -72,8 +69,9 @@ static	int		 roffdata(void *, int, char *);
 static	int		 roffout(void *, int);
 static	int		 roffblkin(void *, int, int *, char **);
 static	int		 roffblkout(void *, int);
-static	int		 roffspecial(void *, int);
+static	int		 roffspecial(void *, int, int *, char **, char **);
 
+static	void		 mbuf_mode(struct md_xml *, enum md_ns);
 static	int		 mbuf_newline(struct md_xml *);
 static	int		 mbuf_indent(struct md_xml *);
 static	int		 mbuf_data(struct md_xml *, int, char *);
@@ -88,6 +86,14 @@ static	int		 mbuf_begintag(struct md_xml *, const char *,
 				enum md_ns, int *, char **);
 static	int		 mbuf_endtag(struct md_xml *, 
 				const char *, enum md_ns);
+
+
+static void
+mbuf_mode(struct md_xml *p, enum md_ns ns)
+{
+	p->flags &= ~MD_OVERRIDE_ONE;
+	p->last = ns;
+}
 
 
 static int
@@ -257,6 +263,9 @@ mbuf_data(struct md_xml *p, int space, char *buf)
 	assert(p->mbuf);
 	assert(0 != p->indent);
 
+	if (MD_OVERRIDE_ONE & p->flags || MD_OVERRIDE_ALL & p->flags)
+		space = 0;
+
 	if (MD_LITERAL & p->flags)
 		return(mbuf_putstring(p, buf));
 
@@ -281,11 +290,11 @@ mbuf_data(struct md_xml *p, int space, char *buf)
 				return(0);
 			if ( ! mbuf_nputstring(p, bufp, sz))
 				return(0);
-			if (p->indent * MAXINDENT + sz >= COLUMNS) {
+			if (p->indent * MAXINDENT + sz >= COLUMNS)
 				if ( ! mbuf_newline(p))
 					return(0);
-				continue;
-			}
+			if ( ! (MD_OVERRIDE_ALL & p->flags))
+				space = 1;
 			continue;
 		}
 
@@ -302,9 +311,8 @@ mbuf_data(struct md_xml *p, int space, char *buf)
 		if ( ! mbuf_nputstring(p, bufp, sz))
 			return(0);
 
-		if ( ! space && p->pos >= COLUMNS)
-			if ( ! mbuf_newline(p))
-				return(0);
+		if ( ! (MD_OVERRIDE_ALL & p->flags))
+			space = 1;
 	}
 
 	return(1);
@@ -388,7 +396,7 @@ roffhead(void *arg)
 		return(0);
 
 	p->indent++;
-	p->last = MD_BLKIN;
+	mbuf_mode(p, MD_BLKIN);
 	return(mbuf_newline(p));
 }
 
@@ -404,16 +412,16 @@ rofftail(void *arg)
 	if (0 != p->pos && ! mbuf_newline(p))
 		return(0);
 
-	p->last = MD_BLKOUT;
+	mbuf_mode(p, MD_BLKOUT);
 	if ( ! mbuf_endtag(p, "mdoc", MD_NS_DEFAULT))
 		return(0);
-
 	return(mbuf_newline(p));
 }
 
 
+/* ARGSUSED */
 static int
-roffspecial(void *arg, int tok)
+roffspecial(void *arg, int tok, int *argc, char **argv, char **more)
 {
 	struct md_xml	*p;
 
@@ -424,7 +432,14 @@ roffspecial(void *arg, int tok)
 
 	switch (tok) {
 	case (ROFF_Ns):
-		p->last = MD_OVERRIDE;
+		p->flags |= MD_OVERRIDE_ONE;
+		break;
+	case (ROFF_Sm):
+		assert(*more);
+		if (0 == strcmp(*more, "on"))
+			p->flags |= MD_OVERRIDE_ALL;
+		else
+			p->flags &= ~MD_OVERRIDE_ALL;
 		break;
 	default:
 		break;
@@ -452,8 +467,8 @@ roffblkin(void *arg, int tok, int *argc, char **argv)
 
 	/* FIXME: xml won't like standards args (e.g., p1003.1-90). */
 
-	p->last = MD_BLKIN;
 	p->indent++;
+	mbuf_mode(p, MD_BLKIN);
 
 	if ( ! mbuf_begintag(p, toknames[tok], MD_NS_BLOCK,
 				argc, argv))
@@ -480,8 +495,7 @@ roffblkout(void *arg, int tok)
 	} else if ( ! mbuf_indent(p))
 		return(0);
 
-	p->last = MD_BLKOUT;
-
+	mbuf_mode(p, MD_BLKOUT);
 	if ( ! mbuf_endtag(p, toknames[tok], MD_NS_BLOCK))
 		return(0);
 	return(mbuf_newline(p));
@@ -496,31 +510,22 @@ roffin(void *arg, int tok, int *argc, char **argv)
 	assert(arg);
 	p = (struct md_xml *)arg;
 
-	/* 
-	 * FIXME: put all of this in a buffer, then check the buffer
-	 * length versus the column width for nicer output.  This is a
-	 * bit hacky.
-	 */
-
-	if (p->pos + 11 > COLUMNS) 
+	if ( ! (MD_OVERRIDE_ONE & p->flags) && 
+			! (MD_OVERRIDE_ALL & p->flags) && 
+			p->pos + 11 > COLUMNS) 
 		if ( ! mbuf_newline(p))
 			return(0);
 
-	if (0 != p->pos) {
-		switch (p->last) {
-		case (MD_TEXT):
-			/* FALLTHROUGH */
-		case (MD_OUT):
-			if ( ! mbuf_nputs(p, " ", 1))
-				return(0);
-			break;
-		default:
-			break;
-		}
-	} else if ( ! mbuf_indent(p))
+	if (0 != p->pos && (MD_TEXT == p->last || MD_OUT == p->last)
+			&& ! (MD_OVERRIDE_ONE & p->flags)
+			&& ! (MD_OVERRIDE_ALL & p->flags))
+		if ( ! mbuf_nputs(p, " ", 1))
+			return(0);
+
+	if (0 == p->pos && ! mbuf_indent(p))
 		return(0);
 
-	p->last = MD_IN;
+	mbuf_mode(p, MD_IN);
 	return(mbuf_begintag(p, toknames[tok], 
 				MD_NS_INLINE, argc, argv));
 }
@@ -537,7 +542,7 @@ roffout(void *arg, int tok)
 	if (0 == p->pos && ! mbuf_indent(p))
 		return(0);
 
-	p->last = MD_OUT;
+	mbuf_mode(p, MD_OUT);
 	return(mbuf_endtag(p, toknames[tok], MD_NS_INLINE));
 }
 
@@ -586,7 +591,7 @@ roffdata(void *arg, int space, char *buf)
 	if ( ! mbuf_data(p, space, buf))
 		return(0);
 
-	p->last = MD_TEXT;
+	mbuf_mode(p, MD_TEXT);
 	return(1);
 }
 

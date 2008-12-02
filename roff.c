@@ -17,6 +17,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 #include <sys/param.h>
+#include <sys/types.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -30,6 +31,8 @@
 #include "libmdocml.h"
 #include "private.h"
 
+/* FIXME: First letters of quoted-text interpreted in rofffindtok. */
+/* FIXME: `No' not implemented. */
 /* TODO: warn if Pp occurs before/after Sh etc. (see mdoc.samples). */
 /* TODO: warn about "X section only" macros. */
 /* TODO: warn about empty lists. */
@@ -104,6 +107,7 @@ static	int		  roff_Dd(ROFFCALL_ARGS);
 static	int		  roff_Dt(ROFFCALL_ARGS);
 static	int		  roff_Os(ROFFCALL_ARGS);
 static	int		  roff_Ns(ROFFCALL_ARGS);
+static	int		  roff_Sm(ROFFCALL_ARGS);
 static	int		  roff_layout(ROFFCALL_ARGS);
 static	int		  roff_text(ROFFCALL_ARGS);
 static	int		  roff_noop(ROFFCALL_ARGS);
@@ -126,8 +130,18 @@ static	int		  roffnextopt(const struct rofftree *,
 				int, char ***, char **);
 static	int		  roffparseopts(struct rofftree *, int, 
 				char ***, int *, char **);
+static	int		  roffcall(struct rofftree *, int, char **);
 static	int 		  roffparse(struct rofftree *, char *);
 static	int		  textparse(const struct rofftree *, char *);
+
+#ifdef __linux__
+static	size_t		  strlcat(char *, const char *, size_t);
+static	size_t		  strlcpy(char *, const char *, size_t);
+extern	int		  vsnprintf(char *, size_t, 
+				const char *, va_list);
+extern	char		 *strptime(const char *, const char *,
+				struct tm *);
+#endif
 
 
 static	const int roffarg_An[] = { ROFF_Split, ROFF_Nosplit, ROFF_ARGMAX };
@@ -252,7 +266,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sc */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* So */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Sq */
-	{        NULL, NULL, NULL, NULL, 0, ROFF_SPECIAL, 0 }, /* Sm */
+	{     roff_Sm, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Sm */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sx */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sy */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Tn */
@@ -818,6 +832,21 @@ roffnode_free(struct rofftree *tree)
 
 
 static int
+roffcall(struct rofftree *tree, int tok, char **argv)
+{
+
+	if (NULL == tokens[tok].cb) {
+		roff_err(tree, *argv, "unsupported macro `%s'", 
+				toknames[tok]);
+		return(0);
+	}
+	if ( ! (*tokens[tok].cb)(tok, tree, argv, ROFF_ENTER))
+		return(0);
+	return(1);
+}
+
+
+static int
 roffnextopt(const struct rofftree *tree, int tok, 
 		char ***in, char **val)
 {
@@ -835,7 +864,7 @@ roffnextopt(const struct rofftree *tree, int tok,
 
 	if (ROFF_ARGMAX == (v = rofffindarg(arg + 1))) {
 		roff_warn(tree, arg, "argument-like parameter `%s' to "
-				"`%s'", &arg[1], toknames[tok]);
+				"`%s'", arg, toknames[tok]);
 		return(-1);
 	} 
 	
@@ -1053,73 +1082,86 @@ roff_Dt(ROFFCALL_ARGS)
 
 /* ARGSUSED */
 static	int
-roff_Ns(ROFFCALL_ARGS)
+roff_Sm(ROFFCALL_ARGS)
 {
-	int		 j, c, first;
+	int		 argcp[1];
+	char		*argvp[1], *morep[1], *p;
 
-	first = (*argv == tree->cur);
+	p = *argv++;
 
-	argv++;
+	argcp[0] = ROFF_ARGMAX;
+	argvp[0] = NULL;
+	if (NULL == (morep[0] = *argv++)) {
+		roff_err(tree, p, "`Sm' expects an argument");
+		return(0);
+	} else if (0 != strcmp(morep[0], "on") && 
+			0 != strcmp(morep[0], "off")) {
+		roff_err(tree, p, "`Sm' has invalid argument");
+		return(0);
+	}
 
-	if (ROFF_MAX != (c = rofffindcallable(*argv))) {
-		if (NULL == tokens[c].cb) {
-			roff_err(tree, *argv, "unsupported macro `%s'",
-					toknames[c]);
-			return(0);
-		}
-		if ( ! (*tree->cb.roffspecial)(tree->arg, tok))
-			return(0);
-		if ( ! (*tokens[c].cb)(c, tree, argv, ROFF_ENTER))
-			return(0);
-		if ( ! first)
-			return(1);
-		return(roffpurgepunct(tree, argv));
-	} 
+	if (*argv) 
+		roff_warn(tree, *argv, "`Sm' shouldn't have arguments");
 
-	if ( ! (*tree->cb.roffdata)(tree->arg, 0, *argv++))
+	if ( ! (*tree->cb.roffspecial)(tree->arg, 
+				tok, argcp, argvp, morep))
 		return(0);
 
 	while (*argv) {
-		if (ROFF_MAX == (c = rofffindcallable(*argv))) {
-			if ( ! roffispunct(*argv)) {
-				if ( ! (*tree->cb.roffdata)
-						(tree->arg, 1, *argv++))
-					return(0);
-				continue;
-			}
-			
-			/* FIXME: this is identical to that of
-			 * roff_text. */
+		if ((*tree->cb.roffdata)(tree->arg, 1, *argv++))
+			continue;
+		return(0);
+	}
 
-			/* See if only punctuation remains. */
+	return(1);
+}
 
-			for (j = 0; argv[j]; j++)
-				if ( ! roffispunct(argv[j]))
-					break;
 
-			if (argv[j]) {
-				if ( ! (*tree->cb.roffdata)
-						(tree->arg, 0, *argv++))
-					return(0);
-				continue;
-			}
+/* ARGSUSED */
+static	int
+roff_Ns(ROFFCALL_ARGS)
+{
+	int		 j, c, first;
+	int		 argcp[1];
+	char		*argvp[1], *morep[1];
 
-			/*  Only punctuation remains. */
+	first = (*argv++ == tree->cur);
 
+	argcp[0] = ROFF_ARGMAX;
+	argvp[0] = morep[0] = NULL;
+
+	if ( ! (*tree->cb.roffspecial)(tree->arg, 
+				tok, argcp, argvp, morep))
+		return(0);
+
+	while (*argv) {
+		if (ROFF_MAX != (c = rofffindcallable(*argv))) {
+			if ( ! roffcall(tree, c, argv))
+				return(0);
 			break;
 		}
-		if (NULL == tokens[c].cb) {
-			roff_err(tree, *argv, "unsupported macro `%s'",
-					toknames[c]);
+
+		if ( ! roffispunct(*argv)) {
+			if ((*tree->cb.roffdata)(tree->arg, 1, *argv++))
+				continue;
 			return(0);
 		}
-		if ( ! (*tokens[c].cb)(c, tree, argv, ROFF_ENTER))
+		for (j = 0; argv[j]; j++)
+			if ( ! roffispunct(argv[j]))
+				break;
+
+		if (argv[j]) {
+			if ((*tree->cb.roffdata)(tree->arg, 0, *argv++))
+				continue;
 			return(0);
+		}
+
 		break;
 	}
 
 	if ( ! first)
 		return(1);
+
 	return(roffpurgepunct(tree, argv));
 }
 
@@ -1240,16 +1282,8 @@ roff_layout(ROFFCALL_ARGS)
 			i = 1;
 			continue;
 		}
-
-		if (NULL == tokens[c].cb) {
-			roff_err(tree, *argv, "unsupported macro `%s'",
-					toknames[c]);
+		if ( ! roffcall(tree, c, argv))
 			return(0);
-		}
-
-		if ( ! (*tokens[c].cb)(c, tree, argv, ROFF_ENTER))
-			return(0);
-
 		break;
 	}
 
@@ -1316,60 +1350,41 @@ roff_text(ROFFCALL_ARGS)
 
 	i = 0;
 	while (*argv) {
-		if (ROFF_MAX == (c = rofffindcallable(*argv))) {
-			if ( ! roffispunct(*argv)) {
-				if ( ! (*tree->cb.roffdata)
-						(tree->arg, i, *argv++))
+		if (ROFF_MAX != (c = rofffindcallable(*argv))) {
+			if ( ! (ROFF_LSCOPE & tokens[tok].flags))
+				if ( ! (*tree->cb.roffout)(tree->arg, tok))
 					return(0);
-				i = 1;
-				continue;
-			}
-
-			/* See if only punctuation remains. */
-
-			i = 1;
-			for (j = 0; argv[j]; j++)
-				if ( ! roffispunct(argv[j]))
-					break;
-
-			if (argv[j]) {
-				if ( ! (*tree->cb.roffdata)
-						(tree->arg, 0, *argv++))
-					return(0);
-				continue;
-			}
-
-			/*  Only punctuation remains. */
-
-			if ( ! (*tree->cb.roffout)(tree->arg, tok))
+	
+			if ( ! roffcall(tree, c, argv))
 				return(0);
+	
+			if (ROFF_LSCOPE & tokens[tok].flags)
+				if ( ! (*tree->cb.roffout)(tree->arg, tok))
+					return(0);
+	
 			break;
 		}
 
-		/*
-		 * A sub-command has been found.  Execute it and
-		 * discontinue parsing for arguments.  If we're
-		 * line-scoped, then close out after it returns; if we
-		 * aren't, then close out before.
-		 */
-
-		if (NULL == tokens[c].cb) {
-			roff_err(tree, *argv, "unsupported macro `%s'",
-					toknames[c]);
-			return(0);
-		} 
-		
-		if ( ! (ROFF_LSCOPE & tokens[tok].flags))
-			if ( ! (*tree->cb.roffout)(tree->arg, tok))
+		if ( ! roffispunct(*argv)) {
+			if ( ! (*tree->cb.roffdata)(tree->arg, i, *argv++))
 				return(0);
-		
-		if ( ! (*tokens[c].cb)(c, tree, argv, ROFF_ENTER))
-			return(0);
+			i = 1;
+			continue;
+		}
 
-		if (ROFF_LSCOPE & tokens[tok].flags)
-			if ( ! (*tree->cb.roffout)(tree->arg, tok))
+		i = 1;
+		for (j = 0; argv[j]; j++)
+			if ( ! roffispunct(argv[j]))
+				break;
+
+		if (argv[j]) {
+			if ( ! (*tree->cb.roffdata)(tree->arg, 0, *argv++))
 				return(0);
+			continue;
+		}
 
+		if ( ! (*tree->cb.roffout)(tree->arg, tok))
+			return(0);
 		break;
 	}
 
@@ -1429,3 +1444,81 @@ roff_err(const struct rofftree *tree, const char *pos, char *fmt, ...)
 	(*tree->cb.roffmsg)(tree->arg, 
 			ROFF_ERROR, tree->cur, pos, buf);
 }
+
+
+#ifdef __linux
+/*	$OpenBSD: strlcat.c,v 1.13 2005/08/08 08:05:37 espie Exp $	*/
+
+/*
+ * Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the
+ * above copyright notice and this permission notice appear in all
+ * copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+ * WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+ * AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+ * DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
+ * PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+ * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
+ */
+static size_t
+strlcat(char *dst, const char *src, size_t siz)
+{
+	char *d = dst;
+	const char *s = src;
+	size_t n = siz;
+	size_t dlen;
+
+	/* Find the end of dst and adjust bytes left but don't go past
+	 * end */
+	while (n-- != 0 && *d != '\0')
+		d++;
+	dlen = d - dst;
+	n = siz - dlen;
+
+	if (n == 0)
+		return(dlen + strlen(s));
+	while (*s != '\0') {
+		if (n != 1) {
+			*d++ = *s;
+			n--;
+		}
+		s++;
+	}
+	*d = '\0';
+
+	return(dlen + (s - src));	/* count does not include NUL */
+}
+
+
+static size_t
+strlcpy(char *dst, const char *src, size_t siz)
+{
+	char *d = dst;
+	const char *s = src;
+	size_t n = siz;
+
+	/* Copy as many bytes as will fit */
+	if (n != 0) {
+		while (--n != 0) {
+			if ((*d++ = *s++) == '\0')
+				break;
+		}
+	}
+
+	/* Not enough room in dst, add NUL and traverse rest of src */
+	if (n == 0) {
+		if (siz != 0)
+			*d = '\0';		/* NUL-terminate dst */
+		while (*s++)
+			;
+	}
+
+	return(s - src - 1);	/* count does not include NUL */
+}
+#endif /*__linux__*/

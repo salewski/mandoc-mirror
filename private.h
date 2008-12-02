@@ -222,7 +222,7 @@ struct	roffcb {
 	int	(*roffout)(void *, int);
 	int	(*roffblkin)(void *, int, int *, char **);
 	int	(*roffblkout)(void *, int);
-	int	(*roffspecial)(void *, int);
+	int	(*roffspecial)(void *, int, int *, char **, char **);
 };
 
 __BEGIN_DECLS
