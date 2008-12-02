@@ -2,15 +2,15 @@ CFLAGS += -W -Wall -Wno-unused-parameter -g
 
 LINTFLAGS += -c -e -f -u
 
-LNS	= mdocml.ln html4_strict.ln xml.ln libmdocml.ln roff.ln
+LNS	= mdocml.ln html4_strict.ln xml.ln libmdocml.ln roff.ln ml.ln
 
 LLNS	= llib-lmdocml.ln
 
 LIBS	= libmdocml.a
 
-OBJS	= mdocml.o html4_strict.o xml.o libmdocml.o roff.o
+OBJS	= mdocml.o html4_strict.o xml.o libmdocml.o roff.o ml.o
 
-SRCS	= mdocml.c html4_strict.c xml.c libmdocml.c roff.c
+SRCS	= mdocml.c html4_strict.c xml.c libmdocml.c roff.c ml.c
 
 HEADS	= libmdocml.h private.h
 
@@ -52,15 +52,15 @@ mdocml.tgz: $(INSTALL)
 	( cd .dist/ && tar zcf ../mdocml.tgz mdocml/ )
 	rm -rf .dist/
 
-llib-lmdocml.ln: mdocml.ln libmdocml.ln html4_strict.ln xml.ln roff.ln
-	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln libmdocml.ln html4_strict.ln xml.ln roff.ln
+llib-lmdocml.ln: mdocml.ln libmdocml.ln html4_strict.ln xml.ln roff.ln ml.ln
+	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln libmdocml.ln html4_strict.ln xml.ln roff.ln ml.ln
 
 mdocml.ln: mdocml.c libmdocml.h
 
 mdocml.o: mdocml.c libmdocml.h
 
-libmdocml.a: libmdocml.o html4_strict.o xml.o roff.o
-	$(AR) rs $@ libmdocml.o html4_strict.o xml.o roff.o
+libmdocml.a: libmdocml.o html4_strict.o xml.o roff.o ml.o
+	$(AR) rs $@ libmdocml.o html4_strict.o xml.o roff.o ml.o
 
 xml.ln: xml.c private.h libmdocml.h
 
@@ -77,3 +77,7 @@ roff.o: roff.c private.h libmdocml.h
 libmdocml.ln: libmdocml.c private.h libmdocml.h
 
 libmdocml.o: libmdocml.c private.h libmdocml.h
+
+ml.ln: ml.c private.h libmdocml.h
+
+ml.o: ml.c private.h libmdocml.h

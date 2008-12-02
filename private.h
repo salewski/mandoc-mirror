@@ -252,6 +252,13 @@ struct	rofftree *roff_alloc(const struct roffcb *, void *);
 int		  roff_engine(struct rofftree *, char *);
 int		  roff_free(struct rofftree *, int);
 
+ssize_t		  ml_begintag(struct md_mbuf *, const char *, 
+			int *, char **);
+ssize_t		  ml_endtag(struct md_mbuf *, const char *);
+ssize_t		  ml_nputstring(struct md_mbuf *, const char *, size_t);
+ssize_t		  ml_nputs(struct md_mbuf *, const char *, size_t);
+ssize_t		  ml_indent(struct md_mbuf *, int);
+
 __END_DECLS
 
 #endif /*!PRIVATE_H*/

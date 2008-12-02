@@ -134,7 +134,7 @@ static	int		  roffcall(struct rofftree *, int, char **);
 static	int 		  roffparse(struct rofftree *, char *);
 static	int		  textparse(const struct rofftree *, char *);
 
-#ifdef __linux__
+#ifdef __linux__ /* FIXME: remove */
 static	size_t		  strlcat(char *, const char *, size_t);
 static	size_t		  strlcpy(char *, const char *, size_t);
 extern	int		  vsnprintf(char *, size_t, 
@@ -1446,7 +1446,7 @@ roff_err(const struct rofftree *tree, const char *pos, char *fmt, ...)
 }
 
 
-#ifdef __linux
+#ifdef __linux /* FIXME: remove. */
 /*	$OpenBSD: strlcat.c,v 1.13 2005/08/08 08:05:37 espie Exp $	*/
 
 /*
