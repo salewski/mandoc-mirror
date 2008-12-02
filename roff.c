@@ -112,6 +112,7 @@ struct	rofftree {
 static	int		  roff_Dd(ROFFCALL_ARGS);
 static	int		  roff_Dt(ROFFCALL_ARGS);
 static	int		  roff_Os(ROFFCALL_ARGS);
+static	int		  roff_Ns(ROFFCALL_ARGS);
 
 static	int		  roff_layout(ROFFCALL_ARGS);
 static	int		  roff_text(ROFFCALL_ARGS);
@@ -126,6 +127,7 @@ static	void		  roff_warn(const struct rofftree *,
 static	void		  roff_err(const struct rofftree *, 
 				const char *, char *, ...);
 
+static	int		  roffpurgepunct(struct rofftree *, char **);
 static	int		  roffscan(int, const int *);
 static	int		  rofffindtok(const char *);
 static	int		  rofffindarg(const char *);
@@ -253,7 +255,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Fx */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ms */
 	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* No */
-	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ns */
+	{     roff_Ns, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ns */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Nx */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ox */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pc */
@@ -878,6 +880,29 @@ roffnextopt(const struct rofftree *tree, int tok,
 
 
 static int
+roffpurgepunct(struct rofftree *tree, char **argv)
+{
+	int		 i;
+
+	i = 0;
+	while (argv[i])
+		i++;
+	assert(i > 0);
+	if ( ! roffispunct(argv[--i]))
+		return(1);
+	while (i >= 0 && roffispunct(argv[i]))
+		i--;
+	i++;
+
+	/* LINTED */
+	while (argv[i])
+		if ( ! (*tree->cb.roffdata)(tree->arg, 0, argv[i++]))
+			return(0);
+	return(1);
+}
+
+
+static int
 roffparseopts(struct rofftree *tree, int tok, 
 		char ***args, int *argc, char **argv)
 {
@@ -1047,6 +1072,79 @@ roff_Dt(ROFFCALL_ARGS)
 
 /* ARGSUSED */
 static	int
+roff_Ns(ROFFCALL_ARGS)
+{
+	int		 j, c, first;
+
+	first = (*argv == tree->cur);
+
+	argv++;
+
+	if (ROFF_MAX != (c = rofffindcallable(*argv))) {
+		if (NULL == tokens[c].cb) {
+			roff_err(tree, *argv, "unsupported macro `%s'",
+					toknames[c]);
+			return(0);
+		}
+		if ( ! (*tree->cb.roffspecial)(tree->arg, tok))
+			return(0);
+		if ( ! (*tokens[c].cb)(c, tree, argv, ROFF_ENTER))
+			return(0);
+		if ( ! first)
+			return(1);
+		return(roffpurgepunct(tree, argv));
+	} 
+
+	if ( ! (*tree->cb.roffdata)(tree->arg, 0, *argv++))
+		return(0);
+
+	while (*argv) {
+		if (ROFF_MAX == (c = rofffindcallable(*argv))) {
+			if ( ! roffispunct(*argv)) {
+				if ( ! (*tree->cb.roffdata)
+						(tree->arg, 1, *argv++))
+					return(0);
+				continue;
+			}
+			
+			/* FIXME: this is identical to that of
+			 * roff_text. */
+
+			/* See if only punctuation remains. */
+
+			for (j = 0; argv[j]; j++)
+				if ( ! roffispunct(argv[j]))
+					break;
+
+			if (argv[j]) {
+				if ( ! (*tree->cb.roffdata)
+						(tree->arg, 0, *argv++))
+					return(0);
+				continue;
+			}
+
+			/*  Only punctuation remains. */
+
+			break;
+		}
+		if (NULL == tokens[c].cb) {
+			roff_err(tree, *argv, "unsupported macro `%s'",
+					toknames[c]);
+			return(0);
+		}
+		if ( ! (*tokens[c].cb)(c, tree, argv, ROFF_ENTER))
+			return(0);
+		break;
+	}
+
+	if ( ! first)
+		return(1);
+	return(roffpurgepunct(tree, argv));
+}
+
+
+/* ARGSUSED */
+static	int
 roff_Os(ROFFCALL_ARGS)
 {
 	char		*p;
@@ -1188,23 +1286,8 @@ roff_layout(ROFFCALL_ARGS)
 	 * a token isn't punctuation.
 	 */
 
-	i = 0;
-	while (argv[i])
-		i++;
-
-	assert(i > 0);
-	if ( ! roffispunct(argv[--i]))
-		return((*tree->cb.roffout)(tree->arg, tok));
-
-	while (i >= 0 && roffispunct(argv[i]))
-		i--;
-
-	i++;
-
-	/* LINTED */
-	while (argv[i])
-		if ( ! (*tree->cb.roffdata)(tree->arg, 0, argv[i++]))
-			return(0);
+	if ( ! roffpurgepunct(tree, argv))
+		return(0);
 
 	return((*tree->cb.roffout)(tree->arg, tok));
 }
@@ -1314,29 +1397,7 @@ roff_text(ROFFCALL_ARGS)
 	if ( ! first)
 		return(1);
 
-	/*
-	 * We're the line-dominant macro.  Check if there's remaining
-	 * punctuation.  If there is, then flush it out before exiting.
-	 */
-
-	i = 0;
-	while (argv[i])
-		i++;
-
-	assert(i > 0);
-	if ( ! roffispunct(argv[--i]))
-		return(1);
-
-	while (i >= 0 && roffispunct(argv[i]))
-		i--;
-	i++;
-
-	/* LINTED */
-	while (argv[i])
-		if ( ! (*tree->cb.roffdata)(tree->arg, 0, argv[i++]))
-			return(0);
-
-	return(1);
+	return(roffpurgepunct(tree, argv));
 }
 
 

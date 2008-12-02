@@ -150,7 +150,7 @@ md_run_leave(const struct md_args *args, struct md_mbuf *mbuf,
 	}
 
 	/* Make final flush of buffer. */
-	if ( ! md_buf_flush(mbuf))
+	if (-1 != c && ! md_buf_flush(mbuf))
 		return(-1);
 
 	return(c);

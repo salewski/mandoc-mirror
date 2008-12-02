@@ -84,7 +84,6 @@ structured ones:
 The engine doesn't understand the
 .Sq \&Xo ,
 .Sq \&Xc ,
-.Sq \&Ns ,
 .Sq \&No ,
 .Sq \&Db ,
 .Sq \&Sm ,
@@ -102,4 +101,9 @@ If terminating punctuation is found, then
 remaining tokens are flushed after line scope is closed, not just the
 last one.
 .El
+.Pp
+The roff engine in 
+.Nm
+produces text in-line; thus, output may already be partially written by
+the time an error is encountered.
 .\" .Sh BUGS

@@ -106,6 +106,9 @@ leave_io(const struct md_buf *out,
 		warn("%s", out->name);
 		c = 1;
 	}
+	if (1 == c && STDOUT_FILENO != out->fd)
+		if (-1 == unlink(out->name))
+			warn("%s", out->name);
 
 	return(c);
 }

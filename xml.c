@@ -29,11 +29,17 @@
 #include "private.h"
 
 #define	MAXINDENT	 8
-#define	COLUMNS		 60
+#define	COLUMNS		 72
 
 #ifdef	__linux__ /* FIXME */
 #define	strlcat		 strncat
 #endif
+
+enum	md_ns {
+	MD_NS_BLOCK,
+	MD_NS_INLINE,
+	MD_NS_DEFAULT
+};
 
 enum	md_tok {
 	MD_BLKIN,
@@ -78,6 +84,76 @@ static	int		 mbuf_nputstring(struct md_xml *,
 static	int		 mbuf_puts(struct md_xml *, const char *);
 static	int		 mbuf_nputs(struct md_xml *, 
 				const char *, size_t);
+static	int		 mbuf_begintag(struct md_xml *, const char *, 
+				enum md_ns, int *, char **);
+static	int		 mbuf_endtag(struct md_xml *, 
+				const char *, enum md_ns);
+
+
+static int
+mbuf_begintag(struct md_xml *p, const char *name, enum md_ns ns, 
+		int *argc, char **argv)
+{
+	int		 i;
+
+	if ( ! mbuf_nputs(p, "<", 1))
+		return(0);
+
+	switch (ns) {
+		case (MD_NS_BLOCK):
+			if ( ! mbuf_nputs(p, "block:", 6))
+				return(0);
+			break;
+		case (MD_NS_INLINE):
+			if ( ! mbuf_nputs(p, "inline:", 7))
+				return(0);
+			break;
+		default:
+			break;
+	}
+
+	if ( ! mbuf_puts(p, name))
+		return(0);
+
+	for (i = 0; ROFF_ARGMAX != argc[i]; i++) {
+		if ( ! mbuf_nputs(p, " ", 1))
+			return(0);
+		if ( ! mbuf_puts(p, tokargnames[argc[i]]))
+			return(0);
+		if ( ! mbuf_nputs(p, "=\"", 2))
+			return(0);
+		if ( ! mbuf_putstring(p, argv[i] ? argv[i] : "true"))
+			return(0);
+		if ( ! mbuf_nputs(p, "\"", 1))
+			return(0);
+	}
+	return(mbuf_nputs(p, ">", 1));
+}
+
+
+static int
+mbuf_endtag(struct md_xml *p, const char *tag, enum md_ns ns)
+{
+	if ( ! mbuf_nputs(p, "</", 2))
+		return(0);
+
+	switch (ns) {
+		case (MD_NS_BLOCK):
+			if ( ! mbuf_nputs(p, "block:", 6))
+				return(0);
+			break;
+		case (MD_NS_INLINE):
+			if ( ! mbuf_nputs(p, "inline:", 7))
+				return(0);
+			break;
+		default:
+			break;
+	}
+
+	if ( ! mbuf_puts(p, tag))
+		return(0);
+	return(mbuf_nputs(p, ">", 1));
+}
 
 
 static int
@@ -104,6 +180,16 @@ mbuf_nputstring(struct md_xml *p, const char *buf, size_t sz)
 			if ( ! md_buf_puts(p->mbuf, "&quot;", 6))
 				return(0);
 			p->pos += 6;
+			break;
+		case ('<'):
+			if ( ! md_buf_puts(p->mbuf, "&lt;", 4))
+				return(0);
+			p->pos += 4;
+			break;
+		case ('>'):
+			if ( ! md_buf_puts(p->mbuf, "&gt;", 4))
+				return(0);
+			p->pos += 4;
 			break;
 		default:
 			if ( ! md_buf_putchar(p->mbuf, buf[i]))
@@ -318,15 +404,14 @@ rofftail(void *arg)
 	if (0 != p->pos && ! mbuf_newline(p))
 		return(0);
 
-	if ( ! mbuf_puts(p, "</mdoc>"))
+	p->last = MD_BLKOUT;
+	if ( ! mbuf_endtag(p, "mdoc", MD_NS_DEFAULT))
 		return(0);
 
-	p->last = MD_BLKOUT;
 	return(mbuf_newline(p));
 }
 
 
-/* ARGSUSED */
 static int
 roffspecial(void *arg, int tok)
 {
@@ -334,6 +419,8 @@ roffspecial(void *arg, int tok)
 
 	assert(arg);
 	p = (struct md_xml *)arg;
+
+	/* FIXME: this is completely ad hoc. */
 
 	switch (tok) {
 	case (ROFF_Ns):
@@ -351,7 +438,6 @@ static int
 roffblkin(void *arg, int tok, int *argc, char **argv)
 {
 	struct md_xml	*p;
-	int		 i;
 
 	assert(arg);
 	p = (struct md_xml *)arg;
@@ -364,33 +450,14 @@ roffblkin(void *arg, int tok, int *argc, char **argv)
 	} else if ( ! mbuf_indent(p))
 		return(0);
 
-	if ( ! mbuf_nputs(p, "<", 1))
-		return(0);
-	if ( ! mbuf_nputs(p, "block:", 6))
-		return(0);
-	if ( ! mbuf_puts(p, toknames[tok]))
-		return(0);
-
 	/* FIXME: xml won't like standards args (e.g., p1003.1-90). */
-
-	for (i = 0; ROFF_ARGMAX != argc[i]; i++) {
-		if ( ! mbuf_nputs(p, " ", 1))
-			return(0);
-		if ( ! mbuf_puts(p, tokargnames[argc[i]]))
-			return(0);
-		if ( ! mbuf_nputs(p, "=\"", 2))
-			return(0);
-		if ( ! mbuf_putstring(p, argv[i] ? argv[i] : "true"))
-			return(0);
-		if ( ! mbuf_nputs(p, "\"", 1))
-			return(0);
-	}
-
-	if ( ! mbuf_nputs(p, ">", 1))
-		return(0);
 
 	p->last = MD_BLKIN;
 	p->indent++;
+
+	if ( ! mbuf_begintag(p, toknames[tok], MD_NS_BLOCK,
+				argc, argv))
+		return(0);
 	return(mbuf_newline(p));
 }
 
@@ -413,16 +480,10 @@ roffblkout(void *arg, int tok)
 	} else if ( ! mbuf_indent(p))
 		return(0);
 
-	if ( ! mbuf_nputs(p, "</", 2))
-		return(0);
-	if ( ! mbuf_nputs(p, "block:", 6))
-		return(0);
-	if ( ! mbuf_puts(p, toknames[tok]))
-		return(0);
-	if ( ! mbuf_nputs(p, ">", 1))
-		return(0);
-
 	p->last = MD_BLKOUT;
+
+	if ( ! mbuf_endtag(p, toknames[tok], MD_NS_BLOCK))
+		return(0);
 	return(mbuf_newline(p));
 }
 
@@ -431,7 +492,6 @@ static int
 roffin(void *arg, int tok, int *argc, char **argv)
 {
 	struct md_xml	*p;
-	int		 i;
 
 	assert(arg);
 	p = (struct md_xml *)arg;
@@ -461,27 +521,8 @@ roffin(void *arg, int tok, int *argc, char **argv)
 		return(0);
 
 	p->last = MD_IN;
-
-	if ( ! mbuf_nputs(p, "<", 1))
-		return(0);
-	if ( ! mbuf_nputs(p, "inline:", 7))
-		return(0);
-	if ( ! mbuf_puts(p, toknames[tok]))
-		return(0);
-
-	for (i = 0; ROFF_ARGMAX != argc[i]; i++) {
-		if ( ! mbuf_nputs(p, " ", 1))
-			return(0);
-		if ( ! mbuf_puts(p, tokargnames[argc[i]]))
-			return(0);
-		if ( ! mbuf_nputs(p, "=\"", 2))
-			return(0);
-		if ( ! mbuf_putstring(p, argv[i] ? argv[i] : "true"))
-			return(0);
-		if ( ! mbuf_nputs(p, "\"", 1))
-			return(0);
-	}
-	return(mbuf_nputs(p, ">", 1));
+	return(mbuf_begintag(p, toknames[tok], 
+				MD_NS_INLINE, argc, argv));
 }
 
 
@@ -493,20 +534,11 @@ roffout(void *arg, int tok)
 	assert(arg);
 	p = (struct md_xml *)arg;
 
-	/* Continue with a regular out token. */
-
 	if (0 == p->pos && ! mbuf_indent(p))
 		return(0);
 
 	p->last = MD_OUT;
-
-	if ( ! mbuf_nputs(p, "</", 2))
-		return(0);
-	if ( ! mbuf_nputs(p, "inline:", 7))
-		return(0);
-	if ( ! mbuf_puts(p, toknames[tok]))
-		return(0);
-	return(mbuf_nputs(p, ">", 1));
+	return(mbuf_endtag(p, toknames[tok], MD_NS_INLINE));
 }
 
 
