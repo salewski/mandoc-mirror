@@ -31,17 +31,11 @@
 #include "private.h"
 
 /* TODO: warn if Pp occurs before/after Sh etc. (see mdoc.samples). */
-
 /* TODO: warn about "X section only" macros. */
-
 /* TODO: warn about empty lists. */
-
 /* TODO: (warn) some sections need specific elements. */
-
 /* TODO: (warn) NAME section has particular order. */
-
 /* TODO: unify empty-content tags a la <br />. */
-
 /* TODO: macros with a set number of arguments? */
 
 #define	ROFF_MAXARG	  32
@@ -67,15 +61,15 @@ struct	rofftree;
 struct	rofftok {
 	int		(*cb)(ROFFCALL_ARGS);	/* Callback. */
 	const int	 *args;			/* Args (or NULL). */
-	const int	 *parents;
-	const int	 *children;
-	int		  ctx;
+	const int	 *parents;		/* Limit to parents. */
+	const int	 *children;		/* Limit to kids. */
+	int		  ctx;			/* Blk-close node. */
 	enum rofftype	  type;			/* Type of macro. */
 	int		  flags;
 #define	ROFF_PARSED	 (1 << 0)		/* "Parsed". */
 #define	ROFF_CALLABLE	 (1 << 1)		/* "Callable". */
 #define	ROFF_SHALLOW	 (1 << 2)		/* Nesting block. */
-#define	ROFF_LSCOPE	 (1 << 3)
+#define	ROFF_LSCOPE	 (1 << 3)		/* Line scope. */
 };
 
 struct	roffarg {
@@ -90,43 +84,36 @@ struct	roffnode {
 
 struct	rofftree {
 	struct roffnode	 *last;			/* Last parsed node. */
-	char		 *cur;
-
+	char		 *cur;			/* Line start. */
 	struct tm	  tm;			/* `Dd' results. */
 	char		  os[64];		/* `Os' results. */
 	char		  title[64];		/* `Dt' results. */
 	char		  section[64];		/* `Dt' results. */
 	char		  volume[64];		/* `Dt' results. */
-
 	int		  state;
 #define	ROFF_PRELUDE	 (1 << 1)		/* In roff prelude. */
 #define	ROFF_PRELUDE_Os	 (1 << 2)		/* `Os' is parsed. */
 #define	ROFF_PRELUDE_Dt	 (1 << 3)		/* `Dt' is parsed. */
 #define	ROFF_PRELUDE_Dd	 (1 << 4)		/* `Dd' is parsed. */
 #define	ROFF_BODY	 (1 << 5)		/* In roff body. */
-
-	struct roffcb	  cb;
-	void		 *arg;
+	struct roffcb	  cb;			/* Callbacks. */
+	void		 *arg;			/* Callbacks' arg. */
 };
 
 static	int		  roff_Dd(ROFFCALL_ARGS);
 static	int		  roff_Dt(ROFFCALL_ARGS);
 static	int		  roff_Os(ROFFCALL_ARGS);
 static	int		  roff_Ns(ROFFCALL_ARGS);
-
 static	int		  roff_layout(ROFFCALL_ARGS);
 static	int		  roff_text(ROFFCALL_ARGS);
 static	int		  roff_noop(ROFFCALL_ARGS);
 static	int		  roff_depr(ROFFCALL_ARGS);
-
 static	struct roffnode	 *roffnode_new(int, struct rofftree *);
 static	void		  roffnode_free(struct rofftree *);
-
 static	void		  roff_warn(const struct rofftree *, 
 				const char *, char *, ...);
 static	void		  roff_err(const struct rofftree *, 
 				const char *, char *, ...);
-
 static	int		  roffpurgepunct(struct rofftree *, char **);
 static	int		  roffscan(int, const int *);
 static	int		  rofffindtok(const char *);
@@ -143,36 +130,31 @@ static	int 		  roffparse(struct rofftree *, char *);
 static	int		  textparse(const struct rofftree *, char *);
 
 
-static	const int roffarg_An[] = { ROFF_Split, ROFF_Nosplit, 
-	ROFF_ARGMAX };
-static	const int roffarg_Bd[] = { ROFF_Ragged, ROFF_Unfilled, 
-	ROFF_Literal, ROFF_File, ROFF_Offset, ROFF_Filled,
-	ROFF_Compact, ROFF_ARGMAX };
+static	const int roffarg_An[] = { ROFF_Split, ROFF_Nosplit, ROFF_ARGMAX };
+static	const int roffarg_Bd[] = { ROFF_Ragged, ROFF_Unfilled, ROFF_Literal,
+	ROFF_File, ROFF_Offset, ROFF_Filled, ROFF_Compact, ROFF_ARGMAX };
 static	const int roffarg_Bk[] = { ROFF_Words, ROFF_ARGMAX };
 static	const int roffarg_Ex[] = { ROFF_Std, ROFF_ARGMAX };
 static	const int roffarg_Rv[] = { ROFF_Std, ROFF_ARGMAX };
-static 	const int roffarg_Bl[] = { ROFF_Bullet, ROFF_Dash, 
-	ROFF_Hyphen, ROFF_Item, ROFF_Enum, ROFF_Tag, ROFF_Diag, 
-	ROFF_Hang, ROFF_Ohang, ROFF_Inset, ROFF_Column, ROFF_Offset, 
-	ROFF_Width, ROFF_Compact, ROFF_ARGMAX };
-static 	const int roffarg_St[] = {
-	ROFF_p1003_1_88, ROFF_p1003_1_90, ROFF_p1003_1_96,
-	ROFF_p1003_1_2001, ROFF_p1003_1_2004, ROFF_p1003_1,
-	ROFF_p1003_1b, ROFF_p1003_1b_93, ROFF_p1003_1c_95,
-	ROFF_p1003_1g_2000, ROFF_p1003_2_92, ROFF_p1387_2_95,
-	ROFF_p1003_2, ROFF_p1387_2, ROFF_isoC_90, ROFF_isoC_amd1,
-	ROFF_isoC_tcor1, ROFF_isoC_tcor2, ROFF_isoC_99, ROFF_ansiC,
-	ROFF_ansiC_89, ROFF_ansiC_99, ROFF_ieee754, ROFF_iso8802_3,
-	ROFF_xpg3, ROFF_xpg4, ROFF_xpg4_2, ROFF_xpg4_3, ROFF_xbd5,
-	ROFF_xcu5, ROFF_xsh5, ROFF_xns5, ROFF_xns5_2d2_0,
-	ROFF_xcurses4_2, ROFF_susv2, ROFF_susv3, ROFF_svid4,
+static 	const int roffarg_Bl[] = { ROFF_Bullet, ROFF_Dash, ROFF_Hyphen,
+	ROFF_Item, ROFF_Enum, ROFF_Tag, ROFF_Diag, ROFF_Hang, ROFF_Ohang,
+	ROFF_Inset, ROFF_Column, ROFF_Offset, ROFF_Width, ROFF_Compact,
 	ROFF_ARGMAX };
+static 	const int roffarg_St[] = { ROFF_p1003_1_88, ROFF_p1003_1_90,
+	ROFF_p1003_1_96, ROFF_p1003_1_2001, ROFF_p1003_1_2004, ROFF_p1003_1,
+	ROFF_p1003_1b, ROFF_p1003_1b_93, ROFF_p1003_1c_95, ROFF_p1003_1g_2000,
+	ROFF_p1003_2_92, ROFF_p1387_2_95, ROFF_p1003_2, ROFF_p1387_2,
+	ROFF_isoC_90, ROFF_isoC_amd1, ROFF_isoC_tcor1, ROFF_isoC_tcor2,
+	ROFF_isoC_99, ROFF_ansiC, ROFF_ansiC_89, ROFF_ansiC_99, ROFF_ieee754,
+	ROFF_iso8802_3, ROFF_xpg3, ROFF_xpg4, ROFF_xpg4_2, ROFF_xpg4_3,
+	ROFF_xbd5, ROFF_xcu5, ROFF_xsh5, ROFF_xns5, ROFF_xns5_2d2_0,
+	ROFF_xcurses4_2, ROFF_susv2, ROFF_susv3, ROFF_svid4, ROFF_ARGMAX };
 
 static	const int roffchild_Bl[] = { ROFF_It, ROFF_El, ROFF_MAX };
 static	const int roffchild_Fo[] = { ROFF_Fa, ROFF_Fc, ROFF_MAX };
-static	const int roffchild_Rs[] = { ROFF_Re, ROFF__A, ROFF__B,
-	ROFF__D, ROFF__I, ROFF__J, ROFF__N, ROFF__O, ROFF__P,
-	ROFF__R, ROFF__T, ROFF__V, ROFF_MAX };
+static	const int roffchild_Rs[] = { ROFF_Re, ROFF__A, ROFF__B, ROFF__D,
+	ROFF__I, ROFF__J, ROFF__N, ROFF__O, ROFF__P, ROFF__R, ROFF__T, ROFF__V,
+	ROFF_MAX };
 
 static	const int roffparent_El[] = { ROFF_Bl, ROFF_It, ROFF_MAX };
 static	const int roffparent_Fc[] = { ROFF_Fo, ROFF_Fa, ROFF_MAX };
@@ -180,7 +162,6 @@ static	const int roffparent_Oc[] = { ROFF_Oo, ROFF_MAX };
 static	const int roffparent_It[] = { ROFF_Bl, ROFF_It, ROFF_MAX };
 static	const int roffparent_Re[] = { ROFF_Rs, ROFF_MAX };
 
-/* Table of all known tokens. */
 static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_noop, NULL, NULL, NULL, 0, ROFF_COMMENT, 0 }, /* \" */
 	{     roff_Dd, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Dd */
@@ -290,7 +271,6 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Ud */
 	};
 
-/* Table of all known token arguments. */
 static	const int tokenargs[ROFF_ARGMAX] = {
 	0,		0,		0,		0,
 	0,		ROFF_VALUE,	ROFF_VALUE,	0,
@@ -665,6 +645,7 @@ roffparse(struct rofftree *tree, char *buf)
 
 	assert(tok != tokens[tok].ctx && 0 != tokens[tok].ctx);
 
+	/* LINTED */
 	for (n = tree->last; n; n = n->parent)
 		if (n->tok != tokens[tok].ctx) {
 			if (n->tok == tokens[n->tok].ctx)

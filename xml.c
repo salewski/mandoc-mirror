@@ -167,9 +167,9 @@ mbuf_putstring(struct md_xml *p, const char *buf)
 static int
 mbuf_nputstring(struct md_xml *p, const char *buf, size_t sz)
 {
-	size_t		 i;
+	int		 i;
 
-	for (i = 0; i < sz; i++) {
+	for (i = 0; i < (int)sz; i++) {
 		switch (buf[i]) {
 		case ('&'):
 			if ( ! md_buf_puts(p->mbuf, "&amp;", 5))
