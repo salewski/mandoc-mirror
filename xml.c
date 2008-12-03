@@ -37,6 +37,7 @@ static	int		xml_end(struct md_mbuf *,
 				const struct md_args *);
 
 
+/* ARGSUSED */
 static int 
 xml_begin(struct md_mbuf *mbuf, const struct md_args *args)
 {
@@ -54,6 +55,7 @@ xml_begin(struct md_mbuf *mbuf, const struct md_args *args)
 }
 
 
+/* ARGSUSED */
 static int 
 xml_end(struct md_mbuf *mbuf, const struct md_args *args)
 {
@@ -67,6 +69,7 @@ xml_end(struct md_mbuf *mbuf, const struct md_args *args)
 }
 
 
+/* ARGSUSED */
 static ssize_t 
 xml_begintag(struct md_mbuf *mbuf, const struct md_args *args, 
 		enum md_ns ns, int tok, 
@@ -97,14 +100,14 @@ xml_begintag(struct md_mbuf *mbuf, const struct md_args *args,
 		break;
 	}
 
-	if ( ! ml_nputs(mbuf, toknames[tok], 
-				strlen(toknames[tok]), &res))
+	if ( ! ml_puts(mbuf, toknames[tok], &res))
 		return(-1);
 
 	return((ssize_t)res);
 }
 
 
+/* ARGSUSED */
 static ssize_t 
 xml_endtag(struct md_mbuf *mbuf, const struct md_args *args, 
 		enum md_ns ns, int tok)
@@ -134,8 +137,7 @@ xml_endtag(struct md_mbuf *mbuf, const struct md_args *args,
 		break;
 	}
 
-	if ( ! ml_nputs(mbuf, toknames[tok], 
-				strlen(toknames[tok]), &res))
+	if ( ! ml_puts(mbuf, toknames[tok], &res))
 		return(-1);
 
 	return((ssize_t)res);

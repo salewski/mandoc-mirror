@@ -189,7 +189,7 @@ mlg_indent(struct md_mlg *p)
 {
 	size_t		 count;
 
-	count = p->indent > MAXINDENT ? MAXINDENT : p->indent;
+	count = p->indent > MAXINDENT ? (size_t)MAXINDENT : p->indent;
 	count *= INDENT;
 
 	assert(0 == p->pos);
@@ -212,6 +212,7 @@ mlg_newline(struct md_mlg *p)
 static void
 mlg_mode(struct md_mlg *p, enum md_tok ns)
 {
+
 	p->flags &= ~ML_OVERRIDE_ONE;
 	p->last = ns;
 }
@@ -252,7 +253,7 @@ mlg_data(struct md_mlg *p, int space, char *buf)
 			if ( ! ml_nputstring(p->mbuf, bufp, 
 						sz, &p->pos))
 				return(0);
-			if (p->indent * MAXINDENT + sz >= COLUMNS)
+			if (p->indent * INDENT + sz >= COLUMNS)
 				if ( ! mlg_newline(p))
 					return(0);
 			if ( ! (ML_OVERRIDE_ALL & p->flags))
