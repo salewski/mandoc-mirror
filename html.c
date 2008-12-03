@@ -25,7 +25,7 @@
 
 /* ARGSUSED */
 int
-md_line_html4_strict(void *data, char *buf)
+md_line_html(void *data, char *buf)
 {
 
 	return(1);
@@ -34,7 +34,7 @@ md_line_html4_strict(void *data, char *buf)
 
 /* ARGSUSED */
 int
-md_exit_html4_strict(void *data, int flush)
+md_exit_html(void *data, int flush)
 {
 
 	return(1);
@@ -43,7 +43,7 @@ md_exit_html4_strict(void *data, int flush)
 
 /* ARGSUSED */
 void *
-md_init_html4_strict(const struct md_args *args,
+md_init_html(const struct md_args *args,
 		struct md_mbuf *mbuf, const struct md_rbuf *rbuf)
 {
 

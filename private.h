@@ -19,7 +19,6 @@
 #ifndef PRIVATE_H
 #define PRIVATE_H
 
-/* Input buffer (input read into buffer, then filled when empty). */
 struct	md_rbuf {
 	int		 fd;		/* Open descriptor. */
 	char		*name;		/* Name of file. */
@@ -28,7 +27,6 @@ struct	md_rbuf {
 	size_t		 line;		/* Current line number. */
 };
 
-/* Output buffer (output buffered until full, then flushed). */
 struct	md_mbuf {
 	int		 fd;		/* Open descriptor. */
 	char		*name;		/* Name of file. */
@@ -225,6 +223,8 @@ struct	roffcb {
 	int	(*roffspecial)(void *, int, int *, char **, char **);
 };
 
+struct	rofftree;
+
 __BEGIN_DECLS
 
 typedef	void  (*(*md_init)(const struct md_args *, 
@@ -232,10 +232,10 @@ typedef	void  (*(*md_init)(const struct md_args *,
 typedef	int	(*md_line)(void *, char *);
 typedef	int	(*md_exit)(void *, int);
 
-void		 *md_init_html4_strict(const struct md_args *,
+void		 *md_init_html(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *);
-int		  md_line_html4_strict(void *, char *);
-int		  md_exit_html4_strict(void *, int);
+int		  md_line_html(void *, char *);
+int		  md_exit_html(void *, int);
 
 void		 *md_init_xml(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *);
@@ -246,18 +246,9 @@ int	 	  md_buf_puts(struct md_mbuf *, const char *, size_t);
 int	 	  md_buf_putchar(struct md_mbuf *, char);
 int	 	  md_buf_putstring(struct md_mbuf *, const char *);
 
-struct	rofftree;
-
 struct	rofftree *roff_alloc(const struct roffcb *, void *);
 int		  roff_engine(struct rofftree *, char *);
 int		  roff_free(struct rofftree *, int);
-
-ssize_t		  ml_begintag(struct md_mbuf *, const char *, 
-			int *, char **);
-ssize_t		  ml_endtag(struct md_mbuf *, const char *);
-ssize_t		  ml_nputstring(struct md_mbuf *, const char *, size_t);
-ssize_t		  ml_nputs(struct md_mbuf *, const char *, size_t);
-ssize_t		  ml_indent(struct md_mbuf *, int);
 
 __END_DECLS
 

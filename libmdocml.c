@@ -139,8 +139,8 @@ md_run_leave(const struct md_args *args, struct md_mbuf *mbuf,
 
 	/* Run exiters. */
 	switch (args->type) {
-	case (MD_HTML4_STRICT):
-		if ( ! md_exit_html4_strict(data, -1 == c ? 0 : 1))
+	case (MD_HTML):
+		if ( ! md_exit_html(data, -1 == c ? 0 : 1))
 			c = -1;
 		break;
 	default:
@@ -172,8 +172,8 @@ md_run_enter(const struct md_args *args, struct md_mbuf *mbuf,
 
 	/* Function ptrs to line-parsers. */
 	switch (args->type) {
-	case (MD_HTML4_STRICT):
-		fp = md_line_html4_strict;
+	case (MD_HTML):
+		fp = md_line_html;
 		break;
 	default:
 		fp = md_line_xml;
@@ -242,9 +242,8 @@ md_run(const struct md_args *args,
 
 	/* Run initialisers. */
 	switch (args->type) {
-	case (MD_HTML4_STRICT):
-		data = md_init_html4_strict
-			(args, &mbuf, &rbuf);
+	case (MD_HTML):
+		data = md_init_html(args, &mbuf, &rbuf);
 		break;
 	default:
 		data = md_init_xml(args, &mbuf, &rbuf);

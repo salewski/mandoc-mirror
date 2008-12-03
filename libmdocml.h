@@ -25,18 +25,18 @@ struct 	md_params_xml {
 	int		 dummy;
 };
 
-struct 	md_params_html4_strict {
+struct 	md_params_html {
 	int		 dummy;
 };
 
 union	md_params {
 	struct md_params_xml xml;
-	struct md_params_html4_strict html4_strict;
+	struct md_params_html html;
 };
 
 enum	md_type {
 	MD_XML,			/* XML. */
-	MD_HTML4_STRICT		/* HTML4.01-strict. */
+	MD_HTML			/* HTML4.01-strict. */
 };
 
 struct	md_args {
