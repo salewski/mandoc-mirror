@@ -215,11 +215,15 @@ struct	roffcb {
 			const char *, const char *, char *);
 	int	(*roffhead)(void *);
 	int	(*rofftail)(void *);
-	int	(*roffin)(void *, int, int *, char **);
 	int	(*roffdata)(void *, int, char *);
+	int	(*roffin)(void *, int, int *, char **);
 	int	(*roffout)(void *, int);
 	int	(*roffblkin)(void *, int, int *, char **);
 	int	(*roffblkout)(void *, int);
+	int	(*roffblkheadin)(void *, int, int *, char **);
+	int	(*roffblkheadout)(void *, int);
+	int	(*roffblkbodyin)(void *, int, int *, char **);
+	int	(*roffblkbodyout)(void *, int);
 	int	(*roffspecial)(void *, int, int *, char **, char **);
 };
 

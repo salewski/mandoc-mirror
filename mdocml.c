@@ -48,18 +48,21 @@ int
 main(int argc, char *argv[])
 {
 	int		 c;
-	char		*out, *in;
+	char		*out, *in, *filter;
 	struct md_args	 args;
 
 	extern char	*optarg;
 	extern int	 optind;
 
-	out = in = NULL;
+	out = in = filter = NULL;
 
 	(void)memset(&args, 0, sizeof(struct md_args));
 	
-	while (-1 != (c = getopt(argc, argv, "o:vW")))
+	while (-1 != (c = getopt(argc, argv, "f:o:vW")))
 		switch (c) {
+		case ('f'):
+			filter = optarg;
+			break;
 		case ('o'):
 			out = optarg;
 			break;
@@ -79,6 +82,16 @@ main(int argc, char *argv[])
 
 	if (1 == argc)
 		in = *argv++;
+
+	if (filter) {
+		if (0 == strcmp(filter, "html"))
+			args.type = MD_HTML;
+		else if (0 == strcmp(filter, "xml"))
+			args.type = MD_XML;
+		else
+			errx(1, "invalid filter type");
+	} else
+		args.type = MD_XML;
 
 	return(begin_io(&args, out ? out : "-", in ? in : "-"));
 }
@@ -220,5 +233,6 @@ usage(void)
 {
 	extern char	*__progname;
 
-	(void)printf("usage: %s [-vW] [-o outfile] [infile]\n", __progname);
+	(void)printf("usage: %s [-vW] [-f filter] [-o outfile] "
+			"[infile]\n", __progname);
 }

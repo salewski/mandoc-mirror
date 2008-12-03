@@ -76,6 +76,19 @@ ml_nputs(struct md_mbuf *p, const char *buf, size_t sz, size_t *pos)
 
 
 int
+ml_puts(struct md_mbuf *p, const char *buf, size_t *pos)
+{
+	size_t		 sz;
+
+	sz = strlen(buf);
+	if ( ! md_buf_puts(p, buf, sz))
+		return(0);
+	*pos += sz;
+	return(1);
+}
+
+
+int
 ml_putchars(struct md_mbuf *p, char buf, size_t count, size_t *pos)
 {
 	size_t		 i;
