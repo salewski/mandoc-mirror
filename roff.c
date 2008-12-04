@@ -40,6 +40,7 @@
 /* TODO: (warn) NAME section has particular order. */
 /* TODO: unify empty-content tags a la <br />. */
 /* TODO: macros with a set number of arguments? */
+/* TODO: validate Dt macro arguments. */
 
 #define	ROFF_MAXARG	  32
 
@@ -1210,7 +1211,9 @@ roff_Os(ROFFCALL_ARGS)
 
 	assert(NULL == tree->last);
 
-	return((*tree->cb.roffhead)(tree->arg));
+	return((*tree->cb.roffhead)(tree->arg, &tree->tm,
+				tree->os, tree->title, tree->section,
+				tree->volume));
 }
 
 

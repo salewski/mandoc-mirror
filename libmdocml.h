@@ -26,7 +26,9 @@ struct 	md_params_xml {
 };
 
 struct 	md_params_html {
-	int		 dummy;
+	char		*css;
+	int		 flags;
+#define	HTML_CSS_EMBED	(1 << 0)
 };
 
 union	md_params {

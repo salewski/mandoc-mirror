@@ -1,6 +1,6 @@
 .\"
 .Dd $Mdocdate$
-.Dt mdocml 1
+.Dt mdocml 1 alpha
 .Os
 .\"
 .Sh NAME
@@ -9,7 +9,7 @@
 .\"
 .Sh SYNOPSIS
 .Nm mdocml
-.Op Fl W
+.Op Fl vW
 .Op Fl f Ar filter
 .Op Fl o Ar outfile
 .Op Ar infile
@@ -18,9 +18,11 @@
 The
 .Nm
 utility parses mdoc formatted manual source and passes results into an
-output filter.  The only current output filter is
+output filter.  The current output filters are
+.Ar html
+and
 .Ar xml ,
-the default.  The arguments are as follows:
+the default.  Arguments common to all filters follow:
 .Bl -tag -width "\-o outfile"
 .It Fl f Ar filter
 The output filter name.
@@ -47,8 +49,10 @@ reads from stdin and writes to stdout using the xml filter.
 .Ss XML Filter
 The XML filter, specified by
 .Fl f Ar xml ,
-is the default filter.  It creates an XML document where element names are
-their respective roff macro names.  Each element name has an associated
+is the default filter.  This filter has no additional arguments.
+.Pp
+The XML filter creates an XML document where element names are their respective
+roff macro names.  Each element name has an associated
 namespace, which is one of 
 .Qq block ,
 .Qq head ,
@@ -58,9 +62,50 @@ or
 corresponding to the display mode of a node.  The document root is
 always the
 .Qq mdoc
-element, in the default namespace.
+element, in the default namespace; the 
+.Qq head
+namespace is for block headers (such as 
+.Sq .Ss
+and
+.Sq .Sh ) ;
+the
+.Qq body
+namespace is for block bodies; and the
+.Qq inline
+namespace is for in-line elements (such as
+.Sq .Em ) .
+.Ss HTML Filter
+The HTML filter, specified by
+.Fl f Ar html ,
+accepts the following filter-specific arguments:
+.Bl -tag -width "\-c css"
+.It Fl c Ar css
+The CSS file location, which defaults to 
+.Ar mdocml.css .
+.It Fl e
+Whether to embed the CSS file into the HTML prologue.
+.El
 .\" This next request is for sections 1, 6, 7 & 8 only.
 .\" .Sh ENVIRONMENT
+.Sh EXAMPLES
+To produce an HTML4-strict document 
+.Pa mdocml.html
+for
+.Pa mdocml.1 
+with the default, embedded style-sheet:
+.Pp
+.D1 % mdocml -fhtml -e mdocml.1 -o mdocml.html
+.Pp
+To create an XML document on standard output from
+.Pa mdocml.1
+with the default namespace identifiers
+.Li head ,
+.Li body ,
+.Li block 
+and
+.Li inline :
+.Pp
+.D1 % mdocml mdocml.1 
 .\"
 .Sh SEE ALSO
 .Xr groff 1 ,

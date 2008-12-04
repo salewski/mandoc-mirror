@@ -16,14 +16,23 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+#include <sys/param.h>
+#include <sys/stat.h>
+
 #include <assert.h>
+#include <err.h>
+#include <fcntl.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "libmdocml.h"
 #include "private.h"
 #include "ml.h"
 
+
+static	int		html_loadcss(struct md_mbuf *, const char *);
 
 static	ssize_t		html_endtag(struct md_mbuf *, 
 				const struct md_args *, 
@@ -32,8 +41,11 @@ static	ssize_t		html_begintag(struct md_mbuf *,
 				const struct md_args *, 
 				enum md_ns, int, 
 				const int *, const char **);
-static	int		html_begin(struct md_mbuf *, 
-				const struct md_args *);
+static	int		html_begin(struct md_mbuf *,
+	       			const struct md_args *, 
+				const struct tm *, 
+				const char *, const char *, 
+				const char *, const char *);
 static	int		html_end(struct md_mbuf *, 
 				const struct md_args *);
 static	ssize_t		html_blocktagname(struct md_mbuf *,
@@ -58,33 +70,113 @@ static	ssize_t		html_inlinetagargs(struct md_mbuf *,
 				const int *, const char **);
 
 
+static int
+html_loadcss(struct md_mbuf *mbuf, const char *css)
+{
+	size_t		 res, bufsz;
+	char		*buf;
+	struct stat	 st;
+	int		 fd, c;
+	ssize_t		 ssz;
+
+	c = 0;
+	res = 0;
+	buf = NULL;
+
+	if (-1 == (fd = open(css, O_RDONLY, 0))) {
+		warn("%s", css);
+		return(0);
+	} 
+	
+	if (-1 == fstat(fd, &st)) {
+		warn("%s", css);
+		goto out;
+	}
+
+	bufsz = MAX(st.st_blksize, BUFSIZ);
+	if (NULL == (buf = malloc(bufsz))) {
+		warn("malloc");
+		goto out;
+	}
+
+	for (;;) {
+		if (-1 == (ssz = read(fd, buf, bufsz))) {
+			warn("%s", css);
+			goto out;
+		} else if (0 == ssz)
+			break;
+		if ( ! ml_nputs(mbuf, buf, (size_t)ssz, &res))
+			goto out;
+	}
+
+	c = 1;
+
+out:
+	if (-1 == close(fd)) {
+		warn("%s", css);
+		c = 0;
+	}
+
+	if (buf)
+		free(buf);
+
+	return(c);
+}
+
+
 /* ARGSUSED */
 static int 
-html_begin(struct md_mbuf *mbuf, const struct md_args *args)
+html_begin(struct md_mbuf *mbuf, const struct md_args *args,
+		const struct tm *tm, const char *os, 
+		const char *title, const char *section, 
+		const char *vol)
 {
+	const char	*preamble, *css, *trail;
+	char		 buf[512];
 	size_t		 res;
 
+	preamble =
+	"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"\n"
+	"    \"http://www.w3.org/TR/html4/strict.dtd\">\n"
+	"<html>\n"
+	"<head>\n"
+	"    <meta http-equiv=\"Content-Type\"\n"
+	"         content=\"text/html;charset=utf-8\">\n"
+	"    <meta name=\"resource-type\" content=\"document\">\n"
+	"    <title>Manual Page for %s(%s)</title>\n";
+
+	css = 
+	"    <link rel=\"stylesheet\" type=\"text/css\"\n"
+	"         href=\"%s\">\n";
+	trail = 
+	"</head>\n"
+	"<body>\n"
+	"<div class=\"mdoc\">\n";
+
 	res = 0;
-	if ( ! ml_puts(mbuf, "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD "
-				"HTML 4.01//EN\" \"http://www.w3.org"
-				"/TR/html4/strict.dtd\">\n", &res))
+
+	(void)snprintf(buf, sizeof(buf) - 1,
+			preamble, title, section);
+
+	if ( ! ml_puts(mbuf, buf, &res))
 		return(0);
-	if ( ! ml_puts(mbuf, "<html>\n", &res))
-		return(0);
-	if ( ! ml_puts(mbuf, "<head>\n", &res))
-		return(0);
-	if ( ! ml_puts(mbuf, " <title>Manual page</title>\n", &res))
-		return(0);
-	if ( ! ml_puts(mbuf, " <meta http-equiv=\"Content-Type\" "
-				"content=\"text/html; "
-				"charset=utf-8\">\n", &res))
-		return(0);
-	if ( ! ml_puts(mbuf, " <meta name=\"resource-type\" "
-				"content=\"document\">\n", &res))
-		return(0);
-	if ( ! ml_puts(mbuf, "</head>\n", &res))
-		return(0);
-	if ( ! ml_puts(mbuf, "<body>", &res))
+
+	assert(args->params.html.css);
+	if (HTML_CSS_EMBED & args->params.html.flags) {
+		if ( ! ml_puts(mbuf, "    <style><!--\n", &res))
+			return(0);
+		if ( ! html_loadcss(mbuf, args->params.html.css))
+			return(0);
+		if ( ! ml_puts(mbuf, "    --!></style>\n", &res))
+			return(0);
+	} else {
+		(void)snprintf(buf, sizeof(buf) - 1, css, 
+				args->params.html.css);
+		if ( ! ml_puts(mbuf, buf, &res))
+			return(0);
+	}
+
+	if ( ! ml_puts(mbuf, trail, &res))
 		return(0);
 
 	return(1);
@@ -98,7 +190,7 @@ html_end(struct md_mbuf *mbuf, const struct md_args *args)
 	size_t		 res;
 
 	res = 0;
-	if ( ! ml_puts(mbuf, "</body>\n</html>", &res))
+	if ( ! ml_puts(mbuf, "</div></body>\n</html>", &res))
 		return(0);
 
 	return(1);
@@ -113,17 +205,8 @@ html_blockbodytagname(struct md_mbuf *mbuf,
 	size_t		 res;
 
 	res = 0;
-
-	switch (tok) {
-	case (ROFF_Sh):
-		if ( ! ml_puts(mbuf, "blockquote", &res))
-			return(-1);
-		break;
-	default:
-		if ( ! ml_puts(mbuf, "div", &res))
-			return(-1);
-		break;
-	}
+	if ( ! ml_puts(mbuf, "div", &res))
+		return(-1);
 
 	return((ssize_t)res);
 }
@@ -139,21 +222,8 @@ html_blockheadtagname(struct md_mbuf *mbuf,
 	size_t		 res;
 
 	res = 0;
-
-	switch (tok) {
-	case (ROFF_Sh):
-		if ( ! ml_puts(mbuf, "h1", &res))
-			return(-1);
-		break;
-	case (ROFF_Ss):
-		if ( ! ml_puts(mbuf, "h2", &res))
-			return(-1);
-		break;
-	default:
-		if ( ! ml_puts(mbuf, "div", &res))
-			return(-1);
-		break;
-	}
+	if ( ! ml_puts(mbuf, "div", &res))
+		return(-1);
 
 	return((ssize_t)res);
 }
@@ -167,25 +237,8 @@ html_blocktagname(struct md_mbuf *mbuf,
 	size_t		 res;
 
 	res = 0;
-
-	switch (tok) {
-	case (ROFF_Bd):
-		if ( ! ml_puts(mbuf, "pre", &res))
-			return(-1);
-		break;
-	case (ROFF_Bl):
-		if ( ! ml_puts(mbuf, "ul", &res))
-			return(-1);
-		break;
-	case (ROFF_It):
-		if ( ! ml_puts(mbuf, "li", &res))
-			return(-1);
-		break;
-	default:
-		if ( ! ml_puts(mbuf, "div", &res))
-			return(-1);
-		break;
-	}
+	if ( ! ml_puts(mbuf, "div", &res))
+		return(-1);
 
 	return((ssize_t)res);
 }
@@ -200,7 +253,7 @@ html_blockheadtagargs(struct md_mbuf *mbuf, const struct md_args *args,
 
 	res = 0;
 
-	if ( ! ml_puts(mbuf, " class=\"head:", &res))
+	if ( ! ml_puts(mbuf, " class=\"head-", &res))
 		return(0);
 	if ( ! ml_puts(mbuf, toknames[tok], &res))
 		return(0);
@@ -225,7 +278,7 @@ html_blockbodytagargs(struct md_mbuf *mbuf, const struct md_args *args,
 
 	res = 0;
 
-	if ( ! ml_puts(mbuf, " class=\"body:", &res))
+	if ( ! ml_puts(mbuf, " class=\"body-", &res))
 		return(0);
 	if ( ! ml_puts(mbuf, toknames[tok], &res))
 		return(0);
@@ -250,7 +303,7 @@ html_blocktagargs(struct md_mbuf *mbuf, const struct md_args *args,
 
 	res = 0;
 
-	if ( ! ml_puts(mbuf, " class=\"block:", &res))
+	if ( ! ml_puts(mbuf, " class=\"block-", &res))
 		return(0);
 	if ( ! ml_puts(mbuf, toknames[tok], &res))
 		return(0);
@@ -275,7 +328,7 @@ html_inlinetagargs(struct md_mbuf *mbuf, const struct md_args *args,
 
 	res = 0;
 
-	if ( ! ml_puts(mbuf, " class=\"inline:", &res))
+	if ( ! ml_puts(mbuf, " class=\"inline-", &res))
 		return(0);
 	if ( ! ml_puts(mbuf, toknames[tok], &res))
 		return(0);
@@ -302,6 +355,10 @@ html_inlinetagname(struct md_mbuf *mbuf,
 	res = 0;
 
 	switch (tok) {
+	case (ROFF_Pp):
+		if ( ! ml_puts(mbuf, "div", &res))
+			return(-1);
+		break;
 	default:
 		if ( ! ml_puts(mbuf, "span", &res))
 			return(-1);

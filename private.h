@@ -213,7 +213,8 @@ enum	roffmsg { ROFF_WARN, ROFF_ERROR };
 struct	roffcb {
 	void	(*roffmsg)(void *, enum roffmsg, 
 			const char *, const char *, char *);
-	int	(*roffhead)(void *);
+	int	(*roffhead)(void *, const struct tm *, const char *, 
+			const char *, const char *, const char *);
 	int	(*rofftail)(void *);
 	int	(*roffdata)(void *, int, char *);
 	int	(*roffin)(void *, int, int *, char **);

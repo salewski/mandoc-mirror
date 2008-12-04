@@ -63,7 +63,9 @@ struct	md_mlg {
 
 static	void		 mlg_roffmsg(void *arg, enum roffmsg, 
 				const char *, const char *, char *);
-static	int		 mlg_roffhead(void *);
+static	int		 mlg_roffhead(void *, const struct tm *, 
+				const char *, const char *, 
+				const char *, const char *);
 static	int		 mlg_rofftail(void *);
 static	int		 mlg_roffin(void *, int, int *, char **);
 static	int		 mlg_roffdata(void *, int, char *);
@@ -346,7 +348,8 @@ mlg_alloc(const struct md_args *args,
 
 
 static int
-mlg_roffhead(void *arg)
+mlg_roffhead(void *arg, const struct tm *tm, const char *os, 
+		const char *title, const char *sec, const char *vol)
 {
 	struct md_mlg	*p;
 
@@ -354,7 +357,7 @@ mlg_roffhead(void *arg)
 	p = (struct md_mlg *)arg;
 
 	mlg_mode(p, MD_BLK_IN);
-	if ( ! (*p->begin)(p->mbuf, p->args))
+	if ( ! (*p->begin)(p->mbuf, p->args, tm, os, title, sec, vol))
 		return(0);
 
 	p->indent++;

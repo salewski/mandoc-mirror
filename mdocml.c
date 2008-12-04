@@ -33,6 +33,12 @@
 #define	BUFFER_IN_DEF	BUFSIZ	 /* See begin_bufs. */
 #define	BUFFER_OUT_DEF	BUFSIZ	 /* See begin_bufs. */
 
+#ifdef	DEBUG
+#define	CSS		"mdocml.css"
+#else
+#define	CSS		"/usr/local/share/mdocml/mdocml.css"
+#endif
+
 static	void		 usage(void);
 
 static	int		 begin_io(const struct md_args *, 
@@ -48,20 +54,37 @@ int
 main(int argc, char *argv[])
 {
 	int		 c;
-	char		*out, *in, *filter;
+	char		*out, *in;
 	struct md_args	 args;
 
 	extern char	*optarg;
 	extern int	 optind;
 
-	out = in = filter = NULL;
+	out = in = NULL;
 
 	(void)memset(&args, 0, sizeof(struct md_args));
-	
-	while (-1 != (c = getopt(argc, argv, "f:o:vW")))
+
+	args.type = MD_XML;
+
+	while (-1 != (c = getopt(argc, argv, "c:ef:o:vW")))
 		switch (c) {
+		case ('c'):
+			if (args.type != MD_HTML)
+				errx(1, "-c only valid for -fhtml");
+			args.params.html.css = optarg;
+			break;
+		case ('e'):
+			if (args.type != MD_HTML)
+				errx(1, "-e only valid for -fhtml");
+			args.params.html.flags |= HTML_CSS_EMBED;
+			break;
 		case ('f'):
-			filter = optarg;
+			if (0 == strcmp(optarg, "html"))
+				args.type = MD_HTML;
+			else if (0 == strcmp(optarg, "xml"))
+				args.type = MD_XML;
+			else
+				errx(1, "invalid filter type");
 			break;
 		case ('o'):
 			out = optarg;
@@ -77,21 +100,15 @@ main(int argc, char *argv[])
 			return(1);
 		}
 
+	if (MD_HTML == args.type)
+		if (NULL == args.params.html.css) 
+			args.params.html.css = CSS;
+
 	argv += optind;
 	argc -= optind;
 
 	if (1 == argc)
 		in = *argv++;
-
-	if (filter) {
-		if (0 == strcmp(filter, "html"))
-			args.type = MD_HTML;
-		else if (0 == strcmp(filter, "xml"))
-			args.type = MD_XML;
-		else
-			errx(1, "invalid filter type");
-	} else
-		args.type = MD_XML;
 
 	return(begin_io(&args, out ? out : "-", in ? in : "-"));
 }
