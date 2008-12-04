@@ -83,6 +83,8 @@ xml_begintag(struct md_mbuf *mbuf, const struct md_args *args,
 {
 	size_t		 res;
 
+	/* FIXME: doesn't print arguments! */
+
 	res = 0;
 
 	switch (ns) {

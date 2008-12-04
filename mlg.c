@@ -73,8 +73,8 @@ static	int		 mlg_roffdata(void *, int,
 static	int		 mlg_roffout(void *, int);
 static	int		 mlg_roffblkin(void *, int, int *, char **);
 static	int		 mlg_roffblkout(void *, int);
-static	int		 mlg_roffspecial(void *, int, int *, 
-				char **, char **);
+static	int		 mlg_roffspecial(void *, int, 
+				const char *, char **);
 static	int		 mlg_roffblkheadin(void *, int, 
 				int *, char **);
 static	int		 mlg_roffblkheadout(void *, int);
@@ -82,8 +82,6 @@ static	int		 mlg_roffblkbodyin(void *, int,
 				int *, char **);
 static	int		 mlg_roffblkbodyout(void *, int);
 
-static	int		 mlg_beginblk(struct md_mlg *, enum md_ns, int, 
-				int *, char **);
 static	int		 mlg_endblk(struct md_mlg *, enum md_ns, int);
 static	int		 mlg_begintag(struct md_mlg *, enum md_ns, 
 				int, int *, char **);
@@ -104,27 +102,6 @@ static	void		 mlg_msg(struct md_mlg *, enum roffmsg,
 extern	size_t		 strlcat(char *, const char *, size_t);
 extern	size_t		 strlcpy(char *, const char *, size_t);
 #endif
-
-
-static int
-mlg_beginblk(struct md_mlg *p, enum md_ns ns, int tok, 
-		int *argc, char **argv)
-{
-	if (0 != p->pos) {
-		if ( ! mlg_newline(p))
-			return(0);
-		if ( ! mlg_indent(p))
-			return(0);
-	} else if ( ! mlg_indent(p))
-		return(0);
-
-	p->indent++;
-	mlg_mode(p, MD_BLK_IN);
-
-	if ( ! mlg_begintag(p, ns, tok, argc, argv))
-		return(0);
-	return(mlg_newline(p));
-}
 
 
 static int
@@ -154,7 +131,37 @@ mlg_begintag(struct md_mlg *p, enum md_ns ns, int tok,
 {
 	ssize_t		 res;
 
-	/* TODO: extra rules for block/inline. */
+	assert(MD_NS_DEFAULT != ns);
+
+	switch (ns) {
+	case (MD_NS_INLINE):
+		if ( ! (ML_OVERRIDE_ONE & p->flags) && 
+				! (ML_OVERRIDE_ALL & p->flags) && 
+				p->pos + 11 > COLUMNS) 
+			if ( ! mlg_newline(p))
+				return(0);
+		if (0 != p->pos && (MD_TEXT == p->last || 
+					MD_INLINE_OUT == p->last)
+				&& ! (ML_OVERRIDE_ONE & p->flags)
+				&& ! (ML_OVERRIDE_ALL & p->flags))
+			if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
+				return(0);
+		if (0 == p->pos && ! mlg_indent(p))
+			return(0);
+		mlg_mode(p, MD_INLINE_IN);
+		break;
+	default:
+		if (0 != p->pos) {
+			if ( ! mlg_newline(p))
+				return(0);
+			if ( ! mlg_indent(p))
+				return(0);
+		} else if ( ! mlg_indent(p))
+			return(0);
+		p->indent++;
+		mlg_mode(p, MD_BLK_IN);
+		break;
+	}
 
 	if ( ! ml_nputs(p->mbuf, "<", 1, &p->pos))
 		return(0);
@@ -167,9 +174,19 @@ mlg_begintag(struct md_mlg *p, enum md_ns ns, int tok,
 	assert(res >= 0);
 	p->pos += (size_t)res;
 
-	/* TODO: extra rules for block/inline. */
+	if ( ! ml_nputs(p->mbuf, ">", 1, &p->pos))
+		return(0);
 
-	return(ml_nputs(p->mbuf, ">", 1, &p->pos));
+	switch (ns) {
+	case (MD_NS_INLINE):
+		break;
+	default:
+		if ( ! mlg_newline(p))
+			return(0);
+		break;
+	}
+
+	return(1);
 }
 
 
@@ -234,7 +251,6 @@ static int
 mlg_data(struct md_mlg *p, int space, const char *start, char *buf)
 {
 	size_t		 sz;
-	char		*bufp;
 	int		 c;
 
 	assert(p->mbuf);
@@ -244,71 +260,50 @@ mlg_data(struct md_mlg *p, int space, const char *start, char *buf)
 			ML_OVERRIDE_ALL & p->flags)
 		space = 0;
 
-	while (*buf) {
-		while (*buf && isspace(*buf))
-			buf++;
+	sz = strlen(buf);
 
-		if (0 == *buf)
-			break;
+	if (0 == p->pos) {
+		if ( ! mlg_indent(p))
+			return(0);
 
-		bufp = buf;
-		while (*buf && ! isspace(*buf))
-			buf++;
+		c = ml_nputstring(p->mbuf, buf, sz, &p->pos);
 
-		if (0 != *buf)
-			*buf++ = 0;
-
-		sz = strlen(bufp);
-
-		if (0 == p->pos) {
-			if ( ! mlg_indent(p))
-				return(0);
-
-			c = ml_nputstring(p->mbuf, bufp, sz, &p->pos);
-			if (0 == c) {
-				mlg_err(p, start, bufp, "invalid "
-						"character sequence");
-				return(0);
-			} else if (c > 1) {
-				mlg_warn(p, start, bufp, "bogus "
-						"character sequence");
-				return(0);
-			} else if (-1 == c)
-				return(0);
-
-			if (p->indent * INDENT + sz >= COLUMNS)
-				if ( ! mlg_newline(p))
-					return(0);
-			if ( ! (ML_OVERRIDE_ALL & p->flags))
-				space = 1;
-			continue;
-		}
-
-		if (space && sz + p->pos >= COLUMNS) {
-			if ( ! mlg_newline(p))
-				return(0);
-			if ( ! mlg_indent(p))
-				return(0);
-		} else if (space) {
-			if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
-				return(0);
-		}
-
-		c = ml_nputstring(p->mbuf, bufp, sz, &p->pos);
 		if (0 == c) {
-			mlg_err(p, start, bufp, "invalid "
-					"character sequence");
+			mlg_err(p, start, buf, "bad char sequence");
 			return(0);
 		} else if (c > 1) {
-			mlg_warn(p, start, bufp, "bogus "
-					"character sequence");
+			mlg_warn(p, start, buf, "bogus char sequence");
 			return(0);
 		} else if (-1 == c)
 			return(0);
 
-		if ( ! (ML_OVERRIDE_ALL & p->flags))
-			space = 1;
+		if (p->indent * INDENT + sz >= COLUMNS)
+			if ( ! mlg_newline(p))
+				return(0);
+
+		return(1);
 	}
+
+	if (space && sz + p->pos >= COLUMNS) {
+		if ( ! mlg_newline(p))
+			return(0);
+		if ( ! mlg_indent(p))
+			return(0);
+	} else if (space) {
+		if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
+			return(0);
+	}
+
+	c = ml_nputstring(p->mbuf, buf, sz, &p->pos);
+
+	if (0 == c) {
+		mlg_err(p, start, buf, "bad char sequence");
+		return(0);
+	} else if (c > 1) {
+		mlg_warn(p, start, buf, "bogus char sequence");
+		return(0);
+	} else if (-1 == c)
+		return(0);
 
 	return(1);
 }
@@ -416,7 +411,7 @@ mlg_rofftail(void *arg)
 
 /* ARGSUSED */
 static int
-mlg_roffspecial(void *arg, int tok, int *argc, char **argv, char **more)
+mlg_roffspecial(void *arg, int tok, const char *start, char **more)
 {
 	struct md_mlg	*p;
 
@@ -424,6 +419,34 @@ mlg_roffspecial(void *arg, int tok, int *argc, char **argv, char **more)
 	p = (struct md_mlg *)arg;
 
 	switch (tok) {
+	case (ROFF_Xr):
+		if ( ! *more) {
+			mlg_err(p, start, start,
+					"missing required argument");
+			return(0);
+		}
+		if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, NULL))
+			return(0);
+		if ( ! ml_puts(p->mbuf, *more++, &p->pos))
+			return(0);
+		if (*more) {
+			if ( ! ml_nputs(p->mbuf, "(", 1, &p->pos))
+				return(0);
+			if ( ! mlg_data(p, 0, start, *more++))
+				return(0);
+			if ( ! ml_nputs(p->mbuf, ")", 1, &p->pos))
+				return(0);
+		}
+		if (*more) {
+			mlg_err(p, start, start, "too many arguments");
+			return(0);
+		}
+		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
+			return(0);
+		mlg_mode(p, MD_INLINE_OUT);
+		break;
+	case (ROFF_Fn):
+		break;
 	case (ROFF_Ns):
 		p->flags |= ML_OVERRIDE_ONE;
 		break;
@@ -446,7 +469,7 @@ static int
 mlg_roffblkin(void *arg, int tok, int *argc, char **argv)
 {
 
-	return(mlg_beginblk((struct md_mlg *)arg, 
+	return(mlg_begintag((struct md_mlg *)arg, 
 				MD_NS_BLOCK, tok, argc, argv));
 }
 
@@ -463,7 +486,7 @@ static int
 mlg_roffblkbodyin(void *arg, int tok, int *argc, char **argv)
 {
 
-	return(mlg_beginblk((struct md_mlg *)arg, 
+	return(mlg_begintag((struct md_mlg *)arg, 
 				MD_NS_BODY, tok, argc, argv));
 }
 
@@ -480,7 +503,7 @@ static int
 mlg_roffblkheadin(void *arg, int tok, int *argc, char **argv)
 {
 
-	return(mlg_beginblk((struct md_mlg *)arg, 
+	return(mlg_begintag((struct md_mlg *)arg, 
 				MD_NS_HEAD, tok, argc, argv));
 }
 
@@ -496,31 +519,9 @@ mlg_roffblkheadout(void *arg, int tok)
 static int
 mlg_roffin(void *arg, int tok, int *argc, char **argv)
 {
-	struct md_mlg	*p;
 
-	assert(arg);
-	p = (struct md_mlg *)arg;
-
-	/* FIXME: this part. */
-
-	if ( ! (ML_OVERRIDE_ONE & p->flags) && 
-			! (ML_OVERRIDE_ALL & p->flags) && 
-			p->pos + 11 > COLUMNS) 
-		if ( ! mlg_newline(p))
-			return(0);
-
-	if (0 != p->pos && (MD_TEXT == p->last || 
-				MD_INLINE_OUT == p->last)
-			&& ! (ML_OVERRIDE_ONE & p->flags)
-			&& ! (ML_OVERRIDE_ALL & p->flags))
-		if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
-			return(0);
-
-	if (0 == p->pos && ! mlg_indent(p))
-		return(0);
-
-	mlg_mode(p, MD_INLINE_IN);
-	return(mlg_begintag(p, MD_NS_INLINE, tok, argc, argv));
+	return(mlg_begintag((struct md_mlg *)arg, 
+				MD_NS_INLINE, tok, argc, argv));
 }
 
 

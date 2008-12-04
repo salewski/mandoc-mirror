@@ -261,7 +261,7 @@ struct	roffcb {
 	int	(*roffblkheadout)(void *, int);
 	int	(*roffblkbodyin)(void *, int, int *, char **);
 	int	(*roffblkbodyout)(void *, int);
-	int	(*roffspecial)(void *, int, int *, char **, char **);
+	int	(*roffspecial)(void *, int, const char *, char **);
 };
 
 struct	rofftree;

@@ -67,16 +67,11 @@ struct	rofftok {
 	const int	 *children;		/* Limit to kids. */
 	int		  ctx;			/* Blk-close node. */
 	enum rofftype	  type;			/* Type of macro. */
-	int		  flags;
+	int	  	  flags;
 #define	ROFF_PARSED	 (1 << 0)		/* "Parsed". */
 #define	ROFF_CALLABLE	 (1 << 1)		/* "Callable". */
 #define	ROFF_SHALLOW	 (1 << 2)		/* Nesting block. */
 #define	ROFF_LSCOPE	 (1 << 3)		/* Line scope. */
-};
-
-struct	roffarg {
-	int		  flags;
-#define	ROFF_VALUE	 (1 << 0)		/* Has a value. */
 };
 
 struct	roffnode {
@@ -111,6 +106,7 @@ static	int		  roff_layout(ROFFCALL_ARGS);
 static	int		  roff_text(ROFFCALL_ARGS);
 static	int		  roff_noop(ROFFCALL_ARGS);
 static	int		  roff_depr(ROFFCALL_ARGS);
+static	int		  roff_ordered(ROFFCALL_ARGS);
 static	struct roffnode	 *roffnode_new(int, struct rofftree *);
 static	void		  roffnode_free(struct rofftree *);
 static	void		  roff_warn(const struct rofftree *, 
@@ -133,6 +129,7 @@ static	int		  roffcall(struct rofftree *, int, char **);
 static	int 		  roffparse(struct rofftree *, char *);
 static	int		  textparse(struct rofftree *, char *);
 static	int		  roffdata(struct rofftree *, int, char *);
+static	int		  roffspecial(struct rofftree *, int, char **);
 
 #ifdef __linux__ 
 extern	size_t		  strlcat(char *, const char *, size_t);
@@ -203,7 +200,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Fa */ /* XXX needs arg */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Fd */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Fl */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Fn */ /* XXX needs arg */ /* FIXME */
+	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, /*XXX*/ -1 }, /* Fn */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ft */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ic */ /* XXX needs arg */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* In */
@@ -217,7 +214,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, roffarg_St, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* St */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Va */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Vt */ /* XXX needs arg */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xr */ /* XXX needs arg */
+	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, /*XXX*/ -1 }, /* Xr */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* %A */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE}, /* %B */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* %D */
@@ -249,7 +246,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Eo */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Fx */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ms */
-	{   NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* No */
+	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* No */
 	{     roff_Ns, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ns */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Nx */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ox */
@@ -271,8 +268,8 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sy */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Tn */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ux */
-	{  NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xc */
-	{  NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xo */
+	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xc */
+	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xo */
 	{ roff_layout, NULL, NULL, roffchild_Fo, 0, ROFF_LAYOUT, 0 }, /* Fo */
 	{   roff_noop, NULL, roffparent_Fc, NULL, ROFF_Fo, ROFF_LAYOUT, 0 }, /* Fc */
 	{ roff_layout, NULL, NULL, NULL, 0, ROFF_LAYOUT, 0 }, /* Oo */
@@ -284,6 +281,8 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_depr, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Fr */
 	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Ud */
 	};
+
+#define	ROFF_VALUE	(1 << 0)
 
 static	const int tokenargs[ROFF_ARGMAX] = {
 	0,		0,		0,		0,
@@ -501,6 +500,13 @@ roffargs(const struct rofftree *tree,
 
 	p = buf;
 
+	/*
+	 * This is an ugly little loop.  It parses a line into
+	 * space-delimited tokens.  If a quote mark is encountered, a
+	 * token is alloted the entire quoted text.  If whitespace is
+	 * escaped, it's included in the prior alloted token.
+	 */
+
 	/* LINTED */
 	for (i = 0; *buf && i < ROFF_MAXLINEARG; i++) {
 		if ('\"' == *buf) {
@@ -516,8 +522,17 @@ roffargs(const struct rofftree *tree,
 			}
 		} else { 
 			argv[i] = buf++;
-			while (*buf && ! isspace(*buf))
-				buf++;
+			while (*buf) {
+				if ( ! isspace(*buf)) {
+					buf++;
+					continue;
+				}
+				if (*(buf - 1) == '\\') {
+					buf++;
+					continue;
+				}
+				break;
+			}
 			if (0 == *buf)
 				continue;
 		}
@@ -525,7 +540,7 @@ roffargs(const struct rofftree *tree,
 		while (*buf && isspace(*buf))
 			buf++;
 	}
-	
+
 	assert(i > 0);
 	if (ROFF_MAXLINEARG == i && *buf) {
 		roff_err(tree, p, "too many arguments for `%s'", toknames
@@ -861,6 +876,15 @@ roffnode_free(struct rofftree *tree)
 
 
 static int
+roffspecial(struct rofftree *tree, int tok, char **ordp)
+{
+
+	return((*tree->cb.roffspecial)(tree->arg, tok, 
+				tree->cur, ordp));
+}
+
+
+static int
 roffcall(struct rofftree *tree, int tok, char **argv)
 {
 
@@ -1124,13 +1148,10 @@ roff_Dt(ROFFCALL_ARGS)
 static	int
 roff_Sm(ROFFCALL_ARGS)
 {
-	int		 argcp[1];
-	char		*argvp[1], *morep[1], *p;
+	char		*morep[1], *p;
 
 	p = *argv++;
 
-	argcp[0] = ROFF_ARGMAX;
-	argvp[0] = NULL;
 	if (NULL == (morep[0] = *argv++)) {
 		roff_err(tree, p, "`Sm' expects an argument");
 		return(0);
@@ -1143,8 +1164,7 @@ roff_Sm(ROFFCALL_ARGS)
 	if (*argv) 
 		roff_warn(tree, *argv, "`Sm' shouldn't have arguments");
 
-	if ( ! (*tree->cb.roffspecial)(tree->arg, 
-				tok, argcp, argvp, morep))
+	if ( ! roffspecial(tree, tok, morep))
 		return(0);
 
 	while (*argv)
@@ -1160,16 +1180,12 @@ static	int
 roff_Ns(ROFFCALL_ARGS)
 {
 	int		 j, c, first;
-	int		 argcp[1];
-	char		*argvp[1], *morep[1];
+	char		*morep[1];
 
 	first = (*argv++ == tree->cur);
+	morep[0] = NULL;
 
-	argcp[0] = ROFF_ARGMAX;
-	argvp[0] = morep[0] = NULL;
-
-	if ( ! (*tree->cb.roffspecial)(tree->arg, 
-				tok, argcp, argvp, morep))
+	if ( ! roffspecial(tree, tok, morep))
 		return(0);
 
 	while (*argv) {
@@ -1357,6 +1373,61 @@ roff_layout(ROFFCALL_ARGS)
 		return(0);
 	return((*tree->cb.roffblkbodyin)
 			(tree->arg, tok, argcp, argvp));
+}
+
+
+/* ARGSUSED */
+static int
+roff_ordered(ROFFCALL_ARGS) 
+{
+	int		 i, first, c;
+	char		*ordp[ROFF_MAXLINEARG];
+
+	if (ROFF_PRELUDE & tree->state) {
+		roff_err(tree, *argv, "`%s' disallowed in prelude", 
+				toknames[tok]);
+		return(0);
+	}
+
+	first = (*argv == tree->cur);
+	argv++;
+
+	if (NULL == *argv) {
+
+		/* FIXME: satisfies number of args? */
+
+		ordp[0] = NULL;
+		return(roffspecial(tree, tok, ordp));
+	}
+
+	i = 0;
+	while (*argv && i < ROFF_MAXLINEARG) {
+		if (ROFF_MAX != (c = rofffindcallable(*argv)))
+			return(roffcall(tree, c, argv));
+		if (roffispunct(*argv)) 
+			break;
+
+		ordp[i++] = *argv++;
+	}
+
+	ordp[i] = NULL;
+
+	/* FIXME: too many or too few args? */
+
+	if (i == ROFF_MAXLINEARG && *argv) {
+		roff_err(tree, *argv, "too many args", toknames[tok]);
+		return(0);
+	}
+
+	/* FIXME: error if there's stuff after the punctuation. */
+
+	if ( ! roffspecial(tree, tok, ordp))
+		return(0);
+
+	if ( ! first || NULL == *argv)
+		return(1);
+
+	return(roffpurgepunct(tree, argv));
 }
 
 
