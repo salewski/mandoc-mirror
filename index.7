@@ -21,8 +21,9 @@ and
 .Nm
 acts directly on source documents, validating its input and producing a
 variety of outputs.
-.Ss Features
-In order to operate properly, 
+.\"
+.Ss Validation
+In order to operate sanely,
 .Nm
 fully validates its input.  This includes, but is not limited to, the
 following checks:
@@ -40,10 +41,19 @@ macros clobbering a pending
 .Sq \&.Bl
 scope),
 .It 
-predefined characters (such as \\*(>= and \\*q),
+predefined characters (such as \\*(>= and \\*q, rendering as \*(>= and \*q,
+respectively),
 .It
 correctly-ordered document prelude,
+.It
+sane argument values (such as those for 
+.Sq \& Dt
+or
+.Sq \& Sm ) ,
+.It
+and so on.
 .El
+.Pp
 .\" 
 .Sh ENVIRONMENT
 The

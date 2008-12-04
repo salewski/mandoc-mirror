@@ -88,7 +88,12 @@ rofftok_predef(const char *buf)
 	if ('(' == *buf)
 		return(rofftok_defined(++buf));
 
-	/* TODO */
+	switch (*buf) {
+	case ('q'):
+		return(ROFFTok_Quote);
+	default:
+		break;
+	}
 
 	return(-1);
 }
@@ -173,6 +178,8 @@ rofftok_scan(const char *buf)
 			return(ROFFTok_Hyphen);
 		case ('*'):
 			return(rofftok_predef(++buf));
+		case ('\\'):
+			return(ROFFTok_MAX);
 		default:
 			break;
 		}
