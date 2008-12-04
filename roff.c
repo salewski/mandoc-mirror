@@ -969,23 +969,9 @@ roffparseopts(struct rofftree *tree, int tok,
 static int
 roffdata(struct rofftree *tree, int space, char *buf)
 {
-	int		 tok;
 
 	if (0 == *buf)
 		return(1);
-
-	if (-1 == (tok = rofftok_scan(buf))) {
-		roff_err(tree, buf, "invalid character sequence");
-		return(0);
-	} else if (ROFFTok_MAX != tok) {
-		if (ROFFTok_Null == tok) { /* FIXME */
-			buf += 2;
-			return(roffdata(tree, space, buf));
-		}
-		return((*tree->cb.rofftoken)
-				(tree->arg, space != 0, tok));
-	}
-
 	return((*tree->cb.roffdata)(tree->arg, 
 				space != 0, tree->cur, buf));
 }

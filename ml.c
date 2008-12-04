@@ -16,6 +16,7 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -33,12 +34,146 @@ int
 ml_nputstring(struct md_mbuf *p, 
 		const char *buf, size_t sz, size_t *pos)
 {
-	int		 i;
+	int		 i, v;
 	const char	*seq;
 	size_t		 ssz;
 
 	for (i = 0; i < (int)sz; i++) {
 		switch (buf[i]) {
+
+		/* Escaped value. */
+		case ('\\'):
+			if (-1 == (v = rofftok_scan(buf, &i))) {
+				/* TODO: error. */
+				return(0);
+			}
+
+			switch (v) {
+			case (ROFFTok_Sp_A):
+				seq = "\\a";
+				ssz = 2;
+				break;
+			case (ROFFTok_Sp_B):
+				seq = "\\b";
+				ssz = 2;
+				break;
+			case (ROFFTok_Sp_F):
+				seq = "\\f";
+				ssz = 2;
+				break;
+			case (ROFFTok_Sp_N):
+				seq = "\\n";
+				ssz = 2;
+				break;
+			case (ROFFTok_Sp_R):
+				seq = "\\r";
+				ssz = 2;
+				break;
+			case (ROFFTok_Sp_T):
+				seq = "\\t";
+				ssz = 2;
+				break;
+			case (ROFFTok_Sp_V):
+				seq = "\\v";
+				ssz = 2;
+				break;
+			case (ROFFTok_Sp_0):
+				seq = "\\0";
+				ssz = 2;
+				break;
+			case (ROFFTok_Space):
+				seq = "&nbsp;";
+				ssz = 6;
+				break;
+			case (ROFFTok_Hyphen):
+				seq = "&#8208;";
+				ssz = 7;
+				break;
+			case (ROFFTok_Em):
+				seq = "&#8212;";
+				ssz = 7;
+				break;
+			case (ROFFTok_En):
+				seq = "&#8211;";
+				ssz = 7;
+				break;
+			case (ROFFTok_Ge):
+				seq = "&#8805;";
+				ssz = 7;
+				break;
+			case (ROFFTok_Le):
+				seq = "&#8804;";
+				ssz = 7;
+				break;
+			case (ROFFTok_Rquote):
+				seq = "&#8221;";
+				ssz = 7;
+				break;
+			case (ROFFTok_Lquote):
+				seq = "&#8220;";
+				ssz = 7;
+				break;
+			case (ROFFTok_Uparrow):
+				seq = "&#8593;";
+				ssz = 7;
+				break;
+			case (ROFFTok_Acute):
+				seq = "&#180;";
+				ssz = 6;
+				break;
+			case (ROFFTok_Grave):
+				seq = "&#96;";
+				ssz = 5;
+				break;
+			case (ROFFTok_Pi):
+				seq = "&#960;";
+				ssz = 6;
+				break;
+			case (ROFFTok_Ne):
+				seq = "&#8800;";
+				ssz = 7;
+				break;
+			case (ROFFTok_Lt):
+				seq = "&lt;";
+				ssz = 4;
+				break;
+			case (ROFFTok_Gt):
+				seq = "&gt;";
+				ssz = 4;
+				break;
+			case (ROFFTok_Plusmin):
+				seq = "&#177;";
+				ssz = 6;
+				break;
+			case (ROFFTok_Infty):
+				seq = "&#8734;";
+				ssz = 7;
+				break;
+			case (ROFFTok_Bar):
+				seq = "&#124;";
+				ssz = 6;
+				break;
+			case (ROFFTok_Nan):
+				seq = "Nan";
+				ssz = 3;
+				break;
+			case (ROFFTok_Quote):
+				seq = "&quot;";
+				ssz = 6;
+				break;
+			case (ROFFTok_Slash):
+				seq = "\\";
+				ssz = 1;
+				break;
+			case (ROFFTok_Null):
+				seq = "";
+				ssz = 0;
+				break;
+			default:
+				/* TODO: print error. */
+				return(-1);
+			}
+			break;
 
 		/* Ampersand ml-escape. */
 		case ('&'):
@@ -70,7 +205,7 @@ ml_nputstring(struct md_mbuf *p,
 			break;
 		}
 
-		if ( ! ml_nputs(p, seq, ssz, pos))
+		if (ssz > 0 && ! ml_nputs(p, seq, ssz, pos))
 			return(-1);
 	}
 	return(1);

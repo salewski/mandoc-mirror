@@ -70,7 +70,6 @@ static	int		 mlg_rofftail(void *);
 static	int		 mlg_roffin(void *, int, int *, char **);
 static	int		 mlg_roffdata(void *, int, 
 				const char *, char *);
-static	int		 mlg_rofftoken(void *, int, int);
 static	int		 mlg_roffout(void *, int);
 static	int		 mlg_roffblkin(void *, int, int *, char **);
 static	int		 mlg_roffblkout(void *, int);
@@ -357,7 +356,6 @@ mlg_alloc(const struct md_args *args,
 	cb.roffspecial = mlg_roffspecial;
 	cb.roffmsg = mlg_roffmsg;
 	cb.roffdata = mlg_roffdata;
-	cb.rofftoken = mlg_rofftoken;
 
 	if (NULL == (p = calloc(1, sizeof(struct md_mlg))))
 		err(1, "calloc");
@@ -548,142 +546,6 @@ mlg_roffmsg(void *arg, enum roffmsg lvl,
 {
 
 	mlg_msg((struct md_mlg *)arg, lvl, buf, pos, msg);
-}
-
-
-static int
-mlg_rofftoken(void *arg, int space, int value)
-{
-	struct md_mlg	*p;
-	const char	*seq;
-	size_t		 sz, res;
-
-	assert(arg);
-	p = (struct md_mlg *)arg;
-
-	switch (value) {
-	case (ROFFTok_Sp_A):
-		seq = "\\a";
-		sz = 2;
-		break;
-	case (ROFFTok_Sp_B):
-		seq = "\\b";
-		sz = 2;
-		break;
-	case (ROFFTok_Sp_F):
-		seq = "\\f";
-		sz = 2;
-		break;
-	case (ROFFTok_Sp_N):
-		seq = "\\n";
-		sz = 2;
-		break;
-	case (ROFFTok_Sp_R):
-		seq = "\\r";
-		sz = 2;
-		break;
-	case (ROFFTok_Sp_T):
-		seq = "\\t";
-		sz = 2;
-		break;
-	case (ROFFTok_Sp_V):
-		seq = "\\v";
-		sz = 2;
-		break;
-	case (ROFFTok_Space):
-		seq = "&nbsp;";
-		sz = 6;
-		break;
-	case (ROFFTok_Hyphen):
-		seq = "&#8208;";
-		sz = 7;
-		break;
-	case (ROFFTok_Em):
-		seq = "&#8212;";
-		sz = 7;
-		break;
-	case (ROFFTok_En):
-		seq = "&#8211;";
-		sz = 7;
-		break;
-	case (ROFFTok_Ge):
-		seq = "&#8805;";
-		sz = 7;
-		break;
-	case (ROFFTok_Le):
-		seq = "&#8804;";
-		sz = 7;
-		break;
-	case (ROFFTok_Rquote):
-		seq = "&#8221;";
-		sz = 7;
-		break;
-	case (ROFFTok_Lquote):
-		seq = "&#8220;";
-		sz = 7;
-		break;
-	case (ROFFTok_Uparrow):
-		seq = "&#8593;";
-		sz = 7;
-		break;
-	case (ROFFTok_Acute):
-		seq = "&#180;";
-		sz = 6;
-		break;
-	case (ROFFTok_Grave):
-		seq = "&#96;";
-		sz = 5;
-		break;
-	case (ROFFTok_Pi):
-		seq = "&#960;";
-		sz = 6;
-		break;
-	case (ROFFTok_Ne):
-		seq = "&#8800;";
-		sz = 7;
-		break;
-	case (ROFFTok_Lt):
-		seq = "&lt;";
-		sz = 4;
-		break;
-	case (ROFFTok_Gt):
-		seq = "&gt;";
-		sz = 4;
-		break;
-	case (ROFFTok_Plusmin):
-		seq = "&#177;";
-		sz = 6;
-		break;
-	case (ROFFTok_Infty):
-		seq = "&#8734;";
-		sz = 7;
-		break;
-	case (ROFFTok_Bar):
-		seq = "&#124;";
-		sz = 6;
-		break;
-	case (ROFFTok_Nan):
-		seq = "Nan";
-		sz = 3;
-		break;
-	case (ROFFTok_Quote):
-		seq = "&quot;";
-		sz = 6;
-		break;
-	default:
-		/* TODO: print error. */
-		return(0);
-	}
-
-	if (space && ! ml_nputs(p->mbuf, " ", 1, &res))
-		return(0);
-	p->pos += res;
-
-	if ( ! ml_nputs(p->mbuf, seq, sz, &res))
-		return(0);
-	p->pos += res;
-
-	return(1);
 }
 
 

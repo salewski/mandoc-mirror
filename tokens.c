@@ -24,55 +24,58 @@
 #include "private.h"
 
 
-static	int		 rofftok_dashes(const char *);
-static	int		 rofftok_special(const char *);
-static	int		 rofftok_predef(const char *);
-static	int		 rofftok_defined(const char *);
+static	int		 rofftok_dashes(const char *, int *);
+static	int		 rofftok_special(const char *, int *);
+static	int		 rofftok_predef(const char *, int *);
+static	int		 rofftok_defined(const char *, int *);
 
 
 static int
-rofftok_defined(const char *buf)
+rofftok_defined(const char *buf, int *i)
 {
-	if (0 == *buf)
+	const char	 *p;
+
+	if (0 == buf[*i])
 		return(-1);
-	if (0 == *(buf + 1))
-		return(-1);
-	if (0 != *(buf + 2))
+	if (0 == buf[*i + 1])
 		return(-1);
 
-	if (0 == strcmp(buf, ">="))
+	(*i)++;
+	p = &buf[(*i)++];
+
+	if (0 == memcmp(p, ">=", 2))
 		return(ROFFTok_Ge);
-	else if (0 == strcmp(buf, "<="))
+	else if (0 == memcmp(p, "<=", 2))
 		return(ROFFTok_Le);
-	else if (0 == strcmp(buf, "Rq"))
+	else if (0 == memcmp(p, "Rq", 2))
 		return(ROFFTok_Rquote);
-	else if (0 == strcmp(buf, "Lq"))
+	else if (0 == memcmp(p, "Lq", 2))
 		return(ROFFTok_Lquote);
-	else if (0 == strcmp(buf, "ua"))
+	else if (0 == memcmp(p, "ua", 2))
 		return(ROFFTok_Uparrow);
-	else if (0 == strcmp(buf, "aa"))
+	else if (0 == memcmp(p, "aa", 2))
 		return(ROFFTok_Acute);
-	else if (0 == strcmp(buf, "ga"))
+	else if (0 == memcmp(p, "ga", 2))
 		return(ROFFTok_Grave);
-	else if (0 == strcmp(buf, "Pi"))
+	else if (0 == memcmp(p, "Pi", 2))
 		return(ROFFTok_Pi);
-	else if (0 == strcmp(buf, "Ne"))
+	else if (0 == memcmp(p, "Ne", 2))
 		return(ROFFTok_Ne);
-	else if (0 == strcmp(buf, "Le"))
+	else if (0 == memcmp(p, "Le", 2))
 		return(ROFFTok_Le);
-	else if (0 == strcmp(buf, "Ge"))
+	else if (0 == memcmp(p, "Ge", 2))
 		return(ROFFTok_Ge);
-	else if (0 == strcmp(buf, "Lt"))
+	else if (0 == memcmp(p, "Lt", 2))
 		return(ROFFTok_Lt);
-	else if (0 == strcmp(buf, "Gt"))
+	else if (0 == memcmp(p, "Gt", 2))
 		return(ROFFTok_Gt);
-	else if (0 == strcmp(buf, "Pm"))
+	else if (0 == memcmp(p, "Pm", 2))
 		return(ROFFTok_Plusmin);
-	else if (0 == strcmp(buf, "If"))
+	else if (0 == memcmp(p, "If", 2))
 		return(ROFFTok_Infty);
-	else if (0 == strcmp(buf, "Na"))
+	else if (0 == memcmp(p, "Na", 2))
 		return(ROFFTok_Nan);
-	else if (0 == strcmp(buf, "Ba"))
+	else if (0 == memcmp(p, "Ba", 2))
 		return(ROFFTok_Bar);
 
 	return(-1);
@@ -80,15 +83,14 @@ rofftok_defined(const char *buf)
 
 
 static int
-rofftok_predef(const char *buf)
+rofftok_predef(const char *buf, int *i)
 {
-	if (0 == *buf)
+	if (0 == buf[*i])
 		return(-1);
+	if ('(' == buf[*i])
+		return(rofftok_defined(buf, i));
 
-	if ('(' == *buf)
-		return(rofftok_defined(++buf));
-
-	switch (*buf) {
+	switch (buf[*i]) {
 	case ('q'):
 		return(ROFFTok_Quote);
 	default:
@@ -100,20 +102,17 @@ rofftok_predef(const char *buf)
 
 
 static int
-rofftok_dashes(const char *buf)
+rofftok_dashes(const char *buf, int *i)
 {
 
-	if (0 == *buf)
+	if (0 == buf[*i])
 		return(-1);
-	else if (*buf++ != 'e')
+	else if (buf[(*i)++] != 'e')
 		return(-1);
-
-	if (0 == *buf)
-		return(-1);
-	else if (0 != *(buf + 1))
+	if (0 == buf[*i])
 		return(-1);
 
-	switch (*buf) {
+	switch (buf[*i]) {
 	case ('m'):
 		return(ROFFTok_Em);
 	case ('n'):
@@ -126,15 +125,13 @@ rofftok_dashes(const char *buf)
 
 
 static int
-rofftok_special(const char *buf)
+rofftok_special(const char *buf, int *i)
 {
 
-	if (0 == *buf)
-		return(-1);
-	else if (0 != *(buf + 1))
-		return(-1);
+	if (0 == buf[*i])
+		return(ROFFTok_Slash);
 
-	switch (*buf) {
+	switch (buf[*i]) {
 	case ('a'):
 		return(ROFFTok_Sp_A);
 	case ('b'):
@@ -149,6 +146,8 @@ rofftok_special(const char *buf)
 		return(ROFFTok_Sp_T);
 	case ('v'):
 		return(ROFFTok_Sp_V);
+	case ('0'):
+		return(ROFFTok_Sp_0);
 	default:
 		break;
 	}
@@ -157,19 +156,22 @@ rofftok_special(const char *buf)
 
 
 int
-rofftok_scan(const char *buf)
+rofftok_scan(const char *buf, int *i)
 {
 
 	assert(*buf);
-	if ('\\' != *buf++)
-		return(ROFFTok_MAX);
+	assert(buf[*i] == '\\');
 
-	for ( ; *buf; buf++) {
-		switch (*buf) {
+	(*i)++;
+
+	for ( ; buf[*i]; (*i)++) {
+		switch (buf[*i]) {
 		case ('e'):
-			return(rofftok_special(++buf));
+			(*i)++;
+			return(rofftok_special(buf, i));
 		case ('('):
-			return(rofftok_dashes(++buf));
+			(*i)++;
+			return(rofftok_dashes(buf, i));
 		case (' '):
 			return(ROFFTok_Space);
 		case ('&'):
@@ -177,9 +179,10 @@ rofftok_scan(const char *buf)
 		case ('-'):
 			return(ROFFTok_Hyphen);
 		case ('*'):
-			return(rofftok_predef(++buf));
+			(*i)++;
+			return(rofftok_predef(buf, i));
 		case ('\\'):
-			return(ROFFTok_MAX);
+			return(ROFFTok_Slash);
 		default:
 			break;
 		}
