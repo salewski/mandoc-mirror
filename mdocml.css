@@ -1,92 +1,28 @@
-	body 
-	{
-		margin: 0px;
-		font-family: Tahoma, sans-serif;
-		font-size: small;
-	}
-
-	div.mdoc
-	{
-		width: 600px;
-	}
-
-	div.block-Sh
-	{
-		margin-bottom: 20px;
-	}
-	
-	div.head-Sh
-	{
-		font-weight: bold;
-		font-size: larger;
-	}
-	
-	div.head-Ss
-	{
-		font-weight: bold;
-		margin-top: 10px;
-		text-align: justify;
-	}
-	
-	div.body-Sh
-	{
-		margin-left: 20px;
-		margin-top: 10px;
-		text-align: justify;
-	}
-	
-	span.inline-Nd:before
-	{
-		content: ' - ';
-	}
-	
-	span.inline-Fl:before
-	{
-		content: '-';
-	}
-
-	span.inline-Fl
-	{
-		font-weight: bolder;
-	}
-
-	span.inline-Ar
-	{
-		text-decoration: underline;
-	}
-
-	span.inline-Pa
-	{
-		text-decoration: underline;
-	}
-
-	span.inline-Op:before
-	{
-		content: '[';
-	}
-
-	span.inline-Op:after
-	{
-		content: ']';
-	}
-
-	div.block-Bl
-	{
-		margin-top: 10px;
-		margin-left: 20px;
-	}
-
-	div.inline-Pp
-	{
-		margin-bottom: 10px;
-	}
-
-	span.inline-D1
-	{
-		margin-left: 20px;
-	}
-
-	span.inline-Qq:before	{ content: '``'; }
-	span.inline-Qq:after	{ content: '\'\''; }
-	span.inline-Sq:before	{ content: '`'; }
-	span.inline-Sq:after	{ content: '\''; }
+	body			{ margin: 10px;
+			 	  font-family: Tahoma, sans-serif;
+				  font-size: small; }
+	div.mdoc		{ width: 600px; }
+	div.block-Sh		{ margin-bottom: 20px; }
+	div.head-Sh		{ font-weight: bold;
+				  font-size: larger; }
+	div.head-Ss		{ font-weight: bold;	
+				  margin-top: 10px;
+				  text-align: justify; }
+	div.body-Sh		{ margin-left: 20px;
+				  margin-top: 10px; 
+				  text-align: justify; }
+	span.inline-Nd:before	{ content: ' \2014 '; }
+	span.inline-Fl:before	{ content: '-'; }
+	span.inline-Fl		{ font-weight: bolder; }
+	span.inline-Ar		{ text-decoration: underline; }
+	span.inline-Pa		{ text-decoration: underline; }
+	span.inline-Op:before	{ content: '['; }
+	span.inline-Op:after	{ content: ']'; }
+	div.block-Bl		{ margin-top: 10px;
+				  margin-left: 20px; }
+	div.inline-Pp		{ margin-bottom: 10px; }
+	span.inline-D1		{ margin-left: 20px; }
+	span.inline-Qq:before	{ content: '\201c'; }
+	span.inline-Qq:after	{ content: '\201d'; }
+	span.inline-Sq:before	{ content: '\2018'; }
+	span.inline-Sq:after	{ content: '\2019'; }

@@ -1,0 +1,65 @@
+.\"
+.Dd $Mdocdate$
+.Dt index 7 
+.Os LOCAL
+.\"
+.Sh NAME
+.Nm mdocml
+.Nd compile manpage source into mark-up language
+.\"
+.Sh DESCRIPTION
+The
+.Nm 
+utility compiles 
+.Xr mdoc 7
+macros, such as those inheriting from
+.Xr mdoc.samples 7 , 
+into XML or HTML documents.  Unlike other similar utilities such as 
+.Xr rman 1
+and
+.Xr man2html 1 ,
+.Nm
+acts directly on source documents, validating its input and producing a
+variety of outputs.
+.Ss Features
+In order to operate properly, 
+.Nm
+fully validates its input.  This includes, but is not limited to, the
+following checks:
+.Pp
+.Bl -enum -compact
+.It 
+special characters (such as
+.Sq \en
+and
+.Sq \et ) ,
+.It 
+macro scope (such as
+.Sq \&.Sh
+macros clobbering a pending
+.Sq \&.Bl
+scope),
+.It 
+predefined characters (such as \\*(>= and \\*q),
+.It
+correctly-ordered document prelude,
+.El
+.\" 
+.Sh ENVIRONMENT
+The
+.Nm
+utility has been tested under Linux and OpenBSD.
+.\" 
+.Sh EXAMPLES
+This page was produced as follows:
+.Pp
+.D1 % mdocml -fhtml -o index.html index.7
+.\"
+.Sh SEE ALSO
+TODO.
+.\"
+.Sh AUTHORS
+The
+.Nm
+utility was written by 
+.An Em Kristaps Dzonsons Aq kristaps@kth.se .

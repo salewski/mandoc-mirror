@@ -34,30 +34,44 @@ ml_nputstring(struct md_mbuf *p,
 		const char *buf, size_t sz, size_t *pos)
 {
 	int		 i;
+	const char	*seq;
+	size_t		 ssz;
 
 	for (i = 0; i < (int)sz; i++) {
 		switch (buf[i]) {
+
+		/* Ampersand ml-escape. */
 		case ('&'):
-			if ( ! ml_nputs(p, "&amp;", 5, pos))
-				return(0);
+			seq = "&amp;";
+			ssz = 5;
 			break;
+
+		/* Quotation ml-escape. */
 		case ('"'):
-			if ( ! ml_nputs(p, "&quot;", 6, pos))
-				return(0);
+			seq = "&quot;";
+			ssz = 6;
 			break;
+
+		/* Lt ml-escape. */
 		case ('<'):
-			if ( ! ml_nputs(p, "&lt;", 4, pos))
-				return(0);
+			seq = "&lt;";
+			ssz = 4;
 			break;
+
+		/* Gt ml-escape. */
 		case ('>'):
-			if ( ! ml_nputs(p, "&gt;", 4, pos))
-				return(0);
+			seq = "&gt;";
+			ssz = 4;
 			break;
+
 		default:
-			if ( ! ml_nputs(p, &buf[i], 1, pos))
-				return(0);
+			seq = &buf[i];
+			ssz = 1;
 			break;
 		}
+
+		if ( ! ml_nputs(p, seq, ssz, pos))
+			return(-1);
 	}
 	return(1);
 }
@@ -66,6 +80,9 @@ ml_nputstring(struct md_mbuf *p,
 int
 ml_nputs(struct md_mbuf *p, const char *buf, size_t sz, size_t *pos)
 {
+
+	if (0 == sz)
+		return(1);
 
 	if ( ! md_buf_puts(p, buf, sz))
 		return(0);
@@ -80,7 +97,9 @@ ml_puts(struct md_mbuf *p, const char *buf, size_t *pos)
 {
 	size_t		 sz;
 
-	sz = strlen(buf);
+	if (0 == (sz = strlen(buf)))
+		return(1);
+
 	if ( ! md_buf_puts(p, buf, sz))
 		return(0);
 	*pos += sz;

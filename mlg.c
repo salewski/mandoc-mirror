@@ -68,15 +68,19 @@ static	int		 mlg_roffhead(void *, const struct tm *,
 				const char *, const char *);
 static	int		 mlg_rofftail(void *);
 static	int		 mlg_roffin(void *, int, int *, char **);
-static	int		 mlg_roffdata(void *, int, char *);
+static	int		 mlg_roffdata(void *, int, 
+				const char *, char *);
+static	int		 mlg_rofftoken(void *, int, int);
 static	int		 mlg_roffout(void *, int);
 static	int		 mlg_roffblkin(void *, int, int *, char **);
 static	int		 mlg_roffblkout(void *, int);
 static	int		 mlg_roffspecial(void *, int, int *, 
 				char **, char **);
-static	int		 mlg_roffblkheadin(void *, int, int *, char **);
+static	int		 mlg_roffblkheadin(void *, int, 
+				int *, char **);
 static	int		 mlg_roffblkheadout(void *, int);
-static	int		 mlg_roffblkbodyin(void *, int, int *, char **);
+static	int		 mlg_roffblkbodyin(void *, int, 
+				int *, char **);
 static	int		 mlg_roffblkbodyout(void *, int);
 
 static	int		 mlg_beginblk(struct md_mlg *, enum md_ns, int, 
@@ -88,7 +92,14 @@ static	int		 mlg_endtag(struct md_mlg *, enum md_ns, int);
 static	int	  	 mlg_indent(struct md_mlg *);
 static	int		 mlg_newline(struct md_mlg *);
 static	void		 mlg_mode(struct md_mlg *, enum md_tok);
-static	int		 mlg_data(struct md_mlg *, int, char *);
+static	int		 mlg_data(struct md_mlg *, int, 
+				const char *, char *);
+static	void		 mlg_err(struct md_mlg *, const char *, 
+				const char *, char *);
+static	void		 mlg_warn(struct md_mlg *, const char *, 
+				const char *, char *);
+static	void		 mlg_msg(struct md_mlg *, enum roffmsg, 
+				const char *, const char *, char *);
 
 #ifdef __linux__
 extern	size_t		 strlcat(char *, const char *, size_t);
@@ -221,10 +232,11 @@ mlg_mode(struct md_mlg *p, enum md_tok ns)
 
 
 static int
-mlg_data(struct md_mlg *p, int space, char *buf)
+mlg_data(struct md_mlg *p, int space, const char *start, char *buf)
 {
 	size_t		 sz;
 	char		*bufp;
+	int		 c;
 
 	assert(p->mbuf);
 	assert(0 != p->indent);
@@ -252,9 +264,19 @@ mlg_data(struct md_mlg *p, int space, char *buf)
 		if (0 == p->pos) {
 			if ( ! mlg_indent(p))
 				return(0);
-			if ( ! ml_nputstring(p->mbuf, bufp, 
-						sz, &p->pos))
+
+			c = ml_nputstring(p->mbuf, bufp, sz, &p->pos);
+			if (0 == c) {
+				mlg_err(p, start, bufp, "invalid "
+						"character sequence");
 				return(0);
+			} else if (c > 1) {
+				mlg_warn(p, start, bufp, "bogus "
+						"character sequence");
+				return(0);
+			} else if (-1 == c)
+				return(0);
+
 			if (p->indent * INDENT + sz >= COLUMNS)
 				if ( ! mlg_newline(p))
 					return(0);
@@ -273,7 +295,16 @@ mlg_data(struct md_mlg *p, int space, char *buf)
 				return(0);
 		}
 
-		if ( ! ml_nputstring(p->mbuf, bufp, sz, &p->pos))
+		c = ml_nputstring(p->mbuf, bufp, sz, &p->pos);
+		if (0 == c) {
+			mlg_err(p, start, bufp, "invalid "
+					"character sequence");
+			return(0);
+		} else if (c > 1) {
+			mlg_warn(p, start, bufp, "bogus "
+					"character sequence");
+			return(0);
+		} else if (-1 == c)
 			return(0);
 
 		if ( ! (ML_OVERRIDE_ALL & p->flags))
@@ -326,6 +357,7 @@ mlg_alloc(const struct md_args *args,
 	cb.roffspecial = mlg_roffspecial;
 	cb.roffmsg = mlg_roffmsg;
 	cb.roffdata = mlg_roffdata;
+	cb.rofftoken = mlg_rofftoken;
 
 	if (NULL == (p = calloc(1, sizeof(struct md_mlg))))
 		err(1, "calloc");
@@ -514,11 +546,181 @@ static void
 mlg_roffmsg(void *arg, enum roffmsg lvl, 
 		const char *buf, const char *pos, char *msg)
 {
-	char		*level;
+
+	mlg_msg((struct md_mlg *)arg, lvl, buf, pos, msg);
+}
+
+
+static int
+mlg_rofftoken(void *arg, int space, int value)
+{
+	struct md_mlg	*p;
+	const char	*seq;
+	size_t		 sz, res;
+
+	assert(arg);
+	p = (struct md_mlg *)arg;
+
+	switch (value) {
+	case (ROFFTok_Sp_A):
+		seq = "\\a";
+		sz = 2;
+		break;
+	case (ROFFTok_Sp_B):
+		seq = "\\b";
+		sz = 2;
+		break;
+	case (ROFFTok_Sp_F):
+		seq = "\\f";
+		sz = 2;
+		break;
+	case (ROFFTok_Sp_N):
+		seq = "\\n";
+		sz = 2;
+		break;
+	case (ROFFTok_Sp_R):
+		seq = "\\r";
+		sz = 2;
+		break;
+	case (ROFFTok_Sp_T):
+		seq = "\\t";
+		sz = 2;
+		break;
+	case (ROFFTok_Sp_V):
+		seq = "\\v";
+		sz = 2;
+		break;
+	case (ROFFTok_Space):
+		seq = "&nbsp;";
+		sz = 6;
+		break;
+	case (ROFFTok_Null):
+		seq = "";
+		sz = 0;
+		break;
+	case (ROFFTok_Hyphen):
+		seq = "&#8208;";
+		sz = 7;
+		break;
+	case (ROFFTok_Em):
+		seq = "&#8212;";
+		sz = 7;
+		break;
+	case (ROFFTok_En):
+		seq = "&#8211;";
+		sz = 7;
+		break;
+	case (ROFFTok_Ge):
+		seq = "&#8805;";
+		sz = 7;
+		break;
+	case (ROFFTok_Le):
+		seq = "&#8804;";
+		sz = 7;
+		break;
+	case (ROFFTok_Rquote):
+		seq = "&#8221;";
+		sz = 7;
+		break;
+	case (ROFFTok_Lquote):
+		seq = "&#8220;";
+		sz = 7;
+		break;
+	case (ROFFTok_Uparrow):
+		seq = "&#8593;";
+		sz = 7;
+		break;
+	case (ROFFTok_Acute):
+		seq = "&#180;";
+		sz = 6;
+		break;
+	case (ROFFTok_Grave):
+		seq = "&#96;";
+		sz = 5;
+		break;
+	case (ROFFTok_Pi):
+		seq = "&#960;";
+		sz = 6;
+		break;
+	case (ROFFTok_Ne):
+		seq = "&#8800;";
+		sz = 7;
+		break;
+	case (ROFFTok_Lt):
+		seq = "&lt;";
+		sz = 4;
+		break;
+	case (ROFFTok_Gt):
+		seq = "&gt;";
+		sz = 4;
+		break;
+	case (ROFFTok_Plusmin):
+		seq = "&#177;";
+		sz = 6;
+		break;
+	case (ROFFTok_Infty):
+		seq = "&#8734;";
+		sz = 7;
+		break;
+	case (ROFFTok_Bar):
+		seq = "&#124;";
+		sz = 6;
+		break;
+	case (ROFFTok_Nan):
+		seq = "Nan";
+		sz = 3;
+		break;
+	}
+
+	if (space && ! ml_nputs(p->mbuf, " ", 1, &res))
+		return(0);
+	p->pos += res;
+
+	if (0 != sz && ! ml_nputs(p->mbuf, seq, sz, &res))
+		return(0);
+	p->pos += res;
+
+	return(1);
+}
+
+
+static int
+mlg_roffdata(void *arg, int space, const char *start, char *buf)
+{
 	struct md_mlg	*p;
 
 	assert(arg);
 	p = (struct md_mlg *)arg;
+
+	if ( ! mlg_data(p, space, start, buf))
+		return(0);
+
+	mlg_mode(p, MD_TEXT);
+	return(1);
+}
+
+
+static void
+mlg_err(struct md_mlg *p, const char *buf, const char *pos, char *msg)
+{
+
+	mlg_msg(p, ROFF_ERROR, buf, pos, msg);
+}
+
+
+static void
+mlg_warn(struct md_mlg *p, const char *buf, const char *pos, char *msg)
+{
+
+	mlg_msg(p, ROFF_WARN, buf, pos, msg);
+}
+
+
+static void
+mlg_msg(struct md_mlg *p, enum roffmsg lvl, 
+		const char *buf, const char *pos, char *msg)
+{
+	char		*level;
 
 	switch (lvl) {
 	case (ROFF_WARN):
@@ -542,20 +744,3 @@ mlg_roffmsg(void *arg, enum roffmsg lvl,
 				p->rbuf->name, level, msg);
 
 }
-
-
-static int
-mlg_roffdata(void *arg, int space, char *buf)
-{
-	struct md_mlg	*p;
-
-	assert(arg);
-	p = (struct md_mlg *)arg;
-
-	if ( ! mlg_data(p, space, buf))
-		return(0);
-
-	mlg_mode(p, MD_TEXT);
-	return(1);
-}
-

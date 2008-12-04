@@ -19,6 +19,8 @@
 #ifndef PRIVATE_H
 #define PRIVATE_H
 
+#include <time.h>
+
 struct	md_rbuf {
 	int		 fd;		/* Open descriptor. */
 	char		*name;		/* Name of file. */
@@ -34,6 +36,35 @@ struct	md_mbuf {
 	size_t		 bufsz;		/* Size of buffer. */
 	size_t		 pos;		/* Position in buffer. */
 };
+
+#define	ROFFTok_Sp_A	 0
+#define	ROFFTok_Sp_B	 1
+#define	ROFFTok_Sp_F	 2
+#define	ROFFTok_Sp_N	 3
+#define	ROFFTok_Sp_R	 4
+#define	ROFFTok_Sp_T	 5
+#define	ROFFTok_Sp_V	 6
+#define	ROFFTok_Space	 7
+#define	ROFFTok_Null	 8
+#define	ROFFTok_Hyphen	 9
+#define	ROFFTok_Em	 10
+#define	ROFFTok_En	 11
+#define	ROFFTok_Ge	 12
+#define	ROFFTok_Le	 13
+#define	ROFFTok_Rquote	 14
+#define	ROFFTok_Lquote	 15
+#define	ROFFTok_Uparrow	 16
+#define	ROFFTok_Acute	 17
+#define	ROFFTok_Grave	 18
+#define	ROFFTok_Pi	 19
+#define	ROFFTok_Ne	 20
+#define	ROFFTok_Lt	 21
+#define	ROFFTok_Gt	 22
+#define	ROFFTok_Plusmin	 23
+#define	ROFFTok_Infty	 24
+#define	ROFFTok_Bar	 25
+#define	ROFFTok_Nan	 26
+#define	ROFFTok_MAX	 27
 
 #define	ROFF___	 	 0
 #define	ROFF_Dd		 1
@@ -205,6 +236,8 @@ struct	md_mbuf {
 #define	ROFF_Words	 59
 #define	ROFF_ARGMAX	 60
 
+#define	ROFF_MAXLINEARG	 32
+
 extern	const char *const *toknames;
 extern	const char *const *tokargnames;
 
@@ -216,7 +249,8 @@ struct	roffcb {
 	int	(*roffhead)(void *, const struct tm *, const char *, 
 			const char *, const char *, const char *);
 	int	(*rofftail)(void *);
-	int	(*roffdata)(void *, int, char *);
+	int	(*roffdata)(void *, int, const char *, char *);
+	int	(*rofftoken)(void *, int, int);
 	int	(*roffin)(void *, int, int *, char **);
 	int	(*roffout)(void *, int);
 	int	(*roffblkin)(void *, int, int *, char **);
@@ -254,6 +288,8 @@ int	 	  md_buf_putstring(struct md_mbuf *, const char *);
 struct	rofftree *roff_alloc(const struct roffcb *, void *);
 int		  roff_engine(struct rofftree *, char *);
 int		  roff_free(struct rofftree *, int);
+
+int		  rofftok_scan(const char *);
 
 __END_DECLS
 

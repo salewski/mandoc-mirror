@@ -29,6 +29,7 @@ enum	md_ns {
 	MD_NS_DEFAULT,
 };
 
+
 typedef	int	(*ml_begin)(struct md_mbuf *, const struct md_args *,
 			const struct tm *, const char *, const char *,
 			const char *, const char *);
@@ -39,7 +40,6 @@ typedef	ssize_t	(*ml_endtag)(struct md_mbuf *,
 typedef	ssize_t	(*ml_begintag)(struct md_mbuf *, 
 			const struct md_args *, enum md_ns, int, 
 			const int *, const char **);
-
 
 __BEGIN_DECLS
 
