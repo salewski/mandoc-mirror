@@ -32,8 +32,12 @@
 #include "ml.h"
 
 
+/* TODO: allow head/tail-less invocations (just "div" start). */
+/* FIXME: free htmlq. */
+
 struct	htmlnode {
-	int		 type;
+	int		 tok;
+	enum md_ns	 ns;
 	int		*argc[ROFF_MAXLINEARG];
 	char		*argv[ROFF_MAXLINEARG];
 	struct htmlnode	*parent;
@@ -45,12 +49,15 @@ struct	htmlq {
 };
 
 
+static	void		htmlnode_free(struct htmlnode *);
+static	void		htmlnode_free(struct htmlnode *);
+
 static	int		html_loadcss(struct md_mbuf *, const char *);
 
-static	ssize_t		html_endtag(struct md_mbuf *, 
+static	ssize_t		html_endtag(struct md_mbuf *, void *,
 				const struct md_args *, 
 				enum md_ns, int);
-static	ssize_t		html_begintag(struct md_mbuf *, 
+static	ssize_t		html_begintag(struct md_mbuf *, void *,
 				const struct md_args *, 
 				enum md_ns, int, 
 				const int *, const char **);
@@ -352,14 +359,30 @@ html_inlinetagname(struct md_mbuf *mbuf,
 
 
 static ssize_t 
-html_begintag(struct md_mbuf *mbuf, const struct md_args *args, 
-		enum md_ns ns, int tok, 
-		const int *argc, const char **argv)
+html_begintag(struct md_mbuf *mbuf, void *data,
+		const struct md_args *args, enum md_ns ns, 
+		int tok, const int *argc, const char **argv)
 {
 	size_t		 res;
+	struct htmlq	*q;
+	struct htmlnode	*node;
 
 	assert(ns != MD_NS_DEFAULT);
 	res = 0;
+
+	assert(data);
+	q = (struct htmlq *)data;
+
+	if (NULL == (node = calloc(1, sizeof(struct htmlnode)))) {
+		warn("calloc");
+		return(-1);
+	}
+
+	node->parent = q->last;
+	node->tok = tok;
+	node->ns = ns;
+
+	q->last = node;
 
 	switch (ns) {
 	case (MD_NS_BLOCK):
@@ -397,13 +420,18 @@ html_begintag(struct md_mbuf *mbuf, const struct md_args *args,
 
 
 static ssize_t 
-html_endtag(struct md_mbuf *mbuf, const struct md_args *args, 
-		enum md_ns ns, int tok)
+html_endtag(struct md_mbuf *mbuf, void *data,
+		const struct md_args *args, enum md_ns ns, int tok)
 {
 	size_t		 res;
+	struct htmlq	*q;
+	struct htmlnode	*node;
 
 	assert(ns != MD_NS_DEFAULT);
 	res = 0;
+
+	assert(data);
+	q = (struct htmlq *)data;
 
 	switch (ns) {
 	case (MD_NS_BLOCK):
@@ -423,6 +451,11 @@ html_endtag(struct md_mbuf *mbuf, const struct md_args *args,
 			return(-1);
 		break;
 	}
+
+	node = q->last;
+	q->last = node->parent;
+
+	htmlnode_free(node);
 
 	return((ssize_t)res);
 }
@@ -448,8 +481,14 @@ void *
 md_init_html(const struct md_args *args,
 		struct md_mbuf *mbuf, const struct md_rbuf *rbuf)
 {
+	struct htmlq	*q;
 
-	return(mlg_alloc(args, rbuf, mbuf, html_begintag, 
+	if (NULL == (q = calloc(1, sizeof(struct htmlq)))) {
+		warn("calloc");
+		return(NULL);
+	}
+
+	return(mlg_alloc(args, q, rbuf, mbuf, html_begintag, 
 				html_endtag, html_begin, html_end));
 }
 

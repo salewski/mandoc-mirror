@@ -58,6 +58,7 @@ struct	md_mlg {
 	int		  flags;
 #define	ML_OVERRIDE_ONE	 (1 << 0)
 #define	ML_OVERRIDE_ALL	 (1 << 1)
+	void		 *data;
 };
 
 
@@ -144,7 +145,7 @@ mlg_begintag(struct md_mlg *p, enum md_ns ns, int tok,
 	if ( ! ml_nputs(p->mbuf, "<", 1, &p->pos))
 		return(0);
 
-	res = (*p->begintag)(p->mbuf, p->args, ns, tok,
+	res = (*p->begintag)(p->mbuf, p->data, p->args, ns, tok,
 			argc, (const char **)argv);
 	if (-1 == res)
 		return(0);
@@ -193,7 +194,7 @@ mlg_endtag(struct md_mlg *p, enum md_ns ns, int tok)
 	if ( ! ml_nputs(p->mbuf, "</", 2, &p->pos))
 		return(0);
 
-	res = (*p->endtag)(p->mbuf, p->args, ns, tok);
+	res = (*p->endtag)(p->mbuf, p->data, p->args, ns, tok);
 	if (-1 == res)
 		return(0);
 
@@ -333,7 +334,7 @@ mlg_exit(struct md_mlg *p, int flush)
 
 
 struct md_mlg *
-mlg_alloc(const struct md_args *args, 
+mlg_alloc(const struct md_args *args, void *data,
 		const struct md_rbuf *rbuf,
 		struct md_mbuf *mbuf, 
 		ml_begintag begintag, ml_endtag endtag,
@@ -366,6 +367,7 @@ mlg_alloc(const struct md_args *args,
 	p->endtag = endtag;
 	p->begin = begin;
 	p->end = end;
+	p->data = data;
 
 	if (NULL == (p->tree = roff_alloc(&cb, p))) {
 		free(p);

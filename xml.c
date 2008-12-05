@@ -24,10 +24,10 @@
 #include "ml.h"
 
 
-static	ssize_t		xml_endtag(struct md_mbuf *, 
+static	ssize_t		xml_endtag(struct md_mbuf *, void *,
 				const struct md_args *, 
 				enum md_ns, int);
-static	ssize_t		xml_begintag(struct md_mbuf *, 
+static	ssize_t		xml_begintag(struct md_mbuf *, void *,
 				const struct md_args *, 
 				enum md_ns, int, 
 				const int *, const char **);
@@ -77,9 +77,9 @@ xml_end(struct md_mbuf *mbuf, const struct md_args *args)
 
 /* ARGSUSED */
 static ssize_t 
-xml_begintag(struct md_mbuf *mbuf, const struct md_args *args, 
-		enum md_ns ns, int tok, 
-		const int *argc, const char **argv)
+xml_begintag(struct md_mbuf *mbuf, void *data,
+		const struct md_args *args, enum md_ns ns, 
+		int tok, const int *argc, const char **argv)
 {
 	size_t		 res;
 
@@ -117,8 +117,8 @@ xml_begintag(struct md_mbuf *mbuf, const struct md_args *args,
 
 /* ARGSUSED */
 static ssize_t 
-xml_endtag(struct md_mbuf *mbuf, const struct md_args *args, 
-		enum md_ns ns, int tok)
+xml_endtag(struct md_mbuf *mbuf, void *data,
+		const struct md_args *args, enum md_ns ns, int tok)
 {
 	size_t		 res;
 
@@ -173,7 +173,7 @@ md_init_xml(const struct md_args *args,
 		struct md_mbuf *mbuf, const struct md_rbuf *rbuf)
 {
 
-	return(mlg_alloc(args, rbuf, mbuf, xml_begintag, 
+	return(mlg_alloc(args, NULL, rbuf, mbuf, xml_begintag, 
 				xml_endtag, xml_begin, xml_end));
 }
 
