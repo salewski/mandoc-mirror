@@ -29,7 +29,6 @@ enum	md_ns {
 	MD_NS_DEFAULT,
 };
 
-
 typedef	int	(*ml_begin)(struct md_mbuf *, const struct md_args *,
 			const struct tm *, const char *, const char *,
 			const char *, const char *);
@@ -43,6 +42,8 @@ typedef	ssize_t	(*ml_begintag)(struct md_mbuf *,
 
 __BEGIN_DECLS
 
+int		  ml_putstring(struct md_mbuf *, 
+			const char *, size_t *);
 int		  ml_nputstring(struct md_mbuf *, 
 			const char *, size_t, size_t *);
 int		  ml_nputs(struct md_mbuf *, 

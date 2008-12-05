@@ -82,7 +82,6 @@ static	int		 mlg_roffblkbodyin(void *, int,
 				int *, char **);
 static	int		 mlg_roffblkbodyout(void *, int);
 
-static	int		 mlg_endblk(struct md_mlg *, enum md_ns, int);
 static	int		 mlg_begintag(struct md_mlg *, enum md_ns, 
 				int, int *, char **);
 static	int		 mlg_endtag(struct md_mlg *, enum md_ns, int);
@@ -105,27 +104,6 @@ extern	size_t		 strlcpy(char *, const char *, size_t);
 
 
 static int
-mlg_endblk(struct md_mlg *p, enum md_ns ns, int tok)
-{
-
-	p->indent--;
-
-	if (0 != p->pos) {
-		if ( ! mlg_newline(p))
-			return(0);
-		if ( ! mlg_indent(p))
-			return(0);
-	} else if ( ! mlg_indent(p))
-		return(0);
-
-	mlg_mode(p, MD_BLK_OUT);
-	if ( ! mlg_endtag(p, ns, tok))
-		return(0);
-	return(mlg_newline(p));
-}
-
-
-static int
 mlg_begintag(struct md_mlg *p, enum md_ns ns, int tok,
 		int *argc, char **argv)
 {
@@ -137,7 +115,7 @@ mlg_begintag(struct md_mlg *p, enum md_ns ns, int tok,
 	case (MD_NS_INLINE):
 		if ( ! (ML_OVERRIDE_ONE & p->flags) && 
 				! (ML_OVERRIDE_ALL & p->flags) && 
-				p->pos + 11 > COLUMNS) 
+				p->pos + 11 >= COLUMNS)
 			if ( ! mlg_newline(p))
 				return(0);
 		if (0 != p->pos && (MD_TEXT == p->last || 
@@ -195,7 +173,22 @@ mlg_endtag(struct md_mlg *p, enum md_ns ns, int tok)
 {
 	ssize_t		 res;
 
-	/* TODO: extra rules for block/inline. */
+	assert(MD_NS_DEFAULT != ns);
+
+	switch (ns) {
+	case (MD_NS_INLINE):
+		break;
+	default:
+		p->indent--;
+		if (0 != p->pos) {
+			if ( ! mlg_newline(p))
+				return(0);
+			if ( ! mlg_indent(p))
+				return(0);
+		} else if ( ! mlg_indent(p))
+			return(0);
+		break;
+	}
 
 	if ( ! ml_nputs(p->mbuf, "</", 2, &p->pos))
 		return(0);
@@ -207,9 +200,19 @@ mlg_endtag(struct md_mlg *p, enum md_ns ns, int tok)
 	assert(res >= 0);
 	p->pos += (size_t)res;
 
-	/* TODO: extra rules for block/inline. */
+	if ( ! ml_nputs(p->mbuf, ">", 1, &p->pos))
+		return(0);
+	
+	switch (ns) {
+	case (MD_NS_INLINE):
+		mlg_mode(p, MD_INLINE_OUT);
+		break;
+	default:
+		mlg_mode(p, MD_BLK_OUT);
+		break;
+	}
 
-	return(ml_nputs(p->mbuf, ">", 1, &p->pos));
+	return(1);
 }
 
 
@@ -218,7 +221,8 @@ mlg_indent(struct md_mlg *p)
 {
 	size_t		 count;
 
-	count = p->indent > MAXINDENT ? (size_t)MAXINDENT : p->indent;
+	count = p->indent > MAXINDENT ? 
+		(size_t)MAXINDENT : p->indent;
 	count *= INDENT;
 
 	assert(0 == p->pos);
@@ -409,7 +413,6 @@ mlg_rofftail(void *arg)
 }
 
 
-/* ARGSUSED */
 static int
 mlg_roffspecial(void *arg, int tok, const char *start, char **more)
 {
@@ -421,8 +424,7 @@ mlg_roffspecial(void *arg, int tok, const char *start, char **more)
 	switch (tok) {
 	case (ROFF_Xr):
 		if ( ! *more) {
-			mlg_err(p, start, start,
-					"missing required argument");
+			mlg_err(p, start, start, "missing argument");
 			return(0);
 		}
 		if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, NULL))
@@ -432,7 +434,7 @@ mlg_roffspecial(void *arg, int tok, const char *start, char **more)
 		if (*more) {
 			if ( ! ml_nputs(p->mbuf, "(", 1, &p->pos))
 				return(0);
-			if ( ! mlg_data(p, 0, start, *more++))
+			if ( ! ml_puts(p->mbuf, *more++, &p->pos))
 				return(0);
 			if ( ! ml_nputs(p->mbuf, ")", 1, &p->pos))
 				return(0);
@@ -443,7 +445,6 @@ mlg_roffspecial(void *arg, int tok, const char *start, char **more)
 		}
 		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
 			return(0);
-		mlg_mode(p, MD_INLINE_OUT);
 		break;
 	case (ROFF_Fn):
 		break;
@@ -478,7 +479,7 @@ static int
 mlg_roffblkout(void *arg, int tok)
 {
 
-	return(mlg_endblk((struct md_mlg *)arg, MD_NS_BLOCK, tok));
+	return(mlg_endtag((struct md_mlg *)arg, MD_NS_BLOCK, tok));
 }
 
 
@@ -495,7 +496,7 @@ static int
 mlg_roffblkbodyout(void *arg, int tok)
 {
 
-	return(mlg_endblk((struct md_mlg *)arg, MD_NS_BODY, tok));
+	return(mlg_endtag((struct md_mlg *)arg, MD_NS_BODY, tok));
 }
 
 
@@ -512,7 +513,7 @@ static int
 mlg_roffblkheadout(void *arg, int tok)
 {
 
-	return(mlg_endblk((struct md_mlg *)arg, MD_NS_HEAD, tok));
+	return(mlg_endtag((struct md_mlg *)arg, MD_NS_HEAD, tok));
 }
 
 
@@ -528,16 +529,8 @@ mlg_roffin(void *arg, int tok, int *argc, char **argv)
 static int
 mlg_roffout(void *arg, int tok)
 {
-	struct md_mlg	*p;
 
-	assert(arg);
-	p = (struct md_mlg *)arg;
-
-	if (0 == p->pos && ! mlg_indent(p))
-		return(0);
-
-	mlg_mode(p, MD_INLINE_OUT);
-	return(mlg_endtag(p, MD_NS_INLINE, tok));
+	return(mlg_endtag((struct md_mlg *)arg, MD_NS_INLINE, tok));
 }
 
 

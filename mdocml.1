@@ -85,8 +85,7 @@ The CSS file location, which defaults to
 .It Fl e
 Whether to embed the CSS file into the HTML prologue.
 .El
-.\" This next request is for sections 1, 6, 7 & 8 only.
-.\" .Sh ENVIRONMENT
+.\" 
 .Sh EXAMPLES
 To produce an HTML4-strict document 
 .Pa mdocml.html
@@ -94,7 +93,7 @@ for
 .Pa mdocml.1 
 with the default, embedded style-sheet:
 .Pp
-.D1 % mdocml -fhtml -e mdocml.1 -o mdocml.html
+.D1 % mdocml -fhtml -e -o mdocml.html mdocml.1 
 .Pp
 To create an XML document on standard output from
 .Pa mdocml.1

@@ -32,6 +32,19 @@
 #include "ml.h"
 
 
+struct	htmlnode {
+	int		 type;
+	int		*argc[ROFF_MAXLINEARG];
+	char		*argv[ROFF_MAXLINEARG];
+	struct htmlnode	*parent;
+};
+
+
+struct	htmlq {
+	struct htmlnode	*last;
+};
+
+
 static	int		html_loadcss(struct md_mbuf *, const char *);
 
 static	ssize_t		html_endtag(struct md_mbuf *, 
@@ -46,28 +59,31 @@ static	int		html_begin(struct md_mbuf *,
 				const struct tm *, 
 				const char *, const char *, 
 				const char *, const char *);
+static	int		html_printargs(struct md_mbuf *, int, 
+				const char *, const int *, 
+				const char **, size_t *);
 static	int		html_end(struct md_mbuf *, 
 				const struct md_args *);
-static	ssize_t		html_blocktagname(struct md_mbuf *,
-				const struct md_args *, int);
-static	ssize_t		html_blocktagargs(struct md_mbuf *,
+static	int		html_blocktagname(struct md_mbuf *,
+				const struct md_args *, int, size_t *);
+static	int		html_blocktagargs(struct md_mbuf *,
 				const struct md_args *, int,
-				const int *, const char **);
-static	ssize_t		html_blockheadtagname(struct md_mbuf *,
-				const struct md_args *, int);
-static	ssize_t		html_blockheadtagargs(struct md_mbuf *,
+				const int *, const char **, size_t *);
+static	int		html_blockheadtagname(struct md_mbuf *,
+				const struct md_args *, int, size_t *);
+static	int		html_blockheadtagargs(struct md_mbuf *,
 				const struct md_args *, int,
-				const int *, const char **);
-static	ssize_t		html_blockbodytagname(struct md_mbuf *,
-				const struct md_args *, int);
-static	ssize_t		html_blockbodytagargs(struct md_mbuf *,
+				const int *, const char **, size_t *);
+static	int		html_blockbodytagname(struct md_mbuf *,
+				const struct md_args *, int, size_t *);
+static	int		html_blockbodytagargs(struct md_mbuf *,
 				const struct md_args *, int,
-				const int *, const char **);
-static	ssize_t		html_inlinetagname(struct md_mbuf *,
-				const struct md_args *, int);
-static	ssize_t		html_inlinetagargs(struct md_mbuf *,
+				const int *, const char **, size_t *);
+static	int		html_inlinetagname(struct md_mbuf *,
+				const struct md_args *, int, size_t *);
+static	int		html_inlinetagargs(struct md_mbuf *,
 				const struct md_args *, int,
-				const int *, const char **);
+				const int *, const char **, size_t *);
 
 
 static int
@@ -198,174 +214,140 @@ html_end(struct md_mbuf *mbuf, const struct md_args *args)
 
 
 /* ARGSUSED */
-static ssize_t
+static int
 html_blockbodytagname(struct md_mbuf *mbuf, 
-		const struct md_args *args, int tok)
+		const struct md_args *args, int tok, size_t *res)
 {
-	size_t		 res;
 
-	res = 0;
-	if ( ! ml_puts(mbuf, "div", &res))
-		return(-1);
-
-	return((ssize_t)res);
+	return(ml_puts(mbuf, "div", res));
 }
 
 
 
 
 /* ARGSUSED */
-static ssize_t
+static int
 html_blockheadtagname(struct md_mbuf *mbuf, 
-		const struct md_args *args, int tok)
+		const struct md_args *args, int tok, size_t *res)
 {
-	size_t		 res;
 
-	res = 0;
-	if ( ! ml_puts(mbuf, "div", &res))
-		return(-1);
-
-	return((ssize_t)res);
+	return(ml_puts(mbuf, "div", res));
 }
 
 
 /* ARGSUSED */
-static ssize_t
+static int
 html_blocktagname(struct md_mbuf *mbuf, 
-		const struct md_args *args, int tok)
+		const struct md_args *args, int tok, size_t *res)
 {
-	size_t		 res;
 
-	res = 0;
-	if ( ! ml_puts(mbuf, "div", &res))
-		return(-1);
-
-	return((ssize_t)res);
+	return(ml_puts(mbuf, "div", res));
 }
 
 
-/* ARGSUSED */
-static ssize_t
-html_blockheadtagargs(struct md_mbuf *mbuf, const struct md_args *args, 
-		int tok, const int *argc, const char **argv)
+static int
+html_printargs(struct md_mbuf *mbuf, int tok, const char *ns,
+		const int *argc, const char **argv, size_t *res)
 {
-	size_t		 res;
+	int		 i, c;
 
-	res = 0;
+	if ( ! ml_puts(mbuf, " class=\"", res))
+		return(0);
+	if ( ! ml_puts(mbuf, ns, res))
+		return(0);
+	if ( ! ml_puts(mbuf, "-", res))
+		return(0);
+	if ( ! ml_puts(mbuf, toknames[tok], res))
+		return(0);
+	if ( ! ml_puts(mbuf, "\"", res))
+		return(0);
 
-	if ( ! ml_puts(mbuf, " class=\"head-", &res))
-		return(0);
-	if ( ! ml_puts(mbuf, toknames[tok], &res))
-		return(0);
-	if ( ! ml_puts(mbuf, "\"", &res))
-		return(0);
+	if (NULL == argv || NULL == argc)
+		return(1);
+	assert(argv && argc);
+	
+	/* FIXME: ignores values. */
 
-	switch (tok) {
-	default:
-		break;
+	for (i = 0; ROFF_ARGMAX != (c = argc[i]); i++) {
+		if (argv[i])
+			continue;
+		if ( ! ml_puts(mbuf, " class=\"", res))
+			return(0);
+		if ( ! ml_puts(mbuf, ns, res))
+			return(0);
+		if ( ! ml_puts(mbuf, "-", res))
+			return(0);
+		if ( ! ml_puts(mbuf, toknames[tok], res))
+			return(0);
+		if ( ! ml_puts(mbuf, "-", res))
+			return(0);
+		if ( ! ml_puts(mbuf, tokargnames[c], res))
+			return(0);
+		if ( ! ml_puts(mbuf, "\"", res))
+			return(0);
 	}
 
-	return(0);
+	return(1);
 }
 
 
 /* ARGSUSED */
-static ssize_t
-html_blockbodytagargs(struct md_mbuf *mbuf, const struct md_args *args, 
-		int tok, const int *argc, const char **argv)
+static int
+html_blockheadtagargs(struct md_mbuf *mbuf, 
+		const struct md_args *args, int tok, 
+		const int *argc, const char **argv, size_t *res)
 {
-	size_t		 res;
 
-	res = 0;
-
-	if ( ! ml_puts(mbuf, " class=\"body-", &res))
-		return(0);
-	if ( ! ml_puts(mbuf, toknames[tok], &res))
-		return(0);
-	if ( ! ml_puts(mbuf, "\"", &res))
-		return(0);
-
-	switch (tok) {
-	default:
-		break;
-	}
-
-	return(res);
+	return(html_printargs(mbuf, tok, "head", argc, argv, res));
 }
 
 
 /* ARGSUSED */
-static ssize_t
-html_blocktagargs(struct md_mbuf *mbuf, const struct md_args *args, 
-		int tok, const int *argc, const char **argv)
+static int
+html_blockbodytagargs(struct md_mbuf *mbuf, 
+		const struct md_args *args, int tok, 
+		const int *argc, const char **argv, size_t *res)
 {
-	size_t		 res;
 
-	res = 0;
-
-	if ( ! ml_puts(mbuf, " class=\"block-", &res))
-		return(0);
-	if ( ! ml_puts(mbuf, toknames[tok], &res))
-		return(0);
-	if ( ! ml_puts(mbuf, "\"", &res))
-		return(0);
-
-	switch (tok) {
-	default:
-		break;
-	}
-
-	return(0);
+	return(html_printargs(mbuf, tok, "body", argc, argv, res));
 }
 
 
 /* ARGSUSED */
-static ssize_t
-html_inlinetagargs(struct md_mbuf *mbuf, const struct md_args *args, 
-		int tok, const int *argc, const char **argv)
+static int
+html_blocktagargs(struct md_mbuf *mbuf, 
+		const struct md_args *args, int tok, 
+		const int *argc, const char **argv, size_t *res)
 {
-	size_t		 res;
 
-	res = 0;
-
-	if ( ! ml_puts(mbuf, " class=\"inline-", &res))
-		return(0);
-	if ( ! ml_puts(mbuf, toknames[tok], &res))
-		return(0);
-	if ( ! ml_puts(mbuf, "\"", &res))
-		return(0);
-
-
-	switch (tok) {
-	default:
-		break;
-	}
-
-	return(0);
+	return(html_printargs(mbuf, tok, "block", argc, argv, res));
 }
 
 
 /* ARGSUSED */
-static ssize_t
+static int
+html_inlinetagargs(struct md_mbuf *mbuf, 
+		const struct md_args *args, int tok, 
+		const int *argc, const char **argv, size_t *res)
+{
+
+	return(html_printargs(mbuf, tok, "inline", argc, argv, res));
+}
+
+
+/* ARGSUSED */
+static int
 html_inlinetagname(struct md_mbuf *mbuf, 
-		const struct md_args *args, int tok)
+		const struct md_args *args, int tok, size_t *res)
 {
-	size_t		 res;
-
-	res = 0;
 
 	switch (tok) {
 	case (ROFF_Pp):
-		if ( ! ml_puts(mbuf, "div", &res))
-			return(-1);
-		break;
+		return(ml_puts(mbuf, "div", res));
 	default:
-		if ( ! ml_puts(mbuf, "span", &res))
-			return(-1);
-		break;
+		return(ml_puts(mbuf, "span", res));
 	}
-
-	return((ssize_t)res);
+	return(1);
 }
 
 
@@ -374,43 +356,43 @@ html_begintag(struct md_mbuf *mbuf, const struct md_args *args,
 		enum md_ns ns, int tok, 
 		const int *argc, const char **argv)
 {
+	size_t		 res;
 
 	assert(ns != MD_NS_DEFAULT);
+	res = 0;
+
 	switch (ns) {
 	case (MD_NS_BLOCK):
-		if ( ! html_blocktagname(mbuf, args, tok))
-			return(0);
-		if (NULL == argc || NULL == argv)
-			return(1);
-		assert(argc && argv);
-		return(html_blocktagargs(mbuf, args, 
-					tok, argc, argv));
+		if ( ! html_blocktagname(mbuf, args, tok, &res))
+			return(-1);
+		if ( ! html_blocktagargs(mbuf, args, tok, 
+					argc, argv, &res))
+			return(-1);
+		break;
 	case (MD_NS_BODY):
-		if ( ! html_blockbodytagname(mbuf, args, tok))
-			return(0);
-		if (NULL == argc || NULL == argv)
-			return(1);
-		assert(argc && argv);
-		return(html_blockbodytagargs(mbuf, args, 
-					tok, argc, argv));
+		if ( ! html_blockbodytagname(mbuf, args, tok, &res))
+			return(-1);
+		if ( ! html_blockbodytagargs(mbuf, args, tok, 
+					argc, argv, &res))
+			return(-1);
+		break;
 	case (MD_NS_HEAD):
-		if ( ! html_blockheadtagname(mbuf, args, tok))
-			return(0);
-		if (NULL == argc || NULL == argv)
-			return(1);
-		assert(argc && argv);
-		return(html_blockheadtagargs(mbuf, args, 
-					tok, argc, argv));
+		if ( ! html_blockheadtagname(mbuf, args, tok, &res))
+			return(-1);
+		if ( ! html_blockheadtagargs(mbuf, args, tok, 
+					argc, argv, &res))
+			return(-1);
+		break;
 	default:
+		if ( ! html_inlinetagname(mbuf, args, tok, &res))
+			return(-1);
+		if ( ! html_inlinetagargs(mbuf, args, tok, 
+					argc, argv, &res))
+			return(-1);
 		break;
 	}
 
-	if ( ! html_inlinetagname(mbuf, args, tok))
-		return(0);
-	if (NULL == argc || NULL == argv)
-		return(1);
-	assert(argc && argv);
-	return(html_inlinetagargs(mbuf, args, tok, argc, argv));
+	return((ssize_t)res);
 }
 
 
@@ -418,20 +400,31 @@ static ssize_t
 html_endtag(struct md_mbuf *mbuf, const struct md_args *args, 
 		enum md_ns ns, int tok)
 {
+	size_t		 res;
 
 	assert(ns != MD_NS_DEFAULT);
+	res = 0;
+
 	switch (ns) {
 	case (MD_NS_BLOCK):
-		return(html_blocktagname(mbuf, args, tok));
+		if ( ! html_blocktagname(mbuf, args, tok, &res))
+			return(-1);
+		break;
 	case (MD_NS_BODY):
-		return(html_blockbodytagname(mbuf, args, tok));
+		if ( ! html_blockbodytagname(mbuf, args, tok, &res))
+			return(-1);
+		break;
 	case (MD_NS_HEAD):
-		return(html_blockheadtagname(mbuf, args, tok));
+		if ( ! html_blockheadtagname(mbuf, args, tok, &res))
+			return(-1);
+		break;
 	default:
+		if ( ! html_inlinetagname(mbuf, args, tok, &res))
+			return(-1);
 		break;
 	}
 
-	return(html_inlinetagname(mbuf, args, tok));
+	return((ssize_t)res);
 }
 
 

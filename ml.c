@@ -31,6 +31,14 @@ extern	size_t		  strlcpy(char *, const char *, size_t);
 
 
 int
+ml_putstring(struct md_mbuf *p, const char *buf, size_t *pos)
+{
+
+	return(ml_nputstring(p, buf, strlen(buf), pos));
+}
+
+
+int
 ml_nputstring(struct md_mbuf *p, 
 		const char *buf, size_t sz, size_t *pos)
 {

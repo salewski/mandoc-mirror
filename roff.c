@@ -41,6 +41,7 @@
 /* TODO: unify empty-content tags a la <br />. */
 /* TODO: macros with a set number of arguments? */
 /* TODO: validate Dt macro arguments. */
+/* FIXME: Bl -diag ignore callable children. */
 
 enum	roffd { 
 	ROFF_ENTER = 0, 
