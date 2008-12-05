@@ -37,7 +37,7 @@
 struct	htmlnode {
 	int		 tok;
 	enum md_ns	 ns;
-	int		*argc[ROFF_MAXLINEARG];
+	int		 argc[ROFF_MAXLINEARG];
 	char		*argv[ROFF_MAXLINEARG];
 	struct htmlnode	*parent;
 };
@@ -70,17 +70,23 @@ static	int		html_printargs(struct md_mbuf *, int,
 static	int		html_end(struct md_mbuf *, 
 				const struct md_args *);
 static	int		html_blocktagname(struct md_mbuf *,
-				const struct md_args *, int, size_t *);
+				const struct md_args *, int, 
+				struct htmlq *, const int *, 
+				const char **, size_t *);
 static	int		html_blocktagargs(struct md_mbuf *,
 				const struct md_args *, int,
 				const int *, const char **, size_t *);
-static	int		html_blockheadtagname(struct md_mbuf *,
-				const struct md_args *, int, size_t *);
-static	int		html_blockheadtagargs(struct md_mbuf *,
+static	int		html_headtagname(struct md_mbuf *,
+				const struct md_args *, int, 
+				struct htmlq *, const int *, 
+				const char **, size_t *);
+static	int		html_headtagargs(struct md_mbuf *,
 				const struct md_args *, int,
 				const int *, const char **, size_t *);
 static	int		html_blockbodytagname(struct md_mbuf *,
-				const struct md_args *, int, size_t *);
+				const struct md_args *, 
+				int, struct htmlq *, const int *, 
+				const char **, size_t *);
 static	int		html_blockbodytagargs(struct md_mbuf *,
 				const struct md_args *, int,
 				const int *, const char **, size_t *);
@@ -89,6 +95,194 @@ static	int		html_inlinetagname(struct md_mbuf *,
 static	int		html_inlinetagargs(struct md_mbuf *,
 				const struct md_args *, int,
 				const int *, const char **, size_t *);
+static	int		html_Bl_bodytagname(struct md_mbuf *, 
+				struct htmlq *, const int *, 
+				const char **, size_t *);
+static	int		html_It_blocktagname(struct md_mbuf *, 
+				struct htmlq *, const int *, 
+				const char **, size_t *);
+static	int		html_It_headtagname(struct md_mbuf *, 
+				struct htmlq *, const int *, 
+				const char **, size_t *);
+static	int		html_It_bodytagname(struct md_mbuf *, 
+				struct htmlq *, const int *, 
+				const char **, size_t *);
+
+
+/* ARGSUSED */
+static int
+html_It_headtagname(struct md_mbuf *mbuf, struct htmlq *q, 
+		const int *argc, const char **argv, size_t *res)
+{
+	struct htmlnode	*n;
+	int		 i, c;
+
+	for (n = q->last; n; n = n->parent)
+		if (n->tok == ROFF_Bl)
+			break;
+
+	assert(n);
+	for (i = 0; ROFF_ARGMAX != (c = n->argc[i]) &&
+			i < ROFF_MAXLINEARG; i++) {
+		switch (n->argc[i]) {
+		case (ROFF_Tag):
+			/* FALLTHROUGH */
+		case (ROFF_Column): 
+			return(ml_nputs(mbuf, "td", 2, res));
+		default:
+			break;
+		}
+	}
+
+	assert(i != ROFF_MAXLINEARG);
+	abort();
+	/* NOTREACHED */
+
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+html_It_bodytagname(struct md_mbuf *mbuf, struct htmlq *q, 
+		const int *argc, const char **argv, size_t *res)
+{
+	struct htmlnode	*n;
+	int		 i, c;
+
+	for (n = q->last; n; n = n->parent)
+		if (n->tok == ROFF_Bl)
+			break;
+
+	assert(n);
+	for (i = 0; ROFF_ARGMAX != (c = n->argc[i]) &&
+			i < ROFF_MAXLINEARG; i++) {
+		switch (n->argc[i]) {
+		case (ROFF_Enum):
+			/* FALLTHROUGH */
+		case (ROFF_Bullet):
+			/* FALLTHROUGH */
+		case (ROFF_Dash):
+			/* FALLTHROUGH */
+		case (ROFF_Hyphen):
+			/* FALLTHROUGH */
+		case (ROFF_Item):
+			/* FALLTHROUGH */
+		case (ROFF_Diag):
+			/* FALLTHROUGH */
+		case (ROFF_Hang):
+			/* FALLTHROUGH */
+		case (ROFF_Ohang): 
+			/* FALLTHROUGH */
+		case (ROFF_Inset):
+			return(ml_nputs(mbuf, "div", 3, res));
+		case (ROFF_Tag):
+			/* FALLTHROUGH */
+		case (ROFF_Column): 
+			return(ml_nputs(mbuf, "td", 2, res));
+		default:
+			break;
+		}
+	}
+
+	assert(i != ROFF_MAXLINEARG);
+	abort();
+	/* NOTREACHED */
+
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+html_Bl_bodytagname(struct md_mbuf *mbuf, struct htmlq *q, 
+		const int *argc, const char **argv, size_t *res)
+{
+	int		 c, i;
+
+	for (i = 0; ROFF_ARGMAX != (c = argc[i])
+			&& i < ROFF_MAXLINEARG; i++) {
+		switch (argc[i]) {
+		case (ROFF_Enum):
+			return(ml_nputs(mbuf, "ol", 2, res));
+		case (ROFF_Bullet):
+			/* FALLTHROUGH */
+		case (ROFF_Dash):
+			/* FALLTHROUGH */
+		case (ROFF_Hyphen):
+			/* FALLTHROUGH */
+		case (ROFF_Item):
+			/* FALLTHROUGH */
+		case (ROFF_Diag):
+			/* FALLTHROUGH */
+		case (ROFF_Hang):
+			/* FALLTHROUGH */
+		case (ROFF_Ohang): 
+			/* FALLTHROUGH */
+		case (ROFF_Inset):
+			return(ml_nputs(mbuf, "ul", 2, res));
+		case (ROFF_Tag):
+			/* FALLTHROUGH */
+		case (ROFF_Column): 
+			return(ml_nputs(mbuf, "table", 5, res));
+		default:
+			break;
+		}
+	}
+
+	assert(i != ROFF_MAXLINEARG);
+	abort();
+	/* NOTREACHED */
+}
+
+
+/* ARGSUSED */
+static int
+html_It_blocktagname(struct md_mbuf *mbuf, struct htmlq *q, 
+		const int *argc, const char **argv, size_t *res)
+{
+	struct htmlnode	*n;
+	int		 i, c;
+
+	for (n = q->last; n; n = n->parent)
+		if (n->tok == ROFF_Bl)
+			break;
+
+	assert(n);
+	for (i = 0; ROFF_ARGMAX != (c = n->argc[i]) &&
+			i < ROFF_MAXLINEARG; i++) {
+		switch (n->argc[i]) {
+		case (ROFF_Enum):
+			/* FALLTHROUGH */
+		case (ROFF_Bullet):
+			/* FALLTHROUGH */
+		case (ROFF_Dash):
+			/* FALLTHROUGH */
+		case (ROFF_Hyphen):
+			/* FALLTHROUGH */
+		case (ROFF_Item):
+			/* FALLTHROUGH */
+		case (ROFF_Diag):
+			/* FALLTHROUGH */
+		case (ROFF_Hang):
+			/* FALLTHROUGH */
+		case (ROFF_Ohang): 
+			/* FALLTHROUGH */
+		case (ROFF_Inset):
+			return(ml_nputs(mbuf, "li", 2, res));
+		case (ROFF_Tag):
+			/* FALLTHROUGH */
+		case (ROFF_Column): 
+			return(ml_nputs(mbuf, "tr", 2, res));
+		default:
+			break;
+		}
+	}
+
+	assert(i != ROFF_MAXLINEARG);
+	abort();
+	/* NOTREACHED */
+}
 
 
 static int
@@ -172,7 +366,7 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 	trail = 
 	"</head>\n"
 	"<body>\n"
-	"<div class=\"mdoc\">\n";
+	"<div class=\"mdoc\">";
 
 	res = 0;
 
@@ -216,8 +410,18 @@ html_end(struct md_mbuf *mbuf, const struct md_args *args)
 /* ARGSUSED */
 static int
 html_blockbodytagname(struct md_mbuf *mbuf, 
-		const struct md_args *args, int tok, size_t *res)
+		const struct md_args *args, int tok, struct htmlq *q, 
+		const int *argc, const char **argv, size_t *res)
 {
+
+	switch (tok) {
+	case (ROFF_Bl):
+		return(html_Bl_bodytagname(mbuf, q, argc, argv, res));
+	case (ROFF_It):
+		return(html_It_bodytagname(mbuf, q, argc, argv, res));
+	default:
+		break;
+	}
 
 	return(ml_puts(mbuf, "div", res));
 }
@@ -225,9 +429,21 @@ html_blockbodytagname(struct md_mbuf *mbuf,
 
 /* ARGSUSED */
 static int
-html_blockheadtagname(struct md_mbuf *mbuf, 
-		const struct md_args *args, int tok, size_t *res)
+html_headtagname(struct md_mbuf *mbuf, 
+		const struct md_args *args, int tok, struct htmlq *q, 
+		const int *argc, const char **argv, size_t *res)
 {
+
+	switch (tok) {
+	case (ROFF_It):
+		return(html_It_headtagname(mbuf, q, argc, argv, res));
+	case (ROFF_Sh):
+		return(ml_puts(mbuf, "h1", res));
+	case (ROFF_Ss):
+		return(ml_puts(mbuf, "h2", res));
+	default:
+		break;
+	}
 
 	return(ml_puts(mbuf, "div", res));
 }
@@ -235,9 +451,17 @@ html_blockheadtagname(struct md_mbuf *mbuf,
 
 /* ARGSUSED */
 static int
-html_blocktagname(struct md_mbuf *mbuf, 
-		const struct md_args *args, int tok, size_t *res)
+html_blocktagname(struct md_mbuf *mbuf, const struct md_args *args, 
+		int tok, struct htmlq *q, const int *argc, 
+		const char **argv, size_t *res)
 {
+
+	switch (tok) {
+	case (ROFF_It):
+		return(html_It_blocktagname(mbuf, q, argc, argv, res));
+	default:
+		break;
+	}
 
 	return(ml_puts(mbuf, "div", res));
 }
@@ -263,7 +487,7 @@ html_printargs(struct md_mbuf *mbuf, int tok, const char *ns,
 
 /* ARGSUSED */
 static int
-html_blockheadtagargs(struct md_mbuf *mbuf, 
+html_headtagargs(struct md_mbuf *mbuf, 
 		const struct md_args *args, int tok, 
 		const int *argc, const char **argv, size_t *res)
 {
@@ -330,6 +554,7 @@ html_begintag(struct md_mbuf *mbuf, void *data,
 	size_t		 res;
 	struct htmlq	*q;
 	struct htmlnode	*node;
+	int		 i, c;
 
 	assert(ns != MD_NS_DEFAULT);
 	res = 0;
@@ -346,27 +571,42 @@ html_begintag(struct md_mbuf *mbuf, void *data,
 	node->tok = tok;
 	node->ns = ns;
 
+	if (argc)  {
+		/* TODO: argv. */
+
+		assert(argv);
+		for (i = 0; ROFF_ARGMAX != (c = argc[i]) 
+				&& i < ROFF_MAXLINEARG; i++) 
+			node->argc[i] = argc[i];
+		assert(i != ROFF_MAXLINEARG);
+	} else
+		assert(NULL == argv);
+
+
 	q->last = node;
 
 	switch (ns) {
 	case (MD_NS_BLOCK):
-		if ( ! html_blocktagname(mbuf, args, tok, &res))
+		if ( ! html_blocktagname(mbuf, args, tok, 
+					q, argc, argv, &res))
 			return(-1);
 		if ( ! html_blocktagargs(mbuf, args, tok, 
 					argc, argv, &res))
 			return(-1);
 		break;
 	case (MD_NS_BODY):
-		if ( ! html_blockbodytagname(mbuf, args, tok, &res))
+		if ( ! html_blockbodytagname(mbuf, args, tok, 
+					q, argc, argv, &res))
 			return(-1);
 		if ( ! html_blockbodytagargs(mbuf, args, tok, 
 					argc, argv, &res))
 			return(-1);
 		break;
 	case (MD_NS_HEAD):
-		if ( ! html_blockheadtagname(mbuf, args, tok, &res))
+		if ( ! html_headtagname(mbuf, args, tok, q,
+					argc, argv, &res))
 			return(-1);
-		if ( ! html_blockheadtagargs(mbuf, args, tok, 
+		if ( ! html_headtagargs(mbuf, args, tok, 
 					argc, argv, &res))
 			return(-1);
 		break;
@@ -396,18 +636,25 @@ html_endtag(struct md_mbuf *mbuf, void *data,
 
 	assert(data);
 	q = (struct htmlq *)data;
+	node = q->last;
 
 	switch (ns) {
 	case (MD_NS_BLOCK):
-		if ( ! html_blocktagname(mbuf, args, tok, &res))
+		if ( ! html_blocktagname(mbuf, args, tok, 
+					q, node->argc, 
+					(const char **)node->argv, &res))
 			return(-1);
 		break;
 	case (MD_NS_BODY):
-		if ( ! html_blockbodytagname(mbuf, args, tok, &res))
+		if ( ! html_blockbodytagname(mbuf, args, tok, 
+					q, node->argc, 
+					(const char **)node->argv, &res))
 			return(-1);
 		break;
 	case (MD_NS_HEAD):
-		if ( ! html_blockheadtagname(mbuf, args, tok, &res))
+		if ( ! html_headtagname(mbuf, args, tok, 
+					q, node->argc,
+					(const char **)node->argv, &res))
 			return(-1);
 		break;
 	default:
@@ -416,7 +663,6 @@ html_endtag(struct md_mbuf *mbuf, void *data,
 		break;
 	}
 
-	node = q->last;
 	q->last = node->parent;
 
 	free(node);

@@ -14,6 +14,7 @@
 	span.inline-Nd:before	{ content: ' \2014 '; }
 	span.inline-Fl:before	{ content: '-'; }
 	span.inline-Fl		{ font-weight: bolder; }
+	span.inline-Nm		{ font-weight: bolder; }
 	span.inline-Ar		{ text-decoration: underline; }
 	span.inline-Pa		{ text-decoration: underline; }
 	span.inline-Op:before	{ content: '['; }

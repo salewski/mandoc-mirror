@@ -84,6 +84,7 @@ struct	rofftree {
 	struct roffnode	 *last;			/* Last parsed node. */
 	char		 *cur;			/* Line start. */
 	struct tm	  tm;			/* `Dd' results. */
+	char		  name[64];		/* `Nm' results. */
 	char		  os[64];		/* `Os' results. */
 	char		  title[64];		/* `Dt' results. */
 	char		  section[64];		/* `Dt' results. */
@@ -98,11 +99,11 @@ struct	rofftree {
 	void		 *arg;			/* Callbacks' arg. */
 };
 
-static	int		  roff_Dd(ROFFCALL_ARGS);
-static	int		  roff_Dt(ROFFCALL_ARGS);
-static	int		  roff_Os(ROFFCALL_ARGS);
-static	int		  roff_Ns(ROFFCALL_ARGS);
-static	int		  roff_Sm(ROFFCALL_ARGS);
+static	int		  roff_Dd(ROFFCALL_ARGS); /* FIXME: deprecate. */
+static	int		  roff_Dt(ROFFCALL_ARGS); /* FIXME: deprecate. */
+static	int		  roff_Os(ROFFCALL_ARGS); /* FIXME: deprecate. */
+static	int		  roff_Ns(ROFFCALL_ARGS); /* FIXME: deprecate. */
+static	int		  roff_Sm(ROFFCALL_ARGS); /* FIXME: deprecate. */
 static	int		  roff_layout(ROFFCALL_ARGS);
 static	int		  roff_text(ROFFCALL_ARGS);
 static	int		  roff_noop(ROFFCALL_ARGS);
@@ -131,6 +132,9 @@ static	int 		  roffparse(struct rofftree *, char *);
 static	int		  textparse(struct rofftree *, char *);
 static	int		  roffdata(struct rofftree *, int, char *);
 static	int		  roffspecial(struct rofftree *, int, char **);
+static	int		  roffsetname(struct rofftree *, char **);
+static	int		  roffgetname(struct rofftree *, char **,
+				const char *);
 
 #ifdef __linux__ 
 extern	size_t		  strlcat(char *, const char *, size_t);
@@ -207,7 +211,7 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* In */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Li */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Nd */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Nm */ /* FIXME */
+	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Nm */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Op */
 	{   roff_depr, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Ot */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pa */
@@ -291,7 +295,7 @@ static	const int tokenargs[ROFF_ARGMAX] = {
 	0,		0,		0,		0,
 	0,		0,		0,		0,
 	0,		0,		ROFF_VALUE,	0,
-	0,		0,		0,		0,
+	0,		ROFF_VALUE,	0,		0,
 	0,		0,		0,		0,
 	0,		0,		0,		0,
 	0,		0,		0,		0,
@@ -1145,8 +1149,44 @@ roff_Dt(ROFFCALL_ARGS)
 }
 
 
+static int
+roffgetname(struct rofftree *tree, char **ordp, const char *start)
+{
+	if (0 == tree->name[0]) {
+		roff_err(tree, start, "`Nm' name not set");
+		return(0);
+	}
+	*ordp++ = tree->name;
+	*ordp = NULL;
+	return(1);
+}
+
+
+static int
+roffsetname(struct rofftree *tree, char **ordp)
+{
+	
+	assert(*ordp);
+
+	/* FIXME: not all sections can set this. */
+
+	if (NULL != *(ordp + 1)) {
+		roff_err(tree, *ordp, "too many `Nm' args");
+		return(0);
+	} 
+	
+	if (strlcpy(tree->name, *ordp, sizeof(tree->name)) 
+			>= sizeof(tree->name)) {
+		roff_err(tree, *ordp, "`Nm' arg too long");
+		return(0);
+	}
+
+	return(1);
+}
+
+
 /* ARGSUSED */
-static	int
+static int
 roff_Sm(ROFFCALL_ARGS)
 {
 	char		*morep[1], *p;
@@ -1394,36 +1434,63 @@ roff_ordered(ROFFCALL_ARGS)
 	argv++;
 
 	if (NULL == *argv) {
+		switch (tok) {
+		case (ROFF_Nm):
+			if ( ! roffgetname(tree, ordp, *(argv - 1)))
+				return(0);
+			break;
+		default:
+			*ordp = NULL;
+			break;
+		}
 
-		/* FIXME: satisfies number of args? */
-
-		ordp[0] = NULL;
 		return(roffspecial(tree, tok, ordp));
 	}
 
 	i = 0;
 	while (*argv && i < ROFF_MAXLINEARG) {
-		if (ROFF_MAX != (c = rofffindcallable(*argv)))
-			return(roffcall(tree, c, argv));
-		if (roffispunct(*argv)) 
+		c = rofffindcallable(*argv);
+
+		if (ROFF_MAX == c && ! roffispunct(*argv)) {
+			ordp[i++] = *argv++;
+			continue;
+		}
+		ordp[i] = NULL;
+
+		if (ROFF_MAX == c)
 			break;
 
-		ordp[i++] = *argv++;
+		switch (tok) {
+		case (ROFF_Nm):
+			if ( ! roffsetname(tree, ordp))
+				return(0);
+			break;
+		default:
+			break;
+		}
+
+		if ( ! roffspecial(tree, tok, ordp))
+			return(0);
+
+		return(roffcall(tree, c, ordp));
 	}
 
+	assert(i != ROFF_MAXLINEARG);
 	ordp[i] = NULL;
 
-	/* FIXME: too many or too few args? */
-
-	if (i == ROFF_MAXLINEARG && *argv) {
-		roff_err(tree, *argv, "too many args", toknames[tok]);
-		return(0);
+	switch (tok) {
+	case (ROFF_Nm):
+		if ( ! roffsetname(tree, ordp))
+			return(0);
+		break;
+	default:
+		break;
 	}
-
-	/* FIXME: error if there's stuff after the punctuation. */
 
 	if ( ! roffspecial(tree, tok, ordp))
 		return(0);
+
+	/* FIXME: error if there's stuff after the punctuation. */
 
 	if ( ! first || NULL == *argv)
 		return(1);
