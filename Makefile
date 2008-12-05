@@ -12,7 +12,7 @@ OBJS	= mdocml.o html.o xml.o libmdocml.o roff.o ml.o mlg.o compat.o tokens.o
 
 SRCS	= mdocml.c html.c xml.c libmdocml.c roff.c ml.c mlg.c compat.c tokens.c
 
-HEADS	= libmdocml.h private.h
+HEADS	= libmdocml.h private.h ml.h roff.h
 
 MANS	= mdocml.1
 
@@ -76,9 +76,9 @@ html.ln: html.c private.h libmdocml.h
 
 html.o: html.c private.h libmdocml.h
 
-roff.ln: roff.c private.h libmdocml.h
+roff.ln: roff.c private.h roff.h libmdocml.h
 
-roff.o: roff.c private.h libmdocml.h
+roff.o: roff.c private.h roff.h libmdocml.h
 
 libmdocml.ln: libmdocml.c private.h libmdocml.h
 

@@ -115,14 +115,14 @@ html_It_headtagname(struct md_mbuf *mbuf, struct htmlq *q,
 		const int *argc, const char **argv, size_t *res)
 {
 	struct htmlnode	*n;
-	int		 i, c;
+	int		 i;
 
 	for (n = q->last; n; n = n->parent)
 		if (n->tok == ROFF_Bl)
 			break;
 
 	assert(n);
-	for (i = 0; ROFF_ARGMAX != (c = n->argc[i]) &&
+	for (i = 0; ROFF_ARGMAX != n->argc[i] &&
 			i < ROFF_MAXLINEARG; i++) {
 		switch (n->argc[i]) {
 		case (ROFF_Tag):
@@ -148,14 +148,14 @@ html_It_bodytagname(struct md_mbuf *mbuf, struct htmlq *q,
 		const int *argc, const char **argv, size_t *res)
 {
 	struct htmlnode	*n;
-	int		 i, c;
+	int		 i;
 
 	for (n = q->last; n; n = n->parent)
 		if (n->tok == ROFF_Bl)
 			break;
 
 	assert(n);
-	for (i = 0; ROFF_ARGMAX != (c = n->argc[i]) &&
+	for (i = 0; ROFF_ARGMAX != n->argc[i] &&
 			i < ROFF_MAXLINEARG; i++) {
 		switch (n->argc[i]) {
 		case (ROFF_Enum):
@@ -198,9 +198,9 @@ static int
 html_Bl_bodytagname(struct md_mbuf *mbuf, struct htmlq *q, 
 		const int *argc, const char **argv, size_t *res)
 {
-	int		 c, i;
+	int		 i;
 
-	for (i = 0; ROFF_ARGMAX != (c = argc[i])
+	for (i = 0; ROFF_ARGMAX != argc[i]
 			&& i < ROFF_MAXLINEARG; i++) {
 		switch (argc[i]) {
 		case (ROFF_Enum):
@@ -242,14 +242,14 @@ html_It_blocktagname(struct md_mbuf *mbuf, struct htmlq *q,
 		const int *argc, const char **argv, size_t *res)
 {
 	struct htmlnode	*n;
-	int		 i, c;
+	int		 i;
 
 	for (n = q->last; n; n = n->parent)
 		if (n->tok == ROFF_Bl)
 			break;
 
 	assert(n);
-	for (i = 0; ROFF_ARGMAX != (c = n->argc[i]) &&
+	for (i = 0; ROFF_ARGMAX != n->argc[i] &&
 			i < ROFF_MAXLINEARG; i++) {
 		switch (n->argc[i]) {
 		case (ROFF_Enum):
@@ -554,7 +554,7 @@ html_begintag(struct md_mbuf *mbuf, void *data,
 	size_t		 res;
 	struct htmlq	*q;
 	struct htmlnode	*node;
-	int		 i, c;
+	int		 i;
 
 	assert(ns != MD_NS_DEFAULT);
 	res = 0;
@@ -575,7 +575,7 @@ html_begintag(struct md_mbuf *mbuf, void *data,
 		/* TODO: argv. */
 
 		assert(argv);
-		for (i = 0; ROFF_ARGMAX != (c = argc[i]) 
+		for (i = 0; ROFF_ARGMAX != argc[i]
 				&& i < ROFF_MAXLINEARG; i++) 
 			node->argc[i] = argc[i];
 		assert(i != ROFF_MAXLINEARG);
