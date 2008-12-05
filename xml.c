@@ -16,6 +16,7 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -24,6 +25,8 @@
 #include "ml.h"
 
 
+static	int		xml_alloc(void **);
+static	void		xml_free(void *);
 static	ssize_t		xml_endtag(struct md_mbuf *, void *,
 				const struct md_args *, 
 				enum md_ns, int);
@@ -38,6 +41,75 @@ static	int		xml_begin(struct md_mbuf *,
 				const char *, const char *);
 static	int		xml_end(struct md_mbuf *, 
 				const struct md_args *);
+static	ssize_t 	xml_printtagname(struct md_mbuf *, 
+				enum md_ns, int);
+static	ssize_t 	xml_printtagargs(struct md_mbuf *, 
+				const int *, const char **);
+
+
+static ssize_t 
+xml_printtagargs(struct md_mbuf *mbuf, const int *argc,
+		const char **argv)
+{
+	int		 i, c;
+	size_t		 res;
+
+	if (NULL == argc || NULL == argv)
+		return(0);
+	assert(argc && argv);
+
+	for (res = 0, i = 0; ROFF_ARGMAX != (c = argc[i]); i++) {
+		if ( ! ml_nputs(mbuf, " ", 1, &res))
+			return(-1);
+
+		if ( ! ml_puts(mbuf, tokargnames[c], &res))
+			return(-1);
+		if ( ! ml_nputs(mbuf, "=\"", 2, &res))
+			return(-1);
+		if (argv[i]) {
+			if ( ! ml_putstring(mbuf, argv[i], &res))
+				return(-1);
+		} else if ( ! ml_nputs(mbuf, "true", 4, &res))
+			return(-1);
+		if ( ! ml_nputs(mbuf, "\"", 1, &res))
+			return(-1);
+	}
+
+	return((ssize_t)res);
+}
+
+
+static ssize_t 
+xml_printtagname(struct md_mbuf *mbuf, enum md_ns ns, int tok)
+{
+	size_t		 res;
+
+	res = 0;
+	switch (ns) {
+	case (MD_NS_BLOCK):
+		if ( ! ml_nputs(mbuf, "block:", 6, &res))
+			return(-1);
+		break;
+	case (MD_NS_INLINE):
+		if ( ! ml_nputs(mbuf, "inline:", 7, &res))
+			return(-1);
+		break;
+	case (MD_NS_BODY):
+		if ( ! ml_nputs(mbuf, "body:", 5, &res))
+			return(-1);
+		break;
+	case (MD_NS_HEAD):
+		if ( ! ml_nputs(mbuf, "head:", 5, &res))
+			return(-1);
+		break;
+	default:
+		break;
+	}
+
+	if ( ! ml_puts(mbuf, toknames[tok], &res))
+		return(-1);
+	return((ssize_t)res);
+}
 
 
 /* ARGSUSED */
@@ -47,17 +119,13 @@ xml_begin(struct md_mbuf *mbuf, const struct md_args *args,
 		const char *title, const char *section, 
 		const char *vol)
 {
-	size_t		 res;
 
 	if ( ! ml_puts(mbuf, "<?xml version=\"1.0\" "
-				"encoding=\"UTF-8\"?>\n", &res))
+				"encoding=\"UTF-8\"?>\n", NULL))
 		return(0);
-	if ( ! ml_puts(mbuf, "<mdoc xmlns:block=\"block\" "
+	return(ml_puts(mbuf, "<mdoc xmlns:block=\"block\" "
 				"xmlns:special=\"special\" "
-				"xmlns:inline=\"inline\">", &res))
-		return(0);
-
-	return(1);
+				"xmlns:inline=\"inline\">", NULL));
 }
 
 
@@ -65,13 +133,8 @@ xml_begin(struct md_mbuf *mbuf, const struct md_args *args,
 static int 
 xml_end(struct md_mbuf *mbuf, const struct md_args *args)
 {
-	size_t		 res;
 
-	res = 0;
-	if ( ! ml_puts(mbuf, "</mdoc>", &res))
-		return(0);
-
-	return(1);
+	return(ml_puts(mbuf, "</mdoc>", NULL));
 }
 
 
@@ -81,37 +144,13 @@ xml_begintag(struct md_mbuf *mbuf, void *data,
 		const struct md_args *args, enum md_ns ns, 
 		int tok, const int *argc, const char **argv)
 {
-	size_t		 res;
+	ssize_t		 res, sz;
 
-	/* FIXME: doesn't print arguments! */
-
-	res = 0;
-
-	switch (ns) {
-	case (MD_NS_BLOCK):
-		if ( ! ml_nputs(mbuf, "block:", 6, &res))
-			return(-1);
-		break;
-	case (MD_NS_BODY):
-		if ( ! ml_nputs(mbuf, "body:", 5, &res))
-			return(-1);
-		break;
-	case (MD_NS_HEAD):
-		if ( ! ml_nputs(mbuf, "head:", 5, &res))
-			return(-1);
-		break;
-	case (MD_NS_INLINE):
-		if ( ! ml_nputs(mbuf, "inline:", 7, &res))
-			return(-1);
-		break;
-	default:
-		break;
-	}
-
-	if ( ! ml_puts(mbuf, toknames[tok], &res))
+	if (-1 == (res = xml_printtagname(mbuf, ns, tok)))
 		return(-1);
-
-	return((ssize_t)res);
+	if (-1 == (sz = xml_printtagargs(mbuf, argc, argv)))
+		return(-1);
+	return(res + sz);
 }
 
 
@@ -120,35 +159,26 @@ static ssize_t
 xml_endtag(struct md_mbuf *mbuf, void *data,
 		const struct md_args *args, enum md_ns ns, int tok)
 {
-	size_t		 res;
 
-	res = 0;
+	return(xml_printtagname(mbuf, ns, tok));
+}
 
-	switch (ns) {
-	case (MD_NS_BLOCK):
-		if ( ! ml_nputs(mbuf, "block:", 6, &res))
-			return(-1);
-		break;
-	case (MD_NS_INLINE):
-		if ( ! ml_nputs(mbuf, "inline:", 7, &res))
-			return(-1);
-		break;
-	case (MD_NS_BODY):
-		if ( ! ml_nputs(mbuf, "body:", 5, &res))
-			return(-1);
-		break;
-	case (MD_NS_HEAD):
-		if ( ! ml_nputs(mbuf, "head:", 5, &res))
-			return(-1);
-		break;
-	default:
-		break;
-	}
 
-	if ( ! ml_puts(mbuf, toknames[tok], &res))
-		return(-1);
+/* ARGSUSED */
+int
+xml_alloc(void **p)
+{
 
-	return((ssize_t)res);
+	return(1);
+}
+
+
+/* ARGSUSED */
+void
+xml_free(void *p)
+{
+
+	/* Do nothing. */
 }
 
 
@@ -172,8 +202,15 @@ void *
 md_init_xml(const struct md_args *args,
 		struct md_mbuf *mbuf, const struct md_rbuf *rbuf)
 {
+	struct ml_cbs	 cbs;
 
-	return(mlg_alloc(args, NULL, rbuf, mbuf, xml_begintag, 
-				xml_endtag, xml_begin, xml_end));
+	cbs.ml_alloc = xml_alloc;
+	cbs.ml_free = xml_free;
+	cbs.ml_begintag = xml_begintag;
+	cbs.ml_endtag = xml_endtag;
+	cbs.ml_begin = xml_begin;
+	cbs.ml_end = xml_end;
+
+	return(mlg_alloc(args, rbuf, mbuf, &cbs));
 }
 

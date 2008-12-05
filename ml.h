@@ -29,16 +29,24 @@ enum	md_ns {
 	MD_NS_DEFAULT,
 };
 
-typedef	int	(*ml_begin)(struct md_mbuf *, const struct md_args *,
-			const struct tm *, const char *, const char *,
+struct	ml_cbs {
+	int	(*ml_begin)(struct md_mbuf *, 
+			const struct md_args *,
+			const struct tm *, 
+			const char *, const char *,
 			const char *, const char *);
-typedef	int	(*ml_end)(struct md_mbuf *, 
+	int	(*ml_end)(struct md_mbuf *, 
 			const struct md_args *);
-typedef	ssize_t	(*ml_endtag)(struct md_mbuf *, void *,
-			const struct md_args *, enum md_ns, int);
-typedef	ssize_t	(*ml_begintag)(struct md_mbuf *, void *,
-			const struct md_args *, enum md_ns, int, 
+	ssize_t	(*ml_endtag)(struct md_mbuf *, 
+			void *, const struct md_args *, 
+			enum md_ns, int);
+	ssize_t	(*ml_begintag)(struct md_mbuf *, 
+			void *, const struct md_args *, 
+			enum md_ns, int, 
 			const int *, const char **);
+	int	(*ml_alloc)(void **);
+	void	(*ml_free)(void *);
+};
 
 __BEGIN_DECLS
 
@@ -52,9 +60,9 @@ int		  ml_puts(struct md_mbuf *, const char *, size_t *);
 int		  ml_putchars(struct md_mbuf *, 
 			char, size_t, size_t *);
 
-struct md_mlg	 *mlg_alloc(const struct md_args *, void *,
+struct md_mlg	 *mlg_alloc(const struct md_args *, 
 			const struct md_rbuf *, struct md_mbuf *,
-			ml_begintag, ml_endtag, ml_begin, ml_end);
+			const struct ml_cbs *);
 int		  mlg_exit(struct md_mlg *, int);
 int		  mlg_line(struct md_mlg *, char *);
 

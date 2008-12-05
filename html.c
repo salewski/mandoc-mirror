@@ -33,7 +33,6 @@
 
 
 /* TODO: allow head/tail-less invocations (just "div" start). */
-/* FIXME: free htmlq. */
 
 struct	htmlnode {
 	int		 tok;
@@ -49,11 +48,10 @@ struct	htmlq {
 };
 
 
-static	void		htmlnode_free(struct htmlnode *);
-static	void		htmlnode_free(struct htmlnode *);
-
 static	int		html_loadcss(struct md_mbuf *, const char *);
 
+static	int		html_alloc(void **);
+static	void		html_free(void *);
 static	ssize_t		html_endtag(struct md_mbuf *, void *,
 				const struct md_args *, 
 				enum md_ns, int);
@@ -210,13 +208,8 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 static int 
 html_end(struct md_mbuf *mbuf, const struct md_args *args)
 {
-	size_t		 res;
 
-	res = 0;
-	if ( ! ml_puts(mbuf, "</div></body>\n</html>", &res))
-		return(0);
-
-	return(1);
+	return(ml_puts(mbuf, "</div></body>\n</html>", NULL));
 }
 
 
@@ -228,8 +221,6 @@ html_blockbodytagname(struct md_mbuf *mbuf,
 
 	return(ml_puts(mbuf, "div", res));
 }
-
-
 
 
 /* ARGSUSED */
@@ -252,11 +243,11 @@ html_blocktagname(struct md_mbuf *mbuf,
 }
 
 
+/* ARGSUSED */
 static int
 html_printargs(struct md_mbuf *mbuf, int tok, const char *ns,
 		const int *argc, const char **argv, size_t *res)
 {
-	int		 i, c;
 
 	if ( ! ml_puts(mbuf, " class=\"", res))
 		return(0);
@@ -266,35 +257,7 @@ html_printargs(struct md_mbuf *mbuf, int tok, const char *ns,
 		return(0);
 	if ( ! ml_puts(mbuf, toknames[tok], res))
 		return(0);
-	if ( ! ml_puts(mbuf, "\"", res))
-		return(0);
-
-	if (NULL == argv || NULL == argc)
-		return(1);
-	assert(argv && argc);
-	
-	/* FIXME: ignores values. */
-
-	for (i = 0; ROFF_ARGMAX != (c = argc[i]); i++) {
-		if (argv[i])
-			continue;
-		if ( ! ml_puts(mbuf, " class=\"", res))
-			return(0);
-		if ( ! ml_puts(mbuf, ns, res))
-			return(0);
-		if ( ! ml_puts(mbuf, "-", res))
-			return(0);
-		if ( ! ml_puts(mbuf, toknames[tok], res))
-			return(0);
-		if ( ! ml_puts(mbuf, "-", res))
-			return(0);
-		if ( ! ml_puts(mbuf, tokargnames[c], res))
-			return(0);
-		if ( ! ml_puts(mbuf, "\"", res))
-			return(0);
-	}
-
-	return(1);
+	return(ml_puts(mbuf, "\"", res));
 }
 
 
@@ -352,9 +315,10 @@ html_inlinetagname(struct md_mbuf *mbuf,
 	case (ROFF_Pp):
 		return(ml_puts(mbuf, "div", res));
 	default:
-		return(ml_puts(mbuf, "span", res));
+		break;
 	}
-	return(1);
+
+	return(ml_puts(mbuf, "span", res));
 }
 
 
@@ -455,9 +419,39 @@ html_endtag(struct md_mbuf *mbuf, void *data,
 	node = q->last;
 	q->last = node->parent;
 
-	htmlnode_free(node);
+	free(node);
 
 	return((ssize_t)res);
+}
+
+
+static int
+html_alloc(void **p)
+{
+
+	if (NULL == (*p = calloc(1, sizeof(struct htmlq)))) {
+		warn("calloc");
+		return(0);
+	}
+	return(1);
+}
+
+
+static void
+html_free(void *p)
+{
+	struct htmlq	*q;
+	struct htmlnode	*n;
+
+	assert(p);
+	q = (struct htmlq *)p;
+
+	while ((n = q->last)) {
+		q->last = n->parent;
+		free(n);
+	}
+
+	free(q);
 }
 
 
@@ -481,14 +475,15 @@ void *
 md_init_html(const struct md_args *args,
 		struct md_mbuf *mbuf, const struct md_rbuf *rbuf)
 {
-	struct htmlq	*q;
+	struct ml_cbs	 cbs;
 
-	if (NULL == (q = calloc(1, sizeof(struct htmlq)))) {
-		warn("calloc");
-		return(NULL);
-	}
+	cbs.ml_alloc = html_alloc;
+	cbs.ml_free = html_free;
+	cbs.ml_begintag = html_begintag;
+	cbs.ml_endtag = html_endtag;
+	cbs.ml_begin = html_begin;
+	cbs.ml_end = html_end;
 
-	return(mlg_alloc(args, q, rbuf, mbuf, html_begintag, 
-				html_endtag, html_begin, html_end));
+	return(mlg_alloc(args, rbuf, mbuf, &cbs));
 }
 

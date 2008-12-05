@@ -51,10 +51,7 @@ struct	md_mlg {
 	size_t		  pos;
 	enum md_tok	  last;
 	void		 *arg;
-	ml_begintag	  begintag;
-	ml_endtag	  endtag;
-	ml_begin	  begin;
-	ml_end		  end;
+	struct ml_cbs	  cbs;
 	int		  flags;
 #define	ML_OVERRIDE_ONE	 (1 << 0)
 #define	ML_OVERRIDE_ALL	 (1 << 1)
@@ -145,7 +142,7 @@ mlg_begintag(struct md_mlg *p, enum md_ns ns, int tok,
 	if ( ! ml_nputs(p->mbuf, "<", 1, &p->pos))
 		return(0);
 
-	res = (*p->begintag)(p->mbuf, p->data, p->args, ns, tok,
+	res = (*p->cbs.ml_begintag)(p->mbuf, p->data, p->args, ns, tok,
 			argc, (const char **)argv);
 	if (-1 == res)
 		return(0);
@@ -194,7 +191,7 @@ mlg_endtag(struct md_mlg *p, enum md_ns ns, int tok)
 	if ( ! ml_nputs(p->mbuf, "</", 2, &p->pos))
 		return(0);
 
-	res = (*p->endtag)(p->mbuf, p->data, p->args, ns, tok);
+	res = (*p->cbs.ml_endtag)(p->mbuf, p->data, p->args, ns, tok);
 	if (-1 == res)
 		return(0);
 
@@ -234,12 +231,9 @@ mlg_indent(struct md_mlg *p)
 static int
 mlg_newline(struct md_mlg *p)
 {
-	size_t		 dummy;
 
-	if ( ! ml_nputs(p->mbuf, "\n", 1, &dummy))
-		return(0);
 	p->pos = 0;
-	return(1);
+	return(ml_nputs(p->mbuf, "\n", 1, NULL));
 }
 
 
@@ -329,16 +323,18 @@ mlg_exit(struct md_mlg *p, int flush)
 
 	c = roff_free(p->tree, flush);
 	free(p);
+
+	(*p->cbs.ml_free)(p->data);
+
 	return(c);
 }
 
 
 struct md_mlg *
-mlg_alloc(const struct md_args *args, void *data,
+mlg_alloc(const struct md_args *args, 
 		const struct md_rbuf *rbuf,
 		struct md_mbuf *mbuf, 
-		ml_begintag begintag, ml_endtag endtag,
-		ml_begin begin, ml_end end)
+		const struct ml_cbs *cbs)
 {
 	struct roffcb	 cb;
 	struct md_mlg	*p;
@@ -363,18 +359,17 @@ mlg_alloc(const struct md_args *args, void *data,
 	p->args = args;
 	p->mbuf = mbuf;
 	p->rbuf = rbuf;
-	p->begintag = begintag;
-	p->endtag = endtag;
-	p->begin = begin;
-	p->end = end;
-	p->data = data;
 
-	if (NULL == (p->tree = roff_alloc(&cb, p))) {
+	(void)memcpy(&p->cbs, cbs, sizeof(struct ml_cbs));
+
+	if (NULL == (p->tree = roff_alloc(&cb, p))) 
 		free(p);
-		return(NULL);
-	}
+	else if ( ! (*p->cbs.ml_alloc)(&p->data))
+		free(p);
+	else
+		return(p);
 
-	return(p);
+	return(NULL);
 }
 
 
@@ -388,7 +383,8 @@ mlg_roffhead(void *arg, const struct tm *tm, const char *os,
 	p = (struct md_mlg *)arg;
 
 	mlg_mode(p, MD_BLK_IN);
-	if ( ! (*p->begin)(p->mbuf, p->args, tm, os, title, sec, vol))
+
+	if ( ! (*p->cbs.ml_begin)(p->mbuf, p->args, tm, os, title, sec, vol))
 		return(0);
 
 	p->indent++;
@@ -404,12 +400,14 @@ mlg_rofftail(void *arg)
 	assert(arg);
 	p = (struct md_mlg *)arg;
 
-	if (0 != p->pos && ! mlg_newline(p))
+	if (0 != p->pos)
+		if ( ! mlg_newline(p))
+			return(0);
+
+	if ( ! (*p->cbs.ml_end)(p->mbuf, p->args))
 		return(0);
 
 	mlg_mode(p, MD_BLK_OUT);
-	if ( ! (*p->end)(p->mbuf, p->args))
-		return(0);
 
 	return(mlg_newline(p));
 }
@@ -557,6 +555,7 @@ mlg_roffdata(void *arg, int space, const char *start, char *buf)
 		return(0);
 
 	mlg_mode(p, MD_TEXT);
+
 	return(1);
 }
 

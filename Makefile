@@ -37,8 +37,14 @@ lint: llib-lmdocml.ln
 dist: mdocml.tgz
 
 regress: mdocml
-	@for f in $(FAIL); do ./mdocml $$f 1>/dev/null 2>/dev/null || continue ; done
-	@for f in $(SUCCEED); do ./mdocml $$f 1>/dev/null || exit 1 ; done
+	@for f in $(FAIL); do \
+		echo "./mdocml $$f" ; \
+		./mdocml $$f 1>/dev/null 2>/dev/null || continue ; \
+	done
+	@for f in $(SUCCEED); do \
+		echo "./mdocml $$f" ; \
+		./mdocml $$f 1>/dev/null || exit 1 ; \
+	done
 
 mdocml: mdocml.o libmdocml.a
 	$(CC) $(CFLAGS) -o $@ mdocml.o libmdocml.a

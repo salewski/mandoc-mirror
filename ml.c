@@ -51,10 +51,8 @@ ml_nputstring(struct md_mbuf *p,
 
 		/* Escaped value. */
 		case ('\\'):
-			if (-1 == (v = rofftok_scan(buf, &i))) {
-				/* TODO: error. */
+			if (-1 == (v = rofftok_scan(buf, &i)))
 				return(0);
-			}
 
 			switch (v) {
 			case (ROFFTok_Sp_A):
@@ -178,8 +176,7 @@ ml_nputstring(struct md_mbuf *p,
 				ssz = 0;
 				break;
 			default:
-				/* TODO: print error. */
-				return(-1);
+				return(0);
 			}
 			break;
 
@@ -230,7 +227,8 @@ ml_nputs(struct md_mbuf *p, const char *buf, size_t sz, size_t *pos)
 	if ( ! md_buf_puts(p, buf, sz))
 		return(0);
 
-	*pos += sz;
+	if (pos)
+		*pos += sz;
 	return(1);
 }
 
@@ -245,7 +243,9 @@ ml_puts(struct md_mbuf *p, const char *buf, size_t *pos)
 
 	if ( ! md_buf_puts(p, buf, sz))
 		return(0);
-	*pos += sz;
+
+	if (pos)
+		*pos += sz;
 	return(1);
 }
 
