@@ -92,7 +92,8 @@ static	int 		  roffparse(struct rofftree *, char *);
 static	int		  textparse(struct rofftree *, char *);
 static	int		  roffdata(struct rofftree *, int, char *);
 static	int		  roffspecial(struct rofftree *, int, 
-				const char *, size_t, char **);
+				const char *, const int *,
+				const char **, size_t, char **);
 static	int		  roffsetname(struct rofftree *, char **);
 
 #ifdef __linux__ 
@@ -618,8 +619,9 @@ roffnode_free(struct rofftree *tree)
 
 
 static int
-roffspecial(struct rofftree *tree, int tok, 
-		const char *start, size_t sz, char **ordp)
+roffspecial(struct rofftree *tree, int tok, const char *start, 
+		const int *argc, const char **argv, 
+		size_t sz, char **ordp)
 {
 
 	switch (tok) {
@@ -689,8 +691,8 @@ roffspecial(struct rofftree *tree, int tok,
 		break;
 	}
 
-	return((*tree->cb.roffspecial)
-			(tree->arg, tok, tree->cur, ordp));
+	return((*tree->cb.roffspecial)(tree->arg, tok, 
+				tree->cur, argc, argv, ordp));
 }
 
 
@@ -987,7 +989,7 @@ roff_Ns(ROFFCALL_ARGS)
 	first = (*argv++ == tree->cur);
 	morep[0] = NULL;
 
-	if ( ! roffspecial(tree, tok, *argv, 0, morep))
+	if ( ! roffspecial(tree, tok, *argv, NULL, NULL, 0, morep))
 		return(0);
 
 	while (*argv) {
@@ -1199,7 +1201,8 @@ roff_ordered(ROFFCALL_ARGS)
 		return(0);
 
 	if (NULL == *argv)
-		return(roffspecial(tree, tok, p, 0, ordp));
+		return(roffspecial(tree, tok, p, argcp, 
+					(const char **)argvp, 0, ordp));
 
 	i = 0;
 	while (*argv && i < ROFF_MAXLINEARG) {
@@ -1215,7 +1218,9 @@ roff_ordered(ROFFCALL_ARGS)
 		if (ROFF_MAX == c)
 			break;
 
-		if ( ! roffspecial(tree, tok, p, (size_t)i, ordp))
+		if ( ! roffspecial(tree, tok, p, argcp, 
+					(const char **)argvp,
+					(size_t)i, ordp))
 			return(0);
 
 		return(roffcall(tree, c, argv));
@@ -1224,7 +1229,9 @@ roff_ordered(ROFFCALL_ARGS)
 	assert(i != ROFF_MAXLINEARG);
 	ordp[i] = NULL;
 
-	if ( ! roffspecial(tree, tok, p, (size_t)i, ordp))
+	if ( ! roffspecial(tree, tok, p, argcp, 
+				(const char**)argvp,
+				(size_t)i, ordp))
 		return(0);
 
 	/* FIXME: error if there's stuff after the punctuation. */

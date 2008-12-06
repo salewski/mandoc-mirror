@@ -62,6 +62,7 @@ struct	md_mlg {
 
 static	char		*mlg_literal(int);
 static	char		*mlg_At_literal(const char *);
+static	char 		*mlg_St_literal(int);
 static	void		 mlg_roffmsg(void *arg, enum roffmsg, 
 				const char *, const char *, char *);
 static	int		 mlg_roffhead(void *, const struct tm *, 
@@ -75,7 +76,8 @@ static	int		 mlg_roffout(void *, int);
 static	int		 mlg_roffblkin(void *, int, int *, char **);
 static	int		 mlg_roffblkout(void *, int);
 static	int		 mlg_roffspecial(void *, int, 
-				const char *, char **);
+				const char *, const int *,
+				const char **, char **);
 static	int		 mlg_roffblkheadin(void *, int, 
 				int *, char **);
 static	int		 mlg_roffblkheadout(void *, int);
@@ -105,6 +107,94 @@ static	void		 mlg_vmsg(struct md_mlg *, enum roffmsg,
 extern	size_t		 strlcat(char *, const char *, size_t);
 extern	size_t		 strlcpy(char *, const char *, size_t);
 #endif
+
+
+static char *
+mlg_St_literal(int argc)
+{
+
+	switch (argc) {
+	case(ROFF_p1003_1_88):
+		return("IEEE Std 1003.1-1988 (&#8220;POSIX&#8221;)");
+	case(ROFF_p1003_1_90):
+		return("IEEE Std 1003.1-1990 (&#8220;POSIX&#8221;)");
+	case(ROFF_p1003_1_96):
+		return("ISO/IEC 9945-1:1996 (&#8220;POSIX&#8221;)");
+	case(ROFF_p1003_1_2001):
+		return("IEEE Std 1003.1-2001 (&#8220;POSIX&#8221;)");
+	case(ROFF_p1003_1_2004):
+		return("IEEE Std 1003.1-2004 (&#8220;POSIX&#8221;)");
+	case(ROFF_p1003_1):
+		return("IEEE Std 1003.1 (&#8220;POSIX&#8221;)");
+	case(ROFF_p1003_1b):
+		return("IEEE Std 1003.1b (&#8220;POSIX&#8221;)");
+	case(ROFF_p1003_1b_93):
+		return("IEEE Std 1003.1b-1993 (&#8220;POSIX&#8221;)");
+	case(ROFF_p1003_1c_95):
+		return("IEEE Std 1003.1c-1995 (&#8220;POSIX&#8221;)");
+	case(ROFF_p1003_1g_2000):
+		return("IEEE Std 1003.1g-2000 (&#8220;POSIX&#8221;)");
+	case(ROFF_p1003_2_92):
+		return("IEEE Std 1003.2-1992 (&#8220;POSIX.2&#8221;)");
+	case(ROFF_p1387_2_95):
+		return("IEEE Std 1387.2-1995 (&#8220;POSIX.7.2&#8221;)");
+	case(ROFF_p1003_2):
+		return("IEEE Std 1003.2 (&#8220;POSIX.2&#8221;)");
+	case(ROFF_p1387_2):
+		return("IEEE Std 1387.2 (&#8220;POSIX.7.2&#8221;)");
+	case(ROFF_isoC_90):
+		return("ISO/IEC 9899:1990 (&#8220;ISO C90&#8221;)");
+	case(ROFF_isoC_amd1):
+		return("ISO/IEC 9899/AMD1:1995 (&#8220;ISO C90&#8221;)");
+	case(ROFF_isoC_tcor1):
+		return("ISO/IEC 9899/TCOR1:1994 (&#8220;ISO C90&#8221;)");
+	case(ROFF_isoC_tcor2):
+		return("ISO/IEC 9899/TCOR2:1995 (&#8220;ISO C90&#8221;)");
+	case(ROFF_isoC_99):
+		return("ISO/IEC 9899:1999 (&#8220;ISO C99&#8221;)");
+	case(ROFF_ansiC):
+		return("ANSI X3.159-1989 (&#8220;ANSI C&#8221;)");
+	case(ROFF_ansiC_89):
+		return("ANSI X3.159-1989 (&#8220;ANSI C&#8221;)");
+	case(ROFF_ansiC_99):
+		return("ANSI/ISO/IEC 9899-1999 (&#8220;ANSI C99&#8221;)");
+	case(ROFF_ieee754):
+		return("IEEE Std 754-1985");
+	case(ROFF_iso8802_3):
+		return("ISO 8802-3: 1989");
+	case(ROFF_xpg3):
+		return("X/Open Portability Guide Issue 3 (&#8220;XPG3&#8221;)");
+	case(ROFF_xpg4):
+		return("X/Open Portability Guide Issue 4 (&#8220;XPG4&#8221;)");
+	case(ROFF_xpg4_2):
+		return("X/Open Portability Guide Issue 4.2 (&#8220;XPG4.2&#8221;)");
+	case(ROFF_xpg4_3):
+		return("X/Open Portability Guide Issue 4.3 (&#8220;XPG4.3&#8221;)");
+	case(ROFF_xbd5):
+		return("X/Open System Interface Definitions Issue 5 (&#8220;XBD5&#8221;)");
+	case(ROFF_xcu5):
+		return("X/Open Commands and Utilities Issue 5 (&#8220;XCU5&#8221;)");
+	case(ROFF_xsh5):
+		return("X/Open System Interfaces and Headers Issue 5 (&#8220;XSH5&#8221;)");
+	case(ROFF_xns5):
+		return("X/Open Networking Services Issue 5 (&#8220;XNS5&#8221;)");
+	case(ROFF_xns5_2d2_0):
+		return("X/Open Networking Services Issue 5.2 Draft 2.0 (&#8220;XNS5.2D2.0&#8221;)");
+	case(ROFF_xcurses4_2):
+		return("X/Open Curses Issue 4 Version 2 (&#8220;XCURSES4.2&#8221;)");
+	case(ROFF_susv2):
+		return("Version 2 of the Single UNIX Specification");
+	case(ROFF_susv3):
+		return("Version 3 of the Single UNIX Specification");
+	case(ROFF_svid4):
+		return("System V Interface Definition, Fourth Edition (&#8220;SVID4&#8221;)");
+	default:
+		break;
+	}
+
+	abort();
+	/* NOTREACHED */
+}
 
 
 static char *
@@ -468,8 +558,10 @@ mlg_rofftail(void *arg)
 }
 
 
+/* ARGSUSED */
 static int
-mlg_roffspecial(void *arg, int tok, const char *start, char **more)
+mlg_roffspecial(void *arg, int tok, const char *start, 
+		const int *argc, const char **argv, char **more)
 {
 	struct md_mlg	*p;
 
@@ -499,6 +591,20 @@ mlg_roffspecial(void *arg, int tok, const char *start, char **more)
 		return(0);
 
 	switch (tok) {
+	case (ROFF_St):
+		assert(NULL == *argv);
+		assert(ROFF_ARGMAX != *argc);
+		if ( ! ml_puts(p->mbuf, mlg_St_literal(*argc),
+					&p->pos))
+			return(0);
+		while (*more) { 
+			if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
+				return(0);
+			if ( ! ml_putstring(p->mbuf, *more++, &p->pos))
+				return(0);
+		}
+		break;
+
 	case (ROFF_Xr):
 		if ( ! *more) {
 			mlg_err(p, start, start, "missing argument");

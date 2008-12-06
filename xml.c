@@ -58,6 +58,7 @@ xml_printtagargs(struct md_mbuf *mbuf, const int *argc,
 		return(0);
 	assert(argc && argv);
 
+	/* LINTED */
 	for (res = 0, i = 0; ROFF_ARGMAX != (c = argc[i]); i++) {
 		if ( ! ml_nputs(mbuf, " ", 1, &res))
 			return(-1);

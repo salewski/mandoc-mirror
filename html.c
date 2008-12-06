@@ -122,6 +122,8 @@ html_It_headtagname(struct md_mbuf *mbuf, struct htmlq *q,
 			break;
 
 	assert(n);
+
+	/* LINTED */
 	for (i = 0; ROFF_ARGMAX != n->argc[i] &&
 			i < ROFF_MAXLINEARG; i++) {
 		switch (n->argc[i]) {
@@ -155,6 +157,8 @@ html_It_bodytagname(struct md_mbuf *mbuf, struct htmlq *q,
 			break;
 
 	assert(n);
+
+	/* LINTED */
 	for (i = 0; ROFF_ARGMAX != n->argc[i] &&
 			i < ROFF_MAXLINEARG; i++) {
 		switch (n->argc[i]) {
@@ -249,6 +253,8 @@ html_It_blocktagname(struct md_mbuf *mbuf, struct htmlq *q,
 			break;
 
 	assert(n);
+
+	/* LINTED */
 	for (i = 0; ROFF_ARGMAX != n->argc[i] &&
 			i < ROFF_MAXLINEARG; i++) {
 		switch (n->argc[i]) {
@@ -549,6 +555,7 @@ html_inlinetagargs(struct md_mbuf *mbuf,
 			return(0);
 		if ( ! ml_nputs(mbuf, "\"", 1, res))
 			return(0);
+		break;
 	default:
 		break;
 	}
@@ -605,6 +612,7 @@ html_begintag(struct md_mbuf *mbuf, void *data,
 		/* TODO: argv. */
 
 		assert(argv);
+		/* LINTED */
 		for (i = 0; ROFF_ARGMAX != argc[i]
 				&& i < ROFF_MAXLINEARG; i++) 
 			node->argc[i] = argc[i];
@@ -721,6 +729,7 @@ html_free(void *p)
 	assert(p);
 	q = (struct htmlq *)p;
 
+	/* LINTED */
 	while ((n = q->last)) {
 		q->last = n->parent;
 		free(n);
