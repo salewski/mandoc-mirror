@@ -91,10 +91,9 @@ static	int		  roffcall(struct rofftree *, int, char **);
 static	int 		  roffparse(struct rofftree *, char *);
 static	int		  textparse(struct rofftree *, char *);
 static	int		  roffdata(struct rofftree *, int, char *);
-static	int		  roffspecial(struct rofftree *, int, char **);
+static	int		  roffspecial(struct rofftree *, int, 
+				const char *, size_t, char **);
 static	int		  roffsetname(struct rofftree *, char **);
-static	int		  roffgetname(struct rofftree *, char **,
-				const char *);
 
 #ifdef __linux__ 
 extern	size_t		  strlcat(char *, const char *, size_t);
@@ -619,11 +618,54 @@ roffnode_free(struct rofftree *tree)
 
 
 static int
-roffspecial(struct rofftree *tree, int tok, char **ordp)
+roffspecial(struct rofftree *tree, int tok, 
+		const char *start, size_t sz, char **ordp)
 {
 
-	return((*tree->cb.roffspecial)(tree->arg, tok, 
-				tree->cur, ordp));
+	switch (tok) {
+	case (ROFF_Nm):
+		if (0 == sz) {
+			if (0 == tree->name[0]) {
+				roff_err(tree, start, "`Nm' not set");
+				return(0);
+			}
+			ordp[0] = tree->name;
+			ordp[1] = NULL;
+		} else if ( ! roffsetname(tree, ordp))
+			return(0);
+		break;
+
+	case (ROFF_Ex):
+		if (0 == sz) {
+			roff_err(tree, start, "`Ex' expects an arg");
+			return(0);
+		} else if (1 != sz) {
+			roff_err(tree, start, "`Ex' expects one arg");
+			return(0);
+		}
+		break;
+
+	case (ROFF_Sm):
+		if (0 == sz) {
+			roff_err(tree, start, "`Sm' expects an arg");
+			return(0);
+		} else if (1 != sz) {
+			roff_err(tree, start, "`Sm' expects one arg");
+			return(0);
+		} 
+		
+		if (0 != strcmp(ordp[0], "on") &&
+				0 != strcmp(ordp[0], "off")) {
+			roff_err(tree, start, "`Sm' has invalid argument");
+			return(0);
+		}
+		break;
+	default:
+		break;
+	}
+
+	return((*tree->cb.roffspecial)
+			(tree->arg, tok, tree->cur, ordp));
 }
 
 
@@ -888,19 +930,6 @@ roff_Dt(ROFFCALL_ARGS)
 
 
 static int
-roffgetname(struct rofftree *tree, char **ordp, const char *start)
-{
-	if (0 == tree->name[0]) {
-		roff_err(tree, start, "`Nm' name not set");
-		return(0);
-	}
-	*ordp++ = tree->name;
-	*ordp = NULL;
-	return(1);
-}
-
-
-static int
 roffsetname(struct rofftree *tree, char **ordp)
 {
 	
@@ -927,30 +956,12 @@ roffsetname(struct rofftree *tree, char **ordp)
 static int
 roff_Sm(ROFFCALL_ARGS)
 {
-	char		*morep[1], *p;
+	char		*ordp[1], *p;
 
 	p = *argv++;
+	*ordp = *argv;
 
-	if (NULL == (morep[0] = *argv++)) {
-		roff_err(tree, p, "`Sm' expects an argument");
-		return(0);
-	} else if (0 != strcmp(morep[0], "on") && 
-			0 != strcmp(morep[0], "off")) {
-		roff_err(tree, p, "`Sm' has invalid argument");
-		return(0);
-	}
-
-	if (*argv) 
-		roff_warn(tree, *argv, "`Sm' shouldn't have arguments");
-
-	if ( ! roffspecial(tree, tok, morep))
-		return(0);
-
-	while (*argv)
-		if ( ! roffdata(tree, 1, *argv++))
-			return(0);
-
-	return(1);
+	return(roffspecial(tree, tok, p, *ordp ? 1 : 0, ordp));
 }
 
 
@@ -964,7 +975,7 @@ roff_Ns(ROFFCALL_ARGS)
 	first = (*argv++ == tree->cur);
 	morep[0] = NULL;
 
-	if ( ! roffspecial(tree, tok, morep))
+	if ( ! roffspecial(tree, tok, *argv, 0, morep))
 		return(0);
 
 	while (*argv) {
@@ -1159,8 +1170,11 @@ roff_layout(ROFFCALL_ARGS)
 static int
 roff_ordered(ROFFCALL_ARGS) 
 {
-	int		 i, first, c;
-	char		*ordp[ROFF_MAXLINEARG];
+	/* FIXME: the tail-switch statement is in two different places:
+	 * consolidate. */
+	int		 i, first, c, argcp[ROFF_MAXLINEARG];
+	char		*ordp[ROFF_MAXLINEARG], *p,
+			*argvp[ROFF_MAXLINEARG];
 
 	if (ROFF_PRELUDE & tree->state) {
 		roff_err(tree, *argv, "`%s' disallowed in prelude", 
@@ -1169,21 +1183,13 @@ roff_ordered(ROFFCALL_ARGS)
 	}
 
 	first = (*argv == tree->cur);
-	argv++;
+	p = *argv++;
 
-	if (NULL == *argv) {
-		switch (tok) {
-		case (ROFF_Nm):
-			if ( ! roffgetname(tree, ordp, *(argv - 1)))
-				return(0);
-			break;
-		default:
-			*ordp = NULL;
-			break;
-		}
+	if ( ! roffparseopts(tree, tok, &argv, argcp, argvp))
+		return(0);
 
-		return(roffspecial(tree, tok, ordp));
-	}
+	if (NULL == *argv)
+		return(roffspecial(tree, tok, p, 0, ordp));
 
 	i = 0;
 	while (*argv && i < ROFF_MAXLINEARG) {
@@ -1198,16 +1204,7 @@ roff_ordered(ROFFCALL_ARGS)
 		if (ROFF_MAX == c)
 			break;
 
-		switch (tok) {
-		case (ROFF_Nm):
-			if ( ! roffsetname(tree, ordp))
-				return(0);
-			break;
-		default:
-			break;
-		}
-
-		if ( ! roffspecial(tree, tok, ordp))
+		if ( ! roffspecial(tree, tok, p, (size_t)i, ordp))
 			return(0);
 
 		return(roffcall(tree, c, ordp));
@@ -1216,16 +1213,7 @@ roff_ordered(ROFFCALL_ARGS)
 	assert(i != ROFF_MAXLINEARG);
 	ordp[i] = NULL;
 
-	switch (tok) {
-	case (ROFF_Nm):
-		if ( ! roffsetname(tree, ordp))
-			return(0);
-		break;
-	default:
-		break;
-	}
-
-	if ( ! roffspecial(tree, tok, ordp))
+	if ( ! roffspecial(tree, tok, p, (size_t)i, ordp))
 		return(0);
 
 	/* FIXME: error if there's stuff after the punctuation. */
