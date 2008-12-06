@@ -199,10 +199,10 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_noop, NULL, roffparent_Oc, NULL, ROFF_Oo, ROFF_LAYOUT, 0 }, /* Oc */
 	{ roff_layout, roffarg_Bk, NULL, NULL, 0, ROFF_LAYOUT, 0 }, /* Bk */
 	{   roff_noop, NULL, NULL, NULL, ROFF_Bk, ROFF_LAYOUT, 0 }, /* Ek */
-	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Bt */
+/*Ok*/	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Bt */
 	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Hf */
-	{   roff_depr, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Fr */
-	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Ud */
+/*Ok*/	{   roff_depr, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Fr */
+/*Ok*/	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Ud */
 	};
 
 #define	ROFF_VALUE	(1 << 0)

@@ -660,6 +660,16 @@ roffspecial(struct rofftree *tree, int tok,
 			return(0);
 		}
 		break;
+	
+	case (ROFF_Ud):
+		/* FALLTHROUGH */
+	case (ROFF_Bt):
+		if (0 != sz) {
+			roff_err(tree, start, "`%s' expects no args",
+					toknames[tok]);
+			return(0);
+		}
+		break;
 	default:
 		break;
 	}
@@ -1170,8 +1180,6 @@ roff_layout(ROFFCALL_ARGS)
 static int
 roff_ordered(ROFFCALL_ARGS) 
 {
-	/* FIXME: the tail-switch statement is in two different places:
-	 * consolidate. */
 	int		 i, first, c, argcp[ROFF_MAXLINEARG];
 	char		*ordp[ROFF_MAXLINEARG], *p,
 			*argvp[ROFF_MAXLINEARG];

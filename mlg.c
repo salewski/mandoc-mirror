@@ -426,6 +426,17 @@ mlg_roffspecial(void *arg, int tok, const char *start, char **more)
 	p = (struct md_mlg *)arg;
 
 	switch (tok) {
+	case (ROFF_Bt):
+		assert(NULL == *more);
+		if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, NULL))
+			return(0);
+		if ( ! ml_puts(p->mbuf, "is currently in beta "
+					"test.", &p->pos))
+			return(0);
+		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
+			return(0);
+		break;
+
 	case (ROFF_Xr):
 		if ( ! *more) {
 			mlg_err(p, start, start, "missing argument");
@@ -491,6 +502,17 @@ mlg_roffspecial(void *arg, int tok, const char *start, char **more)
 					"occurs.", &p->pos))
 			return(0);
 		assert(NULL == *more);
+		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
+			return(0);
+		break;
+
+	case (ROFF_Ud):
+		assert(NULL == *more);
+		if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, NULL))
+			return(0);
+		if ( ! ml_puts(p->mbuf, "currently under "
+					"development.", &p->pos))
+			return(0);
 		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
 			return(0);
 		break;
