@@ -3,8 +3,7 @@
 				  font-size: small; }
 	div.mdoc		{ width: 600px; }
 	div.block-Sh		{ margin-bottom: 20px; }
-	div.head-Sh		{ font-weight: bold;
-				  font-size: larger; }
+	div.head-Sh		{ font-weight: bold; }
 	div.head-Ss		{ font-weight: bold;	
 				  margin-top: 10px;
 				  text-align: justify; }
@@ -17,13 +16,29 @@
 	span.inline-Nm		{ font-weight: bolder; }
 	span.inline-Ar		{ text-decoration: underline; }
 	span.inline-Pa		{ text-decoration: underline; }
-	span.inline-Op:before	{ content: '['; }
-	span.inline-Op:after	{ content: ']'; }
 	div.block-Bl		{ margin-top: 10px;
 				  margin-left: 20px; }
 	div.inline-Pp		{ margin-bottom: 10px; }
+	span.inline-Sy		{ font-weight: bolder; }
+	span.inline-Tn		{ font-variant: small-caps; }
 	span.inline-D1		{ margin-left: 20px; }
-	span.inline-Qq:before	{ content: '\201c'; }
-	span.inline-Qq:after	{ content: '\201d'; }
+	span.head-Fo		{ font-weight: bolder; }
+	span.body-Fo:before	{ content: '('; }
+	span.body-Fo:after	{ content: ')'; }
+	span.body-Oo:before	{ content: '['; }
+	span.body-Oo:after	{ content: ']'; }
+	span.inline-Em		{ font-style: italic; }
+	span.inline-Op:before	{ content: '['; }
+	span.inline-Op:after	{ content: ']'; }
+	span.inline-Qq:before	{ content: '\"'; }
+	span.inline-Qq:after	{ content: '\"'; }
+	span.inline-Bq:before	{ content: '['; }
+	span.inline-Bq:after	{ content: ']'; }
+	span.inline-Dq:before	{ content: '\201c'; }
+	span.inline-Dq:after	{ content: '\201d'; }
+	span.inline-Pq:before	{ content: '('; }
+	span.inline-Pq:after	{ content: ')'; }
+	span.inline-Ql:before	{ content: '\2018'; }
+	span.inline-Ql:after	{ content: '\2019'; }
 	span.inline-Sq:before	{ content: '\2018'; }
 	span.inline-Sq:after	{ content: '\2019'; }

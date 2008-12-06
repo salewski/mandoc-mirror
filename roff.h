@@ -57,7 +57,6 @@ static	int		  roff_Dd(ROFFCALL_ARGS); /* FIXME: deprecate. */
 static	int		  roff_Dt(ROFFCALL_ARGS); /* FIXME: deprecate. */
 static	int		  roff_Os(ROFFCALL_ARGS); /* FIXME: deprecate. */
 static	int		  roff_Ns(ROFFCALL_ARGS); /* FIXME: deprecate. */
-static	int		  roff_Sm(ROFFCALL_ARGS); /* FIXME: deprecate. */
 static	int		  roff_layout(ROFFCALL_ARGS);
 static	int		  roff_text(ROFFCALL_ARGS);
 static	int		  roff_noop(ROFFCALL_ARGS);
@@ -152,53 +151,53 @@ static	const struct rofftok tokens[ROFF_MAX] = {
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ac */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ao */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Aq */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* At */ /* XXX at most 2 args */
+/*Ok*/	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* At */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Bc */
 	{ roff_layout, NULL, NULL, NULL, 0, ROFF_LAYOUT, 0 }, /* Bf */ /* FIXME */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Bo */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Bq */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bsx */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bx */
+/*Ok*/	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Bq */
+/*Ok*/	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bsx */
+/*Ok*/	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Bx */
 	{        NULL, NULL, NULL, NULL, 0, ROFF_SPECIAL, 0 },	/* Db */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Dc */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Do */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Dq */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ec */
+/*Ok*/	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Dq */
+	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ec */
 	{   roff_noop, NULL, NULL, NULL, ROFF_Bf, ROFF_LAYOUT, 0 }, /* Ef */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Em */ /* XXX needs arg */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Eo */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Fx */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ms */
+/*Ok*/	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Em */ /* XXX needs arg */
+	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Eo */
+/*Ok*/	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Fx */
+	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ms */
 	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* No */
-	{     roff_Ns, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ns */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Nx */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ox */
+/*Ok*/	{     roff_Ns, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ns */
+/*Ok*/	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Nx */
+/*Ok*/	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ox */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Pc */
 	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Pf */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Po */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Pq */
+/*Ok*/	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Pq */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qc */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ql */
+/*Ok*/	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Ql */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Qo */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Qq */
+/*Ok*/	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Qq */
 	{   roff_noop, NULL, roffparent_Re, NULL, ROFF_Rs, ROFF_LAYOUT, 0 }, /* Re */
 	{ roff_layout, NULL, NULL, roffchild_Rs, 0, ROFF_LAYOUT, 0 },	/* Rs */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sc */
 	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* So */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Sq */
-	{     roff_Sm, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Sm */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sx */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sy */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Tn */
-	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ux */
+/*Ok*/	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE | ROFF_LSCOPE }, /* Sq */
+/*Ok*/	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Sm */
+/*Ok*/	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sx */
+/*Ok*/	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Sy */
+/*Ok*/	{   roff_text, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Tn */
+/*Ok*/	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED }, /* Ux */
 	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xc */
 	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, ROFF_PARSED | ROFF_CALLABLE }, /* Xo */
-	{ roff_layout, NULL, NULL, roffchild_Fo, 0, ROFF_LAYOUT, 0 }, /* Fo */
-	{   roff_noop, NULL, roffparent_Fc, NULL, ROFF_Fo, ROFF_LAYOUT, 0 }, /* Fc */
-	{ roff_layout, NULL, NULL, NULL, 0, ROFF_LAYOUT, 0 }, /* Oo */
-	{   roff_noop, NULL, roffparent_Oc, NULL, ROFF_Oo, ROFF_LAYOUT, 0 }, /* Oc */
-	{ roff_layout, roffarg_Bk, NULL, NULL, 0, ROFF_LAYOUT, 0 }, /* Bk */
-	{   roff_noop, NULL, NULL, NULL, ROFF_Bk, ROFF_LAYOUT, 0 }, /* Ek */
+/*Ok*/	{ roff_layout, NULL, NULL, roffchild_Fo, 0, ROFF_LAYOUT, 0 }, /* Fo */ /* FIXME: section/linebreak. */
+/*Ok*/	{   roff_noop, NULL, roffparent_Fc, NULL, ROFF_Fo, ROFF_LAYOUT, 0 }, /* Fc */ /* FIXME: section/linebreak. */
+/*Ok*/	{ roff_layout, NULL, NULL, NULL, 0, ROFF_LAYOUT, 0 }, /* Oo */
+/*Ok*/	{   roff_noop, NULL, roffparent_Oc, NULL, ROFF_Oo, ROFF_LAYOUT, 0 }, /* Oc */
+	{        NULL, roffarg_Bk, NULL, NULL, 0, ROFF_LAYOUT, 0 }, /* Bk */
+	{        NULL, NULL, NULL, NULL, ROFF_Bk, ROFF_LAYOUT, 0 }, /* Ek */
 /*Ok*/	{roff_ordered, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Bt */
 	{        NULL, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Hf */
 /*Ok*/	{   roff_depr, NULL, NULL, NULL, 0, ROFF_TEXT, 0 }, /* Fr */

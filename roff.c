@@ -623,6 +623,22 @@ roffspecial(struct rofftree *tree, int tok,
 {
 
 	switch (tok) {
+	case (ROFF_At):
+		if (0 == sz)
+			break;
+		if (0 == strcmp(*ordp, "v6"))
+			break;
+		else if (0 == strcmp(*ordp, "v7")) 
+			break;
+		else if (0 == strcmp(*ordp, "32v"))
+			break;
+		else if (0 == strcmp(*ordp, "V.1"))
+			break;
+		else if (0 == strcmp(*ordp, "V.4"))
+			break;
+		roff_err(tree, start, "invalid `At' arg");
+		return(0);
+
 	case (ROFF_Nm):
 		if (0 == sz) {
 			if (0 == tree->name[0]) {
@@ -635,21 +651,18 @@ roffspecial(struct rofftree *tree, int tok,
 			return(0);
 		break;
 
+	case (ROFF_Sx):
+		/* FALLTHROUGH*/
 	case (ROFF_Ex):
-		if (0 == sz) {
-			roff_err(tree, start, "`Ex' expects an arg");
-			return(0);
-		} else if (1 != sz) {
-			roff_err(tree, start, "`Ex' expects one arg");
+		if (1 != sz) {
+			roff_err(tree, start, "`%s' expects one arg",
+					toknames[tok]);
 			return(0);
 		}
 		break;
 
 	case (ROFF_Sm):
-		if (0 == sz) {
-			roff_err(tree, start, "`Sm' expects an arg");
-			return(0);
-		} else if (1 != sz) {
+		if (1 != sz) {
 			roff_err(tree, start, "`Sm' expects one arg");
 			return(0);
 		} 
@@ -662,6 +675,8 @@ roffspecial(struct rofftree *tree, int tok,
 		break;
 	
 	case (ROFF_Ud):
+		/* FALLTHROUGH */
+	case (ROFF_Ux):
 		/* FALLTHROUGH */
 	case (ROFF_Bt):
 		if (0 != sz) {
@@ -963,19 +978,6 @@ roffsetname(struct rofftree *tree, char **ordp)
 
 
 /* ARGSUSED */
-static int
-roff_Sm(ROFFCALL_ARGS)
-{
-	char		*ordp[1], *p;
-
-	p = *argv++;
-	*ordp = *argv;
-
-	return(roffspecial(tree, tok, p, *ordp ? 1 : 0, ordp));
-}
-
-
-/* ARGSUSED */
 static	int
 roff_Ns(ROFFCALL_ARGS)
 {
@@ -1201,7 +1203,8 @@ roff_ordered(ROFFCALL_ARGS)
 
 	i = 0;
 	while (*argv && i < ROFF_MAXLINEARG) {
-		c = rofffindcallable(*argv);
+		c = ROFF_PARSED & tokens[tok].flags ?
+			rofffindcallable(*argv) : ROFF_MAX;
 
 		if (ROFF_MAX == c && ! roffispunct(*argv)) {
 			ordp[i++] = *argv++;
@@ -1215,7 +1218,7 @@ roff_ordered(ROFFCALL_ARGS)
 		if ( ! roffspecial(tree, tok, p, (size_t)i, ordp))
 			return(0);
 
-		return(roffcall(tree, c, ordp));
+		return(roffcall(tree, c, argv));
 	}
 
 	assert(i != ROFF_MAXLINEARG);

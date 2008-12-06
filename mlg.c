@@ -60,6 +60,8 @@ struct	md_mlg {
 };
 
 
+static	char		*mlg_literal(int);
+static	char		*mlg_At_literal(const char *);
 static	void		 mlg_roffmsg(void *arg, enum roffmsg, 
 				const char *, const char *, char *);
 static	int		 mlg_roffhead(void *, const struct tm *, 
@@ -103,6 +105,55 @@ static	void		 mlg_vmsg(struct md_mlg *, enum roffmsg,
 extern	size_t		 strlcat(char *, const char *, size_t);
 extern	size_t		 strlcpy(char *, const char *, size_t);
 #endif
+
+
+static char *
+mlg_At_literal(const char *p)
+{
+	if (NULL == p)
+		return("AT&amp;T UNIX");
+	if (0 == strcmp(p, "v6"))
+		return("Version 6 AT&amp;T UNIX");
+	else if (0 == strcmp(p, "v7")) 
+		return("Version 7 AT&amp;T UNIX");
+	else if (0 == strcmp(p, "32v"))
+		return("Version 32v AT&amp;T UNIX");
+	else if (0 == strcmp(p, "V.1"))
+		return("AT&amp;T System V.1 UNIX");
+	else if (0 == strcmp(p, "V.4"))
+		return("AT&amp;T System V.4 UNIX");
+
+	abort();
+	/* NOTREACHED */
+}
+
+
+static char *
+mlg_literal(int tok)
+{
+	switch (tok) {
+	case (ROFF_Bt):
+		return("is currently in beta test.");
+	case (ROFF_Ud):
+		return("currently under development.");
+	case (ROFF_Fx):
+		return("FreeBSD");
+	case (ROFF_Nx):
+		return("NetBSD");
+	case (ROFF_Ox):
+		return("OpenBSD");
+	case (ROFF_Ux):
+		return("UNIX");
+	case (ROFF_Bx):
+		return("BSD");
+	case (ROFF_Bsx):
+		return("BSDI BSD/OS");
+	default:
+		break;
+	}
+	abort();
+	/* NOTREACHED */
+}
 
 
 static int
@@ -425,25 +476,34 @@ mlg_roffspecial(void *arg, int tok, const char *start, char **more)
 	assert(arg);
 	p = (struct md_mlg *)arg;
 
+	/*
+	 * First handle macros without content.
+	 */
+	
 	switch (tok) {
-	case (ROFF_Bt):
-		assert(NULL == *more);
-		if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, NULL))
-			return(0);
-		if ( ! ml_puts(p->mbuf, "is currently in beta "
-					"test.", &p->pos))
-			return(0);
-		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
-			return(0);
+	case (ROFF_Ns):
+		p->flags |= ML_OVERRIDE_ONE;
+		return(1);
+	case (ROFF_Sm):
+		assert(*more);
+		if (0 == strcmp(*more, "on"))
+			p->flags |= ML_OVERRIDE_ALL;
+		else
+			p->flags &= ~ML_OVERRIDE_ALL;
+		return(1);
+	default:
 		break;
+	}
 
+	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
+		return(0);
+
+	switch (tok) {
 	case (ROFF_Xr):
 		if ( ! *more) {
 			mlg_err(p, start, start, "missing argument");
 			return(0);
 		}
-		if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, NULL))
-			return(0);
 		if ( ! ml_puts(p->mbuf, *more++, &p->pos))
 			return(0);
 		if (*more) {
@@ -458,37 +518,17 @@ mlg_roffspecial(void *arg, int tok, const char *start, char **more)
 			mlg_err(p, start, start, "too many arguments");
 			return(0);
 		}
-		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
-			return(0);
 		break;
-
+	case (ROFF_Sx):
+		/* FALLTHROUGH */
 	case (ROFF_Nm):
 		assert(*more);
-		if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, NULL))
-			return(0);
 		if ( ! ml_puts(p->mbuf, *more++, &p->pos))
 			return(0);
 		assert(NULL == *more);
-		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
-			return(0);
 		break;
-
-	case (ROFF_Ns):
-		p->flags |= ML_OVERRIDE_ONE;
-		break;
-
-	case (ROFF_Sm):
-		assert(*more);
-		if (0 == strcmp(*more, "on"))
-			p->flags |= ML_OVERRIDE_ALL;
-		else
-			p->flags &= ~ML_OVERRIDE_ALL;
-		break;
-
 	case (ROFF_Ex):
 		assert(*more);
-		if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, NULL))
-			return(0);
 		if ( ! ml_puts(p->mbuf, "The ", &p->pos))
 			return(0);
 		if ( ! mlg_begintag(p, MD_NS_INLINE, ROFF_Xr, NULL, NULL))
@@ -502,28 +542,45 @@ mlg_roffspecial(void *arg, int tok, const char *start, char **more)
 					"occurs.", &p->pos))
 			return(0);
 		assert(NULL == *more);
-		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
+		break;
+	case (ROFF_At):
+		if ( ! ml_puts(p->mbuf, mlg_At_literal(*more), &p->pos))
 			return(0);
 		break;
-
+	case (ROFF_Bx):
+		/* FALLTHROUGH */
+	case (ROFF_Bsx):
+		/* FALLTHROUGH */
+	case (ROFF_Fx):
+		/* FALLTHROUGH */
+	case (ROFF_Nx):
+		/* FALLTHROUGH */
+	case (ROFF_Ox):
+		if ( ! ml_puts(p->mbuf, mlg_literal(tok), &p->pos))
+			return(0);
+		while (*more) { 
+			if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
+				return(0);
+			if ( ! ml_putstring(p->mbuf, *more++, &p->pos))
+				return(0);
+		}
+		break;
+	case (ROFF_Bt):
+		/* FALLTHROUGH */
 	case (ROFF_Ud):
+		/* FALLTHROUGH */
+	case (ROFF_Ux):
 		assert(NULL == *more);
-		if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, NULL))
-			return(0);
-		if ( ! ml_puts(p->mbuf, "currently under "
-					"development.", &p->pos))
-			return(0);
-		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
+		if ( ! ml_puts(p->mbuf, mlg_literal(tok), &p->pos))
 			return(0);
 		break;
-
 	default:
 		mlg_err(p, start, start, "`%s' not yet supported",
 				toknames[tok]);
 		return(0);
 	}
 
-	return(1);
+	return(mlg_endtag(p, MD_NS_INLINE, tok));
 }
 
 

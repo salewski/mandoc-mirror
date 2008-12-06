@@ -30,7 +30,7 @@ The output filter name.
 Write output to 
 .Ar outfile ,
 which may be
-.Qq \-
+.Dq \-
 for stdout.
 .It Fl W
 Print warnings to stderr.
@@ -38,7 +38,7 @@ Print warnings to stderr.
 Read input from
 .Ar infile ,
 which may be 
-.Qq \-
+.Dq \-
 for stdin.
 .El
 .Pp
@@ -56,24 +56,24 @@ is the default filter.  This filter has no additional arguments.
 The XML filter creates an XML document where element names are their respective
 roff macro names.  Each element name has an associated
 namespace, which is one of 
-.Qq block ,
-.Qq head ,
-.Qq body ,
+.Dq block ,
+.Dq head ,
+.Dq body ,
 or
-.Qq inline ,
+.Dq inline ,
 corresponding to the display mode of a node.  The document root is
 always the
-.Qq mdoc
+.Dq mdoc
 element, in the default namespace; the 
-.Qq head
+.Dq head
 namespace is for block headers (such as 
 .Sq .Ss
 and
 .Sq .Sh ) ;
 the
-.Qq body
+.Dq body
 namespace is for block bodies; and the
-.Qq inline
+.Dq inline
 namespace is for in-line elements (such as
 .Sq .Em ) .
 .Ss HTML Filter

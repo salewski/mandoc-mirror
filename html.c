@@ -83,11 +83,11 @@ static	int		html_headtagname(struct md_mbuf *,
 static	int		html_headtagargs(struct md_mbuf *,
 				const struct md_args *, int,
 				const int *, const char **, size_t *);
-static	int		html_blockbodytagname(struct md_mbuf *,
+static	int		html_bodytagname(struct md_mbuf *,
 				const struct md_args *, 
 				int, struct htmlq *, const int *, 
 				const char **, size_t *);
-static	int		html_blockbodytagargs(struct md_mbuf *,
+static	int		html_bodytagargs(struct md_mbuf *,
 				const struct md_args *, int,
 				const int *, const char **, size_t *);
 static	int		html_inlinetagname(struct md_mbuf *,
@@ -409,7 +409,7 @@ html_end(struct md_mbuf *mbuf, const struct md_args *args)
 
 /* ARGSUSED */
 static int
-html_blockbodytagname(struct md_mbuf *mbuf, 
+html_bodytagname(struct md_mbuf *mbuf, 
 		const struct md_args *args, int tok, struct htmlq *q, 
 		const int *argc, const char **argv, size_t *res)
 {
@@ -417,8 +417,12 @@ html_blockbodytagname(struct md_mbuf *mbuf,
 	switch (tok) {
 	case (ROFF_Bl):
 		return(html_Bl_bodytagname(mbuf, q, argc, argv, res));
+	case (ROFF_Fo):
+		return(ml_nputs(mbuf, "span", 4, res));
 	case (ROFF_It):
 		return(html_It_bodytagname(mbuf, q, argc, argv, res));
+	case (ROFF_Oo):
+		return(ml_nputs(mbuf, "span", 4, res));
 	default:
 		break;
 	}
@@ -437,15 +441,19 @@ html_headtagname(struct md_mbuf *mbuf,
 	switch (tok) {
 	case (ROFF_It):
 		return(html_It_headtagname(mbuf, q, argc, argv, res));
+	case (ROFF_Fo):
+		return(ml_nputs(mbuf, "span", 4, res));
+	case (ROFF_Oo):
+		return(ml_nputs(mbuf, "span", 4, res));
 	case (ROFF_Sh):
-		return(ml_puts(mbuf, "h1", res));
+		return(ml_nputs(mbuf, "h1", 2, res));
 	case (ROFF_Ss):
-		return(ml_puts(mbuf, "h2", res));
+		return(ml_nputs(mbuf, "h2", 2, res));
 	default:
 		break;
 	}
 
-	return(ml_puts(mbuf, "div", res));
+	return(ml_nputs(mbuf, "div", 3, res));
 }
 
 
@@ -457,6 +465,10 @@ html_blocktagname(struct md_mbuf *mbuf, const struct md_args *args,
 {
 
 	switch (tok) {
+	case (ROFF_Fo):
+		return(ml_nputs(mbuf, "span", 4, res));
+	case (ROFF_Oo):
+		return(ml_nputs(mbuf, "span", 4, res));
 	case (ROFF_It):
 		return(html_It_blocktagname(mbuf, q, argc, argv, res));
 	default:
@@ -498,7 +510,7 @@ html_headtagargs(struct md_mbuf *mbuf,
 
 /* ARGSUSED */
 static int
-html_blockbodytagargs(struct md_mbuf *mbuf, 
+html_bodytagargs(struct md_mbuf *mbuf, 
 		const struct md_args *args, int tok, 
 		const int *argc, const char **argv, size_t *res)
 {
@@ -525,7 +537,23 @@ html_inlinetagargs(struct md_mbuf *mbuf,
 		const int *argc, const char **argv, size_t *res)
 {
 
-	return(html_printargs(mbuf, tok, "inline", argc, argv, res));
+	if ( ! html_printargs(mbuf, tok, "inline", argc, argv, res))
+		return(0);
+
+	switch (tok) {
+	case (ROFF_Sx):
+		assert(*argv);
+		if ( ! ml_nputs(mbuf, " href=\"#", 8, res))
+			return(0);
+		if ( ! ml_putstring(mbuf, *argv, res))
+			return(0);
+		if ( ! ml_nputs(mbuf, "\"", 1, res))
+			return(0);
+	default:
+		break;
+	}
+	
+	return(1);
 }
 
 
@@ -537,7 +565,9 @@ html_inlinetagname(struct md_mbuf *mbuf,
 
 	switch (tok) {
 	case (ROFF_Pp):
-		return(ml_puts(mbuf, "div", res));
+		return(ml_nputs(mbuf, "div", 3, res));
+	case (ROFF_Sx):
+		return(ml_nputs(mbuf, "a", 1, res));
 	default:
 		break;
 	}
@@ -579,8 +609,7 @@ html_begintag(struct md_mbuf *mbuf, void *data,
 				&& i < ROFF_MAXLINEARG; i++) 
 			node->argc[i] = argc[i];
 		assert(i != ROFF_MAXLINEARG);
-	} else
-		assert(NULL == argv);
+	} 
 
 
 	q->last = node;
@@ -595,10 +624,10 @@ html_begintag(struct md_mbuf *mbuf, void *data,
 			return(-1);
 		break;
 	case (MD_NS_BODY):
-		if ( ! html_blockbodytagname(mbuf, args, tok, 
+		if ( ! html_bodytagname(mbuf, args, tok, 
 					q, argc, argv, &res))
 			return(-1);
-		if ( ! html_blockbodytagargs(mbuf, args, tok, 
+		if ( ! html_bodytagargs(mbuf, args, tok, 
 					argc, argv, &res))
 			return(-1);
 		break;
@@ -646,7 +675,7 @@ html_endtag(struct md_mbuf *mbuf, void *data,
 			return(-1);
 		break;
 	case (MD_NS_BODY):
-		if ( ! html_blockbodytagname(mbuf, args, tok, 
+		if ( ! html_bodytagname(mbuf, args, tok, 
 					q, node->argc, 
 					(const char **)node->argv, &res))
 			return(-1);
