@@ -131,7 +131,8 @@ xml_begin(struct md_mbuf *mbuf, const struct md_args *args,
 				"encoding=\"UTF-8\"?>\n", NULL))
 		return(0);
 	return(ml_puts(mbuf, "<mdoc xmlns:block=\"block\" "
-				"xmlns:special=\"special\" "
+				"xmlns:body=\"body\" "
+				"xmlns:head=\"head\" "
 				"xmlns:inline=\"inline\">", NULL));
 }
 

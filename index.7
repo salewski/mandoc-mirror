@@ -19,8 +19,19 @@ into XML or HTML documents.  Unlike other similar utilities such as
 and
 .Xr man2html 1 ,
 .Nm
-acts directly on source documents, validating its input and producing a
-variety of outputs.
+is a full macro parser operating on source documents, specifically mdoc,
+validating input and compiling to HTML and XML output types.
+.Pp
+The
+.Nm
+utility is tested specifically on
+.Ox 
+manual sources as compiled and invoked both on 
+.Ox
+and Linux.
+.Nm
+is
+.Ud 
 .\"
 .Ss Validation
 In order to operate sanely,
@@ -30,47 +41,35 @@ following checks:
 .Pp
 .Bl -enum -compact
 .It 
-special characters (such as
+valid special characters (such as
 .Sq \en
 and
 .Sq \et ) ,
 .It 
-macro scope (such as
+sane macro scope (such as
 .Sq \&.Sh
 macros clobbering a pending
 .Sq \&.Bl
 scope),
 .It 
-predefined characters (such as \\*(>= and \\*q),
+valid predefined characters (such as \\*(>= and \\*q),
 .It
 correctly-ordered document prelude,
 .It
-sane argument values (such as those for 
+sane macro argument values (such as those for 
 .Sq \&.Dt
 or
 .Sq \&.Sm ) ,
 .It
 and so on.
 .El
-.Pp
-The
-.Nm
-utility has been tested under Linux and 
-.Ox ,
-specifically on
-.Ox 
-manual source.
-.Nm
-is
-.Ud 
 .\"
 .Ss Filtering
-When a block of source has been verified, it's passed to the front-end
-fitlers, which format and display data.  The
-.Nm
-utility is invoked with a filter by the
-.Fl f
-flag.  The HTML filter has the following features:
+When a line of source has been parsed, it's passed to the output
+filters, which format and display data.  The two available filters are
+HTML and XML.
+.Pp
+The HTML filter has the following features:
 .Pp
 .Bl -enum -compact
 .It
@@ -92,7 +91,9 @@ The XML filter creates a correct XML tree with
 and
 .Dq inline
 namespaces corresponding to macro categories.  Namespace identifiers
-correspond to their definitions.
+correspond to their definitions.  A sample is available at
+http://mdocml.bsd.lv/index.xml
+.Ns .
 .\" 
 .Sh DOWNLOADS
 Download 
@@ -102,6 +103,9 @@ at http://mdocml.bsd.lv/mdocml.tgz
 .\" - UPDATE ME WITH EVERY RELEASE. ----------------------------------
 The current version is 1.0.0, dated 08/12/2008.
 .\" ------------------------------------------------------------------
+.Pp
+Previous versions are archived as mdocml-x.y.z.tgz, with the appropriate
+versions filled in.
 .\" 
 .Sh DOCUMENTS
 The manual for 

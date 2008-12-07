@@ -7,23 +7,29 @@ CFLAGS += -W -Wall -Wno-unused-parameter -g -DDEBUG
 
 LINTFLAGS += -c -e -f -u
 
-LNS	= mdocml.ln html.ln xml.ln libmdocml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln
+LNS	= mdocml.ln html.ln xml.ln libmdocml.ln roff.ln ml.ln mlg.ln \
+	  compat.ln tokens.ln literals.ln
 
 LLNS	= llib-lmdocml.ln
 
 LIBS	= libmdocml.a
 
-OBJS	= mdocml.o html.o xml.o libmdocml.o roff.o ml.o mlg.o compat.o tokens.o literals.o
+OBJS	= mdocml.o html.o xml.o libmdocml.o roff.o ml.o mlg.o \
+	  compat.o tokens.o literals.o
 
-SRCS	= mdocml.c html.c xml.c libmdocml.c roff.c ml.c mlg.c compat.c tokens.c literals.c
+SRCS	= mdocml.c html.c xml.c libmdocml.c roff.c ml.c mlg.c \
+	  compat.c tokens.c literals.c
 
 HEADS	= libmdocml.h private.h ml.h roff.h
 
 MANS	= mdocml.1 index.7
 
-HTML	= index.html mdocml.html
+HTML	= index.html mdocml.html 
 
-CLEAN	= mdocml mdocml.tgz $(LLNS) $(LNS) $(OBJS) $(LIBS) $(HTML)
+XML	= index.xml
+
+CLEAN	= mdocml mdocml.tgz $(LLNS) $(LNS) $(OBJS) $(LIBS) $(HTML) \
+	  $(XML)
 
 INSTALL	= Makefile $(HEADS) $(SRCS) $(MANS)
 
@@ -44,7 +50,7 @@ lint: llib-lmdocml.ln
 
 dist: mdocml.tgz
 
-www: $(HTML)
+www: $(HTML) $(XML)
 
 regress: mdocml
 	@for f in $(FAIL); do \
@@ -65,12 +71,16 @@ clean:
 index.html: index.7 mdocml.css
 	./mdocml -W -fhtml -e -o $@ index.7
 
+index.xml: index.7 mdocml.css
+	./mdocml -W -fhtml -e -o $@ index.7
+
 mdocml.html: mdocml.1 mdocml.css
 	./mdocml -W -fhtml -e -o $@ mdocml.1
 
 install-www: www dist
-	install -m 0644 mdocml.tgz $(PREFIX)/
-	install -m 0644 $(HTML) $(PREFIX)/
+	install -m 0644 mdocml.tgz $(PREFIX)/mdocml-$(VERSION).tgz
+	( cd $(PREFIX)/ && ln -sf mdocml-$(VERSION).tgz mdocml.tgz )
+	install -m 0644 $(HTML) $(XML) $(PREFIX)/
 
 mdocml.tgz: $(INSTALL)
 	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
