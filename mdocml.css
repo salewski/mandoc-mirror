@@ -13,6 +13,8 @@
 	span.inline-Nd:before	{ content: ' \2014 '; }
 	span.inline-Fl:before	{ content: '-'; }
 	span.inline-Fl		{ font-weight: bolder; }
+	span.inline-Cm		{ font-weight: bolder; }
+	span.inline-Cd		{ font-weight: bolder; }
 	span.inline-Nm		{ font-weight: bolder; }
 	span.inline-Ar		{ text-decoration: underline; }
 	span.inline-Pa		{ text-decoration: underline; }
@@ -30,6 +32,9 @@
 	span.inline-Va		{ text-decoration: underline; }
 	span.inline-Vt		{ text-decoration: underline; }
 	span.inline-Em		{ font-style: italic; }
+	span.inline-Ft		{ text-decoration: underline; }
+	span.inline-Fd		{ font-weight: bolder; }
+	span.inline-Ic		{ font-weight: bolder; }
 	span.inline-Op:before	{ content: '['; }
 	span.inline-Op:after	{ content: ']'; }
 	span.inline-Qq:before	{ content: '\"'; }

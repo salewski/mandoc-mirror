@@ -234,6 +234,8 @@ mlg_fmt(int tok)
 				"is returned and the global variable "
 				"<span class=\"inline-Va\">errno</span> "
 				"is set to indicate the error.");
+	case (ROFF_In):
+		return("#include &lt;%s&gt;");
 	default:
 		break;
 	}
@@ -614,6 +616,52 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 		break;
 	}
 
+	/* 
+	 * Handle macros put into different-token tags.
+	 */
+
+	switch (tok) {
+	case (ROFF_Fn):
+		assert(*more);
+		if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
+			return(0);
+		if ( ! ml_putstring(p->mbuf, *more++, &p->pos))
+			return(0);
+		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
+			return(0);
+		if (*more) {
+			if ( ! ml_nputs(p->mbuf, "(", 1, &p->pos))
+				return(0);
+			p->flags |= ML_OVERRIDE_ONE;
+			if ( ! mlg_begintag(p, MD_NS_INLINE, 
+						ROFF_Fa, NULL, more))
+				return(0);
+			if ( ! ml_putstring(p->mbuf, *more++, &p->pos))
+				return(0);
+			if ( ! mlg_endtag(p, MD_NS_INLINE, ROFF_Fa))
+				return(0);
+			while (*more) {
+				if ( ! ml_nputs(p->mbuf, ", ", 2, &p->pos))
+					return(0);
+				if ( ! mlg_begintag(p, MD_NS_INLINE, ROFF_Fa, NULL, more))
+					return(0);
+				if ( ! ml_putstring(p->mbuf, *more++, &p->pos))
+					return(0);
+				if ( ! mlg_endtag(p, MD_NS_INLINE, ROFF_Fa))
+					return(0);
+			}
+			if ( ! ml_nputs(p->mbuf, ")", 1, &p->pos))
+				return(0);
+		}
+		return(1);
+	default:
+		break;
+	}
+
+	/*
+	 * Now handle macros in their environments. 
+	 */
+
 	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
 		return(0);
 
@@ -656,15 +704,18 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 		/* FALLTHROUGH */
 	case (ROFF_Nm):
 		assert(*more);
-		if ( ! ml_puts(p->mbuf, *more++, &p->pos))
+		if ( ! ml_putstring(p->mbuf, *more++, &p->pos))
 			return(0);
 		assert(NULL == *more);
 		break;
-
+	
+	case (ROFF_In):
+		/* NOTREACHED */
 	case (ROFF_Ex):
 		/* NOTREACHED */
 	case (ROFF_Rv):
 		assert(*more);
+		/* FIXME: *more must be ml-filtered. */
 		(void)snprintf(buf, sizeof(buf), 
 				mlg_fmt(tok), *more++);
 		if ( ! ml_puts(p->mbuf, buf, &p->pos))

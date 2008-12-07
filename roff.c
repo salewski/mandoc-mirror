@@ -640,6 +640,13 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 			break;
 		roff_err(tree, start, "invalid `At' arg");
 		return(0);
+	
+	case (ROFF_Fn):
+		if (0 != sz) 
+			break;
+		roff_err(tree, start, "`%s' expects at least "
+				"one arg", toknames[tok]);
+		return(0);
 
 	case (ROFF_Nm):
 		if (0 == sz) {
@@ -1201,9 +1208,11 @@ roff_ordered(ROFFCALL_ARGS)
 	if ( ! roffparseopts(tree, tok, &argv, argcp, argvp))
 		return(0);
 
-	if (NULL == *argv)
+	if (NULL == *argv) {
+		ordp[0] = NULL;
 		return(roffspecial(tree, tok, p, argcp, 
 					(const char **)argvp, 0, ordp));
+	}
 
 	i = 0;
 	while (*argv && i < ROFF_MAXLINEARG) {
@@ -1281,6 +1290,8 @@ roff_text(ROFFCALL_ARGS)
 	 * terminating punctuation.  If we encounter it and all
 	 * subsequent tokens are punctuation, then stop processing (the
 	 * line-dominant macro will print these tokens after closure).
+	 * If the punctuation is followed by non-punctuation, then close
+	 * and re-open our scope, then continue.
 	 */
 
 	i = 0;
@@ -1312,8 +1323,20 @@ roff_text(ROFFCALL_ARGS)
 				break;
 
 		if (argv[j]) {
+			if (ROFF_LSCOPE & tokens[tok].flags) {
+				if ( ! roffdata(tree, 0, *argv++))
+					return(0);
+				continue;
+			}
+			if ( ! (*tree->cb.roffout)(tree->arg, tok))
+				return(0);
 			if ( ! roffdata(tree, 0, *argv++))
 				return(0);
+			if ( ! (*tree->cb.roffin)(tree->arg, tok,
+						argcp, argvp))
+				return(0);
+
+			i = 0;
 			continue;
 		}
 
