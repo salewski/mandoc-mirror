@@ -34,6 +34,12 @@ static	ssize_t		xml_begintag(struct md_mbuf *, void *,
 				const struct md_args *, 
 				enum md_ns, int, 
 				const int *, const char **);
+static	ssize_t		xml_beginstring(struct md_mbuf *, 
+				const struct md_args *, 
+				const char *, size_t);
+static	ssize_t		xml_endstring(struct md_mbuf *, 
+				const struct md_args *, 
+				const char *, size_t);
 static	int		xml_begin(struct md_mbuf *,
 	       			const struct md_args *, 
 				const struct tm *, 
@@ -141,6 +147,28 @@ xml_end(struct md_mbuf *mbuf, const struct md_args *args)
 
 /* ARGSUSED */
 static ssize_t 
+xml_beginstring(struct md_mbuf *mbuf, 
+		const struct md_args *args, 
+		const char *buf, size_t sz)
+{
+
+	return(0);
+}
+
+
+/* ARGSUSED */
+static ssize_t 
+xml_endstring(struct md_mbuf *mbuf, 
+		const struct md_args *args, 
+		const char *buf, size_t sz)
+{
+
+	return(0);
+}
+
+
+/* ARGSUSED */
+static ssize_t 
 xml_begintag(struct md_mbuf *mbuf, void *data,
 		const struct md_args *args, enum md_ns ns, 
 		int tok, const int *argc, const char **argv)
@@ -211,6 +239,8 @@ md_init_xml(const struct md_args *args,
 	cbs.ml_endtag = xml_endtag;
 	cbs.ml_begin = xml_begin;
 	cbs.ml_end = xml_end;
+	cbs.ml_beginstring = xml_beginstring;
+	cbs.ml_endstring = xml_endstring;
 
 	return(mlg_alloc(args, rbuf, mbuf, &cbs));
 }

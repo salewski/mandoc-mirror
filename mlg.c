@@ -92,11 +92,13 @@ static	int		 mlg_endtag(struct md_mlg *, enum md_ns, int);
 static	int	  	 mlg_indent(struct md_mlg *);
 static	int		 mlg_newline(struct md_mlg *);
 static	void		 mlg_mode(struct md_mlg *, enum md_tok);
+static	int		 mlg_nstring(struct md_mlg *, 
+				const char *, const char *, size_t);
+static	int		 mlg_string(struct md_mlg *,
+				const char *, const char *);
 static	int		 mlg_data(struct md_mlg *, int, 
 				const char *, char *);
 static	void		 mlg_err(struct md_mlg *, const char *, 
-				const char *, const char *, ...);
-static	void		 mlg_warn(struct md_mlg *, const char *, 
 				const char *, const char *, ...);
 static	void		 mlg_msg(struct md_mlg *, enum roffmsg, 
 				const char *, const char *, char *);
@@ -420,10 +422,46 @@ mlg_mode(struct md_mlg *p, enum md_tok ns)
 
 
 static int
+mlg_string(struct md_mlg *p, const char *start, const char *buf)
+{
+	
+	return(mlg_nstring(p, start, buf, strlen(buf)));
+}
+
+
+static int
+mlg_nstring(struct md_mlg *p, const char *start, 
+		const char *buf, size_t sz)
+{
+	int		 c;
+	ssize_t		 res;
+
+	assert(p->mbuf);
+	assert(0 != p->indent);
+
+	res = (*p->cbs.ml_beginstring)(p->mbuf, p->args, buf, sz);
+	if (-1 == res) 
+		return(0);
+
+	if (0 == (c = ml_nputstring(p->mbuf, buf, sz, &p->pos))) {
+		mlg_err(p, start, buf, "bad string "
+				"encoding: `%s'", buf);
+		return(0);
+	} else if (-1 == c)
+		return(0);
+
+	res = (*p->cbs.ml_endstring)(p->mbuf, p->args, buf, sz);
+	if (-1 == res) 
+		return(0);
+
+	return(1);
+}
+
+
+static int
 mlg_data(struct md_mlg *p, int space, const char *start, char *buf)
 {
 	size_t		 sz;
-	int		 c;
 
 	assert(p->mbuf);
 	assert(0 != p->indent);
@@ -437,16 +475,7 @@ mlg_data(struct md_mlg *p, int space, const char *start, char *buf)
 	if (0 == p->pos) {
 		if ( ! mlg_indent(p))
 			return(0);
-
-		c = ml_nputstring(p->mbuf, buf, sz, &p->pos);
-
-		if (0 == c) {
-			mlg_err(p, start, buf, "bad char sequence");
-			return(0);
-		} else if (c > 1) {
-			mlg_warn(p, start, buf, "bogus char sequence");
-			return(0);
-		} else if (-1 == c)
+		if ( ! mlg_nstring(p, start, buf, sz))
 			return(0);
 
 		if (p->indent * INDENT + sz >= COLUMNS)
@@ -466,18 +495,7 @@ mlg_data(struct md_mlg *p, int space, const char *start, char *buf)
 			return(0);
 	}
 
-	c = ml_nputstring(p->mbuf, buf, sz, &p->pos);
-
-	if (0 == c) {
-		mlg_err(p, start, buf, "bad char sequence");
-		return(0);
-	} else if (c > 1) {
-		mlg_warn(p, start, buf, "bogus char sequence");
-		return(0);
-	} else if (-1 == c)
-		return(0);
-
-	return(1);
+	return(mlg_nstring(p, start, buf, sz));
 }
 
 
@@ -625,7 +643,7 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 		assert(*more);
 		if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
 			return(0);
-		if ( ! ml_putstring(p->mbuf, *more++, &p->pos))
+		if ( ! mlg_string(p, start, *more++))
 			return(0);
 		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
 			return(0);
@@ -636,7 +654,7 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 			if ( ! mlg_begintag(p, MD_NS_INLINE, 
 						ROFF_Fa, NULL, more))
 				return(0);
-			if ( ! ml_putstring(p->mbuf, *more++, &p->pos))
+			if ( ! mlg_string(p, start, *more++))
 				return(0);
 			if ( ! mlg_endtag(p, MD_NS_INLINE, ROFF_Fa))
 				return(0);
@@ -645,7 +663,7 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 					return(0);
 				if ( ! mlg_begintag(p, MD_NS_INLINE, ROFF_Fa, NULL, more))
 					return(0);
-				if ( ! ml_putstring(p->mbuf, *more++, &p->pos))
+				if ( ! mlg_string(p, start, *more++))
 					return(0);
 				if ( ! mlg_endtag(p, MD_NS_INLINE, ROFF_Fa))
 					return(0);
@@ -675,7 +693,7 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 		while (*more) { 
 			if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
 				return(0);
-			if ( ! ml_putstring(p->mbuf, *more++, &p->pos))
+			if ( ! mlg_string(p, start, *more++))
 				return(0);
 		}
 		break;
@@ -690,7 +708,7 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 		if (*more) {
 			if ( ! ml_nputs(p->mbuf, "(", 1, &p->pos))
 				return(0);
-			if ( ! ml_puts(p->mbuf, *more++, &p->pos))
+			if ( ! mlg_string(p, start, *more++))
 				return(0);
 			if ( ! ml_nputs(p->mbuf, ")", 1, &p->pos))
 				return(0);
@@ -700,11 +718,12 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 			return(0);
 		}
 		break;
+
 	case (ROFF_Sx):
 		/* FALLTHROUGH */
 	case (ROFF_Nm):
 		assert(*more);
-		if ( ! ml_putstring(p->mbuf, *more++, &p->pos))
+		if ( ! mlg_string(p, start, *more++))
 			return(0);
 		assert(NULL == *more);
 		break;
@@ -722,10 +741,13 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 			return(0);
 		assert(NULL == *more);
 		break;
+
 	case (ROFF_At):
+		/* FIXME: *more must be ml-filtered. */
 		if ( ! ml_puts(p->mbuf, mlg_At_literal(*more), &p->pos))
 			return(0);
 		break;
+
 	case (ROFF_Bx):
 		/* FALLTHROUGH */
 	case (ROFF_Bsx):
@@ -740,10 +762,11 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 		while (*more) { 
 			if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
 				return(0);
-			if ( ! ml_putstring(p->mbuf, *more++, &p->pos))
+			if ( ! mlg_string(p, start, *more++))
 				return(0);
 		}
 		break;
+
 	case (ROFF_Bt):
 		/* FALLTHROUGH */
 	case (ROFF_Ud):
@@ -753,6 +776,7 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 		if ( ! ml_puts(p->mbuf, mlg_literal(tok), &p->pos))
 			return(0);
 		break;
+
 	default:
 		mlg_err(p, start, start, "`%s' not yet supported",
 				toknames[tok]);
@@ -865,18 +889,6 @@ mlg_vmsg(struct md_mlg *p, enum roffmsg lvl, const char *start,
 
 	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
 	mlg_msg(p, lvl, start, pos, buf);
-}
-
-
-static void
-mlg_warn(struct md_mlg *p, const char *start, 
-		const char *pos, const char *fmt, ...)
-{
-	va_list		 ap;
-
-	va_start(ap, fmt);
-	mlg_vmsg(p, ROFF_WARN, start, pos, fmt, ap);
-	va_end(ap);
 }
 
 

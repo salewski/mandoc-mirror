@@ -55,6 +55,18 @@ static	void		html_free(void *);
 static	ssize_t		html_endtag(struct md_mbuf *, void *,
 				const struct md_args *, 
 				enum md_ns, int);
+static	ssize_t		html_beginstring(struct md_mbuf *, 
+				const struct md_args *, 
+				const char *, size_t);
+static	ssize_t		html_beginhttp(struct md_mbuf *, 
+				const struct md_args *, 
+				const char *, size_t);
+static	ssize_t		html_endstring(struct md_mbuf *, 
+				const struct md_args *, 
+				const char *, size_t);
+static	ssize_t		html_endhttp(struct md_mbuf *, 
+				const struct md_args *, 
+				const char *, size_t);
 static	ssize_t		html_begintag(struct md_mbuf *, void *,
 				const struct md_args *, 
 				enum md_ns, int, 
@@ -127,6 +139,9 @@ html_It_headtagname(struct md_mbuf *mbuf, struct htmlq *q,
 	for (i = 0; ROFF_ARGMAX != n->argc[i] &&
 			i < ROFF_MAXLINEARG; i++) {
 		switch (n->argc[i]) {
+		case (ROFF_Ohang):
+			return(ml_nputs(mbuf, "div", 3, res));
+
 		case (ROFF_Tag):
 			/* FALLTHROUGH */
 		case (ROFF_Column): 
@@ -136,11 +151,8 @@ html_It_headtagname(struct md_mbuf *mbuf, struct htmlq *q,
 		}
 	}
 
-	assert(i != ROFF_MAXLINEARG);
 	abort();
 	/* NOTREACHED */
-
-	return(1);
 }
 
 
@@ -739,6 +751,70 @@ html_free(void *p)
 }
 
 
+static ssize_t 
+html_beginhttp(struct md_mbuf *mbuf, 
+		const struct md_args *args, 
+		const char *buf, size_t sz)
+{
+	size_t		 res;
+
+	res = 0;
+
+	if ( ! ml_puts(mbuf, "<a href=\"", &res))
+		return(-1);
+	if (1 != ml_nputstring(mbuf, buf, sz, &res))
+		return(-1);
+	if ( ! ml_puts(mbuf, "\">", &res))
+		return(-1);
+
+	return((ssize_t)res);
+}
+
+
+static ssize_t 
+html_endhttp(struct md_mbuf *mbuf, 
+		const struct md_args *args, 
+		const char *buf, size_t sz)
+{
+	size_t		 res;
+
+	res = 0;
+
+	if ( ! ml_puts(mbuf, "</a>", &res))
+		return(-1);
+
+	return((ssize_t)res);
+}
+
+
+/* ARGSUSED */
+static ssize_t 
+html_beginstring(struct md_mbuf *mbuf, 
+		const struct md_args *args, 
+		const char *buf, size_t sz)
+{
+
+	if (0 == strncmp(buf, "http://", 7))
+		return(html_beginhttp(mbuf, args, buf, sz));
+
+	return(0);
+}
+
+
+/* ARGSUSED */
+static ssize_t 
+html_endstring(struct md_mbuf *mbuf, 
+		const struct md_args *args, 
+		const char *buf, size_t sz)
+{
+	
+	if (0 == strncmp(buf, "http://", 7))
+		return(html_endhttp(mbuf, args, buf, sz));
+
+	return(0);
+}
+
+
 int
 md_line_html(void *data, char *buf)
 {
@@ -767,7 +843,8 @@ md_init_html(const struct md_args *args,
 	cbs.ml_endtag = html_endtag;
 	cbs.ml_begin = html_begin;
 	cbs.ml_end = html_end;
+	cbs.ml_beginstring = html_beginstring;
+	cbs.ml_endstring = html_endstring;
 
 	return(mlg_alloc(args, rbuf, mbuf, &cbs));
 }
-

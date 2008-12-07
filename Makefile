@@ -1,3 +1,5 @@
+.SUFFIXES:	.html .7
+
 CFLAGS += -W -Wall -Wno-unused-parameter -g -DDEBUG
 
 LINTFLAGS += -c -e -f -u
@@ -16,7 +18,9 @@ HEADS	= libmdocml.h private.h ml.h roff.h
 
 MANS	= mdocml.1
 
-CLEAN	= mdocml mdocml.tgz $(LLNS) $(LNS) $(OBJS) $(LIBS)
+HTML	= index.html
+
+CLEAN	= mdocml mdocml.tgz $(LLNS) $(LNS) $(OBJS) $(LIBS) $(HTML)
 
 INSTALL	= Makefile $(HEADS) $(SRCS) $(MANS)
 
@@ -37,6 +41,8 @@ lint: llib-lmdocml.ln
 
 dist: mdocml.tgz
 
+www: $(HTML)
+
 regress: mdocml
 	@for f in $(FAIL); do \
 		echo "./mdocml $$f" ; \
@@ -52,6 +58,9 @@ mdocml: mdocml.o libmdocml.a
 
 clean:
 	rm -f $(CLEAN)
+
+index.html: index.7 mdocml.css
+	./mdocml -W -fhtml -e -o $@ $<
 
 mdocml.tgz: $(INSTALL)
 	mkdir -p .dist/mdocml/

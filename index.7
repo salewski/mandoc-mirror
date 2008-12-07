@@ -5,7 +5,7 @@
 .\"
 .Sh NAME
 .Nm mdocml
-.Nd compile manpage source into mark-up language
+.Nd compile mdoc macros into mark-up language
 .\"
 .Sh DESCRIPTION
 The
@@ -52,23 +52,57 @@ or
 .It
 and so on.
 .El
-.Pp
+.Ss Filtering
+When a block of source has been verified, it's passed to the front-end
+fitlers, which format and display data.  The
+.Nm
+utility is invoked with a filter by the
+.Fl f
+flag.  The HTML filter has the following features:
+.Bl -enum -compact
+.It
+HTML-4.01 strict compliance.
+.It
+Proper render of values in UTF-8, such as
+.Dq quotes
+and \*(>= predefined values.
+.It
+URI-appearing http://bsd.lv strings are correctly enclosed in link tags.
+.It
+CSS-dictated style with meaningful non-CSS defaults.
+.El
 .\" 
 .Sh ENVIRONMENT
 The
 .Nm
-utility has been tested under Linux and OpenBSD.
+utility has been tested under Linux and 
+.Ox ,
+specifically on
+.Ox 
+manual source.
 .\" 
 .Sh EXAMPLES
 This page was produced as follows:
 .Pp
-.D1 % mdocml -fhtml -o index.html index.7
+.D1 % mdocml -fhtml -W -e -o index.html index.7
 .\"
 .Sh SEE ALSO
-TODO.
+.Bl -ohang
+.It Xr rman Ns : http://polyglotman.sourceforge.net/rman.html
+Accepts either formatted roff output or source and produces HTML output.
+.It Xr man2html Ns : http://www.nongnu.org/man2html/
+Accepts formatted
+.Xr nroff 1
+text and produces HTML output.
+.It Xr man.cgi Ns : http://www.freebsd.org/cgi/man.cgi/source
+.Fx
+and
+.Ox 
+project CGI for producing HTML from nroff source.
+.El
 .\"
 .Sh AUTHORS
 The
 .Nm
 utility was written by 
-.An Em Kristaps Dzonsons Aq kristaps@kth.se .
+.An Kristaps Dzonsons Aq kristaps@kth.se .

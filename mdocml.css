@@ -1,9 +1,10 @@
 	body			{ margin: 10px;
 			 	  font-family: Tahoma, sans-serif;
 				  font-size: small; }
+	h1			{ font-size: medium; }
+	h2			{ font-size: small; }
 	div.mdoc		{ width: 600px; }
 	div.block-Sh		{ margin-bottom: 20px; }
-	div.head-Sh		{ font-weight: bold; }
 	div.head-Ss		{ font-weight: bold;	
 				  margin-top: 10px;
 				  text-align: justify; }
@@ -16,6 +17,7 @@
 	span.inline-Cm		{ font-weight: bolder; }
 	span.inline-Cd		{ font-weight: bolder; }
 	span.inline-Nm		{ font-weight: bolder; }
+	span.inline-An		{ text-decoration: underline; }
 	span.inline-Ar		{ text-decoration: underline; }
 	span.inline-Pa		{ text-decoration: underline; }
 	div.block-Bl		{ margin-top: 10px;
