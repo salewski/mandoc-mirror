@@ -72,20 +72,20 @@ index.html: index.7 mdocml.css
 	./mdocml -W -fhtml -e -o $@ index.7
 
 index.xml: index.7 mdocml.css
-	./mdocml -W -fhtml -e -o $@ index.7
+	./mdocml -W -o $@ index.7
 
 mdocml.html: mdocml.1 mdocml.css
 	./mdocml -W -fhtml -e -o $@ mdocml.1
 
 install-www: www dist
 	install -m 0644 mdocml.tgz $(PREFIX)/mdocml-$(VERSION).tgz
-	( cd $(PREFIX)/ && ln -sf mdocml-$(VERSION).tgz mdocml.tgz )
+	install -m 0644 mdocml.tgz $(PREFIX)/mdocml.tgz
 	install -m 0644 $(HTML) $(XML) $(PREFIX)/
 
 mdocml.tgz: $(INSTALL)
 	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
 	install -m 0644 $(INSTALL) .dist/mdocml/mdocml-$(VERSION)/
-	( cd .dist/mdocml/ && tar zcf ../mdocml.tgz mdocml-$(VERSION)/ )
+	( cd .dist/mdocml/ && tar zcf ../../mdocml.tgz mdocml-$(VERSION)/ )
 	rm -rf .dist/
 
 llib-lmdocml.ln: mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln
