@@ -653,15 +653,16 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 			return(0);
 		break;
 
+	case (ROFF_Rv):
+		/* FALLTHROUGH*/
 	case (ROFF_Sx):
 		/* FALLTHROUGH*/
 	case (ROFF_Ex):
-		if (1 != sz) {
-			roff_err(tree, start, "`%s' expects one arg",
-					toknames[tok]);
-			return(0);
-		}
-		break;
+		if (1 == sz) 
+			break;
+		roff_err(tree, start, "`%s' expects one arg", 
+				toknames[tok]);
+		return(0);
 
 	case (ROFF_Sm):
 		if (1 != sz) {

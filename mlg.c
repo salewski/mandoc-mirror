@@ -62,6 +62,7 @@ struct	md_mlg {
 
 static	char		*mlg_literal(int);
 static	char		*mlg_At_literal(const char *);
+static	char		*mlg_fmt(int);
 static	char 		*mlg_St_literal(int);
 static	void		 mlg_roffmsg(void *arg, enum roffmsg, 
 				const char *, const char *, char *);
@@ -200,6 +201,7 @@ mlg_St_literal(int argc)
 static char *
 mlg_At_literal(const char *p)
 {
+
 	if (NULL == p)
 		return("AT&amp;T UNIX");
 	if (0 == strcmp(p, "v6"))
@@ -219,8 +221,32 @@ mlg_At_literal(const char *p)
 
 
 static char *
+mlg_fmt(int tok)
+{
+
+	switch (tok) {
+	case (ROFF_Ex):
+		return ("The %s utility exits 0 on success, and "
+				"&gt;0 if an error occurs.");
+	case (ROFF_Rv):
+		return ("The %s() function returns the value 0 if "
+				"successful; otherwise the value -1 "
+				"is returned and the global variable "
+				"<span class=\"inline-Va\">errno</span> "
+				"is set to indicate the error.");
+	default:
+		break;
+	}
+
+	abort();
+	/* NOTREACHED */
+}
+
+
+static char *
 mlg_literal(int tok)
 {
+
 	switch (tok) {
 	case (ROFF_Bt):
 		return("is currently in beta test.");
@@ -564,6 +590,7 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 		const int *argc, const char **argv, char **more)
 {
 	struct md_mlg	*p;
+	char		 buf[256];
 
 	assert(arg);
 	p = (struct md_mlg *)arg;
@@ -633,19 +660,14 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 			return(0);
 		assert(NULL == *more);
 		break;
+
 	case (ROFF_Ex):
+		/* NOTREACHED */
+	case (ROFF_Rv):
 		assert(*more);
-		if ( ! ml_puts(p->mbuf, "The ", &p->pos))
-			return(0);
-		if ( ! mlg_begintag(p, MD_NS_INLINE, ROFF_Xr, NULL, NULL))
-			return(0);
-		if ( ! ml_puts(p->mbuf, *more++, &p->pos))
-			return(0);
-		if ( ! mlg_endtag(p, MD_NS_INLINE, ROFF_Xr))
-			return(0);
-		if ( ! ml_puts(p->mbuf, " utility exits 0 on success, "
-					"and &gt;0 if an error "
-					"occurs.", &p->pos))
+		(void)snprintf(buf, sizeof(buf), 
+				mlg_fmt(tok), *more++);
+		if ( ! ml_puts(p->mbuf, buf, &p->pos))
 			return(0);
 		assert(NULL == *more);
 		break;
