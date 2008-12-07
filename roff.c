@@ -641,6 +641,8 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 		roff_err(tree, start, "invalid `At' arg");
 		return(0);
 	
+	case (ROFF_Xr):
+		/* FALLTHROUGH */
 	case (ROFF_Fn):
 		if (0 != sz) 
 			break;
@@ -699,8 +701,8 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 		break;
 	}
 
-	return((*tree->cb.roffspecial)(tree->arg, tok, 
-				tree->cur, argc, argv, ordp));
+	return((*tree->cb.roffspecial)(tree->arg, tok, tree->cur, 
+				argc, argv, (const char **)ordp));
 }
 
 
@@ -1116,13 +1118,16 @@ roff_layout(ROFFCALL_ARGS)
 	 * the layout body is everything following until termination.
 	 */
 
-	if ( ! (*tree->cb.roffblkin)(tree->arg, tok, argcp, argvp))
+	if ( ! (*tree->cb.roffblkin)(tree->arg, tok, argcp, 
+				(const char **)argvp))
 		return(0);
 	if (NULL == *argv)
 		return((*tree->cb.roffblkbodyin)
-				(tree->arg, tok, argcp, argvp));
+				(tree->arg, tok, argcp, 
+				 (const char **)argvp));
 
-	if ( ! (*tree->cb.roffblkheadin)(tree->arg, tok, argcp, argvp))
+	if ( ! (*tree->cb.roffblkheadin)(tree->arg, tok, argcp, 
+				(const char **)argvp))
 		return(0);
 
 	/*
@@ -1139,7 +1144,8 @@ roff_layout(ROFFCALL_ARGS)
 		if ( ! (*tree->cb.roffblkheadout)(tree->arg, tok))
 			return(0);
 		return((*tree->cb.roffblkbodyin)
-				(tree->arg, tok, argcp, argvp));
+				(tree->arg, tok, argcp, 
+				 (const char **)argvp));
 	}
 
 	/*
@@ -1170,7 +1176,8 @@ roff_layout(ROFFCALL_ARGS)
 		if ( ! (*tree->cb.roffblkheadout)(tree->arg, tok))
 			return(0);
 		return((*tree->cb.roffblkbodyin)
-				(tree->arg, tok, argcp, argvp));
+				(tree->arg, tok, argcp, 
+				 (const char **)argvp));
 	}
 
 	/*
@@ -1184,7 +1191,8 @@ roff_layout(ROFFCALL_ARGS)
 	if ( ! (*tree->cb.roffblkheadout)(tree->arg, tok))
 		return(0);
 	return((*tree->cb.roffblkbodyin)
-			(tree->arg, tok, argcp, argvp));
+			(tree->arg, tok, argcp, 
+			 (const char **)argvp));
 }
 
 
@@ -1271,7 +1279,8 @@ roff_text(ROFFCALL_ARGS)
 
 	if ( ! roffparseopts(tree, tok, &argv, argcp, argvp))
 		return(0);
-	if ( ! (*tree->cb.roffin)(tree->arg, tok, argcp, argvp))
+	if ( ! (*tree->cb.roffin)(tree->arg, tok, argcp, 
+				(const char **)argvp))
 		return(0);
 	if (NULL == *argv)
 		return((*tree->cb.roffout)(tree->arg, tok));
@@ -1332,8 +1341,9 @@ roff_text(ROFFCALL_ARGS)
 				return(0);
 			if ( ! roffdata(tree, 0, *argv++))
 				return(0);
-			if ( ! (*tree->cb.roffin)(tree->arg, tok,
-						argcp, argvp))
+			if ( ! (*tree->cb.roffin)(tree->arg, tok, 
+						argcp, 
+						(const char **)argvp))
 				return(0);
 
 			i = 0;

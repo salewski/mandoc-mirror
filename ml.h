@@ -65,6 +65,8 @@ int		  ml_nputs(struct md_mbuf *,
 int		  ml_puts(struct md_mbuf *, const char *, size_t *);
 int		  ml_putchars(struct md_mbuf *, 
 			char, size_t, size_t *);
+char		 *ml_literal(int, const int *,
+			const char **, const char **);
 
 struct md_mlg	 *mlg_alloc(const struct md_args *, 
 			const struct md_rbuf *, struct md_mbuf *,

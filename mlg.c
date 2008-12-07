@@ -59,35 +59,46 @@ struct	md_mlg {
 	void		 *data;
 };
 
-
-static	char		*mlg_literal(int);
-static	char		*mlg_At_literal(const char *);
-static	char		*mlg_fmt(int);
-static	char 		*mlg_St_literal(int);
-static	void		 mlg_roffmsg(void *arg, enum roffmsg, 
-				const char *, const char *, char *);
+static	void		 mlg_roffmsg(void *arg, 
+				enum roffmsg, const char *, 
+				const char *, const char *);
 static	int		 mlg_roffhead(void *, const struct tm *, 
 				const char *, const char *, 
 				const char *, const char *);
 static	int		 mlg_rofftail(void *);
-static	int		 mlg_roffin(void *, int, int *, char **);
+static	int		 mlg_roffin(void *, int, 
+				int *, const char **);
 static	int		 mlg_roffdata(void *, int, 
-				const char *, char *);
+				const char *, const char *);
 static	int		 mlg_roffout(void *, int);
-static	int		 mlg_roffblkin(void *, int, int *, char **);
+static	int		 mlg_roffblkin(void *, int, int *, 
+				const char **);
 static	int		 mlg_roffblkout(void *, int);
 static	int		 mlg_roffspecial(void *, int, 
 				const char *, const int *,
-				const char **, char **);
+				const char **, const char **);
 static	int		 mlg_roffblkheadin(void *, int, 
-				int *, char **);
+				int *, const char **);
 static	int		 mlg_roffblkheadout(void *, int);
 static	int		 mlg_roffblkbodyin(void *, int, 
-				int *, char **);
+				int *, const char **);
 static	int		 mlg_roffblkbodyout(void *, int);
 
+static	int		 mlg_ref_special(struct md_mlg *, int,
+				const char *, const char **);
+static	int		 mlg_formatted_special(struct md_mlg *, 
+				int, const int *, 
+				const char **, const char **);
+static	int		 mlg_literal_special(struct md_mlg *, 
+				int,  const char *, const int *, 
+				const char **, const char **);
+static	int		 mlg_function_special(struct md_mlg *, 
+				const char *, const char **);
+static	int		 mlg_atom_special(struct md_mlg *, int,
+				const char *, const char **);
+
 static	int		 mlg_begintag(struct md_mlg *, enum md_ns, 
-				int, int *, char **);
+				int, int *, const char **);
 static	int		 mlg_endtag(struct md_mlg *, enum md_ns, int);
 static	int	  	 mlg_indent(struct md_mlg *);
 static	int		 mlg_newline(struct md_mlg *);
@@ -97,11 +108,12 @@ static	int		 mlg_nstring(struct md_mlg *,
 static	int		 mlg_string(struct md_mlg *,
 				const char *, const char *);
 static	int		 mlg_data(struct md_mlg *, int, 
-				const char *, char *);
+				const char *, const char *);
 static	void		 mlg_err(struct md_mlg *, const char *, 
 				const char *, const char *, ...);
-static	void		 mlg_msg(struct md_mlg *, enum roffmsg, 
-				const char *, const char *, char *);
+static	void		 mlg_msg(struct md_mlg *, 
+				enum roffmsg, const char *, 
+				const char *, const char *);
 static	void		 mlg_vmsg(struct md_mlg *, enum roffmsg, 
 				const char *, const char *, 
 				const char *, va_list);
@@ -112,173 +124,9 @@ extern	size_t		 strlcpy(char *, const char *, size_t);
 #endif
 
 
-static char *
-mlg_St_literal(int argc)
-{
-
-	switch (argc) {
-	case(ROFF_p1003_1_88):
-		return("IEEE Std 1003.1-1988 (&#8220;POSIX&#8221;)");
-	case(ROFF_p1003_1_90):
-		return("IEEE Std 1003.1-1990 (&#8220;POSIX&#8221;)");
-	case(ROFF_p1003_1_96):
-		return("ISO/IEC 9945-1:1996 (&#8220;POSIX&#8221;)");
-	case(ROFF_p1003_1_2001):
-		return("IEEE Std 1003.1-2001 (&#8220;POSIX&#8221;)");
-	case(ROFF_p1003_1_2004):
-		return("IEEE Std 1003.1-2004 (&#8220;POSIX&#8221;)");
-	case(ROFF_p1003_1):
-		return("IEEE Std 1003.1 (&#8220;POSIX&#8221;)");
-	case(ROFF_p1003_1b):
-		return("IEEE Std 1003.1b (&#8220;POSIX&#8221;)");
-	case(ROFF_p1003_1b_93):
-		return("IEEE Std 1003.1b-1993 (&#8220;POSIX&#8221;)");
-	case(ROFF_p1003_1c_95):
-		return("IEEE Std 1003.1c-1995 (&#8220;POSIX&#8221;)");
-	case(ROFF_p1003_1g_2000):
-		return("IEEE Std 1003.1g-2000 (&#8220;POSIX&#8221;)");
-	case(ROFF_p1003_2_92):
-		return("IEEE Std 1003.2-1992 (&#8220;POSIX.2&#8221;)");
-	case(ROFF_p1387_2_95):
-		return("IEEE Std 1387.2-1995 (&#8220;POSIX.7.2&#8221;)");
-	case(ROFF_p1003_2):
-		return("IEEE Std 1003.2 (&#8220;POSIX.2&#8221;)");
-	case(ROFF_p1387_2):
-		return("IEEE Std 1387.2 (&#8220;POSIX.7.2&#8221;)");
-	case(ROFF_isoC_90):
-		return("ISO/IEC 9899:1990 (&#8220;ISO C90&#8221;)");
-	case(ROFF_isoC_amd1):
-		return("ISO/IEC 9899/AMD1:1995 (&#8220;ISO C90&#8221;)");
-	case(ROFF_isoC_tcor1):
-		return("ISO/IEC 9899/TCOR1:1994 (&#8220;ISO C90&#8221;)");
-	case(ROFF_isoC_tcor2):
-		return("ISO/IEC 9899/TCOR2:1995 (&#8220;ISO C90&#8221;)");
-	case(ROFF_isoC_99):
-		return("ISO/IEC 9899:1999 (&#8220;ISO C99&#8221;)");
-	case(ROFF_ansiC):
-		return("ANSI X3.159-1989 (&#8220;ANSI C&#8221;)");
-	case(ROFF_ansiC_89):
-		return("ANSI X3.159-1989 (&#8220;ANSI C&#8221;)");
-	case(ROFF_ansiC_99):
-		return("ANSI/ISO/IEC 9899-1999 (&#8220;ANSI C99&#8221;)");
-	case(ROFF_ieee754):
-		return("IEEE Std 754-1985");
-	case(ROFF_iso8802_3):
-		return("ISO 8802-3: 1989");
-	case(ROFF_xpg3):
-		return("X/Open Portability Guide Issue 3 (&#8220;XPG3&#8221;)");
-	case(ROFF_xpg4):
-		return("X/Open Portability Guide Issue 4 (&#8220;XPG4&#8221;)");
-	case(ROFF_xpg4_2):
-		return("X/Open Portability Guide Issue 4.2 (&#8220;XPG4.2&#8221;)");
-	case(ROFF_xpg4_3):
-		return("X/Open Portability Guide Issue 4.3 (&#8220;XPG4.3&#8221;)");
-	case(ROFF_xbd5):
-		return("X/Open System Interface Definitions Issue 5 (&#8220;XBD5&#8221;)");
-	case(ROFF_xcu5):
-		return("X/Open Commands and Utilities Issue 5 (&#8220;XCU5&#8221;)");
-	case(ROFF_xsh5):
-		return("X/Open System Interfaces and Headers Issue 5 (&#8220;XSH5&#8221;)");
-	case(ROFF_xns5):
-		return("X/Open Networking Services Issue 5 (&#8220;XNS5&#8221;)");
-	case(ROFF_xns5_2d2_0):
-		return("X/Open Networking Services Issue 5.2 Draft 2.0 (&#8220;XNS5.2D2.0&#8221;)");
-	case(ROFF_xcurses4_2):
-		return("X/Open Curses Issue 4 Version 2 (&#8220;XCURSES4.2&#8221;)");
-	case(ROFF_susv2):
-		return("Version 2 of the Single UNIX Specification");
-	case(ROFF_susv3):
-		return("Version 3 of the Single UNIX Specification");
-	case(ROFF_svid4):
-		return("System V Interface Definition, Fourth Edition (&#8220;SVID4&#8221;)");
-	default:
-		break;
-	}
-
-	abort();
-	/* NOTREACHED */
-}
-
-
-static char *
-mlg_At_literal(const char *p)
-{
-
-	if (NULL == p)
-		return("AT&amp;T UNIX");
-	if (0 == strcmp(p, "v6"))
-		return("Version 6 AT&amp;T UNIX");
-	else if (0 == strcmp(p, "v7")) 
-		return("Version 7 AT&amp;T UNIX");
-	else if (0 == strcmp(p, "32v"))
-		return("Version 32v AT&amp;T UNIX");
-	else if (0 == strcmp(p, "V.1"))
-		return("AT&amp;T System V.1 UNIX");
-	else if (0 == strcmp(p, "V.4"))
-		return("AT&amp;T System V.4 UNIX");
-
-	abort();
-	/* NOTREACHED */
-}
-
-
-static char *
-mlg_fmt(int tok)
-{
-
-	switch (tok) {
-	case (ROFF_Ex):
-		return ("The %s utility exits 0 on success, and "
-				"&gt;0 if an error occurs.");
-	case (ROFF_Rv):
-		return ("The %s() function returns the value 0 if "
-				"successful; otherwise the value -1 "
-				"is returned and the global variable "
-				"<span class=\"inline-Va\">errno</span> "
-				"is set to indicate the error.");
-	case (ROFF_In):
-		return("#include &lt;%s&gt;");
-	default:
-		break;
-	}
-
-	abort();
-	/* NOTREACHED */
-}
-
-
-static char *
-mlg_literal(int tok)
-{
-
-	switch (tok) {
-	case (ROFF_Bt):
-		return("is currently in beta test.");
-	case (ROFF_Ud):
-		return("currently under development.");
-	case (ROFF_Fx):
-		return("FreeBSD");
-	case (ROFF_Nx):
-		return("NetBSD");
-	case (ROFF_Ox):
-		return("OpenBSD");
-	case (ROFF_Ux):
-		return("UNIX");
-	case (ROFF_Bx):
-		return("BSD");
-	case (ROFF_Bsx):
-		return("BSDI BSD/OS");
-	default:
-		break;
-	}
-	abort();
-	/* NOTREACHED */
-}
-
-
 static int
 mlg_begintag(struct md_mlg *p, enum md_ns ns, int tok,
-		int *argc, char **argv)
+		int *argc, const char **argv)
 {
 	ssize_t		 res;
 
@@ -317,8 +165,8 @@ mlg_begintag(struct md_mlg *p, enum md_ns ns, int tok,
 	if ( ! ml_nputs(p->mbuf, "<", 1, &p->pos))
 		return(0);
 
-	res = (*p->cbs.ml_begintag)(p->mbuf, p->data, p->args, ns, tok,
-			argc, (const char **)argv);
+	res = (*p->cbs.ml_begintag)(p->mbuf, p->data, 
+			p->args, ns, tok, argc, argv);
 	if (-1 == res)
 		return(0);
 
@@ -459,7 +307,8 @@ mlg_nstring(struct md_mlg *p, const char *start,
 
 
 static int
-mlg_data(struct md_mlg *p, int space, const char *start, char *buf)
+mlg_data(struct md_mlg *p, int space, 
+		const char *start, const char *buf)
 {
 	size_t		 sz;
 
@@ -604,25 +453,157 @@ mlg_rofftail(void *arg)
 }
 
 
+static int
+mlg_literal_special(struct md_mlg *p, int tok, const char *start,
+		const int *argc, const char **argv, const char **more)
+{
+	char		 *lit;
+
+	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
+		return(0);
+
+	lit = ml_literal(tok, argc, argv, more);
+	assert(lit);
+
+	if ( ! ml_puts(p->mbuf, lit, &p->pos))
+		return(0);
+	while (*more) { 
+		if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
+			return(0);
+		if ( ! mlg_string(p, start, *more++))
+			return(0);
+	}
+
+	return(mlg_endtag(p, MD_NS_INLINE, tok));
+}
+
+
+static int
+mlg_ref_special(struct md_mlg *p, int tok,
+		const char *start, const char **more)
+{
+
+	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
+		return(0);
+
+	assert(*more);
+	if ( ! ml_puts(p->mbuf, *more++, &p->pos))
+		return(0);
+
+	if (*more) {
+		if ( ! ml_nputs(p->mbuf, "(", 1, &p->pos))
+			return(0);
+		if ( ! mlg_string(p, start, *more++))
+			return(0);
+		if ( ! ml_nputs(p->mbuf, ")", 1, &p->pos))
+			return(0);
+	}
+
+	assert(NULL == *more);
+	return(mlg_endtag(p, MD_NS_INLINE, tok));
+}
+
+
+static int
+mlg_formatted_special(struct md_mlg *p, int tok, 
+		const int *argc, const char **argv, const char **more)
+{
+	char		 buf[256], *lit;
+
+	/* FIXME: *more must be ml-filtered. */
+
+	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
+		return(0);
+
+	lit = ml_literal(tok, argc, argv, more);
+	assert(lit);
+	assert(*more);
+	(void)snprintf(buf, sizeof(buf), lit, *more++);
+	assert(NULL == *more);
+
+	if ( ! ml_puts(p->mbuf, buf, &p->pos))
+		return(0);
+
+	return(mlg_endtag(p, MD_NS_INLINE, tok));
+}
+
+
+static int
+mlg_atom_special(struct md_mlg *p, int tok,
+		const char *start, const char **more)
+{
+
+	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
+		return(0);
+
+	assert(*more);
+	if ( ! mlg_string(p, start, *more++))
+		return(0);
+
+	assert(NULL == *more);
+	return(mlg_endtag(p, MD_NS_INLINE, tok));
+}
+
+
+static int
+mlg_function_special(struct md_mlg *p, 
+		const char *start, const char **more)
+{
+
+	assert(*more);
+
+	if ( ! mlg_begintag(p, MD_NS_INLINE, ROFF_Fn, NULL, more))
+		return(0);
+	if ( ! mlg_string(p, start, *more++))
+		return(0);
+	if ( ! mlg_endtag(p, MD_NS_INLINE, ROFF_Fn))
+		return(0);
+
+	if (NULL == *more)
+		return(1);
+
+	if ( ! ml_nputs(p->mbuf, "(", 1, &p->pos))
+		return(0);
+
+	p->flags |= ML_OVERRIDE_ONE;
+
+	if ( ! mlg_begintag(p, MD_NS_INLINE, ROFF_Fa, NULL, more))
+		return(0);
+	if ( ! mlg_string(p, start, *more++))
+		return(0);
+	if ( ! mlg_endtag(p, MD_NS_INLINE, ROFF_Fa))
+		return(0);
+
+	while (*more) {
+		if ( ! ml_nputs(p->mbuf, ", ", 2, &p->pos))
+			return(0);
+		if ( ! mlg_begintag(p, MD_NS_INLINE, ROFF_Fa, NULL, more))
+			return(0);
+		if ( ! mlg_string(p, start, *more++))
+			return(0);
+		if ( ! mlg_endtag(p, MD_NS_INLINE, ROFF_Fa))
+			return(0);
+	}
+
+	return(ml_nputs(p->mbuf, ")", 1, &p->pos));
+}
+
+
 /* ARGSUSED */
 static int
 mlg_roffspecial(void *arg, int tok, const char *start, 
-		const int *argc, const char **argv, char **more)
+		const int *argc, const char **argv, const char **more)
 {
 	struct md_mlg	*p;
-	char		 buf[256];
 
 	assert(arg);
 	p = (struct md_mlg *)arg;
 
-	/*
-	 * First handle macros without content.
-	 */
-	
 	switch (tok) {
 	case (ROFF_Ns):
 		p->flags |= ML_OVERRIDE_ONE;
 		return(1);
+
 	case (ROFF_Sm):
 		assert(*more);
 		if (0 == strcmp(*more, "on"))
@@ -630,124 +611,34 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 		else
 			p->flags &= ~ML_OVERRIDE_ALL;
 		return(1);
-	default:
-		break;
-	}
 
-	/* 
-	 * Handle macros put into different-token tags.
-	 */
-
-	switch (tok) {
 	case (ROFF_Fn):
-		assert(*more);
-		if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
-			return(0);
-		if ( ! mlg_string(p, start, *more++))
-			return(0);
-		if ( ! mlg_endtag(p, MD_NS_INLINE, tok))
-			return(0);
-		if (*more) {
-			if ( ! ml_nputs(p->mbuf, "(", 1, &p->pos))
-				return(0);
-			p->flags |= ML_OVERRIDE_ONE;
-			if ( ! mlg_begintag(p, MD_NS_INLINE, 
-						ROFF_Fa, NULL, more))
-				return(0);
-			if ( ! mlg_string(p, start, *more++))
-				return(0);
-			if ( ! mlg_endtag(p, MD_NS_INLINE, ROFF_Fa))
-				return(0);
-			while (*more) {
-				if ( ! ml_nputs(p->mbuf, ", ", 2, &p->pos))
-					return(0);
-				if ( ! mlg_begintag(p, MD_NS_INLINE, ROFF_Fa, NULL, more))
-					return(0);
-				if ( ! mlg_string(p, start, *more++))
-					return(0);
-				if ( ! mlg_endtag(p, MD_NS_INLINE, ROFF_Fa))
-					return(0);
-			}
-			if ( ! ml_nputs(p->mbuf, ")", 1, &p->pos))
-				return(0);
-		}
-		return(1);
-	default:
-		break;
-	}
-
-	/*
-	 * Now handle macros in their environments. 
-	 */
-
-	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
-		return(0);
-
-	switch (tok) {
-	case (ROFF_St):
-		assert(NULL == *argv);
-		assert(ROFF_ARGMAX != *argc);
-		if ( ! ml_puts(p->mbuf, mlg_St_literal(*argc),
-					&p->pos))
-			return(0);
-		while (*more) { 
-			if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
-				return(0);
-			if ( ! mlg_string(p, start, *more++))
-				return(0);
-		}
-		break;
+		return(mlg_function_special(p, start, more));
 
 	case (ROFF_Xr):
-		if ( ! *more) {
-			mlg_err(p, start, start, "missing argument");
-			return(0);
-		}
-		if ( ! ml_puts(p->mbuf, *more++, &p->pos))
-			return(0);
-		if (*more) {
-			if ( ! ml_nputs(p->mbuf, "(", 1, &p->pos))
-				return(0);
-			if ( ! mlg_string(p, start, *more++))
-				return(0);
-			if ( ! ml_nputs(p->mbuf, ")", 1, &p->pos))
-				return(0);
-		}
-		if (*more) {
-			mlg_err(p, start, start, "too many arguments");
-			return(0);
-		}
-		break;
-
-	case (ROFF_Sx):
+		return(mlg_ref_special(p, tok, start, more));
+ 
+	case (ROFF_Sx): /* FIXME */
 		/* FALLTHROUGH */
 	case (ROFF_Nm):
-		assert(*more);
-		if ( ! mlg_string(p, start, *more++))
-			return(0);
-		assert(NULL == *more);
-		break;
+		return(mlg_atom_special(p, tok, start, more));
 	
 	case (ROFF_In):
 		/* NOTREACHED */
 	case (ROFF_Ex):
 		/* NOTREACHED */
 	case (ROFF_Rv):
-		assert(*more);
-		/* FIXME: *more must be ml-filtered. */
-		(void)snprintf(buf, sizeof(buf), 
-				mlg_fmt(tok), *more++);
-		if ( ! ml_puts(p->mbuf, buf, &p->pos))
-			return(0);
-		assert(NULL == *more);
-		break;
+		return(mlg_formatted_special(p, tok, 
+					argc, argv, more));
 
 	case (ROFF_At):
-		/* FIXME: *more must be ml-filtered. */
-		if ( ! ml_puts(p->mbuf, mlg_At_literal(*more), &p->pos))
-			return(0);
-		break;
-
+		/* FALLTHROUGH */
+	case (ROFF_Bt):
+		/* FALLTHROUGH */
+	case (ROFF_Ud):
+		/* FALLTHROUGH */
+	case (ROFF_Ux):
+		/* FALLTHROUGH */
 	case (ROFF_Bx):
 		/* FALLTHROUGH */
 	case (ROFF_Bsx):
@@ -756,39 +647,24 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 		/* FALLTHROUGH */
 	case (ROFF_Nx):
 		/* FALLTHROUGH */
+	case (ROFF_St):
+		/* FALLTHROUGH */
 	case (ROFF_Ox):
-		if ( ! ml_puts(p->mbuf, mlg_literal(tok), &p->pos))
-			return(0);
-		while (*more) { 
-			if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
-				return(0);
-			if ( ! mlg_string(p, start, *more++))
-				return(0);
-		}
-		break;
-
-	case (ROFF_Bt):
-		/* FALLTHROUGH */
-	case (ROFF_Ud):
-		/* FALLTHROUGH */
-	case (ROFF_Ux):
-		assert(NULL == *more);
-		if ( ! ml_puts(p->mbuf, mlg_literal(tok), &p->pos))
-			return(0);
-		break;
-
+		return(mlg_literal_special(p, tok, start, 
+					argc, argv, more));
 	default:
-		mlg_err(p, start, start, "`%s' not yet supported",
-				toknames[tok]);
-		return(0);
+		break;
 	}
 
-	return(mlg_endtag(p, MD_NS_INLINE, tok));
+	mlg_err(p, start, start, "`%s' not yet supported", 
+			toknames[tok]);
+	return(0);
 }
 
 
 static int
-mlg_roffblkin(void *arg, int tok, int *argc, char **argv)
+mlg_roffblkin(void *arg, int tok, 
+		int *argc, const char **argv)
 {
 
 	return(mlg_begintag((struct md_mlg *)arg, 
@@ -805,7 +681,8 @@ mlg_roffblkout(void *arg, int tok)
 
 
 static int
-mlg_roffblkbodyin(void *arg, int tok, int *argc, char **argv)
+mlg_roffblkbodyin(void *arg, int tok, 
+		int *argc, const char **argv)
 {
 
 	return(mlg_begintag((struct md_mlg *)arg, 
@@ -822,7 +699,8 @@ mlg_roffblkbodyout(void *arg, int tok)
 
 
 static int
-mlg_roffblkheadin(void *arg, int tok, int *argc, char **argv)
+mlg_roffblkheadin(void *arg, int tok, 
+		int *argc, const char **argv)
 {
 
 	return(mlg_begintag((struct md_mlg *)arg, 
@@ -839,7 +717,7 @@ mlg_roffblkheadout(void *arg, int tok)
 
 
 static int
-mlg_roffin(void *arg, int tok, int *argc, char **argv)
+mlg_roffin(void *arg, int tok, int *argc, const char **argv)
 {
 
 	return(mlg_begintag((struct md_mlg *)arg, 
@@ -856,8 +734,8 @@ mlg_roffout(void *arg, int tok)
 
 
 static void
-mlg_roffmsg(void *arg, enum roffmsg lvl, 
-		const char *buf, const char *pos, char *msg)
+mlg_roffmsg(void *arg, enum roffmsg lvl, const char *buf, 
+		const char *pos, const char *msg)
 {
 
 	mlg_msg((struct md_mlg *)arg, lvl, buf, pos, msg);
@@ -865,7 +743,8 @@ mlg_roffmsg(void *arg, enum roffmsg lvl,
 
 
 static int
-mlg_roffdata(void *arg, int space, const char *start, char *buf)
+mlg_roffdata(void *arg, int space, 
+		const char *start, const char *buf)
 {
 	struct md_mlg	*p;
 
@@ -876,7 +755,6 @@ mlg_roffdata(void *arg, int space, const char *start, char *buf)
 		return(0);
 
 	mlg_mode(p, MD_TEXT);
-
 	return(1);
 }
 
@@ -906,7 +784,7 @@ mlg_err(struct md_mlg *p, const char *start,
 
 static void
 mlg_msg(struct md_mlg *p, enum roffmsg lvl, 
-		const char *buf, const char *pos, char *msg)
+		const char *buf, const char *pos, const char *msg)
 {
 	char		*level;
 

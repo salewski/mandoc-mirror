@@ -4,15 +4,15 @@ CFLAGS += -W -Wall -Wno-unused-parameter -g -DDEBUG
 
 LINTFLAGS += -c -e -f -u
 
-LNS	= mdocml.ln html.ln xml.ln libmdocml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln
+LNS	= mdocml.ln html.ln xml.ln libmdocml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln
 
 LLNS	= llib-lmdocml.ln
 
 LIBS	= libmdocml.a
 
-OBJS	= mdocml.o html.o xml.o libmdocml.o roff.o ml.o mlg.o compat.o tokens.o
+OBJS	= mdocml.o html.o xml.o libmdocml.o roff.o ml.o mlg.o compat.o tokens.o literals.o
 
-SRCS	= mdocml.c html.c xml.c libmdocml.c roff.c ml.c mlg.c compat.c tokens.c
+SRCS	= mdocml.c html.c xml.c libmdocml.c roff.c ml.c mlg.c compat.c tokens.c literals.c
 
 HEADS	= libmdocml.h private.h ml.h roff.h
 
@@ -32,7 +32,8 @@ SUCCEED	= test.7 test.8 test.9 test.10 test.11 test.12 test.13 \
 	  test.14 test.16 test.17 test.18 test.19 test.21 test.23 \
 	  test.25 test.28 test.29 test.31 test.32 test.33 test.34 \
 	  test.35 test.38 test.39 test.41 test.42 test.43 test.44 \
-	  test.45 test.46 test.47 test.48 test.49 test.51 test.52
+	  test.45 test.46 test.47 test.48 test.49 test.51 test.52 \
+	  test.54 test.55 test.56 test.57 test.58 test.59 test.60
 
 
 all: mdocml
@@ -60,7 +61,7 @@ clean:
 	rm -f $(CLEAN)
 
 index.html: index.7 mdocml.css
-	./mdocml -W -fhtml -e -o $@ $<
+	./mdocml -W -fhtml -e -o $@ index.7
 
 mdocml.tgz: $(INSTALL)
 	mkdir -p .dist/mdocml/
@@ -68,15 +69,15 @@ mdocml.tgz: $(INSTALL)
 	( cd .dist/ && tar zcf ../mdocml.tgz mdocml/ )
 	rm -rf .dist/
 
-llib-lmdocml.ln: mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln
-	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln
+llib-lmdocml.ln: mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln
+	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln
 
 mdocml.ln: mdocml.c libmdocml.h
 
 mdocml.o: mdocml.c libmdocml.h
 
-libmdocml.a: libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o
-	$(AR) rs $@ libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o
+libmdocml.a: libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o literals.o
+	$(AR) rs $@ libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o literals.o
 
 xml.ln: xml.c private.h libmdocml.h ml.h
 
