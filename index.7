@@ -52,6 +52,18 @@ or
 .It
 and so on.
 .El
+.Pp
+The
+.Nm
+utility has been tested under Linux and 
+.Ox ,
+specifically on
+.Ox 
+manual source.
+.Nm
+is
+.Ud 
+.\"
 .Ss Filtering
 When a block of source has been verified, it's passed to the front-end
 fitlers, which format and display data.  The
@@ -59,6 +71,7 @@ fitlers, which format and display data.  The
 utility is invoked with a filter by the
 .Fl f
 flag.  The HTML filter has the following features:
+.Pp
 .Bl -enum -compact
 .It
 HTML-4.01 strict compliance.
@@ -67,19 +80,34 @@ Proper render of values in UTF-8, such as
 .Dq quotes
 and \*(>= predefined values.
 .It
-URI-appearing http://bsd.lv strings are correctly enclosed in link tags.
+URI-appearing http://bsd.lv/ strings are correctly enclosed in link tags.
 .It
 CSS-dictated style with meaningful non-CSS defaults.
 .El
+.Pp
+The XML filter creates a correct XML tree with 
+.Dq block ,
+.Dq head ,
+.Dq body ,
+and
+.Dq inline
+namespaces corresponding to macro categories.  Namespace identifiers
+correspond to their definitions.
 .\" 
-.Sh ENVIRONMENT
-The
+.Sh DOWNLOADS
+Download 
 .Nm
-utility has been tested under Linux and 
-.Ox ,
-specifically on
-.Ox 
-manual source.
+at http://mdocml.bsd.lv/mdocml.tgz
+.Ns . 
+.\" - UPDATE ME WITH EVERY RELEASE. ----------------------------------
+The current version is 1.0.0, dated 08/12/2008.
+.\" ------------------------------------------------------------------
+.\" 
+.Sh DOCUMENTS
+The manual for 
+.Nm
+is available at http://mdocml.bsd.lv/mdocml.html
+.Ns .
 .\" 
 .Sh EXAMPLES
 This page was produced as follows:

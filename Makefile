@@ -1,5 +1,8 @@
 .SUFFIXES:	.html .7
 
+VERSION	= 1.0.0
+
+# FIXME
 CFLAGS += -W -Wall -Wno-unused-parameter -g -DDEBUG
 
 LINTFLAGS += -c -e -f -u
@@ -16,9 +19,9 @@ SRCS	= mdocml.c html.c xml.c libmdocml.c roff.c ml.c mlg.c compat.c tokens.c lit
 
 HEADS	= libmdocml.h private.h ml.h roff.h
 
-MANS	= mdocml.1
+MANS	= mdocml.1 index.7
 
-HTML	= index.html
+HTML	= index.html mdocml.html
 
 CLEAN	= mdocml mdocml.tgz $(LLNS) $(LNS) $(OBJS) $(LIBS) $(HTML)
 
@@ -34,7 +37,6 @@ SUCCEED	= test.7 test.8 test.9 test.10 test.11 test.12 test.13 \
 	  test.35 test.38 test.39 test.41 test.42 test.43 test.44 \
 	  test.45 test.46 test.47 test.48 test.49 test.51 test.52 \
 	  test.54 test.55 test.56 test.57 test.58 test.59 test.60
-
 
 all: mdocml
 
@@ -63,10 +65,17 @@ clean:
 index.html: index.7 mdocml.css
 	./mdocml -W -fhtml -e -o $@ index.7
 
+mdocml.html: mdocml.1 mdocml.css
+	./mdocml -W -fhtml -e -o $@ mdocml.1
+
+install-www: www dist
+	install -m 0644 mdocml.tgz $(PREFIX)/
+	install -m 0644 $(HTML) $(PREFIX)/
+
 mdocml.tgz: $(INSTALL)
-	mkdir -p .dist/mdocml/
-	install -m 0644 $(INSTALL) .dist/mdocml/
-	( cd .dist/ && tar zcf ../mdocml.tgz mdocml/ )
+	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
+	install -m 0644 $(INSTALL) .dist/mdocml/mdocml-$(VERSION)/
+	( cd .dist/mdocml/ && tar zcf ../mdocml.tgz mdocml-$(VERSION)/ )
 	rm -rf .dist/
 
 llib-lmdocml.ln: mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln
