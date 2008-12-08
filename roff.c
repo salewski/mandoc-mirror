@@ -35,7 +35,6 @@
 /* FIXME: First letters of quoted-text interpreted in rofffindtok. */
 /* FIXME: `No' not implemented. */
 /* TODO: warn if Pp occurs before/after Sh etc. (see mdoc.samples). */
-/* TODO: warn about "X section only" macros. */
 /* TODO: warn about empty lists. */
 /* TODO: (warn) some sections need specific elements. */
 /* TODO: (warn) NAME section has particular order. */
@@ -67,6 +66,8 @@ struct	rofftree {
 #define	ROFF_BODY	 (1 << 5)		/* In roff body. */
 	struct roffcb	  cb;			/* Callbacks. */
 	void		 *arg;			/* Callbacks' arg. */
+	int		  csec;			/* Current section. */
+	int		  asec;			/* Thus-far sections. */
 };
 
 static	struct roffnode	 *roffnode_new(int, struct rofftree *);
@@ -81,7 +82,10 @@ static	int		  rofffindtok(const char *);
 static	int		  rofffindarg(const char *);
 static	int		  rofffindcallable(const char *);
 static	int		  roffismsec(const char *);
+static	int		  roffissec(const char **);
 static	int		  roffispunct(const char *);
+static	int		  roffchecksec(struct rofftree *, 
+				const char *, int);
 static	int		  roffargs(const struct rofftree *,
 				int, char *, char **);
 static	int		  roffargok(int, int);
@@ -124,7 +128,12 @@ roff_free(struct rofftree *tree, int flush)
 	if (ROFF_PRELUDE & tree->state) {
 		roff_err(tree, NULL, "prelude never finished");
 		goto end;
-	} 
+	} else if ( ! (ROFFSec_NAME & tree->asec)) {
+		roff_err(tree, NULL, "missing `NAME' section");
+		goto end;
+	} else if ( ! (ROFFSec_NMASK & tree->asec))
+		roff_warn(tree, NULL, "missing suggested `NAME', "
+				"`SYNOPSIS', `DESCRIPTION' sections");
 
 	for (n = tree->last; n; n = n->parent) {
 		if (0 != tokens[n->tok].ctx) 
@@ -328,7 +337,7 @@ roffparse(struct rofftree *tree, char *buf)
 			return(1);
 
 	if (ROFF_MAX == (tok = rofffindtok(buf + 1))) {
-		roff_err(tree, buf + 1, "bogus line macro");
+		roff_err(tree, buf, "bogus line macro");
 		return(0);
 	} else if ( ! roffargs(tree, tok, buf, argv)) 
 		return(0);
@@ -517,6 +526,125 @@ rofffindtok(const char *buf)
 
 
 static int
+roffchecksec(struct rofftree *tree, const char *start, int sec)
+{
+	int		 prior;
+
+	switch (sec) {
+	case(ROFFSec_SYNOP):
+		if ((prior = ROFFSec_NAME) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_DESC):
+		if ((prior = ROFFSec_SYNOP) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_RETVAL):
+		if ((prior = ROFFSec_DESC) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_ENV):
+		if ((prior = ROFFSec_RETVAL) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_FILES):
+		if ((prior = ROFFSec_ENV) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_EX):
+		if ((prior = ROFFSec_FILES) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_DIAG):
+		if ((prior = ROFFSec_EX) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_ERRS):
+		if ((prior = ROFFSec_DIAG) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_SEEALSO):
+		if ((prior = ROFFSec_ERRS) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_STAND):
+		if ((prior = ROFFSec_SEEALSO) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_HIST):
+		if ((prior = ROFFSec_STAND) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_AUTH):
+		if ((prior = ROFFSec_HIST) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_CAVEATS):
+		if ((prior = ROFFSec_AUTH) & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_BUGS):
+		if ((prior = ROFFSec_CAVEATS) & tree->asec)
+			return(1);
+		break;
+	default:
+		return(1);
+	}
+
+	roff_warn(tree, start, "section violates conventional order");
+	return(1);
+}
+
+
+static int
+roffissec(const char **p)
+{
+
+	assert(*p);
+	if (NULL != *(p + 1)) {
+		if (NULL != *(p + 2))
+			return(ROFFSec_OTHER);
+		if (0 == strcmp(*p, "RETURN") &&
+				0 == strcmp(*(p + 1), "VALUES"))
+			return(ROFFSec_RETVAL);
+		if (0 == strcmp(*p, "SEE") &&
+				0 == strcmp(*(p + 1), "ALSO"))
+			return(ROFFSec_SEEALSO);
+		return(ROFFSec_OTHER);
+	}
+
+	if (0 == strcmp(*p, "NAME"))
+		return(ROFFSec_NAME);
+	else if (0 == strcmp(*p, "SYNOPSIS"))
+		return(ROFFSec_SYNOP);
+	else if (0 == strcmp(*p, "DESCRIPTION"))
+		return(ROFFSec_DESC);
+	else if (0 == strcmp(*p, "ENVIRONMENT"))
+		return(ROFFSec_ENV);
+	else if (0 == strcmp(*p, "FILES"))
+		return(ROFFSec_FILES);
+	else if (0 == strcmp(*p, "EXAMPLES"))
+		return(ROFFSec_EX);
+	else if (0 == strcmp(*p, "DIAGNOSTICS")) 
+		return(ROFFSec_DIAG);
+	else if (0 == strcmp(*p, "ERRORS"))
+		return(ROFFSec_ERRS);
+	else if (0 == strcmp(*p, "STANDARDS"))
+		return(ROFFSec_STAND);
+	else if (0 == strcmp(*p, "HISTORY"))
+		return(ROFFSec_HIST);
+	else if (0 == strcmp(*p, "AUTHORS"))
+		return(ROFFSec_AUTH);
+	else if (0 == strcmp(*p, "CAVEATS"))
+		return(ROFFSec_CAVEATS);
+	else if (0 == strcmp(*p, "BUGS"))
+		return(ROFFSec_BUGS);
+
+	return(ROFFSec_OTHER);
+}
+
+
+static int
 roffismsec(const char *p)
 {
 
@@ -660,7 +788,13 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 	case (ROFF_At):
 		if (0 == sz)
 			break;
-		if (0 == strcmp(*ordp, "v6"))
+		if (0 == strcmp(*ordp, "v1"))
+			break;
+		else if (0 == strcmp(*ordp, "v2")) 
+			break;
+		else if (0 == strcmp(*ordp, "v3")) 
+			break;
+		else if (0 == strcmp(*ordp, "v6")) 
 			break;
 		else if (0 == strcmp(*ordp, "v7")) 
 			break;
@@ -670,7 +804,7 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 			break;
 		else if (0 == strcmp(*ordp, "V.4"))
 			break;
-		roff_err(tree, start, "invalid `At' arg");
+		roff_err(tree, *ordp, "invalid `At' arg");
 		return(0);
 	
 	case (ROFF_Xr):
@@ -683,6 +817,8 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 		}
 		/* FALLTHROUGH */
 
+	case (ROFF_Sx):
+		/* FALLTHROUGH*/
 	case (ROFF_Fn):
 		if (0 != sz) 
 			break;
@@ -703,8 +839,6 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 		break;
 
 	case (ROFF_Rv):
-		/* FALLTHROUGH*/
-	case (ROFF_Sx):
 		/* FALLTHROUGH*/
 	case (ROFF_Ex):
 		if (1 == sz) 
@@ -1159,6 +1293,20 @@ roff_layout(ROFFCALL_ARGS)
 	int		 i, c, argcp[ROFF_MAXLINEARG];
 	char		*argvp[ROFF_MAXLINEARG];
 
+	/*
+	 * The roff_layout function is for multi-line macros.  A layout
+	 * has a start and end point, which is either declared
+	 * explicitly or implicitly.  An explicit start and end is
+	 * embodied by `.Bl' and `.El', with the former being the start
+	 * and the latter being an end.  The `.Sh' and `.Ss' tags, on
+	 * the other hand, are implicit.  The scope of a layout is the
+	 * space between start and end.  Explicit layouts may not close
+	 * out implicit ones and vice versa; implicit layouts may close
+	 * out other implicit layouts.
+	 */
+
+	assert( ! (ROFF_CALLABLE & tokens[tok].flags));
+
 	if (ROFF_PRELUDE & tree->state) {
 		roff_err(tree, *argv, "bad `%s' in prelude", 
 				toknames[tok]);
@@ -1183,11 +1331,56 @@ roff_layout(ROFFCALL_ARGS)
 	 * Layouts have two parts: the layout body and header.  The
 	 * layout header is the trailing text of the line macro, while
 	 * the layout body is everything following until termination.
+	 * Example:
+	 *
+	 * .It Fl f ) ;
+	 * Bar.
+	 *
+	 * ...Produces...
+	 *
+	 * <block>
+	 * 	<head>
+	 * 		<!Fl f!> ;
+	 * 	</head>
+	 * 	
+	 *	<body>
+	 *		Bar.
+	 *	</body>
+	 * </block>
 	 */
 
 	if ( ! (*tree->cb.roffblkin)(tree->arg, tok, argcp, 
 				(const char **)argvp))
 		return(0);
+
+	/* +++ Begin run macro-specific hooks over argv. */
+
+	switch (tok) {
+	case (ROFF_Sh):
+		if (NULL == *argv) {
+			roff_err(tree, *(argv - 1), 
+					"`Sh' expects arguments");
+			return(0);
+		}
+		tree->csec = roffissec((const char **)argv);
+		if ( ! (ROFFSec_OTHER & tree->csec) &&
+				tree->asec & tree->csec) 
+			roff_warn(tree, *argv, "section repeated");
+		if (0 == tree->asec && ! (ROFFSec_NAME & tree->csec)) {
+			roff_err(tree, *argv, "`NAME' section "
+					"must be first");
+			return(0);
+		} else if ( ! roffchecksec(tree, *argv, tree->csec))
+			return(0);
+
+		tree->asec |= tree->csec;
+		break;
+	default:
+		break;
+	}
+
+	/* --- End run macro-specific hooks over argv. */
+
 	if (NULL == *argv)
 		return((*tree->cb.roffblkbodyin)
 				(tree->arg, tok, argcp, 
@@ -1210,8 +1403,7 @@ roff_layout(ROFFCALL_ARGS)
 
 		if ( ! (*tree->cb.roffblkheadout)(tree->arg, tok))
 			return(0);
-		return((*tree->cb.roffblkbodyin)
-				(tree->arg, tok, argcp, 
+		return((*tree->cb.roffblkbodyin)(tree->arg, tok, argcp,
 				 (const char **)argvp));
 	}
 
@@ -1254,12 +1446,10 @@ roff_layout(ROFFCALL_ARGS)
 
 	if ( ! roffpurgepunct(tree, argv))
 		return(0);
-
 	if ( ! (*tree->cb.roffblkheadout)(tree->arg, tok))
 		return(0);
-	return((*tree->cb.roffblkbodyin)
-			(tree->arg, tok, argcp, 
-			 (const char **)argvp));
+	return((*tree->cb.roffblkbodyin)(tree->arg, 
+				tok, argcp, (const char **)argvp));
 }
 
 
@@ -1271,6 +1461,16 @@ roff_ordered(ROFFCALL_ARGS)
 	char		*ordp[ROFF_MAXLINEARG], *p,
 			*argvp[ROFF_MAXLINEARG];
 
+	/*
+	 * Ordered macros pass their arguments directly to handlers,
+	 * instead of considering it free-form text.  Thus, the
+	 * following macro looks as follows:
+	 *
+	 * .Xr foo 1 ) ,
+	 *
+	 * .Xr arg1 arg2 punctuation
+	 */
+
 	if (ROFF_PRELUDE & tree->state) {
 		roff_err(tree, *argv, "`%s' disallowed in prelude", 
 				toknames[tok]);
@@ -1279,15 +1479,14 @@ roff_ordered(ROFFCALL_ARGS)
 
 	first = (*argv == tree->cur);
 	p = *argv++;
+	ordp[0] = NULL;
 
 	if ( ! roffparseopts(tree, tok, &argv, argcp, argvp))
 		return(0);
 
-	if (NULL == *argv) {
-		ordp[0] = NULL;
+	if (NULL == *argv)
 		return(roffspecial(tree, tok, p, argcp, 
 					(const char **)argvp, 0, ordp));
-	}
 
 	i = 0;
 	while (*argv && i < ROFF_MAXLINEARG) {
@@ -1334,6 +1533,18 @@ roff_text(ROFFCALL_ARGS)
 {
 	int		 i, j, first, c, argcp[ROFF_MAXLINEARG];
 	char		*argvp[ROFF_MAXLINEARG];
+
+	/*
+	 * Text macros are similar to special tokens, except that
+	 * arguments are instead flushed as pure data: we're only
+	 * concerned with the macro and its arguments.  Example:
+	 * 
+	 * .Fl v W f ;
+	 *
+	 * ...Produces...
+	 *
+	 * <fl> v W f </fl> ;
+	 */
 
 	if (ROFF_PRELUDE & tree->state) {
 		roff_err(tree, *argv, "`%s' disallowed in prelude", 

@@ -543,7 +543,7 @@ mlg_atom_special(struct md_mlg *p, int tok,
 	if ( ! mlg_string(p, start, *more++))
 		return(0);
 
-	assert(NULL == *more);
+	/*assert(NULL == *more);*/ /* FIXME: ROFF_Sx */
 	return(mlg_endtag(p, MD_NS_INLINE, tok));
 }
 
@@ -790,6 +790,8 @@ mlg_msg(struct md_mlg *p, enum roffmsg lvl,
 		const char *buf, const char *pos, const char *msg)
 {
 	char		*level;
+	char		 b[256];
+	int		 i;
 
 	switch (lvl) {
 	case (ROFF_WARN):
@@ -803,12 +805,31 @@ mlg_msg(struct md_mlg *p, enum roffmsg lvl,
 	default:
 		abort();
 	}
-	
-	if (pos)
-		(void)fprintf(stderr, "%s:%zu: %s: %s (column %zu)\n", 
-				p->rbuf->name, p->rbuf->line, level, 
-				msg, pos - buf);
-	else
-		(void)fprintf(stderr, "%s: %s: %s\n", 
+
+	if (pos) {
+		assert(pos >= buf);
+		if (0 < p->args->verbosity) {
+			(void)snprintf(b, sizeof(b), 
+					"%s:%zu: %s: %s\n",
+					p->rbuf->name, p->rbuf->line, 
+					level, msg);
+			(void)strlcat(b, "Error at: ", sizeof(b));
+			(void)strlcat(b, p->rbuf->linebuf, sizeof(b));
+
+			(void)strlcat(b, "\n          ", sizeof(b));
+			for (i = 0; i < pos - buf; i++)
+				(void)strlcat(b, " ", sizeof(b));
+			(void)strlcat(b, "^", sizeof(b));
+
+		} else
+			(void)snprintf(b, sizeof(b), 
+					"%s:%zu: %s: %s (col %zu)", 
+					p->rbuf->name, p->rbuf->line, 
+					level, msg, pos - buf);
+	} else 
+		(void)snprintf(b, sizeof(b), "%s: %s: %s", 
 				p->rbuf->name, level, msg);
+
+	(void)fprintf(stderr, "%s\n", b);
 }
+

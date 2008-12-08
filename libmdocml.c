@@ -28,8 +28,6 @@
 #include "libmdocml.h"
 #include "private.h"
 
-#define	BUFFER_LINE	 BUFSIZ	/* Default line-buffer size. */
-
 static	int	 md_run_enter(const struct md_args *, 
 			struct md_mbuf *, struct md_rbuf *, void *);
 static	int	 md_run_leave(const struct md_args *, struct md_mbuf *,
@@ -162,8 +160,8 @@ md_run_enter(const struct md_args *args, struct md_mbuf *mbuf,
 		struct md_rbuf *rbuf, void *p)
 {
 	ssize_t		 sz, i;
-	char		 line[BUFFER_LINE];
 	size_t		 pos;
+	char		 line[MD_LINE];
 	md_line		 fp;
 
 	assert(args);
@@ -192,17 +190,10 @@ again:
 		return(md_run_leave(args, mbuf, rbuf, 0, p));
 
 	for (i = 0; i < sz; i++) {
-		/*
-		if ( ! isascii(rbuf->buf[i])) {
-			warnx("%s: non-ascii char (line %zu, col %zu)",
-					rbuf->name, rbuf->line, pos);
-			return(md_run_leave(args, mbuf, rbuf, -1, p));
-		}
-		*/
 		if ('\n' != rbuf->buf[i]) {
-			if (pos < BUFFER_LINE) {
+			if (pos < MD_LINE) {
 				/* LINTED */
-				line[pos++] = rbuf->buf[i];
+				rbuf->linebuf[pos++] = rbuf->buf[i];
 				continue;
 			}
 			warnx("%s: line %zu too long",
@@ -210,7 +201,8 @@ again:
 			return(md_run_leave(args, mbuf, rbuf, -1, p));
 		}
 
-		line[(int)pos] = 0;
+		rbuf->linebuf[(int)pos] = 0;
+		(void)memcpy(line, rbuf->linebuf, sizeof(line));
 		if ( ! (*fp)(p, line))
 			return(md_run_leave(args, mbuf, rbuf, -1, p));
 		rbuf->line++;

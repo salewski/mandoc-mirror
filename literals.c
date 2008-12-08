@@ -88,7 +88,13 @@ ml_literal(int tok, const int *argc,
 		assert(ROFF_ARGMAX == *argc);
 		if (NULL == *morep)
 			return("AT&amp;T UNIX");
-		if (0 == strcmp(*morep, "v6"))
+		if (0 == strcmp(*morep, "v1"))
+			return("Version 1 AT&amp;T UNIX");
+		else if (0 == strcmp(*morep, "v2")) 
+			return("Version 2 AT&amp;T UNIX");
+		else if (0 == strcmp(*morep, "v3")) 
+			return("Version 3 AT&amp;T UNIX");
+		else if (0 == strcmp(*morep, "v6")) 
 			return("Version 6 AT&amp;T UNIX");
 		else if (0 == strcmp(*morep, "v7")) 
 			return("Version 7 AT&amp;T UNIX");

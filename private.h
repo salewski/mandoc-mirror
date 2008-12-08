@@ -19,6 +19,7 @@
 #ifndef PRIVATE_H
 #define PRIVATE_H
 
+#include <stdio.h>
 #include <time.h>
 
 struct	md_rbuf {
@@ -27,6 +28,8 @@ struct	md_rbuf {
 	char		*buf;		/* Buffer. */
 	size_t		 bufsz;		/* Size of buffer. */
 	size_t		 line;		/* Current line number. */
+#define	MD_LINE	 	(BUFSIZ)
+	char		 linebuf[MD_LINE];
 };
 
 struct	md_mbuf {
@@ -265,6 +268,25 @@ enum	roffmsec {
 	ROFF_MSEC_PAPER,
 	ROFF_MSEC_MAX
 };
+
+#define	ROFFSec_NMASK	(0x07)
+
+#define	ROFFSec_NAME	(1 << 0)
+#define	ROFFSec_SYNOP	(1 << 1)
+#define	ROFFSec_DESC	(1 << 2)
+#define	ROFFSec_RETVAL	(1 << 3)
+#define	ROFFSec_ENV	(1 << 4)
+#define	ROFFSec_FILES	(1 << 5)
+#define	ROFFSec_EX	(1 << 6)
+#define	ROFFSec_DIAG	(1 << 7)
+#define	ROFFSec_ERRS	(1 << 8)
+#define	ROFFSec_SEEALSO	(1 << 9)
+#define	ROFFSec_STAND	(1 << 10)
+#define	ROFFSec_HIST	(1 << 11)
+#define	ROFFSec_AUTH	(1 << 12)
+#define	ROFFSec_CAVEATS	(1 << 13)
+#define	ROFFSec_BUGS	(1 << 14)
+#define	ROFFSec_OTHER	(1 << 15)
 
 struct	roffcb {
 	void	(*roffmsg)(void *, enum roffmsg, 

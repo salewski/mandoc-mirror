@@ -141,7 +141,6 @@ html_It_headtagname(struct md_mbuf *mbuf, struct htmlq *q,
 		switch (n->argc[i]) {
 		case (ROFF_Ohang):
 			return(ml_nputs(mbuf, "div", 3, res));
-
 		case (ROFF_Tag):
 			/* FALLTHROUGH */
 		case (ROFF_Column): 
@@ -151,8 +150,7 @@ html_It_headtagname(struct md_mbuf *mbuf, struct htmlq *q,
 		}
 	}
 
-	abort();
-	/* NOTREACHED */
+	return(0);
 }
 
 
@@ -202,10 +200,7 @@ html_It_bodytagname(struct md_mbuf *mbuf, struct htmlq *q,
 	}
 
 	assert(i != ROFF_MAXLINEARG);
-	abort();
-	/* NOTREACHED */
-
-	return(1);
+	return(0);
 }
 
 
@@ -247,8 +242,7 @@ html_Bl_bodytagname(struct md_mbuf *mbuf, struct htmlq *q,
 	}
 
 	assert(i != ROFF_MAXLINEARG);
-	abort();
-	/* NOTREACHED */
+	return(0);
 }
 
 
@@ -298,8 +292,7 @@ html_It_blocktagname(struct md_mbuf *mbuf, struct htmlq *q,
 	}
 
 	assert(i != ROFF_MAXLINEARG);
-	abort();
-	/* NOTREACHED */
+	return(0);
 }
 
 
