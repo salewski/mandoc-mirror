@@ -1,6 +1,6 @@
 .SUFFIXES:	.html .7
 
-VERSION	= 1.0.0
+VERSION	= 1.0.1
 
 # FIXME
 CFLAGS += -W -Wall -Wno-unused-parameter -g -DDEBUG
