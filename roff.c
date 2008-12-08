@@ -84,6 +84,7 @@ static	int		  rofffindcallable(const char *);
 static	int		  roffismsec(const char *);
 static	int		  roffissec(const char **);
 static	int		  roffispunct(const char *);
+static	int		  roffisatt(const char *);
 static	int		  roffchecksec(struct rofftree *, 
 				const char *, int);
 static	int		  roffargs(const struct rofftree *,
@@ -680,6 +681,32 @@ roffismsec(const char *p)
 
 
 static int
+roffisatt(const char *p)
+{
+
+	assert(p);
+	if (0 == strcmp(p, "v1"))
+		return(1);
+	else if (0 == strcmp(p, "v2")) 
+		return(1);
+	else if (0 == strcmp(p, "v3")) 
+		return(1);
+	else if (0 == strcmp(p, "v6")) 
+		return(1);
+	else if (0 == strcmp(p, "v7")) 
+		return(1);
+	else if (0 == strcmp(p, "32v"))
+		return(1);
+	else if (0 == strcmp(p, "V.1"))
+		return(1);
+	else if (0 == strcmp(p, "V.4"))
+		return(1);
+
+	return(0);
+}
+
+
+static int
 roffispunct(const char *p)
 {
 
@@ -788,21 +815,7 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 	case (ROFF_At):
 		if (0 == sz)
 			break;
-		if (0 == strcmp(*ordp, "v1"))
-			break;
-		else if (0 == strcmp(*ordp, "v2")) 
-			break;
-		else if (0 == strcmp(*ordp, "v3")) 
-			break;
-		else if (0 == strcmp(*ordp, "v6")) 
-			break;
-		else if (0 == strcmp(*ordp, "v7")) 
-			break;
-		else if (0 == strcmp(*ordp, "32v"))
-			break;
-		else if (0 == strcmp(*ordp, "V.1"))
-			break;
-		else if (0 == strcmp(*ordp, "V.4"))
+		if (roffisatt(*ordp))
 			break;
 		roff_err(tree, *ordp, "invalid `At' arg");
 		return(0);
@@ -1291,7 +1304,7 @@ static int
 roff_layout(ROFFCALL_ARGS) 
 {
 	int		 i, c, argcp[ROFF_MAXLINEARG];
-	char		*argvp[ROFF_MAXLINEARG];
+	char		*argvp[ROFF_MAXLINEARG], *p;
 
 	/*
 	 * The roff_layout function is for multi-line macros.  A layout
@@ -1320,7 +1333,7 @@ roff_layout(ROFFCALL_ARGS)
 
 	assert( ! (ROFF_CALLABLE & tokens[tok].flags));
 
-	++argv;
+	p = *argv++;
 
 	if ( ! roffparseopts(tree, tok, &argv, argcp, argvp))
 		return(0);
