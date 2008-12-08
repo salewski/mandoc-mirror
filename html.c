@@ -75,7 +75,7 @@ static	int		html_begin(struct md_mbuf *,
 	       			const struct md_args *, 
 				const struct tm *, 
 				const char *, const char *, 
-				const char *, const char *);
+				enum roffmsec, const char *);
 static	int		html_printargs(struct md_mbuf *, int, 
 				const char *, const int *, 
 				const char **, size_t *);
@@ -361,7 +361,7 @@ out:
 static int 
 html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 		const struct tm *tm, const char *os, 
-		const char *title, const char *section, 
+		const char *title, enum roffmsec section, 
 		const char *vol)
 {
 	const char	*preamble, *css, *trail;
@@ -389,7 +389,7 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 	res = 0;
 
 	(void)snprintf(buf, sizeof(buf) - 1,
-			preamble, title, section);
+			preamble, title, ml_section(section));
 
 	if ( ! ml_puts(mbuf, buf, &res))
 		return(0);

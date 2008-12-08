@@ -57,7 +57,7 @@ struct	rofftree {
 	char		  name[64];		/* `Nm' results. */
 	char		  os[64];		/* `Os' results. */
 	char		  title[64];		/* `Dt' results. */
-	char		  section[64];		/* `Dt' results. */
+	enum roffmsec	  section;
 	char		  volume[64];		/* `Dt' results. */
 	int		  state;
 #define	ROFF_PRELUDE	 (1 << 1)		/* In roff prelude. */
@@ -80,6 +80,8 @@ static	int		  roffscan(int, const int *);
 static	int		  rofffindtok(const char *);
 static	int		  rofffindarg(const char *);
 static	int		  rofffindcallable(const char *);
+static	int		  roffismsec(const char *);
+static	int		  roffispunct(const char *);
 static	int		  roffargs(const struct rofftree *,
 				int, char *, char **);
 static	int		  roffargok(int, int);
@@ -88,6 +90,7 @@ static	int		  roffnextopt(const struct rofftree *,
 static	int		  roffparseopts(struct rofftree *, int, 
 				char ***, int *, char **);
 static	int		  roffcall(struct rofftree *, int, char **);
+static	int		  roffexit(struct rofftree *, int);
 static	int 		  roffparse(struct rofftree *, char *);
 static	int		  textparse(struct rofftree *, char *);
 static	int		  roffdata(struct rofftree *, int, char *);
@@ -133,7 +136,7 @@ roff_free(struct rofftree *tree, int flush)
 
 	while (tree->last) {
 		t = tree->last->tok;
-		if ( ! (*tokens[t].cb)(t, tree, NULL, ROFF_EXIT))
+		if ( ! roffexit(tree, t))
 			goto end;
 	}
 
@@ -166,6 +169,7 @@ roff_alloc(const struct roffcb *cb, void *args)
 
 	tree->state = ROFF_PRELUDE;
 	tree->arg = args;
+	tree->section = ROFF_MSEC_MAX;
 
 	(void)memcpy(&tree->cb, cb, sizeof(struct roffcb));
 
@@ -326,14 +330,7 @@ roffparse(struct rofftree *tree, char *buf)
 	if (ROFF_MAX == (tok = rofffindtok(buf + 1))) {
 		roff_err(tree, buf + 1, "bogus line macro");
 		return(0);
-	} else if (NULL == tokens[tok].cb) {
-		roff_err(tree, buf + 1, "unsupported macro `%s'", 
-				toknames[tok]);
-		return(0);
-	}
-
-	assert(ROFF___ != tok);
-	if ( ! roffargs(tree, tok, buf, argv)) 
+	} else if ( ! roffargs(tree, tok, buf, argv)) 
 		return(0);
 
 	argvp = (char **)argv;
@@ -344,7 +341,7 @@ roffparse(struct rofftree *tree, char *buf)
 	
 	if (ROFF_PRELUDE & tree->state) {
 		assert(NULL == tree->last);
-		return((*tokens[tok].cb)(tok, tree, argvp, ROFF_ENTER));
+		return(roffcall(tree, tok, argvp));
 	} 
 
 	assert(ROFF_BODY & tree->state);
@@ -375,9 +372,9 @@ roffparse(struct rofftree *tree, char *buf)
 	 */
 
 	if (ROFF_LAYOUT != tokens[tok].type)
-		return((*tokens[tok].cb)(tok, tree, argvp, ROFF_ENTER));
+		return(roffcall(tree, tok, argvp));
 	if (0 == tokens[tok].ctx)
-		return((*tokens[tok].cb)(tok, tree, argvp, ROFF_ENTER));
+		return(roffcall(tree, tok, argvp));
 
 	/*
 	 * First consider implicit-end tags, like as follows:
@@ -419,7 +416,7 @@ roffparse(struct rofftree *tree, char *buf)
 		 */
 
 		if (NULL == n)
-			return((*tokens[tok].cb)(tok, tree, argvp, ROFF_ENTER));
+			return(roffcall(tree, tok, argvp));
 
 		/* 
 		 * Close out all intermediary scoped blocks, then hang
@@ -428,11 +425,11 @@ roffparse(struct rofftree *tree, char *buf)
 
 		do {
 			t = tree->last->tok;
-			if ( ! (*tokens[t].cb)(t, tree, NULL, ROFF_EXIT))
+			if ( ! roffexit(tree, t))
 				return(0);
 		} while (t != tok);
 
-		return((*tokens[tok].cb)(tok, tree, argvp, ROFF_ENTER));
+		return(roffcall(tree, tok, argvp));
 	}
 
 	/*
@@ -468,7 +465,7 @@ roffparse(struct rofftree *tree, char *buf)
 	/* LINTED */
 	do {
 		t = tree->last->tok;
-		if ( ! (*tokens[t].cb)(t, tree, NULL, ROFF_EXIT))
+		if ( ! roffexit(tree, t))
 			return(0);
 	} while (t != tokens[tok].ctx);
 
@@ -516,6 +513,41 @@ rofffindtok(const char *buf)
 			return((int)i);
 
 	return(ROFF_MAX);
+}
+
+
+static int
+roffismsec(const char *p)
+{
+
+	if (0 == strcmp(p, "1"))
+		return(ROFF_MSEC_1);
+	else if (0 == strcmp(p, "2"))
+		return(ROFF_MSEC_2);
+	else if (0 == strcmp(p, "3"))
+		return(ROFF_MSEC_3);
+	else if (0 == strcmp(p, "3p"))
+		return(ROFF_MSEC_3p);
+	else if (0 == strcmp(p, "4"))
+		return(ROFF_MSEC_4);
+	else if (0 == strcmp(p, "5"))
+		return(ROFF_MSEC_5);
+	else if (0 == strcmp(p, "6"))
+		return(ROFF_MSEC_6);
+	else if (0 == strcmp(p, "7"))
+		return(ROFF_MSEC_7);
+	else if (0 == strcmp(p, "8"))
+		return(ROFF_MSEC_8);
+	else if (0 == strcmp(p, "9"))
+		return(ROFF_MSEC_9);
+	else if (0 == strcmp(p, "unass"))
+		return(ROFF_MSEC_UNASS);
+	else if (0 == strcmp(p, "draft"))
+		return(ROFF_MSEC_DRAFT);
+	else if (0 == strcmp(p, "paper"))
+		return(ROFF_MSEC_PAPER);
+
+	return(ROFF_MSEC_MAX);
 }
 
 
@@ -642,7 +674,15 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 		return(0);
 	
 	case (ROFF_Xr):
+		if (2 == sz) {
+			assert(ordp[1]);
+			if (ROFF_MSEC_MAX != roffismsec(ordp[1]))
+				break;
+			roff_warn(tree, start, "invalid `%s' manual "
+					"section", toknames[tok]);
+		}
 		/* FALLTHROUGH */
+
 	case (ROFF_Fn):
 		if (0 != sz) 
 			break;
@@ -707,17 +747,39 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 
 
 static int
-roffcall(struct rofftree *tree, int tok, char **argv)
+roffexit(struct rofftree *tree, int tok)
 {
 
+	assert(tokens[tok].cb);
+	return((*tokens[tok].cb)(tok, tree, NULL, ROFF_EXIT));
+}
+
+
+static int
+roffcall(struct rofftree *tree, int tok, char **argv)
+{
+	int		 i;
+	enum roffmsec	 c;
+
 	if (NULL == tokens[tok].cb) {
-		roff_err(tree, *argv, "unsupported macro `%s'", 
+		roff_err(tree, *argv, "`%s' is unsupported", 
 				toknames[tok]);
 		return(0);
 	}
-	if ( ! (*tokens[tok].cb)(tok, tree, argv, ROFF_ENTER))
-		return(0);
-	return(1);
+	if (tokens[tok].sections && ROFF_MSEC_MAX != tree->section) {
+		i = 0;
+		while (ROFF_MSEC_MAX != 
+				(c = tokens[tok].sections[i++]))
+			if (c == tree->section)
+				break;
+		if (ROFF_MSEC_MAX == c) {
+			roff_warn(tree, *argv, "`%s' is not a valid "
+					"macro in this manual section",
+					toknames[tok]);
+		}
+	}
+
+	return((*tokens[tok].cb)(tok, tree, argv, ROFF_ENTER));
 }
 
 
@@ -944,9 +1006,10 @@ roff_Dt(ROFFCALL_ARGS)
 	if (NULL == *argv) {
 		roff_err(tree, *argv, "`Dt' needs section");
 		return(0);
-	} else if (strlcpy(tree->section, *argv, sizeof(tree->section))
-			>= sizeof(tree->section)) {
-		roff_err(tree, *argv, "`Dt' section too long");
+	} 
+
+	if (ROFF_MSEC_MAX == (tree->section = roffismsec(*argv))) {
+		roff_err(tree, *argv, "bad `Dt' section");
 		return(0);
 	}
 
@@ -1076,6 +1139,10 @@ roff_Os(ROFFCALL_ARGS)
 	tree->state |= ROFF_PRELUDE_Os;
 	tree->state &= ~ROFF_PRELUDE;
 	tree->state |= ROFF_BODY;
+
+	assert(ROFF_MSEC_MAX != tree->section);
+	assert(0 != tree->title[0]);
+	assert(0 != tree->os[0]);
 
 	assert(NULL == tree->last);
 

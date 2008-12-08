@@ -26,6 +26,46 @@
 
 
 char *
+ml_section(enum roffmsec sec) 
+{
+
+	switch (sec) {
+	case(ROFF_MSEC_1):
+		return("1");
+	case(ROFF_MSEC_2):
+		return("2");
+	case(ROFF_MSEC_3):
+		return("3");
+	case(ROFF_MSEC_3p):
+		return("3p");
+	case(ROFF_MSEC_4):
+		return("4");
+	case(ROFF_MSEC_5):
+		return("5");
+	case(ROFF_MSEC_6):
+		return("6");
+	case(ROFF_MSEC_7):
+		return("7");
+	case(ROFF_MSEC_8):
+		return("8");
+	case(ROFF_MSEC_9):
+		return("9");
+	case(ROFF_MSEC_UNASS):
+		return("unass");
+	case(ROFF_MSEC_DRAFT):
+		return("draft");
+	case(ROFF_MSEC_PAPER):
+		return("paper");
+	default:
+		break;
+	}
+
+	abort();
+	/* NOTREACHED */
+}
+
+
+char *
 ml_literal(int tok, const int *argc, 
 		const char **argv, const char **morep)
 {

@@ -44,7 +44,7 @@ static	int		xml_begin(struct md_mbuf *,
 	       			const struct md_args *, 
 				const struct tm *, 
 				const char *, const char *, 
-				const char *, const char *);
+				enum roffmsec, const char *);
 static	int		xml_end(struct md_mbuf *, 
 				const struct md_args *);
 static	ssize_t 	xml_printtagname(struct md_mbuf *, 
@@ -123,7 +123,7 @@ xml_printtagname(struct md_mbuf *mbuf, enum md_ns ns, int tok)
 static int 
 xml_begin(struct md_mbuf *mbuf, const struct md_args *args,
 		const struct tm *tm, const char *os, 
-		const char *title, const char *section, 
+		const char *title, enum roffmsec section, 
 		const char *vol)
 {
 
@@ -199,6 +199,7 @@ int
 xml_alloc(void **p)
 {
 
+	*p = NULL;
 	return(1);
 }
 

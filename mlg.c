@@ -64,7 +64,7 @@ static	void		 mlg_roffmsg(void *arg,
 				const char *, const char *);
 static	int		 mlg_roffhead(void *, const struct tm *, 
 				const char *, const char *, 
-				const char *, const char *);
+				enum roffmsec, const char *);
 static	int		 mlg_rofftail(void *);
 static	int		 mlg_roffin(void *, int, 
 				int *, const char **);
@@ -362,9 +362,9 @@ mlg_exit(struct md_mlg *p, int flush)
 	int		 c;
 
 	c = roff_free(p->tree, flush);
-	free(p);
-
 	(*p->cbs.ml_free)(p->data);
+
+	free(p);
 
 	return(c);
 }
@@ -415,7 +415,7 @@ mlg_alloc(const struct md_args *args,
 
 static int
 mlg_roffhead(void *arg, const struct tm *tm, const char *os, 
-		const char *title, const char *sec, const char *vol)
+		const char *title, enum roffmsec sec, const char *vol)
 {
 	struct md_mlg	*p;
 
@@ -461,6 +461,8 @@ mlg_literal_special(struct md_mlg *p, int tok, const char *start,
 
 	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
 		return(0);
+
+	/* FIXME: must be ml-filtered. */
 
 	lit = ml_literal(tok, argc, argv, more);
 	assert(lit);
@@ -510,12 +512,13 @@ mlg_formatted_special(struct md_mlg *p, int tok,
 {
 	char		 buf[256], *lit;
 
-	/* FIXME: *more must be ml-filtered. */
-
 	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
 		return(0);
 
+	/* FIXME: must be ml-filtered. */
+
 	lit = ml_literal(tok, argc, argv, more);
+
 	assert(lit);
 	assert(*more);
 	(void)snprintf(buf, sizeof(buf), lit, *more++);

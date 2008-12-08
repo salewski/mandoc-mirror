@@ -244,13 +244,33 @@ struct	md_mbuf {
 extern	const char *const *toknames;
 extern	const char *const *tokargnames;
 
-enum	roffmsg { ROFF_WARN, ROFF_ERROR };
+enum	roffmsg { 
+	ROFF_WARN, 
+	ROFF_ERROR 
+};
+
+enum	roffmsec {
+	ROFF_MSEC_1,
+	ROFF_MSEC_2,
+	ROFF_MSEC_3,
+	ROFF_MSEC_3p,
+	ROFF_MSEC_4,
+	ROFF_MSEC_5,
+	ROFF_MSEC_6,
+	ROFF_MSEC_7,
+	ROFF_MSEC_8,
+	ROFF_MSEC_9,
+	ROFF_MSEC_UNASS,
+	ROFF_MSEC_DRAFT,
+	ROFF_MSEC_PAPER,
+	ROFF_MSEC_MAX
+};
 
 struct	roffcb {
 	void	(*roffmsg)(void *, enum roffmsg, 
 			const char *, const char *, const char *);
 	int	(*roffhead)(void *, const struct tm *, const char *, 
-			const char *, const char *, const char *);
+			const char *, enum roffmsec, const char *);
 	int	(*rofftail)(void *);
 	int	(*roffdata)(void *, int, const char *, const char *);
 	int	(*roffin)(void *, int, int *, const char **);
