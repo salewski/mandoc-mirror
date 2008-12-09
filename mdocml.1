@@ -9,7 +9,8 @@
 .\"
 .Sh SYNOPSIS
 .Nm mdocml
-.Op Fl vW
+.Op Fl v
+.Op Fl W Ns Ar err...
 .Op Fl f Ar filter
 .Op Fl o Ar outfile
 .Op Ar infile
@@ -32,8 +33,15 @@ Write output to
 which may be
 .Dq \-
 for stdout.
-.It Fl W
-Print warnings to stderr.
+.It Fl W Ns Ar err...
+Print warning messages.  If set to 
+.Fl W Ns Ar all ,
+all warnings are printed; if
+.Fl W Ns Ar error ,
+warnings are considered errors and cause utility termination.  Multiple 
+.Fl W
+arguments may be comma-separated, such as
+.Fl W Ns Ar error,all .
 .It Fl v
 Make warning and error messages verbose.
 .It Ar infile

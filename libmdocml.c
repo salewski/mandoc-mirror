@@ -25,7 +25,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "libmdocml.h"
 #include "private.h"
 
 static	int	 md_run_enter(const struct md_args *, 

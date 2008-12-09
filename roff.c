@@ -28,7 +28,6 @@
 #include <string.h>
 #include <time.h>
 
-#include "libmdocml.h"
 #include "private.h"
 #include "roff.h"
 
@@ -38,15 +37,29 @@
 /* TODO: warn about empty lists. */
 /* TODO: (warn) some sections need specific elements. */
 /* TODO: (warn) NAME section has particular order. */
-/* TODO: unify empty-content tags a la <br />. */
 /* TODO: macros with a set number of arguments? */
 /* TODO: validate Dt macro arguments. */
 /* FIXME: Bl -diag supposed to ignore callable children. */
-/* FIXME: Nm has newline when used in NAME section. */
 
 struct	roffnode {
-	int		  tok;			/* Token id. */
-	struct roffnode	 *parent;		/* Parent (or NULL). */
+	int		  tok;		/* Token id. */
+	struct roffnode	 *parent;	/* Parent (or NULL). */
+};
+
+enum	rofferr {
+	ERR_ARGEQ1,			/* Macro requires arg == 1. */
+	ERR_ARGEQ0,			/* Macro requires arg == 0. */
+	ERR_ARGGE1,			/* Macro requires arg >= 1. */
+	ERR_ARGGE2,			/* Macro requires arg >= 2. */
+	ERR_ARGLEN,			/* Macro argument too long. */
+	ERR_BADARG,			/* Macro has bad arg. */
+	ERR_ARGMNY,			/* Too many macro arguments. */
+	ERR_NOTSUP,			/* Macro not supported. */
+	ERR_DEPREC,			/* Macro deprecated. */
+	ERR_PR_OOO,			/* Prelude macro bad order. */
+	ERR_PR_REP,			/* Prelude macro repeated. */
+	ERR_NOT_PR,			/* Not allowed in prelude. */
+	WRN_SECORD,			/* Sections out-of-order. */
 };
 
 struct	rofftree {
@@ -59,7 +72,7 @@ struct	rofftree {
 	enum roffmsec	  section;
 	char		  volume[64];		/* `Dt' results. */
 	int		  state;
-#define	ROFF_PRELUDE	 (1 << 1)		/* In roff prelude. */
+#define	ROFF_PRELUDE	 (1 << 1)		/* In roff prelude. */ /* FIXME: put into asec. */
 #define	ROFF_PRELUDE_Os	 (1 << 2)		/* `Os' is parsed. */
 #define	ROFF_PRELUDE_Dt	 (1 << 3)		/* `Dt' is parsed. */
 #define	ROFF_PRELUDE_Dd	 (1 << 4)		/* `Dd' is parsed. */
@@ -72,19 +85,20 @@ struct	rofftree {
 
 static	struct roffnode	 *roffnode_new(int, struct rofftree *);
 static	void		  roffnode_free(struct rofftree *);
-static	void		  roff_warn(const struct rofftree *, 
+static	int		  roff_warn(const struct rofftree *, 
 				const char *, char *, ...);
-static	void		  roff_err(const struct rofftree *, 
+static	int		  roff_warnp(const struct rofftree *, 
+				const char *, int, enum rofferr);
+static	int		  roff_err(const struct rofftree *, 
 				const char *, char *, ...);
+static	int		  roff_errp(const struct rofftree *, 
+				const char *, int, enum rofferr);
 static	int		  roffpurgepunct(struct rofftree *, char **);
 static	int		  roffscan(int, const int *);
 static	int		  rofffindtok(const char *);
 static	int		  rofffindarg(const char *);
 static	int		  rofffindcallable(const char *);
-static	int		  roffismsec(const char *);
-static	int		  roffissec(const char **);
 static	int		  roffispunct(const char *);
-static	int		  roffisatt(const char *);
 static	int		  roffchecksec(struct rofftree *, 
 				const char *, int);
 static	int		  roffargs(const struct rofftree *,
@@ -133,7 +147,7 @@ roff_free(struct rofftree *tree, int flush)
 		(void)roff_err(tree, NULL, "missing `NAME' section");
 		goto end;
 	} else if ( ! (ROFFSec_NMASK & tree->asec))
-		roff_warn(tree, NULL, "missing suggested `NAME', "
+		(void)roff_warn(tree, NULL, "missing suggested `NAME', "
 				"`SYNOPSIS', `DESCRIPTION' sections");
 
 	for (n = tree->last; n; n = n->parent) {
@@ -576,120 +590,7 @@ roffchecksec(struct rofftree *tree, const char *start, int sec)
 		return(1);
 	}
 
-	roff_warn(tree, start, "section violates conventional order");
-	return(1);
-}
-
-
-/* FIXME: move this into literals.c. */
-static int
-roffissec(const char **p)
-{
-
-	assert(*p);
-	if (NULL != *(p + 1)) {
-		if (NULL != *(p + 2))
-			return(ROFFSec_OTHER);
-		if (0 == strcmp(*p, "RETURN") &&
-				0 == strcmp(*(p + 1), "VALUES"))
-			return(ROFFSec_RETVAL);
-		if (0 == strcmp(*p, "SEE") &&
-				0 == strcmp(*(p + 1), "ALSO"))
-			return(ROFFSec_SEEALSO);
-		return(ROFFSec_OTHER);
-	}
-
-	if (0 == strcmp(*p, "NAME"))
-		return(ROFFSec_NAME);
-	else if (0 == strcmp(*p, "SYNOPSIS"))
-		return(ROFFSec_SYNOP);
-	else if (0 == strcmp(*p, "DESCRIPTION"))
-		return(ROFFSec_DESC);
-	else if (0 == strcmp(*p, "ENVIRONMENT"))
-		return(ROFFSec_ENV);
-	else if (0 == strcmp(*p, "FILES"))
-		return(ROFFSec_FILES);
-	else if (0 == strcmp(*p, "EXAMPLES"))
-		return(ROFFSec_EX);
-	else if (0 == strcmp(*p, "DIAGNOSTICS")) 
-		return(ROFFSec_DIAG);
-	else if (0 == strcmp(*p, "ERRORS"))
-		return(ROFFSec_ERRS);
-	else if (0 == strcmp(*p, "STANDARDS"))
-		return(ROFFSec_STAND);
-	else if (0 == strcmp(*p, "HISTORY"))
-		return(ROFFSec_HIST);
-	else if (0 == strcmp(*p, "AUTHORS"))
-		return(ROFFSec_AUTH);
-	else if (0 == strcmp(*p, "CAVEATS"))
-		return(ROFFSec_CAVEATS);
-	else if (0 == strcmp(*p, "BUGS"))
-		return(ROFFSec_BUGS);
-
-	return(ROFFSec_OTHER);
-}
-
-
-/* FIXME: move this into literals.c. */
-static int
-roffismsec(const char *p)
-{
-
-	if (0 == strcmp(p, "1"))
-		return(ROFF_MSEC_1);
-	else if (0 == strcmp(p, "2"))
-		return(ROFF_MSEC_2);
-	else if (0 == strcmp(p, "3"))
-		return(ROFF_MSEC_3);
-	else if (0 == strcmp(p, "3p"))
-		return(ROFF_MSEC_3p);
-	else if (0 == strcmp(p, "4"))
-		return(ROFF_MSEC_4);
-	else if (0 == strcmp(p, "5"))
-		return(ROFF_MSEC_5);
-	else if (0 == strcmp(p, "6"))
-		return(ROFF_MSEC_6);
-	else if (0 == strcmp(p, "7"))
-		return(ROFF_MSEC_7);
-	else if (0 == strcmp(p, "8"))
-		return(ROFF_MSEC_8);
-	else if (0 == strcmp(p, "9"))
-		return(ROFF_MSEC_9);
-	else if (0 == strcmp(p, "unass"))
-		return(ROFF_MSEC_UNASS);
-	else if (0 == strcmp(p, "draft"))
-		return(ROFF_MSEC_DRAFT);
-	else if (0 == strcmp(p, "paper"))
-		return(ROFF_MSEC_PAPER);
-
-	return(ROFF_MSEC_MAX);
-}
-
-
-/* FIXME: move this into literals.c. */
-static int
-roffisatt(const char *p)
-{
-
-	assert(p);
-	if (0 == strcmp(p, "v1"))
-		return(1);
-	else if (0 == strcmp(p, "v2")) 
-		return(1);
-	else if (0 == strcmp(p, "v3")) 
-		return(1);
-	else if (0 == strcmp(p, "v6")) 
-		return(1);
-	else if (0 == strcmp(p, "v7")) 
-		return(1);
-	else if (0 == strcmp(p, "32v"))
-		return(1);
-	else if (0 == strcmp(p, "V.1"))
-		return(1);
-	else if (0 == strcmp(p, "V.4"))
-		return(1);
-
-	return(0);
+	return(roff_warnp(tree, start, ROFF_Sh, WRN_SECORD));
 }
 
 
@@ -803,17 +704,18 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 	case (ROFF_At):
 		if (0 == sz)
 			break;
-		if (roffisatt(*ordp))
+		if (ROFF_ATT_MAX == roff_att(*ordp))
 			break;
-		return(roff_err(tree, *ordp, "invalid `At' arg"));
+		return(roff_errp(tree, *ordp, tok, ERR_BADARG));
 	
 	case (ROFF_Xr):
 		if (2 == sz) {
 			assert(ordp[1]);
-			if (ROFF_MSEC_MAX != roffismsec(ordp[1]))
+			if (ROFF_MSEC_MAX != roff_msec(ordp[1]))
 				break;
-			roff_warn(tree, start, "invalid `%s' manual "
-					"section", toknames[tok]);
+			if ( ! roff_warn(tree, start, "invalid `%s' manual "
+						"section", toknames[tok]))
+				return(0);
 		}
 		/* FALLTHROUGH */
 
@@ -822,17 +724,16 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 	case (ROFF_Fn):
 		if (0 != sz) 
 			break;
-		return(roff_err(tree, start, "`%s' expects at least "
-					"one arg", toknames[tok]));
+		return(roff_errp(tree, start, tok, ERR_ARGGE1));
 
 	case (ROFF_Nm):
 		if (0 == sz) {
-			if (0 == tree->name[0]) {
-				roff_err(tree, start, "`Nm' not set");
-				return(0);
+			if (0 != tree->name[0]) {
+				ordp[0] = tree->name;
+				ordp[1] = NULL;
+				break;
 			}
-			ordp[0] = tree->name;
-			ordp[1] = NULL;
+			return(roff_err(tree, start, "`Nm' not set"));
 		} else if ( ! roffsetname(tree, ordp))
 			return(0);
 		break;
@@ -842,34 +743,24 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 	case (ROFF_Ex):
 		if (1 == sz) 
 			break;
-		roff_err(tree, start, "`%s' expects one arg", 
-				toknames[tok]);
-		return(0);
+		return(roff_errp(tree, start, tok, ERR_ARGEQ1));
 
 	case (ROFF_Sm):
-		if (1 != sz) {
-			roff_err(tree, start, "`Sm' expects one arg");
-			return(0);
-		} 
-		
-		if (0 != strcmp(ordp[0], "on") &&
-				0 != strcmp(ordp[0], "off")) {
-			roff_err(tree, start, "`Sm' has invalid argument");
-			return(0);
-		}
-		break;
+		if (1 != sz)
+			return(roff_errp(tree, start, tok, ERR_ARGEQ1));
+		else if (0 == strcmp(ordp[0], "on") || 
+				0 == strcmp(ordp[0], "off"))
+			break;
+		return(roff_errp(tree, *ordp, tok, ERR_BADARG));
 	
 	case (ROFF_Ud):
 		/* FALLTHROUGH */
 	case (ROFF_Ux):
 		/* FALLTHROUGH */
 	case (ROFF_Bt):
-		if (0 != sz) {
-			roff_err(tree, start, "`%s' expects no args",
-					toknames[tok]);
-			return(0);
-		}
-		break;
+		if (0 == sz) 
+			break;
+		return(roff_errp(tree, start, tok, ERR_ARGEQ0));
 	default:
 		break;
 	}
@@ -894,11 +785,9 @@ roffcall(struct rofftree *tree, int tok, char **argv)
 	int		 i;
 	enum roffmsec	 c;
 
-	if (NULL == tokens[tok].cb) {
-		roff_err(tree, *argv, "`%s' is unsupported", 
-				toknames[tok]);
-		return(0);
-	}
+	if (NULL == tokens[tok].cb)
+		return(roff_errp(tree, *argv, tok, ERR_NOTSUP));
+
 	if (tokens[tok].sections && ROFF_MSEC_MAX != tree->section) {
 		i = 0;
 		while (ROFF_MSEC_MAX != 
@@ -906,9 +795,10 @@ roffcall(struct rofftree *tree, int tok, char **argv)
 			if (c == tree->section)
 				break;
 		if (ROFF_MSEC_MAX == c) {
-			roff_warn(tree, *argv, "`%s' is not a valid "
+			if ( ! roff_warn(tree, *argv, "`%s' is not a valid "
 					"macro in this manual section",
-					toknames[tok]);
+					toknames[tok]))
+				return(0);
 		}
 	}
 
@@ -933,14 +823,16 @@ roffnextopt(const struct rofftree *tree, int tok,
 		return(-1);
 
 	if (ROFF_ARGMAX == (v = rofffindarg(arg + 1))) {
-		roff_warn(tree, arg, "argument-like parameter `%s' to "
-				"`%s'", arg, toknames[tok]);
+		if ( ! roff_warn(tree, arg, "argument-like parameter `%s' to "
+					"`%s'", arg, toknames[tok]))
+			return(ROFF_ARGMAX);
 		return(-1);
 	} 
 	
 	if ( ! roffargok(tok, v)) {
-		roff_warn(tree, arg, "invalid argument parameter `%s' to "
-				"`%s'", tokargnames[v], toknames[tok]);
+		if ( ! roff_warn(tree, arg, "invalid argument parameter `%s' to "
+				"`%s'", tokargnames[v], toknames[tok]))
+			return(ROFF_ARGMAX);
 		return(-1);
 	} 
 	
@@ -950,7 +842,7 @@ roffnextopt(const struct rofftree *tree, int tok,
 	*in = ++argv;
 
 	if (NULL == *argv) {
-		roff_err(tree, arg, "empty value of `%s' for `%s'",
+		(void)roff_err(tree, arg, "empty value of `%s' for `%s'",
 				tokargnames[v], toknames[tok]);
 		return(ROFF_ARGMAX);
 	}
@@ -1024,6 +916,7 @@ roff_Dd(ROFFCALL_ARGS)
 {
 	time_t		 t;
 	char		*p, buf[32];
+	size_t		 sz;
 
 	if (ROFF_BODY & tree->state) {
 		assert( ! (ROFF_PRELUDE & tree->state));
@@ -1034,17 +927,20 @@ roff_Dd(ROFFCALL_ARGS)
 	assert(ROFF_PRELUDE & tree->state);
 	assert( ! (ROFF_BODY & tree->state));
 
-	if (ROFF_PRELUDE_Dd & tree->state) {
-		roff_err(tree, *argv, "repeated `Dd' in prelude");
-		return(0);
-	} else if (ROFF_PRELUDE_Dt & tree->state) {
-		roff_err(tree, *argv, "out-of-order `Dd' in prelude");
-		return(0);
-	}
+	if (ROFF_PRELUDE_Dd & tree->state)
+		return(roff_errp(tree, *argv, tok, ERR_PR_REP));
+	if (ROFF_PRELUDE_Dt & tree->state)
+		return(roff_errp(tree, *argv, tok, ERR_PR_OOO));
 
 	assert(NULL == tree->last);
 
 	argv++;
+
+	/*
+	 * This is a bit complex because there are many forms the date
+	 * can be in:  it can be simply $Mdocdate$, $Mdocdate <date>$,
+	 * or a raw date.  Process accordingly.
+	 */
 
 	if (0 == strcmp(*argv, "$Mdocdate$")) {
 		t = time(NULL);
@@ -1054,49 +950,36 @@ roff_Dd(ROFFCALL_ARGS)
 		return(1);
 	} 
 
-	/* Build this from Mdocdate or raw date. */
-	
 	buf[0] = 0;
 	p = *argv;
+	sz = sizeof(buf);
 
 	if (0 != strcmp(*argv, "$Mdocdate:")) {
 		while (*argv) {
-			if (strlcat(buf, *argv++, sizeof(buf))
-					< sizeof(buf)) 
+			if (strlcat(buf, *argv++, sz) < sz)
 				continue;
-			roff_err(tree, p, "bad `Dd' date");
-			return(0);
+			return(roff_errp(tree, p, tok, ERR_BADARG));
 		}
 		if (strptime(buf, "%b%d,%Y", &tree->tm)) {
 			tree->state |= ROFF_PRELUDE_Dd;
 			return(1);
 		}
-		roff_err(tree, *argv, "bad `Dd' date");
-		return(0);
+		return(roff_errp(tree, p, tok, ERR_BADARG));
 	}
 
 	argv++;
+
 	while (*argv && **argv != '$') {
-		if (strlcat(buf, *argv++, sizeof(buf))
-				>= sizeof(buf)) {
-			roff_err(tree, p, "bad `Dd' Mdocdate");
-			return(0);
-		} 
-		if (strlcat(buf, " ", sizeof(buf))
-				>= sizeof(buf)) {
-			roff_err(tree, p, "bad `Dd' Mdocdate");
-			return(0);
-		}
-	}
-	if (NULL == *argv) {
-		roff_err(tree, p, "bad `Dd' Mdocdate");
-		return(0);
+		if (strlcat(buf, *argv++, sz) >= sz)
+			return(roff_errp(tree, p, tok, ERR_BADARG));
+		if (strlcat(buf, " ", sz) >= sz) 
+			return(roff_errp(tree, p, tok, ERR_BADARG));
 	}
 
-	if (NULL == strptime(buf, "%b %d %Y", &tree->tm)) {
-		roff_err(tree, *argv, "bad `Dd' Mdocdate");
-		return(0);
-	}
+	if (NULL == *argv) 
+		return(roff_errp(tree, p, tok, ERR_BADARG));
+	if (NULL == strptime(buf, "%b %d %Y", &tree->tm)) 
+		return(roff_errp(tree, p, tok, ERR_BADARG));
 
 	tree->state |= ROFF_PRELUDE_Dd;
 	return(1);
@@ -1107,6 +990,7 @@ roff_Dd(ROFFCALL_ARGS)
 static	int
 roff_Dt(ROFFCALL_ARGS)
 {
+	size_t		 sz;
 
 	if (ROFF_BODY & tree->state) {
 		assert( ! (ROFF_PRELUDE & tree->state));
@@ -1117,43 +1001,33 @@ roff_Dt(ROFFCALL_ARGS)
 	assert(ROFF_PRELUDE & tree->state);
 	assert( ! (ROFF_BODY & tree->state));
 
-	if ( ! (ROFF_PRELUDE_Dd & tree->state)) {
-		roff_err(tree, *argv, "out-of-order `Dt' in prelude");
-		return(0);
-	} else if (ROFF_PRELUDE_Dt & tree->state) {
-		roff_err(tree, *argv, "repeated `Dt' in prelude");
-		return(0);
-	}
+	if ( ! (ROFF_PRELUDE_Dd & tree->state))
+		return(roff_errp(tree, *argv, tok, ERR_PR_OOO));
+	if (ROFF_PRELUDE_Dt & tree->state)
+		return(roff_errp(tree, *argv, tok, ERR_PR_REP));
 
 	argv++;
-	if (NULL == *argv) {
-		roff_err(tree, *argv, "`Dt' needs document title");
-		return(0);
-	} else if (strlcpy(tree->title, *argv, sizeof(tree->title))
-			>= sizeof(tree->title)) {
-		roff_err(tree, *argv, "`Dt' document title too long");
-		return(0);
-	}
+	sz = sizeof(tree->title);
+
+	if (NULL == *argv) 
+		return(roff_errp(tree, *argv, tok, ERR_ARGGE2));
+	if (strlcpy(tree->title, *argv, sz) >= sz)
+		return(roff_errp(tree, *argv, tok, ERR_ARGLEN));
 
 	argv++;
-	if (NULL == *argv) {
-		roff_err(tree, *argv, "`Dt' needs section");
-		return(0);
-	} 
+	if (NULL == *argv)
+		return(roff_errp(tree, *argv, tok, ERR_ARGGE2));
 
-	if (ROFF_MSEC_MAX == (tree->section = roffismsec(*argv))) {
-		roff_err(tree, *argv, "bad `Dt' section");
-		return(0);
-	}
+	if (ROFF_MSEC_MAX == (tree->section = roff_msec(*argv)))
+		return(roff_errp(tree, *argv, tok, ERR_BADARG));
 
 	argv++;
+	sz = sizeof(tree->volume);
+
 	if (NULL == *argv) {
 		tree->volume[0] = 0;
-	} else if (strlcpy(tree->volume, *argv, sizeof(tree->volume))
-			>= sizeof(tree->volume)) {
-		roff_err(tree, *argv, "`Dt' volume too long");
-		return(0);
-	}
+	} else if (strlcpy(tree->volume, *argv, sz) >= sz)
+		return(roff_errp(tree, *argv, tok, ERR_ARGLEN));
 
 	assert(NULL == tree->last);
 	tree->state |= ROFF_PRELUDE_Dt;
@@ -1165,21 +1039,18 @@ roff_Dt(ROFFCALL_ARGS)
 static int
 roffsetname(struct rofftree *tree, char **ordp)
 {
+	size_t		 sz;
 	
 	assert(*ordp);
 
 	/* FIXME: not all sections can set this. */
 
-	if (NULL != *(ordp + 1)) {
-		roff_err(tree, *ordp, "too many `Nm' args");
-		return(0);
-	} 
+	if (NULL != *(ordp + 1))
+		return(roff_errp(tree, *ordp, ROFF_Nm, ERR_ARGMNY));
 	
-	if (strlcpy(tree->name, *ordp, sizeof(tree->name)) 
-			>= sizeof(tree->name)) {
-		roff_err(tree, *ordp, "`Nm' arg too long");
-		return(0);
-	}
+	sz = sizeof(tree->name);
+	if (strlcpy(tree->name, *ordp, sz) >= sz)
+		return(roff_errp(tree, *ordp, ROFF_Nm, ERR_ARGLEN));
 
 	return(1);
 }
@@ -1236,6 +1107,7 @@ static	int
 roff_Os(ROFFCALL_ARGS)
 {
 	char		*p;
+	size_t		 sz;
 
 	if (ROFF_BODY & tree->state) {
 		assert( ! (ROFF_PRELUDE & tree->state));
@@ -1245,29 +1117,21 @@ roff_Os(ROFFCALL_ARGS)
 
 	assert(ROFF_PRELUDE & tree->state);
 	if ( ! (ROFF_PRELUDE_Dt & tree->state) ||
-			! (ROFF_PRELUDE_Dd & tree->state)) {
-		roff_err(tree, *argv, "out-of-order `Os' in prelude");
-		return(0);
-	}
+			! (ROFF_PRELUDE_Dd & tree->state)) 
+		return(roff_errp(tree, *argv, tok, ERR_PR_OOO));
 
 	tree->os[0] = 0;
 
 	p = *++argv;
+	sz = sizeof(tree->os);
 
-	while (*argv) {
-		if (strlcat(tree->os, *argv++, sizeof(tree->os))
-				< sizeof(tree->os)) 
-			continue;
-		roff_err(tree, p, "`Os' value too long");
-		return(0);
-	}
+	while (*argv)
+		if (strlcat(tree->os, *argv++, sz) >= sz)
+			return(roff_errp(tree, p, tok, ERR_ARGLEN));
 
 	if (0 == tree->os[0])
-		if (strlcpy(tree->os, "LOCAL", sizeof(tree->os))
-				>= sizeof(tree->os)) {
-			roff_err(tree, p, "`Os' value too long");
-			return(0);
-		}
+		if (strlcpy(tree->os, "LOCAL", sz) >= sz)
+			return(roff_errp(tree, p, tok, ERR_ARGLEN));
 
 	tree->state |= ROFF_PRELUDE_Os;
 	tree->state &= ~ROFF_PRELUDE;
@@ -1280,8 +1144,8 @@ roff_Os(ROFFCALL_ARGS)
 	assert(NULL == tree->last);
 
 	return((*tree->cb.roffhead)(tree->arg, &tree->tm,
-				tree->os, tree->title, tree->section,
-				tree->volume));
+				tree->os, tree->title, 
+				tree->section, tree->volume));
 }
 
 
@@ -1306,11 +1170,10 @@ roff_layout(ROFFCALL_ARGS)
 
 	assert( ! (ROFF_CALLABLE & tokens[tok].flags));
 
-	if (ROFF_PRELUDE & tree->state) {
-		roff_err(tree, *argv, "bad `%s' in prelude", 
-				toknames[tok]);
-		return(0);
-	} else if (ROFF_EXIT == type) {
+	if (ROFF_PRELUDE & tree->state)
+		return(roff_errp(tree, *argv, tok, ERR_NOT_PR));
+
+	if (ROFF_EXIT == type) {
 		roffnode_free(tree);
 		if ( ! (*tree->cb.roffblkbodyout)(tree->arg, tok))
 			return(0);
@@ -1357,19 +1220,21 @@ roff_layout(ROFFCALL_ARGS)
 	switch (tok) {
 	case (ROFF_Sh):
 		if (NULL == *argv) {
-			roff_err(tree, *(argv - 1), 
-					"`Sh' expects arguments");
-			return(0);
+			argv--;
+			return(roff_errp(tree, *argv, tok, ERR_ARGGE1));
 		}
-		tree->csec = roffissec((const char **)argv);
+
+		tree->csec = roff_sec((const char **)argv);
+
 		if ( ! (ROFFSec_OTHER & tree->csec) &&
 				tree->asec & tree->csec) 
-			roff_warn(tree, *argv, "section repeated");
-		if (0 == tree->asec && ! (ROFFSec_NAME & tree->csec)) {
-			roff_err(tree, *argv, "`NAME' section "
-					"must be first");
-			return(0);
-		} else if ( ! roffchecksec(tree, *argv, tree->csec))
+			if ( ! roff_warn(tree, *argv, "section repeated"))
+				return(0);
+
+		if (0 == tree->asec && ! (ROFFSec_NAME & tree->csec))
+			return(roff_err(tree, *argv, "`NAME' section "
+						"must be first"));
+		if ( ! roffchecksec(tree, *argv, tree->csec))
 			return(0);
 
 		tree->asec |= tree->csec;
@@ -1470,11 +1335,8 @@ roff_ordered(ROFFCALL_ARGS)
 	 * .Xr arg1 arg2 punctuation
 	 */
 
-	if (ROFF_PRELUDE & tree->state) {
-		roff_err(tree, *argv, "`%s' disallowed in prelude", 
-				toknames[tok]);
-		return(0);
-	}
+	if (ROFF_PRELUDE & tree->state)
+		return(roff_errp(tree, *argv, tok, ERR_NOT_PR));
 
 	first = (*argv == tree->cur);
 	p = *argv++;
@@ -1545,11 +1407,8 @@ roff_text(ROFFCALL_ARGS)
 	 * <fl> v W f </fl> ;
 	 */
 
-	if (ROFF_PRELUDE & tree->state) {
-		roff_err(tree, *argv, "`%s' disallowed in prelude", 
-				toknames[tok]);
-		return(0);
-	}
+	if (ROFF_PRELUDE & tree->state)
+		return(roff_errp(tree, *argv, tok, ERR_NOT_PR));
 
 	first = (*argv == tree->cur);
 	argv++;
@@ -1567,7 +1426,6 @@ roff_text(ROFFCALL_ARGS)
 		while (*argv)
 			if ( ! roffdata(tree, i++, *argv++))
 				return(0);
-
 		return((*tree->cb.roffout)(tree->arg, tok));
 	}
 
@@ -1589,11 +1447,9 @@ roff_text(ROFFCALL_ARGS)
 	
 			if ( ! roffcall(tree, c, argv))
 				return(0);
-	
 			if (ROFF_LSCOPE & tokens[tok].flags)
 				if ( ! (*tree->cb.roffout)(tree->arg, tok))
 					return(0);
-	
 			break;
 		}
 
@@ -1655,12 +1511,30 @@ static int
 roff_depr(ROFFCALL_ARGS)
 {
 
-	roff_err(tree, *argv, "`%s' is deprecated", toknames[tok]);
-	return(0);
+	return(roff_errp(tree, *argv, tok, ERR_DEPREC));
 }
 
 
-static void
+static int
+roff_warnp(const struct rofftree *tree, const char *pos,
+		int tok, enum rofferr type)
+{
+	char		 *p;
+
+	switch (type) {
+	case (WRN_SECORD):
+		p = "section at `%s' out of order";
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	return(roff_warn(tree, pos, p, toknames[tok]));
+}
+
+
+static int
 roff_warn(const struct rofftree *tree, const char *pos, char *fmt, ...)
 {
 	va_list		 ap;
@@ -1670,22 +1544,75 @@ roff_warn(const struct rofftree *tree, const char *pos, char *fmt, ...)
 	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
-	(*tree->cb.roffmsg)(tree->arg, 
-			ROFF_WARN, tree->cur, pos, buf);
+	return((*tree->cb.roffmsg)(tree->arg, 
+				ROFF_WARN, tree->cur, pos, buf));
 }
 
 
-static void
+static int
+roff_errp(const struct rofftree *tree, const char *pos, 
+		int tok, enum rofferr type)
+{
+	char		 *p;
+
+	switch (type) {
+	case (ERR_ARGEQ1):
+		p = "`%s' expects exactly one argument";
+		break;
+	case (ERR_ARGEQ0):
+		p = "`%s' expects exactly zero arguments";
+		break;
+	case (ERR_ARGGE1):
+		p = "`%s' expects one or more arguments";
+		break;
+	case (ERR_ARGGE2):
+		p = "`%s' expects two or more arguments";
+		break;
+	case (ERR_BADARG):
+		p = "invalid argument for `%s'";
+		break;
+	case (ERR_NOTSUP):
+		p = "macro `%s' is not supported";
+		break;
+	case(ERR_PR_OOO):
+		p = "prelude macro `%s' is out of order";
+		break;
+	case(ERR_PR_REP):
+		p = "prelude macro `%s' repeated";
+		break;
+	case(ERR_ARGLEN):
+		p = "macro argument for `%s' is too long";
+		break;
+	case(ERR_DEPREC):
+		p = "macro `%s' is deprecated";
+		break;
+	case(ERR_NOT_PR):
+		p = "macro `%s' disallowed in prelude";
+		break;
+	case(ERR_ARGMNY):
+		p = "too many arguments for macro `%s'";
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	return(roff_err(tree, pos, p, toknames[tok]));
+}
+
+
+static int
 roff_err(const struct rofftree *tree, const char *pos, char *fmt, ...)
 {
 	va_list		 ap;
 	char		 buf[128];
 
 	va_start(ap, fmt);
-	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
+	if (-1 == vsnprintf(buf, sizeof(buf), fmt, ap))
+		err(1, "vsnprintf");
 	va_end(ap);
 
-	(*tree->cb.roffmsg)(tree->arg, 
-			ROFF_ERROR, tree->cur, pos, buf);
+	return((*tree->cb.roffmsg)
+			(tree->arg, ROFF_ERROR, tree->cur, pos, buf));
 }
 

@@ -27,10 +27,27 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "libmdocml.h"
 #include "private.h"
 #include "ml.h"
 
+#define	TAG_HTML	"<html>"
+#define	TAG_BODY	"<body>"
+#define	TAG_DIV_MDOC	"<div class=\"mdoc\">"
+#define	TAG_STYLE_CSS	"<style type=\"text/css\"><!--"
+#define	TAG_STYLE_END	"--></style>"
+#define	TAG_HEAD	"<head>"
+#define	TAG_HEAD_END	"</head>"
+#define	TAG_TITLE	"<title>"
+#define	TAG_TITLE_END	"</title>"
+#define	TAG_LINK_CSS	"<link rel=\"stylesheet\" " \
+			"type=\"text/css\" href=\"%s\">"
+#define	TAG_DOCTYPE	"<!DOCTYPE HTML PUBLIC " \
+			"\"-//W3C//DTD HTML 4.01//EN\" " \
+			"\"http://www.w3.org/TR/html4/strict.dtd\">"
+#define	TAG_RESTYPE	"<meta name=\"resource-type\" " \
+			"content=\"document\">"
+#define	TAG_CONTTYPE	"<meta http-equiv=\"Content-Type\" " \
+			"content=\"text/html;charset=utf-8\">"
 
 /* TODO: allow head/tail-less invocations (just "div" start). */
 
@@ -357,55 +374,72 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 		const char *title, enum roffmsec section, 
 		const char *vol)
 {
-	const char	*preamble, *css, *trail;
-	char		 buf[512];
+	char		 mtitle[128], css[128];
 	size_t		 res;
 
-	preamble =
-	"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"\n"
-	"    \"http://www.w3.org/TR/html4/strict.dtd\">\n"
-	"<html>\n"
-	"<head>\n"
-	"    <meta http-equiv=\"Content-Type\"\n"
-	"         content=\"text/html;charset=utf-8\">\n"
-	"    <meta name=\"resource-type\" content=\"document\">\n"
-	"    <title>Manual Page for %s(%s)</title>\n";
-
-	css = 
-	"    <link rel=\"stylesheet\" type=\"text/css\"\n"
-	"         href=\"%s\">\n";
-	trail = 
-	"</head>\n"
-	"<body>\n"
-	"<div class=\"mdoc\">";
+	(void)snprintf(mtitle, sizeof(mtitle), 
+			"Manual Page for %s(%s)",
+			title, roff_msecname(section));
+	(void)snprintf(css, sizeof(css), 
+			TAG_LINK_CSS, args->params.html.css);
 
 	res = 0;
 
-	(void)snprintf(buf, sizeof(buf) - 1,
-			preamble, title, ml_section(section));
-
-	if ( ! ml_puts(mbuf, buf, &res))
+	if ( ! ml_puts(mbuf, TAG_DOCTYPE, &res))
+		return(0);
+	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+		return(0);
+	if ( ! ml_puts(mbuf, TAG_HTML, &res))
+		return(0);
+	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+		return(0);
+	if ( ! ml_puts(mbuf, TAG_BODY, &res))
+		return(0);
+	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+		return(0);
+	if ( ! ml_puts(mbuf, TAG_CONTTYPE, &res))
+		return(0);
+	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+		return(0);
+	if ( ! ml_puts(mbuf, TAG_RESTYPE, &res))
+		return(0);
+	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+		return(0);
+	if ( ! ml_puts(mbuf, TAG_TITLE, &res))
+		return(0);
+	if ( ! ml_putstring(mbuf, mtitle, &res))
+		return(0);
+	if ( ! ml_puts(mbuf, TAG_TITLE_END, &res))
+		return(0);
+	if ( ! ml_nputs(mbuf, "\n", 1, &res))
 		return(0);
 
-	assert(args->params.html.css);
 	if (HTML_CSS_EMBED & args->params.html.flags) {
-		if ( ! ml_puts(mbuf, "    <style type=\"text/css\"><!--\n", &res))
+		if ( ! ml_puts(mbuf, TAG_STYLE_CSS, &res))
+			return(0);
+		if ( ! ml_puts(mbuf, "\n", &res))
 			return(0);
 		if ( ! html_loadcss(mbuf, args->params.html.css))
 			return(0);
-		if ( ! ml_puts(mbuf, "    --!></style>\n", &res))
+		if ( ! ml_puts(mbuf, TAG_STYLE_END, &res))
 			return(0);
-	} else {
-		(void)snprintf(buf, sizeof(buf) - 1, css, 
-				args->params.html.css);
-		if ( ! ml_puts(mbuf, buf, &res))
-			return(0);
-	}
-
-	if ( ! ml_puts(mbuf, trail, &res))
+	} else if ( ! ml_puts(mbuf, css, &res))
 		return(0);
 
-	return(1);
+	if ( ! ml_puts(mbuf, "\n", &res))
+		return(0);
+
+	if ( ! ml_puts(mbuf, TAG_HEAD_END, &res))
+		return(0);
+	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+		return(0);
+	if ( ! ml_puts(mbuf, TAG_BODY, &res))
+		return(0);
+	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+		return(0);
+	if ( ! ml_puts(mbuf, TAG_DIV_MDOC, &res))
+		return(0);
+	return(ml_nputs(mbuf, "\n", 1, &res));
 }
 
 

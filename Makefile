@@ -71,13 +71,13 @@ clean:
 	rm -f $(CLEAN)
 
 index.html: index.7 mdocml.css
-	./mdocml -W -fhtml -e -o $@ index.7
+	./mdocml -Wall -fhtml -e -o $@ index.7
 
 index.xml: index.7 mdocml.css
-	./mdocml -W -o $@ index.7
+	./mdocml -Wall -o $@ index.7
 
 mdocml.html: mdocml.1 mdocml.css
-	./mdocml -W -fhtml -e -o $@ mdocml.1
+	./mdocml -Wall -fhtml -e -o $@ mdocml.1
 
 install-www: www dist
 	install -m 0644 mdocml.tgz $(PREFIX)/mdocml-$(VERSION).tgz

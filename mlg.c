@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "libmdocml.h"
 #include "private.h"
 #include "ml.h"
 
@@ -59,7 +58,7 @@ struct	md_mlg {
 	void		 *data;
 };
 
-static	void		 mlg_roffmsg(void *arg, 
+static	int		 mlg_roffmsg(void *arg, 
 				enum roffmsg, const char *, 
 				const char *, const char *);
 static	int		 mlg_roffhead(void *, const struct tm *, 
@@ -87,7 +86,7 @@ static	int		 mlg_roffblkbodyout(void *, int);
 static	int		 mlg_ref_special(struct md_mlg *, int,
 				const char *, const char **);
 static	int		 mlg_formatted_special(struct md_mlg *, 
-				int, const int *, 
+				int, const char *, const int *, 
 				const char **, const char **);
 static	int		 mlg_literal_special(struct md_mlg *, 
 				int,  const char *, const int *, 
@@ -109,12 +108,12 @@ static	int		 mlg_string(struct md_mlg *,
 				const char *, const char *);
 static	int		 mlg_data(struct md_mlg *, int, 
 				const char *, const char *);
-static	void		 mlg_err(struct md_mlg *, const char *, 
+static	int		 mlg_err(struct md_mlg *, const char *, 
 				const char *, const char *, ...);
-static	void		 mlg_msg(struct md_mlg *, 
+static	int		 mlg_msg(struct md_mlg *, 
 				enum roffmsg, const char *, 
 				const char *, const char *);
-static	void		 mlg_vmsg(struct md_mlg *, enum roffmsg, 
+static	int		 mlg_vmsg(struct md_mlg *, enum roffmsg, 
 				const char *, const char *, 
 				const char *, va_list);
 
@@ -291,11 +290,10 @@ mlg_nstring(struct md_mlg *p, const char *start,
 	if (-1 == res) 
 		return(0);
 
-	if (0 == (c = ml_nputstring(p->mbuf, buf, sz, &p->pos))) {
-		mlg_err(p, start, buf, "bad string "
-				"encoding: `%s'", buf);
-		return(0);
-	} else if (-1 == c)
+	if (0 == (c = ml_nputstring(p->mbuf, buf, sz, &p->pos)))
+		return(mlg_err(p, start, buf, "bad string "
+					"encoding: `%s'", buf));
+	else if (-1 == c)
 		return(0);
 
 	res = (*p->cbs.ml_endstring)(p->mbuf, p->args, buf, sz);
@@ -462,13 +460,12 @@ mlg_literal_special(struct md_mlg *p, int tok, const char *start,
 	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
 		return(0);
 
-	/* FIXME: must be ml-filtered. */
-
-	lit = ml_literal(tok, argc, argv, more);
+	lit = roff_literal(tok, argc, argv, more);
 	assert(lit);
 
-	if ( ! ml_puts(p->mbuf, lit, &p->pos))
+	if ( ! mlg_string(p, start, lit))
 		return(0);
+
 	while (*more) { 
 		if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
 			return(0);
@@ -507,7 +504,7 @@ mlg_ref_special(struct md_mlg *p, int tok,
 
 
 static int
-mlg_formatted_special(struct md_mlg *p, int tok, 
+mlg_formatted_special(struct md_mlg *p, int tok, const char *start,
 		const int *argc, const char **argv, const char **more)
 {
 	char		 buf[256], *lit;
@@ -515,16 +512,14 @@ mlg_formatted_special(struct md_mlg *p, int tok,
 	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
 		return(0);
 
-	/* FIXME: must be ml-filtered. */
-
-	lit = ml_literal(tok, argc, argv, more);
+	lit = roff_fmtstring(tok);
 
 	assert(lit);
 	assert(*more);
 	(void)snprintf(buf, sizeof(buf), lit, *more++);
 	assert(NULL == *more);
 
-	if ( ! ml_puts(p->mbuf, buf, &p->pos))
+	if ( ! mlg_string(p, start, buf))
 		return(0);
 
 	return(mlg_endtag(p, MD_NS_INLINE, tok));
@@ -631,7 +626,7 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 	case (ROFF_Ex):
 		/* NOTREACHED */
 	case (ROFF_Rv):
-		return(mlg_formatted_special(p, tok, 
+		return(mlg_formatted_special(p, tok, start,
 					argc, argv, more));
 
 	case (ROFF_At):
@@ -659,9 +654,8 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 		break;
 	}
 
-	mlg_err(p, start, start, "`%s' not yet supported", 
-			toknames[tok]);
-	return(0);
+	return(mlg_err(p, start, start, "`%s' not yet supported", 
+				toknames[tok]));
 }
 
 
@@ -736,12 +730,12 @@ mlg_roffout(void *arg, int tok)
 }
 
 
-static void
+static int
 mlg_roffmsg(void *arg, enum roffmsg lvl, const char *buf, 
 		const char *pos, const char *msg)
 {
 
-	mlg_msg((struct md_mlg *)arg, lvl, buf, pos, msg);
+	return(mlg_msg((struct md_mlg *)arg, lvl, buf, pos, msg));
 }
 
 
@@ -762,30 +756,32 @@ mlg_roffdata(void *arg, int space,
 }
 
 
-static void
+static int
 mlg_vmsg(struct md_mlg *p, enum roffmsg lvl, const char *start, 
 		const char *pos, const char *fmt, va_list ap)
 {
 	char		 buf[128];
 
 	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
-	mlg_msg(p, lvl, start, pos, buf);
+	return(mlg_msg(p, lvl, start, pos, buf));
 }
 
 
-static void
+static int
 mlg_err(struct md_mlg *p, const char *start, 
 		const char *pos, const char *fmt, ...)
 {
 	va_list		 ap;
+	int		 c;
 
 	va_start(ap, fmt);
-	mlg_vmsg(p, ROFF_ERROR, start, pos, fmt, ap);
+	c = mlg_vmsg(p, ROFF_ERROR, start, pos, fmt, ap);
 	va_end(ap);
+	return(c);
 }
 
 
-static void
+static int
 mlg_msg(struct md_mlg *p, enum roffmsg lvl, 
 		const char *buf, const char *pos, const char *msg)
 {
@@ -795,15 +791,16 @@ mlg_msg(struct md_mlg *p, enum roffmsg lvl,
 
 	switch (lvl) {
 	case (ROFF_WARN):
-		if ( ! (MD_WARN_ALL & p->args->warnings))
-			return;
 		level = "warning";
+		if ( ! (MD_WARN_ALL & p->args->warnings))
+			return(1);
 		break;
 	case (ROFF_ERROR):
 		level = "error";
 		break;
 	default:
 		abort();
+		/* NOTREACHED */
 	}
 
 	if (pos) {
@@ -831,5 +828,6 @@ mlg_msg(struct md_mlg *p, enum roffmsg lvl,
 				p->rbuf->name, level, msg);
 
 	(void)fprintf(stderr, "%s\n", b);
+	return(lvl == ROFF_WARN ? 1 : 0);
 }
 

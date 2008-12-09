@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "libmdocml.h"
+
 struct	md_rbuf {
 	int		 fd;		/* Open descriptor. */
 	char		*name;		/* Name of file. */
@@ -269,6 +271,18 @@ enum	roffmsec {
 	ROFF_MSEC_MAX
 };
 
+enum	roffatt {
+	ROFF_ATT_V1,
+	ROFF_ATT_V2,
+	ROFF_ATT_V3,
+	ROFF_ATT_V6,
+	ROFF_ATT_V7,
+	ROFF_ATT_32V,
+	ROFF_ATT_V_1,
+	ROFF_ATT_V_4,
+	ROFF_ATT_MAX
+};
+
 #define	ROFFSec_NMASK	(0x07)
 
 #define	ROFFSec_NAME	(1 << 0)
@@ -289,7 +303,7 @@ enum	roffmsec {
 #define	ROFFSec_OTHER	(1 << 15)
 
 struct	roffcb {
-	void	(*roffmsg)(void *, enum roffmsg, 
+	int	(*roffmsg)(void *, enum roffmsg, 
 			const char *, const char *, const char *);
 	int	(*roffhead)(void *, const struct tm *, const char *, 
 			const char *, enum roffmsec, const char *);
@@ -335,6 +349,14 @@ int		  roff_engine(struct rofftree *, char *);
 int		  roff_free(struct rofftree *, int);
 
 int		  rofftok_scan(const char *, int *);
+
+char		 *roff_literal(int, const int *,
+			const char **, const char **);
+char		 *roff_fmtstring(int);
+char		 *roff_msecname(enum roffmsec);
+enum roffmsec	  roff_msec(const char *);
+int		  roff_sec(const char **);
+enum roffatt	  roff_att(const char *);
 
 __END_DECLS
 

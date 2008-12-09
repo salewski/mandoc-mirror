@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libmdocml.h"
 #include "private.h"
 #include "ml.h"
 

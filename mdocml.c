@@ -50,6 +50,10 @@ static	int		 begin_bufs(const struct md_args *,
 static int		 leave_bufs(const struct md_buf *, 
 				const struct md_buf *, int);
 
+#ifdef __linux__
+extern	int		 getsubopt(char **, char *const *, char **);
+#endif
+
 int
 main(int argc, char *argv[])
 {
@@ -265,7 +269,8 @@ usage(void)
 {
 	extern char	*__progname;
 
-	(void)printf("usage: %s [-v] [-Wwarn...]  [-f filter] "
-			"[-o outfile] [infile]\n", __progname);
+	(void)fprintf(stderr, "usage: %s [-v] [-Wwarn...]  "
+			"[-f filter] [-o outfile] [infile]\n", 
+			__progname);
 }
 
