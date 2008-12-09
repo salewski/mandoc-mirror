@@ -704,7 +704,7 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 	case (ROFF_At):
 		if (0 == sz)
 			break;
-		if (ROFF_ATT_MAX == roff_att(*ordp))
+		if (ROFF_ATT_MAX != roff_att(*ordp))
 			break;
 		return(roff_errp(tree, *ordp, tok, ERR_BADARG));
 	

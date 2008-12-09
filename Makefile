@@ -57,11 +57,11 @@ www: $(HTML) $(XML)
 regress: mdocml
 	@for f in $(FAIL); do \
 		echo "./mdocml $$f" ; \
-		./mdocml $$f 1>/dev/null 2>/dev/null || continue ; \
+		./mdocml -v $$f 1>/dev/null 2>/dev/null || continue ; \
 	done
 	@for f in $(SUCCEED); do \
 		echo "./mdocml $$f" ; \
-		./mdocml $$f 1>/dev/null || exit 1 ; \
+		./mdocml -v $$f 1>/dev/null || exit 1 ; \
 	done
 
 mdocml: mdocml.o libmdocml.a

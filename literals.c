@@ -23,7 +23,7 @@
 #include "private.h"
 
 #define	ROFF_ATTname_V1		"v1"
-#define	ROFF_ATTname_V2		"v1"
+#define	ROFF_ATTname_V2		"v2"
 #define	ROFF_ATTname_V3		"v3"
 #define	ROFF_ATTname_V6		"v6"
 #define	ROFF_ATTname_V7		"v7"

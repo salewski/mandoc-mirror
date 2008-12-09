@@ -31,8 +31,11 @@
 #include "ml.h"
 
 #define	TAG_HTML	"<html>"
+#define	TAG_HTML_END	"</html>"
 #define	TAG_BODY	"<body>"
+#define	TAG_BODY_END	"</body>"
 #define	TAG_DIV_MDOC	"<div class=\"mdoc\">"
+#define	TAG_DIV_END	"</div>"
 #define	TAG_STYLE_CSS	"<style type=\"text/css\"><!--"
 #define	TAG_STYLE_END	"--></style>"
 #define	TAG_HEAD	"<head>"
@@ -367,6 +370,31 @@ out:
 }
 
 
+static int
+html_putline(struct md_mbuf *mbuf, size_t indent, 
+		const char *p, size_t *res)
+{
+
+	/* FIXME: use INDENT macro for this. */
+	if ( ! ml_putchars(mbuf, ' ', indent * 4, res))
+		return(0);
+	if ( ! ml_puts(mbuf, p, res))
+		return(0);
+	return(ml_nputs(mbuf, "\n", 1, res));
+}
+
+
+static int
+html_putlinestart(struct md_mbuf *mbuf, size_t indent,
+		const char *p, size_t *res)
+{
+
+	if ( ! ml_putchars(mbuf, ' ', indent * 4, res))
+		return(0);
+	return(ml_puts(mbuf, p, res));
+}
+
+
 /* ARGSUSED */
 static int 
 html_begin(struct md_mbuf *mbuf, const struct md_args *args,
@@ -375,7 +403,7 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 		const char *vol)
 {
 	char		 mtitle[128], css[128];
-	size_t		 res;
+	size_t		 i;
 
 	(void)snprintf(mtitle, sizeof(mtitle), 
 			"Manual Page for %s(%s)",
@@ -383,63 +411,68 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 	(void)snprintf(css, sizeof(css), 
 			TAG_LINK_CSS, args->params.html.css);
 
-	res = 0;
+	i = 0;
 
-	if ( ! ml_puts(mbuf, TAG_DOCTYPE, &res))
+	if ( ! html_putline(mbuf, i, TAG_DOCTYPE, NULL))
 		return(0);
-	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+	if ( ! html_putline(mbuf, i, TAG_HTML, NULL))
 		return(0);
-	if ( ! ml_puts(mbuf, TAG_HTML, &res))
+	if ( ! html_putline(mbuf, i++, TAG_HEAD, NULL))
 		return(0);
-	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+	if ( ! html_putline(mbuf, i, TAG_CONTTYPE, NULL))
 		return(0);
-	if ( ! ml_puts(mbuf, TAG_BODY, &res))
+	if ( ! html_putline(mbuf, i, TAG_RESTYPE, NULL))
 		return(0);
-	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+	if ( ! html_putlinestart(mbuf, i, TAG_TITLE, NULL))
 		return(0);
-	if ( ! ml_puts(mbuf, TAG_CONTTYPE, &res))
+	if ( ! ml_putstring(mbuf, mtitle, NULL))
 		return(0);
-	if ( ! ml_nputs(mbuf, "\n", 1, &res))
-		return(0);
-	if ( ! ml_puts(mbuf, TAG_RESTYPE, &res))
-		return(0);
-	if ( ! ml_nputs(mbuf, "\n", 1, &res))
-		return(0);
-	if ( ! ml_puts(mbuf, TAG_TITLE, &res))
-		return(0);
-	if ( ! ml_putstring(mbuf, mtitle, &res))
-		return(0);
-	if ( ! ml_puts(mbuf, TAG_TITLE_END, &res))
-		return(0);
-	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+	if ( ! html_putline(mbuf, i, TAG_TITLE_END, NULL))
 		return(0);
 
 	if (HTML_CSS_EMBED & args->params.html.flags) {
-		if ( ! ml_puts(mbuf, TAG_STYLE_CSS, &res))
-			return(0);
-		if ( ! ml_puts(mbuf, "\n", &res))
+		if ( ! html_putline(mbuf, i, TAG_STYLE_CSS, NULL))
 			return(0);
 		if ( ! html_loadcss(mbuf, args->params.html.css))
 			return(0);
-		if ( ! ml_puts(mbuf, TAG_STYLE_END, &res))
+		if ( ! html_putline(mbuf, i, TAG_STYLE_END, NULL))
 			return(0);
-	} else if ( ! ml_puts(mbuf, css, &res))
+	} else if ( ! html_putline(mbuf, i, css, NULL))
 		return(0);
 
-	if ( ! ml_puts(mbuf, "\n", &res))
+	if ( ! html_putline(mbuf, --i, TAG_HEAD_END, NULL))
 		return(0);
-
-	if ( ! ml_puts(mbuf, TAG_HEAD_END, &res))
+	if ( ! html_putline(mbuf, i, TAG_BODY, NULL))
 		return(0);
-	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+	if ( ! html_putline(mbuf, i, TAG_DIV_MDOC, NULL))
 		return(0);
-	if ( ! ml_puts(mbuf, TAG_BODY, &res))
+	if ( ! html_putline(mbuf, i++, "<table width=\"100%\">", NULL))
 		return(0);
-	if ( ! ml_nputs(mbuf, "\n", 1, &res))
+	if ( ! html_putline(mbuf, i++, "<tr>", NULL))
 		return(0);
-	if ( ! ml_puts(mbuf, TAG_DIV_MDOC, &res))
+	if ( ! html_putline(mbuf, i++, "<td align=\"left\">", NULL))
 		return(0);
-	return(ml_nputs(mbuf, "\n", 1, &res));
+	if ( ! ml_putstring(mbuf, title, NULL))
+		return(0);
+	if ( ! html_putline(mbuf, --i, "</td>", NULL))
+		return(0);
+	if ( ! html_putline(mbuf, i++, "<td align=\"center\">", NULL))
+		return(0);
+	if ( ! ml_putstring(mbuf, "Hello, world.", NULL))
+		return(0);
+	if ( ! html_putline(mbuf, --i, "</td>", NULL))
+		return(0);
+	if ( ! html_putline(mbuf, i++, "<td align=\"right\">", NULL))
+		return(0);
+	if ( ! ml_putstring(mbuf, title, NULL))
+		return(0);
+	if ( ! html_putline(mbuf, --i, "</td>", NULL))
+		return(0);
+	if ( ! html_putline(mbuf, --i, "</tr>", NULL))
+		return(0);
+	if ( ! html_putline(mbuf, --i, "</table>", NULL))
+		return(0);
+	return(1);
 }
 
 
@@ -448,7 +481,11 @@ static int
 html_end(struct md_mbuf *mbuf, const struct md_args *args)
 {
 
-	return(ml_puts(mbuf, "</div></body>\n</html>", NULL));
+	if ( ! html_putline(mbuf, 0, TAG_DIV_END, NULL))
+		return(0);
+	if ( ! html_putline(mbuf, 0, TAG_BODY_END, NULL))
+		return(0);
+	return(html_putline(mbuf, 0, TAG_HTML_END, NULL));
 }
 
 
