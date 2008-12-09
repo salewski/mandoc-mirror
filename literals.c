@@ -24,6 +24,8 @@
 #include "private.h"
 #include "ml.h"
 
+/* FIXME: make this roff_section and so on. */
+
 
 char *
 ml_section(enum roffmsec sec) 

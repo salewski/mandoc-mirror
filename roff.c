@@ -127,10 +127,10 @@ roff_free(struct rofftree *tree, int flush)
 	error = 1;
 
 	if (ROFF_PRELUDE & tree->state) {
-		roff_err(tree, NULL, "prelude never finished");
+		(void)roff_err(tree, NULL, "prelude never finished");
 		goto end;
 	} else if ( ! (ROFFSec_NAME & tree->asec)) {
-		roff_err(tree, NULL, "missing `NAME' section");
+		(void)roff_err(tree, NULL, "missing `NAME' section");
 		goto end;
 	} else if ( ! (ROFFSec_NMASK & tree->asec))
 		roff_warn(tree, NULL, "missing suggested `NAME', "
@@ -139,8 +139,8 @@ roff_free(struct rofftree *tree, int flush)
 	for (n = tree->last; n; n = n->parent) {
 		if (0 != tokens[n->tok].ctx) 
 			continue;
-		roff_err(tree, NULL, "closing explicit scope `%s'", 
-				toknames[n->tok]);
+		(void)roff_err(tree, NULL, "closing explicit scope "
+				"`%s'", toknames[n->tok]);
 		goto end;
 	}
 
@@ -194,10 +194,9 @@ roff_engine(struct rofftree *tree, char *buf)
 	tree->cur = buf;
 	assert(buf);
 
-	if (0 == *buf) {
-		roff_err(tree, buf, "blank line");
-		return(0);
-	} else if ('.' != *buf)
+	if (0 == *buf) 
+		return(roff_err(tree, buf, "blank line"));
+	else if ('.' != *buf)
 		return(textparse(tree, buf));
 
 	return(roffparse(tree, buf));
@@ -211,10 +210,8 @@ textparse(struct rofftree *tree, char *buf)
 
 	/* TODO: literal parsing. */
 
-	if ( ! (ROFF_BODY & tree->state)) {
-		roff_err(tree, buf, "data not in body");
-		return(0);
-	}
+	if ( ! (ROFF_BODY & tree->state))
+		return(roff_err(tree, buf, "data not in body"));
 
 	/* LINTED */
 	while (*buf) {
@@ -270,13 +267,9 @@ roffargs(const struct rofftree *tree,
 			argv[i] = ++buf;
 			while (*buf && '\"' != *buf)
 				buf++;
-			if (0 == *buf) {
-				roff_err(tree, argv[i], "unclosed "
-						"quote in argument "
-						"list for `%s'", 
-						toknames[tok]);
-				return(0);
-			}
+			if (0 == *buf)
+				return(roff_err(tree, argv[i], 
+					"unclosed quote in arg list"));
 		} else { 
 			argv[i] = buf++;
 			while (*buf) {
@@ -299,11 +292,8 @@ roffargs(const struct rofftree *tree,
 	}
 
 	assert(i > 0);
-	if (ROFF_MAXLINEARG == i && *buf) {
-		roff_err(tree, p, "too many arguments for `%s'", toknames
-				[tok]);
-		return(0);
-	}
+	if (ROFF_MAXLINEARG == i && *buf)
+		return(roff_err(tree, p, "too many args"));
 
 	argv[i] = NULL;
 	return(1);
@@ -337,10 +327,9 @@ roffparse(struct rofftree *tree, char *buf)
 		if (0 == strncmp(buf, ".\\\"", 3))
 			return(1);
 
-	if (ROFF_MAX == (tok = rofffindtok(buf + 1))) {
-		roff_err(tree, buf, "bogus line macro");
-		return(0);
-	} else if ( ! roffargs(tree, tok, buf, argv)) 
+	if (ROFF_MAX == (tok = rofffindtok(buf + 1))) 
+		return(roff_err(tree, buf, "bogus line macro"));
+	else if ( ! roffargs(tree, tok, buf, argv)) 
 		return(0);
 
 	argvp = (char **)argv;
@@ -362,20 +351,16 @@ roffparse(struct rofftree *tree, char *buf)
 	 */
 
 	if (tree->last && ! roffscan
-			(tree->last->tok, tokens[tok].parents)) {
-		roff_err(tree, *argvp, "`%s' has invalid parent `%s'",
-				toknames[tok], 
-				toknames[tree->last->tok]);
-		return(0);
-	} 
+			(tree->last->tok, tokens[tok].parents))
+		return(roff_err(tree, *argvp, "`%s' has invalid "
+					"parent `%s'", toknames[tok], 
+					toknames[tree->last->tok]));
 
 	if (tree->last && ! roffscan
-			(tok, tokens[tree->last->tok].children)) {
-		roff_err(tree, *argvp, "`%s' is invalid child of `%s'",
-				toknames[tok],
-				toknames[tree->last->tok]);
-		return(0);
-	}
+			(tok, tokens[tree->last->tok].children))
+		return(roff_err(tree, *argvp, "`%s' has invalid "
+					"child `%s'", toknames[tok],
+					toknames[tree->last->tok]));
 
 	/*
 	 * Branch if we're not a layout token.
@@ -415,9 +400,10 @@ roffparse(struct rofftree *tree, char *buf)
 			}
 			if (tokens[n->tok].ctx == n->tok)
 				continue;
-			roff_err(tree, *argv, "`%s' breaks `%s' scope",
-					toknames[tok], toknames[n->tok]);
-			return(0);
+			return(roff_err(tree, *argv, "`%s' breaks "
+						"scope of prior`%s'",
+						toknames[tok], 
+						toknames[n->tok]));
 		}
 
 		/*
@@ -458,19 +444,17 @@ roffparse(struct rofftree *tree, char *buf)
 		if (n->tok != tokens[tok].ctx) {
 			if (n->tok == tokens[n->tok].ctx)
 				continue;
-			roff_err(tree, *argv, "`%s' breaks `%s' scope",
-					toknames[tok], toknames[n->tok]);
-			return(0);
+			return(roff_err(tree, *argv, "`%s' breaks "
+						"scope of prior `%s'",
+						toknames[tok], 
+						toknames[n->tok]));
 		} else
 			break;
 
-
-	if (NULL == n) {
-		roff_err(tree, *argv, "`%s' has no starting tag `%s'",
-				toknames[tok], 
-				toknames[tokens[tok].ctx]);
-		return(0);
-	}
+	if (NULL == n)
+		return(roff_err(tree, *argv, "`%s' has no starting "
+					"tag `%s'", toknames[tok], 
+					toknames[tokens[tok].ctx]));
 
 	/* LINTED */
 	do {
@@ -597,6 +581,7 @@ roffchecksec(struct rofftree *tree, const char *start, int sec)
 }
 
 
+/* FIXME: move this into literals.c. */
 static int
 roffissec(const char **p)
 {
@@ -645,6 +630,7 @@ roffissec(const char **p)
 }
 
 
+/* FIXME: move this into literals.c. */
 static int
 roffismsec(const char *p)
 {
@@ -680,6 +666,7 @@ roffismsec(const char *p)
 }
 
 
+/* FIXME: move this into literals.c. */
 static int
 roffisatt(const char *p)
 {
@@ -706,6 +693,7 @@ roffisatt(const char *p)
 }
 
 
+/* FIXME: move this into literals.c (or similar). */
 static int
 roffispunct(const char *p)
 {
@@ -817,8 +805,7 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 			break;
 		if (roffisatt(*ordp))
 			break;
-		roff_err(tree, *ordp, "invalid `At' arg");
-		return(0);
+		return(roff_err(tree, *ordp, "invalid `At' arg"));
 	
 	case (ROFF_Xr):
 		if (2 == sz) {
@@ -835,9 +822,8 @@ roffspecial(struct rofftree *tree, int tok, const char *start,
 	case (ROFF_Fn):
 		if (0 != sz) 
 			break;
-		roff_err(tree, start, "`%s' expects at least "
-				"one arg", toknames[tok]);
-		return(0);
+		return(roff_err(tree, start, "`%s' expects at least "
+					"one arg", toknames[tok]));
 
 	case (ROFF_Nm):
 		if (0 == sz) {

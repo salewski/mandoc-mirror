@@ -47,6 +47,7 @@ struct	md_args {
 
 	int		 warnings;
 #define	MD_WARN_ALL	(1 << 0)
+#define	MD_WARN_ERROR	(1 << 1)
 	int		 verbosity;
 };
 
