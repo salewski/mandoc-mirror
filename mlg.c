@@ -92,6 +92,10 @@ static	int		 mlg_function_special(struct md_mlg *,
 				const char *, const char **);
 static	int		 mlg_atom_special(struct md_mlg *, int,
 				const char *, const char **);
+static	int		 mlg_link_special(struct md_mlg *, int,
+				const char *, const char **);
+static	int		 mlg_anchor_special(struct md_mlg *, 
+				int, const char **);
 
 static	int		 mlg_begintag(struct md_mlg *, enum md_ns, 
 				int, int *, const char **);
@@ -534,7 +538,6 @@ mlg_atom_special(struct md_mlg *p, int tok,
 	if ( ! mlg_string(p, start, *more++))
 		return(0);
 
-	/*assert(NULL == *more);*/ /* FIXME: ROFF_Sx */
 	return(mlg_endtag(p, MD_NS_INLINE, tok));
 }
 
@@ -583,6 +586,34 @@ mlg_function_special(struct md_mlg *p,
 }
 
 
+static int
+mlg_anchor_special(struct md_mlg *p, int tok, const char **more)
+{
+	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
+		return(0);
+	return(mlg_endtag(p, MD_NS_INLINE, tok));
+}
+
+
+static int
+mlg_link_special(struct md_mlg *p, int tok,
+		const char *start, const char **more)
+{
+
+	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
+		return(0);
+	if ( ! mlg_string(p, start, *more++))
+		return(0);
+	while (*more) {
+		if ( ! mlg_string(p, start, " "))
+			return(0);
+		if ( ! mlg_string(p, start, *more++))
+			return(0);
+	}
+	return(mlg_endtag(p, MD_NS_INLINE, tok));
+}
+
+
 /* ARGSUSED */
 static int
 mlg_roffspecial(void *arg, int tok, const char *start, 
@@ -611,9 +642,13 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 
 	case (ROFF_Xr):
 		return(mlg_ref_special(p, tok, start, more));
+
+	case (ROFF_Sh):
+		return(mlg_anchor_special(p, tok, more));
  
-	case (ROFF_Sx): /* FIXME */
-		/* FALLTHROUGH */
+	case (ROFF_Sx):
+		return(mlg_link_special(p, tok, start, more));
+
 	case (ROFF_Nm):
 		return(mlg_atom_special(p, tok, start, more));
 	

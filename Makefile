@@ -42,7 +42,7 @@ SUCCEED	= test.7 test.8 test.9 test.10 test.11 test.12 test.13 \
 	  test.35 test.38 test.39 test.41 test.42 test.43 test.44 \
 	  test.45 test.46 test.47 test.48 test.49 test.51 test.52 \
 	  test.54 test.55 test.56 test.57 test.58 test.59 test.60 \
-	  test.62 test.63 test.67 test.68 test.71
+	  test.62 test.63 test.67 test.68 test.71 test.72 test.73
 
 all: mdocml
 
