@@ -37,6 +37,7 @@ static	const char * const tagnames[] = {
 static	const char * const attrnames[] = {
 	"class",	"http-equiv",	"content",	"name",
 	"type",		"rel",		"href",		"width",
+	"align",
 	};
 
 static	const char * const typenames[] = {

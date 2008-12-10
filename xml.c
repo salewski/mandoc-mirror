@@ -68,6 +68,8 @@ xml_printtagargs(struct md_mbuf *mbuf, const int *argc,
 		if ( ! ml_nputs(mbuf, " ", 1, &res))
 			return(-1);
 
+		/* FIXME: should puke on some, no? */
+
 		if ( ! ml_puts(mbuf, tokargnames[c], &res))
 			return(-1);
 		if ( ! ml_nputs(mbuf, "=\"", 2, &res))

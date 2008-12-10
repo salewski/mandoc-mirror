@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "private.h"
 #include "ml.h"
 
 #ifdef __linux__

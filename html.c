@@ -485,7 +485,10 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
 		return(0);
 
-	if ( ! html_tputln(mbuf, ML_OPEN, i, HTML_TAG_TD))
+	attr[0].attr = HTML_ATTR_ALIGN;
+	attr[0].val = "right";
+
+	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_TD, 1, attr))
 		return(0);
 	if ( ! ml_putstring(mbuf, ts, NULL))
 		return(0);

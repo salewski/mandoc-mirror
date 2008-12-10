@@ -51,6 +51,7 @@ enum	html_attr {
 	HTML_ATTR_REL	= 5,
 	HTML_ATTR_HREF	= 6,
 	HTML_ATTR_WIDTH	= 7,
+	HTML_ATTR_ALIGN	= 8,
 };
 
 enum	html_type {

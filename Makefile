@@ -52,7 +52,7 @@ lint: llib-lmdocml.ln
 
 dist: mdocml.tgz
 
-www: $(HTML) $(XML)
+www: all $(HTML) $(XML)
 
 regress: mdocml
 	@for f in $(FAIL); do \
