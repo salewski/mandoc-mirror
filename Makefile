@@ -1,9 +1,7 @@
-VERSION	= 1.0.1
+VERSION	= 1.0.2
 
 # FIXME
 CFLAGS += -W -Wall -Wno-unused-parameter -g -DDEBUG
-
-LINTFLAGS += -c -e -f -u
 
 LNS	= mdocml.ln html.ln xml.ln libmdocml.ln roff.ln ml.ln mlg.ln \
 	  compat.ln tokens.ln literals.ln tags.ln

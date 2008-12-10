@@ -959,6 +959,7 @@ html_free(void *p)
 }
 
 
+/* ARGSUSED */
 static ssize_t 
 html_beginhttp(struct md_mbuf *mbuf, 
 		const struct md_args *args, 
@@ -977,6 +978,7 @@ html_beginhttp(struct md_mbuf *mbuf,
 }
 
 
+/* ARGSUSED */
 static ssize_t 
 html_endhttp(struct md_mbuf *mbuf, 
 		const struct md_args *args, 

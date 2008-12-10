@@ -33,7 +33,7 @@ enum	md_tok {
 	MD_INLINE_IN,
 	MD_INLINE_OUT,
 	MD_BLK_IN,
-	MD_BLK_OUT,
+	MD_BLK_OUT
 };
 
 struct	md_mlg {
@@ -498,6 +498,7 @@ mlg_ref_special(struct md_mlg *p, int tok,
 }
 
 
+/* ARGSUSED */
 static int
 mlg_formatted_special(struct md_mlg *p, int tok, const char *start,
 		const int *argc, const char **argv, const char **more)

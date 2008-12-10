@@ -251,7 +251,7 @@ extern	const char *const *tokargnames;
 
 enum	roffmsg { 
 	ROFF_WARN, 
-	ROFF_ERROR,
+	ROFF_ERROR
 };
 
 enum	roffmsec {
@@ -268,7 +268,7 @@ enum	roffmsec {
 	ROFF_MSEC_UNASS,
 	ROFF_MSEC_DRAFT,
 	ROFF_MSEC_PAPER,
-	ROFF_MSEC_MAX,
+	ROFF_MSEC_MAX
 };
 
 enum	roffatt {
@@ -280,7 +280,7 @@ enum	roffatt {
 	ROFF_ATT_32V,
 	ROFF_ATT_V_1,
 	ROFF_ATT_V_4,
-	ROFF_ATT_MAX,
+	ROFF_ATT_MAX
 };
 
 enum	roffvol {
@@ -319,7 +319,7 @@ enum	roffvol {
 	ROFF_ARCH_SUN3,
 	ROFF_ARCH_VAX,
 	ROFF_ARCH_ZAURUS,
-	ROFF_VOL_MAX,
+	ROFF_VOL_MAX
 };
 
 #define	ROFFSec_NMASK	(0x07)

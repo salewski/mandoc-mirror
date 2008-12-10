@@ -59,7 +59,7 @@ enum	rofferr {
 	ERR_PR_OOO,			/* Prelude macro bad order. */
 	ERR_PR_REP,			/* Prelude macro repeated. */
 	ERR_NOT_PR,			/* Not allowed in prelude. */
-	WRN_SECORD,			/* Sections out-of-order. */
+	WRN_SECORD			/* Sections out-of-order. */
 };
 
 struct	rofftree {
@@ -529,63 +529,62 @@ rofffindtok(const char *buf)
 static int
 roffchecksec(struct rofftree *tree, const char *start, int sec)
 {
-	int		 prior;
 
 	switch (sec) {
 	case(ROFFSec_SYNOP):
-		if ((prior = ROFFSec_NAME) & tree->asec)
+		if (ROFFSec_NAME & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_DESC):
-		if ((prior = ROFFSec_SYNOP) & tree->asec)
+		if (ROFFSec_SYNOP & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_RETVAL):
-		if ((prior = ROFFSec_DESC) & tree->asec)
+		if (ROFFSec_DESC & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_ENV):
-		if ((prior = ROFFSec_RETVAL) & tree->asec)
+		if (ROFFSec_RETVAL & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_FILES):
-		if ((prior = ROFFSec_ENV) & tree->asec)
+		if (ROFFSec_ENV & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_EX):
-		if ((prior = ROFFSec_FILES) & tree->asec)
+		if (ROFFSec_FILES & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_DIAG):
-		if ((prior = ROFFSec_EX) & tree->asec)
+		if (ROFFSec_EX & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_ERRS):
-		if ((prior = ROFFSec_DIAG) & tree->asec)
+		if (ROFFSec_DIAG & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_SEEALSO):
-		if ((prior = ROFFSec_ERRS) & tree->asec)
+		if (ROFFSec_ERRS & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_STAND):
-		if ((prior = ROFFSec_SEEALSO) & tree->asec)
+		if (ROFFSec_SEEALSO & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_HIST):
-		if ((prior = ROFFSec_STAND) & tree->asec)
+		if (ROFFSec_STAND & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_AUTH):
-		if ((prior = ROFFSec_HIST) & tree->asec)
+		if (ROFFSec_HIST & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_CAVEATS):
-		if ((prior = ROFFSec_AUTH) & tree->asec)
+		if (ROFFSec_AUTH & tree->asec)
 			return(1);
 		break;
 	case(ROFFSec_BUGS):
-		if ((prior = ROFFSec_CAVEATS) & tree->asec)
+		if (ROFFSec_CAVEATS & tree->asec)
 			return(1);
 		break;
 	default:

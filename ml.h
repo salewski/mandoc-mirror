@@ -33,7 +33,7 @@ enum	md_ns {
 	MD_NS_HEAD,
 	MD_NS_BODY,
 	MD_NS_INLINE,
-	MD_NS_DEFAULT,
+	MD_NS_DEFAULT
 };
 
 enum	ml_scope {

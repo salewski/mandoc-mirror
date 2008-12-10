@@ -39,7 +39,7 @@ enum	html_tag {
 	HTML_TAG_LI	= 14,
 	HTML_TAG_H1	= 15,
 	HTML_TAG_H2	= 16,
-	HTML_TAG_A	= 17,
+	HTML_TAG_A	= 17
 };
 
 enum	html_attr {
@@ -51,7 +51,7 @@ enum	html_attr {
 	HTML_ATTR_REL	= 5,
 	HTML_ATTR_HREF	= 6,
 	HTML_ATTR_WIDTH	= 7,
-	HTML_ATTR_ALIGN	= 8,
+	HTML_ATTR_ALIGN	= 8
 };
 
 enum	html_type {
