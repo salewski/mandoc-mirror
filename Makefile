@@ -1,7 +1,7 @@
 VERSION	= 1.0.3
 
 # FIXME
-CFLAGS += -W -Wall -Wno-unused-parameter -g
+CFLAGS += -W -Wall -Wno-unused-parameter -g -DDEBUG
 
 LNS	= mdocml.ln html.ln xml.ln libmdocml.ln roff.ln ml.ln mlg.ln \
 	  compat.ln tokens.ln literals.ln tags.ln noop.ln
