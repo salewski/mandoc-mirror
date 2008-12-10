@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <err.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "private.h"
 
@@ -86,6 +87,7 @@ md_line_noop(void *data, char *buf)
 }
 
 
+/* ARGSUSED */
 void *
 md_init_noop(const struct md_args *args, 
 		struct md_mbuf *mbuf, const struct md_rbuf *rbuf)

@@ -1,7 +1,7 @@
 VERSION	= 1.0.3
 
 # FIXME
-CFLAGS += -W -Wall -Wno-unused-parameter -g -DDEBUG
+CFLAGS += -W -Wall -Wno-unused-parameter -g
 
 LNS	= mdocml.ln html.ln xml.ln libmdocml.ln roff.ln ml.ln mlg.ln \
 	  compat.ln tokens.ln literals.ln tags.ln noop.ln
@@ -26,10 +26,10 @@ XML	= index.xml
 
 TEXT	= index.txt
 
-CLEAN	= mdocml mdocml.tgz $(LLNS) $(LNS) $(OBJS) $(LIBS) $(HTML) \
-	  $(XML) $(TEXT)
+CLEAN	= mdocml $(LLNS) $(LNS) $(OBJS) $(LIBS) $(HTML) $(XML) $(TEXT) \
+	  mdocml-$(VERSION).tar.gz mdocml-port-$(VERSION).tar.gz
 
-INSTALL	= Makefile $(HEADS) $(SRCS) $(MANS)
+INSTALL	= Makefile $(HEADS) $(SRCS) $(MANS) mdocml.css
 
 FAIL	= test.0 test.1 test.2 test.3 test.4 test.5 test.6 \
 	  test.15 test.20 test.22 test.24 test.26 test.27 test.30 \
@@ -48,7 +48,7 @@ all: mdocml
 
 lint: llib-lmdocml.ln
 
-dist: mdocml.tgz mdocml-port.tgz
+dist: mdocml-$(VERSION).tar.gz mdocml-port-$(VERSION).tar.gz
 
 www: all $(HTML) $(XML) $(TEXT)
 
@@ -69,10 +69,10 @@ clean:
 	rm -f $(CLEAN)
 
 index.html: index.7 mdocml.css
-	./mdocml -Wall -fhtml -e -o $@ index.7
+	./mdocml -fhtml -Wall -e -o $@ index.7
 
 index.xml: index.7 mdocml.css
-	./mdocml -Wall -o $@ index.7
+	./mdocml -fxml -Wall -o $@ index.7
 
 index.txt: index.7
 	cp -f index.7 index.txt
@@ -80,28 +80,42 @@ index.txt: index.7
 mdocml.html: mdocml.1 mdocml.css
 	./mdocml -Wall -fhtml -e -o $@ mdocml.1
 
+install:
+	mkdir -p $(PREFIX)/bin/
+	install -m 0755 mdocml $(PREFIX)/bin/
+	mkdir -p $(PREFIX)/man/man1/
+	install -m 0444 mdocml.1 $(PREFIX)/man/man1/
+	mkdir -p $(PREFIX)/share/mdocml/
+	install -m 0444 mdocml.css $(PREFIX)/share/mdocml/
+
+uninstall:
+	rm -f $(PREFIX)/bin/mdocml
+	rm -f $(PREFIX)/man/man1/mdocml.1
+	rm -f $(PREFIX)/share/mdocml/mdocml.css
+
 install-www: www dist
-	install -m 0644 mdocml.tgz $(PREFIX)/mdocml-$(VERSION).tgz
-	install -m 0644 mdocml.tgz $(PREFIX)/mdocml.tgz
-	install -m 0644 mdocml-port.tgz $(PREFIX)/mdocml-port-$(VERSION).tgz
-	install -m 0644 mdocml-port.tgz $(PREFIX)/mdocml-port.tgz
+	install -m 0644 mdocml-$(VERSION).tar.gz $(PREFIX)/
+	install -m 0644 mdocml-$(VERSION).tar.gz $(PREFIX)/mdocml.tar.gz
+	install -m 0644 mdocml-port-$(VERSION).tar.gz $(PREFIX)/
+	install -m 0644 mdocml-port-$(VERSION).tar.gz $(PREFIX)/mdocml-port.tar.gz
 	install -m 0644 $(HTML) $(XML) $(TEXT) $(PREFIX)/
 
-mdocml.tgz: $(INSTALL)
+mdocml-$(VERSION).tar.gz: $(INSTALL)
 	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
 	install -m 0644 $(INSTALL) .dist/mdocml/mdocml-$(VERSION)/
 	( cd .dist/mdocml/ && tar zcf ../../$@ mdocml-$(VERSION)/ )
 	rm -rf .dist/
 
-mdocml-port.tgz: $(INSTALL)
+mdocml-port-$(VERSION).tar.gz: $(INSTALL)
 	mkdir -p .dist/mdocml/pkg
 	sed -e "s!@VERSION@!$(VERSION)!" Makefile.port > .dist/mdocml/Makefile
-	md5 mdocml-$(VERSION).tgz > .dist/mdocml/distinfo
-	rmd160 mdocml-$(VERSION).tgz >> .dist/mdocml/distinfo
-	sha1 mdocml-$(VERSION).tgz >> .dist/mdocml/distinfo
+	md5 mdocml-$(VERSION).tar.gz > .dist/mdocml/distinfo
+	rmd160 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
+	sha1 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
 	install -m 0644 DESCR .dist/mdocml/pkg/DESCR
 	echo @comment $$OpenBSD$$ > .dist/mdocml/pkg/PLIST
 	echo bin/mdocml >> .dist/mdocml/pkg/PLIST
+	echo share/mdocml/mdocml.css >> .dist/mdocml/pkg/PLIST
 	echo @man man/man1/mdocml.1 >> .dist/mdocml/pkg/PLIST
 	( cd .dist/ && tar zcf ../$@ mdocml/ )
 	rm -rf .dist/

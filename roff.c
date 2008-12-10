@@ -1181,7 +1181,7 @@ roff_layout(ROFFCALL_ARGS)
 
 	assert( ! (ROFF_CALLABLE & tokens[tok].flags));
 
-	if ( ! ROFFSec_NAME & tree->asec)
+	if ( ! (ROFFSec_PR_Os & tree->asec))
 		return(roff_errp(tree, *argv, tok, ERR_NOT_PR));
 
 	if (ROFF_EXIT == type) {
@@ -1349,7 +1349,7 @@ roff_ordered(ROFFCALL_ARGS)
 	 * .Xr arg1 arg2 punctuation
 	 */
 
-	if ( ! ROFFSec_NAME & tree->asec)
+	if ( ! (ROFFSec_PR_Os & tree->asec))
 		return(roff_errp(tree, *argv, tok, ERR_NOT_PR));
 
 	first = (*argv == tree->cur);
@@ -1421,7 +1421,7 @@ roff_text(ROFFCALL_ARGS)
 	 * <fl> v W f </fl> ;
 	 */
 
-	if ( ! ROFFSec_NAME & tree->asec)
+	if ( ! (ROFFSec_PR_Os & tree->asec))
 		return(roff_errp(tree, *argv, tok, ERR_NOT_PR));
 
 	first = (*argv == tree->cur);

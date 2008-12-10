@@ -15,7 +15,7 @@ PERMIT_PACKAGE_FTP=	Yes
 PERMIT_DISTFILES_CDROM=	Yes
 PERMIT_DISTFILES_FTP=	Yes
 
-MASTER_SITES=		http://sysjail.bsd.lv/dist/
+MASTER_SITES=		http://mdocml.bsd.lv/
 
 WANTLIB=		c
 
