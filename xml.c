@@ -43,7 +43,7 @@ static	int		xml_begin(struct md_mbuf *,
 	       			const struct md_args *, 
 				const struct tm *, 
 				const char *, const char *, 
-				enum roffmsec, const char *);
+				enum roffmsec, enum roffvol);
 static	int		xml_end(struct md_mbuf *, 
 				const struct md_args *);
 static	ssize_t 	xml_printtagname(struct md_mbuf *, 
@@ -124,8 +124,7 @@ xml_printtagname(struct md_mbuf *mbuf, enum md_ns ns, int tok)
 static int 
 xml_begin(struct md_mbuf *mbuf, const struct md_args *args,
 		const struct tm *tm, const char *os, 
-		const char *title, enum roffmsec section, 
-		const char *vol)
+		const char *title, enum roffmsec sec, enum roffvol vol)
 {
 
 	if ( ! ml_puts(mbuf, "<?xml version=\"1.0\" "

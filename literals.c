@@ -65,6 +65,40 @@
 #define	ROFF_MSECname_DRAFT	"draft"
 #define	ROFF_MSECname_PAPER	"paper"
 
+#define	ROFF_VOLname_AMD	"AMD"
+#define	ROFF_VOLname_IND	"IND"
+#define	ROFF_VOLname_KM		"KM"
+#define	ROFF_VOLname_LOCAL	"LOCAL"
+#define	ROFF_VOLname_PRM	"PRM"
+#define	ROFF_VOLname_PS1	"PS1"
+#define	ROFF_VOLname_SMM	"SMM"
+#define	ROFF_VOLname_URM	"URM"
+#define	ROFF_VOLname_USD	"USD"
+#define	ROFF_ARCHname_ALPHA	"alpha"
+#define	ROFF_ARCHname_AMD64	"amd64"
+#define	ROFF_ARCHname_AMIGA	"amiga"
+#define	ROFF_ARCHname_ARC	"arc"
+#define	ROFF_ARCHname_ARMISH	"armish"
+#define	ROFF_ARCHname_AVIION	"aviion"
+#define	ROFF_ARCHname_HP300	"hp300"
+#define	ROFF_ARCHname_HPPA	"hppa"
+#define	ROFF_ARCHname_HPPA64	"hppa64"
+#define	ROFF_ARCHname_I386	"i386"
+#define	ROFF_ARCHname_LANDISK	"landisk"
+#define	ROFF_ARCHname_LUNA88K	"luna88k"
+#define	ROFF_ARCHname_MAC68K	"mac68k"
+#define	ROFF_ARCHname_MACPPC	"macppc"
+#define	ROFF_ARCHname_MVME68K	"mvme68k"
+#define	ROFF_ARCHname_MVME88K	"mvme88k"
+#define	ROFF_ARCHname_MVMEPPC	"mvmeppc"
+#define	ROFF_ARCHname_PMAX	"pmax"
+#define	ROFF_ARCHname_SGI	"sgi"
+#define	ROFF_ARCHname_SPARC	"sparc"
+#define	ROFF_ARCHname_SPARC64	"sparc64"
+#define	ROFF_ARCHname_SUN3	"sun3"
+#define	ROFF_ARCHname_VAX	"vax"
+#define	ROFF_ARCHname_ZAURUS	"zaurus"
+
 int
 roff_sec(const char **p)
 {
@@ -423,3 +457,77 @@ roff_att(const char *p)
 	return(ROFF_ATT_MAX);
 }
 
+
+enum roffvol
+roff_vol(const char *p)
+{
+
+	if (0 == strcmp(p, ROFF_VOLname_AMD))
+		return(ROFF_VOL_AMD);
+	else if (0 == strcmp(p, ROFF_VOLname_IND))
+		return(ROFF_VOL_IND);
+	else if (0 == strcmp(p, ROFF_VOLname_KM))
+		return(ROFF_VOL_KM);
+	else if (0 == strcmp(p, ROFF_VOLname_LOCAL))
+		return(ROFF_VOL_LOCAL);
+	else if (0 == strcmp(p, ROFF_VOLname_PRM))
+		return(ROFF_VOL_PRM);
+	else if (0 == strcmp(p, ROFF_VOLname_PS1))
+		return(ROFF_VOL_PS1);
+	else if (0 == strcmp(p, ROFF_VOLname_SMM))
+		return(ROFF_VOL_SMM);
+	else if (0 == strcmp(p, ROFF_VOLname_URM))
+		return(ROFF_VOL_URM);
+	else if (0 == strcmp(p, ROFF_VOLname_USD))
+		return(ROFF_VOL_USD);
+	else if (0 == strcmp(p, ROFF_ARCHname_ALPHA))
+		return(ROFF_ARCH_ALPHA);
+	else if (0 == strcmp(p, ROFF_ARCHname_AMD64))
+		return(ROFF_ARCH_AMD64);
+	else if (0 == strcmp(p, ROFF_ARCHname_AMIGA))
+		return(ROFF_ARCH_AMIGA);
+	else if (0 == strcmp(p, ROFF_ARCHname_ARC))
+		return(ROFF_ARCH_ARC);
+	else if (0 == strcmp(p, ROFF_ARCHname_ARMISH))
+		return(ROFF_ARCH_ARMISH);
+	else if (0 == strcmp(p, ROFF_ARCHname_AVIION))
+		return(ROFF_ARCH_AVIION);
+	else if (0 == strcmp(p, ROFF_ARCHname_HP300))
+		return(ROFF_ARCH_HP300);
+	else if (0 == strcmp(p, ROFF_ARCHname_HPPA))
+		return(ROFF_ARCH_HPPA);
+	else if (0 == strcmp(p, ROFF_ARCHname_HPPA64))
+		return(ROFF_ARCH_HPPA64);
+	else if (0 == strcmp(p, ROFF_ARCHname_I386))
+		return(ROFF_ARCH_I386);
+	else if (0 == strcmp(p, ROFF_ARCHname_LANDISK))
+		return(ROFF_ARCH_LANDISK);
+	else if (0 == strcmp(p, ROFF_ARCHname_LUNA88K))
+		return(ROFF_ARCH_LUNA88K);
+	else if (0 == strcmp(p, ROFF_ARCHname_MAC68K))
+		return(ROFF_ARCH_MAC68K);
+	else if (0 == strcmp(p, ROFF_ARCHname_MACPPC))
+		return(ROFF_ARCH_MACPPC);
+	else if (0 == strcmp(p, ROFF_ARCHname_MVME68K))
+		return(ROFF_ARCH_MVME68K);
+	else if (0 == strcmp(p, ROFF_ARCHname_MVME88K))
+		return(ROFF_ARCH_MVME88K);
+	else if (0 == strcmp(p, ROFF_ARCHname_MVMEPPC))
+		return(ROFF_ARCH_MVMEPPC);
+	else if (0 == strcmp(p, ROFF_ARCHname_PMAX))
+		return(ROFF_ARCH_PMAX);
+	else if (0 == strcmp(p, ROFF_ARCHname_SGI))
+		return(ROFF_ARCH_SGI);
+	else if (0 == strcmp(p, ROFF_ARCHname_SPARC))
+		return(ROFF_ARCH_SPARC);
+	else if (0 == strcmp(p, ROFF_ARCHname_SPARC64))
+		return(ROFF_ARCH_SPARC64);
+	else if (0 == strcmp(p, ROFF_ARCHname_SUN3))
+		return(ROFF_ARCH_SUN3);
+	else if (0 == strcmp(p, ROFF_ARCHname_VAX))
+		return(ROFF_ARCH_VAX);
+	else if (0 == strcmp(p, ROFF_ARCHname_ZAURUS))
+		return(ROFF_ARCH_ZAURUS);
+
+	return(ROFF_VOL_MAX);
+}

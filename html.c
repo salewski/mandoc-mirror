@@ -72,7 +72,7 @@ static	int		html_begin(struct md_mbuf *,
 	       			const struct md_args *, 
 				const struct tm *, 
 				const char *, const char *, 
-				enum roffmsec, const char *);
+				enum roffmsec, enum roffvol);
 static	int		html_printargs(struct md_mbuf *, int, 
 				const char *, const int *, 
 				const char **, size_t *);
@@ -382,14 +382,22 @@ html_aputln(struct md_mbuf *mbuf, enum ml_scope scope, int i,
 static int 
 html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 		const struct tm *tm, const char *os, 
-		const char *name, enum roffmsec msec, const char *vol)
+		const char *name, enum roffmsec msec, enum roffvol vol)
 {
 	struct html_pair attr[4];
-	char		 ts[32];
+	char		 ts[32], title[64];
 	int		 i;
 
 	(void)snprintf(ts, sizeof(ts), "%s(%s)", 
 			name, roff_msecname(msec));
+
+	(void)snprintf(ts, sizeof(ts), "%s",
+			name, roff_volname(vol));
+
+	if (vol >= ROFF_ARCH_START) {
+
+	}
+
 
 	i = 0;
 

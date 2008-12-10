@@ -251,7 +251,7 @@ extern	const char *const *tokargnames;
 
 enum	roffmsg { 
 	ROFF_WARN, 
-	ROFF_ERROR 
+	ROFF_ERROR,
 };
 
 enum	roffmsec {
@@ -268,7 +268,7 @@ enum	roffmsec {
 	ROFF_MSEC_UNASS,
 	ROFF_MSEC_DRAFT,
 	ROFF_MSEC_PAPER,
-	ROFF_MSEC_MAX
+	ROFF_MSEC_MAX,
 };
 
 enum	roffatt {
@@ -280,7 +280,46 @@ enum	roffatt {
 	ROFF_ATT_32V,
 	ROFF_ATT_V_1,
 	ROFF_ATT_V_4,
-	ROFF_ATT_MAX
+	ROFF_ATT_MAX,
+};
+
+enum	roffvol {
+	ROFF_VOL_NONE,
+	ROFF_VOL_AMD,
+	ROFF_VOL_IND,
+	ROFF_VOL_KM,
+	ROFF_VOL_LOCAL,
+	ROFF_VOL_PRM,
+	ROFF_VOL_PS1,
+	ROFF_VOL_SMM,
+	ROFF_VOL_URM,
+	ROFF_VOL_USD,
+#define	ROFF_ARCH_START	ROFF_ARCH_ALPHA
+	ROFF_ARCH_ALPHA,
+	ROFF_ARCH_AMD64,
+	ROFF_ARCH_AMIGA,
+	ROFF_ARCH_ARC,
+	ROFF_ARCH_ARMISH,
+	ROFF_ARCH_AVIION,
+	ROFF_ARCH_HP300,
+	ROFF_ARCH_HPPA,
+	ROFF_ARCH_HPPA64,
+	ROFF_ARCH_I386,
+	ROFF_ARCH_LANDISK,
+	ROFF_ARCH_LUNA88K,
+	ROFF_ARCH_MAC68K,
+	ROFF_ARCH_MACPPC,
+	ROFF_ARCH_MVME68K,
+	ROFF_ARCH_MVME88K,
+	ROFF_ARCH_MVMEPPC,
+	ROFF_ARCH_PMAX,
+	ROFF_ARCH_SGI,
+	ROFF_ARCH_SPARC,
+	ROFF_ARCH_SPARC64,
+	ROFF_ARCH_SUN3,
+	ROFF_ARCH_VAX,
+	ROFF_ARCH_ZAURUS,
+	ROFF_VOL_MAX,
 };
 
 #define	ROFFSec_NMASK	(0x07)
@@ -306,7 +345,7 @@ struct	roffcb {
 	int	(*roffmsg)(void *, enum roffmsg, 
 			const char *, const char *, const char *);
 	int	(*roffhead)(void *, const struct tm *, const char *, 
-			const char *, enum roffmsec, const char *);
+			const char *, enum roffmsec, enum roffvol);
 	int	(*rofftail)(void *);
 	int	(*roffdata)(void *, int, const char *, const char *);
 	int	(*roffin)(void *, int, int *, const char **);
@@ -329,27 +368,21 @@ typedef	void  (*(*md_init)(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *));
 typedef	int	(*md_line)(void *, char *);
 typedef	int	(*md_exit)(void *, int);
-
 void		 *md_init_html(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *);
 int		  md_line_html(void *, char *);
 int		  md_exit_html(void *, int);
-
 void		 *md_init_xml(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *);
 int		  md_line_xml(void *, char *);
 int		  md_exit_xml(void *, int);
-
 int	 	  md_buf_puts(struct md_mbuf *, const char *, size_t);
 int	 	  md_buf_putchar(struct md_mbuf *, char);
 int	 	  md_buf_putstring(struct md_mbuf *, const char *);
-
 struct	rofftree *roff_alloc(const struct roffcb *, void *);
 int		  roff_engine(struct rofftree *, char *);
 int		  roff_free(struct rofftree *, int);
-
 int		  rofftok_scan(const char *, int *);
-
 char		 *roff_literal(int, const int *,
 			const char **, const char **);
 char		 *roff_fmtstring(int);
@@ -357,6 +390,7 @@ char		 *roff_msecname(enum roffmsec);
 enum roffmsec	  roff_msec(const char *);
 int		  roff_sec(const char **);
 enum roffatt	  roff_att(const char *);
+enum roffvol	  roff_vol(const char *);
 
 __END_DECLS
 

@@ -70,7 +70,7 @@ struct	rofftree {
 	char		  os[64];		/* `Os' results. */
 	char		  title[64];		/* `Dt' results. */
 	enum roffmsec	  section;
-	char		  volume[64];		/* `Dt' results. */
+	enum roffvol	  volume;
 	int		  state;
 #define	ROFF_PRELUDE	 (1 << 1)		/* In roff prelude. */ /* FIXME: put into asec. */
 #define	ROFF_PRELUDE_Os	 (1 << 2)		/* `Os' is parsed. */
@@ -1022,12 +1022,46 @@ roff_Dt(ROFFCALL_ARGS)
 		return(roff_errp(tree, *argv, tok, ERR_BADARG));
 
 	argv++;
-	sz = sizeof(tree->volume);
 
 	if (NULL == *argv) {
-		tree->volume[0] = 0;
-	} else if (strlcpy(tree->volume, *argv, sz) >= sz)
-		return(roff_errp(tree, *argv, tok, ERR_ARGLEN));
+		switch (tree->section) {
+		case(ROFF_MSEC_1):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_6):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_7):
+			tree->volume = ROFF_VOL_URM;
+			break;
+		case(ROFF_MSEC_2):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_3):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_3p):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_4):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_5):
+			tree->volume = ROFF_VOL_PRM;
+			break;
+		case(ROFF_MSEC_8):
+			tree->volume = ROFF_VOL_PRM;
+			break;
+		case(ROFF_MSEC_9):
+			tree->volume = ROFF_VOL_KM;
+			break;
+		case(ROFF_MSEC_UNASS):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_DRAFT):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_PAPER):
+			tree->volume = ROFF_VOL_NONE;
+			break;
+		default:
+			abort();
+			/* NOTREACHED */
+		}
+	} else if (ROFF_VOL_MAX == (tree->volume = roff_vol(*argv)))
+		return(roff_errp(tree, *argv, tok, ERR_BADARG));
 
 	assert(NULL == tree->last);
 	tree->state |= ROFF_PRELUDE_Dt;
