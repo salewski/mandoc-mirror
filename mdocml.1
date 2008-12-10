@@ -1,6 +1,6 @@
 .\"
 .Dd $Mdocdate$
-.Dt mdocml 1 alpha
+.Dt mdocml 1
 .Os
 .\"
 .Sh NAME
@@ -26,7 +26,9 @@ and
 the default.  Arguments common to all filters follow:
 .Bl -tag -width "\-o outfile"
 .It Fl f Ar filter
-The output filter name.
+The output filter name.  This
+.Em must
+be declared before any other options.
 .It Fl o Ar outfile
 Write output to 
 .Ar outfile ,

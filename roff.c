@@ -164,7 +164,9 @@ roff_free(struct rofftree *tree, int flush)
 			goto end;
 	}
 
-	if ( ! (*tree->cb.rofftail)(tree->arg))
+	if ( ! (*tree->cb.rofftail)(tree->arg, &tree->tm,
+				tree->os, tree->title, 
+				tree->section, tree->volume))
 		goto end;
 
 	error = 0;

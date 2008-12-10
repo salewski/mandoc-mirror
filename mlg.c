@@ -59,7 +59,9 @@ static	int		 mlg_roffmsg(void *arg,
 static	int		 mlg_roffhead(void *, const struct tm *, 
 				const char *, const char *, 
 				enum roffmsec, enum roffvol);
-static	int		 mlg_rofftail(void *);
+static	int		 mlg_rofftail(void *, const struct tm *, 
+				const char *, const char *, 
+				enum roffmsec, enum roffvol);
 static	int		 mlg_roffin(void *, int, 
 				int *, const char **);
 static	int		 mlg_roffdata(void *, int, 
@@ -413,7 +415,8 @@ mlg_roffhead(void *arg, const struct tm *tm, const char *os,
 
 	mlg_mode(p, MD_BLK_IN);
 
-	if ( ! (*p->cbs.ml_begin)(p->mbuf, p->args, tm, os, title, sec, vol))
+	if ( ! (*p->cbs.ml_begin)(p->mbuf, p->args, 
+				tm, os, title, sec, vol))
 		return(0);
 
 	p->indent++;
@@ -422,7 +425,8 @@ mlg_roffhead(void *arg, const struct tm *tm, const char *os,
 
 
 static int
-mlg_rofftail(void *arg)
+mlg_rofftail(void *arg, const struct tm *tm, const char *os, 
+		const char *title, enum roffmsec sec, enum roffvol vol)
 {
 	struct md_mlg	*p;
 
@@ -433,11 +437,11 @@ mlg_rofftail(void *arg)
 		if ( ! mlg_newline(p))
 			return(0);
 
-	if ( ! (*p->cbs.ml_end)(p->mbuf, p->args))
+	if ( ! (*p->cbs.ml_end)(p->mbuf, p->args, 
+				tm, os, title, sec, vol))
 		return(0);
 
 	mlg_mode(p, MD_BLK_OUT);
-
 	return(mlg_newline(p));
 }
 

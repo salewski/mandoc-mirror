@@ -44,8 +44,11 @@ static	int		xml_begin(struct md_mbuf *,
 				const struct tm *, 
 				const char *, const char *, 
 				enum roffmsec, enum roffvol);
-static	int		xml_end(struct md_mbuf *, 
-				const struct md_args *);
+static	int		xml_end(struct md_mbuf *,
+	       			const struct md_args *, 
+				const struct tm *, 
+				const char *, const char *, 
+				enum roffmsec, enum roffvol);
 static	ssize_t 	xml_printtagname(struct md_mbuf *, 
 				enum md_ns, int);
 static	ssize_t 	xml_printtagargs(struct md_mbuf *, 
@@ -139,7 +142,9 @@ xml_begin(struct md_mbuf *mbuf, const struct md_args *args,
 
 /* ARGSUSED */
 static int 
-xml_end(struct md_mbuf *mbuf, const struct md_args *args)
+xml_end(struct md_mbuf *mbuf, const struct md_args *args,
+		const struct tm *tm, const char *os, 
+		const char *title, enum roffmsec sec, enum roffvol vol)
 {
 
 	return(ml_puts(mbuf, "</mdoc>", NULL));

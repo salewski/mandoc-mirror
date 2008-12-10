@@ -76,8 +76,11 @@ static	int		html_begin(struct md_mbuf *,
 static	int		html_printargs(struct md_mbuf *, int, 
 				const char *, const int *, 
 				const char **, size_t *);
-static	int		html_end(struct md_mbuf *, 
-				const struct md_args *);
+static	int		html_end(struct md_mbuf *,
+	       			const struct md_args *, 
+				const struct tm *, 
+				const char *, const char *, 
+				enum roffmsec, enum roffvol);
 static	int		html_blocktagname(struct md_mbuf *,
 				const struct md_args *, int, 
 				struct htmlq *, const int *, 
@@ -384,6 +387,7 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 		const struct tm *tm, const char *os, 
 		const char *name, enum roffmsec msec, enum roffvol vol)
 {
+	enum roffvol	 bvol;
 	struct html_pair attr[4];
 	char		 ts[32], title[64];
 	int		 i;
@@ -391,12 +395,48 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 	(void)snprintf(ts, sizeof(ts), "%s(%s)", 
 			name, roff_msecname(msec));
 
-	(void)snprintf(ts, sizeof(ts), "%s",
-			name, roff_volname(vol));
-
 	if (vol >= ROFF_ARCH_START) {
+		switch (msec) {
+		case(ROFF_MSEC_1):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_6):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_7):
+			bvol = ROFF_VOL_URM;
+			break;
+		case(ROFF_MSEC_2):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_3):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_3p):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_4):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_5):
+			bvol = ROFF_VOL_PRM;
+			break;
+		case(ROFF_MSEC_8):
+			bvol = ROFF_VOL_PRM;
+			break;
+		case(ROFF_MSEC_9):
+			bvol = ROFF_VOL_KM;
+			break;
+		case(ROFF_MSEC_UNASS):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_DRAFT):
+			/* FALLTHROUGH */
+		case(ROFF_MSEC_PAPER):
+			bvol = ROFF_VOL_NONE;
+			break;
+		default:
+			abort();
+			/* NOTREACHED */
+		}
 
-	}
+		(void)snprintf(title, sizeof(title), "%s (%s)",
+				roff_volname(bvol), roff_volname(vol));
+	} else
+		(void)snprintf(title, sizeof(title), "%s", roff_volname(vol));
 
 
 	i = 0;
@@ -439,13 +479,13 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 					HTML_TAG_STYLE, 1, attr))
 			return(0);
 		if ( ! html_commentput(mbuf, ML_OPEN, NULL))
-			return(NULL);
+			return(0);
 
 		if ( ! html_loadcss(mbuf, args->params.html.css))
 			return(0);
 
 		if ( ! html_commentput(mbuf, ML_CLOSE, NULL))
-			return(NULL);
+			return(0);
 		if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_STYLE))
 			return(0);
 	} else {
@@ -474,29 +514,44 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 
 	attr[0].attr = HTML_ATTR_WIDTH;
 	attr[0].val = "100%";
+	attr[1].attr = HTML_ATTR_CLASS;
+	attr[1].val = "header-table";
 
-	if ( ! html_aputln(mbuf, ML_OPEN, i++, HTML_TAG_TABLE, 1, attr))
+	if ( ! html_aputln(mbuf, ML_OPEN, i++, HTML_TAG_TABLE, 2, attr))
 		return(0);
 	if ( ! html_tputln(mbuf, ML_OPEN, i++, HTML_TAG_TR))
 		return(0);
 
-	if ( ! html_tputln(mbuf, ML_OPEN, i, HTML_TAG_TD))
+	attr[0].attr = HTML_ATTR_ALIGN;
+	attr[0].val = "left";
+	attr[1].attr = HTML_ATTR_CLASS;
+	attr[1].val = "header-section";
+
+	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
 		return(0);
 	if ( ! ml_putstring(mbuf, ts, NULL))
 		return(0);
 	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
 		return(0);
 
-	if ( ! html_tputln(mbuf, ML_OPEN, i, HTML_TAG_TD))
+	attr[0].attr = HTML_ATTR_ALIGN;
+	attr[0].val = "center";
+	attr[1].attr = HTML_ATTR_CLASS;
+	attr[1].val = "header-volume";
+
+	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
 		return(0);
-	/* TODO: middle. */
+	if ( ! ml_putstring(mbuf, title, NULL))
+		return(0);
 	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
 		return(0);
 
 	attr[0].attr = HTML_ATTR_ALIGN;
 	attr[0].val = "right";
+	attr[1].attr = HTML_ATTR_CLASS;
+	attr[1].val = "header-section";
 
-	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_TD, 1, attr))
+	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
 		return(0);
 	if ( ! ml_putstring(mbuf, ts, NULL))
 		return(0);
@@ -511,8 +566,59 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 
 /* ARGSUSED */
 static int 
-html_end(struct md_mbuf *mbuf, const struct md_args *args)
+html_end(struct md_mbuf *mbuf, const struct md_args *args,
+		const struct tm *tm, const char *os, 
+		const char *name, enum roffmsec msec, enum roffvol vol)
 {
+	struct html_pair attr[4];
+	int		 i;
+	char		 ts[64];
+
+	if (0 == strftime(ts, sizeof(ts), "%B %d, %Y", tm)) {
+		warn("strftime");
+		return(0);
+	}
+
+	i = 0;
+
+	attr[0].attr = HTML_ATTR_WIDTH;
+	attr[0].val = "100%";
+	attr[1].attr = HTML_ATTR_CLASS;
+	attr[1].val = "header-footer";
+
+	if ( ! html_aputln(mbuf, ML_OPEN, i++, HTML_TAG_TABLE, 2, attr))
+		return(0);
+	if ( ! html_tputln(mbuf, ML_OPEN, i++, HTML_TAG_TR))
+		return(0);
+
+	attr[0].attr = HTML_ATTR_ALIGN;
+	attr[0].val = "left";
+	attr[1].attr = HTML_ATTR_CLASS;
+	attr[1].val = "footer-os";
+
+	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
+		return(0);
+	if ( ! ml_putstring(mbuf, os, NULL))
+		return(0);
+	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
+		return(0);
+
+	attr[0].attr = HTML_ATTR_ALIGN;
+	attr[0].val = "right";
+	attr[1].attr = HTML_ATTR_CLASS;
+	attr[1].val = "footer-date";
+
+	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
+		return(0);
+	if ( ! ml_putstring(mbuf, ts, NULL))
+		return(0);
+	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
+		return(0);
+
+	if ( ! html_tputln(mbuf, ML_CLOSE, --i, HTML_TAG_TR))
+		return(0);
+	if ( ! html_tputln(mbuf, ML_CLOSE, --i, HTML_TAG_TABLE))
+		return(0);
 
 	if ( ! html_tputln(mbuf, ML_CLOSE, 0, HTML_TAG_DIV))
 		return(0);

@@ -1,7 +1,7 @@
 	body			{ margin: 10px;
 			 	  font-family: Tahoma, sans-serif;
 				  font-size: small; }
-	h1			{ font-size: medium; }
+	h1			{ font-size: small; }
 	h2			{ font-size: small; }
 	div.mdoc		{ width: 600px; }
 	div.block-Sh		{ margin-bottom: 20px; }
@@ -11,6 +11,8 @@
 	div.body-Sh		{ margin-left: 20px;
 				  margin-top: 10px; 
 				  text-align: justify; }
+	table.header-table	{ margin-bottom: 10px; }
+	td.header-section	{ text-transform: uppercase; }
 	span.inline-Nd:before	{ content: ' \2014 '; }
 	span.inline-Fl:before	{ content: '-'; }
 	span.inline-Fl		{ font-weight: bolder; }

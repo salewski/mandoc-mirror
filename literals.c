@@ -531,3 +531,85 @@ roff_vol(const char *p)
 
 	return(ROFF_VOL_MAX);
 }
+
+
+char *
+roff_volname(enum roffvol vol)
+{
+
+	/* FIXME: is OpenBSD specific! */
+
+	switch (vol) {
+	case(ROFF_VOL_AMD):
+		return("OpenBSD Ancestral Manual Documents");
+	case(ROFF_VOL_IND):
+		return("OpenBSD Manual Master Index");
+	case(ROFF_VOL_KM):
+		return("OpenBSD Kernel Manual");
+	case(ROFF_VOL_LOCAL):
+		return("OpenBSD Local Manual");
+	case(ROFF_VOL_PRM):
+		return("OpenBSD Programmer's Manual");
+	case(ROFF_VOL_PS1):
+		return("OpenBSD Programmer's Supplementary Documents");
+	case(ROFF_VOL_SMM):
+		return("OpenBSD System Manager's Manual");
+	case(ROFF_VOL_URM):
+		return("OpenBSD Reference Manual");
+	case(ROFF_VOL_USD):
+		return("OpenBSD User's Supplementary Documents");
+	case(ROFF_ARCH_ALPHA):
+		return("Alpha");
+	case(ROFF_ARCH_AMD64):
+		return("AMD64");
+	case(ROFF_ARCH_AMIGA):
+		return("Amiga");
+	case(ROFF_ARCH_ARC):
+		return("ARC");
+	case(ROFF_ARCH_ARMISH):
+		return("ARMISH");
+	case(ROFF_ARCH_AVIION):
+		return("AVIION");
+	case(ROFF_ARCH_HP300):
+		return("HP300");
+	case(ROFF_ARCH_HPPA):
+		return("HPPA");
+	case(ROFF_ARCH_HPPA64):
+		return("HPPA64");
+	case(ROFF_ARCH_I386):
+		return("i386");
+	case(ROFF_ARCH_LANDISK):
+		return("LANDISK");
+	case(ROFF_ARCH_LUNA88K):
+		return("Luna88K");
+	case(ROFF_ARCH_MAC68K):
+		return("Mac68K");
+	case(ROFF_ARCH_MACPPC):
+		return("MacPPC");
+	case(ROFF_ARCH_MVME68K):
+		return("MVME68K");
+	case(ROFF_ARCH_MVME88K):
+		return("MVME88K");
+	case(ROFF_ARCH_MVMEPPC):
+		return("MVMEPPC");
+	case(ROFF_ARCH_PMAX):
+		return("PMAX");
+	case(ROFF_ARCH_SGI):
+		return("SGI");
+	case(ROFF_ARCH_SPARC):
+		return("SPARC");
+	case(ROFF_ARCH_SPARC64):
+		return("SPARC64");
+	case(ROFF_ARCH_SUN3):
+		return("Sun3");
+	case(ROFF_ARCH_VAX):
+		return("Vax");
+	case(ROFF_ARCH_ZAURUS):
+		return("Zaurus");
+	default:
+		break;
+	}
+
+	abort();
+	/* NOTREACHED */
+}

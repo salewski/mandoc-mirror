@@ -48,7 +48,10 @@ struct	ml_cbs {
 			const char *, const char *,
 			enum roffmsec, enum roffvol);
 	int	(*ml_end)(struct md_mbuf *, 
-			const struct md_args *);
+			const struct md_args *,
+			const struct tm *, 
+			const char *, const char *,
+			enum roffmsec, enum roffvol);
 	ssize_t	(*ml_beginstring)(struct md_mbuf *,
 			const struct md_args *,
 			const char *, size_t);

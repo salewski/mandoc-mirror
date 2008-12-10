@@ -1,5 +1,3 @@
-.SUFFIXES:	.html .7
-
 VERSION	= 1.0.1
 
 # FIXME
@@ -28,8 +26,10 @@ HTML	= index.html mdocml.html
 
 XML	= index.xml
 
+TEXT	= index.txt
+
 CLEAN	= mdocml mdocml.tgz $(LLNS) $(LNS) $(OBJS) $(LIBS) $(HTML) \
-	  $(XML)
+	  $(XML) $(TEXT)
 
 INSTALL	= Makefile $(HEADS) $(SRCS) $(MANS)
 
@@ -52,7 +52,7 @@ lint: llib-lmdocml.ln
 
 dist: mdocml.tgz
 
-www: all $(HTML) $(XML)
+www: all $(HTML) $(XML) $(TEXT)
 
 regress: mdocml
 	@for f in $(FAIL); do \
@@ -75,6 +75,9 @@ index.html: index.7 mdocml.css
 
 index.xml: index.7 mdocml.css
 	./mdocml -Wall -o $@ index.7
+
+index.txt: index.7
+	cp -f index.7 index.txt
 
 mdocml.html: mdocml.1 mdocml.css
 	./mdocml -Wall -fhtml -e -o $@ mdocml.1
