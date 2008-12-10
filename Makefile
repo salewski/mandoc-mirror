@@ -83,7 +83,7 @@ mdocml.html: mdocml.1 mdocml.css
 install-www: www dist
 	install -m 0644 mdocml.tgz $(PREFIX)/mdocml-$(VERSION).tgz
 	install -m 0644 mdocml.tgz $(PREFIX)/mdocml.tgz
-	install -m 0644 $(HTML) $(XML) $(PREFIX)/
+	install -m 0644 $(HTML) $(XML) $(TEXT) $(PREFIX)/
 
 mdocml.tgz: $(INSTALL)
 	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
