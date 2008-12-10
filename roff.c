@@ -1154,7 +1154,7 @@ static int
 roff_layout(ROFFCALL_ARGS) 
 {
 	int		 i, c, argcp[ROFF_MAXLINEARG];
-	char		*argvp[ROFF_MAXLINEARG], *p;
+	char		*argvp[ROFF_MAXLINEARG];
 
 	/*
 	 * The roff_layout function is for multi-line macros.  A layout
@@ -1180,9 +1180,8 @@ roff_layout(ROFFCALL_ARGS)
 		return((*tree->cb.roffblkout)(tree->arg, tok));
 	} 
 
+	argv++;
 	assert( ! (ROFF_CALLABLE & tokens[tok].flags));
-
-	p = *argv++;
 
 	if ( ! roffparseopts(tree, tok, &argv, argcp, argvp))
 		return(0);

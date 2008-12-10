@@ -8,19 +8,19 @@ CFLAGS += -W -Wall -Wno-unused-parameter -g -DDEBUG
 LINTFLAGS += -c -e -f -u
 
 LNS	= mdocml.ln html.ln xml.ln libmdocml.ln roff.ln ml.ln mlg.ln \
-	  compat.ln tokens.ln literals.ln
+	  compat.ln tokens.ln literals.ln tags.ln
 
 LLNS	= llib-lmdocml.ln
 
 LIBS	= libmdocml.a
 
 OBJS	= mdocml.o html.o xml.o libmdocml.o roff.o ml.o mlg.o \
-	  compat.o tokens.o literals.o
+	  compat.o tokens.o literals.o tags.o
 
 SRCS	= mdocml.c html.c xml.c libmdocml.c roff.c ml.c mlg.c \
-	  compat.c tokens.c literals.c
+	  compat.c tokens.c literals.c tags.c
 
-HEADS	= libmdocml.h private.h ml.h roff.h
+HEADS	= libmdocml.h private.h ml.h roff.h html.h
 
 MANS	= mdocml.1 index.7
 
@@ -90,15 +90,15 @@ mdocml.tgz: $(INSTALL)
 	( cd .dist/mdocml/ && tar zcf ../../mdocml.tgz mdocml-$(VERSION)/ )
 	rm -rf .dist/
 
-llib-lmdocml.ln: mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln
-	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln
+llib-lmdocml.ln: mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln tags.ln
+	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln tags.ln
 
 mdocml.ln: mdocml.c libmdocml.h
 
 mdocml.o: mdocml.c libmdocml.h
 
-libmdocml.a: libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o literals.o
-	$(AR) rs $@ libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o literals.o
+libmdocml.a: libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o literals.o tags.o
+	$(AR) rs $@ libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o literals.o tags.o
 
 xml.ln: xml.c private.h libmdocml.h ml.h
 
@@ -107,6 +107,10 @@ xml.o: xml.c private.h libmdocml.h ml.h
 html.ln: html.c private.h libmdocml.h
 
 html.o: html.c private.h libmdocml.h
+
+tags.ln: tags.c html.h 
+
+tags.o: tags.c html.h
 
 roff.ln: roff.c private.h roff.h libmdocml.h
 
@@ -127,3 +131,10 @@ mlg.o: mlg.c private.h libmdocml.h ml.h
 compat.ln: compat.c
 
 compat.o: compat.c
+
+html.h: ml.h
+
+ml.h: private.h
+
+private.h: libmdocml.h
+

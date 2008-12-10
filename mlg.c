@@ -24,14 +24,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "private.h"
 #include "ml.h"
 
 /* TODO: literal tokens. */
-
-#define	COLUMNS		  72
-#define	INDENT		  4
-#define	MAXINDENT	  10
 
 enum	md_tok {
 	MD_TEXT,
@@ -239,14 +234,10 @@ mlg_endtag(struct md_mlg *p, enum md_ns ns, int tok)
 static int
 mlg_indent(struct md_mlg *p)
 {
-	size_t		 count;
-
-	count = p->indent > MAXINDENT ? 
-		(size_t)MAXINDENT : p->indent;
-	count *= INDENT;
 
 	assert(0 == p->pos);
-	return(ml_putchars(p->mbuf, ' ', count, &p->pos));
+	return(ml_putchars(p->mbuf, ' ', INDENT_SZ * 
+				INDENT(p->indent), &p->pos));
 }
 
 
@@ -325,7 +316,7 @@ mlg_data(struct md_mlg *p, int space,
 		if ( ! mlg_nstring(p, start, buf, sz))
 			return(0);
 
-		if (p->indent * INDENT + sz >= COLUMNS)
+		if (INDENT(p->indent) * INDENT_SZ + sz >= COLUMNS)
 			if ( ! mlg_newline(p))
 				return(0);
 

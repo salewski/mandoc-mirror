@@ -27,30 +27,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "private.h"
+#include "html.h"
 #include "ml.h"
-
-#define	TAG_HTML	"<html>"
-#define	TAG_HTML_END	"</html>"
-#define	TAG_BODY	"<body>"
-#define	TAG_BODY_END	"</body>"
-#define	TAG_DIV_MDOC	"<div class=\"mdoc\">"
-#define	TAG_DIV_END	"</div>"
-#define	TAG_STYLE_CSS	"<style type=\"text/css\"><!--"
-#define	TAG_STYLE_END	"--></style>"
-#define	TAG_HEAD	"<head>"
-#define	TAG_HEAD_END	"</head>"
-#define	TAG_TITLE	"<title>"
-#define	TAG_TITLE_END	"</title>"
-#define	TAG_LINK_CSS	"<link rel=\"stylesheet\" " \
-			"type=\"text/css\" href=\"%s\">"
-#define	TAG_DOCTYPE	"<!DOCTYPE HTML PUBLIC " \
-			"\"-//W3C//DTD HTML 4.01//EN\" " \
-			"\"http://www.w3.org/TR/html4/strict.dtd\">"
-#define	TAG_RESTYPE	"<meta name=\"resource-type\" " \
-			"content=\"document\">"
-#define	TAG_CONTTYPE	"<meta http-equiv=\"Content-Type\" " \
-			"content=\"text/html;charset=utf-8\">"
 
 /* TODO: allow head/tail-less invocations (just "div" start). */
 
@@ -62,14 +40,13 @@ struct	htmlnode {
 	struct htmlnode	*parent;
 };
 
-
 struct	htmlq {
 	struct htmlnode	*last;
 };
 
 
-static	int		html_loadcss(struct md_mbuf *, const char *);
-
+static	int		html_loadcss(struct md_mbuf *, 
+				const char *);
 static	int		html_alloc(void **);
 static	void		html_free(void *);
 static	ssize_t		html_endtag(struct md_mbuf *, void *,
@@ -139,6 +116,11 @@ static	int		html_It_headtagname(struct md_mbuf *,
 static	int		html_It_bodytagname(struct md_mbuf *, 
 				struct htmlq *, const int *, 
 				const char **, size_t *);
+static	int		html_tputln(struct md_mbuf *, 
+				enum ml_scope, int, enum html_tag);
+static	int		html_aputln(struct md_mbuf *, enum ml_scope, 
+				int, enum html_tag, 
+				int, const struct html_pair *);
 
 
 /* ARGSUSED */
@@ -160,11 +142,11 @@ html_It_headtagname(struct md_mbuf *mbuf, struct htmlq *q,
 			i < ROFF_MAXLINEARG; i++) {
 		switch (n->argc[i]) {
 		case (ROFF_Ohang):
-			return(ml_nputs(mbuf, "div", 3, res));
+			return(html_stput(mbuf, HTML_TAG_DIV, res));
 		case (ROFF_Tag):
 			/* FALLTHROUGH */
 		case (ROFF_Column): 
-			return(ml_nputs(mbuf, "td", 2, res));
+			return(html_stput(mbuf, HTML_TAG_TD, res));
 		default:
 			break;
 		}
@@ -209,11 +191,11 @@ html_It_bodytagname(struct md_mbuf *mbuf, struct htmlq *q,
 		case (ROFF_Ohang): 
 			/* FALLTHROUGH */
 		case (ROFF_Inset):
-			return(ml_nputs(mbuf, "div", 3, res));
+			return(html_stput(mbuf, HTML_TAG_DIV, res));
 		case (ROFF_Tag):
 			/* FALLTHROUGH */
 		case (ROFF_Column): 
-			return(ml_nputs(mbuf, "td", 2, res));
+			return(html_stput(mbuf, HTML_TAG_TD, res));
 		default:
 			break;
 		}
@@ -235,7 +217,7 @@ html_Bl_bodytagname(struct md_mbuf *mbuf, struct htmlq *q,
 			&& i < ROFF_MAXLINEARG; i++) {
 		switch (argc[i]) {
 		case (ROFF_Enum):
-			return(ml_nputs(mbuf, "ol", 2, res));
+			return(html_stput(mbuf, HTML_TAG_OL, res));
 		case (ROFF_Bullet):
 			/* FALLTHROUGH */
 		case (ROFF_Dash):
@@ -251,11 +233,11 @@ html_Bl_bodytagname(struct md_mbuf *mbuf, struct htmlq *q,
 		case (ROFF_Ohang): 
 			/* FALLTHROUGH */
 		case (ROFF_Inset):
-			return(ml_nputs(mbuf, "ul", 2, res));
+			return(html_stput(mbuf, HTML_TAG_UL, res));
 		case (ROFF_Tag):
 			/* FALLTHROUGH */
 		case (ROFF_Column): 
-			return(ml_nputs(mbuf, "table", 5, res));
+			return(html_stput(mbuf, HTML_TAG_TABLE, res));
 		default:
 			break;
 		}
@@ -301,11 +283,11 @@ html_It_blocktagname(struct md_mbuf *mbuf, struct htmlq *q,
 		case (ROFF_Ohang): 
 			/* FALLTHROUGH */
 		case (ROFF_Inset):
-			return(ml_nputs(mbuf, "li", 2, res));
+			return(html_stput(mbuf, HTML_TAG_LI, res));
 		case (ROFF_Tag):
 			/* FALLTHROUGH */
 		case (ROFF_Column): 
-			return(ml_nputs(mbuf, "tr", 2, res));
+			return(html_stput(mbuf, HTML_TAG_TR, res));
 		default:
 			break;
 		}
@@ -371,27 +353,28 @@ out:
 
 
 static int
-html_putline(struct md_mbuf *mbuf, size_t indent, 
-		const char *p, size_t *res)
+html_tputln(struct md_mbuf *mbuf, enum ml_scope scope,
+		int i, enum html_tag tag)
 {
 
-	/* FIXME: use INDENT macro for this. */
-	if ( ! ml_putchars(mbuf, ' ', indent * 4, res))
+	if ( ! ml_putchars(mbuf, ' ', INDENT(i) * INDENT_SZ, NULL))
 		return(0);
-	if ( ! ml_puts(mbuf, p, res))
+	if ( ! html_tput(mbuf, scope, tag, NULL))
 		return(0);
-	return(ml_nputs(mbuf, "\n", 1, res));
+	return(ml_nputs(mbuf, "\n", 1, NULL));
 }
 
 
 static int
-html_putlinestart(struct md_mbuf *mbuf, size_t indent,
-		const char *p, size_t *res)
+html_aputln(struct md_mbuf *mbuf, enum ml_scope scope, int i, 
+		enum html_tag tag, int sz, const struct html_pair *p)
 {
 
-	if ( ! ml_putchars(mbuf, ' ', indent * 4, res))
+	if ( ! ml_putchars(mbuf, ' ', INDENT(i) * INDENT_SZ, NULL))
 		return(0);
-	return(ml_puts(mbuf, p, res));
+	if ( ! html_aput(mbuf, scope, tag, NULL, sz, p))
+		return(0);
+	return(ml_nputs(mbuf, "\n", 1, NULL));
 }
 
 
@@ -399,80 +382,119 @@ html_putlinestart(struct md_mbuf *mbuf, size_t indent,
 static int 
 html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 		const struct tm *tm, const char *os, 
-		const char *title, enum roffmsec section, 
-		const char *vol)
+		const char *name, enum roffmsec msec, const char *vol)
 {
-	char		 mtitle[128], css[128];
-	size_t		 i;
+	struct html_pair attr[4];
+	char		 ts[32];
+	int		 i;
 
-	(void)snprintf(mtitle, sizeof(mtitle), 
-			"Manual Page for %s(%s)",
-			title, roff_msecname(section));
-	(void)snprintf(css, sizeof(css), 
-			TAG_LINK_CSS, args->params.html.css);
+	(void)snprintf(ts, sizeof(ts), "%s(%s)", 
+			name, roff_msecname(msec));
 
 	i = 0;
 
-	if ( ! html_putline(mbuf, i, TAG_DOCTYPE, NULL))
+	if ( ! html_typeput(mbuf, HTML_TYPE_4_01_STRICT, NULL))
 		return(0);
-	if ( ! html_putline(mbuf, i, TAG_HTML, NULL))
+	if ( ! html_tputln(mbuf, ML_OPEN, i, HTML_TAG_HTML))
 		return(0);
-	if ( ! html_putline(mbuf, i++, TAG_HEAD, NULL))
+	if ( ! html_tputln(mbuf, ML_OPEN, i++, HTML_TAG_HEAD))
 		return(0);
-	if ( ! html_putline(mbuf, i, TAG_CONTTYPE, NULL))
+
+	attr[0].attr = HTML_ATTR_HTTP_EQUIV;
+	attr[0].val = "content-type";
+	attr[1].attr = HTML_ATTR_CONTENT;
+	attr[1].val = "text/html;charset=utf-8";
+
+	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_META, 2, attr))
 		return(0);
-	if ( ! html_putline(mbuf, i, TAG_RESTYPE, NULL))
+
+	attr[0].attr = HTML_ATTR_NAME;
+	attr[0].val = "resource-type";
+	attr[1].attr = HTML_ATTR_CONTENT;
+	attr[1].val = "document";
+
+	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_META, 2, attr))
 		return(0);
-	if ( ! html_putlinestart(mbuf, i, TAG_TITLE, NULL))
+
+	if ( ! html_tputln(mbuf, ML_OPEN, i, HTML_TAG_TITLE))
 		return(0);
-	if ( ! ml_putstring(mbuf, mtitle, NULL))
+	if ( ! ml_putstring(mbuf, ts, NULL))
 		return(0);
-	if ( ! html_putline(mbuf, i, TAG_TITLE_END, NULL))
+	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TITLE))
 		return(0);
 
 	if (HTML_CSS_EMBED & args->params.html.flags) {
-		if ( ! html_putline(mbuf, i, TAG_STYLE_CSS, NULL))
+		attr[0].attr = HTML_ATTR_TYPE;
+		attr[0].val = "text/css";
+
+		if ( ! html_aputln(mbuf, ML_OPEN, i, 
+					HTML_TAG_STYLE, 1, attr))
 			return(0);
+		if ( ! html_commentput(mbuf, ML_OPEN, NULL))
+			return(NULL);
+
 		if ( ! html_loadcss(mbuf, args->params.html.css))
 			return(0);
-		if ( ! html_putline(mbuf, i, TAG_STYLE_END, NULL))
+
+		if ( ! html_commentput(mbuf, ML_CLOSE, NULL))
+			return(NULL);
+		if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_STYLE))
 			return(0);
-	} else if ( ! html_putline(mbuf, i, css, NULL))
+	} else {
+		attr[0].attr = HTML_ATTR_REL;
+		attr[0].val = "stylesheet";
+		attr[1].attr = HTML_ATTR_TYPE;
+		attr[1].val = "text/css";
+		attr[2].attr = HTML_ATTR_HREF;
+		attr[2].val = args->params.html.css;
+
+		if ( ! html_aputln(mbuf, ML_OPEN, i,
+					HTML_TAG_LINK, 3, attr))
+			return(0);
+	}
+
+	if ( ! html_tputln(mbuf, ML_CLOSE, --i, HTML_TAG_HEAD))
+		return(0);
+	if ( ! html_tputln(mbuf, ML_OPEN, i, HTML_TAG_BODY))
 		return(0);
 
-	if ( ! html_putline(mbuf, --i, TAG_HEAD_END, NULL))
+	attr[0].attr = HTML_ATTR_CLASS;
+	attr[0].val = "mdoc";
+
+	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_DIV, 1, attr))
 		return(0);
-	if ( ! html_putline(mbuf, i, TAG_BODY, NULL))
+
+	attr[0].attr = HTML_ATTR_WIDTH;
+	attr[0].val = "100%";
+
+	if ( ! html_aputln(mbuf, ML_OPEN, i++, HTML_TAG_TABLE, 1, attr))
 		return(0);
-	if ( ! html_putline(mbuf, i, TAG_DIV_MDOC, NULL))
+	if ( ! html_tputln(mbuf, ML_OPEN, i++, HTML_TAG_TR))
 		return(0);
-	if ( ! html_putline(mbuf, i++, "<table width=\"100%\">", NULL))
+
+	if ( ! html_tputln(mbuf, ML_OPEN, i, HTML_TAG_TD))
 		return(0);
-	if ( ! html_putline(mbuf, i++, "<tr>", NULL))
+	if ( ! ml_putstring(mbuf, ts, NULL))
 		return(0);
-	if ( ! html_putline(mbuf, i++, "<td align=\"left\">", NULL))
+	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
 		return(0);
-	if ( ! ml_putstring(mbuf, title, NULL))
+
+	if ( ! html_tputln(mbuf, ML_OPEN, i, HTML_TAG_TD))
 		return(0);
-	if ( ! html_putline(mbuf, --i, "</td>", NULL))
+	/* TODO: middle. */
+	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
 		return(0);
-	if ( ! html_putline(mbuf, i++, "<td align=\"center\">", NULL))
+
+	if ( ! html_tputln(mbuf, ML_OPEN, i, HTML_TAG_TD))
 		return(0);
-	if ( ! ml_putstring(mbuf, "Hello, world.", NULL))
+	if ( ! ml_putstring(mbuf, ts, NULL))
 		return(0);
-	if ( ! html_putline(mbuf, --i, "</td>", NULL))
+	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
 		return(0);
-	if ( ! html_putline(mbuf, i++, "<td align=\"right\">", NULL))
+
+	if ( ! html_tputln(mbuf, ML_CLOSE, --i, HTML_TAG_TR))
 		return(0);
-	if ( ! ml_putstring(mbuf, title, NULL))
-		return(0);
-	if ( ! html_putline(mbuf, --i, "</td>", NULL))
-		return(0);
-	if ( ! html_putline(mbuf, --i, "</tr>", NULL))
-		return(0);
-	if ( ! html_putline(mbuf, --i, "</table>", NULL))
-		return(0);
-	return(1);
+	return(html_tputln(mbuf, ML_CLOSE, --i, HTML_TAG_TABLE));
 }
 
 
@@ -481,11 +503,11 @@ static int
 html_end(struct md_mbuf *mbuf, const struct md_args *args)
 {
 
-	if ( ! html_putline(mbuf, 0, TAG_DIV_END, NULL))
+	if ( ! html_tputln(mbuf, ML_CLOSE, 0, HTML_TAG_DIV))
 		return(0);
-	if ( ! html_putline(mbuf, 0, TAG_BODY_END, NULL))
+	if ( ! html_tputln(mbuf, ML_CLOSE, 0, HTML_TAG_BODY))
 		return(0);
-	return(html_putline(mbuf, 0, TAG_HTML_END, NULL));
+	return(html_tputln(mbuf, ML_CLOSE, 0, HTML_TAG_HTML));
 }
 
 
@@ -500,16 +522,16 @@ html_bodytagname(struct md_mbuf *mbuf,
 	case (ROFF_Bl):
 		return(html_Bl_bodytagname(mbuf, q, argc, argv, res));
 	case (ROFF_Fo):
-		return(ml_nputs(mbuf, "span", 4, res));
+		return(html_stput(mbuf, HTML_TAG_SPAN, res));
 	case (ROFF_It):
 		return(html_It_bodytagname(mbuf, q, argc, argv, res));
 	case (ROFF_Oo):
-		return(ml_nputs(mbuf, "span", 4, res));
+		return(html_stput(mbuf, HTML_TAG_SPAN, res));
 	default:
 		break;
 	}
 
-	return(ml_puts(mbuf, "div", res));
+	return(html_stput(mbuf, HTML_TAG_DIV, res));
 }
 
 
@@ -524,18 +546,18 @@ html_headtagname(struct md_mbuf *mbuf,
 	case (ROFF_It):
 		return(html_It_headtagname(mbuf, q, argc, argv, res));
 	case (ROFF_Fo):
-		return(ml_nputs(mbuf, "span", 4, res));
+		/* FALLTHROUGH */
 	case (ROFF_Oo):
-		return(ml_nputs(mbuf, "span", 4, res));
+		return(html_stput(mbuf, HTML_TAG_SPAN, res));
 	case (ROFF_Sh):
-		return(ml_nputs(mbuf, "h1", 2, res));
+		return(html_stput(mbuf, HTML_TAG_H1, res));
 	case (ROFF_Ss):
-		return(ml_nputs(mbuf, "h2", 2, res));
+		return(html_stput(mbuf, HTML_TAG_H2, res));
 	default:
 		break;
 	}
 
-	return(ml_nputs(mbuf, "div", 3, res));
+	return(html_stput(mbuf, HTML_TAG_DIV, res));
 }
 
 
@@ -548,16 +570,16 @@ html_blocktagname(struct md_mbuf *mbuf, const struct md_args *args,
 
 	switch (tok) {
 	case (ROFF_Fo):
-		return(ml_nputs(mbuf, "span", 4, res));
+		/* FALLTHROUGH */
 	case (ROFF_Oo):
-		return(ml_nputs(mbuf, "span", 4, res));
+		return(html_stput(mbuf, HTML_TAG_SPAN, res));
 	case (ROFF_It):
 		return(html_It_blocktagname(mbuf, q, argc, argv, res));
 	default:
 		break;
 	}
 
-	return(ml_puts(mbuf, "div", res));
+	return(html_stput(mbuf, HTML_TAG_DIV, res));
 }
 
 
@@ -566,6 +588,8 @@ static int
 html_printargs(struct md_mbuf *mbuf, int tok, const char *ns,
 		const int *argc, const char **argv, size_t *res)
 {
+
+	/* FIXME: use API in ml.h. */
 
 	if ( ! ml_puts(mbuf, " class=\"", res))
 		return(0);
@@ -624,6 +648,9 @@ html_inlinetagargs(struct md_mbuf *mbuf,
 
 	switch (tok) {
 	case (ROFF_Sx):
+
+		/* FIXME: use API in ml.h. */
+
 		assert(*argv);
 		if ( ! ml_nputs(mbuf, " href=\"#", 8, res))
 			return(0);
@@ -648,14 +675,14 @@ html_inlinetagname(struct md_mbuf *mbuf,
 
 	switch (tok) {
 	case (ROFF_Pp):
-		return(ml_nputs(mbuf, "div", 3, res));
+		return(html_stput(mbuf, HTML_TAG_DIV, res));
 	case (ROFF_Sx):
-		return(ml_nputs(mbuf, "a", 1, res));
+		return(html_stput(mbuf, HTML_TAG_A, res));
 	default:
 		break;
 	}
 
-	return(ml_puts(mbuf, "span", res));
+	return(html_stput(mbuf, HTML_TAG_SPAN, res));
 }
 
 
@@ -821,16 +848,14 @@ html_beginhttp(struct md_mbuf *mbuf,
 		const char *buf, size_t sz)
 {
 	size_t		 res;
+	struct html_pair pair;
 
 	res = 0;
+	pair.attr = HTML_ATTR_HREF;
+	pair.val = (char *)buf;
 
-	if ( ! ml_puts(mbuf, "<a href=\"", &res))
+	if ( ! html_aput(mbuf, ML_OPEN, HTML_TAG_A, &res, 1, &pair))
 		return(-1);
-	if (1 != ml_nputstring(mbuf, buf, sz, &res))
-		return(-1);
-	if ( ! ml_puts(mbuf, "\">", &res))
-		return(-1);
-
 	return((ssize_t)res);
 }
 
@@ -843,10 +868,8 @@ html_endhttp(struct md_mbuf *mbuf,
 	size_t		 res;
 
 	res = 0;
-
-	if ( ! ml_puts(mbuf, "</a>", &res))
+	if ( ! html_tput(mbuf, ML_CLOSE, HTML_TAG_A, &res))
 		return(-1);
-
 	return((ssize_t)res);
 }
 
