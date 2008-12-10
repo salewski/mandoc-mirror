@@ -20,21 +20,24 @@ The
 .Nm
 utility parses mdoc formatted manual source and passes results into an
 output filter.  The current output filters are
-.Ar html
+.Fl f Ar html
 and
-.Ar xml ,
-the default.  Arguments common to all filters follow:
+.Fl f Ar xml .
+By default, 
+.Nm
+only validates its input. This may be explicitly directed with
+.Fl f Ar noop .  
+Arguments common to all filters follow:
 .Bl -tag -width "\-o outfile"
 .It Fl f Ar filter
-The output filter name.  This
-.Em must
-be declared before any other options.
+The output filter name.  
 .It Fl o Ar outfile
 Write output to 
 .Ar outfile ,
 which may be
 .Dq \-
-for stdout.
+for stdout.  This is meaningless for
+.Fl f Ar noop .
 .It Fl W Ns Ar err...
 Print warning messages.  If set to 
 .Fl W Ns Ar all ,
@@ -56,14 +59,21 @@ for stdin.
 .Pp
 By default,
 .Nm
-reads from stdin and writes to stdout using the xml filter.
+reads from stdin and writes to stdout.
 .Pp
 .Ex -std mdocml
+.\"
+.Ss Noop Filter
+The default noop 
+.Dq validating
+filter simply validates its input; it produces no output beyond error
+and warning messages.
 .\"
 .Ss XML Filter
 The XML filter, specified by
 .Fl f Ar xml ,
-is the default filter.  This filter has no additional arguments.
+produces correctly-formatted XML output.  This filter has no additional
+arguments.
 .Pp
 The XML filter creates an XML document where element names are their respective
 roff macro names.  Each element name has an associated
@@ -88,6 +98,7 @@ namespace is for block bodies; and the
 .Dq inline
 namespace is for in-line elements (such as
 .Sq .Em ) .
+.\"
 .Ss HTML Filter
 The HTML filter, specified by
 .Fl f Ar html ,
@@ -99,6 +110,10 @@ The CSS file location, which defaults to
 .It Fl e
 Whether to embed the CSS file into the HTML prologue.
 .El
+.Pp
+By default, the HTML filter produces HTML-4.01 strict mark-up.  The
+default CSS document styles the page as it would appear in a terminal
+window.
 .\" 
 .Sh EXAMPLES
 To produce an HTML4-strict document 
@@ -118,7 +133,9 @@ with the default namespace identifiers
 and
 .Li inline :
 .Pp
-.D1 % mdocml mdocml.1 
+.D1 % mdocml -Wall,error -fxml mdocml.1 
+.Pp
+The previous example will also halt on input document warnings.
 .\"
 .Sh SEE ALSO
 .Xr groff 1 ,

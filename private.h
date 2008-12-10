@@ -376,6 +376,10 @@ void		 *md_init_html(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *);
 int		  md_line_html(void *, char *);
 int		  md_exit_html(void *, int);
+void		 *md_init_noop(const struct md_args *,
+			struct md_mbuf *, const struct md_rbuf *);
+int		  md_line_noop(void *, char *);
+int		  md_exit_noop(void *, int);
 void		 *md_init_xml(const struct md_args *,
 			struct md_mbuf *, const struct md_rbuf *);
 int		  md_line_xml(void *, char *);

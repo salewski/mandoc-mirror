@@ -130,6 +130,8 @@ static int
 md_run_leave(const struct md_args *args, struct md_mbuf *mbuf, 
 		struct md_rbuf *rbuf, int c, void *data)
 {
+	md_exit		 fp;
+
 	assert(args);
 	assert(mbuf);
 	assert(rbuf);
@@ -137,14 +139,18 @@ md_run_leave(const struct md_args *args, struct md_mbuf *mbuf,
 	/* Run exiters. */
 	switch (args->type) {
 	case (MD_HTML):
-		if ( ! md_exit_html(data, -1 == c ? 0 : 1))
-			c = -1;
+		fp = md_exit_html;
+		break;
+	case (MD_XML):
+		fp = md_exit_xml;
 		break;
 	default:
-		if ( ! md_exit_xml(data, -1 == c ? 0 : 1))
-			c = -1;
+		fp = md_exit_noop;
 		break;
 	}
+
+	if ( ! (*fp)(data, -1 == c ? 0 : 1))
+		c = -1;
 
 	/* Make final flush of buffer. */
 	if (-1 != c && ! md_buf_flush(mbuf))
@@ -172,8 +178,11 @@ md_run_enter(const struct md_args *args, struct md_mbuf *mbuf,
 	case (MD_HTML):
 		fp = md_line_html;
 		break;
-	default:
+	case (MD_XML):
 		fp = md_line_xml;
+		break;
+	default:
+		fp = md_line_noop;
 		break;
 	}
 
@@ -217,6 +226,7 @@ int
 md_run(const struct md_args *args,
 		const struct md_buf *out, const struct md_buf *in)
 {
+	md_init		 fp;
 	struct md_mbuf	 mbuf;
 	struct md_rbuf	 rbuf;
 	void		*data;
@@ -234,12 +244,17 @@ md_run(const struct md_args *args,
 	/* Run initialisers. */
 	switch (args->type) {
 	case (MD_HTML):
-		data = md_init_html(args, &mbuf, &rbuf);
+		fp = md_init_html;
+		break;
+	case (MD_XML):
+		fp = md_init_xml;
 		break;
 	default:
-		data = md_init_xml(args, &mbuf, &rbuf);
+		fp = md_init_noop;
 		break;
 	}
+
+	data = (*fp)(args, &mbuf, &rbuf);
 
 	/* Go into mainline. */
 	return(md_run_enter(args, &mbuf, &rbuf, data));

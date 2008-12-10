@@ -71,7 +71,7 @@ main(int argc, char *argv[])
 
 	(void)memset(&args, 0, sizeof(struct md_args));
 
-	args.type = MD_XML;
+	args.type = MD_NOOP;
 
 	while (-1 != (c = getopt(argc, argv, "c:ef:o:vW:")))
 		switch (c) {
@@ -90,6 +90,8 @@ main(int argc, char *argv[])
 				args.type = MD_HTML;
 			else if (0 == strcmp(optarg, "xml"))
 				args.type = MD_XML;
+			else if (0 == strcmp(optarg, "noop"))
+				args.type = MD_NOOP;
 			else
 				errx(1, "invalid filter type");
 			break;

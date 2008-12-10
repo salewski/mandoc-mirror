@@ -1,20 +1,20 @@
-VERSION	= 1.0.2
+VERSION	= 1.0.3
 
 # FIXME
 CFLAGS += -W -Wall -Wno-unused-parameter -g -DDEBUG
 
 LNS	= mdocml.ln html.ln xml.ln libmdocml.ln roff.ln ml.ln mlg.ln \
-	  compat.ln tokens.ln literals.ln tags.ln
+	  compat.ln tokens.ln literals.ln tags.ln noop.ln
 
 LLNS	= llib-lmdocml.ln
 
 LIBS	= libmdocml.a
 
 OBJS	= mdocml.o html.o xml.o libmdocml.o roff.o ml.o mlg.o \
-	  compat.o tokens.o literals.o tags.o
+	  compat.o tokens.o literals.o tags.o noop.o
 
 SRCS	= mdocml.c html.c xml.c libmdocml.c roff.c ml.c mlg.c \
-	  compat.c tokens.c literals.c tags.c
+	  compat.c tokens.c literals.c tags.c noop.c
 
 HEADS	= libmdocml.h private.h ml.h roff.h html.h
 
@@ -106,47 +106,51 @@ mdocml-port.tgz: $(INSTALL)
 	( cd .dist/ && tar zcf ../$@ mdocml/ )
 	rm -rf .dist/
 
-llib-lmdocml.ln: mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln tags.ln
-	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln tags.ln
+llib-lmdocml.ln: mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln tags.ln noop.ln
+	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln tags.ln noop.ln
 
 mdocml.ln: mdocml.c libmdocml.h
 
 mdocml.o: mdocml.c libmdocml.h
 
-libmdocml.a: libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o literals.o tags.o
-	$(AR) rs $@ libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o literals.o tags.o
+libmdocml.a: libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o literals.o tags.o noop.o
+	$(AR) rs $@ libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o literals.o tags.o noop.o
 
-xml.ln: xml.c private.h libmdocml.h ml.h
+xml.ln: xml.c ml.h
 
-xml.o: xml.c private.h libmdocml.h ml.h
+xml.o: xml.c ml.h
 
-html.ln: html.c private.h libmdocml.h
+html.ln: html.c private.h
 
-html.o: html.c private.h libmdocml.h
+html.o: html.c private.h 
 
 tags.ln: tags.c html.h 
 
 tags.o: tags.c html.h
 
-roff.ln: roff.c private.h roff.h libmdocml.h
+roff.ln: roff.c private.h
 
-roff.o: roff.c private.h roff.h libmdocml.h
+roff.o: roff.c private.h 
 
-libmdocml.ln: libmdocml.c private.h libmdocml.h
+libmdocml.ln: libmdocml.c private.h
 
-libmdocml.o: libmdocml.c private.h libmdocml.h
+libmdocml.o: libmdocml.c private.h
 
-ml.ln: ml.c private.h libmdocml.h ml.h
+ml.ln: ml.c ml.h
 
-ml.o: ml.c private.h libmdocml.h ml.h
+ml.o: ml.c ml.h
 
-mlg.ln: mlg.c private.h libmdocml.h ml.h
+mlg.ln: mlg.c ml.h
 
-mlg.o: mlg.c private.h libmdocml.h ml.h
+mlg.o: mlg.c ml.h
 
 compat.ln: compat.c
 
 compat.o: compat.c
+
+noop.ln: noop.c private.h
+
+noop.o: noop.c private.h
 
 html.h: ml.h
 
