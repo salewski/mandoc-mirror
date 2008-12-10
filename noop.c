@@ -281,7 +281,7 @@ noop_roffmsg(void *arg, enum roffmsg lvl,
 
 		} else
 			(void)snprintf(b, sizeof(b), 
-					"%s:%zu: %s: %s (col %zu)", 
+					"%s:%zu: %s: %s (%zu)", 
 					p->rbuf->name, p->rbuf->line, 
 					level, msg, pos - buf);
 	} else 

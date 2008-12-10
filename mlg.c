@@ -37,10 +37,7 @@ enum	md_tok {
 };
 
 struct	md_mlg {
-	const struct md_args	*args;
-	const struct md_rbuf	*rbuf;
-
-	struct md_mbuf	 *mbuf;
+	struct ml_args	  args;
 	struct rofftree	 *tree;
 	size_t		  indent;
 	size_t		  pos;
@@ -50,7 +47,6 @@ struct	md_mlg {
 	int		  flags;
 #define	ML_OVERRIDE_ONE	 (1 << 0)
 #define	ML_OVERRIDE_ALL	 (1 << 1)
-	void		 *data;
 };
 
 static	int		 mlg_roffmsg(void *arg, 
@@ -143,7 +139,7 @@ mlg_begintag(struct md_mlg *p, enum md_ns ns, int tok,
 					MD_INLINE_OUT == p->last)
 				&& ! (ML_OVERRIDE_ONE & p->flags)
 				&& ! (ML_OVERRIDE_ALL & p->flags))
-			if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
+			if ( ! ml_nputs(p->args.mbuf, " ", 1, &p->pos))
 				return(0);
 		if (0 == p->pos && ! mlg_indent(p))
 			return(0);
@@ -162,18 +158,17 @@ mlg_begintag(struct md_mlg *p, enum md_ns ns, int tok,
 		break;
 	}
 
-	if ( ! ml_nputs(p->mbuf, "<", 1, &p->pos))
+	if ( ! ml_nputs(p->args.mbuf, "<", 1, &p->pos))
 		return(0);
 
-	res = (*p->cbs.ml_begintag)(p->mbuf, p->data, 
-			p->args, ns, tok, argc, argv);
+	res = (*p->cbs.ml_begintag)(&p->args, ns, tok, argc, argv);
 	if (-1 == res)
 		return(0);
 
 	assert(res >= 0);
 	p->pos += (size_t)res;
 
-	if ( ! ml_nputs(p->mbuf, ">", 1, &p->pos))
+	if ( ! ml_nputs(p->args.mbuf, ">", 1, &p->pos))
 		return(0);
 
 	switch (ns) {
@@ -211,17 +206,17 @@ mlg_endtag(struct md_mlg *p, enum md_ns ns, int tok)
 		break;
 	}
 
-	if ( ! ml_nputs(p->mbuf, "</", 2, &p->pos))
+	if ( ! ml_nputs(p->args.mbuf, "</", 2, &p->pos))
 		return(0);
 
-	res = (*p->cbs.ml_endtag)(p->mbuf, p->data, p->args, ns, tok);
+	res = (*p->cbs.ml_endtag)(&p->args, ns, tok);
 	if (-1 == res)
 		return(0);
 
 	assert(res >= 0);
 	p->pos += (size_t)res;
 
-	if ( ! ml_nputs(p->mbuf, ">", 1, &p->pos))
+	if ( ! ml_nputs(p->args.mbuf, ">", 1, &p->pos))
 		return(0);
 	
 	switch (ns) {
@@ -242,7 +237,7 @@ mlg_indent(struct md_mlg *p)
 {
 
 	assert(0 == p->pos);
-	return(ml_putchars(p->mbuf, ' ', INDENT_SZ * 
+	return(ml_putchars(p->args.mbuf, ' ', INDENT_SZ * 
 				INDENT(p->indent), &p->pos));
 }
 
@@ -252,7 +247,7 @@ mlg_newline(struct md_mlg *p)
 {
 
 	p->pos = 0;
-	return(ml_nputs(p->mbuf, "\n", 1, NULL));
+	return(ml_nputs(p->args.mbuf, "\n", 1, NULL));
 }
 
 
@@ -280,20 +275,20 @@ mlg_nstring(struct md_mlg *p, const char *start,
 	int		 c;
 	ssize_t		 res;
 
-	assert(p->mbuf);
+	assert(p->args.mbuf);
 	assert(0 != p->indent);
 
-	res = (*p->cbs.ml_beginstring)(p->mbuf, p->args, buf, sz);
+	res = (*p->cbs.ml_beginstring)(&p->args, buf, sz);
 	if (-1 == res) 
 		return(0);
 
-	if (0 == (c = ml_nputstring(p->mbuf, buf, sz, &p->pos)))
+	if (0 == (c = ml_nputstring(p->args.mbuf, buf, sz, &p->pos)))
 		return(mlg_err(p, start, buf, "bad string "
 					"encoding: `%s'", buf));
 	else if (-1 == c)
 		return(0);
 
-	res = (*p->cbs.ml_endstring)(p->mbuf, p->args, buf, sz);
+	res = (*p->cbs.ml_endstring)(&p->args, buf, sz);
 	if (-1 == res) 
 		return(0);
 
@@ -307,7 +302,7 @@ mlg_data(struct md_mlg *p, int space,
 {
 	size_t		 sz;
 
-	assert(p->mbuf);
+	assert(p->args.mbuf);
 	assert(0 != p->indent);
 
 	if (ML_OVERRIDE_ONE & p->flags || 
@@ -335,7 +330,7 @@ mlg_data(struct md_mlg *p, int space,
 		if ( ! mlg_indent(p))
 			return(0);
 	} else if (space) {
-		if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
+		if ( ! ml_nputs(p->args.mbuf, " ", 1, &p->pos))
 			return(0);
 	}
 
@@ -357,7 +352,7 @@ mlg_exit(struct md_mlg *p, int flush)
 	int		 c;
 
 	c = roff_free(p->tree, flush);
-	(*p->cbs.ml_free)(p->data);
+	(*p->cbs.ml_free)(p->args.data);
 
 	free(p);
 
@@ -391,15 +386,15 @@ mlg_alloc(const struct md_args *args,
 	if (NULL == (p = calloc(1, sizeof(struct md_mlg))))
 		err(1, "calloc");
 
-	p->args = args;
-	p->mbuf = mbuf;
-	p->rbuf = rbuf;
+	p->args.args = args;
+	p->args.mbuf = mbuf;
+	p->args.rbuf = rbuf;
 
 	(void)memcpy(&p->cbs, cbs, sizeof(struct ml_cbs));
 
 	if (NULL == (p->tree = roff_alloc(&cb, p))) 
 		free(p);
-	else if ( ! (*p->cbs.ml_alloc)(&p->data))
+	else if ( ! (*p->cbs.ml_alloc)(&p->args.data))
 		free(p);
 	else
 		return(p);
@@ -419,8 +414,7 @@ mlg_roffhead(void *arg, const struct tm *tm, const char *os,
 
 	mlg_mode(p, MD_BLK_IN);
 
-	if ( ! (*p->cbs.ml_begin)(p->mbuf, p->args, 
-				tm, os, title, sec, vol))
+	if ( ! (*p->cbs.ml_begin)(&p->args, tm, os, title, sec, vol))
 		return(0);
 
 	p->indent++;
@@ -441,8 +435,7 @@ mlg_rofftail(void *arg, const struct tm *tm, const char *os,
 		if ( ! mlg_newline(p))
 			return(0);
 
-	if ( ! (*p->cbs.ml_end)(p->mbuf, p->args, 
-				tm, os, title, sec, vol))
+	if ( ! (*p->cbs.ml_end)(&p->args, tm, os, title, sec, vol))
 		return(0);
 
 	mlg_mode(p, MD_BLK_OUT);
@@ -466,7 +459,7 @@ mlg_literal_special(struct md_mlg *p, int tok, const char *start,
 		return(0);
 
 	while (*more) { 
-		if ( ! ml_nputs(p->mbuf, " ", 1, &p->pos))
+		if ( ! ml_nputs(p->args.mbuf, " ", 1, &p->pos))
 			return(0);
 		if ( ! mlg_string(p, start, *more++))
 			return(0);
@@ -485,15 +478,15 @@ mlg_ref_special(struct md_mlg *p, int tok,
 		return(0);
 
 	assert(*more);
-	if ( ! ml_puts(p->mbuf, *more++, &p->pos))
+	if ( ! ml_puts(p->args.mbuf, *more++, &p->pos))
 		return(0);
 
 	if (*more) {
-		if ( ! ml_nputs(p->mbuf, "(", 1, &p->pos))
+		if ( ! ml_nputs(p->args.mbuf, "(", 1, &p->pos))
 			return(0);
 		if ( ! mlg_string(p, start, *more++))
 			return(0);
-		if ( ! ml_nputs(p->mbuf, ")", 1, &p->pos))
+		if ( ! ml_nputs(p->args.mbuf, ")", 1, &p->pos))
 			return(0);
 	}
 
@@ -531,6 +524,13 @@ mlg_atom_special(struct md_mlg *p, int tok,
 		const char *start, const char **more)
 {
 
+	if (ROFFSec_SYNOP == p->args.section) {
+		if ( ! mlg_begintag(p, MD_NS_INLINE, ROFF_Pp, NULL, more))
+			return(0);
+		if ( ! mlg_endtag(p, MD_NS_INLINE, ROFF_Pp))
+			return(0);
+	}
+
 	if ( ! mlg_begintag(p, MD_NS_INLINE, tok, NULL, more))
 		return(0);
 
@@ -559,7 +559,7 @@ mlg_function_special(struct md_mlg *p,
 	if (NULL == *more)
 		return(1);
 
-	if ( ! ml_nputs(p->mbuf, "(", 1, &p->pos))
+	if ( ! ml_nputs(p->args.mbuf, "(", 1, &p->pos))
 		return(0);
 
 	p->flags |= ML_OVERRIDE_ONE;
@@ -572,7 +572,7 @@ mlg_function_special(struct md_mlg *p,
 		return(0);
 
 	while (*more) {
-		if ( ! ml_nputs(p->mbuf, ", ", 2, &p->pos))
+		if ( ! ml_nputs(p->args.mbuf, ", ", 2, &p->pos))
 			return(0);
 		if ( ! mlg_begintag(p, MD_NS_INLINE, ROFF_Fa, NULL, more))
 			return(0);
@@ -582,7 +582,7 @@ mlg_function_special(struct md_mlg *p,
 			return(0);
 	}
 
-	return(ml_nputs(p->mbuf, ")", 1, &p->pos));
+	return(ml_nputs(p->args.mbuf, ")", 1, &p->pos));
 }
 
 
@@ -644,6 +644,7 @@ mlg_roffspecial(void *arg, int tok, const char *start,
 		return(mlg_ref_special(p, tok, start, more));
 
 	case (ROFF_Sh):
+		p->args.section = roff_sec(more);
 		return(mlg_anchor_special(p, tok, more));
  
 	case (ROFF_Sx):
@@ -816,14 +817,16 @@ static int
 mlg_msg(struct md_mlg *p, enum roffmsg lvl, 
 		const char *buf, const char *pos, const char *msg)
 {
-	char		*level;
-	char		 b[256];
+	char		*level, b[256];
+	size_t		 sz;
 	int		 i;
+
+	sz = sizeof(b);
 
 	switch (lvl) {
 	case (ROFF_WARN):
 		level = "warning";
-		if ( ! (MD_WARN_ALL & p->args->warnings))
+		if ( ! (MD_WARN_ALL & p->args.args->warnings))
 			return(1);
 		break;
 	case (ROFF_ERROR):
@@ -836,27 +839,28 @@ mlg_msg(struct md_mlg *p, enum roffmsg lvl,
 
 	if (pos) {
 		assert(pos >= buf);
-		if (0 < p->args->verbosity) {
-			(void)snprintf(b, sizeof(b), 
-					"%s:%zu: %s: %s\n",
-					p->rbuf->name, p->rbuf->line, 
+		if (0 < p->args.args->verbosity) {
+			(void)snprintf(b, sz, "%s:%zu: %s: %s\n",
+					p->args.rbuf->name, 
+					p->args.rbuf->line, 
 					level, msg);
-			(void)strlcat(b, "Error at: ", sizeof(b));
-			(void)strlcat(b, p->rbuf->linebuf, sizeof(b));
 
-			(void)strlcat(b, "\n          ", sizeof(b));
+			(void)strlcat(b, "Error at: ", sz);
+			(void)strlcat(b, p->args.rbuf->linebuf, sz);
+			(void)strlcat(b, "\n          ", sz);
+
 			for (i = 0; i < pos - buf; i++)
-				(void)strlcat(b, " ", sizeof(b));
-			(void)strlcat(b, "^", sizeof(b));
+				(void)strlcat(b, " ", sz);
 
+			(void)strlcat(b, "^", sz);
 		} else
-			(void)snprintf(b, sizeof(b), 
-					"%s:%zu: %s: %s (col %zu)", 
-					p->rbuf->name, p->rbuf->line, 
+			(void)snprintf(b, sz, "%s:%zu: %s: %s (%zu)", 
+					p->args.rbuf->name, 
+					p->args.rbuf->line, 
 					level, msg, pos - buf);
 	} else 
-		(void)snprintf(b, sizeof(b), "%s: %s: %s", 
-				p->rbuf->name, level, msg);
+		(void)snprintf(b, sz, "%s: %s: %s", 
+				p->args.rbuf->name, level, msg);
 
 	(void)fprintf(stderr, "%s\n", b);
 	return(lvl == ROFF_WARN ? 1 : 0);

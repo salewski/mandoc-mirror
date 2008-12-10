@@ -49,38 +49,32 @@ static	int		html_loadcss(struct md_mbuf *,
 				const char *);
 static	int		html_alloc(void **);
 static	void		html_free(void *);
-static	ssize_t		html_endtag(struct md_mbuf *, void *,
-				const struct md_args *, 
+static	ssize_t		html_endtag(struct ml_args *, 
 				enum md_ns, int);
-static	ssize_t		html_beginstring(struct md_mbuf *, 
-				const struct md_args *, 
+static	ssize_t		html_beginstring(struct ml_args *, 
 				const char *, size_t);
-static	ssize_t		html_beginhttp(struct md_mbuf *, 
-				const struct md_args *, 
+static	ssize_t		html_endstring(struct ml_args *,
 				const char *, size_t);
-static	ssize_t		html_endstring(struct md_mbuf *, 
-				const struct md_args *, 
-				const char *, size_t);
-static	ssize_t		html_endhttp(struct md_mbuf *, 
-				const struct md_args *, 
-				const char *, size_t);
-static	ssize_t		html_begintag(struct md_mbuf *, void *,
-				const struct md_args *, 
-				enum md_ns, int, 
+static	ssize_t		html_begintag(struct ml_args *, 
+				enum md_ns, int,
 				const int *, const char **);
-static	int		html_begin(struct md_mbuf *,
-	       			const struct md_args *, 
+static	int		html_begin(struct ml_args *,
+				const struct tm *, 
+				const char *, const char *, 
+				enum roffmsec, enum roffvol);
+static	int		html_end(struct ml_args *,
 				const struct tm *, 
 				const char *, const char *, 
 				enum roffmsec, enum roffvol);
 static	int		html_printargs(struct md_mbuf *, int, 
 				const char *, const int *, 
 				const char **, size_t *);
-static	int		html_end(struct md_mbuf *,
-	       			const struct md_args *, 
-				const struct tm *, 
-				const char *, const char *, 
-				enum roffmsec, enum roffvol);
+static	ssize_t		html_beginhttp(struct md_mbuf *, 
+				const struct md_args *, 
+				const char *, size_t);
+static	ssize_t		html_endhttp(struct md_mbuf *, 
+				const struct md_args *, 
+				const char *, size_t);
 static	int		html_blocktagname(struct md_mbuf *,
 				const struct md_args *, int, 
 				struct htmlq *, const int *, 
@@ -383,8 +377,7 @@ html_aputln(struct md_mbuf *mbuf, enum ml_scope scope, int i,
 
 /* ARGSUSED */
 static int 
-html_begin(struct md_mbuf *mbuf, const struct md_args *args,
-		const struct tm *tm, const char *os, 
+html_begin(struct ml_args *p, const struct tm *tm, const char *os, 
 		const char *name, enum roffmsec msec, enum roffvol vol)
 {
 	enum roffvol	 bvol;
@@ -441,11 +434,11 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 
 	i = 0;
 
-	if ( ! html_typeput(mbuf, HTML_TYPE_4_01_STRICT, NULL))
+	if ( ! html_typeput(p->mbuf, HTML_TYPE_4_01_STRICT, NULL))
 		return(0);
-	if ( ! html_tputln(mbuf, ML_OPEN, i, HTML_TAG_HTML))
+	if ( ! html_tputln(p->mbuf, ML_OPEN, i, HTML_TAG_HTML))
 		return(0);
-	if ( ! html_tputln(mbuf, ML_OPEN, i++, HTML_TAG_HEAD))
+	if ( ! html_tputln(p->mbuf, ML_OPEN, i++, HTML_TAG_HEAD))
 		return(0);
 
 	attr[0].attr = HTML_ATTR_HTTP_EQUIV;
@@ -453,7 +446,7 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 	attr[1].attr = HTML_ATTR_CONTENT;
 	attr[1].val = "text/html;charset=utf-8";
 
-	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_META, 2, attr))
+	if ( ! html_aputln(p->mbuf, ML_OPEN, i, HTML_TAG_META, 2, attr))
 		return(0);
 
 	attr[0].attr = HTML_ATTR_NAME;
@@ -461,32 +454,32 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 	attr[1].attr = HTML_ATTR_CONTENT;
 	attr[1].val = "document";
 
-	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_META, 2, attr))
+	if ( ! html_aputln(p->mbuf, ML_OPEN, i, HTML_TAG_META, 2, attr))
 		return(0);
 
-	if ( ! html_tputln(mbuf, ML_OPEN, i, HTML_TAG_TITLE))
+	if ( ! html_tputln(p->mbuf, ML_OPEN, i, HTML_TAG_TITLE))
 		return(0);
-	if ( ! ml_putstring(mbuf, ts, NULL))
+	if ( ! ml_putstring(p->mbuf, ts, NULL))
 		return(0);
-	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TITLE))
+	if ( ! html_tputln(p->mbuf, ML_CLOSE, i, HTML_TAG_TITLE))
 		return(0);
 
-	if (HTML_CSS_EMBED & args->params.html.flags) {
+	if (HTML_CSS_EMBED & p->args->params.html.flags) {
 		attr[0].attr = HTML_ATTR_TYPE;
 		attr[0].val = "text/css";
 
-		if ( ! html_aputln(mbuf, ML_OPEN, i, 
+		if ( ! html_aputln(p->mbuf, ML_OPEN, i, 
 					HTML_TAG_STYLE, 1, attr))
 			return(0);
-		if ( ! html_commentput(mbuf, ML_OPEN, NULL))
+		if ( ! html_commentput(p->mbuf, ML_OPEN, NULL))
 			return(0);
 
-		if ( ! html_loadcss(mbuf, args->params.html.css))
+		if ( ! html_loadcss(p->mbuf, p->args->params.html.css))
 			return(0);
 
-		if ( ! html_commentput(mbuf, ML_CLOSE, NULL))
+		if ( ! html_commentput(p->mbuf, ML_CLOSE, NULL))
 			return(0);
-		if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_STYLE))
+		if ( ! html_tputln(p->mbuf, ML_CLOSE, i, HTML_TAG_STYLE))
 			return(0);
 	} else {
 		attr[0].attr = HTML_ATTR_REL;
@@ -494,22 +487,22 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 		attr[1].attr = HTML_ATTR_TYPE;
 		attr[1].val = "text/css";
 		attr[2].attr = HTML_ATTR_HREF;
-		attr[2].val = args->params.html.css;
+		attr[2].val = p->args->params.html.css;
 
-		if ( ! html_aputln(mbuf, ML_OPEN, i,
+		if ( ! html_aputln(p->mbuf, ML_OPEN, i,
 					HTML_TAG_LINK, 3, attr))
 			return(0);
 	}
 
-	if ( ! html_tputln(mbuf, ML_CLOSE, --i, HTML_TAG_HEAD))
+	if ( ! html_tputln(p->mbuf, ML_CLOSE, --i, HTML_TAG_HEAD))
 		return(0);
-	if ( ! html_tputln(mbuf, ML_OPEN, i, HTML_TAG_BODY))
+	if ( ! html_tputln(p->mbuf, ML_OPEN, i, HTML_TAG_BODY))
 		return(0);
 
 	attr[0].attr = HTML_ATTR_CLASS;
 	attr[0].val = "mdoc";
 
-	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_DIV, 1, attr))
+	if ( ! html_aputln(p->mbuf, ML_OPEN, i, HTML_TAG_DIV, 1, attr))
 		return(0);
 
 	attr[0].attr = HTML_ATTR_WIDTH;
@@ -517,9 +510,9 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 	attr[1].attr = HTML_ATTR_CLASS;
 	attr[1].val = "header-table";
 
-	if ( ! html_aputln(mbuf, ML_OPEN, i++, HTML_TAG_TABLE, 2, attr))
+	if ( ! html_aputln(p->mbuf, ML_OPEN, i++, HTML_TAG_TABLE, 2, attr))
 		return(0);
-	if ( ! html_tputln(mbuf, ML_OPEN, i++, HTML_TAG_TR))
+	if ( ! html_tputln(p->mbuf, ML_OPEN, i++, HTML_TAG_TR))
 		return(0);
 
 	attr[0].attr = HTML_ATTR_ALIGN;
@@ -527,11 +520,11 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 	attr[1].attr = HTML_ATTR_CLASS;
 	attr[1].val = "header-section";
 
-	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
+	if ( ! html_aputln(p->mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
 		return(0);
-	if ( ! ml_putstring(mbuf, ts, NULL))
+	if ( ! ml_putstring(p->mbuf, ts, NULL))
 		return(0);
-	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
+	if ( ! html_tputln(p->mbuf, ML_CLOSE, i, HTML_TAG_TD))
 		return(0);
 
 	attr[0].attr = HTML_ATTR_ALIGN;
@@ -539,11 +532,11 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 	attr[1].attr = HTML_ATTR_CLASS;
 	attr[1].val = "header-volume";
 
-	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
+	if ( ! html_aputln(p->mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
 		return(0);
-	if ( ! ml_putstring(mbuf, title, NULL))
+	if ( ! ml_putstring(p->mbuf, title, NULL))
 		return(0);
-	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
+	if ( ! html_tputln(p->mbuf, ML_CLOSE, i, HTML_TAG_TD))
 		return(0);
 
 	attr[0].attr = HTML_ATTR_ALIGN;
@@ -551,23 +544,22 @@ html_begin(struct md_mbuf *mbuf, const struct md_args *args,
 	attr[1].attr = HTML_ATTR_CLASS;
 	attr[1].val = "header-section";
 
-	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
+	if ( ! html_aputln(p->mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
 		return(0);
-	if ( ! ml_putstring(mbuf, ts, NULL))
+	if ( ! ml_putstring(p->mbuf, ts, NULL))
 		return(0);
-	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
+	if ( ! html_tputln(p->mbuf, ML_CLOSE, i, HTML_TAG_TD))
 		return(0);
 
-	if ( ! html_tputln(mbuf, ML_CLOSE, --i, HTML_TAG_TR))
+	if ( ! html_tputln(p->mbuf, ML_CLOSE, --i, HTML_TAG_TR))
 		return(0);
-	return(html_tputln(mbuf, ML_CLOSE, --i, HTML_TAG_TABLE));
+	return(html_tputln(p->mbuf, ML_CLOSE, --i, HTML_TAG_TABLE));
 }
 
 
 /* ARGSUSED */
 static int 
-html_end(struct md_mbuf *mbuf, const struct md_args *args,
-		const struct tm *tm, const char *os, 
+html_end(struct ml_args *p, const struct tm *tm, const char *os, 
 		const char *name, enum roffmsec msec, enum roffvol vol)
 {
 	struct html_pair attr[4];
@@ -586,9 +578,9 @@ html_end(struct md_mbuf *mbuf, const struct md_args *args,
 	attr[1].attr = HTML_ATTR_CLASS;
 	attr[1].val = "header-footer";
 
-	if ( ! html_aputln(mbuf, ML_OPEN, i++, HTML_TAG_TABLE, 2, attr))
+	if ( ! html_aputln(p->mbuf, ML_OPEN, i++, HTML_TAG_TABLE, 2, attr))
 		return(0);
-	if ( ! html_tputln(mbuf, ML_OPEN, i++, HTML_TAG_TR))
+	if ( ! html_tputln(p->mbuf, ML_OPEN, i++, HTML_TAG_TR))
 		return(0);
 
 	attr[0].attr = HTML_ATTR_ALIGN;
@@ -596,11 +588,11 @@ html_end(struct md_mbuf *mbuf, const struct md_args *args,
 	attr[1].attr = HTML_ATTR_CLASS;
 	attr[1].val = "footer-os";
 
-	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
+	if ( ! html_aputln(p->mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
 		return(0);
-	if ( ! ml_putstring(mbuf, os, NULL))
+	if ( ! ml_putstring(p->mbuf, os, NULL))
 		return(0);
-	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
+	if ( ! html_tputln(p->mbuf, ML_CLOSE, i, HTML_TAG_TD))
 		return(0);
 
 	attr[0].attr = HTML_ATTR_ALIGN;
@@ -608,23 +600,23 @@ html_end(struct md_mbuf *mbuf, const struct md_args *args,
 	attr[1].attr = HTML_ATTR_CLASS;
 	attr[1].val = "footer-date";
 
-	if ( ! html_aputln(mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
+	if ( ! html_aputln(p->mbuf, ML_OPEN, i, HTML_TAG_TD, 2, attr))
 		return(0);
-	if ( ! ml_putstring(mbuf, ts, NULL))
+	if ( ! ml_putstring(p->mbuf, ts, NULL))
 		return(0);
-	if ( ! html_tputln(mbuf, ML_CLOSE, i, HTML_TAG_TD))
-		return(0);
-
-	if ( ! html_tputln(mbuf, ML_CLOSE, --i, HTML_TAG_TR))
-		return(0);
-	if ( ! html_tputln(mbuf, ML_CLOSE, --i, HTML_TAG_TABLE))
+	if ( ! html_tputln(p->mbuf, ML_CLOSE, i, HTML_TAG_TD))
 		return(0);
 
-	if ( ! html_tputln(mbuf, ML_CLOSE, 0, HTML_TAG_DIV))
+	if ( ! html_tputln(p->mbuf, ML_CLOSE, --i, HTML_TAG_TR))
 		return(0);
-	if ( ! html_tputln(mbuf, ML_CLOSE, 0, HTML_TAG_BODY))
+	if ( ! html_tputln(p->mbuf, ML_CLOSE, --i, HTML_TAG_TABLE))
 		return(0);
-	return(html_tputln(mbuf, ML_CLOSE, 0, HTML_TAG_HTML));
+
+	if ( ! html_tputln(p->mbuf, ML_CLOSE, 0, HTML_TAG_DIV))
+		return(0);
+	if ( ! html_tputln(p->mbuf, ML_CLOSE, 0, HTML_TAG_BODY))
+		return(0);
+	return(html_tputln(p->mbuf, ML_CLOSE, 0, HTML_TAG_HTML));
 }
 
 
@@ -832,8 +824,7 @@ html_inlinetagname(struct md_mbuf *mbuf,
 
 
 static ssize_t 
-html_begintag(struct md_mbuf *mbuf, void *data,
-		const struct md_args *args, enum md_ns ns, 
+html_begintag(struct ml_args *p, enum md_ns ns, 
 		int tok, const int *argc, const char **argv)
 {
 	size_t		 res;
@@ -844,8 +835,7 @@ html_begintag(struct md_mbuf *mbuf, void *data,
 	assert(ns != MD_NS_DEFAULT);
 	res = 0;
 
-	assert(data);
-	q = (struct htmlq *)data;
+	q = (struct htmlq *)p->data;
 
 	if (NULL == (node = calloc(1, sizeof(struct htmlnode)))) {
 		warn("calloc");
@@ -872,33 +862,33 @@ html_begintag(struct md_mbuf *mbuf, void *data,
 
 	switch (ns) {
 	case (MD_NS_BLOCK):
-		if ( ! html_blocktagname(mbuf, args, tok, 
+		if ( ! html_blocktagname(p->mbuf, p->args, tok, 
 					q, argc, argv, &res))
 			return(-1);
-		if ( ! html_blocktagargs(mbuf, args, tok, 
+		if ( ! html_blocktagargs(p->mbuf, p->args, tok, 
 					argc, argv, &res))
 			return(-1);
 		break;
 	case (MD_NS_BODY):
-		if ( ! html_bodytagname(mbuf, args, tok, 
+		if ( ! html_bodytagname(p->mbuf, p->args, tok, 
 					q, argc, argv, &res))
 			return(-1);
-		if ( ! html_bodytagargs(mbuf, args, tok, 
+		if ( ! html_bodytagargs(p->mbuf, p->args, tok, 
 					argc, argv, &res))
 			return(-1);
 		break;
 	case (MD_NS_HEAD):
-		if ( ! html_headtagname(mbuf, args, tok, q,
+		if ( ! html_headtagname(p->mbuf, p->args, tok, q,
 					argc, argv, &res))
 			return(-1);
-		if ( ! html_headtagargs(mbuf, args, tok, 
+		if ( ! html_headtagargs(p->mbuf, p->args, tok, 
 					argc, argv, &res))
 			return(-1);
 		break;
 	default:
-		if ( ! html_inlinetagname(mbuf, args, tok, &res))
+		if ( ! html_inlinetagname(p->mbuf, p->args, tok, &res))
 			return(-1);
-		if ( ! html_inlinetagargs(mbuf, args, tok, 
+		if ( ! html_inlinetagargs(p->mbuf, p->args, tok, 
 					argc, argv, &res))
 			return(-1);
 		break;
@@ -909,8 +899,7 @@ html_begintag(struct md_mbuf *mbuf, void *data,
 
 
 static ssize_t 
-html_endtag(struct md_mbuf *mbuf, void *data,
-		const struct md_args *args, enum md_ns ns, int tok)
+html_endtag(struct ml_args *p, enum md_ns ns, int tok)
 {
 	size_t		 res;
 	struct htmlq	*q;
@@ -919,31 +908,30 @@ html_endtag(struct md_mbuf *mbuf, void *data,
 	assert(ns != MD_NS_DEFAULT);
 	res = 0;
 
-	assert(data);
-	q = (struct htmlq *)data;
+	q = (struct htmlq *)p->data;
 	node = q->last;
 
 	switch (ns) {
 	case (MD_NS_BLOCK):
-		if ( ! html_blocktagname(mbuf, args, tok, 
+		if ( ! html_blocktagname(p->mbuf, p->args, tok, 
 					q, node->argc, 
 					(const char **)node->argv, &res))
 			return(-1);
 		break;
 	case (MD_NS_BODY):
-		if ( ! html_bodytagname(mbuf, args, tok, 
+		if ( ! html_bodytagname(p->mbuf, p->args, tok, 
 					q, node->argc, 
 					(const char **)node->argv, &res))
 			return(-1);
 		break;
 	case (MD_NS_HEAD):
-		if ( ! html_headtagname(mbuf, args, tok, 
+		if ( ! html_headtagname(p->mbuf, p->args, tok, 
 					q, node->argc,
 					(const char **)node->argv, &res))
 			return(-1);
 		break;
 	default:
-		if ( ! html_inlinetagname(mbuf, args, tok, &res))
+		if ( ! html_inlinetagname(p->mbuf, p->args, tok, &res))
 			return(-1);
 		break;
 	}
@@ -1023,13 +1011,11 @@ html_endhttp(struct md_mbuf *mbuf,
 
 /* ARGSUSED */
 static ssize_t 
-html_beginstring(struct md_mbuf *mbuf, 
-		const struct md_args *args, 
-		const char *buf, size_t sz)
+html_beginstring(struct ml_args *p, const char *buf, size_t sz)
 {
 
 	if (0 == strncmp(buf, "http://", 7))
-		return(html_beginhttp(mbuf, args, buf, sz));
+		return(html_beginhttp(p->mbuf, p->args, buf, sz));
 
 	return(0);
 }
@@ -1037,13 +1023,11 @@ html_beginstring(struct md_mbuf *mbuf,
 
 /* ARGSUSED */
 static ssize_t 
-html_endstring(struct md_mbuf *mbuf, 
-		const struct md_args *args, 
-		const char *buf, size_t sz)
+html_endstring(struct ml_args *p, const char *buf, size_t sz)
 {
 	
 	if (0 == strncmp(buf, "http://", 7))
-		return(html_endhttp(mbuf, args, buf, sz));
+		return(html_endhttp(p->mbuf, p->args, buf, sz));
 
 	return(0);
 }

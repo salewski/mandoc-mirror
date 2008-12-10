@@ -41,29 +41,27 @@ enum	ml_scope {
 	ML_CLOSE
 };
 
+struct	ml_args {
+	const struct md_args	*args;
+	const struct md_rbuf	*rbuf;
+	struct md_mbuf		*mbuf;
+	int		 	 section;
+	void			*data;
+};
+
 struct	ml_cbs {
-	int	(*ml_begin)(struct md_mbuf *, 
-			const struct md_args *,
-			const struct tm *, 
+	int	(*ml_begin)(struct ml_args *, const struct tm *, 
 			const char *, const char *,
 			enum roffmsec, enum roffvol);
-	int	(*ml_end)(struct md_mbuf *, 
-			const struct md_args *,
-			const struct tm *, 
+	int	(*ml_end)(struct ml_args *, const struct tm *, 
 			const char *, const char *,
 			enum roffmsec, enum roffvol);
-	ssize_t	(*ml_beginstring)(struct md_mbuf *,
-			const struct md_args *,
+	ssize_t	(*ml_beginstring)(struct ml_args *,
 			const char *, size_t);
-	ssize_t	(*ml_endstring)(struct md_mbuf *,
-			const struct md_args *,
+	ssize_t	(*ml_endstring)(struct ml_args *,
 			const char *, size_t);
-	ssize_t	(*ml_endtag)(struct md_mbuf *, 
-			void *, const struct md_args *, 
-			enum md_ns, int);
-	ssize_t	(*ml_begintag)(struct md_mbuf *, 
-			void *, const struct md_args *, 
-			enum md_ns, int, 
+	ssize_t	(*ml_endtag)(struct ml_args *, enum md_ns, int);
+	ssize_t	(*ml_begintag)(struct ml_args *, enum md_ns, int, 
 			const int *, const char **);
 	int	(*ml_alloc)(void **);
 	void	(*ml_free)(void *);
@@ -81,7 +79,6 @@ int		  ml_puts(struct md_mbuf *, const char *, size_t *);
 int		  ml_putchars(struct md_mbuf *, 
 			char, size_t, size_t *);
 
-/* FIXME: move into mlg.h or private.h. */
 struct md_mlg	 *mlg_alloc(const struct md_args *, 
 			const struct md_rbuf *, struct md_mbuf *,
 			const struct ml_cbs *);
