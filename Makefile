@@ -48,7 +48,7 @@ all: mdocml
 
 lint: llib-lmdocml.ln
 
-dist: mdocml.tgz
+dist: mdocml.tgz mdocml-port.tgz
 
 www: all $(HTML) $(XML) $(TEXT)
 
@@ -83,12 +83,27 @@ mdocml.html: mdocml.1 mdocml.css
 install-www: www dist
 	install -m 0644 mdocml.tgz $(PREFIX)/mdocml-$(VERSION).tgz
 	install -m 0644 mdocml.tgz $(PREFIX)/mdocml.tgz
+	install -m 0644 mdocml-port.tgz $(PREFIX)/mdocml-port-$(VERSION).tgz
+	install -m 0644 mdocml-port.tgz $(PREFIX)/mdocml-port.tgz
 	install -m 0644 $(HTML) $(XML) $(TEXT) $(PREFIX)/
 
 mdocml.tgz: $(INSTALL)
 	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
 	install -m 0644 $(INSTALL) .dist/mdocml/mdocml-$(VERSION)/
-	( cd .dist/mdocml/ && tar zcf ../../mdocml.tgz mdocml-$(VERSION)/ )
+	( cd .dist/mdocml/ && tar zcf ../../$@ mdocml-$(VERSION)/ )
+	rm -rf .dist/
+
+mdocml-port.tgz: $(INSTALL)
+	mkdir -p .dist/mdocml/pkg
+	sed -e "s!@VERSION@!$(VERSION)!" Makefile.port > .dist/mdocml/Makefile
+	md5 mdocml-$(VERSION).tgz > .dist/mdocml/distinfo
+	rmd160 mdocml-$(VERSION).tgz >> .dist/mdocml/distinfo
+	sha1 mdocml-$(VERSION).tgz >> .dist/mdocml/distinfo
+	install -m 0644 DESCR .dist/mdocml/pkg/DESCR
+	echo @comment $$OpenBSD$$ > .dist/mdocml/pkg/PLIST
+	echo bin/mdocml >> .dist/mdocml/pkg/PLIST
+	echo @man man/man1/mdocml.1 >> .dist/mdocml/pkg/PLIST
+	( cd .dist/ && tar zcf ../$@ mdocml/ )
 	rm -rf .dist/
 
 llib-lmdocml.ln: mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln tags.ln

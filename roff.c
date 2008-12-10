@@ -71,12 +71,6 @@ struct	rofftree {
 	char		  title[64];		/* `Dt' results. */
 	enum roffmsec	  section;
 	enum roffvol	  volume;
-	int		  state;
-#define	ROFF_PRELUDE	 (1 << 1)		/* In roff prelude. */ /* FIXME: put into asec. */
-#define	ROFF_PRELUDE_Os	 (1 << 2)		/* `Os' is parsed. */
-#define	ROFF_PRELUDE_Dt	 (1 << 3)		/* `Dt' is parsed. */
-#define	ROFF_PRELUDE_Dd	 (1 << 4)		/* `Dd' is parsed. */
-#define	ROFF_BODY	 (1 << 5)		/* In roff body. */
 	struct roffcb	  cb;			/* Callbacks. */
 	void		 *arg;			/* Callbacks' arg. */
 	int		  csec;			/* Current section. */
@@ -100,7 +94,7 @@ static	int		  rofffindarg(const char *);
 static	int		  rofffindcallable(const char *);
 static	int		  roffispunct(const char *);
 static	int		  roffchecksec(struct rofftree *, 
-				const char *, int);
+				const char *, int, int);
 static	int		  roffargs(const struct rofftree *,
 				int, char *, char **);
 static	int		  roffargok(int, int);
@@ -140,10 +134,7 @@ roff_free(struct rofftree *tree, int flush)
 
 	error = 1;
 
-	if (ROFF_PRELUDE & tree->state) {
-		(void)roff_err(tree, NULL, "prelude never finished");
-		goto end;
-	} else if ( ! (ROFFSec_NAME & tree->asec)) {
+	if ( ! (ROFFSec_NAME & tree->asec)) {
 		(void)roff_err(tree, NULL, "missing `NAME' section");
 		goto end;
 	} else if ( ! (ROFFSec_NMASK & tree->asec))
@@ -193,7 +184,6 @@ roff_alloc(const struct roffcb *cb, void *args)
 	if (NULL == (tree = calloc(1, sizeof(struct rofftree))))
 		err(1, "calloc");
 
-	tree->state = ROFF_PRELUDE;
 	tree->arg = args;
 	tree->section = ROFF_MSEC_MAX;
 
@@ -226,8 +216,8 @@ textparse(struct rofftree *tree, char *buf)
 
 	/* TODO: literal parsing. */
 
-	if ( ! (ROFF_BODY & tree->state))
-		return(roff_err(tree, buf, "data not in body"));
+	if ( ! (ROFFSec_NAME & tree->asec))
+		return(roff_err(tree, buf, "data before `NAME' section"));
 
 	/* LINTED */
 	while (*buf) {
@@ -354,12 +344,10 @@ roffparse(struct rofftree *tree, char *buf)
 	 * Prelude macros break some assumptions, so branch now. 
 	 */
 	
-	if (ROFF_PRELUDE & tree->state) {
+	if ( ! (ROFFSec_PR_Dd & tree->asec)) {
 		assert(NULL == tree->last);
 		return(roffcall(tree, tok, argvp));
 	} 
-
-	assert(ROFF_BODY & tree->state);
 
 	/* 
 	 * First check that our possible parents and parent's possible
@@ -527,10 +515,25 @@ rofffindtok(const char *buf)
 
 
 static int
-roffchecksec(struct rofftree *tree, const char *start, int sec)
+roffchecksec(struct rofftree *tree, 
+		const char *start, int sec, int fail)
 {
 
 	switch (sec) {
+	case(ROFFSec_PR_Dd):
+		return(1);
+	case(ROFFSec_PR_Dt):
+		if (ROFFSec_PR_Dd & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_PR_Os):
+		if (ROFFSec_PR_Dt & tree->asec)
+			return(1);
+		break;
+	case(ROFFSec_NAME):
+		if (ROFFSec_PR_Os & tree->asec)
+			return(1);
+		break;
 	case(ROFFSec_SYNOP):
 		if (ROFFSec_NAME & tree->asec)
 			return(1);
@@ -591,11 +594,12 @@ roffchecksec(struct rofftree *tree, const char *start, int sec)
 		return(1);
 	}
 
+	if (fail)
+		return(0);
 	return(roff_warnp(tree, start, ROFF_Sh, WRN_SECORD));
 }
 
 
-/* FIXME: move this into literals.c (or similar). */
 static int
 roffispunct(const char *p)
 {
@@ -919,23 +923,16 @@ roff_Dd(ROFFCALL_ARGS)
 	char		*p, buf[32];
 	size_t		 sz;
 
-	if (ROFF_BODY & tree->state) {
-		assert( ! (ROFF_PRELUDE & tree->state));
-		assert(ROFF_PRELUDE_Dd & tree->state);
+	if (ROFFSec_PR_Os & tree->asec)
 		return(roff_text(tok, tree, argv, type));
-	}
-
-	assert(ROFF_PRELUDE & tree->state);
-	assert( ! (ROFF_BODY & tree->state));
-
-	if (ROFF_PRELUDE_Dd & tree->state)
+	if (ROFFSec_PR_Dd & tree->asec)
 		return(roff_errp(tree, *argv, tok, ERR_PR_REP));
-	if (ROFF_PRELUDE_Dt & tree->state)
+	if ( ! roffchecksec(tree, *argv, ROFFSec_PR_Dd, 1))
 		return(roff_errp(tree, *argv, tok, ERR_PR_OOO));
 
 	assert(NULL == tree->last);
-
 	argv++;
+	tree->asec |= (tree->csec = ROFFSec_PR_Dd);
 
 	/*
 	 * This is a bit complex because there are many forms the date
@@ -947,7 +944,6 @@ roff_Dd(ROFFCALL_ARGS)
 		t = time(NULL);
 		if (NULL == localtime_r(&t, &tree->tm))
 			err(1, "localtime_r");
-		tree->state |= ROFF_PRELUDE_Dd;
 		return(1);
 	} 
 
@@ -961,10 +957,8 @@ roff_Dd(ROFFCALL_ARGS)
 				continue;
 			return(roff_errp(tree, p, tok, ERR_BADARG));
 		}
-		if (strptime(buf, "%b%d,%Y", &tree->tm)) {
-			tree->state |= ROFF_PRELUDE_Dd;
+		if (strptime(buf, "%b%d,%Y", &tree->tm))
 			return(1);
-		}
 		return(roff_errp(tree, p, tok, ERR_BADARG));
 	}
 
@@ -982,7 +976,6 @@ roff_Dd(ROFFCALL_ARGS)
 	if (NULL == strptime(buf, "%b %d %Y", &tree->tm)) 
 		return(roff_errp(tree, p, tok, ERR_BADARG));
 
-	tree->state |= ROFF_PRELUDE_Dd;
 	return(1);
 }
 
@@ -993,21 +986,15 @@ roff_Dt(ROFFCALL_ARGS)
 {
 	size_t		 sz;
 
-	if (ROFF_BODY & tree->state) {
-		assert( ! (ROFF_PRELUDE & tree->state));
-		assert(ROFF_PRELUDE_Dt & tree->state);
+	if (ROFFSec_PR_Os & tree->asec)
 		return(roff_text(tok, tree, argv, type));
-	}
-
-	assert(ROFF_PRELUDE & tree->state);
-	assert( ! (ROFF_BODY & tree->state));
-
-	if ( ! (ROFF_PRELUDE_Dd & tree->state))
-		return(roff_errp(tree, *argv, tok, ERR_PR_OOO));
-	if (ROFF_PRELUDE_Dt & tree->state)
+	if (ROFFSec_PR_Dt & tree->asec)
 		return(roff_errp(tree, *argv, tok, ERR_PR_REP));
+	if ( ! roffchecksec(tree, *argv, ROFFSec_PR_Dt, 1))
+		return(roff_errp(tree, *argv, tok, ERR_PR_OOO));
 
 	argv++;
+	tree->asec |= (tree->csec = ROFFSec_PR_Dt);
 	sz = sizeof(tree->title);
 
 	if (NULL == *argv) 
@@ -1065,7 +1052,6 @@ roff_Dt(ROFFCALL_ARGS)
 		return(roff_errp(tree, *argv, tok, ERR_BADARG));
 
 	assert(NULL == tree->last);
-	tree->state |= ROFF_PRELUDE_Dt;
 
 	return(1);
 }
@@ -1144,21 +1130,16 @@ roff_Os(ROFFCALL_ARGS)
 	char		*p;
 	size_t		 sz;
 
-	if (ROFF_BODY & tree->state) {
-		assert( ! (ROFF_PRELUDE & tree->state));
-		assert(ROFF_PRELUDE_Os & tree->state);
+	if (ROFFSec_PR_Os & tree->asec)
 		return(roff_text(tok, tree, argv, type));
-	}
-
-	assert(ROFF_PRELUDE & tree->state);
-	if ( ! (ROFF_PRELUDE_Dt & tree->state) ||
-			! (ROFF_PRELUDE_Dd & tree->state)) 
+	if ( ! roffchecksec(tree, *argv, ROFFSec_PR_Os, 1))
 		return(roff_errp(tree, *argv, tok, ERR_PR_OOO));
-
-	tree->os[0] = 0;
 
 	p = *++argv;
 	sz = sizeof(tree->os);
+	tree->asec |= (tree->csec = ROFFSec_PR_Os);
+
+	tree->os[0] = 0;
 
 	while (*argv)
 		if (strlcat(tree->os, *argv++, sz) >= sz)
@@ -1167,10 +1148,6 @@ roff_Os(ROFFCALL_ARGS)
 	if (0 == tree->os[0])
 		if (strlcpy(tree->os, "LOCAL", sz) >= sz)
 			return(roff_errp(tree, p, tok, ERR_ARGLEN));
-
-	tree->state |= ROFF_PRELUDE_Os;
-	tree->state &= ~ROFF_PRELUDE;
-	tree->state |= ROFF_BODY;
 
 	assert(ROFF_MSEC_MAX != tree->section);
 	assert(0 != tree->title[0]);
@@ -1205,7 +1182,7 @@ roff_layout(ROFFCALL_ARGS)
 
 	assert( ! (ROFF_CALLABLE & tokens[tok].flags));
 
-	if (ROFF_PRELUDE & tree->state)
+	if ( ! ROFFSec_NAME & tree->asec)
 		return(roff_errp(tree, *argv, tok, ERR_NOT_PR));
 
 	if (ROFF_EXIT == type) {
@@ -1268,7 +1245,7 @@ roff_layout(ROFFCALL_ARGS)
 		if (0 == tree->asec && ! (ROFFSec_NAME & tree->csec))
 			return(roff_err(tree, *argv, "`NAME' section "
 						"must be first"));
-		if ( ! roffchecksec(tree, *argv, tree->csec))
+		if ( ! roffchecksec(tree, *argv, tree->csec, 0))
 			return(0);
 
 		tree->asec |= tree->csec;
@@ -1369,7 +1346,7 @@ roff_ordered(ROFFCALL_ARGS)
 	 * .Xr arg1 arg2 punctuation
 	 */
 
-	if (ROFF_PRELUDE & tree->state)
+	if ( ! ROFFSec_NAME & tree->asec)
 		return(roff_errp(tree, *argv, tok, ERR_NOT_PR));
 
 	first = (*argv == tree->cur);
@@ -1441,7 +1418,7 @@ roff_text(ROFFCALL_ARGS)
 	 * <fl> v W f </fl> ;
 	 */
 
-	if (ROFF_PRELUDE & tree->state)
+	if ( ! ROFFSec_NAME & tree->asec)
 		return(roff_errp(tree, *argv, tok, ERR_NOT_PR));
 
 	first = (*argv == tree->cur);
