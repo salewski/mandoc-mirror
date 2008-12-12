@@ -27,7 +27,8 @@
 	div.inline-Pp		{ margin-bottom: 10px; }
 	span.inline-Sy		{ font-weight: bolder; }
 	span.inline-Tn		{ font-variant: small-caps; }
-	span.inline-D1		{ margin-left: 20px; }
+	div.inline-D1		{ margin-left: 20px; }
+	div.inline-Dl		{ margin-left: 20px; }
 	span.head-Fo		{ font-weight: bolder; }
 	span.body-Fo:before	{ content: '('; }
 	span.body-Fo:after	{ content: ')'; }

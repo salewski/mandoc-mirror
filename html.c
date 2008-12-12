@@ -822,6 +822,10 @@ html_inlinetagname(struct md_mbuf *mbuf,
 {
 
 	switch (tok) {
+	case (ROFF_Dl):
+		/* FALLTHROUGH */
+	case (ROFF_D1):
+		return(html_stput(mbuf, HTML_TAG_DIV, res));
 	case (ROFF_Sh):
 		return(html_stput(mbuf, HTML_TAG_A, res));
 	case (ROFF_Pp):
