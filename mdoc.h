@@ -220,6 +220,97 @@ enum	mdoc_type {
 	MDOC_BLOCK
 };
 
+enum	mdoc_msec {
+	MSEC_1,
+	MSEC_2,
+	MSEC_3,
+	MSEC_3f,
+	MSEC_3p,
+	MSEC_4,
+	MSEC_5,
+	MSEC_6,
+	MSEC_7,
+	MSEC_8,
+	MSEC_9,
+	MSEC_X11,
+	MSEC_X11R6,
+	MSEC_local,
+	MSEC_n,
+	MSEC_unass,
+	MSEC_draft,
+	MSEC_paper,
+	MSEC_NONE
+};
+
+enum	mdoc_sec {
+	SEC_PROLOGUE,
+	SEC_NAME,
+	SEC_SYNOPSIS,
+	SEC_DESCRIPTION,
+	SEC_RETURN_VALUES,
+	SEC_ENVIRONMENT,
+	SEC_FILES,
+	SEC_EXAMPLES,
+	SEC_DIAGNOSTICS,
+	SEC_ERRORS,
+	SEC_SEE_ALSO,
+	SEC_STANDARDS,
+	SEC_HISTORY,
+	SEC_AUTHORS,
+	SEC_CAVEATS,
+	SEC_BUGS,
+	SEC_CUSTOM
+};
+
+enum	mdoc_vol {
+	VOL_AMD,
+	VOL_IND,
+	VOL_KM,
+	VOL_LOCAL,
+	VOL_PRM,
+	VOL_PS1,
+	VOL_SMM,
+	VOL_URM,
+	VOL_USD,
+	VOL_DEFAULT
+};
+
+enum	mdoc_arch {
+	ARCH_alpha, 
+	ARCH_amd64, 
+	ARCH_amiga, 
+	ARCH_arc, 
+	ARCH_armish, 
+	ARCH_aviion, 
+	ARCH_hp300,
+	ARCH_hppa, 
+	ARCH_hppa64, 
+	ARCH_i386, 
+	ARCH_landisk, 
+	ARCH_luna88k, 
+	ARCH_mac68k, 
+	ARCH_macppc,
+	ARCH_mvme68k, 
+	ARCH_mvme88k, 
+	ARCH_mvmeppc, 
+	ARCH_pmax, 
+	ARCH_sgi, 
+	ARCH_socppc, 
+	ARCH_sparc,
+	ARCH_sparc64, 
+	ARCH_sun3, 
+	ARCH_vax, 
+	ARCH_zaurus,
+	ARCH_DEFAULT
+};
+
+struct	mdoc_meta {
+	enum mdoc_msec	  msec;
+	enum mdoc_vol	  vol;
+	enum mdoc_arch	  arch;
+	struct tm	  tm;
+};
+
 struct	mdoc_text {
 	char		 *string;
 };
@@ -280,7 +371,6 @@ struct	mdoc;
 void	 	  mdoc_free(struct mdoc *);
 struct	mdoc	 *mdoc_alloc(void *data, const struct mdoc_cb *);
 int	 	  mdoc_parseln(struct mdoc *, char *buf);
-
 const struct mdoc_node
 		 *mdoc_result(struct mdoc *);
 

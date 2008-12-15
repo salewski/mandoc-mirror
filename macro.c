@@ -29,51 +29,8 @@ static	int	  append_text(struct mdoc *, int,
 			int, int, char *[]);
 static	int	  append_scoped(struct mdoc *, int, 
 			int, int, char *[]);
-static	int	  isdelim(const char *);
 static	int 	  args_next(struct mdoc *, int, 
 			int *, char *, char **);
-
-
-static int
-isdelim(const char *p)
-{
-
-	if (0 == *p)
-		return(0);
-	if (0 != *(p + 1))
-		return(0);
-
-	switch (*p) {
-	case('{'):
-		/* FALLTHROUGH */
-	case('.'):
-		/* FALLTHROUGH */
-	case(','):
-		/* FALLTHROUGH */
-	case(';'):
-		/* FALLTHROUGH */
-	case(':'):
-		/* FALLTHROUGH */
-	case('?'):
-		/* FALLTHROUGH */
-	case('!'):
-		/* FALLTHROUGH */
-	case('('):
-		/* FALLTHROUGH */
-	case(')'):
-		/* FALLTHROUGH */
-	case('['):
-		/* FALLTHROUGH */
-	case(']'):
-		/* FALLTHROUGH */
-	case('}'):
-		return(1);
-	default:
-		break;
-	}
-
-	return(0);
-}
 
 
 static int
@@ -125,6 +82,18 @@ append_scoped(struct mdoc *mdoc, int tok,
 		int pos, int sz, char *args[])
 {
 
+	switch (tok) {
+	 /* ======= ADD MORE MACRO CHECKS BELOW. ======= */
+	case (MDOC_Sh):
+		break;
+	case (MDOC_Ss):
+		break;
+	 /* ======= ADD MORE MACRO CHECKS ABOVE. ======= */
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
 	assert(sz >= 0);
 	args[sz] = NULL;
 	mdoc_block_alloc(mdoc, pos, tok, 0, NULL);
@@ -143,8 +112,7 @@ append_text(struct mdoc *mdoc, int tok,
 	args[sz] = NULL;
 
 	switch (tok) {
-	 /* ======= ADD MORE MACRO ARGUMENT-LIMITS BELOW. ======= */
-
+	 /* ======= ADD MORE MACRO CHECKS BELOW. ======= */
 	case (MDOC_Ft):
 		/* FALLTHROUGH */
 	case (MDOC_Li):
@@ -154,21 +122,17 @@ append_text(struct mdoc *mdoc, int tok,
 	case (MDOC_Pa):
 		/* FALLTHROUGH */
 	case (MDOC_Tn):
-		if (0 == sz && ! mdoc_warn(mdoc, tok, pos, WARN_ARGS_GE1))
+		if (0 < sz)
+			break;
+		if ( ! mdoc_warn(mdoc, tok, pos, WARN_ARGS_GE1))
 			return(0);
-		mdoc_elem_alloc(mdoc, pos, tok, 0, 
-				NULL, (size_t)sz, _CC(args));
-		return(1);
-
+		break;
 	case (MDOC_Ar):
 		/* FALLTHROUGH */
 	case (MDOC_Cm):
 		/* FALLTHROUGH */
 	case (MDOC_Fl):
-		mdoc_elem_alloc(mdoc, pos, tok, 0, 
-				NULL, (size_t)sz, _CC(args));
-		return(1);
-
+		break;
 	case (MDOC_Ad):
 		/* FALLTHROUGH */
 	case (MDOC_Em):
@@ -186,19 +150,18 @@ append_text(struct mdoc *mdoc, int tok,
 	case (MDOC_Va):
 		/* FALLTHROUGH */
 	case (MDOC_Vt):
-		if (0 == sz) 
-			return(mdoc_err(mdoc, tok, pos, ERR_ARGS_GE1));
-		mdoc_elem_alloc(mdoc, pos, tok, 0, 
-				NULL, (size_t)sz, _CC(args));
-		return(1);
-
-	 /* ======= ADD MORE MACRO ARGUMENT-LIMITS ABOVE. ======= */
+		if (0 < sz) 
+			break;
+		return(mdoc_err(mdoc, tok, pos, ERR_ARGS_GE1));
+	 /* ======= ADD MORE MACRO CHECKS ABOVE. ======= */
 	default:
-		break;
+		abort();
+		/* NOTREACHED */
 	}
 
-	abort();
-	/* NOTREACHED */
+	mdoc_elem_alloc(mdoc, pos, tok, 0, 
+			NULL, (size_t)sz, _CC(args));
+	return(1);
 }
 
 
@@ -235,7 +198,7 @@ again:
 
 	/* Word found. */
 
-	if ( ! isdelim(args[j])) {
+	if ( ! mdoc_isdelim(args[j])) {
 		j++;
 		goto again;
 	}
