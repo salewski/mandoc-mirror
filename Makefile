@@ -1,174 +1,57 @@
-VERSION	= 1.0.3
+VERSION	= 1.1.0
 
-# FIXME
-CFLAGS += -W -Wall -Wno-unused-parameter -g -DDEBUG
+CFLAGS += -W -Wall -Wno-unused-parameter -g 
 
-LNS	= mdocml.ln html.ln xml.ln libmdocml.ln roff.ln ml.ln mlg.ln \
-	  compat.ln tokens.ln literals.ln tags.ln noop.ln
+LNS	= macro.ln mdoc.ln mdocml.ln hash.ln
 
-LLNS	= llib-lmdocml.ln
+LLNS	= llib-llibmdoc.ln llib-lmdocml.ln
 
-LIBS	= libmdocml.a
+LIBS	= libmdoc.a
 
-OBJS	= mdocml.o html.o xml.o libmdocml.o roff.o ml.o mlg.o \
-	  compat.o tokens.o literals.o tags.o noop.o
+OBJS	= macro.o mdoc.o mdocml.o hash.o
 
-SRCS	= mdocml.c html.c xml.c libmdocml.c roff.c ml.c mlg.c \
-	  compat.c tokens.c literals.c tags.c noop.c
+SRCS	= macro.c mdoc.c mdocml.c hash.c
 
-HEADS	= libmdocml.h private.h ml.h roff.h html.h
+HEADS	= mdoc.h
 
-MANS	= mdocml.1 index.7
+BINS	= mdocml
 
-HTML	= index.html mdocml.html 
+CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS)
 
-XML	= index.xml
+all:	$(BINS)
 
-TEXT	= index.txt
+lint:	$(LLNS)
 
-CLEAN	= mdocml $(LLNS) $(LNS) $(OBJS) $(LIBS) $(HTML) $(XML) $(TEXT) \
-	  mdocml-$(VERSION).tar.gz mdocml-port-$(VERSION).tar.gz
-
-INSTALL	= Makefile $(HEADS) $(SRCS) $(MANS) mdocml.css
-
-FAIL	= test.0 test.1 test.2 test.3 test.4 test.5 test.6 \
-	  test.15 test.20 test.22 test.24 test.26 test.27 test.30 \
-	  test.36 test.37 test.40 test.50 test.61 test.64 test.65 \
-	  test.66 test.69 test.70
-
-SUCCEED	= test.7 test.8 test.9 test.10 test.11 test.12 test.13 \
-	  test.14 test.16 test.17 test.18 test.19 test.21 test.23 \
-	  test.25 test.28 test.29 test.31 test.32 test.33 test.34 \
-	  test.35 test.38 test.39 test.41 test.42 test.43 test.44 \
-	  test.45 test.46 test.47 test.48 test.49 test.51 test.52 \
-	  test.54 test.55 test.56 test.57 test.58 test.59 test.60 \
-	  test.62 test.63 test.67 test.68 test.71 test.72 test.73
-
-all: mdocml
-
-lint: llib-lmdocml.ln
-
-dist: mdocml-$(VERSION).tar.gz mdocml-port-$(VERSION).tar.gz
-
-www: all $(HTML) $(XML) $(TEXT)
-
-regress: mdocml
-	@for f in $(FAIL); do \
-		echo "./mdocml $$f" ; \
-		./mdocml -v $$f 1>/dev/null 2>/dev/null || continue ; \
-	done
-	@for f in $(SUCCEED); do \
-		echo "./mdocml $$f" ; \
-		./mdocml -v $$f 1>/dev/null || exit 1 ; \
-	done
-
-mdocml: mdocml.o libmdocml.a
-	$(CC) $(CFLAGS) -o $@ mdocml.o libmdocml.a
+mdocml:	mdocml.o libmdoc.a
+	$(CC) $(CFLAGS) -o $@ mdocml.o libmdoc.a
 
 clean:
 	rm -f $(CLEAN)
 
-index.html: index.7 mdocml.css
-	./mdocml -fhtml -Wall -e -o $@ index.7
+llib-llibmdoc.ln: macro.ln mdoc.ln hash.ln
+	$(LINT) $(LINTFLAGS) -Cllibmdoc mdoc.ln macro.ln hash.ln
 
-index.xml: index.7 mdocml.css
-	./mdocml -fxml -Wall -o $@ index.7
+llib-llmdocml.ln: mdocml.ln llib-llibmdoc.ln
+	$(LINT) $(LINTFLAGS) -Cllibmdoc mdocml.ln llib-llibmdoc.ln
 
-index.txt: index.7
-	cp -f index.7 index.txt
+macro.ln: macro.c private.h
 
-mdocml.html: mdocml.1 mdocml.css
-	./mdocml -Wall -fhtml -e -o $@ mdocml.1
+macro.o: macro.c private.h
 
-install:
-	mkdir -p $(PREFIX)/bin/
-	install -m 0755 mdocml $(PREFIX)/bin/
-	mkdir -p $(PREFIX)/man/man1/
-	install -m 0444 mdocml.1 $(PREFIX)/man/man1/
-	mkdir -p $(PREFIX)/share/mdocml/
-	install -m 0444 mdocml.css $(PREFIX)/share/mdocml/
+hash.ln: hash.c private.h
 
-uninstall:
-	rm -f $(PREFIX)/bin/mdocml
-	rm -f $(PREFIX)/man/man1/mdocml.1
-	rm -f $(PREFIX)/share/mdocml/mdocml.css
+hash.o: hash.c private.h
 
-install-www: www dist
-	install -m 0644 mdocml-$(VERSION).tar.gz $(PREFIX)/
-	install -m 0644 mdocml-$(VERSION).tar.gz $(PREFIX)/mdocml.tar.gz
-	install -m 0644 mdocml-port-$(VERSION).tar.gz $(PREFIX)/
-	install -m 0644 mdocml-port-$(VERSION).tar.gz $(PREFIX)/mdocml-port.tar.gz
-	install -m 0644 $(HTML) $(XML) $(TEXT) $(PREFIX)/
+mdoc.ln: mdoc.c private.h
 
-mdocml-$(VERSION).tar.gz: $(INSTALL)
-	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
-	install -m 0644 $(INSTALL) .dist/mdocml/mdocml-$(VERSION)/
-	( cd .dist/mdocml/ && tar zcf ../../$@ mdocml-$(VERSION)/ )
-	rm -rf .dist/
+mdoc.o: mdoc.c private.h
 
-mdocml-port-$(VERSION).tar.gz: $(INSTALL)
-	mkdir -p .dist/mdocml/pkg
-	sed -e "s!@VERSION@!$(VERSION)!" Makefile.port > .dist/mdocml/Makefile
-	md5 mdocml-$(VERSION).tar.gz > .dist/mdocml/distinfo
-	rmd160 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
-	sha1 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
-	install -m 0644 DESCR .dist/mdocml/pkg/DESCR
-	echo @comment $$OpenBSD$$ > .dist/mdocml/pkg/PLIST
-	echo bin/mdocml >> .dist/mdocml/pkg/PLIST
-	echo share/mdocml/mdocml.css >> .dist/mdocml/pkg/PLIST
-	echo @man man/man1/mdocml.1 >> .dist/mdocml/pkg/PLIST
-	( cd .dist/ && tar zcf ../$@ mdocml/ )
-	rm -rf .dist/
+mdocml.ln: mdocml.c mdoc.h
 
-llib-lmdocml.ln: mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln tags.ln noop.ln
-	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln libmdocml.ln html.ln xml.ln roff.ln ml.ln mlg.ln compat.ln tokens.ln literals.ln tags.ln noop.ln
+mdocml.o: mdocml.c mdoc.h
 
-mdocml.ln: mdocml.c libmdocml.h
+private.h: mdoc.h
 
-mdocml.o: mdocml.c libmdocml.h
-
-libmdocml.a: libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o literals.o tags.o noop.o
-	$(AR) rs $@ libmdocml.o html.o xml.o roff.o ml.o mlg.o compat.o tokens.o literals.o tags.o noop.o
-
-xml.ln: xml.c ml.h
-
-xml.o: xml.c ml.h
-
-html.ln: html.c private.h
-
-html.o: html.c private.h 
-
-tags.ln: tags.c html.h 
-
-tags.o: tags.c html.h
-
-roff.ln: roff.c private.h
-
-roff.o: roff.c private.h 
-
-libmdocml.ln: libmdocml.c private.h
-
-libmdocml.o: libmdocml.c private.h
-
-ml.ln: ml.c ml.h
-
-ml.o: ml.c ml.h
-
-mlg.ln: mlg.c ml.h
-
-mlg.o: mlg.c ml.h
-
-compat.ln: compat.c
-
-compat.o: compat.c
-
-noop.ln: noop.c private.h
-
-noop.o: noop.c private.h
-
-html.h: ml.h
-
-ml.h: private.h
-
-private.h: libmdocml.h
+libmdoc.a: macro.o mdoc.o hash.o
+	$(AR) rs $@ macro.o mdoc.o hash.o
 

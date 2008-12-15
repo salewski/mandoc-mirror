@@ -16,90 +16,294 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+#include <assert.h>
+#include <ctype.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-#include "roff.h"
+#include "private.h"
+
+#define	_C(p)	((const char **)p)
+
+static	int	  isdelim(const char *);
+static	int 	  args_next(struct mdoc *, int, int *, char *, char **);
+static	int	  append_text(struct mdoc *, int, int, int, char *[]);
+static	int	  append_scoped(struct mdoc *, int, int, int, char *[]);
+
 
 static int
-macro_args_next(struct rofftree *tree, int *pos, char *buf, char **v)
+isdelim(const char *p)
 {
-	int		 i;
+
+	if (0 == *p)
+		return(0);
+	if (0 != *(p + 1))
+		return(0);
+
+	switch (*p) {
+	case('{'):
+		/* FALLTHROUGH */
+	case('.'):
+		/* FALLTHROUGH */
+	case(','):
+		/* FALLTHROUGH */
+	case(';'):
+		/* FALLTHROUGH */
+	case(':'):
+		/* FALLTHROUGH */
+	case('?'):
+		/* FALLTHROUGH */
+	case('!'):
+		/* FALLTHROUGH */
+	case('('):
+		/* FALLTHROUGH */
+	case(')'):
+		/* FALLTHROUGH */
+	case('['):
+		/* FALLTHROUGH */
+	case(']'):
+		/* FALLTHROUGH */
+	case('}'):
+		return(1);
+	default:
+		break;
+	}
+
+	return(0);
+}
+
+
+static int
+args_next(struct mdoc *mdoc, int tok, 
+		int *pos, char *buf, char **v)
+{
 
 	if (0 == buf[*pos])
 		return(0);
 
+	assert( ! isspace(buf[*pos]));
+
 	if ('\"' == buf[*pos]) {
-		/* Syntax error: quotation marks not allowed. */
+		(void)mdoc_err(mdoc, tok, *pos, ERR_SYNTAX_QUOTE);
 		return(-1);
 	}
 
 	*v = &buf[*pos];
 
+	/* Scan ahead to end of token. */
+
 	while (buf[*pos] && ! isspace(buf[*pos]))
 		(*pos)++;
 
-	if (buf[*pos + 1] && '\\' == buf[*pos]) {
-		/* Syntax error: escaped whitespace not allowed. */
+	if (buf[*pos] && buf[*pos + 1] && '\\' == buf[*pos]) {
+		(void)mdoc_err(mdoc, tok, *pos, ERR_SYNTAX_WS);
 		return(-1);
 	}
 
-	buf[i] = 0;
+	if (0 == buf[*pos])
+		return(1);
+
+	/* Scan ahead over trailing whitespace. */
+
+	buf[(*pos)++] = 0;
+	while (buf[*pos] && isspace(buf[*pos]))
+		(*pos)++;
+
+	if (0 == buf[*pos]) 
+		if ( ! mdoc_warn(mdoc, tok, *pos, WARN_SYNTAX_WS_EOLN))
+			return(-1);
+
 	return(1);
 }
 
-/*
- * Parses the following:
- *
- *     .Xx foo bar baz ; foo "bar baz" ; ;
- *         ^----------   ^----------
- */
+
 static int
-macro_fl(struct rofftree *tree, int tok, int *pos, char *buf)
+append_scoped(struct mdoc *mdoc, int tok, int pos, int sz, char *args[])
 {
-	int		  i, j, c, first; 
-	char		 *args[ROFF_MAXLINEARG];
 
-	first = *pos == 0;
+	args[sz] = NULL;
+	mdoc_block_alloc(mdoc, pos, tok, 0, NULL);
+	mdoc_head_alloc(mdoc, pos, tok, sz, _C(args));
+	mdoc_body_alloc(mdoc, pos, tok);
+	return(1);
+}
 
-	for (j = 0; ; ) {
-		i = *pos;
-		c = macro_args_next(tree, *i, buf, args[j]);
-		if (-1 == c) 
+
+static int
+append_text(struct mdoc *mdoc, int tok, int pos, int sz, char *args[])
+{
+
+	args[sz] = NULL;
+
+	switch (tok) {
+	 /* ======= ADD MORE MACRO ARGUMENT-LIMITS BELOW. ======= */
+
+	case (MDOC_Ft):
+		/* FALLTHROUGH */
+	case (MDOC_Li):
+		/* FALLTHROUGH */
+	case (MDOC_Ms):
+		/* FALLTHROUGH */
+	case (MDOC_Pa):
+		/* FALLTHROUGH */
+	case (MDOC_Tn):
+		if (0 == sz && ! mdoc_warn(mdoc, tok, pos, WARN_ARGS_GE1))
 			return(0);
-		if (0 == c) 
-			break;
+		mdoc_elem_alloc(mdoc, pos, tok, 0, NULL, sz, _C(args));
+		return(1);
 
-		/* Break at the next command.  */
+	case (MDOC_Ar):
+		/* FALLTHROUGH */
+	case (MDOC_Cm):
+		/* FALLTHROUGH */
+	case (MDOC_Fl):
+		mdoc_elem_alloc(mdoc, pos, tok, 0, NULL, sz, _C(args));
+		return(1);
 
-		if (ROFF_MAX != (c = rofffindcallable(args[pos]))) {
-			if ( ! macro(tree, tok, argc, argv, i, p))
-				return(0);
-			if ( ! parse(tree, c, pos, args))
-				return(0);
-			break;
-		}
+	case (MDOC_Ad):
+		/* FALLTHROUGH */
+	case (MDOC_Em):
+		/* FALLTHROUGH */
+	case (MDOC_Er):
+		/* FALLTHROUGH */
+	case (MDOC_Ev):
+		/* FALLTHROUGH */
+	case (MDOC_Fa):
+		/* FALLTHROUGH */
+	case (MDOC_Dv):
+		/* FALLTHROUGH */
+	case (MDOC_Ic):
+		/* FALLTHROUGH */
+	case (MDOC_Va):
+		/* FALLTHROUGH */
+	case (MDOC_Vt):
+		if (0 == sz) 
+			return(mdoc_err(mdoc, tok, pos, ERR_ARGS_GE1));
+		mdoc_elem_alloc(mdoc, pos, tok, 0, NULL, sz, _C(args));
+		return(1);
 
-		/* Continue if we're just words. */
-
-		if ( ! roffispunct(args[pos])) {
-			i++;
-			continue;
-		}
-
-		/* Break if there's only remaining punctuation. */
-
-		if (args[pos + 1] && roffispunct(args[pos + 1]))
-			break;
-
-		/* If there are remaining words, start anew. */
-
-		if ( ! macro(tree, tok, argc, argv, i, p))
-			return(0);
-
-		/* Spit out the punctuation. */
-
-		if ( ! word(tree, tok, *args++))
-			return(0);
-		i++;
+	 /* ======= ADD MORE MACRO ARGUMENT-LIMITS ABOVE. ======= */
+	default:
+		break;
 	}
+
+	abort();
+	/* NOTREACHED */
+}
+
+
+int
+macro_text(struct mdoc *mdoc, int tok, int ppos, int *pos, char *buf)
+{
+	int		  lastarg, j, c, lasttok, lastpunct;
+	char		 *args[MDOC_LINEARG_MAX], *p;
+
+	lasttok = ppos;
+	lastpunct = 0;
+	j = 0;
+
+again:
+
+	lastarg = *pos;
+	c = args_next(mdoc, tok, pos, buf, &args[j]);
+	
+	if (-1 == c) 
+		return(0);
+	if (0 == c && ! lastpunct)
+		return(append_text(mdoc, tok, lasttok, j, args));
+	else if (0 == c)
+		return(1);
+
+	/* Command found. */
+
+	if (MDOC_MAX != (c = mdoc_find(mdoc, args[j]))) {
+		if ( ! lastpunct)
+			if ( ! append_text(mdoc, tok, lasttok, j, args))
+				return(0);
+		return(mdoc_macro(mdoc, c, lastarg, pos, buf));
+	}
+
+	/* Word found. */
+
+	if ( ! isdelim(args[j])) {
+		j++;
+		goto again;
+	}
+
+	/* Punctuation found.  */
+
+	p = args[j]; /* Save argument (NULL-ified in append). */
+
+	if ( ! lastpunct)
+		if ( ! append_text(mdoc, tok, lasttok, j, args))
+			return(0);
+
+	args[j] = p;
+
+	mdoc_word_alloc(mdoc, lastarg, args[j]);
+	lastpunct = 1;
+	j = 0;
+
+	goto again;
+
+	/* NOTREACHED */
+}
+
+
+int
+macro_scoped_implicit(struct mdoc *mdoc, 
+		int tok, int ppos, int *pos, char *buf)
+{
+	int		  j, c, lastarg, t;
+	char		 *args[MDOC_LINEARG_MAX];
+	struct mdoc_node *n;
+
+	/*
+	 * Look for an implicit parent.
+	 */
+
+	assert( ! (MDOC_EXPLICIT & mdoc_macros[tok].flags));
+
+	for (n = mdoc->last; n; n = n->parent) {
+		if (MDOC_BLOCK != n->type) 
+			continue;
+		if (tok == (t = n->data.block.tok))
+			break;
+		if ( ! (MDOC_EXPLICIT & mdoc_macros[t].flags))
+			continue;
+		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_BREAK));
+	}
+
+	if (n) {
+		mdoc->last = n;
+		mdoc_msg(mdoc, ppos, "scope: rewound `%s'",
+				mdoc_macronames[tok]);
+	} else
+		mdoc_msg(mdoc, ppos, "scope: new `%s'",
+				mdoc_macronames[tok]);
+
+	j = 0;
+
+again:
+
+	lastarg = *pos;
+	c = args_next(mdoc, tok, pos, buf, &args[j]);
+	
+	if (-1 == c) 
+		return(0);
+	if (0 == c)
+		return(append_scoped(mdoc, tok, ppos, j, args));
+
+	/* Command found. */
+
+	if (MDOC_MAX != (c = mdoc_find(mdoc, args[j])))
+		if ( ! mdoc_warn(mdoc, tok, *pos, WARN_SYNTAX_MACLIKE))
+			return(0);
+
+	/* Word found. */
+
+	j++;
+	goto again;
+
+	/* NOTREACHED */
 }
