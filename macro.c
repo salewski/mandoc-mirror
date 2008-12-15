@@ -23,12 +23,15 @@
 
 #include "private.h"
 
-#define	_C(p)	((const char **)p)
+#define	_CC(p)	((const char **)p)
 
+static	int	  append_text(struct mdoc *, int, 
+			int, int, char *[]);
+static	int	  append_scoped(struct mdoc *, int, 
+			int, int, char *[]);
 static	int	  isdelim(const char *);
-static	int 	  args_next(struct mdoc *, int, int *, char *, char **);
-static	int	  append_text(struct mdoc *, int, int, int, char *[]);
-static	int	  append_scoped(struct mdoc *, int, int, int, char *[]);
+static	int 	  args_next(struct mdoc *, int, 
+			int *, char *, char **);
 
 
 static int
@@ -118,21 +121,25 @@ args_next(struct mdoc *mdoc, int tok,
 
 
 static int
-append_scoped(struct mdoc *mdoc, int tok, int pos, int sz, char *args[])
+append_scoped(struct mdoc *mdoc, int tok, 
+		int pos, int sz, char *args[])
 {
 
+	assert(sz >= 0);
 	args[sz] = NULL;
 	mdoc_block_alloc(mdoc, pos, tok, 0, NULL);
-	mdoc_head_alloc(mdoc, pos, tok, sz, _C(args));
+	mdoc_head_alloc(mdoc, pos, tok, (size_t)sz, _CC(args));
 	mdoc_body_alloc(mdoc, pos, tok);
 	return(1);
 }
 
 
 static int
-append_text(struct mdoc *mdoc, int tok, int pos, int sz, char *args[])
+append_text(struct mdoc *mdoc, int tok, 
+		int pos, int sz, char *args[])
 {
 
+	assert(sz >= 0);
 	args[sz] = NULL;
 
 	switch (tok) {
@@ -149,7 +156,8 @@ append_text(struct mdoc *mdoc, int tok, int pos, int sz, char *args[])
 	case (MDOC_Tn):
 		if (0 == sz && ! mdoc_warn(mdoc, tok, pos, WARN_ARGS_GE1))
 			return(0);
-		mdoc_elem_alloc(mdoc, pos, tok, 0, NULL, sz, _C(args));
+		mdoc_elem_alloc(mdoc, pos, tok, 0, 
+				NULL, (size_t)sz, _CC(args));
 		return(1);
 
 	case (MDOC_Ar):
@@ -157,7 +165,8 @@ append_text(struct mdoc *mdoc, int tok, int pos, int sz, char *args[])
 	case (MDOC_Cm):
 		/* FALLTHROUGH */
 	case (MDOC_Fl):
-		mdoc_elem_alloc(mdoc, pos, tok, 0, NULL, sz, _C(args));
+		mdoc_elem_alloc(mdoc, pos, tok, 0, 
+				NULL, (size_t)sz, _CC(args));
 		return(1);
 
 	case (MDOC_Ad):
@@ -179,7 +188,8 @@ append_text(struct mdoc *mdoc, int tok, int pos, int sz, char *args[])
 	case (MDOC_Vt):
 		if (0 == sz) 
 			return(mdoc_err(mdoc, tok, pos, ERR_ARGS_GE1));
-		mdoc_elem_alloc(mdoc, pos, tok, 0, NULL, sz, _C(args));
+		mdoc_elem_alloc(mdoc, pos, tok, 0, 
+				NULL, (size_t)sz, _CC(args));
 		return(1);
 
 	 /* ======= ADD MORE MACRO ARGUMENT-LIMITS ABOVE. ======= */
@@ -195,7 +205,7 @@ append_text(struct mdoc *mdoc, int tok, int pos, int sz, char *args[])
 int
 macro_text(struct mdoc *mdoc, int tok, int ppos, int *pos, char *buf)
 {
-	int		  lastarg, j, c, lasttok, lastpunct;
+	int		  lastarg, c, lasttok, lastpunct, j;
 	char		 *args[MDOC_LINEARG_MAX], *p;
 
 	lasttok = ppos;
@@ -254,7 +264,7 @@ int
 macro_scoped_implicit(struct mdoc *mdoc, 
 		int tok, int ppos, int *pos, char *buf)
 {
-	int		  j, c, lastarg, t;
+	int		  t, c, lastarg, j;
 	char		 *args[MDOC_LINEARG_MAX];
 	struct mdoc_node *n;
 
@@ -264,6 +274,7 @@ macro_scoped_implicit(struct mdoc *mdoc,
 
 	assert( ! (MDOC_EXPLICIT & mdoc_macros[tok].flags));
 
+	/* LINTED */
 	for (n = mdoc->last; n; n = n->parent) {
 		if (MDOC_BLOCK != n->type) 
 			continue;
@@ -297,7 +308,7 @@ again:
 	/* Command found. */
 
 	if (MDOC_MAX != (c = mdoc_find(mdoc, args[j])))
-		if ( ! mdoc_warn(mdoc, tok, *pos, WARN_SYNTAX_MACLIKE))
+		if ( ! mdoc_warn(mdoc, tok, lastarg, WARN_SYNTAX_MACLIKE))
 			return(0);
 
 	/* Word found. */

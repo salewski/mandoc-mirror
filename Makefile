@@ -29,10 +29,10 @@ clean:
 	rm -f $(CLEAN)
 
 llib-llibmdoc.ln: macro.ln mdoc.ln hash.ln
-	$(LINT) $(LINTFLAGS) -Cllibmdoc mdoc.ln macro.ln hash.ln
+	$(LINT) $(LINTFLAGS) -Clibmdoc mdoc.ln macro.ln hash.ln
 
-llib-llmdocml.ln: mdocml.ln llib-llibmdoc.ln
-	$(LINT) $(LINTFLAGS) -Cllibmdoc mdocml.ln llib-llibmdoc.ln
+llib-lmdocml.ln: mdocml.ln llib-llibmdoc.ln
+	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln llib-llibmdoc.ln
 
 macro.ln: macro.c private.h
 

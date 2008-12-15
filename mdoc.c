@@ -301,7 +301,7 @@ mdoc_parseln(struct mdoc *mdoc, char *buf)
 
 	i--;
 
-	(void)memcpy(tmp, buf + 1, i);
+	(void)memcpy(tmp, buf + 1, (size_t)i);
 	tmp[i++] = 0;
 
 	if (MDOC_MAX == (c = mdoc_find(mdoc, tmp)))
@@ -398,6 +398,9 @@ mdoc_node_append(struct mdoc *mdoc, int pos, struct mdoc_node *p)
 		nn = mdoc_macronames[p->data.block.tok];
 		nt = "block";
 		break;
+	default:
+		abort();
+		/* NOTREACHED */
 	}
 
 	if (NULL == mdoc->first) {
@@ -429,6 +432,9 @@ mdoc_node_append(struct mdoc *mdoc, int pos, struct mdoc_node *p)
 		on = mdoc_macronames[mdoc->last->data.block.tok];
 		ot = "block";
 		break;
+	default:
+		abort();
+		/* NOTREACHED */
 	}
 
 	switch (p->type) {
@@ -575,16 +581,18 @@ mdoc_word_alloc(struct mdoc *mdoc, int pos, const char *word)
 static void
 argfree(size_t sz, struct mdoc_arg *p)
 {
-	size_t		 i, j;
+	int		 i, j;
 
 	if (0 == sz)
 		return;
 
 	assert(p);
-	for (i = 0; i < sz; i++)
+	/* LINTED */
+	for (i = 0; i < (int)sz; i++)
 		if (p[i].sz > 0) {
 			assert(p[i].value);
-			for (j = 0; j < p[i].sz; j++)
+			/* LINTED */
+			for (j = 0; j < (int)p[i].sz; j++)
 				free(p[i].value[j]);
 		}
 	free(p);
@@ -674,13 +682,13 @@ mdoc_find(const struct mdoc *mdoc, const char *key)
 static void
 argcpy(struct mdoc_arg *dst, const struct mdoc_arg *src)
 {
-	size_t		 i;
+	int		 i;
 
 	dst->arg = src->arg;
 	if (0 == (dst->sz = src->sz))
 		return;
 	dst->value = xcalloc(dst->sz, sizeof(char *));
-	for (i = 0; i < dst->sz; i++)
+	for (i = 0; i < (int)dst->sz; i++)
 		dst->value[i] = xstrdup(src->value[i]);
 }
 
@@ -689,13 +697,13 @@ static struct mdoc_arg *
 argdup(size_t argsz, const struct mdoc_arg *args)
 {
 	struct mdoc_arg	*pp;
-	size_t		 i;
+	int		 i;
 
 	if (0 == argsz)
 		return(NULL);
 
 	pp = xcalloc((size_t)argsz, sizeof(struct mdoc_arg));
-	for (i = 0; i < argsz; i++)
+	for (i = 0; i < (int)argsz; i++)
 		argcpy(&pp[i], &args[i]);
 
 	return(pp);
@@ -705,13 +713,14 @@ argdup(size_t argsz, const struct mdoc_arg *args)
 static void
 paramfree(size_t sz, char **p)
 {
-	size_t		 i;
+	int		 i;
 
 	if (0 == sz)
 		return;
 
 	assert(p);
-	for (i = 0; i < sz; i++)
+	/* LINTED */
+	for (i = 0; i < (int)sz; i++)
 		free(p[i]);
 	free(p);
 }
@@ -721,13 +730,13 @@ static char **
 paramdup(size_t sz, const char **p)
 {
 	char		**pp;
-	size_t		  i;
+	int		  i;
 
 	if (0 == sz)
 		return(NULL);
 
 	pp = xcalloc(sz, sizeof(char *));
-	for (i = 0; i < sz; i++) 
+	for (i = 0; i < (int)sz; i++) 
 		pp[i] = xstrdup(p[i]);
 
 	return(pp);

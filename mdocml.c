@@ -207,6 +207,9 @@ print_node(const struct mdoc_node *n, int indent)
 		p = mdoc_macronames[n->data.block.tok];
 		t = "block";
 		break;
+	default:
+		abort();
+		/* NOTREACHED */
 	}
 
 	for (i = 0; i < indent; i++)

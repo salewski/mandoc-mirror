@@ -37,7 +37,7 @@ mdoc_hash_free(void *htab)
 void *
 mdoc_hash_alloc(void)
 {
-	int		  i, major, minor, index;
+	int		  i, major, minor, ind;
 	const void	**htab;
 
 	htab = calloc(27 * 26, sizeof(struct mdoc_macro *));
@@ -69,10 +69,10 @@ mdoc_hash_alloc(void)
 		assert(major >= 0 && major < 27);
 		assert(minor >= 0 && minor < 26);
 
-		index = (major * 27) + minor;
+		ind = (major * 27) + minor;
 
-		assert(NULL == htab[index]);
-		htab[index] = &mdoc_macros[i];
+		assert(NULL == htab[ind]);
+		htab[ind] = &mdoc_macros[i];
 	}
 
 	return((void *)htab);
@@ -82,10 +82,11 @@ mdoc_hash_alloc(void)
 int
 mdoc_hash_find(const void *arg, const char *tmp)
 {
-	int		  major, minor, index, slot;
+	int		  major, minor, ind, slot;
 	const void	**htab;
 
-	htab = (const void **)arg;
+	htab = /* LINTED */
+		(const void **)arg;
 
 	if (0 == tmp[0] || 0 == tmp[1])
 		return(MDOC_MAX);
@@ -110,13 +111,14 @@ mdoc_hash_find(const void *arg, const char *tmp)
 	else
 		minor = tmp[1] - 97;
 
-	index = (major * 27) + minor;
+	ind = (major * 27) + minor;
 
-	if (NULL == htab[index])
+	if (NULL == htab[ind])
 		return(MDOC_MAX);
 
-	slot = htab[index] - (void *)mdoc_macros;
-	assert(0 == slot % sizeof(struct mdoc_macro));
+	slot = htab[ind] - /* LINTED */
+		(void *)mdoc_macros;
+	assert(0 == (size_t)slot % sizeof(struct mdoc_macro));
 	slot /= sizeof(struct mdoc_macro);
 
 	if (0 != strcmp(mdoc_macronames[slot], tmp))
