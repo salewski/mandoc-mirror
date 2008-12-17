@@ -194,15 +194,23 @@
 enum 	mdoc_err {
 	ERR_SYNTAX_QUOTE,
 	ERR_SYNTAX_WS,
+	ERR_SYNTAX_ARGS,
 	ERR_MACRO_NOTSUP,
 	ERR_MACRO_NOTCALL,
 	ERR_SCOPE_BREAK,
-	ERR_ARGS_GE1
+	ERR_SEC_PROLOGUE,
+	ERR_SEC_NPROLOGUE,
+	ERR_SEC_PROLOGUE_OO,
+	ERR_SEC_PROLOGUE_REP,
+	ERR_SEC_NAME,
+	ERR_ARGS_GE1,
+	ERR_ARGS_MANY
 };
 
 enum	mdoc_warn {
 	WARN_SYNTAX_WS_EOLN,
 	WARN_SYNTAX_MACLIKE,
+	WARN_SEC_OO,
 	WARN_ARGS_GE1
 };
 
@@ -221,6 +229,7 @@ enum	mdoc_type {
 };
 
 enum	mdoc_msec {
+	MSEC_DEFAULT = 0,
 	MSEC_1,
 	MSEC_2,
 	MSEC_3,
@@ -238,12 +247,12 @@ enum	mdoc_msec {
 	MSEC_n,
 	MSEC_unass,
 	MSEC_draft,
-	MSEC_paper,
-	MSEC_NONE
+	MSEC_paper
 };
 
 enum	mdoc_sec {
-	SEC_PROLOGUE,
+	SEC_PROLOGUE = 0,
+	SEC_BODY,
 	SEC_NAME,
 	SEC_SYNOPSIS,
 	SEC_DESCRIPTION,
@@ -263,6 +272,7 @@ enum	mdoc_sec {
 };
 
 enum	mdoc_vol {
+	VOL_DEFAULT = 0,
 	VOL_AMD,
 	VOL_IND,
 	VOL_KM,
@@ -271,11 +281,11 @@ enum	mdoc_vol {
 	VOL_PS1,
 	VOL_SMM,
 	VOL_URM,
-	VOL_USD,
-	VOL_DEFAULT
+	VOL_USD
 };
 
 enum	mdoc_arch {
+	ARCH_DEFAULT = 0,
 	ARCH_alpha, 
 	ARCH_amd64, 
 	ARCH_amiga, 
@@ -300,15 +310,16 @@ enum	mdoc_arch {
 	ARCH_sparc64, 
 	ARCH_sun3, 
 	ARCH_vax, 
-	ARCH_zaurus,
-	ARCH_DEFAULT
+	ARCH_zaurus
 };
 
 struct	mdoc_meta {
 	enum mdoc_msec	  msec;
 	enum mdoc_vol	  vol;
 	enum mdoc_arch	  arch;
-	struct tm	  tm;
+	time_t		  date;
+#define	META_TITLE_SZ	 (64)
+	char		  title[META_TITLE_SZ];
 };
 
 struct	mdoc_text {

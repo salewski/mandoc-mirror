@@ -27,7 +27,7 @@ struct	mdoc {
 	void		 *htab;
 	struct mdoc_node *last;
 	struct mdoc_node *first;
-
+	struct mdoc_meta  meta;
 	enum mdoc_sec	  sec_lastn;
 	enum mdoc_sec	  sec_last;
 };
@@ -40,6 +40,9 @@ struct	mdoc_macro {
 };
 
 extern	const struct mdoc_macro *const mdoc_macros;
+
+#define	MACRO_PROT_ARGS	struct mdoc *mdoc, int tok, \
+			int ppos, int *pos, char *buf
 
 __BEGIN_DECLS
 
@@ -64,6 +67,16 @@ void		 *mdoc_hash_alloc(void);
 int		  mdoc_hash_find(const void *, const char *);
 void		  mdoc_hash_free(void *);
 int		  mdoc_isdelim(const char *);
+enum	mdoc_sec  mdoc_atosec(size_t, const char **);
+enum	mdoc_msec mdoc_atomsec(const char *);
+enum	mdoc_vol  mdoc_atovol(const char *);
+enum	mdoc_arch mdoc_atoarch(const char *);
+time_t		  mdoc_atotime(const char *);
+
+int		  macro_text(MACRO_PROT_ARGS);
+int		  macro_scoped_implicit(MACRO_PROT_ARGS);
+int		  macro_prologue_ddate(MACRO_PROT_ARGS);
+int		  macro_prologue_dtitle(MACRO_PROT_ARGS);
 
 __END_DECLS
 

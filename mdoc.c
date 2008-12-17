@@ -26,10 +26,6 @@
 
 #include "private.h"
 
-extern	int	macro_text(struct mdoc *, int, int, int *, char *);
-extern	int	macro_scoped_implicit(struct mdoc *, 
-			int, int, int *, char *);
-
 const	char *const __mdoc_macronames[MDOC_MAX] = {		 
 	"\\\"",		"Dd",		"Dt",		"Os",
 	"Sh",		"Ss",		"Pp",		"D1",
@@ -88,8 +84,8 @@ const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {
 
 const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* \" */
-	{ NULL, 0 }, /* Dd */
-	{ NULL, 0 }, /* Dt */
+	{ macro_prologue_ddate, 0 }, /* Dd */
+	{ macro_prologue_dtitle, 0 }, /* Dt */
 	{ NULL, 0 }, /* Os */
 	{ macro_scoped_implicit, 0 }, /* Sh */
 	{ macro_scoped_implicit, 0 }, /* Ss */ 
@@ -310,12 +306,7 @@ mdoc_parseln(struct mdoc *mdoc, char *buf)
 	while (buf[i] && isspace(buf[i]))
 		i++;
 
-	if (NULL == (mdoc_macros[c].fp)) {
-		(void)mdoc_err(mdoc, c, 1, ERR_MACRO_NOTSUP);
-		return(0);
-	} 
-
-	return((*mdoc_macros[c].fp)(mdoc, c, 1, &i, buf));
+	return(mdoc_macro(mdoc, c, 1, &i, buf));
 }
 
 
@@ -363,7 +354,9 @@ mdoc_macro(struct mdoc *mdoc, int tok, int ppos, int *pos, char *buf)
 	if (NULL == (mdoc_macros[tok].fp)) {
 		(void)mdoc_err(mdoc, tok, ppos, ERR_MACRO_NOTSUP);
 		return(0);
-	} else if ( ! (MDOC_CALLABLE & mdoc_macros[tok].flags)) {
+	}
+
+	if (1 != ppos && ! (MDOC_CALLABLE & mdoc_macros[tok].flags)) {
 		(void)mdoc_err(mdoc, tok, ppos, ERR_MACRO_NOTCALL);
 		return(0);
 	}

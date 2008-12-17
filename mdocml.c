@@ -265,9 +265,9 @@ parse_begin(struct md_parse *p)
 		for (i = 0; i < sz; i++) {
 			if ('\n' != p->buf[i]) {
 				if (pos < sizeof(line)) {
-					/* LINTED */
-					sv[pos] = p->buf[i];
-					line[pos++] = p->buf[i];
+					sv[(int)pos] = p->buf[(int)i];
+					line[(int)pos++] = 
+						p->buf[(int)i];
 					continue;
 				}
 				warnx("%s: line %d too long", 
@@ -306,6 +306,9 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 	case (ERR_SYNTAX_WS):
 		lit = "syntax: whitespace in argument";
 		break;
+	case (ERR_SYNTAX_ARGS):
+		fmt = "syntax: macro `%s' arguments malformed";
+		break;
 	case (ERR_SCOPE_BREAK):
 		/* Which scope is broken? */
 		fmt = "macro `%s' breaks prior explicit scope";
@@ -316,8 +319,26 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 	case (ERR_MACRO_NOTCALL):
 		fmt = "macro `%s' not callable";
 		break;
+	case (ERR_SEC_PROLOGUE):
+		fmt = "macro `%s' cannot be called in the prologue";
+		break;
+	case (ERR_SEC_NPROLOGUE):
+		fmt = "macro `%s' called outside of prologue";
+		break;
 	case (ERR_ARGS_GE1):
 		fmt = "macro `%s' expects one or more arguments";
+		break;
+	case (ERR_ARGS_MANY):
+		fmt = "macro `%s' has too many arguments";
+		break;
+	case (ERR_SEC_PROLOGUE_OO):
+		fmt = "prologue macro `%s' is out-of-order";
+		break;
+	case (ERR_SEC_PROLOGUE_REP):
+		fmt = "prologue macro `%s' repeated";
+		break;
+	case (ERR_SEC_NAME):
+		lit = "`NAME' section must be first";
 		break;
 	default:
 		abort();
@@ -333,7 +354,11 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 				p->name, p->lnn, lit);
 
 	if (p->dbg < 1) {
-		(void)fprintf(stderr, " (column %d)\n", col);
+		if (-1 != col)
+			(void)fprintf(stderr, " (column %d)\n", col);
+		return(0);
+	} else if (-1 == col) {
+		(void)fprintf(stderr, "\nFrom: %s", p->line);
 		return(0);
 	}
 
@@ -360,7 +385,11 @@ msg_msg(void *arg, int col, const char *msg)
 	(void)printf("%s:%d: %s", p->name, p->lnn, msg);
 
 	if (p->dbg < 3) {
-		(void)printf(" (column %d)\n", col);
+		if (-1 != col)
+			(void)printf(" (column %d)\n", col);
+		return;
+	} else if (-1 == col) {
+		(void)printf("\nFrom %s\n", p->line);
 		return;
 	}
 
@@ -392,6 +421,9 @@ msg_warn(void *arg, int tok, int col, enum mdoc_warn type)
 		break;
 	case (WARN_SYNTAX_MACLIKE):
 		lit = "syntax: macro-like argument";
+		break;
+	case (WARN_SEC_OO):
+		lit = "section is out of conventional order";
 		break;
 	case (WARN_ARGS_GE1):
 		fmt = "macro `%s' suggests one or more arguments";
