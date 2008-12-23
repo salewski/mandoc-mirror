@@ -27,7 +27,7 @@
 
 
 void
-mdoc_hash_free(void *htab)
+mdoc_tokhash_free(void *htab)
 {
 
 	free(htab);
@@ -35,7 +35,7 @@ mdoc_hash_free(void *htab)
 
 
 void *
-mdoc_hash_alloc(void)
+mdoc_tokhash_alloc(void)
 {
 	int		  i, major, minor, ind;
 	const void	**htab;
@@ -80,7 +80,7 @@ mdoc_hash_alloc(void)
 
 
 int
-mdoc_hash_find(const void *arg, const char *tmp)
+mdoc_tokhash_find(const void *arg, const char *tmp)
 {
 	int		  major, minor, ind, slot;
 	const void	**htab;

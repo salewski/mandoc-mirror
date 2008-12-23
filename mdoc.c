@@ -86,7 +86,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* \" */
 	{ macro_prologue_ddate, 0 }, /* Dd */
 	{ macro_prologue_dtitle, 0 }, /* Dt */
-	{ NULL, 0 }, /* Os */
+	{ macro_prologue_os, 0 }, /* Os */
 	{ macro_scoped_implicit, 0 }, /* Sh */
 	{ macro_scoped_implicit, 0 }, /* Ss */ 
 	{ NULL, 0 }, /* Pp */ 
@@ -94,8 +94,8 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* Dl */
 	{ NULL, 0 }, /* Bd */
 	{ NULL, 0 }, /* Ed */
-	{ NULL, 0 }, /* Bl */
-	{ NULL, 0 }, /* El */
+	{ macro_scoped_explicit, MDOC_EXPLICIT }, /* Bl */
+	{ macro_scoped_explicit, 0 }, /* El */
 	{ NULL, 0 }, /* It */
 	{ macro_text, MDOC_CALLABLE }, /* Ad */ 
 	{ NULL, 0 }, /* An */ 
@@ -196,9 +196,6 @@ const	char * const *mdoc_argnames = __mdoc_argnames;
 const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;
 
 
-static	void	 	 *xcalloc(size_t, size_t);
-static	char	 	 *xstrdup(const char *);
-
 static	struct mdoc_arg	 *argdup(size_t, const struct mdoc_arg *);
 static	void		  argfree(size_t, struct mdoc_arg *);
 static	void	  	  argcpy(struct mdoc_arg *, 
@@ -228,7 +225,7 @@ mdoc_free(struct mdoc *mdoc)
 	if (mdoc->first)
 		mdoc_node_freelist(mdoc->first);
 	if (mdoc->htab)
-		mdoc_hash_free(mdoc->htab);
+		mdoc_tokhash_free(mdoc->htab);
 	
 	free(mdoc);
 }
@@ -244,30 +241,8 @@ mdoc_alloc(void *data, const struct mdoc_cb *cb)
 	p->data = data;
 	(void)memcpy(&p->cb, cb, sizeof(struct mdoc_cb));
 
-	p->htab = mdoc_hash_alloc();
+	p->htab = mdoc_tokhash_alloc();
 	return(p);
-}
-
-
-static void *
-xcalloc(size_t num, size_t sz)
-{
-	void		*p;
-
-	if (NULL == (p = calloc(num, sz)))
-		err(EXIT_FAILURE, "calloc");
-	return(p);
-}
-
-
-static char *
-xstrdup(const char *p)
-{
-	char		*pp;
-
-	if (NULL == (pp = strdup(p)))
-		err(EXIT_FAILURE, "strdup");
-	return(pp);
 }
 
 
@@ -668,7 +643,7 @@ int
 mdoc_find(const struct mdoc *mdoc, const char *key)
 {
 
-	return(mdoc_hash_find(mdoc->htab, key));
+	return(mdoc_tokhash_find(mdoc->htab, key));
 }
 
 

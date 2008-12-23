@@ -193,11 +193,16 @@
 
 enum 	mdoc_err {
 	ERR_SYNTAX_QUOTE,
+	ERR_SYNTAX_UNQUOTE,
 	ERR_SYNTAX_WS,
 	ERR_SYNTAX_ARGS,
+	ERR_SYNTAX_BADARG,
+	ERR_SYNTAX_ARGVAL,
+	ERR_SYNTAX_ARGMANY,
 	ERR_MACRO_NOTSUP,
 	ERR_MACRO_NOTCALL,
 	ERR_SCOPE_BREAK,
+	ERR_SCOPE_NOCTX,
 	ERR_SEC_PROLOGUE,
 	ERR_SEC_NPROLOGUE,
 	ERR_SEC_PROLOGUE_OO,
@@ -211,7 +216,8 @@ enum	mdoc_warn {
 	WARN_SYNTAX_WS_EOLN,
 	WARN_SYNTAX_MACLIKE,
 	WARN_SEC_OO,
-	WARN_ARGS_GE1
+	WARN_ARGS_GE1,
+	WARN_SYNTAX_ARGLIKE
 };
 
 struct	mdoc_arg {
@@ -320,6 +326,8 @@ struct	mdoc_meta {
 	time_t		  date;
 #define	META_TITLE_SZ	 (64)
 	char		  title[META_TITLE_SZ];
+#define	META_OS_SZ	 (64)
+	char		  os[META_OS_SZ];
 };
 
 struct	mdoc_text {

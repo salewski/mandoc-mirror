@@ -63,9 +63,9 @@ void		  mdoc_body_alloc(struct mdoc *, int, int);
 void		  mdoc_node_free(struct mdoc_node *);
 void		  mdoc_sibling(struct mdoc *, int, struct mdoc_node **,
 			struct mdoc_node **, struct mdoc_node *);
-void		 *mdoc_hash_alloc(void);
-int		  mdoc_hash_find(const void *, const char *);
-void		  mdoc_hash_free(void *);
+void		 *mdoc_tokhash_alloc(void);
+int		  mdoc_tokhash_find(const void *, const char *);
+void		  mdoc_tokhash_free(void *);
 int		  mdoc_isdelim(const char *);
 enum	mdoc_sec  mdoc_atosec(size_t, const char **);
 enum	mdoc_msec mdoc_atomsec(const char *);
@@ -73,10 +73,23 @@ enum	mdoc_vol  mdoc_atovol(const char *);
 enum	mdoc_arch mdoc_atoarch(const char *);
 time_t		  mdoc_atotime(const char *);
 
+int		  mdoc_argv_lookup(int, const char *);
+int		  mdoc_argv_parse(struct mdoc *, int, 
+			int, struct mdoc_arg *, int *, char *);
+void		  mdoc_argv_free(int, struct mdoc_arg *);
+
+int	  	  xstrlcat(char *, const char *, size_t);
+int	  	  xstrlcpy(char *, const char *, size_t);
+int	  	  xstrcmp(const char *, const char *);
+void	 	 *xcalloc(size_t, size_t);
+char	 	 *xstrdup(const char *);
+
 int		  macro_text(MACRO_PROT_ARGS);
 int		  macro_scoped_implicit(MACRO_PROT_ARGS);
+int		  macro_scoped_explicit(MACRO_PROT_ARGS);
 int		  macro_prologue_ddate(MACRO_PROT_ARGS);
 int		  macro_prologue_dtitle(MACRO_PROT_ARGS);
+int		  macro_prologue_os(MACRO_PROT_ARGS);
 
 __END_DECLS
 

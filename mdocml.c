@@ -182,7 +182,12 @@ static void
 print_node(const struct mdoc_node *n, int indent)
 {
 	const char	*p, *t;
-	int		 i;
+	int		 i, j;
+	size_t		 argc;
+	struct mdoc_arg	*argv;
+
+	argv = NULL;
+	argc = 0;
 
 	switch (n->type) {
 	case (MDOC_TEXT):
@@ -202,10 +207,14 @@ print_node(const struct mdoc_node *n, int indent)
 		assert(NULL == n->child);
 		p = mdoc_macronames[n->data.elem.tok];
 		t = "element";
+		argv = n->data.elem.argv;
+		argc = n->data.elem.argc;
 		break;
 	case (MDOC_BLOCK):
 		p = mdoc_macronames[n->data.block.tok];
 		t = "block";
+		argv = n->data.block.argv;
+		argc = n->data.block.argc;
 		break;
 	default:
 		abort();
@@ -214,7 +223,15 @@ print_node(const struct mdoc_node *n, int indent)
 
 	for (i = 0; i < indent; i++)
 		(void)printf("    ");
-	(void)printf("%s (%s)\n", p, t);
+	(void)printf("%s (%s)", p, t);
+
+	for (i = 0; i < (int)argc; i++) {
+		(void)printf(" -%s", mdoc_argnames[argv[i].arg]);
+		for (j = 0; j < (int)argv[i].sz; j++)
+			(void)printf(" \"%s\"", argv[i].value[j]);
+	}
+
+	(void)printf("\n");
 
 	if (n->child)
 		print_node(n->child, indent + 1);
@@ -301,6 +318,9 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 
 	switch (type) {
 	case (ERR_SYNTAX_QUOTE):
+		lit = "syntax: disallowed argument quotation";
+		break;
+	case (ERR_SYNTAX_UNQUOTE):
 		lit = "syntax: unterminated quotation";
 		break;
 	case (ERR_SYNTAX_WS):
@@ -309,9 +329,15 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 	case (ERR_SYNTAX_ARGS):
 		fmt = "syntax: macro `%s' arguments malformed";
 		break;
+	case (ERR_SYNTAX_BADARG):
+		fmt = "syntax: unknown argument for macro `%s'";
+		break;
 	case (ERR_SCOPE_BREAK):
 		/* Which scope is broken? */
-		fmt = "macro `%s' breaks prior explicit scope";
+		fmt = "scope: macro `%s' breaks prior explicit scope";
+		break;
+	case (ERR_SCOPE_NOCTX):
+		fmt = "scope: closure macro `%s' has no context";
 		break;
 	case (ERR_MACRO_NOTSUP):
 		fmt = "macro `%s' not supported";
@@ -339,6 +365,12 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 		break;
 	case (ERR_SEC_NAME):
 		lit = "`NAME' section must be first";
+		break;
+	case (ERR_SYNTAX_ARGVAL):
+		lit = "syntax: expected value for macro argument";
+		break;
+	case (ERR_SYNTAX_ARGMANY):
+		lit = "syntax: too many values for macro argument";
 		break;
 	default:
 		abort();
@@ -421,6 +453,9 @@ msg_warn(void *arg, int tok, int col, enum mdoc_warn type)
 		break;
 	case (WARN_SYNTAX_MACLIKE):
 		lit = "syntax: macro-like argument";
+		break;
+	case (WARN_SYNTAX_ARGLIKE):
+		lit = "syntax: argument-like value";
 		break;
 	case (WARN_SEC_OO):
 		lit = "section is out of conventional order";
