@@ -27,52 +27,68 @@
 #define	_CC(p)	((const char **)p)
 
 static	int	  scope_rewind_exp(struct mdoc *, int, int, int);
+static	int	  scope_rewind_imp(struct mdoc *, int, int);
 static	int	  append_text(struct mdoc *, int, 
 			int, int, char *[]);
 static	int	  append_scoped(struct mdoc *, int, int, int, 
 			const char *[], int, const struct mdoc_arg *);
-static	int 	  args_next(struct mdoc *, int, 
-			int *, char *, char **);
-static	int 	  argv_next(struct mdoc *, int, 
-			int *, char *, struct mdoc_arg *);
-static	int 	  args_next_quoted(struct mdoc *, int, 
-			int *, char *, char **);
+static	int	  append_delims(struct mdoc *, int, int *, char *);
 
 
 static int
-args_next_quoted(struct mdoc *mdoc, int tok, 
-		int *pos, char *buf, char **v)
+append_delims(struct mdoc *mdoc, int tok, int *pos, char *buf)
 {
+	int		 c, lastarg;
+	char		*p;
 
-	if (0 == buf[*pos])
-		return(0);
-
-	assert( ! isspace(buf[*pos]));
-
-	if ('\"' != buf[*pos])
-		return(args_next(mdoc, tok, pos, buf, v));
-
-	*v = &buf[++(*pos)];
-
-	while (buf[*pos] && '\"' != buf[*pos])
-		(*pos)++;
-
-	if (0 == buf[*pos]) {
-		(void)mdoc_err(mdoc, tok, *pos, ERR_SYNTAX_UNQUOTE);
-		return(-1);
-	}
-
-	buf[(*pos)++] = 0;
 	if (0 == buf[*pos])
 		return(1);
 
-	while (buf[*pos] && isspace(buf[*pos]))
-		(*pos)++;
+	mdoc_msg(mdoc, *pos, "appending delimiters");
 
-	if (0 == buf[*pos]) 
-		if ( ! mdoc_warn(mdoc, tok, *pos, WARN_SYNTAX_WS_EOLN))
-			return(-1);
+	for (;;) {
+		lastarg = *pos;
+		c = mdoc_args(mdoc, tok, pos, buf, 0, &p);
+		if (ARGS_ERROR == c)
+			return(0);
+		else if (ARGS_EOLN == c)
+			break;
+		assert(mdoc_isdelim(p));
+		mdoc_word_alloc(mdoc, lastarg, p);
+	}
 
+	return(1);
+}
+
+
+static int
+scope_rewind_imp(struct mdoc *mdoc, int ppos, int tok)
+{
+	struct mdoc_node *n;
+	int		  t;
+
+	n = mdoc->last ? mdoc->last->parent : NULL;
+
+	/* LINTED */
+	for ( ; n; n = n->parent) {
+		if (MDOC_BLOCK != n->type) 
+			continue;
+		if (tok == (t = n->data.block.tok))
+			break;
+		if ( ! (MDOC_EXPLICIT & mdoc_macros[t].flags))
+			continue;
+		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_BREAK));
+	}
+
+	if (n) {
+		mdoc->last = n;
+		mdoc_msg(mdoc, ppos, "scope: rewound implicit `%s'",
+				mdoc_macronames[tok]);
+		return(1);
+	} 
+
+	mdoc_msg(mdoc, ppos, "scope: new implicit `%s'", 
+			mdoc_macronames[tok]);
 	return(1);
 }
 
@@ -82,8 +98,10 @@ scope_rewind_exp(struct mdoc *mdoc, int ppos, int tok, int dst)
 {
 	struct mdoc_node *n;
 
+	assert(mdoc->last);
+
 	/* LINTED */
-	for (n = mdoc->last; n; n = n->parent) {
+	for (n = mdoc->last->parent; n; n = n->parent) {
 		if (MDOC_BLOCK != n->type) 
 			continue;
 		if (dst == n->data.block.tok)
@@ -94,101 +112,8 @@ scope_rewind_exp(struct mdoc *mdoc, int ppos, int tok, int dst)
 	if (NULL == (mdoc->last = n))
 		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_NOCTX));
 
-	mdoc_msg(mdoc, ppos, "scope: rewound `%s' to `%s'",
+	mdoc_msg(mdoc, ppos, "scope: rewound explicit `%s' to `%s'",
 			mdoc_macronames[tok], mdoc_macronames[dst]);
-
-	return(1);
-}
-
-
-static int
-argv_next(struct mdoc *mdoc, int tok, 
-		int *pos, char *buf, struct mdoc_arg *v)
-{
-	char		*argv;
-	int		 i, val;
-
-	if (0 == buf[*pos])
-		return(0);
-
-	assert( ! isspace(buf[*pos]));
-
-	if ('-' != buf[*pos]) {
-		(void)mdoc_err(mdoc, tok, *pos, ERR_SYNTAX_ARGS);
-		return(-1);
-	}
-
-	i = *pos;
-	argv = &buf[++(*pos)];
-
-	while (buf[*pos] && ! isspace(buf[*pos]))
-		(*pos)++;
-
-	if (buf[*pos])
-		buf[(*pos)++] = 0;
-
-	/*
-	 * XXX This is a little bit ugly.  The mdoc_argv structure
-	 * points to a pointer array, which we allocate on-the-fly in
-	 * this function.  If there's any failure, we need to release
-	 * this memory, which is done by the caller of this function
-	 * with mdoc_argv_free.  Ew.  This should be simpler.
-	 */
-
-	if (MDOC_ARG_MAX == (val = mdoc_argv_lookup(tok, argv))) {
-		(void)mdoc_err(mdoc, tok, i, ERR_SYNTAX_BADARG);
-		return(-1);
-	}
-
-	while (buf[*pos] && isspace(buf[*pos]))
-		(*pos)++;
-
-	if ( ! mdoc_argv_parse(mdoc, tok, val, v, pos, buf))
-		return(-1);
-
-	return(1);
-}
-
-
-static int
-args_next(struct mdoc *mdoc, int tok, 
-		int *pos, char *buf, char **v)
-{
-
-	if (0 == buf[*pos])
-		return(0);
-
-	assert( ! isspace(buf[*pos]));
-
-	if ('\"' == buf[*pos]) {
-		(void)mdoc_err(mdoc, tok, *pos, ERR_SYNTAX_QUOTE);
-		return(-1);
-	}
-
-	*v = &buf[*pos];
-
-	/* Scan ahead to end of token. */
-
-	while (buf[*pos] && ! isspace(buf[*pos]))
-		(*pos)++;
-
-	if (buf[*pos] && buf[*pos + 1] && '\\' == buf[*pos]) {
-		(void)mdoc_err(mdoc, tok, *pos, ERR_SYNTAX_WS);
-		return(-1);
-	}
-
-	if (0 == buf[*pos])
-		return(1);
-
-	/* Scan ahead over trailing whitespace. */
-
-	buf[(*pos)++] = 0;
-	while (buf[*pos] && isspace(buf[*pos]))
-		(*pos)++;
-
-	if (0 == buf[*pos]) 
-		if ( ! mdoc_warn(mdoc, tok, *pos, WARN_SYNTAX_WS_EOLN))
-			return(-1);
 
 	return(1);
 }
@@ -199,7 +124,8 @@ append_scoped(struct mdoc *mdoc, int tok, int pos,
 		int sz, const char *args[], 
 		int argc, const struct mdoc_arg *argv)
 {
-	enum mdoc_sec	 sec;
+	enum mdoc_sec	  sec;
+	struct mdoc_node *node;
 
 	switch (tok) {
 	 /* ======= ADD MORE MACRO CHECKS BELOW. ======= */
@@ -223,6 +149,17 @@ append_scoped(struct mdoc *mdoc, int tok, int pos,
 	case (MDOC_Ss):
 		if (0 == sz) 
 			return(mdoc_err(mdoc, tok, pos, ERR_ARGS_GE1));
+		break;
+	
+	case (MDOC_Bd):
+		assert(mdoc->last);
+		for (node = mdoc->last->parent; node; node = node->parent) {
+			if (node->type != MDOC_BLOCK)
+				continue;
+			if (node->data.block.tok != MDOC_Bd)
+				continue;
+			return(mdoc_err(mdoc, tok, pos, ERR_SCOPE_NONEST));
+		}
 		break;
 
 	case (MDOC_Bl):
@@ -251,6 +188,13 @@ append_text(struct mdoc *mdoc, int tok,
 
 	switch (tok) {
 	 /* ======= ADD MORE MACRO CHECKS BELOW. ======= */
+	case (MDOC_Pp):
+		if (0 == sz)
+			break;
+		if ( ! mdoc_warn(mdoc, tok, pos, WARN_ARGS_EQ0))
+			return(0);
+		break;
+
 	case (MDOC_Ft):
 		/* FALLTHROUGH */
 	case (MDOC_Li):
@@ -265,12 +209,15 @@ append_text(struct mdoc *mdoc, int tok,
 		if ( ! mdoc_warn(mdoc, tok, pos, WARN_ARGS_GE1))
 			return(0);
 		break;
+
 	case (MDOC_Ar):
 		/* FALLTHROUGH */
 	case (MDOC_Cm):
 		/* FALLTHROUGH */
 	case (MDOC_Fl):
+		/* These can have no arguments. */
 		break;
+
 	case (MDOC_Ad):
 		/* FALLTHROUGH */
 	case (MDOC_Em):
@@ -297,8 +244,7 @@ append_text(struct mdoc *mdoc, int tok,
 		/* NOTREACHED */
 	}
 
-	mdoc_elem_alloc(mdoc, pos, tok, 0, 
-			NULL, (size_t)sz, _CC(args));
+	mdoc_elem_alloc(mdoc, pos, tok, 0, NULL, (size_t)sz, _CC(args));
 	return(1);
 }
 
@@ -306,59 +252,109 @@ append_text(struct mdoc *mdoc, int tok,
 int
 macro_text(MACRO_PROT_ARGS)
 {
-	int		  lastarg, c, lasttok, lastpunct, j;
+	int		  lastarg, lastpunct, c, j;
 	char		 *args[MDOC_LINEARG_MAX], *p;
-
-	lasttok = ppos;
-	lastpunct = 0;
-	j = 0;
 
 	if (SEC_PROLOGUE == mdoc->sec_lastn)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE));
 
-again:
-	lastarg = *pos;
+	/* Token pre-processing.  */
 
-	if (j == MDOC_LINEARG_MAX)
-		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
-	c = args_next(mdoc, tok, pos, buf, &args[j]);
-	
-	if (-1 == c) 
-		return(0);
-	if (0 == c && ! lastpunct)
-		return(append_text(mdoc, tok, lasttok, j, args));
-	else if (0 == c)
-		return(1);
-
-	/* Command found. */
-
-	if (MDOC_MAX != (c = mdoc_find(mdoc, args[j]))) {
-		if ( ! lastpunct)
-			if ( ! append_text(mdoc, tok, lasttok, j, args))
+	switch (tok) {
+	case (MDOC_Pp):
+		/* `.Pp' ignored when following `.Sh' or `.Ss'. */
+		assert(mdoc->last);
+		if (MDOC_BODY != mdoc->last->type)
+			break;
+		switch (mdoc->last->data.body.tok) {
+		case (MDOC_Ss):
+			/* FALLTHROUGH */
+		case (MDOC_Sh):
+			if ( ! mdoc_warn(mdoc, tok, ppos, WARN_IGN_AFTER_BLK))
 				return(0);
-		return(mdoc_macro(mdoc, c, lastarg, pos, buf));
+			return(1);
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
 	}
 
-	/* Word found. */
+	/* Process line parameters. */
+
+	j = 0;
+	lastarg = ppos;
+	lastpunct = 0;
+
+again:
+	if (j == MDOC_LINEARG_MAX)
+		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
+
+	/* 
+	 * Parse out the next argument, unquoted and unescaped.   If
+	 * we're a word (which may be punctuation followed eventually by
+	 * a real word), then fall into checking for callables.  If
+	 * only punctuation remains and we're the first, then flush
+	 * arguments, punctuation and exit; else, return to the caller.
+	 */
+
+	lastarg = *pos;
+
+	switch (mdoc_args(mdoc, tok, pos, buf, ARGS_DELIM, &args[j])) {
+	case (ARGS_ERROR):
+		return(0);
+	case (ARGS_WORD):
+		break;
+	case (ARGS_PUNCT):
+		if ( ! lastpunct && ! append_text(mdoc, tok, ppos, j, args))
+			return(0);
+		return(append_delims(mdoc, tok, pos, buf));
+	case (ARGS_EOLN):
+		return(append_text(mdoc, tok, ppos, j, args));
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	/* 
+	 * Command found.  First flush out arguments, then call the
+	 * command.  If we're the line macro when it exits, flush
+	 * terminal punctuation.
+	 */
+
+	if (MDOC_MAX != (c = mdoc_find(mdoc, args[j]))) {
+		if ( ! lastpunct && ! append_text(mdoc, tok, ppos, j, args))
+			return(0);
+		if ( ! mdoc_macro(mdoc, c, lastarg, pos, buf))
+			return(0);
+		if (ppos > 1)
+			return(1);
+		return(append_delims(mdoc, tok, pos, buf));
+	}
+
+	/* Word/non-term-punctuation found. */
 
 	if ( ! mdoc_isdelim(args[j])) {
+		/* Words are appended to the array of arguments. */
 		j++;
+		lastpunct = 1;
 		goto again;
 	}
 
-	/* Punctuation found.  */
+	/* 
+	 * For punctuation, flush all collected words, then flush
+	 * punctuation, then start collecting again.   Of course, this
+	 * is non-terminal punctuation.
+	 */
 
-	p = args[j]; /* Save argument (NULL-ified in append). */
+	p = args[j];
+	if ( ! lastpunct && ! append_text(mdoc, tok, ppos, j, args))
+		return(0);
 
-	if ( ! lastpunct)
-		if ( ! append_text(mdoc, tok, lasttok, j, args))
-			return(0);
-
-	args[j] = p;
-
-	mdoc_word_alloc(mdoc, lastarg, args[j]);
-	lastpunct = 1;
+	mdoc_word_alloc(mdoc, lastarg, p);
 	j = 0;
+	lastpunct = 1;
 
 	goto again;
 
@@ -369,7 +365,7 @@ again:
 int
 macro_prologue_dtitle(MACRO_PROT_ARGS)
 {
-	int		  c, lastarg, j;
+	int		  lastarg, j;
 	char		 *args[MDOC_LINEARG_MAX];
 
 	if (SEC_PROLOGUE != mdoc->sec_lastn)
@@ -380,15 +376,16 @@ macro_prologue_dtitle(MACRO_PROT_ARGS)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE_REP));
 
 	j = -1;
+	lastarg = ppos;
 
 again:
-	lastarg = *pos;
-
 	if (j == MDOC_LINEARG_MAX)
 		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
-	c = args_next(mdoc, tok, pos, buf, &args[++j]);
 
-	if (0 == c) {
+	lastarg = *pos;
+
+	switch (mdoc_args(mdoc, tok, pos, buf, 0, &args[++j])) {
+	case (ARGS_EOLN):
 		if (mdoc->meta.title)
 			return(1);
 		if ( ! mdoc_warn(mdoc, tok, ppos, WARN_ARGS_GE1))
@@ -396,9 +393,12 @@ again:
 		(void)xstrlcpy(mdoc->meta.title, 
 				"UNTITLED", META_TITLE_SZ);
 		return(1);
-	} else if (-1 == c)
+	case (ARGS_ERROR):
 		return(0);
-	
+	default:
+		break;
+	}
+
 	if (MDOC_MAX != mdoc_find(mdoc, args[j]) && ! mdoc_warn
 			(mdoc, tok, lastarg, WARN_SYNTAX_MACLIKE))
 		return(0);
@@ -406,13 +406,13 @@ again:
 	if (0 == j) {
 		if (xstrlcpy(mdoc->meta.title, args[0], META_TITLE_SZ))
 			goto again;
-		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGS));
+		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGFORM));
 
 	} else if (1 == j) {
 		mdoc->meta.msec = mdoc_atomsec(args[1]);
 		if (MSEC_DEFAULT != mdoc->meta.msec)
 			goto again;
-		return(mdoc_err(mdoc, tok, -1, ERR_SYNTAX_ARGS));
+		return(mdoc_err(mdoc, tok, -1, ERR_SYNTAX_ARGFORM));
 
 	} else if (2 == j) {
 		mdoc->meta.vol = mdoc_atovol(args[2]);
@@ -421,7 +421,7 @@ again:
 		mdoc->meta.arch = mdoc_atoarch(args[2]);
 		if (ARCH_DEFAULT != mdoc->meta.arch)
 			goto again;
-		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGS));
+		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGFORM));
 	}
 
 	return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
@@ -431,7 +431,7 @@ again:
 int
 macro_prologue_os(MACRO_PROT_ARGS)
 {
-	int		  c, lastarg, j;
+	int		  lastarg, j;
 	char		 *args[MDOC_LINEARG_MAX];
 
 	if (SEC_PROLOGUE != mdoc->sec_lastn)
@@ -442,24 +442,29 @@ macro_prologue_os(MACRO_PROT_ARGS)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE_REP));
 
 	j = -1;
+	lastarg = ppos;
 
 again:
-	lastarg = *pos;
-
 	if (j == MDOC_LINEARG_MAX)
 		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
-	c = args_next_quoted(mdoc, tok, pos, buf, &args[++j]);
 
-	if (0 == c) {
+	lastarg = *pos;
+
+	switch (mdoc_args(mdoc, tok, pos, buf, 
+				ARGS_QUOTED, &args[++j])) {
+	case (ARGS_EOLN):
 		mdoc->sec_lastn = mdoc->sec_last = SEC_BODY;
 		return(1);
-	} else if (-1 == c) 
+	case (ARGS_ERROR):
 		return(0);
+	default:
+		break;
+	}
 	
 	if ( ! xstrlcat(mdoc->meta.os, args[j], sizeof(mdoc->meta.os)))
-		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGS));
+		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGFORM));
 	if ( ! xstrlcat(mdoc->meta.os, " ", sizeof(mdoc->meta.os)))
-		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGS));
+		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGFORM));
 
 	goto again;
 	/* NOTREACHED */
@@ -469,7 +474,7 @@ again:
 int
 macro_prologue_ddate(MACRO_PROT_ARGS)
 {
-	int		  c, lastarg, j;
+	int		  lastarg, j;
 	char		 *args[MDOC_LINEARG_MAX], date[64];
 
 	if (SEC_PROLOGUE != mdoc->sec_lastn)
@@ -481,23 +486,26 @@ macro_prologue_ddate(MACRO_PROT_ARGS)
 
 	j = -1;
 	date[0] = 0;
+	lastarg = ppos;
 
 again:
-	lastarg = *pos;
-
 	if (j == MDOC_LINEARG_MAX)
 		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
-	c = args_next(mdoc, tok, pos, buf, &args[++j]);
 
-	if (0 == c) {
+	lastarg = *pos;
+	switch (mdoc_args(mdoc, tok, pos, buf, 0, &args[++j])) {
+	case (ARGS_EOLN):
 		if (mdoc->meta.date)
 			return(1);
 		mdoc->meta.date = mdoc_atotime(date);
 		if (mdoc->meta.date)
 			return(1);
-		return(mdoc_err(mdoc, tok, ppos, ERR_SYNTAX_ARGS));
-	} else if (-1 == c) 
+		return(mdoc_err(mdoc, tok, ppos, ERR_SYNTAX_ARGFORM));
+	case (ARGS_ERROR):
 		return(0);
+	default:
+		break;
+	}
 	
 	if (MDOC_MAX != mdoc_find(mdoc, args[j]) && ! mdoc_warn
 			(mdoc, tok, lastarg, WARN_SYNTAX_MACLIKE))
@@ -514,9 +522,9 @@ again:
 			goto again;
 
 	if ( ! xstrlcat(date, args[j], sizeof(date)))
-		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGS));
+		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGFORM));
 	if ( ! xstrlcat(date, " ", sizeof(date)))
-		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGS));
+		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGFORM));
 
 	goto again;
 	/* NOTREACHED */
@@ -528,6 +536,7 @@ macro_scoped_explicit(MACRO_PROT_ARGS)
 {
 	int		  c, lastarg, j;
 	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
+	struct mdoc_node *n;
 
 	if (SEC_PROLOGUE == mdoc->sec_lastn)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE));
@@ -541,17 +550,43 @@ macro_scoped_explicit(MACRO_PROT_ARGS)
 	switch (tok) {
 	case (MDOC_El):
 		return(scope_rewind_exp(mdoc, ppos, tok, MDOC_Bl));
+	case (MDOC_Ed):
+		return(scope_rewind_exp(mdoc, ppos, tok, MDOC_Bd));
 	default:
 		break;
 	}
 
 	assert(MDOC_EXPLICIT & mdoc_macros[tok].flags);
 
+	/* Token pre-processing. */
+
+	switch (tok) {
+	case (MDOC_Bl):
+		/* FALLTHROUGH */
+	case (MDOC_Bd):
+		/* `.Pp' ignored when preceding `.Bl' or `.Bd'. */
+		assert(mdoc->last);
+		if (MDOC_ELEM != mdoc->last->type)
+			break;
+		if (MDOC_Pp != mdoc->last->data.elem.tok)
+			break;
+		if ( ! mdoc_warn(mdoc, tok, ppos, WARN_IGN_BEFORE_BLK))
+			return(0);
+		assert(mdoc->last->prev);
+		n = mdoc->last;
+		mdoc->last = mdoc->last->prev;
+		mdoc->last->next = NULL;
+		mdoc_node_free(n);
+		break;
+	default:
+		break;
+	}
+
 	lastarg = *pos;
 
 	for (j = 0; j < MDOC_LINEARG_MAX; j++) {
 		lastarg = *pos;
-		c = argv_next(mdoc, tok, pos, buf, &argv[j]);
+		c = mdoc_argv(mdoc, tok, &argv[j], pos, buf);
 		if (0 == c)
 			break;
 		else if (1 == c)
@@ -575,7 +610,7 @@ macro_scoped_explicit(MACRO_PROT_ARGS)
 int
 macro_scoped_implicit(MACRO_PROT_ARGS)
 {
-	int		  t, c, lastarg, j;
+	int		  lastarg, j;
 	char		 *args[MDOC_LINEARG_MAX];
 	struct mdoc_node *n;
 
@@ -584,45 +619,63 @@ macro_scoped_implicit(MACRO_PROT_ARGS)
 	if (SEC_PROLOGUE == mdoc->sec_lastn)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE));
 
-	/* FIXME: put into scope_rewind_imp(). */
+	/* Token pre-processing. */
 
-	/* LINTED */
-	for (n = mdoc->last; n; n = n->parent) {
-		if (MDOC_BLOCK != n->type) 
-			continue;
-		if (tok == (t = n->data.block.tok))
+	switch (tok) {
+	case (MDOC_Ss):
+		/* FALLTHROUGH */
+	case (MDOC_Sh):
+		/* `.Pp' ignored when preceding `.Ss' or `.Sh'. */
+		if (NULL == mdoc->last)
 			break;
-		if ( ! (MDOC_EXPLICIT & mdoc_macros[t].flags))
-			continue;
-		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_BREAK));
+		if (MDOC_ELEM != mdoc->last->type)
+			break;
+		if (MDOC_Pp != mdoc->last->data.elem.tok)
+			break;
+		if ( ! mdoc_warn(mdoc, tok, ppos, WARN_IGN_BEFORE_BLK))
+			return(0);
+		assert(mdoc->last->prev);
+		n = mdoc->last;
+		mdoc->last = mdoc->last->prev;
+		mdoc->last->next = NULL;
+		mdoc_node_free(n);
+		break;
+	default:
+		break;
 	}
 
-	if (n) {
-		mdoc->last = n;
-		mdoc_msg(mdoc, ppos, "scope: rewound `%s'",
-				mdoc_macronames[tok]);
-	} else
-		mdoc_msg(mdoc, ppos, "scope: new `%s'",
-				mdoc_macronames[tok]);
+	switch (tok) {
+	case (MDOC_Sh):
+		/* FALLTHROUGH */
+	case (MDOC_Ss):
+		if ( ! scope_rewind_imp(mdoc, ppos, tok))
+			return(0);
+		break;
+	default:
+		break;
+	}
 
 	j = 0;
+	lastarg = ppos;
 
 again:
-	lastarg = *pos;
-
 	if (j == MDOC_LINEARG_MAX)
 		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
-	c = args_next(mdoc, tok, pos, buf, &args[j]);
-	
-	if (-1 == c) 
+
+	lastarg = *pos;
+
+	switch (mdoc_args(mdoc, tok, pos, buf, 0, &args[j])) {
+	case (ARGS_ERROR):
 		return(0);
-	if (0 == c)
-		return(append_scoped(mdoc, tok, ppos, 
-					j, _CC(args), 0, NULL));
+	case (ARGS_EOLN):
+		return(append_scoped(mdoc, tok, ppos, j, _CC(args), 0, NULL));
+	default:
+		break;
+	}
 
 	/* Command found. */
 
-	if (MDOC_MAX != (c = mdoc_find(mdoc, args[j])))
+	if (MDOC_MAX != mdoc_find(mdoc, args[j]))
 		if ( ! mdoc_warn(mdoc, tok, lastarg, WARN_SYNTAX_MACLIKE))
 			return(0);
 
@@ -634,3 +687,10 @@ again:
 	/* NOTREACHED */
 }
 
+
+int
+macro_scoped_line(MACRO_PROT_ARGS)
+{
+
+	return(1);
+}

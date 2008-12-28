@@ -67,16 +67,25 @@ void		 *mdoc_tokhash_alloc(void);
 int		  mdoc_tokhash_find(const void *, const char *);
 void		  mdoc_tokhash_free(void *);
 int		  mdoc_isdelim(const char *);
+int		  mdoc_iscdelim(char);
 enum	mdoc_sec  mdoc_atosec(size_t, const char **);
 enum	mdoc_msec mdoc_atomsec(const char *);
 enum	mdoc_vol  mdoc_atovol(const char *);
 enum	mdoc_arch mdoc_atoarch(const char *);
 time_t		  mdoc_atotime(const char *);
 
-int		  mdoc_argv_lookup(int, const char *);
-int		  mdoc_argv_parse(struct mdoc *, int, 
-			int, struct mdoc_arg *, int *, char *);
+int		  mdoc_argv(struct mdoc *, int, 
+			struct mdoc_arg *, int *, char *);
 void		  mdoc_argv_free(int, struct mdoc_arg *);
+int		  mdoc_args(struct mdoc *, int,
+			int *, char *, int, char **);
+#define	ARGS_ERROR	(-1)
+#define	ARGS_EOLN	(0)
+#define	ARGS_WORD	(1)
+#define	ARGS_PUNCT	(2)
+
+#define	ARGS_QUOTED	(1 << 0)
+#define	ARGS_DELIM	(1 << 1)
 
 int	  	  xstrlcat(char *, const char *, size_t);
 int	  	  xstrlcpy(char *, const char *, size_t);

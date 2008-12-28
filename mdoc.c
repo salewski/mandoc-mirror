@@ -89,11 +89,11 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_prologue_os, 0 }, /* Os */
 	{ macro_scoped_implicit, 0 }, /* Sh */
 	{ macro_scoped_implicit, 0 }, /* Ss */ 
-	{ NULL, 0 }, /* Pp */ 
+	{ macro_text, 0 }, /* Pp */ 
 	{ NULL, 0 }, /* D1 */
 	{ NULL, 0 }, /* Dl */
-	{ NULL, 0 }, /* Bd */
-	{ NULL, 0 }, /* Ed */
+	{ macro_scoped_explicit, MDOC_EXPLICIT }, /* Bd */
+	{ macro_scoped_explicit, 0 }, /* Ed */
 	{ macro_scoped_explicit, MDOC_EXPLICIT }, /* Bl */
 	{ macro_scoped_explicit, 0 }, /* El */
 	{ NULL, 0 }, /* It */
@@ -252,9 +252,9 @@ mdoc_parseln(struct mdoc *mdoc, char *buf)
 	int		  c, i;
 	char		  tmp[5];
 
-	if ('.' != *buf)  {
-		/* TODO. */
-		return(1); 
+	if ('.' != *buf) {
+		mdoc_word_alloc(mdoc, 0, buf);
+		return(1);
 	}
 
 	if (buf[1] && '\\' == buf[1])
@@ -347,7 +347,7 @@ mdoc_node_append(struct mdoc *mdoc, int pos, struct mdoc_node *p)
 
 	switch (p->type) {
 	case (MDOC_TEXT):
-		nn = "<text>";
+		nn = p->data.text.string;
 		nt = "text";
 		break;
 	case (MDOC_BODY):
@@ -416,6 +416,7 @@ mdoc_node_append(struct mdoc *mdoc, int pos, struct mdoc_node *p)
 		case (MDOC_HEAD):
 			p->parent = mdoc->last->parent;
 			mdoc->last->next = p;
+			p->prev = mdoc->last;
 			act = "sibling";
 			break;
 		default:
@@ -440,6 +441,7 @@ mdoc_node_append(struct mdoc *mdoc, int pos, struct mdoc_node *p)
 			break;
 		default:
 			p->parent = mdoc->last->parent;
+			p->prev = mdoc->last;
 			mdoc->last->next = p;
 			act = "sibling";
 			break;

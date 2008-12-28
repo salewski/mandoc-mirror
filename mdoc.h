@@ -192,17 +192,19 @@
 #define	MDOC_ARG_MAX	 60
 
 enum 	mdoc_err {
-	ERR_SYNTAX_QUOTE,
+	ERR_SYNTAX_QUOTE, /* NOTUSED */
 	ERR_SYNTAX_UNQUOTE,
 	ERR_SYNTAX_WS,
-	ERR_SYNTAX_ARGS,
-	ERR_SYNTAX_BADARG,
+	ERR_SYNTAX_ARG,
+	ERR_SYNTAX_ARGFORM,
 	ERR_SYNTAX_ARGVAL,
+	ERR_SYNTAX_ARGBAD,
 	ERR_SYNTAX_ARGMANY,
 	ERR_MACRO_NOTSUP,
 	ERR_MACRO_NOTCALL,
 	ERR_SCOPE_BREAK,
 	ERR_SCOPE_NOCTX,
+	ERR_SCOPE_NONEST,
 	ERR_SEC_PROLOGUE,
 	ERR_SEC_NPROLOGUE,
 	ERR_SEC_PROLOGUE_OO,
@@ -215,9 +217,13 @@ enum 	mdoc_err {
 enum	mdoc_warn {
 	WARN_SYNTAX_WS_EOLN,
 	WARN_SYNTAX_MACLIKE,
+	WARN_SYNTAX_ARGLIKE,
+	WARN_SYNTAX_QUOTED,
+	WARN_IGN_AFTER_BLK,
+	WARN_IGN_BEFORE_BLK,
 	WARN_SEC_OO,
 	WARN_ARGS_GE1,
-	WARN_SYNTAX_ARGLIKE
+	WARN_ARGS_EQ0,
 };
 
 struct	mdoc_arg {
@@ -370,6 +376,7 @@ struct	mdoc_node {
 	struct mdoc_node *parent;
 	struct mdoc_node *child;
 	struct mdoc_node *next;
+	struct mdoc_node *prev;
 	enum mdoc_type	  type;
 	union mdoc_data	  data;
 };

@@ -192,7 +192,7 @@ print_node(const struct mdoc_node *n, int indent)
 	switch (n->type) {
 	case (MDOC_TEXT):
 		assert(NULL == n->child);
-		p = "<text>";
+		p = n->data.text.string;
 		t = "text";
 		break;
 	case (MDOC_BODY):
@@ -326,10 +326,10 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 	case (ERR_SYNTAX_WS):
 		lit = "syntax: whitespace in argument";
 		break;
-	case (ERR_SYNTAX_ARGS):
+	case (ERR_SYNTAX_ARGFORM):
 		fmt = "syntax: macro `%s' arguments malformed";
 		break;
-	case (ERR_SYNTAX_BADARG):
+	case (ERR_SYNTAX_ARG):
 		fmt = "syntax: unknown argument for macro `%s'";
 		break;
 	case (ERR_SCOPE_BREAK):
@@ -338,6 +338,9 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 		break;
 	case (ERR_SCOPE_NOCTX):
 		fmt = "scope: closure macro `%s' has no context";
+		break;
+	case (ERR_SCOPE_NONEST):
+		fmt = "scope: macro `%s' may not be nested";
 		break;
 	case (ERR_MACRO_NOTSUP):
 		fmt = "macro `%s' not supported";
@@ -368,6 +371,9 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 		break;
 	case (ERR_SYNTAX_ARGVAL):
 		lit = "syntax: expected value for macro argument";
+		break;
+	case (ERR_SYNTAX_ARGBAD):
+		lit = "syntax: invalid value for macro argument";
 		break;
 	case (ERR_SYNTAX_ARGMANY):
 		lit = "syntax: too many values for macro argument";
@@ -451,6 +457,9 @@ msg_warn(void *arg, int tok, int col, enum mdoc_warn type)
 	case (WARN_SYNTAX_WS_EOLN):
 		lit = "syntax: whitespace at end-of-line";
 		break;
+	case (WARN_SYNTAX_QUOTED):
+		lit = "syntax: quotation mark starting string";
+		break;
 	case (WARN_SYNTAX_MACLIKE):
 		lit = "syntax: macro-like argument";
 		break;
@@ -462,6 +471,15 @@ msg_warn(void *arg, int tok, int col, enum mdoc_warn type)
 		break;
 	case (WARN_ARGS_GE1):
 		fmt = "macro `%s' suggests one or more arguments";
+		break;
+	case (WARN_ARGS_EQ0):
+		fmt = "macro `%s' suggests zero arguments";
+		break;
+	case (WARN_IGN_AFTER_BLK):
+		fmt = "ignore: macro `%s' ignored after block macro";
+		break;
+	case (WARN_IGN_BEFORE_BLK):
+		fmt = "ignore: macro before block macro `%s' ignored";
 		break;
 	default:
 		abort();

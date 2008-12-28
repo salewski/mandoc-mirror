@@ -25,15 +25,10 @@
 #include "private.h"
 
 int
-mdoc_isdelim(const char *p)
+mdoc_iscdelim(char p)
 {
 
-	if (0 == *p)
-		return(0);
-	if (0 != *(p + 1))
-		return(0);
-
-	switch (*p) {
+	switch (p) {
 	case('{'):
 		/* FALLTHROUGH */
 	case('.'):
@@ -63,6 +58,18 @@ mdoc_isdelim(const char *p)
 	}
 
 	return(0);
+}
+
+
+int
+mdoc_isdelim(const char *p)
+{
+
+	if (0 == *p)
+		return(0);
+	if (0 != *(p + 1))
+		return(0);
+	return(mdoc_iscdelim(*p));
 }
 
 
