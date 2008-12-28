@@ -224,6 +224,7 @@ enum	mdoc_warn {
 	WARN_SEC_OO,
 	WARN_ARGS_GE1,
 	WARN_ARGS_EQ0,
+	WARN_COMPAT_TROFF
 };
 
 struct	mdoc_arg {

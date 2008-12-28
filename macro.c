@@ -154,7 +154,9 @@ append_scoped(struct mdoc *mdoc, int tok, int pos,
 	
 	case (MDOC_Bd):
 		assert(mdoc->last);
-		for (node = mdoc->last->parent; node; node = node->parent) {
+		node = mdoc->last->parent; 
+		/* LINTED */
+		for ( ; node; node = node->parent) {
 			if (node->type != MDOC_BLOCK)
 				continue;
 			if (node->data.block.tok != MDOC_Bd)
@@ -791,6 +793,11 @@ again:
 }
 
 
+/* 
+ * Partial-line scope is identical to line scope (macro_scoped_line())
+ * except that trailing punctuation is appended to the BLOCK, instead of
+ * contained within the HEAD.
+ */
 int
 macro_scoped_pline(MACRO_PROT_ARGS)
 {
@@ -803,6 +810,10 @@ macro_scoped_pline(MACRO_PROT_ARGS)
 	/* Token pre-processing.  */
 
 	switch (tok) {
+	case (MDOC_Ql):
+		if ( ! mdoc_warn(mdoc, tok, ppos, WARN_COMPAT_TROFF))
+			return(0);
+		break;
 	default:
 		break;
 	}

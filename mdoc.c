@@ -137,18 +137,18 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* %V */
 	{ NULL, 0 }, /* Ac */
 	{ NULL, 0 }, /* Ao */
-	{ NULL, 0 }, /* Aq */
+	{ macro_scoped_pline, MDOC_CALLABLE }, /* Aq */
 	{ NULL, 0 }, /* At */
 	{ NULL, 0 }, /* Bc */
 	{ NULL, 0 }, /* Bf */ 
 	{ NULL, 0 }, /* Bo */
-	{ NULL, 0 }, /* Bq */
+	{ macro_scoped_pline, MDOC_CALLABLE }, /* Bq */
 	{ NULL, 0 }, /* Bsx */
 	{ NULL, 0 }, /* Bx */
 	{ NULL, 0 }, /* Db */
 	{ NULL, 0 }, /* Dc */
 	{ NULL, 0 }, /* Do */
-	{ NULL, 0 }, /* Dq */
+	{ macro_scoped_pline, MDOC_CALLABLE }, /* Dq */
 	{ NULL, 0 }, /* Ec */
 	{ NULL, 0 }, /* Ef */
 	{ macro_text, MDOC_CALLABLE }, /* Em */ 
@@ -162,16 +162,16 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* Pc */
 	{ NULL, 0 }, /* Pf */
 	{ NULL, 0 }, /* Po */
-	{ NULL, 0 }, /* Pq */
+	{ macro_scoped_pline, MDOC_CALLABLE }, /* Pq */
 	{ NULL, 0 }, /* Qc */
-	{ NULL, 0 }, /* Ql */
+	{ macro_scoped_pline, MDOC_CALLABLE }, /* Ql */
 	{ NULL, 0 }, /* Qo */
 	{ macro_scoped_pline, MDOC_CALLABLE }, /* Qq */
 	{ NULL, 0 }, /* Re */
 	{ NULL, 0 }, /* Rs */
 	{ NULL, 0 }, /* Sc */
 	{ NULL, 0 }, /* So */
-	{ NULL, 0 }, /* Sq */
+	{ macro_scoped_pline, MDOC_CALLABLE }, /* Sq */
 	{ NULL, 0 }, /* Sm */
 	{ NULL, 0 }, /* Sx */
 	{ NULL, 0 }, /* Sy */
