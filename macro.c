@@ -44,7 +44,8 @@ append_delims(struct mdoc *mdoc, int tok, int *pos, char *buf)
 	if (0 == buf[*pos])
 		return(1);
 
-	mdoc_msg(mdoc, *pos, "appending delimiters");
+	mdoc_msg(mdoc, *pos, "`%s' flushing punctuation",
+			mdoc_macronames[tok]);
 
 	for (;;) {
 		lastarg = *pos;
@@ -309,8 +310,12 @@ again:
 	case (ARGS_PUNCT):
 		if ( ! lastpunct && ! append_text(mdoc, tok, ppos, j, args))
 			return(0);
+		if (ppos > 1)
+			return(1);
 		return(append_delims(mdoc, tok, pos, buf));
 	case (ARGS_EOLN):
+		if (lastpunct)
+			return(1);
 		return(append_text(mdoc, tok, ppos, j, args));
 	default:
 		abort();
@@ -338,7 +343,7 @@ again:
 	if ( ! mdoc_isdelim(args[j])) {
 		/* Words are appended to the array of arguments. */
 		j++;
-		lastpunct = 1;
+		lastpunct = 0;
 		goto again;
 	}
 
@@ -357,7 +362,6 @@ again:
 	lastpunct = 1;
 
 	goto again;
-
 	/* NOTREACHED */
 }
 
@@ -607,6 +611,18 @@ macro_scoped_explicit(MACRO_PROT_ARGS)
 }
 
 
+/*
+ * Implicity-scoped macros, like `.Ss', have a scope that terminates
+ * with a subsequent call to the same macro.  Implicit macros cannot
+ * break the scope of explicitly-scoped macros; however, they can break
+ * the scope of other implicit macros (so `.Sh' can break `.Ss').  This
+ * is ok with macros like `.It' because they exist only within an
+ * explicit context.
+ *
+ * These macros put line arguments (which it's allowed to have) into the
+ * HEAD section and open a BODY scope to be used until the macro scope
+ * closes.
+ */
 int
 macro_scoped_implicit(MACRO_PROT_ARGS)
 {
@@ -636,6 +652,7 @@ macro_scoped_implicit(MACRO_PROT_ARGS)
 			return(0);
 		assert(mdoc->last->prev);
 		n = mdoc->last;
+		mdoc_msg(mdoc, ppos, "removing prior `Pp' macro");
 		mdoc->last = mdoc->last->prev;
 		mdoc->last->next = NULL;
 		mdoc_node_free(n);
@@ -644,19 +661,19 @@ macro_scoped_implicit(MACRO_PROT_ARGS)
 		break;
 	}
 
-	switch (tok) {
-	case (MDOC_Sh):
-		/* FALLTHROUGH */
-	case (MDOC_Ss):
-		if ( ! scope_rewind_imp(mdoc, ppos, tok))
-			return(0);
-		break;
-	default:
-		break;
-	}
+	/* Rewind our scope. */
+
+	if ( ! scope_rewind_imp(mdoc, ppos, tok))
+		return(0);
 
 	j = 0;
 	lastarg = ppos;
+
+	/*
+	 * Process until we hit a line.  Note that current implicit
+	 * macros don't have any arguments, so we don't need to do any
+	 * argument processing.
+	 */
 
 again:
 	if (j == MDOC_LINEARG_MAX)
@@ -673,24 +690,171 @@ again:
 		break;
 	}
 
-	/* Command found. */
-
 	if (MDOC_MAX != mdoc_find(mdoc, args[j]))
 		if ( ! mdoc_warn(mdoc, tok, lastarg, WARN_SYNTAX_MACLIKE))
 			return(0);
 
-	/* Word found. */
-
 	j++;
 	goto again;
+	/* NOTREACHED */
+}
 
+
+/*
+ * A line-scoped macro opens a scope for the contents of its line, which
+ * are placed under the HEAD node.  Punctuation trailing the line is put
+ * as a sibling to the HEAD node, under the BLOCK node.  
+ */
+int
+macro_scoped_line(MACRO_PROT_ARGS)
+{
+	int		  lastarg, c, j;
+	char		  *p;
+	struct mdoc_node  *n;
+
+	if (SEC_PROLOGUE == mdoc->sec_lastn)
+		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE));
+
+	assert(1 == ppos);
+	
+	/* Token pre-processing.  */
+
+	switch (tok) {
+	case (MDOC_D1):
+		/* FALLTHROUGH */
+	case (MDOC_Dl):
+		/* These can't be nested in a display block. */
+		assert(mdoc->last);
+		for (n = mdoc->last->parent ; n; n = n->parent)
+			if (MDOC_BLOCK != n->type) 
+				continue;
+			else if (MDOC_Bd == n->data.block.tok)
+				break;
+		if (NULL == n)
+			break;
+		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_NONEST));
+	default:
+		break;
+	}
+
+	/*
+	 * All line-scoped macros have a HEAD and optionally a BODY
+	 * section.  We open our scope here; when we exit this function,
+	 * we'll rewind our scope appropriately.
+	 */
+
+	mdoc_block_alloc(mdoc, ppos, tok, 0, NULL);
+	mdoc_head_alloc(mdoc, ppos, tok, 0, NULL);
+
+	/* Process line parameters. */
+
+	j = 0;
+	lastarg = ppos;
+
+again:
+	if (j == MDOC_LINEARG_MAX)
+		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
+
+	lastarg = *pos;
+	c = mdoc_args(mdoc, tok, pos, buf, ARGS_DELIM, &p);
+
+	switch (c) {
+	case (ARGS_ERROR):
+		return(0);
+	case (ARGS_WORD):
+		break;
+	case (ARGS_PUNCT):
+		if ( ! append_delims(mdoc, tok, pos, buf))
+			return(0);
+		return(scope_rewind_imp(mdoc, ppos, tok));
+	case (ARGS_EOLN):
+		return(scope_rewind_imp(mdoc, ppos, tok));
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	if (MDOC_MAX != (c = mdoc_find(mdoc, p))) {
+		if ( ! mdoc_macro(mdoc, c, lastarg, pos, buf))
+			return(0);
+		if ( ! append_delims(mdoc, tok, pos, buf))
+			return(0);
+		return(scope_rewind_imp(mdoc, ppos, tok));
+	}
+
+	if (mdoc_isdelim(p))
+		j = 0;
+
+	mdoc_word_alloc(mdoc, lastarg, p);
+	goto again;
 	/* NOTREACHED */
 }
 
 
 int
-macro_scoped_line(MACRO_PROT_ARGS)
+macro_scoped_pline(MACRO_PROT_ARGS)
 {
+	int		  lastarg, c, j;
+	char		  *p;
 
-	return(1);
+	if (SEC_PROLOGUE == mdoc->sec_lastn)
+		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE));
+
+	/* Token pre-processing.  */
+
+	switch (tok) {
+	default:
+		break;
+	}
+
+	mdoc_block_alloc(mdoc, ppos, tok, 0, NULL);
+	mdoc_head_alloc(mdoc, ppos, tok, 0, NULL);
+
+	/* Process line parameters. */
+
+	j = 0;
+	lastarg = ppos;
+
+again:
+	if (j == MDOC_LINEARG_MAX)
+		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
+
+	lastarg = *pos;
+	c = mdoc_args(mdoc, tok, pos, buf, ARGS_DELIM, &p);
+
+	switch (c) {
+	case (ARGS_ERROR):
+		return(0);
+	case (ARGS_WORD):
+		break;
+	case (ARGS_PUNCT):
+		if ( ! scope_rewind_imp(mdoc, ppos, tok))
+			return(0);
+		if (ppos > 1)
+			return(1);
+		return(append_delims(mdoc, tok, pos, buf));
+	case (ARGS_EOLN):
+		return(scope_rewind_imp(mdoc, ppos, tok));
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	if (MDOC_MAX != (c = mdoc_find(mdoc, p))) {
+		if ( ! mdoc_macro(mdoc, c, lastarg, pos, buf))
+			return(0);
+		if ( ! scope_rewind_imp(mdoc, ppos, tok))
+			return(0);
+		if (ppos > 1)
+			return(1);
+		return(append_delims(mdoc, tok, pos, buf));
+	}
+
+	if (mdoc_isdelim(p))
+		j = 0;
+
+	mdoc_word_alloc(mdoc, lastarg, p);
+	goto again;
+	/* NOTREACHED */
 }
+

@@ -90,8 +90,8 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_scoped_implicit, 0 }, /* Sh */
 	{ macro_scoped_implicit, 0 }, /* Ss */ 
 	{ macro_text, 0 }, /* Pp */ 
-	{ NULL, 0 }, /* D1 */
-	{ NULL, 0 }, /* Dl */
+	{ macro_scoped_line, 0 }, /* D1 */
+	{ macro_scoped_line, 0 }, /* Dl */
 	{ macro_scoped_explicit, MDOC_EXPLICIT }, /* Bd */
 	{ macro_scoped_explicit, 0 }, /* Ed */
 	{ macro_scoped_explicit, MDOC_EXPLICIT }, /* Bl */
@@ -166,7 +166,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* Qc */
 	{ NULL, 0 }, /* Ql */
 	{ NULL, 0 }, /* Qo */
-	{ NULL, 0 }, /* Qq */
+	{ macro_scoped_pline, MDOC_CALLABLE }, /* Qq */
 	{ NULL, 0 }, /* Re */
 	{ NULL, 0 }, /* Rs */
 	{ NULL, 0 }, /* Sc */
@@ -336,6 +336,8 @@ mdoc_macro(struct mdoc *mdoc, int tok, int ppos, int *pos, char *buf)
 		return(0);
 	}
 
+	/*mdoc_msg(mdoc, ppos, "calling `%s'", mdoc_macronames[tok]);*/
+
 	return((*mdoc_macros[tok].fp)(mdoc, tok, ppos, pos, buf));
 }
 
@@ -407,35 +409,25 @@ mdoc_node_append(struct mdoc *mdoc, int pos, struct mdoc_node *p)
 
 	switch (p->type) {
 	case (MDOC_BODY):
-		switch (mdoc->last->type) {
-		case (MDOC_BLOCK):
-			p->parent = mdoc->last;
-			mdoc->last->child = p;
-			act = "child";
-			break;
-		case (MDOC_HEAD):
-			p->parent = mdoc->last->parent;
-			mdoc->last->next = p;
-			p->prev = mdoc->last;
-			act = "sibling";
-			break;
-		default:
-			abort();
-			/* NOTREACHED */
-		}
+		p->parent = mdoc->last->parent;
+		mdoc->last->next = p;
+		p->prev = mdoc->last;
+		act = "sibling";
 		break;
+
 	case (MDOC_HEAD):
 		assert(mdoc->last->type == MDOC_BLOCK);
 		p->parent = mdoc->last;
 		mdoc->last->child = p;
 		act = "child";
 		break;
+
 	default:
 		switch (mdoc->last->type) {
 		case (MDOC_BODY):
 			/* FALLTHROUGH */
 		case (MDOC_HEAD):
-			p->parent = mdoc->last->parent;
+			p->parent = mdoc->last;
 			mdoc->last->child = p;
 			act = "child";
 			break;
@@ -455,6 +447,7 @@ mdoc_node_append(struct mdoc *mdoc, int pos, struct mdoc_node *p)
 }
 
 
+/* FIXME: deprecate paramsz, params. */
 void
 mdoc_head_alloc(struct mdoc *mdoc, int pos, int tok, 
 		size_t paramsz, const char **params)
