@@ -143,8 +143,8 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* Bf */ 
 	{ NULL, 0 }, /* Bo */
 	{ macro_scoped_pline, MDOC_CALLABLE }, /* Bq */
-	{ NULL, 0 }, /* Bsx */
-	{ NULL, 0 }, /* Bx */
+	{ macro_constant_delimited, 0 }, /* Bsx */
+	{ macro_constant_delimited, 0 }, /* Bx */
 	{ NULL, 0 }, /* Db */
 	{ NULL, 0 }, /* Dc */
 	{ NULL, 0 }, /* Do */
@@ -153,12 +153,12 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* Ef */
 	{ macro_text, MDOC_CALLABLE }, /* Em */ 
 	{ NULL, 0 }, /* Eo */
-	{ NULL, 0 }, /* Fx */
+	{ macro_constant_delimited, 0 }, /* Fx */
 	{ macro_text, 0 }, /* Ms */
 	{ NULL, 0 }, /* No */
 	{ NULL, 0 }, /* Ns */
-	{ NULL, 0 }, /* Nx */
-	{ NULL, 0 }, /* Ox */
+	{ macro_constant_delimited, 0 }, /* Nx */
+	{ macro_constant_delimited, 0 }, /* Ox */
 	{ NULL, 0 }, /* Pc */
 	{ NULL, 0 }, /* Pf */
 	{ NULL, 0 }, /* Po */
@@ -176,7 +176,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* Sx */
 	{ NULL, 0 }, /* Sy */
 	{ macro_text, MDOC_CALLABLE }, /* Tn */
-	{ NULL, 0 }, /* Ux */
+	{ macro_constant_delimited, 0 }, /* Ux */
 	{ NULL, 0 }, /* Xc */
 	{ NULL, 0 }, /* Xo */
 	{ NULL, 0 }, /* Fo */ 

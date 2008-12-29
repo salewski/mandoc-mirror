@@ -19,7 +19,7 @@
 #ifndef MDOC_H
 #define MDOC_H
 
-#define	MDOC_LINEARG_MAX 9
+#define	MDOC_LINEARG_MAX 8
 
 #define	MDOC___	 	 0
 #define	MDOC_Dd		 1

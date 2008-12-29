@@ -24,12 +24,15 @@
 
 #include "private.h"
 
+/* FIXME: maxlineargs should be per LINE, no per TOKEN. */
+
 #define	_CC(p)	((const char **)p)
 
 static	int	  scope_rewind_exp(struct mdoc *, int, int, int);
 static	int	  scope_rewind_imp(struct mdoc *, int, int);
 static	int	  append_text(struct mdoc *, int, 
 			int, int, char *[]);
+static	int	  append_const(struct mdoc *, int, int, int, char *[]);
 static	int	  append_scoped(struct mdoc *, int, int, int, 
 			const char *[], int, const struct mdoc_arg *);
 static	int	  append_delims(struct mdoc *, int, int *, char *);
@@ -177,6 +180,43 @@ append_scoped(struct mdoc *mdoc, int tok, int pos,
 	mdoc_block_alloc(mdoc, pos, tok, (size_t)argc, argv);
 	mdoc_head_alloc(mdoc, pos, tok, (size_t)sz, _CC(args));
 	mdoc_body_alloc(mdoc, pos, tok);
+	return(1);
+}
+
+
+static int
+append_const(struct mdoc *mdoc, int tok, 
+		int pos, int sz, char *args[])
+{
+
+	assert(sz >= 0);
+	args[sz] = NULL;
+
+	switch (tok) {
+	 /* ======= ADD MORE MACRO CHECKS BELOW. ======= */
+	case (MDOC_Bx):
+		/* FALLTHROUGH */
+	case (MDOC_Bsx):
+		/* FALLTHROUGH */
+	case (MDOC_Os):
+		/* FALLTHROUGH */
+	case (MDOC_Fx):
+		/* FALLTHROUGH */
+	case (MDOC_Nx):
+		assert(sz <= 1);
+		break;
+
+	case (MDOC_Ux):
+		assert(0 == sz);
+		break;
+
+	 /* ======= ADD MORE MACRO CHECKS ABOVE. ======= */
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	mdoc_elem_alloc(mdoc, pos, tok, 0, NULL, (size_t)sz, _CC(args));
 	return(1);
 }
 
@@ -869,3 +909,90 @@ again:
 	/* NOTREACHED */
 }
 
+
+/*
+ * A delimited-constant macro is similar to a general text macro: the
+ * macro is followed by a 0 or 1 arguments (possibly-unspecified) then
+ * terminating punctuation, other words, or another callable macro.
+ */
+int
+macro_constant_delimited(MACRO_PROT_ARGS)
+{
+	int		  lastarg, flushed, c, maxargs;
+	char		 *p, *pp;
+
+	if (SEC_PROLOGUE == mdoc->sec_lastn)
+		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE));
+
+	/* Process line parameters. */
+
+	lastarg = ppos;
+	flushed = 0;
+
+	switch (tok) {
+	case (MDOC_Ux):
+		maxargs = 0;
+		break;
+	default:
+		maxargs = 1;
+		break;
+	}
+
+again:
+	lastarg = *pos;
+
+	switch (mdoc_args(mdoc, tok, pos, buf, ARGS_DELIM, &p)) {
+	case (ARGS_ERROR):
+		return(0);
+	case (ARGS_WORD):
+		break;
+	case (ARGS_PUNCT):
+		if ( ! flushed && ! append_const(mdoc, tok, ppos, 0, &p))
+			return(0);
+		if (ppos > 1)
+			return(1);
+		return(append_delims(mdoc, tok, pos, buf));
+	case (ARGS_EOLN):
+		if (flushed)
+			return(1);
+		return(append_const(mdoc, tok, ppos, 0, &p));
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	if (0 == maxargs) {
+		pp = p;
+		if ( ! append_const(mdoc, tok, ppos, 0, &p))
+			return(0);
+		p = pp;
+		flushed = 1;
+	}
+
+	if (MDOC_MAX != (c = mdoc_find(mdoc, p))) {
+		if ( ! flushed && ! append_const(mdoc, tok, ppos, 0, &p))
+			return(0);
+		if ( ! mdoc_macro(mdoc, c, lastarg, pos, buf))
+			return(0);
+		if (ppos > 1)
+			return(1);
+		return(append_delims(mdoc, tok, pos, buf));
+	}
+
+	if ( ! flushed && ! mdoc_isdelim(p)) {
+	       if ( ! append_const(mdoc, tok, ppos, 1, &p))
+			return(0);
+		flushed = 1;
+		goto again;
+	} else if ( ! flushed) {
+		pp = p;
+		if ( ! append_const(mdoc, tok, ppos, 0, &p))
+			return(0);
+		p = pp;
+		flushed = 1;
+	}
+
+	mdoc_word_alloc(mdoc, lastarg, p);
+	goto again;
+	/* NOTREACHED */
+}
