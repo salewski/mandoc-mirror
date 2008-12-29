@@ -370,6 +370,9 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 	case (ERR_ARGS_EQ0):
 		fmt = "macro `%s' expects zero arguments";
 		break;
+	case (ERR_ARGS_EQ1):
+		fmt = "macro `%s' expects one argument";
+		break;
 	case (ERR_ARGS_GE1):
 		fmt = "macro `%s' expects one or more arguments";
 		break;

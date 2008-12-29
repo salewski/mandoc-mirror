@@ -114,7 +114,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_text, MDOC_CALLABLE }, /* Ic */ 
 	{ NULL, 0 }, /* In */ 
 	{ macro_text, MDOC_CALLABLE }, /* Li */
-	{ NULL, 0 }, /* Nd */ 
+	{ macro_constant, 0 }, /* Nd */ 
 	{ NULL, 0 }, /* Nm */ 
 	{ NULL, 0 }, /* Op */
 	{ NULL, 0 }, /* Ot */
@@ -173,8 +173,8 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* So */
 	{ macro_scoped_pline, MDOC_CALLABLE }, /* Sq */
 	{ NULL, 0 }, /* Sm */
-	{ NULL, 0 }, /* Sx */
-	{ NULL, 0 }, /* Sy */
+	{ macro_text, MDOC_CALLABLE }, /* Sx */
+	{ macro_text, MDOC_CALLABLE }, /* Sy */
 	{ macro_text, MDOC_CALLABLE }, /* Tn */
 	{ macro_constant_delimited, 0 }, /* Ux */
 	{ NULL, 0 }, /* Xc */
@@ -186,7 +186,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* Bk */
 	{ NULL, 0 }, /* Ek */
 	{ macro_constant, 0 }, /* Bt */
-	{ NULL, 0 }, /* Hf */
+	{ macro_constant, 0 }, /* Hf */
 	{ NULL, 0 }, /* Fr */
 	{ macro_constant, 0 }, /* Ud */
 };
