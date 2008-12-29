@@ -339,6 +339,9 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 	case (ERR_SYNTAX_ARGFORM):
 		fmt = "syntax: macro `%s' arguments malformed";
 		break;
+	case (ERR_SYNTAX_NOPUNCT):
+		fmt = "syntax: macro `%s' doesn't understand punctuation";
+		break;
 	case (ERR_SYNTAX_ARG):
 		fmt = "syntax: unknown argument for macro `%s'";
 		break;
@@ -364,8 +367,14 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 	case (ERR_SEC_NPROLOGUE):
 		fmt = "macro `%s' called outside of prologue";
 		break;
+	case (ERR_ARGS_EQ0):
+		fmt = "macro `%s' expects zero arguments";
+		break;
 	case (ERR_ARGS_GE1):
 		fmt = "macro `%s' expects one or more arguments";
+		break;
+	case (ERR_ARGS_LE2):
+		fmt = "macro `%s' expects two or fewer arguments";
 		break;
 	case (ERR_ARGS_MANY):
 		fmt = "macro `%s' has too many arguments";

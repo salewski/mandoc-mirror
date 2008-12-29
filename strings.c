@@ -21,8 +21,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef __linux__
+#include <time.h>
+#endif
 
 #include "private.h"
+
+#ifdef __linux__
+extern	char		*strptime(const char *, const char *, struct tm *);
+#endif
 
 int
 mdoc_iscdelim(char p)
@@ -263,4 +270,38 @@ mdoc_atoarch(const char *p)
 		return(ARCH_zaurus);
 
 	return(ARCH_DEFAULT);
+}
+
+
+enum mdoc_att
+mdoc_atoatt(const char *p)
+{
+
+	assert(p);
+	if (0 == strcmp(p, "v1"))
+		return(ATT_v1);
+	else if (0 == strcmp(p, "v2"))
+		return(ATT_v2);
+	else if (0 == strcmp(p, "v3"))
+		return(ATT_v3);
+	else if (0 == strcmp(p, "v4"))
+		return(ATT_v4);
+	else if (0 == strcmp(p, "v5"))
+		return(ATT_v5);
+	else if (0 == strcmp(p, "v6"))
+		return(ATT_v6);
+	else if (0 == strcmp(p, "v7"))
+		return(ATT_v7);
+	else if (0 == strcmp(p, "32v"))
+		return(ATT_32v);
+	else if (0 == strcmp(p, "V.1"))
+		return(ATT_V1);
+	else if (0 == strcmp(p, "V.2"))
+		return(ATT_V2);
+	else if (0 == strcmp(p, "V.3"))
+		return(ATT_V3);
+	else if (0 == strcmp(p, "V.4"))
+		return(ATT_V4);
+	
+	return(ATT_DEFAULT);
 }

@@ -73,6 +73,7 @@ enum	mdoc_sec  mdoc_atosec(size_t, const char **);
 enum	mdoc_msec mdoc_atomsec(const char *);
 enum	mdoc_vol  mdoc_atovol(const char *);
 enum	mdoc_arch mdoc_atoarch(const char *);
+enum	mdoc_att  mdoc_atoatt(const char *);
 time_t		  mdoc_atotime(const char *);
 
 int		  mdoc_argv(struct mdoc *, int, 
@@ -94,6 +95,7 @@ int	  	  xstrcmp(const char *, const char *);
 void	 	 *xcalloc(size_t, size_t);
 char	 	 *xstrdup(const char *);
 
+int		  macro_constant(MACRO_PROT_ARGS);
 int		  macro_constant_delimited(MACRO_PROT_ARGS);
 int		  macro_text(MACRO_PROT_ARGS);
 int		  macro_scoped_implicit(MACRO_PROT_ARGS);

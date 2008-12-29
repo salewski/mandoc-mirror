@@ -21,6 +21,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef	__linux__
+#include <time.h>
+#endif
 
 #include "private.h"
 
@@ -189,11 +192,33 @@ append_const(struct mdoc *mdoc, int tok,
 		int pos, int sz, char *args[])
 {
 
-	assert(sz >= 0);
-	args[sz] = NULL;
-
 	switch (tok) {
 	 /* ======= ADD MORE MACRO CHECKS BELOW. ======= */
+	case (MDOC_At):
+		/* This needs special handling. */
+		if (0 == sz)
+			break;
+		else if (sz > 2)
+			return(mdoc_err(mdoc, tok, pos, ERR_ARGS_LE2));
+
+		if (ATT_DEFAULT != mdoc_atoatt(args[0])) {
+			mdoc_elem_alloc(mdoc, pos, tok, 0, 
+					NULL, 1, _CC(&args[0]));
+		} else {
+			mdoc_elem_alloc(mdoc, pos, tok, 
+					0, NULL, 0, NULL);
+			if (mdoc_isdelim(args[0]))
+				return(mdoc_err(mdoc, tok, pos, ERR_SYNTAX_NOPUNCT));
+			mdoc_word_alloc(mdoc, pos, args[0]);
+		}
+
+		if (1 == sz)
+			return(1);
+		if (mdoc_isdelim(args[1]))
+			return(mdoc_err(mdoc, tok, pos, ERR_SYNTAX_NOPUNCT));
+		mdoc_word_alloc(mdoc, pos, args[1]);
+		return(1);
+
 	case (MDOC_Bx):
 		/* FALLTHROUGH */
 	case (MDOC_Bsx):
@@ -209,6 +234,13 @@ append_const(struct mdoc *mdoc, int tok,
 	case (MDOC_Ux):
 		assert(0 == sz);
 		break;
+
+	case (MDOC_Bt):
+		/* FALLTHROUGH */
+	case (MDOC_Ud):
+		if (0 == sz)
+			break;
+		return(mdoc_err(mdoc, tok, pos, ERR_ARGS_EQ0));
 
 	 /* ======= ADD MORE MACRO CHECKS ABOVE. ======= */
 	default:
@@ -929,6 +961,8 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 	lastarg = ppos;
 	flushed = 0;
 
+	/* Token pre-processing. */
+
 	switch (tok) {
 	case (MDOC_Ux):
 		maxargs = 0;
@@ -961,6 +995,8 @@ again:
 		/* NOTREACHED */
 	}
 
+	/* Accepts no arguments: flush out symbol and continue. */
+
 	if (0 == maxargs) {
 		pp = p;
 		if ( ! append_const(mdoc, tok, ppos, 0, &p))
@@ -979,6 +1015,11 @@ again:
 		return(append_delims(mdoc, tok, pos, buf));
 	}
 
+	/* 
+	 * We only accept one argument; subsequent tokens are considered
+	 * as literal words (until a macro).
+	 */
+
 	if ( ! flushed && ! mdoc_isdelim(p)) {
 	       if ( ! append_const(mdoc, tok, ppos, 1, &p))
 			return(0);
@@ -993,6 +1034,45 @@ again:
 	}
 
 	mdoc_word_alloc(mdoc, lastarg, p);
+	goto again;
+	/* NOTREACHED */
+}
+
+
+int
+macro_constant(MACRO_PROT_ARGS)
+{
+	int		  lastarg, j;
+	char		 *args[MDOC_LINEARG_MAX];
+
+	if (SEC_PROLOGUE == mdoc->sec_lastn)
+		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE));
+
+	j = 0;
+
+again:
+	if (j == MDOC_LINEARG_MAX)
+		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
+
+	lastarg = *pos;
+
+	switch (mdoc_args(mdoc, tok, pos, buf, 0, &args[j])) {
+	case (ARGS_ERROR):
+		return(0);
+	case (ARGS_WORD):
+		break;
+	case (ARGS_EOLN):
+		return(append_const(mdoc, tok, ppos, j, args));
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	if (MDOC_MAX != mdoc_find(mdoc, args[j])) 
+		if ( ! mdoc_warn(mdoc, tok, lastarg, WARN_SYNTAX_MACLIKE))
+			return(0);
+
+	j++;
 	goto again;
 	/* NOTREACHED */
 }

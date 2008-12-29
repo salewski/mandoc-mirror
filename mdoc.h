@@ -194,6 +194,7 @@
 enum 	mdoc_err {
 	ERR_SYNTAX_QUOTE, /* NOTUSED */
 	ERR_SYNTAX_UNQUOTE,
+	ERR_SYNTAX_NOPUNCT,
 	ERR_SYNTAX_WS,
 	ERR_SYNTAX_ARG,
 	ERR_SYNTAX_ARGFORM,
@@ -210,8 +211,26 @@ enum 	mdoc_err {
 	ERR_SEC_PROLOGUE_OO,
 	ERR_SEC_PROLOGUE_REP,
 	ERR_SEC_NAME,
+	ERR_ARGS_EQ0,
 	ERR_ARGS_GE1,
+	ERR_ARGS_LE2,
 	ERR_ARGS_MANY
+};
+
+enum	mdoc_att {
+	ATT_DEFAULT = 0,
+	ATT_v1,
+	ATT_v2,
+	ATT_v3,
+	ATT_v4,
+	ATT_v5,
+	ATT_v6,
+	ATT_v7,
+	ATT_32v,
+	ATT_V1,
+	ATT_V2,
+	ATT_V3,
+	ATT_V4
 };
 
 enum	mdoc_warn {
