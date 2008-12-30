@@ -154,66 +154,19 @@ append_scoped(struct mdoc *mdoc, int tok, int pos,
 		int argc, const struct mdoc_arg *argv)
 {
 	enum mdoc_sec	  sec;
-	struct mdoc_node *node;
+
+	if ( ! mdoc_valid(mdoc, tok, pos, sz, args, argc, argv))
+		return(0);
 
 	switch (tok) {
-	 /* ======= ADD MORE MACRO CHECKS BELOW. ======= */
-
 	case (MDOC_Sh):
-		/*
-		 * Check rules for section ordering.  We can have
-		 * "known" sections (like NAME and so on) and "custom"
-		 * sections, which are unknown.  If we have a known
-		 * section, we should fall within the conventional
-		 * section order.
-		 */
-		if (0 == sz) 
-			return(mdoc_err(mdoc, tok, pos, ERR_ARGS_GE1));
-
 		sec = mdoc_atosec((size_t)sz, _CC(args));
-		if (SEC_CUSTOM != sec && sec < mdoc->sec_lastn)
-			if ( ! mdoc_warn(mdoc, tok, pos, WARN_SEC_OO))
-				return(0);
-
-		if (SEC_BODY == mdoc->sec_last && SEC_NAME != sec)
-			return(mdoc_err(mdoc, tok, pos, ERR_SEC_NAME));
 		if (SEC_CUSTOM != sec)
 			mdoc->sec_lastn = sec;
 		mdoc->sec_last = sec;
 		break;
-
-	case (MDOC_Ss):
-		if (0 != sz) 
-			break;
-		return(mdoc_err(mdoc, tok, pos, ERR_ARGS_GE1));
-	
-	case (MDOC_Bd):
-		/*
-		 * We can't be nested within any other block displays
-		 * (or really any other kind of display, although Bd is
-		 * the only multi-line one that will show up). 
-		 */
-		assert(mdoc->last);
-		node = mdoc->last->parent; 
-		/* LINTED */
-		for ( ; node; node = node->parent) {
-			if (node->type != MDOC_BLOCK)
-				continue;
-			if (node->data.block.tok != MDOC_Bd)
-				continue;
-			break;
-		}
-		if (NULL == node)
-			break;
-		return(mdoc_err(mdoc, tok, pos, ERR_SCOPE_NONEST));
-
-	case (MDOC_Bl):
-		break;
-
-	 /* ======= ADD MORE MACRO CHECKS ABOVE. ======= */
 	default:
-		abort();
-		/* NOTREACHED */
+		break;
 	}
 
 	mdoc_block_alloc(mdoc, pos, tok, (size_t)argc, argv);
@@ -228,16 +181,13 @@ append_const(struct mdoc *mdoc, int tok,
 		int pos, int sz, char *args[])
 {
 
-	switch (tok) {
-	 /* ======= ADD MORE MACRO CHECKS BELOW. ======= */
+	if ( ! mdoc_valid(mdoc, tok, pos, sz, _CC(args), 0, NULL))
+		return(0);
 
-	/* FIXME: this is the ugliest part of this page. */
+	switch (tok) {
 	case (MDOC_At):
-		/* This needs special handling. */
 		if (0 == sz)
 			break;
-		else if (sz > 2)
-			return(mdoc_err(mdoc, tok, pos, ERR_ARGS_LE2));
 
 		if (ATT_DEFAULT != mdoc_atoatt(args[0])) {
 			mdoc_elem_alloc(mdoc, pos, tok, 0, 
@@ -245,57 +195,15 @@ append_const(struct mdoc *mdoc, int tok,
 		} else {
 			mdoc_elem_alloc(mdoc, pos, tok, 
 					0, NULL, 0, NULL);
-			if (mdoc_isdelim(args[0]))
-				return(mdoc_err(mdoc, tok, pos, ERR_SYNTAX_NOPUNCT));
 			mdoc_word_alloc(mdoc, pos, args[0]);
 		}
 
 		if (1 == sz)
 			return(1);
-		if (mdoc_isdelim(args[1]))
-			return(mdoc_err(mdoc, tok, pos, ERR_SYNTAX_NOPUNCT));
 		mdoc_word_alloc(mdoc, pos, args[1]);
 		return(1);
-
-	case (MDOC_Nd):
-		if (sz > 0)
-			break;
-		if ( ! mdoc_warn(mdoc, tok, pos, WARN_ARGS_GE1))
-			return(0);
-		break;
-	
-	case (MDOC_Hf):
-		if (1 == sz)
-			break;
-		return(mdoc_err(mdoc, tok, pos, ERR_ARGS_EQ1));
-
-	case (MDOC_Bx):
-		/* FALLTHROUGH */
-	case (MDOC_Bsx):
-		/* FALLTHROUGH */
-	case (MDOC_Os):
-		/* FALLTHROUGH */
-	case (MDOC_Fx):
-		/* FALLTHROUGH */
-	case (MDOC_Nx):
-		assert(sz <= 1);
-		break;
-
-	case (MDOC_Ux):
-		assert(0 == sz);
-		break;
-
-	case (MDOC_Bt):
-		/* FALLTHROUGH */
-	case (MDOC_Ud):
-		if (0 == sz)
-			break;
-		return(mdoc_err(mdoc, tok, pos, ERR_ARGS_EQ0));
-
-	 /* ======= ADD MORE MACRO CHECKS ABOVE. ======= */
 	default:
-		abort();
-		/* NOTREACHED */
+		break;
 	}
 
 	mdoc_elem_alloc(mdoc, pos, tok, 0, NULL, (size_t)sz, _CC(args));
@@ -308,68 +216,8 @@ append_text(struct mdoc *mdoc, int tok,
 		int pos, int sz, char *args[])
 {
 
-	switch (tok) {
-	 /* ======= ADD MORE MACRO CHECKS BELOW. ======= */
-	case (MDOC_Pp):
-		if (0 == sz)
-			break;
-		if ( ! mdoc_warn(mdoc, tok, pos, WARN_ARGS_EQ0))
-			return(0);
-		break;
-
-	case (MDOC_Ft):
-		/* FALLTHROUGH */
-	case (MDOC_Li):
-		/* FALLTHROUGH */
-	case (MDOC_Ms):
-		/* FALLTHROUGH */
-	case (MDOC_Pa):
-		/* FALLTHROUGH */
-	case (MDOC_Tn):
-		if (0 < sz)
-			break;
-		if ( ! mdoc_warn(mdoc, tok, pos, WARN_ARGS_GE1))
-			return(0);
-		break;
-
-	case (MDOC_Ar):
-		/* FALLTHROUGH */
-	case (MDOC_Cm):
-		/* FALLTHROUGH */
-	case (MDOC_Fl):
-		/* These can have no arguments. */
-		break;
-
-	case (MDOC_Ad):
-		/* FALLTHROUGH */
-	case (MDOC_Em):
-		/* FALLTHROUGH */
-	case (MDOC_Er):
-		/* FALLTHROUGH */
-	case (MDOC_Ev):
-		/* FALLTHROUGH */
-	case (MDOC_Fa):
-		/* FALLTHROUGH */
-	case (MDOC_Dv):
-		/* FALLTHROUGH */
-	case (MDOC_Ic):
-		/* FALLTHROUGH */
-	case (MDOC_Sy):
-		/* FALLTHROUGH */
-	case (MDOC_Sx):
-		/* FALLTHROUGH */
-	case (MDOC_Va):
-		/* FALLTHROUGH */
-	case (MDOC_Vt):
-		if (0 < sz) 
-			break;
-		return(mdoc_err(mdoc, tok, pos, ERR_ARGS_GE1));
-	 /* ======= ADD MORE MACRO CHECKS ABOVE. ======= */
-	default:
-		abort();
-		/* NOTREACHED */
-	}
-
+	if ( ! mdoc_valid(mdoc, tok, pos, sz, _CC(args), 0, NULL))
+		return(0);
 	mdoc_elem_alloc(mdoc, pos, tok, 0, NULL, (size_t)sz, _CC(args));
 	return(1);
 }
