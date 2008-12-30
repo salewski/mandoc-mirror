@@ -500,6 +500,9 @@ msg_warn(void *arg, int tok, int col, enum mdoc_warn type)
 	case (WARN_IGN_AFTER_BLK):
 		fmt = "ignore: macro `%s' ignored after block macro";
 		break;
+	case (WARN_IGN_OBSOLETE):
+		fmt = "ignore: macro `%s' is obsolete";
+		break;
 	case (WARN_IGN_BEFORE_BLK):
 		fmt = "ignore: macro before block macro `%s' ignored";
 		break;

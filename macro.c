@@ -29,6 +29,7 @@
 
 /* FIXME: maxlineargs should be per LINE, no per TOKEN. */
 /* FIXME: prologue check should be in macro_call. */
+/* FIXME: prologue macros should be part of macro_constant. */
 
 #define	_CC(p)	((const char **)p)
 
@@ -42,33 +43,6 @@ static	int	  append_constarg(struct mdoc *, int, int,
 static	int	  append_scoped(struct mdoc *, int, int, int, 
 			const char *[], int, const struct mdoc_arg *);
 static	int	  append_delims(struct mdoc *, int, int *, char *);
-
-
-static int
-append_delims(struct mdoc *mdoc, int tok, int *pos, char *buf)
-{
-	int		 c, lastarg;
-	char		*p;
-
-	if (0 == buf[*pos])
-		return(1);
-
-	mdoc_msg(mdoc, *pos, "`%s' flushing punctuation",
-			mdoc_macronames[tok]);
-
-	for (;;) {
-		lastarg = *pos;
-		c = mdoc_args(mdoc, tok, pos, buf, 0, &p);
-		if (ARGS_ERROR == c)
-			return(0);
-		else if (ARGS_EOLN == c)
-			break;
-		assert(mdoc_isdelim(p));
-		mdoc_word_alloc(mdoc, lastarg, p);
-	}
-
-	return(1);
-}
 
 
 static int
@@ -90,15 +64,8 @@ scope_rewind_imp(struct mdoc *mdoc, int ppos, int tok)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_BREAK));
 	}
 
-	if (n) {
+	if (n)
 		mdoc->last = n;
-		mdoc_msg(mdoc, ppos, "scope: rewound implicit `%s'",
-				mdoc_macronames[tok]);
-		return(1);
-	} 
-
-	mdoc_msg(mdoc, ppos, "scope: new implicit `%s'", 
-			mdoc_macronames[tok]);
 	return(1);
 }
 
@@ -119,11 +86,31 @@ scope_rewind_exp(struct mdoc *mdoc, int ppos, int tok, int dst)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_BREAK));
 	}
 
-	if (NULL == (mdoc->last = n))
-		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_NOCTX));
+	if ((mdoc->last = n))
+		return(1);
+	return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_NOCTX));
+}
 
-	mdoc_msg(mdoc, ppos, "scope: rewound explicit `%s' to `%s'",
-			mdoc_macronames[tok], mdoc_macronames[dst]);
+
+static int
+append_delims(struct mdoc *mdoc, int tok, int *pos, char *buf)
+{
+	int		 c, lastarg;
+	char		*p;
+
+	if (0 == buf[*pos])
+		return(1);
+
+	for (;;) {
+		lastarg = *pos;
+		c = mdoc_args(mdoc, tok, pos, buf, 0, &p);
+		if (ARGS_ERROR == c)
+			return(0);
+		else if (ARGS_EOLN == c)
+			break;
+		assert(mdoc_isdelim(p));
+		mdoc_word_alloc(mdoc, lastarg, p);
+	}
 
 	return(1);
 }
@@ -134,20 +121,13 @@ append_constarg(struct mdoc *mdoc, int tok, int pos,
 		int argc, const struct mdoc_arg *argv)
 {
 
-	switch (tok) {
-	default:
-		break;
-	}
-
+	if ( ! mdoc_valid(mdoc, tok, pos, 0, NULL, argc, argv))
+		return(0);
 	mdoc_elem_alloc(mdoc, pos, tok, argc, argv, 0, NULL);
 	return(1);
 }
 
 
-/*
- * Append a node with implicit or explicit scoping ONLY.  ALL macros
- * with the implicit- or explicit-scope callback must be included here.
- */
 static int
 append_scoped(struct mdoc *mdoc, int tok, int pos, 
 		int sz, const char *args[], 
@@ -188,19 +168,16 @@ append_const(struct mdoc *mdoc, int tok,
 	case (MDOC_At):
 		if (0 == sz)
 			break;
-
-		if (ATT_DEFAULT != mdoc_atoatt(args[0])) {
-			mdoc_elem_alloc(mdoc, pos, tok, 0, 
-					NULL, 1, _CC(&args[0]));
-		} else {
+		if (ATT_DEFAULT == mdoc_atoatt(args[0])) {
 			mdoc_elem_alloc(mdoc, pos, tok, 
 					0, NULL, 0, NULL);
 			mdoc_word_alloc(mdoc, pos, args[0]);
-		}
+		} else
+			mdoc_elem_alloc(mdoc, pos, tok, 0, 
+					NULL, 1, _CC(&args[0]));
 
-		if (1 == sz)
-			return(1);
-		mdoc_word_alloc(mdoc, pos, args[1]);
+		if (sz > 1)
+			mdoc_word_alloc(mdoc, pos, args[1]);
 		return(1);
 	default:
 		break;
@@ -226,7 +203,7 @@ append_text(struct mdoc *mdoc, int tok,
 int
 macro_text(MACRO_PROT_ARGS)
 {
-	int		  lastarg, lastpunct, c, j;
+	int		  lastarg, lastpunct, c, j, fl;
 	char		 *args[MDOC_LINEARG_MAX];
 
 	if (SEC_PROLOGUE == mdoc->sec_lastn)
@@ -260,6 +237,10 @@ macro_text(MACRO_PROT_ARGS)
 	j = 0;
 	lastarg = ppos;
 	lastpunct = 0;
+	fl = ARGS_DELIM;
+
+	if (MDOC_QUOTABLE & mdoc_macros[tok].flags)
+		fl |= ARGS_QUOTED;
 
 again:
 	if (j == MDOC_LINEARG_MAX)
@@ -275,7 +256,7 @@ again:
 
 	lastarg = *pos;
 
-	switch (mdoc_args(mdoc, tok, pos, buf, ARGS_DELIM, &args[j])) {
+	switch (mdoc_args(mdoc, tok, pos, buf, fl, &args[j])) {
 	case (ARGS_ERROR):
 		return(0);
 	case (ARGS_WORD):
@@ -409,6 +390,8 @@ macro_prologue_os(MACRO_PROT_ARGS)
 {
 	int		  lastarg, j;
 	char		 *args[MDOC_LINEARG_MAX];
+
+	/* FIXME: if we use `Os' again... ? */
 
 	if (SEC_PROLOGUE != mdoc->sec_lastn)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_NPROLOGUE));
@@ -936,14 +919,16 @@ again:
 int
 macro_constant(MACRO_PROT_ARGS)
 {
-	int		  lastarg, j;
+	int		  lastarg, j, fl;
 	char		 *args[MDOC_LINEARG_MAX];
 
 	if (SEC_PROLOGUE == mdoc->sec_lastn)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE));
 
-	j = 0;
+	j = fl = 0;
 	lastarg = ppos;
+	if (MDOC_QUOTABLE & mdoc_macros[tok].flags)
+		fl = ARGS_QUOTED;
 
 again:
 	if (j == MDOC_LINEARG_MAX)
@@ -951,7 +936,7 @@ again:
 
 	lastarg = *pos;
 
-	switch (mdoc_args(mdoc, tok, pos, buf, 0, &args[j])) {
+	switch (mdoc_args(mdoc, tok, pos, buf, fl, &args[j])) {
 	case (ARGS_ERROR):
 		return(0);
 	case (ARGS_WORD):
@@ -1004,4 +989,12 @@ macro_constant_argv(MACRO_PROT_ARGS)
 	c = append_constarg(mdoc, tok, ppos, j, argv);
 	mdoc_argv_free(j, argv);
 	return(c);
+}
+
+
+int
+macro_obsolete(MACRO_PROT_ARGS)
+{
+
+	return(mdoc_warn(mdoc, tok, ppos, WARN_IGN_OBSOLETE));
 }

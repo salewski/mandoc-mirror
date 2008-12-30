@@ -65,7 +65,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ need_ge1, NULL }, /* Ad */ 
 	{ NULL, NULL }, /* An */ 
 	{ NULL, NULL }, /* Ar */
-	{ NULL, NULL }, /* Cd */
+	{ need_ge1, NULL }, /* Cd */
 	{ NULL, NULL }, /* Cm */
 	{ need_ge1, NULL }, /* Dv */ 
 	{ need_ge1, NULL }, /* Er */ 
@@ -74,7 +74,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ need_ge1, NULL }, /* Fa */ 
 	{ NULL, NULL }, /* Fd */ 
 	{ NULL, NULL }, /* Fl */
-	{ NULL, NULL }, /* Fn */ 
+	{ need_ge1, NULL }, /* Fn */ 
 	{ want_ge1, NULL }, /* Ft */ 
 	{ need_ge1, NULL }, /* Ic */ 
 	{ NULL, NULL }, /* In */ 

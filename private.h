@@ -37,7 +37,7 @@ struct	mdoc_macro {
 	int	  flags;
 #define	MDOC_CALLABLE	(1 << 0)
 #define	MDOC_EXPLICIT	(1 << 1)
-#define	MDOC_PPOST	(1 << 2) /* Linescope: punctuation post-line. */
+#define	MDOC_QUOTABLE	(1 << 2)
 };
 
 extern	const struct mdoc_macro *const mdoc_macros;
@@ -99,6 +99,9 @@ int	  	  xstrcmp(const char *, const char *);
 void	 	 *xcalloc(size_t, size_t);
 char	 	 *xstrdup(const char *);
 
+int		  macro_obsolete(MACRO_PROT_ARGS);
+int		  macro_constant_quoted(MACRO_PROT_ARGS);
+int		  macro_constant_obsolete(MACRO_PROT_ARGS);
 int		  macro_constant_argv(MACRO_PROT_ARGS);
 int		  macro_constant(MACRO_PROT_ARGS);
 int		  macro_constant_delimited(MACRO_PROT_ARGS);
