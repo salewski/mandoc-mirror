@@ -95,6 +95,7 @@ int	  	  xstrcmp(const char *, const char *);
 void	 	 *xcalloc(size_t, size_t);
 char	 	 *xstrdup(const char *);
 
+int		  macro_constant_argv(MACRO_PROT_ARGS);
 int		  macro_constant(MACRO_PROT_ARGS);
 int		  macro_constant_delimited(MACRO_PROT_ARGS);
 int		  macro_text(MACRO_PROT_ARGS);
