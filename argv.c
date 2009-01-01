@@ -183,6 +183,83 @@ lookup(int tok, const char *argv)
 		if (xstrcmp(argv, "std"))
 			return(MDOC_Std);
 		break;
+	
+	case (MDOC_St):
+		if (xstrcmp(argv, "p1003.1-88"))
+			return(MDOC_p1003_1_88);
+		else if (xstrcmp(argv, "p1003.1-90"))
+			return(MDOC_p1003_1_90);
+		else if (xstrcmp(argv, "p1003.1-96"))
+			return(MDOC_p1003_1_96);
+		else if (xstrcmp(argv, "p1003.1-2001"))
+			return(MDOC_p1003_1_2001);
+		else if (xstrcmp(argv, "p1003.1-2004"))
+			return(MDOC_p1003_1_2004);
+		else if (xstrcmp(argv, "p1003.1"))
+			return(MDOC_p1003_1);
+		else if (xstrcmp(argv, "p1003.1b"))
+			return(MDOC_p1003_1b);
+		else if (xstrcmp(argv, "p1003.1b-93"))
+			return(MDOC_p1003_1b_93);
+		else if (xstrcmp(argv, "p1003.1c-95"))
+			return(MDOC_p1003_1c_95);
+		else if (xstrcmp(argv, "p1003.1g-2000"))
+			return(MDOC_p1003_1g_2000);
+		else if (xstrcmp(argv, "p1003.2-92"))
+			return(MDOC_p1003_2_92);
+		else if (xstrcmp(argv, "p1003.2-95"))
+			return(MDOC_p1387_2_95);
+		else if (xstrcmp(argv, "p1003.2"))
+			return(MDOC_p1003_2);
+		else if (xstrcmp(argv, "p1387.2-95"))
+			return(MDOC_p1387_2);
+		else if (xstrcmp(argv, "isoC-90"))
+			return(MDOC_isoC_90);
+		else if (xstrcmp(argv, "isoC-amd1"))
+			return(MDOC_isoC_amd1);
+		else if (xstrcmp(argv, "isoC-tcor1"))
+			return(MDOC_isoC_tcor1);
+		else if (xstrcmp(argv, "isoC-tcor2"))
+			return(MDOC_isoC_tcor2);
+		else if (xstrcmp(argv, "isoC-99"))
+			return(MDOC_isoC_99);
+		else if (xstrcmp(argv, "ansiC"))
+			return(MDOC_ansiC);
+		else if (xstrcmp(argv, "ansiC-89"))
+			return(MDOC_ansiC_89);
+		else if (xstrcmp(argv, "ansiC-99"))
+			return(MDOC_ansiC_99);
+		else if (xstrcmp(argv, "ieee754"))
+			return(MDOC_ieee754);
+		else if (xstrcmp(argv, "iso8802-3"))
+			return(MDOC_iso8802_3);
+		else if (xstrcmp(argv, "xpg3"))
+			return(MDOC_xpg3);
+		else if (xstrcmp(argv, "xpg4"))
+			return(MDOC_xpg4);
+		else if (xstrcmp(argv, "xpg4.2"))
+			return(MDOC_xpg4_2);
+		else if (xstrcmp(argv, "xpg4.3"))
+			return(MDOC_xpg4_3);
+		else if (xstrcmp(argv, "xbd5"))
+			return(MDOC_xbd5);
+		else if (xstrcmp(argv, "xcu5"))
+			return(MDOC_xcu5);
+		else if (xstrcmp(argv, "xsh5"))
+			return(MDOC_xsh5);
+		else if (xstrcmp(argv, "xns5"))
+			return(MDOC_xns5);
+		else if (xstrcmp(argv, "xns5.2d2.0"))
+			return(MDOC_xns5_2d2_0);
+		else if (xstrcmp(argv, "xcurses4.2"))
+			return(MDOC_xcurses4_2);
+		else if (xstrcmp(argv, "susv2"))
+			return(MDOC_susv2);
+		else if (xstrcmp(argv, "susv3"))
+			return(MDOC_susv3);
+		else if (xstrcmp(argv, "svid4"))
+			return(MDOC_svid4);
+		break;
 
 	default:
 		abort();
@@ -326,14 +403,12 @@ mdoc_argv(struct mdoc *mdoc, int tok,
 	(void)memset(v, 0, sizeof(struct mdoc_arg));
 
 	if (0 == buf[*pos])
-		return(0);
+		return(ARGV_EOLN);
 
 	assert( ! isspace(buf[*pos]));
 
-	if ('-' != buf[*pos]) {
-		(void)mdoc_err(mdoc, tok, *pos, ERR_SYNTAX_ARGFORM);
-		return(-1);
-	}
+	if ('-' != buf[*pos])
+		return(ARGV_WORD);
 
 	i = *pos;
 	argv = &buf[++(*pos)];
@@ -346,7 +421,7 @@ mdoc_argv(struct mdoc *mdoc, int tok,
 
 	if (MDOC_ARG_MAX == (v->arg = lookup(tok, argv))) {
 		(void)mdoc_err(mdoc, tok, i, ERR_SYNTAX_ARG);
-		return(-1);
+		return(ARGV_ERROR);
 	}
 
 	while (buf[*pos] && isspace(buf[*pos]))
@@ -356,11 +431,11 @@ mdoc_argv(struct mdoc *mdoc, int tok,
 
 	ppos = *pos;
 	if ( ! parse(mdoc, tok, v, pos, buf))
-		return(-1);
+		return(ARGV_ERROR);
 	if ( ! postparse(mdoc, tok, v, ppos))
-		return(-1);
+		return(ARGV_ERROR);
 
-	return(1);
+	return(ARGV_ARG);
 }
 
 

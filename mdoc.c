@@ -84,18 +84,18 @@ const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {
 
 const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* \" */
-	{ macro_prologue_ddate, 0 }, /* Dd */
-	{ macro_prologue_dtitle, 0 }, /* Dt */
-	{ macro_prologue_os, 0 }, /* Os */
-	{ macro_scoped_implicit, 0 }, /* Sh */
-	{ macro_scoped_implicit, 0 }, /* Ss */ 
+	{ NULL, MDOC_PROLOGUE }, /* Dd */
+	{ NULL, MDOC_PROLOGUE }, /* Dt */
+	{ NULL, MDOC_PROLOGUE }, /* Os */
+	{ macro_scoped, 0 }, /* Sh */
+	{ macro_scoped, 0 }, /* Ss */ 
 	{ macro_text, 0 }, /* Pp */ 
 	{ macro_scoped_line, 0 }, /* D1 */
 	{ macro_scoped_line, 0 }, /* Dl */
-	{ macro_scoped_explicit, MDOC_EXPLICIT }, /* Bd */
-	{ macro_scoped_explicit, 0 }, /* Ed */
-	{ macro_scoped_explicit, MDOC_EXPLICIT }, /* Bl */
-	{ macro_scoped_explicit, 0 }, /* El */
+	{ macro_scoped, MDOC_EXPLICIT }, /* Bd */
+	{ macro_close_explicit, 0 }, /* Ed */
+	{ macro_scoped, MDOC_EXPLICIT }, /* Bl */
+	{ macro_close_explicit, 0 }, /* El */
 	{ NULL, 0 }, /* It */
 	{ macro_text, MDOC_CALLABLE }, /* Ad */ 
 	{ NULL, 0 }, /* An */ 
@@ -105,74 +105,74 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_text, MDOC_CALLABLE }, /* Dv */ 
 	{ macro_text, MDOC_CALLABLE }, /* Er */ 
 	{ macro_text, MDOC_CALLABLE }, /* Ev */ 
-	{ macro_constant_argv, 0 }, /* Ex */
+	{ macro_constant, 0 }, /* Ex */
 	{ macro_text, MDOC_CALLABLE }, /* Fa */ 
-	{ NULL, 0 }, /* Fd */ 
+	{ macro_constant, 0 }, /* Fd */ 
 	{ macro_text, MDOC_CALLABLE }, /* Fl */
 	{ macro_text, MDOC_CALLABLE | MDOC_QUOTABLE }, /* Fn */ 
 	{ macro_text, 0 }, /* Ft */ 
 	{ macro_text, MDOC_CALLABLE }, /* Ic */ 
-	{ NULL, 0 }, /* In */ 
+	{ macro_constant, 0 }, /* In */ 
 	{ macro_text, MDOC_CALLABLE }, /* Li */
 	{ macro_constant, 0 }, /* Nd */ 
 	{ NULL, 0 }, /* Nm */ 
-	{ NULL, 0 }, /* Op */
-	{ NULL, 0 }, /* Ot */
+	{ macro_scoped_line, MDOC_CALLABLE }, /* Op */
+	{ macro_obsolete, 0 }, /* Ot */
 	{ macro_text, MDOC_CALLABLE }, /* Pa */
-	{ macro_constant_argv, 0 }, /* Rv */
-	{ NULL, 0 }, /* St */
+	{ macro_constant, 0 }, /* Rv */
+	{ macro_constant, 0 }, /* St */
 	{ macro_text, MDOC_CALLABLE }, /* Va */
 	{ macro_text, MDOC_CALLABLE }, /* Vt */ 
-	{ NULL, 0 }, /* Xr */
-	{ NULL, 0 }, /* %A */
-	{ NULL, 0 }, /* %B */
-	{ NULL, 0 }, /* %D */
-	{ NULL, 0 }, /* %I */
-	{ NULL, 0 }, /* %J */
-	{ NULL, 0 }, /* %N */
-	{ NULL, 0 }, /* %O */
-	{ NULL, 0 }, /* %P */
-	{ NULL, 0 }, /* %R */
-	{ NULL, 0 }, /* %T */
-	{ NULL, 0 }, /* %V */
+	{ macro_text, MDOC_CALLABLE }, /* Xr */
+	{ macro_constant, MDOC_QUOTABLE }, /* %A */
+	{ macro_constant, MDOC_QUOTABLE }, /* %B */
+	{ macro_constant, MDOC_QUOTABLE }, /* %D */
+	{ macro_constant, MDOC_QUOTABLE }, /* %I */
+	{ macro_constant, MDOC_QUOTABLE }, /* %J */
+	{ macro_constant, MDOC_QUOTABLE }, /* %N */
+	{ macro_constant, MDOC_QUOTABLE }, /* %O */
+	{ macro_constant, MDOC_QUOTABLE }, /* %P */
+	{ macro_constant, MDOC_QUOTABLE }, /* %R */
+	{ macro_constant, MDOC_QUOTABLE }, /* %T */
+	{ macro_constant, MDOC_QUOTABLE }, /* %V */
 	{ NULL, 0 }, /* Ac */
 	{ NULL, 0 }, /* Ao */
-	{ macro_scoped_pline, MDOC_CALLABLE }, /* Aq */
+	{ macro_scoped_line, MDOC_CALLABLE }, /* Aq */
 	{ macro_constant, 0 }, /* At */
 	{ NULL, 0 }, /* Bc */
 	{ NULL, 0 }, /* Bf */ 
 	{ NULL, 0 }, /* Bo */
-	{ macro_scoped_pline, MDOC_CALLABLE }, /* Bq */
+	{ macro_scoped_line, MDOC_CALLABLE }, /* Bq */
 	{ macro_constant_delimited, 0 }, /* Bsx */
 	{ macro_constant_delimited, 0 }, /* Bx */
-	{ NULL, 0 }, /* Db */
+	{ macro_constant, 0 }, /* Db */
 	{ NULL, 0 }, /* Dc */
 	{ NULL, 0 }, /* Do */
-	{ macro_scoped_pline, MDOC_CALLABLE }, /* Dq */
+	{ macro_scoped_line, MDOC_CALLABLE }, /* Dq */
 	{ NULL, 0 }, /* Ec */
 	{ NULL, 0 }, /* Ef */
 	{ macro_text, MDOC_CALLABLE }, /* Em */ 
 	{ NULL, 0 }, /* Eo */
 	{ macro_constant_delimited, 0 }, /* Fx */
 	{ macro_text, 0 }, /* Ms */
-	{ NULL, 0 }, /* No */
-	{ NULL, 0 }, /* Ns */
+	{ macro_constant_delimited, MDOC_CALLABLE }, /* No */
+	{ macro_constant_delimited, MDOC_CALLABLE }, /* Ns */
 	{ macro_constant_delimited, 0 }, /* Nx */
 	{ macro_constant_delimited, 0 }, /* Ox */
 	{ NULL, 0 }, /* Pc */
 	{ NULL, 0 }, /* Pf */
 	{ NULL, 0 }, /* Po */
-	{ macro_scoped_pline, MDOC_CALLABLE }, /* Pq */
+	{ macro_scoped_line, MDOC_CALLABLE }, /* Pq */
 	{ NULL, 0 }, /* Qc */
-	{ macro_scoped_pline, MDOC_CALLABLE }, /* Ql */
+	{ macro_scoped_line, MDOC_CALLABLE }, /* Ql */
 	{ NULL, 0 }, /* Qo */
-	{ macro_scoped_pline, MDOC_CALLABLE }, /* Qq */
-	{ NULL, 0 }, /* Re */
-	{ NULL, 0 }, /* Rs */
+	{ macro_scoped_line, MDOC_CALLABLE }, /* Qq */
+	{ macro_scoped, MDOC_EXPLICIT }, /* Re */
+	{ macro_scoped, MDOC_EXPLICIT }, /* Rs */
 	{ NULL, 0 }, /* Sc */
 	{ NULL, 0 }, /* So */
-	{ macro_scoped_pline, MDOC_CALLABLE }, /* Sq */
-	{ NULL, 0 }, /* Sm */
+	{ macro_scoped_line, MDOC_CALLABLE }, /* Sq */
+	{ macro_constant, 0 }, /* Sm */
 	{ macro_text, MDOC_CALLABLE }, /* Sx */
 	{ macro_text, MDOC_CALLABLE }, /* Sy */
 	{ macro_text, MDOC_CALLABLE }, /* Tn */
@@ -254,6 +254,7 @@ mdoc_parseln(struct mdoc *mdoc, char *buf)
 
 	if ('.' != *buf) {
 		mdoc_word_alloc(mdoc, 0, buf);
+		mdoc->next = MDOC_NEXT_SIBLING;
 		return(1);
 	}
 
@@ -326,6 +327,13 @@ int
 mdoc_macro(struct mdoc *mdoc, int tok, int ppos, int *pos, char *buf)
 {
 
+	if (MDOC_PROLOGUE & mdoc_macros[tok].flags &&
+			SEC_PROLOGUE == mdoc->sec_lastn)
+		return(macro_prologue(mdoc, tok, ppos, pos, buf));
+	
+	if (SEC_PROLOGUE == mdoc->sec_lastn)
+		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE));
+
 	if (NULL == (mdoc_macros[tok].fp)) {
 		(void)mdoc_err(mdoc, tok, ppos, ERR_MACRO_NOTSUP);
 		return(0);
@@ -335,8 +343,6 @@ mdoc_macro(struct mdoc *mdoc, int tok, int ppos, int *pos, char *buf)
 		(void)mdoc_err(mdoc, tok, ppos, ERR_MACRO_NOTCALL);
 		return(0);
 	}
-
-	/*mdoc_msg(mdoc, ppos, "calling `%s'", mdoc_macronames[tok]);*/
 
 	return((*mdoc_macros[tok].fp)(mdoc, tok, ppos, pos, buf));
 }
@@ -407,63 +413,42 @@ mdoc_node_append(struct mdoc *mdoc, int pos, struct mdoc_node *p)
 		/* NOTREACHED */
 	}
 
-	switch (p->type) {
-	case (MDOC_BODY):
-		p->parent = mdoc->last->parent;
+	switch (mdoc->next) {
+	case (MDOC_NEXT_SIBLING):
 		mdoc->last->next = p;
 		p->prev = mdoc->last;
+		p->parent = mdoc->last->parent;
 		act = "sibling";
 		break;
-
-	case (MDOC_HEAD):
-		assert(mdoc->last->type == MDOC_BLOCK);
-		p->parent = mdoc->last;
+	case (MDOC_NEXT_CHILD):
 		mdoc->last->child = p;
+		p->parent = mdoc->last;
 		act = "child";
 		break;
-
 	default:
-		switch (mdoc->last->type) {
-		case (MDOC_BODY):
-			/* FALLTHROUGH */
-		case (MDOC_HEAD):
-			p->parent = mdoc->last;
-			mdoc->last->child = p;
-			act = "child";
-			break;
-		default:
-			p->parent = mdoc->last->parent;
-			p->prev = mdoc->last;
-			mdoc->last->next = p;
-			act = "sibling";
-			break;
-		}
-		break;
+		abort();
+		/* NOTREACHED */
 	}
 
-	mdoc_msg(mdoc, pos, "parse: %s `%s' %s %s `%s'", 
+	mdoc_msg(mdoc, pos, "parse: %s `%s' %s of %s `%s'", 
 			nt, nn, act, ot, on);
+
 	mdoc->last = p;
 }
 
 
-/* FIXME: deprecate paramsz, params. */
 void
-mdoc_head_alloc(struct mdoc *mdoc, int pos, int tok, 
-		size_t paramsz, const char **params)
+mdoc_head_alloc(struct mdoc *mdoc, int pos, int tok)
 {
 	struct mdoc_node *p;
 
 	assert(mdoc->first);
 	assert(mdoc->last);
-	assert(mdoc->last->type == MDOC_BLOCK);
-	assert(mdoc->last->data.block.tok == tok);
 
 	p = xcalloc(1, sizeof(struct mdoc_node));
+
 	p->type = MDOC_HEAD;
 	p->data.head.tok = tok;
-	p->data.head.sz = paramsz;
-	p->data.head.args = paramdup(paramsz, params);
 
 	mdoc_node_append(mdoc, pos, p);
 }
@@ -476,12 +461,6 @@ mdoc_body_alloc(struct mdoc *mdoc, int pos, int tok)
 
 	assert(mdoc->first);
 	assert(mdoc->last);
-	assert((mdoc->last->type == MDOC_BLOCK) ||
-			(mdoc->last->type == MDOC_HEAD));
-	if (mdoc->last->type == MDOC_BLOCK) 
-		assert(mdoc->last->data.block.tok == tok);
-	else
-		assert(mdoc->last->data.head.tok == tok);
 
 	p = xcalloc(1, sizeof(struct mdoc_node));
 
@@ -588,14 +567,6 @@ mdoc_text_free(struct mdoc_text *p)
 }
 
 
-static void
-mdoc_head_free(struct mdoc_head *p)
-{
-
-	paramfree(p->sz, p->args);
-}
-
-
 void
 mdoc_node_free(struct mdoc_node *p)
 {
@@ -609,9 +580,6 @@ mdoc_node_free(struct mdoc_node *p)
 		break;
 	case (MDOC_BLOCK):
 		mdoc_block_free(&p->data.block);
-		break;
-	case (MDOC_HEAD):
-		mdoc_head_free(&p->data.head);
 		break;
 	default:
 		break;

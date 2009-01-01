@@ -215,7 +215,8 @@ enum 	mdoc_err {
 	ERR_ARGS_EQ1,
 	ERR_ARGS_GE1,
 	ERR_ARGS_LE2,
-	ERR_ARGS_MANY
+	ERR_ARGS_MANY,
+	ERR_CHILD_HEAD
 };
 
 enum	mdoc_att {

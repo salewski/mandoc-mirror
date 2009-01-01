@@ -21,10 +21,17 @@
 
 #include "mdoc.h"
 
+enum	mdoc_next {
+	MDOC_NEXT_SIBLING = 0,
+	MDOC_NEXT_CHILD
+};
+
 struct	mdoc {
 	void		 *data;
 	struct mdoc_cb	  cb;
 	void		 *htab;
+	int		  flags;
+	enum mdoc_next	  next;
 	struct mdoc_node *last;
 	struct mdoc_node *first;
 	struct mdoc_meta  meta;
@@ -38,6 +45,7 @@ struct	mdoc_macro {
 #define	MDOC_CALLABLE	(1 << 0)
 #define	MDOC_EXPLICIT	(1 << 1)
 #define	MDOC_QUOTABLE	(1 << 2)
+#define	MDOC_PROLOGUE	(1 << 3)
 };
 
 extern	const struct mdoc_macro *const mdoc_macros;
@@ -58,8 +66,7 @@ void		  mdoc_elem_alloc(struct mdoc *, int, int,
 			size_t, const char **);
 void		  mdoc_block_alloc(struct mdoc *, int, int, 
 			size_t, const struct mdoc_arg *);
-void		  mdoc_head_alloc(struct mdoc *, 
-			int, int, size_t, const char **);
+void		  mdoc_head_alloc(struct mdoc *, int, int);
 void		  mdoc_body_alloc(struct mdoc *, int, int);
 void		  mdoc_node_free(struct mdoc_node *);
 void		  mdoc_sibling(struct mdoc *, int, struct mdoc_node **,
@@ -76,12 +83,17 @@ enum	mdoc_arch mdoc_atoarch(const char *);
 enum	mdoc_att  mdoc_atoatt(const char *);
 time_t		  mdoc_atotime(const char *);
 
-int		  mdoc_valid(struct mdoc *, int, int,
+int		  mdoc_valid_post(struct mdoc *, int, int);
+int		  mdoc_valid_pre(struct mdoc *, int, int,
 			int, const char *[],
 			int, const struct mdoc_arg *);
 
 int		  mdoc_argv(struct mdoc *, int, 
 			struct mdoc_arg *, int *, char *);
+#define	ARGV_ERROR	(-1)
+#define	ARGV_EOLN	(0)
+#define	ARGV_ARG	(1)
+#define	ARGV_WORD	(2)
 void		  mdoc_argv_free(int, struct mdoc_arg *);
 int		  mdoc_args(struct mdoc *, int,
 			int *, char *, int, char **);
@@ -106,13 +118,11 @@ int		  macro_constant_argv(MACRO_PROT_ARGS);
 int		  macro_constant(MACRO_PROT_ARGS);
 int		  macro_constant_delimited(MACRO_PROT_ARGS);
 int		  macro_text(MACRO_PROT_ARGS);
-int		  macro_scoped_implicit(MACRO_PROT_ARGS);
-int		  macro_scoped_explicit(MACRO_PROT_ARGS);
+int		  macro_scoped(MACRO_PROT_ARGS);
+int		  macro_close_explicit(MACRO_PROT_ARGS);
 int		  macro_scoped_line(MACRO_PROT_ARGS);
 int		  macro_scoped_pline(MACRO_PROT_ARGS);
-int		  macro_prologue_ddate(MACRO_PROT_ARGS);
-int		  macro_prologue_dtitle(MACRO_PROT_ARGS);
-int		  macro_prologue_os(MACRO_PROT_ARGS);
+int		  macro_prologue(MACRO_PROT_ARGS);
 
 __END_DECLS
 

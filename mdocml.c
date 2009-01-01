@@ -205,8 +205,6 @@ print_node(const struct mdoc_node *n, int indent)
 	case (MDOC_HEAD):
 		p = mdoc_macronames[n->data.head.tok];
 		t = "block-head";
-		params = n->data.head.args;
-		sz = n->data.head.sz;
 		break;
 	case (MDOC_ELEM):
 		assert(NULL == n->child);
@@ -399,6 +397,9 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 		break;
 	case (ERR_SYNTAX_ARGMANY):
 		lit = "syntax: too many values for macro argument";
+		break;
+	case (ERR_CHILD_HEAD):
+		lit = "scope context expects block-header child";
 		break;
 	default:
 		abort();
