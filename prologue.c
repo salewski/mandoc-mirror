@@ -18,6 +18,9 @@
  */
 #include <assert.h>
 #include <stdlib.h>
+#ifdef __linux__
+#include <time.h>
+#endif
 
 #include "private.h"
 

@@ -81,7 +81,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL, no_head_child }, /* El */
 	{ NULL, NULL, NULL }, /* It */
 	{ need_ge1, NULL, NULL }, /* Ad */ 
-	{ NULL, NULL, NULL }, /* An */ 
+	{ NULL, NULL, NULL }, /* An */  /* FIXME: no args & argv. */
 	{ NULL, NULL, NULL }, /* Ar */
 	{ need_ge1, NULL, NULL }, /* Cd */
 	{ NULL, NULL, NULL }, /* Cm */
@@ -133,7 +133,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL, NULL }, /* Do */
 	{ NULL, NULL, NULL }, /* Dq */
 	{ NULL, NULL, NULL }, /* Ec */
-	{ NULL, NULL, NULL }, /* Ef */
+	{ NULL, NULL, NULL }, /* Ef */ /* -symbolic, etc. */
 	{ need_ge1, NULL, NULL }, /* Em */ 
 	{ NULL, NULL, NULL }, /* Eo */
 	{ assert_le1, NULL, NULL }, /* Fx */
@@ -143,7 +143,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ assert_le1, NULL, NULL }, /* Nx */
 	{ assert_le1, NULL, NULL }, /* Ox */
 	{ NULL, NULL, NULL }, /* Pc */
-	{ NULL, NULL, NULL }, /* Pf */
+	{ NULL, NULL, NULL }, /* Pf */ /* 2 or more arguments */
 	{ NULL, NULL, NULL }, /* Po */
 	{ NULL, NULL, NULL }, /* Pq */
 	{ NULL, NULL, NULL }, /* Qc */

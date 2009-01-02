@@ -189,7 +189,9 @@
 #define MDOC_svid4	 57
 #define	MDOC_Filled	 58
 #define	MDOC_Words	 59
-#define	MDOC_ARG_MAX	 60
+#define	MDOC_Emphasis	 60
+#define	MDOC_Symbolic	 61
+#define	MDOC_ARG_MAX	 62
 
 enum 	mdoc_err {
 	ERR_SYNTAX_QUOTE, /* NOTUSED */

@@ -80,6 +80,7 @@ const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {
 	"xsh5",			"xns5",			"xns5.2d2.0",
 	"xcurses4.2",		"susv2",		"susv3",
 	"svid4",		"filled",		"words",
+	"emphasis",		"symbolic",
 	};
 
 const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
@@ -98,7 +99,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_close_explicit, 0 }, /* El */
 	{ NULL, 0 }, /* It */
 	{ macro_text, MDOC_CALLABLE }, /* Ad */ 
-	{ NULL, 0 }, /* An */ 
+	{ macro_constant, 0 }, /* An */ 
 	{ macro_text, MDOC_CALLABLE }, /* Ar */
 	{ macro_constant, MDOC_QUOTABLE }, /* Cd */
 	{ macro_text, MDOC_CALLABLE }, /* Cm */
@@ -140,7 +141,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_scoped_line, MDOC_CALLABLE }, /* Aq */
 	{ macro_constant, 0 }, /* At */
 	{ NULL, 0 }, /* Bc */
-	{ NULL, 0 }, /* Bf */ 
+	{ macro_scoped, 0 }, /* Bf */ 
 	{ NULL, 0 }, /* Bo */
 	{ macro_scoped_line, MDOC_CALLABLE }, /* Bq */
 	{ macro_constant_delimited, 0 }, /* Bsx */
@@ -150,7 +151,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* Do */
 	{ macro_scoped_line, MDOC_CALLABLE }, /* Dq */
 	{ NULL, 0 }, /* Ec */
-	{ NULL, 0 }, /* Ef */
+	{ macro_close_explicit, 0 }, /* Ef */
 	{ macro_text, MDOC_CALLABLE }, /* Em */ 
 	{ NULL, 0 }, /* Eo */
 	{ macro_constant_delimited, 0 }, /* Fx */
@@ -160,7 +161,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_constant_delimited, 0 }, /* Nx */
 	{ macro_constant_delimited, 0 }, /* Ox */
 	{ NULL, 0 }, /* Pc */
-	{ NULL, 0 }, /* Pf */
+	{ macro_constant, 0 }, /* Pf */
 	{ NULL, 0 }, /* Po */
 	{ macro_scoped_line, MDOC_CALLABLE }, /* Pq */
 	{ NULL, 0 }, /* Qc */
