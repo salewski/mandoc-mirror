@@ -29,6 +29,7 @@ typedef int	(*v_args)(struct mdoc *, int, int, int,
 typedef int	(*v_post)(struct mdoc *, int, int);
 
 static	int	  need_head_child(struct mdoc *, int, int);
+static	int	  no_head_child(struct mdoc *, int, int);
 
 static	int	  assert_eq0(struct mdoc *, int, int, int);
 static	int	  assert_le1(struct mdoc *, int, int, int);
@@ -59,6 +60,11 @@ struct	valids {
 };
 
 
+/* 
+ * FIXME: have arrays of function pointers in case we want multiple
+ * check callbacks per macro.
+ */
+
 const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL, NULL }, /* \" */
 	{ NULL, NULL, NULL }, /* Dd */ /* TODO */
@@ -70,9 +76,9 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, args_blocknest, need_head_child }, /* D1 */
 	{ NULL, args_blocknest, need_head_child }, /* Dl */
 	{ NULL, args_blocknest, NULL }, /* Bd */
-	{ NULL, NULL, NULL }, /* Ed */
+	{ NULL, NULL, no_head_child }, /* Ed */
 	{ NULL, NULL, NULL }, /* Bl */
-	{ NULL, NULL, NULL }, /* El */
+	{ NULL, NULL, no_head_child }, /* El */
 	{ NULL, NULL, NULL }, /* It */
 	{ need_ge1, NULL, NULL }, /* Ad */ 
 	{ NULL, NULL, NULL }, /* An */ 
@@ -238,6 +244,15 @@ need_ge1(struct mdoc *mdoc, int tok, int pos, int sz)
 	if (sz > 0)
 		return(1);
 	return(mdoc_err(mdoc, tok, pos, ERR_ARGS_GE1));
+}
+
+
+static int
+no_head_child(struct mdoc *mdoc, int tok, int pos)
+{
+
+	/* TODO */
+	return(1);
 }
 
 
