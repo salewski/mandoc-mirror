@@ -62,8 +62,7 @@ int		  mdoc_macro(struct mdoc *, int, int, int *, char *);
 int		  mdoc_find(const struct mdoc *, const char *);
 void		  mdoc_word_alloc(struct mdoc *, int, const char *);
 void		  mdoc_elem_alloc(struct mdoc *, int, int, 
-			size_t, const struct mdoc_arg *, 
-			size_t, const char **);
+			size_t, const struct mdoc_arg *);
 void		  mdoc_block_alloc(struct mdoc *, int, int, 
 			size_t, const struct mdoc_arg *);
 void		  mdoc_head_alloc(struct mdoc *, int, int);
@@ -83,10 +82,9 @@ enum	mdoc_arch mdoc_atoarch(const char *);
 enum	mdoc_att  mdoc_atoatt(const char *);
 time_t		  mdoc_atotime(const char *);
 
-int		  mdoc_valid_post(struct mdoc *, int, int);
 int		  mdoc_valid_pre(struct mdoc *, int, int,
-			int, const char *[],
 			int, const struct mdoc_arg *);
+int		  mdoc_valid_post(struct mdoc *, int, int);
 
 int		  mdoc_argv(struct mdoc *, int, 
 			struct mdoc_arg *, int *, char *);

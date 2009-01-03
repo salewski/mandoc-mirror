@@ -491,16 +491,14 @@ mdoc_block_alloc(struct mdoc *mdoc, int pos, int tok,
 
 void
 mdoc_elem_alloc(struct mdoc *mdoc, int pos, int tok, 
-		size_t argsz, const struct mdoc_arg *args, 
-		size_t paramsz, const char **params)
+		size_t argsz, const struct mdoc_arg *args)
 {
 	struct mdoc_node *p;
 
 	p = xcalloc(1, sizeof(struct mdoc_node));
 	p->type = MDOC_ELEM;
 	p->data.elem.tok = tok;
-	p->data.elem.sz = paramsz;
-	p->data.elem.args = paramdup(paramsz, params);
+	/* FIXME: freeing of params... */
 	p->data.elem.argc = argsz;
 	p->data.elem.argv = argdup(argsz, args);
 

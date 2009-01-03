@@ -76,14 +76,14 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL, NULL, NULL }, /* Dd */ /* TODO */
 	{ NULL, NULL, NULL, NULL }, /* Dt */ /* TODO */
 	{ NULL, NULL, NULL, NULL }, /* Os */ /* TODO */
-	{ want_ge1, args_sh, NULL, NULL }, /* Sh */
-	{ want_ge1, NULL, NULL, NULL }, /* Ss */ 
+	{ want_ge1, args_sh, NULL, NULL }, /* Sh */ /* FIXME: preceding Pp. */
+	{ want_ge1, NULL, NULL, NULL }, /* Ss */ /* FIXME: preceding Pp. */
 	{ want_eq0, NULL, NULL, NULL }, /* Pp */ 
 	{ assert_eq0, NULL, tree_pre_display, tree_post_onlyhead }, /* D1 */
 	{ assert_eq0, NULL, tree_pre_display, tree_post_onlyhead }, /* Dl */
-	{ want_eq0, NULL, tree_pre_display, tree_post_warnemptybody }, /* Bd */
+	{ want_eq0, NULL, tree_pre_display, tree_post_warnemptybody }, /* Bd */ /* FIXME: preceding Pp. */
 	{ assert_eq0, NULL, NULL, tree_post_onlybody }, /* Ed */
-	{ want_eq0, NULL, NULL, NULL }, /* Bl */
+	{ want_eq0, NULL, NULL, NULL }, /* Bl */ /* FIXME: preceding Pp. */
 	{ assert_eq0, NULL, NULL, tree_post_onlybody }, /* El */
 	{ NULL, NULL, NULL, NULL }, /* It */
 	{ need_ge1, NULL, NULL, NULL }, /* Ad */ 
@@ -127,7 +127,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL, NULL, NULL }, /* Ac */
 	{ NULL, NULL, NULL, NULL }, /* Ao */
 	{ NULL, NULL, NULL, NULL }, /* Aq */
-	{ need_le2, args_nopunct, NULL, NULL }, /* At */
+	{ need_le2, args_nopunct, NULL, NULL }, /* At */ /* FIXME */
 	{ NULL, NULL, NULL, NULL }, /* Bc */
 	{ NULL, NULL, NULL, NULL }, /* Bf */ 
 	{ NULL, NULL, NULL, NULL }, /* Bo */
@@ -151,7 +151,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL, NULL, NULL }, /* Pc */
 	{ NULL, NULL, NULL, NULL }, /* Pf */ /* 2 or more arguments */
 	{ NULL, NULL, NULL, NULL }, /* Po */
-	{ NULL, NULL, NULL, NULL }, /* Pq */
+	{ NULL, NULL, NULL, NULL }, /* Pq */ /* FIXME: ignore following Sh/Ss */
 	{ NULL, NULL, NULL, NULL }, /* Qc */
 	{ NULL, NULL, NULL, NULL }, /* Ql */
 	{ NULL, NULL, NULL, NULL }, /* Qo */
@@ -446,7 +446,6 @@ tree_pre_display(struct mdoc *mdoc, int tok, int pos)
 
 int
 mdoc_valid_pre(struct mdoc *mdoc, int tok, int pos, 
-		int sz, const char *args[], 
 		int argc, const struct mdoc_arg *argv)
 {
 
@@ -466,7 +465,8 @@ mdoc_valid_pre(struct mdoc *mdoc, int tok, int pos,
 
 
 int
-mdoc_valid_post(struct mdoc *mdoc, int tok, int pos)
+mdoc_valid_post(struct mdoc *mdoc, int tok, int pos,
+		int argc, const struct mdoc_arg *argv)
 {
 
 	if (mdoc_valids[tok].tree_post)
