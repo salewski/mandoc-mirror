@@ -171,6 +171,9 @@ append_text(struct mdoc *mdoc, int tok,
 		return(0);
 
 	switch (tok) {
+		/*
+		 * FIXME: deprecate this "feature" of mdoc(7).
+		 */
 	case (MDOC_At):
 		if (0 == sz)
 			break;
@@ -210,6 +213,7 @@ macro_text(MACRO_PROT_ARGS)
 	/* Token pre-processing.  */
 
 	switch (tok) {
+		/* FIXME: move to validate.c. */
 	case (MDOC_Pp):
 		/* `.Pp' ignored when following `.Sh' or `.Ss'. */
 		assert(mdoc->last);
@@ -349,6 +353,8 @@ macro_close_explicit(MACRO_PROT_ARGS)
 		/* NOTREACHED */
 	}
 
+	if (0 != buf[*pos])
+		return(mdoc_err(mdoc, tok, ppos, ERR_ARGS_EQ0));
 	return(scope_rewind_exp(mdoc, ppos, tok, tt));
 }
 
@@ -465,16 +471,18 @@ macro_scoped(MACRO_PROT_ARGS)
 
 	mdoc_argv_free(argc, argv);
 
-	mdoc_head_alloc(mdoc, ppos, tok);
-	mdoc->next = MDOC_NEXT_CHILD;
-
-	for (i = 0; i < sz; i++) {
-		mdoc_word_alloc(mdoc, ppos, args[i]);
-		mdoc->next = MDOC_NEXT_SIBLING;
+	if (sz > 0) {
+		mdoc_head_alloc(mdoc, ppos, tok);
+		mdoc->next = MDOC_NEXT_CHILD;
+	
+		for (i = 0; i < sz; i++) {
+			mdoc_word_alloc(mdoc, ppos, args[i]);
+			mdoc->next = MDOC_NEXT_SIBLING;
+		}
+	
+		if ( ! scope_rewind_line(mdoc, ppos, tok))
+			return(0);
 	}
-
-	if ( ! scope_rewind_line(mdoc, ppos, tok))
-		return(0);
 
 	mdoc_body_alloc(mdoc, ppos, tok);
 	mdoc->next = MDOC_NEXT_CHILD;

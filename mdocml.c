@@ -398,8 +398,17 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 	case (ERR_SYNTAX_ARGMANY):
 		lit = "syntax: too many values for macro argument";
 		break;
-	case (ERR_CHILD_HEAD):
-		lit = "scope context expects block-header child";
+	case (ERR_SYNTAX_CHILDHEAD):
+		lit = "syntax: expected only block-header section";
+		break;
+	case (ERR_SYNTAX_CHILDBODY):
+		lit = "syntax: expected only a block-body section";
+		break;
+	case (ERR_SYNTAX_EMPTYHEAD):
+		lit = "syntax: block-header section may not be empty";
+		break;
+	case (ERR_SYNTAX_EMPTYBODY):
+		lit = "syntax: block-body section may not be empty";
 		break;
 	default:
 		abort();
@@ -488,6 +497,9 @@ msg_warn(void *arg, int tok, int col, enum mdoc_warn type)
 		break;
 	case (WARN_SYNTAX_ARGLIKE):
 		lit = "syntax: argument-like value";
+		break;
+	case (WARN_SYNTAX_EMPTYBODY):
+		lit = "syntax: empty block-body section";
 		break;
 	case (WARN_SEC_OO):
 		lit = "section is out of conventional order";
