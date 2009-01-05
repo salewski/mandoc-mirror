@@ -24,6 +24,8 @@
 
 #include "private.h"
 
+/* FIXME: deprecate into actions.c! */
+
 static int		 prologue_dt(MACRO_PROT_ARGS);
 static int		 prologue_dd(MACRO_PROT_ARGS);
 static int		 prologue_os(MACRO_PROT_ARGS);

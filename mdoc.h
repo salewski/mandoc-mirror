@@ -265,6 +265,7 @@ enum	mdoc_type {
 	MDOC_TEXT,
 	MDOC_ELEM,
 	MDOC_HEAD,
+	MDOC_TAIL,
 	MDOC_BODY,
 	MDOC_BLOCK
 };
@@ -376,8 +377,10 @@ struct	mdoc_block {
 };
 
 struct	mdoc_head {
-	size_t		  sz;
-	char		**args;
+	int		  tok;
+};
+
+struct	mdoc_tail {
 	int		  tok;
 };
 
@@ -398,6 +401,7 @@ union	mdoc_data {
 	struct mdoc_elem  elem;
 	struct mdoc_body  body;
 	struct mdoc_head  head;
+	struct mdoc_tail  tail;
 	struct mdoc_block block;
 };
 

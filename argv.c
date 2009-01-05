@@ -162,6 +162,11 @@ lookup(int tok, const char *argv)
 			return(MDOC_Offset);
 		break;
 
+	case (MDOC_Bk):
+		if (xstrcmp(argv, "words"))
+			return(MDOC_Words);
+		break;
+
 	case (MDOC_Bl):
 		if (xstrcmp(argv, "bullet"))
 			return(MDOC_Bullet);

@@ -206,6 +206,10 @@ print_node(const struct mdoc_node *n, int indent)
 		p = mdoc_macronames[n->data.head.tok];
 		t = "block-head";
 		break;
+	case (MDOC_TAIL):
+		p = mdoc_macronames[n->data.tail.tok];
+		t = "block-tail";
+		break;
 	case (MDOC_ELEM):
 		p = mdoc_macronames[n->data.elem.tok];
 		t = "element";

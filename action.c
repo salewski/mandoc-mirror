@@ -160,5 +160,7 @@ mdoc_action(struct mdoc *mdoc, int tok, int pos)
 	default:
 		break;
 	}
+
+	MDOC_Nm... ?
 #endif
 
