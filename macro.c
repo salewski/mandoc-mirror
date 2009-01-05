@@ -107,6 +107,7 @@ static int
 rewind_expblock(struct mdoc *mdoc, int ppos, int tok, int tt)
 {
 	struct mdoc_node *n;
+	int		  t;
 
 	assert(mdoc->last);
 
@@ -114,9 +115,9 @@ rewind_expblock(struct mdoc *mdoc, int ppos, int tok, int tt)
 	for (n = mdoc->last->parent; n; n = n->parent) {
 		if (MDOC_BLOCK != n->type) 
 			continue;
-		if (tt == n->data.block.tok)
+		if (tt == (t = n->data.block.tok))
 			break;
-		if (MDOC_NESTED & mdoc_macros[n->data.block.tok].flags)
+		if (MDOC_NESTED & mdoc_macros[t].flags)
 			continue;
 		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_BREAK));
 	}
@@ -147,11 +148,16 @@ rewind_impblock(struct mdoc *mdoc, int ppos, int tok)
 			break;
 		if ( ! (MDOC_EXPLICIT & mdoc_macros[t].flags))
 			continue;
+		if (MDOC_NESTED & mdoc_macros[tok].flags)
+			return(1);
 		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_BREAK));
 	}
 
-	mdoc->last = n ? n : mdoc->last;
+	if (NULL == n)
+		return(1);
+
 	mdoc->next = MDOC_NEXT_SIBLING;
+	mdoc->last = n;
 	if ( ! mdoc_valid_post(mdoc, tok, ppos))
 		return(0);
 	return(mdoc_action(mdoc, tok, ppos));
@@ -215,8 +221,8 @@ macro_close_explicit(MACRO_PROT_ARGS)
 	case (MDOC_El):
 		tt = MDOC_Bl;
 		break;
-	case (MDOC_Fo):
-		tt = MDOC_Fc;
+	case (MDOC_Fc):
+		tt = MDOC_Fo;
 		break;
 	case (MDOC_Oc):
 		tt = MDOC_Oo;
@@ -425,8 +431,7 @@ macro_scoped(MACRO_PROT_ARGS)
 
 	assert ( ! (MDOC_CALLABLE & mdoc_macros[tok].flags));
 
-	if ( ! (MDOC_EXPLICIT & mdoc_macros[tok].flags) &&
-			! (MDOC_NESTED & mdoc_macros[tok].flags))
+	if ( ! (MDOC_EXPLICIT & mdoc_macros[tok].flags)) 
 		if ( ! rewind_impblock(mdoc, ppos, tok))
 			return(0);
 

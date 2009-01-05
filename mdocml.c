@@ -328,6 +328,9 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 	fmt = lit = NULL;
 
 	switch (type) {
+	case (ERR_SYNTAX_NOTEXT):
+		lit = "syntax: context-free text disallowed";
+		break;
 	case (ERR_SYNTAX_QUOTE):
 		lit = "syntax: disallowed argument quotation";
 		break;
@@ -357,7 +360,7 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 		fmt = "scope: macro `%s' may not be nested in the current context";
 		break;
 	case (ERR_MACRO_NOTSUP):
-		fmt = "macro `%s' not supported";
+		lit = "macro not supported";
 		break;
 	case (ERR_MACRO_NOTCALL):
 		fmt = "macro `%s' not callable";

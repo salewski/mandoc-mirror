@@ -133,15 +133,6 @@ lookup(int tok, const char *argv)
 {
 
 	switch (tok) {
-	case (MDOC_Bf):
-		if (xstrcmp(argv, "emphasis"))
-			return(MDOC_Emphasis);
-		else if (xstrcmp(argv, "literal"))
-			return(MDOC_Literal);
-		else if (xstrcmp(argv, "symbolic"))
-			return(MDOC_Symbolic);
-		break;
-
 	case (MDOC_An):
 		if (xstrcmp(argv, "split"))
 			return(MDOC_Split);
@@ -160,6 +151,15 @@ lookup(int tok, const char *argv)
 			return(MDOC_File);
 		else if (xstrcmp(argv, "offset"))
 			return(MDOC_Offset);
+		break;
+
+	case (MDOC_Bf):
+		if (xstrcmp(argv, "emphasis"))
+			return(MDOC_Emphasis);
+		else if (xstrcmp(argv, "literal"))
+			return(MDOC_Literal);
+		else if (xstrcmp(argv, "symbolic"))
+			return(MDOC_Symbolic);
 		break;
 
 	case (MDOC_Bk):
@@ -283,8 +283,7 @@ lookup(int tok, const char *argv)
 		break;
 
 	default:
-		abort();
-		/* NOTREACHED */
+		break;
 	}
 
 	return(MDOC_ARG_MAX);

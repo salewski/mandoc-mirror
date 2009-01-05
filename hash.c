@@ -112,6 +112,8 @@ mdoc_tokhash_find(const void *arg, const char *tmp)
 		minor = tmp[1] - 97;
 
 	ind = (major * 27) + minor;
+	if (ind < 0 || ind >= (27 * 26))
+		return(MDOC_MAX);
 
 	if (NULL == htab[ind])
 		return(MDOC_MAX);

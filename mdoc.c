@@ -107,7 +107,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_text, MDOC_CALLABLE }, /* Er */ 
 	{ macro_text, MDOC_CALLABLE }, /* Ev */ 
 	{ macro_constant, 0 }, /* Ex */
-	{ macro_text, MDOC_CALLABLE }, /* Fa */ 
+	{ macro_text, MDOC_CALLABLE | MDOC_QUOTABLE }, /* Fa */ 
 	{ macro_constant, 0 }, /* Fd */ 
 	{ macro_text, MDOC_CALLABLE }, /* Fl */
 	{ macro_text, MDOC_CALLABLE | MDOC_QUOTABLE }, /* Fn */ 
@@ -168,7 +168,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_scoped_line, MDOC_CALLABLE }, /* Ql */
 	{ macro_constant_scoped, MDOC_CALLABLE }, /* Qo */
 	{ macro_scoped_line, MDOC_CALLABLE }, /* Qq */
-	{ macro_scoped, MDOC_EXPLICIT }, /* Re */
+	{ macro_close_explicit, 0 }, /* Re */
 	{ macro_scoped, MDOC_EXPLICIT }, /* Rs */
 	{ macro_close_explicit, MDOC_CALLABLE }, /* Sc */
 	{ macro_constant_scoped, MDOC_CALLABLE }, /* So */
@@ -252,6 +252,8 @@ mdoc_parseln(struct mdoc *mdoc, char *buf)
 	char		  tmp[5];
 
 	if ('.' != *buf) {
+		if (SEC_PROLOGUE == mdoc->sec_lastn)
+			return(mdoc_err(mdoc, -1, 0, ERR_SYNTAX_NOTEXT));
 		mdoc_word_alloc(mdoc, 0, buf);
 		mdoc->next = MDOC_NEXT_SIBLING;
 		return(1);

@@ -67,10 +67,6 @@ again:
 		break;
 	}
 
-	if (MDOC_MAX != mdoc_find(mdoc, args[j]) && ! mdoc_warn
-			(mdoc, tok, lastarg, WARN_SYNTAX_MACLIKE))
-		return(0);
-
 	if (0 == j) {
 		if (xstrlcpy(mdoc->meta.title, args[0], META_TITLE_SZ))
 			goto again;
