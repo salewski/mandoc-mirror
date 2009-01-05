@@ -85,6 +85,7 @@ time_t		  mdoc_atotime(const char *);
 int		  mdoc_valid_pre(struct mdoc *, int, int,
 			int, const struct mdoc_arg *);
 int		  mdoc_valid_post(struct mdoc *, int, int);
+int		  mdoc_action(struct mdoc *, int, int);
 
 int		  mdoc_argv(struct mdoc *, int, 
 			struct mdoc_arg *, int *, char *);

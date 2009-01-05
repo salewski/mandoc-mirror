@@ -141,7 +141,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_scoped_line, MDOC_CALLABLE }, /* Aq */
 	{ macro_constant, 0 }, /* At */
 	{ NULL, 0 }, /* Bc */
-	{ macro_scoped, 0 }, /* Bf */ 
+	{ macro_scoped, MDOC_EXPLICIT }, /* Bf */ 
 	{ NULL, 0 }, /* Bo */
 	{ macro_scoped_line, MDOC_CALLABLE }, /* Bq */
 	{ macro_constant_delimited, 0 }, /* Bsx */
@@ -201,8 +201,6 @@ static	struct mdoc_arg	 *argdup(size_t, const struct mdoc_arg *);
 static	void		  argfree(size_t, struct mdoc_arg *);
 static	void	  	  argcpy(struct mdoc_arg *, 
 				const struct mdoc_arg *);
-static	char		**paramdup(size_t, const char **);
-static	void		  paramfree(size_t, char **);
 
 static	void		  mdoc_node_freelist(struct mdoc_node *);
 static	void		  mdoc_node_append(struct mdoc *, int, 
@@ -544,7 +542,6 @@ static void
 mdoc_elem_free(struct mdoc_elem *p)
 {
 
-	paramfree(p->sz, p->args);
 	argfree(p->argc, p->argv);
 }
 
@@ -639,35 +636,3 @@ argdup(size_t argsz, const struct mdoc_arg *args)
 	return(pp);
 }
 
-
-static void
-paramfree(size_t sz, char **p)
-{
-	int		 i;
-
-	if (0 == sz)
-		return;
-
-	assert(p);
-	/* LINTED */
-	for (i = 0; i < (int)sz; i++)
-		free(p[i]);
-	free(p);
-}
-
-
-static char **
-paramdup(size_t sz, const char **p)
-{
-	char		**pp;
-	int		  i;
-
-	if (0 == sz)
-		return(NULL);
-
-	pp = xcalloc(sz, sizeof(char *));
-	for (i = 0; i < (int)sz; i++) 
-		pp[i] = xstrdup(p[i]);
-
-	return(pp);
-}

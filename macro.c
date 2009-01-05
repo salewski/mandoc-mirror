@@ -49,7 +49,9 @@ rewind_elem(struct mdoc *mdoc, int ppos, int tok)
 
 	mdoc->last = n;
 	mdoc->next = MDOC_NEXT_SIBLING;
-	return(mdoc_valid_post(mdoc, tok, ppos));
+	if ( ! mdoc_valid_post(mdoc, tok, ppos))
+		return(0);
+	return(mdoc_action(mdoc, tok, ppos));
 }
 
 
@@ -72,6 +74,7 @@ rewind_line(struct mdoc *mdoc, int ppos, int tok)
 
 	mdoc->last = n ? n : mdoc->last;
 	mdoc->next = MDOC_NEXT_SIBLING;
+	/* XXX - no validation, we do this only for blocks/elements. */
 	return(1);
 }
 
@@ -96,7 +99,36 @@ rewind_exp(struct mdoc *mdoc, int ppos, int tok, int tt)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_NOCTX));
 
 	mdoc->next = MDOC_NEXT_SIBLING;
-	return(mdoc_valid_post(mdoc, tok, ppos));
+	if ( ! mdoc_valid_post(mdoc, tok, ppos))
+		return(0);
+	return(mdoc_action(mdoc, tok, ppos));
+}
+
+
+static int
+rewind_imp(struct mdoc *mdoc, int ppos, int tok)
+{
+	struct mdoc_node *n;
+	int		  t;
+
+	n = mdoc->last ? mdoc->last->parent : NULL;
+
+	/* LINTED */
+	for ( ; n; n = n->parent) {
+		if (MDOC_BLOCK != n->type) 
+			continue;
+		if (tok == (t = n->data.block.tok))
+			break;
+		if ( ! (MDOC_EXPLICIT & mdoc_macros[t].flags))
+			continue;
+		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_BREAK));
+	}
+
+	mdoc->last = n ? n : mdoc->last;
+	mdoc->next = MDOC_NEXT_SIBLING;
+	if ( ! mdoc_valid_post(mdoc, tok, ppos))
+		return(0);
+	return(mdoc_action(mdoc, tok, ppos));
 }
 
 
@@ -127,32 +159,6 @@ macro_close_explicit(MACRO_PROT_ARGS)
 	if (0 != buf[*pos])
 		return(mdoc_err(mdoc, tok, ppos, ERR_ARGS_EQ0));
 	return(rewind_exp(mdoc, ppos, tok, tt));
-}
-
-
-static int
-rewind_imp(struct mdoc *mdoc, int ppos, int tok)
-{
-	struct mdoc_node *n;
-	int		  t;
-
-	n = mdoc->last ? mdoc->last->parent : NULL;
-
-	/* LINTED */
-	for ( ; n; n = n->parent) {
-		if (MDOC_BLOCK != n->type) 
-			continue;
-		if (tok == (t = n->data.block.tok))
-			break;
-		if ( ! (MDOC_EXPLICIT & mdoc_macros[t].flags))
-			continue;
-		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_BREAK));
-	}
-
-	mdoc->last = n ? n : mdoc->last;
-	mdoc->next = MDOC_NEXT_SIBLING;
-	return(1);
-	/*return(mdoc_valid_post(mdoc, tok, ppos));*/
 }
 
 
@@ -542,7 +548,7 @@ macro_constant(MACRO_PROT_ARGS)
 			break;
 
 		mdoc_word_alloc(mdoc, lastarg, p);
-		mdoc->next = MDOC_NEXT_CHILD;
+		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
 	if (MDOC_LINEARG_MAX == sz + argc)

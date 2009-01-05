@@ -322,7 +322,6 @@ args_an(struct mdoc *mdoc, int tok, int pos,
 		int argc, const struct mdoc_arg *argv)
 {
 
-	printf("argc=%d, sz=%d\n", argc, sz);
 	if (0 != argc && 0 != sz) 
 		return(mdoc_warn(mdoc, tok, pos, WARN_ARGS_EQ0));
 	return(1);
@@ -449,28 +448,14 @@ mdoc_valid_pre(struct mdoc *mdoc, int tok, int pos,
 		int argc, const struct mdoc_arg *argv)
 {
 
-	assert(tok < MDOC_MAX);
-	if (mdoc_valids[tok].sz) 
-		if ( ! (*mdoc_valids[tok].sz)(mdoc, tok, pos, sz))
-			return(0);
-	if (mdoc_valids[tok].args) 
-		if ( ! (*mdoc_valids[tok].args)(mdoc, tok, pos, 
-					sz, args, argc, argv))
-			return(0);
-	if (mdoc_valids[tok].tree_pre) 
-		if ( ! (*mdoc_valids[tok].tree_pre)(mdoc, tok, pos))
-			return(0);
 	return(1);
 }
 
 
 int
-mdoc_valid_post(struct mdoc *mdoc, int tok, int pos,
-		int argc, const struct mdoc_arg *argv)
+mdoc_valid_post(struct mdoc *mdoc, int tok, int pos)
 {
 
-	if (mdoc_valids[tok].tree_post)
-		return((*mdoc_valids[tok].tree_post)(mdoc, tok, pos));
 	return(1);
 }
 
