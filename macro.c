@@ -126,7 +126,7 @@ macro_close_explicit(MACRO_PROT_ARGS)
 
 	if (0 != buf[*pos])
 		return(mdoc_err(mdoc, tok, ppos, ERR_ARGS_EQ0));
-	return(scope_rewind_exp(mdoc, ppos, tok, tt));
+	return(rewind_exp(mdoc, ppos, tok, tt));
 }
 
 
