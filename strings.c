@@ -133,6 +133,8 @@ mdoc_atotime(const char *p)
 {
 	struct tm	 tm;
 
+	(void)memset(&tm, 0, sizeof(struct tm));
+
 	if (strptime(p, "%b %d %Y", &tm))
 		return(mktime(&tm));
 	if (strptime(p, "%b %d, %Y", &tm))
