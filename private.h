@@ -64,14 +64,15 @@ int		  mdoc_warn(struct mdoc *, int, int, enum mdoc_warn);
 void		  mdoc_msg(struct mdoc *, int, const char *, ...);
 int		  mdoc_macro(MACRO_PROT_ARGS);
 int		  mdoc_find(const struct mdoc *, const char *);
-void		  mdoc_word_alloc(struct mdoc *, int, const char *);
+void		  mdoc_word_alloc(struct mdoc *, 
+			int, int, const char *);
 void		  mdoc_elem_alloc(struct mdoc *, int, int, 
-			size_t, const struct mdoc_arg *);
+			int, size_t, const struct mdoc_arg *);
 void		  mdoc_block_alloc(struct mdoc *, int, int, 
-			size_t, const struct mdoc_arg *);
-void		  mdoc_head_alloc(struct mdoc *, int, int);
-void		  mdoc_tail_alloc(struct mdoc *, int, int);
-void		  mdoc_body_alloc(struct mdoc *, int, int);
+			int, size_t, const struct mdoc_arg *);
+void		  mdoc_head_alloc(struct mdoc *, int, int, int);
+void		  mdoc_tail_alloc(struct mdoc *, int, int, int);
+void		  mdoc_body_alloc(struct mdoc *, int, int, int);
 void		  mdoc_node_free(struct mdoc_node *);
 void		  mdoc_sibling(struct mdoc *, int, struct mdoc_node **,
 			struct mdoc_node **, struct mdoc_node *);

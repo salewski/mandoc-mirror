@@ -35,7 +35,8 @@ static	int	  rewind_expblock(struct mdoc *, int, int, int);
 static	int	  rewind_head(struct mdoc *, int, int);
 static	int	  rewind_body(struct mdoc *, int, int, int);
 static	int	  rewind_last(struct mdoc *, int, struct mdoc_node *);
-static	int	  append_delims(struct mdoc *, int, int *, char *);
+static	int	  append_delims(struct mdoc *, 
+			int, int, int *, char *);
 static	int	  lookup(struct mdoc *, int, const char *);
 
 
@@ -181,7 +182,8 @@ rewind_impblock(struct mdoc *mdoc, int ppos, int tok)
 
 
 static int
-append_delims(struct mdoc *mdoc, int tok, int *pos, char *buf)
+append_delims(struct mdoc *mdoc, int tok, 
+		int line, int *pos, char *buf)
 {
 	int		 c, lastarg;
 	char		*p;
@@ -197,7 +199,7 @@ append_delims(struct mdoc *mdoc, int tok, int *pos, char *buf)
 		else if (ARGS_EOLN == c)
 			break;
 		assert(mdoc_isdelim(p));
-		mdoc_word_alloc(mdoc, lastarg, p);
+		mdoc_word_alloc(mdoc, line, lastarg, p);
 		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
@@ -287,7 +289,7 @@ macro_close_explicit(MACRO_PROT_ARGS)
 	flushed = 0;
 
 	if (maxargs > 0) {
-		mdoc_tail_alloc(mdoc, ppos, tt);
+		mdoc_tail_alloc(mdoc, line, ppos, tt);
 		mdoc->next = MDOC_NEXT_CHILD;
 	}
 
@@ -319,7 +321,7 @@ macro_close_explicit(MACRO_PROT_ARGS)
 			break;
 		}
 
-		mdoc_word_alloc(mdoc, lastarg, p);
+		mdoc_word_alloc(mdoc, line, lastarg, p);
 		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
@@ -332,7 +334,7 @@ macro_close_explicit(MACRO_PROT_ARGS)
 
 	if (ppos > 1)
 		return(1);
-	return(append_delims(mdoc, tok, pos, buf));
+	return(append_delims(mdoc, tok, line, pos, buf));
 }
 
 
@@ -376,14 +378,14 @@ macro_text(MACRO_PROT_ARGS)
 	if (MDOC_QUOTABLE & mdoc_macros[tok].flags)
 		fl |= ARGS_QUOTED;
 
-	mdoc_elem_alloc(mdoc, lastarg, tok, argc, argv);
+	mdoc_elem_alloc(mdoc, line, lastarg, tok, argc, argv);
 	mdoc->next = MDOC_NEXT_CHILD;
 
 	for (lastpunct = sz = 0; sz + argc < MDOC_LINEARG_MAX; sz++) {
 		lastarg = *pos;
 
 		if (lastpunct) {
-			mdoc_elem_alloc(mdoc, lastarg, tok, argc, argv);
+			mdoc_elem_alloc(mdoc, line, lastarg, tok, argc, argv);
 			mdoc->next = MDOC_NEXT_CHILD;
 			lastpunct = 0;
 		}
@@ -409,7 +411,7 @@ macro_text(MACRO_PROT_ARGS)
 				return(0);
 			if (ppos > 1)
 				return(1);
-			return(append_delims(mdoc, tok, pos, buf));
+			return(append_delims(mdoc, tok, line, pos, buf));
 		}
 
 		if (mdoc_isdelim(p)) {
@@ -419,7 +421,7 @@ macro_text(MACRO_PROT_ARGS)
 			}
 			lastpunct = 1;
 		}
-		mdoc_word_alloc(mdoc, lastarg, p);
+		mdoc_word_alloc(mdoc, line, lastarg, p);
 		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
@@ -432,7 +434,7 @@ macro_text(MACRO_PROT_ARGS)
 		return(0);
 	if (ppos > 1)
 		return(1);
-	return(append_delims(mdoc, tok, pos, buf));
+	return(append_delims(mdoc, tok, line, pos, buf));
 }
 
 
@@ -470,21 +472,21 @@ macro_scoped(MACRO_PROT_ARGS)
 		return(0);
 	}
 
-	mdoc_block_alloc(mdoc, ppos, tok, (size_t)argc, argv);
+	mdoc_block_alloc(mdoc, line, ppos, tok, (size_t)argc, argv);
 	mdoc->next = MDOC_NEXT_CHILD;
 
 	mdoc_argv_free(argc, argv);
 
 	if (0 == buf[*pos]) {
-		mdoc_head_alloc(mdoc, ppos, tok);
+		mdoc_head_alloc(mdoc, line, ppos, tok);
 		if ( ! rewind_head(mdoc, ppos, tok))
 			return(0);
-		mdoc_body_alloc(mdoc, ppos, tok);
+		mdoc_body_alloc(mdoc, line, ppos, tok);
 		mdoc->next = MDOC_NEXT_CHILD;
 		return(1);
 	}
 
-	mdoc_head_alloc(mdoc, ppos, tok);
+	mdoc_head_alloc(mdoc, line, ppos, tok);
 	mdoc->next = MDOC_NEXT_CHILD;
 
 	for (j = 0; j < MDOC_LINEARG_MAX; j++) {
@@ -499,7 +501,7 @@ macro_scoped(MACRO_PROT_ARGS)
 			break;
 	
 		if (MDOC_MAX == (c = lookup(mdoc, tok, p))) {
-			mdoc_word_alloc(mdoc, lastarg, p);
+			mdoc_word_alloc(mdoc, line, lastarg, p);
 			mdoc->next = MDOC_NEXT_SIBLING;
 			continue;
 		}
@@ -514,10 +516,10 @@ macro_scoped(MACRO_PROT_ARGS)
 
 	if ( ! rewind_head(mdoc, ppos, tok))
 		return(0);
-	if (1 == ppos && ! append_delims(mdoc, tok, pos, buf))
+	if (1 == ppos && ! append_delims(mdoc, tok, line, pos, buf))
 		return(0);
 
-	mdoc_body_alloc(mdoc, ppos, tok);
+	mdoc_body_alloc(mdoc, line, ppos, tok);
 	mdoc->next = MDOC_NEXT_CHILD;
 
 	return(1);
@@ -535,10 +537,10 @@ macro_scoped_line(MACRO_PROT_ARGS)
 	int		  lastarg, c, j;
 	char		  *p;
 
-	mdoc_block_alloc(mdoc, ppos, tok, 0, NULL);
+	mdoc_block_alloc(mdoc, line, ppos, tok, 0, NULL);
 	mdoc->next = MDOC_NEXT_CHILD;
 
-	mdoc_head_alloc(mdoc, ppos, tok);
+	mdoc_head_alloc(mdoc, line, ppos, tok);
 	mdoc->next = MDOC_NEXT_CHILD;
 
 	/* XXX - no known argument macros. */
@@ -560,7 +562,7 @@ macro_scoped_line(MACRO_PROT_ARGS)
 			break;
 
 		if (MDOC_MAX == (c = lookup(mdoc, tok, p))) {
-			mdoc_word_alloc(mdoc, lastarg, p);
+			mdoc_word_alloc(mdoc, line, lastarg, p);
 			mdoc->next = MDOC_NEXT_SIBLING;
 			continue;
 		}
@@ -576,7 +578,7 @@ macro_scoped_line(MACRO_PROT_ARGS)
 	if (1 == ppos) {
 		if ( ! rewind_head(mdoc, ppos, tok))
 			return(0);
-		if ( ! append_delims(mdoc, tok, pos, buf))
+		if ( ! append_delims(mdoc, tok, line, pos, buf))
 			return(0);
 	}
 	return(rewind_impblock(mdoc, ppos, tok));
@@ -604,17 +606,17 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 	if ( ! mdoc_valid_pre(mdoc, tok, ppos, 0, NULL))
 		return(0);
 
-	mdoc_block_alloc(mdoc, ppos, tok, 0, NULL);
+	mdoc_block_alloc(mdoc, line, ppos, tok, 0, NULL);
 	mdoc->next = MDOC_NEXT_CHILD;
 
 	if (0 == maxargs) {
-		mdoc_head_alloc(mdoc, ppos, tok);
+		mdoc_head_alloc(mdoc, line, ppos, tok);
 		if ( ! rewind_head(mdoc, ppos, tok))
 			return(0);
-		mdoc_body_alloc(mdoc, ppos, tok);
+		mdoc_body_alloc(mdoc, line, ppos, tok);
 		flushed = 1;
 	} else
-		mdoc_head_alloc(mdoc, ppos, tok);
+		mdoc_head_alloc(mdoc, line, ppos, tok);
 
 	mdoc->next = MDOC_NEXT_CHILD;
 
@@ -625,7 +627,7 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 			if ( ! rewind_head(mdoc, ppos, tok))
 				return(0);
 			flushed = 1;
-			mdoc_body_alloc(mdoc, ppos, tok);
+			mdoc_body_alloc(mdoc, line, ppos, tok);
 			mdoc->next = MDOC_NEXT_CHILD;
 		}
 
@@ -642,7 +644,7 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 				if ( ! rewind_head(mdoc, ppos, tok))
 					return(0);
 				flushed = 1;
-				mdoc_body_alloc(mdoc, ppos, tok);
+				mdoc_body_alloc(mdoc, line, ppos, tok);
 				mdoc->next = MDOC_NEXT_CHILD;
 			}
 			if ( ! mdoc_macro(mdoc, c, line, lastarg, pos, buf))
@@ -654,11 +656,11 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 			if ( ! rewind_head(mdoc, ppos, tok))
 				return(0);
 			flushed = 1;
-			mdoc_body_alloc(mdoc, ppos, tok);
+			mdoc_body_alloc(mdoc, line, ppos, tok);
 			mdoc->next = MDOC_NEXT_CHILD;
 		}
 	
-		mdoc_word_alloc(mdoc, lastarg, p);
+		mdoc_word_alloc(mdoc, line, lastarg, p);
 		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
@@ -668,13 +670,13 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 	if ( ! flushed) {
 		if ( ! rewind_head(mdoc, ppos, tok))
 			return(0);
-		mdoc_body_alloc(mdoc, ppos, tok);
+		mdoc_body_alloc(mdoc, line, ppos, tok);
 		mdoc->next = MDOC_NEXT_CHILD;
 	}
 
 	if (ppos > 1)
 		return(1);
-	return(append_delims(mdoc, tok, pos, buf));
+	return(append_delims(mdoc, tok, line, pos, buf));
 }
 
 
@@ -725,7 +727,7 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 		return(0);
 	}
 
-	mdoc_elem_alloc(mdoc, lastarg, tok, argc, argv);
+	mdoc_elem_alloc(mdoc, line, lastarg, tok, argc, argv);
 	mdoc->next = MDOC_NEXT_CHILD;
 
 	mdoc_argv_free(argc, argv);
@@ -762,7 +764,7 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 			flushed = 1;
 		}
 	
-		mdoc_word_alloc(mdoc, lastarg, p);
+		mdoc_word_alloc(mdoc, line, lastarg, p);
 		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
@@ -774,7 +776,7 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 
 	if (ppos > 1)
 		return(1);
-	return(append_delims(mdoc, tok, pos, buf));
+	return(append_delims(mdoc, tok, line, pos, buf));
 }
 
 
@@ -815,7 +817,7 @@ macro_constant(MACRO_PROT_ARGS)
 		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
 	}
 
-	mdoc_elem_alloc(mdoc, ppos, tok, argc, argv);
+	mdoc_elem_alloc(mdoc, line, ppos, tok, argc, argv);
 	mdoc->next = MDOC_NEXT_CHILD;
 
 	mdoc_argv_free(argc, argv);
@@ -828,7 +830,7 @@ macro_constant(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		mdoc_word_alloc(mdoc, lastarg, p);
+		mdoc_word_alloc(mdoc, line, lastarg, p);
 		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 

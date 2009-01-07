@@ -121,7 +121,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_obsolete, 0 }, /* Ot */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Pa */
 	{ macro_constant, 0 }, /* Rv */
-	/* XXX - supposed to be (but isn't) callable. */
+	/* XXX - .St supposed to be (but isn't) callable. */
 	{ macro_constant_delimited, MDOC_PARSED }, /* St */ 
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Va */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Vt */ 
@@ -278,7 +278,7 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 	if ('.' != *buf) {
 		if (SEC_PROLOGUE == mdoc->sec_lastn)
 			return(mdoc_err(mdoc, -1, 0, ERR_SYNTAX_NOTEXT));
-		mdoc_word_alloc(mdoc, 0, buf);
+		mdoc_word_alloc(mdoc, line, 0, buf);
 		mdoc->next = MDOC_NEXT_SIBLING;
 		return(1);
 	}
@@ -376,7 +376,8 @@ mdoc_macro(struct mdoc *mdoc, int tok,
 		return(0);
 	}
 
-	return((*mdoc_macros[tok].fp)(mdoc, tok, line, ppos, pos, buf));
+	return((*mdoc_macros[tok].fp)(mdoc, tok, 
+				line, ppos, pos, buf));
 }
 
 
@@ -478,7 +479,7 @@ mdoc_node_append(struct mdoc *mdoc, int pos, struct mdoc_node *p)
 
 
 void
-mdoc_tail_alloc(struct mdoc *mdoc, int pos, int tok)
+mdoc_tail_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 {
 	struct mdoc_node *p;
 
@@ -487,6 +488,8 @@ mdoc_tail_alloc(struct mdoc *mdoc, int pos, int tok)
 
 	p = xcalloc(1, sizeof(struct mdoc_node));
 
+	p->line = line;
+	p->pos = pos;
 	p->type = MDOC_TAIL;
 	p->data.tail.tok = tok;
 
@@ -495,7 +498,7 @@ mdoc_tail_alloc(struct mdoc *mdoc, int pos, int tok)
 
 
 void
-mdoc_head_alloc(struct mdoc *mdoc, int pos, int tok)
+mdoc_head_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 {
 	struct mdoc_node *p;
 
@@ -504,6 +507,8 @@ mdoc_head_alloc(struct mdoc *mdoc, int pos, int tok)
 
 	p = xcalloc(1, sizeof(struct mdoc_node));
 
+	p->line = line;
+	p->pos = pos;
 	p->type = MDOC_HEAD;
 	p->data.head.tok = tok;
 
@@ -512,7 +517,7 @@ mdoc_head_alloc(struct mdoc *mdoc, int pos, int tok)
 
 
 void
-mdoc_body_alloc(struct mdoc *mdoc, int pos, int tok)
+mdoc_body_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 {
 	struct mdoc_node *p;
 
@@ -521,6 +526,8 @@ mdoc_body_alloc(struct mdoc *mdoc, int pos, int tok)
 
 	p = xcalloc(1, sizeof(struct mdoc_node));
 
+	p->line = line;
+	p->pos = pos;
 	p->type = MDOC_BODY;
 	p->data.body.tok = tok;
 
@@ -529,13 +536,15 @@ mdoc_body_alloc(struct mdoc *mdoc, int pos, int tok)
 
 
 void
-mdoc_block_alloc(struct mdoc *mdoc, int pos, int tok,
-		size_t argsz, const struct mdoc_arg *args)
+mdoc_block_alloc(struct mdoc *mdoc, int line, int pos, 
+		int tok, size_t argsz, const struct mdoc_arg *args)
 {
 	struct mdoc_node *p;
 
 	p = xcalloc(1, sizeof(struct mdoc_node));
 
+	p->pos = pos;
+	p->line = line;
 	p->type = MDOC_BLOCK;
 	p->data.block.tok = tok;
 	p->data.block.argc = argsz;
@@ -546,12 +555,15 @@ mdoc_block_alloc(struct mdoc *mdoc, int pos, int tok,
 
 
 void
-mdoc_elem_alloc(struct mdoc *mdoc, int pos, int tok, 
-		size_t argsz, const struct mdoc_arg *args)
+mdoc_elem_alloc(struct mdoc *mdoc, int line, int pos, 
+		int tok, size_t argsz, const struct mdoc_arg *args)
 {
 	struct mdoc_node *p;
 
 	p = xcalloc(1, sizeof(struct mdoc_node));
+
+	p->line = line;
+	p->pos = pos;
 	p->type = MDOC_ELEM;
 	p->data.elem.tok = tok;
 	p->data.elem.argc = argsz;
@@ -562,11 +574,14 @@ mdoc_elem_alloc(struct mdoc *mdoc, int pos, int tok,
 
 
 void
-mdoc_word_alloc(struct mdoc *mdoc, int pos, const char *word)
+mdoc_word_alloc(struct mdoc *mdoc, 
+		int line, int pos, const char *word)
 {
 	struct mdoc_node *p;
 
 	p = xcalloc(1, sizeof(struct mdoc_node));
+	p->line = line;
+	p->pos = pos;
 	p->type = MDOC_TEXT;
 	p->data.text.string = xstrdup(word);
 
