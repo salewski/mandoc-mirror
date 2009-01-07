@@ -249,10 +249,31 @@ mdoc_alloc(void *data, const struct mdoc_cb *cb)
 
 
 int
-mdoc_parseln(struct mdoc *mdoc, char *buf)
+mdoc_endparse(struct mdoc *mdoc)
+{
+
+	if (MDOC_HALT & mdoc->flags)
+		return(0);
+	if (NULL == mdoc->first)
+		return(1);
+
+	assert(mdoc->last);
+	if ( ! macro_end(mdoc)) {
+		mdoc->flags |= MDOC_HALT;
+		return(0);
+	}
+	return(1);
+}
+
+
+int
+mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 {
 	int		  c, i;
 	char		  tmp[5];
+
+	if (MDOC_HALT & mdoc->flags)
+		return(0);
 
 	if ('.' != *buf) {
 		if (SEC_PROLOGUE == mdoc->sec_lastn)
@@ -270,23 +291,32 @@ mdoc_parseln(struct mdoc *mdoc, char *buf)
 	while (buf[i] && ! isspace(buf[i]) && i < (int)sizeof(tmp))
 		i++;
 
-	if (i == (int)sizeof(tmp))
+	if (i == (int)sizeof(tmp)) {
+		mdoc->flags |= MDOC_HALT;
 		return(mdoc_err(mdoc, -1, 1, ERR_MACRO_NOTSUP));
-	else if (i <= 2)
+	} else if (i <= 2) {
+		mdoc->flags |= MDOC_HALT;
 		return(mdoc_err(mdoc, -1, 1, ERR_MACRO_NOTSUP));
+	}
 
 	i--;
 
 	(void)memcpy(tmp, buf + 1, (size_t)i);
 	tmp[i++] = 0;
 
-	if (MDOC_MAX == (c = mdoc_find(mdoc, tmp)))
+	if (MDOC_MAX == (c = mdoc_find(mdoc, tmp))) {
+		mdoc->flags |= MDOC_HALT;
 		return(mdoc_err(mdoc, c, 1, ERR_MACRO_NOTSUP));
+	}
 
 	while (buf[i] && isspace(buf[i]))
 		i++;
 
-	return(mdoc_macro(mdoc, c, 1, &i, buf));
+	if ( ! mdoc_macro(mdoc, c, 1, &i, buf)) {
+		mdoc->flags |= MDOC_HALT;
+		return(0);
+	}
+	return(1);
 }
 
 

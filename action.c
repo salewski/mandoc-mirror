@@ -21,9 +21,7 @@
 
 #include "private.h"
 
-typedef int	(*a_act)(struct mdoc *, int, int, 
-			int, const char *[],
-			int, const struct mdoc_arg *);
+typedef int	(*a_act)(struct mdoc *, int, int);
 
 
 struct	actions {
@@ -31,12 +29,15 @@ struct	actions {
 };
 
 
+static int	 action_sh(struct mdoc *, int, int);
+
+
 const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* \" */
 	{ NULL }, /* Dd */ 
 	{ NULL }, /* Dt */ 
 	{ NULL }, /* Os */ 
-	{ NULL }, /* Sh */ 
+	{ action_sh }, /* Sh */ 
 	{ NULL }, /* Ss */ 
 	{ NULL }, /* Pp */ 
 	{ NULL }, /* D1 */
@@ -141,26 +142,61 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 };
 
 
-int
-mdoc_action(struct mdoc *mdoc, int tok, int pos)
+static int
+action_sh(struct mdoc *mdoc, int tok, int pos)
 {
+	enum mdoc_sec	  sec;
+	int		  i;
+	struct mdoc_node *n;
+	char		 *args[MDOC_LINEARG_MAX];
+
+	if (MDOC_HEAD != mdoc->last->type)
+		return(1);
+
+	n = mdoc->last->child;
+	assert(n);
+
+	for (i = 0; n && i < MDOC_LINEARG_MAX; n = n->next, i++) {
+		assert(MDOC_TEXT == n->type);
+		assert(NULL == n->child);
+		assert(n->data.text.string);
+		args[i] = n->data.text.string;
+	}
+
+	sec = mdoc_atosec((size_t)i, (const char **)args);
+	if (SEC_CUSTOM != sec)
+		mdoc->sec_lastn = sec;
+	mdoc->sec_last = sec;
 
 	return(1);
 }
 
-#if 0
-	/* Post-processing. */
-	switch (tok) {
-	case (MDOC_Sh):
-		sec = mdoc_atosec((size_t)sz, _CC(args));
-		if (SEC_CUSTOM != sec)
-			mdoc->sec_lastn = sec;
-		mdoc->sec_last = sec;
+
+int
+mdoc_action(struct mdoc *mdoc, int pos)
+{
+	int		 t;
+
+	switch (mdoc->last->type) {
+	case (MDOC_BODY):
+		t = mdoc->last->data.body.tok;
+		break;
+	case (MDOC_ELEM):
+		t = mdoc->last->data.elem.tok;
+		break;
+	case (MDOC_BLOCK):
+		t = mdoc->last->data.block.tok;
+		break;
+	case (MDOC_HEAD):
+		t = mdoc->last->data.head.tok;
 		break;
 	default:
-		break;
+		return(1);
 	}
 
-	MDOC_Nm... ?
-#endif
+	if (NULL == mdoc_actions[t].action)
+		return(1);
+	/* TODO: MDOC_Nm... ? */
+	return((*mdoc_actions[t].action)(mdoc, t, pos));
+}
 

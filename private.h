@@ -31,6 +31,7 @@ struct	mdoc {
 	struct mdoc_cb	  cb;
 	void		 *htab;
 	int		  flags;
+#define	MDOC_HALT	 (1 << 0)
 	enum mdoc_next	  next;
 	struct mdoc_node *last;
 	struct mdoc_node *first;
@@ -87,8 +88,8 @@ time_t		  mdoc_atotime(const char *);
 
 int		  mdoc_valid_pre(struct mdoc *, int, int,
 			int, const struct mdoc_arg *);
-int		  mdoc_valid_post(struct mdoc *, int, int);
-int		  mdoc_action(struct mdoc *, int, int);
+int		  mdoc_valid_post(struct mdoc *, int);
+int		  mdoc_action(struct mdoc *, int);
 
 int		  mdoc_argv(struct mdoc *, int, 
 			struct mdoc_arg *, int *, char *);
@@ -122,6 +123,7 @@ int		  macro_scoped(MACRO_PROT_ARGS);
 int		  macro_close_explicit(MACRO_PROT_ARGS);
 int		  macro_scoped_line(MACRO_PROT_ARGS);
 int		  macro_prologue(MACRO_PROT_ARGS);
+int		  macro_end(struct mdoc *);
 
 __END_DECLS
 

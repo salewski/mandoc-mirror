@@ -34,6 +34,7 @@ static	int	  rewind_impblock(struct mdoc *, int, int);
 static	int	  rewind_expblock(struct mdoc *, int, int, int);
 static	int	  rewind_head(struct mdoc *, int, int);
 static	int	  rewind_body(struct mdoc *, int, int, int);
+static	int	  rewind_last(struct mdoc *, int, struct mdoc_node *);
 static	int	  append_delims(struct mdoc *, int, int *, char *);
 static	int	  lookup(struct mdoc *, int, const char *);
 
@@ -49,6 +50,26 @@ lookup(struct mdoc *mdoc, int from, const char *p)
 
 
 static int
+rewind_last(struct mdoc *mdoc, int ppos, struct mdoc_node *to)
+{
+
+	assert(to);
+	while (mdoc->last != to) {
+		if ( ! mdoc_valid_post(mdoc, ppos))
+			return(0);
+		if ( ! mdoc_action(mdoc, ppos))
+			return(0);
+		mdoc->last = mdoc->last->parent;
+		assert(mdoc->last);
+	}
+	mdoc->next = MDOC_NEXT_SIBLING;
+	if ( ! mdoc_valid_post(mdoc, ppos))
+		return(0);
+	return(mdoc_action(mdoc, ppos));
+}
+
+
+static int
 rewind_elem(struct mdoc *mdoc, int ppos, int tok)
 {
 	struct mdoc_node *n;
@@ -59,11 +80,7 @@ rewind_elem(struct mdoc *mdoc, int ppos, int tok)
 	assert(MDOC_ELEM == n->type);
 	assert(tok == n->data.elem.tok);
 
-	mdoc->last = n;
-	mdoc->next = MDOC_NEXT_SIBLING;
-	if ( ! mdoc_valid_post(mdoc, tok, ppos))
-		return(0);
-	return(mdoc_action(mdoc, tok, ppos));
+	return(rewind_last(mdoc, ppos, n));
 }
 
 
@@ -71,22 +88,21 @@ static int
 rewind_body(struct mdoc *mdoc, int ppos, int tok, int tt)
 {
 	struct mdoc_node *n;
+	int		  t;
 
 	/* LINTED */
 	for (n = mdoc->last; n; n = n->parent) {
 		if (MDOC_BODY != n->type) 
 			continue;
-		if (tt == n->data.head.tok)
+		if (tt == (t = n->data.head.tok))
 			break;
-		if ( ! (MDOC_EXPLICIT & mdoc_macros[tt].flags))
+		if ( ! (MDOC_EXPLICIT & mdoc_macros[t].flags))
 			continue;
 		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_BREAK));
 	}
 
-	mdoc->last = n ? n : mdoc->last;
-	mdoc->next = MDOC_NEXT_SIBLING;
-	/* XXX - no validation, we do this only for blocks/elements. */
-	return(1);
+	assert(n);
+	return(rewind_last(mdoc, ppos, n));
 }
 
 
@@ -107,10 +123,8 @@ rewind_head(struct mdoc *mdoc, int ppos, int tok)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_BREAK));
 	}
 
-	mdoc->last = n ? n : mdoc->last;
-	mdoc->next = MDOC_NEXT_SIBLING;
-	/* XXX - no validation, we do this only for blocks/elements. */
-	return(1);
+	assert(n);
+	return(rewind_last(mdoc, ppos, n));
 }
 
 
@@ -133,13 +147,9 @@ rewind_expblock(struct mdoc *mdoc, int ppos, int tok, int tt)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_BREAK));
 	}
 
-	if (NULL == (mdoc->last = n))
+	if (NULL == n)
 		return(mdoc_err(mdoc, tok, ppos, ERR_SCOPE_NOCTX));
-
-	mdoc->next = MDOC_NEXT_SIBLING;
-	if ( ! mdoc_valid_post(mdoc, tok, ppos))
-		return(0);
-	return(mdoc_action(mdoc, tok, ppos));
+	return(rewind_last(mdoc, ppos, n));
 }
 
 
@@ -166,12 +176,7 @@ rewind_impblock(struct mdoc *mdoc, int ppos, int tok)
 
 	if (NULL == n)
 		return(1);
-
-	mdoc->next = MDOC_NEXT_SIBLING;
-	mdoc->last = n;
-	if ( ! mdoc_valid_post(mdoc, tok, ppos))
-		return(0);
-	return(mdoc_action(mdoc, tok, ppos));
+	return(rewind_last(mdoc, ppos, n));
 }
 
 
@@ -471,6 +476,9 @@ macro_scoped(MACRO_PROT_ARGS)
 	mdoc_argv_free(argc, argv);
 
 	if (0 == buf[*pos]) {
+		mdoc_head_alloc(mdoc, ppos, tok);
+		if ( ! rewind_head(mdoc, ppos, tok))
+			return(0);
 		mdoc_body_alloc(mdoc, ppos, tok);
 		mdoc->next = MDOC_NEXT_CHILD;
 		return(1);
@@ -600,6 +608,9 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 	mdoc->next = MDOC_NEXT_CHILD;
 
 	if (0 == maxargs) {
+		mdoc_head_alloc(mdoc, ppos, tok);
+		if ( ! rewind_head(mdoc, ppos, tok))
+			return(0);
 		mdoc_body_alloc(mdoc, ppos, tok);
 		flushed = 1;
 	} else
@@ -834,4 +845,14 @@ macro_obsolete(MACRO_PROT_ARGS)
 {
 
 	return(mdoc_warn(mdoc, tok, ppos, WARN_IGN_OBSOLETE));
+}
+
+
+int
+macro_end(struct mdoc *mdoc)
+{
+
+	assert(mdoc->first);
+	assert(mdoc->last);
+	return(rewind_last(mdoc, -1, mdoc->first));
 }

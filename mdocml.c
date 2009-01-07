@@ -215,8 +215,6 @@ print_node(const struct mdoc_node *n, int indent)
 		t = "element";
 		argv = n->data.elem.argv;
 		argc = n->data.elem.argc;
-		params = n->data.elem.args;
-		sz = n->data.elem.sz;
 		break;
 	case (MDOC_BLOCK):
 		p = mdoc_macronames[n->data.block.tok];
@@ -256,11 +254,14 @@ parse_leave(struct md_parse *p, int code)
 {
 	const struct mdoc_node *n;
 
-	if (p->mdoc) {
-		if ((n = mdoc_result(p->mdoc)))
-			print_node(n, 0);
-		mdoc_free(p->mdoc);
-	}
+	if (NULL == p->mdoc)
+		return(code);
+
+	if ( ! mdoc_endparse(p->mdoc))
+		code = 0;
+	if ((n = mdoc_result(p->mdoc)))
+		print_node(n, 0);
+
 	return(code);
 }
 
@@ -304,7 +305,7 @@ parse_begin(struct md_parse *p)
 			}
 	
 			line[(int)pos] = sv[(int)pos] = 0;
-			if ( ! mdoc_parseln(p->mdoc, line))
+			if ( ! mdoc_parseln(p->mdoc, p->lnn, line))
 				return(parse_leave(p, 0));
 
 			p->lnn++;
@@ -383,6 +384,9 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 	case (ERR_ARGS_LE2):
 		fmt = "macro `%s' expects two or fewer arguments";
 		break;
+	case (ERR_ARGS_LE8):
+		fmt = "macro `%s' expects eight or fewer arguments";
+		break;
 	case (ERR_ARGS_MANY):
 		fmt = "macro `%s' has too many arguments";
 		break;
@@ -434,7 +438,7 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 			(void)fprintf(stderr, " (column %d)\n", col);
 		return(0);
 	} else if (-1 == col) {
-		(void)fprintf(stderr, "\nFrom: %s", p->line);
+		(void)fprintf(stderr, "\nFrom: %s\n", p->line);
 		return(0);
 	}
 
@@ -541,13 +545,15 @@ msg_warn(void *arg, int tok, int col, enum mdoc_warn type)
 		(void)fprintf(stderr, "%s:%d: warning: %s",
 				p->name, p->lnn, lit);
 
-	if (p->dbg >= 1) {
+	if (col >= 0 && p->dbg >= 1) {
 		(void)fprintf(stderr, "\nFrom: %s\n      ", p->line);
 		for (i = 0; i < col; i++)
 			(void)fprintf(stderr, " ");
 		(void)fprintf(stderr, "^\n");
-	} else
+	} else if (col >= 0)
 		(void)fprintf(stderr, " (column %d)\n", col);
+	else 
+		(void)fprintf(stderr, "\n");
 
 	if (p->warn & MD_WARN_ERR) {
 		(void)fprintf(stderr, "%s: considering warnings as "

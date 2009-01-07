@@ -21,425 +21,186 @@
 
 #include "private.h"
 
-/* FIXME: `.St' can only have one argument set. */
 
-typedef int	(*v_args_sz)(struct mdoc *, int, int, int);
-typedef int	(*v_args)(struct mdoc *, int, int, 
-			int, const char *[],
+typedef	int	(*v_pre)(struct mdoc *, int, int, 
 			int, const struct mdoc_arg *);
-typedef int	(*v_tree)(struct mdoc *, int, int);
+typedef	int	(*v_post)(struct mdoc *, int, int);
 
 
 struct	valids {
-	v_args_sz sz;
-	v_args	  args;
-	v_tree	  tree_pre;
-	v_tree	  tree_post;
+	v_pre	 pre;
+	v_post	*post;
 };
 
 
-static	int	  assert_eq0(struct mdoc *, int, int, int);
-static	int	  assert_le1(struct mdoc *, int, int, int);
-static	int	  need_eq0(struct mdoc *, int, int, int);
-static	int	  need_eq1(struct mdoc *, int, int, int);
-static	int	  need_ge1(struct mdoc *, int, int, int);
-static	int	  need_le2(struct mdoc *, int, int, int);
-static	int	  want_eq0(struct mdoc *, int, int, int);
-static	int	  want_ge1(struct mdoc *, int, int, int);
+static	int	pre_sh(struct mdoc *, int, int, 
+			int, const struct mdoc_arg *);
+static	int	post_headchild_err_ge1(struct mdoc *, int, int);
+static	int	post_headchild_err_le8(struct mdoc *, int, int);
+static	int	post_bodychild_warn_ge1(struct mdoc *, int, int);
 
-static	int	  tree_pre_ref(struct mdoc *, int, int);
-static	int	  tree_pre_display(struct mdoc *, int, int);
-
-static	int	  tree_post_onlyhead(struct mdoc *, int, int);
-static	int	  tree_post_onlybody(struct mdoc *, int, int);
-static	int	  tree_post_warnemptybody(struct mdoc *, int, int);
-
-static	int	  args_bool(struct mdoc *, int, int, 
-			int, const char *[], 
-			int, const struct mdoc_arg *);
-static	int	  args_sh(struct mdoc *, int, int, 
-			int, const char *[], 
-			int, const struct mdoc_arg *);
-static	int	  args_an(struct mdoc *, int, int, 
-			int, const char *[], 
-			int, const struct mdoc_arg *);
-static	int	  args_nopunct(struct mdoc *, int, int, 
-			int, const char *[], 
-			int, const struct mdoc_arg *);
-static	int	  args_xr(struct mdoc *, int, int, 
-			int, const char *[], 
-			int, const struct mdoc_arg *);
+static v_post	posts_sh[] = { post_headchild_err_ge1, 
+			post_bodychild_warn_ge1, 
+			post_headchild_err_le8, NULL };
 
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
-	{ NULL, NULL, NULL, NULL }, /* \" */
-	{ NULL, NULL, NULL, NULL }, /* Dd */ /* TODO */
-	{ NULL, NULL, NULL, NULL }, /* Dt */ /* TODO */
-	{ NULL, NULL, NULL, NULL }, /* Os */ /* TODO */
-	{ want_ge1, args_sh, NULL, NULL }, /* Sh */ /* FIXME: preceding Pp. */
-	{ want_ge1, NULL, NULL, NULL }, /* Ss */ /* FIXME: preceding Pp. */
-	{ want_eq0, NULL, NULL, NULL }, /* Pp */ 
-	{ assert_eq0, NULL, tree_pre_display, tree_post_onlyhead }, /* D1 */
-	{ assert_eq0, NULL, tree_pre_display, tree_post_onlyhead }, /* Dl */
-	{ want_eq0, NULL, tree_pre_display, tree_post_warnemptybody }, /* Bd */ /* FIXME: preceding Pp. */
-	{ assert_eq0, NULL, NULL, tree_post_onlybody }, /* Ed */
-	{ want_eq0, NULL, NULL, NULL }, /* Bl */ /* FIXME: preceding Pp. */
-	{ assert_eq0, NULL, NULL, tree_post_onlybody }, /* El */
-	{ NULL, NULL, NULL, NULL }, /* It */
-	{ need_ge1, NULL, NULL, NULL }, /* Ad */ 
-	{ NULL, args_an, NULL, NULL }, /* An */
-	{ NULL, NULL, NULL, NULL }, /* Ar */
-	{ need_ge1, NULL, NULL, NULL }, /* Cd */
-	{ NULL, NULL, NULL, NULL }, /* Cm */
-	{ need_ge1, NULL, NULL, NULL }, /* Dv */ 
-	{ need_ge1, NULL, NULL, NULL }, /* Er */ 
-	{ need_ge1, NULL, NULL, NULL }, /* Ev */ 
-	{ NULL, NULL, NULL, NULL }, /* Ex */
-	{ need_ge1, NULL, NULL, NULL }, /* Fa */ 
-	{ NULL, NULL, NULL, NULL }, /* Fd */ 
-	{ NULL, NULL, NULL, NULL }, /* Fl */
-	{ need_ge1, NULL, NULL, NULL }, /* Fn */ 
-	{ want_ge1, NULL, NULL, NULL }, /* Ft */ 
-	{ need_ge1, NULL, NULL, NULL }, /* Ic */ 
-	{ need_eq1, NULL, NULL, NULL }, /* In */ 
-	{ want_ge1, NULL, NULL, NULL }, /* Li */
-	{ want_ge1, NULL, NULL, NULL }, /* Nd */ 
-	{ NULL, NULL, NULL, NULL }, /* Nm */ 
-	{ NULL, NULL, NULL, NULL }, /* Op */
-	{ NULL, NULL, NULL, NULL }, /* Ot */
-	{ want_ge1, NULL, NULL, NULL }, /* Pa */
-	{ NULL, NULL, NULL, NULL }, /* Rv */
-	{ NULL, NULL, NULL, NULL }, /* St */
-	{ need_ge1, NULL, NULL, NULL }, /* Va */
-	{ need_ge1, NULL, NULL, NULL }, /* Vt */ 
-	{ need_le2, args_xr, NULL, NULL }, /* Xr */
-	{ need_ge1, NULL, tree_pre_ref, NULL }, /* %A */
-	{ need_ge1, NULL, tree_pre_ref, NULL }, /* %B */
-	{ need_ge1, NULL, tree_pre_ref, NULL }, /* %D */
-	{ need_ge1, NULL, tree_pre_ref, NULL }, /* %I */
-	{ need_ge1, NULL, tree_pre_ref, NULL }, /* %J */
-	{ need_ge1, NULL, tree_pre_ref, NULL }, /* %N */
-	{ need_ge1, NULL, tree_pre_ref, NULL }, /* %O */
-	{ need_ge1, NULL, tree_pre_ref, NULL }, /* %P */
-	{ need_ge1, NULL, tree_pre_ref, NULL }, /* %R */
-	{ need_ge1, NULL, tree_pre_ref, NULL }, /* %T */
-	{ need_ge1, NULL, tree_pre_ref, NULL }, /* %V */
-	{ NULL, NULL, NULL, NULL }, /* Ac */
-	{ NULL, NULL, NULL, NULL }, /* Ao */
-	{ NULL, NULL, NULL, NULL }, /* Aq */
-	{ need_le2, args_nopunct, NULL, NULL }, /* At */ /* FIXME */
-	{ NULL, NULL, NULL, NULL }, /* Bc */
-	{ NULL, NULL, NULL, NULL }, /* Bf */ 
-	{ NULL, NULL, NULL, NULL }, /* Bo */
-	{ NULL, NULL, NULL, NULL }, /* Bq */
-	{ assert_le1, NULL, NULL, NULL }, /* Bsx */
-	{ assert_le1, NULL, NULL, NULL }, /* Bx */
-	{ need_eq1, args_bool, NULL, NULL }, /* Db */
-	{ NULL, NULL, NULL, NULL }, /* Dc */
-	{ NULL, NULL, NULL, NULL }, /* Do */
-	{ NULL, NULL, NULL, NULL }, /* Dq */
-	{ NULL, NULL, NULL, NULL }, /* Ec */
-	{ NULL, NULL, NULL, NULL }, /* Ef */ /* -symbolic, etc. */
-	{ need_ge1, NULL, NULL, NULL }, /* Em */ 
-	{ NULL, NULL, NULL, NULL }, /* Eo */
-	{ assert_le1, NULL, NULL, NULL }, /* Fx */
-	{ want_ge1, NULL, NULL, NULL }, /* Ms */
-	{ NULL, NULL, NULL, NULL }, /* No */
-	{ NULL, NULL, NULL, NULL }, /* Ns */
-	{ assert_le1, NULL, NULL, NULL }, /* Nx */
-	{ assert_le1, NULL, NULL, NULL }, /* Ox */
-	{ NULL, NULL, NULL, NULL }, /* Pc */
-	{ NULL, NULL, NULL, NULL }, /* Pf */ /* 2 or more arguments */
-	{ NULL, NULL, NULL, NULL }, /* Po */
-	{ NULL, NULL, NULL, NULL }, /* Pq */ /* FIXME: ignore following Sh/Ss */
-	{ NULL, NULL, NULL, NULL }, /* Qc */
-	{ NULL, NULL, NULL, NULL }, /* Ql */
-	{ NULL, NULL, NULL, NULL }, /* Qo */
-	{ NULL, NULL, NULL, NULL }, /* Qq */
-	{ NULL, NULL, NULL, NULL }, /* Re */
-	{ NULL, NULL, NULL, NULL }, /* Rs */
-	{ NULL, NULL, NULL, NULL }, /* Sc */
-	{ NULL, NULL, NULL, NULL }, /* So */
-	{ NULL, NULL, NULL, NULL }, /* Sq */
-	{ need_eq1, args_bool, NULL, NULL }, /* Sm */
-	{ need_ge1, NULL, NULL, NULL }, /* Sx */
-	{ need_ge1, NULL, NULL, NULL }, /* Sy */
-	{ want_ge1, NULL, NULL, NULL }, /* Tn */
-	{ assert_eq0, NULL, NULL, NULL }, /* Ux */
-	{ NULL, NULL, NULL, NULL }, /* Xc */
-	{ NULL, NULL, NULL, NULL }, /* Xo */
-	{ NULL, NULL, NULL, NULL }, /* Fo */ 
-	{ NULL, NULL, NULL, NULL }, /* Fc */ 
-	{ NULL, NULL, NULL, NULL }, /* Oo */
-	{ NULL, NULL, NULL, NULL }, /* Oc */
-	{ NULL, NULL, NULL, NULL }, /* Bk */
-	{ NULL, NULL, NULL, NULL }, /* Ek */
-	{ need_eq0, NULL, NULL, NULL }, /* Bt */
-	{ need_eq1, NULL, NULL, NULL }, /* Hf */
-	{ NULL, NULL, NULL, NULL }, /* Fr */
-	{ need_eq0, NULL, NULL, NULL }, /* Ud */
+	{ NULL, NULL }, /* \" */
+	{ NULL, NULL }, /* Dd */ /* TODO */
+	{ NULL, NULL }, /* Dt */ /* TODO */
+	{ NULL, NULL }, /* Os */ /* TODO */
+	{ pre_sh, posts_sh }, /* Sh */ /* FIXME: preceding Pp. */
+	{ NULL, NULL }, /* Ss */ /* FIXME: preceding Pp. */
+	{ NULL, NULL }, /* Pp */ 
+	{ NULL, NULL }, /* D1 */
+	{ NULL, NULL }, /* Dl */
+	{ NULL, NULL }, /* Bd */ /* FIXME: preceding Pp. */
+	{ NULL, NULL }, /* Ed */
+	{ NULL, NULL }, /* Bl */ /* FIXME: preceding Pp. */
+	{ NULL, NULL }, /* El */
+	{ NULL, NULL }, /* It */
+	{ NULL, NULL }, /* Ad */ 
+	{ NULL, NULL }, /* An */
+	{ NULL, NULL }, /* Ar */
+	{ NULL, NULL }, /* Cd */
+	{ NULL, NULL }, /* Cm */
+	{ NULL, NULL }, /* Dv */ 
+	{ NULL, NULL }, /* Er */ 
+	{ NULL, NULL }, /* Ev */ 
+	{ NULL, NULL }, /* Ex */
+	{ NULL, NULL }, /* Fa */ 
+	{ NULL, NULL }, /* Fd */ 
+	{ NULL, NULL }, /* Fl */
+	{ NULL, NULL }, /* Fn */ 
+	{ NULL, NULL }, /* Ft */ 
+	{ NULL, NULL }, /* Ic */ 
+	{ NULL, NULL }, /* In */ 
+	{ NULL, NULL }, /* Li */
+	{ NULL, NULL }, /* Nd */ 
+	{ NULL, NULL }, /* Nm */ 
+	{ NULL, NULL }, /* Op */
+	{ NULL, NULL }, /* Ot */
+	{ NULL, NULL }, /* Pa */
+	{ NULL, NULL }, /* Rv */
+	{ NULL, NULL }, /* St */
+	{ NULL, NULL }, /* Va */
+	{ NULL, NULL }, /* Vt */ 
+	{ NULL, NULL }, /* Xr */
+	{ NULL, NULL }, /* %A */
+	{ NULL, NULL }, /* %B */
+	{ NULL, NULL }, /* %D */
+	{ NULL, NULL }, /* %I */
+	{ NULL, NULL }, /* %J */
+	{ NULL, NULL }, /* %N */
+	{ NULL, NULL }, /* %O */
+	{ NULL, NULL }, /* %P */
+	{ NULL, NULL }, /* %R */
+	{ NULL, NULL }, /* %T */
+	{ NULL, NULL }, /* %V */
+	{ NULL, NULL }, /* Ac */
+	{ NULL, NULL }, /* Ao */
+	{ NULL, NULL }, /* Aq */
+	{ NULL, NULL }, /* At */ /* FIXME */
+	{ NULL, NULL }, /* Bc */
+	{ NULL, NULL }, /* Bf */ 
+	{ NULL, NULL }, /* Bo */
+	{ NULL, NULL }, /* Bq */
+	{ NULL, NULL }, /* Bsx */
+	{ NULL, NULL }, /* Bx */
+	{ NULL, NULL }, /* Db */
+	{ NULL, NULL }, /* Dc */
+	{ NULL, NULL }, /* Do */
+	{ NULL, NULL }, /* Dq */
+	{ NULL, NULL }, /* Ec */
+	{ NULL, NULL }, /* Ef */ /* -symbolic, etc. */
+	{ NULL, NULL }, /* Em */ 
+	{ NULL, NULL }, /* Eo */
+	{ NULL, NULL }, /* Fx */
+	{ NULL, NULL }, /* Ms */
+	{ NULL, NULL }, /* No */
+	{ NULL, NULL }, /* Ns */
+	{ NULL, NULL }, /* Nx */
+	{ NULL, NULL }, /* Ox */
+	{ NULL, NULL }, /* Pc */
+	{ NULL, NULL }, /* Pf */ /* 2 or more arguments */
+	{ NULL, NULL }, /* Po */
+	{ NULL, NULL }, /* Pq */ /* FIXME: ignore following Sh/Ss */
+	{ NULL, NULL }, /* Qc */
+	{ NULL, NULL }, /* Ql */
+	{ NULL, NULL }, /* Qo */
+	{ NULL, NULL }, /* Qq */
+	{ NULL, NULL }, /* Re */
+	{ NULL, NULL }, /* Rs */
+	{ NULL, NULL }, /* Sc */
+	{ NULL, NULL }, /* So */
+	{ NULL, NULL }, /* Sq */
+	{ NULL, NULL }, /* Sm */
+	{ NULL, NULL }, /* Sx */
+	{ NULL, NULL }, /* Sy */
+	{ NULL, NULL }, /* Tn */
+	{ NULL, NULL }, /* Ux */
+	{ NULL, NULL }, /* Xc */
+	{ NULL, NULL }, /* Xo */
+	{ NULL, NULL }, /* Fo */ 
+	{ NULL, NULL }, /* Fc */ 
+	{ NULL, NULL }, /* Oo */
+	{ NULL, NULL }, /* Oc */
+	{ NULL, NULL }, /* Bk */
+	{ NULL, NULL }, /* Ek */
+	{ NULL, NULL }, /* Bt */
+	{ NULL, NULL }, /* Hf */
+	{ NULL, NULL }, /* Fr */
+	{ NULL, NULL }, /* Ud */
 };
 
 
 static int
-need_le2(struct mdoc *mdoc, int tok, int pos, int sz)
+post_bodychild_warn_ge1(struct mdoc *mdoc, int tok, int pos)
 {
-	if (sz <= 2)
-		return(1);
-	return(mdoc_err(mdoc, tok, pos, ERR_ARGS_LE2));
-}
 
-
-static int
-want_ge1(struct mdoc *mdoc, int tok, int pos, int sz)
-{
-	if (sz > 0)
+	if (MDOC_BODY != mdoc->last->type)
 		return(1);
+	if (mdoc->last->child)
+		return(1);
+
 	return(mdoc_warn(mdoc, tok, pos, WARN_ARGS_GE1));
 }
 
 
 static int
-want_eq0(struct mdoc *mdoc, int tok, int pos, int sz)
+post_headchild_err_ge1(struct mdoc *mdoc, int tok, int pos)
 {
-	if (sz == 0)
+
+	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
-	return(mdoc_warn(mdoc, tok, pos, WARN_ARGS_EQ0));
-}
-
-
-static int
-need_eq0(struct mdoc *mdoc, int tok, int pos, int sz)
-{
-	if (sz == 0)
-		return(1);
-	return(mdoc_err(mdoc, tok, pos, ERR_ARGS_EQ0));
-}
-
-
-static int
-assert_le1(struct mdoc *mdoc, int tok, int pos, int sz)
-{
-
-	assert(sz <= 1);
-	return(1);
-}
-
-
-static int
-assert_eq0(struct mdoc *mdoc, int tok, int pos, int sz)
-{
-
-	assert(sz == 0);
-	return(1);
-}
-
-
-static int
-need_eq1(struct mdoc *mdoc, int tok, int pos, int sz)
-{
-	if (sz == 1)
-		return(1);
-	return(mdoc_err(mdoc, tok, pos, ERR_ARGS_EQ1));
-}
-
-
-static int
-need_ge1(struct mdoc *mdoc, int tok, int pos, int sz)
-{
-	if (sz > 0)
+	if (mdoc->last->child)
 		return(1);
 	return(mdoc_err(mdoc, tok, pos, ERR_ARGS_GE1));
 }
 
 
 static int
-tree_post_onlybody(struct mdoc *mdoc, int tok, int pos)
+post_headchild_err_le8(struct mdoc *mdoc, int tok, int pos)
 {
+	int		  i;
 	struct mdoc_node *n;
 
-	assert(mdoc->last);
-	n = mdoc->last;
-
-	assert(MDOC_BLOCK == n->type);
-	assert(n->child);
-
-	if (MDOC_BODY == n->child->type) {
-		if (n->child->child)
-			return(1);
-		return(mdoc_err(mdoc, tok, pos, ERR_SYNTAX_EMPTYBODY));
-	}
-
-	return(mdoc_err(mdoc, tok, pos, ERR_SYNTAX_CHILDBODY));
-}
-
-
-static int
-tree_post_warnemptybody(struct mdoc *mdoc, int tok, int pos)
-{
-	struct mdoc_node *n;
-
-	assert(mdoc->last);
-	n = mdoc->last;
-
-	assert(MDOC_BLOCK == n->type);
-	assert(n->child);
-
-	for (n = n->child; n; n = n->next)
-		if (MDOC_BODY == n->type)
-			break;
-
-	if (n && n->child)
+	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
-	return(mdoc_warn(mdoc, tok, pos, WARN_SYNTAX_EMPTYBODY));
-}
-
-
-static int
-tree_post_onlyhead(struct mdoc *mdoc, int tok, int pos)
-{
-	struct mdoc_node *n;
-
-	assert(mdoc->last);
-	n = mdoc->last;
-
-	assert(MDOC_BLOCK == n->type);
-	assert(n->child);
-
-	n = n->child;
-
-	if (MDOC_HEAD != n->type) 
-		return(mdoc_err(mdoc, tok, pos, ERR_SYNTAX_CHILDHEAD));
-	if (n->child)
+	for (i = 0, n = mdoc->last->child; n; n = n->next, i++)
+		/* Do nothing. */ ;
+	if (i <= 8)
 		return(1);
-	return(mdoc_err(mdoc, tok, pos, ERR_SYNTAX_EMPTYHEAD));
+	return(mdoc_err(mdoc, tok, pos, ERR_ARGS_LE8));
 }
 
 
 static int
-args_an(struct mdoc *mdoc, int tok, int pos, 
-		int sz, const char *args[],
+pre_sh(struct mdoc *mdoc, int tok, int pos,
 		int argc, const struct mdoc_arg *argv)
 {
 
-	if (0 != argc && 0 != sz) 
-		return(mdoc_warn(mdoc, tok, pos, WARN_ARGS_EQ0));
 	return(1);
-}
-
-
-static int
-args_sh(struct mdoc *mdoc, int tok, int pos, 
-		int sz, const char *args[],
-		int argc, const struct mdoc_arg *argv)
-{
-	enum mdoc_sec	 sec;
-
-	sec = mdoc_atosec((size_t)sz, args);
-	if (SEC_CUSTOM != sec && sec < mdoc->sec_lastn)
-		if ( ! mdoc_warn(mdoc, tok, pos, WARN_SEC_OO))
-			return(0);
-	if (SEC_BODY == mdoc->sec_last && SEC_NAME != sec)
-		return(mdoc_err(mdoc, tok, pos, ERR_SEC_NAME));
-
-	return(1);
-}
-
-
-static int
-args_bool(struct mdoc *mdoc, int tok, int pos, 
-		int sz, const char *args[],
-		int argc, const struct mdoc_arg *argv)
-{
-	int	 	 i;
-
-	for (i = 0; i < sz; i++) {
-		if (xstrcmp(args[i], "on"))
-			continue;
-		if (xstrcmp(args[i], "off"))
-			continue;
-		return(mdoc_err(mdoc, tok, pos, ERR_SYNTAX_ARGBAD));
-	}
-	return(1);
-}
-
-
-static int
-tree_pre_ref(struct mdoc *mdoc, int tok, int pos)
-{
-	struct mdoc_node *n;
-
-	assert(mdoc->last);
-	for (n = mdoc->last ; n; n = n->parent) {
-		if (MDOC_BLOCK != n->type)
-			continue;
-		if (MDOC_Rs != n->data.block.tok)
-			break;
-		return(1);
-	}
-
-	return(mdoc_err(mdoc, tok, pos, ERR_SCOPE_NOCTX));
-}
-
-
-static int
-args_xr(struct mdoc *mdoc, int tok, int pos, 
-		int sz, const char *args[],
-		int argc, const struct mdoc_arg *argv)
-{
-
-	if (1 == sz)
-		return(1);
-	if (0 == sz)
-		return(mdoc_err(mdoc, tok, pos, ERR_ARGS_GE1));
-	if (MSEC_DEFAULT == mdoc_atomsec(args[1]))
-		return(mdoc_err(mdoc, tok, pos, ERR_SYNTAX_ARGFORM));
-	return(1);
-}
-
-
-static int
-args_nopunct(struct mdoc *mdoc, int tok, int pos, 
-		int sz, const char *args[],
-		int argc, const struct mdoc_arg *argv)
-{
-	int		 i;
-
-	if (0 == sz)
-		return(1);
-
-	i = 0;
-	if (ATT_DEFAULT == mdoc_atoatt(args[i]))
-		i++;
-	for ( ; i < sz; i++) {
-		if ( ! mdoc_isdelim(args[i]))
-			continue;
-		return(mdoc_err(mdoc, tok, pos, ERR_SYNTAX_NOPUNCT));
-	}
-	return(1);
-}
-
-
-static int
-tree_pre_display(struct mdoc *mdoc, int tok, int pos)
-{
-	struct mdoc_node *node;
-
-	assert(mdoc->last);
-
-	/* Displays may not be nested in other displays. */
-
-	/* LINTED */
-	for (node = mdoc->last; node; node = node->parent) {
-		if (node->type != MDOC_BLOCK)
-			continue;
-		if (node->data.block.tok != MDOC_Bd)
-			continue;
-		break;
-	}
-	if (NULL == node)
-		return(1);
-	return(mdoc_err(mdoc, tok, pos, ERR_SCOPE_NONEST));
 }
 
 
@@ -448,13 +209,41 @@ mdoc_valid_pre(struct mdoc *mdoc, int tok, int pos,
 		int argc, const struct mdoc_arg *argv)
 {
 
-	return(1);
+	if (NULL == mdoc_valids[tok].pre)
+		return(1);
+	return((*mdoc_valids[tok].pre)(mdoc, tok, pos, argc, argv));
 }
 
 
 int
-mdoc_valid_post(struct mdoc *mdoc, int tok, int pos)
+mdoc_valid_post(struct mdoc *mdoc, int pos)
 {
+	v_post		*p;
+	int		 t;
+
+	switch (mdoc->last->type) {
+	case (MDOC_BODY):
+		t = mdoc->last->data.body.tok;
+		break;
+	case (MDOC_ELEM):
+		t = mdoc->last->data.elem.tok;
+		break;
+	case (MDOC_BLOCK):
+		t = mdoc->last->data.block.tok;
+		break;
+	case (MDOC_HEAD):
+		t = mdoc->last->data.head.tok;
+		break;
+	default:
+		return(1);
+	}
+
+	if (NULL == mdoc_valids[t].post)
+		return(1);
+
+	for (p = mdoc_valids[t].post; *p; p++)
+		if ( ! (*p)(mdoc, t, pos)) 
+			return(0);
 
 	return(1);
 }

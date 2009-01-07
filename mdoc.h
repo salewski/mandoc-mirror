@@ -19,7 +19,7 @@
 #ifndef MDOC_H
 #define MDOC_H
 
-#define	MDOC_LINEARG_MAX 8
+#define	MDOC_LINEARG_MAX 12
 
 #define	MDOC___	 	 0
 #define	MDOC_Dd		 1
@@ -217,6 +217,7 @@ enum 	mdoc_err {
 	ERR_ARGS_EQ1,
 	ERR_ARGS_GE1,
 	ERR_ARGS_LE2,
+	ERR_ARGS_LE8,
 	ERR_ARGS_MANY,
 	ERR_SYNTAX_CHILDHEAD,
 	ERR_SYNTAX_CHILDBODY,
@@ -411,6 +412,8 @@ struct	mdoc_node {
 	struct mdoc_node *child;
 	struct mdoc_node *next;
 	struct mdoc_node *prev;
+	int		  line;
+	int		  pos;
 	enum mdoc_type	  type;
 	union mdoc_data	  data;
 };
@@ -430,9 +433,10 @@ struct	mdoc;
 
 void	 	  mdoc_free(struct mdoc *);
 struct	mdoc	 *mdoc_alloc(void *data, const struct mdoc_cb *);
-int	 	  mdoc_parseln(struct mdoc *, char *buf);
+int	 	  mdoc_parseln(struct mdoc *, int, char *buf);
 const struct mdoc_node
 		 *mdoc_result(struct mdoc *);
+int		  mdoc_endparse(struct mdoc *);
 
 __END_DECLS
 
