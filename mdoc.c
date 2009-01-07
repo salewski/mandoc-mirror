@@ -312,7 +312,7 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 	while (buf[i] && isspace(buf[i]))
 		i++;
 
-	if ( ! mdoc_macro(mdoc, c, 1, &i, buf)) {
+	if ( ! mdoc_macro(mdoc, c, line, 1, &i, buf)) {
 		mdoc->flags |= MDOC_HALT;
 		return(0);
 	}
@@ -358,7 +358,8 @@ mdoc_warn(struct mdoc *mdoc, int tok, int pos, enum mdoc_warn type)
 
 
 int
-mdoc_macro(struct mdoc *mdoc, int tok, int ppos, int *pos, char *buf)
+mdoc_macro(struct mdoc *mdoc, int tok, 
+		int line, int ppos, int *pos, char *buf)
 {
 
 	if ( ! (MDOC_PROLOGUE & mdoc_macros[tok].flags) &&
@@ -375,7 +376,7 @@ mdoc_macro(struct mdoc *mdoc, int tok, int ppos, int *pos, char *buf)
 		return(0);
 	}
 
-	return((*mdoc_macros[tok].fp)(mdoc, tok, ppos, pos, buf));
+	return((*mdoc_macros[tok].fp)(mdoc, tok, line, ppos, pos, buf));
 }
 
 

@@ -203,11 +203,11 @@ macro_prologue(MACRO_PROT_ARGS)
 
 	switch (tok) {
 	case (MDOC_Dt):
-		return(prologue_dt(mdoc, tok, ppos, pos, buf));
+		return(prologue_dt(mdoc, tok, line, ppos, pos, buf));
 	case (MDOC_Dd):
-		return(prologue_dd(mdoc, tok, ppos, pos, buf));
+		return(prologue_dd(mdoc, tok, line, ppos, pos, buf));
 	case (MDOC_Os):
-		return(prologue_os(mdoc, tok, ppos, pos, buf));
+		return(prologue_os(mdoc, tok, line, ppos, pos, buf));
 	default:
 		break;
 	}

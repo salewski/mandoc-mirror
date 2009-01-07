@@ -40,8 +40,12 @@ struct	mdoc {
 	enum mdoc_sec	  sec_last;
 };
 
+
+#define	MACRO_PROT_ARGS	struct mdoc *mdoc, int tok, int line, \
+			int ppos, int *pos, char *buf
+
 struct	mdoc_macro {
-	int	(*fp)(struct mdoc *, int, int, int *, char *);
+	int	(*fp)(MACRO_PROT_ARGS);
 	int	  flags;
 #define	MDOC_CALLABLE	(1 << 0)
 #define	MDOC_PARSED	(1 << 1)
@@ -53,15 +57,12 @@ struct	mdoc_macro {
 
 extern	const struct mdoc_macro *const mdoc_macros;
 
-#define	MACRO_PROT_ARGS	struct mdoc *mdoc, int tok, \
-			int ppos, int *pos, char *buf
-
 __BEGIN_DECLS
 
 int		  mdoc_err(struct mdoc *, int, int, enum mdoc_err);
 int		  mdoc_warn(struct mdoc *, int, int, enum mdoc_warn);
 void		  mdoc_msg(struct mdoc *, int, const char *, ...);
-int		  mdoc_macro(struct mdoc *, int, int, int *, char *);
+int		  mdoc_macro(MACRO_PROT_ARGS);
 int		  mdoc_find(const struct mdoc *, const char *);
 void		  mdoc_word_alloc(struct mdoc *, int, const char *);
 void		  mdoc_elem_alloc(struct mdoc *, int, int, 
