@@ -18,6 +18,7 @@
  */
 #include <assert.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "private.h"
 
@@ -182,64 +183,47 @@ post_sh(struct mdoc *mdoc)
 static int
 post_dt(struct mdoc *mdoc)
 {
-#if 0
-	int		  lastarg, j;
-	char		 *args[MDOC_LINEARG_MAX];
+	int		  i;
+	char		 *p;
+	size_t		  sz;
+	struct mdoc_node *n;
 
-	if (SEC_PROLOGUE != mdoc->sec_lastn)
-		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_NPROLOGUE));
-	if (0 == mdoc->meta.date)
-		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE_OO));
-	if (mdoc->meta.title[0])
-		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE_REP));
+	assert(MDOC_ELEM == mdoc->last->type);
+	assert(MDOC_Dt == mdoc->last->data.elem.tok);
+	assert(0 == mdoc->meta.title[0]);
 
-	j = -1;
-	lastarg = ppos;
+	sz = META_TITLE_SZ;
+	(void)xstrlcpy(mdoc->meta.title, "UNTITLED", sz);
 
-again:
-	if (j == MDOC_LINEARG_MAX)
-		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
+	for (i = 0, n = mdoc->last->child; n; n = n->next, i++) {
+		assert(MDOC_TEXT == n->type);
+		p = n->data.text.string;
 
-	lastarg = *pos;
-
-	switch (mdoc_args(mdoc, tok, pos, buf, 0, &args[++j])) {
-	case (ARGS_EOLN):
-		if (mdoc->meta.title)
-			return(1);
-		if ( ! mdoc_warn(mdoc, tok, ppos, WARN_ARGS_GE1))
-			return(0);
-		(void)xstrlcpy(mdoc->meta.title, 
-				"UNTITLED", META_TITLE_SZ);
-		return(1);
-	case (ARGS_ERROR):
-		return(0);
-	default:
-		break;
+		switch (i) {
+		case (0):
+			if (xstrlcpy(mdoc->meta.title, p, sz))
+				break;
+			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+		case (1):
+			mdoc->meta.msec = mdoc_atomsec(p);
+			if (MSEC_DEFAULT != mdoc->meta.msec)
+				break;
+			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+		case (2):
+			mdoc->meta.vol = mdoc_atovol(p);
+			if (VOL_DEFAULT != mdoc->meta.vol)
+				break;
+			mdoc->meta.arch = mdoc_atoarch(p);
+			if (ARCH_DEFAULT != mdoc->meta.arch)
+				break;
+			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+		default:
+			return(mdoc_err(mdoc, ERR_ARGS_MANY));
+		}
 	}
 
-	if (0 == j) {
-		if (xstrlcpy(mdoc->meta.title, args[0], META_TITLE_SZ))
-			goto again;
-		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGFORM));
-
-	} else if (1 == j) {
-		mdoc->meta.msec = mdoc_atomsec(args[1]);
-		if (MSEC_DEFAULT != mdoc->meta.msec)
-			goto again;
-		return(mdoc_err(mdoc, tok, -1, ERR_SYNTAX_ARGFORM));
-
-	} else if (2 == j) {
-		mdoc->meta.vol = mdoc_atovol(args[2]);
-		if (VOL_DEFAULT != mdoc->meta.vol)
-			goto again;
-		mdoc->meta.arch = mdoc_atoarch(args[2]);
-		if (ARCH_DEFAULT != mdoc->meta.arch)
-			goto again;
-		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGFORM));
-	}
-
-	return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
-#endif
+	mdoc_msg(mdoc, "parsed title: %s", mdoc->meta.title);
+	/* TODO: have vol2a functions. */
 	return(1);
 }
 
@@ -247,47 +231,29 @@ again:
 static int
 post_os(struct mdoc *mdoc)
 {
-#if 0
-	int		  lastarg, j;
-	char		 *args[MDOC_LINEARG_MAX];
+	char		 *p;
+	size_t		  sz;
+	struct mdoc_node *n;
 
-	/* FIXME: if we use `Os' again... ? */
+	assert(MDOC_ELEM == mdoc->last->type);
+	assert(MDOC_Os == mdoc->last->data.elem.tok);
+	assert(0 == mdoc->meta.os[0]);
 
-	if (SEC_PROLOGUE != mdoc->sec_lastn)
-		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_NPROLOGUE));
-	if (0 == mdoc->meta.title[0])
-		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE_OO));
-	if (mdoc->meta.os[0])
-		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE_REP));
+	sz = META_OS_SZ;
+	(void)xstrlcpy(mdoc->meta.os, "LOCAL", sz);
 
-	j = -1;
-	lastarg = ppos;
+	for (n = mdoc->last->child; n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
+		p = n->data.text.string;
 
-again:
-	if (j == MDOC_LINEARG_MAX)
-		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
-
-	lastarg = *pos;
-
-	switch (mdoc_args(mdoc, tok, pos, buf, 
-				ARGS_QUOTED, &args[++j])) {
-	case (ARGS_EOLN):
-		mdoc->sec_lastn = mdoc->sec_last = SEC_BODY;
-		return(1);
-	case (ARGS_ERROR):
-		return(0);
-	default:
-		break;
+		if ( ! xstrlcat(mdoc->meta.os, p, sz))
+			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+		if ( ! xstrlcat(mdoc->meta.os, " ", sz))
+			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
 	}
-	
-	if ( ! xstrlcat(mdoc->meta.os, args[j], sizeof(mdoc->meta.os)))
-		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGFORM));
-	if ( ! xstrlcat(mdoc->meta.os, " ", sizeof(mdoc->meta.os)))
-		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGFORM));
 
-	goto again;
-	/* NOTREACHED */
-#endif
+	mdoc_msg(mdoc, "parsed operating system (entering document body)");
+	mdoc->sec_lastn = mdoc->sec_last = SEC_BODY;
 	return(1);
 }
 
@@ -295,63 +261,46 @@ again:
 static int
 post_dd(struct mdoc *mdoc)
 {
-#if 0
-	int		  lastarg, j;
-	char		 *args[MDOC_LINEARG_MAX], date[64];
+	char		  date[64];
+	size_t		  sz;
+	char		 *p;
+	struct mdoc_node *n;
 
-	if (SEC_PROLOGUE != mdoc->sec_lastn)
-		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_NPROLOGUE));
-	if (mdoc->meta.title[0])
-		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE_OO));
-	if (mdoc->meta.date)
-		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE_REP));
+	assert(MDOC_ELEM == mdoc->last->type);
+	assert(MDOC_Dd == mdoc->last->data.elem.tok);
 
-	j = -1;
+	n = mdoc->last->child; 
+	assert(0 == mdoc->meta.date);
 	date[0] = 0;
-	lastarg = ppos;
 
-again:
-	if (j == MDOC_LINEARG_MAX)
-		return(mdoc_err(mdoc, tok, lastarg, ERR_ARGS_MANY));
+	sz = 64;
 
-	lastarg = *pos;
-	switch (mdoc_args(mdoc, tok, pos, buf, 0, &args[++j])) {
-	case (ARGS_EOLN):
-		if (mdoc->meta.date)
-			return(1);
-		mdoc->meta.date = mdoc_atotime(date);
-		if (mdoc->meta.date)
-			return(1);
-		return(mdoc_err(mdoc, tok, ppos, ERR_SYNTAX_ARGFORM));
-	case (ARGS_ERROR):
-		return(0);
-	default:
-		break;
-	}
-	
-	if (MDOC_MAX != mdoc_find(mdoc, args[j]) && ! mdoc_warn
-			(mdoc, tok, lastarg, WARN_SYNTAX_MACLIKE))
-		return(0);
-	
-	if (0 == j) {
-		if (xstrcmp("$Mdocdate$", args[j])) {
+	for ( ; 0 == mdoc->meta.date && n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
+		p = n->data.text.string;
+
+		if (xstrcmp(p, "$Mdocdate$")) {
 			mdoc->meta.date = time(NULL);
-			goto again;
-		} else if (xstrcmp("$Mdocdate:", args[j])) 
-			goto again;
-	} else if (4 == j)
-		if ( ! xstrcmp("$", args[j]))
-			goto again;
+			continue;
+		} else if (xstrcmp(p, "$")) {
+			mdoc->meta.date = mdoc_atotime(date);
+			continue;
+		} else if (xstrcmp(p, "$Mdocdate:"))
+			continue;
 
-	if ( ! xstrlcat(date, args[j], sizeof(date)))
-		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGFORM));
-	if ( ! xstrlcat(date, " ", sizeof(date)))
-		return(mdoc_err(mdoc, tok, lastarg, ERR_SYNTAX_ARGFORM));
+		if ( ! xstrlcat(date, n->data.text.string, sz))
+			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+		if ( ! xstrlcat(date, " ", sz))
+			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+	}
 
-	goto again;
-	/* NOTREACHED */
-#endif
-	return(1);
+	if (mdoc->meta.date && NULL == n) {
+		mdoc_msg(mdoc, "parsed time: %u since epoch", 
+				mdoc->meta.date);
+		return(1);
+	}
+
+	return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
 }
 
 

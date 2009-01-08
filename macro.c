@@ -55,19 +55,20 @@ rewind_last(struct mdoc *mdoc, struct mdoc_node *to)
 {
 
 	assert(to);
-	while (mdoc->last != to) {
+	if (mdoc->last == to)
+		return(1);
+
+	do {
+		mdoc->last = mdoc->last->parent;
+		assert(mdoc->last);
 		if ( ! mdoc_valid_post(mdoc))
 			return(0);
 		if ( ! mdoc_action_post(mdoc))
 			return(0);
-		mdoc->last = mdoc->last->parent;
-		assert(mdoc->last);
-	}
+	} while (mdoc->last != to);
 
 	mdoc->next = MDOC_NEXT_SIBLING;
-	if ( ! mdoc_valid_post(mdoc))
-		return(0);
-	return(mdoc_action_post(mdoc));
+	return(1);
 }
 
 

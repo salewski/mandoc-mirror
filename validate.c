@@ -33,6 +33,9 @@ struct	valids {
 
 
 static	int	pre_sh(struct mdoc *, struct mdoc_node *);
+static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
+static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
+static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	post_headchild_err_ge1(struct mdoc *);
 static	int	post_headchild_err_le8(struct mdoc *);
 static	int	post_bodychild_warn_ge1(struct mdoc *);
@@ -44,9 +47,9 @@ static v_post	posts_sh[] = { post_headchild_err_ge1,
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* \" */
-	{ NULL, NULL }, /* Dd */ /* TODO: pre: ordering, repetition */
-	{ NULL, NULL }, /* Dt */ /* TODO ... */
-	{ NULL, NULL }, /* Os */ /* TODO ... */
+	{ pre_prologue, NULL }, /* Dd */ /* TODO: pre: ordering, repetition */
+	{ pre_prologue, NULL }, /* Dt */ /* TODO ... */
+	{ pre_prologue, NULL }, /* Os */ /* TODO ... */
 	{ pre_sh, posts_sh }, /* Sh */ /* FIXME: preceding Pp. */
 	{ NULL, NULL }, /* Ss */ /* FIXME: preceding Pp. */
 	{ NULL, NULL }, /* Pp */ 
@@ -194,6 +197,58 @@ post_headchild_err_le8(struct mdoc *mdoc)
 
 
 static int
+pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
+{
+
+	if (SEC_PROLOGUE != mdoc->sec_lastn)
+		return(mdoc_verr(mdoc, node, ERR_SEC_NPROLOGUE));
+	assert(MDOC_ELEM == node->type);
+
+	/* Check for ordering. */
+
+	switch (node->data.elem.tok) {
+	case (MDOC_Os):
+		if (mdoc->meta.title[0] && mdoc->meta.date)
+			break;
+		return(mdoc_verr(mdoc, node, ERR_SEC_PROLOGUE_OO));
+	case (MDOC_Dt):
+		if (0 == mdoc->meta.title[0] && mdoc->meta.date)
+			break;
+		return(mdoc_verr(mdoc, node, ERR_SEC_PROLOGUE_OO));
+	case (MDOC_Dd):
+		if (0 == mdoc->meta.title[0] && 0 == mdoc->meta.date)
+			break;
+		return(mdoc_verr(mdoc, node, ERR_SEC_PROLOGUE_OO));
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	/* Check for repetition. */
+
+	switch (node->data.elem.tok) {
+	case (MDOC_Os):
+		if (0 == mdoc->meta.os[0])
+			return(1);
+		break;
+	case (MDOC_Dd):
+		if (0 == mdoc->meta.date)
+			return(1);
+		break;
+	case (MDOC_Dt):
+		if (0 == mdoc->meta.title[0])
+			return(1);
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	return(mdoc_verr(mdoc, node, ERR_SEC_PROLOGUE_REP));
+}
+
+
+static int
 pre_sh(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
@@ -208,16 +263,16 @@ mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *node)
 
 	switch (node->type) {
 	case (MDOC_BODY):
-		t = mdoc->last->data.body.tok;
+		t = node->data.body.tok;
 		break;
 	case (MDOC_ELEM):
-		t = mdoc->last->data.elem.tok;
+		t = node->data.elem.tok;
 		break;
 	case (MDOC_BLOCK):
-		t = mdoc->last->data.block.tok;
+		t = node->data.block.tok;
 		break;
 	case (MDOC_HEAD):
-		t = mdoc->last->data.head.tok;
+		t = node->data.head.tok;
 		break;
 	default:
 		return(1);
