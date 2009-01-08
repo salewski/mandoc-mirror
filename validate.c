@@ -22,9 +22,8 @@
 #include "private.h"
 
 
-typedef	int	(*v_pre)(struct mdoc *, int, int, 
-			int, const struct mdoc_arg *);
-typedef	int	(*v_post)(struct mdoc *, int, int);
+typedef	int	(*v_pre)(struct mdoc *, struct mdoc_node *);
+typedef	int	(*v_post)(struct mdoc *);
 
 
 struct	valids {
@@ -33,11 +32,10 @@ struct	valids {
 };
 
 
-static	int	pre_sh(struct mdoc *, int, int, 
-			int, const struct mdoc_arg *);
-static	int	post_headchild_err_ge1(struct mdoc *, int, int);
-static	int	post_headchild_err_le8(struct mdoc *, int, int);
-static	int	post_bodychild_warn_ge1(struct mdoc *, int, int);
+static	int	pre_sh(struct mdoc *, struct mdoc_node *);
+static	int	post_headchild_err_ge1(struct mdoc *);
+static	int	post_headchild_err_le8(struct mdoc *);
+static	int	post_bodychild_warn_ge1(struct mdoc *);
 
 static v_post	posts_sh[] = { post_headchild_err_ge1, 
 			post_bodychild_warn_ge1, 
@@ -155,7 +153,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 
 
 static int
-post_bodychild_warn_ge1(struct mdoc *mdoc, int tok, int pos)
+post_bodychild_warn_ge1(struct mdoc *mdoc)
 {
 
 	if (MDOC_BODY != mdoc->last->type)
@@ -163,24 +161,24 @@ post_bodychild_warn_ge1(struct mdoc *mdoc, int tok, int pos)
 	if (mdoc->last->child)
 		return(1);
 
-	return(mdoc_warn(mdoc, tok, pos, WARN_ARGS_GE1));
+	return(mdoc_warn(mdoc, WARN_ARGS_GE1));
 }
 
 
 static int
-post_headchild_err_ge1(struct mdoc *mdoc, int tok, int pos)
+post_headchild_err_ge1(struct mdoc *mdoc)
 {
 
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
 	if (mdoc->last->child)
 		return(1);
-	return(mdoc_err(mdoc, tok, pos, ERR_ARGS_GE1));
+	return(mdoc_err(mdoc, ERR_ARGS_GE1));
 }
 
 
 static int
-post_headchild_err_le8(struct mdoc *mdoc, int tok, int pos)
+post_headchild_err_le8(struct mdoc *mdoc)
 {
 	int		  i;
 	struct mdoc_node *n;
@@ -191,13 +189,12 @@ post_headchild_err_le8(struct mdoc *mdoc, int tok, int pos)
 		/* Do nothing. */ ;
 	if (i <= 8)
 		return(1);
-	return(mdoc_err(mdoc, tok, pos, ERR_ARGS_LE8));
+	return(mdoc_err(mdoc, ERR_ARGS_LE8));
 }
 
 
 static int
-pre_sh(struct mdoc *mdoc, int tok, int pos,
-		int argc, const struct mdoc_arg *argv)
+pre_sh(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
 	return(1);
@@ -205,18 +202,35 @@ pre_sh(struct mdoc *mdoc, int tok, int pos,
 
 
 int
-mdoc_valid_pre(struct mdoc *mdoc, int tok, int pos, 
-		int argc, const struct mdoc_arg *argv)
+mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *node)
 {
+	int		 t;
 
-	if (NULL == mdoc_valids[tok].pre)
+	switch (node->type) {
+	case (MDOC_BODY):
+		t = mdoc->last->data.body.tok;
+		break;
+	case (MDOC_ELEM):
+		t = mdoc->last->data.elem.tok;
+		break;
+	case (MDOC_BLOCK):
+		t = mdoc->last->data.block.tok;
+		break;
+	case (MDOC_HEAD):
+		t = mdoc->last->data.head.tok;
+		break;
+	default:
 		return(1);
-	return((*mdoc_valids[tok].pre)(mdoc, tok, pos, argc, argv));
+	}
+
+	if (NULL == mdoc_valids[t].pre)
+		return(1);
+	return((*mdoc_valids[t].pre)(mdoc, node));
 }
 
 
 int
-mdoc_valid_post(struct mdoc *mdoc, int pos)
+mdoc_valid_post(struct mdoc *mdoc)
 {
 	v_post		*p;
 	int		 t;
@@ -242,7 +256,7 @@ mdoc_valid_post(struct mdoc *mdoc, int pos)
 		return(1);
 
 	for (p = mdoc_valids[t].post; *p; p++)
-		if ( ! (*p)(mdoc, t, pos)) 
+		if ( ! (*p)(mdoc)) 
 			return(0);
 
 	return(1);

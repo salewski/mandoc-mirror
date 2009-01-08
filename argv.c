@@ -27,14 +27,14 @@
 
 
 static	int		 lookup(int, const char *);
-static	int		 parse(struct mdoc *, int, 
+static	int		 parse(struct mdoc *, int, int,
 				struct mdoc_arg *, int *, char *);
 static	int		 postparse(struct mdoc *, int, 
 				const struct mdoc_arg *, int);
 
 
 int
-mdoc_args(struct mdoc *mdoc, int tok, int *pos, char *buf, int fl, char **v)
+mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 {
 	int		 i;
 
@@ -42,11 +42,11 @@ mdoc_args(struct mdoc *mdoc, int tok, int *pos, char *buf, int fl, char **v)
 		return(ARGS_EOLN);
 
 	if ('\"' == buf[*pos] && ! (fl & ARGS_QUOTED))
-		if ( ! mdoc_warn(mdoc, tok, *pos, WARN_SYNTAX_QUOTED))
+		if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX_QUOTED))
 			return(ARGS_ERROR);
 
 	if ('-' == buf[*pos]) 
-		if ( ! mdoc_warn(mdoc, tok, *pos, WARN_SYNTAX_ARGLIKE))
+		if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX_ARGLIKE))
 			return(ARGS_ERROR);
 
 	if ((fl & ARGS_DELIM) && mdoc_iscdelim(buf[*pos])) {
@@ -89,7 +89,7 @@ mdoc_args(struct mdoc *mdoc, int tok, int *pos, char *buf, int fl, char **v)
 		if (buf[*pos])
 			return(ARGS_WORD);
 
-		if ( ! mdoc_warn(mdoc, tok, *pos, WARN_SYNTAX_WS_EOLN))
+		if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX_WS_EOLN))
 			return(ARGS_ERROR);
 
 		return(ARGS_WORD);
@@ -107,7 +107,7 @@ mdoc_args(struct mdoc *mdoc, int tok, int *pos, char *buf, int fl, char **v)
 		(*pos)++;
 
 	if (0 == buf[*pos]) {
-		(void)mdoc_err(mdoc, tok, *pos, ERR_SYNTAX_UNQUOTE);
+		(void)mdoc_perr(mdoc, line, *pos, ERR_SYNTAX_UNQUOTE);
 		return(ARGS_ERROR);
 	}
 
@@ -121,7 +121,7 @@ mdoc_args(struct mdoc *mdoc, int tok, int *pos, char *buf, int fl, char **v)
 	if (buf[*pos])
 		return(ARGS_WORD);
 
-	if ( ! mdoc_warn(mdoc, tok, *pos, WARN_SYNTAX_WS_EOLN))
+	if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX_WS_EOLN))
 		return(ARGS_ERROR);
 
 	return(ARGS_WORD);
@@ -291,7 +291,7 @@ lookup(int tok, const char *argv)
 
 
 static int
-postparse(struct mdoc *mdoc, int tok, const struct mdoc_arg *v, int pos)
+postparse(struct mdoc *mdoc, int line, const struct mdoc_arg *v, int pos)
 {
 
 	switch (v->arg) {
@@ -308,7 +308,7 @@ postparse(struct mdoc *mdoc, int tok, const struct mdoc_arg *v, int pos)
 			break;
 		if (xstrcmp(v->value[0], "indent-two"))
 			break;
-		return(mdoc_err(mdoc, tok, pos, ERR_SYNTAX_ARGBAD));
+		return(mdoc_perr(mdoc, line, pos, ERR_SYNTAX_ARGBAD));
 	default:
 		break;
 	}
@@ -318,7 +318,7 @@ postparse(struct mdoc *mdoc, int tok, const struct mdoc_arg *v, int pos)
 
 
 static int
-parse(struct mdoc *mdoc, int tok, 
+parse(struct mdoc *mdoc, int line, int tok, 
 		struct mdoc_arg *v, int *pos, char *buf)
 {
 	char		*p;
@@ -335,16 +335,16 @@ parse(struct mdoc *mdoc, int tok,
 		/*
 		 * This has a single value for an argument.
 		 */
-		c = mdoc_args(mdoc, tok, pos, buf, ARGS_QUOTED, &p);
+		c = mdoc_args(mdoc, line, pos, buf, ARGS_QUOTED, &p);
 		if (ARGS_ERROR == c)
 			return(0);
-		else if (ARGS_EOLN == c)
-			return(mdoc_err(mdoc, tok, ppos, ERR_SYNTAX_ARGVAL));
-			
-		v->sz = 1;
-		v->value = xcalloc(1, sizeof(char *));
-		v->value[0] = p;
-		break;
+		else if (ARGS_EOLN != c) {
+			v->sz = 1;
+			v->value = xcalloc(1, sizeof(char *));
+			v->value[0] = p;
+			break;
+		}
+		return(mdoc_perr(mdoc, line, ppos, ERR_SYNTAX_ARGVAL));
 
 	case(MDOC_Column):
 		/*
@@ -355,7 +355,7 @@ parse(struct mdoc *mdoc, int tok,
 		v->sz = 0;
 		v->value = xcalloc(MDOC_LINEARG_MAX, sizeof(char *));
 		for (i = 0; i < MDOC_LINEARG_MAX; i++) {
-			c = mdoc_args(mdoc, tok, pos, buf, ARGS_QUOTED, &p);
+			c = mdoc_args(mdoc, line, pos, buf, ARGS_QUOTED, &p);
 			if (ARGS_ERROR == c) {
 				free(v->value);
 				return(0);
@@ -365,9 +365,11 @@ parse(struct mdoc *mdoc, int tok,
 		}
 		if (0 == i) {
 			free(v->value);
-			return(mdoc_err(mdoc, tok, ppos, ERR_SYNTAX_ARGVAL));
+			return(mdoc_perr(mdoc, line, ppos, 
+						ERR_SYNTAX_ARGVAL));
 		} else if (MDOC_LINEARG_MAX == i)
-			return(mdoc_err(mdoc, tok, ppos, ERR_SYNTAX_ARGMANY));
+			return(mdoc_perr(mdoc, line, ppos, 
+						ERR_SYNTAX_ARGMANY));
 
 		v->sz = i;
 		break;
@@ -383,7 +385,7 @@ parse(struct mdoc *mdoc, int tok,
 
 
 int
-mdoc_argv(struct mdoc *mdoc, int tok, 
+mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		struct mdoc_arg *v, int *pos, char *buf)
 {
 	int		 i, ppos;
@@ -409,7 +411,7 @@ mdoc_argv(struct mdoc *mdoc, int tok,
 		buf[(*pos)++] = 0;
 
 	if (MDOC_ARG_MAX == (v->arg = lookup(tok, argv))) {
-		(void)mdoc_err(mdoc, tok, i, ERR_SYNTAX_ARG);
+		(void)mdoc_perr(mdoc, line, i, ERR_SYNTAX_ARG);
 		return(ARGV_ERROR);
 	}
 
@@ -419,9 +421,9 @@ mdoc_argv(struct mdoc *mdoc, int tok,
 	/* FIXME: whitespace if no value. */
 
 	ppos = *pos;
-	if ( ! parse(mdoc, tok, v, pos, buf))
+	if ( ! parse(mdoc, line, tok, v, pos, buf))
 		return(ARGV_ERROR);
-	if ( ! postparse(mdoc, tok, v, ppos))
+	if ( ! postparse(mdoc, line, v, ppos))
 		return(ARGV_ERROR);
 
 	return(ARGV_ARG);

@@ -421,7 +421,7 @@ struct	mdoc_node {
 struct	mdoc_cb {
 	int	(*mdoc_err)(void *, int, int, enum mdoc_err);
 	int	(*mdoc_warn)(void *, int, int, enum mdoc_warn);
-	void	(*mdoc_msg)(void *, int, const char *);
+	void	(*mdoc_msg)(void *, int, int, const char *);
 };
 
 extern	const char *const *mdoc_macronames;

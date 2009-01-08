@@ -126,16 +126,16 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Va */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Vt */ 
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Xr */
-	{ macro_constant, MDOC_QUOTABLE | MDOC_PARSED }, /* %A */
-	{ macro_constant, MDOC_QUOTABLE | MDOC_PARSED }, /* %B */
+	{ macro_constant, MDOC_QUOTABLE }, /* %A */
+	{ macro_constant, MDOC_QUOTABLE }, /* %B */
 	{ macro_constant, MDOC_QUOTABLE }, /* %D */
-	{ macro_constant, MDOC_QUOTABLE | MDOC_PARSED }, /* %I */
-	{ macro_constant, MDOC_QUOTABLE | MDOC_PARSED }, /* %J */
+	{ macro_constant, MDOC_QUOTABLE }, /* %I */
+	{ macro_constant, MDOC_QUOTABLE }, /* %J */
 	{ macro_constant, MDOC_QUOTABLE }, /* %N */
 	{ macro_constant, MDOC_QUOTABLE }, /* %O */
 	{ macro_constant, MDOC_QUOTABLE }, /* %P */
 	{ macro_constant, MDOC_QUOTABLE }, /* %R */
-	{ macro_constant, MDOC_QUOTABLE | MDOC_PARSED }, /* %T */
+	{ macro_constant, MDOC_QUOTABLE }, /* %T */
 	{ macro_constant, MDOC_QUOTABLE }, /* %V */
 	{ macro_close_explicit, MDOC_CALLABLE | MDOC_PARSED }, /* Ac */
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED }, /* Ao */
@@ -206,7 +206,7 @@ static	void	  	  argcpy(struct mdoc_arg *,
 				const struct mdoc_arg *);
 
 static	void		  mdoc_node_freelist(struct mdoc_node *);
-static	void		  mdoc_node_append(struct mdoc *, int, 
+static	int		  mdoc_node_append(struct mdoc *, 
 				struct mdoc_node *);
 static	void		  mdoc_elem_free(struct mdoc_elem *);
 static	void		  mdoc_text_free(struct mdoc_text *);
@@ -276,11 +276,12 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 		return(0);
 
 	if ('.' != *buf) {
-		if (SEC_PROLOGUE == mdoc->sec_lastn)
-			return(mdoc_err(mdoc, -1, 0, ERR_SYNTAX_NOTEXT));
-		mdoc_word_alloc(mdoc, line, 0, buf);
-		mdoc->next = MDOC_NEXT_SIBLING;
-		return(1);
+		if (SEC_PROLOGUE != mdoc->sec_lastn) {
+			mdoc_word_alloc(mdoc, line, 0, buf);
+			mdoc->next = MDOC_NEXT_SIBLING;
+			return(1);
+		}
+		return(mdoc_perr(mdoc, line, 0, ERR_SYNTAX_NOTEXT));
 	}
 
 	if (buf[1] && '\\' == buf[1])
@@ -293,10 +294,10 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 
 	if (i == (int)sizeof(tmp)) {
 		mdoc->flags |= MDOC_HALT;
-		return(mdoc_err(mdoc, -1, 1, ERR_MACRO_NOTSUP));
+		return(mdoc_perr(mdoc, line, 1, ERR_MACRO_NOTSUP));
 	} else if (i <= 2) {
 		mdoc->flags |= MDOC_HALT;
-		return(mdoc_err(mdoc, -1, 1, ERR_MACRO_NOTSUP));
+		return(mdoc_perr(mdoc, line, 1, ERR_MACRO_NOTSUP));
 	}
 
 	i--;
@@ -306,7 +307,7 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 
 	if (MDOC_MAX == (c = mdoc_find(mdoc, tmp))) {
 		mdoc->flags |= MDOC_HALT;
-		return(mdoc_err(mdoc, c, 1, ERR_MACRO_NOTSUP));
+		return(mdoc_perr(mdoc, line, 1, ERR_MACRO_NOTSUP));
 	}
 
 	while (buf[i] && isspace(buf[i]))
@@ -321,68 +322,69 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 
 
 void
-mdoc_msg(struct mdoc *mdoc, int pos, const char *fmt, ...)
+mdoc_msg(struct mdoc *mdoc, const char *fmt, ...)
 {
-	va_list		 ap;
-	char		 buf[256];
+	struct mdoc_node *n;
+	va_list		  ap;
+	char		  buf[256];
 
 	if (NULL == mdoc->cb.mdoc_msg)
 		return;
+
+	n = mdoc->last;
+	assert(n);
 
 	va_start(ap, fmt);
 	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
-	(*mdoc->cb.mdoc_msg)(mdoc->data, pos, buf);
+	(*mdoc->cb.mdoc_msg)(mdoc->data, n->line, n->pos, buf);
 }
 
 
 int
-mdoc_err(struct mdoc *mdoc, int tok, int pos, enum mdoc_err type)
+mdoc_perr(struct mdoc *mdoc, 
+		int line, int pos, enum mdoc_err type)
 {
 
 	if (NULL == mdoc->cb.mdoc_err)
 		return(0);
-	return((*mdoc->cb.mdoc_err)(mdoc->data, tok, pos, type));
+	return((*mdoc->cb.mdoc_err)(mdoc->data, line, pos, type));
 }
 
 
 int
-mdoc_warn(struct mdoc *mdoc, int tok, int pos, enum mdoc_warn type)
+mdoc_pwarn(struct mdoc *mdoc, 
+		int line, int pos, enum mdoc_warn type)
 {
 
 	if (NULL == mdoc->cb.mdoc_warn)
 		return(0);
-	return((*mdoc->cb.mdoc_warn)(mdoc->data, tok, pos, type));
+	return((*mdoc->cb.mdoc_warn)(mdoc->data, line, pos, type));
 }
 
 
 int
 mdoc_macro(struct mdoc *mdoc, int tok, 
-		int line, int ppos, int *pos, char *buf)
+		int ln, int ppos, int *pos, char *buf)
 {
 
 	if ( ! (MDOC_PROLOGUE & mdoc_macros[tok].flags) &&
 			SEC_PROLOGUE == mdoc->sec_lastn)
-		return(mdoc_err(mdoc, tok, ppos, ERR_SEC_PROLOGUE));
+		return(mdoc_perr(mdoc, ln, ppos, ERR_SEC_PROLOGUE));
 
-	if (NULL == (mdoc_macros[tok].fp)) {
-		(void)mdoc_err(mdoc, tok, ppos, ERR_MACRO_NOTSUP);
-		return(0);
-	}
+	if (NULL == (mdoc_macros[tok].fp))
+		return(mdoc_perr(mdoc, ln, ppos, ERR_MACRO_NOTSUP));
 
-	if (1 != ppos && ! (MDOC_CALLABLE & mdoc_macros[tok].flags)) {
-		(void)mdoc_err(mdoc, tok, ppos, ERR_MACRO_NOTCALL);
-		return(0);
-	}
+	if (1 != ppos && ! (MDOC_CALLABLE & mdoc_macros[tok].flags))
+		return(mdoc_perr(mdoc, ln, ppos, ERR_MACRO_NOTCALL));
 
-	return((*mdoc_macros[tok].fp)(mdoc, tok, 
-				line, ppos, pos, buf));
+	return((*mdoc_macros[tok].fp)(mdoc, tok, ln, ppos, pos, buf));
 }
 
 
-static void
-mdoc_node_append(struct mdoc *mdoc, int pos, struct mdoc_node *p)
+static int
+mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 {
 	const char	 *nn, *on, *nt, *ot, *act;
 
@@ -418,10 +420,14 @@ mdoc_node_append(struct mdoc *mdoc, int pos, struct mdoc_node *p)
 
 	if (NULL == mdoc->first) {
 		assert(NULL == mdoc->last);
+		if ( ! mdoc_valid_pre(mdoc, p))
+			return(0);
+		if ( ! mdoc_action_pre(mdoc, p))
+			return(0);
 		mdoc->first = p;
 		mdoc->last = p;
-		mdoc_msg(mdoc, pos, "parse: root %s `%s'", nt, nn);
-		return;
+		mdoc_msg(mdoc, "parse: root %s `%s'", nt, nn);
+		return(1);
 	}
 
 	switch (mdoc->last->type) {
@@ -471,14 +477,17 @@ mdoc_node_append(struct mdoc *mdoc, int pos, struct mdoc_node *p)
 		/* NOTREACHED */
 	}
 
-	mdoc_msg(mdoc, pos, "parse: %s `%s' %s of %s `%s'", 
-			nt, nn, act, ot, on);
-
+	if ( ! mdoc_valid_pre(mdoc, p))
+		return(0);
+	if ( ! mdoc_action_pre(mdoc, p))
+		return(0);
 	mdoc->last = p;
+	mdoc_msg(mdoc, "parse: %s of %s `%s'", act, ot, on);
+	return(1);
 }
 
 
-void
+int
 mdoc_tail_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 {
 	struct mdoc_node *p;
@@ -493,11 +502,11 @@ mdoc_tail_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 	p->type = MDOC_TAIL;
 	p->data.tail.tok = tok;
 
-	mdoc_node_append(mdoc, pos, p);
+	return(mdoc_node_append(mdoc, p));
 }
 
 
-void
+int
 mdoc_head_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 {
 	struct mdoc_node *p;
@@ -512,11 +521,11 @@ mdoc_head_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 	p->type = MDOC_HEAD;
 	p->data.head.tok = tok;
 
-	mdoc_node_append(mdoc, pos, p);
+	return(mdoc_node_append(mdoc, p));
 }
 
 
-void
+int
 mdoc_body_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 {
 	struct mdoc_node *p;
@@ -531,11 +540,11 @@ mdoc_body_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 	p->type = MDOC_BODY;
 	p->data.body.tok = tok;
 
-	mdoc_node_append(mdoc, pos, p);
+	return(mdoc_node_append(mdoc, p));
 }
 
 
-void
+int
 mdoc_block_alloc(struct mdoc *mdoc, int line, int pos, 
 		int tok, size_t argsz, const struct mdoc_arg *args)
 {
@@ -550,11 +559,11 @@ mdoc_block_alloc(struct mdoc *mdoc, int line, int pos,
 	p->data.block.argc = argsz;
 	p->data.block.argv = argdup(argsz, args);
 
-	mdoc_node_append(mdoc, pos, p);
+	return(mdoc_node_append(mdoc, p));
 }
 
 
-void
+int
 mdoc_elem_alloc(struct mdoc *mdoc, int line, int pos, 
 		int tok, size_t argsz, const struct mdoc_arg *args)
 {
@@ -569,11 +578,11 @@ mdoc_elem_alloc(struct mdoc *mdoc, int line, int pos,
 	p->data.elem.argc = argsz;
 	p->data.elem.argv = argdup(argsz, args);
 
-	mdoc_node_append(mdoc, pos, p);
+	return(mdoc_node_append(mdoc, p));
 }
 
 
-void
+int
 mdoc_word_alloc(struct mdoc *mdoc, 
 		int line, int pos, const char *word)
 {
@@ -585,7 +594,7 @@ mdoc_word_alloc(struct mdoc *mdoc,
 	p->type = MDOC_TEXT;
 	p->data.text.string = xstrdup(word);
 
-	mdoc_node_append(mdoc, pos, p);
+	return(mdoc_node_append(mdoc, p));
 }
 
 

@@ -57,7 +57,7 @@ static	int		 buf_leave(struct md_parse *, int);
 
 static	int		 msg_err(void *, int, int, enum mdoc_err);
 static	int		 msg_warn(void *, int, int, enum mdoc_warn);
-static	void		 msg_msg(void *, int, const char *);
+static	void		 msg_msg(void *, int, int, const char *);
 
 #ifdef __linux__
 extern	int		 getsubopt(char **, char *const *, char **);
@@ -318,15 +318,15 @@ parse_begin(struct md_parse *p)
 
 
 static int
-msg_err(void *arg, int tok, int col, enum mdoc_err type)
+msg_err(void *arg, int line, int col, enum mdoc_err type)
 {
-	char		 *fmt, *lit;
+	char		 *lit;
 	struct md_parse	 *p;
 	int		  i;
 
 	p = (struct md_parse *)arg;
 
-	fmt = lit = NULL;
+	lit = NULL;
 
 	switch (type) {
 	case (ERR_SYNTAX_NOTEXT):
@@ -342,59 +342,59 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 		lit = "syntax: whitespace in argument";
 		break;
 	case (ERR_SYNTAX_ARGFORM):
-		fmt = "syntax: macro `%s' arguments malformed";
+		lit = "syntax: macro arguments malformed";
 		break;
 	case (ERR_SYNTAX_NOPUNCT):
-		fmt = "syntax: macro `%s' doesn't understand punctuation";
+		lit = "syntax: macro doesn't understand punctuation";
 		break;
 	case (ERR_SYNTAX_ARG):
-		fmt = "syntax: unknown argument for macro `%s'";
+		lit = "syntax: unknown argument for macro";
 		break;
 	case (ERR_SCOPE_BREAK):
 		/* Which scope is broken? */
-		fmt = "scope: macro `%s' breaks prior explicit scope";
+		lit = "scope: macro breaks prior explicit scope";
 		break;
 	case (ERR_SCOPE_NOCTX):
-		fmt = "scope: closure macro `%s' has no context";
+		lit = "scope: closure macro has no context";
 		break;
 	case (ERR_SCOPE_NONEST):
-		fmt = "scope: macro `%s' may not be nested in the current context";
+		lit = "scope: macro may not be nested in the current context";
 		break;
 	case (ERR_MACRO_NOTSUP):
 		lit = "macro not supported";
 		break;
 	case (ERR_MACRO_NOTCALL):
-		fmt = "macro `%s' not callable";
+		lit = "macro not callable";
 		break;
 	case (ERR_SEC_PROLOGUE):
-		fmt = "macro `%s' cannot be called in the prologue";
+		lit = "macro cannot be called in the prologue";
 		break;
 	case (ERR_SEC_NPROLOGUE):
-		fmt = "macro `%s' called outside of prologue";
+		lit = "macro called outside of prologue";
 		break;
 	case (ERR_ARGS_EQ0):
-		fmt = "macro `%s' expects zero arguments";
+		lit = "macro expects zero arguments";
 		break;
 	case (ERR_ARGS_EQ1):
-		fmt = "macro `%s' expects one argument";
+		lit = "macro expects one argument";
 		break;
 	case (ERR_ARGS_GE1):
-		fmt = "macro `%s' expects one or more arguments";
+		lit = "macro expects one or more arguments";
 		break;
 	case (ERR_ARGS_LE2):
-		fmt = "macro `%s' expects two or fewer arguments";
+		lit = "macro expects two or fewer arguments";
 		break;
 	case (ERR_ARGS_LE8):
-		fmt = "macro `%s' expects eight or fewer arguments";
+		lit = "macro expects eight or fewer arguments";
 		break;
 	case (ERR_ARGS_MANY):
-		fmt = "macro `%s' has too many arguments";
+		lit = "macro has too many arguments";
 		break;
 	case (ERR_SEC_PROLOGUE_OO):
-		fmt = "prologue macro `%s' is out-of-order";
+		lit = "prologue macro is out-of-order";
 		break;
 	case (ERR_SEC_PROLOGUE_REP):
-		fmt = "prologue macro `%s' repeated";
+		lit = "prologue macro repeated";
 		break;
 	case (ERR_SEC_NAME):
 		lit = "`NAME' section must be first";
@@ -425,22 +425,12 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 		/* NOTREACHED */
 	}
 
-	if (fmt) {
-		(void)fprintf(stderr, "%s:%d: error: ",
-				p->name, p->lnn);
-		(void)fprintf(stderr, fmt, mdoc_macronames[tok]);
-	} else
-		(void)fprintf(stderr, "%s:%d: error: %s",
-				p->name, p->lnn, lit);
+	(void)fprintf(stderr, "%s:%d: error: %s", p->name, p->lnn, lit);
 
 	if (p->dbg < 1) {
-		if (-1 != col)
-			(void)fprintf(stderr, " (column %d)\n", col);
+		(void)fprintf(stderr, " (column %d)\n", col);
 		return(0);
-	} else if (-1 == col) {
-		(void)fprintf(stderr, "\nFrom: %s\n", p->line);
-		return(0);
-	}
+	} 
 
 	(void)fprintf(stderr, "\nFrom: %s\n      ", p->line);
 	for (i = 0; i < col; i++)
@@ -452,7 +442,7 @@ msg_err(void *arg, int tok, int col, enum mdoc_err type)
 
 
 static void
-msg_msg(void *arg, int col, const char *msg)
+msg_msg(void *arg, int line, int col, const char *msg)
 {
 	struct md_parse	 *p;
 	int		  i;
@@ -462,14 +452,10 @@ msg_msg(void *arg, int col, const char *msg)
 	if (p->dbg < 2)
 		return;
 
-	(void)printf("%s:%d: %s", p->name, p->lnn, msg);
+	(void)printf("%s:%d: %s", p->name, line, msg);
 
 	if (p->dbg < 3) {
-		if (-1 != col)
-			(void)printf(" (column %d)\n", col);
-		return;
-	} else if (-1 == col) {
-		(void)printf("\nFrom %s\n", p->line);
+		(void)printf(" (column %d)\n", col);
 		return;
 	}
 
@@ -481,9 +467,9 @@ msg_msg(void *arg, int col, const char *msg)
 
 
 static int
-msg_warn(void *arg, int tok, int col, enum mdoc_warn type)
+msg_warn(void *arg, int line, int col, enum mdoc_warn type)
 {
-	char		 *fmt, *lit;
+	char		 *lit;
 	struct md_parse	 *p;
 	int		  i;
 	extern char	 *__progname;
@@ -493,7 +479,7 @@ msg_warn(void *arg, int tok, int col, enum mdoc_warn type)
 	if ( ! (p->warn & MD_WARN_ALL))
 		return(1);
 
-	fmt = lit = NULL;
+	lit = NULL;
 
 	switch (type) {
 	case (WARN_SYNTAX_WS_EOLN):
@@ -515,45 +501,38 @@ msg_warn(void *arg, int tok, int col, enum mdoc_warn type)
 		lit = "section is out of conventional order";
 		break;
 	case (WARN_ARGS_GE1):
-		fmt = "macro `%s' suggests one or more arguments";
+		lit = "macro suggests one or more arguments";
 		break;
 	case (WARN_ARGS_EQ0):
-		fmt = "macro `%s' suggests zero arguments";
+		lit = "macro suggests zero arguments";
 		break;
 	case (WARN_IGN_AFTER_BLK):
-		fmt = "ignore: macro `%s' ignored after block macro";
+		lit = "ignore: macro ignored after block macro";
 		break;
 	case (WARN_IGN_OBSOLETE):
-		fmt = "ignore: macro `%s' is obsolete";
+		lit = "ignore: macro is obsolete";
 		break;
 	case (WARN_IGN_BEFORE_BLK):
-		fmt = "ignore: macro before block macro `%s' ignored";
+		lit = "ignore: macro before block macro ignored";
 		break;
 	case (WARN_COMPAT_TROFF):
-		fmt = "compat: macro `%s' behaves differently in troff and nroff";
+		lit = "compat: macro behaves differently in troff and nroff";
 		break;
 	default:
 		abort();
 		/* NOTREACHED */
 	}
 
-	if (fmt) {
-		(void)fprintf(stderr, "%s:%d: warning: ",
-				p->name, p->lnn);
-		(void)fprintf(stderr, fmt, mdoc_macronames[tok]);
-	} else
-		(void)fprintf(stderr, "%s:%d: warning: %s",
-				p->name, p->lnn, lit);
 
-	if (col >= 0 && p->dbg >= 1) {
+	(void)fprintf(stderr, "%s:%d: warning: %s", p->name, line, lit);
+
+	if (p->dbg >= 1) {
 		(void)fprintf(stderr, "\nFrom: %s\n      ", p->line);
 		for (i = 0; i < col; i++)
 			(void)fprintf(stderr, " ");
 		(void)fprintf(stderr, "^\n");
-	} else if (col >= 0)
+	} else 
 		(void)fprintf(stderr, " (column %d)\n", col);
-	else 
-		(void)fprintf(stderr, "\n");
 
 	if (p->warn & MD_WARN_ERR) {
 		(void)fprintf(stderr, "%s: considering warnings as "

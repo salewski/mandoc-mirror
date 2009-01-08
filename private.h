@@ -59,20 +59,28 @@ extern	const struct mdoc_macro *const mdoc_macros;
 
 __BEGIN_DECLS
 
-int		  mdoc_err(struct mdoc *, int, int, enum mdoc_err);
-int		  mdoc_warn(struct mdoc *, int, int, enum mdoc_warn);
-void		  mdoc_msg(struct mdoc *, int, const char *, ...);
+#define	mdoc_vwarn(m, n, t) \
+		  mdoc_pwarn((m), (n)->line, (n)->pos, (t))
+#define	mdoc_verr(m, n, t) \
+		  mdoc_perr((m), (n)->line, (n)->pos, (t))
+#define	mdoc_warn(m, t) \
+		  mdoc_pwarn((m), (m)->last->line, (m)->last->pos, (t))
+#define	mdoc_err(m, t) \
+		  mdoc_perr((m), (m)->last->line, (m)->last->pos, (t))
+int		  mdoc_pwarn(struct mdoc *, int, int, enum mdoc_warn);
+int		  mdoc_perr(struct mdoc *, int, int, enum mdoc_err);
+void		  mdoc_msg(struct mdoc *, const char *, ...);
 int		  mdoc_macro(MACRO_PROT_ARGS);
 int		  mdoc_find(const struct mdoc *, const char *);
-void		  mdoc_word_alloc(struct mdoc *, 
+int		  mdoc_word_alloc(struct mdoc *, 
 			int, int, const char *);
-void		  mdoc_elem_alloc(struct mdoc *, int, int, 
+int		  mdoc_elem_alloc(struct mdoc *, int, int, 
 			int, size_t, const struct mdoc_arg *);
-void		  mdoc_block_alloc(struct mdoc *, int, int, 
+int		  mdoc_block_alloc(struct mdoc *, int, int, 
 			int, size_t, const struct mdoc_arg *);
-void		  mdoc_head_alloc(struct mdoc *, int, int, int);
-void		  mdoc_tail_alloc(struct mdoc *, int, int, int);
-void		  mdoc_body_alloc(struct mdoc *, int, int, int);
+int		  mdoc_head_alloc(struct mdoc *, int, int, int);
+int		  mdoc_tail_alloc(struct mdoc *, int, int, int);
+int		  mdoc_body_alloc(struct mdoc *, int, int, int);
 void		  mdoc_node_free(struct mdoc_node *);
 void		  mdoc_sibling(struct mdoc *, int, struct mdoc_node **,
 			struct mdoc_node **, struct mdoc_node *);
@@ -88,12 +96,12 @@ enum	mdoc_arch mdoc_atoarch(const char *);
 enum	mdoc_att  mdoc_atoatt(const char *);
 time_t		  mdoc_atotime(const char *);
 
-int		  mdoc_valid_pre(struct mdoc *, int, int,
-			int, const struct mdoc_arg *);
-int		  mdoc_valid_post(struct mdoc *, int);
-int		  mdoc_action(struct mdoc *, int);
+int		  mdoc_valid_pre(struct mdoc *, struct mdoc_node *);
+int		  mdoc_valid_post(struct mdoc *);
+int		  mdoc_action_pre(struct mdoc *, struct mdoc_node *);
+int		  mdoc_action_post(struct mdoc *);
 
-int		  mdoc_argv(struct mdoc *, int, 
+int		  mdoc_argv(struct mdoc *, int, int, 
 			struct mdoc_arg *, int *, char *);
 #define	ARGV_ERROR	(-1)
 #define	ARGV_EOLN	(0)
