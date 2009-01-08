@@ -2,15 +2,15 @@ VERSION	= 1.1.0
 
 CFLAGS += -W -Wall -Wno-unused-parameter -g 
 
-LNS	= macro.ln mdoc.ln mdocml.ln hash.ln strings.ln xstd.ln argv.ln validate.ln prologue.ln action.ln
+LNS	= macro.ln mdoc.ln mdocml.ln hash.ln strings.ln xstd.ln argv.ln validate.ln action.ln
 
 LLNS	= llib-llibmdoc.ln llib-lmdocml.ln
 
 LIBS	= libmdoc.a
 
-OBJS	= macro.o mdoc.o mdocml.o hash.o strings.o xstd.o argv.o validate.o prologue.o action.o
+OBJS	= macro.o mdoc.o mdocml.o hash.o strings.o xstd.o argv.o validate.o action.o
 
-SRCS	= macro.c mdoc.c mdocml.c hash.c strings.c xstd.c argv.c validate.c prologue.c action.c
+SRCS	= macro.c mdoc.c mdocml.c hash.c strings.c xstd.c argv.c validate.c action.c
 
 HEADS	= mdoc.h
 
@@ -28,8 +28,8 @@ mdocml:	mdocml.o libmdoc.a
 clean:
 	rm -f $(CLEAN)
 
-llib-llibmdoc.ln: macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln validate.ln prologue.ln action.ln
-	$(LINT) $(LINTFLAGS) -Clibmdoc mdoc.ln macro.ln hash.ln strings.ln xstd.ln argv.ln validate.ln prologue.ln action.ln
+llib-llibmdoc.ln: macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln validate.ln action.ln
+	$(LINT) $(LINTFLAGS) -Clibmdoc mdoc.ln macro.ln hash.ln strings.ln xstd.ln argv.ln validate.ln action.ln
 
 llib-lmdocml.ln: mdocml.ln llib-llibmdoc.ln
 	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln llib-llibmdoc.ln
@@ -66,16 +66,12 @@ validate.ln: validate.c private.h
 
 validate.o: validate.c private.h
 
-prologue.ln: prologue.c private.h
-
-prologue.o: prologue.c private.h
-
 action.ln: action.c private.h
 
 action.o: action.c private.h
 
 private.h: mdoc.h
 
-libmdoc.a: macro.o mdoc.o hash.o strings.o xstd.o argv.o validate.o prologue.o action.o
-	$(AR) rs $@ macro.o mdoc.o hash.o strings.o xstd.o argv.o validate.o prologue.o action.o
+libmdoc.a: macro.o mdoc.o hash.o strings.o xstd.o argv.o validate.o action.o
+	$(AR) rs $@ macro.o mdoc.o hash.o strings.o xstd.o argv.o validate.o action.o
 

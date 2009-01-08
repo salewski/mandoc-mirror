@@ -85,9 +85,9 @@ const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {
 
 const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* \" */
-	{ macro_prologue, MDOC_PROLOGUE }, /* Dd */
-	{ macro_prologue, MDOC_PROLOGUE }, /* Dt */
-	{ macro_prologue, MDOC_PROLOGUE }, /* Os */
+	{ macro_constant, MDOC_PROLOGUE }, /* Dd */
+	{ macro_constant, MDOC_PROLOGUE }, /* Dt */
+	{ macro_constant, MDOC_PROLOGUE }, /* Os */
 	{ macro_scoped, 0 }, /* Sh */
 	{ macro_scoped, 0 }, /* Ss */ 
 	{ macro_text, 0 }, /* Pp */ 

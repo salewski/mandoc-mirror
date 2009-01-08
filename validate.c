@@ -44,9 +44,9 @@ static v_post	posts_sh[] = { post_headchild_err_ge1,
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* \" */
-	{ NULL, NULL }, /* Dd */ /* TODO */
-	{ NULL, NULL }, /* Dt */ /* TODO */
-	{ NULL, NULL }, /* Os */ /* TODO */
+	{ NULL, NULL }, /* Dd */ /* TODO: pre: ordering, repetition */
+	{ NULL, NULL }, /* Dt */ /* TODO ... */
+	{ NULL, NULL }, /* Os */ /* TODO ... */
 	{ pre_sh, posts_sh }, /* Sh */ /* FIXME: preceding Pp. */
 	{ NULL, NULL }, /* Ss */ /* FIXME: preceding Pp. */
 	{ NULL, NULL }, /* Pp */ 
