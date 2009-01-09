@@ -37,11 +37,14 @@ static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	post_headchild_err_ge1(struct mdoc *);
 static	int	post_elemchild_err_ge1(struct mdoc *);
+static	int	post_elemchild_warn_eq0(struct mdoc *);
 static	int	post_bodychild_warn_ge1(struct mdoc *);
 static	int	post_sh(struct mdoc *);
 
 static	v_post	posts_sh[] = { post_headchild_err_ge1, 
 			post_bodychild_warn_ge1, post_sh, NULL };
+static	v_post	posts_ss[] = { post_headchild_err_ge1, NULL };
+static	v_post	posts_pp[] = { post_elemchild_warn_eq0, NULL };
 static	v_post	posts_dd[] = { post_elemchild_err_ge1, NULL };
 
 
@@ -51,8 +54,8 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pre_prologue, NULL }, /* Dt */
 	{ pre_prologue, NULL }, /* Os */
 	{ NULL, posts_sh }, /* Sh */ /* FIXME: preceding Pp. */
-	{ NULL, NULL }, /* Ss */ /* FIXME: preceding Pp. */
-	{ NULL, NULL }, /* Pp */ 
+	{ NULL, posts_ss }, /* Ss */ /* FIXME: preceding Pp. */
+	{ NULL, posts_pp }, /* Pp */ /* FIXME: proceeding... */
 	{ NULL, NULL }, /* D1 */
 	{ NULL, NULL }, /* Dl */
 	{ NULL, NULL }, /* Bd */ /* FIXME: preceding Pp. */
@@ -165,6 +168,17 @@ post_bodychild_warn_ge1(struct mdoc *mdoc)
 		return(1);
 
 	return(mdoc_warn(mdoc, WARN_ARGS_GE1));
+}
+
+
+static int
+post_elemchild_warn_eq0(struct mdoc *mdoc)
+{
+
+	assert(MDOC_ELEM == mdoc->last->type);
+	if (NULL == mdoc->last->child)
+		return(1);
+	return(mdoc_warn(mdoc, WARN_ARGS_EQ0));
 }
 
 

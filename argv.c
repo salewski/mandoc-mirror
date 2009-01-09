@@ -411,8 +411,8 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		buf[(*pos)++] = 0;
 
 	if (MDOC_ARG_MAX == (v->arg = lookup(tok, argv))) {
-		(void)mdoc_perr(mdoc, line, i, ERR_SYNTAX_ARG);
-		return(ARGV_ERROR);
+		(void)mdoc_pwarn(mdoc, line, i, WARN_SYNTAX_ARGLIKE);
+		return(ARGV_WORD);
 	}
 
 	while (buf[*pos] && isspace(buf[*pos]))
