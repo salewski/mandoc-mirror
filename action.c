@@ -223,7 +223,7 @@ post_dt(struct mdoc *mdoc)
 	}
 
 	mdoc_msg(mdoc, "parsed title: %s", mdoc->meta.title);
-	/* TODO: have vol2a functions. */
+	/* TODO: print vol2a functions. */
 	return(1);
 }
 
@@ -240,7 +240,6 @@ post_os(struct mdoc *mdoc)
 	assert(0 == mdoc->meta.os[0]);
 
 	sz = META_OS_SZ;
-	(void)xstrlcpy(mdoc->meta.os, "LOCAL", sz);
 
 	for (n = mdoc->last->child; n; n = n->next) {
 		assert(MDOC_TEXT == n->type);
@@ -252,7 +251,10 @@ post_os(struct mdoc *mdoc)
 			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
 	}
 
-	mdoc_msg(mdoc, "parsed operating system (entering document body)");
+	if (0 == mdoc->meta.os[0]) 
+		(void)xstrlcpy(mdoc->meta.os, "LOCAL", sz);
+
+	mdoc_msg(mdoc, "parsed operating system: %s", mdoc->meta.os);
 	mdoc->sec_lastn = mdoc->sec_last = SEC_BODY;
 	return(1);
 }

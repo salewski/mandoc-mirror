@@ -32,25 +32,25 @@ struct	valids {
 };
 
 
-static	int	pre_sh(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	post_headchild_err_ge1(struct mdoc *);
-static	int	post_headchild_err_le8(struct mdoc *);
+static	int	post_elemchild_err_ge1(struct mdoc *);
 static	int	post_bodychild_warn_ge1(struct mdoc *);
+static	int	post_sh(struct mdoc *);
 
-static v_post	posts_sh[] = { post_headchild_err_ge1, 
-			post_bodychild_warn_ge1, 
-			post_headchild_err_le8, NULL };
+static	v_post	posts_sh[] = { post_headchild_err_ge1, 
+			post_bodychild_warn_ge1, post_sh, NULL };
+static	v_post	posts_dd[] = { post_elemchild_err_ge1, NULL };
 
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* \" */
-	{ pre_prologue, NULL }, /* Dd */ /* TODO: pre: ordering, repetition */
-	{ pre_prologue, NULL }, /* Dt */ /* TODO ... */
-	{ pre_prologue, NULL }, /* Os */ /* TODO ... */
-	{ pre_sh, posts_sh }, /* Sh */ /* FIXME: preceding Pp. */
+	{ pre_prologue, posts_dd }, /* Dd */
+	{ pre_prologue, NULL }, /* Dt */
+	{ pre_prologue, NULL }, /* Os */
+	{ NULL, posts_sh }, /* Sh */ /* FIXME: preceding Pp. */
 	{ NULL, NULL }, /* Ss */ /* FIXME: preceding Pp. */
 	{ NULL, NULL }, /* Pp */ 
 	{ NULL, NULL }, /* D1 */
@@ -169,6 +169,17 @@ post_bodychild_warn_ge1(struct mdoc *mdoc)
 
 
 static int
+post_elemchild_err_ge1(struct mdoc *mdoc)
+{
+
+	assert(MDOC_ELEM == mdoc->last->type);
+	if (mdoc->last->child)
+		return(1);
+	return(mdoc_err(mdoc, ERR_ARGS_GE1));
+}
+
+
+static int
 post_headchild_err_ge1(struct mdoc *mdoc)
 {
 
@@ -177,22 +188,6 @@ post_headchild_err_ge1(struct mdoc *mdoc)
 	if (mdoc->last->child)
 		return(1);
 	return(mdoc_err(mdoc, ERR_ARGS_GE1));
-}
-
-
-static int
-post_headchild_err_le8(struct mdoc *mdoc)
-{
-	int		  i;
-	struct mdoc_node *n;
-
-	if (MDOC_HEAD != mdoc->last->type)
-		return(1);
-	for (i = 0, n = mdoc->last->child; n; n = n->next, i++)
-		/* Do nothing. */ ;
-	if (i <= 8)
-		return(1);
-	return(mdoc_err(mdoc, ERR_ARGS_LE8));
 }
 
 
@@ -248,11 +243,42 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 }
 
 
+/*
+ * Warn if sections (those that are with a known title, such as NAME,
+ * DESCRIPTION, and so forth) are out of the conventional order.
+ */
 static int
-pre_sh(struct mdoc *mdoc, struct mdoc_node *node)
+post_sh(struct mdoc *mdoc)
 {
+	enum mdoc_sec	  sec;
+	int		  i;
+	struct mdoc_node *n;
+	char		 *args[MDOC_LINEARG_MAX];
 
-	return(1);
+	if (MDOC_HEAD != mdoc->last->type)
+		return(1);
+	
+	assert(MDOC_Sh == mdoc->last->data.head.tok);
+
+	n = mdoc->last->child;
+	assert(n);
+
+	for (i = 0; n && i < MDOC_LINEARG_MAX; n = n->next, i++) {
+		assert(MDOC_TEXT == n->type);
+		assert(NULL == n->child);
+		assert(n->data.text.string);
+		args[i] = n->data.text.string;
+	}
+
+	sec = mdoc_atosec((size_t)i, (const char **)args);
+	if (SEC_CUSTOM == sec)
+		return(1);
+	if (sec > mdoc->sec_lastn)
+		return(1);
+
+	if (sec == mdoc->sec_lastn)
+		return(mdoc_warn(mdoc, WARN_SEC_REP));
+	return(mdoc_warn(mdoc, WARN_SEC_OO));
 }
 
 

@@ -37,16 +37,23 @@ static	int	  rewind_body(struct mdoc *, int);
 static	int	  rewind_last(struct mdoc *, struct mdoc_node *);
 static	int	  append_delims(struct mdoc *, 
 			int, int, int *, char *);
-static	int	  lookup(struct mdoc *, int, const char *);
+static	int	  lookup(struct mdoc *, int, int, int, const char *);
 
 
 static int
-lookup(struct mdoc *mdoc, int from, const char *p)
+lookup(struct mdoc *mdoc, int line, int pos, int from, const char *p)
 {
+	int		 res;
 
-	if ( ! (MDOC_PARSED & mdoc_macros[from].flags))
-		return(MDOC_MAX);
-	return(mdoc_find(mdoc, p));
+	res = mdoc_find(mdoc, p);
+	if (MDOC_PARSED & mdoc_macros[from].flags)
+		return(res);
+	if (MDOC_MAX == res)
+		return(res);
+
+	if ( ! mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX_MACLIKE))
+		return(-1);
+	return(MDOC_MAX);
 }
 
 
@@ -55,8 +62,14 @@ rewind_last(struct mdoc *mdoc, struct mdoc_node *to)
 {
 
 	assert(to);
-	if (mdoc->last == to)
+	mdoc->next = MDOC_NEXT_SIBLING;
+	if (mdoc->last == to) {
+		if ( ! mdoc_valid_post(mdoc))
+			return(0);
+		if ( ! mdoc_action_post(mdoc))
+			return(0);
 		return(1);
+	}
 
 	do {
 		mdoc->last = mdoc->last->parent;
@@ -67,7 +80,6 @@ rewind_last(struct mdoc *mdoc, struct mdoc_node *to)
 			return(0);
 	} while (mdoc->last != to);
 
-	mdoc->next = MDOC_NEXT_SIBLING;
 	return(1);
 }
 
@@ -315,7 +327,9 @@ macro_close_explicit(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		if (MDOC_MAX != (c = lookup(mdoc, tok, p))) {
+		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
+			return(0);
+		else if (MDOC_MAX != c) {
 			if ( ! flushed) {
 				if ( ! rewind_expblock(mdoc, tt))
 					return(0);
@@ -324,7 +338,7 @@ macro_close_explicit(MACRO_PROT_ARGS)
 			if ( ! mdoc_macro(mdoc, c, line, lastarg, pos, buf))
 				return(0);
 			break;
-		}
+		} 
 
 		if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
 			return(0);
@@ -417,7 +431,9 @@ macro_text(MACRO_PROT_ARGS)
 		if (ARGS_PUNCT == c)
 			break;
 
-		if (MDOC_MAX != (c = lookup(mdoc, tok, p))) {
+		if (-1 == (c = lookup(mdoc, line, la, tok, p)))
+			return(0);
+		else if (MDOC_MAX != c) {
 			if ( ! rewind_elem(mdoc, tok)) {
 				mdoc_argv_free(argc, argv);
 				return(0);
@@ -524,12 +540,14 @@ macro_scoped(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 	
-		if (MDOC_MAX == (c = lookup(mdoc, tok, p))) {
+		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
+			return(0);
+		else if (MDOC_MAX == c) {
 			if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
 				return(0);
 			mdoc->next = MDOC_NEXT_SIBLING;
 			continue;
-		}
+		} 
 
 		if ( ! mdoc_macro(mdoc, c, line, lastarg, pos, buf))
 			return(0);
@@ -584,12 +602,14 @@ macro_scoped_line(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		if (MDOC_MAX == (c = lookup(mdoc, tok, p))) {
+		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
+			return(0);
+		else if (MDOC_MAX == c) {
 			if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
 				return(0);
 			mdoc->next = MDOC_NEXT_SIBLING;
 			continue;
-		}
+		} 
 
 		if ( ! mdoc_macro(mdoc, c, line, lastarg, pos, buf))
 			return(0);
@@ -668,7 +688,9 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		if (MDOC_MAX != (c = lookup(mdoc, tok, p))) {
+		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
+			return(0);
+		else if (MDOC_MAX != c) {
 			if ( ! flushed) {
 				if ( ! rewind_head(mdoc, tok))
 					return(0);
@@ -780,7 +802,9 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		if (MDOC_MAX != (c = lookup(mdoc, tok, p))) {
+		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
+			return(0);
+		else if (MDOC_MAX != c) {
 			if ( ! flushed && ! rewind_elem(mdoc, tok))
 				return(0);
 			flushed = 1;

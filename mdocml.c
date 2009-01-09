@@ -222,6 +222,10 @@ print_node(const struct mdoc_node *n, int indent)
 		argv = n->data.block.argv;
 		argc = n->data.block.argc;
 		break;
+	case (MDOC_ROOT):
+		p = "root";
+		t = "root";
+		break;
 	default:
 		abort();
 		/* NOTREACHED */
@@ -261,6 +265,8 @@ parse_leave(struct md_parse *p, int code)
 		code = 0;
 	if ((n = mdoc_result(p->mdoc)))
 		print_node(n, 0);
+
+	mdoc_free(p->mdoc);
 
 	return(code);
 }
@@ -499,6 +505,9 @@ msg_warn(void *arg, int line, int col, enum mdoc_warn type)
 		break;
 	case (WARN_SEC_OO):
 		lit = "section is out of conventional order";
+		break;
+	case (WARN_SEC_REP):
+		lit = "section repeated";
 		break;
 	case (WARN_ARGS_GE1):
 		lit = "macro suggests one or more arguments";

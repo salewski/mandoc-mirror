@@ -78,6 +78,7 @@ int		  mdoc_elem_alloc(struct mdoc *, int, int,
 			int, size_t, const struct mdoc_arg *);
 int		  mdoc_block_alloc(struct mdoc *, int, int, 
 			int, size_t, const struct mdoc_arg *);
+int		  mdoc_root_alloc(struct mdoc *);
 int		  mdoc_head_alloc(struct mdoc *, int, int, int);
 int		  mdoc_tail_alloc(struct mdoc *, int, int, int);
 int		  mdoc_body_alloc(struct mdoc *, int, int, int);

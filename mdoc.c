@@ -243,7 +243,13 @@ mdoc_alloc(void *data, const struct mdoc_cb *cb)
 	p->data = data;
 	(void)memcpy(&p->cb, cb, sizeof(struct mdoc_cb));
 
+	p->last = xcalloc(1, sizeof(struct mdoc_node));
+	p->last->type = MDOC_ROOT;
+	p->first = p->last;
+
+	p->next = MDOC_NEXT_CHILD;
 	p->htab = mdoc_tokhash_alloc();
+
 	return(p);
 }
 
@@ -418,17 +424,9 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 		/* NOTREACHED */
 	}
 
-	if (NULL == mdoc->first) {
-		assert(NULL == mdoc->last);
-		if ( ! mdoc_valid_pre(mdoc, p))
-			return(0);
-		if ( ! mdoc_action_pre(mdoc, p))
-			return(0);
-		mdoc->first = p;
-		mdoc->last = p;
-		mdoc_msg(mdoc, "parse: root %s `%s'", nt, nn);
-		return(1);
-	}
+	assert(mdoc->last);
+	assert(mdoc->first);
+	assert(MDOC_ROOT != p->type);
 
 	switch (mdoc->last->type) {
 	case (MDOC_TEXT):
@@ -454,6 +452,10 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	case (MDOC_BLOCK):
 		on = mdoc_macronames[mdoc->last->data.block.tok];
 		ot = "block";
+		break;
+	case (MDOC_ROOT):
+		on = "root";
+		ot = "root";
 		break;
 	default:
 		abort();
@@ -539,6 +541,19 @@ mdoc_body_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 	p->pos = pos;
 	p->type = MDOC_BODY;
 	p->data.body.tok = tok;
+
+	return(mdoc_node_append(mdoc, p));
+}
+
+
+int
+mdoc_root_alloc(struct mdoc *mdoc)
+{
+	struct mdoc_node *p;
+
+	p = xcalloc(1, sizeof(struct mdoc_node));
+
+	p->type = MDOC_ROOT;
 
 	return(mdoc_node_append(mdoc, p));
 }
