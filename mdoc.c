@@ -97,7 +97,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_close_explicit, 0 }, /* Ed */
 	{ macro_scoped, MDOC_EXPLICIT }, /* Bl */
 	{ macro_close_explicit, 0 }, /* El */
-	{ macro_scoped, MDOC_NESTED | MDOC_PARSED }, /* It */
+	{ macro_scoped, MDOC_NESTED | MDOC_PARSED | MDOC_TABSEP}, /* It */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ad */ 
 	{ macro_constant, MDOC_PARSED }, /* An */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ar */

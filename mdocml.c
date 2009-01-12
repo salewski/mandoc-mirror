@@ -238,12 +238,16 @@ print_node(const struct mdoc_node *n, int indent)
 
 	for (i = 0; i < (int)argc; i++) {
 		(void)printf(" -%s", mdoc_argnames[argv[i].arg]);
+		if (j > 0)
+			(void)printf(" [");
 		for (j = 0; j < (int)argv[i].sz; j++)
-			(void)printf(" \"%s\"", argv[i].value[j]);
+			(void)printf(" [%s]", argv[i].value[j]);
+		if (j > 0)
+			(void)printf(" ]");
 	}
 
 	for (i = 0; i < (int)sz; i++)
-		(void)printf(" \"%s\"", params[i]);
+		(void)printf(" [%s]", params[i]);
 
 	(void)printf(" %d:%d\n", n->line, n->pos);
 

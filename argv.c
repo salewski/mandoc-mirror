@@ -29,6 +29,10 @@
 static	int		 lookup(int, const char *);
 static	int		 parse(struct mdoc *, int, int,
 				struct mdoc_arg *, int *, char *);
+static	int		 parse_single(struct mdoc *, int, 
+				struct mdoc_arg *, int *, char *);
+static	int		 parse_multi(struct mdoc *, int, 
+				struct mdoc_arg *, int *, char *);
 static	int		 postparse(struct mdoc *, int, 
 				const struct mdoc_arg *, int);
 
@@ -50,6 +54,10 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 			return(ARGS_ERROR);
 
 	if ((fl & ARGS_DELIM) && mdoc_iscdelim(buf[*pos])) {
+		/* 
+		 * If ARGS_DELIM, return ARGS_PUNCT if only space-separated
+		 * punctuation remains.  
+		 */
 		for (i = *pos; buf[i]; ) {
 			if ( ! mdoc_iscdelim(buf[i]))
 				break;
@@ -66,25 +74,43 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 		}
 	}
 
-	/*
-	 * Parse routine for non-quoted string.  
-	 */
+	/* Parse routine for non-quoted string. */
 
 	if ('\"' != buf[*pos]) {
 		*v = &buf[*pos];
 
-		while (buf[*pos] && ! isspace(buf[*pos]))
-			(*pos)++;
+		/* FIXME: UGLY tab-sep processing. */
+
+		if (ARGS_TABSEP & fl)
+			while (buf[*pos]) {
+				if ('\t' == buf[*pos])
+					break;
+				if ('T' == buf[*pos]) {
+					(*pos)++;
+					if (0 == buf[*pos])
+						break;
+					if ('a' == buf[*pos]) {
+						buf[*pos - 1] = 0;
+						break;
+					}
+				}
+				(*pos)++;
+			}
+		else
+			while (buf[*pos] && ! isspace(buf[*pos]))
+				(*pos)++;
 
 		if (0 == buf[*pos])
 			return(ARGS_WORD);
 
 		buf[(*pos)++] = 0;
+
 		if (0 == buf[*pos])
 			return(ARGS_WORD);
 
-		while (buf[*pos] && isspace(buf[*pos]))
-			(*pos)++;
+		if ( ! (ARGS_TABSEP & fl))
+			while (buf[*pos] && isspace(buf[*pos]))
+				(*pos)++;
 
 		if (buf[*pos])
 			return(ARGS_WORD);
@@ -100,6 +126,8 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 	 * then parse ahead to the next quote.  If none's found, it's an
 	 * error.  After, parse to the next word.  
 	 */
+
+	assert( ! (ARGS_TABSEP & fl));
 
 	*v = &buf[++(*pos)];
 
@@ -318,13 +346,67 @@ postparse(struct mdoc *mdoc, int line, const struct mdoc_arg *v, int pos)
 
 
 static int
+parse_multi(struct mdoc *mdoc, int line, 
+		struct mdoc_arg *v, int *pos, char *buf)
+{
+	int		 c, ppos;
+	char		*p;
+
+	v->sz = 0;
+	v->value = xcalloc(MDOC_LINEARG_MAX, sizeof(char *));
+
+	ppos = *pos;
+
+	for (v->sz = 0; v->sz < MDOC_LINEARG_MAX; v->sz++) {
+		if ('-' == buf[*pos])
+			break;
+		c = mdoc_args(mdoc, line, pos, buf, ARGS_QUOTED, &p);
+		if (ARGS_ERROR == c) {
+			free(v->value);
+			return(0);
+		} else if (ARGS_EOLN == c)
+			break;
+		v->value[v->sz] = p;
+	}
+
+	if (0 < v->sz && v->sz < MDOC_LINEARG_MAX)
+		return(1);
+
+	c = 0 == v->sz ? ERR_SYNTAX_ARGVAL : ERR_SYNTAX_ARGMANY;
+	free(v->value);
+	return(mdoc_perr(mdoc, line, ppos, c));
+}
+
+
+static int
+parse_single(struct mdoc *mdoc, int line, 
+		struct mdoc_arg *v, int *pos, char *buf)
+{
+	int		 c, ppos;
+	char		*p;
+
+	ppos = *pos;
+
+	c = mdoc_args(mdoc, line, pos, buf, ARGS_QUOTED, &p);
+	if (ARGS_ERROR == c)
+		return(0);
+	if (ARGS_EOLN == c)
+		return(mdoc_perr(mdoc, line, ppos, ERR_SYNTAX_ARGVAL));
+
+	v->sz = 1;
+	v->value = xcalloc(1, sizeof(char *));
+	v->value[0] = p;
+	return(1);
+}
+
+
+static int
 parse(struct mdoc *mdoc, int line, int tok, 
 		struct mdoc_arg *v, int *pos, char *buf)
 {
-	char		*p;
-	int		 c, ppos, i;
 
-	ppos = *pos;
+	v->sz = 0;
+	v->value = NULL;
 
 	switch (v->arg) {
 	case(MDOC_Std):
@@ -332,51 +414,10 @@ parse(struct mdoc *mdoc, int line, int tok,
 	case(MDOC_Width):
 		/* FALLTHROUGH */
 	case(MDOC_Offset):
-		/*
-		 * This has a single value for an argument.
-		 */
-		c = mdoc_args(mdoc, line, pos, buf, ARGS_QUOTED, &p);
-		if (ARGS_ERROR == c)
-			return(0);
-		else if (ARGS_EOLN != c) {
-			v->sz = 1;
-			v->value = xcalloc(1, sizeof(char *));
-			v->value[0] = p;
-			break;
-		}
-		return(mdoc_perr(mdoc, line, ppos, ERR_SYNTAX_ARGVAL));
-
+		return(parse_single(mdoc, line, v, pos, buf));
 	case(MDOC_Column):
-		/*
-		 * This has several value for a single argument.  We
-		 * pre-allocate a pointer array and don't let it exceed
-		 * this size.
-		 */
-		v->sz = 0;
-		v->value = xcalloc(MDOC_LINEARG_MAX, sizeof(char *));
-		for (i = 0; i < MDOC_LINEARG_MAX; i++) {
-			c = mdoc_args(mdoc, line, pos, buf, ARGS_QUOTED, &p);
-			if (ARGS_ERROR == c) {
-				free(v->value);
-				return(0);
-			} else if (ARGS_EOLN == c)
-				break;
-			v->value[i] = p;
-		}
-		if (0 == i) {
-			free(v->value);
-			return(mdoc_perr(mdoc, line, ppos, 
-						ERR_SYNTAX_ARGVAL));
-		} else if (MDOC_LINEARG_MAX == i)
-			return(mdoc_perr(mdoc, line, ppos, 
-						ERR_SYNTAX_ARGMANY));
-
-		v->sz = i;
-		break;
-
+		return(parse_multi(mdoc, line, v, pos, buf));
 	default:
-		v->sz = 0;
-		v->value = NULL;
 		break;
 	}
 

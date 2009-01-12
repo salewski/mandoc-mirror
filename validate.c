@@ -42,9 +42,11 @@ static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 
 static	int	headchild_err_ge1(struct mdoc *);
 static	int	headchild_err_eq0(struct mdoc *);
+static	int	elemchild_err_eq0(struct mdoc *);
 static	int	elemchild_err_ge1(struct mdoc *);
 static	int	elemchild_warn_eq0(struct mdoc *);
 static	int	bodychild_warn_ge1(struct mdoc *);
+static	int	elemchild_warn_ge1(struct mdoc *);
 static	int	post_sh(struct mdoc *);
 static	int	post_bl(struct mdoc *);
 static	int	post_it(struct mdoc *);
@@ -57,6 +59,9 @@ static	v_pre	pres_it[] = { pre_it, NULL };
 static	v_post	posts_bd[] = { headchild_err_eq0, 
 			bodychild_warn_ge1, NULL };
 
+static	v_post	posts_text[] = { elemchild_err_ge1, NULL };
+static	v_post	posts_wtext[] = { elemchild_warn_ge1, NULL };
+static	v_post	posts_notext[] = { elemchild_err_eq0, NULL };
 static	v_post	posts_sh[] = { headchild_err_ge1, 
 			bodychild_warn_ge1, post_sh, NULL };
 static	v_post	posts_bl[] = { headchild_err_eq0, 
@@ -64,104 +69,111 @@ static	v_post	posts_bl[] = { headchild_err_eq0,
 static	v_post	posts_it[] = { post_it, NULL };
 static	v_post	posts_ss[] = { headchild_err_ge1, NULL };
 static	v_post	posts_pp[] = { elemchild_warn_eq0, NULL };
-static	v_post	posts_dd[] = { elemchild_err_ge1, NULL };
 static	v_post	posts_d1[] = { headchild_err_ge1, NULL };
 
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* \" */
-	{ pres_prologue, posts_dd }, /* Dd */
+	{ pres_prologue, posts_text }, /* Dd */
 	{ pres_prologue, NULL }, /* Dt */
 	{ pres_prologue, NULL }, /* Os */
-	{ NULL, posts_sh }, /* Sh */ /* FIXME: preceding Pp. */
-	{ NULL, posts_ss }, /* Ss */ /* FIXME: preceding Pp. */
-	{ NULL, posts_pp }, /* Pp */ /* FIXME: proceeding... */
+	/* FIXME: preceding Pp. */ 
+	/* FIXME: NAME section internal ordering. */
+	{ NULL, posts_sh }, /* Sh */ 
+	/* FIXME: preceding Pp. */
+	{ NULL, posts_ss }, /* Ss */ 
+	/* FIXME: proceeding... */
+	{ NULL, posts_pp }, /* Pp */ 
 	{ pres_d1, posts_d1 }, /* D1 */
 	{ pres_d1, posts_d1 }, /* Dl */
-	{ pres_bd, posts_bd }, /* Bd */ /* FIXME: preceding Pp. */
+	 /* FIXME: preceding Pp. */
+	{ pres_bd, posts_bd }, /* Bd */
 	{ NULL, NULL }, /* Ed */
-	{ pres_bl, posts_bl }, /* Bl */ /* FIXME: preceding Pp. */
+	/* FIXME: preceding Pp. */
+	{ pres_bl, posts_bl }, /* Bl */ 
 	{ NULL, NULL }, /* El */
 	{ pres_it, posts_it }, /* It */
-	{ NULL, NULL }, /* Ad */ 
-	{ NULL, NULL }, /* An */
+	{ NULL, posts_text }, /* Ad */ 
+	/* FIXME */
+	{ NULL, NULL }, /* An */ 
 	{ NULL, NULL }, /* Ar */
-	{ NULL, NULL }, /* Cd */
+
+	{ NULL, posts_text }, /* Cd */ /* FIXME: section 4 only. */
 	{ NULL, NULL }, /* Cm */
-	{ NULL, NULL }, /* Dv */ 
-	{ NULL, NULL }, /* Er */ 
-	{ NULL, NULL }, /* Ev */ 
-	{ NULL, NULL }, /* Ex */
-	{ NULL, NULL }, /* Fa */ 
-	{ NULL, NULL }, /* Fd */ 
+	{ NULL, posts_text }, /* Dv */ 
+	{ NULL, posts_text }, /* Er */ /* FIXME: section 2 only. */
+	{ NULL, posts_text }, /* Ev */ 
+	{ NULL, posts_notext }, /* Ex */ /* FIXME: sections 1,6,8 only. */ /* -std required */
+	{ NULL, posts_text }, /* Fa */ 
+	{ NULL, NULL }, /* Fd */ /* FIXME: SYNOPSIS section. */
 	{ NULL, NULL }, /* Fl */
-	{ NULL, NULL }, /* Fn */ 
+	{ NULL, posts_text }, /* Fn */ 
 	{ NULL, NULL }, /* Ft */ 
-	{ NULL, NULL }, /* Ic */ 
-	{ NULL, NULL }, /* In */ 
-	{ NULL, NULL }, /* Li */
-	{ NULL, NULL }, /* Nd */ 
-	{ NULL, NULL }, /* Nm */ 
-	{ NULL, NULL }, /* Op */
+	{ NULL, posts_text }, /* Ic */ 
+	{ NULL, posts_wtext }, /* In */ 
+	{ NULL, posts_text }, /* Li */
+	{ NULL, posts_wtext }, /* Nd */
+	{ NULL, NULL }, /* Nm */  /* FIXME: If name not set? */
+	{ NULL, posts_wtext }, /* Op */
 	{ NULL, NULL }, /* Ot */
 	{ NULL, NULL }, /* Pa */
-	{ NULL, NULL }, /* Rv */
-	{ NULL, NULL }, /* St */
-	{ NULL, NULL }, /* Va */
-	{ NULL, NULL }, /* Vt */ 
-	{ NULL, NULL }, /* Xr */
-	{ NULL, NULL }, /* %A */
-	{ NULL, NULL }, /* %B */
-	{ NULL, NULL }, /* %D */
-	{ NULL, NULL }, /* %I */
-	{ NULL, NULL }, /* %J */
-	{ NULL, NULL }, /* %N */
-	{ NULL, NULL }, /* %O */
-	{ NULL, NULL }, /* %P */
-	{ NULL, NULL }, /* %R */
-	{ NULL, NULL }, /* %T */
-	{ NULL, NULL }, /* %V */
+	{ NULL, posts_notext }, /* Rv */ /* -std required */
+	{ NULL, posts_notext }, /* St */ /* arg required */
+	{ NULL, posts_text }, /* Va */
+	{ NULL, posts_text }, /* Vt */ 
+	{ NULL, NULL }, /* Xr */ /* FIXME */
+	{ NULL, posts_text }, /* %A */
+	{ NULL, posts_text }, /* %B */
+	{ NULL, posts_text }, /* %D */
+	{ NULL, posts_text }, /* %I */
+	{ NULL, posts_text }, /* %J */
+	{ NULL, posts_text }, /* %N */
+	{ NULL, posts_text }, /* %O */
+	{ NULL, posts_text }, /* %P */
+	{ NULL, posts_text }, /* %R */
+	{ NULL, posts_text }, /* %T */
+	{ NULL, posts_text }, /* %V */
 	{ NULL, NULL }, /* Ac */
 	{ NULL, NULL }, /* Ao */
-	{ NULL, NULL }, /* Aq */
+	{ NULL, posts_wtext }, /* Aq */
 	{ NULL, NULL }, /* At */ /* FIXME */
 	{ NULL, NULL }, /* Bc */
 	{ NULL, NULL }, /* Bf */ 
 	{ NULL, NULL }, /* Bo */
-	{ NULL, NULL }, /* Bq */
+	{ NULL, posts_wtext }, /* Bq */
 	{ NULL, NULL }, /* Bsx */
 	{ NULL, NULL }, /* Bx */
-	{ NULL, NULL }, /* Db */
+	{ NULL, NULL }, /* Db */ /* FIXME: boolean */
 	{ NULL, NULL }, /* Dc */
 	{ NULL, NULL }, /* Do */
-	{ NULL, NULL }, /* Dq */
+	{ NULL, posts_wtext }, /* Dq */
 	{ NULL, NULL }, /* Ec */
 	{ NULL, NULL }, /* Ef */ /* -symbolic, etc. */
-	{ NULL, NULL }, /* Em */ 
+	{ NULL, posts_text }, /* Em */ 
 	{ NULL, NULL }, /* Eo */
 	{ NULL, NULL }, /* Fx */
-	{ NULL, NULL }, /* Ms */
-	{ NULL, NULL }, /* No */
-	{ NULL, NULL }, /* Ns */
+	{ NULL, posts_text }, /* Ms */ /* FIXME: which symbols? */
+	{ NULL, posts_notext }, /* No */
+	{ NULL, posts_notext }, /* Ns */
 	{ NULL, NULL }, /* Nx */
 	{ NULL, NULL }, /* Ox */
 	{ NULL, NULL }, /* Pc */
-	{ NULL, NULL }, /* Pf */ /* 2 or more arguments */
+	{ NULL, NULL }, /* Pf */ /* FIXME: 2 or more arguments */
 	{ NULL, NULL }, /* Po */
-	{ NULL, NULL }, /* Pq */ /* FIXME: ignore following Sh/Ss */
+	{ NULL, posts_wtext }, /* Pq */ /* FIXME: ignore following Sh/Ss */
 	{ NULL, NULL }, /* Qc */
-	{ NULL, NULL }, /* Ql */
+	{ NULL, posts_wtext }, /* Ql */
 	{ NULL, NULL }, /* Qo */
-	{ NULL, NULL }, /* Qq */
+	{ NULL, posts_wtext }, /* Qq */
 	{ NULL, NULL }, /* Re */
 	{ NULL, NULL }, /* Rs */
 	{ NULL, NULL }, /* Sc */
 	{ NULL, NULL }, /* So */
-	{ NULL, NULL }, /* Sq */
-	{ NULL, NULL }, /* Sm */
-	{ NULL, NULL }, /* Sx */
-	{ NULL, NULL }, /* Sy */
-	{ NULL, NULL }, /* Tn */
+	{ NULL, posts_wtext }, /* Sq */
+	{ NULL, NULL }, /* Sm */ /* FIXME: boolean */
+	{ NULL, posts_text }, /* Sx */
+	{ NULL, posts_text }, /* Sy */
+	{ NULL, posts_text }, /* Tn */
 	{ NULL, NULL }, /* Ux */
 	{ NULL, NULL }, /* Xc */
 	{ NULL, NULL }, /* Xo */
@@ -171,10 +183,10 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* Oc */
 	{ NULL, NULL }, /* Bk */
 	{ NULL, NULL }, /* Ek */
-	{ NULL, NULL }, /* Bt */
+	{ NULL, posts_notext }, /* Bt */
 	{ NULL, NULL }, /* Hf */
 	{ NULL, NULL }, /* Fr */
-	{ NULL, NULL }, /* Ud */
+	{ NULL, posts_notext }, /* Ud */
 };
 
 
@@ -199,6 +211,28 @@ elemchild_warn_eq0(struct mdoc *mdoc)
 		return(1);
 	return(mdoc_pwarn(mdoc, mdoc->last->child->line,
 			mdoc->last->child->pos, WARN_ARGS_EQ0));
+}
+
+
+static int
+elemchild_warn_ge1(struct mdoc *mdoc)
+{
+
+	assert(MDOC_ELEM == mdoc->last->type);
+	if (mdoc->last->child)
+		return(1);
+	return(mdoc_warn(mdoc, WARN_ARGS_GE1));
+}
+
+
+static int
+elemchild_err_eq0(struct mdoc *mdoc)
+{
+
+	assert(MDOC_ELEM == mdoc->last->type);
+	if (NULL == mdoc->last->child)
+		return(1);
+	return(mdoc_err(mdoc, ERR_ARGS_EQ0));
 }
 
 
@@ -293,6 +327,8 @@ pre_bl(struct mdoc *mdoc, struct mdoc_node *node)
 		case (MDOC_Ohang):
 			/* FALLTHROUGH */
 		case (MDOC_Inset):
+			/* FALLTHROUGH */
+		case (MDOC_Column):
 			if (type)
 				err++;
 			type++;
@@ -449,6 +485,8 @@ post_it(struct mdoc *mdoc)
 
 	argc = n->data.block.argc;
 	type = TYPE_NONE;
+	
+	/* Some types require block-head, some not. */
 
 	for (i = 0; TYPE_NONE == type && i < argc; i++)
 		switch (n->data.block.argv[(int)i].arg) {
@@ -513,10 +551,20 @@ post_it(struct mdoc *mdoc)
 		if ( ! mdoc_warn(mdoc, WARN_SYNTAX_NOBODY))
 			return(0);
 
-	/* TODO: make sure columns are aligned. */
-	assert(MDOC_Column != sv);
+	if (MDOC_Column != sv) 
+		return(1);
 
-	return(1);
+	/* Make sure the number of columns is sane. */
+
+	sv = mdoc->last->parent->parent->data.block.argv->sz;
+	n = mdoc->last->data.block.head->child;
+
+	for (i = 0; n; n = n->next)
+		i++;
+
+	if (i == (size_t)sv)
+		return(1);
+	return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
 
 #undef	TYPE_NONE
 #undef	TYPE_BODY

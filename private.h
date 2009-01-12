@@ -53,6 +53,7 @@ struct	mdoc_macro {
 #define	MDOC_QUOTABLE	(1 << 3)
 #define	MDOC_PROLOGUE	(1 << 4)
 #define	MDOC_NESTED	(1 << 5)
+#define	MDOC_TABSEP	(1 << 6)
 };
 
 extern	const struct mdoc_macro *const mdoc_macros;
@@ -118,6 +119,7 @@ int		  mdoc_args(struct mdoc *, int,
 
 #define	ARGS_QUOTED	(1 << 0)
 #define	ARGS_DELIM	(1 << 1)
+#define	ARGS_TABSEP	(1 << 2)
 
 int	  	  xstrlcat(char *, const char *, size_t);
 int	  	  xstrlcpy(char *, const char *, size_t);

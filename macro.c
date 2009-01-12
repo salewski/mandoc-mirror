@@ -479,7 +479,7 @@ macro_text(MACRO_PROT_ARGS)
 int
 macro_scoped(MACRO_PROT_ARGS)
 {
-	int		  c, lastarg, argc, j;
+	int		  c, lastarg, argc, j, fl;
 	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
 	char		 *p;
 
@@ -529,9 +529,13 @@ macro_scoped(MACRO_PROT_ARGS)
 		return(0);
 	mdoc->next = MDOC_NEXT_CHILD;
 
+	fl = ARGS_DELIM;
+	if (MDOC_TABSEP & mdoc_macros[tok].flags)
+		fl |= ARGS_TABSEP;
+
 	for (j = 0; j < MDOC_LINEARG_MAX; j++) {
 		lastarg = *pos;
-		c = mdoc_args(mdoc, line, pos, buf, ARGS_DELIM, &p);
+		c = mdoc_args(mdoc, line, pos, buf, fl, &p);
 	
 		if (ARGS_ERROR == c)
 			return(0);
