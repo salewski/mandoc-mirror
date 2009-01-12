@@ -153,10 +153,10 @@ rewind_expblock(struct mdoc *mdoc, int tok)
 	struct mdoc_node *n;
 	int		  t;
 
-	assert(mdoc->last);
+	n = mdoc->last ? mdoc->last->parent : NULL;
 
 	/* LINTED */
-	for (n = mdoc->last; n; n = n->parent) {
+	for ( ; n; n = n->parent) {
 		if (MDOC_BLOCK != n->type)
 			continue;
 		if (tok == (t = n->data.block.tok))
@@ -187,7 +187,7 @@ rewind_impblock(struct mdoc *mdoc, int tok)
 			break;
 		if ( ! (MDOC_EXPLICIT & mdoc_macros[t].flags))
 			continue;
-		if (MDOC_NESTED & mdoc_macros[t].flags)
+		if (MDOC_NESTED & mdoc_macros[tok].flags)
 			return(1);
 		return(mdoc_verr(mdoc, n, ERR_SCOPE_BREAK));
 	}
@@ -293,7 +293,7 @@ macro_close_explicit(MACRO_PROT_ARGS)
 	}
 
 	if ( ! (MDOC_CALLABLE & mdoc_macros[tok].flags)) {
-		if (buf[*pos])
+		if (0 == buf[*pos])
 			return(rewind_expblock(mdoc, tt));
 		return(mdoc_perr(mdoc, line, ppos, ERR_ARGS_EQ0));
 	}

@@ -202,6 +202,7 @@ enum 	mdoc_err {
 	ERR_SYNTAX_ARGFORM,
 	ERR_SYNTAX_ARGVAL,
 	ERR_SYNTAX_ARGBAD,
+	ERR_SYNTAX_ARGMISS,
 	ERR_SYNTAX_ARGMANY,
 	ERR_MACRO_NOTSUP,
 	ERR_MACRO_NOTCALL,
@@ -219,6 +220,7 @@ enum 	mdoc_err {
 	ERR_ARGS_LE2,
 	ERR_ARGS_LE8,
 	ERR_ARGS_MANY,
+	ERR_SYNTAX_CHILDBAD,
 	ERR_SYNTAX_CHILDHEAD,
 	ERR_SYNTAX_CHILDBODY,
 	ERR_SYNTAX_EMPTYBODY,
@@ -260,6 +262,8 @@ enum	mdoc_warn {
 
 struct	mdoc_arg {
 	int	  	  arg;
+	int		  line;
+	int		  pos;
 	size_t		  sz;
 	char		**value;
 };

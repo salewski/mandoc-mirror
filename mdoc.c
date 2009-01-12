@@ -283,7 +283,8 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 
 	if ('.' != *buf) {
 		if (SEC_PROLOGUE != mdoc->sec_lastn) {
-			mdoc_word_alloc(mdoc, line, 0, buf);
+			if ( ! mdoc_word_alloc(mdoc, line, 0, buf))
+				return(0);
 			mdoc->next = MDOC_NEXT_SIBLING;
 			return(1);
 		}
@@ -392,37 +393,7 @@ mdoc_macro(struct mdoc *mdoc, int tok,
 static int
 mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 {
-	const char	 *nn, *on, *nt, *ot, *act;
-
-	switch (p->type) {
-	case (MDOC_TEXT):
-		nn = p->data.text.string;
-		nt = "text";
-		break;
-	case (MDOC_BODY):
-		nn = mdoc_macronames[p->data.body.tok];
-		nt = "body";
-		break;
-	case (MDOC_ELEM):
-		nn = mdoc_macronames[p->data.elem.tok];
-		nt = "elem";
-		break;
-	case (MDOC_HEAD):
-		nn = mdoc_macronames[p->data.head.tok];
-		nt = "head";
-		break;
-	case (MDOC_TAIL):
-		nn = mdoc_macronames[p->data.tail.tok];
-		nt = "tail";
-		break;
-	case (MDOC_BLOCK):
-		nn = mdoc_macronames[p->data.block.tok];
-		nt = "block";
-		break;
-	default:
-		abort();
-		/* NOTREACHED */
-	}
+	const char	 *on, *ot, *act;
 
 	assert(mdoc->last);
 	assert(mdoc->first);
@@ -708,6 +679,8 @@ argcpy(struct mdoc_arg *dst, const struct mdoc_arg *src)
 {
 	int		 i;
 
+	dst->line = src->line;
+	dst->pos = src->pos;
 	dst->arg = src->arg;
 	if (0 == (dst->sz = src->sz))
 		return;

@@ -404,6 +404,9 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	i = *pos;
 	argv = &buf[++(*pos)];
 
+	v->line = line;
+	v->pos = *pos;
+
 	while (buf[*pos] && ! isspace(buf[*pos]))
 		(*pos)++;
 

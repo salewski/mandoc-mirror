@@ -244,7 +244,7 @@ print_node(const struct mdoc_node *n, int indent)
 	for (i = 0; i < (int)sz; i++)
 		(void)printf(" \"%s\"", params[i]);
 
-	(void)printf("\n");
+	(void)printf(" %d:%d\n", n->line, n->pos);
 
 	if (n->child)
 		print_node(n->child, indent + 1);
@@ -328,7 +328,6 @@ msg_err(void *arg, int line, int col, enum mdoc_err type)
 {
 	char		 *lit;
 	struct md_parse	 *p;
-	int		  i;
 
 	p = (struct md_parse *)arg;
 
@@ -409,10 +408,16 @@ msg_err(void *arg, int line, int col, enum mdoc_err type)
 		lit = "syntax: expected value for macro argument";
 		break;
 	case (ERR_SYNTAX_ARGBAD):
-		lit = "syntax: invalid value for macro argument";
+		lit = "syntax: invalid value(s) for macro argument";
+		break;
+	case (ERR_SYNTAX_ARGMISS):
+		lit = "syntax: missing required argument(s) for macro";
 		break;
 	case (ERR_SYNTAX_ARGMANY):
 		lit = "syntax: too many values for macro argument";
+		break;
+	case (ERR_SYNTAX_CHILDBAD):
+		lit = "syntax: invalid child for parent macro";
 		break;
 	case (ERR_SYNTAX_CHILDHEAD):
 		lit = "syntax: expected only block-header section";
@@ -431,18 +436,8 @@ msg_err(void *arg, int line, int col, enum mdoc_err type)
 		/* NOTREACHED */
 	}
 
-	(void)fprintf(stderr, "%s:%d: error: %s", p->name, p->lnn, lit);
-
-	if (p->dbg < 1) {
-		(void)fprintf(stderr, " (column %d)\n", col);
-		return(0);
-	} 
-
-	(void)fprintf(stderr, "\nFrom: %s\n      ", p->line);
-	for (i = 0; i < col; i++)
-		(void)fprintf(stderr, " ");
-	(void)fprintf(stderr, "^\n");
-
+	(void)fprintf(stderr, "%s:%d: error: %s (column %d)\n", 
+			p->name, line, lit, col);
 	return(0);
 }
 
@@ -451,24 +446,14 @@ static void
 msg_msg(void *arg, int line, int col, const char *msg)
 {
 	struct md_parse	 *p;
-	int		  i;
 
 	p = (struct md_parse *)arg;
 
 	if (p->dbg < 2)
 		return;
 
-	(void)printf("%s:%d: %s", p->name, line, msg);
-
-	if (p->dbg < 3) {
-		(void)printf(" (column %d)\n", col);
-		return;
-	}
-
-	(void)printf("\nFrom: %s\n      ", p->line);
-	for (i = 0; i < col; i++)
-		(void)printf(" ");
-	(void)printf("^\n");
+	(void)printf("%s:%d: %s (column %d)\n", 
+			p->name, line, msg, col);
 }
 
 
@@ -477,7 +462,6 @@ msg_warn(void *arg, int line, int col, enum mdoc_warn type)
 {
 	char		 *lit;
 	struct md_parse	 *p;
-	int		  i;
 	extern char	 *__progname;
 
 	p = (struct md_parse *)arg;
@@ -533,15 +517,8 @@ msg_warn(void *arg, int line, int col, enum mdoc_warn type)
 	}
 
 
-	(void)fprintf(stderr, "%s:%d: warning: %s", p->name, line, lit);
-
-	if (p->dbg >= 1) {
-		(void)fprintf(stderr, "\nFrom: %s\n      ", p->line);
-		for (i = 0; i < col; i++)
-			(void)fprintf(stderr, " ");
-		(void)fprintf(stderr, "^\n");
-	} else 
-		(void)fprintf(stderr, " (column %d)\n", col);
+	(void)fprintf(stderr, "%s:%d: warning: %s (column %d)\n", 
+			p->name, line, lit, col);
 
 	if (p->warn & MD_WARN_ERR) {
 		(void)fprintf(stderr, "%s: considering warnings as "
