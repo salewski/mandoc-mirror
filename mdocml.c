@@ -192,6 +192,7 @@ print_node(const struct mdoc_node *n, int indent)
 	params = NULL;
 	sz = 0;
 
+	/* FIXME: put parts of this in util.c. */
 	switch (n->type) {
 	case (MDOC_TEXT):
 		assert(NULL == n->child);
@@ -199,25 +200,25 @@ print_node(const struct mdoc_node *n, int indent)
 		t = "text";
 		break;
 	case (MDOC_BODY):
-		p = mdoc_macronames[n->data.body.tok];
+		p = mdoc_macronames[n->tok];
 		t = "block-body";
 		break;
 	case (MDOC_HEAD):
-		p = mdoc_macronames[n->data.head.tok];
+		p = mdoc_macronames[n->tok];
 		t = "block-head";
 		break;
 	case (MDOC_TAIL):
-		p = mdoc_macronames[n->data.tail.tok];
+		p = mdoc_macronames[n->tok];
 		t = "block-tail";
 		break;
 	case (MDOC_ELEM):
-		p = mdoc_macronames[n->data.elem.tok];
+		p = mdoc_macronames[n->tok];
 		t = "element";
 		argv = n->data.elem.argv;
 		argc = n->data.elem.argc;
 		break;
 	case (MDOC_BLOCK):
-		p = mdoc_macronames[n->data.block.tok];
+		p = mdoc_macronames[n->tok];
 		t = "block";
 		argv = n->data.block.argv;
 		argc = n->data.block.argc;
@@ -419,6 +420,9 @@ msg_err(void *arg, int line, int col, enum mdoc_err type)
 	case (ERR_SYNTAX_CHILDBAD):
 		lit = "syntax: invalid child for parent macro";
 		break;
+	case (ERR_SYNTAX_PARENTBAD):
+		lit = "syntax: invalid parent for macro";
+		break;
 	case (ERR_SYNTAX_CHILDHEAD):
 		lit = "syntax: expected only block-header section";
 		break;
@@ -485,7 +489,13 @@ msg_warn(void *arg, int line, int col, enum mdoc_warn type)
 		lit = "syntax: argument-like value";
 		break;
 	case (WARN_SYNTAX_EMPTYBODY):
-		lit = "syntax: empty block-body section";
+		lit = "syntax: macro suggests non-empty block-body section";
+		break;
+	case (WARN_SYNTAX_EMPTYHEAD):
+		lit = "syntax: macro suggests non-empty block-head section";
+		break;
+	case (WARN_SYNTAX_NOBODY):
+		lit = "syntax: macro suggests empty block-body section";
 		break;
 	case (WARN_SEC_OO):
 		lit = "section is out of conventional order";

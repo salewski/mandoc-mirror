@@ -35,6 +35,7 @@ struct	valids {
 static	int	pre_display(struct mdoc *, struct mdoc_node *);
 static	int	pre_bd(struct mdoc *, struct mdoc_node *);
 static	int	pre_bl(struct mdoc *, struct mdoc_node *);
+static	int	pre_it(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
@@ -46,11 +47,13 @@ static	int	elemchild_warn_eq0(struct mdoc *);
 static	int	bodychild_warn_ge1(struct mdoc *);
 static	int	post_sh(struct mdoc *);
 static	int	post_bl(struct mdoc *);
+static	int	post_it(struct mdoc *);
 
 static	v_pre	pres_prologue[] = { pre_prologue, NULL };
 static	v_pre	pres_d1[] = { pre_display, NULL };
 static	v_pre	pres_bd[] = { pre_display, pre_bd, NULL };
 static	v_pre	pres_bl[] = { pre_bl, NULL };
+static	v_pre	pres_it[] = { pre_it, NULL };
 static	v_post	posts_bd[] = { headchild_err_eq0, 
 			bodychild_warn_ge1, NULL };
 
@@ -58,6 +61,7 @@ static	v_post	posts_sh[] = { headchild_err_ge1,
 			bodychild_warn_ge1, post_sh, NULL };
 static	v_post	posts_bl[] = { headchild_err_eq0, 
 			bodychild_warn_ge1, post_bl, NULL };
+static	v_post	posts_it[] = { post_it, NULL };
 static	v_post	posts_ss[] = { headchild_err_ge1, NULL };
 static	v_post	posts_pp[] = { elemchild_warn_eq0, NULL };
 static	v_post	posts_dd[] = { elemchild_err_ge1, NULL };
@@ -78,7 +82,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ed */
 	{ pres_bl, posts_bl }, /* Bl */ /* FIXME: preceding Pp. */
 	{ NULL, NULL }, /* El */
-	{ NULL, NULL }, /* It */
+	{ pres_it, posts_it }, /* It */
 	{ NULL, NULL }, /* Ad */ 
 	{ NULL, NULL }, /* An */
 	{ NULL, NULL }, /* Ar */
@@ -244,7 +248,7 @@ pre_display(struct mdoc *mdoc, struct mdoc_node *node)
 
 	for (n = mdoc->last; n; n = n->parent) 
 		if (MDOC_BLOCK == n->type)
-			if (MDOC_Bd == n->data.block.tok)
+			if (MDOC_Bd == n->tok)
 				break;
 	if (NULL == n)
 		return(1);
@@ -261,7 +265,7 @@ pre_bl(struct mdoc *mdoc, struct mdoc_node *node)
 
 	if (MDOC_BLOCK != node->type)
 		return(1);
-	assert(MDOC_Bl == node->data.block.tok);
+	assert(MDOC_Bl == node->tok);
 
 	argv = NULL;
 	argc = node->data.block.argc; 
@@ -316,7 +320,7 @@ pre_bd(struct mdoc *mdoc, struct mdoc_node *node)
 
 	if (MDOC_BLOCK != node->type)
 		return(1);
-	assert(MDOC_Bd == node->data.block.tok);
+	assert(MDOC_Bd == node->tok);
 
 	argv = NULL;
 	argc = node->data.block.argc;
@@ -351,6 +355,23 @@ pre_bd(struct mdoc *mdoc, struct mdoc_node *node)
 
 
 static int
+pre_it(struct mdoc *mdoc, struct mdoc_node *node)
+{
+
+	if (MDOC_BLOCK != mdoc->last->type)
+		return(1);
+	assert(MDOC_It == mdoc->last->tok);
+
+	if (MDOC_BODY != mdoc->last->parent->type) 
+		return(mdoc_verr(mdoc, node, ERR_SYNTAX_PARENTBAD));
+	if (MDOC_Bl != mdoc->last->parent->tok)
+		return(mdoc_verr(mdoc, node, ERR_SYNTAX_PARENTBAD));
+
+	return(1);
+}
+
+
+static int
 pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
@@ -360,7 +381,7 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 
 	/* Check for ordering. */
 
-	switch (node->data.elem.tok) {
+	switch (node->tok) {
 	case (MDOC_Os):
 		if (mdoc->meta.title[0] && mdoc->meta.date)
 			break;
@@ -380,7 +401,7 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 
 	/* Check for repetition. */
 
-	switch (node->data.elem.tok) {
+	switch (node->tok) {
 	case (MDOC_Os):
 		if (0 == mdoc->meta.os[0])
 			return(1);
@@ -402,6 +423,108 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 }
 
 
+/* Warn if `Bl' type-specific syntax isn't reflected in items. */
+static int
+post_it(struct mdoc *mdoc)
+{
+	int		  type, sv;
+#define	TYPE_NONE	 (0)
+#define	TYPE_BODY	 (1)
+#define	TYPE_HEAD	 (2)
+	size_t		  i, argc;
+	struct mdoc_node *n;
+
+	if (MDOC_BLOCK != mdoc->last->type)
+		return(1);
+
+	assert(MDOC_It == mdoc->last->tok);
+
+	n = mdoc->last->parent;
+	assert(n);
+	assert(MDOC_Bl == n->tok);
+
+	n = n->parent;
+	assert(MDOC_BLOCK == n->type);
+	assert(MDOC_Bl == n->tok);
+
+	argc = n->data.block.argc;
+	type = TYPE_NONE;
+
+	for (i = 0; TYPE_NONE == type && i < argc; i++)
+		switch (n->data.block.argv[(int)i].arg) {
+		case (MDOC_Tag):
+			/* FALLTHROUGH */
+		case (MDOC_Diag):
+			/* FALLTHROUGH */
+		case (MDOC_Hang):
+			/* FALLTHROUGH */
+		case (MDOC_Ohang):
+			/* FALLTHROUGH */
+		case (MDOC_Inset):
+			type = TYPE_HEAD;
+			sv = n->data.block.argv[(int)i].arg;
+			break;
+		case (MDOC_Bullet):
+			/* FALLTHROUGH */
+		case (MDOC_Dash):
+			/* FALLTHROUGH */
+		case (MDOC_Enum):
+			/* FALLTHROUGH */
+		case (MDOC_Hyphen):
+			/* FALLTHROUGH */
+		case (MDOC_Item):
+			/* FALLTHROUGH */
+		case (MDOC_Column):
+			type = TYPE_BODY;
+			sv = n->data.block.argv[(int)i].arg;
+			break;
+		default:
+			break;
+		}
+
+	assert(TYPE_NONE != type);
+
+	if (TYPE_HEAD == type) {
+		if (NULL == (n = mdoc->last->data.block.head)) {
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX_EMPTYHEAD))
+				return(0);
+		} else if (NULL == n->child)
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX_EMPTYHEAD))
+				return(0);
+
+		if (NULL == (n = mdoc->last->data.block.body)) {
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX_EMPTYBODY))
+				return(0);
+		} else if (NULL == n->child)
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX_EMPTYBODY))
+				return(0);
+
+		return(1);
+	}
+
+	if (NULL == (n = mdoc->last->data.block.head)) {
+		if ( ! mdoc_warn(mdoc, WARN_SYNTAX_EMPTYHEAD))
+			return(0);
+	} else if (NULL == n->child)
+		if ( ! mdoc_warn(mdoc, WARN_SYNTAX_EMPTYHEAD))
+			return(0);
+
+	if ((n = mdoc->last->data.block.body) && n->child)
+		if ( ! mdoc_warn(mdoc, WARN_SYNTAX_NOBODY))
+			return(0);
+
+	/* TODO: make sure columns are aligned. */
+	assert(MDOC_Column != sv);
+
+	return(1);
+
+#undef	TYPE_NONE
+#undef	TYPE_BODY
+#undef	TYPE_HEAD
+}
+
+
+/* Make sure that only `It' macros are our body-children. */
 static int
 post_bl(struct mdoc *mdoc)
 {
@@ -409,11 +532,11 @@ post_bl(struct mdoc *mdoc)
 
 	if (MDOC_BODY != mdoc->last->type)
 		return(1);
-	assert(MDOC_Bl == mdoc->last->data.body.tok);
+	assert(MDOC_Bl == mdoc->last->tok);
 
 	for (n = mdoc->last->child; n; n = n->next) {
 		if (MDOC_BLOCK == n->type) 
-			if (MDOC_It == n->data.block.tok)
+			if (MDOC_It == n->tok)
 				continue;
 		break;
 	}
@@ -423,10 +546,7 @@ post_bl(struct mdoc *mdoc)
 }
 
 
-/*
- * Warn if sections (those that are with a known title, such as NAME,
- * DESCRIPTION, and so forth) are out of the conventional order.
- */
+/* Warn if conventional sections are out of order. */
 static int
 post_sh(struct mdoc *mdoc)
 {
@@ -438,7 +558,7 @@ post_sh(struct mdoc *mdoc)
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
 	
-	assert(MDOC_Sh == mdoc->last->data.head.tok);
+	assert(MDOC_Sh == mdoc->last->tok);
 
 	n = mdoc->last->child;
 	assert(n);
@@ -466,28 +586,16 @@ int
 mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *node)
 {
 	v_pre		*p;
-	int		 t;
 
-	switch (node->type) {
-	case (MDOC_BODY):
-		t = node->data.body.tok;
-		break;
-	case (MDOC_ELEM):
-		t = node->data.elem.tok;
-		break;
-	case (MDOC_BLOCK):
-		t = node->data.block.tok;
-		break;
-	case (MDOC_HEAD):
-		t = node->data.head.tok;
-		break;
-	default:
-		return(1);
-	}
+	/* TODO: character-escape checks. */
 
-	if (NULL == mdoc_valids[t].pre)
+	if (MDOC_TEXT == node->type)
 		return(1);
-	for (p = mdoc_valids[t].pre; *p; p++)
+	assert(MDOC_ROOT != node->type);
+
+	if (NULL == mdoc_valids[node->tok].pre)
+		return(1);
+	for (p = mdoc_valids[node->tok].pre; *p; p++)
 		if ( ! (*p)(mdoc, node)) 
 			return(0);
 	return(1);
@@ -498,28 +606,15 @@ int
 mdoc_valid_post(struct mdoc *mdoc)
 {
 	v_post		*p;
-	int		 t;
 
-	switch (mdoc->last->type) {
-	case (MDOC_BODY):
-		t = mdoc->last->data.body.tok;
-		break;
-	case (MDOC_ELEM):
-		t = mdoc->last->data.elem.tok;
-		break;
-	case (MDOC_BLOCK):
-		t = mdoc->last->data.block.tok;
-		break;
-	case (MDOC_HEAD):
-		t = mdoc->last->data.head.tok;
-		break;
-	default:
+	if (MDOC_TEXT == mdoc->last->type)
 		return(1);
-	}
+	if (MDOC_ROOT == mdoc->last->type)
+		return(1);
 
-	if (NULL == mdoc_valids[t].post)
+	if (NULL == mdoc_valids[mdoc->last->tok].post)
 		return(1);
-	for (p = mdoc_valids[t].post; *p; p++)
+	for (p = mdoc_valids[mdoc->last->tok].post; *p; p++)
 		if ( ! (*p)(mdoc)) 
 			return(0);
 

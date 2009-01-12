@@ -93,7 +93,7 @@ rewind_elem(struct mdoc *mdoc, int tok)
 	if (MDOC_ELEM != n->type)
 		n = n->parent;
 	assert(MDOC_ELEM == n->type);
-	assert(tok == n->data.elem.tok);
+	assert(tok == n->tok);
 
 	return(rewind_last(mdoc, n));
 }
@@ -111,7 +111,7 @@ rewind_body(struct mdoc *mdoc, int tok)
 	for (n = mdoc->last; n; n = n->parent) {
 		if (MDOC_BODY != n->type) 
 			continue;
-		if (tok == (t = n->data.head.tok))
+		if (tok == (t = n->tok))
 			break;
 		if ( ! (MDOC_EXPLICIT & mdoc_macros[t].flags))
 			continue;
@@ -135,7 +135,7 @@ rewind_head(struct mdoc *mdoc, int tok)
 	for (n = mdoc->last; n; n = n->parent) {
 		if (MDOC_HEAD != n->type) 
 			continue;
-		if (tok == (t = n->data.head.tok))
+		if (tok == (t = n->tok))
 			break;
 		if ( ! (MDOC_EXPLICIT & mdoc_macros[t].flags))
 			continue;
@@ -159,7 +159,7 @@ rewind_expblock(struct mdoc *mdoc, int tok)
 	for ( ; n; n = n->parent) {
 		if (MDOC_BLOCK != n->type)
 			continue;
-		if (tok == (t = n->data.block.tok))
+		if (tok == (t = n->tok))
 			break;
 		if (MDOC_NESTED & mdoc_macros[t].flags)
 			continue;
@@ -183,7 +183,7 @@ rewind_impblock(struct mdoc *mdoc, int tok)
 	for ( ; n; n = n->parent) {
 		if (MDOC_BLOCK != n->type) 
 			continue;
-		if (tok == (t = n->data.block.tok))
+		if (tok == (t = n->tok))
 			break;
 		if ( ! (MDOC_EXPLICIT & mdoc_macros[t].flags))
 			continue;

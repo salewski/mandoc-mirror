@@ -399,33 +399,34 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	assert(mdoc->first);
 	assert(MDOC_ROOT != p->type);
 
+	if (MDOC_TEXT == mdoc->last->type)
+		on = "<text>";
+	else if (MDOC_ROOT == mdoc->last->type)
+		on = "<root>";
+	else
+		on = mdoc_macronames[mdoc->last->tok];
+
+	/* FIXME: put this into util.c. */
 	switch (mdoc->last->type) {
 	case (MDOC_TEXT):
-		on = "<text>";
 		ot = "text";
 		break;
 	case (MDOC_BODY):
-		on = mdoc_macronames[mdoc->last->data.body.tok];
 		ot = "body";
 		break;
 	case (MDOC_ELEM):
-		on = mdoc_macronames[mdoc->last->data.elem.tok];
 		ot = "elem";
 		break;
 	case (MDOC_HEAD):
-		on = mdoc_macronames[mdoc->last->data.head.tok];
 		ot = "head";
 		break;
 	case (MDOC_TAIL):
-		on = mdoc_macronames[mdoc->last->data.tail.tok];
 		ot = "tail";
 		break;
 	case (MDOC_BLOCK):
-		on = mdoc_macronames[mdoc->last->data.block.tok];
 		ot = "block";
 		break;
 	case (MDOC_ROOT):
-		on = "root";
 		ot = "root";
 		break;
 	default:
@@ -454,6 +455,24 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 		return(0);
 	if ( ! mdoc_action_pre(mdoc, p))
 		return(0);
+
+	switch (p->type) {
+	case (MDOC_HEAD):
+		assert(MDOC_BLOCK == p->parent->type);
+		p->parent->data.block.head = p;
+		break;
+	case (MDOC_TAIL):
+		assert(MDOC_BLOCK == p->parent->type);
+		p->parent->data.block.tail = p;
+		break;
+	case (MDOC_BODY):
+		assert(MDOC_BLOCK == p->parent->type);
+		p->parent->data.block.body = p;
+		break;
+	default:
+		break;
+	}
+
 	mdoc->last = p;
 	mdoc_msg(mdoc, "parse: %s of %s `%s'", act, ot, on);
 	return(1);
@@ -473,7 +492,7 @@ mdoc_tail_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 	p->line = line;
 	p->pos = pos;
 	p->type = MDOC_TAIL;
-	p->data.tail.tok = tok;
+	p->tok = tok;
 
 	return(mdoc_node_append(mdoc, p));
 }
@@ -492,7 +511,7 @@ mdoc_head_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 	p->line = line;
 	p->pos = pos;
 	p->type = MDOC_HEAD;
-	p->data.head.tok = tok;
+	p->tok = tok;
 
 	return(mdoc_node_append(mdoc, p));
 }
@@ -511,7 +530,7 @@ mdoc_body_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 	p->line = line;
 	p->pos = pos;
 	p->type = MDOC_BODY;
-	p->data.body.tok = tok;
+	p->tok = tok;
 
 	return(mdoc_node_append(mdoc, p));
 }
@@ -541,7 +560,7 @@ mdoc_block_alloc(struct mdoc *mdoc, int line, int pos,
 	p->pos = pos;
 	p->line = line;
 	p->type = MDOC_BLOCK;
-	p->data.block.tok = tok;
+	p->tok = tok;
 	p->data.block.argc = argsz;
 	p->data.block.argv = argdup(argsz, args);
 
@@ -560,7 +579,7 @@ mdoc_elem_alloc(struct mdoc *mdoc, int line, int pos,
 	p->line = line;
 	p->pos = pos;
 	p->type = MDOC_ELEM;
-	p->data.elem.tok = tok;
+	p->tok = tok;
 	p->data.elem.argc = argsz;
 	p->data.elem.argv = argdup(argsz, args);
 

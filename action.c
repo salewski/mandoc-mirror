@@ -159,7 +159,7 @@ post_sh(struct mdoc *mdoc)
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
 	
-	assert(MDOC_Sh == mdoc->last->data.head.tok);
+	assert(MDOC_Sh == mdoc->last->tok);
 
 	n = mdoc->last->child;
 	assert(n);
@@ -189,7 +189,7 @@ post_dt(struct mdoc *mdoc)
 	struct mdoc_node *n;
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	assert(MDOC_Dt == mdoc->last->data.elem.tok);
+	assert(MDOC_Dt == mdoc->last->tok);
 	assert(0 == mdoc->meta.title[0]);
 
 	sz = META_TITLE_SZ;
@@ -236,7 +236,7 @@ post_os(struct mdoc *mdoc)
 	struct mdoc_node *n;
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	assert(MDOC_Os == mdoc->last->data.elem.tok);
+	assert(MDOC_Os == mdoc->last->tok);
 	assert(0 == mdoc->meta.os[0]);
 
 	sz = META_OS_SZ;
@@ -269,7 +269,7 @@ post_dd(struct mdoc *mdoc)
 	struct mdoc_node *n;
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	assert(MDOC_Dd == mdoc->last->data.elem.tok);
+	assert(MDOC_Dd == mdoc->last->tok);
 
 	n = mdoc->last->child; 
 	assert(0 == mdoc->meta.date);
@@ -317,27 +317,14 @@ mdoc_action_pre(struct mdoc *mdoc, struct mdoc_node *node)
 int
 mdoc_action_post(struct mdoc *mdoc)
 {
-	int		 t;
 
-	switch (mdoc->last->type) {
-	case (MDOC_BODY):
-		t = mdoc->last->data.body.tok;
-		break;
-	case (MDOC_ELEM):
-		t = mdoc->last->data.elem.tok;
-		break;
-	case (MDOC_BLOCK):
-		t = mdoc->last->data.block.tok;
-		break;
-	case (MDOC_HEAD):
-		t = mdoc->last->data.head.tok;
-		break;
-	default:
+	if (MDOC_TEXT == mdoc->last->type)
 		return(1);
-	}
+	if (MDOC_ROOT == mdoc->last->type)
+		return(1);
 
-	if (NULL == mdoc_actions[t].post)
+	if (NULL == mdoc_actions[mdoc->last->tok].post)
 		return(1);
 	/* TODO: MDOC_Nm... ? */
-	return((*mdoc_actions[t].post)(mdoc));
+	return((*mdoc_actions[mdoc->last->tok].post)(mdoc));
 }
