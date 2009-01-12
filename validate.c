@@ -41,11 +41,13 @@ static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 
 static	int	headchild_err_ge1(struct mdoc *);
+static	int	headchild_warn_ge1(struct mdoc *);
 static	int	headchild_err_eq0(struct mdoc *);
 static	int	elemchild_err_eq0(struct mdoc *);
 static	int	elemchild_err_ge1(struct mdoc *);
 static	int	elemchild_warn_eq0(struct mdoc *);
 static	int	bodychild_warn_ge1(struct mdoc *);
+static	int	bodychild_err_eq0(struct mdoc *);
 static	int	elemchild_warn_ge1(struct mdoc *);
 static	int	post_sh(struct mdoc *);
 static	int	post_bl(struct mdoc *);
@@ -56,16 +58,14 @@ static	v_pre	pres_d1[] = { pre_display, NULL };
 static	v_pre	pres_bd[] = { pre_display, pre_bd, NULL };
 static	v_pre	pres_bl[] = { pre_bl, NULL };
 static	v_pre	pres_it[] = { pre_it, NULL };
-static	v_post	posts_bd[] = { headchild_err_eq0, 
-			bodychild_warn_ge1, NULL };
 
+static	v_post	posts_bd[] = { headchild_err_eq0, bodychild_warn_ge1, NULL };
 static	v_post	posts_text[] = { elemchild_err_ge1, NULL };
 static	v_post	posts_wtext[] = { elemchild_warn_ge1, NULL };
 static	v_post	posts_notext[] = { elemchild_err_eq0, NULL };
-static	v_post	posts_sh[] = { headchild_err_ge1, 
-			bodychild_warn_ge1, post_sh, NULL };
-static	v_post	posts_bl[] = { headchild_err_eq0, 
-			bodychild_warn_ge1, post_bl, NULL };
+static	v_post	posts_wline[] = { headchild_warn_ge1, bodychild_err_eq0, NULL };
+static	v_post	posts_sh[] = { headchild_err_ge1, bodychild_warn_ge1, post_sh, NULL };
+static	v_post	posts_bl[] = { headchild_err_eq0, bodychild_warn_ge1, post_bl, NULL };
 static	v_post	posts_it[] = { post_it, NULL };
 static	v_post	posts_ss[] = { headchild_err_ge1, NULL };
 static	v_post	posts_pp[] = { elemchild_warn_eq0, NULL };
@@ -114,7 +114,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_text }, /* Li */
 	{ NULL, posts_wtext }, /* Nd */
 	{ NULL, NULL }, /* Nm */  /* FIXME: If name not set? */
-	{ NULL, posts_wtext }, /* Op */
+	{ NULL, posts_wline }, /* Op */
 	{ NULL, NULL }, /* Ot */
 	{ NULL, NULL }, /* Pa */
 	{ NULL, posts_notext }, /* Rv */ /* -std required */
@@ -135,18 +135,18 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_text }, /* %V */
 	{ NULL, NULL }, /* Ac */
 	{ NULL, NULL }, /* Ao */
-	{ NULL, posts_wtext }, /* Aq */
+	{ NULL, posts_wline }, /* Aq */
 	{ NULL, NULL }, /* At */ /* FIXME */
 	{ NULL, NULL }, /* Bc */
 	{ NULL, NULL }, /* Bf */ 
 	{ NULL, NULL }, /* Bo */
-	{ NULL, posts_wtext }, /* Bq */
+	{ NULL, posts_wline }, /* Bq */
 	{ NULL, NULL }, /* Bsx */
 	{ NULL, NULL }, /* Bx */
 	{ NULL, NULL }, /* Db */ /* FIXME: boolean */
 	{ NULL, NULL }, /* Dc */
 	{ NULL, NULL }, /* Do */
-	{ NULL, posts_wtext }, /* Dq */
+	{ NULL, posts_wline }, /* Dq */
 	{ NULL, NULL }, /* Ec */
 	{ NULL, NULL }, /* Ef */ /* -symbolic, etc. */
 	{ NULL, posts_text }, /* Em */ 
@@ -160,16 +160,16 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* Pc */
 	{ NULL, NULL }, /* Pf */ /* FIXME: 2 or more arguments */
 	{ NULL, NULL }, /* Po */
-	{ NULL, posts_wtext }, /* Pq */ /* FIXME: ignore following Sh/Ss */
+	{ NULL, posts_wline }, /* Pq */ /* FIXME: ignore following Sh/Ss */
 	{ NULL, NULL }, /* Qc */
-	{ NULL, posts_wtext }, /* Ql */
+	{ NULL, posts_wline }, /* Ql */
 	{ NULL, NULL }, /* Qo */
-	{ NULL, posts_wtext }, /* Qq */
+	{ NULL, posts_wline }, /* Qq */
 	{ NULL, NULL }, /* Re */
 	{ NULL, NULL }, /* Rs */
 	{ NULL, NULL }, /* Sc */
 	{ NULL, NULL }, /* So */
-	{ NULL, posts_wtext }, /* Sq */
+	{ NULL, posts_wline }, /* Sq */
 	{ NULL, NULL }, /* Sm */ /* FIXME: boolean */
 	{ NULL, posts_text }, /* Sx */
 	{ NULL, posts_text }, /* Sy */
@@ -188,6 +188,18 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* Fr */
 	{ NULL, posts_notext }, /* Ud */
 };
+
+
+static int
+bodychild_err_eq0(struct mdoc *mdoc)
+{
+
+	if (MDOC_BODY != mdoc->last->type)
+		return(1);
+	if (NULL == mdoc->last->child)
+		return(1);
+	return(mdoc_warn(mdoc, WARN_ARGS_EQ0));
+}
 
 
 static int
@@ -257,6 +269,18 @@ headchild_err_eq0(struct mdoc *mdoc)
 		return(1);
 	return(mdoc_perr(mdoc, mdoc->last->child->line,
 			mdoc->last->child->pos, ERR_ARGS_EQ0));
+}
+
+
+static int
+headchild_warn_ge1(struct mdoc *mdoc)
+{
+
+	if (MDOC_HEAD != mdoc->last->type)
+		return(1);
+	if (mdoc->last->child)
+		return(1);
+	return(mdoc_warn(mdoc, WARN_ARGS_GE1));
 }
 
 
