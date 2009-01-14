@@ -192,40 +192,34 @@ print_node(const struct mdoc_node *n, int indent)
 	params = NULL;
 	sz = 0;
 
-	/* FIXME: put parts of this in util.c. */
+	t = mdoc_type2a(n->type);
+
 	switch (n->type) {
 	case (MDOC_TEXT):
 		assert(NULL == n->child);
 		p = n->data.text.string;
-		t = "text";
 		break;
 	case (MDOC_BODY):
 		p = mdoc_macronames[n->tok];
-		t = "block-body";
 		break;
 	case (MDOC_HEAD):
 		p = mdoc_macronames[n->tok];
-		t = "block-head";
 		break;
 	case (MDOC_TAIL):
 		p = mdoc_macronames[n->tok];
-		t = "block-tail";
 		break;
 	case (MDOC_ELEM):
 		p = mdoc_macronames[n->tok];
-		t = "element";
 		argv = n->data.elem.argv;
 		argc = n->data.elem.argc;
 		break;
 	case (MDOC_BLOCK):
 		p = mdoc_macronames[n->tok];
-		t = "block";
 		argv = n->data.block.argv;
 		argc = n->data.block.argc;
 		break;
 	case (MDOC_ROOT):
 		p = "root";
-		t = "root";
 		break;
 	default:
 		abort();
@@ -238,11 +232,11 @@ print_node(const struct mdoc_node *n, int indent)
 
 	for (i = 0; i < (int)argc; i++) {
 		(void)printf(" -%s", mdoc_argnames[argv[i].arg]);
-		if (j > 0)
+		if (argv[i].sz > 0)
 			(void)printf(" [");
 		for (j = 0; j < (int)argv[i].sz; j++)
 			(void)printf(" [%s]", argv[i].value[j]);
-		if (j > 0)
+		if (argv[i].sz > 0)
 			(void)printf(" ]");
 	}
 
@@ -361,8 +355,7 @@ msg_err(void *arg, int line, int col, enum mdoc_err type)
 		lit = "syntax: unknown argument for macro";
 		break;
 	case (ERR_SCOPE_BREAK):
-		/* Which scope is broken? */
-		lit = "scope: macro breaks prior explicit scope";
+		lit = "scope: macro breaks prior scope";
 		break;
 	case (ERR_SCOPE_NOCTX):
 		lit = "scope: closure macro has no context";

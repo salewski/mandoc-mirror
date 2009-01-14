@@ -307,3 +307,30 @@ mdoc_atoatt(const char *p)
 	
 	return(ATT_DEFAULT);
 }
+
+
+char *
+mdoc_type2a(enum mdoc_type type)
+{
+	switch (type) {
+	case (MDOC_ROOT):
+		return("root");
+	case (MDOC_BLOCK):
+		return("block");
+	case (MDOC_HEAD):
+		return("block-head");
+	case (MDOC_BODY):
+		return("block-body");
+	case (MDOC_TAIL):
+		return("block-tail");
+	case (MDOC_ELEM):
+		return("elem");
+	case (MDOC_TEXT):
+		return("text");
+	default:
+		break;
+	}
+
+	abort();
+	/* NOTREACHED */
+}

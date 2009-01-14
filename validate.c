@@ -79,8 +79,10 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pres_prologue, NULL }, /* Os */
 	/* FIXME: preceding Pp. */ 
 	/* FIXME: NAME section internal ordering. */
+	/* FIXME: can only be a child of root. */
 	{ NULL, posts_sh }, /* Sh */ 
 	/* FIXME: preceding Pp. */
+	/* FIXME: can only be a child of Sh. */
 	{ NULL, posts_ss }, /* Ss */ 
 	/* FIXME: proceeding... */
 	{ NULL, posts_pp }, /* Pp */ 

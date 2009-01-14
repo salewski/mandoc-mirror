@@ -193,6 +193,8 @@
 #define	MDOC_Symbolic	 61
 #define	MDOC_ARG_MAX	 62
 
+/* FIXME: have these be generic groups. */
+
 enum 	mdoc_err {
 	ERR_SYNTAX_QUOTE, /* NOTUSED */
 	ERR_SYNTAX_UNQUOTE,
@@ -433,6 +435,8 @@ int	 	  mdoc_parseln(struct mdoc *, int, char *buf);
 const struct mdoc_node
 		 *mdoc_result(struct mdoc *);
 int		  mdoc_endparse(struct mdoc *);
+
+char		 *mdoc_type2a(enum mdoc_type);
 
 __END_DECLS
 
