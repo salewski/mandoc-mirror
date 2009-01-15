@@ -42,8 +42,6 @@ struct	md_parse {
 	u_long		 bufsz;
 	char		*name;
 	int		 fd;
-	int		 lnn;
-	char		*line;
 };
 
 static	void		 usage(void);
@@ -278,6 +276,7 @@ parse_begin(struct md_parse *p)
 	size_t		 pos;
 	char		 line[256], sv[256];
 	struct mdoc_cb	 cb;
+	int		 lnn;
 
 	cb.mdoc_err = msg_err;
 	cb.mdoc_warn = msg_warn;
@@ -286,10 +285,7 @@ parse_begin(struct md_parse *p)
 	if (NULL == (p->mdoc = mdoc_alloc(p, &cb)))
 		return(parse_leave(p, 0));
 
-	p->lnn = 1;
-	p->line = sv;
-
-	for (pos = 0; ; ) {
+	for (lnn = 1, pos = 0; ; ) {
 		if (-1 == (sz = read(p->fd, p->buf, p->bufsz))) {
 			warn("%s", p->name);
 			return(parse_leave(p, 0));
@@ -305,15 +301,15 @@ parse_begin(struct md_parse *p)
 					continue;
 				}
 				warnx("%s: line %d too long", 
-						p->name, p->lnn);
+						p->name, lnn);
 				return(parse_leave(p, 0));
 			}
 	
 			line[(int)pos] = sv[(int)pos] = 0;
-			if ( ! mdoc_parseln(p->mdoc, p->lnn, line))
+			if ( ! mdoc_parseln(p->mdoc, lnn, line))
 				return(parse_leave(p, 0));
 
-			p->lnn++;
+			lnn++;
 			pos = 0;
 		}
 	}
