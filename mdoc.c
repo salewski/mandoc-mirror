@@ -288,7 +288,7 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 			mdoc->next = MDOC_NEXT_SIBLING;
 			return(1);
 		}
-		return(mdoc_perr(mdoc, line, 0, ERR_SYNTAX_NOTEXT));
+		return(mdoc_perr(mdoc, line, 0, "text disallowed"));
 	}
 
 	if (buf[1] && '\\' == buf[1])
@@ -301,10 +301,10 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 
 	if (i == (int)sizeof(tmp)) {
 		mdoc->flags |= MDOC_HALT;
-		return(mdoc_perr(mdoc, line, 1, ERR_MACRO_NOTSUP));
+		return(mdoc_perr(mdoc, line, 1, "unknown macro"));
 	} else if (i <= 2) {
 		mdoc->flags |= MDOC_HALT;
-		return(mdoc_perr(mdoc, line, 1, ERR_MACRO_NOTSUP));
+		return(mdoc_perr(mdoc, line, 1, "unknown macro"));
 	}
 
 	i--;
@@ -314,7 +314,7 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 
 	if (MDOC_MAX == (c = mdoc_find(mdoc, tmp))) {
 		mdoc->flags |= MDOC_HALT;
-		return(mdoc_perr(mdoc, line, 1, ERR_MACRO_NOTSUP));
+		return(mdoc_perr(mdoc, line, 1, "unknown macro"));
 	}
 
 	while (buf[i] && isspace(buf[i]))
@@ -329,45 +329,52 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 
 
 void
-mdoc_msg(struct mdoc *mdoc, const char *fmt, ...)
+mdoc_vmsg(struct mdoc *mdoc, int ln, int pos, const char *fmt, ...)
 {
-	struct mdoc_node *n;
-	va_list		  ap;
 	char		  buf[256];
+	va_list		  ap;
 
 	if (NULL == mdoc->cb.mdoc_msg)
 		return;
 
-	n = mdoc->last;
-	assert(n);
-
 	va_start(ap, fmt);
-	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
+	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
 	va_end(ap);
-
-	(*mdoc->cb.mdoc_msg)(mdoc->data, n->line, n->pos, buf);
+	(*mdoc->cb.mdoc_msg)(mdoc->data, ln, pos, buf);
 }
 
 
 int
-mdoc_perr(struct mdoc *mdoc, 
-		int line, int pos, enum mdoc_err type)
+mdoc_verr(struct mdoc *mdoc, int ln, int pos, 
+		const char *fmt, ...)
 {
+	char		 buf[256];
+	va_list		 ap;
 
 	if (NULL == mdoc->cb.mdoc_err)
 		return(0);
-	return((*mdoc->cb.mdoc_err)(mdoc->data, line, pos, type));
+
+	va_start(ap, fmt);
+	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
+	va_end(ap);
+	return((*mdoc->cb.mdoc_err)(mdoc->data, ln, pos, buf));
 }
 
 
 int
-mdoc_pwarn(struct mdoc *mdoc, 
-		int line, int pos, enum mdoc_warn type)
+mdoc_vwarn(struct mdoc *mdoc, int ln, int pos, 
+		enum mdoc_warn type, const char *fmt, ...)
 {
+	char		 buf[256];
+	va_list		 ap;
 
 	if (NULL == mdoc->cb.mdoc_warn)
 		return(0);
-	return((*mdoc->cb.mdoc_warn)(mdoc->data, line, pos, type));
+
+	va_start(ap, fmt);
+	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
+	va_end(ap);
+	return((*mdoc->cb.mdoc_warn)(mdoc->data, ln, pos, type, buf));
 }
 
 
@@ -376,16 +383,13 @@ mdoc_macro(struct mdoc *mdoc, int tok,
 		int ln, int ppos, int *pos, char *buf)
 {
 
+	assert(mdoc_macros[tok].fp);
+
 	if ( ! (MDOC_PROLOGUE & mdoc_macros[tok].flags) &&
 			SEC_PROLOGUE == mdoc->sec_lastn)
-		return(mdoc_perr(mdoc, ln, ppos, ERR_SEC_PROLOGUE));
-
-	if (NULL == (mdoc_macros[tok].fp))
-		return(mdoc_perr(mdoc, ln, ppos, ERR_MACRO_NOTSUP));
-
+		return(mdoc_perr(mdoc, ln, ppos, "macro disallowed in document prologue"));
 	if (1 != ppos && ! (MDOC_CALLABLE & mdoc_macros[tok].flags))
-		return(mdoc_perr(mdoc, ln, ppos, ERR_MACRO_NOTCALL));
-
+		return(mdoc_perr(mdoc, ln, ppos, "macro not callable"));
 	return((*mdoc_macros[tok].fp)(mdoc, tok, ln, ppos, pos, buf));
 }
 

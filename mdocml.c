@@ -30,19 +30,27 @@
 
 #include "mdoc.h"
 
-#define	MD_LINE_SZ	(256)
+#define	xfprintf	(void)fprintf
+#define	xprintf		(void)printf
+#define	xvfprintf	(void)fvprintf
+
+#define	MD_LINE_SZ	(256)		/* Max input line size. */
 
 struct	md_parse {
-	int		 warn;
-#define	MD_WARN_ALL	(1 << 0)
-#define	MD_WARN_ERR	(1 << 1)
-	int		 dbg;
-	struct mdoc	*mdoc;
-	char		*buf;
-	u_long		 bufsz;
-	char		*name;
-	int		 fd;
+	int		 warn;		/* Warning flags. */
+#define	MD_WARN_SYNTAX	(1 << 0)	/* Show syntax warnings. */
+#define	MD_WARN_COMPAT	(1 << 1)	/* Show compat warnings. */
+#define	MD_WARN_ALL	(0x03)		/* Show all warnings. */
+#define	MD_WARN_ERR	(1 << 2)	/* Make warnings->errors. */
+	int		 dbg;		/* Debug level. */
+	struct mdoc	*mdoc;		/* Active parser. */
+	char		*buf;		/* Input buffer. */
+	u_long		 bufsz;		/* Input buffer size. */
+	char		*name;		/* Input file name. */
+	int		 fd;		/* Input file desc. */
 };
+
+extern	char	 	*__progname;
 
 static	void		 usage(void);
 
@@ -53,9 +61,10 @@ static	int		 io_leave(struct md_parse *, int);
 static	int		 buf_begin(struct md_parse *);
 static	int		 buf_leave(struct md_parse *, int);
 
-static	int		 msg_err(void *, int, int, enum mdoc_err);
-static	int		 msg_warn(void *, int, int, enum mdoc_warn);
 static	void		 msg_msg(void *, int, int, const char *);
+static	int		 msg_err(void *, int, int, const char *);
+static	int		 msg_warn(void *, int, int, 
+				enum mdoc_warn, const char *);
 
 #ifdef __linux__
 extern	int		 getsubopt(char **, char *const *, char **);
@@ -68,8 +77,11 @@ main(int argc, char *argv[])
 	struct md_parse	 parser;
 	char		*opts, *v;
 #define ALL     	 0
-#define ERROR     	 1
-	char		*toks[] = { "all", "error", NULL };
+#define COMPAT     	 1
+#define SYNTAX     	 2
+#define ERROR     	 3
+	char		*toks[] = { "all", "compat", "syntax", 
+				    "error", NULL };
 
 	extern char	*optarg;
 	extern int	 optind;
@@ -87,6 +99,12 @@ main(int argc, char *argv[])
 				switch (getsubopt(&opts, toks, &v)) {
 				case (ALL):
 					parser.warn |= MD_WARN_ALL;
+					break;
+				case (COMPAT):
+					parser.warn |= MD_WARN_COMPAT;
+					break;
+				case (SYNTAX):
+					parser.warn |= MD_WARN_SYNTAX;
 					break;
 				case (ERROR):
 					parser.warn |= MD_WARN_ERR;
@@ -186,15 +204,13 @@ print_node(const struct mdoc_node *n, int indent)
 	struct mdoc_arg	 *argv;
 
 	argv = NULL;
-	argc = 0;
+	argc = sz = 0;
 	params = NULL;
-	sz = 0;
 
 	t = mdoc_type2a(n->type);
 
 	switch (n->type) {
 	case (MDOC_TEXT):
-		assert(NULL == n->child);
 		p = n->data.text.string;
 		break;
 	case (MDOC_BODY):
@@ -225,23 +241,23 @@ print_node(const struct mdoc_node *n, int indent)
 	}
 
 	for (i = 0; i < indent; i++)
-		(void)printf("    ");
-	(void)printf("%s (%s)", p, t);
+		xprintf("    ");
+	xprintf("%s (%s)", p, t);
 
 	for (i = 0; i < (int)argc; i++) {
-		(void)printf(" -%s", mdoc_argnames[argv[i].arg]);
+		xprintf(" -%s", mdoc_argnames[argv[i].arg]);
 		if (argv[i].sz > 0)
-			(void)printf(" [");
+			xprintf(" [");
 		for (j = 0; j < (int)argv[i].sz; j++)
-			(void)printf(" [%s]", argv[i].value[j]);
+			xprintf(" [%s]", argv[i].value[j]);
 		if (argv[i].sz > 0)
-			(void)printf(" ]");
+			xprintf(" ]");
 	}
 
 	for (i = 0; i < (int)sz; i++)
-		(void)printf(" [%s]", params[i]);
+		xprintf(" [%s]", params[i]);
 
-	(void)printf(" %d:%d\n", n->line, n->pos);
+	xprintf(" %d:%d\n", n->line, n->pos);
 
 	if (n->child)
 		print_node(n->child, indent + 1);
@@ -274,7 +290,7 @@ parse_begin(struct md_parse *p)
 {
 	ssize_t		 sz, i;
 	size_t		 pos;
-	char		 line[256], sv[256];
+	char		 line[MD_LINE_SZ];
 	struct mdoc_cb	 cb;
 	int		 lnn;
 
@@ -295,9 +311,7 @@ parse_begin(struct md_parse *p)
 		for (i = 0; i < sz; i++) {
 			if ('\n' != p->buf[i]) {
 				if (pos < sizeof(line)) {
-					sv[(int)pos] = p->buf[(int)i];
-					line[(int)pos++] = 
-						p->buf[(int)i];
+					line[(int)pos++] = p->buf[(int)i];
 					continue;
 				}
 				warnx("%s: line %d too long", 
@@ -305,7 +319,7 @@ parse_begin(struct md_parse *p)
 				return(parse_leave(p, 0));
 			}
 	
-			line[(int)pos] = sv[(int)pos] = 0;
+			line[(int)pos] = 0;
 			if ( ! mdoc_parseln(p->mdoc, lnn, line))
 				return(parse_leave(p, 0));
 
@@ -319,122 +333,14 @@ parse_begin(struct md_parse *p)
 
 
 static int
-msg_err(void *arg, int line, int col, enum mdoc_err type)
+msg_err(void *arg, int line, int col, const char *msg)
 {
-	char		 *lit;
 	struct md_parse	 *p;
 
 	p = (struct md_parse *)arg;
 
-	lit = NULL;
-
-	switch (type) {
-	case (ERR_SYNTAX_NOTEXT):
-		lit = "syntax: context-free text disallowed";
-		break;
-	case (ERR_SYNTAX_QUOTE):
-		lit = "syntax: disallowed argument quotation";
-		break;
-	case (ERR_SYNTAX_UNQUOTE):
-		lit = "syntax: unterminated quotation";
-		break;
-	case (ERR_SYNTAX_WS):
-		lit = "syntax: whitespace in argument";
-		break;
-	case (ERR_SYNTAX_ARGFORM):
-		lit = "syntax: macro arguments malformed";
-		break;
-	case (ERR_SYNTAX_NOPUNCT):
-		lit = "syntax: macro doesn't understand punctuation";
-		break;
-	case (ERR_SYNTAX_ARG):
-		lit = "syntax: unknown argument for macro";
-		break;
-	case (ERR_SCOPE_BREAK):
-		lit = "scope: macro breaks prior scope";
-		break;
-	case (ERR_SCOPE_NOCTX):
-		lit = "scope: closure macro has no context";
-		break;
-	case (ERR_SCOPE_NONEST):
-		lit = "scope: macro may not be nested in the current context";
-		break;
-	case (ERR_MACRO_NOTSUP):
-		lit = "macro not supported";
-		break;
-	case (ERR_MACRO_NOTCALL):
-		lit = "macro not callable";
-		break;
-	case (ERR_SEC_PROLOGUE):
-		lit = "macro cannot be called in the prologue";
-		break;
-	case (ERR_SEC_NPROLOGUE):
-		lit = "macro called outside of prologue";
-		break;
-	case (ERR_ARGS_EQ0):
-		lit = "macro expects zero arguments";
-		break;
-	case (ERR_ARGS_EQ1):
-		lit = "macro expects one argument";
-		break;
-	case (ERR_ARGS_GE1):
-		lit = "macro expects one or more arguments";
-		break;
-	case (ERR_ARGS_LE2):
-		lit = "macro expects two or fewer arguments";
-		break;
-	case (ERR_ARGS_LE8):
-		lit = "macro expects eight or fewer arguments";
-		break;
-	case (ERR_ARGS_MANY):
-		lit = "macro has too many arguments";
-		break;
-	case (ERR_SEC_PROLOGUE_OO):
-		lit = "prologue macro is out-of-order";
-		break;
-	case (ERR_SEC_PROLOGUE_REP):
-		lit = "prologue macro repeated";
-		break;
-	case (ERR_SEC_NAME):
-		lit = "`NAME' section must be first";
-		break;
-	case (ERR_SYNTAX_ARGVAL):
-		lit = "syntax: expected value for macro argument";
-		break;
-	case (ERR_SYNTAX_ARGBAD):
-		lit = "syntax: invalid value(s) for macro argument";
-		break;
-	case (ERR_SYNTAX_ARGMISS):
-		lit = "syntax: missing required argument(s) for macro";
-		break;
-	case (ERR_SYNTAX_ARGMANY):
-		lit = "syntax: too many values for macro argument";
-		break;
-	case (ERR_SYNTAX_CHILDBAD):
-		lit = "syntax: invalid child for parent macro";
-		break;
-	case (ERR_SYNTAX_PARENTBAD):
-		lit = "syntax: invalid parent for macro";
-		break;
-	case (ERR_SYNTAX_CHILDHEAD):
-		lit = "syntax: expected only block-header section";
-		break;
-	case (ERR_SYNTAX_CHILDBODY):
-		lit = "syntax: expected only a block-body section";
-		break;
-	case (ERR_SYNTAX_EMPTYHEAD):
-		lit = "syntax: block-header section may not be empty";
-		break;
-	case (ERR_SYNTAX_EMPTYBODY):
-		lit = "syntax: block-body section may not be empty";
-		break;
-	default:
-		abort();
-		/* NOTREACHED */
-	}
-
-	(void)fprintf(stderr, "%s:%d: error: %s (column %d)\n", 
-			p->name, line, lit, col);
+	xfprintf(stderr, "%s:%d: error: %s (column %d)", 
+			p->name, line, msg, col);
 	return(0);
 }
 
@@ -446,99 +352,50 @@ msg_msg(void *arg, int line, int col, const char *msg)
 
 	p = (struct md_parse *)arg;
 
-	if (p->dbg < 2)
+	if (0 == p->dbg)
 		return;
 
-	(void)printf("%s:%d: %s (column %d)\n", 
+	xfprintf(stderr, "%s:%d: debug: %s (column %d)", 
 			p->name, line, msg, col);
 }
 
 
 static int
-msg_warn(void *arg, int line, int col, enum mdoc_warn type)
+msg_warn(void *arg, int line, int col, 
+		enum mdoc_warn type, const char *msg)
 {
-	char		 *lit;
 	struct md_parse	 *p;
-	extern char	 *__progname;
 
 	p = (struct md_parse *)arg;
 
-	if ( ! (p->warn & MD_WARN_ALL))
+	switch (type) {
+	case (WARN_COMPAT):
+		if (p->warn & MD_WARN_COMPAT)
+			break;
+		return(1);
+	case (WARN_SYNTAX):
+		if (p->warn & MD_WARN_SYNTAX)
+			break;
+		return(1);
+	}
+
+	xfprintf(stderr, "%s:%d: warning: %s (column %d)\n", 
+			p->name, line, msg, col);
+
+	if ( ! (p->warn & MD_WARN_ERR))
 		return(1);
 
-	lit = NULL;
-
-	switch (type) {
-	case (WARN_SYNTAX_WS_EOLN):
-		lit = "syntax: whitespace at end-of-line";
-		break;
-	case (WARN_SYNTAX_QUOTED):
-		lit = "syntax: quotation mark starting string";
-		break;
-	case (WARN_SYNTAX_MACLIKE):
-		lit = "syntax: macro-like argument";
-		break;
-	case (WARN_SYNTAX_ARGLIKE):
-		lit = "syntax: argument-like value";
-		break;
-	case (WARN_SYNTAX_EMPTYBODY):
-		lit = "syntax: macro suggests non-empty block-body section";
-		break;
-	case (WARN_SYNTAX_EMPTYHEAD):
-		lit = "syntax: macro suggests non-empty block-head section";
-		break;
-	case (WARN_SYNTAX_NOBODY):
-		lit = "syntax: macro suggests empty block-body section";
-		break;
-	case (WARN_SEC_OO):
-		lit = "section is out of conventional order";
-		break;
-	case (WARN_SEC_REP):
-		lit = "section repeated";
-		break;
-	case (WARN_ARGS_GE1):
-		lit = "macro suggests one or more arguments";
-		break;
-	case (WARN_ARGS_EQ0):
-		lit = "macro suggests zero arguments";
-		break;
-	case (WARN_IGN_AFTER_BLK):
-		lit = "ignore: macro ignored after block macro";
-		break;
-	case (WARN_IGN_OBSOLETE):
-		lit = "ignore: macro is obsolete";
-		break;
-	case (WARN_IGN_BEFORE_BLK):
-		lit = "ignore: macro before block macro ignored";
-		break;
-	case (WARN_COMPAT_TROFF):
-		lit = "compat: macro behaves differently in troff and nroff";
-		break;
-	default:
-		abort();
-		/* NOTREACHED */
-	}
-
-
-	(void)fprintf(stderr, "%s:%d: warning: %s (column %d)\n", 
-			p->name, line, lit, col);
-
-	if (p->warn & MD_WARN_ERR) {
-		(void)fprintf(stderr, "%s: considering warnings as "
-				"errors\n", __progname);
-		return(0);
-	}
-
-	return(1);
+	xfprintf(stderr, "%s: considering warnings as errors\n", 
+			__progname);
+	return(0);
 }
 
 
 static void
 usage(void)
 {
-	extern char	*__progname;
 
-	(void)fprintf(stderr, "usage: %s [-v] [-Wwarn...] [infile]\n",
+	xfprintf(stderr, "usage: %s [-v] [-Wwarn...] [infile]\n",
 			__progname);
 }
 

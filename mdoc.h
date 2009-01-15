@@ -19,7 +19,11 @@
 #ifndef MDOC_H
 #define MDOC_H
 
+/* FIXME: move this elsewhere (it's 9, too). */
+
 #define	MDOC_LINEARG_MAX 12
+
+/* What follows is a list of ALL possible macros. */
 
 #define	MDOC___	 	 0
 #define	MDOC_Dd		 1
@@ -129,6 +133,8 @@
 #define	MDOC_Ud		 105
 #define	MDOC_MAX	 106
 
+/* What follows is a list of ALL possible macro arguments. */
+
 #define	MDOC_Split	 0
 #define	MDOC_Nosplit	 1
 #define	MDOC_Ragged	 2
@@ -193,42 +199,9 @@
 #define	MDOC_Symbolic	 61
 #define	MDOC_ARG_MAX	 62
 
-/* FIXME: have these be generic groups. */
-
-enum 	mdoc_err {
-	ERR_SYNTAX_QUOTE, /* NOTUSED */
-	ERR_SYNTAX_UNQUOTE,
-	ERR_SYNTAX_NOPUNCT,
-	ERR_SYNTAX_WS,
-	ERR_SYNTAX_ARG,
-	ERR_SYNTAX_ARGFORM,
-	ERR_SYNTAX_ARGVAL,
-	ERR_SYNTAX_ARGBAD,
-	ERR_SYNTAX_ARGMISS,
-	ERR_SYNTAX_ARGMANY,
-	ERR_MACRO_NOTSUP,
-	ERR_MACRO_NOTCALL,
-	ERR_SCOPE_BREAK,
-	ERR_SCOPE_NOCTX,
-	ERR_SCOPE_NONEST,
-	ERR_SEC_PROLOGUE,
-	ERR_SEC_NPROLOGUE,
-	ERR_SEC_PROLOGUE_OO,
-	ERR_SEC_PROLOGUE_REP,
-	ERR_SEC_NAME,
-	ERR_ARGS_EQ0,
-	ERR_ARGS_EQ1,
-	ERR_ARGS_GE1,
-	ERR_ARGS_LE2,
-	ERR_ARGS_LE8,
-	ERR_ARGS_MANY,
-	ERR_SYNTAX_CHILDBAD,
-	ERR_SYNTAX_PARENTBAD,
-	ERR_SYNTAX_CHILDHEAD,
-	ERR_SYNTAX_CHILDBODY,
-	ERR_SYNTAX_EMPTYBODY,
-	ERR_SYNTAX_EMPTYHEAD,
-	ERR_SYNTAX_NOTEXT
+enum	mdoc_warn {
+	WARN_SYNTAX,		/* Syntax warn (at line/col). */
+	WARN_COMPAT		/* Groff compat warn (at line/col). */
 };
 
 enum	mdoc_att {
@@ -245,24 +218,6 @@ enum	mdoc_att {
 	ATT_V2,
 	ATT_V3,
 	ATT_V4
-};
-
-enum	mdoc_warn {
-	WARN_SYNTAX_WS_EOLN,
-	WARN_SYNTAX_MACLIKE,
-	WARN_SYNTAX_ARGLIKE,
-	WARN_SYNTAX_QUOTED,
-	WARN_SYNTAX_EMPTYHEAD,
-	WARN_SYNTAX_EMPTYBODY,
-	WARN_SYNTAX_NOBODY,
-	WARN_IGN_AFTER_BLK,
-	WARN_IGN_BEFORE_BLK,
-	WARN_IGN_OBSOLETE,
-	WARN_SEC_OO,
-	WARN_SEC_REP,
-	WARN_ARGS_GE1,
-	WARN_ARGS_EQ0,
-	WARN_COMPAT_TROFF
 };
 
 struct	mdoc_arg {
@@ -417,9 +372,10 @@ struct	mdoc_node {
 };
 
 struct	mdoc_cb {
-	int	(*mdoc_err)(void *, int, int, enum mdoc_err);
-	int	(*mdoc_warn)(void *, int, int, enum mdoc_warn);
 	void	(*mdoc_msg)(void *, int, int, const char *);
+	int	(*mdoc_err)(void *, int, int, const char *);
+	int	(*mdoc_warn)(void *, int, int, 
+			enum mdoc_warn, const char *);
 };
 
 extern	const char *const *mdoc_macronames;

@@ -312,7 +312,7 @@ pre_display(struct mdoc *mdoc, struct mdoc_node *node)
 				break;
 	if (NULL == n)
 		return(1);
-	return(mdoc_verr(mdoc, node, ERR_SCOPE_NONEST));
+	return(mdoc_nerr(mdoc, node, ERR_SCOPE_NONEST));
 }
 
 
@@ -427,9 +427,9 @@ pre_it(struct mdoc *mdoc, struct mdoc_node *node)
 	assert(MDOC_It == mdoc->last->tok);
 
 	if (MDOC_BODY != mdoc->last->parent->type) 
-		return(mdoc_verr(mdoc, node, ERR_SYNTAX_PARENTBAD));
+		return(mdoc_nerr(mdoc, node, ERR_SYNTAX_PARENTBAD));
 	if (MDOC_Bl != mdoc->last->parent->tok)
-		return(mdoc_verr(mdoc, node, ERR_SYNTAX_PARENTBAD));
+		return(mdoc_nerr(mdoc, node, ERR_SYNTAX_PARENTBAD));
 
 	return(1);
 }
@@ -440,7 +440,7 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
 	if (SEC_PROLOGUE != mdoc->sec_lastn)
-		return(mdoc_verr(mdoc, node, ERR_SEC_NPROLOGUE));
+		return(mdoc_nerr(mdoc, node, ERR_SEC_NPROLOGUE));
 	assert(MDOC_ELEM == node->type);
 
 	/* Check for ordering. */
@@ -449,15 +449,15 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 	case (MDOC_Os):
 		if (mdoc->meta.title[0] && mdoc->meta.date)
 			break;
-		return(mdoc_verr(mdoc, node, ERR_SEC_PROLOGUE_OO));
+		return(mdoc_nerr(mdoc, node, ERR_SEC_PROLOGUE_OO));
 	case (MDOC_Dt):
 		if (0 == mdoc->meta.title[0] && mdoc->meta.date)
 			break;
-		return(mdoc_verr(mdoc, node, ERR_SEC_PROLOGUE_OO));
+		return(mdoc_nerr(mdoc, node, ERR_SEC_PROLOGUE_OO));
 	case (MDOC_Dd):
 		if (0 == mdoc->meta.title[0] && 0 == mdoc->meta.date)
 			break;
-		return(mdoc_verr(mdoc, node, ERR_SEC_PROLOGUE_OO));
+		return(mdoc_nerr(mdoc, node, ERR_SEC_PROLOGUE_OO));
 	default:
 		abort();
 		/* NOTREACHED */
@@ -483,7 +483,7 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 		/* NOTREACHED */
 	}
 
-	return(mdoc_verr(mdoc, node, ERR_SEC_PROLOGUE_REP));
+	return(mdoc_nerr(mdoc, node, ERR_SEC_PROLOGUE_REP));
 }
 
 
@@ -618,7 +618,7 @@ post_bl(struct mdoc *mdoc)
 	}
 	if (NULL == n)
 		return(1);
-	return(mdoc_verr(mdoc, n, ERR_SYNTAX_CHILDBAD));
+	return(mdoc_nerr(mdoc, n, ERR_SYNTAX_CHILDBAD));
 }
 
 

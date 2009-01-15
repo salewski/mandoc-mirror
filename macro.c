@@ -355,7 +355,7 @@ rewind_subblock(enum mdoc_type type, struct mdoc *mdoc, int tok)
 			break;
 		else if (rewind_dobreak(tok, type, n))
 			continue;
-		return(mdoc_verr(mdoc, n, ERR_SCOPE_BREAK));
+		return(mdoc_nerr(mdoc, n, "body scope broken"));
 	}
 
 	assert(n);
@@ -384,7 +384,7 @@ rewind_expblock(struct mdoc *mdoc, int tok)
 			break;
 		else if (rewind_dobreak(tok, MDOC_BLOCK, n))
 			continue;
-		return(mdoc_verr(mdoc, n, ERR_SCOPE_BREAK));
+		return(mdoc_nerr(mdoc, n, "macro scope broken"));
 	}
 
 	assert(n);
@@ -414,7 +414,7 @@ rewind_impblock(struct mdoc *mdoc, int tok)
 			break;
 		else if (rewind_dobreak(tok, MDOC_BLOCK, n))
 			continue;
-		return(mdoc_verr(mdoc, n, ERR_SCOPE_BREAK));
+		return(mdoc_nerr(mdoc, n, "macro scope broken"));
 	}
 
 	assert(n);

@@ -45,31 +45,59 @@ struct	mdoc {
 			int ppos, int *pos, char *buf
 
 struct	mdoc_macro {
-	int	(*fp)(MACRO_PROT_ARGS);
-	int	  flags;
-#define	MDOC_CALLABLE	(1 << 0)
-#define	MDOC_PARSED	(1 << 1)
-#define	MDOC_EXPLICIT	(1 << 2)
-#define	MDOC_QUOTABLE	(1 << 3)
-#define	MDOC_PROLOGUE	(1 << 4)
-#define	MDOC_TABSEP	(1 << 5)
+	int		(*fp)(MACRO_PROT_ARGS);
+	int		  flags;
+#define	MDOC_CALLABLE	 (1 << 0)
+#define	MDOC_PARSED	 (1 << 1)
+#define	MDOC_EXPLICIT	 (1 << 2)
+#define	MDOC_QUOTABLE	 (1 << 3)
+#define	MDOC_PROLOGUE	 (1 << 4)
+#define	MDOC_TABSEP	 (1 << 5)
 };
+
+#define	mdoc_nwarn(mdoc, node, type, fmt, ...) \
+		  mdoc_vwarn((mdoc), (node)->line, \
+		  (node)->pos, (type), (fmt), ##__VA_ARGS__)
+
+#define	mdoc_nerr(mdoc, node, fmt, ...) \
+		  mdoc_verr((mdoc), (node)->line, \
+		  (node)->pos, (fmt), ##__VA_ARGS__)
+
+#define	mdoc_warn(mdoc, type, fmt, ...) \
+		  mdoc_vwarn((mdoc), (mdoc)->last->line, \
+		  (mdoc)->last->pos, (type), (fmt), ##__VA_ARGS__)
+
+#define	mdoc_err(mdoc, fmt, ...) \
+		  mdoc_verr((mdoc), (mdoc)->last->line, \
+		  (mdoc)->last->pos, (fmt), ##__VA_ARGS__)
+
+#define	mdoc_msg(mdoc, fmt, ...) \
+		  mdoc_vmsg((mdoc), (mdoc)->last->line, \
+		  (mdoc)->last->pos, (fmt), ##__VA_ARGS__)
+
+#define	mdoc_pmsg(mdoc, line, pos, fmt, ...) \
+		  mdoc_vmsg((mdoc), (line), \
+	  	  (pos), (fmt), ##__VA_ARGS__)
+
+#define	mdoc_pwarn(mdoc, line, pos, type, fmt, ...) \
+		  mdoc_vwarn((mdoc), (line), \
+	  	  (pos), (type), (fmt), ##__VA_ARGS__)
+
+#define	mdoc_perr(mdoc, line, pos, fmt, ...) \
+		  mdoc_verr((mdoc), (line), \
+	  	  (pos), (fmt), ##__VA_ARGS__)
 
 extern	const struct mdoc_macro *const mdoc_macros;
 
 __BEGIN_DECLS
 
-#define	mdoc_vwarn(m, n, t) \
-		  mdoc_pwarn((m), (n)->line, (n)->pos, (t))
-#define	mdoc_verr(m, n, t) \
-		  mdoc_perr((m), (n)->line, (n)->pos, (t))
-#define	mdoc_warn(m, t) \
-		  mdoc_pwarn((m), (m)->last->line, (m)->last->pos, (t))
-#define	mdoc_err(m, t) \
-		  mdoc_perr((m), (m)->last->line, (m)->last->pos, (t))
-int		  mdoc_pwarn(struct mdoc *, int, int, enum mdoc_warn);
-int		  mdoc_perr(struct mdoc *, int, int, enum mdoc_err);
-void		  mdoc_msg(struct mdoc *, const char *, ...);
+int		  mdoc_vwarn(struct mdoc *, int, int, 
+			enum mdoc_warn, const char *, ...);
+void		  mdoc_vmsg(struct mdoc *, int, int, 
+			const char *, ...);
+int		  mdoc_verr(struct mdoc *, int, int, 
+			const char *, ...);
+
 int		  mdoc_macro(MACRO_PROT_ARGS);
 int		  mdoc_find(const struct mdoc *, const char *);
 int		  mdoc_word_alloc(struct mdoc *, 
