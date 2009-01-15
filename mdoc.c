@@ -393,7 +393,7 @@ mdoc_macro(struct mdoc *mdoc, int tok,
 static int
 mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 {
-	const char	 *on, *ot, *act;
+	const char	 *nn, *nt, *on, *ot, *act;
 
 	assert(mdoc->last);
 	assert(mdoc->first);
@@ -406,33 +406,15 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	else
 		on = mdoc_macronames[mdoc->last->tok];
 
-	/* FIXME: put this into util.c. */
-	switch (mdoc->last->type) {
-	case (MDOC_TEXT):
-		ot = "text";
-		break;
-	case (MDOC_BODY):
-		ot = "body";
-		break;
-	case (MDOC_ELEM):
-		ot = "elem";
-		break;
-	case (MDOC_HEAD):
-		ot = "head";
-		break;
-	case (MDOC_TAIL):
-		ot = "tail";
-		break;
-	case (MDOC_BLOCK):
-		ot = "block";
-		break;
-	case (MDOC_ROOT):
-		ot = "root";
-		break;
-	default:
-		abort();
-		/* NOTREACHED */
-	}
+	if (MDOC_TEXT == p->type)
+		nn = "<text>";
+	else if (MDOC_ROOT == p->type)
+		nn = "<root>";
+	else
+		nn = mdoc_macronames[p->tok];
+
+	ot = mdoc_type2a(mdoc->last->type);
+	nt = mdoc_type2a(p->type);
 
 	switch (mdoc->next) {
 	case (MDOC_NEXT_SIBLING):
@@ -474,7 +456,8 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	}
 
 	mdoc->last = p;
-	mdoc_msg(mdoc, "parse: %s of %s `%s'", act, ot, on);
+	mdoc_msg(mdoc, "parse: %s `%s' %s of %s `%s'", 
+			nt, nn, act, ot, on);
 	return(1);
 }
 

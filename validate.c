@@ -395,6 +395,8 @@ pre_bd(struct mdoc *mdoc, struct mdoc_node *node)
 			/* FALLTHROUGH */
 		case (MDOC_Unfilled):
 			/* FALLTHROUGH */
+		case (MDOC_Filled):
+			/* FALLTHROUGH */
 		case (MDOC_Literal):
 			/* FALLTHROUGH */
 		case (MDOC_File):

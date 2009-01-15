@@ -173,6 +173,8 @@ lookup(int tok, const char *argv)
 			return(MDOC_Ragged);
 		else if (xstrcmp(argv, "unfilled"))
 			return(MDOC_Unfilled);
+		else if (xstrcmp(argv, "filled"))
+			return(MDOC_Filled);
 		else if (xstrcmp(argv, "literal"))
 			return(MDOC_Literal);
 		else if (xstrcmp(argv, "file"))
