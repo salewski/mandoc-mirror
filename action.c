@@ -203,12 +203,12 @@ post_dt(struct mdoc *mdoc)
 		case (0):
 			if (xstrlcpy(mdoc->meta.title, p, sz))
 				break;
-			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+			return(mdoc_nerr(mdoc, n, "badly-formed manual title parameter"));
 		case (1):
 			mdoc->meta.msec = mdoc_atomsec(p);
 			if (MSEC_DEFAULT != mdoc->meta.msec)
 				break;
-			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+			return(mdoc_nerr(mdoc, n, "badly-formed manual section parameter"));
 		case (2):
 			mdoc->meta.vol = mdoc_atovol(p);
 			if (VOL_DEFAULT != mdoc->meta.vol)
@@ -216,9 +216,9 @@ post_dt(struct mdoc *mdoc)
 			mdoc->meta.arch = mdoc_atoarch(p);
 			if (ARCH_DEFAULT != mdoc->meta.arch)
 				break;
-			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+			return(mdoc_nerr(mdoc, n, "badly-formed manual volume parameter"));
 		default:
-			return(mdoc_err(mdoc, ERR_ARGS_MANY));
+			return(mdoc_nerr(mdoc, n, "too many parameters"));
 		}
 	}
 
@@ -246,9 +246,9 @@ post_os(struct mdoc *mdoc)
 		p = n->data.text.string;
 
 		if ( ! xstrlcat(mdoc->meta.os, p, sz))
-			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+			return(mdoc_nerr(mdoc, n, "badly-formed manual system parameter"));
 		if ( ! xstrlcat(mdoc->meta.os, " ", sz))
-			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+			return(mdoc_nerr(mdoc, n, "badly-formed manual system parameter"));
 	}
 
 	if (0 == mdoc->meta.os[0]) 
@@ -291,9 +291,9 @@ post_dd(struct mdoc *mdoc)
 			continue;
 
 		if ( ! xstrlcat(date, n->data.text.string, sz))
-			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+			return(mdoc_nerr(mdoc, n, "badly-formed manual date parameter"));
 		if ( ! xstrlcat(date, " ", sz))
-			return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+			return(mdoc_nerr(mdoc, n, "badly-formed manual date parameter"));
 	}
 
 	if (mdoc->meta.date && NULL == n) {
@@ -302,7 +302,7 @@ post_dd(struct mdoc *mdoc)
 		return(1);
 	}
 
-	return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+	return(mdoc_err(mdoc, "badly-formed manual date"));
 }
 
 

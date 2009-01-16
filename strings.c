@@ -36,8 +36,6 @@ mdoc_iscdelim(char p)
 {
 
 	switch (p) {
-	case('{'):
-		/* FALLTHROUGH */
 	case('.'):
 		/* FALLTHROUGH */
 	case(','):
@@ -57,6 +55,8 @@ mdoc_iscdelim(char p)
 	case('['):
 		/* FALLTHROUGH */
 	case(']'):
+		/* FALLTHROUGH */
+	case('{'):
 		/* FALLTHROUGH */
 	case('}'):
 		return(1);

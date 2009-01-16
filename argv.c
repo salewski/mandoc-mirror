@@ -46,11 +46,11 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 		return(ARGS_EOLN);
 
 	if ('\"' == buf[*pos] && ! (fl & ARGS_QUOTED))
-		if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX_QUOTED))
+		if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX, "unexpected quoted parameter"))
 			return(ARGS_ERROR);
 
 	if ('-' == buf[*pos]) 
-		if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX_ARGLIKE))
+		if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX, "argument-like parameter"))
 			return(ARGS_ERROR);
 
 	if ((fl & ARGS_DELIM) && mdoc_iscdelim(buf[*pos])) {
@@ -115,7 +115,7 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 		if (buf[*pos])
 			return(ARGS_WORD);
 
-		if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX_WS_EOLN))
+		if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_COMPAT, "whitespace at end-of-line"))
 			return(ARGS_ERROR);
 
 		return(ARGS_WORD);
@@ -127,15 +127,13 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 	 * error.  After, parse to the next word.  
 	 */
 
-	assert( ! (ARGS_TABSEP & fl));
-
 	*v = &buf[++(*pos)];
 
 	while (buf[*pos] && '\"' != buf[*pos])
 		(*pos)++;
 
 	if (0 == buf[*pos]) {
-		(void)mdoc_perr(mdoc, line, *pos, ERR_SYNTAX_UNQUOTE);
+		(void)mdoc_perr(mdoc, line, *pos, "unterminated quoted parameter");
 		return(ARGS_ERROR);
 	}
 
@@ -149,7 +147,7 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 	if (buf[*pos])
 		return(ARGS_WORD);
 
-	if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX_WS_EOLN))
+	if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_COMPAT, "whitespace at end-of-line"))
 		return(ARGS_ERROR);
 
 	return(ARGS_WORD);
@@ -338,7 +336,7 @@ postparse(struct mdoc *mdoc, int line, const struct mdoc_arg *v, int pos)
 			break;
 		if (xstrcmp(v->value[0], "indent-two"))
 			break;
-		return(mdoc_perr(mdoc, line, pos, ERR_SYNTAX_ARGBAD));
+		return(mdoc_perr(mdoc, line, pos, "invalid offset value"));
 	default:
 		break;
 	}
@@ -374,9 +372,10 @@ parse_multi(struct mdoc *mdoc, int line,
 	if (0 < v->sz && v->sz < MDOC_LINEARG_MAX)
 		return(1);
 
-	c = 0 == v->sz ? ERR_SYNTAX_ARGVAL : ERR_SYNTAX_ARGMANY;
 	free(v->value);
-	return(mdoc_perr(mdoc, line, ppos, c));
+	return(mdoc_perr(mdoc, line, ppos, 0 == v->sz ?
+				"argument requires a value" :
+				"too many values to argument"));
 }
 
 
@@ -393,7 +392,7 @@ parse_single(struct mdoc *mdoc, int line,
 	if (ARGS_ERROR == c)
 		return(0);
 	if (ARGS_EOLN == c)
-		return(mdoc_perr(mdoc, line, ppos, ERR_SYNTAX_ARGVAL));
+		return(mdoc_perr(mdoc, line, ppos,  "argument requires a value"));
 
 	v->sz = 1;
 	v->value = xcalloc(1, sizeof(char *));
@@ -457,7 +456,8 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		buf[(*pos)++] = 0;
 
 	if (MDOC_ARG_MAX == (v->arg = lookup(tok, argv))) {
-		(void)mdoc_pwarn(mdoc, line, i, WARN_SYNTAX_ARGLIKE);
+		if ( ! mdoc_pwarn(mdoc, line, i, WARN_SYNTAX, "argument-like parameter"))
+			return(ARGV_ERROR);
 		return(ARGV_WORD);
 	}
 

@@ -200,7 +200,7 @@ bodychild_err_eq0(struct mdoc *mdoc)
 		return(1);
 	if (NULL == mdoc->last->child)
 		return(1);
-	return(mdoc_warn(mdoc, WARN_ARGS_EQ0));
+	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests no body children"));
 }
 
 
@@ -212,7 +212,7 @@ bodychild_warn_ge1(struct mdoc *mdoc)
 		return(1);
 	if (mdoc->last->child)
 		return(1);
-	return(mdoc_warn(mdoc, WARN_ARGS_GE1));
+	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests one or more body children"));
 }
 
 
@@ -224,7 +224,7 @@ elemchild_warn_eq0(struct mdoc *mdoc)
 	if (NULL == mdoc->last->child)
 		return(1);
 	return(mdoc_pwarn(mdoc, mdoc->last->child->line,
-			mdoc->last->child->pos, WARN_ARGS_EQ0));
+			mdoc->last->child->pos, WARN_SYNTAX, "macro suggests no parameters"));
 }
 
 
@@ -235,7 +235,7 @@ elemchild_warn_ge1(struct mdoc *mdoc)
 	assert(MDOC_ELEM == mdoc->last->type);
 	if (mdoc->last->child)
 		return(1);
-	return(mdoc_warn(mdoc, WARN_ARGS_GE1));
+	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests one or more parameters"));
 }
 
 
@@ -246,7 +246,7 @@ elemchild_err_eq0(struct mdoc *mdoc)
 	assert(MDOC_ELEM == mdoc->last->type);
 	if (NULL == mdoc->last->child)
 		return(1);
-	return(mdoc_err(mdoc, ERR_ARGS_EQ0));
+	return(mdoc_err(mdoc, "macro expects no parameters"));
 }
 
 
@@ -257,7 +257,7 @@ elemchild_err_ge1(struct mdoc *mdoc)
 	assert(MDOC_ELEM == mdoc->last->type);
 	if (mdoc->last->child)
 		return(1);
-	return(mdoc_err(mdoc, ERR_ARGS_GE1));
+	return(mdoc_err(mdoc, "macro expects one or more parameters"));
 }
 
 
@@ -270,7 +270,7 @@ headchild_err_eq0(struct mdoc *mdoc)
 	if (NULL == mdoc->last->child)
 		return(1);
 	return(mdoc_perr(mdoc, mdoc->last->child->line,
-			mdoc->last->child->pos, ERR_ARGS_EQ0));
+			mdoc->last->child->pos, "macro expects no parameters"));
 }
 
 
@@ -282,7 +282,7 @@ headchild_warn_ge1(struct mdoc *mdoc)
 		return(1);
 	if (mdoc->last->child)
 		return(1);
-	return(mdoc_warn(mdoc, WARN_ARGS_GE1));
+	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests one or more parameters"));
 }
 
 
@@ -294,7 +294,7 @@ headchild_err_ge1(struct mdoc *mdoc)
 		return(1);
 	if (mdoc->last->child)
 		return(1);
-	return(mdoc_err(mdoc, ERR_ARGS_GE1));
+	return(mdoc_err(mdoc, "macro expects one or more parameters"));
 }
 
 
@@ -312,7 +312,7 @@ pre_display(struct mdoc *mdoc, struct mdoc_node *node)
 				break;
 	if (NULL == n)
 		return(1);
-	return(mdoc_nerr(mdoc, node, ERR_SCOPE_NONEST));
+	return(mdoc_nerr(mdoc, node, "displays may not be nested"));
 }
 
 
@@ -364,12 +364,12 @@ pre_bl(struct mdoc *mdoc, struct mdoc_node *node)
 		}
 	}
 	if (0 == type)
-		return(mdoc_err(mdoc, ERR_SYNTAX_ARGMISS));
+		return(mdoc_err(mdoc, "no list type specified"));
 	if (0 == err)
 		return(1);
 	assert(argv);
 	return(mdoc_perr(mdoc, argv->line, 
-			argv->pos, ERR_SYNTAX_ARGBAD));
+			argv->pos, "only one list type possible"));
 }
 
 
@@ -409,12 +409,12 @@ pre_bd(struct mdoc *mdoc, struct mdoc_node *node)
 		}
 	}
 	if (0 == type)
-		return(mdoc_err(mdoc, ERR_SYNTAX_ARGMISS));
+		return(mdoc_err(mdoc, "no display type specified"));
 	if (0 == err)
 		return(1);
 	assert(argv);
 	return(mdoc_perr(mdoc, argv->line, 
-			argv->pos, ERR_SYNTAX_ARGBAD));
+			argv->pos, "only one display type possible"));
 }
 
 
@@ -427,9 +427,9 @@ pre_it(struct mdoc *mdoc, struct mdoc_node *node)
 	assert(MDOC_It == mdoc->last->tok);
 
 	if (MDOC_BODY != mdoc->last->parent->type) 
-		return(mdoc_nerr(mdoc, node, ERR_SYNTAX_PARENTBAD));
+		return(mdoc_nerr(mdoc, node, "invalid macro parent `%s'", mdoc_macronames[mdoc->last->parent->tok]));
 	if (MDOC_Bl != mdoc->last->parent->tok)
-		return(mdoc_nerr(mdoc, node, ERR_SYNTAX_PARENTBAD));
+		return(mdoc_nerr(mdoc, node, "invalid macro parent `%s'", mdoc_macronames[mdoc->last->parent->tok]));
 
 	return(1);
 }
@@ -440,7 +440,7 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
 	if (SEC_PROLOGUE != mdoc->sec_lastn)
-		return(mdoc_nerr(mdoc, node, ERR_SEC_NPROLOGUE));
+		return(mdoc_nerr(mdoc, node, "macro may only be invoked in the prologue"));
 	assert(MDOC_ELEM == node->type);
 
 	/* Check for ordering. */
@@ -449,15 +449,15 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 	case (MDOC_Os):
 		if (mdoc->meta.title[0] && mdoc->meta.date)
 			break;
-		return(mdoc_nerr(mdoc, node, ERR_SEC_PROLOGUE_OO));
+		return(mdoc_nerr(mdoc, node, "prologue macro out-of-order"));
 	case (MDOC_Dt):
 		if (0 == mdoc->meta.title[0] && mdoc->meta.date)
 			break;
-		return(mdoc_nerr(mdoc, node, ERR_SEC_PROLOGUE_OO));
+		return(mdoc_nerr(mdoc, node, "prologue macro out-of-order"));
 	case (MDOC_Dd):
 		if (0 == mdoc->meta.title[0] && 0 == mdoc->meta.date)
 			break;
-		return(mdoc_nerr(mdoc, node, ERR_SEC_PROLOGUE_OO));
+		return(mdoc_nerr(mdoc, node, "prologue macro out-of-order"));
 	default:
 		abort();
 		/* NOTREACHED */
@@ -483,7 +483,7 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 		/* NOTREACHED */
 	}
 
-	return(mdoc_nerr(mdoc, node, ERR_SEC_PROLOGUE_REP));
+	return(mdoc_nerr(mdoc, node, "prologue macro repeated"));
 }
 
 
@@ -552,31 +552,31 @@ post_it(struct mdoc *mdoc)
 
 	if (TYPE_HEAD == type) {
 		if (NULL == (n = mdoc->last->data.block.head)) {
-			if ( ! mdoc_warn(mdoc, WARN_SYNTAX_EMPTYHEAD))
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests line parameters"))
 				return(0);
 		} else if (NULL == n->child)
-			if ( ! mdoc_warn(mdoc, WARN_SYNTAX_EMPTYHEAD))
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests line parameters"))
 				return(0);
 
 		if (NULL == (n = mdoc->last->data.block.body)) {
-			if ( ! mdoc_warn(mdoc, WARN_SYNTAX_EMPTYBODY))
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests body children"))
 				return(0);
 		} else if (NULL == n->child)
-			if ( ! mdoc_warn(mdoc, WARN_SYNTAX_EMPTYBODY))
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests body children"))
 				return(0);
 
 		return(1);
 	}
 
 	if (NULL == (n = mdoc->last->data.block.head)) {
-		if ( ! mdoc_warn(mdoc, WARN_SYNTAX_EMPTYHEAD))
+		if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests line parameters"))
 			return(0);
 	} else if (NULL == n->child)
-		if ( ! mdoc_warn(mdoc, WARN_SYNTAX_EMPTYHEAD))
+		if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests line parameters"))
 			return(0);
 
 	if ((n = mdoc->last->data.block.body) && n->child)
-		if ( ! mdoc_warn(mdoc, WARN_SYNTAX_NOBODY))
+		if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests body children"))
 			return(0);
 
 	if (MDOC_Column != sv) 
@@ -592,7 +592,7 @@ post_it(struct mdoc *mdoc)
 
 	if (i == (size_t)sv)
 		return(1);
-	return(mdoc_err(mdoc, ERR_SYNTAX_ARGFORM));
+	return(mdoc_err(mdoc, "expected %d list columns, have %d", sv, (int)i));
 
 #undef	TYPE_NONE
 #undef	TYPE_BODY
@@ -618,7 +618,7 @@ post_bl(struct mdoc *mdoc)
 	}
 	if (NULL == n)
 		return(1);
-	return(mdoc_nerr(mdoc, n, ERR_SYNTAX_CHILDBAD));
+	return(mdoc_nerr(mdoc, n, "invalid child of parent macro `Bl'"));
 }
 
 
@@ -653,8 +653,8 @@ post_sh(struct mdoc *mdoc)
 		return(1);
 
 	if (sec == mdoc->sec_lastn)
-		return(mdoc_warn(mdoc, WARN_SEC_REP));
-	return(mdoc_warn(mdoc, WARN_SEC_OO));
+		return(mdoc_warn(mdoc, WARN_SYNTAX, "section repeated"));
+	return(mdoc_warn(mdoc, WARN_SYNTAX, "section out of conventional order"));
 }
 
 
