@@ -306,7 +306,8 @@ pre_display(struct mdoc *mdoc, struct mdoc_node *node)
 	if (MDOC_BLOCK != node->type)
 		return(1);
 
-	for (n = mdoc->last; n; n = n->parent) 
+	assert(mdoc->last);
+	for (n = mdoc->last->parent; n; n = n->parent) 
 		if (MDOC_BLOCK == n->type)
 			if (MDOC_Bd == n->tok)
 				break;

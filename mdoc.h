@@ -19,10 +19,6 @@
 #ifndef MDOC_H
 #define MDOC_H
 
-/* FIXME: move this elsewhere (it's 9, too). */
-
-#define	MDOC_LINEARG_MAX 12
-
 /* What follows is a list of ALL possible macros. */
 
 #define	MDOC___	 	 0
@@ -204,6 +200,7 @@ enum	mdoc_warn {
 	WARN_COMPAT		/* Groff compat warn (at line/col). */
 };
 
+/* Possible values for the `At' macro. */
 enum	mdoc_att {
 	ATT_DEFAULT = 0,
 	ATT_v1,
@@ -220,6 +217,7 @@ enum	mdoc_att {
 	ATT_V4
 };
 
+/* An argument to a macro (multiple values = `It -column'). */
 struct	mdoc_arg {
 	int	  	  arg;
 	int		  line;
@@ -228,6 +226,20 @@ struct	mdoc_arg {
 	char		**value;
 };
 
+/*
+ * Simplified grammar of syntax tree:
+ *
+ * MDOC_ROOT: root of tree
+ * MDOC_TEXT: free-form text
+ * MDOC_ELEM: elem [args] MDOC_TEXT...
+ * MDOC_BLOCK, MDOC_HEAD, MDOC_BODY, MDOC_TAIL:
+ *   MDOC_BLOCK:
+ *     MDOC_HEAD [args] (MDOC_TEXT|MDOC_ELEM|MDOC_BLOCK)...
+ *     MDOC_BODY (MDOC_TEXT|MDOC_ELEM|MDOC_BLOCK)...
+ *     MDOC_TAIL (optional) (MDOC_TEXT|MDOC_ELEM|MDOC_BLOCK)...
+ */
+
+/* Type of a syntax node. */
 enum	mdoc_type {
 	MDOC_TEXT,
 	MDOC_ELEM,
@@ -238,6 +250,7 @@ enum	mdoc_type {
 	MDOC_ROOT
 };
 
+/* Manual section. */
 enum	mdoc_msec {
 	MSEC_DEFAULT = 0,
 	MSEC_1,
@@ -260,6 +273,7 @@ enum	mdoc_msec {
 	MSEC_paper
 };
 
+/* Section (named/unnamed) of `Ss'. */
 enum	mdoc_sec {
 	SEC_PROLOGUE = 0,
 	SEC_BODY,
@@ -281,6 +295,7 @@ enum	mdoc_sec {
 	SEC_CUSTOM
 };
 
+/* Volume of `Dt'. */
 enum	mdoc_vol {
 	VOL_DEFAULT = 0,
 	VOL_AMD,
@@ -294,12 +309,14 @@ enum	mdoc_vol {
 	VOL_USD
 };
 
+/* Architecture of `Dt'. */
 enum	mdoc_arch {
 	ARCH_DEFAULT = 0,
 	ARCH_alpha, 
 	ARCH_amd64, 
 	ARCH_amiga, 
 	ARCH_arc, 
+	ARCH_arm, 
 	ARCH_armish, 
 	ARCH_aviion, 
 	ARCH_hp300,
@@ -323,6 +340,7 @@ enum	mdoc_arch {
 	ARCH_zaurus
 };
 
+/* Meta-information from prologue. */
 struct	mdoc_meta {
 	enum mdoc_msec	  msec;
 	enum mdoc_vol	  vol;
@@ -359,6 +377,7 @@ union	mdoc_data {
 	struct mdoc_block block;
 };
 
+/* Syntax node in parse tree. */
 struct	mdoc_node {
 	struct mdoc_node *parent;
 	struct mdoc_node *child;
@@ -371,6 +390,7 @@ struct	mdoc_node {
 	union mdoc_data	  data;
 };
 
+/* Call-backs for parse messages. */
 struct	mdoc_cb {
 	void	(*mdoc_msg)(void *, int, int, const char *);
 	int	(*mdoc_err)(void *, int, int, const char *);
@@ -385,13 +405,22 @@ __BEGIN_DECLS
 
 struct	mdoc;
 
+/* Free memory allocated with mdoc_alloc. */
 void	 	  mdoc_free(struct mdoc *);
+
+/* Allocate a new parser instance. */
 struct	mdoc	 *mdoc_alloc(void *data, const struct mdoc_cb *);
+
+/* Parse a single line (boolean retval). */
 int	 	  mdoc_parseln(struct mdoc *, int, char *buf);
-const struct mdoc_node
-		 *mdoc_result(struct mdoc *);
+
+/* Get parse result or NULL. */
+const struct mdoc_node *mdoc_result(struct mdoc *);
+
+/* Signal end of parse sequence (boolean retval). */
 int		  mdoc_endparse(struct mdoc *);
 
+/* Node type to static string. */
 char		 *mdoc_type2a(enum mdoc_type);
 
 __END_DECLS

@@ -41,6 +41,10 @@ struct	mdoc {
 };
 
 
+/* FIXME: it's 9 (this isn't used properly). */
+
+#define	MDOC_LINEARG_MAX 12
+
 #define	MACRO_PROT_ARGS	struct mdoc *mdoc, int tok, int line, \
 			int ppos, int *pos, char *buf
 

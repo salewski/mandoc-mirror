@@ -26,6 +26,8 @@
 #include "private.h"
 
 
+/* FIXME: .It called with -column and quoted arguments. */
+
 static	int		 lookup(int, const char *);
 static	int		 parse(struct mdoc *, int, int,
 				struct mdoc_arg *, int *, char *);

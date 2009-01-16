@@ -135,9 +135,9 @@ mdoc_atotime(const char *p)
 
 	(void)memset(&tm, 0, sizeof(struct tm));
 
-	if (strptime(p, "%b %d %Y", &tm))
+	if (0 == strptime(p, "%b %d %Y", &tm))
 		return(mktime(&tm));
-	if (strptime(p, "%b %d, %Y", &tm))
+	if (0 == strptime(p, "%b %d, %Y", &tm))
 		return(mktime(&tm));
 
 	return(0);
@@ -228,6 +228,8 @@ mdoc_atoarch(const char *p)
 		return(ARCH_amiga);
 	else if (0 == strcmp(p, "arc"))
 		return(ARCH_arc);
+	else if (0 == strcmp(p, "arm"))
+		return(ARCH_arm);
 	else if (0 == strcmp(p, "armish"))
 		return(ARCH_armish);
 	else if (0 == strcmp(p, "aviion"))

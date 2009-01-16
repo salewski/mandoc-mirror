@@ -292,11 +292,18 @@ post_dd(struct mdoc *mdoc)
 
 		if ( ! xstrlcat(date, n->data.text.string, sz))
 			return(mdoc_nerr(mdoc, n, "badly-formed manual date parameter"));
-		if ( ! xstrlcat(date, " ", sz))
+		if (n->next && ! xstrlcat(date, " ", sz))
 			return(mdoc_nerr(mdoc, n, "badly-formed manual date parameter"));
 	}
 
 	if (mdoc->meta.date && NULL == n) {
+		mdoc_msg(mdoc, "parsed time: %u since epoch", 
+				mdoc->meta.date);
+		return(1);
+	} else if (n)
+		return(mdoc_err(mdoc, "badly-formed manual date"));
+
+	if ((mdoc->meta.date = mdoc_atotime(date))) {
 		mdoc_msg(mdoc, "parsed time: %u since epoch", 
 				mdoc->meta.date);
 		return(1);
