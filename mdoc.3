@@ -9,20 +9,20 @@
 .Nm mdoc_endparse ,
 .Nm mdoc_result ,
 .Nm mdoc_free
-.Nd mdoc macro compiler
+.Nd mdoc macro compiler library
 .\"
 .Sh SYNOPSIS
 .In mdoc.h
 .Ft "struct mdoc *"
 .Fn mdoc_alloc "void *data" "const struct mdoc_cb *cb"
 .Ft void
-.Fn mdoc_free "struct mdoc *"
+.Fn mdoc_free "struct mdoc *mdoc"
 .Ft int
-.Fn mdoc_parseln "struct mdoc *" "int" "char *buf"
+.Fn mdoc_parseln "struct mdoc *mdoc" "int line" "char *buf"
 .Ft "const struct mdoc_node *"
-.Fn mdoc_result "struct mdoc *"
+.Fn mdoc_result "struct mdoc *mdoc"
 .Ft int
-.Fn mdoc_endparse "struct mdoc *"
+.Fn mdoc_endparse "struct mdoc *mdoc"
 .\"
 .Sh DESCRIPTION
 The
@@ -41,16 +41,103 @@ then free all allocated memory with
 See the
 .Sx EXAMPLES
 section for a full example.
-.\" The following requests should be uncommented and used where appropriate.
-.\" This next request is for sections 2, 3, and 9 function return values only.
-.\" .Sh RETURN VALUES
-.\" .Sh EXAMPLES
-.\" The next request is for sections 2, 3, and 9 error and signal handling only.
-.\" .Sh ERRORS
-.\" .Sh SEE ALSO
-.\" .Xr foobar 1
-.\" .Sh STANDARDS
-.\" .Sh HISTORY
-.\" .Sh AUTHORS
-.\" .Sh CAVEATS
-.\" .Sh BUGS
+.Pp
+Function descriptions follow:
+.Bl -ohang -offset indent
+.It Fn mdoc_alloc
+Allocates a parsing structure.  The
+.Fa data
+pointer is passed to callbacks in
+.Fa cb , 
+which are documented further in the header file.  Returns NULL on
+failure.  If non-NULL, the pointer must be freed with
+.Fn mdoc_free .
+.It Fn mdoc_free
+Free all resources of a parser.  The pointer is no longer valid after
+invocation.
+.It Fn mdoc_parseln
+Parse a nil-terminated line of input.  This line should not contain the
+trailing newline.  Returns 0 on failure, 1 on success.  The input buffer 
+.Fa buf
+is modified by this function.
+.It Fn mdoc_endparse
+Signals that the parse is complete.  Note that if 
+.Fn mdoc_endparse
+is called subsequent to
+.Fn mdoc_result ,
+the resulting tree is incomplete.  Returns 0 on failure, 1 on success.
+.It Fn mdoc_result
+Returns the result of the parse or NULL on failure.  Note that if 
+.Fn mdoc_parseln
+or
+.Fn mdoc_endparse
+return 0, the tree will be incomplete.
+.El
+.Pp
+.Nm
+is
+.Ud
+.\" 
+.Sh EXAMPLES
+The following example reads lines from stdin and parses them, operating
+on the finished parse tree with 
+.Fn parsed .
+Note that, if the last line of the file isn't newline-terminated, this
+will truncate the file's last character (see 
+.Xr fgetln 3 ) .
+Further, this example does not error-check nor free memory upon failure.
+.Bd -literal
+struct mdoc *mdoc;
+struct mdoc_node *node;
+char *buf;
+size_t len;
+int line;
+
+line = 1;
+mdoc = mdoc_alloc(NULL, NULL);
+
+while ((buf = fgetln(fp, &len))) {
+	buf[len - 1] = '\\0';
+	if ( ! mdoc_parseln(mdoc, line, buf))
+		errx(1, "mdoc_parseln");
+	line++;
+}
+
+if ( ! mdoc_endparse(mdoc))
+	errx(1, "mdoc_endparse");
+if (NULL == (node = mdoc_result(mdoc)))
+	errx(1, "mdoc_result");
+
+parsed(mdoc, node);
+mdoc_free(mdoc);
+.Ed
+.\"
+.Sh SEE ALSO
+.Xr mdoc 7 ,
+.Xr mdoc.samples 7 ,
+.Xr groff 1 ,
+.Xr mdocml 1
+.\"
+.\"
+.Sh AUTHORS
+The
+.Nm
+utility was written by 
+.An Kristaps Dzonsons Aq kristaps@kth.se .
+.\"
+.\"
+.Sh BUGS
+The 
+.Sq \&Xc
+and
+.Sq \&Xo
+macros aren't handled when used to span lines for the
+.Sq \&It
+macro.  Such usage is specifically discouraged in
+.Xr mdoc.samples 7 .
+.Pp
+When 
+.Sq \&It \-column
+is invoked, whitespace is not stripped around
+.Sq \&Ta
+or tab-character separators.

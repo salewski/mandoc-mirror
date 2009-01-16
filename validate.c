@@ -45,6 +45,7 @@ static	int	pre_it(struct mdoc *, struct mdoc_node *);
 static	int	pre_cd(struct mdoc *, struct mdoc_node *);
 static	int	pre_er(struct mdoc *, struct mdoc_node *);
 static	int	pre_ex(struct mdoc *, struct mdoc_node *);
+static	int	pre_an(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
@@ -53,6 +54,7 @@ static	int	head_err_ge1(struct mdoc *);
 static	int	head_warn_ge1(struct mdoc *);
 static	int	head_err_eq0(struct mdoc *);
 static	int	elem_err_eq0(struct mdoc *);
+static	int	elem_err_le1(struct mdoc *);
 static	int	elem_err_eq1(struct mdoc *);
 static	int	elem_err_ge1(struct mdoc *);
 static	int	elem_warn_eq0(struct mdoc *);
@@ -63,6 +65,8 @@ static	int	elem_bool(struct mdoc *);
 static	int	post_sh(struct mdoc *);
 static	int	post_bl(struct mdoc *);
 static	int	post_it(struct mdoc *);
+static	int	post_ex(struct mdoc *);
+static	int	post_an(struct mdoc *);
 
 static	v_pre	pres_prologue[] = { pre_prologue, NULL };
 static	v_pre	pres_d1[] = { pre_display, NULL };
@@ -74,6 +78,7 @@ static	v_pre	pres_sh[] = { pre_sh, NULL };
 static	v_pre	pres_cd[] = { pre_cd, NULL };
 static	v_pre	pres_er[] = { pre_er, NULL };
 static	v_pre	pres_ex[] = { pre_ex, NULL };
+static	v_pre	pres_an[] = { pre_an, NULL };
 
 static	v_post	posts_bool[] = { elem_err_eq1, elem_bool, NULL };
 static	v_post	posts_bd[] = { head_err_eq0, body_warn_ge1, NULL };
@@ -89,6 +94,8 @@ static	v_post	posts_it[] = { post_it, NULL };
 static	v_post	posts_ss[] = { head_err_ge1, NULL };
 static	v_post	posts_pp[] = { elem_warn_eq0, NULL };
 static	v_post	posts_d1[] = { head_err_ge1, NULL };
+static	v_post	posts_ex[] = { elem_err_le1, post_ex, NULL };
+static	v_post	posts_an[] = { post_an, NULL };
 
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
@@ -101,7 +108,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pres_sh, posts_sh }, /* Sh */ 
 	/* FIXME: preceding Pp. */
 	{ pres_ss, posts_ss }, /* Ss */ 
-	/* FIXME: proceeding... */
+	/* FIXME: proceeding Pp */
 	{ NULL, posts_pp }, /* Pp */ 
 	{ pres_d1, posts_d1 }, /* D1 */
 	{ pres_d1, posts_d1 }, /* Dl */
@@ -113,17 +120,17 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* El */
 	{ pres_it, posts_it }, /* It */
 	{ NULL, posts_text }, /* Ad */ 
-	/* FIXME: argument OR parameters. */
-	{ NULL, NULL }, /* An */ 
+	{ pres_an, posts_an }, /* An */ 
 	{ NULL, NULL }, /* Ar */
 	{ pres_cd, posts_text }, /* Cd */ 
 	{ NULL, NULL }, /* Cm */
 	{ NULL, posts_text }, /* Dv */ 
 	{ pres_er, posts_text }, /* Er */ 
 	{ NULL, posts_text }, /* Ev */ 
-	{ pres_ex, posts_notext }, /* Ex */ /* FIXME: -std required */
+	{ pres_ex, posts_ex }, /* Ex */ 
 	{ NULL, posts_text }, /* Fa */ 
-	{ NULL, NULL }, /* Fd */ /* FIXME: SYNOPSIS section. */
+	/* FIXME: only in SYNOPSIS section. */
+	{ NULL, NULL }, /* Fd */
 	{ NULL, NULL }, /* Fl */
 	{ NULL, posts_text }, /* Fn */ 
 	{ NULL, NULL }, /* Ft */ 
@@ -131,15 +138,16 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_wtext }, /* In */ 
 	{ NULL, posts_text }, /* Li */
 	{ NULL, posts_wtext }, /* Nd */
-	{ NULL, NULL }, /* Nm */  /* FIXME: If name not set? */
+	/* FIXME: check that name must be set/provided. */
+	{ NULL, NULL }, /* Nm */
 	{ NULL, posts_wline }, /* Op */
 	{ NULL, NULL }, /* Ot */
 	{ NULL, NULL }, /* Pa */
-	{ NULL, posts_notext }, /* Rv */ /* -std required */
-	{ NULL, posts_notext }, /* St */ /* arg required */
+	{ NULL, posts_notext }, /* Rv */ /* FIXME: -std required */
+	{ NULL, posts_notext }, /* St */ /* FIXME: arg required */
 	{ NULL, posts_text }, /* Va */
 	{ NULL, posts_text }, /* Vt */ 
-	{ NULL, NULL }, /* Xr */ /* FIXME */
+	{ NULL, NULL }, /* Xr */ /* FIXME: valid arguments */
 	{ NULL, posts_text }, /* %A */
 	{ NULL, posts_text }, /* %B */
 	{ NULL, posts_text }, /* %D */
@@ -154,7 +162,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ac */
 	{ NULL, NULL }, /* Ao */
 	{ NULL, posts_wline }, /* Aq */
-	{ NULL, NULL }, /* At */ /* FIXME */
+	{ NULL, NULL }, /* At */ /* FIXME: valid arguments */
 	{ NULL, NULL }, /* Bc */
 	{ NULL, NULL }, /* Bf */ 
 	{ NULL, NULL }, /* Bo */
@@ -176,7 +184,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* Nx */
 	{ NULL, NULL }, /* Ox */
 	{ NULL, NULL }, /* Pc */
-	{ NULL, NULL }, /* Pf */ /* FIXME: 2 or more arguments */ /* First should be text. */
+	{ NULL, NULL }, /* Pf */
 	{ NULL, NULL }, /* Po */
 	{ NULL, posts_wline }, /* Pq */ /* FIXME: ignore following Sh/Ss */
 	{ NULL, NULL }, /* Qc */
@@ -227,13 +235,13 @@ pre_check_parent(struct mdoc *mdoc, struct mdoc_node *node,
 		int tok, enum mdoc_type type)
 {
 
-	if (type != mdoc->last->parent->type) 
+	if (type != node->parent->type) 
 		return(mdoc_nerr(mdoc, node, "invalid macro parent class %s, expected %s", 
-					mdoc_type2a(mdoc->last->parent->type),
+					mdoc_type2a(node->parent->type),
 					mdoc_type2a(type)));
-	if (MDOC_ROOT != type && tok == mdoc->last->parent->tok)
+	if (MDOC_ROOT != type && tok != node->parent->tok)
 		return(mdoc_nerr(mdoc, node, "invalid macro parent `%s', expected `%s'", 
-					mdoc_macronames[mdoc->last->parent->tok],
+					mdoc_macronames[node->parent->tok],
 					mdoc_macronames[tok]));
 	return(1);
 }
@@ -296,6 +304,19 @@ elem_err_eq1(struct mdoc *mdoc)
 	if (mdoc->last->child->next)
 		return(mdoc_err(mdoc, "macro expects one parameter"));
 	return(1);
+}
+
+
+static int
+elem_err_le1(struct mdoc *mdoc)
+{
+
+	assert(MDOC_ELEM == mdoc->last->type);
+	if (NULL == mdoc->last->child)
+		return(1);
+	if (NULL == mdoc->last->child->next)
+		return(1);
+	return(mdoc_err(mdoc, "macro expects one or fewer parameters"));
 }
 
 
@@ -483,9 +504,8 @@ static int
 pre_ss(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
-	if (MDOC_BLOCK != mdoc->last->type)
+	if (MDOC_BLOCK != node->type)
 		return(1);
-	assert(MDOC_Sh == mdoc->last->tok);
 	return(pre_check_parent(mdoc, node, MDOC_Sh, MDOC_BODY));
 }
 
@@ -494,10 +514,20 @@ static int
 pre_sh(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
-	if (MDOC_BLOCK != mdoc->last->type)
+	if (MDOC_BLOCK != node->type)
 		return(1);
-	assert(MDOC_Sh == mdoc->last->tok);
 	return(pre_check_parent(mdoc, node, -1, MDOC_ROOT));
+}
+
+
+static int
+pre_an(struct mdoc *mdoc, struct mdoc_node *node)
+{
+	assert(MDOC_ELEM == node->type);
+	assert(MDOC_An == node->tok);
+	if (1 >= node->data.elem.argc)
+		return(1);
+	return(mdoc_nerr(mdoc, node, "macro may only have one argument"));
 }
 
 
@@ -506,10 +536,27 @@ pre_ex(struct mdoc *mdoc, struct mdoc_node *node)
 {
 	enum mdoc_msec	 msecs[3];
 
+	assert(MDOC_ELEM == node->type);
+
 	msecs[0] = MSEC_1;
 	msecs[1] = MSEC_6;
 	msecs[2] = MSEC_8;
-	return(pre_check_msecs(mdoc, node, 3, msecs));
+	if ( ! pre_check_msecs(mdoc, node, 3, msecs))
+		return(0);
+
+	if (1 != node->data.elem.argc) {
+		if ( ! mdoc_nwarn(mdoc, node, WARN_COMPAT, 
+					"macro suggests `%s' argument",
+					mdoc_argnames[MDOC_Std]))
+			return(0);
+		return(1);
+	}
+	if (MDOC_Std != node->data.elem.argv[0].arg)
+		if ( ! mdoc_nwarn(mdoc, node, WARN_COMPAT, 
+					"macro suggests `%s' argument",
+					mdoc_argnames[MDOC_Std]))
+			return(0);
+	return(1);
 }
 
 
@@ -537,9 +584,8 @@ static int
 pre_it(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
-	if (MDOC_BLOCK != mdoc->last->type)
+	if (MDOC_BLOCK != node->type)
 		return(1);
-	assert(MDOC_It == mdoc->last->tok);
 	return(pre_check_parent(mdoc, node, MDOC_Bl, MDOC_BODY));
 }
 
@@ -593,6 +639,51 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 	}
 
 	return(mdoc_nerr(mdoc, node, "prologue macro repeated"));
+}
+
+
+static int
+post_an(struct mdoc *mdoc)
+{
+
+	assert(MDOC_ELEM == mdoc->last->type);
+	assert(MDOC_An == mdoc->last->tok);
+
+	if (0 != mdoc->last->data.elem.argc) {
+		if (NULL == mdoc->last->child)
+			return(1);
+		return(mdoc_err(mdoc, "macro expects either argument or parameters"));
+	}
+
+	if (mdoc->last->child)
+		return(1);
+	return(mdoc_err(mdoc, "macro expects either argument or parameters"));
+}
+
+
+static int
+post_ex(struct mdoc *mdoc)
+{
+
+	assert(MDOC_ELEM == mdoc->last->type);
+	assert(MDOC_Ex == mdoc->last->tok);
+
+	if (0 == mdoc->last->data.elem.argc) {
+		if (mdoc->last->child)
+			return(1);
+		return(mdoc_err(mdoc, "macro expects `%s' or a single child",
+					mdoc_argnames[MDOC_Std]));
+	}
+	if (mdoc->last->child)
+		return(mdoc_err(mdoc, "macro expects `%s' or a single child",
+					mdoc_argnames[MDOC_Std]));
+	if (1 != mdoc->last->data.elem.argc)
+		return(mdoc_err(mdoc, "macro expects `%s' or a single child",
+					mdoc_argnames[MDOC_Std]));
+	if (MDOC_Std != mdoc->last->data.elem.argv[0].arg)
+		return(mdoc_err(mdoc, "macro expects `%s' or a single child",
+					mdoc_argnames[MDOC_Std]));
+	return(1);
 }
 
 
@@ -704,7 +795,6 @@ post_it(struct mdoc *mdoc)
 	if (i == (size_t)sv)
 		return(1);
 	return(mdoc_err(mdoc, "expected %d list columns, have %d", sv, (int)i));
-
 #undef	TYPE_NONE
 #undef	TYPE_BODY
 #undef	TYPE_HEAD

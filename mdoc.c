@@ -241,7 +241,8 @@ mdoc_alloc(void *data, const struct mdoc_cb *cb)
 	p = xcalloc(1, sizeof(struct mdoc));
 
 	p->data = data;
-	(void)memcpy(&p->cb, cb, sizeof(struct mdoc_cb));
+	if (cb)
+		(void)memcpy(&p->cb, cb, sizeof(struct mdoc_cb));
 
 	p->last = xcalloc(1, sizeof(struct mdoc_node));
 	p->last->type = MDOC_ROOT;

@@ -36,38 +36,42 @@
 
 #define	MD_LINE_SZ	(256)		/* Max input line size. */
 
+
 struct	md_parse {
-	int		 warn;		/* Warning flags. */
-#define	MD_WARN_SYNTAX	(1 << 0)	/* Show syntax warnings. */
-#define	MD_WARN_COMPAT	(1 << 1)	/* Show compat warnings. */
-#define	MD_WARN_ALL	(0x03)		/* Show all warnings. */
-#define	MD_WARN_ERR	(1 << 2)	/* Make warnings->errors. */
-	int		 dbg;		/* Debug level. */
-	struct mdoc	*mdoc;		/* Active parser. */
-	char		*buf;		/* Input buffer. */
-	u_long		 bufsz;		/* Input buffer size. */
-	char		*name;		/* Input file name. */
-	int		 fd;		/* Input file desc. */
+	int		  warn;		/* Warning flags. */
+#define	MD_WARN_SYNTAX	 (1 << 0)	/* Show syntax warnings. */
+#define	MD_WARN_COMPAT	 (1 << 1)	/* Show compat warnings. */
+#define	MD_WARN_ALL	 (0x03)		/* Show all warnings. */
+#define	MD_WARN_ERR	 (1 << 2)	/* Make warnings->errors. */
+	int		  dbg;		/* Debug level. */
+	struct mdoc	 *mdoc;		/* Active parser. */
+	char		 *buf;		/* Input buffer. */
+	u_long		  bufsz;	/* Input buffer size. */
+	char		 *name;		/* Input file name. */
+	int		  fd;		/* Input file desc. */
+	int		(*fp)(const struct mdoc_node *, const char *);
 };
 
-extern	char	 	*__progname;
+extern	char	 	 *__progname;
 
-static	void		 usage(void);
+extern	int		 
 
-static	int		 parse_begin(struct md_parse *);
-static	int		 parse_leave(struct md_parse *, int);
-static	int		 io_begin(struct md_parse *);
-static	int		 io_leave(struct md_parse *, int);
-static	int		 buf_begin(struct md_parse *);
-static	int		 buf_leave(struct md_parse *, int);
+static	void		  usage(void);
 
-static	void		 msg_msg(void *, int, int, const char *);
-static	int		 msg_err(void *, int, int, const char *);
-static	int		 msg_warn(void *, int, int, 
+static	int		  parse_begin(struct md_parse *);
+static	int		  parse_leave(struct md_parse *, int);
+static	int		  io_begin(struct md_parse *);
+static	int		  io_leave(struct md_parse *, int);
+static	int		  buf_begin(struct md_parse *);
+static	int		  buf_leave(struct md_parse *, int);
+
+static	void		  msg_msg(void *, int, int, const char *);
+static	int		  msg_err(void *, int, int, const char *);
+static	int		  msg_warn(void *, int, int, 
 				enum mdoc_warn, const char *);
 
 #ifdef __linux__
-extern	int		 getsubopt(char **, char *const *, char **);
+extern	int		  getsubopt(char **, char *const *, char **);
 #endif
 
 int
@@ -75,7 +79,7 @@ main(int argc, char *argv[])
 {
 	int		 c;
 	struct md_parse	 parser;
-	char		*opts, *v;
+	char		*opts, *v, *filter, *output;
 #define ALL     	 0
 #define COMPAT     	 1
 #define SYNTAX     	 2
@@ -86,10 +90,18 @@ main(int argc, char *argv[])
 	extern char	*optarg;
 	extern int	 optind;
 
+	output = filter = NULL;
+
 	(void)memset(&parser, 0, sizeof(struct md_parse));
 
-	while (-1 != (c = getopt(argc, argv, "vW:")))
+	while (-1 != (c = getopt(argc, argv, "f:vW:o:")))
 		switch (c) {
+		case ('f'):
+			filter = optarg;
+			break;
+		case ('o'):
+			output = optarg;
+			break;
 		case ('v'):
 			parser.dbg++;
 			break;
@@ -194,79 +206,6 @@ buf_begin(struct md_parse *p)
 }
 
 
-/* TODO: remove this to a print-tree output filter. */
-static void
-print_node(const struct mdoc_node *n, int indent)
-{
-	const char	 *p, *t;
-	int		  i, j;
-	size_t		  argc, sz;
-	char		**params;
-	struct mdoc_arg	 *argv;
-
-	argv = NULL;
-	argc = sz = 0;
-	params = NULL;
-
-	t = mdoc_type2a(n->type);
-
-	switch (n->type) {
-	case (MDOC_TEXT):
-		p = n->data.text.string;
-		break;
-	case (MDOC_BODY):
-		p = mdoc_macronames[n->tok];
-		break;
-	case (MDOC_HEAD):
-		p = mdoc_macronames[n->tok];
-		break;
-	case (MDOC_TAIL):
-		p = mdoc_macronames[n->tok];
-		break;
-	case (MDOC_ELEM):
-		p = mdoc_macronames[n->tok];
-		argv = n->data.elem.argv;
-		argc = n->data.elem.argc;
-		break;
-	case (MDOC_BLOCK):
-		p = mdoc_macronames[n->tok];
-		argv = n->data.block.argv;
-		argc = n->data.block.argc;
-		break;
-	case (MDOC_ROOT):
-		p = "root";
-		break;
-	default:
-		abort();
-		/* NOTREACHED */
-	}
-
-	for (i = 0; i < indent; i++)
-		xprintf("    ");
-	xprintf("%s (%s)", p, t);
-
-	for (i = 0; i < (int)argc; i++) {
-		xprintf(" -%s", mdoc_argnames[argv[i].arg]);
-		if (argv[i].sz > 0)
-			xprintf(" [");
-		for (j = 0; j < (int)argv[i].sz; j++)
-			xprintf(" [%s]", argv[i].value[j]);
-		if (argv[i].sz > 0)
-			xprintf(" ]");
-	}
-
-	for (i = 0; i < (int)sz; i++)
-		xprintf(" [%s]", params[i]);
-
-	xprintf(" %d:%d\n", n->line, n->pos);
-
-	if (n->child)
-		print_node(n->child, indent + 1);
-	if (n->next)
-		print_node(n->next, indent);
-}
-
-
 static int
 parse_leave(struct md_parse *p, int code)
 {
@@ -277,8 +216,8 @@ parse_leave(struct md_parse *p, int code)
 
 	if ( ! mdoc_endparse(p->mdoc))
 		code = 0;
-	if ((n = mdoc_result(p->mdoc)))
-		print_node(n, 0);
+	if (p->fp && (n = mdoc_result(p->mdoc)))
+		(*p->fp)(n, NULL);
 
 	mdoc_free(p->mdoc);
 
@@ -396,7 +335,7 @@ static void
 usage(void)
 {
 
-	xfprintf(stderr, "usage: %s [-v] [-Wwarn...] [infile]\n",
-			__progname);
+	xfprintf(stderr, "usage: %s [-v] [-Wwarn...] [-ffilter] "
+			"[-o outfile] [infile]\n", __progname);
 }
 
