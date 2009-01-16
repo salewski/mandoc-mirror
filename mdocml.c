@@ -194,6 +194,7 @@ buf_begin(struct md_parse *p)
 }
 
 
+/* TODO: remove this to a print-tree output filter. */
 static void
 print_node(const struct mdoc_node *n, int indent)
 {

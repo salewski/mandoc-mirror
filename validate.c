@@ -49,15 +49,17 @@ static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 
-static	int	headchild_err_ge1(struct mdoc *);
-static	int	headchild_warn_ge1(struct mdoc *);
-static	int	headchild_err_eq0(struct mdoc *);
-static	int	elemchild_err_eq0(struct mdoc *);
-static	int	elemchild_err_ge1(struct mdoc *);
-static	int	elemchild_warn_eq0(struct mdoc *);
-static	int	bodychild_warn_ge1(struct mdoc *);
-static	int	bodychild_err_eq0(struct mdoc *);
-static	int	elemchild_warn_ge1(struct mdoc *);
+static	int	head_err_ge1(struct mdoc *);
+static	int	head_warn_ge1(struct mdoc *);
+static	int	head_err_eq0(struct mdoc *);
+static	int	elem_err_eq0(struct mdoc *);
+static	int	elem_err_eq1(struct mdoc *);
+static	int	elem_err_ge1(struct mdoc *);
+static	int	elem_warn_eq0(struct mdoc *);
+static	int	body_warn_ge1(struct mdoc *);
+static	int	body_err_eq0(struct mdoc *);
+static	int	elem_warn_ge1(struct mdoc *);
+static	int	elem_bool(struct mdoc *);
 static	int	post_sh(struct mdoc *);
 static	int	post_bl(struct mdoc *);
 static	int	post_it(struct mdoc *);
@@ -73,17 +75,20 @@ static	v_pre	pres_cd[] = { pre_cd, NULL };
 static	v_pre	pres_er[] = { pre_er, NULL };
 static	v_pre	pres_ex[] = { pre_ex, NULL };
 
-static	v_post	posts_bd[] = { headchild_err_eq0, bodychild_warn_ge1, NULL };
-static	v_post	posts_text[] = { elemchild_err_ge1, NULL };
-static	v_post	posts_wtext[] = { elemchild_warn_ge1, NULL };
-static	v_post	posts_notext[] = { elemchild_err_eq0, NULL };
-static	v_post	posts_wline[] = { headchild_warn_ge1, bodychild_err_eq0, NULL };
-static	v_post	posts_sh[] = { headchild_err_ge1, bodychild_warn_ge1, post_sh, NULL };
-static	v_post	posts_bl[] = { headchild_err_eq0, bodychild_warn_ge1, post_bl, NULL };
+static	v_post	posts_bool[] = { elem_err_eq1, elem_bool, NULL };
+static	v_post	posts_bd[] = { head_err_eq0, body_warn_ge1, NULL };
+static	v_post	posts_text[] = { elem_err_ge1, NULL };
+static	v_post	posts_wtext[] = { elem_warn_ge1, NULL };
+static	v_post	posts_notext[] = { elem_err_eq0, NULL };
+static	v_post	posts_wline[] = { head_warn_ge1, body_err_eq0, NULL };
+static	v_post	posts_sh[] = { head_err_ge1, 
+			body_warn_ge1, post_sh, NULL };
+static	v_post	posts_bl[] = { head_err_eq0, 
+			body_warn_ge1, post_bl, NULL };
 static	v_post	posts_it[] = { post_it, NULL };
-static	v_post	posts_ss[] = { headchild_err_ge1, NULL };
-static	v_post	posts_pp[] = { elemchild_warn_eq0, NULL };
-static	v_post	posts_d1[] = { headchild_err_ge1, NULL };
+static	v_post	posts_ss[] = { head_err_ge1, NULL };
+static	v_post	posts_pp[] = { elem_warn_eq0, NULL };
+static	v_post	posts_d1[] = { head_err_ge1, NULL };
 
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
@@ -156,7 +161,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_wline }, /* Bq */
 	{ NULL, NULL }, /* Bsx */
 	{ NULL, NULL }, /* Bx */
-	{ NULL, NULL }, /* Db */ /* FIXME: boolean */
+	{ NULL, posts_bool }, /* Db */
 	{ NULL, NULL }, /* Dc */
 	{ NULL, NULL }, /* Do */
 	{ NULL, posts_wline }, /* Dq */
@@ -183,7 +188,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* Sc */
 	{ NULL, NULL }, /* So */
 	{ NULL, posts_wline }, /* Sq */
-	{ NULL, NULL }, /* Sm */ /* FIXME: boolean */
+	{ NULL, posts_bool }, /* Sm */ 
 	{ NULL, posts_text }, /* Sx */
 	{ NULL, posts_text }, /* Sy */
 	{ NULL, posts_text }, /* Tn */
@@ -235,7 +240,7 @@ pre_check_parent(struct mdoc *mdoc, struct mdoc_node *node,
 
 
 static int
-bodychild_err_eq0(struct mdoc *mdoc)
+body_err_eq0(struct mdoc *mdoc)
 {
 
 	if (MDOC_BODY != mdoc->last->type)
@@ -247,7 +252,7 @@ bodychild_err_eq0(struct mdoc *mdoc)
 
 
 static int
-bodychild_warn_ge1(struct mdoc *mdoc)
+body_warn_ge1(struct mdoc *mdoc)
 {
 
 	if (MDOC_BODY != mdoc->last->type)
@@ -259,7 +264,7 @@ bodychild_warn_ge1(struct mdoc *mdoc)
 
 
 static int
-elemchild_warn_eq0(struct mdoc *mdoc)
+elem_warn_eq0(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
@@ -271,7 +276,7 @@ elemchild_warn_eq0(struct mdoc *mdoc)
 
 
 static int
-elemchild_warn_ge1(struct mdoc *mdoc)
+elem_warn_ge1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
@@ -282,7 +287,20 @@ elemchild_warn_ge1(struct mdoc *mdoc)
 
 
 static int
-elemchild_err_eq0(struct mdoc *mdoc)
+elem_err_eq1(struct mdoc *mdoc)
+{
+
+	assert(MDOC_ELEM == mdoc->last->type);
+	if (NULL == mdoc->last->child)
+		return(mdoc_err(mdoc, "macro expects one parameter"));
+	if (mdoc->last->child->next)
+		return(mdoc_err(mdoc, "macro expects one parameter"));
+	return(1);
+}
+
+
+static int
+elem_err_eq0(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
@@ -293,7 +311,7 @@ elemchild_err_eq0(struct mdoc *mdoc)
 
 
 static int
-elemchild_err_ge1(struct mdoc *mdoc)
+elem_err_ge1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
@@ -304,7 +322,7 @@ elemchild_err_ge1(struct mdoc *mdoc)
 
 
 static int
-headchild_err_eq0(struct mdoc *mdoc)
+head_err_eq0(struct mdoc *mdoc)
 {
 
 	if (MDOC_HEAD != mdoc->last->type)
@@ -317,7 +335,7 @@ headchild_err_eq0(struct mdoc *mdoc)
 
 
 static int
-headchild_warn_ge1(struct mdoc *mdoc)
+head_warn_ge1(struct mdoc *mdoc)
 {
 
 	if (MDOC_HEAD != mdoc->last->type)
@@ -329,7 +347,7 @@ headchild_warn_ge1(struct mdoc *mdoc)
 
 
 static int
-headchild_err_ge1(struct mdoc *mdoc)
+head_err_ge1(struct mdoc *mdoc)
 {
 
 	if (MDOC_HEAD != mdoc->last->type)
@@ -712,6 +730,27 @@ post_bl(struct mdoc *mdoc)
 	if (NULL == n)
 		return(1);
 	return(mdoc_nerr(mdoc, n, "invalid child of parent macro `Bl'"));
+}
+
+
+static int
+elem_bool(struct mdoc *mdoc)
+{
+	struct mdoc_node *n;
+
+	assert(MDOC_ELEM == mdoc->last->type);
+	for (n = mdoc->last->child; n; n = n->next) {
+		if (MDOC_TEXT != n->type)
+			break;
+		if (xstrcmp(n->data.text.string, "on"))
+			continue;
+		if (xstrcmp(n->data.text.string, "off"))
+			continue;
+		break;
+	}
+	if (NULL == n)
+		return(1);
+	return(mdoc_nerr(mdoc, n, "expected boolean value [on/off]"));
 }
 
 
