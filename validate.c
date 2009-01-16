@@ -31,11 +31,20 @@ struct	valids {
 	v_post	*post;
 };
 
+static	int	pre_check_parent(struct mdoc *, struct mdoc_node *, 
+			int, enum mdoc_type);
+static	int	pre_check_msecs(struct mdoc *, struct mdoc_node *, 
+			int, enum mdoc_msec *);
 
 static	int	pre_display(struct mdoc *, struct mdoc_node *);
+static	int	pre_sh(struct mdoc *, struct mdoc_node *);
+static	int	pre_ss(struct mdoc *, struct mdoc_node *);
 static	int	pre_bd(struct mdoc *, struct mdoc_node *);
 static	int	pre_bl(struct mdoc *, struct mdoc_node *);
 static	int	pre_it(struct mdoc *, struct mdoc_node *);
+static	int	pre_cd(struct mdoc *, struct mdoc_node *);
+static	int	pre_er(struct mdoc *, struct mdoc_node *);
+static	int	pre_ex(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
@@ -58,6 +67,11 @@ static	v_pre	pres_d1[] = { pre_display, NULL };
 static	v_pre	pres_bd[] = { pre_display, pre_bd, NULL };
 static	v_pre	pres_bl[] = { pre_bl, NULL };
 static	v_pre	pres_it[] = { pre_it, NULL };
+static	v_pre	pres_ss[] = { pre_ss, NULL };
+static	v_pre	pres_sh[] = { pre_sh, NULL };
+static	v_pre	pres_cd[] = { pre_cd, NULL };
+static	v_pre	pres_er[] = { pre_er, NULL };
+static	v_pre	pres_ex[] = { pre_ex, NULL };
 
 static	v_post	posts_bd[] = { headchild_err_eq0, bodychild_warn_ge1, NULL };
 static	v_post	posts_text[] = { elemchild_err_ge1, NULL };
@@ -79,11 +93,9 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pres_prologue, NULL }, /* Os */
 	/* FIXME: preceding Pp. */ 
 	/* FIXME: NAME section internal ordering. */
-	/* FIXME: can only be a child of root. */
-	{ NULL, posts_sh }, /* Sh */ 
+	{ pres_sh, posts_sh }, /* Sh */ 
 	/* FIXME: preceding Pp. */
-	/* FIXME: can only be a child of Sh. */
-	{ NULL, posts_ss }, /* Ss */ 
+	{ pres_ss, posts_ss }, /* Ss */ 
 	/* FIXME: proceeding... */
 	{ NULL, posts_pp }, /* Pp */ 
 	{ pres_d1, posts_d1 }, /* D1 */
@@ -96,16 +108,15 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* El */
 	{ pres_it, posts_it }, /* It */
 	{ NULL, posts_text }, /* Ad */ 
-	/* FIXME */
+	/* FIXME: argument OR parameters. */
 	{ NULL, NULL }, /* An */ 
 	{ NULL, NULL }, /* Ar */
-
-	{ NULL, posts_text }, /* Cd */ /* FIXME: section 4 only. */
+	{ pres_cd, posts_text }, /* Cd */ 
 	{ NULL, NULL }, /* Cm */
 	{ NULL, posts_text }, /* Dv */ 
-	{ NULL, posts_text }, /* Er */ /* FIXME: section 2 only. */
+	{ pres_er, posts_text }, /* Er */ 
 	{ NULL, posts_text }, /* Ev */ 
-	{ NULL, posts_notext }, /* Ex */ /* FIXME: sections 1,6,8 only. */ /* -std required */
+	{ pres_ex, posts_notext }, /* Ex */ /* FIXME: -std required */
 	{ NULL, posts_text }, /* Fa */ 
 	{ NULL, NULL }, /* Fd */ /* FIXME: SYNOPSIS section. */
 	{ NULL, NULL }, /* Fl */
@@ -160,7 +171,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* Nx */
 	{ NULL, NULL }, /* Ox */
 	{ NULL, NULL }, /* Pc */
-	{ NULL, NULL }, /* Pf */ /* FIXME: 2 or more arguments */
+	{ NULL, NULL }, /* Pf */ /* FIXME: 2 or more arguments */ /* First should be text. */
 	{ NULL, NULL }, /* Po */
 	{ NULL, posts_wline }, /* Pq */ /* FIXME: ignore following Sh/Ss */
 	{ NULL, NULL }, /* Qc */
@@ -190,6 +201,37 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* Fr */
 	{ NULL, posts_notext }, /* Ud */
 };
+
+
+static int
+pre_check_msecs(struct mdoc *mdoc, struct mdoc_node *node, 
+		int sz, enum mdoc_msec *msecs)
+{
+	int		 i;
+
+	for (i = 0; i < sz; i++)
+		if (msecs[i] == mdoc->meta.msec)
+			return(1);
+	return(mdoc_nwarn(mdoc, node, WARN_COMPAT,
+				"macro is not appropriate for this manual section"));
+}
+
+
+static int
+pre_check_parent(struct mdoc *mdoc, struct mdoc_node *node, 
+		int tok, enum mdoc_type type)
+{
+
+	if (type != mdoc->last->parent->type) 
+		return(mdoc_nerr(mdoc, node, "invalid macro parent class %s, expected %s", 
+					mdoc_type2a(mdoc->last->parent->type),
+					mdoc_type2a(type)));
+	if (MDOC_ROOT != type && tok == mdoc->last->parent->tok)
+		return(mdoc_nerr(mdoc, node, "invalid macro parent `%s', expected `%s'", 
+					mdoc_macronames[mdoc->last->parent->tok],
+					mdoc_macronames[tok]));
+	return(1);
+}
 
 
 static int
@@ -420,19 +462,67 @@ pre_bd(struct mdoc *mdoc, struct mdoc_node *node)
 
 
 static int
+pre_ss(struct mdoc *mdoc, struct mdoc_node *node)
+{
+
+	if (MDOC_BLOCK != mdoc->last->type)
+		return(1);
+	assert(MDOC_Sh == mdoc->last->tok);
+	return(pre_check_parent(mdoc, node, MDOC_Sh, MDOC_BODY));
+}
+
+
+static int
+pre_sh(struct mdoc *mdoc, struct mdoc_node *node)
+{
+
+	if (MDOC_BLOCK != mdoc->last->type)
+		return(1);
+	assert(MDOC_Sh == mdoc->last->tok);
+	return(pre_check_parent(mdoc, node, -1, MDOC_ROOT));
+}
+
+
+static int
+pre_ex(struct mdoc *mdoc, struct mdoc_node *node)
+{
+	enum mdoc_msec	 msecs[3];
+
+	msecs[0] = MSEC_1;
+	msecs[1] = MSEC_6;
+	msecs[2] = MSEC_8;
+	return(pre_check_msecs(mdoc, node, 3, msecs));
+}
+
+
+static int
+pre_er(struct mdoc *mdoc, struct mdoc_node *node)
+{
+	enum mdoc_msec	 msecs[1];
+
+	msecs[0] = MSEC_2;
+	return(pre_check_msecs(mdoc, node, 1, msecs));
+}
+
+
+static int
+pre_cd(struct mdoc *mdoc, struct mdoc_node *node)
+{
+	enum mdoc_msec	 msecs[1];
+
+	msecs[0] = MSEC_4;
+	return(pre_check_msecs(mdoc, node, 1, msecs));
+}
+
+
+static int
 pre_it(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
 	if (MDOC_BLOCK != mdoc->last->type)
 		return(1);
 	assert(MDOC_It == mdoc->last->tok);
-
-	if (MDOC_BODY != mdoc->last->parent->type) 
-		return(mdoc_nerr(mdoc, node, "invalid macro parent `%s'", mdoc_macronames[mdoc->last->parent->tok]));
-	if (MDOC_Bl != mdoc->last->parent->tok)
-		return(mdoc_nerr(mdoc, node, "invalid macro parent `%s'", mdoc_macronames[mdoc->last->parent->tok]));
-
-	return(1);
+	return(pre_check_parent(mdoc, node, MDOC_Bl, MDOC_BODY));
 }
 
 
@@ -552,31 +642,33 @@ post_it(struct mdoc *mdoc)
 	assert(TYPE_NONE != type);
 
 	if (TYPE_HEAD == type) {
-		if (NULL == (n = mdoc->last->data.block.head)) {
-			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests line parameters"))
-				return(0);
-		} else if (NULL == n->child)
+		n = mdoc->last->data.block.head;
+		assert(n);
+		if (NULL == n->child)
 			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests line parameters"))
 				return(0);
 
-		if (NULL == (n = mdoc->last->data.block.body)) {
-			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests body children"))
-				return(0);
-		} else if (NULL == n->child)
+		n = mdoc->last->data.block.body;
+		assert(n);
+		if (NULL == n->child)
 			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests body children"))
 				return(0);
 
 		return(1);
 	}
 
-	if (NULL == (n = mdoc->last->data.block.head)) {
-		if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests line parameters"))
-			return(0);
-	} else if (NULL == n->child)
-		if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests line parameters"))
+	assert(TYPE_BODY == type);
+	assert(mdoc->last->data.block.head);
+
+	n = mdoc->last->data.block.head;
+	assert(n);
+	if (n->child)
+		if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests no line parameters"))
 			return(0);
 
-	if ((n = mdoc->last->data.block.body) && n->child)
+	n = mdoc->last->data.block.body;
+	assert(n);
+	if (NULL == n->child)
 		if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests body children"))
 			return(0);
 
@@ -686,8 +778,10 @@ mdoc_valid_post(struct mdoc *mdoc)
 
 	if (MDOC_TEXT == mdoc->last->type)
 		return(1);
-	if (MDOC_ROOT == mdoc->last->type)
+	if (MDOC_ROOT == mdoc->last->type) {
+		/* TODO: make sure prologue is complete. */
 		return(1);
+	}
 
 	if (NULL == mdoc_valids[mdoc->last->tok].post)
 		return(1);

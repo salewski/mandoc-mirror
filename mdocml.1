@@ -5,50 +5,37 @@
 .\"
 .Sh NAME
 .Nm mdocml
-.Nd compile manpage source into mark-up language
+.Nd mdoc macro compiler
 .\"
 .Sh SYNOPSIS
 .Nm mdocml
 .Op Fl v
 .Op Fl W Ns Ar err...
-.Op Fl f Ar filter
-.Op Fl o Ar outfile
 .Op Ar infile
 .\"
 .Sh DESCRIPTION
 The
 .Nm
-utility parses mdoc formatted manual source and passes results into an
-output filter.  The current output filters are
-.Fl f Ar html
-and
-.Fl f Ar xml .
-By default, 
-.Nm
-only validates its input. This may be explicitly directed with
-.Fl f Ar noop .  
-Arguments common to all filters follow:
-.Bl -tag -width "\-o outfile"
-.It Fl f Ar filter
-The output filter name.  
-.It Fl o Ar outfile
-Write output to 
-.Ar outfile ,
-which may be
-.Dq \-
-for stdout.  This is meaningless for
-.Fl f Ar noop .
+utility interfaces the
+.Xr mdoc 3
+library to validate and parse mdoc-macro documents.  Arguments follow:
+.Bl -tag -width "\-Werr... "
 .It Fl W Ns Ar err...
-Print warning messages.  If set to 
-.Fl W Ns Ar all ,
-all warnings are printed; if
-.Fl W Ns Ar error ,
-warnings are considered errors and cause utility termination.  Multiple 
+Print warning messages.  May be set to 
+.Fl W Ns Ar all
+for all warnings, 
+.Ar compat
+for groff/troff-compatibility warnings, or
+.Ar syntax
+for syntax warnings.  If
+.Fl W Ns Ar error 
+is specified, warnings are considered errors and cause utility
+termination.  Multiple 
 .Fl W
 arguments may be comma-separated, such as
 .Fl W Ns Ar error,all .
 .It Fl v
-Make warning and error messages verbose.
+Print verbose parsing output.
 .It Ar infile
 Read input from
 .Ar infile ,
@@ -57,90 +44,29 @@ which may be
 for stdin.
 .El
 .Pp
+Parsing and validation rules are drawn entirely from the 
+.Xr mdoc 7
+and
+.Xr mdoc.samples 7 
+manuals.
+.Pp
 By default,
 .Nm
-reads from stdin and writes to stdout.
+reads from stdin, writes messages to stdout, and writes errors and
+warnings to stderr.
 .Pp
 .Ex -std mdocml
-.\"
-.Ss Noop Filter
-The default noop 
-.Dq validating
-filter simply validates its input; it produces no output beyond error
-and warning messages.
-.\"
-.Ss XML Filter
-The XML filter, specified by
-.Fl f Ar xml ,
-produces correctly-formatted XML output.  This filter has no additional
-arguments.
-.Pp
-The XML filter creates an XML document where element names are their respective
-roff macro names.  Each element name has an associated
-namespace, which is one of 
-.Dq block ,
-.Dq head ,
-.Dq body ,
-or
-.Dq inline ,
-corresponding to the display mode of a node.  The document root is
-always the
-.Dq mdoc
-element, in the default namespace; the 
-.Dq head
-namespace is for block headers (such as 
-.Sq .Ss
-and
-.Sq .Sh ) ;
-the
-.Dq body
-namespace is for block bodies; and the
-.Dq inline
-namespace is for in-line elements (such as
-.Sq .Em ) .
-.\"
-.Ss HTML Filter
-The HTML filter, specified by
-.Fl f Ar html ,
-accepts the following filter-specific arguments:
-.Bl -tag -width "\-c css"
-.It Fl c Ar css
-The CSS file location, which defaults to 
-.Ar mdocml.css .
-.It Fl e
-Whether to embed the CSS file into the HTML prologue.
-.El
-.Pp
-By default, the HTML filter produces HTML-4.01 strict mark-up.  The
-default CSS document styles the page as it would appear in a terminal
-window.
 .\" 
 .Sh EXAMPLES
-To produce an HTML4-strict document 
-.Pa mdocml.html
-for
-.Pa mdocml.1 
-with the default, embedded style-sheet:
+To validate this manual page:
 .Pp
-.D1 % mdocml -fhtml -e -o mdocml.html mdocml.1 
-.Pp
-To create an XML document on standard output from
-.Pa mdocml.1
-with the default namespace identifiers
-.Li head ,
-.Li body ,
-.Li block 
-and
-.Li inline :
-.Pp
-.D1 % mdocml -Wall,error -fxml mdocml.1 
-.Pp
-The previous example will also halt on input document warnings.
+.D1 % mdocml \-Wall,error mdocml.1 
 .\"
 .Sh SEE ALSO
 .Xr groff 1 ,
 .Xr mdoc.samples 7 ,
-.Xr mdoc 7
+.Xr mdoc 7 ,
+.Xr mdoc 3
 .\" .Sh STANDARDS
 .\" .Sh HISTORY
 .Sh AUTHORS
@@ -150,34 +76,16 @@ utility was written by
 .An Kristaps Dzonsons Aq kristaps@kth.se .
 .\"
 .Sh CAVEATS
-Most caveats of
+The most glaring short-coming of 
 .Nm
-stem from ambiguities in 
-.Xr mdoc 7
-or the necessary limitations of converting an ad hoc language into
-structured ones:
-.Bl -enum -compact -offset indent
-.It 
-The engine doesn't understand the
-.Sq \&No ,
-.Sq \&Db ,
-.Sq \&Xc ,
+is that it doesn't yet support the 
+.Sq \&Xc
 and
 .Sq \&Xo
-mdoc macros.
-.It 
-All macro arguments may be quoted, instead of only some.
-.It 
-Blank lines raise errors.
-.It 
-If terminating punctuation is found, then 
-.Em all
-remaining tokens are flushed after line scope is closed, not just the
-last one.
-.El
-.Pp
-The roff engine in 
-.Nm
-produces text in-line; thus, output may already be partially written by
-the time an error is encountered.
+macros when used to extend the line arguments to
+.Sq \&It ;
+in effect, trampling the body section.  We note that this is explicitly
+discouraged in
+.Xr mdoc.samples 7 ,
+but in practice used quite often.
 .\" .Sh BUGS

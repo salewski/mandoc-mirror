@@ -1,0 +1,56 @@
+.\" 
+.Dd $Mdocdate$
+.Dt mdoc 3
+.Os
+.\"
+.Sh NAME
+.Nm mdoc_alloc ,
+.Nm mdoc_parseln ,
+.Nm mdoc_endparse ,
+.Nm mdoc_result ,
+.Nm mdoc_free
+.Nd mdoc macro compiler
+.\"
+.Sh SYNOPSIS
+.In mdoc.h
+.Ft "struct mdoc *"
+.Fn mdoc_alloc "void *data" "const struct mdoc_cb *cb"
+.Ft void
+.Fn mdoc_free "struct mdoc *"
+.Ft int
+.Fn mdoc_parseln "struct mdoc *" "int" "char *buf"
+.Ft "const struct mdoc_node *"
+.Fn mdoc_result "struct mdoc *"
+.Ft int
+.Fn mdoc_endparse "struct mdoc *"
+.\"
+.Sh DESCRIPTION
+The
+.Nm mdoc
+library parses lines of mdoc-macro text into an abstract syntax tree.
+In general, applications initiate a parsing sequence with
+.Fn mdoc_alloc ,
+parse each line in a document with 
+.Fn mdoc_parseln ,
+close the parsing session with
+.Fn mdoc_endparse ,
+operate over the syntax tree returned by
+.Fn mdoc_result ,
+then free all allocated memory with
+.Fn mdoc_free .
+See the
+.Sx EXAMPLES
+section for a full example.
+.\" The following requests should be uncommented and used where appropriate.
+.\" This next request is for sections 2, 3, and 9 function return values only.
+.\" .Sh RETURN VALUES
+.\" .Sh EXAMPLES
+.\" The next request is for sections 2, 3, and 9 error and signal handling only.
+.\" .Sh ERRORS
+.\" .Sh SEE ALSO
+.\" .Xr foobar 1
+.\" .Sh STANDARDS
+.\" .Sh HISTORY
+.\" .Sh AUTHORS
+.\" .Sh CAVEATS
+.\" .Sh BUGS
