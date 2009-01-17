@@ -130,6 +130,7 @@ enum	mdoc_att  mdoc_atoatt(const char *);
 time_t		  mdoc_atotime(const char *);
 
 char		 *mdoc_type2a(enum mdoc_type);
+char		 *mdoc_node2a(struct mdoc_node *);
 
 int		  mdoc_valid_pre(struct mdoc *, struct mdoc_node *);
 int		  mdoc_valid_post(struct mdoc *);

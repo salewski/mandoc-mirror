@@ -465,6 +465,7 @@ pre_display(struct mdoc *mdoc, struct mdoc_node *node)
 		return(1);
 
 	assert(mdoc->last);
+	/* LINTED */
 	for (n = mdoc->last->parent; n; n = n->parent) 
 		if (MDOC_BLOCK == n->type)
 			if (MDOC_Bd == n->tok)
@@ -489,6 +490,7 @@ pre_bl(struct mdoc *mdoc, struct mdoc_node *node)
 	argv = NULL;
 	argc = node->data.block.argc; 
 
+	/* LINTED */
 	for (i = type = err = 0; i < argc; i++) {
 		argv = &node->data.block.argv[(int)i];
 		assert(argv);
@@ -546,6 +548,7 @@ pre_bd(struct mdoc *mdoc, struct mdoc_node *node)
 	argv = NULL;
 	argc = node->data.block.argc;
 
+	/* LINTED */
 	for (err = i = type = 0; 0 == err && i < argc; i++) {
 		argv = &node->data.block.argv[(int)i];
 		assert(argv);
@@ -858,9 +861,11 @@ post_it(struct mdoc *mdoc)
 
 	argc = n->data.block.argc;
 	type = TYPE_NONE;
+	sv = -1;
 	
 	/* Some types require block-head, some not. */
 
+	/* LINTED */
 	for (i = 0; TYPE_NONE == type && i < argc; i++)
 		switch (n->data.block.argv[(int)i].arg) {
 		case (MDOC_Tag):
@@ -926,20 +931,21 @@ post_it(struct mdoc *mdoc)
 		if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests body children"))
 			return(0);
 
+	assert(-1 != sv);
 	if (MDOC_Column != sv) 
 		return(1);
 
 	/* Make sure the number of columns is sane. */
 
-	sv = mdoc->last->parent->parent->data.block.argv->sz;
+	argc = mdoc->last->parent->parent->data.block.argv->sz;
 	n = mdoc->last->data.block.head->child;
 
 	for (i = 0; n; n = n->next)
 		i++;
 
-	if (i == (size_t)sv)
+	if (i == argc)
 		return(1);
-	return(mdoc_err(mdoc, "expected %d list columns, have %d", sv, (int)i));
+	return(mdoc_err(mdoc, "expected %zu list columns, have %zu", argc, i));
 #undef	TYPE_NONE
 #undef	TYPE_BODY
 #undef	TYPE_HEAD
@@ -955,6 +961,7 @@ post_bl(struct mdoc *mdoc)
 		return(1);
 	assert(MDOC_Bl == mdoc->last->tok);
 
+	/* LINTED */
 	for (n = mdoc->last->child; n; n = n->next) {
 		if (MDOC_BLOCK == n->type) 
 			if (MDOC_It == n->tok)
@@ -973,6 +980,7 @@ ebool(struct mdoc *mdoc)
 	struct mdoc_node *n;
 
 	assert(MDOC_ELEM == mdoc->last->type);
+	/* LINTED */
 	for (n = mdoc->last->child; n; n = n->next) {
 		if (MDOC_TEXT != n->type)
 			break;

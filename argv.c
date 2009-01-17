@@ -29,7 +29,7 @@
 /* FIXME: .It called with -column and quoted arguments. */
 
 static	int		 lookup(int, const char *);
-static	int		 parse(struct mdoc *, int, int,
+static	int		 parse(struct mdoc *, int,
 				struct mdoc_arg *, int *, char *);
 static	int		 parse_single(struct mdoc *, int, 
 				struct mdoc_arg *, int *, char *);
@@ -404,7 +404,7 @@ parse_single(struct mdoc *mdoc, int line,
 
 
 static int
-parse(struct mdoc *mdoc, int line, int tok, 
+parse(struct mdoc *mdoc, int line, 
 		struct mdoc_arg *v, int *pos, char *buf)
 {
 
@@ -469,7 +469,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	/* FIXME: whitespace if no value. */
 
 	ppos = *pos;
-	if ( ! parse(mdoc, line, tok, v, pos, buf))
+	if ( ! parse(mdoc, line, v, pos, buf))
 		return(ARGV_ERROR);
 	if ( ! postparse(mdoc, line, v, ppos))
 		return(ARGV_ERROR);
