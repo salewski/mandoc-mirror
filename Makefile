@@ -18,6 +18,20 @@ BINS	= mdocml
 
 CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS)
 
+SUCCESS	= test.1 test.7 test.8 test.9 test.11 test.11 test.12 test.16 \
+	  test.17 test.19 test.20 test.21 test.23 test.25 test.27     \
+	  test.28 test.29 test.31 test.32 test.33 test.34 test.35     \
+	  test.38 test.39 test.40 test.41 test.42 test.43 test.44     \
+	  test.45 test.46 test.47 test.49 test.51 test.52 test.53     \
+	  test.54 test.55 test.56 test.57 test.58 test.59 test.60     \
+	  test.62 test.67 test.68 test.71 test.72 test.73 test.74     \
+	  test.75
+
+FAIL	= test.0 test.2 test.3 test.4 test.5 test.6 test.13 test.14   \
+	  test.15 test.18 test.22 test.24 test.26 test.30 test.36     \
+	  test.37 test.48 test.50 test.61 test.63 test.64 test.65     \
+	  test.66 test.69 test.70
+
 all:	$(BINS)
 
 lint:	$(LLNS)
@@ -27,6 +41,12 @@ mdocml:	mdocml.o tree.o libmdoc.a
 
 clean:
 	rm -f $(CLEAN)
+
+regress: mdocml $(SUCCESS) $(FAIL)
+	@for f in $(SUCCESS) ; do \
+		echo "./mdocml $$f" ; \
+		./mdocml $$f || exit 1 ; \
+	done
 
 llib-llibmdoc.ln: macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln validate.ln action.ln
 	$(LINT) $(LINTFLAGS) -Clibmdoc mdoc.ln macro.ln hash.ln strings.ln xstd.ln argv.ln validate.ln action.ln

@@ -21,19 +21,21 @@
 
 #include "private.h"
 
-
 typedef	int	(*v_pre)(struct mdoc *, struct mdoc_node *);
 typedef	int	(*v_post)(struct mdoc *);
-
 
 /* FIXME: some sections should only occur in specific msecs. */
 /* FIXME: ignoring Pp. */
 /* FIXME: math symbols. */
+/* FIXME: make sure prologue is complete. */
+/* FIXME: valid character-escape checks. */
 
 struct	valids {
 	v_pre	*pre;
 	v_post	*post;
 };
+
+/* Utility checks. */
 
 static	int	pre_check_parent(struct mdoc *, struct mdoc_node *, 
 			int, enum mdoc_type);
@@ -44,6 +46,8 @@ static	int	post_check_children_count(struct mdoc *);
 static	int	post_check_children_lt(struct mdoc *, int);
 static	int	post_check_children_gt(struct mdoc *, int);
 static	int	post_check_children_eq(struct mdoc *, int);
+
+/* Specific pre-child-parse routines. */
 
 static	int	pre_display(struct mdoc *, struct mdoc_node *);
 static	int	pre_sh(struct mdoc *, struct mdoc_node *);
@@ -61,19 +65,21 @@ static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 
-static	int	head_err_ge1(struct mdoc *);
-static	int	head_warn_ge1(struct mdoc *);
-static	int	head_err_eq0(struct mdoc *);
-static	int	elem_err_eq0(struct mdoc *);
-static	int	elem_err_le1(struct mdoc *);
-static	int	elem_err_le2(struct mdoc *);
-static	int	elem_err_eq1(struct mdoc *);
-static	int	elem_err_ge1(struct mdoc *);
-static	int	elem_warn_eq0(struct mdoc *);
-static	int	body_warn_ge1(struct mdoc *);
-static	int	body_err_eq0(struct mdoc *);
-static	int	elem_warn_ge1(struct mdoc *);
-static	int	elem_bool(struct mdoc *);
+/* Specific post-child-parse routines. */
+
+static	int	herr_ge1(struct mdoc *);
+static	int	hwarn_ge1(struct mdoc *);
+static	int	herr_eq0(struct mdoc *);
+static	int	eerr_eq0(struct mdoc *);
+static	int	eerr_le1(struct mdoc *);
+static	int	eerr_le2(struct mdoc *);
+static	int	eerr_eq1(struct mdoc *);
+static	int	eerr_ge1(struct mdoc *);
+static	int	ewarn_eq0(struct mdoc *);
+static	int	bwarn_ge1(struct mdoc *);
+static	int	berr_eq0(struct mdoc *);
+static	int	ewarn_ge1(struct mdoc *);
+static	int	ebool(struct mdoc *);
 static	int	post_sh(struct mdoc *);
 static	int	post_bl(struct mdoc *);
 static	int	post_it(struct mdoc *);
@@ -81,6 +87,10 @@ static	int	post_ex(struct mdoc *);
 static	int	post_an(struct mdoc *);
 static	int	post_at(struct mdoc *);
 static	int	post_xr(struct mdoc *);
+static	int	post_nm(struct mdoc *);
+static	int	post_root(struct mdoc *);
+
+/* Collections of pre-child-parse routines. */
 
 static	v_pre	pres_prologue[] = { pre_prologue, NULL };
 static	v_pre	pres_d1[] = { pre_display, NULL };
@@ -96,26 +106,27 @@ static	v_pre	pres_rv[] = { pre_rv, NULL };
 static	v_pre	pres_an[] = { pre_an, NULL };
 static	v_pre	pres_st[] = { pre_st, NULL };
 
-static	v_post	posts_bool[] = { elem_err_eq1, elem_bool, NULL };
-static	v_post	posts_bd[] = { head_err_eq0, body_warn_ge1, NULL };
-static	v_post	posts_text[] = { elem_err_ge1, NULL };
-static	v_post	posts_wtext[] = { elem_warn_ge1, NULL };
-static	v_post	posts_notext[] = { elem_err_eq0, NULL };
-static	v_post	posts_wline[] = { head_warn_ge1, body_err_eq0, NULL };
-static	v_post	posts_sh[] = { head_err_ge1, 
-			body_warn_ge1, post_sh, NULL };
-static	v_post	posts_bl[] = { head_err_eq0, 
-			body_warn_ge1, post_bl, NULL };
-static	v_post	posts_it[] = { post_it, NULL };
-static	v_post	posts_ss[] = { head_err_ge1, NULL };
-static	v_post	posts_pp[] = { elem_warn_eq0, NULL };
-static	v_post	posts_d1[] = { head_err_ge1, NULL };
-static	v_post	posts_ex[] = { elem_err_le1, post_ex, NULL };
-static	v_post	posts_an[] = { post_an, NULL };
-static	v_post	posts_at[] = { elem_err_eq1, post_at, NULL };
-static	v_post	posts_xr[] = { elem_err_ge1, elem_err_le2, 
-			post_xr, NULL };
+/* Collections of post-child-parse routines. */
 
+static	v_post	posts_bool[] = { eerr_eq1, ebool, NULL };
+static	v_post	posts_bd[] = { herr_eq0, bwarn_ge1, NULL };
+static	v_post	posts_text[] = { eerr_ge1, NULL };
+static	v_post	posts_wtext[] = { ewarn_ge1, NULL };
+static	v_post	posts_notext[] = { eerr_eq0, NULL };
+static	v_post	posts_wline[] = { hwarn_ge1, berr_eq0, NULL };
+static	v_post	posts_sh[] = { herr_ge1, bwarn_ge1, post_sh, NULL };
+static	v_post	posts_bl[] = { herr_eq0, bwarn_ge1, post_bl, NULL };
+static	v_post	posts_it[] = { post_it, NULL };
+static	v_post	posts_ss[] = { herr_ge1, NULL };
+static	v_post	posts_pp[] = { ewarn_eq0, NULL };
+static	v_post	posts_d1[] = { herr_ge1, NULL };
+static	v_post	posts_ex[] = { eerr_le1, post_ex, NULL };
+static	v_post	posts_an[] = { post_an, NULL };
+static	v_post	posts_at[] = { post_at, NULL };
+static	v_post	posts_xr[] = { eerr_ge1, eerr_le2, post_xr, NULL };
+static	v_post	posts_nm[] = { post_nm, NULL };
+
+/* Per-macro pre- and post-child-check routine collections. */
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* \" */
@@ -152,8 +163,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_wtext }, /* In */ 
 	{ NULL, posts_text }, /* Li */
 	{ NULL, posts_wtext }, /* Nd */
-	/* FIXME: check that name must be set/provided. */
-	{ NULL, NULL }, /* Nm */
+	{ NULL, posts_nm }, /* Nm */
 	{ NULL, posts_wline }, /* Op */
 	{ NULL, NULL }, /* Ot */
 	{ NULL, NULL }, /* Pa */
@@ -300,8 +310,8 @@ pre_check_msecs(struct mdoc *mdoc, struct mdoc_node *node,
 	for (i = 0; i < sz; i++)
 		if (msecs[i] == mdoc->meta.msec)
 			return(1);
-	return(mdoc_nwarn(mdoc, node, WARN_COMPAT,
-				"macro is not appropriate for this manual section"));
+	return(mdoc_nwarn(mdoc, node, WARN_COMPAT, "macro not "
+				"appropriate for manual section"));
 }
 
 
@@ -323,7 +333,7 @@ pre_check_parent(struct mdoc *mdoc, struct mdoc_node *node,
 
 
 static int
-body_err_eq0(struct mdoc *mdoc)
+berr_eq0(struct mdoc *mdoc)
 {
 
 	if (MDOC_BODY != mdoc->last->type)
@@ -335,7 +345,7 @@ body_err_eq0(struct mdoc *mdoc)
 
 
 static int
-body_warn_ge1(struct mdoc *mdoc)
+bwarn_ge1(struct mdoc *mdoc)
 {
 
 	if (MDOC_BODY != mdoc->last->type)
@@ -347,7 +357,7 @@ body_warn_ge1(struct mdoc *mdoc)
 
 
 static int
-elem_warn_eq0(struct mdoc *mdoc)
+ewarn_eq0(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
@@ -359,7 +369,7 @@ elem_warn_eq0(struct mdoc *mdoc)
 
 
 static int
-elem_warn_ge1(struct mdoc *mdoc)
+ewarn_ge1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
@@ -370,7 +380,7 @@ elem_warn_ge1(struct mdoc *mdoc)
 
 
 static int
-elem_err_eq1(struct mdoc *mdoc)
+eerr_eq1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
@@ -379,7 +389,7 @@ elem_err_eq1(struct mdoc *mdoc)
 
 
 static int
-elem_err_le2(struct mdoc *mdoc)
+eerr_le2(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
@@ -388,7 +398,7 @@ elem_err_le2(struct mdoc *mdoc)
 
 
 static int
-elem_err_le1(struct mdoc *mdoc)
+eerr_le1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
@@ -397,7 +407,7 @@ elem_err_le1(struct mdoc *mdoc)
 
 
 static int
-elem_err_eq0(struct mdoc *mdoc)
+eerr_eq0(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
@@ -406,7 +416,7 @@ elem_err_eq0(struct mdoc *mdoc)
 
 
 static int
-elem_err_ge1(struct mdoc *mdoc)
+eerr_ge1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
@@ -415,7 +425,7 @@ elem_err_ge1(struct mdoc *mdoc)
 
 
 static int
-head_err_eq0(struct mdoc *mdoc)
+herr_eq0(struct mdoc *mdoc)
 {
 
 	if (MDOC_HEAD != mdoc->last->type)
@@ -425,7 +435,7 @@ head_err_eq0(struct mdoc *mdoc)
 
 
 static int
-head_warn_ge1(struct mdoc *mdoc)
+hwarn_ge1(struct mdoc *mdoc)
 {
 
 	if (MDOC_HEAD != mdoc->last->type)
@@ -437,7 +447,7 @@ head_warn_ge1(struct mdoc *mdoc)
 
 
 static int
-head_err_ge1(struct mdoc *mdoc)
+herr_ge1(struct mdoc *mdoc)
 {
 
 	if (MDOC_HEAD != mdoc->last->type)
@@ -727,6 +737,21 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 
 
 static int
+post_nm(struct mdoc *mdoc)
+{
+
+	assert(MDOC_ELEM == mdoc->last->type);
+	assert(MDOC_Nm == mdoc->last->tok);
+	if (mdoc->last->child)
+		return(1);
+	if (mdoc->meta.name)
+		return(1);
+	return(mdoc_err(mdoc, "macro `%s' has not been invoked with a name",
+				mdoc_macronames[MDOC_Nm]));
+}
+
+
+static int
 post_xr(struct mdoc *mdoc)
 {
 	struct mdoc_node *n;
@@ -751,7 +776,9 @@ post_at(struct mdoc *mdoc)
 
 	assert(MDOC_ELEM == mdoc->last->type);
 	assert(MDOC_At == mdoc->last->tok);
-	assert(mdoc->last->child);
+
+	if (NULL == mdoc->last->child)
+		return(1);
 	assert(MDOC_TEXT == mdoc->last->child->type);
 
 	if (ATT_DEFAULT != mdoc_atoatt(mdoc->last->child->data.text.string))
@@ -919,7 +946,6 @@ post_it(struct mdoc *mdoc)
 }
 
 
-/* Make sure that only `It' macros are our body-children. */
 static int
 post_bl(struct mdoc *mdoc)
 {
@@ -942,7 +968,7 @@ post_bl(struct mdoc *mdoc)
 
 
 static int
-elem_bool(struct mdoc *mdoc)
+ebool(struct mdoc *mdoc)
 {
 	struct mdoc_node *n;
 
@@ -958,7 +984,23 @@ elem_bool(struct mdoc *mdoc)
 	}
 	if (NULL == n)
 		return(1);
-	return(mdoc_nerr(mdoc, n, "expected boolean value [on/off]"));
+	return(mdoc_nerr(mdoc, n, "expected boolean value"));
+}
+
+
+static int
+post_root(struct mdoc *mdoc)
+{
+
+	if (NULL == mdoc->last->child)
+		return(mdoc_err(mdoc, "document has no data"));
+	if (NULL == mdoc->meta.title)
+		return(mdoc_err(mdoc, "document has no incomplete prologue"));
+	if (NULL == mdoc->meta.os)
+		return(mdoc_err(mdoc, "document has no incomplete prologue"));
+	if (0 == mdoc->meta.date)
+		return(mdoc_err(mdoc, "document has no incomplete prologue"));
+	return(1);
 }
 
 
@@ -991,8 +1033,6 @@ mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *node)
 {
 	v_pre		*p;
 
-	/* TODO: character-escape checks. */
-
 	if (MDOC_TEXT == node->type)
 		return(1);
 	assert(MDOC_ROOT != node->type);
@@ -1013,10 +1053,8 @@ mdoc_valid_post(struct mdoc *mdoc)
 
 	if (MDOC_TEXT == mdoc->last->type)
 		return(1);
-	if (MDOC_ROOT == mdoc->last->type) {
-		/* TODO: make sure prologue is complete. */
-		return(1);
-	}
+	if (MDOC_ROOT == mdoc->last->type)
+		return(post_root(mdoc));
 
 	if (NULL == mdoc_valids[mdoc->last->tok].post)
 		return(1);

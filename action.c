@@ -27,12 +27,15 @@ struct	actions {
 	int	(*post)(struct mdoc *);
 };
 
+/* Per-macro action routines. */
 
 static int	 post_sh(struct mdoc *);
 static int	 post_os(struct mdoc *);
 static int	 post_dt(struct mdoc *);
 static int	 post_dd(struct mdoc *);
 static int	 post_nm(struct mdoc *);
+
+/* Array of macro action routines. */
 
 const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* \" */
@@ -155,12 +158,12 @@ post_nm(struct mdoc *mdoc)
 	if (mdoc->meta.name)
 		return(1);
 
-	if ( ! xstrlcats(buf, mdoc->last->child, 64))
-		return(mdoc_err(mdoc, "macro parameters too long"));
+	if (xstrlcats(buf, mdoc->last->child, 64)) {
+		mdoc->meta.name = xstrdup(buf);
+		return(1);
+	}
 
-	mdoc->meta.name = xstrdup(buf);
-	mdoc_msg(mdoc, "parsed name: %s", mdoc->meta.name);
-	return(1);
+	return(mdoc_err(mdoc, "macro parameters too long"));
 }
 
 
@@ -172,14 +175,14 @@ post_sh(struct mdoc *mdoc)
 
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
-	if ( ! xstrlcats(buf, mdoc->last->child, 64))
-		return(mdoc_err(mdoc, "macro parameters too long"));
+	if (xstrlcats(buf, mdoc->last->child, 64)) {
+		if (SEC_CUSTOM != (sec = mdoc_atosec(buf)))
+			mdoc->sec_lastn = sec;
+		mdoc->sec_last = sec;
+		return(1);
+	}
 
-	if (SEC_CUSTOM != (sec = mdoc_atosec(buf)))
-		mdoc->sec_lastn = sec;
-	mdoc->sec_last = sec;
-
-	return(1);
+	return(mdoc_err(mdoc, "macro parameters too long"));
 }
 
 
@@ -223,9 +226,6 @@ post_dt(struct mdoc *mdoc)
 
 	if (NULL == mdoc->meta.title)
 		mdoc->meta.title = xstrdup("untitled");
-
-	mdoc_msg(mdoc, "parsed title: %s", mdoc->meta.title);
-	/* TODO: print vol2a functions. */
 	return(1);
 }
 
@@ -243,7 +243,6 @@ post_os(struct mdoc *mdoc)
 		return(mdoc_err(mdoc, "macro parameters too long")); 
 
 	mdoc->meta.os = xstrdup(buf[0] ? buf : "local");
-	mdoc_msg(mdoc, "parsed operating system: %s", mdoc->meta.os);
 	mdoc->sec_lastn = mdoc->sec_last = SEC_BODY;
 	return(1);
 }
@@ -285,19 +284,12 @@ post_dd(struct mdoc *mdoc)
 			return(mdoc_nerr(mdoc, n, "invalid parameter syntax"));
 	}
 
-	if (mdoc->meta.date && NULL == n) {
-		mdoc_msg(mdoc, "parsed time: %u since epoch", 
-				mdoc->meta.date);
+	if (mdoc->meta.date && NULL == n)
 		return(1);
-	} else if (n)
+	else if (n)
 		return(mdoc_err(mdoc, "invalid parameter syntax"));
-
-	if ((mdoc->meta.date = mdoc_atotime(date))) {
-		mdoc_msg(mdoc, "parsed time: %u since epoch", 
-				mdoc->meta.date);
+	if ((mdoc->meta.date = mdoc_atotime(date)))
 		return(1);
-	}
-
 	return(mdoc_err(mdoc, "invalid parameter syntax"));
 }
 
