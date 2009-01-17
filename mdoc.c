@@ -140,7 +140,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Ac */
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Ao */
 	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Aq */
-	{ macro_constant, 0 }, /* At */
+	{ macro_constant_delimited, 0 }, /* At */
 	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Bc */
 	{ macro_scoped, MDOC_EXPLICIT }, /* Bf */ 
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Bo */
@@ -217,6 +217,19 @@ mdoc_result(struct mdoc *mdoc)
 {
 
 	return(mdoc->first);
+}
+
+
+void
+mdoc_meta_free(struct mdoc *mdoc)
+{
+
+	if (mdoc->meta.title)
+		free(mdoc->meta.title);
+	if (mdoc->meta.os)
+		free(mdoc->meta.os);
+	if (mdoc->meta.name)
+		free(mdoc->meta.name);
 }
 
 
@@ -439,8 +452,6 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	}
 
 	if ( ! mdoc_valid_pre(mdoc, p))
-		return(0);
-	if ( ! mdoc_action_pre(mdoc, p))
 		return(0);
 
 	switch (p->type) {

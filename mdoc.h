@@ -346,10 +346,9 @@ struct	mdoc_meta {
 	enum mdoc_vol	  vol;
 	enum mdoc_arch	  arch;
 	time_t		  date;
-#define	META_TITLE_SZ	 (64)
-	char		  title[META_TITLE_SZ];
-#define	META_OS_SZ	 (64)
-	char		  os[META_OS_SZ];
+	char		 *title;
+	char		 *os;
+	char		 *name;
 };
 
 struct	mdoc_text {

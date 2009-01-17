@@ -16,6 +16,7 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+#include <assert.h>
 #include <err.h>
 #include <stdlib.h>
 #include <string.h>
@@ -73,6 +74,30 @@ xstrdup(const char *p)
 		err(EXIT_FAILURE, "strdup");
 	return(pp);
 }
+
+
+int
+xstrlcats(char *buf, const struct mdoc_node *n, size_t sz)
+{
+	char		 *p;
+
+	assert(sz > 0);
+	assert(buf);
+	*buf = 0;
+
+	for ( ; n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
+		p = n->data.text.string;
+		if ( ! xstrlcat(buf, p, sz))
+			return(0);
+		if (n->next && ! xstrlcat(buf, " ", sz))
+			return(0);
+	}
+
+	return(1);
+}
+
+
 
 
 #ifdef __linux__

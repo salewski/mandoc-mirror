@@ -22,13 +22,9 @@
 
 #include "private.h"
 
-typedef int	(*a_pre)(struct mdoc *, struct mdoc_node *);
-typedef int	(*a_post)(struct mdoc *);
-
 
 struct	actions {
-	a_pre	 pre;
-	a_post	 post;
+	int	(*post)(struct mdoc *);
 };
 
 
@@ -36,143 +32,150 @@ static int	 post_sh(struct mdoc *);
 static int	 post_os(struct mdoc *);
 static int	 post_dt(struct mdoc *);
 static int	 post_dd(struct mdoc *);
-
+static int	 post_nm(struct mdoc *);
 
 const	struct actions mdoc_actions[MDOC_MAX] = {
-	{ NULL, NULL }, /* \" */
-	{ NULL, post_dd }, /* Dd */ 
-	{ NULL, post_dt }, /* Dt */ 
-	{ NULL, post_os }, /* Os */ 
-	{ NULL, post_sh }, /* Sh */ 
-	{ NULL, NULL }, /* Ss */ 
-	{ NULL, NULL }, /* Pp */ 
-	{ NULL, NULL }, /* D1 */
-	{ NULL, NULL }, /* Dl */
-	{ NULL, NULL }, /* Bd */ 
-	{ NULL, NULL }, /* Ed */
-	{ NULL, NULL }, /* Bl */ 
-	{ NULL, NULL }, /* El */
-	{ NULL, NULL }, /* It */
-	{ NULL, NULL }, /* Ad */ 
-	{ NULL, NULL }, /* An */
-	{ NULL, NULL }, /* Ar */
-	{ NULL, NULL }, /* Cd */
-	{ NULL, NULL }, /* Cm */
-	{ NULL, NULL }, /* Dv */ 
-	{ NULL, NULL }, /* Er */ 
-	{ NULL, NULL }, /* Ev */ 
-	{ NULL, NULL }, /* Ex */
-	{ NULL, NULL }, /* Fa */ 
-	{ NULL, NULL }, /* Fd */ 
-	{ NULL, NULL }, /* Fl */
-	{ NULL, NULL }, /* Fn */ 
-	{ NULL, NULL }, /* Ft */ 
-	{ NULL, NULL }, /* Ic */ 
-	{ NULL, NULL }, /* In */ 
-	{ NULL, NULL }, /* Li */
-	{ NULL, NULL }, /* Nd */ 
-	{ NULL, NULL }, /* Nm */ 
-	{ NULL, NULL }, /* Op */
-	{ NULL, NULL }, /* Ot */
-	{ NULL, NULL }, /* Pa */
-	{ NULL, NULL }, /* Rv */
-	{ NULL, NULL }, /* St */
-	{ NULL, NULL }, /* Va */
-	{ NULL, NULL }, /* Vt */ 
-	{ NULL, NULL }, /* Xr */
-	{ NULL, NULL }, /* %A */
-	{ NULL, NULL }, /* %B */
-	{ NULL, NULL }, /* %D */
-	{ NULL, NULL }, /* %I */
-	{ NULL, NULL }, /* %J */
-	{ NULL, NULL }, /* %N */
-	{ NULL, NULL }, /* %O */
-	{ NULL, NULL }, /* %P */
-	{ NULL, NULL }, /* %R */
-	{ NULL, NULL }, /* %T */
-	{ NULL, NULL }, /* %V */
-	{ NULL, NULL }, /* Ac */
-	{ NULL, NULL }, /* Ao */
-	{ NULL, NULL }, /* Aq */
-	{ NULL, NULL }, /* At */ 
-	{ NULL, NULL }, /* Bc */
-	{ NULL, NULL }, /* Bf */ 
-	{ NULL, NULL }, /* Bo */
-	{ NULL, NULL }, /* Bq */
-	{ NULL, NULL }, /* Bsx */
-	{ NULL, NULL }, /* Bx */
-	{ NULL, NULL }, /* Db */
-	{ NULL, NULL }, /* Dc */
-	{ NULL, NULL }, /* Do */
-	{ NULL, NULL }, /* Dq */
-	{ NULL, NULL }, /* Ec */
-	{ NULL, NULL }, /* Ef */
-	{ NULL, NULL }, /* Em */ 
-	{ NULL, NULL }, /* Eo */
-	{ NULL, NULL }, /* Fx */
-	{ NULL, NULL }, /* Ms */
-	{ NULL, NULL }, /* No */
-	{ NULL, NULL }, /* Ns */
-	{ NULL, NULL }, /* Nx */
-	{ NULL, NULL }, /* Ox */
-	{ NULL, NULL }, /* Pc */
-	{ NULL, NULL }, /* Pf */
-	{ NULL, NULL }, /* Po */
-	{ NULL, NULL }, /* Pq */
-	{ NULL, NULL }, /* Qc */
-	{ NULL, NULL }, /* Ql */
-	{ NULL, NULL }, /* Qo */
-	{ NULL, NULL }, /* Qq */
-	{ NULL, NULL }, /* Re */
-	{ NULL, NULL }, /* Rs */
-	{ NULL, NULL }, /* Sc */
-	{ NULL, NULL }, /* So */
-	{ NULL, NULL }, /* Sq */
-	{ NULL, NULL }, /* Sm */
-	{ NULL, NULL }, /* Sx */
-	{ NULL, NULL }, /* Sy */
-	{ NULL, NULL }, /* Tn */
-	{ NULL, NULL }, /* Ux */
-	{ NULL, NULL }, /* Xc */
-	{ NULL, NULL }, /* Xo */
-	{ NULL, NULL }, /* Fo */ 
-	{ NULL, NULL }, /* Fc */ 
-	{ NULL, NULL }, /* Oo */
-	{ NULL, NULL }, /* Oc */
-	{ NULL, NULL }, /* Bk */
-	{ NULL, NULL }, /* Ek */
-	{ NULL, NULL }, /* Bt */
-	{ NULL, NULL }, /* Hf */
-	{ NULL, NULL }, /* Fr */
-	{ NULL, NULL }, /* Ud */
+	{ NULL }, /* \" */
+	{ post_dd }, /* Dd */ 
+	{ post_dt }, /* Dt */ 
+	{ post_os }, /* Os */ 
+	{ post_sh }, /* Sh */ 
+	{ NULL }, /* Ss */ 
+	{ NULL }, /* Pp */ 
+	{ NULL }, /* D1 */
+	{ NULL }, /* Dl */
+	{ NULL }, /* Bd */ 
+	{ NULL }, /* Ed */
+	{ NULL }, /* Bl */ 
+	{ NULL }, /* El */
+	{ NULL }, /* It */
+	{ NULL }, /* Ad */ 
+	{ NULL }, /* An */
+	{ NULL }, /* Ar */
+	{ NULL }, /* Cd */
+	{ NULL }, /* Cm */
+	{ NULL }, /* Dv */ 
+	{ NULL }, /* Er */ 
+	{ NULL }, /* Ev */ 
+	{ NULL }, /* Ex */
+	{ NULL }, /* Fa */ 
+	{ NULL }, /* Fd */ 
+	{ NULL }, /* Fl */
+	{ NULL }, /* Fn */ 
+	{ NULL }, /* Ft */ 
+	{ NULL }, /* Ic */ 
+	{ NULL }, /* In */ 
+	{ NULL }, /* Li */
+	{ NULL }, /* Nd */ 
+	{ post_nm }, /* Nm */ 
+	{ NULL }, /* Op */
+	{ NULL }, /* Ot */
+	{ NULL }, /* Pa */
+	{ NULL }, /* Rv */
+	{ NULL }, /* St */
+	{ NULL }, /* Va */
+	{ NULL }, /* Vt */ 
+	{ NULL }, /* Xr */
+	{ NULL }, /* %A */
+	{ NULL }, /* %B */
+	{ NULL }, /* %D */
+	{ NULL }, /* %I */
+	{ NULL }, /* %J */
+	{ NULL }, /* %N */
+	{ NULL }, /* %O */
+	{ NULL }, /* %P */
+	{ NULL }, /* %R */
+	{ NULL }, /* %T */
+	{ NULL }, /* %V */
+	{ NULL }, /* Ac */
+	{ NULL }, /* Ao */
+	{ NULL }, /* Aq */
+	{ NULL }, /* At */ 
+	{ NULL }, /* Bc */
+	{ NULL }, /* Bf */ 
+	{ NULL }, /* Bo */
+	{ NULL }, /* Bq */
+	{ NULL }, /* Bsx */
+	{ NULL }, /* Bx */
+	{ NULL }, /* Db */
+	{ NULL }, /* Dc */
+	{ NULL }, /* Do */
+	{ NULL }, /* Dq */
+	{ NULL }, /* Ec */
+	{ NULL }, /* Ef */
+	{ NULL }, /* Em */ 
+	{ NULL }, /* Eo */
+	{ NULL }, /* Fx */
+	{ NULL }, /* Ms */
+	{ NULL }, /* No */
+	{ NULL }, /* Ns */
+	{ NULL }, /* Nx */
+	{ NULL }, /* Ox */
+	{ NULL }, /* Pc */
+	{ NULL }, /* Pf */
+	{ NULL }, /* Po */
+	{ NULL }, /* Pq */
+	{ NULL }, /* Qc */
+	{ NULL }, /* Ql */
+	{ NULL }, /* Qo */
+	{ NULL }, /* Qq */
+	{ NULL }, /* Re */
+	{ NULL }, /* Rs */
+	{ NULL }, /* Sc */
+	{ NULL }, /* So */
+	{ NULL }, /* Sq */
+	{ NULL }, /* Sm */
+	{ NULL }, /* Sx */
+	{ NULL }, /* Sy */
+	{ NULL }, /* Tn */
+	{ NULL }, /* Ux */
+	{ NULL }, /* Xc */
+	{ NULL }, /* Xo */
+	{ NULL }, /* Fo */ 
+	{ NULL }, /* Fc */ 
+	{ NULL }, /* Oo */
+	{ NULL }, /* Oc */
+	{ NULL }, /* Bk */
+	{ NULL }, /* Ek */
+	{ NULL }, /* Bt */
+	{ NULL }, /* Hf */
+	{ NULL }, /* Fr */
+	{ NULL }, /* Ud */
 };
+
+
+static int
+post_nm(struct mdoc *mdoc)
+{
+	char		 buf[64];
+
+	assert(MDOC_ELEM == mdoc->last->type);
+	assert(MDOC_Nm == mdoc->last->tok);
+
+	if (mdoc->meta.name)
+		return(1);
+
+	if ( ! xstrlcats(buf, mdoc->last->child, 64))
+		return(mdoc_err(mdoc, "macro parameters too long"));
+
+	mdoc->meta.name = xstrdup(buf);
+	mdoc_msg(mdoc, "parsed name: %s", mdoc->meta.name);
+	return(1);
+}
 
 
 static int
 post_sh(struct mdoc *mdoc)
 {
-	enum mdoc_sec	  sec;
-	int		  i;
-	struct mdoc_node *n;
-	char		 *args[MDOC_LINEARG_MAX];
+	enum mdoc_sec	 sec;
+	char		 buf[64];
 
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
-	
-	assert(MDOC_Sh == mdoc->last->tok);
+	if ( ! xstrlcats(buf, mdoc->last->child, 64))
+		return(mdoc_err(mdoc, "macro parameters too long"));
 
-	n = mdoc->last->child;
-	assert(n);
-
-	for (i = 0; n && i < MDOC_LINEARG_MAX; n = n->next, i++) {
-		assert(MDOC_TEXT == n->type);
-		assert(NULL == n->child);
-		assert(n->data.text.string);
-		args[i] = n->data.text.string;
-	}
-
-	sec = mdoc_atosec((size_t)i, (const char **)args);
-	if (SEC_CUSTOM != sec)
+	if (SEC_CUSTOM != (sec = mdoc_atosec(buf)))
 		mdoc->sec_lastn = sec;
 	mdoc->sec_last = sec;
 
@@ -185,15 +188,12 @@ post_dt(struct mdoc *mdoc)
 {
 	int		  i;
 	char		 *p;
-	size_t		  sz;
 	struct mdoc_node *n;
 
 	assert(MDOC_ELEM == mdoc->last->type);
 	assert(MDOC_Dt == mdoc->last->tok);
-	assert(0 == mdoc->meta.title[0]);
 
-	sz = META_TITLE_SZ;
-	(void)xstrlcpy(mdoc->meta.title, "UNTITLED", sz);
+	assert(NULL == mdoc->meta.title);
 
 	for (i = 0, n = mdoc->last->child; n; n = n->next, i++) {
 		assert(MDOC_TEXT == n->type);
@@ -201,14 +201,13 @@ post_dt(struct mdoc *mdoc)
 
 		switch (i) {
 		case (0):
-			if (xstrlcpy(mdoc->meta.title, p, sz))
-				break;
-			return(mdoc_nerr(mdoc, n, "badly-formed manual title parameter"));
+			mdoc->meta.title = xstrdup(p);
+			break;
 		case (1):
 			mdoc->meta.msec = mdoc_atomsec(p);
 			if (MSEC_DEFAULT != mdoc->meta.msec)
 				break;
-			return(mdoc_nerr(mdoc, n, "badly-formed manual section parameter"));
+			return(mdoc_nerr(mdoc, n, "invalid parameter syntax"));
 		case (2):
 			mdoc->meta.vol = mdoc_atovol(p);
 			if (VOL_DEFAULT != mdoc->meta.vol)
@@ -216,11 +215,14 @@ post_dt(struct mdoc *mdoc)
 			mdoc->meta.arch = mdoc_atoarch(p);
 			if (ARCH_DEFAULT != mdoc->meta.arch)
 				break;
-			return(mdoc_nerr(mdoc, n, "badly-formed manual volume parameter"));
+			return(mdoc_nerr(mdoc, n, "invalid parameter syntax"));
 		default:
 			return(mdoc_nerr(mdoc, n, "too many parameters"));
 		}
 	}
+
+	if (NULL == mdoc->meta.title)
+		mdoc->meta.title = xstrdup("untitled");
 
 	mdoc_msg(mdoc, "parsed title: %s", mdoc->meta.title);
 	/* TODO: print vol2a functions. */
@@ -231,29 +233,16 @@ post_dt(struct mdoc *mdoc)
 static int
 post_os(struct mdoc *mdoc)
 {
-	char		 *p;
-	size_t		  sz;
-	struct mdoc_node *n;
+	char		  buf[64];
 
 	assert(MDOC_ELEM == mdoc->last->type);
 	assert(MDOC_Os == mdoc->last->tok);
-	assert(0 == mdoc->meta.os[0]);
+	assert(NULL == mdoc->meta.os);
 
-	sz = META_OS_SZ;
+	if ( ! xstrlcats(buf, mdoc->last->child, 64))
+		return(mdoc_err(mdoc, "macro parameters too long")); 
 
-	for (n = mdoc->last->child; n; n = n->next) {
-		assert(MDOC_TEXT == n->type);
-		p = n->data.text.string;
-
-		if ( ! xstrlcat(mdoc->meta.os, p, sz))
-			return(mdoc_nerr(mdoc, n, "badly-formed manual system parameter"));
-		if ( ! xstrlcat(mdoc->meta.os, " ", sz))
-			return(mdoc_nerr(mdoc, n, "badly-formed manual system parameter"));
-	}
-
-	if (0 == mdoc->meta.os[0]) 
-		(void)xstrlcpy(mdoc->meta.os, "LOCAL", sz);
-
+	mdoc->meta.os = xstrdup(buf[0] ? buf : "local");
 	mdoc_msg(mdoc, "parsed operating system: %s", mdoc->meta.os);
 	mdoc->sec_lastn = mdoc->sec_last = SEC_BODY;
 	return(1);
@@ -291,9 +280,9 @@ post_dd(struct mdoc *mdoc)
 			continue;
 
 		if ( ! xstrlcat(date, n->data.text.string, sz))
-			return(mdoc_nerr(mdoc, n, "badly-formed manual date parameter"));
+			return(mdoc_nerr(mdoc, n, "invalid parameter syntax"));
 		if (n->next && ! xstrlcat(date, " ", sz))
-			return(mdoc_nerr(mdoc, n, "badly-formed manual date parameter"));
+			return(mdoc_nerr(mdoc, n, "invalid parameter syntax"));
 	}
 
 	if (mdoc->meta.date && NULL == n) {
@@ -301,7 +290,7 @@ post_dd(struct mdoc *mdoc)
 				mdoc->meta.date);
 		return(1);
 	} else if (n)
-		return(mdoc_err(mdoc, "badly-formed manual date"));
+		return(mdoc_err(mdoc, "invalid parameter syntax"));
 
 	if ((mdoc->meta.date = mdoc_atotime(date))) {
 		mdoc_msg(mdoc, "parsed time: %u since epoch", 
@@ -309,15 +298,7 @@ post_dd(struct mdoc *mdoc)
 		return(1);
 	}
 
-	return(mdoc_err(mdoc, "badly-formed manual date"));
-}
-
-
-int
-mdoc_action_pre(struct mdoc *mdoc, struct mdoc_node *node)
-{
-
-	return(1);
+	return(mdoc_err(mdoc, "invalid parameter syntax"));
 }
 
 
@@ -329,9 +310,7 @@ mdoc_action_post(struct mdoc *mdoc)
 		return(1);
 	if (MDOC_ROOT == mdoc->last->type)
 		return(1);
-
 	if (NULL == mdoc_actions[mdoc->last->tok].post)
 		return(1);
-	/* TODO: MDOC_Nm... ? */
 	return((*mdoc_actions[mdoc->last->tok].post)(mdoc));
 }

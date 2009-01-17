@@ -81,47 +81,39 @@ mdoc_isdelim(const char *p)
 
 
 enum mdoc_sec 
-mdoc_atosec(size_t sz, const char **p)
+mdoc_atosec(const char *p)
 {
 
-	assert(sz > 0);
-	if (sz > 2)
-		return(SEC_CUSTOM);
-	if (sz == 2) {
-		if (0 == strcmp(*p, "RETURN") &&
-				0 == strcmp(*(p + 1), "VALUES"))
-			return(SEC_RETURN_VALUES);
-		if (0 == strcmp(*p, "SEE") &&
-				0 == strcmp(*(p + 1), "ALSO"))
-			return(SEC_SEE_ALSO);
-		return(SEC_CUSTOM);
-	}
-
-	if (0 == strcmp(*p, "NAME"))
+	assert(p);
+	if (0 == strcmp(p, "NAME"))
 		return(SEC_NAME);
-	else if (0 == strcmp(*p, "SYNOPSIS"))
+	else if (0 == strcmp(p, "RETURN VALUES"))
+		return(SEC_RETURN_VALUES);
+	else if (0 == strcmp(p, "SEE ALSO"))
+		return(SEC_SEE_ALSO);
+	else if (0 == strcmp(p, "SYNOPSIS"))
 		return(SEC_SYNOPSIS);
-	else if (0 == strcmp(*p, "DESCRIPTION"))
+	else if (0 == strcmp(p, "DESCRIPTION"))
 		return(SEC_DESCRIPTION);
-	else if (0 == strcmp(*p, "ENVIRONMENT"))
+	else if (0 == strcmp(p, "ENVIRONMENT"))
 		return(SEC_ENVIRONMENT);
-	else if (0 == strcmp(*p, "FILES"))
+	else if (0 == strcmp(p, "FILES"))
 		return(SEC_FILES);
-	else if (0 == strcmp(*p, "EXAMPLES"))
+	else if (0 == strcmp(p, "EXAMPLES"))
 		return(SEC_EXAMPLES);
-	else if (0 == strcmp(*p, "DIAGNOSTICS"))
+	else if (0 == strcmp(p, "DIAGNOSTICS"))
 		return(SEC_DIAGNOSTICS);
-	else if (0 == strcmp(*p, "ERRORS"))
+	else if (0 == strcmp(p, "ERRORS"))
 		return(SEC_ERRORS);
-	else if (0 == strcmp(*p, "STANDARDS"))
+	else if (0 == strcmp(p, "STANDARDS"))
 		return(SEC_STANDARDS);
-	else if (0 == strcmp(*p, "HISTORY"))
+	else if (0 == strcmp(p, "HISTORY"))
 		return(SEC_HISTORY);
-	else if (0 == strcmp(*p, "AUTHORS"))
+	else if (0 == strcmp(p, "AUTHORS"))
 		return(SEC_AUTHORS);
-	else if (0 == strcmp(*p, "CAVEATS"))
+	else if (0 == strcmp(p, "CAVEATS"))
 		return(SEC_CAVEATS);
-	else if (0 == strcmp(*p, "BUGS"))
+	else if (0 == strcmp(p, "BUGS"))
 		return(SEC_BUGS);
 
 	return(SEC_CUSTOM);

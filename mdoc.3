@@ -127,6 +127,12 @@ utility was written by
 .\"
 .\"
 .Sh BUGS
+Both bugs and incompabilities are documented in this section.  An
+incompatible macro or behaviour is relative to the default
+.Xr groff 1
+system bundled with 
+.Ox .
+.Pp
 The 
 .Sq \&Xc
 and
@@ -141,3 +147,7 @@ When
 is invoked, whitespace is not stripped around
 .Sq \&Ta
 or tab-character separators.
+.Pp
+The 
+.Sq \&At
+macro only accepts a single parameter.
