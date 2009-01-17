@@ -17,14 +17,16 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "mdoc.h"
 
+#define	xprintf		(void)printf
 
-#if 0
-/* TODO: remove this to a print-tree output filter. */
+static	void	 treeprint_r(const struct mdoc_node *, int);
+
 static void
-print_node(const struct mdoc_node *n, int indent)
+treeprint_r(const struct mdoc_node *n, int indent)
 {
 	const char	 *p, *t;
 	int		  i, j;
@@ -36,7 +38,32 @@ print_node(const struct mdoc_node *n, int indent)
 	argc = sz = 0;
 	params = NULL;
 
-	t = mdoc_type2a(n->type);
+	switch (n->type) {
+	case (MDOC_ROOT):
+		t = "root";
+		break;
+	case (MDOC_BLOCK):
+		t = "block";
+		break;
+	case (MDOC_HEAD):
+		t = "block-head";
+		break;
+	case (MDOC_BODY):
+		t = "block-body";
+		break;
+	case (MDOC_TAIL):
+		t = "block-tail";
+		break;
+	case (MDOC_ELEM):
+		t = "elem";
+		break;
+	case (MDOC_TEXT):
+		t = "text";
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
 
 	switch (n->type) {
 	case (MDOC_TEXT):
@@ -89,13 +116,16 @@ print_node(const struct mdoc_node *n, int indent)
 	xprintf(" %d:%d\n", n->line, n->pos);
 
 	if (n->child)
-		print_node(n->child, indent + 1);
+		treeprint_r(n->child, indent + 1);
 	if (n->next)
-		print_node(n->next, indent);
+		treeprint_r(n->next, indent);
 }
-#endif
+
 
 int
-treeprint(const struct mdoc_node *node, const char *out)
+treeprint(const struct mdoc_node *node)
 {
+
+	treeprint_r(node, 0);
+	return(1);
 }

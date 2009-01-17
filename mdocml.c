@@ -31,10 +31,24 @@
 #include "mdoc.h"
 
 #define	xfprintf	(void)fprintf
-#define	xprintf		(void)printf
-#define	xvfprintf	(void)fvprintf
 
 #define	MD_LINE_SZ	(256)		/* Max input line size. */
+
+/*
+ * Put this into a mdoctrans.h, which has:
+ *
+ * struct mdoc_trans; (opaque)
+ *
+ * struct mdoc_trans *mdoc_trans_alloc(const char *filter);
+ *
+ * mdoc_trans_free(struct mdoc_trans *);
+ *
+ * int mdoc_trans_getopt(struct mdoc_trans *, char *);
+ *
+ * int mdoc_trans_print(struct mdoc_trans *, const struct mdoc_node *);
+ */
+
+typedef	int		(*mdocprint)(const struct mdoc_node *);
 
 
 struct	md_parse {
@@ -49,12 +63,12 @@ struct	md_parse {
 	u_long		  bufsz;	/* Input buffer size. */
 	char		 *name;		/* Input file name. */
 	int		  fd;		/* Input file desc. */
-	int		(*fp)(const struct mdoc_node *, const char *);
+	mdocprint	  print;	/* Node-print function. */
 };
 
 extern	char	 	 *__progname;
 
-extern	int		 
+extern	int		  treeprint(const struct mdoc_node *);
 
 static	void		  usage(void);
 
@@ -79,7 +93,7 @@ main(int argc, char *argv[])
 {
 	int		 c;
 	struct md_parse	 parser;
-	char		*opts, *v, *filter, *output;
+	char		*opts, *v, *filter;
 #define ALL     	 0
 #define COMPAT     	 1
 #define SYNTAX     	 2
@@ -90,17 +104,14 @@ main(int argc, char *argv[])
 	extern char	*optarg;
 	extern int	 optind;
 
-	output = filter = NULL;
+	filter = NULL;
 
 	(void)memset(&parser, 0, sizeof(struct md_parse));
 
-	while (-1 != (c = getopt(argc, argv, "f:vW:o:")))
+	while (-1 != (c = getopt(argc, argv, "f:vW:")))
 		switch (c) {
 		case ('f'):
 			filter = optarg;
-			break;
-		case ('o'):
-			output = optarg;
 			break;
 		case ('v'):
 			parser.dbg++;
@@ -137,6 +148,11 @@ main(int argc, char *argv[])
 	parser.name = "-";
 	if (1 == argc)
 		parser.name = *argv++;
+
+	if (filter) {
+		if (0 == strcmp(filter, "tree"))
+			parser.print = treeprint;
+	}
 
 	if ( ! io_begin(&parser))
 		return(EXIT_FAILURE);
@@ -216,8 +232,8 @@ parse_leave(struct md_parse *p, int code)
 
 	if ( ! mdoc_endparse(p->mdoc))
 		code = 0;
-	if (p->fp && (n = mdoc_result(p->mdoc)))
-		(*p->fp)(n, NULL);
+	if (p->print && (n = mdoc_result(p->mdoc)))
+		(*p->print)(n);
 
 	mdoc_free(p->mdoc);
 
@@ -336,6 +352,6 @@ usage(void)
 {
 
 	xfprintf(stderr, "usage: %s [-v] [-Wwarn...] [-ffilter] "
-			"[-o outfile] [infile]\n", __progname);
+			"[infile]\n", __progname);
 }
 

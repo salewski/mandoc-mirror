@@ -420,9 +420,6 @@ const struct mdoc_node *mdoc_result(struct mdoc *);
 /* Signal end of parse sequence (boolean retval). */
 int		  mdoc_endparse(struct mdoc *);
 
-/* Node type to static string. */
-char		 *mdoc_type2a(enum mdoc_type);
-
 __END_DECLS
 
 #endif /*!MDOC_H*/
