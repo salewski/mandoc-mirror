@@ -78,7 +78,8 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 
 	/* Parse routine for non-quoted string. */
 
-	if ('\"' != buf[*pos]) {
+	assert(*pos > 0);
+	if ('\"' != buf[*pos] || ! (ARGS_QUOTED & fl)) {
 		*v = &buf[*pos];
 
 		/* FIXME: UGLY tab-sep processing. */
@@ -98,9 +99,14 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 				}
 				(*pos)++;
 			}
-		else
-			while (buf[*pos] && ! isspace(buf[*pos]))
+		else {
+			while (buf[*pos]) {
+				if (isspace(buf[*pos]))
+					if ('\\' != buf[*pos - 1])
+						break;
 				(*pos)++;
+			}
+		}
 
 		if (0 == buf[*pos])
 			return(ARGS_WORD);
@@ -451,8 +457,13 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	v->line = line;
 	v->pos = *pos;
 
-	while (buf[*pos] && ! isspace(buf[*pos]))
+	assert(*pos > 0);
+	while (buf[*pos]) {
+		if (isspace(buf[*pos])) 
+			if ('\\' != buf[*pos - 1])
+				break;
 		(*pos)++;
+	}
 
 	if (buf[*pos])
 		buf[(*pos)++] = 0;

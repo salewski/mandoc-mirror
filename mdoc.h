@@ -385,6 +385,9 @@ struct	mdoc_node {
 	int		  line;
 	int		  pos;
 	int		  tok;
+	int		  flags;
+#define	MDOC_VALID	 (1 << 0)
+#define	MDOC_ACTED	 (1 << 1)
 	enum mdoc_type	  type;
 	union mdoc_data	  data;
 };

@@ -298,6 +298,10 @@ int
 mdoc_action_post(struct mdoc *mdoc)
 {
 
+	if (MDOC_ACTED & mdoc->last->flags)
+		return(1);
+	mdoc->last->flags |= MDOC_ACTED;
+
 	if (MDOC_TEXT == mdoc->last->type)
 		return(1);
 	if (MDOC_ROOT == mdoc->last->type)

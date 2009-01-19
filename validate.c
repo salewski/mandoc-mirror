@@ -29,6 +29,7 @@ typedef	int	(*v_post)(struct mdoc *);
 /* FIXME: math symbols. */
 /* FIXME: make sure prologue is complete. */
 /* FIXME: valid character-escape checks. */
+/* FIXME: make sure required sections are included (NAME, ...). */
 
 struct	valids {
 	v_pre	*pre;
@@ -45,7 +46,9 @@ static	int	pre_check_stdarg(struct mdoc *, struct mdoc_node *);
 static	int	post_check_children_count(struct mdoc *);
 static	int	post_check_children_lt(struct mdoc *, int);
 static	int	post_check_children_gt(struct mdoc *, int);
+static	int	post_check_children_wgt(struct mdoc *, int);
 static	int	post_check_children_eq(struct mdoc *, int);
+static	int	post_check_children_weq(struct mdoc *, int);
 
 /* Specific pre-child-parse routines. */
 
@@ -76,6 +79,7 @@ static	int	eerr_le2(struct mdoc *);
 static	int	eerr_eq1(struct mdoc *);
 static	int	eerr_ge1(struct mdoc *);
 static	int	ewarn_eq0(struct mdoc *);
+static	int	ewarn_eq1(struct mdoc *);
 static	int	bwarn_ge1(struct mdoc *);
 static	int	berr_eq0(struct mdoc *);
 static	int	ewarn_ge1(struct mdoc *);
@@ -117,6 +121,7 @@ static	v_post	posts_wline[] = { hwarn_ge1, berr_eq0, NULL };
 static	v_post	posts_sh[] = { herr_ge1, bwarn_ge1, post_sh, NULL };
 static	v_post	posts_bl[] = { herr_eq0, bwarn_ge1, post_bl, NULL };
 static	v_post	posts_it[] = { post_it, NULL };
+static	v_post	posts_in[] = { ewarn_eq1, NULL };
 static	v_post	posts_ss[] = { herr_ge1, NULL };
 static	v_post	posts_pp[] = { ewarn_eq0, NULL };
 static	v_post	posts_d1[] = { herr_ge1, NULL };
@@ -155,12 +160,12 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pres_ex, posts_ex }, /* Ex */ 
 	{ NULL, posts_text }, /* Fa */ 
 	/* FIXME: only in SYNOPSIS section. */
-	{ NULL, NULL }, /* Fd */
+	{ NULL, posts_wtext }, /* Fd */
 	{ NULL, NULL }, /* Fl */
 	{ NULL, posts_text }, /* Fn */ 
-	{ NULL, NULL }, /* Ft */ 
+	{ NULL, posts_wtext }, /* Ft */ 
 	{ NULL, posts_text }, /* Ic */ 
-	{ NULL, posts_wtext }, /* In */ 
+	{ NULL, posts_in }, /* In */ 
 	{ NULL, posts_text }, /* Li */
 	{ NULL, posts_wtext }, /* Nd */
 	{ NULL, posts_nm }, /* Nm */
@@ -188,7 +193,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_wline }, /* Aq */
 	{ NULL, posts_at }, /* At */ 
 	{ NULL, NULL }, /* Bc */
-	{ NULL, NULL }, /* Bf */ 
+	{ NULL, NULL }, /* Bf */  /* FIXME */
 	{ NULL, NULL }, /* Bo */
 	{ NULL, posts_wline }, /* Bq */
 	{ NULL, NULL }, /* Bsx */
@@ -253,6 +258,18 @@ post_check_children_count(struct mdoc *mdoc)
 
 
 static int
+post_check_children_wgt(struct mdoc *mdoc, int sz)
+{
+	int		  i;
+
+	if ((i = post_check_children_count(mdoc)) > sz)
+		return(1);
+	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests more "
+				"than %d parameters (has %d)", sz, i));
+}
+
+
+static int
 post_check_children_gt(struct mdoc *mdoc, int sz)
 {
 	int		  i;
@@ -260,7 +277,19 @@ post_check_children_gt(struct mdoc *mdoc, int sz)
 	if ((i = post_check_children_count(mdoc)) > sz)
 		return(1);
 	return(mdoc_err(mdoc, "macro requires more than %d "
-				"parameters (have %d)", sz, i));
+				"parameters (has %d)", sz, i));
+}
+
+
+static int
+post_check_children_weq(struct mdoc *mdoc, int sz)
+{
+	int		  i;
+
+	if ((i = post_check_children_count(mdoc)) == sz)
+		return(1);
+	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests %d "
+				"parameters (has %d)", sz, i));
 }
 
 
@@ -338,9 +367,7 @@ berr_eq0(struct mdoc *mdoc)
 
 	if (MDOC_BODY != mdoc->last->type)
 		return(1);
-	if (NULL == mdoc->last->child)
-		return(1);
-	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests no body children"));
+	return(post_check_children_eq(mdoc, 0));
 }
 
 
@@ -350,9 +377,16 @@ bwarn_ge1(struct mdoc *mdoc)
 
 	if (MDOC_BODY != mdoc->last->type)
 		return(1);
-	if (mdoc->last->child)
-		return(1);
-	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests one or more body children"));
+	return(post_check_children_wgt(mdoc, 0));
+}
+
+
+static int
+ewarn_eq1(struct mdoc *mdoc)
+{
+
+	assert(MDOC_ELEM == mdoc->last->type);
+	return(post_check_children_weq(mdoc, 1));
 }
 
 
@@ -361,10 +395,7 @@ ewarn_eq0(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	if (NULL == mdoc->last->child)
-		return(1);
-	return(mdoc_pwarn(mdoc, mdoc->last->child->line,
-			mdoc->last->child->pos, WARN_SYNTAX, "macro suggests no parameters"));
+	return(post_check_children_weq(mdoc, 0));
 }
 
 
@@ -373,9 +404,7 @@ ewarn_ge1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	if (mdoc->last->child)
-		return(1);
-	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests one or more parameters"));
+	return(post_check_children_wgt(mdoc, 0));
 }
 
 
@@ -440,9 +469,7 @@ hwarn_ge1(struct mdoc *mdoc)
 
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
-	if (mdoc->last->child)
-		return(1);
-	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests one or more parameters"));
+	return(post_check_children_wgt(mdoc, 0));
 }
 
 
@@ -1003,11 +1030,11 @@ post_root(struct mdoc *mdoc)
 	if (NULL == mdoc->last->child)
 		return(mdoc_err(mdoc, "document has no data"));
 	if (NULL == mdoc->meta.title)
-		return(mdoc_err(mdoc, "document has no incomplete prologue"));
+		return(mdoc_err(mdoc, "document has incomplete prologue"));
 	if (NULL == mdoc->meta.os)
-		return(mdoc_err(mdoc, "document has no incomplete prologue"));
+		return(mdoc_err(mdoc, "document has incomplete prologue"));
 	if (0 == mdoc->meta.date)
-		return(mdoc_err(mdoc, "document has no incomplete prologue"));
+		return(mdoc_err(mdoc, "document has incomplete prologue"));
 	return(1);
 }
 
@@ -1058,6 +1085,10 @@ int
 mdoc_valid_post(struct mdoc *mdoc)
 {
 	v_post		*p;
+
+	if (MDOC_VALID & mdoc->last->flags)
+		return(1);
+	mdoc->last->flags |= MDOC_VALID;
 
 	if (MDOC_TEXT == mdoc->last->type)
 		return(1);

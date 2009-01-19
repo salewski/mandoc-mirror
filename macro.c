@@ -70,24 +70,19 @@ rewind_last(struct mdoc *mdoc, struct mdoc_node *to)
 
 	assert(to);
 	mdoc->next = MDOC_NEXT_SIBLING;
-	if (mdoc->last == to) {
+
+	while (mdoc->last != to) {
 		if ( ! mdoc_valid_post(mdoc))
 			return(0);
 		if ( ! mdoc_action_post(mdoc))
 			return(0);
-		return(1);
-	}
-
-	do {
 		mdoc->last = mdoc->last->parent;
 		assert(mdoc->last);
-		if ( ! mdoc_valid_post(mdoc))
-			return(0);
-		if ( ! mdoc_action_post(mdoc))
-			return(0);
-	} while (mdoc->last != to);
+	}
 
-	return(1);
+	if ( ! mdoc_valid_post(mdoc))
+		return(0);
+	return(mdoc_action_post(mdoc));
 }
 
 
@@ -139,9 +134,7 @@ rewind_dohalt(int tok, enum mdoc_type type, const struct mdoc_node *p)
 
 	if (MDOC_ROOT == p->type)
 		return(REWIND_HALT);
-	if (MDOC_TEXT == p->type) 
-		return(REWIND_NOHALT);
-	if (MDOC_ELEM == p->type) 
+	if (MDOC_VALID & p->flags)
 		return(REWIND_NOHALT);
 
 	switch (tok) {
@@ -276,6 +269,8 @@ rewind_dobreak(int tok, const struct mdoc_node *p)
 		return(1);
 	if (MDOC_TEXT == p->type)
 		return(1);
+	if (MDOC_VALID & p->flags)
+		return(1);
 
 	switch (tok) {
 	/* Implicit rules. */
@@ -328,14 +323,8 @@ rewind_subblock(enum mdoc_type type, struct mdoc *mdoc,
 	struct mdoc_node *n;
 	int		  c;
 
-	c = rewind_dohalt(tok, type, mdoc->last);
-	if (REWIND_HALT == c)
-		return(1);
-	if (REWIND_REWIND == c)
-		return(rewind_last(mdoc, mdoc->last));
-
 	/* LINTED */
-	for (n = mdoc->last->parent; n; n = n->parent) {
+	for (n = mdoc->last; n; n = n->parent) {
 		c = rewind_dohalt(tok, type, n);
 		if (REWIND_HALT == c)
 			return(1);
@@ -357,14 +346,8 @@ rewind_expblock(struct mdoc *mdoc, int tok, int line, int ppos)
 	struct mdoc_node *n;
 	int		  c;
 
-	c = rewind_dohalt(tok, MDOC_BLOCK, mdoc->last);
-	if (REWIND_HALT == c)
-		return(mdoc_perr(mdoc, line, ppos, "closing macro has no context"));
-	if (REWIND_REWIND == c)
-		return(rewind_last(mdoc, mdoc->last));
-
 	/* LINTED */
-	for (n = mdoc->last->parent; n; n = n->parent) {
+	for (n = mdoc->last; n; n = n->parent) {
 		c = rewind_dohalt(tok, MDOC_BLOCK, n);
 		if (REWIND_HALT == c)
 			return(mdoc_perr(mdoc, line, ppos, "closing macro has no context"));
@@ -386,14 +369,8 @@ rewind_impblock(struct mdoc *mdoc, int tok, int line, int ppos)
 	struct mdoc_node *n;
 	int		  c;
 
-	c = rewind_dohalt(tok, MDOC_BLOCK, mdoc->last);
-	if (REWIND_HALT == c)
-		return(1);
-	if (REWIND_REWIND == c)
-		return(rewind_last(mdoc, mdoc->last));
-
 	/* LINTED */
-	for (n = mdoc->last->parent; n; n = n->parent) {
+	for (n = mdoc->last; n; n = n->parent) {
 		c = rewind_dohalt(tok, MDOC_BLOCK, n);
 		if (REWIND_HALT == c)
 			return(1);
@@ -435,7 +412,6 @@ append_delims(struct mdoc *mdoc, int line, int *pos, char *buf)
 }
 
 
-/* ARGSUSED */
 int
 macro_scoped_close(MACRO_PROT_ARGS)
 {
@@ -521,15 +497,6 @@ macro_scoped_close(MACRO_PROT_ARGS)
 }
 
 
-/*
- * A general text domain macro.  When invoked, this opens a scope that
- * accepts words until either end-of-line, only-punctuation, or a
- * callable macro.  If the word is punctuation (not only-punctuation),
- * then the scope is closed out, the punctuation appended, then the
- * scope opened again.  If any terminating conditions are met, the scope
- * is closed out.  If this is the first macro in the line and
- * only-punctuation remains, this punctuation is flushed.
- */
 int
 macro_text(MACRO_PROT_ARGS)
 {
@@ -636,9 +603,6 @@ macro_text(MACRO_PROT_ARGS)
 }
 
 
-/*
- * Implicit- or explicit-end multi-line scoped macro.
- */
 int
 macro_scoped(MACRO_PROT_ARGS)
 {
@@ -740,11 +704,6 @@ macro_scoped(MACRO_PROT_ARGS)
 }
 
 
-/*
- * When scoped to a line, a macro encompasses all of the contents.  This
- * differs from constants or text macros, where a new macro will
- * terminate the existing context.
- */
 int
 macro_scoped_line(MACRO_PROT_ARGS)
 {
@@ -798,10 +757,6 @@ macro_scoped_line(MACRO_PROT_ARGS)
 }
 
 
-/*
- * Constant-scope macros accept a fixed number of arguments and behave
- * like constant macros except that they're scoped across lines.
- */
 int
 macro_constant_scoped(MACRO_PROT_ARGS)
 {
@@ -901,12 +856,6 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 }
 
 
-/*
- * Delimited macros are like text macros except that, should punctuation
- * be encountered, the macro isn't re-started with remaining tokens
- * (it's only emitted once).  Delimited macros can have a maximum number
- * of arguments.
- */
 int
 macro_constant_delimited(MACRO_PROT_ARGS)
 {
@@ -1000,7 +949,7 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
-	if ( ! flushed && rewind_elem(mdoc, tok))
+	if ( ! flushed && ! rewind_elem(mdoc, tok))
 		return(0);
 
 	if (ppos > 1)
@@ -1009,10 +958,6 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 }
 
 
-/*
- * Constant macros span an entire line:  they constitute a macro and all
- * of its arguments and child data.
- */
 int
 macro_constant(MACRO_PROT_ARGS)
 {
@@ -1090,8 +1035,24 @@ macro_obsolete(MACRO_PROT_ARGS)
 int
 macro_end(struct mdoc *mdoc)
 {
+	struct mdoc_node *n;
 
 	assert(mdoc->first);
 	assert(mdoc->last);
+
+	/* Scan for open explicit scopes. */
+
+	n = MDOC_VALID & mdoc->last->flags ?
+		mdoc->last->parent : mdoc->last;
+
+	for ( ; n; n = n->parent) {
+		if (MDOC_BLOCK != n->type)
+			continue;
+		if ( ! (MDOC_EXPLICIT & mdoc_macros[n->tok].flags))
+			continue;
+		mdoc_nerr(mdoc, n, "macro scope still open on exit");
+		return(0);
+	}
+
 	return(rewind_last(mdoc, mdoc->first));
 }
