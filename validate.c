@@ -71,6 +71,7 @@ static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 /* Specific post-child-parse routines. */
 
 static	int	herr_ge1(struct mdoc *);
+static	int	herr_le1(struct mdoc *);
 static	int	hwarn_ge1(struct mdoc *);
 static	int	herr_eq0(struct mdoc *);
 static	int	eerr_eq0(struct mdoc *);
@@ -92,6 +93,7 @@ static	int	post_an(struct mdoc *);
 static	int	post_at(struct mdoc *);
 static	int	post_xr(struct mdoc *);
 static	int	post_nm(struct mdoc *);
+static	int	post_bf(struct mdoc *);
 static	int	post_root(struct mdoc *);
 
 /* Collections of pre-child-parse routines. */
@@ -130,6 +132,7 @@ static	v_post	posts_an[] = { post_an, NULL };
 static	v_post	posts_at[] = { post_at, NULL };
 static	v_post	posts_xr[] = { eerr_ge1, eerr_le2, post_xr, NULL };
 static	v_post	posts_nm[] = { post_nm, NULL };
+static	v_post	posts_bf[] = { herr_le1, post_bf, NULL };
 
 /* Per-macro pre- and post-child-check routine collections. */
 
@@ -193,7 +196,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_wline }, /* Aq */
 	{ NULL, posts_at }, /* At */ 
 	{ NULL, NULL }, /* Bc */
-	{ NULL, NULL }, /* Bf */  /* FIXME */
+	{ NULL, posts_bf }, /* Bf */  /* FIXME */
 	{ NULL, NULL }, /* Bo */
 	{ NULL, posts_wline }, /* Bq */
 	{ NULL, NULL }, /* Bsx */
@@ -470,6 +473,15 @@ hwarn_ge1(struct mdoc *mdoc)
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
 	return(post_check_children_wgt(mdoc, "parameters", 0));
+}
+
+
+static int
+herr_le1(struct mdoc *mdoc)
+{
+	if (MDOC_HEAD != mdoc->last->type)
+		return(1);
+	return(post_check_children_lt(mdoc, "parameters", 2));
 }
 
 
@@ -763,6 +775,40 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 	}
 
 	return(mdoc_nerr(mdoc, node, "prologue macro repeated"));
+}
+
+
+static int
+post_bf(struct mdoc *mdoc)
+{
+	char		 *p;
+	struct mdoc_node *head;
+
+	if (MDOC_BLOCK != mdoc->last->type)
+		return(1);
+	assert(MDOC_Bf == mdoc->last->tok);
+	head = mdoc->last->data.block.head;
+	assert(head);
+
+	if (0 == mdoc->last->data.block.argc) {
+		if (head->child) {
+			assert(MDOC_TEXT == head->child->type);
+			p = head->child->data.text.string;
+			if (xstrcmp(p, "Em"))
+				return(1);
+			else if (xstrcmp(p, "Li"))
+				return(1);
+			else if (xstrcmp(p, "Sm"))
+				return(1);
+			return(mdoc_nerr(mdoc, head->child, "invalid font mode"));
+		}
+		return(mdoc_err(mdoc, "macro expects an argument or parameter"));
+	}
+	if (head->child)
+		return(mdoc_err(mdoc, "macro expects an argument or parameter"));
+	if (1 == mdoc->last->data.block.argc)
+		return(1);
+	return(mdoc_err(mdoc, "macro expects an argument or parameter"));
 }
 
 
