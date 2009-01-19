@@ -228,19 +228,6 @@ mdoc_meta(struct mdoc *mdoc)
 
 
 void
-mdoc_meta_free(struct mdoc *mdoc)
-{
-
-	if (mdoc->meta.title)
-		free(mdoc->meta.title);
-	if (mdoc->meta.os)
-		free(mdoc->meta.os);
-	if (mdoc->meta.name)
-		free(mdoc->meta.name);
-}
-
-
-void
 mdoc_free(struct mdoc *mdoc)
 {
 
@@ -248,7 +235,13 @@ mdoc_free(struct mdoc *mdoc)
 		mdoc_node_freelist(mdoc->first);
 	if (mdoc->htab)
 		mdoc_tokhash_free(mdoc->htab);
-	
+	if (mdoc->meta.title)
+		free(mdoc->meta.title);
+	if (mdoc->meta.os)
+		free(mdoc->meta.os);
+	if (mdoc->meta.name)
+		free(mdoc->meta.name);
+
 	free(mdoc);
 }
 
