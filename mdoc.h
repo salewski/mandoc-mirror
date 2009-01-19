@@ -416,8 +416,11 @@ struct	mdoc	 *mdoc_alloc(void *data, const struct mdoc_cb *);
 /* Parse a single line (boolean retval). */
 int	 	  mdoc_parseln(struct mdoc *, int, char *buf);
 
-/* Get parse result or NULL. */
-const struct mdoc_node *mdoc_result(struct mdoc *);
+/* Get result first node. */
+const struct mdoc_node *mdoc_node(struct mdoc *);
+
+/* Get result meta-information. */
+const struct mdoc_meta *mdoc_meta(struct mdoc *);
 
 /* Signal end of parse sequence (boolean retval). */
 int		  mdoc_endparse(struct mdoc *);

@@ -44,11 +44,11 @@ static	int	pre_check_msecs(struct mdoc *, struct mdoc_node *,
 			int, enum mdoc_msec *);
 static	int	pre_check_stdarg(struct mdoc *, struct mdoc_node *);
 static	int	post_check_children_count(struct mdoc *);
-static	int	post_check_children_lt(struct mdoc *, int);
-static	int	post_check_children_gt(struct mdoc *, int);
-static	int	post_check_children_wgt(struct mdoc *, int);
-static	int	post_check_children_eq(struct mdoc *, int);
-static	int	post_check_children_weq(struct mdoc *, int);
+static	int	post_check_children_lt(struct mdoc *, const char *, int);
+static	int	post_check_children_gt(struct mdoc *, const char *, int);
+static	int	post_check_children_wgt(struct mdoc *, const char *, int);
+static	int	post_check_children_eq(struct mdoc *, const char *, int);
+static	int	post_check_children_weq(struct mdoc *, const char *, int);
 
 /* Specific pre-child-parse routines. */
 
@@ -258,62 +258,62 @@ post_check_children_count(struct mdoc *mdoc)
 
 
 static int
-post_check_children_wgt(struct mdoc *mdoc, int sz)
+post_check_children_wgt(struct mdoc *mdoc, const char *p, int sz)
 {
 	int		  i;
 
 	if ((i = post_check_children_count(mdoc)) > sz)
 		return(1);
 	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests more "
-				"than %d parameters (has %d)", sz, i));
+				"than %d %s (has %d)", sz, p, i));
 }
 
 
 static int
-post_check_children_gt(struct mdoc *mdoc, int sz)
+post_check_children_gt(struct mdoc *mdoc, const char *p, int sz)
 {
 	int		  i;
 
 	if ((i = post_check_children_count(mdoc)) > sz)
 		return(1);
 	return(mdoc_err(mdoc, "macro requires more than %d "
-				"parameters (has %d)", sz, i));
+				"%s (has %d)", sz, p, i));
 }
 
 
 static int
-post_check_children_weq(struct mdoc *mdoc, int sz)
+post_check_children_weq(struct mdoc *mdoc, const char *p, int sz)
 {
 	int		  i;
 
 	if ((i = post_check_children_count(mdoc)) == sz)
 		return(1);
 	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests %d "
-				"parameters (has %d)", sz, i));
+				"%s (has %d)", sz, p, i));
 }
 
 
 static int
-post_check_children_eq(struct mdoc *mdoc, int sz)
+post_check_children_eq(struct mdoc *mdoc, const char *p, int sz)
 {
 	int		  i;
 
 	if ((i = post_check_children_count(mdoc)) == sz)
 		return(1);
-	return(mdoc_err(mdoc, "macro requires %d parameters "
-				"(have %d)", sz, i));
+	return(mdoc_err(mdoc, "macro requires %d %s "
+				"(have %d)", sz, p, i));
 }
 
 
 static int
-post_check_children_lt(struct mdoc *mdoc, int sz)
+post_check_children_lt(struct mdoc *mdoc, const char *p, int sz)
 {
 	int		  i;
 
 	if ((i = post_check_children_count(mdoc)) < sz)
 		return(1);
 	return(mdoc_err(mdoc, "macro requires less than %d "
-				"parameters (have %d)", sz, i));
+				"%s (have %d)", sz, p, i));
 }
 
 
@@ -367,7 +367,7 @@ berr_eq0(struct mdoc *mdoc)
 
 	if (MDOC_BODY != mdoc->last->type)
 		return(1);
-	return(post_check_children_eq(mdoc, 0));
+	return(post_check_children_eq(mdoc, "body children", 0));
 }
 
 
@@ -377,7 +377,7 @@ bwarn_ge1(struct mdoc *mdoc)
 
 	if (MDOC_BODY != mdoc->last->type)
 		return(1);
-	return(post_check_children_wgt(mdoc, 0));
+	return(post_check_children_wgt(mdoc, "body children", 0));
 }
 
 
@@ -386,7 +386,7 @@ ewarn_eq1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_weq(mdoc, 1));
+	return(post_check_children_weq(mdoc, "parameters", 1));
 }
 
 
@@ -395,7 +395,7 @@ ewarn_eq0(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_weq(mdoc, 0));
+	return(post_check_children_weq(mdoc, "parameters", 0));
 }
 
 
@@ -404,7 +404,7 @@ ewarn_ge1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_wgt(mdoc, 0));
+	return(post_check_children_wgt(mdoc, "parameters", 0));
 }
 
 
@@ -413,7 +413,7 @@ eerr_eq1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_eq(mdoc, 1));
+	return(post_check_children_eq(mdoc, "parameters", 1));
 }
 
 
@@ -422,7 +422,7 @@ eerr_le2(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_lt(mdoc, 3));
+	return(post_check_children_lt(mdoc, "parameters", 3));
 }
 
 
@@ -431,7 +431,7 @@ eerr_le1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_lt(mdoc, 2));
+	return(post_check_children_lt(mdoc, "parameters", 2));
 }
 
 
@@ -440,7 +440,7 @@ eerr_eq0(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_eq(mdoc, 0));
+	return(post_check_children_eq(mdoc, "parameters", 0));
 }
 
 
@@ -449,7 +449,7 @@ eerr_ge1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_gt(mdoc, 0));
+	return(post_check_children_gt(mdoc, "parameters", 0));
 }
 
 
@@ -459,7 +459,7 @@ herr_eq0(struct mdoc *mdoc)
 
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
-	return(post_check_children_eq(mdoc, 0));
+	return(post_check_children_eq(mdoc, "parameters", 0));
 }
 
 
@@ -469,7 +469,7 @@ hwarn_ge1(struct mdoc *mdoc)
 
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
-	return(post_check_children_wgt(mdoc, 0));
+	return(post_check_children_wgt(mdoc, "parameters", 0));
 }
 
 
@@ -479,7 +479,7 @@ herr_ge1(struct mdoc *mdoc)
 
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
-	return(post_check_children_gt(mdoc, 0));
+	return(post_check_children_gt(mdoc, "parameters", 0));
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id$ */
+	/* $Id$ */
 /*
  * Copyright (c) 2008 Kristaps Dzonsons <kristaps@kth.se>
  *
@@ -232,7 +232,7 @@ parse_leave(struct md_parse *p, int code)
 
 	if ( ! mdoc_endparse(p->mdoc))
 		code = 0;
-	if (p->print && (n = mdoc_result(p->mdoc)))
+	if (p->print && (n = mdoc_node(p->mdoc)))
 		(*p->print)(n);
 
 	mdoc_free(p->mdoc);

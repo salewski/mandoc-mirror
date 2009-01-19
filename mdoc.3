@@ -7,12 +7,15 @@
 .Nm mdoc_alloc ,
 .Nm mdoc_parseln ,
 .Nm mdoc_endparse ,
-.Nm mdoc_result ,
+.Nm mdoc_node ,
+.Nm mdoc_meta ,
 .Nm mdoc_free
 .Nd mdoc macro compiler library
 .\"
 .Sh SYNOPSIS
-.In mdoc.h
+.Fd #include <mdoc.h>
+.Vt extern const char * const * mdoc_macronames;
+.Vt extern const char * const * mdoc_argnames;
 .Ft "struct mdoc *"
 .Fn mdoc_alloc "void *data" "const struct mdoc_cb *cb"
 .Ft void
@@ -20,7 +23,9 @@
 .Ft int
 .Fn mdoc_parseln "struct mdoc *mdoc" "int line" "char *buf"
 .Ft "const struct mdoc_node *"
-.Fn mdoc_result "struct mdoc *mdoc"
+.Fn mdoc_node "struct mdoc *mdoc"
+.Ft "const struct mdoc_meta *"
+.Fn mdoc_meta "struct mdoc *mdoc"
 .Ft int
 .Fn mdoc_endparse "struct mdoc *mdoc"
 .\"
@@ -35,13 +40,16 @@ parse each line in a document with
 close the parsing session with
 .Fn mdoc_endparse ,
 operate over the syntax tree returned by
-.Fn mdoc_result ,
+.Fn mdoc_node 
+and
+.Fn mdoc_meta ,
 then free all allocated memory with
 .Fn mdoc_free .
 See the
 .Sx EXAMPLES
 section for a full example.
 .Pp
+.\" Function descriptions.
 Function descriptions follow:
 .Bl -ohang -offset indent
 .It Fn mdoc_alloc
@@ -64,14 +72,30 @@ is modified by this function.
 Signals that the parse is complete.  Note that if 
 .Fn mdoc_endparse
 is called subsequent to
-.Fn mdoc_result ,
+.Fn mdoc_node ,
 the resulting tree is incomplete.  Returns 0 on failure, 1 on success.
-.It Fn mdoc_result
-Returns the result of the parse or NULL on failure.  Note that if 
+.It Fn mdoc_node
+Returns the first node of the parse.  Note that if 
 .Fn mdoc_parseln
 or
 .Fn mdoc_endparse
 return 0, the tree will be incomplete.
+.It Fn mdoc_meta
+Returns the document's parsed meta-data.  If this information has not
+yet been supplied or 
+.Fn mdoc_parseln
+or
+.Fn mdoc_endparse
+return 0, the data will be incomplete.
+.El
+.Pp
+.\" Variable descriptions.
+The following variables are also defined:
+.Bl -ohang -offset indent
+.It Va mdoc_macronames
+An array of string-ified token names.
+.It Va mdoc_argnames
+An array of string-ified token argument names.
 .El
 .Pp
 .Nm
@@ -105,8 +129,8 @@ while ((buf = fgetln(fp, &len))) {
 
 if ( ! mdoc_endparse(mdoc))
 	errx(1, "mdoc_endparse");
-if (NULL == (node = mdoc_result(mdoc)))
-	errx(1, "mdoc_result");
+if (NULL == (node = mdoc_node(mdoc)))
+	errx(1, "mdoc_node");
 
 parsed(mdoc, node);
 mdoc_free(mdoc);
@@ -127,13 +151,15 @@ utility was written by
 .\"
 .\"
 .Sh BUGS
-Both bugs and incompabilities are documented in this section.  An
-incompatible macro or behaviour is relative to the default
+Bugs, un-implemented macros and incompabilities are documented in this
+section.  The baseline for determining whether macro parsing is 
+.Qq incompatible
+is the default
 .Xr groff 1
 system bundled with 
 .Ox .
 .Pp
-The 
+Un-implemented: the 
 .Sq \&Xc
 and
 .Sq \&Xo
@@ -142,12 +168,15 @@ macros aren't handled when used to span lines for the
 macro.  Such usage is specifically discouraged in
 .Xr mdoc.samples 7 .
 .Pp
-When 
+Bugs: when 
 .Sq \&It \-column
 is invoked, whitespace is not stripped around
 .Sq \&Ta
 or tab-character separators.
 .Pp
-The 
+Incompatible: the 
 .Sq \&At
-macro only accepts a single parameter.
+macro only accepts a single parameter.  Furthermore, several macros 
+.Pf ( Sq \&Pp ,
+.Sq \&It ,
+and possibly others) accept multiple arguments with a warning.

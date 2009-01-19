@@ -85,9 +85,9 @@ const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {
 
 const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* \" */
-	{ macro_constant, MDOC_PROLOGUE }, /* Dd */
-	{ macro_constant, MDOC_PROLOGUE }, /* Dt */
-	{ macro_constant, MDOC_PROLOGUE }, /* Os */
+	{ macro_constant, MDOC_PROLOGUE | MDOC_NOKEEP }, /* Dd */
+	{ macro_constant, MDOC_PROLOGUE | MDOC_NOKEEP }, /* Dt */
+	{ macro_constant, MDOC_PROLOGUE | MDOC_NOKEEP }, /* Os */
 	{ macro_scoped, 0 }, /* Sh */
 	{ macro_scoped, 0 }, /* Ss */ 
 	{ macro_text, 0 }, /* Pp */ 
@@ -205,7 +205,6 @@ static	void		  argfree(size_t, struct mdoc_arg *);
 static	void	  	  argcpy(struct mdoc_arg *, 
 				const struct mdoc_arg *);
 
-static	void		  mdoc_node_freelist(struct mdoc_node *);
 static	int		  mdoc_node_append(struct mdoc *, 
 				struct mdoc_node *);
 static	void		  mdoc_elem_free(struct mdoc_elem *);
@@ -213,10 +212,18 @@ static	void		  mdoc_text_free(struct mdoc_text *);
 
 
 const struct mdoc_node *
-mdoc_result(struct mdoc *mdoc)
+mdoc_node(struct mdoc *mdoc)
 {
 
 	return(mdoc->first);
+}
+
+
+const struct mdoc_meta *
+mdoc_meta(struct mdoc *mdoc)
+{
+
+	return(&mdoc->meta);
 }
 
 
@@ -671,7 +678,7 @@ mdoc_node_free(struct mdoc_node *p)
 }
 
 
-static void
+void
 mdoc_node_freelist(struct mdoc_node *p)
 {
 

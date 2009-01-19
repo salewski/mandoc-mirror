@@ -57,6 +57,7 @@ struct	mdoc_macro {
 #define	MDOC_QUOTABLE	 (1 << 3)
 #define	MDOC_PROLOGUE	 (1 << 4)
 #define	MDOC_TABSEP	 (1 << 5)
+#define	MDOC_NOKEEP	 (1 << 6)
 };
 
 #define	mdoc_nwarn(mdoc, node, type, fmt, ...) \
@@ -115,6 +116,7 @@ int		  mdoc_head_alloc(struct mdoc *, int, int, int);
 int		  mdoc_tail_alloc(struct mdoc *, int, int, int);
 int		  mdoc_body_alloc(struct mdoc *, int, int, int);
 void		  mdoc_node_free(struct mdoc_node *);
+void		  mdoc_node_freelist(struct mdoc_node *);
 void		  mdoc_sibling(struct mdoc *, int, struct mdoc_node **,
 			struct mdoc_node **, struct mdoc_node *);
 void		 *mdoc_tokhash_alloc(void);
