@@ -53,6 +53,12 @@ install:
 	install -m 0644 libmdoc.a $(PREFIX)/lib/
 	install -m 0444 mdoc.h $(PREFIX)/include/
 
+install-dist: mdocml-$(VERSION).tar.gz mdocml-oport-$(VERSION).tar.gz
+	install -m 0644 mdocml-$(VERSION).tar.gz $(PREFIX)/
+	install -m 0644 mdocml-$(VERSION).tar.gz $(PREFIX)/mdocml.tar.gz
+	install -m 0644 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/
+	install -m 0644 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/mdocml-oport.tar.gz
+
 uninstall:
 	rm -f $(PREFIX)/bin/mdocml
 	rm -f $(PREFIX)/man/man1/mdocml.1
