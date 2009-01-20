@@ -25,9 +25,14 @@
 
 #include "private.h"
 
+/*
+ * Parse arguments and parameters of macros.  Arguments follow the
+ * syntax of `-arg [val [valN...]]', while parameters are free-form text
+ * following arguments (if any).  This file must correctly handle the
+ * strange punctuation rules dictated by groff.
+ */
+
 /* FIXME: .It called with -column and quoted arguments. */
-/* FIXME: if arguments are quoted, they should not be later parsed for
- * macros. */
 
 static	int		 lookup(int, const char *);
 static	int		 parse(struct mdoc *, int,

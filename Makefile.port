@@ -1,6 +1,6 @@
 # $OpenBSD$
 
-COMMENT=		compile mdoc macros into mark-up languages
+COMMENT=		mdoc macro compiler
 
 DISTNAME=		mdocml-@VERSION@
 CATEGORIES=		devel

@@ -2,57 +2,63 @@ VERSION	= 1.1.0
 
 CFLAGS += -W -Wall -Wno-unused-parameter -g 
 
-LNS	= macro.ln mdoc.ln mdocml.ln hash.ln strings.ln xstd.ln argv.ln validate.ln action.ln tree.ln
+LIBLNS	= macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
+	  validate.ln action.ln
+
+BINLNS	= tree.ln mdocml.ln
+
+LNS	= $(LIBLNS) $(BINLNS)
 
 LLNS	= llib-llibmdoc.ln llib-lmdocml.ln
 
 LIBS	= libmdoc.a
 
-OBJS	= macro.o mdoc.o mdocml.o hash.o strings.o xstd.o argv.o validate.o action.o tree.o
+LIBOBJS	= macro.o mdoc.o hash.o strings.o xstd.o argv.o \
+	  validate.o action.o
 
-SRCS	= macro.c mdoc.c mdocml.c hash.c strings.c xstd.c argv.c validate.c action.c tree.c
+BINOBJS	= tree.o mdocml.o
 
-HEADS	= mdoc.h
+OBJS	= $(LIBOBJS) $(BINOBJS)
+
+SRCS	= macro.c mdoc.c mdocml.c hash.c strings.c xstd.c argv.c \
+	  validate.c action.c tree.c
+
+HEADS	= mdoc.h private.h
 
 BINS	= mdocml
 
 CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS)
 
-SUCCESS	= test.1 test.7 test.8 test.9 test.11 test.11 test.12 test.16 \
-	  test.17 test.19 test.20 test.21 test.23 test.25 test.27     \
-	  test.28 test.29 test.31 test.32 test.33 test.34 test.35     \
-	  test.38 test.39 test.40 test.41 test.42 test.43 test.44     \
-	  test.45 test.46 test.47 test.49 test.51 test.52 test.53     \
-	  test.54 test.55 test.56 test.57 test.58 test.59 test.60     \
-	  test.62 test.67 test.68 test.71 test.72 test.73 test.74     \
-	  test.75
-
-FAIL	= test.0 test.2 test.3 test.4 test.5 test.6 test.13 test.14   \
-	  test.15 test.18 test.22 test.24 test.26 test.30 test.36     \
-	  test.37 test.48 test.50 test.61 test.63 test.64 test.65     \
-	  test.66 test.69 test.70
+INSTALL	= $(SRCS) $(HEADS) Makefile Makefile.port DESCR
 
 all:	$(BINS)
 
 lint:	$(LLNS)
 
-mdocml:	mdocml.o tree.o libmdoc.a
-	$(CC) $(CFLAGS) -o $@ mdocml.o tree.o libmdoc.a
-
 clean:
 	rm -f $(CLEAN)
 
-regress: mdocml $(SUCCESS) $(FAIL)
-	@for f in $(SUCCESS) ; do \
-		echo "./mdocml $$f" ; \
-		./mdocml $$f || exit 1 ; \
-	done
+dist:	mdocml-$(VERSION).tar.gz
 
-llib-llibmdoc.ln: macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln validate.ln action.ln
-	$(LINT) $(LINTFLAGS) -Clibmdoc mdoc.ln macro.ln hash.ln strings.ln xstd.ln argv.ln validate.ln action.ln
+port:	mdocml-oport-$(VERSION).tar.gz
 
-llib-lmdocml.ln: mdocml.ln tree.ln llib-llibmdoc.ln
-	$(LINT) $(LINTFLAGS) -Cmdocml mdocml.ln tree.ln llib-llibmdoc.ln
+install:
+	mkdir -p $(PREFIX)/bin/
+	mkdir -p $(PREFIX)/include/mdoc/
+	mkdir -p $(PREFIX)/lib/
+	mkdir -p $(PREFIX)/man/man1/
+	install -m 0755 mdocml $(PREFIX)/bin/
+	install -m 0444 mdocml.1 $(PREFIX)/man/man1/
+	install -m 0444 mdoc.3 $(PREFIX)/man/man3/
+	install -m 0644 libmdoc.a $(PREFIX)/lib/
+	install -m 0444 mdoc.h $(PREFIX)/include/
+
+uninstall:
+	rm -f $(PREFIX)/bin/mdocml
+	rm -f $(PREFIX)/man/man1/mdocml.1
+	rm -f $(PREFIX)/man/man3/mdoc.3
+	rm -f $(PREFIX)/lib/libmdoc.a
+	rm -f $(PREFIX)/include/mdoc.h
 
 macro.ln: macro.c private.h
 
@@ -96,6 +102,37 @@ action.o: action.c private.h
 
 private.h: mdoc.h
 
-libmdoc.a: macro.o mdoc.o hash.o strings.o xstd.o argv.o validate.o action.o
-	$(AR) rs $@ macro.o mdoc.o hash.o strings.o xstd.o argv.o validate.o action.o
+mdocml-oport-$(VERSION).tar.gz: Makefile.port DESCR
+	mkdir -p .dist/mdocml/pkg
+	sed -e "s!@VERSION@!$(VERSION)!" Makefile.port > .dist/mdocml/Makefile
+	md5 mdocml-$(VERSION).tar.gz > .dist/mdocml/distinfo
+	rmd160 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
+	sha1 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
+	install -m 0644 DESCR .dist/mdocml/pkg/DESCR
+	echo @comment $$OpenBSD$$ > .dist/mdocml/pkg/PLIST
+	echo bin/mdocml >> .dist/mdocml/pkg/PLIST
+	echo lib/libmdoc.a >> .dist/mdocml/pkg/PLIST
+	echo include/mdoc.h >> .dist/mdocml/pkg/PLIST
+	echo @man man/man1/mdocml.1 >> .dist/mdocml/pkg/PLIST
+	echo @man man/man3/mdoc.3 >> .dist/mdocml/pkg/PLIST
+	( cd .dist/ && tar zcf ../$@ mdocml/ )
+	rm -rf .dist/
+
+mdocml-$(VERSION).tar.gz: $(INSTALL)
+	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
+	install -m 0644 $(INSTALL) .dist/mdocml/mdocml-$(VERSION)/
+	( cd .dist/mdocml/ && tar zcf ../../$@ mdocml-$(VERSION)/ )
+	rm -rf .dist/
+
+llib-llibmdoc.ln: $(LIBLNS)
+	$(LINT) $(LINTFLAGS) -Clibmdoc $(LIBLNS)
+
+llib-lmdocml.ln: $(BINLNS) llib-llibmdoc.ln
+	$(LINT) $(LINTFLAGS) -Cmdocml $(BINLNS) llib-llibmdoc.ln
+
+libmdoc.a: $(LIBOBJS)
+	$(AR) rs $@ $(LIBOBJS)
+
+mdocml:	$(BINOBJS) libmdoc.a
+	$(CC) $(CFLAGS) -o $@ $(BINOBJS) libmdoc.a
 

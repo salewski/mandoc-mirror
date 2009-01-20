@@ -23,11 +23,15 @@
 
 #include "private.h"
 
+/*
+ * Contains wrappers for common functions to simplify their general
+ * usage throughout this codebase.
+ */
+
 #ifdef __linux__
 extern	size_t		 strlcat(char *, const char *, size_t);
 extern	size_t		 strlcpy(char *, const char *, size_t);
 #endif
-
 
 int
 xstrcmp(const char *p1, const char *p2)
@@ -36,7 +40,6 @@ xstrcmp(const char *p1, const char *p2)
 	return(0 == strcmp(p1, p2));
 }
 
-
 int
 xstrlcat(char *dst, const char *src, size_t sz)
 {
@@ -44,15 +47,12 @@ xstrlcat(char *dst, const char *src, size_t sz)
 	return(strlcat(dst, src, sz) < sz);
 }
 
-
 int
 xstrlcpy(char *dst, const char *src, size_t sz)
 {
 
 	return(strlcpy(dst, src, sz) < sz);
 }
-
-
 
 void *
 xcalloc(size_t num, size_t sz)
@@ -64,7 +64,6 @@ xcalloc(size_t num, size_t sz)
 	return(p);
 }
 
-
 char *
 xstrdup(const char *p)
 {
@@ -74,7 +73,6 @@ xstrdup(const char *p)
 		err(EXIT_FAILURE, "strdup");
 	return(pp);
 }
-
 
 int
 xstrlcats(char *buf, const struct mdoc_node *n, size_t sz)
@@ -96,9 +94,6 @@ xstrlcats(char *buf, const struct mdoc_node *n, size_t sz)
 
 	return(1);
 }
-
-
-
 
 #ifdef __linux__
 /*	$OpenBSD: strlcat.c,v 1.13 2005/08/08 08:05:37 espie Exp $	*/
@@ -150,7 +145,6 @@ strlcat(char *dst, const char *src, size_t siz)
 
 	return(dlen + (s - src));	/* count does not include NUL */
 }
-
 
 size_t
 strlcpy(char *dst, const char *src, size_t siz)

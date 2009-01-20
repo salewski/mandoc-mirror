@@ -21,6 +21,14 @@
 
 #include "private.h"
 
+/*
+ * Pre- and post-validate macros as they're parsed.  Pre-validation
+ * occurs when the macro has been detected and its arguments parsed.
+ * Post-validation occurs when all child macros have also been parsed.
+ * In the ELEMENT case, this is simply the parameters of the macro; in
+ * the BLOCK case, this is the HEAD, BODY, TAIL and so on.
+ */
+
 typedef	int	(*v_pre)(struct mdoc *, struct mdoc_node *);
 typedef	int	(*v_post)(struct mdoc *);
 

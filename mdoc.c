@@ -26,6 +26,12 @@
 
 #include "private.h"
 
+/*
+ * Main caller in the libmdoc library.  This begins the parsing routine,
+ * handles allocation of data, and so forth.  Most of the "work" is done
+ * in macro.c, but this orchestrates who does what, when.
+ */
+
 const	char *const __mdoc_macronames[MDOC_MAX] = {		 
 	"\\\"",		"Dd",		"Dt",		"Os",
 	"Sh",		"Ss",		"Pp",		"D1",
@@ -82,6 +88,8 @@ const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {
 	"svid4",		"filled",		"words",
 	"emphasis",		"symbolic",
 	};
+
+/* Central table of library: who gets parsed how. */
 
 const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* \" */
@@ -198,7 +206,6 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 const	char * const *mdoc_macronames = __mdoc_macronames;
 const	char * const *mdoc_argnames = __mdoc_argnames;
 const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;
-
 
 static	struct mdoc_arg	 *argdup(size_t, const struct mdoc_arg *);
 static	void		  argfree(size_t, struct mdoc_arg *);

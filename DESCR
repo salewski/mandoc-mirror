@@ -1,1 +1,2 @@
-Compile mdoc macros into mark-up languages such as HTML and XML.
+The mdocml utility interfaces with the mdoc library to compile
+mdoc-roff documents into a variety of output formats.

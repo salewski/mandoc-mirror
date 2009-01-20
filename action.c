@@ -22,6 +22,11 @@
 
 #include "private.h"
 
+/*
+ * Actions are executed on macros after they've been post-validated: in
+ * other words, a macro will not be "acted upon" until all of its
+ * children have been filled in (post-fix order).
+ */
 
 struct	actions {
 	int	(*post)(struct mdoc *);
@@ -149,6 +154,11 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 };
 
 
+/*
+ * The `Nm' macro sets the document's name when used the first time with
+ * an argument.  Subsequent calls without a value will result in the
+ * name value being used.
+ */
 static int
 post_nm(struct mdoc *mdoc)
 {
@@ -169,6 +179,10 @@ post_nm(struct mdoc *mdoc)
 }
 
 
+/*
+ * We keep track of the current section in order to provide warnings on
+ * section ordering, per-section macros, and so on.
+ */
 static int
 post_sh(struct mdoc *mdoc)
 {
@@ -188,6 +202,9 @@ post_sh(struct mdoc *mdoc)
 }
 
 
+/* 
+ * Prologue title must be parsed into document meta-data.
+ */
 static int
 post_dt(struct mdoc *mdoc)
 {
@@ -233,6 +250,9 @@ post_dt(struct mdoc *mdoc)
 }
 
 
+/* 
+ * Prologue operating system must be parsed into document meta-data.
+ */
 static int
 post_os(struct mdoc *mdoc)
 {
@@ -253,6 +273,9 @@ post_os(struct mdoc *mdoc)
 }
 
 
+/* 
+ * Prologue date must be parsed into document meta-data.
+ */
 static int
 post_dd(struct mdoc *mdoc)
 {
@@ -299,6 +322,10 @@ post_dd(struct mdoc *mdoc)
 }
 
 
+/*
+ * The end document shouldn't have the prologue macros as part of the
+ * syntax tree (they encompass only meta-data). 
+ */
 static int
 post_prologue(struct mdoc *mdoc)
 {
