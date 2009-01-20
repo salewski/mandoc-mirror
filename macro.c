@@ -713,12 +713,16 @@ macro_scoped(MACRO_PROT_ARGS)
 
 	assert ( ! (MDOC_CALLABLE & mdoc_macros[tok].flags));
 
+	/* First rewind extant implicit scope. */
+
 	if ( ! (MDOC_EXPLICIT & mdoc_macros[tok].flags)) {
 		if ( ! rewind_subblock(MDOC_BODY, mdoc, tok, line, ppos))
 			return(0);
 		if ( ! rewind_impblock(mdoc, tok, line, ppos))
 			return(0);
 	}
+
+	/* Parse arguments. */
 
 	for (argc = 0; argc < MDOC_LINEARG_MAX; argc++) {
 		lastarg = *pos;
