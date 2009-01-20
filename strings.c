@@ -124,12 +124,18 @@ time_t
 mdoc_atotime(const char *p)
 {
 	struct tm	 tm;
+	char		*pp;
 
 	(void)memset(&tm, 0, sizeof(struct tm));
 
-	if (0 == strptime(p, "%b %d %Y", &tm))
+	if (xstrcmp(p, "$Mdocdate$"))
+		return(time(NULL));
+	if ((pp = strptime(p, "$Mdocdate$", &tm)) && 0 == *pp)
 		return(mktime(&tm));
-	if (0 == strptime(p, "%b %d, %Y", &tm))
+	/* XXX - this matches "June 1999", which is wrong. */
+	if ((pp = strptime(p, "%b %d %Y", &tm)) && 0 == *pp)
+		return(mktime(&tm));
+	if ((pp = strptime(p, "%b %d, %Y", &tm)) && 0 == *pp)
 		return(mktime(&tm));
 
 	return(0);

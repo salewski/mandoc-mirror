@@ -33,6 +33,14 @@ extern	size_t		 strlcat(char *, const char *, size_t);
 extern	size_t		 strlcpy(char *, const char *, size_t);
 #endif
 
+
+int
+xstrncmp(const char *p1, const char *p2, size_t sz)
+{
+
+	return(0 == strncmp(p1, p2, sz));
+}
+
 int
 xstrcmp(const char *p1, const char *p2)
 {

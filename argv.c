@@ -169,7 +169,6 @@ mdoc_args(struct mdoc *mdoc, int line,
 	if (MDOC_It == tok) {
 		n = mdoc->last->parent;
 		/* FIXME: scan for ARGS_TABSEP. */
-
 	}
 
 	if (0 == buf[*pos])

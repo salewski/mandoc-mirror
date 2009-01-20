@@ -246,6 +246,8 @@ post_dt(struct mdoc *mdoc)
 	if (NULL == mdoc->meta.title)
 		mdoc->meta.title = xstrdup("untitled");
 
+	mdoc_msg(mdoc, "title: %s", mdoc->meta.title);
+
 	return(post_prologue(mdoc));
 }
 
@@ -279,46 +281,21 @@ post_os(struct mdoc *mdoc)
 static int
 post_dd(struct mdoc *mdoc)
 {
-	char		  date[64];
-	size_t		  sz;
-	char		 *p;
-	struct mdoc_node *n;
+	char		  buf[64];
 
 	assert(MDOC_ELEM == mdoc->last->type);
 	assert(MDOC_Dd == mdoc->last->tok);
 
-	n = mdoc->last->child; 
 	assert(0 == mdoc->meta.date);
-	date[0] = 0;
 
-	sz = 64;
-
-	for ( ; 0 == mdoc->meta.date && n; n = n->next) {
-		assert(MDOC_TEXT == n->type);
-		p = n->data.text.string;
-
-		if (xstrcmp(p, "$Mdocdate$")) {
-			mdoc->meta.date = time(NULL);
-			continue;
-		} else if (xstrcmp(p, "$")) {
-			mdoc->meta.date = mdoc_atotime(date);
-			continue;
-		} else if (xstrcmp(p, "$Mdocdate:"))
-			continue;
-
-		if ( ! xstrlcat(date, n->data.text.string, sz))
-			return(mdoc_nerr(mdoc, n, "invalid parameter syntax"));
-		if (n->next && ! xstrlcat(date, " ", sz))
-			return(mdoc_nerr(mdoc, n, "invalid parameter syntax"));
-	}
-
-	if (mdoc->meta.date && NULL == n)
-		return(post_prologue(mdoc));
-	else if (n)
+	if ( ! xstrlcats(buf, mdoc->last->child, 64))
+		return(mdoc_err(mdoc, "macro parameters too long"));
+	if (0 == (mdoc->meta.date = mdoc_atotime(buf)))
 		return(mdoc_err(mdoc, "invalid parameter syntax"));
-	if ((mdoc->meta.date = mdoc_atotime(date)))
-		return(post_prologue(mdoc));
-	return(mdoc_err(mdoc, "invalid parameter syntax"));
+
+	mdoc_msg(mdoc, "date: %u", mdoc->meta.date);
+
+	return(post_prologue(mdoc));
 }
 
 

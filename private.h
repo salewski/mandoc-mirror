@@ -161,6 +161,7 @@ int		  xstrlcats(char *, const struct mdoc_node *, size_t);
 int	  	  xstrlcat(char *, const char *, size_t);
 int	  	  xstrlcpy(char *, const char *, size_t);
 int	  	  xstrcmp(const char *, const char *);
+int	  	  xstrncmp(const char *, const char *, size_t);
 void	 	 *xcalloc(size_t, size_t);
 char	 	 *xstrdup(const char *);
 

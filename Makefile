@@ -33,6 +33,34 @@ CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS)
 
 INSTALL	= $(SRCS) $(HEADS) Makefile Makefile.port DESCR $(MANS)
 
+FAIL	= regress/test.empty \
+	  regress/test.prologue.00 \
+	  regress/test.prologue.01 \
+	  regress/test.prologue.02 \
+	  regress/test.prologue.03 \
+	  regress/test.prologue.04 \
+	  regress/test.prologue.06 \
+	  regress/test.prologue.13 \
+	  regress/test.prologue.15 \
+	  regress/test.prologue.16 \
+	  regress/test.prologue.18 \
+	  regress/test.prologue.19 \
+	  regress/test.prologue.21 \
+	  regress/test.prologue.22 \
+	  regress/test.prologue.23 \
+	  regress/test.prologue.24
+
+SUCCEED	= regress/test.prologue.05 \
+	  regress/test.prologue.07 \
+	  regress/test.prologue.08 \
+	  regress/test.prologue.09 \
+	  regress/test.prologue.10 \
+	  regress/test.prologue.11 \
+	  regress/test.prologue.12 \
+	  regress/test.prologue.14 \
+	  regress/test.prologue.17 \
+	  regress/test.prologue.20
+
 all:	$(BINS)
 
 lint:	$(LLNS)
@@ -43,6 +71,14 @@ clean:
 dist:	mdocml-$(VERSION).tar.gz
 
 port:	mdocml-oport-$(VERSION).tar.gz
+
+regress::
+	@for f in $(FAIL); do \
+		echo "./mdocml $$f" ; \
+		./mdocml $$f 2>/dev/null || continue ; exit 1 ; done
+	@for f in $(SUCCEED); do \
+		echo "./mdocml $$f" ; \
+		./mdocml $$f 2>/dev/null || exit 1 ; done
 
 install:
 	mkdir -p $(PREFIX)/bin/

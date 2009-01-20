@@ -1,0 +1,4 @@
+.Dd $Mdocdate$
+.Dt test
+.Os
+.Sh NAME
