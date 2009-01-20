@@ -1213,8 +1213,7 @@ macro_end(struct mdoc *mdoc)
 			continue;
 		if ( ! (MDOC_EXPLICIT & mdoc_macros[n->tok].flags))
 			continue;
-		mdoc_nerr(mdoc, n, "macro scope still open on exit");
-		return(0);
+		return(mdoc_nerr(mdoc, n, "macro scope still open on exit"));
 	}
 
 	return(rewind_last(mdoc, mdoc->first));
