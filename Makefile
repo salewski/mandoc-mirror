@@ -25,11 +25,13 @@ SRCS	= macro.c mdoc.c mdocml.c hash.c strings.c xstd.c argv.c \
 
 HEADS	= mdoc.h private.h
 
+MANS	= mdocml.1 mdoc.3
+
 BINS	= mdocml
 
 CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS)
 
-INSTALL	= $(SRCS) $(HEADS) Makefile Makefile.port DESCR
+INSTALL	= $(SRCS) $(HEADS) Makefile Makefile.port DESCR $(MANS)
 
 all:	$(BINS)
 
