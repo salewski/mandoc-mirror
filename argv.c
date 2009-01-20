@@ -70,10 +70,10 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 			if ( ! mdoc_iscdelim(buf[i]))
 				break;
 			i++;
-			if (0 == buf[i] || ! isspace(buf[i]))
+			if (0 == buf[i] || ! isspace((int)buf[i]))
 				break;
 			i++;
-			while (buf[i] && isspace(buf[i]))
+			while (buf[i] && isspace((int)buf[i]))
 				i++;
 		}
 		if (0 == buf[i]) {
@@ -107,7 +107,7 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 			}
 		else {
 			while (buf[*pos]) {
-				if (isspace(buf[*pos]))
+				if (isspace((int)buf[*pos]))
 					if ('\\' != buf[*pos - 1])
 						break;
 				(*pos)++;
@@ -123,7 +123,7 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 			return(ARGS_WORD);
 
 		if ( ! (ARGS_TABSEP & fl))
-			while (buf[*pos] && isspace(buf[*pos]))
+			while (buf[*pos] && isspace((int)buf[*pos]))
 				(*pos)++;
 
 		if (buf[*pos])
@@ -155,7 +155,7 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 	if (0 == buf[*pos])
 		return(ARGS_QWORD);
 
-	while (buf[*pos] && isspace(buf[*pos]))
+	while (buf[*pos] && isspace((int)buf[*pos]))
 		(*pos)++;
 
 	if (buf[*pos])
@@ -452,7 +452,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	if (0 == buf[*pos])
 		return(ARGV_EOLN);
 
-	assert( ! isspace(buf[*pos]));
+	assert( ! isspace((int)buf[*pos]));
 
 	if ('-' != buf[*pos])
 		return(ARGV_WORD);
@@ -465,7 +465,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 
 	assert(*pos > 0);
 	while (buf[*pos]) {
-		if (isspace(buf[*pos])) 
+		if (isspace((int)buf[*pos])) 
 			if ('\\' != buf[*pos - 1])
 				break;
 		(*pos)++;
@@ -480,7 +480,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		return(ARGV_WORD);
 	}
 
-	while (buf[*pos] && isspace(buf[*pos]))
+	while (buf[*pos] && isspace((int)buf[*pos]))
 		(*pos)++;
 
 	/* FIXME: whitespace if no value. */

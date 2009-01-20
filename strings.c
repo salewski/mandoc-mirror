@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef __linux__
+#ifndef __OpenBSD__
 #include <time.h>
 #endif
 
