@@ -85,9 +85,9 @@ const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {
 
 const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ NULL, 0 }, /* \" */
-	{ macro_constant, MDOC_PROLOGUE | MDOC_NOKEEP }, /* Dd */
-	{ macro_constant, MDOC_PROLOGUE | MDOC_NOKEEP }, /* Dt */
-	{ macro_constant, MDOC_PROLOGUE | MDOC_NOKEEP }, /* Os */
+	{ macro_constant, MDOC_PROLOGUE }, /* Dd */
+	{ macro_constant, MDOC_PROLOGUE }, /* Dt */
+	{ macro_constant, MDOC_PROLOGUE }, /* Os */
 	{ macro_scoped, 0 }, /* Sh */
 	{ macro_scoped, 0 }, /* Ss */ 
 	{ macro_text, 0 }, /* Pp */ 
@@ -295,14 +295,15 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 	if (MDOC_HALT & mdoc->flags)
 		return(0);
 
+	mdoc->linetok = 0;
+
 	if ('.' != *buf) {
-		if (SEC_PROLOGUE != mdoc->sec_lastn) {
-			if ( ! mdoc_word_alloc(mdoc, line, 0, buf))
-				return(0);
-			mdoc->next = MDOC_NEXT_SIBLING;
-			return(1);
-		}
-		return(mdoc_perr(mdoc, line, 0, "text disallowed"));
+		if ( ! (MDOC_BODYPARSE & mdoc->flags))
+			return(mdoc_perr(mdoc, line, 0, "text disallowed"));
+		if ( ! mdoc_word_alloc(mdoc, line, 0, buf))
+			return(0);
+		mdoc->next = MDOC_NEXT_SIBLING;
+		return(1);
 	}
 
 	if (buf[1] && '\\' == buf[1])
@@ -400,8 +401,8 @@ mdoc_macro(struct mdoc *mdoc, int tok,
 	assert(mdoc_macros[tok].fp);
 
 	if ( ! (MDOC_PROLOGUE & mdoc_macros[tok].flags) &&
-			SEC_PROLOGUE == mdoc->sec_lastn)
-		return(mdoc_perr(mdoc, ln, ppos, "macro disallowed in document prologue"));
+			! (MDOC_BODYPARSE & mdoc->flags))
+		return(mdoc_perr(mdoc, ln, ppos, "macro disallowed: not in document body"));
 	if (1 != ppos && ! (MDOC_CALLABLE & mdoc_macros[tok].flags))
 		return(mdoc_perr(mdoc, ln, ppos, "macro not callable"));
 	return((*mdoc_macros[tok].fp)(mdoc, tok, ln, ppos, pos, buf));
@@ -416,6 +417,26 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	assert(mdoc->last);
 	assert(mdoc->first);
 	assert(MDOC_ROOT != p->type);
+
+	/* See if we exceed the suggest line-max. */
+
+	switch (p->type) {
+	case (MDOC_TEXT):
+		/* FALLTHROUGH */
+	case (MDOC_ELEM):
+		/* FALLTHROUGH */
+	case (MDOC_BLOCK):
+		mdoc->linetok++;
+		break;
+	default:
+		break;
+	}
+
+	if (mdoc->linetok > MDOC_LINEARG_SOFTMAX) 
+		if ( ! mdoc_nwarn(mdoc, p, WARN_COMPAT, 
+					"suggested %d tokens per line exceeded (has %d)",
+					MDOC_LINEARG_SOFTMAX, mdoc->linetok))
+			return(0);
 
 	if (MDOC_TEXT == mdoc->last->type)
 		on = "<text>";

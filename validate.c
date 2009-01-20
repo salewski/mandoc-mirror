@@ -27,7 +27,6 @@ typedef	int	(*v_post)(struct mdoc *);
 /* FIXME: some sections should only occur in specific msecs. */
 /* FIXME: ignoring Pp. */
 /* FIXME: math symbols. */
-/* FIXME: make sure prologue is complete. */
 /* FIXME: valid character-escape checks. */
 /* FIXME: make sure required sections are included (NAME, ...). */
 
@@ -72,7 +71,6 @@ static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
 
 static	int	herr_ge1(struct mdoc *);
 static	int	herr_le1(struct mdoc *);
-static	int	hwarn_ge1(struct mdoc *);
 static	int	herr_eq0(struct mdoc *);
 static	int	eerr_eq0(struct mdoc *);
 static	int	eerr_le1(struct mdoc *);
@@ -82,7 +80,6 @@ static	int	eerr_ge1(struct mdoc *);
 static	int	ewarn_eq0(struct mdoc *);
 static	int	ewarn_eq1(struct mdoc *);
 static	int	bwarn_ge1(struct mdoc *);
-static	int	berr_eq0(struct mdoc *);
 static	int	ewarn_ge1(struct mdoc *);
 static	int	ebool(struct mdoc *);
 static	int	post_sh(struct mdoc *);
@@ -119,14 +116,13 @@ static	v_post	posts_bd[] = { herr_eq0, bwarn_ge1, NULL };
 static	v_post	posts_text[] = { eerr_ge1, NULL };
 static	v_post	posts_wtext[] = { ewarn_ge1, NULL };
 static	v_post	posts_notext[] = { eerr_eq0, NULL };
-static	v_post	posts_wline[] = { hwarn_ge1, berr_eq0, NULL };
+static	v_post	posts_wline[] = { bwarn_ge1, herr_eq0, NULL };
 static	v_post	posts_sh[] = { herr_ge1, bwarn_ge1, post_sh, NULL };
 static	v_post	posts_bl[] = { herr_eq0, bwarn_ge1, post_bl, NULL };
 static	v_post	posts_it[] = { post_it, NULL };
 static	v_post	posts_in[] = { ewarn_eq1, NULL };
 static	v_post	posts_ss[] = { herr_ge1, NULL };
 static	v_post	posts_pp[] = { ewarn_eq0, NULL };
-static	v_post	posts_d1[] = { herr_ge1, NULL };
 static	v_post	posts_ex[] = { eerr_le1, post_ex, NULL };
 static	v_post	posts_an[] = { post_an, NULL };
 static	v_post	posts_at[] = { post_at, NULL };
@@ -145,8 +141,8 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pres_sh, posts_sh }, /* Sh */ 
 	{ pres_ss, posts_ss }, /* Ss */ 
 	{ NULL, posts_pp }, /* Pp */ 
-	{ pres_d1, posts_d1 }, /* D1 */
-	{ pres_d1, posts_d1 }, /* Dl */
+	{ pres_d1, posts_wline }, /* D1 */
+	{ pres_d1, posts_wline }, /* Dl */
 	{ pres_bd, posts_bd }, /* Bd */
 	{ NULL, NULL }, /* Ed */
 	{ pres_bl, posts_bl }, /* Bl */ 
@@ -365,16 +361,6 @@ pre_check_parent(struct mdoc *mdoc, struct mdoc_node *node,
 
 
 static int
-berr_eq0(struct mdoc *mdoc)
-{
-
-	if (MDOC_BODY != mdoc->last->type)
-		return(1);
-	return(post_check_children_eq(mdoc, "body children", 0));
-}
-
-
-static int
 bwarn_ge1(struct mdoc *mdoc)
 {
 
@@ -463,16 +449,6 @@ herr_eq0(struct mdoc *mdoc)
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
 	return(post_check_children_eq(mdoc, "parameters", 0));
-}
-
-
-static int
-hwarn_ge1(struct mdoc *mdoc)
-{
-
-	if (MDOC_HEAD != mdoc->last->type)
-		return(1);
-	return(post_check_children_wgt(mdoc, "parameters", 0));
 }
 
 

@@ -25,19 +25,65 @@
 #include <time.h>
 #endif
 
+/*
+ * This has scanning/parsing routines, each of which extract a macro and
+ * its arguments and parameters, then know how to progress to the next
+ * macro.  Macros are parsed according as follows:
+ *
+ *   ELEMENT:	  TEXT | epsilon
+ *   BLOCK:	  HEAD PUNCT BODY PUNCT BLOCK_TAIL PUNCT
+ *   BLOCK_TAIL:  TAIL | epsilon
+ *   HEAD:	  ELEMENT | TEXT | BLOCK | epsilon
+ *   BODY:	  ELEMENT | TEXT | BLOCK | epsilon
+ *   TAIL:	  TEXT | epsilon
+ *   PUNCT:	  TEXT (delimiters) | epsilon
+ *
+ * These are arranged into a parse tree, an example of which follows:
+ *
+ *   ROOT
+ *       BLOCK (.Sh)
+ *           HEAD
+ *               TEXT (`NAME')
+ *           BODY
+ *               ELEMENT (.Nm)
+ *                   TEXT (`mdocml')
+ *               ELEMENT (.Nd)
+ *                   TEXT (`mdoc macro compiler')
+ *               BLOCK (.Op)
+ *                   HEAD
+ *                       ELEMENT (.Fl)
+ *                           TEXT (`v')
+ *               BLOCK (.Op)
+ *                   HEAD
+ *                       ELEMENT (.Fl)
+ *                           TEXT (`v')
+ *                       ELEMENT (.Fl)
+ *                           TEXT (`W')
+ *                       ELEMENT (.Ns)
+ *                       ELEMENT (.Ar)
+ *                           TEXT (`err...')
+ *
+ * These types are always per-line except for block bodies, which may
+ * span multiple lines.  Macros are assigned a parsing routine, which
+ * corresponds to the type, in the mdoc_macros table.
+ *
+ * Note that types are general:  there can be several parsing routines
+ * corresponding to a single type.  The macro_text function, for
+ * example, parses an ELEMENT type (see the function definition for
+ * details) that may be interrupted by further macros; the
+ * macro_constant function, on the other hand, parses an ELEMENT type
+ * spanning a single line.
+ */
+
 #include "private.h"
 
-/* FIXME: maxlineargs should be per LINE, no per TOKEN. */
-
-static	int	  rewind_alt(int);
-static	int	  rewind_dohalt(int, enum mdoc_type, 
-			const struct mdoc_node *);
 #define	REWIND_REWIND	(1 << 0)
 #define	REWIND_NOHALT	(1 << 1)
 #define	REWIND_HALT	(1 << 2)
+static	int	  rewind_dohalt(int, enum mdoc_type, 
+			const struct mdoc_node *);
+static	int	  rewind_alt(int);
 static	int	  rewind_dobreak(int, const struct mdoc_node *);
-
-
 static	int	  rewind_elem(struct mdoc *, int);
 static	int	  rewind_impblock(struct mdoc *, int, int, int);
 static	int	  rewind_expblock(struct mdoc *, int, int, int);
@@ -158,7 +204,7 @@ rewind_dohalt(int tok, enum mdoc_type type, const struct mdoc_node *p)
 	case (MDOC_Qq):
 		/* FALLTHROUGH */
 	case (MDOC_Sq):
-		assert(MDOC_BODY != type);
+		assert(MDOC_HEAD != type);
 		assert(MDOC_TAIL != type);
 		if (type == p->type && tok == p->tok)
 			return(REWIND_REWIND);
@@ -412,6 +458,10 @@ append_delims(struct mdoc *mdoc, int line, int *pos, char *buf)
 }
 
 
+/*
+ * Close out an explicit scope.  This optionally parses a TAIL type with
+ * a set number of TEXT children.
+ */
 int
 macro_scoped_close(MACRO_PROT_ARGS)
 {
@@ -497,6 +547,30 @@ macro_scoped_close(MACRO_PROT_ARGS)
 }
 
 
+/*
+ * A general text macro.  This is a complex case because of punctuation.
+ * If a text macro is followed by words, then punctuation, the macro is
+ * "stopped" and "reopened" following the punctuation.  Thus, the
+ * following arises:
+ *
+ *    .Fl a ; b
+ *
+ *    ELEMENT (.Fl)
+ *        TEXT (`a')
+ *    TEXT (`;')
+ *    ELEMENT (.Fl)
+ *        TEXT (`b')
+ *
+ * This must handle the following situations:
+ *
+ *    .Fl Ar b ; ;
+ *
+ *    ELEMENT (.Fl)
+ *    ELEMENT (.Ar)
+ *        TEXT (`b')
+ *    TEXT (`;')
+ *    TEXT (`;')
+ */
 int
 macro_text(MACRO_PROT_ARGS)
 {
@@ -603,6 +677,30 @@ macro_text(MACRO_PROT_ARGS)
 }
 
 
+/*
+ * Handle explicit-scope (having a different closure token) and implicit
+ * scope (closing out prior scopes when re-invoked) macros.  These
+ * constitute the BLOCK type and usually span multiple lines.  These
+ * always have HEAD and sometimes have BODY types.  In the multi-line
+ * case:
+ *
+ *     .Bd -ragged
+ *     Text.
+ *     .Fl macro
+ *     Another.
+ *     .Ed
+ *
+ *     BLOCK (.Bd)
+ *         HEAD
+ *         BODY
+ *             TEXT (`Text.')
+ *             ELEMENT (.Fl)
+ *                 TEXT (`macro')
+ *             TEXT (`Another.')
+ *
+ * Note that the `.It' macro, possibly the most difficult (as it has
+ * embedded scope, etc.) is handled by this routine.
+ */
 int
 macro_scoped(MACRO_PROT_ARGS)
 {
@@ -704,6 +802,25 @@ macro_scoped(MACRO_PROT_ARGS)
 }
 
 
+/*
+ * This handles a case of implicitly-scoped macro (BLOCK) limited to a
+ * single line.  Instead of being closed out by a subsequent call to
+ * another macro, the scope is closed at the end of line.  These don't
+ * have BODY or TAIL types.  Notice that the punctuation falls outside
+ * of the HEAD type.
+ *
+ *     .Qq a Fl b Ar d ; ;
+ *
+ *     BLOCK (Qq)
+ *         HEAD
+ *             TEXT (`a')
+ *             ELEMENT (.Fl)
+ *                 TEXT (`b')
+ *             ELEMENT (.Ar)
+ *                 TEXT (`d')
+ *         TEXT (`;')
+ *         TEXT (`;')
+ */
 int
 macro_scoped_line(MACRO_PROT_ARGS)
 {
@@ -715,6 +832,9 @@ macro_scoped_line(MACRO_PROT_ARGS)
 	mdoc->next = MDOC_NEXT_CHILD;
 
 	if ( ! mdoc_head_alloc(mdoc, line, ppos, tok))
+		return(0);
+	mdoc->next = MDOC_NEXT_SIBLING;
+	if ( ! mdoc_body_alloc(mdoc, line, ppos, tok))
 		return(0);
 	mdoc->next = MDOC_NEXT_CHILD;
 
@@ -747,16 +867,31 @@ macro_scoped_line(MACRO_PROT_ARGS)
 	}
 
 	if (1 == ppos) {
-		if ( ! rewind_subblock(MDOC_HEAD, mdoc, tok, line, ppos))
+		if ( ! rewind_subblock(MDOC_BODY, mdoc, tok, line, ppos))
 			return(0);
 		if ( ! append_delims(mdoc, line, pos, buf))
 			return(0);
-	} else if ( ! rewind_subblock(MDOC_HEAD, mdoc, tok, line, ppos))
+	} else if ( ! rewind_subblock(MDOC_BODY, mdoc, tok, line, ppos))
 		return(0);
 	return(rewind_impblock(mdoc, tok, line, ppos));
 }
 
 
+/*
+ * A constant-scoped macro is like a simple-scoped macro (mdoc_scoped)
+ * except that it doesn't handle implicit scopes and explicit ones have
+ * a fixed number of TEXT children to the BODY.
+ *
+ *     .Fl a So b Sc ;
+ *
+ *     ELEMENT (.Fl)
+ *         TEXT (`a')
+ *     BLOCK (.So)
+ *         HEAD
+ *         BODY
+ *             TEXT (`b')
+ *     TEXT (';')
+ */
 int
 macro_constant_scoped(MACRO_PROT_ARGS)
 {
@@ -856,6 +991,19 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 }
 
 
+/*
+ * A delimited constant is very similar to the macros parsed by
+ * macro_text except that, in the event of punctuation, the macro isn't
+ * "re-opened" as it is in macro_text.  Also, these macros have a fixed
+ * number of parameters.
+ *
+ *    .Fl a No b
+ *
+ *    ELEMENT (.Fl)
+ *        TEXT (`a')
+ *    ELEMENT (.No)
+ *    TEXT (`b')
+ */
 int
 macro_constant_delimited(MACRO_PROT_ARGS)
 {
@@ -958,13 +1106,18 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 }
 
 
+/*
+ * A constant macro is the simplest classification.  It spans an entire
+ * line.  
+ */
 int
 macro_constant(MACRO_PROT_ARGS)
 {
 	int		  c, lastarg, argc, fl;
 	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
 	char		 *p;
-	struct mdoc_node *n;
+
+	assert( ! (MDOC_CALLABLE & mdoc_macros[tok].flags));
 
 	fl = 0;
 	if (MDOC_QUOTABLE & mdoc_macros[tok].flags)
@@ -1020,31 +1173,7 @@ macro_constant(MACRO_PROT_ARGS)
 		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
-	if ( ! rewind_elem(mdoc, tok))
-		return(0);
-	if ( ! (MDOC_NOKEEP & mdoc_macros[tok].flags))
-		return(1);
-
-	assert(mdoc->last->tok == tok);
-	if (mdoc->last->parent->child == mdoc->last)
-		mdoc->last->parent->child = mdoc->last->prev;
-	if (mdoc->last->prev)
-		mdoc->last->prev->next = NULL;
-
-	n = mdoc->last;
-	assert(NULL == mdoc->last->next);
-
-	if (mdoc->last->prev) {
-		mdoc->last = mdoc->last->prev;
-		mdoc->next = MDOC_NEXT_SIBLING;
-	} else {
-		mdoc->last = mdoc->last->parent;
-		mdoc->next = MDOC_NEXT_CHILD;
-	}
-
-	mdoc_node_freelist(n);
-
-	return(1);
+	return(rewind_elem(mdoc, tok));
 }
 
 
@@ -1057,6 +1186,11 @@ macro_obsolete(MACRO_PROT_ARGS)
 }
 
 
+/*
+ * This is called at the end of parsing.  It must traverse up the tree,
+ * closing out open [implicit] scopes.  Obviously, open explicit scopes
+ * are errors.
+ */
 int
 macro_end(struct mdoc *mdoc)
 {

@@ -29,11 +29,13 @@ struct	actions {
 
 /* Per-macro action routines. */
 
-static int	 post_sh(struct mdoc *);
-static int	 post_os(struct mdoc *);
-static int	 post_dt(struct mdoc *);
-static int	 post_dd(struct mdoc *);
-static int	 post_nm(struct mdoc *);
+static	int	 post_sh(struct mdoc *);
+static	int	 post_os(struct mdoc *);
+static	int	 post_dt(struct mdoc *);
+static	int	 post_dd(struct mdoc *);
+static	int	 post_nm(struct mdoc *);
+
+static	int	 post_prologue(struct mdoc *);
 
 /* Array of macro action routines. */
 
@@ -226,7 +228,8 @@ post_dt(struct mdoc *mdoc)
 
 	if (NULL == mdoc->meta.title)
 		mdoc->meta.title = xstrdup("untitled");
-	return(1);
+
+	return(post_prologue(mdoc));
 }
 
 
@@ -244,7 +247,9 @@ post_os(struct mdoc *mdoc)
 
 	mdoc->meta.os = xstrdup(buf[0] ? buf : "local");
 	mdoc->sec_lastn = mdoc->sec_last = SEC_BODY;
-	return(1);
+	mdoc->flags |= MDOC_BODYPARSE;
+
+	return(post_prologue(mdoc));
 }
 
 
@@ -285,12 +290,38 @@ post_dd(struct mdoc *mdoc)
 	}
 
 	if (mdoc->meta.date && NULL == n)
-		return(1);
+		return(post_prologue(mdoc));
 	else if (n)
 		return(mdoc_err(mdoc, "invalid parameter syntax"));
 	if ((mdoc->meta.date = mdoc_atotime(date)))
-		return(1);
+		return(post_prologue(mdoc));
 	return(mdoc_err(mdoc, "invalid parameter syntax"));
+}
+
+
+static int
+post_prologue(struct mdoc *mdoc)
+{
+	struct mdoc_node *n;
+
+	if (mdoc->last->parent->child == mdoc->last)
+		mdoc->last->parent->child = mdoc->last->prev;
+	if (mdoc->last->prev)
+		mdoc->last->prev->next = NULL;
+
+	n = mdoc->last;
+	assert(NULL == mdoc->last->next);
+
+	if (mdoc->last->prev) {
+		mdoc->last = mdoc->last->prev;
+		mdoc->next = MDOC_NEXT_SIBLING;
+	} else {
+		mdoc->last = mdoc->last->parent;
+		mdoc->next = MDOC_NEXT_CHILD;
+	}
+
+	mdoc_node_freelist(n);
+	return(1);
 }
 
 

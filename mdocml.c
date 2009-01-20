@@ -34,19 +34,7 @@
 
 #define	MD_LINE_SZ	(256)		/* Max input line size. */
 
-/*
- * Put this into a mdoctrans.h, which has:
- *
- * struct mdoc_trans; (opaque)
- *
- * struct mdoc_trans *mdoc_trans_alloc(const char *filter);
- *
- * mdoc_trans_free(struct mdoc_trans *);
- *
- * int mdoc_trans_getopt(struct mdoc_trans *, char *);
- *
- * int mdoc_trans_print(struct mdoc_trans *, const struct mdoc_node *);
- */
+/* TODO: have a struct for each transformer. */
 
 typedef	int		(*mdocprint)(const struct mdoc_node *);
 

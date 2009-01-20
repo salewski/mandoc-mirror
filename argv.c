@@ -25,8 +25,9 @@
 
 #include "private.h"
 
-
 /* FIXME: .It called with -column and quoted arguments. */
+/* FIXME: if arguments are quoted, they should not be later parsed for
+ * macros. */
 
 static	int		 lookup(int, const char *);
 static	int		 parse(struct mdoc *, int,

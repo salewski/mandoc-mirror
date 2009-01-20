@@ -30,8 +30,10 @@ struct	mdoc {
 	void		 *data;
 	struct mdoc_cb	  cb;
 	void		 *htab;
+	int		  linetok;
 	int		  flags;
 #define	MDOC_HALT	 (1 << 0)
+#define	MDOC_BODYPARSE	 (1 << 1)
 	enum mdoc_next	  next;
 	struct mdoc_node *last;
 	struct mdoc_node *first;
@@ -41,9 +43,13 @@ struct	mdoc {
 };
 
 
-/* FIXME: it's 9 (this isn't used properly). */
+/* Hard-limit of macro arguments. */
 
-#define	MDOC_LINEARG_MAX 12
+#define	MDOC_LINEARG_MAX 9
+
+/* Suggested limit of macro arguments. */
+
+#define	MDOC_LINEARG_SOFTMAX 9
 
 #define	MACRO_PROT_ARGS	struct mdoc *mdoc, int tok, int line, \
 			int ppos, int *pos, char *buf
@@ -57,7 +63,6 @@ struct	mdoc_macro {
 #define	MDOC_QUOTABLE	 (1 << 3)
 #define	MDOC_PROLOGUE	 (1 << 4)
 #define	MDOC_TABSEP	 (1 << 5)
-#define	MDOC_NOKEEP	 (1 << 6)
 };
 
 #define	mdoc_nwarn(mdoc, node, type, fmt, ...) \
