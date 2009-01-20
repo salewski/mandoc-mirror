@@ -148,18 +148,18 @@ mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
 
 	buf[(*pos)++] = 0;
 	if (0 == buf[*pos])
-		return(ARGS_WORD);
+		return(ARGS_QWORD);
 
 	while (buf[*pos] && isspace(buf[*pos]))
 		(*pos)++;
 
 	if (buf[*pos])
-		return(ARGS_WORD);
+		return(ARGS_QWORD);
 
 	if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_COMPAT, "whitespace at end-of-line"))
 		return(ARGS_ERROR);
 
-	return(ARGS_WORD);
+	return(ARGS_QWORD);
 }
 
 

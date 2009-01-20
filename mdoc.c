@@ -432,6 +432,7 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 		break;
 	}
 
+	/* This sort-of works (re-opening of text macros...). */
 	if (mdoc->linetok > MDOC_LINEARG_SOFTMAX) 
 		if ( ! mdoc_nwarn(mdoc, p, WARN_COMPAT, 
 					"suggested %d tokens per line exceeded (has %d)",

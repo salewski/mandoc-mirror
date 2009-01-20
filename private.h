@@ -157,6 +157,7 @@ int		  mdoc_args(struct mdoc *, int,
 #define	ARGS_EOLN	(0)
 #define	ARGS_WORD	(1)
 #define	ARGS_PUNCT	(2)
+#define	ARGS_QWORD	(3)
 
 #define	ARGS_QUOTED	(1 << 0)
 #define	ARGS_DELIM	(1 << 1)

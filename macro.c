@@ -574,7 +574,7 @@ macro_scoped_close(MACRO_PROT_ARGS)
 int
 macro_text(MACRO_PROT_ARGS)
 {
-	int		  la, lastpunct, c, fl, argc;
+	int		  la, lastpunct, c, w, fl, argc;
 	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
 	char		 *p;
 
@@ -617,35 +617,38 @@ macro_text(MACRO_PROT_ARGS)
 	lastpunct = 0;
 	for (;;) {
 		la = *pos;
-		c = mdoc_args(mdoc, line, pos, buf, fl, &p);
-		if (ARGS_ERROR == c) {
+		w = mdoc_args(mdoc, line, pos, buf, fl, &p);
+		if (ARGS_ERROR == w) {
 			mdoc_argv_free(argc, argv);
 			return(0);
 		}
 
-		if (ARGS_EOLN == c)
+		if (ARGS_EOLN == w)
 			break;
-		if (ARGS_PUNCT == c)
+		if (ARGS_PUNCT == w)
 			break;
 
-		if (-1 == (c = lookup(mdoc, line, la, tok, p)))
-			return(0);
-		else if (MDOC_MAX != c) {
+		c = ARGS_QWORD == w ? MDOC_MAX :
+			lookup(mdoc, line, la, tok, p);
+
+		if (MDOC_MAX != c && -1 != c) {
 			if (0 == lastpunct && ! rewind_elem(mdoc, tok)) {
 				mdoc_argv_free(argc, argv);
 				return(0);
 			}
 			mdoc_argv_free(argc, argv);
-
 			c = mdoc_macro(mdoc, c, line, la, pos, buf);
 			if (0 == c)
 				return(0);
 			if (ppos > 1)
 				return(1);
 			return(append_delims(mdoc, line, pos, buf));
+		} else if (-1 == c) {
+			mdoc_argv_free(argc, argv);
+			return(0);
 		}
 
-		if (mdoc_isdelim(p)) {
+		if (ARGS_QWORD != w && mdoc_isdelim(p)) {
 			if (0 == lastpunct && ! rewind_elem(mdoc, tok)) {
 				mdoc_argv_free(argc, argv);
 				return(0);
@@ -1113,23 +1116,19 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 int
 macro_constant(MACRO_PROT_ARGS)
 {
-	int		  c, lastarg, argc, fl;
+	int		  c, w, la, argc, fl;
 	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
 	char		 *p;
 
 	assert( ! (MDOC_CALLABLE & mdoc_macros[tok].flags));
 
-	fl = 0;
-	if (MDOC_QUOTABLE & mdoc_macros[tok].flags)
-		fl = ARGS_QUOTED;
-
 	for (argc = 0; argc < MDOC_LINEARG_MAX; argc++) {
-		lastarg = *pos;
+		la = *pos;
 		c = mdoc_argv(mdoc, line, tok, &argv[argc], pos, buf);
 		if (ARGV_EOLN == c) 
 			break;
 		if (ARGV_WORD == c) {
-			*pos = lastarg;
+			*pos = la;
 			break;
 		} else if (ARGV_ARG == c)
 			continue;
@@ -1151,24 +1150,29 @@ macro_constant(MACRO_PROT_ARGS)
 
 	mdoc->next = MDOC_NEXT_CHILD;
 
+	fl = 0;
+	if (MDOC_QUOTABLE & mdoc_macros[tok].flags)
+		fl = ARGS_QUOTED;
+
 	for (;;) {
-		lastarg = *pos;
-		c = mdoc_args(mdoc, line, pos, buf, fl, &p);
-		if (ARGS_ERROR == c)
+		la = *pos;
+		w = mdoc_args(mdoc, line, pos, buf, fl, &p);
+		if (ARGS_ERROR == w)
 			return(0);
-		if (ARGS_EOLN == c)
+		if (ARGS_EOLN == w)
 			break;
 
-		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
-			return(0);
-		else if (MDOC_MAX != c) {
+		c = ARGS_QWORD == w ? MDOC_MAX :
+			lookup(mdoc, line, la, tok, p);
+
+		if (MDOC_MAX != c && -1 != c) {
 			if ( ! rewind_elem(mdoc, tok))
 				return(0);
-			return(mdoc_macro(mdoc, c, line, 
-						lastarg, pos, buf));
-		}
+			return(mdoc_macro(mdoc, c, line, la, pos, buf));
+		} else if (-1 == c)
+			return(0);
 
-		if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
+		if ( ! mdoc_word_alloc(mdoc, line, la, p))
 			return(0);
 		mdoc->next = MDOC_NEXT_SIBLING;
 	}
