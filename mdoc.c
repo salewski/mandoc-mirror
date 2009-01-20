@@ -105,21 +105,21 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_scoped_close, MDOC_EXPLICIT }, /* Ed */
 	{ macro_scoped, MDOC_EXPLICIT }, /* Bl */
 	{ macro_scoped_close, MDOC_EXPLICIT }, /* El */
-	{ macro_scoped, MDOC_PARSED | MDOC_TABSEP}, /* It */
+	{ macro_scoped, MDOC_PARSED }, /* It */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ad */ 
 	{ macro_text, MDOC_PARSED }, /* An */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ar */
-	{ macro_constant, MDOC_QUOTABLE }, /* Cd */
+	{ macro_constant, 0 }, /* Cd */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Cm */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Dv */ 
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Er */ 
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ev */ 
 	{ macro_constant, 0 }, /* Ex */
-	{ macro_text, MDOC_CALLABLE | MDOC_QUOTABLE | MDOC_PARSED }, /* Fa */ 
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Fa */ 
 	{ macro_constant, 0 }, /* Fd */ 
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Fl */
-	{ macro_text, MDOC_CALLABLE | MDOC_QUOTABLE | MDOC_PARSED }, /* Fn */ 
-	{ macro_text, MDOC_PARSED | MDOC_QUOTABLE }, /* Ft */ 
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Fn */ 
+	{ macro_text, MDOC_PARSED }, /* Ft */ 
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ic */ 
 	{ macro_constant, 0 }, /* In */ 
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Li */
@@ -134,17 +134,17 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Va */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Vt */ 
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Xr */
-	{ macro_constant, MDOC_QUOTABLE }, /* %A */
-	{ macro_constant, MDOC_QUOTABLE }, /* %B */
-	{ macro_constant, MDOC_QUOTABLE }, /* %D */
-	{ macro_constant, MDOC_QUOTABLE }, /* %I */
-	{ macro_constant, MDOC_QUOTABLE }, /* %J */
-	{ macro_constant, MDOC_QUOTABLE }, /* %N */
-	{ macro_constant, MDOC_QUOTABLE }, /* %O */
-	{ macro_constant, MDOC_QUOTABLE }, /* %P */
-	{ macro_constant, MDOC_QUOTABLE }, /* %R */
-	{ macro_constant, MDOC_QUOTABLE }, /* %T */
-	{ macro_constant, MDOC_QUOTABLE }, /* %V */
+	{ macro_constant, 0 }, /* %A */
+	{ macro_constant, 0 }, /* %B */
+	{ macro_constant, 0 }, /* %D */
+	{ macro_constant, 0 }, /* %I */
+	{ macro_constant, 0 }, /* %J */
+	{ macro_constant, 0 }, /* %N */
+	{ macro_constant, 0 }, /* %O */
+	{ macro_constant, 0 }, /* %P */
+	{ macro_constant, 0 }, /* %R */
+	{ macro_constant, 0 }, /* %T */
+	{ macro_constant, 0 }, /* %V */
 	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Ac */
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Ao */
 	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Aq */
@@ -190,9 +190,9 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Xc */
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Xo */
 	/* XXX - .Fo supposed to be (but isn't) callable. */
-	{ macro_scoped, MDOC_EXPLICIT | MDOC_PARSED }, /* Fo */ 
+	{ macro_scoped, MDOC_EXPLICIT }, /* Fo */ 
 	/* XXX - .Fc supposed to be (but isn't) callable. */
-	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_PARSED }, /* Fc */ 
+	{ macro_scoped_close, MDOC_EXPLICIT }, /* Fc */ 
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Oo */
 	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Oc */
 	{ macro_scoped, MDOC_EXPLICIT }, /* Bk */

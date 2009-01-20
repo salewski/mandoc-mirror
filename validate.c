@@ -137,6 +137,9 @@ static	v_post	posts_at[] = { post_at, NULL };
 static	v_post	posts_xr[] = { eerr_ge1, eerr_le2, post_xr, NULL };
 static	v_post	posts_nm[] = { post_nm, NULL };
 static	v_post	posts_bf[] = { herr_le1, post_bf, NULL };
+static	v_post	posts_rs[] = { herr_eq0, bwarn_ge1, NULL };
+static	v_post	posts_fo[] = { bwarn_ge1, NULL };
+static	v_post	posts_bk[] = { herr_eq0, bwarn_ge1, NULL };
 
 /* Per-macro pre- and post-child-check routine collections. */
 
@@ -228,7 +231,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* Qo */
 	{ NULL, posts_wline }, /* Qq */
 	{ NULL, NULL }, /* Re */
-	{ NULL, NULL }, /* Rs */
+	{ NULL, posts_rs }, /* Rs */
 	{ NULL, NULL }, /* Sc */
 	{ NULL, NULL }, /* So */
 	{ NULL, posts_wline }, /* Sq */
@@ -239,11 +242,11 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ux */
 	{ NULL, NULL }, /* Xc */
 	{ NULL, NULL }, /* Xo */
-	{ NULL, NULL }, /* Fo */ 
+	{ NULL, posts_fo }, /* Fo */ 
 	{ NULL, NULL }, /* Fc */ 
 	{ NULL, NULL }, /* Oo */
 	{ NULL, NULL }, /* Oc */
-	{ NULL, NULL }, /* Bk */
+	{ NULL, posts_bk }, /* Bk */
 	{ NULL, NULL }, /* Ek */
 	{ NULL, posts_notext }, /* Bt */
 	{ NULL, NULL }, /* Hf */

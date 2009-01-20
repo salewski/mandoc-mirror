@@ -44,11 +44,133 @@ static	int		 parse_multi(struct mdoc *, int,
 static	int		 postparse(struct mdoc *, int, 
 				const struct mdoc_arg *, int);
 
+#define	ARGS_QUOTED	(1 << 0)
+#define	ARGS_DELIM	(1 << 1)
+#define	ARGS_TABSEP	(1 << 2)
+
+static	int mdoc_argflags[MDOC_MAX] = {
+	0, /* \" */
+	0, /* Dd */
+	0, /* Dt */
+	0, /* Os */
+	0, /* Sh */
+	0, /* Ss */ 
+	ARGS_DELIM, /* Pp */ 
+	ARGS_DELIM, /* D1 */
+	ARGS_DELIM, /* Dl */
+	0, /* Bd */
+	0, /* Ed */
+	0, /* Bl */
+	0, /* El */
+	ARGS_DELIM, /* It */
+	ARGS_DELIM, /* Ad */ 
+	ARGS_DELIM, /* An */
+	ARGS_DELIM, /* Ar */
+	ARGS_QUOTED, /* Cd */
+	ARGS_DELIM, /* Cm */
+	ARGS_DELIM, /* Dv */ 
+	ARGS_DELIM, /* Er */ 
+	ARGS_DELIM, /* Ev */ 
+	0, /* Ex */
+	ARGS_DELIM | ARGS_QUOTED, /* Fa */ 
+	0, /* Fd */ 
+	ARGS_DELIM, /* Fl */
+	ARGS_DELIM | ARGS_QUOTED, /* Fn */ 
+	ARGS_DELIM | ARGS_QUOTED, /* Ft */ 
+	ARGS_DELIM, /* Ic */ 
+	0, /* In */ 
+	ARGS_DELIM, /* Li */
+	0, /* Nd */ 
+	ARGS_DELIM, /* Nm */ 
+	ARGS_DELIM, /* Op */
+	0, /* Ot */
+	ARGS_DELIM, /* Pa */
+	0, /* Rv */
+	ARGS_DELIM, /* St */ 
+	ARGS_DELIM, /* Va */
+	ARGS_DELIM, /* Vt */ 
+	ARGS_DELIM, /* Xr */
+	ARGS_QUOTED, /* %A */
+	ARGS_QUOTED, /* %B */
+	ARGS_QUOTED, /* %D */
+	ARGS_QUOTED, /* %I */
+	ARGS_QUOTED, /* %J */
+	ARGS_QUOTED, /* %N */
+	ARGS_QUOTED, /* %O */
+	ARGS_QUOTED, /* %P */
+	ARGS_QUOTED, /* %R */
+	ARGS_QUOTED, /* %T */
+	ARGS_QUOTED, /* %V */
+	ARGS_DELIM, /* Ac */
+	0, /* Ao */
+	ARGS_DELIM, /* Aq */
+	ARGS_DELIM, /* At */
+	ARGS_DELIM, /* Bc */
+	0, /* Bf */ 
+	0, /* Bo */
+	ARGS_DELIM, /* Bq */
+	ARGS_DELIM, /* Bsx */
+	ARGS_DELIM, /* Bx */
+	0, /* Db */
+	ARGS_DELIM, /* Dc */
+	0, /* Do */
+	ARGS_DELIM, /* Dq */
+	ARGS_DELIM, /* Ec */
+	0, /* Ef */
+	ARGS_DELIM, /* Em */ 
+	0, /* Eo */
+	ARGS_DELIM, /* Fx */
+	ARGS_DELIM, /* Ms */
+	ARGS_DELIM, /* No */
+	ARGS_DELIM, /* Ns */
+	ARGS_DELIM, /* Nx */
+	ARGS_DELIM, /* Ox */
+	ARGS_DELIM, /* Pc */
+	ARGS_DELIM, /* Pf */
+	0, /* Po */
+	ARGS_DELIM, /* Pq */
+	ARGS_DELIM, /* Qc */
+	ARGS_DELIM, /* Ql */
+	0, /* Qo */
+	ARGS_DELIM, /* Qq */
+	0, /* Re */
+	0, /* Rs */
+	ARGS_DELIM, /* Sc */
+	0, /* So */
+	ARGS_DELIM, /* Sq */
+	0, /* Sm */
+	ARGS_DELIM, /* Sx */
+	ARGS_DELIM, /* Sy */
+	ARGS_DELIM, /* Tn */
+	ARGS_DELIM, /* Ux */
+	ARGS_DELIM, /* Xc */
+	0, /* Xo */
+	0, /* Fo */ 
+	0, /* Fc */ 
+	0, /* Oo */
+	ARGS_DELIM, /* Oc */
+	0, /* Bk */
+	0, /* Ek */
+	0, /* Bt */
+	0, /* Hf */
+	0, /* Fr */
+	0, /* Ud */
+};
+
 
 int
-mdoc_args(struct mdoc *mdoc, int line, int *pos, char *buf, int fl, char **v)
+mdoc_args(struct mdoc *mdoc, int line, 
+		int *pos, char *buf, int tok, char **v)
 {
-	int		 i;
+	int		  i, fl;
+	struct mdoc_node *n;
+
+	fl = 0 == tok ? 0 : mdoc_argflags[tok];
+	if (MDOC_It == tok) {
+		n = mdoc->last->parent;
+		/* FIXME: scan for ARGS_TABSEP. */
+
+	}
 
 	if (0 == buf[*pos])
 		return(ARGS_EOLN);

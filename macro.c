@@ -512,7 +512,7 @@ macro_scoped_close(MACRO_PROT_ARGS)
 			flushed = 1;
 		}
 
-		c = mdoc_args(mdoc, line, pos, buf, ARGS_DELIM, &p);
+		c = mdoc_args(mdoc, line, pos, buf, tok, &p);
 		if (ARGS_ERROR == c)
 			return(0);
 		if (ARGS_PUNCT == c)
@@ -574,7 +574,7 @@ macro_scoped_close(MACRO_PROT_ARGS)
 int
 macro_text(MACRO_PROT_ARGS)
 {
-	int		  la, lastpunct, c, w, fl, argc;
+	int		  la, lastpunct, c, w, argc;
 	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
 	char		 *p;
 
@@ -610,14 +610,10 @@ macro_text(MACRO_PROT_ARGS)
 
 	mdoc->next = MDOC_NEXT_CHILD;
 
-	fl = ARGS_DELIM;
-	if (MDOC_QUOTABLE & mdoc_macros[tok].flags)
-		fl |= ARGS_QUOTED;
-
 	lastpunct = 0;
 	for (;;) {
 		la = *pos;
-		w = mdoc_args(mdoc, line, pos, buf, fl, &p);
+		w = mdoc_args(mdoc, line, pos, buf, tok, &p);
 		if (ARGS_ERROR == w) {
 			mdoc_argv_free(argc, argv);
 			return(0);
@@ -707,7 +703,7 @@ macro_text(MACRO_PROT_ARGS)
 int
 macro_scoped(MACRO_PROT_ARGS)
 {
-	int		  c, lastarg, argc, fl;
+	int		  c, lastarg, argc;
 	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
 	char		 *p;
 
@@ -767,13 +763,9 @@ macro_scoped(MACRO_PROT_ARGS)
 		return(0);
 	mdoc->next = MDOC_NEXT_CHILD;
 
-	fl = ARGS_DELIM;
-	if (MDOC_TABSEP & mdoc_macros[tok].flags)
-		fl |= ARGS_TABSEP;
-
 	for (;;) {
 		lastarg = *pos;
-		c = mdoc_args(mdoc, line, pos, buf, fl, &p);
+		c = mdoc_args(mdoc, line, pos, buf, tok, &p);
 	
 		if (ARGS_ERROR == c)
 			return(0);
@@ -781,10 +773,14 @@ macro_scoped(MACRO_PROT_ARGS)
 			break;
 		if (ARGS_EOLN == c)
 			break;
+
+		/* FIXME: if .It -column, the lookup must be for a
+		 * sub-line component.  BLAH. */
 	
 		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
 			return(0);
-		else if (MDOC_MAX == c) {
+
+		if (MDOC_MAX == c) {
 			if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
 				return(0);
 			mdoc->next = MDOC_NEXT_SIBLING;
@@ -795,7 +791,7 @@ macro_scoped(MACRO_PROT_ARGS)
 			return(0);
 		break;
 	}
-
+	
 	if ( ! rewind_subblock(MDOC_HEAD, mdoc, tok, line, ppos))
 		return(0);
 	if (1 == ppos && ! append_delims(mdoc, line, pos, buf))
@@ -850,7 +846,7 @@ macro_scoped_line(MACRO_PROT_ARGS)
 	lastarg = ppos;
 	for (;;) {
 		lastarg = *pos;
-		c = mdoc_args(mdoc, line, pos, buf, ARGS_DELIM, &p);
+		c = mdoc_args(mdoc, line, pos, buf, tok, &p);
 
 		if (ARGS_ERROR == c)
 			return(0);
@@ -946,7 +942,7 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 			mdoc->next = MDOC_NEXT_CHILD;
 		}
 
-		c = mdoc_args(mdoc, line, pos, buf, ARGS_DELIM, &p);
+		c = mdoc_args(mdoc, line, pos, buf, tok, &p);
 		if (ARGS_ERROR == c)
 			return(0);
 		if (ARGS_PUNCT == c)
@@ -1074,7 +1070,7 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 			flushed = 1;
 		}
 
-		c = mdoc_args(mdoc, line, pos, buf, ARGS_DELIM, &p);
+		c = mdoc_args(mdoc, line, pos, buf, tok, &p);
 		if (ARGS_ERROR == c)
 			return(0);
 		if (ARGS_PUNCT == c)
@@ -1120,7 +1116,7 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 int
 macro_constant(MACRO_PROT_ARGS)
 {
-	int		  c, w, la, argc, fl;
+	int		  c, w, la, argc;
 	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
 	char		 *p;
 
@@ -1154,13 +1150,9 @@ macro_constant(MACRO_PROT_ARGS)
 
 	mdoc->next = MDOC_NEXT_CHILD;
 
-	fl = 0;
-	if (MDOC_QUOTABLE & mdoc_macros[tok].flags)
-		fl = ARGS_QUOTED;
-
 	for (;;) {
 		la = *pos;
-		w = mdoc_args(mdoc, line, pos, buf, fl, &p);
+		w = mdoc_args(mdoc, line, pos, buf, tok, &p);
 		if (ARGS_ERROR == w)
 			return(0);
 		if (ARGS_EOLN == w)
