@@ -150,7 +150,6 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pres_prologue, posts_text }, /* Dd */
 	{ pres_prologue, NULL }, /* Dt */
 	{ pres_prologue, NULL }, /* Os */
-	/* FIXME: NAME section internal ordering. */
 	{ pres_sh, posts_sh }, /* Sh */ 
 	{ pres_ss, posts_ss }, /* Ss */ 
 	{ NULL, posts_pp }, /* Pp */ 
@@ -905,6 +904,7 @@ post_it(struct mdoc *mdoc)
 #define	TYPE_NONE	 (0)
 #define	TYPE_BODY	 (1)
 #define	TYPE_HEAD	 (2)
+#define	TYPE_OHEAD	 (3)
 	size_t		  i, argc;
 	struct mdoc_node *n;
 
@@ -951,9 +951,11 @@ post_it(struct mdoc *mdoc)
 		case (MDOC_Hyphen):
 			/* FALLTHROUGH */
 		case (MDOC_Item):
-			/* FALLTHROUGH */
-		case (MDOC_Column):
 			type = TYPE_BODY;
+			sv = n->data.block.argv[(int)i].arg;
+			break;
+		case (MDOC_Column):
+			type = TYPE_OHEAD;
 			sv = n->data.block.argv[(int)i].arg;
 			break;
 		default:
@@ -962,9 +964,10 @@ post_it(struct mdoc *mdoc)
 
 	assert(TYPE_NONE != type);
 
+	n = mdoc->last->data.block.head;
+	assert(n);
+
 	if (TYPE_HEAD == type) {
-		n = mdoc->last->data.block.head;
-		assert(n);
 		if (NULL == n->child)
 			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests line parameters"))
 				return(0);
@@ -975,26 +978,29 @@ post_it(struct mdoc *mdoc)
 			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests body children"))
 				return(0);
 
-		return(1);
+	} else if (TYPE_BODY == type) {
+		if (n->child)
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests no line parameters"))
+				return(0);
+	
+		n = mdoc->last->data.block.body;
+		assert(n);
+		if (NULL == n->child)
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests body children"))
+				return(0);
+	} else {
+		if (NULL == n->child)
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests line parameters"))
+				return(0);
+	
+		n = mdoc->last->data.block.body;
+		assert(n);
+		if (n->child)
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests no body children"))
+				return(0);
 	}
 
-	assert(TYPE_BODY == type);
-	assert(mdoc->last->data.block.head);
-
-	n = mdoc->last->data.block.head;
-	assert(n);
-	if (n->child)
-		if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests no line parameters"))
-			return(0);
-
-	n = mdoc->last->data.block.body;
-	assert(n);
-	if (NULL == n->child)
-		if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests body children"))
-			return(0);
-
-	assert(-1 != sv);
-	if (MDOC_Column != sv) 
+	if (MDOC_Column != sv)
 		return(1);
 
 	/* Make sure the number of columns is sane. */
@@ -1011,6 +1017,7 @@ post_it(struct mdoc *mdoc)
 #undef	TYPE_NONE
 #undef	TYPE_BODY
 #undef	TYPE_HEAD
+#undef	TYPE_OHEAD
 }
 
 

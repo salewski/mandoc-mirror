@@ -76,7 +76,12 @@ SUCCEED	= regress/test.prologue.05 \
 	  regress/test.prologue.17 \
 	  regress/test.prologue.20 \
 	  regress/test.sh.00 \
-	  regress/test.name.00
+	  regress/test.name.00 \
+	  regress/test.list.00 \
+	  regress/test.list.01 \
+	  regress/test.list.02 \
+	  regress/test.list.03 \
+	  regress/test.list.04
 
 all:	$(BINS)
 

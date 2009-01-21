@@ -32,7 +32,9 @@
  * strange punctuation rules dictated by groff.
  */
 
-/* FIXME: .It called with -column and quoted arguments. */
+#define	ARGS_QUOTED	(1 << 0)
+#define	ARGS_DELIM	(1 << 1)
+#define	ARGS_TABSEP	(1 << 2)
 
 static	int		 lookup(int, const char *);
 static	int		 parse(struct mdoc *, int,
@@ -43,10 +45,10 @@ static	int		 parse_multi(struct mdoc *, int,
 				struct mdoc_arg *, int *, char *);
 static	int		 postparse(struct mdoc *, int, 
 				const struct mdoc_arg *, int);
+static	int		 pwarn(struct mdoc *, int, int, int);
 
-#define	ARGS_QUOTED	(1 << 0)
-#define	ARGS_DELIM	(1 << 1)
-#define	ARGS_TABSEP	(1 << 2)
+#define	WQUOTPARM	(0)
+#define	WARGVPARM	(1)
 
 static	int mdoc_argflags[MDOC_MAX] = {
 	0, /* \" */
@@ -158,43 +160,87 @@ static	int mdoc_argflags[MDOC_MAX] = {
 };
 
 
+static int
+pwarn(struct mdoc *mdoc, int line, int pos, int code)
+{
+	int		 c;
+
+	switch (code) {
+	case (WQUOTPARM):
+		c = mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX, 
+				"unexpected quoted parameter");
+		break;
+	case (WARGVPARM):
+		c = mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX, 
+				"argument-like parameter");
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+	return(c);
+}
+
+
 int
 mdoc_args(struct mdoc *mdoc, int line, 
 		int *pos, char *buf, int tok, char **v)
 {
-	int		  i, fl;
+	int		  i, c, fl;
+	char		 *p, *pp;
 	struct mdoc_node *n;
 
-	fl = 0 == tok ? 0 : mdoc_argflags[tok];
-	if (MDOC_It == tok) {
-		n = mdoc->last->parent;
-		/* FIXME: scan for ARGS_TABSEP. */
-	}
+	assert(*pos > 0);
 
 	if (0 == buf[*pos])
 		return(ARGS_EOLN);
 
+	fl = (0 == tok) ? 0 : mdoc_argflags[tok];
+
 	if ('\"' == buf[*pos] && ! (fl & ARGS_QUOTED))
-		if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX, "unexpected quoted parameter"))
+		if ( ! pwarn(mdoc, line, *pos, WQUOTPARM))
 			return(ARGS_ERROR);
 
 	if ('-' == buf[*pos]) 
-		if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX, "argument-like parameter"))
+		if ( ! pwarn(mdoc, line, *pos, WARGVPARM))
 			return(ARGS_ERROR);
 
+	/* 
+	 * First see if we should use TABSEP (Bl -column).  This
+	 * invalidates the use of ARGS_DELIM.
+	 */
+
+	if (MDOC_It == tok) {
+		for (n = mdoc->last; n; n = n->parent)
+			if (MDOC_BLOCK == n->type)
+				if (MDOC_Bl == n->tok)
+					break;
+		assert(n);
+		c = (int)n->data.block.argc;
+		assert(c > 0);
+		for (i = 0; i < c; i++) {
+			if (MDOC_Column != n->data.block.argv[i].arg)
+				continue;
+			fl |= ARGS_TABSEP;
+			fl &= ~ARGS_DELIM;
+		}
+	}
+
+	/* 
+	 * If the first character is a delimiter and we're to look for
+	 * delimited strings, then pass down the buffer seeing if it
+	 * follows the pattern of [[::delim::][ ]+]+.
+	 */
+
 	if ((fl & ARGS_DELIM) && mdoc_iscdelim(buf[*pos])) {
-		/* 
-		 * If ARGS_DELIM, return ARGS_PUNCT if only space-separated
-		 * punctuation remains.  
-		 */
-		for (i = *pos; buf[i]; ) {
-			if ( ! mdoc_iscdelim(buf[i]))
+		for (i = *pos; (c = buf[i]); ) {
+			if ( ! mdoc_iscdelim(c))
 				break;
 			i++;
-			if (0 == buf[i] || ! isspace((int)buf[i]))
+			if (0 == buf[i] || ! isspace(c))
 				break;
 			i++;
-			while (buf[i] && isspace((int)buf[i]))
+			while (buf[i] && isspace(c))
 				i++;
 		}
 		if (0 == buf[i]) {
@@ -203,37 +249,105 @@ mdoc_args(struct mdoc *mdoc, int line,
 		}
 	}
 
-	/* Parse routine for non-quoted string. */
+	/* First parse non-quoted strings. */
 
-	assert(*pos > 0);
 	if ('\"' != buf[*pos] || ! (ARGS_QUOTED & fl)) {
 		*v = &buf[*pos];
 
-		/* FIXME: UGLY tab-sep processing. */
+		/* 
+		 * Thar be dragons here!  If we're tab-separated, search
+		 * ahead for either a tab or the `Ta' macro.  If a tab
+		 * is detected, it mustn't be escaped; if a `Ta' is
+		 * detected, it must be space-buffered before and after.
+		 * If either of these hold true, then prune out the
+		 * extra spaces and call it an argument.
+		 */
 
-		if (ARGS_TABSEP & fl)
-			while (buf[*pos]) {
-				if ('\t' == buf[*pos])
+		if (ARGS_TABSEP & fl) {
+			/* Scan ahead to unescaped tab. */
+
+			for (p = *v; ; p++) {
+				if (NULL == (p = strchr(p, '\t')))
 					break;
-				if ('T' == buf[*pos]) {
-					(*pos)++;
-					if (0 == buf[*pos])
-						break;
-					if ('a' == buf[*pos]) {
-						buf[*pos - 1] = 0;
-						break;
-					}
-				}
-				(*pos)++;
+				if (p == *v)
+					break;
+				if ('\\' != *(p - 1))
+					break;
 			}
-		else {
-			while (buf[*pos]) {
-				if (isspace((int)buf[*pos]))
+
+			/* Scan ahead to unescaped `Ta'. */
+
+			for (pp = *v; ; pp++) {
+				if (NULL == (pp = strstr(pp, "Ta")))
+					break;
+				if (pp > *v && ' ' != *(pp - 1))
+					continue;
+				if (' ' == *(pp + 2) || 0 == *(pp + 2))
+					break;
+			}
+
+			/* Choose delimiter tab/Ta. */
+
+			if (p && pp)
+				p = (p < pp ? p : pp);
+			else if ( ! p && pp)
+				p = pp;
+
+			/* Strip delimiter's preceding whitespace. */
+
+			if (p && p > *v) {
+				pp = p - 1;
+				while (pp > *v && ' ' == *pp)
+					pp--;
+				if (pp == *v && ' ' == *pp) 
+					*pp = 0;
+				else if (' ' == *pp)
+					*(pp + 1) = 0;
+			}
+
+			/* ...in- and proceding whitespace. */
+
+			if (p && ('\t' != *p)) {
+				*p++ = 0;
+				*p++ = 0;
+			} else if (p)
+				*p++ = 0;
+
+			if (p) {
+				while (' ' == *p)
+					p++;
+				if (0 != *p)
+					*(p - 1) = 0;
+				else if (0 == *p) 
+					if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX, "empty final token")) /* FIXME: verbiage */
+						return(0);
+				*pos += p - *v;
+			} 
+
+			/* Configure the eoln case, too. */
+
+			if (NULL == p) {
+				p = strchr(*v, 0);
+				assert(p);
+
+				/*if (p > *v && ' ' == *(p - 1))
+					Warn about whitespace. */
+
+				*pos += p - *v;
+			}
+
+			return(ARGS_WORD);
+		} 
+
+		/* Do non-tabsep look-ahead here. */
+		
+		if ( ! (ARGS_TABSEP & fl))
+			while ((c = buf[*pos])) {
+				if (isspace(c))
 					if ('\\' != buf[*pos - 1])
 						break;
 				(*pos)++;
 			}
-		}
 
 		if (0 == buf[*pos])
 			return(ARGS_WORD);
