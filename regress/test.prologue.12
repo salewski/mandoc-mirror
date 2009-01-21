@@ -2,3 +2,5 @@
 .Dt test 1
 .Os
 .Sh NAME
+.Nm name
+.Nd description

@@ -2,3 +2,5 @@
 .Dt
 .Os
 .Sh NAME
+.Nm name
+.Nd description

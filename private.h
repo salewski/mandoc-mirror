@@ -33,13 +33,11 @@ struct	mdoc {
 	int		  linetok;
 	int		  flags;
 #define	MDOC_HALT	 (1 << 0)
-#define	MDOC_BODYPARSE	 (1 << 1)
 	enum mdoc_next	  next;
 	struct mdoc_node *last;
 	struct mdoc_node *first;
 	struct mdoc_meta  meta;
-	enum mdoc_sec	  sec_lastn;
-	enum mdoc_sec	  sec_last;
+	enum mdoc_sec	  lastnamed;
 };
 
 

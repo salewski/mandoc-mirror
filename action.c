@@ -193,8 +193,7 @@ post_sh(struct mdoc *mdoc)
 		return(1);
 	if (xstrlcats(buf, mdoc->last->child, 64)) {
 		if (SEC_CUSTOM != (sec = mdoc_atosec(buf)))
-			mdoc->sec_lastn = sec;
-		mdoc->sec_last = sec;
+			mdoc->lastnamed = sec;
 		return(1);
 	}
 
@@ -268,8 +267,7 @@ post_os(struct mdoc *mdoc)
 		return(mdoc_err(mdoc, "macro parameters too long")); 
 
 	mdoc->meta.os = xstrdup(buf[0] ? buf : "local");
-	mdoc->sec_lastn = mdoc->sec_last = SEC_BODY;
-	mdoc->flags |= MDOC_BODYPARSE;
+	mdoc->lastnamed = SEC_BODY;
 
 	return(post_prologue(mdoc));
 }

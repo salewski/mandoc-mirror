@@ -305,8 +305,8 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 	mdoc->linetok = 0;
 
 	if ('.' != *buf) {
-		if ( ! (MDOC_BODYPARSE & mdoc->flags))
-			return(mdoc_perr(mdoc, line, 0, "text disallowed"));
+		if (SEC_PROLOGUE == mdoc->lastnamed)
+			return(mdoc_perr(mdoc, line, 0, "text disallowed in document prologue"));
 		if ( ! mdoc_word_alloc(mdoc, line, 0, buf))
 			return(0);
 		mdoc->next = MDOC_NEXT_SIBLING;
@@ -407,9 +407,12 @@ mdoc_macro(struct mdoc *mdoc, int tok,
 
 	assert(mdoc_macros[tok].fp);
 
-	if ( ! (MDOC_PROLOGUE & mdoc_macros[tok].flags) &&
-			! (MDOC_BODYPARSE & mdoc->flags))
-		return(mdoc_perr(mdoc, ln, ppos, "macro disallowed: not in document body"));
+	if (MDOC_PROLOGUE & mdoc_macros[tok].flags && 
+			SEC_PROLOGUE != mdoc->lastnamed)
+		return(mdoc_perr(mdoc, ln, ppos, "macro disallowed in document body"));
+	if ( ! (MDOC_PROLOGUE & mdoc_macros[tok].flags) && 
+			SEC_PROLOGUE == mdoc->lastnamed)
+		return(mdoc_perr(mdoc, ln, ppos, "macro disallowed in document prologue"));
 	if (1 != ppos && ! (MDOC_CALLABLE & mdoc_macros[tok].flags))
 		return(mdoc_perr(mdoc, ln, ppos, "macro not callable"));
 	return((*mdoc_macros[tok].fp)(mdoc, tok, ln, ppos, pos, buf));

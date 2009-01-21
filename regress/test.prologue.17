@@ -2,3 +2,5 @@
 .Dt test 1 AMD
 .Os
 .Sh NAME
+.Nm name
+.Nd description

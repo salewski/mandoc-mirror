@@ -91,6 +91,8 @@ static	int	bwarn_ge1(struct mdoc *);
 static	int	ewarn_ge1(struct mdoc *);
 static	int	ebool(struct mdoc *);
 static	int	post_sh(struct mdoc *);
+static	int	post_sh_body(struct mdoc *);
+static	int	post_sh_head(struct mdoc *);
 static	int	post_bl(struct mdoc *);
 static	int	post_it(struct mdoc *);
 static	int	post_ex(struct mdoc *);
@@ -717,7 +719,7 @@ static int
 pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
-	if (SEC_PROLOGUE != mdoc->sec_lastn)
+	if (SEC_PROLOGUE != mdoc->lastnamed)
 		return(mdoc_nerr(mdoc, node, "macro may only be invoked in the prologue"));
 	assert(MDOC_ELEM == node->type);
 
@@ -1060,39 +1062,78 @@ static int
 post_root(struct mdoc *mdoc)
 {
 
-	if (NULL == mdoc->last->child)
+	if (NULL == mdoc->first->child)
 		return(mdoc_err(mdoc, "document has no data"));
-	if (NULL == mdoc->meta.title)
+	if (SEC_PROLOGUE == mdoc->lastnamed)
 		return(mdoc_err(mdoc, "document has incomplete prologue"));
-	if (NULL == mdoc->meta.os)
-		return(mdoc_err(mdoc, "document has incomplete prologue"));
-	if (0 == mdoc->meta.date)
-		return(mdoc_err(mdoc, "document has incomplete prologue"));
+	if (MDOC_BLOCK != mdoc->first->child->type)
+		return(mdoc_err(mdoc, "document expects `%s' macro after prologue", mdoc_macronames[MDOC_Sh]));
+	if (MDOC_Sh != mdoc->first->child->tok)
+		return(mdoc_err(mdoc, "document expects `%s' macro after prologue", mdoc_macronames[MDOC_Sh]));
 	return(1);
 }
 
 
-/* Warn if conventional sections are out of order. */
 static int
 post_sh(struct mdoc *mdoc)
+{
+
+	if (MDOC_HEAD == mdoc->last->type)
+		return(post_sh_head(mdoc));
+	if (MDOC_BODY == mdoc->last->type)
+		return(post_sh_body(mdoc));
+	return(1);
+}
+
+
+static int
+post_sh_body(struct mdoc *mdoc)
+{
+	struct mdoc_node *n;
+
+	assert(MDOC_Sh == mdoc->last->tok);
+	if (SEC_NAME != mdoc->lastnamed)
+		return(1);
+
+	if (NULL == (n = mdoc->last->child))
+		return(mdoc_err(mdoc, "section NAME must contain %s as the first body child", mdoc_macronames[MDOC_Nm]));
+	if (MDOC_ELEM != n->type || MDOC_Nm != n->tok)
+		return(mdoc_err(mdoc, "section NAME must contain %s as the first body child", mdoc_macronames[MDOC_Nm]));
+	if (NULL == (n = n->next))
+		return(mdoc_err(mdoc, "section NAME must contain %s as the second body child", mdoc_macronames[MDOC_Nd]));
+	if (MDOC_ELEM != n->type || MDOC_Nd != n->tok)
+		return(mdoc_err(mdoc, "section NAME must contain %s as the second body child", mdoc_macronames[MDOC_Nd]));
+	if (NULL == (n = n->next))
+		return(1);
+
+	return(mdoc_warn(mdoc, WARN_SYNTAX, "section NAME usually limited to %s and %s body children",
+				mdoc_macronames[MDOC_Nm], mdoc_macronames[MDOC_Nd]));
+}
+
+
+static int
+post_sh_head(struct mdoc *mdoc)
 {
 	char		  buf[64];
 	enum mdoc_sec	  sec;
 
-	if (MDOC_HEAD != mdoc->last->type)
-		return(1);
 	assert(MDOC_Sh == mdoc->last->tok);
 
 	if ( ! xstrlcats(buf, mdoc->last->child, 64))
 		return(mdoc_err(mdoc, "macro parameters too long"));
 
-	if (SEC_CUSTOM == (sec = mdoc_atosec(buf)))
+	sec = mdoc_atosec(buf);
+
+	if (SEC_BODY == mdoc->lastnamed && SEC_NAME != sec)
+		return(mdoc_err(mdoc, "section NAME must be first"));
+	if (SEC_CUSTOM == sec)
 		return(1);
-	if (sec > mdoc->sec_lastn)
-		return(1);
-	if (sec == mdoc->sec_lastn)
+	if (sec == mdoc->lastnamed)
 		return(mdoc_warn(mdoc, WARN_SYNTAX, "section repeated"));
-	return(mdoc_warn(mdoc, WARN_SYNTAX, "section out of conventional order"));
+	if (sec < mdoc->lastnamed)
+		return(mdoc_warn(mdoc, WARN_SYNTAX, "section out of conventional order"));
+
+	return(1);
 }
 
 

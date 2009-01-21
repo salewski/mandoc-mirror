@@ -48,7 +48,22 @@ FAIL	= regress/test.empty \
 	  regress/test.prologue.21 \
 	  regress/test.prologue.22 \
 	  regress/test.prologue.23 \
-	  regress/test.prologue.24
+	  regress/test.prologue.24 \
+	  regress/test.prologue.25 \
+	  regress/test.prologue.26 \
+	  regress/test.prologue.27 \
+	  regress/test.prologue.28 \
+	  regress/test.prologue.29 \
+	  regress/test.prologue.30 \
+	  regress/test.prologue.31 \
+	  regress/test.prologue.32 \
+	  regress/test.prologue.33 \
+	  regress/test.sh.01 \
+	  regress/test.sh.02 \
+	  regress/test.sh.03 \
+	  regress/test.name.01 \
+	  regress/test.name.02 \
+	  regress/test.name.03
 
 SUCCEED	= regress/test.prologue.05 \
 	  regress/test.prologue.07 \
@@ -59,7 +74,9 @@ SUCCEED	= regress/test.prologue.05 \
 	  regress/test.prologue.12 \
 	  regress/test.prologue.14 \
 	  regress/test.prologue.17 \
-	  regress/test.prologue.20
+	  regress/test.prologue.20 \
+	  regress/test.sh.00 \
+	  regress/test.name.00
 
 all:	$(BINS)
 

@@ -1,6 +1,7 @@
 .Dd $Mdocdate$
-.Dt test
+.Dt
 .Os
 .Sh NAME
 .Nm name
+.Fl
 .Nd description
