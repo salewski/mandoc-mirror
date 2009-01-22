@@ -81,7 +81,9 @@ SUCCEED	= regress/test.prologue.05 \
 	  regress/test.list.01 \
 	  regress/test.list.02 \
 	  regress/test.list.03 \
-	  regress/test.list.04
+	  regress/test.list.04 \
+	  regress/test.list.05 \
+	  regress/test.list.06
 
 all:	$(BINS)
 

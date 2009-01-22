@@ -46,9 +46,17 @@ static	int		 parse_multi(struct mdoc *, int,
 static	int		 postparse(struct mdoc *, int, 
 				const struct mdoc_arg *, int);
 static	int		 pwarn(struct mdoc *, int, int, int);
+static	int		 perr(struct mdoc *, int, int, int);
 
 #define	WQUOTPARM	(0)
 #define	WARGVPARM	(1)
+#define	WCOLEMPTY	(2)
+#define	WTAILWS		(3)
+
+#define	EQUOTTERM	(0)
+#define	EOFFSET		(1)
+#define	EARGVAL		(2)
+#define	EARGMANY	(3)
 
 static	int mdoc_argflags[MDOC_MAX] = {
 	0, /* \" */
@@ -161,6 +169,36 @@ static	int mdoc_argflags[MDOC_MAX] = {
 
 
 static int
+perr(struct mdoc *mdoc, int line, int pos, int code)
+{
+	int		 c;
+
+	switch (code) {
+	case (EQUOTTERM):
+		c = mdoc_perr(mdoc, line, pos, 
+				"unterminated quoted parameter");
+		break;
+	case (EOFFSET):
+		c = mdoc_perr(mdoc, line, pos, 
+				"invalid value for offset argument");
+		break;
+	case (EARGVAL):
+		c = mdoc_perr(mdoc, line, pos, 
+				"argument requires a value");
+		break;
+	case (EARGMANY):
+		c = mdoc_perr(mdoc, line, pos, 
+				"too many values for argument");
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+	return(c);
+}
+
+
+static int
 pwarn(struct mdoc *mdoc, int line, int pos, int code)
 {
 	int		 c;
@@ -173,6 +211,14 @@ pwarn(struct mdoc *mdoc, int line, int pos, int code)
 	case (WARGVPARM):
 		c = mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX, 
 				"argument-like parameter");
+		break;
+	case (WCOLEMPTY):
+		c = mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX, 
+				"last list column is empty");
+		break;
+	case (WTAILWS):
+		c = mdoc_pwarn(mdoc, line, pos, WARN_COMPAT, 
+				"trailing whitespace");
 		break;
 	default:
 		abort();
@@ -318,11 +364,15 @@ mdoc_args(struct mdoc *mdoc, int line,
 					p++;
 				if (0 != *p)
 					*(p - 1) = 0;
-				else if (0 == *p) 
-					if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_SYNTAX, "empty final token")) /* FIXME: verbiage */
-						return(0);
 				*pos += p - *v;
 			} 
+
+			if (p && 0 == *p)
+				if ( ! pwarn(mdoc, line, *pos, WCOLEMPTY))
+					return(0);
+			if (p && 0 == *p && p > *v && ' ' == *(p - 1))
+				if ( ! pwarn(mdoc, line, *pos, WTAILWS))
+					return(0);
 
 			/* Configure the eoln case, too. */
 
@@ -330,9 +380,9 @@ mdoc_args(struct mdoc *mdoc, int line,
 				p = strchr(*v, 0);
 				assert(p);
 
-				/*if (p > *v && ' ' == *(p - 1))
-					Warn about whitespace. */
-
+				if (p > *v && ' ' == *(p - 1))
+					if ( ! pwarn(mdoc, line, *pos, WTAILWS))
+						return(0);
 				*pos += p - *v;
 			}
 
@@ -364,7 +414,7 @@ mdoc_args(struct mdoc *mdoc, int line,
 		if (buf[*pos])
 			return(ARGS_WORD);
 
-		if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_COMPAT, "whitespace at end-of-line"))
+		if ( ! pwarn(mdoc, line, *pos, WTAILWS))
 			return(ARGS_ERROR);
 
 		return(ARGS_WORD);
@@ -382,7 +432,7 @@ mdoc_args(struct mdoc *mdoc, int line,
 		(*pos)++;
 
 	if (0 == buf[*pos]) {
-		(void)mdoc_perr(mdoc, line, *pos, "unterminated quoted parameter");
+		(void)perr(mdoc, line, *pos, EQUOTTERM);
 		return(ARGS_ERROR);
 	}
 
@@ -396,7 +446,7 @@ mdoc_args(struct mdoc *mdoc, int line,
 	if (buf[*pos])
 		return(ARGS_QWORD);
 
-	if ( ! mdoc_pwarn(mdoc, line, *pos, WARN_COMPAT, "whitespace at end-of-line"))
+	if ( ! pwarn(mdoc, line, *pos, WTAILWS))
 		return(ARGS_ERROR);
 
 	return(ARGS_QWORD);
@@ -585,7 +635,7 @@ postparse(struct mdoc *mdoc, int line, const struct mdoc_arg *v, int pos)
 			break;
 		if (xstrcmp(v->value[0], "indent-two"))
 			break;
-		return(mdoc_perr(mdoc, line, pos, "invalid offset value"));
+		return(perr(mdoc, line, pos, EOFFSET));
 	default:
 		break;
 	}
@@ -622,9 +672,10 @@ parse_multi(struct mdoc *mdoc, int line,
 		return(1);
 
 	free(v->value);
-	return(mdoc_perr(mdoc, line, ppos, 0 == v->sz ?
-				"argument requires a value" :
-				"too many values to argument"));
+	if (0 == v->sz) 
+		return(perr(mdoc, line, ppos, EARGVAL));
+
+	return(perr(mdoc, line, ppos, EARGMANY));
 }
 
 
@@ -641,7 +692,7 @@ parse_single(struct mdoc *mdoc, int line,
 	if (ARGS_ERROR == c)
 		return(0);
 	if (ARGS_EOLN == c)
-		return(mdoc_perr(mdoc, line, ppos,  "argument requires a value"));
+		return(perr(mdoc, line, ppos,  EARGVAL));
 
 	v->sz = 1;
 	v->value = xcalloc(1, sizeof(char *));
@@ -710,7 +761,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		buf[(*pos)++] = 0;
 
 	if (MDOC_ARG_MAX == (v->arg = lookup(tok, argv))) {
-		if ( ! mdoc_pwarn(mdoc, line, i, WARN_SYNTAX, "argument-like parameter"))
+		if ( ! pwarn(mdoc, line, i, WARGVPARM))
 			return(ARGV_ERROR);
 		return(ARGV_WORD);
 	}

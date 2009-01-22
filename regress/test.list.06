@@ -1,0 +1,12 @@
+.Dd $Mdocdate$
+.Dt 
+.Os 
+.Sh NAME
+.Nm name
+.Nd description
+.Sh DESCRIPTION
+.Bl -column "xxxxx" "xxxxx"
+.It a Ta b    
+.It a Ta b
+.It a Ta b Ta      
+.El
