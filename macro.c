@@ -80,6 +80,7 @@
 #define	REWIND_REWIND	(1 << 0)
 #define	REWIND_NOHALT	(1 << 1)
 #define	REWIND_HALT	(1 << 2)
+
 static	int	  rewind_dohalt(int, enum mdoc_type, 
 			const struct mdoc_node *);
 static	int	  rewind_alt(int);
@@ -92,6 +93,63 @@ static	int	  rewind_subblock(enum mdoc_type,
 static	int	  rewind_last(struct mdoc *, struct mdoc_node *);
 static	int	  append_delims(struct mdoc *, int, int *, char *);
 static	int	  lookup(struct mdoc *, int, int, int, const char *);
+static	int	  pwarn(struct mdoc *, int, int, int);
+static	int	  perr(struct mdoc *, int, int, int);
+
+#define	WMACPARM	(1)
+#define	WOBS		(2)
+
+#define	ENOCTX		(1)
+#define	ENOPARMS	(2)
+#define	EARGVLIM	(3)
+
+
+static int
+perr(struct mdoc *mdoc, int line, int pos, int type)
+{
+	int		 c;
+
+	switch (type) {
+	case (ENOCTX):
+		c = mdoc_perr(mdoc, line, pos, 
+				"closing macro has prior context");
+		break;
+	case (ENOPARMS):
+		c = mdoc_perr(mdoc, line, pos, 
+				"macro doesn't expect parameters");
+		break;
+	case (EARGVLIM):
+		c = mdoc_perr(mdoc, line, pos, 
+				"argument hard-limit %d reached",
+				MDOC_LINEARG_MAX);
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+	return(c);
+}
+
+static int
+pwarn(struct mdoc *mdoc, int line, int pos, int type)
+{
+	int		 c;
+
+	switch (type) {
+	case (WMACPARM):
+		c = mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX,
+				"macro-like parameter");
+		break;
+	case (WOBS):
+		c = mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX,
+				"macro is marked obsolete");
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+	return(c);
+}
 
 
 static int
@@ -104,7 +162,7 @@ lookup(struct mdoc *mdoc, int line, int pos, int from, const char *p)
 		return(res);
 	if (MDOC_MAX == res)
 		return(res);
-	if ( ! mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX, "macro-like parameter"))
+	if ( ! pwarn(mdoc, line, pos, WMACPARM))
 		return(-1);
 	return(MDOC_MAX);
 }
@@ -117,6 +175,7 @@ rewind_last(struct mdoc *mdoc, struct mdoc_node *to)
 	assert(to);
 	mdoc->next = MDOC_NEXT_SIBLING;
 
+	/* LINTED */
 	while (mdoc->last != to) {
 		if ( ! mdoc_valid_post(mdoc))
 			return(0);
@@ -396,7 +455,7 @@ rewind_expblock(struct mdoc *mdoc, int tok, int line, int ppos)
 	for (n = mdoc->last; n; n = n->parent) {
 		c = rewind_dohalt(tok, MDOC_BLOCK, n);
 		if (REWIND_HALT == c)
-			return(mdoc_perr(mdoc, line, ppos, "closing macro has no context"));
+			return(perr(mdoc, line, ppos, ENOCTX));
 		if (REWIND_REWIND == c)
 			break;
 		else if (rewind_dobreak(tok, n))
@@ -444,6 +503,8 @@ append_delims(struct mdoc *mdoc, int line, int *pos, char *buf)
 	for (;;) {
 		lastarg = *pos;
 		c = mdoc_args(mdoc, line, pos, buf, 0, &p);
+		assert(ARGS_PHRASE != c);
+
 		if (ARGS_ERROR == c)
 			return(0);
 		else if (ARGS_EOLN == c)
@@ -488,7 +549,7 @@ macro_scoped_close(MACRO_PROT_ARGS)
 				return(0);
 			return(rewind_expblock(mdoc, tok, line, ppos));
 		}
-		return(mdoc_perr(mdoc, line, ppos, "macro expects no parameters"));
+		return(perr(mdoc, line, ppos, ENOPARMS));
 	}
 
 	if ( ! rewind_subblock(MDOC_BODY, mdoc, tok, line, ppos))
@@ -513,6 +574,8 @@ macro_scoped_close(MACRO_PROT_ARGS)
 		}
 
 		c = mdoc_args(mdoc, line, pos, buf, tok, &p);
+		assert(ARGS_PHRASE != c);
+
 		if (ARGS_ERROR == c)
 			return(0);
 		if (ARGS_PUNCT == c)
@@ -598,7 +661,7 @@ macro_text(MACRO_PROT_ARGS)
 
 	if (MDOC_LINEARG_MAX == argc) {
 		mdoc_argv_free(argc - 1, argv);
-		return(mdoc_perr(mdoc, line, ppos, "parameter hard-limit exceeded"));
+		return(perr(mdoc, line, ppos, EARGVLIM));
 	}
 
 	c = mdoc_elem_alloc(mdoc, line, ppos, tok, argc, argv);
@@ -614,6 +677,8 @@ macro_text(MACRO_PROT_ARGS)
 	for (;;) {
 		la = *pos;
 		w = mdoc_args(mdoc, line, pos, buf, tok, &p);
+		assert(ARGS_PHRASE != c);
+
 		if (ARGS_ERROR == w) {
 			mdoc_argv_free(argc, argv);
 			return(0);
@@ -736,7 +801,7 @@ macro_scoped(MACRO_PROT_ARGS)
 
 	if (MDOC_LINEARG_MAX == argc) {
 		mdoc_argv_free(argc - 1, argv);
-		return(mdoc_perr(mdoc, line, ppos, "parameter hard-limit exceeded"));
+		return(perr(mdoc, line, ppos, EARGVLIM));
 	}
 
 	c = mdoc_block_alloc(mdoc, line, ppos, 
@@ -766,13 +831,21 @@ macro_scoped(MACRO_PROT_ARGS)
 	for (;;) {
 		lastarg = *pos;
 		c = mdoc_args(mdoc, line, pos, buf, tok, &p);
-	
+
 		if (ARGS_ERROR == c)
 			return(0);
 		if (ARGS_PUNCT == c)
 			break;
 		if (ARGS_EOLN == c)
 			break;
+
+		if (ARGS_PHRASE == c) {
+			/*
+			if ( ! mdoc_phrase(mdoc, line, lastarg, buf))
+				return(0);
+			*/
+			continue;
+		}
 
 		/* FIXME: if .It -column, the lookup must be for a
 		 * sub-line component.  BLAH. */
@@ -847,6 +920,7 @@ macro_scoped_line(MACRO_PROT_ARGS)
 	for (;;) {
 		lastarg = *pos;
 		c = mdoc_args(mdoc, line, pos, buf, tok, &p);
+		assert(ARGS_PHRASE != c);
 
 		if (ARGS_ERROR == c)
 			return(0);
@@ -943,6 +1017,8 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 		}
 
 		c = mdoc_args(mdoc, line, pos, buf, tok, &p);
+		assert(ARGS_PHRASE != c);
+
 		if (ARGS_ERROR == c)
 			return(0);
 		if (ARGS_PUNCT == c)
@@ -1050,7 +1126,7 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 
 	if (MDOC_LINEARG_MAX == argc) {
 		mdoc_argv_free(argc - 1, argv);
-		return(mdoc_perr(mdoc, line, ppos, "parameter hard-limit exceeded"));
+		return(perr(mdoc, line, ppos, EARGVLIM));
 	}
 
 	c = mdoc_elem_alloc(mdoc, line, ppos, tok, argc, argv);
@@ -1071,6 +1147,8 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 		}
 
 		c = mdoc_args(mdoc, line, pos, buf, tok, &p);
+		assert(ARGS_PHRASE != c);
+
 		if (ARGS_ERROR == c)
 			return(0);
 		if (ARGS_PUNCT == c)
@@ -1139,7 +1217,7 @@ macro_constant(MACRO_PROT_ARGS)
 
 	if (MDOC_LINEARG_MAX == argc) {
 		mdoc_argv_free(argc - 1, argv);
-		return(mdoc_perr(mdoc, line, ppos, "parameter hard-limit exceeded"));
+		return(perr(mdoc, line, ppos, EARGVLIM));
 	}
 
 	c = mdoc_elem_alloc(mdoc, line, ppos, tok, argc, argv);
@@ -1153,6 +1231,8 @@ macro_constant(MACRO_PROT_ARGS)
 	for (;;) {
 		la = *pos;
 		w = mdoc_args(mdoc, line, pos, buf, tok, &p);
+		assert(ARGS_PHRASE != c);
+
 		if (ARGS_ERROR == w)
 			return(0);
 		if (ARGS_EOLN == w)
@@ -1182,7 +1262,7 @@ int
 macro_obsolete(MACRO_PROT_ARGS)
 {
 
-	return(mdoc_pwarn(mdoc, line, ppos, WARN_SYNTAX, "macro is obsolete"));
+	return(pwarn(mdoc, line, ppos, WOBS));
 }
 
 

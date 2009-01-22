@@ -96,7 +96,7 @@ dist:	mdocml-$(VERSION).tar.gz
 
 port:	mdocml-oport-$(VERSION).tar.gz
 
-regress::
+regress:: mdocml
 	@for f in $(FAIL); do \
 		echo "./mdocml $$f" ; \
 		./mdocml $$f 2>/dev/null || continue ; exit 1 ; done

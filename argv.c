@@ -37,21 +37,27 @@
 #define	ARGS_TABSEP	(1 << 2)
 
 static	int		 lookup(int, const char *);
-static	int		 parse(struct mdoc *, int,
+static	int		 args(struct mdoc *, int, int *, 
+				char *, int, char **);
+static	int		 argv(struct mdoc *, int,
 				struct mdoc_arg *, int *, char *);
-static	int		 parse_single(struct mdoc *, int, 
+static	int		 argv_single(struct mdoc *, int, 
 				struct mdoc_arg *, int *, char *);
-static	int		 parse_multi(struct mdoc *, int, 
+static	int		 argv_multi(struct mdoc *, int, 
 				struct mdoc_arg *, int *, char *);
-static	int		 postparse(struct mdoc *, int, 
+static	int		 postargv(struct mdoc *, int, 
 				const struct mdoc_arg *, int);
 static	int		 pwarn(struct mdoc *, int, int, int);
 static	int		 perr(struct mdoc *, int, int, int);
+
+/* Warning messages. */
 
 #define	WQUOTPARM	(0)
 #define	WARGVPARM	(1)
 #define	WCOLEMPTY	(2)
 #define	WTAILWS		(3)
+
+/* Error messages. */
 
 #define	EQUOTTERM	(0)
 #define	EOFFSET		(1)
@@ -232,24 +238,10 @@ int
 mdoc_args(struct mdoc *mdoc, int line, 
 		int *pos, char *buf, int tok, char **v)
 {
-	int		  i, c, fl;
-	char		 *p, *pp;
+	int		  fl, c, i;
 	struct mdoc_node *n;
 
-	assert(*pos > 0);
-
-	if (0 == buf[*pos])
-		return(ARGS_EOLN);
-
 	fl = (0 == tok) ? 0 : mdoc_argflags[tok];
-
-	if ('\"' == buf[*pos] && ! (fl & ARGS_QUOTED))
-		if ( ! pwarn(mdoc, line, *pos, WQUOTPARM))
-			return(ARGS_ERROR);
-
-	if ('-' == buf[*pos]) 
-		if ( ! pwarn(mdoc, line, *pos, WARGVPARM))
-			return(ARGS_ERROR);
 
 	/* 
 	 * First see if we should use TABSEP (Bl -column).  This
@@ -264,13 +256,40 @@ mdoc_args(struct mdoc *mdoc, int line,
 		assert(n);
 		c = (int)n->data.block.argc;
 		assert(c > 0);
+
+		/* LINTED */
 		for (i = 0; i < c; i++) {
 			if (MDOC_Column != n->data.block.argv[i].arg)
 				continue;
 			fl |= ARGS_TABSEP;
 			fl &= ~ARGS_DELIM;
+			break;
 		}
 	}
+
+	return(args(mdoc, line, pos, buf, fl, v));
+}
+
+
+static int
+args(struct mdoc *mdoc, int line, 
+		int *pos, char *buf, int fl, char **v)
+{
+	int		  i, c;
+	char		 *p, *pp;
+
+	assert(*pos > 0);
+
+	if (0 == buf[*pos])
+		return(ARGS_EOLN);
+
+	if ('\"' == buf[*pos] && ! (fl & ARGS_QUOTED))
+		if ( ! pwarn(mdoc, line, *pos, WQUOTPARM))
+			return(ARGS_ERROR);
+
+	if ('-' == buf[*pos]) 
+		if ( ! pwarn(mdoc, line, *pos, WARGVPARM))
+			return(ARGS_ERROR);
 
 	/* 
 	 * If the first character is a delimiter and we're to look for
@@ -374,17 +393,18 @@ mdoc_args(struct mdoc *mdoc, int line,
 				if ( ! pwarn(mdoc, line, *pos, WTAILWS))
 					return(0);
 
+			if (p)
+				return(ARGS_WORD);
+
 			/* Configure the eoln case, too. */
 
-			if (NULL == p) {
-				p = strchr(*v, 0);
-				assert(p);
+			p = strchr(*v, 0);
+			assert(p);
 
-				if (p > *v && ' ' == *(p - 1))
-					if ( ! pwarn(mdoc, line, *pos, WTAILWS))
-						return(0);
-				*pos += p - *v;
-			}
+			if (p > *v && ' ' == *(p - 1))
+				if ( ! pwarn(mdoc, line, *pos, WTAILWS))
+					return(0);
+			*pos += p - *v;
 
 			return(ARGS_WORD);
 		} 
@@ -618,7 +638,7 @@ lookup(int tok, const char *argv)
 
 
 static int
-postparse(struct mdoc *mdoc, int line, const struct mdoc_arg *v, int pos)
+postargv(struct mdoc *mdoc, int line, const struct mdoc_arg *v, int pos)
 {
 
 	switch (v->arg) {
@@ -645,7 +665,7 @@ postparse(struct mdoc *mdoc, int line, const struct mdoc_arg *v, int pos)
 
 
 static int
-parse_multi(struct mdoc *mdoc, int line, 
+argv_multi(struct mdoc *mdoc, int line, 
 		struct mdoc_arg *v, int *pos, char *buf)
 {
 	int		 c, ppos;
@@ -659,7 +679,7 @@ parse_multi(struct mdoc *mdoc, int line,
 	for (v->sz = 0; v->sz < MDOC_LINEARG_MAX; v->sz++) {
 		if ('-' == buf[*pos])
 			break;
-		c = mdoc_args(mdoc, line, pos, buf, ARGS_QUOTED, &p);
+		c = args(mdoc, line, pos, buf, ARGS_QUOTED, &p);
 		if (ARGS_ERROR == c) {
 			free(v->value);
 			return(0);
@@ -680,7 +700,7 @@ parse_multi(struct mdoc *mdoc, int line,
 
 
 static int
-parse_single(struct mdoc *mdoc, int line, 
+argv_single(struct mdoc *mdoc, int line, 
 		struct mdoc_arg *v, int *pos, char *buf)
 {
 	int		 c, ppos;
@@ -688,7 +708,7 @@ parse_single(struct mdoc *mdoc, int line,
 
 	ppos = *pos;
 
-	c = mdoc_args(mdoc, line, pos, buf, ARGS_QUOTED, &p);
+	c = args(mdoc, line, pos, buf, ARGS_QUOTED, &p);
 	if (ARGS_ERROR == c)
 		return(0);
 	if (ARGS_EOLN == c)
@@ -702,7 +722,7 @@ parse_single(struct mdoc *mdoc, int line,
 
 
 static int
-parse(struct mdoc *mdoc, int line, 
+argv(struct mdoc *mdoc, int line, 
 		struct mdoc_arg *v, int *pos, char *buf)
 {
 
@@ -715,9 +735,9 @@ parse(struct mdoc *mdoc, int line,
 	case(MDOC_Width):
 		/* FALLTHROUGH */
 	case(MDOC_Offset):
-		return(parse_single(mdoc, line, v, pos, buf));
+		return(argv_single(mdoc, line, v, pos, buf));
 	case(MDOC_Column):
-		return(parse_multi(mdoc, line, v, pos, buf));
+		return(argv_multi(mdoc, line, v, pos, buf));
 	default:
 		break;
 	}
@@ -731,7 +751,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		struct mdoc_arg *v, int *pos, char *buf)
 {
 	int		 i, ppos;
-	char		*argv;
+	char		*p;
 
 	(void)memset(v, 0, sizeof(struct mdoc_arg));
 
@@ -744,12 +764,14 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		return(ARGV_WORD);
 
 	i = *pos;
-	argv = &buf[++(*pos)];
+	p = &buf[++(*pos)];
 
 	v->line = line;
 	v->pos = *pos;
 
 	assert(*pos > 0);
+
+	/* LINTED */
 	while (buf[*pos]) {
 		if (isspace((int)buf[*pos])) 
 			if ('\\' != buf[*pos - 1])
@@ -760,7 +782,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	if (buf[*pos])
 		buf[(*pos)++] = 0;
 
-	if (MDOC_ARG_MAX == (v->arg = lookup(tok, argv))) {
+	if (MDOC_ARG_MAX == (v->arg = lookup(tok, p))) {
 		if ( ! pwarn(mdoc, line, i, WARGVPARM))
 			return(ARGV_ERROR);
 		return(ARGV_WORD);
@@ -772,9 +794,9 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	/* FIXME: whitespace if no value. */
 
 	ppos = *pos;
-	if ( ! parse(mdoc, line, v, pos, buf))
+	if ( ! argv(mdoc, line, v, pos, buf))
 		return(ARGV_ERROR);
-	if ( ! postparse(mdoc, line, v, ppos))
+	if ( ! postargv(mdoc, line, v, ppos))
 		return(ARGV_ERROR);
 
 	return(ARGV_ARG);
