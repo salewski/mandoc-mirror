@@ -5,7 +5,7 @@ CFLAGS += -W -Wall -Wno-unused-parameter -g
 LIBLNS	= macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
 	  validate.ln action.ln 
 
-BINLNS	= tree.ln mdocml.ln
+BINLNS	= mdocml.ln
 
 LNS	= $(LIBLNS) $(BINLNS)
 
@@ -16,12 +16,12 @@ LIBS	= libmdoc.a
 LIBOBJS	= macro.o mdoc.o hash.o strings.o xstd.o argv.o \
 	  validate.o action.o 
 
-BINOBJS	= tree.o mdocml.o
+BINOBJS	= mdocml.o
 
 OBJS	= $(LIBOBJS) $(BINOBJS)
 
 SRCS	= macro.c mdoc.c mdocml.c hash.c strings.c xstd.c argv.c \
-	  validate.c action.c tree.c 
+	  validate.c action.c 
 
 HEADS	= mdoc.h private.h
 
@@ -135,10 +135,6 @@ macro.o: macro.c private.h
 strings.ln: strings.c private.h
 
 strings.o: strings.c private.h
-
-tree.ln: tree.c mdoc.h
-
-tree.o: tree.c mdoc.h
 
 hash.ln: hash.c private.h
 
