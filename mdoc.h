@@ -195,9 +195,10 @@
 #define	MDOC_Symbolic	 61
 #define	MDOC_ARG_MAX	 62
 
+/* Warnings are either syntax or groff-compatibility. */
 enum	mdoc_warn {
-	WARN_SYNTAX,		/* Syntax warn (at line/col). */
-	WARN_COMPAT		/* Groff compat warn (at line/col). */
+	WARN_SYNTAX,
+	WARN_COMPAT
 };
 
 /* Possible values for the `At' macro. */
@@ -225,19 +226,6 @@ struct	mdoc_arg {
 	size_t		  sz;
 	char		**value;
 };
-
-/*
- * Simplified grammar of syntax tree:
- *
- * MDOC_ROOT: root of tree
- * MDOC_TEXT: free-form text
- * MDOC_ELEM: elem [args] MDOC_TEXT...
- * MDOC_BLOCK, MDOC_HEAD, MDOC_BODY, MDOC_TAIL:
- *   MDOC_BLOCK:
- *     MDOC_HEAD [args] (MDOC_TEXT|MDOC_ELEM|MDOC_BLOCK)...
- *     MDOC_BODY (MDOC_TEXT|MDOC_ELEM|MDOC_BLOCK)...
- *     MDOC_TAIL (optional) (MDOC_TEXT|MDOC_ELEM|MDOC_BLOCK)...
- */
 
 /* Type of a syntax node. */
 enum	mdoc_type {
@@ -340,7 +328,7 @@ enum	mdoc_arch {
 	ARCH_zaurus
 };
 
-/* Meta-information from prologue. */
+/* Information from prologue. */
 struct	mdoc_meta {
 	enum mdoc_msec	  msec;
 	enum mdoc_vol	  vol;
@@ -351,10 +339,12 @@ struct	mdoc_meta {
 	char		 *name;
 };
 
+/* Text-only node. */
 struct	mdoc_text {
 	char		 *string;
 };
 
+/* Block (scoped) node. */
 struct	mdoc_block {
 	size_t		  argc;
 	struct mdoc_arg	 *argv;
@@ -363,6 +353,7 @@ struct	mdoc_block {
 	struct mdoc_node *tail;
 };
 
+/* In-line element node. */
 struct	mdoc_elem {
 	size_t		  sz;
 	char		**args;
@@ -370,13 +361,14 @@ struct	mdoc_elem {
 	struct mdoc_arg	 *argv;
 };
 
+/* Typed nodes of an AST node. */
 union	mdoc_data {
 	struct mdoc_text  text;
 	struct mdoc_elem  elem;
 	struct mdoc_block block;
 };
 
-/* Syntax node in parse tree. */
+/* Node in AST. */
 struct	mdoc_node {
 	struct mdoc_node *parent;
 	struct mdoc_node *child;
@@ -401,7 +393,10 @@ struct	mdoc_cb {
 			enum mdoc_warn, const char *);
 };
 
+/* Global table of macro names (`Bd', `Ed', etc.). */
 extern	const char *const *mdoc_macronames;
+
+/* Global table of argument names (`column', `tag', etc.). */
 extern	const char *const *mdoc_argnames;
 
 __BEGIN_DECLS
@@ -414,13 +409,13 @@ void	 	  mdoc_free(struct mdoc *);
 /* Allocate a new parser instance. */
 struct	mdoc	 *mdoc_alloc(void *data, const struct mdoc_cb *);
 
-/* Parse a single line (boolean retval). */
+/* Parse a single line in a stream (boolean retval). */
 int	 	  mdoc_parseln(struct mdoc *, int, char *buf);
 
-/* Get result first node. */
+/* Get result first node (after mdoc_endparse!). */
 const struct mdoc_node *mdoc_node(struct mdoc *);
 
-/* Get result meta-information. */
+/* Get result meta-information (after mdoc_endparse!). */
 const struct mdoc_meta *mdoc_meta(struct mdoc *);
 
 /* Signal end of parse sequence (boolean retval). */

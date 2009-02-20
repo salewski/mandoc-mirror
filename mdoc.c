@@ -212,10 +212,12 @@ static	void		  argfree(size_t, struct mdoc_arg *);
 static	void	  	  argcpy(struct mdoc_arg *, 
 				const struct mdoc_arg *);
 
+static	struct mdoc_node *mdoc_node_alloc(void);
 static	int		  mdoc_node_append(struct mdoc *, 
 				struct mdoc_node *);
 static	void		  mdoc_elem_free(struct mdoc_elem *);
 static	void		  mdoc_text_free(struct mdoc_text *);
+
 
 
 const struct mdoc_node *
@@ -510,6 +512,14 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 }
 
 
+static struct mdoc_node *
+mdoc_node_alloc(void)
+{
+
+	return(xcalloc(1, sizeof(struct mdoc_node)));
+}
+
+
 int
 mdoc_tail_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 {
@@ -518,7 +528,7 @@ mdoc_tail_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 	assert(mdoc->first);
 	assert(mdoc->last);
 
-	p = xcalloc(1, sizeof(struct mdoc_node));
+	p = mdoc_node_alloc();
 
 	p->line = line;
 	p->pos = pos;
@@ -537,7 +547,7 @@ mdoc_head_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 	assert(mdoc->first);
 	assert(mdoc->last);
 
-	p = xcalloc(1, sizeof(struct mdoc_node));
+	p = mdoc_node_alloc();
 
 	p->line = line;
 	p->pos = pos;
@@ -556,7 +566,7 @@ mdoc_body_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 	assert(mdoc->first);
 	assert(mdoc->last);
 
-	p = xcalloc(1, sizeof(struct mdoc_node));
+	p = mdoc_node_alloc();
 
 	p->line = line;
 	p->pos = pos;
@@ -572,7 +582,7 @@ mdoc_root_alloc(struct mdoc *mdoc)
 {
 	struct mdoc_node *p;
 
-	p = xcalloc(1, sizeof(struct mdoc_node));
+	p = mdoc_node_alloc();
 
 	p->type = MDOC_ROOT;
 
@@ -586,7 +596,7 @@ mdoc_block_alloc(struct mdoc *mdoc, int line, int pos,
 {
 	struct mdoc_node *p;
 
-	p = xcalloc(1, sizeof(struct mdoc_node));
+	p = mdoc_node_alloc();
 
 	p->pos = pos;
 	p->line = line;
@@ -605,7 +615,7 @@ mdoc_elem_alloc(struct mdoc *mdoc, int line, int pos,
 {
 	struct mdoc_node *p;
 
-	p = xcalloc(1, sizeof(struct mdoc_node));
+	p = mdoc_node_alloc();
 
 	p->line = line;
 	p->pos = pos;
@@ -624,7 +634,8 @@ mdoc_word_alloc(struct mdoc *mdoc,
 {
 	struct mdoc_node *p;
 
-	p = xcalloc(1, sizeof(struct mdoc_node));
+	p = mdoc_node_alloc();
+
 	p->line = line;
 	p->pos = pos;
 	p->type = MDOC_TEXT;

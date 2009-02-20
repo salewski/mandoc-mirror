@@ -3,7 +3,7 @@ VERSION	= 1.2.0
 CFLAGS += -W -Wall -Wno-unused-parameter -g 
 
 LIBLNS	= macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
-	  validate.ln action.ln
+	  validate.ln action.ln 
 
 BINLNS	= tree.ln mdocml.ln
 
@@ -14,14 +14,14 @@ LLNS	= llib-llibmdoc.ln llib-lmdocml.ln
 LIBS	= libmdoc.a
 
 LIBOBJS	= macro.o mdoc.o hash.o strings.o xstd.o argv.o \
-	  validate.o action.o
+	  validate.o action.o 
 
 BINOBJS	= tree.o mdocml.o
 
 OBJS	= $(LIBOBJS) $(BINOBJS)
 
 SRCS	= macro.c mdoc.c mdocml.c hash.c strings.c xstd.c argv.c \
-	  validate.c action.c tree.c
+	  validate.c action.c tree.c 
 
 HEADS	= mdoc.h private.h
 
