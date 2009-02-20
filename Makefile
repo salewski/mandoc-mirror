@@ -5,7 +5,7 @@ CFLAGS += -W -Wall -Wno-unused-parameter -g
 LIBLNS	= macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
 	  validate.ln action.ln 
 
-BINLNS	= mdocml.ln
+BINLNS	= mdocml.ln term.ln tree.ln
 
 LNS	= $(LIBLNS) $(BINLNS)
 
@@ -16,7 +16,7 @@ LIBS	= libmdoc.a
 LIBOBJS	= macro.o mdoc.o hash.o strings.o xstd.o argv.o \
 	  validate.o action.o 
 
-BINOBJS	= mdocml.o
+BINOBJS	= mdocml.o term.o tree.o
 
 OBJS	= $(LIBOBJS) $(BINOBJS)
 
@@ -132,6 +132,14 @@ macro.ln: macro.c private.h
 
 macro.o: macro.c private.h
 
+tree.ln: tree.c mdoc.h
+
+tree.o: tree.c mdoc.h
+
+term.ln: term.c mdoc.h
+
+term.o: term.c mdoc.h
+
 strings.ln: strings.c private.h
 
 strings.o: strings.c private.h
@@ -198,5 +206,5 @@ libmdoc.a: $(LIBOBJS)
 	$(AR) rs $@ $(LIBOBJS)
 
 mdocml:	$(BINOBJS) libmdoc.a
-	$(CC) $(CFLAGS) -o $@ $(BINOBJS) libmdoc.a
+	$(CC) $(CFLAGS) -o $@ $(BINOBJS) libmdoc.a -lcurses
 

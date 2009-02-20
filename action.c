@@ -243,7 +243,7 @@ post_dt(struct mdoc *mdoc)
 	}
 
 	if (NULL == mdoc->meta.title)
-		mdoc->meta.title = xstrdup("untitled");
+		mdoc->meta.title = xstrdup("UNTITLED");
 
 	mdoc_msg(mdoc, "title: %s", mdoc->meta.title);
 

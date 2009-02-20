@@ -224,6 +224,8 @@ buf_begin(struct md_parse *p)
 static int
 parse_leave(struct md_parse *p, int code)
 {
+	extern int termprint(const struct mdoc_node *, 
+			const struct mdoc_meta *);
 
 	if (NULL == p->mdoc)
 		return(code);
@@ -231,13 +233,9 @@ parse_leave(struct md_parse *p, int code)
 	if ( ! mdoc_endparse(p->mdoc))
 		code = 0;
 
-#if 0
 	/* TODO */
-	if (code && ! mdoc_write(p->out, mdoc_node(p->mdoc))) {
-		warnx("%s: write error", p->out);
+	if (code && ! termprint(mdoc_node(p->mdoc), mdoc_meta(p->mdoc)))
 		code = 0;
-	}
-#endif
 
 	mdoc_free(p->mdoc);
 	return(code);
