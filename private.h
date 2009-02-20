@@ -132,6 +132,11 @@ enum	mdoc_arch mdoc_atoarch(const char *);
 enum	mdoc_att  mdoc_atoatt(const char *);
 time_t		  mdoc_atotime(const char *);
 
+/* FIXME: these three are only for output channels. */
+char 		 *mdoc_arch2a(enum mdoc_arch);
+char 		 *mdoc_vol2a(enum mdoc_vol);
+char 		 *mdoc_msec2a(enum mdoc_msec);
+
 char		 *mdoc_type2a(enum mdoc_type);
 char		 *mdoc_node2a(struct mdoc_node *);
 

@@ -122,8 +122,10 @@ treeprint_r(const struct mdoc_node *n, int indent)
 }
 
 
+/* ARGSUSED */
 int
-treeprint(const struct mdoc_node *node)
+treeprint(const struct mdoc_node *node,
+		const struct mdoc_meta *meta)
 {
 
 	treeprint_r(node, 0);

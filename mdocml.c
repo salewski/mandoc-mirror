@@ -226,6 +226,8 @@ parse_leave(struct md_parse *p, int code)
 {
 	extern int termprint(const struct mdoc_node *, 
 			const struct mdoc_meta *);
+	/*extern int treeprint(const struct mdoc_node *, 
+			const struct mdoc_meta *);*/
 
 	if (NULL == p->mdoc)
 		return(code);
@@ -236,6 +238,8 @@ parse_leave(struct md_parse *p, int code)
 	/* TODO */
 	if (code && ! termprint(mdoc_node(p->mdoc), mdoc_meta(p->mdoc)))
 		code = 0;
+	/*if (code && ! treeprint(mdoc_node(p->mdoc), mdoc_meta(p->mdoc)))
+		code = 0;*/
 
 	mdoc_free(p->mdoc);
 	return(code);

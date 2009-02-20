@@ -136,9 +136,9 @@ tree.ln: tree.c mdoc.h
 
 tree.o: tree.c mdoc.h
 
-term.ln: term.c mdoc.h
+term.ln: term.c private.h
 
-term.o: term.c mdoc.h
+term.o: term.c private.h
 
 strings.ln: strings.c private.h
 

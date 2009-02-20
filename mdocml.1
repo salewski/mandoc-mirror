@@ -2,17 +2,17 @@
 .Dd $Mdocdate$
 .Dt mdocml 1
 .Os
-.\"
+.\" SECTION
 .Sh NAME
 .Nm mdocml
 .Nd mdoc macro compiler
-.\"
+.\" SECTION
 .Sh SYNOPSIS
 .Nm mdocml
 .Op Fl v
 .Op Fl W Ns Ar err...
 .Op Ar infile
-.\"
+.\" SECTION
 .Sh DESCRIPTION
 The
 .Nm
@@ -44,44 +44,47 @@ which may be
 .Dq \-
 for stdin.
 .El
+.\" PARAGRAPH
 .Pp
 Parsing and validation rules are drawn entirely from the 
 .Xr mdoc 7
 and
 .Xr mdoc.samples 7 
 manuals.
+.\" PARAGRAPH
 .Pp
 By default,
 .Nm
 reads from stdin, writes messages to stdout, and writes errors and
 warnings to stderr.
+.\" PARAGRAPH
 .Pp
 .Ex -std mdocml
+.\" PARAGRAPH
 .Pp
 .Nm
 is
 .Ud
-.\" 
+.\" SECTION
 .Sh EXAMPLES
 To validate this manual page:
+.\" PARAGRAPH
 .Pp
 .D1 % mdocml \-Wall,error mdocml.1 
-.\"
+.\" SECTION
 .Sh SEE ALSO
 .Xr groff 1 ,
 .Xr mdoc.samples 7 ,
 .Xr mdoc 7 ,
 .Xr mdoc 3
-.\" .Sh STANDARDS
-.\" .Sh HISTORY
+.\" 
 .Sh AUTHORS
 The
 .Nm
 utility was written by 
 .An Kristaps Dzonsons Aq kristaps@kth.se .
-.\"
+.\" SECTION
 .Sh CAVEATS
 See
 .Xr mdoc 3
 for a list of bugs, caveats, and incomplete macros.
-.\" .Sh BUGS

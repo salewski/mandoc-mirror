@@ -334,3 +334,158 @@ mdoc_type2a(enum mdoc_type type)
 	abort();
 	/* NOTREACHED */
 }
+
+
+char *
+mdoc_arch2a(enum mdoc_arch arch)
+{
+
+	switch (arch) {
+	case (ARCH_alpha):
+		return("Alpha");
+	case (ARCH_amd64):
+		return("AMD64");
+	case (ARCH_amiga):
+		return("Amiga");
+	case (ARCH_arc):
+		return("ARC");
+	case (ARCH_arm):
+		return("ARM");
+	case (ARCH_armish):
+		return("ARMISH");
+	case (ARCH_aviion):
+		return("AViion");
+	case (ARCH_hp300):
+		return("HP300");
+	case (ARCH_hppa):
+		return("HPPA");
+	case (ARCH_hppa64):
+		return("HPPA64");
+	case (ARCH_i386):
+		return("i386");
+	case (ARCH_landisk):
+		return("LANDISK");
+	case (ARCH_luna88k):
+		return("Luna88k");
+	case (ARCH_mac68k):
+		return("Mac68k");
+	case (ARCH_macppc):
+		return("MacPPC");
+	case (ARCH_mvme68k):
+		return("MVME68k");
+	case (ARCH_mvme88k):
+		return("MVME88k");
+	case (ARCH_mvmeppc):
+		return("MVMEPPC");
+	case (ARCH_pmax):
+		return("PMAX");
+	case (ARCH_sgi):
+		return("SGI");
+	case (ARCH_socppc):
+		return("SOCPPC");
+	case (ARCH_sparc):
+		return("SPARC");
+	case (ARCH_sparc64):
+		return("SPARC64");
+	case (ARCH_sun3):
+		return("Sun3");
+	case (ARCH_vax):
+		return("VAX");
+	case (ARCH_zaurus):
+		return("Zaurus");
+	case (ARCH_DEFAULT):
+		return(NULL);
+	default:
+		break;
+	}
+
+	abort();
+	/* NOTREACHED */
+}
+
+
+char *
+mdoc_vol2a(enum mdoc_vol vol)
+{
+
+	switch (vol) {
+	case (VOL_AMD):
+		return("OpenBSD Ancestral Manual Documents");
+	case (VOL_IND):
+		return("OpenBSD Manual Master Index");
+	case (VOL_KM):
+		return("OpenBSD Kernel Manual");
+	case (VOL_LOCAL):
+		return("OpenBSD Local Manual");
+	case (VOL_PRM):
+		return("OpenBSD Programmer's Manual");
+	case (VOL_PS1):
+		return("OpenBSD Programmer's Supplementary Documents");
+	case (VOL_SMM):
+		return("OpenBSD System Manager's Manual");
+	case (VOL_URM):
+		return("OpenBSD Reference Manual");
+	case (VOL_USD):
+		return("OpenBSD User's Supplementary Documents");
+	case (VOL_DEFAULT):
+		return(NULL);
+	default:
+		break;
+	}
+
+	abort();
+	/* NOTREACHED */
+}
+
+
+char *
+mdoc_msec2a(enum mdoc_msec msec)
+{
+
+	switch (msec) {
+	case(MSEC_1):
+		return("1");
+	case(MSEC_2):
+		return("2");
+	case(MSEC_3):
+		return("3");
+	case(MSEC_3f):
+		return("3f");
+	case(MSEC_3p):
+		return("3p");
+	case(MSEC_4):
+		return("4");
+	case(MSEC_5):
+		return("5");
+	case(MSEC_6):
+		return("6");
+	case(MSEC_7):
+		return("7");
+	case(MSEC_8):
+		return("8");
+	case(MSEC_9):
+		return("9");
+	case(MSEC_X11):
+		return("X11");
+	case(MSEC_X11R6):
+		return("X11R6");
+	case(MSEC_local):
+		return("local");
+	case(MSEC_n):
+		return("n");
+	case(MSEC_unass):
+		/* FALLTHROUGH */
+	case(MSEC_draft):
+		return("draft");
+	case(MSEC_paper):
+		return("paper");
+	case(MSEC_DEFAULT):
+		return(NULL);
+	default:
+		break;
+	}
+
+	abort();
+	/* NOTREACHED */
+}
+
