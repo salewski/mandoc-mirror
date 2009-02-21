@@ -1,6 +1,6 @@
 VERSION	= 1.2.0
 
-CFLAGS += -W -Wall -Wno-unused-parameter -g 
+CFLAGS += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g 
 
 LIBLNS	= macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
 	  validate.ln action.ln 

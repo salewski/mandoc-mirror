@@ -708,6 +708,8 @@ static int
 pre_it(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
+	/* TODO: -width attribute must be specified for -tag. */
+
 	if (MDOC_BLOCK != node->type)
 		return(1);
 	return(pre_check_parent(mdoc, node, MDOC_Bl, MDOC_BODY));
