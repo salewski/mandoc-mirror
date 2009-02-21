@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2008 Kristaps Dzonsons <kristaps@kth.se>
+ * Copyright (c) 2008, 2009 Kristaps Dzonsons <kristaps@kth.se>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the
@@ -18,44 +18,19 @@
  */
 #include <assert.h>
 #include <ctype.h>
-#include <curses.h>
 #include <err.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <term.h>
 #include <unistd.h>
 
-#include "private.h"
+#include "term.h"
+#include "private.h" /* XXX */
 
-enum	termesc {
-	ESC_CLEAR,
-	ESC_BOLD,
-	ESC_UNDERLINE
-};
-
-struct	termp {
-	size_t		  rmargin;
-	size_t		  maxrmargin;
-	size_t		  maxcols;
-	size_t		  offset;
-	size_t		  col;
-	int		  flags;
-#define	TERMP_BOLD	 (1 << 0)	/* Embolden words. */
-#define	TERMP_UNDERLINE	 (1 << 1)	/* Underline words. */
-#define	TERMP_NOSPACE	 (1 << 2)	/* No space before words. */
-#define	TERMP_NOLPAD	 (1 << 3)	/* No left-padding. */
-#define	TERMP_NOBREAK	 (1 << 4)	/* No break after line */
-	char		 *buf;
-};
-
-struct	termact {
-	int		(*pre)(struct termp *,
-				const struct mdoc_meta *,
-				const struct mdoc_node *);
-	int		(*post)(struct termp *,
-				const struct mdoc_meta *,
-				const struct mdoc_node *);
+enum	termstyle {
+	STYLE_CLEAR,
+	STYLE_BOLD,
+	STYLE_UNDERLINE
 };
 
 static	void		  termprint_r(struct termp *,
@@ -66,175 +41,12 @@ static	void		  termprint_header(struct termp *,
 static	void		  termprint_footer(struct termp *,
 				const struct mdoc_meta *);
 
-static	int		  arg_hasattr(int, size_t, 
-				const struct mdoc_arg *);
-static	int		  arg_getattr(int, size_t, 
-				const struct mdoc_arg *);
-
-static	void		  newln(struct termp *);
-static	void		  vspace(struct termp *);
 static	void		  pword(struct termp *, const char *, size_t);
-static	void		  word(struct termp *, const char *);
-
-#define	decl_prepost(name, suffix) \
-static	int		  name##_##suffix(struct termp *, \
-				const struct mdoc_meta *, \
-				const struct mdoc_node *)
-
-#define	decl_pre(name)	  decl_prepost(name, pre)
-#define	decl_post(name)   decl_prepost(name, post)
-
-decl_pre(termp_fl);
-decl_pre(termp_it);
-decl_pre(termp_nd);
-decl_pre(termp_ns);
-decl_pre(termp_op);
-decl_pre(termp_pp);
-decl_pre(termp_sh);
-decl_pre(termp_xr);
-
-decl_post(termp_bl);
-decl_post(termp_it);
-decl_post(termp_op);
-decl_post(termp_sh);
-
-decl_pre(termp_bold);
-decl_pre(termp_under);
-
-decl_post(termp_bold);
-decl_post(termp_under);
-
-const	struct termact termacts[MDOC_MAX] = {
-	{ NULL, NULL }, /* \" */
-	{ NULL, NULL }, /* Dd */
-	{ NULL, NULL }, /* Dt */
-	{ NULL, NULL }, /* Os */
-	{ termp_sh_pre, termp_sh_post }, /* Sh */
-	{ NULL, NULL }, /* Ss */ 
-	{ termp_pp_pre, NULL }, /* Pp */ 
-	{ NULL, NULL }, /* D1 */
-	{ NULL, NULL }, /* Dl */
-	{ NULL, NULL }, /* Bd */
-	{ NULL, NULL }, /* Ed */
-	{ NULL, termp_bl_post }, /* Bl */
-	{ NULL, NULL }, /* El */
-	{ termp_it_pre, termp_it_post }, /* It */
-	{ NULL, NULL }, /* Ad */ 
-	{ NULL, NULL }, /* An */
-	{ termp_under_pre, termp_under_post }, /* Ar */
-	{ NULL, NULL }, /* Cd */
-	{ NULL, NULL }, /* Cm */
-	{ NULL, NULL }, /* Dv */ 
-	{ NULL, NULL }, /* Er */ 
-	{ NULL, NULL }, /* Ev */ 
-	{ NULL, NULL }, /* Ex */
-	{ NULL, NULL }, /* Fa */ 
-	{ NULL, NULL }, /* Fd */ 
-	{ termp_fl_pre, termp_bold_post }, /* Fl */
-	{ NULL, NULL }, /* Fn */ 
-	{ NULL, NULL }, /* Ft */ 
-	{ NULL, NULL }, /* Ic */ 
-	{ NULL, NULL }, /* In */ 
-	{ NULL, NULL }, /* Li */
-	{ termp_nd_pre, NULL }, /* Nd */ 
-	{ termp_bold_pre, termp_bold_post }, /* Nm */ 
-	{ termp_op_pre, termp_op_post }, /* Op */
-	{ NULL, NULL }, /* Ot */
-	{ NULL, NULL }, /* Pa */
-	{ NULL, NULL }, /* Rv */
-	{ NULL, NULL }, /* St */ 
-	{ NULL, NULL }, /* Va */
-	{ NULL, NULL }, /* Vt */ 
-	{ termp_xr_pre, NULL }, /* Xr */
-	{ NULL, NULL }, /* %A */
-	{ NULL, NULL }, /* %B */
-	{ NULL, NULL }, /* %D */
-	{ NULL, NULL }, /* %I */
-	{ NULL, NULL }, /* %J */
-	{ NULL, NULL }, /* %N */
-	{ NULL, NULL }, /* %O */
-	{ NULL, NULL }, /* %P */
-	{ NULL, NULL }, /* %R */
-	{ NULL, NULL }, /* %T */
-	{ NULL, NULL }, /* %V */
-	{ NULL, NULL }, /* Ac */
-	{ NULL, NULL }, /* Ao */
-	{ NULL, NULL }, /* Aq */
-	{ NULL, NULL }, /* At */
-	{ NULL, NULL }, /* Bc */
-	{ NULL, NULL }, /* Bf */ 
-	{ NULL, NULL }, /* Bo */
-	{ NULL, NULL }, /* Bq */
-	{ NULL, NULL }, /* Bsx */
-	{ NULL, NULL }, /* Bx */
-	{ NULL, NULL }, /* Db */
-	{ NULL, NULL }, /* Dc */
-	{ NULL, NULL }, /* Do */
-	{ NULL, NULL }, /* Dq */
-	{ NULL, NULL }, /* Ec */
-	{ NULL, NULL }, /* Ef */
-	{ NULL, NULL }, /* Em */ 
-	{ NULL, NULL }, /* Eo */
-	{ NULL, NULL }, /* Fx */
-	{ NULL, NULL }, /* Ms */
-	{ NULL, NULL }, /* No */
-	{ termp_ns_pre, NULL }, /* Ns */
-	{ NULL, NULL }, /* Nx */
-	{ NULL, NULL }, /* Ox */
-	{ NULL, NULL }, /* Pc */
-	{ NULL, NULL }, /* Pf */
-	{ NULL, NULL }, /* Po */
-	{ NULL, NULL }, /* Pq */
-	{ NULL, NULL }, /* Qc */
-	{ NULL, NULL }, /* Ql */
-	{ NULL, NULL }, /* Qo */
-	{ NULL, NULL }, /* Qq */
-	{ NULL, NULL }, /* Re */
-	{ NULL, NULL }, /* Rs */
-	{ NULL, NULL }, /* Sc */
-	{ NULL, NULL }, /* So */
-	{ NULL, NULL }, /* Sq */
-	{ NULL, NULL }, /* Sm */
-	{ NULL, NULL }, /* Sx */
-	{ NULL, NULL }, /* Sy */
-	{ NULL, NULL }, /* Tn */
-	{ NULL, NULL }, /* Ux */
-	{ NULL, NULL }, /* Xc */
-	{ NULL, NULL }, /* Xo */
-	{ NULL, NULL }, /* Fo */ 
-	{ NULL, NULL }, /* Fc */ 
-	{ NULL, NULL }, /* Oo */
-	{ NULL, NULL }, /* Oc */
-	{ NULL, NULL }, /* Bk */
-	{ NULL, NULL }, /* Ek */
-	{ NULL, NULL }, /* Bt */
-	{ NULL, NULL }, /* Hf */
-	{ NULL, NULL }, /* Fr */
-	{ NULL, NULL }, /* Ud */
-};
+static	void		  chara(struct termp *, char);
+static	void		  escape(struct termp *, enum termstyle);
 
 
-static int
-arg_hasattr(int arg, size_t argc, const struct mdoc_arg *argv)
-{
-
-	return(-1 != arg_getattr(arg, argc, argv));
-}
-
-
-static int
-arg_getattr(int arg, size_t argc, const struct mdoc_arg *argv)
-{
-	int		 i;
-
-	for (i = 0; i < (int)argc; i++) 
-		if (argv[i].arg == arg)
-			return(i);
-	return(-1);
-}
-
-
-static void
+void
 flushln(struct termp *p)
 {
 	size_t		 i, j, vsz, vis, maxvis;
@@ -333,7 +145,7 @@ flushln(struct termp *p)
 }
 
 
-static void
+void
 newln(struct termp *p)
 {
 
@@ -348,7 +160,7 @@ newln(struct termp *p)
 }
 
 
-static void
+void
 vspace(struct termp *p)
 {
 
@@ -373,7 +185,7 @@ chara(struct termp *p, char c)
 
 
 static void
-escape(struct termp *p, enum termesc esc)
+escape(struct termp *p, enum termstyle esc)
 {
 
 	if (p->col + 4 >= p->maxcols)
@@ -382,13 +194,13 @@ escape(struct termp *p, enum termesc esc)
 	p->buf[(p->col)++] = 27;
 	p->buf[(p->col)++] = '[';
 	switch (esc) {
-	case (ESC_CLEAR):
+	case (STYLE_CLEAR):
 		p->buf[(p->col)++] = '0';
 		break;
-	case (ESC_BOLD):
+	case (STYLE_BOLD):
 		p->buf[(p->col)++] = '1';
 		break;
-	case (ESC_UNDERLINE):
+	case (STYLE_UNDERLINE):
 		p->buf[(p->col)++] = '4';
 		break;
 	default:
@@ -412,9 +224,9 @@ pword(struct termp *p, const char *word, size_t len)
 	p->flags &= ~TERMP_NOSPACE;
 
 	if (p->flags & TERMP_BOLD)
-		escape(p, ESC_BOLD);
+		escape(p, STYLE_BOLD);
 	if (p->flags & TERMP_UNDERLINE)
-		escape(p, ESC_UNDERLINE);
+		escape(p, STYLE_UNDERLINE);
 
 	/* TODO: escape patterns. */
 
@@ -423,11 +235,11 @@ pword(struct termp *p, const char *word, size_t len)
 
 	if (p->flags & TERMP_BOLD ||
 			p->flags & TERMP_UNDERLINE)
-		escape(p, ESC_CLEAR);
+		escape(p, STYLE_CLEAR);
 }
 
 
-static void
+void
 word(struct termp *p, const char *word)
 {
 	size_t 		 i, j, len;
@@ -457,350 +269,13 @@ word(struct termp *p, const char *word)
 }
 
 
-/* ARGSUSED */
-static int
-termp_it_post(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-	const struct mdoc_node *n, *it;
-	const struct mdoc_block *bl;
-	int		 i;
-	size_t		 width;
-
-	switch (node->type) {
-	case (MDOC_BODY):
-		/* FALLTHROUGH */
-	case (MDOC_HEAD):
-		break;
-	default:
-		return(1);
-	}
-
-	it = node->parent;
-	assert(MDOC_BLOCK == it->type);
-	assert(MDOC_It == it->tok);
-
-	n = it->parent;
-	assert(MDOC_BODY == n->type);
-	assert(MDOC_Bl == n->tok);
-	n = n->parent;
-	bl = &n->data.block;
-
-	/* If `-tag', adjust our margins accordingly. */
-
-	if (arg_hasattr(MDOC_Tag, bl->argc, bl->argv)) {
-		i = arg_getattr(MDOC_Width, bl->argc, bl->argv);
-		assert(i >= 0);
-		assert(1 == bl->argv[i].sz);
-		width = strlen(*bl->argv[i].value); /* XXX */
-
-		if (MDOC_HEAD == node->type) {
-			flushln(p);
-			/* FIXME: nested lists. */
-			p->rmargin = p->maxrmargin;
-			p->flags &= ~TERMP_NOBREAK;
-		} else {
-			flushln(p);
-			p->offset -= width + 1;
-			p->flags &= ~TERMP_NOLPAD;
-		}
-	}
-
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_it_pre(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-	const struct mdoc_node *n, *it;
-	const struct mdoc_block *bl;
-	int		 i;
-	size_t		 width;
-
-	switch (node->type) {
-	case (MDOC_BODY):
-		/* FALLTHROUGH */
-	case (MDOC_HEAD):
-		it = node->parent;
-		break;
-	case (MDOC_BLOCK):
-		it = node;
-		break;
-	default:
-		return(1);
-	}
-
-	assert(MDOC_BLOCK == it->type);
-	assert(MDOC_It == it->tok);
-
-	n = it->parent;
-	assert(MDOC_BODY == n->type);
-	assert(MDOC_Bl == n->tok);
-	n = n->parent;
-	bl = &n->data.block;
-
-	/* If `-compact', don't assert vertical space. */
-
-	if (MDOC_BLOCK == node->type) {
-		if (arg_hasattr(MDOC_Compact, bl->argc, bl->argv))
-			newln(p);
-		else
-			vspace(p);
-		return(1);
-	}
-
-	assert(MDOC_HEAD == node->type 
-			|| MDOC_BODY == node->type);
-
-	/* If `-tag', adjust our margins accordingly. */
-
-	if (arg_hasattr(MDOC_Tag, bl->argc, bl->argv)) {
-		i = arg_getattr(MDOC_Width, bl->argc, bl->argv);
-		assert(i >= 0); /* XXX */
-		assert(1 == bl->argv[i].sz);
-		width = strlen(*bl->argv[i].value); /* XXX */
-
-		/* FIXME: nested lists. */
-
-		if (MDOC_HEAD == node->type) {
-			p->flags |= TERMP_NOBREAK;
-			p->flags |= TERMP_NOSPACE;
-			p->rmargin = p->offset + width;
-		} else {
-			p->flags |= TERMP_NOSPACE;
-			p->flags |= TERMP_NOLPAD;
-			p->offset += width + 1;
-		}
-	}
-
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_bold_post(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	p->flags &= ~TERMP_BOLD;
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_under_pre(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	p->flags |= TERMP_UNDERLINE;
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_bold_pre(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	p->flags |= TERMP_BOLD;
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_ns_pre(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	p->flags |= TERMP_NOSPACE;
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_pp_pre(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	vspace(p);
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_under_post(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	p->flags &= ~TERMP_UNDERLINE;
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_nd_pre(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	word(p, "-");
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_bl_post(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	switch (node->type) {
-	case (MDOC_BLOCK):
-		newln(p);
-		break;
-	default:
-		break;
-	}
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_op_post(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	switch (node->type) {
-	case (MDOC_BODY):
-		p->flags |= TERMP_NOSPACE;
-		word(p, "\\]");
-		break;
-	default:
-		break;
-	}
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_sh_post(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	switch (node->type) {
-	case (MDOC_HEAD):
-		p->flags &= ~TERMP_BOLD;
-		newln(p);
-		break;
-	case (MDOC_BODY):
-		newln(p);
-		p->offset -= 4;
-		break;
-	default:
-		break;
-	}
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_xr_pre(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-	const struct mdoc_node *n;
-
-	n = node->child;
-	assert(n);
-
-	assert(MDOC_TEXT == n->type);
-	word(p, n->data.text.string);
-
-	if (NULL == (n = n->next)) 
-		return(0);
-
-	assert(MDOC_TEXT == n->type);
-	p->flags |= TERMP_NOSPACE;
-	word(p, "\\(");
-	p->flags |= TERMP_NOSPACE;
-	word(p, n->data.text.string);
-	p->flags |= TERMP_NOSPACE;
-	word(p, "\\)");
-
-	return(0);
-}
-
-
-/* ARGSUSED */
-static int
-termp_sh_pre(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	switch (node->type) {
-	case (MDOC_HEAD):
-		vspace(p);
-		p->flags |= TERMP_BOLD;
-		break;
-	case (MDOC_BODY):
-		p->offset += 4;
-		break;
-	default:
-		break;
-	}
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_op_pre(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	switch (node->type) {
-	case (MDOC_BODY):
-		word(p, "\\[");
-		p->flags |= TERMP_NOSPACE;
-		break;
-	default:
-		break;
-	}
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_fl_pre(struct termp *p, const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	p->flags |= TERMP_BOLD;
-	word(p, "-");
-	p->flags |= TERMP_NOSPACE;
-	return(1);
-}
-
-
 static void
 termprint_r(struct termp *p, const struct mdoc_meta *meta,
 		const struct mdoc_node *node)
 {
 	int		 dochild;
 
-	/* Pre-processing ----------------- */
+	/* Pre-processing. */
 
 	dochild = 1;
 
@@ -811,30 +286,12 @@ termprint_r(struct termp *p, const struct mdoc_meta *meta,
 	} else /* MDOC_TEXT == node->type */
 		word(p, node->data.text.string);
 
-	/* Children ---------------------- */
+	/* Children. */
 
-	if (dochild && NULL == node->child) {
-		/* No-child processing. */
-		switch (node->type) {
-		case (MDOC_ELEM):
-			switch (node->tok) {
-			case (MDOC_Nm):
-				word(p, "progname"); /* TODO */
-				break;
-			case (MDOC_Ar):
-				word(p, "..."); 
-				break;
-			default:
-				break;
-			}
-			break;
-		default:
-			break;
-		}
-	} else if (dochild)
+	if (dochild && node->child)
 		termprint_r(p, meta, node->child);
 
-	/* Post-processing --------------- */
+	/* Post-processing. */
 
 	if (MDOC_TEXT != node->type) {
 		if (termacts[node->tok].post)
@@ -842,7 +299,7 @@ termprint_r(struct termp *p, const struct mdoc_meta *meta,
 				return;
 	} 
 
-	/* Siblings ---------------------- */
+	/* Siblings. */
 
 	if (node->next)
 		termprint_r(p, meta, node->next);
@@ -988,10 +445,7 @@ termprint(const struct mdoc_node *node,
 {
 	struct termp	 p;
 
-	if (ERR == setupterm(NULL, STDOUT_FILENO, NULL))
-		return(0);
-
-	p.maxrmargin = columns < 60 ? 60 : (size_t)columns;
+	p.maxrmargin = 80; /* XXX */
 	p.rmargin = p.maxrmargin;
 	p.maxcols = 1024;
 	p.offset = p.col = 0;
