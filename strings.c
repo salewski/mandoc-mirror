@@ -336,7 +336,7 @@ mdoc_type2a(enum mdoc_type type)
 }
 
 
-char *
+const char *
 mdoc_arch2a(enum mdoc_arch arch)
 {
 
@@ -404,7 +404,7 @@ mdoc_arch2a(enum mdoc_arch arch)
 }
 
 
-char *
+const char *
 mdoc_vol2a(enum mdoc_vol vol)
 {
 
@@ -438,7 +438,7 @@ mdoc_vol2a(enum mdoc_vol vol)
 }
 
 
-char *
+const char *
 mdoc_msec2a(enum mdoc_msec msec)
 {
 

@@ -56,11 +56,10 @@ static	int		  arg_getattr(int, size_t,
 	const struct mdoc_meta *meta, \
 	const struct mdoc_node *node
 
-#define	DECL_PREPOST(name, suffix) \
-static int	 	  name##_##suffix(DECL_ARGS)
-
-#define	DECL_PRE(name)	  DECL_PREPOST(name, pre)
-#define	DECL_POST(name)   DECL_PREPOST(name, post)
+#define	DECL_PRE(name) \
+static	int	 	  name##_pre(DECL_ARGS)
+#define	DECL_POST(name) \
+static	void	 	  name##_post(DECL_ARGS)
 
 DECL_PRE(termp_aq);
 DECL_PRE(termp_ar);
@@ -216,21 +215,20 @@ termp_dq_pre(DECL_ARGS)
 
 
 /* ARGSUSED */
-static int
+static void
 termp_dq_post(DECL_ARGS)
 {
 
 	if (MDOC_BODY != node->type)
-		return(1);
+		return;
 
 	p->flags |= TERMP_NOSPACE;
 	word(p, "''");
-	return(1);
 }
 
 
 /* ARGSUSED */
-static int
+static void
 termp_it_post(DECL_ARGS)
 {
 	const struct mdoc_node *n, *it;
@@ -251,7 +249,7 @@ termp_it_post(DECL_ARGS)
 	case (MDOC_HEAD):
 		break;
 	default:
-		return(1);
+		return;
 	}
 
 	it = node->parent;
@@ -283,8 +281,6 @@ termp_it_post(DECL_ARGS)
 			p->flags &= ~TERMP_NOLPAD;
 		}
 	}
-
-	return(1);
 }
 
 
@@ -362,22 +358,20 @@ termp_it_pre(DECL_ARGS)
 
 
 /* ARGSUSED */
-static int
+static void
 termp_nm_post(DECL_ARGS)
 {
 
 	p->flags &= ~ttypes[TTYPE_PROG];
-	return(1);
 }
 
 
 /* ARGSUSED */
-static int
+static void
 termp_fl_post(DECL_ARGS)
 {
 
 	p->flags &= ~ttypes[TTYPE_CMD_FLAG];
-	return(1);
 }
 
 
@@ -426,12 +420,11 @@ termp_pp_pre(DECL_ARGS)
 
 
 /* ARGSUSED */
-static int
+static void
 termp_ar_post(DECL_ARGS)
 {
 
 	p->flags &= ~ttypes[TTYPE_CMD_ARG];
-	return(1);
 }
 
 
@@ -466,40 +459,29 @@ termp_nd_pre(DECL_ARGS)
 
 
 /* ARGSUSED */
-static int
+static void
 termp_bl_post(DECL_ARGS)
 {
 
-	switch (node->type) {
-	case (MDOC_BLOCK):
+	if (MDOC_BLOCK == node->type)
 		newln(p);
-		break;
-	default:
-		break;
-	}
-	return(1);
 }
 
 
 /* ARGSUSED */
-static int
+static void
 termp_op_post(DECL_ARGS)
 {
 
-	switch (node->type) {
-	case (MDOC_BODY):
-		p->flags |= TERMP_NOSPACE;
-		word(p, "\\]");
-		break;
-	default:
-		break;
-	}
-	return(1);
+	if (MDOC_BODY != node->type) 
+		return;
+	p->flags |= TERMP_NOSPACE;
+	word(p, "\\(rB");
 }
 
 
 /* ARGSUSED */
-static int
+static void
 termp_sh_post(DECL_ARGS)
 {
 
@@ -515,7 +497,6 @@ termp_sh_post(DECL_ARGS)
 	default:
 		break;
 	}
-	return(1);
 }
 
 
@@ -536,11 +517,11 @@ termp_xr_pre(DECL_ARGS)
 
 	assert(MDOC_TEXT == n->type);
 	p->flags |= TERMP_NOSPACE;
-	word(p, "\\(");
+	word(p, "(");
 	p->flags |= TERMP_NOSPACE;
 	word(p, n->data.text.string);
 	p->flags |= TERMP_NOSPACE;
-	word(p, "\\)");
+	word(p, ")");
 
 	return(0);
 }
@@ -573,7 +554,7 @@ termp_op_pre(DECL_ARGS)
 
 	switch (node->type) {
 	case (MDOC_BODY):
-		word(p, "\\[");
+		word(p, "\\(lB");
 		p->flags |= TERMP_NOSPACE;
 		break;
 	default:
@@ -619,15 +600,14 @@ termp_d1_pre(DECL_ARGS)
 
 
 /* ARGSUSED */
-static int
+static void
 termp_d1_post(DECL_ARGS)
 {
 
-	if (MDOC_BODY != node->type)
-		return(1);
+	if (MDOC_BODY != node->type) 
+		return;
 	newln(p);
 	p->offset -= 4;
-	return(1);
 }
 
 
@@ -645,15 +625,14 @@ termp_aq_pre(DECL_ARGS)
 
 
 /* ARGSUSED */
-static int
+static void
 termp_aq_post(DECL_ARGS)
 {
 
 	if (MDOC_BODY != node->type)
-		return(1);
+		return;
 	p->flags |= TERMP_NOSPACE;
 	word(p, "\\>");
-	return(1);
 }
 
 

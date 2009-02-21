@@ -1,0 +1,113 @@
+.\" $Id$
+.\"
+.\" Copyright (c) 2009 Kristaps Dzonsons <kristaps@kth.se>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the
+.\" above copyright notice and this permission notice appear in all
+.\" copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+.\" WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+.\" WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+.\" AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+.\" DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
+.\" PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+.\" TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+.\" PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt mdocmterm 1
+.Os
+.\" SECTION
+.Sh NAME
+.Nm mdocmterm
+.Nd mdoc macro compiler
+.\" SECTION
+.Sh SYNOPSIS
+.Nm mdocmterm
+.Op Fl v
+.Op Fl W Ns Ar err...
+.Op Ar infile
+.\" SECTION
+.Sh DESCRIPTION
+The
+.Nm
+utility formats a BSD 
+.Dq mdoc 
+manual page for display on the terminal.  The arguments are as follows:
+.Bl -tag -width "\-Werr... "
+.\" ITEM
+.It Fl v
+Print verbose parsing output.
+.\" ITEM
+.It Fl W Ns Ar err...
+Print warning messages.  May be set to 
+.Fl W Ns Ar all
+for all warnings, 
+.Ar compat
+for groff/troff-compatibility warnings, or
+.Ar syntax
+for syntax warnings.  If
+.Fl W Ns Ar error 
+is specified, warnings are considered errors and cause utility
+termination.  Multiple 
+.Fl W
+arguments may be comma-separated, such as
+.Fl W Ns Ar error,all .
+.\" ITEM
+.It Ar infile
+Read input from
+.Ar infile ,
+which may be 
+.Dq \-
+for stdin.
+.El
+.\" PARAGRAPH
+The
+.Nm
+utility is a formatting front-end for
+.Xr mdoc 3 ,
+which parses the 
+.Dq mdoc
+input, documented at
+.Xr mdoc 7
+and
+.Xr mdoc.samples 7 ,
+into an abstract syntax tree.
+.\" PARAGRAPH
+.Pp
+By default,
+.Nm
+reads from stdin and prints terminal-encoded output to stdout.
+.\" PARAGRAPH
+.Pp
+.Ex -std mdocmterm
+.\" PARAGRAPH
+.Pp
+.Nm
+is
+.Ud
+.\" SECTION
+.Sh EXAMPLES
+To display this manual page:
+.\" PARAGRAPH
+.Pp
+.D1 % mdocmterm \-Wall,error mdocmterm.1 
+.\" SECTION
+.Sh SEE ALSO
+.Xr mdoctree 1 ,
+.Xr mdoc.samples 7 ,
+.Xr mdoc 7 ,
+.Xr mdoc 3
+.\" 
+.Sh AUTHORS
+The
+.Nm
+utility was written by 
+.An Kristaps Dzonsons Aq kristaps@kth.se .
+.\" SECTION
+.Sh CAVEATS
+See
+.Xr mdoc 3
+for a list of bugs, caveats, and incomplete macros.

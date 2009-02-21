@@ -25,7 +25,6 @@
 #include <unistd.h>
 
 #include "term.h"
-#include "private.h" /* XXX */
 
 enum	termstyle {
 	STYLE_CLEAR,
@@ -42,8 +41,10 @@ static	void		  termprint_footer(struct termp *,
 				const struct mdoc_meta *);
 
 static	void		  pword(struct termp *, const char *, size_t);
+static	void		  pescape(struct termp *, 
+				const char *, size_t *, size_t);
 static	void		  chara(struct termp *, char);
-static	void		  escape(struct termp *, enum termstyle);
+static	void		  style(struct termp *, enum termstyle);
 
 
 void
@@ -185,7 +186,7 @@ chara(struct termp *p, char c)
 
 
 static void
-escape(struct termp *p, enum termstyle esc)
+style(struct termp *p, enum termstyle esc)
 {
 
 	if (p->col + 4 >= p->maxcols)
@@ -212,6 +213,48 @@ escape(struct termp *p, enum termstyle esc)
 
 
 static void
+pescape(struct termp *p, const char *word, size_t *i, size_t len)
+{
+
+	(*i)++;
+	assert(*i < len);
+
+	if ('(' == word[*i]) {
+		/* Two-character escapes. */
+		(*i)++;
+		assert(*i + 1 < len);
+
+		if ('r' == word[*i] && 'B' == word[*i + 1])
+			chara(p, ']');
+		else if ('l' == word[*i] && 'B' == word[*i + 1])
+			chara(p, '[');
+
+		(*i)++;
+		return;
+
+	} else if ('[' != word[*i]) {
+		/* One-character escapes. */
+		switch (word[*i]) {
+		case ('\\'):
+			/* FALLTHROUGH */
+		case ('\''):
+			/* FALLTHROUGH */
+		case ('`'):
+			/* FALLTHROUGH */
+		case ('-'):
+			/* FALLTHROUGH */
+		case ('.'):
+			chara(p, word[*i]);
+		default:
+			break;
+		}
+		return;
+	}
+	/* n-character escapes. */
+}
+
+
+static void
 pword(struct termp *p, const char *word, size_t len)
 {
 	size_t		 i;
@@ -224,18 +267,21 @@ pword(struct termp *p, const char *word, size_t len)
 	p->flags &= ~TERMP_NOSPACE;
 
 	if (p->flags & TERMP_BOLD)
-		escape(p, STYLE_BOLD);
+		style(p, STYLE_BOLD);
 	if (p->flags & TERMP_UNDERLINE)
-		escape(p, STYLE_UNDERLINE);
+		style(p, STYLE_UNDERLINE);
 
-	/* TODO: escape patterns. */
-
-	for (i = 0; i < len; i++) 
+	for (i = 0; i < len; i++) {
+		if ('\\' == word[i]) {
+			pescape(p, word, &i, len);
+			continue;
+		}
 		chara(p, word[i]);
+	}
 
 	if (p->flags & TERMP_BOLD ||
 			p->flags & TERMP_UNDERLINE)
-		escape(p, STYLE_CLEAR);
+		style(p, STYLE_CLEAR);
 }
 
 
@@ -293,11 +339,9 @@ termprint_r(struct termp *p, const struct mdoc_meta *meta,
 
 	/* Post-processing. */
 
-	if (MDOC_TEXT != node->type) {
+	if (MDOC_TEXT != node->type)
 		if (termacts[node->tok].post)
-			if ( ! (*termacts[node->tok].post)(p, meta, node))
-				return;
-	} 
+			(*termacts[node->tok].post)(p, meta, node);
 
 	/* Siblings. */
 
@@ -351,7 +395,8 @@ termprint_footer(struct termp *p, const struct mdoc_meta *meta)
 static void
 termprint_header(struct termp *p, const struct mdoc_meta *meta)
 {
-	char		*msec, *buf, *title, *pp;
+	char		*buf, *title;
+	const char	*pp, *msec;
 	size_t		 ssz, tsz, ttsz, i;;
 
 	if (NULL == (buf = malloc(p->rmargin)))
@@ -439,7 +484,7 @@ termprint_header(struct termp *p, const struct mdoc_meta *meta)
 }
 
 
-int
+void
 termprint(const struct mdoc_node *node,
 		const struct mdoc_meta *meta)
 {
@@ -459,8 +504,6 @@ termprint(const struct mdoc_node *node,
 	termprint_footer(&p, meta);
 
 	free(p.buf);
-
-	return(1);
 }
 
 

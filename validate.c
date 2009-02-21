@@ -35,7 +35,7 @@ typedef	int	(*v_post)(struct mdoc *);
 /* FIXME: some sections should only occur in specific msecs. */
 /* FIXME: ignoring Pp. */
 /* FIXME: math symbols. */
-/* FIXME: valid character-escape checks. */
+/* FIXME: valid character-escape checks!!!! */
 /* FIXME: make sure required sections are included (NAME, ...). */
 
 struct	valids {

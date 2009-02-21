@@ -42,15 +42,20 @@ struct	termact {
 	int		(*pre)(struct termp *,
 				const struct mdoc_meta *,
 				const struct mdoc_node *);
-	int		(*post)(struct termp *,
+	void		(*post)(struct termp *,
 				const struct mdoc_meta *,
 				const struct mdoc_node *);
 };
+
+void			  termprint(const struct mdoc_node *,
+				const struct mdoc_meta *);
 
 void			  newln(struct termp *);
 void			  vspace(struct termp *);
 void			  word(struct termp *, const char *);
 void			  flushln(struct termp *);
+void			  transcode(struct termp *, 
+				const char *, size_t);
 
 const	struct termact 	 *termacts;
 

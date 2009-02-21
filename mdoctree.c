@@ -32,9 +32,6 @@
 
 #define	MD_LINE_SZ	(256)		/* Max input line size. */
 
-typedef	int		(*md_print)(const struct mdoc_node *,
-				const struct mdoc_meta *);
-
 struct	md_parse {
 	int		  warn;		/* Warning flags. */
 #define	MD_WARN_SYNTAX	 (1 << 0)	/* Show syntax warnings. */
@@ -47,27 +44,20 @@ struct	md_parse {
 	u_long		  bufsz;	/* Input buffer size. */
 	char		 *in;		/* Input file name. */
 	int		  fdin;		/* Input file desc. */
-	md_print	  fp;
 };
 
 extern	char	 	 *__progname;
 
 static	void		  usage(void);
-
-static	int		  parse_opts(struct md_parse *, int, char *[]);
-static	int		  parse_subopts(struct md_parse *, char *);
-
-static	int		  parse_begin(struct md_parse *);
-static	int		  parse_leave(struct md_parse *, int);
-static	int		  io_begin(struct md_parse *);
-static	int		  io_leave(struct md_parse *, int);
-static	int		  buf_begin(struct md_parse *);
-static	int		  buf_leave(struct md_parse *, int);
-
+static	int		  getsopts(struct md_parse *, char *);
+static	int		  parse(struct md_parse *);
 static	void		  msg_msg(void *, int, int, const char *);
 static	int		  msg_err(void *, int, int, const char *);
 static	int		  msg_warn(void *, int, int, 
 				enum mdoc_warn, const char *);
+
+extern	void		  treeprint(const struct mdoc_node *,
+				const struct mdoc_meta *);
 
 #ifdef __linux__
 extern	int		  getsubopt(char **, char *const *, char **);
@@ -76,46 +66,92 @@ extern	int		  getsubopt(char **, char *const *, char **);
 int
 main(int argc, char *argv[])
 {
-	struct md_parse	 parser;
+	struct md_parse	 p;
+	struct mdoc_cb	 cb;
+	struct stat	 st;
+	int		 c;
+	extern char	*optarg;
+	extern int	 optind;
 
-	(void)memset(&parser, 0, sizeof(struct md_parse));
+	(void)memset(&p, 0, sizeof(struct md_parse));
 
-	if ( ! parse_opts(&parser, argc, argv))
+	while (-1 != (c = getopt(argc, argv, "vW:")))
+		switch (c) {
+		case ('v'):
+			p.dbg++;
+			break;
+		case ('W'):
+			if ( ! getsopts(&p, optarg))
+				return(0);
+			break;
+		default:
+			usage();
+			return(0);
+		}
+
+	argv += optind;
+	argc -= optind;
+
+	/* Initialise the input file. */
+
+	p.in = "-";
+	p.fdin = STDIN_FILENO;
+
+	if (argc > 0) {
+		p.in = *argv++;
+		p.fdin = open(p.in, O_RDONLY, 0);
+		if (-1 == p.fdin)
+			err(1, "%s", p.in);
+	}
+
+	/* Allocate a buffer to be BUFSIZ/block size. */
+
+	if (-1 == fstat(p.fdin, &st)) {
+		warn("%s", p.in);
+		p.bufsz = BUFSIZ;
+	} else 
+		p.bufsz = MAX(st.st_blksize, BUFSIZ);
+
+	p.buf = malloc(p.bufsz);
+	if (NULL == p.buf)
+		err(1, "malloc");
+
+	/* Allocate the parser. */
+
+	cb.mdoc_err = msg_err;
+	cb.mdoc_warn = msg_warn;
+	cb.mdoc_msg = msg_msg;
+
+	p.mdoc = mdoc_alloc(&p, &cb);
+
+	/* Parse the input file. */
+
+	c = parse(&p);
+	free(p.buf);
+
+	if (STDIN_FILENO != p.fdin && -1 == close(p.fdin))
+		warn("%s", p.in);
+
+	if (0 == c) {
+		mdoc_free(p.mdoc);
 		return(EXIT_FAILURE);
-	if ( ! io_begin(&parser))
-		return(EXIT_FAILURE);
+	}
+
+	/* If the parse succeeded, print it out. */
+
+	treeprint(mdoc_node(p.mdoc), mdoc_meta(p.mdoc));
+	mdoc_free(p.mdoc);
 
 	return(EXIT_SUCCESS);
 }
 
 
 static int
-io_leave(struct md_parse *p, int code)
-{
-
-	if (-1 == p->fdin || STDIN_FILENO == p->fdin)
-		return(code);
-
-	if (-1 == close(p->fdin)) {
-		warn("%s", p->in);
-		code = 0;
-	}
-	return(code);
-}
-
-
-static int
-parse_subopts(struct md_parse *p, char *arg)
+getsopts(struct md_parse *p, char *arg)
 {
 	char		*v;
 	char		*toks[] = { "all", "compat", 
 				"syntax", "error", NULL };
-
-	/* 
-	 * Future -Wxxx levels and so on should be here.  For now we
-	 * only recognise syntax and compat warnings as categories,
-	 * beyond the usually "all" and "error" (make warn error out).
-	 */
 
 	while (*arg) 
 		switch (getsubopt(&arg, toks, &v)) {
@@ -141,141 +177,12 @@ parse_subopts(struct md_parse *p, char *arg)
 
 
 static int
-parse_opts(struct md_parse *p, int argc, char *argv[])
-{
-	int		 c;
-
-	extern char	*optarg;
-	extern int	 optind;
-
-	extern int termprint(const struct mdoc_node *, 
-			const struct mdoc_meta *);
-	extern int treeprint(const struct mdoc_node *, 
-			const struct mdoc_meta *);
-
-	p->in = "-";
-
-	while (-1 != (c = getopt(argc, argv, "f:vW:")))
-		switch (c) {
-		case ('f'):
-			if (0 == strcmp(optarg, "tree")) {
-				p->fp = treeprint;
-				break;
-			} else if (0 == strcmp(optarg, "term")) {
-				p->fp = termprint;
-				break;
-			}
-			warnx("unknown filter: %s", optarg);
-			return(0);
-		case ('v'):
-			p->dbg++;
-			break;
-		case ('W'):
-			if ( ! parse_subopts(p, optarg))
-				return(0);
-			break;
-		default:
-			usage();
-			return(0);
-		}
-
-	argv += optind;
-	if (0 == (argc -= optind))
-		return(1);
-
-	p->in = *argv++;
-	return(1);
-}
-
-
-static int
-io_begin(struct md_parse *p)
-{
-
-	p->fdin = STDIN_FILENO;
-	if (0 != strncmp(p->in, "-", 1))
-		if (-1 == (p->fdin = open(p->in, O_RDONLY, 0))) {
-			warn("%s", p->in);
-			return(io_leave(p, 0));
-		}
-
-	return(io_leave(p, buf_begin(p)));
-}
-
-
-static int
-buf_leave(struct md_parse *p, int code)
-{
-
-	if (p->buf)
-		free(p->buf);
-	return(code);
-}
-
-
-static int
-buf_begin(struct md_parse *p)
-{
-	struct stat	 st;
-
-	if (-1 == fstat(p->fdin, &st)) {
-		warn("%s", p->in);
-		return(0);
-	} 
-
-	/*
-	 * Try to intuit the fastest way of sucking down buffered data
-	 * by using either the block buffer size or the hard-coded one.
-	 * This is inspired by bin/cat.c.
-	 */
-
-	p->bufsz = MAX(st.st_blksize, BUFSIZ);
-
-	if (NULL == (p->buf = malloc(p->bufsz))) {
-		warn("malloc");
-		return(buf_leave(p, 0));
-	}
-
-	return(buf_leave(p, parse_begin(p)));
-}
-
-
-static int
-parse_leave(struct md_parse *p, int code)
-{
-	md_print	 fp;
-
-	if (NULL == p->mdoc)
-		return(code);
-
-	if ( ! mdoc_endparse(p->mdoc))
-		code = 0;
-
-	if (code && (fp = p->fp)) {
-		if ( ! (*fp)(mdoc_node(p->mdoc), mdoc_meta(p->mdoc)))
-			code = 0;
-	}
-
-	mdoc_free(p->mdoc);
-	return(code);
-}
-
-
-static int
-parse_begin(struct md_parse *p)
+parse(struct md_parse *p)
 {
 	ssize_t		 sz, i;
 	size_t		 pos;
 	char		 line[MD_LINE_SZ];
-	struct mdoc_cb	 cb;
 	int		 lnn;
-
-	cb.mdoc_err = msg_err;
-	cb.mdoc_warn = msg_warn;
-	cb.mdoc_msg = msg_msg;
-
-	if (NULL == (p->mdoc = mdoc_alloc(p, &cb)))
-		return(parse_leave(p, 0));
 
 	/*
 	 * This is a little more complicated than fgets.  TODO: have
@@ -290,7 +197,7 @@ parse_begin(struct md_parse *p)
 	for (lnn = 1, pos = 0; ; ) {
 		if (-1 == (sz = read(p->fdin, p->buf, p->bufsz))) {
 			warn("%s", p->in);
-			return(parse_leave(p, 0));
+			return(0);
 		} else if (0 == sz) 
 			break;
 
@@ -301,19 +208,19 @@ parse_begin(struct md_parse *p)
 					continue;
 				}
 				warnx("%s: line %d too long", p->in, lnn);
-				return(parse_leave(p, 0));
+				return(0);
 			}
 	
 			line[(int)pos] = 0;
 			if ( ! mdoc_parseln(p->mdoc, lnn, line))
-				return(parse_leave(p, 0));
+				return(0);
 
 			lnn++;
 			pos = 0;
 		}
 	}
 
-	return(parse_leave(p, 1));
+	return(mdoc_endparse(p->mdoc));
 }
 
 
@@ -379,7 +286,6 @@ static void
 usage(void)
 {
 
-	warnx("usage: %s [-ffilter] [-v] [-Wwarn...] [infile]", 
-			__progname);
+	warnx("usage: %s [-v] [-Wwarn...] [infile]", __progname);
 }
 

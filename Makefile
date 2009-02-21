@@ -1,33 +1,37 @@
-VERSION	= 1.2.0
+VERSION	= 1.3.0
 
 CFLAGS += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g 
 
 LIBLNS	= macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
 	  validate.ln action.ln 
 
-BINLNS	= mdocml.ln term.ln tree.ln termact.ln
+TREELNS	= mdoctree.ln tree.ln 
 
-LNS	= $(LIBLNS) $(BINLNS)
+TERMLNS	= mdoctree.ln term.ln termact.ln
 
-LLNS	= llib-llibmdoc.ln llib-lmdocml.ln
+LNS	= $(LIBLNS) $(TREELNS) $(TERMLNS)
+
+LLNS	= llib-llibmdoc.ln llib-lmdoctree.ln llib-lmdocterm.ln
 
 LIBS	= libmdoc.a
 
 LIBOBJS	= macro.o mdoc.o hash.o strings.o xstd.o argv.o \
-	  validate.o action.o 
+	  validate.o action.o
 
-BINOBJS	= mdocml.o term.o tree.o termact.o
+TERMOBJS= mdocterm.o term.o termact.o
 
-OBJS	= $(LIBOBJS) $(BINOBJS)
+TREEOBJS= mdoctree.o tree.o 
 
-SRCS	= macro.c mdoc.c mdocml.c hash.c strings.c xstd.c argv.c \
-	  validate.c action.c term.c tree.c termact.c
+OBJS	= $(LIBOBJS) $(TERMOBJS) $(TREEOBJS)
+
+SRCS	= macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
+	  action.c term.c tree.c termact.c mdoctree.c mdocterm.c
 
 HEADS	= mdoc.h private.h term.h
 
-MANS	= mdocml.1 mdoc.3
+MANS	= mdoctree.1 mdocterm.1 mdoc.3
 
-BINS	= mdocml
+BINS	= mdocterm mdoctree
 
 CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS)
 
@@ -109,8 +113,10 @@ install:
 	mkdir -p $(PREFIX)/include/mdoc/
 	mkdir -p $(PREFIX)/lib/
 	mkdir -p $(PREFIX)/man/man1/
-	install -m 0755 mdocml $(PREFIX)/bin/
-	install -m 0444 mdocml.1 $(PREFIX)/man/man1/
+	install -m 0755 mdocterm $(PREFIX)/bin/
+	install -m 0755 mdoctree $(PREFIX)/bin/
+	install -m 0444 mdocterm.1 $(PREFIX)/man/man1/
+	install -m 0444 mdocterm.1 $(PREFIX)/man/man1/
 	install -m 0444 mdoc.3 $(PREFIX)/man/man3/
 	install -m 0644 libmdoc.a $(PREFIX)/lib/
 	install -m 0444 mdoc.h $(PREFIX)/include/
@@ -122,8 +128,10 @@ install-dist: mdocml-$(VERSION).tar.gz mdocml-oport-$(VERSION).tar.gz
 	install -m 0644 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/mdocml-oport.tar.gz
 
 uninstall:
-	rm -f $(PREFIX)/bin/mdocml
-	rm -f $(PREFIX)/man/man1/mdocml.1
+	rm -f $(PREFIX)/bin/mdocterm
+	rm -f $(PREFIX)/bin/mdoctree
+	rm -f $(PREFIX)/man/man1/mdocterm.1
+	rm -f $(PREFIX)/man/man1/mdoctree.1
 	rm -f $(PREFIX)/man/man3/mdoc.3
 	rm -f $(PREFIX)/lib/libmdoc.a
 	rm -f $(PREFIX)/include/mdoc.h
@@ -156,9 +164,13 @@ mdoc.ln: mdoc.c private.h
 
 mdoc.o: mdoc.c private.h
 
-mdocml.ln: mdocml.c mdoc.h
+mdocterm.ln: mdocterm.c term.h
 
-mdocml.o: mdocml.c mdoc.h
+mdocterm.o: mdocterm.c term.h
+
+mdoctree.ln: mdoctree.c mdoc.h
+
+mdoctree.o: mdoctree.c mdoc.h
 
 xstd.ln: xstd.c private.h
 
@@ -186,10 +198,12 @@ mdocml-oport-$(VERSION).tar.gz: Makefile.port DESCR
 	sha1 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
 	install -m 0644 DESCR .dist/mdocml/pkg/DESCR
 	echo @comment $$OpenBSD$$ > .dist/mdocml/pkg/PLIST
-	echo bin/mdocml >> .dist/mdocml/pkg/PLIST
+	echo bin/mdocterm >> .dist/mdocml/pkg/PLIST
+	echo bin/mdoctree >> .dist/mdocml/pkg/PLIST
 	echo lib/libmdoc.a >> .dist/mdocml/pkg/PLIST
 	echo include/mdoc.h >> .dist/mdocml/pkg/PLIST
-	echo @man man/man1/mdocml.1 >> .dist/mdocml/pkg/PLIST
+	echo @man man/man1/mdoctree.1 >> .dist/mdocml/pkg/PLIST
+	echo @man man/man1/mdocterm.1 >> .dist/mdocml/pkg/PLIST
 	echo @man man/man3/mdoc.3 >> .dist/mdocml/pkg/PLIST
 	( cd .dist/ && tar zcf ../$@ mdocml/ )
 	rm -rf .dist/
@@ -203,12 +217,18 @@ mdocml-$(VERSION).tar.gz: $(INSTALL)
 llib-llibmdoc.ln: $(LIBLNS)
 	$(LINT) $(LINTFLAGS) -Clibmdoc $(LIBLNS)
 
-llib-lmdocml.ln: $(BINLNS) llib-llibmdoc.ln
-	$(LINT) $(LINTFLAGS) -Cmdocml $(BINLNS) llib-llibmdoc.ln
+llib-lmdoctree.ln: $(TREELNS) llib-llibmdoc.ln
+	$(LINT) $(LINTFLAGS) -Cmdoctree $(TREELNS) llib-llibmdoc.ln
+
+llib-lmdocterm.ln: $(TERMLNS) llib-llibmdoc.ln
+	$(LINT) $(LINTFLAGS) -Cmdocterm $(TERMLNS) llib-llibmdoc.ln
 
 libmdoc.a: $(LIBOBJS)
 	$(AR) rs $@ $(LIBOBJS)
 
-mdocml:	$(BINOBJS) libmdoc.a
-	$(CC) $(CFLAGS) -o $@ $(BINOBJS) libmdoc.a 
+mdocterm: $(TERMOBJS) libmdoc.a
+	$(CC) $(CFLAGS) -o $@ $(TERMOBJS) libmdoc.a 
+
+mdoctree: $(TREEOBJS) libmdoc.a
+	$(CC) $(CFLAGS) -o $@ $(TREEOBJS) libmdoc.a 
 
