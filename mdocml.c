@@ -32,6 +32,9 @@
 
 #define	MD_LINE_SZ	(256)		/* Max input line size. */
 
+typedef	int		(*md_print)(const struct mdoc_node *,
+				const struct mdoc_meta *);
+
 struct	md_parse {
 	int		  warn;		/* Warning flags. */
 #define	MD_WARN_SYNTAX	 (1 << 0)	/* Show syntax warnings. */
@@ -44,6 +47,7 @@ struct	md_parse {
 	u_long		  bufsz;	/* Input buffer size. */
 	char		 *in;		/* Input file name. */
 	int		  fdin;		/* Input file desc. */
+	md_print	  fp;
 };
 
 extern	char	 	 *__progname;
@@ -144,10 +148,25 @@ parse_opts(struct md_parse *p, int argc, char *argv[])
 	extern char	*optarg;
 	extern int	 optind;
 
+	extern int termprint(const struct mdoc_node *, 
+			const struct mdoc_meta *);
+	extern int treeprint(const struct mdoc_node *, 
+			const struct mdoc_meta *);
+
 	p->in = "-";
 
-	while (-1 != (c = getopt(argc, argv, "vW:")))
+	while (-1 != (c = getopt(argc, argv, "f:vW:")))
 		switch (c) {
+		case ('f'):
+			if (0 == strcmp(optarg, "tree")) {
+				p->fp = treeprint;
+				break;
+			} else if (0 == strcmp(optarg, "term")) {
+				p->fp = termprint;
+				break;
+			}
+			warnx("unknown filter: %s", optarg);
+			return(0);
 		case ('v'):
 			p->dbg++;
 			break;
@@ -224,10 +243,7 @@ buf_begin(struct md_parse *p)
 static int
 parse_leave(struct md_parse *p, int code)
 {
-	extern int termprint(const struct mdoc_node *, 
-			const struct mdoc_meta *);
-	/*extern int treeprint(const struct mdoc_node *, 
-			const struct mdoc_meta *);*/
+	md_print	 fp;
 
 	if (NULL == p->mdoc)
 		return(code);
@@ -235,11 +251,10 @@ parse_leave(struct md_parse *p, int code)
 	if ( ! mdoc_endparse(p->mdoc))
 		code = 0;
 
-	/* TODO */
-	if (code && ! termprint(mdoc_node(p->mdoc), mdoc_meta(p->mdoc)))
-		code = 0;
-	/*if (code && ! treeprint(mdoc_node(p->mdoc), mdoc_meta(p->mdoc)))
-		code = 0;*/
+	if (code && (fp = p->fp)) {
+		if ( ! (*fp)(mdoc_node(p->mdoc), mdoc_meta(p->mdoc)))
+			code = 0;
+	}
 
 	mdoc_free(p->mdoc);
 	return(code);
@@ -364,6 +379,7 @@ static void
 usage(void)
 {
 
-	warnx("usage: %s [-v] [-Wwarn...] [infile]", __progname);
+	warnx("usage: %s [-ffilter] [-v] [-Wwarn...] [infile]", 
+			__progname);
 }
 

@@ -91,6 +91,7 @@ decl_pre(termp_ns);
 decl_pre(termp_op);
 decl_pre(termp_pp);
 decl_pre(termp_sh);
+decl_pre(termp_xr);
 
 decl_post(termp_bl);
 decl_post(termp_it);
@@ -144,7 +145,7 @@ const	struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* St */ 
 	{ NULL, NULL }, /* Va */
 	{ NULL, NULL }, /* Vt */ 
-	{ NULL, NULL }, /* Xr */
+	{ termp_xr_pre, NULL }, /* Xr */
 	{ NULL, NULL }, /* %A */
 	{ NULL, NULL }, /* %B */
 	{ NULL, NULL }, /* %D */
@@ -682,7 +683,7 @@ termp_op_post(struct termp *p, const struct mdoc_meta *meta,
 	switch (node->type) {
 	case (MDOC_BODY):
 		p->flags |= TERMP_NOSPACE;
-		word(p, "\\(rB");
+		word(p, "\\]");
 		break;
 	default:
 		break;
@@ -715,6 +716,34 @@ termp_sh_post(struct termp *p, const struct mdoc_meta *meta,
 
 /* ARGSUSED */
 static int
+termp_xr_pre(struct termp *p, const struct mdoc_meta *meta,
+		const struct mdoc_node *node)
+{
+	const struct mdoc_node *n;
+
+	n = node->child;
+	assert(n);
+
+	assert(MDOC_TEXT == n->type);
+	word(p, n->data.text.string);
+
+	if (NULL == (n = n->next)) 
+		return(0);
+
+	assert(MDOC_TEXT == n->type);
+	p->flags |= TERMP_NOSPACE;
+	word(p, "\\(");
+	p->flags |= TERMP_NOSPACE;
+	word(p, n->data.text.string);
+	p->flags |= TERMP_NOSPACE;
+	word(p, "\\)");
+
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
 termp_sh_pre(struct termp *p, const struct mdoc_meta *meta,
 		const struct mdoc_node *node)
 {
@@ -742,7 +771,7 @@ termp_op_pre(struct termp *p, const struct mdoc_meta *meta,
 
 	switch (node->type) {
 	case (MDOC_BODY):
-		word(p, "\\(lB");
+		word(p, "\\[");
 		p->flags |= TERMP_NOSPACE;
 		break;
 	default:
@@ -769,19 +798,22 @@ static void
 termprint_r(struct termp *p, const struct mdoc_meta *meta,
 		const struct mdoc_node *node)
 {
+	int		 dochild;
 
 	/* Pre-processing ----------------- */
+
+	dochild = 1;
 
 	if (MDOC_TEXT != node->type) {
 		if (termacts[node->tok].pre)
 			if ( ! (*termacts[node->tok].pre)(p, meta, node))
-				return;
+				dochild = 0;
 	} else /* MDOC_TEXT == node->type */
 		word(p, node->data.text.string);
 
 	/* Children ---------------------- */
 
-	if (NULL == node->child) {
+	if (dochild && NULL == node->child) {
 		/* No-child processing. */
 		switch (node->type) {
 		case (MDOC_ELEM):
@@ -799,7 +831,7 @@ termprint_r(struct termp *p, const struct mdoc_meta *meta,
 		default:
 			break;
 		}
-	} else
+	} else if (dochild)
 		termprint_r(p, meta, node->child);
 
 	/* Post-processing --------------- */

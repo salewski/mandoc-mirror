@@ -709,6 +709,7 @@ pre_it(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
 	/* TODO: -width attribute must be specified for -tag. */
+	/* TODO: children too big for -width? */
 
 	if (MDOC_BLOCK != node->type)
 		return(1);
