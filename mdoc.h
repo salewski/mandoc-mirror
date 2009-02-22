@@ -413,10 +413,10 @@ struct	mdoc	 *mdoc_alloc(void *data, const struct mdoc_cb *);
 int	 	  mdoc_parseln(struct mdoc *, int, char *buf);
 
 /* Get result first node (after mdoc_endparse!). */
-const struct mdoc_node *mdoc_node(struct mdoc *);
+const struct mdoc_node *mdoc_node(const struct mdoc *);
 
 /* Get result meta-information (after mdoc_endparse!). */
-const struct mdoc_meta *mdoc_meta(struct mdoc *);
+const struct mdoc_meta *mdoc_meta(const struct mdoc *);
 
 /* Signal end of parse sequence (boolean retval). */
 int		  mdoc_endparse(struct mdoc *);

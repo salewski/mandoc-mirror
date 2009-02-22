@@ -221,7 +221,7 @@ static	void		  mdoc_text_free(struct mdoc_text *);
 
 
 const struct mdoc_node *
-mdoc_node(struct mdoc *mdoc)
+mdoc_node(const struct mdoc *mdoc)
 {
 
 	return(mdoc->first);
@@ -229,7 +229,7 @@ mdoc_node(struct mdoc *mdoc)
 
 
 const struct mdoc_meta *
-mdoc_meta(struct mdoc *mdoc)
+mdoc_meta(const struct mdoc *mdoc)
 {
 
 	return(&mdoc->meta);

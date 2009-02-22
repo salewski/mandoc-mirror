@@ -5,9 +5,9 @@ CFLAGS += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
 LIBLNS	= macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
 	  validate.ln action.ln 
 
-TREELNS	= mdoctree.ln tree.ln 
+TREELNS	= mdoctree.ln mmain.ln tree.ln 
 
-TERMLNS	= mdoctree.ln term.ln termact.ln
+TERMLNS	= mdoctree.ln mmain.ln term.ln termact.ln
 
 LNS	= $(LIBLNS) $(TREELNS) $(TERMLNS)
 
@@ -18,16 +18,17 @@ LIBS	= libmdoc.a
 LIBOBJS	= macro.o mdoc.o hash.o strings.o xstd.o argv.o \
 	  validate.o action.o
 
-TERMOBJS= mdocterm.o term.o termact.o
+TERMOBJS= mdocterm.o mmain.o term.o termact.o
 
-TREEOBJS= mdoctree.o tree.o 
+TREEOBJS= mdoctree.o mmain.o tree.o 
 
 OBJS	= $(LIBOBJS) $(TERMOBJS) $(TREEOBJS)
 
 SRCS	= macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
-	  action.c term.c tree.c termact.c mdoctree.c mdocterm.c
+	  action.c term.c tree.c termact.c mdoctree.c mdocterm.c \
+	  mmain.c
 
-HEADS	= mdoc.h private.h term.h
+HEADS	= mdoc.h private.h term.h mmain.h
 
 MANS	= mdoctree.1 mdocterm.1 mdoc.3
 
@@ -137,58 +138,52 @@ uninstall:
 	rm -f $(PREFIX)/include/mdoc.h
 
 macro.ln: macro.c private.h
-
 macro.o: macro.c private.h
 
 tree.ln: tree.c mdoc.h
-
 tree.o: tree.c mdoc.h
 
 term.ln: term.c term.h 
-
 term.o: term.c term.h
 
 termact.ln: termact.c term.h 
-
 termact.o: termact.c term.h
 
 strings.ln: strings.c private.h
-
 strings.o: strings.c private.h
 
 hash.ln: hash.c private.h
-
 hash.o: hash.c private.h
 
 mdoc.ln: mdoc.c private.h
-
 mdoc.o: mdoc.c private.h
 
-mdocterm.ln: mdocterm.c term.h
+mdocterm.ln: mdocterm.c mmain.h
+mdocterm.o: mdocterm.c mmain.h
 
-mdocterm.o: mdocterm.c term.h
-
-mdoctree.ln: mdoctree.c mdoc.h
-
-mdoctree.o: mdoctree.c mdoc.h
+mdoctree.ln: mdoctree.c mmain.h
+mdoctree.o: mdoctree.c mmain.h
 
 xstd.ln: xstd.c private.h
-
 xstd.o: xstd.c private.h
 
 argv.ln: argv.c private.h
-
 argv.o: argv.c private.h
 
 validate.ln: validate.c private.h
-
 validate.o: validate.c private.h
 
 action.ln: action.c private.h
-
 action.o: action.c private.h
 
+mmain.ln: mmain.c mmain.h
+mmain.o: mmain.c mmain.h
+
 private.h: mdoc.h
+
+mmain.h: mdoc.h
+
+term.h: mdoc.h
 
 mdocml-oport-$(VERSION).tar.gz: Makefile.port DESCR
 	mkdir -p .dist/mdocml/pkg

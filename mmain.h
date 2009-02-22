@@ -1,4 +1,4 @@
-	/* $Id$ */
+/* $Id$ */
 /*
  * Copyright (c) 2008 Kristaps Dzonsons <kristaps@kth.se>
  *
@@ -16,45 +16,30 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-#include <assert.h>
-#include <err.h>
-#include <getopt.h>
-#include <stdlib.h>
+#ifndef MMAIN_H
+#define MMAIN_H
 
-#include "mmain.h"
-#include "term.h"
+/* 
+ * This is a convenience library for utilities implementing mdoc(3)
+ * accepting a similar set of command-line patterns.  mmain handles
+ * error reporting (to the terminal), preparing and reading the input
+ * file, and enacting the parse itself.
+ */
 
-int
-main(int argc, char *argv[])
-{
-	struct mmain	*p;
-	const struct mdoc *mdoc;
-	int		 c;
+#include "mdoc.h"
 
-	extern int	 optreset;
-	extern int	 optind;
+__BEGIN_DECLS
 
-	p = mmain_alloc();
+struct	mmain;
 
-	if ( ! mmain_getopt(p, argc, argv, ""))
-		mmain_exit(p, 1);
+struct	mmain		*mmain_alloc(void);
+__dead void		 mmain_exit(struct mmain *, int);
+int			 mmain_getopt(struct mmain *, int, 
+				char *[], const char *);
+int			 mmain_isopt(int);
+struct mdoc		*mmain_mdoc(struct mmain *);
+void			 mmain_usage(const char *);
 
-	optreset = optind = 1;
+__END_DECLS
 
-	while (-1 != (c = getopt(argc, argv, "")))
-		switch (c) {
-		default:
-			mmain_usage("");
-			mmain_exit(p, 1);
-			/* NOTREACHED */
-		}
-
-	if (NULL == (mdoc = mmain_mdoc(p)))
-		mmain_exit(p, 1);
-
-	termprint(mdoc_node(mdoc), mdoc_meta(mdoc));
-	mmain_exit(p, 0);
-	/* NOTREACHED */
-}
-
-
+#endif /*!MMAIN_H*/
