@@ -82,6 +82,18 @@ flushln(struct termp *p)
 		for (j = 0; j < p->offset; j++)
 			putchar(' ');
 
+	/*
+	 * If we're literal, print out verbatim.
+	 */
+	if (p->flags & TERMP_LITERAL) {
+		/* FIXME: count non-printing chars. */
+		for (i = 0; i < p->col; i++)
+			putchar(p->buf[i]);
+		putchar('\n');
+		p->col = 0;
+		return;
+	}
+
 	for (i = 0; i < p->col; i++) {
 		/*
 		 * Count up visible word characters.  Control sequences
@@ -267,9 +279,10 @@ pword(struct termp *p, const char *word, size_t len)
 {
 	size_t		 i;
 
-	assert(len > 0);
+	/*assert(len > 0);*/ /* Can be, if literal. */
 
-	if ( ! (p->flags & TERMP_NOSPACE))
+	if ( ! (p->flags & TERMP_NOSPACE) && 
+			! (p->flags & TERMP_LITERAL))
 		chara(p, ' ');
 
 	p->flags &= ~TERMP_NOSPACE;
@@ -298,11 +311,16 @@ word(struct termp *p, const char *word)
 {
 	size_t 		 i, j, len;
 
-	if (mdoc_isdelim(word))
-		p->flags |= TERMP_NOSPACE;
+	if (p->flags & TERMP_LITERAL) {
+		pword(p, word, strlen(word));
+		return;
+	}
 
 	len = strlen(word);
 	assert(len > 0);
+
+	if (mdoc_isdelim(word))
+		p->flags |= TERMP_NOSPACE;
 
 	/* LINTED */
 	for (j = i = 0; i < len; i++) {

@@ -83,6 +83,7 @@ static	void	 	  name##_post(DECL_ARGS)
 
 DECL_PRE(termp_aq);
 DECL_PRE(termp_ar);
+DECL_PRE(termp_bd);
 DECL_PRE(termp_d1);
 DECL_PRE(termp_dq);
 DECL_PRE(termp_ex);
@@ -97,9 +98,11 @@ DECL_PRE(termp_nm);
 DECL_PRE(termp_ns);
 DECL_PRE(termp_op);
 DECL_PRE(termp_pp);
+DECL_PRE(termp_qq);
 DECL_PRE(termp_sh);
 DECL_PRE(termp_sx);
 DECL_PRE(termp_ud);
+DECL_PRE(termp_va);
 DECL_PRE(termp_vt);
 DECL_PRE(termp_xr);
 
@@ -116,8 +119,10 @@ DECL_POST(termp_ft);
 DECL_POST(termp_it);
 DECL_POST(termp_nm);
 DECL_POST(termp_op);
+DECL_POST(termp_qq);
 DECL_POST(termp_sh);
 DECL_POST(termp_sx);
+DECL_POST(termp_va);
 DECL_POST(termp_vt);
 
 const	struct termact __termacts[MDOC_MAX] = {
@@ -130,7 +135,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_pp_pre, NULL }, /* Pp */ 
 	{ termp_d1_pre, termp_d1_post }, /* D1 */
 	{ NULL, NULL }, /* Dl */
-	{ NULL, NULL }, /* Bd */
+	{ termp_bd_pre, NULL }, /* Bd */
 	{ NULL, NULL }, /* Ed */
 	{ NULL, termp_bl_post }, /* Bl */
 	{ NULL, NULL }, /* El */
@@ -159,7 +164,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Pa */
 	{ NULL, NULL }, /* Rv */
 	{ NULL, NULL }, /* St */ 
-	{ NULL, NULL }, /* Va */
+	{ termp_va_pre, termp_va_post }, /* Va */
 	{ termp_vt_pre, termp_vt_post }, /* Vt */ 
 	{ termp_xr_pre, NULL }, /* Xr */
 	{ NULL, NULL }, /* %A */
@@ -204,7 +209,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Qc */
 	{ NULL, NULL }, /* Ql */
 	{ NULL, NULL }, /* Qo */
-	{ NULL, NULL }, /* Qq */
+	{ termp_qq_pre, termp_qq_post }, /* Qq */
 	{ NULL, NULL }, /* Re */
 	{ NULL, NULL }, /* Rs */
 	{ NULL, NULL }, /* Sc */
@@ -881,6 +886,86 @@ termp_fa_post(DECL_ARGS)
 {
 
 	p->flags &= ~ttypes[TTYPE_FUNC_ARG];
+}
+
+
+/* ARGSUSED */
+static int
+termp_va_pre(DECL_ARGS)
+{
+
+	p->flags |= ttypes[TTYPE_VAR_DECL];
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_va_post(DECL_ARGS)
+{
+
+	p->flags &= ~ttypes[TTYPE_VAR_DECL];
+}
+
+
+/* ARGSUSED */
+static int
+termp_bd_pre(DECL_ARGS)
+{
+	const struct mdoc_block *bl;
+	const struct mdoc_node *n;
+
+	if (MDOC_BLOCK == node->type) {
+		vspace(p);
+		return(1);
+	} else if (MDOC_BODY != node->type)
+		return(1);
+
+	assert(MDOC_BLOCK == node->parent->type);
+
+	bl = &node->parent->data.block;
+	if ( ! arg_hasattr(MDOC_Literal, bl->argc, bl->argv))
+		return(1);
+
+	p->flags |= TERMP_LITERAL;
+
+	for (n = node->child; n; n = n->next) {
+		assert(MDOC_TEXT == n->type); /* FIXME */
+		if ((*n->data.text.string)) {
+			word(p, n->data.text.string);
+			flushln(p);
+		} else
+			vspace(p);
+
+	}
+
+	p->flags &= ~TERMP_LITERAL;
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+termp_qq_pre(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return(1);
+	word(p, "\"");
+	p->flags |= TERMP_NOSPACE;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_qq_post(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return;
+	p->flags |= TERMP_NOSPACE;
+	word(p, "\"");
 }
 
 
