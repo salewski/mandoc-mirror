@@ -38,6 +38,7 @@ struct	mdoc {
 	struct mdoc_node *first;
 	struct mdoc_meta  meta;
 	enum mdoc_sec	  lastnamed;
+	enum mdoc_sec	  lastsec;
 };
 
 

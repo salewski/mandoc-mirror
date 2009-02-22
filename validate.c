@@ -34,9 +34,10 @@ typedef	int	(*v_post)(struct mdoc *);
 
 /* FIXME: some sections should only occur in specific msecs. */
 /* FIXME: ignoring Pp. */
+/* FIXME: .Ef arguments */
 /* FIXME: math symbols. */
-/* FIXME: valid character-escape checks!!!! */
-/* FIXME: make sure required sections are included (NAME, ...). */
+/* FIXME: valid character-escape checks. */
+/* FIXME: .Fd only in synopsis section. */
 
 struct	valids {
 	v_pre	*pre;
@@ -45,17 +46,24 @@ struct	valids {
 
 /* Utility checks. */
 
-static	int	pre_check_parent(struct mdoc *, struct mdoc_node *, 
+static	int	check_parent(struct mdoc *, struct mdoc_node *, 
 			int, enum mdoc_type);
-static	int	pre_check_msecs(struct mdoc *, struct mdoc_node *, 
+static	int	check_msec(struct mdoc *, struct mdoc_node *, 
 			int, enum mdoc_msec *);
-static	int	pre_check_stdarg(struct mdoc *, struct mdoc_node *);
-static	int	post_check_children_count(struct mdoc *);
-static	int	post_check_children_lt(struct mdoc *, const char *, int);
-static	int	post_check_children_gt(struct mdoc *, const char *, int);
-static	int	post_check_children_wgt(struct mdoc *, const char *, int);
-static	int	post_check_children_eq(struct mdoc *, const char *, int);
-static	int	post_check_children_weq(struct mdoc *, const char *, int);
+static	int	check_stdarg(struct mdoc *, struct mdoc_node *);
+static	int	err_child_lt(struct mdoc *, const char *, int);
+static	int	err_child_gt(struct mdoc *, const char *, int);
+static	int	warn_child_gt(struct mdoc *, const char *, int);
+static	int	err_child_eq(struct mdoc *, const char *, int);
+static	int	warn_child_eq(struct mdoc *, const char *, int);
+
+/* Utility auxiliaries. */
+
+static	inline int count_child(struct mdoc *);
+static	inline int warn_count(struct mdoc *, const char *, 
+			int, const char *, int);
+static	inline int err_count(struct mdoc *, const char *, 
+			int, const char *, int);
 
 /* Specific pre-child-parse routines. */
 
@@ -146,121 +154,140 @@ static	v_post	posts_bk[] = { herr_eq0, bwarn_ge1, NULL };
 /* Per-macro pre- and post-child-check routine collections. */
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
-	{ NULL, NULL }, /* \" */
-	{ pres_prologue, posts_text }, /* Dd */
-	{ pres_prologue, NULL }, /* Dt */
-	{ pres_prologue, NULL }, /* Os */
-	{ pres_sh, posts_sh }, /* Sh */ 
-	{ pres_ss, posts_ss }, /* Ss */ 
-	{ NULL, posts_pp }, /* Pp */ 
-	{ pres_d1, posts_wline }, /* D1 */
-	{ pres_d1, posts_wline }, /* Dl */
-	{ pres_bd, posts_bd }, /* Bd */
-	{ NULL, NULL }, /* Ed */
-	{ pres_bl, posts_bl }, /* Bl */ 
-	{ NULL, NULL }, /* El */
-	{ pres_it, posts_it }, /* It */
-	{ NULL, posts_text }, /* Ad */ 
-	{ pres_an, posts_an }, /* An */ 
-	{ NULL, NULL }, /* Ar */
-	{ pres_cd, posts_text }, /* Cd */ 
-	{ NULL, NULL }, /* Cm */
-	{ NULL, posts_text }, /* Dv */ 
-	{ pres_er, posts_text }, /* Er */ 
-	{ NULL, posts_text }, /* Ev */ 
-	{ pres_ex, posts_ex }, /* Ex */ 
-	{ NULL, posts_text }, /* Fa */ 
-	/* FIXME: only in SYNOPSIS section. */
-	{ NULL, posts_wtext }, /* Fd */
-	{ NULL, NULL }, /* Fl */
-	{ NULL, posts_text }, /* Fn */ 
-	{ NULL, posts_wtext }, /* Ft */ 
-	{ NULL, posts_text }, /* Ic */ 
-	{ NULL, posts_in }, /* In */ 
-	{ NULL, posts_text }, /* Li */
-	{ NULL, posts_wtext }, /* Nd */
-	{ NULL, posts_nm }, /* Nm */
-	{ NULL, posts_wline }, /* Op */
-	{ NULL, NULL }, /* Ot */
-	{ NULL, NULL }, /* Pa */
-	{ pres_rv, posts_notext }, /* Rv */
-	{ pres_st, posts_notext }, /* St */ 
-	{ NULL, posts_text }, /* Va */
-	{ NULL, posts_text }, /* Vt */ 
-	{ NULL, posts_xr }, /* Xr */ 
-	{ NULL, posts_text }, /* %A */
-	{ NULL, posts_text }, /* %B */
-	{ NULL, posts_text }, /* %D */
-	{ NULL, posts_text }, /* %I */
-	{ NULL, posts_text }, /* %J */
-	{ NULL, posts_text }, /* %N */
-	{ NULL, posts_text }, /* %O */
-	{ NULL, posts_text }, /* %P */
-	{ NULL, posts_text }, /* %R */
-	{ NULL, posts_text }, /* %T */
-	{ NULL, posts_text }, /* %V */
-	{ NULL, NULL }, /* Ac */
-	{ NULL, NULL }, /* Ao */
-	{ NULL, posts_wline }, /* Aq */
-	{ NULL, posts_at }, /* At */ 
-	{ NULL, NULL }, /* Bc */
-	{ NULL, posts_bf }, /* Bf */
-	{ NULL, NULL }, /* Bo */
-	{ NULL, posts_wline }, /* Bq */
-	{ NULL, NULL }, /* Bsx */
-	{ NULL, NULL }, /* Bx */
-	{ NULL, posts_bool }, /* Db */
-	{ NULL, NULL }, /* Dc */
-	{ NULL, NULL }, /* Do */
-	{ NULL, posts_wline }, /* Dq */
-	{ NULL, NULL }, /* Ec */
-	{ NULL, NULL }, /* Ef */ /* -symbolic, etc. */
-	{ NULL, posts_text }, /* Em */ 
-	{ NULL, NULL }, /* Eo */
-	{ NULL, NULL }, /* Fx */
-	{ NULL, posts_text }, /* Ms */ 
-	{ NULL, posts_notext }, /* No */
-	{ NULL, posts_notext }, /* Ns */
-	{ NULL, NULL }, /* Nx */
-	{ NULL, NULL }, /* Ox */
-	{ NULL, NULL }, /* Pc */
-	{ NULL, NULL }, /* Pf */
-	{ NULL, NULL }, /* Po */
-	{ NULL, posts_wline }, /* Pq */
-	{ NULL, NULL }, /* Qc */
-	{ NULL, posts_wline }, /* Ql */
-	{ NULL, NULL }, /* Qo */
-	{ NULL, posts_wline }, /* Qq */
-	{ NULL, NULL }, /* Re */
-	{ NULL, posts_rs }, /* Rs */
-	{ NULL, NULL }, /* Sc */
-	{ NULL, NULL }, /* So */
-	{ NULL, posts_wline }, /* Sq */
-	{ NULL, posts_bool }, /* Sm */ 
-	{ NULL, posts_text }, /* Sx */
-	{ NULL, posts_text }, /* Sy */
-	{ NULL, posts_text }, /* Tn */
-	{ NULL, NULL }, /* Ux */
-	{ NULL, NULL }, /* Xc */
-	{ NULL, NULL }, /* Xo */
-	{ NULL, posts_fo }, /* Fo */ 
-	{ NULL, NULL }, /* Fc */ 
-	{ NULL, NULL }, /* Oo */
-	{ NULL, NULL }, /* Oc */
-	{ NULL, posts_bk }, /* Bk */
-	{ NULL, NULL }, /* Ek */
-	{ NULL, posts_notext }, /* Bt */
-	{ NULL, NULL }, /* Hf */
-	{ NULL, NULL }, /* Fr */
-	{ NULL, posts_notext }, /* Ud */
+	{ NULL, NULL }, 			/* \" */
+	{ pres_prologue, posts_text },		/* Dd */
+	{ pres_prologue, NULL },		/* Dt */
+	{ pres_prologue, NULL },		/* Os */
+	{ pres_sh, posts_sh },			/* Sh */ 
+	{ pres_ss, posts_ss },			/* Ss */ 
+	{ NULL, posts_pp },			/* Pp */ 
+	{ pres_d1, posts_wline },		/* D1 */
+	{ pres_d1, posts_wline },		/* Dl */
+	{ pres_bd, posts_bd },			/* Bd */
+	{ NULL, NULL },				/* Ed */
+	{ pres_bl, posts_bl },			/* Bl */ 
+	{ NULL, NULL },				/* El */
+	{ pres_it, posts_it },			/* It */
+	{ NULL, posts_text },			/* Ad */ 
+	{ pres_an, posts_an },			/* An */ 
+	{ NULL, NULL },				/* Ar */
+	{ pres_cd, posts_text },		/* Cd */ 
+	{ NULL, NULL },				/* Cm */
+	{ NULL, posts_text },			/* Dv */ 
+	{ pres_er, posts_text },		/* Er */ 
+	{ NULL, posts_text },			/* Ev */ 
+	{ pres_ex, posts_ex },			/* Ex */ 
+	{ NULL, posts_text },			/* Fa */ 
+	{ NULL, posts_wtext },			/* Fd */
+	{ NULL, NULL },				/* Fl */
+	{ NULL, posts_text },			/* Fn */ 
+	{ NULL, posts_wtext },			/* Ft */ 
+	{ NULL, posts_text },			/* Ic */ 
+	{ NULL, posts_in },			/* In */ 
+	{ NULL, posts_text },			/* Li */
+	{ NULL, posts_wtext },			/* Nd */
+	{ NULL, posts_nm },			/* Nm */
+	{ NULL, posts_wline },			/* Op */
+	{ NULL, NULL },				/* Ot */
+	{ NULL, NULL },				/* Pa */
+	{ pres_rv, posts_notext },		/* Rv */
+	{ pres_st, posts_notext },		/* St */ 
+	{ NULL, posts_text },			/* Va */
+	{ NULL, posts_text },			/* Vt */ 
+	{ NULL, posts_xr },			/* Xr */ 
+	{ NULL, posts_text },			/* %A */
+	{ NULL, posts_text },			/* %B */
+	{ NULL, posts_text },			/* %D */
+	{ NULL, posts_text },			/* %I */
+	{ NULL, posts_text },			/* %J */
+	{ NULL, posts_text },			/* %N */
+	{ NULL, posts_text },			/* %O */
+	{ NULL, posts_text },			/* %P */
+	{ NULL, posts_text },			/* %R */
+	{ NULL, posts_text },			/* %T */
+	{ NULL, posts_text },			/* %V */
+	{ NULL, NULL },				/* Ac */
+	{ NULL, NULL },				/* Ao */
+	{ NULL, posts_wline },			/* Aq */
+	{ NULL, posts_at },			/* At */ 
+	{ NULL, NULL },				/* Bc */
+	{ NULL, posts_bf },			/* Bf */
+	{ NULL, NULL },				/* Bo */
+	{ NULL, posts_wline },			/* Bq */
+	{ NULL, NULL },				/* Bsx */
+	{ NULL, NULL },				/* Bx */
+	{ NULL, posts_bool },			/* Db */
+	{ NULL, NULL },				/* Dc */
+	{ NULL, NULL },				/* Do */
+	{ NULL, posts_wline },			/* Dq */
+	{ NULL, NULL },				/* Ec */
+	{ NULL, NULL },				/* Ef */ 
+	{ NULL, posts_text },			/* Em */ 
+	{ NULL, NULL },				/* Eo */
+	{ NULL, NULL },				/* Fx */
+	{ NULL, posts_text },			/* Ms */ 
+	{ NULL, posts_notext },			/* No */
+	{ NULL, posts_notext },			/* Ns */
+	{ NULL, NULL },				/* Nx */
+	{ NULL, NULL },				/* Ox */
+	{ NULL, NULL },				/* Pc */
+	{ NULL, NULL },				/* Pf */
+	{ NULL, NULL },				/* Po */
+	{ NULL, posts_wline },			/* Pq */
+	{ NULL, NULL },				/* Qc */
+	{ NULL, posts_wline },			/* Ql */
+	{ NULL, NULL },				/* Qo */
+	{ NULL, posts_wline },			/* Qq */
+	{ NULL, NULL },				/* Re */
+	{ NULL, posts_rs },			/* Rs */
+	{ NULL, NULL },				/* Sc */
+	{ NULL, NULL },				/* So */
+	{ NULL, posts_wline },			/* Sq */
+	{ NULL, posts_bool },			/* Sm */ 
+	{ NULL, posts_text },			/* Sx */
+	{ NULL, posts_text },			/* Sy */
+	{ NULL, posts_text },			/* Tn */
+	{ NULL, NULL },				/* Ux */
+	{ NULL, NULL },				/* Xc */
+	{ NULL, NULL },				/* Xo */
+	{ NULL, posts_fo },			/* Fo */ 
+	{ NULL, NULL },				/* Fc */ 
+	{ NULL, NULL },				/* Oo */
+	{ NULL, NULL },				/* Oc */
+	{ NULL, posts_bk },			/* Bk */
+	{ NULL, NULL },				/* Ek */
+	{ NULL, posts_notext },			/* Bt */
+	{ NULL, NULL },				/* Hf */
+	{ NULL, NULL },				/* Fr */
+	{ NULL, posts_notext },			/* Ud */
 };
 
 
-static int
-post_check_children_count(struct mdoc *mdoc)
+static inline int
+warn_count(struct mdoc *m, const char *k, 
+		int want, const char *v, int has)
 {
-	struct mdoc_node *n;
+
+	return(mdoc_warn(m, WARN_SYNTAX, "suggests %s %d %s "
+				"(has %d)", v, want, k, has));
+}
+
+
+static inline int
+err_count(struct mdoc *m, const char *k,
+		int want, const char *v, int has)
+{
+
+	return(mdoc_err(m, "requires %s %d %s (has %d)",
+				v, want, k, has));
+}
+
+
+static inline int
+count_child(struct mdoc *mdoc)
+{
 	int		  i;
+	struct mdoc_node *n;
 
 	for (i = 0, n = mdoc->last->child; n; n = n->next, i++)
 		/* Do nothing */ ;
@@ -269,72 +296,68 @@ post_check_children_count(struct mdoc *mdoc)
 
 
 static int
-post_check_children_wgt(struct mdoc *mdoc, const char *p, int sz)
+warn_child_gt(struct mdoc *mdoc, const char *p, int sz)
 {
 	int		  i;
 
-	if ((i = post_check_children_count(mdoc)) > sz)
+	if ((i = count_child(mdoc)) > sz)
 		return(1);
-	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests more "
-				"than %d %s (has %d)", sz, p, i));
+	return(warn_count(mdoc, ">", sz, p, i));
 }
 
 
 static int
-post_check_children_gt(struct mdoc *mdoc, const char *p, int sz)
+err_child_gt(struct mdoc *mdoc, const char *p, int sz)
 {
 	int		  i;
 
-	if ((i = post_check_children_count(mdoc)) > sz)
+	if ((i = count_child(mdoc)) > sz)
 		return(1);
-	return(mdoc_err(mdoc, "macro requires more than %d "
-				"%s (has %d)", sz, p, i));
+	return(err_count(mdoc, ">", sz, p, i));
 }
 
 
 static int
-post_check_children_weq(struct mdoc *mdoc, const char *p, int sz)
+warn_child_eq(struct mdoc *mdoc, const char *p, int sz)
 {
 	int		  i;
 
-	if ((i = post_check_children_count(mdoc)) == sz)
+	if ((i = count_child(mdoc)) == sz)
 		return(1);
-	return(mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests %d "
-				"%s (has %d)", sz, p, i));
+	return(warn_count(mdoc, "==", sz, p, i));
 }
 
 
 static int
-post_check_children_eq(struct mdoc *mdoc, const char *p, int sz)
+err_child_eq(struct mdoc *mdoc, const char *p, int sz)
 {
 	int		  i;
 
-	if ((i = post_check_children_count(mdoc)) == sz)
+	if ((i = count_child(mdoc)) == sz)
 		return(1);
-	return(mdoc_err(mdoc, "macro requires %d %s "
-				"(have %d)", sz, p, i));
+	return(err_count(mdoc, "==", sz, p, i));
 }
 
 
 static int
-post_check_children_lt(struct mdoc *mdoc, const char *p, int sz)
+err_child_lt(struct mdoc *mdoc, const char *p, int sz)
 {
 	int		  i;
 
-	if ((i = post_check_children_count(mdoc)) < sz)
+	if ((i = count_child(mdoc)) < sz)
 		return(1);
-	return(mdoc_err(mdoc, "macro requires less than %d "
-				"%s (have %d)", sz, p, i));
+	return(err_count(mdoc, "<", sz, p, i));
 }
 
 
 static int
-pre_check_stdarg(struct mdoc *mdoc, struct mdoc_node *node)
+check_stdarg(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
-	if (1 == node->data.elem.argc &&
-			MDOC_Std == node->data.elem.argv[0].arg)
+	if (MDOC_Std == node->data.elem.argv[0].arg && 
+			1 == node->data.elem.argc)
 		return(1);
+
 	return(mdoc_nwarn(mdoc, node, WARN_COMPAT, 
 				"macro suggests single `%s' argument",
 				mdoc_argnames[MDOC_Std]));
@@ -342,7 +365,7 @@ pre_check_stdarg(struct mdoc *mdoc, struct mdoc_node *node)
 
 
 static int
-pre_check_msecs(struct mdoc *mdoc, struct mdoc_node *node, 
+check_msec(struct mdoc *mdoc, struct mdoc_node *node, 
 		int sz, enum mdoc_msec *msecs)
 {
 	int		 i;
@@ -356,19 +379,20 @@ pre_check_msecs(struct mdoc *mdoc, struct mdoc_node *node,
 
 
 static int
-pre_check_parent(struct mdoc *mdoc, struct mdoc_node *node, 
-		int tok, enum mdoc_type type)
+check_parent(struct mdoc *mdoc, struct mdoc_node *n, 
+		int tok, enum mdoc_type t)
 {
 
-	if (type != node->parent->type) 
-		return(mdoc_nerr(mdoc, node, "invalid macro parent class %s, expected %s", 
-					mdoc_type2a(node->parent->type),
-					mdoc_type2a(type)));
-	if (MDOC_ROOT != type && tok != node->parent->tok)
-		return(mdoc_nerr(mdoc, node, "invalid macro parent `%s', expected `%s'", 
-					mdoc_macronames[node->parent->tok],
-					mdoc_macronames[tok]));
-	return(1);
+	assert(n->parent);
+	if ((MDOC_ROOT == t || tok == n->parent->tok) &&
+			(t == n->parent->type))
+		return(1);
+
+	return(mdoc_nerr(mdoc, n, "require parent %s (have %s)", 
+			MDOC_ROOT == t ? "<root>" :
+			mdoc_macronames[tok],
+			MDOC_ROOT == n->parent->type ? "<root>" :
+			mdoc_macronames[n->parent->type]));
 }
 
 
@@ -378,7 +402,7 @@ bwarn_ge1(struct mdoc *mdoc)
 
 	if (MDOC_BODY != mdoc->last->type)
 		return(1);
-	return(post_check_children_wgt(mdoc, "body children", 0));
+	return(warn_child_gt(mdoc, "multi-line parameters", 0));
 }
 
 
@@ -387,7 +411,7 @@ ewarn_eq1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_weq(mdoc, "parameters", 1));
+	return(warn_child_eq(mdoc, "line parameters", 1));
 }
 
 
@@ -396,7 +420,7 @@ ewarn_eq0(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_weq(mdoc, "parameters", 0));
+	return(warn_child_eq(mdoc, "line parameters", 0));
 }
 
 
@@ -405,7 +429,7 @@ ewarn_ge1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_wgt(mdoc, "parameters", 0));
+	return(warn_child_gt(mdoc, "line parameters", 0));
 }
 
 
@@ -414,7 +438,7 @@ eerr_eq1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_eq(mdoc, "parameters", 1));
+	return(err_child_eq(mdoc, "line parameters", 1));
 }
 
 
@@ -423,7 +447,7 @@ eerr_le2(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_lt(mdoc, "parameters", 3));
+	return(err_child_lt(mdoc, "line parameters", 3));
 }
 
 
@@ -432,7 +456,7 @@ eerr_le1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_lt(mdoc, "parameters", 2));
+	return(err_child_lt(mdoc, "line parameters", 2));
 }
 
 
@@ -441,7 +465,7 @@ eerr_eq0(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_eq(mdoc, "parameters", 0));
+	return(err_child_eq(mdoc, "line parameters", 0));
 }
 
 
@@ -450,7 +474,7 @@ eerr_ge1(struct mdoc *mdoc)
 {
 
 	assert(MDOC_ELEM == mdoc->last->type);
-	return(post_check_children_gt(mdoc, "parameters", 0));
+	return(err_child_gt(mdoc, "line parameters", 0));
 }
 
 
@@ -460,7 +484,7 @@ herr_eq0(struct mdoc *mdoc)
 
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
-	return(post_check_children_eq(mdoc, "parameters", 0));
+	return(err_child_eq(mdoc, "line parameters", 0));
 }
 
 
@@ -469,7 +493,7 @@ herr_le1(struct mdoc *mdoc)
 {
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
-	return(post_check_children_lt(mdoc, "parameters", 2));
+	return(err_child_lt(mdoc, "line parameters", 2));
 }
 
 
@@ -479,7 +503,7 @@ herr_ge1(struct mdoc *mdoc)
 
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
-	return(post_check_children_gt(mdoc, "parameters", 0));
+	return(err_child_gt(mdoc, "line parameters", 0));
 }
 
 
@@ -613,7 +637,7 @@ pre_ss(struct mdoc *mdoc, struct mdoc_node *node)
 
 	if (MDOC_BLOCK != node->type)
 		return(1);
-	return(pre_check_parent(mdoc, node, MDOC_Sh, MDOC_BODY));
+	return(check_parent(mdoc, node, MDOC_Sh, MDOC_BODY));
 }
 
 
@@ -623,7 +647,7 @@ pre_sh(struct mdoc *mdoc, struct mdoc_node *node)
 
 	if (MDOC_BLOCK != node->type)
 		return(1);
-	return(pre_check_parent(mdoc, node, -1, MDOC_ROOT));
+	return(check_parent(mdoc, node, -1, MDOC_ROOT));
 }
 
 
@@ -661,9 +685,9 @@ pre_rv(struct mdoc *mdoc, struct mdoc_node *node)
 
 	msecs[0] = MSEC_2;
 	msecs[1] = MSEC_3;
-	if ( ! pre_check_msecs(mdoc, node, 2, msecs))
+	if ( ! check_msec(mdoc, node, 2, msecs))
 		return(0);
-	return(pre_check_stdarg(mdoc, node));
+	return(check_stdarg(mdoc, node));
 }
 
 
@@ -678,9 +702,9 @@ pre_ex(struct mdoc *mdoc, struct mdoc_node *node)
 	msecs[0] = MSEC_1;
 	msecs[1] = MSEC_6;
 	msecs[2] = MSEC_8;
-	if ( ! pre_check_msecs(mdoc, node, 3, msecs))
+	if ( ! check_msec(mdoc, node, 3, msecs))
 		return(0);
-	return(pre_check_stdarg(mdoc, node));
+	return(check_stdarg(mdoc, node));
 }
 
 
@@ -690,7 +714,7 @@ pre_er(struct mdoc *mdoc, struct mdoc_node *node)
 	enum mdoc_msec	 msecs[1];
 
 	msecs[0] = MSEC_2;
-	return(pre_check_msecs(mdoc, node, 1, msecs));
+	return(check_msec(mdoc, node, 1, msecs));
 }
 
 
@@ -700,7 +724,7 @@ pre_cd(struct mdoc *mdoc, struct mdoc_node *node)
 	enum mdoc_msec	 msecs[1];
 
 	msecs[0] = MSEC_4;
-	return(pre_check_msecs(mdoc, node, 1, msecs));
+	return(check_msec(mdoc, node, 1, msecs));
 }
 
 
@@ -713,7 +737,7 @@ pre_it(struct mdoc *mdoc, struct mdoc_node *node)
 
 	if (MDOC_BLOCK != node->type)
 		return(1);
-	return(pre_check_parent(mdoc, node, MDOC_Bl, MDOC_BODY));
+	return(check_parent(mdoc, node, MDOC_Bl, MDOC_BODY));
 }
 
 
@@ -1102,22 +1126,40 @@ post_sh_body(struct mdoc *mdoc)
 	struct mdoc_node *n;
 
 	assert(MDOC_Sh == mdoc->last->tok);
+	assert(MDOC_BODY == mdoc->last->type);
 	if (SEC_NAME != mdoc->lastnamed)
 		return(1);
 
+	/*
+	 * Warn if the NAME section doesn't contain the `Nm' and `Nd'
+	 * macros (can have multiple `Nm' and one `Nd').  Note that the
+	 * children of the BODY declaration can also be "text".
+	 */
+
 	if (NULL == (n = mdoc->last->child))
-		return(mdoc_err(mdoc, "section NAME must contain %s as the first body child", mdoc_macronames[MDOC_Nm]));
-	if (MDOC_ELEM != n->type || MDOC_Nm != n->tok)
-		return(mdoc_err(mdoc, "section NAME must contain %s as the first body child", mdoc_macronames[MDOC_Nm]));
-	if (NULL == (n = n->next))
-		return(mdoc_err(mdoc, "section NAME must contain %s as the second body child", mdoc_macronames[MDOC_Nd]));
-	if (MDOC_ELEM != n->type || MDOC_Nd != n->tok)
-		return(mdoc_err(mdoc, "section NAME must contain %s as the second body child", mdoc_macronames[MDOC_Nd]));
-	if (NULL == (n = n->next))
+		return(mdoc_warn(mdoc, WARN_COMPAT, "section NAME "
+					"should contain %s and %s", 
+					mdoc_macronames[MDOC_Nm],
+					mdoc_macronames[MDOC_Nd]));
+
+	for ( ; n && n->next; n = n->next) {
+		if (MDOC_ELEM == n->type && MDOC_Nm == n->tok)
+			continue;
+		if (MDOC_TEXT == n->type)
+			continue;
+		if ( ! (mdoc_nwarn(mdoc, n, WARN_COMPAT, "section "
+					"NAME should contain %s as "
+					"initial body child", 
+					mdoc_macronames[MDOC_Nm])))
+			return(0);
+	}
+
+	if (MDOC_ELEM == n->type && MDOC_Nd == n->tok)
 		return(1);
 
-	return(mdoc_warn(mdoc, WARN_SYNTAX, "section NAME usually limited to %s and %s body children",
-				mdoc_macronames[MDOC_Nm], mdoc_macronames[MDOC_Nd]));
+	return(mdoc_warn(mdoc, WARN_COMPAT, "section NAME should "
+				"contain %s as the last child",
+				mdoc_macronames[MDOC_Nd]));
 }
 
 

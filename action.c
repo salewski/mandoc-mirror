@@ -194,6 +194,7 @@ post_sh(struct mdoc *mdoc)
 	if (xstrlcats(buf, mdoc->last->child, 64)) {
 		if (SEC_CUSTOM != (sec = mdoc_atosec(buf)))
 			mdoc->lastnamed = sec;
+		mdoc->lastsec = sec;
 		return(1);
 	}
 

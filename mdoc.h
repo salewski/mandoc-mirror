@@ -382,7 +382,7 @@ struct	mdoc_node {
 #define	MDOC_ACTED	 (1 << 1)
 	enum mdoc_type	  type;
 	union mdoc_data	  data;
-	/* FIXME: have an enum mdoc_sec. */
+	enum mdoc_sec	  sec;
 };
 
 /* Call-backs for parse messages. */

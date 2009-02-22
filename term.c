@@ -24,6 +24,10 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef __linux__
+#include <time.h>
+#endif
+
 #include "term.h"
 
 enum	termstyle {
@@ -46,6 +50,10 @@ static	void		  pescape(struct termp *,
 static	void		  chara(struct termp *, char);
 static	void		  style(struct termp *, enum termstyle);
 
+#ifdef __linux__
+extern	size_t		  strlcat(char *, const char *, size_t);
+extern	size_t		  strlcpy(char *, const char *, size_t);
+#endif
 
 void
 flushln(struct termp *p)
@@ -363,7 +371,12 @@ termprint_footer(struct termp *p, const struct mdoc_meta *meta)
 		err(1, "malloc");
 
 	tm = localtime(&meta->date);
+
+#ifdef __linux__
+	if (0 == strftime(buf, p->rmargin, "%B %d, %Y", tm))
+#else
 	if (NULL == strftime(buf, p->rmargin, "%B %d, %Y", tm))
+#endif
 		err(1, "strftime");
 
 	osz = strlcpy(os, meta->os, p->rmargin);

@@ -22,11 +22,24 @@
 
 #include "term.h"
 
+#define	INDENT		  4
+
+/*
+ * Performs actions on nodes of the abstract syntax tree.  Both pre- and
+ * post-fix operations are defined here.
+ */
+
 #define	TTYPE_PROG	  0
 #define	TTYPE_CMD_FLAG	  1
 #define	TTYPE_CMD_ARG	  2
 #define	TTYPE_SECTION	  3
-#define	TTYPE_NMAX	  4
+#define	TTYPE_FUNC_DECL	  4
+#define	TTYPE_VAR_DECL	  5
+#define	TTYPE_FUNC_TYPE	  6
+#define	TTYPE_FUNC_NAME	  7
+#define	TTYPE_FUNC_ARG	  8
+#define	TTYPE_LINK	  9
+#define	TTYPE_NMAX	  10
 
 /* 
  * These define "styles" for element types, like command arguments or
@@ -38,13 +51,20 @@ const	int ttypes[TTYPE_NMAX] = {
 	TERMP_BOLD,		/* TTYPE_PROG */
 	TERMP_BOLD,		/* TTYPE_CMD_FLAG */
 	TERMP_UNDERLINE, 	/* TTYPE_CMD_ARG */
-	TERMP_BOLD 		/* TTYPE_SECTION */
+	TERMP_BOLD, 		/* TTYPE_SECTION */
+	TERMP_BOLD,		/* TTYPE_FUNC_DECL */
+	TERMP_UNDERLINE,	/* TTYPE_VAR_DECL */
+	TERMP_UNDERLINE,	/* TTYPE_FUNC_TYPE */
+	TERMP_BOLD, 		/* TTYPE_FUNC_NAME */
+	TERMP_UNDERLINE, 	/* TTYPE_FUNC_ARG */
+	TERMP_UNDERLINE 	/* TTYPE_LINK */
 };
 
 static	int		  arg_hasattr(int, size_t, 
 				const struct mdoc_arg *);
 static	int		  arg_getattr(int, size_t, 
 				const struct mdoc_arg *);
+static	size_t		  arg_offset(const char *);
 
 /*
  * What follows describes prefix and postfix operations for the abstract
@@ -66,7 +86,11 @@ DECL_PRE(termp_ar);
 DECL_PRE(termp_d1);
 DECL_PRE(termp_dq);
 DECL_PRE(termp_ex);
+DECL_PRE(termp_fa);
+DECL_PRE(termp_fd);
 DECL_PRE(termp_fl);
+DECL_PRE(termp_fn);
+DECL_PRE(termp_ft);
 DECL_PRE(termp_it);
 DECL_PRE(termp_nd);
 DECL_PRE(termp_nm);
@@ -74,7 +98,9 @@ DECL_PRE(termp_ns);
 DECL_PRE(termp_op);
 DECL_PRE(termp_pp);
 DECL_PRE(termp_sh);
+DECL_PRE(termp_sx);
 DECL_PRE(termp_ud);
+DECL_PRE(termp_vt);
 DECL_PRE(termp_xr);
 
 DECL_POST(termp_aq);
@@ -82,11 +108,17 @@ DECL_POST(termp_ar);
 DECL_POST(termp_bl);
 DECL_POST(termp_d1);
 DECL_POST(termp_dq);
+DECL_POST(termp_fa);
+DECL_POST(termp_fd);
 DECL_POST(termp_fl);
+DECL_POST(termp_fn);
+DECL_POST(termp_ft);
 DECL_POST(termp_it);
 DECL_POST(termp_nm);
 DECL_POST(termp_op);
 DECL_POST(termp_sh);
+DECL_POST(termp_sx);
+DECL_POST(termp_vt);
 
 const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* \" */
@@ -112,11 +144,11 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Er */ 
 	{ NULL, NULL }, /* Ev */ 
 	{ termp_ex_pre, NULL }, /* Ex */
-	{ NULL, NULL }, /* Fa */ 
-	{ NULL, NULL }, /* Fd */ 
+	{ termp_fa_pre, termp_fa_post }, /* Fa */ 
+	{ termp_fd_pre, termp_fd_post }, /* Fd */ 
 	{ termp_fl_pre, termp_fl_post }, /* Fl */
-	{ NULL, NULL }, /* Fn */ 
-	{ NULL, NULL }, /* Ft */ 
+	{ termp_fn_pre, termp_fn_post }, /* Fn */ 
+	{ termp_ft_pre, termp_ft_post }, /* Ft */ 
 	{ NULL, NULL }, /* Ic */ 
 	{ NULL, NULL }, /* In */ 
 	{ NULL, NULL }, /* Li */
@@ -128,7 +160,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Rv */
 	{ NULL, NULL }, /* St */ 
 	{ NULL, NULL }, /* Va */
-	{ NULL, NULL }, /* Vt */ 
+	{ termp_vt_pre, termp_vt_post }, /* Vt */ 
 	{ termp_xr_pre, NULL }, /* Xr */
 	{ NULL, NULL }, /* %A */
 	{ NULL, NULL }, /* %B */
@@ -179,7 +211,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* So */
 	{ NULL, NULL }, /* Sq */
 	{ NULL, NULL }, /* Sm */
-	{ NULL, NULL }, /* Sx */
+	{ termp_sx_pre, termp_sx_post }, /* Sx */
 	{ NULL, NULL }, /* Sy */
 	{ NULL, NULL }, /* Tn */
 	{ NULL, NULL }, /* Ux */
@@ -198,6 +230,39 @@ const	struct termact __termacts[MDOC_MAX] = {
 };
 
 const struct termact *termacts = __termacts;
+
+
+static size_t
+arg_offset(const char *v)
+{
+	if (0 == strcmp(v, "indent"))
+		return(INDENT);
+	if (0 == strcmp(v, "indent-two"))
+		return(INDENT * 2);
+
+	/* TODO */
+	return(0);
+}
+
+
+static int
+arg_hasattr(int arg, size_t argc, const struct mdoc_arg *argv)
+{
+
+	return(-1 != arg_getattr(arg, argc, argv));
+}
+
+
+static int
+arg_getattr(int arg, size_t argc, const struct mdoc_arg *argv)
+{
+	int		 i;
+
+	for (i = 0; i < (int)argc; i++) 
+		if (argv[i].arg == arg)
+			return(i);
+	return(-1);
+}
 
 
 /* ARGSUSED */
@@ -280,6 +345,18 @@ termp_it_post(DECL_ARGS)
 			p->offset -= width + 1;
 			p->flags &= ~TERMP_NOLPAD;
 		}
+		return;
+	}
+
+	if (arg_hasattr(MDOC_Ohang, bl->argc, bl->argv)) {
+		i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
+		assert(i >= 0);
+		assert(1 == bl->argv[i].sz);
+		width = arg_offset(*bl->argv[i].value);
+
+		flushln(p);
+		p->offset -= width + 1;
+		return;
 	}
 }
 
@@ -351,6 +428,20 @@ termp_it_pre(DECL_ARGS)
 			p->flags |= TERMP_NOLPAD;
 			p->offset += width + 1;
 		}
+		return(1);
+	}
+
+	/* If `-ohang', adjust left-margin. */
+
+	if (arg_hasattr(MDOC_Ohang, bl->argc, bl->argv)) {
+		i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
+		assert(i >= 0);
+		assert(1 == bl->argv[i].sz);
+		width = arg_offset(*bl->argv[i].value);
+
+		p->flags |= TERMP_NOSPACE;
+		p->offset += width + 1;
+		return(1);
 	}
 
 	return(1);
@@ -492,7 +583,7 @@ termp_sh_post(DECL_ARGS)
 		break;
 	case (MDOC_BODY):
 		newln(p);
-		p->offset -= 4;
+		p->offset -= INDENT;
 		break;
 	default:
 		break;
@@ -529,6 +620,54 @@ termp_xr_pre(DECL_ARGS)
 
 /* ARGSUSED */
 static int
+termp_vt_pre(DECL_ARGS)
+{
+
+	/* FIXME: this can be "type name". */
+	p->flags |= ttypes[TTYPE_VAR_DECL];
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_vt_post(DECL_ARGS)
+{
+
+	p->flags &= ~ttypes[TTYPE_VAR_DECL];
+	if (node->sec == SEC_SYNOPSIS)
+		vspace(p);
+}
+
+
+/* ARGSUSED */
+static int
+termp_fd_pre(DECL_ARGS)
+{
+
+	/* 
+	 * FIXME: this naming is bad.  This value is used, in general,
+	 * for the #include header or other preprocessor statement.
+	 */
+	p->flags |= ttypes[TTYPE_FUNC_DECL];
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_fd_post(DECL_ARGS)
+{
+
+	p->flags &= ~ttypes[TTYPE_FUNC_DECL];
+	if (node->sec == SEC_SYNOPSIS)
+		vspace(p);
+
+}
+
+
+/* ARGSUSED */
+static int
 termp_sh_pre(DECL_ARGS)
 {
 
@@ -538,7 +677,7 @@ termp_sh_pre(DECL_ARGS)
 		p->flags |= ttypes[TTYPE_SECTION];
 		break;
 	case (MDOC_BODY):
-		p->offset += 4;
+		p->offset += INDENT;
 		break;
 	default:
 		break;
@@ -594,7 +733,7 @@ termp_d1_pre(DECL_ARGS)
 	if (MDOC_BODY != node->type)
 		return(1);
 	newln(p);
-	p->offset += 4;
+	p->offset += INDENT;
 	return(1);
 }
 
@@ -607,7 +746,7 @@ termp_d1_post(DECL_ARGS)
 	if (MDOC_BODY != node->type) 
 		return;
 	newln(p);
-	p->offset -= 4;
+	p->offset -= INDENT;
 }
 
 
@@ -636,22 +775,112 @@ termp_aq_post(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
 static int
-arg_hasattr(int arg, size_t argc, const struct mdoc_arg *argv)
+termp_ft_pre(DECL_ARGS)
 {
 
-	return(-1 != arg_getattr(arg, argc, argv));
+	p->flags |= ttypes[TTYPE_FUNC_TYPE];
+	return(1);
 }
 
 
-static int
-arg_getattr(int arg, size_t argc, const struct mdoc_arg *argv)
+/* ARGSUSED */
+static void
+termp_ft_post(DECL_ARGS)
 {
-	int		 i;
 
-	for (i = 0; i < (int)argc; i++) 
-		if (argv[i].arg == arg)
-			return(i);
-	return(-1);
+	p->flags &= ~ttypes[TTYPE_FUNC_TYPE];
+	if (node->sec == SEC_SYNOPSIS)
+		newln(p);
+
 }
+
+
+/* ARGSUSED */
+static int
+termp_fn_pre(DECL_ARGS)
+{
+	const struct mdoc_node *n;
+
+	assert(node->child);
+	assert(MDOC_TEXT == node->child->type);
+
+	/* FIXME: can be "type funcname" "type varname"... */
+
+	p->flags |= ttypes[TTYPE_FUNC_NAME];
+	word(p, node->child->data.text.string);
+	p->flags &= ~ttypes[TTYPE_FUNC_NAME];
+
+	p->flags |= TERMP_NOSPACE;
+	word(p, "(");
+
+	p->flags |= TERMP_NOSPACE;
+	for (n = node->child->next; n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
+		p->flags |= ttypes[TTYPE_FUNC_ARG];
+		word(p, n->data.text.string);
+		p->flags &= ~ttypes[TTYPE_FUNC_ARG];
+		if ((n->next))
+			word(p, ",");
+	}
+
+	p->flags |= TERMP_NOSPACE;
+	word(p, ")");
+
+	if (SEC_SYNOPSIS == node->sec)
+		word(p, ";");
+
+	return(0);
+}
+
+
+/* ARGSUSED */
+static void
+termp_fn_post(DECL_ARGS)
+{
+
+	if (node->sec == SEC_SYNOPSIS)
+		vspace(p);
+
+}
+
+
+/* ARGSUSED */
+static int
+termp_sx_pre(DECL_ARGS)
+{
+
+	p->flags |= ttypes[TTYPE_LINK];
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_sx_post(DECL_ARGS)
+{
+
+	p->flags &= ~ttypes[TTYPE_LINK];
+}
+
+
+/* ARGSUSED */
+static int
+termp_fa_pre(DECL_ARGS)
+{
+
+	p->flags |= ttypes[TTYPE_FUNC_ARG];
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_fa_post(DECL_ARGS)
+{
+
+	p->flags &= ~ttypes[TTYPE_FUNC_ARG];
+}
+
 
