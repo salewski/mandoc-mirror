@@ -64,6 +64,7 @@ which may be
 for stdin.
 .El
 .\" PARAGRAPH
+.Pp
 The
 .Nm
 utility is a formatting front-end for
@@ -94,6 +95,11 @@ To display this manual page:
 .\" PARAGRAPH
 .Pp
 .D1 % mdocmterm \-Wall,error mdocmterm.1 
+.\" PARAGRAPH
+.Pp
+To pipe a manual page to the pager:
+.Pp
+.D1 % mdocterm mdocterm.1 | less -R
 .\" SECTION
 .Sh SEE ALSO
 .Xr mdoctree 1 ,
