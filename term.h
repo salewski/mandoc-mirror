@@ -36,6 +36,7 @@ struct	termp {
 #define	TERMP_NOLPAD	 (1 << 3)	/* No leftpad before flush. */
 #define	TERMP_NOBREAK	 (1 << 4)	/* No break after flush. */
 #define	TERMP_LITERAL	 (1 << 5)	/* Literal words. */
+#define	TERMP_IGNDELIM	 (1 << 6)	/* Delims like regulars. */
 	char		 *buf;
 };
 

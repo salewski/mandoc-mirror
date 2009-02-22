@@ -319,8 +319,11 @@ word(struct termp *p, const char *word)
 	len = strlen(word);
 	assert(len > 0);
 
-	if (mdoc_isdelim(word))
-		p->flags |= TERMP_NOSPACE;
+	if (mdoc_isdelim(word)) {
+		if ( ! (p->flags & TERMP_IGNDELIM))
+			p->flags |= TERMP_NOSPACE;
+		p->flags &= ~TERMP_IGNDELIM;
+	}
 
 	/* LINTED */
 	for (j = i = 0; i < len; i++) {

@@ -96,10 +96,14 @@ DECL_PRE(termp_it);
 DECL_PRE(termp_nd);
 DECL_PRE(termp_nm);
 DECL_PRE(termp_ns);
+DECL_PRE(termp_nx);
 DECL_PRE(termp_op);
+DECL_PRE(termp_ox);
+DECL_PRE(termp_pf);
 DECL_PRE(termp_pp);
 DECL_PRE(termp_qq);
 DECL_PRE(termp_sh);
+DECL_PRE(termp_sq);
 DECL_PRE(termp_sx);
 DECL_PRE(termp_ud);
 DECL_PRE(termp_va);
@@ -119,8 +123,10 @@ DECL_POST(termp_ft);
 DECL_POST(termp_it);
 DECL_POST(termp_nm);
 DECL_POST(termp_op);
+DECL_POST(termp_pf);
 DECL_POST(termp_qq);
 DECL_POST(termp_sh);
+DECL_POST(termp_sq);
 DECL_POST(termp_sx);
 DECL_POST(termp_va);
 DECL_POST(termp_vt);
@@ -200,10 +206,10 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ms */
 	{ NULL, NULL }, /* No */
 	{ termp_ns_pre, NULL }, /* Ns */
-	{ NULL, NULL }, /* Nx */
-	{ NULL, NULL }, /* Ox */
+	{ termp_nx_pre, NULL }, /* Nx */
+	{ termp_ox_pre, NULL }, /* Ox */
 	{ NULL, NULL }, /* Pc */
-	{ NULL, NULL }, /* Pf */
+	{ termp_pf_pre, termp_pf_post }, /* Pf */
 	{ NULL, NULL }, /* Po */
 	{ NULL, NULL }, /* Pq */
 	{ NULL, NULL }, /* Qc */
@@ -214,7 +220,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Rs */
 	{ NULL, NULL }, /* Sc */
 	{ NULL, NULL }, /* So */
-	{ NULL, NULL }, /* Sq */
+	{ termp_sq_pre, termp_sq_post }, /* Sq */
 	{ NULL, NULL }, /* Sm */
 	{ termp_sx_pre, termp_sx_post }, /* Sx */
 	{ NULL, NULL }, /* Sy */
@@ -966,6 +972,71 @@ termp_qq_post(DECL_ARGS)
 		return;
 	p->flags |= TERMP_NOSPACE;
 	word(p, "\"");
+}
+
+
+/* ARGSUSED */
+static int
+termp_ox_pre(DECL_ARGS)
+{
+
+	word(p, "OpenBSD");
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+termp_nx_pre(DECL_ARGS)
+{
+
+	word(p, "NetBSD");
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+termp_sq_pre(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return(1);
+	word(p, "`");
+	p->flags |= TERMP_NOSPACE;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_sq_post(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return;
+	p->flags |= TERMP_NOSPACE;
+	word(p, "\'");
+}
+
+
+/* ARGSUSED */
+static int
+termp_pf_pre(DECL_ARGS)
+{
+
+	p->flags |= TERMP_IGNDELIM;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_pf_post(DECL_ARGS)
+{
+
+	p->flags &= ~TERMP_IGNDELIM;
+	p->flags |= TERMP_NOSPACE;
 }
 
 

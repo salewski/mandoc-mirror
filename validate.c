@@ -140,6 +140,7 @@ static	v_post	posts_bl[] = { herr_eq0, bwarn_ge1, post_bl, NULL };
 static	v_post	posts_it[] = { post_it, NULL };
 static	v_post	posts_in[] = { ewarn_eq1, NULL };
 static	v_post	posts_ss[] = { herr_ge1, NULL };
+static	v_post	posts_pf[] = { eerr_eq1, NULL };
 static	v_post	posts_pp[] = { ewarn_eq0, NULL };
 static	v_post	posts_ex[] = { eerr_le1, post_ex, NULL };
 static	v_post	posts_an[] = { post_an, NULL };
@@ -231,7 +232,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Nx */
 	{ NULL, NULL },				/* Ox */
 	{ NULL, NULL },				/* Pc */
-	{ NULL, NULL },				/* Pf */
+	{ NULL, posts_pf },			/* Pf */
 	{ NULL, NULL },				/* Po */
 	{ NULL, posts_wline },			/* Pq */
 	{ NULL, NULL },				/* Qc */

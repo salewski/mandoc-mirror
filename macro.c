@@ -1086,7 +1086,8 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 int
 macro_constant_delimited(MACRO_PROT_ARGS)
 {
-	int		  lastarg, flushed, j, c, maxargs, argc;
+	int		  lastarg, flushed, j, c, maxargs, argc,
+			  igndelim;
 	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
 	char		 *p;
 
@@ -1098,8 +1099,6 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Ns):
 		/* FALLTHROUGH */
-	case (MDOC_Pf):
-		/* FALLTHROUGH */
 	case (MDOC_Ux):
 		/* FALLTHROUGH */
 	case (MDOC_St):
@@ -1107,6 +1106,15 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 		break;
 	default:
 		maxargs = 1;
+		break;
+	}
+
+	switch (tok) {
+	case (MDOC_Pf):
+		igndelim = 1;
+		break;
+	default:
+		igndelim = 0;
 		break;
 	}
 
@@ -1167,7 +1175,7 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 			break;
 		}
 
-		if ( ! flushed && mdoc_isdelim(p)) {
+		if ( ! flushed && mdoc_isdelim(p) && ! igndelim) {
 			if ( ! rewind_elem(mdoc, tok))
 				return(0);
 			flushed = 1;
