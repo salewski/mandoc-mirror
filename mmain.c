@@ -147,8 +147,8 @@ mmain_getopt(struct mmain *p, int argc, char *argv[],
 }
 
 
-__dead void
-mmain_exit(struct mmain *p, int code)
+dead_pre void
+mmain_exit(struct mmain *p, int code) 
 {
 
 	if (p->mdoc)

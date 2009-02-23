@@ -68,6 +68,11 @@
 					INSTALLING SOURCES
 					</h1>
 
+					<p>
+					Sources correctly build and install on OpenBSD, NetBSD and Linux operating systems, tested variously on
+					i386, AMD64 and Alpha.
+					</p>
+
 					<h2>
 					nightly source
 					</h2>
