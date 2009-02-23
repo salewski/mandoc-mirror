@@ -28,8 +28,16 @@
 
 #include "mdoc.h"
 
-#ifdef __linux__
-#define __dead /* Nothing */
+/* Rules for "dead" functions: */
+#if defined(__NetBSD__)
+#define	dead_pre	__dead
+#define	dead_post	__attribute__((__noreturn__))
+#elif defined(__OpenBSD__)
+#define	dead_pre	__dead
+#define	dead_post	/* Nothing. */
+#else
+#define	dead_pre	/* Nothing. */
+#define	dead_post	__attribute__((__noreturn__))
 #endif
 
 __BEGIN_DECLS
@@ -37,12 +45,7 @@ __BEGIN_DECLS
 struct	mmain;
 
 struct	mmain		*mmain_alloc(void);
-#ifdef __linux__
-void		 	 mmain_exit(struct mmain *, int) 
-				__attribute__((__noreturn__));
-#else
-__dead void		 mmain_exit(struct mmain *, int);
-#endif
+dead_pre void	 	 mmain_exit(struct mmain *, int) dead_post;
 int			 mmain_getopt(struct mmain *, int, char *[], 
 				const char *, const char *, void *,
 				int (*)(void *, int, const char *));

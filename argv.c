@@ -715,7 +715,7 @@ int
 mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		struct mdoc_arg *v, int *pos, char *buf)
 {
-	int		 i, ppos;
+	int		 i;
 	char		*p;
 
 	(void)memset(v, 0, sizeof(struct mdoc_arg));
@@ -758,7 +758,6 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 
 	/* FIXME: whitespace if no value. */
 
-	ppos = *pos;
 	if ( ! argv(mdoc, line, v, pos, buf))
 		return(ARGV_ERROR);
 

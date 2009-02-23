@@ -24,12 +24,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __linux__
+#ifndef __OpenBSD__
 #include <time.h>
 #endif
 
 #include "mmain.h"
 #include "term.h"
+
+#ifdef __NetBSD__
+#define xisspace(x) isspace((int)(x))
+#else
+#define	xisspace(x) isspace((x))
+#endif
 
 enum	termstyle {
 	STYLE_CLEAR,
@@ -137,11 +143,11 @@ flushln(struct termp *p)
 		 * Count up visible word characters.  Control sequences
 		 * (starting with the CSI) aren't counted. 
 		 */
-		assert( ! isspace(p->buf[i]));
+		assert( ! xisspace(p->buf[i]));
 
 		/* LINTED */
 		for (j = i, vsz = 0; j < p->col; j++) {
-			if (isspace(p->buf[j]))
+			if (xisspace(p->buf[j]))
 				break;
 			else if (27 == p->buf[j]) {
 				assert(j + 4 <= p->col);
@@ -177,7 +183,7 @@ flushln(struct termp *p)
 		 */
 
 		for ( ; i < p->col; i++) {
-			if (isspace(p->buf[i]))
+			if (xisspace(p->buf[i]))
 				break;
 			putchar(p->buf[i]);
 		}
@@ -378,7 +384,7 @@ word(struct termp *p, const char *word)
 
 	/* LINTED */
 	for (j = i = 0; i < len; i++) {
-		if ( ! isspace(word[i])) {
+		if ( ! xisspace(word[i])) {
 			j++;
 			continue;
 		}
@@ -444,10 +450,10 @@ footer(struct termp *p, const struct mdoc_meta *meta)
 
 	tm = localtime(&meta->date);
 
-#ifdef __linux__
-	if (0 == strftime(buf, p->rmargin, "%B %d, %Y", tm))
-#else
+#ifdef __OpenBSD__
 	if (NULL == strftime(buf, p->rmargin, "%B %d, %Y", tm))
+#else
+	if (0 == strftime(buf, p->rmargin, "%B %d, %Y", tm))
 #endif
 		err(1, "strftime");
 
