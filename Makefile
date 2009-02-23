@@ -5,9 +5,9 @@ CFLAGS += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
 LIBLNS	= macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
 	  validate.ln action.ln 
 
-TREELNS	= mdoctree.ln mmain.ln tree.ln 
+TREELNS	= mdoctree.ln mmain.ln 
 
-TERMLNS	= mdoctree.ln mmain.ln term.ln termact.ln
+TERMLNS	= mdoctree.ln mmain.ln term.ln
 
 LNS	= $(LIBLNS) $(TREELNS) $(TERMLNS)
 
@@ -18,15 +18,14 @@ LIBS	= libmdoc.a
 LIBOBJS	= macro.o mdoc.o hash.o strings.o xstd.o argv.o \
 	  validate.o action.o
 
-TERMOBJS= mdocterm.o mmain.o term.o termact.o
+TERMOBJS= mdocterm.o mmain.o term.o
 
-TREEOBJS= mdoctree.o mmain.o tree.o 
+TREEOBJS= mdoctree.o mmain.o
 
 OBJS	= $(LIBOBJS) $(TERMOBJS) $(TREEOBJS)
 
 SRCS	= macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
-	  action.c term.c tree.c termact.c mdoctree.c mdocterm.c \
-	  mmain.c
+	  action.c term.c mdoctree.c mdocterm.c mmain.c
 
 HEADS	= mdoc.h private.h term.h mmain.h
 
@@ -140,14 +139,8 @@ uninstall:
 macro.ln: macro.c private.h
 macro.o: macro.c private.h
 
-tree.ln: tree.c mdoc.h
-tree.o: tree.c mdoc.h
-
 term.ln: term.c term.h 
 term.o: term.c term.h
-
-termact.ln: termact.c term.h 
-termact.o: termact.c term.h
 
 strings.ln: strings.c private.h
 strings.o: strings.c private.h

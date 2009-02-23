@@ -42,7 +42,7 @@ struct	mmain {
 	struct mdoc	 *mdoc;		/* Active parser. */
 	char		 *buf;		/* Input buffer. */
 	u_long		  bufsz;	/* Input buffer size. */
-	char		  in[MAXPATHLEN]; /* Input file name. */
+	char		 *in; 		/* Input file name. */
 	int		  fdin;		/* Input file desc. */
 };
 
@@ -60,6 +60,9 @@ extern	int		  getsubopt(char **, char *const *, char **);
 #endif
 
 
+/*
+ * Print our and our caller's usage message.
+ */
 void
 mmain_usage(const char *help)
 {
@@ -69,6 +72,9 @@ mmain_usage(const char *help)
 }
 
 
+/*
+ * Allocate the convenience library and initialise some values.
+ */ 
 struct mmain *
 mmain_alloc(void)
 {
@@ -77,36 +83,41 @@ mmain_alloc(void)
 	if (NULL == (p = calloc(1, sizeof(struct mmain))))
 		err(1, "malloc");
 
-	(void)strlcpy(p->in, "-", MAXPATHLEN);
+	p->in = "-";
 	p->fdin = STDIN_FILENO;
 
 	return(p);
 }
 
 
+/*
+ * Parse command-line options.  Accepts a small (<28 char) opstring "u"
+ * parameter (e.g. "ho:") or NULL, a corresponding "help" string (e.g.
+ * "[-h] [-o output]" or NULL, a callback function for parsed arguments
+ * and an opaque pointer argument for that function.
+ */
 int
-mmain_isopt(int c)
-{
-	
-	switch (c) {
-	case ('v'):
-		/* FALLTHROUGH */
-	case ('W'):
-		return(1);
-	default:
-		break;
-	}
-	return(0);
-}
-
-
-int
-mmain_getopt(struct mmain *p, int argc,
-		char *argv[], const char *help)
+mmain_getopt(struct mmain *p, int argc, char *argv[], 
+		const char *help, const char *u, void *arg,
+		int (*getopt_cb)(void *, int, const char *))
 {
 	int		 c;
+	char		 opts[32]; /* XXX */
+	size_t		 sz;
 
-	while (-1 != (c = getopt(argc, argv, ":vW:")))
+	extern int	 optind;
+	extern int	 optreset;
+
+	sz = strlcpy(opts, "vW:", 32);
+	assert(sz < 32);
+
+	if (u) {
+		sz = strlcat(opts, u, 32);
+		assert(sz < 32);
+	}
+
+	/* LINTED */
+	while (-1 != (c = getopt(argc, argv, opts)))
 		switch (c) {
 		case ('v'):
 			p->dbg++;
@@ -116,23 +127,20 @@ mmain_getopt(struct mmain *p, int argc,
 				return(0);
 			break;
 		case ('?'):
-			break;
-		default:
 			mmain_usage(help);
+			return(0);
+		default:
+			assert(getopt_cb);
+			if ((*getopt_cb)(arg, c, optarg))
+				break;
 			return(0);
 		}
 
 	argv += optind;
-	argc -= optind;
+	if ((argc -= optind) > 0)
+		p->in = *argv++;
 
-	if (0 == argc)
-		return(1);
-
-	if (strlcpy(p->in, *argv++, MAXPATHLEN) < MAXPATHLEN)
-		return(1);
-
-	warnx("filename too long");
-	return(0);
+	return(1);
 }
 
 
