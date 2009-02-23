@@ -30,6 +30,7 @@
  */
 
 /* FIXME: indent/tab. */
+/* FIXME: handle nested lists. */
 
 #define	TTYPE_PROG	  0
 #define	TTYPE_CMD_FLAG	  1
@@ -72,7 +73,8 @@ static	int		  arg_hasattr(int, size_t,
 				const struct mdoc_arg *);
 static	int		  arg_getattr(int, size_t, 
 				const struct mdoc_arg *);
-static	size_t		  arg_offset(const char *);
+static	size_t		  arg_offset(const struct mdoc_arg *);
+static	size_t		  arg_width(const struct mdoc_arg *);
 
 /*
  * What follows describes prefix and postfix operations for the abstract
@@ -94,6 +96,7 @@ DECL_POST(name);
 
 DECL_PREPOST(termp_aq);
 DECL_PREPOST(termp_ar);
+DECL_PREPOST(termp_bd);
 DECL_PREPOST(termp_d1);
 DECL_PREPOST(termp_dq);
 DECL_PREPOST(termp_em);
@@ -116,7 +119,6 @@ DECL_PREPOST(termp_sx);
 DECL_PREPOST(termp_va);
 DECL_PREPOST(termp_vt);
 
-DECL_PRE(termp_bd);
 DECL_PRE(termp_bx);
 DECL_PRE(termp_ex);
 DECL_PRE(termp_nd);
@@ -139,7 +141,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_pp_pre, NULL }, /* Pp */ 
 	{ termp_d1_pre, termp_d1_post }, /* D1 */
 	{ NULL, NULL }, /* Dl */
-	{ termp_bd_pre, NULL }, /* Bd */
+	{ termp_bd_pre, termp_bd_post }, /* Bd */
 	{ NULL, NULL }, /* Ed */
 	{ NULL, termp_bl_post }, /* Bl */
 	{ NULL, NULL }, /* El */
@@ -242,15 +244,27 @@ const struct termact *termacts = __termacts;
 
 
 static size_t
-arg_offset(const char *v)
+arg_width(const struct mdoc_arg *arg)
 {
-	if (0 == strcmp(v, "indent"))
-		return(INDENT);
-	if (0 == strcmp(v, "indent-two"))
-		return(INDENT * 2);
 
 	/* TODO */
-	return(0);
+	assert(*arg->value);
+	return(strlen(*arg->value));
+}
+
+
+static size_t
+arg_offset(const struct mdoc_arg *arg)
+{
+
+	/* TODO */
+	assert(*arg->value);
+	if (0 == strcmp(*arg->value, "indent"))
+		return(INDENT);
+	if (0 == strcmp(*arg->value, "indent-two"))
+		return(INDENT * 2);
+
+	return(strlen(*arg->value));
 }
 
 
@@ -308,7 +322,7 @@ termp_it_post(DECL_ARGS)
 	const struct mdoc_node *n, *it;
 	const struct mdoc_block *bl;
 	int		 i;
-	size_t		 width;
+	size_t		 width, offset;
 
 	/*
 	 * This (and termp_it_pre()) are the most complicated functions
@@ -339,34 +353,32 @@ termp_it_post(DECL_ARGS)
 	/* If `-tag', adjust our margins accordingly. */
 
 	if (arg_hasattr(MDOC_Tag, bl->argc, bl->argv)) {
+		flushln(p);
+
+		/* FIXME: this should auto-size. */
 		i = arg_getattr(MDOC_Width, bl->argc, bl->argv);
-		assert(i >= 0);
-		assert(1 == bl->argv[i].sz);
-		width = strlen(*bl->argv[i].value); /* XXX */
+		width = i >= 0 ? arg_width(&bl->argv[i]) : 10;
+
+		/* FIXME: nesting!  Should happen at block. */
+		i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
+		offset = i >= 0 ? arg_width(&bl->argv[i]) : 0;
 
 		if (MDOC_HEAD == node->type) {
-			flushln(p);
-			/* FIXME: nested lists. */
 			p->rmargin = p->maxrmargin;
+			p->offset -= offset;
 			p->flags &= ~TERMP_NOBREAK;
 		} else {
-			flushln(p);
-			p->offset -= width + 1;
+			p->offset -= width;
 			p->flags &= ~TERMP_NOLPAD;
 		}
-		return;
 	}
 
 	if (arg_hasattr(MDOC_Ohang, bl->argc, bl->argv)) {
 		i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
-		width = 0;
-		if (i >= 0) {
-			assert(1 == bl->argv[i].sz);
-			width = arg_offset(*bl->argv[i].value);
-		}
+		offset = i >= 0 ? arg_offset(&bl->argv[i]) : 0;
 
 		flushln(p);
-		p->offset -= width;
+		p->offset -= offset;
 		return;
 	}
 }
@@ -379,7 +391,7 @@ termp_it_pre(DECL_ARGS)
 	const struct mdoc_node *n, *it;
 	const struct mdoc_block *bl;
 	int		 i;
-	size_t		 width;
+	size_t		 width, offset;
 
 	/*
 	 * Also see termp_it_post() for general comments.
@@ -420,24 +432,27 @@ termp_it_pre(DECL_ARGS)
 	assert(MDOC_HEAD == node->type 
 			|| MDOC_BODY == node->type);
 
+	/* FIXME: see termp_it_post(). */
+
 	/* If `-tag', adjust our margins accordingly. */
 
 	if (arg_hasattr(MDOC_Tag, bl->argc, bl->argv)) {
-		i = arg_getattr(MDOC_Width, bl->argc, bl->argv);
-		assert(i >= 0); /* XXX */
-		assert(1 == bl->argv[i].sz);
-		width = strlen(*bl->argv[i].value); /* XXX */
+		p->flags |= TERMP_NOSPACE;
 
-		/* FIXME: nested lists. */
+		i = arg_getattr(MDOC_Width, bl->argc, bl->argv);
+		width = i >= 0 ? arg_width(&bl->argv[i]) : 10;
+
+		i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
+		offset = i >= 0 ? arg_offset(&bl->argv[i]) : 0;
 
 		if (MDOC_HEAD == node->type) {
 			p->flags |= TERMP_NOBREAK;
-			p->flags |= TERMP_NOSPACE;
+			p->offset += offset;
 			p->rmargin = p->offset + width;
 		} else {
 			p->flags |= TERMP_NOSPACE;
 			p->flags |= TERMP_NOLPAD;
-			p->offset += width + 1;
+			p->offset += width;
 		}
 		return(1);
 	}
@@ -445,15 +460,11 @@ termp_it_pre(DECL_ARGS)
 	/* If `-ohang', adjust left-margin. */
 
 	if (arg_hasattr(MDOC_Ohang, bl->argc, bl->argv)) {
-		width = 0;
 		i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
-		if (i >= 0) {
-			assert(1 == bl->argv[i].sz);
-			width = arg_offset(*bl->argv[i].value);
-		} 
+		offset = i >= 0 ? arg_offset(&bl->argv[i]) : 0;
 
 		p->flags |= TERMP_NOSPACE;
-		p->offset += width;
+		p->offset += offset;
 		return(1);
 	}
 
@@ -922,6 +933,7 @@ termp_bd_pre(DECL_ARGS)
 {
 	const struct mdoc_block *bl;
 	const struct mdoc_node *n;
+	int		 i;
 
 	if (MDOC_BLOCK == node->type) {
 		vspace(p);
@@ -932,6 +944,13 @@ termp_bd_pre(DECL_ARGS)
 	assert(MDOC_BLOCK == node->parent->type);
 
 	bl = &node->parent->data.block;
+
+	i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
+	if (-1 != i) {
+		assert(1 == bl->argv[i].sz);
+		p->offset += arg_offset(&bl->argv[i]);
+	}
+
 	if ( ! arg_hasattr(MDOC_Literal, bl->argc, bl->argv))
 		return(1);
 
@@ -949,6 +968,27 @@ termp_bd_pre(DECL_ARGS)
 
 	p->flags &= ~TERMP_LITERAL;
 	return(0);
+}
+
+
+/* ARGSUSED */
+static void
+termp_bd_post(DECL_ARGS)
+{
+	int		 i;
+	const struct mdoc_block *bl;
+
+	if (MDOC_BODY != node->type)
+		return;
+
+	assert(MDOC_BLOCK == node->parent->type);
+	bl = &node->parent->data.block;
+
+	i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
+	if (-1 != i) {
+		assert(1 == bl->argv[i].sz);
+		p->offset -= arg_offset(&bl->argv[i]);
+	}
 }
 
 

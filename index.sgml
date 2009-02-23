@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="resource-type" content="document">
+		<link rel="stylesheet" href="style.css" type="text/css" media="all">
+		<title>mdocml.bsd.lv</title>
+	</head>
+	<body>
+	<table width="600">
+		<col width="100%">
+		<tbody>
+			<tr>
+				<td>
+					<div class="head">
+						<b>mdocml</b> &#8211; mdoc macro compiler
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top">
+					<h1>
+					DESCRIPTION
+					</h1>
+
+					<p>
+					<span class="nm">mdocml</span> is a suite of tools that compile &#8220;mdoc&#8221;, the roff macro
+					package of the BSD manual pages.  The mission of <span class="nm">mdocml</span> is to deprecate <a
+					href="http://www.gnu.org/software/groff/" class="external">groff</a>, the GNU roff implementation, for
+					displaying BSD mdoc pages.  groff amounts to over 60 000 lines of GPL C++ source, which is a
+					considerable encumbrance to BSD operating system.
+					</p>
+
+					<p>
+					The core of <span class="nm">mdocml</span> is the libmdoc library, a validating scanner-parser producing
+					intermediate-form output from mdoc input.  libmdoc is a simple, fast library operating on memory buffers
+					of mdoc input.  Its intermediate output, an abstract syntax tree, is fully documented in the <span
+					class="man">mdoc(3)</span> reference manual.
+					</p>
+
+					<p>
+					There are three utilities implementing <span class="man">mdoc(3)</span>:
+					</p>
+
+					<ul>
+					<li><span class="man">mdocterm(1)</span> &#8211; formats mdoc input for display on the terminal
+					<li><span class="man">mdochtml(1)</span> &#8211; formats mdoc input as strict HTML (nascent)
+					<li><span class="man">mdoclint(1)</span> &#8211; validates mdoc input
+					<li><span class="man">mdoctree(1)</span> &#8211; prints input abstract syntax tree
+					</ul>
+
+					<p>
+					The <span class="man">mdocterm(1)</span> utility is intended to deprecate usage of <a
+					href="http://www.gnu.org/software/groff/" class="external">groff</a> for displaying BSD manuals to the
+					terminal, either directly or cached as a &#8220;catman&#8221; page.
+					</p>
+
+					<p>
+					<span class="attn">Please submit patches!</span> Although a significant implementation exists, work
+					remains for the backend library and especially the front-end utilities.  See the <a
+					href="#contact">contact</a> information below to submit patches and bug reports.
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<h1>
+					INSTALLING SOURCES
+					</h1>
+
+					<h2>
+					nightly source
+					</h2>
+
+					<p>
+					CVS sources are checkedout and snapshotted nightly.  These may be found in the <a
+					href="/snapshots/">/snapshots/</a> directory.
+					</p>
+
+					<p class="boxed">
+					% cd /tmp<br>
+					% ftp -V -o- http://mdocml.bsd.lv/snapshots/mdocml.tgz | tar -zxf -<br>
+					% cd mdocml<br>
+					% make<br>
+					% make regress<br>
+					% make install
+					</p>
+
+					<h2>
+					nightly port
+					</h2>
+
+					<p>
+					The nightly snapshot is automatically converted into an OpenBSD port (ports for other BSD systems not
+					yet available).  These may be found in the <a href="/ports-openbsd/">/ports-openbsd/</a> directory.
+					</p>
+
+					<p>
+					If installing for the first time:
+					</p>
+
+					<p class="boxed">
+					% ftp -V -o- http://mdocml.bsd.lv/ports-openbsd/mdocml.tgz | tar -zxf -<br>
+					% cd mdocml<br>
+					% sudo make<br>
+					% sudo make install
+					</p>
+
+					<p>
+					Subsequent installations:
+					</p>
+
+					<p class="boxed">
+					% sudo pkg_add -r mdocml
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<h1>
+					CONTACT
+					</h1>
+
+					<p>
+					Please contact Kristaps, kris<a class="external"
+					href="http://mailhide.recaptcha.net/d?k=01jt88xIsFONwVjHZmGpc4AQ==&amp;c=sb5E6ulipc-eTnpTVqI-BQ=="
+					onclick="window.open('http://mailhide.recaptcha.net/d?k=01jt88xIsFONwVjHZmGpc4AQ==&amp;c=sb5E6ulipc-eTnpTVqI-BQ==',
+					'', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return
+					false;" title="Reveal this e-mail address">...</a>@kth.se, with questions, bug reports, patches, and so on.  
+					</p>
+					
+					<p>
+					If you'd like to submit patches, please contact us beforehand in case larger changes are pending but not
+					checked in.  If making a bug report, please make sure it's repeatable on the most current snapshot.
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<div class="foot">
+						Copyright &#169; 2009 Kristaps D&#382;onsons, $Date$
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	</body>
+</html>

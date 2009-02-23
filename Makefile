@@ -1,3 +1,5 @@
+.SUFFIXES:	.html .sgml
+
 VERSION	= 1.3.0
 
 CFLAGS += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g 
@@ -33,13 +35,20 @@ SRCS	= macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
 
 HEADS	= mdoc.h private.h term.h mmain.h
 
+SGMLS	= index.sgml
+
+HTMLS	= index.html
+
+STATICS	= style.css external.png
+
 MANS	= mdoctree.1 mdocterm.1 mdoc.3
 
 BINS	= mdocterm mdoctree mdoclint
 
-CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS)
+CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS)
 
-INSTALL	= $(SRCS) $(HEADS) Makefile Makefile.port DESCR $(MANS)
+INSTALL	= $(SRCS) $(HEADS) Makefile Makefile.port DESCR $(MANS) \
+	  $(SGMLS) $(STATICS)
 
 FAIL	= regress/test.empty \
 	  regress/test.prologue.00 \
@@ -103,6 +112,8 @@ clean:
 dist:	mdocml-$(VERSION).tar.gz
 
 port:	mdocml-oport-$(VERSION).tar.gz
+
+www:	$(HTMLS)
 
 regress:: mdoclint
 	@for f in $(FAIL); do \
@@ -231,3 +242,7 @@ mdoctree: $(TREEOBJS) libmdoc.a
 
 mdoclint: $(LINTOBJS) libmdoc.a
 	$(CC) $(CFLAGS) -o $@ $(LINTOBJS) libmdoc.a 
+
+.sgml.html:
+	validate $<
+	cp -f $< $@

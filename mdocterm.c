@@ -167,10 +167,9 @@ flushln(struct termp *p)
 			for (j = 0; j < p->offset; j++)
 				putchar(' ');
 			vis = 0;
-		} else if (vis + vsz >= maxvis) {
+		} else if (vis + vsz >= maxvis)
 			/* FIXME */
 			errx(1, "word breaks right margin");
-		}
 
 		/* 
 		 * Write out the word and a trailing space.  Omit the

@@ -44,8 +44,6 @@ static	int		 argv_single(struct mdoc *, int,
 				struct mdoc_arg *, int *, char *);
 static	int		 argv_multi(struct mdoc *, int, 
 				struct mdoc_arg *, int *, char *);
-static	int		 postargv(struct mdoc *, int, 
-				const struct mdoc_arg *, int);
 static	int		 pwarn(struct mdoc *, int, int, int);
 static	int		 perr(struct mdoc *, int, int, int);
 
@@ -59,9 +57,8 @@ static	int		 perr(struct mdoc *, int, int, int);
 /* Error messages. */
 
 #define	EQUOTTERM	(0)
-#define	EOFFSET		(1)
-#define	EARGVAL		(2)
-#define	EARGMANY	(3)
+#define	EARGVAL		(1)
+#define	EARGMANY	(2)
 
 static	int mdoc_argflags[MDOC_MAX] = {
 	0, /* \" */
@@ -182,10 +179,6 @@ perr(struct mdoc *mdoc, int line, int pos, int code)
 	case (EQUOTTERM):
 		c = mdoc_perr(mdoc, line, pos, 
 				"unterminated quoted parameter");
-		break;
-	case (EOFFSET):
-		c = mdoc_perr(mdoc, line, pos, 
-				"invalid value for offset argument");
 		break;
 	case (EARGVAL):
 		c = mdoc_perr(mdoc, line, pos, 
@@ -637,33 +630,6 @@ lookup(int tok, const char *argv)
 
 
 static int
-postargv(struct mdoc *mdoc, int line, const struct mdoc_arg *v, int pos)
-{
-
-	switch (v->arg) {
-	case (MDOC_Offset):
-		assert(v->value);
-		assert(v->value[0]);
-		if (xstrcmp(v->value[0], "left"))
-			break;
-		if (xstrcmp(v->value[0], "right"))
-			break;
-		if (xstrcmp(v->value[0], "center"))
-			break;
-		if (xstrcmp(v->value[0], "indent"))
-			break;
-		if (xstrcmp(v->value[0], "indent-two"))
-			break;
-		return(perr(mdoc, line, pos, EOFFSET));
-	default:
-		break;
-	}
-
-	return(1);
-}
-
-
-static int
 argv_multi(struct mdoc *mdoc, int line, 
 		struct mdoc_arg *v, int *pos, char *buf)
 {
@@ -794,8 +760,6 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 
 	ppos = *pos;
 	if ( ! argv(mdoc, line, v, pos, buf))
-		return(ARGV_ERROR);
-	if ( ! postargv(mdoc, line, v, ppos))
 		return(ARGV_ERROR);
 
 	return(ARGV_ARG);
