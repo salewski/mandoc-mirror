@@ -127,7 +127,7 @@ installwww: www
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz
 	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/mdocml.tar.gz
 
-regress:: mdoclint
+regress::
 	@for f in $(FAIL); do \
 		echo "./mdoclint $$f" ; \
 		./mdoclint $$f 2>/dev/null || continue ; exit 1 ; done

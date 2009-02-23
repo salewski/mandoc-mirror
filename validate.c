@@ -34,7 +34,6 @@ typedef	int	(*v_post)(struct mdoc *);
 
 /* FIXME: some sections should only occur in specific msecs. */
 /* FIXME: ignoring Pp. */
-/* FIXME: .Ef arguments */
 /* FIXME: math symbols. */
 /* FIXME: valid character-escape checks. */
 /* FIXME: .Fd only in synopsis section. */
@@ -292,63 +291,71 @@ count_child(struct mdoc *mdoc)
 
 	for (i = 0, n = mdoc->last->child; n; n = n->next, i++)
 		/* Do nothing */ ;
+
 	return(i);
 }
 
 
-static int
-warn_child_gt(struct mdoc *mdoc, const char *p, int sz)
-{
-	int		  i;
+/*
+ * Build these up with macros because they're basically the same check
+ * for different inequalities.  Yes, this could be done with functions,
+ * but this is reasonable for now.
+ */
 
-	if ((i = count_child(mdoc)) > sz)
-		return(1);
-	return(warn_count(mdoc, ">", sz, p, i));
+#define CHECK_CHILD_DEFN(lvl, name, ineq) 			\
+static int 							\
+lvl##_child_##name(struct mdoc *mdoc, const char *p, int sz) 	\
+{ 								\
+	int i; 							\
+	if ((i = count_child(mdoc)) ineq sz) 			\
+		return(1); 					\
+	return(lvl##_count(mdoc, #ineq, sz, p, i)); 		\
+}
+
+#define CHECK_BODY_DEFN(name, lvl, func, num) 			\
+static int 							\
+b##lvl##_##name(struct mdoc *mdoc) 				\
+{ 								\
+	if (MDOC_BODY != mdoc->last->type) 			\
+		return(1); 					\
+	return(func(mdoc, "multiline parameters", (num))); 	\
+}
+
+#define CHECK_ELEM_DEFN(name, lvl, func, num) 			\
+static int							\
+e##lvl##_##name(struct mdoc *mdoc) 				\
+{ 								\
+	assert(MDOC_ELEM == mdoc->last->type); 			\
+	return(func(mdoc, "line parameters", (num))); 		\
+}
+
+#define CHECK_HEAD_DEFN(name, lvl, func, num)			\
+static int 							\
+h##lvl##_##name(struct mdoc *mdoc) 				\
+{ 								\
+	if (MDOC_HEAD != mdoc->last->type) 			\
+		return(1); 					\
+	return(func(mdoc, "multiline parameters", (num))); 	\
 }
 
 
-static int
-err_child_gt(struct mdoc *mdoc, const char *p, int sz)
-{
-	int		  i;
-
-	if ((i = count_child(mdoc)) > sz)
-		return(1);
-	return(err_count(mdoc, ">", sz, p, i));
-}
-
-
-static int
-warn_child_eq(struct mdoc *mdoc, const char *p, int sz)
-{
-	int		  i;
-
-	if ((i = count_child(mdoc)) == sz)
-		return(1);
-	return(warn_count(mdoc, "==", sz, p, i));
-}
-
-
-static int
-err_child_eq(struct mdoc *mdoc, const char *p, int sz)
-{
-	int		  i;
-
-	if ((i = count_child(mdoc)) == sz)
-		return(1);
-	return(err_count(mdoc, "==", sz, p, i));
-}
-
-
-static int
-err_child_lt(struct mdoc *mdoc, const char *p, int sz)
-{
-	int		  i;
-
-	if ((i = count_child(mdoc)) < sz)
-		return(1);
-	return(err_count(mdoc, "<", sz, p, i));
-}
+CHECK_CHILD_DEFN(warn, gt, >)			/* warn_child_gt() */
+CHECK_CHILD_DEFN(err, gt, >)			/* err_child_gt() */
+CHECK_CHILD_DEFN(warn, eq, ==)			/* warn_child_eq() */
+CHECK_CHILD_DEFN(err, eq, ==)			/* err_child_eq() */
+CHECK_CHILD_DEFN(err, lt, <)			/* err_child_lt() */
+CHECK_BODY_DEFN(ge1, warn, warn_child_gt, 0)	/* bwarn_ge1() */
+CHECK_ELEM_DEFN(eq1, warn, warn_child_eq, 1)	/* ewarn_eq1() */
+CHECK_ELEM_DEFN(eq0, warn, warn_child_eq, 0)	/* ewarn_eq0() */
+CHECK_ELEM_DEFN(ge1, warn, warn_child_gt, 0)	/* ewarn_gt1() */
+CHECK_ELEM_DEFN(eq1, err, err_child_eq, 1)	/* eerr_eq1() */
+CHECK_ELEM_DEFN(le2, err, err_child_lt, 3)	/* eerr_le2() */
+CHECK_ELEM_DEFN(le1, err, err_child_lt, 2)	/* eerr_le1() */
+CHECK_ELEM_DEFN(eq0, err, err_child_eq, 0)	/* eerr_eq0() */
+CHECK_ELEM_DEFN(ge1, err, err_child_gt, 0)	/* eerr_ge1() */
+CHECK_HEAD_DEFN(eq0, err, err_child_eq, 0)	/* herr_eq0() */
+CHECK_HEAD_DEFN(le1, err, err_child_lt, 2)	/* herr_le1() */
+CHECK_HEAD_DEFN(ge1, err, err_child_gt, 0)	/* herr_ge1() */
 
 
 static int
@@ -360,8 +367,7 @@ check_stdarg(struct mdoc *mdoc, struct mdoc_node *node)
 		return(1);
 
 	return(mdoc_nwarn(mdoc, node, WARN_COMPAT, 
-				"macro suggests single `%s' argument",
-				mdoc_argnames[MDOC_Std]));
+				"one argument suggested"));
 }
 
 
@@ -374,137 +380,8 @@ check_msec(struct mdoc *mdoc, struct mdoc_node *node,
 	for (i = 0; i < sz; i++)
 		if (msecs[i] == mdoc->meta.msec)
 			return(1);
-	return(mdoc_nwarn(mdoc, node, WARN_COMPAT, "macro not "
-				"appropriate for manual section"));
-}
-
-
-static int
-check_parent(struct mdoc *mdoc, struct mdoc_node *n, 
-		int tok, enum mdoc_type t)
-{
-
-	assert(n->parent);
-	if ((MDOC_ROOT == t || tok == n->parent->tok) &&
-			(t == n->parent->type))
-		return(1);
-
-	return(mdoc_nerr(mdoc, n, "require parent %s (have %s)", 
-			MDOC_ROOT == t ? "<root>" :
-			mdoc_macronames[tok],
-			MDOC_ROOT == n->parent->type ? "<root>" :
-			mdoc_macronames[n->parent->type]));
-}
-
-
-static int
-bwarn_ge1(struct mdoc *mdoc)
-{
-
-	if (MDOC_BODY != mdoc->last->type)
-		return(1);
-	return(warn_child_gt(mdoc, "multi-line parameters", 0));
-}
-
-
-static int
-ewarn_eq1(struct mdoc *mdoc)
-{
-
-	assert(MDOC_ELEM == mdoc->last->type);
-	return(warn_child_eq(mdoc, "line parameters", 1));
-}
-
-
-static int
-ewarn_eq0(struct mdoc *mdoc)
-{
-
-	assert(MDOC_ELEM == mdoc->last->type);
-	return(warn_child_eq(mdoc, "line parameters", 0));
-}
-
-
-static int
-ewarn_ge1(struct mdoc *mdoc)
-{
-
-	assert(MDOC_ELEM == mdoc->last->type);
-	return(warn_child_gt(mdoc, "line parameters", 0));
-}
-
-
-static int
-eerr_eq1(struct mdoc *mdoc)
-{
-
-	assert(MDOC_ELEM == mdoc->last->type);
-	return(err_child_eq(mdoc, "line parameters", 1));
-}
-
-
-static int
-eerr_le2(struct mdoc *mdoc)
-{
-
-	assert(MDOC_ELEM == mdoc->last->type);
-	return(err_child_lt(mdoc, "line parameters", 3));
-}
-
-
-static int
-eerr_le1(struct mdoc *mdoc)
-{
-
-	assert(MDOC_ELEM == mdoc->last->type);
-	return(err_child_lt(mdoc, "line parameters", 2));
-}
-
-
-static int
-eerr_eq0(struct mdoc *mdoc)
-{
-
-	assert(MDOC_ELEM == mdoc->last->type);
-	return(err_child_eq(mdoc, "line parameters", 0));
-}
-
-
-static int
-eerr_ge1(struct mdoc *mdoc)
-{
-
-	assert(MDOC_ELEM == mdoc->last->type);
-	return(err_child_gt(mdoc, "line parameters", 0));
-}
-
-
-static int
-herr_eq0(struct mdoc *mdoc)
-{
-
-	if (MDOC_HEAD != mdoc->last->type)
-		return(1);
-	return(err_child_eq(mdoc, "line parameters", 0));
-}
-
-
-static int
-herr_le1(struct mdoc *mdoc)
-{
-	if (MDOC_HEAD != mdoc->last->type)
-		return(1);
-	return(err_child_lt(mdoc, "line parameters", 2));
-}
-
-
-static int
-herr_ge1(struct mdoc *mdoc)
-{
-
-	if (MDOC_HEAD != mdoc->last->type)
-		return(1);
-	return(err_child_gt(mdoc, "line parameters", 0));
+	return(mdoc_nwarn(mdoc, node, WARN_COMPAT, 
+				"wrong manual section"));
 }
 
 
@@ -513,10 +390,11 @@ pre_display(struct mdoc *mdoc, struct mdoc_node *node)
 {
 	struct mdoc_node *n;
 
+	/* Display elements (`Bd', `D1'...) cannot be nested. */
+
 	if (MDOC_BLOCK != node->type)
 		return(1);
 
-	assert(mdoc->last);
 	/* LINTED */
 	for (n = mdoc->last->parent; n; n = n->parent) 
 		if (MDOC_BLOCK == n->type)
@@ -524,6 +402,7 @@ pre_display(struct mdoc *mdoc, struct mdoc_node *node)
 				break;
 	if (NULL == n)
 		return(1);
+
 	return(mdoc_nerr(mdoc, node, "displays may not be nested"));
 }
 
@@ -531,21 +410,21 @@ pre_display(struct mdoc *mdoc, struct mdoc_node *node)
 static int
 pre_bl(struct mdoc *mdoc, struct mdoc_node *node)
 {
-	int		 type, err;
+	int		 type, err, i;
 	struct mdoc_arg	*argv;
-	size_t		 i, argc;
+	size_t		 argc;
 
 	if (MDOC_BLOCK != node->type)
 		return(1);
-	assert(MDOC_Bl == node->tok);
 
-	argv = NULL;
 	argc = node->data.block.argc; 
 
+	/* Make sure that only one type of list is specified.  */
+
 	/* LINTED */
-	for (i = type = err = 0; i < argc; i++) {
-		argv = &node->data.block.argv[(int)i];
-		assert(argv);
+	for (i = 0, type = err = 0; i < (int)argc; i++) {
+		argv = &node->data.block.argv[i];
+
 		switch (argv->arg) {
 		case (MDOC_Bullet):
 			/* FALLTHROUGH */
@@ -568,42 +447,39 @@ pre_bl(struct mdoc *mdoc, struct mdoc_node *node)
 		case (MDOC_Inset):
 			/* FALLTHROUGH */
 		case (MDOC_Column):
-			if (type)
-				err++;
-			type++;
-			break;
+			if (0 == type++)
+				break;
+			return(mdoc_perr(mdoc, argv->line, argv->pos, 
+					"multiple types specified"));
 		default:
 			break;
 		}
 	}
-	if (0 == type)
-		return(mdoc_err(mdoc, "no list type specified"));
-	if (0 == err)
+
+	if (type)
 		return(1);
-	assert(argv);
-	return(mdoc_perr(mdoc, argv->line, 
-			argv->pos, "only one list type possible"));
+	return(mdoc_err(mdoc, "no type specified"));
 }
 
 
 static int
 pre_bd(struct mdoc *mdoc, struct mdoc_node *node)
 {
-	int		 type, err;
+	int		 type, err, i;
 	struct mdoc_arg	*argv;
-	size_t		 i, argc;
+	size_t		 argc;
 
 	if (MDOC_BLOCK != node->type)
 		return(1);
-	assert(MDOC_Bd == node->tok);
 
-	argv = NULL;
 	argc = node->data.block.argc;
 
+	/* Make sure that only one type of display is specified.  */
+
 	/* LINTED */
-	for (err = i = type = 0; 0 == err && i < argc; i++) {
-		argv = &node->data.block.argv[(int)i];
-		assert(argv);
+	for (i = 0, err = type = 0; ! err && i < (int)argc; i++) {
+		argv = &node->data.block.argv[i];
+
 		switch (argv->arg) {
 		case (MDOC_Ragged):
 			/* FALLTHROUGH */
@@ -614,21 +490,18 @@ pre_bd(struct mdoc *mdoc, struct mdoc_node *node)
 		case (MDOC_Literal):
 			/* FALLTHROUGH */
 		case (MDOC_File):
-			if (type)
-				err++;
-			type++;
-			break;
+			if (0 == type++) 
+				break;
+			return(mdoc_perr(mdoc, argv->line, argv->pos, 
+					"multiple types specified"));
 		default:
 			break;
 		}
 	}
-	if (0 == type)
-		return(mdoc_err(mdoc, "no display type specified"));
-	if (0 == err)
+
+	if (type)
 		return(1);
-	assert(argv);
-	return(mdoc_perr(mdoc, argv->line, 
-			argv->pos, "only one display type possible"));
+	return(mdoc_err(mdoc, "no type specified"));
 }
 
 
@@ -653,83 +526,6 @@ pre_sh(struct mdoc *mdoc, struct mdoc_node *node)
 
 
 static int
-pre_st(struct mdoc *mdoc, struct mdoc_node *node)
-{
-
-	assert(MDOC_ELEM == node->type);
-	assert(MDOC_St == node->tok);
-	if (1 == node->data.elem.argc)
-		return(1);
-	return(mdoc_nerr(mdoc, node, "macro must have one argument"));
-}
-
-
-static int
-pre_an(struct mdoc *mdoc, struct mdoc_node *node)
-{
-
-	assert(MDOC_ELEM == node->type);
-	assert(MDOC_An == node->tok);
-	if (1 >= node->data.elem.argc)
-		return(1);
-	return(mdoc_nerr(mdoc, node, "macro may only have one argument"));
-}
-
-
-static int
-pre_rv(struct mdoc *mdoc, struct mdoc_node *node)
-{
-	enum mdoc_msec	 msecs[2];
-
-	assert(MDOC_ELEM == node->type);
-	assert(MDOC_Rv == node->tok);
-
-	msecs[0] = MSEC_2;
-	msecs[1] = MSEC_3;
-	if ( ! check_msec(mdoc, node, 2, msecs))
-		return(0);
-	return(check_stdarg(mdoc, node));
-}
-
-
-static int
-pre_ex(struct mdoc *mdoc, struct mdoc_node *node)
-{
-	enum mdoc_msec	 msecs[3];
-
-	assert(MDOC_ELEM == node->type);
-	assert(MDOC_Ex == node->tok);
-
-	msecs[0] = MSEC_1;
-	msecs[1] = MSEC_6;
-	msecs[2] = MSEC_8;
-	if ( ! check_msec(mdoc, node, 3, msecs))
-		return(0);
-	return(check_stdarg(mdoc, node));
-}
-
-
-static int
-pre_er(struct mdoc *mdoc, struct mdoc_node *node)
-{
-	enum mdoc_msec	 msecs[1];
-
-	msecs[0] = MSEC_2;
-	return(check_msec(mdoc, node, 1, msecs));
-}
-
-
-static int
-pre_cd(struct mdoc *mdoc, struct mdoc_node *node)
-{
-	enum mdoc_msec	 msecs[1];
-
-	msecs[0] = MSEC_4;
-	return(check_msec(mdoc, node, 1, msecs));
-}
-
-
-static int
 pre_it(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
@@ -743,12 +539,71 @@ pre_it(struct mdoc *mdoc, struct mdoc_node *node)
 
 
 static int
+pre_st(struct mdoc *mdoc, struct mdoc_node *node)
+{
+
+	if (1 == node->data.elem.argc)
+		return(1);
+	return(mdoc_nerr(mdoc, node, "one argument required"));
+}
+
+
+static int
+pre_an(struct mdoc *mdoc, struct mdoc_node *node)
+{
+
+	if (1 >= node->data.elem.argc)
+		return(1);
+	return(mdoc_nerr(mdoc, node, "one argument allowed"));
+}
+
+
+static int
+pre_rv(struct mdoc *mdoc, struct mdoc_node *node)
+{
+	enum mdoc_msec msecs[] = { MSEC_2, MSEC_3 };
+
+	if ( ! check_msec(mdoc, node, 2, msecs))
+		return(0);
+	return(check_stdarg(mdoc, node));
+}
+
+
+static int
+pre_ex(struct mdoc *mdoc, struct mdoc_node *node)
+{
+	enum mdoc_msec msecs[] = { MSEC_1, MSEC_6, MSEC_8 };
+
+	if ( ! check_msec(mdoc, node, 3, msecs))
+		return(0);
+	return(check_stdarg(mdoc, node));
+}
+
+
+static int
+pre_er(struct mdoc *mdoc, struct mdoc_node *node)
+{
+	enum mdoc_msec msecs[] = { MSEC_2 };
+
+	return(check_msec(mdoc, node, 1, msecs));
+}
+
+
+static int
+pre_cd(struct mdoc *mdoc, struct mdoc_node *node)
+{
+	enum mdoc_msec msecs[] = { MSEC_4 };
+
+	return(check_msec(mdoc, node, 1, msecs));
+}
+
+
+static int
 pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 {
 
 	if (SEC_PROLOGUE != mdoc->lastnamed)
-		return(mdoc_nerr(mdoc, node, "macro may only be invoked in the prologue"));
-	assert(MDOC_ELEM == node->type);
+		return(mdoc_nerr(mdoc, node, "prologue only"));
 
 	/* Check for ordering. */
 
@@ -756,15 +611,18 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 	case (MDOC_Os):
 		if (mdoc->meta.title && mdoc->meta.date)
 			break;
-		return(mdoc_nerr(mdoc, node, "prologue macro out-of-order"));
+		return(mdoc_nerr(mdoc, node, 
+				"prologue out-of-order"));
 	case (MDOC_Dt):
 		if (NULL == mdoc->meta.title && mdoc->meta.date)
 			break;
-		return(mdoc_nerr(mdoc, node, "prologue macro out-of-order"));
+		return(mdoc_nerr(mdoc, node, 
+				"prologue out-of-order"));
 	case (MDOC_Dd):
 		if (NULL == mdoc->meta.title && 0 == mdoc->meta.date)
 			break;
-		return(mdoc_nerr(mdoc, node, "prologue macro out-of-order"));
+		return(mdoc_nerr(mdoc, node, 
+				"prologue out-of-order"));
 	default:
 		abort();
 		/* NOTREACHED */
@@ -790,7 +648,7 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 		/* NOTREACHED */
 	}
 
-	return(mdoc_nerr(mdoc, node, "prologue macro repeated"));
+	return(mdoc_nerr(mdoc, node, "prologue repetition"));
 }
 
 
@@ -802,29 +660,29 @@ post_bf(struct mdoc *mdoc)
 
 	if (MDOC_BLOCK != mdoc->last->type)
 		return(1);
-	assert(MDOC_Bf == mdoc->last->tok);
+
 	head = mdoc->last->data.block.head;
-	assert(head);
 
 	if (0 == mdoc->last->data.block.argc) {
-		if (head->child) {
-			assert(MDOC_TEXT == head->child->type);
-			p = head->child->data.text.string;
-			if (xstrcmp(p, "Em"))
-				return(1);
-			else if (xstrcmp(p, "Li"))
-				return(1);
-			else if (xstrcmp(p, "Sm"))
-				return(1);
-			return(mdoc_nerr(mdoc, head->child, "invalid font mode"));
-		}
-		return(mdoc_err(mdoc, "macro expects an argument or parameter"));
+		if (NULL == head->child)
+			return(mdoc_err(mdoc, "argument expected"));
+
+		p = head->child->data.text.string;
+		if (xstrcmp(p, "Em"))
+			return(1);
+		else if (xstrcmp(p, "Li"))
+			return(1);
+		else if (xstrcmp(p, "Sm"))
+			return(1);
+		return(mdoc_nerr(mdoc, head->child, "invalid font"));
 	}
+
 	if (head->child)
-		return(mdoc_err(mdoc, "macro expects an argument or parameter"));
+		return(mdoc_err(mdoc, "argument expected"));
+
 	if (1 == mdoc->last->data.block.argc)
 		return(1);
-	return(mdoc_err(mdoc, "macro expects an argument or parameter"));
+	return(mdoc_err(mdoc, "argument expected"));
 }
 
 
@@ -832,14 +690,11 @@ static int
 post_nm(struct mdoc *mdoc)
 {
 
-	assert(MDOC_ELEM == mdoc->last->type);
-	assert(MDOC_Nm == mdoc->last->tok);
 	if (mdoc->last->child)
 		return(1);
 	if (mdoc->meta.name)
 		return(1);
-	return(mdoc_err(mdoc, "macro `%s' has not been invoked with a name",
-				mdoc_macronames[MDOC_Nm]));
+	return(mdoc_err(mdoc, "not yet invoked with name"));
 }
 
 
@@ -848,14 +703,8 @@ post_xr(struct mdoc *mdoc)
 {
 	struct mdoc_node *n;
 
-	assert(MDOC_ELEM == mdoc->last->type);
-	assert(MDOC_Xr == mdoc->last->tok);
-	assert(mdoc->last->child);
-	assert(MDOC_TEXT == mdoc->last->child->type);
-
 	if (NULL == (n = mdoc->last->child->next))
 		return(1);
-	assert(MDOC_TEXT == n->type);
 	if (MSEC_DEFAULT != mdoc_atomsec(n->data.text.string))
 		return(1);
 	return(mdoc_nerr(mdoc, n, "invalid manual section"));
@@ -866,16 +715,11 @@ static int
 post_at(struct mdoc *mdoc)
 {
 
-	assert(MDOC_ELEM == mdoc->last->type);
-	assert(MDOC_At == mdoc->last->tok);
-
 	if (NULL == mdoc->last->child)
 		return(1);
-	assert(MDOC_TEXT == mdoc->last->child->type);
-
 	if (ATT_DEFAULT != mdoc_atoatt(mdoc->last->child->data.text.string))
 		return(1);
-	return(mdoc_err(mdoc, "macro expects a valid AT&T version symbol"));
+	return(mdoc_err(mdoc, "require valid symbol"));
 }
 
 
@@ -883,18 +727,15 @@ static int
 post_an(struct mdoc *mdoc)
 {
 
-	assert(MDOC_ELEM == mdoc->last->type);
-	assert(MDOC_An == mdoc->last->tok);
-
 	if (0 != mdoc->last->data.elem.argc) {
 		if (NULL == mdoc->last->child)
 			return(1);
-		return(mdoc_err(mdoc, "macro expects either argument or parameters"));
+		return(mdoc_err(mdoc, "argument(s) expected"));
 	}
 
 	if (mdoc->last->child)
 		return(1);
-	return(mdoc_err(mdoc, "macro expects either argument or parameters"));
+	return(mdoc_err(mdoc, "argument(s) expected"));
 }
 
 
@@ -902,52 +743,37 @@ static int
 post_ex(struct mdoc *mdoc)
 {
 
-	assert(MDOC_ELEM == mdoc->last->type);
-	assert(MDOC_Ex == mdoc->last->tok);
-
 	if (0 == mdoc->last->data.elem.argc) {
 		if (mdoc->last->child)
 			return(1);
-		return(mdoc_err(mdoc, "macro expects `%s' or a single child",
-					mdoc_argnames[MDOC_Std]));
+		return(mdoc_err(mdoc, "argument(s) expected"));
 	}
 	if (mdoc->last->child)
-		return(mdoc_err(mdoc, "macro expects `%s' or a single child",
-					mdoc_argnames[MDOC_Std]));
+		return(mdoc_err(mdoc, "argument(s) expected"));
 	if (1 != mdoc->last->data.elem.argc)
-		return(mdoc_err(mdoc, "macro expects `%s' or a single child",
-					mdoc_argnames[MDOC_Std]));
+		return(mdoc_err(mdoc, "argument(s) expected"));
 	if (MDOC_Std != mdoc->last->data.elem.argv[0].arg)
-		return(mdoc_err(mdoc, "macro expects `%s' or a single child",
-					mdoc_argnames[MDOC_Std]));
+		return(mdoc_err(mdoc, "argument(s) expected"));
+
 	return(1);
 }
 
 
-/* Warn if `Bl' type-specific syntax isn't reflected in items. */
 static int
 post_it(struct mdoc *mdoc)
 {
-	int		  type, sv;
+	int		  type, sv, i;
 #define	TYPE_NONE	 (0)
 #define	TYPE_BODY	 (1)
 #define	TYPE_HEAD	 (2)
 #define	TYPE_OHEAD	 (3)
-	size_t		  i, argc;
+	size_t		  argc;
 	struct mdoc_node *n;
 
 	if (MDOC_BLOCK != mdoc->last->type)
 		return(1);
 
-	assert(MDOC_It == mdoc->last->tok);
-
-	n = mdoc->last->parent;
-	assert(n);
-	assert(MDOC_Bl == n->tok);
-
-	n = n->parent;
-	assert(MDOC_BLOCK == n->type);
-	assert(MDOC_Bl == n->tok);
+	n = mdoc->last->parent->parent;
 
 	argc = n->data.block.argc;
 	type = TYPE_NONE;
@@ -956,8 +782,8 @@ post_it(struct mdoc *mdoc)
 	/* Some types require block-head, some not. */
 
 	/* LINTED */
-	for (i = 0; TYPE_NONE == type && i < argc; i++)
-		switch (n->data.block.argv[(int)i].arg) {
+	for (i = 0; TYPE_NONE == type && i < (int)argc; i++)
+		switch (n->data.block.argv[i].arg) {
 		case (MDOC_Tag):
 			/* FALLTHROUGH */
 		case (MDOC_Diag):
@@ -968,7 +794,7 @@ post_it(struct mdoc *mdoc)
 			/* FALLTHROUGH */
 		case (MDOC_Inset):
 			type = TYPE_HEAD;
-			sv = n->data.block.argv[(int)i].arg;
+			sv = n->data.block.argv[i].arg;
 			break;
 		case (MDOC_Bullet):
 			/* FALLTHROUGH */
@@ -980,11 +806,11 @@ post_it(struct mdoc *mdoc)
 			/* FALLTHROUGH */
 		case (MDOC_Item):
 			type = TYPE_BODY;
-			sv = n->data.block.argv[(int)i].arg;
+			sv = n->data.block.argv[i].arg;
 			break;
 		case (MDOC_Column):
 			type = TYPE_OHEAD;
-			sv = n->data.block.argv[(int)i].arg;
+			sv = n->data.block.argv[i].arg;
 			break;
 		default:
 			break;
@@ -993,45 +819,45 @@ post_it(struct mdoc *mdoc)
 	assert(TYPE_NONE != type);
 
 	n = mdoc->last->data.block.head;
-	assert(n);
 
 	if (TYPE_HEAD == type) {
 		if (NULL == n->child)
-			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests line parameters"))
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, 
+					"argument(s) suggested"))
 				return(0);
 
 		n = mdoc->last->data.block.body;
-		assert(n);
 		if (NULL == n->child)
-			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests body children"))
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, 
+					"multiline body suggested"))
 				return(0);
 
 	} else if (TYPE_BODY == type) {
 		if (n->child)
-			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests no line parameters"))
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, 
+					"no argument suggested"))
 				return(0);
 	
 		n = mdoc->last->data.block.body;
-		assert(n);
 		if (NULL == n->child)
-			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests body children"))
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, 
+					"multiline body suggested"))
 				return(0);
 	} else {
 		if (NULL == n->child)
-			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests line parameters"))
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, 
+					"argument(s) suggested"))
 				return(0);
 	
 		n = mdoc->last->data.block.body;
-		assert(n);
 		if (n->child)
-			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, "macro suggests no body children"))
+			if ( ! mdoc_warn(mdoc, WARN_SYNTAX, 
+					"no multiline body suggested"))
 				return(0);
 	}
 
 	if (MDOC_Column != sv)
 		return(1);
-
-	/* Make sure the number of columns is sane. */
 
 	argc = mdoc->last->parent->parent->data.block.argv->sz;
 	n = mdoc->last->data.block.head->child;
@@ -1039,9 +865,10 @@ post_it(struct mdoc *mdoc)
 	for (i = 0; n; n = n->next)
 		i++;
 
-	if (i == argc)
+	if (i == (int)argc)
 		return(1);
-	return(mdoc_err(mdoc, "expected %zu list columns, have %zu", argc, i));
+
+	return(mdoc_err(mdoc, "need %zu columns (have %d)", argc, i));
 #undef	TYPE_NONE
 #undef	TYPE_BODY
 #undef	TYPE_HEAD
@@ -1052,11 +879,10 @@ post_it(struct mdoc *mdoc)
 static int
 post_bl(struct mdoc *mdoc)
 {
-	struct mdoc_node *n;
+	struct mdoc_node	*n;
 
 	if (MDOC_BODY != mdoc->last->type)
 		return(1);
-	assert(MDOC_Bl == mdoc->last->tok);
 
 	/* LINTED */
 	for (n = mdoc->last->child; n; n = n->next) {
@@ -1065,9 +891,11 @@ post_bl(struct mdoc *mdoc)
 				continue;
 		break;
 	}
+
 	if (NULL == n)
 		return(1);
-	return(mdoc_nerr(mdoc, n, "invalid child of parent macro `Bl'"));
+
+	return(mdoc_nerr(mdoc, n, "bad child of parent list"));
 }
 
 
@@ -1076,7 +904,6 @@ ebool(struct mdoc *mdoc)
 {
 	struct mdoc_node *n;
 
-	assert(MDOC_ELEM == mdoc->last->type);
 	/* LINTED */
 	for (n = mdoc->last->child; n; n = n->next) {
 		if (MDOC_TEXT != n->type)
@@ -1087,9 +914,10 @@ ebool(struct mdoc *mdoc)
 			continue;
 		break;
 	}
+
 	if (NULL == n)
 		return(1);
-	return(mdoc_nerr(mdoc, n, "expected boolean value"));
+	return(mdoc_nerr(mdoc, n, "expected boolean"));
 }
 
 
@@ -1098,13 +926,17 @@ post_root(struct mdoc *mdoc)
 {
 
 	if (NULL == mdoc->first->child)
-		return(mdoc_err(mdoc, "document has no data"));
+		return(mdoc_err(mdoc, "document lacks data"));
 	if (SEC_PROLOGUE == mdoc->lastnamed)
-		return(mdoc_err(mdoc, "document has incomplete prologue"));
+		return(mdoc_err(mdoc, "document lacks prologue"));
+
 	if (MDOC_BLOCK != mdoc->first->child->type)
-		return(mdoc_err(mdoc, "document expects `%s' macro after prologue", mdoc_macronames[MDOC_Sh]));
+		return(mdoc_err(mdoc, "lacking post-prologue `%s'", 
+					mdoc_macronames[MDOC_Sh]));
 	if (MDOC_Sh != mdoc->first->child->tok)
-		return(mdoc_err(mdoc, "document expects `%s' macro after prologue", mdoc_macronames[MDOC_Sh]));
+		return(mdoc_err(mdoc, "lacking post-prologue `%s'", 
+					mdoc_macronames[MDOC_Sh]));
+
 	return(1);
 }
 
@@ -1117,6 +949,7 @@ post_sh(struct mdoc *mdoc)
 		return(post_sh_head(mdoc));
 	if (MDOC_BODY == mdoc->last->type)
 		return(post_sh_body(mdoc));
+
 	return(1);
 }
 
@@ -1126,8 +959,6 @@ post_sh_body(struct mdoc *mdoc)
 {
 	struct mdoc_node *n;
 
-	assert(MDOC_Sh == mdoc->last->tok);
-	assert(MDOC_BODY == mdoc->last->type);
 	if (SEC_NAME != mdoc->lastnamed)
 		return(1);
 
