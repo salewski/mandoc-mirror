@@ -43,7 +43,8 @@
 #define	TTYPE_LINK	  9
 #define	TTYPE_SSECTION	  10
 #define	TTYPE_FILE	  11
-#define	TTYPE_NMAX	  12
+#define	TTYPE_EMPH	  12
+#define	TTYPE_NMAX	  13
 
 /* 
  * These define "styles" for element types, like command arguments or
@@ -63,7 +64,8 @@ const	int ttypes[TTYPE_NMAX] = {
 	TERMP_UNDERLINE, 	/* TTYPE_FUNC_ARG */
 	TERMP_UNDERLINE, 	/* TTYPE_LINK */
 	TERMP_BOLD,	 	/* TTYPE_SSECTION */
-	TERMP_UNDERLINE	 	/* TTYPE_FILE */
+	TERMP_UNDERLINE, 	/* TTYPE_FILE */
+	TERMP_UNDERLINE	 	/* TTYPE_EMPH */
 };
 
 static	int		  arg_hasattr(int, size_t, 
@@ -94,6 +96,7 @@ DECL_PREPOST(termp_aq);
 DECL_PREPOST(termp_ar);
 DECL_PREPOST(termp_d1);
 DECL_PREPOST(termp_dq);
+DECL_PREPOST(termp_em);
 DECL_PREPOST(termp_fa);
 DECL_PREPOST(termp_fd);
 DECL_PREPOST(termp_fl);
@@ -104,6 +107,7 @@ DECL_PREPOST(termp_nm);
 DECL_PREPOST(termp_op);
 DECL_PREPOST(termp_pa);
 DECL_PREPOST(termp_pf);
+DECL_PREPOST(termp_qo);
 DECL_PREPOST(termp_qq);
 DECL_PREPOST(termp_sh);
 DECL_PREPOST(termp_ss);
@@ -194,7 +198,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_dq_pre, termp_dq_post }, /* Dq */
 	{ NULL, NULL }, /* Ec */
 	{ NULL, NULL }, /* Ef */
-	{ NULL, NULL }, /* Em */ 
+	{ termp_em_pre, termp_em_post }, /* Em */ 
 	{ NULL, NULL }, /* Eo */
 	{ NULL, NULL }, /* Fx */
 	{ NULL, NULL }, /* Ms */
@@ -208,7 +212,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Pq */
 	{ NULL, NULL }, /* Qc */
 	{ NULL, NULL }, /* Ql */
-	{ NULL, NULL }, /* Qo */
+	{ termp_qo_pre, termp_qo_post }, /* Qo */
 	{ termp_qq_pre, termp_qq_post }, /* Qq */
 	{ NULL, NULL }, /* Re */
 	{ NULL, NULL }, /* Rs */
@@ -1100,4 +1104,48 @@ termp_pa_post(DECL_ARGS)
 {
 
 	p->flags &= ~ttypes[TTYPE_FILE];
+}
+
+
+/* ARGSUSED */
+static int
+termp_qo_pre(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return(1);
+	word(p, "\"");
+	p->flags |= TERMP_NOSPACE;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_qo_post(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return;
+	p->flags |= TERMP_NOSPACE;
+	word(p, "\"");
+}
+
+
+/* ARGSUSED */
+static int
+termp_em_pre(DECL_ARGS)
+{
+
+	p->flags |= ttypes[TTYPE_EMPH];
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_em_post(DECL_ARGS)
+{
+
+	p->flags &= ~ttypes[TTYPE_EMPH];
 }
