@@ -26,10 +26,9 @@
 #include "private.h"
 
 /*
- * Parse arguments and parameters of macros.  Arguments follow the
- * syntax of `-arg [val [valN...]]', while parameters are free-form text
- * following arguments (if any).  This file must correctly handle the
- * strange punctuation rules dictated by groff.
+ * Routines to parse arguments of macros.  Arguments follow the syntax
+ * of `-arg [val [valN...]]'.  Arguments come in all types:  quoted
+ * arguments, multiple arguments per value, no-value arguments, etc.
  */
 
 #define	ARGS_QUOTED	(1 << 0)

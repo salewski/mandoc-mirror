@@ -57,6 +57,8 @@ static	int		  msg_warn(void *, int, int,
 
 #ifdef __linux__
 extern	int		  getsubopt(char **, char *const *, char **);
+extern	size_t		  strlcpy(char *, const char *, size_t);
+extern	size_t		  strlcat(char *, const char *, size_t);
 #endif
 
 
@@ -106,7 +108,6 @@ mmain_getopt(struct mmain *p, int argc, char *argv[],
 	size_t		 sz;
 
 	extern int	 optind;
-	extern int	 optreset;
 
 	sz = strlcpy(opts, "vW:", 32);
 	assert(sz < 32);
@@ -115,6 +116,8 @@ mmain_getopt(struct mmain *p, int argc, char *argv[],
 		sz = strlcat(opts, u, 32);
 		assert(sz < 32);
 	}
+
+	optind = 1;
 
 	/* LINTED */
 	while (-1 != (c = getopt(argc, argv, opts)))

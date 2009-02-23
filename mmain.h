@@ -28,12 +28,21 @@
 
 #include "mdoc.h"
 
+#ifdef __linux__
+#define __dead /* Nothing */
+#endif
+
 __BEGIN_DECLS
 
 struct	mmain;
 
 struct	mmain		*mmain_alloc(void);
+#ifdef __linux__
+void		 	 mmain_exit(struct mmain *, int) 
+				__attribute__((__noreturn__));
+#else
 __dead void		 mmain_exit(struct mmain *, int);
+#endif
 int			 mmain_getopt(struct mmain *, int, char *[], 
 				const char *, const char *, void *,
 				int (*)(void *, int, const char *));

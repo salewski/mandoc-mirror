@@ -1,0 +1,21 @@
+$Id$
+
+This documents how to go about adding a macro to mdoc.3.
+
+(1) Add the macro to the #define list in mdoc.h.
+(2) Add the macro to __mdoc_macronames in mdoc.c.
+(3) Add the macro to __mdoc_macros in mdoc.c.
+(4) Add the macro to mdoc_valids in validate.c.
+(5) Add the macro to mdoc_actions in action.c.
+(6) Add the macro to mdoc_argflags in argv.c.
+(7) Modify the hash routine in hash.c (may not be required).
+
+If the macro has arguments:
+
+(1) Add arguments to the #define list in mdoc.h.
+(2) Add the arguments to __mdoc_argnames in mdoc.c.
+(3) Modify parts of argv.c (lookup() and mdoc_args()).
+
+You'll certainly want to change the front-ends:
+
+(1) Add the macro to __termacts in term.c.

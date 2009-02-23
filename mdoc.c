@@ -29,8 +29,20 @@
 /*
  * Main caller in the libmdoc library.  This begins the parsing routine,
  * handles allocation of data, and so forth.  Most of the "work" is done
- * in macro.c, but this orchestrates who does what, when.
+ * in macro.c and validate.c.
  */
+
+static	struct mdoc_arg	 *argdup(size_t, const struct mdoc_arg *);
+static	void		  argfree(size_t, struct mdoc_arg *);
+static	void	  	  argcpy(struct mdoc_arg *, 
+				const struct mdoc_arg *);
+
+static	struct mdoc_node *mdoc_node_alloc(const struct mdoc *);
+static	int		  mdoc_node_append(struct mdoc *, 
+				struct mdoc_node *);
+static	void		  mdoc_elem_free(struct mdoc_elem *);
+static	void		  mdoc_text_free(struct mdoc_text *);
+
 
 const	char *const __mdoc_macronames[MDOC_MAX] = {		 
 	"\\\"",		"Dd",		"Dt",		"Os",
@@ -89,135 +101,8 @@ const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {
 	"emphasis",		"symbolic",
 	};
 
-/* Central table of library: who gets parsed how. */
-
-const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
-	{ NULL, 0 }, /* \" */
-	{ macro_constant, MDOC_PROLOGUE }, /* Dd */
-	{ macro_constant, MDOC_PROLOGUE }, /* Dt */
-	{ macro_constant, MDOC_PROLOGUE }, /* Os */
-	{ macro_scoped, 0 }, /* Sh */
-	{ macro_scoped, 0 }, /* Ss */ 
-	{ macro_text, 0 }, /* Pp */ 
-	{ macro_scoped_line, MDOC_PARSED }, /* D1 */
-	{ macro_scoped_line, MDOC_PARSED }, /* Dl */
-	{ macro_scoped, MDOC_EXPLICIT }, /* Bd */
-	{ macro_scoped_close, MDOC_EXPLICIT }, /* Ed */
-	{ macro_scoped, MDOC_EXPLICIT }, /* Bl */
-	{ macro_scoped_close, MDOC_EXPLICIT }, /* El */
-	{ macro_scoped, MDOC_PARSED }, /* It */
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ad */ 
-	{ macro_text, MDOC_PARSED }, /* An */
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ar */
-	{ macro_constant, 0 }, /* Cd */
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Cm */
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Dv */ 
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Er */ 
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ev */ 
-	{ macro_constant, 0 }, /* Ex */
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Fa */ 
-	{ macro_constant, 0 }, /* Fd */ 
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Fl */
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Fn */ 
-	{ macro_text, MDOC_PARSED }, /* Ft */ 
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ic */ 
-	{ macro_constant, 0 }, /* In */ 
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Li */
-	{ macro_constant, 0 }, /* Nd */ 
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Nm */ 
-	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Op */
-	{ macro_obsolete, 0 }, /* Ot */
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Pa */
-	{ macro_constant, 0 }, /* Rv */
-	/* XXX - .St supposed to be (but isn't) callable. */
-	{ macro_constant_delimited, MDOC_PARSED }, /* St */ 
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Va */
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Vt */ 
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Xr */
-	{ macro_constant, 0 }, /* %A */
-	{ macro_constant, 0 }, /* %B */
-	{ macro_constant, 0 }, /* %D */
-	{ macro_constant, 0 }, /* %I */
-	{ macro_constant, 0 }, /* %J */
-	{ macro_constant, 0 }, /* %N */
-	{ macro_constant, 0 }, /* %O */
-	{ macro_constant, 0 }, /* %P */
-	{ macro_constant, 0 }, /* %R */
-	{ macro_constant, 0 }, /* %T */
-	{ macro_constant, 0 }, /* %V */
-	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Ac */
-	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Ao */
-	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Aq */
-	{ macro_constant_delimited, 0 }, /* At */
-	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Bc */
-	{ macro_scoped, MDOC_EXPLICIT }, /* Bf */ 
-	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Bo */
-	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Bq */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Bsx */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Bx */
-	{ macro_constant, 0 }, /* Db */
-	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Dc */
-	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Do */
-	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Dq */
-	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Ec */
-	{ macro_scoped_close, MDOC_EXPLICIT }, /* Ef */
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Em */ 
-	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Eo */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Fx */
-	{ macro_text, MDOC_PARSED }, /* Ms */
-	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* No */
-	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* Ns */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Nx */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Ox */
-	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Pc */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Pf */
-	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Po */
-	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Pq */
-	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Qc */
-	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ql */
-	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Qo */
-	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Qq */
-	{ macro_scoped_close, MDOC_EXPLICIT }, /* Re */
-	{ macro_scoped, MDOC_EXPLICIT }, /* Rs */
-	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Sc */
-	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* So */
-	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Sq */
-	{ macro_constant, 0 }, /* Sm */
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Sx */
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Sy */
-	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Tn */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Ux */
-	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Xc */
-	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Xo */
-	/* XXX - .Fo supposed to be (but isn't) callable. */
-	{ macro_scoped, MDOC_EXPLICIT }, /* Fo */ 
-	/* XXX - .Fc supposed to be (but isn't) callable. */
-	{ macro_scoped_close, MDOC_EXPLICIT }, /* Fc */ 
-	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Oo */
-	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Oc */
-	{ macro_scoped, MDOC_EXPLICIT }, /* Bk */
-	{ macro_scoped_close, MDOC_EXPLICIT }, /* Ek */
-	{ macro_constant, 0 }, /* Bt */
-	{ macro_constant, 0 }, /* Hf */
-	{ macro_obsolete, 0 }, /* Fr */
-	{ macro_constant, 0 }, /* Ud */
-};
-
 const	char * const *mdoc_macronames = __mdoc_macronames;
 const	char * const *mdoc_argnames = __mdoc_argnames;
-const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;
-
-static	struct mdoc_arg	 *argdup(size_t, const struct mdoc_arg *);
-static	void		  argfree(size_t, struct mdoc_arg *);
-static	void	  	  argcpy(struct mdoc_arg *, 
-				const struct mdoc_arg *);
-
-static	struct mdoc_node *mdoc_node_alloc(const struct mdoc *);
-static	int		  mdoc_node_append(struct mdoc *, 
-				struct mdoc_node *);
-static	void		  mdoc_elem_free(struct mdoc_elem *);
-static	void		  mdoc_text_free(struct mdoc_text *);
-
 
 
 const struct mdoc_node *

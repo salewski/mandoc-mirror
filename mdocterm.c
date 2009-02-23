@@ -24,6 +24,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __linux__
+#include <time.h>
+#endif
+
 #include "mmain.h"
 #include "term.h"
 
@@ -60,9 +64,6 @@ main(int argc, char *argv[])
 	struct mmain	*p;
 	const struct mdoc *mdoc;
 	struct termp	 termp;
-
-	extern int	 optreset;
-	extern int	 optind;
 
 	p = mmain_alloc();
 

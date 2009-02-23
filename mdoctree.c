@@ -34,9 +34,6 @@ main(int argc, char *argv[])
 	struct mmain	*p;
 	const struct mdoc *mdoc;
 
-	extern int	 optreset;
-	extern int	 optind;
-
 	p = mmain_alloc();
 
 	if ( ! mmain_getopt(p, argc, argv, NULL, NULL, NULL, NULL))

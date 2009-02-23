@@ -238,31 +238,31 @@ where capitalised non-terminals represent nodes.
 .Pp
 Of note are the TEXT nodes following the HEAD, BODY and TAIL nodes of
 the BLOCK production.  These refer to punctuation marks.  Furthermore,
-although a TEXT node will generally have a non-zero-length string, it
-certain cases, such as 
-.Dq \&.Bd \-literal ,
+although a TEXT node will generally have a non-zero-length string, in
+the specific case of 
+.Sq \&.Bd \-literal ,
 an empty line will produce a zero-length string.
 .\" PARAGRAPH
 .Pp
-The rule-of-thumb for mapping node types to macros follows: in-line
+The rule-of-thumb for mapping node types to macros follows. In-line
 elements, such as 
-.Dq \&.Em foo ,
+.Sq \&.Em foo ,
 are classified as ELEMENT nodes, which can only contain text.
-Multi-line elements such as
-.Dq \&.Sh
+Multi-line elements, such as
+.Sq \&.Sh ,
 are BLOCK elements, where the HEAD constitutes line contents and the
 BODY constitutes subsequent lines.  In-line elements with matching
 pairs, such as
-.Dq \&.So
+.Sq \&.So
 and
-.Dq \&.Sc ,
+.Sq \&.Sc ,
 are BLOCK elements with no HEAD tag.  The only exception to this is
-.Dq \&.Eo 
+.Sq \&.Eo 
 and
-.Dq \&.Ec ,
+.Sq \&.Ec ,
 which has a HEAD and TAIL node corresponding to the enclosure string.
-TEXT nodes, obviously, constitute text; the ROOT node is the document's
-root.
+TEXT nodes, obviously, constitute text, and the ROOT node is the
+document's root.
 .\" SECTION
 .Sh EXAMPLES
 The following example reads lines from stdin and parses them, operating

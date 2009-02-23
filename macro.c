@@ -28,54 +28,19 @@
 /*
  * This has scanning/parsing routines, each of which extract a macro and
  * its arguments and parameters, then know how to progress to the next
- * macro.  Macros are parsed according as follows:
- *
- *   ELEMENT:	  TEXT | epsilon
- *   BLOCK:	  HEAD PUNCT BODY PUNCT BLOCK_TAIL PUNCT
- *   BLOCK_TAIL:  TAIL | epsilon
- *   HEAD:	  ELEMENT | TEXT | BLOCK | epsilon
- *   BODY:	  ELEMENT | TEXT | BLOCK | epsilon
- *   TAIL:	  TEXT | epsilon
- *   PUNCT:	  TEXT (delimiters) | epsilon
- *
- * These are arranged into a parse tree, an example of which follows:
- *
- *   ROOT
- *       BLOCK (.Sh)
- *           HEAD
- *               TEXT (`NAME')
- *           BODY
- *               ELEMENT (.Nm)
- *                   TEXT (`mdocml')
- *               ELEMENT (.Nd)
- *                   TEXT (`mdoc macro compiler')
- *               BLOCK (.Op)
- *                   HEAD
- *                       ELEMENT (.Fl)
- *                           TEXT (`v')
- *               BLOCK (.Op)
- *                   HEAD
- *                       ELEMENT (.Fl)
- *                           TEXT (`v')
- *                       ELEMENT (.Fl)
- *                           TEXT (`W')
- *                       ELEMENT (.Ns)
- *                       ELEMENT (.Ar)
- *                           TEXT (`err...')
- *
- * These types are always per-line except for block bodies, which may
- * span multiple lines.  Macros are assigned a parsing routine, which
- * corresponds to the type, in the mdoc_macros table.
- *
- * Note that types are general:  there can be several parsing routines
- * corresponding to a single type.  The macro_text function, for
- * example, parses an ELEMENT type (see the function definition for
- * details) that may be interrupted by further macros; the
- * macro_constant function, on the other hand, parses an ELEMENT type
- * spanning a single line.
+ * macro. 
  */
 
 #include "private.h"
+
+static int	  macro_obsolete(MACRO_PROT_ARGS);
+static int	  macro_constant(MACRO_PROT_ARGS);
+static int	  macro_constant_scoped(MACRO_PROT_ARGS);
+static int	  macro_constant_delimited(MACRO_PROT_ARGS);
+static int	  macro_text(MACRO_PROT_ARGS);
+static int	  macro_scoped(MACRO_PROT_ARGS);
+static int	  macro_scoped_close(MACRO_PROT_ARGS);
+static int	  macro_scoped_line(MACRO_PROT_ARGS);
 
 #define	REWIND_REWIND	(1 << 0)
 #define	REWIND_NOHALT	(1 << 1)
@@ -102,6 +67,122 @@ static	int	  perr(struct mdoc *, int, int, int);
 #define	ENOCTX		(1)
 #define	ENOPARMS	(2)
 #define	EARGVLIM	(3)
+
+/* Central table of library: who gets parsed how. */
+
+const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
+	{ NULL, 0 }, /* \" */
+	{ macro_constant, MDOC_PROLOGUE }, /* Dd */
+	{ macro_constant, MDOC_PROLOGUE }, /* Dt */
+	{ macro_constant, MDOC_PROLOGUE }, /* Os */
+	{ macro_scoped, 0 }, /* Sh */
+	{ macro_scoped, 0 }, /* Ss */ 
+	{ macro_text, 0 }, /* Pp */ 
+	{ macro_scoped_line, MDOC_PARSED }, /* D1 */
+	{ macro_scoped_line, MDOC_PARSED }, /* Dl */
+	{ macro_scoped, MDOC_EXPLICIT }, /* Bd */
+	{ macro_scoped_close, MDOC_EXPLICIT }, /* Ed */
+	{ macro_scoped, MDOC_EXPLICIT }, /* Bl */
+	{ macro_scoped_close, MDOC_EXPLICIT }, /* El */
+	{ macro_scoped, MDOC_PARSED }, /* It */
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ad */ 
+	{ macro_text, MDOC_PARSED }, /* An */
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ar */
+	{ macro_constant, 0 }, /* Cd */
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Cm */
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Dv */ 
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Er */ 
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ev */ 
+	{ macro_constant, 0 }, /* Ex */
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Fa */ 
+	{ macro_constant, 0 }, /* Fd */ 
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Fl */
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Fn */ 
+	{ macro_text, MDOC_PARSED }, /* Ft */ 
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ic */ 
+	{ macro_constant, 0 }, /* In */ 
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Li */
+	{ macro_constant, 0 }, /* Nd */ 
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Nm */ 
+	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Op */
+	{ macro_obsolete, 0 }, /* Ot */
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Pa */
+	{ macro_constant, 0 }, /* Rv */
+	/* XXX - .St supposed to be (but isn't) callable. */
+	{ macro_constant_delimited, MDOC_PARSED }, /* St */ 
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Va */
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Vt */ 
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Xr */
+	{ macro_constant, 0 }, /* %A */
+	{ macro_constant, 0 }, /* %B */
+	{ macro_constant, 0 }, /* %D */
+	{ macro_constant, 0 }, /* %I */
+	{ macro_constant, 0 }, /* %J */
+	{ macro_constant, 0 }, /* %N */
+	{ macro_constant, 0 }, /* %O */
+	{ macro_constant, 0 }, /* %P */
+	{ macro_constant, 0 }, /* %R */
+	{ macro_constant, 0 }, /* %T */
+	{ macro_constant, 0 }, /* %V */
+	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Ac */
+	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Ao */
+	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Aq */
+	{ macro_constant_delimited, 0 }, /* At */
+	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Bc */
+	{ macro_scoped, MDOC_EXPLICIT }, /* Bf */ 
+	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Bo */
+	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Bq */
+	{ macro_constant_delimited, MDOC_PARSED }, /* Bsx */
+	{ macro_constant_delimited, MDOC_PARSED }, /* Bx */
+	{ macro_constant, 0 }, /* Db */
+	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Dc */
+	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Do */
+	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Dq */
+	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Ec */
+	{ macro_scoped_close, MDOC_EXPLICIT }, /* Ef */
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Em */ 
+	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Eo */
+	{ macro_constant_delimited, MDOC_PARSED }, /* Fx */
+	{ macro_text, MDOC_PARSED }, /* Ms */
+	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* No */
+	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* Ns */
+	{ macro_constant_delimited, MDOC_PARSED }, /* Nx */
+	{ macro_constant_delimited, MDOC_PARSED }, /* Ox */
+	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Pc */
+	{ macro_constant_delimited, MDOC_PARSED }, /* Pf */
+	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Po */
+	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Pq */
+	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Qc */
+	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ql */
+	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Qo */
+	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Qq */
+	{ macro_scoped_close, MDOC_EXPLICIT }, /* Re */
+	{ macro_scoped, MDOC_EXPLICIT }, /* Rs */
+	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Sc */
+	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* So */
+	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Sq */
+	{ macro_constant, 0 }, /* Sm */
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Sx */
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Sy */
+	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Tn */
+	{ macro_constant_delimited, MDOC_PARSED }, /* Ux */
+	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Xc */
+	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Xo */
+	/* XXX - .Fo supposed to be (but isn't) callable. */
+	{ macro_scoped, MDOC_EXPLICIT }, /* Fo */ 
+	/* XXX - .Fc supposed to be (but isn't) callable. */
+	{ macro_scoped_close, MDOC_EXPLICIT }, /* Fc */ 
+	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Oo */
+	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Oc */
+	{ macro_scoped, MDOC_EXPLICIT }, /* Bk */
+	{ macro_scoped_close, MDOC_EXPLICIT }, /* Ek */
+	{ macro_constant, 0 }, /* Bt */
+	{ macro_constant, 0 }, /* Hf */
+	{ macro_obsolete, 0 }, /* Fr */
+	{ macro_constant, 0 }, /* Ud */
+};
+
+const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;
 
 
 static int
@@ -460,7 +541,9 @@ rewind_expblock(struct mdoc *mdoc, int tok, int line, int ppos)
 			break;
 		else if (rewind_dobreak(tok, n))
 			continue;
-		return(mdoc_perr(mdoc, line, ppos, "scope breaks prior %s", mdoc_node2a(n)));
+		return(mdoc_perr(mdoc, line, ppos, 
+					"scope breaks prior %s", 
+					mdoc_node2a(n)));
 	}
 
 	assert(n);
@@ -483,7 +566,9 @@ rewind_impblock(struct mdoc *mdoc, int tok, int line, int ppos)
 			break;
 		else if (rewind_dobreak(tok, n))
 			continue;
-		return(mdoc_perr(mdoc, line, ppos, "scope breaks prior %s", mdoc_node2a(n)));
+		return(mdoc_perr(mdoc, line, ppos, 
+					"scope breaks prior %s", 
+					mdoc_node2a(n)));
 	}
 
 	assert(n);
@@ -523,7 +608,7 @@ append_delims(struct mdoc *mdoc, int line, int *pos, char *buf)
  * Close out an explicit scope.  This optionally parses a TAIL type with
  * a set number of TEXT children.
  */
-int
+static int
 macro_scoped_close(MACRO_PROT_ARGS)
 {
 	int	 	 tt, j, c, lastarg, maxargs, flushed;
@@ -545,7 +630,8 @@ macro_scoped_close(MACRO_PROT_ARGS)
 
 	if ( ! (MDOC_CALLABLE & mdoc_macros[tok].flags)) {
 		if (0 == buf[*pos]) {
-			if ( ! rewind_subblock(MDOC_BODY, mdoc, tok, line, ppos))
+			if ( ! rewind_subblock(MDOC_BODY, mdoc, 
+						tok, line, ppos))
 				return(0);
 			return(rewind_expblock(mdoc, tok, line, ppos));
 		}
@@ -587,7 +673,8 @@ macro_scoped_close(MACRO_PROT_ARGS)
 			return(0);
 		else if (MDOC_MAX != c) {
 			if ( ! flushed) {
-				if ( ! rewind_expblock(mdoc, tok, line, ppos))
+				if ( ! rewind_expblock(mdoc, tok, 
+							line, ppos))
 					return(0);
 				flushed = 1;
 			}
@@ -634,7 +721,7 @@ macro_scoped_close(MACRO_PROT_ARGS)
  *    TEXT (`;')
  *    TEXT (`;')
  */
-int
+static int
 macro_text(MACRO_PROT_ARGS)
 {
 	int		  la, lastpunct, c, w, argc;
@@ -765,7 +852,7 @@ macro_text(MACRO_PROT_ARGS)
  * Note that the `.It' macro, possibly the most difficult (as it has
  * embedded scope, etc.) is handled by this routine.
  */
-int
+static int
 macro_scoped(MACRO_PROT_ARGS)
 {
 	int		  c, lastarg, argc;
@@ -816,7 +903,8 @@ macro_scoped(MACRO_PROT_ARGS)
 	if (0 == buf[*pos]) {
 		if ( ! mdoc_head_alloc(mdoc, line, ppos, tok))
 			return(0);
-		if ( ! rewind_subblock(MDOC_HEAD, mdoc, tok, line, ppos))
+		if ( ! rewind_subblock(MDOC_HEAD, mdoc, 
+					tok, line, ppos))
 			return(0);
 		if ( ! mdoc_body_alloc(mdoc, line, ppos, tok))
 			return(0);
@@ -897,7 +985,7 @@ macro_scoped(MACRO_PROT_ARGS)
  *         TEXT (`;')
  *         TEXT (`;')
  */
-int
+static int
 macro_scoped_line(MACRO_PROT_ARGS)
 {
 	int		  lastarg, c;
@@ -969,7 +1057,7 @@ macro_scoped_line(MACRO_PROT_ARGS)
  *             TEXT (`b')
  *     TEXT (';')
  */
-int
+static int
 macro_constant_scoped(MACRO_PROT_ARGS)
 {
 	int		  lastarg, flushed, j, c, maxargs;
@@ -1030,20 +1118,24 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 			return(0);
 		else if (MDOC_MAX != c) {
 			if ( ! flushed) {
-				if ( ! rewind_subblock(MDOC_HEAD, mdoc, tok, line, ppos))
+				if ( ! rewind_subblock(MDOC_HEAD, mdoc, 
+							tok, line, ppos))
 					return(0);
 				flushed = 1;
-				if ( ! mdoc_body_alloc(mdoc, line, ppos, tok))
+				if ( ! mdoc_body_alloc(mdoc, line, 
+							ppos, tok))
 					return(0);
 				mdoc->next = MDOC_NEXT_CHILD;
 			}
-			if ( ! mdoc_macro(mdoc, c, line, lastarg, pos, buf))
+			if ( ! mdoc_macro(mdoc, c, line, lastarg, 
+						pos, buf))
 				return(0);
 			break;
 		}
 
 		if ( ! flushed && mdoc_isdelim(p)) {
-			if ( ! rewind_subblock(MDOC_HEAD, mdoc, tok, line, ppos))
+			if ( ! rewind_subblock(MDOC_HEAD, mdoc, 
+						tok, line, ppos))
 				return(0);
 			flushed = 1;
 			if ( ! mdoc_body_alloc(mdoc, line, ppos, tok))
@@ -1083,7 +1175,7 @@ macro_constant_scoped(MACRO_PROT_ARGS)
  *    ELEMENT (.No)
  *    TEXT (`b')
  */
-int
+static int
 macro_constant_delimited(MACRO_PROT_ARGS)
 {
 	int		  lastarg, flushed, j, c, maxargs, argc,
@@ -1199,7 +1291,7 @@ macro_constant_delimited(MACRO_PROT_ARGS)
  * A constant macro is the simplest classification.  It spans an entire
  * line.  
  */
-int
+static int
 macro_constant(MACRO_PROT_ARGS)
 {
 	int		  c, w, la, argc;
@@ -1266,7 +1358,7 @@ macro_constant(MACRO_PROT_ARGS)
 
 
 /* ARGSUSED */
-int
+static int
 macro_obsolete(MACRO_PROT_ARGS)
 {
 
@@ -1297,7 +1389,8 @@ macro_end(struct mdoc *mdoc)
 			continue;
 		if ( ! (MDOC_EXPLICIT & mdoc_macros[n->tok].flags))
 			continue;
-		return(mdoc_nerr(mdoc, n, "macro scope still open on exit"));
+		return(mdoc_nerr(mdoc, n, 
+				"macro scope still open on exit"));
 	}
 
 	return(rewind_last(mdoc, mdoc->first));

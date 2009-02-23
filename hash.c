@@ -28,9 +28,8 @@
 /*
  * Routines for the perfect-hash hashtable used by the parser to look up
  * tokens by their string-ified names (`.Fl' -> MDOC_Fl).  The
- * allocation penalty for this is 27 * 26 * sizeof(ptr).
+ * allocation penalty for this is 27 * 26 * sizeof(ptr). 
  */
-
 
 void
 mdoc_tokhash_free(void *htab)

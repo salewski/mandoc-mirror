@@ -164,15 +164,6 @@ int	  	  xstrncmp(const char *, const char *, size_t);
 void	 	 *xcalloc(size_t, size_t);
 char	 	 *xstrdup(const char *);
 
-int		  macro_obsolete(MACRO_PROT_ARGS);
-int		  macro_constant(MACRO_PROT_ARGS);
-int		  macro_constant_scoped(MACRO_PROT_ARGS);
-int		  macro_constant_delimited(MACRO_PROT_ARGS);
-int		  macro_text(MACRO_PROT_ARGS);
-int		  macro_scoped(MACRO_PROT_ARGS);
-int		  macro_scoped_close(MACRO_PROT_ARGS);
-int		  macro_scoped_line(MACRO_PROT_ARGS);
-int		  macro_prologue(MACRO_PROT_ARGS);
 int		  macro_end(struct mdoc *);
 
 __END_DECLS

@@ -21,9 +21,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#ifndef __OpenBSD__
+#ifdef __linux__
 #include <time.h>
 #endif
+
+/*
+ * Convert scalars to and from string format.
+ */
 
 #include "private.h"
 
