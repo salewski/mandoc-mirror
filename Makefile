@@ -9,6 +9,8 @@ TREELNS	= mdoctree.ln mmain.ln
 
 TERMLNS	= mdoctree.ln mmain.ln term.ln
 
+LINTLNS	= mdoclint.ln mmain.ln
+
 LNS	= $(LIBLNS) $(TREELNS) $(TERMLNS)
 
 LLNS	= llib-llibmdoc.ln llib-lmdoctree.ln llib-lmdocterm.ln
@@ -22,16 +24,18 @@ TERMOBJS= mdocterm.o mmain.o term.o
 
 TREEOBJS= mdoctree.o mmain.o
 
+LINTOBJS= mdoclint.o mmain.o
+
 OBJS	= $(LIBOBJS) $(TERMOBJS) $(TREEOBJS)
 
 SRCS	= macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
-	  action.c term.c mdoctree.c mdocterm.c mmain.c
+	  action.c term.c mdoctree.c mdocterm.c mmain.c mdoclint.c
 
 HEADS	= mdoc.h private.h term.h mmain.h
 
 MANS	= mdoctree.1 mdocterm.1 mdoc.3
 
-BINS	= mdocterm mdoctree
+BINS	= mdocterm mdoctree mdoclint
 
 CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS)
 
@@ -64,10 +68,7 @@ FAIL	= regress/test.empty \
 	  regress/test.prologue.33 \
 	  regress/test.sh.01 \
 	  regress/test.sh.02 \
-	  regress/test.sh.03 \
-	  regress/test.name.01 \
-	  regress/test.name.02 \
-	  regress/test.name.03
+	  regress/test.sh.03
 
 SUCCEED	= regress/test.prologue.05 \
 	  regress/test.prologue.07 \
@@ -81,6 +82,9 @@ SUCCEED	= regress/test.prologue.05 \
 	  regress/test.prologue.20 \
 	  regress/test.sh.00 \
 	  regress/test.name.00 \
+	  regress/test.name.01 \
+	  regress/test.name.02 \
+	  regress/test.name.03 \
 	  regress/test.list.00 \
 	  regress/test.list.01 \
 	  regress/test.list.02 \
@@ -100,13 +104,13 @@ dist:	mdocml-$(VERSION).tar.gz
 
 port:	mdocml-oport-$(VERSION).tar.gz
 
-regress:: mdocml
+regress:: mdoclint
 	@for f in $(FAIL); do \
-		echo "./mdocml $$f" ; \
-		./mdocml $$f 2>/dev/null || continue ; exit 1 ; done
+		echo "./mdoclint $$f" ; \
+		./mdoclint $$f 2>/dev/null || continue ; exit 1 ; done
 	@for f in $(SUCCEED); do \
-		echo "./mdocml $$f" ; \
-		./mdocml $$f 2>/dev/null || exit 1 ; done
+		echo "./mdoclint $$f" ; \
+		./mdoclint $$f 2>/dev/null || exit 1 ; done
 
 install:
 	mkdir -p $(PREFIX)/bin/
@@ -154,6 +158,9 @@ mdoc.o: mdoc.c private.h
 mdocterm.ln: mdocterm.c mmain.h
 mdocterm.o: mdocterm.c mmain.h
 
+mdoclint.ln: mdoclint.c mmain.h
+mdoclint.o: mdoclint.c mmain.h
+
 mdoctree.ln: mdoctree.c mmain.h
 mdoctree.o: mdoctree.c mmain.h
 
@@ -188,10 +195,12 @@ mdocml-oport-$(VERSION).tar.gz: Makefile.port DESCR
 	echo @comment $$OpenBSD$$ > .dist/mdocml/pkg/PLIST
 	echo bin/mdocterm >> .dist/mdocml/pkg/PLIST
 	echo bin/mdoctree >> .dist/mdocml/pkg/PLIST
+	echo bin/mdoclint >> .dist/mdocml/pkg/PLIST
 	echo lib/libmdoc.a >> .dist/mdocml/pkg/PLIST
 	echo include/mdoc.h >> .dist/mdocml/pkg/PLIST
 	echo @man man/man1/mdoctree.1 >> .dist/mdocml/pkg/PLIST
 	echo @man man/man1/mdocterm.1 >> .dist/mdocml/pkg/PLIST
+	echo @man man/man1/mdoclint.1 >> .dist/mdocml/pkg/PLIST
 	echo @man man/man3/mdoc.3 >> .dist/mdocml/pkg/PLIST
 	( cd .dist/ && tar zcf ../$@ mdocml/ )
 	rm -rf .dist/
@@ -220,3 +229,5 @@ mdocterm: $(TERMOBJS) libmdoc.a
 mdoctree: $(TREEOBJS) libmdoc.a
 	$(CC) $(CFLAGS) -o $@ $(TREEOBJS) libmdoc.a 
 
+mdoclint: $(LINTOBJS) libmdoc.a
+	$(CC) $(CFLAGS) -o $@ $(LINTOBJS) libmdoc.a 
