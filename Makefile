@@ -115,6 +115,9 @@ port:	mdocml-oport-$(VERSION).tar.gz
 
 www:	$(HTMLS)
 
+installwww: www
+	install -m 0444 $(HTMLS) $(STATICS) $(PREFIX)/
+
 regress:: mdoclint
 	@for f in $(FAIL); do \
 		echo "./mdoclint $$f" ; \

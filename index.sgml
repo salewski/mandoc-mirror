@@ -101,10 +101,11 @@
 					</p>
 
 					<p>
-					If installing for the first time:
+					If installing for the first time (you must have the ports tree installed):
 					</p>
 
 					<p class="boxed">
+					% cd /usr/ports/devel/<br>
 					% ftp -V -o- http://mdocml.bsd.lv/ports-openbsd/mdocml.tgz | tar -zxf -<br>
 					% cd mdocml<br>
 					% sudo make<br>
