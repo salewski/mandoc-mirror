@@ -19,6 +19,14 @@
 #ifndef MDOC_H
 #define MDOC_H
 
+/*
+ * This library implements a validating scanner/parser for ``mdoc'' roff
+ * macro documents, a.k.a. BSD manual page documents.  The mdoc.c file
+ * drives the parser, while macro.c describes the macro ontologies.
+ * validate.c pre- and post-validates parsed macros, and action.c
+ * performs actions on parsed and validated macros.
+ */
+
 /* What follows is a list of ALL possible macros. */
 
 #define	MDOC___	 	 0
@@ -421,12 +429,10 @@ const struct mdoc_meta *mdoc_meta(const struct mdoc *);
 /* Signal end of parse sequence (boolean retval). */
 int		  mdoc_endparse(struct mdoc *);
 
+/* The following are utility functions. */
 const char 	 *mdoc_arch2a(enum mdoc_arch);
-
 const char 	 *mdoc_vol2a(enum mdoc_vol);
-
 const char 	 *mdoc_msec2a(enum mdoc_msec);
-
 int		  mdoc_isdelim(const char *);
 
 __END_DECLS

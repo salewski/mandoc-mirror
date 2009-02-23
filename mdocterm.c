@@ -45,6 +45,7 @@ static	void		  pword(struct termp *, const char *, size_t);
 static	void		  pescape(struct termp *, 
 				const char *, size_t *, size_t);
 static	void		  chara(struct termp *, char);
+static	void		  stringa(struct termp *, const char *);
 static	void		  style(struct termp *, enum termstyle);
 
 #ifdef __linux__
@@ -231,6 +232,16 @@ vspace(struct termp *p)
 
 
 static void
+stringa(struct termp *p, const char *s)
+{
+
+	/* XXX - speed up if not passing to chara. */
+	for ( ; *s; s++)
+		chara(p, *s);
+}
+
+
+static void
 chara(struct termp *p, char c)
 {
 
@@ -284,6 +295,10 @@ pescape(struct termp *p, const char *word, size_t *i, size_t len)
 			chara(p, ']');
 		else if ('l' == word[*i] && 'B' == word[*i + 1])
 			chara(p, '[');
+		else if ('<' == word[*i] && '-' == word[*i + 1])
+			stringa(p, "<-");
+		else if ('-' == word[*i] && '>' == word[*i + 1])
+			stringa(p, "->");
 
 		(*i)++;
 		return;
