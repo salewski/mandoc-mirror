@@ -15,10 +15,10 @@ PERMIT_PACKAGE_FTP=	Yes
 PERMIT_DISTFILES_CDROM=	Yes
 PERMIT_DISTFILES_FTP=	Yes
 
-MASTER_SITES=		http://mdocml.bsd.lv/ports-openbsd/
+MASTER_SITES=		http://mdocml.bsd.lv/snapshots/
 
 WANTLIB=		c
 
-NO_REGRESS=		Yes
+NO_REGRESS=		No
 
 .include <bsd.port.mk>

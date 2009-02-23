@@ -74,21 +74,19 @@
 					</p>
 
 					<h2>
-					nightly source
+					snapshotted source
 					</h2>
 
 					<p>
-					CVS sources are checkedout and snapshotted nightly.  These may be found in the <a
+					CVS sources are checkedout and snapshotted with big updates.  These may be found in the <a
 					href="/snapshots/">/snapshots/</a> directory.
 					</p>
 
 					<p class="boxed">
 					% cd /tmp<br>
-					% ftp -V -o- http://mdocml.bsd.lv/snapshots/mdocml.tgz | tar -zxf -<br>
+					% ftp -V -o- http://mdocml.bsd.lv/snapshots/mdocml.tar.gz | tar -zvxf -<br>
 					% cd mdocml<br>
-					% make<br>
-					% make regress<br>
-					% make install
+					% make && make regress && make install
 					</p>
 
 					<h2>
@@ -96,28 +94,18 @@
 					</h2>
 
 					<p>
-					The nightly snapshot is automatically converted into an OpenBSD port (ports for other BSD systems not
+					The source snapshot is automatically converted into an OpenBSD port (ports for other BSD systems not
 					yet available).  These may be found in the <a href="/ports-openbsd/">/ports-openbsd/</a> directory.
-					</p>
-
-					<p>
-					If installing for the first time (you must have the ports tree installed):
+					You <span class="emph">must</span> have the ports tree installed.
 					</p>
 
 					<p class="boxed">
+					% sudo pkg_delete mdocml<br>
 					% cd /usr/ports/devel/<br>
-					% ftp -V -o- http://mdocml.bsd.lv/ports-openbsd/mdocml.tgz | tar -zxf -<br>
+					% sudo rm -rf mdocml<br>
+					% ftp -V -o- http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz | sudo tar -zvxf -<br>
 					% cd mdocml<br>
-					% sudo make<br>
-					% sudo make install
-					</p>
-
-					<p>
-					Subsequent installations:
-					</p>
-
-					<p class="boxed">
-					% sudo pkg_add -r mdocml
+					% sudo make && sudo make regress && sudo make install
 					</p>
 				</td>
 			</tr>

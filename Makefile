@@ -1,6 +1,6 @@
 .SUFFIXES:	.html .sgml
 
-VERSION	= 1.3.0
+VERSION	= 1.3.3
 
 CFLAGS += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g 
 
@@ -41,11 +41,14 @@ HTMLS	= index.html
 
 STATICS	= style.css external.png
 
-MANS	= mdoctree.1 mdocterm.1 mdoc.3
+TARGZS	= mdocml-$(VERSION).tar.gz mdocml-oport-$(VERSION).tar.gz
+
+MANS	= mdoctree.1 mdocterm.1 mdoclint.1 mdoc.3
 
 BINS	= mdocterm mdoctree mdoclint
 
-CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS)
+CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
+	  $(TARGZS)
 
 INSTALL	= $(SRCS) $(HEADS) Makefile Makefile.port DESCR $(MANS) \
 	  $(SGMLS) $(STATICS)
@@ -102,6 +105,8 @@ SUCCEED	= regress/test.prologue.05 \
 	  regress/test.list.05 \
 	  regress/test.list.06
 
+REGRESS	= $(FAIL) $(SUCCEED)
+
 all:	$(BINS)
 
 lint:	$(LLNS)
@@ -113,10 +118,14 @@ dist:	mdocml-$(VERSION).tar.gz
 
 port:	mdocml-oport-$(VERSION).tar.gz
 
-www:	$(HTMLS)
+www:	$(HTMLS) $(TARGZS)
 
 installwww: www
 	install -m 0444 $(HTMLS) $(STATICS) $(PREFIX)/
+	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/
+	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/
+	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz
+	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/mdocml.tar.gz
 
 regress:: mdoclint
 	@for f in $(FAIL); do \
@@ -133,23 +142,21 @@ install:
 	mkdir -p $(PREFIX)/man/man1/
 	install -m 0755 mdocterm $(PREFIX)/bin/
 	install -m 0755 mdoctree $(PREFIX)/bin/
+	install -m 0755 mdoclint $(PREFIX)/bin/
 	install -m 0444 mdocterm.1 $(PREFIX)/man/man1/
-	install -m 0444 mdocterm.1 $(PREFIX)/man/man1/
+	install -m 0444 mdoctree.1 $(PREFIX)/man/man1/
+	install -m 0444 mdoclint.1 $(PREFIX)/man/man1/
 	install -m 0444 mdoc.3 $(PREFIX)/man/man3/
 	install -m 0644 libmdoc.a $(PREFIX)/lib/
 	install -m 0444 mdoc.h $(PREFIX)/include/
 
-install-dist: mdocml-$(VERSION).tar.gz mdocml-oport-$(VERSION).tar.gz
-	install -m 0644 mdocml-$(VERSION).tar.gz $(PREFIX)/
-	install -m 0644 mdocml-$(VERSION).tar.gz $(PREFIX)/mdocml.tar.gz
-	install -m 0644 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/
-	install -m 0644 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/mdocml-oport.tar.gz
-
 uninstall:
 	rm -f $(PREFIX)/bin/mdocterm
 	rm -f $(PREFIX)/bin/mdoctree
+	rm -f $(PREFIX)/bin/mdoclint
 	rm -f $(PREFIX)/man/man1/mdocterm.1
 	rm -f $(PREFIX)/man/man1/mdoctree.1
+	rm -f $(PREFIX)/man/man1/mdoclint.1
 	rm -f $(PREFIX)/man/man3/mdoc.3
 	rm -f $(PREFIX)/lib/libmdoc.a
 	rm -f $(PREFIX)/include/mdoc.h
@@ -199,9 +206,10 @@ mmain.h: mdoc.h
 
 term.h: mdoc.h
 
-mdocml-oport-$(VERSION).tar.gz: Makefile.port DESCR
+mdocml-oport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.port DESCR
 	mkdir -p .dist/mdocml/pkg
-	sed -e "s!@VERSION@!$(VERSION)!" Makefile.port > .dist/mdocml/Makefile
+	sed -e "s!@VERSION@!$(VERSION)!" Makefile.port > \
+		.dist/mdocml/Makefile
 	md5 mdocml-$(VERSION).tar.gz > .dist/mdocml/distinfo
 	rmd160 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
 	sha1 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
@@ -221,7 +229,9 @@ mdocml-oport-$(VERSION).tar.gz: Makefile.port DESCR
 
 mdocml-$(VERSION).tar.gz: $(INSTALL)
 	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
+	mkdir -p .dist/mdocml/mdocml-$(VERSION)/regress/
 	install -m 0644 $(INSTALL) .dist/mdocml/mdocml-$(VERSION)/
+	install -m 0644 $(REGRESS) .dist/mdocml/mdocml-$(VERSION)/regress/
 	( cd .dist/mdocml/ && tar zcf ../../$@ mdocml-$(VERSION)/ )
 	rm -rf .dist/
 
