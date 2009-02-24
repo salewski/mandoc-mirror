@@ -103,6 +103,7 @@ DECL_POST(name);
 DECL_PREPOST(termp_aq);
 DECL_PREPOST(termp_ar);
 DECL_PREPOST(termp_bd);
+DECL_PREPOST(termp_bq);
 DECL_PREPOST(termp_cd);
 DECL_PREPOST(termp_cm);
 DECL_PREPOST(termp_d1);
@@ -120,7 +121,7 @@ DECL_PREPOST(termp_nm);
 DECL_PREPOST(termp_op);
 DECL_PREPOST(termp_pa);
 DECL_PREPOST(termp_pf);
-DECL_PREPOST(termp_qo);
+DECL_PREPOST(termp_pq);
 DECL_PREPOST(termp_qq);
 DECL_PREPOST(termp_sh);
 DECL_PREPOST(termp_ss);
@@ -130,6 +131,7 @@ DECL_PREPOST(termp_va);
 DECL_PREPOST(termp_vt);
 
 DECL_PRE(termp_at);
+DECL_PRE(termp_bsx);
 DECL_PRE(termp_bx);
 DECL_PRE(termp_ex);
 DECL_PRE(termp_nd);
@@ -203,13 +205,13 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_at_pre, NULL }, /* At */
 	{ NULL, NULL }, /* Bc */
 	{ NULL, NULL }, /* Bf */ 
-	{ NULL, NULL }, /* Bo */
-	{ NULL, NULL }, /* Bq */
-	{ NULL, NULL }, /* Bsx */
+	{ termp_bq_pre, termp_bq_post }, /* Bo */
+	{ termp_bq_pre, termp_bq_post }, /* Bq */
+	{ termp_bsx_pre, NULL }, /* Bsx */
 	{ termp_bx_pre, NULL }, /* Bx */
 	{ NULL, NULL }, /* Db */
 	{ NULL, NULL }, /* Dc */
-	{ NULL, NULL }, /* Do */
+	{ termp_dq_pre, termp_dq_post }, /* Do */
 	{ termp_dq_pre, termp_dq_post }, /* Dq */
 	{ NULL, NULL }, /* Ec */
 	{ NULL, NULL }, /* Ef */
@@ -223,16 +225,16 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_ox_pre, NULL }, /* Ox */
 	{ NULL, NULL }, /* Pc */
 	{ termp_pf_pre, termp_pf_post }, /* Pf */
-	{ NULL, NULL }, /* Po */
-	{ NULL, NULL }, /* Pq */
+	{ termp_pq_pre, termp_pq_post }, /* Po */
+	{ termp_pq_pre, termp_pq_post }, /* Pq */
 	{ NULL, NULL }, /* Qc */
 	{ NULL, NULL }, /* Ql */
-	{ termp_qo_pre, termp_qo_post }, /* Qo */
+	{ termp_qq_pre, termp_qq_post }, /* Qo */
 	{ termp_qq_pre, termp_qq_post }, /* Qq */
 	{ NULL, NULL }, /* Re */
 	{ NULL, NULL }, /* Rs */
 	{ NULL, NULL }, /* Sc */
-	{ NULL, NULL }, /* So */
+	{ termp_sq_pre, termp_sq_post }, /* So */
 	{ termp_sq_pre, termp_sq_post }, /* Sq */
 	{ NULL, NULL }, /* Sm */
 	{ termp_sx_pre, termp_sx_post }, /* Sx */
@@ -1078,6 +1080,16 @@ termp_qq_post(DECL_ARGS)
 
 /* ARGSUSED */
 static int
+termp_bsx_pre(DECL_ARGS)
+{
+
+	word(p, "BSDI BSD/OS");
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
 termp_bx_pre(DECL_ARGS)
 {
 
@@ -1208,31 +1220,6 @@ termp_pa_post(DECL_ARGS)
 
 /* ARGSUSED */
 static int
-termp_qo_pre(DECL_ARGS)
-{
-
-	if (MDOC_BODY != node->type)
-		return(1);
-	word(p, "\"");
-	p->flags |= TERMP_NOSPACE;
-	return(1);
-}
-
-
-/* ARGSUSED */
-static void
-termp_qo_post(DECL_ARGS)
-{
-
-	if (MDOC_BODY != node->type)
-		return;
-	p->flags |= TERMP_NOSPACE;
-	word(p, "\"");
-}
-
-
-/* ARGSUSED */
-static int
 termp_em_pre(DECL_ARGS)
 {
 
@@ -1341,3 +1328,55 @@ termp_at_pre(DECL_ARGS)
 	word(p, mdoc_att2a(c));
 	return(0);
 }
+
+
+/* ARGSUSED */
+static int
+termp_bq_pre(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return(1);
+	word(p, "[");
+	p->flags |= TERMP_NOSPACE;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_bq_post(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return;
+	p->flags |= TERMP_NOSPACE;
+	word(p, "]");
+}
+
+
+/* ARGSUSED */
+static int
+termp_pq_pre(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return(1);
+	word(p, "(");
+	p->flags |= TERMP_NOSPACE;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_pq_post(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return;
+	p->flags |= TERMP_NOSPACE;
+	word(p, ")");
+}
+
+
