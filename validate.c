@@ -99,6 +99,7 @@ static	int	eerr_ge1(POST_ARGS);
 static	int	ewarn_eq0(POST_ARGS);
 static	int	ewarn_eq1(POST_ARGS);
 static	int	bwarn_ge1(POST_ARGS);
+static	int	hwarn_eq1(POST_ARGS);
 static	int	ewarn_ge1(POST_ARGS);
 static	int	ebool(POST_ARGS);
 
@@ -154,7 +155,7 @@ static	v_post	posts_xr[] = { eerr_ge1, eerr_le2, post_xr, NULL };
 static	v_post	posts_nm[] = { post_nm, NULL };
 static	v_post	posts_bf[] = { herr_le1, post_bf, NULL };
 static	v_post	posts_rs[] = { herr_eq0, bwarn_ge1, NULL };
-static	v_post	posts_fo[] = { bwarn_ge1, NULL };
+static	v_post	posts_fo[] = { hwarn_eq1, bwarn_ge1, NULL };
 static	v_post	posts_bk[] = { herr_eq0, bwarn_ge1, NULL };
 static	v_post	posts_fd[] = { ewarn_ge1, post_fd, NULL };
 
@@ -355,8 +356,8 @@ warn_count(struct mdoc *m, const char *k,
 {
 
 	return(mdoc_warn(m, WARN_SYNTAX, 
-				"suggests %s %d %s (has %d)", 
-				v, want, k, has));
+				"suggests %s %s %d (has %d)", 
+				v, k, want, has));
 }
 
 
@@ -365,8 +366,8 @@ err_count(struct mdoc *m, const char *k,
 		int want, const char *v, int has)
 {
 
-	return(mdoc_err(m, "requires %s %d %s (has %d)",
-				v, want, k, has));
+	return(mdoc_err(m, "requires %s %s %d (has %d)",
+				v, k, want, has));
 }
 
 
@@ -422,7 +423,7 @@ h##lvl##_##name(POST_ARGS) 					\
 { 								\
 	if (MDOC_HEAD != mdoc->last->type) 			\
 		return(1); 					\
-	return(func(mdoc, "multiline parameters", (num))); 	\
+	return(func(mdoc, "line parameters", (num)));	 	\
 }
 
 
@@ -443,6 +444,7 @@ CHECK_ELEM_DEFN(ge1, err, err_child_gt, 0)	/* eerr_ge1() */
 CHECK_HEAD_DEFN(eq0, err, err_child_eq, 0)	/* herr_eq0() */
 CHECK_HEAD_DEFN(le1, err, err_child_lt, 2)	/* herr_le1() */
 CHECK_HEAD_DEFN(ge1, err, err_child_gt, 0)	/* herr_ge1() */
+CHECK_HEAD_DEFN(eq1, warn, warn_child_eq, 1)	/* hwarn_eq1() */
 
 
 static int

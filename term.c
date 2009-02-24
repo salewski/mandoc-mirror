@@ -113,6 +113,7 @@ DECL_PREPOST(termp_fa);
 DECL_PREPOST(termp_fd);
 DECL_PREPOST(termp_fl);
 DECL_PREPOST(termp_fn);
+DECL_PREPOST(termp_fo);
 DECL_PREPOST(termp_ft);
 DECL_PREPOST(termp_ic);
 DECL_PREPOST(termp_in);
@@ -134,6 +135,7 @@ DECL_PRE(termp_at);
 DECL_PRE(termp_bsx);
 DECL_PRE(termp_bx);
 DECL_PRE(termp_ex);
+DECL_PRE(termp_fx);
 DECL_PRE(termp_nd);
 DECL_PRE(termp_ns);
 DECL_PRE(termp_nx);
@@ -142,6 +144,7 @@ DECL_PRE(termp_pp);
 DECL_PRE(termp_rv);
 DECL_PRE(termp_st);
 DECL_PRE(termp_ud);
+DECL_PRE(termp_ux);
 DECL_PRE(termp_xr);
 
 DECL_POST(termp_bl);
@@ -217,7 +220,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ef */
 	{ termp_em_pre, termp_em_post }, /* Em */ 
 	{ NULL, NULL }, /* Eo */
-	{ NULL, NULL }, /* Fx */
+	{ termp_fx_pre, NULL }, /* Fx */
 	{ NULL, NULL }, /* Ms */
 	{ NULL, NULL }, /* No */
 	{ termp_ns_pre, NULL }, /* Ns */
@@ -228,7 +231,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_pq_pre, termp_pq_post }, /* Po */
 	{ termp_pq_pre, termp_pq_post }, /* Pq */
 	{ NULL, NULL }, /* Qc */
-	{ NULL, NULL }, /* Ql */
+	{ termp_sq_pre, termp_sq_post }, /* Ql */
 	{ termp_qq_pre, termp_qq_post }, /* Qo */
 	{ termp_qq_pre, termp_qq_post }, /* Qq */
 	{ NULL, NULL }, /* Re */
@@ -240,12 +243,12 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_sx_pre, termp_sx_post }, /* Sx */
 	{ NULL, NULL }, /* Sy */
 	{ NULL, NULL }, /* Tn */
-	{ NULL, NULL }, /* Ux */
+	{ termp_ux_pre, NULL }, /* Ux */
 	{ NULL, NULL }, /* Xc */
 	{ NULL, NULL }, /* Xo */
-	{ NULL, NULL }, /* Fo */ 
+	{ termp_fo_pre, termp_fo_post }, /* Fo */ 
 	{ NULL, NULL }, /* Fc */ 
-	{ NULL, NULL }, /* Oo */
+	{ termp_op_pre, termp_op_post }, /* Oo */
 	{ NULL, NULL }, /* Oc */
 	{ NULL, NULL }, /* Bk */
 	{ NULL, NULL }, /* Ek */
@@ -897,7 +900,6 @@ termp_fn_pre(DECL_ARGS)
 	word(p, node->child->data.text.string);
 	p->flags &= ~ttypes[TTYPE_FUNC_NAME];
 
-	p->flags |= TERMP_NOSPACE;
 	word(p, "(");
 
 	p->flags |= TERMP_NOSPACE;
@@ -906,11 +908,10 @@ termp_fn_pre(DECL_ARGS)
 		p->flags |= ttypes[TTYPE_FUNC_ARG];
 		word(p, n->data.text.string);
 		p->flags &= ~ttypes[TTYPE_FUNC_ARG];
-		if ((n->next))
+		if (n->next)
 			word(p, ",");
 	}
 
-	p->flags |= TERMP_NOSPACE;
 	word(p, ")");
 
 	if (SEC_SYNOPSIS == node->sec)
@@ -954,9 +955,28 @@ termp_sx_post(DECL_ARGS)
 static int
 termp_fa_pre(DECL_ARGS)
 {
+	struct mdoc_node *n;
 
-	p->flags |= ttypes[TTYPE_FUNC_ARG];
-	return(1);
+	if (node->parent->tok != MDOC_Fo) {
+		p->flags |= ttypes[TTYPE_FUNC_ARG];
+		return(1);
+	}
+
+	for (n = node->child; n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
+
+		p->flags |= ttypes[TTYPE_FUNC_ARG];
+		word(p, n->data.text.string);
+		p->flags &= ~ttypes[TTYPE_FUNC_ARG];
+
+		if (n->next)
+			word(p, ",");
+	}
+
+	if (node->next && node->next->tok == MDOC_Fa)
+		word(p, ",");
+
+	return(0);
 }
 
 
@@ -1104,6 +1124,26 @@ termp_ox_pre(DECL_ARGS)
 {
 
 	word(p, "OpenBSD");
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+termp_ux_pre(DECL_ARGS)
+{
+
+	word(p, "UNIX");
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+termp_fx_pre(DECL_ARGS)
+{
+
+	word(p, "FreeBSD");
 	return(1);
 }
 
@@ -1350,7 +1390,6 @@ termp_bq_post(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return;
-	p->flags |= TERMP_NOSPACE;
 	word(p, "]");
 }
 
@@ -1375,8 +1414,44 @@ termp_pq_post(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return;
-	p->flags |= TERMP_NOSPACE;
 	word(p, ")");
+}
+
+
+/* ARGSUSED */
+static int
+termp_fo_pre(DECL_ARGS)
+{
+	const struct mdoc_node *n;
+
+	if (MDOC_BODY == node->type) {
+		word(p, "(");
+		p->flags |= TERMP_NOSPACE;
+		return(1);
+	} else if (MDOC_HEAD != node->type) 
+		return(1);
+
+	p->flags |= ttypes[TTYPE_FUNC_NAME];
+	for (n = node->child; n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
+		word(p, n->data.text.string);
+	}
+	p->flags &= ~ttypes[TTYPE_FUNC_NAME];
+
+	return(0);
+}
+
+
+/* ARGSUSED */
+static void
+termp_fo_post(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return;
+	word(p, ")");
+	word(p, ";");
+	newln(p);
 }
 
 

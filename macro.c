@@ -170,8 +170,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Xo */
 	/* XXX - .Fo supposed to be (but isn't) callable. */
 	{ macro_scoped, MDOC_EXPLICIT }, /* Fo */ 
-	/* XXX - .Fc supposed to be (but isn't) callable. */
-	{ macro_scoped_close, MDOC_EXPLICIT }, /* Fc */ 
+	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Fc */ 
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Oo */
 	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Oc */
 	{ macro_scoped, MDOC_EXPLICIT }, /* Bk */
