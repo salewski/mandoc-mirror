@@ -539,3 +539,190 @@ mdoc_msec2a(enum mdoc_msec msec)
 	/* NOTREACHED */
 }
 
+
+const char *
+mdoc_st2a(int c)
+{
+	char		 *p;
+
+	switch (c) {
+	case(MDOC_p1003_1_88):
+		p = "IEEE Std 1003.1-1988 (\\(lqPOSIX\\(rq)";
+		break;
+	case(MDOC_p1003_1_90):
+		p = "IEEE Std 1003.1-1990 (\\(lqPOSIX\\(rq)";
+		break;
+	case(MDOC_p1003_1_96):
+		p = "ISO/IEC 9945-1:1996 (\\(lqPOSIX\\(rq)";
+		break;
+	case(MDOC_p1003_1_2001):
+		p = "IEEE Std 1003.1-2001 (\\(lqPOSIX\\(rq)";
+		break;
+	case(MDOC_p1003_1_2004):
+		p = "IEEE Std 1003.1-2004 (\\(lqPOSIX\\(rq)";
+		break;
+	case(MDOC_p1003_1):
+		p = "IEEE Std 1003.1 (\\(lqPOSIX\\(rq)";
+		break;
+	case(MDOC_p1003_1b):
+		p = "IEEE Std 1003.1b (\\(lqPOSIX\\(rq)";
+		break;
+	case(MDOC_p1003_1b_93):
+		p = "IEEE Std 1003.1b-1993 (\\(lqPOSIX\\(rq)";
+		break;
+	case(MDOC_p1003_1c_95):
+		p = "IEEE Std 1003.1c-1995 (\\(lqPOSIX\\(rq)";
+		break;
+	case(MDOC_p1003_1g_2000):
+		p = "IEEE Std 1003.1g-2000 (\\(lqPOSIX\\(rq)";
+		break;
+	case(MDOC_p1003_2_92):
+		p = "IEEE Std 1003.2-1992 (\\(lqPOSIX.2\\(rq)";
+		break;
+	case(MDOC_p1387_2_95):
+		p = "IEEE Std 1387.2-1995 (\\(lqPOSIX.7.2\\(rq)";
+		break;
+	case(MDOC_p1003_2):
+		p = "IEEE Std 1003.2 (\\(lqPOSIX.2\\(rq)";
+		break;
+	case(MDOC_p1387_2):
+		p = "IEEE Std 1387.2 (\\(lqPOSIX.7.2\\(rq)";
+		break;
+	case(MDOC_isoC_90):
+		p = "ISO/IEC 9899:1990 (\\(lqISO C90\\(rq)";
+		break;
+	case(MDOC_isoC_amd1):
+		p = "ISO/IEC 9899/AMD1:1995 (\\(lqISO C90\\(rq)";
+		break;
+	case(MDOC_isoC_tcor1):
+		p = "ISO/IEC 9899/TCOR1:1994 (\\(lqISO C90\\(rq)";
+		break;
+	case(MDOC_isoC_tcor2):
+		p = "ISO/IEC 9899/TCOR2:1995 (\\(lqISO C90\\(rq)";
+		break;
+	case(MDOC_isoC_99):
+		p = "ISO/IEC 9899:1999 (\\(lqISO C99\\(rq)";
+		break;
+	case(MDOC_ansiC):
+		p = "ANSI X3.159-1989 (\\(lqANSI C\\(rq)";
+		break;
+	case(MDOC_ansiC_89):
+		p = "ANSI X3.159-1989 (\\(lqANSI C\\(rq)";
+		break;
+	case(MDOC_ansiC_99):
+		p = "ANSI/ISO/IEC 9899-1999 (\\(lqANSI C99\\(rq)";
+		break;
+	case(MDOC_ieee754):
+		p = "IEEE Std 754-1985";
+		break;
+	case(MDOC_iso8802_3):
+		p = "ISO 8802-3: 1989";
+		break;
+	case(MDOC_xpg3):
+		p = "X/Open Portability Guide Issue 3 "
+			"(\\(lqXPG3\\(rq)";
+		break;
+	case(MDOC_xpg4):
+		p = "X/Open Portability Guide Issue 4 "
+			"(\\(lqXPG4\\(rq)";
+		break;
+	case(MDOC_xpg4_2):
+		p = "X/Open Portability Guide Issue 4.2 "
+			"(\\(lqXPG4.2\\(rq)";
+		break;
+	case(MDOC_xpg4_3):
+		p = "X/Open Portability Guide Issue 4.3 "
+			"(\\(lqXPG4.3\\(rq)";
+		break;
+	case(MDOC_xbd5):
+		p = "X/Open System Interface Definitions Issue 5 "
+			"(\\(lqXBD5\\(rq)";
+		break;
+	case(MDOC_xcu5):
+		p = "X/Open Commands and Utilities Issue 5 "
+			"(\\(lqXCU5\\(rq)";
+		break;
+	case(MDOC_xsh5):
+		p = "X/Open System Interfaces and Headers Issue 5 "
+			"(\\(lqXSH5\\(rq)";
+		break;
+	case(MDOC_xns5):
+		p = "X/Open Networking Services Issue 5 "
+			"(\\(lqXNS5\\(rq)";
+		break;
+	case(MDOC_xns5_2d2_0):
+		p = "X/Open Networking Services Issue 5.2 Draft 2.0 "
+			"(\\(lqXNS5.2D2.0\\(rq)";
+		break;
+	case(MDOC_xcurses4_2):
+		p = "X/Open Curses Issue 4 Version 2 "
+			"(\\(lqXCURSES4.2\\(rq)";
+		break;
+	case(MDOC_susv2):
+		p = "Version 2 of the Single UNIX Specification";
+		break;
+	case(MDOC_susv3):
+		p = "Version 3 of the Single UNIX Specification";
+		break;
+	case(MDOC_svid4):
+		p = "System V Interface Definition, Fourth Edition "
+			"(\\(lqSVID4\\(rq)";
+		break;
+	default:
+		p = NULL;
+		break;
+	}
+
+	return(p);
+}
+
+
+const char *
+mdoc_att2a(enum mdoc_att c)
+{
+	char		*p;
+	
+	switch (c) {
+	case(ATT_v1):
+		p = "Version 1 AT&T UNIX";
+		break;
+	case(ATT_v2):
+		p = "Version 2 AT&T UNIX";
+		break;
+	case(ATT_v3):
+		p = "Version 3 AT&T UNIX";
+		break;
+	case(ATT_v4):
+		p = "Version 4 AT&T UNIX";
+		break;
+	case(ATT_v5):
+		p = "Version 5 AT&T UNIX";
+		break;
+	case(ATT_v6):
+		p = "Version 6 AT&T UNIX";
+		break;
+	case(ATT_v7):
+		p = "Version 7 AT&T UNIX";
+		break;
+	case(ATT_32v):
+		p = "Version 32V AT&T UNIX";
+		break;
+	case(ATT_V1):
+		p = "AT&T System V.1 UNIX";
+		break;
+	case(ATT_V2):
+		p = "AT&T System V.2 UNIX";
+		break;
+	case(ATT_V3):
+		p = "AT&T System V.3 UNIX";
+		break;
+	case(ATT_V4):
+		p = "AT&T System V.4 UNIX";
+		break;
+	default:
+		p = "AT&T UNIX";
+		break;
+	}
+
+	return(p);
+}

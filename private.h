@@ -130,7 +130,6 @@ enum	mdoc_sec  mdoc_atosec(const char *);
 enum	mdoc_msec mdoc_atomsec(const char *);
 enum	mdoc_vol  mdoc_atovol(const char *);
 enum	mdoc_arch mdoc_atoarch(const char *);
-enum	mdoc_att  mdoc_atoatt(const char *);
 time_t		  mdoc_atotime(const char *);
 
 char		 *mdoc_type2a(enum mdoc_type);

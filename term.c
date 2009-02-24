@@ -45,7 +45,10 @@
 #define	TTYPE_SSECTION	  10
 #define	TTYPE_FILE	  11
 #define	TTYPE_EMPH	  12
-#define	TTYPE_NMAX	  13
+#define	TTYPE_CONFIG	  13
+#define	TTYPE_CMD	  14
+#define	TTYPE_INCLUDE	  15
+#define	TTYPE_NMAX	  16
 
 /* 
  * These define "styles" for element types, like command arguments or
@@ -66,7 +69,10 @@ const	int ttypes[TTYPE_NMAX] = {
 	TERMP_UNDERLINE, 	/* TTYPE_LINK */
 	TERMP_BOLD,	 	/* TTYPE_SSECTION */
 	TERMP_UNDERLINE, 	/* TTYPE_FILE */
-	TERMP_UNDERLINE	 	/* TTYPE_EMPH */
+	TERMP_UNDERLINE, 	/* TTYPE_EMPH */
+	TERMP_BOLD,	 	/* TTYPE_CONFIG */
+	TERMP_BOLD,	 	/* TTYPE_CMD */
+	TERMP_BOLD	 	/* TTYPE_INCLUDE */
 };
 
 static	int		  arg_hasattr(int, size_t, 
@@ -97,6 +103,8 @@ DECL_POST(name);
 DECL_PREPOST(termp_aq);
 DECL_PREPOST(termp_ar);
 DECL_PREPOST(termp_bd);
+DECL_PREPOST(termp_cd);
+DECL_PREPOST(termp_cm);
 DECL_PREPOST(termp_d1);
 DECL_PREPOST(termp_dq);
 DECL_PREPOST(termp_em);
@@ -105,6 +113,8 @@ DECL_PREPOST(termp_fd);
 DECL_PREPOST(termp_fl);
 DECL_PREPOST(termp_fn);
 DECL_PREPOST(termp_ft);
+DECL_PREPOST(termp_ic);
+DECL_PREPOST(termp_in);
 DECL_PREPOST(termp_it);
 DECL_PREPOST(termp_nm);
 DECL_PREPOST(termp_op);
@@ -119,6 +129,7 @@ DECL_PREPOST(termp_sx);
 DECL_PREPOST(termp_va);
 DECL_PREPOST(termp_vt);
 
+DECL_PRE(termp_at);
 DECL_PRE(termp_bx);
 DECL_PRE(termp_ex);
 DECL_PRE(termp_nd);
@@ -126,6 +137,8 @@ DECL_PRE(termp_ns);
 DECL_PRE(termp_nx);
 DECL_PRE(termp_ox);
 DECL_PRE(termp_pp);
+DECL_PRE(termp_rv);
+DECL_PRE(termp_st);
 DECL_PRE(termp_ud);
 DECL_PRE(termp_xr);
 
@@ -149,8 +162,8 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ad */ 
 	{ NULL, NULL }, /* An */
 	{ termp_ar_pre, termp_ar_post }, /* Ar */
-	{ NULL, NULL }, /* Cd */
-	{ NULL, NULL }, /* Cm */
+	{ termp_cd_pre, termp_cd_post }, /* Cd */
+	{ termp_cm_pre, termp_cm_post }, /* Cm */
 	{ NULL, NULL }, /* Dv */ 
 	{ NULL, NULL }, /* Er */ 
 	{ NULL, NULL }, /* Ev */ 
@@ -160,16 +173,16 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_fl_pre, termp_fl_post }, /* Fl */
 	{ termp_fn_pre, termp_fn_post }, /* Fn */ 
 	{ termp_ft_pre, termp_ft_post }, /* Ft */ 
-	{ NULL, NULL }, /* Ic */ 
-	{ NULL, NULL }, /* In */ 
+	{ termp_ic_pre, termp_ic_post }, /* Ic */ 
+	{ termp_in_pre, termp_in_post }, /* In */ 
 	{ NULL, NULL }, /* Li */
 	{ termp_nd_pre, NULL }, /* Nd */ 
 	{ termp_nm_pre, termp_nm_post }, /* Nm */ 
 	{ termp_op_pre, termp_op_post }, /* Op */
 	{ NULL, NULL }, /* Ot */
 	{ termp_pa_pre, termp_pa_post }, /* Pa */
-	{ NULL, NULL }, /* Rv */
-	{ NULL, NULL }, /* St */ 
+	{ termp_rv_pre, NULL }, /* Rv */
+	{ termp_st_pre, NULL }, /* St */ 
 	{ termp_va_pre, termp_va_post }, /* Va */
 	{ termp_vt_pre, termp_vt_post }, /* Vt */ 
 	{ termp_xr_pre, NULL }, /* Xr */
@@ -185,9 +198,9 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* %T */
 	{ NULL, NULL }, /* %V */
 	{ NULL, NULL }, /* Ac */
-	{ NULL, NULL }, /* Ao */
+	{ termp_aq_pre, termp_aq_post }, /* Ao */
 	{ termp_aq_pre, termp_aq_post }, /* Aq */
-	{ NULL, NULL }, /* At */
+	{ termp_at_pre, NULL }, /* At */
 	{ NULL, NULL }, /* Bc */
 	{ NULL, NULL }, /* Bf */ 
 	{ NULL, NULL }, /* Bo */
@@ -540,6 +553,52 @@ termp_ar_post(DECL_ARGS)
 {
 
 	p->flags &= ~ttypes[TTYPE_CMD_ARG];
+}
+
+
+/* ARGSUSED */
+static int
+termp_st_pre(DECL_ARGS)
+{
+	const char 	*tp;
+
+	assert(1 == node->data.elem.argc);
+
+	tp = mdoc_st2a(node->data.elem.argv[0].arg);
+	word(p, tp);
+
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+termp_rv_pre(DECL_ARGS)
+{
+	int		 i;
+
+	i = arg_getattr(MDOC_Std, node->data.elem.argc, 
+			node->data.elem.argv);
+	assert(i >= 0);
+
+	newln(p);
+	word(p, "The");
+
+	p->flags |= ttypes[TTYPE_FUNC_NAME];
+	word(p, *node->data.elem.argv[i].value);
+	p->flags &= ~ttypes[TTYPE_FUNC_NAME];
+
+       	word(p, "() function returns the value 0 if successful;");
+       	word(p, "otherwise the value -1 is returned and the");
+       	word(p, "global variable");
+
+	p->flags |= ttypes[TTYPE_VAR_DECL];
+	word(p, "errno");
+	p->flags &= ~ttypes[TTYPE_VAR_DECL];
+
+       	word(p, "is set to indicate the error.");
+
+	return(1);
 }
 
 
@@ -1188,4 +1247,97 @@ termp_em_post(DECL_ARGS)
 {
 
 	p->flags &= ~ttypes[TTYPE_EMPH];
+}
+
+
+/* ARGSUSED */
+static int
+termp_cd_pre(DECL_ARGS)
+{
+
+	p->flags |= ttypes[TTYPE_CONFIG];
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_cd_post(DECL_ARGS)
+{
+
+	p->flags &= ~ttypes[TTYPE_CONFIG];
+}
+
+
+/* ARGSUSED */
+static int
+termp_cm_pre(DECL_ARGS)
+{
+
+	p->flags |= ttypes[TTYPE_CMD_FLAG];
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_cm_post(DECL_ARGS)
+{
+
+	p->flags &= ~ttypes[TTYPE_CMD_FLAG];
+}
+
+
+/* ARGSUSED */
+static int
+termp_ic_pre(DECL_ARGS)
+{
+
+	p->flags |= ttypes[TTYPE_CMD];
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_ic_post(DECL_ARGS)
+{
+
+	p->flags &= ~ttypes[TTYPE_CMD];
+}
+
+
+/* ARGSUSED */
+static int
+termp_in_pre(DECL_ARGS)
+{
+
+	p->flags |= ttypes[TTYPE_INCLUDE];
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_in_post(DECL_ARGS)
+{
+
+	p->flags &= ~ttypes[TTYPE_INCLUDE];
+}
+
+
+/* ARGSUSED */
+static int
+termp_at_pre(DECL_ARGS)
+{
+	enum mdoc_att	 c;
+
+	c = ATT_DEFAULT;
+	if (node->child) {
+		assert(MDOC_TEXT == node->child->type);
+		c = mdoc_atoatt(node->child->data.text.string);
+	}
+
+	word(p, mdoc_att2a(c));
+	return(0);
 }

@@ -305,6 +305,10 @@ pescape(struct termp *p, const char *word, size_t *i, size_t len)
 			stringa(p, "<-");
 		else if ('-' == word[*i] && '>' == word[*i + 1])
 			stringa(p, "->");
+		else if ('l' == word[*i] && 'q' == word[*i + 1])
+			chara(p, '\"');
+		else if ('r' == word[*i] && 'q' == word[*i + 1])
+			chara(p, '\"');
 
 		(*i)++;
 		return;
