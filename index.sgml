@@ -28,7 +28,7 @@
 					package of the BSD manual pages.  The mission of <span class="nm">mdocml</span> is to deprecate <a
 					href="http://www.gnu.org/software/groff/" class="external">groff</a>, the GNU roff implementation, for
 					displaying BSD mdoc pages.  groff amounts to over 60 000 lines of GPL C++ source, which is a
-					considerable encumbrance to BSD operating system.
+					considerable encumbrance to BSD operating systems.
 					</p>
 
 					<p>

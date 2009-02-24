@@ -363,8 +363,6 @@ struct	mdoc_block {
 
 /* In-line element node. */
 struct	mdoc_elem {
-	size_t		  sz;
-	char		**args;
 	size_t		  argc;
 	struct mdoc_arg	 *argv;
 };

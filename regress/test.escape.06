@@ -1,0 +1,11 @@
+.\" 
+.Dd $Mdocdate$
+.Dt mdoc 3
+.Os
+.\"
+.Sh NAME
+.Nm mdoc_free
+.Nd mdoc macro compiler library
+.\"
+.Sh SYNOPSIS
+.Rv -std \"

@@ -29,8 +29,11 @@
  * the BLOCK case, this is the HEAD, BODY, TAIL and so on.
  */
 
-typedef	int	(*v_pre)(struct mdoc *, struct mdoc_node *);
-typedef	int	(*v_post)(struct mdoc *);
+#define	PRE_ARGS	struct mdoc *mdoc, const struct mdoc_node *n
+#define	POST_ARGS	struct mdoc *mdoc
+
+typedef	int	(*v_pre)(PRE_ARGS);
+typedef	int	(*v_post)(POST_ARGS);
 
 /* FIXME: some sections should only occur in specific msecs. */
 /* FIXME: ignoring Pp. */
@@ -44,11 +47,13 @@ struct	valids {
 
 /* Utility checks. */
 
-static	int	check_parent(struct mdoc *, struct mdoc_node *, 
-			int, enum mdoc_type);
-static	int	check_msec(struct mdoc *, struct mdoc_node *, 
-			int, enum mdoc_msec *);
-static	int	check_stdarg(struct mdoc *, struct mdoc_node *);
+static	int	check_parent(PRE_ARGS, int, enum mdoc_type);
+static	int	check_msec(PRE_ARGS, int, enum mdoc_msec *);
+static	int	check_stdarg(PRE_ARGS);
+
+static	int	check_text(struct mdoc *, 
+			size_t, size_t, const char *);
+
 static	int	err_child_lt(struct mdoc *, const char *, int);
 static	int	err_child_gt(struct mdoc *, const char *, int);
 static	int	warn_child_gt(struct mdoc *, const char *, int);
@@ -65,50 +70,50 @@ static	inline int err_count(struct mdoc *, const char *,
 
 /* Specific pre-child-parse routines. */
 
-static	int	pre_display(struct mdoc *, struct mdoc_node *);
-static	int	pre_sh(struct mdoc *, struct mdoc_node *);
-static	int	pre_ss(struct mdoc *, struct mdoc_node *);
-static	int	pre_bd(struct mdoc *, struct mdoc_node *);
-static	int	pre_bl(struct mdoc *, struct mdoc_node *);
-static	int	pre_it(struct mdoc *, struct mdoc_node *);
-static	int	pre_cd(struct mdoc *, struct mdoc_node *);
-static	int	pre_er(struct mdoc *, struct mdoc_node *);
-static	int	pre_ex(struct mdoc *, struct mdoc_node *);
-static	int	pre_rv(struct mdoc *, struct mdoc_node *);
-static	int	pre_an(struct mdoc *, struct mdoc_node *);
-static	int	pre_st(struct mdoc *, struct mdoc_node *);
-static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
-static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
-static	int	pre_prologue(struct mdoc *, struct mdoc_node *);
+static	int	pre_display(PRE_ARGS);
+static	int	pre_sh(PRE_ARGS);
+static	int	pre_ss(PRE_ARGS);
+static	int	pre_bd(PRE_ARGS);
+static	int	pre_bl(PRE_ARGS);
+static	int	pre_it(PRE_ARGS);
+static	int	pre_cd(PRE_ARGS);
+static	int	pre_er(PRE_ARGS);
+static	int	pre_ex(PRE_ARGS);
+static	int	pre_rv(PRE_ARGS);
+static	int	pre_an(PRE_ARGS);
+static	int	pre_st(PRE_ARGS);
+static	int	pre_prologue(PRE_ARGS);
+static	int	pre_prologue(PRE_ARGS);
+static	int	pre_prologue(PRE_ARGS);
 
 /* Specific post-child-parse routines. */
 
-static	int	herr_ge1(struct mdoc *);
-static	int	herr_le1(struct mdoc *);
-static	int	herr_eq0(struct mdoc *);
-static	int	eerr_eq0(struct mdoc *);
-static	int	eerr_le1(struct mdoc *);
-static	int	eerr_le2(struct mdoc *);
-static	int	eerr_eq1(struct mdoc *);
-static	int	eerr_ge1(struct mdoc *);
-static	int	ewarn_eq0(struct mdoc *);
-static	int	ewarn_eq1(struct mdoc *);
-static	int	bwarn_ge1(struct mdoc *);
-static	int	ewarn_ge1(struct mdoc *);
-static	int	ebool(struct mdoc *);
-static	int	post_sh(struct mdoc *);
-static	int	post_sh_body(struct mdoc *);
-static	int	post_sh_head(struct mdoc *);
-static	int	post_bl(struct mdoc *);
-static	int	post_it(struct mdoc *);
-static	int	post_ex(struct mdoc *);
-static	int	post_an(struct mdoc *);
-static	int	post_at(struct mdoc *);
-static	int	post_xr(struct mdoc *);
-static	int	post_nm(struct mdoc *);
-static	int	post_bf(struct mdoc *);
-static	int	post_root(struct mdoc *);
-static	int	pre_text(struct mdoc *, const struct mdoc_node *);
+static	int	herr_ge1(POST_ARGS);
+static	int	herr_le1(POST_ARGS);
+static	int	herr_eq0(POST_ARGS);
+static	int	eerr_eq0(POST_ARGS);
+static	int	eerr_le1(POST_ARGS);
+static	int	eerr_le2(POST_ARGS);
+static	int	eerr_eq1(POST_ARGS);
+static	int	eerr_ge1(POST_ARGS);
+static	int	ewarn_eq0(POST_ARGS);
+static	int	ewarn_eq1(POST_ARGS);
+static	int	bwarn_ge1(POST_ARGS);
+static	int	ewarn_ge1(POST_ARGS);
+static	int	ebool(POST_ARGS);
+
+static	int	post_sh(POST_ARGS);
+static	int	post_sh_body(POST_ARGS);
+static	int	post_sh_head(POST_ARGS);
+static	int	post_bl(POST_ARGS);
+static	int	post_it(POST_ARGS);
+static	int	post_ex(POST_ARGS);
+static	int	post_an(POST_ARGS);
+static	int	post_at(POST_ARGS);
+static	int	post_xr(POST_ARGS);
+static	int	post_nm(POST_ARGS);
+static	int	post_bf(POST_ARGS);
+static	int	post_root(POST_ARGS);
 
 /* Collections of pre-child-parse routines. */
 
@@ -268,8 +273,9 @@ warn_count(struct mdoc *m, const char *k,
 		int want, const char *v, int has)
 {
 
-	return(mdoc_warn(m, WARN_SYNTAX, "suggests %s %d %s "
-				"(has %d)", v, want, k, has));
+	return(mdoc_warn(m, WARN_SYNTAX, 
+				"suggests %s %d %s (has %d)", 
+				v, want, k, has));
 }
 
 
@@ -314,7 +320,7 @@ lvl##_child_##name(struct mdoc *mdoc, const char *p, int sz) 	\
 
 #define CHECK_BODY_DEFN(name, lvl, func, num) 			\
 static int 							\
-b##lvl##_##name(struct mdoc *mdoc) 				\
+b##lvl##_##name(POST_ARGS) 					\
 { 								\
 	if (MDOC_BODY != mdoc->last->type) 			\
 		return(1); 					\
@@ -323,7 +329,7 @@ b##lvl##_##name(struct mdoc *mdoc) 				\
 
 #define CHECK_ELEM_DEFN(name, lvl, func, num) 			\
 static int							\
-e##lvl##_##name(struct mdoc *mdoc) 				\
+e##lvl##_##name(POST_ARGS) 					\
 { 								\
 	assert(MDOC_ELEM == mdoc->last->type); 			\
 	return(func(mdoc, "line parameters", (num))); 		\
@@ -331,7 +337,7 @@ e##lvl##_##name(struct mdoc *mdoc) 				\
 
 #define CHECK_HEAD_DEFN(name, lvl, func, num)			\
 static int 							\
-h##lvl##_##name(struct mdoc *mdoc) 				\
+h##lvl##_##name(POST_ARGS) 					\
 { 								\
 	if (MDOC_HEAD != mdoc->last->type) 			\
 		return(1); 					\
@@ -359,35 +365,55 @@ CHECK_HEAD_DEFN(ge1, err, err_child_gt, 0)	/* herr_ge1() */
 
 
 static int
-check_stdarg(struct mdoc *mdoc, struct mdoc_node *node)
+check_stdarg(PRE_ARGS)
 {
 
-	if (MDOC_Std == node->data.elem.argv[0].arg && 
-			1 == node->data.elem.argc)
+	if (MDOC_Std == n->data.elem.argv[0].arg && 
+			1 == n->data.elem.argc)
 		return(1);
 
-	return(mdoc_nwarn(mdoc, node, WARN_COMPAT, 
+	return(mdoc_nwarn(mdoc, n, WARN_COMPAT, 
 				"one argument suggested"));
 }
 
 
 static int
-check_msec(struct mdoc *mdoc, struct mdoc_node *node, 
-		int sz, enum mdoc_msec *msecs)
+check_msec(PRE_ARGS, int sz, enum mdoc_msec *msecs)
 {
 	int		 i;
 
 	for (i = 0; i < sz; i++)
 		if (msecs[i] == mdoc->meta.msec)
 			return(1);
-	return(mdoc_nwarn(mdoc, node, WARN_COMPAT, 
-				"wrong manual section"));
+	return(mdoc_nwarn(mdoc, n, WARN_COMPAT, 
+				"invalid manual section"));
 }
 
 
 static int
-check_parent(struct mdoc *mdoc, struct mdoc_node *n, 
-		int tok, enum mdoc_type t)
+check_text(struct mdoc *mdoc, size_t line, size_t pos, const char *p)
+{
+	size_t		 c;
+
+	for ( ; *p; p++) {
+		if ('\\' != *p)
+			continue;
+		if ((c = mdoc_isescape(p))) {
+			p += (c - 1);
+			continue;
+		}
+		return(mdoc_perr(mdoc, line, pos,
+				"invalid escape sequence"));
+	}
+
+	return(1);
+}
+
+
+
+
+static int
+check_parent(PRE_ARGS, int tok, enum mdoc_type t)
 {
 
 	assert(n->parent);
@@ -402,44 +428,44 @@ check_parent(struct mdoc *mdoc, struct mdoc_node *n,
 
 
 static int
-pre_display(struct mdoc *mdoc, struct mdoc_node *node)
+pre_display(PRE_ARGS)
 {
-	struct mdoc_node *n;
+	struct mdoc_node *node;
 
 	/* Display elements (`Bd', `D1'...) cannot be nested. */
 
-	if (MDOC_BLOCK != node->type)
+	if (MDOC_BLOCK != n->type)
 		return(1);
 
 	/* LINTED */
-	for (n = mdoc->last->parent; n; n = n->parent) 
-		if (MDOC_BLOCK == n->type)
-			if (MDOC_Bd == n->tok)
+	for (node = mdoc->last->parent; node; node = node->parent) 
+		if (MDOC_BLOCK == node->type)
+			if (MDOC_Bd == node->tok)
 				break;
-	if (NULL == n)
+	if (NULL == node)
 		return(1);
 
-	return(mdoc_nerr(mdoc, node, "displays may not be nested"));
+	return(mdoc_nerr(mdoc, n, "displays may not be nested"));
 }
 
 
 static int
-pre_bl(struct mdoc *mdoc, struct mdoc_node *node)
+pre_bl(PRE_ARGS)
 {
 	int		 type, err, i;
 	struct mdoc_arg	*argv;
 	size_t		 argc;
 
-	if (MDOC_BLOCK != node->type)
+	if (MDOC_BLOCK != n->type)
 		return(1);
 
-	argc = node->data.block.argc; 
+	argc = n->data.block.argc; 
 
 	/* Make sure that only one type of list is specified.  */
 
 	/* LINTED */
 	for (i = 0, type = err = 0; i < (int)argc; i++) {
-		argv = &node->data.block.argv[i];
+		argv = &n->data.block.argv[i];
 
 		switch (argv->arg) {
 		case (MDOC_Bullet):
@@ -479,22 +505,22 @@ pre_bl(struct mdoc *mdoc, struct mdoc_node *node)
 
 
 static int
-pre_bd(struct mdoc *mdoc, struct mdoc_node *node)
+pre_bd(PRE_ARGS)
 {
 	int		 type, err, i;
 	struct mdoc_arg	*argv;
 	size_t		 argc;
 
-	if (MDOC_BLOCK != node->type)
+	if (MDOC_BLOCK != n->type)
 		return(1);
 
-	argc = node->data.block.argc;
+	argc = n->data.block.argc;
 
 	/* Make sure that only one type of display is specified.  */
 
 	/* LINTED */
 	for (i = 0, err = type = 0; ! err && i < (int)argc; i++) {
-		argv = &node->data.block.argv[i];
+		argv = &n->data.block.argv[i];
 
 		switch (argv->arg) {
 		case (MDOC_Ragged):
@@ -522,123 +548,120 @@ pre_bd(struct mdoc *mdoc, struct mdoc_node *node)
 
 
 static int
-pre_ss(struct mdoc *mdoc, struct mdoc_node *node)
+pre_ss(PRE_ARGS)
 {
 
-	if (MDOC_BLOCK != node->type)
+	if (MDOC_BLOCK != n->type)
 		return(1);
-	return(check_parent(mdoc, node, MDOC_Sh, MDOC_BODY));
+	return(check_parent(mdoc, n, MDOC_Sh, MDOC_BODY));
 }
 
 
 static int
-pre_sh(struct mdoc *mdoc, struct mdoc_node *node)
+pre_sh(PRE_ARGS)
 {
 
-	if (MDOC_BLOCK != node->type)
+	if (MDOC_BLOCK != n->type)
 		return(1);
-	return(check_parent(mdoc, node, -1, MDOC_ROOT));
+	return(check_parent(mdoc, n, -1, MDOC_ROOT));
 }
 
 
 static int
-pre_it(struct mdoc *mdoc, struct mdoc_node *node)
+pre_it(PRE_ARGS)
 {
 
 	/* TODO: -width attribute must be specified for -tag. */
 	/* TODO: children too big for -width? */
 
-	if (MDOC_BLOCK != node->type)
+	if (MDOC_BLOCK != n->type)
 		return(1);
-	return(check_parent(mdoc, node, MDOC_Bl, MDOC_BODY));
+	return(check_parent(mdoc, n, MDOC_Bl, MDOC_BODY));
 }
 
 
 static int
-pre_st(struct mdoc *mdoc, struct mdoc_node *node)
+pre_st(PRE_ARGS)
 {
 
-	if (1 == node->data.elem.argc)
+	if (1 == n->data.elem.argc)
 		return(1);
-	return(mdoc_nerr(mdoc, node, "one argument required"));
+	return(mdoc_nerr(mdoc, n, "one argument required"));
 }
 
 
 static int
-pre_an(struct mdoc *mdoc, struct mdoc_node *node)
+pre_an(PRE_ARGS)
 {
 
-	if (1 >= node->data.elem.argc)
+	if (1 >= n->data.elem.argc)
 		return(1);
-	return(mdoc_nerr(mdoc, node, "one argument allowed"));
+	return(mdoc_nerr(mdoc, n, "one argument allowed"));
 }
 
 
 static int
-pre_rv(struct mdoc *mdoc, struct mdoc_node *node)
+pre_rv(PRE_ARGS)
 {
 	enum mdoc_msec msecs[] = { MSEC_2, MSEC_3 };
 
-	if ( ! check_msec(mdoc, node, 2, msecs))
+	if ( ! check_msec(mdoc, n, 2, msecs))
 		return(0);
-	return(check_stdarg(mdoc, node));
+	return(check_stdarg(mdoc, n));
 }
 
 
 static int
-pre_ex(struct mdoc *mdoc, struct mdoc_node *node)
+pre_ex(PRE_ARGS)
 {
 	enum mdoc_msec msecs[] = { MSEC_1, MSEC_6, MSEC_8 };
 
-	if ( ! check_msec(mdoc, node, 3, msecs))
+	if ( ! check_msec(mdoc, n, 3, msecs))
 		return(0);
-	return(check_stdarg(mdoc, node));
+	return(check_stdarg(mdoc, n));
 }
 
 
 static int
-pre_er(struct mdoc *mdoc, struct mdoc_node *node)
+pre_er(PRE_ARGS)
 {
 	enum mdoc_msec msecs[] = { MSEC_2 };
 
-	return(check_msec(mdoc, node, 1, msecs));
+	return(check_msec(mdoc, n, 1, msecs));
 }
 
 
 static int
-pre_cd(struct mdoc *mdoc, struct mdoc_node *node)
+pre_cd(PRE_ARGS)
 {
 	enum mdoc_msec msecs[] = { MSEC_4 };
 
-	return(check_msec(mdoc, node, 1, msecs));
+	return(check_msec(mdoc, n, 1, msecs));
 }
 
 
 static int
-pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
+pre_prologue(PRE_ARGS)
 {
 
 	if (SEC_PROLOGUE != mdoc->lastnamed)
-		return(mdoc_nerr(mdoc, node, "prologue only"));
+		return(mdoc_nerr(mdoc, n, "prologue only"));
 
 	/* Check for ordering. */
 
-	switch (node->tok) {
+	switch (n->tok) {
 	case (MDOC_Os):
 		if (mdoc->meta.title && mdoc->meta.date)
 			break;
-		return(mdoc_nerr(mdoc, node, 
-				"prologue out-of-order"));
+		return(mdoc_nerr(mdoc, n, "prologue out-of-order"));
 	case (MDOC_Dt):
 		if (NULL == mdoc->meta.title && mdoc->meta.date)
 			break;
-		return(mdoc_nerr(mdoc, node, 
-				"prologue out-of-order"));
+		return(mdoc_nerr(mdoc, n, "prologue out-of-order"));
 	case (MDOC_Dd):
 		if (NULL == mdoc->meta.title && 0 == mdoc->meta.date)
 			break;
-		return(mdoc_nerr(mdoc, node, 
-				"prologue out-of-order"));
+		return(mdoc_nerr(mdoc, n, "prologue out-of-order"));
 	default:
 		abort();
 		/* NOTREACHED */
@@ -646,7 +669,7 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 
 	/* Check for repetition. */
 
-	switch (node->tok) {
+	switch (n->tok) {
 	case (MDOC_Os):
 		if (NULL == mdoc->meta.os)
 			return(1);
@@ -664,12 +687,12 @@ pre_prologue(struct mdoc *mdoc, struct mdoc_node *node)
 		/* NOTREACHED */
 	}
 
-	return(mdoc_nerr(mdoc, node, "prologue repetition"));
+	return(mdoc_nerr(mdoc, n, "prologue repetition"));
 }
 
 
 static int
-post_bf(struct mdoc *mdoc)
+post_bf(POST_ARGS)
 {
 	char		 *p;
 	struct mdoc_node *head;
@@ -703,7 +726,7 @@ post_bf(struct mdoc *mdoc)
 
 
 static int
-post_nm(struct mdoc *mdoc)
+post_nm(POST_ARGS)
 {
 
 	if (mdoc->last->child)
@@ -715,7 +738,7 @@ post_nm(struct mdoc *mdoc)
 
 
 static int
-post_xr(struct mdoc *mdoc)
+post_xr(POST_ARGS)
 {
 	struct mdoc_node *n;
 
@@ -728,7 +751,7 @@ post_xr(struct mdoc *mdoc)
 
 
 static int
-post_at(struct mdoc *mdoc)
+post_at(POST_ARGS)
 {
 
 	if (NULL == mdoc->last->child)
@@ -740,7 +763,7 @@ post_at(struct mdoc *mdoc)
 
 
 static int
-post_an(struct mdoc *mdoc)
+post_an(POST_ARGS)
 {
 
 	if (0 != mdoc->last->data.elem.argc) {
@@ -756,7 +779,7 @@ post_an(struct mdoc *mdoc)
 
 
 static int
-post_ex(struct mdoc *mdoc)
+post_ex(POST_ARGS)
 {
 
 	if (0 == mdoc->last->data.elem.argc) {
@@ -776,7 +799,7 @@ post_ex(struct mdoc *mdoc)
 
 
 static int
-post_it(struct mdoc *mdoc)
+post_it(POST_ARGS)
 {
 	int		  type, sv, i;
 #define	TYPE_NONE	 (0)
@@ -893,7 +916,7 @@ post_it(struct mdoc *mdoc)
 
 
 static int
-post_bl(struct mdoc *mdoc)
+post_bl(POST_ARGS)
 {
 	struct mdoc_node	*n;
 
@@ -938,27 +961,7 @@ ebool(struct mdoc *mdoc)
 
 
 static int
-pre_text(struct mdoc *mdoc, const struct mdoc_node *n)
-{
-	size_t		 c;
-	const char	*p;
-
-	for (p = n->data.text.string; *p; p++) {
-		if ('\\' != *p)
-			continue;
-		if ((c = mdoc_isescape(p))) {
-			p += (c - 1);
-			continue;
-		}
-		return(mdoc_nerr(mdoc, n, "bad escape sequence"));
-	}
-
-	return(1);
-}
-
-
-static int
-post_root(struct mdoc *mdoc)
+post_root(POST_ARGS)
 {
 
 	if (NULL == mdoc->first->child)
@@ -978,7 +981,7 @@ post_root(struct mdoc *mdoc)
 
 
 static int
-post_sh(struct mdoc *mdoc)
+post_sh(POST_ARGS)
 {
 
 	if (MDOC_HEAD == mdoc->last->type)
@@ -991,7 +994,7 @@ post_sh(struct mdoc *mdoc)
 
 
 static int
-post_sh_body(struct mdoc *mdoc)
+post_sh_body(POST_ARGS)
 {
 	struct mdoc_node *n;
 
@@ -1031,7 +1034,7 @@ post_sh_body(struct mdoc *mdoc)
 
 
 static int
-post_sh_head(struct mdoc *mdoc)
+post_sh_head(POST_ARGS)
 {
 	char		  buf[64];
 	enum mdoc_sec	  sec;
@@ -1060,13 +1063,41 @@ post_sh_head(struct mdoc *mdoc)
 
 
 int
-mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *node)
+mdoc_valid_pre(struct mdoc *mdoc, 
+		const struct mdoc_node *node)
 {
 	v_pre		*p;
+	struct mdoc_arg	*argv;
+	size_t		 argc, i, j, line, pos;
+	const char	*tp;
 
-	if (MDOC_TEXT == node->type)
-		return(pre_text(mdoc, node));
-	assert(MDOC_ROOT != node->type);
+	if (MDOC_TEXT == node->type) {
+		tp = node->data.text.string;
+		line = node->line;
+		pos = node->pos;
+		return(check_text(mdoc, line, pos, tp));
+	}
+
+	if (MDOC_BLOCK == node->type || MDOC_ELEM == node->type) {
+		argv = MDOC_BLOCK == node->type ?
+			node->data.block.argv :
+			node->data.elem.argv;
+		argc = MDOC_BLOCK == node->type ?
+			node->data.block.argc :
+			node->data.elem.argc;
+
+		for (i = 0; i < argc; i++) {
+			if (0 == argv[i].sz)
+				continue;
+			for (j = 0; j < argv[i].sz; j++) {
+				tp = argv[i].value[j];
+				line = argv[i].line;
+				pos = argv[i].pos;
+				if ( ! check_text(mdoc, line, pos, tp))
+					return(0);
+			}
+		}
+	}
 
 	if (NULL == mdoc_valids[node->tok].pre)
 		return(1);
