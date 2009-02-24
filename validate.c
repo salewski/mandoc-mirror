@@ -39,7 +39,6 @@ typedef	int	(*v_post)(POST_ARGS);
 /* FIXME: some sections should only occur in specific msecs. */
 /* FIXME: ignoring Pp. */
 /* FIXME: math symbols. */
-/* FIXME: .Fd only in synopsis section. */
 
 struct	valids {
 	v_pre	*pre;
@@ -106,6 +105,7 @@ static	int	ebool(POST_ARGS);
 static	int	post_sh(POST_ARGS);
 static	int	post_sh_body(POST_ARGS);
 static	int	post_sh_head(POST_ARGS);
+static	int	post_fd(POST_ARGS);
 static	int	post_bl(POST_ARGS);
 static	int	post_it(POST_ARGS);
 static	int	post_ex(POST_ARGS);
@@ -156,6 +156,7 @@ static	v_post	posts_bf[] = { herr_le1, post_bf, NULL };
 static	v_post	posts_rs[] = { herr_eq0, bwarn_ge1, NULL };
 static	v_post	posts_fo[] = { bwarn_ge1, NULL };
 static	v_post	posts_bk[] = { herr_eq0, bwarn_ge1, NULL };
+static	v_post	posts_fd[] = { ewarn_ge1, post_fd, NULL };
 
 /* Per-macro pre- and post-child-check routine collections. */
 
@@ -184,7 +185,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_text },			/* Ev */ 
 	{ pres_ex, posts_ex },			/* Ex */ 
 	{ NULL, posts_text },			/* Fa */ 
-	{ NULL, posts_wtext },			/* Fd */
+	{ NULL, posts_fd },			/* Fd */
 	{ NULL, NULL },				/* Fl */
 	{ NULL, posts_text },			/* Fn */ 
 	{ NULL, posts_wtext },			/* Ft */ 
@@ -267,6 +268,85 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Fr */
 	{ NULL, posts_notext },			/* Ud */
 };
+
+
+int
+mdoc_valid_pre(struct mdoc *mdoc, 
+		const struct mdoc_node *node)
+{
+	v_pre		*p;
+	struct mdoc_arg	*argv;
+	size_t		 argc, i, j, line, pos;
+	const char	*tp;
+
+	if (MDOC_TEXT == node->type) {
+		tp = node->data.text.string;
+		line = node->line;
+		pos = node->pos;
+		return(check_text(mdoc, line, pos, tp));
+	}
+
+	if (MDOC_BLOCK == node->type || MDOC_ELEM == node->type) {
+		argv = MDOC_BLOCK == node->type ?
+			node->data.block.argv :
+			node->data.elem.argv;
+		argc = MDOC_BLOCK == node->type ?
+			node->data.block.argc :
+			node->data.elem.argc;
+
+		for (i = 0; i < argc; i++) {
+			if (0 == argv[i].sz)
+				continue;
+			for (j = 0; j < argv[i].sz; j++) {
+				tp = argv[i].value[j];
+				line = argv[i].line;
+				pos = argv[i].pos;
+				if ( ! check_text(mdoc, line, pos, tp))
+					return(0);
+			}
+		}
+	}
+
+	if (NULL == mdoc_valids[node->tok].pre)
+		return(1);
+	for (p = mdoc_valids[node->tok].pre; *p; p++)
+		if ( ! (*p)(mdoc, node)) 
+			return(0);
+	return(1);
+}
+
+
+int
+mdoc_valid_post(struct mdoc *mdoc)
+{
+	v_post		*p;
+
+	/*
+	 * This check occurs after the macro's children have been filled
+	 * in: postfix validation.  Since this happens when we're
+	 * rewinding the scope tree, it's possible to have multiple
+	 * invocations (as by design, for now), we set bit MDOC_VALID to
+	 * indicate that we've validated.
+	 */
+
+	if (MDOC_VALID & mdoc->last->flags)
+		return(1);
+	mdoc->last->flags |= MDOC_VALID;
+
+	if (MDOC_TEXT == mdoc->last->type)
+		return(1);
+	if (MDOC_ROOT == mdoc->last->type)
+		return(post_root(mdoc));
+
+	if (NULL == mdoc_valids[mdoc->last->tok].post)
+		return(1);
+	for (p = mdoc_valids[mdoc->last->tok].post; *p; p++)
+		if ( ! (*p)(mdoc)) 
+			return(0);
+
+	return(1);
+}
+
 
 
 static inline int
@@ -1066,80 +1146,12 @@ post_sh_head(POST_ARGS)
 }
 
 
-int
-mdoc_valid_pre(struct mdoc *mdoc, 
-		const struct mdoc_node *node)
+static int
+post_fd(POST_ARGS)
 {
-	v_pre		*p;
-	struct mdoc_arg	*argv;
-	size_t		 argc, i, j, line, pos;
-	const char	*tp;
 
-	if (MDOC_TEXT == node->type) {
-		tp = node->data.text.string;
-		line = node->line;
-		pos = node->pos;
-		return(check_text(mdoc, line, pos, tp));
-	}
-
-	if (MDOC_BLOCK == node->type || MDOC_ELEM == node->type) {
-		argv = MDOC_BLOCK == node->type ?
-			node->data.block.argv :
-			node->data.elem.argv;
-		argc = MDOC_BLOCK == node->type ?
-			node->data.block.argc :
-			node->data.elem.argc;
-
-		for (i = 0; i < argc; i++) {
-			if (0 == argv[i].sz)
-				continue;
-			for (j = 0; j < argv[i].sz; j++) {
-				tp = argv[i].value[j];
-				line = argv[i].line;
-				pos = argv[i].pos;
-				if ( ! check_text(mdoc, line, pos, tp))
-					return(0);
-			}
-		}
-	}
-
-	if (NULL == mdoc_valids[node->tok].pre)
+	if (SEC_SYNOPSIS == mdoc->last->sec)
 		return(1);
-	for (p = mdoc_valids[node->tok].pre; *p; p++)
-		if ( ! (*p)(mdoc, node)) 
-			return(0);
-	return(1);
+	return(mdoc_warn(mdoc, WARN_COMPAT, 
+			"suggested only in section SYNOPSIS"));
 }
-
-
-int
-mdoc_valid_post(struct mdoc *mdoc)
-{
-	v_post		*p;
-
-	/*
-	 * This check occurs after the macro's children have been filled
-	 * in: postfix validation.  Since this happens when we're
-	 * rewinding the scope tree, it's possible to have multiple
-	 * invocations (as by design, for now), we set bit MDOC_VALID to
-	 * indicate that we've validated.
-	 */
-
-	if (MDOC_VALID & mdoc->last->flags)
-		return(1);
-	mdoc->last->flags |= MDOC_VALID;
-
-	if (MDOC_TEXT == mdoc->last->type)
-		return(1);
-	if (MDOC_ROOT == mdoc->last->type)
-		return(post_root(mdoc));
-
-	if (NULL == mdoc_valids[mdoc->last->tok].post)
-		return(1);
-	for (p = mdoc_valids[mdoc->last->tok].post; *p; p++)
-		if ( ! (*p)(mdoc)) 
-			return(0);
-
-	return(1);
-}
-
