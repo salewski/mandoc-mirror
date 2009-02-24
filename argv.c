@@ -267,7 +267,7 @@ static int
 args(struct mdoc *mdoc, int line, 
 		int *pos, char *buf, int fl, char **v)
 {
-	int		  i, c;
+	int		  i;
 	char		 *p, *pp;
 
 	assert(*pos > 0);
@@ -290,14 +290,11 @@ args(struct mdoc *mdoc, int line,
 	 */
 
 	if ((fl & ARGS_DELIM) && mdoc_iscdelim(buf[*pos])) {
-		for (i = *pos; (c = buf[i]); ) {
-			if ( ! mdoc_iscdelim(c))
+		for (i = *pos; buf[i]; ) {
+			if ( ! mdoc_iscdelim(buf[i]))
 				break;
 			i++;
-			if (0 == buf[i] || ! isspace(c))
-				break;
-			i++;
-			while (buf[i] && isspace(c))
+			while (buf[i] && isspace((int)buf[i]))
 				i++;
 		}
 		if (0 == buf[i]) {
@@ -404,8 +401,8 @@ args(struct mdoc *mdoc, int line,
 		/* Do non-tabsep look-ahead here. */
 		
 		if ( ! (ARGS_TABSEP & fl))
-			while ((c = buf[*pos])) {
-				if (isspace(c))
+			while (buf[*pos]) {
+				if (isspace((int)buf[*pos]))
 					if ('\\' != buf[*pos - 1])
 						break;
 				(*pos)++;
