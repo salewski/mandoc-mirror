@@ -6,5 +6,5 @@
 .Nd description
 .Sh DESCRIPTION
 .Bl -column "xxxxx" "xxxxx"
-.It d \	 e	f
+.It d \ e	f
 .El

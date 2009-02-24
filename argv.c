@@ -35,7 +35,7 @@
 #define	ARGS_DELIM	(1 << 1)
 #define	ARGS_TABSEP	(1 << 2)
 
-static	int		 lookup(int, const char *);
+static	int		 argv_a2arg(int, const char *);
 static	int		 args(struct mdoc *, int, int *, 
 				char *, int, char **);
 static	int		 argv(struct mdoc *, int,
@@ -466,7 +466,7 @@ args(struct mdoc *mdoc, int line,
 
 
 static int
-lookup(int tok, const char *argv)
+argv_a2arg(int tok, const char *argv)
 {
 
 	switch (tok) {
@@ -747,7 +747,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	if (buf[*pos])
 		buf[(*pos)++] = 0;
 
-	if (MDOC_ARG_MAX == (v->arg = lookup(tok, p))) {
+	if (MDOC_ARG_MAX == (v->arg = argv_a2arg(tok, p))) {
 		if ( ! pwarn(mdoc, line, i, WARGVPARM))
 			return(ARGV_ERROR);
 		return(ARGV_WORD);

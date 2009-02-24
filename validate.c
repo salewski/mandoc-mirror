@@ -35,7 +35,6 @@ typedef	int	(*v_post)(struct mdoc *);
 /* FIXME: some sections should only occur in specific msecs. */
 /* FIXME: ignoring Pp. */
 /* FIXME: math symbols. */
-/* FIXME: valid character-escape checks. */
 /* FIXME: .Fd only in synopsis section. */
 
 struct	valids {
@@ -109,6 +108,7 @@ static	int	post_xr(struct mdoc *);
 static	int	post_nm(struct mdoc *);
 static	int	post_bf(struct mdoc *);
 static	int	post_root(struct mdoc *);
+static	int	pre_text(struct mdoc *, const struct mdoc_node *);
 
 /* Collections of pre-child-parse routines. */
 
@@ -383,6 +383,22 @@ check_msec(struct mdoc *mdoc, struct mdoc_node *node,
 	return(mdoc_nwarn(mdoc, node, WARN_COMPAT, 
 				"wrong manual section"));
 }
+
+
+static int
+check_parent(struct mdoc *mdoc, struct mdoc_node *n, 
+		int tok, enum mdoc_type t)
+{
+
+	assert(n->parent);
+	if ((MDOC_ROOT == t || tok == n->parent->tok) &&
+			(t == n->parent->type))
+		return(1);
+
+	return(mdoc_nerr(mdoc, n, "require parent %s",
+		MDOC_ROOT == t ? "<root>" : mdoc_macronames[tok]));
+}
+
 
 
 static int
@@ -922,6 +938,26 @@ ebool(struct mdoc *mdoc)
 
 
 static int
+pre_text(struct mdoc *mdoc, const struct mdoc_node *n)
+{
+	size_t		 c;
+	const char	*p;
+
+	for (p = n->data.text.string; *p; p++) {
+		if ('\\' != *p)
+			continue;
+		if ((c = mdoc_isescape(p))) {
+			p += (c - 1);
+			continue;
+		}
+		return(mdoc_nerr(mdoc, n, "bad escape sequence"));
+	}
+
+	return(1);
+}
+
+
+static int
 post_root(struct mdoc *mdoc)
 {
 
@@ -931,10 +967,10 @@ post_root(struct mdoc *mdoc)
 		return(mdoc_err(mdoc, "document lacks prologue"));
 
 	if (MDOC_BLOCK != mdoc->first->child->type)
-		return(mdoc_err(mdoc, "lacking post-prologue `%s'", 
+		return(mdoc_err(mdoc, "lacking post-prologue %s", 
 					mdoc_macronames[MDOC_Sh]));
 	if (MDOC_Sh != mdoc->first->child->tok)
-		return(mdoc_err(mdoc, "lacking post-prologue `%s'", 
+		return(mdoc_err(mdoc, "lacking post-prologue %s", 
 					mdoc_macronames[MDOC_Sh]));
 
 	return(1);
@@ -969,8 +1005,8 @@ post_sh_body(struct mdoc *mdoc)
 	 */
 
 	if (NULL == (n = mdoc->last->child))
-		return(mdoc_warn(mdoc, WARN_COMPAT, "section NAME "
-					"should contain %s and %s", 
+		return(mdoc_warn(mdoc, WARN_SYNTAX, 
+					"section should have %s and %s",
 					mdoc_macronames[MDOC_Nm],
 					mdoc_macronames[MDOC_Nd]));
 
@@ -979,9 +1015,8 @@ post_sh_body(struct mdoc *mdoc)
 			continue;
 		if (MDOC_TEXT == n->type)
 			continue;
-		if ( ! (mdoc_nwarn(mdoc, n, WARN_COMPAT, "section "
-					"NAME should contain %s as "
-					"initial body child", 
+		if ( ! (mdoc_nwarn(mdoc, n, WARN_SYNTAX, 
+					"section should have %s first",
 					mdoc_macronames[MDOC_Nm])))
 			return(0);
 	}
@@ -989,8 +1024,8 @@ post_sh_body(struct mdoc *mdoc)
 	if (MDOC_ELEM == n->type && MDOC_Nd == n->tok)
 		return(1);
 
-	return(mdoc_warn(mdoc, WARN_COMPAT, "section NAME should "
-				"contain %s as the last child",
+	return(mdoc_warn(mdoc, WARN_SYNTAX, 
+				"section should have %s last",
 				mdoc_macronames[MDOC_Nd]));
 }
 
@@ -1003,19 +1038,22 @@ post_sh_head(struct mdoc *mdoc)
 
 	assert(MDOC_Sh == mdoc->last->tok);
 
-	if ( ! xstrlcats(buf, mdoc->last->child, 64))
-		return(mdoc_err(mdoc, "macro parameters too long"));
+	if ( ! xstrlcats(buf, mdoc->last->child, sizeof(buf)))
+		return(mdoc_err(mdoc, "argument too long"));
 
 	sec = mdoc_atosec(buf);
 
 	if (SEC_BODY == mdoc->lastnamed && SEC_NAME != sec)
-		return(mdoc_err(mdoc, "section NAME must be first"));
+		return(mdoc_warn(mdoc, WARN_SYNTAX, 
+				"section NAME should be first"));
 	if (SEC_CUSTOM == sec)
 		return(1);
 	if (sec == mdoc->lastnamed)
-		return(mdoc_warn(mdoc, WARN_SYNTAX, "section repeated"));
+		return(mdoc_warn(mdoc, WARN_SYNTAX, 
+				"section repeated"));
 	if (sec < mdoc->lastnamed)
-		return(mdoc_warn(mdoc, WARN_SYNTAX, "section out of conventional order"));
+		return(mdoc_warn(mdoc, WARN_SYNTAX, 
+				"section out of order"));
 
 	return(1);
 }
@@ -1027,7 +1065,7 @@ mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *node)
 	v_pre		*p;
 
 	if (MDOC_TEXT == node->type)
-		return(1);
+		return(pre_text(mdoc, node));
 	assert(MDOC_ROOT != node->type);
 
 	if (NULL == mdoc_valids[node->tok].pre)
@@ -1043,6 +1081,14 @@ int
 mdoc_valid_post(struct mdoc *mdoc)
 {
 	v_post		*p;
+
+	/*
+	 * This check occurs after the macro's children have been filled
+	 * in: postfix validation.  Since this happens when we're
+	 * rewinding the scope tree, it's possible to have multiple
+	 * invocations (as by design, for now), we set bit MDOC_VALID to
+	 * indicate that we've validated.
+	 */
 
 	if (MDOC_VALID & mdoc->last->flags)
 		return(1);
