@@ -416,6 +416,8 @@ body(struct termp *p, const struct mdoc_meta *meta,
 
 	dochild = 1;
 	pair.type = 0;
+	pair.offset = 0;
+	pair.flag = 0;
 
 	if (MDOC_TEXT != node->type) {
 		if (termacts[node->tok].pre)
@@ -426,24 +428,14 @@ body(struct termp *p, const struct mdoc_meta *meta,
 
 	/* Children. */
 
-	switch (pair.type) {
-	case (TERMPAIR_FLAG):
-		p->flags |= pair.data.flag;
-		break;
-	default:
-		break;
-	}
+	if (TERMPAIR_FLAG & pair.type)
+		p->flags |= pair.flag;
 
 	if (dochild && node->child)
 		body(p, meta, node->child);
 
-	switch (pair.type) {
-	case (TERMPAIR_FLAG):
-		p->flags &= ~pair.data.flag;
-		break;
-	default:
-		break;
-	}
+	if (TERMPAIR_FLAG & pair.type)
+		p->flags &= ~pair.flag;
 
 	/* Post-processing. */
 

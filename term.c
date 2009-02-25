@@ -654,25 +654,6 @@ termp_op_post(DECL_ARGS)
 
 
 /* ARGSUSED */
-static void
-termp_sh_post(DECL_ARGS)
-{
-
-	switch (node->type) {
-	case (MDOC_HEAD):
-		newln(p);
-		break;
-	case (MDOC_BODY):
-		newln(p);
-		p->offset = 0;
-		break;
-	default:
-		break;
-	}
-}
-
-
-/* ARGSUSED */
 static int
 termp_xr_pre(DECL_ARGS)
 {
@@ -765,6 +746,25 @@ termp_sh_pre(DECL_ARGS)
 
 
 /* ARGSUSED */
+static void
+termp_sh_post(DECL_ARGS)
+{
+
+	switch (node->type) {
+	case (MDOC_HEAD):
+		newln(p);
+		break;
+	case (MDOC_BODY):
+		newln(p);
+		p->offset = 0;
+		break;
+	default:
+		break;
+	}
+}
+
+
+/* ARGSUSED */
 static int
 termp_op_pre(DECL_ARGS)
 {
@@ -809,7 +809,7 @@ termp_d1_pre(DECL_ARGS)
 	if (MDOC_BODY != node->type)
 		return(1);
 	newln(p);
-	p->offset += INDENT;
+	p->offset += (pair->offset = INDENT);
 	return(1);
 }
 
@@ -822,7 +822,7 @@ termp_d1_post(DECL_ARGS)
 	if (MDOC_BODY != node->type) 
 		return;
 	newln(p);
-	p->offset -= INDENT;
+	p->offset -= pair->offset;
 }
 
 
@@ -988,7 +988,8 @@ termp_bd_pre(DECL_ARGS)
 	i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
 	if (-1 != i) {
 		assert(1 == bl->argv[i].sz);
-		p->offset += arg_offset(&bl->argv[i]);
+		pair->offset = arg_offset(&bl->argv[i]);
+		p->offset += pair->offset;
 	}
 
 	if ( ! arg_hasattr(MDOC_Literal, bl->argc, bl->argv))
@@ -1015,20 +1016,9 @@ termp_bd_pre(DECL_ARGS)
 static void
 termp_bd_post(DECL_ARGS)
 {
-	int		 i;
-	const struct mdoc_block *bl;
 
-	if (MDOC_BODY != node->type)
-		return;
-
-	assert(MDOC_BLOCK == node->parent->type);
-	bl = &node->parent->data.block;
-
-	i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
-	if (-1 != i) {
-		assert(1 == bl->argv[i].sz);
-		p->offset -= arg_offset(&bl->argv[i]);
-	}
+	if (MDOC_BODY == node->type)
+		p->offset -= pair->offset;
 }
 
 

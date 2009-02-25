@@ -43,15 +43,15 @@ struct	termp {
 struct	termpair {
 	int		  type;
 #define	TERMPAIR_FLAG	 (1 << 0)
-	union {
-		int	  flag;
-	} data;
+	int	  	  flag;
+	size_t	  	  offset;
 };
 
 #define	TERMPAIR_SETFLAG(p, fl) \
 	do { \
-		(p)->data.flag = (fl); \
-		(p)->type = TERMPAIR_FLAG; \
+		assert(! (TERMPAIR_FLAG & (p)->type)); \
+		(p)->flag = (fl); \
+		(p)->type |= TERMPAIR_FLAG; \
 	} while (0)
 
 struct	termact {
