@@ -1,6 +1,7 @@
 .SUFFIXES:	.html .sgml
 
-VERSION	= 1.3.3
+VERSION	= "1.3.5"
+VDATE	= "25 February 2009"
 
 CFLAGS += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g 
 
@@ -268,4 +269,5 @@ mdoclint: $(LINTOBJS) libmdoc.a
 
 .sgml.html:
 	validate $<
-	cp -f $< $@
+	sed -e "s!@VERSION@!$(VERSION)!" -e "s!@VDATE@!$(VDATE)!" $< > $@
+

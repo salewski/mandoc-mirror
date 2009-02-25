@@ -73,6 +73,10 @@
 					i386, AMD64 and Alpha.
 					</p>
 
+					<p>
+					The most current version is <b>@VERSION@</b>, dated <b>@VDATE@</b>.
+					</p>
+
 					<h2>
 					snapshotted source
 					</h2>
