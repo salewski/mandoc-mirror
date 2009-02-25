@@ -55,6 +55,7 @@ static	int	check_text(struct mdoc *,
 			size_t, size_t, const char *);
 
 static	int	err_child_lt(struct mdoc *, const char *, int);
+static	int	warn_child_lt(struct mdoc *, const char *, int);
 static	int	err_child_gt(struct mdoc *, const char *, int);
 static	int	warn_child_gt(struct mdoc *, const char *, int);
 static	int	err_child_eq(struct mdoc *, const char *, int);
@@ -89,7 +90,7 @@ static	int	pre_prologue(PRE_ARGS);
 /* Specific post-child-parse routines. */
 
 static	int	herr_ge1(POST_ARGS);
-static	int	herr_le1(POST_ARGS);
+static	int	hwarn_le1(POST_ARGS);
 static	int	herr_eq0(POST_ARGS);
 static	int	eerr_eq0(POST_ARGS);
 static	int	eerr_le1(POST_ARGS);
@@ -153,7 +154,7 @@ static	v_post	posts_an[] = { post_an, NULL };
 static	v_post	posts_at[] = { post_at, NULL };
 static	v_post	posts_xr[] = { eerr_ge1, eerr_le2, post_xr, NULL };
 static	v_post	posts_nm[] = { post_nm, NULL };
-static	v_post	posts_bf[] = { herr_le1, post_bf, NULL };
+static	v_post	posts_bf[] = { hwarn_le1, post_bf, NULL };
 static	v_post	posts_rs[] = { herr_eq0, bwarn_ge1, NULL };
 static	v_post	posts_fo[] = { hwarn_eq1, bwarn_ge1, NULL };
 static	v_post	posts_bk[] = { herr_eq0, bwarn_ge1, NULL };
@@ -432,6 +433,7 @@ CHECK_CHILD_DEFN(err, gt, >)			/* err_child_gt() */
 CHECK_CHILD_DEFN(warn, eq, ==)			/* warn_child_eq() */
 CHECK_CHILD_DEFN(err, eq, ==)			/* err_child_eq() */
 CHECK_CHILD_DEFN(err, lt, <)			/* err_child_lt() */
+CHECK_CHILD_DEFN(warn, lt, <)			/* warn_child_lt() */
 CHECK_BODY_DEFN(ge1, warn, warn_child_gt, 0)	/* bwarn_ge1() */
 CHECK_ELEM_DEFN(eq1, warn, warn_child_eq, 1)	/* ewarn_eq1() */
 CHECK_ELEM_DEFN(eq0, warn, warn_child_eq, 0)	/* ewarn_eq0() */
@@ -442,7 +444,7 @@ CHECK_ELEM_DEFN(le1, err, err_child_lt, 2)	/* eerr_le1() */
 CHECK_ELEM_DEFN(eq0, err, err_child_eq, 0)	/* eerr_eq0() */
 CHECK_ELEM_DEFN(ge1, err, err_child_gt, 0)	/* eerr_ge1() */
 CHECK_HEAD_DEFN(eq0, err, err_child_eq, 0)	/* herr_eq0() */
-CHECK_HEAD_DEFN(le1, err, err_child_lt, 2)	/* herr_le1() */
+CHECK_HEAD_DEFN(le1, warn, warn_child_lt, 2)	/* hwarn_le1() */
 CHECK_HEAD_DEFN(ge1, err, err_child_gt, 0)	/* herr_ge1() */
 CHECK_HEAD_DEFN(eq1, warn, warn_child_eq, 1)	/* hwarn_eq1() */
 

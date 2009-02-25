@@ -48,7 +48,9 @@
 #define	TTYPE_CONFIG	  13
 #define	TTYPE_CMD	  14
 #define	TTYPE_INCLUDE	  15
-#define	TTYPE_NMAX	  16
+#define	TTYPE_SYMB	  16
+#define	TTYPE_SYMBOL	  17
+#define	TTYPE_NMAX	  18
 
 /* 
  * These define "styles" for element types, like command arguments or
@@ -72,7 +74,9 @@ const	int ttypes[TTYPE_NMAX] = {
 	TERMP_UNDERLINE, 	/* TTYPE_EMPH */
 	TERMP_BOLD,	 	/* TTYPE_CONFIG */
 	TERMP_BOLD,	 	/* TTYPE_CMD */
-	TERMP_BOLD	 	/* TTYPE_INCLUDE */
+	TERMP_BOLD,	 	/* TTYPE_INCLUDE */
+	TERMP_BOLD,	 	/* TTYPE_SYMB */
+	TERMP_BOLD	 	/* TTYPE_SYMBOL */
 };
 
 static	int		  arg_hasattr(int, size_t, 
@@ -102,6 +106,7 @@ DECL_POST(name);
 
 DECL_PREPOST(termp_aq);
 DECL_PREPOST(termp_ar);
+DECL_PREPOST(termp_bf);
 DECL_PREPOST(termp_bd);
 DECL_PREPOST(termp_bq);
 DECL_PREPOST(termp_cd);
@@ -118,6 +123,7 @@ DECL_PREPOST(termp_ft);
 DECL_PREPOST(termp_ic);
 DECL_PREPOST(termp_in);
 DECL_PREPOST(termp_it);
+DECL_PREPOST(termp_ms);
 DECL_PREPOST(termp_nm);
 DECL_PREPOST(termp_op);
 DECL_PREPOST(termp_pa);
@@ -128,11 +134,13 @@ DECL_PREPOST(termp_sh);
 DECL_PREPOST(termp_ss);
 DECL_PREPOST(termp_sq);
 DECL_PREPOST(termp_sx);
+DECL_PREPOST(termp_sy);
 DECL_PREPOST(termp_va);
 DECL_PREPOST(termp_vt);
 
 DECL_PRE(termp_at);
 DECL_PRE(termp_bsx);
+DECL_PRE(termp_bt);
 DECL_PRE(termp_bx);
 DECL_PRE(termp_ex);
 DECL_PRE(termp_fx);
@@ -207,7 +215,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_aq_pre, termp_aq_post }, /* Aq */
 	{ termp_at_pre, NULL }, /* At */
 	{ NULL, NULL }, /* Bc */
-	{ NULL, NULL }, /* Bf */ 
+	{ termp_bf_pre, termp_bf_post }, /* Bf */ 
 	{ termp_bq_pre, termp_bq_post }, /* Bo */
 	{ termp_bq_pre, termp_bq_post }, /* Bq */
 	{ termp_bsx_pre, NULL }, /* Bsx */
@@ -221,7 +229,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_em_pre, termp_em_post }, /* Em */ 
 	{ NULL, NULL }, /* Eo */
 	{ termp_fx_pre, NULL }, /* Fx */
-	{ NULL, NULL }, /* Ms */
+	{ termp_ms_pre, termp_ms_post }, /* Ms */
 	{ NULL, NULL }, /* No */
 	{ termp_ns_pre, NULL }, /* Ns */
 	{ termp_nx_pre, NULL }, /* Nx */
@@ -241,7 +249,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_sq_pre, termp_sq_post }, /* Sq */
 	{ NULL, NULL }, /* Sm */
 	{ termp_sx_pre, termp_sx_post }, /* Sx */
-	{ NULL, NULL }, /* Sy */
+	{ termp_sy_pre, termp_sy_post }, /* Sy */
 	{ NULL, NULL }, /* Tn */
 	{ termp_ux_pre, NULL }, /* Ux */
 	{ NULL, NULL }, /* Xc */
@@ -252,7 +260,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Oc */
 	{ NULL, NULL }, /* Bk */
 	{ NULL, NULL }, /* Ek */
-	{ NULL, NULL }, /* Bt */
+	{ termp_bt_pre, NULL }, /* Bt */
 	{ NULL, NULL }, /* Hf */
 	{ NULL, NULL }, /* Fr */
 	{ termp_ud_pre, NULL }, /* Ud */
@@ -787,6 +795,16 @@ termp_op_pre(DECL_ARGS)
 	default:
 		break;
 	}
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+termp_bt_pre(DECL_ARGS)
+{
+
+	word(p, "is currently in beta test.");
 	return(1);
 }
 
@@ -1431,6 +1449,8 @@ termp_fo_pre(DECL_ARGS)
 	} else if (MDOC_HEAD != node->type) 
 		return(1);
 
+	/* XXX - groff shows only first parameter */
+
 	p->flags |= ttypes[TTYPE_FUNC_NAME];
 	for (n = node->child; n; n = n->next) {
 		assert(MDOC_TEXT == n->type);
@@ -1455,3 +1475,107 @@ termp_fo_post(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
+static int
+termp_bf_pre(DECL_ARGS)
+{
+	const struct mdoc_node	*n;
+	const struct mdoc_block	*b;
+
+	/* XXX - we skip over possible trailing HEAD tokens. */
+
+	if (MDOC_HEAD == node->type)
+		return(0);
+	else if (MDOC_BLOCK != node->type)
+		return(1);
+
+	b = &node->data.block;
+
+	if (NULL == (n = b->head->child)) {
+		if (arg_hasattr(MDOC_Emphasis, b->argc, b->argv))
+			p->flags |= ttypes[TTYPE_EMPH];
+		else if (arg_hasattr(MDOC_Symbolic, b->argc, b->argv))
+			p->flags |= ttypes[TTYPE_SYMB];
+
+		return(1);
+	} 
+
+	assert(MDOC_TEXT == n->type);
+
+	if (0 == strcmp("Em", n->data.text.string))
+		p->flags |= ttypes[TTYPE_EMPH];
+	else if (0 == strcmp("Sy", n->data.text.string))
+		p->flags |= ttypes[TTYPE_SYMB];
+
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_bf_post(DECL_ARGS)
+{
+	const struct mdoc_node	*n;
+	const struct mdoc_block	*b;
+
+	if (MDOC_BLOCK != node->type)
+		return;
+
+	b = &node->data.block;
+
+	if (NULL == (n = b->head->child)) {
+		if (arg_hasattr(MDOC_Emphasis, b->argc, b->argv))
+			p->flags &= ~ttypes[TTYPE_EMPH];
+		else if (arg_hasattr(MDOC_Symbolic, b->argc, b->argv))
+			p->flags &= ~ttypes[TTYPE_SYMB];
+
+		return;
+	} 
+
+	assert(MDOC_TEXT == n->type);
+
+	if (0 == strcmp("Emphasis", n->data.text.string))
+		p->flags &= ~ttypes[TTYPE_EMPH];
+	else if (0 == strcmp("Symbolic", n->data.text.string))
+		p->flags &= ~ttypes[TTYPE_SYMB];
+
+	return;
+}
+
+
+/* ARGSUSED */
+static int
+termp_sy_pre(DECL_ARGS)
+{
+
+	p->flags |= ttypes[TTYPE_SYMB];
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_sy_post(DECL_ARGS)
+{
+
+	p->flags &= ~ttypes[TTYPE_SYMB];
+}
+
+
+/* ARGSUSED */
+static int
+termp_ms_pre(DECL_ARGS)
+{
+
+	p->flags |= ttypes[TTYPE_SYMBOL];
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_ms_post(DECL_ARGS)
+{
+
+	p->flags &= ~ttypes[TTYPE_SYMBOL];
+}
