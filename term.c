@@ -17,6 +17,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 #include <assert.h>
+#include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -350,8 +351,8 @@ termp_it_pre(DECL_ARGS)
 {
 	const struct mdoc_node *n, *it;
 	const struct mdoc_block *bl;
-	char		 buf[7];
-	int		 i;
+	char		 buf[7], *tp;
+	int		 i, type;
 	size_t		 width, offset;
 
 	switch (node->type) {
@@ -378,79 +379,151 @@ termp_it_pre(DECL_ARGS)
 		return(1);
 	}
 
+	/* Get our list type. */
+
+	for (i = 0; i < (int)bl->argc; i++) 
+		switch (bl->argv[i].arg) {
+		case (MDOC_Bullet):
+			/* FALLTHROUGH */
+		case (MDOC_Dash):
+			/* FALLTHROUGH */
+		case (MDOC_Enum):
+			/* FALLTHROUGH */
+		case (MDOC_Hyphen):
+			/* FALLTHROUGH */
+		case (MDOC_Item):
+			/* FALLTHROUGH */
+		case (MDOC_Tag):
+			/* FALLTHROUGH */
+		case (MDOC_Ohang):
+			type = bl->argv[i].arg;
+			i = (int)bl->argc;
+			break;
+		case (MDOC_Inset):
+			/* FALLTHROUGH */
+		case (MDOC_Hang):
+			/* FALLTHROUGH */
+		case (MDOC_Diag):
+			/* FALLTHROUGH */
+		case (MDOC_Column):
+			errx(1, "list type not supported");
+			/* NOTREACHED */
+		default:
+			break;
+		}
+
+	/* Save our existing (inherited) margin and offset. */
+
 	pair->offset = p->offset;
 	pair->rmargin = p->rmargin;
 
+	/* Get list width and offset. */
+
 	/* FIXME: auto-size. */
 	i = arg_getattr(MDOC_Width, bl->argc, bl->argv);
-	width = i >= 0 ? arg_width(&bl->argv[i]) : 10;
+	width = i >= 0 ? arg_width(&bl->argv[i]) : 0;
 
 	i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
 	offset = i >= 0 ? arg_offset(&bl->argv[i]) : 0;
 
-	assert(MDOC_HEAD == node->type || 
-			MDOC_BODY == node->type);
+	/* Override the width. */
 
-	if (arg_hasattr(MDOC_Tag, bl->argc, bl->argv)) {
-		p->flags |= TERMP_NOSPACE;
-		if (MDOC_BODY == node->type) {
-			p->flags |= TERMP_NOLPAD;
-			p->offset += width;
-		} else  {
+	switch (type) {
+	case (MDOC_Bullet):
+		/* FALLTHROUGH */
+	case (MDOC_Dash):
+		/* FALLTHROUGH */
+	case (MDOC_Enum):
+		/* FALLTHROUGH */
+	case (MDOC_Hyphen):
+		width = width > 6 ? width : 6;
+		break;
+	case (MDOC_Tag):
+		if (0 == width)
+			errx(1, "need non-zero -width");
+		break;
+	default:
+		break;
+	}
+
+	/* Word-wrap control. */
+
+	p->flags |= TERMP_NOSPACE;
+
+	switch (type) {
+	case (MDOC_Bullet):
+		/* FALLTHROUGH */
+	case (MDOC_Dash):
+		/* FALLTHROUGH */
+	case (MDOC_Enum):
+		/* FALLTHROUGH */
+	case (MDOC_Hyphen):
+		/* FALLTHROUGH */
+	case (MDOC_Tag):
+		if (MDOC_HEAD == node->type)
 			p->flags |= TERMP_NOBREAK;
-			p->rmargin = p->offset + offset + width;
-		}
-
-	} else if (arg_hasattr(MDOC_Ohang, bl->argc, bl->argv)) {
-		p->flags |= TERMP_NOSPACE;
-
-	} else if (arg_hasattr(MDOC_Diag, bl->argc, bl->argv)) {
-		/* TODO. */
-
-	} else if (arg_hasattr(MDOC_Hang, bl->argc, bl->argv)) {
-		/* TODO. */
-
-	} else if (arg_hasattr(MDOC_Bullet, bl->argc, bl->argv)) {
-		p->flags |= TERMP_NOSPACE;
-		if (MDOC_BODY == node->type) {
+		else if (MDOC_BODY == node->type)
 			p->flags |= TERMP_NOLPAD;
-			p->offset += 6;
-		} else {
-			word(p, "\\[bu]");
-			p->flags |= TERMP_NOBREAK;
-			p->rmargin = p->offset + offset + 6;
-		}
+		break;
+	case (MDOC_Ohang):
+		break;
+	}
 
-	} else if (arg_hasattr(MDOC_Enum, bl->argc, bl->argv)) {
-		p->flags |= TERMP_NOSPACE;
-		if (MDOC_BODY == node->type) {
-			p->flags |= TERMP_NOLPAD;
-			p->offset += 6;
-		} else {
+	/* 
+	 * Get a token to use as the HEAD lead-in.  If NULL, we use the
+	 * HEAD child. 
+	 */
+
+	tp = NULL;
+	if (MDOC_HEAD == node->type) {
+		if (arg_hasattr(MDOC_Bullet, bl->argc, bl->argv))
+			tp = "\\[bu]";
+		if (arg_hasattr(MDOC_Dash, bl->argc, bl->argv))
+			tp = "\\-";
+		if (arg_hasattr(MDOC_Enum, bl->argc, bl->argv)) {
 			(pair->ppair->ppair->count)++;
 			(void)snprintf(buf, sizeof(buf), "%d.", 
 					pair->ppair->ppair->count);
-			word(p, buf);
-			p->flags |= TERMP_NOBREAK;
-			p->rmargin = p->offset + offset + 6;
+			tp = buf;
 		}
+		if (arg_hasattr(MDOC_Hyphen, bl->argc, bl->argv))
+			tp = "\\-";
+		if (arg_hasattr(MDOC_Item, bl->argc, bl->argv))
+			tp = "";
+	}
 
-	} else if (arg_hasattr(MDOC_Dash, bl->argc, bl->argv) ||
-			arg_hasattr(MDOC_Hyphen, bl->argc, bl->argv)) {
-		p->flags |= TERMP_NOSPACE;
-		if (MDOC_BODY == node->type) {
-			p->flags |= TERMP_NOLPAD;
-			p->offset += 6;
-			return(1);
-		} else {
-			word(p, "\\-");
-			p->flags |= TERMP_NOBREAK;
-			p->rmargin = p->offset + offset + 6;
-		}
-	} 
+	/* Margin control. */
 
 	p->offset += offset;
-	return(1);
+
+	switch (type) {
+	case (MDOC_Bullet):
+		/* FALLTHROUGH */
+	case (MDOC_Dash):
+		/* FALLTHROUGH */
+	case (MDOC_Enum):
+		/* FALLTHROUGH */
+	case (MDOC_Hyphen):
+		/* FALLTHROUGH */
+	case (MDOC_Item):
+		/* FALLTHROUGH */
+	case (MDOC_Tag):
+		if (MDOC_HEAD == node->type)
+			p->rmargin = p->offset + width;
+		else if (MDOC_BODY == node->type) 
+			p->offset += width;
+		break;
+	case (MDOC_Ohang):
+		break;
+	}
+
+	if (NULL == tp)
+		return(1);
+
+	/* XXX - ignoring children. */
+
+	word(p, tp);
+	return(0);
 }
 
 
@@ -458,41 +531,20 @@ termp_it_pre(DECL_ARGS)
 static void
 termp_it_post(DECL_ARGS)
 {
-	const struct mdoc_node *n, *it;
-	const struct mdoc_block *bl;
 
 	if (MDOC_BODY != node->type && MDOC_HEAD != node->type)
 		return;
 
-	it = node->parent;
-	n = it->parent->parent;
-	bl = &n->data.block;
-
-	if (arg_hasattr(MDOC_Tag, bl->argc, bl->argv) ||
-			arg_hasattr(MDOC_Bullet, bl->argc, bl->argv) ||
-			arg_hasattr(MDOC_Dash, bl->argc, bl->argv) ||
-			arg_hasattr(MDOC_Enum, bl->argc, bl->argv) ||
-			arg_hasattr(MDOC_Hyphen, bl->argc, bl->argv)) {
-		flushln(p);
-		if (MDOC_HEAD == node->type) {
-			p->rmargin = pair->rmargin;
-			p->flags &= ~TERMP_NOBREAK;
-		} else
-			p->flags &= ~TERMP_NOLPAD;
-
-	} else if (arg_hasattr(MDOC_Ohang, bl->argc, bl->argv)) {
-		flushln(p);
-
-	} else if (arg_hasattr(MDOC_Inset, bl->argc, bl->argv)) {
-		if (MDOC_BODY == node->type)
-			flushln(p);
-
-	} else if (arg_hasattr(MDOC_Item, bl->argc, bl->argv)) {
-		if (MDOC_BODY == node->type)
-			flushln(p);
-	}
+	flushln(p);
 
 	p->offset = pair->offset;
+	p->rmargin = pair->rmargin;
+
+	if (MDOC_HEAD == node->type) {
+		p->flags &= ~TERMP_NOBREAK;
+		p->flags &= ~TERMP_NORPAD;
+	} else if (MDOC_BODY == node->type)
+		p->flags &= ~TERMP_NOLPAD;
 }
 
 
