@@ -41,11 +41,13 @@ struct	termp {
 };
 
 struct	termpair {
+	struct termpair	 *ppair;
 	int		  type;
 #define	TERMPAIR_FLAG	 (1 << 0)
 	int	  	  flag;
 	size_t	  	  offset;
 	size_t	  	  rmargin;
+	int		  count;
 };
 
 #define	TERMPAIR_SETFLAG(p, fl) \

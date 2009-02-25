@@ -44,6 +44,7 @@ enum	termstyle {
 };
 
 static	void		  body(struct termp *,
+				struct termpair *,
 				const struct mdoc_meta *,
 				const struct mdoc_node *);
 static	void		  header(struct termp *,
@@ -54,6 +55,8 @@ static	void		  footer(struct termp *,
 static	void		  pword(struct termp *, const char *, size_t);
 static	void		  pescape(struct termp *, 
 				const char *, size_t *, size_t);
+static	void		  nescape(struct termp *, 
+				const char *, size_t);
 static	void		  chara(struct termp *, char);
 static	void		  stringa(struct termp *, const char *);
 static	void		  style(struct termp *, enum termstyle);
@@ -89,7 +92,7 @@ main(int argc, char *argv[])
 		err(1, "malloc");
 
 	header(&termp, mdoc_meta(mdoc));
-	body(&termp, mdoc_meta(mdoc), mdoc_node(mdoc));
+	body(&termp, NULL, mdoc_meta(mdoc), mdoc_node(mdoc));
 	footer(&termp, mdoc_meta(mdoc));
 
 	free(termp.buf);
@@ -218,8 +221,10 @@ newln(struct termp *p)
 	 * vertical space.
 	 */
 	p->flags |= TERMP_NOSPACE;
-	if (0 == p->col) 
+	if (0 == p->col) {
+		p->flags &= ~TERMP_NOLPAD;
 		return;
+	}
 	flushln(p);
 	p->flags &= ~TERMP_NOLPAD;
 }
@@ -287,8 +292,36 @@ style(struct termp *p, enum termstyle esc)
 
 
 static void
+nescape(struct termp *p, const char *word, size_t len)
+{
+
+	switch (len) {
+	case (2):
+		if ('r' == word[0] && 'B' == word[1])
+			chara(p, ']');
+		else if ('l' == word[0] && 'B' == word[1])
+			chara(p, '[');
+		else if ('<' == word[0] && '-' == word[1])
+			stringa(p, "<-");
+		else if ('-' == word[0] && '>' == word[1])
+			stringa(p, "->");
+		else if ('l' == word[0] && 'q' == word[1])
+			chara(p, '\"');
+		else if ('r' == word[0] && 'q' == word[1])
+			chara(p, '\"');
+		else if ('b' == word[0] && 'u' == word[1])
+			chara(p, 'o');
+		break;
+	default:
+		break;
+	}
+}
+
+
+static void
 pescape(struct termp *p, const char *word, size_t *i, size_t len)
 {
+	size_t		 j;
 
 	(*i)++;
 	assert(*i < len);
@@ -297,20 +330,7 @@ pescape(struct termp *p, const char *word, size_t *i, size_t len)
 		/* Two-character escapes. */
 		(*i)++;
 		assert(*i + 1 < len);
-
-		if ('r' == word[*i] && 'B' == word[*i + 1])
-			chara(p, ']');
-		else if ('l' == word[*i] && 'B' == word[*i + 1])
-			chara(p, '[');
-		else if ('<' == word[*i] && '-' == word[*i + 1])
-			stringa(p, "<-");
-		else if ('-' == word[*i] && '>' == word[*i + 1])
-			stringa(p, "->");
-		else if ('l' == word[*i] && 'q' == word[*i + 1])
-			chara(p, '\"');
-		else if ('r' == word[*i] && 'q' == word[*i + 1])
-			chara(p, '\"');
-
+		nescape(p, &word[*i], 2);
 		(*i)++;
 		return;
 
@@ -332,7 +352,12 @@ pescape(struct termp *p, const char *word, size_t *i, size_t len)
 		}
 		return;
 	}
-	/* n-character escapes. */
+
+	(*i)++;
+	for (j = 0; word[*i] && ']' != word[*i]; (*i)++, j++)
+		/* Loop... */ ;
+
+	nescape(p, &word[*i - j], j);
 }
 
 
@@ -407,7 +432,8 @@ word(struct termp *p, const char *word)
 
 
 static void
-body(struct termp *p, const struct mdoc_meta *meta,
+body(struct termp *p, struct termpair *ppair,
+		const struct mdoc_meta *meta,
 		const struct mdoc_node *node)
 {
 	int		 dochild;
@@ -416,9 +442,11 @@ body(struct termp *p, const struct mdoc_meta *meta,
 	/* Pre-processing. */
 
 	dochild = 1;
+	pair.ppair = ppair;
 	pair.type = 0;
 	pair.offset = pair.rmargin = 0;
 	pair.flag = 0;
+	pair.count = 0;
 
 	if (MDOC_TEXT != node->type) {
 		if (termacts[node->tok].pre)
@@ -433,7 +461,7 @@ body(struct termp *p, const struct mdoc_meta *meta,
 		p->flags |= pair.flag;
 
 	if (dochild && node->child)
-		body(p, meta, node->child);
+		body(p, &pair, meta, node->child);
 
 	if (TERMPAIR_FLAG & pair.type)
 		p->flags &= ~pair.flag;
@@ -447,7 +475,7 @@ body(struct termp *p, const struct mdoc_meta *meta,
 	/* Siblings. */
 
 	if (node->next)
-		body(p, meta, node->next);
+		body(p, ppair, meta, node->next);
 }
 
 

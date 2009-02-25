@@ -30,7 +30,7 @@
  */
 
 /* FIXME: indent/tab. */
-/* FIXME: handle nested lists. */
+/* FIXME: macro arguments can be escaped. */
 
 #define	TTYPE_PROG	  0
 #define	TTYPE_CMD_FLAG	  1
@@ -348,6 +348,7 @@ termp_it_pre(DECL_ARGS)
 {
 	const struct mdoc_node *n, *it;
 	const struct mdoc_block *bl;
+	char		 buf[7];
 	int		 i;
 	size_t		 width, offset;
 
@@ -364,16 +365,8 @@ termp_it_pre(DECL_ARGS)
 		return(1);
 	}
 
-	assert(MDOC_BLOCK == it->type);
-	assert(MDOC_It == it->tok);
-
-	n = it->parent;
-	assert(MDOC_BODY == n->type);
-	assert(MDOC_Bl == n->tok);
-	n = n->parent;
+	n = it->parent->parent;
 	bl = &n->data.block;
-
-	/* If `-compact', don't assert vertical space. */
 
 	if (MDOC_BLOCK == node->type) {
 		if (arg_hasattr(MDOC_Compact, bl->argc, bl->argv))
@@ -398,21 +391,63 @@ termp_it_pre(DECL_ARGS)
 
 	if (arg_hasattr(MDOC_Tag, bl->argc, bl->argv)) {
 		p->flags |= TERMP_NOSPACE;
-
-		if (MDOC_HEAD == node->type) {
-			p->flags |= TERMP_NOBREAK;
-			p->offset += offset;
-			p->rmargin = p->offset + width;
-		} else {
+		if (MDOC_BODY == node->type) {
 			p->flags |= TERMP_NOLPAD;
 			p->offset += width;
+		} else  {
+			p->flags |= TERMP_NOBREAK;
+			p->rmargin = p->offset + offset + width;
 		}
 
 	} else if (arg_hasattr(MDOC_Ohang, bl->argc, bl->argv)) {
 		p->flags |= TERMP_NOSPACE;
-		p->offset += offset;
-	}
 
+	} else if (arg_hasattr(MDOC_Diag, bl->argc, bl->argv)) {
+		/* TODO. */
+
+	} else if (arg_hasattr(MDOC_Hang, bl->argc, bl->argv)) {
+		/* TODO. */
+
+	} else if (arg_hasattr(MDOC_Bullet, bl->argc, bl->argv)) {
+		p->flags |= TERMP_NOSPACE;
+		if (MDOC_BODY == node->type) {
+			p->flags |= TERMP_NOLPAD;
+			p->offset += 6;
+		} else {
+			word(p, "\\[bu]");
+			p->flags |= TERMP_NOBREAK;
+			p->rmargin = p->offset + offset + 6;
+		}
+
+	} else if (arg_hasattr(MDOC_Enum, bl->argc, bl->argv)) {
+		p->flags |= TERMP_NOSPACE;
+		if (MDOC_BODY == node->type) {
+			p->flags |= TERMP_NOLPAD;
+			p->offset += 6;
+		} else {
+			(pair->ppair->ppair->count)++;
+			(void)snprintf(buf, sizeof(buf), "%d.", 
+					pair->ppair->ppair->count);
+			word(p, buf);
+			p->flags |= TERMP_NOBREAK;
+			p->rmargin = p->offset + offset + 6;
+		}
+
+	} else if (arg_hasattr(MDOC_Dash, bl->argc, bl->argv) ||
+			arg_hasattr(MDOC_Hyphen, bl->argc, bl->argv)) {
+		p->flags |= TERMP_NOSPACE;
+		if (MDOC_BODY == node->type) {
+			p->flags |= TERMP_NOLPAD;
+			p->offset += 6;
+			return(1);
+		} else {
+			word(p, "\\-");
+			p->flags |= TERMP_NOBREAK;
+			p->rmargin = p->offset + offset + 6;
+		}
+	} 
+
+	p->offset += offset;
 	return(1);
 }
 
@@ -424,43 +459,38 @@ termp_it_post(DECL_ARGS)
 	const struct mdoc_node *n, *it;
 	const struct mdoc_block *bl;
 
-	switch (node->type) {
-	case (MDOC_BODY):
-		/* FALLTHROUGH */
-	case (MDOC_HEAD):
-		break;
-	default:
+	if (MDOC_BODY != node->type && MDOC_HEAD != node->type)
 		return;
-	}
 
 	it = node->parent;
-	assert(MDOC_BLOCK == it->type);
-	assert(MDOC_It == it->tok);
-
-	n = it->parent;
-	assert(MDOC_BODY == n->type);
-	assert(MDOC_Bl == n->tok);
-	n = n->parent;
+	n = it->parent->parent;
 	bl = &n->data.block;
 
-	/* If `-tag', adjust our margins accordingly. */
-
-	if (arg_hasattr(MDOC_Tag, bl->argc, bl->argv)) {
+	if (arg_hasattr(MDOC_Tag, bl->argc, bl->argv) ||
+			arg_hasattr(MDOC_Bullet, bl->argc, bl->argv) ||
+			arg_hasattr(MDOC_Dash, bl->argc, bl->argv) ||
+			arg_hasattr(MDOC_Enum, bl->argc, bl->argv) ||
+			arg_hasattr(MDOC_Hyphen, bl->argc, bl->argv)) {
 		flushln(p);
-
 		if (MDOC_HEAD == node->type) {
 			p->rmargin = pair->rmargin;
-			p->offset = pair->offset;
 			p->flags &= ~TERMP_NOBREAK;
-		} else {
-			p->offset = pair->offset;
+		} else
 			p->flags &= ~TERMP_NOLPAD;
-		}
 
 	} else if (arg_hasattr(MDOC_Ohang, bl->argc, bl->argv)) {
 		flushln(p);
-		p->offset = pair->offset;
+
+	} else if (arg_hasattr(MDOC_Inset, bl->argc, bl->argv)) {
+		if (MDOC_BODY == node->type)
+			flushln(p);
+
+	} else if (arg_hasattr(MDOC_Item, bl->argc, bl->argv)) {
+		if (MDOC_BODY == node->type)
+			flushln(p);
 	}
+
+	p->offset = pair->offset;
 }
 
 
