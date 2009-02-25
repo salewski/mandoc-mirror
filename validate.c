@@ -481,7 +481,7 @@ check_text(struct mdoc *mdoc, size_t line, size_t pos, const char *p)
 	size_t		 c;
 
 	for ( ; *p; p++) {
-		if ( ! isprint(*p) && '\t' != *p)
+		if ( ! isprint((int)*p) && '\t' != *p)
 			return(mdoc_perr(mdoc, line, pos,
 					"invalid characters"));
 		if ('\\' != *p)
@@ -540,7 +540,7 @@ pre_display(PRE_ARGS)
 static int
 pre_bl(PRE_ARGS)
 {
-	int		 type, err, i;
+	int		 type, i;
 	struct mdoc_arg	*argv;
 	size_t		 argc;
 
@@ -552,7 +552,7 @@ pre_bl(PRE_ARGS)
 	/* Make sure that only one type of list is specified.  */
 
 	/* LINTED */
-	for (i = 0, type = err = 0; i < (int)argc; i++) {
+	for (i = 0, type = 0; i < (int)argc; i++) {
 		argv = &n->data.block.argv[i];
 
 		switch (argv->arg) {

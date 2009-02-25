@@ -86,7 +86,9 @@
 					% cd /tmp<br>
 					% ftp -V -o- http://mdocml.bsd.lv/snapshots/mdocml.tar.gz | tar -zvxf -<br>
 					% cd mdocml<br>
-					% make && make regress && make install
+					% make all<br>
+					% make regress<br>
+					# make install
 					</p>
 
 					<h2>
@@ -100,12 +102,14 @@
 					</p>
 
 					<p class="boxed">
-					% sudo pkg_delete mdocml<br>
-					% cd /usr/ports/devel/<br>
-					% sudo rm -rf mdocml<br>
-					% ftp -V -o- http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz | sudo tar -zvxf -<br>
-					% cd mdocml<br>
-					% sudo make && sudo make regress && sudo make install
+					# pkg_delete mdocml<br>
+					# cd /usr/ports/devel/<br>
+					# rm -rf mdocml<br>
+					# ftp -V -o- http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz | tar -zvxf -<br>
+					# cd mdocml<br>
+					# make build<br>
+					# make regress<br>
+					# make install
 					</p>
 				</td>
 			</tr>
