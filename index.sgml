@@ -74,7 +74,8 @@
 					</p>
 
 					<p>
-					The most current version is <b>@VERSION@</b>, dated <b>@VDATE@</b>.
+					The most current version is <span class="attn">@VERSION@</span>, dated 
+					<span class="attn">@VDATE@</span>.
 					</p>
 
 					<h2>
