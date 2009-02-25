@@ -1,4 +1,4 @@
-	/* $Id$ */
+/* $Id$ */
 /*
  * Copyright (c) 2008 Kristaps Dzonsons <kristaps@kth.se>
  *
@@ -200,7 +200,7 @@ flushln(struct termp *p)
 	 */
 
 	if (p->flags & TERMP_NOBREAK) {
-		for ( ; vis <= maxvis; vis++)
+		for ( ; vis < maxvis; vis++)
 			putchar(' ');
 	} else
 		putchar('\n');
@@ -221,6 +221,7 @@ newln(struct termp *p)
 	if (0 == p->col) 
 		return;
 	flushln(p);
+	p->flags &= ~TERMP_NOLPAD;
 }
 
 
@@ -416,7 +417,7 @@ body(struct termp *p, const struct mdoc_meta *meta,
 
 	dochild = 1;
 	pair.type = 0;
-	pair.offset = 0;
+	pair.offset = pair.rmargin = 0;
 	pair.flag = 0;
 
 	if (MDOC_TEXT != node->type) {

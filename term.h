@@ -45,6 +45,7 @@ struct	termpair {
 #define	TERMPAIR_FLAG	 (1 << 0)
 	int	  	  flag;
 	size_t	  	  offset;
+	size_t	  	  rmargin;
 };
 
 #define	TERMPAIR_SETFLAG(p, fl) \
