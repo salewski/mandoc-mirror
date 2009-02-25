@@ -37,6 +37,7 @@ struct	termp {
 #define	TERMP_NOBREAK	 (1 << 4)	/* No break after flush. */
 #define	TERMP_LITERAL	 (1 << 5)	/* Literal words. */
 #define	TERMP_IGNDELIM	 (1 << 6)	/* Delims like regulars. */
+#define	TERMP_NONOSPACE	 (1 << 7)	/* No space (no autounset). */
 	char		 *buf;
 };
 

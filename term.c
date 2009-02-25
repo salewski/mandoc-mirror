@@ -17,6 +17,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -148,6 +149,7 @@ DECL_PRE(termp_ox);
 DECL_PRE(termp_pa);
 DECL_PRE(termp_pp);
 DECL_PRE(termp_rv);
+DECL_PRE(termp_sm);
 DECL_PRE(termp_st);
 DECL_PRE(termp_sx);
 DECL_PRE(termp_sy);
@@ -248,7 +250,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Sc */
 	{ termp_sq_pre, termp_sq_post }, /* So */
 	{ termp_sq_pre, termp_sq_post }, /* Sq */
-	{ NULL, NULL }, /* Sm */
+	{ termp_sm_pre, NULL }, /* Sm */
 	{ termp_sx_pre, NULL }, /* Sx */
 	{ termp_sy_pre, NULL }, /* Sy */
 	{ NULL, NULL }, /* Tn */
@@ -1404,3 +1406,23 @@ termp_ms_pre(DECL_ARGS)
 	return(1);
 }
 
+
+
+/* ARGSUSED */
+static int
+termp_sm_pre(DECL_ARGS)
+{
+
+#if notyet
+	assert(node->child);
+	if (0 == strcmp("off", node->child->data.text.string)) {
+		p->flags &= ~TERMP_NONOSPACE;
+		p->flags &= ~TERMP_NOSPACE;
+	} else {
+		p->flags |= TERMP_NONOSPACE;
+		p->flags |= TERMP_NOSPACE;
+	}
+#endif
+
+	return(0);
+}

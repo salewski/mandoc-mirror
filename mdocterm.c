@@ -345,6 +345,8 @@ pescape(struct termp *p, const char *word, size_t *i, size_t len)
 			/* FALLTHROUGH */
 		case ('-'):
 			/* FALLTHROUGH */
+		case (' '):
+			/* FALLTHROUGH */
 		case ('.'):
 			chara(p, word[*i]);
 		default:
@@ -372,7 +374,8 @@ pword(struct termp *p, const char *word, size_t len)
 			! (p->flags & TERMP_LITERAL))
 		chara(p, ' ');
 
-	p->flags &= ~TERMP_NOSPACE;
+	if ( ! (p->flags & TERMP_NONOSPACE))
+		p->flags &= ~TERMP_NOSPACE;
 
 	if (p->flags & TERMP_BOLD)
 		style(p, STYLE_BOLD);
@@ -530,8 +533,7 @@ static void
 header(struct termp *p, const struct mdoc_meta *meta)
 {
 	char		*buf, *title;
-	const char	*pp, *msec;
-	size_t		 ssz, tsz, ttsz, i;;
+	const char	*pp;
 
 	if (NULL == (buf = malloc(p->rmargin)))
 		err(1, "malloc");
@@ -568,50 +570,44 @@ header(struct termp *p, const struct mdoc_meta *meta)
 				pp = mdoc_msec2a(MSEC_local);
 			break;
 		}
-	assert(pp);
 
-	tsz = strlcpy(buf, pp, p->rmargin);
-	assert(tsz < p->rmargin);
+	if (mdoc_arch2a(meta->arch))
+		(void)snprintf(buf, p->rmargin, "%s(%s)",
+				pp, mdoc_arch2a(meta->arch));
+	else
+		(void)strlcpy(buf, pp, p->rmargin);
 
-	if ((pp = mdoc_arch2a(meta->arch))) {
-		tsz = strlcat(buf, " (", p->rmargin);
-		assert(tsz < p->rmargin);
-		tsz = strlcat(buf, pp, p->rmargin);
-		assert(tsz < p->rmargin);
-		tsz = strlcat(buf, ")", p->rmargin);
-		assert(tsz < p->rmargin);
-	}
+	pp = mdoc_msec2a(meta->msec);
 
-	ttsz = strlcpy(title, meta->title, p->rmargin);
+	(void)snprintf(title, p->rmargin, "%s(%s)",
+			meta->title, pp ? pp : "");
 
-	if (NULL == (msec = mdoc_msec2a(meta->msec)))
-		msec = "";
+	p->offset = 0;
+	p->rmargin = (p->maxrmargin - strlen(buf)) / 2;
+	p->flags |= TERMP_NOBREAK;
+	p->flags |= TERMP_NOSPACE;
 
-	ssz = (2 * (ttsz + 2 + strlen(msec))) + tsz + 2;
+	word(p, title);
+	flushln(p);
 
-	if (ssz > p->rmargin) {
-		if ((ssz -= p->rmargin) % 2)
-			ssz++;
-		ssz /= 2;
-	
-		assert(ssz <= ttsz);
-		title[ttsz - ssz] = 0;
-		ssz = 1;
-	} else
-		ssz = ((p->rmargin - ssz) / 2) + 1;
+	p->offset = p->rmargin;
+	p->rmargin += strlen(buf);
 
-	printf("%s(%s)", title, msec);
+	word(p, buf);
+	flushln(p);
 
-	for (i = 0; i < ssz; i++)
-		printf(" ");
+	exit(1);
 
-	printf("%s", buf);
+	p->offset = p->rmargin;
+	p->rmargin = p->maxrmargin;
+	p->flags &= ~TERMP_NOBREAK;
 
-	for (i = 0; i < ssz; i++)
-		printf(" ");
+	word(p, title);
+	flushln(p);
 
-	printf("%s(%s)\n", title, msec);
-	fflush(stdout);
+	p->rmargin = p->maxrmargin;
+	p->offset = 0;
+	p->flags &= ~TERMP_NOSPACE;
 
 	free(title);
 	free(buf);
