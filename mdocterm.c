@@ -91,7 +91,7 @@ main(int argc, char *argv[])
 	if (NULL == (termp.buf = malloc(termp.maxcols)))
 		err(1, "malloc");
 
-	/*header(&termp, mdoc_meta(mdoc));*/
+	header(&termp, mdoc_meta(mdoc));
 	body(&termp, NULL, mdoc_meta(mdoc), mdoc_node(mdoc));
 	footer(&termp, mdoc_meta(mdoc));
 
@@ -488,7 +488,6 @@ footer(struct termp *p, const struct mdoc_meta *meta)
 {
 	struct tm	*tm;
 	char		*buf, *os;
-	size_t		 sz, osz, ssz, i;
 
 	if (NULL == (buf = malloc(p->rmargin)))
 		err(1, "malloc");
@@ -504,26 +503,24 @@ footer(struct termp *p, const struct mdoc_meta *meta)
 #endif
 		err(1, "strftime");
 
-	osz = strlcpy(os, meta->os, p->rmargin);
+	(void)strlcpy(os, meta->os, p->rmargin);
 
-	sz = strlen(buf);
-	ssz = sz + osz + 1;
+	vspace(p);
 
-	if (ssz > p->rmargin) {
-		ssz -= p->rmargin;
-		assert(ssz <= osz);
-		os[osz - ssz] = 0;
-		ssz = 1;
-	} else
-		ssz = p->rmargin - ssz + 1;
+	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
+	p->rmargin = p->maxrmargin - strlen(buf);
+	p->offset = 0;
 
-	printf("\n");
-	printf("%s", os);
-	for (i = 0; i < ssz; i++)
-		printf(" ");
+	word(p, os);
+	flushln(p);
 
-	printf("%s\n", buf);
-	fflush(stdout);
+	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+	p->offset = p->rmargin;
+	p->rmargin = p->maxrmargin;
+	p->flags &= ~TERMP_NOBREAK;
+
+	word(p, buf);
+	flushln(p);
 
 	free(buf);
 	free(os);
@@ -585,23 +582,22 @@ header(struct termp *p, const struct mdoc_meta *meta)
 
 	p->offset = 0;
 	p->rmargin = (p->maxrmargin - strlen(buf)) / 2;
-	p->flags |= TERMP_NOBREAK;
-	p->flags |= TERMP_NOSPACE;
+	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
 
 	word(p, title);
 	flushln(p);
 
+	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 	p->offset = p->rmargin;
-	p->rmargin += strlen(buf);
+	p->rmargin = p->maxrmargin - strlen(title);
 
 	word(p, buf);
 	flushln(p);
 
-	exit(1);
-
 	p->offset = p->rmargin;
 	p->rmargin = p->maxrmargin;
 	p->flags &= ~TERMP_NOBREAK;
+	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 
 	word(p, title);
 	flushln(p);
