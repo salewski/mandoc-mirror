@@ -381,7 +381,7 @@ termp_it_pre(DECL_ARGS)
 
 	/* Get our list type. */
 
-	for (i = 0; i < (int)bl->argc; i++) 
+	for (type = -1, i = 0; i < (int)bl->argc; i++) 
 		switch (bl->argv[i].arg) {
 		case (MDOC_Bullet):
 			/* FALLTHROUGH */
@@ -391,26 +391,18 @@ termp_it_pre(DECL_ARGS)
 			/* FALLTHROUGH */
 		case (MDOC_Hyphen):
 			/* FALLTHROUGH */
-		case (MDOC_Item):
-			/* FALLTHROUGH */
 		case (MDOC_Tag):
 			/* FALLTHROUGH */
 		case (MDOC_Ohang):
 			type = bl->argv[i].arg;
 			i = (int)bl->argc;
 			break;
-		case (MDOC_Inset):
-			/* FALLTHROUGH */
-		case (MDOC_Hang):
-			/* FALLTHROUGH */
-		case (MDOC_Diag):
-			/* FALLTHROUGH */
-		case (MDOC_Column):
+		default:
 			errx(1, "list type not supported");
 			/* NOTREACHED */
-		default:
-			break;
 		}
+
+	assert(-1 != type);
 
 	/* Save our existing (inherited) margin and offset. */
 
@@ -419,7 +411,6 @@ termp_it_pre(DECL_ARGS)
 
 	/* Get list width and offset. */
 
-	/* FIXME: auto-size. */
 	i = arg_getattr(MDOC_Width, bl->argc, bl->argv);
 	width = i >= 0 ? arg_width(&bl->argv[i]) : 0;
 
@@ -439,6 +430,7 @@ termp_it_pre(DECL_ARGS)
 		width = width > 6 ? width : 6;
 		break;
 	case (MDOC_Tag):
+		/* FIXME: auto-size. */
 		if (0 == width)
 			errx(1, "need non-zero -width");
 		break;
@@ -465,7 +457,7 @@ termp_it_pre(DECL_ARGS)
 		else if (MDOC_BODY == node->type)
 			p->flags |= TERMP_NOLPAD;
 		break;
-	case (MDOC_Ohang):
+	default:
 		break;
 	}
 
@@ -475,6 +467,7 @@ termp_it_pre(DECL_ARGS)
 	 */
 
 	tp = NULL;
+
 	if (MDOC_HEAD == node->type) {
 		if (arg_hasattr(MDOC_Bullet, bl->argc, bl->argv))
 			tp = "\\[bu]";
@@ -488,8 +481,6 @@ termp_it_pre(DECL_ARGS)
 		}
 		if (arg_hasattr(MDOC_Hyphen, bl->argc, bl->argv))
 			tp = "\\-";
-		if (arg_hasattr(MDOC_Item, bl->argc, bl->argv))
-			tp = "";
 	}
 
 	/* Margin control. */
@@ -505,22 +496,18 @@ termp_it_pre(DECL_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Hyphen):
 		/* FALLTHROUGH */
-	case (MDOC_Item):
-		/* FALLTHROUGH */
 	case (MDOC_Tag):
 		if (MDOC_HEAD == node->type)
 			p->rmargin = p->offset + width;
 		else if (MDOC_BODY == node->type) 
 			p->offset += width;
 		break;
-	case (MDOC_Ohang):
+	default:
 		break;
 	}
 
 	if (NULL == tp)
 		return(1);
-
-	/* XXX - ignoring children. */
 
 	word(p, tp);
 	return(0);

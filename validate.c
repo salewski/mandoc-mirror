@@ -540,7 +540,7 @@ pre_display(PRE_ARGS)
 static int
 pre_bl(PRE_ARGS)
 {
-	int		 type, i;
+	int		 type, i, width, offset;
 	struct mdoc_arg	*argv;
 	size_t		 argc;
 
@@ -551,8 +551,10 @@ pre_bl(PRE_ARGS)
 
 	/* Make sure that only one type of list is specified.  */
 
+	type = offset = width = -1;
+
 	/* LINTED */
-	for (i = 0, type = 0; i < (int)argc; i++) {
+	for (i = 0; i < (int)argc; i++) {
 		argv = &n->data.block.argv[i];
 
 		switch (argv->arg) {
@@ -577,18 +579,60 @@ pre_bl(PRE_ARGS)
 		case (MDOC_Inset):
 			/* FALLTHROUGH */
 		case (MDOC_Column):
-			if (0 == type++)
+			if (-1 == type) {
+				type = argv->arg;
 				break;
+			}
 			return(mdoc_perr(mdoc, argv->line, argv->pos, 
 					"multiple types specified"));
+		case (MDOC_Width):
+			if (-1 == width) {
+				width = argv->arg;
+				break;
+			}
+			return(mdoc_perr(mdoc, argv->line, argv->pos, 
+					"multiple -%s arguments",
+					mdoc_argnames[MDOC_Width]));
+		case (MDOC_Offset):
+			if (-1 == offset) {
+				offset = argv->arg;
+				break;
+			}
+			return(mdoc_perr(mdoc, argv->line, argv->pos, 
+					"multiple -%s arguments",
+					mdoc_argnames[MDOC_Offset]));
 		default:
 			break;
 		}
 	}
 
-	if (type)
-		return(1);
-	return(mdoc_err(mdoc, "no type specified"));
+	if (-1 == type)
+		return(mdoc_err(mdoc, "no type specified"));
+
+	switch (type) {
+	case (MDOC_Column):
+		/* FALLTHROUGH */
+	case (MDOC_Diag):
+		/* FALLTHROUGH */
+	case (MDOC_Inset):
+		/* FALLTHROUGH */
+	case (MDOC_Item):
+		if (-1 == width)
+			break;
+		return(mdoc_nwarn(mdoc, n, WARN_SYNTAX,
+				"superfluous -%s argument",
+				mdoc_argnames[MDOC_Width]));
+	case (MDOC_Tag):
+		if (-1 != width)
+			break;
+		return(mdoc_nwarn(mdoc, n, WARN_SYNTAX,
+				"suggest -%s argument",
+				mdoc_argnames[MDOC_Width]));
+	default:
+		break;
+	}
+
+	return(1);
 }
 
 
@@ -659,7 +703,6 @@ static int
 pre_it(PRE_ARGS)
 {
 
-	/* TODO: -width attribute must be specified for -tag. */
 	/* TODO: children too big for -width? */
 
 	if (MDOC_BLOCK != n->type)
