@@ -17,6 +17,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 #include <assert.h>
+#include <ctype.h>
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -276,9 +277,29 @@ const struct termact *termacts = __termacts;
 static size_t
 arg_width(const struct mdoc_arg *arg)
 {
+	size_t		 len, i, v;
 
 	/* TODO */
 	assert(*arg->value);
+	if (0 == strcmp(*arg->value, "indent"))
+		return(INDENT);
+	if (0 == strcmp(*arg->value, "indent-two"))
+		return(INDENT * 2);
+
+	len = strlen(*arg->value);
+	assert(len > 0);
+
+	for (i = 0; i < len - 1; i++) 
+		if ( ! isdigit((int)(*arg->value)[i]))
+			break;
+
+	if (i == len - 1) {
+		if ('n' == (*arg->value)[len - 1]) {
+			v = (size_t)atoi(*arg->value);
+			return(v);
+		}
+
+	}
 	return(strlen(*arg->value));
 }
 
@@ -293,7 +314,6 @@ arg_offset(const struct mdoc_arg *arg)
 		return(INDENT);
 	if (0 == strcmp(*arg->value, "indent-two"))
 		return(INDENT * 2);
-
 	return(strlen(*arg->value));
 }
 

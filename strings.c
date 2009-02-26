@@ -404,7 +404,7 @@ mdoc_arch2a(enum mdoc_arch arch)
 	case (ARCH_armish):
 		return("ARMISH");
 	case (ARCH_aviion):
-		return("AViion");
+		return("AViiON");
 	case (ARCH_hp300):
 		return("HP300");
 	case (ARCH_hppa):
@@ -725,4 +725,98 @@ mdoc_att2a(enum mdoc_att c)
 	}
 
 	return(p);
+}
+
+
+size_t
+mdoc_macro2len(int macro)
+{
+
+	switch (macro) {
+	case(MDOC_Ad):
+		return(12);
+	case(MDOC_Ao):
+		return(12);
+	case(MDOC_An):
+		return(12);
+	case(MDOC_Aq):
+		return(12);
+	case(MDOC_Ar):
+		return(12);
+	case(MDOC_Bo):
+		return(12);
+	case(MDOC_Bq):
+		return(12);
+	case(MDOC_Cd):
+		return(12);
+	case(MDOC_Cm):
+		return(10);
+	case(MDOC_Do):
+		return(10);
+	case(MDOC_Dq):
+		return(12);
+	case(MDOC_Dv):
+		return(12);
+	case(MDOC_Eo):
+		return(12);
+	case(MDOC_Em):
+		return(10);
+	case(MDOC_Er):
+		return(12);
+	case(MDOC_Ev):
+		return(15);
+	case(MDOC_Fa):
+		return(12);
+	case(MDOC_Fl):
+		return(10);
+	case(MDOC_Fo):
+		return(16);
+	case(MDOC_Fn):
+		return(16);
+	case(MDOC_Ic):
+		return(10);
+	case(MDOC_Li):
+		return(16);
+	case(MDOC_Ms):
+		return(6);
+	case(MDOC_Nm):
+		return(10);
+	case(MDOC_No):
+		return(12);
+	case(MDOC_Oo):
+		return(10);
+	case(MDOC_Op):
+		return(14);
+	case(MDOC_Pa):
+		return(32);
+	case(MDOC_Pf):
+		return(12);
+	case(MDOC_Po):
+		return(12);
+	case(MDOC_Pq):
+		return(12);
+	case(MDOC_Ql):
+		return(16);
+	case(MDOC_Qo):
+		return(12);
+	case(MDOC_So):
+		return(12);
+	case(MDOC_Sq):
+		return(12);
+	case(MDOC_Sy):
+		return(6);
+	case(MDOC_Sx):
+		return(16);
+	case(MDOC_Tn):
+		return(10);
+	case(MDOC_Va):
+		return(12);
+	case(MDOC_Vt):
+		return(12);
+	case(MDOC_Xr):
+		return(10);
+	default:
+		break;
+	};
+	return(0);
 }

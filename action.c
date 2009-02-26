@@ -17,7 +17,9 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include "private.h"
@@ -34,6 +36,7 @@ struct	actions {
 
 /* Per-macro action routines. */
 
+static	int	 post_bl(struct mdoc *);
 static	int	 post_sh(struct mdoc *);
 static	int	 post_os(struct mdoc *);
 static	int	 post_dt(struct mdoc *);
@@ -56,7 +59,7 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* Dl */
 	{ NULL }, /* Bd */ 
 	{ NULL }, /* Ed */
-	{ NULL }, /* Bl */ 
+	{ post_bl }, /* Bl */ 
 	{ NULL }, /* El */
 	{ NULL }, /* It */
 	{ NULL }, /* Ad */ 
@@ -272,6 +275,52 @@ post_os(struct mdoc *mdoc)
 	mdoc->lastnamed = SEC_BODY;
 
 	return(post_prologue(mdoc));
+}
+
+
+/* 
+ * Transform -width MACRO values into real widths. 
+ */
+static int
+post_bl(struct mdoc *mdoc)
+{
+	struct mdoc_block *bl;
+	size_t		   i, width;
+	int		   tok;
+	char		   buf[32];
+
+	if (MDOC_BLOCK != mdoc->last->type)
+		return(1);
+
+	bl = &mdoc->last->data.block;
+
+	for (i = 0; i < bl->argc; i++)
+		if (MDOC_Width == bl->argv[i].arg)
+			break;
+
+	if (i == bl->argc)
+		return(1);
+
+	assert(1 == bl->argv[i].sz);
+	if (MDOC_MAX == (tok = mdoc_find(mdoc, *bl->argv[i].value)))
+		return(1);
+
+	if (0 == (width = mdoc_macro2len(tok))) 
+		return(mdoc_warn(mdoc, WARN_SYNTAX,
+					"-%s macro has no length", 
+					mdoc_argnames[MDOC_Width]));
+
+	mdoc_msg(mdoc, "re-writing %s argument: %s -> %zun", 
+			mdoc_argnames[MDOC_Width],
+			*bl->argv[i].value, width);
+
+	/* FIXME: silently truncates. */
+	(void)snprintf(buf, sizeof(buf), "%zun", width);
+
+	free(*bl->argv[i].value);
+	*bl->argv[i].value = strdup(buf);
+
+	return(1);
 }
 
 
