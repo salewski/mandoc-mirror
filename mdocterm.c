@@ -31,6 +31,32 @@
 #include "mmain.h"
 #include "term.h"
 
+#define	TERMSYM_RBRACK		"]"
+#define	TERMSYM_LBRACK		"["
+#define	TERMSYM_LARROW		"<-"
+#define	TERMSYM_RARROW		"->"
+#define	TERMSYM_UARROW		"^"
+#define	TERMSYM_LSQUOTE		"`"
+#define	TERMSYM_RSQUOTE		"\'"
+#define	TERMSYM_SQUOTE		"\'"
+#define	TERMSYM_LDQUOTE		"``"
+#define	TERMSYM_RDQUOTE		"\'\'"
+#define	TERMSYM_DQUOTE		"\""
+#define	TERMSYM_LT		"<"
+#define	TERMSYM_GT		">"
+#define	TERMSYM_LE		"<="
+#define	TERMSYM_GE		">="
+#define	TERMSYM_EQ		"=="
+#define	TERMSYM_NEQ		"!="
+#define	TERMSYM_ACUTE		"\'"
+#define	TERMSYM_GRAVE		"`"
+#define	TERMSYM_PI		"pi"
+#define	TERMSYM_PLUSMINUS	"+="
+#define	TERMSYM_INFINITY	"infinity"
+#define	TERMSYM_NAN		"NaN"
+#define	TERMSYM_BAR		"|"
+#define	TERMSYM_BULLET		"o"
+
 #ifdef __NetBSD__
 #define xisspace(x) isspace((int)(x))
 #else
@@ -133,7 +159,6 @@ flushln(struct termp *p)
 	 * If we're literal, print out verbatim.
 	 */
 	if (p->flags & TERMP_LITERAL) {
-		/* FIXME: count non-printing chars. */
 		for (i = 0; i < p->col; i++)
 			putchar(p->buf[i]);
 		putchar('\n');
@@ -168,8 +193,9 @@ flushln(struct termp *p)
 		 * the line with TERMP_NOBREAK).
 		 */
 
+		/* FIXME: allow selective right-margin breaking. */
+
 		if (vis && vis + vsz > maxvis) {
-			/* FIXME */
 			if (p->flags & TERMP_NOBREAK)
 				errx(1, "word breaks right margin");
 			putchar('\n');
@@ -177,7 +203,6 @@ flushln(struct termp *p)
 				putchar(' ');
 			vis = 0;
 		} else if (vis + vsz > maxvis)
-			/* FIXME */
 			errx(1, "word breaks right margin");
 
 		/* 
@@ -258,9 +283,16 @@ static void
 chara(struct termp *p, char c)
 {
 
-	/* TODO: dynamically expand the buffer. */
-	if (p->col + 1 >= p->maxcols)
-		errx(1, "line overrun");
+	/*
+	 * Insert a single character into the line-buffer.  If the
+	 * buffer's space is exceeded, then allocate more space.
+	 */
+	if (p->col + 1 >= p->maxcols) {
+		p->buf = realloc(p->buf, p->maxcols * 2);
+		if (NULL == p->buf)
+			err(1, "malloc");
+		p->maxcols *= 2;
+	}
 	p->buf[(p->col)++] = c;
 }
 
@@ -297,21 +329,59 @@ nescape(struct termp *p, const char *word, size_t len)
 {
 
 	switch (len) {
+	case (1):
+		if ('q' == word[0])
+			stringa(p, TERMSYM_DQUOTE);
+		break;
 	case (2):
 		if ('r' == word[0] && 'B' == word[1])
-			chara(p, ']');
+			stringa(p, TERMSYM_RBRACK);
 		else if ('l' == word[0] && 'B' == word[1])
-			chara(p, '[');
+			stringa(p, TERMSYM_LBRACK);
 		else if ('<' == word[0] && '-' == word[1])
-			stringa(p, "<-");
+			stringa(p, TERMSYM_LARROW);
 		else if ('-' == word[0] && '>' == word[1])
-			stringa(p, "->");
+			stringa(p, TERMSYM_RARROW);
 		else if ('l' == word[0] && 'q' == word[1])
-			chara(p, '\"');
+			stringa(p, TERMSYM_DQUOTE);
 		else if ('r' == word[0] && 'q' == word[1])
-			chara(p, '\"');
+			stringa(p, TERMSYM_DQUOTE);
 		else if ('b' == word[0] && 'u' == word[1])
-			chara(p, 'o');
+			stringa(p, TERMSYM_BULLET);
+		else if ('L' == word[0] && 'e' == word[1])
+			stringa(p, TERMSYM_LE);
+		else if ('<' == word[0] && '=' == word[1])
+			stringa(p, TERMSYM_LE);
+		else if ('G' == word[0] && 'e' == word[1])
+			stringa(p, TERMSYM_GE);
+		else if ('>' == word[0] && '=' == word[1])
+			stringa(p, TERMSYM_GE);
+		else if ('R' == word[0] && 'q' == word[1])
+			stringa(p, TERMSYM_RDQUOTE);
+		else if ('L' == word[0] && 'q' == word[1])
+			stringa(p, TERMSYM_LDQUOTE);
+		else if ('u' == word[0] && 'a' == word[1])
+			stringa(p, TERMSYM_UARROW);
+		else if ('a' == word[0] && 'a' == word[1])
+			stringa(p, TERMSYM_ACUTE);
+		else if ('g' == word[0] && 'a' == word[1])
+			stringa(p, TERMSYM_GRAVE);
+		else if ('P' == word[0] && 'i' == word[1])
+			stringa(p, TERMSYM_PI);
+		else if ('N' == word[0] && 'e' == word[1])
+			stringa(p, TERMSYM_NEQ);
+		else if ('L' == word[0] && 't' == word[1])
+			stringa(p, TERMSYM_LT);
+		else if ('G' == word[0] && 't' == word[1])
+			stringa(p, TERMSYM_GT);
+		else if ('P' == word[0] && 'm' == word[1])
+			stringa(p, TERMSYM_PLUSMINUS);
+		else if ('I' == word[0] && 'f' == word[1])
+			stringa(p, TERMSYM_INFINITY);
+		else if ('N' == word[0] && 'a' == word[1])
+			stringa(p, TERMSYM_NAN);
+		else if ('B' == word[0] && 'a' == word[1])
+			stringa(p, TERMSYM_BAR);
 		break;
 	default:
 		break;
@@ -327,12 +397,33 @@ pescape(struct termp *p, const char *word, size_t *i, size_t len)
 	(*i)++;
 	assert(*i < len);
 
+	/*
+	 * Handle an escape sequence.  This must manage both groff-style
+	 * escapes and mdoc-style escapes.
+	 */
+
 	if ('(' == word[*i]) {
 		/* Two-character escapes. */
 		(*i)++;
 		assert(*i + 1 < len);
 		nescape(p, &word[*i], 2);
 		(*i)++;
+		return;
+
+	} else if ('*' == word[*i]) { 
+		(*i)++;
+		assert(*i < len);
+		switch (word[*i]) {
+		case ('('):
+			(*i)++;
+			assert(*i + 1 < len);
+			nescape(p, &word[*i], 2);
+			(*i)++;
+			return;
+		default:
+			break;
+		}
+		nescape(p, &word[*i], 1);
 		return;
 
 	} else if ('[' != word[*i]) {
@@ -371,12 +462,23 @@ pword(struct termp *p, const char *word, size_t len)
 
 	/*assert(len > 0);*/ /* Can be, if literal. */
 
+	/*
+	 * Handle pwords, partial words, which may be either a single
+	 * word or a phrase that cannot be broken down (such as a
+	 * literal string).  This handles word styling.
+	 */
+
 	if ( ! (p->flags & TERMP_NOSPACE) && 
 			! (p->flags & TERMP_LITERAL))
 		chara(p, ' ');
 
 	if ( ! (p->flags & TERMP_NONOSPACE))
 		p->flags &= ~TERMP_NOSPACE;
+
+	/* 
+	 * XXX - if literal and underlining, this will underline the
+	 * spaces between literal words. 
+	 */
 
 	if (p->flags & TERMP_BOLD)
 		style(p, STYLE_BOLD);
@@ -401,6 +503,13 @@ void
 word(struct termp *p, const char *word)
 {
 	size_t 		 i, j, len;
+
+	/*
+	 * Break apart a word into tokens.  If we're a literal word,
+	 * then don't.  This doesn't handle zero-length words (there
+	 * should be none) and makes sure that pword doesn't get spaces
+	 * or nil words unless literal.
+	 */
 
 	if (p->flags & TERMP_LITERAL) {
 		pword(p, word, strlen(word));
@@ -442,6 +551,12 @@ body(struct termp *p, struct termpair *ppair,
 {
 	int		 dochild;
 	struct termpair	 pair;
+
+	/*
+	 * This is the main function for printing out nodes.  It's
+	 * constituted of PRE and POST functions, which correspond to
+	 * prefix and infix processing.
+	 */
 
 	/* Pre-processing. */
 
@@ -505,6 +620,13 @@ footer(struct termp *p, const struct mdoc_meta *meta)
 
 	(void)strlcpy(os, meta->os, p->rmargin);
 
+	/*
+	 * This is /slightly/ different from regular groff output
+	 * because we don't have page numbers.  Print the following:
+	 *
+	 * OS                                            MDOCDATE
+	 */
+
 	vspace(p);
 
 	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
@@ -530,7 +652,7 @@ footer(struct termp *p, const struct mdoc_meta *meta)
 static void
 header(struct termp *p, const struct mdoc_meta *meta)
 {
-	char		*buf, *title;
+	char		*buf, *title, *bufp;
 	const char	*pp;
 
 	if (NULL == (buf = malloc(p->rmargin)))
@@ -569,8 +691,21 @@ header(struct termp *p, const struct mdoc_meta *meta)
 			break;
 		}
 
+	/*
+	 * The header is strange.  It has three components, which are
+	 * really two with the first duplicated.  It goes like this:
+	 *
+	 * IDENTIFIER              TITLE                   IDENTIFIER
+	 *
+	 * The IDENTIFIER is NAME(SECTION), which is the command-name
+	 * (if given, or "unknown" if not) followed by the manual page
+	 * section.  These are given in `Dt'.  The TITLE is a free-form
+	 * string depending on the manual volume.  If not specified, it
+	 * switches on the manual section.
+	 */
+
 	if (mdoc_arch2a(meta->arch))
-		(void)snprintf(buf, p->rmargin, "%s(%s)",
+		(void)snprintf(buf, p->rmargin, "%s (%s)",
 				pp, mdoc_arch2a(meta->arch));
 	else
 		(void)strlcpy(buf, pp, p->rmargin);
@@ -580,6 +715,9 @@ header(struct termp *p, const struct mdoc_meta *meta)
 	(void)snprintf(title, p->rmargin, "%s(%s)",
 			meta->title, pp ? pp : "");
 
+	for (bufp = title; *bufp; bufp++)
+		*bufp = toupper(*bufp);
+	
 	p->offset = 0;
 	p->rmargin = (p->maxrmargin - strlen(buf)) / 2;
 	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;

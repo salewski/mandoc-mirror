@@ -25,7 +25,7 @@
 
 #include "term.h"
 
-#define	INDENT		  4
+#define	INDENT		  6
 
 /*
  * Performs actions on nodes of the abstract syntax tree.  Both pre- and
@@ -279,7 +279,6 @@ arg_width(const struct mdoc_arg *arg)
 {
 	size_t		 len, i, v;
 
-	/* TODO */
 	assert(*arg->value);
 	if (0 == strcmp(*arg->value, "indent"))
 		return(INDENT);
@@ -1330,7 +1329,7 @@ termp_bq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "[");
+	word(p, "\\[");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1354,7 +1353,7 @@ termp_pq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "(");
+	word(p, "\\&(");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }

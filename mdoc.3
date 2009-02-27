@@ -184,7 +184,8 @@ The
 .Xr mdoc 3
 library accepts only printable ASCII characters as defined by
 .Xr isprint 3 .
-Non-ASCII character sequences are escaped with an escape character 
+Non-ASCII character sequences are delimited in various ways.  All are
+preceeded by an escape character
 .Sq \\
 and followed by either an open-parenthesis 
 .Sq \&(
@@ -192,7 +193,43 @@ for two-character sequences; an open-bracket
 .Sq \&[
 for n-character sequences (terminated at a close-bracket
 .Sq \&] ) ;
-or one of a small set of single characters for other escapes.
+an asterisk and open-parenthesis
+.Sq \&*(
+for two-character sequences;
+an asterisk and non-open-parenthesis 
+.Sq \&*
+for single-character sequences; or one of a small set of standalone
+single characters for other escapes.
+.Pp
+Examples:
+.Pp
+.Bl -tag -width "XXXXXXXX" -offset "XXXX" -compact
+.\" LIST-ITEM
+.It \\*(<=
+prints 
+.Dq \*(<=
+.Pq greater-equal
+.\" LIST-ITEM
+.It \\(<-
+prints
+.Dq \(<-
+.Pq left-arrow
+.\" LIST-ITEM
+.It \\[<-]
+also prints
+.Dq \(<-
+.Pq left-arrow
+.\" LIST-ITEM
+.It \\*(Ba
+prints
+.Dq \*(Ba
+.Pq bar
+.\" LIST-ITEM
+.It \\*q
+prints
+.Dq \*q
+.Pq double-quote
+.El
 .\" SUBSECTION
 .Ss Abstract Syntax Tree
 The 

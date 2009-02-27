@@ -61,6 +61,18 @@ mdoc_isescape(const char *p)
 		/* FALLTHROUGH */
 	case ('e'):
 		return(2);
+	case ('*'):
+		if (0 == *++p || ! isgraph((int)*p))
+			return(0);
+		switch (*p) {
+		case ('('):
+			if (0 == *++p || ! isgraph((int)*p))
+				return(0);
+			return(4);
+		default:
+			break;
+		}
+		return(3);
 	case ('('):
 		if (0 == *++p || ! isgraph((int)*p))
 			return(0);
