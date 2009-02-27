@@ -52,7 +52,7 @@ static	int	check_msec(PRE_ARGS, int, enum mdoc_msec *);
 static	int	check_stdarg(PRE_ARGS);
 
 static	int	check_text(struct mdoc *, 
-			size_t, size_t, const char *);
+			int, int, const char *);
 
 static	int	err_child_lt(struct mdoc *, const char *, int);
 static	int	warn_child_lt(struct mdoc *, const char *, int);
@@ -278,7 +278,8 @@ mdoc_valid_pre(struct mdoc *mdoc,
 {
 	v_pre		*p;
 	struct mdoc_arg	*argv;
-	size_t		 argc, i, j, line, pos;
+	size_t		 argc;
+	int		 line, pos, i, j;
 	const char	*tp;
 
 	if (MDOC_TEXT == node->type) {
@@ -296,10 +297,10 @@ mdoc_valid_pre(struct mdoc *mdoc,
 			node->data.block.argc :
 			node->data.elem.argc;
 
-		for (i = 0; i < argc; i++) {
+		for (i = 0; i < (int)argc; i++) {
 			if (0 == argv[i].sz)
 				continue;
-			for (j = 0; j < argv[i].sz; j++) {
+			for (j = 0; j < (int)argv[i].sz; j++) {
 				tp = argv[i].value[j];
 				line = argv[i].line;
 				pos = argv[i].pos;
@@ -476,7 +477,7 @@ check_msec(PRE_ARGS, int sz, enum mdoc_msec *msecs)
 
 
 static int
-check_text(struct mdoc *mdoc, size_t line, size_t pos, const char *p)
+check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 {
 	size_t		 c;
 
@@ -489,7 +490,7 @@ check_text(struct mdoc *mdoc, size_t line, size_t pos, const char *p)
 		if ('\\' != *p)
 			continue;
 		if ((c = mdoc_isescape(p))) {
-			p += (c - 1);
+			p += (int)c - 1;
 			continue;
 		}
 		return(mdoc_perr(mdoc, line, pos,

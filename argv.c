@@ -372,7 +372,7 @@ args(struct mdoc *mdoc, int line,
 					p++;
 				if (0 != *p)
 					*(p - 1) = 0;
-				*pos += p - *v;
+				*pos += (int)(p - *v);
 			} 
 
 			if (p && 0 == *p)
@@ -393,7 +393,7 @@ args(struct mdoc *mdoc, int line,
 			if (p > *v && ' ' == *(p - 1))
 				if ( ! pwarn(mdoc, line, *pos, WTAILWS))
 					return(0);
-			*pos += p - *v;
+			*pos += (int)(p - *v);
 
 			return(ARGS_WORD);
 		} 
@@ -647,7 +647,7 @@ argv_multi(struct mdoc *mdoc, int line,
 			return(0);
 		} else if (ARGS_EOLN == c)
 			break;
-		v->value[v->sz] = p;
+		v->value[(int)v->sz] = p;
 	}
 
 	if (0 < v->sz && v->sz < MDOC_LINEARG_MAX)

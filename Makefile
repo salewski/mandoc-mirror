@@ -128,6 +128,9 @@ lint:	$(LLNS)
 clean:
 	rm -f $(CLEAN)
 
+cleanlint:
+	rm -f $(LNS) $(LLNS)
+
 dist:	mdocml-$(VERSION).tar.gz
 
 port:	mdocml-oport-$(VERSION).tar.gz
@@ -141,7 +144,7 @@ installwww: www
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz
 	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/mdocml.tar.gz
 
-regress::
+regress: mdoclint
 	@for f in $(FAIL); do \
 		echo "./mdoclint $$f" ; \
 		./mdoclint $$f 2>/dev/null || continue ; exit 1 ; done

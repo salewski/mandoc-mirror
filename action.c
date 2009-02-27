@@ -285,8 +285,8 @@ static int
 post_bl(struct mdoc *mdoc)
 {
 	struct mdoc_block *bl;
-	size_t		   i, width;
-	int		   tok;
+	size_t		   width;
+	int		   tok, i;
 	char		   buf[32];
 
 	if (MDOC_BLOCK != mdoc->last->type)
@@ -294,11 +294,11 @@ post_bl(struct mdoc *mdoc)
 
 	bl = &mdoc->last->data.block;
 
-	for (i = 0; i < bl->argc; i++)
+	for (i = 0; i < (int)bl->argc; i++)
 		if (MDOC_Width == bl->argv[i].arg)
 			break;
 
-	if (i == bl->argc)
+	if (i == (int)bl->argc)
 		return(1);
 
 	assert(1 == bl->argv[i].sz);

@@ -750,7 +750,8 @@ macro_text(MACRO_PROT_ARGS)
 		return(perr(mdoc, line, ppos, EARGVLIM));
 	}
 
-	c = mdoc_elem_alloc(mdoc, line, ppos, tok, argc, argv);
+	c = mdoc_elem_alloc(mdoc, line, ppos, 
+			tok, (size_t)argc, argv);
 
 	if (0 == c) {
 		mdoc_argv_free(argc, argv);
@@ -802,8 +803,8 @@ macro_text(MACRO_PROT_ARGS)
 			}
 			lastpunct = 1;
 		} else if (lastpunct) {
-			c = mdoc_elem_alloc(mdoc, line, 
-					ppos, tok, argc, argv);
+			c = mdoc_elem_alloc(mdoc, line, ppos, 
+					tok, (size_t)argc, argv);
 			if (0 == c) {
 				mdoc_argv_free(argc, argv);
 				return(0);
@@ -1225,7 +1226,9 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 		return(perr(mdoc, line, ppos, EARGVLIM));
 	}
 
-	c = mdoc_elem_alloc(mdoc, line, ppos, tok, argc, argv);
+	c = mdoc_elem_alloc(mdoc, line, ppos, 
+			tok, (size_t)argc, argv);
+
 	mdoc_argv_free(argc, argv);
 
 	if (0 == c)
@@ -1316,7 +1319,9 @@ macro_constant(MACRO_PROT_ARGS)
 		return(perr(mdoc, line, ppos, EARGVLIM));
 	}
 
-	c = mdoc_elem_alloc(mdoc, line, ppos, tok, argc, argv);
+	c = mdoc_elem_alloc(mdoc, line, ppos, 
+			tok, (size_t)argc, argv);
+
 	mdoc_argv_free(argc, argv);
 
 	if (0 == c)
