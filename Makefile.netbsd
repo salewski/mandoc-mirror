@@ -1,0 +1,16 @@
+# $NetBSD$
+
+COMMENT=		mdoc macro compiler
+
+DISTNAME=		mdocml-@VERSION@
+CATEGORIES=		devel
+
+HOMEPAGE=		http://mdocml.bsd.lv/
+
+MAINTAINER=		Kristaps Dzonsons <kristaps@kth.se>
+
+MASTER_SITES=		http://mdocml.bsd.lv/snapshots/
+
+WANTLIB=		c
+
+.include "../../mk/bsd.pkg.mk"

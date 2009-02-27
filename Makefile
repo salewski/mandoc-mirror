@@ -51,8 +51,8 @@ BINS	= mdocterm mdoctree mdoclint
 CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
 	  $(TARGZS)
 
-INSTALL	= $(SRCS) $(HEADS) Makefile Makefile.port DESCR $(MANS) \
-	  $(SGMLS) $(STATICS)
+INSTALL	= $(SRCS) $(HEADS) Makefile DESCR $(MANS) $(SGMLS) \
+	  $(STATICS) Makefile.netbsd Makefile.openbsd
 
 FAIL	= regress/test.empty \
 	  regress/test.prologue.00 \
@@ -133,7 +133,7 @@ cleanlint:
 
 dist:	mdocml-$(VERSION).tar.gz
 
-port:	mdocml-oport-$(VERSION).tar.gz
+port:	mdocml-oport-$(VERSION).tar.gz mdocml-nport-$(VERSION).tar.gz
 
 www:	$(HTMLS) $(TARGZS)
 
@@ -223,9 +223,30 @@ mmain.h: mdoc.h
 
 term.h: mdoc.h
 
-mdocml-oport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.port DESCR
+mdocml-nport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.netbsd DESCR
+	mkdir -p .dist/mdocml/
+	sed -e "s!@VERSION@!$(VERSION)!" Makefile.netbsd > \
+		.dist/mdocml/Makefile
+	md5 mdocml-$(VERSION).tar.gz > .dist/mdocml/distinfo
+	rmd160 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
+	sha1 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
+	install -m 0644 DESCR .dist/mdocml/
+	echo @comment $$NetBSD$$ > .dist/mdocml/PLIST
+	echo bin/mdocterm >> .dist/mdocml/PLIST
+	echo bin/mdoctree >> .dist/mdocml/PLIST
+	echo bin/mdoclint >> .dist/mdocml/PLIST
+	echo lib/libmdoc.a >> .dist/mdocml/PLIST
+	echo include/mdoc.h >> .dist/mdocml/PLIST
+	echo man/man1/mdoctree.1 >> .dist/mdocml/PLIST
+	echo man/man1/mdocterm.1 >> .dist/mdocml/PLIST
+	echo man/man1/mdoclint.1 >> .dist/mdocml/PLIST
+	echo man/man3/mdoc.3 >> .dist/mdocml/PLIST
+	( cd .dist/ && tar zcf ../$@ mdocml/ )
+	rm -rf .dist/
+
+mdocml-oport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.openbsd DESCR
 	mkdir -p .dist/mdocml/pkg
-	sed -e "s!@VERSION@!$(VERSION)!" Makefile.port > \
+	sed -e "s!@VERSION@!$(VERSION)!" Makefile.openbsd > \
 		.dist/mdocml/Makefile
 	md5 mdocml-$(VERSION).tar.gz > .dist/mdocml/distinfo
 	rmd160 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
