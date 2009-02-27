@@ -36,6 +36,7 @@
 #define	TERMSYM_LARROW		"<-"
 #define	TERMSYM_RARROW		"->"
 #define	TERMSYM_UARROW		"^"
+#define	TERMSYM_DARROW		"v"
 #define	TERMSYM_LSQUOTE		"`"
 #define	TERMSYM_RSQUOTE		"\'"
 #define	TERMSYM_SQUOTE		"\'"
@@ -52,7 +53,8 @@
 #define	TERMSYM_GRAVE		"`"
 #define	TERMSYM_PI		"pi"
 #define	TERMSYM_PLUSMINUS	"+="
-#define	TERMSYM_INFINITY	"infinity"
+#define	TERMSYM_INF		"oo"
+#define	TERMSYM_INF2		"infinity"
 #define	TERMSYM_NAN		"NaN"
 #define	TERMSYM_BAR		"|"
 #define	TERMSYM_BULLET		"o"
@@ -338,50 +340,70 @@ nescape(struct termp *p, const char *word, size_t len)
 			stringa(p, TERMSYM_RBRACK);
 		else if ('l' == word[0] && 'B' == word[1])
 			stringa(p, TERMSYM_LBRACK);
+		else if ('l' == word[0] && 'q' == word[1])
+			stringa(p, TERMSYM_LDQUOTE);
+		else if ('r' == word[0] && 'q' == word[1])
+			stringa(p, TERMSYM_RDQUOTE);
+		else if ('o' == word[0] && 'q' == word[1])
+			stringa(p, TERMSYM_LSQUOTE);
+		else if ('a' == word[0] && 'q' == word[1])
+			stringa(p, TERMSYM_RSQUOTE);
 		else if ('<' == word[0] && '-' == word[1])
 			stringa(p, TERMSYM_LARROW);
 		else if ('-' == word[0] && '>' == word[1])
 			stringa(p, TERMSYM_RARROW);
-		else if ('l' == word[0] && 'q' == word[1])
-			stringa(p, TERMSYM_DQUOTE);
-		else if ('r' == word[0] && 'q' == word[1])
-			stringa(p, TERMSYM_DQUOTE);
 		else if ('b' == word[0] && 'u' == word[1])
 			stringa(p, TERMSYM_BULLET);
-		else if ('L' == word[0] && 'e' == word[1])
-			stringa(p, TERMSYM_LE);
 		else if ('<' == word[0] && '=' == word[1])
 			stringa(p, TERMSYM_LE);
-		else if ('G' == word[0] && 'e' == word[1])
-			stringa(p, TERMSYM_GE);
 		else if ('>' == word[0] && '=' == word[1])
 			stringa(p, TERMSYM_GE);
-		else if ('R' == word[0] && 'q' == word[1])
-			stringa(p, TERMSYM_RDQUOTE);
-		else if ('L' == word[0] && 'q' == word[1])
-			stringa(p, TERMSYM_LDQUOTE);
+		else if ('=' == word[0] && '=' == word[1])
+			stringa(p, TERMSYM_EQ);
+		else if ('+' == word[0] && '-' == word[1])
+			stringa(p, TERMSYM_PLUSMINUS);
 		else if ('u' == word[0] && 'a' == word[1])
 			stringa(p, TERMSYM_UARROW);
+		else if ('d' == word[0] && 'a' == word[1])
+			stringa(p, TERMSYM_DARROW);
 		else if ('a' == word[0] && 'a' == word[1])
 			stringa(p, TERMSYM_ACUTE);
 		else if ('g' == word[0] && 'a' == word[1])
 			stringa(p, TERMSYM_GRAVE);
-		else if ('P' == word[0] && 'i' == word[1])
-			stringa(p, TERMSYM_PI);
-		else if ('N' == word[0] && 'e' == word[1])
+		else if ('!' == word[0] && '=' == word[1])
 			stringa(p, TERMSYM_NEQ);
-		else if ('L' == word[0] && 't' == word[1])
-			stringa(p, TERMSYM_LT);
-		else if ('G' == word[0] && 't' == word[1])
-			stringa(p, TERMSYM_GT);
-		else if ('P' == word[0] && 'm' == word[1])
-			stringa(p, TERMSYM_PLUSMINUS);
-		else if ('I' == word[0] && 'f' == word[1])
-			stringa(p, TERMSYM_INFINITY);
-		else if ('N' == word[0] && 'a' == word[1])
+		else if ('i' == word[0] && 'f' == word[1])
+			stringa(p, TERMSYM_INF);
+		else if ('n' == word[0] && 'a' == word[1])
 			stringa(p, TERMSYM_NAN);
+		else if ('b' == word[0] && 'a' == word[1])
+			stringa(p, TERMSYM_BAR);
+
+		/* Deprecated forms. */
 		else if ('B' == word[0] && 'a' == word[1])
 			stringa(p, TERMSYM_BAR);
+		else if ('I' == word[0] && 'f' == word[1])
+			stringa(p, TERMSYM_INF2);
+		else if ('G' == word[0] && 'e' == word[1])
+			stringa(p, TERMSYM_GE);
+		else if ('G' == word[0] && 't' == word[1])
+			stringa(p, TERMSYM_GT);
+		else if ('L' == word[0] && 'e' == word[1])
+			stringa(p, TERMSYM_LE);
+		else if ('L' == word[0] && 'q' == word[1])
+			stringa(p, TERMSYM_LDQUOTE);
+		else if ('L' == word[0] && 't' == word[1])
+			stringa(p, TERMSYM_LT);
+		else if ('N' == word[0] && 'a' == word[1])
+			stringa(p, TERMSYM_NAN);
+		else if ('N' == word[0] && 'e' == word[1])
+			stringa(p, TERMSYM_NEQ);
+		else if ('P' == word[0] && 'i' == word[1])
+			stringa(p, TERMSYM_PI);
+		else if ('P' == word[0] && 'm' == word[1])
+			stringa(p, TERMSYM_PLUSMINUS);
+		else if ('R' == word[0] && 'q' == word[1])
+			stringa(p, TERMSYM_RDQUOTE);
 		break;
 	default:
 		break;

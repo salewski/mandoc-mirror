@@ -480,6 +480,8 @@ check_text(struct mdoc *mdoc, size_t line, size_t pos, const char *p)
 {
 	size_t		 c;
 
+	/* XXX - indicate deprecated escapes \*(xx and \*x. */
+
 	for ( ; *p; p++) {
 		if ( ! isprint((int)*p) && '\t' != *p)
 			return(mdoc_perr(mdoc, line, pos,

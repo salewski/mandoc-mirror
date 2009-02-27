@@ -200,6 +200,7 @@ an asterisk and non-open-parenthesis
 .Sq \&*
 for single-character sequences; or one of a small set of standalone
 single characters for other escapes.
+.\" PARAGRAPH
 .Pp
 Examples:
 .Pp
@@ -230,6 +231,10 @@ prints
 .Dq \*q
 .Pq double-quote
 .El
+.\" PARAGRAPH
+.Pp
+All escaped sequences are syntax-checked, but it's up to the front-end
+system to correctly render them to the output device.
 .\" SUBSECTION
 .Ss Abstract Syntax Tree
 The 

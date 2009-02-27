@@ -89,6 +89,117 @@ reads from stdin and prints terminal-encoded output to stdout.
 .Nm
 is
 .Ud
+.\" SUB-SECTION
+.Ss Character Escapes
+This section documents the character-escapes accepted by
+.Xr mdocterm 1 .
+Note that the \\x, \\(xx and \\[n] forms are described here; the \\*(xx
+and \\*x forms described in
+.Xr mdoc.samples 7
+are deprecated, but still correctly rendered.  For all two-character
+sequences, \\(xx is equivalent to the n-character \\[xx].
+.Pp
+Note that the
+.Em Output
+column will render differently whether executed with
+.Xr mdocterm 1 
+or another output filter.
+.\" PARAGRAPH
+.Pp
+Enclosures:
+.Pp
+.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
+.It Em Output
+.Em Input (Name)
+.El 
+.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
+.It \(rB
+\\(rB (right bracket)
+.It \(lB
+\\(rB (left bracket)
+.It \(lq
+\\(lq (left double-quote)
+.It \(rq
+\\(rq (right double-quote)
+.It \(oq
+\\(lq (left single-quote)
+.It \(aq
+\\(aq (right single-quote, apostrophe)
+.El
+.\" PARAGRAPH
+.Pp
+Indicatives:
+.Pp
+.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
+.It Em Output
+.Em Input (Name)
+.El 
+.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
+.It \(<-
+\\(<- (left arrow)
+.It \(->
+\\(-> (right arrow)
+.It \(ua
+\\(ua (up arrow)
+.It \(da
+\\(da (down arrow)
+.El
+.\" PARAGRAPH
+.Pp
+Mathematical:
+.Pp
+.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
+.It Em Output
+.Em Input (Name)
+.El 
+.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
+.It \(<=
+\\(<= (less-than-equal)
+.It \(>=
+\\(>= (greater-than-equal)
+.It \(==
+\\(== (greater-than-equal)
+.It \(!=
+\\(!= (not equal)
+.It \(if
+\\(if (infinity)
+.It \(na
+\\(na (NaN)*
+.It \(+-
+\\(+- (plus-minus)
+.El
+.\" PARAGRAPH
+.Pp
+*This is a deviation from the standard, as NaN is usually rendered as
+\\*(Na, which is a deprecated form.  We introduce \\(na, which follows
+the more general syntax.
+.Pp
+Diacritics:
+.Pp
+.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
+.It Em Output
+.Em Input (Name)
+.El 
+.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
+.It \(ga
+\\(ga (accent grave)
+.It \(aa
+\\(aa (accent accute)
+.El
+.\" PARAGRAPH
+.Pp
+Special symbols:
+.Pp
+.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
+.It Em Output
+.Em Input (Name)
+.El 
+.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
+.It \(bu
+\\(bu (bullet)
+.It \(ba
+\\(ba (bar)
+.El 
 .\" SECTION
 .Sh EXAMPLES
 To display this manual page:
