@@ -271,7 +271,7 @@ post_os(struct mdoc *mdoc)
 	if ( ! xstrlcats(buf, mdoc->last->child, 64))
 		return(mdoc_err(mdoc, "macro parameters too long")); 
 
-	mdoc->meta.os = xstrdup(buf[0] ? buf : "local");
+	mdoc->meta.os = xstrdup(buf[0] ? buf : "LOCAL");
 	mdoc->lastnamed = SEC_BODY;
 
 	return(post_prologue(mdoc));

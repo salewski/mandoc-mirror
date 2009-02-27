@@ -16,6 +16,8 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+#include <sys/utsname.h>
+
 #include <assert.h>
 #include <ctype.h>
 #include <err.h>
@@ -674,15 +676,21 @@ footer(struct termp *p, const struct mdoc_meta *meta)
 static void
 header(struct termp *p, const struct mdoc_meta *meta)
 {
-	char		*buf, *title, *bufp;
+	char		*buf, *title, *bufp, *vbuf;
 	const char	*pp;
+	struct utsname	 uts;
+
+	p->rmargin = p->maxrmargin;
+	p->offset = 0;
 
 	if (NULL == (buf = malloc(p->rmargin)))
 		err(1, "malloc");
 	if (NULL == (title = malloc(p->rmargin)))
 		err(1, "malloc");
+	if (NULL == (vbuf = malloc(p->rmargin)))
+		err(1, "malloc");
 
-	if (NULL == (pp = mdoc_vol2a(meta->vol)))
+	if (NULL == (pp = mdoc_vol2a(meta->vol))) {
 		switch (meta->msec) {
 		case (MSEC_1):
 			/* FALLTHROUGH */
@@ -707,11 +715,20 @@ header(struct termp *p, const struct mdoc_meta *meta)
 			pp = mdoc_vol2a(VOL_KM);
 			break;
 		default:
-			/* FIXME: capitalise. */
-			if (NULL == (pp = mdoc_msec2a(meta->msec)))
-				pp = mdoc_msec2a(MSEC_local);
 			break;
 		}
+	}
+	vbuf[0] = 0;
+
+	if (pp) {
+		if (-1 == uname(&uts)) 
+			err(1, "uname");
+		(void)strlcat(vbuf, uts.sysname, p->rmargin);
+		(void)strlcat(vbuf, " ", p->rmargin);
+	} else if (NULL == (pp = mdoc_msec2a(meta->msec)))
+		pp = mdoc_msec2a(MSEC_local);
+
+	(void)strlcat(vbuf, pp, p->rmargin);
 
 	/*
 	 * The header is strange.  It has three components, which are
@@ -728,9 +745,9 @@ header(struct termp *p, const struct mdoc_meta *meta)
 
 	if (mdoc_arch2a(meta->arch))
 		(void)snprintf(buf, p->rmargin, "%s (%s)",
-				pp, mdoc_arch2a(meta->arch));
+				vbuf, mdoc_arch2a(meta->arch));
 	else
-		(void)strlcpy(buf, pp, p->rmargin);
+		(void)strlcpy(buf, vbuf, p->rmargin);
 
 	pp = mdoc_msec2a(meta->msec);
 
@@ -767,5 +784,6 @@ header(struct termp *p, const struct mdoc_meta *meta)
 	p->flags &= ~TERMP_NOSPACE;
 
 	free(title);
+	free(vbuf);
 	free(buf);
 }

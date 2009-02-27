@@ -24,11 +24,16 @@
 					</h1>
 
 					<p>
-					<span class="nm">mdocml</span> is a suite of tools that compile &#8220;mdoc&#8221;, the roff macro
-					package of the BSD manual pages.  The mission of <span class="nm">mdocml</span> is to deprecate <a
+					<span class="nm">mdocml</span> is a suite of tools compiling &#8220;mdoc&#8221;, the roff macro
+					package for BSD manual pages.  The mission of <span class="nm">mdocml</span> is to deprecate <a
 					href="http://www.gnu.org/software/groff/" class="external">groff</a>, the GNU roff implementation, for
-					displaying BSD mdoc pages.  groff amounts to over 60 000 lines of GPL C++ source, which is a
-					considerable encumbrance to BSD operating systems.
+					displaying BSD mdoc pages.
+					</p>
+
+					<p>
+					Why?  groff amounts to roughly 5,2 MB of source code (OpenBSD 4.2), some of which is C++ and all of
+					which is GPL.  It runs slowly, produces uncertain output, and varies in operation from system
+					to system.  mdocml strives to fix this (respectively small, C, ISC-licensed, fast and regular).
 					</p>
 
 					<p>
@@ -44,7 +49,7 @@
 
 					<ul>
 					<li><span class="man">mdocterm(1)</span> &#8211; formats mdoc input for display on the terminal
-					<li><span class="man">mdochtml(1)</span> &#8211; formats mdoc input as strict HTML (nascent)
+					<li><span class="man">mdochtml(1)</span> &#8211; formats mdoc input as HTML/CSS (nascent)
 					<li><span class="man">mdoclint(1)</span> &#8211; validates mdoc input
 					<li><span class="man">mdoctree(1)</span> &#8211; prints input abstract syntax tree
 					</ul>
@@ -79,11 +84,11 @@
 					</p>
 
 					<h2>
-					snapshotted source
+					Snapshot source
 					</h2>
 
 					<p>
-					CVS sources are checkedout and snapshotted with big updates.  These may be found in the <a
+					CVS sources are checkedout and snapshotted with version updates.  These may be found in the <a
 					href="/snapshots/">/snapshots/</a> directory.
 					</p>
 
@@ -97,7 +102,7 @@
 					</p>
 
 					<h2>
-					nightly port
+					Snapshot port
 					</h2>
 
 					<p>

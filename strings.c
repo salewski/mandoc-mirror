@@ -472,23 +472,23 @@ mdoc_vol2a(enum mdoc_vol vol)
 
 	switch (vol) {
 	case (VOL_AMD):
-		return("OpenBSD Ancestral Manual Documents");
+		return("Ancestral Manual Documents");
 	case (VOL_IND):
-		return("OpenBSD Manual Master Index");
+		return("Manual Master Index");
 	case (VOL_KM):
-		return("OpenBSD Kernel Manual");
+		return("Kernel Manual");
 	case (VOL_LOCAL):
-		return("OpenBSD Local Manual");
+		return("Local Manual");
 	case (VOL_PRM):
-		return("OpenBSD Programmer's Manual");
+		return("Programmer's Manual");
 	case (VOL_PS1):
-		return("OpenBSD Programmer's Supplementary Documents");
+		return("Programmer's Supplementary Documents");
 	case (VOL_SMM):
-		return("OpenBSD System Manager's Manual");
+		return("System Manager's Manual");
 	case (VOL_URM):
-		return("OpenBSD Reference Manual");
+		return("Reference Manual");
 	case (VOL_USD):
-		return("OpenBSD User's Supplementary Documents");
+		return("User's Supplementary Documents");
 	case (VOL_DEFAULT):
 		return(NULL);
 	default:
