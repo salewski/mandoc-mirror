@@ -796,6 +796,8 @@ macro_text(MACRO_PROT_ARGS)
 			return(0);
 		}
 
+		/* FIXME: .Fl and .Ar handling of `|'. */
+
 		if (ARGS_QWORD != w && mdoc_isdelim(p)) {
 			if (0 == lastpunct && ! rewind_elem(mdoc, tok)) {
 				mdoc_argv_free(argc, argv);

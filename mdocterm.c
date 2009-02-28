@@ -554,7 +554,14 @@ word(struct termp *p, const char *word)
 		if ( ! xisspace(word[i])) {
 			j++;
 			continue;
+		} 
+		
+		/* Escaped spaces don't delimit... */
+		if (i > 0 && xisspace(word[i]) && '\\' == word[i - 1]) {
+			j++;
+			continue;
 		}
+
 		if (0 == j)
 			continue;
 		assert(i >= j);

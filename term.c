@@ -25,7 +25,7 @@
 
 #include "term.h"
 
-#define	INDENT		  8
+#define	INDENT		  6
 
 /*
  * Performs actions on nodes of the abstract syntax tree.  Both pre- and
@@ -174,7 +174,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_ss_pre, termp_ss_post }, /* Ss */ 
 	{ termp_pp_pre, NULL }, /* Pp */ 
 	{ termp_d1_pre, termp_d1_post }, /* D1 */
-	{ NULL, NULL }, /* Dl */
+	{ termp_d1_pre, termp_d1_post }, /* Dl */
 	{ termp_bd_pre, termp_bd_post }, /* Bd */
 	{ NULL, NULL }, /* Ed */
 	{ NULL, termp_bl_post }, /* Bl */
@@ -208,16 +208,16 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_vt_pre, termp_vt_post }, /* Vt */ 
 	{ termp_xr_pre, NULL }, /* Xr */
 	{ NULL, termp____post }, /* %A */
-	{ NULL, NULL }, /* %B */
+	{ NULL, termp____post }, /* %B */
 	{ NULL, termp____post }, /* %D */
-	{ NULL, NULL }, /* %I */
+	{ NULL, termp____post }, /* %I */
 	{ NULL, termp____post }, /* %J */
-	{ NULL, NULL }, /* %N */
-	{ NULL, NULL }, /* %O */
-	{ NULL, NULL }, /* %P */
-	{ NULL, NULL }, /* %R */
+	{ NULL, termp____post }, /* %N */
+	{ NULL, termp____post }, /* %O */
+	{ NULL, termp____post }, /* %P */
+	{ NULL, termp____post }, /* %R */
 	{ termp__t_pre, termp__t_post }, /* %T */
-	{ NULL, NULL }, /* %V */
+	{ NULL, termp____post }, /* %V */
 	{ NULL, NULL }, /* Ac */
 	{ termp_aq_pre, termp_aq_post }, /* Ao */
 	{ termp_aq_pre, termp_aq_post }, /* Aq */
@@ -303,7 +303,7 @@ arg_width(const struct mdoc_arg *arg)
 		}
 
 	}
-	return(strlen(*arg->value) + 1);
+	return(strlen(*arg->value) + 2);
 }
 
 
@@ -395,10 +395,10 @@ termp_it_pre(DECL_ARGS)
 	bl = &n->data.block;
 
 	if (MDOC_BLOCK == node->type) {
-		if (arg_hasattr(MDOC_Compact, bl->argc, bl->argv))
-			newln(p);
-		else
-			vspace(p);
+		newln(p);
+		if ( ! arg_hasattr(MDOC_Compact, bl->argc, bl->argv))
+			if (node->prev || n->prev)
+				vspace(p);
 		return(1);
 	}
 
@@ -563,6 +563,9 @@ static int
 termp_nm_pre(DECL_ARGS)
 {
 
+	if (SEC_SYNOPSIS == node->sec)
+		newln(p);
+
 	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_PROG]);
 	if (NULL == node->child)
 		word(p, meta->name);
@@ -587,9 +590,14 @@ static int
 termp_ar_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_CMD_ARG]);
-	if (NULL == node->child)
-		word(p, "...");
+	if (node->child) {
+		TERMPAIR_SETFLAG(pair, ttypes[TTYPE_CMD_ARG]);
+		return(1);
+	}
+	p->flags |= ttypes[TTYPE_CMD_ARG];
+	word(p, "file");
+	word(p, "...");
+	p->flags &= ~ttypes[TTYPE_CMD_ARG];
 	return(1);
 }
 
