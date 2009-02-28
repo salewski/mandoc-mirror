@@ -294,6 +294,10 @@ args(struct mdoc *mdoc, int line,
 			if ( ! mdoc_iscdelim(buf[i]))
 				break;
 			i++;
+			/* There must be at least one space... */
+			if (0 == buf[i] || ! isspace((int)buf[i]))
+				break;
+			i++;
 			while (buf[i] && isspace((int)buf[i]))
 				i++;
 		}
