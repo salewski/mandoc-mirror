@@ -42,7 +42,8 @@ HTMLS	= index.html
 
 STATICS	= style.css external.png
 
-TARGZS	= mdocml-$(VERSION).tar.gz mdocml-oport-$(VERSION).tar.gz
+TARGZS	= mdocml-$(VERSION).tar.gz mdocml-oport-$(VERSION).tar.gz \
+	  mdocml-nport-$(VERSION).tar.gz
 
 MANS	= mdoctree.1 mdocterm.1 mdoclint.1 mdoc.3
 
@@ -140,9 +141,11 @@ www:	$(HTMLS) $(TARGZS)
 installwww: www
 	install -m 0444 $(HTMLS) $(STATICS) $(PREFIX)/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/
-	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz
+	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/
 	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/mdocml.tar.gz
+	install -m 0444 mdocml-nport-$(VERSION).tar.gz $(PREFIX)/ports-netbsd/
+	install -m 0444 mdocml-nport-$(VERSION).tar.gz $(PREFIX)/ports-netbsd/mdocml.tar.gz
 
 regress: mdoclint
 	@for f in $(FAIL); do \
