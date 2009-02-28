@@ -465,6 +465,10 @@ pescape(struct termp *p, const char *word, size_t *i, size_t len)
 			/* FALLTHROUGH */
 		case ('.'):
 			chara(p, word[*i]);
+			break;
+		case ('e'):
+			chara(p, '\\');
+			break;
 		default:
 			break;
 		}

@@ -118,6 +118,7 @@ DECL_PREPOST(termp_fd);
 DECL_PREPOST(termp_fn);
 DECL_PREPOST(termp_fo);
 DECL_PREPOST(termp_ft);
+DECL_PREPOST(termp_in);
 DECL_PREPOST(termp_it);
 DECL_PREPOST(termp_op);
 DECL_PREPOST(termp_pf);
@@ -142,7 +143,6 @@ DECL_PRE(termp_fa);
 DECL_PRE(termp_fl);
 DECL_PRE(termp_fx);
 DECL_PRE(termp_ic);
-DECL_PRE(termp_in);
 DECL_PRE(termp_ms);
 DECL_PRE(termp_nd);
 DECL_PRE(termp_nm);
@@ -195,7 +195,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_fn_pre, termp_fn_post }, /* Fn */ 
 	{ termp_ft_pre, termp_ft_post }, /* Ft */ 
 	{ termp_ic_pre, NULL }, /* Ic */ 
-	{ termp_in_pre, NULL }, /* In */ 
+	{ termp_in_pre, termp_in_post }, /* In */ 
 	{ NULL, NULL }, /* Li */
 	{ termp_nd_pre, NULL }, /* Nd */ 
 	{ termp_nm_pre, NULL }, /* Nm */ 
@@ -642,7 +642,7 @@ static int
 termp_rs_pre(DECL_ARGS)
 {
 
-	if (MDOC_BLOCK == node->type)
+	if (MDOC_BLOCK == node->type && node->prev)
 		vspace(p);
 	return(1);
 }
@@ -798,7 +798,10 @@ static void
 termp_fd_post(DECL_ARGS)
 {
 
-	if (node->sec == SEC_SYNOPSIS)
+	if (node->sec != SEC_SYNOPSIS)
+		return;
+	newln(p);
+	if (node->next && MDOC_Fd != node->next->tok)
 		vspace(p);
 }
 
@@ -990,7 +993,7 @@ static void
 termp_fn_post(DECL_ARGS)
 {
 
-	if (node->sec == SEC_SYNOPSIS)
+	if (node->sec == SEC_SYNOPSIS && node->next)
 		vspace(p);
 
 }
@@ -1054,7 +1057,8 @@ termp_bd_pre(DECL_ARGS)
 	int		 i;
 
 	if (MDOC_BLOCK == node->type) {
-		vspace(p);
+		if (node->prev)
+			vspace(p);
 		return(1);
 	} else if (MDOC_BODY != node->type)
 		return(1);
@@ -1323,8 +1327,29 @@ static int
 termp_in_pre(DECL_ARGS)
 {
 
+	p->flags |= ttypes[TTYPE_INCLUDE];
+	word(p, "#include");
+	word(p, "<");
+	p->flags &= ~ttypes[TTYPE_INCLUDE];
+	p->flags |= TERMP_NOSPACE;
 	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_INCLUDE]);
 	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_in_post(DECL_ARGS)
+{
+
+	p->flags |= TERMP_NOSPACE;
+	word(p, ">");
+
+	newln(p);
+	if (SEC_SYNOPSIS != node->sec)
+		return;
+	if (node->next && MDOC_In != node->next->tok)
+		vspace(p);
 }
 
 
@@ -1352,7 +1377,7 @@ termp_bq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "\\[");
+	word(p, "[");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1376,7 +1401,7 @@ termp_pq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "\\&(");
+	word(p, "(");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
