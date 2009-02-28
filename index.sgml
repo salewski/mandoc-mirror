@@ -102,14 +102,19 @@
 					</p>
 
 					<h2>
-					Snapshot port
+					Snapshot port/pkgsrc
 					</h2>
 
 					<p>
-					The source snapshot is automatically converted into an OpenBSD port (ports for other BSD systems not
-					yet available).  These may be found in the <a href="/ports-openbsd/">/ports-openbsd/</a> directory.
-					You <span class="emph">must</span> have the ports tree installed.
+					The source snapshot is automatically converted into OpenBSD port and NetBSD pkgsrc forms at <a
+					href="/ports-openbsd/">/ports-openbsd/</a> and <a href="/ports-netbsd/">/ports-netbsd/</a>,
+					respectively.  Please read the <a href="http://www.openbsd.org/faq/faq15.html">OpenBSD Ports FAQ</a> or
+					<a href="http://www.netbsd.org/docs/software/packages.html">NetBSD pkgsrc guide</a>, first.
 					</p>
+
+					<h3>
+					OpenBSD port
+					</h3>
 
 					<p class="boxed">
 					# pkg_delete mdocml<br>
@@ -118,7 +123,20 @@
 					# ftp -V -o- http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz | tar -zvxf -<br>
 					# cd mdocml<br>
 					# make build<br>
-					# make regress<br>
+					# make install
+					</p>
+
+					<h3>
+					NetBSD pkgsrc
+					</h3>
+
+					<p class="boxed">
+					# pkg_delete mdocml<br>
+					# cd /usr/pkgsrc/devel/<br>
+					# rm -rf mdocml<br>
+					# ftp -V -o- http://mdocml.bsd.lv/ports-netbsd/mdocml.tar.gz | tar -zvxf -<br>
+					# cd mdocml<br>
+					# make build<br>
 					# make install
 					</p>
 				</td>
