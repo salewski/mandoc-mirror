@@ -392,10 +392,11 @@ post_bl_width(struct mdoc *mdoc)
 	 * the macro's width as set in share/tmac/mdoc/doc-common.
 	 */
 
-	if (MDOC_MAX == (tok = mdoc_find(mdoc, *p)))
+	if (xstrcmp(*p, "Ds"))
+		width = 6;
+	else if (MDOC_MAX == (tok = mdoc_find(mdoc, *p)))
 		return(1);
-
-	if (0 == (width = mdoc_macro2len(tok))) 
+	else if (0 == (width = mdoc_macro2len(tok))) 
 		return(mdoc_warn(mdoc, WARN_SYNTAX,
 					"-%s macro has no length", 
 					mdoc_argnames[MDOC_Width]));
