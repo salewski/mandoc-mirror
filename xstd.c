@@ -63,6 +63,16 @@ xstrlcpy(char *dst, const char *src, size_t sz)
 }
 
 void *
+xrealloc(void *ptr, size_t sz)
+{
+	void		*p;
+
+	if (NULL == (p = realloc(ptr, sz)))
+		err(EXIT_FAILURE, "realloc");
+	return(p);
+}
+
+void *
 xcalloc(size_t num, size_t sz)
 {
 	void		*p;

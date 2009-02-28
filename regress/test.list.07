@@ -1,0 +1,11 @@
+.Dd $Mdocdate$
+.Dt 
+.Os 
+.Sh NAME
+.Nm name
+.Nd description
+.Sh DESCRIPTION
+.Bl -tag -width Fa
+.It foo
+bar
+.El

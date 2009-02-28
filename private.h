@@ -164,6 +164,7 @@ int	  	  xstrlcpy(char *, const char *, size_t);
 int	  	  xstrcmp(const char *, const char *);
 int	  	  xstrncmp(const char *, const char *, size_t);
 void	 	 *xcalloc(size_t, size_t);
+void	 	 *xrealloc(void *, size_t);
 char	 	 *xstrdup(const char *);
 
 int		  macro_end(struct mdoc *);

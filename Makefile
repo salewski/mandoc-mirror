@@ -114,6 +114,7 @@ SUCCEED	= regress/test.prologue.05 \
 	  regress/test.list.04 \
 	  regress/test.list.05 \
 	  regress/test.list.06 \
+	  regress/test.list.07 \
 	  regress/test.sh.01 \
 	  regress/test.sh.02 \
 	  regress/test.escape.00 \

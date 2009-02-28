@@ -36,9 +36,7 @@
 typedef	int	(*v_pre)(PRE_ARGS);
 typedef	int	(*v_post)(POST_ARGS);
 
-/* FIXME: some sections should only occur in specific msecs. */
-/* FIXME: ignoring Pp. */
-/* FIXME: math symbols. */
+/* TODO: ignoring Pp (it's superfluous in some invocations). */
 
 struct	valids {
 	v_pre	*pre;
@@ -626,11 +624,11 @@ pre_bl(PRE_ARGS)
 				"superfluous -%s argument",
 				mdoc_argnames[MDOC_Width]));
 	case (MDOC_Tag):
-		if (-1 != width)
-			break;
-		return(mdoc_nwarn(mdoc, n, WARN_SYNTAX,
-				"suggest -%s argument",
-				mdoc_argnames[MDOC_Width]));
+		if (-1 == width && ! mdoc_nwarn(mdoc, n, WARN_SYNTAX, 
+					"suggest -%s argument",
+					mdoc_argnames[MDOC_Width]))
+			return(0);
+		break;
 	default:
 		break;
 	}
@@ -705,8 +703,6 @@ pre_sh(PRE_ARGS)
 static int
 pre_it(PRE_ARGS)
 {
-
-	/* TODO: children too big for -width? */
 
 	if (MDOC_BLOCK != n->type)
 		return(1);
@@ -1056,19 +1052,25 @@ post_bl(POST_ARGS)
 
 	if (MDOC_BODY != mdoc->last->type)
 		return(1);
+	if (NULL == (mdoc->last->child))
+		return(1);
+
+	/*
+	 * Only allow `It' macros to be the immediate descendants of the
+	 * `Bl' list. 
+	 */
 
 	/* LINTED */
 	for (n = mdoc->last->child; n; n = n->next) {
 		if (MDOC_BLOCK == n->type) 
 			if (MDOC_It == n->tok)
 				continue;
-		break;
+
+		return(mdoc_nerr(mdoc, n, "bad child of parent %s",
+				mdoc_macronames[mdoc->last->tok]));
 	}
 
-	if (NULL == n)
-		return(1);
-
-	return(mdoc_nerr(mdoc, n, "bad child of parent list"));
+	return(1);
 }
 
 

@@ -37,6 +37,8 @@ struct	actions {
 /* Per-macro action routines. */
 
 static	int	 post_bl(struct mdoc *);
+static	int	 post_bl_width(struct mdoc *);
+static	int	 post_bl_tagwidth(struct mdoc *);
 static	int	 post_sh(struct mdoc *);
 static	int	 post_os(struct mdoc *);
 static	int	 post_dt(struct mdoc *);
@@ -157,11 +159,6 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 };
 
 
-/*
- * The `Nm' macro sets the document's name when used the first time with
- * an argument.  Subsequent calls without a value will result in the
- * name value being used.
- */
 static int
 post_nm(struct mdoc *mdoc)
 {
@@ -169,6 +166,12 @@ post_nm(struct mdoc *mdoc)
 
 	assert(MDOC_ELEM == mdoc->last->type);
 	assert(MDOC_Nm == mdoc->last->tok);
+
+	/*
+	 * The `Nm' macro sets the document's name when used the first
+	 * time with an argument.  Subsequent calls without a value will
+	 * result in the name value being used.
+	 */
 
 	if (mdoc->meta.name)
 		return(1);
@@ -182,15 +185,17 @@ post_nm(struct mdoc *mdoc)
 }
 
 
-/*
- * We keep track of the current section in order to provide warnings on
- * section ordering, per-section macros, and so on.
- */
 static int
 post_sh(struct mdoc *mdoc)
 {
 	enum mdoc_sec	 sec;
 	char		 buf[64];
+
+	/*
+	 * We keep track of the current section /and/ the "named"
+	 * section, which is one of the conventional ones, in order to
+	 * check ordering.
+	 */
 
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
@@ -198,22 +203,43 @@ post_sh(struct mdoc *mdoc)
 		if (SEC_CUSTOM != (sec = mdoc_atosec(buf)))
 			mdoc->lastnamed = sec;
 		mdoc->lastsec = sec;
-		return(1);
-	}
+	} else
+		return(mdoc_err(mdoc, "parameters too long"));
 
-	return(mdoc_err(mdoc, "macro parameters too long"));
+	switch (mdoc->lastsec) {
+	case (SEC_RETURN_VALUES):
+		/* FALLTHROUGH */
+	case (SEC_ERRORS):
+		switch (mdoc->meta.msec) {
+		case (MSEC_2):
+			/* FALLTHROUGH */
+		case (MSEC_3):
+			/* FALLTHROUGH */
+		case (MSEC_9):
+			break;
+		default:
+			return(mdoc_warn(mdoc, WARN_COMPAT,
+					"inappropriate section for "
+					"manual section"));
+		}
+		break;
+	default:
+		break;
+	}
+	return(1);
 }
 
 
-/* 
- * Prologue title must be parsed into document meta-data.
- */
 static int
 post_dt(struct mdoc *mdoc)
 {
 	int		  i;
 	char		 *p;
 	struct mdoc_node *n;
+
+	/* 
+	 * Prologue title must be parsed into document meta-data.
+	 */
 
 	assert(MDOC_ELEM == mdoc->last->type);
 	assert(MDOC_Dt == mdoc->last->tok);
@@ -256,13 +282,15 @@ post_dt(struct mdoc *mdoc)
 }
 
 
-/* 
- * Prologue operating system must be parsed into document meta-data.
- */
 static int
 post_os(struct mdoc *mdoc)
 {
 	char		  buf[64];
+
+	/* 
+	 * Prologue operating system must be parsed into document
+	 * meta-data.
+	 */
 
 	assert(MDOC_ELEM == mdoc->last->type);
 	assert(MDOC_Os == mdoc->last->tok);
@@ -278,31 +306,93 @@ post_os(struct mdoc *mdoc)
 }
 
 
-/* 
- * Transform -width MACRO values into real widths. 
- */
 static int
-post_bl(struct mdoc *mdoc)
+post_bl_tagwidth(struct mdoc *mdoc)
 {
-	struct mdoc_block *bl;
-	size_t		   width;
-	int		   tok, i;
+	struct mdoc_node  *n;
+	struct mdoc_block *b;
+	int		   sz;
 	char		   buf[32];
 
-	if (MDOC_BLOCK != mdoc->last->type)
+	/*
+	 * If -tag has been specified and -width has not been, then try
+	 * to intuit our width from the first body element.  
+	 */
+
+	b = &mdoc->last->data.block;
+
+	if (NULL == (n = b->body->child))
 		return(1);
+	assert(MDOC_It == n->tok);
 
-	bl = &mdoc->last->data.block;
+	/*
+	 * Use the text width, if a text node, or the default macro
+	 * width if a macro.
+	 */
 
-	for (i = 0; i < (int)bl->argc; i++)
-		if (MDOC_Width == bl->argv[i].arg)
+	if ((n = n->data.block.head->child)) {
+		if (MDOC_TEXT != n->type) {
+			if (0 == (sz = mdoc_macro2len(n->tok)))
+				sz = -1;
+		} else
+			sz = (int)strlen(n->data.text.string) + 1;
+	} else
+		sz = -1;
+
+	if (-1 == sz) {
+		if ( ! mdoc_warn(mdoc, WARN_SYNTAX,
+				"cannot determine default %s",
+				mdoc_argnames[MDOC_Width]))
+			return(0);
+		sz = 10;
+	}
+
+	(void)snprintf(buf, sizeof(buf), "%dn", sz);
+
+	/*
+	 * We have to dynamically add this to the macro's argument list.
+	 * We're guaranteed that a MDOC_Width doesn't already exist.
+	 */
+
+	(b->argc)++;
+	b->argv = xrealloc(b->argv, b->argc * sizeof(struct mdoc_arg));
+
+	b->argv[b->argc - 1].arg = MDOC_Width;
+	b->argv[b->argc - 1].line = mdoc->last->line;
+	b->argv[b->argc - 1].pos = mdoc->last->pos;
+	b->argv[b->argc - 1].sz = 1;
+	b->argv[b->argc - 1].value = xcalloc(1, sizeof(char *));
+	b->argv[b->argc - 1].value[0] = xstrdup(buf);
+
+	mdoc_msg(mdoc, "adding %s argument: %dn", 
+			mdoc_argnames[MDOC_Width], sz);
+
+	return(1);
+}
+
+
+static int
+post_bl_width(struct mdoc *mdoc)
+{
+	size_t		  width;
+	int		  i, tok;
+	char		  buf[32];
+	char		**p;
+
+	for (i = 0; i < (int)mdoc->last->data.block.argc; i++) 
+		if (MDOC_Width == mdoc->last->data.block.argv[i].arg)
 			break;
 
-	if (i == (int)bl->argc)
-		return(1);
+	assert(i < (int)mdoc->last->data.block.argc);
+	assert(1 == mdoc->last->data.block.argv[i].sz);
+	p = &mdoc->last->data.block.argv[i].value[0];
 
-	assert(1 == bl->argv[i].sz);
-	if (MDOC_MAX == (tok = mdoc_find(mdoc, *bl->argv[i].value)))
+	/*
+	 * If the value to -width is a macro, then we re-write it to be
+	 * the macro's width as set in share/tmac/mdoc/doc-common.
+	 */
+
+	if (MDOC_MAX == (tok = mdoc_find(mdoc, *p)))
 		return(1);
 
 	if (0 == (width = mdoc_macro2len(tok))) 
@@ -311,26 +401,63 @@ post_bl(struct mdoc *mdoc)
 					mdoc_argnames[MDOC_Width]));
 
 	mdoc_msg(mdoc, "re-writing %s argument: %s -> %zun", 
-			mdoc_argnames[MDOC_Width],
-			*bl->argv[i].value, width);
+			mdoc_argnames[MDOC_Width], *p, width);
 
-	/* FIXME: silently truncates. */
+	/* The value already exists: free and reallocate it. */
+
 	(void)snprintf(buf, sizeof(buf), "%zun", width);
 
-	free(*bl->argv[i].value);
-	*bl->argv[i].value = strdup(buf);
+	free(*p);
+	*p = strdup(buf);
 
 	return(1);
 }
 
 
-/* 
- * Prologue date must be parsed into document meta-data.
- */
+static int
+post_bl(struct mdoc *mdoc)
+{
+	int		  i, r;
+
+	if (MDOC_BLOCK != mdoc->last->type)
+		return(1);
+
+	/*
+	 * These are fairly complicated, so we've broken them into two
+	 * functions.  post_bl_tagwidth() is called when a -tag is
+	 * specified, but no -width (it must be guessed).  The second
+	 * when a -width is specified (macro indicators must be
+	 * rewritten into real lengths).
+	 */
+
+	for (r = i = 0; i < (int)mdoc->last->data.block.argc; i++) {
+		if (MDOC_Tag == mdoc->last->data.block.argv[i].arg)
+			r |= 1 << 0;
+		if (MDOC_Width == mdoc->last->data.block.argv[i].arg)
+			r |= 1 << 1;
+	}
+
+	if (r & (1 << 0) && ! (r & (1 << 1))) {
+		if ( ! post_bl_tagwidth(mdoc))
+			return(0);
+	} else if (r & (1 << 1))
+		if ( ! post_bl_width(mdoc))
+			return(0);
+
+	return(1);
+}
+
+
 static int
 post_dd(struct mdoc *mdoc)
 {
 	char		  buf[64];
+
+	/* 
+	 * Prologue date must be parsed into document meta-data.  We
+	 * accept multiple kinds of dates, described mostly in
+	 * mdoc_atotime().
+	 */
 
 	assert(MDOC_ELEM == mdoc->last->type);
 	assert(MDOC_Dd == mdoc->last->tok);
@@ -348,14 +475,15 @@ post_dd(struct mdoc *mdoc)
 }
 
 
-/*
- * The end document shouldn't have the prologue macros as part of the
- * syntax tree (they encompass only meta-data). 
- */
 static int
 post_prologue(struct mdoc *mdoc)
 {
 	struct mdoc_node *n;
+
+	/* 
+	 * The end document shouldn't have the prologue macros as part
+	 * of the syntax tree (they encompass only meta-data).  
+	 */
 
 	if (mdoc->last->parent->child == mdoc->last)
 		mdoc->last->parent->child = mdoc->last->prev;
