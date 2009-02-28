@@ -259,7 +259,8 @@ post_dt(struct mdoc *mdoc)
 			mdoc->meta.msec = mdoc_atomsec(p);
 			if (MSEC_DEFAULT != mdoc->meta.msec)
 				break;
-			return(mdoc_nerr(mdoc, n, "invalid parameter syntax"));
+			return(mdoc_nerr(mdoc, n, 
+					"invalid parameter syntax"));
 		case (2):
 			mdoc->meta.vol = mdoc_atovol(p);
 			if (VOL_DEFAULT != mdoc->meta.vol)
@@ -267,9 +268,11 @@ post_dt(struct mdoc *mdoc)
 			mdoc->meta.arch = mdoc_atoarch(p);
 			if (ARCH_DEFAULT != mdoc->meta.arch)
 				break;
-			return(mdoc_nerr(mdoc, n, "invalid parameter syntax"));
+			return(mdoc_nerr(mdoc, n, 
+					"invalid parameter syntax"));
 		default:
-			return(mdoc_nerr(mdoc, n, "too many parameters"));
+			return(mdoc_nerr(mdoc, n, 
+					"too many parameters"));
 		}
 	}
 
