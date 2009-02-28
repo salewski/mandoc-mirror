@@ -1,6 +1,6 @@
 .SUFFIXES:	.html .sgml
 
-VERSION	= 1.3.9
+VERSION	= 1.3.10
 VDATE	= 28 February 2009
 
 CFLAGS += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g 
