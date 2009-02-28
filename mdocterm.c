@@ -112,7 +112,7 @@ main(int argc, char *argv[])
 	if (NULL == (mdoc = mmain_mdoc(p)))
 		mmain_exit(p, 1);
 
-	termp.maxrmargin = 80; /* XXX */
+	termp.maxrmargin = 78; /* XXX */
 	termp.rmargin = termp.maxrmargin;
 	termp.maxcols = 1024;
 	termp.offset = termp.col = 0;
