@@ -25,7 +25,7 @@
 
 #include "term.h"
 
-#define	INDENT		  6
+#define	INDENT		  8
 
 /*
  * Performs actions on nodes of the abstract syntax tree.  Both pre- and
@@ -108,6 +108,7 @@ static	void	 	  name##_post(DECL_ARGS)
 DECL_PRE(name); \
 DECL_POST(name);
 
+DECL_PREPOST(termp__t);
 DECL_PREPOST(termp_aq);
 DECL_PREPOST(termp_bd);
 DECL_PREPOST(termp_bq);
@@ -150,6 +151,7 @@ DECL_PRE(termp_nx);
 DECL_PRE(termp_ox);
 DECL_PRE(termp_pa);
 DECL_PRE(termp_pp);
+DECL_PRE(termp_rs);
 DECL_PRE(termp_rv);
 DECL_PRE(termp_sm);
 DECL_PRE(termp_st);
@@ -160,6 +162,7 @@ DECL_PRE(termp_ux);
 DECL_PRE(termp_va);
 DECL_PRE(termp_xr);
 
+DECL_POST(termp___);
 DECL_POST(termp_bl);
 
 const	struct termact __termacts[MDOC_MAX] = {
@@ -204,16 +207,16 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_va_pre, NULL }, /* Va */
 	{ termp_vt_pre, termp_vt_post }, /* Vt */ 
 	{ termp_xr_pre, NULL }, /* Xr */
-	{ NULL, NULL }, /* %A */
+	{ NULL, termp____post }, /* %A */
 	{ NULL, NULL }, /* %B */
-	{ NULL, NULL }, /* %D */
+	{ NULL, termp____post }, /* %D */
 	{ NULL, NULL }, /* %I */
-	{ NULL, NULL }, /* %J */
+	{ NULL, termp____post }, /* %J */
 	{ NULL, NULL }, /* %N */
 	{ NULL, NULL }, /* %O */
 	{ NULL, NULL }, /* %P */
 	{ NULL, NULL }, /* %R */
-	{ NULL, NULL }, /* %T */
+	{ termp__t_pre, termp__t_post }, /* %T */
 	{ NULL, NULL }, /* %V */
 	{ NULL, NULL }, /* Ac */
 	{ termp_aq_pre, termp_aq_post }, /* Ao */
@@ -248,7 +251,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_qq_pre, termp_qq_post }, /* Qo */
 	{ termp_qq_pre, termp_qq_post }, /* Qq */
 	{ NULL, NULL }, /* Re */
-	{ NULL, NULL }, /* Rs */
+	{ termp_rs_pre, NULL }, /* Rs */
 	{ NULL, NULL }, /* Sc */
 	{ termp_sq_pre, termp_sq_post }, /* So */
 	{ termp_sq_pre, termp_sq_post }, /* Sq */
@@ -300,7 +303,7 @@ arg_width(const struct mdoc_arg *arg)
 		}
 
 	}
-	return(strlen(*arg->value));
+	return(strlen(*arg->value) + 1);
 }
 
 
@@ -622,6 +625,17 @@ termp_st_pre(DECL_ARGS)
 	tp = mdoc_st2a(node->data.elem.argv[0].arg);
 	word(p, tp);
 
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+termp_rs_pre(DECL_ARGS)
+{
+
+	if (MDOC_BLOCK == node->type)
+		vspace(p);
 	return(1);
 }
 
@@ -1173,7 +1187,7 @@ termp_sq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "\'");
+	word(p, "`");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1484,4 +1498,36 @@ termp_sm_pre(DECL_ARGS)
 #endif
 
 	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+termp__t_pre(DECL_ARGS)
+{
+
+	word(p, "\"");
+	p->flags |= TERMP_NOSPACE;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp__t_post(DECL_ARGS)
+{
+
+	p->flags |= TERMP_NOSPACE;
+	word(p, "\"");
+	word(p, node->next ? "," : ".");
+}
+
+
+/* ARGSUSED */
+static void
+termp____post(DECL_ARGS)
+{
+
+	p->flags |= TERMP_NOSPACE;
+	word(p, node->next ? "," : ".");
 }

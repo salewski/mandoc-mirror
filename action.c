@@ -397,7 +397,7 @@ post_bl_width(struct mdoc *mdoc)
 					"%s argument deprecated",
 					mdoc_argnames[MDOC_Width]))
 			return(0);
-		width = 6;
+		width = 8;
 	} else if (MDOC_MAX == (tok = mdoc_find(mdoc, *p)))
 		return(1);
 	else if (0 == (width = mdoc_macro2len(tok))) 
