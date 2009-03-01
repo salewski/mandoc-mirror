@@ -191,9 +191,14 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 
 	mdoc->linetok = 0;
 
+	/*
+	 * FIXME: should puke on whitespace in non-literal displays.
+	 */
+
 	if ('.' != *buf) {
 		if (SEC_PROLOGUE == mdoc->lastnamed)
-			return(mdoc_perr(mdoc, line, 0, "text disallowed in document prologue"));
+			return(mdoc_perr(mdoc, line, 0, 
+				"no text in document prologue"));
 		if ( ! mdoc_word_alloc(mdoc, line, 0, buf))
 			return(0);
 		mdoc->next = MDOC_NEXT_SIBLING;

@@ -395,13 +395,9 @@ post_bl_width(struct mdoc *mdoc)
 	 * the macro's width as set in share/tmac/mdoc/doc-common.
 	 */
 
-	if (xstrcmp(*p, "Ds")) {
-		if ( ! mdoc_warn(mdoc, WARN_COMPAT,
-					"%s argument deprecated",
-					mdoc_argnames[MDOC_Width]))
-			return(0);
+	if (xstrcmp(*p, "Ds"))
 		width = 8;
-	} else if (MDOC_MAX == (tok = mdoc_find(mdoc, *p)))
+	else if (MDOC_MAX == (tok = mdoc_find(mdoc, *p)))
 		return(1);
 	else if (0 == (width = mdoc_macro2len(tok))) 
 		return(mdoc_warn(mdoc, WARN_SYNTAX,

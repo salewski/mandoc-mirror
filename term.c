@@ -1065,20 +1065,17 @@ termp_bd_pre(DECL_ARGS)
 
 	bl = &node->parent->data.block;
 
-
 	i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
 	if (-1 != i) {
 		assert(1 == bl->argv[i].sz);
 		p->offset += arg_offset(&bl->argv[i]);
 	}
 
-	if ( ! arg_hasattr(MDOC_Literal, bl->argc, bl->argv))
-		return(1);
-
 	p->flags |= TERMP_LITERAL;
 
 	for (n = node->child; n; n = n->next) {
-		assert(MDOC_TEXT == n->type); /* FIXME */
+		if (MDOC_TEXT != n->type) 
+			errx(1, "non-text displays unsupported");
 		if ((*n->data.text.string)) {
 			word(p, n->data.text.string);
 			flushln(p);
