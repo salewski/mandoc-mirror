@@ -1292,6 +1292,7 @@ termp_cd_pre(DECL_ARGS)
 {
 
 	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_CONFIG]);
+	newln(p);
 	return(1);
 }
 
