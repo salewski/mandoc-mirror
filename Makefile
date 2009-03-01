@@ -167,31 +167,31 @@ regress: mdoclint
 		./mdoclint $$f 2>/dev/null || exit 1 ; done
 
 install:
-	mkdir -p $(DESTDIR)$(BINDIR)
-	mkdir -p $(DESTDIR)$(INCLUDEDIR)
-	mkdir -p $(DESTDIR)$(LIBDIR)/lib
-	mkdir -p $(DESTDIR)$(MANDIR)/man1
-	mkdir -p $(DESTDIR)$(MANDIR)/man3
-	$(INSTALL_PROGRAM) mdocterm $(DESTDIR)$(BINDIR)
-	$(INSTALL_PROGRAM) mdoctree $(DESTDIR)$(BINDIR)
-	$(INSTALL_PROGRAM) mdoclint $(DESTDIR)$(BINDIR)
-	$(INSTALL_MAN) mdocterm.1 $(DESTDIR)$(MANDIR)/man1
-	$(INSTALL_MAN) mdoctree.1 $(DESTDIR)$(MANDIR)/man1
-	$(INSTALL_MAN) mdoclint.1 $(DESTDIR)$(MANDIR)/man1
-	$(INSTALL_MAN) mdoc.3 $(DESTDIR)$(MANDIR)/man3
-	$(INSTALL_LIB) libmdoc.a $(DESTDIR)$(LIBDIR)
-	$(INSTALL_DATA) mdoc.h $(DESTDIR)$(INCLUDEDIR)
+	mkdir -p $(BINDIR)
+	mkdir -p $(INCLUDEDIR)
+	mkdir -p $(LIBDIR)/lib
+	mkdir -p $(MANDIR)/man1
+	mkdir -p $(MANDIR)/man3
+	$(INSTALL_PROGRAM) mdocterm $(BINDIR)
+	$(INSTALL_PROGRAM) mdoctree $(BINDIR)
+	$(INSTALL_PROGRAM) mdoclint $(BINDIR)
+	$(INSTALL_MAN) mdocterm.1 $(MANDIR)/man1
+	$(INSTALL_MAN) mdoctree.1 $(MANDIR)/man1
+	$(INSTALL_MAN) mdoclint.1 $(MANDIR)/man1
+	$(INSTALL_MAN) mdoc.3 $(MANDIR)/man3
+	$(INSTALL_LIB) libmdoc.a $(LIBDIR)
+	$(INSTALL_DATA) mdoc.h $(INCLUDEDIR)
 
 uninstall:
-	rm -f $(DESTDIR)$(BINDIR)/mdocterm
-	rm -f $(DESTDIR)$(BINDIR)/mdoctree
-	rm -f $(DESTDIR)$(BINDIR)/mdoclint
-	rm -f $(DESTDIR)$(MANDIR)/man1/mdocterm.1
-	rm -f $(DESTDIR)$(MANDIR)/man1/mdoctree.1
-	rm -f $(DESTDIR)$(MANDIR)/man1/mdoclint.1
-	rm -f $(DESTDIR)$(MANDIR)/man3/mdoc.3
-	rm -f $(DESTDIR)$(LIBDIR)/libmdoc.a
-	rm -f $(DESTDIR)$(INCLUDEDIR)/mdoc.h
+	rm -f $(BINDIR)/mdocterm
+	rm -f $(BINDIR)/mdoctree
+	rm -f $(BINDIR)/mdoclint
+	rm -f $(MANDIR)/man1/mdocterm.1
+	rm -f $(MANDIR)/man1/mdoctree.1
+	rm -f $(MANDIR)/man1/mdoclint.1
+	rm -f $(MANDIR)/man3/mdoc.3
+	rm -f $(LIBDIR)/libmdoc.a
+	rm -f $(INCLUDEDIR)/mdoc.h
 
 macro.ln: macro.c private.h
 macro.o: macro.c private.h
