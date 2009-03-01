@@ -173,9 +173,10 @@ flushln(struct termp *p)
 	for (i = 0; i < p->col; i++) {
 		/*
 		 * Count up visible word characters.  Control sequences
-		 * (starting with the CSI) aren't counted. 
+		 * (starting with the CSI) aren't counted.  A space
+		 * generates a non-printing word, which is valid (the
+		 * space is printed according to regular spacing rules).
 		 */
-		assert( ! xisspace(p->buf[i]));
 
 		/* LINTED */
 		for (j = i, vsz = 0; j < p->col; j++) {
@@ -187,7 +188,6 @@ flushln(struct termp *p)
 			} else
 				vsz++;
 		}
-		assert(vsz > 0);
 
 		/*
 		 * If we're breaking normally...
@@ -498,8 +498,6 @@ static void
 pword(struct termp *p, const char *word, size_t len)
 {
 	size_t		 i;
-
-	/*assert(len > 0);*/ /* Can be, if literal. */
 
 	/*
 	 * Handle pwords, partial words, which may be either a single
