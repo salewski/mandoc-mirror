@@ -3,6 +3,16 @@
 VERSION	= 1.3.13
 VDATE	= 01 March 2009
 
+BINDIR		= $(PREFIX)/bin
+INCLUDEDIR	= $(PREFIX)/include
+LIBDIR		= $(PREFIX)/lib
+MANDIR		= $(PREFIX)/man
+
+INSTALL_PROGRAM	= install -m 0755
+INSTALL_DATA	= install -m 0444
+INSTALL_LIB	= install -m 0644
+INSTALL_MAN	= $(INSTALL_DATA)
+
 CFLAGS += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g 
 
 LIBLNS	= macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
@@ -157,30 +167,31 @@ regress: mdoclint
 		./mdoclint $$f 2>/dev/null || exit 1 ; done
 
 install:
-	mkdir -p $(PREFIX)/bin/
-	mkdir -p $(PREFIX)/include/mdoc/
-	mkdir -p $(PREFIX)/lib/
-	mkdir -p $(PREFIX)/man/man1/
-	install -m 0755 mdocterm $(PREFIX)/bin/
-	install -m 0755 mdoctree $(PREFIX)/bin/
-	install -m 0755 mdoclint $(PREFIX)/bin/
-	install -m 0444 mdocterm.1 $(PREFIX)/man/man1/
-	install -m 0444 mdoctree.1 $(PREFIX)/man/man1/
-	install -m 0444 mdoclint.1 $(PREFIX)/man/man1/
-	install -m 0444 mdoc.3 $(PREFIX)/man/man3/
-	install -m 0644 libmdoc.a $(PREFIX)/lib/
-	install -m 0444 mdoc.h $(PREFIX)/include/
+	mkdir -p $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(INCLUDEDIR)
+	mkdir -p $(DESTDIR)$(LIBDIR)/lib
+	mkdir -p $(DESTDIR)$(MANDIR)/man1
+	mkdir -p $(DESTDIR)$(MANDIR)/man3
+	$(INSTALL_PROGRAM) mdocterm $(DESTDIR)$(BINDIR)
+	$(INSTALL_PROGRAM) mdoctree $(DESTDIR)$(BINDIR)
+	$(INSTALL_PROGRAM) mdoclint $(DESTDIR)$(BINDIR)
+	$(INSTALL_MAN) mdocterm.1 $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL_MAN) mdoctree.1 $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL_MAN) mdoclint.1 $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL_MAN) mdoc.3 $(DESTDIR)$(MANDIR)/man3
+	$(INSTALL_LIB) libmdoc.a $(DESTDIR)$(LIBDIR)
+	$(INSTALL_DATA) mdoc.h $(DESTDIR)$(INCLUDEDIR)
 
 uninstall:
-	rm -f $(PREFIX)/bin/mdocterm
-	rm -f $(PREFIX)/bin/mdoctree
-	rm -f $(PREFIX)/bin/mdoclint
-	rm -f $(PREFIX)/man/man1/mdocterm.1
-	rm -f $(PREFIX)/man/man1/mdoctree.1
-	rm -f $(PREFIX)/man/man1/mdoclint.1
-	rm -f $(PREFIX)/man/man3/mdoc.3
-	rm -f $(PREFIX)/lib/libmdoc.a
-	rm -f $(PREFIX)/include/mdoc.h
+	rm -f $(DESTDIR)$(BINDIR)/mdocterm
+	rm -f $(DESTDIR)$(BINDIR)/mdoctree
+	rm -f $(DESTDIR)$(BINDIR)/mdoclint
+	rm -f $(DESTDIR)$(MANDIR)/man1/mdocterm.1
+	rm -f $(DESTDIR)$(MANDIR)/man1/mdoctree.1
+	rm -f $(DESTDIR)$(MANDIR)/man1/mdoclint.1
+	rm -f $(DESTDIR)$(MANDIR)/man3/mdoc.3
+	rm -f $(DESTDIR)$(LIBDIR)/libmdoc.a
+	rm -f $(DESTDIR)$(INCLUDEDIR)/mdoc.h
 
 macro.ln: macro.c private.h
 macro.o: macro.c private.h
