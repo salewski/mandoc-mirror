@@ -190,23 +190,27 @@ flushln(struct termp *p)
 		assert(vsz > 0);
 
 		/*
+		 * If we're breaking normally...
+		 *
 		 * If a word is too long and we're within a line, put it
 		 * on the next line.  Puke if we're being asked to write
 		 * something that will exceed the right margin (i.e.,
-		 * from a fresh line or when we're not allowed to break
-		 * the line with TERMP_NOBREAK).
+		 * from a fresh line).
+		 *
+		 * If we're not breaking...
+		 *
+		 * Don't let the visible size exceed the full margin.
 		 */
 
-		/* FIXME: allow selective right-margin breaking. */
-
-		if (vis && vis + vsz > maxvis) {
-			if (p->flags & TERMP_NOBREAK)
+		if ( ! (TERMP_NOBREAK & p->flags)) {
+			if (vis && vis + vsz > maxvis) {
+				putchar('\n');
+				for (j = 0; j < p->offset; j++)
+					putchar(' ');
+				vis = 0;
+			} else if (vis + vsz > maxvis)
 				errx(1, "word breaks right margin");
-			putchar('\n');
-			for (j = 0; j < p->offset; j++)
-				putchar(' ');
-			vis = 0;
-		} else if (vis + vsz > maxvis)
+		} else if (vis + vsz > p->maxrmargin)
 			errx(1, "word breaks right margin");
 
 		/* 
@@ -226,15 +230,22 @@ flushln(struct termp *p)
 		}
 	}
 
+	if ((TERMP_NOBREAK & p->flags) && vis >= maxvis) {
+		putchar('\n');
+		for (i = 0; i < p->rmargin; i++)
+			putchar(' ');
+		p->col = 0;
+		return;
+	}
+
 	/*
 	 * If we're not to right-marginalise it (newline), then instead
 	 * pad to the right margin and stay off.
 	 */
 
 	if (p->flags & TERMP_NOBREAK) {
-		if ( ! (p->flags & TERMP_NORPAD))
-			for ( ; vis < maxvis; vis++)
-				putchar(' ');
+		for ( ; vis < maxvis; vis++)
+			putchar(' ');
 	} else
 		putchar('\n');
 

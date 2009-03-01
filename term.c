@@ -134,7 +134,6 @@ DECL_PRE(termp_at);
 DECL_PRE(termp_bf);
 DECL_PRE(termp_bsx);
 DECL_PRE(termp_bt);
-DECL_PRE(termp_bx);
 DECL_PRE(termp_cd);
 DECL_PRE(termp_cm);
 DECL_PRE(termp_em);
@@ -164,6 +163,7 @@ DECL_PRE(termp_xr);
 
 DECL_POST(termp___);
 DECL_POST(termp_bl);
+DECL_POST(termp_bx);
 
 const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* \" */
@@ -227,7 +227,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_bq_pre, termp_bq_post }, /* Bo */
 	{ termp_bq_pre, termp_bq_post }, /* Bq */
 	{ termp_bsx_pre, NULL }, /* Bsx */
-	{ termp_bx_pre, NULL }, /* Bx */
+	{ NULL, termp_bx_post }, /* Bx */
 	{ NULL, NULL }, /* Db */
 	{ NULL, NULL }, /* Dc */
 	{ termp_dq_pre, termp_dq_post }, /* Do */
@@ -303,7 +303,7 @@ arg_width(const struct mdoc_arg *arg)
 		}
 
 	}
-	return(strlen(*arg->value) + 2);
+	return(strlen(*arg->value) + 1);
 }
 
 
@@ -550,10 +550,9 @@ termp_it_post(DECL_ARGS)
 	p->offset = pair->offset;
 	p->rmargin = pair->rmargin;
 
-	if (MDOC_HEAD == node->type) {
+	if (MDOC_HEAD == node->type)
 		p->flags &= ~TERMP_NOBREAK;
-		p->flags &= ~TERMP_NORPAD;
-	} else if (MDOC_BODY == node->type)
+	else if (MDOC_BODY == node->type)
 		p->flags &= ~TERMP_NOLPAD;
 }
 
@@ -566,9 +565,10 @@ termp_nm_pre(DECL_ARGS)
 	if (SEC_SYNOPSIS == node->sec)
 		newln(p);
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_PROG]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_PROG]);
 	if (NULL == node->child)
 		word(p, meta->name);
+
 	return(1);
 }
 
@@ -578,7 +578,7 @@ static int
 termp_fl_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_CMD_FLAG]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_CMD_FLAG]);
 	word(p, "\\-");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
@@ -590,14 +590,11 @@ static int
 termp_ar_pre(DECL_ARGS)
 {
 
-	if (node->child) {
-		TERMPAIR_SETFLAG(pair, ttypes[TTYPE_CMD_ARG]);
-		return(1);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_CMD_ARG]);
+	if (NULL == node->child) {
+		word(p, "file");
+		word(p, "...");
 	}
-	p->flags |= ttypes[TTYPE_CMD_ARG];
-	word(p, "file");
-	word(p, "...");
-	p->flags &= ~ttypes[TTYPE_CMD_ARG];
 	return(1);
 }
 
@@ -764,7 +761,7 @@ termp_vt_pre(DECL_ARGS)
 {
 
 	/* FIXME: this can be "type name". */
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_VAR_DECL]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_VAR_DECL]);
 	return(1);
 }
 
@@ -788,7 +785,7 @@ termp_fd_pre(DECL_ARGS)
 	 * FIXME: this naming is bad.  This value is used, in general,
 	 * for the #include header or other preprocessor statement.
 	 */
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_FUNC_DECL]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_FUNC_DECL]);
 	return(1);
 }
 
@@ -814,7 +811,7 @@ termp_sh_pre(DECL_ARGS)
 	switch (node->type) {
 	case (MDOC_HEAD):
 		vspace(p);
-		TERMPAIR_SETFLAG(pair, ttypes[TTYPE_SECTION]);
+		TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_SECTION]);
 		break;
 	case (MDOC_BODY):
 		p->offset = INDENT;
@@ -937,7 +934,7 @@ static int
 termp_ft_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_FUNC_TYPE]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_FUNC_TYPE]);
 	return(1);
 }
 
@@ -1004,7 +1001,7 @@ static int
 termp_sx_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_LINK]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_LINK]);
 	return(1);
 }
 
@@ -1016,7 +1013,7 @@ termp_fa_pre(DECL_ARGS)
 	struct mdoc_node *n;
 
 	if (node->parent->tok != MDOC_Fo) {
-		TERMPAIR_SETFLAG(pair, ttypes[TTYPE_FUNC_ARG]);
+		TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_FUNC_ARG]);
 		return(1);
 	}
 
@@ -1043,7 +1040,7 @@ static int
 termp_va_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_VAR_DECL]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_VAR_DECL]);
 	return(1);
 }
 
@@ -1143,12 +1140,12 @@ termp_bsx_pre(DECL_ARGS)
 
 
 /* ARGSUSED */
-static int
-termp_bx_pre(DECL_ARGS)
+static void
+termp_bx_post(DECL_ARGS)
 {
 
+	p->flags |= TERMP_NOSPACE;
 	word(p, "BSD");
-	return(1);
 }
 
 
@@ -1245,7 +1242,7 @@ termp_ss_pre(DECL_ARGS)
 	switch (node->type) {
 	case (MDOC_HEAD):
 		vspace(p);
-		TERMPAIR_SETFLAG(pair, ttypes[TTYPE_SSECTION]);
+		TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_SSECTION]);
 		p->offset = INDENT / 2;
 		break;
 	default:
@@ -1277,7 +1274,7 @@ static int
 termp_pa_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_FILE]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_FILE]);
 	return(1);
 }
 
@@ -1287,7 +1284,7 @@ static int
 termp_em_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_EMPH]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_EMPH]);
 	return(1);
 }
 
@@ -1297,7 +1294,7 @@ static int
 termp_cd_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_CONFIG]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_CONFIG]);
 	return(1);
 }
 
@@ -1307,7 +1304,7 @@ static int
 termp_cm_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_CMD_FLAG]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_CMD_FLAG]);
 	return(1);
 }
 
@@ -1317,7 +1314,7 @@ static int
 termp_ic_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_CMD]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_CMD]);
 	return(1);
 }
 
@@ -1327,12 +1324,10 @@ static int
 termp_in_pre(DECL_ARGS)
 {
 
-	p->flags |= ttypes[TTYPE_INCLUDE];
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_INCLUDE]);
 	word(p, "#include");
 	word(p, "<");
-	p->flags &= ~ttypes[TTYPE_INCLUDE];
 	p->flags |= TERMP_NOSPACE;
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_INCLUDE]);
 	return(1);
 }
 
@@ -1401,7 +1396,7 @@ termp_pq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "(");
+	word(p, "\\&(");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1475,9 +1470,9 @@ termp_bf_pre(DECL_ARGS)
 
 	if (NULL == (n = b->head->child)) {
 		if (arg_hasattr(MDOC_Emphasis, b->argc, b->argv))
-			TERMPAIR_SETFLAG(pair, ttypes[TTYPE_EMPH]);
+			TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_EMPH]);
 		else if (arg_hasattr(MDOC_Symbolic, b->argc, b->argv))
-			TERMPAIR_SETFLAG(pair, ttypes[TTYPE_SYMB]);
+			TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_SYMB]);
 
 		return(1);
 	} 
@@ -1485,9 +1480,9 @@ termp_bf_pre(DECL_ARGS)
 	assert(MDOC_TEXT == n->type);
 
 	if (0 == strcmp("Em", n->data.text.string))
-		TERMPAIR_SETFLAG(pair, ttypes[TTYPE_EMPH]);
+		TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_EMPH]);
 	else if (0 == strcmp("Sy", n->data.text.string))
-		TERMPAIR_SETFLAG(pair, ttypes[TTYPE_EMPH]);
+		TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_EMPH]);
 
 	return(1);
 }
@@ -1498,7 +1493,7 @@ static int
 termp_sy_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_SYMB]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_SYMB]);
 	return(1);
 }
 
@@ -1508,7 +1503,7 @@ static int
 termp_ms_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(pair, ttypes[TTYPE_SYMBOL]);
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_SYMBOL]);
 	return(1);
 }
 
