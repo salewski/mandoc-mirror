@@ -220,3 +220,22 @@ See
 .Xr mdoc 3
 for a list of bugs, caveats, and incomplete macros regarding the
 document parse.
+.Pp
+The 
+.Nm
+utility doesn't yet know how to display the following:
+.Pp
+.Bl -bullet -compact
+.It
+Only \-bullet , \-dash , \-enum , \-hyphen , \-tag and \-ohang
+.Sq \&Bl
+lists are supported.
+.It
+The \-literal and \-unfilled 
+.Sq \&Bd
+displays only accept text contents.
+.It
+The
+.Sq \&Xo/Xc
+pair isn't supported (and never will be).
+.El

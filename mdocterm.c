@@ -44,13 +44,13 @@ static	void		  footer(struct termp *,
 static	void		  pword(struct termp *, const char *, size_t);
 static	void		  pescape(struct termp *, const char *, 
 				size_t *, size_t);
-static	void		  style(struct termp *, enum tstyle);
 static	void		  nescape(struct termp *,
 				const char *, size_t);
 static	void		  chara(struct termp *, char);
 static	void		  stringa(struct termp *, 
 				const char *, size_t);
 static	void		  symbola(struct termp *, enum tsym);
+static	void		  stylea(struct termp *, enum tstyle);
 
 #ifdef __linux__
 extern	size_t		  strlcat(char *, const char *, size_t);
@@ -730,37 +730,6 @@ nescape(struct termp *p, const char *word, size_t len)
 
 
 /*
- * Apply a style to the output buffer.  This is looked up by means of
- * the styletab.
- */
-static void
-style(struct termp *p, enum tstyle esc)
-{
-
-	if (p->col + 4 >= p->maxcols)
-		errx(1, "line overrun");
-
-	p->buf[(p->col)++] = 27;
-	p->buf[(p->col)++] = '[';
-	switch (esc) {
-	case (TERMSTYLE_CLEAR):
-		p->buf[(p->col)++] = '0';
-		break;
-	case (TERMSTYLE_BOLD):
-		p->buf[(p->col)++] = '1';
-		break;
-	case (TERMSTYLE_UNDER):
-		p->buf[(p->col)++] = '4';
-		break;
-	default:
-		abort();
-		/* NOTREACHED */
-	}
-	p->buf[(p->col)++] = 'm';
-}
-
-
-/*
  * Handle an escape sequence: determine its length and pass it to the
  * escape-symbol look table.  Note that we assume mdoc(3) has validated
  * the escape sequence (we assert upon badly-formed escape sequences).
@@ -835,9 +804,9 @@ pword(struct termp *p, const char *word, size_t len)
 	 */
 
 	if (p->flags & TERMP_BOLD)
-		style(p, TERMSTYLE_BOLD);
+		stylea(p, TERMSTYLE_BOLD);
 	if (p->flags & TERMP_UNDERLINE)
-		style(p, TERMSTYLE_UNDER);
+		stylea(p, TERMSTYLE_UNDER);
 
 	for (i = 0; i < len; i++) {
 		if ('\\' == word[i]) {
@@ -849,7 +818,7 @@ pword(struct termp *p, const char *word, size_t len)
 
 	if (p->flags & TERMP_BOLD ||
 			p->flags & TERMP_UNDERLINE)
-		style(p, TERMSTYLE_CLEAR);
+		stylea(p, TERMSTYLE_CLEAR);
 }
 
 
@@ -862,6 +831,18 @@ symbola(struct termp *p, enum tsym sym)
 
 	assert(p->symtab[sym].sym);
 	stringa(p, p->symtab[sym].sym, p->symtab[sym].sz);
+}
+
+
+/*
+ * Add a style to the output line buffer.
+ */
+static void
+stylea(struct termp *p, enum tstyle style)
+{
+
+	assert(p->styletab[style].sym);
+	stringa(p, p->styletab[style].sym, p->styletab[style].sz);
 }
 
 

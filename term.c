@@ -30,7 +30,6 @@
  * post-fix operations are defined here.
  */
 
-/* FIXME: indent/tab. */
 /* FIXME: macro arguments can be escaped. */
 
 #define	TTYPE_PROG	  0
@@ -58,6 +57,8 @@
  * executable names.  This is useful when multiple macros must decorate
  * the same thing (like .Ex -std cmd and .Nm cmd). 
  */
+
+/* TODO: abstract this into mdocterm.c. */
 
 const	int ttypes[TTYPE_NMAX] = {
 	TERMP_BOLD,		/* TTYPE_PROG */
