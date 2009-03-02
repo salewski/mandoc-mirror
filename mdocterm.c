@@ -85,6 +85,7 @@ static	void		  footer(struct termp *,
 static	void		  pword(struct termp *, const char *, size_t);
 static	void		  pescape(struct termp *, 
 				const char *, size_t *, size_t);
+static	void		  pgraph(struct termp *, char);
 static	void		  nescape(struct termp *, 
 				const char *, size_t);
 static	void		  chara(struct termp *, char);
@@ -199,7 +200,8 @@ flushln(struct termp *p)
 		 *
 		 * If we're not breaking...
 		 *
-		 * Don't let the visible size exceed the full margin.
+		 * Don't let the visible size exceed the full right
+		 * margin.
 		 */
 
 		if ( ! (TERMP_NOBREAK & p->flags)) {
@@ -210,8 +212,12 @@ flushln(struct termp *p)
 				vis = 0;
 			} else if (vis + vsz > maxvis)
 				errx(1, "word breaks right margin");
-		} else if (vis + vsz > p->maxrmargin)
-			errx(1, "word breaks right margin");
+		} else if (vis + vsz > p->maxrmargin - p->offset) {
+			putchar('\n');
+			for (j = 0; j < p->rmargin; j++)
+				putchar(' ');
+			vis = p->rmargin;
+		}
 
 		/* 
 		 * Write out the word and a trailing space.  Omit the
@@ -425,6 +431,26 @@ nescape(struct termp *p, const char *word, size_t len)
 
 
 static void
+pgraph(struct termp *p, char byte)
+{
+	int		 i;
+
+	switch (byte) {
+	case (' '):
+		chara(p, ' ');
+		break;
+	case ('\t'):
+		for (i = 0; i < INDENT; i++)
+			chara(p, ' ');
+		break;
+	default:
+		warnx("unknown non-graphing character");
+		break;
+	}
+}
+
+
+static void
 pescape(struct termp *p, const char *word, size_t *i, size_t len)
 {
 	size_t		 j;
@@ -525,6 +551,10 @@ pword(struct termp *p, const char *word, size_t len)
 	for (i = 0; i < len; i++) {
 		if ('\\' == word[i]) {
 			pescape(p, word, &i, len);
+			continue;
+		}
+		if ( ! isgraph((int)word[i])) {
+			pgraph(p, word[i]);
 			continue;
 		}
 		chara(p, word[i]);

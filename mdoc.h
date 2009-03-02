@@ -220,6 +220,7 @@ enum	mdoc_att {
 	ATT_v6,
 	ATT_v7,
 	ATT_32v,
+	ATT_V,
 	ATT_V1,
 	ATT_V2,
 	ATT_V3,

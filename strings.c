@@ -358,6 +358,8 @@ mdoc_atoatt(const char *p)
 		return(ATT_v7);
 	else if (0 == strcmp(p, "32v"))
 		return(ATT_32v);
+	else if (0 == strcmp(p, "V"))
+		return(ATT_V);
 	else if (0 == strcmp(p, "V.1"))
 		return(ATT_V1);
 	else if (0 == strcmp(p, "V.2"))
@@ -718,6 +720,9 @@ mdoc_att2a(enum mdoc_att c)
 		break;
 	case(ATT_32v):
 		p = "Version 32V AT&T UNIX";
+		break;
+	case(ATT_V):
+		p = "AT&T System V UNIX";
 		break;
 	case(ATT_V1):
 		p = "AT&T System V.1 UNIX";

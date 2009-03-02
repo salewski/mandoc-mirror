@@ -25,8 +25,6 @@
 
 #include "term.h"
 
-#define	INDENT		  6
-
 /*
  * Performs actions on nodes of the abstract syntax tree.  Both pre- and
  * post-fix operations are defined here.
@@ -934,6 +932,9 @@ static int
 termp_ft_pre(DECL_ARGS)
 {
 
+	if (SEC_SYNOPSIS == node->sec)
+		if (node->prev && MDOC_Fo == node->prev->tok)
+			vspace(p);
 	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_FUNC_TYPE]);
 	return(1);
 }
@@ -944,7 +945,7 @@ static void
 termp_ft_post(DECL_ARGS)
 {
 
-	if (node->sec == SEC_SYNOPSIS)
+	if (SEC_SYNOPSIS == node->sec)
 		newln(p);
 }
 
@@ -1141,7 +1142,8 @@ static void
 termp_bx_post(DECL_ARGS)
 {
 
-	p->flags |= TERMP_NOSPACE;
+	if (node->child)
+		p->flags |= TERMP_NOSPACE;
 	word(p, "BSD");
 }
 

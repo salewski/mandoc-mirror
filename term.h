@@ -21,6 +21,8 @@
 
 #include "mdoc.h"
 
+#define	INDENT		  6
+
 __BEGIN_DECLS
 
 struct	termp {
