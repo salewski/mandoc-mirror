@@ -69,6 +69,11 @@ mdoc_isescape(const char *p)
 			if (0 == *++p || ! isgraph((int)*p))
 				return(0);
 			return(4);
+		case ('['):
+			for (c = 3, p++; *p && ']' != *p; p++, c++)
+				if ( ! isgraph((int)*p))
+					break;
+			return(*p == ']' ? c : 0);
 		default:
 			break;
 		}

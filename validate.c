@@ -484,7 +484,7 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 	for ( ; *p; p++) {
 		if ( ! isprint((int)*p) && '\t' != *p)
 			return(mdoc_perr(mdoc, line, pos,
-					"invalid characters"));
+				"invalid non-printing characters"));
 		if ('\\' != *p)
 			continue;
 		if ((c = mdoc_isescape(p))) {

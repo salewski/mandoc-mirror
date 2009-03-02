@@ -1051,8 +1051,8 @@ static int
 termp_bd_pre(DECL_ARGS)
 {
 	const struct mdoc_block *bl;
-	const struct mdoc_node *n;
-	int		 i;
+	const struct mdoc_node  *n;
+	int		 i, type;
 
 	if (MDOC_BLOCK == node->type) {
 		if (node->prev)
@@ -1061,10 +1061,27 @@ termp_bd_pre(DECL_ARGS)
 	} else if (MDOC_BODY != node->type)
 		return(1);
 
-	assert(MDOC_BLOCK == node->parent->type);
 	pair->offset = p->offset;
-
 	bl = &node->parent->data.block;
+
+	for (type = -1, i = 0; i < (int)bl->argc; i++) {
+		switch (bl->argv[i].arg) {
+		case (MDOC_Ragged):
+			/* FALLTHROUGH */
+		case (MDOC_Filled):
+			/* FALLTHROUGH */
+		case (MDOC_Unfilled):
+			/* FALLTHROUGH */
+		case (MDOC_Literal):
+			type = bl->argv[i].arg;
+			i = (int)bl->argc;
+			break;
+		default:
+			errx(1, "display type not supported");
+		}
+	}
+
+	assert(-1 != type);
 
 	i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
 	if (-1 != i) {
@@ -1072,20 +1089,27 @@ termp_bd_pre(DECL_ARGS)
 		p->offset += arg_offset(&bl->argv[i]);
 	}
 
+
+	switch (type) {
+	case (MDOC_Literal):
+		/* FALLTHROUGH */
+	case (MDOC_Unfilled):
+		break;
+	default:
+		return(1);
+	}
+
 	p->flags |= TERMP_LITERAL;
 
 	for (n = node->child; n; n = n->next) {
-		if (MDOC_TEXT != n->type) 
-			errx(1, "non-text displays unsupported");
-		if ((*n->data.text.string)) {
-			word(p, n->data.text.string);
-			flushln(p);
-		} else
-			vspace(p);
-
+		if (MDOC_TEXT != n->type) {
+			warnx("non-text children not yet allowed");
+			continue;
+		}
+		word(p, n->data.text.string);
+		flushln(p);
 	}
 
-	p->flags &= ~TERMP_LITERAL;
 	return(0);
 }
 
@@ -1097,7 +1121,11 @@ termp_bd_post(DECL_ARGS)
 
 	if (MDOC_BODY != node->type) 
 		return;
-	newln(p);
+
+	if ( ! (p->flags & TERMP_LITERAL))
+		flushln(p);
+
+	p->flags &= ~TERMP_LITERAL;
 	p->offset = pair->offset;
 }
 
