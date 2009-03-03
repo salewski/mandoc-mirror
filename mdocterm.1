@@ -93,17 +93,33 @@ is
 .Ss Character Escapes
 This section documents the character-escapes accepted by
 .Xr mdocterm 1 .
-Note that the \\x, \\(xx and \\[n] forms are described here; the \\*(xx
-and \\*x forms described in
+Note that the \\x, \\(xx and \\[n] forms are described here; the \\*(xx,
+\\*[n] and \\*x forms described in
 .Xr mdoc.samples 7
-are deprecated, but still correctly rendered.  For all two-character
-sequences, \\(xx is equivalent to the n-character \\[xx].
+are deprecated, but still rendered.  All one- and two-character
+sequences may be used in the n-character sequence \\[n].
 .Pp
 Note that the
 .Em Output
 column will render differently whether executed with
 .Xr mdocterm 1 
 or another output filter.
+.\" PARAGRAPH
+.Pp
+Grammatic:
+.Pp
+.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
+.It Em Output
+.Em Input (Name)
+.It \(em
+\\(em (em-dash)
+.It \(en
+\\(en (en-dash)
+.It \-
+\\- (hyphen)
+.It \\
+\\ (back-slash)
+.El
 .\" PARAGRAPH
 .Pp
 Enclosures:
@@ -118,9 +134,9 @@ Enclosures:
 .It \(lq
 \\(lq (left double-quote)
 .It \(rq
-\\(rq (right double-quote)
+\\(rq, \\' (right double-quote)
 .It \(oq
-\\(lq (left single-quote)
+\\(lq, \\` (left single-quote)
 .It \(aq
 \\(aq (right single-quote, apostrophe)
 .El
@@ -161,12 +177,10 @@ Mathematical:
 \\(na (NaN)*
 .It \(+-
 \\(+- (plus-minus)
+.It \(**
+\\(** (asterisk)
 .El
 .\" PARAGRAPH
-.Pp
-*This is a deviation from the standard, as NaN is usually rendered as
-\\*(Na, which is a deprecated form.  We introduce \\(na, which follows
-the more general syntax.
 .Pp
 Diacritics:
 .Pp
@@ -189,7 +203,13 @@ Special symbols:
 \\(bu (bullet)
 .It \(ba
 \\(ba (bar)
+.It \(co
+\\(co (copyright)
 .El 
+.Pp
+*This is a deviation from the standard, as NaN is usually rendered as
+\\*(Na, which is a deprecated form.  We introduce \\(na, which follows
+the more general syntax.
 .\" SECTION
 .Sh EXAMPLES
 To display this manual page:

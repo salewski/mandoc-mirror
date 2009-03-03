@@ -32,6 +32,11 @@
 #include "mmain.h"
 #include "term.h"
 
+struct	termenc {
+	const char	 *enc;
+	int		  sym;
+};
+
 static	void		  body(struct termp *,
 				struct termpair *,
 				const struct mdoc_meta *,
@@ -56,6 +61,67 @@ static	void		  stylea(struct termp *, enum tstyle);
 extern	size_t		  strlcat(char *, const char *, size_t);
 extern	size_t		  strlcpy(char *, const char *, size_t);
 #endif
+
+static	struct termenc	  termenc1[] = {
+	{ "\\",		  TERMSYM_SLASH },
+	{ "\'",		  TERMSYM_RSQUOTE },
+	{ "`",		  TERMSYM_LSQUOTE },
+	{ "-",		  TERMSYM_HYPHEN },
+	{ " ",		  TERMSYM_SPACE },
+	{ ".",		  TERMSYM_PERIOD },
+	{ "&",		  TERMSYM_BREAK },
+	{ "e",		  TERMSYM_SLASH },
+	{ "q",		  TERMSYM_DQUOTE },
+	{ NULL,		  0 }
+};
+
+static	struct termenc	  termenc2[] = {
+	{ "rB", 	  TERMSYM_RBRACK },
+	{ "lB", 	  TERMSYM_LBRACK },
+	{ "Lq", 	  TERMSYM_LDQUOTE },
+	{ "lq", 	  TERMSYM_LDQUOTE },
+	{ "Rq", 	  TERMSYM_RDQUOTE },
+	{ "rq", 	  TERMSYM_RDQUOTE },
+	{ "oq", 	  TERMSYM_LSQUOTE },
+	{ "aq", 	  TERMSYM_RSQUOTE },
+
+	{ "<-", 	  TERMSYM_LARROW },
+	{ "->", 	  TERMSYM_RARROW },
+	{ "ua", 	  TERMSYM_UARROW },
+	{ "da", 	  TERMSYM_DARROW },
+
+	{ "bu", 	  TERMSYM_BULLET },
+	{ "Ba", 	  TERMSYM_BAR },
+	{ "ba", 	  TERMSYM_BAR },
+	{ "co", 	  TERMSYM_COPY },
+	{ "Am", 	  TERMSYM_AMP },
+
+	{ "Le", 	  TERMSYM_LE },
+	{ "<=", 	  TERMSYM_LE },
+	{ "Ge", 	  TERMSYM_GE },
+	{ "=>", 	  TERMSYM_GE },
+	{ "==", 	  TERMSYM_EQ },
+	{ "Ne", 	  TERMSYM_NEQ },
+	{ "!=", 	  TERMSYM_NEQ },
+	{ "Pm", 	  TERMSYM_PLUSMINUS },
+	{ "+-", 	  TERMSYM_PLUSMINUS },
+	{ "If", 	  TERMSYM_INF2 },
+	{ "if", 	  TERMSYM_INF },
+	{ "Na", 	  TERMSYM_NAN },
+	{ "na", 	  TERMSYM_NAN },
+	{ "**", 	  TERMSYM_ASTERISK },
+	{ "Gt", 	  TERMSYM_GT },
+	{ "Lt", 	  TERMSYM_LT },
+
+	{ "aa", 	  TERMSYM_ACUTE },
+	{ "ga", 	  TERMSYM_GRAVE },
+
+	{ "en", 	  TERMSYM_EN },
+	{ "em", 	  TERMSYM_EM },
+
+	{ "Pi", 	  TERMSYM_PI },
+	{ NULL,		  0 }
+};
 
 static	struct termsym	  termsym_ansi[] = {
 	{ "]", 1 },		/* TERMSYM_RBRACK */
@@ -85,8 +151,16 @@ static	struct termsym	  termsym_ansi[] = {
 	{ "NaN", 3 },		/* TERMSYM_NAN */
 	{ "|", 1 },		/* TERMSYM_BAR */
 	{ "o", 1 },		/* TERMSYM_BULLET */
-	{ "&", 1 },		/* TERMSYM_AND */
-	{ "|", 1 },		/* TERMSYM_OR */
+	{ "&", 1 },		/* TERMSYM_AMP */
+	{ "--", 2 },		/* TERMSYM_EM */
+	{ "-", 1 },		/* TERMSYM_EN */
+	{ "(C)", 3 },		/* TERMSYM_COPY */
+	{ "*", 1 },		/* TERMSYM_ASTERISK */
+	{ "\\", 1 },		/* TERMSYM_SLASH */
+	{ "-", 1 },		/* TERMSYM_HYPHEN */
+	{ " ", 1 },		/* TERMSYM_SPACE */
+	{ ".", 1 },		/* TERMSYM_PERIOD */
+	{ "", 0 },		/* TERMSYM_BREAK */
 };
 
 static	const char	  ansi_clear[]  = { 27, '[', '0', 'm' };
@@ -614,118 +688,27 @@ header(struct termp *p, const struct mdoc_meta *meta)
 static void
 nescape(struct termp *p, const char *word, size_t len)
 {
+	struct termenc	*enc;
 
 	switch (len) {
 	case (1):
-		switch (word[0]) {
-		case ('\\'):
-			/* FALLTHROUGH */
-		case ('\''):
-			/* FALLTHROUGH */
-		case ('`'):
-			/* FALLTHROUGH */
-		case ('-'):
-			/* FALLTHROUGH */
-		case (' '):
-			/* FALLTHROUGH */
-		case ('.'):
-			chara(p, word[0]); /* FIXME */
-			break;
-		case ('&'):
-			break;
-		case ('e'):
-			chara(p, '\\'); /* FIXME */
-			break;
-		case ('q'):
-			symbola(p, TERMSYM_DQUOTE);
-			break;
-		default:
-			warnx("escape sequence not supported: %c",
-					word[0]);
-			break;
-		}
+		enc = termenc1;
 		break;
-
 	case (2):
-		if ('r' == word[0] && 'B' == word[1])
-			symbola(p, TERMSYM_RBRACK);
-		else if ('l' == word[0] && 'B' == word[1])
-			symbola(p, TERMSYM_LBRACK);
-		else if ('l' == word[0] && 'q' == word[1])
-			symbola(p, TERMSYM_LDQUOTE);
-		else if ('r' == word[0] && 'q' == word[1])
-			symbola(p, TERMSYM_RDQUOTE);
-		else if ('o' == word[0] && 'q' == word[1])
-			symbola(p, TERMSYM_LSQUOTE);
-		else if ('a' == word[0] && 'q' == word[1])
-			symbola(p, TERMSYM_RSQUOTE);
-		else if ('<' == word[0] && '-' == word[1])
-			symbola(p, TERMSYM_LARROW);
-		else if ('-' == word[0] && '>' == word[1])
-			symbola(p, TERMSYM_RARROW);
-		else if ('b' == word[0] && 'u' == word[1])
-			symbola(p, TERMSYM_BULLET);
-		else if ('<' == word[0] && '=' == word[1])
-			symbola(p, TERMSYM_LE);
-		else if ('>' == word[0] && '=' == word[1])
-			symbola(p, TERMSYM_GE);
-		else if ('=' == word[0] && '=' == word[1])
-			symbola(p, TERMSYM_EQ);
-		else if ('+' == word[0] && '-' == word[1])
-			symbola(p, TERMSYM_PLUSMINUS);
-		else if ('u' == word[0] && 'a' == word[1])
-			symbola(p, TERMSYM_UARROW);
-		else if ('d' == word[0] && 'a' == word[1])
-			symbola(p, TERMSYM_DARROW);
-		else if ('a' == word[0] && 'a' == word[1])
-			symbola(p, TERMSYM_ACUTE);
-		else if ('g' == word[0] && 'a' == word[1])
-			symbola(p, TERMSYM_GRAVE);
-		else if ('!' == word[0] && '=' == word[1])
-			symbola(p, TERMSYM_NEQ);
-		else if ('i' == word[0] && 'f' == word[1])
-			symbola(p, TERMSYM_INF);
-		else if ('n' == word[0] && 'a' == word[1])
-			symbola(p, TERMSYM_NAN);
-		else if ('b' == word[0] && 'a' == word[1])
-			symbola(p, TERMSYM_BAR);
-
-		/* Deprecated forms. */
-		else if ('A' == word[0] && 'm' == word[1])
-			symbola(p, TERMSYM_AMP);
-		else if ('B' == word[0] && 'a' == word[1])
-			symbola(p, TERMSYM_BAR);
-		else if ('I' == word[0] && 'f' == word[1])
-			symbola(p, TERMSYM_INF2);
-		else if ('G' == word[0] && 'e' == word[1])
-			symbola(p, TERMSYM_GE);
-		else if ('G' == word[0] && 't' == word[1])
-			symbola(p, TERMSYM_GT);
-		else if ('L' == word[0] && 'e' == word[1])
-			symbola(p, TERMSYM_LE);
-		else if ('L' == word[0] && 'q' == word[1])
-			symbola(p, TERMSYM_LDQUOTE);
-		else if ('L' == word[0] && 't' == word[1])
-			symbola(p, TERMSYM_LT);
-		else if ('N' == word[0] && 'a' == word[1])
-			symbola(p, TERMSYM_NAN);
-		else if ('N' == word[0] && 'e' == word[1])
-			symbola(p, TERMSYM_NEQ);
-		else if ('P' == word[0] && 'i' == word[1])
-			symbola(p, TERMSYM_PI);
-		else if ('P' == word[0] && 'm' == word[1])
-			symbola(p, TERMSYM_PLUSMINUS);
-		else if ('R' == word[0] && 'q' == word[1])
-			symbola(p, TERMSYM_RDQUOTE);
-		else
-			warnx("escape sequence not supported: %c%c",
-					word[0], word[1]);
+		enc = termenc2;
 		break;
-
 	default:
-		warnx("escape sequence not supported");
-		break;
+		warnx("unsupported %zu-byte escape sequence", len);
+		return;
 	}
+
+	for ( ; enc->enc; enc++) 
+		if (0 == memcmp(enc->enc, word, len)) {
+			symbola(p, enc->sym);
+			return;
+		}
+
+	warnx("unsupported %zu-byte escape sequence", len);
 }
 
 
@@ -855,6 +838,9 @@ static void
 stringa(struct termp *p, const char *c, size_t sz)
 {
 	size_t		 s;
+
+	if (0 == sz)
+		return;
 
 	s = sz > p->maxcols * 2 ? sz : p->maxcols * 2;
 	
