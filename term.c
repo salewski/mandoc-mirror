@@ -50,7 +50,8 @@
 #define	TTYPE_INCLUDE	  15
 #define	TTYPE_SYMB	  16
 #define	TTYPE_SYMBOL	  17
-#define	TTYPE_NMAX	  18
+#define	TTYPE_DIAG	  18
+#define	TTYPE_NMAX	  19
 
 /* 
  * These define "styles" for element types, like command arguments or
@@ -78,7 +79,8 @@ const	int ttypes[TTYPE_NMAX] = {
 	TERMP_BOLD,	 	/* TTYPE_CMD */
 	TERMP_BOLD,	 	/* TTYPE_INCLUDE */
 	TERMP_BOLD,	 	/* TTYPE_SYMB */
-	TERMP_BOLD	 	/* TTYPE_SYMBOL */
+	TERMP_BOLD,	 	/* TTYPE_SYMBOL */
+	TERMP_BOLD	 	/* TTYPE_DIAG */
 };
 
 static	int		  arg_hasattr(int, size_t, 
@@ -415,6 +417,10 @@ termp_it_pre(DECL_ARGS)
 			/* FALLTHROUGH */
 		case (MDOC_Tag):
 			/* FALLTHROUGH */
+		case (MDOC_Inset):
+			/* FALLTHROUGH */
+		case (MDOC_Diag):
+			/* FALLTHROUGH */
 		case (MDOC_Ohang):
 			type = bl->argv[i].arg;
 			i = (int)bl->argc;
@@ -452,7 +458,6 @@ termp_it_pre(DECL_ARGS)
 		width = width > 6 ? width : 6;
 		break;
 	case (MDOC_Tag):
-		/* FIXME: auto-size. */
 		if (0 == width)
 			errx(1, "need non-zero -width");
 		break;
@@ -462,9 +467,15 @@ termp_it_pre(DECL_ARGS)
 
 	/* Word-wrap control. */
 
-	p->flags |= TERMP_NOSPACE;
-
 	switch (type) {
+	case (MDOC_Diag):
+		if (MDOC_HEAD == node->type)
+			TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_DIAG]);
+		/* FALLTHROUGH */
+	case (MDOC_Inset):
+		if (MDOC_HEAD == node->type)
+			p->flags |= TERMP_NOSPACE;
+		break;
 	case (MDOC_Bullet):
 		/* FALLTHROUGH */
 	case (MDOC_Dash):
@@ -474,6 +485,7 @@ termp_it_pre(DECL_ARGS)
 	case (MDOC_Hyphen):
 		/* FALLTHROUGH */
 	case (MDOC_Tag):
+		p->flags |= TERMP_NOSPACE;
 		if (MDOC_HEAD == node->type)
 			p->flags |= TERMP_NOBREAK;
 		else if (MDOC_BODY == node->type)
@@ -540,19 +552,65 @@ termp_it_pre(DECL_ARGS)
 static void
 termp_it_post(DECL_ARGS)
 {
+	int		   type, i;
+	struct mdoc_block *bl;
 
 	if (MDOC_BODY != node->type && MDOC_HEAD != node->type)
 		return;
 
-	flushln(p);
+	assert(MDOC_BLOCK == node->parent->parent->parent->type);
+	assert(MDOC_Bl == node->parent->parent->parent->tok);
+	bl = &node->parent->parent->parent->data.block;
+
+	for (type = -1, i = 0; i < (int)bl->argc; i++) 
+		switch (bl->argv[i].arg) {
+		case (MDOC_Bullet):
+			/* FALLTHROUGH */
+		case (MDOC_Dash):
+			/* FALLTHROUGH */
+		case (MDOC_Enum):
+			/* FALLTHROUGH */
+		case (MDOC_Hyphen):
+			/* FALLTHROUGH */
+		case (MDOC_Tag):
+			/* FALLTHROUGH */
+		case (MDOC_Diag):
+			/* FALLTHROUGH */
+		case (MDOC_Inset):
+			/* FALLTHROUGH */
+		case (MDOC_Ohang):
+			type = bl->argv[i].arg;
+			i = (int)bl->argc;
+			break;
+		default:
+			errx(1, "list type not supported");
+			/* NOTREACHED */
+		}
+
+
+	switch (type) {
+	case (MDOC_Diag):
+		/* FALLTHROUGH */
+	case (MDOC_Inset):
+		break;
+	default:
+		flushln(p);
+		break;
+	}
 
 	p->offset = pair->offset;
 	p->rmargin = pair->rmargin;
 
-	if (MDOC_HEAD == node->type)
-		p->flags &= ~TERMP_NOBREAK;
-	else if (MDOC_BODY == node->type)
-		p->flags &= ~TERMP_NOLPAD;
+	switch (type) {
+	case (MDOC_Inset):
+		break;
+	default:
+		if (MDOC_HEAD == node->type)
+			p->flags &= ~TERMP_NOBREAK;
+		else if (MDOC_BODY == node->type)
+			p->flags &= ~TERMP_NOLPAD;
+		break;
+	}
 }
 
 
