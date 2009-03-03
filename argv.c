@@ -251,11 +251,19 @@ mdoc_args(struct mdoc *mdoc, int line,
 
 		/* LINTED */
 		for (i = 0; i < c; i++) {
-			if (MDOC_Column != n->data.block.argv[i].arg)
-				continue;
-			fl |= ARGS_TABSEP;
-			fl &= ~ARGS_DELIM;
-			break;
+			switch (n->data.block.argv[i].arg) {
+			case (MDOC_Column):
+				fl |= ARGS_TABSEP;
+				fl &= ~ARGS_DELIM;
+				i = c;
+				break;
+			case (MDOC_Diag):
+				fl |= ARGS_QUOTED;
+				i = c;
+				break;
+			default:
+				break;
+			}
 		}
 	}
 

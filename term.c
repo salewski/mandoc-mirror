@@ -455,7 +455,7 @@ termp_it_pre(DECL_ARGS)
 	case (MDOC_Enum):
 		/* FALLTHROUGH */
 	case (MDOC_Hyphen):
-		width = width > 6 ? width : 6;
+		width = width > 4 ? width : 4;
 		break;
 	case (MDOC_Tag):
 		if (0 == width)
@@ -469,6 +469,7 @@ termp_it_pre(DECL_ARGS)
 
 	switch (type) {
 	case (MDOC_Diag):
+		/* XXX - ignore child macros!? */
 		if (MDOC_HEAD == node->type)
 			TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_DIAG]);
 		/* FALLTHROUGH */
