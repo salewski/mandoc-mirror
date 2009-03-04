@@ -89,6 +89,7 @@ static	int		  arg_getattr(int, size_t,
 				const struct mdoc_arg *);
 static	size_t		  arg_offset(const struct mdoc_arg *);
 static	size_t		  arg_width(const struct mdoc_arg *);
+static	int		  arg_listtype(const struct mdoc_node *);
 
 /*
  * What follows describes prefix and postfix operations for the abstract
@@ -308,6 +309,44 @@ arg_width(const struct mdoc_arg *arg)
 }
 
 
+static int
+arg_listtype(const struct mdoc_node *n)
+{
+	const struct mdoc_block *bl;
+	int		 i, len;
+
+	bl = &n->data.block;
+	len = (int)bl->argc;
+
+	for (i = 0; i < len; i++) 
+		switch (bl->argv[i].arg) {
+		case (MDOC_Bullet):
+			/* FALLTHROUGH */
+		case (MDOC_Dash):
+			/* FALLTHROUGH */
+		case (MDOC_Enum):
+			/* FALLTHROUGH */
+		case (MDOC_Hyphen):
+			/* FALLTHROUGH */
+		case (MDOC_Tag):
+			/* FALLTHROUGH */
+		case (MDOC_Inset):
+			/* FALLTHROUGH */
+		case (MDOC_Diag):
+			/* FALLTHROUGH */
+		case (MDOC_Item):
+			/* FALLTHROUGH */
+		case (MDOC_Ohang):
+			return(bl->argv[i].arg);
+		default:
+			break;
+		}
+
+	errx(1, "list type not supported");
+	/* NOTREACHED */
+}
+
+
 static size_t
 arg_offset(const struct mdoc_arg *arg)
 {
@@ -371,71 +410,45 @@ termp_dq_post(DECL_ARGS)
 
 /* ARGSUSED */
 static int
+termp_it_pre_block(DECL_ARGS)
+{
+	const struct mdoc_node  *n;
+	const struct mdoc_block *bl;
+
+	n = node->parent->parent;
+	bl = &n->data.block;
+
+	newln(p);
+	if ( ! arg_hasattr(MDOC_Compact, bl->argc, bl->argv))
+		if (node->prev || n->prev)
+			vspace(p);
+
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
 termp_it_pre(DECL_ARGS)
 {
-	const struct mdoc_node *n, *it;
 	const struct mdoc_block *bl;
-	char		 buf[7], *tp;
+	char		 buf[7];
 	int		 i, type;
 	size_t		 width, offset;
 
-	switch (node->type) {
-	case (MDOC_BODY):
-		/* FALLTHROUGH */
-	case (MDOC_HEAD):
-		it = node->parent;
-		break;
-	case (MDOC_BLOCK):
-		it = node;
-		break;
-	default:
-		return(1);
-	}
+	if (MDOC_BLOCK == node->type)
+		return(termp_it_pre_block(p, pair, meta, node));
 
-	n = it->parent->parent;
-	bl = &n->data.block;
+	/* Get ptr to list block, type, etc. */
 
-	if (MDOC_BLOCK == node->type) {
-		newln(p);
-		if ( ! arg_hasattr(MDOC_Compact, bl->argc, bl->argv))
-			if (node->prev || n->prev)
-				vspace(p);
-		return(1);
-	}
+	bl = &node->parent->parent->parent->data.block;
+	type = arg_listtype(node->parent->parent->parent);
 
-	/* Get our list type. */
-
-	for (type = -1, i = 0; i < (int)bl->argc; i++) 
-		switch (bl->argv[i].arg) {
-		case (MDOC_Bullet):
-			/* FALLTHROUGH */
-		case (MDOC_Dash):
-			/* FALLTHROUGH */
-		case (MDOC_Enum):
-			/* FALLTHROUGH */
-		case (MDOC_Hyphen):
-			/* FALLTHROUGH */
-		case (MDOC_Tag):
-			/* FALLTHROUGH */
-		case (MDOC_Inset):
-			/* FALLTHROUGH */
-		case (MDOC_Diag):
-			/* FALLTHROUGH */
-		case (MDOC_Ohang):
-			type = bl->argv[i].arg;
-			i = (int)bl->argc;
-			break;
-		default:
-			errx(1, "list type not supported");
-			/* NOTREACHED */
-		}
-
-	assert(-1 != type);
-
-	/* Save our existing (inherited) margin and offset. */
+	/* Save parent attributes. */
 
 	pair->offset = p->offset;
 	pair->rmargin = p->rmargin;
+	pair->flag = p->flags;
 
 	/* Get list width and offset. */
 
@@ -445,7 +458,11 @@ termp_it_pre(DECL_ARGS)
 	i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
 	offset = i >= 0 ? arg_offset(&bl->argv[i]) : 0;
 
-	/* Override the width. */
+	/* 
+	 * List-type can override the width in the case of fixed-head
+	 * values (bullet, dash/hyphen, enum).  Tags need a non-zero
+	 * offset.
+	 */
 
 	switch (type) {
 	case (MDOC_Bullet):
@@ -458,25 +475,54 @@ termp_it_pre(DECL_ARGS)
 		width = width > 4 ? width : 4;
 		break;
 	case (MDOC_Tag):
-		if (0 == width)
-			errx(1, "need non-zero -width");
+		if (width)
+			break;
+		errx(1, "need non-zero %s for list type", 
+				mdoc_argnames[MDOC_Width]);
+	default:
+		break;
+	}
+
+	/* 
+	 * Whitespace control.  Inset bodies need an initial space.
+	 */
+
+	switch (type) {
+	case (MDOC_Diag):
+		/* FALLTHROUGH */
+	case (MDOC_Inset):
+		if (MDOC_BODY == node->type) 
+			p->flags &= ~TERMP_NOSPACE;
+		else
+			p->flags |= TERMP_NOSPACE;
+		break;
+	default:
+		p->flags |= TERMP_NOSPACE;
+		break;
+	}
+
+	/*
+	 * Style flags.  Diagnostic heads need TTYPE_DIAG.
+	 */
+
+	switch (type) {
+	case (MDOC_Diag):
+		if (MDOC_HEAD == node->type)
+			p->flags |= ttypes[TTYPE_DIAG];
 		break;
 	default:
 		break;
 	}
 
-	/* Word-wrap control. */
+	/*
+	 * Pad and break control.  This is the tricker part.  Lists with
+	 * set right-margins for the head get TERMP_NOBREAK because, if
+	 * they overrun the margin, they wrap to the new margin.
+	 * Correspondingly, the body for these types don't left-pad, as
+	 * the head will pad out to to the right.
+	 */
 
 	switch (type) {
-	case (MDOC_Diag):
-		/* XXX - ignore child macros!? */
-		if (MDOC_HEAD == node->type)
-			TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_DIAG]);
-		/* FALLTHROUGH */
-	case (MDOC_Inset):
-		if (MDOC_HEAD == node->type)
-			p->flags |= TERMP_NOSPACE;
-		break;
 	case (MDOC_Bullet):
 		/* FALLTHROUGH */
 	case (MDOC_Dash):
@@ -486,39 +532,24 @@ termp_it_pre(DECL_ARGS)
 	case (MDOC_Hyphen):
 		/* FALLTHROUGH */
 	case (MDOC_Tag):
-		p->flags |= TERMP_NOSPACE;
 		if (MDOC_HEAD == node->type)
 			p->flags |= TERMP_NOBREAK;
-		else if (MDOC_BODY == node->type)
+		else
 			p->flags |= TERMP_NOLPAD;
+		break;
+	case (MDOC_Diag):
+		if (MDOC_HEAD == node->type)
+			p->flags |= TERMP_NOBREAK;
 		break;
 	default:
 		break;
 	}
 
 	/* 
-	 * Get a token to use as the HEAD lead-in.  If NULL, we use the
-	 * HEAD child. 
+	 * Margin control.  Set-head-width lists have their right
+	 * margins shortened.  The body for these lists has the offset
+	 * necessarily lengthened.  Everybody gets the offset.
 	 */
-
-	tp = NULL;
-
-	if (MDOC_HEAD == node->type) {
-		if (arg_hasattr(MDOC_Bullet, bl->argc, bl->argv))
-			tp = "\\[bu]";
-		if (arg_hasattr(MDOC_Dash, bl->argc, bl->argv))
-			tp = "\\-";
-		if (arg_hasattr(MDOC_Enum, bl->argc, bl->argv)) {
-			(pair->ppair->ppair->count)++;
-			(void)snprintf(buf, sizeof(buf), "%d.", 
-					pair->ppair->ppair->count);
-			tp = buf;
-		}
-		if (arg_hasattr(MDOC_Hyphen, bl->argc, bl->argv))
-			tp = "\\-";
-	}
-
-	/* Margin control. */
 
 	p->offset += offset;
 
@@ -534,18 +565,61 @@ termp_it_pre(DECL_ARGS)
 	case (MDOC_Tag):
 		if (MDOC_HEAD == node->type)
 			p->rmargin = p->offset + width;
-		else if (MDOC_BODY == node->type) 
+		else 
 			p->offset += width;
-		break;
+		/* FALLTHROUGH */
 	default:
 		break;
 	}
 
-	if (NULL == tp)
-		return(1);
+	/* 
+	 * The dash, hyphen, bullet and enum lists all have a special
+	 * HEAD character.  Print it now.
+	 */
 
-	word(p, tp);
-	return(0);
+	if (MDOC_HEAD == node->type)
+		switch (type) {
+		case (MDOC_Bullet):
+			word(p, "\\[bu]");
+			break;
+		case (MDOC_Dash):
+			/* FALLTHROUGH */
+		case (MDOC_Hyphen):
+			word(p, "\\-");
+			break;
+		case (MDOC_Enum):
+			/* TODO: have a wordfmt or something. */
+			(pair->ppair->ppair->count)++;
+			(void)snprintf(buf, sizeof(buf), "%d.", 
+					pair->ppair->ppair->count);
+			word(p, buf);
+			break;
+		default:
+			break;
+		}
+
+	/* 
+	 * If we're not going to process our header children, indicate
+	 * so here.
+	 */
+
+	if (MDOC_HEAD == node->type) 
+		switch (type) {
+		case (MDOC_Bullet):
+			/* FALLTHROUGH */
+		case (MDOC_Item):
+			/* FALLTHROUGH */
+		case (MDOC_Dash):
+			/* FALLTHROUGH */
+		case (MDOC_Hyphen):
+			/* FALLTHROUGH */
+		case (MDOC_Enum):
+			return(0);
+		default:
+			break;
+	}
+
+	return(1);
 }
 
 
@@ -553,46 +627,22 @@ termp_it_pre(DECL_ARGS)
 static void
 termp_it_post(DECL_ARGS)
 {
-	int		   type, i;
-	struct mdoc_block *bl;
+	int		   type;
 
 	if (MDOC_BODY != node->type && MDOC_HEAD != node->type)
 		return;
 
-	assert(MDOC_BLOCK == node->parent->parent->parent->type);
-	assert(MDOC_Bl == node->parent->parent->parent->tok);
-	bl = &node->parent->parent->parent->data.block;
-
-	for (type = -1, i = 0; i < (int)bl->argc; i++) 
-		switch (bl->argv[i].arg) {
-		case (MDOC_Bullet):
-			/* FALLTHROUGH */
-		case (MDOC_Dash):
-			/* FALLTHROUGH */
-		case (MDOC_Enum):
-			/* FALLTHROUGH */
-		case (MDOC_Hyphen):
-			/* FALLTHROUGH */
-		case (MDOC_Tag):
-			/* FALLTHROUGH */
-		case (MDOC_Diag):
-			/* FALLTHROUGH */
-		case (MDOC_Inset):
-			/* FALLTHROUGH */
-		case (MDOC_Ohang):
-			type = bl->argv[i].arg;
-			i = (int)bl->argc;
-			break;
-		default:
-			errx(1, "list type not supported");
-			/* NOTREACHED */
-		}
-
+	type = arg_listtype(node->parent->parent->parent);
 
 	switch (type) {
 	case (MDOC_Diag):
 		/* FALLTHROUGH */
+	case (MDOC_Item):
+		/* FALLTHROUGH */
 	case (MDOC_Inset):
+		if (MDOC_BODY != node->type)
+			break;
+		flushln(p);
 		break;
 	default:
 		flushln(p);
@@ -601,17 +651,7 @@ termp_it_post(DECL_ARGS)
 
 	p->offset = pair->offset;
 	p->rmargin = pair->rmargin;
-
-	switch (type) {
-	case (MDOC_Inset):
-		break;
-	default:
-		if (MDOC_HEAD == node->type)
-			p->flags &= ~TERMP_NOBREAK;
-		else if (MDOC_BODY == node->type)
-			p->flags &= ~TERMP_NOLPAD;
-		break;
-	}
+	p->flags = pair->flag;
 }
 
 

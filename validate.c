@@ -22,6 +22,8 @@
 
 #include "private.h"
 
+/* FIXME: .Bl -diag can't have non-text children in HEAD. */
+
 /*
  * Pre- and post-validate macros as they're parsed.  Pre-validation
  * occurs when the macro has been detected and its arguments parsed.
