@@ -536,6 +536,10 @@ termp_it_pre(DECL_ARGS)
 			p->flags |= TERMP_NOBREAK;
 		else
 			p->flags |= TERMP_NOLPAD;
+		if (MDOC_HEAD == node->type && MDOC_Tag == type)
+			if (NULL == node->next ||
+					NULL == node->next->child)
+				p->flags |= TERMP_NONOBREAK;
 		break;
 	case (MDOC_Diag):
 		if (MDOC_HEAD == node->type)
@@ -1662,6 +1666,7 @@ static int
 termp__t_pre(DECL_ARGS)
 {
 
+	/* FIXME: titles are underlined. */
 	word(p, "\"");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
@@ -1674,6 +1679,7 @@ termp__t_post(DECL_ARGS)
 {
 
 	p->flags |= TERMP_NOSPACE;
+	/* FIXME: titles are underlined. */
 	word(p, "\"");
 	word(p, node->next ? "," : ".");
 }
