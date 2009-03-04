@@ -316,7 +316,7 @@ flushln(struct termp *p)
 				putchar('\n');
 				for (j = 0; j < p->rmargin; j++)
 					putchar(' ');
-				vis = p->offset;
+				vis = p->rmargin - p->offset;
 			} else if (vis + vsz > bp) 
 				warnx("word breaks right margin");
 
