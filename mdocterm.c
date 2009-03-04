@@ -78,6 +78,8 @@ static	struct termenc	  termenc1[] = {
 static	struct termenc	  termenc2[] = {
 	{ "rB", 	  TERMSYM_RBRACK },
 	{ "lB", 	  TERMSYM_LBRACK },
+	{ "ra", 	  TERMSYM_RANGLE },
+	{ "la", 	  TERMSYM_LANGLE },
 	{ "Lq", 	  TERMSYM_LDQUOTE },
 	{ "lq", 	  TERMSYM_LDQUOTE },
 	{ "Rq", 	  TERMSYM_RDQUOTE },
@@ -99,7 +101,7 @@ static	struct termenc	  termenc2[] = {
 	{ "Le", 	  TERMSYM_LE },
 	{ "<=", 	  TERMSYM_LE },
 	{ "Ge", 	  TERMSYM_GE },
-	{ "=>", 	  TERMSYM_GE },
+	{ ">=", 	  TERMSYM_GE },
 	{ "==", 	  TERMSYM_EQ },
 	{ "Ne", 	  TERMSYM_NEQ },
 	{ "!=", 	  TERMSYM_NEQ },
@@ -161,6 +163,8 @@ static	struct termsym	  termsym_ansi[] = {
 	{ " ", 1 },		/* TERMSYM_SPACE */
 	{ ".", 1 },		/* TERMSYM_PERIOD */
 	{ "", 0 },		/* TERMSYM_BREAK */
+	{ "<", 1 },		/* TERMSYM_LANGLE */
+	{ ">", 1 },		/* TERMSYM_RANGLE */
 };
 
 static	const char	  ansi_clear[]  = { 27, '[', '0', 'm' };

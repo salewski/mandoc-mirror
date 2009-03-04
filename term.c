@@ -1009,7 +1009,7 @@ termp_aq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "<");
+	word(p, "\\(la");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1023,7 +1023,7 @@ termp_aq_post(DECL_ARGS)
 	if (MDOC_BODY != node->type)
 		return;
 	p->flags |= TERMP_NOSPACE;
-	word(p, ">");
+	word(p, "\\(ra");
 }
 
 
