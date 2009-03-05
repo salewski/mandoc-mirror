@@ -39,11 +39,12 @@ struct	actions {
 static	int	 post_bl(struct mdoc *);
 static	int	 post_bl_width(struct mdoc *);
 static	int	 post_bl_tagwidth(struct mdoc *);
-static	int	 post_sh(struct mdoc *);
-static	int	 post_os(struct mdoc *);
-static	int	 post_dt(struct mdoc *);
 static	int	 post_dd(struct mdoc *);
+static	int	 post_dt(struct mdoc *);
+static	int	 post_ex(struct mdoc *);
 static	int	 post_nm(struct mdoc *);
+static	int	 post_os(struct mdoc *);
+static	int	 post_sh(struct mdoc *);
 
 static	int	 post_prologue(struct mdoc *);
 
@@ -72,7 +73,7 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* Dv */ 
 	{ NULL }, /* Er */ 
 	{ NULL }, /* Ev */ 
-	{ NULL }, /* Ex */
+	{ post_ex }, /* Ex */
 	{ NULL }, /* Fa */ 
 	{ NULL }, /* Fd */ 
 	{ NULL }, /* Fl */
@@ -157,6 +158,36 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* Fr */
 	{ NULL }, /* Ud */
 };
+
+
+static int
+post_ex(struct mdoc *mdoc)
+{
+
+	/*
+	 * If `.Ex -std' is invoked without an argument, fill it in with
+	 * our name (if it's been set).
+	 */
+
+	if (0 == mdoc->last->data.elem.argc)
+		return(1);
+
+	assert(1 == mdoc->last->data.elem.argc);
+	if (1 == mdoc->last->data.elem.argv[0].sz)
+		return(1);
+	assert(0 == mdoc->last->data.elem.argv[0].sz);
+
+	if (NULL == mdoc->meta.name)
+		return(mdoc_err(mdoc, "default name not yet set"));
+
+	mdoc_msg(mdoc, "writing %s argument: %s", 
+			mdoc_argnames[MDOC_Std], mdoc->meta.name);
+
+	mdoc->last->data.elem.argv[0].sz = 1;
+	mdoc->last->data.elem.argv[0].value = xcalloc(1, sizeof(char *));
+	mdoc->last->data.elem.argv[0].value[0] = xstrdup(mdoc->meta.name);
+	return(1);
+}
 
 
 static int

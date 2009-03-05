@@ -101,7 +101,8 @@ FAIL	= regress/test.empty \
 	  regress/test.escape.09 \
 	  regress/test.escape.11 \
 	  regress/test.escape.12 \
-	  regress/test.escape.14
+	  regress/test.escape.14 \
+	  regress/test.argv.01
 
 SUCCEED	= regress/test.prologue.05 \
 	  regress/test.prologue.07 \
@@ -131,7 +132,8 @@ SUCCEED	= regress/test.prologue.05 \
 	  regress/test.escape.00 \
 	  regress/test.escape.05 \
 	  regress/test.escape.10 \
-	  regress/test.escape.13
+	  regress/test.escape.13 \
+	  regress/test.argv.00
 
 REGRESS	= $(FAIL) $(SUCCEED)
 

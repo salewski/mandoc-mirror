@@ -35,12 +35,19 @@
 #define	ARGS_DELIM	(1 << 1)
 #define	ARGS_TABSEP	(1 << 2)
 
+#define	ARGV_NONE	(1 << 0)
+#define	ARGV_SINGLE	(1 << 1)
+#define	ARGV_MULTI	(1 << 2)
+#define	ARGV_OPT_SINGLE	(1 << 3)
+
 static	int		 argv_a2arg(int, const char *);
 static	int		 args(struct mdoc *, int, int *, 
 				char *, int, char **);
 static	int		 argv(struct mdoc *, int,
 				struct mdoc_arg *, int *, char *);
 static	int		 argv_single(struct mdoc *, int, 
+				struct mdoc_arg *, int *, char *);
+static	int		 argv_opt_single(struct mdoc *, int, 
 				struct mdoc_arg *, int *, char *);
 static	int		 argv_multi(struct mdoc *, int, 
 				struct mdoc_arg *, int *, char *);
@@ -59,6 +66,73 @@ static	int		 perr(struct mdoc *, int, int, int);
 #define	EQUOTTERM	(0)
 #define	EARGVAL		(1)
 #define	EARGMANY	(2)
+
+/* Per-argument flags. */
+
+static	int mdoc_argvflags[MDOC_ARG_MAX] = {
+	ARGV_NONE,	/* MDOC_Split */
+	ARGV_NONE,	/* MDOC_Nosplit */
+	ARGV_NONE,	/* MDOC_Ragged */
+	ARGV_NONE,	/* MDOC_Unfilled */
+	ARGV_NONE,	/* MDOC_Literal */
+	ARGV_NONE,	/* MDOC_File */
+	ARGV_SINGLE,	/* MDOC_Offset */
+	ARGV_NONE,	/* MDOC_Bullet */
+	ARGV_NONE,	/* MDOC_Dash */
+	ARGV_NONE,	/* MDOC_Hyphen */
+	ARGV_NONE,	/* MDOC_Item */
+	ARGV_NONE,	/* MDOC_Enum */
+	ARGV_NONE,	/* MDOC_Tag */
+	ARGV_NONE,	/* MDOC_Diag */
+	ARGV_NONE,	/* MDOC_Hang */
+	ARGV_NONE,	/* MDOC_Ohang */
+	ARGV_NONE,	/* MDOC_Inset */
+	ARGV_MULTI,	/* MDOC_Column */
+	ARGV_SINGLE,	/* MDOC_Width */
+	ARGV_NONE,	/* MDOC_Compact */
+	ARGV_OPT_SINGLE, /* MDOC_Std */
+	ARGV_NONE,	/* MDOC_p1003_1_88 */
+	ARGV_NONE,	/* MDOC_p1003_1_90 */
+	ARGV_NONE,	/* MDOC_p1003_1_96 */
+	ARGV_NONE,	/* MDOC_p1003_1_2001 */
+	ARGV_NONE,	/* MDOC_p1003_1_2004 */
+	ARGV_NONE,	/* MDOC_p1003_1 */
+	ARGV_NONE,	/* MDOC_p1003_1b */
+	ARGV_NONE,	/* MDOC_p1003_1b_93 */
+	ARGV_NONE,	/* MDOC_p1003_1c_95 */
+	ARGV_NONE,	/* MDOC_p1003_1g_2000 */
+	ARGV_NONE,	/* MDOC_p1003_2_92 */
+	ARGV_NONE,	/* MDOC_p1387_2_95 */
+	ARGV_NONE,	/* MDOC_p1003_2 */
+	ARGV_NONE,	/* MDOC_p1387_2 */
+	ARGV_NONE,	/* MDOC_isoC_90 */
+	ARGV_NONE,	/* MDOC_isoC_amd1 */
+	ARGV_NONE,	/* MDOC_isoC_tcor1 */
+	ARGV_NONE,	/* MDOC_isoC_tcor2 */
+	ARGV_NONE,	/* MDOC_isoC_99 */
+	ARGV_NONE,	/* MDOC_ansiC */
+	ARGV_NONE,	/* MDOC_ansiC_89 */
+	ARGV_NONE,	/* MDOC_ansiC_99 */
+	ARGV_NONE,	/* MDOC_ieee754 */
+	ARGV_NONE,	/* MDOC_iso8802_3 */
+	ARGV_NONE,	/* MDOC_xpg3 */
+	ARGV_NONE,	/* MDOC_xpg4 */
+	ARGV_NONE,	/* MDOC_xpg4_2 */
+	ARGV_NONE,	/* MDOC_xpg4_3 */
+	ARGV_NONE,	/* MDOC_xbd5 */
+	ARGV_NONE,	/* MDOC_xcu5 */
+	ARGV_NONE,	/* MDOC_xsh5 */
+	ARGV_NONE,	/* MDOC_xns5 */
+	ARGV_NONE,	/* MDOC_xns5_2d2_0 */
+	ARGV_NONE,	/* MDOC_xcurses4_2 */
+	ARGV_NONE,	/* MDOC_susv2 */
+	ARGV_NONE,	/* MDOC_susv3 */
+	ARGV_NONE,	/* MDOC_svid4 */
+	ARGV_NONE,	/* MDOC_Filled */
+	ARGV_NONE,	/* MDOC_Words */
+	ARGV_NONE,	/* MDOC_Emphasis */
+	ARGV_NONE	/* MDOC_Symbolic */
+};
 
 static	int mdoc_argflags[MDOC_MAX] = {
 	0, /* \" */
@@ -236,18 +310,26 @@ mdoc_args(struct mdoc *mdoc, int line,
 	fl = (0 == tok) ? 0 : mdoc_argflags[tok];
 
 	/* 
-	 * First see if we should use TABSEP (Bl -column).  This
-	 * invalidates the use of ARGS_DELIM.
+	 * Override per-macro argument flags with context-specific ones.
+	 * As of now, this is only valid for `It' depending on its list
+	 * context.
 	 */
 
-	if (MDOC_It == tok) {
+	switch (tok) {
+	case (MDOC_It):
 		for (n = mdoc->last; n; n = n->parent)
-			if (MDOC_BLOCK == n->type)
-				if (MDOC_Bl == n->tok)
-					break;
+			if (MDOC_BLOCK == n->type && MDOC_Bl == n->tok)
+				break;
+
 		assert(n);
 		c = (int)n->data.block.argc;
 		assert(c > 0);
+
+		/*
+		 * Using `Bl -column' adds ARGS_TABSEP to the arguments
+		 * and invalidates ARGS_DELIM.  Using `Bl -diag' allows
+		 * for quoted arguments.
+		 */
 
 		/* LINTED */
 		for (i = 0; i < c; i++) {
@@ -265,7 +347,11 @@ mdoc_args(struct mdoc *mdoc, int line,
 				break;
 			}
 		}
+	default:
+		break;
 	}
+
+	/* Continue parsing the arguments themselves...  */
 
 	return(args(mdoc, line, pos, buf, fl, v));
 }
@@ -478,6 +564,14 @@ static int
 argv_a2arg(int tok, const char *argv)
 {
 
+	/*
+	 * Parse an argument identifier from its text.  XXX - this
+	 * should really be table-driven to clarify the code.
+	 *
+	 * If you add an argument to the list, make sure that you
+	 * register it here with its one or more macros!
+	 */
+
 	switch (tok) {
 	case (MDOC_An):
 		if (xstrcmp(argv, "split"))
@@ -674,6 +768,34 @@ argv_multi(struct mdoc *mdoc, int line,
 
 
 static int
+argv_opt_single(struct mdoc *mdoc, int line, 
+		struct mdoc_arg *v, int *pos, char *buf)
+{
+	int		 c, ppos;
+	char		*p;
+
+	ppos = *pos;
+
+	if ('-' == buf[*pos])
+		return(1);
+
+	c = args(mdoc, line, pos, buf, ARGS_QUOTED, &p);
+	if (ARGS_ERROR == c)
+		return(0);
+	if (ARGS_EOLN == c)
+		return(1);
+
+	v->sz = 1;
+	v->value = xcalloc(1, sizeof(char *));
+	v->value[0] = p;
+	return(1);
+}
+
+
+/*
+ * Parse a single, mandatory value from the stream.
+ */
+static int
 argv_single(struct mdoc *mdoc, int line, 
 		struct mdoc_arg *v, int *pos, char *buf)
 {
@@ -686,7 +808,7 @@ argv_single(struct mdoc *mdoc, int line,
 	if (ARGS_ERROR == c)
 		return(0);
 	if (ARGS_EOLN == c)
-		return(perr(mdoc, line, ppos,  EARGVAL));
+		return(perr(mdoc, line, ppos, EARGVAL));
 
 	v->sz = 1;
 	v->value = xcalloc(1, sizeof(char *));
@@ -695,6 +817,11 @@ argv_single(struct mdoc *mdoc, int line,
 }
 
 
+/*
+ * Determine rules for parsing arguments.  Arguments can either accept
+ * no parameters, an optional single parameter, one parameter, or
+ * multiple parameters.
+ */
 static int
 argv(struct mdoc *mdoc, int line, 
 		struct mdoc_arg *v, int *pos, char *buf)
@@ -703,16 +830,15 @@ argv(struct mdoc *mdoc, int line,
 	v->sz = 0;
 	v->value = NULL;
 
-	switch (v->arg) {
-	case(MDOC_Std):
-		/* FALLTHROUGH */
-	case(MDOC_Width):
-		/* FALLTHROUGH */
-	case(MDOC_Offset):
+	switch (mdoc_argvflags[v->arg]) {
+	case (ARGV_SINGLE):
 		return(argv_single(mdoc, line, v, pos, buf));
-	case(MDOC_Column):
+	case (ARGV_MULTI):
 		return(argv_multi(mdoc, line, v, pos, buf));
+	case (ARGV_OPT_SINGLE):
+		return(argv_opt_single(mdoc, line, v, pos, buf));
 	default:
+		/* ARGV_NONE */
 		break;
 	}
 
@@ -720,6 +846,11 @@ argv(struct mdoc *mdoc, int line,
 }
 
 
+/*
+ * Parse an argument from line text.  This comes in the form of -key
+ * [value0...], which may either have a single mandatory value, at least
+ * one mandatory value, an optional single value, or no value.
+ */
 int
 mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		struct mdoc_arg *v, int *pos, char *buf)
@@ -755,6 +886,12 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 
 	if (buf[*pos])
 		buf[(*pos)++] = 0;
+
+	/*
+	 * We now parse out the per-macro arguments.  XXX - this can be
+	 * made much cleaner using per-argument tables.  See argv_a2arg
+	 * for details.
+	 */
 
 	if (MDOC_ARG_MAX == (v->arg = argv_a2arg(tok, p))) {
 		if ( ! pwarn(mdoc, line, i, WARGVPARM))

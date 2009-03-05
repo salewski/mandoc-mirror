@@ -31,6 +31,11 @@
  * macro. 
  */
 
+/* 
+ * FIXME: don't use static mdoc_argv values, as they require us to do a
+ * complicated copy-over when actually assigning them to dynamic memory.
+ */
+
 #include "private.h"
 
 static int	  macro_obsolete(MACRO_PROT_ARGS);
