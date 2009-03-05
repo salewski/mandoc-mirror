@@ -53,6 +53,9 @@ static	int	check_stdarg(PRE_ARGS);
 
 static	int	check_text(struct mdoc *, 
 			int, int, const char *);
+static	int	check_argv(struct mdoc *, 
+			const struct mdoc_node *,
+			const struct mdoc_arg *);
 
 static	int	err_child_lt(struct mdoc *, const char *, int);
 static	int	warn_child_lt(struct mdoc *, const char *, int);
@@ -298,8 +301,6 @@ mdoc_valid_pre(struct mdoc *mdoc,
 			node->data.elem.argc;
 
 		for (i = 0; i < (int)argc; i++) {
-			if (0 == argv[i].sz)
-				continue;
 			for (j = 0; j < (int)argv[i].sz; j++) {
 				tp = argv[i].value[j];
 				line = argv[i].line;
@@ -307,6 +308,8 @@ mdoc_valid_pre(struct mdoc *mdoc,
 				if ( ! check_text(mdoc, line, pos, tp))
 					return(0);
 			}
+			if ( ! check_argv(mdoc, node, &argv[i]))
+				return(0);
 		}
 	}
 
@@ -476,6 +479,45 @@ check_msec(PRE_ARGS, int sz, enum mdoc_msec *msecs)
 }
 
 
+/*
+ * Check over an argument.  When this has more stuff in it, make this
+ * into a table-driven function; until then, a switch is fine.
+ */
+static int
+check_argv(struct mdoc *mdoc, 
+		const struct mdoc_node *node,
+		const struct mdoc_arg *argv)
+{
+
+
+	switch (argv->arg) {
+	case (MDOC_Std):
+		switch (node->tok) {
+		case (MDOC_Ex):
+			/*
+			 * If the -std does not have an argument, then
+			 * set it with the default name (if set).  This
+			 * only happens with MDOC_Ex.
+			 */
+			if (1 == argv->sz)
+				return(1);
+			assert(0 == argv->sz);
+			if (mdoc->meta.name)
+				return(1);
+			return(mdoc_nerr(mdoc, node, 
+					"default name not yet set"));
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+
+	return(1);
+}
+
+
 static int
 check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 {
@@ -484,7 +526,7 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 	/* XXX - indicate deprecated escapes \*(xx and \*x. */
 
 	for ( ; *p; p++) {
-		if ( ! isprint((int)*p) && '\t' != *p)
+		if ( ! isprint((u_char)*p) && '\t' != *p)
 			return(mdoc_perr(mdoc, line, pos,
 				"invalid non-printing characters"));
 		if ('\\' != *p)

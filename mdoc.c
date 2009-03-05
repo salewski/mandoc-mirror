@@ -220,7 +220,8 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 			return(1);
 
 	i = 1;
-	while (buf[i] && ! isspace((int)buf[i]) && i < (int)sizeof(tmp))
+	while (buf[i] && ! isspace((u_char)buf[i]) && 
+			i < (int)sizeof(tmp))
 		i++;
 
 	if (i == (int)sizeof(tmp)) {
@@ -241,7 +242,7 @@ mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
 		return(mdoc_perr(mdoc, line, 1, "unknown macro"));
 	}
 
-	while (buf[i] && isspace((int)buf[i]))
+	while (buf[i] && isspace((u_char)buf[i]))
 		i++;
 
 	if ( ! mdoc_macro(mdoc, c, line, 1, &i, buf)) {

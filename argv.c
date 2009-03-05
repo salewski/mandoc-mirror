@@ -43,7 +43,7 @@
 static	int		 argv_a2arg(int, const char *);
 static	int		 args(struct mdoc *, int, int *, 
 				char *, int, char **);
-static	int		 argv(struct mdoc *, int,
+static	int		 argv(struct mdoc *, int, int,
 				struct mdoc_arg *, int *, char *);
 static	int		 argv_single(struct mdoc *, int, 
 				struct mdoc_arg *, int *, char *);
@@ -90,7 +90,7 @@ static	int mdoc_argvflags[MDOC_ARG_MAX] = {
 	ARGV_MULTI,	/* MDOC_Column */
 	ARGV_SINGLE,	/* MDOC_Width */
 	ARGV_NONE,	/* MDOC_Compact */
-	ARGV_OPT_SINGLE, /* MDOC_Std */
+	ARGV_SINGLE,	/* MDOC_Std */
 	ARGV_NONE,	/* MDOC_p1003_1_88 */
 	ARGV_NONE,	/* MDOC_p1003_1_90 */
 	ARGV_NONE,	/* MDOC_p1003_1_96 */
@@ -389,10 +389,10 @@ args(struct mdoc *mdoc, int line,
 				break;
 			i++;
 			/* There must be at least one space... */
-			if (0 == buf[i] || ! isspace((int)buf[i]))
+			if (0 == buf[i] || ! isspace((u_char)buf[i]))
 				break;
 			i++;
-			while (buf[i] && isspace((int)buf[i]))
+			while (buf[i] && isspace((u_char)buf[i]))
 				i++;
 		}
 		if (0 == buf[i]) {
@@ -500,7 +500,7 @@ args(struct mdoc *mdoc, int line,
 		
 		if ( ! (ARGS_TABSEP & fl))
 			while (buf[*pos]) {
-				if (isspace((int)buf[*pos]))
+				if (isspace((u_char)buf[*pos]))
 					if ('\\' != buf[*pos - 1])
 						break;
 				(*pos)++;
@@ -515,7 +515,7 @@ args(struct mdoc *mdoc, int line,
 			return(ARGS_WORD);
 
 		if ( ! (ARGS_TABSEP & fl))
-			while (buf[*pos] && isspace((int)buf[*pos]))
+			while (buf[*pos] && isspace((u_char)buf[*pos]))
 				(*pos)++;
 
 		if (buf[*pos])
@@ -547,7 +547,7 @@ args(struct mdoc *mdoc, int line,
 	if (0 == buf[*pos])
 		return(ARGS_QWORD);
 
-	while (buf[*pos] && isspace((int)buf[*pos]))
+	while (buf[*pos] && isspace((u_char)buf[*pos]))
 		(*pos)++;
 
 	if (buf[*pos])
@@ -823,14 +823,28 @@ argv_single(struct mdoc *mdoc, int line,
  * multiple parameters.
  */
 static int
-argv(struct mdoc *mdoc, int line, 
+argv(struct mdoc *mdoc, int tok, int line, 
 		struct mdoc_arg *v, int *pos, char *buf)
 {
+	int		 fl;
 
 	v->sz = 0;
 	v->value = NULL;
+	fl = mdoc_argvflags[v->arg];
 
-	switch (mdoc_argvflags[v->arg]) {
+	/*
+	 * Override the default per-argument value.
+	 */
+
+	switch (tok) {
+	case (MDOC_Ex):
+		fl = ARGV_OPT_SINGLE;
+		break;
+	default:
+		break;
+	}
+
+	switch (fl) {
 	case (ARGV_SINGLE):
 		return(argv_single(mdoc, line, v, pos, buf));
 	case (ARGV_MULTI):
@@ -863,7 +877,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	if (0 == buf[*pos])
 		return(ARGV_EOLN);
 
-	assert( ! isspace((int)buf[*pos]));
+	assert( ! isspace((u_char)buf[*pos]));
 
 	if ('-' != buf[*pos])
 		return(ARGV_WORD);
@@ -878,7 +892,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 
 	/* LINTED */
 	while (buf[*pos]) {
-		if (isspace((int)buf[*pos])) 
+		if (isspace((u_char)buf[*pos])) 
 			if ('\\' != buf[*pos - 1])
 				break;
 		(*pos)++;
@@ -899,12 +913,12 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		return(ARGV_WORD);
 	}
 
-	while (buf[*pos] && isspace((int)buf[*pos]))
+	while (buf[*pos] && isspace((u_char)buf[*pos]))
 		(*pos)++;
 
 	/* FIXME: whitespace if no value. */
 
-	if ( ! argv(mdoc, line, v, pos, buf))
+	if ( ! argv(mdoc, tok, line, v, pos, buf))
 		return(ARGV_ERROR);
 
 	return(ARGV_ARG);

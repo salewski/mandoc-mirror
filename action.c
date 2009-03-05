@@ -36,15 +36,16 @@ struct	actions {
 
 /* Per-macro action routines. */
 
+static	int	 post_ar(struct mdoc *);
 static	int	 post_bl(struct mdoc *);
 static	int	 post_bl_width(struct mdoc *);
 static	int	 post_bl_tagwidth(struct mdoc *);
 static	int	 post_dd(struct mdoc *);
 static	int	 post_dt(struct mdoc *);
-static	int	 post_ex(struct mdoc *);
 static	int	 post_nm(struct mdoc *);
 static	int	 post_os(struct mdoc *);
 static	int	 post_sh(struct mdoc *);
+static	int	 post_ex(struct mdoc *);
 
 static	int	 post_prologue(struct mdoc *);
 
@@ -67,7 +68,7 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* It */
 	{ NULL }, /* Ad */ 
 	{ NULL }, /* An */
-	{ NULL }, /* Ar */
+	{ post_ar }, /* Ar */
 	{ NULL }, /* Cd */
 	{ NULL }, /* Cm */
 	{ NULL }, /* Dv */ 
@@ -171,14 +172,10 @@ post_ex(struct mdoc *mdoc)
 
 	if (0 == mdoc->last->data.elem.argc)
 		return(1);
-
-	assert(1 == mdoc->last->data.elem.argc);
-	if (1 == mdoc->last->data.elem.argv[0].sz)
+	if (mdoc->last->data.elem.argv[0].sz)
 		return(1);
-	assert(0 == mdoc->last->data.elem.argv[0].sz);
 
-	if (NULL == mdoc->meta.name)
-		return(mdoc_err(mdoc, "default name not yet set"));
+	assert(mdoc->meta.name);
 
 	mdoc_msg(mdoc, "writing %s argument: %s", 
 			mdoc_argnames[MDOC_Std], mdoc->meta.name);
@@ -479,6 +476,29 @@ post_bl(struct mdoc *mdoc)
 		if ( ! post_bl_width(mdoc))
 			return(0);
 
+	return(1);
+}
+
+
+static int
+post_ar(struct mdoc *mdoc)
+{
+	struct mdoc_node *n;
+
+	if (mdoc->last->child)
+		return(1);
+	
+	n = mdoc->last;
+
+	mdoc->next = MDOC_NEXT_CHILD;
+	mdoc_word_alloc(mdoc, mdoc->last->line,
+			mdoc->last->pos, "file");
+	mdoc->next = MDOC_NEXT_SIBLING;
+	mdoc_word_alloc(mdoc, mdoc->last->line,
+			mdoc->last->pos, "...");
+
+	mdoc->last = n;
+	mdoc->next = MDOC_NEXT_SIBLING;
 	return(1);
 }
 

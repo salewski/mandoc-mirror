@@ -295,7 +295,7 @@ arg_width(const struct mdoc_arg *arg)
 	assert(len > 0);
 
 	for (i = 0; i < len - 1; i++) 
-		if ( ! isdigit((int)(*arg->value)[i]))
+		if ( ! isdigit((u_char)(*arg->value)[i]))
 			break;
 
 	if (i == len - 1) {
@@ -693,10 +693,6 @@ termp_ar_pre(DECL_ARGS)
 {
 
 	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_CMD_ARG]);
-	if (NULL == node->child) {
-		word(p, "file");
-		word(p, "...");
-	}
 	return(1);
 }
 

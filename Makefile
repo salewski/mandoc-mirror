@@ -102,7 +102,8 @@ FAIL	= regress/test.empty \
 	  regress/test.escape.11 \
 	  regress/test.escape.12 \
 	  regress/test.escape.14 \
-	  regress/test.argv.01
+	  regress/test.argv.01 \
+	  regress/test.argv.02
 
 SUCCEED	= regress/test.prologue.05 \
 	  regress/test.prologue.07 \
@@ -162,7 +163,7 @@ installwww: www
 	install -m 0444 mdocml-nport-$(VERSION).tar.gz $(PREFIX)/ports-netbsd/
 	install -m 0444 mdocml-nport-$(VERSION).tar.gz $(PREFIX)/ports-netbsd/mdocml.tar.gz
 
-regress: mdoclint
+regress: mdoclint $(FAIL) $(SUCCEED)
 	@for f in $(FAIL); do \
 		echo "./mdoclint $$f" ; \
 		./mdoclint $$f 2>/dev/null || continue ; exit 1 ; done
