@@ -67,6 +67,9 @@ mdoc_a2${name}(const char *p)
 !
 
 while read in ; do
+	[ -z "$in" ] && continue;
+	[ "#" == `echo "$in" | cut -c1` ] && continue;
+
 	key=`printf "%s\n" "$in" | cut -f 1`
 	val=`printf "%s\n" "$in" | cut -f 2- | sed 's!^[ 	]*!!'`
 	cat <<!

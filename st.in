@@ -1,3 +1,11 @@
+# $Id$
+#
+# This file defines the `.St' macro arguments.  Lines are composed of
+# tab-delimited fields -- multiple tabs may delimit fields.  Comment
+# lines begin with '#'; blank lines are also ok.
+#
+# These were last grok'd from OpenBSD-4.4's mdoc.samples(7).
+
 -p1003.1-88		IEEE Std 1003.1-1988 (\\\\(lqPOSIX\\\\(rq)
 -p1003.1-90		IEEE Std 1003.1-1990 (\\\\(lqPOSIX\\\\(rq)
 -p1003.1-96		ISO/IEC 9945-1:1996 (\\\\(lqPOSIX\\\\(rq)

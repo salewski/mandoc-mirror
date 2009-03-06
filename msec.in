@@ -1,3 +1,11 @@
+# $Id$
+#
+# This file defines the `.Dt' macro 'volume' argument.  Lines are
+# composed of tab-delimited fields -- multiple tabs may delimit fields.
+# Comment lines begin with '#'; blank lines are also ok.
+#
+# These were last grok'd from OpenBSD-4.4's mdoc.samples(7).
+
 1	General Commands Manual
 2	System Calls Manual
 3	Library Functions Manual

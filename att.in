@@ -1,3 +1,11 @@
+# $Id$
+#
+# This file defines the `.At' macro argument.  Lines are composed of
+# tab-delimited fields -- multiple tabs may delimit fields.  Comment
+# lines begin with '#'; blank lines are also ok.
+#
+# These were last grok'd from OpenBSD-4.4's mdoc.samples(7).
+
 v1	Version 1 AT&T UNIX
 v2	Version 2 AT&T UNIX
 v3	Version 3 AT&T UNIX

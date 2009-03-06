@@ -535,11 +535,13 @@ post_ar(struct mdoc *mdoc)
 	n = mdoc->last;
 
 	mdoc->next = MDOC_NEXT_CHILD;
-	mdoc_word_alloc(mdoc, mdoc->last->line,
-			mdoc->last->pos, "file");
+	if ( ! mdoc_word_alloc(mdoc, mdoc->last->line,
+				mdoc->last->pos, "file"))
+		return(0);
 	mdoc->next = MDOC_NEXT_SIBLING;
-	mdoc_word_alloc(mdoc, mdoc->last->line,
-			mdoc->last->pos, "...");
+	if ( ! mdoc_word_alloc(mdoc, mdoc->last->line, 
+				mdoc->last->pos, "..."))
+		return(0);
 
 	mdoc->last = n;
 	mdoc->next = MDOC_NEXT_SIBLING;
