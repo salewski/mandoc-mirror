@@ -135,7 +135,8 @@
 #define	MDOC_Hf		 103
 #define	MDOC_Fr		 104
 #define	MDOC_Ud		 105
-#define	MDOC_MAX	 106
+#define	MDOC_Lb		 106
+#define	MDOC_MAX	 107
 
 /* What follows is a list of ALL possible macro arguments. */
 
@@ -160,71 +161,16 @@
 #define	MDOC_Width	 18
 #define	MDOC_Compact	 19
 #define	MDOC_Std	 20
-#define MDOC_p1003_1_88	 21
-#define MDOC_p1003_1_90	 22
-#define MDOC_p1003_1_96	 23
-#define MDOC_p1003_1_2001 24
-#define MDOC_p1003_1_2004 25
-#define MDOC_p1003_1	 26
-#define MDOC_p1003_1b	 27
-#define MDOC_p1003_1b_93 28
-#define MDOC_p1003_1c_95 29
-#define MDOC_p1003_1g_2000 30
-#define MDOC_p1003_2_92	 31
-#define MDOC_p1387_2_95	 32
-#define MDOC_p1003_2	 33
-#define MDOC_p1387_2	 34
-#define MDOC_isoC_90	 35
-#define MDOC_isoC_amd1	 36
-#define MDOC_isoC_tcor1	 37
-#define MDOC_isoC_tcor2	 38
-#define MDOC_isoC_99	 39
-#define MDOC_ansiC	 40
-#define MDOC_ansiC_89	 41
-#define MDOC_ansiC_99	 42
-#define MDOC_ieee754	 43
-#define MDOC_iso8802_3	 44
-#define MDOC_xpg3	 45
-#define MDOC_xpg4	 46
-#define MDOC_xpg4_2	 47
-#define MDOC_xpg4_3	 48
-#define MDOC_xbd5	 49
-#define MDOC_xcu5	 50
-#define MDOC_xsh5	 51
-#define MDOC_xns5	 52
-#define MDOC_xns5_2d2_0	 53
-#define MDOC_xcurses4_2	 54
-#define MDOC_susv2	 55
-#define MDOC_susv3	 56
-#define MDOC_svid4	 57
-#define	MDOC_Filled	 58
-#define	MDOC_Words	 59
-#define	MDOC_Emphasis	 60
-#define	MDOC_Symbolic	 61
-#define	MDOC_ARG_MAX	 62
+#define	MDOC_Filled	 21
+#define	MDOC_Words	 22
+#define	MDOC_Emphasis	 23
+#define	MDOC_Symbolic	 24
+#define	MDOC_ARG_MAX	 25
 
 /* Warnings are either syntax or groff-compatibility. */
 enum	mdoc_warn {
 	WARN_SYNTAX,
 	WARN_COMPAT
-};
-
-/* Possible values for the `At' macro. */
-enum	mdoc_att {
-	ATT_DEFAULT = 0,
-	ATT_v1,
-	ATT_v2,
-	ATT_v3,
-	ATT_v4,
-	ATT_v5,
-	ATT_v6,
-	ATT_v7,
-	ATT_32v,
-	ATT_V,
-	ATT_V1,
-	ATT_V2,
-	ATT_V3,
-	ATT_V4
 };
 
 /* An argument to a macro (multiple values = `It -column'). */
@@ -247,101 +193,36 @@ enum	mdoc_type {
 	MDOC_ROOT
 };
 
-/* Manual section. */
-enum	mdoc_msec {
-	MSEC_DEFAULT = 0,
-	MSEC_1,
-	MSEC_2,
-	MSEC_3,
-	MSEC_3f,
-	MSEC_3p,
-	MSEC_4,
-	MSEC_5,
-	MSEC_6,
-	MSEC_7,
-	MSEC_8,
-	MSEC_9,
-	MSEC_X11,
-	MSEC_X11R6,
-	MSEC_local,
-	MSEC_n,
-	MSEC_unass,
-	MSEC_draft,
-	MSEC_paper
-};
-
-/* Section (named/unnamed) of `Ss'. */
+/* Section (named/unnamed) of `Sh'. */
 enum	mdoc_sec {
-	SEC_PROLOGUE = 0,
-	SEC_BODY,
-	SEC_NAME,
-	SEC_SYNOPSIS,
-	SEC_DESCRIPTION,
-	SEC_RETURN_VALUES,
-	SEC_ENVIRONMENT,
-	SEC_FILES,
-	SEC_EXAMPLES,
-	SEC_DIAGNOSTICS,
-	SEC_ERRORS,
-	SEC_SEE_ALSO,
-	SEC_STANDARDS,
-	SEC_HISTORY,
-	SEC_AUTHORS,
-	SEC_CAVEATS,
-	SEC_BUGS,
+	SEC_PROLOGUE 		= 0,
+	SEC_BODY		= 1,
+	SEC_NAME		= 2,
+	SEC_LIBRARY		= 3,
+	SEC_SYNOPSIS		= 4,
+	SEC_DESCRIPTION		= 5,
+	SEC_IMPLEMENTATION	= 6,
+	SEC_RETURN_VALUES	= 7,
+	SEC_ENVIRONMENT		= 8,
+	SEC_FILES		= 9,
+	SEC_EXAMPLES		= 10,
+	SEC_DIAGNOSTICS		= 11,
+	SEC_COMPATIBILITY	= 12,
+	SEC_ERRORS		= 13,
+	SEC_SEE_ALSO		= 14,
+	SEC_STANDARDS		= 15,
+	SEC_HISTORY		= 16,
+	SEC_AUTHORS		= 17,
+	SEC_CAVEATS		= 18,
+	SEC_BUGS		= 19,
 	SEC_CUSTOM
-};
-
-/* Volume of `Dt'. */
-enum	mdoc_vol {
-	VOL_DEFAULT = 0,
-	VOL_AMD,
-	VOL_IND,
-	VOL_KM,
-	VOL_LOCAL,
-	VOL_PRM,
-	VOL_PS1,
-	VOL_SMM,
-	VOL_URM,
-	VOL_USD
-};
-
-/* Architecture of `Dt'. */
-enum	mdoc_arch {
-	ARCH_DEFAULT = 0,
-	ARCH_alpha, 
-	ARCH_amd64, 
-	ARCH_amiga, 
-	ARCH_arc, 
-	ARCH_arm, 
-	ARCH_armish, 
-	ARCH_aviion, 
-	ARCH_hp300,
-	ARCH_hppa, 
-	ARCH_hppa64, 
-	ARCH_i386, 
-	ARCH_landisk, 
-	ARCH_luna88k, 
-	ARCH_mac68k, 
-	ARCH_macppc,
-	ARCH_mvme68k, 
-	ARCH_mvme88k, 
-	ARCH_mvmeppc, 
-	ARCH_pmax, 
-	ARCH_sgi, 
-	ARCH_socppc, 
-	ARCH_sparc,
-	ARCH_sparc64, 
-	ARCH_sun3, 
-	ARCH_vax, 
-	ARCH_zaurus
 };
 
 /* Information from prologue. */
 struct	mdoc_meta {
-	enum mdoc_msec	  msec;
-	enum mdoc_vol	  vol;
-	enum mdoc_arch	  arch;
+	int		  msec;
+	char		 *vol;
+	char		 *arch;
 	time_t		  date;
 	char		 *title;
 	char		 *os;
@@ -429,12 +310,11 @@ const struct mdoc_meta *mdoc_meta(const struct mdoc *);
 int		  mdoc_endparse(struct mdoc *);
 
 /* The following are utility functions. */
-const char 	 *mdoc_arch2a(enum mdoc_arch);
-const char 	 *mdoc_vol2a(enum mdoc_vol);
-const char 	 *mdoc_msec2a(enum mdoc_msec);
-const char	 *mdoc_att2a(enum mdoc_att);
-enum	mdoc_att  mdoc_atoatt(const char *);
-const char	 *mdoc_st2a(int);
+
+const char	 *mdoc_a2att(const char *);
+const char	 *mdoc_a2lib(const char *);
+const char	 *mdoc_a2st(const char *);
+
 int		  mdoc_isdelim(const char *);
 
 __END_DECLS

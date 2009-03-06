@@ -1,7 +1,0 @@
-$Id$
-
-To add regression tests, name the file according as
-regress/test.NAME.NN, where NAME approximately documents the test domain
-and NN is a two-digit, zero-padded number for the test index.
-
-Subsequent that, add the test to either FAIL or SUCCEED in the Makefile.

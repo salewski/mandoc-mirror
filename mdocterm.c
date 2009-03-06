@@ -16,8 +16,6 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-#include <sys/utsname.h>
-
 #include <assert.h>
 #include <ctype.h>
 #include <err.h>
@@ -181,14 +179,16 @@ static	struct termsym	  termstyle_ansi[] = {
 int
 main(int argc, char *argv[])
 {
-	struct mmain	*p;
+	struct mmain	  *p;
+	int		   c;
 	const struct mdoc *mdoc;
-	struct termp	 termp;
+	struct termp	   termp;
 
 	p = mmain_alloc();
 
-	if ( ! mmain_getopt(p, argc, argv, NULL, NULL, NULL, NULL))
-		mmain_exit(p, 1);
+	c = mmain_getopt(p, argc, argv, NULL, NULL, NULL, NULL);
+	if (1 != c)
+		mmain_exit(p, -1 == c ? 1 : 0);
 
 	if (NULL == (mdoc = mmain_mdoc(p)))
 		mmain_exit(p, 1);
@@ -570,9 +570,7 @@ footer(struct termp *p, const struct mdoc_meta *meta)
 static void
 header(struct termp *p, const struct mdoc_meta *meta)
 {
-	char		*buf, *title, *bufp, *vbuf;
-	const char	*pp;
-	struct utsname	 uts;
+	char		*buf, *title, *bufp;
 
 	p->rmargin = p->maxrmargin;
 	p->offset = 0;
@@ -581,48 +579,6 @@ header(struct termp *p, const struct mdoc_meta *meta)
 		err(1, "malloc");
 	if (NULL == (title = malloc(p->rmargin)))
 		err(1, "malloc");
-	if (NULL == (vbuf = malloc(p->rmargin)))
-		err(1, "malloc");
-
-	if (NULL == (pp = mdoc_vol2a(meta->vol))) {
-		switch (meta->msec) {
-		case (MSEC_1):
-			/* FALLTHROUGH */
-		case (MSEC_6):
-			/* FALLTHROUGH */
-		case (MSEC_7):
-			pp = mdoc_vol2a(VOL_URM);
-			break;
-		case (MSEC_8):
-			pp = mdoc_vol2a(VOL_SMM);
-			break;
-		case (MSEC_2):
-			/* FALLTHROUGH */
-		case (MSEC_3):
-			/* FALLTHROUGH */
-		case (MSEC_4):
-			/* FALLTHROUGH */
-		case (MSEC_5):
-			pp = mdoc_vol2a(VOL_PRM);
-			break;
-		case (MSEC_9):
-			pp = mdoc_vol2a(VOL_KM);
-			break;
-		default:
-			break;
-		}
-	}
-	vbuf[0] = 0;
-
-	if (pp) {
-		if (-1 == uname(&uts)) 
-			err(1, "uname");
-		(void)strlcat(vbuf, uts.sysname, p->rmargin);
-		(void)strlcat(vbuf, " ", p->rmargin);
-	} else if (NULL == (pp = mdoc_msec2a(meta->msec)))
-		pp = mdoc_msec2a(MSEC_local);
-
-	(void)strlcat(vbuf, pp, p->rmargin);
 
 	/*
 	 * The header is strange.  It has three components, which are
@@ -637,16 +593,17 @@ header(struct termp *p, const struct mdoc_meta *meta)
 	 * switches on the manual section.
 	 */
 
-	if (mdoc_arch2a(meta->arch))
-		(void)snprintf(buf, p->rmargin, "%s (%s)",
-				vbuf, mdoc_arch2a(meta->arch));
-	else
-		(void)strlcpy(buf, vbuf, p->rmargin);
+	assert(meta->vol);
+	(void)strlcpy(buf, meta->vol, p->rmargin);
 
-	pp = mdoc_msec2a(meta->msec);
+	if (meta->arch) {
+		(void)strlcat(buf, " (", p->rmargin);
+		(void)strlcat(buf, meta->arch, p->rmargin);
+		(void)strlcat(buf, ")", p->rmargin);
+	}
 
-	(void)snprintf(title, p->rmargin, "%s(%s)",
-			meta->title, pp ? pp : "");
+	(void)snprintf(title, p->rmargin, "%s(%d)", 
+			meta->title, meta->msec);
 
 	for (bufp = title; *bufp; bufp++)
 		*bufp = toupper((u_char)*bufp);
@@ -678,7 +635,6 @@ header(struct termp *p, const struct mdoc_meta *meta)
 	p->flags &= ~TERMP_NOSPACE;
 
 	free(title);
-	free(vbuf);
 	free(buf);
 }
 

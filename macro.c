@@ -184,6 +184,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_constant, 0 }, /* Hf */
 	{ macro_obsolete, 0 }, /* Fr */
 	{ macro_constant, 0 }, /* Ud */
+	{ macro_constant, 0 }, /* Lb */
 };
 
 const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;
@@ -522,7 +523,9 @@ rewind_subblock(enum mdoc_type type, struct mdoc *mdoc,
 			break;
 		else if (rewind_dobreak(tok, n))
 			continue;
-		return(mdoc_perr(mdoc, line, ppos, "scope breaks prior %s", mdoc_node2a(n)));
+		return(mdoc_perr(mdoc, line, ppos, 
+			"scope breaks %s", MDOC_ROOT == n->type ?
+			"<root>" : mdoc_macronames[n->tok]));
 	}
 
 	assert(n);
@@ -546,8 +549,8 @@ rewind_expblock(struct mdoc *mdoc, int tok, int line, int ppos)
 		else if (rewind_dobreak(tok, n))
 			continue;
 		return(mdoc_perr(mdoc, line, ppos, 
-					"scope breaks prior %s", 
-					mdoc_node2a(n)));
+			"scope breaks %s", MDOC_ROOT == n->type ?
+			"<root>" : mdoc_macronames[n->tok]));
 	}
 
 	assert(n);
@@ -571,8 +574,8 @@ rewind_impblock(struct mdoc *mdoc, int tok, int line, int ppos)
 		else if (rewind_dobreak(tok, n))
 			continue;
 		return(mdoc_perr(mdoc, line, ppos, 
-					"scope breaks prior %s", 
-					mdoc_node2a(n)));
+			"scope breaks %s", MDOC_ROOT == n->type ?
+			"<root>" : mdoc_macronames[n->tok]));
 	}
 
 	assert(n);
@@ -1183,12 +1186,18 @@ static int
 macro_constant_delimited(MACRO_PROT_ARGS)
 {
 	int		  lastarg, flushed, j, c, maxargs, argc,
-			  igndelim;
+			  igndelim, ignargs;
 	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
 	char		 *p;
 
 	lastarg = ppos;
 	flushed = 0;
+
+	
+	/* 
+	 * Maximum arguments per macro.  Some of these have none and
+	 * exit as soon as they're parsed.
+	 */
 
 	switch (tok) {
 	case (MDOC_No):
@@ -1196,14 +1205,18 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 	case (MDOC_Ns):
 		/* FALLTHROUGH */
 	case (MDOC_Ux):
-		/* FALLTHROUGH */
-	case (MDOC_St):
 		maxargs = 0;
 		break;
 	default:
 		maxargs = 1;
 		break;
 	}
+
+	/* 
+	 * Whether to ignore delimiter characters.  `Pf' accepts its
+	 * first token as a parameter no matter what it looks like (if
+	 * it's text).
+	 */
 
 	switch (tok) {
 	case (MDOC_Pf):
@@ -1214,19 +1227,37 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 		break;
 	}
 
-	for (argc = 0; argc < MDOC_LINEARG_MAX; argc++) {
-		lastarg = *pos;
-		c = mdoc_argv(mdoc, line, tok, &argv[argc], pos, buf);
-		if (ARGV_EOLN == c)
-			break;
-		if (ARGV_WORD == c) {
-			*pos = lastarg;
-			break;
-		} else if (ARGV_ARG == c)
-			continue;
-		mdoc_argv_free(argc, argv);
-		return(0);
+	/* 
+	 * Whether to ignore arguments: `St', for example, handles its
+	 * argument-like parameters as regular parameters.
+	 */
+
+	switch (tok) {
+	case (MDOC_St):
+		ignargs = 1;
+		break;
+	default:
+		ignargs = 0;
+		break;
 	}
+
+	argc = 0;
+
+	if ( ! ignargs)
+		for ( ; argc < MDOC_LINEARG_MAX; argc++) {
+			lastarg = *pos;
+			c = mdoc_argv(mdoc, line, tok, 
+					&argv[argc], pos, buf);
+			if (ARGV_EOLN == c)
+				break;
+			if (ARGV_WORD == c) {
+				*pos = lastarg;
+				break;
+			} else if (ARGV_ARG == c)
+				continue;
+			mdoc_argv_free(argc, argv);
+			return(0);
+		}
 
 	if (MDOC_LINEARG_MAX == argc) {
 		mdoc_argv_free(argc - 1, argv);

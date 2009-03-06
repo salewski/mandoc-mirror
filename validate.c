@@ -18,6 +18,7 @@
  */
 #include <assert.h>
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdlib.h>
 
 #include "private.h"
@@ -48,7 +49,8 @@ struct	valids {
 /* Utility checks. */
 
 static	int	check_parent(PRE_ARGS, int, enum mdoc_type);
-static	int	check_msec(PRE_ARGS, int, enum mdoc_msec *);
+static	int	check_msec(PRE_ARGS, ...);
+static	int	check_sec(PRE_ARGS, ...);
 static	int	check_stdarg(PRE_ARGS);
 
 static	int	check_text(struct mdoc *, 
@@ -74,21 +76,23 @@ static	inline int err_count(struct mdoc *, const char *,
 
 /* Specific pre-child-parse routines. */
 
-static	int	pre_display(PRE_ARGS);
-static	int	pre_sh(PRE_ARGS);
-static	int	pre_ss(PRE_ARGS);
+static	int	pre_an(PRE_ARGS);
 static	int	pre_bd(PRE_ARGS);
 static	int	pre_bl(PRE_ARGS);
-static	int	pre_it(PRE_ARGS);
 static	int	pre_cd(PRE_ARGS);
+static	int	pre_dd(PRE_ARGS);
+static	int	pre_display(PRE_ARGS);
+static	int	pre_dt(PRE_ARGS);
 static	int	pre_er(PRE_ARGS);
 static	int	pre_ex(PRE_ARGS);
+static	int	pre_fd(PRE_ARGS);
+static	int	pre_it(PRE_ARGS);
+static	int	pre_lb(PRE_ARGS);
+static	int	pre_os(PRE_ARGS);
+static	int	pre_prologue(PRE_ARGS);
 static	int	pre_rv(PRE_ARGS);
-static	int	pre_an(PRE_ARGS);
-static	int	pre_st(PRE_ARGS);
-static	int	pre_prologue(PRE_ARGS);
-static	int	pre_prologue(PRE_ARGS);
-static	int	pre_prologue(PRE_ARGS);
+static	int	pre_sh(PRE_ARGS);
+static	int	pre_ss(PRE_ARGS);
 
 /* Specific post-child-parse routines. */
 
@@ -107,35 +111,37 @@ static	int	hwarn_eq1(POST_ARGS);
 static	int	ewarn_ge1(POST_ARGS);
 static	int	ebool(POST_ARGS);
 
+static	int	post_an(POST_ARGS);
+static	int	post_at(POST_ARGS);
+static	int	post_bf(POST_ARGS);
+static	int	post_bl(POST_ARGS);
+static	int	post_ex(POST_ARGS);
+static	int	post_it(POST_ARGS);
+static	int	post_nm(POST_ARGS);
+static	int	post_root(POST_ARGS);
 static	int	post_sh(POST_ARGS);
 static	int	post_sh_body(POST_ARGS);
 static	int	post_sh_head(POST_ARGS);
-static	int	post_fd(POST_ARGS);
-static	int	post_bl(POST_ARGS);
-static	int	post_it(POST_ARGS);
-static	int	post_ex(POST_ARGS);
-static	int	post_an(POST_ARGS);
-static	int	post_at(POST_ARGS);
-static	int	post_xr(POST_ARGS);
-static	int	post_nm(POST_ARGS);
-static	int	post_bf(POST_ARGS);
-static	int	post_root(POST_ARGS);
+static	int	post_st(POST_ARGS);
 
 /* Collections of pre-child-parse routines. */
 
-static	v_pre	pres_prologue[] = { pre_prologue, NULL };
-static	v_pre	pres_d1[] = { pre_display, NULL };
+static	v_pre	pres_an[] = { pre_an, NULL };
 static	v_pre	pres_bd[] = { pre_display, pre_bd, NULL };
 static	v_pre	pres_bl[] = { pre_bl, NULL };
-static	v_pre	pres_it[] = { pre_it, NULL };
-static	v_pre	pres_ss[] = { pre_ss, NULL };
-static	v_pre	pres_sh[] = { pre_sh, NULL };
 static	v_pre	pres_cd[] = { pre_cd, NULL };
+static	v_pre	pres_dd[] = { pre_prologue, pre_dd, NULL };
+static	v_pre	pres_d1[] = { pre_display, NULL };
+static	v_pre	pres_dt[] = { pre_prologue, pre_dt, NULL };
 static	v_pre	pres_er[] = { pre_er, NULL };
 static	v_pre	pres_ex[] = { pre_ex, NULL };
+static	v_pre	pres_fd[] = { pre_fd, NULL };
+static	v_pre	pres_it[] = { pre_it, NULL };
+static	v_pre	pres_lb[] = { pre_lb, NULL };
+static	v_pre	pres_os[] = { pre_prologue, pre_os, NULL };
 static	v_pre	pres_rv[] = { pre_rv, NULL };
-static	v_pre	pres_an[] = { pre_an, NULL };
-static	v_pre	pres_st[] = { pre_st, NULL };
+static	v_pre	pres_sh[] = { pre_sh, NULL };
+static	v_pre	pres_ss[] = { pre_ss, NULL };
 
 /* Collections of post-child-parse routines. */
 
@@ -151,25 +157,27 @@ static	v_post	posts_it[] = { post_it, NULL };
 static	v_post	posts_in[] = { ewarn_eq1, NULL };
 static	v_post	posts_ss[] = { herr_ge1, NULL };
 static	v_post	posts_pf[] = { eerr_eq1, NULL };
+static	v_post	posts_lb[] = { eerr_eq1, NULL };
+static	v_post	posts_st[] = { eerr_eq1, post_st, NULL };
 static	v_post	posts_pp[] = { ewarn_eq0, NULL };
 static	v_post	posts_ex[] = { eerr_le1, post_ex, NULL };
 static	v_post	posts_an[] = { post_an, NULL };
 static	v_post	posts_at[] = { post_at, NULL };
-static	v_post	posts_xr[] = { eerr_ge1, eerr_le2, post_xr, NULL };
+static	v_post	posts_xr[] = { eerr_ge1, eerr_le2, NULL };
 static	v_post	posts_nm[] = { post_nm, NULL };
 static	v_post	posts_bf[] = { hwarn_le1, post_bf, NULL };
 static	v_post	posts_rs[] = { herr_eq0, bwarn_ge1, NULL };
 static	v_post	posts_fo[] = { hwarn_eq1, bwarn_ge1, NULL };
 static	v_post	posts_bk[] = { herr_eq0, bwarn_ge1, NULL };
-static	v_post	posts_fd[] = { ewarn_ge1, post_fd, NULL };
+static	v_post	posts_fd[] = { ewarn_ge1, NULL };
 
 /* Per-macro pre- and post-child-check routine collections. */
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, 			/* \" */
-	{ pres_prologue, posts_text },		/* Dd */
-	{ pres_prologue, NULL },		/* Dt */
-	{ pres_prologue, NULL },		/* Os */
+	{ pres_dd, posts_text },		/* Dd */
+	{ pres_dt, NULL },			/* Dt */
+	{ pres_os, NULL },			/* Os */
 	{ pres_sh, posts_sh },			/* Sh */ 
 	{ pres_ss, posts_ss },			/* Ss */ 
 	{ NULL, posts_pp },			/* Pp */ 
@@ -190,7 +198,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_text },			/* Ev */ 
 	{ pres_ex, posts_ex },			/* Ex */ 
 	{ NULL, posts_text },			/* Fa */ 
-	{ NULL, posts_fd },			/* Fd */
+	{ pres_fd, posts_fd },			/* Fd */
 	{ NULL, NULL },				/* Fl */
 	{ NULL, posts_text },			/* Fn */ 
 	{ NULL, posts_wtext },			/* Ft */ 
@@ -203,7 +211,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Ot */
 	{ NULL, NULL },				/* Pa */
 	{ pres_rv, posts_notext },		/* Rv */
-	{ pres_st, posts_notext },		/* St */ 
+	{ NULL, posts_st },			/* St */ 
 	{ NULL, posts_text },			/* Va */
 	{ NULL, posts_text },			/* Vt */ 
 	{ NULL, posts_xr },			/* Xr */ 
@@ -272,6 +280,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Hf */
 	{ NULL, NULL },				/* Fr */
 	{ NULL, posts_notext },			/* Ud */
+	{ pres_lb, posts_lb },			/* Lb */
 };
 
 
@@ -467,15 +476,47 @@ check_stdarg(PRE_ARGS)
 
 
 static int
-check_msec(PRE_ARGS, int sz, enum mdoc_msec *msecs)
+check_sec(PRE_ARGS, ...)
 {
-	int		 i;
+	enum mdoc_sec	 sec;
+	va_list		 ap;
 
-	for (i = 0; i < sz; i++)
-		if (msecs[i] == mdoc->meta.msec)
-			return(1);
+	va_start(ap, n);
+
+	for (;;) {
+		if (SEC_CUSTOM == (sec = va_arg(ap, enum mdoc_sed)))
+			break;
+		if (sec != mdoc->lastsec)
+			continue;
+		va_end(ap);
+		return(1);
+	}
+
+	va_end(ap);
 	return(mdoc_nwarn(mdoc, n, WARN_COMPAT, 
-				"invalid manual section"));
+		"inappropriate document section for macro"));
+}
+
+
+static int
+check_msec(PRE_ARGS, ...)
+{
+	va_list		 ap;
+	int		 msec;
+
+	va_start(ap, n);
+	for (;;) {
+		if (0 == (msec = va_arg(ap, int)))
+			break;
+		if (msec != mdoc->meta.msec)
+			continue;
+		va_end(ap);
+		return(1);
+	}
+
+	va_end(ap);
+	return(mdoc_nwarn(mdoc, n, WARN_COMPAT, 
+		"inappropriate manual section for macro"));
 }
 
 
@@ -755,16 +796,6 @@ pre_it(PRE_ARGS)
 
 
 static int
-pre_st(PRE_ARGS)
-{
-
-	if (1 == n->data.elem.argc)
-		return(1);
-	return(mdoc_nerr(mdoc, n, "one argument required"));
-}
-
-
-static int
 pre_an(PRE_ARGS)
 {
 
@@ -775,11 +806,18 @@ pre_an(PRE_ARGS)
 
 
 static int
+pre_lb(PRE_ARGS)
+{
+
+	return(check_sec(mdoc, n, SEC_LIBRARY, SEC_CUSTOM));
+}
+
+
+static int
 pre_rv(PRE_ARGS)
 {
-	enum mdoc_msec msecs[] = { MSEC_2, MSEC_3 };
 
-	if ( ! check_msec(mdoc, n, 2, msecs))
+	if ( ! check_msec(mdoc, n, 2, 3, 0))
 		return(0);
 	return(check_stdarg(mdoc, n));
 }
@@ -788,9 +826,8 @@ pre_rv(PRE_ARGS)
 static int
 pre_ex(PRE_ARGS)
 {
-	enum mdoc_msec msecs[] = { MSEC_1, MSEC_6, MSEC_8 };
 
-	if ( ! check_msec(mdoc, n, 3, msecs))
+	if ( ! check_msec(mdoc, n, 1, 6, 8, 0))
 		return(0);
 	return(check_stdarg(mdoc, n));
 }
@@ -799,18 +836,16 @@ pre_ex(PRE_ARGS)
 static int
 pre_er(PRE_ARGS)
 {
-	enum mdoc_msec msecs[] = { MSEC_2 };
 
-	return(check_msec(mdoc, n, 1, msecs));
+	return(check_msec(mdoc, n, 2, 0));
 }
 
 
 static int
 pre_cd(PRE_ARGS)
 {
-	enum mdoc_msec msecs[] = { MSEC_4 };
 
-	return(check_msec(mdoc, n, 1, msecs));
+	return(check_msec(mdoc, n, 4, 0));
 }
 
 
@@ -818,50 +853,55 @@ static int
 pre_prologue(PRE_ARGS)
 {
 
-	if (SEC_PROLOGUE != mdoc->lastnamed)
-		return(mdoc_nerr(mdoc, n, "prologue only"));
+	return(check_sec(mdoc, n, SEC_PROLOGUE, SEC_CUSTOM));
+}
 
-	/* Check for ordering. */
 
-	switch (n->tok) {
-	case (MDOC_Os):
-		if (mdoc->meta.title && mdoc->meta.date)
-			break;
-		return(mdoc_nerr(mdoc, n, "prologue out-of-order"));
-	case (MDOC_Dt):
-		if (NULL == mdoc->meta.title && mdoc->meta.date)
-			break;
-		return(mdoc_nerr(mdoc, n, "prologue out-of-order"));
-	case (MDOC_Dd):
-		if (NULL == mdoc->meta.title && 0 == mdoc->meta.date)
-			break;
-		return(mdoc_nerr(mdoc, n, "prologue out-of-order"));
-	default:
-		abort();
-		/* NOTREACHED */
-	}
+static int
+pre_dt(PRE_ARGS)
+{
 
-	/* Check for repetition. */
+	if (0 == mdoc->meta.date || mdoc->meta.os)
+		if ( ! mdoc_nwarn(mdoc, n, WARN_COMPAT, 
+					"out-of-order prologue"))
+			return(0);
+	if (mdoc->meta.title)
+		if ( ! mdoc_nwarn(mdoc, n, WARN_COMPAT, 
+					"prologue re-invoked"))
+			return(0);
+	return(1);
+}
 
-	switch (n->tok) {
-	case (MDOC_Os):
-		if (NULL == mdoc->meta.os)
-			return(1);
-		break;
-	case (MDOC_Dd):
-		if (0 == mdoc->meta.date)
-			return(1);
-		break;
-	case (MDOC_Dt):
-		if (NULL == mdoc->meta.title)
-			return(1);
-		break;
-	default:
-		abort();
-		/* NOTREACHED */
-	}
 
-	return(mdoc_nerr(mdoc, n, "prologue repetition"));
+static int
+pre_os(PRE_ARGS)
+{
+
+	if (NULL == mdoc->meta.title || 0 == mdoc->meta.date)
+		if ( ! mdoc_nwarn(mdoc, n, WARN_COMPAT, 
+					"out-of-order prologue"))
+			return(0);
+	if (mdoc->meta.os)
+		if ( ! mdoc_nwarn(mdoc, n, WARN_COMPAT, 
+					"prologue re-invoked"))
+			return(0);
+	return(1);
+}
+
+
+static int
+pre_dd(PRE_ARGS)
+{
+
+	if (mdoc->meta.title || mdoc->meta.os)
+		if ( ! mdoc_nwarn(mdoc, n, WARN_COMPAT,
+					"out-of-order prologue"))
+			return(0);
+	if (mdoc->meta.date)
+		if ( ! mdoc_nwarn(mdoc, n, WARN_COMPAT,
+					"prologue re-invoked"))
+			return(0);
+	return(1);
 }
 
 
@@ -912,27 +952,14 @@ post_nm(POST_ARGS)
 
 
 static int
-post_xr(POST_ARGS)
-{
-	struct mdoc_node *n;
-
-	if (NULL == (n = mdoc->last->child->next))
-		return(1);
-	if (MSEC_DEFAULT != mdoc_atomsec(n->data.text.string))
-		return(1);
-	return(mdoc_nerr(mdoc, n, "invalid manual section"));
-}
-
-
-static int
 post_at(POST_ARGS)
 {
 
 	if (NULL == mdoc->last->child)
 		return(1);
-	if (ATT_DEFAULT != mdoc_atoatt(mdoc->last->child->data.text.string))
+	if (mdoc_a2att(mdoc->last->child->data.text.string))
 		return(1);
-	return(mdoc_err(mdoc, "require valid symbol"));
+	return(mdoc_err(mdoc, "require valid AT&T symbol"));
 }
 
 
@@ -1161,6 +1188,17 @@ post_root(POST_ARGS)
 
 
 static int
+post_st(POST_ARGS)
+{
+
+	if (mdoc_a2st(mdoc->last->child->data.text.string))
+		return(1);
+
+	return(mdoc_warn(mdoc, WARN_SYNTAX, "invalid standard"));
+}
+
+
+static int
 post_sh(POST_ARGS)
 {
 
@@ -1219,35 +1257,61 @@ post_sh_head(POST_ARGS)
 	char		  buf[64];
 	enum mdoc_sec	  sec;
 
+	/*
+	 * Process a new section.  Sections are either "named" or
+	 * "custom"; custom sections are user-defined, while named ones
+	 * usually follow a conventional order and may only appear in
+	 * certain manual sections.
+	 */
+
 	assert(MDOC_Sh == mdoc->last->tok);
 
-	if ( ! xstrlcats(buf, mdoc->last->child, sizeof(buf)))
-		return(mdoc_err(mdoc, "argument too long"));
+	(void)xstrlcpys(buf, mdoc->last->child, sizeof(buf));
 
 	sec = mdoc_atosec(buf);
+
+	/* The NAME section should always be first. */
 
 	if (SEC_BODY == mdoc->lastnamed && SEC_NAME != sec)
 		return(mdoc_warn(mdoc, WARN_SYNTAX, 
 				"section NAME should be first"));
 	if (SEC_CUSTOM == sec)
 		return(1);
+
+	/* Check for repeated or out-of-order sections. */
+
 	if (sec == mdoc->lastnamed)
 		return(mdoc_warn(mdoc, WARN_SYNTAX, 
 				"section repeated"));
 	if (sec < mdoc->lastnamed)
 		return(mdoc_warn(mdoc, WARN_SYNTAX, 
-				"section out of order"));
+				"section out of conventional order"));
+
+	/* Check particular section/manual section conventions. */
+
+	switch (sec) {
+	case (SEC_LIBRARY):
+		switch (mdoc->meta.msec) {
+		case (2):
+			/* FALLTHROUGH */
+		case (3):
+			break;
+		default:
+			return(mdoc_warn(mdoc, WARN_COMPAT,
+				"section in wrong manual section"));
+		}
+		break;
+	default:
+		break;
+	}
 
 	return(1);
 }
 
 
 static int
-post_fd(POST_ARGS)
+pre_fd(PRE_ARGS)
 {
 
-	if (SEC_SYNOPSIS == mdoc->last->sec)
-		return(1);
-	return(mdoc_warn(mdoc, WARN_COMPAT, 
-			"suggested only in section SYNOPSIS"));
+	return(check_sec(mdoc, n, SEC_SYNOPSIS, SEC_CUSTOM));
 }

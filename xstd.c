@@ -93,7 +93,7 @@ xstrdup(const char *p)
 }
 
 int
-xstrlcats(char *buf, const struct mdoc_node *n, size_t sz)
+xstrlcpys(char *buf, const struct mdoc_node *n, size_t sz)
 {
 	char		 *p;
 

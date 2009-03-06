@@ -31,13 +31,15 @@ static	void	doprint(const struct mdoc_node *, int);
 int
 main(int argc, char *argv[])
 {
-	struct mmain	*p;
+	struct mmain	  *p;
+	int		   c;
 	const struct mdoc *mdoc;
 
 	p = mmain_alloc();
 
-	if ( ! mmain_getopt(p, argc, argv, NULL, NULL, NULL, NULL))
-		mmain_exit(p, 1);
+	c = mmain_getopt(p, argc, argv, NULL, NULL, NULL, NULL);
+	if (1 != c) 
+		mmain_exit(p, -1 == c ? 1 : 0);
 
 	if (NULL == (mdoc = mmain_mdoc(p)))
 		mmain_exit(p, 1);

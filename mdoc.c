@@ -74,7 +74,7 @@ const	char *const __mdoc_macronames[MDOC_MAX] = {
 	"Tn",		"Ux",		"Xc",		"Xo",
 	"Fo",		"Fc",		"Oo",		"Oc",
 	"Bk",		"Ek",		"Bt",		"Hf",
-	"Fr",		"Ud",
+	"Fr",		"Ud",		"Lb",
 	};
 
 const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {		 
@@ -85,20 +85,8 @@ const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {
 	"tag",			"diag",			"hang",		 
 	"ohang",		"inset",		"column",	 
 	"width",		"compact",		"std",	 
-	"p1003.1-88",		"p1003.1-90",		"p1003.1-96",
-	"p1003.1-2001",		"p1003.1-2004",		"p1003.1",
-	"p1003.1b",		"p1003.1b-93",		"p1003.1c-95",
-	"p1003.1g-2000",	"p1003.2-92",		"p1387.2-95",
-	"p1003.2",		"p1387.2",		"isoC-90",
-	"isoC-amd1",		"isoC-tcor1",		"isoC-tcor2",
-	"isoC-99",		"ansiC",		"ansiC-89",
-	"ansiC-99",		"ieee754",		"iso8802-3",
-	"xpg3",			"xpg4",			"xpg4.2",
-	"xpg4.3",		"xbd5",			"xcu5",
-	"xsh5",			"xns5",			"xns5.2d2.0",
-	"xcurses4.2",		"susv2",		"susv3",
-	"svid4",		"filled",		"words",
-	"emphasis",		"symbolic",
+	"filled",		"words",		"emphasis",
+	"symbolic"
 	};
 
 const	char * const *mdoc_macronames = __mdoc_macronames;
@@ -135,6 +123,10 @@ mdoc_free(struct mdoc *mdoc)
 		free(mdoc->meta.os);
 	if (mdoc->meta.name)
 		free(mdoc->meta.name);
+	if (mdoc->meta.arch)
+		free(mdoc->meta.arch);
+	if (mdoc->meta.vol)
+		free(mdoc->meta.vol);
 
 	free(mdoc);
 }
@@ -326,7 +318,6 @@ mdoc_macro(struct mdoc *mdoc, int tok,
 static int
 mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 {
-	const char	 *nn, *nt, *on, *ot, *act;
 
 	assert(mdoc->last);
 	assert(mdoc->first);
@@ -353,34 +344,15 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 					MDOC_LINEARG_SOFTMAX, mdoc->linetok))
 			return(0);
 
-	if (MDOC_TEXT == mdoc->last->type)
-		on = "<text>";
-	else if (MDOC_ROOT == mdoc->last->type)
-		on = "<root>";
-	else
-		on = mdoc_macronames[mdoc->last->tok];
-
-	if (MDOC_TEXT == p->type)
-		nn = "<text>";
-	else if (MDOC_ROOT == p->type)
-		nn = "<root>";
-	else
-		nn = mdoc_macronames[p->tok];
-
-	ot = mdoc_type2a(mdoc->last->type);
-	nt = mdoc_type2a(p->type);
-
 	switch (mdoc->next) {
 	case (MDOC_NEXT_SIBLING):
 		mdoc->last->next = p;
 		p->prev = mdoc->last;
 		p->parent = mdoc->last->parent;
-		act = "sibling";
 		break;
 	case (MDOC_NEXT_CHILD):
 		mdoc->last->child = p;
 		p->parent = mdoc->last;
-		act = "child";
 		break;
 	default:
 		abort();
@@ -408,8 +380,6 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	}
 
 	mdoc->last = p;
-	mdoc_msg(mdoc, "parse: %s `%s' %s of %s `%s'", 
-			nt, nn, act, ot, on);
 	return(1);
 }
 
@@ -672,28 +642,4 @@ argdup(size_t argsz, const struct mdoc_arg *args)
 
 	return(pp);
 }
-
-
-/* FIXME: deprecate. */
-char *
-mdoc_node2a(struct mdoc_node *node)
-{
-	static char	 buf[64];
-
-	assert(node);
-
-	buf[0] = 0;
-	(void)xstrlcat(buf, mdoc_type2a(node->type), 64);
-	if (MDOC_ROOT == node->type)
-		return(buf);
-	(void)xstrlcat(buf, " `", 64);
-	if (MDOC_TEXT == node->type)
-		(void)xstrlcat(buf, node->data.text.string, 64);
-	else
-		(void)xstrlcat(buf, mdoc_macronames[node->tok], 64);
-	(void)xstrlcat(buf, "'", 64);
-
-	return(buf);
-}
-
 

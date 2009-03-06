@@ -16,7 +16,10 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+#include <sys/utsname.h>
+
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -158,6 +161,7 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* Hf */
 	{ NULL }, /* Fr */
 	{ NULL }, /* Ud */
+	{ NULL }, /* Lb */
 };
 
 
@@ -192,24 +196,14 @@ post_nm(struct mdoc *mdoc)
 {
 	char		 buf[64];
 
-	assert(MDOC_ELEM == mdoc->last->type);
-	assert(MDOC_Nm == mdoc->last->tok);
-
-	/*
-	 * The `Nm' macro sets the document's name when used the first
-	 * time with an argument.  Subsequent calls without a value will
-	 * result in the name value being used.
-	 */
-
 	if (mdoc->meta.name)
 		return(1);
 
-	if (xstrlcats(buf, mdoc->last->child, 64)) {
-		mdoc->meta.name = xstrdup(buf);
-		return(1);
-	}
+	(void)xstrlcpys(buf, mdoc->last->child, sizeof(buf));
+	mdoc->meta.name = xstrdup(buf);
+	mdoc_msg(mdoc, "name: %s", mdoc->meta.name);
 
-	return(mdoc_err(mdoc, "macro parameters too long"));
+	return(1);
 }
 
 
@@ -227,23 +221,23 @@ post_sh(struct mdoc *mdoc)
 
 	if (MDOC_HEAD != mdoc->last->type)
 		return(1);
-	if (xstrlcats(buf, mdoc->last->child, 64)) {
-		if (SEC_CUSTOM != (sec = mdoc_atosec(buf)))
-			mdoc->lastnamed = sec;
-		mdoc->lastsec = sec;
-	} else
-		return(mdoc_err(mdoc, "parameters too long"));
+
+	(void)xstrlcpys(buf, mdoc->last->child, sizeof(buf));
+	if (SEC_CUSTOM != (sec = mdoc_atosec(buf)))
+		mdoc->lastnamed = sec;
+
+	mdoc->lastsec = sec;
 
 	switch (mdoc->lastsec) {
 	case (SEC_RETURN_VALUES):
 		/* FALLTHROUGH */
 	case (SEC_ERRORS):
 		switch (mdoc->meta.msec) {
-		case (MSEC_2):
+		case (2):
 			/* FALLTHROUGH */
-		case (MSEC_3):
+		case (3):
 			/* FALLTHROUGH */
-		case (MSEC_9):
+		case (9):
 			break;
 		default:
 			return(mdoc_warn(mdoc, WARN_COMPAT,
@@ -261,53 +255,99 @@ post_sh(struct mdoc *mdoc)
 static int
 post_dt(struct mdoc *mdoc)
 {
-	int		  i;
-	char		 *p;
 	struct mdoc_node *n;
+	const char	 *cp;
+	char		 *ep;
+	long		  lval;
 
-	/* 
-	 * Prologue title must be parsed into document meta-data.
+	if (mdoc->meta.title)
+		free(mdoc->meta.title);
+	if (mdoc->meta.vol)
+		free(mdoc->meta.vol);
+	if (mdoc->meta.arch)
+		free(mdoc->meta.arch);
+
+	mdoc->meta.title = mdoc->meta.vol = mdoc->meta.arch = NULL;
+	mdoc->meta.msec = 0;
+
+	/* Handles: `.Dt' 
+	 *   --> title = unknown, volume = local, msec = 0, arch = NULL
 	 */
 
-	assert(MDOC_ELEM == mdoc->last->type);
-	assert(MDOC_Dt == mdoc->last->tok);
-
-	assert(NULL == mdoc->meta.title);
-
-	/* LINTED */
-	for (i = 0, n = mdoc->last->child; n; n = n->next, i++) {
-		assert(MDOC_TEXT == n->type);
-		p = n->data.text.string;
-
-		switch (i) {
-		case (0):
-			mdoc->meta.title = xstrdup(p);
-			break;
-		case (1):
-			mdoc->meta.msec = mdoc_atomsec(p);
-			if (MSEC_DEFAULT != mdoc->meta.msec)
-				break;
-			return(mdoc_nerr(mdoc, n, 
-					"invalid parameter syntax"));
-		case (2):
-			mdoc->meta.vol = mdoc_atovol(p);
-			if (VOL_DEFAULT != mdoc->meta.vol)
-				break;
-			mdoc->meta.arch = mdoc_atoarch(p);
-			if (ARCH_DEFAULT != mdoc->meta.arch)
-				break;
-			return(mdoc_nerr(mdoc, n, 
-					"invalid parameter syntax"));
-		default:
-			return(mdoc_nerr(mdoc, n, 
-					"too many parameters"));
-		}
+	if (NULL == (n = mdoc->last->child)) {
+		mdoc->meta.title = xstrdup("unknown");
+		mdoc->meta.vol = xstrdup("local");
+		mdoc_msg(mdoc, "title: %s", mdoc->meta.title);
+		mdoc_msg(mdoc, "volume: %s", mdoc->meta.vol);
+		mdoc_msg(mdoc, "arch: <unset>");
+		mdoc_msg(mdoc, "msec: <unset>");
+		return(post_prologue(mdoc));
 	}
 
-	if (NULL == mdoc->meta.title)
-		mdoc->meta.title = xstrdup("UNTITLED");
+	/* Handles: `.Dt TITLE' 
+	 *   --> title = TITLE, volume = local, msec = 0, arch = NULL
+	 */
 
+	mdoc->meta.title = xstrdup(n->data.text.string);
 	mdoc_msg(mdoc, "title: %s", mdoc->meta.title);
+
+	if (NULL == (n = n->next)) {
+		mdoc->meta.vol = xstrdup("local");
+		mdoc_msg(mdoc, "volume: %s", mdoc->meta.vol);
+		mdoc_msg(mdoc, "arch: <unset>");
+		mdoc_msg(mdoc, "msec: %d", mdoc->meta.msec);
+		return(post_prologue(mdoc));
+	}
+
+	/* Handles: `.Dt TITLE SEC'
+	 *   --> title = TITLE, volume = SEC is msec ? 
+	 *           format(msec) : SEC,
+	 *       msec = SEC is msec ? atoi(msec) : 0,
+	 *       arch = NULL
+	 */
+
+	if ((cp = mdoc_a2msec(n->data.text.string))) {
+		mdoc->meta.vol = xstrdup(cp);
+		errno = 0;
+		lval = strtol(n->data.text.string, &ep, 10);
+		if (n->data.text.string[0] != '\0' && *ep == '\0')
+			mdoc->meta.msec = (int)lval;
+	} else 
+		mdoc->meta.vol = xstrdup(n->data.text.string);
+
+	if (NULL == (n = n->next)) {
+		mdoc_msg(mdoc, "volume: %s", mdoc->meta.vol);
+		mdoc_msg(mdoc, "arch: <unset>");
+		mdoc_msg(mdoc, "msec: %d", mdoc->meta.msec);
+		return(post_prologue(mdoc));
+	}
+
+	/* Handles: `.Dt TITLE SEC VOL'
+	 *   --> title = TITLE, volume = VOL is vol ?
+	 *       format(VOL) : 
+	 *           VOL is arch ? format(arch) : 
+	 *               VOL
+	 */
+
+	if ((cp = mdoc_a2vol(n->data.text.string))) {
+		free(mdoc->meta.vol);
+		mdoc->meta.vol = xstrdup(cp);
+		n = n->next;
+	} else {
+		cp = mdoc_a2arch(n->data.text.string);
+		if (NULL == cp) {
+			free(mdoc->meta.vol);
+			mdoc->meta.vol = xstrdup(n->data.text.string);
+		} else
+			mdoc->meta.arch = xstrdup(cp);
+	}	
+
+	mdoc_msg(mdoc, "volume: %s", mdoc->meta.vol);
+	mdoc_msg(mdoc, "arch: %s", mdoc->meta.arch ?
+			mdoc->meta.arch : "<unset>");
+	mdoc_msg(mdoc, "msec: %d", mdoc->meta.msec);
+
+	/* Ignore any subsequent parameters... */
 
 	return(post_prologue(mdoc));
 }
@@ -317,21 +357,25 @@ static int
 post_os(struct mdoc *mdoc)
 {
 	char		  buf[64];
+	struct utsname	  utsname;
 
-	/* 
-	 * Prologue operating system must be parsed into document
-	 * meta-data.
-	 */
+	if (mdoc->meta.os)
+		free(mdoc->meta.os);
 
-	assert(MDOC_ELEM == mdoc->last->type);
-	assert(MDOC_Os == mdoc->last->tok);
-	assert(NULL == mdoc->meta.os);
+	(void)xstrlcpys(buf, mdoc->last->child, sizeof(buf));
 
-	if ( ! xstrlcats(buf, mdoc->last->child, 64))
-		return(mdoc_err(mdoc, "macro parameters too long")); 
+	if (0 == buf[0]) {
+		if (-1 == uname(&utsname))
+			return(mdoc_err(mdoc, "utsname"));
+		(void)xstrlcpy(buf, utsname.sysname, sizeof(buf));
+		(void)xstrlcat(buf, " ", sizeof(buf));
+		(void)xstrlcat(buf, utsname.release, sizeof(buf));
+	}
 
-	mdoc->meta.os = xstrdup(buf[0] ? buf : "LOCAL");
-	mdoc->lastnamed = SEC_BODY;
+	mdoc->meta.os = xstrdup(buf);
+	mdoc_msg(mdoc, "system: %s", mdoc->meta.os);
+
+	mdoc->lastnamed = mdoc->lastsec = SEC_BODY;
 
 	return(post_prologue(mdoc));
 }
@@ -508,24 +552,12 @@ post_dd(struct mdoc *mdoc)
 {
 	char		  buf[64];
 
-	/* 
-	 * Prologue date must be parsed into document meta-data.  We
-	 * accept multiple kinds of dates, described mostly in
-	 * mdoc_atotime().
-	 */
+	(void)xstrlcpys(buf, mdoc->last->child, sizeof(buf));
 
-	assert(MDOC_ELEM == mdoc->last->type);
-	assert(MDOC_Dd == mdoc->last->tok);
-
-	assert(0 == mdoc->meta.date);
-
-	if ( ! xstrlcats(buf, mdoc->last->child, 64))
-		return(mdoc_err(mdoc, "macro parameters too long"));
 	if (0 == (mdoc->meta.date = mdoc_atotime(buf)))
-		return(mdoc_err(mdoc, "invalid parameter syntax"));
+		return(mdoc_err(mdoc, "invalid date syntax"));
 
 	mdoc_msg(mdoc, "date: %u", mdoc->meta.date);
-
 	return(post_prologue(mdoc));
 }
 

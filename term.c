@@ -166,6 +166,7 @@ DECL_PRE(termp_xr);
 DECL_POST(termp___);
 DECL_POST(termp_bl);
 DECL_POST(termp_bx);
+DECL_POST(termp_lb);
 
 const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* \" */
@@ -274,6 +275,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Hf */
 	{ NULL, NULL }, /* Fr */
 	{ termp_ud_pre, NULL }, /* Ud */
+	{ NULL, termp_lb_post }, /* lb */
 };
 
 const struct termact *termacts = __termacts;
@@ -721,14 +723,13 @@ termp_pp_pre(DECL_ARGS)
 static int
 termp_st_pre(DECL_ARGS)
 {
-	const char 	*tp;
+	const char	*cp;
 
-	assert(1 == node->data.elem.argc);
-
-	tp = mdoc_st2a(node->data.elem.argv[0].arg);
-	word(p, tp);
-
-	return(1);
+	/* XXX - if child isn't text? */
+	if (node->child) 
+		if ((cp = mdoc_a2st(node->child->data.text.string)))
+			word(p, cp);
+	return(0);
 }
 
 
@@ -964,6 +965,15 @@ termp_bt_pre(DECL_ARGS)
 
 	word(p, "is currently in beta test.");
 	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_lb_post(DECL_ARGS)
+{
+
+	newln(p);
 }
 
 
@@ -1480,15 +1490,19 @@ termp_in_post(DECL_ARGS)
 static int
 termp_at_pre(DECL_ARGS)
 {
-	enum mdoc_att	 c;
+	const char	*att;
 
-	c = ATT_DEFAULT;
+	att = NULL;
+
 	if (node->child) {
 		assert(MDOC_TEXT == node->child->type);
-		c = mdoc_atoatt(node->child->data.text.string);
+		att = mdoc_a2att(node->child->data.text.string);
 	}
 
-	word(p, mdoc_att2a(c));
+	if (NULL == att)
+		att = "AT&T UNIX";
+
+	word(p, att);
 	return(0);
 }
 

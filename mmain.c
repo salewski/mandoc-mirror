@@ -109,7 +109,7 @@ mmain_getopt(struct mmain *p, int argc, char *argv[],
 
 	extern int	 optind;
 
-	sz = strlcpy(opts, "vW:", 32);
+	sz = strlcpy(opts, "VvW:", 32);
 	assert(sz < 32);
 
 	if (u) {
@@ -125,18 +125,21 @@ mmain_getopt(struct mmain *p, int argc, char *argv[],
 		case ('v'):
 			p->dbg++;
 			break;
+		case ('V'):
+			(void)printf("%s %s\n", __progname, VERSION);
+			return(0);
 		case ('W'):
 			if ( ! getsopts(p, optarg))
-				return(0);
+				return(-1);
 			break;
 		case ('?'):
 			mmain_usage(help);
-			return(0);
+			return(-1);
 		default:
 			assert(getopt_cb);
 			if ((*getopt_cb)(arg, c, optarg))
 				break;
-			return(0);
+			return(-1);
 		}
 
 	argv += optind;

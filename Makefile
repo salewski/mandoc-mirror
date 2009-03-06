@@ -1,7 +1,7 @@
 .SUFFIXES:	.html .sgml
 
-VERSION	= 1.3.18
-VDATE	= 04 March 2009
+VERSION	= 1.3.19
+VDATE	= 05 March 2009
 
 BINDIR		= $(PREFIX)/bin
 INCLUDEDIR	= $(PREFIX)/include
@@ -14,9 +14,11 @@ INSTALL_LIB	= install -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
 CFLAGS += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g 
+CFLAGS += -DVERSION=\"$(VERSION)\"
 
 LIBLNS	= macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
-	  validate.ln action.ln 
+	  validate.ln action.ln lib.ln att.ln arch.ln vol.ln \
+	  msec.ln st.ln
 
 TREELNS	= mdoctree.ln mmain.ln 
 
@@ -31,7 +33,8 @@ LLNS	= llib-llibmdoc.ln llib-lmdoctree.ln llib-lmdocterm.ln
 LIBS	= libmdoc.a
 
 LIBOBJS	= macro.o mdoc.o hash.o strings.o xstd.o argv.o \
-	  validate.o action.o
+	  validate.o action.o lib.o att.o arch.o vol.o msec.o \
+	  st.o
 
 TERMOBJS= mdocterm.o mmain.o term.o
 
@@ -39,10 +42,14 @@ TREEOBJS= mdoctree.o mmain.o
 
 LINTOBJS= mdoclint.o mmain.o
 
-OBJS	= $(LIBOBJS) $(TERMOBJS) $(TREEOBJS)
+OBJS	= $(LIBOBJS) $(TERMOBJS) $(TREEOBJS) $(LINTOBJS)
 
 SRCS	= macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
 	  action.c term.c mdoctree.c mdocterm.c mmain.c mdoclint.c
+
+SCRIPTS = strings.sh
+
+GEN	= lib.c att.c arch.c vol.c msec.c st.c
 
 HEADS	= mdoc.h private.h term.h mmain.h
 
@@ -60,10 +67,10 @@ MANS	= mdoctree.1 mdocterm.1 mdoclint.1 mdoc.3
 BINS	= mdocterm mdoctree mdoclint
 
 CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
-	  $(TARGZS)
+	  $(TARGZS) $(GEN)
 
 INSTALL	= $(SRCS) $(HEADS) Makefile DESCR $(MANS) $(SGMLS) \
-	  $(STATICS) Makefile.netbsd Makefile.openbsd
+	  $(STATICS) $(SCRIPTS) Makefile.netbsd Makefile.openbsd
 
 FAIL	= regress/test.empty \
 	  regress/test.prologue.00 \
@@ -72,24 +79,14 @@ FAIL	= regress/test.empty \
 	  regress/test.prologue.03 \
 	  regress/test.prologue.04 \
 	  regress/test.prologue.06 \
-	  regress/test.prologue.13 \
-	  regress/test.prologue.15 \
-	  regress/test.prologue.16 \
-	  regress/test.prologue.18 \
 	  regress/test.prologue.19 \
-	  regress/test.prologue.21 \
-	  regress/test.prologue.22 \
 	  regress/test.prologue.23 \
 	  regress/test.prologue.24 \
-	  regress/test.prologue.25 \
-	  regress/test.prologue.26 \
 	  regress/test.prologue.27 \
 	  regress/test.prologue.28 \
-	  regress/test.prologue.29 \
 	  regress/test.prologue.30 \
 	  regress/test.prologue.31 \
 	  regress/test.prologue.32 \
-	  regress/test.prologue.33 \
 	  regress/test.sh.03 \
 	  regress/test.escape.01 \
 	  regress/test.escape.02 \
@@ -112,9 +109,19 @@ SUCCEED	= regress/test.prologue.05 \
 	  regress/test.prologue.10 \
 	  regress/test.prologue.11 \
 	  regress/test.prologue.12 \
+	  regress/test.prologue.13 \
 	  regress/test.prologue.14 \
+	  regress/test.prologue.15 \
+	  regress/test.prologue.16 \
 	  regress/test.prologue.17 \
+	  regress/test.prologue.18 \
 	  regress/test.prologue.20 \
+	  regress/test.prologue.21 \
+	  regress/test.prologue.22 \
+	  regress/test.prologue.25 \
+	  regress/test.prologue.26 \
+	  regress/test.prologue.29 \
+	  regress/test.prologue.33 \
 	  regress/test.sh.00 \
 	  regress/test.name.00 \
 	  regress/test.name.01 \
@@ -197,6 +204,42 @@ uninstall:
 	rm -f $(MANDIR)/man3/mdoc.3
 	rm -f $(LIBDIR)/libmdoc.a
 	rm -f $(INCLUDEDIR)/mdoc.h
+
+lib.ln: lib.c private.h
+lib.o: lib.c private.h
+
+att.ln: att.c private.h
+att.o: att.c private.h
+
+arch.ln: arch.c private.h
+arch.o: arch.c private.h
+
+vol.ln: vol.c private.h
+vol.o: vol.c private.h
+
+msec.ln: msec.c private.h
+msec.o: msec.c private.h
+
+st.ln: st.c private.h
+st.o: st.c private.h
+
+lib.c: lib.in strings.sh
+	sh strings.sh -o $@ lib lib.in
+
+st.c: st.in strings.sh
+	sh strings.sh -o $@ st st.in
+
+msec.c: msec.in strings.sh
+	sh strings.sh -o $@ msec msec.in
+
+att.c: att.in strings.sh
+	sh strings.sh -o $@ att att.in
+
+arch.c: arch.in strings.sh
+	sh strings.sh -o $@ arch arch.in
+
+vol.c: vol.in strings.sh
+	sh strings.sh -o $@ vol vol.in
 
 macro.ln: macro.c private.h
 macro.o: macro.c private.h

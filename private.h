@@ -128,13 +128,12 @@ int		  mdoc_iscdelim(char);
 size_t		  mdoc_isescape(const char *);
 enum	mdoc_sec  mdoc_atosec(const char *);
 enum	mdoc_msec mdoc_atomsec(const char *);
-enum	mdoc_vol  mdoc_atovol(const char *);
-enum	mdoc_arch mdoc_atoarch(const char *);
 time_t		  mdoc_atotime(const char *);
 size_t		  mdoc_macro2len(int);
 
-char		 *mdoc_type2a(enum mdoc_type);
-char		 *mdoc_node2a(struct mdoc_node *);
+const char	 *mdoc_a2arch(const char *);
+const char	 *mdoc_a2vol(const char *);
+const char	 *mdoc_a2msec(const char *);
 
 int		  mdoc_valid_pre(struct mdoc *, 
 			const struct mdoc_node *);
@@ -158,7 +157,7 @@ int		  mdoc_args(struct mdoc *, int,
 #define	ARGS_QWORD	(3)
 #define	ARGS_PHRASE	(4)
 
-int		  xstrlcats(char *, const struct mdoc_node *, size_t);
+int		  xstrlcpys(char *, const struct mdoc_node *, size_t);
 int	  	  xstrlcat(char *, const char *, size_t);
 int	  	  xstrlcpy(char *, const char *, size_t);
 int	  	  xstrcmp(const char *, const char *);

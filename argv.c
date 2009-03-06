@@ -34,6 +34,7 @@
 #define	ARGS_QUOTED	(1 << 0)
 #define	ARGS_DELIM	(1 << 1)
 #define	ARGS_TABSEP	(1 << 2)
+#define	ARGS_ARGVLIKE	(1 << 3)
 
 #define	ARGV_NONE	(1 << 0)
 #define	ARGV_SINGLE	(1 << 1)
@@ -91,43 +92,6 @@ static	int mdoc_argvflags[MDOC_ARG_MAX] = {
 	ARGV_SINGLE,	/* MDOC_Width */
 	ARGV_NONE,	/* MDOC_Compact */
 	ARGV_SINGLE,	/* MDOC_Std */
-	ARGV_NONE,	/* MDOC_p1003_1_88 */
-	ARGV_NONE,	/* MDOC_p1003_1_90 */
-	ARGV_NONE,	/* MDOC_p1003_1_96 */
-	ARGV_NONE,	/* MDOC_p1003_1_2001 */
-	ARGV_NONE,	/* MDOC_p1003_1_2004 */
-	ARGV_NONE,	/* MDOC_p1003_1 */
-	ARGV_NONE,	/* MDOC_p1003_1b */
-	ARGV_NONE,	/* MDOC_p1003_1b_93 */
-	ARGV_NONE,	/* MDOC_p1003_1c_95 */
-	ARGV_NONE,	/* MDOC_p1003_1g_2000 */
-	ARGV_NONE,	/* MDOC_p1003_2_92 */
-	ARGV_NONE,	/* MDOC_p1387_2_95 */
-	ARGV_NONE,	/* MDOC_p1003_2 */
-	ARGV_NONE,	/* MDOC_p1387_2 */
-	ARGV_NONE,	/* MDOC_isoC_90 */
-	ARGV_NONE,	/* MDOC_isoC_amd1 */
-	ARGV_NONE,	/* MDOC_isoC_tcor1 */
-	ARGV_NONE,	/* MDOC_isoC_tcor2 */
-	ARGV_NONE,	/* MDOC_isoC_99 */
-	ARGV_NONE,	/* MDOC_ansiC */
-	ARGV_NONE,	/* MDOC_ansiC_89 */
-	ARGV_NONE,	/* MDOC_ansiC_99 */
-	ARGV_NONE,	/* MDOC_ieee754 */
-	ARGV_NONE,	/* MDOC_iso8802_3 */
-	ARGV_NONE,	/* MDOC_xpg3 */
-	ARGV_NONE,	/* MDOC_xpg4 */
-	ARGV_NONE,	/* MDOC_xpg4_2 */
-	ARGV_NONE,	/* MDOC_xpg4_3 */
-	ARGV_NONE,	/* MDOC_xbd5 */
-	ARGV_NONE,	/* MDOC_xcu5 */
-	ARGV_NONE,	/* MDOC_xsh5 */
-	ARGV_NONE,	/* MDOC_xns5 */
-	ARGV_NONE,	/* MDOC_xns5_2d2_0 */
-	ARGV_NONE,	/* MDOC_xcurses4_2 */
-	ARGV_NONE,	/* MDOC_susv2 */
-	ARGV_NONE,	/* MDOC_susv3 */
-	ARGV_NONE,	/* MDOC_svid4 */
 	ARGV_NONE,	/* MDOC_Filled */
 	ARGV_NONE,	/* MDOC_Words */
 	ARGV_NONE,	/* MDOC_Emphasis */
@@ -172,7 +136,7 @@ static	int mdoc_argflags[MDOC_MAX] = {
 	0, /* Ot */
 	ARGS_DELIM, /* Pa */
 	0, /* Rv */
-	ARGS_DELIM, /* St */ 
+	ARGS_DELIM | ARGS_ARGVLIKE, /* St */ 
 	ARGS_DELIM, /* Va */
 	ARGS_DELIM, /* Vt */ 
 	ARGS_DELIM, /* Xr */
@@ -241,6 +205,7 @@ static	int mdoc_argflags[MDOC_MAX] = {
 	0, /* Hf */
 	0, /* Fr */
 	0, /* Ud */
+	0, /* Lb */
 };
 
 
@@ -373,7 +338,7 @@ args(struct mdoc *mdoc, int line,
 		if ( ! pwarn(mdoc, line, *pos, WQUOTPARM))
 			return(ARGS_ERROR);
 
-	if ('-' == buf[*pos]) 
+	if ( ! (fl & ARGS_ARGVLIKE) && '-' == buf[*pos]) 
 		if ( ! pwarn(mdoc, line, *pos, WARGVPARM))
 			return(ARGS_ERROR);
 
@@ -646,84 +611,6 @@ argv_a2arg(int tok, const char *argv)
 		if (xstrcmp(argv, "std"))
 			return(MDOC_Std);
 		break;
-	
-	case (MDOC_St):
-		if (xstrcmp(argv, "p1003.1-88"))
-			return(MDOC_p1003_1_88);
-		else if (xstrcmp(argv, "p1003.1-90"))
-			return(MDOC_p1003_1_90);
-		else if (xstrcmp(argv, "p1003.1-96"))
-			return(MDOC_p1003_1_96);
-		else if (xstrcmp(argv, "p1003.1-2001"))
-			return(MDOC_p1003_1_2001);
-		else if (xstrcmp(argv, "p1003.1-2004"))
-			return(MDOC_p1003_1_2004);
-		else if (xstrcmp(argv, "p1003.1"))
-			return(MDOC_p1003_1);
-		else if (xstrcmp(argv, "p1003.1b"))
-			return(MDOC_p1003_1b);
-		else if (xstrcmp(argv, "p1003.1b-93"))
-			return(MDOC_p1003_1b_93);
-		else if (xstrcmp(argv, "p1003.1c-95"))
-			return(MDOC_p1003_1c_95);
-		else if (xstrcmp(argv, "p1003.1g-2000"))
-			return(MDOC_p1003_1g_2000);
-		else if (xstrcmp(argv, "p1003.2-92"))
-			return(MDOC_p1003_2_92);
-		else if (xstrcmp(argv, "p1003.2-95"))
-			return(MDOC_p1387_2_95);
-		else if (xstrcmp(argv, "p1003.2"))
-			return(MDOC_p1003_2);
-		else if (xstrcmp(argv, "p1387.2-95"))
-			return(MDOC_p1387_2);
-		else if (xstrcmp(argv, "isoC-90"))
-			return(MDOC_isoC_90);
-		else if (xstrcmp(argv, "isoC-amd1"))
-			return(MDOC_isoC_amd1);
-		else if (xstrcmp(argv, "isoC-tcor1"))
-			return(MDOC_isoC_tcor1);
-		else if (xstrcmp(argv, "isoC-tcor2"))
-			return(MDOC_isoC_tcor2);
-		else if (xstrcmp(argv, "isoC-99"))
-			return(MDOC_isoC_99);
-		else if (xstrcmp(argv, "ansiC"))
-			return(MDOC_ansiC);
-		else if (xstrcmp(argv, "ansiC-89"))
-			return(MDOC_ansiC_89);
-		else if (xstrcmp(argv, "ansiC-99"))
-			return(MDOC_ansiC_99);
-		else if (xstrcmp(argv, "ieee754"))
-			return(MDOC_ieee754);
-		else if (xstrcmp(argv, "iso8802-3"))
-			return(MDOC_iso8802_3);
-		else if (xstrcmp(argv, "xpg3"))
-			return(MDOC_xpg3);
-		else if (xstrcmp(argv, "xpg4"))
-			return(MDOC_xpg4);
-		else if (xstrcmp(argv, "xpg4.2"))
-			return(MDOC_xpg4_2);
-		else if (xstrcmp(argv, "xpg4.3"))
-			return(MDOC_xpg4_3);
-		else if (xstrcmp(argv, "xbd5"))
-			return(MDOC_xbd5);
-		else if (xstrcmp(argv, "xcu5"))
-			return(MDOC_xcu5);
-		else if (xstrcmp(argv, "xsh5"))
-			return(MDOC_xsh5);
-		else if (xstrcmp(argv, "xns5"))
-			return(MDOC_xns5);
-		else if (xstrcmp(argv, "xns5.2d2.0"))
-			return(MDOC_xns5_2d2_0);
-		else if (xstrcmp(argv, "xcurses4.2"))
-			return(MDOC_xcurses4_2);
-		else if (xstrcmp(argv, "susv2"))
-			return(MDOC_susv2);
-		else if (xstrcmp(argv, "susv3"))
-			return(MDOC_susv3);
-		else if (xstrcmp(argv, "svid4"))
-			return(MDOC_svid4);
-		break;
-
 	default:
 		break;
 	}
