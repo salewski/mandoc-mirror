@@ -685,7 +685,7 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 			continue;
 		}
 		return(mdoc_perr(mdoc, line, pos, 
-				"invalid escape sequence"));
+				"invalid escape sequence: %s", p));
 	}
 
 	return(1);
