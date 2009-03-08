@@ -120,6 +120,7 @@ DECL_PREPOST(termp_fo);
 DECL_PREPOST(termp_ft);
 DECL_PREPOST(termp_in);
 DECL_PREPOST(termp_it);
+DECL_PREPOST(termp_lb);
 DECL_PREPOST(termp_op);
 DECL_PREPOST(termp_pf);
 DECL_PREPOST(termp_pq);
@@ -164,7 +165,6 @@ DECL_PRE(termp_xr);
 DECL_POST(termp___);
 DECL_POST(termp_bl);
 DECL_POST(termp_bx);
-DECL_POST(termp_lb);
 
 const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* \" */
@@ -273,7 +273,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Hf */
 	{ NULL, NULL }, /* Fr */
 	{ termp_ud_pre, NULL }, /* Ud */
-	{ NULL, termp_lb_post }, /* lb */
+	{ termp_lb_pre, termp_lb_post }, /* Lb */
 };
 
 const struct termact *termacts = __termacts;
@@ -965,6 +965,27 @@ termp_bt_pre(DECL_ARGS)
 {
 
 	word(p, "is currently in beta test.");
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+termp_lb_pre(DECL_ARGS)
+{
+	const char	*lb;
+
+	if (NULL == node->child)
+		errx(1, "expected text line argument");
+	if (MDOC_TEXT != node->child->type)
+		errx(1, "expected text line argument");
+
+	if ((lb = mdoc_a2lib(node->child->string))) {
+		word(p, lb);
+		return(0);
+	}
+
+	word(p, "library");
 	return(1);
 }
 
