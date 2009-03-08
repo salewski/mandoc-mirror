@@ -97,7 +97,6 @@ void		  mdoc_vmsg(struct mdoc *, int, int,
 			const char *, ...);
 int		  mdoc_verr(struct mdoc *, int, int, 
 			const char *, ...);
-
 int		  mdoc_macro(MACRO_PROT_ARGS);
 int		  mdoc_word_alloc(struct mdoc *, 
 			int, int, const char *);
@@ -111,28 +110,22 @@ int		  mdoc_tail_alloc(struct mdoc *, int, int, int);
 int		  mdoc_body_alloc(struct mdoc *, int, int, int);
 void		  mdoc_node_free(struct mdoc_node *);
 void		  mdoc_node_freelist(struct mdoc_node *);
-void		  mdoc_sibling(struct mdoc *, int, struct mdoc_node **,
-			struct mdoc_node **, struct mdoc_node *);
 void		 *mdoc_tokhash_alloc(void);
 int		  mdoc_tokhash_find(const void *, const char *);
 void		  mdoc_tokhash_free(void *);
 int		  mdoc_iscdelim(char);
 size_t		  mdoc_isescape(const char *);
 enum	mdoc_sec  mdoc_atosec(const char *);
-
 time_t		  mdoc_atotime(const char *);
 size_t		  mdoc_macro2len(int);
-
 const char	 *mdoc_a2arch(const char *);
 const char	 *mdoc_a2vol(const char *);
 const char	 *mdoc_a2msec(const char *);
-
 int		  mdoc_valid_pre(struct mdoc *, 
 			const struct mdoc_node *);
 int		  mdoc_valid_post(struct mdoc *);
 int		  mdoc_action_pre(struct mdoc *, struct mdoc_node *);
 int		  mdoc_action_post(struct mdoc *);
-
 int		  mdoc_argv(struct mdoc *, int, int,
 			struct mdoc_arg **, int *, char *);
 #define	ARGV_ERROR	(-1)
@@ -148,16 +141,13 @@ int		  mdoc_args(struct mdoc *, int,
 #define	ARGS_PUNCT	(2)
 #define	ARGS_QWORD	(3)
 #define	ARGS_PHRASE	(4)
-
 int		  xstrlcpys(char *, const struct mdoc_node *, size_t);
 int	  	  xstrlcat(char *, const char *, size_t);
 int	  	  xstrlcpy(char *, const char *, size_t);
 int	  	  xstrcmp(const char *, const char *);
-int	  	  xstrncmp(const char *, const char *, size_t);
 void	 	 *xcalloc(size_t, size_t);
 void	 	 *xrealloc(void *, size_t);
 char	 	 *xstrdup(const char *);
-
 int		  macro_end(struct mdoc *);
 
 __END_DECLS
