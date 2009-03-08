@@ -1,6 +1,6 @@
 .SUFFIXES:	.html .sgml
 
-VERSION	= 1.4.1
+VERSION	= 1.4.2
 VDATE	= 8 March 2009
 
 BINDIR		= $(PREFIX)/bin
@@ -49,6 +49,8 @@ SRCS	= macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
 
 SCRIPTS = strings.sh
 
+DATAS	= arch.in att.in lib.in msec.in st.in vol.in
+
 GEN	= lib.c att.c arch.c vol.c msec.c st.c
 
 HEADS	= mdoc.h private.h term.h mmain.h
@@ -70,7 +72,8 @@ CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
 	  $(TARGZS) $(GEN)
 
 INSTALL	= $(SRCS) $(HEADS) Makefile DESCR $(MANS) $(SGMLS) \
-	  $(STATICS) $(SCRIPTS) Makefile.netbsd Makefile.openbsd
+	  $(STATICS) $(SCRIPTS) Makefile.netbsd Makefile.openbsd \
+	  $(DATAS)
 
 FAIL	= regress/test.empty \
 	  regress/test.prologue.00 \
