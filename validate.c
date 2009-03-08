@@ -685,7 +685,12 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 			p += (int)c - 1;
 			continue;
 		}
-		return(mdoc_perr(mdoc, line, pos, "invalid escape"));
+		if ( ! (MDOC_IGN_ESCAPE & mdoc->pflags))
+			return(mdoc_perr(mdoc, line, pos, 
+					"invalid escape sequence"));
+		if ( ! mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX,
+					"invalid escape sequence"))
+			return(0);
 	}
 
 	return(1);

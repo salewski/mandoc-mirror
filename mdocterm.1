@@ -26,7 +26,8 @@
 .\" SECTION
 .Sh SYNOPSIS
 .Nm mdocmterm
-.Op Fl v
+.Op Fl vV
+.Op Fl f Ns Ar option...
 .Op Fl W Ns Ar err...
 .Op Ar infile
 .\" SECTION
@@ -36,10 +37,18 @@ The
 utility formats a BSD 
 .Dq mdoc 
 manual page for display on the terminal.  The arguments are as follows:
-.Bl -tag -width "\-Werr... "
+.Bl -tag -width XXXXXXXXXXXX
 .\" ITEM
 .It Fl v
 Print verbose parsing output.
+.\" ITEM
+.It Fl v
+Print version and exit.
+.\" ITEM
+.It Fl f Ns Ar option...
+Override default compiler behaviour.  See 
+.Sx Compiler Options
+for details.
 .\" ITEM
 .It Fl W Ns Ar err...
 Print warning messages.  May be set to 
@@ -75,20 +84,38 @@ input, documented at
 .Xr mdoc 7
 and
 .Xr mdoc.samples 7 ,
-into an abstract syntax tree.
-.\" PARAGRAPH
+into an abstract syntax tree.  
 .Pp
-By default,
-.Nm
-reads from stdin and prints terminal-encoded output to stdout.
+By default, 
+.Nm 
+reads from stdin and prints ANSI 
+.Qq raw
+terminal-encoded output to stdout, at this time to a fixed column with
+of 78 characters.
 .\" PARAGRAPH
 .Pp
 .Ex -std mdocmterm
+.\" SUB-SECTION
+.Ss Compiler Options
+Default compiler behaviour may be overriden with the
+.Fl f
+flag.  The available options are as follows:
+.Bl -tag -width XXXXXXXXXXXX -offset XXXX
+.It Fl f Ns Ar ign-scope
+When rewinding the scope of a block macro, forces the compiler to ignore
+scope violations.  This can seriously mangle the resulting tree.
+.It Fl f Ns Ar ign-escape
+Ignore invalid escape sequences.
+.El
 .\" PARAGRAPH
 .Pp
-.Nm
-is
-.Ud
+As with the
+.Fl W
+flag, multiple
+.Fl f
+options may be grouped and delimited with a comma.  Using
+.Fl f Ns Ar ign-scope,ign-escape ,
+for example, will try to ignore scope and character-escape errors.
 .\" SUB-SECTION
 .Ss Character Escapes
 This section documents the character-escapes accepted by
@@ -224,7 +251,7 @@ To display this manual page:
 .Pp
 To pipe a manual page to the pager:
 .Pp
-.D1 % mdocterm mdocterm.1 | less \-R
+.D1 % mdocterm mdocterm.1 2>&1 | less \-R
 .\" SECTION
 .Sh SEE ALSO
 .Xr mdoctree 1 ,

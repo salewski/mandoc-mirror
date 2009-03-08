@@ -26,7 +26,8 @@
 .\" SECTION
 .Sh SYNOPSIS
 .Nm mdoclint
-.Op Fl v
+.Op Fl vV
+.Op Fl f Ns Ar options...
 .Op Fl W Ns Ar err...
 .Op Ar infile
 .\" SECTION
@@ -37,10 +38,18 @@ utility parses a BSD
 .Dq mdoc 
 manual pages and validates its syntax tree.  The arguments are as
 follows:
-.Bl -tag -width "\-Werr... "
+.Bl -tag -width XXXXXXXXXXXX -offset XXXX
 .\" ITEM
 .It Fl v
 Print verbose parsing output.
+.\" ITEM
+.It Fl V
+Print version and exit.
+.\" ITEM
+.It Fl f Ns Ar option...
+Override default compiler behaviour.  See 
+.Sx Compiler Options
+for details.
 .\" ITEM
 .It Fl W Ns Ar err...
 Print warning messages.  May be set to 
@@ -76,20 +85,31 @@ input, documented at
 .Xr mdoc 7
 and
 .Xr mdoc.samples 7 ,
-into an abstract syntax tree.
-.\" PARAGRAPH
-.Pp
-By default,
-.Nm
-reads from stdin.
+into an abstract syntax tree.  By default, it reads from stdin.
 .\" PARAGRAPH
 .Pp
 .Ex -std mdoclint
+.\" SUB-SECTION
+.Ss Compiler Options
+Default compiler behaviour may be overriden with the
+.Fl f
+flag.  The available options are as follows:
+.Bl -tag -width XXXXXXXXXXXX -offset XXXX
+.It Fl f Ns Ar ign-scope
+When rewinding the scope of a block macro, forces the compiler to ignore
+scope violations.  This can seriously mangle the resulting tree.
+.It Fl f Ns Ar ign-escape
+Ignore invalid escape sequences.
+.El
 .\" PARAGRAPH
 .Pp
-.Nm
-is
-.Ud
+As with the
+.Fl W
+flag, multiple
+.Fl f
+options may be grouped and delimited with a comma.  Using
+.Fl f Ns Ar ign-scope,ign-escape ,
+for example, will try to ignore scope and character-escape errors.
 .\" SECTION
 .Sh EXAMPLES
 To validate this manual page:

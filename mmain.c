@@ -71,7 +71,7 @@ void
 mmain_usage(const char *help)
 {
 
-	warnx("usage: %s %s%s[-v] [-Wwarn...] [infile]", __progname, 
+	warnx("usage: %s %s%s[-v] [-foption...] [-Wwarn...] [infile]", __progname, 
 			help ? help : "", help ? " " : "");
 }
 
@@ -198,7 +198,7 @@ mmain_mdoc(struct mmain *p)
 
 	/* Allocate the parser. */
 
-	p->mdoc = mdoc_alloc(p, &cb);
+	p->mdoc = mdoc_alloc(p, p->pflags, &cb);
 
 	/* Parse the input file. */
 
@@ -217,14 +217,18 @@ static int
 optsopt(struct mmain *p, char *arg)
 {
 	char		*v;
-	char		*toks[] = { "ignore-scope", NULL };
+	char		*toks[] = { "ign-scope", "ign-escape", NULL };
 
 	while (*arg) 
 		switch (getsubopt(&arg, toks, &v)) {
 		case (0):
 			p->pflags |= MDOC_IGN_SCOPE;
 			break;
+		case (1):
+			p->pflags |= MDOC_IGN_ESCAPE;
+			break;
 		default:
+			/* FIXME: report? */
 			return(0);
 		}
 
@@ -254,6 +258,7 @@ optswarn(struct mmain *p, char *arg)
 			p->warn |= MD_WARN_ERR;
 			break;
 		default:
+			/* FIXME: report? */
 			return(0);
 		}
 

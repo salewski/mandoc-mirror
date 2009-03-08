@@ -251,6 +251,8 @@ struct	mdoc_node {
 #define	MDOC_ACTED	 (1 << 1)
 	enum mdoc_type	  type;
 	enum mdoc_sec	  sec;
+
+	/* FIXME: union/struct this with #defines. */
 	struct mdoc_arg	 *args; 	/* BLOCK/ELEM */
 	struct mdoc_node *head;		/* BLOCK */
 	struct mdoc_node *body;		/* BLOCK */
@@ -258,7 +260,8 @@ struct	mdoc_node {
 	char		 *string;	/* TEXT */
 };
 
-#define	MDOC_IGN_SCOPE	 (1 << 0)
+#define	MDOC_IGN_SCOPE	 (1 << 0) /* Ignore scope violations. */
+#define	MDOC_IGN_ESCAPE	 (1 << 1) /* Ignore bad escape sequences. */
 
 /* Call-backs for parse messages. */
 struct	mdoc_cb {
@@ -282,7 +285,7 @@ struct	mdoc;
 void	 	  mdoc_free(struct mdoc *);
 
 /* Allocate a new parser instance. */
-struct	mdoc	 *mdoc_alloc(void *data, const struct mdoc_cb *);
+struct	mdoc	 *mdoc_alloc(void *, int, const struct mdoc_cb *);
 
 /* Set parse options. */
 void		  mdoc_setflags(struct mdoc *, int);

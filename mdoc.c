@@ -129,7 +129,7 @@ mdoc_free(struct mdoc *mdoc)
 
 
 struct mdoc *
-mdoc_alloc(void *data, const struct mdoc_cb *cb)
+mdoc_alloc(void *data, int pflags, const struct mdoc_cb *cb)
 {
 	struct mdoc	*p;
 
@@ -142,7 +142,7 @@ mdoc_alloc(void *data, const struct mdoc_cb *cb)
 	p->last = xcalloc(1, sizeof(struct mdoc_node));
 	p->last->type = MDOC_ROOT;
 	p->first = p->last;
-
+	p->pflags = pflags;
 	p->next = MDOC_NEXT_CHILD;
 	p->htab = mdoc_tokhash_alloc();
 

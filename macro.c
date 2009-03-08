@@ -60,6 +60,8 @@ static	int	  append_delims(struct mdoc *, int, int *, char *);
 static	int	  lookup(struct mdoc *, int, int, int, const char *);
 static	int	  pwarn(struct mdoc *, int, int, int);
 static	int	  perr(struct mdoc *, int, int, int);
+static	int	  scopewarn(struct mdoc *, enum mdoc_type, int, int, 
+			const struct mdoc_node *);
 
 #define	WMACPARM	(1)
 #define	WOBS		(2)
@@ -192,7 +194,7 @@ perr(struct mdoc *mdoc, int line, int pos, int type)
 	switch (type) {
 	case (ENOCTX):
 		c = mdoc_perr(mdoc, line, pos, 
-				"closing macro has prior context");
+				"closing macro has no prior context");
 		break;
 	case (ENOPARMS):
 		c = mdoc_perr(mdoc, line, pos, 
@@ -224,6 +226,53 @@ pwarn(struct mdoc *mdoc, int line, int pos, int type)
 		/* NOTREACHED */
 	}
 	return(c);
+}
+
+
+static int
+scopewarn(struct mdoc *mdoc, enum mdoc_type type, 
+		int line, int pos, const struct mdoc_node *p)
+{
+	const char	*n, *t, *tt;
+
+	n = t = "<root>";
+	tt = "block";
+
+	switch (p->type) {
+	case (MDOC_BODY):
+		tt = "multi-line";
+		break;
+	case (MDOC_HEAD):
+		tt = "line";
+		break;
+	default:
+		break;
+	}
+
+	switch (p->type) {
+	case (MDOC_BLOCK):
+		n = mdoc_macronames[p->tok];
+		t = "block";
+		break;
+	case (MDOC_BODY):
+		n = mdoc_macronames[p->tok];
+		t = "multi-line";
+		break;
+	case (MDOC_HEAD):
+		n = mdoc_macronames[p->tok];
+		t = "line";
+		break;
+	default:
+		break;
+	}
+
+	if ( ! (MDOC_IGN_SCOPE & mdoc->pflags))
+		return(mdoc_perr(mdoc, line, pos, 
+				"%s scope breaks %s scope of %s", 
+				tt, t, n));
+	return(mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX,
+				"%s scope breaks %s scope of %s", 
+				tt, t, n));
 }
 
 
@@ -512,9 +561,8 @@ rewind_subblock(enum mdoc_type type, struct mdoc *mdoc,
 			break;
 		else if (rewind_dobreak(tok, n))
 			continue;
-		return(mdoc_perr(mdoc, line, ppos, 
-			"scope breaks %s", MDOC_ROOT == n->type ?
-			"<root>" : mdoc_macronames[n->tok]));
+		if ( ! scopewarn(mdoc, type, line, ppos, n))
+			return(0);
 	}
 
 	assert(n);
@@ -537,9 +585,8 @@ rewind_expblock(struct mdoc *mdoc, int tok, int line, int ppos)
 			break;
 		else if (rewind_dobreak(tok, n))
 			continue;
-		return(mdoc_perr(mdoc, line, ppos, 
-			"scope breaks %s", MDOC_ROOT == n->type ?
-			"<root>" : mdoc_macronames[n->tok]));
+		if ( ! scopewarn(mdoc, MDOC_BLOCK, line, ppos, n))
+			return(0);
 	}
 
 	assert(n);
@@ -562,9 +609,8 @@ rewind_impblock(struct mdoc *mdoc, int tok, int line, int ppos)
 			break;
 		else if (rewind_dobreak(tok, n))
 			continue;
-		return(mdoc_perr(mdoc, line, ppos, 
-			"scope breaks %s", MDOC_ROOT == n->type ?
-			"<root>" : mdoc_macronames[n->tok]));
+		if ( ! scopewarn(mdoc, MDOC_BLOCK, line, ppos, n))
+			return(0);
 	}
 
 	assert(n);
