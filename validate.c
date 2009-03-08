@@ -299,6 +299,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_notext },			/* Ud */
 	{ pres_lb, posts_lb },			/* Lb */
 	{ NULL, NULL },				/* Lb */
+	{ NULL, posts_pp },			/* Pp */ 
 };
 
 

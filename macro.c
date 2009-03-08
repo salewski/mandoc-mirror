@@ -182,6 +182,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_constant, 0 }, /* Ud */
 	{ macro_constant, 0 }, /* Lb */
 	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* Ap */
+	{ macro_text, 0 }, /* Lp */ 
 };
 
 const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;
