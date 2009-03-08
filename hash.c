@@ -128,6 +128,11 @@ mdoc_tokhash_find(const void *arg, const char *tmp)
 	assert(0 == (size_t)slot % sizeof(struct mdoc_macro));
 	slot /= sizeof(struct mdoc_macro);
 
+	/* 
+	 * FIXME: is this necessary, or do we only need to check the
+	 * remaining characters (2+)? 
+	 */
+
 	if (0 != strcmp(mdoc_macronames[slot], tmp))
 		return(MDOC_MAX);
 	return(slot);

@@ -44,11 +44,13 @@ struct	mmain {
 	u_long		  bufsz;	/* Input buffer size. */
 	char		 *in; 		/* Input file name. */
 	int		  fdin;		/* Input file desc. */
+	int		  pflags;	/* Parse flags. */
 };
 
 extern	char	 	 *__progname;
 
-static	int		  getsopts(struct mmain *, char *);
+static	int		  optswarn(struct mmain *, char *);
+static	int		  optsopt(struct mmain *, char *);
 static	int		  parse(struct mmain *);
 static	void		  msg_msg(void *, int, int, const char *);
 static	int		  msg_err(void *, int, int, const char *);
@@ -109,7 +111,7 @@ mmain_getopt(struct mmain *p, int argc, char *argv[],
 
 	extern int	 optind;
 
-	sz = strlcpy(opts, "VvW:", 32);
+	sz = strlcpy(opts, "VvW:f:", 32);
 	assert(sz < 32);
 
 	if (u) {
@@ -122,6 +124,10 @@ mmain_getopt(struct mmain *p, int argc, char *argv[],
 	/* LINTED */
 	while (-1 != (c = getopt(argc, argv, opts)))
 		switch (c) {
+		case ('f'):
+			if ( ! optsopt(p, optarg))
+				return(-1);
+			break;
 		case ('v'):
 			p->dbg++;
 			break;
@@ -129,7 +135,7 @@ mmain_getopt(struct mmain *p, int argc, char *argv[],
 			(void)printf("%s %s\n", __progname, VERSION);
 			return(0);
 		case ('W'):
-			if ( ! getsopts(p, optarg))
+			if ( ! optswarn(p, optarg))
 				return(-1);
 			break;
 		case ('?'):
@@ -208,7 +214,26 @@ mmain_mdoc(struct mmain *p)
 
 
 static int
-getsopts(struct mmain *p, char *arg)
+optsopt(struct mmain *p, char *arg)
+{
+	char		*v;
+	char		*toks[] = { "ignore-scope", NULL };
+
+	while (*arg) 
+		switch (getsubopt(&arg, toks, &v)) {
+		case (0):
+			p->pflags |= MDOC_IGN_SCOPE;
+			break;
+		default:
+			return(0);
+		}
+
+	return(1);
+}
+
+
+static int
+optswarn(struct mmain *p, char *arg)
 {
 	char		*v;
 	char		*toks[] = { "all", "compat", 

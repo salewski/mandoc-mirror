@@ -32,16 +32,12 @@
  * in macro.c and validate.c.
  */
 
-static	struct mdoc_arg	 *argdup(size_t, const struct mdoc_arg *);
-static	void		  argfree(size_t, struct mdoc_arg *);
-static	void	  	  argcpy(struct mdoc_arg *, 
-				const struct mdoc_arg *);
-
 static	struct mdoc_node *mdoc_node_alloc(const struct mdoc *);
 static	int		  mdoc_node_append(struct mdoc *, 
 				struct mdoc_node *);
-static	void		  mdoc_elem_free(struct mdoc_elem *);
-static	void		  mdoc_text_free(struct mdoc_text *);
+
+static	int		  parsetext(struct mdoc *, int, char *);
+static	int		  parsemacro(struct mdoc *, int, char *);
 
 
 const	char *const __mdoc_macronames[MDOC_MAX] = {		 
@@ -173,76 +169,20 @@ mdoc_endparse(struct mdoc *mdoc)
 
 
 /*
- * Main line-parsing routine.  If the line is a macro-line (started with
- * a '.' control character), then pass along to the parser, which parses
- * subsequent macros until the end of line.  If normal text, simply
- * append the entire line to the chain.
+ * Main parse routine.  Parses a single line -- really just hands off to
+ * the macro or text parser.
  */
 int
-mdoc_parseln(struct mdoc *mdoc, int line, char *buf)
+mdoc_parseln(struct mdoc *m, int ln, char *buf)
 {
-	int		  c, i;
-	char		  tmp[5];
 
-	if (MDOC_HALT & mdoc->flags)
+	/* If in error-mode, then we parse no more. */
+
+	if (MDOC_HALT & m->flags)
 		return(0);
 
-	mdoc->linetok = 0;
-
-	if ('.' != *buf) {
-		/*
-		 * Free-form text.  Not allowed in the prologue.
-		 */
-		if (SEC_PROLOGUE == mdoc->lastnamed)
-			return(mdoc_perr(mdoc, line, 0, 
-					"no text in prologue"));
-
-		if ( ! mdoc_word_alloc(mdoc, line, 0, buf))
-			return(0);
-		mdoc->next = MDOC_NEXT_SIBLING;
-		return(1);
-	}
-
-	/*
-	 * Control-character detected.  Begin the parsing sequence.
-	 */
-
-	if (buf[1] && '\\' == buf[1])
-		if (buf[2] && '\"' == buf[2])
-			return(1);
-
-	i = 1;
-	while (buf[i] && ! isspace((u_char)buf[i]) && 
-			i < (int)sizeof(tmp))
-		i++;
-
-	if (i == (int)sizeof(tmp)) {
-		mdoc->flags |= MDOC_HALT;
-		return(mdoc_perr(mdoc, line, 1, "unknown macro"));
-	} else if (i <= 2) {
-		mdoc->flags |= MDOC_HALT;
-		return(mdoc_perr(mdoc, line, 1, "unknown macro"));
-	}
-
-	i--;
-
-	(void)memcpy(tmp, buf + 1, (size_t)i);
-	tmp[i++] = 0;
-
-	if (MDOC_MAX == (c = mdoc_find(mdoc, tmp))) {
-		mdoc->flags |= MDOC_HALT;
-		return(mdoc_perr(mdoc, line, 1, "unknown macro"));
-	}
-
-	while (buf[i] && isspace((u_char)buf[i]))
-		i++;
-
-	if ( ! mdoc_macro(mdoc, c, line, 1, &i, buf)) {
-		mdoc->flags |= MDOC_HALT;
-		return(0);
-	}
-
-	return(1);
+	return('.' == *buf ? parsemacro(m, ln, buf) :
+			parsetext(m, ln, buf));
 }
 
 
@@ -297,21 +237,26 @@ mdoc_vwarn(struct mdoc *mdoc, int ln, int pos,
 
 
 int
-mdoc_macro(struct mdoc *mdoc, int tok, 
-		int ln, int ppos, int *pos, char *buf)
+mdoc_macro(struct mdoc *m, int tok, 
+		int ln, int pp, int *pos, char *buf)
 {
 
-	assert(mdoc_macros[tok].fp);
+	/* FIXME - these should happen during validation. */
 
 	if (MDOC_PROLOGUE & mdoc_macros[tok].flags && 
-			SEC_PROLOGUE != mdoc->lastnamed)
-		return(mdoc_perr(mdoc, ln, ppos, "macro disallowed in document body"));
+			SEC_PROLOGUE != m->lastnamed)
+		return(mdoc_perr(m, ln, pp, 
+				"disallowed in document body"));
+
 	if ( ! (MDOC_PROLOGUE & mdoc_macros[tok].flags) && 
-			SEC_PROLOGUE == mdoc->lastnamed)
-		return(mdoc_perr(mdoc, ln, ppos, "macro disallowed in document prologue"));
-	if (1 != ppos && ! (MDOC_CALLABLE & mdoc_macros[tok].flags))
-		return(mdoc_perr(mdoc, ln, ppos, "macro not callable"));
-	return((*mdoc_macros[tok].fp)(mdoc, tok, ln, ppos, pos, buf));
+			SEC_PROLOGUE == m->lastnamed)
+		return(mdoc_perr(m, ln, pp, 
+				"disallowed in prologue"));
+
+	if (1 != pp && ! (MDOC_CALLABLE & mdoc_macros[tok].flags))
+		return(mdoc_perr(m, ln, pp, "not callable"));
+
+	return((*mdoc_macros[tok].fp)(m, tok, ln, pp, pos, buf));
 }
 
 
@@ -322,27 +267,6 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	assert(mdoc->last);
 	assert(mdoc->first);
 	assert(MDOC_ROOT != p->type);
-
-	/* See if we exceed the suggest line-max. */
-
-	switch (p->type) {
-	case (MDOC_TEXT):
-		/* FALLTHROUGH */
-	case (MDOC_ELEM):
-		/* FALLTHROUGH */
-	case (MDOC_BLOCK):
-		mdoc->linetok++;
-		break;
-	default:
-		break;
-	}
-
-	/* This sort-of works (re-opening of text macros...). */
-	if (mdoc->linetok > MDOC_LINEARG_SOFTMAX) 
-		if ( ! mdoc_nwarn(mdoc, p, WARN_COMPAT, 
-					"suggested %d tokens per line exceeded (has %d)",
-					MDOC_LINEARG_SOFTMAX, mdoc->linetok))
-			return(0);
 
 	switch (mdoc->next) {
 	case (MDOC_NEXT_SIBLING):
@@ -365,15 +289,15 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	switch (p->type) {
 	case (MDOC_HEAD):
 		assert(MDOC_BLOCK == p->parent->type);
-		p->parent->data.block.head = p;
+		p->parent->head = p;
 		break;
 	case (MDOC_TAIL):
 		assert(MDOC_BLOCK == p->parent->type);
-		p->parent->data.block.tail = p;
+		p->parent->tail = p;
 		break;
 	case (MDOC_BODY):
 		assert(MDOC_BLOCK == p->parent->type);
-		p->parent->data.block.body = p;
+		p->parent->body = p;
 		break;
 	default:
 		break;
@@ -468,7 +392,7 @@ mdoc_root_alloc(struct mdoc *mdoc)
 
 int
 mdoc_block_alloc(struct mdoc *mdoc, int line, int pos, 
-		int tok, size_t argsz, const struct mdoc_arg *args)
+		int tok, struct mdoc_arg *args)
 {
 	struct mdoc_node *p;
 
@@ -478,8 +402,10 @@ mdoc_block_alloc(struct mdoc *mdoc, int line, int pos,
 	p->line = line;
 	p->type = MDOC_BLOCK;
 	p->tok = tok;
-	p->data.block.argc = argsz;
-	p->data.block.argv = argdup(argsz, args);
+	p->args = args;
+
+	if (args)
+		(args->refcnt)++;
 
 	return(mdoc_node_append(mdoc, p));
 }
@@ -487,7 +413,7 @@ mdoc_block_alloc(struct mdoc *mdoc, int line, int pos,
 
 int
 mdoc_elem_alloc(struct mdoc *mdoc, int line, int pos, 
-		int tok, size_t argsz, const struct mdoc_arg *args)
+		int tok, struct mdoc_arg *args)
 {
 	struct mdoc_node *p;
 
@@ -497,8 +423,10 @@ mdoc_elem_alloc(struct mdoc *mdoc, int line, int pos,
 	p->pos = pos;
 	p->type = MDOC_ELEM;
 	p->tok = tok;
-	p->data.elem.argc = argsz;
-	p->data.elem.argv = argdup(argsz, args);
+	p->args = args;
+
+	if (args)
+		(args->refcnt)++;
 
 	return(mdoc_node_append(mdoc, p));
 }
@@ -515,56 +443,9 @@ mdoc_word_alloc(struct mdoc *mdoc,
 	p->line = line;
 	p->pos = pos;
 	p->type = MDOC_TEXT;
-	p->data.text.string = xstrdup(word);
+	p->string = xstrdup(word);
 
 	return(mdoc_node_append(mdoc, p));
-}
-
-
-static void
-argfree(size_t sz, struct mdoc_arg *p)
-{
-	int		 i, j;
-
-	if (0 == sz)
-		return;
-
-	assert(p);
-	/* LINTED */
-	for (i = 0; i < (int)sz; i++)
-		if (p[i].sz > 0) {
-			assert(p[i].value);
-			/* LINTED */
-			for (j = 0; j < (int)p[i].sz; j++)
-				free(p[i].value[j]);
-			free(p[i].value);
-		}
-	free(p);
-}
-
-
-static void
-mdoc_elem_free(struct mdoc_elem *p)
-{
-
-	argfree(p->argc, p->argv);
-}
-
-
-static void
-mdoc_block_free(struct mdoc_block *p)
-{
-
-	argfree(p->argc, p->argv);
-}
-
-
-static void
-mdoc_text_free(struct mdoc_text *p)
-{
-
-	if (p->string)
-		free(p->string);
 }
 
 
@@ -572,20 +453,10 @@ void
 mdoc_node_free(struct mdoc_node *p)
 {
 
-	switch (p->type) {
-	case (MDOC_TEXT):
-		mdoc_text_free(&p->data.text);
-		break;
-	case (MDOC_ELEM):
-		mdoc_elem_free(&p->data.elem);
-		break;
-	case (MDOC_BLOCK):
-		mdoc_block_free(&p->data.block);
-		break;
-	default:
-		break;
-	}
-
+	if (p->string)
+		free(p->string);
+	if (p->args)
+		mdoc_argv_free(p->args);
 	free(p);
 }
 
@@ -603,43 +474,78 @@ mdoc_node_freelist(struct mdoc_node *p)
 }
 
 
+/*
+ * Parse free-form text, that is, a line that does not begin with the
+ * control character.
+ */
+static int
+parsetext(struct mdoc *mdoc, int line, char *buf)
+{
+
+	if (SEC_PROLOGUE == mdoc->lastnamed)
+		return(mdoc_perr(mdoc, line, 0,
+			"text disallowed in prologue"));
+
+	if ( ! mdoc_word_alloc(mdoc, line, 0, buf))
+		return(0);
+
+	mdoc->next = MDOC_NEXT_SIBLING;
+	return(1);
+}
+
+
+/*
+ * Parse a macro line, that is, a line beginning with the control
+ * character.
+ */
 int
-mdoc_find(const struct mdoc *mdoc, const char *key)
+parsemacro(struct mdoc *m, int ln, char *buf)
 {
+	int		  i, c;
+	char		  mac[5];
 
-	return(mdoc_tokhash_find(mdoc->htab, key));
+	/* Comments are quickly ignored. */
+
+	if (buf[1] && '\\' == buf[1])
+		if (buf[2] && '\"' == buf[2])
+			return(1);
+
+	/* Copy the first word into a nil-terminated buffer. */
+
+	for (i = 1; i < 5; i++) {
+		if (0 == (mac[i - 1] = buf[i]))
+			break;
+		else if (isspace((unsigned char)buf[i]))
+			break;
+	}
+
+	mac[i - 1] = 0;
+
+	if (i == 5 || i <= 2) {
+		(void)mdoc_perr(m, ln, 1, "unknown macro: %s%s", 
+				mac, i == 5 ? "..." : "");
+		goto err;
+	} 
+	
+	if (MDOC_MAX == (c = mdoc_tokhash_find(m->htab, mac))) {
+		(void)mdoc_perr(m, ln, 1, "unknown macro: %s", mac);
+		goto err;
+	}
+
+	/* The macro is sane.  Jump to the next word. */
+
+	while (buf[i] && isspace((unsigned char)buf[i]))
+		i++;
+
+	/* Begin recursive parse sequence. */
+
+	if ( ! mdoc_macro(m, c, ln, 1, &i, buf)) 
+		goto err;
+
+	return(1);
+
+err:	/* Error out. */
+
+	m->flags |= MDOC_HALT;
+	return(0);
 }
-
-
-static void
-argcpy(struct mdoc_arg *dst, const struct mdoc_arg *src)
-{
-	int		 i;
-
-	dst->line = src->line;
-	dst->pos = src->pos;
-	dst->arg = src->arg;
-	if (0 == (dst->sz = src->sz))
-		return;
-	dst->value = xcalloc(dst->sz, sizeof(char *));
-	for (i = 0; i < (int)dst->sz; i++)
-		dst->value[i] = xstrdup(src->value[i]);
-}
-
-
-static struct mdoc_arg *
-argdup(size_t argsz, const struct mdoc_arg *args)
-{
-	struct mdoc_arg	*pp;
-	int		 i;
-
-	if (0 == argsz)
-		return(NULL);
-
-	pp = xcalloc((size_t)argsz, sizeof(struct mdoc_arg));
-	for (i = 0; i < (int)argsz; i++)
-		argcpy(&pp[i], &args[i]);
-
-	return(pp);
-}
-

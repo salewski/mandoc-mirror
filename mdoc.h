@@ -173,15 +173,6 @@ enum	mdoc_warn {
 	WARN_COMPAT
 };
 
-/* An argument to a macro (multiple values = `It -column'). */
-struct	mdoc_arg {
-	int	  	  arg;
-	int		  line;
-	int		  pos;
-	size_t		  sz;
-	char		**value;
-};
-
 /* Type of a syntax node. */
 enum	mdoc_type {
 	MDOC_TEXT,
@@ -229,31 +220,19 @@ struct	mdoc_meta {
 	char		 *name;
 };
 
-/* Text-only node. */
-struct	mdoc_text {
-	char		 *string;
+/* An argument to a macro (multiple values = `It -column'). */
+struct	mdoc_argv {
+	int	  	  arg;
+	int		  line;
+	int		  pos;
+	size_t		  sz;
+	char		**value;
 };
 
-/* Block (scoped) node. */
-struct	mdoc_block {
+struct 	mdoc_arg {
 	size_t		  argc;
-	struct mdoc_arg	 *argv;
-	struct mdoc_node *head;
-	struct mdoc_node *body;
-	struct mdoc_node *tail;
-};
-
-/* In-line element node. */
-struct	mdoc_elem {
-	size_t		  argc;
-	struct mdoc_arg	 *argv;
-};
-
-/* Typed nodes of an AST node. */
-union	mdoc_data {
-	struct mdoc_text  text;
-	struct mdoc_elem  elem;
-	struct mdoc_block block;
+	struct mdoc_argv *argv;
+	unsigned int	  refcnt;
 };
 
 /* Node in AST. */
@@ -269,9 +248,15 @@ struct	mdoc_node {
 #define	MDOC_VALID	 (1 << 0)
 #define	MDOC_ACTED	 (1 << 1)
 	enum mdoc_type	  type;
-	union mdoc_data	  data;
 	enum mdoc_sec	  sec;
+	struct mdoc_arg	 *args; 	/* BLOCK/ELEM */
+	struct mdoc_node *head;		/* BLOCK */
+	struct mdoc_node *body;		/* BLOCK */
+	struct mdoc_node *tail;		/* BLOCK */
+	char		 *string;	/* TEXT */
 };
+
+#define	MDOC_IGN_SCOPE	 (1 << 0)
 
 /* Call-backs for parse messages. */
 struct	mdoc_cb {
@@ -296,6 +281,9 @@ void	 	  mdoc_free(struct mdoc *);
 
 /* Allocate a new parser instance. */
 struct	mdoc	 *mdoc_alloc(void *data, const struct mdoc_cb *);
+
+/* Set parse options. */
+void		  mdoc_setflags(struct mdoc *, int);
 
 /* Parse a single line in a stream (boolean retval). */
 int	 	  mdoc_parseln(struct mdoc *, int, char *buf);

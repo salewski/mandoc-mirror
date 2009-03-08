@@ -33,12 +33,24 @@
  * children have been filled in (post-fix order).
  */
 
+enum	merr {
+	ENOWIDTH
+};
+
+enum	mwarn {
+	WBADSEC,
+	WNOWIDTH,
+	WBADDATE
+};
+
 struct	actions {
 	int	(*post)(struct mdoc *);
 };
 
-/* Per-macro action routines. */
-
+static	int	 nwarn(struct mdoc *, 
+			const struct mdoc_node *, enum mwarn);
+static	int	 nerr(struct mdoc *, 
+			const struct mdoc_node *, enum merr);
 static	int	 post_ar(struct mdoc *);
 static	int	 post_bl(struct mdoc *);
 static	int	 post_bl_width(struct mdoc *);
@@ -49,10 +61,7 @@ static	int	 post_nm(struct mdoc *);
 static	int	 post_os(struct mdoc *);
 static	int	 post_sh(struct mdoc *);
 static	int	 post_ex(struct mdoc *);
-
 static	int	 post_prologue(struct mdoc *);
-
-/* Array of macro action routines. */
 
 const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* \" */
@@ -165,6 +174,53 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 };
 
 
+#define	merr(m, t) nerr((m), (m)->last, (t))
+static int
+nerr(struct mdoc *m, const struct mdoc_node *n, enum merr type)
+{
+	char		*p;
+
+	p = NULL;
+
+	switch (type) {
+	case (ENOWIDTH):
+		p = "missing width argument";
+		break;
+	}
+
+	assert(p);
+	return(mdoc_nerr(m, n, p));
+}
+
+
+#define	mwarn(m, t) nwarn((m), (m)->last, (t))
+static int
+nwarn(struct mdoc *m, const struct mdoc_node *n, enum mwarn type)
+{
+	char		*p;
+	int		 c;
+
+	p = NULL;
+	c = WARN_SYNTAX;
+
+	switch (type) {
+	case (WBADSEC):
+		p = "inappropriate document section in manual section";
+		c = WARN_COMPAT;
+		break;
+	case (WNOWIDTH):
+		p = "cannot determine default width";
+		break;
+	case (WBADDATE):
+		p = "malformed date syntax";
+		break;
+	}
+
+	assert(p);
+	return(mdoc_nwarn(m, n, c, p));
+}
+
+
 static int
 post_ex(struct mdoc *mdoc)
 {
@@ -174,19 +230,22 @@ post_ex(struct mdoc *mdoc)
 	 * our name (if it's been set).
 	 */
 
-	if (0 == mdoc->last->data.elem.argc)
+	if (NULL == mdoc->last->args)
 		return(1);
-	if (mdoc->last->data.elem.argv[0].sz)
+	if (mdoc->last->args->argv[0].sz)
 		return(1);
 
 	assert(mdoc->meta.name);
 
 	mdoc_msg(mdoc, "writing %s argument: %s", 
-			mdoc_argnames[MDOC_Std], mdoc->meta.name);
+			mdoc_argnames[MDOC_Std], 
+			mdoc->meta.name);
 
-	mdoc->last->data.elem.argv[0].sz = 1;
-	mdoc->last->data.elem.argv[0].value = xcalloc(1, sizeof(char *));
-	mdoc->last->data.elem.argv[0].value[0] = xstrdup(mdoc->meta.name);
+	assert(1 == mdoc->last->args->argv[0].sz);
+
+	mdoc->last->args->argv[0].sz = 1;
+	mdoc->last->args->argv[0].value = xcalloc(1, sizeof(char *));
+	mdoc->last->args->argv[0].value[0] = xstrdup(mdoc->meta.name);
 	return(1);
 }
 
@@ -240,9 +299,7 @@ post_sh(struct mdoc *mdoc)
 		case (9):
 			break;
 		default:
-			return(mdoc_warn(mdoc, WARN_COMPAT,
-					"inappropriate section for "
-					"manual section"));
+			return(mwarn(mdoc, WBADSEC));
 		}
 		break;
 	default:
@@ -288,7 +345,7 @@ post_dt(struct mdoc *mdoc)
 	 *   --> title = TITLE, volume = local, msec = 0, arch = NULL
 	 */
 
-	mdoc->meta.title = xstrdup(n->data.text.string);
+	mdoc->meta.title = xstrdup(n->string);
 	mdoc_msg(mdoc, "title: %s", mdoc->meta.title);
 
 	if (NULL == (n = n->next)) {
@@ -306,14 +363,14 @@ post_dt(struct mdoc *mdoc)
 	 *       arch = NULL
 	 */
 
-	if ((cp = mdoc_a2msec(n->data.text.string))) {
+	if ((cp = mdoc_a2msec(n->string))) {
 		mdoc->meta.vol = xstrdup(cp);
 		errno = 0;
-		lval = strtol(n->data.text.string, &ep, 10);
-		if (n->data.text.string[0] != '\0' && *ep == '\0')
+		lval = strtol(n->string, &ep, 10);
+		if (n->string[0] != '\0' && *ep == '\0')
 			mdoc->meta.msec = (int)lval;
 	} else 
-		mdoc->meta.vol = xstrdup(n->data.text.string);
+		mdoc->meta.vol = xstrdup(n->string);
 
 	if (NULL == (n = n->next)) {
 		mdoc_msg(mdoc, "volume: %s", mdoc->meta.vol);
@@ -329,15 +386,15 @@ post_dt(struct mdoc *mdoc)
 	 *               VOL
 	 */
 
-	if ((cp = mdoc_a2vol(n->data.text.string))) {
+	if ((cp = mdoc_a2vol(n->string))) {
 		free(mdoc->meta.vol);
 		mdoc->meta.vol = xstrdup(cp);
 		n = n->next;
 	} else {
-		cp = mdoc_a2arch(n->data.text.string);
+		cp = mdoc_a2arch(n->string);
 		if (NULL == cp) {
 			free(mdoc->meta.vol);
-			mdoc->meta.vol = xstrdup(n->data.text.string);
+			mdoc->meta.vol = xstrdup(n->string);
 		} else
 			mdoc->meta.arch = xstrdup(cp);
 	}	
@@ -385,7 +442,6 @@ static int
 post_bl_tagwidth(struct mdoc *mdoc)
 {
 	struct mdoc_node  *n;
-	struct mdoc_block *b;
 	int		   sz;
 	char		   buf[32];
 
@@ -394,30 +450,25 @@ post_bl_tagwidth(struct mdoc *mdoc)
 	 * to intuit our width from the first body element.  
 	 */
 
-	b = &mdoc->last->data.block;
-
-	if (NULL == (n = b->body->child))
+	if (NULL == (n = mdoc->last->body->child))
 		return(1);
-	assert(MDOC_It == n->tok);
 
 	/*
 	 * Use the text width, if a text node, or the default macro
 	 * width if a macro.
 	 */
 
-	if ((n = n->data.block.head->child)) {
+	if ((n = n->head->child)) {
 		if (MDOC_TEXT != n->type) {
-			if (0 == (sz = mdoc_macro2len(n->tok)))
+			if (0 == (sz = (int)mdoc_macro2len(n->tok)))
 				sz = -1;
 		} else
-			sz = (int)strlen(n->data.text.string) + 1;
+			sz = (int)strlen(n->string) + 1;
 	} else
 		sz = -1;
 
 	if (-1 == sz) {
-		if ( ! mdoc_warn(mdoc, WARN_SYNTAX,
-				"cannot determine default %s",
-				mdoc_argnames[MDOC_Width]))
+		if ( ! mwarn(mdoc, WNOWIDTH))
 			return(0);
 		sz = 10;
 	}
@@ -429,38 +480,53 @@ post_bl_tagwidth(struct mdoc *mdoc)
 	 * We're guaranteed that a MDOC_Width doesn't already exist.
 	 */
 
-	(b->argc)++;
-	b->argv = xrealloc(b->argv, b->argc * sizeof(struct mdoc_arg));
+	if (NULL == mdoc->last->args) {
+		mdoc->last->args = xcalloc
+			(1, sizeof(struct mdoc_arg));
+		mdoc->last->args->refcnt = 1;
+	}
 
-	b->argv[b->argc - 1].arg = MDOC_Width;
-	b->argv[b->argc - 1].line = mdoc->last->line;
-	b->argv[b->argc - 1].pos = mdoc->last->pos;
-	b->argv[b->argc - 1].sz = 1;
-	b->argv[b->argc - 1].value = xcalloc(1, sizeof(char *));
-	b->argv[b->argc - 1].value[0] = xstrdup(buf);
+	n = mdoc->last;
+	sz = (int)n->args->argc;
+	
+	(n->args->argc)++;
 
-	mdoc_msg(mdoc, "adding %s argument: %dn", 
-			mdoc_argnames[MDOC_Width], sz);
+	n->args->argv = xrealloc(n->args->argv, 
+			n->args->argc * sizeof(struct mdoc_arg));
+
+	n->args->argv[sz - 1].arg = MDOC_Width;
+	n->args->argv[sz - 1].line = mdoc->last->line;
+	n->args->argv[sz - 1].pos = mdoc->last->pos;
+	n->args->argv[sz - 1].sz = 1;
+	n->args->argv[sz - 1].value = xcalloc(1, sizeof(char *));
+	n->args->argv[sz - 1].value[0] = xstrdup(buf);
+
+	mdoc_msg(mdoc, "adding %s argument: %s", 
+			mdoc_argnames[MDOC_Width], buf);
 
 	return(1);
 }
 
 
 static int
-post_bl_width(struct mdoc *mdoc)
+post_bl_width(struct mdoc *m)
 {
 	size_t		  width;
 	int		  i, tok;
 	char		  buf[32];
 	char		**p;
 
-	for (i = 0; i < (int)mdoc->last->data.block.argc; i++) 
-		if (MDOC_Width == mdoc->last->data.block.argv[i].arg)
+	if (NULL == m->last->args)
+		return(merr(m, ENOWIDTH));
+
+	for (i = 0; i < (int)m->last->args->argc; i++)
+		if (MDOC_Width == m->last->args->argv[i].arg)
 			break;
 
-	assert(i < (int)mdoc->last->data.block.argc);
-	assert(1 == mdoc->last->data.block.argv[i].sz);
-	p = &mdoc->last->data.block.argv[i].value[0];
+	if (i == (int)m->last->args->argc)
+		return(merr(m, ENOWIDTH));
+
+	p = &m->last->args->argv[i].value[0];
 
 	/*
 	 * If the value to -width is a macro, then we re-write it to be
@@ -469,14 +535,12 @@ post_bl_width(struct mdoc *mdoc)
 
 	if (xstrcmp(*p, "Ds"))
 		width = 8;
-	else if (MDOC_MAX == (tok = mdoc_find(mdoc, *p)))
+	else if (MDOC_MAX == (tok = mdoc_tokhash_find(m->htab, *p)))
 		return(1);
 	else if (0 == (width = mdoc_macro2len(tok))) 
-		return(mdoc_warn(mdoc, WARN_SYNTAX,
-					"%s macro has no length", 
-					mdoc_argnames[MDOC_Width]));
+		return(mwarn(m, WNOWIDTH));
 
-	mdoc_msg(mdoc, "re-writing %s argument: %s -> %zun", 
+	mdoc_msg(m, "re-writing %s argument: %s -> %zun", 
 			mdoc_argnames[MDOC_Width], *p, width);
 
 	/* The value already exists: free and reallocate it. */
@@ -484,7 +548,7 @@ post_bl_width(struct mdoc *mdoc)
 	(void)snprintf(buf, sizeof(buf), "%zun", width);
 
 	free(*p);
-	*p = strdup(buf);
+	*p = xstrdup(buf);
 
 	return(1);
 }
@@ -493,7 +557,7 @@ post_bl_width(struct mdoc *mdoc)
 static int
 post_bl(struct mdoc *mdoc)
 {
-	int		  i, r;
+	int		  i, r, len;
 
 	if (MDOC_BLOCK != mdoc->last->type)
 		return(1);
@@ -506,10 +570,12 @@ post_bl(struct mdoc *mdoc)
 	 * rewritten into real lengths).
 	 */
 
-	for (r = i = 0; i < (int)mdoc->last->data.block.argc; i++) {
-		if (MDOC_Tag == mdoc->last->data.block.argv[i].arg)
+	len = (int)(mdoc->last->args ? mdoc->last->args->argc : 0);
+
+	for (r = i = 0; i < len; i++) {
+		if (MDOC_Tag == mdoc->last->args->argv[i].arg)
 			r |= 1 << 0;
-		if (MDOC_Width == mdoc->last->data.block.argv[i].arg)
+		if (MDOC_Width == mdoc->last->args->argv[i].arg)
 			r |= 1 << 1;
 	}
 
@@ -556,8 +622,11 @@ post_dd(struct mdoc *mdoc)
 
 	(void)xstrlcpys(buf, mdoc->last->child, sizeof(buf));
 
-	if (0 == (mdoc->meta.date = mdoc_atotime(buf)))
-		return(mdoc_err(mdoc, "invalid date syntax"));
+	if (0 == (mdoc->meta.date = mdoc_atotime(buf))) {
+		if ( ! mwarn(mdoc, WBADDATE))
+			return(0);
+		mdoc->meta.date = time(NULL);
+	}
 
 	mdoc_msg(mdoc, "date: %u", mdoc->meta.date);
 	return(post_prologue(mdoc));

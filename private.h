@@ -33,6 +33,7 @@ struct	mdoc {
 	int		  linetok;
 	int		  flags;
 #define	MDOC_HALT	 (1 << 0)
+	int		  pflags;
 	enum mdoc_next	  next;
 	struct mdoc_node *last;
 	struct mdoc_node *first;
@@ -41,14 +42,6 @@ struct	mdoc {
 	enum mdoc_sec	  lastsec;
 };
 
-
-/* Hard-limit of macro arguments. */
-
-#define	MDOC_LINEARG_MAX 9
-
-/* Suggested limit of macro arguments. */
-
-#define	MDOC_LINEARG_SOFTMAX 9
 
 #define	MACRO_PROT_ARGS	struct mdoc *mdoc, int tok, int line, \
 			int ppos, int *pos, char *buf
@@ -106,13 +99,12 @@ int		  mdoc_verr(struct mdoc *, int, int,
 			const char *, ...);
 
 int		  mdoc_macro(MACRO_PROT_ARGS);
-int		  mdoc_find(const struct mdoc *, const char *);
 int		  mdoc_word_alloc(struct mdoc *, 
 			int, int, const char *);
 int		  mdoc_elem_alloc(struct mdoc *, int, int, 
-			int, size_t, const struct mdoc_arg *);
+			int, struct mdoc_arg *);
 int		  mdoc_block_alloc(struct mdoc *, int, int, 
-			int, size_t, const struct mdoc_arg *);
+			int, struct mdoc_arg *);
 int		  mdoc_root_alloc(struct mdoc *);
 int		  mdoc_head_alloc(struct mdoc *, int, int, int);
 int		  mdoc_tail_alloc(struct mdoc *, int, int, int);
@@ -141,13 +133,13 @@ int		  mdoc_valid_post(struct mdoc *);
 int		  mdoc_action_pre(struct mdoc *, struct mdoc_node *);
 int		  mdoc_action_post(struct mdoc *);
 
-int		  mdoc_argv(struct mdoc *, int, int, 
-			struct mdoc_arg *, int *, char *);
+int		  mdoc_argv(struct mdoc *, int, int,
+			struct mdoc_arg **, int *, char *);
 #define	ARGV_ERROR	(-1)
 #define	ARGV_EOLN	(0)
 #define	ARGV_ARG	(1)
 #define	ARGV_WORD	(2)
-void		  mdoc_argv_free(int, struct mdoc_arg *);
+void		  mdoc_argv_free(struct mdoc_arg *);
 int		  mdoc_args(struct mdoc *, int,
 			int *, char *, int, char **);
 #define	ARGS_ERROR	(-1)

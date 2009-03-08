@@ -31,11 +31,6 @@
  * macro. 
  */
 
-/* 
- * FIXME: don't use static mdoc_argv values, as they require us to do a
- * complicated copy-over when actually assigning them to dynamic memory.
- */
-
 #include "private.h"
 
 static int	  macro_obsolete(MACRO_PROT_ARGS);
@@ -71,7 +66,6 @@ static	int	  perr(struct mdoc *, int, int, int);
 
 #define	ENOCTX		(1)
 #define	ENOPARMS	(2)
-#define	EARGVLIM	(3)
 
 /* Central table of library: who gets parsed how. */
 
@@ -204,11 +198,6 @@ perr(struct mdoc *mdoc, int line, int pos, int type)
 		c = mdoc_perr(mdoc, line, pos, 
 				"macro doesn't expect parameters");
 		break;
-	case (EARGVLIM):
-		c = mdoc_perr(mdoc, line, pos, 
-				"argument hard-limit %d reached",
-				MDOC_LINEARG_MAX);
-		break;
 	default:
 		abort();
 		/* NOTREACHED */
@@ -243,7 +232,7 @@ lookup(struct mdoc *mdoc, int line, int pos, int from, const char *p)
 {
 	int		 res;
 
-	res = mdoc_find(mdoc, p);
+	res = mdoc_tokhash_find(mdoc->htab, p);
 	if (MDOC_PARSED & mdoc_macros[from].flags)
 		return(res);
 	if (MDOC_MAX == res)
@@ -731,16 +720,17 @@ macro_scoped_close(MACRO_PROT_ARGS)
 static int
 macro_text(MACRO_PROT_ARGS)
 {
-	int		  la, lastpunct, c, w, argc;
-	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
+	int		  la, lastpunct, c, w;
+	struct mdoc_arg	 *arg;
 	char		 *p;
 
 	la = ppos;
 	lastpunct = 0;
+	arg = NULL;
 
-	for (argc = 0; argc < MDOC_LINEARG_MAX; argc++) {
+	for (;;) {
 		la = *pos;
-		c = mdoc_argv(mdoc, line, tok, &argv[argc], pos, buf);
+		c = mdoc_argv(mdoc, line, tok, &arg, pos, buf);
 		if (ARGV_EOLN == c)
 			break;
 		if (ARGV_WORD == c) {
@@ -748,23 +738,12 @@ macro_text(MACRO_PROT_ARGS)
 			break;
 		} else if (ARGV_ARG == c)
 			continue;
-
-		mdoc_argv_free(argc, argv);
+		mdoc_argv_free(arg);
 		return(0);
 	}
 
-	if (MDOC_LINEARG_MAX == argc) {
-		mdoc_argv_free(argc - 1, argv);
-		return(perr(mdoc, line, ppos, EARGVLIM));
-	}
-
-	c = mdoc_elem_alloc(mdoc, line, ppos, 
-			tok, (size_t)argc, argv);
-
-	if (0 == c) {
-		mdoc_argv_free(argc, argv);
+	if ( ! mdoc_elem_alloc(mdoc, line, ppos, tok, arg))
 		return(0);
-	}
 
 	mdoc->next = MDOC_NEXT_CHILD;
 
@@ -774,11 +753,8 @@ macro_text(MACRO_PROT_ARGS)
 		w = mdoc_args(mdoc, line, pos, buf, tok, &p);
 		assert(ARGS_PHRASE != c);
 
-		if (ARGS_ERROR == w) {
-			mdoc_argv_free(argc, argv);
+		if (ARGS_ERROR == w)
 			return(0);
-		}
-
 		if (ARGS_EOLN == w)
 			break;
 		if (ARGS_PUNCT == w)
@@ -788,37 +764,29 @@ macro_text(MACRO_PROT_ARGS)
 			lookup(mdoc, line, la, tok, p);
 
 		if (MDOC_MAX != c && -1 != c) {
-			if (0 == lastpunct && ! rewind_elem(mdoc, tok)) {
-				mdoc_argv_free(argc, argv);
+			if (0 == lastpunct && ! rewind_elem(mdoc, tok))
 				return(0);
-			}
-			mdoc_argv_free(argc, argv);
 			c = mdoc_macro(mdoc, c, line, la, pos, buf);
 			if (0 == c)
 				return(0);
 			if (ppos > 1)
 				return(1);
 			return(append_delims(mdoc, line, pos, buf));
-		} else if (-1 == c) {
-			mdoc_argv_free(argc, argv);
+		} else if (-1 == c)
 			return(0);
-		}
 
 		/* FIXME: .Fl and .Ar handling of `|'. */
 
 		if (ARGS_QWORD != w && mdoc_isdelim(p)) {
-			if (0 == lastpunct && ! rewind_elem(mdoc, tok)) {
-				mdoc_argv_free(argc, argv);
+			if (0 == lastpunct && ! rewind_elem(mdoc, tok))
 				return(0);
-			}
 			lastpunct = 1;
 		} else if (lastpunct) {
-			c = mdoc_elem_alloc(mdoc, line, ppos, 
-					tok, (size_t)argc, argv);
-			if (0 == c) {
-				mdoc_argv_free(argc, argv);
+			c = mdoc_elem_alloc(mdoc, line, ppos, tok, arg);
+
+			if (0 == c)
 				return(0);
-			}
+
 			mdoc->next = MDOC_NEXT_CHILD;
 			lastpunct = 0;
 		}
@@ -827,8 +795,6 @@ macro_text(MACRO_PROT_ARGS)
 			return(0);
 		mdoc->next = MDOC_NEXT_SIBLING;
 	}
-
-	mdoc_argv_free(argc, argv);
 
 	if (0 == lastpunct && ! rewind_elem(mdoc, tok))
 		return(0);
@@ -865,8 +831,8 @@ macro_text(MACRO_PROT_ARGS)
 static int
 macro_scoped(MACRO_PROT_ARGS)
 {
-	int		  c, lastarg, argc;
-	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
+	int		  c, lastarg;
+	struct mdoc_arg	 *arg;
 	char		 *p;
 
 	assert ( ! (MDOC_CALLABLE & mdoc_macros[tok].flags));
@@ -881,10 +847,12 @@ macro_scoped(MACRO_PROT_ARGS)
 	}
 
 	/* Parse arguments. */
+	
+	arg = NULL;
 
-	for (argc = 0; argc < MDOC_LINEARG_MAX; argc++) {
+	for (;;) {
 		lastarg = *pos;
-		c = mdoc_argv(mdoc, line, tok, &argv[argc], pos, buf);
+		c = mdoc_argv(mdoc, line, tok, &arg, pos, buf);
 		if (ARGV_EOLN == c)
 			break;
 		if (ARGV_WORD == c) {
@@ -892,20 +860,11 @@ macro_scoped(MACRO_PROT_ARGS)
 			break;
 		} else if (ARGV_ARG == c)
 			continue;
-		mdoc_argv_free(argc, argv);
+		mdoc_argv_free(arg);
 		return(0);
 	}
 
-	if (MDOC_LINEARG_MAX == argc) {
-		mdoc_argv_free(argc - 1, argv);
-		return(perr(mdoc, line, ppos, EARGVLIM));
-	}
-
-	c = mdoc_block_alloc(mdoc, line, ppos, 
-			tok, (size_t)argc, argv);
-	mdoc_argv_free(argc, argv);
-
-	if (0 == c)
+	if ( ! mdoc_block_alloc(mdoc, line, ppos, tok, arg))
 		return(0);
 
 	mdoc->next = MDOC_NEXT_CHILD;
@@ -998,7 +957,7 @@ macro_scoped_line(MACRO_PROT_ARGS)
 	int		  lastarg, c;
 	char		  *p;
 
-	if ( ! mdoc_block_alloc(mdoc, line, ppos, tok, 0, NULL))
+	if ( ! mdoc_block_alloc(mdoc, line, ppos, tok, NULL))
 		return(0);
 	mdoc->next = MDOC_NEXT_CHILD;
 
@@ -1082,7 +1041,7 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 		break;
 	}
 
-	if ( ! mdoc_block_alloc(mdoc, line, ppos, tok, 0, NULL))
+	if ( ! mdoc_block_alloc(mdoc, line, ppos, tok, NULL))
 		return(0); 
 	mdoc->next = MDOC_NEXT_CHILD;
 
@@ -1185,14 +1144,13 @@ macro_constant_scoped(MACRO_PROT_ARGS)
 static int
 macro_constant_delimited(MACRO_PROT_ARGS)
 {
-	int		  lastarg, flushed, j, c, maxargs, argc,
+	int		  lastarg, flushed, j, c, maxargs, 
 			  igndelim, ignargs;
-	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
+	struct mdoc_arg	 *arg;
 	char		 *p;
 
 	lastarg = ppos;
 	flushed = 0;
-
 	
 	/* 
 	 * Maximum arguments per macro.  Some of these have none and
@@ -1241,13 +1199,12 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 		break;
 	}
 
-	argc = 0;
+	arg = NULL;
 
 	if ( ! ignargs)
-		for ( ; argc < MDOC_LINEARG_MAX; argc++) {
+		for (;;) {
 			lastarg = *pos;
-			c = mdoc_argv(mdoc, line, tok, 
-					&argv[argc], pos, buf);
+			c = mdoc_argv(mdoc, line, tok, &arg, pos, buf);
 			if (ARGV_EOLN == c)
 				break;
 			if (ARGV_WORD == c) {
@@ -1255,21 +1212,11 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 				break;
 			} else if (ARGV_ARG == c)
 				continue;
-			mdoc_argv_free(argc, argv);
+			mdoc_argv_free(arg);
 			return(0);
 		}
 
-	if (MDOC_LINEARG_MAX == argc) {
-		mdoc_argv_free(argc - 1, argv);
-		return(perr(mdoc, line, ppos, EARGVLIM));
-	}
-
-	c = mdoc_elem_alloc(mdoc, line, ppos, 
-			tok, (size_t)argc, argv);
-
-	mdoc_argv_free(argc, argv);
-
-	if (0 == c)
+	if ( ! mdoc_elem_alloc(mdoc, line, ppos, tok, arg))
 		return(0);
 
 	mdoc->next = MDOC_NEXT_CHILD;
@@ -1331,15 +1278,17 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 static int
 macro_constant(MACRO_PROT_ARGS)
 {
-	int		  c, w, la, argc;
-	struct mdoc_arg	  argv[MDOC_LINEARG_MAX];
+	int		  c, w, la;
+	struct mdoc_arg	 *arg;
 	char		 *p;
 
 	assert( ! (MDOC_CALLABLE & mdoc_macros[tok].flags));
 
-	for (argc = 0; argc < MDOC_LINEARG_MAX; argc++) {
+	arg = NULL;
+
+	for (;;) {
 		la = *pos;
-		c = mdoc_argv(mdoc, line, tok, &argv[argc], pos, buf);
+		c = mdoc_argv(mdoc, line, tok, &arg, pos, buf);
 		if (ARGV_EOLN == c) 
 			break;
 		if (ARGV_WORD == c) {
@@ -1347,22 +1296,11 @@ macro_constant(MACRO_PROT_ARGS)
 			break;
 		} else if (ARGV_ARG == c)
 			continue;
-
-		mdoc_argv_free(argc, argv);
+		mdoc_argv_free(arg);
 		return(0);
 	}
 
-	if (MDOC_LINEARG_MAX == argc) {
-		mdoc_argv_free(argc - 1, argv);
-		return(perr(mdoc, line, ppos, EARGVLIM));
-	}
-
-	c = mdoc_elem_alloc(mdoc, line, ppos, 
-			tok, (size_t)argc, argv);
-
-	mdoc_argv_free(argc, argv);
-
-	if (0 == c)
+	if ( ! mdoc_elem_alloc(mdoc, line, ppos, tok, arg))
 		return(0);
 
 	mdoc->next = MDOC_NEXT_CHILD;
