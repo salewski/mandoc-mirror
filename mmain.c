@@ -30,7 +30,7 @@
 
 #include "mmain.h"
 
-#define	MD_LINE_SZ	(256)		/* Max input line size. */
+#define	MD_LINE_SZ	(256)		/* Input line step-size. */
 
 struct	mmain {
 	int		  warn;		/* Warning flags. */
@@ -269,39 +269,31 @@ optswarn(struct mmain *p, char *arg)
 static int
 parse(struct mmain *p)
 {
-	ssize_t		 sz, i;
-	size_t		 pos;
-	char		 line[MD_LINE_SZ];
-	int		 lnn;
+	ssize_t		 sz;
+	int		 i, pos, len, lnn;
+	char		*line;
 
-	/*
-	 * This is a little more complicated than fgets.  TODO: have
-	 * some benchmarks that show it's faster (note that I want to
-	 * check many, many manuals simultaneously, so speed is
-	 * important).  Fill a buffer (sized to the block size) with a
-	 * single read, then parse \n-terminated lines into a line
-	 * buffer, which is passed to the parser.  Hard-code the line
-	 * buffer to a particular size -- a reasonable assumption.
-	 */
-
-	for (lnn = 1, pos = 0; ; ) {
+	for (line = NULL, lnn = 1, len = pos = 0; ; ) {
 		if (-1 == (sz = read(p->fdin, p->buf, p->bufsz))) {
 			warn("%s", p->in);
 			return(0);
 		} else if (0 == sz) 
 			break;
 
-		for (i = 0; i < sz; i++) {
-			if ('\n' != p->buf[i]) {
-				if (pos < sizeof(line)) {
-					line[(int)pos++] = p->buf[(int)i];
-					continue;
-				}
-				warnx("%s: line %d too long", p->in, lnn);
-				return(0);
+		for (i = 0; i < (int)sz; i++) {
+			if (pos >= len) {
+				len += MD_LINE_SZ;
+				line = realloc(line, len);
+				if (NULL == line)
+					err(1, "realloc");
 			}
-	
-			line[(int)pos] = 0;
+
+			if ('\n' != p->buf[i]) {
+				line[pos++] = p->buf[i];
+				continue;
+			}
+
+			line[pos] = 0;
 			if ( ! mdoc_parseln(p->mdoc, lnn, line))
 				return(0);
 
@@ -310,6 +302,8 @@ parse(struct mmain *p)
 		}
 	}
 
+	if (line)
+		free(line);
 	return(mdoc_endparse(p->mdoc));
 }
 
