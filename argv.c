@@ -273,13 +273,13 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		return(ARGV_ERROR);
 
 	if (NULL == (arg = *v)) {
-		v = xcalloc(1, sizeof(struct mdoc_arg));
+		*v = xcalloc(1, sizeof(struct mdoc_arg));
 		arg = *v;
-	}
+	} 
 
 	arg->argc++;
 	arg->argv = xrealloc(arg->argv, arg->argc * 
-			sizeof(struct mdoc_arg));
+			sizeof(struct mdoc_argv));
 
 	(void)memcpy(&arg->argv[(int)arg->argc - 1], 
 			&tmp, sizeof(struct mdoc_argv));
@@ -293,8 +293,13 @@ mdoc_argv_free(struct mdoc_arg *p)
 {
 	int		 i, j;
 
-	if (p->refcnt && --(p->refcnt) > 0)
-		return;
+	if (p->refcnt) {
+		--(p->refcnt);
+		if (p->refcnt)
+			return;
+	}
+
+	assert(p->argc);
 
 	/* LINTED */
 	for (i = 0; i < (int)p->argc; i++) {
@@ -303,11 +308,11 @@ mdoc_argv_free(struct mdoc_arg *p)
 		/* LINTED */
 		for (j = 0; j < (int)p->argv[i].sz; j++)
 			free(p->argv[i].value[j]);
+
 		free(p->argv[i].value);
 	}
 
-	if (p->argc)
-		free(p->argv);
+	free(p->argv);
 	free(p);
 }
 
@@ -742,7 +747,7 @@ argv_multi(struct mdoc *mdoc, int line,
 			v->value = xrealloc(v->value, 
 				(v->sz + 5) * sizeof(char *));
 
-		v->value[(int)v->sz] = p;
+		v->value[(int)v->sz] = xstrdup(p);
 	}
 
 	if (v->sz)
@@ -770,7 +775,7 @@ argv_opt_single(struct mdoc *mdoc, int line,
 
 	v->sz = 1;
 	v->value = xcalloc(1, sizeof(char *));
-	v->value[0] = p;
+	v->value[0] = xstrdup(p);
 	return(1);
 }
 
@@ -795,7 +800,7 @@ argv_single(struct mdoc *mdoc, int line,
 
 	v->sz = 1;
 	v->value = xcalloc(1, sizeof(char *));
-	v->value[0] = p;
+	v->value[0] = xstrdup(p);
 	return(1);
 }
 

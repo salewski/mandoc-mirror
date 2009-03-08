@@ -514,7 +514,7 @@ post_bl_width(struct mdoc *m)
 	size_t		  width;
 	int		  i, tok;
 	char		  buf[32];
-	char		**p;
+	char		 *p;
 
 	if (NULL == m->last->args)
 		return(merr(m, ENOWIDTH));
@@ -526,29 +526,29 @@ post_bl_width(struct mdoc *m)
 	if (i == (int)m->last->args->argc)
 		return(merr(m, ENOWIDTH));
 
-	p = &m->last->args->argv[i].value[0];
+	p = m->last->args->argv[i].value[0];
 
 	/*
 	 * If the value to -width is a macro, then we re-write it to be
 	 * the macro's width as set in share/tmac/mdoc/doc-common.
 	 */
 
-	if (xstrcmp(*p, "Ds"))
+	if (xstrcmp(p, "Ds"))
 		width = 8;
-	else if (MDOC_MAX == (tok = mdoc_tokhash_find(m->htab, *p)))
+	else if (MDOC_MAX == (tok = mdoc_tokhash_find(m->htab, p)))
 		return(1);
 	else if (0 == (width = mdoc_macro2len(tok))) 
 		return(mwarn(m, WNOWIDTH));
 
 	mdoc_msg(m, "re-writing %s argument: %s -> %zun", 
-			mdoc_argnames[MDOC_Width], *p, width);
+			mdoc_argnames[MDOC_Width], p, width);
 
 	/* The value already exists: free and reallocate it. */
 
 	(void)snprintf(buf, sizeof(buf), "%zun", width);
 
-	free(*p);
-	*p = xstrdup(buf);
+	free(m->last->args->argv[i].value[0]);
+	m->last->args->argv[i].value[0] = xstrdup(buf);
 
 	return(1);
 }

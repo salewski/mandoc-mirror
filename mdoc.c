@@ -519,6 +519,8 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 			break;
 	}
 
+	/* FIXME: be able to skip unknown macro lines! */
+
 	mac[i - 1] = 0;
 
 	if (i == 5 || i <= 2) {

@@ -638,6 +638,7 @@ check_args(struct mdoc *m, const struct mdoc_node *n)
 	if (NULL == n->args)
 		return(1);
 
+	assert(n->args->argc);
 	for (i = 0; i < (int)n->args->argc; i++)
 		if ( ! check_argv(m, n, &n->args->argv[i]))
 			return(0);
@@ -684,8 +685,7 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 			p += (int)c - 1;
 			continue;
 		}
-		return(mdoc_perr(mdoc, line, pos, 
-				"invalid escape sequence: %s", p));
+		return(mdoc_perr(mdoc, line, pos, "invalid escape"));
 	}
 
 	return(1);
@@ -891,7 +891,7 @@ static int
 pre_an(PRE_ARGS)
 {
 
-	if (n->args && 1 >= n->args->argc)
+	if (NULL == n->args || 1 == n->args->argc)
 		return(1);
 	return(mdoc_nerr(mdoc, n, "only one argument allowed"));
 }
