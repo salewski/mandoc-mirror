@@ -181,6 +181,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_obsolete, 0 }, /* Fr */
 	{ macro_constant, 0 }, /* Ud */
 	{ macro_constant, 0 }, /* Lb */
+	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* Ap */
 };
 
 const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;
@@ -1204,6 +1205,8 @@ macro_constant_delimited(MACRO_PROT_ARGS)
 	 */
 
 	switch (tok) {
+	case (MDOC_Ap):
+		/* FALLTHROUGH */
 	case (MDOC_No):
 		/* FALLTHROUGH */
 	case (MDOC_Ns):

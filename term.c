@@ -130,6 +130,7 @@ DECL_PREPOST(termp_ss);
 DECL_PREPOST(termp_sq);
 DECL_PREPOST(termp_vt);
 
+DECL_PRE(termp_ap);
 DECL_PRE(termp_ar);
 DECL_PRE(termp_at);
 DECL_PRE(termp_bf);
@@ -274,6 +275,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Fr */
 	{ termp_ud_pre, NULL }, /* Ud */
 	{ termp_lb_pre, termp_lb_post }, /* Lb */
+	{ termp_ap_pre, NULL }, /* Lb */
 };
 
 const struct termact *termacts = __termacts;
@@ -1695,6 +1697,18 @@ termp_sm_pre(DECL_ARGS)
 #endif
 
 	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+termp_ap_pre(DECL_ARGS)
+{
+
+	p->flags |= TERMP_NOSPACE;
+	word(p, "\\(aq");
+	p->flags |= TERMP_NOSPACE;
+	return(1);
 }
 
 
