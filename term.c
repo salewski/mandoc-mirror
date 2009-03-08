@@ -83,12 +83,10 @@ const	int ttypes[TTYPE_NMAX] = {
 	TERMP_BOLD	 	/* TTYPE_DIAG */
 };
 
-static	int		  arg_hasattr(int, size_t, 
-				const struct mdoc_arg *);
-static	int		  arg_getattr(int, size_t, 
-				const struct mdoc_arg *);
-static	size_t		  arg_offset(const struct mdoc_arg *);
-static	size_t		  arg_width(const struct mdoc_arg *);
+static	int		  arg_hasattr(int, const struct mdoc_node *);
+static	int		  arg_getattr(int, const struct mdoc_node *);
+static	size_t		  arg_offset(const struct mdoc_argv *);
+static	size_t		  arg_width(const struct mdoc_argv *);
 static	int		  arg_listtype(const struct mdoc_node *);
 
 /*
@@ -282,7 +280,7 @@ const struct termact *termacts = __termacts;
 
 
 static size_t
-arg_width(const struct mdoc_arg *arg)
+arg_width(const struct mdoc_argv *arg)
 {
 	size_t		 v;
 	int		 i, len;
@@ -314,14 +312,14 @@ arg_width(const struct mdoc_arg *arg)
 static int
 arg_listtype(const struct mdoc_node *n)
 {
-	const struct mdoc_block *bl;
 	int		 i, len;
 
-	bl = &n->data.block;
-	len = (int)bl->argc;
+	assert(MDOC_BLOCK == n->type);
+
+	len = n->args ? n->args->argc : 0;
 
 	for (i = 0; i < len; i++) 
-		switch (bl->argv[i].arg) {
+		switch (n->args->argv[i].arg) {
 		case (MDOC_Bullet):
 			/* FALLTHROUGH */
 		case (MDOC_Dash):
@@ -339,7 +337,7 @@ arg_listtype(const struct mdoc_node *n)
 		case (MDOC_Item):
 			/* FALLTHROUGH */
 		case (MDOC_Ohang):
-			return(bl->argv[i].arg);
+			return(n->args->argv[i].arg);
 		default:
 			break;
 		}
@@ -350,7 +348,7 @@ arg_listtype(const struct mdoc_node *n)
 
 
 static size_t
-arg_offset(const struct mdoc_arg *arg)
+arg_offset(const struct mdoc_argv *arg)
 {
 
 	/* TODO */
@@ -364,20 +362,22 @@ arg_offset(const struct mdoc_arg *arg)
 
 
 static int
-arg_hasattr(int arg, size_t argc, const struct mdoc_arg *argv)
+arg_hasattr(int arg, const struct mdoc_node *n)
 {
 
-	return(-1 != arg_getattr(arg, argc, argv));
+	return(-1 != arg_getattr(arg, n));
 }
 
 
 static int
-arg_getattr(int arg, size_t argc, const struct mdoc_arg *argv)
+arg_getattr(int arg, const struct mdoc_node *n)
 {
 	int		 i;
 
-	for (i = 0; i < (int)argc; i++) 
-		if (argv[i].arg == arg)
+	if (NULL == n->args)
+		return(-1);
+	for (i = 0; i < (int)n->args->argc; i++) 
+		if (n->args->argv[i].arg == arg)
 			return(i);
 	return(-1);
 }
@@ -414,15 +414,10 @@ termp_dq_post(DECL_ARGS)
 static int
 termp_it_pre_block(DECL_ARGS)
 {
-	const struct mdoc_node  *n;
-	const struct mdoc_block *bl;
-
-	n = node->parent->parent;
-	bl = &n->data.block;
 
 	newln(p);
-	if ( ! arg_hasattr(MDOC_Compact, bl->argc, bl->argv))
-		if (node->prev || n->prev)
+	if ( ! arg_hasattr(MDOC_Compact, node->parent->parent))
+		if (node->prev || node->parent->parent->prev)
 			vspace(p);
 
 	return(1);
@@ -433,7 +428,7 @@ termp_it_pre_block(DECL_ARGS)
 static int
 termp_it_pre(DECL_ARGS)
 {
-	const struct mdoc_block *bl;
+	const struct mdoc_node *bl;
 	char		 buf[7];
 	int		 i, type;
 	size_t		 width, offset;
@@ -443,8 +438,8 @@ termp_it_pre(DECL_ARGS)
 
 	/* Get ptr to list block, type, etc. */
 
-	bl = &node->parent->parent->parent->data.block;
-	type = arg_listtype(node->parent->parent->parent);
+	bl = node->parent->parent->parent;
+	type = arg_listtype(bl);
 
 	/* Save parent attributes. */
 
@@ -454,11 +449,11 @@ termp_it_pre(DECL_ARGS)
 
 	/* Get list width and offset. */
 
-	i = arg_getattr(MDOC_Width, bl->argc, bl->argv);
-	width = i >= 0 ? arg_width(&bl->argv[i]) : 0;
+	i = arg_getattr(MDOC_Width, bl);
+	width = i >= 0 ? arg_width(&bl->args->argv[i]) : 0;
 
-	i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
-	offset = i >= 0 ? arg_offset(&bl->argv[i]) : 0;
+	i = arg_getattr(MDOC_Offset, bl);
+	offset = i >= 0 ? arg_offset(&bl->args->argv[i]) : 0;
 
 	/* 
 	 * List-type can override the width in the case of fixed-head
@@ -725,10 +720,12 @@ termp_st_pre(DECL_ARGS)
 {
 	const char	*cp;
 
-	/* XXX - if child isn't text? */
-	if (node->child) 
-		if ((cp = mdoc_a2st(node->child->data.text.string)))
+	if (node->child) {
+		if (MDOC_TEXT != node->child->type)
+			errx(1, "expected text line arguments");
+		if ((cp = mdoc_a2st(node->child->string)))
 			word(p, cp);
+	}
 	return(0);
 }
 
@@ -750,15 +747,16 @@ termp_rv_pre(DECL_ARGS)
 {
 	int		 i;
 
-	i = arg_getattr(MDOC_Std, node->data.elem.argc, 
-			node->data.elem.argv);
-	assert(i >= 0);
+	if (-1 == (i = arg_getattr(MDOC_Std, node)))
+		errx(1, "expected -std argument");
+	if (1 != node->args->argv[i].sz)
+		errx(1, "expected -std argument");
 
 	newln(p);
 	word(p, "The");
 
 	p->flags |= ttypes[TTYPE_FUNC_NAME];
-	word(p, *node->data.elem.argv[i].value);
+	word(p, *node->args->argv[i].value);
 	p->flags &= ~ttypes[TTYPE_FUNC_NAME];
 
        	word(p, "() function returns the value 0 if successful;");
@@ -781,13 +779,14 @@ termp_ex_pre(DECL_ARGS)
 {
 	int		 i;
 
-	i = arg_getattr(MDOC_Std, node->data.elem.argc, 
-			node->data.elem.argv);
-	assert(i >= 0);
+	if (-1 == (i = arg_getattr(MDOC_Std, node)))
+		errx(1, "expected -std argument");
+	if (1 != node->args->argv[i].sz)
+		errx(1, "expected -std argument");
 
 	word(p, "The");
 	p->flags |= ttypes[TTYPE_PROG];
-	word(p, *node->data.elem.argv[i].value);
+	word(p, *node->args->argv[i].value);
 	p->flags &= ~ttypes[TTYPE_PROG];
        	word(p, "utility exits 0 on success, and >0 if an error occurs.");
 
@@ -833,20 +832,22 @@ termp_xr_pre(DECL_ARGS)
 {
 	const struct mdoc_node *n;
 
-	n = node->child;
-	assert(n);
+	if (NULL == (n = node->child))
+		errx(1, "expected text line argument");
+	if (MDOC_TEXT != n->type)
+		errx(1, "expected text line argument");
 
-	assert(MDOC_TEXT == n->type);
-	word(p, n->data.text.string);
+	word(p, n->string);
 
 	if (NULL == (n = n->next)) 
 		return(0);
+	if (MDOC_TEXT != n->type)
+		errx(1, "expected text line argument");
 
-	assert(MDOC_TEXT == n->type);
 	p->flags |= TERMP_NOSPACE;
 	word(p, "(");
 	p->flags |= TERMP_NOSPACE;
-	word(p, n->data.text.string);
+	word(p, n->string);
 	p->flags |= TERMP_NOSPACE;
 	word(p, ")");
 
@@ -1066,22 +1067,25 @@ termp_fn_pre(DECL_ARGS)
 {
 	const struct mdoc_node *n;
 
-	assert(node->child);
-	assert(MDOC_TEXT == node->child->type);
+	if (NULL == node->child)
+		errx(1, "expected text line arguments");
+	if (MDOC_TEXT != node->child->type)
+		errx(1, "expected text line arguments");
 
 	/* FIXME: can be "type funcname" "type varname"... */
 
 	p->flags |= ttypes[TTYPE_FUNC_NAME];
-	word(p, node->child->data.text.string);
+	word(p, node->child->string);
 	p->flags &= ~ttypes[TTYPE_FUNC_NAME];
 
 	word(p, "(");
 
 	p->flags |= TERMP_NOSPACE;
 	for (n = node->child->next; n; n = n->next) {
-		assert(MDOC_TEXT == n->type);
+		if (MDOC_TEXT != n->type)
+			errx(1, "expected text line arguments");
 		p->flags |= ttypes[TTYPE_FUNC_ARG];
-		word(p, n->data.text.string);
+		word(p, n->string);
 		p->flags &= ~ttypes[TTYPE_FUNC_ARG];
 		if (n->next)
 			word(p, ",");
@@ -1129,10 +1133,11 @@ termp_fa_pre(DECL_ARGS)
 	}
 
 	for (n = node->child; n; n = n->next) {
-		assert(MDOC_TEXT == n->type);
+		if (MDOC_TEXT != n->type)
+			errx(1, "expected text line arguments");
 
 		p->flags |= ttypes[TTYPE_FUNC_ARG];
-		word(p, n->data.text.string);
+		word(p, n->string);
 		p->flags &= ~ttypes[TTYPE_FUNC_ARG];
 
 		if (n->next)
@@ -1160,9 +1165,8 @@ termp_va_pre(DECL_ARGS)
 static int
 termp_bd_pre(DECL_ARGS)
 {
-	const struct mdoc_block *bl;
 	const struct mdoc_node  *n;
-	int		 i, type;
+	int		         i, type;
 
 	if (MDOC_BLOCK == node->type) {
 		if (node->prev)
@@ -1171,11 +1175,14 @@ termp_bd_pre(DECL_ARGS)
 	} else if (MDOC_BODY != node->type)
 		return(1);
 
-	pair->offset = p->offset;
-	bl = &node->parent->data.block;
+	if (NULL == node->parent->args)
+		errx(1, "missing display type");
 
-	for (type = -1, i = 0; i < (int)bl->argc; i++) {
-		switch (bl->argv[i].arg) {
+	pair->offset = p->offset;
+
+	for (type = -1, i = 0; 
+			i < (int)node->parent->args->argc; i++) {
+		switch (node->parent->args->argv[i].arg) {
 		case (MDOC_Ragged):
 			/* FALLTHROUGH */
 		case (MDOC_Filled):
@@ -1183,22 +1190,23 @@ termp_bd_pre(DECL_ARGS)
 		case (MDOC_Unfilled):
 			/* FALLTHROUGH */
 		case (MDOC_Literal):
-			type = bl->argv[i].arg;
-			i = (int)bl->argc;
+			type = node->parent->args->argv[i].arg;
+			i = (int)node->parent->args->argc;
 			break;
 		default:
-			errx(1, "display type not supported");
+			break;
 		}
 	}
 
-	assert(-1 != type);
+	if (NULL == node->parent->args)
+		errx(1, "missing display type");
 
-	i = arg_getattr(MDOC_Offset, bl->argc, bl->argv);
+	i = arg_getattr(MDOC_Offset, node->parent);
 	if (-1 != i) {
-		assert(1 == bl->argv[i].sz);
-		p->offset += arg_offset(&bl->argv[i]);
+		if (1 != node->args->argv[i].sz)
+			errx(1, "expected single value");
+		p->offset += arg_offset(&node->args->argv[i]);
 	}
-
 
 	switch (type) {
 	case (MDOC_Literal):
@@ -1216,7 +1224,7 @@ termp_bd_pre(DECL_ARGS)
 			warnx("non-text children not yet allowed");
 			continue;
 		}
-		word(p, n->data.text.string);
+		word(p, n->string);
 		flushln(p);
 	}
 
@@ -1495,8 +1503,9 @@ termp_at_pre(DECL_ARGS)
 	att = NULL;
 
 	if (node->child) {
-		assert(MDOC_TEXT == node->child->type);
-		att = mdoc_a2att(node->child->data.text.string);
+		if (MDOC_TEXT != node->child->type)
+			errx(1, "expected text line argument");
+		att = mdoc_a2att(node->child->string);
 	}
 
 	if (NULL == att)
@@ -1572,8 +1581,9 @@ termp_fo_pre(DECL_ARGS)
 
 	p->flags |= ttypes[TTYPE_FUNC_NAME];
 	for (n = node->child; n; n = n->next) {
-		assert(MDOC_TEXT == n->type);
-		word(p, n->data.text.string);
+		if (MDOC_TEXT != n->type)
+			errx(1, "expected text line argument");
+		word(p, n->string);
 	}
 	p->flags &= ~ttypes[TTYPE_FUNC_NAME];
 
@@ -1599,31 +1609,27 @@ static int
 termp_bf_pre(DECL_ARGS)
 {
 	const struct mdoc_node	*n;
-	const struct mdoc_block	*b;
 
-	/* XXX - we skip over possible trailing HEAD tokens. */
-
-	if (MDOC_HEAD == node->type)
+	if (MDOC_HEAD == node->type) {
 		return(0);
-	else if (MDOC_BLOCK != node->type)
+	} else if (MDOC_BLOCK != node->type)
 		return(1);
 
-	b = &node->data.block;
-
-	if (NULL == (n = b->head->child)) {
-		if (arg_hasattr(MDOC_Emphasis, b->argc, b->argv))
+	if (NULL == (n = node->head->child)) {
+		if (arg_hasattr(MDOC_Emphasis, node))
 			TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_EMPH]);
-		else if (arg_hasattr(MDOC_Symbolic, b->argc, b->argv))
+		else if (arg_hasattr(MDOC_Symbolic, node))
 			TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_SYMB]);
 
 		return(1);
 	} 
 
-	assert(MDOC_TEXT == n->type);
+	if (MDOC_TEXT != n->type)
+		errx(1, "expected text line arguments");
 
-	if (0 == strcmp("Em", n->data.text.string))
+	if (0 == strcmp("Em", n->string))
 		TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_EMPH]);
-	else if (0 == strcmp("Sy", n->data.text.string))
+	else if (0 == strcmp("Sy", n->string))
 		TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_EMPH]);
 
 	return(1);

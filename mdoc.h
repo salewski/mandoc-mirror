@@ -29,6 +29,8 @@
 
 /* What follows is a list of ALL possible macros. */
 
+/* TODO: Brq et al. */
+
 #define	MDOC___	 	 0
 #define	MDOC_Dd		 1
 #define	MDOC_Dt		 2

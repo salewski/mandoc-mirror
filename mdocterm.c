@@ -490,7 +490,7 @@ body(struct termp *p, struct termpair *ppair,
 			if ( ! (*termacts[node->tok].pre)(p, &pair, meta, node))
 				dochild = 0;
 	} else /* MDOC_TEXT == node->type */
-		word(p, node->data.text.string);
+		word(p, node->string);
 
 	/* Children. */
 
