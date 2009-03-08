@@ -1203,9 +1203,9 @@ termp_bd_pre(DECL_ARGS)
 
 	i = arg_getattr(MDOC_Offset, node->parent);
 	if (-1 != i) {
-		if (1 != node->args->argv[i].sz)
+		if (1 != node->parent->args->argv[i].sz)
 			errx(1, "expected single value");
-		p->offset += arg_offset(&node->args->argv[i]);
+		p->offset += arg_offset(&node->parent->args->argv[i]);
 	}
 
 	switch (type) {
