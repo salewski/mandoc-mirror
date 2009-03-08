@@ -119,7 +119,7 @@ void		  mdoc_tokhash_free(void *);
 int		  mdoc_iscdelim(char);
 size_t		  mdoc_isescape(const char *);
 enum	mdoc_sec  mdoc_atosec(const char *);
-enum	mdoc_msec mdoc_atomsec(const char *);
+
 time_t		  mdoc_atotime(const char *);
 size_t		  mdoc_macro2len(int);
 
