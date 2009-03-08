@@ -293,6 +293,9 @@ mdoc_argv_free(struct mdoc_arg *p)
 {
 	int		 i, j;
 
+	if (NULL == p)
+		return;
+
 	if (p->refcnt) {
 		--(p->refcnt);
 		if (p->refcnt)
