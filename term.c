@@ -316,7 +316,7 @@ arg_listtype(const struct mdoc_node *n)
 
 	assert(MDOC_BLOCK == n->type);
 
-	len = n->args ? n->args->argc : 0;
+	len = (int)(n->args ? n->args->argc : 0);
 
 	for (i = 0; i < len; i++) 
 		switch (n->args->argv[i].arg) {

@@ -57,7 +57,7 @@ doprint(const struct mdoc_node *n, int indent)
 	int		  i, j;
 	size_t		  argc, sz;
 	char		**params;
-	struct mdoc_arg	 *argv;
+	struct mdoc_argv *argv;
 
 	argv = NULL;
 	argc = sz = 0;
@@ -92,7 +92,7 @@ doprint(const struct mdoc_node *n, int indent)
 
 	switch (n->type) {
 	case (MDOC_TEXT):
-		p = n->data.text.string;
+		p = n->string;
 		break;
 	case (MDOC_BODY):
 		p = mdoc_macronames[n->tok];
@@ -105,13 +105,17 @@ doprint(const struct mdoc_node *n, int indent)
 		break;
 	case (MDOC_ELEM):
 		p = mdoc_macronames[n->tok];
-		argv = n->data.elem.argv;
-		argc = n->data.elem.argc;
+		if (n->args) {
+			argv = n->args->argv;
+			argc = n->args->argc;
+		}
 		break;
 	case (MDOC_BLOCK):
 		p = mdoc_macronames[n->tok];
-		argv = n->data.block.argv;
-		argc = n->data.block.argc;
+		if (n->args) {
+			argv = n->args->argv;
+			argc = n->args->argc;
+		}
 		break;
 	case (MDOC_ROOT):
 		p = "root";
