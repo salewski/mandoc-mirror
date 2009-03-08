@@ -238,7 +238,7 @@ scopewarn(struct mdoc *mdoc, enum mdoc_type type,
 	n = t = "<root>";
 	tt = "block";
 
-	switch (p->type) {
+	switch (type) {
 	case (MDOC_BODY):
 		tt = "multi-line";
 		break;

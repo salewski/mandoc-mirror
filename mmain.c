@@ -41,7 +41,7 @@ struct	mmain {
 	int		  dbg;		/* Debug level. */
 	struct mdoc	 *mdoc;		/* Active parser. */
 	char		 *buf;		/* Input buffer. */
-	u_long		  bufsz;	/* Input buffer size. */
+	size_t		  bufsz;	/* Input buffer size. */
 	char		 *in; 		/* Input file name. */
 	int		  fdin;		/* Input file desc. */
 	int		  pflags;	/* Parse flags. */
@@ -190,7 +190,7 @@ mmain_mdoc(struct mmain *p)
 		warn("%s", p->in);
 		p->bufsz = BUFSIZ;
 	} else 
-		p->bufsz = MAX(st.st_blksize, BUFSIZ);
+		p->bufsz = (size_t)MAX(st.st_blksize, BUFSIZ);
 
 	p->buf = malloc(p->bufsz);
 	if (NULL == p->buf)
@@ -283,7 +283,7 @@ parse(struct mmain *p)
 		for (i = 0; i < (int)sz; i++) {
 			if (pos >= len) {
 				len += MD_LINE_SZ;
-				line = realloc(line, len);
+				line = realloc(line, (size_t)len);
 				if (NULL == line)
 					err(1, "realloc");
 			}

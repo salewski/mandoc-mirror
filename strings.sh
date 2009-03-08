@@ -45,11 +45,11 @@ fi
 input=$2
 
 if [ "$output" ]; then
-	exec 1<>$output
+	exec >$output
 fi
 
 if [ "$input" ]; then
-	exec 0<>$input
+	exec <$input
 fi
 
 cat <<!
@@ -67,9 +67,12 @@ mdoc_a2${name}(const char *p)
 !
 
 while read in ; do
-	[ -z "$in" ] && continue;
-	[ "#" == `echo "$in" | cut -c1` ] && continue;
-
+	if [ -z "$in" ]; then
+		continue
+	fi
+	if [ "#" = `echo "$in" | cut -c1` ]; then
+		continue
+	fi
 	key=`printf "%s\n" "$in" | cut -f 1`
 	val=`printf "%s\n" "$in" | cut -f 2- | sed 's!^[ 	]*!!'`
 	cat <<!
