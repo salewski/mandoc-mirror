@@ -180,6 +180,8 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_constant, 0 }, /* Lb */
 	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* Ap */
 	{ macro_text, 0 }, /* Lp */ 
+	{ macro_text, MDOC_PARSED }, /* Lk */ 
+	{ macro_text, MDOC_PARSED }, /* Mt */ 
 };
 
 const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;

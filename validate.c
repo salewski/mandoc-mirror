@@ -137,6 +137,7 @@ static	int	bwarn_ge1(POST_ARGS);
 static	int	hwarn_eq1(POST_ARGS);
 static	int	ewarn_ge1(POST_ARGS);
 static	int	ebool(POST_ARGS);
+
 static	int	post_an(POST_ARGS);
 static	int	post_at(POST_ARGS);
 static	int	post_bf(POST_ARGS);
@@ -179,12 +180,14 @@ static	v_post	posts_in[] = { ewarn_eq1, NULL };
 static	v_post	posts_ss[] = { herr_ge1, NULL };
 static	v_post	posts_pf[] = { eerr_eq1, NULL };
 static	v_post	posts_lb[] = { eerr_eq1, NULL };
+static	v_post	posts_mt[] = { eerr_ge1, NULL };
 static	v_post	posts_st[] = { eerr_eq1, post_st, NULL };
 static	v_post	posts_pp[] = { ewarn_eq0, NULL };
 static	v_post	posts_ex[] = { eerr_eq0, post_ex, NULL };
 static	v_post	posts_an[] = { post_an, NULL };
 static	v_post	posts_at[] = { post_at, NULL };
 static	v_post	posts_xr[] = { eerr_ge1, eerr_le2, NULL };
+static	v_post	posts_lk[] = { eerr_ge1, NULL };
 static	v_post	posts_nm[] = { post_nm, NULL };
 static	v_post	posts_bf[] = { hwarn_le1, post_bf, NULL };
 static	v_post	posts_rs[] = { herr_eq0, bwarn_ge1, NULL };
@@ -302,6 +305,8 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pres_lb, posts_lb },			/* Lb */
 	{ NULL, NULL },				/* Lb */
 	{ NULL, posts_pp },			/* Pp */ 
+	{ NULL, posts_lk },			/* Lk */ 
+	{ NULL, posts_mt },			/* Mt */ 
 };
 
 

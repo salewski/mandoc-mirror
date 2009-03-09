@@ -53,7 +53,9 @@
 #define	TTYPE_SYMB	  16
 #define	TTYPE_SYMBOL	  17
 #define	TTYPE_DIAG	  18
-#define	TTYPE_NMAX	  19
+#define	TTYPE_LINK_ANCHOR 19
+#define	TTYPE_LINK_TEXT	  20
+#define	TTYPE_NMAX	  21
 
 /* 
  * These define "styles" for element types, like command arguments or
@@ -82,7 +84,9 @@ const	int ttypes[TTYPE_NMAX] = {
 	TERMP_BOLD,	 	/* TTYPE_INCLUDE */
 	TERMP_BOLD,	 	/* TTYPE_SYMB */
 	TERMP_BOLD,	 	/* TTYPE_SYMBOL */
-	TERMP_BOLD	 	/* TTYPE_DIAG */
+	TERMP_BOLD,	 	/* TTYPE_DIAG */
+	TERMP_UNDERLINE, 	/* TTYPE_LINK_ANCHOR */
+	TERMP_BOLD	 	/* TTYPE_LINK_TEXT */
 };
 
 static	int		  arg_hasattr(int, const struct mdoc_node *);
@@ -146,7 +150,9 @@ DECL_PRE(termp_fa);
 DECL_PRE(termp_fl);
 DECL_PRE(termp_fx);
 DECL_PRE(termp_ic);
+DECL_PRE(termp_lk);
 DECL_PRE(termp_ms);
+DECL_PRE(termp_mt);
 DECL_PRE(termp_nd);
 DECL_PRE(termp_nm);
 DECL_PRE(termp_ns);
@@ -279,6 +285,8 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_lb_pre, termp_lb_post }, /* Lb */
 	{ termp_ap_pre, NULL }, /* Lb */
 	{ termp_pp_pre, NULL }, /* Pp */ 
+	{ termp_lk_pre, NULL }, /* Lk */ 
+	{ termp_mt_pre, NULL }, /* Mt */ 
 };
 
 const struct termact *termacts = __termacts;
@@ -1747,3 +1755,43 @@ termp____post(DECL_ARGS)
 	p->flags |= TERMP_NOSPACE;
 	word(p, node->next ? "," : ".");
 }
+
+
+/* ARGSUSED */
+static int
+termp_lk_pre(DECL_ARGS)
+{
+	const struct mdoc_node *n;
+
+	if (NULL == (n = node->child))
+		errx(1, "expected text line argument");
+	if (MDOC_TEXT != n->type)
+		errx(1, "expected text line argument");
+
+	p->flags |= ttypes[TTYPE_LINK_ANCHOR];
+	word(p, n->string);
+	p->flags &= ~ttypes[TTYPE_LINK_ANCHOR];
+	p->flags |= TERMP_NOSPACE;
+	word(p, ":");
+
+	p->flags |= ttypes[TTYPE_LINK_TEXT];
+	for ( ; n; n = n->next) {
+		if (MDOC_TEXT != n->type)
+			errx(1, "expected text line argument");
+		word(p, n->string);
+	}
+	p->flags &= ~ttypes[TTYPE_LINK_TEXT];
+
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+termp_mt_pre(DECL_ARGS)
+{
+
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_LINK_ANCHOR]);
+	return(1);
+}
+
