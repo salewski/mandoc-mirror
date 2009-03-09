@@ -217,7 +217,8 @@ static int
 optsopt(struct mmain *p, char *arg)
 {
 	char		*v;
-	char		*toks[] = { "ign-scope", "ign-escape", NULL };
+	char		*toks[] = { "ign-scope", "ign-escape", 
+				    "ign-macro", NULL };
 
 	while (*arg) 
 		switch (getsubopt(&arg, toks, &v)) {
@@ -227,8 +228,11 @@ optsopt(struct mmain *p, char *arg)
 		case (1):
 			p->pflags |= MDOC_IGN_ESCAPE;
 			break;
+		case (2):
+			p->pflags |= MDOC_IGN_MACRO;
+			break;
 		default:
-			/* FIXME: report? */
+			warnx("unknown -f argument");
 			return(0);
 		}
 
@@ -258,7 +262,7 @@ optswarn(struct mmain *p, char *arg)
 			p->warn |= MD_WARN_ERR;
 			break;
 		default:
-			/* FIXME: report? */
+			warnx("unknown -W argument");
 			return(0);
 		}
 
@@ -270,10 +274,10 @@ static int
 parse(struct mmain *p)
 {
 	ssize_t		 sz;
-	int		 i, pos, len, lnn;
-	char		*line;
+	int		 j, i, pos, len, lnn;
+	char		*ln;
 
-	for (line = NULL, lnn = 1, len = pos = 0; ; ) {
+	for (ln = NULL, lnn = 1, len = pos = 0; ; ) {
 		if (-1 == (sz = read(p->fdin, p->buf, p->bufsz))) {
 			warn("%s", p->in);
 			return(0);
@@ -283,27 +287,43 @@ parse(struct mmain *p)
 		for (i = 0; i < (int)sz; i++) {
 			if (pos >= len) {
 				len += MD_LINE_SZ;
-				line = realloc(line, (size_t)len);
-				if (NULL == line)
+				ln = realloc(ln, (size_t)len);
+				if (NULL == ln)
 					err(1, "realloc");
 			}
 
 			if ('\n' != p->buf[i]) {
-				line[pos++] = p->buf[i];
+				ln[pos++] = p->buf[i];
 				continue;
 			}
 
-			line[pos] = 0;
-			if ( ! mdoc_parseln(p->mdoc, lnn, line))
-				return(0);
+			/* Check for escaped newline.  */
 
+			if (pos > 0 && '\\' == ln[pos - 1]) {
+				for (j = pos - 1; j >= 0; j--)
+					if ('\\' != ln[j])
+						break;
+
+				if ( ! ((pos - j) % 2)) {
+					pos--;
+					lnn++;
+					continue;
+				}
+			}
+
+			ln[pos] = 0;
+			if ( ! mdoc_parseln(p->mdoc, lnn, ln))
+				return(0);
 			lnn++;
 			pos = 0;
 		}
 	}
 
-	if (line)
-		free(line);
+	if (pos > 0)
+		warnx("%s: file not eof-terminated", p->in);
+
+	if (ln)
+		free(ln);
 	return(mdoc_endparse(p->mdoc));
 }
 

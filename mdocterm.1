@@ -106,6 +106,8 @@ When rewinding the scope of a block macro, forces the compiler to ignore
 scope violations.  This can seriously mangle the resulting tree.
 .It Fl f Ns Ar ign-escape
 Ignore invalid escape sequences.
+.It Fl f Ns Ar ign-macro
+Ignore unknown macros at the start of input lines.
 .El
 .\" PARAGRAPH
 .Pp
@@ -116,6 +118,21 @@ flag, multiple
 options may be grouped and delimited with a comma.  Using
 .Fl f Ns Ar ign-scope,ign-escape ,
 for example, will try to ignore scope and character-escape errors.
+.\" SUB-SECTION
+.Ss Input Encoding
+The
+.Nm
+utility expects its input to be 7-bit ASCII as defined in
+.Xr ascii 7 .
+The only non-graphing characters accepted are spaces,
+.Sq \  ,
+and tabs,
+.Sq \et .
+Tabs are only accepted in literal block-displays and as column
+delimiters.
+.Pp
+Only Unix-style newlines (\en) are accepted; if the newline is escaped,
+the line is concatenated with the next.
 .\" SUB-SECTION
 .Ss Character Escapes
 This section documents the character-escapes accepted by

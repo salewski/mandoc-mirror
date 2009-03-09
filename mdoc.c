@@ -38,6 +38,7 @@ static	int		  mdoc_node_append(struct mdoc *,
 
 static	int		  parsetext(struct mdoc *, int, char *);
 static	int		  parsemacro(struct mdoc *, int, char *);
+static	int		  macrowarn(struct mdoc *, int, const char *);
 
 
 const	char *const __mdoc_macronames[MDOC_MAX] = {		 
@@ -495,6 +496,19 @@ parsetext(struct mdoc *mdoc, int line, char *buf)
 }
 
 
+static int
+macrowarn(struct mdoc *m, int ln, const char *buf)
+{
+	if ( ! (MDOC_IGN_MACRO & m->pflags))
+		return(mdoc_perr(m, ln, 1, "unknown macro: %s%s", 
+				buf, buf[3] ? "..." : ""));
+	return(mdoc_pwarn(m, ln, 1, WARN_SYNTAX,
+				"unknown macro: %s%s",
+				buf, buf[3] ? "..." : ""));
+}
+
+
+
 /*
  * Parse a macro line, that is, a line beginning with the control
  * character.
@@ -525,14 +539,15 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 	mac[i - 1] = 0;
 
 	if (i == 5 || i <= 2) {
-		(void)mdoc_perr(m, ln, 1, "unknown macro: %s%s", 
-				mac, i == 5 ? "..." : "");
-		goto err;
+		if ( ! macrowarn(m, ln, mac))
+			goto err;
+		return(1);
 	} 
 	
 	if (MDOC_MAX == (c = mdoc_tokhash_find(m->htab, mac))) {
-		(void)mdoc_perr(m, ln, 1, "unknown macro: %s", mac);
-		goto err;
+		if ( ! macrowarn(m, ln, mac))
+			goto err;
+		return(1);
 	}
 
 	/* The macro is sane.  Jump to the next word. */
