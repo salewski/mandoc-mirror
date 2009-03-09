@@ -21,17 +21,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef	__linux__
-#include <time.h>
-#endif
+
+#include "private.h"
 
 /*
  * This has scanning/parsing routines, each of which extract a macro and
  * its arguments and parameters, then know how to progress to the next
  * macro. 
  */
-
-#include "private.h"
 
 static int	  macro_obsolete(MACRO_PROT_ARGS);
 static int	  macro_constant(MACRO_PROT_ARGS);

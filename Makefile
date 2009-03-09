@@ -1,6 +1,6 @@
 .SUFFIXES:	.html .sgml
 
-VERSION	= 1.4.4
+VERSION	= 1.4.5
 VDATE	= 9 March 2009
 
 BINDIR		= $(PREFIX)/bin
@@ -13,8 +13,11 @@ INSTALL_DATA	= install -m 0444
 INSTALL_LIB	= install -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
-CPPFLAGS = -DVERSION=\"$(VERSION)\"
+VFLAGS  = -DVERSION=\"$(VERSION)\"
 CFLAGS += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g 
+
+LINTFLAGS += $(VFLAGS)
+CFLAGS    += $(VFLAGS)
 
 LIBLNS	= macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
 	  validate.ln action.ln lib.ln att.ln arch.ln vol.ln \
