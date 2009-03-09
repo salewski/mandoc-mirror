@@ -312,18 +312,19 @@ parse(struct mmain *p)
 			}
 
 			ln[pos] = 0;
-			if ( ! mdoc_parseln(p->mdoc, lnn, ln))
+			if ( ! mdoc_parseln(p->mdoc, lnn, ln)) {
+				free(ln);
 				return(0);
+			}
 			lnn++;
 			pos = 0;
 		}
 	}
 
-	if (pos > 0)
-		warnx("%s: file not eof-terminated", p->in);
-
 	if (ln)
 		free(ln);
+	if (pos > 0)
+		warnx("%s: file not eof-terminated", p->in);
 	return(mdoc_endparse(p->mdoc));
 }
 

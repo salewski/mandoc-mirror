@@ -501,10 +501,10 @@ macrowarn(struct mdoc *m, int ln, const char *buf)
 {
 	if ( ! (MDOC_IGN_MACRO & m->pflags))
 		return(mdoc_perr(m, ln, 1, "unknown macro: %s%s", 
-				buf, buf[3] ? "..." : ""));
+				buf, strlen(buf) > 3 ? "..." : ""));
 	return(mdoc_pwarn(m, ln, 1, WARN_SYNTAX,
 				"unknown macro: %s%s",
-				buf, buf[3] ? "..." : ""));
+				buf, strlen(buf) > 3 ? "..." : ""));
 }
 
 
