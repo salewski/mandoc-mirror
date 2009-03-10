@@ -52,6 +52,7 @@ static	void		  chara(struct termp *, char);
 static	void		  stringa(struct termp *, 
 				const char *, size_t);
 static	void		  symbola(struct termp *, enum tsym);
+static	void		  sanity(const struct mdoc_node *);
 static	void		  stylea(struct termp *, enum tstyle);
 
 #ifdef __linux__
@@ -475,6 +476,10 @@ body(struct termp *p, struct termpair *ppair,
 	int		 dochild;
 	struct termpair	 pair;
 
+	/* Some quick sanity-checking. */
+
+	sanity(node);
+
 	/* Pre-processing. */
 
 	dochild = 1;
@@ -845,3 +850,114 @@ chara(struct termp *p, char c)
 	}
 	p->buf[(p->col)++] = c;
 }
+
+
+static void
+sanity(const struct mdoc_node *n)
+{
+
+	switch (n->type) {
+	case (MDOC_TEXT):
+		if (n->child) 
+			errx(1, "regular form violated (1)");
+		if (NULL == n->parent) 
+			errx(1, "regular form violated (2)");
+		if (NULL == n->string)
+			errx(1, "regular form violated (3)");
+		switch (n->parent->type) {
+		case (MDOC_TEXT):
+			/* FALLTHROUGH */
+		case (MDOC_ROOT):
+			errx(1, "regular form violated (4)");
+			/* NOTREACHED */
+		default:
+			break;
+		}
+		break;
+	case (MDOC_ELEM):
+		if (NULL == n->parent)
+			errx(1, "regular form violated (5)");
+		switch (n->parent->type) {
+		case (MDOC_TAIL):
+			/* FALLTHROUGH */
+		case (MDOC_BODY):
+			/* FALLTHROUGH */
+		case (MDOC_HEAD):
+			break;
+		default:
+			errx(1, "regular form violated (6)");
+			/* NOTREACHED */
+		}
+		if (n->child) switch (n->child->type) {
+		case (MDOC_TEXT):
+			break;
+		default:
+			errx(1, "regular form violated (7(");
+			/* NOTREACHED */
+		}
+		break;
+	case (MDOC_HEAD):
+		/* FALLTHROUGH */
+	case (MDOC_BODY):
+		/* FALLTHROUGH */
+	case (MDOC_TAIL):
+		if (NULL == n->parent)
+			errx(1, "regular form violated (8)");
+		if (MDOC_BLOCK != n->parent->type)
+			errx(1, "regular form violated (9)");
+		if (n->child) switch (n->child->type) {
+		case (MDOC_BLOCK):
+			/* FALLTHROUGH */
+		case (MDOC_ELEM):
+			/* FALLTHROUGH */
+		case (MDOC_TEXT):
+			break;
+		default:
+			errx(1, "regular form violated (a)");
+			/* NOTREACHED */
+		}
+		break;
+	case (MDOC_BLOCK):
+		if (NULL == n->parent)
+			errx(1, "regular form violated (b)");
+		if (NULL == n->child)
+			errx(1, "regular form violated (c)");
+		switch (n->parent->type) {
+		case (MDOC_ROOT):
+			/* FALLTHROUGH */
+		case (MDOC_HEAD):
+			/* FALLTHROUGH */
+		case (MDOC_BODY):
+			/* FALLTHROUGH */
+		case (MDOC_TAIL):
+			break;
+		default:
+			errx(1, "regular form violated (d)");
+			/* NOTREACHED */
+		}
+		switch (n->child->type) {
+		case (MDOC_ROOT):
+			/* FALLTHROUGH */
+		case (MDOC_ELEM):
+			errx(1, "regular form violated (e)");
+			/* NOTREACHED */
+		default:
+			break;
+		}
+		break;
+	case (MDOC_ROOT):
+		if (n->parent)
+			errx(1, "regular form violated (f)");
+		if (NULL == n->child)
+			errx(1, "regular form violated (10)");
+		switch (n->child->type) {
+		case (MDOC_BLOCK):
+			break;
+		default:
+			errx(1, "regular form violated (11)");
+			/* NOTREACHED */
+		}
+		break;
+	}
+}
+

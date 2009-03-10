@@ -733,12 +733,8 @@ termp_st_pre(DECL_ARGS)
 {
 	const char	*cp;
 
-	if (node->child) {
-		if (MDOC_TEXT != node->child->type)
-			errx(1, "expected text line arguments");
-		if ((cp = mdoc_a2st(node->child->string)))
-			word(p, cp);
-	}
+	if (node->child && (cp = mdoc_a2st(node->child->string)))
+		word(p, cp);
 	return(0);
 }
 
@@ -847,23 +843,15 @@ termp_xr_pre(DECL_ARGS)
 
 	if (NULL == (n = node->child))
 		errx(1, "expected text line argument");
-	if (MDOC_TEXT != n->type)
-		errx(1, "expected text line argument");
-
 	word(p, n->string);
-
 	if (NULL == (n = n->next)) 
 		return(0);
-	if (MDOC_TEXT != n->type)
-		errx(1, "expected text line argument");
-
 	p->flags |= TERMP_NOSPACE;
 	word(p, "(");
 	p->flags |= TERMP_NOSPACE;
 	word(p, n->string);
 	p->flags |= TERMP_NOSPACE;
 	word(p, ")");
-
 	return(0);
 }
 
@@ -990,14 +978,10 @@ termp_lb_pre(DECL_ARGS)
 
 	if (NULL == node->child)
 		errx(1, "expected text line argument");
-	if (MDOC_TEXT != node->child->type)
-		errx(1, "expected text line argument");
-
 	if ((lb = mdoc_a2lib(node->child->string))) {
 		word(p, lb);
 		return(0);
 	}
-
 	word(p, "library");
 	return(1);
 }
@@ -1103,8 +1087,6 @@ termp_fn_pre(DECL_ARGS)
 
 	if (NULL == node->child)
 		errx(1, "expected text line arguments");
-	if (MDOC_TEXT != node->child->type)
-		errx(1, "expected text line arguments");
 
 	/* FIXME: can be "type funcname" "type varname"... */
 
@@ -1116,8 +1098,6 @@ termp_fn_pre(DECL_ARGS)
 
 	p->flags |= TERMP_NOSPACE;
 	for (n = node->child->next; n; n = n->next) {
-		if (MDOC_TEXT != n->type)
-			errx(1, "expected text line arguments");
 		p->flags |= ttypes[TTYPE_FUNC_ARG];
 		word(p, n->string);
 		p->flags &= ~ttypes[TTYPE_FUNC_ARG];
@@ -1167,13 +1147,9 @@ termp_fa_pre(DECL_ARGS)
 	}
 
 	for (n = node->child; n; n = n->next) {
-		if (MDOC_TEXT != n->type)
-			errx(1, "expected text line arguments");
-
 		p->flags |= ttypes[TTYPE_FUNC_ARG];
 		word(p, n->string);
 		p->flags &= ~ttypes[TTYPE_FUNC_ARG];
-
 		if (n->next)
 			word(p, ",");
 	}
@@ -1536,12 +1512,8 @@ termp_at_pre(DECL_ARGS)
 
 	att = NULL;
 
-	if (node->child) {
-		if (MDOC_TEXT != node->child->type)
-			errx(1, "expected text line argument");
+	if (node->child)
 		att = mdoc_a2att(node->child->string);
-	}
-
 	if (NULL == att)
 		att = "AT&T UNIX";
 
@@ -1764,9 +1736,7 @@ termp_lk_pre(DECL_ARGS)
 	const struct mdoc_node *n;
 
 	if (NULL == (n = node->child))
-		errx(1, "expected text line argument");
-	if (MDOC_TEXT != n->type)
-		errx(1, "expected text line argument");
+		errx(1, "expected line argument");
 
 	p->flags |= ttypes[TTYPE_LINK_ANCHOR];
 	word(p, n->string);
@@ -1776,8 +1746,6 @@ termp_lk_pre(DECL_ARGS)
 
 	p->flags |= ttypes[TTYPE_LINK_TEXT];
 	for ( ; n; n = n->next) {
-		if (MDOC_TEXT != n->type)
-			errx(1, "expected text line argument");
 		word(p, n->string);
 	}
 	p->flags &= ~ttypes[TTYPE_LINK_TEXT];
