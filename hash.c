@@ -130,10 +130,13 @@ mdoc_tokhash_find(const void *arg, const char *tmp)
 	assert(0 == (size_t)slot % sizeof(struct mdoc_macro));
 	slot /= sizeof(struct mdoc_macro);
 
-	if (0 == tmp[2])
-		return(slot);
+	if (mdoc_macronames[slot][0] != tmp[0])
+		return(MDOC_MAX);
+	if (mdoc_macronames[slot][1] != tmp[1])
+		return(MDOC_MAX);
+	if (tmp[2] && mdoc_macronames[slot][2] != tmp[2])
+		return(MDOC_MAX);
 
-	assert(0 == tmp[3]);
-	return(tmp[2] == mdoc_macronames[slot][2] ? slot : MDOC_MAX);
+	return(slot);
 }
 
