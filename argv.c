@@ -253,9 +253,11 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 
 	/* 
 	 * XXX: save the nullified byte as we'll restore it if this
-	 * doesn't end up being a command after all.
+	 * doesn't end up being a command after all.  This is a little
+	 * bit hacky.  I don't like it, but it works for now.
 	 */
 
+	sv = 0;
 	if (buf[*pos]) {
 		sv = buf[*pos];
 		buf[(*pos)++] = 0;
@@ -272,8 +274,9 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	 */
 
 	if (MDOC_ARG_MAX == (tmp.arg = argv_a2arg(tok, p))) {
-		/* Restore saved byte. */
-		buf[*pos - 1] = sv;
+		/* XXX - restore saved byte. */
+		if (sv)
+			buf[*pos - 1] = sv;
 		if ( ! pwarn(mdoc, line, i, WARGVPARM))
 			return(ARGV_ERROR);
 		return(ARGV_WORD);
