@@ -226,7 +226,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		struct mdoc_arg **v, int *pos, char *buf)
 {
 	int		  i;
-	char		 *p;
+	char		 *p, sv;
 	struct mdoc_argv tmp;
 	struct mdoc_arg	 *arg;
 
@@ -251,8 +251,15 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		(*pos)++;
 	}
 
-	if (buf[*pos])
+	/* 
+	 * XXX: save the nullified byte as we'll restore it if this
+	 * doesn't end up being a command after all.
+	 */
+
+	if (buf[*pos]) {
+		sv = buf[*pos];
 		buf[(*pos)++] = 0;
+	}
 
 	(void)memset(&tmp, 0, sizeof(struct mdoc_argv));
 	tmp.line = line;
@@ -265,6 +272,8 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	 */
 
 	if (MDOC_ARG_MAX == (tmp.arg = argv_a2arg(tok, p))) {
+		/* Restore saved byte. */
+		buf[*pos - 1] = sv;
 		if ( ! pwarn(mdoc, line, i, WARGVPARM))
 			return(ARGV_ERROR);
 		return(ARGV_WORD);
@@ -575,7 +584,7 @@ args(struct mdoc *mdoc, int line,
 
 			return(ARGS_WORD);
 		} 
-
+		
 		/* Do non-tabsep look-ahead here. */
 		
 		if ( ! (ARGS_TABSEP & fl))

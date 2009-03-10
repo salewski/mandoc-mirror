@@ -30,6 +30,8 @@
  * macro. 
  */
 
+/* FIXME: .Fl, .Ar, .Cd handling of `|'. */
+
 static int	  macro_obsolete(MACRO_PROT_ARGS);
 static int	  macro_constant(MACRO_PROT_ARGS);
 static int	  macro_constant_scoped(MACRO_PROT_ARGS);
@@ -798,7 +800,7 @@ macro_text(MACRO_PROT_ARGS)
 	for (;;) {
 		la = *pos;
 		w = mdoc_args(mdoc, line, pos, buf, tok, &p);
-		assert(ARGS_PHRASE != c);
+		assert(ARGS_PHRASE != w);
 
 		if (ARGS_ERROR == w)
 			return(0);
@@ -807,8 +809,12 @@ macro_text(MACRO_PROT_ARGS)
 		if (ARGS_PUNCT == w)
 			break;
 
+		/* Quoted words shouldn't be looked-up. */
+
 		c = ARGS_QWORD == w ? MDOC_MAX :
 			lookup(mdoc, line, la, tok, p);
+
+		/* MDOC_MAX (not a macro) or -1 (error). */
 
 		if (MDOC_MAX != c && -1 != c) {
 			if (0 == lastpunct && ! rewind_elem(mdoc, tok))
@@ -822,7 +828,7 @@ macro_text(MACRO_PROT_ARGS)
 		} else if (-1 == c)
 			return(0);
 
-		/* FIXME: .Fl and .Ar handling of `|'. */
+		/* Non-quote-enclosed punctuation. */
 
 		if (ARGS_QWORD != w && mdoc_isdelim(p)) {
 			if (0 == lastpunct && ! rewind_elem(mdoc, tok))
