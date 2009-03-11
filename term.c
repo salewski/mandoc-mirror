@@ -118,6 +118,7 @@ DECL_PREPOST(termp__t);
 DECL_PREPOST(termp_aq);
 DECL_PREPOST(termp_bd);
 DECL_PREPOST(termp_bq);
+DECL_PREPOST(termp_brq);
 DECL_PREPOST(termp_d1);
 DECL_PREPOST(termp_dq);
 DECL_PREPOST(termp_fd);
@@ -287,6 +288,9 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_pp_pre, NULL }, /* Pp */ 
 	{ termp_lk_pre, NULL }, /* Lk */ 
 	{ termp_mt_pre, NULL }, /* Mt */ 
+	{ termp_brq_pre, termp_brq_post }, /* Brq */ 
+	{ termp_brq_pre, termp_brq_post }, /* Bro */ 
+	{ NULL, NULL }, /* Brc */ 
 };
 
 const struct termact *termacts = __termacts;
@@ -1524,12 +1528,37 @@ termp_at_pre(DECL_ARGS)
 
 /* ARGSUSED */
 static int
+termp_brq_pre(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return(1);
+	word(p, "\\(lC");
+	p->flags |= TERMP_NOSPACE;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp_brq_post(DECL_ARGS)
+{
+
+	if (MDOC_BODY != node->type)
+		return;
+	p->flags |= TERMP_NOSPACE;
+	word(p, "\\(rC");
+}
+
+
+/* ARGSUSED */
+static int
 termp_bq_pre(DECL_ARGS)
 {
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "[");
+	word(p, "\\(lB");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1542,7 +1571,8 @@ termp_bq_post(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return;
-	word(p, "]");
+	p->flags |= TERMP_NOSPACE;
+	word(p, "\\(rB");
 }
 
 
@@ -1604,7 +1634,9 @@ termp_fo_post(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return;
+	p->flags |= TERMP_NOSPACE;
 	word(p, ")");
+	p->flags |= TERMP_NOSPACE;
 	word(p, ";");
 	newln(p);
 }

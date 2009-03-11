@@ -213,6 +213,9 @@ static	int mdoc_argflags[MDOC_MAX] = {
 	ARGS_DELIM, /* Lp */
 	ARGS_DELIM | ARGS_QUOTED, /* Lk */
 	ARGS_DELIM | ARGS_QUOTED, /* Mt */
+	ARGS_DELIM, /* Brq */
+	0, /* Bro */
+	ARGS_DELIM, /* Brc */
 };
 
 

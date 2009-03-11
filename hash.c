@@ -45,7 +45,7 @@ mdoc_tokhash_alloc(void)
 	int		  i, major, minor, ind;
 	const void	**htab;
 
-	htab = calloc(27 * 26, sizeof(struct mdoc_macro *));
+	htab = calloc(27 * 26 * 3, sizeof(struct mdoc_macro *));
 	if (NULL == htab) 
 		err(1, "calloc");
 
@@ -74,9 +74,19 @@ mdoc_tokhash_alloc(void)
 		assert(major >= 0 && major < 27);
 		assert(minor >= 0 && minor < 26);
 
-		ind = (major * 27) + minor;
+		ind = (major * 27 * 3) + (minor * 3);
 
-		assert(NULL == htab[ind]);
+		if (NULL == htab[ind]) {
+			htab[ind] = &mdoc_macros[i];
+			continue;
+		}
+
+		if (NULL == htab[++ind]) {
+			htab[ind] = &mdoc_macros[i];
+			continue;
+		}
+
+		assert(NULL == htab[++ind]);
 		htab[ind] = &mdoc_macros[i];
 	}
 
@@ -118,25 +128,48 @@ mdoc_tokhash_find(const void *arg, const char *tmp)
 	else
 		minor = tmp[1] - 97;
 
-	ind = (major * 27) + minor;
-	if (ind < 0 || ind >= (27 * 26))
+	ind = (major * 27 * 3) + (minor * 3);
+	if (ind < 0 || ind >= (27 * 26 * 3))
 		return(MDOC_MAX);
 
-	if (NULL == htab[ind])
-		return(MDOC_MAX);
+	if (htab[ind]) {
+		slot = htab[ind] - /* LINTED */
+			(void *)mdoc_macros;
+		assert(0 == (size_t)slot % sizeof(struct mdoc_macro));
+		slot /= sizeof(struct mdoc_macro);
+		if (mdoc_macronames[slot][0] == tmp[0] && 
+				mdoc_macronames[slot][1] == tmp[1] && 
+				(0 == tmp[2] ||
+				 mdoc_macronames[slot][2] == tmp[2]))
+			return(slot);
+		ind++;
+	}
 
+	if (htab[ind]) {
+		slot = htab[ind] - /* LINTED */
+			(void *)mdoc_macros;
+		assert(0 == (size_t)slot % sizeof(struct mdoc_macro));
+		slot /= sizeof(struct mdoc_macro);
+		if (mdoc_macronames[slot][0] == tmp[0] && 
+				mdoc_macronames[slot][1] == tmp[1] && 
+				(0 == tmp[2] ||
+				 mdoc_macronames[slot][2] == tmp[2]))
+			return(slot);
+		ind++;
+	}
+
+	if (NULL == htab[ind]) 
+		return(MDOC_MAX);
 	slot = htab[ind] - /* LINTED */
 		(void *)mdoc_macros;
 	assert(0 == (size_t)slot % sizeof(struct mdoc_macro));
 	slot /= sizeof(struct mdoc_macro);
+	if (mdoc_macronames[slot][0] == tmp[0] && 
+			mdoc_macronames[slot][1] == tmp[1] && 
+			(0 == tmp[2] ||
+			 mdoc_macronames[slot][2] == tmp[2]))
+		return(slot);
 
-	if (mdoc_macronames[slot][0] != tmp[0])
-		return(MDOC_MAX);
-	if (mdoc_macronames[slot][1] != tmp[1])
-		return(MDOC_MAX);
-	if (tmp[2] && mdoc_macronames[slot][2] != tmp[2])
-		return(MDOC_MAX);
-
-	return(slot);
+	return(MDOC_MAX);
 }
 

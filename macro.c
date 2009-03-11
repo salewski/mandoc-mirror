@@ -184,6 +184,9 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_text, 0 }, /* Lp */ 
 	{ macro_text, MDOC_PARSED }, /* Lk */ 
 	{ macro_text, MDOC_PARSED }, /* Mt */ 
+	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Brq */
+	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Bro */
+	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Brc */
 };
 
 const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;
@@ -326,6 +329,8 @@ rewind_alt(int tok)
 		return(MDOC_Ao);
 	case (MDOC_Bc):
 		return(MDOC_Bo);
+	case (MDOC_Brc):
+		return(MDOC_Bro);
 	case (MDOC_Dc):
 		return(MDOC_Do);
 	case (MDOC_Ec):
@@ -374,6 +379,8 @@ rewind_dohalt(int tok, enum mdoc_type type, const struct mdoc_node *p)
 	case (MDOC_Aq):
 		/* FALLTHROUGH */
 	case (MDOC_Bq):
+		/* FALLTHROUGH */
+	case (MDOC_Brq):
 		/* FALLTHROUGH */
 	case (MDOC_D1):
 		/* FALLTHROUGH */
@@ -429,6 +436,8 @@ rewind_dohalt(int tok, enum mdoc_type type, const struct mdoc_node *p)
 		/* FALLTHROUGH */
 	case (MDOC_Bo):
 		/* FALLTHROUGH */
+	case (MDOC_Bro):
+		/* FALLTHROUGH */
 	case (MDOC_Do):
 		/* FALLTHROUGH */
 	case (MDOC_Eo):
@@ -454,6 +463,8 @@ rewind_dohalt(int tok, enum mdoc_type type, const struct mdoc_node *p)
 	case (MDOC_Ac):
 		/* FALLTHROUGH */
 	case (MDOC_Bc):
+		/* FALLTHROUGH */
+	case (MDOC_Brc):
 		/* FALLTHROUGH */
 	case (MDOC_Dc):
 		/* FALLTHROUGH */

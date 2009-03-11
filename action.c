@@ -174,6 +174,9 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* Lp */
 	{ NULL }, /* Lk */
 	{ NULL }, /* Mt */
+	{ NULL }, /* Brq */
+	{ NULL }, /* Bro */
+	{ NULL }, /* Brc */
 };
 
 
