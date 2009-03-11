@@ -1,7 +1,7 @@
 .SUFFIXES:	.html .sgml
 
-VERSION	= 1.4.8
-VDATE	= 10 March 2009
+VERSION	= 1.4.9
+VDATE	= 11 March 2009
 
 BINDIR		= $(PREFIX)/bin
 INCLUDEDIR	= $(PREFIX)/include
