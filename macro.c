@@ -1482,8 +1482,7 @@ macro_phrase(struct mdoc *mdoc, int line, int ppos, char *buf)
 		if (MDOC_MAX != (c = mdoc_tokhash_find(mdoc->htab, &buf[la]))) {
 			if ( ! mdoc_macro(mdoc, c, line, la, &i, buf))
 				return(0);
-
-			return(1);
+			return(append_delims(mdoc, line, &i, buf));
 		}
 
 		if ( ! mdoc_word_alloc(mdoc, line, la, &buf[la]))
