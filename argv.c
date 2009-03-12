@@ -576,7 +576,7 @@ args(struct mdoc *mdoc, int line,
 					return(0);
 
 			if (p)
-				return(ARGS_WORD);
+				return(ARGS_PHRASE);
 
 			/* Configure the eoln case, too. */
 
@@ -588,7 +588,7 @@ args(struct mdoc *mdoc, int line,
 					return(0);
 			*pos += (int)(p - *v);
 
-			return(ARGS_WORD);
+			return(ARGS_PHRASE);
 		} 
 		
 		/* Do non-tabsep look-ahead here. */
@@ -688,6 +688,8 @@ argv_a2arg(int tok, const char *argv)
 			return(MDOC_File);
 		else if (xstrcmp(argv, "offset"))
 			return(MDOC_Offset);
+		else if (xstrcmp(argv, "compact"))
+			return(MDOC_Compact);
 		break;
 
 	case (MDOC_Bf):

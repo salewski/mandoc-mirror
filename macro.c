@@ -32,14 +32,15 @@
 
 /* FIXME: .Fl, .Ar, .Cd handling of `|'. */
 
-static int	  macro_obsolete(MACRO_PROT_ARGS);
-static int	  macro_constant(MACRO_PROT_ARGS);
-static int	  macro_constant_scoped(MACRO_PROT_ARGS);
-static int	  macro_constant_delimited(MACRO_PROT_ARGS);
-static int	  macro_text(MACRO_PROT_ARGS);
-static int	  macro_scoped(MACRO_PROT_ARGS);
-static int	  macro_scoped_close(MACRO_PROT_ARGS);
-static int	  macro_scoped_line(MACRO_PROT_ARGS);
+static	int	  macro_obsolete(MACRO_PROT_ARGS);
+static	int	  macro_constant(MACRO_PROT_ARGS);
+static	int	  macro_constant_scoped(MACRO_PROT_ARGS);
+static	int	  macro_constant_delimited(MACRO_PROT_ARGS);
+static	int	  macro_text(MACRO_PROT_ARGS);
+static	int	  macro_scoped(MACRO_PROT_ARGS);
+static	int	  macro_scoped_close(MACRO_PROT_ARGS);
+static	int	  macro_scoped_line(MACRO_PROT_ARGS);
+static	int	  macro_phrase(struct mdoc *, int, char *);
 
 #define	REWIND_REWIND	(1 << 0)
 #define	REWIND_NOHALT	(1 << 1)
@@ -190,6 +191,37 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 };
 
 const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;
+
+
+/*
+ * This is called at the end of parsing.  It must traverse up the tree,
+ * closing out open [implicit] scopes.  Obviously, open explicit scopes
+ * are errors.
+ */
+int
+macro_end(struct mdoc *mdoc)
+{
+	struct mdoc_node *n;
+
+	assert(mdoc->first);
+	assert(mdoc->last);
+
+	/* Scan for open explicit scopes. */
+
+	n = MDOC_VALID & mdoc->last->flags ?
+		mdoc->last->parent : mdoc->last;
+
+	for ( ; n; n = n->parent) {
+		if (MDOC_BLOCK != n->type)
+			continue;
+		if ( ! (MDOC_EXPLICIT & mdoc_macros[n->tok].flags))
+			continue;
+		return(mdoc_nerr(mdoc, n, 
+				"macro scope still open on exit"));
+	}
+
+	return(rewind_last(mdoc, mdoc->first));
+}
 
 
 static int
@@ -890,12 +922,14 @@ macro_text(MACRO_PROT_ARGS)
  *             TEXT (`Another.')
  *
  * Note that the `.It' macro, possibly the most difficult (as it has
- * embedded scope, etc.) is handled by this routine.
+ * embedded scope, etc.) is handled by this routine.  It handles
+ * columnar output, where columns are "phrases" and denote multiple
+ * block heads.
  */
 static int
 macro_scoped(MACRO_PROT_ARGS)
 {
-	int		  c, lastarg;
+	int		  c, lastarg, reopen;
 	struct mdoc_arg	 *arg;
 	char		 *p;
 
@@ -947,6 +981,9 @@ macro_scoped(MACRO_PROT_ARGS)
 
 	if ( ! mdoc_head_alloc(mdoc, line, ppos, tok))
 		return(0);
+
+	/* Indicate that columnar scope shouldn't be reopened. */
+	reopen = 0;
 	mdoc->next = MDOC_NEXT_CHILD;
 
 	for (;;) {
@@ -958,16 +995,24 @@ macro_scoped(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 		if (ARGS_PHRASE == c) {
-			/*
-			if ( ! mdoc_phrase(mdoc, line, lastarg, buf))
+			if (reopen && ! mdoc_head_alloc(mdoc, line, ppos, tok))
 				return(0);
-			*/
+			mdoc->next = MDOC_NEXT_CHILD;
+
+			/*
+			 * Phrases are self-contained macro phrases used
+			 * in the columnar output of a macro. They need
+			 * special handling.
+			 */
+			if ( ! macro_phrase(mdoc, line, p))
+				return(0);
+			if ( ! rewind_subblock(MDOC_HEAD, mdoc, tok, line, ppos))
+				return(0);
+
+			reopen = 1;
 			continue;
 		}
 
-		/* FIXME: if .It -column, the lookup must be for a
-		 * sub-line component.  BLAH. */
-	
 		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
 			return(0);
 
@@ -1409,32 +1454,24 @@ macro_obsolete(MACRO_PROT_ARGS)
 }
 
 
-/*
- * This is called at the end of parsing.  It must traverse up the tree,
- * closing out open [implicit] scopes.  Obviously, open explicit scopes
- * are errors.
- */
-int
-macro_end(struct mdoc *mdoc)
+static int
+macro_phrase(struct mdoc *mdoc, int line, int ppos, char *buf)
 {
-	struct mdoc_node *n;
+	int		 i, la, c;
 
-	assert(mdoc->first);
-	assert(mdoc->last);
+	i = ppos;
 
-	/* Scan for open explicit scopes. */
+again:
+	la = i;
+	while (buf[i] && ! isspace((unsigned char)buf[i]))
+		i++;
 
-	n = MDOC_VALID & mdoc->last->flags ?
-		mdoc->last->parent : mdoc->last;
+	if (0 == buf[i])
+		return(mdoc_word_alloc(mdoc, line, la, buf));
 
-	for ( ; n; n = n->parent) {
-		if (MDOC_BLOCK != n->type)
-			continue;
-		if ( ! (MDOC_EXPLICIT & mdoc_macros[n->tok].flags))
-			continue;
-		return(mdoc_nerr(mdoc, n, 
-				"macro scope still open on exit"));
+	buf[i] = 0;
+
+	if (MDOC_MAX == (c = mdoc_tokhash_find(mdoc->htab, p))) {
+		if ( ! mdoc_word_alloc(mdoc, line, 
 	}
-
-	return(rewind_last(mdoc, mdoc->first));
 }
