@@ -520,7 +520,19 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 	int		  i, c;
 	char		  mac[5];
 
-	/* Comments are quickly ignored. */
+	/* Comments and empties are quickly ignored. */
+
+	if (0 == buf[1])
+		return(1);
+
+	if (isspace((unsigned char)buf[1])) {
+		i = 2;
+		while (buf[i] && isspace((unsigned char)buf[i]))
+			i++;
+		if (0 == buf[i])
+			return(1);
+		return(mdoc_perr(m, ln, 1, "invalid syntax"));
+	}
 
 	if (buf[1] && '\\' == buf[1])
 		if (buf[2] && '\"' == buf[2])

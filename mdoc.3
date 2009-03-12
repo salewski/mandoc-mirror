@@ -360,6 +360,39 @@ parsed(mdoc, node);
 mdoc_free(mdoc);
 .Ed
 .\" SECTION
+.Sh COMPATIBILITY
+In general, only those macros specified by
+.Xr mdoc.samples 7
+and
+.Xr mdoc 7
+for
+.Ox
+and
+.Nx
+are supported; support for other 
+.Bx
+systems is in progress.
+.Bl -bullet
+.\" LIST-ITEM
+.It
+NetBSD
+.Sq \&It \-nested
+is assumed for all lists: any list may be nested and
+.Sq \-enum
+lists will restart the sequence only for the sub-list.
+.\" LIST-ITEM
+.It
+Newer NetBSD-style
+.Sq \&It \-column
+syntax, where column widths may be preceeded by other arguments (instead
+of proceeded), is not supported.
+.\" LIST-ITEM
+.It
+The 
+.Sq \&At
+macro only accepts a single parameter.
+.El
+.\" SECTION
 .Sh SEE ALSO
 .Xr mdoc 7 ,
 .Xr mdoc.samples 7 ,
@@ -372,17 +405,11 @@ The
 utility was written by 
 .An Kristaps Dzonsons Aq kristaps@kth.se .
 .\" SECTION
-.Sh BUGS
-Bugs, un-implemented macros and incompabilities are documented in this
-section.  The baseline for determining whether macro parsing is 
-.Qq incompatible
-is the default
-.Xr groff 1
-system bundled with 
-.Ox .
-.\" PARAGRAPH
-.Pp
-Un-implemented: the 
+.Sh CAVEATS
+.Bl -bullet
+.\" LIST-ITEM
+.It
+The 
 .Sq \&Xc
 and
 .Sq \&Xo
@@ -390,36 +417,4 @@ macros aren't handled when used to span lines for the
 .Sq \&It
 macro.  Such usage is specifically discouraged in
 .Xr mdoc.samples 7 .
-.\" PARAGRAPH
-.Pp
-Bugs: when 
-.Sq \&It \-column
-is invoked, whitespace is not stripped around
-.Sq \&Ta
-or tab-character separators.
-.\" PARAGRAPH
-.Pp
-Bugs: elements within columns for
-.Sq \&It \-column
-are not yet supported.
-.\" PARAGRAPH
-.Pp
-Incompatible: the 
-.Sq \&At
-macro only accepts a single parameter.  Furthermore, several macros 
-.Pf ( Sq \&Pp ,
-.Sq \&It ,
-and possibly others) accept multiple arguments with a warning.
-.\" PARAGRAPH
-.Pp
-Incompatible: only those macros specified by
-.Xr mdoc.samples 7
-and
-.Xr mdoc 7
-for
-.Ox
-are supported; support for
-.Nx
-and other 
-.Bx
-systems is in progress.
+.El

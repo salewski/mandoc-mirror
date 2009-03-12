@@ -508,6 +508,8 @@ termp_it_pre(DECL_ARGS)
 				(&bl->args->argv[vals[2]], i);
 		assert(i < (int)bl->args->argv[vals[2]].sz);
 		width = arg_width(&bl->args->argv[vals[2]], i);
+		if (vals[1] >= 0) 
+			offset += arg_offset(&bl->args->argv[vals[1]]);
 		break;
 	default:
 		if (vals[0] >= 0) 
