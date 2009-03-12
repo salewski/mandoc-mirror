@@ -404,12 +404,16 @@ incorrectly by following it with a delimeter (see
 and expecting the delimiter to render.  This is not supported.
 .\" LIST-ITEM
 .It
-The 
-.Sq Bx
-family of macros (
-.Sq Ux ,
-.Sq Nx
-and so on) are not callable as they are in NetBSD.
+The system-name macros (
+.Ns Sq \&At ,
+.Sq \&Bsx ,
+.Sq \&Bx ,
+.Sq \&Fx ,
+.Sq \&Nx ,
+.Sq \&Ox ,
+and
+.Sq \&Ux )
+are callable.
 .El
 .\" SECTION
 .Sh SEE ALSO
@@ -436,4 +440,10 @@ macros aren't handled when used to span lines for the
 .Sq \&It
 macro.  Such usage is specifically discouraged in
 .Xr mdoc.samples 7 .
+.\" LIST-ITEM
+.It
+The 
+.Sq \&Bsx
+macro doesn't understand yet the arguments as dictated for 
+.Nx .
 .El

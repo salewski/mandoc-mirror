@@ -128,13 +128,13 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Ac */
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Ao */
 	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Aq */
-	{ macro_constant_delimited, 0 }, /* At */
+	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* At */
 	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Bc */
 	{ macro_scoped, MDOC_EXPLICIT }, /* Bf */ 
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Bo */
 	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Bq */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Bsx */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Bx */
+	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* Bsx */
+	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* Bx */
 	{ macro_constant, 0 }, /* Db */
 	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Dc */
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Do */
@@ -143,12 +143,12 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_scoped_close, MDOC_EXPLICIT }, /* Ef */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Em */ 
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Eo */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Fx */
+	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* Fx */
 	{ macro_text, MDOC_PARSED }, /* Ms */
 	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* No */
 	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* Ns */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Nx */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Ox */
+	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* Nx */
+	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* Ox */
 	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Pc */
 	{ macro_constant_delimited, MDOC_PARSED }, /* Pf */
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Po */
@@ -166,7 +166,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Sx */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Sy */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Tn */
-	{ macro_constant_delimited, MDOC_PARSED }, /* Ux */
+	{ macro_constant_delimited, MDOC_CALLABLE | MDOC_PARSED }, /* Ux */
 	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Xc */
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Xo */
 	/* XXX - .Fo supposed to be (but isn't) callable. */
