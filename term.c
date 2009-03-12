@@ -531,7 +531,7 @@ termp_it_pre(DECL_ARGS)
 	case (MDOC_Enum):
 		/* FALLTHROUGH */
 	case (MDOC_Hyphen):
-		if (width > 4)
+		if (width < 4)
 			width = 4;
 		break;
 	case (MDOC_Tag):

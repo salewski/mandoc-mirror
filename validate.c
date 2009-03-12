@@ -1187,15 +1187,13 @@ post_it(POST_ARGS)
 		if (mdoc->last->body->child)
 			if ( ! mwarn(mdoc, WNOMULTILINE))
 				return(0);
-		c = mdoc->last->head;
+		c = mdoc->last->child;
 		for (i = 0; c && MDOC_HEAD == c->type; c = c->next)
 			i++;
 		if (i == cols)
 			break;
-		if ( ! mdoc_warn(mdoc, WARN_SYNTAX, 
-					"column mismatch (have %d, want %d)", i, cols))
-			return(0);
-		break;
+		return(mdoc_err(mdoc, "column mismatch (have "
+					"%d, want %d)", i, cols));
 	default:
 		break;
 	}

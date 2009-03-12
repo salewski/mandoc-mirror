@@ -40,7 +40,7 @@ static	int	  macro_text(MACRO_PROT_ARGS);
 static	int	  macro_scoped(MACRO_PROT_ARGS);
 static	int	  macro_scoped_close(MACRO_PROT_ARGS);
 static	int	  macro_scoped_line(MACRO_PROT_ARGS);
-static	int	  macro_phrase(struct mdoc *, int, char *);
+static	int	  macro_phrase(struct mdoc *, int, int, char *);
 
 #define	REWIND_REWIND	(1 << 0)
 #define	REWIND_NOHALT	(1 << 1)
@@ -1004,7 +1004,7 @@ macro_scoped(MACRO_PROT_ARGS)
 			 * in the columnar output of a macro. They need
 			 * special handling.
 			 */
-			if ( ! macro_phrase(mdoc, line, p))
+			if ( ! macro_phrase(mdoc, line, lastarg, buf))
 				return(0);
 			if ( ! rewind_subblock(MDOC_HEAD, mdoc, tok, line, ppos))
 				return(0);
@@ -1459,19 +1459,40 @@ macro_phrase(struct mdoc *mdoc, int line, int ppos, char *buf)
 {
 	int		 i, la, c;
 
-	i = ppos;
+	for (i = ppos; buf[i]; ) {
+		assert(' ' != buf[i]);
 
-again:
-	la = i;
-	while (buf[i] && ! isspace((unsigned char)buf[i]))
-		i++;
+		la = i;
+		if ('\"' == buf[i]) {
+			la = ++i;
+			while (buf[i] && '\"' != buf[i])
+				i++;
+			if (0 == buf[i]) 
+				return(mdoc_err(mdoc, "unterminated quoted parameter"));
+		} else
+			while (buf[i] && ! isspace ((unsigned char)buf[i]))
+				i++;
 
-	if (0 == buf[i])
-		return(mdoc_word_alloc(mdoc, line, la, buf));
+		if (buf[i])
+			buf[i++] = 0;
 
-	buf[i] = 0;
+		while (buf[i] && isspace((unsigned char)buf[i]))
+			i++;
 
-	if (MDOC_MAX == (c = mdoc_tokhash_find(mdoc->htab, p))) {
-		if ( ! mdoc_word_alloc(mdoc, line, 
+		if (MDOC_MAX != (c = mdoc_tokhash_find(mdoc->htab, &buf[la]))) {
+			if ( ! mdoc_macro(mdoc, c, line, la, &i, buf))
+				return(0);
+
+			return(1);
+		}
+
+		if ( ! mdoc_word_alloc(mdoc, line, la, &buf[la]))
+			return(0);
+		mdoc->next = MDOC_NEXT_SIBLING;
+
+		while (buf[i] && isspace((unsigned char)buf[i]))
+			i++;
 	}
+
+	return(1);
 }

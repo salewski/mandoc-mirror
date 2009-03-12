@@ -430,8 +430,8 @@ word(struct termp *p, const char *word)
 		return;
 	}
 
-	len = strlen(word);
-	assert(len > 0);
+	if (0 == (len = strlen(word)))
+		errx(1, "blank line not in literal context");
 
 	if (mdoc_isdelim(word)) {
 		if ( ! (p->flags & TERMP_IGNDELIM))
