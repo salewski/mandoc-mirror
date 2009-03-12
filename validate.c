@@ -139,10 +139,10 @@ static	int	ewarn_ge1(POST_ARGS);
 static	int	ebool(POST_ARGS);
 
 static	int	post_an(POST_ARGS);
+static	int	post_args(POST_ARGS);
 static	int	post_at(POST_ARGS);
 static	int	post_bf(POST_ARGS);
 static	int	post_bl(POST_ARGS);
-static	int	post_ex(POST_ARGS);
 static	int	post_it(POST_ARGS);
 static	int	post_nm(POST_ARGS);
 static	int	post_root(POST_ARGS);
@@ -183,7 +183,8 @@ static	v_post	posts_lb[] = { eerr_eq1, NULL };
 static	v_post	posts_mt[] = { eerr_ge1, NULL };
 static	v_post	posts_st[] = { eerr_eq1, post_st, NULL };
 static	v_post	posts_pp[] = { ewarn_eq0, NULL };
-static	v_post	posts_ex[] = { eerr_eq0, post_ex, NULL };
+static	v_post	posts_ex[] = { eerr_eq0, post_args, NULL };
+static	v_post	posts_rv[] = { eerr_eq0, post_args, NULL };
 static	v_post	posts_an[] = { post_an, NULL };
 static	v_post	posts_at[] = { post_at, NULL };
 static	v_post	posts_xr[] = { eerr_ge1, eerr_le2, NULL };
@@ -232,7 +233,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_wline },			/* Op */
 	{ NULL, NULL },				/* Ot */
 	{ NULL, NULL },				/* Pa */
-	{ pres_rv, posts_notext },		/* Rv */
+	{ pres_rv, posts_rv },			/* Rv */
 	{ NULL, posts_st },			/* St */ 
 	{ NULL, posts_text },			/* Va */
 	{ NULL, posts_text },			/* Vt */ 
@@ -310,6 +311,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_wline },			/* Brq */ 
 	{ NULL, NULL },				/* Bro */ 
 	{ NULL, NULL },				/* Brc */ 
+	{ NULL, posts_text },			/* %C */
 };
 
 
@@ -669,7 +671,7 @@ check_argv(struct mdoc *m, const struct mdoc_node *n,
 		if ( ! check_text(m, v->line, v->pos, v->value[i]))
 			return(0);
 
-	if (MDOC_Std == v->arg && MDOC_Ex == n->tok) {
+	if (MDOC_Std == v->arg) {
 		/* `Nm' name must be set. */
 		if (v->sz || m->meta.name)
 			return(1);
@@ -1084,7 +1086,7 @@ post_an(POST_ARGS)
 
 
 static int
-post_ex(POST_ARGS)
+post_args(POST_ARGS)
 {
 
 	if (mdoc->last->args)

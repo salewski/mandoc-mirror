@@ -1,6 +1,6 @@
 .SUFFIXES:	.html .sgml
 
-VERSION	= 1.4.11
+VERSION	= 1.4.12
 VDATE	= 13 March 2009
 
 BINDIR		= $(PREFIX)/bin

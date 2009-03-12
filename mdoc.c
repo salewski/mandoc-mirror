@@ -73,7 +73,8 @@ const	char *const __mdoc_macronames[MDOC_MAX] = {
 	"Bk",		"Ek",		"Bt",		"Hf",
 	"Fr",		"Ud",		"Lb",		"Ap",
 	"Lp",		"Lk",		"Mt",		"Brq",
-	"Bro",		"Brc"
+	/* LINTED */
+	"Bro",		"Brc",		"\%C"
 	};
 
 const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {		 
@@ -85,7 +86,7 @@ const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {
 	"ohang",		"inset",		"column",	 
 	"width",		"compact",		"std",	 
 	"filled",		"words",		"emphasis",
-	"symbolic"
+	"symbolic",		"nested"
 	};
 
 const	char * const *mdoc_macronames = __mdoc_macronames;
@@ -257,7 +258,8 @@ mdoc_macro(struct mdoc *m, int tok,
 				"disallowed in prologue"));
 
 	if (1 != pp && ! (MDOC_CALLABLE & mdoc_macros[tok].flags))
-		return(mdoc_perr(m, ln, pp, "not callable"));
+		return(mdoc_perr(m, ln, pp, "%s not callable",
+					mdoc_macronames[tok]));
 
 	return((*mdoc_macros[tok].fp)(m, tok, ln, pp, pos, buf));
 }

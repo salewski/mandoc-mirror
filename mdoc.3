@@ -375,6 +375,10 @@ systems is in progress.
 .Bl -bullet
 .\" LIST-ITEM
 .It
+.Sq \&Cd
+isn't labelled as callable but is.
+.\" LIST-ITEM
+.It
 NetBSD
 .Sq \&It \-nested
 is assumed for all lists: any list may be nested and
@@ -391,6 +395,21 @@ of proceeded), is not supported.
 The 
 .Sq \&At
 macro only accepts a single parameter.
+.\" LIST-ITEM
+.It
+Some manuals use
+.Sq \&Li
+incorrectly by following it with a delimeter (see
+.Xr mdoc.samples 7 )
+and expecting the delimiter to render.  This is not supported.
+.\" LIST-ITEM
+.It
+The 
+.Sq Bx
+family of macros (
+.Sq Ux ,
+.Sq Nx
+and so on) are not callable as they are in NetBSD.
 .El
 .\" SECTION
 .Sh SEE ALSO

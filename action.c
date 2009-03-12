@@ -59,7 +59,7 @@ static	int	 post_dt(struct mdoc *);
 static	int	 post_nm(struct mdoc *);
 static	int	 post_os(struct mdoc *);
 static	int	 post_sh(struct mdoc *);
-static	int	 post_ex(struct mdoc *);
+static	int	 post_std(struct mdoc *);
 static	int	 post_prologue(struct mdoc *);
 
 const	struct actions mdoc_actions[MDOC_MAX] = {
@@ -85,7 +85,7 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* Dv */ 
 	{ NULL }, /* Er */ 
 	{ NULL }, /* Ev */ 
-	{ post_ex }, /* Ex */
+	{ post_std }, /* Ex */
 	{ NULL }, /* Fa */ 
 	{ NULL }, /* Fd */ 
 	{ NULL }, /* Fl */
@@ -99,7 +99,7 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* Op */
 	{ NULL }, /* Ot */
 	{ NULL }, /* Pa */
-	{ NULL }, /* Rv */
+	{ post_std }, /* Rv */
 	{ NULL }, /* St */
 	{ NULL }, /* Va */
 	{ NULL }, /* Vt */ 
@@ -177,6 +177,7 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* Brq */
 	{ NULL }, /* Bro */
 	{ NULL }, /* Brc */
+	{ NULL }, /* %C */
 };
 
 
@@ -228,12 +229,12 @@ nwarn(struct mdoc *m, const struct mdoc_node *n, enum mwarn type)
 
 
 static int
-post_ex(struct mdoc *mdoc)
+post_std(struct mdoc *mdoc)
 {
 
 	/*
-	 * If `.Ex -std' is invoked without an argument, fill it in with
-	 * our name (if it's been set).
+	 * If '-std' is invoked without an argument, fill it in with our
+	 * name (if it's been set).
 	 */
 
 	if (NULL == mdoc->last->args)

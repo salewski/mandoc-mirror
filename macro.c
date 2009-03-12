@@ -89,7 +89,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ad */ 
 	{ macro_text, MDOC_PARSED }, /* An */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Ar */
-	{ macro_constant, 0 }, /* Cd */
+	{ macro_constant, MDOC_CALLABLE }, /* Cd */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Cm */
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Dv */ 
 	{ macro_text, MDOC_CALLABLE | MDOC_PARSED }, /* Er */ 
@@ -188,6 +188,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ macro_scoped_line, MDOC_CALLABLE | MDOC_PARSED }, /* Brq */
 	{ macro_constant_scoped, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Bro */
 	{ macro_scoped_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Brc */
+	{ macro_constant, 0 }, /* %C */
 };
 
 const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;
@@ -1392,8 +1393,6 @@ macro_constant(MACRO_PROT_ARGS)
 	int		  c, w, la;
 	struct mdoc_arg	 *arg;
 	char		 *p;
-
-	assert( ! (MDOC_CALLABLE & mdoc_macros[tok].flags));
 
 	arg = NULL;
 
