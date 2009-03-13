@@ -180,7 +180,6 @@ static	v_post	posts_in[] = { ewarn_eq1, NULL };
 static	v_post	posts_ss[] = { herr_ge1, NULL };
 static	v_post	posts_pf[] = { eerr_eq1, NULL };
 static	v_post	posts_lb[] = { eerr_eq1, NULL };
-static	v_post	posts_mt[] = { eerr_ge1, NULL };
 static	v_post	posts_st[] = { eerr_eq1, post_st, NULL };
 static	v_post	posts_pp[] = { ewarn_eq0, NULL };
 static	v_post	posts_ex[] = { eerr_eq0, post_args, NULL };
@@ -188,7 +187,6 @@ static	v_post	posts_rv[] = { eerr_eq0, post_args, NULL };
 static	v_post	posts_an[] = { post_an, NULL };
 static	v_post	posts_at[] = { post_at, NULL };
 static	v_post	posts_xr[] = { eerr_ge1, eerr_le2, NULL };
-static	v_post	posts_lk[] = { eerr_ge1, NULL };
 static	v_post	posts_nm[] = { post_nm, NULL };
 static	v_post	posts_bf[] = { hwarn_le1, post_bf, NULL };
 static	v_post	posts_rs[] = { herr_eq0, bwarn_ge1, NULL };
@@ -304,10 +302,10 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Fr */
 	{ NULL, posts_notext },			/* Ud */
 	{ pres_lb, posts_lb },			/* Lb */
-	{ NULL, NULL },				/* Lb */
-	{ NULL, posts_pp },			/* Pp */ 
-	{ NULL, posts_lk },			/* Lk */ 
-	{ NULL, posts_mt },			/* Mt */ 
+	{ NULL, NULL },				/* Ap */
+	{ NULL, posts_pp },			/* Lp */ 
+	{ NULL, posts_text },			/* Lk */ 
+	{ NULL, posts_text },			/* Mt */ 
 	{ NULL, posts_wline },			/* Brq */ 
 	{ NULL, NULL },				/* Bro */ 
 	{ NULL, NULL },				/* Brc */ 

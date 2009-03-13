@@ -36,7 +36,8 @@ document follows simple rules:  lines beginning with the control
 character
 .Sq \.
 are parsed for macros.  Other lines are interpreted within the scope of
-prior macros.  Macros are either two or three characters in length.
+prior macros.  This document describes the encoding, ontology and syntax
+of these macros.
 .\" SECTION
 .Sh CHARACTER ENCODING
 .Nm
@@ -359,7 +360,8 @@ for per-macro details.
 .\" .Ed
 .\" SECTION
 .Sh SYNTAX
-The syntax of macro invocation depends on classification.  
+Macros are generally two and at times three characters in length.  The
+syntax of macro invocation depends on its classification.  
 .Qq \-arg
 refers to the macro arguments (which may contain zero or more values).
 In these illustrations, 
@@ -510,78 +512,81 @@ and/or tail
 .El
 .\" SUB-SECTION
 .Ss In-line 
-In-line macros have only text children.  
+In-line macros have only text children.  If a number (or inequality) of
+arguments is
+.Pq n , 
+then the macro accepts an arbitrary number of arguments.
 .Pp
 .Bl -column "MacroX" "CallableX" "ParsableX" "Arguments" -compact -offset XXXX
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Arguments
-.It \&.Dd    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Dt    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Os    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Dd    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.Dt    Ta    \&No  Ta    \&No    Ta    n
+.It \&.Os    Ta    \&No  Ta    \&No    Ta    n
 .It \&.Pp    Ta    \&No  Ta    \&No    Ta    0
-.It \&.Ad    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.An    Ta    \&No  Ta    Yes     Ta    \&
-.It \&.Ar    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Cd    Ta    Yes   Ta    \&No    Ta    \&
-.It \&.Cm    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Dv    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Er    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Ev    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Ex    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Fa    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Fd    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Fl    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Fn    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Ft    Ta    \&No  Ta    Yes     Ta    \&
-.It \&.Ic    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.In    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Li    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Nd    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Nm    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Ot    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Pa    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Rv    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.St    Ta    \&No  Ta    Yes     Ta    \&
-.It \&.Va    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Vt    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Xr    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.%A    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.%B    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.%C    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.%D    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.%I    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.%J    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.%N    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.%O    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.%P    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.%R    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.%T    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.%V    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.At    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Bsx   Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Bx    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Db    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Em    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Fx    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Ms    Ta    \&No  Ta    Yes     Ta    \&
-.It \&.No    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Ns    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Nx    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Ox    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Pf    Ta    \&No  Ta    Yes     Ta    \&
-.It \&.Sm    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Sx    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Sy    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Tn    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Ux    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Bt    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Hf    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Fr    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Ud    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Lb    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Ap    Ta    Yes   Ta    Yes     Ta    \&
-.It \&.Lp    Ta    \&No  Ta    \&No    Ta    \&
-.It \&.Lk    Ta    \&No  Ta    Yes     Ta    \&
-.It \&.Mt    Ta    \&No  Ta    Yes     Ta    \&
+.It \&.Ad    Ta    Yes   Ta    Yes     Ta    n
+.It \&.An    Ta    \&No  Ta    Yes     Ta    n
+.It \&.Ar    Ta    Yes   Ta    Yes     Ta    n
+.It \&.Cd    Ta    Yes   Ta    \&No    Ta    >0
+.It \&.Cm    Ta    Yes   Ta    Yes     Ta    n
+.It \&.Dv    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.Er    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.Ev    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.Ex    Ta    \&No  Ta    \&No    Ta    0
+.It \&.Fa    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.Fd    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.Fl    Ta    Yes   Ta    Yes     Ta    n
+.It \&.Fn    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.Ft    Ta    \&No  Ta    Yes     Ta    n
+.It \&.Ic    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.In    Ta    \&No  Ta    \&No    Ta    n
+.It \&.Li    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.Nd    Ta    \&No  Ta    \&No    Ta    n
+.It \&.Nm    Ta    Yes   Ta    Yes     Ta    n
+.It \&.Ot    Ta    \&No  Ta    \&No    Ta    n
+.It \&.Pa    Ta    Yes   Ta    Yes     Ta    n
+.It \&.Rv    Ta    \&No  Ta    \&No    Ta    0
+.It \&.St    Ta    \&No  Ta    Yes     Ta    1
+.It \&.Va    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.Vt    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.Xr    Ta    Yes   Ta    Yes     Ta    >0, <3
+.It \&.%A    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.%B    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.%C    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.%D    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.%I    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.%J    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.%N    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.%O    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.%P    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.%R    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.%T    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.%V    Ta    \&No  Ta    \&No    Ta    >0
+.It \&.At    Ta    Yes   Ta    Yes     Ta    1
+.It \&.Bsx   Ta    Yes   Ta    Yes     Ta    n
+.It \&.Bx    Ta    Yes   Ta    Yes     Ta    n
+.It \&.Db    Ta    \&No  Ta    \&No    Ta    1
+.It \&.Em    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.Fx    Ta    Yes   Ta    Yes     Ta    n
+.It \&.Ms    Ta    \&No  Ta    Yes     Ta    >0
+.It \&.No    Ta    Yes   Ta    Yes     Ta    0
+.It \&.Ns    Ta    Yes   Ta    Yes     Ta    0
+.It \&.Nx    Ta    Yes   Ta    Yes     Ta    n
+.It \&.Ox    Ta    Yes   Ta    Yes     Ta    n
+.It \&.Pf    Ta    \&No  Ta    Yes     Ta    1
+.It \&.Sm    Ta    \&No  Ta    \&No    Ta    1
+.It \&.Sx    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.Sy    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.Tn    Ta    Yes   Ta    Yes     Ta    >0
+.It \&.Ux    Ta    Yes   Ta    Yes     Ta    n
+.It \&.Bt    Ta    \&No  Ta    \&No    Ta    0
+.It \&.Hf    Ta    \&No  Ta    \&No    Ta    n
+.It \&.Fr    Ta    \&No  Ta    \&No    Ta    n
+.It \&.Ud    Ta    \&No  Ta    \&No    Ta    0
+.It \&.Lb    Ta    \&No  Ta    \&No    Ta    1
+.It \&.Ap    Ta    Yes   Ta    Yes     Ta    0
+.It \&.Lp    Ta    \&No  Ta    \&No    Ta    0
+.It \&.Lk    Ta    \&No  Ta    Yes     Ta    >0
+.It \&.Mt    Ta    \&No  Ta    Yes     Ta    >0
 .El
 .\" SECTION
 .Sh SEE ALSO
@@ -589,6 +594,11 @@ In-line macros have only text children.
 .Xr mdoclint 1 ,
 .Xr mdocterm 1 ,
 .Xr mdoc 3
+.\" SECTION
+.Sh HISTORY
+This manual describes the language accepted by
+.Xr mdoc 3 ,
+which implements the roff-mdoc macro package.
 .\" SECTION
 .Sh AUTHORS
 The
