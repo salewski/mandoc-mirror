@@ -1,6 +1,6 @@
 .SUFFIXES:	.html .sgml
 
-VERSION	= 1.4.13
+VERSION	= 1.4.14
 VDATE	= 13 March 2009
 
 BINDIR		= $(PREFIX)/bin
@@ -67,7 +67,7 @@ STATICS	= style.css external.png
 TARGZS	= mdocml-$(VERSION).tar.gz mdocml-oport-$(VERSION).tar.gz \
 	  mdocml-nport-$(VERSION).tar.gz
 
-MANS	= mdoctree.1 mdocterm.1 mdoclint.1 mdoc.3
+MANS	= mdoctree.1 mdocterm.1 mdoclint.1 mdoc.3 mdoc.7
 
 BINS	= mdocterm mdoctree mdoclint
 
@@ -176,12 +176,12 @@ installwww: www
 	install -m 0444 mdocml-nport-$(VERSION).tar.gz $(PREFIX)/ports-netbsd/
 	install -m 0444 mdocml-nport-$(VERSION).tar.gz $(PREFIX)/ports-netbsd/mdocml.tar.gz
 
-regress: mdoclint $(FAIL) $(SUCCEED)
-	@for f in $(FAIL); do \
-		echo "./mdoclint $$f" ; \
-		./mdoclint $$f 2>/dev/null || continue ; exit 1 ; done
-	@for f in $(SUCCEED); do \
-		echo "./mdoclint $$f" ; \
+#regress: mdoclint $(FAIL) $(SUCCEED)
+#	@for f in $(FAIL); do \
+#		echo "./mdoclint $$f" ; \
+#		./mdoclint $$f 2>/dev/null || continue ; exit 1 ; done
+#	@for f in $(SUCCEED); do \
+#		echo "./mdoclint $$f" ; \
 		./mdoclint $$f 2>/dev/null || exit 1 ; done
 
 install:

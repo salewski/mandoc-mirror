@@ -19,6 +19,4 @@ MASTER_SITES=		http://mdocml.bsd.lv/snapshots/
 
 WANTLIB=		c
 
-NO_REGRESS=		No
-
 .include <bsd.port.mk>
