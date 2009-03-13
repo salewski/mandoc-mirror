@@ -49,36 +49,35 @@ All manuals must have
 .Sq \en
 line termination.
 .\" SUB-SECTION
-.Ss Special Characters
-Within a macro line, the following characters are special:
-.\" PARAGRAPH
-.Pp
-.Bl -tag -width Ds -offset XXXX -compact
+.Ss Reserved Characters
+Within a macro line, the following characters are reserved:
+.Bl -tag -width 12n -offset XXXX -compact
 .It \&.
-period
+.Pq period
 .It \&,
-comma
+.Pq comma
 .It \&:
-colon
+.Pq colon
 .It \&;
-semicolon
+.Pq semicolon
 .It \&(
-left-parenthesis
+.Pq left-parenthesis
 .It \&)
-right-parenthesis
+.Pq right-parenthesis
 .It \&[
-left-bracket
+.Pq left-bracket
 .It \&]
-right-bracket
+.Pq right-bracket
 .It \&?
-question
+.Pq question
 .It \&!
-exclmamation 
+.Pq exclmamation 
 .El
 .Pp
 Use of these characters must either be escaped with a non-breaking space
 .Pq Sq \e&
-or, if applicable, an appropriate escape-sequence used.
+or, if applicable, an appropriate escape-sequence used.  Use of reserved
+characters is described later in this document.
 .\" SUB-SECTION
 .Ss Special Characters
 Special character sequences begin with the escape character
@@ -98,7 +97,6 @@ deprecated.  The following is a table of all available escapes, arranged
 by classification.  
 .Pp
 Grammatic:
-.Pp
 .Bl -tag -width 12n -offset "XXXX" -compact
 .It \\(em
 .Pq em-dash
@@ -120,7 +118,6 @@ Grammatic:
 .\" PARAGRAPH
 .Pp
 Enclosures:
-.Pp
 .Bl -tag -width 12n -offset "XXXX" -compact
 .It \\(rC
 .Pq right brace
@@ -152,7 +149,6 @@ Enclosures:
 .\" PARAGRAPH
 .Pp
 Indicatives:
-.Pp
 .Bl -tag -width 12n -offset "XXXX" -compact
 .It \\(<-
 .Pq left arrow
@@ -166,7 +162,6 @@ Indicatives:
 .\" PARAGRAPH
 .Pp
 Mathematical:
-.Pp
 .Bl -tag -width 12n -offset "XXXX" -compact
 .It \\(Gt
 .Pq greater-than, deprecated
@@ -204,7 +199,6 @@ Mathematical:
 .\" PARAGRAPH
 .Pp
 Diacritics:
-.Pp
 .Bl -tag -width 12n -offset "XXXX" -compact
 .It \\(ga
 .Pq accent grave
@@ -214,7 +208,6 @@ Diacritics:
 .\" PARAGRAPH
 .Pp
 Special symbols:
-.Pp
 .Bl -tag -width 12n -offset "XXXX" -compact
 .It \\(bu
 .Pq bullet
@@ -232,22 +225,23 @@ Special symbols:
 .Pq ampersand, deprecated
 .El 
 .\" SECTION
-.Sh CLASSIFICATION
+.Sh ONTOLOGY
 Macros are classified in an ontology described by scope rules.  
-.Bl -tag -width "in-lineX"
+.Bl -inset 
 .\" LIST-ITEM
 .It Em Block
-Block macros enclose other block macros, in-line macros or text, and
+macros enclose other block macros, in-line macros or text, and
 may span multiple lines.  
 .Qq Implicit 
 block scope is closed by a subsequent invocation of the same macro,
 one of a set of corresponding closure macros or end-of-file.
 .Qq Explicit 
 block scope is closed by a corresponding closure macro.
-.Bl -tag -width "partial-blockX"
+.Bl -inset -offset XXXX
 .\" LIST-ITEM
 .It Em Full-block
-Always spans multiple lines.  Consists optionally of one or more
+macros always span multiple lines.  They consist optionally of one or
+more
 .Qq heads ,
 subsequent macros or text on the same line following invocation; a
 .Qq body ,
@@ -256,7 +250,7 @@ which spans subsequent lines of text or macros; and an optional
 macros or text on the same line following closure.
 .\" LIST-ITEM
 .It Em Partial-block
-May span multiple lines.  Consists optionally of a 
+macros may span multiple lines.  They consists optionally of a 
 .Qq head ,
 text immediately following invocation; always a 
 .Qq body ,
@@ -267,7 +261,7 @@ text immediately following closure.
 .El
 .\" LIST-ITEM
 .It Em In-line
-In-line macros may only enclose text and span at most a single line.  If
+macros may only enclose text and span at most a single line.  If
 a macro is parsable, its scope may be closed by subsequent macros or
 delimiting punctuation.  In-line macros follow different conventions for
 closure; see 
@@ -364,14 +358,65 @@ for per-macro details.
 .\" \&.Fl text0 text1 ; Ar text0 text1
 .\" .Ed
 .\" SECTION
+.Sh SYNTAX
+The syntax of macro invocation depends on classification.  
+.Qq \-arg
+refers to the macro arguments (which may contain zero or more values).
+In these illustrations, 
+.Sq \&.Yo
+opens the scope of a macro, and if specified,
+.Sq \&.Yc
+closes it out (closure may be implicit at end-of-line or end-of-file).
+.Pp
+Block full-explicit (may contain head, body, tail):
+.Bd -literal -offset XXXX
+\&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead...\(rB
+\(lBbody...\(rB
+\&.Yc \(lBtail...\(rB
+.Ed
+.Pp
+Block full-implicit (may contain zero or more heads, body, no tail):
+.Bd -literal -offset XXXX
+\&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead... \(lBTa head...\(rB\(rB
+\(lBbody...\(rB
+\&.Yc
+.Ed
+.Pp
+Block partial-explicit (may contain head, multi-line body, tail):
+.Bd -literal -offset XXXX
+\&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead...\(rB 
+\(lBbody...\(rB
+\&.Yc \(lBtail...\(rB
+
+\&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead...\(rB \
+\(lBbody...\(rB \&Yc \(lBtail...\(rB
+.Ed
+.Pp
+Block partial-implicit (no head, body, no tail):
+.Bd -literal -offset XXXX
+\&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBbody...\(rB
+.Ed
+.Pp
+In-line (may be closed by end-of-line, reserved character, subsequent
+macro invocation or finite number of arguments):
+.Bd -literal -offset XXX
+\&.Yy \(lB\-arg \(lBval...\(rB\(rB args...
+
+\&.Yy \(lB\-arg \(lBval...\(rB\(rB args... ;
+
+\&.Yy \(lB\-arg \(lBval...\(rB\(rB args... Xx
+
+\&.Yy \(lB\-arg \(lBval...\(rB\(rB arg0 arg1 argN
+.Ed
+.\"
 .Sh MACROS
 This section contains a complete list of all 
 .Nm
-macros, arranged ontologically then alphanumerically by macro name.  A 
+macros, arranged ontologically.  A 
 .Qq callable
 macro is may be invoked subsequent to the initial macro-line macro.  A
 .Qq parsable
-macro May be followed by further (ostensibly callable) macros.
+macro may be followed by further (ostensibly callable) macros.
 .\" SUB-SECTION
 .Ss Block full-implicit
 The head of these macros follows invocation; the body is the content of
@@ -381,7 +426,8 @@ some
 .Sq \&It \-bullet , 
 .Sq \-hyphen , 
 .Sq \-dash ,
-.Sq \-enum 
+.Sq \-enum ,
+.Sq \-item 
 .Pc
 don't have heads.
 .Pp
@@ -405,6 +451,8 @@ the explicit scope rules.  All contains bodies, some may contain heads
 .It \&.El    Ta    \&No    Ta    \&No    Ta    opened by \&.Bl
 .It \&.Bf    Ta    \&No    Ta    \&No    Ta    closed by \&.Ef
 .It \&.Ef    Ta    \&No    Ta    \&No    Ta    opened by \&.Bf
+.It \&.Bk    Ta    \&No    Ta    \&No    Ta    closed by \&.Ek
+.It \&.Ek    Ta    \&No    Ta    \&No    Ta    opened by \&.Bk
 .El
 .\" SUB-SECTION
 .Ss Block partial-implicit
@@ -421,6 +469,9 @@ close at the invocation's end-of-line.
 .It \&.Qq    Ta    Yes   Ta    Yes
 .It \&.Sq    Ta    Yes   Ta    Yes
 .It \&.Brq   Ta    Yes   Ta    Yes
+.It \&.D1    Ta    \&No  Ta    \&Yes
+.It \&.Dl    Ta    \&No  Ta    Yes
+.It \&.Ql    Ta    Yes   Ta    Yes
 .El
 .\" SUB-SECTION
 .Ss Block partial-explicit
@@ -454,84 +505,93 @@ and/or tail
 .It \&.Eo    Ta    Yes   Ta    Yes    Ta    closed by \&.Ec
 .It \&.Qc    Ta    Yes   Ta    Yes    Ta    opened by \&.Oo
 .It \&.Qo    Ta    Yes   Ta    Yes    Ta    closed by \&.Oc
+.It \&.Re    Ta    \&No  Ta    \&No   Ta    opened by \&.Rs
+.It \&.Rs    Ta    \&No  Ta    \&No   Ta    closed by \&.Re
 .El
 .\" SUB-SECTION
-.Ss General
-.Bl -column "MacroX" "CallableX" "ParsableX" -compact -offset XXXX
-.It Em Macro Ta Em Callable Ta Em Parsable
-.It \&.Dd    Ta    \&    Ta    \&
-.It \&.Dt    Ta    \&    Ta    \&
-.It \&.Os    Ta    \&    Ta    \&
-.It \&.Pp    Ta    \&    Ta    \&
-.It \&.D1    Ta    \&    Ta    \&
-.It \&.Dl    Ta    \&    Ta    Yes
-.It \&.Ad    Ta    Yes   Ta    Yes
-.It \&.An    Ta    \&    Ta    Yes
-.It \&.Ar    Ta    Yes   Ta    Yes
-.It \&.Cd    Ta    Yes   Ta    \&
-.It \&.Cm    Ta    Yes   Ta    Yes
-.It \&.Dv    Ta    Yes   Ta    Yes
-.It \&.Er    Ta    Yes   Ta    Yes
-.It \&.Ev    Ta    Yes   Ta    Yes
-.It \&.Ex    Ta    \&    Ta    \&
-.It \&.Fa    Ta    Yes   Ta    Yes
-.It \&.Fd    Ta    \&    Ta    \&
-.It \&.Fl    Ta    Yes   Ta    Yes
-.It \&.Fn    Ta    Yes   Ta    Yes
-.It \&.Ft    Ta    \&    Ta    \&
-.It \&.Ic    Ta    Yes   Ta    Yes
-.It \&.In    Ta    \&    Ta    \&
-.It \&.Li    Ta    Yes   Ta    Yes
-.It \&.Nd    Ta    \&    Ta    \&
-.It \&.Nm    Ta    Yes   Ta    Yes
-.It \&.Ot    Ta    \&    Ta    \&
-.It \&.Pa    Ta    Yes   Ta    Yes
-.It \&.Rv    Ta    \&    Ta    \&
-.It \&.St    Ta    Yes   Ta    \&
-.It \&.Va    Ta    Yes   Ta    Yes
-.It \&.Vt    Ta    Yes   Ta    Yes
-.It \&.Xr    Ta    Yes   Ta    Yes
-.It \&.%A    Ta    \&    Ta    \&
-.It \&.%B    Ta    \&    Ta    \&
-.It \&.%C    Ta    \&    Ta    \&
-.It \&.%D    Ta    \&    Ta    \&
-.It \&.%I    Ta    \&    Ta    \&
-.It \&.%J    Ta    \&    Ta    \&
-.It \&.%N    Ta    \&    Ta    \&
-.It \&.%O    Ta    \&    Ta    \&
-.It \&.%P    Ta    \&    Ta    \&
-.It \&.%R    Ta    \&    Ta    \&
-.It \&.%T    Ta    \&    Ta    \&
-.It \&.%V    Ta    \&    Ta    \&
-.It \&.At    Ta    Yes   Ta    Yes
-.It \&.Bsx   Ta    Yes   Ta    Yes
-.It \&.Bx    Ta    Yes   Ta    Yes
-.It \&.Db    Ta    \&    Ta    \&
-.It \&.Em    Ta    Yes   Ta    Yes
-.It \&.Fx    Ta    Yes   Ta    Yes
-.It \&.Ms    Ta    \&    Ta    Yes
-.It \&.No    Ta    Yes   Ta    Yes
-.It \&.Ns    Ta    Yes   Ta    Yes
-.It \&.Nx    Ta    Yes   Ta    Yes
-.It \&.Ox    Ta    Yes   Ta    Yes
-.It \&.Pf    Ta    \&    Ta    Yes
-.It \&.Ql    Ta    Yes   Ta    Yes
-.It \&.Re    Ta    \&    Ta    \&
-.It \&.Rs    Ta    \&    Ta    \&
-.It \&.Sm    Ta    \&    Ta    \&
-.It \&.Sx    Ta    Yes   Ta    Yes
-.It \&.Sy    Ta    Yes   Ta    Yes
-.It \&.Tn    Ta    Yes   Ta    Yes
-.It \&.Ux    Ta    Yes   Ta    Yes
-.It \&.Bk    Ta    \&    Ta    \&
-.It \&.Ek    Ta    \&    Ta    \&
-.It \&.Bt    Ta    \&    Ta    \&
-.It \&.Hf    Ta    \&    Ta    \&
-.It \&.Fr    Ta    \&    Ta    \&
-.It \&.Ud    Ta    \&    Ta    \&
-.It \&.Lb    Ta    \&    Ta    \&
-.It \&.Ap    Ta    Yes   Ta    Yes
-.It \&.Lp    Ta    \&    Ta    \&
-.It \&.Lk    Ta    \&    Ta    Yes
-.It \&.Mt    Ta    \&    Ta    Yes
+.Ss In-line 
+In-line macros have only text children.  
+.Pp
+.Bl -column "MacroX" "CallableX" "ParsableX" "Arguments" -compact -offset XXXX
+.It Em Macro Ta Em Callable Ta Em Parsable Ta Em Arguments
+.It \&.Dd    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Dt    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Os    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Pp    Ta    \&No  Ta    \&No    Ta    0
+.It \&.Ad    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.An    Ta    \&No  Ta    Yes     Ta    \&
+.It \&.Ar    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Cd    Ta    Yes   Ta    \&No    Ta    \&
+.It \&.Cm    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Dv    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Er    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Ev    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Ex    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Fa    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Fd    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Fl    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Fn    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Ft    Ta    \&No  Ta    Yes     Ta    \&
+.It \&.Ic    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.In    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Li    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Nd    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Nm    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Ot    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Pa    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Rv    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.St    Ta    \&No  Ta    Yes     Ta    \&
+.It \&.Va    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Vt    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Xr    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.%A    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.%B    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.%C    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.%D    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.%I    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.%J    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.%N    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.%O    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.%P    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.%R    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.%T    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.%V    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.At    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Bsx   Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Bx    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Db    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Em    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Fx    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Ms    Ta    \&No  Ta    Yes     Ta    \&
+.It \&.No    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Ns    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Nx    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Ox    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Pf    Ta    \&No  Ta    Yes     Ta    \&
+.It \&.Sm    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Sx    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Sy    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Tn    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Ux    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Bt    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Hf    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Fr    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Ud    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Lb    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Ap    Ta    Yes   Ta    Yes     Ta    \&
+.It \&.Lp    Ta    \&No  Ta    \&No    Ta    \&
+.It \&.Lk    Ta    \&No  Ta    Yes     Ta    \&
+.It \&.Mt    Ta    \&No  Ta    Yes     Ta    \&
 .El
+.\" SECTION
+.Sh SEE ALSO
+.Xr mdoctree 1 ,
+.Xr mdoclint 1 ,
+.Xr mdocterm 1 ,
+.Xr mdoc 3
+.\" SECTION
+.Sh AUTHORS
+The
+.Nm
+utility was written by 
+.An Kristaps Dzonsons Aq kristaps@kth.se .
