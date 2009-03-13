@@ -1469,8 +1469,12 @@ termp_ss_pre(DECL_ARGS)
 {
 
 	switch (node->type) {
+	case (MDOC_BLOCK):
+		newln(p);
+		if (node->prev)
+			vspace(p);
+		break;
 	case (MDOC_HEAD):
-		vspace(p);
 		TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_SSECTION]);
 		p->offset = INDENT / 2;
 		break;
