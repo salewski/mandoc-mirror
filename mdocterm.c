@@ -29,11 +29,12 @@
 #include "mmain.h"
 #include "term.h"
 
-struct	termenc {
+struct	termseq {
 	const char	 *enc;
 	int		  sym;
 };
 
+static	int		  option(void *, int, const char *);
 static	void		  body(struct termp *,
 				struct termpair *,
 				const struct mdoc_meta *,
@@ -53,14 +54,13 @@ static	void		  stringa(struct termp *,
 				const char *, size_t);
 static	void		  symbola(struct termp *, enum tsym);
 static	void		  sanity(const struct mdoc_node *);
-static	void		  stylea(struct termp *, enum tstyle);
 
 #ifdef __linux__
 extern	size_t		  strlcat(char *, const char *, size_t);
 extern	size_t		  strlcpy(char *, const char *, size_t);
 #endif
 
-static	struct termenc	  termenc1[] = {
+static	struct termseq	  termenc1[] = {
 	{ "\\",		  TERMSYM_SLASH },
 	{ "\'",		  TERMSYM_RSQUOTE },
 	{ "`",		  TERMSYM_LSQUOTE },
@@ -74,7 +74,7 @@ static	struct termenc	  termenc1[] = {
 	{ NULL,		  0 }
 };
 
-static	struct termenc	  termenc2[] = {
+static	struct termseq	  termenc2[] = {
 	{ "rC", 	  TERMSYM_RBRACE },
 	{ "lC", 	  TERMSYM_LBRACE },
 	{ "rB", 	  TERMSYM_RBRACK },
@@ -126,7 +126,7 @@ static	struct termenc	  termenc2[] = {
 	{ NULL,		  0 }
 };
 
-static	struct termsym	  termsym_ansi[TERMSYM_MAX] = {
+static	struct termsym	  termsym_ascii[TERMSYM_MAX] = {
 	{ "]", 1 },		/* TERMSYM_RBRACK */
 	{ "[", 1 },		/* TERMSYM_LBRACK */
 	{ "<-", 2 },		/* TERMSYM_LARROW */
@@ -170,16 +170,6 @@ static	struct termsym	  termsym_ansi[TERMSYM_MAX] = {
 	{ "}", 1 },		/* TERMSYM_RBRACE */
 };
 
-static	const char	  ansi_clear[]  = { 27, '[', '0', 'm' };
-static	const char	  ansi_bold[]  = { 27, '[', '1', 'm' };
-static	const char	  ansi_under[]  = { 27, '[', '4', 'm' };
-
-static	struct termsym	  termstyle_ansi[] = {
-	{ ansi_clear, 4 },
-	{ ansi_bold, 4 },
-	{ ansi_under, 4 }
-};
-
 
 int
 main(int argc, char *argv[])
@@ -189,21 +179,24 @@ main(int argc, char *argv[])
 	const struct mdoc *mdoc;
 	struct termp	   termp;
 
-	p = mmain_alloc();
-
-	c = mmain_getopt(p, argc, argv, NULL, NULL, NULL, NULL);
-	if (1 != c)
-		mmain_exit(p, -1 == c ? 1 : 0);
-
-	if (NULL == (mdoc = mmain_mdoc(p)))
-		mmain_exit(p, 1);
+	(void)memset(&termp, 0, sizeof(struct termp));
 
 	termp.maxrmargin = termp.rmargin = 78; /* XXX */
 	termp.maxcols = 1024;
 	termp.offset = termp.col = 0;
 	termp.flags = TERMP_NOSPACE;
-	termp.symtab = termsym_ansi;
-	termp.styletab = termstyle_ansi;
+	termp.symtab = termsym_ascii;
+	termp.enc = TERMENC_ANSI;
+
+	p = mmain_alloc();
+	c = mmain_getopt(p, argc, argv, "[-Ooption...]", 
+			"O:", &termp, option);
+
+	if (1 != c)
+		mmain_exit(p, -1 == c ? 1 : 0);
+
+	if (NULL == (mdoc = mmain_mdoc(p)))
+		mmain_exit(p, 1);
 
 	if (NULL == (termp.buf = malloc(termp.maxcols)))
 		err(1, "malloc");
@@ -216,6 +209,26 @@ main(int argc, char *argv[])
 
 	mmain_exit(p, 0);
 	/* NOTREACHED */
+}
+
+
+int
+option(void *ptr, int c, const char *arg)
+{
+	struct termp	*p;
+
+	p = (struct termp *)ptr;
+
+	if (0 == strcmp(arg, "nroff")) {
+		p->enc = TERMENC_NROFF;
+		return(1);
+	} else if (0 == strcmp(arg, "ansi")) {
+		p->enc = TERMENC_ANSI;
+		return(1);
+	}
+
+	warnx("unknown option: -O%s", arg);
+	return(0);
 }
 
 
@@ -288,15 +301,18 @@ flushln(struct termp *p)
 		 * space is printed according to regular spacing rules).
 		 */
 
-		/* FIXME: make non-ANSI friendly. */
-
 		/* LINTED */
 		for (j = i, vsz = 0; j < p->col; j++) {
-			if (isspace((u_char)p->buf[j]))
+			if (isspace((u_char)p->buf[j])) {
 				break;
-			else if (27 == p->buf[j]) {
-				assert(j + 4 <= p->col);
-				j += 3;
+			} else if (27 == p->buf[j]) {
+				assert(TERMENC_ANSI == p->enc);
+				assert(j + 5 <= p->col);
+				j += 4;
+			} else if (8 == p->buf[j]) {
+				assert(TERMENC_NROFF == p->enc);
+				assert(j + 2 <= p->col);
+				j += 1;
 			} else
 				vsz++;
 		}
@@ -656,7 +672,7 @@ header(struct termp *p, const struct mdoc_meta *meta)
 static void
 nescape(struct termp *p, const char *word, size_t len)
 {
-	struct termenc	*enc;
+	struct termseq	*enc;
 
 	switch (len) {
 	case (1):
@@ -763,26 +779,70 @@ pword(struct termp *p, const char *word, size_t len)
 		p->flags &= ~TERMP_NOSPACE;
 
 	/* 
-	 * XXX - if literal and underlining, this will underline the
-	 * spaces between literal words. 
+	 * If ANSI (word-length styling), then apply our style now,
+	 * before the word.
 	 */
 
-	if (p->flags & TERMP_BOLD)
-		stylea(p, TERMSTYLE_BOLD);
-	if (p->flags & TERMP_UNDERLINE)
-		stylea(p, TERMSTYLE_UNDER);
+	if (TERMENC_ANSI == p->enc && TERMP_STYLE & p->flags) {
+		if (TERMP_BOLD & p->flags) {
+			chara(p, 27);
+			stringa(p, "[01m", 4);
+		}
+		if (TERMP_UNDER & p->flags) {
+			chara(p, 27);
+			stringa(p, "[04m", 4);
+		}
+		if (TERMP_RED & p->flags) {
+			chara(p, 27);
+			stringa(p, "[31m", 4);
+		}
+		if (TERMP_GREEN & p->flags) {
+			chara(p, 27);
+			stringa(p, "[32m", 4);
+		}
+		if (TERMP_YELLOW & p->flags) {
+			chara(p, 27);
+			stringa(p, "[33m", 4);
+		}
+		if (TERMP_BLUE & p->flags) {
+			chara(p, 27);
+			stringa(p, "[34m", 4);
+		}
+		if (TERMP_MAGENTA & p->flags) {
+			chara(p, 27);
+			stringa(p, "[35m", 4);
+		}
+		if (TERMP_CYAN & p->flags) {
+			chara(p, 27);
+			stringa(p, "[36m", 4);
+		}
+	}
 
 	for (i = 0; i < len; i++) {
 		if ('\\' == word[i]) {
 			pescape(p, word, &i, len);
 			continue;
 		}
+
+		if (TERMENC_NROFF == p->enc && 
+				TERMP_STYLE & p->flags) {
+			if (TERMP_BOLD & p->flags) {
+				chara(p, word[i]);
+				chara(p, 8);
+			}
+			if (TERMP_UNDER & p->flags) {
+				chara(p, '_');
+				chara(p, 8);
+			}
+		}
+
 		chara(p, word[i]);
 	}
 
-	if (p->flags & TERMP_BOLD ||
-			p->flags & TERMP_UNDERLINE)
-		stylea(p, TERMSTYLE_CLEAR);
+	if (TERMENC_ANSI == p->enc && TERMP_STYLE & p->flags) {
+		chara(p, 27);
+		stringa(p, "[00m", 4);
+	}
 }
 
 
@@ -795,18 +855,6 @@ symbola(struct termp *p, enum tsym sym)
 
 	assert(p->symtab[sym].sym);
 	stringa(p, p->symtab[sym].sym, p->symtab[sym].sz);
-}
-
-
-/*
- * Add a style to the output line buffer.
- */
-static void
-stylea(struct termp *p, enum tstyle style)
-{
-
-	assert(p->styletab[style].sym);
-	stringa(p, p->styletab[style].sym, p->styletab[style].sz);
 }
 
 

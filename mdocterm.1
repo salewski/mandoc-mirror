@@ -28,6 +28,7 @@
 .Nm mdocmterm
 .Op Fl vV
 .Op Fl f Ns Ar option...
+.Op Fl O Ns Ar option...
 .Op Fl W Ns Ar err...
 .Op Ar infile
 .\" SECTION
@@ -49,6 +50,15 @@ Print version and exit.
 Override default compiler behaviour.  See 
 .Sx Compiler Options
 for details.
+.\" ITEM
+.It Fl O Ns Ar option...
+Terminal-encoding options.  May be set to 
+.Fl O Ns Ar ansi
+for ANSI/VT100-encoded output (the default) or
+.Fl O Ns Ar nroff
+for nroff-encoded 
+.Qq backspace
+output.
 .\" ITEM
 .It Fl W Ns Ar err...
 Print warning messages.  May be set to 
@@ -119,30 +129,11 @@ options may be grouped and delimited with a comma.  Using
 .Fl f Ns Ar ign-scope,ign-escape ,
 for example, will try to ignore scope and character-escape errors.
 .\" SUB-SECTION
-.Ss Input Encoding
-The
-.Nm
-utility expects its input to be 7-bit ASCII as defined in
-.Xr ascii 7 .
-The only non-graphing characters accepted are spaces,
-.Sq \  ,
-and tabs,
-.Sq \et .
-Tabs are only accepted in literal block-displays and as column
-delimiters.
-.Pp
-Only Unix-style newlines (\en) are accepted; if the newline is escaped,
-the line is concatenated with the next.
-.\" SUB-SECTION
 .Ss Character Escapes
-This section documents the character-escapes accepted by
-.Xr mdocterm 1 .
-Note that the \\x, \\(xx and \\[n] forms are described here; the \\*(xx,
-\\*[n] and \\*x forms described in
-.Xr mdoc.samples 7
-are deprecated, but still rendered.  All one- and two-character
-sequences may be used in the n-character sequence \\[n].
-.Pp
+The following table shows all 
+.Xr mdoc 7
+character escapes rendered by
+.Nm .
 Note that the
 .Em Output
 column will render differently whether executed with
@@ -266,7 +257,7 @@ Special symbols:
 the more general syntax.
 .\" SECTION
 .Sh EXAMPLES
-To display this manual page:
+To display this manual page on ANSI-capable terminal:
 .\" PARAGRAPH
 .Pp
 .D1 % mdocmterm \-Wall,error mdocmterm.1 
@@ -274,7 +265,7 @@ To display this manual page:
 .Pp
 To pipe a manual page to the pager:
 .Pp
-.D1 % mdocterm mdocterm.1 2>&1 | less \-R
+.D1 % mdocterm -Onroff mdocterm.1 | less
 .\" SECTION
 .Sh SEE ALSO
 .Xr mdoctree 1 ,

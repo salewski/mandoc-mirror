@@ -70,12 +70,9 @@ enum	tsym {
 	TERMSYM_MAX = 		41
 };
 
-
-enum	tstyle {
-	TERMSTYLE_CLEAR	=	0,
-	TERMSTYLE_BOLD =	1,
-	TERMSTYLE_UNDER =	2,
-	TERMSTYLE_MAX =		3
+enum	termenc {
+	TERMENC_ANSI,
+	TERMENC_NROFF
 };
 
 struct	termsym {
@@ -90,18 +87,26 @@ struct	termp {
 	size_t		  offset;
 	size_t		  col;
 	int		  flags;
-#define	TERMP_BOLD	 (1 << 0)	/* Embolden words. */
-#define	TERMP_UNDERLINE	 (1 << 1)	/* Underline words. */
-#define	TERMP_NOSPACE	 (1 << 2)	/* No space before words. */
-#define	TERMP_NOLPAD	 (1 << 3)	/* No leftpad before flush. */
-#define	TERMP_NOBREAK	 (1 << 4)	/* No break after flush. */
-#define	TERMP_LITERAL	 (1 << 5)	/* Literal words. */
-#define	TERMP_IGNDELIM	 (1 << 6)	/* Delims like regulars. */
-#define	TERMP_NONOSPACE	 (1 << 7)	/* No space (no autounset). */
-#define	TERMP_NONOBREAK	 (1 << 8)
+#define	TERMP_NOSPACE	 (1 << 0)	/* No space before words. */
+#define	TERMP_NOLPAD	 (1 << 1)	/* No leftpad before flush. */
+#define	TERMP_NOBREAK	 (1 << 2)	/* No break after flush. */
+#define	TERMP_LITERAL	 (1 << 3)	/* Literal words. */
+#define	TERMP_IGNDELIM	 (1 << 4)	/* Delims like regulars. */
+#define	TERMP_NONOSPACE	 (1 << 5)	/* No space (no autounset). */
+#define	TERMP_NONOBREAK	 (1 << 7)	/* Don't newln NOBREAK. */
+
+#define	TERMP_STYLE	 0xff00		/* Style mask. */
+#define	TERMP_BOLD	 (1 << 8)	/* Styles... */
+#define	TERMP_UNDER	 (1 << 9)
+#define	TERMP_BLUE	 (1 << 10)
+#define	TERMP_RED	 (1 << 11)
+#define	TERMP_YELLOW	 (1 << 12)
+#define	TERMP_MAGENTA	 (1 << 13)
+#define	TERMP_CYAN	 (1 << 14)
+#define	TERMP_GREEN	 (1 << 15)
 	char		 *buf;
 	struct termsym	 *symtab;	/* Special-symbol table. */
-	struct termsym	 *styletab;	/* Style table. */
+	enum termenc	  enc;		/* Encoding. */
 };
 
 struct	termpair {
