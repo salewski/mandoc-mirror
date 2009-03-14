@@ -70,6 +70,7 @@ static	struct termenc	  termenc1[] = {
 	{ "&",		  TERMSYM_BREAK },
 	{ "e",		  TERMSYM_SLASH },
 	{ "q",		  TERMSYM_DQUOTE },
+	{ "|",		  TERMSYM_BREAK },
 	{ NULL,		  0 }
 };
 
@@ -125,7 +126,7 @@ static	struct termenc	  termenc2[] = {
 	{ NULL,		  0 }
 };
 
-static	struct termsym	  termsym_ansi[] = {
+static	struct termsym	  termsym_ansi[TERMSYM_MAX] = {
 	{ "]", 1 },		/* TERMSYM_RBRACK */
 	{ "[", 1 },		/* TERMSYM_LBRACK */
 	{ "<-", 2 },		/* TERMSYM_LARROW */
