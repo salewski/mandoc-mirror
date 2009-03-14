@@ -60,7 +60,7 @@ enum	merr {
 static	int		 argv_a2arg(int, const char *);
 static	int		 args(struct mdoc *, int, int *, 
 				char *, int, char **);
-static	int		 argv(struct mdoc *, int, int,
+static	int		 argv(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
 static	int		 argv_single(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
@@ -292,7 +292,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 
 	/* FIXME: whitespace if no value. */
 
-	if ( ! argv(mdoc, tok, line, &tmp, pos, buf))
+	if ( ! argv(mdoc, line, &tmp, pos, buf))
 		return(ARGV_ERROR);
 
 	if (NULL == (arg = *v)) {
@@ -841,7 +841,7 @@ argv_single(struct mdoc *mdoc, int line,
  * multiple parameters.
  */
 static int
-argv(struct mdoc *mdoc, int tok, int line, 
+argv(struct mdoc *mdoc, int line, 
 		struct mdoc_argv *v, int *pos, char *buf)
 {
 

@@ -78,12 +78,13 @@ Within a macro line, the following characters are reserved:
 Use of these characters must either be escaped with a non-breaking space
 .Pq Sq \e&
 or, if applicable, an appropriate escape-sequence used.  Use of reserved
-characters is described later in this document.
+characters is described in
+.Sx Closure .
 .\" SUB-SECTION
 .Ss Special Characters
 Special character sequences begin with the escape character
 .Sq \\
-and followed by either an open-parenthesis 
+followed by either an open-parenthesis 
 .Sq \&(
 for two-character sequences; an open-bracket
 .Sq \&[
@@ -93,9 +94,9 @@ or a single one-character sequence.
 .Pp
 Characters may alternatively be escaped by a slash-asterisk,
 .Sq \\* ,
-with the same combinations as described above.  This form, however, is
-deprecated.  The following is a table of all available escapes, arranged
-by classification.  
+with the same combinations as described above.  This form is deprecated.  
+.Pp
+The following is a table of all available escapes.
 .Pp
 Grammatic:
 .Bl -tag -width 12n -offset "XXXX" -compact
@@ -228,16 +229,13 @@ Special symbols:
 .\" SECTION
 .Sh ONTOLOGY
 Macros are classified in an ontology described by scope rules.  
+.\" SUB-SECTION
+.Ss Scope
 .Bl -inset 
 .\" LIST-ITEM
 .It Em Block
 macros enclose other block macros, in-line macros or text, and
-may span multiple lines.  
-.Qq Implicit 
-block scope is closed by a subsequent invocation of the same macro,
-one of a set of corresponding closure macros or end-of-file.
-.Qq Explicit 
-block scope is closed by a corresponding closure macro.
+may span multiple lines.
 .Bl -inset -offset XXXX
 .\" LIST-ITEM
 .It Em Full-block
@@ -259,16 +257,56 @@ text or macros following the head on the same and subsequent lines; and
 optionally a
 .Qq tail ,
 text immediately following closure.
-.El
 .\" LIST-ITEM
 .It Em In-line
-macros may only enclose text and span at most a single line.  If
-a macro is parsable, its scope may be closed by subsequent macros or
-delimiting punctuation.  In-line macros follow different conventions for
-closure; see 
-.Sx MACROS 
-for per-macro details.
+macros may only enclose text and span at most a single line. 
 .El
+.El
+.\" SUB-SECTION
+.Ss Closure
+Closure of a macro's scope depends first on its classification, then
+on whether it's parsable.  In this table,
+.Sq BFE
+refers to block full-explicit and so on.
+.\" PARAGRAPH
+.Pp
+.Bl -tag -width 12n -offset XXXX -compact
+.It BPE , BFE
+corresponding explicit closure macro
+.It BFI
+end-of-file or a corresponding implicit closure macro
+.It BPI
+end-of-line (body may be closed by >0 space-separated
+.Sx Reserved Characters ,
+although block scope will still be open)
+.It INL
+end-of-line
+.El
+.\" PARAGRAPH
+.Pp
+If a macro (block or in-line) is parsable, it may also be closed out by
+one of the following scenarios (unless specifically noted otherwise):
+.\" PARAGRAPH
+.Pp
+.Bl -dash -offset XXXX -compact
+.It 
+a sequence of >0 space-separated
+.Sx Reserved Characters ,
+.It
+another macro,
+.It
+end-of-line, or
+.It
+completion of a set number of arguments.
+.El
+.\" PARAGRAPH
+.Pp
+If >0 space-separated
+.Sx Reserved Characters
+are followed by non-reserved characters, the behaviour differs per
+macro.  In general, scope of the macro is closed and re-opened:
+subsequent tokens are interpreted as if the scope had just been opened.
+In other circumstances, scope is simply closed out.
 .\" .\" SUB-SECTION
 .\" .Ss Examples
 .\" The following examples illustrate each macro classification.
@@ -369,44 +407,47 @@ In these illustrations,
 opens the scope of a macro, and if specified,
 .Sq \&.Yc
 closes it out (closure may be implicit at end-of-line or end-of-file).
+.\" PARAGRAPH
 .Pp
-Block full-explicit (may contain head, body, tail):
-.Bd -literal -offset XXXX
-\&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead...\(rB
-\(lBbody...\(rB
-\&.Yc \(lBtail...\(rB
-.Ed
-.Pp
-Block full-implicit (may contain zero or more heads, body, no tail):
-.Bd -literal -offset XXXX
-\&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead... \(lBTa head...\(rB\(rB
-\(lBbody...\(rB
-\&.Yc
-.Ed
-.Pp
-Block partial-explicit (may contain head, multi-line body, tail):
+Block full-explicit (may contain head, body, tail).
 .Bd -literal -offset XXXX
 \&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead...\(rB 
-\(lBbody...\(rB
-\&.Yc \(lBtail...\(rB
+\(lBbody...\(rB 
+\&.Yc \(lBtail...\(rB 
+.Ed
+.\" PARAGRAPH
+.Pp
+Block full-implicit (may contain zero or more heads, body, no tail).
+.Bd -literal -offset XXXX
+\&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead... \(lBTa head...\(rB\(rB 
+\(lBbody...\(rB 
+\&.Yc
+.Ed
+.\" PARAGRAPH
+.Pp
+Block partial-explicit (may contain head, multi-line body, tail).
+.Bd -literal -offset XXXX
+\&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead...\(rB 
+\(lBbody...\(rB 
+\&.Yc \(lBtail...\(rB 
 
 \&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead...\(rB \
-\(lBbody...\(rB \&Yc \(lBtail...\(rB
+\(lBbody...\(rB \&Yc \(lBtail...\(rB 
 .Ed
+.\" PARAGRAPH
 .Pp
-Block partial-implicit (no head, body, no tail):
+Block partial-implicit (no head, body, no tail).  Note that the body
+section may be followed by zero or more 
+.Sx Reserved Words .
+These are in the block scope, but not in the body scope.
 .Bd -literal -offset XXXX
-\&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBbody...\(rB
+\&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBbody...\(rB \(lBreserved...\(rB
 .Ed
+.\" PARAGRAPH
 .Pp
-In-line (may be closed by end-of-line, reserved character, subsequent
-macro invocation or finite number of arguments):
+In-lines have \(>=0 scoped arguments.
 .Bd -literal -offset XXX
-\&.Yy \(lB\-arg \(lBval...\(rB\(rB args...
-
-\&.Yy \(lB\-arg \(lBval...\(rB\(rB args... ;
-
-\&.Yy \(lB\-arg \(lBval...\(rB\(rB args... Xx
+\&.Yy \(lB\-arg \(lBval...\(rB\(rB \(lBargs...\(rB
 
 \&.Yy \(lB\-arg \(lBval...\(rB\(rB arg0 arg1 argN
 .Ed
@@ -589,16 +630,59 @@ then the macro accepts an arbitrary number of arguments.
 .It \&.Mt    Ta    \&No  Ta    Yes     Ta    >0
 .El
 .\" SECTION
+.Sh COMPATIBILITY
+The mdoc language was traditionally a 
+.Qq roff
+macro package; most existing manuals were written with mdoc syntax
+dictated by system-dependent roff installations.  This section documents
+compatibility with these systems.
+.Pp
+.Bl -dash -compact
+.\" LIST-ITEM
+.It
+.Sq \&It \-nested
+is assumed for all lists: any list may be nested and
+.Sq \-enum
+lists will restart the sequence only for the sub-list.
+.\" LIST-ITEM
+.It
+.Sq \&It \-column
+syntax where column widths may be preceeded by other arguments (instead
+of proceeded) is not supported.
+.\" LIST-ITEM
+.It
+The 
+.Sq \&At
+macro only accepts a single parameter.
+.\" LIST-ITEM
+.It
+The system-name macros (
+.Ns Sq \&At ,
+.Sq \&Bsx ,
+.Sq \&Bx ,
+.Sq \&Fx ,
+.Sq \&Nx ,
+.Sq \&Ox ,
+and
+.Sq \&Ux )
+are callable.
+.\" LIST-ITEM
+.It
+Some manuals use
+.Sq \&Li
+incorrectly by following it with a reserved character and expecting the
+delimiter to render.  This is not supported.
+.\" LIST-ITEM
+.It
+.Sq \&Cd
+is callable.
+.El
+.\" SECTION
 .Sh SEE ALSO
 .Xr mdoctree 1 ,
 .Xr mdoclint 1 ,
 .Xr mdocterm 1 ,
 .Xr mdoc 3
-.\" SECTION
-.Sh HISTORY
-This manual describes the language accepted by
-.Xr mdoc 3 ,
-which implements the roff-mdoc macro package.
 .\" SECTION
 .Sh AUTHORS
 The
