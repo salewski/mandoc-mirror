@@ -29,7 +29,7 @@
 .Op Fl vV
 .Op Fl f Ns Ar options...
 .Op Fl W Ns Ar err...
-.Op Ar infile
+.Op Ar infile...
 .\" SECTION
 .Sh DESCRIPTION
 The
@@ -71,7 +71,10 @@ Read input from
 .Ar infile ,
 which may be 
 .Dq \-
-for stdin.
+for stdin.  If multiple 
+.Ar infile
+arguments are specified, each is processed and the system will exit on
+the first failure.
 .El
 .\" PARAGRAPH
 .Pp

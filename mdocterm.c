@@ -25,16 +25,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "mmain.h"
 #include "term.h"
+
+struct	nroffopt {
+	int		  fl_h;
+	int		  fl_i;
+	char		 *arg_m;
+	char		 *arg_n;
+	char		 *arg_o;
+	char		 *arg_r;
+	char		 *arg_T;
+	struct termp	 *termp; /* Ephemeral. */
+};
 
 struct	termseq {
 	const char	 *enc;
 	int		  sym;
 };
 
-static	int		  option(void *, int, const char *);
+dead_pre void		  punt(struct nroffopt *, char *) dead_post;
+static	int		  option(void *, int, char *);
+static	int		  optsopt(struct termp *, char *);
 static	void		  body(struct termp *,
 				struct termpair *,
 				const struct mdoc_meta *,
@@ -126,6 +140,7 @@ static	struct termseq	  termenc2[] = {
 	{ NULL,		  0 }
 };
 
+/* FIXME: abstract to dynamically-compiled table. */
 static	struct termsym	  termsym_ascii[TERMSYM_MAX] = {
 	{ "]", 1 },		/* TERMSYM_RBRACK */
 	{ "[", 1 },		/* TERMSYM_LBRACK */
@@ -170,33 +185,49 @@ static	struct termsym	  termsym_ascii[TERMSYM_MAX] = {
 	{ "}", 1 },		/* TERMSYM_RBRACE */
 };
 
-
 int
 main(int argc, char *argv[])
 {
 	struct mmain	  *p;
-	int		   c;
 	const struct mdoc *mdoc;
+	struct nroffopt	   nroff;
 	struct termp	   termp;
+	int		   c;
+	char		  *in;
 
 	(void)memset(&termp, 0, sizeof(struct termp));
+	(void)memset(&nroff, 0, sizeof(struct nroffopt));
 
-	termp.maxrmargin = termp.rmargin = 78; /* XXX */
-	termp.maxcols = 1024;
+	termp.maxrmargin = termp.rmargin = 78; /* FIXME */
+	termp.maxcols = 1024; /* FIXME */
 	termp.offset = termp.col = 0;
 	termp.flags = TERMP_NOSPACE;
 	termp.symtab = termsym_ascii;
-	termp.enc = TERMENC_ANSI;
+	termp.enc = TERMENC_NROFF;
+
+	nroff.termp = &termp;
 
 	p = mmain_alloc();
+
 	c = mmain_getopt(p, argc, argv, "[-Ooption...]", 
-			"O:", &termp, option);
+			"[infile]", "him:n:o:r:T:O:", &nroff, option);
 
-	if (1 != c)
-		mmain_exit(p, -1 == c ? 1 : 0);
+	/* FIXME: this needs to accept multiple outputs. */
+	argv += c;
+	if ((argc -= c) > 0)
+		in = *argv++;
+	else
+		in = "-";
 
-	if (NULL == (mdoc = mmain_mdoc(p)))
-		mmain_exit(p, 1);
+	mmain_prepare(p, in);
+
+	if (NULL == (mdoc = mmain_process(p))) {
+		if (TERMP_NOPUNT & termp.iflags)
+			mmain_exit(p, 1);
+		mmain_free(p);
+		punt(&nroff, in);
+		/* NOTREACHED */
+	}
 
 	if (NULL == (termp.buf = malloc(termp.maxcols)))
 		err(1, "malloc");
@@ -212,23 +243,67 @@ main(int argc, char *argv[])
 }
 
 
-int
-option(void *ptr, int c, const char *arg)
+static int
+optsopt(struct termp *p, char *arg)
 {
-	struct termp	*p;
+	char		*v;
+	char		*toks[] = { "ansi", "nopunt", NULL };
 
-	p = (struct termp *)ptr;
+	while (*arg) 
+		switch (getsubopt(&arg, toks, &v)) {
+		case (0):
+			p->enc = TERMENC_ANSI;
+			break;
+		case (2):
+			p->iflags |= TERMP_NOPUNT;
+			break;
+		default:
+			warnx("unknown -O argument");
+			return(0);
+		}
 
-	if (0 == strcmp(arg, "nroff")) {
-		p->enc = TERMENC_NROFF;
-		return(1);
-	} else if (0 == strcmp(arg, "ansi")) {
-		p->enc = TERMENC_ANSI;
-		return(1);
+	return(1);
+}
+
+
+static int
+option(void *ptr, int c, char *arg)
+{
+	struct termp	*termp;
+	struct nroffopt *nroff;
+
+	nroff = (struct nroffopt *)ptr;
+	termp = nroff->termp;
+
+	switch (c) {
+	case ('h'):
+		nroff->fl_h = 1;
+		break;
+	case ('i'):
+		nroff->fl_i = 1;
+		break;
+	case ('m'):
+		nroff->arg_m = arg;
+		break;
+	case ('n'):
+		nroff->arg_n = arg;
+		break;
+	case ('o'):
+		nroff->arg_o = arg;
+		break;
+	case ('r'):
+		nroff->arg_r = arg;
+		break;
+	case ('T'):
+		nroff->arg_T = arg;
+		break;
+	case ('O'):
+		return(optsopt(termp, arg));
+	default:
+		break;
 	}
 
-	warnx("unknown option: -O%s", arg);
-	return(0);
+	return(1);
 }
 
 
@@ -1012,5 +1087,40 @@ sanity(const struct mdoc_node *n)
 		}
 		break;
 	}
+}
+
+
+dead_pre void
+punt(struct nroffopt *nroff, char *in)
+{
+	char		*args[32];
+	char		 arg0[32], argm[32];
+	int		 i;
+
+	warnx("punting to nroff!");
+
+	i = 0;
+
+	(void)strlcpy(arg0, "nroff", 32);
+	args[i++] = arg0;
+
+	if (nroff->fl_h)
+		args[i++] = "-h";
+	if (nroff->fl_i)
+		args[i++] = "-i";
+
+	if (nroff->arg_m) {
+		(void)strlcpy(argm, "-m", 32);
+		(void)strlcat(argm, nroff->arg_m, 32);
+		args[i++] = argm;
+	} else
+		args[i++] = "-mandoc";
+
+	args[i++] = in;
+	args[i++] = (char *)NULL;
+
+	(void)execvp("nroff", args);
+	errx(1, "exec");
+	/* NOTREACHED */
 }
 

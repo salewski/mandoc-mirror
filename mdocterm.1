@@ -21,15 +21,23 @@
 .Os
 .\" SECTION
 .Sh NAME
-.Nm mdocmterm
+.Nm mdocterm
 .Nd mdoc macro compiler
 .\" SECTION
 .Sh SYNOPSIS
-.Nm mdocmterm
+.Nm mdocterm
 .Op Fl vV
 .Op Fl f Ns Ar option...
 .Op Fl O Ns Ar option...
 .Op Fl W Ns Ar err...
+.Op Ar infile
+.Nm mdocterm
+.Op Fl hi
+.Op Fl m Ns Ar name
+.Op Fl n Ns Ar num
+.Op Fl o Ns Ar list
+.Op Fl r Ns Ar cn
+.Op Fl T Ns Ar name
 .Op Ar infile
 .\" SECTION
 .Sh DESCRIPTION
@@ -52,13 +60,9 @@ Override default compiler behaviour.  See
 for details.
 .\" ITEM
 .It Fl O Ns Ar option...
-Terminal-encoding options.  May be set to 
-.Fl O Ns Ar ansi
-for ANSI/VT100-encoded output (the default) or
-.Fl O Ns Ar nroff
-for nroff-encoded 
-.Qq backspace
-output.
+Terminal-encoding options.  See
+.Sx Front-end Options
+for details.
 .\" ITEM
 .It Fl W Ns Ar err...
 Print warning messages.  May be set to 
@@ -84,6 +88,15 @@ for stdin.
 .El
 .\" PARAGRAPH
 .Pp
+If
+.Xr nroff 1
+arguments are supplied on the command line
+.Pq Fl himnorT ,
+these are ignored unless 
+.Xr nroff 1
+is invoked on parse failure.
+.\" PARAGRAPH
+.Pp
 The
 .Nm
 utility is a formatting front-end for
@@ -95,16 +108,40 @@ input, documented at
 and
 .Xr mdoc.samples 7 ,
 into an abstract syntax tree.  
+.\" PARAGRAPH
 .Pp
 By default, 
 .Nm 
-reads from stdin and prints ANSI 
-.Qq raw
+reads from stdin and prints nroff 
+.Qq backspace
 terminal-encoded output to stdout, at this time to a fixed column with
-of 78 characters.
+of 78 characters.  If
+.Ar infile
+can't be parsed (isn't valid mdoc, doesn't contain valid syntax, etc.),
+.Xr nroff 1
+is invoked.  If no 
+.Xr nroff 1
+command-line argumnets aren't provided,
+.Fl m Ar Ns andoc
+is implied.
 .\" PARAGRAPH
 .Pp
-.Ex -std mdocmterm
+.Ex -std mdocterm
+.\" SUB-SECTION
+.Ss Front-end Options
+The default behaviour may be overriden with the
+.Fl O
+flag.  The available options are as follows:
+.Bl -tag -width XXXXXXXXXXXX -offset XXXX
+.It Fl O Ns Ar nopunt
+Don't punt to 
+.Xr nroff 1
+if 
+.Ar infile
+may not be parsed.
+.It Fl O Ns Ar ansi
+Use ANSI/VT100 output encoding instead of backspaces.
+.El
 .\" SUB-SECTION
 .Ss Compiler Options
 Default compiler behaviour may be overriden with the
@@ -125,6 +162,8 @@ As with the
 .Fl W
 flag, multiple
 .Fl f
+and
+.Fl O
 options may be grouped and delimited with a comma.  Using
 .Fl f Ns Ar ign-scope,ign-escape ,
 for example, will try to ignore scope and character-escape errors.
@@ -260,17 +299,16 @@ the more general syntax.
 To display this manual page on ANSI-capable terminal:
 .\" PARAGRAPH
 .Pp
-.D1 % mdocmterm \-Wall,error mdocmterm.1 
+.D1 % mdocterm \-Wall,error mdocterm.1 
 .\" PARAGRAPH
 .Pp
 To pipe a manual page to the pager:
 .Pp
-.D1 % mdocterm -Onroff mdocterm.1 | less
+.D1 % mdocterm mdocterm.1 | less
 .\" SECTION
 .Sh SEE ALSO
 .Xr mdoctree 1 ,
 .Xr mdoclint 1 ,
-.Xr mdoc.samples 7 ,
 .Xr mdoc 7 ,
 .Xr mdoc 3
 .\" 

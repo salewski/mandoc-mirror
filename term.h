@@ -86,6 +86,8 @@ struct	termp {
 	size_t		  maxcols;
 	size_t		  offset;
 	size_t		  col;
+	int		  iflags;
+#define	TERMP_NOPUNT	 (1 << 0)
 	int		  flags;
 #define	TERMP_NOSPACE	 (1 << 0)	/* No space before words. */
 #define	TERMP_NOLPAD	 (1 << 1)	/* No leftpad before flush. */
@@ -94,7 +96,6 @@ struct	termp {
 #define	TERMP_IGNDELIM	 (1 << 4)	/* Delims like regulars. */
 #define	TERMP_NONOSPACE	 (1 << 5)	/* No space (no autounset). */
 #define	TERMP_NONOBREAK	 (1 << 7)	/* Don't newln NOBREAK. */
-
 #define	TERMP_STYLE	 0xff00		/* Style mask. */
 #define	TERMP_BOLD	 (1 << 8)	/* Styles... */
 #define	TERMP_UNDER	 (1 << 9)

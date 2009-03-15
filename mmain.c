@@ -42,13 +42,14 @@ struct	mmain {
 	struct mdoc	 *mdoc;		/* Active parser. */
 	char		 *buf;		/* Input buffer. */
 	size_t		  bufsz;	/* Input buffer size. */
-	char		 *in; 		/* Input file name. */
+	const char	 *in; 		/* Input file name. */
 	int		  fdin;		/* Input file desc. */
 	int		  pflags;	/* Parse flags. */
 };
 
 extern	char	 	 *__progname;
 
+static	void		  usage(const char *, const char *);
 static	int		  optswarn(struct mmain *, char *);
 static	int		  optsopt(struct mmain *, char *);
 static	int		  parse(struct mmain *);
@@ -68,11 +69,13 @@ extern	size_t		  strlcat(char *, const char *, size_t);
  * Print our and our caller's usage message.
  */
 void
-mmain_usage(const char *help)
+usage(const char *help, const char *args)
 {
 
-	warnx("usage: %s %s%s[-v] [-foption...] [-Wwarn...] [infile]", __progname, 
-			help ? help : "", help ? " " : "");
+	warnx("usage: %s %s%s[-v] [-foption...] [-Wwarn...]%s%s", 
+			__progname, 
+			help ? help : "", help ? " " : "",
+			args ? " " : "", args ? args : "");
 }
 
 
@@ -87,9 +90,6 @@ mmain_alloc(void)
 	if (NULL == (p = calloc(1, sizeof(struct mmain))))
 		err(1, "malloc");
 
-	p->in = "-";
-	p->fdin = STDIN_FILENO;
-
 	return(p);
 }
 
@@ -102,8 +102,9 @@ mmain_alloc(void)
  */
 int
 mmain_getopt(struct mmain *p, int argc, char *argv[], 
-		const char *help, const char *u, void *arg,
-		int (*getopt_cb)(void *, int, const char *))
+		const char *help, const char *args,
+		const char *u, void *arg,
+		int (*getopt_cb)(void *, int, char *))
 {
 	int		 c;
 	char		 opts[32]; /* XXX */
@@ -126,33 +127,52 @@ mmain_getopt(struct mmain *p, int argc, char *argv[],
 		switch (c) {
 		case ('f'):
 			if ( ! optsopt(p, optarg))
-				return(-1);
+				mmain_exit(p, 1);
 			break;
 		case ('v'):
 			p->dbg++;
 			break;
 		case ('V'):
 			(void)printf("%s %s\n", __progname, VERSION);
-			return(0);
+			mmain_exit(p, 0);
+			/* NOTREACHED */
 		case ('W'):
 			if ( ! optswarn(p, optarg))
-				return(-1);
+				mmain_exit(p, 1);
 			break;
 		case ('?'):
-			mmain_usage(help);
-			return(-1);
+			usage(help, args);
+			mmain_exit(p, 1);
+			/* NOTREACHED */
 		default:
 			assert(getopt_cb);
 			if ((*getopt_cb)(arg, c, optarg))
 				break;
-			return(-1);
+			mmain_exit(p, 1);
+			/* NOTREACHED */
 		}
 
-	argv += optind;
-	if ((argc -= optind) > 0)
-		p->in = *argv++;
+	return(optind);
+}
 
-	return(1);
+
+void
+mmain_reset(struct mmain *p)
+{
+
+	if (p->mdoc)
+		mdoc_free(p->mdoc);
+	p->mdoc = NULL;
+}
+
+
+void
+mmain_free(struct mmain *p)
+{
+
+	if (p->mdoc)
+		mdoc_free(p->mdoc);
+	free(p);
 }
 
 
@@ -160,28 +180,23 @@ dead_pre void
 mmain_exit(struct mmain *p, int code) 
 {
 
-	if (p->mdoc)
-		mdoc_free(p->mdoc);
-	free(p);
+	mmain_free(p);
 	exit(code);
 }
 
 
-struct mdoc *
-mmain_mdoc(struct mmain *p)
+void
+mmain_prepare(struct mmain *p, const char *in)
 {
 	struct stat	 st;
-	int		 c;
-	struct mdoc_cb	 cb;
 
-	cb.mdoc_err = msg_err;
-	cb.mdoc_warn = msg_warn;
-	cb.mdoc_msg = msg_msg;
+	p->in = in;
+	p->fdin = STDIN_FILENO;
 
 	if (0 != strcmp(p->in, "-"))
 		if (-1 == (p->fdin = open(p->in, O_RDONLY, 0))) {
 			warn("%s", p->in);
-			return(0);
+			mmain_exit(p, 1);
 		}
 
 	/* Allocate a buffer to be BUFSIZ/block size. */
@@ -195,6 +210,19 @@ mmain_mdoc(struct mmain *p)
 	p->buf = malloc(p->bufsz);
 	if (NULL == p->buf)
 		err(1, "malloc");
+}
+
+
+struct mdoc *
+mmain_process(struct mmain *p)
+{
+	int		 c;
+	struct mdoc_cb	 cb;
+
+	/* XXX - in mmain_alloc.*/
+	cb.mdoc_err = msg_err;
+	cb.mdoc_warn = msg_warn;
+	cb.mdoc_msg = msg_msg;
 
 	/* Allocate the parser. */
 
@@ -210,6 +238,15 @@ mmain_mdoc(struct mmain *p)
 			warn("%s", p->in);
 
 	return(c ? p->mdoc : NULL);
+}
+
+
+struct mdoc *
+mmain_mdoc(struct mmain *p, const char *in)
+{
+
+	mmain_prepare(p, in);
+	return(mmain_process(p));
 }
 
 

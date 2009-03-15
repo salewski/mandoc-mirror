@@ -47,10 +47,14 @@ struct	mmain;
 struct	mmain		*mmain_alloc(void);
 dead_pre void	 	 mmain_exit(struct mmain *, int) dead_post;
 int			 mmain_getopt(struct mmain *, int, char *[], 
-				const char *, const char *, void *,
-				int (*)(void *, int, const char *));
-struct mdoc		*mmain_mdoc(struct mmain *);
-void			 mmain_usage(const char *);
+				const char *, const char *,
+				const char *, void *,
+				int (*)(void *, int, char *));
+struct mdoc		*mmain_mdoc(struct mmain *, const char *);
+void			 mmain_reset(struct mmain *);
+void			 mmain_free(struct mmain *);
+void			 mmain_prepare(struct mmain *, const char *);
+struct mdoc		*mmain_process(struct mmain *);
 
 __END_DECLS
 

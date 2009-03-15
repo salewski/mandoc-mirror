@@ -29,16 +29,21 @@ main(int argc, char *argv[])
 {
 	struct mmain	*p;
 	int		 c;
-	const struct mdoc *mdoc;
 
 	p = mmain_alloc();
 
-	c = mmain_getopt(p, argc, argv, NULL, NULL, NULL, NULL);
-	if (1 != c)
-		mmain_exit(p, -1 == c ? 1 : 0);
+	c = mmain_getopt(p, argc, argv, NULL, 
+			"[infile...]", NULL, NULL, NULL);
 
-	if (NULL == (mdoc = mmain_mdoc(p)))
-		mmain_exit(p, 1);
+	argv += c;
+	if (0 == (argc -= c))
+		mmain_exit(p, NULL != mmain_mdoc(p, "-"));
+
+	while (c-- > 0) {
+		if (NULL == mmain_mdoc(p, *argv++))
+			mmain_exit(p, 1);
+		mmain_reset(p);
+	}
 
 	mmain_exit(p, 0);
 	/* NOTREACHED */
