@@ -254,7 +254,7 @@ optsopt(struct termp *p, char *arg)
 		case (0):
 			p->enc = TERMENC_ANSI;
 			break;
-		case (2):
+		case (1):
 			p->iflags |= TERMP_NOPUNT;
 			break;
 		default:
