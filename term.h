@@ -70,11 +70,6 @@ enum	tsym {
 	TERMSYM_MAX = 		41
 };
 
-enum	termenc {
-	TERMENC_ANSI,
-	TERMENC_NROFF
-};
-
 struct	termsym {
 	const char	 *sym;
 	size_t		  sz;
@@ -96,18 +91,11 @@ struct	termp {
 #define	TERMP_IGNDELIM	 (1 << 4)	/* Delims like regulars. */
 #define	TERMP_NONOSPACE	 (1 << 5)	/* No space (no autounset). */
 #define	TERMP_NONOBREAK	 (1 << 7)	/* Don't newln NOBREAK. */
-#define	TERMP_STYLE	 0xff00		/* Style mask. */
+#define	TERMP_STYLE	 0x0300		/* Style mask. */
 #define	TERMP_BOLD	 (1 << 8)	/* Styles... */
 #define	TERMP_UNDER	 (1 << 9)
-#define	TERMP_BLUE	 (1 << 10)
-#define	TERMP_RED	 (1 << 11)
-#define	TERMP_YELLOW	 (1 << 12)
-#define	TERMP_MAGENTA	 (1 << 13)
-#define	TERMP_CYAN	 (1 << 14)
-#define	TERMP_GREEN	 (1 << 15)
 	char		 *buf;
 	struct termsym	 *symtab;	/* Special-symbol table. */
-	enum termenc	  enc;		/* Encoding. */
 };
 
 struct	termpair {

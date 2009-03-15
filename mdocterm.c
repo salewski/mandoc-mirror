@@ -203,7 +203,6 @@ main(int argc, char *argv[])
 	termp.offset = termp.col = 0;
 	termp.flags = TERMP_NOSPACE;
 	termp.symtab = termsym_ascii;
-	termp.enc = TERMENC_NROFF;
 
 	nroff.termp = &termp;
 
@@ -247,14 +246,11 @@ static int
 optsopt(struct termp *p, char *arg)
 {
 	char		*v;
-	char		*toks[] = { "ansi", "nopunt", NULL };
+	char		*toks[] = { "nopunt", NULL };
 
 	while (*arg) 
 		switch (getsubopt(&arg, toks, &v)) {
 		case (0):
-			p->enc = TERMENC_ANSI;
-			break;
-		case (1):
 			p->iflags |= TERMP_NOPUNT;
 			break;
 		default:
@@ -378,17 +374,11 @@ flushln(struct termp *p)
 
 		/* LINTED */
 		for (j = i, vsz = 0; j < p->col; j++) {
-			if (isspace((u_char)p->buf[j])) {
+			if (isspace((u_char)p->buf[j]))
 				break;
-			} else if (27 == p->buf[j]) {
-				assert(TERMENC_ANSI == p->enc);
-				assert(j + 5 <= p->col);
-				j += 4;
-			} else if (8 == p->buf[j]) {
-				assert(TERMENC_NROFF == p->enc);
-				assert(j + 2 <= p->col);
+			else if (8 == p->buf[j])
 				j += 1;
-			} else
+			else
 				vsz++;
 		}
 
@@ -858,49 +848,13 @@ pword(struct termp *p, const char *word, size_t len)
 	 * before the word.
 	 */
 
-	if (TERMENC_ANSI == p->enc && TERMP_STYLE & p->flags) {
-		if (TERMP_BOLD & p->flags) {
-			chara(p, 27);
-			stringa(p, "[01m", 4);
-		}
-		if (TERMP_UNDER & p->flags) {
-			chara(p, 27);
-			stringa(p, "[04m", 4);
-		}
-		if (TERMP_RED & p->flags) {
-			chara(p, 27);
-			stringa(p, "[31m", 4);
-		}
-		if (TERMP_GREEN & p->flags) {
-			chara(p, 27);
-			stringa(p, "[32m", 4);
-		}
-		if (TERMP_YELLOW & p->flags) {
-			chara(p, 27);
-			stringa(p, "[33m", 4);
-		}
-		if (TERMP_BLUE & p->flags) {
-			chara(p, 27);
-			stringa(p, "[34m", 4);
-		}
-		if (TERMP_MAGENTA & p->flags) {
-			chara(p, 27);
-			stringa(p, "[35m", 4);
-		}
-		if (TERMP_CYAN & p->flags) {
-			chara(p, 27);
-			stringa(p, "[36m", 4);
-		}
-	}
-
 	for (i = 0; i < len; i++) {
 		if ('\\' == word[i]) {
 			pescape(p, word, &i, len);
 			continue;
 		}
 
-		if (TERMENC_NROFF == p->enc && 
-				TERMP_STYLE & p->flags) {
+		if (TERMP_STYLE & p->flags) {
 			if (TERMP_BOLD & p->flags) {
 				chara(p, word[i]);
 				chara(p, 8);
@@ -912,11 +866,6 @@ pword(struct termp *p, const char *word, size_t len)
 		}
 
 		chara(p, word[i]);
-	}
-
-	if (TERMENC_ANSI == p->enc && TERMP_STYLE & p->flags) {
-		chara(p, 27);
-		stringa(p, "[00m", 4);
 	}
 }
 
