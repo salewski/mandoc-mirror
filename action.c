@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2008 Kristaps Dzonsons <kristaps@kth.se>
+ * Copyright (c) 2008, 2009 Kristaps Dzonsons <kristaps@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the
@@ -183,6 +183,7 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* %C */
 	{ NULL }, /* Es */
 	{ NULL }, /* En */
+	{ NULL }, /* Dx */
 };
 
 

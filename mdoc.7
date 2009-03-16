@@ -1,6 +1,6 @@
 .\" $Id$
 .\"
-.\" Copyright (c) 2009 Kristaps Dzonsons <kristaps@kth.se>
+.\" Copyright (c) 2009 Kristaps Dzonsons <kristaps@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the
@@ -41,8 +41,7 @@ of these macros.
 .\" SECTION
 .Sh CHARACTER ENCODING
 .Nm
-documents may contain only printable alphanumeric characters, the space
-character
+documents may contain only printable characters, the space character
 .Sq \  ,
 and, in certain circumstances, the tab character
 .Sq \et .
@@ -643,6 +642,7 @@ then the macro accepts an arbitrary number of arguments.
 .It \&.Sy    Ta    Yes   Ta    Yes     Ta    >0
 .It \&.Tn    Ta    Yes   Ta    Yes     Ta    >0
 .It \&.Ux    Ta    Yes   Ta    Yes     Ta    n
+.It \&.Dx    Ta    Yes   Ta    Yes     Ta    n
 .It \&.Bt    Ta    \&No  Ta    \&No    Ta    0
 .It \&.Hf    Ta    \&No  Ta    \&No    Ta    n
 .It \&.Fr    Ta    \&No  Ta    \&No    Ta    n
@@ -652,7 +652,17 @@ then the macro accepts an arbitrary number of arguments.
 .It \&.Lp    Ta    \&No  Ta    \&No    Ta    0
 .It \&.Lk    Ta    \&No  Ta    Yes     Ta    >0
 .It \&.Mt    Ta    \&No  Ta    Yes     Ta    >0
+.It \&.Es    Ta    \&No  Ta    \&No    Ta    0
+.It \&.En    Ta    \&No  Ta    \&No    Ta    0
 .El
+.Pp
+The
+.Sq \&Ot ,
+.Sq \&Fr ,
+.Sq \&Es 
+and
+.Sq \&En ,
+macros are obsolete.
 .\" SECTION
 .Sh COMPATIBILITY
 The mdoc language was traditionally a 
@@ -718,7 +728,7 @@ is callable.
 The
 .Nm
 utility was written by 
-.An Kristaps Dzonsons Aq kristaps@kth.se .
+.An Kristaps Dzonsons Aq kristaps@openbsd.org .
 .\" SECTION
 .Sh CAVEATS
 There are several ambiguous parts of mdoc.
@@ -773,4 +783,12 @@ The
 .Sq \&Dt
 macro lacks clarity.  It should be absolutely clear which title will
 render when formatting the manual page.
+.\" LIST-ITEM
+.It
+A
+.Sq \&Lx
+should be provided for Linux (\(`a la 
+.Sq \&Ox ,
+.Sq \&Nx 
+etc.).
 .El

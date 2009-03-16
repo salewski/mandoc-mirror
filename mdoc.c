@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2008 Kristaps Dzonsons <kristaps@kth.se>
+ * Copyright (c) 2008, 2009 Kristaps Dzonsons <kristaps@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the
@@ -75,7 +75,7 @@ const	char *const __mdoc_macronames[MDOC_MAX] = {
 	"Lp",		"Lk",		"Mt",		"Brq",
 	/* LINTED */
 	"Bro",		"Brc",		"\%C",		"Es",
-	"En"
+	"En",		"Dx"
 	};
 
 const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {		 

@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2009 Kristaps Dzonsons <kristaps@kth.se>
+ * Copyright (c) 2008, 2009 Kristaps Dzonsons <kristaps@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the
@@ -149,6 +149,7 @@ DECL_PRE(termp_bsx);
 DECL_PRE(termp_bt);
 DECL_PRE(termp_cd);
 DECL_PRE(termp_cm);
+DECL_PRE(termp_dx);
 DECL_PRE(termp_em);
 DECL_PRE(termp_ex);
 DECL_PRE(termp_fa);
@@ -298,6 +299,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* %C */ 
 	{ NULL, NULL }, /* Es */ 
 	{ NULL, NULL }, /* En */ 
+	{ termp_dx_pre, NULL }, /* Dx */ 
 };
 
 const struct termact *termacts = __termacts;
@@ -1386,6 +1388,16 @@ termp_ox_pre(DECL_ARGS)
 {
 
 	word(p, "OpenBSD");
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+termp_dx_pre(DECL_ARGS)
+{
+
+	word(p, "DragonFly");
 	return(1);
 }
 
