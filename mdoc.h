@@ -31,8 +31,6 @@
 
 /* What follows is a list of ALL possible macros. */
 
-/* TODO: Brq et al. */
-
 #define	MDOC___	 	 0
 #define	MDOC_Dd		 1
 #define	MDOC_Dt		 2
@@ -148,7 +146,9 @@
 #define	MDOC_Bro	 112
 #define	MDOC_Brc	 113
 #define	MDOC__C	 	 114
-#define	MDOC_MAX	 115
+#define	MDOC_Es	 	 115
+#define	MDOC_En	 	 116
+#define	MDOC_MAX	 117
 
 /* What follows is a list of ALL possible macro arguments. */
 

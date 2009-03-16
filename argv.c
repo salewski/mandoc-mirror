@@ -45,6 +45,8 @@
 #define	ARGV_MULTI	(1 << 2)
 #define	ARGV_OPT_SINGLE	(1 << 3)
 
+#define	MULTI_STEP	 5
+
 enum 	mwarn {
 	WQUOTPARM,
 	WARGVPARM,
@@ -218,6 +220,8 @@ static	int mdoc_argflags[MDOC_MAX] = {
 	0, /* Bro */
 	ARGS_DELIM, /* Brc */
 	ARGS_QUOTED, /* %C */
+	0, /* Es */
+	0, /* En */
 };
 
 
@@ -238,10 +242,12 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	if (0 == buf[*pos])
 		return(ARGV_EOLN);
 
-	assert( ! isspace((u_char)buf[*pos]));
+	assert(' ' != buf[*pos]);
 
-	if ('-' != buf[*pos])
+	if ('-' != buf[*pos] || ARGS_ARGVLIKE & mdoc_argflags[tok])
 		return(ARGV_WORD);
+
+	/* Parse through to the first unescaped space. */
 
 	i = *pos;
 	p = &buf[++(*pos)];
@@ -250,17 +256,13 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 
 	/* LINTED */
 	while (buf[*pos]) {
-		if (isspace((u_char)buf[*pos])) 
+		if (' ' == buf[*pos])
 			if ('\\' != buf[*pos - 1])
 				break;
 		(*pos)++;
 	}
 
-	/* 
-	 * XXX: save the nullified byte as we'll restore it if this
-	 * doesn't end up being a command after all.  This is a little
-	 * bit hacky.  I don't like it, but it works for now.
-	 */
+	/* XXX - save zeroed byte, if not an argument. */
 
 	sv = 0;
 	if (buf[*pos]) {
@@ -272,14 +274,10 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	tmp.line = line;
 	tmp.pos = *pos;
 
-	/*
-	 * We now parse out the per-macro arguments.  XXX - this can be
-	 * made much cleaner using per-argument tables.  See argv_a2arg
-	 * for details.
-	 */
+	/* See if our token accepts the argument. */
 
 	if (MDOC_ARG_MAX == (tmp.arg = argv_a2arg(tok, p))) {
-		/* XXX - restore saved byte. */
+		/* XXX - restore saved zeroed byte. */
 		if (sv)
 			buf[*pos - 1] = sv;
 		if ( ! pwarn(mdoc, line, i, WARGVPARM))
@@ -287,10 +285,8 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		return(ARGV_WORD);
 	}
 
-	while (buf[*pos] && isspace((u_char)buf[*pos]))
+	while (buf[*pos] && ' ' == buf[*pos])
 		(*pos)++;
-
-	/* FIXME: whitespace if no value. */
 
 	if ( ! argv(mdoc, line, &tmp, pos, buf))
 		return(ARGV_ERROR);
@@ -448,8 +444,6 @@ mdoc_args(struct mdoc *mdoc, int line,
 		break;
 	}
 
-	/* Continue parsing the arguments themselves...  */
-
 	return(args(mdoc, line, pos, buf, fl, v));
 }
 
@@ -486,10 +480,10 @@ args(struct mdoc *mdoc, int line,
 				break;
 			i++;
 			/* There must be at least one space... */
-			if (0 == buf[i] || ! isspace((u_char)buf[i]))
+			if (0 == buf[i] || ' ' != buf[i])
 				break;
 			i++;
-			while (buf[i] && isspace((u_char)buf[i]))
+			while (buf[i] && ' ' == buf[i])
 				i++;
 		}
 		if (0 == buf[i]) {
@@ -505,24 +499,16 @@ args(struct mdoc *mdoc, int line,
 
 		/* 
 		 * Thar be dragons here!  If we're tab-separated, search
-		 * ahead for either a tab or the `Ta' macro.  If a tab
-		 * is detected, it mustn't be escaped; if a `Ta' is
-		 * detected, it must be space-buffered before and after.
-		 * If either of these hold true, then prune out the
+		 * ahead for either a tab or the `Ta' macro.  
+		 * If a `Ta' is detected, it must be space-buffered before and
+		 * after.  If either of these hold true, then prune out the
 		 * extra spaces and call it an argument.
 		 */
 
 		if (ARGS_TABSEP & fl) {
 			/* Scan ahead to unescaped tab. */
 
-			for (p = *v; ; p++) {
-				if (NULL == (p = strchr(p, '\t')))
-					break;
-				if (p == *v)
-					break;
-				if ('\\' != *(p - 1))
-					break;
-			}
+			p = strchr(*v, '\t');
 
 			/* Scan ahead to unescaped `Ta'. */
 
@@ -597,7 +583,7 @@ args(struct mdoc *mdoc, int line,
 		
 		if ( ! (ARGS_TABSEP & fl))
 			while (buf[*pos]) {
-				if (isspace((u_char)buf[*pos]))
+				if (' ' == buf[*pos])
 					if ('\\' != buf[*pos - 1])
 						break;
 				(*pos)++;
@@ -612,7 +598,7 @@ args(struct mdoc *mdoc, int line,
 			return(ARGS_WORD);
 
 		if ( ! (ARGS_TABSEP & fl))
-			while (buf[*pos] && isspace((u_char)buf[*pos]))
+			while (buf[*pos] && ' ' == buf[*pos])
 				(*pos)++;
 
 		if (buf[*pos])
@@ -644,7 +630,7 @@ args(struct mdoc *mdoc, int line,
 	if (0 == buf[*pos])
 		return(ARGS_QWORD);
 
-	while (buf[*pos] && isspace((u_char)buf[*pos]))
+	while (buf[*pos] && ' ' == buf[*pos])
 		(*pos)++;
 
 	if (buf[*pos])
@@ -773,9 +759,9 @@ argv_multi(struct mdoc *mdoc, int line,
 		else if (ARGS_EOLN == c)
 			break;
 
-		if (0 == v->sz % 5)
+		if (0 == v->sz % MULTI_STEP)
 			v->value = xrealloc(v->value, 
-				(v->sz + 5) * sizeof(char *));
+				(v->sz + MULTI_STEP) * sizeof(char *));
 
 		v->value[(int)v->sz] = xstrdup(p);
 	}

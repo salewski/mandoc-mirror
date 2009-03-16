@@ -40,6 +40,7 @@
 #define	POST_ARGS	struct mdoc *mdoc
 
 enum	merr {
+	EPRINT,
 	ENODATA,
 	ENOPROLOGUE,
 	ELINE,
@@ -81,16 +82,13 @@ struct	valids {
 
 /* Utility checks. */
 
-static	int	nwarn(struct mdoc *, 
-			const struct mdoc_node *, enum mwarn);
-static	int	nerr(struct mdoc *, 
-			const struct mdoc_node *, enum merr);
+static	int	pwarn(struct mdoc *, int, int, enum mwarn);
+static	int	perr(struct mdoc *, int, int, enum merr);
 static	int	check_parent(PRE_ARGS, int, enum mdoc_type);
 static	int	check_msec(PRE_ARGS, ...);
 static	int	check_sec(PRE_ARGS, ...);
 static	int	check_stdarg(PRE_ARGS);
-static	int	check_text(struct mdoc *, 
-			int, int, const char *);
+static	int	check_text(struct mdoc *, int, int, const char *);
 static	int	check_argv(struct mdoc *, 
 			const struct mdoc_node *,
 			const struct mdoc_argv *);
@@ -150,6 +148,11 @@ static	int	post_sh(POST_ARGS);
 static	int	post_sh_body(POST_ARGS);
 static	int	post_sh_head(POST_ARGS);
 static	int	post_st(POST_ARGS);
+
+#define	mwarn(m, t) nwarn((m), (m)->last, (t))
+#define	merr(m, t) nerr((m), (m)->last, (t))
+#define	nwarn(m, n, t) pwarn((m), (n)->line, (n)->pos, (t))
+#define	nerr(m, n, t) perr((m), (n)->line, (n)->pos, (t))
 
 static	v_pre	pres_an[] = { pre_an, NULL };
 static	v_pre	pres_bd[] = { pre_display, pre_bd, NULL };
@@ -310,30 +313,32 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Bro */ 
 	{ NULL, NULL },				/* Brc */ 
 	{ NULL, posts_text },			/* %C */
+	{ NULL, NULL },				/* Es */
+	{ NULL, NULL },				/* En */
 };
 
 
 int
 mdoc_valid_pre(struct mdoc *mdoc, 
-		const struct mdoc_node *node)
+		const struct mdoc_node *n)
 {
 	v_pre		*p;
 	int		 line, pos;
 	const char	*tp;
 
-	if (MDOC_TEXT == node->type) {
-		tp = node->string;
-		line = node->line;
-		pos = node->pos;
+	if (MDOC_TEXT == n->type) {
+		tp = n->string;
+		line = n->line;
+		pos = n->pos;
 		return(check_text(mdoc, line, pos, tp));
 	}
 
-	if ( ! check_args(mdoc, node))
+	if ( ! check_args(mdoc, n))
 		return(0);
-	if (NULL == mdoc_valids[node->tok].pre)
+	if (NULL == mdoc_valids[n->tok].pre)
 		return(1);
-	for (p = mdoc_valids[node->tok].pre; *p; p++)
-		if ( ! (*p)(mdoc, node)) 
+	for (p = mdoc_valids[n->tok].pre; *p; p++)
+		if ( ! (*p)(mdoc, n)) 
 			return(0);
 	return(1);
 }
@@ -371,15 +376,16 @@ mdoc_valid_post(struct mdoc *mdoc)
 }
 
 
-#define	merr(m, t) nerr((m), (m)->last, (t))
 static int
-nerr(struct mdoc *m, const struct mdoc_node *n, enum merr type)
+perr(struct mdoc *m, int line, int pos, enum merr type)
 {
 	char		 *p;
 	
 	p = NULL;
-
 	switch (type) {
+	case (EPRINT):
+		p = "invalid character";
+		break;
 	case (ENESTDISP):
 		p = "displays may not be nested";
 		break;
@@ -417,22 +423,19 @@ nerr(struct mdoc *m, const struct mdoc_node *n, enum merr type)
 		p = "default name not yet set";
 		break;
 	}
-
 	assert(p);
-	return(mdoc_nerr(m, n, p));
+	return(mdoc_perr(m, line, pos, p));
 }
 
 
-#define	mwarn(m, t) nwarn((m), (m)->last, (t))
 static int
-nwarn(struct mdoc *m, const struct mdoc_node *n, enum mwarn type)
+pwarn(struct mdoc *m, int line, int pos, enum mwarn type)
 {
 	char		 *p;
 	enum mdoc_warn	  c;
 
 	c = WARN_SYNTAX;
 	p = NULL;
-
 	switch (type) {
 	case (WBADMSEC):
 		p = "inappropriate manual section";
@@ -484,7 +487,7 @@ nwarn(struct mdoc *m, const struct mdoc_node *n, enum mwarn type)
 		break;
 	}
 	assert(p);
-	return(mdoc_nwarn(m, n, c, p));
+	return(mdoc_pwarn(m, line, pos, c, p));
 }
 
 
@@ -685,12 +688,12 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 {
 	size_t		 c;
 
-	/* XXX - indicate deprecated escapes \*(xx and \*x. */
+	/* FIXME: indicate deprecated escapes \*(xx and \*x. */
+	/* FIXME: don't allow tabs unless in literal mode. */
 
 	for ( ; *p; p++) {
-		if ( ! isprint((u_char)*p) && '\t' != *p)
-			return(mdoc_perr(mdoc, line, pos,
-				"invalid non-printing character"));
+		if ('\t' != *p && ! isprint((u_char)*p))
+			return(perr(mdoc, line, pos, EPRINT));
 		if ('\\' != *p)
 			continue;
 		if ((c = mdoc_isescape(p))) {

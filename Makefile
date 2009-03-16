@@ -25,7 +25,7 @@ LIBLNS	= macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
 
 TREELNS	= mdoctree.ln mmain.ln 
 
-TERMLNS	= mdoctree.ln mmain.ln term.ln
+TERMLNS	= mdoctree.ln mmain.ln term.ln ascii.ln
 
 LINTLNS	= mdoclint.ln mmain.ln
 
@@ -39,7 +39,7 @@ LIBOBJS	= macro.o mdoc.o hash.o strings.o xstd.o argv.o \
 	  validate.o action.o lib.o att.o arch.o vol.o msec.o \
 	  st.o
 
-TERMOBJS= mdocterm.o mmain.o term.o
+TERMOBJS= mdocterm.o mmain.o term.o ascii.o
 
 TREEOBJS= mdoctree.o mmain.o
 
@@ -50,11 +50,7 @@ OBJS	= $(LIBOBJS) $(TERMOBJS) $(TREEOBJS) $(LINTOBJS)
 SRCS	= macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
 	  action.c term.c mdoctree.c mdocterm.c mmain.c mdoclint.c
 
-SCRIPTS = strings.sh
-
-DATAS	= arch.in att.in lib.in msec.in st.in vol.in
-
-GEN	= lib.c att.c arch.c vol.c msec.c st.c
+DATAS	= arch.in att.in lib.in msec.in st.in vol.in ascii.in
 
 HEADS	= mdoc.h private.h term.h mmain.h
 
@@ -72,84 +68,10 @@ MANS	= mdoctree.1 mdocterm.1 mdoclint.1 mdoc.3 mdoc.7
 BINS	= mdocterm mdoctree mdoclint
 
 CLEAN	= $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
-	  $(TARGZS) $(GEN)
+	  $(TARGZS) 
 
 INSTALL	= $(SRCS) $(HEADS) Makefile DESCR $(MANS) $(SGMLS) \
-	  $(STATICS) $(SCRIPTS) Makefile.netbsd Makefile.openbsd \
-	  $(DATAS)
-
-FAIL	= regress/test.empty \
-	  regress/test.prologue.00 \
-	  regress/test.prologue.01 \
-	  regress/test.prologue.02 \
-	  regress/test.prologue.03 \
-	  regress/test.prologue.04 \
-	  regress/test.prologue.06 \
-	  regress/test.prologue.19 \
-	  regress/test.prologue.23 \
-	  regress/test.prologue.24 \
-	  regress/test.prologue.27 \
-	  regress/test.prologue.28 \
-	  regress/test.prologue.30 \
-	  regress/test.prologue.31 \
-	  regress/test.prologue.32 \
-	  regress/test.sh.03 \
-	  regress/test.escape.01 \
-	  regress/test.escape.02 \
-	  regress/test.escape.03 \
-	  regress/test.escape.04 \
-	  regress/test.escape.06 \
-	  regress/test.escape.07 \
-	  regress/test.escape.08 \
-	  regress/test.escape.09 \
-	  regress/test.escape.11 \
-	  regress/test.escape.12 \
-	  regress/test.escape.14 \
-	  regress/test.argv.01 \
-	  regress/test.argv.02
-
-SUCCEED	= regress/test.prologue.05 \
-	  regress/test.prologue.07 \
-	  regress/test.prologue.08 \
-	  regress/test.prologue.09 \
-	  regress/test.prologue.10 \
-	  regress/test.prologue.11 \
-	  regress/test.prologue.12 \
-	  regress/test.prologue.13 \
-	  regress/test.prologue.14 \
-	  regress/test.prologue.15 \
-	  regress/test.prologue.16 \
-	  regress/test.prologue.17 \
-	  regress/test.prologue.18 \
-	  regress/test.prologue.20 \
-	  regress/test.prologue.21 \
-	  regress/test.prologue.22 \
-	  regress/test.prologue.25 \
-	  regress/test.prologue.26 \
-	  regress/test.prologue.29 \
-	  regress/test.prologue.33 \
-	  regress/test.sh.00 \
-	  regress/test.name.00 \
-	  regress/test.name.01 \
-	  regress/test.name.02 \
-	  regress/test.name.03 \
-	  regress/test.list.00 \
-	  regress/test.list.01 \
-	  regress/test.list.02 \
-	  regress/test.list.03 \
-	  regress/test.list.04 \
-	  regress/test.list.05 \
-	  regress/test.list.06 \
-	  regress/test.list.07 \
-	  regress/test.sh.01 \
-	  regress/test.sh.02 \
-	  regress/test.escape.00 \
-	  regress/test.escape.05 \
-	  regress/test.escape.10 \
-	  regress/test.escape.13 \
-	  regress/test.argv.00
-
-REGRESS	= $(FAIL) $(SUCCEED)
+	  $(STATICS) Makefile.netbsd Makefile.openbsd $(DATAS)
 
 all:	$(BINS)
 
@@ -175,14 +97,6 @@ installwww: www
 	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/mdocml.tar.gz
 	install -m 0444 mdocml-nport-$(VERSION).tar.gz $(PREFIX)/ports-netbsd/
 	install -m 0444 mdocml-nport-$(VERSION).tar.gz $(PREFIX)/ports-netbsd/mdocml.tar.gz
-
-#regress: mdoclint $(FAIL) $(SUCCEED)
-#	@for f in $(FAIL); do \
-#		echo "./mdoclint $$f" ; \
-#		./mdoclint $$f 2>/dev/null || continue ; exit 1 ; done
-#	@for f in $(SUCCEED); do \
-#		echo "./mdoclint $$f" ; \
-		./mdoclint $$f 2>/dev/null || exit 1 ; done
 
 install:
 	mkdir -p $(BINDIR)
@@ -211,41 +125,26 @@ uninstall:
 	rm -f $(LIBDIR)/libmdoc.a
 	rm -f $(INCLUDEDIR)/mdoc.h
 
-lib.ln: lib.c private.h
-lib.o: lib.c private.h
+lib.ln: lib.c lib.in private.h
+lib.o: lib.c lib.in private.h
 
-att.ln: att.c private.h
-att.o: att.c private.h
+att.ln: att.c att.in private.h
+att.o: att.c att.in private.h
 
-arch.ln: arch.c private.h
-arch.o: arch.c private.h
+arch.ln: arch.c arch.in private.h
+arch.o: arch.c arch.in private.h
 
-vol.ln: vol.c private.h
-vol.o: vol.c private.h
+vol.ln: vol.c vol.in private.h
+vol.o: vol.c vol.in private.h
 
-msec.ln: msec.c private.h
-msec.o: msec.c private.h
+ascii.ln: ascii.c ascii.in term.h
+ascii.o: ascii.c ascii.in term.h
 
-st.ln: st.c private.h
-st.o: st.c private.h
+msec.ln: msec.c msec.in private.h
+msec.o: msec.c msec.in private.h
 
-lib.c: lib.in strings.sh
-	sh strings.sh -o $@ lib lib.in
-
-st.c: st.in strings.sh
-	sh strings.sh -o $@ st st.in
-
-msec.c: msec.in strings.sh
-	sh strings.sh -o $@ msec msec.in
-
-att.c: att.in strings.sh
-	sh strings.sh -o $@ att att.in
-
-arch.c: arch.in strings.sh
-	sh strings.sh -o $@ arch arch.in
-
-vol.c: vol.in strings.sh
-	sh strings.sh -o $@ vol vol.in
+st.ln: st.c st.in private.h
+st.o: st.c st.in private.h
 
 macro.ln: macro.c private.h
 macro.o: macro.c private.h
@@ -336,9 +235,7 @@ mdocml-oport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.openbsd DESCR
 
 mdocml-$(VERSION).tar.gz: $(INSTALL)
 	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
-	mkdir -p .dist/mdocml/mdocml-$(VERSION)/regress/
 	install -m 0644 $(INSTALL) .dist/mdocml/mdocml-$(VERSION)/
-	install -m 0644 $(REGRESS) .dist/mdocml/mdocml-$(VERSION)/regress/
 	( cd .dist/mdocml/ && tar zcf ../../$@ mdocml-$(VERSION)/ )
 	rm -rf .dist/
 

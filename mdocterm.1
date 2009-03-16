@@ -167,131 +167,20 @@ options may be grouped and delimited with a comma.  Using
 for example, will try to ignore scope and character-escape errors.
 .\" SUB-SECTION
 .Ss Character Escapes
-The following table shows all 
+The
+.Nm
+utility correctly renders all 
+.Sx Special Characters
+in
 .Xr mdoc 7
-character escapes rendered by
-.Nm .
-Note that the
-.Em Output
-column will render differently whether executed with
-.Xr mdocterm 1 
-or another output filter.
-.\" PARAGRAPH
+in 7-bit ASCII.
 .Pp
-Grammatic:
-.Pp
-.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
-.It Em Output
-.Em Input (Name)
-.It \(em
-\\(em (em-dash)
-.It \(en
-\\(en (en-dash)
-.It \-
-\\- (hyphen)
-.It \\
-\\\\ (back-slash)
-.El
-.\" PARAGRAPH
-.Pp
-Enclosures:
-.Pp
-.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
-.It Em Output
-.Em Input (Name)
-.It \(rC
-\\(rC (right brace)
-.It \(lC
-\\(lC (left brace)
-.It \(ra
-\\(ra (right angle)
-.It \(la
-\\(la (left angle)
-.It \(rB
-\\(rB (right bracket)
-.It \(lB
-\\(lB (left bracket)
-.It \q
-\\q (double-quote)
-.It \(lq
-\\(lq (left double-quote)
-.It \(rq
-\\(rq (right double-quote)
-.It \(oq
-\\(oq, \\` (left single-quote)
-.It \(aq
-\\(aq, \\' (right single-quote, apostrophe)
-.El
-.\" PARAGRAPH
-.Pp
-Indicatives:
-.Pp
-.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
-.It Em Output
-.Em Input (Name)
-.It \(<-
-\\(<- (left arrow)
-.It \(->
-\\(-> (right arrow)
-.It \(ua
-\\(ua (up arrow)
-.It \(da
-\\(da (down arrow)
-.El
-.\" PARAGRAPH
-.Pp
-Mathematical:
-.Pp
-.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
-.It Em Output
-.Em Input (Name)
-.It \(<=
-\\(<= (less-than-equal)
-.It \(>=
-\\(>= (greater-than-equal)
-.It \(==
-\\(== (equal)
-.It \(!=
-\\(!= (not equal)
-.It \(if
-\\(if (infinity)
-.It \(na
-\\(na (NaN)*
-.It \(+-
-\\(+- (plus-minus)
-.It \(**
-\\(** (asterisk)
-.El
-.\" PARAGRAPH
-.Pp
-Diacritics:
-.Pp
-.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
-.It Em Output
-.Em Input (Name)
-.It \(ga
-\\(ga (accent grave)
-.It \(aa
-\\(aa (accent accute)
-.El
-.\" PARAGRAPH
-.Pp
-Special symbols:
-.Pp
-.Bl -tag -width "OutputXXXX" -offset "XXXX" -compact
-.It Em Output
-.Em Input (Name)
-.It \(bu
-\\(bu (bullet)
-.It \(ba
-\\(ba (bar)
-.It \(co
-\\(co (copyright)
-.El 
-.Pp
-*This is a deviation from the standard, as NaN is usually rendered as
-\\*(Na, which is a deprecated form.  We introduce \\(na, which follows
-the more general syntax.
+In the general sense, 
+.Nm
+will make a 
+.Pq best-effort
+to render complex characters; however, if a manual is using considerable
+special characters, some meaning may be lost in translation.
 .\" SECTION
 .Sh EXAMPLES
 To display this manual page:

@@ -58,13 +58,6 @@ static	int		  msg_err(void *, int, int, const char *);
 static	int		  msg_warn(void *, int, int, 
 				enum mdoc_warn, const char *);
 
-#ifdef __linux__
-extern	int		  getsubopt(char **, char *const *, char **);
-extern	size_t		  strlcpy(char *, const char *, size_t);
-extern	size_t		  strlcat(char *, const char *, size_t);
-#endif
-
-
 /*
  * Print our and our caller's usage message.
  */
@@ -176,7 +169,7 @@ mmain_free(struct mmain *p)
 }
 
 
-dead_pre void
+__dead void
 mmain_exit(struct mmain *p, int code) 
 {
 

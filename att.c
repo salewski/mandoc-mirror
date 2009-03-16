@@ -16,24 +16,19 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+#include <stdlib.h>
+#include <string.h>
 
-/*
- * This file defines the AT&T versions of the .At macro.  This probably
- * isn't going to change.  The right-hand side is the formatted string.
- *
- * Be sure to escape strings.
- */
+#include "private.h"
 
-LINE("v1",		"Version 1 AT&T UNIX")
-LINE("v2",		"Version 2 AT&T UNIX")
-LINE("v3",		"Version 3 AT&T UNIX")
-LINE("v4",		"Version 4 AT&T UNIX")
-LINE("v5",		"Version 5 AT&T UNIX")
-LINE("v6",		"Version 6 AT&T UNIX")
-LINE("v7",		"Version 7 AT&T UNIX")
-LINE("32v",		"Version 32V AT&T UNIX")
-LINE("V",		"AT&T System V UNIX")
-LINE("V.1",		"AT&T System V.1 UNIX")
-LINE("V.2",		"AT&T System V.2 UNIX")
-LINE("V.3",		"AT&T System V.3 UNIX")
-LINE("V.4",		"AT&T System V.4 UNIX")
+#define LINE(x, y) \
+	if (0 == strcmp(p, x)) return(y);
+
+const char *
+mdoc_a2att(const char *p)
+{
+
+#include "att.in" 
+
+	return(NULL);
+}

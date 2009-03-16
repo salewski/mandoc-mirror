@@ -62,6 +62,9 @@ static	int	 post_sh(struct mdoc *);
 static	int	 post_std(struct mdoc *);
 static	int	 post_prologue(struct mdoc *);
 
+#define	merr(m, t) nerr((m), (m)->last, (t))
+#define	mwarn(m, t) nwarn((m), (m)->last, (t))
+
 const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* \" */
 	{ post_dd }, /* Dd */ 
@@ -178,10 +181,11 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL }, /* Bro */
 	{ NULL }, /* Brc */
 	{ NULL }, /* %C */
+	{ NULL }, /* Es */
+	{ NULL }, /* En */
 };
 
 
-#define	merr(m, t) nerr((m), (m)->last, (t))
 static int
 nerr(struct mdoc *m, const struct mdoc_node *n, enum merr type)
 {
@@ -200,7 +204,6 @@ nerr(struct mdoc *m, const struct mdoc_node *n, enum merr type)
 }
 
 
-#define	mwarn(m, t) nwarn((m), (m)->last, (t))
 static int
 nwarn(struct mdoc *m, const struct mdoc_node *n, enum mwarn type)
 {

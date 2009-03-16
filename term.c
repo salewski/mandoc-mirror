@@ -296,6 +296,8 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ termp_brq_pre, termp_brq_post }, /* Bro */ 
 	{ NULL, NULL }, /* Brc */ 
 	{ NULL, NULL }, /* %C */ 
+	{ NULL, NULL }, /* Es */ 
+	{ NULL, NULL }, /* En */ 
 };
 
 const struct termact *termacts = __termacts;

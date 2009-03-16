@@ -41,12 +41,7 @@ struct	nroffopt {
 	struct termp	 *termp; /* Ephemeral. */
 };
 
-struct	termseq {
-	const char	 *enc;
-	int		  sym;
-};
-
-dead_pre void		  punt(struct nroffopt *, char *) dead_post;
+__dead void		  punt(struct nroffopt *, char *);
 static	int		  option(void *, int, char *);
 static	int		  optsopt(struct termp *, char *);
 static	void		  body(struct termp *,
@@ -66,124 +61,7 @@ static	void		  nescape(struct termp *,
 static	void		  chara(struct termp *, char);
 static	void		  stringa(struct termp *, 
 				const char *, size_t);
-static	void		  symbola(struct termp *, enum tsym);
 static	void		  sanity(const struct mdoc_node *);
-
-#ifdef __linux__
-extern	size_t		  strlcat(char *, const char *, size_t);
-extern	size_t		  strlcpy(char *, const char *, size_t);
-#endif
-
-static	struct termseq	  termenc1[] = {
-	{ "\\",		  TERMSYM_SLASH },
-	{ "\'",		  TERMSYM_RSQUOTE },
-	{ "`",		  TERMSYM_LSQUOTE },
-	{ "-",		  TERMSYM_HYPHEN },
-	{ " ",		  TERMSYM_SPACE },
-	{ ".",		  TERMSYM_PERIOD },
-	{ "&",		  TERMSYM_BREAK },
-	{ "e",		  TERMSYM_SLASH },
-	{ "q",		  TERMSYM_DQUOTE },
-	{ "|",		  TERMSYM_BREAK },
-	{ NULL,		  0 }
-};
-
-static	struct termseq	  termenc2[] = {
-	{ "rC", 	  TERMSYM_RBRACE },
-	{ "lC", 	  TERMSYM_LBRACE },
-	{ "rB", 	  TERMSYM_RBRACK },
-	{ "lB", 	  TERMSYM_LBRACK },
-	{ "ra", 	  TERMSYM_RANGLE },
-	{ "la", 	  TERMSYM_LANGLE },
-	{ "Lq", 	  TERMSYM_LDQUOTE },
-	{ "lq", 	  TERMSYM_LDQUOTE },
-	{ "Rq", 	  TERMSYM_RDQUOTE },
-	{ "rq", 	  TERMSYM_RDQUOTE },
-	{ "oq", 	  TERMSYM_LSQUOTE },
-	{ "aq", 	  TERMSYM_RSQUOTE },
-
-	{ "<-", 	  TERMSYM_LARROW },
-	{ "->", 	  TERMSYM_RARROW },
-	{ "ua", 	  TERMSYM_UARROW },
-	{ "da", 	  TERMSYM_DARROW },
-
-	{ "bu", 	  TERMSYM_BULLET },
-	{ "Ba", 	  TERMSYM_BAR },
-	{ "ba", 	  TERMSYM_BAR },
-	{ "co", 	  TERMSYM_COPY },
-	{ "Am", 	  TERMSYM_AMP },
-
-	{ "Le", 	  TERMSYM_LE },
-	{ "<=", 	  TERMSYM_LE },
-	{ "Ge", 	  TERMSYM_GE },
-	{ ">=", 	  TERMSYM_GE },
-	{ "==", 	  TERMSYM_EQ },
-	{ "Ne", 	  TERMSYM_NEQ },
-	{ "!=", 	  TERMSYM_NEQ },
-	{ "Pm", 	  TERMSYM_PLUSMINUS },
-	{ "+-", 	  TERMSYM_PLUSMINUS },
-	{ "If", 	  TERMSYM_INF2 },
-	{ "if", 	  TERMSYM_INF },
-	{ "Na", 	  TERMSYM_NAN },
-	{ "na", 	  TERMSYM_NAN },
-	{ "**", 	  TERMSYM_ASTERISK },
-	{ "Gt", 	  TERMSYM_GT },
-	{ "Lt", 	  TERMSYM_LT },
-
-	{ "aa", 	  TERMSYM_ACUTE },
-	{ "ga", 	  TERMSYM_GRAVE },
-
-	{ "en", 	  TERMSYM_EN },
-	{ "em", 	  TERMSYM_EM },
-
-	{ "Pi", 	  TERMSYM_PI },
-	{ NULL,		  0 }
-};
-
-/* FIXME: abstract to dynamically-compiled table. */
-static	struct termsym	  termsym_ascii[TERMSYM_MAX] = {
-	{ "]", 1 },		/* TERMSYM_RBRACK */
-	{ "[", 1 },		/* TERMSYM_LBRACK */
-	{ "<-", 2 },		/* TERMSYM_LARROW */
-	{ "->", 2 },		/* TERMSYM_RARROW */
-	{ "^", 1 },		/* TERMSYM_UARROW */
-	{ "v", 1 },		/* TERMSYM_DARROW */
-	{ "`", 1 },		/* TERMSYM_LSQUOTE */
-	{ "\'", 1 },		/* TERMSYM_RSQUOTE */
-	{ "\'", 1 },		/* TERMSYM_SQUOTE */
-	{ "``", 2 },		/* TERMSYM_LDQUOTE */
-	{ "\'\'", 2 },		/* TERMSYM_RDQUOTE */
-	{ "\"", 1 },		/* TERMSYM_DQUOTE */
-	{ "<", 1 },		/* TERMSYM_LT */
-	{ ">", 1 },		/* TERMSYM_GT */
-	{ "<=", 2 },		/* TERMSYM_LE */
-	{ ">=", 2 },		/* TERMSYM_GE */
-	{ "==", 2 },		/* TERMSYM_EQ */
-	{ "!=", 2 },		/* TERMSYM_NEQ */
-	{ "\'", 1 },		/* TERMSYM_ACUTE */
-	{ "`", 1 },		/* TERMSYM_GRAVE */
-	{ "pi", 2 },		/* TERMSYM_PI */
-	{ "+=", 2 },		/* TERMSYM_PLUSMINUS */
-	{ "oo", 2 },		/* TERMSYM_INF */
-	{ "infinity", 8 },	/* TERMSYM_INF2 */
-	{ "NaN", 3 },		/* TERMSYM_NAN */
-	{ "|", 1 },		/* TERMSYM_BAR */
-	{ "o", 1 },		/* TERMSYM_BULLET */
-	{ "&", 1 },		/* TERMSYM_AMP */
-	{ "--", 2 },		/* TERMSYM_EM */
-	{ "-", 1 },		/* TERMSYM_EN */
-	{ "(C)", 3 },		/* TERMSYM_COPY */
-	{ "*", 1 },		/* TERMSYM_ASTERISK */
-	{ "\\", 1 },		/* TERMSYM_SLASH */
-	{ "-", 1 },		/* TERMSYM_HYPHEN */
-	{ " ", 1 },		/* TERMSYM_SPACE */
-	{ ".", 1 },		/* TERMSYM_PERIOD */
-	{ "", 0 },		/* TERMSYM_BREAK */
-	{ "<", 1 },		/* TERMSYM_LANGLE */
-	{ ">", 1 },		/* TERMSYM_RANGLE */
-	{ "{", 1 },		/* TERMSYM_LBRACE */
-	{ "}", 1 },		/* TERMSYM_RBRACE */
-};
 
 int
 main(int argc, char *argv[])
@@ -200,9 +78,8 @@ main(int argc, char *argv[])
 
 	termp.maxrmargin = termp.rmargin = 78; /* FIXME */
 	termp.maxcols = 1024; /* FIXME */
-	termp.offset = termp.col = 0;
 	termp.flags = TERMP_NOSPACE;
-	termp.symtab = termsym_ascii;
+	termp.symtab = ascii2htab();
 
 	nroff.termp = &termp;
 
@@ -374,7 +251,7 @@ flushln(struct termp *p)
 
 		/* LINTED */
 		for (j = i, vsz = 0; j < p->col; j++) {
-			if (isspace((u_char)p->buf[j]))
+			if (' ' == p->buf[j])
 				break;
 			else if (8 == p->buf[j])
 				j += 1;
@@ -420,7 +297,7 @@ flushln(struct termp *p)
 		 */
 
 		for ( ; i < p->col; i++) {
-			if (isspace((u_char)p->buf[i]))
+			if (' ' == p->buf[i])
 				break;
 			putchar(p->buf[i]);
 		}
@@ -523,14 +400,13 @@ word(struct termp *p, const char *word)
 
 	/* LINTED */
 	for (j = i = 0; i < len; i++) {
-		if ( ! isspace((u_char)word[i])) {
+		if (' ' != word[i]) {
 			j++;
 			continue;
 		} 
 		
 		/* Escaped spaces don't delimit... */
-		if (i > 0 && isspace((u_char)word[i]) && 
-				'\\' == word[i - 1]) {
+		if (i && ' ' == word[i] && '\\' == word[i - 1]) {
 			j++;
 			continue;
 		}
@@ -737,27 +613,15 @@ header(struct termp *p, const struct mdoc_meta *meta)
 static void
 nescape(struct termp *p, const char *word, size_t len)
 {
-	struct termseq	*enc;
+	const char	*rhs;
+	size_t		 sz;
 
-	switch (len) {
-	case (1):
-		enc = termenc1;
-		break;
-	case (2):
-		enc = termenc2;
-		break;
-	default:
+	if (NULL == (rhs = a2ascii(p->symtab, word, len, &sz))) {
 		warnx("unsupported %zu-byte escape sequence", len);
 		return;
 	}
 
-	for ( ; enc->enc; enc++) 
-		if (0 == memcmp(enc->enc, word, len)) {
-			symbola(p, enc->sym);
-			return;
-		}
-
-	warnx("unsupported %zu-byte escape sequence", len);
+	stringa(p, rhs, sz);
 }
 
 
@@ -867,18 +731,6 @@ pword(struct termp *p, const char *word, size_t len)
 
 		chara(p, word[i]);
 	}
-}
-
-
-/*
- * Add a symbol to the output line buffer.
- */
-static void
-symbola(struct termp *p, enum tsym sym)
-{
-
-	assert(p->symtab[sym].sym);
-	stringa(p, p->symtab[sym].sym, p->symtab[sym].sz);
 }
 
 
@@ -1039,7 +891,7 @@ sanity(const struct mdoc_node *n)
 }
 
 
-dead_pre void
+__dead void
 punt(struct nroffopt *nroff, char *in)
 {
 	char		*args[32];

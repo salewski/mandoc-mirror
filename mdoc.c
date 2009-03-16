@@ -74,7 +74,8 @@ const	char *const __mdoc_macronames[MDOC_MAX] = {
 	"Fr",		"Ud",		"Lb",		"Ap",
 	"Lp",		"Lk",		"Mt",		"Brq",
 	/* LINTED */
-	"Bro",		"Brc",		"\%C"
+	"Bro",		"Brc",		"\%C",		"Es",
+	"En"
 	};
 
 const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {		 
@@ -527,9 +528,9 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 	if (0 == buf[1])
 		return(1);
 
-	if (isspace((unsigned char)buf[1])) {
+	if (' ' == buf[1]) {
 		i = 2;
-		while (buf[i] && isspace((unsigned char)buf[i]))
+		while (buf[i] && ' ' == buf[i])
 			i++;
 		if (0 == buf[i])
 			return(1);
@@ -545,7 +546,7 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 	for (i = 1; i < 5; i++) {
 		if (0 == (mac[i - 1] = buf[i]))
 			break;
-		else if (isspace((unsigned char)buf[i]))
+		else if (' ' == buf[i])
 			break;
 	}
 
@@ -565,7 +566,7 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 
 	/* The macro is sane.  Jump to the next word. */
 
-	while (buf[i] && isspace((unsigned char)buf[i]))
+	while (buf[i] && ' ' == buf[i])
 		i++;
 
 	/* Begin recursive parse sequence. */

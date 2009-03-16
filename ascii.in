@@ -1,0 +1,134 @@
+/* $Id$ */
+/*
+ * Copyright (c) 2009 Kristaps Dzonsons <kristaps@openbsd.org>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the
+ * above copyright notice and this permission notice appear in all
+ * copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+ * WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+ * AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+ * DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
+ * PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+ * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
+ */
+
+/*
+ * The ASCII translation table.  The left-hand side corresponds to the
+ * escape sequence (\x, \(xx and so on) whose length is listed second
+ * element.  The right-hand side is what's produced by the front-end,
+ * with the fourth element being its length.
+ *
+ * Be sure to escape strings.
+ */
+
+LINE("\\", 1,	  "\\", 1)
+LINE("\'", 1,	  "\'", 1)
+LINE("`", 1,	  "`", 1)
+LINE("-", 1,	  "-", 1)
+LINE(" ", 1,	  " ", 1)
+LINE(".", 1,	  ".", 1)
+LINE("&", 1,	  "", 0)
+LINE("e", 1,	  "\\", 1)
+LINE("q", 1,	  "\"", 1)
+LINE("|", 1,	  "", 0)
+LINE("rC", 2, 	  "}", 1)
+LINE("lC", 2, 	  "{", 1)
+LINE("rB", 2, 	  "]", 1)
+LINE("lB", 2, 	  "[", 1)
+LINE("ra", 2, 	  ">", 1)
+LINE("la", 2, 	  "<", 1)
+LINE("Lq", 2, 	  "``", 2)
+LINE("lq", 2, 	  "``", 2)
+LINE("Rq", 2, 	  "\'\'", 2)
+LINE("rq", 2, 	  "\'\'", 2)
+LINE("oq", 2, 	  "`", 1)
+LINE("aq", 2, 	  "\'", 1)
+LINE("<-", 2, 	  "<-", 2)
+LINE("->", 2, 	  "->", 2)
+LINE("<>", 2, 	  "<>", 2)
+LINE("ua", 2, 	  "^", 1)
+LINE("da", 2, 	  "v", 1)
+LINE("bu", 2, 	  "o", 1)
+LINE("Ba", 2, 	  "|", 1)
+LINE("ba", 2, 	  "|", 1)
+LINE("co", 2, 	  "(C)", 3)
+LINE("rg", 2, 	  "(R)", 3)
+LINE("tm", 2, 	  "tm", 2)
+LINE("Am", 2, 	  "&", 1)
+LINE("Le", 2, 	  "<=", 2)
+LINE("<=", 2, 	  "<=", 2)
+LINE("Ge", 2, 	  ">=", 2)
+LINE(">=", 2, 	  ">=", 2)
+LINE("==", 2, 	  "==", 2)
+LINE("Ne", 2, 	  "!=", 2)
+LINE("!=", 2, 	  "!=", 2)
+LINE("Pm", 2, 	  "+-", 2)
+LINE("+-", 2, 	  "+-", 2)
+LINE("If", 2, 	  "infinity", 8)
+LINE("if", 2, 	  "oo", 2)
+LINE("Na", 2, 	  "NaN", 3)
+LINE("na", 2, 	  "NaN", 3)
+LINE("**", 2, 	  "*", 1)
+LINE("Gt", 2, 	  ">", 1)
+LINE("Lt", 2, 	  "<", 1)
+LINE("aa", 2, 	  "\'", 1)
+LINE("a~", 2, 	  "~", 1)
+LINE("ga", 2, 	  "`", 1)
+LINE("en", 2, 	  "-", 1)
+LINE("em", 2, 	  "--", 2)
+LINE("Pi", 2, 	  "pi", 2)
+LINE("<<", 2,	  "<<", 2)
+LINE(">>", 2,	  ">>", 2)
+LINE("lh", 2,	  "<=", 2)
+LINE("rh", 2,	  "=>", 2)
+LINE("ae", 2,	  "ae", 2)
+LINE("AE", 2,	  "AE", 2)
+LINE("oe", 2,	  "oe", 2)
+LINE("OE", 2,	  "OE", 2)
+LINE("\'A", 2,	  "A", 1)
+LINE("\'E", 2,	  "E", 1)
+LINE("\'I", 2,	  "I", 1)
+LINE("\'O", 2,	  "O", 1)
+LINE("\'U", 2,	  "U", 1)
+LINE("\'a", 2,	  "a", 1)
+LINE("\'e", 2,	  "e", 1)
+LINE("\'i", 2,	  "i", 1)
+LINE("\'o", 2,	  "o", 1)
+LINE("\'u", 2,	  "u", 1)
+LINE("`A", 2,	  "A", 1)
+LINE("`E", 2,	  "E", 1)
+LINE("`I", 2,	  "I", 1)
+LINE("`O", 2,	  "O", 1)
+LINE("`U", 2,	  "U", 1)
+LINE("`a", 2,	  "a", 1)
+LINE("`e", 2,	  "e", 1)
+LINE("`i", 2,	  "i", 1)
+LINE("`o", 2,	  "o", 1)
+LINE("`u", 2,	  "u", 1)
+LINE("~A", 2,	  "A", 1)
+LINE("~N", 2,	  "N", 1)
+LINE("~O", 2,	  "O", 1)
+LINE("~a", 2,	  "a", 1)
+LINE("~n", 2,	  "n", 1)
+LINE("~o", 2,	  "o", 1)
+LINE("lA", 2, 	  "<=", 2)
+LINE("rA", 2, 	  "=>", 2)
+LINE("uA", 2, 	  "^", 1)
+LINE("dA", 2, 	  "v", 1)
+LINE("hA", 2, 	  "<=>", 3)
+LINE(":A", 2,	  "A", 1)
+LINE(":E", 2,	  "E", 1)
+LINE(":I", 2,	  "I", 1)
+LINE(":O", 2,	  "O", 1)
+LINE(":U", 2,	  "U", 1)
+LINE(":a", 2,	  "a", 1)
+LINE(":e", 2,	  "e", 1)
+LINE(":i", 2,	  "i", 1)
+LINE(":o", 2,	  "o", 1)
+LINE(":u", 2,	  "u", 1)
+LINE(":y", 2,	  "y", 1)

@@ -21,59 +21,11 @@
 
 #include "mdoc.h"
 
+/* XXX - clean up tabs. */
+
 #define	INDENT		  6
 
 __BEGIN_DECLS
-
-enum	tsym {
-	TERMSYM_RBRACK = 	0,
-	TERMSYM_LBRACK = 	1,
-	TERMSYM_LARROW = 	2,
-	TERMSYM_RARROW = 	3,
-	TERMSYM_UARROW = 	4,
-	TERMSYM_DARROW = 	5,
-	TERMSYM_LSQUOTE = 	6,
-	TERMSYM_RSQUOTE = 	7,
-	TERMSYM_SQUOTE = 	8,
-	TERMSYM_LDQUOTE = 	9,
-	TERMSYM_RDQUOTE = 	10,
-	TERMSYM_DQUOTE = 	11,
-	TERMSYM_LT = 		12,
-	TERMSYM_GT = 		13,
-	TERMSYM_LE = 		14,
-	TERMSYM_GE = 		15,
-	TERMSYM_EQ = 		16,
-	TERMSYM_NEQ = 		17,
-	TERMSYM_ACUTE = 	18,
-	TERMSYM_GRAVE = 	19,
-	TERMSYM_PI = 		20,
-	TERMSYM_PLUSMINUS = 	21,
-	TERMSYM_INF = 		22,
-	TERMSYM_INF2 = 		23,
-	TERMSYM_NAN = 		24,
-	TERMSYM_BAR = 		25,
-	TERMSYM_BULLET = 	26,
-	TERMSYM_AMP = 		27,
-	TERMSYM_EM = 		28,
-	TERMSYM_EN = 		29,
-	TERMSYM_COPY = 		30,
-	TERMSYM_ASTERISK =	31,
-	TERMSYM_SLASH =		32,
-	TERMSYM_HYPHEN =	33,
-	TERMSYM_SPACE =		34,
-	TERMSYM_PERIOD =	35,
-	TERMSYM_BREAK =		36,
-	TERMSYM_LANGLE =	37,
-	TERMSYM_RANGLE =	38,
-	TERMSYM_LBRACE =	39,
-	TERMSYM_RBRACE =	40,
-	TERMSYM_MAX = 		41
-};
-
-struct	termsym {
-	const char	 *sym;
-	size_t		  sz;
-};
 
 struct	termp {
 	size_t		  rmargin;
@@ -95,8 +47,10 @@ struct	termp {
 #define	TERMP_BOLD	 (1 << 8)	/* Styles... */
 #define	TERMP_UNDER	 (1 << 9)
 	char		 *buf;
-	struct termsym	 *symtab;	/* Special-symbol table. */
+	void		 *symtab;
 };
+
+/* XXX - clean this up. */
 
 struct	termpair {
 	struct termpair	 *ppair;
@@ -117,26 +71,24 @@ struct	termpair {
 	} while (0)
 
 struct	termact {
-	int		(*pre)(struct termp *,
-				struct termpair *,
-				const struct mdoc_meta *,
-				const struct mdoc_node *);
-	void		(*post)(struct termp *,
-				struct termpair *,
-				const struct mdoc_meta *,
-				const struct mdoc_node *);
+	int	(*pre)(struct termp *, struct termpair *,
+			const struct mdoc_meta *,
+			const struct mdoc_node *);
+	void	(*post)(struct termp *, struct termpair *,
+			const struct mdoc_meta *,
+			const struct mdoc_node *);
 };
 
-void			  newln(struct termp *);
-void			  vspace(struct termp *);
-void			  word(struct termp *, const char *);
-void			  flushln(struct termp *);
-void			  transcode(struct termp *, 
-				const char *, size_t);
-void			  subtree(struct termp *,
-				const struct mdoc_meta *,
-				const struct mdoc_node *);
+void		 *ascii2htab(void);
+const char	 *a2ascii(void *, const char *, size_t, size_t *);
 
+void		  newln(struct termp *);
+void		  vspace(struct termp *);
+void		  word(struct termp *, const char *);
+void		  flushln(struct termp *);
+void		  transcode(struct termp *, const char *, size_t);
+void		  subtree(struct termp *, const struct mdoc_meta *, 
+			const struct mdoc_node *); 
 
 const	struct termact 	 *termacts;
 
