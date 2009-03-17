@@ -33,16 +33,16 @@
  */
 
 struct	line {
-	const char	*code;
-	const char	*out;
+	const char	 *code;
+	const char	 *out;
 	/* 32- and 64-bit alignment safe. */
-	size_t		 codesz;
-	size_t		 outsz;
+	size_t		  codesz;
+	size_t		  outsz;
 };
 
 struct	linep {
 	const struct line *line;
-	struct linep	*next;
+	struct linep	 *next;
 };
 
 #define LINE(w, x, y, z) \
@@ -51,14 +51,33 @@ static	const struct line lines[] = {
 #include "ascii.in"
 };
 
+struct	asciitab {
+	struct linep	 *lines;
+	void		**htab;
+};
 
-static	inline int	 match(const struct line *,
+
+static	inline int	  match(const struct line *,
 				const char *, size_t);
+
+
+void
+asciifree(void *arg)
+{
+	struct asciitab	*tab;
+
+	tab = (struct asciitab *)arg;
+
+	free(tab->lines);
+	free(tab->htab);
+	free(tab);
+}
 
 
 void *
 ascii2htab(void)
 {
+	struct asciitab  *tab;
 	void		**htab;
 	struct linep	 *pp, *p;
 	int		  i, len, hash;
@@ -69,6 +88,9 @@ ascii2htab(void)
 	 * Subsequent entries are chained in the order they're processed
 	 * (they're in-line re-ordered during lookup).
 	 */
+
+	if (NULL == (tab = malloc(sizeof(struct asciitab))))
+		err(1, "malloc");
 
 	assert(0 == sizeof(lines) % sizeof(struct line));
 	len = sizeof(lines) / sizeof(struct line);
@@ -102,18 +124,23 @@ ascii2htab(void)
 		pp->next = &p[i];
 	}
 
-	return((void *)htab);
+	tab->htab = htab;
+	tab->lines = p;
+
+	return(tab);
 }
 
 
 const char *
-a2ascii(void *htabp, const char *p, size_t sz, size_t *rsz)
+a2ascii(void *arg, const char *p, size_t sz, size_t *rsz)
 {
+	struct asciitab	 *tab;
 	struct linep	 *pp, *prev;
 	void		**htab;
 	int		  hash;
 
-	htab = (void **)htabp;
+	tab = (struct asciitab *)arg;
+	htab = tab->htab;
 
 	assert(p);
 	assert(sz > 0);

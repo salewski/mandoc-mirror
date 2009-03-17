@@ -81,6 +81,7 @@ struct	termact {
 
 void		 *ascii2htab(void);
 const char	 *a2ascii(void *, const char *, size_t, size_t *);
+void		  asciifree(void *);
 
 void		  newln(struct termp *);
 void		  vspace(struct termp *);

@@ -113,6 +113,7 @@ main(int argc, char *argv[])
 	footer(&termp, mdoc_meta(mdoc));
 
 	free(termp.buf);
+	asciifree(termp.symtab);
 
 	mmain_exit(p, 0);
 	/* NOTREACHED */
