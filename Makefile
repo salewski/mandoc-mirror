@@ -48,7 +48,8 @@ LINTOBJS= mdoclint.o mmain.o
 OBJS	= $(LIBOBJS) $(TERMOBJS) $(TREEOBJS) $(LINTOBJS)
 
 SRCS	= macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
-	  action.c term.c mdoctree.c mdocterm.c mmain.c mdoclint.c
+	  action.c term.c mdoctree.c mdocterm.c mmain.c mdoclint.c \
+	  lib.c att.c arch.c vol.c msec.c st.c ascii.c
 
 DATAS	= arch.in att.in lib.in msec.in st.in vol.in ascii.in
 
