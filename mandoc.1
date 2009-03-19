@@ -72,7 +72,9 @@ arguments may be comma-separated, such as
 .It Ar infile...
 Read input from zero or more
 .Ar infile .
-If unspecified, reads from stdin.
+If unspecified, reads from stdin.  If multiple files are specified,
+.Nm
+will halt with the first failed parse.
 .El
 .\" PARAGRAPH
 .Pp

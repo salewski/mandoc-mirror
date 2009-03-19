@@ -165,18 +165,32 @@ main(int argc, char *argv[])
 
 	mdoc = mdoc_alloc(&wflags, fflags, &cb);
 
-	while (*argv) {
-		if ( ! file(&line, &linesz, &buf, &bufsz, *argv, mdoc))
-			break;
-		if (outrun && ! (*outrun)(outdata, mdoc))
-			break;
+	/*
+	 * Loop around available files.
+	 */
 
-		/* Reset the parser for another file. */
-		mdoc_reset(mdoc);
-		argv++;
+	if (NULL == *argv) {
+		c = fdesc(&line, &linesz, &buf, &bufsz, 
+				"stdin", STDIN_FILENO, mdoc);
+		rc = 0;
+		if (c && NULL == outrun)
+			rc = 1;
+		else if (c && outrun && (*outrun)(outdata, mdoc))
+			rc = 1;
+	} else {
+		while (*argv) {
+			c = file(&line, &linesz, &buf, 
+					&bufsz, *argv, mdoc);
+			if ( ! c)
+				break;
+			if (outrun && ! (*outrun)(outdata, mdoc))
+				break;
+			/* Reset the parser for another file. */
+			mdoc_reset(mdoc);
+			argv++;
+		}
+		rc = NULL == *argv;
 	}
-
-	rc = NULL == *argv;
 
 	if (buf)
 		free(buf);
