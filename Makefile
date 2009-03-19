@@ -9,7 +9,7 @@ INSTALL_DATA	= install -m 0444
 INSTALL_LIB	= install -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
-VERSION	   = 1.6.0
+VERSION	   = 1.6.1
 VDATE	   = 19 March 2009
 
 VFLAGS     = -DVERSION=\"$(VERSION)\"
@@ -25,9 +25,9 @@ LIBOBJS	   = macro.o mdoc.o hash.o strings.o xstd.o argv.o validate.o \
 LIBSRCS	   = macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
 	     action.c lib.c att.c arch.c vol.c msec.c st.c
 
-MAINLNS	   = main.ln term.ln ascii.ln terminal.ln tree.ln
-MAINOBJS   = main.o term.o ascii.o terminal.o tree.o 
-MAINSRCS   = main.c term.c ascii.c terminal.c tree.c
+MAINLNS	   = main.ln term.ln ascii.ln terminal.ln tree.ln compat.ln
+MAINOBJS   = main.o term.o ascii.o terminal.o tree.o compat.o
+MAINSRCS   = main.c term.c ascii.c terminal.c tree.c compat.c
 
 LLNS	   = llib-llibmdoc.ln llib-lmandoc.ln
 LNS	   = $(MAINLNS) $(LIBLNS)

@@ -24,6 +24,11 @@
 
 #include "term.h"
 
+#ifdef __linux__
+extern	size_t		  strlcpy(char *, const char *, size_t);
+extern	size_t		  strlcat(char *, const char *, size_t);
+#endif
+
 static	struct termp	 *termp_alloc(enum termenc);
 static	void		  termp_free(struct termp *);
 static	void		  termp_body(struct termp *, struct termpair *,

@@ -28,6 +28,13 @@
 
 #include "mdoc.h"
 
+#ifdef __linux__
+extern	int		  getsubopt(char **, char * const *, char **);
+# ifndef __dead
+#  define __dead __attribute__((__noreturn__))
+# endif
+#endif
+
 #define	WARN_WALL	  0x03		/* All-warnings mask. */
 #define	WARN_WCOMPAT	 (1 << 0)	/* Compatibility warnings. */
 #define	WARN_WSYNTAX	 (1 << 1)	/* Syntax warnings. */

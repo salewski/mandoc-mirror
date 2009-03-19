@@ -23,6 +23,11 @@
 
 #include "private.h"
 
+#ifdef __linux__
+extern	size_t			strlcpy(char *, const char *, size_t);
+extern	size_t			strlcat(char *, const char *, size_t);
+#endif
+
 /*
  * Contains wrappers for common functions to simplify their general
  * usage throughout this codebase.
