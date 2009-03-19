@@ -26,6 +26,7 @@
 static	void	tree_body(const struct mdoc_node *, int);
 
 
+/* ARGSUSED */
 int
 tree_run(void *arg, const struct mdoc *mdoc)
 {
