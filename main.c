@@ -405,6 +405,7 @@ woptions(int *wflags, char *arg)
 }
 
 
+/* ARGSUSED */
 static int
 merr(void *arg, int line, int col, const char *msg)
 {
