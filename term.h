@@ -21,20 +21,18 @@
 
 #include "mdoc.h"
 
-/* XXX - clean up tabs. */
+/* FIXME - clean up tabs. */
 
 #define	INDENT		  6
 
 __BEGIN_DECLS
 
 struct	termp {
-	size_t		  rmargin;
-	size_t		  maxrmargin;
-	size_t		  maxcols;
-	size_t		  offset;
-	size_t		  col;
-	int		  iflags;
-#define	TERMP_NOPUNT	 (1 << 0)
+	size_t		  rmargin;	/* Current right margin. */
+	size_t		  maxrmargin;	/* Max right margin. */
+	size_t		  maxcols;	/* Max size of buf. */
+	size_t		  offset;	/* Margin offest. */
+	size_t		  col;		/* Bytes in buf. */
 	int		  flags;
 #define	TERMP_NOSPACE	 (1 << 0)	/* No space before words. */
 #define	TERMP_NOLPAD	 (1 << 1)	/* No leftpad before flush. */
@@ -43,11 +41,11 @@ struct	termp {
 #define	TERMP_IGNDELIM	 (1 << 4)	/* Delims like regulars. */
 #define	TERMP_NONOSPACE	 (1 << 5)	/* No space (no autounset). */
 #define	TERMP_NONOBREAK	 (1 << 7)	/* Don't newln NOBREAK. */
-#define	TERMP_STYLE	 0x0300		/* Style mask. */
+#define	TERMP_STYLE	  0x0300	/* Style mask. */
 #define	TERMP_BOLD	 (1 << 8)	/* Styles... */
 #define	TERMP_UNDER	 (1 << 9)
-	char		 *buf;
-	void		 *symtab;
+	char		 *buf;		/* Output buffer. */
+	void		 *symtab;	/* Encoded-symbol table. */
 };
 
 /* XXX - clean this up. */

@@ -111,6 +111,34 @@ mdoc_meta(const struct mdoc *mdoc)
 
 
 void
+mdoc_reset(struct mdoc *mdoc)
+{
+
+	if (mdoc->first)
+		mdoc_node_freelist(mdoc->first);
+	if (mdoc->meta.title)
+		free(mdoc->meta.title);
+	if (mdoc->meta.os)
+		free(mdoc->meta.os);
+	if (mdoc->meta.name)
+		free(mdoc->meta.name);
+	if (mdoc->meta.arch)
+		free(mdoc->meta.arch);
+	if (mdoc->meta.vol)
+		free(mdoc->meta.vol);
+
+	bzero(&mdoc->meta, sizeof(struct mdoc_meta));
+	mdoc->flags = 0;
+	mdoc->lastnamed = mdoc->lastsec = 0;
+
+	mdoc->first = mdoc->last = 
+		xcalloc(1, sizeof(struct mdoc_node));
+	mdoc->last->type = MDOC_ROOT;
+	mdoc->next = MDOC_NEXT_CHILD;
+}
+
+
+void
 mdoc_free(struct mdoc *mdoc)
 {
 
@@ -144,13 +172,12 @@ mdoc_alloc(void *data, int pflags, const struct mdoc_cb *cb)
 	if (cb)
 		(void)memcpy(&p->cb, cb, sizeof(struct mdoc_cb));
 
-	p->last = xcalloc(1, sizeof(struct mdoc_node));
+	p->last = p->first = 
+		xcalloc(1, sizeof(struct mdoc_node));
 	p->last->type = MDOC_ROOT;
-	p->first = p->last;
 	p->pflags = pflags;
 	p->next = MDOC_NEXT_CHILD;
 	p->htab = mdoc_tokhash_alloc();
-
 	return(p);
 }
 

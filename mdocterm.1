@@ -26,19 +26,10 @@
 .\" SECTION
 .Sh SYNOPSIS
 .Nm mdocterm
-.Op Fl vV
+.Op Fl V
 .Op Fl f Ns Ar option...
-.Op Fl O Ns Ar option...
 .Op Fl W Ns Ar err...
-.Op Ar infile
-.Nm mdocterm
-.Op Fl hi
-.Op Fl m Ns Ar name
-.Op Fl n Ns Ar num
-.Op Fl o Ns Ar list
-.Op Fl r Ns Ar cn
-.Op Fl T Ns Ar name
-.Op Ar infile
+.Op Ar infile...
 .\" SECTION
 .Sh DESCRIPTION
 The
@@ -48,20 +39,12 @@ utility formats a BSD
 manual page for display on the terminal.  The arguments are as follows:
 .Bl -tag -width XXXXXXXXXXXX
 .\" ITEM
-.It Fl v
-Print verbose parsing output.
-.\" ITEM
-.It Fl v
+.It Fl V
 Print version and exit.
 .\" ITEM
 .It Fl f Ns Ar option...
 Override default compiler behaviour.  See 
 .Sx Compiler Options
-for details.
-.\" ITEM
-.It Fl O Ns Ar option...
-Front-end options.  See
-.Sx Front-end Options
 for details.
 .\" ITEM
 .It Fl W Ns Ar err...
@@ -79,22 +62,11 @@ termination.  Multiple
 arguments may be comma-separated, such as
 .Fl W Ns Ar error,all .
 .\" ITEM
-.It Ar infile
-Read input from
-.Ar infile ,
-which may be 
-.Dq \-
-for stdin.
+.It Ar infile...
+Read input from zero or more
+.Ar infile .
+If unspecified, reads from stdin.
 .El
-.\" PARAGRAPH
-.Pp
-If
-.Xr nroff 1
-arguments are supplied on the command line
-.Pq Fl himnorT ,
-these are ignored unless 
-.Xr nroff 1
-is invoked on parse failure.
 .\" PARAGRAPH
 .Pp
 The
@@ -115,31 +87,10 @@ By default,
 reads from stdin and prints nroff 
 .Qq backspace
 terminal-encoded output to stdout, at this time to a fixed column with
-of 78 characters.  If
-.Ar infile
-can't be parsed (isn't valid mdoc, doesn't contain valid syntax, etc.),
-.Xr nroff 1
-is invoked.  If no 
-.Xr nroff 1
-command-line argumnets aren't provided,
-.Fl m Ns Ar andoc
-is implied.
+of 78 characters. 
 .\" PARAGRAPH
 .Pp
 .Ex -std mdocterm
-.\" SUB-SECTION
-.Ss Front-end Options
-The default behaviour may be overriden with the
-.Fl O
-flag.  The available options are as follows:
-.Bl -tag -width XXXXXXXXXXXX -offset XXXX
-.It Fl O Ns Ar nopunt
-Don't punt to 
-.Xr nroff 1
-if 
-.Ar infile
-may not be parsed.
-.El
 .\" SUB-SECTION
 .Ss Compiler Options
 Default compiler behaviour may be overriden with the
@@ -160,8 +111,6 @@ As with the
 .Fl W
 flag, multiple
 .Fl f
-and
-.Fl O
 options may be grouped and delimited with a comma.  Using
 .Fl f Ns Ar ign-scope,ign-escape ,
 for example, will try to ignore scope and character-escape errors.
@@ -194,8 +143,6 @@ To pipe a manual page to the pager:
 .D1 % mdocterm mdocterm.1 | less
 .\" SECTION
 .Sh SEE ALSO
-.Xr mdoctree 1 ,
-.Xr mdoclint 1 ,
 .Xr mdoc 7 ,
 .Xr mdoc 3
 .\" 

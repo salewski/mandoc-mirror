@@ -300,8 +300,8 @@ void	 	  mdoc_free(struct mdoc *);
 /* Allocate a new parser instance. */
 struct	mdoc	 *mdoc_alloc(void *, int, const struct mdoc_cb *);
 
-/* Set parse options. */
-void		  mdoc_setflags(struct mdoc *, int);
+/* Gets system ready for another parse. */
+void		  mdoc_reset(struct mdoc *);
 
 /* Parse a single line in a stream (boolean retval). */
 int	 	  mdoc_parseln(struct mdoc *, int, char *buf);

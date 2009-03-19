@@ -183,26 +183,25 @@ mmain_prepare(struct mmain *p, const char *in)
 {
 	struct stat	 st;
 
-	p->in = in;
-	p->fdin = STDIN_FILENO;
-
-	if (0 != strcmp(p->in, "-"))
+	if ((p->in = in)) {
 		if (-1 == (p->fdin = open(p->in, O_RDONLY, 0))) {
 			warn("%s", p->in);
 			mmain_exit(p, 1);
 		}
-
-	/* Allocate a buffer to be BUFSIZ/block size. */
+	} else {
+		p->fdin = STDIN_FILENO;
+		p->in = "-";
+	}
 
 	if (-1 == fstat(p->fdin, &st)) {
 		warn("%s", p->in);
 		p->bufsz = BUFSIZ;
 	} else 
-		p->bufsz = (size_t)MAX(st.st_blksize, BUFSIZ);
+		p->bufsz = (unsigned)BUFSIZ > st.st_blksize ?
+			(size_t)BUFSIZ : st.st_blksize;
 
-	p->buf = malloc(p->bufsz);
-	if (NULL == p->buf)
-		err(1, "malloc");
+	if (NULL == (p->buf = realloc(p->buf, p->bufsz)))
+		err(1, "realloc");
 }
 
 
@@ -359,59 +358,3 @@ parse(struct mmain *p)
 }
 
 
-static int
-msg_err(void *arg, int line, int col, const char *msg)
-{
-	struct mmain	 *p;
-
-	p = (struct mmain *)arg;
-
-	warnx("%s:%d: error: %s (column %d)", 
-			p->in, line, msg, col);
-	return(0);
-}
-
-
-static void
-msg_msg(void *arg, int line, int col, const char *msg)
-{
-	struct mmain	 *p;
-
-	p = (struct mmain *)arg;
-
-	if (0 == p->dbg)
-		return;
-
-	warnx("%s:%d: debug: %s (column %d)", 
-			p->in, line, msg, col);
-}
-
-
-static int
-msg_warn(void *arg, int line, int col, 
-		enum mdoc_warn type, const char *msg)
-{
-	struct mmain	 *p;
-
-	p = (struct mmain *)arg;
-
-	switch (type) {
-	case (WARN_COMPAT):
-		if (p->warn & MD_WARN_COMPAT)
-			break;
-		return(1);
-	case (WARN_SYNTAX):
-		if (p->warn & MD_WARN_SYNTAX)
-			break;
-		return(1);
-	}
-
-	warnx("%s:%d: warning: %s (column %d)", 
-			p->in, line, msg, col);
-
-	if ( ! (p->warn & MD_WARN_ERR))
-		return(1);
-
-	warnx("%s: considering warnings as errors", __progname);
-	return(0);
-}
