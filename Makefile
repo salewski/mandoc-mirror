@@ -16,29 +16,34 @@ VFLAGS     = -DVERSION=\"$(VERSION)\"
 CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g 
 LINTFLAGS += $(VFLAGS)
 CFLAGS    += $(VFLAGS)
+
 LIBLNS	   = macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
 	     validate.ln action.ln lib.ln att.ln arch.ln vol.ln \
 	     msec.ln st.ln
 LIBOBJS	   = macro.o mdoc.o hash.o strings.o xstd.o argv.o validate.o \
 	     action.o lib.o att.o arch.o vol.o msec.o st.o
-TERMLNS	   = mdocterm.ln term.ln ascii.ln
-TERMOBJS   = mdocterm.o term.o ascii.o
-LLNS	   = llib-llibmdoc.ln llib-lmdocterm.ln
-LNS	   = $(TERMLNS) $(LIBLNS)
+LIBSRCS	   = macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
+	     action.c lib.c att.c arch.c vol.c msec.c st.c
+
+MAINLNS	   = main.ln term.ln ascii.ln terminal.ln tree.ln
+MAINOBJS   = main.o term.o ascii.o terminal.o tree.o 
+MAINSRCS   = main.c term.c ascii.c terminal.c tree.c
+
+LLNS	   = llib-llibmdoc.ln llib-lmandoc.ln
+LNS	   = $(MAINLNS) $(LIBLNS)
 LIBS	   = libmdoc.a
-OBJS	   = $(LIBOBJS) $(TERMOBJS)
-SRCS	   = macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
-	     action.c term.c mdocterm.c lib.c att.c arch.c vol.c \
-	     msec.c st.c ascii.c
+OBJS	   = $(LIBOBJS) $(MAINOBJS)
+SRCS	   = $(LIBSRCS) $(MAINSRCS)
 DATAS	   = arch.in att.in lib.in msec.in st.in vol.in ascii.in
 HEADS	   = mdoc.h private.h term.h 
 SGMLS	   = index.sgml
 HTMLS	   = index.html
 STATICS	   = style.css external.png
-TARGZS	   = mdocml-$(VERSION).tar.gz mdocml-oport-$(VERSION).tar.gz \
+TARGZS	   = mdocml-$(VERSION).tar.gz \
+	     mdocml-oport-$(VERSION).tar.gz \
 	     mdocml-nport-$(VERSION).tar.gz
-MANS	   = mdocterm.1 mdoc.3 mdoc.7
-BINS	   = mdocterm 
+MANS	   = mandoc.1 mdoc.3 mdoc.7
+BINS	   = mandoc
 CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) $(TARGZS) 
 INSTALL	   = $(SRCS) $(HEADS) Makefile DESCR $(MANS) $(SGMLS) \
 	     $(STATICS) Makefile.netbsd Makefile.openbsd $(DATAS)
@@ -70,25 +75,16 @@ installwww: www
 
 install:
 	mkdir -p $(BINDIR)
-	mkdir -p $(INCLUDEDIR)
-	mkdir -p $(LIBDIR)/lib
 	mkdir -p $(MANDIR)/man1
-	mkdir -p $(MANDIR)/man3
 	mkdir -p $(MANDIR)/man7
-	$(INSTALL_PROGRAM) mdocterm $(BINDIR)
-	$(INSTALL_MAN) mdocterm.1 $(MANDIR)/man1
-	$(INSTALL_MAN) mdoc.3 $(MANDIR)/man3
+	$(INSTALL_PROGRAM) mandoc $(BINDIR)
+	$(INSTALL_MAN) mandoc.1 $(MANDIR)/man1
 	$(INSTALL_MAN) mdoc.7 $(MANDIR)/man7
-	$(INSTALL_LIB) libmdoc.a $(LIBDIR)
-	$(INSTALL_DATA) mdoc.h $(INCLUDEDIR)
 
 uninstall:
-	rm -f $(BINDIR)/mdocterm
-	rm -f $(MANDIR)/man1/mdocterm.1
-	rm -f $(MANDIR)/man3/mdoc.3
+	rm -f $(BINDIR)/mandoc
+	rm -f $(MANDIR)/man1/mandoc.1
 	rm -f $(MANDIR)/man7/mdoc.7
-	rm -f $(LIBDIR)/libmdoc.a
-	rm -f $(INCLUDEDIR)/mdoc.h
 
 lib.ln: lib.c lib.in private.h
 lib.o: lib.c lib.in private.h
@@ -126,8 +122,11 @@ hash.o: hash.c private.h
 mdoc.ln: mdoc.c private.h
 mdoc.o: mdoc.c private.h
 
-mdocterm.ln: mdocterm.c
-mdocterm.o: mdocterm.c
+main.ln: main.c mdoc.h
+main.o: main.c mdoc.h
+
+terminal.ln: terminal.c term.h
+terminal.o: terminal.c term.h
 
 xstd.ln: xstd.c private.h
 xstd.o: xstd.c private.h
@@ -154,11 +153,9 @@ mdocml-nport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.netbsd DESCR
 	sha1 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
 	install -m 0644 DESCR .dist/mdocml/
 	echo @comment $$NetBSD$$ > .dist/mdocml/PLIST
-	echo bin/mdocterm >> .dist/mdocml/PLIST
-	echo lib/libmdoc.a >> .dist/mdocml/PLIST
-	echo include/mdoc.h >> .dist/mdocml/PLIST
-	echo man/man1/mdocterm.1 >> .dist/mdocml/PLIST
-	echo man/man3/mdoc.3 >> .dist/mdocml/PLIST
+	echo bin/mandoc >> .dist/mdocml/PLIST
+	echo man/man1/mandoc.1 >> .dist/mdocml/PLIST
+	echo man/man7/mdoc.7 >> .dist/mdocml/PLIST
 	( cd .dist/ && tar zcf ../$@ mdocml/ )
 	rm -rf .dist/
 
@@ -171,11 +168,9 @@ mdocml-oport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.openbsd DESCR
 	sha1 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
 	install -m 0644 DESCR .dist/mdocml/pkg/DESCR
 	echo @comment $$OpenBSD$$ > .dist/mdocml/pkg/PLIST
-	echo bin/mdocterm >> .dist/mdocml/pkg/PLIST
-	echo lib/libmdoc.a >> .dist/mdocml/pkg/PLIST
-	echo include/mdoc.h >> .dist/mdocml/pkg/PLIST
-	echo @man man/man1/mdocterm.1 >> .dist/mdocml/pkg/PLIST
-	echo @man man/man3/mdoc.3 >> .dist/mdocml/pkg/PLIST
+	echo bin/mandoc >> .dist/mdocml/pkg/PLIST
+	echo @man man/man1/mandoc.1 >> .dist/mdocml/pkg/PLIST
+	echo @man man/man7/mdoc.7 >> .dist/mdocml/pkg/PLIST
 	( cd .dist/ && tar zcf ../$@ mdocml/ )
 	rm -rf .dist/
 
@@ -188,16 +183,15 @@ mdocml-$(VERSION).tar.gz: $(INSTALL)
 llib-llibmdoc.ln: $(LIBLNS)
 	$(LINT) $(LINTFLAGS) -Clibmdoc $(LIBLNS)
 
-llib-lmdocterm.ln: $(TERMLNS) llib-llibmdoc.ln
-	$(LINT) $(LINTFLAGS) -Cmdocterm $(TERMLNS) llib-llibmdoc.ln
+llib-lmandoc.ln: $(MAINLNS) llib-llibmdoc.ln
+	$(LINT) $(LINTFLAGS) -Cmandoc $(MAINLNS) llib-llibmdoc.ln
 
 libmdoc.a: $(LIBOBJS)
 	$(AR) rs $@ $(LIBOBJS)
 
-mdocterm: $(TERMOBJS) libmdoc.a
-	$(CC) $(CFLAGS) -o $@ $(TERMOBJS) libmdoc.a 
+mandoc: $(MAINOBJS) libmdoc.a
+	$(CC) $(CFLAGS) -o $@ $(MAINOBJS) libmdoc.a 
 
 .sgml.html:
 	validate $<
 	sed -e "s!@VERSION@!$(VERSION)!" -e "s!@VDATE@!$(VDATE)!" $< > $@
-

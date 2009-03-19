@@ -27,6 +27,12 @@
 
 __BEGIN_DECLS
 
+enum	termenc {
+	TERMENC_ASCII,
+	TERMENC_LATIN1,
+	TERMENC_UTF8
+};
+
 struct	termp {
 	size_t		  rmargin;	/* Current right margin. */
 	size_t		  maxrmargin;	/* Max right margin. */
@@ -45,6 +51,7 @@ struct	termp {
 #define	TERMP_BOLD	 (1 << 8)	/* Styles... */
 #define	TERMP_UNDER	 (1 << 9)
 	char		 *buf;		/* Output buffer. */
+	enum termenc	  enc;		/* Type of encoding. */
 	void		 *symtab;	/* Encoded-symbol table. */
 };
 

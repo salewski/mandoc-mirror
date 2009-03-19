@@ -16,365 +16,108 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-#include <sys/types.h>
-#include <sys/stat.h>
-
 #include <assert.h>
 #include <err.h>
-#include <fcntl.h>
-#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "term.h"
 
-#define	WARN_WALL	  0x03		/* All-warnings mask. */
-#define	WARN_WCOMPAT	 (1 << 0)	/* Compatibility warnings. */
-#define	WARN_WSYNTAX	 (1 << 1)	/* Syntax warnings. */
-#define	WARN_WERR	 (1 << 2)	/* Warnings->errors. */
-
-enum	termt {
-	TERMT_ASCII,
-	TERMT_LINT,
-	TERMT_TREE
-};
-
-extern	char		 *__progname;
-
-__dead	static void	  version(void);
-__dead	static void	  usage(void);
-#if 0
-__dead	static void	  punt(struct cmdargs *, char **);
-#endif
-static	int		  foptions(int *, char *);
-static	int		  toptions(enum termt *, char *);
-static	int		  woptions(int *, char *);
-static	int		  merr(void *, int, int, const char *);
-static	int		  mwarn(void *, int, int, 
-				enum mdoc_warn, const char *);
-static	void		  body(struct termp *, struct termpair *,
+static	struct termp	 *termp_alloc(enum termenc);
+static	void		  termp_free(struct termp *);
+static	void		  termp_body(struct termp *, struct termpair *,
 				const struct mdoc_meta *,
 				const struct mdoc_node *);
-static	void		  header(struct termp *,
+static	void		  termp_head(struct termp *,
 				const struct mdoc_meta *);
-static	void		  footer(struct termp *,
+static	void		  termp_foot(struct termp *,
 				const struct mdoc_meta *);
-static	int		  file(char **, size_t *, char **, size_t *, 
-				const char *, struct mdoc *);
-static	int		  fdesc(char **, size_t *, char **, size_t *, 
-				const char *, int, struct mdoc *);
-static	void		  pword(struct termp *, const char *, int);
-static	void		  pescape(struct termp *, 
+static	void		  termp_pword(struct termp *, const char *, int);
+static	void		  termp_pescape(struct termp *, 
 				const char *, int *, int);
-static	void		  nescape(struct termp *,
+static	void		  termp_nescape(struct termp *,
 				const char *, size_t);
-static	void		  chara(struct termp *, char);
-static	void		  stringa(struct termp *, 
+static	void		  termp_chara(struct termp *, char);
+static	void		  termp_stringa(struct termp *, 
 				const char *, size_t);
-static	void		  sanity(const struct mdoc_node *);
+static	void		  sanity(const struct mdoc_node *); /* XXX */
+
+
+void *
+latin1_alloc(void)
+{
+
+	return(termp_alloc(TERMENC_LATIN1));
+}
+
+
+void *
+utf8_alloc(void)
+{
+
+	return(termp_alloc(TERMENC_UTF8));
+}
+
+
+void *
+ascii_alloc(void)
+{
+
+	return(termp_alloc(TERMENC_ASCII));
+}
 
 
 int
-main(int argc, char *argv[])
+terminal_run(void *arg, const struct mdoc *mdoc)
 {
-	struct termp	 termp;
-	int		 c, fflags, wflags;
-	struct mdoc_cb	 cb;
-	struct mdoc	*mdoc;
-	char		*buf, *line;
-	size_t		 bufsz, linesz;
-	enum termt	 termt;
+	struct termp	*p;
 
-	bzero(&termp, sizeof(struct termp));
-	bzero(&cb, sizeof(struct mdoc_cb));
+	p = (struct termp *)arg;
 
-	termt = TERMT_ASCII;
-	fflags = wflags = 0;
+	if (NULL == p->symtab)
+		p->symtab = ascii2htab();
 
-	/* LINTED */
-	while (-1 != (c = getopt(argc, argv, "f:VW:T:")))
-		switch (c) {
-		case ('f'):
-			if ( ! foptions(&fflags, optarg))
-				return(0);
-			break;
-		case ('T'):
-			if ( ! toptions(&termt, optarg))
-				return(0);
-			break;
-		case ('W'):
-			if ( ! woptions(&wflags, optarg))
-				return(0);
-			break;
-		case ('V'):
-			version();
-			/* NOTREACHED */
-		default:
-			usage();
-			/* NOTREACHED */
-		}
-
-	argc -= optind;
-	argv += optind;
-
-	termp.maxrmargin = 78;			/* FIXME */
-
-	cb.mdoc_err = merr;
-	cb.mdoc_warn = mwarn;
-
-	/* Line and block buffers persist between parses. */
-
-	buf = line = NULL;
-	bufsz = linesz = 0;
-
-	/* Overall mdoc persists between parses. */
-
-	mdoc = mdoc_alloc(&wflags, fflags, &cb);
-
-	while (*argv) {
-		if ( ! file(&line, &linesz, &buf, &bufsz, *argv, mdoc))
-			break;
-
-		switch (termt) {
-		case (TERMT_ASCII):
-			if (NULL == termp.symtab)
-				termp.symtab = ascii2htab();
-			header(&termp, mdoc_meta(mdoc));
-			body(&termp, NULL, mdoc_meta(mdoc), 
-					mdoc_node(mdoc));
-			footer(&termp, mdoc_meta(mdoc));
-			break;
-		default:
-			break;
-		}
-
-		mdoc_reset(mdoc);
-		argv++;
-	}
-
-	if (buf)
-		free(buf);
-	if (line)
-		free(line);
-	if (termp.buf)
-		free(termp.buf);
-	if (termp.symtab)
-		asciifree(termp.symtab);
-
-	mdoc_free(mdoc);
-
-	return(0);
-}
-
-
-__dead static void
-version(void)
-{
-
-	(void)printf("%s %s\n", __progname, VERSION);
-	exit(0);
-	/* NOTREACHED */
-}
-
-
-__dead static void
-usage(void)
-{
-
-	(void)fprintf(stderr, "usage: %s\n", __progname);
-	exit(1);
-	/* NOTREACHED */
-}
-
-
-static int
-file(char **ln, size_t *lnsz, char **buf, size_t *bufsz, 
-		const char *file, struct mdoc *mdoc)
-{
-	int		 fd, c;
-
-	if (-1 == (fd = open(file, O_RDONLY, 0))) {
-		warn("%s", file);
-		return(0);
-	}
-
-	c = fdesc(ln, lnsz, buf, bufsz, file, fd, mdoc);
-
-	if (-1 == close(fd))
-		warn("%s", file);
-
-	return(c);
-}
-
-
-static int
-fdesc(char **lnp, size_t *lnsz, char **bufp, size_t *bufsz, 
-		const char *f, int fd, struct mdoc *mdoc)
-{
-	size_t		 sz;
-	ssize_t		 ssz;
-	struct stat	 st;
-	int		 j, i, pos, lnn;
-	char		*ln, *buf;
-
-	buf = *bufp;
-	ln = *lnp;
-
-	/*
-	 * Two buffers: ln and buf.  buf is the input buffer, optimised
-	 * for each file's block size.  ln is a line buffer.  Both
-	 * growable, hence passed in by ptr-ptr.
-	 */
-
-	if (-1 == fstat(fd, &st)) {
-		warnx("%s", f);
-		sz = BUFSIZ;
-	} else 
-		sz = (unsigned)BUFSIZ > st.st_blksize ?
-			(size_t)BUFSIZ : st.st_blksize;
-
-	if (sz > *bufsz) {
-		if (NULL == (buf = realloc(buf, sz)))
-			err(1, "realloc");
-		*bufp = buf;
-		*bufsz = sz;
-	}
-
-	/*
-	 * Fill buf with file blocksize and parse newlines into ln.
-	 */
-
-	for (lnn = 1, pos = 0; ; ) {
-		if (-1 == (ssz = read(fd, buf, sz))) {
-			warn("%s", f);
-			return(0);
-		} else if (0 == ssz) 
-			break;
-
-		for (i = 0; i < (int)ssz; i++) {
-			if (pos >= (int)*lnsz) {
-				*lnsz += 256; /* Step-size. */
-				ln = realloc(ln, *lnsz);
-				if (NULL == ln)
-					err(1, "realloc");
-				*lnp = ln;
-			}
-
-			if ('\n' != buf[i]) {
-				ln[pos++] = buf[i];
-				continue;
-			}
-
-			/* Check for CPP-escaped newline.  */
-
-			if (pos > 0 && '\\' == ln[pos - 1]) {
-				for (j = pos - 1; j >= 0; j--)
-					if ('\\' != ln[j])
-						break;
-
-				if ( ! ((pos - j) % 2)) {
-					pos--;
-					lnn++;
-					continue;
-				}
-			}
-
-			ln[pos] = 0;
-			if ( ! mdoc_parseln(mdoc, lnn, ln))
-				return(0);
-			lnn++;
-			pos = 0;
-		}
-	}
-
-	return(mdoc_endparse(mdoc));
-}
-
-
-static int
-toptions(enum termt *tflags, char *arg)
-{
-
-	if (0 == strcmp(arg, "ascii"))
-		*tflags = TERMT_ASCII;
-	else if (0 == strcmp(arg, "lint"))
-		*tflags = TERMT_LINT;
-	else if (0 == strcmp(arg, "tree"))
-		*tflags = TERMT_TREE;
-	else {
-		warnx("bad argument: -T%s", arg);
-		return(0);
-	}
+	termp_head(p, mdoc_meta(mdoc));
+	termp_body(p, NULL, mdoc_meta(mdoc), mdoc_node(mdoc));
+	termp_foot(p, mdoc_meta(mdoc));
 
 	return(1);
 }
 
 
-/*
- * Parse out the options for [-fopt...] setting compiler options.  These
- * can be comma-delimited or called again.
- */
-static int
-foptions(int *fflags, char *arg)
+void
+terminal_free(void *arg)
 {
-	char		*v;
-	char		*toks[] = { "ign-scope", "ign-escape", 
-				    "ign-macro", NULL };
 
-	while (*arg) 
-		switch (getsubopt(&arg, toks, &v)) {
-		case (0):
-			*fflags |= MDOC_IGN_SCOPE;
-			break;
-		case (1):
-			*fflags |= MDOC_IGN_ESCAPE;
-			break;
-		case (2):
-			*fflags |= MDOC_IGN_MACRO;
-			break;
-		default:
-			warnx("bad argument: -f%s", arg);
-			return(0);
-		}
-
-	return(1);
+	termp_free((struct termp *)arg);
 }
 
 
-/* 
- * Parse out the options for [-Werr...], which sets warning modes.
- * These can be comma-delimited or called again.  XXX - should this be
- * using -w like troff?
- */
-static int
-woptions(int *wflags, char *arg)
+static void
+termp_free(struct termp *p)
 {
-	char		*v;
-	char		*toks[] = { "all", "compat", 
-			"syntax", "error", NULL };
 
-	while (*arg) 
-		switch (getsubopt(&arg, toks, &v)) {
-		case (0):
-			*wflags |= WARN_WALL;
-			break;
-		case (1):
-			*wflags |= WARN_WCOMPAT;
-			break;
-		case (2):
-			*wflags |= WARN_WSYNTAX;
-			break;
-		case (3):
-			*wflags |= WARN_WERR;
-			break;
-		default:
-			warnx("bad argument: -W%s", arg);
-			return(0);
-		}
+	if (p->buf)
+		free(p->buf);
+	if (TERMENC_ASCII == p->enc && p->symtab)
+		asciifree(p->symtab);
 
-	return(1);
+	free(p);
+}
+
+
+static struct termp *
+termp_alloc(enum termenc enc)
+{
+	struct termp *p;
+
+	if (NULL == (p = malloc(sizeof(struct termp))))
+		err(1, "malloc");
+	bzero(p, sizeof(struct termp));
+	p->maxrmargin = 78;
+	p->enc = enc;
+	return(p);
 }
 
 
@@ -586,7 +329,7 @@ word(struct termp *p, const char *word)
 	int 		 i, j, len;
 
 	if (p->flags & TERMP_LITERAL) {
-		pword(p, word, (int)strlen(word));
+		termp_pword(p, word, (int)strlen(word));
 		return;
 	}
 
@@ -615,12 +358,12 @@ word(struct termp *p, const char *word)
 		if (0 == j)
 			continue;
 		assert(i >= j);
-		pword(p, &word[i - j], j);
+		termp_pword(p, &word[i - j], j);
 		j = 0;
 	}
 	if (j > 0) {
 		assert(i >= j);
-		pword(p, &word[i - j], j);
+		termp_pword(p, &word[i - j], j);
 	}
 }
 
@@ -632,7 +375,7 @@ word(struct termp *p, const char *word)
  * prefix and postfix invocations.
  */
 static void
-body(struct termp *p, struct termpair *ppair,
+termp_body(struct termp *p, struct termpair *ppair,
 		const struct mdoc_meta *meta,
 		const struct mdoc_node *node)
 {
@@ -665,7 +408,7 @@ body(struct termp *p, struct termpair *ppair,
 		p->flags |= pair.flag;
 
 	if (dochild && node->child)
-		body(p, &pair, meta, node->child);
+		termp_body(p, &pair, meta, node->child);
 
 	if (TERMPAIR_FLAG & pair.type)
 		p->flags &= ~pair.flag;
@@ -679,12 +422,12 @@ body(struct termp *p, struct termpair *ppair,
 	/* Siblings. */
 
 	if (node->next)
-		body(p, ppair, meta, node->next);
+		termp_body(p, ppair, meta, node->next);
 }
 
 
 static void
-footer(struct termp *p, const struct mdoc_meta *meta)
+termp_foot(struct termp *p, const struct mdoc_meta *meta)
 {
 	struct tm	*tm;
 	char		*buf, *os;
@@ -735,7 +478,7 @@ footer(struct termp *p, const struct mdoc_meta *meta)
 
 
 static void
-header(struct termp *p, const struct mdoc_meta *meta)
+termp_head(struct termp *p, const struct mdoc_meta *meta)
 {
 	char		*buf, *title;
 
@@ -809,14 +552,14 @@ header(struct termp *p, const struct mdoc_meta *meta)
  * output buffer by way of the symbol table.
  */
 static void
-nescape(struct termp *p, const char *word, size_t len)
+termp_nescape(struct termp *p, const char *word, size_t len)
 {
 	const char	*rhs;
 	size_t		 sz;
 
 	if (NULL == (rhs = a2ascii(p->symtab, word, len, &sz))) 
 		return;
-	stringa(p, rhs, sz);
+	termp_stringa(p, rhs, sz);
 }
 
 
@@ -826,7 +569,7 @@ nescape(struct termp *p, const char *word, size_t len)
  * the escape sequence (we assert upon badly-formed escape sequences).
  */
 static void
-pescape(struct termp *p, const char *word, int *i, int len)
+termp_pescape(struct termp *p, const char *word, int *i, int len)
 {
 	int		 j;
 
@@ -838,7 +581,7 @@ pescape(struct termp *p, const char *word, int *i, int len)
 		if (*i + 1 >= len)
 			return;
 
-		nescape(p, &word[*i], 2);
+		termp_nescape(p, &word[*i], 2);
 		(*i)++;
 		return;
 
@@ -853,18 +596,18 @@ pescape(struct termp *p, const char *word, int *i, int len)
 			if (*i + 1 >= len)
 				return;
 
-			nescape(p, &word[*i], 2);
+			termp_nescape(p, &word[*i], 2);
 			(*i)++;
 			return;
 		case ('['):
 			break;
 		default:
-			nescape(p, &word[*i], 1);
+			termp_nescape(p, &word[*i], 1);
 			return;
 		}
 
 	} else if ('[' != word[*i]) {
-		nescape(p, &word[*i], 1);
+		termp_nescape(p, &word[*i], 1);
 		return;
 	}
 
@@ -875,7 +618,7 @@ pescape(struct termp *p, const char *word, int *i, int len)
 	if (0 == word[*i])
 		return;
 
-	nescape(p, &word[*i - j], (size_t)j);
+	termp_nescape(p, &word[*i - j], (size_t)j);
 }
 
 
@@ -885,13 +628,13 @@ pescape(struct termp *p, const char *word, int *i, int len)
  * handles word styling.
  */
 static void
-pword(struct termp *p, const char *word, int len)
+termp_pword(struct termp *p, const char *word, int len)
 {
 	int		 i;
 
 	if ( ! (TERMP_NOSPACE & p->flags) && 
 			! (TERMP_LITERAL & p->flags))
-		chara(p, ' ');
+		termp_chara(p, ' ');
 
 	if ( ! (p->flags & TERMP_NONOSPACE))
 		p->flags &= ~TERMP_NOSPACE;
@@ -903,33 +646,33 @@ pword(struct termp *p, const char *word, int len)
 
 	for (i = 0; i < len; i++) {
 		if ('\\' == word[i]) {
-			pescape(p, word, &i, len);
+			termp_pescape(p, word, &i, len);
 			continue;
 		}
 
 		if (TERMP_STYLE & p->flags) {
 			if (TERMP_BOLD & p->flags) {
-				chara(p, word[i]);
-				chara(p, 8);
+				termp_chara(p, word[i]);
+				termp_chara(p, 8);
 			}
 			if (TERMP_UNDER & p->flags) {
-				chara(p, '_');
-				chara(p, 8);
+				termp_chara(p, '_');
+				termp_chara(p, 8);
 			}
 		}
 
-		chara(p, word[i]);
+		termp_chara(p, word[i]);
 	}
 }
 
 
 /*
- * Like chara() but for arbitrary-length buffers.  Resize the buffer by
- * a factor of two (if the buffer is less than that) or the buffer's
- * size.
+ * Like termp_chara() but for arbitrary-length buffers.  Resize the
+ * buffer by a factor of two (if the buffer is less than that) or the
+ * buffer's size.
  */
 static void
-stringa(struct termp *p, const char *c, size_t sz)
+termp_stringa(struct termp *p, const char *c, size_t sz)
 {
 	size_t		 s;
 
@@ -958,7 +701,7 @@ stringa(struct termp *p, const char *c, size_t sz)
  * size.
  */
 static void
-chara(struct termp *p, char c)
+termp_chara(struct termp *p, char c)
 {
 	size_t		 s;
 
@@ -1083,50 +826,3 @@ sanity(const struct mdoc_node *n)
 		break;
 	}
 }
-
-
-static int
-merr(void *arg, int line, int col, const char *msg)
-{
-
-	warnx("error: %s (line %d, column %d)", msg, line, col);
-	return(0);
-}
-
-
-static int
-mwarn(void *arg, int line, int col, 
-		enum mdoc_warn type, const char *msg)
-{
-	int		 flags;
-	char		*wtype;
-
-	flags = *(int *)arg;
-	wtype = NULL;
-
-	switch (type) {
-	case (WARN_COMPAT):
-		wtype = "compat";
-		if (flags & WARN_WCOMPAT)
-			break;
-		return(1);
-	case (WARN_SYNTAX):
-		wtype = "syntax";
-		if (flags & WARN_WSYNTAX)
-			break;
-		return(1);
-	}
-
-	assert(wtype);
-	warnx("%s warning: %s (line %d, column %d)", 
-			wtype, msg, line, col);
-
-	if ( ! (flags & WARN_WERR))
-		return(1);
-
-	warnx("%s: considering warnings as errors", 
-			__progname);
-	return(0);
-}
-
-

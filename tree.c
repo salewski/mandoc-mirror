@@ -18,46 +18,25 @@
  */
 #include <assert.h>
 #include <err.h>
-#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "mmain.h"
+#include "mdoc.h"
 
-#define	xprintf (void)printf
+static	void	tree_body(const struct mdoc_node *, int);
 
-static	void	doprint(const struct mdoc_node *, int);
 
 int
-main(int argc, char *argv[])
+tree_run(void *arg, const struct mdoc *mdoc)
 {
-	struct mmain	  *p;
-	const struct mdoc *mdoc;
-	int		   c;
-	char		  *in;
 
-	p = mmain_alloc();
-
-	c = mmain_getopt(p, argc, argv, NULL, 
-			"[infile]", NULL, NULL, NULL);
-
-	argv += c;
-	if ((argc -= c) > 0)
-		in = *argv++;
-	else
-		in = "-";
-
-	if (NULL == (mdoc = mmain_mdoc(p, in)))
-		mmain_exit(p, 1);
-
-	doprint(mdoc_node(mdoc), 0);
-	mmain_exit(p, 0);
-	/* NOTREACHED */
+	tree_body(mdoc_node(mdoc), 0);
+	return(1);
 }
 
 
 static void
-doprint(const struct mdoc_node *n, int indent)
+tree_body(const struct mdoc_node *n, int indent)
 {
 	const char	 *p, *t;
 	int		  i, j;
@@ -132,26 +111,27 @@ doprint(const struct mdoc_node *n, int indent)
 	}
 
 	for (i = 0; i < indent; i++)
-		xprintf("    ");
-	xprintf("%s (%s)", p, t);
+		(void)printf("    ");
+	(void)printf("%s (%s)", p, t);
 
 	for (i = 0; i < (int)argc; i++) {
-		xprintf(" -%s", mdoc_argnames[argv[i].arg]);
+		(void)printf(" -%s", mdoc_argnames[argv[i].arg]);
 		if (argv[i].sz > 0)
-			xprintf(" [");
+			(void)printf(" [");
 		for (j = 0; j < (int)argv[i].sz; j++)
-			xprintf(" [%s]", argv[i].value[j]);
+			(void)printf(" [%s]", argv[i].value[j]);
 		if (argv[i].sz > 0)
-			xprintf(" ]");
+			(void)printf(" ]");
 	}
 
 	for (i = 0; i < (int)sz; i++)
-		xprintf(" [%s]", params[i]);
+		(void)printf(" [%s]", params[i]);
 
-	xprintf(" %d:%d\n", n->line, n->pos);
+	(void)printf(" %d:%d\n", n->line, n->pos);
 
 	if (n->child)
-		doprint(n->child, indent + 1);
+		tree_body(n->child, indent + 1);
 	if (n->next)
-		doprint(n->next, indent);
+		tree_body(n->next, indent);
 }
+

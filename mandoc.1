@@ -17,41 +17,42 @@
 .\" PERFORMANCE OF THIS SOFTWARE.
 .\"
 .Dd $Mdocdate$
-.Dt mdoctree 1
+.Dt mandoc 1
 .Os
 .\" SECTION
 .Sh NAME
-.Nm mdoctree
-.Nd mdoc macro compiler
+.Nm mandoc
+.Nd format and display BSD manuals
 .\" SECTION
 .Sh SYNOPSIS
-.Nm mdoctree
-.Op Fl vV
-.Op Fl f Ns Ar options...
+.Nm mandoc
+.Op Fl V
+.Op Fl f Ns Ar option...
 .Op Fl W Ns Ar err...
-.Op Ar infile
+.Op Fl T Ns Ar output
+.Op Ar infile...
 .\" SECTION
 .Sh DESCRIPTION
 The
 .Nm
-utility parses a BSD 
+utility formats a BSD 
 .Dq mdoc 
-manual pages and prints its syntax tree.  It's commonly used to see the
-syntax tree of a document when building new 
-.Xr mdoc 3
-utilities.  The arguments are as follows:
+manual page for display.  The arguments are as follows:
 .Bl -tag -width XXXXXXXXXXXX
-.\" ITEM
-.It Fl v
-Print verbose parsing output.
-.\" ITEM
-.It Fl V
-Print version and exit.
 .\" ITEM
 .It Fl f Ns Ar option...
 Override default compiler behaviour.  See 
 .Sx Compiler Options
 for details.
+.\" ITEM
+.It Fl T
+Output format.  See
+.Sx Output Formats
+for available formats.  Defaults to
+.Fl T Ns Ar ascii .
+.\" ITEM
+.It Fl V
+Print version and exit.
 .\" ITEM
 .It Fl W Ns Ar err...
 Print warning messages.  May be set to 
@@ -68,35 +69,43 @@ termination.  Multiple
 arguments may be comma-separated, such as
 .Fl W Ns Ar error,all .
 .\" ITEM
-.It Ar infile
-Read input from
-.Ar infile ,
-which may be 
-.Dq \-
-for stdin.
+.It Ar infile...
+Read input from zero or more
+.Ar infile .
+If unspecified, reads from stdin.
 .El
 .\" PARAGRAPH
 .Pp
-The
-.Nm
-utility is a formatting front-end for
-.Xr mdoc 3 ,
-which parses the 
-.Dq mdoc
-input, documented at
-.Xr mdoc 7
-and
-.Xr mdoc.samples 7 ,
-into an abstract syntax tree.  By default, it reads from stdin and
-prints the syntax tree to stdout.
+By default, 
+.Nm 
+reads from stdin and prints 78-column backspace-encoded output to stdout
+as if
+.Fl T Ns Ar ascii
+were provided.
 .\" PARAGRAPH
 .Pp
-.Ex -std mdoctree
+.Ex -std mandoc
+.\" SUB-SECTION
+.Ss Output Formats
+The
+.Nm
+utility accepts the following
+.Fl T
+arguments:
+.Bl -tag -width XXXXXXXXXXXX -offset XXXX
+.It Ar ascii
+Produce 7-bit ASCII output, backspace-encoded for bold and underline
+styles.  This is the default.
+.It Ar tree
+Produce an indented parse tree.
+.It Ar lint
+Parse only: produce no output.
+.El
 .\" SUB-SECTION
 .Ss Compiler Options
 Default compiler behaviour may be overriden with the
 .Fl f
-flag.  The available options are as follows:
+flag.
 .Bl -tag -width XXXXXXXXXXXX -offset XXXX
 .It Fl f Ns Ar ign-scope
 When rewinding the scope of a block macro, forces the compiler to ignore
@@ -115,40 +124,15 @@ flag, multiple
 options may be grouped and delimited with a comma.  Using
 .Fl f Ns Ar ign-scope,ign-escape ,
 for example, will try to ignore scope and character-escape errors.
-.\" SUB-SECTION
-.Ss Input Encoding
-The
-.Nm
-utility expects its input to be 7-bit ASCII as defined in
-.Xr ascii 7 .
-The only non-graphing characters accepted are spaces,
-.Sq \  ,
-and tabs,
-.Sq \et .
-Tabs are only accepted in literal block-displays and as column
-delimiters.
-.Pp
-Only Unix-style newlines (\en) are accepted; if the newline is escaped,
-the line is concatenated with the next.
-.\" SUB-SECTION
-.Ss Character Escapes
-Since
-.Nm
-doesn't format its output, character escapes are displayed as passed
-into the compiler. 
 .\" SECTION
 .Sh EXAMPLES
-To validate this manual page:
+To page this manual page on the terminal:
 .\" PARAGRAPH
 .Pp
-.D1 % mdoctree \-Wall,error mdoctree.1 
+.D1 % mandoc \-Wall,error mandoc.1 2>&1 | less
 .\" SECTION
 .Sh SEE ALSO
-.Xr mdocterm 1 ,
-.Xr mdoclint 1 ,
-.Xr mdoc.samples 7 ,
-.Xr mdoc 7 ,
-.Xr mdoc 3
+.Xr mdoc 7
 .\" 
 .Sh AUTHORS
 The
@@ -157,6 +141,29 @@ utility was written by
 .An Kristaps Dzonsons Aq kristaps@openbsd.org .
 .\" SECTION
 .Sh CAVEATS
-See
-.Xr mdoc 3
-for a list of bugs, caveats, and incomplete macros.
+The 
+.Nm
+utility doesn't yet know how to display the following:
+.Pp
+.Bl -bullet -compact
+.It
+The \-hang 
+.Sq \&Bl
+list is not yet supported.
+.It
+The \-literal and \-unfilled 
+.Sq \&Bd
+displays only accept text contents.
+.It
+The
+.Sq \&Xo/Xc
+pair isn't supported.
+.It
+The
+.Sq \&Sm
+macro has no effect, yet.
+.El
+.Pp
+Other macros still aren't supported by virtue of nobody complaining
+about their absence.  Please report any omissions: this is a work in
+progress.
