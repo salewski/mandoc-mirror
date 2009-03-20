@@ -95,6 +95,8 @@ mdoc_isescape(const char *p)
 		/* FALLTHROUGH */
 	case ('.'):
 		/* FALLTHROUGH */
+	case (':'):
+		/* FALLTHROUGH */
 	case ('e'):
 		return(2);
 	case ('*'):

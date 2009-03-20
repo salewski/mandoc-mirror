@@ -35,10 +35,19 @@ extern	int		  getsubopt(char **, char * const *, char **);
 # endif
 #endif
 
+struct	buf {
+	char	 	 *buf;
+	size_t		  sz;
+};
+
+struct	curparse {
+	const char	 *file;
+	int		  wflags;
 #define	WARN_WALL	  0x03		/* All-warnings mask. */
 #define	WARN_WCOMPAT	 (1 << 0)	/* Compatibility warnings. */
 #define	WARN_WSYNTAX	 (1 << 1)	/* Syntax warnings. */
 #define	WARN_WERR	 (1 << 2)	/* Warnings->errors. */
+};
 
 enum outt {
 	OUTT_ASCII,
@@ -68,9 +77,9 @@ static	int		  woptions(int *, char *);
 static	int		  merr(void *, int, int, const char *);
 static	int		  mwarn(void *, int, int, 
 				enum mdoc_warn, const char *);
-static	int		  file(char **, size_t *, char **, size_t *, 
+static	int		  file(struct buf *, struct buf *,
 				const char *, struct mdoc *);
-static	int		  fdesc(char **, size_t *, char **, size_t *, 
+static	int		  fdesc(struct buf *, struct buf *,
 				const char *, int, struct mdoc *);
 
 
@@ -80,15 +89,17 @@ main(int argc, char *argv[])
 	int		 c, rc, fflags, wflags;
 	struct mdoc_cb	 cb;
 	struct mdoc	*mdoc;
-	char		*buf, *line;
-	size_t		 bufsz, linesz;
 	void		*outdata;
 	enum outt	 outtype;
+	struct buf	 ln, blk;
 	out_run		 outrun;
 	out_free	 outfree;
+	struct curparse	 curp;
 
 	fflags = wflags = 0;
 	outtype = OUTT_ASCII;
+
+	bzero(&curp, sizeof(struct curparse));
 
 	/* LINTED */
 	while (-1 != (c = getopt(argc, argv, "f:VW:T:")))
@@ -102,7 +113,7 @@ main(int argc, char *argv[])
 				return(0);
 			break;
 		case ('W'):
-			if ( ! woptions(&wflags, optarg))
+			if ( ! woptions(&curp.wflags, optarg))
 				return(0);
 			break;
 		case ('V'):
@@ -160,18 +171,18 @@ main(int argc, char *argv[])
 	cb.mdoc_err = merr;
 	cb.mdoc_warn = mwarn;
 
-	buf = line = NULL;
-	bufsz = linesz = 0;
+	bzero(&ln, sizeof(struct buf));
+	bzero(&blk, sizeof(struct buf));
 
-	mdoc = mdoc_alloc(&wflags, fflags, &cb);
+	mdoc = mdoc_alloc(&curp, fflags, &cb);
 
 	/*
 	 * Loop around available files.
 	 */
 
 	if (NULL == *argv) {
-		c = fdesc(&line, &linesz, &buf, &bufsz, 
-				"stdin", STDIN_FILENO, mdoc);
+		curp.file = "<stdin>";
+		c = fdesc(&blk, &ln, "stdin", STDIN_FILENO, mdoc);
 		rc = 0;
 		if (c && NULL == outrun)
 			rc = 1;
@@ -179,8 +190,8 @@ main(int argc, char *argv[])
 			rc = 1;
 	} else {
 		while (*argv) {
-			c = file(&line, &linesz, &buf, 
-					&bufsz, *argv, mdoc);
+			curp.file = *argv;
+			c = file(&blk, &ln, *argv, mdoc);
 			if ( ! c)
 				break;
 			if (outrun && ! (*outrun)(outdata, mdoc))
@@ -192,10 +203,10 @@ main(int argc, char *argv[])
 		rc = NULL == *argv;
 	}
 
-	if (buf)
-		free(buf);
-	if (line)
-		free(line);
+	if (blk.buf)
+		free(blk.buf);
+	if (ln.buf)
+		free(ln.buf);
 	if (outfree)
 		(*outfree)(outdata);
 
@@ -226,7 +237,7 @@ usage(void)
 
 
 static int
-file(char **ln, size_t *lnsz, char **buf, size_t *bufsz, 
+file(struct buf *blk, struct buf *ln,
 		const char *file, struct mdoc *mdoc)
 {
 	int		 fd, c;
@@ -236,7 +247,7 @@ file(char **ln, size_t *lnsz, char **buf, size_t *bufsz,
 		return(0);
 	}
 
-	c = fdesc(ln, lnsz, buf, bufsz, file, fd, mdoc);
+	c = fdesc(blk, ln, file, fd, mdoc);
 
 	if (-1 == close(fd))
 		warn("%s", file);
@@ -246,17 +257,13 @@ file(char **ln, size_t *lnsz, char **buf, size_t *bufsz,
 
 
 static int
-fdesc(char **lnp, size_t *lnsz, char **bufp, size_t *bufsz, 
+fdesc(struct buf *blk, struct buf *ln,
 		const char *f, int fd, struct mdoc *mdoc)
 {
 	size_t		 sz;
 	ssize_t		 ssz;
 	struct stat	 st;
 	int		 j, i, pos, lnn;
-	char		*ln, *buf;
-
-	buf = *bufp;
-	ln = *lnp;
 
 	/*
 	 * Two buffers: ln and buf.  buf is the input buffer, optimised
@@ -271,11 +278,11 @@ fdesc(char **lnp, size_t *lnsz, char **bufp, size_t *bufsz,
 		sz = (unsigned)BUFSIZ > st.st_blksize ?
 			(size_t)BUFSIZ : st.st_blksize;
 
-	if (sz > *bufsz) {
-		if (NULL == (buf = realloc(buf, sz)))
+	if (sz > blk->sz) {
+		blk->buf = realloc(blk->buf, sz);
+		if (NULL == blk->buf)
 			err(1, "realloc");
-		*bufp = buf;
-		*bufsz = sz;
+		blk->sz = sz;
 	}
 
 	/*
@@ -283,31 +290,30 @@ fdesc(char **lnp, size_t *lnsz, char **bufp, size_t *bufsz,
 	 */
 
 	for (lnn = 1, pos = 0; ; ) {
-		if (-1 == (ssz = read(fd, buf, sz))) {
+		if (-1 == (ssz = read(fd, blk->buf, sz))) {
 			warn("%s", f);
 			return(0);
 		} else if (0 == ssz) 
 			break;
 
 		for (i = 0; i < (int)ssz; i++) {
-			if (pos >= (int)*lnsz) {
-				*lnsz += 256; /* Step-size. */
-				ln = realloc(ln, *lnsz);
-				if (NULL == ln)
+			if (pos >= (int)ln->sz) {
+				ln->sz += 256; /* Step-size. */
+				ln->buf = realloc(ln->buf, ln->sz);
+				if (NULL == ln->buf)
 					err(1, "realloc");
-				*lnp = ln;
 			}
 
-			if ('\n' != buf[i]) {
-				ln[pos++] = buf[i];
+			if ('\n' != blk->buf[i]) {
+				ln->buf[pos++] = blk->buf[i];
 				continue;
 			}
 
 			/* Check for CPP-escaped newline.  */
 
-			if (pos > 0 && '\\' == ln[pos - 1]) {
+			if (pos > 0 && '\\' == ln->buf[pos - 1]) {
 				for (j = pos - 1; j >= 0; j--)
-					if ('\\' != ln[j])
+					if ('\\' != ln->buf[j])
 						break;
 
 				if ( ! ((pos - j) % 2)) {
@@ -317,8 +323,8 @@ fdesc(char **lnp, size_t *lnsz, char **bufp, size_t *bufsz,
 				}
 			}
 
-			ln[pos] = 0;
-			if ( ! mdoc_parseln(mdoc, lnn, ln))
+			ln->buf[pos] = 0;
+			if ( ! mdoc_parseln(mdoc, lnn, ln->buf))
 				return(0);
 			lnn++;
 			pos = 0;
@@ -430,8 +436,12 @@ woptions(int *wflags, char *arg)
 static int
 merr(void *arg, int line, int col, const char *msg)
 {
+	struct curparse *curp;
 
-	warnx("error: %s (line %d, column %d)", msg, line, col);
+	curp = (struct curparse *)arg;
+
+	warnx("%s:%d: error: %s (column %d)", 
+			curp->file, line, msg, col);
 	return(0);
 }
 
@@ -440,30 +450,30 @@ static int
 mwarn(void *arg, int line, int col, 
 		enum mdoc_warn type, const char *msg)
 {
-	int		 flags;
+	struct curparse *curp;
 	char		*wtype;
 
-	flags = *(int *)arg;
+	curp = (struct curparse *)arg;
 	wtype = NULL;
 
 	switch (type) {
 	case (WARN_COMPAT):
 		wtype = "compat";
-		if (flags & WARN_WCOMPAT)
+		if (curp->wflags & WARN_WCOMPAT)
 			break;
 		return(1);
 	case (WARN_SYNTAX):
 		wtype = "syntax";
-		if (flags & WARN_WSYNTAX)
+		if (curp->wflags & WARN_WSYNTAX)
 			break;
 		return(1);
 	}
 
 	assert(wtype);
-	warnx("%s warning: %s (line %d, column %d)", 
-			wtype, msg, line, col);
+	warnx("%s:%d: %s warning: %s (column %d)", 
+			curp->file, line, wtype, msg, col);
 
-	if ( ! (flags & WARN_WERR))
+	if ( ! (curp->wflags & WARN_WERR))
 		return(1);
 
 	warnx("%s: considering warnings as errors", 

@@ -57,8 +57,8 @@ static	int	  post_ar(POST_ARGS);
 static	int	  post_bl(POST_ARGS);
 static	int	  post_bl_width(POST_ARGS);
 static	int	  post_bl_tagwidth(POST_ARGS);
-static	int	  post_bd(POST_ARGS);
 static	int	  post_dd(POST_ARGS);
+static	int	  post_display(POST_ARGS);
 static	int	  post_dt(POST_ARGS);
 static	int	  post_nm(POST_ARGS);
 static	int	  post_os(POST_ARGS);
@@ -67,6 +67,7 @@ static	int	  post_sh(POST_ARGS);
 static	int	  post_std(POST_ARGS);
 
 static	int	  pre_bd(PRE_ARGS);
+static	int	  pre_dl(PRE_ARGS);
 
 #define	merr(m, t) perr((m), (m)->last->line, (m)->last->pos, (t))
 #define	mwarn(m, t) pwarn((m), (m)->last->line, (m)->last->pos, (t))
@@ -80,8 +81,8 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ss */ 
 	{ NULL, NULL }, /* Pp */ 
 	{ NULL, NULL }, /* D1 */
-	{ NULL, NULL }, /* Dl */
-	{ pre_bd, post_bd }, /* Bd */ 
+	{ pre_dl, post_display }, /* Dl */
+	{ pre_bd, post_display }, /* Bd */ 
 	{ NULL, NULL }, /* Ed */
 	{ NULL, post_bl }, /* Bl */ 
 	{ NULL, NULL }, /* El */
@@ -686,6 +687,17 @@ post_prol(POST_ARGS)
 
 
 static int
+pre_dl(PRE_ARGS)
+{
+
+	if (MDOC_BODY != n->type)
+		return(1);
+	m->flags |= MDOC_LITERAL;
+	return(1);
+}
+
+
+static int
 pre_bd(PRE_ARGS)
 {
 	int		 i;
@@ -714,7 +726,7 @@ pre_bd(PRE_ARGS)
 
 
 static int
-post_bd(POST_ARGS)
+post_display(POST_ARGS)
 {
 
 	if (MDOC_BODY == m->last->type)
