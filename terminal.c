@@ -222,21 +222,12 @@ term_flushln(struct termp *p)
 				for (j = 0; j < (int)p->offset; j++)
 					putchar(' ');
 				vis = 0;
-			} else if (vis + vsz > bp)
-				warnx("word breaks right margin");
-
-			/* TODO: hyphenate. */
-
-		} else {
-			if (vis && vis + vsz > bp) {
-				putchar('\n');
-				for (j = 0; j < (int)p->rmargin; j++)
-					putchar(' ');
-				vis = p->rmargin - p->offset;
-			} else if (vis + vsz > bp) 
-				warnx("word breaks right margin");
-
-			/* TODO: hyphenate. */
+			} 
+		} else if (vis && vis + vsz > bp) {
+			putchar('\n');
+			for (j = 0; j < (int)p->rmargin; j++)
+				putchar(' ');
+			vis = p->rmargin - p->offset;
 		}
 
 		/* 
