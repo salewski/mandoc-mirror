@@ -62,7 +62,7 @@ static	inline int	  match(const struct line *,
 
 
 void
-asciifree(void *arg)
+term_asciifree(void *arg)
 {
 	struct asciitab	*tab;
 
@@ -75,7 +75,7 @@ asciifree(void *arg)
 
 
 void *
-ascii2htab(void)
+term_ascii2htab(void)
 {
 	struct asciitab  *tab;
 	void		**htab;
@@ -132,7 +132,7 @@ ascii2htab(void)
 
 
 const char *
-a2ascii(void *arg, const char *p, size_t sz, size_t *rsz)
+term_a2ascii(void *arg, const char *p, size_t sz, size_t *rsz)
 {
 	struct asciitab	 *tab;
 	struct linep	 *pp, *prev;

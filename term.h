@@ -84,17 +84,17 @@ struct	termact {
 			const struct mdoc_node *);
 };
 
-void		 *ascii2htab(void);
-const char	 *a2ascii(void *, const char *, size_t, size_t *);
-void		  asciifree(void *);
+void		 *term_ascii2htab(void);
+const char	 *term_a2ascii(void *, const char *, size_t, size_t *);
+void		  term_asciifree(void *);
 
-void		  newln(struct termp *);
-void		  vspace(struct termp *);
-void		  word(struct termp *, const char *);
-void		  flushln(struct termp *);
-void		  transcode(struct termp *, const char *, size_t);
-void		  subtree(struct termp *, const struct mdoc_meta *, 
-			const struct mdoc_node *); 
+void		  term_newln(struct termp *);
+void		  term_vspace(struct termp *);
+void		  term_word(struct termp *, const char *);
+void		  term_flushln(struct termp *);
+void	  	  term_node(struct termp *, struct termpair *,
+			const struct mdoc_meta *,
+			const struct mdoc_node *);
 
 const	struct termact 	 *termacts;
 

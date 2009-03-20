@@ -434,7 +434,7 @@ termp_dq_pre(DECL_ARGS)
 	if (MDOC_BODY != node->type)
 		return(1);
 
-	word(p, "\\(lq");
+	term_word(p, "\\(lq");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -449,7 +449,7 @@ termp_dq_post(DECL_ARGS)
 		return;
 
 	p->flags |= TERMP_NOSPACE;
-	word(p, "\\(rq");
+	term_word(p, "\\(rq");
 }
 
 
@@ -458,11 +458,9 @@ static int
 termp_it_pre_block(DECL_ARGS)
 {
 
-	newln(p);
+	term_newln(p);
 	if ( ! arg_hasattr(MDOC_Compact, node->parent->parent))
-		/* FIXME: parent->parent->parent? */
-		if (node->prev || node->parent->parent->prev)
-			vspace(p);
+		term_vspace(p);
 
 	return(1);
 }
@@ -664,18 +662,18 @@ termp_it_pre(DECL_ARGS)
 	if (MDOC_HEAD == node->type)
 		switch (type) {
 		case (MDOC_Bullet):
-			word(p, "\\[bu]");
+			term_word(p, "\\[bu]");
 			break;
 		case (MDOC_Dash):
 			/* FALLTHROUGH */
 		case (MDOC_Hyphen):
-			word(p, "\\-");
+			term_word(p, "\\-");
 			break;
 		case (MDOC_Enum):
 			(pair->ppair->ppair->count)++;
 			(void)snprintf(buf, sizeof(buf), "%d.", 
 					pair->ppair->ppair->count);
-			word(p, buf);
+			term_word(p, buf);
 			break;
 		default:
 			break;
@@ -728,14 +726,14 @@ termp_it_post(DECL_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Inset):
 		if (MDOC_BODY == node->type)
-			flushln(p);
+			term_flushln(p);
 		break;
 	case (MDOC_Column):
 		if (MDOC_HEAD == node->type)
-			flushln(p);
+			term_flushln(p);
 		break;
 	default:
-		flushln(p);
+		term_flushln(p);
 		break;
 	}
 
@@ -751,11 +749,11 @@ termp_nm_pre(DECL_ARGS)
 {
 
 	if (SEC_SYNOPSIS == node->sec)
-		newln(p);
+		term_newln(p);
 
 	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_PROG]);
 	if (NULL == node->child)
-		word(p, meta->name);
+		term_word(p, meta->name);
 
 	return(1);
 }
@@ -767,7 +765,7 @@ termp_fl_pre(DECL_ARGS)
 {
 
 	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_CMD_FLAG]);
-	word(p, "\\-");
+	term_word(p, "\\-");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -798,7 +796,7 @@ static int
 termp_pp_pre(DECL_ARGS)
 {
 
-	vspace(p);
+	term_vspace(p);
 	return(1);
 }
 
@@ -810,7 +808,7 @@ termp_st_pre(DECL_ARGS)
 	const char	*cp;
 
 	if (node->child && (cp = mdoc_a2st(node->child->string)))
-		word(p, cp);
+		term_word(p, cp);
 	return(0);
 }
 
@@ -821,7 +819,7 @@ termp_rs_pre(DECL_ARGS)
 {
 
 	if (MDOC_BLOCK == node->type && node->prev)
-		vspace(p);
+		term_vspace(p);
 	return(1);
 }
 
@@ -837,23 +835,23 @@ termp_rv_pre(DECL_ARGS)
 	if (1 != node->args->argv[i].sz)
 		errx(1, "expected -std argument");
 
-	newln(p);
-	word(p, "The");
+	term_newln(p);
+	term_word(p, "The");
 
 	p->flags |= ttypes[TTYPE_FUNC_NAME];
-	word(p, *node->args->argv[i].value);
+	term_word(p, *node->args->argv[i].value);
 	p->flags &= ~ttypes[TTYPE_FUNC_NAME];
 	p->flags |= TERMP_NOSPACE;
 
-       	word(p, "() function returns the value 0 if successful;");
-       	word(p, "otherwise the value -1 is returned and the");
-       	word(p, "global variable");
+       	term_word(p, "() function returns the value 0 if successful;");
+       	term_word(p, "otherwise the value -1 is returned and the");
+       	term_word(p, "global variable");
 
 	p->flags |= ttypes[TTYPE_VAR_DECL];
-	word(p, "errno");
+	term_word(p, "errno");
 	p->flags &= ~ttypes[TTYPE_VAR_DECL];
 
-       	word(p, "is set to indicate the error.");
+       	term_word(p, "is set to indicate the error.");
 
 	return(1);
 }
@@ -870,11 +868,11 @@ termp_ex_pre(DECL_ARGS)
 	if (1 != node->args->argv[i].sz)
 		errx(1, "expected -std argument");
 
-	word(p, "The");
+	term_word(p, "The");
 	p->flags |= ttypes[TTYPE_PROG];
-	word(p, *node->args->argv[i].value);
+	term_word(p, *node->args->argv[i].value);
 	p->flags &= ~ttypes[TTYPE_PROG];
-       	word(p, "utility exits 0 on success, and >0 if an error occurs.");
+       	term_word(p, "utility exits 0 on success, and >0 if an error occurs.");
 
 	return(1);
 }
@@ -885,7 +883,7 @@ static int
 termp_nd_pre(DECL_ARGS)
 {
 
-	word(p, "\\-");
+	term_word(p, "\\-");
 	return(1);
 }
 
@@ -896,7 +894,7 @@ termp_bl_post(DECL_ARGS)
 {
 
 	if (MDOC_BLOCK == node->type)
-		newln(p);
+		term_newln(p);
 }
 
 
@@ -908,7 +906,7 @@ termp_op_post(DECL_ARGS)
 	if (MDOC_BODY != node->type) 
 		return;
 	p->flags |= TERMP_NOSPACE;
-	word(p, "\\(rB");
+	term_word(p, "\\(rB");
 }
 
 
@@ -920,15 +918,15 @@ termp_xr_pre(DECL_ARGS)
 
 	if (NULL == (n = node->child))
 		errx(1, "expected text line argument");
-	word(p, n->string);
+	term_word(p, n->string);
 	if (NULL == (n = n->next)) 
 		return(0);
 	p->flags |= TERMP_NOSPACE;
-	word(p, "(");
+	term_word(p, "(");
 	p->flags |= TERMP_NOSPACE;
-	word(p, n->string);
+	term_word(p, n->string);
 	p->flags |= TERMP_NOSPACE;
-	word(p, ")");
+	term_word(p, ")");
 	return(0);
 }
 
@@ -950,7 +948,7 @@ termp_vt_post(DECL_ARGS)
 {
 
 	if (node->sec == SEC_SYNOPSIS)
-		vspace(p);
+		term_vspace(p);
 }
 
 
@@ -975,9 +973,9 @@ termp_fd_post(DECL_ARGS)
 
 	if (node->sec != SEC_SYNOPSIS)
 		return;
-	newln(p);
+	term_newln(p);
 	if (node->next && MDOC_Fd != node->next->tok)
-		vspace(p);
+		term_vspace(p);
 }
 
 
@@ -988,7 +986,7 @@ termp_sh_pre(DECL_ARGS)
 
 	switch (node->type) {
 	case (MDOC_HEAD):
-		vspace(p);
+		term_vspace(p);
 		TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_SECTION]);
 		break;
 	case (MDOC_BODY):
@@ -1008,10 +1006,10 @@ termp_sh_post(DECL_ARGS)
 
 	switch (node->type) {
 	case (MDOC_HEAD):
-		newln(p);
+		term_newln(p);
 		break;
 	case (MDOC_BODY):
-		newln(p);
+		term_newln(p);
 		p->offset = 0;
 		break;
 	default:
@@ -1027,7 +1025,7 @@ termp_op_pre(DECL_ARGS)
 
 	switch (node->type) {
 	case (MDOC_BODY):
-		word(p, "\\(lB");
+		term_word(p, "\\(lB");
 		p->flags |= TERMP_NOSPACE;
 		break;
 	default:
@@ -1042,7 +1040,7 @@ static int
 termp_bt_pre(DECL_ARGS)
 {
 
-	word(p, "is currently in beta test.");
+	term_word(p, "is currently in beta test.");
 	return(1);
 }
 
@@ -1056,10 +1054,10 @@ termp_lb_pre(DECL_ARGS)
 	if (NULL == node->child)
 		errx(1, "expected text line argument");
 	if ((lb = mdoc_a2lib(node->child->string))) {
-		word(p, lb);
+		term_word(p, lb);
 		return(0);
 	}
-	word(p, "library");
+	term_word(p, "library");
 	return(1);
 }
 
@@ -1069,7 +1067,7 @@ static void
 termp_lb_post(DECL_ARGS)
 {
 
-	newln(p);
+	term_newln(p);
 }
 
 
@@ -1078,7 +1076,7 @@ static int
 termp_ud_pre(DECL_ARGS)
 {
 
-	word(p, "currently under development.");
+	term_word(p, "currently under development.");
 	return(1);
 }
 
@@ -1090,7 +1088,7 @@ termp_d1_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	newln(p);
+	term_newln(p);
 	p->offset += (pair->offset = INDENT);
 	return(1);
 }
@@ -1103,7 +1101,7 @@ termp_d1_post(DECL_ARGS)
 
 	if (MDOC_BODY != node->type) 
 		return;
-	newln(p);
+	term_newln(p);
 	p->offset -= pair->offset;
 }
 
@@ -1115,7 +1113,7 @@ termp_aq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "\\(la");
+	term_word(p, "\\(la");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1129,7 +1127,7 @@ termp_aq_post(DECL_ARGS)
 	if (MDOC_BODY != node->type)
 		return;
 	p->flags |= TERMP_NOSPACE;
-	word(p, "\\(ra");
+	term_word(p, "\\(ra");
 }
 
 
@@ -1140,7 +1138,7 @@ termp_ft_pre(DECL_ARGS)
 
 	if (SEC_SYNOPSIS == node->sec)
 		if (node->prev && MDOC_Fo == node->prev->tok)
-			vspace(p);
+			term_vspace(p);
 	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_FUNC_TYPE]);
 	return(1);
 }
@@ -1152,7 +1150,7 @@ termp_ft_post(DECL_ARGS)
 {
 
 	if (SEC_SYNOPSIS == node->sec)
-		newln(p);
+		term_newln(p);
 }
 
 
@@ -1168,24 +1166,24 @@ termp_fn_pre(DECL_ARGS)
 	/* FIXME: can be "type funcname" "type varname"... */
 
 	p->flags |= ttypes[TTYPE_FUNC_NAME];
-	word(p, node->child->string);
+	term_word(p, node->child->string);
 	p->flags &= ~ttypes[TTYPE_FUNC_NAME];
 
-	word(p, "(");
+	term_word(p, "(");
 
 	p->flags |= TERMP_NOSPACE;
 	for (n = node->child->next; n; n = n->next) {
 		p->flags |= ttypes[TTYPE_FUNC_ARG];
-		word(p, n->string);
+		term_word(p, n->string);
 		p->flags &= ~ttypes[TTYPE_FUNC_ARG];
 		if (n->next)
-			word(p, ",");
+			term_word(p, ",");
 	}
 
-	word(p, ")");
+	term_word(p, ")");
 
 	if (SEC_SYNOPSIS == node->sec)
-		word(p, ";");
+		term_word(p, ";");
 
 	return(0);
 }
@@ -1197,7 +1195,7 @@ termp_fn_post(DECL_ARGS)
 {
 
 	if (node->sec == SEC_SYNOPSIS && node->next)
-		vspace(p);
+		term_vspace(p);
 
 }
 
@@ -1225,14 +1223,14 @@ termp_fa_pre(DECL_ARGS)
 
 	for (n = node->child; n; n = n->next) {
 		p->flags |= ttypes[TTYPE_FUNC_ARG];
-		word(p, n->string);
+		term_word(p, n->string);
 		p->flags &= ~ttypes[TTYPE_FUNC_ARG];
 		if (n->next)
-			word(p, ",");
+			term_word(p, ",");
 	}
 
 	if (node->next && node->next->tok == MDOC_Fa)
-		word(p, ",");
+		term_word(p, ",");
 
 	return(0);
 }
@@ -1252,13 +1250,23 @@ termp_va_pre(DECL_ARGS)
 static int
 termp_bd_pre(DECL_ARGS)
 {
-	const struct mdoc_node  *n;
-	int		         i, type;
+	int	         i, type, ln;
+
+	/*
+	 * This is fairly tricky due primarily to crappy documentation.
+	 * If -ragged or -filled are specified, the block does nothing
+	 * but change the indentation.
+	 *
+	 * If, on the other hand, -unfilled or -literal are specified,
+	 * then the game changes.  Text is printed exactly as entered in
+	 * the display: if a macro line, a newline is appended to the
+	 * line.  Blank lines are allowed.
+	 */
 
 	if (MDOC_BLOCK == node->type) {
 		/* FIXME: parent prev? */
 		if (node->prev)
-			vspace(p);
+			term_vspace(p);
 		return(1);
 	} else if (MDOC_BODY != node->type)
 		return(1);
@@ -1305,15 +1313,22 @@ termp_bd_pre(DECL_ARGS)
 		return(1);
 	}
 
-	p->flags |= TERMP_LITERAL;
+	/*
+	 * Tricky.  Iterate through all children.  If we're on a
+	 * different parse line, append a newline and then the contents.
+	 * Ew.
+	 */
 
-	for (n = node->child; n; n = n->next) {
-		if (MDOC_TEXT != n->type) {
-			warnx("non-text children not yet allowed");
-			continue;
+	p->flags |= TERMP_LITERAL;
+	ln = node->child ? node->child->line : 0;
+
+	for (node = node->child; node; node = node->next) {
+		if (ln < node->line) {
+			term_flushln(p);
+			p->flags |= TERMP_NOSPACE;
 		}
-		word(p, n->string);
-		flushln(p);
+		ln = node->line;
+		term_node(p, pair, meta, node);
 	}
 
 	return(0);
@@ -1328,11 +1343,9 @@ termp_bd_post(DECL_ARGS)
 	if (MDOC_BODY != node->type) 
 		return;
 
-	if ( ! (p->flags & TERMP_LITERAL))
-		flushln(p);
-
 	p->flags &= ~TERMP_LITERAL;
 	p->offset = pair->offset;
+	p->flags |= TERMP_NOSPACE;
 }
 
 
@@ -1343,7 +1356,7 @@ termp_qq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "\"");
+	term_word(p, "\"");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1357,7 +1370,7 @@ termp_qq_post(DECL_ARGS)
 	if (MDOC_BODY != node->type)
 		return;
 	p->flags |= TERMP_NOSPACE;
-	word(p, "\"");
+	term_word(p, "\"");
 }
 
 
@@ -1366,7 +1379,7 @@ static int
 termp_bsx_pre(DECL_ARGS)
 {
 
-	word(p, "BSDI BSD/OS");
+	term_word(p, "BSDI BSD/OS");
 	return(1);
 }
 
@@ -1378,7 +1391,7 @@ termp_bx_post(DECL_ARGS)
 
 	if (node->child)
 		p->flags |= TERMP_NOSPACE;
-	word(p, "BSD");
+	term_word(p, "BSD");
 }
 
 
@@ -1387,7 +1400,7 @@ static int
 termp_ox_pre(DECL_ARGS)
 {
 
-	word(p, "OpenBSD");
+	term_word(p, "OpenBSD");
 	return(1);
 }
 
@@ -1397,7 +1410,7 @@ static int
 termp_dx_pre(DECL_ARGS)
 {
 
-	word(p, "DragonFly");
+	term_word(p, "DragonFly");
 	return(1);
 }
 
@@ -1407,7 +1420,7 @@ static int
 termp_ux_pre(DECL_ARGS)
 {
 
-	word(p, "UNIX");
+	term_word(p, "UNIX");
 	return(1);
 }
 
@@ -1417,7 +1430,7 @@ static int
 termp_fx_pre(DECL_ARGS)
 {
 
-	word(p, "FreeBSD");
+	term_word(p, "FreeBSD");
 	return(1);
 }
 
@@ -1427,7 +1440,7 @@ static int
 termp_nx_pre(DECL_ARGS)
 {
 
-	word(p, "NetBSD");
+	term_word(p, "NetBSD");
 	return(1);
 }
 
@@ -1439,7 +1452,7 @@ termp_sq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "\\(oq");
+	term_word(p, "\\(oq");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1453,7 +1466,7 @@ termp_sq_post(DECL_ARGS)
 	if (MDOC_BODY != node->type)
 		return;
 	p->flags |= TERMP_NOSPACE;
-	word(p, "\\(aq");
+	term_word(p, "\\(aq");
 }
 
 
@@ -1484,9 +1497,9 @@ termp_ss_pre(DECL_ARGS)
 
 	switch (node->type) {
 	case (MDOC_BLOCK):
-		newln(p);
+		term_newln(p);
 		if (node->prev)
-			vspace(p);
+			term_vspace(p);
 		break;
 	case (MDOC_HEAD):
 		TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_SSECTION]);
@@ -1507,7 +1520,7 @@ termp_ss_post(DECL_ARGS)
 
 	switch (node->type) {
 	case (MDOC_HEAD):
-		newln(p);
+		term_newln(p);
 		p->offset = INDENT;
 		break;
 	default:
@@ -1542,7 +1555,7 @@ termp_cd_pre(DECL_ARGS)
 {
 
 	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_CONFIG]);
-	newln(p);
+	term_newln(p);
 	return(1);
 }
 
@@ -1573,8 +1586,8 @@ termp_in_pre(DECL_ARGS)
 {
 
 	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_INCLUDE]);
-	word(p, "#include");
-	word(p, "<");
+	term_word(p, "#include");
+	term_word(p, "<");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1586,13 +1599,13 @@ termp_in_post(DECL_ARGS)
 {
 
 	p->flags |= TERMP_NOSPACE;
-	word(p, ">");
+	term_word(p, ">");
 
-	newln(p);
+	term_newln(p);
 	if (SEC_SYNOPSIS != node->sec)
 		return;
 	if (node->next && MDOC_In != node->next->tok)
-		vspace(p);
+		term_vspace(p);
 }
 
 
@@ -1609,7 +1622,7 @@ termp_at_pre(DECL_ARGS)
 	if (NULL == att)
 		att = "AT&T UNIX";
 
-	word(p, att);
+	term_word(p, att);
 	return(0);
 }
 
@@ -1621,7 +1634,7 @@ termp_brq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "\\(lC");
+	term_word(p, "\\(lC");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1635,7 +1648,7 @@ termp_brq_post(DECL_ARGS)
 	if (MDOC_BODY != node->type)
 		return;
 	p->flags |= TERMP_NOSPACE;
-	word(p, "\\(rC");
+	term_word(p, "\\(rC");
 }
 
 
@@ -1646,7 +1659,7 @@ termp_bq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "\\(lB");
+	term_word(p, "\\(lB");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1660,7 +1673,7 @@ termp_bq_post(DECL_ARGS)
 	if (MDOC_BODY != node->type)
 		return;
 	p->flags |= TERMP_NOSPACE;
-	word(p, "\\(rB");
+	term_word(p, "\\(rB");
 }
 
 
@@ -1671,7 +1684,7 @@ termp_pq_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
-	word(p, "\\&(");
+	term_word(p, "\\&(");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1684,7 +1697,7 @@ termp_pq_post(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return;
-	word(p, ")");
+	term_word(p, ")");
 }
 
 
@@ -1695,7 +1708,7 @@ termp_fo_pre(DECL_ARGS)
 	const struct mdoc_node *n;
 
 	if (MDOC_BODY == node->type) {
-		word(p, "(");
+		term_word(p, "(");
 		p->flags |= TERMP_NOSPACE;
 		return(1);
 	} else if (MDOC_HEAD != node->type) 
@@ -1707,7 +1720,7 @@ termp_fo_pre(DECL_ARGS)
 	for (n = node->child; n; n = n->next) {
 		if (MDOC_TEXT != n->type)
 			errx(1, "expected text line argument");
-		word(p, n->string);
+		term_word(p, n->string);
 	}
 	p->flags &= ~ttypes[TTYPE_FUNC_NAME];
 
@@ -1723,10 +1736,10 @@ termp_fo_post(DECL_ARGS)
 	if (MDOC_BODY != node->type)
 		return;
 	p->flags |= TERMP_NOSPACE;
-	word(p, ")");
+	term_word(p, ")");
 	p->flags |= TERMP_NOSPACE;
-	word(p, ";");
-	newln(p);
+	term_word(p, ";");
+	term_newln(p);
 }
 
 
@@ -1809,7 +1822,7 @@ termp_ap_pre(DECL_ARGS)
 {
 
 	p->flags |= TERMP_NOSPACE;
-	word(p, "\\(aq");
+	term_word(p, "\\(aq");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1831,7 +1844,7 @@ termp____post(DECL_ARGS)
 {
 
 	p->flags |= TERMP_NOSPACE;
-	word(p, node->next ? "," : ".");
+	term_word(p, node->next ? "," : ".");
 }
 
 
@@ -1845,14 +1858,14 @@ termp_lk_pre(DECL_ARGS)
 		errx(1, "expected line argument");
 
 	p->flags |= ttypes[TTYPE_LINK_ANCHOR];
-	word(p, n->string);
+	term_word(p, n->string);
 	p->flags &= ~ttypes[TTYPE_LINK_ANCHOR];
 	p->flags |= TERMP_NOSPACE;
-	word(p, ":");
+	term_word(p, ":");
 
 	p->flags |= ttypes[TTYPE_LINK_TEXT];
 	for ( ; n; n = n->next) {
-		word(p, n->string);
+		term_word(p, n->string);
 	}
 	p->flags &= ~ttypes[TTYPE_LINK_TEXT];
 

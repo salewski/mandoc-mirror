@@ -26,7 +26,8 @@
 .Nm mdoc_endparse ,
 .Nm mdoc_node ,
 .Nm mdoc_meta ,
-.Nm mdoc_free
+.Nm mdoc_free ,
+.Nm mdoc_reset
 .Nd mdoc macro compiler library
 .\" SECTION
 .Sh SYNOPSIS
@@ -34,7 +35,9 @@
 .Vt extern const char * const * mdoc_macronames;
 .Vt extern const char * const * mdoc_argnames;
 .Ft "struct mdoc *"
-.Fn mdoc_alloc "void *data" "const struct mdoc_cb *cb"
+.Fn mdoc_alloc "void *data" "int pflags" "const struct mdoc_cb *cb"
+.Ft void
+.Fn mdoc_reset "struct mdoc *mdoc"
 .Ft void
 .Fn mdoc_free "struct mdoc *mdoc"
 .Ft int
@@ -75,7 +78,10 @@ and
 .Fn mdoc_meta ,
 then free all allocated memory with
 .Fn mdoc_free .
-See the
+The
+.Fn mdoc_reset
+function may be used in order to reset the parser for another input
+sequence.  See the
 .Sx EXAMPLES
 section for a full example.
 .\" PARAGRAPH
@@ -123,9 +129,18 @@ Allocates a parsing structure.  The
 .Fa data
 pointer is passed to callbacks in
 .Fa cb , 
-which are documented further in the header file.  Returns NULL on
-failure.  If non-NULL, the pointer must be freed with
+which are documented further in the header file.  
+The
+.Fa pflags
+arguments are defined in
+.Pa mdoc.h .
+Returns NULL on failure.  If non-NULL, the pointer must be freed with
 .Fn mdoc_free .
+.\" LIST-ITEM
+.It Fn mdoc_reset
+Reset the parser for another parse routine.  After its use, 
+.Fn mdoc_parseln
+behaves as if invoked for the first time.
 .\" LIST-ITEM
 .It Fn mdoc_free
 Free all resources of a parser.  The pointer is no longer valid after
@@ -285,9 +300,7 @@ mdoc_free(mdoc);
 .Ed
 .\" SECTION
 .Sh SEE ALSO
-.Xr mdocterm 1 ,
-.Xr mdoclint 1 ,
-.Xr mdoctree 1 ,
+.Xr mandoc 1 ,
 .Xr mdoc 7
 .\" SECTION
 .Sh AUTHORS

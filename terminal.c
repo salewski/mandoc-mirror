@@ -81,7 +81,7 @@ terminal_run(void *arg, const struct mdoc *mdoc)
 	p = (struct termp *)arg;
 
 	if (NULL == p->symtab)
-		p->symtab = ascii2htab();
+		p->symtab = term_ascii2htab();
 
 	termp_head(p, mdoc_meta(mdoc));
 	termp_body(p, NULL, mdoc_meta(mdoc), mdoc_node(mdoc));
@@ -106,7 +106,7 @@ termp_free(struct termp *p)
 	if (p->buf)
 		free(p->buf);
 	if (TERMENC_ASCII == p->enc && p->symtab)
-		asciifree(p->symtab);
+		term_asciifree(p->symtab);
 
 	free(p);
 }
@@ -161,7 +161,7 @@ termp_alloc(enum termenc enc)
  *  possible).
  */
 void
-flushln(struct termp *p)
+term_flushln(struct termp *p)
 {
 	int		 i, j;
 	size_t		 vsz, vis, maxvis, mmax, bp;
@@ -294,7 +294,7 @@ flushln(struct termp *p)
  * assertion.
  */
 void
-newln(struct termp *p)
+term_newln(struct termp *p)
 {
 
 	p->flags |= TERMP_NOSPACE;
@@ -302,7 +302,7 @@ newln(struct termp *p)
 		p->flags &= ~TERMP_NOLPAD;
 		return;
 	}
-	flushln(p);
+	term_flushln(p);
 	p->flags &= ~TERMP_NOLPAD;
 }
 
@@ -314,10 +314,10 @@ newln(struct termp *p)
  * assertion.
  */
 void
-vspace(struct termp *p)
+term_vspace(struct termp *p)
 {
 
-	newln(p);
+	term_newln(p);
 	putchar('\n');
 }
 
@@ -329,17 +329,16 @@ vspace(struct termp *p)
  * the word and put it verbatim into the output buffer.
  */
 void
-word(struct termp *p, const char *word)
+term_word(struct termp *p, const char *word)
 {
 	int 		 i, j, len;
 
+	len = (int)strlen(word);
+
 	if (p->flags & TERMP_LITERAL) {
-		termp_pword(p, word, (int)strlen(word));
+		termp_pword(p, word, len);
 		return;
 	}
-
-	if (0 == (len = (int)strlen(word)))
-		errx(1, "blank line not in literal context");
 
 	if (mdoc_isdelim(word)) {
 		if ( ! (p->flags & TERMP_IGNDELIM))
@@ -373,14 +372,26 @@ word(struct termp *p, const char *word)
 }
 
 
+static void
+termp_body(struct termp *p, struct termpair *ppair,
+		const struct mdoc_meta *meta,
+		const struct mdoc_node *node)
+{
+
+	term_node(p, ppair, meta, node);
+	if (node->next)
+		termp_body(p, ppair, meta, node->next);
+}
+
+
 /*
  * This is the main function for printing out nodes.  It's constituted
  * of PRE and POST functions, which correspond to prefix and infix
  * processing.  The termpair structure allows data to persist between
  * prefix and postfix invocations.
  */
-static void
-termp_body(struct termp *p, struct termpair *ppair,
+void
+term_node(struct termp *p, struct termpair *ppair,
 		const struct mdoc_meta *meta,
 		const struct mdoc_node *node)
 {
@@ -405,7 +416,7 @@ termp_body(struct termp *p, struct termpair *ppair,
 			if ( ! (*termacts[node->tok].pre)(p, &pair, meta, node))
 				dochild = 0;
 	} else /* MDOC_TEXT == node->type */
-		word(p, node->string);
+		term_word(p, node->string);
 
 	/* Children. */
 
@@ -423,11 +434,6 @@ termp_body(struct termp *p, struct termpair *ppair,
 	if (MDOC_TEXT != node->type)
 		if (termacts[node->tok].post)
 			(*termacts[node->tok].post)(p, &pair, meta, node);
-
-	/* Siblings. */
-
-	if (node->next)
-		termp_body(p, ppair, meta, node->next);
 }
 
 
@@ -460,22 +466,22 @@ termp_foot(struct termp *p, const struct mdoc_meta *meta)
 	 * OS                                            MDOCDATE
 	 */
 
-	vspace(p);
+	term_vspace(p);
 
 	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
 	p->rmargin = p->maxrmargin - strlen(buf);
 	p->offset = 0;
 
-	word(p, os);
-	flushln(p);
+	term_word(p, os);
+	term_flushln(p);
 
 	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 	p->offset = p->rmargin;
 	p->rmargin = p->maxrmargin;
 	p->flags &= ~TERMP_NOBREAK;
 
-	word(p, buf);
-	flushln(p);
+	term_word(p, buf);
+	term_flushln(p);
 
 	free(buf);
 	free(os);
@@ -524,23 +530,23 @@ termp_head(struct termp *p, const struct mdoc_meta *meta)
 	p->rmargin = (p->maxrmargin - strlen(buf)) / 2;
 	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
 
-	word(p, title);
-	flushln(p);
+	term_word(p, title);
+	term_flushln(p);
 
 	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 	p->offset = p->rmargin;
 	p->rmargin = p->maxrmargin - strlen(title);
 
-	word(p, buf);
-	flushln(p);
+	term_word(p, buf);
+	term_flushln(p);
 
 	p->offset = p->rmargin;
 	p->rmargin = p->maxrmargin;
 	p->flags &= ~TERMP_NOBREAK;
 	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 
-	word(p, title);
-	flushln(p);
+	term_word(p, title);
+	term_flushln(p);
 
 	p->rmargin = p->maxrmargin;
 	p->offset = 0;
@@ -562,7 +568,7 @@ termp_nescape(struct termp *p, const char *word, size_t len)
 	const char	*rhs;
 	size_t		 sz;
 
-	if (NULL == (rhs = a2ascii(p->symtab, word, len, &sz))) 
+	if (NULL == (rhs = term_a2ascii(p->symtab, word, len, &sz))) 
 		return;
 	termp_stringa(p, rhs, sz);
 }
@@ -637,8 +643,7 @@ termp_pword(struct termp *p, const char *word, int len)
 {
 	int		 i;
 
-	if ( ! (TERMP_NOSPACE & p->flags) && 
-			! (TERMP_LITERAL & p->flags))
+	if ( ! (TERMP_NOSPACE & p->flags))
 		termp_chara(p, ' ');
 
 	if ( ! (p->flags & TERMP_NONOSPACE))

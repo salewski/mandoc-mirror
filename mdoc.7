@@ -47,7 +47,23 @@ and, in certain circumstances, the tab character
 .Sq \et .
 All manuals must have
 .Sq \en
-line termination.
+line termination.  
+.Pp
+The only time a blank line is acceptable is within
+the context of 
+.Sq \&Bd \-literal
+or
+.Sq \&Bd \-unfilled .
+.Pp
+Tab characters 
+.Pq \et
+are only acceptable when delimiting 
+.Sq \&Bl \-column 
+and in
+.Sq \&Bd \-literal
+or
+.Sq \&Bd \-unfilled
+contexts.
 .\" SUB-SECTION
 .Ss Reserved Characters
 Within a macro line, the following characters are reserved:

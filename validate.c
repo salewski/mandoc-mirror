@@ -40,6 +40,7 @@
 #define	POST_ARGS	struct mdoc *mdoc
 
 enum	merr {
+	EESCAPE,
 	EPRINT,
 	ENODATA,
 	ENOPROLOGUE,
@@ -56,6 +57,7 @@ enum	merr {
 };
 
 enum	mwarn {
+	WESCAPE,
 	WWRONGMSEC,
 	WSECOOO,
 	WSECREP,
@@ -192,10 +194,7 @@ static	v_post	posts_at[] = { post_at, NULL };
 static	v_post	posts_xr[] = { eerr_ge1, eerr_le2, NULL };
 static	v_post	posts_nm[] = { post_nm, NULL };
 static	v_post	posts_bf[] = { hwarn_le1, post_bf, NULL };
-static	v_post	posts_rs[] = { herr_eq0, bwarn_ge1, NULL };
 static	v_post	posts_fo[] = { hwarn_eq1, bwarn_ge1, NULL };
-static	v_post	posts_bk[] = { herr_eq0, bwarn_ge1, NULL };
-static	v_post	posts_fd[] = { ewarn_ge1, NULL };
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL }, 			/* \" */
@@ -222,7 +221,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_text },			/* Ev */ 
 	{ pres_ex, posts_ex },			/* Ex */ 
 	{ NULL, posts_text },			/* Fa */ 
-	{ pres_fd, posts_fd },			/* Fd */
+	{ pres_fd, posts_wtext },		/* Fd */
 	{ NULL, NULL },				/* Fl */
 	{ NULL, posts_text },			/* Fn */ 
 	{ NULL, posts_wtext },			/* Ft */ 
@@ -283,7 +282,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Qo */
 	{ NULL, posts_wline },			/* Qq */
 	{ NULL, NULL },				/* Re */
-	{ NULL, posts_rs },			/* Rs */
+	{ NULL, posts_wline },			/* Rs */
 	{ NULL, NULL },				/* Sc */
 	{ NULL, NULL },				/* So */
 	{ NULL, posts_wline },			/* Sq */
@@ -298,7 +297,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Fc */ 
 	{ NULL, NULL },				/* Oo */
 	{ NULL, NULL },				/* Oc */
-	{ NULL, posts_bk },			/* Bk */
+	{ NULL, posts_wline },			/* Bk */
 	{ NULL, NULL },				/* Ek */
 	{ NULL, posts_notext },			/* Bt */
 	{ NULL, NULL },				/* Hf */
@@ -384,6 +383,9 @@ perr(struct mdoc *m, int line, int pos, enum merr type)
 	
 	p = NULL;
 	switch (type) {
+	case (EESCAPE):
+		p = "invalid escape sequence";
+		break;
 	case (EPRINT):
 		p = "invalid character";
 		break;
@@ -457,6 +459,9 @@ pwarn(struct mdoc *m, int line, int pos, enum mwarn type)
 	case (WPROLOOO):
 		p = "prologue macros out-of-order";
 		c = WARN_COMPAT;
+		break;
+	case (WESCAPE):
+		p = "invalid escape sequence";
 		break;
 	case (WNOLINE):
 		p = "suggested no line arguments";
@@ -690,22 +695,24 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 	size_t		 c;
 
 	/* FIXME: indicate deprecated escapes \*(xx and \*x. */
-	/* FIXME: don't allow tabs unless in literal mode. */
 
 	for ( ; *p; p++) {
-		if ('\t' != *p && ! isprint((u_char)*p))
+		if ('\t' == *p) {
+			if ( ! (MDOC_LITERAL & mdoc->flags))
+				return(perr(mdoc, line, pos, EPRINT));
+		} else if ( ! isprint((u_char)*p))
 			return(perr(mdoc, line, pos, EPRINT));
+
 		if ('\\' != *p)
 			continue;
+
 		if ((c = mdoc_isescape(p))) {
 			p += (int)c - 1;
 			continue;
 		}
 		if ( ! (MDOC_IGN_ESCAPE & mdoc->pflags))
-			return(mdoc_perr(mdoc, line, pos, 
-					"invalid escape sequence"));
-		if ( ! mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX,
-					"invalid escape sequence"))
+			return(perr(mdoc, line, pos, EESCAPE));
+		if ( ! pwarn(mdoc, line, pos, WESCAPE))
 			return(0);
 	}
 

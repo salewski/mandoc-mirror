@@ -29,7 +29,7 @@
 /*
  * Main caller in the libmdoc library.  This begins the parsing routine,
  * handles allocation of data, and so forth.  Most of the "work" is done
- * in macro.c and validate.c.
+ * in macro.c, validate.c and action.c.
  */
 
 static	struct mdoc_node *mdoc_node_alloc(const struct mdoc *);
@@ -94,10 +94,17 @@ const	char * const *mdoc_macronames = __mdoc_macronames;
 const	char * const *mdoc_argnames = __mdoc_argnames;
 
 
+/*
+ * Get the first (root) node of the parse tree.
+ */
 const struct mdoc_node *
 mdoc_node(const struct mdoc *mdoc)
 {
 
+	if (MDOC_HALT & mdoc->flags)
+		return(NULL);
+	if (mdoc->first)
+		assert(MDOC_ROOT == mdoc->first->type);
 	return(mdoc->first);
 }
 
@@ -106,10 +113,16 @@ const struct mdoc_meta *
 mdoc_meta(const struct mdoc *mdoc)
 {
 
+	if (MDOC_HALT & mdoc->flags)
+		return(NULL);
 	return(&mdoc->meta);
 }
 
 
+/*
+ * Free up all resources contributed by a parse:  the node tree, meta-data and
+ * so on.  Then reallocate the root node for another parse.
+ */
 void
 mdoc_reset(struct mdoc *mdoc)
 {
@@ -138,14 +151,15 @@ mdoc_reset(struct mdoc *mdoc)
 }
 
 
+/*
+ * Completely free up all resources.
+ */
 void
 mdoc_free(struct mdoc *mdoc)
 {
 
 	if (mdoc->first)
 		mdoc_node_freelist(mdoc->first);
-	if (mdoc->htab)
-		mdoc_tokhash_free(mdoc->htab);
 	if (mdoc->meta.title)
 		free(mdoc->meta.title);
 	if (mdoc->meta.os)
@@ -156,6 +170,9 @@ mdoc_free(struct mdoc *mdoc)
 		free(mdoc->meta.arch);
 	if (mdoc->meta.vol)
 		free(mdoc->meta.vol);
+
+	if (mdoc->htab)
+		mdoc_tokhash_free(mdoc->htab);
 
 	free(mdoc);
 }
@@ -182,6 +199,10 @@ mdoc_alloc(void *data, int pflags, const struct mdoc_cb *cb)
 }
 
 
+/*
+ * Climb back up the parse tree, validating open scopes.  Mostly calls
+ * through to macro_end in macro.c.
+ */
 int
 mdoc_endparse(struct mdoc *mdoc)
 {
@@ -317,6 +338,8 @@ mdoc_node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	}
 
 	if ( ! mdoc_valid_pre(mdoc, p))
+		return(0);
+	if ( ! mdoc_action_pre(mdoc, p))
 		return(0);
 
 	switch (p->type) {
@@ -512,17 +535,21 @@ mdoc_node_freelist(struct mdoc_node *p)
  * control character.
  */
 static int
-parsetext(struct mdoc *mdoc, int line, char *buf)
+parsetext(struct mdoc *m, int line, char *buf)
 {
 
-	if (SEC_PROLOGUE == mdoc->lastnamed)
-		return(mdoc_perr(mdoc, line, 0,
+	if (SEC_PROLOGUE == m->lastnamed)
+		return(mdoc_perr(m, line, 0,
 			"text disallowed in prologue"));
 
-	if ( ! mdoc_word_alloc(mdoc, line, 0, buf))
+	if (0 == buf[0] && ! (MDOC_LITERAL & m->flags))
+		return(mdoc_perr(m, line, 0,
+			"blank lines only in literal context"));
+
+	if ( ! mdoc_word_alloc(m, line, 0, buf))
 		return(0);
 
-	mdoc->next = MDOC_NEXT_SIBLING;
+	m->next = MDOC_NEXT_SIBLING;
 	return(1);
 }
 
@@ -600,6 +627,12 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 
 	if ( ! mdoc_macro(m, c, ln, 1, &i, buf)) 
 		goto err;
+
+	/*
+	 * If we're in literal mode, then add a newline to the end of
+	 * macro lines.  Our frontends will interpret this correctly
+	 * (it's documented in mdoc.3).
+	 */
 
 	return(1);
 
