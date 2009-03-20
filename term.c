@@ -1343,6 +1343,7 @@ termp_bd_post(DECL_ARGS)
 	if (MDOC_BODY != node->type) 
 		return;
 
+	term_flushln(p);
 	p->flags &= ~TERMP_LITERAL;
 	p->offset = pair->offset;
 	p->flags |= TERMP_NOSPACE;
