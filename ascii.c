@@ -92,7 +92,6 @@ term_ascii2htab(void)
 	if (NULL == (tab = malloc(sizeof(struct asciitab))))
 		err(1, "malloc");
 
-	assert(0 == sizeof(lines) % sizeof(struct line));
 	len = sizeof(lines) / sizeof(struct line);
 
 	if (NULL == (p = calloc((size_t)len, sizeof(struct linep))))

@@ -86,7 +86,7 @@ static	int		  fdesc(struct buf *, struct buf *,
 int
 main(int argc, char *argv[])
 {
-	int		 c, rc, fflags, wflags;
+	int		 c, rc, fflags;
 	struct mdoc_cb	 cb;
 	struct mdoc	*mdoc;
 	void		*outdata;
@@ -96,7 +96,7 @@ main(int argc, char *argv[])
 	out_free	 outfree;
 	struct curparse	 curp;
 
-	fflags = wflags = 0;
+	fflags = 0;
 	outtype = OUTT_ASCII;
 
 	bzero(&curp, sizeof(struct curparse));
