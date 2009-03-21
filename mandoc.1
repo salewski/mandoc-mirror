@@ -88,6 +88,45 @@ were provided.
 .Pp
 .Ex -std mandoc
 .\" SUB-SECTION
+.Ss Reserved Words
+The reserved words described in
+.Xr mdoc 7
+are handled according to the following rules:
+.Bl -enum -offset XXX
+.It
+Opening delimiters 
+.Po
+.Sq \&( , 
+.Sq \&[ , 
+and
+.Sq \&{
+.Pc are not followed by whitespace.
+.It
+Closing delimiters
+.Po
+.Sq \&. , 
+.Sq \&, , 
+.Sq \&; , 
+.Sq \&: , 
+.Sq \&? , 
+.Sq \&! , 
+.Sq \&) , 
+.Sq \&] 
+and
+.Sq \&}
+.Pc are not preceeded by whitespace.
+.El
+.\" PARAGRAPH
+.Pp
+Note that reserved words may occur in streams of text, so the following:
+.Bd -literal -offset XXXX
+this self is not that of the waking , empirically real man
+.Ed
+.\" PARAGRAPH
+.Pp
+\&...correctly adjusts the comma spacing to
+.Qq this self is not that of the waking , empirically real man .
+.\" SUB-SECTION
 .Ss Output Formats
 The
 .Nm
@@ -160,10 +199,6 @@ displays types are synonyms, as are \-filled and \-ragged.
 The
 .Sq \&Xo/Xc
 pair isn't supported.
-.It
-The
-.Sq \&Sm
-macro has no effect, yet.
 .El
 .Pp
 Other macros still aren't supported by virtue of nobody complaining

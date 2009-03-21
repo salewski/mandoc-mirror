@@ -29,23 +29,25 @@ extern	size_t		  strlcpy(char *, const char *, size_t);
 extern	size_t		  strlcat(char *, const char *, size_t);
 #endif
 
-static	struct termp	 *termp_alloc(enum termenc);
-static	void		  termp_free(struct termp *);
-static	void		  termp_body(struct termp *, struct termpair *,
+static	struct termp	 *term_alloc(enum termenc);
+static	void		  term_free(struct termp *);
+static	void		  term_body(struct termp *, struct termpair *,
 				const struct mdoc_meta *,
 				const struct mdoc_node *);
-static	void		  termp_head(struct termp *,
+static	void		  term_head(struct termp *,
 				const struct mdoc_meta *);
-static	void		  termp_foot(struct termp *,
+static	void		  term_foot(struct termp *,
 				const struct mdoc_meta *);
-static	void		  termp_pword(struct termp *, const char *, int);
-static	void		  termp_pescape(struct termp *, 
+static	void		  term_pword(struct termp *, const char *, int);
+static	void		  term_pescape(struct termp *, 
 				const char *, int *, int);
-static	void		  termp_nescape(struct termp *,
+static	void		  term_nescape(struct termp *,
 				const char *, size_t);
-static	void		  termp_chara(struct termp *, char);
-static	void		  termp_stringa(struct termp *, 
+static	void		  term_chara(struct termp *, char);
+static	void		  term_stringa(struct termp *, 
 				const char *, size_t);
+static	int		  term_isopendelim(const char *, size_t);
+static	int		  term_isclosedelim(const char *, size_t);
 static	void		  sanity(const struct mdoc_node *); /* XXX */
 
 
@@ -53,7 +55,7 @@ void *
 latin1_alloc(void)
 {
 
-	return(termp_alloc(TERMENC_LATIN1));
+	return(term_alloc(TERMENC_LATIN1));
 }
 
 
@@ -61,7 +63,7 @@ void *
 utf8_alloc(void)
 {
 
-	return(termp_alloc(TERMENC_UTF8));
+	return(term_alloc(TERMENC_UTF8));
 }
 
 
@@ -69,7 +71,7 @@ void *
 ascii_alloc(void)
 {
 
-	return(termp_alloc(TERMENC_ASCII));
+	return(term_alloc(TERMENC_ASCII));
 }
 
 
@@ -83,9 +85,9 @@ terminal_run(void *arg, const struct mdoc *mdoc)
 	if (NULL == p->symtab)
 		p->symtab = term_ascii2htab();
 
-	termp_head(p, mdoc_meta(mdoc));
-	termp_body(p, NULL, mdoc_meta(mdoc), mdoc_node(mdoc));
-	termp_foot(p, mdoc_meta(mdoc));
+	term_head(p, mdoc_meta(mdoc));
+	term_body(p, NULL, mdoc_meta(mdoc), mdoc_node(mdoc));
+	term_foot(p, mdoc_meta(mdoc));
 
 	return(1);
 }
@@ -95,12 +97,12 @@ void
 terminal_free(void *arg)
 {
 
-	termp_free((struct termp *)arg);
+	term_free((struct termp *)arg);
 }
 
 
 static void
-termp_free(struct termp *p)
+term_free(struct termp *p)
 {
 
 	if (p->buf)
@@ -113,7 +115,7 @@ termp_free(struct termp *p)
 
 
 static struct termp *
-termp_alloc(enum termenc enc)
+term_alloc(enum termenc enc)
 {
 	struct termp *p;
 
@@ -123,6 +125,62 @@ termp_alloc(enum termenc enc)
 	p->maxrmargin = 78;
 	p->enc = enc;
 	return(p);
+}
+
+
+static int
+term_isclosedelim(const char *p, size_t len)
+{
+
+	if (1 != len)
+		return(0);
+
+	switch (*p) {
+	case('.'):
+		/* FALLTHROUGH */
+	case(','):
+		/* FALLTHROUGH */
+	case(';'):
+		/* FALLTHROUGH */
+	case(':'):
+		/* FALLTHROUGH */
+	case('?'):
+		/* FALLTHROUGH */
+	case('!'):
+		/* FALLTHROUGH */
+	case(')'):
+		/* FALLTHROUGH */
+	case(']'):
+		/* FALLTHROUGH */
+	case('}'):
+		return(1);
+	default:
+		break;
+	}
+
+	return(0);
+}
+
+
+static int
+term_isopendelim(const char *p, size_t len)
+{
+
+	if (1 != len)
+		return(0);
+
+	switch (*p) {
+	case('('):
+		/* FALLTHROUGH */
+	case('['):
+		/* FALLTHROUGH */
+	case('{'):
+		return(1);
+	default:
+		break;
+	}
+
+	return(0);
 }
 
 
@@ -327,14 +385,8 @@ term_word(struct termp *p, const char *word)
 	len = (int)strlen(word);
 
 	if (p->flags & TERMP_LITERAL) {
-		termp_pword(p, word, len);
+		term_pword(p, word, len);
 		return;
-	}
-
-	if (mdoc_isdelim(word)) {
-		if ( ! (p->flags & TERMP_IGNDELIM))
-			p->flags |= TERMP_NOSPACE;
-		p->flags &= ~TERMP_IGNDELIM;
 	}
 
 	/* LINTED */
@@ -353,25 +405,25 @@ term_word(struct termp *p, const char *word)
 		if (0 == j)
 			continue;
 		assert(i >= j);
-		termp_pword(p, &word[i - j], j);
+		term_pword(p, &word[i - j], j);
 		j = 0;
 	}
 	if (j > 0) {
 		assert(i >= j);
-		termp_pword(p, &word[i - j], j);
+		term_pword(p, &word[i - j], j);
 	}
 }
 
 
 static void
-termp_body(struct termp *p, struct termpair *ppair,
+term_body(struct termp *p, struct termpair *ppair,
 		const struct mdoc_meta *meta,
 		const struct mdoc_node *node)
 {
 
 	term_node(p, ppair, meta, node);
 	if (node->next)
-		termp_body(p, ppair, meta, node->next);
+		term_body(p, ppair, meta, node->next);
 }
 
 
@@ -415,7 +467,7 @@ term_node(struct termp *p, struct termpair *ppair,
 		p->flags |= pair.flag;
 
 	if (dochild && node->child)
-		termp_body(p, &pair, meta, node->child);
+		term_body(p, &pair, meta, node->child);
 
 	if (TERMPAIR_FLAG & pair.type)
 		p->flags &= ~pair.flag;
@@ -429,7 +481,7 @@ term_node(struct termp *p, struct termpair *ppair,
 
 
 static void
-termp_foot(struct termp *p, const struct mdoc_meta *meta)
+term_foot(struct termp *p, const struct mdoc_meta *meta)
 {
 	struct tm	*tm;
 	char		*buf, *os;
@@ -480,7 +532,7 @@ termp_foot(struct termp *p, const struct mdoc_meta *meta)
 
 
 static void
-termp_head(struct termp *p, const struct mdoc_meta *meta)
+term_head(struct termp *p, const struct mdoc_meta *meta)
 {
 	char		*buf, *title;
 
@@ -554,14 +606,14 @@ termp_head(struct termp *p, const struct mdoc_meta *meta)
  * output buffer by way of the symbol table.
  */
 static void
-termp_nescape(struct termp *p, const char *word, size_t len)
+term_nescape(struct termp *p, const char *word, size_t len)
 {
 	const char	*rhs;
 	size_t		 sz;
 
 	if (NULL == (rhs = term_a2ascii(p->symtab, word, len, &sz))) 
 		return;
-	termp_stringa(p, rhs, sz);
+	term_stringa(p, rhs, sz);
 }
 
 
@@ -571,7 +623,7 @@ termp_nescape(struct termp *p, const char *word, size_t len)
  * the escape sequence (we assert upon badly-formed escape sequences).
  */
 static void
-termp_pescape(struct termp *p, const char *word, int *i, int len)
+term_pescape(struct termp *p, const char *word, int *i, int len)
 {
 	int		 j;
 
@@ -583,7 +635,7 @@ termp_pescape(struct termp *p, const char *word, int *i, int len)
 		if (*i + 1 >= len)
 			return;
 
-		termp_nescape(p, &word[*i], 2);
+		term_nescape(p, &word[*i], 2);
 		(*i)++;
 		return;
 
@@ -598,18 +650,18 @@ termp_pescape(struct termp *p, const char *word, int *i, int len)
 			if (*i + 1 >= len)
 				return;
 
-			termp_nescape(p, &word[*i], 2);
+			term_nescape(p, &word[*i], 2);
 			(*i)++;
 			return;
 		case ('['):
 			break;
 		default:
-			termp_nescape(p, &word[*i], 1);
+			term_nescape(p, &word[*i], 1);
 			return;
 		}
 
 	} else if ('[' != word[*i]) {
-		termp_nescape(p, &word[*i], 1);
+		term_nescape(p, &word[*i], 1);
 		return;
 	}
 
@@ -620,7 +672,7 @@ termp_pescape(struct termp *p, const char *word, int *i, int len)
 	if (0 == word[*i])
 		return;
 
-	termp_nescape(p, &word[*i - j], (size_t)j);
+	term_nescape(p, &word[*i - j], (size_t)j);
 }
 
 
@@ -630,12 +682,16 @@ termp_pescape(struct termp *p, const char *word, int *i, int len)
  * handles word styling.
  */
 static void
-termp_pword(struct termp *p, const char *word, int len)
+term_pword(struct termp *p, const char *word, int len)
 {
 	int		 i;
 
+	if (term_isclosedelim(word, len))
+		if ( ! (TERMP_IGNDELIM & p->flags))
+			p->flags |= TERMP_NOSPACE;
+
 	if ( ! (TERMP_NOSPACE & p->flags))
-		termp_chara(p, ' ');
+		term_chara(p, ' ');
 
 	if ( ! (p->flags & TERMP_NONOSPACE))
 		p->flags &= ~TERMP_NOSPACE;
@@ -647,33 +703,36 @@ termp_pword(struct termp *p, const char *word, int len)
 
 	for (i = 0; i < len; i++) {
 		if ('\\' == word[i]) {
-			termp_pescape(p, word, &i, len);
+			term_pescape(p, word, &i, len);
 			continue;
 		}
 
 		if (TERMP_STYLE & p->flags) {
 			if (TERMP_BOLD & p->flags) {
-				termp_chara(p, word[i]);
-				termp_chara(p, 8);
+				term_chara(p, word[i]);
+				term_chara(p, 8);
 			}
 			if (TERMP_UNDER & p->flags) {
-				termp_chara(p, '_');
-				termp_chara(p, 8);
+				term_chara(p, '_');
+				term_chara(p, 8);
 			}
 		}
 
-		termp_chara(p, word[i]);
+		term_chara(p, word[i]);
 	}
+
+	if (term_isopendelim(word, len))
+		p->flags |= TERMP_NOSPACE;
 }
 
 
 /*
- * Like termp_chara() but for arbitrary-length buffers.  Resize the
+ * Like term_chara() but for arbitrary-length buffers.  Resize the
  * buffer by a factor of two (if the buffer is less than that) or the
  * buffer's size.
  */
 static void
-termp_stringa(struct termp *p, const char *c, size_t sz)
+term_stringa(struct termp *p, const char *c, size_t sz)
 {
 	size_t		 s;
 
@@ -702,7 +761,7 @@ termp_stringa(struct termp *p, const char *c, size_t sz)
  * size.
  */
 static void
-termp_chara(struct termp *p, char c)
+term_chara(struct termp *p, char c)
 {
 	size_t		 s;
 

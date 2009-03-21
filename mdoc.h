@@ -322,8 +322,6 @@ const char	 *mdoc_a2att(const char *);
 const char	 *mdoc_a2lib(const char *);
 const char	 *mdoc_a2st(const char *);
 
-int		  mdoc_isdelim(const char *);
-
 __END_DECLS
 
 #endif /*!MDOC_H*/

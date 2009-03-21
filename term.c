@@ -55,7 +55,7 @@
 #define	TTYPE_DIAG	  18
 #define	TTYPE_LINK_ANCHOR 19
 #define	TTYPE_LINK_TEXT	  20
-#define	TTYPE_REF_TITLE	  21
+#define	TTYPE_REF_JOURNAL 21
 #define	TTYPE_NMAX	  22
 
 /* 
@@ -88,7 +88,7 @@ const	int ttypes[TTYPE_NMAX] = {
 	TERMP_BOLD,	 	/* TTYPE_DIAG */
 	TERMP_UNDER, 		/* TTYPE_LINK_ANCHOR */
 	TERMP_BOLD,	 	/* TTYPE_LINK_TEXT */
-	TERMP_UNDER	 	/* TTYPE_REF_TITLE */
+	TERMP_UNDER	 	/* TTYPE_REF_JOURNAL */
 };
 
 static	int		  arg_hasattr(int, const struct mdoc_node *);
@@ -118,6 +118,7 @@ static	void	 	  name##_post(DECL_ARGS)
 DECL_PRE(name); \
 DECL_POST(name);
 
+DECL_PREPOST(termp__t);
 DECL_PREPOST(termp_aq);
 DECL_PREPOST(termp_bd);
 DECL_PREPOST(termp_bq);
@@ -140,7 +141,7 @@ DECL_PREPOST(termp_ss);
 DECL_PREPOST(termp_sq);
 DECL_PREPOST(termp_vt);
 
-DECL_PRE(termp__t);
+DECL_PRE(termp__j);
 DECL_PRE(termp_ap);
 DECL_PRE(termp_ar);
 DECL_PRE(termp_at);
@@ -227,12 +228,12 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, termp____post }, /* %B */
 	{ NULL, termp____post }, /* %D */
 	{ NULL, termp____post }, /* %I */
-	{ NULL, termp____post }, /* %J */
+	{ termp__j_pre, termp____post }, /* %J */
 	{ NULL, termp____post }, /* %N */
 	{ NULL, termp____post }, /* %O */
 	{ NULL, termp____post }, /* %P */
 	{ NULL, termp____post }, /* %R */
-	{ termp__t_pre, termp____post }, /* %T */
+	{ termp__t_pre, termp__t_post }, /* %T */
 	{ NULL, termp____post }, /* %V */
 	{ NULL, NULL }, /* Ac */
 	{ termp_aq_pre, termp_aq_post }, /* Ao */
@@ -1803,16 +1804,14 @@ static int
 termp_sm_pre(DECL_ARGS)
 {
 
-#if notyet
-	assert(node->child);
-	if (0 == strcmp("off", node->child->data.text.string)) {
+	if (NULL == node->child || MDOC_TEXT != node->child->type)
+		errx(1, "expected boolean line argument");
+
+	if (0 == strcmp("on", node->child->string)) {
 		p->flags &= ~TERMP_NONOSPACE;
 		p->flags &= ~TERMP_NOSPACE;
-	} else {
+	} else
 		p->flags |= TERMP_NONOSPACE;
-		p->flags |= TERMP_NOSPACE;
-	}
-#endif
 
 	return(0);
 }
@@ -1832,11 +1831,33 @@ termp_ap_pre(DECL_ARGS)
 
 /* ARGSUSED */
 static int
+termp__j_pre(DECL_ARGS)
+{
+
+	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_REF_JOURNAL]);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
 termp__t_pre(DECL_ARGS)
 {
 
-	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_REF_TITLE]);
+	term_word(p, "\"");
+	p->flags |= TERMP_NOSPACE;
 	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+termp__t_post(DECL_ARGS)
+{
+
+	p->flags |= TERMP_NOSPACE;
+	term_word(p, "\"");
+	termp____post(p, pair, meta, node);
 }
 
 

@@ -117,6 +117,7 @@ void		 *mdoc_tokhash_alloc(void);
 int		  mdoc_tokhash_find(const void *, const char *);
 void		  mdoc_tokhash_free(void *);
 int		  mdoc_iscdelim(char);
+int		  mdoc_isdelim(const char *);
 size_t		  mdoc_isescape(const char *);
 enum	mdoc_sec  mdoc_atosec(const char *);
 time_t		  mdoc_atotime(const char *);

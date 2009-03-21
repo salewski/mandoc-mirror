@@ -265,7 +265,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_wline },			/* Dq */
 	{ NULL, NULL },				/* Ec */
 	{ NULL, NULL },				/* Ef */ 
-	{ NULL, posts_text },			/* Em */ 
+	{ NULL, NULL },				/* Em */ 
 	{ NULL, NULL },				/* Eo */
 	{ NULL, NULL },				/* Fx */
 	{ NULL, posts_text },			/* Ms */ 
