@@ -220,7 +220,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pres_er, posts_text },		/* Er */ 
 	{ NULL, NULL },				/* Ev */ 
 	{ pres_ex, posts_ex },			/* Ex */ 
-	{ NULL, posts_text },			/* Fa */ 
+	{ NULL, NULL },				/* Fa */ 
 	{ pres_fd, posts_wtext },		/* Fd */
 	{ NULL, NULL },				/* Fl */
 	{ NULL, posts_text },			/* Fn */ 
