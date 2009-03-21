@@ -839,7 +839,8 @@ pre_bl(PRE_ARGS)
 	case (MDOC_Tag):
 		if (-1 != width)
 			break;
-		return(mdoc_nerr(mdoc, n, "missing %s argument",
+		return(mdoc_nwarn(mdoc, n, WARN_SYNTAX, 
+				"suggest %s argument", 
 				mdoc_argnames[MDOC_Width]));
 	default:
 		break;

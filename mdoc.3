@@ -325,4 +325,24 @@ macro.
 The 
 .Sq \&Bsx
 macro doesn't yet understand version arguments.
+.\" LIST-ITEM
+.It
+If not given a value, the \-offset argument to
+.Sq \&Bd
+and
+.Sq \&Bl
+should by the width of 
+.Qq <string> .
+.\" LIST-ITEM
+.It
+Columns widths in
+.Sq \&Bl -column
+should default to width
+.Qq <stringx>
+if not included.
+.\" LIST-ITEM
+.It
+List-width suffix
+.Qq m
+isn't handled.
 .El

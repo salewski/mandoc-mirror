@@ -32,10 +32,6 @@
  * children have been filled in (post-fix order).
  */
 
-enum	merr {
-	ENOWIDTH
-};
-
 enum	mwarn {
 	WBADSEC,
 	WNOWIDTH,
@@ -51,7 +47,6 @@ struct	actions {
 };
 
 static	int	  pwarn(struct mdoc *, int, int, enum mwarn);
-static	int	  perr(struct mdoc *, int, int, enum merr);
 
 static	int	  post_ar(POST_ARGS);
 static	int	  post_bl(POST_ARGS);
@@ -69,7 +64,6 @@ static	int	  post_std(POST_ARGS);
 static	int	  pre_bd(PRE_ARGS);
 static	int	  pre_dl(PRE_ARGS);
 
-#define	merr(m, t) perr((m), (m)->last->line, (m)->last->pos, (t))
 #define	mwarn(m, t) pwarn((m), (m)->last->line, (m)->last->pos, (t))
 
 const	struct actions mdoc_actions[MDOC_MAX] = {
@@ -232,24 +226,6 @@ mdoc_action_post(struct mdoc *m)
 		return((*mdoc_actions[m->last->tok].post)(m));
 	}
 	return(1);
-}
-
-
-static int
-perr(struct mdoc *m, int line, int pos, enum merr type)
-{
-	char		*p;
-
-	p = NULL;
-
-	switch (type) {
-	case (ENOWIDTH):
-		p = "missing width argument";
-		break;
-	}
-
-	assert(p);
-	return(mdoc_perr(m, line, pos, p));
 }
 
 
@@ -471,6 +447,10 @@ post_os(POST_ARGS)
 }
 
 
+/*
+ * Calculate the -width for a `Bl -tag' list if it hasn't been provided.
+ * Uses the first head macro.
+ */
 static int
 post_bl_tagwidth(struct mdoc *m)
 {
@@ -479,33 +459,21 @@ post_bl_tagwidth(struct mdoc *m)
 	char		   buf[32];
 
 	/*
-	 * If -tag has been specified and -width has not been, then try
-	 * to intuit our width from the first body element.  
-	 */
-
-	if (NULL == (n = m->last->body->child))
-		return(1);
-
-	/*
 	 * Use the text width, if a text node, or the default macro
 	 * width if a macro.
 	 */
 
-	n = n->head->child;
+	n = m->last->head->child;
+	sz = 10; /* Default size. */
+
 	if (n) {
 		if (MDOC_TEXT != n->type) {
 			if (0 == (sz = (int)mdoc_macro2len(n->tok)))
-				sz = -1;
+				if ( ! mwarn(m, WNOWIDTH))
+					return(0);
 		} else
 			sz = (int)strlen(n->string) + 1;
-	} else
-		sz = -1;
-
-	if (-1 == sz) {
-		if ( ! mwarn(m, WNOWIDTH))
-			return(0);
-		sz = 10;
-	}
+	} 
 
 	(void)snprintf(buf, sizeof(buf), "%dn", sz);
 
@@ -514,26 +482,19 @@ post_bl_tagwidth(struct mdoc *m)
 	 * We're guaranteed that a MDOC_Width doesn't already exist.
 	 */
 
-	if (NULL == m->last->args) {
-		m->last->args = xcalloc
-			(1, sizeof(struct mdoc_arg));
-		m->last->args->refcnt = 1;
-	}
-
 	n = m->last;
-	sz = (int)n->args->argc;
-	
+	assert(n->args);
+
 	(n->args->argc)++;
-
 	n->args->argv = xrealloc(n->args->argv, 
-			n->args->argc * sizeof(struct mdoc_arg));
+			n->args->argc * sizeof(struct mdoc_argv));
 
-	n->args->argv[sz - 1].arg = MDOC_Width;
-	n->args->argv[sz - 1].line = m->last->line;
-	n->args->argv[sz - 1].pos = m->last->pos;
-	n->args->argv[sz - 1].sz = 1;
-	n->args->argv[sz - 1].value = xcalloc(1, sizeof(char *));
-	n->args->argv[sz - 1].value[0] = xstrdup(buf);
+	n->args->argv[n->args->argc - 1].arg = MDOC_Width;
+	n->args->argv[n->args->argc - 1].line = m->last->line;
+	n->args->argv[n->args->argc - 1].pos = m->last->pos;
+	n->args->argv[n->args->argc - 1].sz = 1;
+	n->args->argv[n->args->argc - 1].value = xcalloc(1, sizeof(char *));
+	n->args->argv[n->args->argc - 1].value[0] = xstrdup(buf);
 
 	return(1);
 }
@@ -548,14 +509,14 @@ post_bl_width(struct mdoc *m)
 	char		 *p;
 
 	if (NULL == m->last->args)
-		return(merr(m, ENOWIDTH));
+		return(1);
 
 	for (i = 0; i < (int)m->last->args->argc; i++)
 		if (MDOC_Width == m->last->args->argv[i].arg)
 			break;
 
 	if (i == (int)m->last->args->argc)
-		return(merr(m, ENOWIDTH));
+		return(1);
 
 	p = m->last->args->argv[i].value[0];
 

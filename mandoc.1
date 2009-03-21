@@ -184,21 +184,30 @@ utility was written by
 .Sh CAVEATS
 The 
 .Nm
-utility doesn't yet know how to display the following:
+utility in
+.Fl T Ns Ar ascii
+mode doesn't yet know how to display the following:
 .Pp
 .Bl -bullet -compact
 .It
 The \-hang 
 .Sq \&Bl
 list is not yet supported.
+.\" LIST-ITEM
 .It
 The \-literal and \-unfilled 
 .Sq \&Bd
 displays types are synonyms, as are \-filled and \-ragged.
+.\" LIST-ITEM
 .It
 The
 .Sq \&Xo/Xc
 pair isn't supported.
+.\" LIST-ITEM
+.It
+The
+.Sq \&Bd
+macro doesn't process \-compact .
 .El
 .Pp
 Other macros still aren't supported by virtue of nobody complaining
