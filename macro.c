@@ -1057,19 +1057,15 @@ blk_part_imp(MACRO_PROT_ARGS)
 		if (body == n)
 			break;
 
-	if (n) {
-		mdoc->last = body;
-		mdoc->next = MDOC_NEXT_SIBLING;
-	} 
+	if (n && ! rew_last(mdoc, body))
+		return(0);
 
 	if (1 == ppos && ! append_delims(mdoc, line, pos, buf))
 		return(0);
 
-	if (n) {
-		mdoc->last = mdoc->last->parent;
-		assert(mdoc->last == blk);
-		mdoc->next = MDOC_NEXT_SIBLING;
-	}
+	if (n && ! rew_last(mdoc, blk))
+		return(0);
+
 	return(1);
 }
 
