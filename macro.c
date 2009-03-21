@@ -406,7 +406,13 @@ rew_alt(int tok)
 }
 
 
-static int
+/* 
+ * Rewind rules.  This indicates whether to stop rewinding
+ * (REWIND_HALT) without touching our current scope, stop rewinding and
+ * close our current scope (REWIND_REWIND), or continue (REWIND_NOHALT).
+ * The scope-closing and so on occurs in the various rew_* routines.
+ */
+static int 
 rew_dohalt(int tok, enum mdoc_type type, const struct mdoc_node *p)
 {
 
@@ -416,7 +422,6 @@ rew_dohalt(int tok, enum mdoc_type type, const struct mdoc_node *p)
 		return(REWIND_NOHALT);
 
 	switch (tok) {
-	/* One-liner implicit-scope. */
 	case (MDOC_Aq):
 		/* FALLTHROUGH */
 	case (MDOC_Bq):
@@ -443,8 +448,6 @@ rew_dohalt(int tok, enum mdoc_type type, const struct mdoc_node *p)
 		if (type == p->type && tok == p->tok)
 			return(REWIND_REWIND);
 		break;
-
-	/* Multi-line implicit-scope. */
 	case (MDOC_It):
 		assert(MDOC_TAIL != type);
 		if (type == p->type && tok == p->tok)
@@ -463,8 +466,6 @@ rew_dohalt(int tok, enum mdoc_type type, const struct mdoc_node *p)
 		if (MDOC_BODY == p->type && MDOC_Sh == p->tok)
 			return(REWIND_HALT);
 		break;
-	
-	/* Multi-line explicit scope start. */
 	case (MDOC_Ao):
 		/* FALLTHROUGH */
 	case (MDOC_Bd):
@@ -544,6 +545,10 @@ rew_dohalt(int tok, enum mdoc_type type, const struct mdoc_node *p)
 }
 
 
+/*
+ * See if we can break an encountered scope (the rew_dohalt has returned
+ * REWIND_NOHALT). 
+ */
 static int
 rew_dobreak(int tok, const struct mdoc_node *p)
 {
@@ -557,7 +562,6 @@ rew_dobreak(int tok, const struct mdoc_node *p)
 		return(1);
 
 	switch (tok) {
-	/* Implicit rules. */
 	case (MDOC_It):
 		return(MDOC_It == p->tok);
 	case (MDOC_Ss):
@@ -566,10 +570,13 @@ rew_dobreak(int tok, const struct mdoc_node *p)
 		if (MDOC_Ss == p->tok)
 			return(1);
 		return(MDOC_Sh == p->tok);
-
-	/* Extra scope rules. */
 	case (MDOC_El):
 		if (MDOC_It == p->tok)
+			return(1);
+		break;
+	case (MDOC_Oc):
+		/* XXX - experimental! */
+		if (MDOC_Op == p->tok)
 			return(1);
 		break;
 	default:
@@ -995,18 +1002,22 @@ static int
 blk_part_imp(MACRO_PROT_ARGS)
 {
 	int		  lastarg, c;
-	char		  *p;
+	char		 *p;
+	struct mdoc_node *blk, *body, *n;
 
 	if ( ! mdoc_block_alloc(mdoc, line, ppos, tok, NULL))
 		return(0);
 	mdoc->next = MDOC_NEXT_CHILD;
+	blk = mdoc->last;
 
 	if ( ! mdoc_head_alloc(mdoc, line, ppos, tok))
 		return(0);
 	mdoc->next = MDOC_NEXT_SIBLING;
+
 	if ( ! mdoc_body_alloc(mdoc, line, ppos, tok))
 		return(0);
 	mdoc->next = MDOC_NEXT_CHILD;
+	body = mdoc->last;
 
 	/* XXX - no known argument macros. */
 
@@ -1036,14 +1047,30 @@ blk_part_imp(MACRO_PROT_ARGS)
 		break;
 	}
 
-	if (1 == ppos) {
-		if ( ! rew_subblock(MDOC_BODY, mdoc, tok, line, ppos))
-			return(0);
-		if ( ! append_delims(mdoc, line, pos, buf))
-			return(0);
-	} else if ( ! rew_subblock(MDOC_BODY, mdoc, tok, line, ppos))
+	/*
+	 * Since we know what our context is, we can rewind directly to
+	 * it.  This allows us to accomodate for our scope being
+	 * violated by another token.
+	 */
+
+	for (n = mdoc->last; n; n = n->parent)
+		if (body == n)
+			break;
+
+	if (n) {
+		mdoc->last = body;
+		mdoc->next = MDOC_NEXT_SIBLING;
+	} 
+
+	if (1 == ppos && ! append_delims(mdoc, line, pos, buf))
 		return(0);
-	return(rew_impblock(mdoc, tok, line, ppos));
+
+	if (n) {
+		mdoc->last = mdoc->last->parent;
+		assert(mdoc->last == blk);
+		mdoc->next = MDOC_NEXT_SIBLING;
+	}
+	return(1);
 }
 
 
