@@ -300,6 +300,7 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Es */ 
 	{ NULL, NULL }, /* En */ 
 	{ termp_dx_pre, NULL }, /* Dx */ 
+	{ NULL, NULL }, /* %Q */ 
 };
 
 const struct termact *termacts = __termacts;
