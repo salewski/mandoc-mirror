@@ -405,7 +405,8 @@ post_dt(POST_ARGS)
 	 *       arch = NULL
 	 */
 
-	if ((cp = mdoc_a2msec(n->string))) {
+	cp = mdoc_a2msec(n->string);
+	if (cp) {
 		m->meta.vol = xstrdup(cp);
 		errno = 0;
 		lval = strtol(n->string, &ep, 10);
@@ -424,7 +425,8 @@ post_dt(POST_ARGS)
 	 *               VOL
 	 */
 
-	if ((cp = mdoc_a2vol(n->string))) {
+	cp = mdoc_a2vol(n->string);
+	if (cp) {
 		free(m->meta.vol);
 		m->meta.vol = xstrdup(cp);
 		n = n->next;
@@ -489,7 +491,8 @@ post_bl_tagwidth(struct mdoc *m)
 	 * width if a macro.
 	 */
 
-	if ((n = n->head->child)) {
+	n = n->head->child;
+	if (n) {
 		if (MDOC_TEXT != n->type) {
 			if (0 == (sz = (int)mdoc_macro2len(n->tok)))
 				sz = -1;

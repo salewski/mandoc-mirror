@@ -707,7 +707,8 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 		if ('\\' != *p)
 			continue;
 
-		if ((c = mdoc_isescape(p))) {
+		c = mdoc_isescape(p);
+		if (c) {
 			p += (int)c - 1;
 			continue;
 		}

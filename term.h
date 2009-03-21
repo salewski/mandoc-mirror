@@ -73,7 +73,7 @@ struct	termpair {
 		(termp)->flags |= (fl); \
 		(p)->flag = (fl); \
 		(p)->type |= TERMPAIR_FLAG; \
-	} while (0)
+	} while ( /* CONSTCOND */ 0)
 
 struct	termact {
 	int	(*pre)(struct termp *, struct termpair *,
