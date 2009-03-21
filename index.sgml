@@ -118,7 +118,7 @@
 
 					<p class="boxed">
 					# pkg_delete mdocml<br>
-					# cd /usr/ports/devel/<br>
+					# cd /usr/ports/textproc/<br>
 					# rm -rf mdocml<br>
 					# ftp -V -o- http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz | tar -zvxf -<br>
 					# cd mdocml<br>
@@ -132,7 +132,7 @@
 
 					<p class="boxed">
 					# pkg_delete mdocml<br>
-					# cd /usr/pkgsrc/devel/<br>
+					# cd /usr/pkgsrc/textproc/<br>
 					# rm -rf mdocml<br>
 					# ftp -V -o- http://mdocml.bsd.lv/ports-netbsd/mdocml.tar.gz | tar -zvxf -<br>
 					# cd mdocml<br>
