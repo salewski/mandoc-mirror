@@ -320,8 +320,8 @@ arg_width(const struct mdoc_argv *arg, int pos)
 	if (0 == strcmp(arg->value[pos], "indent-two"))
 		return(INDENT * 2);
 
-	len = (int)strlen(arg->value[pos]);
-	assert(len > 0);
+	if (0 == (len = (int)strlen(arg->value[pos])))
+		return(0);
 
 	for (i = 0; i < len - 1; i++) 
 		if ( ! isdigit((u_char)arg->value[pos][i]))
