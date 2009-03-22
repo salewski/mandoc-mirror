@@ -37,32 +37,31 @@ section 1.  You can query a manual explicitly by its section:
 .Pp
 .Dl % man \-s 1 ps
 .Pp
-The following table lists broad classifications and the applicable
-manual sections:
+The following table lists classifications and the applicable manual
+sections:
 .Pp
-.\" LIST
 .Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
-.It Em Category
-.Em Section(s)
-.It Device
-4
-.It Executable
-1, 6, 8
-.It Function
-2, 3, 9
-.It File-format
-5
-.It Other
-7
+.It Em Section
+.Em Description
+.It 1
+operator utilities
+.It 2
+system calls
+.It 3, 3p, 3f
+programming libraries (C, Perl, Fortran)
+.It 5
+file and wire protocol formats
+.It 6
+games
+.It 7
+tutorials, documents and papers
+.It 8 
+administrator utilities
+.It 9
+in-kernel routines
 .El
-.\" SUBSECTION
-.Ss Devices
-Consists of hardware (and pseudo-) device driver documentation.  Drivers
-are unilaterally classified in section 4.
-.Em Note :
-these manuals are necessarily system- and architecture-specific.
 .Pp
-Example:
+Some examples in regular name/section form:
 .Pp
 .\" LIST
 .Bl -tag -width "File-formatX" -offset indent -compact
@@ -70,63 +69,12 @@ Example:
 .Em Description
 .It Xr dc 4
 DEC/Intel 10/100 Ethernet device
-.El
-.\" SUBSECTION
-.Ss Executables
-Executables consist of runnable binaries.  They're further classified by
-operator utility:
-.Pp
-.\" LIST
-.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
-.It Em Section
-.Em Description
-.It 1
-operator utilities
-.It 8 
-administrator utilities
-.It 6
-games
-.El
-.Pp
-Examples:
-.Pp
-.\" LIST
-.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
-.It Em Manual
-.Em Description
 .It Xr usermod 8
 modify user login information
 .It Xr cc 1
 the C compiler
 .It Xr fortune 6
 print a random adage
-.El
-.\" SUBSECTION
-.Ss Functions
-Function documentation describes programme source code, whether in the
-form of libraries, modules or standalone sources.  They're further
-classified by context: 
-.Pp
-.\" LIST
-.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
-.It Em Section
-.Em Description
-.It 2
-system calls
-.It 3, 3p, 3f
-programming libraries (C, Perl, Fortran)
-.It 9
-in-kernel routines
-.El
-.Pp
-.Em Note :
-section 2 and 9 manuals are necessarily system- and often
-architecture-specific.  Examples:
-.Pp
-.\" LIST
-.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
-.It Em Manual
-.Em Description
 .It Xr open 2
 open or create a file for reading or writing
 .It Xr isspace 3
@@ -135,37 +83,8 @@ whitespace character test
 convert POD data to formatted roff
 .It Xr tsleep 9
 process context sleep
-.El
-.\" SUBSECTION
-.Ss File-formats
-A file format usually describes the format of on-disc binary or text
-data, although it can also be used to describe wire protocols (this is
-usually best left to RFC).  These manuals are unilaterally classified in
-section 5.
-.Pp
-Example:
-.Pp
-.\" LIST
-.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
-.It Em Manual
-.Em Description
 .It Xr passwd 5
 format of the password file
-.El
-.\" SUBSECTION
-.Ss Other
-Documents with no other classification are relegated to section 7.  This
-constitutes reference tutorials (such as this document) and other
-miscellaneous information.
-.Pp
-Examples:
-.Pp
-.\" LIST
-.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
-.It Em Manual
-.Em Description
-.It Xr ascii 7
-ASCII character sets
 .It Xr symlink 7
 symbolic link handling
 .El
@@ -330,7 +249,15 @@ publications, please use the
 .Sq \&Rs/Re
 block macros.
 .\" SUBSECTION
-.Ss Types and Prototypes
-If writing section 3 manuals, make sure that you correctly annotate your
-variables and functions.  This guarantees that cross-referncing between
-function names and their prototypes works properly.
+.Ss Formatting
+Let the front-ends worry about formatting for you, but if you must think
+about formatting (at times necessary, especially for tagged and columnar
+lists), assume that your output device is a fixed-width terminal window:
+.Bd -literal -offset indent
+\&.Bl \-tag \-width "-o outfile"
+\&.It \&Fl \&Ar outfile
+.Ed
+.Pp
+You may assume that the width calculated by the string literal 
+.Qq Fl o Ar outfile
+will 
