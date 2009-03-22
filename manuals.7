@@ -25,22 +25,20 @@ documentation
 If you add something to your operating system, whether it's a new file
 format or directory structure or device driver, it needs documentation.
 .\" SECTION
-.Sh CLASSIFICATION
-Classify your system component.  In
-.Ux ,
-each component has a manual section , which categorises the component's
-function.  The section of a manual is usually listed in parenthesis next
-to the component name, such as
-.Xr ps 1 ,
-section 1.  You can query a manual explicitly by its section:
-.Bd -literal -offset XXXX
-% man \-s 1 ps
-% apropos ps
-.Ed
+.Sh COMPOSITION
+Prepare your composition environment by copying over the manual template
+from 
+.Pa /usr/share/misc/mdoc.template .
+.Em \&Do not
+start afresh or by copying another manual unless you know exactly what
+you're doing!
+.\" SUBSECTION
+.Ss Section Numbering
+Find an appropriate section for your manual.  There may exist multiple
+manual names per section, so be specific.  A table of all available
+manual sections follows:
 .Pp
-The following table lists classifications and the applicable manual
-sections:
-.Pp
+.\" LIST
 .Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
 .It Em Section
 .Em Description
@@ -62,52 +60,30 @@ administrator utilities
 in-kernel routines
 .El
 .Pp
-Some examples in regular name/section form:
-.Pp
-.\" LIST
-.Bl -tag -width "File-formatX" -offset indent -compact
-.It Em Manual
-.Em Description
-.It Xr dc 4
-DEC/Intel 10/100 Ethernet device
-.It Xr usermod 8
-modify user login information
-.It Xr cc 1
-the C compiler
-.It Xr fortune 6
-print a random adage
-.It Xr open 2
-open or create a file for reading or writing
-.It Xr isspace 3
-whitespace character test
-.It Xr Pod::Man 3p
-convert POD data to formatted roff
-.It Xr tsleep 9
-process context sleep
-.It Xr passwd 5
-format of the password file
-.It Xr symlink 7
-symbolic link handling
-.El
-.\" SECTION
-.Sh COMPOSITION
-Prepare your composition environment by copying over the manual template
-from 
-.Pa /usr/share/misc/mdoc.template .
-.Em \&Do not
-start afresh or by copying another manual unless you know exactly what
-you're doing!
+If your manual falls into multiple categories, choose the most
+widely-used or, better, re-consider the topic of your manual to be more
+specific.  You can list all manuals per section by invoking
+.Xr apropos 1 ,
+then provide the
+.Fl s
+flag to
+.Xr man 1
+to see the specific section manual (section 1, in this example):
+.\" DISPLAY
+.Bd -literal -offset indent
+% apropos myname
+myname (1) - some description here
+% man \-s 1 myname
+.Ed
 .\" SUBSECTION
 .Ss Naming
-Your component will need a name by which to query its contents via
-.Xr man 1 .
-Keep it simple.  You may want to look for other manuals by that same
-name before committing:
+Name your component.  Be terse, erring on the side of clarity.  You may
+want to look for other manuals by that same name before committing:
 .Pp
 .Dl % apropos myname
 .Pp
-Conventionally, manual files are named 
-.Pa myname.section ,
+Manual files are named 
+.Pa myname.mysection ,
 such as
 .Pa manuals.7
 for this document.
@@ -129,13 +105,13 @@ packages of
 .Xr roff 7 ;
 newer languages such as DocBook, texinfo or schema-driven XML; or even
 ad-hoc conventions such as README files.  
-.Em Stay away from these methods!
+.Em Avoid these formats .
 Historical formats fail to capture a manual's semantic content, instead
 only modelling its style.  Newer methods requires special,
 system-specific tools and may change or become obsolete over the
 life-time of your component.
 .Pp
-There are two canonical references for writing mdoc manuals:
+There are two canonical references for writing mdoc.  Read them.
 .Pp
 .\" LIST
 .Bl -tag -width XXXXXXXXXXXXXXXX -offset indent -compact
@@ -200,10 +176,8 @@ output:
 \&.in.1:
 	mandoc -Wall,error -Tlint $<
 	cp -f $< $@
-
 \&.1.html:
 	mandoc -Thtml $< >$@
-
 \&.1.txt:
 	mandoc -Tascii $< | col -b >$@
 .Ed
@@ -238,7 +212,7 @@ symbols and so on), use the escapes dictated in
 .\" SUBSECTION
 .Ss References 
 Other components may be referenced with the
-.Sq \&Xr ,
+.Sq \&Xr
 and
 .Sq \&Sx
 macros.  Make sure that these exist.  If you intend to distribute your
@@ -266,3 +240,9 @@ lists), assume that your output device is a fixed-width terminal window:
 You may assume that the width calculated by the string literal 
 .Qq Fl o Ar outfile
 will be covered by the \-width argument.
+.\" SECTION
+.Sh MAINTENANCE
+As your component changes and bugs are fixed, your manual may become out
+of date.  You may be tempted to use automation tools like Doxygen to
+smooth the development of your manuals.  Don't.  Source documentation is
+different from a component manual.

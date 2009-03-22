@@ -264,6 +264,9 @@ fdesc(struct buf *blk, struct buf *ln,
 	ssize_t		 ssz;
 	struct stat	 st;
 	int		 j, i, pos, lnn;
+#ifdef	STRIP_XO
+	int		 macro, xo, xeoln;
+#endif
 
 	/*
 	 * Two buffers: ln and buf.  buf is the input buffer, optimised
@@ -288,6 +291,9 @@ fdesc(struct buf *blk, struct buf *ln,
 	/*
 	 * Fill buf with file blocksize and parse newlines into ln.
 	 */
+#ifdef	STRIP_XO
+	macro = xo = xeoln = 0;
+#endif
 
 	for (lnn = 1, pos = 0; ; ) {
 		if (-1 == (ssz = read(fd, blk->buf, sz))) {
@@ -305,6 +311,66 @@ fdesc(struct buf *blk, struct buf *ln,
 			}
 
 			if ('\n' != blk->buf[i]) {
+				/*
+				 * Ugly of uglies.  Here we handle the
+				 * dreaded `Xo/Xc' scoping.  Cover the
+				 * eyes of any nearby children.  This
+				 * makes `Xo/Xc' enclosures look like
+				 * one huge line.
+				 */
+#ifdef	STRIP_XO
+				/*
+				 * First, note whether we're in a macro
+				 * line.
+				 */
+				if (0 == pos && '.' == blk->buf[i])
+					macro = 1;
+
+				/*
+				 * If we're in an `Xo' context and just
+				 * nixed a newline, remove the control
+				 * character for new macro lines:
+				 * they're going to show up as all part
+				 * of the same line.
+				 */
+				if (xo && xeoln && '.' == blk->buf[i]) {
+					xeoln = 0;
+					continue;
+				}
+				xeoln = 0;
+
+				/*
+				 * If we've parsed `Xo', enter an xo
+				 * context.  `Xo' must be in a parsable
+				 * state.  This is the ugly part.  IT IS
+				 * NOT SMART ENOUGH TO HANDLE ESCAPED
+				 * WHITESPACE.
+				 */
+				if (macro && pos && 'o' == blk->buf[i]) {
+					if (xo && 'X' == ln->buf[pos - 1])  {
+						if (' ' == ln->buf[pos - 2])
+							xo++;
+					} else if ('X' == ln->buf[pos - 1]) {
+						if (2 == pos && '.' == ln->buf[pos - 2])
+							xo++;
+						else if (' ' == ln->buf[pos - 2])
+							xo++;
+					}
+				}
+
+				/*
+				 * If we're parsed `Xc', leave an xo
+				 * context if one's already pending.
+				 * `Xc' must be in a parsable state.
+				 * THIS IS NOT SMART ENOUGH TO HANDLE
+				 * ESCAPED WHITESPACE.
+				 */
+				if (macro && pos && 'c' == blk->buf[i])
+					if (xo && 'X' == ln->buf[pos - 1])
+						if (' ' == ln->buf[pos - 2])
+							xo--;
+#endif	/* STRIP_XO */
+
 				ln->buf[pos++] = blk->buf[i];
 				continue;
 			}
@@ -323,11 +389,25 @@ fdesc(struct buf *blk, struct buf *ln,
 				}
 			}
 
+#ifdef	STRIP_XO
+			/*
+			 * If we're in an xo context, put a space in
+			 * place of the newline and continue parsing.
+			 * Mark that we just did a newline.
+			 */
+			if (xo) {
+				xeoln = 1;
+				ln->buf[pos++] = ' ';
+				lnn++;
+				continue;
+			}
+#endif	/* STRIP_XO */
+
 			ln->buf[pos] = 0;
 			if ( ! mdoc_parseln(mdoc, lnn, ln->buf))
 				return(0);
 			lnn++;
-			pos = 0;
+			macro = pos = 0;
 		}
 	}
 

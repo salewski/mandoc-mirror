@@ -13,9 +13,13 @@ VERSION	   = 1.6.8
 VDATE	   = 21 March 2009
 
 VFLAGS     = -DVERSION=\"$(VERSION)\"
-CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g 
+CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
 LINTFLAGS += $(VFLAGS)
 CFLAGS    += $(VFLAGS)
+
+# If you want to strip `Xo/Xc' macro pairs, enable this.  Really, only
+# OpenBSD should be doing this while it kicks its cruft.
+CFLAGS	  += -DSTRIP_XO
 
 LIBLNS	   = macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
 	     validate.ln action.ln lib.ln att.ln arch.ln vol.ln \

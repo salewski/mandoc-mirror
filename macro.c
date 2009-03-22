@@ -33,6 +33,7 @@
 /* FIXME: .Fl, .Ar, .Cd handling of `|'. */
 
 enum	mwarn {
+	WIMPBRK,
 	WMACPARM,
 	WOBS
 };
@@ -236,6 +237,9 @@ pwarn(struct mdoc *mdoc, int line, int pos, enum mwarn type)
 
 	p = NULL;
 	switch (type) {
+	case (WIMPBRK):
+		p = "crufty end-of-line scope violation";
+		break;
 	case (WMACPARM):
 		p = "macro-like parameter";
 		break;
@@ -1057,6 +1061,9 @@ blk_part_imp(MACRO_PROT_ARGS)
 	for (n = mdoc->last; n; n = n->parent)
 		if (body == n)
 			break;
+
+	if (NULL == n && ! pwarn(mdoc, body->line, body->pos, WIMPBRK))
+			return(0);
 
 	if (n && ! rew_last(mdoc, body))
 		return(0);
