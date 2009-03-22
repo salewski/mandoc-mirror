@@ -401,13 +401,14 @@ fdesc(struct buf *blk, struct buf *ln,
 				lnn++;
 				continue;
 			}
+			macro = 0;
 #endif	/* STRIP_XO */
 
 			ln->buf[pos] = 0;
 			if ( ! mdoc_parseln(mdoc, lnn, ln->buf))
 				return(0);
 			lnn++;
-			macro = pos = 0;
+			pos = 0;
 		}
 	}
 

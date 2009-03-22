@@ -46,8 +46,8 @@ static	void		  term_nescape(struct termp *,
 static	void		  term_chara(struct termp *, char);
 static	void		  term_stringa(struct termp *, 
 				const char *, size_t);
-static	int		  term_isopendelim(const char *, size_t);
-static	int		  term_isclosedelim(const char *, size_t);
+static	int		  term_isopendelim(const char *, int);
+static	int		  term_isclosedelim(const char *, int);
 static	void		  sanity(const struct mdoc_node *); /* XXX */
 
 
@@ -129,7 +129,7 @@ term_alloc(enum termenc enc)
 
 
 static int
-term_isclosedelim(const char *p, size_t len)
+term_isclosedelim(const char *p, int len)
 {
 
 	if (1 != len)
@@ -163,7 +163,7 @@ term_isclosedelim(const char *p, size_t len)
 
 
 static int
-term_isopendelim(const char *p, size_t len)
+term_isopendelim(const char *p, int len)
 {
 
 	if (1 != len)
