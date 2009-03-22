@@ -19,8 +19,8 @@ CFLAGS    += $(VFLAGS)
 
 # If you want to strip `Xo/Xc' macro pairs, enable this.  Really, only
 # OpenBSD should be doing this while it kicks its cruft.
-CFLAGS	  += -DSTRIP_XO
-LINTFLAGS += -DSTRIP_XO
+#CFLAGS	  += -DSTRIP_XO
+#LINTFLAGS += -DSTRIP_XO
 
 LIBLNS	   = macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
 	     validate.ln action.ln lib.ln att.ln arch.ln vol.ln \
