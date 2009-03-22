@@ -98,6 +98,9 @@ static	int		  arg_getattr(int, const struct mdoc_node *);
 static	size_t		  arg_offset(const struct mdoc_argv *);
 static	size_t		  arg_width(const struct mdoc_argv *, int);
 static	int		  arg_listtype(const struct mdoc_node *);
+static	int		  fmt_block_vspace(struct termp *,
+				const struct mdoc_node *,
+				const struct mdoc_node *);
 
 /*
  * What follows describes prefix and postfix operations for the abstract
@@ -430,6 +433,36 @@ arg_getattrs(const int *keys, int *vals,
 
 /* ARGSUSED */
 static int
+fmt_block_vspace(struct termp *p, 
+		const struct mdoc_node *bl, 
+		const struct mdoc_node *node)
+{
+	const struct mdoc_node *n;
+
+	term_newln(p);
+
+	if (arg_hasattr(MDOC_Compact, bl))
+		return(1);
+
+	for (n = node; n; n = n->parent) {
+		if (MDOC_BLOCK != n->type)
+			continue;
+		if (MDOC_Ss == n->tok)
+			break;
+		if (MDOC_Sh == n->tok)
+			break;
+		if (NULL == n->prev)
+			continue;
+		term_vspace(p);
+		break;
+	}
+
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
 termp_dq_pre(DECL_ARGS)
 {
 
@@ -457,19 +490,6 @@ termp_dq_post(DECL_ARGS)
 
 /* ARGSUSED */
 static int
-termp_it_pre_block(DECL_ARGS)
-{
-
-	term_newln(p);
-	if ( ! arg_hasattr(MDOC_Compact, node->parent->parent))
-		term_vspace(p);
-
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
 termp_it_pre(DECL_ARGS)
 {
 	const struct mdoc_node *bl, *n;
@@ -478,7 +498,7 @@ termp_it_pre(DECL_ARGS)
 	size_t		        width, offset;
 
 	if (MDOC_BLOCK == node->type)
-		return(termp_it_pre_block(p, pair, meta, node));
+		return(fmt_block_vspace(p, node->parent->parent, node));
 
 	bl = node->parent->parent->parent;
 
@@ -1265,12 +1285,9 @@ termp_bd_pre(DECL_ARGS)
 	 * line.  Blank lines are allowed.
 	 */
 
-	if (MDOC_BLOCK == node->type) {
-		/* FIXME: parent prev? */
-		if (node->prev)
-			term_vspace(p);
-		return(1);
-	} else if (MDOC_BODY != node->type)
+	if (MDOC_BLOCK == node->type)
+		return(fmt_block_vspace(p, node, node));
+	else if (MDOC_BODY != node->type)
 		return(1);
 
 	if (NULL == node->parent->args)
