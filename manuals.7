@@ -229,20 +229,12 @@ publications, please use the
 block macros.
 .\" SUBSECTION
 .Ss Formatting
-Let the front-ends worry about formatting for you, but if you must think
-about formatting (at times necessary, especially for tagged and columnar
-lists), assume that your output device is a fixed-width terminal window:
-.Bd -literal -offset indent
-\&.Bl \-tag \-width "-o outfile"
-\&.It \&Fl \&Ar outfile
-.Ed
-.Pp
-You may assume that the width calculated by the string literal 
-.Qq Fl o Ar outfile
-will be covered by the \-width argument.
+.Em Don't style your manual.  
+Give it meaningful content.  The front-end will worry about formatting
+and style.
 .\" SECTION
 .Sh MAINTENANCE
 As your component changes and bugs are fixed, your manual may become out
 of date.  You may be tempted to use automation tools like Doxygen to
 smooth the development of your manuals.  Don't.  Source documentation is
-different from a component manual.
+different from a component manual. 
