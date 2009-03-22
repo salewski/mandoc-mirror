@@ -36,13 +36,13 @@ OBJS	   = $(LIBOBJS) $(MAINOBJS)
 SRCS	   = $(LIBSRCS) $(MAINSRCS)
 DATAS	   = arch.in att.in lib.in msec.in st.in vol.in ascii.in
 HEADS	   = mdoc.h private.h term.h 
-SGMLS	   = index.sgml
+SGMLS	   = index.sgml 
 HTMLS	   = index.html
 STATICS	   = style.css external.png
 TARGZS	   = mdocml-$(VERSION).tar.gz \
 	     mdocml-oport-$(VERSION).tar.gz \
 	     mdocml-nport-$(VERSION).tar.gz
-MANS	   = mandoc.1 mdoc.3 mdoc.7
+MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7
 BINS	   = mandoc
 CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) $(TARGZS) 
 INSTALL	   = $(SRCS) $(HEADS) Makefile DESCR $(MANS) $(SGMLS) \

@@ -30,18 +30,33 @@ The
 language is used to format 
 .Bx 
 .Ux
-manuals.  An
+manuals.  In this reference document, we describe the syntax, ontology
+and structure of the 
+.Nm
+language.
+.\" PARAGRAPH
+.Pp
+An
 .Nm
 document follows simple rules:  lines beginning with the control
-character
+character 
 .Sq \.
 are parsed for macros.  Other lines are interpreted within the scope of
-prior macros.  This document describes the encoding, ontology and syntax
-of these macros.
+prior macros:
+.Bd -literal -offset XXX
+\&.Sh Macro lines change control state.
+Other lines are interpreted within the current state.
+.Ed
+.\" PARAGRAPH
+.Pp
+Macros are two- or three-character sequences whose scope rules, rules
+that dictate handling of subsequent-line or same-line arguments, are
+governed by one of five classifications described in this document.
 .\" SECTION
-.Sh CHARACTER ENCODING
+.Sh INPUT ENCODING
 .Nm
-documents may contain only printable characters, the space character
+documents may contain only graphable 7-bit ASCII characters, the space
+character
 .Sq \  ,
 and, in certain circumstances, the tab character
 .Sq \et .
@@ -529,7 +544,11 @@ Special symbols:
 .El 
 .\" SECTION
 .Sh ONTOLOGY
-Macros are classified in an ontology described by scope rules.  
+Macros are classified in an ontology described by their scope rules.
+Some macros are allowed to deviate from their classifications to
+preserve backward-compatibility with old macro combinations still found
+in the manual corpus.  These are specifically noted on a per-macro
+basis.
 .\" SUB-SECTION
 .Ss Scope
 .Bl -inset 
@@ -729,6 +748,22 @@ close at the invocation's end-of-line.
 .It \&.Dl    Ta    \&No  Ta    Yes
 .It \&.Ql    Ta    Yes   Ta    Yes
 .El
+.\" PARAGRAPH
+.Pp
+The
+.Sq \&Op
+may be broken by \&Oc as in the following example:
+.Bd -literal -offset XXXX
+\&.Oo
+\&.Op Fl a Oc
+.Ed
+.Pp
+In the above example, the scope of
+.Sq \&Op
+is technically broken by 
+.Sq \&Oc ,
+however, due to the overwhelming existence of this sequence, it's
+allowed.
 .\" SUB-SECTION
 .Ss Block partial-explicit
 Each of these contains at least a body and, in limited circumstances, a
