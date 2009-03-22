@@ -1,39 +1,336 @@
 .Dd $Mdocdate$
-.Dt "Writing Unix Documentation" paper
+.Dt manuals 7
 .Os
+.\" SECTION
 .Sh NAME
-.Nm Writing Unix Documentation
-.Nd a guide to writing Unix manuals
+.Nm Writing UNIX Documentation
+.Nd a guide to writing UNIX manuals
+.\" SECTION
 .Sh DESCRIPTION
-					<h1>
-					Writing Unix Documentation
-					</h1>
+.Em A utility without good documentation is of no utility at all .
+.\" PARAGRAPH
+.Pp
+A system component's documentation describes the utility of that
+component, whether it's a device driver, an executable or, most
+importantly, a game.  Although there are plenty of documents available
+on how to read 
+.Ux 
+documents, or where to find them, few focus on composition.
+.\" PARAGRAPH
+.Pp
+This document serves as a tutorial to writing 
+.Ux 
+documentation
+.Pq Dq manuals .
+If you add something to your operating system, whether it's a new file
+format or directory structure or device driver, it needs documentation.
+.\" SECTION
+.Sh CLASSIFICATION
+Classify your system component.  In
+.Ux ,
+each component has a 
+.Dq manual section ,
+which categorises the component's function.  The section of a manual is
+usually listed in parenthesis next to the component name, such as
+.Xr ps 1 ,
+section 1.  You can query a manual explicitly by its section:
+.Pp
+.Dl % man \-s 1 ps
+.Pp
+The following table lists broad classifications and the applicable
+manual sections:
+.Pp
+.\" LIST
+.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
+.It Em Category
+.Em Section(s)
+.It Device
+4
+.It Executable
+1, 6, 8
+.It Function
+2, 3, 9
+.It File-format
+5
+.It Other
+7
+.El
+.\" SUBSECTION
+.Ss Devices
+Consists of hardware (and pseudo-) device driver documentation.  Drivers
+are unilaterally classified in section 4.
+.Em Note :
+these manuals are necessarily system- and architecture-specific.
+.Pp
+Example:
+.Pp
+.\" LIST
+.Bl -tag -width "File-formatX" -offset indent -compact
+.It Em Manual
+.Em Description
+.It Xr dc 4
+DEC/Intel 10/100 Ethernet device
+.El
+.\" SUBSECTION
+.Ss Executables
+Executables consist of runnable binaries.  They're further classified by
+operator utility:
+.Pp
+.\" LIST
+.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
+.It Em Section
+.Em Description
+.It 1
+operator utilities
+.It 8 
+administrator utilities
+.It 6
+games
+.El
+.Pp
+Examples:
+.Pp
+.\" LIST
+.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
+.It Em Manual
+.Em Description
+.It Xr usermod 8
+modify user login information
+.It Xr cc 1
+the C compiler
+.It Xr fortune 6
+print a random adage
+.El
+.\" SUBSECTION
+.Ss Functions
+Function documentation describes programme source code, whether in the
+form of libraries, modules or standalone sources.  They're further
+classified by context: 
+.Pp
+.\" LIST
+.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
+.It Em Section
+.Em Description
+.It 2
+system calls
+.It 3, 3p, 3f
+programming libraries (C, Perl, Fortran)
+.It 9
+in-kernel routines
+.El
+.Pp
+.Em Note :
+section 2 and 9 manuals are necessarily system- and often
+architecture-specific.  Examples:
+.Pp
+.\" LIST
+.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
+.It Em Manual
+.Em Description
+.It Xr open 2
+open or create a file for reading or writing
+.It Xr isspace 3
+whitespace character test
+.It Xr Pod::Man 3p
+convert POD data to formatted roff
+.It Xr tsleep 9
+process context sleep
+.El
+.\" SUBSECTION
+.Ss File-formats
+A file format usually describes the format of on-disc binary or text
+data, although it can also be used to describe wire protocols (this is
+usually best left to RFC).  These manuals are unilaterally classified in
+section 5.
+.Pp
+Example:
+.Pp
+.\" LIST
+.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
+.It Em Manual
+.Em Description
+.It Xr passwd 5
+format of the password file
+.El
+.\" SUBSECTION
+.Ss Other
+Documents with no other classification are relegated to section 7.  This
+constitutes reference tutorials (such as this document) and other
+miscellaneous information.
+.Pp
+Examples:
+.Pp
+.\" LIST
+.Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
+.It Em Manual
+.Em Description
+.It Xr ascii 7
+ASCII character sets
+.It Xr symlink 7
+symbolic link handling
+.El
+.\" SECTION
+.Sh COMPOSITION
+Prepare your composition environment.  
+.\" SUBSECTION
+.Ss Naming
+Your component will need a name by which to query its contents via
+.Xr man 1 .
+Keep it simple.  You may want to look for other manuals by that same
+name before committing:
+.Pp
+.Dl % apropos myname
+.Pp
+Conventionally, manual files are named 
+.Pa myname.section ,
+such as
+.Pa manuals.7
+for this document.
+.\" SUBSECTION
+.Ss Input Language
+Manuals should 
+.Em always 
+be written in the
+.Xr mdoc 7
+formatting language.
+.Pp
+There exist other documentation-specific languages, such as the
+historical
+.Xr me 7 ,
+.Xr ms 7
+and
+.Xr man 7
+packages of 
+.Xr roff 7 ;
+newer languages such as DocBook, texinfo or schema-driven XML; or even
+ad-hoc conventions such as README files.  
+.Em Stay away from these methods!
+Historical formats fail to capture a manual's semantic content, instead
+only modelling its style.  Newer methods requires special,
+system-specific tools and may change or become obsolete over the
+life-time of your component.
+.Pp
+There are two canonical references for writing mdoc manuals:
+.Pp
+.\" LIST
+.Bl -tag -width XXXXXXXXXXXXXXXX -offset indent -compact
+.It Xr mdoc 7
+formal language reference
+.It Xr mdoc.samples 7
+macro reference
+.El
+.Pp
+Don't merely copy existing manuals!  Most systems distribute an mdoc
+template to help you get started in
+.Pa /usr/share/misc/mdoc.template .
+.\" SUBSECTION
+.Ss Development Tools
+While writing, make sure that your manual is correctly structured:
+.Pp
+.Dl % mandoc \-Tlint \-Wall name.1
+.Pp
+You may spell-check your work as follows:
+.Pp
+.Dl % deroff name.1 | spell
+.Dl % ispell \-n name.1
+.Pp
+Use 
+.Xr cvs 1
+or, if not available,
+.Xr rcs 1
+to version-control your work.  If you wish the last check-in to effect
+your document's date, use the following RCS tag for the date macro:
+.Pp
+.Dl \&.Dd $Mdocdate$
+.Pp
+.\" SUBSECTION
+.Ss Viewing
+mdoc documents may be paged to your terminal with traditional 
+tools such as
+.Xr nroff 1 ,
+.Xr groff 1 ,
+or with newer, more powerful tools such as
+.Xr mandoc 1 :
+.\" DISPLAY
+.Bd -literal -offset indent
+% nroff \-mandoc name.1 | less
+% groff \-Tascii \-mandoc name.1 | less
+% mandoc name.1 | less
+.Ed
+.Pp
+Other output formats are also supported:
+.\" DISPLAY
+.Bd -literal -offset indent
+% groff \-Tps \-mandoc name.1 | less
+% mandoc \-Thtml name.1 | less
+.Ed
+.\" SUBSECTION
+.Ss Automation
+Consider adding your mdoc documents to 
+.Xr make 1
+Makefiles in order to automatically check your input and generate
+output:
+.Bd -literal -offset indent
+\&.SUFFIXES: .html .txt .1 .in
 
-					<p>
-					<span class="attn">A utility without documentation is of no utility at all.</span>
-					</p>
+\&.in.1:
+	mandoc -Wall,error -Tlint $<
+	cp -f $< $@
 
-					<p>
-					A system component's documentation describes the utility of that component, whether it's a device
-					driver, an executable or, most importantly, a game.  Although there are plenty of documents available on
-					how to <i>read</i> Unix documents, or where to find them, few focus on how to <i>write</i> them.
-					</p>
+\&.1.html:
+	mandoc -Thtml $< >$@
 
-					<p>
-					This document serves as a reference guide to writing Unix documentation.  If you add something to your
-					operating system, whether it's a new file format or directory structure or device driver, it needs
-					documentation.
-					</p>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<div class="foot">
-						Copyright &#169; 2009 Kristaps D&#382;onsons, $Date$
-					</div>
-				</td>
-			</tr>
-		</tbody>
-	</table>
-	</body>
-</html>
+\&.1.txt:
+	mandoc -Tascii $< | col -b >$@
+.Ed
+.\" SECTION
+.Sh BEST PRACTICES
+The
+.Xr mdoc 7
+and 
+.Xr mdoc.samples 7
+files will be indispensable in guiding composition.  In this section, we
+introduce some 
+.Ux
+manual best practices:
+.\" SUBSECTION
+.Ss Language
+.Bl -enum 
+.It
+Use clear, concise language.  Favour simplicity.
+.It
+Write your manual in non-idiomatic English.  Don't worry about
+Commonwealth or American spellings \(em just correct ones.
+.It
+Spell-check your manual, keeping in mind short-letter terms (
+.Xr iwi 4
+vs.
+.Xr iwn 4 ) .
+.It
+If you absolutely must use special characters (diacritics, mathematical
+symbols and so on), use the escapes dictated in
+.Xr mdoc 7 .
+.El
+.\" SUBSECTION
+.Ss References 
+Other components may be referenced with the
+.Sq \&Xr ,
+and
+.Sq \&Sx
+macros.  Make sure that these exist.  If you intend to distribute your
+manual, make sure
+.Sq \&Xr
+references are valid across systems (within reason).  If you cross-link with
+.Sq \&Sx ,
+make sure that the section reference exists.
+.\" SUBSECTION
+.Ss Citations
+Cite your work.  If your system references standards documents or other
+publications, please use the
+.Sq \&Rs/Re
+block macros.
+.\" SUBSECTION
+.Ss Types and Prototypes
+If writing section 3 manuals, make sure that you correctly annotate your
+variables and functions.  This guarantees that cross-referncing between
+function names and their prototypes works properly.
