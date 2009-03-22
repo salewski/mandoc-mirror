@@ -28,14 +28,15 @@ format or directory structure or device driver, it needs documentation.
 .Sh CLASSIFICATION
 Classify your system component.  In
 .Ux ,
-each component has a 
-.Dq manual section ,
-which categorises the component's function.  The section of a manual is
-usually listed in parenthesis next to the component name, such as
+each component has a manual section , which categorises the component's
+function.  The section of a manual is usually listed in parenthesis next
+to the component name, such as
 .Xr ps 1 ,
 section 1.  You can query a manual explicitly by its section:
-.Pp
-.Dl % man \-s 1 ps
+.Bd -literal -offset XXXX
+% man \-s 1 ps
+% apropos ps
+.Ed
 .Pp
 The following table lists classifications and the applicable manual
 sections:
@@ -90,7 +91,12 @@ symbolic link handling
 .El
 .\" SECTION
 .Sh COMPOSITION
-Prepare your composition environment.  
+Prepare your composition environment by copying over the manual template
+from 
+.Pa /usr/share/misc/mdoc.template .
+.Em \&Do not
+start afresh or by copying another manual unless you know exactly what
+you're doing!
 .\" SUBSECTION
 .Ss Naming
 Your component will need a name by which to query its contents via
@@ -139,9 +145,9 @@ formal language reference
 macro reference
 .El
 .Pp
-Don't merely copy existing manuals!  Most systems distribute an mdoc
-template to help you get started in
-.Pa /usr/share/misc/mdoc.template .
+Open the template you've copied into
+.Pa name.section
+and begin editing.
 .\" SUBSECTION
 .Ss Development Tools
 While writing, make sure that your manual is correctly structured:
@@ -161,7 +167,6 @@ to version-control your work.  If you wish the last check-in to effect
 your document's date, use the following RCS tag for the date macro:
 .Pp
 .Dl \&.Dd $Mdocdate$
-.Pp
 .\" SUBSECTION
 .Ss Viewing
 mdoc documents may be paged to your terminal with traditional 
@@ -208,7 +213,7 @@ The
 .Xr mdoc 7
 and 
 .Xr mdoc.samples 7
-files will be indispensable in guiding composition.  In this section, we
+files are indispensable in guiding composition.  In this section, we
 introduce some 
 .Ux
 manual best practices:
@@ -260,4 +265,4 @@ lists), assume that your output device is a fixed-width terminal window:
 .Pp
 You may assume that the width calculated by the string literal 
 .Qq Fl o Ar outfile
-will 
+will be covered by the \-width argument.
