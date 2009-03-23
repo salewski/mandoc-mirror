@@ -27,25 +27,25 @@
 static	int	  in_line_eoln(MACRO_PROT_ARGS);
 
 const	struct man_macro __man_macros[MAN_MAX] = {
-	{ in_line_eoln, NULL },	/* MAN___ */
-	{ in_line_eoln, NULL },	/* MAN_TH */
-	{ in_line_eoln, NULL },	/* MAN_SH */
-	{ in_line_eoln, NULL },	/* MAN_SS */
-	{ in_line_eoln, NULL },	/* MAN_TP */
-	{ in_line_eoln, NULL },	/* MAN_LP */
-	{ in_line_eoln, NULL },	/* MAN_PP */
-	{ in_line_eoln, NULL },	/* MAN_P */
-	{ in_line_eoln, NULL },	/* MAN_IP */
-	{ in_line_eoln, NULL },	/* MAN_HP */
-	{ in_line_eoln, NULL },	/* MAN_SM */
-	{ in_line_eoln, NULL },	/* MAN_SB */
-	{ in_line_eoln, NULL },	/* MAN_BI */
-	{ in_line_eoln, NULL },	/* MAN_IB */
-	{ in_line_eoln, NULL },	/* MAN_BR */
-	{ in_line_eoln, NULL },	/* MAN_RB */
-	{ in_line_eoln, NULL },	/* MAN_R */
-	{ in_line_eoln, NULL },	/* MAN_B */
-	{ in_line_eoln, NULL },	/* MAN_I */
+	{ in_line_eoln, 0 },	/* MAN___ */
+	{ in_line_eoln, 0 },	/* MAN_TH */
+	{ in_line_eoln, 0 },	/* MAN_SH */
+	{ in_line_eoln, 0 },	/* MAN_SS */
+	{ in_line_eoln, 0 },	/* MAN_TP */
+	{ in_line_eoln, 0 },	/* MAN_LP */
+	{ in_line_eoln, 0 },	/* MAN_PP */
+	{ in_line_eoln, 0 },	/* MAN_P */
+	{ in_line_eoln, 0 },	/* MAN_IP */
+	{ in_line_eoln, 0 },	/* MAN_HP */
+	{ in_line_eoln, 0 },	/* MAN_SM */
+	{ in_line_eoln, 0 },	/* MAN_SB */
+	{ in_line_eoln, 0 },	/* MAN_BI */
+	{ in_line_eoln, 0 },	/* MAN_IB */
+	{ in_line_eoln, 0 },	/* MAN_BR */
+	{ in_line_eoln, 0 },	/* MAN_RB */
+	{ in_line_eoln, 0 },	/* MAN_R */
+	{ in_line_eoln, 0 },	/* MAN_B */
+	{ in_line_eoln, 0 },	/* MAN_I */
 };
 
 const	struct man_macro * const man_macros = __man_macros;

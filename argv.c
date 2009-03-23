@@ -765,8 +765,8 @@ argv_multi(struct mdoc *mdoc, int line,
 		if (0 == v->sz % MULTI_STEP)
 			v->value = xrealloc(v->value, 
 				(v->sz + MULTI_STEP) * sizeof(char *));
-
-		v->value[(int)v->sz] = xstrdup(p);
+		if (NULL == (v->value[(int)v->sz] = strdup(p)))
+			err(1, "strdup");
 	}
 
 	if (v->sz)
