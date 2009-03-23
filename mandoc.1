@@ -118,14 +118,19 @@ and
 .El
 .\" PARAGRAPH
 .Pp
-Note that reserved words may occur in streams of text, so the following:
+Note that reserved words only register as such as if they appear as
+standalone tokens, either in parsed lines or streams of text.  Thus, the
+following fragment:
 .Bd -literal -offset XXXX
 this self is not that of the waking , empirically real man
 .Ed
 .\" PARAGRAPH
 .Pp
 \&...correctly adjusts the comma spacing to
-.Qq this self is not that of the waking , empirically real man .
+.Dq this self is not that of the waking , empirically real man .
+However, if the comma were part of 
+.Dq ,empirically ,
+it would not.
 .\" SUB-SECTION
 .Ss Output Formats
 The
@@ -193,18 +198,28 @@ mode doesn't yet know how to display the following:
 The \-hang 
 .Sq \&Bl
 list is not yet supported.
-.\" LIST-ITEM
-.It
-The \-literal and \-unfilled 
-.Sq \&Bd
-displays types are synonyms, as are \-filled and \-ragged.
-.\" LIST-ITEM
-.It
-The
-.Sq \&Bd
-macro doesn't process \-compact .
 .El
 .Pp
 Other macros still aren't supported by virtue of nobody complaining
 about their absence.  Please report any omissions: this is a work in
 progress.
+.Pp
+The following list documents differences between traditional
+.Xr nroff 1
+output and
+.Nm :
+.Pp
+.Bl -bullet -compact
+.It 
+A list of display following
+.Sq \&Ss
+does not assert a prior vertical break, just as it doesn't with
+.Sq \&Sh .
+.It
+Special characters don't follow the current font style.
+.\" LIST-ITEM
+.It
+The \-literal and \-unfilled 
+.Sq \&Bd
+displays types are synonyms, as are \-filled and \-ragged.
+.El

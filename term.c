@@ -56,7 +56,8 @@
 #define	TTYPE_LINK_ANCHOR 19
 #define	TTYPE_LINK_TEXT	  20
 #define	TTYPE_REF_JOURNAL 21
-#define	TTYPE_NMAX	  22
+#define	TTYPE_LIST	  22
+#define	TTYPE_NMAX	  23
 
 /* 
  * These define "styles" for element types, like command arguments or
@@ -88,7 +89,8 @@ const	int ttypes[TTYPE_NMAX] = {
 	TERMP_BOLD,	 	/* TTYPE_DIAG */
 	TERMP_UNDER, 		/* TTYPE_LINK_ANCHOR */
 	TERMP_BOLD,	 	/* TTYPE_LINK_TEXT */
-	TERMP_UNDER	 	/* TTYPE_REF_JOURNAL */
+	TERMP_UNDER,	 	/* TTYPE_REF_JOURNAL */
+	TERMP_BOLD		/* TTYPE_LIST */
 };
 
 static	int		  arg_hasattr(int, const struct mdoc_node *);
