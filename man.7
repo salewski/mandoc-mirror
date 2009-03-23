@@ -1,0 +1,554 @@
+.\" $Id$
+.\"
+.\" Copyright (c) 2009 Kristaps Dzonsons <kristaps@openbsd.org>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the
+.\" above copyright notice and this permission notice appear in all
+.\" copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+.\" WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+.\" WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+.\" AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+.\" DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
+.\" PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+.\" TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+.\" PERFORMANCE OF THIS SOFTWARE.
+.\" 
+.Dd $Mdocdate$
+.Dt man 7
+.Os
+.\" SECTION
+.Sh NAME
+.Nm man
+.Nd man language reference
+.\" SECTION
+.Sh DESCRIPTION
+The
+.Nm man
+language was historically used to format 
+.Ux
+manuals.  In this reference document, we describe the syntax and
+structure of the 
+.Nm
+language.
+.Pp
+.Em \&Do not
+use 
+.Nm
+to write your manuals.  Use the
+.Xr mdoc 7
+language, instead.
+.\" PARAGRAPH
+.Pp
+An
+.Nm
+document follows simple rules:  lines beginning with the control
+character 
+.Sq \.
+are parsed for macros.  Other lines are interpreted within the scope of
+prior macros:
+.Bd -literal -offset XXX
+\&.SH Macro lines change control state.
+Other lines are interpreted within the current state.
+.Ed
+.\" PARAGRAPH
+.Pp
+Macros are character sequences whose structural rules are described
+later in this document.
+.\" SECTION
+.Sh INPUT ENCODING
+.Nm
+documents may contain only graphable 7-bit ASCII characters and the
+space character
+.Sq \  .
+All manuals must have
+.Sq \en
+line termination.  
+.Pp
+Blank lines are acceptable; where found, the output will also assert a
+vertical space.
+.\" SUB-SECTION
+.Ss Special Characters
+Special character sequences begin with the escape character
+.Sq \\
+followed by either an open-parenthesis 
+.Sq \&(
+for two-character sequences; an open-bracket
+.Sq \&[
+for n-character sequences (terminated at a close-bracket
+.Sq \&] ) ;
+or a single one-character sequence.
+.Pp
+Characters may alternatively be escaped by a slash-asterisk,
+.Sq \\* ,
+with the same combinations as described above.  This form is deprecated.  
+.Pp
+The following is a table of all available escapes.
+.Pp
+Grammatic:
+.Bl -tag -width 12n -offset "XXXX" -compact
+.It \\(em
+.Pq em-dash
+.It \\(en
+.Pq en-dash
+.It \e-
+.Pq hyphen
+.It \\\\
+.Pq back-slash
+.It \e'
+.Pq apostrophe
+.It \e`
+.Pq back-tick
+.It \\
+.Pq space
+.It \\.
+.Pq period
+.It \\(r!
+.Pq upside-down exclamation
+.It \\(r?
+.Pq upside-down question
+.El
+.\" PARAGRAPH
+.Pp
+Enclosures:
+.Bl -tag -width 12n -offset "XXXX" -compact
+.It \\(lh
+.Pq left hand
+.It \\(rh
+.Pq right hand
+.It \\(Fo
+.Pq left guillemet
+.It \\(Fc
+.Pq right guillemet
+.It \\(fo
+.Pq left guilsing
+.It \\(fc
+.Pq right guilsing
+.It \\(rC
+.Pq right brace
+.It \\(lC
+.Pq left brace
+.It \\(ra
+.Pq right angle
+.It \\(la
+.Pq left angle
+.It \\(rB
+.Pq right bracket
+.It \\(lB
+.Pq left bracket
+.It \\q
+.Pq double-quote
+.It \\(lq
+.Pq left double-quote
+.It \\(Lq
+.Pq left double-quote, deprecated
+.It \\(rq
+.Pq right double-quote
+.It \\(Rq
+.Pq right double-quote, deprecated
+.It \\(oq
+.Pq left single-quote
+.It \\(aq
+.Pq right single-quote
+.It \\(Bq
+.Pq right low double-quote
+.It \\(bq
+.Pq right low single-quote
+.El
+.\" PARAGRAPH
+.Pp
+Indicatives:
+.Bl -tag -width 12n -offset "XXXX" -compact
+.It \\(<-
+.Pq left arrow
+.It \\(->
+.Pq right arrow
+.It \\(ua
+.Pq up arrow
+.It \\(da
+.Pq down arrow
+.It \\(<>
+.Pq left-right arrow
+.It \\(lA
+.Pq left double-arrow
+.It \\(rA
+.Pq right double-arrow
+.It \\(uA
+.Pq up double-arrow
+.It \\(dA
+.Pq down double-arrow
+.It \\(hA
+.Pq left-right double-arrow
+.El
+.\" PARAGRAPH
+.Pp
+Mathematical:
+.Bl -tag -width 12n -offset "XXXX" -compact
+.It \\(es
+.Pq empty set
+.It \\(ca
+.Pq intersection
+.It \\(cu
+.Pq union
+.It \\(gr
+.Pq gradient
+.It \\(pd
+.Pq partial differential
+.It \\(ap
+.Pq similarity
+.It \\(=)
+.Pq proper superset
+.It \\((=
+.Pq proper subset
+.It \\(eq
+.Pq equals
+.It \\(di
+.Pq division
+.It \\(mu
+.Pq multiplication
+.It \\(pl
+.Pq addition
+.It \\(nm
+.Pq not element
+.It \\(mo
+.Pq element
+.It \\(Im
+.Pq imaginary
+.It \\(Re
+.Pq real
+.It \\(Ah
+.Pq aleph
+.It \\(te
+.Pq existential quantifier
+.It \\(fa
+.Pq universal quantifier
+.It \\(AN
+.Pq logical AND
+.It \\(OR
+.Pq logical OR
+.It \\(no
+.Pq logical NOT
+.It \\(st
+.Pq such that
+.It \\(tf
+.Pq therefore
+.It \\(~~
+.Pq approximate
+.It \\(~=
+.Pq approximately equals
+.It \\(=~
+.Pq congruent
+.It \\(Gt
+.Pq greater-than, deprecated
+.It \\(Lt
+.Pq less-than, deprecated
+.It \\(<=
+.Pq less-than-equal
+.It \\(Le
+.Pq less-than-equal, deprecated
+.It \\(>=
+.Pq greater-than-equal
+.It \\(Ge
+.Pq greater-than-equal
+.It \\(==
+.Pq equal
+.It \\(!=
+.Pq not equal
+.It \\(Ne
+.Pq not equal, deprecated
+.It \\(if
+.Pq infinity
+.It \\(If
+.Pq infinity, deprecated
+.It \\(na
+.Pq NaN , an extension
+.It \\(Na
+.Pq NaN, deprecated
+.It \\(+-
+.Pq plus-minus
+.It \\(Pm
+.Pq plus-minus, deprecated
+.It \\(**
+.Pq asterisk
+.El
+.\" PARAGRAPH
+.Pp
+Ligatures:
+.Bl -tag -width 12n -offset "XXXX" -compact
+.It \\(ss
+.Pq German eszett
+.It \\(AE
+.Pq upper-case AE
+.It \\(ae
+.Pq lower-case AE
+.It \\(OE
+.Pq upper-case OE
+.It \\(oe
+.Pq lower-case OE
+.It \\(ff
+.Pq ff ligature
+.It \\(fi
+.Pq fi ligature
+.It \\(fl
+.Pq fl ligature
+.It \\(Fi
+.Pq ffi ligature
+.It \\(Fl
+.Pq ffl ligature
+.El
+.\" PARAGRAPH
+.Pp
+Diacritics and letters:
+.Bl -tag -width 12n -offset "XXXX" -compact
+.It \\(ga
+.Pq grave accent
+.It \\(aa
+.Pq accute accent
+.It \\(a"
+.Pq umlaut accent
+.It \\(ad
+.Pq dieresis accent
+.It \\(a~
+.Pq tilde accent
+.It \\(a^
+.Pq circumflex accent
+.It \\(ac
+.Pq cedilla accent
+.It \\(ad
+.Pq dieresis accent
+.It \\(ah
+.Pq caron accent
+.It \\(ao
+.Pq ring accent
+.It \\(ho
+.Pq hook accent
+.It \\(ab
+.Pq breve accent
+.It \\(a-
+.Pq macron accent
+.It \\(-D
+.Pq upper-case eth
+.It \\(Sd
+.Pq lower-case eth
+.It \\(TP
+.Pq upper-case thorn
+.It \\(Tp
+.Pq lower-case thorn
+.It \\('A
+.Pq upper-case acute A
+.It \\('E
+.Pq upper-case acute E
+.It \\('I
+.Pq upper-case acute I
+.It \\('O
+.Pq upper-case acute O
+.It \\('U
+.Pq upper-case acute U
+.It \\('a
+.Pq lower-case acute a
+.It \\('e
+.Pq lower-case acute e
+.It \\('i
+.Pq lower-case acute i
+.It \\('o
+.Pq lower-case acute o
+.It \\('u
+.Pq lower-case acute u
+.It \\(`A
+.Pq upper-case grave A
+.It \\(`E
+.Pq upper-case grave E
+.It \\(`I
+.Pq upper-case grave I
+.It \\(`O
+.Pq upper-case grave O
+.It \\(`U
+.Pq upper-case grave U
+.It \\(`a
+.Pq lower-case grave a
+.It \\(`e
+.Pq lower-case grave e
+.It \\(`i
+.Pq lower-case grave i
+.It \\(`o
+.Pq lower-case grave o
+.It \\(`u
+.Pq lower-case grave u
+.It \\(~A
+.Pq upper-case tilde A
+.It \\(~N
+.Pq upper-case tilde N
+.It \\(~O
+.Pq upper-case tilde O
+.It \\(~a
+.Pq lower-case tilde a
+.It \\(~n
+.Pq lower-case tilde n
+.It \\(~o
+.Pq lower-case tilde o
+.It \\(:A
+.Pq upper-case dieresis A
+.It \\(:E
+.Pq upper-case dieresis E
+.It \\(:I
+.Pq upper-case dieresis I
+.It \\(:O
+.Pq upper-case dieresis O
+.It \\(:U
+.Pq upper-case dieresis U
+.It \\(:a
+.Pq lower-case dieresis a
+.It \\(:e
+.Pq lower-case dieresis e
+.It \\(:i
+.Pq lower-case dieresis i
+.It \\(:o
+.Pq lower-case dieresis o
+.It \\(:u
+.Pq lower-case dieresis u
+.It \\(:y
+.Pq lower-case dieresis y
+.It \\(^A
+.Pq upper-case circumflex A
+.It \\(^E
+.Pq upper-case circumflex E
+.It \\(^I
+.Pq upper-case circumflex I
+.It \\(^O
+.Pq upper-case circumflex O
+.It \\(^U
+.Pq upper-case circumflex U
+.It \\(^a
+.Pq lower-case circumflex a
+.It \\(^e
+.Pq lower-case circumflex e
+.It \\(^i
+.Pq lower-case circumflex i
+.It \\(^o
+.Pq lower-case circumflex o
+.It \\(^u
+.Pq lower-case circumflex u
+.It \\(,C
+.Pq upper-case cedilla C
+.It \\(,c
+.Pq lower-case cedilla c
+.It \\(/L
+.Pq upper-case stroke L
+.It \\(/l
+.Pq lower-case stroke l
+.It \\(/O
+.Pq upper-case stroke O
+.It \\(/o
+.Pq lower-case stroke o
+.It \\(oA
+.Pq upper-case ring A
+.It \\(oa
+.Pq lower-case ring a
+.El
+.\" PARAGRAPH
+.Pp
+Monetary:
+.Bl -tag -width 12n -offset "XXXX" -compact
+.It \\(Cs
+.Pq Scandinavian
+.It \\(Do
+.Pq dollar
+.It \\(Po
+.Pq pound
+.It \\(Ye
+.Pq yen
+.It \\(Fn
+.Pq florin
+.It \\(ct
+.Pq cent
+.El
+.\" PARAGRAPH
+.Pp
+Special symbols:
+.Bl -tag -width 12n -offset "XXXX" -compact
+.It \\(de
+.Pq degree
+.It \\(ps
+.Pq paragraph
+.It \\(sc
+.Pq section
+.It \\(dg
+.Pq dagger
+.It \\(dd
+.Pq double dagger
+.It \\(ci
+.Pq circle
+.It \\(ba
+.Pq bar
+.It \\(bb
+.Pq broken bar
+.It \\(Ba
+.Pq bar, deprecated
+.It \\(co
+.Pq copyright
+.It \\(rg
+.Pq registered
+.It \\(tm
+.Pq trademarked
+.It \\&
+.Pq non-breaking space
+.It \\e
+.Pq escape
+.It \\(Am
+.Pq ampersand, deprecated
+.El 
+.\" SECTION
+.Sh STRUCTURE
+Macros are case in-sensitive and one to three three characters in
+length.  All follow the same structural rules:
+.Bd -literal -offset XXXX
+\&.Yo \(lBbody...\(rB 
+.Ed
+.Pp
+The
+.Dq body
+consists of zero or more arguments to the macro.
+.\" PARAGRAPH
+.Sh MACROS
+This section contains a complete list of all 
+.Nm
+macros, arranged alphabetically, with the number of arguments.
+.Pp
+.Bl -column "MacroX" "Arguments" -compact -offset XXXX
+.It Em Macro Ta Em Arguments
+.It \&.TH    Ta    >0
+.It \&.SH    Ta    n
+.It \&.SS    Ta    n
+.It \&.TP    Ta    n
+.It \&.LP    Ta    n
+.It \&.PP    Ta    n
+.It \&.P     Ta    n
+.It \&.IP    Ta    n
+.It \&.HP    Ta    n
+.It \&.SM    Ta    n
+.It \&.SB    Ta    n
+.It \&.BI    Ta    n
+.It \&.IB    Ta    n
+.It \&.BR    Ta    n
+.It \&.RB    Ta    n
+.It \&.R     Ta    n
+.It \&.B     Ta    n
+.It \&.I     Ta    n
+.It \&.IR    Ta    n
+.El
+.\" SECTION
+.Sh SEE ALSO
+.Xr mandoc 1
+.\" SECTION
+.Sh AUTHORS
+The
+.Nm
+utility was written by 
+.An Kristaps Dzonsons Aq kristaps@openbsd.org .
+.\" SECTION
+.Sh CAVEATS
+Do not use this language.  Use
+.Xr mdoc 7 ,
+instead.
