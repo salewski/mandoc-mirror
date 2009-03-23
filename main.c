@@ -67,7 +67,8 @@ enum	outt {
 	OUTT_LINT
 };
 
-typedef	int		(*out_run)(void *, const struct mdoc *);
+typedef	int		(*out_run)(void *, const struct man *,
+				const struct mdoc *);
 typedef	void		(*out_free)(void *);
 
 extern	char		 *__progname;
@@ -75,8 +76,10 @@ extern	char		 *__progname;
 extern	void		 *ascii_alloc(void);
 extern	void		 *latin1_alloc(void);
 extern	void		 *utf8_alloc(void);
-extern	int		  terminal_run(void *, const struct mdoc *);
-extern	int		  tree_run(void *, const struct mdoc *);
+extern	int		  terminal_run(void *, const struct man *, 
+				const struct mdoc *);
+extern	int		  tree_run(void *, const struct man *,
+				const struct mdoc *);
 extern	void		  terminal_free(void *);
 
 static	int		  foptions(int *, char *);
@@ -219,20 +222,16 @@ main(int argc, char *argv[])
 
 		if (c && NULL == outrun)
 			rc = 1;
-#if 0
-		else if (c && outrun && (*outrun)(outdata, mdoc))
+		else if (c && outrun && (*outrun)(outdata, man, mdoc))
 			rc = 1;
-#endif
 	} else {
 		while (*argv) {
 			curp.file = *argv;
 			c = file(&blk, &ln, *argv, man, mdoc);
 			if ( ! c)
 				break;
-#if 0
-			if (outrun && ! (*outrun)(outdata, mdoc))
+			if (outrun && ! (*outrun)(outdata, man, mdoc))
 				break;
-#endif
 			if (man)
 				man_reset(man);
 			if (mdoc)

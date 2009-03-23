@@ -22,22 +22,28 @@
 #include <stdlib.h>
 
 #include "mdoc.h"
+#include "man.h"
 
-static	void	tree_body(const struct mdoc_node *, int);
+static	void	tree_mdoc(const struct mdoc_node *, int);
+static	void	tree_man(const struct man_node *, int);
 
 
 /* ARGSUSED */
 int
-tree_run(void *arg, const struct mdoc *mdoc)
+tree_run(void *arg, const struct man *man,
+		const struct mdoc *mdoc)
 {
 
-	tree_body(mdoc_node(mdoc), 0);
+	if (man)
+		tree_man(man_node(man), 0);
+	if (mdoc)
+		tree_mdoc(mdoc_node(mdoc), 0);
 	return(1);
 }
 
 
 static void
-tree_body(const struct mdoc_node *n, int indent)
+tree_mdoc(const struct mdoc_node *n, int indent)
 {
 	const char	 *p, *t;
 	int		  i, j;
@@ -131,8 +137,54 @@ tree_body(const struct mdoc_node *n, int indent)
 	(void)printf(" %d:%d\n", n->line, n->pos);
 
 	if (n->child)
-		tree_body(n->child, indent + 1);
+		tree_mdoc(n->child, indent + 1);
 	if (n->next)
-		tree_body(n->next, indent);
+		tree_mdoc(n->next, indent);
 }
 
+
+static void
+tree_man(const struct man_node *n, int indent)
+{
+	const char	 *p, *t;
+	int		  i;
+
+	switch (n->type) {
+	case (MAN_ROOT):
+		t = "root";
+		break;
+	case (MAN_ELEM):
+		t = "elem";
+		break;
+	case (MAN_TEXT):
+		t = "text";
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	switch (n->type) {
+	case (MAN_TEXT):
+		p = n->string;
+		break;
+	case (MAN_ELEM):
+		p = man_macronames[n->tok];
+		break;
+	case (MAN_ROOT):
+		p = "root";
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	for (i = 0; i < indent; i++)
+		(void)printf("    ");
+	(void)printf("%s (%s) %d:%d\n", p, t, n->line, n->pos);
+
+	if (n->child)
+		tree_man(n->child, indent + 1);
+	if (n->next)
+		tree_man(n->next, indent);
+}

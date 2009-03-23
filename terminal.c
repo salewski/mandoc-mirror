@@ -76,9 +76,13 @@ ascii_alloc(void)
 
 
 int
-terminal_run(void *arg, const struct mdoc *mdoc)
+terminal_run(void *arg, const struct man *man,
+		const struct mdoc *mdoc)
 {
 	struct termp	*p;
+
+	if (NULL == mdoc)
+		return(1);
 
 	p = (struct termp *)arg;
 

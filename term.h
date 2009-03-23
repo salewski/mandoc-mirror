@@ -20,6 +20,7 @@
 #define TERM_H
 
 #include "mdoc.h"
+#include "man.h"
 
 /* FIXME - clean up tabs. */
 

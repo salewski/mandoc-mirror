@@ -18,79 +18,119 @@
  */
 #include <assert.h>
 #include <ctype.h>
+#include <err.h> /* XXX */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "libman.h"
 
-static	int	  in_line_eoln(MACRO_PROT_ARGS);
-
-const	struct man_macro __man_macros[MAN_MAX] = {
-	{ in_line_eoln, 0 },	/* MAN___ */
-	{ in_line_eoln, 0 },	/* MAN_TH */
-	{ in_line_eoln, 0 },	/* MAN_SH */
-	{ in_line_eoln, 0 },	/* MAN_SS */
-	{ in_line_eoln, 0 },	/* MAN_TP */
-	{ in_line_eoln, 0 },	/* MAN_LP */
-	{ in_line_eoln, 0 },	/* MAN_PP */
-	{ in_line_eoln, 0 },	/* MAN_P */
-	{ in_line_eoln, 0 },	/* MAN_IP */
-	{ in_line_eoln, 0 },	/* MAN_HP */
-	{ in_line_eoln, 0 },	/* MAN_SM */
-	{ in_line_eoln, 0 },	/* MAN_SB */
-	{ in_line_eoln, 0 },	/* MAN_BI */
-	{ in_line_eoln, 0 },	/* MAN_IB */
-	{ in_line_eoln, 0 },	/* MAN_BR */
-	{ in_line_eoln, 0 },	/* MAN_RB */
-	{ in_line_eoln, 0 },	/* MAN_R */
-	{ in_line_eoln, 0 },	/* MAN_B */
-	{ in_line_eoln, 0 },	/* MAN_I */
-};
-
-const	struct man_macro * const man_macros = __man_macros;
+static	int		 man_args(struct man *, int, 
+				int *, char *, char **);
 
 
-/*
- * In-line macro that spans an entire line.  May be callable, but has no
- * subsequent parsed arguments.
- */
-static int
-in_line_eoln(MACRO_PROT_ARGS)
+int
+man_macro(struct man *man, int tok, int line, 
+		int ppos, int *pos, char *buf)
 {
-#if 0
-	int		  c, w, la;
-	char		 *p;
+	int		 w, la;
+	char		*p;
+	struct man_node	*n;
 
-	if ( ! man_elem_alloc(man, line, ppos, tok, arg))
+	if ( ! man_elem_alloc(man, line, ppos, tok))
 		return(0);
-	man->next = MDOC_NEXT_SIBLING;
+	n = man->last;
+	man->next = MAN_NEXT_CHILD;
 
 	for (;;) {
 		la = *pos;
-		w = man_args(man, line, pos, buf, tok, &p);
+		w = man_args(man, line, pos, buf, &p);
 
-		if (ARGS_ERROR == w)
+		if (-1 == w)
 			return(0);
-		if (ARGS_EOLN == w)
+		if (0 == w)
 			break;
 
-		c = ARGS_QWORD == w ? MAN_MAX :
-			lookup(man, line, la, tok, p);
-
-		if (MDOC_MAX != c && -1 != c) {
-			if ( ! rew_elem(mdoc, tok))
-				return(0);
-			return(mdoc_macro(mdoc, c, line, la, pos, buf));
-		} else if (-1 == c)
+		if ( ! man_word_alloc(man, line, la, p))
 			return(0);
-
-		if ( ! mdoc_word_alloc(mdoc, line, la, p))
-			return(0);
+		man->next = MAN_NEXT_SIBLING;
 	}
 
-	return(rew_elem(mdoc, tok));
-#endif
+	/* TODO: validate. */
+	/* TODO: validate. */
+
+	man->last = n;
+	man->next = MAN_NEXT_SIBLING;
+
 	return(1);
 }
 
+
+/* ARGSUSED */
+int
+man_args(struct man *man, int line, 
+		int *pos, char *buf, char **v)
+{
+
+	if (0 == buf[*pos])
+		return(0);
+
+	/* First parse non-quoted strings. */
+
+	if ('\"' != buf[*pos]) {
+		*v = &buf[*pos];
+
+		while (buf[*pos]) {
+			if (' ' == buf[*pos])
+				if ('\\' != buf[*pos - 1])
+					break;
+			(*pos)++;
+		}
+
+		if (0 == buf[*pos])
+			return(1);
+
+		buf[(*pos)++] = 0;
+
+		if (0 == buf[*pos])
+			return(1);
+
+		while (buf[*pos] && ' ' == buf[*pos])
+			(*pos)++;
+
+		if (buf[*pos])
+			return(1);
+
+		warnx("tail whitespace");
+		return(-1);
+	}
+
+	/*
+	 * If we're a quoted string (and quoted strings are allowed),
+	 * then parse ahead to the next quote.  If none's found, it's an
+	 * error.  After, parse to the next word.  
+	 */
+
+	*v = &buf[++(*pos)];
+
+	while (buf[*pos] && '\"' != buf[*pos])
+		(*pos)++;
+
+	if (0 == buf[*pos]) {
+		warnx("unterminated quotation");
+		return(-1);
+	}
+
+	buf[(*pos)++] = 0;
+	if (0 == buf[*pos])
+		return(1);
+
+	while (buf[*pos] && ' ' == buf[*pos])
+		(*pos)++;
+
+	if (buf[*pos])
+		return(1);
+
+	warnx("tail whitespace");
+	return(-1);
+}

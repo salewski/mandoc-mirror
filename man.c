@@ -31,7 +31,7 @@ const	char *const __man_macronames[MAN_MAX] = {
 	"TP", 		"LP",		"PP",		"P",
 	"IP",		"HP",		"SM",		"SB",
 	"BI",		"IB",		"BR",		"RB",
-	"R",		"B",		"I"
+	"R",		"B",		"I",		"IR"
 	};
 
 const	char * const *man_macronames = __man_macronames;
@@ -41,21 +41,23 @@ static	int		 man_node_append(struct man *,
 				struct man_node *);
 static	int		 man_ptext(struct man *, int, char *);
 static	int		 man_pmacro(struct man *, int, char *);
+static	void		 man_free1(struct man *);
+static	void		 man_alloc1(struct man *);
 
 
 const struct man_node *
-man_node(const struct man *man)
+man_node(const struct man *m)
 {
 
-	return(man->first);
+	return(MAN_HALT & m->flags ? NULL : m->first);
 }
 
 
 const struct man_meta *
-man_meta(const struct man *man)
+man_meta(const struct man *m)
 {
 
-	return(&man->meta);
+	return(MAN_HALT & m->flags ? NULL : &m->meta);
 }
 
 
@@ -63,22 +65,8 @@ void
 man_reset(struct man *man)
 {
 
-	if (man->first)
-		man_node_freelist(man->first);
-	if (man->meta.title)
-		free(man->meta.title);
-	if (man->meta.os)
-		free(man->meta.os);
-	if (man->meta.vol)
-		free(man->meta.vol);
-
-	bzero(&man->meta, sizeof(struct man_meta));
-	man->flags = 0;
-	if (NULL == (man->last = calloc(1, sizeof(struct man_node))))
-		err(1, "malloc");
-	man->first = man->last;
-	man->last->type = MAN_ROOT;
-	man->next = MAN_NEXT_CHILD;
+	man_free1(man);
+	man_alloc1(man);
 }
 
 
@@ -86,14 +74,8 @@ void
 man_free(struct man *man)
 {
 
-	if (man->first)
-		man_node_freelist(man->first);
-	if (man->meta.title)
-		free(man->meta.title);
-	if (man->meta.os)
-		free(man->meta.os);
-	if (man->meta.vol)
-		free(man->meta.vol);
+	man_free1(man);
+
 	if (man->htab)
 		man_hash_free(man->htab);
 	free(man);
@@ -105,14 +87,12 @@ man_alloc(void)
 {
 	struct man	*p;
 
-	if (NULL == (p = calloc(1, sizeof(struct man))))
-		err(1, "malloc");
-	if (NULL == (p->last = calloc(1, sizeof(struct man_node))))
-		err(1, "malloc");
+	p = calloc(1, sizeof(struct man));
+	if (NULL == p)
+		err(1, "calloc");
 
-	p->first = p->last;
-	p->last->type = MAN_ROOT;
-	p->next = MAN_NEXT_CHILD;
+	man_alloc1(p);
+
 	p->htab = man_hash_alloc();
 	return(p);
 }
@@ -122,6 +102,7 @@ int
 man_endparse(struct man *m)
 {
 
+	/* FIXME. */
 	return(1);
 }
 
@@ -133,6 +114,36 @@ man_parseln(struct man *m, int ln, char *buf)
 	return('.' == *buf ? 
 			man_pmacro(m, ln, buf) : 
 			man_ptext(m, ln, buf));
+}
+
+
+static void
+man_free1(struct man *man)
+{
+
+	if (man->first)
+		man_node_freelist(man->first);
+	if (man->meta.title)
+		free(man->meta.title);
+	if (man->meta.os)
+		free(man->meta.os);
+	if (man->meta.vol)
+		free(man->meta.vol);
+}
+
+
+static void
+man_alloc1(struct man *m)
+{
+
+	bzero(&m->meta, sizeof(struct man_meta));
+	m->flags = 0;
+	m->last = calloc(1, sizeof(struct man_node));
+	if (NULL == m->last)
+		err(1, "calloc");
+	m->first = m->last;
+	m->last->type = MAN_ROOT;
+	m->next = MAN_NEXT_CHILD;
 }
 
 
@@ -166,20 +177,21 @@ man_node_append(struct man *man, struct man_node *p)
 		return(0);
 #endif
 
+	man->last = p;
+
 	switch (p->type) {
-	case (MAN_HEAD):
-		assert(MAN_BLOCK == p->parent->type);
-		p->parent->head = p;
-		break;
-	case (MAN_BODY):
-		assert(MAN_BLOCK == p->parent->type);
-		p->parent->body = p;
+	case (MAN_TEXT):
+#if 0
+		if ( ! man_valid_post(man))
+			return(0);
+		if ( ! man_action_post(man))
+			return(0);
+#endif
 		break;
 	default:
 		break;
 	}
 
-	man->last = p;
 	return(1);
 }
 
@@ -196,42 +208,6 @@ man_node_alloc(int line, int pos, enum man_type type)
 	p->type = type;
 
 	return(p);
-}
-
-
-int
-man_head_alloc(struct man *man, int line, int pos, int tok)
-{
-	struct man_node	*p;
-
-	p = man_node_alloc(line, pos, MAN_HEAD);
-	p->tok = tok;
-
-	return(man_node_append(man, p));
-}
-
-
-int
-man_body_alloc(struct man *man, int line, int pos, int tok)
-{
-	struct man_node	*p;
-
-	p = man_node_alloc(line, pos, MAN_BODY);
-	p->tok = tok;
-
-	return(man_node_append(man, p));
-}
-
-
-int
-man_block_alloc(struct man *man, int line, int pos, int tok)
-{
-	struct man_node	*p;
-
-	p = man_node_alloc(line, pos, MAN_BLOCK);
-	p->tok = tok;
-
-	return(man_node_append(man, p));
 }
 
 
@@ -288,14 +264,8 @@ static int
 man_ptext(struct man *m, int line, char *buf)
 {
 
-	if (0 == buf[0]) {
-		warnx("blank line!");
-		return(1);
-	}
-
 	if ( ! man_word_alloc(m, line, 0, buf))
 		return(0);
-
 	m->next = MAN_NEXT_SIBLING;
 	return(1);
 }
@@ -354,15 +324,13 @@ man_pmacro(struct man *m, int ln, char *buf)
 
 	/* Begin recursive parse sequence. */
 
-	if ( ! (*man_macros[c].fp)(m, c, ln, 1, &i, buf))
+	if ( ! man_macro(m, c, ln, 1, &i, buf))
 		goto err;
 
 	return(1);
 
 err:	/* Error out. */
 
-#if 0
-	m->flags |= MDOC_HALT;
-#endif
+	m->flags |= MAN_HALT;
 	return(0);
 }
