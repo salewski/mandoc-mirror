@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "private.h"
+#include "libmdoc.h"
 
 /*
  * This has scanning/parsing routines, each of which extract a macro and

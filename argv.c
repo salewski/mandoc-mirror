@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "private.h"
+#include "libmdoc.h"
 
 /*
  * Routines to parse arguments of macros.  Arguments follow the syntax
@@ -294,7 +294,8 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		return(ARGV_ERROR);
 
 	if (NULL == (arg = *v)) {
-		*v = xcalloc(1, sizeof(struct mdoc_arg));
+		if (NULL == (*v = calloc(1, sizeof(struct mdoc_arg))))
+			err(1, "calloc");
 		arg = *v;
 	} 
 
@@ -792,8 +793,10 @@ argv_opt_single(struct mdoc *mdoc, int line,
 		return(1);
 
 	v->sz = 1;
-	v->value = xcalloc(1, sizeof(char *));
-	v->value[0] = xstrdup(p);
+	if (NULL == (v->value = calloc(1, sizeof(char *))))
+		err(1, "calloc");
+	if (NULL == (v->value[0] = strdup(p)))
+		err(1, "strdup");
 	return(1);
 }
 
@@ -817,8 +820,10 @@ argv_single(struct mdoc *mdoc, int line,
 		return(perr(mdoc, line, ppos, EARGVAL));
 
 	v->sz = 1;
-	v->value = xcalloc(1, sizeof(char *));
-	v->value[0] = xstrdup(p);
+	if (NULL == (v->value = calloc(1, sizeof(char *))))
+		err(1, "calloc");
+	if (NULL == (v->value[0] = strdup(p)))
+		err(1, "strdup");
 	return(1);
 }
 

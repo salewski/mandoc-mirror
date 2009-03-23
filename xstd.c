@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "private.h"
+#include "libmdoc.h"
 
 #ifdef __linux__
 extern	size_t			strlcpy(char *, const char *, size_t);
@@ -64,15 +64,6 @@ xrealloc(void *ptr, size_t sz)
 	return(p);
 }
 
-void *
-xcalloc(size_t num, size_t sz)
-{
-	void		*p;
-
-	if (NULL == (p = calloc(num, sz)))
-		err(EXIT_FAILURE, "calloc");
-	return(p);
-}
 
 char *
 xstrdup(const char *p)

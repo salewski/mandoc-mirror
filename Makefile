@@ -17,30 +17,29 @@ CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
 LINTFLAGS += $(VFLAGS)
 CFLAGS    += $(VFLAGS)
 
-# If you want to strip `Xo/Xc' macro pairs, enable this.  Really, only
-# OpenBSD should be doing this while it kicks its cruft.
-#CFLAGS	  += -DSTRIP_XO
-#LINTFLAGS += -DSTRIP_XO
+MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln strings.ln xstd.ln \
+	     argv.ln validate.ln action.ln lib.ln att.ln arch.ln \
+	     vol.ln msec.ln st.ln
+MDOCOBJS   = mdoc_macro.o mdoc.o mdoc_hash.o strings.o xstd.o argv.o \
+	     validate.o action.o lib.o att.o arch.o vol.o msec.o st.o
+MDOCSRCS   = mdoc_macro.c mdoc.c mdoc_hash.c strings.c xstd.c argv.c \
+	     validate.c action.c lib.c att.c arch.c vol.c msec.c st.c
 
-LIBLNS	   = macro.ln mdoc.ln hash.ln strings.ln xstd.ln argv.ln \
-	     validate.ln action.ln lib.ln att.ln arch.ln vol.ln \
-	     msec.ln st.ln
-LIBOBJS	   = macro.o mdoc.o hash.o strings.o xstd.o argv.o validate.o \
-	     action.o lib.o att.o arch.o vol.o msec.o st.o
-LIBSRCS	   = macro.c mdoc.c hash.c strings.c xstd.c argv.c validate.c \
-	     action.c lib.c att.c arch.c vol.c msec.c st.c
+MANLNS	   = man_macro.ln man.ln man_hash.ln
+MANOBJS	   = man_macro.o man.o man_hash.o
+MANSRCS	   = man_macro.c man.c man_hash.c
 
 MAINLNS	   = main.ln term.ln ascii.ln terminal.ln tree.ln compat.ln
 MAINOBJS   = main.o term.o ascii.o terminal.o tree.o compat.o
 MAINSRCS   = main.c term.c ascii.c terminal.c tree.c compat.c
 
-LLNS	   = llib-llibmdoc.ln llib-lmandoc.ln
-LNS	   = $(MAINLNS) $(LIBLNS)
-LIBS	   = libmdoc.a
-OBJS	   = $(LIBOBJS) $(MAINOBJS)
-SRCS	   = $(LIBSRCS) $(MAINSRCS)
+LLNS	   = llib-llibmdoc.ln llib-llibman.ln llib-lmandoc.ln
+LNS	   = $(MAINLNS) $(MDOCLNS)
+LIBS	   = libmdoc.a libman.a
+OBJS	   = $(MDOCOBJS) $(MAINOBJS)
+SRCS	   = $(MDOCSRCS) $(MAINSRCS)
 DATAS	   = arch.in att.in lib.in msec.in st.in vol.in ascii.in
-HEADS	   = mdoc.h private.h term.h 
+HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h 
 SGMLS	   = index.sgml 
 HTMLS	   = index.html
 STATICS	   = style.css external.png
@@ -91,41 +90,50 @@ uninstall:
 	rm -f $(MANDIR)/man1/mandoc.1
 	rm -f $(MANDIR)/man7/mdoc.7
 
-lib.ln: lib.c lib.in private.h
-lib.o: lib.c lib.in private.h
+man_macro.ln: man_macro.c libman.h
+man_macro.o: man_macro.c libman.h
 
-att.ln: att.c att.in private.h
-att.o: att.c att.in private.h
+lib.ln: lib.c lib.in libmdoc.h
+lib.o: lib.c lib.in libmdoc.h
 
-arch.ln: arch.c arch.in private.h
-arch.o: arch.c arch.in private.h
+att.ln: att.c att.in libmdoc.h
+att.o: att.c att.in libmdoc.h
 
-vol.ln: vol.c vol.in private.h
-vol.o: vol.c vol.in private.h
+arch.ln: arch.c arch.in libmdoc.h
+arch.o: arch.c arch.in libmdoc.h
+
+vol.ln: vol.c vol.in libmdoc.h
+vol.o: vol.c vol.in libmdoc.h
 
 ascii.ln: ascii.c ascii.in term.h
 ascii.o: ascii.c ascii.in term.h
 
-msec.ln: msec.c msec.in private.h
-msec.o: msec.c msec.in private.h
+msec.ln: msec.c msec.in libmdoc.h
+msec.o: msec.c msec.in libmdoc.h
 
-st.ln: st.c st.in private.h
-st.o: st.c st.in private.h
+st.ln: st.c st.in libmdoc.h
+st.o: st.c st.in libmdoc.h
 
-macro.ln: macro.c private.h
-macro.o: macro.c private.h
+mdoc_macro.ln: mdoc_macro.c libmdoc.h
+mdoc_macro.o: mdoc_macro.c libmdoc.h
 
 term.ln: term.c term.h 
 term.o: term.c term.h
 
-strings.ln: strings.c private.h
-strings.o: strings.c private.h
+strings.ln: strings.c libmdoc.h
+strings.o: strings.c libmdoc.h
 
-hash.ln: hash.c private.h
-hash.o: hash.c private.h
+man_hash.ln: man_hash.c libman.h
+man_hash.o: man_hash.c libman.h
 
-mdoc.ln: mdoc.c private.h
-mdoc.o: mdoc.c private.h
+mdoc_hash.ln: mdoc_hash.c libmdoc.h
+mdoc_hash.o: mdoc_hash.c libmdoc.h
+
+mdoc.ln: mdoc.c libmdoc.h
+mdoc.o: mdoc.c libmdoc.h
+
+man.ln: man.c libman.h
+man.o: man.c libman.h
 
 main.ln: main.c mdoc.h
 main.o: main.c mdoc.h
@@ -133,19 +141,19 @@ main.o: main.c mdoc.h
 terminal.ln: terminal.c term.h
 terminal.o: terminal.c term.h
 
-xstd.ln: xstd.c private.h
-xstd.o: xstd.c private.h
+xstd.ln: xstd.c libmdoc.h
+xstd.o: xstd.c libmdoc.h
 
-argv.ln: argv.c private.h
-argv.o: argv.c private.h
+argv.ln: argv.c libmdoc.h
+argv.o: argv.c libmdoc.h
 
-validate.ln: validate.c private.h
-validate.o: validate.c private.h
+validate.ln: validate.c libmdoc.h
+validate.o: validate.c libmdoc.h
 
-action.ln: action.c private.h
-action.o: action.c private.h
+action.ln: action.c libmdoc.h
+action.o: action.c libmdoc.h
 
-private.h: mdoc.h
+libmdoc.h: mdoc.h
 
 term.h: mdoc.h
 
@@ -185,17 +193,23 @@ mdocml-$(VERSION).tar.gz: $(INSTALL)
 	( cd .dist/mdocml/ && tar zcf ../../$@ mdocml-$(VERSION)/ )
 	rm -rf .dist/
 
-llib-llibmdoc.ln: $(LIBLNS)
-	$(LINT) $(LINTFLAGS) -Clibmdoc $(LIBLNS)
+llib-llibmdoc.ln: $(MDOCLNS)
+	$(LINT) $(LINTFLAGS) -Clibmdoc $(MDOCLNS)
+
+llib-llibman.ln: $(MANLNS)
+	$(LINT) $(LINTFLAGS) -Clibman $(MANLNS)
 
 llib-lmandoc.ln: $(MAINLNS) llib-llibmdoc.ln
 	$(LINT) $(LINTFLAGS) -Cmandoc $(MAINLNS) llib-llibmdoc.ln
 
-libmdoc.a: $(LIBOBJS)
-	$(AR) rs $@ $(LIBOBJS)
+libmdoc.a: $(MDOCOBJS)
+	$(AR) rs $@ $(MDOCOBJS)
 
-mandoc: $(MAINOBJS) libmdoc.a
-	$(CC) $(CFLAGS) -o $@ $(MAINOBJS) libmdoc.a 
+libman.a: $(MANOBJS)
+	$(AR) rs $@ $(MANOBJS)
+
+mandoc: $(MAINOBJS) libmdoc.a libman.a
+	$(CC) $(CFLAGS) -o $@ $(MAINOBJS) libmdoc.a libman.a
 
 .sgml.html:
 	validate $<

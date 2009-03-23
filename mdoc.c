@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "private.h"
+#include "libmdoc.h"
 
 /*
  * Main caller in the libmdoc library.  This begins the parsing routine,
@@ -32,6 +32,7 @@
  * in macro.c, validate.c and action.c.
  */
 
+/* FIXME: have this accept line/pos/tok. */
 static	struct mdoc_node *mdoc_node_alloc(const struct mdoc *);
 static	int		  mdoc_node_append(struct mdoc *, 
 				struct mdoc_node *);
@@ -121,8 +122,9 @@ mdoc_meta(const struct mdoc *mdoc)
 
 
 /*
- * Free up all resources contributed by a parse:  the node tree, meta-data and
- * so on.  Then reallocate the root node for another parse.
+ * Free up all resources contributed by a parse:  the node tree,
+ * meta-data and so on.  Then reallocate the root node for another
+ * parse.
  */
 void
 mdoc_reset(struct mdoc *mdoc)
@@ -144,9 +146,10 @@ mdoc_reset(struct mdoc *mdoc)
 	bzero(&mdoc->meta, sizeof(struct mdoc_meta));
 	mdoc->flags = 0;
 	mdoc->lastnamed = mdoc->lastsec = 0;
-
-	mdoc->first = mdoc->last = 
-		xcalloc(1, sizeof(struct mdoc_node));
+	mdoc->last = calloc(1, sizeof(struct mdoc_node));
+	if (NULL == mdoc->last)
+		err(1, "calloc");
+	mdoc->first = mdoc->last;
 	mdoc->last->type = MDOC_ROOT;
 	mdoc->next = MDOC_NEXT_CHILD;
 }
@@ -184,14 +187,16 @@ mdoc_alloc(void *data, int pflags, const struct mdoc_cb *cb)
 {
 	struct mdoc	*p;
 
-	p = xcalloc(1, sizeof(struct mdoc));
+	if (NULL == (p = calloc(1, sizeof(struct mdoc))))
+		err(1, "calloc");
 
 	p->data = data;
 	if (cb)
 		(void)memcpy(&p->cb, cb, sizeof(struct mdoc_cb));
 
-	p->last = p->first = 
-		xcalloc(1, sizeof(struct mdoc_node));
+	if (NULL == (p->first = calloc(1, sizeof(struct mdoc_node))))
+		err(1, "calloc");
+	p->last = p->first;
 	p->last->type = MDOC_ROOT;
 	p->pflags = pflags;
 	p->next = MDOC_NEXT_CHILD;
@@ -370,7 +375,8 @@ mdoc_node_alloc(const struct mdoc *mdoc)
 {
 	struct mdoc_node *p;
 
-	p = xcalloc(1, sizeof(struct mdoc_node));
+	if (NULL == (p = calloc(1, sizeof(struct mdoc_node))))
+		err(1, "calloc");
 	p->sec = mdoc->lastsec;
 
 	return(p);
@@ -435,19 +441,6 @@ mdoc_body_alloc(struct mdoc *mdoc, int line, int pos, int tok)
 
 
 int
-mdoc_root_alloc(struct mdoc *mdoc)
-{
-	struct mdoc_node *p;
-
-	p = mdoc_node_alloc(mdoc);
-
-	p->type = MDOC_ROOT;
-
-	return(mdoc_node_append(mdoc, p));
-}
-
-
-int
 mdoc_block_alloc(struct mdoc *mdoc, int line, int pos, 
 		int tok, struct mdoc_arg *args)
 {
@@ -500,7 +493,8 @@ mdoc_word_alloc(struct mdoc *mdoc,
 	p->line = line;
 	p->pos = pos;
 	p->type = MDOC_TEXT;
-	p->string = xstrdup(word);
+	if (NULL == (p->string = strdup(word)))
+		err(1, "strdup");
 
 	return(mdoc_node_append(mdoc, p));
 }
@@ -628,12 +622,6 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 
 	if ( ! mdoc_macro(m, c, ln, 1, &i, buf)) 
 		goto err;
-
-	/*
-	 * If we're in literal mode, then add a newline to the end of
-	 * macro lines.  Our frontends will interpret this correctly
-	 * (it's documented in mdoc.3).
-	 */
 
 	return(1);
 

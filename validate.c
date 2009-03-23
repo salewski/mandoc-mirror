@@ -23,7 +23,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "private.h"
+#include "libmdoc.h"
 
 /* FIXME: .Bl -diag can't have non-text children in HEAD. */
 /* TODO: ignoring Pp (it's superfluous in some invocations). */

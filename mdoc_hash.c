@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "private.h"
+#include "libmdoc.h"
 
 /*
  * Routines for the perfect-hash hashtable used by the parser to look up

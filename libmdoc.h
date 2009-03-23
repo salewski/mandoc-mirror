@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2008 Kristaps Dzonsons <kristaps@kth.se>
+ * Copyright (c) 2008, 2009 Kristaps Dzonsons <kristaps@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the
@@ -16,8 +16,8 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef PRIVATE_H
-#define PRIVATE_H
+#ifndef LIBMDOC_H
+#define LIBMDOC_H
 
 #include "mdoc.h"
 
@@ -30,7 +30,6 @@ struct	mdoc {
 	void		 *data;
 	struct mdoc_cb	  cb;
 	void		 *htab;
-	int		  linetok;
 	int		  flags;
 #define	MDOC_HALT	 (1 << 0)
 #define	MDOC_LITERAL	 (1 << 1)
@@ -107,7 +106,6 @@ int		  mdoc_elem_alloc(struct mdoc *, int, int,
 			int, struct mdoc_arg *);
 int		  mdoc_block_alloc(struct mdoc *, int, int, 
 			int, struct mdoc_arg *);
-int		  mdoc_root_alloc(struct mdoc *);
 int		  mdoc_head_alloc(struct mdoc *, int, int, int);
 int		  mdoc_tail_alloc(struct mdoc *, int, int, int);
 int		  mdoc_body_alloc(struct mdoc *, int, int, int);
@@ -121,6 +119,7 @@ int		  mdoc_isdelim(const char *);
 size_t		  mdoc_isescape(const char *);
 enum	mdoc_sec  mdoc_atosec(const char *);
 time_t		  mdoc_atotime(const char *);
+
 size_t		  mdoc_macro2len(int);
 const char	 *mdoc_a2arch(const char *);
 const char	 *mdoc_a2vol(const char *);
@@ -146,15 +145,16 @@ int		  mdoc_args(struct mdoc *, int,
 #define	ARGS_PUNCT	(2)
 #define	ARGS_QWORD	(3)
 #define	ARGS_PHRASE	(4)
+
+/* FIXME: get rid of these. */
 int		  xstrlcpys(char *, const struct mdoc_node *, size_t);
 int	  	  xstrlcat(char *, const char *, size_t);
 int	  	  xstrlcpy(char *, const char *, size_t);
 int	  	  xstrcmp(const char *, const char *);
-void	 	 *xcalloc(size_t, size_t);
 void	 	 *xrealloc(void *, size_t);
 char	 	 *xstrdup(const char *);
 int		  macro_end(struct mdoc *);
 
 __END_DECLS
 
-#endif /*!PRIVATE_H*/
+#endif /*!LIBMDOC_H*/

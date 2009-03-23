@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2009 Kristaps Dzonsons <kristaps@openbsd.org>
+ * Copyright (c) 2008, 2009 Kristaps Dzonsons <kristaps@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the
@@ -16,19 +16,43 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
+#include <assert.h>
+#include <ctype.h>
+#include <err.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
-#include "libmdoc.h"
+#include "libman.h"
 
-#define LINE(x, y) \
-	if (0 == strcmp(p, x)) return(y);
-
-const char *
-mdoc_a2vol(const char *p)
+/* ARGUSED */
+void
+man_hash_free(void *htab)
 {
 
-#include "vol.in"
+	/* Do nothing. */
+}
 
+
+/* ARGUSED */
+void *
+man_hash_alloc(void)
+{
+
+	/* Do nothing. */
 	return(NULL);
 }
+
+
+int
+man_hash_find(const void *arg, const char *tmp)
+{
+	int		 i;
+
+	for (i = 0; i < MAN_MAX; i++) 
+		if (0 == strcasecmp(tmp, man_macronames[i]))
+			return(i);
+
+	return(MAN_MAX);
+}
+

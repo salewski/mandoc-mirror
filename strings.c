@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "private.h"
+#include "libmdoc.h"
 
 /*
  * Various string-literal operations:  converting scalars to and from

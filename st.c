@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "private.h"
+#include "libmdoc.h"
 
 #define LINE(x, y) \
 	if (0 == strcmp(p, x)) return(y);
