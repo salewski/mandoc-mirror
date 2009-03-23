@@ -34,7 +34,7 @@ extern	int		  getsubopt(char **, char * const *, char **);
 # ifndef __dead
 #  define __dead __attribute__((__noreturn__))
 # endif
-#elif defined(__FreeBSD__)
+#elif defined(__dead2)
 # ifndef __dead
 #  define __dead __dead2
 # endif
