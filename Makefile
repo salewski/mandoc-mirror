@@ -9,7 +9,7 @@ INSTALL_DATA	= install -m 0444
 INSTALL_LIB	= install -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
-VERSION	   = 1.7.1
+VERSION	   = 1.7.2
 VDATE	   = 23 March 2009
 
 VFLAGS     = -DVERSION=\"$(VERSION)\"
