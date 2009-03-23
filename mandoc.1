@@ -22,12 +22,13 @@
 .\" SECTION
 .Sh NAME
 .Nm mandoc
-.Nd format and display BSD manuals
+.Nd format and display UNIX manuals
 .\" SECTION
 .Sh SYNOPSIS
 .Nm mandoc
 .Op Fl V
 .Op Fl f Ns Ar option...
+.Op Fl m Ns Ar format
 .Op Fl W Ns Ar err...
 .Op Fl T Ns Ar output
 .Op Ar infile...
@@ -35,15 +36,21 @@
 .Sh DESCRIPTION
 The
 .Nm
-utility formats a BSD 
-.Dq mdoc 
-manual page for display.  The arguments are as follows:
+utility formats 
+.Ux
+manual pages for display.  The arguments are as follows:
 .Bl -tag -width XXXXXXXXXXXX
 .\" ITEM
 .It Fl f Ns Ar option...
 Override default compiler behaviour.  See 
 .Sx Compiler Options
 for details.
+.\" ITEM
+.It Fl m
+Input format.  See
+.Sx Input Formats
+for available formats.  Defaults to
+.Fl m Ns Ar mdoc .
 .\" ITEM
 .It Fl T
 Output format.  See
@@ -80,15 +87,18 @@ will halt with the first failed parse.
 .Pp
 By default, 
 .Nm 
-reads from stdin and prints 78-column backspace-encoded output to stdout
-as if
+reads 
+.Xr mdoc 7
+text from stdin, implying
+.Fl m Ns Ar mdoc ,
+and prints 78-column backspace-encoded output to stdout as if
 .Fl T Ns Ar ascii
 were provided.
 .\" PARAGRAPH
 .Pp
 .Ex -std mandoc
 .\" SUB-SECTION
-.Ss Reserved Words
+.Ss Reserved Words (mdoc only)
 The reserved words described in
 .Xr mdoc 7
 are handled according to the following rules:
@@ -132,6 +142,30 @@ However, if the comma were part of
 .Dq ,empirically ,
 it would not.
 .\" SUB-SECTION
+.Ss Input Formats
+The
+.Nm
+utility accepts
+.Xr mdoc 7
+and
+.Xr man 7
+input with
+.Fl m Ns Ar mdoc
+and
+.Fl m Ns Ar man ,
+respectively.  The
+.Xr mdoc 7
+format is
+.Em strongly
+recommended; 
+.Xr man 7
+should only be used for legacy manuals.
+.Pp
+Note that the
+.Fl m Ns Ar man
+option is experimental and only works with
+.Fl T Ns Ar tree .
+.\" SUB-SECTION
 .Ss Output Formats
 The
 .Nm
@@ -156,6 +190,7 @@ flag.
 .It Fl f Ns Ar ign-scope
 When rewinding the scope of a block macro, forces the compiler to ignore
 scope violations.  This can seriously mangle the resulting tree.
+.Pq mdoc only
 .It Fl f Ns Ar ign-escape
 Ignore invalid escape sequences.
 .It Fl f Ns Ar ign-macro

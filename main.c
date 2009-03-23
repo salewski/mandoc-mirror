@@ -271,7 +271,9 @@ __dead static void
 usage(void)
 {
 
-	(void)fprintf(stderr, "usage: %s\n", __progname);
+	(void)fprintf(stderr, "usage: %s [-V] [-foption...] "
+			"[-mformat] [-Toutput] [-Werr...]\n", 
+			__progname);
 	exit(1);
 	/* NOTREACHED */
 }

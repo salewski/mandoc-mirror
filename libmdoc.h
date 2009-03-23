@@ -153,7 +153,7 @@ int	  	  xstrlcpy(char *, const char *, size_t);
 int	  	  xstrcmp(const char *, const char *);
 void	 	 *xrealloc(void *, size_t);
 char	 	 *xstrdup(const char *);
-int		  macro_end(struct mdoc *);
+int		  mdoc_macroend(struct mdoc *);
 
 __END_DECLS
 

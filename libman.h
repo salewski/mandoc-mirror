@@ -47,6 +47,7 @@ int		  man_macro(struct man *, int,
 			int, int, int *, char *);
 int		  man_hash_find(const void *, const char *);
 void		  man_hash_free(void *);
+int		  man_macroend(struct man *);
 
 __END_DECLS
 

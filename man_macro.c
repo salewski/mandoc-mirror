@@ -56,8 +56,7 @@ man_macro(struct man *man, int tok, int line,
 		man->next = MAN_NEXT_SIBLING;
 	}
 
-	/* TODO: validate. */
-	/* TODO: validate. */
+	/* TODO: validate & actions. */
 
 	man->last = n;
 	man->next = MAN_NEXT_SIBLING;
@@ -66,8 +65,17 @@ man_macro(struct man *man, int tok, int line,
 }
 
 
-/* ARGSUSED */
 int
+man_macroend(struct man *m)
+{
+
+	/* TODO: validate & actions. */
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
 man_args(struct man *man, int line, 
 		int *pos, char *buf, char **v)
 {

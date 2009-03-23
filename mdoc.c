@@ -204,20 +204,15 @@ mdoc_alloc(void *data, int pflags, const struct mdoc_cb *cb)
  * through to macro_end in macro.c.
  */
 int
-mdoc_endparse(struct mdoc *mdoc)
+mdoc_endparse(struct mdoc *m)
 {
 
-	if (MDOC_HALT & mdoc->flags)
+	if (MDOC_HALT & m->flags)
 		return(0);
-	if (NULL == mdoc->first)
+	else if (mdoc_macroend(m))
 		return(1);
-
-	assert(mdoc->last);
-	if ( ! macro_end(mdoc)) {
-		mdoc->flags |= MDOC_HALT;
-		return(0);
-	}
-	return(1);
+	m->flags |= MDOC_HALT;
+	return(0);
 }
 
 

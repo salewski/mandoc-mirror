@@ -305,12 +305,9 @@ swarn(struct mdoc *mdoc, enum mdoc_type type,
  * are errors.
  */
 int
-macro_end(struct mdoc *mdoc)
+mdoc_macroend(struct mdoc *mdoc)
 {
 	struct mdoc_node *n;
-
-	assert(mdoc->first);
-	assert(mdoc->last);
 
 	/* Scan for open explicit scopes. */
 
