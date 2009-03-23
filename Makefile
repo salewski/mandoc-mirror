@@ -45,6 +45,7 @@ HTMLS	   = index.html
 STATICS	   = style.css external.png
 TARGZS	   = mdocml-$(VERSION).tar.gz \
 	     mdocml-oport-$(VERSION).tar.gz \
+	     mdocml-fport-$(VERSION).tar.gz \
 	     mdocml-nport-$(VERSION).tar.gz
 MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7
 BINS	   = mandoc
@@ -64,7 +65,9 @@ cleanlint:
 
 dist:	mdocml-$(VERSION).tar.gz
 
-port:	mdocml-oport-$(VERSION).tar.gz mdocml-nport-$(VERSION).tar.gz
+port:	mdocml-oport-$(VERSION).tar.gz \
+	mdocml-fport-$(VERSION).tar.gz \
+	mdocml-nport-$(VERSION).tar.gz
 
 www:	$(HTMLS) $(TARGZS)
 
@@ -76,6 +79,8 @@ installwww: www
 	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/mdocml.tar.gz
 	install -m 0444 mdocml-nport-$(VERSION).tar.gz $(PREFIX)/ports-netbsd/
 	install -m 0444 mdocml-nport-$(VERSION).tar.gz $(PREFIX)/ports-netbsd/mdocml.tar.gz
+	install -m 0444 mdocml-fport-$(VERSION).tar.gz $(PREFIX)/ports-freebsd/
+	install -m 0444 mdocml-fport-$(VERSION).tar.gz $(PREFIX)/ports-freebsd/mdocml.tar.gz
 
 install:
 	mkdir -p $(BINDIR)
@@ -184,6 +189,20 @@ mdocml-oport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.openbsd DESCR
 	echo bin/mandoc >> .dist/mdocml/pkg/PLIST
 	echo @man man/man1/mandoc.1 >> .dist/mdocml/pkg/PLIST
 	echo @man man/man7/mdoc.7 >> .dist/mdocml/pkg/PLIST
+	( cd .dist/ && tar zcf ../$@ mdocml/ )
+	rm -rf .dist/
+
+mdocml-fport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.freebsd DESCR
+	mkdir -p .dist/mdocml
+	sed -e "s!@VERSION@!$(VERSION)!" Makefile.freebsd > \
+		.dist/mdocml/Makefile
+	( md5 mdocml-$(VERSION).tar.gz; \
+	  sha1 mdocml-$(VERSION).tar.gz; \
+	  echo -n "SIZE (mdocml-$(VERSION).tar.gz) = "; \
+	  ls -l mdocml-$(VERSION).tar.gz | awk '{print $$5}' \
+	  ) > .dist/mdocml/distinfo
+	install -m 0644 DESCR .dist/mdocml/pkg-descr
+	( echo; echo "WWW: http://mdocml.bsd.lv/") >> .dist/mdocml/pkg-descr
 	( cd .dist/ && tar zcf ../$@ mdocml/ )
 	rm -rf .dist/
 

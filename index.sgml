@@ -106,10 +106,12 @@
 					</h2>
 
 					<p>
-					The source snapshot is automatically converted into OpenBSD port and NetBSD pkgsrc forms at <a
-					href="/ports-openbsd/">/ports-openbsd/</a> and <a href="/ports-netbsd/">/ports-netbsd/</a>,
-					respectively.  Please read the <a href="http://www.openbsd.org/faq/faq15.html">OpenBSD Ports FAQ</a> or
-					<a href="http://www.netbsd.org/docs/software/packages.html">NetBSD pkgsrc guide</a>, first.
+					The source snapshot is automatically converted into OpenBSD, NetBSD and FreeBSD ports at <a
+					href="/ports-openbsd/">/ports-openbsd/</a>, <a href="/ports-netbsd/">/ports-netbsd/</a> and <a
+					href="/ports-freebsd/">/ports-freebsd/</a>, respectively.  Please read the <a
+					href="http://www.openbsd.org/faq/faq15.html">OpenBSD Ports FAQ</a>, <a
+					href="http://www.netbsd.org/docs/software/packages.html">NetBSD pkgsrc guide</a> or <a
+					href="http://www.freebsd.org/ports/">FreeBSD Ports Guide</a> first.
 					</p>
 
 					<h3>
@@ -135,6 +137,20 @@
 					# cd /usr/pkgsrc/textproc/<br>
 					# rm -rf mdocml<br>
 					# ftp -V -o- http://mdocml.bsd.lv/ports-netbsd/mdocml.tar.gz | tar -zvxf -<br>
+					# cd mdocml<br>
+					# make build<br>
+					# make install
+					</p>
+
+					<h3>
+					FreeBSD port
+					</h3>
+
+					<p class="boxed">
+					# pkg_delete mdocml<br>
+					# cd /usr/ports/textproc/<br>
+					# rm -rf mdocml<br>
+					# ftp -V -o- http://mdocml.bsd.lv/ports-freebsd/mdocml.tar.gz | tar -zvxf -<br>
 					# cd mdocml<br>
 					# make build<br>
 					# make install
