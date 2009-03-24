@@ -25,9 +25,9 @@
 
 					<p>
 					<span class="nm">mdocml</span> is a suite of tools compiling &#8220;-mdoc&#8221;, the roff macro
-					package for BSD manual pages.  The mission of <span class="nm">mdocml</span> is to deprecate <a
-					href="http://www.gnu.org/software/groff/" class="external">groff</a>, the GNU roff implementation, for
-					displaying BSD mdoc pages.
+					package of choice for BSD manual pages.  The mission of <span class="nm">mdocml</span> is to deprecate
+					<a href="http://www.gnu.org/software/groff/" class="external">groff</a>, the GNU roff implementation,
+					for displaying -mdoc pages.
 					</p>
 
 					<p>
@@ -39,21 +39,20 @@
 					<p>
 					The core of <span class="nm">mdocml</span> is the libmdoc library, a validating scanner-parser producing
 					intermediate-form output from -mdoc input.  libmdoc is a simple, fast library operating on memory
-					buffers, so it can be used for a variety of front-ends (terminal-based, CGI and so on).  The primary
-					front-end is <span class="man">mandoc(1)</span>, which formats -mdoc manuals for display on the
-					terminal.
+					buffers, so it can be used for a variety of front-ends (terminal-based, CGI and so on).  
 					</p>
-
+					
 					<p>
-					The <span class="man">mandoc(1)</span> utility is intended to deprecate usage of <a
+					The primary front-end is <span class="man">mandoc(1)</span>, which formats -mdoc manuals for display on
+					the terminal.  The <span class="man">mandoc(1)</span> utility is intended to deprecate usage of <a
 					href="http://www.gnu.org/software/groff/" class="external">groff</a> for displaying mdoc manuals on the
 					terminal.
 					</p>
 
 					<p>
-					<span class="attn">Please submit patches!</span> Although a significant implementation exists, work
-					remains for the backend library and especially the front-end utilities.  See the <a
-					href="#contact">contact</a> information below to submit patches and bug reports.
+					<span class="attn">Please submit patches, bug reports and suggestions!</span> Although a significant
+					implementation exists, work remains for the backend library and especially the front-end utilities.  See
+					the <a href="#contact">contact</a> information below for submissions.
 					</p>
 				</td>
 			</tr>
@@ -65,7 +64,7 @@
 
 					<p>
 					Sources correctly build and install on FreeBSD, OpenBSD, NetBSD and Linux operating systems, tested
-					variously on i386, AMD64, Alpha and others. 
+					variously on i386, AMD64, alpha and others. 
 					</p>
 
 					<p>
@@ -98,10 +97,12 @@
 					<p>
 					The source snapshot is automatically converted into OpenBSD, NetBSD and FreeBSD ports at <a
 					href="/ports-openbsd/">/ports-openbsd/</a>, <a href="/ports-netbsd/">/ports-netbsd/</a> and <a
-					href="/ports-freebsd/">/ports-freebsd/</a>, respectively.  Please read the <a
-					href="http://www.openbsd.org/faq/faq15.html">OpenBSD Ports FAQ</a>, <a
-					href="http://www.netbsd.org/docs/software/packages.html">NetBSD pkgsrc guide</a> or <a
-					href="http://www.freebsd.org/ports/">FreeBSD Ports Guide</a> first.
+					href="/ports-freebsd/">/ports-freebsd/</a>, respectively.  Please read the <a class="external"
+					href="http://www.openbsd.org/faq/faq15.html">OpenBSD Ports FAQ</a>, the <a class="external"
+					href="http://www.netbsd.org/docs/software/packages.html">NetBSD pkgsrc guide</a> or the <a
+					class="external"
+					href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/ports-using.html">FreeBSD ports
+					guide</a>, first.
 					</p>
 
 					<h3>
