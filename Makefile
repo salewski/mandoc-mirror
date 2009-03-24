@@ -9,8 +9,8 @@ INSTALL_DATA	= install -m 0444
 INSTALL_LIB	= install -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
-VERSION	   = 1.7.2
-VDATE	   = 23 March 2009
+VERSION	   = 1.7.3
+VDATE	   = 24 March 2009
 
 VFLAGS     = -DVERSION=\"$(VERSION)\"
 CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
@@ -50,8 +50,10 @@ TARGZS	   = mdocml-$(VERSION).tar.gz \
 MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7
 BINS	   = mandoc
 CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) $(TARGZS) 
-INSTALL	   = $(SRCS) $(HEADS) Makefile DESCR $(MANS) $(SGMLS) \
-	     $(STATICS) Makefile.netbsd Makefile.openbsd $(DATAS)
+MAKEFILES  = Makefile.netbsd Makefile.openbsd Makefile.freebsd \
+	     Makefile
+INSTALL	   = $(SRCS) $(HEADS) $(MAKEFILES) DESCR $(MANS) $(SGMLS) \
+	     $(STATICS) $(DATAS)
 
 all:	$(BINS)
 

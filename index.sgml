@@ -138,12 +138,11 @@
 					</h3>
 
 					<p class="boxed">
-					# pkg_delete mdocml<br>
-					# cd /usr/ports/textproc/<br>
-					# rm -rf mdocml<br>
+					# pkg_delete -x mdocml<br>
+					# cd /tmp<br>
 					# ftp -V -o- http://mdocml.bsd.lv/ports-freebsd/mdocml.tar.gz | tar -zvxf -<br>
 					# cd mdocml<br>
-					# make build<br>
+					# make<br>
 					# make install
 					</p>
 				</td>
@@ -159,7 +158,8 @@
 					href="http://mailhide.recaptcha.net/d?k=01jt88xIsFONwVjHZmGpc4AQ==&amp;c=sb5E6ulipc-eTnpTVqI-BQ=="
 					onclick="window.open('http://mailhide.recaptcha.net/d?k=01jt88xIsFONwVjHZmGpc4AQ==&amp;c=sb5E6ulipc-eTnpTVqI-BQ==',
 					'', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return
-					false;" title="Reveal this e-mail address">...</a>@kth.se, with questions, bug reports, patches, and so on.  
+					false;" title="Reveal this e-mail address">...</a>@kth.se, with questions, bug reports, patches, and so
+					on.  
 					</p>
 					
 					<p>
