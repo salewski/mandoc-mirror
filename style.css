@@ -39,6 +39,10 @@ span.nm		{ color: #000000; font-weight: bold; }
 
 span.attn	{ color: #000000; font-weight: bold; }
 
+span.fl		{ font-weight: bold; }
+
+span.ar		{ text-decoration: underline; }
+
 div.head	{ border-bottom: 1px dotted #cccccc; 
 		  padding-bottom: 5px;
 		  text-align: right; }

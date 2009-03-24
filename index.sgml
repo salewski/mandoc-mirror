@@ -24,40 +24,30 @@
 					</h1>
 
 					<p>
-					<span class="nm">mdocml</span> is a suite of tools compiling &#8220;mdoc&#8221;, the roff macro
+					<span class="nm">mdocml</span> is a suite of tools compiling &#8220;-mdoc&#8221;, the roff macro
 					package for BSD manual pages.  The mission of <span class="nm">mdocml</span> is to deprecate <a
 					href="http://www.gnu.org/software/groff/" class="external">groff</a>, the GNU roff implementation, for
 					displaying BSD mdoc pages.
 					</p>
 
 					<p>
-					Why?  groff amounts to roughly 5,2 MB of source code (OpenBSD 4.2), some of which is C++ and all of
-					which is GPL.  It runs slowly, produces uncertain output, and varies in operation from system
-					to system.  mdocml strives to fix this (respectively small, C, ISC-licensed, fast and regular).
+					Why?  groff amounts to over 5 MB of source code, most of which is C++ and all of which is GPL.  It runs
+					slowly, produces uncertain output, and varies in operation from system to system.  mdocml strives to fix
+					this (respectively small, C, ISC-licensed, fast and regular).
 					</p>
 
 					<p>
 					The core of <span class="nm">mdocml</span> is the libmdoc library, a validating scanner-parser producing
-					intermediate-form output from mdoc input.  libmdoc is a simple, fast library operating on memory buffers
-					of mdoc input.  Its intermediate output, an abstract syntax tree, is fully documented in the <span
-					class="man">mdoc(3)</span> reference manual.
+					intermediate-form output from -mdoc input.  libmdoc is a simple, fast library operating on memory
+					buffers, so it can be used for a variety of front-ends (terminal-based, CGI and so on).  The primary
+					front-end is <span class="man">mandoc(1)</span>, which formats -mdoc manuals for display on the
+					terminal.
 					</p>
 
 					<p>
-					There are three utilities implementing <span class="man">mdoc(3)</span>:
-					</p>
-
-					<ul>
-					<li><span class="man">mdocterm(1)</span> &#8211; formats mdoc input for display on the terminal
-					<li><span class="man">mdochtml(1)</span> &#8211; formats mdoc input as HTML/CSS (nascent)
-					<li><span class="man">mdoclint(1)</span> &#8211; validates mdoc input
-					<li><span class="man">mdoctree(1)</span> &#8211; prints input abstract syntax tree
-					</ul>
-
-					<p>
-					The <span class="man">mdocterm(1)</span> utility is intended to deprecate usage of <a
-					href="http://www.gnu.org/software/groff/" class="external">groff</a> for displaying BSD manuals to the
-					terminal, either directly or cached as a &#8220;catman&#8221; page.
+					The <span class="man">mandoc(1)</span> utility is intended to deprecate usage of <a
+					href="http://www.gnu.org/software/groff/" class="external">groff</a> for displaying mdoc manuals on the
+					terminal.
 					</p>
 
 					<p>
@@ -74,8 +64,8 @@
 					</h1>
 
 					<p>
-					Sources correctly build and install on OpenBSD, NetBSD and Linux operating systems, tested variously on
-					i386, AMD64 and Alpha.
+					Sources correctly build and install on FreeBSD, OpenBSD, NetBSD and Linux operating systems, tested
+					variously on i386, AMD64, Alpha and others. 
 					</p>
 
 					<p>
@@ -180,7 +170,7 @@
 			<tr>
 				<td>
 					<div class="foot">
-						Copyright &#169; 2009 Kristaps D&#382;onsons, $Date$
+						Copyright &#169; 2008, 2009 Kristaps D&#382;onsons, $Date$
 					</div>
 				</td>
 			</tr>
