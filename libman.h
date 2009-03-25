@@ -52,6 +52,8 @@ void		  man_hash_free(void *);
 int		  man_macroend(struct man *);
 int		  man_vwarn(struct man *, int, int, const char *, ...);
 int		  man_verr(struct man *, int, int, const char *, ...);
+int		  man_valid_post(struct man *);
+int		  man_action_post(struct man *);
 
 __END_DECLS
 

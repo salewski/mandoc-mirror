@@ -467,7 +467,12 @@ post_bl_tagwidth(struct mdoc *m)
 	 * width if a macro.
 	 */
 
-	n = m->last->head->child;
+	if ((n = m->last->body->child)) {
+		assert(MDOC_BLOCK == n->type);
+		assert(MDOC_It == n->tok);
+		n = n->head->child;
+	}
+
 	sz = 10; /* Default size. */
 
 	if (n) {
@@ -489,18 +494,18 @@ post_bl_tagwidth(struct mdoc *m)
 	n = m->last;
 	assert(n->args);
 
-	(n->args->argc)++;
+	sz = (int)(n->args->argc)++;
 	n->args->argv = xrealloc(n->args->argv, 
 			n->args->argc * sizeof(struct mdoc_argv));
 
-	n->args->argv[n->args->argc - 1].arg = MDOC_Width;
-	n->args->argv[n->args->argc - 1].line = m->last->line;
-	n->args->argv[n->args->argc - 1].pos = m->last->pos;
-	n->args->argv[n->args->argc - 1].sz = 1;
-	n->args->argv[n->args->argc - 1].value = calloc(1, sizeof(char *));
-	if (NULL == n->args->argv[n->args->argc - 1].value)
+	n->args->argv[sz].arg = MDOC_Width;
+	n->args->argv[sz].line = m->last->line;
+	n->args->argv[sz].pos = m->last->pos;
+	n->args->argv[sz].sz = 1;
+	n->args->argv[sz].value = calloc(1, sizeof(char *));
+	if (NULL == n->args->argv[sz].value)
 		err(1, "calloc");
-	n->args->argv[n->args->argc - 1].value[0] = xstrdup(buf);
+	n->args->argv[sz].value[0] = xstrdup(buf);
 
 	return(1);
 }

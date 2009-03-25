@@ -178,21 +178,14 @@ man_node_append(struct man *man, struct man_node *p)
 		/* NOTREACHED */
 	}
 
-#if 0
-	if ( ! man_action_pre(man, p))
-		return(0);
-#endif
-
 	man->last = p;
 
 	switch (p->type) {
 	case (MAN_TEXT):
 		if ( ! man_valid_post(man))
 			return(0);
-#if 0
 		if ( ! man_action_post(man))
 			return(0);
-#endif
 		break;
 	default:
 		break;

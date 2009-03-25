@@ -57,13 +57,20 @@ man_macro(struct man *man, int tok, int line,
 	}
 
 	for ( ; man->last && man->last != n; 
-			man->last = man->last->parent)
+			man->last = man->last->parent) {
 		if ( ! man_valid_post(man))
 			return(0);
+		if ( ! man_action_post(man))
+			return(0);
+	}
 
 	assert(man->last);
+
 	if ( ! man_valid_post(man))
 		return(0);
+	if ( ! man_action_post(man))
+		return(0);
+
 	man->next = MAN_NEXT_SIBLING;
 
 	return(1);
@@ -74,7 +81,19 @@ int
 man_macroend(struct man *m)
 {
 
-	/* TODO: validate & actions. */
+	for ( ; m->last && m->last != m->first; 
+			m->last = m->last->parent) {
+		if ( ! man_valid_post(m))
+			return(0);
+		if ( ! man_action_post(m))
+			return(0);
+	}
+
+	if ( ! man_valid_post(m))
+		return(0);
+	if ( ! man_action_post(m))
+		return(0);
+
 	return(1);
 }
 
