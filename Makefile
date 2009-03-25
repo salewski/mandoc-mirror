@@ -199,7 +199,7 @@ mdocml-fport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.freebsd DESCR
 	sed -e "s!@VERSION@!$(VERSION)!" Makefile.freebsd > \
 		.dist/mdocml/Makefile
 	( md5 mdocml-$(VERSION).tar.gz; \
-	  sha1 mdocml-$(VERSION).tar.gz; \
+	  cksum -a SHA256 mdocml-$(VERSION).tar.gz; \
 	  echo -n "SIZE (mdocml-$(VERSION).tar.gz) = "; \
 	  ls -l mdocml-$(VERSION).tar.gz | awk '{print $$5}' \
 	  ) > .dist/mdocml/distinfo
