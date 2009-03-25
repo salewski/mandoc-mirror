@@ -30,6 +30,7 @@ struct	man {
 	void		*data;
 	struct man_cb	 cb;
 	void		*htab;
+	int		 pflags;
 	int		 flags;
 #define	MAN_HALT	(1 << 0)
 	enum man_next	 next;

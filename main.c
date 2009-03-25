@@ -54,6 +54,10 @@ struct	curparse {
 #define	WARN_WERR	 (1 << 2)	/* Warnings->errors. */
 };
 
+#define	IGN_SCOPE	 (1 << 0) /* Flag to ignore scope. */
+#define	IGN_ESCAPE	 (1 << 1) /* Flag to ignore bad escapes. */
+#define	IGN_MACRO	 (1 << 2) /* Flag to ignore unknown macros. */
+
 enum	intt {
 	INTT_MDOC = 0,
 	INTT_MAN
@@ -104,7 +108,7 @@ __dead	static void	  usage(void);
 int
 main(int argc, char *argv[])
 {
-	int		 c, rc, fflags;
+	int		 c, rc, fflags, pflags;
 	struct mdoc_cb	 mdoccb;
 	struct man_cb	 mancb;
 	struct man	*man;
@@ -205,13 +209,24 @@ main(int argc, char *argv[])
 
 	man = NULL;
 	mdoc = NULL;
+	pflags = 0;
 
 	switch (inttype) {
 	case (INTT_MAN):
-		man = man_alloc(&curp, &mancb);
+		if (fflags & IGN_MACRO)
+			pflags |= MAN_IGN_MACRO;
+
+		man = man_alloc(&curp, pflags, &mancb);
 		break;
 	default:
-		mdoc = mdoc_alloc(&curp, fflags, &mdoccb);
+		if (fflags & IGN_SCOPE)
+			pflags |= MDOC_IGN_SCOPE;
+		if (fflags & IGN_ESCAPE)
+			pflags |= MDOC_IGN_ESCAPE;
+		if (fflags & IGN_MACRO)
+			pflags |= MDOC_IGN_MACRO;
+
+		mdoc = mdoc_alloc(&curp, pflags, &mdoccb);
 		break;
 	}
 
@@ -449,13 +464,13 @@ foptions(int *fflags, char *arg)
 	while (*arg) 
 		switch (getsubopt(&arg, toks, &v)) {
 		case (0):
-			*fflags |= MDOC_IGN_SCOPE;
+			*fflags |= IGN_SCOPE;
 			break;
 		case (1):
-			*fflags |= MDOC_IGN_ESCAPE;
+			*fflags |= IGN_ESCAPE;
 			break;
 		case (2):
-			*fflags |= MDOC_IGN_MACRO;
+			*fflags |= IGN_MACRO;
 			break;
 		default:
 			warnx("bad argument: -f%s", arg);

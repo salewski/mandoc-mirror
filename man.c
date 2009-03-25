@@ -18,7 +18,6 @@
  */
 #include <assert.h>
 #include <ctype.h>
-#include <err.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -83,7 +82,7 @@ man_free(struct man *man)
 
 
 struct man *
-man_alloc(void *data, const struct man_cb *cb)
+man_alloc(void *data, int pflags, const struct man_cb *cb)
 {
 	struct man	*p;
 
@@ -98,6 +97,8 @@ man_alloc(void *data, const struct man_cb *cb)
 
 	p->htab = man_hash_alloc();
 	p->data = data;
+	p->pflags = pflags;
+
 	return(p);
 }
 
@@ -287,8 +288,7 @@ man_pmacro(struct man *m, int ln, char *buf)
 			i++;
 		if (0 == buf[i])
 			return(1);
-		warnx("invalid syntax");
-		return(0);
+		return(man_vwarn(m, ln, 0, "invalid syntax"));
 	}
 
 	if (buf[1] && '\\' == buf[1])
@@ -307,13 +307,25 @@ man_pmacro(struct man *m, int ln, char *buf)
 	mac[i - 1] = 0;
 
 	if (i == 5 || i <= 1) {
-		warnx("unknown macro: %s", mac);
-		goto err;
-	} 
+		if ( ! (MAN_IGN_MACRO & m->pflags)) {
+			(void)man_verr(m, ln, 1, 
+				"ill-formed macro: %s", mac);
+			goto err;
+		} 
+		if ( ! man_vwarn(m, ln, 1, "ill-formed macro: %s", mac))
+			goto err;
+		return(1);
+	}
 	
 	if (MAN_MAX == (c = man_hash_find(m->htab, mac))) {
-		warnx("unknown macro: %s", mac);
-		goto err;
+		if ( ! (MAN_IGN_MACRO & m->pflags)) {
+			(void)man_verr(m, ln, 1, 
+				"unknown macro: %s", mac);
+			goto err;
+		} 
+		if ( ! man_vwarn(m, ln, 1, "unknown macro: %s", mac))
+			goto err;
+		return(1);
 	}
 
 	/* The macro is sane.  Jump to the next word. */
