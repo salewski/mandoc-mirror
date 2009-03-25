@@ -18,16 +18,18 @@ LINTFLAGS += $(VFLAGS)
 CFLAGS    += $(VFLAGS)
 
 MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln strings.ln xstd.ln \
-	     argv.ln validate.ln action.ln lib.ln att.ln arch.ln \
-	     vol.ln msec.ln st.ln
+	     argv.ln mdoc_validate.ln action.ln lib.ln att.ln \
+	     arch.ln vol.ln msec.ln st.ln
 MDOCOBJS   = mdoc_macro.o mdoc.o mdoc_hash.o strings.o xstd.o argv.o \
-	     validate.o action.o lib.o att.o arch.o vol.o msec.o st.o
+	     mdoc_validate.o action.o lib.o att.o arch.o vol.o \
+	     msec.o st.o
 MDOCSRCS   = mdoc_macro.c mdoc.c mdoc_hash.c strings.c xstd.c argv.c \
-	     validate.c action.c lib.c att.c arch.c vol.c msec.c st.c
+	     mdoc_validate.c action.c lib.c att.c arch.c vol.c \
+	     msec.c st.c
 
-MANLNS	   = man_macro.ln man.ln man_hash.ln
-MANOBJS	   = man_macro.o man.o man_hash.o
-MANSRCS	   = man_macro.c man.c man_hash.c
+MANLNS	   = man_macro.ln man.ln man_hash.ln man_validate.ln
+MANOBJS	   = man_macro.o man.o man_hash.o man_validate.o
+MANSRCS	   = man_macro.c man.c man_hash.c man_validate.c
 
 MAINLNS	   = main.ln term.ln ascii.ln terminal.ln tree.ln compat.ln
 MAINOBJS   = main.o term.o ascii.o terminal.o tree.o compat.o
@@ -154,8 +156,11 @@ xstd.o: xstd.c libmdoc.h
 argv.ln: argv.c libmdoc.h
 argv.o: argv.c libmdoc.h
 
-validate.ln: validate.c libmdoc.h
-validate.o: validate.c libmdoc.h
+man_validate.ln: man_validate.c libman.h
+man_validate.o: man_validate.c libman.h
+
+mdoc_validate.ln: mdoc_validate.c libmdoc.h
+mdoc_validate.o: mdoc_validate.c libmdoc.h
 
 action.ln: action.c libmdoc.h
 action.o: action.c libmdoc.h

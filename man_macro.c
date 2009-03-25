@@ -56,9 +56,14 @@ man_macro(struct man *man, int tok, int line,
 		man->next = MAN_NEXT_SIBLING;
 	}
 
-	/* TODO: validate & actions. */
+	for ( ; man->last && man->last != n; 
+			man->last = man->last->parent)
+		if ( ! man_valid_post(man))
+			return(0);
 
-	man->last = n;
+	assert(man->last);
+	if ( ! man_valid_post(man))
+		return(0);
 	man->next = MAN_NEXT_SIBLING;
 
 	return(1);

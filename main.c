@@ -87,7 +87,8 @@ static	int		  toptions(enum outt *, char *);
 static	int		  moptions(enum intt *, char *);
 static	int		  woptions(int *, char *);
 static	int		  merr(void *, int, int, const char *);
-static	int		  mwarn(void *, int, int, 
+static	int		  manwarn(void *, int, int, const char *);
+static	int		  mdocwarn(void *, int, int, 
 				enum mdoc_warn, const char *);
 static	int		  file(struct buf *, struct buf *, 
 				const char *, 
@@ -104,7 +105,8 @@ int
 main(int argc, char *argv[])
 {
 	int		 c, rc, fflags;
-	struct mdoc_cb	 cb;
+	struct mdoc_cb	 mdoccb;
+	struct man_cb	 mancb;
 	struct man	*man;
 	struct mdoc	*mdoc;
 	void		*outdata;
@@ -191,9 +193,12 @@ main(int argc, char *argv[])
 	 * screen.  XXX - for now, no path for debugging messages.
 	 */
 
-	cb.mdoc_msg = NULL;
-	cb.mdoc_err = merr;
-	cb.mdoc_warn = mwarn;
+	mdoccb.mdoc_msg = NULL;
+	mdoccb.mdoc_err = merr;
+	mdoccb.mdoc_warn = mdocwarn;
+
+	mancb.man_err = merr;
+	mancb.man_warn = manwarn;
 
 	bzero(&ln, sizeof(struct buf));
 	bzero(&blk, sizeof(struct buf));
@@ -203,10 +208,10 @@ main(int argc, char *argv[])
 
 	switch (inttype) {
 	case (INTT_MAN):
-		man = man_alloc();
+		man = man_alloc(&curp, &mancb);
 		break;
 	default:
-		mdoc = mdoc_alloc(&curp, fflags, &cb);
+		mdoc = mdoc_alloc(&curp, fflags, &mdoccb);
 		break;
 	}
 
@@ -515,7 +520,7 @@ merr(void *arg, int line, int col, const char *msg)
 
 
 static int
-mwarn(void *arg, int line, int col, 
+mdocwarn(void *arg, int line, int col, 
 		enum mdoc_warn type, const char *msg)
 {
 	struct curparse *curp;
@@ -550,3 +555,23 @@ mwarn(void *arg, int line, int col,
 }
 
 
+static int
+manwarn(void *arg, int line, int col, const char *msg)
+{
+	struct curparse *curp;
+
+	curp = (struct curparse *)arg;
+
+	if ( ! (curp->wflags & WARN_WSYNTAX))
+		return(1);
+
+	warnx("%s:%d: syntax warning: %s (column %d)", 
+			curp->file, line, msg, col);
+
+	if ( ! (curp->wflags & WARN_WERR))
+		return(1);
+
+	warnx("%s: considering warnings as errors", 
+			__progname);
+	return(0);
+}

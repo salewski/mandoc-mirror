@@ -83,7 +83,7 @@ man_free(struct man *man)
 
 
 struct man *
-man_alloc(void)
+man_alloc(void *data, const struct man_cb *cb)
 {
 	struct man	*p;
 
@@ -93,7 +93,11 @@ man_alloc(void)
 
 	man_alloc1(p);
 
+	if (cb)
+		(void)memcpy(&p->cb, cb, sizeof(struct man_cb));
+
 	p->htab = man_hash_alloc();
+	p->data = data;
 	return(p);
 }
 
@@ -175,8 +179,6 @@ man_node_append(struct man *man, struct man_node *p)
 	}
 
 #if 0
-	if ( ! man_valid_pre(man, p))
-		return(0);
 	if ( ! man_action_pre(man, p))
 		return(0);
 #endif
@@ -185,9 +187,9 @@ man_node_append(struct man *man, struct man_node *p)
 
 	switch (p->type) {
 	case (MAN_TEXT):
-#if 0
 		if ( ! man_valid_post(man))
 			return(0);
+#if 0
 		if ( ! man_action_post(man))
 			return(0);
 #endif
@@ -338,4 +340,37 @@ err:	/* Error out. */
 	m->flags |= MAN_HALT;
 	return(0);
 }
+
+
+int
+man_verr(struct man *man, int ln, int pos, const char *fmt, ...)
+{
+	char		 buf[256];
+	va_list		 ap;
+
+	if (NULL == man->cb.man_err)
+		return(0);
+
+	va_start(ap, fmt);
+	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
+	va_end(ap);
+	return((*man->cb.man_err)(man->data, ln, pos, buf));
+}
+
+
+int
+man_vwarn(struct man *man, int ln, int pos, const char *fmt, ...)
+{
+	char		 buf[256];
+	va_list		 ap;
+
+	if (NULL == man->cb.man_warn)
+		return(0);
+
+	va_start(ap, fmt);
+	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
+	va_end(ap);
+	return((*man->cb.man_warn)(man->data, ln, pos, buf));
+}
+
 
