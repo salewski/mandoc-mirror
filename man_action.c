@@ -27,6 +27,9 @@
 
 #include "libman.h"
 
+#ifdef __linux__
+extern	char		*strptime(const char *, const char *, struct tm *);
+#endif
 
 struct	actions {
 	int	(*post)(struct man *);
