@@ -133,8 +133,8 @@ man_free1(struct man *man)
 		man_node_freelist(man->first);
 	if (man->meta.title)
 		free(man->meta.title);
-	if (man->meta.os)
-		free(man->meta.os);
+	if (man->meta.source)
+		free(man->meta.source);
 	if (man->meta.vol)
 		free(man->meta.vol);
 }

@@ -33,9 +33,12 @@ struct	actions {
 };
 
 
+static	int	  post_TH(struct man *);
+static time_t	  man_atotime(const char *);
+
 const	struct actions man_actions[MAN_MAX] = {
 	{ NULL }, /* __ */
-	{ NULL }, /* TH */
+	{ post_TH }, /* TH */
 	{ NULL }, /* SH */
 	{ NULL }, /* SS */
 	{ NULL }, /* TP */
@@ -78,119 +81,103 @@ man_action_post(struct man *m)
 	return(1);
 }
 
-#if 0
+
 static int
-post_dt(POST_ARGS)
+post_TH(struct man *m)
 {
-	struct mdoc_node *n;
-	const char	 *cp;
-	char		 *ep;
-	long		  lval;
+	struct man_node	*n;
+	char		*ep;
+	long		 lval;
 
 	if (m->meta.title)
 		free(m->meta.title);
 	if (m->meta.vol)
 		free(m->meta.vol);
-	if (m->meta.arch)
-		free(m->meta.arch);
+	if (m->meta.source)
+		free(m->meta.source);
 
-	m->meta.title = m->meta.vol = m->meta.arch = NULL;
+	m->meta.title = m->meta.vol = m->meta.source = NULL;
 	m->meta.msec = 0;
+	m->meta.date = 0;
 
-	/* Handles: `.Dt' 
-	 *   --> title = unknown, volume = local, msec = 0, arch = NULL
-	 */
+	/* ->TITLE<- MSEC DATE SOURCE VOL */
 
-	if (NULL == (n = m->last->child)) {
-		m->meta.title = xstrdup("unknown");
-		m->meta.vol = xstrdup("local");
-		return(post_prol(m));
-	}
+	n = m->last->child;
+	assert(n);
 
-	/* Handles: `.Dt TITLE' 
-	 *   --> title = TITLE, volume = local, msec = 0, arch = NULL
-	 */
+	if (NULL == (m->meta.title = strdup(n->string)))
+		return(man_verr(m, n->line, n->pos, "malloc"));
 
-	m->meta.title = xstrdup(n->string);
+	/* TITLE ->MSEC<- DATE SOURCE VOL */
+
+	n = n->next;
+	assert(n);
+
+	errno = 0;
+	lval = strtol(n->string, &ep, 10);
+	if (n->string[0] != '\0' && *ep == '\0')
+		m->meta.msec = (int)lval;
+	else if ( ! man_vwarn(m, n->line, n->pos, "invalid section"))
+		return(0);
+
+	/* TITLE MSEC ->DATE<- SOURCE VOL */
 
 	if (NULL == (n = n->next)) {
-		m->meta.vol = xstrdup("local");
-		return(post_prol(m));
+		m->meta.date = time(NULL);
+		return(1);
 	}
 
-	/* Handles: `.Dt TITLE SEC'
-	 *   --> title = TITLE, volume = SEC is msec ? 
-	 *           format(msec) : SEC,
-	 *       msec = SEC is msec ? atoi(msec) : 0,
-	 *       arch = NULL
-	 */
+	if (0 == (m->meta.date = man_atotime(n->string))) {
+		if ( ! man_vwarn(m, n->line, n->pos, "invalid date"))
+			return(0);
+		m->meta.date = time(NULL);
+	}
 
-	cp = mdoc_a2msec(n->string);
-	if (cp) {
-		m->meta.vol = xstrdup(cp);
-		errno = 0;
-		lval = strtol(n->string, &ep, 10);
-		if (n->string[0] != '\0' && *ep == '\0')
-			m->meta.msec = (int)lval;
-	} else 
-		m->meta.vol = xstrdup(n->string);
+	/* TITLE MSEC DATE ->SOURCE<- VOL */
 
-	if (NULL == (n = n->next))
-		return(post_prol(m));
+	if ((n = n->next))
+		if (NULL == (m->meta.source = strdup(n->string)))
+			return(man_verr(m, n->line, n->pos, "malloc"));
 
-	/* Handles: `.Dt TITLE SEC VOL'
-	 *   --> title = TITLE, volume = VOL is vol ?
-	 *       format(VOL) : 
-	 *           VOL is arch ? format(arch) : 
-	 *               VOL
-	 */
+	/* TITLE MSEC DATE SOURCE ->VOL<- */
 
-	cp = mdoc_a2vol(n->string);
-	if (cp) {
-		free(m->meta.vol);
-		m->meta.vol = xstrdup(cp);
-		n = n->next;
-	} else {
-		cp = mdoc_a2arch(n->string);
-		if (NULL == cp) {
-			free(m->meta.vol);
-			m->meta.vol = xstrdup(n->string);
-		} else
-			m->meta.arch = xstrdup(cp);
-	}	
-
-	/* Ignore any subsequent parameters... */
-
-	return(post_prol(m));
-}
-
-static int
-post_prol(POST_ARGS)
-{
-	struct mdoc_node *n;
+	if ((n = n->next))
+		if (NULL == (m->meta.vol = strdup(n->string)))
+			return(man_verr(m, n->line, n->pos, "malloc"));
 
 	/* 
 	 * The end document shouldn't have the prologue macros as part
 	 * of the syntax tree (they encompass only meta-data).  
 	 */
 
-	if (m->last->parent->child == m->last)
-		m->last->parent->child = m->last->prev;
-	if (m->last->prev)
-		m->last->prev->next = NULL;
-
+	assert(MAN_ROOT == m->last->parent->type);
+	m->last->parent->child = NULL;
 	n = m->last;
-	assert(NULL == m->last->next);
+	m->last = m->last->parent;
+	m->next = MAN_NEXT_CHILD;
+	assert(m->last == m->first);
 
-	if (m->last->prev) {
-		m->last = m->last->prev;
-		m->next = MDOC_NEXT_SIBLING;
-	} else {
-		m->last = m->last->parent;
-		m->next = MDOC_NEXT_CHILD;
-	}
-
-	mdoc_node_freelist(n);
+	man_node_freelist(n);
 	return(1);
 }
-#endif
+
+
+static time_t
+man_atotime(const char *p)
+{
+	struct tm	 tm;
+	char		*pp;
+
+	(void)memset(&tm, 0, sizeof(struct tm));
+
+	if ((pp = strptime(p, "%b %d %Y", &tm)) && 0 == *pp)
+		return(mktime(&tm));
+	if ((pp = strptime(p, "%d %b %Y", &tm)) && 0 == *pp)
+		return(mktime(&tm));
+	if ((pp = strptime(p, "%b %d, %Y", &tm)) && 0 == *pp)
+		return(mktime(&tm));
+	if ((pp = strptime(p, "%b %Y", &tm)) && 0 == *pp)
+		return(mktime(&tm));
+
+	return(0);
+}

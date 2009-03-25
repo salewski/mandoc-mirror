@@ -51,10 +51,10 @@ enum	man_type {
 
 struct	man_meta {
 	int		 msec;
-	char		*vol;
 	time_t		 date;
+	char		*vol;
 	char		*title;
-	char		*os;
+	char		*source;
 };
 
 struct	man_node {
