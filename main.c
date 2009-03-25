@@ -29,6 +29,8 @@
 #include "mdoc.h"
 #include "man.h"
 
+/* Account for FreeBSD and Linux in our declarations. */
+
 #ifdef __linux__
 extern	int		  getsubopt(char **, char * const *, char **);
 # ifndef __dead
@@ -54,9 +56,9 @@ struct	curparse {
 #define	WARN_WERR	 (1 << 2)	/* Warnings->errors. */
 };
 
-#define	IGN_SCOPE	 (1 << 0) /* Flag to ignore scope. */
-#define	IGN_ESCAPE	 (1 << 1) /* Flag to ignore bad escapes. */
-#define	IGN_MACRO	 (1 << 2) /* Flag to ignore unknown macros. */
+#define	IGN_SCOPE	 (1 << 0) 	/* Ignore scope errors. */
+#define	IGN_ESCAPE	 (1 << 1) 	/* Ignore bad escapes. */
+#define	IGN_MACRO	 (1 << 2) 	/* Ignore unknown macros. */
 
 enum	intt {
 	INTT_MDOC = 0,
@@ -65,8 +67,6 @@ enum	intt {
 
 enum	outt {
 	OUTT_ASCII = 0,
-	OUTT_LATIN1,
-	OUTT_UTF8,
 	OUTT_TREE,
 	OUTT_LINT
 };
@@ -78,8 +78,6 @@ typedef	void		(*out_free)(void *);
 extern	char		 *__progname;
 
 extern	void		 *ascii_alloc(void);
-extern	void		 *latin1_alloc(void);
-extern	void		 *utf8_alloc(void);
 extern	int		  terminal_run(void *, const struct man *, 
 				const struct mdoc *);
 extern	int		  tree_run(void *, const struct man *,
@@ -100,7 +98,6 @@ static	int		  file(struct buf *, struct buf *,
 static	int		  fdesc(struct buf *, struct buf *,
 				const char *, int, 
 				struct man *, struct mdoc *);
-
 __dead	static void	  version(void);
 __dead	static void	  usage(void);
 
@@ -158,23 +155,13 @@ main(int argc, char *argv[])
 	argv += optind;
 
 	/*
-	 * Allocate the appropriate front-end.  Note that utf8, ascii
-	 * and latin1 all resolve to the terminal front-end with
-	 * different encodings (see terminal.c).  Not all frontends have
-	 * cleanup or alloc routines.
+	 * Allocate the appropriate front-end.  Note that utf8, latin1
+	 * (both not yet implemented) and ascii all resolve to the
+	 * terminal front-end with different encodings (see terminal.c).
+	 * Not all frontends have cleanup or alloc routines.
 	 */
 
 	switch (outtype) {
-	case (OUTT_LATIN1):
-		outdata = latin1_alloc();
-		outrun = terminal_run;
-		outfree = terminal_free;
-		break;
-	case (OUTT_UTF8):
-		outdata = utf8_alloc();
-		outrun = terminal_run;
-		outfree = terminal_free;
-		break;
 	case (OUTT_TREE):
 		outdata = NULL;
 		outrun = tree_run;
@@ -204,6 +191,8 @@ main(int argc, char *argv[])
 	mancb.man_err = merr;
 	mancb.man_warn = manwarn;
 
+	/* Configure buffers. */
+
 	bzero(&ln, sizeof(struct buf));
 	bzero(&blk, sizeof(struct buf));
 
@@ -211,11 +200,16 @@ main(int argc, char *argv[])
 	mdoc = NULL;
 	pflags = 0;
 
+	/*
+	 * Allocate the parser.  There are two kinds of parser: libman
+	 * and libmdoc.  We must separately copy over the flags that
+	 * we'll use internally.
+	 */
+
 	switch (inttype) {
 	case (INTT_MAN):
 		if (fflags & IGN_MACRO)
 			pflags |= MAN_IGN_MACRO;
-
 		man = man_alloc(&curp, pflags, &mancb);
 		break;
 	default:
@@ -225,20 +219,18 @@ main(int argc, char *argv[])
 			pflags |= MDOC_IGN_ESCAPE;
 		if (fflags & IGN_MACRO)
 			pflags |= MDOC_IGN_MACRO;
-
 		mdoc = mdoc_alloc(&curp, pflags, &mdoccb);
 		break;
 	}
 
 	/*
-	 * Loop around available files.
+	 * Main loop around available files.
 	 */
 
 	if (NULL == *argv) {
 		curp.file = "<stdin>";
 		rc = 0;
-		c = fdesc(&blk, &ln, "stdin", 
-				STDIN_FILENO, man, mdoc);
+		c = fdesc(&blk, &ln, "stdin", STDIN_FILENO, man, mdoc);
 
 		if (c && NULL == outrun)
 			rc = 1;
@@ -256,7 +248,6 @@ main(int argc, char *argv[])
 				man_reset(man);
 			if (mdoc)
 				mdoc_reset(mdoc);
-
 			argv++;
 		}
 		rc = NULL == *argv;
@@ -429,10 +420,6 @@ toptions(enum outt *tflags, char *arg)
 
 	if (0 == strcmp(arg, "ascii"))
 		*tflags = OUTT_ASCII;
-	else if (0 == strcmp(arg, "latin1"))
-		*tflags = OUTT_LATIN1;
-	else if (0 == strcmp(arg, "utf8"))
-		*tflags = OUTT_UTF8;
 	else if (0 == strcmp(arg, "lint"))
 		*tflags = OUTT_LINT;
 	else if (0 == strcmp(arg, "tree"))

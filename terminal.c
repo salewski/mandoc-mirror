@@ -52,22 +52,6 @@ static	void		  sanity(const struct mdoc_node *); /* XXX */
 
 
 void *
-latin1_alloc(void)
-{
-
-	return(term_alloc(TERMENC_LATIN1));
-}
-
-
-void *
-utf8_alloc(void)
-{
-
-	return(term_alloc(TERMENC_UTF8));
-}
-
-
-void *
 ascii_alloc(void)
 {
 

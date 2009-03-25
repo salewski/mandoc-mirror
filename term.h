@@ -30,8 +30,8 @@ __BEGIN_DECLS
 
 enum	termenc {
 	TERMENC_ASCII,
-	TERMENC_LATIN1,
-	TERMENC_UTF8
+	TERMENC_LATIN1,		/* Not implemented. */
+	TERMENC_UTF8		/* Not implemented. */
 };
 
 struct	termp {

@@ -80,7 +80,6 @@ man_valid_post(struct man *m)
 
 	if (MAN_VALID & m->last->flags)
 		return(1);
-
 	m->last->flags |= MAN_VALID;
 
 	switch (m->last->type) {
