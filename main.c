@@ -401,9 +401,9 @@ static int
 moptions(enum intt *tflags, char *arg)
 {
 
-	if (0 == strcmp(arg, "mdoc"))
+	if (0 == strcmp(arg, "doc"))
 		*tflags = INTT_MDOC;
-	else if (0 == strcmp(arg, "man"))
+	else if (0 == strcmp(arg, "an"))
 		*tflags = INTT_MAN;
 	else {
 		warnx("bad argument: -m%s", arg);

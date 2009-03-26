@@ -34,7 +34,7 @@ structure of the
 .Nm
 language.
 .Pp
-.Em \&Do not
+.Em \&Do not ever
 use 
 .Nm
 to write your manuals.  Use the
@@ -49,7 +49,7 @@ character
 .Sq \&.
 are parsed for macros.  Other lines are interpreted within the scope of
 prior macros:
-.Bd -literal -offset XXX
+.Bd -literal -offset indent
 \&.SH Macro lines change control state.
 Other lines are interpreted within the current state.
 .Ed
@@ -69,6 +69,13 @@ line termination.
 .Pp
 Blank lines are acceptable; where found, the output will also assert a
 vertical space.
+.Pp
+The
+.Sq \ec
+escape is common in historical
+.Nm
+documents; if encountered at the end of a word, it ensures that the
+subsequent word isn't off-set by whitespace.
 .\" SUB-SECTION
 .Ss Special Characters
 Special character sequences begin with the escape character
@@ -91,41 +98,89 @@ contains a table of all available escapes.
 .\" SECTION
 .Sh STRUCTURE
 Macros are one to three three characters in length and begin with a
-control character 
-.Sq \&.
+control character ,
+.Sq \&. ,
 at the beginning of the line.  An arbitrary amount of whitespace may
 sit between the control character and the macro name.  Thus,
-.Sq \&PP
+.Sq \&.PP
 and
 .Sq \&.\ \ \ \&PP
 are equivalent.
 .Pp
-All follow the same
-structural rules:
-.Bd -literal -offset XXXX
-\&.Yo \(lBbody...\(rB 
+All 
+.Nm
+macros follow the same structural rules:
+.Bd -literal -offset indent
+\&.YO \(lBbody...\(rB 
 .Ed
 .Pp
 The
 .Dq body
 consists of zero or more arguments to the macro.
+.Pp
+.Nm
+has a primitive notion of multi-line scope for the following macros: 
+.Sq \&.TM ,
+.Sq \&.SM ,
+.Sq \&.SB ,
+.Sq \&.BI ,
+.Sq \&.IB ,
+.Sq \&.BR ,
+.Sq \&.RB ,
+.Sq \&.R ,
+.Sq \&.B ,
+.Sq \&.I ,
+.Sq \&.IR 
+and
+.Sq \&.RI .
+When these macros are invoked without arguments, the subsequent line is
+considered a continuation of the macro.  Thus:
+.Bd -literal -offset indent
+\&.RI foo
+.Ed
+.Pp
+and
+.Bd -literal -offset indent 
+\&.RI 
+foo
+.Ed
+.Pp
+are equivalent.  If two consecutive lines exhibit the latter behaviour,
+an error is raised.  Thus, the following is acceptable:
+.Bd -literal -offset indent 
+\&.RI 
+\&.I Hello, world.
+foo
+.Ed
+.Pp
+The following, however, is not:
+.Bd -literal -offset indent 
+\&.RI 
+\&.I 
+Hello, world.
+.Ed
+.Pp
+The
+.Sq \&.TP
+macro has similar behaviour, but does not need an empty argument line in
+order to trigger scope.
 .\" PARAGRAPH
 .Sh MACROS
 This section contains a complete list of all 
 .Nm
 macros, arranged alphabetically, with the number of arguments.
 .Pp
-.Bl -column "MacroX" "Arguments" -compact -offset XXXX
+.Bl -column "MacroX" "Arguments" -compact -offset indent
 .It Em Macro Ta Em Arguments
-.It \&.TH    Ta    >0
-.It \&.SH    Ta    n
-.It \&.SS    Ta    n
+.It \&.TH    Ta    >1, <6
+.It \&.SH    Ta    >0
+.It \&.SS    Ta    >0
 .It \&.TP    Ta    n
-.It \&.LP    Ta    n
-.It \&.PP    Ta    n
-.It \&.P     Ta    n
-.It \&.IP    Ta    n
-.It \&.HP    Ta    n
+.It \&.LP    Ta    0
+.It \&.PP    Ta    0
+.It \&.P     Ta    0
+.It \&.IP    Ta    <3
+.It \&.HP    Ta    <2
 .It \&.SM    Ta    n
 .It \&.SB    Ta    n
 .It \&.BI    Ta    n

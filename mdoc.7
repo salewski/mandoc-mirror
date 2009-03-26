@@ -66,18 +66,18 @@ line termination.
 .Pp
 The only time a blank line is acceptable is within
 the context of 
-.Sq \&Bd \-literal
+.Sq \&.Bd \-literal
 or
-.Sq \&Bd \-unfilled .
+.Sq \&.Bd \-unfilled .
 .Pp
 Tab characters 
 .Pq \et
 are only acceptable when delimiting 
-.Sq \&Bl \-column 
+.Sq \&.Bl \-column 
 and in
-.Sq \&Bd \-literal
+.Sq \&.Bd \-literal
 or
-.Sq \&Bd \-unfilled
+.Sq \&.Bd \-unfilled
 contexts.
 .\" SUB-SECTION
 .Ss Reserved Characters
@@ -115,7 +115,7 @@ or, if applicable, an appropriate escape-sequence used.
 .\" SUB-SECTION
 .Ss Special Characters
 Special character sequences begin with the escape character
-.Sq \\
+.Sq \e
 followed by either an open-parenthesis 
 .Sq \&(
 for two-character sequences; an open-bracket
@@ -125,421 +125,421 @@ for n-character sequences (terminated at a close-bracket
 or a single one-character sequence.
 .Pp
 Characters may alternatively be escaped by a slash-asterisk,
-.Sq \\* ,
+.Sq \e* ,
 with the same combinations as described above.  This form is deprecated.  
 .Pp
 The following is a table of all available escapes.
 .Pp
 Grammatic:
 .Bl -tag -width 12n -offset "XXXX" -compact
-.It \\(em
+.It \e(em
 .Pq em-dash
-.It \\(en
+.It \e(en
 .Pq en-dash
 .It \e-
 .Pq hyphen
-.It \\\\
+.It \e\e
 .Pq back-slash
 .It \e'
 .Pq apostrophe
 .It \e`
 .Pq back-tick
-.It \\
+.It \e
 .Pq space
-.It \\.
+.It \e.
 .Pq period
-.It \\(r!
+.It \e(r!
 .Pq upside-down exclamation
-.It \\(r?
+.It \e(r?
 .Pq upside-down question
 .El
 .\" PARAGRAPH
 .Pp
 Enclosures:
 .Bl -tag -width 12n -offset "XXXX" -compact
-.It \\(lh
+.It \e(lh
 .Pq left hand
-.It \\(rh
+.It \e(rh
 .Pq right hand
-.It \\(Fo
+.It \e(Fo
 .Pq left guillemet
-.It \\(Fc
+.It \e(Fc
 .Pq right guillemet
-.It \\(fo
+.It \e(fo
 .Pq left guilsing
-.It \\(fc
+.It \e(fc
 .Pq right guilsing
-.It \\(rC
+.It \e(rC
 .Pq right brace
-.It \\(lC
+.It \e(lC
 .Pq left brace
-.It \\(ra
+.It \e(ra
 .Pq right angle
-.It \\(la
+.It \e(la
 .Pq left angle
-.It \\(rB
+.It \e(rB
 .Pq right bracket
-.It \\(lB
+.It \e(lB
 .Pq left bracket
-.It \\q
+.It \eq
 .Pq double-quote
-.It \\(lq
+.It \e(lq
 .Pq left double-quote
-.It \\(Lq
+.It \e(Lq
 .Pq left double-quote, deprecated
-.It \\(rq
+.It \e(rq
 .Pq right double-quote
-.It \\(Rq
+.It \e(Rq
 .Pq right double-quote, deprecated
-.It \\(oq
+.It \e(oq
 .Pq left single-quote
-.It \\(aq
+.It \e(aq
 .Pq right single-quote
-.It \\(Bq
+.It \e(Bq
 .Pq right low double-quote
-.It \\(bq
+.It \e(bq
 .Pq right low single-quote
 .El
 .\" PARAGRAPH
 .Pp
 Indicatives:
 .Bl -tag -width 12n -offset "XXXX" -compact
-.It \\(<-
+.It \e(<-
 .Pq left arrow
-.It \\(->
+.It \e(->
 .Pq right arrow
-.It \\(ua
+.It \e(ua
 .Pq up arrow
-.It \\(da
+.It \e(da
 .Pq down arrow
-.It \\(<>
+.It \e(<>
 .Pq left-right arrow
-.It \\(lA
+.It \e(lA
 .Pq left double-arrow
-.It \\(rA
+.It \e(rA
 .Pq right double-arrow
-.It \\(uA
+.It \e(uA
 .Pq up double-arrow
-.It \\(dA
+.It \e(dA
 .Pq down double-arrow
-.It \\(hA
+.It \e(hA
 .Pq left-right double-arrow
 .El
 .\" PARAGRAPH
 .Pp
 Mathematical:
 .Bl -tag -width 12n -offset "XXXX" -compact
-.It \\(es
+.It \e(es
 .Pq empty set
-.It \\(ca
+.It \e(ca
 .Pq intersection
-.It \\(cu
+.It \e(cu
 .Pq union
-.It \\(gr
+.It \e(gr
 .Pq gradient
-.It \\(pd
+.It \e(pd
 .Pq partial differential
-.It \\(ap
+.It \e(ap
 .Pq similarity
-.It \\(=)
+.It \e(=)
 .Pq proper superset
-.It \\((=
+.It \e((=
 .Pq proper subset
-.It \\(eq
+.It \e(eq
 .Pq equals
-.It \\(di
+.It \e(di
 .Pq division
-.It \\(mu
+.It \e(mu
 .Pq multiplication
-.It \\(pl
+.It \e(pl
 .Pq addition
-.It \\(nm
+.It \e(nm
 .Pq not element
-.It \\(mo
+.It \e(mo
 .Pq element
-.It \\(Im
+.It \e(Im
 .Pq imaginary
-.It \\(Re
+.It \e(Re
 .Pq real
-.It \\(Ah
+.It \e(Ah
 .Pq aleph
-.It \\(te
+.It \e(te
 .Pq existential quantifier
-.It \\(fa
+.It \e(fa
 .Pq universal quantifier
-.It \\(AN
+.It \e(AN
 .Pq logical AND
-.It \\(OR
+.It \e(OR
 .Pq logical OR
-.It \\(no
+.It \e(no
 .Pq logical NOT
-.It \\(st
+.It \e(st
 .Pq such that
-.It \\(tf
+.It \e(tf
 .Pq therefore
-.It \\(~~
+.It \e(~~
 .Pq approximate
-.It \\(~=
+.It \e(~=
 .Pq approximately equals
-.It \\(=~
+.It \e(=~
 .Pq congruent
-.It \\(Gt
+.It \e(Gt
 .Pq greater-than, deprecated
-.It \\(Lt
+.It \e(Lt
 .Pq less-than, deprecated
-.It \\(<=
+.It \e(<=
 .Pq less-than-equal
-.It \\(Le
+.It \e(Le
 .Pq less-than-equal, deprecated
-.It \\(>=
+.It \e(>=
 .Pq greater-than-equal
-.It \\(Ge
+.It \e(Ge
 .Pq greater-than-equal
-.It \\(==
+.It \e(==
 .Pq equal
-.It \\(!=
+.It \e(!=
 .Pq not equal
-.It \\(Ne
+.It \e(Ne
 .Pq not equal, deprecated
-.It \\(if
+.It \e(if
 .Pq infinity
-.It \\(If
+.It \e(If
 .Pq infinity, deprecated
-.It \\(na
+.It \e(na
 .Pq NaN , an extension
-.It \\(Na
+.It \e(Na
 .Pq NaN, deprecated
-.It \\(+-
+.It \e(+-
 .Pq plus-minus
-.It \\(Pm
+.It \e(Pm
 .Pq plus-minus, deprecated
-.It \\(**
+.It \e(**
 .Pq asterisk
 .El
 .\" PARAGRAPH
 .Pp
 Ligatures:
 .Bl -tag -width 12n -offset "XXXX" -compact
-.It \\(ss
+.It \e(ss
 .Pq German eszett
-.It \\(AE
+.It \e(AE
 .Pq upper-case AE
-.It \\(ae
+.It \e(ae
 .Pq lower-case AE
-.It \\(OE
+.It \e(OE
 .Pq upper-case OE
-.It \\(oe
+.It \e(oe
 .Pq lower-case OE
-.It \\(ff
+.It \e(ff
 .Pq ff ligature
-.It \\(fi
+.It \e(fi
 .Pq fi ligature
-.It \\(fl
+.It \e(fl
 .Pq fl ligature
-.It \\(Fi
+.It \e(Fi
 .Pq ffi ligature
-.It \\(Fl
+.It \e(Fl
 .Pq ffl ligature
 .El
 .\" PARAGRAPH
 .Pp
 Diacritics and letters:
 .Bl -tag -width 12n -offset "XXXX" -compact
-.It \\(ga
+.It \e(ga
 .Pq grave accent
-.It \\(aa
+.It \e(aa
 .Pq accute accent
-.It \\(a"
+.It \e(a"
 .Pq umlaut accent
-.It \\(ad
+.It \e(ad
 .Pq dieresis accent
-.It \\(a~
+.It \e(a~
 .Pq tilde accent
-.It \\(a^
+.It \e(a^
 .Pq circumflex accent
-.It \\(ac
+.It \e(ac
 .Pq cedilla accent
-.It \\(ad
+.It \e(ad
 .Pq dieresis accent
-.It \\(ah
+.It \e(ah
 .Pq caron accent
-.It \\(ao
+.It \e(ao
 .Pq ring accent
-.It \\(ho
+.It \e(ho
 .Pq hook accent
-.It \\(ab
+.It \e(ab
 .Pq breve accent
-.It \\(a-
+.It \e(a-
 .Pq macron accent
-.It \\(-D
+.It \e(-D
 .Pq upper-case eth
-.It \\(Sd
+.It \e(Sd
 .Pq lower-case eth
-.It \\(TP
+.It \e(TP
 .Pq upper-case thorn
-.It \\(Tp
+.It \e(Tp
 .Pq lower-case thorn
-.It \\('A
+.It \e('A
 .Pq upper-case acute A
-.It \\('E
+.It \e('E
 .Pq upper-case acute E
-.It \\('I
+.It \e('I
 .Pq upper-case acute I
-.It \\('O
+.It \e('O
 .Pq upper-case acute O
-.It \\('U
+.It \e('U
 .Pq upper-case acute U
-.It \\('a
+.It \e('a
 .Pq lower-case acute a
-.It \\('e
+.It \e('e
 .Pq lower-case acute e
-.It \\('i
+.It \e('i
 .Pq lower-case acute i
-.It \\('o
+.It \e('o
 .Pq lower-case acute o
-.It \\('u
+.It \e('u
 .Pq lower-case acute u
-.It \\(`A
+.It \e(`A
 .Pq upper-case grave A
-.It \\(`E
+.It \e(`E
 .Pq upper-case grave E
-.It \\(`I
+.It \e(`I
 .Pq upper-case grave I
-.It \\(`O
+.It \e(`O
 .Pq upper-case grave O
-.It \\(`U
+.It \e(`U
 .Pq upper-case grave U
-.It \\(`a
+.It \e(`a
 .Pq lower-case grave a
-.It \\(`e
+.It \e(`e
 .Pq lower-case grave e
-.It \\(`i
+.It \e(`i
 .Pq lower-case grave i
-.It \\(`o
+.It \e(`o
 .Pq lower-case grave o
-.It \\(`u
+.It \e(`u
 .Pq lower-case grave u
-.It \\(~A
+.It \e(~A
 .Pq upper-case tilde A
-.It \\(~N
+.It \e(~N
 .Pq upper-case tilde N
-.It \\(~O
+.It \e(~O
 .Pq upper-case tilde O
-.It \\(~a
+.It \e(~a
 .Pq lower-case tilde a
-.It \\(~n
+.It \e(~n
 .Pq lower-case tilde n
-.It \\(~o
+.It \e(~o
 .Pq lower-case tilde o
-.It \\(:A
+.It \e(:A
 .Pq upper-case dieresis A
-.It \\(:E
+.It \e(:E
 .Pq upper-case dieresis E
-.It \\(:I
+.It \e(:I
 .Pq upper-case dieresis I
-.It \\(:O
+.It \e(:O
 .Pq upper-case dieresis O
-.It \\(:U
+.It \e(:U
 .Pq upper-case dieresis U
-.It \\(:a
+.It \e(:a
 .Pq lower-case dieresis a
-.It \\(:e
+.It \e(:e
 .Pq lower-case dieresis e
-.It \\(:i
+.It \e(:i
 .Pq lower-case dieresis i
-.It \\(:o
+.It \e(:o
 .Pq lower-case dieresis o
-.It \\(:u
+.It \e(:u
 .Pq lower-case dieresis u
-.It \\(:y
+.It \e(:y
 .Pq lower-case dieresis y
-.It \\(^A
+.It \e(^A
 .Pq upper-case circumflex A
-.It \\(^E
+.It \e(^E
 .Pq upper-case circumflex E
-.It \\(^I
+.It \e(^I
 .Pq upper-case circumflex I
-.It \\(^O
+.It \e(^O
 .Pq upper-case circumflex O
-.It \\(^U
+.It \e(^U
 .Pq upper-case circumflex U
-.It \\(^a
+.It \e(^a
 .Pq lower-case circumflex a
-.It \\(^e
+.It \e(^e
 .Pq lower-case circumflex e
-.It \\(^i
+.It \e(^i
 .Pq lower-case circumflex i
-.It \\(^o
+.It \e(^o
 .Pq lower-case circumflex o
-.It \\(^u
+.It \e(^u
 .Pq lower-case circumflex u
-.It \\(,C
+.It \e(,C
 .Pq upper-case cedilla C
-.It \\(,c
+.It \e(,c
 .Pq lower-case cedilla c
-.It \\(/L
+.It \e(/L
 .Pq upper-case stroke L
-.It \\(/l
+.It \e(/l
 .Pq lower-case stroke l
-.It \\(/O
+.It \e(/O
 .Pq upper-case stroke O
-.It \\(/o
+.It \e(/o
 .Pq lower-case stroke o
-.It \\(oA
+.It \e(oA
 .Pq upper-case ring A
-.It \\(oa
+.It \e(oa
 .Pq lower-case ring a
 .El
 .\" PARAGRAPH
 .Pp
 Monetary:
 .Bl -tag -width 12n -offset "XXXX" -compact
-.It \\(Cs
+.It \e(Cs
 .Pq Scandinavian
-.It \\(Do
+.It \e(Do
 .Pq dollar
-.It \\(Po
+.It \e(Po
 .Pq pound
-.It \\(Ye
+.It \e(Ye
 .Pq yen
-.It \\(Fn
+.It \e(Fn
 .Pq florin
-.It \\(ct
+.It \e(ct
 .Pq cent
 .El
 .\" PARAGRAPH
 .Pp
 Special symbols:
 .Bl -tag -width 12n -offset "XXXX" -compact
-.It \\(de
+.It \e(de
 .Pq degree
-.It \\(ps
+.It \e(ps
 .Pq paragraph
-.It \\(sc
+.It \e(sc
 .Pq section
-.It \\(dg
+.It \e(dg
 .Pq dagger
-.It \\(dd
+.It \e(dd
 .Pq double dagger
-.It \\(ci
+.It \e(ci
 .Pq circle
-.It \\(ba
+.It \e(ba
 .Pq bar
-.It \\(bb
+.It \e(bb
 .Pq broken bar
-.It \\(Ba
+.It \e(Ba
 .Pq bar, deprecated
-.It \\(co
+.It \e(co
 .Pq copyright
-.It \\(rg
+.It \e(rg
 .Pq registered
-.It \\(tm
+.It \e(tm
 .Pq trademarked
-.It \\&
+.It \e&
 .Pq non-breaking space
-.It \\e
+.It \ee
 .Pq escape
-.It \\(Am
+.It \e(Am
 .Pq ampersand, deprecated
 .El 
 .\" SECTION
@@ -698,7 +698,7 @@ The head of these macros follows invocation; the body is the content of
 subsequent lines prior to closure.  None of these macros have tails;
 some 
 .Po
-.Sq \&It \-bullet , 
+.Sq \&.It \-bullet , 
 .Sq \-hyphen , 
 .Sq \-dash ,
 .Sq \-enum ,
@@ -751,26 +751,28 @@ close at the invocation's end-of-line.
 .\" PARAGRAPH
 .Pp
 The
-.Sq \&Op
-may be broken by \&Oc as in the following example:
+.Sq \&.Op
+may be broken by 
+.Sq \&.Oc 
+as in the following example:
 .Bd -literal -offset XXXX
 \&.Oo
 \&.Op Fl a Oc
 .Ed
 .Pp
 In the above example, the scope of
-.Sq \&Op
+.Sq \&.Op
 is technically broken by 
-.Sq \&Oc ,
+.Sq \&.Oc ,
 however, due to the overwhelming existence of this sequence, it's
 allowed.
 .\" SUB-SECTION
 .Ss Block partial-explicit
 Each of these contains at least a body and, in limited circumstances, a
 head 
-.Pq So \&Fo Sc , So \&Eo Sc
+.Pq So \&.Fo Sc , So \&.Eo Sc
 and/or tail 
-.Pq So \&Ec Sc .
+.Pq So \&.Ec Sc .
 .Pp
 .Bl -column "MacroX" "CallableX" "ParsableX" "closed by XXXX" -compact -offset XXXX
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Scope
@@ -882,11 +884,11 @@ then the macro accepts an arbitrary number of arguments.
 .El
 .Pp
 The
-.Sq \&Ot ,
-.Sq \&Fr ,
-.Sq \&Es 
+.Sq \&.Ot ,
+.Sq \&.Fr ,
+.Sq \&.Es 
 and
-.Sq \&En ,
+.Sq \&.En ,
 macros are obsolete.
 .\" SECTION
 .Sh COMPATIBILITY
@@ -899,47 +901,47 @@ compatibility with these systems.
 .Bl -dash -compact
 .\" LIST-ITEM
 .It
-.Sq \&Fo
+.Sq \&.Fo
 and
-.Sq \&St
+.Sq \&.St
 historically weren't always callable.  Both are now correctly callable.
 .\" LIST-ITEM
 .It
-.Sq \&It \-nested
+.Sq \&.It \-nested
 is assumed for all lists: any list may be nested and
 .Sq \-enum
 lists will restart the sequence only for the sub-list.
 .\" LIST-ITEM
 .It
-.Sq \&It \-column
+.Sq \&.It \-column
 syntax where column widths may be preceeded by other arguments (instead
 of proceeded) is not supported.
 .\" LIST-ITEM
 .It
 The 
-.Sq \&At
+.Sq \&.At
 macro only accepts a single parameter.
 .\" LIST-ITEM
 .It
 The system-name macros (
-.Ns Sq \&At ,
-.Sq \&Bsx ,
-.Sq \&Bx ,
-.Sq \&Fx ,
-.Sq \&Nx ,
-.Sq \&Ox ,
+.Ns Sq \&.At ,
+.Sq \&.Bsx ,
+.Sq \&.Bx ,
+.Sq \&.Fx ,
+.Sq \&.Nx ,
+.Sq \&.Ox ,
 and
-.Sq \&Ux )
+.Sq \&.Ux )
 are callable.
 .\" LIST-ITEM
 .It
 Some manuals use
-.Sq \&Li
+.Sq \&.Li
 incorrectly by following it with a reserved character and expecting the
 delimiter to render.  This is not supported.
 .\" LIST-ITEM
 .It
-.Sq \&Cd
+.Sq \&.Cd
 is callable.
 .El
 .\" SECTION
@@ -958,64 +960,64 @@ There are several ambiguous parts of mdoc.
 .Bl -dash -compact
 .\" LIST-ITEM
 .It
-.Sq \&Fa
+.Sq \&.Fa
 should be 
-.Sq \&Va
+.Sq \&.Va
 as function arguments are variables.
 .\" LIST-ITEM
 .It
-.Sq \&Ft
+.Sq \&.Ft
 should be
-.Sq \&Vt
+.Sq \&.Vt
 as function return types are still types.  Furthermore, the
-.Sq \&Ft
+.Sq \&.Ft
 should be removed and
-.Sq \&Fo ,
+.Sq \&.Fo ,
 which ostensibly follows it, should follow the same convention as
-.Sq \&Va .
+.Sq \&.Va .
 .\" LIST-ITEM
 .It
-.Sq \&Va
+.Sq \&.Va
 should formalise that only one or two arguments are acceptable: a
 variable name and optional, preceeding type.
 .\" LIST-ITEM
 .It
-.Sq \&Fd
+.Sq \&.Fd
 is ambiguous.  It's commonly used to indicate an include file in the
 synopsis section.  
-.Sq \&In
+.Sq \&.In
 should be used, instead.
 .\" LIST-ITEM
 .It
 Only the
 .Sq \-literal
 argument to
-.Sq \&Bd
+.Sq \&.Bd
 makes sense.  The remaining ones should be removed.
 .\" LIST-ITEM
 .It
 The 
-.Sq \&Xo
+.Sq \&.Xo
 and
-.Sq \&Xc
+.Sq \&.Xc
 macros should be deprecated.
 .\" LIST-ITEM
 .It
 The
-.Sq \&Dt
+.Sq \&.Dt
 macro lacks clarity.  It should be absolutely clear which title will
 render when formatting the manual page.
 .\" LIST-ITEM
 .It
 A
-.Sq \&Lx
+.Sq \&.Lx
 should be provided for Linux (\(`a la 
-.Sq \&Ox ,
-.Sq \&Nx 
+.Sq \&.Ox ,
+.Sq \&.Nx 
 etc.).
 .\" LIST-ITEM
 .It
 There's no way to refer to references in
-.Sq \&Rs/Re
+.Sq \&.Rs/.Re
 blocks.
 .El

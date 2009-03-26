@@ -50,7 +50,7 @@ for details.
 Input format.  See
 .Sx Input Formats
 for available formats.  Defaults to
-.Fl m Ns Ar mdoc .
+.Fl m Ns Ar doc .
 .\" ITEM
 .It Fl T
 Output format.  See
@@ -150,9 +150,9 @@ utility accepts
 and
 .Xr man 7
 input with
-.Fl m Ns Ar mdoc
+.Fl m Ns Ar doc
 and
-.Fl m Ns Ar man ,
+.Fl m Ns Ar an ,
 respectively.  The
 .Xr mdoc 7
 format is
@@ -160,11 +160,6 @@ format is
 recommended; 
 .Xr man 7
 should only be used for legacy manuals.
-.Pp
-Note that the
-.Fl m Ns Ar man
-option is experimental and only works with
-.Fl T Ns Ar tree .
 .\" SUB-SECTION
 .Ss Output Formats
 The
@@ -232,7 +227,7 @@ mode doesn't yet know how to display the following:
 .Bl -bullet -compact
 .It
 The \-hang 
-.Sq \&Bl
+.Sq \&.Bl
 list is not yet supported.
 .El
 .Pp
@@ -248,14 +243,14 @@ output and
 .Bl -bullet -compact
 .It 
 A list of display following
-.Sq \&Ss
+.Sq \&.Ss
 does not assert a prior vertical break, just as it doesn't with
-.Sq \&Sh .
+.Sq \&.Sh .
 .It
 Special characters don't follow the current font style.
 .\" LIST-ITEM
 .It
 The \-literal and \-unfilled 
-.Sq \&Bd
+.Sq \&.Bd
 displays types are synonyms, as are \-filled and \-ragged.
 .El

@@ -44,6 +44,7 @@ static	int		  pre_BI(DECL_ARGS);
 static	int		  pre_BR(DECL_ARGS);
 static	int		  pre_I(DECL_ARGS);
 static	int		  pre_IB(DECL_ARGS);
+static	int		  pre_IP(DECL_ARGS);
 static	int		  pre_IR(DECL_ARGS);
 static	int		  pre_PP(DECL_ARGS);
 static	int		  pre_RB(DECL_ARGS);
@@ -66,8 +67,8 @@ static const struct termact termacts[MAN_MAX] = {
 	{ pre_PP, NULL }, /* LP */
 	{ pre_PP, NULL }, /* PP */
 	{ pre_PP, NULL }, /* P */
-	{ NULL, NULL }, /* IP */
-	{ pre_PP, NULL }, /* HP */ /* XXX */
+	{ pre_IP, NULL }, /* IP */
+	{ pre_PP, NULL }, /* HP */ /* FIXME */
 	{ NULL, NULL }, /* SM */
 	{ pre_B, post_B }, /* SB */
 	{ pre_BI, NULL }, /* BI */
@@ -131,6 +132,8 @@ pre_IR(DECL_ARGS)
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		if ( ! (i % 2))
 			p->flags |= TERMP_UNDER;
+		if (i > 0)
+			p->flags |= TERMP_NOSPACE;
 		print_node(p, nn, m);
 		if ( ! (i % 2))
 			p->flags &= ~TERMP_UNDER;
@@ -148,6 +151,8 @@ pre_IB(DECL_ARGS)
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		p->flags |= i % 2 ? TERMP_BOLD : TERMP_UNDER;
+		if (i > 0)
+			p->flags |= TERMP_NOSPACE;
 		print_node(p, nn, m);
 		p->flags &= i % 2 ? ~TERMP_BOLD : ~TERMP_UNDER;
 	}
@@ -165,6 +170,8 @@ pre_RB(DECL_ARGS)
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		if (i % 2)
 			p->flags |= TERMP_BOLD;
+		if (i > 0)
+			p->flags |= TERMP_NOSPACE;
 		print_node(p, nn, m);
 		if (i % 2)
 			p->flags &= ~TERMP_BOLD;
@@ -183,6 +190,8 @@ pre_RI(DECL_ARGS)
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		if ( ! (i % 2))
 			p->flags |= TERMP_UNDER;
+		if (i > 0)
+			p->flags |= TERMP_NOSPACE;
 		print_node(p, nn, m);
 		if ( ! (i % 2))
 			p->flags &= ~TERMP_UNDER;
@@ -201,6 +210,8 @@ pre_BR(DECL_ARGS)
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		if ( ! (i % 2))
 			p->flags |= TERMP_BOLD;
+		if (i > 0)
+			p->flags |= TERMP_NOSPACE;
 		print_node(p, nn, m);
 		if ( ! (i % 2))
 			p->flags &= ~TERMP_BOLD;
@@ -218,6 +229,8 @@ pre_BI(DECL_ARGS)
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		p->flags |= i % 2 ? TERMP_UNDER : TERMP_BOLD;
+		if (i > 0)
+			p->flags |= TERMP_NOSPACE;
 		print_node(p, nn, m);
 		p->flags &= i % 2 ? ~TERMP_UNDER : ~TERMP_BOLD;
 	}
@@ -251,6 +264,34 @@ pre_PP(DECL_ARGS)
 
 	term_vspace(p);
 	p->offset = INDENT;
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+pre_IP(DECL_ARGS)
+{
+	const struct man_node *nn;
+	size_t		 offs;
+
+	term_vspace(p);
+	p->offset = INDENT;
+
+	if (NULL == (nn = n->child))
+		return(1);
+
+	/* FIXME - ignore the designator. */
+	nn = nn->next;
+
+	if (MAN_TEXT != nn->type)
+		errx(1, "expected text line argument");
+
+	offs = (size_t)atoi(nn->string);
+	nn = nn->next;
+
+	p->flags |= TERMP_NOSPACE;
+	p->offset += offs;
 	return(0);
 }
 
@@ -335,7 +376,7 @@ post_SH(DECL_ARGS)
 static void
 print_node(DECL_ARGS)
 {
-	int		 c;
+	int		 c, sz;
 
 	c = 1;
 
@@ -345,11 +386,21 @@ print_node(DECL_ARGS)
 			c = (*termacts[n->tok].pre)(p, n, m);
 		break;
 	case(MAN_TEXT):
-		if (*n->string) {
-			term_word(p, n->string);
+		if (0 == *n->string) {
+			term_vspace(p);
 			break;
 		}
-		term_vspace(p);
+		/*
+		 * Note!  This is hacky.  Here, we recognise the `\c'
+		 * escape embedded in so many -man pages.  It's supposed
+		 * to remove the subsequent space, so we mark NOSPACE if
+		 * it's encountered in the string.
+		 */
+		sz = (int)strlen(n->string);
+		term_word(p, n->string);
+		if (sz >= 2 && n->string[sz - 1] == 'c' &&
+				n->string[sz - 2] == '\\')
+			p->flags |= TERMP_NOSPACE;
 		break;
 	default:
 		break;
@@ -397,13 +448,6 @@ print_foot(struct termp *p, const struct man_meta *meta)
 #endif
 		err(1, "strftime");
 
-	/*
-	 * This is /slightly/ different from regular groff output
-	 * because we don't have page numbers.  Print the following:
-	 *
-	 * OS                                            MDOCDATE
-	 */
-
 	term_vspace(p);
 
 	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
@@ -440,19 +484,6 @@ print_head(struct termp *p, const struct man_meta *meta)
 		err(1, "malloc");
 	if (NULL == (title = malloc(p->rmargin)))
 		err(1, "malloc");
-
-	/*
-	 * The header is strange.  It has three components, which are
-	 * really two with the first duplicated.  It goes like this:
-	 *
-	 * IDENTIFIER              TITLE                   IDENTIFIER
-	 *
-	 * The IDENTIFIER is NAME(SECTION), which is the command-name
-	 * (if given, or "unknown" if not) followed by the manual page
-	 * section.  These are given in `Dt'.  The TITLE is a free-form
-	 * string depending on the manual volume.  If not specified, it
-	 * switches on the manual section.
-	 */
 
 	if (meta->vol)
 		(void)strlcpy(buf, meta->vol, p->rmargin);

@@ -321,11 +321,11 @@ static	int	  arg_listtype(const struct mdoc_node *);
 static	int	  fmt_block_vspace(struct termp *,
 			const struct mdoc_node *,
 			const struct mdoc_node *);
-static	int  	  print_node(DECL_ARGS);
-static	int	  print_head(struct termp *, 
+static	void  	  print_node(DECL_ARGS);
+static	void	  print_head(struct termp *, 
 			const struct mdoc_meta *);
-static	int	  print_body(DECL_ARGS);
-static	int	  print_foot(struct termp *, 
+static	void	  print_body(DECL_ARGS);
+static	void	  print_foot(struct termp *, 
 			const struct mdoc_meta *);
 static	void	  sanity(const struct mdoc_node *);
 
@@ -334,27 +334,25 @@ int
 mdoc_run(struct termp *p, const struct mdoc *m)
 {
 
-	if ( ! print_head(p, mdoc_meta(m)))
-		return(0);
-	if ( ! print_body(p, NULL, mdoc_meta(m), mdoc_node(m)))
-		return(0);
-	return(print_foot(p, mdoc_meta(m)));
+	print_head(p, mdoc_meta(m));
+	print_body(p, NULL, mdoc_meta(m), mdoc_node(m));
+	print_foot(p, mdoc_meta(m));
+	return(1);
 }
 
 
-static int
+static void
 print_body(DECL_ARGS)
 {
 
-	if ( ! print_node(p, pair, meta, node))
-		return(0);
+	print_node(p, pair, meta, node);
 	if ( ! node->next)
-		return(1);
-	return(print_body(p, pair, meta, node->next));
+		return;
+	print_body(p, pair, meta, node->next);
 }
 
 
-static int
+static void
 print_node(DECL_ARGS)
 {
 	int		 dochild;
@@ -396,12 +394,10 @@ print_node(DECL_ARGS)
 	if (MDOC_TEXT != node->type)
 		if (termacts[node->tok].post)
 			(*termacts[node->tok].post)(p, &npair, meta, node);
-
-	return(1);
 }
 
 
-static int
+static void
 print_foot(struct termp *p, const struct mdoc_meta *meta)
 {
 	struct tm	*tm;
@@ -449,12 +445,10 @@ print_foot(struct termp *p, const struct mdoc_meta *meta)
 
 	free(buf);
 	free(os);
-
-	return(1);
 }
 
 
-static int
+static void
 print_head(struct termp *p, const struct mdoc_meta *meta)
 {
 	char		*buf, *title;
@@ -520,8 +514,6 @@ print_head(struct termp *p, const struct mdoc_meta *meta)
 
 	free(title);
 	free(buf);
-
-	return(1);
 }
 
 
