@@ -25,6 +25,11 @@
 #include "term.h"
 #include "man.h"
 
+#ifdef __linux__
+extern	size_t		  strlcpy(char *, const char *, size_t);
+extern	size_t		  strlcat(char *, const char *, size_t);
+#endif
+
 #define	DECL_ARGS 	  struct termp *p, \
 			  const struct man_node *n, \
 			  const struct man_meta *m

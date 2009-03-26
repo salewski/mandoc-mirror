@@ -26,11 +26,6 @@
 #include "man.h"
 #include "mdoc.h"
 
-#ifdef __linux__
-extern	size_t		  strlcpy(char *, const char *, size_t);
-extern	size_t		  strlcat(char *, const char *, size_t);
-#endif
-
 extern	int		  man_run(struct termp *, 
 				const struct man *);
 extern	int		  mdoc_run(struct termp *, 

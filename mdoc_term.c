@@ -306,6 +306,11 @@ static const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* %Q */ 
 };
 
+#ifdef __linux__
+extern	size_t		  strlcpy(char *, const char *, size_t);
+extern	size_t		  strlcat(char *, const char *, size_t);
+#endif
+
 static	int	  arg_hasattr(int, const struct mdoc_node *);
 static	int	  arg_getattrs(const int *, int *, size_t,
 			const struct mdoc_node *);
