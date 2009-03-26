@@ -160,6 +160,17 @@ format is
 recommended; 
 .Xr man 7
 should only be used for legacy manuals.
+.Pp
+The following escape sequences are recognised, although the per-format
+compiler may not allow certain sequences.
+.Bl -tag -width Ds -offset XXXX
+.It \efX
+sets the font mode to X (B, I, R or P, where P resets the font)
+.It \eX, \e(XX, \e[XN]
+queries the special-character table for a corresponding symbol
+.It \e*X, \e*(XX, \e*[XN]
+deprecated special-character format
+.El
 .\" SUB-SECTION
 .Ss Output Formats
 The
