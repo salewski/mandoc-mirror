@@ -53,10 +53,6 @@ prior macros:
 \&.SH Macro lines change control state.
 Other lines are interpreted within the current state.
 .Ed
-.\" PARAGRAPH
-.Pp
-Macros are character sequences whose structural rules are described
-later in this document.
 .\" SECTION
 .Sh INPUT ENCODING
 .Nm
@@ -64,10 +60,11 @@ documents may contain only graphable 7-bit ASCII characters and the
 space character
 .Sq \  .
 All manuals must have
+.Ux
 .Sq \en
 line termination.  
 .Pp
-Blank lines are acceptable; where found, the output will also assert a
+Blank lines are acceptable; where found, the output will assert a
 vertical space.
 .Pp
 The
@@ -135,25 +132,15 @@ and
 .Sq \&.RI .
 When these macros are invoked without arguments, the subsequent line is
 considered a continuation of the macro.  Thus:
-.Bd -literal -offset indent
-\&.RI foo
-.Ed
-.Pp
-and
 .Bd -literal -offset indent 
 \&.RI 
 foo
 .Ed
 .Pp
-are equivalent.  If two consecutive lines exhibit the latter behaviour,
-an error is raised.  Thus, the following is acceptable:
-.Bd -literal -offset indent 
-\&.RI 
-\&.I Hello, world.
-foo
-.Ed
-.Pp
-The following, however, is not:
+is equivalent to 
+.Sq \&.RI foo .  
+If two consecutive lines exhibit the latter behaviour,
+an error is raised.  Thus, the following is not acceptable:
 .Bd -literal -offset indent 
 \&.RI 
 \&.I 
@@ -162,13 +149,13 @@ Hello, world.
 .Pp
 The
 .Sq \&.TP
-macro has similar behaviour, but does not need an empty argument line in
-order to trigger scope.
+macro is similar, but does not need an empty argument line to trigger
+the behaviour.
 .\" PARAGRAPH
 .Sh MACROS
 This section contains a complete list of all 
 .Nm
-macros, arranged alphabetically, with the number of arguments.
+macros and corresponding number of arguments.
 .Pp
 .Bl -column "MacroX" "Arguments" -compact -offset indent
 .It Em Macro Ta Em Arguments

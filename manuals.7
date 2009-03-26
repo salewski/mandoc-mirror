@@ -30,18 +30,12 @@
 .Pp
 A system component's documentation describes the utility of that
 component, whether it's a device driver, an executable or, most
-importantly, a game.  Although there are plenty of documents available
-on how to read 
-.Ux 
-documents, or where to find them, few focus on composition.
-.\" PARAGRAPH
+importantly, a game.  
 .Pp
 This document serves as a tutorial to writing 
 .Ux 
 documentation
 .Pq Dq manuals .
-If you add something to your operating system, whether it's a new file
-format or directory structure or device driver, it needs documentation.
 .\" SECTION
 .Sh COMPOSITION
 Prepare your composition environment by copying over the manual template
@@ -55,8 +49,7 @@ you're doing!
 .\" SUBSECTION
 .Ss Section Numbering
 Find an appropriate section for your manual.  There may exist multiple
-manual names per section, so be specific.  A table of all available
-manual sections follows:
+manual names per section, so be specific:
 .Pp
 .\" LIST
 .Bl -tag -width "XXXXXXXXXXXX" -offset indent -compact
@@ -98,8 +91,8 @@ myname (3) - library description
 .Ed
 .\" SUBSECTION
 .Ss Naming
-Name your component.  Be terse, erring on the side of clarity.  You may
-want to look for other manuals by that same name before committing:
+Name your component.  Be terse, erring on the side of clarity.  Look for
+other manuals by that same name before committing:
 .Pp
 .Dl % apropos myname
 .Pp
@@ -121,13 +114,9 @@ historical
 .Xr man 7
 package of 
 .Xr roff 7 ;
-newer languages such as DocBook, texinfo or schema-driven XML; or even
-ad-hoc conventions such as README files.  
+newer languages such as DocBook or texinfo; or even ad-hoc conventions
+such as README files.  
 .Em Avoid these formats .
-Historical formats fail to capture a manual's semantic content, instead
-only modelling its style.  Newer methods requires special,
-system-specific tools and may change or become obsolete over the
-life-time of your component.
 .Pp
 There are two canonical references for writing mdoc.  Read them.
 .Pp
@@ -155,54 +144,34 @@ You may spell-check your work as follows:
 .Pp
 Use 
 .Xr cvs 1
-or, if not available,
+or
 .Xr rcs 1
 to version-control your work.  If you wish the last check-in to effect
 your document's date, use the following RCS tag for the date macro:
 .Pp
 .Dl \&.Dd $Mdocdate$
-.Pp
-If using version control, the first line in your manual should be a
-comment with the 
-.Li $Id$
-rcs tag.
 .\" SUBSECTION
 .Ss Viewing
-mdoc documents may be paged to your terminal with traditional 
-tools such as
-.Xr nroff 1 ,
-.Xr groff 1 ,
-or with newer, more powerful tools such as
-.Xr mandoc 1 :
-.\" DISPLAY
+mdoc documents may be paged to your terminal with 
+.Xr mandoc 1 .
+If you plan on distributing your work to systems without this tool,
+check it against
+.Xr groff 1 :
 .Bd -literal -offset indent
-% nroff \-mandoc name.1 | less
-% groff \-Tascii \-mandoc name.1 | less
-% mandoc name.1 | less
-.Ed
-.Pp
-Other output formats are also supported:
-.\" DISPLAY
-.Bd -literal -offset indent
-% groff \-Tps \-mandoc name.1 | less
-% mandoc \-Thtml name.1 | less
+% mandoc \-Wall name.1 2>&1 | less
+% groff -mandoc name.1 2>&1 | less
 .Ed
 .\" SUBSECTION
 .Ss Automation
 Consider adding your mdoc documents to 
 .Xr make 1
-Makefiles in order to automatically check your input and generate
-output:
+Makefiles in order to automatically check your input:
 .Bd -literal -offset indent
-\&.SUFFIXES: .html .txt .1 .in
+\&.SUFFIXES: .1 .in
 
 \&.in.1:
 	mandoc -Wall,error -Tlint $<
 	cp -f $< $@
-\&.1.html:
-	mandoc -Thtml $< >$@
-\&.1.txt:
-	mandoc -Tascii $< | col -b >$@
 .Ed
 .\" SUBSECTION
 .Ss Licensing
@@ -242,11 +211,11 @@ The structure of the mdoc language makes it very hard to have any
 particular format style.  Keep your lines under 72 characters in length.
 If you must have long option lines, use 
 .Sq \&Oo/Oc .
+The same goes for function prototypes.
 .Em \&Do not
 use 
-.Sq \&Xo/Xc ;
-instead, either fine another way to write long lines, or, at the
-absolute worst, use CPP-style newline escapes.
+.Sq \&Xo/Xc .
+Find another way to structure your line.
 .\" SUBSECTION
 .Ss References 
 Other components may be referenced with the
@@ -267,7 +236,7 @@ publications, please use the
 block macros.
 .\" SUBSECTION
 .Ss Formatting
-.Em Don't style your manual.
+.Em Don't style your manual .
 Give it meaningful content.  The front-end will worry about formatting
 and style.
 .\" SECTION

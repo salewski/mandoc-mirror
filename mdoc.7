@@ -47,11 +47,6 @@ prior macros:
 \&.Sh Macro lines change control state.
 Other lines are interpreted within the current state.
 .Ed
-.\" PARAGRAPH
-.Pp
-Macros are two- or three-character sequences whose scope rules, rules
-that dictate handling of subsequent-line or same-line arguments, are
-governed by one of five classifications described in this document.
 .\" SECTION
 .Sh INPUT ENCODING
 .Nm
@@ -543,7 +538,7 @@ Special symbols:
 .Pq ampersand, deprecated
 .El 
 .\" SECTION
-.Sh ONTOLOGY
+.Sh STRUCTURE
 Macros are classified in an ontology described by their scope rules.
 Some macros are allowed to deviate from their classifications to
 preserve backward-compatibility with old macro combinations still found
@@ -630,8 +625,8 @@ subsequent tokens are interpreted as if the scope had just been opened.
 In other circumstances, scope is simply closed out.
 .\" SECTION
 .Sh SYNTAX
-Macros are generally two and at times three characters in length.  The
-syntax of macro invocation depends on its classification.  
+Macros are two or three characters in length.  The syntax of macro
+invocation depends on its classification.  
 .Qq \-arg
 refers to the macro arguments (which may contain zero or more values).
 In these illustrations, 
@@ -689,7 +684,7 @@ This section contains a complete list of all
 .Nm
 macros, arranged ontologically.  A 
 .Qq callable
-macro is may be invoked subsequent to the initial macro-line macro.  A
+macro is invoked subsequent to the initial macro-line macro.  A
 .Qq parsable
 macro may be followed by further (ostensibly callable) macros.
 .\" SUB-SECTION
