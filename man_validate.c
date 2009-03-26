@@ -35,7 +35,7 @@ struct	man_valid {
 	v_post	 *posts;
 };
 
-static	int	  count(POSTARGS);
+static	int	  count(const struct man_node *);
 static	int	  check_eq0(POSTARGS);
 static	int	  check_ge1(POSTARGS);
 static	int	  check_ge2(POSTARGS);
@@ -102,7 +102,7 @@ man_valid_post(struct man *m)
 
 
 static inline int
-count(POSTARGS)
+count(const struct man_node *n)
 { 
 	int		 i;
 
@@ -117,7 +117,7 @@ static int \
 check_##name(POSTARGS) \
 { \
 	int		 c; \
-	if ((c = count(m, n->child)) ineq (x)) \
+	if ((c = count(n->child)) ineq (x)) \
 		return(1); \
 	return(man_vwarn(m, n->line, n->pos, \
 			"expected line arguments %s %d, have %d", \

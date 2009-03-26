@@ -39,7 +39,7 @@ MAINOBJS   = main.o term.o ascii.o terminal.o tree.o compat.o
 MAINSRCS   = main.c term.c ascii.c terminal.c tree.c compat.c
 
 LLNS	   = llib-llibmdoc.ln llib-llibman.ln llib-lmandoc.ln
-LNS	   = $(MAINLNS) $(MDOCLNS)
+LNS	   = $(MAINLNS) $(MDOCLNS) $(MANLNS)
 LIBS	   = libmdoc.a libman.a
 OBJS	   = $(MDOCOBJS) $(MAINOBJS)
 SRCS	   = $(MDOCSRCS) $(MAINSRCS) $(MANSRCS)

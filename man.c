@@ -275,7 +275,7 @@ man_ptext(struct man *m, int line, char *buf)
 int
 man_pmacro(struct man *m, int ln, char *buf)
 {
-	int		  i, c;
+	int		  i, j, c;
 	char		  mac[5];
 
 	/* Comments and empties are quickly ignored. */
@@ -283,48 +283,49 @@ man_pmacro(struct man *m, int ln, char *buf)
 	if (0 == buf[1])
 		return(1);
 
-	if (' ' == buf[1]) {
-		i = 2;
+	i = 1;
+
+	if (' ' == buf[i]) {
+		i++;
 		while (buf[i] && ' ' == buf[i])
 			i++;
 		if (0 == buf[i])
 			return(1);
-		return(man_vwarn(m, ln, 0, "invalid syntax"));
 	}
 
-	if (buf[1] && '\\' == buf[1])
-		if (buf[2] && '\"' == buf[2])
+	if (buf[i] && '\\' == buf[i])
+		if (buf[i + 1] && '\"' == buf[i + 1])
 			return(1);
 
 	/* Copy the first word into a nil-terminated buffer. */
 
-	for (i = 1; i < 5; i++) {
-		if (0 == (mac[i - 1] = buf[i]))
+	for (j = 0; j < 4; j++) {
+		if (0 == (mac[j] = buf[j + i]))
 			break;
-		else if (' ' == buf[i])
+		else if (' ' == buf[j + i])
 			break;
 	}
 
-	mac[i - 1] = 0;
+	mac[j] = 0;
 
-	if (i == 5 || i <= 1) {
+	if (j == 4 || j < 1) {
 		if ( ! (MAN_IGN_MACRO & m->pflags)) {
-			(void)man_verr(m, ln, 1, 
+			(void)man_verr(m, ln, i, 
 				"ill-formed macro: %s", mac);
 			goto err;
 		} 
-		if ( ! man_vwarn(m, ln, 1, "ill-formed macro: %s", mac))
+		if ( ! man_vwarn(m, ln, 0, "ill-formed macro: %s", mac))
 			goto err;
 		return(1);
 	}
 	
 	if (MAN_MAX == (c = man_hash_find(m->htab, mac))) {
 		if ( ! (MAN_IGN_MACRO & m->pflags)) {
-			(void)man_verr(m, ln, 1, 
+			(void)man_verr(m, ln, i, 
 				"unknown macro: %s", mac);
 			goto err;
 		} 
-		if ( ! man_vwarn(m, ln, 1, "unknown macro: %s", mac))
+		if ( ! man_vwarn(m, ln, i, "unknown macro: %s", mac))
 			goto err;
 		return(1);
 	}

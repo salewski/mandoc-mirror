@@ -52,7 +52,7 @@ man_hash_find(const void *arg, const char *tmp)
 	/* TODO */
 
 	for (i = 0; i < MAN_MAX; i++) 
-		if (0 == strcasecmp(tmp, man_macronames[i]))
+		if (0 == strcmp(tmp, man_macronames[i]))
 			return(i);
 
 	return(MAN_MAX);
