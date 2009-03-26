@@ -54,7 +54,7 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ posts_ge2_le5 }, /* TH */
 	{ posts_ge1 }, /* SH */
 	{ posts_ge1 }, /* SS */
-	{ posts_le1 }, /* TP */
+	{ NULL }, /* TP */
 	{ posts_eq0 }, /* LP */
 	{ posts_eq0 }, /* PP */
 	{ posts_eq0 }, /* P */
@@ -70,6 +70,7 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL }, /* B */
 	{ NULL }, /* I */
 	{ NULL }, /* IR */
+	{ NULL }, /* RI */
 };
 
 
@@ -119,7 +120,7 @@ check_##name(POSTARGS) \
 	int		 c; \
 	if ((c = count(n->child)) ineq (x)) \
 		return(1); \
-	return(man_vwarn(m, n->line, n->pos, \
+	return(man_verr(m, n->line, n->pos, \
 			"expected line arguments %s %d, have %d", \
 			#ineq, (x), c)); \
 }

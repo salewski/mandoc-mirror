@@ -23,21 +23,21 @@
 #include <string.h>
 
 #include "term.h"
+#include "man.h"
+#include "mdoc.h"
 
 #ifdef __linux__
 extern	size_t		  strlcpy(char *, const char *, size_t);
 extern	size_t		  strlcat(char *, const char *, size_t);
 #endif
 
+extern	int		  man_run(struct termp *, 
+				const struct man *);
+extern	int		  mdoc_run(struct termp *, 
+				const struct mdoc *);
+
 static	struct termp	 *term_alloc(enum termenc);
 static	void		  term_free(struct termp *);
-static	void		  term_body(struct termp *, struct termpair *,
-				const struct mdoc_meta *,
-				const struct mdoc_node *);
-static	void		  term_head(struct termp *,
-				const struct mdoc_meta *);
-static	void		  term_foot(struct termp *,
-				const struct mdoc_meta *);
 static	void		  term_pword(struct termp *, const char *, int);
 static	void		  term_pescape(struct termp *, 
 				const char *, int *, int);
@@ -48,7 +48,6 @@ static	void		  term_stringa(struct termp *,
 				const char *, size_t);
 static	int		  term_isopendelim(const char *, int);
 static	int		  term_isclosedelim(const char *, int);
-static	void		  sanity(const struct mdoc_node *); /* XXX */
 
 
 void *
@@ -65,17 +64,15 @@ terminal_run(void *arg, const struct man *man,
 {
 	struct termp	*p;
 
-	if (NULL == mdoc)
-		return(1);
-
 	p = (struct termp *)arg;
 
 	if (NULL == p->symtab)
 		p->symtab = term_ascii2htab();
 
-	term_head(p, mdoc_meta(mdoc));
-	term_body(p, NULL, mdoc_meta(mdoc), mdoc_node(mdoc));
-	term_foot(p, mdoc_meta(mdoc));
+	if (man)
+		return(man_run(p, man));
+	if (mdoc)
+		return(mdoc_run(p, mdoc));
 
 	return(1);
 }
@@ -403,191 +400,6 @@ term_word(struct termp *p, const char *word)
 }
 
 
-static void
-term_body(struct termp *p, struct termpair *ppair,
-		const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-
-	term_node(p, ppair, meta, node);
-	if (node->next)
-		term_body(p, ppair, meta, node->next);
-}
-
-
-/*
- * This is the main function for printing out nodes.  It's constituted
- * of PRE and POST functions, which correspond to prefix and infix
- * processing.  The termpair structure allows data to persist between
- * prefix and postfix invocations.
- */
-void
-term_node(struct termp *p, struct termpair *ppair,
-		const struct mdoc_meta *meta,
-		const struct mdoc_node *node)
-{
-	int		 dochild;
-	struct termpair	 pair;
-
-	/* Some quick sanity-checking. */
-
-	sanity(node);
-
-	/* Pre-processing. */
-
-	dochild = 1;
-	pair.ppair = ppair;
-	pair.type = 0;
-	pair.offset = pair.rmargin = 0;
-	pair.flag = 0;
-	pair.count = 0;
-
-	if (MDOC_TEXT != node->type) {
-		if (termacts[node->tok].pre)
-			if ( ! (*termacts[node->tok].pre)(p, &pair, meta, node))
-				dochild = 0;
-	} else /* MDOC_TEXT == node->type */
-		term_word(p, node->string);
-
-	/* Children. */
-
-	if (TERMPAIR_FLAG & pair.type)
-		p->flags |= pair.flag;
-
-	if (dochild && node->child)
-		term_body(p, &pair, meta, node->child);
-
-	if (TERMPAIR_FLAG & pair.type)
-		p->flags &= ~pair.flag;
-
-	/* Post-processing. */
-
-	if (MDOC_TEXT != node->type)
-		if (termacts[node->tok].post)
-			(*termacts[node->tok].post)(p, &pair, meta, node);
-}
-
-
-static void
-term_foot(struct termp *p, const struct mdoc_meta *meta)
-{
-	struct tm	*tm;
-	char		*buf, *os;
-
-	if (NULL == (buf = malloc(p->rmargin)))
-		err(1, "malloc");
-	if (NULL == (os = malloc(p->rmargin)))
-		err(1, "malloc");
-
-	tm = localtime(&meta->date);
-
-#ifdef __OpenBSD__
-	if (NULL == strftime(buf, p->rmargin, "%B %d, %Y", tm))
-#else
-	if (0 == strftime(buf, p->rmargin, "%B %d, %Y", tm))
-#endif
-		err(1, "strftime");
-
-	(void)strlcpy(os, meta->os, p->rmargin);
-
-	/*
-	 * This is /slightly/ different from regular groff output
-	 * because we don't have page numbers.  Print the following:
-	 *
-	 * OS                                            MDOCDATE
-	 */
-
-	term_vspace(p);
-
-	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
-	p->rmargin = p->maxrmargin - strlen(buf);
-	p->offset = 0;
-
-	term_word(p, os);
-	term_flushln(p);
-
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
-	p->offset = p->rmargin;
-	p->rmargin = p->maxrmargin;
-	p->flags &= ~TERMP_NOBREAK;
-
-	term_word(p, buf);
-	term_flushln(p);
-
-	free(buf);
-	free(os);
-}
-
-
-static void
-term_head(struct termp *p, const struct mdoc_meta *meta)
-{
-	char		*buf, *title;
-
-	p->rmargin = p->maxrmargin;
-	p->offset = 0;
-
-	if (NULL == (buf = malloc(p->rmargin)))
-		err(1, "malloc");
-	if (NULL == (title = malloc(p->rmargin)))
-		err(1, "malloc");
-
-	/*
-	 * The header is strange.  It has three components, which are
-	 * really two with the first duplicated.  It goes like this:
-	 *
-	 * IDENTIFIER              TITLE                   IDENTIFIER
-	 *
-	 * The IDENTIFIER is NAME(SECTION), which is the command-name
-	 * (if given, or "unknown" if not) followed by the manual page
-	 * section.  These are given in `Dt'.  The TITLE is a free-form
-	 * string depending on the manual volume.  If not specified, it
-	 * switches on the manual section.
-	 */
-
-	assert(meta->vol);
-	(void)strlcpy(buf, meta->vol, p->rmargin);
-
-	if (meta->arch) {
-		(void)strlcat(buf, " (", p->rmargin);
-		(void)strlcat(buf, meta->arch, p->rmargin);
-		(void)strlcat(buf, ")", p->rmargin);
-	}
-
-	(void)snprintf(title, p->rmargin, "%s(%d)", 
-			meta->title, meta->msec);
-
-	p->offset = 0;
-	p->rmargin = (p->maxrmargin - strlen(buf)) / 2;
-	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
-
-	term_word(p, title);
-	term_flushln(p);
-
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
-	p->offset = p->rmargin;
-	p->rmargin = p->maxrmargin - strlen(title);
-
-	term_word(p, buf);
-	term_flushln(p);
-
-	p->offset = p->rmargin;
-	p->rmargin = p->maxrmargin;
-	p->flags &= ~TERMP_NOBREAK;
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
-
-	term_word(p, title);
-	term_flushln(p);
-
-	p->rmargin = p->maxrmargin;
-	p->offset = 0;
-	p->flags &= ~TERMP_NOSPACE;
-
-	free(title);
-	free(buf);
-}
-
-
 /*
  * Determine the symbol indicated by an escape sequences, that is, one
  * starting with a backslash.  Once done, we pass this value into the
@@ -765,112 +577,3 @@ term_chara(struct termp *p, char c)
 	p->buf[(int)(p->col)++] = c;
 }
 
-
-static void
-sanity(const struct mdoc_node *n)
-{
-
-	switch (n->type) {
-	case (MDOC_TEXT):
-		if (n->child) 
-			errx(1, "regular form violated (1)");
-		if (NULL == n->parent) 
-			errx(1, "regular form violated (2)");
-		if (NULL == n->string)
-			errx(1, "regular form violated (3)");
-		switch (n->parent->type) {
-		case (MDOC_TEXT):
-			/* FALLTHROUGH */
-		case (MDOC_ROOT):
-			errx(1, "regular form violated (4)");
-			/* NOTREACHED */
-		default:
-			break;
-		}
-		break;
-	case (MDOC_ELEM):
-		if (NULL == n->parent)
-			errx(1, "regular form violated (5)");
-		switch (n->parent->type) {
-		case (MDOC_TAIL):
-			/* FALLTHROUGH */
-		case (MDOC_BODY):
-			/* FALLTHROUGH */
-		case (MDOC_HEAD):
-			break;
-		default:
-			errx(1, "regular form violated (6)");
-			/* NOTREACHED */
-		}
-		if (n->child) switch (n->child->type) {
-		case (MDOC_TEXT):
-			break;
-		default:
-			errx(1, "regular form violated (7(");
-			/* NOTREACHED */
-		}
-		break;
-	case (MDOC_HEAD):
-		/* FALLTHROUGH */
-	case (MDOC_BODY):
-		/* FALLTHROUGH */
-	case (MDOC_TAIL):
-		if (NULL == n->parent)
-			errx(1, "regular form violated (8)");
-		if (MDOC_BLOCK != n->parent->type)
-			errx(1, "regular form violated (9)");
-		if (n->child) switch (n->child->type) {
-		case (MDOC_BLOCK):
-			/* FALLTHROUGH */
-		case (MDOC_ELEM):
-			/* FALLTHROUGH */
-		case (MDOC_TEXT):
-			break;
-		default:
-			errx(1, "regular form violated (a)");
-			/* NOTREACHED */
-		}
-		break;
-	case (MDOC_BLOCK):
-		if (NULL == n->parent)
-			errx(1, "regular form violated (b)");
-		if (NULL == n->child)
-			errx(1, "regular form violated (c)");
-		switch (n->parent->type) {
-		case (MDOC_ROOT):
-			/* FALLTHROUGH */
-		case (MDOC_HEAD):
-			/* FALLTHROUGH */
-		case (MDOC_BODY):
-			/* FALLTHROUGH */
-		case (MDOC_TAIL):
-			break;
-		default:
-			errx(1, "regular form violated (d)");
-			/* NOTREACHED */
-		}
-		switch (n->child->type) {
-		case (MDOC_ROOT):
-			/* FALLTHROUGH */
-		case (MDOC_ELEM):
-			errx(1, "regular form violated (e)");
-			/* NOTREACHED */
-		default:
-			break;
-		}
-		break;
-	case (MDOC_ROOT):
-		if (n->parent)
-			errx(1, "regular form violated (f)");
-		if (NULL == n->child)
-			errx(1, "regular form violated (10)");
-		switch (n->child->type) {
-		case (MDOC_BLOCK):
-			break;
-		default:
-			errx(1, "regular form violated (11)");
-			/* NOTREACHED */
-		}
-		break;
-	}
-}

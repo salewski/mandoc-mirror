@@ -37,7 +37,7 @@ struct	actions {
 
 
 static	int	  post_TH(struct man *);
-static time_t	  man_atotime(const char *);
+static	time_t	  man_atotime(const char *);
 
 const	struct actions man_actions[MAN_MAX] = {
 	{ NULL }, /* __ */
@@ -60,6 +60,7 @@ const	struct actions man_actions[MAN_MAX] = {
 	{ NULL }, /* B */
 	{ NULL }, /* I */
 	{ NULL }, /* IR */
+	{ NULL }, /* RI */
 };
 
 
@@ -125,12 +126,9 @@ post_TH(struct man *m)
 
 	/* TITLE MSEC ->DATE<- SOURCE VOL */
 
-	if (NULL == (n = n->next)) {
+	if (NULL == (n = n->next))
 		m->meta.date = time(NULL);
-		return(1);
-	}
-
-	if (0 == (m->meta.date = man_atotime(n->string))) {
+	else if (0 == (m->meta.date = man_atotime(n->string))) {
 		if ( ! man_vwarn(m, n->line, n->pos, "invalid date"))
 			return(0);
 		m->meta.date = time(NULL);
@@ -138,13 +136,13 @@ post_TH(struct man *m)
 
 	/* TITLE MSEC DATE ->SOURCE<- VOL */
 
-	if ((n = n->next))
+	if (n && (n = n->next))
 		if (NULL == (m->meta.source = strdup(n->string)))
 			return(man_verr(m, n->line, n->pos, "malloc"));
 
 	/* TITLE MSEC DATE SOURCE ->VOL<- */
 
-	if ((n = n->next))
+	if (n && (n = n->next))
 		if (NULL == (m->meta.vol = strdup(n->string)))
 			return(man_verr(m, n->line, n->pos, "malloc"));
 

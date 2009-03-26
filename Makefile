@@ -34,9 +34,12 @@ MANOBJS	   = man_macro.o man.o man_hash.o man_validate.o \
 MANSRCS	   = man_macro.c man.c man_hash.c man_validate.c \
 	     man_action.c
 
-MAINLNS	   = main.ln term.ln ascii.ln terminal.ln tree.ln compat.ln
-MAINOBJS   = main.o term.o ascii.o terminal.o tree.o compat.o
-MAINSRCS   = main.c term.c ascii.c terminal.c tree.c compat.c
+MAINLNS	   = main.ln mdoc_term.ln ascii.ln terminal.ln tree.ln \
+	     compat.ln man_term.ln
+MAINOBJS   = main.o mdoc_term.o ascii.o terminal.o tree.o compat.o \
+	     man_term.o
+MAINSRCS   = main.c mdoc_term.c ascii.c terminal.c tree.c compat.c \
+	     man_term.c
 
 LLNS	   = llib-llibmdoc.ln llib-llibman.ln llib-lmandoc.ln
 LNS	   = $(MAINLNS) $(MDOCLNS) $(MANLNS)
@@ -129,8 +132,8 @@ st.o: st.c st.in libmdoc.h
 mdoc_macro.ln: mdoc_macro.c libmdoc.h
 mdoc_macro.o: mdoc_macro.c libmdoc.h
 
-term.ln: term.c term.h 
-term.o: term.c term.h
+mdoc_term.ln: mdoc_term.c term.h mdoc.h
+mdoc_term.o: mdoc_term.c term.h mdoc.h
 
 strings.ln: strings.c libmdoc.h
 strings.o: strings.c libmdoc.h
@@ -150,8 +153,8 @@ man.o: man.c libman.h
 main.ln: main.c mdoc.h
 main.o: main.c mdoc.h
 
-terminal.ln: terminal.c term.h
-terminal.o: terminal.c term.h
+terminal.ln: terminal.c term.h man.h mdoc.h
+terminal.o: terminal.c term.h man.h mdoc.h
 
 xstd.ln: xstd.c libmdoc.h
 xstd.o: xstd.c libmdoc.h
@@ -169,8 +172,6 @@ mdoc_action.ln: mdoc_action.c libmdoc.h
 mdoc_action.o: mdoc_action.c libmdoc.h
 
 libmdoc.h: mdoc.h
-
-term.h: mdoc.h
 
 mdocml-nport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.netbsd DESCR
 	mkdir -p .dist/mdocml/

@@ -19,9 +19,6 @@
 #ifndef TERM_H
 #define TERM_H
 
-#include "mdoc.h"
-#include "man.h"
-
 /* FIXME - clean up tabs. */
 
 #define	INDENT		  6
@@ -56,35 +53,6 @@ struct	termp {
 	void		 *symtab;	/* Encoded-symbol table. */
 };
 
-/* XXX - clean this up. */
-
-struct	termpair {
-	struct termpair	 *ppair;
-	int		  type;
-#define	TERMPAIR_FLAG	 (1 << 0)
-	int	  	  flag;
-	size_t	  	  offset;
-	size_t	  	  rmargin;
-	int		  count;
-};
-
-#define	TERMPAIR_SETFLAG(termp, p, fl) \
-	do { \
-		assert(! (TERMPAIR_FLAG & (p)->type)); \
-		(termp)->flags |= (fl); \
-		(p)->flag = (fl); \
-		(p)->type |= TERMPAIR_FLAG; \
-	} while ( /* CONSTCOND */ 0)
-
-struct	termact {
-	int	(*pre)(struct termp *, struct termpair *,
-			const struct mdoc_meta *,
-			const struct mdoc_node *);
-	void	(*post)(struct termp *, struct termpair *,
-			const struct mdoc_meta *,
-			const struct mdoc_node *);
-};
-
 void		 *term_ascii2htab(void);
 const char	 *term_a2ascii(void *, const char *, size_t, size_t *);
 void		  term_asciifree(void *);
@@ -93,11 +61,6 @@ void		  term_newln(struct termp *);
 void		  term_vspace(struct termp *);
 void		  term_word(struct termp *, const char *);
 void		  term_flushln(struct termp *);
-void	  	  term_node(struct termp *, struct termpair *,
-			const struct mdoc_meta *,
-			const struct mdoc_node *);
-
-const	struct termact 	 *termacts;
 
 __END_DECLS
 

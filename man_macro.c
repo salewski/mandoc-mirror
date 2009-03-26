@@ -24,9 +24,35 @@
 
 #include "libman.h"
 
+#define	FL_NLINE	(1 << 0)
+#define	FL_TLINE	(1 << 1)
+
 static	int		 man_args(struct man *, int, 
 				int *, char *, char **);
 
+static	int man_flags[MAN_MAX] = {
+	0, /* __ */
+	0, /* TH */
+	0, /* SH */
+	0, /* SS */
+	FL_TLINE, /* TP */
+	0, /* LP */
+	0, /* PP */
+	0, /* P */
+	0, /* IP */
+	0, /* HP */
+	FL_NLINE, /* SM */
+	FL_NLINE, /* SB */
+	FL_NLINE, /* BI */
+	FL_NLINE, /* IB */
+	FL_NLINE, /* BR */
+	FL_NLINE, /* RB */
+	FL_NLINE, /* R */
+	FL_NLINE, /* B */
+	FL_NLINE, /* I */
+	FL_NLINE, /* IR */
+	FL_NLINE, /* RI */
+};
 
 int
 man_macro(struct man *man, int tok, int line, 
@@ -53,6 +79,22 @@ man_macro(struct man *man, int tok, int line,
 		if ( ! man_word_alloc(man, line, la, p))
 			return(0);
 		man->next = MAN_NEXT_SIBLING;
+	}
+
+	if (n == man->last && (FL_NLINE & man_flags[tok])) {
+		if (MAN_NLINE & man->flags) 
+			return(man_verr(man, line, ppos, 
+				"next-line scope already open"));
+		man->flags |= MAN_NLINE;
+		return(1);
+	}
+
+	if (FL_TLINE & man_flags[tok]) {
+		if (MAN_NLINE & man->flags) 
+			return(man_verr(man, line, ppos, 
+				"next-line scope already open"));
+		man->flags |= MAN_NLINE;
+		return(1);
 	}
 
 	/*

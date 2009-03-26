@@ -26,13 +26,10 @@
 #include <string.h>
 
 #include "term.h"
-
-/*
- * Performs actions on nodes of the abstract syntax tree.  Both pre- and
- * post-fix operations are defined here.
- */
+#include "mdoc.h"
 
 /* FIXME: macro arguments can be escaped. */
+/* FIXME: support more offset/width tokens. */
 
 #define	TTYPE_PROG	  0
 #define	TTYPE_CMD_FLAG	  1
@@ -58,14 +55,6 @@
 #define	TTYPE_REF_JOURNAL 21
 #define	TTYPE_LIST	  22
 #define	TTYPE_NMAX	  23
-
-/* 
- * These define "styles" for element types, like command arguments or
- * executable names.  This is useful when multiple macros must decorate
- * the same thing (like .Ex -std cmd and .Nm cmd). 
- */
-
-/* TODO: abstract this into mdocterm.c. */
 
 const	int ttypes[TTYPE_NMAX] = {
 	TERMP_BOLD, 		/* TTYPE_PROG */
@@ -93,25 +82,28 @@ const	int ttypes[TTYPE_NMAX] = {
 	TERMP_BOLD		/* TTYPE_LIST */
 };
 
-static	int		  arg_hasattr(int, const struct mdoc_node *);
-static	int		  arg_getattrs(const int *, int *, size_t,
-				const struct mdoc_node *);
-static	int		  arg_getattr(int, const struct mdoc_node *);
-static	size_t		  arg_offset(const struct mdoc_argv *);
-static	size_t		  arg_width(const struct mdoc_argv *, int);
-static	int		  arg_listtype(const struct mdoc_node *);
-static	int		  fmt_block_vspace(struct termp *,
-				const struct mdoc_node *,
-				const struct mdoc_node *);
+/* XXX - clean this up. */
 
-/*
- * What follows describes prefix and postfix operations for the abstract
- * syntax tree descent.
- */
+struct	termpair {
+	struct termpair	 *ppair;
+	int		  type;
+#define	TERMPAIR_FLAG	 (1 << 0)
+	int	  	  flag;
+	size_t	  	  offset;
+	size_t	  	  rmargin;
+	int		  count;
+};
+
+#define	TERMPAIR_SETFLAG(termp, p, fl) \
+	do { \
+		assert(! (TERMPAIR_FLAG & (p)->type)); \
+		(termp)->flags |= (fl); \
+		(p)->flag = (fl); \
+		(p)->type |= TERMPAIR_FLAG; \
+	} while ( /* CONSTCOND */ 0)
 
 #define	DECL_ARGS \
-	struct termp *p, \
-	struct termpair *pair, \
+	struct termp *p, struct termpair *pair, \
 	const struct mdoc_meta *meta, \
 	const struct mdoc_node *node
 
@@ -187,7 +179,12 @@ DECL_POST(termp___);
 DECL_POST(termp_bl);
 DECL_POST(termp_bx);
 
-const	struct termact __termacts[MDOC_MAX] = {
+struct	termact {
+	int	(*pre)(DECL_ARGS);
+	void	(*post)(DECL_ARGS);
+};
+
+static const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* \" */
 	{ NULL, NULL }, /* Dd */
 	{ NULL, NULL }, /* Dt */
@@ -309,7 +306,331 @@ const	struct termact __termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* %Q */ 
 };
 
-const struct termact *termacts = __termacts;
+static	int	  arg_hasattr(int, const struct mdoc_node *);
+static	int	  arg_getattrs(const int *, int *, size_t,
+			const struct mdoc_node *);
+static	int	  arg_getattr(int, const struct mdoc_node *);
+static	size_t	  arg_offset(const struct mdoc_argv *);
+static	size_t	  arg_width(const struct mdoc_argv *, int);
+static	int	  arg_listtype(const struct mdoc_node *);
+static	int	  fmt_block_vspace(struct termp *,
+			const struct mdoc_node *,
+			const struct mdoc_node *);
+static	int  	  print_node(DECL_ARGS);
+static	int	  print_head(struct termp *, 
+			const struct mdoc_meta *);
+static	int	  print_body(DECL_ARGS);
+static	int	  print_foot(struct termp *, 
+			const struct mdoc_meta *);
+static	void	  sanity(const struct mdoc_node *);
+
+
+int
+mdoc_run(struct termp *p, const struct mdoc *m)
+{
+
+	if ( ! print_head(p, mdoc_meta(m)))
+		return(0);
+	if ( ! print_body(p, NULL, mdoc_meta(m), mdoc_node(m)))
+		return(0);
+	return(print_foot(p, mdoc_meta(m)));
+}
+
+
+static int
+print_body(DECL_ARGS)
+{
+
+	if ( ! print_node(p, pair, meta, node))
+		return(0);
+	if ( ! node->next)
+		return(1);
+	return(print_body(p, pair, meta, node->next));
+}
+
+
+static int
+print_node(DECL_ARGS)
+{
+	int		 dochild;
+	struct termpair	 npair;
+
+	/* Some quick sanity-checking. */
+
+	sanity(node);
+
+	/* Pre-processing. */
+
+	dochild = 1;
+	npair.ppair = pair;
+	npair.type = 0;
+	npair.offset = npair.rmargin = 0;
+	npair.flag = 0;
+	npair.count = 0;
+
+	if (MDOC_TEXT != node->type) {
+		if (termacts[node->tok].pre)
+			if ( ! (*termacts[node->tok].pre)(p, &npair, meta, node))
+				dochild = 0;
+	} else /* MDOC_TEXT == node->type */
+		term_word(p, node->string);
+
+	/* Children. */
+
+	if (TERMPAIR_FLAG & npair.type)
+		p->flags |= npair.flag;
+
+	if (dochild && node->child)
+		print_body(p, &npair, meta, node->child);
+
+	if (TERMPAIR_FLAG & npair.type)
+		p->flags &= ~npair.flag;
+
+	/* Post-processing. */
+
+	if (MDOC_TEXT != node->type)
+		if (termacts[node->tok].post)
+			(*termacts[node->tok].post)(p, &npair, meta, node);
+
+	return(1);
+}
+
+
+static int
+print_foot(struct termp *p, const struct mdoc_meta *meta)
+{
+	struct tm	*tm;
+	char		*buf, *os;
+
+	if (NULL == (buf = malloc(p->rmargin)))
+		err(1, "malloc");
+	if (NULL == (os = malloc(p->rmargin)))
+		err(1, "malloc");
+
+	tm = localtime(&meta->date);
+
+#ifdef __OpenBSD__
+	if (NULL == strftime(buf, p->rmargin, "%B %d, %Y", tm))
+#else
+	if (0 == strftime(buf, p->rmargin, "%B %d, %Y", tm))
+#endif
+		err(1, "strftime");
+
+	(void)strlcpy(os, meta->os, p->rmargin);
+
+	/*
+	 * This is /slightly/ different from regular groff output
+	 * because we don't have page numbers.  Print the following:
+	 *
+	 * OS                                            MDOCDATE
+	 */
+
+	term_vspace(p);
+
+	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
+	p->rmargin = p->maxrmargin - strlen(buf);
+	p->offset = 0;
+
+	term_word(p, os);
+	term_flushln(p);
+
+	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+	p->offset = p->rmargin;
+	p->rmargin = p->maxrmargin;
+	p->flags &= ~TERMP_NOBREAK;
+
+	term_word(p, buf);
+	term_flushln(p);
+
+	free(buf);
+	free(os);
+
+	return(1);
+}
+
+
+static int
+print_head(struct termp *p, const struct mdoc_meta *meta)
+{
+	char		*buf, *title;
+
+	p->rmargin = p->maxrmargin;
+	p->offset = 0;
+
+	if (NULL == (buf = malloc(p->rmargin)))
+		err(1, "malloc");
+	if (NULL == (title = malloc(p->rmargin)))
+		err(1, "malloc");
+
+	/*
+	 * The header is strange.  It has three components, which are
+	 * really two with the first duplicated.  It goes like this:
+	 *
+	 * IDENTIFIER              TITLE                   IDENTIFIER
+	 *
+	 * The IDENTIFIER is NAME(SECTION), which is the command-name
+	 * (if given, or "unknown" if not) followed by the manual page
+	 * section.  These are given in `Dt'.  The TITLE is a free-form
+	 * string depending on the manual volume.  If not specified, it
+	 * switches on the manual section.
+	 */
+
+	assert(meta->vol);
+	(void)strlcpy(buf, meta->vol, p->rmargin);
+
+	if (meta->arch) {
+		(void)strlcat(buf, " (", p->rmargin);
+		(void)strlcat(buf, meta->arch, p->rmargin);
+		(void)strlcat(buf, ")", p->rmargin);
+	}
+
+	(void)snprintf(title, p->rmargin, "%s(%d)", 
+			meta->title, meta->msec);
+
+	p->offset = 0;
+	p->rmargin = (p->maxrmargin - strlen(buf)) / 2;
+	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
+
+	term_word(p, title);
+	term_flushln(p);
+
+	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+	p->offset = p->rmargin;
+	p->rmargin = p->maxrmargin - strlen(title);
+
+	term_word(p, buf);
+	term_flushln(p);
+
+	p->offset = p->rmargin;
+	p->rmargin = p->maxrmargin;
+	p->flags &= ~TERMP_NOBREAK;
+	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+
+	term_word(p, title);
+	term_flushln(p);
+
+	p->rmargin = p->maxrmargin;
+	p->offset = 0;
+	p->flags &= ~TERMP_NOSPACE;
+
+	free(title);
+	free(buf);
+
+	return(1);
+}
+
+
+static void
+sanity(const struct mdoc_node *n)
+{
+	char		*p;
+
+	p = "regular form violated";
+
+	switch (n->type) {
+	case (MDOC_TEXT):
+		if (n->child) 
+			errx(1, p);
+		if (NULL == n->parent) 
+			errx(1, p);
+		if (NULL == n->string)
+			errx(1, p);
+		switch (n->parent->type) {
+		case (MDOC_TEXT):
+			/* FALLTHROUGH */
+		case (MDOC_ROOT):
+			errx(1, p);
+			/* NOTREACHED */
+		default:
+			break;
+		}
+		break;
+	case (MDOC_ELEM):
+		if (NULL == n->parent)
+			errx(1, p);
+		switch (n->parent->type) {
+		case (MDOC_TAIL):
+			/* FALLTHROUGH */
+		case (MDOC_BODY):
+			/* FALLTHROUGH */
+		case (MDOC_HEAD):
+			break;
+		default:
+			errx(1, p);
+			/* NOTREACHED */
+		}
+		if (n->child) switch (n->child->type) {
+		case (MDOC_TEXT):
+			break;
+		default:
+			errx(1, p);
+			/* NOTREACHED */
+		}
+		break;
+	case (MDOC_HEAD):
+		/* FALLTHROUGH */
+	case (MDOC_BODY):
+		/* FALLTHROUGH */
+	case (MDOC_TAIL):
+		if (NULL == n->parent)
+			errx(1, p);
+		if (MDOC_BLOCK != n->parent->type)
+			errx(1, p);
+		if (n->child) switch (n->child->type) {
+		case (MDOC_BLOCK):
+			/* FALLTHROUGH */
+		case (MDOC_ELEM):
+			/* FALLTHROUGH */
+		case (MDOC_TEXT):
+			break;
+		default:
+			errx(1, p);
+			/* NOTREACHED */
+		}
+		break;
+	case (MDOC_BLOCK):
+		if (NULL == n->parent)
+			errx(1, p);
+		if (NULL == n->child)
+			errx(1, p);
+		switch (n->parent->type) {
+		case (MDOC_ROOT):
+			/* FALLTHROUGH */
+		case (MDOC_HEAD):
+			/* FALLTHROUGH */
+		case (MDOC_BODY):
+			/* FALLTHROUGH */
+		case (MDOC_TAIL):
+			break;
+		default:
+			errx(1, p);
+			/* NOTREACHED */
+		}
+		switch (n->child->type) {
+		case (MDOC_ROOT):
+			/* FALLTHROUGH */
+		case (MDOC_ELEM):
+			errx(1, p);
+			/* NOTREACHED */
+		default:
+			break;
+		}
+		break;
+	case (MDOC_ROOT):
+		if (n->parent)
+			errx(1, p);
+		if (NULL == n->child)
+			errx(1, p);
+		switch (n->child->type) {
+		case (MDOC_BLOCK):
+			break;
+		default:
+			errx(1, p);
+			/* NOTREACHED */
+		}
+		break;
+	}
+}
 
 
 static size_t
@@ -387,7 +708,6 @@ static size_t
 arg_offset(const struct mdoc_argv *arg)
 {
 
-	/* TODO */
 	assert(*arg->value);
 	if (0 == strcmp(*arg->value, "indent"))
 		return(INDENT);
@@ -1349,7 +1669,7 @@ termp_bd_pre(DECL_ARGS)
 			p->flags |= TERMP_NOSPACE;
 		}
 		ln = node->line;
-		term_node(p, pair, meta, node);
+		print_node(p, pair, meta, node);
 	}
 
 	return(0);
@@ -1923,4 +2243,5 @@ termp_mt_pre(DECL_ARGS)
 	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_LINK_ANCHOR]);
 	return(1);
 }
+
 

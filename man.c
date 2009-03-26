@@ -31,7 +31,8 @@ const	char *const __man_macronames[MAN_MAX] = {
 	"TP", 		"LP",		"PP",		"P",
 	"IP",		"HP",		"SM",		"SB",
 	"BI",		"IB",		"BR",		"RB",
-	"R",		"B",		"I",		"IR"
+	"R",		"B",		"I",		"IR",
+	"RI"
 	};
 
 const	char * const *man_macronames = __man_macronames;
@@ -268,6 +269,25 @@ man_ptext(struct man *m, int line, char *buf)
 	if ( ! man_word_alloc(m, line, 0, buf))
 		return(0);
 	m->next = MAN_NEXT_SIBLING;
+
+	/*
+	 * If this is one of the zany NLINE macros that consumes the
+	 * next line of input as being influenced, then close out the
+	 * existing macro "scope" and continue processing.
+	 */
+
+	if ( ! (MAN_NLINE & m->flags))
+		return(1);
+
+	m->flags &= ~MAN_NLINE;
+	m->last = m->last->parent;
+
+	assert(MAN_ROOT != m->last->type);
+	if ( ! man_valid_post(m))
+		return(0);
+	if ( ! man_action_post(m))
+		return(0);
+
 	return(1);
 }
 
@@ -275,13 +295,17 @@ man_ptext(struct man *m, int line, char *buf)
 int
 man_pmacro(struct man *m, int ln, char *buf)
 {
-	int		  i, j, c, ppos;
+	int		  i, j, c, ppos, fl;
 	char		  mac[5];
+	struct man_node	 *n;
 
 	/* Comments and empties are quickly ignored. */
 
+	n = m->last;
+	fl = MAN_NLINE & m->flags;
+
 	if (0 == buf[1])
-		return(1);
+		goto out;
 
 	i = 1;
 
@@ -290,14 +314,14 @@ man_pmacro(struct man *m, int ln, char *buf)
 		while (buf[i] && ' ' == buf[i])
 			i++;
 		if (0 == buf[i])
-			return(1);
+			goto out;
 	}
 
 	ppos = i;
 
 	if (buf[i] && '\\' == buf[i])
 		if (buf[i + 1] && '\"' == buf[i + 1])
-			return(1);
+			goto out;
 
 	/* Copy the first word into a nil-terminated buffer. */
 
@@ -319,7 +343,7 @@ man_pmacro(struct man *m, int ln, char *buf)
 		if ( ! man_vwarn(m, ln, ppos, 
 				"ill-formed macro: %s", mac))
 			goto err;
-		return(1);
+		goto out;
 	}
 	
 	if (MAN_MAX == (c = man_hash_find(m->htab, mac))) {
@@ -331,7 +355,7 @@ man_pmacro(struct man *m, int ln, char *buf)
 		if ( ! man_vwarn(m, ln, ppos, 
 				"unknown macro: %s", mac))
 			goto err;
-		return(1);
+		goto out;
 	}
 
 	/* The macro is sane.  Jump to the next word. */
@@ -343,6 +367,28 @@ man_pmacro(struct man *m, int ln, char *buf)
 
 	if ( ! man_macro(m, c, ln, ppos, &i, buf))
 		goto err;
+
+out:
+	if (fl) {
+		/*
+		 * A NLINE macro has been immediately followed with
+		 * another.  Close out the preceeding macro's scope, and
+		 * continue.
+		 */
+		assert(MAN_ROOT != m->last->type);
+		assert(m->last->parent);
+		assert(MAN_ROOT != m->last->parent->type);
+
+		if (n != m->last)
+			m->last = m->last->parent;
+
+		if ( ! man_valid_post(m))
+			return(0);
+		if ( ! man_action_post(m))
+			return(0);
+		m->next = MAN_NEXT_SIBLING;
+		m->flags &= ~MAN_NLINE;
+	} 
 
 	return(1);
 

@@ -33,6 +33,7 @@ struct	man {
 	int		 pflags;
 	int		 flags;
 #define	MAN_HALT	(1 << 0)
+#define	MAN_NLINE	(1 << 1)
 	enum man_next	 next;
 	struct man_node	*last;
 	struct man_node	*first;
