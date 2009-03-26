@@ -456,7 +456,8 @@ term_pescape(struct termp *p, const char *word, int *i, int len)
 		}
 	
 	} else if ('f' == word[*i]) {
-		if (++(*i) >= len)
+		(*i)++;
+		if (*i >= len)
 			return;
 		switch (word[*i]) {
 		case ('B'):
