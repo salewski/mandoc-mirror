@@ -40,8 +40,14 @@ struct	termact {
 };
 
 static	int		  pre_B(DECL_ARGS);
+static	int		  pre_BI(DECL_ARGS);
+static	int		  pre_BR(DECL_ARGS);
 static	int		  pre_I(DECL_ARGS);
+static	int		  pre_IB(DECL_ARGS);
+static	int		  pre_IR(DECL_ARGS);
 static	int		  pre_PP(DECL_ARGS);
+static	int		  pre_RB(DECL_ARGS);
+static	int		  pre_RI(DECL_ARGS);
 static	int		  pre_SH(DECL_ARGS);
 static	int		  pre_SS(DECL_ARGS);
 static	int		  pre_TP(DECL_ARGS);
@@ -64,15 +70,15 @@ static const struct termact termacts[MAN_MAX] = {
 	{ pre_PP, NULL }, /* HP */ /* XXX */
 	{ NULL, NULL }, /* SM */
 	{ pre_B, post_B }, /* SB */
-	{ NULL, NULL }, /* BI */
-	{ NULL, NULL }, /* IB */
-	{ NULL, NULL }, /* BR */
-	{ NULL, NULL }, /* RB */
+	{ pre_BI, NULL }, /* BI */
+	{ pre_IB, NULL }, /* IB */
+	{ pre_BR, NULL }, /* BR */
+	{ pre_RB, NULL }, /* RB */
 	{ NULL, NULL }, /* R */
 	{ pre_B, post_B }, /* B */
 	{ pre_I, post_I }, /* I */
-	{ NULL, NULL }, /* IR */
-	{ NULL, NULL }, /* RI */
+	{ pre_IR, NULL }, /* IR */
+	{ pre_RI, NULL }, /* RI */
 };
 
 static	void		  print_head(struct termp *, 
@@ -96,6 +102,7 @@ man_run(struct termp *p, const struct man *m)
 }
 
 
+/* ARGSUSED */
 static int
 pre_I(DECL_ARGS)
 {
@@ -105,6 +112,7 @@ pre_I(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
 static void
 post_I(DECL_ARGS)
 {
@@ -113,6 +121,111 @@ post_I(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
+static int
+pre_IR(DECL_ARGS)
+{
+	const struct man_node *nn;
+	int		 i;
+
+	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
+		if ( ! (i % 2))
+			p->flags |= TERMP_UNDER;
+		print_node(p, nn, m);
+		if ( ! (i % 2))
+			p->flags &= ~TERMP_UNDER;
+	}
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+pre_IB(DECL_ARGS)
+{
+	const struct man_node *nn;
+	int		 i;
+
+	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
+		p->flags |= i % 2 ? TERMP_BOLD : TERMP_UNDER;
+		print_node(p, nn, m);
+		p->flags &= i % 2 ? ~TERMP_BOLD : ~TERMP_UNDER;
+	}
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+pre_RB(DECL_ARGS)
+{
+	const struct man_node *nn;
+	int		 i;
+
+	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
+		if (i % 2)
+			p->flags |= TERMP_BOLD;
+		print_node(p, nn, m);
+		if (i % 2)
+			p->flags &= ~TERMP_BOLD;
+	}
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+pre_RI(DECL_ARGS)
+{
+	const struct man_node *nn;
+	int		 i;
+
+	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
+		if ( ! (i % 2))
+			p->flags |= TERMP_UNDER;
+		print_node(p, nn, m);
+		if ( ! (i % 2))
+			p->flags &= ~TERMP_UNDER;
+	}
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+pre_BR(DECL_ARGS)
+{
+	const struct man_node *nn;
+	int		 i;
+
+	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
+		if ( ! (i % 2))
+			p->flags |= TERMP_BOLD;
+		print_node(p, nn, m);
+		if ( ! (i % 2))
+			p->flags &= ~TERMP_BOLD;
+	}
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+pre_BI(DECL_ARGS)
+{
+	const struct man_node *nn;
+	int		 i;
+
+	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
+		p->flags |= i % 2 ? TERMP_UNDER : TERMP_BOLD;
+		print_node(p, nn, m);
+		p->flags &= i % 2 ? ~TERMP_UNDER : ~TERMP_BOLD;
+	}
+	return(0);
+}
+
+
+/* ARGSUSED */
 static int
 pre_B(DECL_ARGS)
 {
@@ -122,6 +235,7 @@ pre_B(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
 static void
 post_B(DECL_ARGS)
 {
@@ -130,6 +244,7 @@ post_B(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
 static int
 pre_PP(DECL_ARGS)
 {
@@ -140,6 +255,7 @@ pre_PP(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
 static int
 pre_TP(DECL_ARGS)
 {
@@ -155,7 +271,7 @@ pre_TP(DECL_ARGS)
 	if (nn->line == n->line) {
 		if (MAN_TEXT != nn->type)
 			errx(1, "expected text line argument");
-		offs = atoi(nn->string);
+		offs = (size_t)atoi(nn->string);
 		nn = nn->next;
 	} else
 		offs = INDENT;
@@ -170,6 +286,7 @@ pre_TP(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
 static int
 pre_SS(DECL_ARGS)
 {
@@ -180,6 +297,7 @@ pre_SS(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
 static void
 post_SS(DECL_ARGS)
 {
@@ -190,6 +308,7 @@ post_SS(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
 static int
 pre_SH(DECL_ARGS)
 {
@@ -201,6 +320,7 @@ pre_SH(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
 static void
 post_SH(DECL_ARGS)
 {
