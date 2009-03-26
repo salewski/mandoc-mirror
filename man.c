@@ -275,7 +275,7 @@ man_ptext(struct man *m, int line, char *buf)
 int
 man_pmacro(struct man *m, int ln, char *buf)
 {
-	int		  i, j, c;
+	int		  i, j, c, ppos;
 	char		  mac[5];
 
 	/* Comments and empties are quickly ignored. */
@@ -293,16 +293,18 @@ man_pmacro(struct man *m, int ln, char *buf)
 			return(1);
 	}
 
+	ppos = i;
+
 	if (buf[i] && '\\' == buf[i])
 		if (buf[i + 1] && '\"' == buf[i + 1])
 			return(1);
 
 	/* Copy the first word into a nil-terminated buffer. */
 
-	for (j = 0; j < 4; j++) {
-		if (0 == (mac[j] = buf[j + i]))
+	for (j = 0; j < 4; j++, i++) {
+		if (0 == (mac[j] = buf[i]))
 			break;
-		else if (' ' == buf[j + i])
+		else if (' ' == buf[i])
 			break;
 	}
 
@@ -310,22 +312,24 @@ man_pmacro(struct man *m, int ln, char *buf)
 
 	if (j == 4 || j < 1) {
 		if ( ! (MAN_IGN_MACRO & m->pflags)) {
-			(void)man_verr(m, ln, i, 
+			(void)man_verr(m, ln, ppos, 
 				"ill-formed macro: %s", mac);
 			goto err;
 		} 
-		if ( ! man_vwarn(m, ln, 0, "ill-formed macro: %s", mac))
+		if ( ! man_vwarn(m, ln, ppos, 
+				"ill-formed macro: %s", mac))
 			goto err;
 		return(1);
 	}
 	
 	if (MAN_MAX == (c = man_hash_find(m->htab, mac))) {
 		if ( ! (MAN_IGN_MACRO & m->pflags)) {
-			(void)man_verr(m, ln, i, 
+			(void)man_verr(m, ln, ppos, 
 				"unknown macro: %s", mac);
 			goto err;
 		} 
-		if ( ! man_vwarn(m, ln, i, "unknown macro: %s", mac))
+		if ( ! man_vwarn(m, ln, ppos, 
+				"unknown macro: %s", mac))
 			goto err;
 		return(1);
 	}
@@ -337,7 +341,7 @@ man_pmacro(struct man *m, int ln, char *buf)
 
 	/* Begin recursive parse sequence. */
 
-	if ( ! man_macro(m, c, ln, 1, &i, buf))
+	if ( ! man_macro(m, c, ln, ppos, &i, buf))
 		goto err;
 
 	return(1);
