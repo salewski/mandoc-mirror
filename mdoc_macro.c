@@ -800,7 +800,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 static int
 in_line(MACRO_PROT_ARGS)
 {
-	int		  la, lastpunct, c, w;
+	int		  la, lastpunct, c, w, cnt, d, call;
 	struct mdoc_arg	 *arg;
 	char		 *p;
 
@@ -812,7 +812,6 @@ in_line(MACRO_PROT_ARGS)
 			*pos = la;
 			break;
 		} 
-
 		if (ARGV_EOLN == c)
 			break;
 		if (ARGV_ARG == c)
@@ -822,11 +821,7 @@ in_line(MACRO_PROT_ARGS)
 		return(0);
 	}
 
-	if ( ! mdoc_elem_alloc(mdoc, line, ppos, tok, arg))
-		return(0);
-	mdoc->next = MDOC_NEXT_CHILD;
-
-	for (lastpunct = 0;; ) {
+	for (call = cnt = 0, lastpunct = 1;; ) {
 		la = *pos;
 		w = mdoc_args(mdoc, line, pos, buf, tok, &p);
 
@@ -847,6 +842,14 @@ in_line(MACRO_PROT_ARGS)
 		if (MDOC_MAX != c && -1 != c) {
 			if (0 == lastpunct && ! rew_elem(mdoc, tok))
 				return(0);
+			if (0 == cnt) {
+				if ( ! mdoc_elem_alloc(mdoc, line, ppos, 
+							tok, arg))
+					return(0);
+				if ( ! rew_elem(mdoc, tok))
+					return(0);
+				mdoc->next = MDOC_NEXT_SIBLING;
+			}
 			c = mdoc_macro(mdoc, c, line, la, pos, buf);
 			if (0 == c)
 				return(0);
@@ -858,20 +861,22 @@ in_line(MACRO_PROT_ARGS)
 
 		/* Non-quote-enclosed punctuation. */
 
-		if (ARGS_QWORD != w && mdoc_isdelim(p)) {
+		d = mdoc_isdelim(p);
+
+		if (ARGS_QWORD != w && d) {
 			if (0 == lastpunct && ! rew_elem(mdoc, tok))
 				return(0);
 			lastpunct = 1;
 		} else if (lastpunct) {
 			c = mdoc_elem_alloc(mdoc, line, ppos, tok, arg);
-
 			if (0 == c)
 				return(0);
-
 			mdoc->next = MDOC_NEXT_CHILD;
 			lastpunct = 0;
 		}
 
+		if ( ! d)
+			cnt++;
 		if ( ! mdoc_word_alloc(mdoc, line, la, p))
 			return(0);
 		mdoc->next = MDOC_NEXT_SIBLING;
@@ -879,6 +884,13 @@ in_line(MACRO_PROT_ARGS)
 
 	if (0 == lastpunct && ! rew_elem(mdoc, tok))
 		return(0);
+	if (0 == cnt) {
+		c = mdoc_elem_alloc(mdoc, line, ppos, tok, arg);
+		if (0 == c)
+			return(0);
+		if ( ! rew_elem(mdoc, tok))
+			return(0);
+	}
 	if (ppos > 1)
 		return(1);
 	return(append_delims(mdoc, line, pos, buf));

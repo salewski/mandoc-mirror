@@ -89,6 +89,8 @@ mdoc_isescape(const char *p)
 		/* FALLTHROUGH */
 	case ('%'):
 		/* FALLTHROUGH */
+	case ('0'):
+		/* FALLTHROUGH */
 	case (' '):
 		/* FALLTHROUGH */
 	case ('|'):

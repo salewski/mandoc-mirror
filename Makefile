@@ -18,14 +18,14 @@ LINTFLAGS += $(VFLAGS)
 CFLAGS    += $(VFLAGS)
 
 MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln strings.ln xstd.ln \
-	     argv.ln mdoc_validate.ln mdoc_action.ln lib.ln att.ln \
-	     arch.ln vol.ln msec.ln st.ln
-MDOCOBJS   = mdoc_macro.o mdoc.o mdoc_hash.o strings.o xstd.o argv.o \
-	     mdoc_validate.o mdoc_action.o lib.o att.o arch.o vol.o \
-	     msec.o st.o
-MDOCSRCS   = mdoc_macro.c mdoc.c mdoc_hash.c strings.c xstd.c argv.c \
-	     mdoc_validate.c mdoc_action.c lib.c att.c arch.c vol.c \
-	     msec.c st.c
+	     mdoc_argv.ln mdoc_validate.ln mdoc_action.ln lib.ln \
+	     att.ln arch.ln vol.ln msec.ln st.ln
+MDOCOBJS   = mdoc_macro.o mdoc.o mdoc_hash.o strings.o xstd.o \
+	     mdoc_argv.o mdoc_validate.o mdoc_action.o lib.o att.o \
+	     arch.o vol.o msec.o st.o
+MDOCSRCS   = mdoc_macro.c mdoc.c mdoc_hash.c strings.c xstd.c \
+	     mdoc_argv.c mdoc_validate.c mdoc_action.c lib.c att.c \
+	     arch.c vol.c msec.c st.c
 
 MANLNS	   = man_macro.ln man.ln man_hash.ln man_validate.ln \
 	     man_action.ln
@@ -159,8 +159,8 @@ terminal.o: terminal.c term.h man.h mdoc.h
 xstd.ln: xstd.c libmdoc.h
 xstd.o: xstd.c libmdoc.h
 
-argv.ln: argv.c libmdoc.h
-argv.o: argv.c libmdoc.h
+mdoc_argv.ln: mdoc_argv.c libmdoc.h
+mdoc_argv.o: mdoc_argv.c libmdoc.h
 
 man_validate.ln: man_validate.c libman.h
 man_validate.o: man_validate.c libman.h
