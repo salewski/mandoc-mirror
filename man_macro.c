@@ -52,6 +52,7 @@ static	int man_flags[MAN_MAX] = {
 	FL_NLINE, /* I */
 	FL_NLINE, /* IR */
 	FL_NLINE, /* RI */
+	0, /* br */
 };
 
 int

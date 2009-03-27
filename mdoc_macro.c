@@ -33,6 +33,7 @@
 /* FIXME: .Fl, .Ar, .Cd handling of `|'. */
 
 enum	mwarn {
+	WIGNE,
 	WIMPBRK,
 	WMACPARM,
 	WOBS
@@ -237,6 +238,9 @@ pwarn(struct mdoc *mdoc, int line, int pos, enum mwarn type)
 
 	p = NULL;
 	switch (type) {
+	case (WIGNE):
+		p = "ignoring empty element";
+		break;
 	case (WIMPBRK):
 		p = "crufty end-of-line scope violation";
 		break;
@@ -800,9 +804,30 @@ blk_exp_close(MACRO_PROT_ARGS)
 static int
 in_line(MACRO_PROT_ARGS)
 {
-	int		  la, lastpunct, c, w, cnt, d, call;
+	int		  la, lastpunct, c, w, cnt, d, nc;
 	struct mdoc_arg	 *arg;
 	char		 *p;
+
+	/*
+	 * Whether we allow ignored elements (those without content,
+	 * usually because of reserved words) to squeak by.
+	 */
+	switch (tok) {
+	case (MDOC_Lp):
+		/* FALLTHROUGH */
+	case (MDOC_Pp):
+		/* FALLTHROUGH */
+	case (MDOC_Nm):
+		/* FALLTHROUGH */
+	case (MDOC_Fl):
+		/* FALLTHROUGH */
+	case (MDOC_Ar):
+		nc = 1;
+		break;
+	default:
+		nc = 0;
+		break;
+	}
 
 	for (la = ppos, arg = NULL;; ) {
 		la = *pos;
@@ -821,7 +846,7 @@ in_line(MACRO_PROT_ARGS)
 		return(0);
 	}
 
-	for (call = cnt = 0, lastpunct = 1;; ) {
+	for (cnt = 0, lastpunct = 1;; ) {
 		la = *pos;
 		w = mdoc_args(mdoc, line, pos, buf, tok, &p);
 
@@ -837,19 +862,24 @@ in_line(MACRO_PROT_ARGS)
 		c = ARGS_QWORD == w ? MDOC_MAX :
 			lookup(mdoc, line, la, tok, p);
 
-		/* MDOC_MAX (not a macro) or -1 (error). */
+		/* 
+		 * In this case, we've located a submacro and must
+		 * execute it.  Close out scope, if open.  If no
+		 * elements have been generated, either create one (nc)
+		 * or raise a warning.
+		 */
 
 		if (MDOC_MAX != c && -1 != c) {
 			if (0 == lastpunct && ! rew_elem(mdoc, tok))
 				return(0);
-			if (0 == cnt) {
+			if (nc && 0 == cnt) {
 				if ( ! mdoc_elem_alloc(mdoc, line, ppos, 
 							tok, arg))
 					return(0);
-				if ( ! rew_elem(mdoc, tok))
-					return(0);
 				mdoc->next = MDOC_NEXT_SIBLING;
-			}
+			} else if ( ! nc && 0 == cnt)
+				if ( ! pwarn(mdoc, line, ppos, WIGNE))
+					return(0);
 			c = mdoc_macro(mdoc, c, line, la, pos, buf);
 			if (0 == c)
 				return(0);
@@ -859,7 +889,11 @@ in_line(MACRO_PROT_ARGS)
 		} else if (-1 == c)
 			return(0);
 
-		/* Non-quote-enclosed punctuation. */
+		/* 
+		 * Non-quote-enclosed punctuation.  Set up our scope, if
+		 * a word; rewind the scope, if a delimiter; then append
+		 * the word. 
+		 */
 
 		d = mdoc_isdelim(p);
 
@@ -884,13 +918,22 @@ in_line(MACRO_PROT_ARGS)
 
 	if (0 == lastpunct && ! rew_elem(mdoc, tok))
 		return(0);
-	if (0 == cnt) {
+
+	/*
+	 * If no elements have been collected and we're allowed to have
+	 * empties (nc), open a scope and close it out.  Otherwise,
+	 * raise a warning.
+	 *
+	 */
+	if (nc && 0 == cnt) {
 		c = mdoc_elem_alloc(mdoc, line, ppos, tok, arg);
 		if (0 == c)
 			return(0);
-		if ( ! rew_elem(mdoc, tok))
+		mdoc->next = MDOC_NEXT_SIBLING;
+	} else if ( ! nc && 0 == cnt) 
+		if ( ! pwarn(mdoc, line, ppos, WIGNE))
 			return(0);
-	}
+
 	if (ppos > 1)
 		return(1);
 	return(append_delims(mdoc, line, pos, buf));
