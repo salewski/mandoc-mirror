@@ -148,9 +148,6 @@ int		  mdoc_args(struct mdoc *, int,
 
 /* FIXME: get rid of these. */
 int		  xstrlcpys(char *, const struct mdoc_node *, size_t);
-int	  	  xstrlcat(char *, const char *, size_t);
-int	  	  xstrlcpy(char *, const char *, size_t);
-int	  	  xstrcmp(const char *, const char *);
 void	 	 *xrealloc(void *, size_t);
 char	 	 *xstrdup(const char *);
 int		  mdoc_macroend(struct mdoc *);

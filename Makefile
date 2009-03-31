@@ -9,21 +9,21 @@ INSTALL_DATA	= install -m 0444
 INSTALL_LIB	= install -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
-VERSION	   = 1.7.7
-VDATE	   = 27 March 2009
+VERSION	   = 1.7.8
+VDATE	   = 31 March 2009
 
 VFLAGS     = -DVERSION=\"$(VERSION)\"
 CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
 LINTFLAGS += $(VFLAGS)
 CFLAGS    += $(VFLAGS)
 
-MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln strings.ln xstd.ln \
-	     mdoc_argv.ln mdoc_validate.ln mdoc_action.ln lib.ln \
-	     att.ln arch.ln vol.ln msec.ln st.ln
-MDOCOBJS   = mdoc_macro.o mdoc.o mdoc_hash.o strings.o xstd.o \
+MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln mdoc_strings.ln \
+	     mdoc_argv.ln mdoc_validate.ln mdoc_action.ln \
+	     lib.ln att.ln arch.ln vol.ln msec.ln st.ln
+MDOCOBJS   = mdoc_macro.o mdoc.o mdoc_hash.o mdoc_strings.o \
 	     mdoc_argv.o mdoc_validate.o mdoc_action.o lib.o att.o \
 	     arch.o vol.o msec.o st.o
-MDOCSRCS   = mdoc_macro.c mdoc.c mdoc_hash.c strings.c xstd.c \
+MDOCSRCS   = mdoc_macro.c mdoc.c mdoc_hash.c mdoc_strings.c \
 	     mdoc_argv.c mdoc_validate.c mdoc_action.c lib.c att.c \
 	     arch.c vol.c msec.c st.c
 
@@ -34,11 +34,11 @@ MANOBJS	   = man_macro.o man.o man_hash.o man_validate.o \
 MANSRCS	   = man_macro.c man.c man_hash.c man_validate.c \
 	     man_action.c
 
-MAINLNS	   = main.ln mdoc_term.ln ascii.ln terminal.ln tree.ln \
+MAINLNS	   = main.ln mdoc_term.ln ascii.ln term.ln tree.ln \
 	     compat.ln man_term.ln
-MAINOBJS   = main.o mdoc_term.o ascii.o terminal.o tree.o compat.o \
+MAINOBJS   = main.o mdoc_term.o ascii.o term.o tree.o compat.o \
 	     man_term.o
-MAINSRCS   = main.c mdoc_term.c ascii.c terminal.c tree.c compat.c \
+MAINSRCS   = main.c mdoc_term.c ascii.c term.c tree.c compat.c \
 	     man_term.c
 
 LLNS	   = llib-llibmdoc.ln llib-llibman.ln llib-lmandoc.ln
@@ -135,8 +135,8 @@ mdoc_macro.o: mdoc_macro.c libmdoc.h
 mdoc_term.ln: mdoc_term.c term.h mdoc.h
 mdoc_term.o: mdoc_term.c term.h mdoc.h
 
-strings.ln: strings.c libmdoc.h
-strings.o: strings.c libmdoc.h
+mdoc_strings.ln: mdoc_strings.c libmdoc.h
+mdoc_strings.o: mdoc_strings.c libmdoc.h
 
 man_hash.ln: man_hash.c libman.h
 man_hash.o: man_hash.c libman.h
@@ -153,11 +153,8 @@ man.o: man.c libman.h
 main.ln: main.c mdoc.h
 main.o: main.c mdoc.h
 
-terminal.ln: terminal.c term.h man.h mdoc.h
-terminal.o: terminal.c term.h man.h mdoc.h
-
-xstd.ln: xstd.c libmdoc.h
-xstd.o: xstd.c libmdoc.h
+term.ln: term.c term.h man.h mdoc.h
+term.o: term.c term.h man.h mdoc.h
 
 mdoc_argv.ln: mdoc_argv.c libmdoc.h
 mdoc_argv.o: mdoc_argv.c libmdoc.h

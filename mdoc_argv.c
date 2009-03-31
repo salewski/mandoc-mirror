@@ -20,7 +20,6 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <err.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -56,6 +55,7 @@ enum 	mwarn {
 
 enum	merr {
 	EQUOTTERM,
+	EMALLOC,
 	EARGVAL	
 };
 
@@ -72,6 +72,8 @@ static	int		 argv_multi(struct mdoc *, int,
 				struct mdoc_argv *, int *, char *);
 static	int		 pwarn(struct mdoc *, int, int, enum mwarn);
 static	int		 perr(struct mdoc *, int, int, enum merr);
+
+#define verr(m, t) perr((m), (m)->last->line, (m)->last->pos, (t))
 
 /* Per-argument flags. */
 
@@ -294,14 +296,22 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		return(ARGV_ERROR);
 
 	if (NULL == (arg = *v)) {
-		if (NULL == (*v = calloc(1, sizeof(struct mdoc_arg))))
-			err(1, "calloc");
+		*v = calloc(1, sizeof(struct mdoc_arg));
+		if (NULL == *v) {
+			(void)verr(mdoc, EMALLOC);
+			return(ARGV_ERROR);
+		}
 		arg = *v;
 	} 
 
 	arg->argc++;
-	arg->argv = xrealloc(arg->argv, arg->argc * 
+	arg->argv = realloc(arg->argv, arg->argc * 
 			sizeof(struct mdoc_argv));
+
+	if (NULL == arg->argv) {
+		(void)verr(mdoc, EMALLOC);
+		return(ARGV_ERROR);
+	}
 
 	(void)memcpy(&arg->argv[(int)arg->argc - 1], 
 			&tmp, sizeof(struct mdoc_argv));
@@ -323,7 +333,6 @@ mdoc_argv_free(struct mdoc_arg *p)
 		if (p->refcnt)
 			return;
 	}
-
 	assert(p->argc);
 
 	/* LINTED */
@@ -349,8 +358,10 @@ perr(struct mdoc *mdoc, int line, int pos, enum merr code)
 	char		*p;
 
 	p = NULL;
-
 	switch (code) {
+	case (EMALLOC):
+		p = "memory exhausted";
+		break;
 	case (EQUOTTERM):
 		p = "unterminated quoted parameter";
 		break;
@@ -358,7 +369,6 @@ perr(struct mdoc *mdoc, int line, int pos, enum merr code)
 		p = "argument requires a value";
 		break;
 	}
-
 	assert(p);
 	return(mdoc_perr(mdoc, line, pos, p));
 }
@@ -372,7 +382,6 @@ pwarn(struct mdoc *mdoc, int line, int pos, enum mwarn code)
 
 	p = NULL;
 	c = WARN_SYNTAX;
-
 	switch (code) {
 	case (WQUOTPARM):
 		p = "unexpected quoted parameter";
@@ -389,7 +398,6 @@ pwarn(struct mdoc *mdoc, int line, int pos, enum mwarn code)
 		c = WARN_COMPAT;
 		break;
 	}
-
 	assert(p);
 	return(mdoc_pwarn(mdoc, line, pos, c, p));
 }
@@ -660,80 +668,80 @@ argv_a2arg(int tok, const char *argv)
 
 	switch (tok) {
 	case (MDOC_An):
-		if (xstrcmp(argv, "split"))
+		if (0 == strcmp(argv, "split"))
 			return(MDOC_Split);
-		else if (xstrcmp(argv, "nosplit"))
+		else if (0 == strcmp(argv, "nosplit"))
 			return(MDOC_Nosplit);
 		break;
 
 	case (MDOC_Bd):
-		if (xstrcmp(argv, "ragged"))
+		if (0 == strcmp(argv, "ragged"))
 			return(MDOC_Ragged);
-		else if (xstrcmp(argv, "unfilled"))
+		else if (0 == strcmp(argv, "unfilled"))
 			return(MDOC_Unfilled);
-		else if (xstrcmp(argv, "filled"))
+		else if (0 == strcmp(argv, "filled"))
 			return(MDOC_Filled);
-		else if (xstrcmp(argv, "literal"))
+		else if (0 == strcmp(argv, "literal"))
 			return(MDOC_Literal);
-		else if (xstrcmp(argv, "file"))
+		else if (0 == strcmp(argv, "file"))
 			return(MDOC_File);
-		else if (xstrcmp(argv, "offset"))
+		else if (0 == strcmp(argv, "offset"))
 			return(MDOC_Offset);
-		else if (xstrcmp(argv, "compact"))
+		else if (0 == strcmp(argv, "compact"))
 			return(MDOC_Compact);
 		break;
 
 	case (MDOC_Bf):
-		if (xstrcmp(argv, "emphasis"))
+		if (0 == strcmp(argv, "emphasis"))
 			return(MDOC_Emphasis);
-		else if (xstrcmp(argv, "literal"))
+		else if (0 == strcmp(argv, "literal"))
 			return(MDOC_Literal);
-		else if (xstrcmp(argv, "symbolic"))
+		else if (0 == strcmp(argv, "symbolic"))
 			return(MDOC_Symbolic);
 		break;
 
 	case (MDOC_Bk):
-		if (xstrcmp(argv, "words"))
+		if (0 == strcmp(argv, "words"))
 			return(MDOC_Words);
 		break;
 
 	case (MDOC_Bl):
-		if (xstrcmp(argv, "bullet"))
+		if (0 == strcmp(argv, "bullet"))
 			return(MDOC_Bullet);
-		else if (xstrcmp(argv, "dash"))
+		else if (0 == strcmp(argv, "dash"))
 			return(MDOC_Dash);
-		else if (xstrcmp(argv, "hyphen"))
+		else if (0 == strcmp(argv, "hyphen"))
 			return(MDOC_Hyphen);
-		else if (xstrcmp(argv, "item"))
+		else if (0 == strcmp(argv, "item"))
 			return(MDOC_Item);
-		else if (xstrcmp(argv, "enum"))
+		else if (0 == strcmp(argv, "enum"))
 			return(MDOC_Enum);
-		else if (xstrcmp(argv, "tag"))
+		else if (0 == strcmp(argv, "tag"))
 			return(MDOC_Tag);
-		else if (xstrcmp(argv, "diag"))
+		else if (0 == strcmp(argv, "diag"))
 			return(MDOC_Diag);
-		else if (xstrcmp(argv, "hang"))
+		else if (0 == strcmp(argv, "hang"))
 			return(MDOC_Hang);
-		else if (xstrcmp(argv, "ohang"))
+		else if (0 == strcmp(argv, "ohang"))
 			return(MDOC_Ohang);
-		else if (xstrcmp(argv, "inset"))
+		else if (0 == strcmp(argv, "inset"))
 			return(MDOC_Inset);
-		else if (xstrcmp(argv, "column"))
+		else if (0 == strcmp(argv, "column"))
 			return(MDOC_Column);
-		else if (xstrcmp(argv, "width"))
+		else if (0 == strcmp(argv, "width"))
 			return(MDOC_Width);
-		else if (xstrcmp(argv, "offset"))
+		else if (0 == strcmp(argv, "offset"))
 			return(MDOC_Offset);
-		else if (xstrcmp(argv, "compact"))
+		else if (0 == strcmp(argv, "compact"))
 			return(MDOC_Compact);
-		else if (xstrcmp(argv, "nested"))
+		else if (0 == strcmp(argv, "nested"))
 			return(MDOC_Nested);
 		break;
 	
 	case (MDOC_Rv):
 		/* FALLTHROUGH */
 	case (MDOC_Ex):
-		if (xstrcmp(argv, "std"))
+		if (0 == strcmp(argv, "std"))
 			return(MDOC_Std);
 		break;
 	default:
@@ -762,11 +770,16 @@ argv_multi(struct mdoc *mdoc, int line,
 		else if (ARGS_EOLN == c)
 			break;
 
-		if (0 == v->sz % MULTI_STEP)
-			v->value = xrealloc(v->value, 
+		if (0 == v->sz % MULTI_STEP) {
+			v->value = realloc(v->value, 
 				(v->sz + MULTI_STEP) * sizeof(char *));
+			if (NULL == v->value) {
+				(void)verr(mdoc, EMALLOC);
+				return(ARGV_ERROR);
+			}
+		}
 		if (NULL == (v->value[(int)v->sz] = strdup(p)))
-			err(1, "strdup");
+			return(verr(mdoc, EMALLOC));
 	}
 
 	if (v->sz)
@@ -794,9 +807,10 @@ argv_opt_single(struct mdoc *mdoc, int line,
 
 	v->sz = 1;
 	if (NULL == (v->value = calloc(1, sizeof(char *))))
-		err(1, "calloc");
+		return(verr(mdoc, EMALLOC));
 	if (NULL == (v->value[0] = strdup(p)))
-		err(1, "strdup");
+		return(verr(mdoc, EMALLOC));
+
 	return(1);
 }
 
@@ -821,9 +835,10 @@ argv_single(struct mdoc *mdoc, int line,
 
 	v->sz = 1;
 	if (NULL == (v->value = calloc(1, sizeof(char *))))
-		err(1, "calloc");
+		return(verr(mdoc, EMALLOC));
 	if (NULL == (v->value[0] = strdup(p)))
-		err(1, "strdup");
+		return(verr(mdoc, EMALLOC));
+
 	return(1);
 }
 

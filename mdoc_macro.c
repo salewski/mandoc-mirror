@@ -24,12 +24,6 @@
 
 #include "libmdoc.h"
 
-/*
- * This has scanning/parsing routines, each of which extract a macro and
- * its arguments and parameters, then know how to progress to the next
- * macro. 
- */
-
 /* FIXME: .Fl, .Ar, .Cd handling of `|'. */
 
 enum	mwarn {

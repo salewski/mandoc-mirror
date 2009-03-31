@@ -197,7 +197,7 @@ mdoc_atosec(const char *p)
 
 	for (i = 0, n = secnames; n->name; n++, i++)
 		if ( ! (n->flag & MSECNAME_META))
-			if (xstrcmp(p, n->name))
+			if (0 == strcmp(p, n->name))
 				return((enum mdoc_sec)i);
 
 	return(SEC_CUSTOM);
@@ -212,7 +212,7 @@ mdoc_atotime(const char *p)
 
 	(void)memset(&tm, 0, sizeof(struct tm));
 
-	if (xstrcmp(p, "$Mdocdate$"))
+	if (0 == strcmp(p, "$Mdocdate$"))
 		return(time(NULL));
 	if ((pp = strptime(p, "$Mdocdate$", &tm)) && 0 == *pp)
 		return(mktime(&tm));

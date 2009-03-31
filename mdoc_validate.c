@@ -22,24 +22,18 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "libmdoc.h"
 
 /* FIXME: .Bl -diag can't have non-text children in HEAD. */
 /* TODO: ignoring Pp (it's superfluous in some invocations). */
 
-/*
- * Pre- and post-validate macros as they're parsed.  Pre-validation
- * occurs when the macro has been detected and its arguments parsed.
- * Post-validation occurs when all child macros have also been parsed.
- * In the ELEMENT case, this is simply the parameters of the macro; in
- * the BLOCK case, this is the HEAD, BODY, TAIL and so on.
- */
-
 #define	PRE_ARGS	struct mdoc *mdoc, const struct mdoc_node *n
 #define	POST_ARGS	struct mdoc *mdoc
 
 enum	merr {
+	ETOOLONG,
 	EESCAPE,
 	EPRINT,
 	ENODATA,
@@ -82,8 +76,6 @@ struct	valids {
 	v_post	*post;
 };
 
-/* Utility checks. */
-
 static	int	pwarn(struct mdoc *, int, int, enum mwarn);
 static	int	perr(struct mdoc *, int, int, enum merr);
 static	int	check_parent(PRE_ARGS, int, enum mdoc_type);
@@ -102,10 +94,10 @@ static	int	err_child_gt(struct mdoc *, const char *, int);
 static	int	warn_child_gt(struct mdoc *, const char *, int);
 static	int	err_child_eq(struct mdoc *, const char *, int);
 static	int	warn_child_eq(struct mdoc *, const char *, int);
-static	inline int count_child(struct mdoc *);
-static	inline int warn_count(struct mdoc *, const char *, 
+static	int	count_child(struct mdoc *);
+static	int	warn_count(struct mdoc *, const char *, 
 			int, const char *, int);
-static	inline int err_count(struct mdoc *, const char *, 
+static	int	err_count(struct mdoc *, const char *, 
 			int, const char *, int);
 static	int	pre_an(PRE_ARGS);
 static	int	pre_bd(PRE_ARGS);
@@ -137,7 +129,6 @@ static	int	bwarn_ge1(POST_ARGS);
 static	int	hwarn_eq1(POST_ARGS);
 static	int	ewarn_ge1(POST_ARGS);
 static	int	ebool(POST_ARGS);
-
 static	int	post_an(POST_ARGS);
 static	int	post_args(POST_ARGS);
 static	int	post_at(POST_ARGS);
@@ -151,8 +142,8 @@ static	int	post_sh_body(POST_ARGS);
 static	int	post_sh_head(POST_ARGS);
 static	int	post_st(POST_ARGS);
 
-#define	mwarn(m, t) nwarn((m), (m)->last, (t))
-#define	merr(m, t) nerr((m), (m)->last, (t))
+#define	vwarn(m, t) nwarn((m), (m)->last, (t))
+#define	verr(m, t) nerr((m), (m)->last, (t))
 #define	nwarn(m, n, t) pwarn((m), (n)->line, (n)->pos, (t))
 #define	nerr(m, n, t) perr((m), (n)->line, (n)->pos, (t))
 
@@ -319,6 +310,12 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 };
 
 
+#ifdef __linux__
+extern	size_t	strlcpy(char *, const char *, size_t);
+extern	size_t	strlcat(char *, const char *, size_t);
+#endif
+
+
 int
 mdoc_valid_pre(struct mdoc *mdoc, 
 		const struct mdoc_node *n)
@@ -384,6 +381,9 @@ perr(struct mdoc *m, int line, int pos, enum merr type)
 	
 	p = NULL;
 	switch (type) {
+	case (ETOOLONG):
+		p = "text argument too long";
+		break;
 	case (EESCAPE):
 		p = "invalid escape sequence";
 		break;
@@ -1039,11 +1039,11 @@ post_bf(POST_ARGS)
 			return(mdoc_err(mdoc, "text argument expected"));
 
 		p = head->child->string;
-		if (xstrcmp(p, "Em"))
+		if (0 == strcmp(p, "Em"))
 			return(1);
-		else if (xstrcmp(p, "Li"))
+		else if (0 == strcmp(p, "Li"))
 			return(1);
-		else if (xstrcmp(p, "Sm"))
+		else if (0 == strcmp(p, "Sm"))
 			return(1);
 		return(mdoc_nerr(mdoc, head->child, "invalid font"));
 	}
@@ -1063,7 +1063,7 @@ post_nm(POST_ARGS)
 		return(1);
 	if (mdoc->meta.name)
 		return(1);
-	return(merr(mdoc, ENAME));
+	return(verr(mdoc, ENAME));
 }
 
 
@@ -1074,10 +1074,10 @@ post_at(POST_ARGS)
 	if (NULL == mdoc->last->child)
 		return(1);
 	if (MDOC_TEXT != mdoc->last->child->type)
-		return(merr(mdoc, EATT));
+		return(verr(mdoc, EATT));
 	if (mdoc_a2att(mdoc->last->child->string))
 		return(1);
-	return(merr(mdoc, EATT));
+	return(verr(mdoc, EATT));
 }
 
 
@@ -1088,12 +1088,12 @@ post_an(POST_ARGS)
 	if (mdoc->last->args) {
 		if (NULL == mdoc->last->child)
 			return(1);
-		return(merr(mdoc, ELINE));
+		return(verr(mdoc, ELINE));
 	}
 
 	if (mdoc->last->child)
 		return(1);
-	return(merr(mdoc, ELINE));
+	return(verr(mdoc, ELINE));
 }
 
 
@@ -1103,7 +1103,7 @@ post_args(POST_ARGS)
 
 	if (mdoc->last->args)
 		return(1);
-	return(merr(mdoc, ELINE));
+	return(verr(mdoc, ELINE));
 }
 
 
@@ -1118,7 +1118,7 @@ post_it(POST_ARGS)
 
 	n = mdoc->last->parent->parent;
 	if (NULL == n->args)
-		return(merr(mdoc, ELISTTYPE));
+		return(verr(mdoc, ELISTTYPE));
 
 	/* Some types require block-head, some not. */
 
@@ -1156,12 +1156,12 @@ post_it(POST_ARGS)
 		}
 
 	if (-1 == type)
-		return(merr(mdoc, ELISTTYPE));
+		return(verr(mdoc, ELISTTYPE));
 
 	switch (type) {
 	case (MDOC_Tag):
 		if (NULL == mdoc->last->head->child)
-			if ( ! mwarn(mdoc, WLINE))
+			if ( ! vwarn(mdoc, WLINE))
 				return(0);
 		break;
 	case (MDOC_Hang):
@@ -1172,10 +1172,10 @@ post_it(POST_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Diag):
 		if (NULL == mdoc->last->head->child)
-			if ( ! mwarn(mdoc, WLINE))
+			if ( ! vwarn(mdoc, WLINE))
 				return(0);
 		if (NULL == mdoc->last->body->child)
-			if ( ! mwarn(mdoc, WMULTILINE))
+			if ( ! vwarn(mdoc, WMULTILINE))
 				return(0);
 		break;
 	case (MDOC_Bullet):
@@ -1188,18 +1188,18 @@ post_it(POST_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Item):
 		if (mdoc->last->head->child)
-			if ( ! mwarn(mdoc, WNOLINE))
+			if ( ! vwarn(mdoc, WNOLINE))
 				return(0);
 		if (NULL == mdoc->last->body->child)
-			if ( ! mwarn(mdoc, WMULTILINE))
+			if ( ! vwarn(mdoc, WMULTILINE))
 				return(0);
 		break;
 	case (MDOC_Column):
 		if (NULL == mdoc->last->head->child)
-			if ( ! mwarn(mdoc, WLINE))
+			if ( ! vwarn(mdoc, WLINE))
 				return(0);
 		if (mdoc->last->body->child)
-			if ( ! mwarn(mdoc, WNOMULTILINE))
+			if ( ! vwarn(mdoc, WNOMULTILINE))
 				return(0);
 		c = mdoc->last->child;
 		for (i = 0; c && MDOC_HEAD == c->type; c = c->next)
@@ -1248,9 +1248,9 @@ ebool(struct mdoc *mdoc)
 	for (n = mdoc->last->child; n; n = n->next) {
 		if (MDOC_TEXT != n->type)
 			break;
-		if (xstrcmp(n->string, "on"))
+		if (0 == strcmp(n->string, "on"))
 			continue;
-		if (xstrcmp(n->string, "off"))
+		if (0 == strcmp(n->string, "off"))
 			continue;
 		break;
 	}
@@ -1266,14 +1266,14 @@ post_root(POST_ARGS)
 {
 
 	if (NULL == mdoc->first->child)
-		return(merr(mdoc, ENODATA));
+		return(verr(mdoc, ENODATA));
 	if (SEC_PROLOGUE == mdoc->lastnamed)
-		return(merr(mdoc, ENOPROLOGUE));
+		return(verr(mdoc, ENOPROLOGUE));
 
 	if (MDOC_BLOCK != mdoc->first->child->type)
-		return(merr(mdoc, ENODATA));
+		return(verr(mdoc, ENODATA));
 	if (MDOC_Sh != mdoc->first->child->tok)
-		return(merr(mdoc, ENODATA));
+		return(verr(mdoc, ENODATA));
 
 	return(1);
 }
@@ -1285,7 +1285,7 @@ post_st(POST_ARGS)
 
 	if (mdoc_a2st(mdoc->last->child->string))
 		return(1);
-	return(mwarn(mdoc, WBADSTAND));
+	return(vwarn(mdoc, WBADSTAND));
 }
 
 
@@ -1317,28 +1317,29 @@ post_sh_body(POST_ARGS)
 	 */
 
 	if (NULL == (n = mdoc->last->child))
-		return(mwarn(mdoc, WNAMESECINC));
+		return(vwarn(mdoc, WNAMESECINC));
 
 	for ( ; n && n->next; n = n->next) {
 		if (MDOC_ELEM == n->type && MDOC_Nm == n->tok)
 			continue;
 		if (MDOC_TEXT == n->type)
 			continue;
-		if ( ! mwarn(mdoc, WNAMESECINC))
+		if ( ! vwarn(mdoc, WNAMESECINC))
 			return(0);
 	}
 
 	if (MDOC_ELEM == n->type && MDOC_Nd == n->tok)
 		return(1);
-	return(mwarn(mdoc, WNAMESECINC));
+	return(vwarn(mdoc, WNAMESECINC));
 }
 
 
 static int
 post_sh_head(POST_ARGS)
 {
-	char		  buf[64];
-	enum mdoc_sec	  sec;
+	char		        buf[64];
+	enum mdoc_sec	        sec;
+	const struct mdoc_node *n;
 
 	/*
 	 * Process a new section.  Sections are either "named" or
@@ -1349,23 +1350,33 @@ post_sh_head(POST_ARGS)
 
 	assert(MDOC_Sh == mdoc->last->tok);
 
-	(void)xstrlcpys(buf, mdoc->last->child, sizeof(buf));
+	/* This is just concat() inlined, which is irritating. */
+
+	for (n = mdoc->last->child; n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
+		if (strlcat(buf, n->string, 64) >= 64)
+			return(nerr(mdoc, n, ETOOLONG));
+		if (NULL == n->next)
+			continue;
+		if (strlcat(buf, " ", 64) >= 64)
+			return(nerr(mdoc, n, ETOOLONG));
+	}
 
 	sec = mdoc_atosec(buf);
 
 	/* The NAME section should always be first. */
 
 	if (SEC_BODY == mdoc->lastnamed && SEC_NAME != sec)
-		return(mwarn(mdoc, WSECOOO));
+		return(vwarn(mdoc, WSECOOO));
 	if (SEC_CUSTOM == sec)
 		return(1);
 
 	/* Check for repeated or out-of-order sections. */
 
 	if (sec == mdoc->lastnamed)
-		return(mwarn(mdoc, WSECREP));
+		return(vwarn(mdoc, WSECREP));
 	if (sec < mdoc->lastnamed)
-		return(mwarn(mdoc, WSECOOO));
+		return(vwarn(mdoc, WSECOOO));
 
 	/* Check particular section/manual section conventions. */
 
@@ -1377,7 +1388,7 @@ post_sh_head(POST_ARGS)
 		case (3):
 			break;
 		default:
-			return(mwarn(mdoc, WWRONGMSEC));
+			return(vwarn(mdoc, WWRONGMSEC));
 		}
 		break;
 	default:

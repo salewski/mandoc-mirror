@@ -302,7 +302,7 @@ void	 	  mdoc_free(struct mdoc *);
 struct	mdoc	 *mdoc_alloc(void *, int, const struct mdoc_cb *);
 
 /* Gets system ready for another parse. */
-void		  mdoc_reset(struct mdoc *);
+int		  mdoc_reset(struct mdoc *);
 
 /* Parse a single line in a stream (boolean retval). */
 int	 	  mdoc_parseln(struct mdoc *, int, char *buf);

@@ -36,7 +36,7 @@
 .Vt extern const char * const * mdoc_argnames;
 .Ft "struct mdoc *"
 .Fn mdoc_alloc "void *data" "int pflags" "const struct mdoc_cb *cb"
-.Ft void
+.Ft int
 .Fn mdoc_reset "struct mdoc *mdoc"
 .Ft void
 .Fn mdoc_free "struct mdoc *mdoc"
@@ -133,7 +133,8 @@ Returns NULL on failure.  If non-NULL, the pointer must be freed with
 .It Fn mdoc_reset
 Reset the parser for another parse routine.  After its use, 
 .Fn mdoc_parseln
-behaves as if invoked for the first time.
+behaves as if invoked for the first time.  If it returns 0, memory could
+not be allocated.
 .\" LIST-ITEM
 .It Fn mdoc_free
 Free all resources of a parser.  The pointer is no longer valid after

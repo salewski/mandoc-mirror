@@ -220,6 +220,8 @@ main(int argc, char *argv[])
 		if (fflags & IGN_MACRO)
 			pflags |= MDOC_IGN_MACRO;
 		mdoc = mdoc_alloc(&curp, pflags, &mdoccb);
+		if (NULL == mdoc)
+			errx(1, "memory exhausted");
 		break;
 	}
 
@@ -246,8 +248,10 @@ main(int argc, char *argv[])
 				break;
 			if (man)
 				man_reset(man);
-			if (mdoc)
-				mdoc_reset(mdoc);
+			if (mdoc && ! mdoc_reset(mdoc)) {
+				warnx("memory exhausted");
+				break;
+			}
 			argv++;
 		}
 		rc = NULL == *argv;
@@ -273,8 +277,7 @@ version(void)
 {
 
 	(void)printf("%s %s\n", __progname, VERSION);
-	exit(0);
-	/* NOTREACHED */
+	exit(EXIT_SUCCESS);
 }
 
 
@@ -285,8 +288,7 @@ usage(void)
 	(void)fprintf(stderr, "usage: %s [-V] [-foption...] "
 			"[-mformat] [-Toutput] [-Werr...]\n", 
 			__progname);
-	exit(1);
-	/* NOTREACHED */
+	exit(EXIT_FAILURE);
 }
 
 
