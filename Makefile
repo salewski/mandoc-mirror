@@ -57,7 +57,8 @@ TARGZS	   = mdocml-$(VERSION).tar.gz \
 	     mdocml-nport-$(VERSION).tar.gz
 MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7
 BINS	   = mandoc
-CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) $(TARGZS) 
+CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) $(TARGZS) \
+	     tags
 MAKEFILES  = Makefile.netbsd Makefile.openbsd Makefile.freebsd \
 	     Makefile
 INSTALL	   = $(SRCS) $(HEADS) $(MAKEFILES) DESCR $(MANS) $(SGMLS) \

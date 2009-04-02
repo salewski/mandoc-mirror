@@ -47,21 +47,9 @@ struct	buf {
 	size_t		  sz;
 };
 
-struct	curparse {
-	const char	 *file;
-	int		  wflags;
-#define	WARN_WALL	  0x03		/* All-warnings mask. */
-#define	WARN_WCOMPAT	 (1 << 0)	/* Compatibility warnings. */
-#define	WARN_WSYNTAX	 (1 << 1)	/* Syntax warnings. */
-#define	WARN_WERR	 (1 << 2)	/* Warnings->errors. */
-};
-
-#define	IGN_SCOPE	 (1 << 0) 	/* Ignore scope errors. */
-#define	IGN_ESCAPE	 (1 << 1) 	/* Ignore bad escapes. */
-#define	IGN_MACRO	 (1 << 2) 	/* Ignore unknown macros. */
-
 enum	intt {
-	INTT_MDOC = 0,
+	INTT_AUTO,
+	INTT_MDOC,
 	INTT_MAN
 };
 
@@ -70,6 +58,24 @@ enum	outt {
 	OUTT_TREE,
 	OUTT_LINT
 };
+
+struct	curparse {
+	const char	 *file;
+	int		  fd;
+	int		  wflags;
+#define	WARN_WALL	  0x03		/* All-warnings mask. */
+#define	WARN_WCOMPAT	 (1 << 0)	/* Compatibility warnings. */
+#define	WARN_WSYNTAX	 (1 << 1)	/* Syntax warnings. */
+#define	WARN_WERR	 (1 << 2)	/* Warnings->errors. */
+	int		  fflags;
+	enum intt	  inttype;
+	struct man	 *man;
+	struct mdoc	 *mdoc;
+};
+
+#define	IGN_SCOPE	 (1 << 0) 	/* Ignore scope errors. */
+#define	IGN_ESCAPE	 (1 << 1) 	/* Ignore bad escapes. */
+#define	IGN_MACRO	 (1 << 2) 	/* Ignore unknown macros. */
 
 typedef	int		(*out_run)(void *, const struct man *,
 				const struct mdoc *);
@@ -92,12 +98,16 @@ static	int		  merr(void *, int, int, const char *);
 static	int		  manwarn(void *, int, int, const char *);
 static	int		  mdocwarn(void *, int, int, 
 				enum mdoc_warn, const char *);
-static	int		  file(struct buf *, struct buf *, 
-				const char *, 
-				struct man *, struct mdoc *);
+static	int		  fstdin(struct buf *, struct buf *, 
+				struct curparse *);
+static	int		  ffile(struct buf *, struct buf *, 
+				const char *, struct curparse *);
 static	int		  fdesc(struct buf *, struct buf *,
-				const char *, int, 
-				struct man *, struct mdoc *);
+				struct curparse *);
+static	int		  pset(const char *, size_t, struct curparse *,
+				struct man **, struct mdoc **);
+static	struct man	 *man_init(struct curparse *);
+static	struct mdoc	 *mdoc_init(struct curparse *);
 __dead	static void	  version(void);
 __dead	static void	  usage(void);
 
@@ -105,34 +115,29 @@ __dead	static void	  usage(void);
 int
 main(int argc, char *argv[])
 {
-	int		 c, rc, fflags, pflags;
-	struct mdoc_cb	 mdoccb;
-	struct man_cb	 mancb;
-	struct man	*man;
-	struct mdoc	*mdoc;
+	int		 c, rc;
 	void		*outdata;
 	enum outt	 outtype;
-	enum intt	 inttype;
 	struct buf	 ln, blk;
 	out_run		 outrun;
 	out_free	 outfree;
 	struct curparse	 curp;
 
-	fflags = 0;
 	outtype = OUTT_ASCII;
-	inttype = INTT_MDOC;
 
 	bzero(&curp, sizeof(struct curparse));
+
+	curp.inttype = INTT_AUTO;
 
 	/* LINTED */
 	while (-1 != (c = getopt(argc, argv, "f:m:VW:T:")))
 		switch (c) {
 		case ('f'):
-			if ( ! foptions(&fflags, optarg))
+			if ( ! foptions(&curp.fflags, optarg))
 				return(0);
 			break;
 		case ('m'):
-			if ( ! moptions(&inttype, optarg))
+			if ( ! moptions(&curp.inttype, optarg))
 				return(0);
 			break;
 		case ('T'):
@@ -179,76 +184,33 @@ main(int argc, char *argv[])
 		break;
 	}
 
-	/*
-	 * All callbacks route into here, where we print them onto the
-	 * screen.  XXX - for now, no path for debugging messages.
-	 */
-
-	mdoccb.mdoc_msg = NULL;
-	mdoccb.mdoc_err = merr;
-	mdoccb.mdoc_warn = mdocwarn;
-
-	mancb.man_err = merr;
-	mancb.man_warn = manwarn;
-
 	/* Configure buffers. */
 
 	bzero(&ln, sizeof(struct buf));
 	bzero(&blk, sizeof(struct buf));
-
-	man = NULL;
-	mdoc = NULL;
-	pflags = 0;
-
-	/*
-	 * Allocate the parser.  There are two kinds of parser: libman
-	 * and libmdoc.  We must separately copy over the flags that
-	 * we'll use internally.
-	 */
-
-	switch (inttype) {
-	case (INTT_MAN):
-		if (fflags & IGN_MACRO)
-			pflags |= MAN_IGN_MACRO;
-		man = man_alloc(&curp, pflags, &mancb);
-		break;
-	default:
-		if (fflags & IGN_SCOPE)
-			pflags |= MDOC_IGN_SCOPE;
-		if (fflags & IGN_ESCAPE)
-			pflags |= MDOC_IGN_ESCAPE;
-		if (fflags & IGN_MACRO)
-			pflags |= MDOC_IGN_MACRO;
-		mdoc = mdoc_alloc(&curp, pflags, &mdoccb);
-		if (NULL == mdoc)
-			errx(1, "memory exhausted");
-		break;
-	}
 
 	/*
 	 * Main loop around available files.
 	 */
 
 	if (NULL == *argv) {
-		curp.file = "<stdin>";
 		rc = 0;
-		c = fdesc(&blk, &ln, "stdin", STDIN_FILENO, man, mdoc);
+		c = fstdin(&blk, &ln, &curp);
 
 		if (c && NULL == outrun)
 			rc = 1;
-		else if (c && outrun && (*outrun)(outdata, man, mdoc))
-			rc = 1;
+		/*else if (c && outrun && (*outrun)(outdata, curp.man, curp.mdoc))
+			rc = 1;*/
 	} else {
 		while (*argv) {
-			curp.file = *argv;
-			c = file(&blk, &ln, *argv, man, mdoc);
+			c = ffile(&blk, &ln, *argv, &curp);
 			if ( ! c)
 				break;
-			if (outrun && ! (*outrun)(outdata, man, mdoc))
-				break;
-			if (man)
-				man_reset(man);
-			if (mdoc && ! mdoc_reset(mdoc)) {
+			/*if (outrun && ! (*outrun)(outdata, curp.man, curp.mdoc))
+				break;*/
+			if (curp.man)
+				man_reset(curp.man);
+			if (curp.mdoc && ! mdoc_reset(curp.mdoc)) {
 				warnx("memory exhausted");
 				break;
 			}
@@ -263,10 +225,10 @@ main(int argc, char *argv[])
 		free(ln.buf);
 	if (outfree)
 		(*outfree)(outdata);
-	if (mdoc)
-		mdoc_free(mdoc);
-	if (man)
-		man_free(man);
+	if (curp.mdoc)
+		mdoc_free(curp.mdoc);
+	if (curp.man)
+		man_free(curp.man);
 
 	return(rc ? EXIT_SUCCESS : EXIT_FAILURE);
 }
@@ -292,75 +254,139 @@ usage(void)
 }
 
 
-static int
-file(struct buf *blk, struct buf *ln, const char *file, 
-		struct man *man, struct mdoc *mdoc)
+static struct man *
+man_init(struct curparse *curp)
 {
-	int		 fd, c;
+	int		 pflags;
+	struct man	*man;
+	struct man_cb	 mancb;
 
-	if (-1 == (fd = open(file, O_RDONLY, 0))) {
-		warn("%s", file);
+	mancb.man_err = merr;
+	mancb.man_warn = manwarn;
+
+	pflags = 0;
+
+	if (curp->fflags & IGN_MACRO)
+		pflags |= MAN_IGN_MACRO;
+
+	if (NULL == (man = man_alloc(curp, pflags, &mancb)))
+		warnx("memory exhausted");
+
+	return(man);
+}
+
+
+static struct mdoc *
+mdoc_init(struct curparse *curp)
+{
+	int		 pflags;
+	struct mdoc	*mdoc;
+	struct mdoc_cb	 mdoccb;
+
+	mdoccb.mdoc_msg = NULL;
+	mdoccb.mdoc_err = merr;
+	mdoccb.mdoc_warn = mdocwarn;
+
+	pflags = 0;
+
+	if (curp->fflags & IGN_SCOPE)
+		pflags |= MDOC_IGN_SCOPE;
+	if (curp->fflags & IGN_ESCAPE)
+		pflags |= MDOC_IGN_ESCAPE;
+	if (curp->fflags & IGN_MACRO)
+		pflags |= MDOC_IGN_MACRO;
+
+	if (NULL == (mdoc = mdoc_alloc(curp, pflags, &mdoccb)))
+		warnx("memory allocated");
+
+	return(mdoc);
+}
+
+
+static int
+fstdin(struct buf *blk, struct buf *ln, struct curparse *curp)
+{
+
+	curp->file = "<stdin>";
+	curp->fd = STDIN_FILENO;
+	return(fdesc(blk, ln, curp));
+}
+
+
+static int
+ffile(struct buf *blk, struct buf *ln, 
+		const char *file, struct curparse *curp)
+{
+	int		 c;
+
+	curp->file = file;
+	if (-1 == (curp->fd = open(curp->file, O_RDONLY, 0))) {
+		warn("%s", curp->file);
 		return(0);
 	}
 
-	c = fdesc(blk, ln, file, fd, man, mdoc);
+	c = fdesc(blk, ln, curp);
 
-	if (-1 == close(fd))
-		warn("%s", file);
+	if (-1 == close(curp->fd))
+		warn("%s", curp->file);
 
 	return(c);
 }
 
 
 static int
-fdesc(struct buf *blk, struct buf *ln,
-		const char *f, int fd, 
-		struct man *man, struct mdoc *mdoc)
+fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 {
 	size_t		 sz;
 	ssize_t		 ssz;
 	struct stat	 st;
 	int		 j, i, pos, lnn;
+	struct man	*man;
+	struct mdoc	*mdoc;
 
-	assert( ! (man && mdoc));
+	sz = BUFSIZ;
+	man = NULL;
+	mdoc = NULL;
 
 	/*
-	 * Two buffers: ln and buf.  buf is the input buffer, optimised
-	 * for each file's block size.  ln is a line buffer.  Both
+	 * Two buffers: ln and buf.  buf is the input buffer optimised
+	 * here for each file's block size.  ln is a line buffer.  Both
 	 * growable, hence passed in by ptr-ptr.
 	 */
 
-	sz = BUFSIZ;
-
-	if (-1 == fstat(fd, &st))
-		warnx("%s", f);
+	if (-1 == fstat(curp->fd, &st))
+		warnx("%s", curp->file);
 	else if ((size_t)st.st_blksize > sz)
 		sz = st.st_blksize;
 
 	if (sz > blk->sz) {
 		blk->buf = realloc(blk->buf, sz);
-		if (NULL == blk->buf)
-			err(1, "realloc");
+		if (NULL == blk->buf) {
+			warn("realloc");
+			return(0);
+		}
 		blk->sz = sz;
 	}
 
-	/*
-	 * Fill buf with file blocksize and parse newlines into ln.
-	 */
+	/* Fill buf with file blocksize. */
 
-	for (lnn = 1, pos = 0; ; ) {
-		if (-1 == (ssz = read(fd, blk->buf, sz))) {
-			warn("%s", f);
+	for (lnn = 0, pos = 0; ; ) {
+		if (-1 == (ssz = read(curp->fd, blk->buf, sz))) {
+			warn("%s", curp->file);
 			return(0);
 		} else if (0 == ssz) 
 			break;
+
+		/* Parse the read block into partial or full lines. */
 
 		for (i = 0; i < (int)ssz; i++) {
 			if (pos >= (int)ln->sz) {
 				ln->sz += 256; /* Step-size. */
 				ln->buf = realloc(ln->buf, ln->sz);
-				if (NULL == ln->buf)
-					err(1, "realloc");
+				if (NULL == ln->buf) {
+					warn("realloc");
+					return(0);
+				}
 			}
 
 			if ('\n' != blk->buf[i]) {
@@ -383,19 +409,88 @@ fdesc(struct buf *blk, struct buf *ln,
 			}
 
 			ln->buf[pos] = 0;
-			if (mdoc && ! mdoc_parseln(mdoc, lnn, ln->buf))
+			lnn++;
+			
+			/*
+			 * If no manual parser has been assigned, then
+			 * try to assign one in pset(), which may do
+			 * nothing at all.  After this, parse the manual
+			 * line accordingly.
+			 */
+
+			if ( ! (man || mdoc) && ! pset(ln->buf, 
+						pos, curp, &man, &mdoc))
 				return(0);
+
+			pos = 0;
+
 			if (man && ! man_parseln(man, lnn, ln->buf))
 				return(0);
-			lnn++;
-			pos = 0;
+			if (mdoc && ! mdoc_parseln(mdoc, lnn, ln->buf))
+				return(0);
 		}
 	}
 
+	/* Note that a parser may not have been assigned, yet. */
+
 	if (mdoc)
 	       return(mdoc_endparse(mdoc));
+	if (man)
+		return(man_endparse(man));
 
-	return(man_endparse(man));
+	warnx("%s: not a manual", curp->file);
+	return(0);
+}
+
+
+static int
+pset(const char *buf, size_t pos, struct curparse *curp,
+		struct man **man, struct mdoc **mdoc)
+{
+
+	/*
+	 * Try to intuit which kind of manual parser should be used.  If
+	 * passed in by command-line (-man, -mdoc), then use that
+	 * explicitly.  If passed as -mandoc, then try to guess from the
+	 * line: either skip comments, use -mdoc when finding `.Dt', or
+	 * default to -man, which is more lenient.
+	 */
+
+	if (pos >= 3 && 0 == memcmp(buf, ".\\\"", 3))
+		return(1);
+
+	switch (curp->inttype) {
+	case (INTT_MDOC):
+		if (NULL == curp->mdoc) 
+			curp->mdoc = mdoc_init(curp);
+		if (NULL == (*mdoc = curp->mdoc))
+			return(0);
+		warnx("inheriting -mdoc parser");
+		return(1);
+	case (INTT_MAN):
+		if (NULL == curp->man) 
+			curp->man = man_init(curp);
+		if (NULL == (*man = curp->man))
+			return(0);
+		warnx("inheriting -man parser");
+		return(1);
+	default:
+		break;
+	}
+
+	if (pos >= 3 && 0 == memcmp(buf, ".Dd", 3))  {
+		if (NULL == curp->mdoc) 
+			curp->mdoc = mdoc_init(curp);
+		if (NULL == (*mdoc = curp->mdoc))
+			return(0);
+		return(1);
+	} 
+
+	if (NULL == curp->man) 
+		curp->man = man_init(curp);
+	if (NULL == (*man = curp->man))
+		return(0);
+	return(1);
 }
 
 
@@ -405,6 +500,8 @@ moptions(enum intt *tflags, char *arg)
 
 	if (0 == strcmp(arg, "doc"))
 		*tflags = INTT_MDOC;
+	else if (0 == strcmp(arg, "andoc"))
+		*tflags = INTT_AUTO;
 	else if (0 == strcmp(arg, "an"))
 		*tflags = INTT_MAN;
 	else {
