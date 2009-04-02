@@ -50,7 +50,7 @@ for details.
 Input format.  See
 .Sx Input Formats
 for available formats.  Defaults to
-.Fl m Ns Ar doc .
+.Fl m Ns Ar andoc .
 .\" ITEM
 .It Fl T
 Output format.  See
@@ -89,8 +89,10 @@ By default,
 .Nm 
 reads 
 .Xr mdoc 7
+or
+.Xr man 7
 text from stdin, implying
-.Fl m Ns Ar mdoc ,
+.Fl m Ns Ar andoc ,
 and prints 78-column backspace-encoded output to stdout as if
 .Fl T Ns Ar ascii
 were provided.
@@ -161,6 +163,16 @@ recommended;
 .Xr man 7
 should only be used for legacy manuals.
 .Pp
+A third option,
+.Fl m Ns Ar andoc ,
+which is also the default, determines encoding on-the-fly.  If multiple
+files are passed in, each has its file-type determined this way.  If
+multiple files are passed and
+.Fl m Ns Ar doc
+or
+.Fl m Ns Ar an
+is specified, then this format is used exclusively.
+.Pp
 The following escape sequences are recognised, although the per-format
 compiler may not allow certain sequences.
 .Bl -tag -width Ds -offset XXXX
@@ -192,7 +204,7 @@ Parse only: produce no output.
 Default compiler behaviour may be overriden with the
 .Fl f
 flag.
-.Bl -tag -width XXXXXXXXXXXX -offset XXXX
+.Bl -tag -width XXXXXXXXXXXXXX -offset XXXX
 .It Fl f Ns Ar ign-scope
 When rewinding the scope of a block macro, forces the compiler to ignore
 scope violations.  This can seriously mangle the resulting tree.
@@ -200,7 +212,13 @@ scope violations.  This can seriously mangle the resulting tree.
 .It Fl f Ns Ar ign-escape
 Ignore invalid escape sequences.
 .It Fl f Ns Ar ign-macro
-Ignore unknown macros at the start of input lines.
+Ignore unknown macros at the start of input lines (default for 
+.Xr man 7
+parsing).
+.It Fl f Ns Ar no-ign-macro
+Do not ignore unknown macros at the start of input lines (default for 
+.Xr mdoc 7
+parsing).
 .El
 .\" PARAGRAPH
 .Pp

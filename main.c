@@ -268,8 +268,6 @@ man_init(struct curparse *curp)
 	/* Set command defaults. */
 	pflags = MAN_IGN_MACRO;
 
-	if (curp->fflags & IGN_MACRO)
-		pflags |= MAN_IGN_MACRO;
 	if (curp->fflags & NO_IGN_MACRO)
 		pflags &= ~MAN_IGN_MACRO;
 
