@@ -43,7 +43,8 @@
 #define	MAN_IR		 19
 #define	MAN_RI		 20
 #define	MAN_br		 21
-#define	MAN_MAX	 	 22
+#define	MAN_na		 22
+#define	MAN_MAX	 	 23
 
 enum	man_type {
 	MAN_TEXT,

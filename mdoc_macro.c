@@ -328,7 +328,7 @@ lookup(struct mdoc *mdoc, int line, int pos, int from, const char *p)
 {
 	int		 res;
 
-	res = mdoc_tokhash_find(mdoc->htab, p);
+	res = mdoc_hash_find(mdoc->htab, p);
 	if (MDOC_PARSED & mdoc_macros[from].flags)
 		return(res);
 	if (MDOC_MAX == res)
@@ -1473,7 +1473,7 @@ phrase(struct mdoc *mdoc, int line, int ppos, char *buf)
 		 */
 
 		c = quoted ? MDOC_MAX :
-			mdoc_tokhash_find(mdoc->htab, &buf[la]);
+			mdoc_hash_find(mdoc->htab, &buf[la]);
 
 		if (MDOC_MAX != c) {
 			if ( ! mdoc_macro(mdoc, c, line, la, &i, buf))

@@ -18,7 +18,6 @@
  */
 #include <assert.h>
 #include <ctype.h>
-#include <err.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -32,7 +31,7 @@
  */
 
 void
-mdoc_tokhash_free(void *htab)
+mdoc_hash_free(void *htab)
 {
 
 	free(htab);
@@ -40,14 +39,14 @@ mdoc_tokhash_free(void *htab)
 
 
 void *
-mdoc_tokhash_alloc(void)
+mdoc_hash_alloc(void)
 {
 	int		  i, major, minor, ind;
 	const void	**htab;
 
 	htab = calloc(27 * 26 * 3, sizeof(struct mdoc_macro *));
 	if (NULL == htab) 
-		err(1, "calloc");
+		return(NULL);
 
 	for (i = 1; i < MDOC_MAX; i++) {
 		major = mdoc_macronames[i][0];
@@ -95,7 +94,7 @@ mdoc_tokhash_alloc(void)
 
 
 int
-mdoc_tokhash_find(const void *arg, const char *tmp)
+mdoc_hash_find(const void *arg, const char *tmp)
 {
 	int		  major, minor, ind, slot;
 	const void	**htab;
