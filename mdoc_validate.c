@@ -311,7 +311,6 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 
 
 #ifdef __linux__
-extern	size_t	strlcpy(char *, const char *, size_t);
 extern	size_t	strlcat(char *, const char *, size_t);
 #endif
 
@@ -1352,6 +1351,7 @@ post_sh_head(POST_ARGS)
 
 	/* This is just concat() inlined, which is irritating. */
 
+	buf[0] = 0;
 	for (n = mdoc->last->child; n; n = n->next) {
 		assert(MDOC_TEXT == n->type);
 		if (strlcat(buf, n->string, 64) >= 64)

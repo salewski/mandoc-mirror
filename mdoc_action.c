@@ -195,7 +195,6 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 
 
 #ifdef __linux__
-extern	size_t	strlcpy(char *, const char *, size_t);
 extern	size_t	strlcat(char *, const char *, size_t);
 #endif
 
@@ -495,13 +494,15 @@ post_os(POST_ARGS)
 
 	if (m->meta.os)
 		free(m->meta.os);
+
+	buf[0] = 0;
 	if ( ! concat(m, m->last->child, buf, sizeof(buf)))
 		return(0);
 
 	if (0 == buf[0]) {
 		if (-1 == uname(&utsname))
 			return(mdoc_err(m, "utsname"));
-		if (strlcpy(buf, utsname.sysname, 64) >= 64)
+		if (strlcat(buf, utsname.sysname, 64) >= 64)
 			return(verr(m, ETOOLONG));
 		if (strlcat(buf, " ", 64) >= 64)
 			return(verr(m, ETOOLONG));

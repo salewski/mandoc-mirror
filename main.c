@@ -76,6 +76,7 @@ struct	curparse {
 #define	IGN_SCOPE	 (1 << 0) 	/* Ignore scope errors. */
 #define	IGN_ESCAPE	 (1 << 1) 	/* Ignore bad escapes. */
 #define	IGN_MACRO	 (1 << 2) 	/* Ignore unknown macros. */
+#define	NO_IGN_MACRO	 (1 << 3) 
 
 typedef	int		(*out_run)(void *, const struct man *,
 				const struct mdoc *);
@@ -264,10 +265,13 @@ man_init(struct curparse *curp)
 	mancb.man_err = merr;
 	mancb.man_warn = manwarn;
 
-	pflags = 0;
+	/* Set command defaults. */
+	pflags = MAN_IGN_MACRO;
 
 	if (curp->fflags & IGN_MACRO)
 		pflags |= MAN_IGN_MACRO;
+	if (curp->fflags & NO_IGN_MACRO)
+		pflags &= ~MAN_IGN_MACRO;
 
 	if (NULL == (man = man_alloc(curp, pflags, &mancb)))
 		warnx("memory exhausted");
@@ -540,12 +544,13 @@ static int
 foptions(int *fflags, char *arg)
 {
 	char		*v;
-	char		*toks[4];
+	char		*toks[5];
 
 	toks[0] = "ign-scope";
 	toks[1] = "ign-escape";
 	toks[2] = "ign-macro";
-	toks[3] = NULL;
+	toks[4] = "no-ign-macro";
+	toks[5] = NULL;
 
 	while (*arg) 
 		switch (getsubopt(&arg, toks, &v)) {
@@ -557,6 +562,9 @@ foptions(int *fflags, char *arg)
 			break;
 		case (2):
 			*fflags |= IGN_MACRO;
+			break;
+		case (3):
+			*fflags |= NO_IGN_MACRO;
 			break;
 		default:
 			warnx("bad argument: -f%s", arg);
