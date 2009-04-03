@@ -59,7 +59,6 @@ terminal_man(void *arg, const struct man *man)
 	struct termp	*p;
 
 	p = (struct termp *)arg;
-
 	if (NULL == p->symtab)
 		p->symtab = term_ascii2htab();
 
@@ -73,7 +72,6 @@ terminal_mdoc(void *arg, const struct mdoc *mdoc)
 	struct termp	*p;
 
 	p = (struct termp *)arg;
-
 	if (NULL == p->symtab)
 		p->symtab = term_ascii2htab();
 

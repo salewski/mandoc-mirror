@@ -71,7 +71,11 @@ struct	curparse {
 #define	WARN_WCOMPAT	 (1 << 0)	/* Compatibility warnings. */
 #define	WARN_WSYNTAX	 (1 << 1)	/* Syntax warnings. */
 #define	WARN_WERR	 (1 << 2)	/* Warnings->errors. */
-	int		  fflags;	/* Per-intt flags. */
+	int		  fflags;
+#define	IGN_SCOPE	 (1 << 0) 	/* Ignore scope errors. */
+#define	IGN_ESCAPE	 (1 << 1) 	/* Ignore bad escapes. */
+#define	IGN_MACRO	 (1 << 2) 	/* Ignore unknown macros. */
+#define	NO_IGN_MACRO	 (1 << 3) 
 	enum intt	  inttype;	/* Input parsers. */
 	struct man	 *man;
 	struct man	 *lastman;
@@ -83,11 +87,6 @@ struct	curparse {
 	out_free	  outfree;
 	void		 *outdata;
 };
-
-#define	IGN_SCOPE	 (1 << 0) 	/* Ignore scope errors. */
-#define	IGN_ESCAPE	 (1 << 1) 	/* Ignore bad escapes. */
-#define	IGN_MACRO	 (1 << 2) 	/* Ignore unknown macros. */
-#define	NO_IGN_MACRO	 (1 << 3) 
 
 extern	void		 *ascii_alloc(void);
 extern	int		  tree_mdoc(void *, const struct mdoc *);
