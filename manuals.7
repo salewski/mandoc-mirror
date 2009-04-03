@@ -38,14 +38,15 @@ documentation
 .Pq Dq manuals .
 .\" SECTION
 .Sh COMPOSITION
-Prepare your composition environment by copying over the manual template
-from 
-.Pa /usr/share/misc/mdoc.template .
+First, copy over the manual template from 
+.Pa /usr/share/misc/mdoc.template
+into your source directory.
 .Pp
-If this file doesn't exist, bug your administrator.
+.Dl % cp /usr/share/misc/mdoc.template \.
+.Pp
 .Em \&Do not
 start afresh or by copying another manual unless you know exactly what
-you're doing!
+you're doing!  If the template doesn't exist, bug your administrator.
 .\" SUBSECTION
 .Ss Section Numbering
 Find an appropriate section for your manual.  There may exist multiple
@@ -100,7 +101,9 @@ Manual files are named
 .Pa myname.mysection ,
 such as
 .Pa manuals.7
-for this document.
+for this document.  Rename the template file:
+.Pp
+.Dl % mv mdoc.template myname.mysection
 .\" SUBSECTION
 .Ss Input Language
 Manuals should 
@@ -129,7 +132,7 @@ macro reference
 .El
 .Pp
 Open the template you've copied into
-.Pa name.section
+.Pa myname.mysection
 and begin editing.
 .\" SUBSECTION
 .Ss Development Tools
@@ -140,6 +143,11 @@ While writing, make sure that your manual is correctly structured:
 You may spell-check your work as follows:
 .Pp
 .Dl % deroff name.1 | spell
+.Pp
+If 
+.Xr ispell 1
+is installed, it has a special mode for manuals:
+.Pp
 .Dl % ispell \-n name.1
 .Pp
 Use 
@@ -242,6 +250,8 @@ and style.
 .\" SECTION
 .Sh MAINTENANCE
 As your component changes and bugs are fixed, your manual may become out
-of date.  You may be tempted to use automation tools like Doxygen to
-smooth the development of your manuals.  Don't.  Source documentation is
-different from a component manual. 
+of date.  You may be tempted to use tools like Doxygen to automate the
+development of your manuals.  Don't.
+.Pp
+.Em Manuals are part of a system component :
+if you modify your code or specifications, modify the documentation.

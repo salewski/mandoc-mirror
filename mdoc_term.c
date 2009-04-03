@@ -1427,7 +1427,7 @@ static int
 termp_d1_pre(DECL_ARGS)
 {
 
-	if (MDOC_BODY != node->type)
+	if (MDOC_BLOCK != node->type)
 		return(1);
 	term_newln(p);
 	p->offset += (pair->offset = INDENT);
@@ -1440,7 +1440,7 @@ static void
 termp_d1_post(DECL_ARGS)
 {
 
-	if (MDOC_BODY != node->type) 
+	if (MDOC_BLOCK != node->type) 
 		return;
 	term_newln(p);
 	p->offset -= pair->offset;
