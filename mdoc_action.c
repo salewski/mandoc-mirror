@@ -343,6 +343,8 @@ post_nm(POST_ARGS)
 
 	if (m->meta.name)
 		return(1);
+
+	buf[0] = 0;
 	if ( ! concat(m, m->last->child, buf, sizeof(buf)))
 		return(0);
 	if (NULL == (m->meta.name = strdup(buf)))
@@ -366,6 +368,8 @@ post_sh(POST_ARGS)
 
 	if (MDOC_HEAD != m->last->type)
 		return(1);
+
+	buf[0] = 0;
 	if ( ! concat(m, m->last->child, buf, sizeof(buf)))
 		return(0);
 	if (SEC_CUSTOM != (sec = mdoc_atosec(buf)))
@@ -694,6 +698,7 @@ post_dd(POST_ARGS)
 {
 	char		  buf[64];
 
+	buf[0] = 0;
 	if ( ! concat(m, m->last->child, buf, sizeof(buf)))
 		return(0);
 

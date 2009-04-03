@@ -42,6 +42,10 @@ extern	int		  getsubopt(char **, char * const *, char **);
 # endif
 #endif
 
+typedef	int		(*out_mdoc)(void *, const struct mdoc *);
+typedef	int		(*out_man)(void *, const struct man *);
+typedef	void		(*out_free)(void *);
+
 struct	buf {
 	char	 	 *buf;
 	size_t		  sz;
@@ -60,17 +64,24 @@ enum	outt {
 };
 
 struct	curparse {
-	const char	 *file;
-	int		  fd;
+	const char	 *file;		/* Current parse. */
+	int		  fd;		/* Current parse. */
 	int		  wflags;
 #define	WARN_WALL	  0x03		/* All-warnings mask. */
 #define	WARN_WCOMPAT	 (1 << 0)	/* Compatibility warnings. */
 #define	WARN_WSYNTAX	 (1 << 1)	/* Syntax warnings. */
 #define	WARN_WERR	 (1 << 2)	/* Warnings->errors. */
-	int		  fflags;
-	enum intt	  inttype;
+	int		  fflags;	/* Per-intt flags. */
+	enum intt	  inttype;	/* Input parsers. */
 	struct man	 *man;
+	struct man	 *lastman;
 	struct mdoc	 *mdoc;
+	struct mdoc	 *lastmdoc;
+	enum outt	  outtype;	/* Output devices. */
+	out_mdoc	  outmdoc;
+	out_man	  	  outman;
+	out_free	  outfree;
+	void		 *outdata;
 };
 
 #define	IGN_SCOPE	 (1 << 0) 	/* Ignore scope errors. */
@@ -78,17 +89,11 @@ struct	curparse {
 #define	IGN_MACRO	 (1 << 2) 	/* Ignore unknown macros. */
 #define	NO_IGN_MACRO	 (1 << 3) 
 
-typedef	int		(*out_run)(void *, const struct man *,
-				const struct mdoc *);
-typedef	void		(*out_free)(void *);
-
-extern	char		 *__progname;
-
 extern	void		 *ascii_alloc(void);
-extern	int		  terminal_run(void *, const struct man *, 
-				const struct mdoc *);
-extern	int		  tree_run(void *, const struct man *,
-				const struct mdoc *);
+extern	int		  tree_mdoc(void *, const struct mdoc *);
+extern	int		  tree_man(void *, const struct man *);
+extern	int		  terminal_mdoc(void *, const struct mdoc *);
+extern	int		  terminal_man(void *, const struct man *);
 extern	void		  terminal_free(void *);
 
 static	int		  foptions(int *, char *);
@@ -105,30 +110,27 @@ static	int		  ffile(struct buf *, struct buf *,
 				const char *, struct curparse *);
 static	int		  fdesc(struct buf *, struct buf *,
 				struct curparse *);
-static	int		  pset(const char *, size_t, struct curparse *,
+static	int		  pset(const char *, int, struct curparse *,
 				struct man **, struct mdoc **);
 static	struct man	 *man_init(struct curparse *);
 static	struct mdoc	 *mdoc_init(struct curparse *);
 __dead	static void	  version(void);
 __dead	static void	  usage(void);
 
+extern	char		 *__progname;
+
 
 int
 main(int argc, char *argv[])
 {
 	int		 c, rc;
-	void		*outdata;
-	enum outt	 outtype;
 	struct buf	 ln, blk;
-	out_run		 outrun;
-	out_free	 outfree;
 	struct curparse	 curp;
-
-	outtype = OUTT_ASCII;
 
 	bzero(&curp, sizeof(struct curparse));
 
 	curp.inttype = INTT_AUTO;
+	curp.outtype = OUTT_ASCII;
 
 	/* LINTED */
 	while (-1 != (c = getopt(argc, argv, "f:m:VW:T:")))
@@ -142,7 +144,7 @@ main(int argc, char *argv[])
 				return(0);
 			break;
 		case ('T'):
-			if ( ! toptions(&outtype, optarg))
+			if ( ! toptions(&curp.outtype, optarg))
 				return(0);
 			break;
 		case ('W'):
@@ -160,72 +162,39 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	/*
-	 * Allocate the appropriate front-end.  Note that utf8, latin1
-	 * (both not yet implemented) and ascii all resolve to the
-	 * terminal front-end with different encodings (see terminal.c).
-	 * Not all frontends have cleanup or alloc routines.
-	 */
-
-	switch (outtype) {
-	case (OUTT_TREE):
-		outdata = NULL;
-		outrun = tree_run;
-		outfree = NULL;
-		break;
-	case (OUTT_LINT):
-		outdata = NULL;
-		outrun = NULL;
-		outfree = NULL;
-		break;
-	default:
-		outdata = ascii_alloc();
-		outrun = terminal_run;
-		outfree = terminal_free;
-		break;
-	}
-
 	/* Configure buffers. */
 
 	bzero(&ln, sizeof(struct buf));
 	bzero(&blk, sizeof(struct buf));
 
-	/*
-	 * Main loop around available files.
-	 */
+	rc = 1;
 
-	if (NULL == *argv) {
-		rc = 0;
-		c = fstdin(&blk, &ln, &curp);
+	if (NULL == *argv)
+		if ( ! fstdin(&blk, &ln, &curp))
+			rc = 0;
 
-		if (c && NULL == outrun)
-			rc = 1;
-		/*else if (c && outrun && (*outrun)(outdata, curp.man, curp.mdoc))
-			rc = 1;*/
-	} else {
-		while (*argv) {
-			c = ffile(&blk, &ln, *argv, &curp);
-			if ( ! c)
-				break;
-			/*if (outrun && ! (*outrun)(outdata, curp.man, curp.mdoc))
-				break;*/
-			if (curp.man)
-				man_reset(curp.man);
-			if (curp.mdoc && ! mdoc_reset(curp.mdoc)) {
-				warnx("memory exhausted");
-				break;
-			}
-			argv++;
+	while (rc && *argv) {
+		if ( ! ffile(&blk, &ln, *argv, &curp))
+			rc = 0;
+		argv++;
+		if (*argv && rc) {
+			if (curp.lastman)
+				if ( ! man_reset(curp.lastman))
+					rc = 0;
+			if (curp.lastmdoc)
+				if ( ! mdoc_reset(curp.lastmdoc))
+					rc = 0;
+			curp.lastman = NULL;
+			curp.lastmdoc = NULL;
 		}
-		rc = NULL == *argv;
 	}
 
 	if (blk.buf)
 		free(blk.buf);
 	if (ln.buf)
 		free(ln.buf);
-	if (outfree)
-		(*outfree)(outdata);
+	if (curp.outfree)
+		(*curp.outfree)(curp.outdata);
 	if (curp.mdoc)
 		mdoc_free(curp.mdoc);
 	if (curp.man)
@@ -265,8 +234,7 @@ man_init(struct curparse *curp)
 	mancb.man_err = merr;
 	mancb.man_warn = manwarn;
 
-	/* Set command defaults. */
-	pflags = MAN_IGN_MACRO;
+	pflags = MAN_IGN_MACRO; /* XXX */
 
 	if (curp->fflags & NO_IGN_MACRO)
 		pflags &= ~MAN_IGN_MACRO;
@@ -289,7 +257,7 @@ mdoc_init(struct curparse *curp)
 	mdoccb.mdoc_err = merr;
 	mdoccb.mdoc_warn = mdocwarn;
 
-	pflags = 0;
+	pflags = 0; /* XXX */
 
 	if (curp->fflags & IGN_SCOPE)
 		pflags |= MDOC_IGN_SCOPE;
@@ -435,18 +403,55 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 
 	/* Note that a parser may not have been assigned, yet. */
 
-	if (mdoc)
-	       return(mdoc_endparse(mdoc));
-	if (man)
-		return(man_endparse(man));
+	if ( ! (man || mdoc)) {
+		warnx("%s: not a manual", curp->file);
+		return(0);
+	}
 
-	warnx("%s: not a manual", curp->file);
-	return(0);
+	if (mdoc && ! mdoc_endparse(mdoc))
+		return(0);
+	if (man && ! man_endparse(man))
+		return(0);
+
+	/*
+	 * If an output device hasn't been allocated, see if we should
+	 * do so now.  Note that not all outtypes have functions, so
+	 * this switch statement may be superfluous, but it's
+	 * low-overhead enough not to matter very much.
+	 */
+
+	if ( ! (curp->outman && curp->outmdoc)) {
+		switch (curp->outtype) {
+		case (OUTT_TREE):
+			curp->outman = tree_man;
+			curp->outmdoc = tree_mdoc;
+			break;
+		case (OUTT_LINT):
+			break;
+		default:
+			curp->outdata = ascii_alloc();
+			curp->outman = terminal_man;
+			curp->outmdoc = terminal_mdoc;
+			curp->outfree = terminal_free;
+			break;
+		}
+	}
+
+	/* Execute the out device, if it exists. */
+
+	if (man && curp->outman)
+		if ( ! (*curp->outman)(curp->outdata, man))
+			return(0);
+	if (mdoc && curp->outmdoc)
+		if ( ! (*curp->outmdoc)(curp->outdata, mdoc))
+			return(0);
+
+	return(1);
 }
 
 
 static int
-pset(const char *buf, size_t pos, struct curparse *curp,
+pset(const char *buf, int pos, struct curparse *curp,
 		struct man **man, struct mdoc **mdoc)
 {
 
@@ -467,14 +472,14 @@ pset(const char *buf, size_t pos, struct curparse *curp,
 			curp->mdoc = mdoc_init(curp);
 		if (NULL == (*mdoc = curp->mdoc))
 			return(0);
-		warnx("inheriting -mdoc parser");
+		curp->lastmdoc = *mdoc;
 		return(1);
 	case (INTT_MAN):
 		if (NULL == curp->man) 
 			curp->man = man_init(curp);
 		if (NULL == (*man = curp->man))
 			return(0);
-		warnx("inheriting -man parser");
+		curp->lastman = *man;
 		return(1);
 	default:
 		break;
@@ -485,6 +490,7 @@ pset(const char *buf, size_t pos, struct curparse *curp,
 			curp->mdoc = mdoc_init(curp);
 		if (NULL == (*mdoc = curp->mdoc))
 			return(0);
+		curp->lastmdoc = *mdoc;
 		return(1);
 	} 
 
@@ -492,6 +498,7 @@ pset(const char *buf, size_t pos, struct curparse *curp,
 		curp->man = man_init(curp);
 	if (NULL == (*man = curp->man))
 		return(0);
+	curp->lastman = *man;
 	return(1);
 }
 
@@ -547,8 +554,8 @@ foptions(int *fflags, char *arg)
 	toks[0] = "ign-scope";
 	toks[1] = "ign-escape";
 	toks[2] = "ign-macro";
-	toks[4] = "no-ign-macro";
-	toks[5] = NULL;
+	toks[3] = "no-ign-macro";
+	toks[4] = NULL;
 
 	while (*arg) 
 		switch (getsubopt(&arg, toks, &v)) {

@@ -54,8 +54,7 @@ ascii_alloc(void)
 
 
 int
-terminal_run(void *arg, const struct man *man,
-		const struct mdoc *mdoc)
+terminal_man(void *arg, const struct man *man)
 {
 	struct termp	*p;
 
@@ -64,12 +63,21 @@ terminal_run(void *arg, const struct man *man,
 	if (NULL == p->symtab)
 		p->symtab = term_ascii2htab();
 
-	if (man)
-		return(man_run(p, man));
-	if (mdoc)
-		return(mdoc_run(p, mdoc));
+	return(man_run(p, man));
+}
 
-	return(1);
+
+int
+terminal_mdoc(void *arg, const struct mdoc *mdoc)
+{
+	struct termp	*p;
+
+	p = (struct termp *)arg;
+
+	if (NULL == p->symtab)
+		p->symtab = term_ascii2htab();
+
+	return(mdoc_run(p, mdoc));
 }
 
 

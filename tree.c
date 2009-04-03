@@ -24,26 +24,32 @@
 #include "mdoc.h"
 #include "man.h"
 
-static	void	tree_mdoc(const struct mdoc_node *, int);
-static	void	tree_man(const struct man_node *, int);
+static	void	print_mdoc(const struct mdoc_node *, int);
+static	void	print_man(const struct man_node *, int);
 
 
 /* ARGSUSED */
 int
-tree_run(void *arg, const struct man *man,
-		const struct mdoc *mdoc)
+tree_mdoc(void *arg, const struct mdoc *mdoc)
 {
 
-	if (man)
-		tree_man(man_node(man), 0);
-	if (mdoc)
-		tree_mdoc(mdoc_node(mdoc), 0);
+	print_mdoc(mdoc_node(mdoc), 0);
+	return(1);
+}
+
+
+/* ARGSUSED */
+int
+tree_man(void *arg, const struct man *man)
+{
+
+	print_man(man_node(man), 0);
 	return(1);
 }
 
 
 static void
-tree_mdoc(const struct mdoc_node *n, int indent)
+print_mdoc(const struct mdoc_node *n, int indent)
 {
 	const char	 *p, *t;
 	int		  i, j;
@@ -137,14 +143,14 @@ tree_mdoc(const struct mdoc_node *n, int indent)
 	(void)printf(" %d:%d\n", n->line, n->pos);
 
 	if (n->child)
-		tree_mdoc(n->child, indent + 1);
+		print_mdoc(n->child, indent + 1);
 	if (n->next)
-		tree_mdoc(n->next, indent);
+		print_mdoc(n->next, indent);
 }
 
 
 static void
-tree_man(const struct man_node *n, int indent)
+print_man(const struct man_node *n, int indent)
 {
 	const char	 *p, *t;
 	int		  i;
@@ -184,7 +190,7 @@ tree_man(const struct man_node *n, int indent)
 	(void)printf("%s (%s) %d:%d\n", p, t, n->line, n->pos);
 
 	if (n->child)
-		tree_man(n->child, indent + 1);
+		print_man(n->child, indent + 1);
 	if (n->next)
-		tree_man(n->next, indent);
+		print_man(n->next, indent);
 }

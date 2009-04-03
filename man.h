@@ -90,7 +90,7 @@ struct	man;
 
 void	 	  man_free(struct man *);
 struct	man	 *man_alloc(void *, int, const struct man_cb *);
-void		  man_reset(struct man *);
+int		  man_reset(struct man *);
 int	 	  man_parseln(struct man *, int, char *buf);
 int		  man_endparse(struct man *);
 int		  man_valid_post(struct man *);

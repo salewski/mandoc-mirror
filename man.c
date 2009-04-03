@@ -62,12 +62,14 @@ man_meta(const struct man *m)
 }
 
 
-void
+int
 man_reset(struct man *man)
 {
 
 	man_free1(man);
 	man_alloc1(man);
+	/* TODO */
+	return(1);
 }
 
 
