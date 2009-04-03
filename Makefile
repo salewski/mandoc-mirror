@@ -9,8 +9,8 @@ INSTALL_DATA	= install -m 0444
 INSTALL_LIB	= install -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
-VERSION	   = 1.7.8
-VDATE	   = 31 March 2009
+VERSION	   = 1.7.9
+VDATE	   = 03 April 2009
 
 VFLAGS     = -DVERSION=\"$(VERSION)\"
 CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
