@@ -86,7 +86,7 @@ port:	mdocml-oport-$(VERSION).tar.gz \
 www:	all $(HTMLS) $(TARGZS) $(TEXTS)
 
 installwww: www
-	install -m 0444 $(HTMLS) $(STATICS) $(PREFIX)/
+	install -m 0444 $(TEXTS) $(HTMLS) $(STATICS) $(PREFIX)/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz
 	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/
