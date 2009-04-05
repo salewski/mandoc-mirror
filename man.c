@@ -18,7 +18,6 @@
  */
 #include <assert.h>
 #include <ctype.h>
-#include <err.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,18 +31,19 @@ const	char *const __man_macronames[MAN_MAX] = {
 	"IP",		"HP",		"SM",		"SB",
 	"BI",		"IB",		"BR",		"RB",
 	"R",		"B",		"I",		"IR",
-	"RI",		"br",		"na"
+	"RI",		"br",		"na",		"i"
 	};
 
 const	char * const *man_macronames = __man_macronames;
 
-static	struct man_node	*man_node_alloc(int, int, enum man_type);
+static	struct man_node	*man_node_alloc(int, int, 
+				enum man_type, int);
 static	int		 man_node_append(struct man *, 
 				struct man_node *);
 static	int		 man_ptext(struct man *, int, char *);
 static	int		 man_pmacro(struct man *, int, char *);
 static	void		 man_free1(struct man *);
-static	void		 man_alloc1(struct man *);
+static	int		 man_alloc1(struct man *);
 
 
 const struct man_node *
@@ -67,9 +67,7 @@ man_reset(struct man *man)
 {
 
 	man_free1(man);
-	man_alloc1(man);
-	/* TODO */
-	return(1);
+	return(man_alloc1(man));
 }
 
 
@@ -90,19 +88,22 @@ man_alloc(void *data, int pflags, const struct man_cb *cb)
 {
 	struct man	*p;
 
-	p = calloc(1, sizeof(struct man));
-	if (NULL == p)
-		err(1, "calloc");
+	if (NULL == (p = calloc(1, sizeof(struct man))))
+		return(NULL);
 
-	man_alloc1(p);
+	if ( ! man_alloc1(p)) {
+		free(p);
+		return(NULL);
+	}
 
-	if (cb)
-		(void)memcpy(&p->cb, cb, sizeof(struct man_cb));
-
-	p->htab = man_hash_alloc();
 	p->data = data;
 	p->pflags = pflags;
+	(void)memcpy(&p->cb, cb, sizeof(struct man_cb));
 
+	if (NULL == (p->htab = man_hash_alloc())) {
+		free(p);
+		return(NULL);
+	}
 	return(p);
 }
 
@@ -145,7 +146,7 @@ man_free1(struct man *man)
 }
 
 
-static void
+static int
 man_alloc1(struct man *m)
 {
 
@@ -153,10 +154,11 @@ man_alloc1(struct man *m)
 	m->flags = 0;
 	m->last = calloc(1, sizeof(struct man_node));
 	if (NULL == m->last)
-		err(1, "calloc");
+		return(0);
 	m->first = m->last;
 	m->last->type = MAN_ROOT;
 	m->next = MAN_NEXT_CHILD;
+	return(1);
 }
 
 
@@ -201,16 +203,18 @@ man_node_append(struct man *man, struct man_node *p)
 
 
 static struct man_node *
-man_node_alloc(int line, int pos, enum man_type type)
+man_node_alloc(int line, int pos, enum man_type type, int tok)
 {
 	struct man_node *p;
 
-	if (NULL == (p = calloc(1, sizeof(struct man_node))))
-		err(1, "malloc");
+	p = calloc(1, sizeof(struct man_node));
+	if (NULL == p)
+		return(NULL);
+
 	p->line = line;
 	p->pos = pos;
 	p->type = type;
-
+	p->tok = tok;
 	return(p);
 }
 
@@ -220,9 +224,9 @@ man_elem_alloc(struct man *man, int line, int pos, int tok)
 {
 	struct man_node *p;
 
-	p = man_node_alloc(line, pos, MAN_ELEM);
-	p->tok = tok;
-
+	p = man_node_alloc(line, pos, MAN_ELEM, tok);
+	if (NULL == p)
+		return(0);
 	return(man_node_append(man, p));
 }
 
@@ -233,10 +237,11 @@ man_word_alloc(struct man *man,
 {
 	struct man_node	*p;
 
-	p = man_node_alloc(line, pos, MAN_TEXT);
+	p = man_node_alloc(line, pos, MAN_TEXT, -1);
+	if (NULL == p)
+		return(0);
 	if (NULL == (p->string = strdup(word)))
-		err(1, "strdup");
-
+		return(0);
 	return(man_node_append(man, p));
 }
 

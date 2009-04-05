@@ -29,12 +29,10 @@ The
 .Nm man
 language was historically used to format 
 .Ux
-manuals.  In this reference document, we describe the syntax and
-structure of the 
-.Nm
-language.
+manuals.  This reference document describes the syntax and structure of
+this language.
 .Pp
-.Em \&Do not ever
+.Em \&Do not
 use 
 .Nm
 to write your manuals.  Use the
@@ -134,7 +132,7 @@ foo
 .Ed
 .Pp
 is equivalent to 
-.Sq \&.RI foo .  
+.Sq \&.RI foo .
 If two consecutive lines exhibit the latter behaviour,
 an error is raised.  Thus, the following is not acceptable:
 .Bd -literal -offset indent 
@@ -184,7 +182,12 @@ system, the following macros are also supported:
 .Bl -column "MacroX" "Arguments" -compact -offset indent
 .It Em Macro Ta Em Arguments
 .It \&.br    Ta    0
+.It \&.i     Ta    n
 .El
+.Pp
+These follow the same calling conventions as the above
+.Nm
+macros.
 .\" SECTION
 .Sh SEE ALSO
 .Xr mandoc 1 ,

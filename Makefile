@@ -1,4 +1,4 @@
-.SUFFIXES:	.html .sgml
+.SUFFIXES:	.html .sgml .1.txt .3.txt .7.txt .1 .3 .7
 
 BINDIR		= $(PREFIX)/bin
 INCLUDEDIR	= $(PREFIX)/include
@@ -9,8 +9,8 @@ INSTALL_DATA	= install -m 0444
 INSTALL_LIB	= install -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
-VERSION	   = 1.7.9
-VDATE	   = 03 April 2009
+VERSION	   = 1.7.10
+VDATE	   = 05 April 2009
 
 VFLAGS     = -DVERSION=\"$(VERSION)\"
 CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
@@ -55,10 +55,13 @@ TARGZS	   = mdocml-$(VERSION).tar.gz \
 	     mdocml-oport-$(VERSION).tar.gz \
 	     mdocml-fport-$(VERSION).tar.gz \
 	     mdocml-nport-$(VERSION).tar.gz
-MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7
+MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7 mandoc_char.7 \
+	     man.7 man.3
+TEXTS	   = mandoc.1.txt mdoc.3.txt mdoc.7.txt manuals.7.txt \
+	     mandoc_char.7.txt man.7.txt man.3.txt
 BINS	   = mandoc
-CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) $(TARGZS) \
-	     tags
+CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
+	     $(TARGZS) tags $(TEXTS)
 MAKEFILES  = Makefile.netbsd Makefile.openbsd Makefile.freebsd \
 	     Makefile
 INSTALL	   = $(SRCS) $(HEADS) $(MAKEFILES) DESCR $(MANS) $(SGMLS) \
@@ -80,7 +83,7 @@ port:	mdocml-oport-$(VERSION).tar.gz \
 	mdocml-fport-$(VERSION).tar.gz \
 	mdocml-nport-$(VERSION).tar.gz
 
-www:	$(HTMLS) $(TARGZS)
+www:	all $(HTMLS) $(TARGZS) $(TEXTS)
 
 installwww: www
 	install -m 0444 $(HTMLS) $(STATICS) $(PREFIX)/
@@ -242,3 +245,12 @@ mandoc: $(MAINOBJS) libmdoc.a libman.a
 .sgml.html:
 	validate $<
 	sed -e "s!@VERSION@!$(VERSION)!" -e "s!@VDATE@!$(VDATE)!" $< > $@
+
+.1.1.txt:
+	./mandoc -Wall,error $< | col -b > $@
+
+.3.3.txt:
+	./mandoc -Wall,error $< | col -b > $@
+
+.7.7.txt:
+	./mandoc -Wall,error $< | col -b > $@

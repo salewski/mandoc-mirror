@@ -26,12 +26,6 @@
 #define	ASCII_PRINT_HI	 126
 #define	ASCII_PRINT_LO	 32
 
-/*
- * Lookup and hashing routines for constructing the ASCII symbol table,
- * which should contain a significant portion of mdoc(7)'s special
- * symbols.
- */
-
 struct	line {
 	const char	 *code;
 	const char	 *out;

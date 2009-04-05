@@ -100,21 +100,19 @@ were provided.
 .Pp
 .Ex -std mandoc
 .\" SUB-SECTION
-.Ss Reserved Words (mdoc only)
-The reserved words described in
-.Xr mdoc 7
-are handled according to the following rules:
-.Bl -enum -offset XXX
-.It
-Opening delimiters 
+.Ss Punctuation
+If punctuation is set apart from words, such as in the phrase
+.Dq to be \&, or not to be ,
+it's processed by
+.Nm
+according to the following rules.  Opening punctuation
 .Po
 .Sq \&( , 
 .Sq \&[ , 
 and
 .Sq \&{
-.Pc are not followed by whitespace.
-.It
-Closing delimiters
+.Pc 
+is not followed by a space. Closing punctuation
 .Po
 .Sq \&. , 
 .Sq \&, , 
@@ -126,23 +124,12 @@ Closing delimiters
 .Sq \&] 
 and
 .Sq \&}
-.Pc are not preceeded by whitespace.
-.El
-.\" PARAGRAPH
+.Pc 
+is not preceeded by whitespace.
 .Pp
-Note that reserved words only register as such as if they appear as
-standalone tokens, either in parsed lines or streams of text.  Thus, the
-following fragment:
-.Bd -literal -offset XXXX
-this self is not that of the waking , empirically real man
-.Ed
-.\" PARAGRAPH
-.Pp
-\&...correctly adjusts the comma spacing to
-.Dq this self is not that of the waking , empirically real man .
-However, if the comma were part of 
-.Dq ,empirically ,
-it would not.
+If the input is
+.Xr mdoc 7 ,
+these rules are also applied to macro arguments when appropriate.
 .\" SUB-SECTION
 .Ss Input Formats
 The
@@ -165,24 +152,37 @@ should only be used for legacy manuals.
 .Pp
 A third option,
 .Fl m Ns Ar andoc ,
-which is also the default, determines encoding on-the-fly.  If multiple
-files are passed in, each has its file-type determined this way.  If
-multiple files are passed and
+which is also the default, determines encoding on-the-fly: if the first
+non-comment macro is 
+.Sq \&.Dd
+or
+.Sq \&.Dt ,
+the 
+.Xr mdoc 7
+parser is used; otherwise, the
+.Xr man 7
+parser is used.
+.Pp
+If multiple
+files are specified with 
+.Fl m Ns Ar andoc , 
+each has its file-type determined this way.  If multiple files are
+specified and
 .Fl m Ns Ar doc
 or
 .Fl m Ns Ar an
 is specified, then this format is used exclusively.
-.Pp
-The following escape sequences are recognised, although the per-format
-compiler may not allow certain sequences.
-.Bl -tag -width Ds -offset XXXX
-.It \efX
-sets the font mode to X (B, I, R or P, where P resets the font)
-.It \eX, \e(XX, \e[XN]
-queries the special-character table for a corresponding symbol
-.It \e*X, \e*(XX, \e*[XN]
-deprecated special-character format
-.El
+.\" .Pp
+.\" The following escape sequences are recognised, although the per-format
+.\" compiler may not allow certain sequences.
+.\" .Bl -tag -width Ds -offset XXXX
+.\" .It \efX
+.\" sets the font mode to X (B, I, R or P, where P resets the font)
+.\" .It \eX, \e(XX, \e[XN]
+.\" queries the special-character table for a corresponding symbol
+.\" .It \e*X, \e*(XX, \e*[XN]
+.\" deprecated special-character format
+.\" .El
 .\" SUB-SECTION
 .Ss Output Formats
 The
@@ -190,21 +190,24 @@ The
 utility accepts the following
 .Fl T
 arguments:
-.Bl -tag -width XXXXXXXXXXXX -offset XXXX
-.It Ar ascii
+.Bl -tag -width XXXXXXXXXXXX 
+.It Fl T Ns Ar ascii
 Produce 7-bit ASCII output, backspace-encoded for bold and underline
 styles.  This is the default.
-.It Ar tree
+.It Fl T Ns Ar tree
 Produce an indented parse tree.
-.It Ar lint
+.It Fl T Ns Ar lint
 Parse only: produce no output.
 .El
+.Pp
+If multiple input files are specified, these will be processed by the
+corresponding filter in-order.
 .\" SUB-SECTION
 .Ss Compiler Options
 Default compiler behaviour may be overriden with the
 .Fl f
 flag.
-.Bl -tag -width XXXXXXXXXXXXXX -offset XXXX
+.Bl -tag -width XXXXXXXXXXXXXX 
 .It Fl f Ns Ar ign-scope
 When rewinding the scope of a block macro, forces the compiler to ignore
 scope violations.  This can seriously mangle the resulting tree.
@@ -231,12 +234,15 @@ options may be grouped and delimited with a comma.  Using
 for example, will try to ignore scope and character-escape errors.
 .\" SECTION
 .Sh EXAMPLES
-To page this manual page on the terminal:
+To page manuals to the terminal:
 .\" PARAGRAPH
 .Pp
 .D1 % mandoc \-Wall,error mandoc.1 2>&1 | less
+.Pp
+.D1 % mandoc mandoc.1 mdoc.3 mdoc.7 | less
 .\" SECTION
 .Sh SEE ALSO
+.Xr mandoc_char 7 ,
 .Xr mdoc 7 ,
 .Xr man 7
 .\" 

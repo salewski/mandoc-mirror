@@ -24,10 +24,16 @@
 					</h1>
 
 					<p>
-					<span class="nm">mdocml</span> is a suite of tools compiling &#8220;-mdoc&#8221;, the roff macro
-					package of choice for BSD manual pages.  The mission of <span class="nm">mdocml</span> is to deprecate
-					<a href="http://www.gnu.org/software/groff/" class="external">groff</a>, the GNU roff implementation,
-					for displaying -mdoc pages.
+					<span class="nm">mdocml</span> is a suite of tools compiling &#8220;-mdoc&#8221;, the roff macro package
+					of choice for BSD manual pages, and &#8220;-man&#8221;, the predominant historical package for UNIX
+					manuals.  The mission of <span class="nm">mdocml</span> is to deprecate <a
+					href="http://www.gnu.org/software/groff/" class="external">groff</a>, the GNU roff implementation, for
+					displaying <a href="mdoc.7.txt" class="man">mdoc(7)</a> pages whilst providing token support for <a
+					href="man.7.txt" class="man">man(7)</a>.
+					</p>
+
+					<p>
+					What are UNIX manuals?  Read <a href="manuals.7.txt" class="man">manuals(7)</a> for an introduction.
 					</p>
 
 					<p>
@@ -37,16 +43,16 @@
 					</p>
 
 					<p>
-					The core of <span class="nm">mdocml</span> is the libmdoc library, a validating scanner-parser producing
-					intermediate-form output from -mdoc input.  libmdoc is a simple, fast library operating on memory
-					buffers, so it can be used for a variety of front-ends (terminal-based, CGI and so on).  
+					The core of <span class="nm">mdocml</span> are the <a href="man.3.txt" class="man">man(3)</a> and <a
+					href="mdoc.3.txt" class="man">mdoc(3)</a> libraries, validating compilers producing intermediate-form
+					output from -man or -mdoc input.  Both are simple, fast libraries operating on memory buffers, so they
+					may be used for a variety of front-ends (terminal-based, CGI and so on).  
 					</p>
 					
 					<p>
-					The primary front-end is <span class="man">mandoc(1)</span>, which formats -mdoc manuals for display on
-					the terminal.  The <span class="man">mandoc(1)</span> utility is intended to deprecate usage of <a
-					href="http://www.gnu.org/software/groff/" class="external">groff</a> for displaying mdoc manuals on the
-					terminal.
+					The primary front-end is <a href="mandoc.1.txt" class="man">mandoc(1)</a>, which formats manuals for
+					display on the terminal.  Its purpose is to deprecate usage of groff for displaying -mdoc and, to a
+					limited extent, -man manuals on the terminal.
 					</p>
 
 					<p>
@@ -83,7 +89,8 @@
 
 					<p class="boxed">
 					% cd /tmp<br>
-					% ftp -V -o- http://mdocml.bsd.lv/snapshots/mdocml.tar.gz | tar -zvxf -<br>
+					% ftp -V -o- <a href="http://mdocml.bsd.lv/snapshots/mdocml.tar.gz">
+					http://mdocml.bsd.lv/snapshots/mdocml.tar.gz</a> | tar -zvxf -<br>
 					% cd mdocml<br>
 					% make all<br>
 					% make regress<br>
@@ -113,7 +120,8 @@
 					# pkg_delete mdocml<br>
 					# cd /usr/ports/textproc/<br>
 					# rm -rf mdocml<br>
-					# ftp -V -o- http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz | tar -zvxf -<br>
+					# ftp -V -o- <a href="http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz">
+					http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz</a> | tar -zvxf -<br>
 					# cd mdocml<br>
 					# make build<br>
 					# make install
@@ -127,7 +135,8 @@
 					# pkg_delete mdocml<br>
 					# cd /usr/pkgsrc/textproc/<br>
 					# rm -rf mdocml<br>
-					# ftp -V -o- http://mdocml.bsd.lv/ports-netbsd/mdocml.tar.gz | tar -zvxf -<br>
+					# ftp -V -o- <a href="http://mdocml.bsd.lv/ports-netbsd/mdocml.tar.gz">
+					http://mdocml.bsd.lv/ports-netbsd/mdocml.tar.gz</a> | tar -zvxf -<br>
 					# cd mdocml<br>
 					# make build<br>
 					# make install
@@ -140,7 +149,8 @@
 					<p class="boxed">
 					# pkg_delete -x mdocml<br>
 					# cd /tmp<br>
-					# ftp -V -o- http://mdocml.bsd.lv/ports-freebsd/mdocml.tar.gz | tar -zvxf -<br>
+					# ftp -V -o- <a href="http://mdocml.bsd.lv/ports-freebsd/mdocml.tar.gz">
+					http://mdocml.bsd.lv/ports-freebsd/mdocml.tar.gz</a> | tar -zvxf -<br>
 					# cd mdocml<br>
 					# make<br>
 					# make install
