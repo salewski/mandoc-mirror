@@ -379,7 +379,7 @@ out:
 	if (fl) {
 		/*
 		 * A NLINE macro has been immediately followed with
-		 * another.  Close out the preceeding macro's scope, and
+		 * another.  Close out the preceding macro's scope, and
 		 * continue.
 		 */
 		assert(MAN_ROOT != m->last->type);
