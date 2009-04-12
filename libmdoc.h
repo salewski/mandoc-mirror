@@ -146,10 +146,6 @@ int		  mdoc_args(struct mdoc *, int,
 #define	ARGS_QWORD	(3)
 #define	ARGS_PHRASE	(4)
 
-/* FIXME: get rid of these. */
-int		  xstrlcpys(char *, const struct mdoc_node *, size_t);
-void	 	 *xrealloc(void *, size_t);
-char	 	 *xstrdup(const char *);
 int		  mdoc_macroend(struct mdoc *);
 
 __END_DECLS
