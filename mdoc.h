@@ -276,6 +276,7 @@ struct	mdoc_node {
 #define	MDOC_IGN_SCOPE	 (1 << 0) /* Ignore scope violations. */
 #define	MDOC_IGN_ESCAPE	 (1 << 1) /* Ignore bad escape sequences. */
 #define	MDOC_IGN_MACRO	 (1 << 2) /* Ignore unknown macros. */
+#define	MDOC_IGN_CHARS	 (1 << 3) /* Ignore disallowed chars. */
 
 /* Call-backs for parse messages. */
 struct	mdoc_cb {

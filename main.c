@@ -73,9 +73,9 @@ struct	curparse {
 #define	WARN_WERR	 (1 << 2)	/* Warnings->errors. */
 	int		  fflags;
 #define	IGN_SCOPE	 (1 << 0) 	/* Ignore scope errors. */
-#define	IGN_ESCAPE	 (1 << 1) 	/* Ignore bad escapes. */
-#define	IGN_MACRO	 (1 << 2) 	/* Ignore unknown macros. */
-#define	NO_IGN_MACRO	 (1 << 3) 
+#define	NO_IGN_ESCAPE	 (1 << 1) 	/* Don't ignore bad escapes. */
+#define	NO_IGN_MACRO	 (1 << 2) 	/* Don't ignore bad macros. */
+#define	NO_IGN_CHARS	 (1 << 3)	/* Don't ignore bad chars. */
 	enum intt	  inttype;	/* Input parsers. */
 	struct man	 *man;
 	struct man	 *lastman;
@@ -256,17 +256,19 @@ mdoc_init(struct curparse *curp)
 	mdoccb.mdoc_err = merr;
 	mdoccb.mdoc_warn = mdocwarn;
 
-	pflags = 0; /* XXX */
+	pflags = MDOC_IGN_MACRO | MDOC_IGN_ESCAPE | MDOC_IGN_CHARS;
 
 	if (curp->fflags & IGN_SCOPE)
 		pflags |= MDOC_IGN_SCOPE;
-	if (curp->fflags & IGN_ESCAPE)
-		pflags |= MDOC_IGN_ESCAPE;
-	if (curp->fflags & IGN_MACRO)
-		pflags |= MDOC_IGN_MACRO;
+	if (curp->fflags & NO_IGN_ESCAPE)
+		pflags &= ~MDOC_IGN_ESCAPE;
+	if (curp->fflags & NO_IGN_MACRO)
+		pflags &= ~MDOC_IGN_MACRO;
+	if (curp->fflags & NO_IGN_CHARS)
+		pflags &= ~MDOC_IGN_CHARS;
 
 	if (NULL == (mdoc = mdoc_alloc(curp, pflags, &mdoccb)))
-		warnx("memory allocated");
+		warnx("memory exhausted");
 
 	return(mdoc);
 }
@@ -548,13 +550,14 @@ static int
 foptions(int *fflags, char *arg)
 {
 	char		*v;
-	char		*toks[5];
+	char		*toks[6];
 
 	toks[0] = "ign-scope";
-	toks[1] = "ign-escape";
-	toks[2] = "ign-macro";
-	toks[3] = "no-ign-macro";
-	toks[4] = NULL;
+	toks[1] = "no-ign-escape";
+	toks[2] = "no-ign-macro";
+	toks[3] = "no-ign-chars";
+	toks[4] = "strict";
+	toks[5] = NULL;
 
 	while (*arg) 
 		switch (getsubopt(&arg, toks, &v)) {
@@ -562,13 +565,17 @@ foptions(int *fflags, char *arg)
 			*fflags |= IGN_SCOPE;
 			break;
 		case (1):
-			*fflags |= IGN_ESCAPE;
+			*fflags |= NO_IGN_ESCAPE;
 			break;
 		case (2):
-			*fflags |= IGN_MACRO;
+			*fflags |= NO_IGN_MACRO;
 			break;
 		case (3):
-			*fflags |= NO_IGN_MACRO;
+			*fflags |= NO_IGN_CHARS;
+			break;
+		case (4):
+			*fflags |= NO_IGN_ESCAPE | 
+			 	   NO_IGN_MACRO | NO_IGN_CHARS;
 			break;
 		default:
 			warnx("bad argument: -f%s", arg);

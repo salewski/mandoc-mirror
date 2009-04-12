@@ -51,6 +51,7 @@ enum	merr {
 };
 
 enum	mwarn {
+	WPRINT,
 	WESCAPE,
 	WWRONGMSEC,
 	WSECOOO,
@@ -95,6 +96,7 @@ static	int	warn_child_gt(struct mdoc *, const char *, int);
 static	int	err_child_eq(struct mdoc *, const char *, int);
 static	int	warn_child_eq(struct mdoc *, const char *, int);
 static	int	count_child(struct mdoc *);
+static	int	warn_print(struct mdoc *, int, int);
 static	int	warn_count(struct mdoc *, const char *, 
 			int, const char *, int);
 static	int	err_count(struct mdoc *, const char *, 
@@ -460,6 +462,9 @@ pwarn(struct mdoc *m, int line, int pos, enum mwarn type)
 		p = "prologue macros out-of-order";
 		c = WARN_COMPAT;
 		break;
+	case (WPRINT):
+		p = "invalid character";
+		break;
 	case (WESCAPE):
 		p = "invalid escape sequence";
 		break;
@@ -496,6 +501,14 @@ pwarn(struct mdoc *m, int line, int pos, enum mwarn type)
 	return(mdoc_pwarn(m, line, pos, c, p));
 }
 
+
+static int
+warn_print(struct mdoc *m, int ln, int pos)
+{
+	if (MDOC_IGN_CHARS & m->pflags)
+		return(pwarn(m, ln, pos, WPRINT));
+	return(perr(m, ln, pos, EPRINT));
+}
 
 
 static inline int
@@ -699,9 +712,11 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 	for ( ; *p; p++) {
 		if ('\t' == *p) {
 			if ( ! (MDOC_LITERAL & mdoc->flags))
-				return(perr(mdoc, line, pos, EPRINT));
+				if ( ! warn_print(mdoc, line, pos))
+					return(0);
 		} else if ( ! isprint((u_char)*p))
-			return(perr(mdoc, line, pos, EPRINT));
+			if ( ! warn_print(mdoc, line, pos))
+				return(0);
 
 		if ('\\' != *p)
 			continue;

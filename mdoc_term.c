@@ -1842,7 +1842,7 @@ termp_ss_pre(DECL_ARGS)
 		break;
 	case (MDOC_HEAD):
 		TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_SSECTION]);
-		p->offset = INDENT / 2;
+		p->offset = HALFINDENT;
 		break;
 	default:
 		break;

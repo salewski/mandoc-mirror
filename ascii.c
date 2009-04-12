@@ -137,7 +137,10 @@ term_a2ascii(void *arg, const char *p, size_t sz, size_t *rsz)
 
 	assert(p);
 	assert(sz > 0);
-	assert(p[0] >= ASCII_PRINT_LO && p[0] <= ASCII_PRINT_HI);
+
+	if (p[0] < ASCII_PRINT_LO || p[0] > ASCII_PRINT_HI)
+		return(NULL);
+
 
 	/*
 	 * Lookup the symbol in the symbol hash.  See ascii2htab for the

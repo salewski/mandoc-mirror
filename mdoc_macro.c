@@ -871,9 +871,11 @@ in_line(MACRO_PROT_ARGS)
 							tok, arg))
 					return(0);
 				mdoc->next = MDOC_NEXT_SIBLING;
-			} else if ( ! nc && 0 == cnt)
+			} else if ( ! nc && 0 == cnt) {
+				mdoc_argv_free(arg);
 				if ( ! pwarn(mdoc, line, ppos, WIGNE))
 					return(0);
+			}
 			c = mdoc_macro(mdoc, c, line, la, pos, buf);
 			if (0 == c)
 				return(0);
@@ -924,9 +926,11 @@ in_line(MACRO_PROT_ARGS)
 		if (0 == c)
 			return(0);
 		mdoc->next = MDOC_NEXT_SIBLING;
-	} else if ( ! nc && 0 == cnt) 
+	} else if ( ! nc && 0 == cnt) {
+		mdoc_argv_free(arg);
 		if ( ! pwarn(mdoc, line, ppos, WIGNE))
 			return(0);
+	}
 
 	if (ppos > 1)
 		return(1);
