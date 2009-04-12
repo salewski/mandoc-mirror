@@ -972,7 +972,7 @@ static int
 pre_er(PRE_ARGS)
 {
 
-	return(check_msec(mdoc, n, 2, 0));
+	return(check_msec(mdoc, n, 2, 3, 9, 0));
 }
 
 
