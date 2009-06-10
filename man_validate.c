@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2008, 2009 Kristaps Dzonsons <kristaps@openbsd.org>
+ * Copyright (c) 2008, 2009 Kristaps Dzonsons <kristaps@kth.se>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
