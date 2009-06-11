@@ -273,12 +273,15 @@ pre_PP(DECL_ARGS)
 static int
 pre_IP(DECL_ARGS)
 {
+#if 0
 	const struct man_node *nn;
 	size_t		 offs;
+#endif
 
 	term_vspace(p);
 	p->offset = INDENT;
 
+#if 0
 	if (NULL == (nn = n->child))
 		return(1);
 	if (MAN_TEXT != nn->type)
@@ -295,6 +298,8 @@ pre_IP(DECL_ARGS)
 	/* FIXME */
 	if ((p->offset += offs) > p->rmargin)
 		errx(1, "line too long");
+#endif
+
 	return(0);
 }
 
