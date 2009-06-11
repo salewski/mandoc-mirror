@@ -101,9 +101,9 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ in_line_eoln, 0 }, /* Fd */ 
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Fl */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Fn */ 
-	{ in_line, MDOC_PARSED }, /* Ft */ 
+	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ft */ 
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ic */ 
-	{ in_line_eoln, 0 }, /* In */ 
+	{ in_line_eoln, 0 }, /* In */  /* FIXME: historic usage! */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Li */
 	{ in_line_eoln, 0 }, /* Nd */ 
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Nm */ 
@@ -145,7 +145,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Em */ 
 	{ blk_part_exp, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Eo */
 	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* Fx */
-	{ in_line, MDOC_PARSED }, /* Ms */
+	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ms */
 	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* No */
 	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* Ns */
 	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* Nx */

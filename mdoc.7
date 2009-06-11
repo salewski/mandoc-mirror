@@ -405,7 +405,7 @@ then the macro accepts an arbitrary number of arguments.
 .It \&.Fd    Ta    \&No  Ta    \&No    Ta    >0
 .It \&.Fl    Ta    Yes   Ta    Yes     Ta    n
 .It \&.Fn    Ta    Yes   Ta    Yes     Ta    >0
-.It \&.Ft    Ta    \&No  Ta    Yes     Ta    n
+.It \&.Ft    Ta    Yes   Ta    Yes     Ta    n
 .It \&.Ic    Ta    Yes   Ta    Yes     Ta    >0
 .It \&.In    Ta    \&No  Ta    \&No    Ta    n
 .It \&.Li    Ta    Yes   Ta    Yes     Ta    n
@@ -436,7 +436,7 @@ then the macro accepts an arbitrary number of arguments.
 .It \&.Db    Ta    \&No  Ta    \&No    Ta    1
 .It \&.Em    Ta    Yes   Ta    Yes     Ta    >0
 .It \&.Fx    Ta    Yes   Ta    Yes     Ta    n
-.It \&.Ms    Ta    \&No  Ta    Yes     Ta    >0
+.It \&.Ms    Ta    Yes   Ta    Yes     Ta    >0
 .It \&.No    Ta    Yes   Ta    Yes     Ta    0
 .It \&.Ns    Ta    Yes   Ta    Yes     Ta    0
 .It \&.Nx    Ta    Yes   Ta    Yes     Ta    n
@@ -481,9 +481,10 @@ compatibility with these systems.
 .It
 .Sq \&.An ,
 .Sq \&.Fo ,
+.Sq \&.Ms ,
 and
 .Sq \&.St
-historically weren't always callable.  Both are now correctly callable.
+historically weren't callable (they are now).
 .\" LIST-ITEM
 .It
 .Sq \&.It \-nested
