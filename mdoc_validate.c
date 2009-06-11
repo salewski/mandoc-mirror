@@ -50,7 +50,10 @@ enum	merr {
 
 enum	mwarn {
 	WPRINT,
+	WNOWIDTH,
+	WMISSWIDTH,
 	WESCAPE,
+	WDEPCOL,
 	WWRONGMSEC,
 	WSECOOO,
 	WSECREP,
@@ -460,6 +463,16 @@ pwarn(struct mdoc *m, int line, int pos, enum mwarn type)
 		p = "prologue macros out-of-order";
 		c = WARN_COMPAT;
 		break;
+	case (WDEPCOL):
+		p = "deprecated column argument syntax";
+		c = WARN_COMPAT;
+		break;
+	case (WNOWIDTH):
+		p = "superfluous width argument";
+		break;
+	case (WMISSWIDTH):
+		p = "missing width argument";
+		break;
 	case (WPRINT):
 		p = "invalid character";
 		break;
@@ -776,7 +789,7 @@ pre_display(PRE_ARGS)
 static int
 pre_bl(PRE_ARGS)
 {
-	int		 i, type, width, offset;
+	int		 pos, type, width, offset;
 
 	if (MDOC_BLOCK != n->type)
 		return(1);
@@ -788,8 +801,8 @@ pre_bl(PRE_ARGS)
 	type = offset = width = -1;
 
 	/* LINTED */
-	for (i = 0; i < (int)n->args->argc; i++)
-		switch (n->args->argv[i].arg) {
+	for (pos = 0; pos < (int)n->args->argc; pos++)
+		switch (n->args->argv[pos].arg) {
 		case (MDOC_Bullet):
 			/* FALLTHROUGH */
 		case (MDOC_Dash):
@@ -811,23 +824,20 @@ pre_bl(PRE_ARGS)
 		case (MDOC_Inset):
 			/* FALLTHROUGH */
 		case (MDOC_Column):
-			if (-1 == type) {
-				type = n->args->argv[i].arg;
-				break;
-			}
-			return(nerr(mdoc, n, EMULTILIST));
+			if (-1 != type) 
+				return(nerr(mdoc, n, EMULTILIST));
+			type = n->args->argv[pos].arg;
+			break;
 		case (MDOC_Width):
-			if (-1 == width) {
-				width = n->args->argv[i].arg;
-				break;
-			}
-			return(nerr(mdoc, n, EARGREP));
+			if (-1 != width)
+				return(nerr(mdoc, n, EARGREP));
+			width = n->args->argv[pos].arg;
+			break;
 		case (MDOC_Offset):
-			if (-1 == offset) {
-				offset = n->args->argv[i].arg;
-				break;
-			}
-			return(nerr(mdoc, n, EARGREP));
+			if (-1 != offset)
+				return(nerr(mdoc, n, EARGREP));
+			offset = n->args->argv[pos].arg;
+			break;
 		default:
 			break;
 		}
@@ -835,7 +845,17 @@ pre_bl(PRE_ARGS)
 	if (-1 == type)
 		return(nerr(mdoc, n, ELISTTYPE));
 
+	/* 
+	 * Validate the width field.  Some list types don't need width
+	 * types and should be warned about them.  Others should have it
+	 * and must also be warned.
+	 */
+
 	switch (type) {
+	case (MDOC_Tag):
+		if (-1 == width && ! nwarn(mdoc, n, WMISSWIDTH))
+			return(0);
+		break;
 	case (MDOC_Column):
 		/* FALLTHROUGH */
 	case (MDOC_Diag):
@@ -843,17 +863,24 @@ pre_bl(PRE_ARGS)
 	case (MDOC_Inset):
 		/* FALLTHROUGH */
 	case (MDOC_Item):
-		if (-1 == width)
+		if (-1 != width && ! nwarn(mdoc, n, WNOWIDTH))
+			return(0);
+		break;
+	default:
+		break;
+	}
+
+	/*
+	 * General validation of fields.
+	 */
+
+	switch (type) {
+	case (MDOC_Column):
+		if (0 == n->args->argv[pos].sz)
 			break;
-		return(mdoc_nwarn(mdoc, n, WARN_SYNTAX,
-				"superfluous %s argument",
-				mdoc_argnames[MDOC_Width]));
-	case (MDOC_Tag):
-		if (-1 != width)
-			break;
-		return(mdoc_nwarn(mdoc, n, WARN_SYNTAX, 
-				"suggest %s argument", 
-				mdoc_argnames[MDOC_Width]));
+		if ( ! nwarn(mdoc, n, WDEPCOL))
+			return(0);
+		break;
 	default:
 		break;
 	}
