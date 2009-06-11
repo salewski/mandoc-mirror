@@ -592,6 +592,8 @@ arg_listtype(const struct mdoc_node *n)
 			break;
 		}
 
+	/* FIXME: mandated by parser. */
+
 	errx(1, "list type not supported");
 	/* NOTREACHED */
 }
@@ -610,6 +612,7 @@ arg_offset(const struct mdoc_argv *arg)
 		return(INDENT * 2);
 
 	/* FIXME: needs to support field-widths (10n, etc.). */
+
 	return(strlen(*arg->value));
 }
 
@@ -1071,6 +1074,8 @@ termp_rv_pre(DECL_ARGS)
 {
 	int		 i;
 
+	/* FIXME: mandated by parser. */
+
 	if (-1 == (i = arg_getattr(MDOC_Std, node)))
 		errx(1, "expected -std argument");
 	if (1 != node->args->argv[i].sz)
@@ -1103,6 +1108,8 @@ static int
 termp_ex_pre(DECL_ARGS)
 {
 	int		 i;
+
+	/* FIXME: mandated by parser? */
 
 	if (-1 == (i = arg_getattr(MDOC_Std, node)))
 		errx(1, "expected -std argument");
@@ -1157,8 +1164,9 @@ termp_xr_pre(DECL_ARGS)
 {
 	const struct mdoc_node *n;
 
-	if (NULL == (n = node->child))
-		errx(1, "expected text line argument");
+	assert(node->child && MDOC_TEXT == node->child->type);
+	n = node->child;
+
 	term_word(p, n->string);
 	if (NULL == (n = n->next)) 
 		return(0);
@@ -1292,8 +1300,7 @@ termp_lb_pre(DECL_ARGS)
 {
 	const char	*lb;
 
-	if (NULL == node->child)
-		errx(1, "expected text line argument");
+	assert(node->child && MDOC_TEXT == node->child->type);
 	if ((lb = mdoc_a2lib(node->child->string))) {
 		term_word(p, lb);
 		return(0);
@@ -1401,8 +1408,7 @@ termp_fn_pre(DECL_ARGS)
 {
 	const struct mdoc_node *n;
 
-	if (NULL == node->child)
-		errx(1, "expected text line arguments");
+	assert(node->child && MDOC_TEXT == node->child->type);
 
 	/* FIXME: can be "type funcname" "type varname"... */
 
@@ -1508,6 +1514,8 @@ termp_bd_pre(DECL_ARGS)
 		return(fmt_block_vspace(p, node, node));
 	else if (MDOC_BODY != node->type)
 		return(1);
+
+	/* FIXME: display type should be mandated by parser. */
 
 	if (NULL == node->parent->args)
 		errx(1, "missing display type");
@@ -1957,8 +1965,7 @@ termp_fo_pre(DECL_ARGS)
 
 	p->flags |= ttypes[TTYPE_FUNC_NAME];
 	for (n = node->child; n; n = n->next) {
-		if (MDOC_TEXT != n->type)
-			errx(1, "expected text line argument");
+		assert(MDOC_TEXT == n->type);
 		term_word(p, n->string);
 	}
 	p->flags &= ~ttypes[TTYPE_FUNC_NAME];
@@ -2002,9 +2009,7 @@ termp_bf_pre(DECL_ARGS)
 		return(1);
 	} 
 
-	if (MDOC_TEXT != n->type)
-		errx(1, "expected text line arguments");
-
+	assert(MDOC_TEXT == n->type);
 	if (0 == strcmp("Em", n->string))
 		TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_EMPH]);
 	else if (0 == strcmp("Sy", n->string))
@@ -2040,9 +2045,7 @@ static int
 termp_sm_pre(DECL_ARGS)
 {
 
-	if (NULL == node->child || MDOC_TEXT != node->child->type)
-		errx(1, "expected boolean line argument");
-
+	assert(node->child && MDOC_TEXT == node->child->type);
 	if (0 == strcmp("on", node->child->string)) {
 		p->flags &= ~TERMP_NONOSPACE;
 		p->flags &= ~TERMP_NOSPACE;
@@ -2113,8 +2116,8 @@ termp_lk_pre(DECL_ARGS)
 {
 	const struct mdoc_node *n;
 
-	if (NULL == (n = node->child))
-		errx(1, "expected line argument");
+	assert(node->child);
+	n = node->child;
 
 	p->flags |= ttypes[TTYPE_LINK_ANCHOR];
 	term_word(p, n->string);
@@ -2123,9 +2126,8 @@ termp_lk_pre(DECL_ARGS)
 	term_word(p, ":");
 
 	p->flags |= ttypes[TTYPE_LINK_TEXT];
-	for ( ; n; n = n->next) {
+	for ( ; n; n = n->next) 
 		term_word(p, n->string);
-	}
 	p->flags &= ~ttypes[TTYPE_LINK_TEXT];
 
 	return(0);
