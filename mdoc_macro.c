@@ -89,7 +89,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ blk_exp_close, MDOC_EXPLICIT }, /* El */
 	{ blk_full, MDOC_PARSED }, /* It */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ad */ 
-	{ in_line, MDOC_PARSED }, /* An */
+	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* An */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ar */
 	{ in_line_eoln, MDOC_CALLABLE }, /* Cd */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Cm */

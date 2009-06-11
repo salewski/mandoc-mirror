@@ -393,7 +393,7 @@ then the macro accepts an arbitrary number of arguments.
 .It \&.Os    Ta    \&No  Ta    \&No    Ta    n
 .It \&.Pp    Ta    \&No  Ta    \&No    Ta    0
 .It \&.Ad    Ta    Yes   Ta    Yes     Ta    n
-.It \&.An    Ta    \&No  Ta    Yes     Ta    n
+.It \&.An    Ta    Yes   Ta    Yes     Ta    n
 .It \&.Ar    Ta    Yes   Ta    Yes     Ta    n
 .It \&.Cd    Ta    Yes   Ta    \&No    Ta    >0
 .It \&.Cm    Ta    Yes   Ta    Yes     Ta    n
@@ -479,7 +479,8 @@ compatibility with these systems.
 .Bl -dash -compact
 .\" LIST-ITEM
 .It
-.Sq \&.Fo
+.Sq \&.An ,
+.Sq \&.Fo ,
 and
 .Sq \&.St
 historically weren't always callable.  Both are now correctly callable.
