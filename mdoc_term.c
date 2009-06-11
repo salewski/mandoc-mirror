@@ -86,10 +86,10 @@ struct	termpair {
 	struct termpair	 *ppair;
 	int		  type;
 #define	TERMPAIR_FLAG	 (1 << 0)
-	int	  	  flag;
-	size_t	  	  offset;
-	size_t	  	  rmargin;
-	int		  count;
+	int	  	  flag;		/* Whether being used. */
+	size_t	  	  offset;	/* Left margin. */
+	size_t	  	  rmargin;	/* Right margin. */
+	int		  count;	/* Enum count. */
 };
 
 #define	TERMPAIR_SETFLAG(termp, p, fl) \
@@ -602,10 +602,14 @@ arg_offset(const struct mdoc_argv *arg)
 {
 
 	assert(*arg->value);
+	if (0 == strcmp(*arg->value, "left"))
+		return(0);
 	if (0 == strcmp(*arg->value, "indent"))
 		return(INDENT);
 	if (0 == strcmp(*arg->value, "indent-two"))
 		return(INDENT * 2);
+
+	/* FIXME: needs to support field-widths (10n, etc.). */
 	return(strlen(*arg->value));
 }
 
