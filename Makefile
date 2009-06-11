@@ -157,6 +157,9 @@ man.o: man.c libman.h
 main.ln: main.c mdoc.h
 main.o: main.c mdoc.h
 
+compat.ln: compat.c 
+compat.o: compat.c
+
 term.ln: term.c term.h man.h mdoc.h
 term.o: term.c term.h man.h mdoc.h
 
