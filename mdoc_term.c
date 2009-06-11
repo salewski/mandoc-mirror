@@ -305,8 +305,8 @@ static const struct termact termacts[MDOC_MAX] = {
 };
 
 #ifdef __linux__
-extern	size_t		  strlcpy(char *, const char *, size_t);
-extern	size_t		  strlcat(char *, const char *, size_t);
+extern	size_t	  strlcpy(char *, const char *, size_t);
+extern	size_t	  strlcat(char *, const char *, size_t);
 #endif
 
 static	int	  arg_hasattr(int, const struct mdoc_node *);
@@ -325,12 +325,15 @@ static	void	  print_head(struct termp *,
 static	void	  print_body(DECL_ARGS);
 static	void	  print_foot(struct termp *, 
 			const struct mdoc_meta *);
-static	void	  sanity(const struct mdoc_node *);
 
 
 int
 mdoc_run(struct termp *p, const struct mdoc *m)
 {
+	/*
+	 * Main output function.  When this is called, assume that the
+	 * tree is properly formed.
+	 */
 
 	print_head(p, mdoc_meta(m));
 	print_body(p, NULL, mdoc_meta(m), mdoc_node(m));
@@ -355,10 +358,6 @@ print_node(DECL_ARGS)
 {
 	int		 dochild;
 	struct termpair	 npair;
-
-	/* Some quick sanity-checking. */
-
-	sanity(node);
 
 	/* Pre-processing. */
 
@@ -401,6 +400,14 @@ print_foot(struct termp *p, const struct mdoc_meta *meta)
 	struct tm	*tm;
 	char		*buf, *os;
 
+	/* 
+	 * Output the footer in new-groff style, that is, three columns
+	 * with the middle being the manual date and flanking columns
+	 * being the operating system:
+	 *
+	 * SYSTEM                  DATE                    SYSTEM
+	 */
+
 	if (NULL == (buf = malloc(p->rmargin)))
 		err(1, "malloc");
 	if (NULL == (os = malloc(p->rmargin)))
@@ -417,29 +424,33 @@ print_foot(struct termp *p, const struct mdoc_meta *meta)
 
 	(void)strlcpy(os, meta->os, p->rmargin);
 
-	/*
-	 * This is /slightly/ different from regular groff output
-	 * because we don't have page numbers.  Print the following:
-	 *
-	 * OS                                            MDOCDATE
-	 */
-
 	term_vspace(p);
 
-	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
-	p->rmargin = p->maxrmargin - strlen(buf);
 	p->offset = 0;
+	p->rmargin = (p->maxrmargin - strlen(buf) + 1) / 2;
+	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
 
 	term_word(p, os);
 	term_flushln(p);
 
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 	p->offset = p->rmargin;
-	p->rmargin = p->maxrmargin;
-	p->flags &= ~TERMP_NOBREAK;
+	p->rmargin = p->maxrmargin - strlen(os);
+	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 
 	term_word(p, buf);
 	term_flushln(p);
+
+	p->offset = p->rmargin;
+	p->rmargin = p->maxrmargin;
+	p->flags &= ~TERMP_NOBREAK;
+	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+
+	term_word(p, os);
+	term_flushln(p);
+
+	p->offset = 0;
+	p->rmargin = p->maxrmargin;
+	p->flags = 0;
 
 	free(buf);
 	free(os);
@@ -491,9 +502,9 @@ print_head(struct termp *p, const struct mdoc_meta *meta)
 	term_word(p, title);
 	term_flushln(p);
 
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 	p->offset = p->rmargin;
 	p->rmargin = p->maxrmargin - strlen(title);
+	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 
 	term_word(p, buf);
 	term_flushln(p);
@@ -506,125 +517,12 @@ print_head(struct termp *p, const struct mdoc_meta *meta)
 	term_word(p, title);
 	term_flushln(p);
 
-	p->rmargin = p->maxrmargin;
 	p->offset = 0;
+	p->rmargin = p->maxrmargin;
 	p->flags &= ~TERMP_NOSPACE;
 
 	free(title);
 	free(buf);
-}
-
-
-static void
-sanity(const struct mdoc_node *n)
-{
-	char		*p;
-
-	p = "regular form violated";
-
-	switch (n->type) {
-	case (MDOC_TEXT):
-		if (n->child) 
-			errx(1, p);
-		if (NULL == n->parent) 
-			errx(1, p);
-		if (NULL == n->string)
-			errx(1, p);
-		switch (n->parent->type) {
-		case (MDOC_TEXT):
-			/* FALLTHROUGH */
-		case (MDOC_ROOT):
-			errx(1, p);
-			/* NOTREACHED */
-		default:
-			break;
-		}
-		break;
-	case (MDOC_ELEM):
-		if (NULL == n->parent)
-			errx(1, p);
-		switch (n->parent->type) {
-		case (MDOC_TAIL):
-			/* FALLTHROUGH */
-		case (MDOC_BODY):
-			/* FALLTHROUGH */
-		case (MDOC_HEAD):
-			break;
-		default:
-			errx(1, p);
-			/* NOTREACHED */
-		}
-		if (n->child) switch (n->child->type) {
-		case (MDOC_TEXT):
-			break;
-		default:
-			errx(1, p);
-			/* NOTREACHED */
-		}
-		break;
-	case (MDOC_HEAD):
-		/* FALLTHROUGH */
-	case (MDOC_BODY):
-		/* FALLTHROUGH */
-	case (MDOC_TAIL):
-		if (NULL == n->parent)
-			errx(1, p);
-		if (MDOC_BLOCK != n->parent->type)
-			errx(1, p);
-		if (n->child) switch (n->child->type) {
-		case (MDOC_BLOCK):
-			/* FALLTHROUGH */
-		case (MDOC_ELEM):
-			/* FALLTHROUGH */
-		case (MDOC_TEXT):
-			break;
-		default:
-			errx(1, p);
-			/* NOTREACHED */
-		}
-		break;
-	case (MDOC_BLOCK):
-		if (NULL == n->parent)
-			errx(1, p);
-		if (NULL == n->child)
-			errx(1, p);
-		switch (n->parent->type) {
-		case (MDOC_ROOT):
-			/* FALLTHROUGH */
-		case (MDOC_HEAD):
-			/* FALLTHROUGH */
-		case (MDOC_BODY):
-			/* FALLTHROUGH */
-		case (MDOC_TAIL):
-			break;
-		default:
-			errx(1, p);
-			/* NOTREACHED */
-		}
-		switch (n->child->type) {
-		case (MDOC_ROOT):
-			/* FALLTHROUGH */
-		case (MDOC_ELEM):
-			errx(1, p);
-			/* NOTREACHED */
-		default:
-			break;
-		}
-		break;
-	case (MDOC_ROOT):
-		if (n->parent)
-			errx(1, p);
-		if (NULL == n->child)
-			errx(1, p);
-		switch (n->child->type) {
-		case (MDOC_BLOCK):
-			break;
-		default:
-			errx(1, p);
-			/* NOTREACHED */
-		}
-		break;
-	}
 }
 
 
