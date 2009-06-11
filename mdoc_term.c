@@ -485,7 +485,7 @@ print_head(struct termp *p, const struct mdoc_meta *meta)
 			meta->title, meta->msec);
 
 	p->offset = 0;
-	p->rmargin = (p->maxrmargin - strlen(buf)) / 2;
+	p->rmargin = (p->maxrmargin - strlen(buf) + 1) / 2;
 	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
 
 	term_word(p, title);
