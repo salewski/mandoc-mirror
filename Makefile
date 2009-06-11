@@ -61,7 +61,7 @@ TEXTS	   = mandoc.1.txt mdoc.3.txt mdoc.7.txt manuals.7.txt \
 	     mandoc_char.7.txt man.7.txt man.3.txt
 BINS	   = mandoc
 CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
-	     $(TARGZS) tags $(TEXTS)
+	     $(TARGZS) tags $(TEXTS) ChangeLog
 MAKEFILES  = Makefile.netbsd Makefile.openbsd Makefile.freebsd \
 	     Makefile
 INSTALL	   = $(SRCS) $(HEADS) $(MAKEFILES) DESCR $(MANS) $(SGMLS) \
@@ -83,10 +83,11 @@ port:	mdocml-oport-$(VERSION).tar.gz \
 	mdocml-fport-$(VERSION).tar.gz \
 	mdocml-nport-$(VERSION).tar.gz
 
-www:	all $(HTMLS) $(TARGZS) $(TEXTS)
+www:	all $(HTMLS) $(TARGZS) $(TEXTS) ChangeLog
 
 installwww: www
 	install -m 0444 $(TEXTS) $(HTMLS) $(STATICS) $(PREFIX)/
+	install -m 0444 ChangeLog $(PREFIX)/snapshots/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz
 	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/
@@ -176,6 +177,9 @@ mdoc_action.ln: mdoc_action.c libmdoc.h
 mdoc_action.o: mdoc_action.c libmdoc.h
 
 libmdoc.h: mdoc.h
+
+ChangeLog:
+	cvs2cl -P -t --no-indent --FSF --no-times
 
 mdocml-nport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.netbsd DESCR
 	mkdir -p .dist/mdocml/

@@ -75,7 +75,7 @@
 
 					<p>
 					The most current version is <span class="attn">@VERSION@</span>, dated 
-					<span class="attn">@VDATE@</span>.
+					<span class="attn">@VDATE@</span>.  
 					</p>
 
 					<h2>
@@ -84,7 +84,8 @@
 
 					<p>
 					CVS sources are checkedout and snapshotted with version updates.  These may be found in the <a
-					href="/snapshots/">/snapshots/</a> directory.
+					href="/snapshots/">/snapshots/</a> directory.  A full <a href="/snapshots/ChangeLog">ChangeLog</a> is
+					written with each new snapshot.
 					</p>
 
 					<p class="boxed">
@@ -93,7 +94,6 @@
 					http://mdocml.bsd.lv/snapshots/mdocml.tar.gz</a> | tar -zvxf -<br>
 					% cd mdocml<br>
 					% make all<br>
-					% make regress<br>
 					# make install
 					</p>
 
