@@ -183,8 +183,8 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ in_line_eoln, 0 }, /* Lb */
 	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* Ap */
 	{ in_line, 0 }, /* Lp */ 
-	{ in_line, MDOC_PARSED }, /* Lk */ 
-	{ in_line, MDOC_PARSED }, /* Mt */ 
+	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Lk */ 
+	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Mt */ 
 	{ blk_part_imp, MDOC_CALLABLE | MDOC_PARSED }, /* Brq */
 	{ blk_part_exp, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Bro */
 	{ blk_exp_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Brc */
@@ -813,6 +813,8 @@ in_line(MACRO_PROT_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Fl):
 		/* FALLTHROUGH */
+	case (MDOC_Lk):
+		/* FALLTHROUGH */
 	case (MDOC_Ar):
 		nc = 1;
 		break;
@@ -868,7 +870,8 @@ in_line(MACRO_PROT_ARGS)
 				if ( ! mdoc_elem_alloc(mdoc, line, ppos, 
 							tok, arg))
 					return(0);
-				mdoc->next = MDOC_NEXT_SIBLING;
+				if ( ! rew_last(mdoc, mdoc->last))
+					return(0);
 			} else if ( ! nc && 0 == cnt) {
 				mdoc_argv_free(arg);
 				if ( ! pwarn(mdoc, line, ppos, WIGNE))
@@ -923,7 +926,8 @@ in_line(MACRO_PROT_ARGS)
 		c = mdoc_elem_alloc(mdoc, line, ppos, tok, arg);
 		if (0 == c)
 			return(0);
-		mdoc->next = MDOC_NEXT_SIBLING;
+		if ( ! rew_last(mdoc, mdoc->last))
+			return(0);
 	} else if ( ! nc && 0 == cnt) {
 		mdoc_argv_free(arg);
 		if ( ! pwarn(mdoc, line, ppos, WIGNE))

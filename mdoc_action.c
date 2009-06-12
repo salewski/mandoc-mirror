@@ -56,6 +56,7 @@ static	int	  post_bl_tagwidth(POST_ARGS);
 static	int	  post_dd(POST_ARGS);
 static	int	  post_display(POST_ARGS);
 static	int	  post_dt(POST_ARGS);
+static	int	  post_lk(POST_ARGS);
 static	int	  post_nm(POST_ARGS);
 static	int	  post_os(POST_ARGS);
 static	int	  post_prol(POST_ARGS);
@@ -179,7 +180,7 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Lb */
 	{ NULL, NULL }, /* Ap */
 	{ NULL, NULL }, /* Lp */
-	{ NULL, NULL }, /* Lk */
+	{ NULL, post_lk }, /* Lk */
 	{ NULL, NULL }, /* Mt */
 	{ NULL, NULL }, /* Brq */
 	{ NULL, NULL }, /* Bro */
@@ -664,6 +665,27 @@ post_bl(POST_ARGS)
 		if ( ! post_bl_width(m))
 			return(0);
 
+	return(1);
+}
+
+
+static int
+post_lk(POST_ARGS)
+{
+	struct mdoc_node *n;
+
+	if (m->last->child)
+		return(1);
+	
+	n = m->last;
+	m->next = MDOC_NEXT_CHILD;
+	/* FIXME: this isn't documented anywhere! */
+	if ( ! mdoc_word_alloc(m, m->last->line,
+				m->last->pos, "~"))
+		return(0);
+
+	m->last = n;
+	m->next = MDOC_NEXT_SIBLING;
 	return(1);
 }
 

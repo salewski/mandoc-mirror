@@ -300,7 +300,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pres_lb, posts_lb },			/* Lb */
 	{ NULL, NULL },				/* Ap */
 	{ NULL, posts_pp },			/* Lp */ 
-	{ NULL, posts_text },			/* Lk */ 
+	{ NULL, NULL },				/* Lk */ 
 	{ NULL, posts_text },			/* Mt */ 
 	{ NULL, posts_wline },			/* Brq */ 
 	{ NULL, NULL },				/* Bro */ 
@@ -789,7 +789,7 @@ pre_display(PRE_ARGS)
 static int
 pre_bl(PRE_ARGS)
 {
-	int		 pos, type, width, offset;
+	int		 pos, col, type, width, offset;
 
 	if (MDOC_BLOCK != n->type)
 		return(1);
@@ -798,7 +798,7 @@ pre_bl(PRE_ARGS)
 
 	/* Make sure that only one type of list is specified.  */
 
-	type = offset = width = -1;
+	type = offset = width = col = -1;
 
 	/* LINTED */
 	for (pos = 0; pos < (int)n->args->argc; pos++)
@@ -827,6 +827,7 @@ pre_bl(PRE_ARGS)
 			if (-1 != type) 
 				return(nerr(mdoc, n, EMULTILIST));
 			type = n->args->argv[pos].arg;
+			col = pos;
 			break;
 		case (MDOC_Width):
 			if (-1 != width)
@@ -876,7 +877,8 @@ pre_bl(PRE_ARGS)
 
 	switch (type) {
 	case (MDOC_Column):
-		if (0 == n->args->argv[pos].sz)
+		assert(col >= 0);
+		if (0 == n->args->argv[col].sz)
 			break;
 		if ( ! nwarn(mdoc, n, WDEPCOL))
 			return(0);
