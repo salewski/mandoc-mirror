@@ -538,7 +538,8 @@ post_bl_tagwidth(struct mdoc *m)
 	 * width if a macro.
 	 */
 
-	if ((n = m->last->body->child)) {
+	n = m->last->body->child;
+	if (n) {
 		assert(MDOC_BLOCK == n->type);
 		assert(MDOC_It == n->tok);
 		n = n->head->child;

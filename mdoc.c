@@ -480,7 +480,8 @@ mdoc_block_alloc(struct mdoc *mdoc, int line, int pos,
 	p = node_alloc(mdoc, line, pos, tok, MDOC_BLOCK);
 	if (NULL == p)
 		return(0);
-	if ((p->args = args))
+	p->args = args;
+	if (p->args)
 		(args->refcnt)++;
 	return(node_append(mdoc, p));
 }
@@ -495,7 +496,8 @@ mdoc_elem_alloc(struct mdoc *mdoc, int line, int pos,
 	p = node_alloc(mdoc, line, pos, tok, MDOC_ELEM);
 	if (NULL == p)
 		return(0);
-	if ((p->args = args))
+	p->args = args;
+	if (p->args)
 		(args->refcnt)++;
 	return(node_append(mdoc, p));
 }
