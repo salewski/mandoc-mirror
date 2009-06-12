@@ -254,10 +254,10 @@ mandoc: $(MAINOBJS) libmdoc.a libman.a
 	sed -e "s!@VERSION@!$(VERSION)!" -e "s!@VDATE@!$(VDATE)!" $< > $@
 
 .1.1.txt:
-	./mandoc -Wall,error $< | col -b > $@
+	./mandoc -Wall $< | col -b > $@
 
 .3.3.txt:
-	./mandoc -Wall,error $< | col -b > $@
+	./mandoc -Wall $< | col -b > $@
 
 .7.7.txt:
-	./mandoc -Wall,error $< | col -b > $@
+	./mandoc -Wall $< | col -b > $@
