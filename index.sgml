@@ -38,10 +38,10 @@
 					</p>
 
 					<p>
-					The core of <span class="nm">mdocml</span> are the <i>libmdoc</i> and <i>libman</i> validating compiler
-					libraries.  Both are simple, fast libraries operating on memory buffers, so they may be used for a
-					variety of front-ends (terminal-based, CGI and so on).  The primary front-end is <i> mandoc</i>, which
-					formats manuals for display on the terminal.
+					The core of <span class="nm">mdocml</span> is composed of the <i>libmdoc</i> and <i>libman</i>
+					validating compiler libraries.  Both are simple, fast libraries operating on memory buffers, so they may
+					be used for a variety of front-ends (terminal-based, CGI and so on).  The primary front-end is <i>
+					mandoc</i>, which formats manuals for display on the terminal.
 					</p>
 				</td>
 			</tr>
@@ -206,7 +206,7 @@
 					</p>
 
 					<p>
-					We don't yet offer anonymous CVS access.  If you must have read-only access to the CVS tree (for
+					We don'yet offer anonymous CVS access.  If you must have read-only access to the CVS tree (for
 					down-stream maintenance and so on), then please contact Kristaps directly for a read-only CVS account.
 					We strongly suggest using snapshots, instead.
 					</p>
