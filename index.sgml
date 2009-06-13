@@ -28,12 +28,7 @@
 					of choice for BSD manual pages, and &#8220;-man&#8221;, the predominant historical package for UNIX
 					manuals.  The mission of <span class="nm">mdocml</span> is to deprecate <a
 					href="http://www.gnu.org/software/groff/" class="external">groff</a>, the GNU roff implementation, for
-					displaying <a href="mdoc.7.txt" class="man">mdoc(7)</a> pages whilst providing token support for <a
-					href="man.7.txt" class="man">man(7)</a>.
-					</p>
-
-					<p>
-					What are UNIX manuals?  Read <a href="manuals.7.txt" class="man">manuals(7)</a> for an introduction.
+					displaying -mdoc pages whilst providing token support for -man.
 					</p>
 
 					<p>
@@ -43,22 +38,10 @@
 					</p>
 
 					<p>
-					The core of <span class="nm">mdocml</span> are the <a href="man.3.txt" class="man">man(3)</a> and <a
-					href="mdoc.3.txt" class="man">mdoc(3)</a> libraries, validating compilers producing intermediate-form
-					output from -man or -mdoc input.  Both are simple, fast libraries operating on memory buffers, so they
-					may be used for a variety of front-ends (terminal-based, CGI and so on).  
-					</p>
-					
-					<p>
-					The primary front-end is <a href="mandoc.1.txt" class="man">mandoc(1)</a>, which formats manuals for
-					display on the terminal.  Its purpose is to deprecate usage of groff for displaying -mdoc and, to a
-					limited extent, -man manuals on the terminal.
-					</p>
-
-					<p>
-					<span class="attn">Please submit patches, bug reports and suggestions!</span> Although a significant
-					implementation exists, work remains for the backend library and especially the front-end utilities.  See
-					the <a href="#contact">contact</a> information below for submissions.
+					The core of <span class="nm">mdocml</span> are the <i>libmdoc</i> and <i>libman</i> validating compiler
+					libraries.  Both are simple, fast libraries operating on memory buffers, so they may be used for a
+					variety of front-ends (terminal-based, CGI and so on).  The primary front-end is <i> mandoc</i>, which
+					formats manuals for display on the terminal.
 					</p>
 				</td>
 			</tr>
@@ -70,12 +53,8 @@
 
 					<p>
 					Sources correctly build and install on FreeBSD, OpenBSD, NetBSD and Linux operating systems, tested
-					variously on i386, AMD64, alpha and others. 
-					</p>
-
-					<p>
-					The most current version is <span class="attn">@VERSION@</span>, dated 
-					<span class="attn">@VDATE@</span>.  
+					variously on i386, AMD64, alpha and others.  The most current version is <span
+					class="attn">@VERSION@</span>, dated <span class="attn">@VDATE@</span>.  
 					</p>
 
 					<h2>
@@ -83,9 +62,9 @@
 					</h2>
 
 					<p>
-					CVS sources are checkedout and snapshotted with version updates.  These may be found in the <a
-					href="/snapshots/">/snapshots/</a> directory.  A full <a href="/snapshots/ChangeLog">ChangeLog</a> is
-					written with each new snapshot.
+					CVS sources are checkedout and snapshotted with version updates.  These (and all historical snapshots)
+					may be found in the <a href="/snapshots/">/snapshots/</a> directory.  A full <a
+					href="/snapshots/ChangeLog">ChangeLog</a> is written with each new snapshot.
 					</p>
 
 					<p class="boxed">
@@ -160,21 +139,76 @@
 			<tr>
 				<td>
 					<h1>
+					DOCUMENTATION
+					</h1>
+
+					<table width="100%">
+						<colgroup>
+							<col>
+							<col width="5">
+							<col width="100%">
+						</colgroup>
+						<tr>
+							<td><a href="mandoc.1.txt">mandoc(1)</a></td>
+							<td></td>
+							<td>format and display UNIX manuals</td>
+						</tr>
+						<tr>
+							<td><a href="mandoc_char.7.txt">mandoc_char(7)</a></td>
+							<td></td>
+							<td>mandoc special characters</td>
+						</tr>
+						<tr>
+							<td><a href="mdoc.7.txt">mdoc(7)</a></td>
+							<td></td>
+							<td>mdoc language reference</td>
+						</tr>
+						<tr>
+							<td><a href="man.7.txt">man(7)</a></td>
+							<td></td>
+							<td>man language reference</td>
+						</tr>
+						<tr>
+							<td><a href="manuals.7.txt">manuals(7)</a></td>
+							<td></td>
+							<td>a guide to writing UNIX manuals</td>
+						</tr>
+						<tr>
+							<td><a href="mdoc.3.txt">mdoc(3)</a></td>
+							<td></td>
+							<td>mdoc macro compiler library</td>
+						</tr>
+						<tr>
+							<td><a href="man.3.txt">man(3)</a></td>
+							<td></td>
+							<td>man macro compiler library</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<h1>
 					CONTACT
 					</h1>
 
 					<p>
-					Please contact Kristaps, kris<a class="external"
+					For all issues related to <span class="nm">mdocml</span>, contact Kristaps, kris<a class="external"
 					href="http://mailhide.recaptcha.net/d?k=01jt88xIsFONwVjHZmGpc4AQ==&amp;c=sb5E6ulipc-eTnpTVqI-BQ=="
 					onclick="window.open('http://mailhide.recaptcha.net/d?k=01jt88xIsFONwVjHZmGpc4AQ==&amp;c=sb5E6ulipc-eTnpTVqI-BQ==',
 					'', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return
-					false;" title="Reveal this e-mail address">...</a>@kth.se, with questions, bug reports, patches, and so
-					on.  
+					false;" title="Reveal this e-mail address">...</a>@kth.se.
 					</p>
-					
+
 					<p>
-					If you'd like to submit patches, please contact us beforehand in case larger changes are pending but not
-					checked in.  If making a bug report, please make sure it's repeatable on the most current snapshot.
+					If you want to receive a semi-automated mail-out of new versions, then please write with a message
+					subject of &#8220;subscribe mdocml&#8221; (or, symmetrically, &#8220;unsubscribe mdocml&#8221;).
+					</p>
+
+					<p>
+					We don't yet offer anonymous CVS access.  If you must have read-only access to the CVS tree (for
+					down-stream maintenance and so on), then please contact Kristaps directly for a read-only CVS account.
+					We strongly suggest using snapshots, instead.
 					</p>
 				</td>
 			</tr>
