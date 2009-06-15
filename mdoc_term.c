@@ -415,11 +415,7 @@ print_foot(struct termp *p, const struct mdoc_meta *meta)
 
 	tm = localtime(&meta->date);
 
-#ifdef __OpenBSD__
-	if (NULL == strftime(buf, p->rmargin, "%B %d, %Y", tm))
-#else
 	if (0 == strftime(buf, p->rmargin, "%B %d, %Y", tm))
-#endif
 		err(1, "strftime");
 
 	(void)strlcpy(os, meta->os, p->rmargin);
