@@ -278,7 +278,6 @@ struct	mdoc_node {
 
 /* Call-backs for parse messages. */
 struct	mdoc_cb {
-	void	(*mdoc_msg)(void *, int, int, const char *);
 	int	(*mdoc_err)(void *, int, int, const char *);
 	int	(*mdoc_warn)(void *, int, int, 
 			enum mdoc_warn, const char *);

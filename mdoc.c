@@ -242,22 +242,6 @@ mdoc_parseln(struct mdoc *m, int ln, char *buf)
 }
 
 
-void
-mdoc_vmsg(struct mdoc *mdoc, int ln, int pos, const char *fmt, ...)
-{
-	char		  buf[256];
-	va_list		  ap;
-
-	if (NULL == mdoc->cb.mdoc_msg)
-		return;
-
-	va_start(ap, fmt);
-	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
-	va_end(ap);
-	(*mdoc->cb.mdoc_msg)(mdoc->data, ln, pos, buf);
-}
-
-
 int
 mdoc_verr(struct mdoc *mdoc, int ln, int pos, 
 		const char *fmt, ...)
@@ -339,39 +323,6 @@ mdoc_err(struct mdoc *mdoc, const char *fmt, ...)
 	va_end(ap);
 	return((*mdoc->cb.mdoc_err)(mdoc->data, mdoc->last->line,
 	    mdoc->last->pos, buf));
-}
-
-
-void
-mdoc_msg(struct mdoc *mdoc, const char *fmt, ...)
-{
-	char		  buf[256];
-	va_list		  ap;
-
-	if (NULL == mdoc->cb.mdoc_msg)
-		return;
-
-	va_start(ap, fmt);
-	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
-	va_end(ap);
-	(*mdoc->cb.mdoc_msg)(mdoc->data, mdoc->last->line, mdoc->last->pos,
-	    buf);
-}
-
-
-void
-mdoc_pmsg(struct mdoc *mdoc, int line, int pos, const char *fmt, ...)
-{
-	char		  buf[256];
-	va_list		  ap;
-
-	if (NULL == mdoc->cb.mdoc_msg)
-		return;
-
-	va_start(ap, fmt);
-	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
-	va_end(ap);
-	(*mdoc->cb.mdoc_msg)(mdoc->data, line, pos, buf);
 }
 
 

@@ -259,7 +259,6 @@ mdoc_init(struct curparse *curp)
 	struct mdoc	*mdoc;
 	struct mdoc_cb	 mdoccb;
 
-	mdoccb.mdoc_msg = NULL;
 	mdoccb.mdoc_err = merr;
 	mdoccb.mdoc_warn = mdocwarn;
 
