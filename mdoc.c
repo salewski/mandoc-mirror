@@ -293,23 +293,6 @@ mdoc_vwarn(struct mdoc *mdoc, int ln, int pos,
 
 
 int
-mdoc_nwarn(struct mdoc *mdoc, const struct mdoc_node *node, enum mdoc_warn type,
-		const char *fmt, ...)
-{
-	char		 buf[256];
-	va_list		 ap;
-
-	if (NULL == mdoc->cb.mdoc_warn)
-		return(0);
-
-	va_start(ap, fmt);
-	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
-	va_end(ap);
-	return((*mdoc->cb.mdoc_warn)(mdoc->data, node->line, node->pos, type,
-	    buf));
-}
-
-int
 mdoc_nerr(struct mdoc *mdoc, const struct mdoc_node *node, const char *fmt, ...)
 {
 	char		 buf[256];

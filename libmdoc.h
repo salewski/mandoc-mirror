@@ -69,8 +69,6 @@ void		  mdoc_vmsg(struct mdoc *, int, int,
 			const char *, ...);
 int		  mdoc_verr(struct mdoc *, int, int, 
 			const char *, ...);
-int		  mdoc_nwarn(struct mdoc *, const struct mdoc_node *,
-			enum mdoc_warn, const char *, ...);
 int		  mdoc_nerr(struct mdoc *, const struct mdoc_node *,
 			const char *, ...);
 int		  mdoc_warn(struct mdoc *, enum mdoc_warn, const char *, ...);
