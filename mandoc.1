@@ -37,20 +37,20 @@ The
 utility formats 
 .Ux
 manual pages for display.  The arguments are as follows:
-.Bl -tag -width XXXXXXXXXXXX
+.Bl -tag -width Ds
 .\" ITEM
 .It Fl f Ns Ar option...
 Override default compiler behaviour.  See 
 .Sx Compiler Options
 for details.
 .\" ITEM
-.It Fl m
+.It Fl m Ns Ar format
 Input format.  See
 .Sx Input Formats
 for available formats.  Defaults to
 .Fl m Ns Ar andoc .
 .\" ITEM
-.It Fl T
+.It Fl T Ns Ar output
 Output format.  See
 .Sx Output Formats
 for available formats.  Defaults to
@@ -188,7 +188,7 @@ The
 utility accepts the following
 .Fl T
 arguments:
-.Bl -tag -width XXXXXXXXXXXX 
+.Bl -tag -width Ds
 .It Fl T Ns Ar ascii
 Produce 7-bit ASCII output, backspace-encoded for bold and underline
 styles.  This is the default.
@@ -205,7 +205,7 @@ corresponding filter in-order.
 Default compiler behaviour may be overriden with the
 .Fl f
 flag.
-.Bl -tag -width XXXXXXXXXXXXXX 
+.Bl -tag -width Ds
 .It Fl f Ns Ar ign-scope
 When rewinding the scope of a block macro, forces the compiler to ignore
 scope violations.  This can seriously mangle the resulting tree.
