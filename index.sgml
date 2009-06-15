@@ -95,6 +95,12 @@
 					OpenBSD port
 					</h3>
 
+					<p>
+					Note: the <span class="nm">mdocml</span> utility is part of OpenBSD's base system at <a
+					href="http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/mandoc/">usr.bin/mandoc</a>.  Please use this
+					instead of the provided port.
+					</p>
+
 					<p class="boxed">
 					# pkg_delete mdocml<br>
 					# cd /usr/ports/textproc/<br>
@@ -110,6 +116,12 @@
 					NetBSD pkgsrc
 					</h3>
 
+					<p>
+					Note: a pkgsrc port is maintained in-tree at <a
+					href="http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/textproc/mdocml/">textproc/mdocml</a>.  Please use this
+					instead of the provided pkgsrc.
+					</p>
+
 					<p class="boxed">
 					# pkg_delete mdocml<br>
 					# cd /usr/pkgsrc/textproc/<br>
@@ -124,6 +136,12 @@
 					<h3>
 					FreeBSD port
 					</h3>
+
+					<p>
+					Note: a port is maintained in-tree at <a
+					href="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/">textproc/mdocml</a>.  Please use
+					this instead of the provided port.
+					</p>
 
 					<p class="boxed">
 					# pkg_delete -x mdocml<br>
@@ -206,9 +224,9 @@
 					</p>
 
 					<p>
-					We don'yet offer anonymous CVS access.  If you must have read-only access to the CVS tree (for
-					down-stream maintenance and so on), then please contact Kristaps directly for a read-only CVS account.
-					We strongly suggest using snapshots, instead.
+					We don't offer anonymous CVS access.  If you must have read-only access to the CVS tree (for down-stream
+					maintenance and so on), then please contact Kristaps directly for a read-only CVS account.  We strongly
+					suggest using snapshots, instead.
 					</p>
 				</td>
 			</tr>
