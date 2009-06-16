@@ -324,10 +324,6 @@ man_pmacro(struct man *m, int ln, char *buf)
 
 	ppos = i;
 
-	if (buf[i] && '\\' == buf[i])
-		if (buf[i + 1] && '\"' == buf[i + 1])
-			goto out;
-
 	/* Copy the first word into a nil-terminated buffer. */
 
 	for (j = 0; j < 4; j++, i++) {

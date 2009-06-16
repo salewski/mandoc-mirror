@@ -657,7 +657,7 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 	int		  i, c;
 	char		  mac[5];
 
-	/* Comments and empties are quickly ignored. */
+	/* Empty lines are ignored. */
 
 	if (0 == buf[1])
 		return(1);
@@ -670,10 +670,6 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 			return(1);
 		return(perr(m, ln, 1, ESPACE));
 	}
-
-	if (buf[1] && '\\' == buf[1])
-		if (buf[2] && '\"' == buf[2])
-			return(1);
 
 	/* Copy the first word into a nil-terminated buffer. */
 

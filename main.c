@@ -74,12 +74,12 @@ struct	curparse {
 #define	NO_IGN_ESCAPE	 (1 << 1) 	/* Don't ignore bad escapes. */
 #define	NO_IGN_MACRO	 (1 << 2) 	/* Don't ignore bad macros. */
 #define	NO_IGN_CHARS	 (1 << 3)	/* Don't ignore bad chars. */
-	enum intt	  inttype;	/* Input parsers. */
+	enum intt	  inttype;	/* Input parsers... */
 	struct man	 *man;
 	struct man	 *lastman;
 	struct mdoc	 *mdoc;
 	struct mdoc	 *lastmdoc;
-	enum outt	  outtype;	/* Output devices. */
+	enum outt	  outtype;	/* Output devices... */
 	out_mdoc	  outmdoc;
 	out_man	  	  outman;
 	out_free	  outfree;
@@ -325,7 +325,7 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 	size_t		 sz;
 	ssize_t		 ssz;
 	struct stat	 st;
-	int		 j, i, pos, lnn;
+	int		 j, i, pos, lnn, comment;
 	struct man	*man;
 	struct mdoc	*mdoc;
 
@@ -355,7 +355,7 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 
 	/* Fill buf with file blocksize. */
 
-	for (lnn = 0, pos = 0; ; ) {
+	for (lnn = pos = comment = 0; ; ) {
 		if (-1 == (ssz = read(curp->fd, blk->buf, sz))) {
 			warn("%s", curp->file);
 			return(0);
@@ -375,17 +375,34 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 			}
 
 			if ('\n' != blk->buf[i]) {
+				if (comment)
+					continue;
 				ln->buf[pos++] = blk->buf[i];
-				continue;
-			}
 
-			/* Check for CPP-escaped newline. */
+				/* Handle in-line `\"' comments. */
 
-			if (pos > 0 && '\\' == ln->buf[pos - 1]) {
-				for (j = pos - 1; j >= 0; j--)
+				if (1 == pos || '\"' != ln->buf[pos - 1])
+					continue;
+
+				for (j = pos - 2; j >= 0; j--)
 					if ('\\' != ln->buf[j])
 						break;
 
+				if ( ! ((pos - 2 - j) % 2))
+					continue;
+
+				comment = 1;
+				pos -= 2;
+				continue;
+			} 
+
+			/* Handle escaped `\\n' newlines. */
+
+			if (pos > 0 && 0 == comment && 
+					'\\' == ln->buf[pos - 1]) {
+				for (j = pos - 1; j >= 0; j--)
+					if ('\\' != ln->buf[j])
+						break;
 				if ( ! ((pos - j) % 2)) {
 					pos--;
 					lnn++;
@@ -395,19 +412,14 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 
 			ln->buf[pos] = 0;
 			lnn++;
-			
-			/*
-			 * If no manual parser has been assigned, then
-			 * try to assign one in pset(), which may do
-			 * nothing at all.  After this, parse the manual
-			 * line accordingly.
-			 */
+
+			/* If unset, assign parser in pset(). */
 
 			if ( ! (man || mdoc) && ! pset(ln->buf, 
 						pos, curp, &man, &mdoc))
 				return(0);
 
-			pos = 0;
+			pos = comment = 0;
 
 			if (man && ! man_parseln(man, lnn, ln->buf))
 				return(0);
@@ -416,7 +428,7 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 		}
 	}
 
-	/* Note that a parser may not have been assigned, yet. */
+	/* NOTE a parser may not have been assigned, yet. */
 
 	if ( ! (man || mdoc)) {
 		warnx("%s: not a manual", curp->file);
@@ -428,12 +440,7 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 	if (man && ! man_endparse(man))
 		return(0);
 
-	/*
-	 * If an output device hasn't been allocated, see if we should
-	 * do so now.  Note that not all outtypes have functions, so
-	 * this switch statement may be superfluous, but it's
-	 * low-overhead enough not to matter very much.
-	 */
+	/* If unset, allocate output dev now (if applicable). */
 
 	if ( ! (curp->outman && curp->outmdoc)) {
 		switch (curp->outtype) {
@@ -469,6 +476,7 @@ static int
 pset(const char *buf, int pos, struct curparse *curp,
 		struct man **man, struct mdoc **mdoc)
 {
+	int		 i;
 
 	/*
 	 * Try to intuit which kind of manual parser should be used.  If
@@ -478,8 +486,13 @@ pset(const char *buf, int pos, struct curparse *curp,
 	 * default to -man, which is more lenient.
 	 */
 
-	if (pos >= 3 && 0 == memcmp(buf, ".\\\"", 3))
-		return(1);
+	if (buf[0] == '.') {
+		for (i = 1; buf[i]; i++)
+			if (' ' != buf[i] && '\t' != buf[i])
+				break;
+		if (0 == buf[i])
+			return(1);
+	}
 
 	switch (curp->inttype) {
 	case (INTT_MDOC):

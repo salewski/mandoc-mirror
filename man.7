@@ -70,6 +70,16 @@ escape is common in historical
 documents; if encountered at the end of a word, it ensures that the
 subsequent word isn't off-set by whitespace.
 .\" SUB-SECTION
+.Ss Comments
+Anything following a
+.Sq \e" 
+delimiter is considered a comment (unless the 
+.Sq \e
+itself has been escaped) and is ignored to the end of line.
+Furthermore, a macro line with only a control character
+.Sq \. ,
+optionally followed by whitespace, is ignored.
+.\" SUB-SECTION
 .Ss Special Characters
 Special character sequences begin with the escape character
 .Sq \e

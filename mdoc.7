@@ -78,9 +78,19 @@ or
 .Sq \&.Bd \-unfilled
 contexts.
 .\" SUB-SECTION
+.Ss Comments
+Anything following a
+.Sq \e" 
+delimiter is considered a comment (unless the 
+.Sq \e
+itself has been escaped) and is ignored to the end of line.
+Furthermore, a macro line with only a control character
+.Sq \. ,
+optionally followed by whitespace, is ignored.
+.\" SUB-SECTION
 .Ss Reserved Characters
 Within a macro line, the following characters are reserved:
-.Bl -tag -width 12n -offset XXXX -compact
+.Bl -tag -width Ds -offset XXXX -compact
 .It \&.
 .Pq period
 .It \&,
