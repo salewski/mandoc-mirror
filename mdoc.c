@@ -99,9 +99,6 @@ static	int		  perr(struct mdoc *, int, int, enum merr);
 
 #define verr(m, t) perr((m), (m)->last->line, (m)->last->pos, (t))
 
-/*
- * Get the first (root) node of the parse tree.
- */
 const struct mdoc_node *
 mdoc_node(const struct mdoc *m)
 {
@@ -644,7 +641,6 @@ macrowarn(struct mdoc *m, int ln, const char *buf)
 				"unknown macro: %s%s",
 				buf, strlen(buf) > 3 ? "..." : ""));
 }
-
 
 
 /*

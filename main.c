@@ -101,8 +101,6 @@ static	int		  merr(void *, int, int, const char *);
 static	int		  manwarn(void *, int, int, const char *);
 static	int		  mdocwarn(void *, int, int, 
 				enum mdoc_warn, const char *);
-static	int		  fstdin(struct buf *, struct buf *, 
-				struct curparse *);
 static	int		  ffile(struct buf *, struct buf *, 
 				const char *, struct curparse *);
 static	int		  fdesc(struct buf *, struct buf *,
@@ -159,16 +157,17 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	/* Configure buffers. */
-
 	bzero(&ln, sizeof(struct buf));
 	bzero(&blk, sizeof(struct buf));
 
 	rc = 1;
 
-	if (NULL == *argv)
-		if ( ! fstdin(&blk, &ln, &curp))
+	if (NULL == *argv) {
+		curp.file = "<stdin>";
+		curp.fd = STDIN_FILENO;
+		if ( ! fdesc(&blk, &ln, &curp))
 			rc = 0;
+	}
 
 	while (rc && *argv) {
 		if ( ! ffile(&blk, &ln, *argv, &curp))
@@ -190,8 +189,6 @@ main(int argc, char *argv[])
 		free(blk.buf);
 	if (ln.buf)
 		free(ln.buf);
-
-	/* TODO: have a curp_free routine. */
 	if (curp.outfree)
 		(*curp.outfree)(curp.outdata);
 	if (curp.mdoc)
@@ -233,14 +230,9 @@ man_init(struct curparse *curp)
 	mancb.man_err = merr;
 	mancb.man_warn = manwarn;
 
-	/*
-	 * Default behaviour is to ignore unknown macros.  This is
-	 * specified in mandoc.1.
-	 */
+	/* Defaults from mandoc.1. */
 
 	pflags = MAN_IGN_MACRO;
-
-	/* Override default behaviour... */
 
 	if (curp->fflags & NO_IGN_MACRO)
 		pflags &= ~MAN_IGN_MACRO;
@@ -262,15 +254,9 @@ mdoc_init(struct curparse *curp)
 	mdoccb.mdoc_err = merr;
 	mdoccb.mdoc_warn = mdocwarn;
 
-	/* 
-	 * Default behaviour is to ignore unknown macros, escape
-	 * sequences and characters (very liberal).  This is specified
-	 * in mandoc.1.
-	 */
+	/* Defaults from mandoc.1. */
 
 	pflags = MDOC_IGN_MACRO | MDOC_IGN_ESCAPE | MDOC_IGN_CHARS;
-
-	/* Override default behaviour... */
 
 	if (curp->fflags & IGN_SCOPE)
 		pflags |= MDOC_IGN_SCOPE;
@@ -285,16 +271,6 @@ mdoc_init(struct curparse *curp)
 		warnx("memory exhausted");
 
 	return(mdoc);
-}
-
-
-static int
-fstdin(struct buf *blk, struct buf *ln, struct curparse *curp)
-{
-
-	curp->file = "<stdin>";
-	curp->fd = STDIN_FILENO;
-	return(fdesc(blk, ln, curp));
 }
 
 
@@ -421,6 +397,8 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 
 			pos = comment = 0;
 
+			/* Pass down into parsers. */
+
 			if (man && ! man_parseln(man, lnn, ln->buf))
 				return(0);
 			if (mdoc && ! mdoc_parseln(mdoc, lnn, ln->buf))
@@ -482,7 +460,7 @@ pset(const char *buf, int pos, struct curparse *curp,
 	 * Try to intuit which kind of manual parser should be used.  If
 	 * passed in by command-line (-man, -mdoc), then use that
 	 * explicitly.  If passed as -mandoc, then try to guess from the
-	 * line: either skip comments, use -mdoc when finding `.Dt', or
+	 * line: either skip dot-lines, use -mdoc when finding `.Dt', or
 	 * default to -man, which is more lenient.
 	 */
 
@@ -569,10 +547,6 @@ toptions(enum outt *tflags, char *arg)
 }
 
 
-/*
- * Parse out the options for [-fopt...] setting compiler options.  These
- * can be comma-delimited or called again.
- */
 static int
 foptions(int *fflags, char *arg)
 {
@@ -613,10 +587,6 @@ foptions(int *fflags, char *arg)
 }
 
 
-/* 
- * Parse out the options for [-Werr...], which sets warning modes.
- * These can be comma-delimited or called again.  
- */
 static int
 woptions(int *wflags, char *arg)
 {
@@ -662,7 +632,6 @@ merr(void *arg, int line, int col, const char *msg)
 	warnx("%s:%d: error: %s (column %d)", 
 			curp->file, line, msg, col);
 
-	/* Always exit on errors... */
 	return(0);
 }
 
@@ -697,13 +666,7 @@ mdocwarn(void *arg, int line, int col,
 	if ( ! (curp->wflags & WARN_WERR))
 		return(1);
 	
-	/*
-	 * If the -Werror flag is passed in, as in gcc, then all
-	 * warnings are considered as errors.
-	 */
-
-	warnx("%s: considering warnings as errors", 
-			__progname);
+	warnx("considering warnings as errors");
 	return(0);
 }
 
@@ -724,12 +687,6 @@ manwarn(void *arg, int line, int col, const char *msg)
 	if ( ! (curp->wflags & WARN_WERR))
 		return(1);
 
-	/* 
-	 * If the -Werror flag is passed in, as in gcc, then all
-	 * warnings are considered as errors.
-	 */
-
-	warnx("%s: considering warnings as errors", 
-			__progname);
+	warnx("considering warnings as errors");
 	return(0);
 }
