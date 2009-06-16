@@ -57,7 +57,7 @@ static	void		  post_SH(DECL_ARGS);
 static	void		  post_SS(DECL_ARGS);
 
 static const struct termact termacts[MAN_MAX] = {
-	{ NULL, NULL }, /* __ */
+	{ pre_PP, NULL }, /* br */
 	{ NULL, NULL }, /* TH */
 	{ pre_SH, post_SH }, /* SH */
 	{ pre_SS, post_SS }, /* SS */
@@ -78,7 +78,6 @@ static const struct termact termacts[MAN_MAX] = {
 	{ pre_I, post_I }, /* I */
 	{ pre_IR, NULL }, /* IR */
 	{ pre_RI, NULL }, /* RI */
-	{ pre_PP, NULL }, /* br */
 	{ NULL, NULL }, /* na */
 	{ pre_I, post_I }, /* i */
 };
@@ -97,7 +96,10 @@ man_run(struct termp *p, const struct man *m)
 
 	print_head(p, man_meta(m));
 	p->flags |= TERMP_NOSPACE;
-	print_body(p, man_node(m), man_meta(m));
+	assert(man_node(m));
+	assert(MAN_ROOT == man_node(m)->type);
+	if (man_node(m)->child)
+		print_body(p, man_node(m)->child, man_meta(m));
 	print_foot(p, man_meta(m));
 
 	return(1);

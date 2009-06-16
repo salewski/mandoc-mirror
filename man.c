@@ -24,12 +24,12 @@
 #include "libman.h"
 
 const	char *const __man_macronames[MAN_MAX] = {		 
-	"\\\"",		"TH",		"SH",		"SS",
+	"br",		"TH",		"SH",		"SS",
 	"TP", 		"LP",		"PP",		"P",
 	"IP",		"HP",		"SM",		"SB",
 	"BI",		"IB",		"BR",		"RB",
 	"R",		"B",		"I",		"IR",
-	"RI",		"br",		"na",		"i"
+	"RI",		"na",		"i"
 	};
 
 const	char * const *man_macronames = __man_macronames;

@@ -46,7 +46,7 @@ mdoc_hash_alloc(void)
 	if (NULL == htab) 
 		return(NULL);
 
-	for (i = 1; i < MDOC_MAX; i++) {
+	for (i = 0; i < MDOC_MAX; i++) {
 		major = mdoc_macronames[i][0];
 		assert((major >= 65 && major <= 90) ||
 				major == 37);

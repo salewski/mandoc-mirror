@@ -41,7 +41,7 @@ man_hash_alloc(void)
 	if (NULL == htab)
 		return(NULL);
 
-	for (i = 1; i < MAN_MAX; i++) {
+	for (i = 0; i < MAN_MAX; i++) {
 		x = man_macronames[i][0];
 
 		assert((x >= 65 && x <= 90) ||
