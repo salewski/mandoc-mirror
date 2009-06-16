@@ -105,7 +105,7 @@ static	int mdoc_argvflags[MDOC_ARG_MAX] = {
 };
 
 static	int mdoc_argflags[MDOC_MAX] = {
-	0, /* \" */
+	0, /* Ap */
 	0, /* Dd */
 	0, /* Dt */
 	0, /* Os */
@@ -212,7 +212,6 @@ static	int mdoc_argflags[MDOC_MAX] = {
 	0, /* Fr */
 	0, /* Ud */
 	0, /* Lb */
-	0, /* Ap */
 	ARGS_DELIM, /* Lp */
 	ARGS_DELIM | ARGS_QUOTED, /* Lk */
 	ARGS_DELIM | ARGS_QUOTED, /* Mt */

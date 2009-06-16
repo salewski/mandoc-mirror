@@ -34,7 +34,7 @@ enum	merr {
 };
 
 const	char *const __mdoc_macronames[MDOC_MAX] = {		 
-	"\\\"",		"Dd",		"Dt",		"Os",
+	"Ap",		"Dd",		"Dt",		"Os",
 	"Sh",		"Ss",		"Pp",		"D1",
 	"Dl",		"Bd",		"Ed",		"Bl",
 	"El",		"It",		"Ad",		"An",
@@ -63,12 +63,12 @@ const	char *const __mdoc_macronames[MDOC_MAX] = {
 	"Tn",		"Ux",		"Xc",		"Xo",
 	"Fo",		"Fc",		"Oo",		"Oc",
 	"Bk",		"Ek",		"Bt",		"Hf",
-	"Fr",		"Ud",		"Lb",		"Ap",
-	"Lp",		"Lk",		"Mt",		"Brq",
+	"Fr",		"Ud",		"Lb",		"Lp",
+	"Lk",		"Mt",		"Brq",		"Bro",
 	/* LINTED */
-	"Bro",		"Brc",		"\%C",		"Es",
+	"Brc",		"\%C",		"Es",		"En",
 	/* LINTED */
-	"En",		"Dx",		"\%Q"
+	"Dx",		"\%Q"
 	};
 
 const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {		 

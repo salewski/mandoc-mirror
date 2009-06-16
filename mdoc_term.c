@@ -183,7 +183,7 @@ struct	termact {
 };
 
 static const struct termact termacts[MDOC_MAX] = {
-	{ NULL, NULL }, /* \" */
+	{ termp_ap_pre, NULL }, /* Ap */
 	{ NULL, NULL }, /* Dd */
 	{ NULL, NULL }, /* Dt */
 	{ NULL, NULL }, /* Os */
@@ -290,8 +290,7 @@ static const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Fr */
 	{ termp_ud_pre, NULL }, /* Ud */
 	{ termp_lb_pre, termp_lb_post }, /* Lb */
-	{ termp_ap_pre, NULL }, /* Lb */
-	{ termp_pp_pre, NULL }, /* Pp */ 
+	{ termp_pp_pre, NULL }, /* Lp */ 
 	{ termp_lk_pre, NULL }, /* Lk */ 
 	{ termp_mt_pre, NULL }, /* Mt */ 
 	{ termp_brq_pre, termp_brq_post }, /* Brq */ 
@@ -336,7 +335,10 @@ mdoc_run(struct termp *p, const struct mdoc *m)
 	 */
 
 	print_head(p, mdoc_meta(m));
-	print_body(p, NULL, mdoc_meta(m), mdoc_node(m));
+	assert(mdoc_node(m));
+	assert(MDOC_ROOT == mdoc_node(m)->type);
+	if (mdoc_node(m)->child)
+		print_body(p, NULL, mdoc_meta(m), mdoc_node(m)->child);
 	print_foot(p, mdoc_meta(m));
 	return(1);
 }
