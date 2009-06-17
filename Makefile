@@ -14,7 +14,6 @@ VDATE	   = 15 June 2009
 
 VFLAGS     = -DVERSION=\"$(VERSION)\"
 CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
-LINTFLAGS += $(VFLAGS)
 CFLAGS    += $(VFLAGS)
 
 MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln mdoc_strings.ln \
@@ -232,13 +231,13 @@ mdocml-$(VERSION).tar.gz: $(INSTALL)
 	rm -rf .dist/
 
 llib-llibmdoc.ln: $(MDOCLNS)
-	$(LINT) $(LINTFLAGS) -Clibmdoc $(MDOCLNS)
+	$(LINT) -Clibmdoc $(MDOCLNS)
 
 llib-llibman.ln: $(MANLNS)
-	$(LINT) $(LINTFLAGS) -Clibman $(MANLNS)
+	$(LINT) -Clibman $(MANLNS)
 
 llib-lmandoc.ln: $(MAINLNS) llib-llibmdoc.ln
-	$(LINT) $(LINTFLAGS) -Cmandoc $(MAINLNS) llib-llibmdoc.ln
+	$(LINT) -Cmandoc $(MAINLNS) llib-llibmdoc.ln
 
 libmdoc.a: $(MDOCOBJS)
 	$(AR) rs $@ $(MDOCOBJS)

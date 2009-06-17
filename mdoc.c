@@ -97,8 +97,6 @@ static	int		  parsemacro(struct mdoc *, int, char *);
 static	int		  macrowarn(struct mdoc *, int, const char *);
 static	int		  perr(struct mdoc *, int, int, enum merr);
 
-#define verr(m, t) perr((m), (m)->last->line, (m)->last->pos, (t))
-
 const struct mdoc_node *
 mdoc_node(const struct mdoc *m)
 {
@@ -229,8 +227,6 @@ int
 mdoc_parseln(struct mdoc *m, int ln, char *buf)
 {
 
-	/* If in error-mode, then we parse no more. */
-
 	if (MDOC_HALT & m->flags)
 		return(0);
 
@@ -274,7 +270,8 @@ mdoc_vwarn(struct mdoc *mdoc, int ln, int pos,
 
 
 int
-mdoc_nerr(struct mdoc *mdoc, const struct mdoc_node *node, const char *fmt, ...)
+mdoc_nerr(struct mdoc *mdoc, const struct mdoc_node *node, 
+		const char *fmt, ...)
 {
 	char		 buf[256];
 	va_list		 ap;
@@ -285,12 +282,14 @@ mdoc_nerr(struct mdoc *mdoc, const struct mdoc_node *node, const char *fmt, ...)
 	va_start(ap, fmt);
 	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
 	va_end(ap);
-	return((*mdoc->cb.mdoc_err)(mdoc->data, node->line, node->pos, buf));
+	return((*mdoc->cb.mdoc_err)(mdoc->data, 
+				node->line, node->pos, buf));
 }
 
 
 int
-mdoc_warn(struct mdoc *mdoc, enum mdoc_warn type, const char *fmt, ...)
+mdoc_warn(struct mdoc *mdoc, enum mdoc_warn type, 
+		const char *fmt, ...)
 {
 	char		 buf[256];
 	va_list		 ap;
@@ -302,7 +301,7 @@ mdoc_warn(struct mdoc *mdoc, enum mdoc_warn type, const char *fmt, ...)
 	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
 	va_end(ap);
 	return((*mdoc->cb.mdoc_warn)(mdoc->data, mdoc->last->line,
-	    mdoc->last->pos, type, buf));
+				mdoc->last->pos, type, buf));
 }
 
 
@@ -319,7 +318,7 @@ mdoc_err(struct mdoc *mdoc, const char *fmt, ...)
 	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
 	va_end(ap);
 	return((*mdoc->cb.mdoc_err)(mdoc->data, mdoc->last->line,
-	    mdoc->last->pos, buf));
+				mdoc->last->pos, buf));
 }
 
 
@@ -336,7 +335,8 @@ mdoc_pwarn(struct mdoc *mdoc, int line, int pos, enum mdoc_warn type,
 	va_start(ap, fmt);
 	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
 	va_end(ap);
-	return((*mdoc->cb.mdoc_warn)(mdoc->data, line, pos, type, buf));
+	return((*mdoc->cb.mdoc_warn)(mdoc->data, 
+				line, pos, type, buf));
 }
 
 int
@@ -480,7 +480,8 @@ node_alloc(struct mdoc *mdoc, int line,
 	struct mdoc_node *p;
 
 	if (NULL == (p = calloc(1, sizeof(struct mdoc_node)))) {
-		(void)verr(mdoc, EMALLOC);
+		(void)perr(mdoc, (mdoc)->last->line, 
+				(mdoc)->last->pos, EMALLOC);
 		return(NULL);
 	}
 
@@ -576,7 +577,8 @@ mdoc_word_alloc(struct mdoc *mdoc,
 	if (NULL == p)
 		return(0);
 	if (NULL == (p->string = strdup(word))) {
-		(void)verr(mdoc, EMALLOC);
+		(void)perr(mdoc, (mdoc)->last->line, 
+				(mdoc)->last->pos, EMALLOC);
 		return(0);
 	}
 	return(node_append(mdoc, p));
