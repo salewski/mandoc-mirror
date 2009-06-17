@@ -515,8 +515,8 @@ post_os(POST_ARGS)
 
 	if (NULL == (m->meta.os = strdup(buf)))
 		return(verr(m, EMALLOC));
-	m->lastnamed = m->lastsec = SEC_BODY;
 
+	m->flags |= MDOC_PBODY;
 	return(post_prol(m));
 }
 

@@ -29,8 +29,9 @@ struct	mdoc {
 	struct mdoc_cb	  cb;
 	void		 *htab;
 	int		  flags;
-#define	MDOC_HALT	 (1 << 0)
-#define	MDOC_LITERAL	 (1 << 1)
+#define	MDOC_HALT	 (1 << 0)	/* Error in parse. Halt. */
+#define	MDOC_LITERAL	 (1 << 1)	/* In a literal scope. */
+#define	MDOC_PBODY	 (1 << 2)	/* In the document body. */
 	int		  pflags;
 	enum mdoc_next	  next;
 	struct mdoc_node *last;

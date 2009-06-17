@@ -198,27 +198,26 @@ enum	mdoc_type {
 
 /* Section (named/unnamed) of `Sh'. */
 enum	mdoc_sec {
-	SEC_PROLOGUE 		= 0,
-	SEC_BODY		= 1,
-	SEC_NAME		= 2,
-	SEC_LIBRARY		= 3,
-	SEC_SYNOPSIS		= 4,
-	SEC_DESCRIPTION		= 5,
-	SEC_IMPLEMENTATION	= 6,
-	SEC_RETURN_VALUES	= 7,
-	SEC_ENVIRONMENT		= 8,
-	SEC_FILES		= 9,
-	SEC_EXAMPLES		= 10,
-	SEC_DIAGNOSTICS		= 11,
-	SEC_COMPATIBILITY	= 12,
-	SEC_ERRORS		= 13,
-	SEC_SEE_ALSO		= 14,
-	SEC_STANDARDS		= 15,
-	SEC_HISTORY		= 16,
-	SEC_AUTHORS		= 17,
-	SEC_CAVEATS		= 18,
-	SEC_BUGS		= 19,
-	SEC_CUSTOM
+	SEC_NONE,		/* No section, yet. */
+	SEC_NAME,
+	SEC_LIBRARY,
+	SEC_SYNOPSIS,
+	SEC_DESCRIPTION,
+	SEC_IMPLEMENTATION,
+	SEC_RETURN_VALUES,
+	SEC_ENVIRONMENT,
+	SEC_FILES,
+	SEC_EXAMPLES,
+	SEC_DIAGNOSTICS,
+	SEC_COMPATIBILITY,
+	SEC_ERRORS,
+	SEC_SEE_ALSO,
+	SEC_STANDARDS,
+	SEC_HISTORY,
+	SEC_AUTHORS,
+	SEC_CAVEATS,
+	SEC_BUGS,
+	SEC_CUSTOM		/* User-defined. */
 };
 
 /* Information from prologue. */
@@ -276,44 +275,31 @@ struct	mdoc_node {
 #define	MDOC_IGN_CHARS	 (1 << 3) /* Ignore disallowed chars. */
 
 /* Call-backs for parse messages. */
+/* FIXME: unify somehow with man_cb. */
 struct	mdoc_cb {
 	int	(*mdoc_err)(void *, int, int, const char *);
 	int	(*mdoc_warn)(void *, int, int, 
 			enum mdoc_warn, const char *);
 };
 
-/* Global table of macro names (`Bd', `Ed', etc.). */
-extern	const char *const *mdoc_macronames;
+/* See mdoc.3 for documentation. */
 
-/* Global table of argument names (`column', `tag', etc.). */
+extern	const char *const *mdoc_macronames;
 extern	const char *const *mdoc_argnames;
 
 __BEGIN_DECLS
 
 struct	mdoc;
 
-/* Free memory allocated with mdoc_alloc. */
+/* See mdoc.3 for documentation. */
+
 void	 	  mdoc_free(struct mdoc *);
-
-/* Allocate a new parser instance. */
 struct	mdoc	 *mdoc_alloc(void *, int, const struct mdoc_cb *);
-
-/* Gets system ready for another parse. */
 int		  mdoc_reset(struct mdoc *);
-
-/* Parse a single line in a stream (boolean retval). */
 int	 	  mdoc_parseln(struct mdoc *, int, char *buf);
-
-/* Get result first node (after mdoc_endparse!). */
 const struct mdoc_node *mdoc_node(const struct mdoc *);
-
-/* Get result meta-information (after mdoc_endparse!). */
 const struct mdoc_meta *mdoc_meta(const struct mdoc *);
-
-/* Signal end of parse sequence (boolean retval). */
 int		  mdoc_endparse(struct mdoc *);
-
-/* The following are utility functions. */
 
 const char	 *mdoc_a2att(const char *);
 const char	 *mdoc_a2lib(const char *);

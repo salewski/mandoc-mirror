@@ -42,6 +42,7 @@ enum	merr {
 	ELISTTYPE,
 	EDISPTYPE,
 	EMULTIDISP,
+	ESECNAME,
 	EMULTILIST,
 	EARGREP,
 	EBOOL,
@@ -116,7 +117,6 @@ static	int	pre_fd(PRE_ARGS);
 static	int	pre_it(PRE_ARGS);
 static	int	pre_lb(PRE_ARGS);
 static	int	pre_os(PRE_ARGS);
-static	int	pre_prologue(PRE_ARGS);
 static	int	pre_rv(PRE_ARGS);
 static	int	pre_sh(PRE_ARGS);
 static	int	pre_ss(PRE_ARGS);
@@ -155,15 +155,15 @@ static	v_pre	pres_an[] = { pre_an, NULL };
 static	v_pre	pres_bd[] = { pre_display, pre_bd, NULL };
 static	v_pre	pres_bl[] = { pre_bl, NULL };
 static	v_pre	pres_cd[] = { pre_cd, NULL };
-static	v_pre	pres_dd[] = { pre_prologue, pre_dd, NULL };
+static	v_pre	pres_dd[] = { pre_dd, NULL };
 static	v_pre	pres_d1[] = { pre_display, NULL };
-static	v_pre	pres_dt[] = { pre_prologue, pre_dt, NULL };
+static	v_pre	pres_dt[] = { pre_dt, NULL };
 static	v_pre	pres_er[] = { pre_er, NULL };
 static	v_pre	pres_ex[] = { pre_ex, NULL };
 static	v_pre	pres_fd[] = { pre_fd, NULL };
 static	v_pre	pres_it[] = { pre_it, NULL };
 static	v_pre	pres_lb[] = { pre_lb, NULL };
-static	v_pre	pres_os[] = { pre_prologue, pre_os, NULL };
+static	v_pre	pres_os[] = { pre_os, NULL };
 static	v_pre	pres_rv[] = { pre_rv, NULL };
 static	v_pre	pres_sh[] = { pre_sh, NULL };
 static	v_pre	pres_ss[] = { pre_ss, NULL };
@@ -412,6 +412,9 @@ perr(struct mdoc *m, int line, int pos, enum merr type)
 		break;
 	case (EDISPTYPE):
 		p = "missing display type";
+		break;
+	case (ESECNAME):
+		p = "the NAME section must come first";
 		break;
 	case (ELINE):
 		p = "expected line arguments";
@@ -1019,14 +1022,6 @@ pre_cd(PRE_ARGS)
 
 
 static int
-pre_prologue(PRE_ARGS)
-{
-
-	return(check_sec(mdoc, n, SEC_PROLOGUE, SEC_CUSTOM));
-}
-
-
-static int
 pre_dt(PRE_ARGS)
 {
 
@@ -1077,7 +1072,11 @@ post_bf(POST_ARGS)
 	if (MDOC_BLOCK != mdoc->last->type)
 		return(1);
 
+	/* FIXME: clean-up .*/
+
 	head = mdoc->last->head;
+
+	if (mdoc->last->args && head->child)
 
 	if (NULL == mdoc->last->args) {
 		if (NULL == head->child || 
@@ -1313,7 +1312,7 @@ post_root(POST_ARGS)
 
 	if (NULL == mdoc->first->child)
 		return(verr(mdoc, ENODATA));
-	if (SEC_PROLOGUE == mdoc->lastnamed)
+	if ( ! (MDOC_PBODY & mdoc->flags))
 		return(verr(mdoc, ENOPROLOGUE));
 
 	if (MDOC_BLOCK != mdoc->first->child->type)
@@ -1394,13 +1393,12 @@ post_sh_head(POST_ARGS)
 	 * certain manual sections.
 	 */
 
-	assert(MDOC_Sh == mdoc->last->tok);
-
-	/* This is just concat() inlined, which is irritating. */
-
 	buf[0] = 0;
+
 	for (n = mdoc->last->child; n; n = n->next) {
+		/* XXX - copied from compact(). */
 		assert(MDOC_TEXT == n->type);
+
 		if (strlcat(buf, n->string, 64) >= 64)
 			return(nerr(mdoc, n, ETOOLONG));
 		if (NULL == n->next)
@@ -1411,21 +1409,24 @@ post_sh_head(POST_ARGS)
 
 	sec = mdoc_atosec(buf);
 
-	/* The NAME section should always be first. */
+	/* 
+	 * Check: NAME should always be first, CUSTOM has no roles,
+	 * non-CUSTOM has a conventional order to be followed.
+	 */
 
-	if (SEC_BODY == mdoc->lastnamed && SEC_NAME != sec)
-		return(vwarn(mdoc, WSECOOO));
+	if (SEC_NAME != sec && SEC_NONE == mdoc->lastnamed)
+		return(verr(mdoc, ESECNAME));
 	if (SEC_CUSTOM == sec)
 		return(1);
-
-	/* Check for repeated or out-of-order sections. */
-
 	if (sec == mdoc->lastnamed)
 		return(vwarn(mdoc, WSECREP));
 	if (sec < mdoc->lastnamed)
 		return(vwarn(mdoc, WSECOOO));
 
-	/* Check particular section/manual section conventions. */
+	/* 
+	 * Check particular section/manual conventions.  LIBRARY can
+	 * only occur in msec 2, 3 (TODO: are there more of these?).
+	 */
 
 	switch (sec) {
 	case (SEC_LIBRARY):

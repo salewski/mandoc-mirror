@@ -113,6 +113,9 @@ mdoc_meta(const struct mdoc *m)
 }
 
 
+/*
+ * Frees volatile resources (parse tree, meta-data, fields).
+ */
 static void
 mdoc_free1(struct mdoc *mdoc)
 {
@@ -132,13 +135,16 @@ mdoc_free1(struct mdoc *mdoc)
 }
 
 
+/*
+ * Allocate all volatile resources (parse tree, meta-data, fields).
+ */
 static int
 mdoc_alloc1(struct mdoc *mdoc)
 {
 
 	bzero(&mdoc->meta, sizeof(struct mdoc_meta));
 	mdoc->flags = 0;
-	mdoc->lastnamed = mdoc->lastsec = 0;
+	mdoc->lastnamed = mdoc->lastsec = SEC_NONE;
 	mdoc->last = calloc(1, sizeof(struct mdoc_node));
 	if (NULL == mdoc->last)
 		return(0);
@@ -151,9 +157,10 @@ mdoc_alloc1(struct mdoc *mdoc)
 
 
 /*
- * Free up all resources contributed by a parse:  the node tree,
- * meta-data and so on.  Then reallocate the root node for another
- * parse.
+ * Free up volatile resources (see mdoc_free1()) then re-initialises the
+ * data with mdoc_alloc1().  After invocation, parse data has been reset
+ * and the parser is ready for re-invocation on a new tree; however,
+ * cross-parse non-volatile data is kept intact.
  */
 int
 mdoc_reset(struct mdoc *mdoc)
@@ -165,7 +172,8 @@ mdoc_reset(struct mdoc *mdoc)
 
 
 /*
- * Completely free up all resources.
+ * Completely free up all volatile and non-volatile parse resources.
+ * After invocation, the pointer is no longer usable.
  */
 void
 mdoc_free(struct mdoc *mdoc)
@@ -178,6 +186,9 @@ mdoc_free(struct mdoc *mdoc)
 }
 
 
+/*
+ * Allocate volatile and non-volatile parse resources.  
+ */
 struct mdoc *
 mdoc_alloc(void *data, int pflags, const struct mdoc_cb *cb)
 {
@@ -204,7 +215,7 @@ mdoc_alloc(void *data, int pflags, const struct mdoc_cb *cb)
 
 /*
  * Climb back up the parse tree, validating open scopes.  Mostly calls
- * through to macro_end in macro.c.
+ * through to macro_end() in macro.c.
  */
 int
 mdoc_endparse(struct mdoc *m)
@@ -221,7 +232,7 @@ mdoc_endparse(struct mdoc *m)
 
 /*
  * Main parse routine.  Parses a single line -- really just hands off to
- * the macro or text parser.
+ * the macro (parsemacro()) or text parser (parsetext()).
  */
 int
 mdoc_parseln(struct mdoc *m, int ln, char *buf)
@@ -360,14 +371,11 @@ mdoc_macro(struct mdoc *m, int tok,
 		int ln, int pp, int *pos, char *buf)
 {
 
-	/* FIXME - these should happen during validation. */
-
 	if (MDOC_PROLOGUE & mdoc_macros[tok].flags && 
-			SEC_PROLOGUE != m->lastnamed)
+			MDOC_PBODY & m->flags)
 		return(perr(m, ln, pp, EPROLBODY));
-
 	if ( ! (MDOC_PROLOGUE & mdoc_macros[tok].flags) && 
-			SEC_PROLOGUE == m->lastnamed)
+			! (MDOC_PBODY & m->flags))
 		return(perr(m, ln, pp, EBODYPROL));
 
 	if (1 != pp && ! (MDOC_CALLABLE & mdoc_macros[tok].flags))
@@ -618,7 +626,7 @@ static int
 parsetext(struct mdoc *m, int line, char *buf)
 {
 
-	if (SEC_PROLOGUE == m->lastnamed)
+	if (SEC_NONE == m->lastnamed)
 		return(perr(m, line, 0, ETEXTPROL));
 
 	if (0 == buf[0] && ! (MDOC_LITERAL & m->flags))
