@@ -15,6 +15,7 @@ VDATE	   = 15 June 2009
 VFLAGS     = -DVERSION=\"$(VERSION)\"
 CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
 CFLAGS    += $(VFLAGS)
+LINTFLAGS += $(VFLAGS)
 
 MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln mdoc_strings.ln \
 	     mdoc_argv.ln mdoc_validate.ln mdoc_action.ln \
