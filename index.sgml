@@ -222,12 +222,6 @@
 					If you want to receive a semi-automated mail-out of new versions, then please write with a message
 					subject of &#8220;subscribe mdocml&#8221; (or, symmetrically, &#8220;unsubscribe mdocml&#8221;).
 					</p>
-
-					<p>
-					We don't offer anonymous CVS access.  If you must have read-only access to the CVS tree (for down-stream
-					maintenance and so on), then please contact Kristaps directly for a read-only CVS account.  We strongly
-					suggest using snapshots, instead.
-					</p>
 				</td>
 			</tr>
 			<tr>

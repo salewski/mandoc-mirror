@@ -239,11 +239,33 @@ To page manuals to the terminal:
 .Pp
 .D1 % mandoc mandoc.1 mdoc.3 mdoc.7 | less
 .\" SECTION
+.Sh COMPATIBILITY
+This section summarises 
+.Nm
+compatibility with 
+.Xr groff 1 .
+.Pp
+.Bl -bullet -compact
+.It 
+A list or display following
+.Sq \&.Ss
+does not assert a prior vertical break, just as it doesn't with
+.Sq \&.Sh .
+.\" LIST-ITEM
+.It
+The \-literal and \-unfilled 
+.Sq \&.Bd
+displays types are synonyms, as are \-filled and \-ragged.
+.\" LIST-ITEM
+.It
+Words aren't hyphenated.
+.El
+.\" SECTION
 .Sh SEE ALSO
 .Xr mandoc_char 7 ,
 .Xr mdoc 7 ,
 .Xr man 7
-.\" 
+.\" SECTION
 .Sh AUTHORS
 The
 .Nm
@@ -253,37 +275,7 @@ utility was written by
 .Sh CAVEATS
 The 
 .Nm
-utility in
-.Fl T Ns Ar ascii
-mode doesn't yet know how to display the following:
-.Pp
-.Bl -bullet -compact
-.It
-The \-hang 
-.Sq \&.Bl
-list is not yet supported.
-.El
+utility doesn't yet know how to display \-hang lists.
 .Pp
 Other macros still aren't supported by virtue of nobody complaining
-about their absence.  Please report any omissions: this is a work in
-progress.
-.Pp
-The following list documents differences between traditional
-.Xr nroff 1
-output and
-.Nm :
-.Pp
-.Bl -bullet -compact
-.It 
-A list of display following
-.Sq \&.Ss
-does not assert a prior vertical break, just as it doesn't with
-.Sq \&.Sh .
-.It
-Special characters don't follow the current font style.
-.\" LIST-ITEM
-.It
-The \-literal and \-unfilled 
-.Sq \&.Bd
-displays types are synonyms, as are \-filled and \-ragged.
-.El
+about their absence.

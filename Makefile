@@ -9,8 +9,8 @@ INSTALL_DATA	= install -m 0444
 INSTALL_LIB	= install -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
-VERSION	   = 1.7.18
-VDATE	   = 15 June 2009
+VERSION	   = 1.7.19
+VDATE	   = 17 June 2009
 
 VFLAGS     = -DVERSION=\"$(VERSION)\"
 CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
@@ -254,10 +254,10 @@ mandoc: $(MAINOBJS) libmdoc.a libman.a
 	sed -e "s!@VERSION@!$(VERSION)!" -e "s!@VDATE@!$(VDATE)!" $< > $@
 
 .1.1.txt:
-	./mandoc -Wall $< | col -b > $@
+	./mandoc -Wall,error -fstrict $< | col -b > $@
 
 .3.3.txt:
-	./mandoc -Wall $< | col -b > $@
+	./mandoc -Wall,error -fstrict $< | col -b > $@
 
 .7.7.txt:
-	./mandoc -Wall $< | col -b > $@
+	./mandoc -Wall,error -fstrict $< | col -b > $@
