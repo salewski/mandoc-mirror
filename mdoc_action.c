@@ -819,9 +819,8 @@ static int
 pre_dl(PRE_ARGS)
 {
 
-	if (MDOC_BODY != n->type)
-		return(1);
-	m->flags |= MDOC_LITERAL;
+	if (MDOC_BODY == n->type)
+		m->flags |= MDOC_LITERAL;
 	return(1);
 }
 
