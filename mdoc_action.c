@@ -666,8 +666,8 @@ post_bl_head(POST_ARGS)
 	for (i = 0, nn = m->last->child; nn; nn = nn->next, i++)
 		/* Count children. */;
 
-	n->args->argv[c].sz = i;
-	n->args->argv[c].value = malloc(i * sizeof(char *));
+	n->args->argv[c].sz = (size_t)i;
+	n->args->argv[c].value = malloc((size_t)i * sizeof(char *));
 
 	for (i = 0, nn = m->last->child; nn; i++) {
 		n->args->argv[c].value[i] = nn->string;

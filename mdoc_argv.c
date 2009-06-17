@@ -756,10 +756,8 @@ static int
 argv_multi(struct mdoc *mdoc, int line, 
 		struct mdoc_argv *v, int *pos, char *buf)
 {
-	int		 c, ppos;
+	int		 c;
 	char		*p;
-
-	ppos = *pos;
 
 	for (v->sz = 0; ; v->sz++) {
 		if ('-' == buf[*pos])

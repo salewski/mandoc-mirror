@@ -802,7 +802,7 @@ pre_display(PRE_ARGS)
 static int
 pre_bl(PRE_ARGS)
 {
-	int		 pos, col, type, width, offset;
+	int		 pos, type, width, offset;
 
 	if (MDOC_BLOCK != n->type)
 		return(1);
@@ -811,7 +811,7 @@ pre_bl(PRE_ARGS)
 
 	/* Make sure that only one type of list is specified.  */
 
-	type = offset = width = col = -1;
+	type = offset = width = -1;
 
 	/* LINTED */
 	for (pos = 0; pos < (int)n->args->argc; pos++)
@@ -840,7 +840,6 @@ pre_bl(PRE_ARGS)
 			if (-1 != type) 
 				return(nerr(mdoc, n, EMULTILIST));
 			type = n->args->argv[pos].arg;
-			col = pos;
 			break;
 		case (MDOC_Width):
 			if (-1 != width)
