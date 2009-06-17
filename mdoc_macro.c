@@ -22,8 +22,6 @@
 
 #include "libmdoc.h"
 
-/* FIXME: .Fl, .Ar, .Cd handling of `|'. */
-
 enum	mwarn {
 	WIGNE,
 	WIMPBRK,
