@@ -24,15 +24,10 @@
 
 #include "libmdoc.h"
 
-/*
- * Various string-literal operations:  converting scalars to and from
- * strings, etc.
- */
-
 struct mdoc_secname {
-	const char	*name;
+	const char	*name;	/* Name of section. */
 	int		 flag;
-#define	MSECNAME_META	(1 << 0)
+#define	MSECNAME_META	(1 << 0)/* Logical section (not real). */
 };
 
 /* Section names corresponding to mdoc_sec. */
