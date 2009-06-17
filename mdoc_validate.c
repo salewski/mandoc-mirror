@@ -1072,31 +1072,26 @@ post_bf(POST_ARGS)
 	if (MDOC_BLOCK != mdoc->last->type)
 		return(1);
 
-	/* FIXME: clean-up .*/
-
 	head = mdoc->last->head;
 
 	if (mdoc->last->args && head->child)
-
-	if (NULL == mdoc->last->args) {
-		if (NULL == head->child || 
-				MDOC_TEXT != head->child->type)
-			return(mdoc_err(mdoc, "text argument expected"));
-
-		p = head->child->string;
-		if (0 == strcmp(p, "Em"))
-			return(1);
-		else if (0 == strcmp(p, "Li"))
-			return(1);
-		else if (0 == strcmp(p, "Sm"))
-			return(1);
-		return(mdoc_nerr(mdoc, head->child, "invalid font"));
-	}
-
-	if (head->child)
 		return(mdoc_err(mdoc, "one argument expected"));
+	else if (mdoc->last->args)
+		return(1);
 
-	return(1);
+	if (NULL == head->child || MDOC_TEXT != head->child->type)
+		return(mdoc_err(mdoc, "text argument expected"));
+
+	p = head->child->string;
+
+	if (0 == strcmp(p, "Em"))
+		return(1);
+	else if (0 == strcmp(p, "Li"))
+		return(1);
+	else if (0 == strcmp(p, "Sm"))
+		return(1);
+
+	return(mdoc_nerr(mdoc, head->child, "invalid font mode"));
 }
 
 
