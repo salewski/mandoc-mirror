@@ -25,10 +25,6 @@
 
 #define	POSTARGS  struct man *m, const struct man_node *n
 
-enum	merr {
-	WPRINT
-};
-
 typedef	int	(*v_post)(POSTARGS);
 
 struct	man_valid {
@@ -42,7 +38,6 @@ static	int	  check_le1(POSTARGS);
 static	int	  check_le2(POSTARGS);
 static	int	  check_le5(POSTARGS);
 static	int	  check_text(POSTARGS);
-static	int	  perr(struct man *, int, int, int, enum merr);
 
 static	v_post	  posts_le1[] = { check_le1, NULL };
 static	v_post	  posts_le2[] = { check_le2, NULL };
@@ -106,27 +101,6 @@ man_valid_post(struct man *m)
 
 
 static int
-perr(struct man *m, int line, int pos, 
-		int iserr, enum merr type)
-{
-	const char	 *p;
-	
-	p = NULL;
-	switch (type) {
-	case (WPRINT):
-		p = "invalid character";
-		break;
-	}
-	assert(p);
-
-	if (iserr)
-		return(man_verr(m, line, pos, p));
-
-	return(man_vwarn(m, line, pos, p));
-}
-
-
-static int
 check_text(POSTARGS) 
 {
 	const char	*p;
@@ -139,8 +113,8 @@ check_text(POSTARGS)
 			continue;
 
 		if (MAN_IGN_CHARS & m->pflags)
-			return(perr(m, n->line, pos, 0, WPRINT));
-		return(perr(m, n->line, pos, 1, WPRINT));
+			return(man_pwarn(m, n->line, pos, WNPRINT));
+		return(man_perr(m, n->line, pos, WNPRINT));
 	}
 
 	return(1);
