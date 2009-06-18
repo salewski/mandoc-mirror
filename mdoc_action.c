@@ -663,11 +663,9 @@ post_bl_head(POST_ARGS)
 	 * column field.  Then, delete the head children.
 	 */
 
-	for (i = 0, nn = m->last->child; nn; nn = nn->next, i++)
-		/* Count children. */;
-
-	n->args->argv[c].sz = (size_t)i;
-	n->args->argv[c].value = malloc((size_t)i * sizeof(char *));
+	n->args->argv[c].sz = (size_t)m->last->nchild;
+	n->args->argv[c].value = malloc
+		((size_t)m->last->nchild * sizeof(char *));
 
 	for (i = 0, nn = m->last->child; nn; i++) {
 		n->args->argv[c].value[i] = nn->string;
@@ -677,7 +675,9 @@ post_bl_head(POST_ARGS)
 		mdoc_node_free(nnp);
 	}
 
+	m->last->nchild = 0;
 	m->last->child = NULL;
+
 	return(1);
 }
 

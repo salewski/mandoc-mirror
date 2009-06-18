@@ -252,6 +252,7 @@ struct	mdoc_node {
 	struct mdoc_node *child;
 	struct mdoc_node *next;
 	struct mdoc_node *prev;
+	int		  nchild;
 	int		  line;
 	int		  pos;
 	int		  tok;

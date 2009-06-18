@@ -325,6 +325,7 @@ pre_TP(DECL_ARGS)
 	size_t		 offs;
 
 	term_vspace(p);
+
 	p->offset = INDENT;
 
 	if (NULL == (nn = n->child))
