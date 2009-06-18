@@ -210,16 +210,18 @@ flag.
 When rewinding the scope of a block macro, forces the compiler to ignore
 scope violations.  This can seriously mangle the resulting tree.
 .Pq mdoc only
-.It Fl f Ns Ar ign-escape
-Ignore invalid escape sequences.
-.It Fl f Ns Ar ign-macro
-Ignore unknown macros at the start of input lines (default for 
-.Xr man 7
-parsing).
+.It Fl f Ns Ar no-ign-escape
+Don't ignore invalid escape sequences.
 .It Fl f Ns Ar no-ign-macro
-Do not ignore unknown macros at the start of input lines (default for 
-.Xr mdoc 7
-parsing).
+Do not ignore unknown macros at the start of input lines.
+.It Fl f Ns Ar no-ign-chars
+Do not ignore disallowed characters.
+.It Fl f Ns Ar strict
+Implies 
+.Fl f Ns Ar no-ign-escape ,
+.Fl f Ns Ar no-ign-macro 
+and
+.Fl f Ns Ar no-ign-chars . 
 .El
 .\" PARAGRAPH
 .Pp
@@ -228,15 +230,15 @@ As with the
 flag, multiple
 .Fl f
 options may be grouped and delimited with a comma.  Using
-.Fl f Ns Ar ign-scope,ign-escape ,
-for example, will try to ignore scope and character-escape errors.
+.Fl f Ns Ar ign-scope,no-ign-escape ,
+for example, will try to ignore scope and not ignore character-escape
+errors.
 .\" SECTION
 .Sh EXAMPLES
 To page manuals to the terminal:
 .\" PARAGRAPH
 .Pp
-.D1 % mandoc \-Wall,error mandoc.1 2>&1 | less
-.Pp
+.D1 % mandoc \-Wall,error \-fstrict mandoc.1 2>&1 | less
 .D1 % mandoc mandoc.1 mdoc.3 mdoc.7 | less
 .\" SECTION
 .Sh COMPATIBILITY
