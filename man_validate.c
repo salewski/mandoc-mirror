@@ -23,9 +23,11 @@
 
 #include "libman.h"
 
-/* FIXME: validate text. */
-
 #define	POSTARGS  struct man *m, const struct man_node *n
+
+enum	merr {
+	WPRINT
+};
 
 typedef	int	(*v_post)(POSTARGS);
 
@@ -33,13 +35,14 @@ struct	man_valid {
 	v_post	 *posts;
 };
 
-static	int	  count(const struct man_node *);
 static	int	  check_eq0(POSTARGS);
 static	int	  check_ge1(POSTARGS);
 static	int	  check_ge2(POSTARGS);
 static	int	  check_le1(POSTARGS);
 static	int	  check_le2(POSTARGS);
 static	int	  check_le5(POSTARGS);
+static	int	  check_text(POSTARGS);
+static	int	  perr(struct man *, int, int, int, enum merr);
 
 static	v_post	  posts_le1[] = { check_le1, NULL };
 static	v_post	  posts_le2[] = { check_le2, NULL };
@@ -85,7 +88,7 @@ man_valid_post(struct man *m)
 
 	switch (m->last->type) {
 	case (MAN_TEXT): 
-		/* FALLTHROUGH */
+		return(check_text(m, m->last));
 	case (MAN_ROOT):
 		return(1);
 	default:
@@ -102,14 +105,45 @@ man_valid_post(struct man *m)
 }
 
 
-static inline int
-count(const struct man_node *n)
-{ 
-	int		 i;
+static int
+perr(struct man *m, int line, int pos, 
+		int iserr, enum merr type)
+{
+	const char	 *p;
+	
+	p = NULL;
+	switch (type) {
+	case (WPRINT):
+		p = "invalid character";
+		break;
+	}
+	assert(p);
 
-	for (i = 0; n; n = n->next, i++) 
-		/* Loop. */ ;
-	return(i);
+	if (iserr)
+		return(man_verr(m, line, pos, p));
+
+	return(man_vwarn(m, line, pos, p));
+}
+
+
+static int
+check_text(POSTARGS) 
+{
+	const char	*p;
+	int		 pos;
+
+	assert(n->string);
+
+	for (p = n->string, pos = n->pos + 1; *p; p++, pos++) {
+		if ('\t' == *p || isprint((u_char)*p))
+			continue;
+
+		if (MAN_IGN_CHARS & m->pflags)
+			return(perr(m, n->line, pos, 0, WPRINT));
+		return(perr(m, n->line, pos, 1, WPRINT));
+	}
+
+	return(1);
 }
 
 
@@ -117,12 +151,11 @@ count(const struct man_node *n)
 static int \
 check_##name(POSTARGS) \
 { \
-	int		 c; \
-	if ((c = count(n->child)) ineq (x)) \
+	if (n->nchild ineq (x)) \
 		return(1); \
 	return(man_verr(m, n->line, n->pos, \
 			"expected line arguments %s %d, have %d", \
-			#ineq, (x), c)); \
+			#ineq, (x), n->nchild)); \
 }
 
 INEQ_DEFINE(0, ==, eq0)

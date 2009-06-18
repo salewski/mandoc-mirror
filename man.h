@@ -63,6 +63,7 @@ struct	man_node {
 	struct man_node	*child;
 	struct man_node	*next;
 	struct man_node	*prev;
+	int		 nchild;
 	int		 line;
 	int		 pos;
 	int		 tok;
@@ -73,7 +74,8 @@ struct	man_node {
 	char		*string;
 };
 
-#define	MAN_IGN_MACRO	 (1 << 0) /* Ignore unknown macros. */
+#define	MAN_IGN_MACRO	 (1 << 0)
+#define	MAN_IGN_CHARS	 (1 << 1)
 
 extern	const char *const *man_macronames;
 

@@ -182,6 +182,8 @@ man_node_append(struct man *man, struct man_node *p)
 		abort();
 		/* NOTREACHED */
 	}
+	
+	p->parent->nchild++;
 
 	man->last = p;
 
