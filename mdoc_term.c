@@ -1309,7 +1309,8 @@ termp_lb_pre(DECL_ARGS)
 	const char	*lb;
 
 	assert(node->child && MDOC_TEXT == node->child->type);
-	if ((lb = mdoc_a2lib(node->child->string))) {
+	lb = mdoc_a2lib(node->child->string);
+	if (lb) {
 		term_word(p, lb);
 		return(0);
 	}
