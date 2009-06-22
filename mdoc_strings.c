@@ -221,6 +221,7 @@ mdoc_atotime(const char *p)
 }
 
 
+/* FIXME: move this into an editable .in file. */
 size_t
 mdoc_macro2len(int macro)
 {
@@ -255,7 +256,7 @@ mdoc_macro2len(int macro)
 	case(MDOC_Em):
 		return(10);
 	case(MDOC_Er):
-		return(12);
+		return(17);
 	case(MDOC_Ev):
 		return(15);
 	case(MDOC_Fa):
