@@ -98,19 +98,19 @@ were provided.
 .Pp
 .Ex -std mandoc
 .\" SUB-SECTION
-.Ss Punctuation
+.Ss Punctuation and Spacing
 If punctuation is set apart from words, such as in the phrase
 .Dq to be \&, or not to be ,
 it's processed by
 .Nm
-according to the following rules.  Opening punctuation
+according to the following rules:  opening punctuation
 .Po
 .Sq \&( , 
 .Sq \&[ , 
 and
 .Sq \&{
 .Pc 
-is not followed by a space. Closing punctuation
+is not followed by a space; closing punctuation
 .Po
 .Sq \&. , 
 .Sq \&, , 
@@ -128,6 +128,15 @@ is not preceded by whitespace.
 If the input is
 .Xr mdoc 7 ,
 these rules are also applied to macro arguments when appropriate.
+.Pp
+White-space, in non-literal (normal) mode, is stripped from input and
+replaced on output by a single space.  Thus, if you wish to preserve
+multiple spaces, they must be space-escaped
+.Sq \e\  .
+or used in a literal display mode, e.g., 
+.Sq \&.Bd \-literal 
+in 
+.Xr mdoc 7 .
 .\" SUB-SECTION
 .Ss Input Formats
 The
@@ -253,14 +262,17 @@ A list or display following
 .Sq \&.Ss
 does not assert a prior vertical break, just as it doesn't with
 .Sq \&.Sh .
-.\" LIST-ITEM
 .It
 The \-literal and \-unfilled 
 .Sq \&.Bd
 displays types are synonyms, as are \-filled and \-ragged.
-.\" LIST-ITEM
 .It
 Words aren't hyphenated.
+.It
+In normal mode (not a literal block), blocks of spaces aren't preserved,
+so double spaces following sentence closure 
+.Pq Qq French spacing
+are reduced to a single space.
 .El
 .\" SECTION
 .Sh SEE ALSO

@@ -533,9 +533,9 @@ arg_width(const struct mdoc_argv *arg, int pos)
 	assert(pos < (int)arg->sz && pos >= 0);
 	assert(arg->value[pos]);
 	if (0 == strcmp(arg->value[pos], "indent"))
-		return(INDENT);
+		return(INDENT + 3);
 	if (0 == strcmp(arg->value[pos], "indent-two"))
-		return(INDENT * 2);
+		return(INDENT * 2 + 2);
 
 	if (0 == (len = (int)strlen(arg->value[pos])))
 		return(0);
@@ -545,13 +545,14 @@ arg_width(const struct mdoc_argv *arg, int pos)
 			break;
 
 	if (i == len - 1) {
-		if ('n' == arg->value[pos][len - 1]) {
+		if ('n' == arg->value[pos][len - 1] ||
+				'm' == arg->value[pos][len - 1]) {
 			v = (size_t)atoi(arg->value[pos]);
-			return(v);
+			return(v + 2);
 		}
 
 	}
-	return(strlen(arg->value[pos]) + 1);
+	return(strlen(arg->value[pos]) + 2);
 }
 
 
@@ -603,9 +604,9 @@ arg_offset(const struct mdoc_argv *arg)
 
 	assert(*arg->value);
 	if (0 == strcmp(*arg->value, "left"))
-		return(0);
+		return(INDENT - 1);
 	if (0 == strcmp(*arg->value, "indent"))
-		return(INDENT);
+		return(INDENT + 1);
 	if (0 == strcmp(*arg->value, "indent-two"))
 		return(INDENT * 2);
 
@@ -1340,7 +1341,8 @@ termp_d1_pre(DECL_ARGS)
 	if (MDOC_BLOCK != node->type)
 		return(1);
 	term_newln(p);
-	p->offset += (pair->offset = INDENT);
+	pair->offset = INDENT + 1;
+	p->offset += pair->offset;
 	return(1);
 }
 

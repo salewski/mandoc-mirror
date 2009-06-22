@@ -614,7 +614,7 @@ post_bl_width(struct mdoc *m)
 	 */
 
 	if (0 == strcmp(p, "Ds"))
-		width = 8;
+		width = 6;
 	else if (MDOC_MAX == (tok = mdoc_hash_find(m->htab, p)))
 		return(1);
 	else if (0 == (width = mdoc_macro2len(tok))) 
