@@ -105,7 +105,7 @@ term_alloc(enum termenc enc)
 	if (NULL == (p = malloc(sizeof(struct termp))))
 		err(1, "malloc");
 	bzero(p, sizeof(struct termp));
-	p->maxrmargin = 80;
+	p->maxrmargin = 78;
 	p->enc = enc;
 	return(p);
 }

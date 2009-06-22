@@ -85,6 +85,7 @@ man_valid_post(struct man *m)
 	case (MAN_TEXT): 
 		return(check_text(m, m->last));
 	case (MAN_ROOT):
+		/* FIXME: validate that TH has been invoked! */
 		return(1);
 	default:
 		break;
