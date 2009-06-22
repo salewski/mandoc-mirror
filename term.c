@@ -200,6 +200,9 @@ term_isopendelim(const char *p, int len)
  *  Otherwise, the line will break at the right margin.  Extremely long
  *  lines will cause the system to emit a warning (TODO: hyphenate, if
  *  possible).
+ *
+ *  FIXME: newline breaks occur (in groff) also occur when a single
+ *  space follows a NOBREAK!
  */
 void
 term_flushln(struct termp *p)

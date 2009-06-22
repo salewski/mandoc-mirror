@@ -89,7 +89,7 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ad */ 
 	{ NULL, NULL }, /* An */
 	{ NULL, post_ar }, /* Ar */
-	{ NULL, NULL }, /* Cd */
+	{ NULL, NULL }, /* Cd */ /* FIXME: tabs are accepted! */
 	{ NULL, NULL }, /* Cm */
 	{ NULL, NULL }, /* Dv */ 
 	{ NULL, NULL }, /* Er */ 
