@@ -38,6 +38,7 @@ static	int	  check_le1(POSTARGS);
 static	int	  check_le2(POSTARGS);
 static	int	  check_le5(POSTARGS);
 static	int	  check_text(POSTARGS);
+static	int	  check_root(POSTARGS);
 
 static	v_post	  posts_le1[] = { check_le1, NULL };
 static	v_post	  posts_le2[] = { check_le2, NULL };
@@ -85,8 +86,7 @@ man_valid_post(struct man *m)
 	case (MAN_TEXT): 
 		return(check_text(m, m->last));
 	case (MAN_ROOT):
-		/* FIXME: validate that TH has been invoked! */
-		return(1);
+		return(check_root(m, m->last));
 	default:
 		break;
 	}
@@ -96,6 +96,19 @@ man_valid_post(struct man *m)
 	for ( ; *cp; cp++)
 		if ( ! (*cp)(m, m->last))
 			return(0);
+
+	return(1);
+}
+
+
+static int
+check_root(POSTARGS) 
+{
+	
+	if (NULL == m->first->child)
+		return(man_nerr(m, n, WNODATA));
+	if (NULL == m->meta.title)
+		return(man_nerr(m, n, WNOTITLE));
 
 	return(1);
 }

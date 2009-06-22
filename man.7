@@ -97,7 +97,7 @@ Characters may alternatively be escaped by a slash-asterisk,
 .Sq \e* ,
 with the same combinations as described above.  This form is deprecated.  
 .\" SECTION
-.Sh STRUCTURE
+.Sh SYNTAX
 Macros are one to three three characters in length and begin with a
 control character ,
 .Sq \&. ,
@@ -155,7 +155,20 @@ The
 .Sq \&.TP
 macro is similar, but does not need an empty argument line to trigger
 the behaviour.
-.\" PARAGRAPH
+.\" SECTION
+.Sh STRUCTURE
+Each
+.Nm
+document must contain contains at least the
+.Sq \&.TH
+macro describing the document's section and title.  It may occur
+anywhere in the document, although conventionally, it appears as the
+first macro.
+.Pp
+Beyond the 
+.Sq \&.TH ,
+at least one macro or text node must appear in the document.
+.\" SECTION
 .Sh MACROS
 This section contains a complete list of all 
 .Nm

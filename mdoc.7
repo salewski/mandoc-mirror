@@ -278,7 +278,23 @@ In-lines have \(>=0 scoped arguments.
 
 \&.Yy \(lB\-arg \(lBval...\(rB\(rB arg0 arg1 argN
 .Ed
-.\"
+.\" SECTION
+.Sh STRUCTURE
+Each
+.Nm
+document must begin with the document prologue, containing, in order, 
+.Sq \&.Dd ,
+.Sq \&.Dt ,
+and
+.Sq \&.Os .
+.Pp
+Following these, the document body must begin with the NAME section
+containing at least one 
+.Sq \&.Nm
+followed by a
+.Sq \&.Nd
+macro.
+.\" SECTION
 .Sh MACROS
 This section contains a complete list of all 
 .Nm

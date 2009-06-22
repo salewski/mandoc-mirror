@@ -466,6 +466,12 @@ man_err(struct man *m, int line, int pos,
 	case (WTQUOTE):
 		p = "unterminated quotation";
 		break;
+	case (WNODATA):
+		p = "document has no data";
+		break;
+	case (WNOTITLE):
+		p = "document has no title/section";
+		break;
 	}
 	assert(p);
 
