@@ -48,110 +48,121 @@
 			<tr>
 				<td>
 					<h1>
-					INSTALLING SOURCES
+					DOWNLOADS
 					</h1>
 
 					<p>
 					Sources correctly build and install on FreeBSD, OpenBSD, NetBSD and Linux operating systems, tested
 					variously on i386, AMD64, alpha and others.  The most current version is <span
-					class="attn">@VERSION@</span>, dated <span class="attn">@VDATE@</span>.  
+					class="attn">@VERSION@</span>, dated <span class="attn">@VDATE@</span>.  A full <a
+					href="/snapshots/ChangeLog">ChangeLog</a> is written with each new version.
 					</p>
 
 					<h2>
-					Snapshot source
+					Downstream
 					</h2>
 
-					<p>
-					CVS sources are checkedout and snapshotted with version updates.  These (and all historical snapshots)
-					may be found in the <a href="/snapshots/">/snapshots/</a> directory.  A full <a
-					href="/snapshots/ChangeLog">ChangeLog</a> is written with each new snapshot.
-					</p>
-
-					<p class="boxed">
-					% cd /tmp<br>
-					% ftp -V -o- <a href="http://mdocml.bsd.lv/snapshots/mdocml.tar.gz">
-					http://mdocml.bsd.lv/snapshots/mdocml.tar.gz</a> | tar -zvxf -<br>
-					% cd mdocml<br>
-					% make all<br>
-					# make install
-					</p>
+					<table width="100%" style="padding-left: 10px;">
+					<col width="40%">
+					<col width="60%">
+					<tbody>
+						<tr>
+							<td>FreeBSD (ports)</td>
+							<td>
+							<a href="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/"
+								class="external">/textproc/mandoc</a> 
+							</td>
+						</tr>
+						<tr>
+							<td>NetBSD (pkgsrc)</td>
+							<td>
+							<a href="http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/textproc/mdocml/"
+								class="external">/textproc/mandoc</a> 
+							</td>
+						</tr>
+						<tr>
+							<td>OpenBSD (base system)</td>
+							<td>
+							<a href="http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/mandoc/"
+								class="external">/usr.bin/mandoc</a> 
+							</td>
+						</tr>
+					</tbody>
+					</table>
 
 					<h2>
-					Snapshot port/pkgsrc
+					Current
 					</h2>
 
-					<p>
-					The source snapshot is automatically converted into OpenBSD, NetBSD and FreeBSD ports at <a
-					href="/ports-openbsd/">/ports-openbsd/</a>, <a href="/ports-netbsd/">/ports-netbsd/</a> and <a
-					href="/ports-freebsd/">/ports-freebsd/</a>, respectively.  Please read the <a class="external"
-					href="http://www.openbsd.org/faq/faq15.html">OpenBSD Ports FAQ</a>, the <a class="external"
-					href="http://www.netbsd.org/docs/software/packages.html">NetBSD pkgsrc guide</a> or the <a
-					class="external"
-					href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/ports-using.html">FreeBSD ports
-					guide</a>, first.
-					</p>
+					<table width="100%" style="padding-left: 10px;">
+					<col width="40%">
+					<col width="60%">
+					<tbody>
+						<tr>
+							<td>Source archive</td>
+							<td>
+							<a href="http://mdocml.bsd.lv/snapshots/mdocml.tar.gz">/snapshots/mdocml.tar.gz</a> 
+							(<a href="http://mdocml.bsd.lv/snapshots/mdocml.md5">md5</a>)
+							</td>
+						</tr>
+						<tr>
+							<td>OpenBSD port</td>
+							<td>
+							<a href="http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz">/ports-openbsd/mdocml.tar.gz</a> 
+							(<a href="http://mdocml.bsd.lv/ports-openbsd/mdocml.md5">md5</a>)
+							</td>
+						</tr>
+						<tr>
+							<td>FreeBSD port</td>
+							<td>
+							<a href="http://mdocml.bsd.lv/ports-freebsd/mdocml.tar.gz">/ports-freebsd/mdocml.tar.gz</a> 
+							(<a href="http://mdocml.bsd.lv/snapshots/mdocml.md5">md5</a>)
+							</td>
+						</tr>
+						<tr>
+							<td>NetBSD pkgsrc</td>
+							<td>
+							<a href="http://mdocml.bsd.lv/ports-netbsd/mdocml.tar.gz">/ports-netbsd/mdocml.tar.gz</a> 
+							(<a href="http://mdocml.bsd.lv/snapshots/mdocml.md5">md5</a>)
+							</td>
+						</tr>
+					</tbody>
+					</table>
 
-					<h3>
-					OpenBSD port
-					</h3>
+					<h2>
+					Historical
+					</h2>
 
-					<p>
-					Note: the <span class="nm">mdocml</span> utility is part of OpenBSD's base system at <a
-					href="http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/mandoc/">usr.bin/mandoc</a>.  Please use this
-					instead of the provided port.
-					</p>
-
-					<p class="boxed">
-					# pkg_delete mdocml<br>
-					# cd /usr/ports/textproc/<br>
-					# rm -rf mdocml<br>
-					# ftp -V -o- <a href="http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz">
-					http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz</a> | tar -zvxf -<br>
-					# cd mdocml<br>
-					# make build<br>
-					# make install
-					</p>
-
-					<h3>
-					NetBSD pkgsrc
-					</h3>
-
-					<p>
-					Note: a pkgsrc port is maintained in-tree at <a
-					href="http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/textproc/mdocml/">textproc/mdocml</a>.  Please use this
-					instead of the provided pkgsrc.
-					</p>
-
-					<p class="boxed">
-					# pkg_delete mdocml<br>
-					# cd /usr/pkgsrc/textproc/<br>
-					# rm -rf mdocml<br>
-					# ftp -V -o- <a href="http://mdocml.bsd.lv/ports-netbsd/mdocml.tar.gz">
-					http://mdocml.bsd.lv/ports-netbsd/mdocml.tar.gz</a> | tar -zvxf -<br>
-					# cd mdocml<br>
-					# make build<br>
-					# make install
-					</p>
-
-					<h3>
-					FreeBSD port
-					</h3>
-
-					<p>
-					Note: a port is maintained in-tree at <a
-					href="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/">textproc/mdocml</a>.  Please use
-					this instead of the provided port.
-					</p>
-
-					<p class="boxed">
-					# pkg_delete -x mdocml<br>
-					# cd /tmp<br>
-					# ftp -V -o- <a href="http://mdocml.bsd.lv/ports-freebsd/mdocml.tar.gz">
-					http://mdocml.bsd.lv/ports-freebsd/mdocml.tar.gz</a> | tar -zvxf -<br>
-					# cd mdocml<br>
-					# make<br>
-					# make install
-					</p>
+					<table width="100%" style="padding-left: 10px;">
+					<col width="40%">
+					<col width="60%">
+					<tbody>
+						<tr>
+							<td>Source archive</td>
+							<td>
+							<a href="http://mdocml.bsd.lv/snapshots/">/snapshots/</a> 
+							</td>
+						</tr>
+						<tr>
+							<td>OpenBSD port</td>
+							<td>
+							<a href="http://mdocml.bsd.lv/ports-openbsd/">/ports-openbsd/</a> 
+							</td>
+						</tr>
+						<tr>
+							<td>FreeBSD port</td>
+							<td>
+							<a href="http://mdocml.bsd.lv/ports-freebsd/">/ports-freebsd/</a> 
+							</td>
+						</tr>
+						<tr>
+							<td>NetBSD pkgsrc</td>
+							<td>
+							<a href="http://mdocml.bsd.lv/ports-netbsd/">/ports-netbsd/</a> 
+							</td>
+						</tr>
+					</tbody>
+					</table>
 				</td>
 			</tr>
 			<tr>
@@ -160,47 +171,39 @@
 					DOCUMENTATION
 					</h1>
 
-					<table width="100%">
-						<colgroup>
-							<col>
-							<col width="5">
-							<col width="100%">
-						</colgroup>
+					<table width="100%" style="padding-left: 10px;">
+					<col width="40%">
+					<col width="60%">
+					<tbody>
 						<tr>
 							<td><a href="mandoc.1.txt">mandoc(1)</a></td>
-							<td></td>
 							<td>format and display UNIX manuals</td>
 						</tr>
 						<tr>
 							<td><a href="mandoc_char.7.txt">mandoc_char(7)</a></td>
-							<td></td>
 							<td>mandoc special characters</td>
 						</tr>
 						<tr>
 							<td><a href="mdoc.7.txt">mdoc(7)</a></td>
-							<td></td>
 							<td>mdoc language reference</td>
 						</tr>
 						<tr>
 							<td><a href="man.7.txt">man(7)</a></td>
-							<td></td>
 							<td>man language reference</td>
 						</tr>
 						<tr>
 							<td><a href="manuals.7.txt">manuals(7)</a></td>
-							<td></td>
 							<td>a guide to writing UNIX manuals</td>
 						</tr>
 						<tr>
 							<td><a href="mdoc.3.txt">mdoc(3)</a></td>
-							<td></td>
 							<td>mdoc macro compiler library</td>
 						</tr>
 						<tr>
 							<td><a href="man.3.txt">man(3)</a></td>
-							<td></td>
 							<td>man macro compiler library</td>
 						</tr>
+					</tbody>
 					</table>
 				</td>
 			</tr>
@@ -211,7 +214,8 @@
 					</h1>
 
 					<p>
-					For all issues related to <span class="nm">mdocml</span>, contact Kristaps, kris<a class="external"
+					For all issues related to <span class="nm">mdocml</span>, contact Kristaps D&#382;onsons, kris<a
+					class="external"
 					href="http://mailhide.recaptcha.net/d?k=01jt88xIsFONwVjHZmGpc4AQ==&amp;c=sb5E6ulipc-eTnpTVqI-BQ=="
 					onclick="window.open('http://mailhide.recaptcha.net/d?k=01jt88xIsFONwVjHZmGpc4AQ==&amp;c=sb5E6ulipc-eTnpTVqI-BQ==',
 					'', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return
@@ -220,7 +224,7 @@
 
 					<p>
 					If you want to receive a semi-automated mail-out of new versions, then please write with a message
-					subject of &#8220;subscribe mdocml&#8221; (or, symmetrically, &#8220;unsubscribe mdocml&#8221;).
+					subject of <i>subscribe mdocml</i> (or <i>unsubscribe mdocml</i>).
 					</p>
 				</td>
 			</tr>

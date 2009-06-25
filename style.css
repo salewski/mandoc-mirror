@@ -55,3 +55,4 @@ div.foot	{ border-top: 1px dotted #cccccc;
 
 a.external 	{ background: transparent url(external.png) center right no-repeat; padding-right: 12px; }
 
+td.zebra	{ background-color: #eeeeee; }

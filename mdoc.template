@@ -8,9 +8,11 @@
 .\" See mdoc(7) for further reference.
 .\"
 .Dd $\&Mdocdate$
-.Dt DOCUMENT_TITLE SECTION
+.Dt <document_title> <section>
 .Os
 .Sh NAME
+.Nm <name>
+.Nd <description>
 .\" The next request should be used for sections 2 and 3 only.
 .\" .Sh LIBRARY
 .Sh SYNOPSIS

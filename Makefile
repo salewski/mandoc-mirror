@@ -1,4 +1,4 @@
-.SUFFIXES:	.html .sgml .1.txt .3.txt .7.txt .1 .3 .7
+.SUFFIXES:	.html .sgml .1.txt .3.txt .7.txt .1 .3 .7 .md5 .tar.gz
 
 BINDIR		= $(PREFIX)/bin
 INCLUDEDIR	= $(PREFIX)/include
@@ -51,6 +51,10 @@ HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h
 SGMLS	   = index.sgml 
 HTMLS	   = index.html
 STATICS	   = style.css external.png
+MD5S	   = mdocml-$(VERSION).md5 \
+	     mdocml-oport-$(VERSION).md5 \
+	     mdocml-fport-$(VERSION).md5 \
+	     mdocml-nport-$(VERSION).md5
 TARGZS	   = mdocml-$(VERSION).tar.gz \
 	     mdocml-oport-$(VERSION).tar.gz \
 	     mdocml-fport-$(VERSION).tar.gz \
@@ -79,11 +83,11 @@ cleanlint:
 
 dist:	mdocml-$(VERSION).tar.gz
 
-port:	mdocml-oport-$(VERSION).tar.gz \
-	mdocml-fport-$(VERSION).tar.gz \
-	mdocml-nport-$(VERSION).tar.gz
+html:	$(HTMLS)
 
-www:	all $(HTMLS) $(TARGZS) $(TEXTS) ChangeLog
+md5:	$(MD5)
+
+www:	all $(TARGZS) $(TEXTS) ChangeLog
 
 installwww: www
 	install -m 0444 $(TEXTS) $(HTMLS) $(STATICS) $(PREFIX)/
@@ -261,3 +265,6 @@ mandoc: $(MAINOBJS) libmdoc.a libman.a
 
 .7.7.txt:
 	./mandoc -Wall,error -fstrict $< | col -b > $@
+
+.tar.gz.md5:
+	md5 $< $@

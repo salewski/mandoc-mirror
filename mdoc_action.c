@@ -33,6 +33,7 @@ enum	mwarn {
 enum	merr {
 	ETOOLONG,
 	EMALLOC,
+	EUTSNAME,
 	ENUMFMT
 };
 
@@ -272,6 +273,9 @@ perr(struct mdoc *m, int line, int pos, enum merr type)
 	case (ETOOLONG):
 		p = "argument text too long";
 		break;
+	case (EUTSNAME):
+		p = "utsname";
+		break;
 	case (EMALLOC):
 		p = "memory exhausted";
 		break;
@@ -505,7 +509,7 @@ post_os(POST_ARGS)
 
 	if (0 == buf[0]) {
 		if (-1 == uname(&utsname))
-			return(mdoc_err(m, "utsname"));
+			return(verr(m, EUTSNAME));
 		if (strlcat(buf, utsname.sysname, 64) >= 64)
 			return(verr(m, ETOOLONG));
 		if (strlcat(buf, " ", 64) >= 64)
