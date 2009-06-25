@@ -137,6 +137,12 @@ or a single one-character sequence.
 Characters may alternatively be escaped by a slash-asterisk,
 .Sq \e* ,
 with the same combinations as described above.  This form is deprecated.  
+.\" SUB-SECTION
+.Ss Whitespace
+Unless in literal mode or specifically escaped, consecutive blocks of
+whitespace are pruned from input.  These are later re-added, if
+applicable, by a front-end utility such as
+.Xr mandoc 1 .
 .\" SECTION
 .Sh STRUCTURE
 Each
