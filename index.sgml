@@ -67,24 +67,24 @@
 					<col width="60%">
 					<tbody>
 						<tr>
-							<td>FreeBSD (ports)</td>
+							<td>FreeBSD</td>
 							<td>
 							<a href="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/"
-								class="external">/textproc/mandoc</a> 
+								class="external">ports/textproc/mandoc</a> 
 							</td>
 						</tr>
 						<tr>
-							<td>NetBSD (pkgsrc)</td>
+							<td>NetBSD</td>
 							<td>
 							<a href="http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/textproc/mdocml/"
-								class="external">/textproc/mandoc</a> 
+								class="external">pkgsrc/textproc/mandoc</a> 
 							</td>
 						</tr>
 						<tr>
-							<td>OpenBSD (base system)</td>
+							<td>OpenBSD</td>
 							<td>
 							<a href="http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/mandoc/"
-								class="external">/usr.bin/mandoc</a> 
+								class="external">src/usr.bin/mandoc</a> 
 							</td>
 						</tr>
 					</tbody>
@@ -101,21 +101,14 @@
 						<tr>
 							<td>Source archive</td>
 							<td>
-							<a href="http://mdocml.bsd.lv/snapshots/mdocml.tar.gz">/snapshots/mdocml.tar.gz</a> 
+							<a href="http://mdocml.bsd.lv/snapshots/mdocml.tar.gz">mdocml.tar.gz</a> 
 							(<a href="http://mdocml.bsd.lv/snapshots/mdocml.md5">md5</a>)
-							</td>
-						</tr>
-						<tr>
-							<td>OpenBSD port</td>
-							<td>
-							<a href="http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz">/ports-openbsd/mdocml.tar.gz</a> 
-							(<a href="http://mdocml.bsd.lv/ports-openbsd/mdocml.md5">md5</a>)
 							</td>
 						</tr>
 						<tr>
 							<td>FreeBSD port</td>
 							<td>
-							<a href="http://mdocml.bsd.lv/ports-freebsd/mdocml.tar.gz">/ports-freebsd/mdocml.tar.gz</a> 
+							<a href="http://mdocml.bsd.lv/ports-freebsd/mdocml.tar.gz">mdocml.tar.gz</a> 
 							(<a href="http://mdocml.bsd.lv/snapshots/mdocml.md5">md5</a>)
 							</td>
 						</tr>
@@ -124,6 +117,13 @@
 							<td>
 							<a href="http://mdocml.bsd.lv/ports-netbsd/mdocml.tar.gz">/ports-netbsd/mdocml.tar.gz</a> 
 							(<a href="http://mdocml.bsd.lv/snapshots/mdocml.md5">md5</a>)
+							</td>
+						</tr>
+						<tr>
+							<td>OpenBSD port</td>
+							<td>
+							<a href="http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz">mdocml.tar.gz</a> 
+							(<a href="http://mdocml.bsd.lv/ports-openbsd/mdocml.md5">md5</a>)
 							</td>
 						</tr>
 					</tbody>
@@ -144,12 +144,6 @@
 							</td>
 						</tr>
 						<tr>
-							<td>OpenBSD port</td>
-							<td>
-							<a href="http://mdocml.bsd.lv/ports-openbsd/">/ports-openbsd/</a> 
-							</td>
-						</tr>
-						<tr>
 							<td>FreeBSD port</td>
 							<td>
 							<a href="http://mdocml.bsd.lv/ports-freebsd/">/ports-freebsd/</a> 
@@ -159,6 +153,12 @@
 							<td>NetBSD pkgsrc</td>
 							<td>
 							<a href="http://mdocml.bsd.lv/ports-netbsd/">/ports-netbsd/</a> 
+							</td>
+						</tr>
+						<tr>
+							<td>OpenBSD port</td>
+							<td>
+							<a href="http://mdocml.bsd.lv/ports-openbsd/">/ports-openbsd/</a> 
 							</td>
 						</tr>
 					</tbody>
