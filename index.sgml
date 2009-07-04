@@ -7,7 +7,7 @@
 		<title>mdocml.bsd.lv</title>
 	</head>
 	<body>
-	<table width="600">
+	<table class="frame">
 		<col width="100%">
 		<tbody>
 			<tr>
@@ -53,31 +53,31 @@
 
 					<p>
 					Sources correctly build and install on FreeBSD, OpenBSD, NetBSD and Linux operating systems, tested
-					variously on i386, AMD64, alpha and others.  The most current version is <span
+					variously on i386, AMD64, alpha, and others.  The most current version is <span
 					class="attn">@VERSION@</span>, dated <span class="attn">@VDATE@</span>.  A full <a
-					href="/snapshots/ChangeLog">ChangeLog</a> is written with each new version.
+					href="/snapshots/ChangeLog">ChangeLog</a> is written with each release.
 					</p>
 
 					<h2>
 					Downstream
 					</h2>
 
-					<table width="100%" style="padding-left: 10px;">
-					<col width="40%">
-					<col width="60%">
+					<table width="100%">
+					<col width="200">
+					<col>
 					<tbody>
 						<tr>
 							<td>FreeBSD</td>
 							<td>
-							<a href="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/"
-								class="external">ports/textproc/mandoc</a> 
+							<a href="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/" 
+								class="external">ports/textproc/mdocml</a>
 							</td>
 						</tr>
 						<tr>
 							<td>NetBSD</td>
 							<td>
 							<a href="http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/textproc/mdocml/"
-								class="external">pkgsrc/textproc/mandoc</a> 
+								class="external">pkgsrc/textproc/mdocml</a> 
 							</td>
 						</tr>
 						<tr>
@@ -94,36 +94,36 @@
 					Current
 					</h2>
 
-					<table width="100%" style="padding-left: 10px;">
-					<col width="40%">
-					<col width="60%">
+					<table width="100%">
+					<col width="200">
+					<col>
 					<tbody>
 						<tr>
 							<td>Source archive</td>
 							<td>
-							<a href="http://mdocml.bsd.lv/snapshots/mdocml.tar.gz">mdocml.tar.gz</a> 
-							(<a href="http://mdocml.bsd.lv/snapshots/mdocml.md5">md5</a>)
+							<a href="/snapshots/mdocml.tar.gz">/snapshots/mdocml.tar.gz</a> 
+							(<a href="/snapshots/mdocml.md5">md5</a>)
 							</td>
 						</tr>
 						<tr>
 							<td>FreeBSD port</td>
 							<td>
-							<a href="http://mdocml.bsd.lv/ports-freebsd/mdocml.tar.gz">mdocml.tar.gz</a> 
-							(<a href="http://mdocml.bsd.lv/snapshots/mdocml.md5">md5</a>)
+							<a href="/ports-freebsd/mdocml.tar.gz">/ports-freebsd/mdocml.tar.gz</a> 
+							(<a href="/ports-freebsd/mdocml.md5">md5</a>)
 							</td>
 						</tr>
 						<tr>
 							<td>NetBSD pkgsrc</td>
 							<td>
-							<a href="http://mdocml.bsd.lv/ports-netbsd/mdocml.tar.gz">/ports-netbsd/mdocml.tar.gz</a> 
-							(<a href="http://mdocml.bsd.lv/snapshots/mdocml.md5">md5</a>)
+							<a href="/ports-netbsd/mdocml.tar.gz">/ports-netbsd/mdocml.tar.gz</a> 
+							(<a href="/ports-netbsd/mdocml.md5">md5</a>)
 							</td>
 						</tr>
 						<tr>
 							<td>OpenBSD port</td>
 							<td>
-							<a href="http://mdocml.bsd.lv/ports-openbsd/mdocml.tar.gz">mdocml.tar.gz</a> 
-							(<a href="http://mdocml.bsd.lv/ports-openbsd/mdocml.md5">md5</a>)
+							<a href="/ports-openbsd/mdocml.tar.gz">/ports-openbsd/mdocml.tar.gz</a> 
+							(<a href="/ports-openbsd/mdocml.md5">md5</a>)
 							</td>
 						</tr>
 					</tbody>
@@ -133,32 +133,32 @@
 					Historical
 					</h2>
 
-					<table width="100%" style="padding-left: 10px;">
-					<col width="40%">
-					<col width="60%">
+					<table width="100%">
+					<col width="200">
+					<col>
 					<tbody>
 						<tr>
 							<td>Source archive</td>
 							<td>
-							<a href="http://mdocml.bsd.lv/snapshots/">/snapshots/</a> 
+							<a href="/snapshots/">/snapshots/</a> 
 							</td>
 						</tr>
 						<tr>
 							<td>FreeBSD port</td>
 							<td>
-							<a href="http://mdocml.bsd.lv/ports-freebsd/">/ports-freebsd/</a> 
+							<a href="/ports-freebsd/">/ports-freebsd/</a> 
 							</td>
 						</tr>
 						<tr>
 							<td>NetBSD pkgsrc</td>
 							<td>
-							<a href="http://mdocml.bsd.lv/ports-netbsd/">/ports-netbsd/</a> 
+							<a href="/ports-netbsd/">/ports-netbsd/</a> 
 							</td>
 						</tr>
 						<tr>
 							<td>OpenBSD port</td>
 							<td>
-							<a href="http://mdocml.bsd.lv/ports-openbsd/">/ports-openbsd/</a> 
+							<a href="/ports-openbsd/">/ports-openbsd/</a> 
 							</td>
 						</tr>
 					</tbody>
@@ -171,9 +171,14 @@
 					DOCUMENTATION
 					</h1>
 
-					<table width="100%" style="padding-left: 10px;">
-					<col width="40%">
-					<col width="60%">
+					<p>
+					These manuals are generated automatically (with <a href="mandoc.1.txt">mandoc(1)</a>) and refer to the
+					current snapshot.
+					</p>
+
+					<table width="100%">
+					<col width="200">
+					<col>
 					<tbody>
 						<tr>
 							<td><a href="mandoc.1.txt">mandoc(1)</a></td>
@@ -217,13 +222,11 @@
 					For all issues related to <span class="nm">mdocml</span>, contact Kristaps D&#382;onsons, kris<a
 					class="external"
 					href="http://mailhide.recaptcha.net/d?k=01jt88xIsFONwVjHZmGpc4AQ==&amp;c=sb5E6ulipc-eTnpTVqI-BQ=="
-					onclick="window.open('http://mailhide.recaptcha.net/d?k=01jt88xIsFONwVjHZmGpc4AQ==&amp;c=sb5E6ulipc-eTnpTVqI-BQ==',
-					'', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return
-					false;" title="Reveal this e-mail address">...</a>@kth.se.
+					title="Reveal this e-mail address">...</a>@kth.se.
 					</p>
 
 					<p>
-					If you want to receive a semi-automated mail-out of new versions, then please write with a message
+					If you want to receive a semi-automated mail-out of new releases, then please write with a message
 					subject of <i>subscribe mdocml</i> (or <i>unsubscribe mdocml</i>).
 					</p>
 				</td>

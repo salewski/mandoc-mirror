@@ -2,18 +2,13 @@ body		{ color: #333333;
 		  font-size: smaller;
 		  font-family: Verdana, Tahoma, Arial, sans-serif; }
 
-p		{ margin-left: 40px;
+table.frame	{ max-width: 800px; 
+		  padding-left: 10px; }
+
+table		{ padding-left: 40px; }
+
+p		{ padding-left: 40px;
 		  text-align: justify; }
-
-table		{ margin-left: 40px; }
-
-ul		{ margin-left: 40px; }
-
-p.boxed		{ border: 1px solid #cccccc; 
-		  margin-left: 40px;
-		  text-align: justify;
-		  padding: 2px;
-		  color: black; }
 
 h1		{ font-weight: bold;
 		  font-size: small;
@@ -21,28 +16,13 @@ h1		{ font-weight: bold;
 
 h2		{ font-weight: bold;
 		  font-size: small;
-		  margin-left: 20px;
+		  padding-left: 20px;
 		  margin-bottom: 0px; 
 		  font-family: Verdana, Tahoma, Arial, sans-serif; }
-
-h3		{ font-size: small;
-		  font-weight: normal;
-		  margin-left: 20px;
-		  margin-bottom: 0px; 
-		  font-family: Verdana, Tahoma, Arial, sans-serif; }
-
-a.man		{ text-decoration: none; 
-	 	  border-bottom: 1px dotted #999999; }
-
-span.path	{ color: #000000; }
 
 span.nm		{ color: #000000; font-weight: bold; }
 
 span.attn	{ color: #000000; font-weight: bold; }
-
-span.fl		{ font-weight: bold; }
-
-span.ar		{ text-decoration: underline; }
 
 div.head	{ border-bottom: 1px dotted #cccccc; 
 		  padding-bottom: 5px;
@@ -54,5 +34,3 @@ div.foot	{ border-top: 1px dotted #cccccc;
 		  text-align: right; }
 
 a.external 	{ background: transparent url(external.png) center right no-repeat; padding-right: 12px; }
-
-td.zebra	{ background-color: #eeeeee; }
