@@ -608,7 +608,7 @@ arg_offset(const struct mdoc_argv *arg)
 	if (0 == strcmp(*arg->value, "indent"))
 		return(INDENT + 1);
 	if (0 == strcmp(*arg->value, "indent-two"))
-		return(INDENT * 2);
+		return((INDENT + 1) * 2);
 
 	/* FIXME: needs to support field-widths (10n, etc.). */
 
