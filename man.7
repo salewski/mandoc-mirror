@@ -95,7 +95,12 @@ or a single one-character sequence.
 .Pp
 Characters may alternatively be escaped by a slash-asterisk,
 .Sq \e* ,
-with the same combinations as described above.  This form is deprecated.  
+with the same combinations as described above.
+.Pp
+Terms may also be text-decorated using the
+.Sq \ef
+escape followed by a text-decoration letter: B (bold), I, (italic), or P
+and R (Roman, or reset).
 .\" SUB-SECTION
 .Ss Whitespace
 Unless specifically escaped, consecutive blocks of whitespace are pruned
@@ -217,6 +222,11 @@ system, the following macros are also supported:
 These follow the same calling conventions as the above
 .Nm
 macros.
+.\" SECTION
+.Sh COMPATIBILITY
+See
+.Xr mdoc 7
+for groff compatibility notes.
 .\" SECTION
 .Sh SEE ALSO
 .Xr mandoc 1 ,

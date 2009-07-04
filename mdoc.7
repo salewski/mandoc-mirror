@@ -136,7 +136,12 @@ or a single one-character sequence.
 .Pp
 Characters may alternatively be escaped by a slash-asterisk,
 .Sq \e* ,
-with the same combinations as described above.  This form is deprecated.  
+with the same combinations as described above.
+.Pp
+Terms may also be text-decorated using the
+.Sq \ef
+escape followed by a text-decoration letter: B (bold), I, (italic), or P
+and R (Roman, or reset).  This form is not recommended.
 .\" SUB-SECTION
 .Ss Whitespace
 Unless in literal mode or specifically escaped, consecutive blocks of
@@ -522,13 +527,27 @@ file re-write
 .Bl -dash -compact
 .\" LIST-ITEM
 .It
+Some character sequences in groff are not handled depending on escape
+style, e.g., 
+.Sq \e(ba
+and
+.Sq \e*(Ba
+may not be interchanged.  This is no longer the case: all character
+sequences resolve to the same symbol, regardless the escape style.
+.\" LIST-ITEM
+.It
+Blocks of whitespace are stripped from both macro and free-form text
+lines (except when in literal mode), while groff would retain whitespace
+in free-form text lines.
+.\" LIST-ITEM
+.It
 Historic groff has many un-callable macros.  Most of these (excluding
 some block-level macros) are now callable, conforming to the
 non-historic groff version.
 .\" LIST-ITEM
 .It
 The vertical bar 
-.Sq \(Ba
+.Sq \(ba
 made historic groff
 .Qq go orbital
 but is a proper delimiter in this implementation.
@@ -557,11 +576,10 @@ incorrectly by following it with a reserved character and expecting the
 delimiter to render.  This is not supported.
 .\" LIST-ITEM
 .It
-If an special-character control character 
-.Sq \e 
-is escaped, it will
-obviously not render the sequence.  Even newer versions of groff seem to
-dither on this.
+If an special-character control character is escaped
+.Sq \e\e ,
+it will obviously not render the subsequent sequence.  Even newer
+versions of groff seem to dither on this.
 .El
 .\" SECTION
 .Sh SEE ALSO
