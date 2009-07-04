@@ -232,12 +232,14 @@ man_init(struct curparse *curp)
 
 	/* Defaults from mandoc.1. */
 
-	pflags = MAN_IGN_MACRO | MAN_IGN_CHARS;
+	pflags = MAN_IGN_MACRO | MAN_IGN_ESCAPE | MAN_IGN_CHARS;
 
 	if (curp->fflags & NO_IGN_MACRO)
 		pflags &= ~MAN_IGN_MACRO;
 	if (curp->fflags & NO_IGN_CHARS)
 		pflags &= ~MAN_IGN_CHARS;
+	if (curp->fflags & NO_IGN_ESCAPE)
+		pflags &= ~MAN_IGN_ESCAPE;
 
 	if (NULL == (man = man_alloc(curp, pflags, &mancb)))
 		warnx("memory exhausted");

@@ -17,7 +17,6 @@
 #include <sys/types.h>
 
 #include <assert.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -57,82 +56,6 @@ static	const struct mdoc_secname secnames[SECNAME_MAX] = {
 #ifdef __linux__
 extern	char		*strptime(const char *, const char *, struct tm *);
 #endif
-
-
-size_t
-mdoc_isescape(const char *p)
-{
-	size_t		 c;
-	
-	if ('\\' != *p++)
-		return(0);
-
-	switch (*p) {
-	case ('\\'):
-		/* FALLTHROUGH */
-	case ('\''):
-		/* FALLTHROUGH */
-	case ('`'):
-		/* FALLTHROUGH */
-	case ('q'):
-		/* FALLTHROUGH */
-	case ('-'):
-		/* FALLTHROUGH */
-	case ('~'):
-		/* FALLTHROUGH */
-	case ('^'):
-		/* FALLTHROUGH */
-	case ('%'):
-		/* FALLTHROUGH */
-	case ('0'):
-		/* FALLTHROUGH */
-	case (' '):
-		/* FALLTHROUGH */
-	case ('|'):
-		/* FALLTHROUGH */
-	case ('&'):
-		/* FALLTHROUGH */
-	case ('.'):
-		/* FALLTHROUGH */
-	case (':'):
-		/* FALLTHROUGH */
-	case ('e'):
-		return(2);
-	case ('*'):
-		if (0 == *++p || ! isgraph((u_char)*p))
-			return(0);
-		switch (*p) {
-		case ('('):
-			if (0 == *++p || ! isgraph((u_char)*p))
-				return(0);
-			return(4);
-		case ('['):
-			for (c = 3, p++; *p && ']' != *p; p++, c++)
-				if ( ! isgraph((u_char)*p))
-					break;
-			return(*p == ']' ? c : 0);
-		default:
-			break;
-		}
-		return(3);
-	case ('('):
-		if (0 == *++p || ! isgraph((u_char)*p))
-			return(0);
-		if (0 == *++p || ! isgraph((u_char)*p))
-			return(0);
-		return(4);
-	case ('['):
-		break;
-	default:
-		return(0);
-	}
-
-	for (c = 3, p++; *p && ']' != *p; p++, c++)
-		if ( ! isgraph((u_char)*p))
-			break;
-
-	return(*p == ']' ? c : 0);
-}
 
 
 int

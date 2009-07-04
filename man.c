@@ -472,6 +472,9 @@ man_err(struct man *m, int line, int pos,
 	case (WNOTITLE):
 		p = "document has no title/section";
 		break;
+	case (WESCAPE):
+		p = "invalid escape sequence";
+		break;
 	}
 	assert(p);
 

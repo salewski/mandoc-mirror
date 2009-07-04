@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "libmdoc.h"
+#include "libmandoc.h"
 
 /* FIXME: .Bl -diag can't have non-text children in HEAD. */
 /* TODO: ignoring Pp (it's superfluous in some invocations). */
@@ -708,9 +709,9 @@ check_argv(struct mdoc *m, const struct mdoc_node *n,
 static int
 check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 {
-	size_t		 c;
+	int		 c;
 
-	for ( ; *p; p++) {
+	for ( ; *p; p++, pos++) {
 		if ('\t' == *p) {
 			if ( ! (MDOC_LITERAL & mdoc->flags))
 				if ( ! warn_print(mdoc, line, pos))
@@ -722,9 +723,10 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 		if ('\\' != *p)
 			continue;
 
-		c = mdoc_isescape(p);
+		c = mandoc_special(p);
 		if (c) {
-			p += (int)c - 1;
+			p += c - 1;
+			pos += c - 1;
 			continue;
 		}
 		if ( ! (MDOC_IGN_ESCAPE & mdoc->pflags))

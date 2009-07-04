@@ -19,20 +19,21 @@ LINTFLAGS += $(VFLAGS)
 
 MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln mdoc_strings.ln \
 	     mdoc_argv.ln mdoc_validate.ln mdoc_action.ln \
-	     lib.ln att.ln arch.ln vol.ln msec.ln st.ln
+	     lib.ln att.ln arch.ln vol.ln msec.ln st.ln \
+	     mandoc.ln
 MDOCOBJS   = mdoc_macro.o mdoc.o mdoc_hash.o mdoc_strings.o \
 	     mdoc_argv.o mdoc_validate.o mdoc_action.o lib.o att.o \
-	     arch.o vol.o msec.o st.o
+	     arch.o vol.o msec.o st.o mandoc.o
 MDOCSRCS   = mdoc_macro.c mdoc.c mdoc_hash.c mdoc_strings.c \
 	     mdoc_argv.c mdoc_validate.c mdoc_action.c lib.c att.c \
-	     arch.c vol.c msec.c st.c
+	     arch.c vol.c msec.c st.c mandoc.c
 
 MANLNS	   = man_macro.ln man.ln man_hash.ln man_validate.ln \
-	     man_action.ln
+	     man_action.ln mandoc.ln
 MANOBJS	   = man_macro.o man.o man_hash.o man_validate.o \
-	     man_action.o
+	     man_action.o mandoc.o
 MANSRCS	   = man_macro.c man.c man_hash.c man_validate.c \
-	     man_action.c
+	     man_action.c mandoc.c
 
 MAINLNS	   = main.ln mdoc_term.ln ascii.ln term.ln tree.ln \
 	     compat.ln man_term.ln
@@ -47,7 +48,7 @@ LIBS	   = libmdoc.a libman.a
 OBJS	   = $(MDOCOBJS) $(MAINOBJS) $(MANOBJS)
 SRCS	   = $(MDOCSRCS) $(MAINSRCS) $(MANSRCS)
 DATAS	   = arch.in att.in lib.in msec.in st.in vol.in ascii.in
-HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h 
+HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h libmandoc.h
 SGMLS	   = index.sgml 
 HTMLS	   = index.html
 STATICS	   = style.css external.png
