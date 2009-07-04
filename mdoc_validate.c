@@ -56,7 +56,6 @@ enum	mwarn {
 	WNOWIDTH,
 	WMISSWIDTH,
 	WESCAPE,
-	WDEPCOL,
 	WWRONGMSEC,
 	WSECOOO,
 	WSECREP,
@@ -468,10 +467,6 @@ pwarn(struct mdoc *m, int line, int pos, enum mwarn type)
 		break;
 	case (WPROLOOO):
 		p = "prologue macros out-of-order";
-		c = WARN_COMPAT;
-		break;
-	case (WDEPCOL):
-		p = "deprecated column argument syntax";
 		c = WARN_COMPAT;
 		break;
 	case (WNOWIDTH):
