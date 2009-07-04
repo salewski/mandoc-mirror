@@ -604,7 +604,7 @@ arg_offset(const struct mdoc_argv *arg)
 
 	assert(*arg->value);
 	if (0 == strcmp(*arg->value, "left"))
-		return(INDENT - 1);
+		return(0);
 	if (0 == strcmp(*arg->value, "indent"))
 		return(INDENT + 1);
 	if (0 == strcmp(*arg->value, "indent-two"))
@@ -761,7 +761,7 @@ termp_it_pre(DECL_ARGS)
 		if (vals[0] >= 0) 
 			width = arg_width(&bl->args->argv[vals[0]], 0);
 		if (vals[1] >= 0) 
-			offset = arg_offset(&bl->args->argv[vals[1]]);
+			offset += arg_offset(&bl->args->argv[vals[1]]);
 		break;
 	}
 
