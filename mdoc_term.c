@@ -532,10 +532,6 @@ arg_width(const struct mdoc_argv *arg, int pos)
 
 	assert(pos < (int)arg->sz && pos >= 0);
 	assert(arg->value[pos]);
-	if (0 == strcmp(arg->value[pos], "indent"))
-		return(INDENT + 3);
-	if (0 == strcmp(arg->value[pos], "indent-two"))
-		return(INDENT * 2 + 2);
 
 	if (0 == (len = (int)strlen(arg->value[pos])))
 		return(0);
