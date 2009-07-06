@@ -241,7 +241,7 @@ pwarn(struct mdoc *mdoc, int line, int pos, enum mwarn type)
 		break;
 	}
 	assert(p);
-	return(mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX, p));
+	return(mdoc_pwarn(mdoc, line, pos, p));
 }
 
 
@@ -286,7 +286,7 @@ swarn(struct mdoc *mdoc, enum mdoc_type type,
 		return(mdoc_perr(mdoc, line, pos, 
 				"%s scope breaks %s scope of %s", 
 				tt, t, n));
-	return(mdoc_pwarn(mdoc, line, pos, WARN_SYNTAX,
+	return(mdoc_pwarn(mdoc, line, pos, 
 				"%s scope breaks %s scope of %s", 
 				tt, t, n));
 }

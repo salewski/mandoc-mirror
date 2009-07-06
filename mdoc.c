@@ -264,8 +264,7 @@ mdoc_verr(struct mdoc *mdoc, int ln, int pos,
 
 
 int
-mdoc_vwarn(struct mdoc *mdoc, int ln, int pos, 
-		enum mdoc_warn type, const char *fmt, ...)
+mdoc_vwarn(struct mdoc *mdoc, int ln, int pos, const char *fmt, ...)
 {
 	char		 buf[256];
 	va_list		 ap;
@@ -276,7 +275,7 @@ mdoc_vwarn(struct mdoc *mdoc, int ln, int pos,
 	va_start(ap, fmt);
 	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
 	va_end(ap);
-	return((*mdoc->cb.mdoc_warn)(mdoc->data, ln, pos, type, buf));
+	return((*mdoc->cb.mdoc_warn)(mdoc->data, ln, pos, buf));
 }
 
 
@@ -299,8 +298,7 @@ mdoc_nerr(struct mdoc *mdoc, const struct mdoc_node *node,
 
 
 int
-mdoc_warn(struct mdoc *mdoc, enum mdoc_warn type, 
-		const char *fmt, ...)
+mdoc_warn(struct mdoc *mdoc, const char *fmt, ...)
 {
 	char		 buf[256];
 	va_list		 ap;
@@ -311,8 +309,8 @@ mdoc_warn(struct mdoc *mdoc, enum mdoc_warn type,
 	va_start(ap, fmt);
 	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
 	va_end(ap);
-	return((*mdoc->cb.mdoc_warn)(mdoc->data, mdoc->last->line,
-				mdoc->last->pos, type, buf));
+	return((*mdoc->cb.mdoc_warn)(mdoc->data, mdoc->last->line, 
+				mdoc->last->pos, buf));
 }
 
 
@@ -334,8 +332,7 @@ mdoc_err(struct mdoc *mdoc, const char *fmt, ...)
 
 
 int
-mdoc_pwarn(struct mdoc *mdoc, int line, int pos, enum mdoc_warn type,
-		const char *fmt, ...)
+mdoc_pwarn(struct mdoc *mdoc, int line, int pos, const char *fmt, ...)
 {
 	char		 buf[256];
 	va_list		 ap;
@@ -346,8 +343,7 @@ mdoc_pwarn(struct mdoc *mdoc, int line, int pos, enum mdoc_warn type,
 	va_start(ap, fmt);
 	(void)vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
 	va_end(ap);
-	return((*mdoc->cb.mdoc_warn)(mdoc->data, 
-				line, pos, type, buf));
+	return((*mdoc->cb.mdoc_warn)(mdoc->data, line, pos, buf));
 }
 
 int
@@ -652,8 +648,7 @@ macrowarn(struct mdoc *m, int ln, const char *buf)
 		return(mdoc_perr(m, ln, 1, 
 				"unknown macro: %s%s", 
 				buf, strlen(buf) > 3 ? "..." : ""));
-	return(mdoc_pwarn(m, ln, 1, WARN_SYNTAX,
-				"unknown macro: %s%s",
+	return(mdoc_pwarn(m, ln, 1, "unknown macro: %s%s",
 				buf, strlen(buf) > 3 ? "..." : ""));
 }
 

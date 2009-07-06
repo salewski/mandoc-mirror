@@ -64,16 +64,13 @@ __BEGIN_DECLS
  * When GCC2 is deprecated, most of these can be reverted to #define
  * as mdoc_vXXX using __VA_ARGS__.  Until then, use real functions.
  */
-int		  mdoc_vwarn(struct mdoc *, int, int, 
-			enum mdoc_warn, const char *, ...);
-int		  mdoc_verr(struct mdoc *, int, int, 
-			const char *, ...);
+int		  mdoc_vwarn(struct mdoc *, int, int, const char *, ...);
+int		  mdoc_verr(struct mdoc *, int, int, const char *, ...);
 int		  mdoc_nerr(struct mdoc *, const struct mdoc_node *,
 			const char *, ...);
-int		  mdoc_warn(struct mdoc *, enum mdoc_warn, const char *, ...);
+int		  mdoc_warn(struct mdoc *, const char *, ...);
 int		  mdoc_err(struct mdoc *, const char *, ...);
-int		  mdoc_pwarn(struct mdoc *, int, int,
-			enum mdoc_warn,const char *, ...);
+int		  mdoc_pwarn(struct mdoc *, int, int, const char *, ...);
 int		  mdoc_perr(struct mdoc *, int, int, const char *, ...);
 int		  mdoc_macro(MACRO_PROT_ARGS);
 int		  mdoc_word_alloc(struct mdoc *, 

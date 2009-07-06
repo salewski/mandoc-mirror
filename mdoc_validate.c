@@ -444,30 +444,24 @@ static int
 pwarn(struct mdoc *m, int line, int pos, enum mwarn type)
 {
 	char		 *p;
-	enum mdoc_warn	  c;
 
-	c = WARN_SYNTAX;
 	p = NULL;
+
 	switch (type) {
 	case (WBADMSEC):
 		p = "inappropriate manual section";
-		c = WARN_COMPAT;
 		break;
 	case (WBADSEC):
 		p = "inappropriate document section";
-		c = WARN_COMPAT;
 		break;
 	case (WARGVAL):
 		p = "argument value suggested";
-		c = WARN_COMPAT;
 		break;
 	case (WPROLREP):
 		p = "prologue macros repeated";
-		c = WARN_COMPAT;
 		break;
 	case (WPROLOOO):
 		p = "prologue macros out-of-order";
-		c = WARN_COMPAT;
 		break;
 	case (WNOWIDTH):
 		p = "superfluous width argument";
@@ -495,7 +489,6 @@ pwarn(struct mdoc *m, int line, int pos, enum mwarn type)
 		break;
 	case (WWRONGMSEC):
 		p = "document section in wrong manual section";
-		c = WARN_COMPAT;
 		break;
 	case (WSECOOO):
 		p = "document section out of conventional order";
@@ -510,8 +503,9 @@ pwarn(struct mdoc *m, int line, int pos, enum mwarn type)
 		p = "NAME section contents incomplete/badly-ordered";
 		break;
 	}
+
 	assert(p);
-	return(mdoc_pwarn(m, line, pos, c, p));
+	return(mdoc_pwarn(m, line, pos, p));
 }
 
 
@@ -529,8 +523,8 @@ warn_count(struct mdoc *m, const char *k,
 		int want, const char *v, int has)
 {
 
-	return(mdoc_warn(m, WARN_SYNTAX, 
-		"suggests %s %s %d (has %d)", v, k, want, has));
+	return(mdoc_warn(m, "suggests %s %s %d (has %d)", 
+				v, k, want, has));
 }
 
 

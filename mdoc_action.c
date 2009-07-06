@@ -289,14 +289,12 @@ static int
 pwarn(struct mdoc *m, int line, int pos, enum mwarn type)
 {
 	char		*p;
-	int		 c;
 
 	p = NULL;
-	c = WARN_SYNTAX;
+
 	switch (type) {
 	case (WBADSEC):
 		p = "inappropriate document section in manual section";
-		c = WARN_COMPAT;
 		break;
 	case (WNOWIDTH):
 		p = "cannot determine default width";
@@ -305,8 +303,9 @@ pwarn(struct mdoc *m, int line, int pos, enum mwarn type)
 		p = "malformed date syntax";
 		break;
 	}
+
 	assert(p);
-	return(mdoc_pwarn(m, line, pos, c, p));
+	return(mdoc_pwarn(m, line, pos, p));
 }
 
 

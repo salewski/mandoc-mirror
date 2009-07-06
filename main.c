@@ -99,8 +99,7 @@ static	int		  moptions(enum intt *, char *);
 static	int		  woptions(int *, char *);
 static	int		  merr(void *, int, int, const char *);
 static	int		  manwarn(void *, int, int, const char *);
-static	int		  mdocwarn(void *, int, int, 
-				enum mdoc_warn, const char *);
+static	int		  mdocwarn(void *, int, int, const char *);
 static	int		  ffile(struct buf *, struct buf *, 
 				const char *, struct curparse *);
 static	int		  fdesc(struct buf *, struct buf *,
@@ -645,31 +644,14 @@ merr(void *arg, int line, int col, const char *msg)
 
 
 static int
-mdocwarn(void *arg, int line, int col, 
-		enum mdoc_warn type, const char *msg)
+mdocwarn(void *arg, int line, int col, const char *msg)
 {
 	struct curparse *curp;
-	char		*wtype;
 
 	curp = (struct curparse *)arg;
-	wtype = NULL;
 
-	switch (type) {
-	case (WARN_COMPAT):
-		wtype = "compat";
-		if (curp->wflags & WARN_WCOMPAT)
-			break;
-		return(1);
-	case (WARN_SYNTAX):
-		wtype = "syntax";
-		if (curp->wflags & WARN_WSYNTAX)
-			break;
-		return(1);
-	}
-
-	assert(wtype);
-	warnx("%s:%d: %s warning: %s (column %d)", 
-			curp->file, line, wtype, msg, col);
+	warnx("%s:%d: warning: %s (column %d)", 
+			curp->file, line, msg, col);
 
 	if ( ! (curp->wflags & WARN_WERR))
 		return(1);

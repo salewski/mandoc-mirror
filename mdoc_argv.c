@@ -369,6 +369,7 @@ perr(struct mdoc *mdoc, int line, int pos, enum merr code)
 		p = "argument requires a value";
 		break;
 	}
+
 	assert(p);
 	return(mdoc_perr(mdoc, line, pos, p));
 }
@@ -378,10 +379,9 @@ static int
 pwarn(struct mdoc *mdoc, int line, int pos, enum mwarn code)
 {
 	char		*p;
-	int		 c;
 
 	p = NULL;
-	c = WARN_SYNTAX;
+
 	switch (code) {
 	case (WQUOTPARM):
 		p = "unexpected quoted parameter";
@@ -391,15 +391,14 @@ pwarn(struct mdoc *mdoc, int line, int pos, enum mwarn code)
 		break;
 	case (WCOLEMPTY):
 		p = "last list column is empty";
-		c = WARN_COMPAT;
 		break;
 	case (WTAILWS):
 		p = "trailing whitespace";
-		c = WARN_COMPAT;
 		break;
 	}
+
 	assert(p);
-	return(mdoc_pwarn(mdoc, line, pos, c, p));
+	return(mdoc_pwarn(mdoc, line, pos, p));
 }
 
 
