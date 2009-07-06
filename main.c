@@ -96,8 +96,7 @@ static	int		  toptions(enum outt *, char *);
 static	int		  moptions(enum intt *, char *);
 static	int		  woptions(int *, char *);
 static	int		  merr(void *, int, int, const char *);
-static	int		  manwarn(void *, int, int, const char *);
-static	int		  mdocwarn(void *, int, int, const char *);
+static	int		  mwarn(void *, int, int, const char *);
 static	int		  ffile(struct buf *, struct buf *, 
 				const char *, struct curparse *);
 static	int		  fdesc(struct buf *, struct buf *,
@@ -225,7 +224,7 @@ man_init(struct curparse *curp)
 	struct man_cb	 mancb;
 
 	mancb.man_err = merr;
-	mancb.man_warn = manwarn;
+	mancb.man_warn = mwarn;
 
 	/* Defaults from mandoc.1. */
 
@@ -253,7 +252,7 @@ mdoc_init(struct curparse *curp)
 	struct mdoc_cb	 mdoccb;
 
 	mdoccb.mdoc_err = merr;
-	mdoccb.mdoc_warn = mdocwarn;
+	mdoccb.mdoc_warn = mwarn;
 
 	/* Defaults from mandoc.1. */
 
@@ -635,7 +634,7 @@ merr(void *arg, int line, int col, const char *msg)
 
 
 static int
-mdocwarn(void *arg, int line, int col, const char *msg)
+mwarn(void *arg, int line, int col, const char *msg)
 {
 	struct curparse *curp;
 
@@ -654,23 +653,3 @@ mdocwarn(void *arg, int line, int col, const char *msg)
 	return(0);
 }
 
-
-static int
-manwarn(void *arg, int line, int col, const char *msg)
-{
-	struct curparse *curp;
-
-	curp = (struct curparse *)arg;
-
-	if ( ! (curp->wflags & WARN_WALL))
-		return(1);
-
-	warnx("%s:%d: syntax warning: %s (column %d)", 
-			curp->file, line, msg, col);
-
-	if ( ! (curp->wflags & WARN_WERR))
-		return(1);
-
-	warnx("considering warnings as errors");
-	return(0);
-}
