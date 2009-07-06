@@ -24,13 +24,10 @@
 
 #include "libmdoc.h"
 
-enum	mwarn {
-	WBADSEC,
-	WNOWIDTH,
-	WBADDATE
-};
-
 enum	merr {
+	EBADDATE,
+	ENOWIDTH,
+	EBADSEC,
 	ETOOLONG,
 	EMALLOC,
 	EUTSNAME,
@@ -45,8 +42,7 @@ struct	actions {
 	int	(*post)(POST_ARGS);
 };
 
-static	int	  pwarn(struct mdoc *, int, int, enum mwarn);
-static	int	  perr(struct mdoc *, int, int, enum merr);
+static	int	  perr(struct mdoc *, int, int, enum merr, int);
 static	int	  concat(struct mdoc *, const struct mdoc_node *, 
 			char *, size_t);
 
@@ -68,9 +64,9 @@ static	int	  post_std(POST_ARGS);
 static	int	  pre_bd(PRE_ARGS);
 static	int	  pre_dl(PRE_ARGS);
 
-#define	vwarn(m, t) pwarn((m), (m)->last->line, (m)->last->pos, (t))
-#define	verr(m, t) perr((m), (m)->last->line, (m)->last->pos, (t))
-#define	nerr(m, n, t) perr((m), (n)->line, (n)->pos, (t))
+#define	vwarn(m, t) perr((m), (m)->last->line, (m)->last->pos, (t), 0)
+#define	verr(m, t) perr((m), (m)->last->line, (m)->last->pos, (t), 1)
+#define	nerr(m, n, t) perr((m), (n)->line, (n)->pos, (t), 1)
 
 const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ap */
@@ -261,11 +257,12 @@ concat(struct mdoc *m, const struct mdoc_node *n,
 
 
 static int
-perr(struct mdoc *m, int line, int pos, enum merr type)
+perr(struct mdoc *m, int line, int pos, enum merr type, int iserr)
 {
 	char		*p;
 
 	p = NULL;
+
 	switch (type) {
 	case (ENUMFMT):
 		p = "bad number format";
@@ -279,32 +276,21 @@ perr(struct mdoc *m, int line, int pos, enum merr type)
 	case (EMALLOC):
 		p = "memory exhausted";
 		break;
-	}
-	assert(p);
-	return(mdoc_perr(m, line, pos, p));
-}
-
-
-static int
-pwarn(struct mdoc *m, int line, int pos, enum mwarn type)
-{
-	char		*p;
-
-	p = NULL;
-
-	switch (type) {
-	case (WBADSEC):
+	case (EBADSEC):
 		p = "inappropriate document section in manual section";
 		break;
-	case (WNOWIDTH):
+	case (ENOWIDTH):
 		p = "cannot determine default width";
 		break;
-	case (WBADDATE):
+	case (EBADDATE):
 		p = "malformed date syntax";
 		break;
 	}
 
 	assert(p);
+	if (iserr)
+		return(mdoc_perr(m, line, pos, p));
+
 	return(mdoc_pwarn(m, line, pos, p));
 }
 
@@ -390,7 +376,7 @@ post_sh(POST_ARGS)
 		case (9):
 			break;
 		default:
-			return(vwarn(m, WBADSEC));
+			return(vwarn(m, EBADSEC));
 		}
 		break;
 	default:
@@ -553,7 +539,7 @@ post_bl_tagwidth(struct mdoc *m)
 	if (n) {
 		if (MDOC_TEXT != n->type) {
 			if (0 == (sz = (int)mdoc_macro2len(n->tok)))
-				if ( ! vwarn(m, WNOWIDTH))
+				if ( ! vwarn(m, ENOWIDTH))
 					return(0);
 		} else
 			sz = (int)strlen(n->string) + 1;
@@ -621,7 +607,7 @@ post_bl_width(struct mdoc *m)
 	else if (MDOC_MAX == (tok = mdoc_hash_find(m->htab, p)))
 		return(1);
 	else if (0 == (width = mdoc_macro2len(tok))) 
-		return(vwarn(m, WNOWIDTH));
+		return(vwarn(m, ENOWIDTH));
 
 	/* The value already exists: free and reallocate it. */
 
@@ -778,7 +764,7 @@ post_dd(POST_ARGS)
 		return(0);
 
 	if (0 == (m->meta.date = mdoc_atotime(buf))) {
-		if ( ! vwarn(m, WBADDATE))
+		if ( ! vwarn(m, EBADDATE))
 			return(0);
 		m->meta.date = time(NULL);
 	}
