@@ -22,20 +22,6 @@
 
 #include "libmdoc.h"
 
-enum	mwarn {
-	WIGNE,
-	WIMPBRK,
-	WMACPARM,
-	WOBS
-};
-
-enum	merr {
-	EOPEN,
-	EQUOT,
-	ENOCTX,
-	ENOPARMS
-};
-
 #define	REWIND_REWIND	(1 << 0)
 #define	REWIND_NOHALT	(1 << 1)
 #define	REWIND_HALT	(1 << 2)
@@ -62,12 +48,8 @@ static	int	  rew_subblock(enum mdoc_type,
 static	int	  rew_last(struct mdoc *, struct mdoc_node *);
 static	int	  append_delims(struct mdoc *, int, int *, char *);
 static	int	  lookup(struct mdoc *, int, int, int, const char *);
-static	int	  pwarn(struct mdoc *, int, int, enum mwarn);
-static	int	  perr(struct mdoc *, int, int, enum merr);
 static	int	  swarn(struct mdoc *, enum mdoc_type, int, int, 
 			const struct mdoc_node *);
-
-#define	nerr(m, n, t) perr((m), (n)->line, (n)->pos, (t))
 
 /* Central table of library: who gets parsed how. */
 
@@ -196,56 +178,6 @@ const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;
 
 
 static int
-perr(struct mdoc *mdoc, int line, int pos, enum merr type)
-{
-	char		*p;
-
-	p = NULL;
-	switch (type) {
-	case (EOPEN):
-		p = "explicit scope still open on exit";
-		break;
-	case (EQUOT):
-		p = "unterminated quotation";
-		break;
-	case (ENOCTX):
-		p = "closure has no prior context";
-		break;
-	case (ENOPARMS):
-		p = "unexpect line arguments";
-		break;
-	}
-	assert(p);
-	return(mdoc_perr(mdoc, line, pos, p));
-}
-
-
-static int
-pwarn(struct mdoc *mdoc, int line, int pos, enum mwarn type)
-{
-	char		*p;
-
-	p = NULL;
-	switch (type) {
-	case (WIGNE):
-		p = "ignoring empty element";
-		break;
-	case (WIMPBRK):
-		p = "crufty end-of-line scope violation";
-		break;
-	case (WMACPARM):
-		p = "macro-like parameter";
-		break;
-	case (WOBS):
-		p = "macro marked obsolete";
-		break;
-	}
-	assert(p);
-	return(mdoc_pwarn(mdoc, line, pos, p));
-}
-
-
-static int
 swarn(struct mdoc *mdoc, enum mdoc_type type, 
 		int line, int pos, const struct mdoc_node *p)
 {
@@ -283,10 +215,10 @@ swarn(struct mdoc *mdoc, enum mdoc_type type,
 	}
 
 	if ( ! (MDOC_IGN_SCOPE & mdoc->pflags))
-		return(mdoc_perr(mdoc, line, pos, 
+		return(mdoc_verr(mdoc, line, pos, 
 				"%s scope breaks %s scope of %s", 
 				tt, t, n));
-	return(mdoc_pwarn(mdoc, line, pos, 
+	return(mdoc_vwarn(mdoc, line, pos, 
 				"%s scope breaks %s scope of %s", 
 				tt, t, n));
 }
@@ -312,7 +244,7 @@ mdoc_macroend(struct mdoc *mdoc)
 			continue;
 		if ( ! (MDOC_EXPLICIT & mdoc_macros[n->tok].flags))
 			continue;
-		return(nerr(mdoc, n, EOPEN));
+		return(mdoc_nerr(mdoc, n, EOPEN));
 	}
 
 	return(rew_last(mdoc, mdoc->first));
@@ -328,7 +260,7 @@ lookup(struct mdoc *mdoc, int line, int pos, int from, const char *p)
 		return(res);
 	if (MDOC_MAX == res)
 		return(res);
-	if ( ! pwarn(mdoc, line, pos, WMACPARM))
+	if ( ! mdoc_pwarn(mdoc, line, pos, EMACPARM))
 		return(-1);
 	return(MDOC_MAX);
 }
@@ -637,7 +569,7 @@ rew_expblock(struct mdoc *mdoc, int tok, int line, int ppos)
 	for (n = mdoc->last; n; n = n->parent) {
 		c = rew_dohalt(tok, MDOC_BLOCK, n);
 		if (REWIND_HALT == c)
-			return(perr(mdoc, line, ppos, ENOCTX));
+			return(mdoc_perr(mdoc, line, ppos, ENOCTX));
 		if (REWIND_REWIND == c)
 			break;
 		else if (rew_dobreak(tok, n))
@@ -728,7 +660,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 				return(0);
 			return(rew_expblock(mdoc, tok, line, ppos));
 		}
-		return(perr(mdoc, line, ppos, ENOPARMS));
+		return(mdoc_perr(mdoc, line, ppos, ENOPARMS));
 	}
 
 	if ( ! rew_subblock(MDOC_BODY, mdoc, tok, line, ppos))
@@ -871,7 +803,7 @@ in_line(MACRO_PROT_ARGS)
 					return(0);
 			} else if ( ! nc && 0 == cnt) {
 				mdoc_argv_free(arg);
-				if ( ! pwarn(mdoc, line, ppos, WIGNE))
+				if ( ! mdoc_pwarn(mdoc, line, ppos, EIGNE))
 					return(0);
 			}
 			c = mdoc_macro(mdoc, c, line, la, pos, buf);
@@ -927,7 +859,7 @@ in_line(MACRO_PROT_ARGS)
 			return(0);
 	} else if ( ! nc && 0 == cnt) {
 		mdoc_argv_free(arg);
-		if ( ! pwarn(mdoc, line, ppos, WIGNE))
+		if ( ! mdoc_pwarn(mdoc, line, ppos, EIGNE))
 			return(0);
 	}
 
@@ -1111,7 +1043,7 @@ blk_part_imp(MACRO_PROT_ARGS)
 		if (body == n)
 			break;
 
-	if (NULL == n && ! pwarn(mdoc, body->line, body->pos, WIMPBRK))
+	if (NULL == n && ! mdoc_nwarn(mdoc, body, EIMPBRK))
 			return(0);
 
 	if (n && ! rew_last(mdoc, body))
@@ -1414,7 +1346,7 @@ static int
 obsolete(MACRO_PROT_ARGS)
 {
 
-	return(pwarn(mdoc, line, ppos, WOBS));
+	return(mdoc_pwarn(mdoc, line, ppos, EOBS));
 }
 
 
@@ -1450,7 +1382,7 @@ phrase(struct mdoc *mdoc, int line, int ppos, char *buf)
 				else if ('\\' != buf[i - 1])
 					break;
 			if (0 == buf[i]) 
-				return(perr(mdoc, line, la, EQUOT));
+				return(mdoc_perr(mdoc, line, la, EQUOT));
 			quoted = 1;
 		} else
 			for ( ; buf[i]; i++)
