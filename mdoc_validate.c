@@ -488,7 +488,7 @@ static int
 warn_print(struct mdoc *m, int ln, int pos)
 {
 
-	return(perr(m, ln, pos, EPRINT, ! (MDOC_IGN_CHARS & m->flags)));
+	return(perr(m, ln, pos, EPRINT, ! (MDOC_IGN_CHARS & m->pflags)));
 }
 
 
