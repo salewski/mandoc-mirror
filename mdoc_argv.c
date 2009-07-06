@@ -47,14 +47,11 @@
 
 #define	MULTI_STEP	 5
 
-enum 	mwarn {
-	WQUOTPARM,
-	WARGVPARM,
-	WCOLEMPTY,
-	WTAILWS	
-};
-
 enum	merr {
+	ETAILWS,
+	ECOLEMPTY,
+	EARGVPARM,
+	EQUOTPARM,
 	EQUOTTERM,
 	EMALLOC,
 	EARGVAL	
@@ -71,10 +68,10 @@ static	int		 argv_opt_single(struct mdoc *, int,
 				struct mdoc_argv *, int *, char *);
 static	int		 argv_multi(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
-static	int		 pwarn(struct mdoc *, int, int, enum mwarn);
-static	int		 perr(struct mdoc *, int, int, enum merr);
+static	int		 perr(struct mdoc *, int, int, enum merr, int);
 
-#define verr(m, t) perr((m), (m)->last->line, (m)->last->pos, (t))
+#define	pwarn(m, l, p, t) perr((m), (l), (p), (t), 0)
+#define verr(m, t) perr((m), (m)->last->line, (m)->last->pos, (t), 1)
 
 /* Per-argument flags. */
 
@@ -284,7 +281,7 @@ mdoc_argv(struct mdoc *mdoc, int line, int tok,
 		/* XXX - restore saved zeroed byte. */
 		if (sv)
 			buf[*pos - 1] = sv;
-		if ( ! pwarn(mdoc, line, i, WARGVPARM))
+		if ( ! pwarn(mdoc, line, i, EARGVPARM))
 			return(ARGV_ERROR);
 		return(ARGV_WORD);
 	}
@@ -353,11 +350,12 @@ mdoc_argv_free(struct mdoc_arg *p)
 
 
 static int
-perr(struct mdoc *mdoc, int line, int pos, enum merr code)
+perr(struct mdoc *mdoc, int line, int pos, enum merr code, int iserr)
 {
 	char		*p;
 
 	p = NULL;
+
 	switch (code) {
 	case (EMALLOC):
 		p = "memory exhausted";
@@ -368,36 +366,24 @@ perr(struct mdoc *mdoc, int line, int pos, enum merr code)
 	case (EARGVAL):
 		p = "argument requires a value";
 		break;
-	}
-
-	assert(p);
-	return(mdoc_perr(mdoc, line, pos, p));
-}
-
-
-static int
-pwarn(struct mdoc *mdoc, int line, int pos, enum mwarn code)
-{
-	char		*p;
-
-	p = NULL;
-
-	switch (code) {
-	case (WQUOTPARM):
+	case (EQUOTPARM):
 		p = "unexpected quoted parameter";
 		break;
-	case (WARGVPARM):
+	case (EARGVPARM):
 		p = "argument-like parameter";
 		break;
-	case (WCOLEMPTY):
+	case (ECOLEMPTY):
 		p = "last list column is empty";
 		break;
-	case (WTAILWS):
+	case (ETAILWS):
 		p = "trailing whitespace";
 		break;
 	}
 
 	assert(p);
+	if (iserr)
+		return(mdoc_perr(mdoc, line, pos, p));
+
 	return(mdoc_pwarn(mdoc, line, pos, p));
 }
 
@@ -471,11 +457,11 @@ args(struct mdoc *mdoc, int line,
 		return(ARGS_EOLN);
 
 	if ('\"' == buf[*pos] && ! (fl & ARGS_QUOTED))
-		if ( ! pwarn(mdoc, line, *pos, WQUOTPARM))
+		if ( ! pwarn(mdoc, line, *pos, EQUOTPARM))
 			return(ARGS_ERROR);
 
 	if ( ! (fl & ARGS_ARGVLIKE) && '-' == buf[*pos]) 
-		if ( ! pwarn(mdoc, line, *pos, WARGVPARM))
+		if ( ! pwarn(mdoc, line, *pos, EARGVPARM))
 			return(ARGS_ERROR);
 
 	/* 
@@ -567,10 +553,10 @@ args(struct mdoc *mdoc, int line,
 			} 
 
 			if (p && 0 == *p)
-				if ( ! pwarn(mdoc, line, *pos, WCOLEMPTY))
+				if ( ! pwarn(mdoc, line, *pos, ECOLEMPTY))
 					return(0);
 			if (p && 0 == *p && p > *v && ' ' == *(p - 1))
-				if ( ! pwarn(mdoc, line, *pos, WTAILWS))
+				if ( ! pwarn(mdoc, line, *pos, ETAILWS))
 					return(0);
 
 			if (p)
@@ -582,7 +568,7 @@ args(struct mdoc *mdoc, int line,
 			assert(p);
 
 			if (p > *v && ' ' == *(p - 1))
-				if ( ! pwarn(mdoc, line, *pos, WTAILWS))
+				if ( ! pwarn(mdoc, line, *pos, ETAILWS))
 					return(0);
 			*pos += (int)(p - *v);
 
@@ -614,7 +600,7 @@ args(struct mdoc *mdoc, int line,
 		if (buf[*pos])
 			return(ARGS_WORD);
 
-		if ( ! pwarn(mdoc, line, *pos, WTAILWS))
+		if ( ! pwarn(mdoc, line, *pos, ETAILWS))
 			return(ARGS_ERROR);
 
 		return(ARGS_WORD);
@@ -632,7 +618,7 @@ args(struct mdoc *mdoc, int line,
 		(*pos)++;
 
 	if (0 == buf[*pos]) {
-		(void)perr(mdoc, line, *pos, EQUOTTERM);
+		(void)perr(mdoc, line, *pos, EQUOTTERM, 1);
 		return(ARGS_ERROR);
 	}
 
@@ -646,7 +632,7 @@ args(struct mdoc *mdoc, int line,
 	if (buf[*pos])
 		return(ARGS_QWORD);
 
-	if ( ! pwarn(mdoc, line, *pos, WTAILWS))
+	if ( ! pwarn(mdoc, line, *pos, ETAILWS))
 		return(ARGS_ERROR);
 
 	return(ARGS_QWORD);
@@ -825,7 +811,7 @@ argv_single(struct mdoc *mdoc, int line,
 	if (ARGS_ERROR == c)
 		return(0);
 	if (ARGS_EOLN == c)
-		return(perr(mdoc, line, ppos, EARGVAL));
+		return(perr(mdoc, line, ppos, EARGVAL, 1));
 
 	v->sz = 1;
 	if (NULL == (v->value = calloc(1, sizeof(char *))))
