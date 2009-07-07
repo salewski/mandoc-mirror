@@ -23,6 +23,19 @@
 
 #include "libman.h"
 
+const	char *const __man_merrnames[WERRMAX] = {		 
+	"invalid character", /* WNPRINT */
+	"system: malloc error", /* WNMEM */
+	"invalid manual section", /* WMSEC */
+	"invalid date format", /* WDATE */
+	"scope of prior line violated", /* WLNSCOPE */
+	"trailing whitespace", /* WTSPACE */
+	"unterminated quoted parameter", /* WTQUOTE */
+	"document has no body", /* WNODATA */
+	"document has no title/section", /* WNOTITLE */
+	"invalid escape sequence", /* WESCAPE */
+};
+
 const	char *const __man_macronames[MAN_MAX] = {		 
 	"br",		"TH",		"SH",		"SS",
 	"TP", 		"LP",		"PP",		"P",
@@ -438,44 +451,11 @@ man_vwarn(struct man *man, int ln, int pos, const char *fmt, ...)
 
 
 int
-man_err(struct man *m, int line, int pos, 
-		int iserr, enum merr type)
+man_err(struct man *m, int line, int pos, int iserr, enum merr type)
 {
 	const char	 *p;
 	
-	p = NULL;
-	switch (type) {
-	case (WNPRINT):
-		p = "invalid character";
-		break;
-	case (WNMEM):
-		p = "memory exhausted";
-		break;
-	case (WMSEC):
-		p = "invalid manual section";
-		break;
-	case (WDATE):
-		p = "invalid date format";
-		break;
-	case (WLNSCOPE):
-		p = "scope of prior line violated";
-		break;
-	case (WTSPACE):
-		p = "trailing whitespace at end of line";
-		break;
-	case (WTQUOTE):
-		p = "unterminated quotation";
-		break;
-	case (WNODATA):
-		p = "document has no data";
-		break;
-	case (WNOTITLE):
-		p = "document has no title/section";
-		break;
-	case (WESCAPE):
-		p = "invalid escape sequence";
-		break;
-	}
+	p = __man_merrnames[(int)type];
 	assert(p);
 
 	if (iserr)

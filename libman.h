@@ -39,7 +39,7 @@ struct	man {
 };
 
 enum	merr {
-	WNPRINT,
+	WNPRINT = 0,
 	WNMEM,
 	WMSEC,
 	WDATE,
@@ -48,7 +48,8 @@ enum	merr {
 	WTQUOTE,
 	WNODATA,
 	WNOTITLE,
-	WESCAPE
+	WESCAPE,
+	WERRMAX
 };
 
 __BEGIN_DECLS
