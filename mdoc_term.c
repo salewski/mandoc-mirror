@@ -1838,8 +1838,12 @@ static int
 termp_in_pre(DECL_ARGS)
 {
 
+	/* XXX This conforms to new-groff style. */
 	TERMPAIR_SETFLAG(p, pair, ttypes[TTYPE_INCLUDE]);
-	term_word(p, "#include");
+
+	if (SEC_SYNOPSIS == node->sec)
+		term_word(p, "#include");
+
 	term_word(p, "<");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
@@ -1854,9 +1858,16 @@ termp_in_post(DECL_ARGS)
 	p->flags |= TERMP_NOSPACE;
 	term_word(p, ">");
 
-	term_newln(p);
 	if (SEC_SYNOPSIS != node->sec)
 		return;
+
+	term_newln(p);
+	/* 
+	 * XXX Not entirely correct.  If `.In foo bar' is specified in
+	 * the SYNOPSIS section, then it produces a single break after
+	 * the <foo>; mandoc asserts a vertical space.  Since this
+	 * construction is rarely used, I think it's fine.
+	 */
 	if (node->next && MDOC_In != node->next->tok)
 		term_vspace(p);
 }

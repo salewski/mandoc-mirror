@@ -665,7 +665,8 @@ post_lk(POST_ARGS)
 	
 	n = m->last;
 	m->next = MDOC_NEXT_CHILD;
-	/* FIXME: this isn't documented anywhere! */
+
+	/* XXX: this isn't documented anywhere! */
 	if ( ! mdoc_word_alloc(m, m->last->line,
 				m->last->pos, "~"))
 		return(0);

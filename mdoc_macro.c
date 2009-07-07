@@ -83,7 +83,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Fn */ 
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ft */ 
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ic */ 
-	{ in_line_eoln, 0 }, /* In */  /* FIXME: historic usage! */
+	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* In */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Li */
 	{ in_line_eoln, 0 }, /* Nd */ 
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Nm */ 
