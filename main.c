@@ -643,7 +643,7 @@ mwarn(void *arg, int line, int col, const char *msg)
 	if ( ! (curp->wflags & WARN_WALL))
 		return(1);
 
-	warnx("%s:%d: syntax warning: %s (column %d)", 
+	warnx("%s:%d: warning: %s (column %d)", 
 			curp->file, line, msg, col);
 
 	if ( ! (curp->wflags & WARN_WERR))
