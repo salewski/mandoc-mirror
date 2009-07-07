@@ -23,6 +23,64 @@
 
 #include "libmdoc.h"
 
+const	char *const __mdoc_merrnames[MERRMAX] = {		 
+	"trailing whitespace", /* ETAILWS */
+	"empty last list column", /* ECOLEMPTY */
+	"argument-like parameter", /* EARGVPARM */
+	"unexpected quoted parameter", /* EQUOTPARM */
+	"unterminated quoted parameter", /* EQUOTTERM */
+	"system: malloc error", /* EMALLOC */
+	"argument parameter suggested", /* EARGVAL */
+	"macro not callable", /* ENOCALL */
+	"macro disallowed in prologue", /* EBODYPROL */
+	"macro disallowed in body", /* EPROLBODY */
+	"text disallowed in prologue", /* ETEXTPROL */
+	"blank line disallowed", /* ENOBLANK */
+	"text parameter too long", /* ETOOLONG */
+	"invalid escape sequence", /* EESCAPE */
+	"invalid character", /* EPRINT */
+	"document has no body", /* ENODAT */
+	"document has no prologue", /* ENOPROLOGUE */
+	"expected line arguments", /* ELINE */
+	"invalid AT&T argument", /* EATT */
+	"default name not yet set", /* ENAME */
+	"missing list type", /* ELISTTYPE */
+	"missing display type", /* EDISPTYPE */
+	"too many display types", /* EMULTIDISP */
+	"too many list types", /* EMULTILIST */
+	"NAME section must be first", /* ESECNAME */
+	"badly-formed NAME section", /* ENAMESECINC */
+	"argument repeated", /* EARGREP */
+	"expected boolean parameter", /* EBOOL */
+	"inconsistent column syntax", /* ECOLMIS */
+	"nested display invalid", /* ENESTDISP */
+	"width argument missing", /* EMISSWIDTH */
+	"invalid section for this manual section", /* EWRONGMSEC */
+	"section out of conventional order", /* ESECOOO */
+	"section repeated", /* ESECREP */
+	"invalid standard argument", /* EBADSTAND */
+	"multi-line arguments discouraged", /* ENOMULTILINE */
+	"multi-line arguments suggested", /* EMULTILINE */
+	"line arguments discouraged", /* ENOLINE */
+	"prologue macro out of conventional order", /* EPROLOOO */
+	"prologue macro repeated", /* EPROLREP */
+	"invalid manual section", /* EBADMSEC */
+	"invalid section", /* EBADSEC */
+	"invalid font mode", /* EFONT */
+	"invalid date syntax", /* EBADDATE */
+	"invalid number format", /* ENUMFMT */
+	"superfluous width argument", /* ENOWIDTH */
+	"system: utsname error", /* EUTSNAME */
+	"obsolete macro", /* EOBS */
+	"macro-like parameter", /* EMACPARM */
+	"end-of-line scope violation", /* EIMPBRK */
+	"empty macro ignored", /* EIGNE */
+	"unclosed explicit scope", /* EOPEN */
+	"unterminated quoted phrase", /* EQUOTPHR */
+	"closure macro without prior context", /* ENOCTX */
+	"invalid whitespace after control character", /* ESPACE */
+};
+
 const	char *const __mdoc_macronames[MDOC_MAX] = {		 
 	"Ap",		"Dd",		"Dt",		"Os",
 	"Sh",		"Ss",		"Pp",		"D1",
@@ -274,181 +332,9 @@ mdoc_vwarn(struct mdoc *mdoc, int ln, int pos, const char *fmt, ...)
 int
 mdoc_err(struct mdoc *m, int line, int pos, int iserr, enum merr type)
 {
-	char		 *p;
-	
-	p = NULL;
+	const char	*p;
 
-	switch (type) {
-	case (ENOCALL):
-		p = "not callable";
-		break;
-	case (EPROLBODY):
-		p = "macro disallowed in document body";
-		break;
-	case (EBODYPROL):
-		p = "macro disallowed in document prologue";
-		break;
-	case (EMALLOC):
-		p = "memory exhausted";
-		break;
-	case (ETEXTPROL):
-		p = "text disallowed in document prologue";
-		break;
-	case (ENOBLANK):
-		p = "blank lines disallowed in non-literal contexts";
-		break;
-	case (ESPACE):
-		p = "whitespace disallowed after delimiter";
-		break;
-	case (ETOOLONG):
-		p = "text argument too long";
-		break;
-	case (EESCAPE):
-		p = "invalid escape sequence";
-		break;
-	case (EPRINT):
-		p = "invalid character";
-		break;
-	case (ENESTDISP):
-		p = "displays may not be nested";
-		break;
-	case (EBOOL):
-		p = "expected boolean value";
-		break;
-	case (EARGREP):
-		p = "argument repeated";
-		break;
-	case (EMULTIDISP):
-		p = "multiple display types specified";
-		break;
-	case (EMULTILIST):
-		p = "multiple list types specified";
-		break;
-	case (ELISTTYPE):
-		p = "missing list type";
-		break;
-	case (EDISPTYPE):
-		p = "missing display type";
-		break;
-	case (ESECNAME):
-		p = "the NAME section must come first";
-		break;
-	case (ELINE):
-		p = "expected line arguments";
-		break;
-	case (ENOPROLOGUE):
-		p = "document has no prologue";
-		break;
-	case (ENODAT):
-		p = "document has no data";
-		break;
-	case (ECOLMIS):
-		p = "column syntax style mismatch";
-		break;
-	case (EATT):
-		p = "expected valid AT&T symbol";
-		break;
-	case (ENAME):
-		p = "default name not yet set";
-		break;
-	case (ENOWIDTH):
-		p = "superfluous width argument";
-		break;
-	case (EMISSWIDTH):
-		p = "missing width argument";
-		break;
-	case (EWRONGMSEC):
-		p = "document section in wrong manual section";
-		break;
-	case (ESECOOO):
-		p = "document section out of conventional order";
-		break;
-	case (ESECREP):
-		p = "document section repeated";
-		break;
-	case (EBADSTAND):
-		p = "unknown standard";
-		break;
-	case (ENAMESECINC):
-		p = "NAME section contents incomplete/badly-ordered";
-		break;
-	case (ENOMULTILINE):
-		p = "suggested no multi-line arguments";
-		break;
-	case (EMULTILINE):
-		p = "suggested multi-line arguments";
-		break;
-	case (ENOLINE):
-		p = "suggested no line arguments";
-		break;
-	case (EPROLOOO):
-		p = "prologue macros out-of-order";
-		break;
-	case (EPROLREP):
-		p = "prologue macros repeated";
-		break;
-	case (EARGVAL):
-		p = "argument value suggested";
-		break;
-	case (EFONT):
-		p = "invalid font mode";
-		break;
-	case (EBADMSEC):
-		p = "inappropriate manual section";
-		break;
-	case (EBADSEC):
-		p = "inappropriate document section";
-		break;
-	case (EQUOTTERM):
-		p = "unterminated quoted parameter";
-		break;
-	case (EQUOTPARM):
-		p = "unexpected quoted parameter";
-		break;
-	case (EARGVPARM):
-		p = "argument-like parameter";
-		break;
-	case (ECOLEMPTY):
-		p = "last list column is empty";
-		break;
-	case (ETAILWS):
-		p = "trailing whitespace";
-		break;
-	case (ENUMFMT):
-		p = "bad number format";
-		break;
-	case (EUTSNAME):
-		p = "utsname";
-		break;
-	case (EBADDATE):
-		p = "malformed date syntax";
-		break;
-	case (EOPEN):
-		p = "explicit scope still open on exit";
-		break;
-	case (EQUOT):
-		p = "unterminated quotation";
-		break;
-	case (ENOCTX):
-		p = "closure has no prior context";
-		break;
-	case (ENOPARMS):
-		p = "unexpect line arguments";
-		break;
-	case (EIGNE):
-		p = "ignoring empty element";
-		break;
-	case (EIMPBRK):
-		p = "crufty end-of-line scope violation";
-		break;
-	case (EMACPARM):
-		p = "macro-like parameter";
-		break;
-	case (EOBS):
-		p = "macro marked obsolete";
-		break;
-	}
-
+	p = __mdoc_merrnames[(int)type];
 	assert(p);
 
 	if (iserr)

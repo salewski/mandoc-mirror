@@ -660,7 +660,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 				return(0);
 			return(rew_expblock(mdoc, tok, line, ppos));
 		}
-		return(mdoc_perr(mdoc, line, ppos, ENOPARMS));
+		return(mdoc_perr(mdoc, line, ppos, ENOLINE));
 	}
 
 	if ( ! rew_subblock(MDOC_BODY, mdoc, tok, line, ppos))
@@ -1382,7 +1382,7 @@ phrase(struct mdoc *mdoc, int line, int ppos, char *buf)
 				else if ('\\' != buf[i - 1])
 					break;
 			if (0 == buf[i]) 
-				return(mdoc_perr(mdoc, line, la, EQUOT));
+				return(mdoc_perr(mdoc, line, la, EQUOTPHR));
 			quoted = 1;
 		} else
 			for ( ; buf[i]; i++)
