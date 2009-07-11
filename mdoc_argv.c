@@ -33,7 +33,6 @@
  */
 
 /* FIXME .Bf Li raises "macro-like parameter". */
-/* FIXME .Bl -column should deprecate old-groff syntax. */
 
 #define	ARGS_QUOTED	(1 << 0)
 #define	ARGS_DELIM	(1 << 1)
