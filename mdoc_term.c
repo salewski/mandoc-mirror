@@ -908,7 +908,7 @@ termp_it_pre(DECL_ARGS)
 			/* FALLTHROUGH */
 		case (MDOC_Hyphen):
 			p->flags |= TERMP_BOLD;
-			term_word(p, "\\-");
+			term_word(p, "\\(hy");
 			break;
 		case (MDOC_Enum):
 			(pair->ppair->ppair->count)++;
@@ -1137,7 +1137,7 @@ termp_nd_pre(DECL_ARGS)
 	 * produces a minus sign after the Nd, which is wrong, but is
 	 * consistent with the historic OpenBSD tmac file.
 	 */
-#ifdef __OpenBSD__
+#if defined(__OpenBSD__) || defined(__linux__)
 	term_word(p, "\\-");
 #else
 	term_word(p, "\\(em");
