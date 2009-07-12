@@ -153,6 +153,7 @@ enum	mdoc_sec  mdoc_atosec(const char *);
 time_t		  mdoc_atotime(const char *);
 
 size_t		  mdoc_macro2len(int);
+const char	 *mdoc_a2att(const char *);
 const char	 *mdoc_a2arch(const char *);
 const char	 *mdoc_a2vol(const char *);
 const char	 *mdoc_a2msec(const char *);

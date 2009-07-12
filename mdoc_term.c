@@ -127,7 +127,6 @@ static	int	  termp__t_pre(DECL_ARGS);
 static	int	  termp_ap_pre(DECL_ARGS);
 static	int	  termp_aq_pre(DECL_ARGS);
 static	int	  termp_ar_pre(DECL_ARGS);
-static	int	  termp_at_pre(DECL_ARGS);
 static	int	  termp_bd_pre(DECL_ARGS);
 static	int	  termp_bf_pre(DECL_ARGS);
 static	int	  termp_bq_pre(DECL_ARGS);
@@ -232,7 +231,7 @@ static const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ac */
 	{ termp_aq_pre, termp_aq_post }, /* Ao */
 	{ termp_aq_pre, termp_aq_post }, /* Aq */
-	{ termp_at_pre, NULL }, /* At */
+	{ NULL, NULL }, /* At */
 	{ NULL, NULL }, /* Bc */
 	{ termp_bf_pre, NULL }, /* Bf */ 
 	{ termp_bq_pre, termp_bq_post }, /* Bo */
@@ -1833,24 +1832,6 @@ termp_in_post(DECL_ARGS)
 	 */
 	if (node->next && MDOC_In != node->next->tok)
 		term_vspace(p);
-}
-
-
-/* ARGSUSED */
-static int
-termp_at_pre(DECL_ARGS)
-{
-	const char	*att;
-
-	att = NULL;
-
-	if (node->child)
-		att = mdoc_a2att(node->child->string);
-	if (NULL == att)
-		att = "AT&T UNIX";
-
-	term_word(p, att);
-	return(0);
 }
 
 

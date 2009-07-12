@@ -295,7 +295,6 @@ const struct mdoc_node *mdoc_node(const struct mdoc *);
 const struct mdoc_meta *mdoc_meta(const struct mdoc *);
 int		  mdoc_endparse(struct mdoc *);
 
-const char	 *mdoc_a2att(const char *);
 const char	 *mdoc_a2lib(const char *);
 const char	 *mdoc_a2st(const char *);
 
