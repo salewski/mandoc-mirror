@@ -87,7 +87,6 @@ const	int ttypes[TTYPE_NMAX] = {
 struct	termpair {
 	struct termpair	 *ppair;
 	int	  	  flag;		/* Whether being used. */
-	size_t	  	  offset;	/* Left margin. */
 	size_t	  	  rmargin;	/* Right margin. */
 	int		  count;	/* Enum count. */
 };
@@ -347,12 +346,15 @@ print_node(DECL_ARGS)
 {
 	int		 dochild;
 	struct termpair	 npair;
+	size_t		 offset;
 
 	/* Pre-processing. */
 
 	dochild = 1;
+	offset = p->offset;
+
 	npair.ppair = pair;
-	npair.offset = npair.rmargin = 0;
+	npair.rmargin = 0;
 	npair.flag = 0;
 	npair.count = 0;
 
@@ -370,13 +372,14 @@ print_node(DECL_ARGS)
 	if (dochild && node->child)
 		print_body(p, &npair, meta, node->child);
 
-	p->flags &= ~npair.flag;
-
 	/* Post-processing. */
 
 	if (MDOC_TEXT != node->type)
 		if (termacts[node->tok].post)
 			(*termacts[node->tok].post)(p, &npair, meta, node);
+
+	p->offset = offset;
+	p->flags &= ~npair.flag;
 }
 
 
@@ -705,7 +708,6 @@ termp_it_pre(DECL_ARGS)
 
 	/* Save parent attributes. */
 
-	pair->offset = p->offset;
 	pair->rmargin = p->rmargin;
 	pair->flag = p->flags;
 
@@ -969,7 +971,6 @@ termp_it_post(DECL_ARGS)
 		break;
 	}
 
-	p->offset = pair->offset;
 	p->rmargin = pair->rmargin;
 	p->flags = pair->flag;
 }
@@ -1188,7 +1189,7 @@ termp_vt_pre(DECL_ARGS)
 {
 
 	/* FIXME: this can be "type name". */
-	pair->flag |= TTYPE_VAR_DECL;
+	pair->flag |= ttypes[TTYPE_VAR_DECL];
 	return(1);
 }
 
@@ -1208,7 +1209,7 @@ static int
 termp_fd_pre(DECL_ARGS)
 {
 
-	pair->flag |= TTYPE_FUNC_DECL;
+	pair->flag |= ttypes[TTYPE_FUNC_DECL];
 	return(1);
 }
 
@@ -1220,6 +1221,7 @@ termp_fd_post(DECL_ARGS)
 
 	if (node->sec != SEC_SYNOPSIS)
 		return;
+
 	term_newln(p);
 	if (node->next && MDOC_Fd != node->next->tok)
 		term_vspace(p);
@@ -1336,8 +1338,7 @@ termp_d1_pre(DECL_ARGS)
 	if (MDOC_BLOCK != node->type)
 		return(1);
 	term_newln(p);
-	pair->offset = INDENT + 1;
-	p->offset += pair->offset;
+	p->offset += (INDENT + 1);
 	return(1);
 }
 
@@ -1350,7 +1351,6 @@ termp_d1_post(DECL_ARGS)
 	if (MDOC_BLOCK != node->type) 
 		return;
 	term_newln(p);
-	p->offset -= pair->offset;
 }
 
 
@@ -1519,8 +1519,6 @@ termp_bd_pre(DECL_ARGS)
 	if (NULL == node->parent->args)
 		errx(1, "missing display type");
 
-	pair->offset = p->offset;
-
 	for (type = -1, i = 0; 
 			i < (int)node->parent->args->argc; i++) {
 		switch (node->parent->args->argv[i].arg) {
@@ -1590,7 +1588,6 @@ termp_bd_post(DECL_ARGS)
 
 	term_flushln(p);
 	p->flags &= ~TERMP_LITERAL;
-	p->offset = pair->offset;
 	p->flags |= TERMP_NOSPACE;
 }
 
@@ -1740,14 +1737,8 @@ static void
 termp_ss_post(DECL_ARGS)
 {
 
-	switch (node->type) {
-	case (MDOC_HEAD):
+	if (MDOC_HEAD == node->type)
 		term_newln(p);
-		p->offset = INDENT;
-		break;
-	default:
-		break;
-	}
 }
 
 
