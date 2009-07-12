@@ -1204,7 +1204,11 @@ static void
 termp_vt_post(DECL_ARGS)
 {
 
-	if (node->sec == SEC_SYNOPSIS)
+	if (node->sec != SEC_SYNOPSIS)
+		return;
+	if (node->next && MDOC_Vt == node->next->tok)
+		term_newln(p);
+	else if (node->next)
 		term_vspace(p);
 }
 
