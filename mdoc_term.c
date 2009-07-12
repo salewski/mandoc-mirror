@@ -1135,7 +1135,11 @@ static int
 termp_nd_pre(DECL_ARGS)
 {
 
+#ifdef __OpenBSD__
 	term_word(p, "\\-");
+#else
+	term_word(p, "\\(em");
+#endif
 	return(1);
 }
 
