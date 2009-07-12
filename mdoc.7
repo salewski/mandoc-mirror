@@ -46,7 +46,7 @@ character
 .Sq \.
 are parsed for macros.  Other lines are interpreted within the scope of
 prior macros:
-.Bd -literal -offset XXX
+.Bd -literal -offset indent
 \&.Sh Macro lines change control state.
 Other lines are interpreted within the current state.
 .Ed
@@ -90,7 +90,7 @@ optionally followed by whitespace, is ignored.
 .\" SUB-SECTION
 .Ss Reserved Characters
 Within a macro line, the following characters are reserved:
-.Bl -tag -width Ds -offset XXXX -compact
+.Bl -tag -width Ds -offset indent -compact
 .It \&.
 .Pq period
 .It \&,
@@ -178,7 +178,7 @@ specifically noted on a per-macro basis.
 .It Em Block
 macros enclose other block macros, in-line macros or text, and
 may span multiple lines.
-.Bl -inset -offset XXXX
+.Bl -inset -offset indent
 .\" LIST-ITEM
 .It Em Full-block
 macros always span multiple lines.  They consist of zero or 
@@ -213,7 +213,7 @@ on whether it's parsable.  In this table,
 refers to block full-explicit and so on.
 .\" PARAGRAPH
 .Pp
-.Bl -tag -width 12n -offset XXXX -compact
+.Bl -tag -width 12n -offset indent -compact
 .It BPE , BFE
 corresponding explicit closure macro
 .It BFI
@@ -231,7 +231,7 @@ If a macro (block or in-line) is parsable, it may also be closed out by
 one of the following scenarios (unless specifically noted otherwise):
 .\" PARAGRAPH
 .Pp
-.Bl -dash -offset XXXX -compact
+.Bl -dash -offset indent -compact
 .It 
 a sequence of >0 space-separated
 .Sx Reserved Characters ,
@@ -264,7 +264,7 @@ closes it out (closure may be implicit at end-of-line or end-of-file).
 .\" PARAGRAPH
 .Pp
 Block full-explicit (may contain head, body, tail).
-.Bd -literal -offset XXXX
+.Bd -literal -offset indent
 \&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead...\(rB 
 \(lBbody...\(rB 
 \&.Yc \(lBtail...\(rB 
@@ -272,7 +272,7 @@ Block full-explicit (may contain head, body, tail).
 .\" PARAGRAPH
 .Pp
 Block full-implicit (may contain zero or more heads, body, no tail).
-.Bd -literal -offset XXXX
+.Bd -literal -offset indent
 \&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead... \(lBTa head...\(rB\(rB 
 \(lBbody...\(rB 
 \&.Yc
@@ -280,7 +280,7 @@ Block full-implicit (may contain zero or more heads, body, no tail).
 .\" PARAGRAPH
 .Pp
 Block partial-explicit (may contain head, multi-line body, tail).
-.Bd -literal -offset XXXX
+.Bd -literal -offset indent
 \&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBhead...\(rB 
 \(lBbody...\(rB 
 \&.Yc \(lBtail...\(rB 
@@ -294,13 +294,13 @@ Block partial-implicit (no head, body, no tail).  Note that the body
 section may be followed by zero or more 
 .Sx Reserved Words .
 These are in the block scope, but not in the body scope.
-.Bd -literal -offset XXXX
+.Bd -literal -offset indent
 \&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBbody...\(rB \(lBreserved...\(rB
 .Ed
 .\" PARAGRAPH
 .Pp
 In-lines have \(>=0 scoped arguments.
-.Bd -literal -offset XXX
+.Bd -literal -offset indent
 \&.Yy \(lB\-arg \(lBval...\(rB\(rB \(lBargs...\(rB
 
 \&.Yy \(lB\-arg \(lBval...\(rB\(rB arg0 arg1 argN
@@ -328,7 +328,7 @@ some
 .Pc
 don't have heads.
 .Pp
-.Bl -column -compact -offset XXXX "MacroX" "CallableX" "ParsableX" "Closing"
+.Bl -column -compact -offset indent "MacroX" "CallableX" "ParsableX" "Closing"
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Closing
 .It \&.Sh    Ta    \&No    Ta    \&No    Ta    \&.Sh
 .It \&.Ss    Ta    \&No    Ta    \&No    Ta    \&.Sh, \&.Ss
@@ -340,7 +340,7 @@ None of these macros are callable or parsed.  The last column indicates
 the explicit scope rules.  All contains bodies, some may contain heads 
 .Pq So \&Bf Sc .
 .Pp
-.Bl -column -compact -offset XXXX "MacroX" "CallableX" "ParsableX" "closed by XXX"
+.Bl -column -compact -offset indent "MacroX" "CallableX" "ParsableX" "closed by XXX"
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Scope
 .It \&.Bd    Ta    \&No    Ta    \&No    Ta    closed by \&.Ed
 .It \&.Ed    Ta    \&No    Ta    \&No    Ta    opened by \&.Bd
@@ -356,7 +356,7 @@ the explicit scope rules.  All contains bodies, some may contain heads
 All of these are callable and parsed for further macros.  Their scopes
 close at the invocation's end-of-line.
 .Pp
-.Bl -column "MacroX" "CallableX" "ParsableX" -compact -offset XXXX
+.Bl -column "MacroX" "CallableX" "ParsableX" -compact -offset indent
 .It Em Macro Ta Em Callable Ta Em Parsable
 .It \&.Aq    Ta    Yes   Ta    Yes
 .It \&.Op    Ta    Yes   Ta    Yes
@@ -377,7 +377,7 @@ The
 may be broken by 
 .Sq \&.Oc 
 as in the following example:
-.Bd -literal -offset XXXX
+.Bd -literal -offset indent
 \&.Oo
 \&.Op Fl a Oc
 .Ed
@@ -396,7 +396,7 @@ head
 and/or tail 
 .Pq So \&.Ec Sc .
 .Pp
-.Bl -column "MacroX" "CallableX" "ParsableX" "closed by XXXX" -compact -offset XXXX
+.Bl -column "MacroX" "CallableX" "ParsableX" "closed by XXXX" -compact -offset indent
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Scope
 .It \&.Ao    Ta    Yes   Ta    Yes    Ta    closed by \&.Ac
 .It \&.Ac    Ta    Yes   Ta    Yes    Ta    opened by \&.Ao
@@ -430,7 +430,7 @@ arguments is
 .Pq n , 
 then the macro accepts an arbitrary number of arguments.
 .Pp
-.Bl -column "MacroX" "CallableX" "ParsableX" "Arguments" -compact -offset XXXX
+.Bl -column "MacroX" "CallableX" "ParsableX" "Arguments" -compact -offset indent
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Arguments
 .It \&.Dd    Ta    \&No  Ta    \&No    Ta    >0
 .It \&.Dt    Ta    \&No  Ta    \&No    Ta    n
