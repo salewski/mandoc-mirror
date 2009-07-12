@@ -1217,9 +1217,11 @@ post_sh_head(POST_ARGS)
 	if (SEC_CUSTOM == sec)
 		return(1);
 	if (sec == mdoc->lastnamed)
-		return(mdoc_nwarn(mdoc, mdoc->last, ESECREP));
+		if ( ! mdoc_nwarn(mdoc, mdoc->last, ESECREP))
+			return(0);
 	if (sec < mdoc->lastnamed)
-		return(mdoc_nwarn(mdoc, mdoc->last, ESECOOO));
+		if ( ! mdoc_nwarn(mdoc, mdoc->last, ESECOOO))
+			return(0);
 
 	/* 
 	 * Check particular section/manual conventions.  LIBRARY can

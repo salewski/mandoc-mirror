@@ -123,9 +123,9 @@ __BEGIN_DECLS
 #define		  mdoc_pwarn(m, l, p, t) \
 		  mdoc_err((m), (l), (p), 0, (t))
 #define		  mdoc_nerr(m, n, t) \
-		  mdoc_err((m), (n)->line, (n)->pos, 0, (t))
-#define		  mdoc_nwarn(m, n, t) \
 		  mdoc_err((m), (n)->line, (n)->pos, 1, (t))
+#define		  mdoc_nwarn(m, n, t) \
+		  mdoc_err((m), (n)->line, (n)->pos, 0, (t))
 
 int		  mdoc_err(struct mdoc *, int, int, int, enum merr);
 int		  mdoc_verr(struct mdoc *, int, int, const char *, ...);
