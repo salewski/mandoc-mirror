@@ -41,6 +41,7 @@ static	int	  post_bl_width(POST_ARGS);
 static	int	  post_dd(POST_ARGS);
 static	int	  post_display(POST_ARGS);
 static	int	  post_dt(POST_ARGS);
+static	int	  post_lb(POST_ARGS);
 static	int	  post_lk(POST_ARGS);
 static	int	  post_nm(POST_ARGS);
 static	int	  post_os(POST_ARGS);
@@ -159,7 +160,7 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Hf */
 	{ NULL, NULL }, /* Fr */
 	{ NULL, NULL }, /* Ud */
-	{ NULL, NULL }, /* Lb */
+	{ NULL, post_lb }, /* Lb */
 	{ NULL, NULL }, /* Lp */
 	{ NULL, post_lk }, /* Lk */
 	{ NULL, NULL }, /* Mt */
@@ -286,6 +287,36 @@ post_nm(POST_ARGS)
 	if (NULL == (m->meta.name = strdup(buf)))
 		return(mdoc_nerr(m, m->last, EMALLOC));
 
+	return(1);
+}
+
+
+static int
+post_lb(POST_ARGS)
+{
+	const char	*p;
+	char		*buf;
+	size_t		 sz;
+
+	assert(MDOC_TEXT == m->last->child->type);
+	p = mdoc_a2lib(m->last->child->string);
+	if (NULL == p) {
+		sz = strlen(m->last->child->string) +
+			2 + strlen("\\(lqlibrary\\(rq");
+		buf = malloc(sz);
+		if (NULL == buf)
+			return(mdoc_nerr(m, m->last, EMALLOC));
+		(void)snprintf(buf, sz, "library \\(lq%s\\(rq", 
+				m->last->child->string);
+		free(m->last->child->string);
+		m->last->child->string = buf;
+		return(1);
+	}
+
+	free(m->last->child->string);
+	m->last->child->string = strdup(p);
+	if (NULL == m->last->child->string)
+		return(mdoc_nerr(m, m->last, EMALLOC));
 	return(1);
 }
 

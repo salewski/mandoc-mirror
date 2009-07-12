@@ -90,6 +90,7 @@ static	int	berr_ge1(POST_ARGS);
 static	int	hwarn_eq1(POST_ARGS);
 static	int	ewarn_ge1(POST_ARGS);
 static	int	ebool(POST_ARGS);
+
 static	int	post_an(POST_ARGS);
 static	int	post_args(POST_ARGS);
 static	int	post_at(POST_ARGS);
@@ -97,6 +98,7 @@ static	int	post_bf(POST_ARGS);
 static	int	post_bl(POST_ARGS);
 static	int	post_bl_head(POST_ARGS);
 static	int	post_it(POST_ARGS);
+static	int	post_lb(POST_ARGS);
 static	int	post_nm(POST_ARGS);
 static	int	post_root(POST_ARGS);
 static	int	post_sh(POST_ARGS);
@@ -133,7 +135,7 @@ static	v_post	posts_in[] = { eerr_eq1, NULL };
 static	v_post	posts_ss[] = { herr_ge1, NULL };
 static	v_post	posts_nd[] = { berr_ge1, NULL };
 static	v_post	posts_pf[] = { eerr_eq1, NULL };
-static	v_post	posts_lb[] = { eerr_eq1, NULL };
+static	v_post	posts_lb[] = { eerr_eq1, post_lb, NULL };
 static	v_post	posts_st[] = { eerr_eq1, post_st, NULL };
 static	v_post	posts_pp[] = { ewarn_eq0, NULL };
 static	v_post	posts_ex[] = { eerr_eq0, post_args, NULL };
@@ -871,6 +873,16 @@ post_bf(POST_ARGS)
 		return(1);
 
 	return(mdoc_nerr(mdoc, head, EFONT));
+}
+
+
+static int
+post_lb(POST_ARGS)
+{
+
+	if (mdoc_a2lib(mdoc->last->child->string))
+		return(1);
+	return(mdoc_nwarn(mdoc, mdoc->last, ELIB));
 }
 
 

@@ -147,7 +147,6 @@ static	int	  termp_ft_pre(DECL_ARGS);
 static	int	  termp_ic_pre(DECL_ARGS);
 static	int	  termp_in_pre(DECL_ARGS);
 static	int	  termp_it_pre(DECL_ARGS);
-static	int	  termp_lb_pre(DECL_ARGS);
 static	int	  termp_lk_pre(DECL_ARGS);
 static	int	  termp_ms_pre(DECL_ARGS);
 static	int	  termp_mt_pre(DECL_ARGS);
@@ -281,7 +280,7 @@ static const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Hf */
 	{ NULL, NULL }, /* Fr */
 	{ termp_ud_pre, NULL }, /* Ud */
-	{ termp_lb_pre, termp_lb_post }, /* Lb */
+	{ NULL, termp_lb_post }, /* Lb */
 	{ termp_pp_pre, NULL }, /* Lp */ 
 	{ termp_lk_pre, NULL }, /* Lk */ 
 	{ termp_mt_pre, NULL }, /* Mt */ 
@@ -1279,23 +1278,6 @@ termp_bt_pre(DECL_ARGS)
 {
 
 	term_word(p, "is currently in beta test.");
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_lb_pre(DECL_ARGS)
-{
-	const char	*lb;
-
-	assert(node->child && MDOC_TEXT == node->child->type);
-	lb = mdoc_a2lib(node->child->string);
-	if (lb) {
-		term_word(p, lb);
-		return(0);
-	}
-	term_word(p, "library");
 	return(1);
 }
 

@@ -79,6 +79,7 @@ const	char *const __mdoc_merrnames[MERRMAX] = {
 	"unterminated quoted phrase", /* EQUOTPHR */
 	"closure macro without prior context", /* ENOCTX */
 	"invalid whitespace after control character", /* ESPACE */
+	"no description found for library" /* ELIB */
 };
 
 const	char *const __mdoc_macronames[MDOC_MAX] = {		 

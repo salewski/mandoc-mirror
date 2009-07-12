@@ -97,6 +97,7 @@ enum	merr {
 	EQUOTPHR,
 	ENOCTX,
 	ESPACE,
+	ELIB,
 	MERRMAX
 };
 
@@ -154,6 +155,7 @@ time_t		  mdoc_atotime(const char *);
 
 size_t		  mdoc_macro2len(int);
 const char	 *mdoc_a2att(const char *);
+const char	 *mdoc_a2lib(const char *);
 const char	 *mdoc_a2st(const char *);
 const char	 *mdoc_a2arch(const char *);
 const char	 *mdoc_a2vol(const char *);
