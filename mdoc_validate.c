@@ -1153,7 +1153,7 @@ post_sh_body(POST_ARGS)
 {
 	struct mdoc_node *n;
 
-	if (SEC_NAME != mdoc->lastnamed)
+	if (SEC_NAME != mdoc->lastsec)
 		return(1);
 
 	/*
