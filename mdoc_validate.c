@@ -1168,6 +1168,8 @@ post_sh_body(POST_ARGS)
 	for ( ; n && n->next; n = n->next) {
 		if (MDOC_ELEM == n->type && MDOC_Nm == n->tok)
 			continue;
+		if (MDOC_TEXT == n->type)
+			continue;
 		if ( ! mdoc_nwarn(mdoc, mdoc->last, ENAMESECINC))
 			return(0);
 	}
