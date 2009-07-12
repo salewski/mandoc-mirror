@@ -166,7 +166,6 @@ static	int	  termp_sh_pre(DECL_ARGS);
 static	int	  termp_sm_pre(DECL_ARGS);
 static	int	  termp_sq_pre(DECL_ARGS);
 static	int	  termp_ss_pre(DECL_ARGS);
-static	int	  termp_st_pre(DECL_ARGS);
 static	int	  termp_sx_pre(DECL_ARGS);
 static	int	  termp_sy_pre(DECL_ARGS);
 static	int	  termp_ud_pre(DECL_ARGS);
@@ -213,7 +212,7 @@ static const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ot */
 	{ termp_pa_pre, NULL }, /* Pa */
 	{ termp_rv_pre, NULL }, /* Rv */
-	{ termp_st_pre, NULL }, /* St */ 
+	{ NULL, NULL }, /* St */ 
 	{ termp_va_pre, NULL }, /* Va */
 	{ termp_vt_pre, termp_vt_post }, /* Vt */ 
 	{ termp_xr_pre, NULL }, /* Xr */
@@ -1037,18 +1036,6 @@ termp_pp_pre(DECL_ARGS)
 
 	term_vspace(p);
 	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-termp_st_pre(DECL_ARGS)
-{
-	const char	*cp;
-
-	if (node->child && (cp = mdoc_a2st(node->child->string)))
-		term_word(p, cp);
-	return(0);
 }
 
 

@@ -46,6 +46,7 @@ static	int	  post_nm(POST_ARGS);
 static	int	  post_os(POST_ARGS);
 static	int	  post_prol(POST_ARGS);
 static	int	  post_sh(POST_ARGS);
+static	int	  post_st(POST_ARGS);
 static	int	  post_std(POST_ARGS);
 
 static	int	  pre_bd(PRE_ARGS);
@@ -89,7 +90,7 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ot */
 	{ NULL, NULL }, /* Pa */
 	{ NULL, post_std }, /* Rv */
-	{ NULL, NULL }, /* St */
+	{ NULL, post_st }, /* St */
 	{ NULL, NULL }, /* Va */
 	{ NULL, NULL }, /* Vt */ 
 	{ NULL, NULL }, /* Xr */
@@ -285,6 +286,22 @@ post_nm(POST_ARGS)
 	if (NULL == (m->meta.name = strdup(buf)))
 		return(mdoc_nerr(m, m->last, EMALLOC));
 
+	return(1);
+}
+
+
+static int
+post_st(POST_ARGS)
+{
+	const char	*p;
+
+	assert(MDOC_TEXT == m->last->child->type);
+	p = mdoc_a2st(m->last->child->string);
+	assert(p);
+	free(m->last->child->string);
+	m->last->child->string = strdup(p);
+	if (NULL == m->last->child->string)
+		return(mdoc_nerr(m, m->last, EMALLOC));
 	return(1);
 }
 
