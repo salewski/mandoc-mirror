@@ -86,8 +86,7 @@ const	int ttypes[TTYPE_NMAX] = {
  */
 struct	termpair {
 	struct termpair	 *ppair;
-	int	  	  flag;		/* Whether being used. */
-	size_t	  	  rmargin;	/* Right margin. */
+	int	  	  flag;		/* Cross-body struct termp:flags. */
 	int		  count;	/* Enum count. */
 };
 
@@ -346,15 +345,13 @@ print_node(DECL_ARGS)
 {
 	int		 dochild;
 	struct termpair	 npair;
-	size_t		 offset;
-
-	/* Pre-processing. */
+	size_t		 offset, rmargin;
 
 	dochild = 1;
 	offset = p->offset;
+	rmargin = p->rmargin;
 
 	npair.ppair = pair;
-	npair.rmargin = 0;
 	npair.flag = 0;
 	npair.count = 0;
 
@@ -379,6 +376,7 @@ print_node(DECL_ARGS)
 			(*termacts[node->tok].post)(p, &npair, meta, node);
 
 	p->offset = offset;
+	p->rmargin = rmargin;
 	p->flags &= ~npair.flag;
 }
 
@@ -708,7 +706,6 @@ termp_it_pre(DECL_ARGS)
 
 	/* Save parent attributes. */
 
-	pair->rmargin = p->rmargin;
 	pair->flag = p->flags;
 
 	/* Get list width and offset. */
@@ -971,7 +968,6 @@ termp_it_post(DECL_ARGS)
 		break;
 	}
 
-	p->rmargin = pair->rmargin;
 	p->flags = pair->flag;
 }
 
@@ -1125,6 +1121,7 @@ termp_nd_pre(DECL_ARGS)
 
 	if (MDOC_BODY != node->type)
 		return(1);
+
 	/* 
 	 * XXX: signed off by jmc@openbsd.org.  This technically
 	 * produces a minus sign after the Nd, which is wrong, but is
