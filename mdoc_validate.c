@@ -86,6 +86,7 @@ static	int	eerr_eq1(POST_ARGS);
 static	int	eerr_ge1(POST_ARGS);
 static	int	ewarn_eq0(POST_ARGS);
 static	int	bwarn_ge1(POST_ARGS);
+static	int	berr_ge1(POST_ARGS);
 static	int	hwarn_eq1(POST_ARGS);
 static	int	ewarn_ge1(POST_ARGS);
 static	int	ebool(POST_ARGS);
@@ -130,6 +131,7 @@ static	v_post	posts_bl[] = { bwarn_ge1, post_bl, NULL };
 static	v_post	posts_it[] = { post_it, NULL };
 static	v_post	posts_in[] = { eerr_eq1, NULL };
 static	v_post	posts_ss[] = { herr_ge1, NULL };
+static	v_post	posts_nd[] = { berr_ge1, NULL };
 static	v_post	posts_pf[] = { eerr_eq1, NULL };
 static	v_post	posts_lb[] = { eerr_eq1, NULL };
 static	v_post	posts_st[] = { eerr_eq1, post_st, NULL };
@@ -175,7 +177,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_text },			/* Ic */ 
 	{ NULL, posts_in },			/* In */ 
 	{ NULL, NULL },				/* Li */
-	{ NULL, posts_wtext },			/* Nd */
+	{ NULL, posts_nd },			/* Nd */
 	{ NULL, posts_nm },			/* Nm */
 	{ NULL, posts_wline },			/* Op */
 	{ NULL, NULL },				/* Ot */
@@ -407,6 +409,7 @@ CHECK_CHILD_DEFN(err, eq, ==)			/* err_child_eq() */
 CHECK_CHILD_DEFN(err, lt, <)			/* err_child_lt() */
 CHECK_CHILD_DEFN(warn, lt, <)			/* warn_child_lt() */
 CHECK_BODY_DEFN(ge1, warn, warn_child_gt, 0)	/* bwarn_ge1() */
+CHECK_BODY_DEFN(ge1, err, err_child_gt, 0)	/* berr_ge1() */
 CHECK_ELEM_DEFN(eq0, warn, warn_child_eq, 0)	/* ewarn_eq0() */
 CHECK_ELEM_DEFN(ge1, warn, warn_child_gt, 0)	/* ewarn_gt1() */
 CHECK_ELEM_DEFN(eq1, err, err_child_eq, 1)	/* eerr_eq1() */
@@ -1165,13 +1168,11 @@ post_sh_body(POST_ARGS)
 	for ( ; n && n->next; n = n->next) {
 		if (MDOC_ELEM == n->type && MDOC_Nm == n->tok)
 			continue;
-		if (MDOC_TEXT == n->type)
-			continue;
 		if ( ! mdoc_nwarn(mdoc, mdoc->last, ENAMESECINC))
 			return(0);
 	}
 
-	if (MDOC_ELEM == n->type && MDOC_Nd == n->tok)
+	if (MDOC_BLOCK == n->type && MDOC_Nd == n->tok)
 		return(1);
 	return(mdoc_nwarn(mdoc, mdoc->last, ENAMESECINC));
 }
