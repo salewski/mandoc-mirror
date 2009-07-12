@@ -1941,13 +1941,12 @@ termp_fo_pre(DECL_ARGS)
 	const struct mdoc_node *n;
 
 	if (MDOC_BODY == node->type) {
+		p->flags |= TERMP_NOSPACE;
 		term_word(p, "(");
 		p->flags |= TERMP_NOSPACE;
 		return(1);
 	} else if (MDOC_HEAD != node->type) 
 		return(1);
-
-	/* XXX - groff shows only first parameter */
 
 	p->flags |= ttypes[TTYPE_FUNC_NAME];
 	for (n = node->child; n; n = n->next) {
