@@ -571,16 +571,15 @@ arg_listtype(const struct mdoc_node *n)
 			/* FALLTHROUGH */
 		case (MDOC_Column):
 			/* FALLTHROUGH */
+		case (MDOC_Hang):
+			/* FALLTHROUGH */
 		case (MDOC_Ohang):
 			return(n->args->argv[i].arg);
 		default:
 			break;
 		}
 
-	/* FIXME: mandated by parser. */
-
-	errx(1, "list type not supported");
-	/* NOTREACHED */
+	return(-1);
 }
 
 
@@ -726,6 +725,7 @@ termp_it_pre(DECL_ARGS)
 	(void)arg_getattrs(keys, vals, 3, bl);
 
 	type = arg_listtype(bl);
+	assert(-1 != type);
 
 	/* Calculate real width and offset. */
 
@@ -752,7 +752,7 @@ termp_it_pre(DECL_ARGS)
 	/* 
 	 * List-type can override the width in the case of fixed-head
 	 * values (bullet, dash/hyphen, enum).  Tags need a non-zero
-	 * offset.
+	 * offset.  FIXME: double-check that correct.
 	 */
 
 	switch (type) {
@@ -768,6 +768,8 @@ termp_it_pre(DECL_ARGS)
 		if (width < 5)
 			width = 5;
 		break;
+	case (MDOC_Hang):
+		/* FALLTHROUGH */
 	case (MDOC_Tag):
 		if (0 == width)
 			width = 10;
@@ -784,6 +786,8 @@ termp_it_pre(DECL_ARGS)
 	switch (type) {
 	case (MDOC_Diag):
 		term_word(p, "\\ ");
+		/* FALLTHROUGH */
+	case (MDOC_Hang):
 		/* FALLTHROUGH */
 	case (MDOC_Inset):
 		if (MDOC_BODY == node->type) 
@@ -826,11 +830,17 @@ termp_it_pre(DECL_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Hyphen):
 		/* FALLTHROUGH */
+	case (MDOC_Hang):
+		/* FALLTHROUGH */
 	case (MDOC_Tag):
 		if (MDOC_HEAD == node->type)
 			p->flags |= TERMP_NOBREAK;
 		else
 			p->flags |= TERMP_NOLPAD;
+
+		if (MDOC_HEAD == node->type && MDOC_Hang == type)
+			p->flags |= TERMP_NONOBREAK;
+
 		if (MDOC_HEAD == node->type && MDOC_Tag == type)
 			if (NULL == node->next ||
 					NULL == node->next->child)
@@ -871,6 +881,8 @@ termp_it_pre(DECL_ARGS)
 	case (MDOC_Enum):
 		/* FALLTHROUGH */
 	case (MDOC_Hyphen):
+		/* FALLTHROUGH */
+	case (MDOC_Hang):
 		/* FALLTHROUGH */
 	case (MDOC_Tag):
 		if (MDOC_HEAD == node->type)
@@ -954,6 +966,7 @@ termp_it_post(DECL_ARGS)
 		return;
 
 	type = arg_listtype(node->parent->parent->parent);
+	assert(-1 != type);
 
 	switch (type) {
 	case (MDOC_Diag):
