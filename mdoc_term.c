@@ -700,7 +700,7 @@ termp_it_pre(DECL_ARGS)
 {
 	const struct mdoc_node *bl, *n;
 	char		        buf[7];
-	int		        i, type, keys[3], vals[3], sv;
+	int		        i, type, keys[3], vals[3];
 	size_t		        width, offset;
 
 	if (MDOC_BLOCK == node->type)
@@ -769,7 +769,9 @@ termp_it_pre(DECL_ARGS)
 			width = 5;
 		break;
 	case (MDOC_Hang):
-		/* FALLTHROUGH */
+		if (0 == width)
+			width = 8;
+		break;
 	case (MDOC_Tag):
 		if (0 == width)
 			width = 10;
@@ -786,8 +788,6 @@ termp_it_pre(DECL_ARGS)
 	switch (type) {
 	case (MDOC_Diag):
 		term_word(p, "\\ ");
-		/* FALLTHROUGH */
-	case (MDOC_Hang):
 		/* FALLTHROUGH */
 	case (MDOC_Inset):
 		if (MDOC_BODY == node->type) 
@@ -829,22 +829,30 @@ termp_it_pre(DECL_ARGS)
 	case (MDOC_Enum):
 		/* FALLTHROUGH */
 	case (MDOC_Hyphen):
-		/* FALLTHROUGH */
+		if (MDOC_HEAD == node->type)
+			p->flags |= TERMP_NOBREAK;
+		else
+			p->flags |= TERMP_NOLPAD;
+		break;
 	case (MDOC_Hang):
-		/* FALLTHROUGH */
+		if (MDOC_HEAD == node->type)
+			p->flags |= TERMP_NOBREAK;
+		else
+			p->flags |= TERMP_NOLPAD;
+
+		if (MDOC_HEAD == node->type)
+			p->flags |= TERMP_HANG;
+		break;
 	case (MDOC_Tag):
 		if (MDOC_HEAD == node->type)
 			p->flags |= TERMP_NOBREAK;
 		else
 			p->flags |= TERMP_NOLPAD;
 
-		if (MDOC_HEAD == node->type && MDOC_Hang == type)
-			p->flags |= TERMP_NONOBREAK;
-
-		if (MDOC_HEAD == node->type && MDOC_Tag == type)
-			if (NULL == node->next ||
-					NULL == node->next->child)
-				p->flags |= TERMP_NONOBREAK;
+		if (MDOC_HEAD != node->type)
+			break;
+		if (NULL == node->next || NULL == node->next->child)
+			p->flags |= TERMP_DANGLE;
 		break;
 	case (MDOC_Column):
 		if (MDOC_HEAD == node->type) {
@@ -902,18 +910,19 @@ termp_it_pre(DECL_ARGS)
 	 * HEAD character (temporarily bold, in some cases).  
 	 */
 
-	sv = p->flags;
 	if (MDOC_HEAD == node->type)
 		switch (type) {
 		case (MDOC_Bullet):
 			p->flags |= TERMP_BOLD;
 			term_word(p, "\\[bu]");
+			p->flags &= ~TERMP_BOLD;
 			break;
 		case (MDOC_Dash):
 			/* FALLTHROUGH */
 		case (MDOC_Hyphen):
 			p->flags |= TERMP_BOLD;
 			term_word(p, "\\(hy");
+			p->flags &= ~TERMP_BOLD;
 			break;
 		case (MDOC_Enum):
 			(pair->ppair->ppair->count)++;
@@ -924,8 +933,6 @@ termp_it_pre(DECL_ARGS)
 		default:
 			break;
 		}
-
-	p->flags = sv; /* Restore saved flags. */
 
 	/* 
 	 * If we're not going to process our children, indicate so here.
