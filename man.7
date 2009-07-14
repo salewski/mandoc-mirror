@@ -27,13 +27,15 @@ The
 .Nm man
 language was historically used to format 
 .Ux
-manuals.  This reference document describes the syntax and structure of
-this language.
+manuals.  This reference document describes its syntax, structure, and
+usage.
 .Pp
-.Em \&Do not
-use 
+.Bf Em
+Do not use 
 .Nm
-to write your manuals.  Use the
+to write your manuals.  
+.Ef
+Use the
 .Xr mdoc 7
 language, instead.
 .\" PARAGRAPH
@@ -53,13 +55,8 @@ Other lines are interpreted within the current state.
 .Sh INPUT ENCODING
 .Nm
 documents may contain only graphable 7-bit ASCII characters, the
-space character
-.Sq \  ,
-and tabs
-.Sq \et . 
-All manuals must have
+space character, and the tabs character.  All manuals must have
 .Ux
-.Sq \en
 line termination.  
 .Pp
 Blank lines are acceptable; where found, the output will assert a
