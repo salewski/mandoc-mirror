@@ -315,7 +315,7 @@ term_flushln(struct termp *p)
 				putchar(' ');
 		}
 		if (TERMP_HANG & p->flags)
-			sv = vis - maxvis;
+			sv = (int)(vis - maxvis);
 		p->col = 0;
 		return;
 	}
