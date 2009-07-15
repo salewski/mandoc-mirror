@@ -298,6 +298,11 @@ post_lb(POST_ARGS)
 	char		*buf;
 	size_t		 sz;
 
+	/* 
+	 * FIXME: this must be broken apart into a series of TEXT nodes,
+	 * each containing a single word. 
+	 */
+
 	assert(MDOC_TEXT == m->last->child->type);
 	p = mdoc_a2lib(m->last->child->string);
 	if (NULL == p) {
@@ -326,6 +331,11 @@ post_st(POST_ARGS)
 {
 	const char	*p;
 
+	/* 
+	 * FIXME: this must be broken apart into a series of TEXT nodes,
+	 * each containing a single word. 
+	 */
+
 	assert(MDOC_TEXT == m->last->child->type);
 	p = mdoc_a2st(m->last->child->string);
 	assert(p);
@@ -342,6 +352,11 @@ post_at(POST_ARGS)
 {
 	struct mdoc_node *n;
 	const char	 *p;
+
+	/* 
+	 * FIXME: this must be broken apart into a series of TEXT nodes,
+	 * each containing a single word. 
+	 */
 
 	if (m->last->child) {
 		assert(MDOC_TEXT == m->last->child->type);

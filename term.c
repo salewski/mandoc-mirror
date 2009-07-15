@@ -496,7 +496,6 @@ void
 term_word(struct termp *p, const char *word)
 {
 
-	assert(*word);
 	if (term_isclosedelim(word))
 		if ( ! (TERMP_IGNDELIM & p->flags))
 			p->flags |= TERMP_NOSPACE;
