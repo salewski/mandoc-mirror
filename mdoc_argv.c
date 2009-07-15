@@ -390,8 +390,8 @@ mdoc_args(struct mdoc *m, int line,
 
 
 static int
-args(struct mdoc *m, int line, 
-		int *pos, char *buf, int fl, char **v)
+args(struct mdoc *m, int line, int *pos, 
+		char *buf, int fl, char **v)
 {
 	int		  i;
 	char		 *p, *pp;
@@ -499,10 +499,10 @@ args(struct mdoc *m, int line,
 
 			if (p && 0 == *p)
 				if ( ! mdoc_pwarn(m, line, *pos, ECOLEMPTY))
-					return(0);
+					return(ARGS_ERROR);
 			if (p && 0 == *p && p > *v && ' ' == *(p - 1))
 				if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
-					return(0);
+					return(ARGS_ERROR);
 
 			if (p)
 				return(ARGS_PHRASE);
@@ -514,7 +514,7 @@ args(struct mdoc *m, int line,
 
 			if (p > *v && ' ' == *(p - 1))
 				if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
-					return(0);
+					return(ARGS_ERROR);
 			*pos += (int)(p - *v);
 
 			return(ARGS_PHRASE);
