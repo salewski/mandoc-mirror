@@ -1,4 +1,4 @@
-.SUFFIXES:	.html .sgml .1.txt .3.txt .7.txt .1 .3 .7 .md5 .tar.gz
+.SUFFIXES:	.html .xml .sgml .1.txt .3.txt .7.txt .1 .3 .7 .md5 .tar.gz 
 
 BINDIR		= $(PREFIX)/bin
 INCLUDEDIR	= $(PREFIX)/include
@@ -50,7 +50,9 @@ SRCS	   = $(MDOCSRCS) $(MAINSRCS) $(MANSRCS)
 DATAS	   = arch.in att.in lib.in msec.in st.in vol.in ascii.in
 HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h libmandoc.h
 SGMLS	   = index.sgml 
-HTMLS	   = index.html
+XSLS	   = ChangeLog.xsl
+HTMLS	   = index.html ChangeLog.html
+XMLS	   = ChangeLog.xml
 STATICS	   = style.css external.png
 MD5S	   = mdocml-$(VERSION).md5 \
 	     mdocml-oport-$(VERSION).md5 \
@@ -66,11 +68,12 @@ TEXTS	   = mandoc.1.txt mdoc.3.txt mdoc.7.txt manuals.7.txt \
 	     mandoc_char.7.txt man.7.txt man.3.txt
 BINS	   = mandoc
 CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
-	     $(TARGZS) tags $(TEXTS) ChangeLog $(MD5S)
+	     $(TARGZS) tags $(TEXTS) ChangeLog.html $(MD5S) \
+	     $(XMLS)
 MAKEFILES  = Makefile.netbsd Makefile.openbsd Makefile.freebsd \
 	     Makefile
 INSTALL	   = $(SRCS) $(HEADS) $(MAKEFILES) DESCR $(MANS) $(SGMLS) \
-	     $(STATICS) $(DATAS)
+	     $(STATICS) $(DATAS) $(XSLS)
 
 all:	$(BINS)
 
@@ -86,11 +89,10 @@ dist:	mdocml-$(VERSION).tar.gz
 
 html:	$(HTMLS)
 
-www:	all $(HTMLS) $(MD5S) $(TARGZS) $(TEXTS) ChangeLog
+www:	all $(HTMLS) $(MD5S) $(TARGZS) $(TEXTS) 
 
 installwww: www
 	install -m 0444 $(TEXTS) $(HTMLS) $(STATICS) $(PREFIX)/
-	install -m 0444 ChangeLog $(PREFIX)/snapshots/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/
 	install -m 0444 mdocml-$(VERSION).md5 $(PREFIX)/snapshots/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz
@@ -189,8 +191,11 @@ mdoc_action.o: mdoc_action.c libmdoc.h
 
 libmdoc.h: mdoc.h
 
-ChangeLog::
-	cvs2cl -P -t --no-indent --FSF --no-times
+ChangeLog.xml:
+	cvs2cl --xml --xml-encoding iso-8859-15 --noxmlns -f $@
+
+ChangeLog.html: ChangeLog.xml
+	xsltproc -o $@ ChangeLog.xsl ChangeLog.xml
 
 mdocml-nport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.netbsd DESCR
 	mkdir -p .dist/mdocml/
