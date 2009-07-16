@@ -147,6 +147,10 @@ static	int		  macrowarn(struct mdoc *, int, const char *);
 static	int		  pstring(struct mdoc *, int, int, 
 				const char *, size_t);
 
+#ifdef __linux__
+extern	size_t	  	  strlcpy(char *, const char *, size_t);
+#endif
+
 
 const struct mdoc_node *
 mdoc_node(const struct mdoc *m)
