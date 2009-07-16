@@ -495,6 +495,7 @@ term_pescape(struct termp *p, const char **word)
 void
 term_word(struct termp *p, const char *word)
 {
+	const char	 *sv;
 
 	if (term_isclosedelim(word))
 		if ( ! (TERMP_IGNDELIM & p->flags))
@@ -511,13 +512,13 @@ term_word(struct termp *p, const char *word)
 	 * before the word.
 	 */
 
-	for ( ; *word; word++)
+	for (sv = word; *word; word++)
 		if ('\\' != *word)
 			term_encodea(p, *word);
 		else
 			term_pescape(p, &word);
 
-	if (term_isopendelim(word))
+	if (term_isopendelim(sv))
 		p->flags |= TERMP_NOSPACE;
 }
 
