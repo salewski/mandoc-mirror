@@ -35,7 +35,7 @@ This document serves as a tutorial to writing
 documentation
 .Pq Dq manuals .
 .\" SECTION
-.Sh COMPOSITION
+.Sh ENVIRONMENT
 First, copy over the manual template from 
 .Pa /usr/share/misc/mdoc.template
 into your source directory.
@@ -103,36 +103,6 @@ for this document.  Rename the template file:
 .Pp
 .Dl % mv mdoc.template myname.mysection
 .\" SUBSECTION
-.Ss Input Language
-Manuals should 
-.Em always 
-be written in the
-.Xr mdoc 7
-formatting language.
-.Pp
-There exist other documentation-specific languages, such as the
-historical
-.Xr man 7
-package of 
-.Xr roff 7 ;
-newer languages such as DocBook or texinfo; or even ad-hoc conventions
-such as README files.  
-.Em Avoid these formats .
-.Pp
-There are two canonical references for writing mdoc.  Read them.
-.Pp
-.\" LIST
-.Bl -tag -width XXXXXXXXXXXXXXXX -offset indent -compact
-.It Xr mdoc 7
-formal language reference
-.It Xr mdoc.samples 7
-macro reference
-.El
-.Pp
-Open the template you've copied into
-.Pa myname.mysection
-and begin editing.
-.\" SUBSECTION
 .Ss Development Tools
 While writing, make sure that your manual is correctly structured:
 .Pp
@@ -184,15 +154,17 @@ Makefiles in order to automatically check your input:
 Your manual must have a license.  It should be listed at the start of
 your document, just as in source code.
 .\" SECTION
-.Sh BEST PRACTICES
-The
+.Sh COMPOSITION
+Manuals should 
+.Em always 
+be written in the
 .Xr mdoc 7
-and 
-.Xr mdoc.samples 7
-files are indispensable in guiding composition.  In this section, we
-introduce some 
-.Ux
-manual best practises:
+formatting language.
+.\" PARAGRAPH
+.Pp
+Open the template you've copied into
+.Pa myname.mysection
+and begin editing.
 .\" SUBSECTION
 .Ss Language
 .Bl -enum 
