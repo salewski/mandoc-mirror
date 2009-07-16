@@ -797,9 +797,6 @@ termp_it_pre(DECL_ARGS)
 	 */
 
 	switch (type) {
-	case (MDOC_Diag):
-		term_word(p, "\\ ");
-		/* FALLTHROUGH */
 	case (MDOC_Inset):
 		if (MDOC_BODY == node->type) 
 			p->flags &= ~TERMP_NOSPACE;
@@ -988,6 +985,7 @@ termp_it_post(DECL_ARGS)
 
 	switch (type) {
 	case (MDOC_Diag):
+		term_word(p, "\\ ");
 		/* FALLTHROUGH */
 	case (MDOC_Item):
 		/* FALLTHROUGH */
