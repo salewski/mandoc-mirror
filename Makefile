@@ -194,7 +194,7 @@ libmdoc.h: mdoc.h
 ChangeLog.xml:
 	cvs2cl --xml --xml-encoding iso-8859-15 --noxmlns -f $@
 
-ChangeLog.html: ChangeLog.xml
+ChangeLog.html: ChangeLog.xml ChangeLog.xsl
 	xsltproc -o $@ ChangeLog.xsl ChangeLog.xml
 
 mdocml-nport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.netbsd DESCR

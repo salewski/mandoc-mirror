@@ -20,6 +20,14 @@ h2		{ font-weight: bold;
 		  margin-bottom: 0px; 
 		  font-family: Verdana, Tahoma, Arial, sans-serif; }
 
+div.clhead	{ background-color: #E6E6FA; color: #000000; padding: 2px; font-weight: bold; }
+
+div.clbody	{ margin-left: 2px; }
+
+ul.clbody	{ margin-top: 4px; }
+
+span.rev	{ color: #808080; }
+
 span.nm		{ color: #000000; font-weight: bold; }
 
 span.attn	{ color: #000000; font-weight: bold; }
