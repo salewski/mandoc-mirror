@@ -127,6 +127,9 @@ mdoc_hash_find(const void *arg, const char *tmp)
 
 	ind = INDEX(major, minor);
 
+	if (ind < 0 || ind >= 26 * 3 * 52)
+		return(MDOC_MAX);
+
 	if (htab[ind]) {
 		slot = htab[ind] - /* LINTED */
 			(void *)mdoc_macros;
