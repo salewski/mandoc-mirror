@@ -37,7 +37,6 @@
 #define	ARGS_QUOTED	(1 << 0)
 #define	ARGS_DELIM	(1 << 1)
 #define	ARGS_TABSEP	(1 << 2)
-#define	ARGS_ARGVLIKE	(1 << 3)
 
 #define	ARGV_NONE	(1 << 0)
 #define	ARGV_SINGLE	(1 << 1)
@@ -127,7 +126,7 @@ static	int mdoc_argflags[MDOC_MAX] = {
 	0, /* Ot */
 	ARGS_DELIM, /* Pa */
 	0, /* Rv */
-	ARGS_DELIM | ARGS_ARGVLIKE, /* St */ 
+	ARGS_DELIM, /* St */ 
 	ARGS_DELIM, /* Va */
 	ARGS_DELIM, /* Vt */ 
 	ARGS_DELIM, /* Xr */
@@ -232,9 +231,6 @@ mdoc_argv(struct mdoc *m, int line, int tok,
 
 	assert(' ' != buf[*pos]);
 
-	if ('-' != buf[*pos] || ARGS_ARGVLIKE & mdoc_argflags[tok])
-		return(ARGV_WORD);
-
 	/* Parse through to the first unescaped space. */
 
 	i = *pos;
@@ -268,8 +264,6 @@ mdoc_argv(struct mdoc *m, int line, int tok,
 		/* XXX - restore saved zeroed byte. */
 		if (sv)
 			buf[*pos - 1] = sv;
-		if ( ! mdoc_pwarn(m, line, i, EARGVPARM))
-			return(ARGV_ERROR);
 		return(ARGV_WORD);
 	}
 
@@ -405,10 +399,6 @@ args(struct mdoc *m, int line, int *pos,
 
 	if ('\"' == buf[*pos] && ! (fl & ARGS_QUOTED))
 		if ( ! mdoc_pwarn(m, line, *pos, EQUOTPARM))
-			return(ARGS_ERROR);
-
-	if ( ! (fl & ARGS_ARGVLIKE) && '-' == buf[*pos]) 
-		if ( ! mdoc_pwarn(m, line, *pos, EARGVPARM))
 			return(ARGS_ERROR);
 
 	/* 
