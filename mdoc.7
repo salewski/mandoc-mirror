@@ -177,90 +177,6 @@ followed by
 .Pp
 Subsequent SYNOPSIS and DESCRIPTION sections are strongly encouraged,
 but non-compulsory. 
-.\" SUB-SECTION----------------------
-.\" .Ss Classification
-.\" Macros are classified by their scope rules: block full-explicit (BFE),
-.\" block partial-explicit (BPE), block full-implicit (BFI), block
-.\" partial-implicit (BPI), and in-line.
-.\" SUB-SECTION----------------------
-.\" .Ss Scope
-.\" .Bl -inset 
-.\" .\" LIST-ITEM
-.\" .It Em Block
-.\" macros enclose other block macros, in-line macros or text, and
-.\" may span multiple lines.
-.\" .Bl -inset -offset indent
-.\" .\" LIST-ITEM
-.\" .It Em Full-block
-.\" macros always span multiple lines.  They consist of zero or 
-.\" more
-.\" .Qq heads ,
-.\" subsequent macros or text on the same line following invocation; an
-.\" optional
-.\" .Qq body ,
-.\" which spans subsequent lines of text or macros; and an optional
-.\" .Qq tail ,
-.\" macros or text on the same line following closure.
-.\" .\" LIST-ITEM
-.\" .It Em Partial-block
-.\" macros may span multiple lines.  They consists of a optional
-.\" .Qq head ,
-.\" text immediately following invocation; always a 
-.\" .Qq body ,
-.\" text or macros following the head on the same and subsequent lines; and
-.\" optionally a
-.\" .Qq tail ,
-.\" text immediately following closure.
-.\" .\" LIST-ITEM
-.\" .It Em In-line
-.\" macros may only enclose text and span at most a single line. 
-.\" .El
-.\" .El
-.\" SUB-SECTION----------------------
-.\" .Ss Closure
-.\" Closure of a macro's scope depends first on its classification, then
-.\" on whether it's parsable.  In this table,
-.\" .Sq BFE
-.\" refers to block full-explicit and so on.
-.\" .\" PARAGRAPH------------
-.\" .Pp
-.\" .Bl -tag -width 12n -offset indent -compact
-.\" .It BPE , BFE
-.\" corresponding explicit closure macro
-.\" .It BFI
-.\" end-of-file or a corresponding implicit closure macro
-.\" .It BPI
-.\" end-of-line (body may be closed by >0 space-separated
-.\" .Sx Reserved Characters ,
-.\" although block scope will still be open)
-.\" .It INL
-.\" end-of-line
-.\" .El
-.\" PARAGRAPH------------
-.\" .Pp
-.\" If a macro (block or in-line) is parsable, it may also be closed out by
-.\" one of the following scenarios (unless specifically noted otherwise):
-.\" .\" PARAGRAPH------------
-.\" .Pp
-.\" .Bl -dash -offset indent -compact
-.\" .It 
-.\" a sequence of >0 space-separated
-.\" .Sx Reserved Characters ,
-.\" .It
-.\" another macro,
-.\" .It
-.\" end-of-line, or
-.\" .It
-.\" completion of a set number of arguments.
-.\" .El
-.\" PARAGRAPH------------
-.\" .Pp
-.\" If >0 space-separated
-.\" .Sx Reserved Characters
-.\" are followed by non-reserved characters, the behaviour differs per
-.\" macro.  In general, scope of the macro is closed and re-opened:
-.\" subsequent tokens are interpreted as if the scope had just been opened.
-.\" In other circumstances, scope is simply closed out.
 .\" SECTION---------------------------------------------
 .Sh MACRO SYNTAX
 Every line beginning with the control character 
@@ -304,13 +220,13 @@ contains a head.
 .Bl -column -compact -offset indent "MacroX" "CallableX" "ParsableX" "closed by XXX"
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Scope
 .It \&Bd     Ta    \&No     Ta    \&No     Ta    closed by \&Ed
-.It \&Ed     Ta    \&No     Ta    \&No     Ta    opened by \&Bd
-.It \&Bl     Ta    \&No     Ta    \&No     Ta    closed by \&El
-.It \&El     Ta    \&No     Ta    \&No     Ta    opened by \&Bl
 .It \&Bf     Ta    \&No     Ta    \&No     Ta    closed by \&Ef
-.It \&Ef     Ta    \&No     Ta    \&No     Ta    opened by \&Bf
 .It \&Bk     Ta    \&No     Ta    \&No     Ta    closed by \&Ek
+.It \&Bl     Ta    \&No     Ta    \&No     Ta    closed by \&El
+.It \&Ed     Ta    \&No     Ta    \&No     Ta    opened by \&Bd
+.It \&Ef     Ta    \&No     Ta    \&No     Ta    opened by \&Bf
 .It \&Ek     Ta    \&No     Ta    \&No     Ta    opened by \&Bk
+.It \&El     Ta    \&No     Ta    \&No     Ta    opened by \&Bl
 .El
 .\" SUB-SECTION----------------------
 .Ss Block full-implicit
@@ -334,10 +250,10 @@ may have multiple heads.
 .Pp
 .Bl -column -compact -offset indent "MacroX" "CallableX" "ParsableX" "closed by XXXXXXXXXXX"
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Scope
+.It \&It     Ta    \&No     Ta    Yes      Ta    closed by \&It, \&El
 .It \&Nd     Ta    \&No     Ta    \&No     Ta    closed by \&Sh
 .It \&Sh     Ta    \&No     Ta    \&No     Ta    closed by \&Sh
 .It \&Ss     Ta    \&No     Ta    \&No     Ta    closed by \&Sh, \&Ss
-.It \&It     Ta    \&No     Ta    Yes      Ta    closed by \&It, \&El
 .El
 .\" SUB-SECTION----------------------
 .Ss Block partial-explicit
@@ -358,30 +274,30 @@ and/or tail
 .Pp
 .Bl -column "MacroX" "CallableX" "ParsableX" "closed by XXXX" -compact -offset indent
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Scope
-.It \&Ao     Ta    Yes      Ta    Yes      Ta    closed by \&Ac
 .It \&Ac     Ta    Yes      Ta    Yes      Ta    opened by \&Ao
+.It \&Ao     Ta    Yes      Ta    Yes      Ta    closed by \&Ac
 .It \&Bc     Ta    Yes      Ta    Yes      Ta    closed by \&Bo
 .It \&Bo     Ta    Yes      Ta    Yes      Ta    opened by \&Bc
-.It \&Pc     Ta    Yes      Ta    Yes      Ta    closed by \&Po
-.It \&Po     Ta    Yes      Ta    Yes      Ta    opened by \&Pc
-.It \&Do     Ta    Yes      Ta    Yes      Ta    closed by \&Dc
-.It \&Dc     Ta    Yes      Ta    Yes      Ta    opened by \&Do
-.It \&Xo     Ta    Yes      Ta    Yes      Ta    closed by \&Xc
-.It \&Xc     Ta    Yes      Ta    Yes      Ta    opened by \&Xo
-.It \&Bro    Ta    Yes      Ta    Yes      Ta    closed by \&Brc
 .It \&Brc    Ta    Yes      Ta    Yes      Ta    opened by \&Bro
-.It \&Oc     Ta    Yes      Ta    Yes      Ta    closed by \&Oo
-.It \&Oo     Ta    Yes      Ta    Yes      Ta    opened by \&Oc
-.It \&So     Ta    Yes      Ta    Yes      Ta    closed by \&Sc
-.It \&Sc     Ta    Yes      Ta    Yes      Ta    opened by \&So
-.It \&Fc     Ta    Yes      Ta    Yes      Ta    opened by \&Fo
-.It \&Fo     Ta    \&No     Ta    \&No     Ta    closed by \&Fc
+.It \&Bro    Ta    Yes      Ta    Yes      Ta    closed by \&Brc
+.It \&Dc     Ta    Yes      Ta    Yes      Ta    opened by \&Do
+.It \&Do     Ta    Yes      Ta    Yes      Ta    closed by \&Dc
 .It \&Ec     Ta    Yes      Ta    Yes      Ta    opened by \&Eo
 .It \&Eo     Ta    Yes      Ta    Yes      Ta    closed by \&Ec
+.It \&Fc     Ta    Yes      Ta    Yes      Ta    opened by \&Fo
+.It \&Fo     Ta    \&No     Ta    \&No     Ta    closed by \&Fc
+.It \&Oc     Ta    Yes      Ta    Yes      Ta    closed by \&Oo
+.It \&Oo     Ta    Yes      Ta    Yes      Ta    opened by \&Oc
+.It \&Pc     Ta    Yes      Ta    Yes      Ta    closed by \&Po
+.It \&Po     Ta    Yes      Ta    Yes      Ta    opened by \&Pc
 .It \&Qc     Ta    Yes      Ta    Yes      Ta    opened by \&Oo
 .It \&Qo     Ta    Yes      Ta    Yes      Ta    closed by \&Oc
 .It \&Re     Ta    \&No     Ta    \&No     Ta    opened by \&Rs
 .It \&Rs     Ta    \&No     Ta    \&No     Ta    closed by \&Re
+.It \&Sc     Ta    Yes      Ta    Yes      Ta    opened by \&So
+.It \&So     Ta    Yes      Ta    Yes      Ta    closed by \&Sc
+.It \&Xc     Ta    Yes      Ta    Yes      Ta    opened by \&Xo
+.It \&Xo     Ta    Yes      Ta    Yes      Ta    closed by \&Xc
 .El
 .\" SUB-SECTION----------------------
 .Ss Block partial-implicit
@@ -396,16 +312,16 @@ or end of line.
 .Bl -column "MacroX" "CallableX" "ParsableX" -compact -offset indent
 .It Em Macro Ta Em Callable Ta Em Parsable
 .It \&Aq     Ta    Yes      Ta    Yes
-.It \&Op     Ta    Yes      Ta    Yes
 .It \&Bq     Ta    Yes      Ta    Yes
-.It \&Dq     Ta    Yes      Ta    Yes
-.It \&Pq     Ta    Yes      Ta    Yes
-.It \&Qq     Ta    Yes      Ta    Yes
-.It \&Sq     Ta    Yes      Ta    Yes
 .It \&Brq    Ta    Yes      Ta    Yes
 .It \&D1     Ta    \&No     Ta    \&Yes
 .It \&Dl     Ta    \&No     Ta    Yes
+.It \&Dq     Ta    Yes      Ta    Yes
+.It \&Op     Ta    Yes      Ta    Yes
+.It \&Pq     Ta    Yes      Ta    Yes
 .It \&Ql     Ta    Yes      Ta    Yes
+.It \&Qq     Ta    Yes      Ta    Yes
+.It \&Sq     Ta    Yes      Ta    Yes
 .El
 .\" SUB-SECTION----------------------
 .Ss In-line
@@ -427,35 +343,6 @@ then the macro accepts an arbitrary number of arguments.
 .Pp
 .Bl -column "MacroX" "CallableX" "ParsableX" "Arguments" -compact -offset indent
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Arguments
-.It \&Dd     Ta    \&No     Ta    \&No     Ta    >0
-.It \&Dt     Ta    \&No     Ta    \&No     Ta    n
-.It \&Os     Ta    \&No     Ta    \&No     Ta    n
-.It \&Pp     Ta    \&No     Ta    \&No     Ta    0
-.It \&Ad     Ta    Yes      Ta    Yes      Ta    n
-.It \&An     Ta    Yes      Ta    Yes      Ta    n
-.It \&Ar     Ta    Yes      Ta    Yes      Ta    n
-.It \&Cd     Ta    Yes      Ta    \&No     Ta    >0
-.It \&Cm     Ta    Yes      Ta    Yes      Ta    n
-.It \&Dv     Ta    Yes      Ta    Yes      Ta    n
-.It \&Er     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Ev     Ta    Yes      Ta    Yes      Ta    n
-.It \&Ex     Ta    \&No     Ta    \&No     Ta    0
-.It \&Fa     Ta    Yes      Ta    Yes      Ta    n
-.It \&Fd     Ta    \&No     Ta    \&No     Ta    >0
-.It \&Fl     Ta    Yes      Ta    Yes      Ta    n
-.It \&Fn     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Ft     Ta    Yes      Ta    Yes      Ta    n
-.It \&Ic     Ta    Yes      Ta    Yes      Ta    >0
-.It \&In     Ta    \&No     Ta    \&No     Ta    n
-.It \&Li     Ta    Yes      Ta    Yes      Ta    n
-.It \&Nm     Ta    Yes      Ta    Yes      Ta    n
-.It \&Ot     Ta    \&No     Ta    \&No     Ta    n
-.It \&Pa     Ta    Yes      Ta    Yes      Ta    n
-.It \&Rv     Ta    \&No     Ta    \&No     Ta    0
-.It \&St     Ta    \&No     Ta    Yes      Ta    1
-.It \&Va     Ta    Yes      Ta    Yes      Ta    n
-.It \&Vt     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Xr     Ta    Yes      Ta    Yes      Ta    >0, <3
 .It \&%A     Ta    \&No     Ta    \&No     Ta    >0
 .It \&%B     Ta    \&No     Ta    \&No     Ta    >0
 .It \&%C     Ta    \&No     Ta    \&No     Ta    >0
@@ -468,35 +355,65 @@ then the macro accepts an arbitrary number of arguments.
 .It \&%R     Ta    \&No     Ta    \&No     Ta    >0
 .It \&%T     Ta    \&No     Ta    \&No     Ta    >0
 .It \&%V     Ta    \&No     Ta    \&No     Ta    >0
+.It \&Ad     Ta    Yes      Ta    Yes      Ta    n
+.It \&An     Ta    Yes      Ta    Yes      Ta    n
+.It \&Ap     Ta    Yes      Ta    Yes      Ta    0
+.It \&Ar     Ta    Yes      Ta    Yes      Ta    n
 .It \&At     Ta    Yes      Ta    Yes      Ta    1
 .It \&Bsx    Ta    Yes      Ta    Yes      Ta    n
+.It \&Bt     Ta    \&No     Ta    \&No     Ta    0
 .It \&Bx     Ta    Yes      Ta    Yes      Ta    n
+.It \&Cd     Ta    Yes      Ta    \&No     Ta    >0
+.It \&Cm     Ta    Yes      Ta    Yes      Ta    n
 .It \&Db     Ta    \&No     Ta    \&No     Ta    1
+.It \&Dd     Ta    \&No     Ta    \&No     Ta    >0
+.It \&Dt     Ta    \&No     Ta    \&No     Ta    n
+.It \&Dv     Ta    Yes      Ta    Yes      Ta    n
+.It \&Dx     Ta    Yes      Ta    Yes      Ta    n
 .It \&Em     Ta    Yes      Ta    Yes      Ta    >0
+.It \&En     Ta    \&No     Ta    \&No     Ta    0
+.It \&Er     Ta    Yes      Ta    Yes      Ta    >0
+.It \&Es     Ta    \&No     Ta    \&No     Ta    0
+.It \&Ev     Ta    Yes      Ta    Yes      Ta    n
+.It \&Ex     Ta    \&No     Ta    \&No     Ta    0
+.It \&Fa     Ta    Yes      Ta    Yes      Ta    n
+.It \&Fd     Ta    \&No     Ta    \&No     Ta    >0
+.It \&Fl     Ta    Yes      Ta    Yes      Ta    n
+.It \&Fn     Ta    Yes      Ta    Yes      Ta    >0
+.It \&Fr     Ta    \&No     Ta    \&No     Ta    n
+.It \&Ft     Ta    Yes      Ta    Yes      Ta    n
 .It \&Fx     Ta    Yes      Ta    Yes      Ta    n
+.It \&Hf     Ta    \&No     Ta    \&No     Ta    n
+.It \&Ic     Ta    Yes      Ta    Yes      Ta    >0
+.It \&In     Ta    \&No     Ta    \&No     Ta    n
+.It \&Lb     Ta    \&No     Ta    \&No     Ta    1
+.It \&Li     Ta    Yes      Ta    Yes      Ta    n
+.It \&Lk     Ta    Yes      Ta    Yes      Ta    n
+.It \&Lp     Ta    \&No     Ta    \&No     Ta    0
 .It \&Ms     Ta    Yes      Ta    Yes      Ta    >0
+.It \&Mt     Ta    Yes      Ta    Yes      Ta    >0
+.It \&Nm     Ta    Yes      Ta    Yes      Ta    n
 .It \&No     Ta    Yes      Ta    Yes      Ta    0
 .It \&Ns     Ta    Yes      Ta    Yes      Ta    0
 .It \&Nx     Ta    Yes      Ta    Yes      Ta    n
+.It \&Os     Ta    \&No     Ta    \&No     Ta    n
+.It \&Ot     Ta    \&No     Ta    \&No     Ta    n
 .It \&Ox     Ta    Yes      Ta    Yes      Ta    n
+.It \&Pa     Ta    Yes      Ta    Yes      Ta    n
 .It \&Pf     Ta    \&No     Ta    Yes      Ta    1
+.It \&Pp     Ta    \&No     Ta    \&No     Ta    0
+.It \&Rv     Ta    \&No     Ta    \&No     Ta    0
 .It \&Sm     Ta    \&No     Ta    \&No     Ta    1
+.It \&St     Ta    \&No     Ta    Yes      Ta    1
 .It \&Sx     Ta    Yes      Ta    Yes      Ta    >0
 .It \&Sy     Ta    Yes      Ta    Yes      Ta    >0
 .It \&Tn     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Ux     Ta    Yes      Ta    Yes      Ta    n
-.It \&Dx     Ta    Yes      Ta    Yes      Ta    n
-.It \&Bt     Ta    \&No     Ta    \&No     Ta    0
-.It \&Hf     Ta    \&No     Ta    \&No     Ta    n
-.It \&Fr     Ta    \&No     Ta    \&No     Ta    n
 .It \&Ud     Ta    \&No     Ta    \&No     Ta    0
-.It \&Lb     Ta    \&No     Ta    \&No     Ta    1
-.It \&Ap     Ta    Yes      Ta    Yes      Ta    0
-.It \&Lp     Ta    \&No     Ta    \&No     Ta    0
-.It \&Lk     Ta    Yes      Ta    Yes      Ta    n
-.It \&Mt     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Es     Ta    \&No     Ta    \&No     Ta    0
-.It \&En     Ta    \&No     Ta    \&No     Ta    0
+.It \&Ux     Ta    Yes      Ta    Yes      Ta    n
+.It \&Va     Ta    Yes      Ta    Yes      Ta    n
+.It \&Vt     Ta    Yes      Ta    Yes      Ta    >0
+.It \&Xr     Ta    Yes      Ta    Yes      Ta    >0, <3
+.It \&br     Ta    \&No     Ta    \&No     Ta    0
 .El
 .\" SECTION---------------------------------------------
 .Sh COMPATIBILITY
