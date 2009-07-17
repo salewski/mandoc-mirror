@@ -221,7 +221,6 @@ int
 mdoc_argv(struct mdoc *m, int line, int tok,
 		struct mdoc_arg **v, int *pos, char *buf)
 {
-	int		  i;
 	char		 *p, sv;
 	struct mdoc_argv tmp;
 	struct mdoc_arg	 *arg;
@@ -233,7 +232,6 @@ mdoc_argv(struct mdoc *m, int line, int tok,
 
 	/* Parse through to the first unescaped space. */
 
-	i = *pos;
 	p = &buf[++(*pos)];
 
 	assert(*pos > 0);
