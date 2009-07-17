@@ -49,13 +49,13 @@ prior macros:
 Other lines are interpreted within the current state.
 .Ed
 .\" SECTION---------------------------------------------
-.Sh INPUT ENCODING
+.Sh LANGUAGE SYNTAX
 .Nm
 documents may contain only graphable 7-bit ASCII characters, the space
 character, and, in certain circumstances, the tab character.  All
 manuals must have
 .Ux
-line termination.  
+line terminators.  
 .\" SUB-SECTION----------------------
 .Ss Comments
 Text following a
@@ -133,22 +133,36 @@ escape followed by an indicator: B (bold), I, (italic), or P and R
 (Roman, or reset).  This form is not recommended.
 .\" SUB-SECTION----------------------
 .Ss Whitespace
-In general, consecutive blocks of whitespace are pruned from input.
-These are later re-added, when applicable, by 
-.Xr mandoc 1 .
+In non-literal free-form lines, consecutive blocks of whitespace are
+pruned from input and added later in the output filter, if applicable:
+.Bd -literal -offset indent
+These     spaces   are    pruned       from    input.
+\&.Bd \-literal 
+These         are              not.
+\&.Ed
+.Ed
 .\" PARAGRAPH------------
 .Pp
-Blank lines are permitted within
-.Sq \&Bd \-literal
-or
-.Sq \&Bd \-unfilled
-contexts.  Tab characters are only acceptable when delimiting 
+In macro lines, whitespace delimits arguments and is discarded.  If
+arguments are quoted, whitespace is conditionally retained within the
+quotes.
+.\" TODO: which do and which don't?
+.\" PARAGRAPH------------
+.Pp
+Blank lines are only permitted within literal contexts, as are lines
+containing only whitespace.  Tab characters are only acceptable when
+delimiting 
 .Sq \&Bl \-column
-and in
-.Sq \&Bd \-literal
-or
-.Sq \&Bd \-unfilled
-contexts.
+or when in a literal context.
+.\" SUB-SECTION----------------------
+.Ss Quotation
+Macro arguments may be quoted with a double-quote to group
+space-delimited terms or to retain blocks of whitespace.  A quoted
+argument begins with a double-quote preceded by whitespace.  The next
+double-quote terminates the term, regardless of surrounding whitespace.
+.\" PARAGRAPH------------
+.Pp
+In free-form mode, quotes are regarded as opaque text.
 .\" SECTION---------------------------------------------
 .Sh MANUAL STRUCTURE
 Each
@@ -157,8 +171,11 @@ document must begin with a document prologue, containing, in order,
 .Sq \&Dd ,
 .Sq \&Dt ,
 and
-.Sq \&Os 
-(using this manual as an example):
+.Sq \&Os ,
+then the NAME section containing at least one
+.Sq \&Nm
+followed by 
+.Sq \&Nd :
 .Bd -literal -offset indent
 \&.Dd $\&Mdocdate$
 \&.Dt mdoc 7
@@ -167,12 +184,6 @@ and
 \&.Nm mdoc
 \&.Nd mdoc language reference
 .Ed
-.Pp
-Following these, the document body must begin with the NAME section
-containing at least one 
-.Sq \&Nm
-followed by 
-.Sq \&Nd .
 .\" PARAGRAPH------------
 .Pp
 Subsequent SYNOPSIS and DESCRIPTION sections are strongly encouraged,
@@ -181,10 +192,10 @@ but non-compulsory.
 .Sh MACRO SYNTAX
 Every line beginning with the control character 
 .Sq \.
-is processed for macros, two- or three-character semantic annotations.
+is processed for macros, two- or three-character sequences.
 .\" PARAGRAPH------------
 .Pp
-The syntax of macro depends on its classification.  In this section,
+The syntax of a macro depends on its classification.  In this section,
 .Sq \-arg 
 refers to macro arguments, which may be followed by zero or more
 .Sq parm
@@ -199,7 +210,7 @@ The
 .Em Callable
 column indicates that the macro may be called subsequent to the initial
 line-macro.  The 
-.Qq Parsable
+.Em Parsable
 column indicates whether the macro may be followed by further
 (ostensibly callable) macros.  The
 .Em Scope
@@ -504,7 +515,7 @@ macro only produces the first parameter.  This is no longer the case.
 .Sh AUTHORS
 The
 .Nm
-utility was written by 
+reference was written by 
 .An Kristaps Dzonsons Aq kristaps@kth.se .
 .\" SECTION---------------------------------------------
 .Sh CAVEATS
