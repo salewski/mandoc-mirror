@@ -59,6 +59,24 @@
 					</p>
 
 					<h2>
+					Current
+					</h2>
+
+					<table width="100%">
+					<col width="200">
+					<col>
+					<tbody>
+						<tr>
+							<td>Source archive</td>
+							<td>
+							<a href="/snapshots/mdocml.tar.gz">/snapshots/mdocml.tar.gz</a> 
+							(<a href="/snapshots/mdocml.md5">md5</a>)
+							</td>
+						</tr>
+					</tbody>
+					</table>
+
+					<h2>
 					Downstream
 					</h2>
 
@@ -85,45 +103,6 @@
 							<td>
 							<a href="http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/mandoc/"
 								class="external">src/usr.bin/mandoc</a> 
-							</td>
-						</tr>
-					</tbody>
-					</table>
-
-					<h2>
-					Current
-					</h2>
-
-					<table width="100%">
-					<col width="200">
-					<col>
-					<tbody>
-						<tr>
-							<td>Source archive</td>
-							<td>
-							<a href="/snapshots/mdocml.tar.gz">/snapshots/mdocml.tar.gz</a> 
-							(<a href="/snapshots/mdocml.md5">md5</a>)
-							</td>
-						</tr>
-						<tr>
-							<td>FreeBSD port</td>
-							<td>
-							<a href="/ports-freebsd/mdocml.tar.gz">/ports-freebsd/mdocml.tar.gz</a> 
-							(<a href="/ports-freebsd/mdocml.md5">md5</a>)
-							</td>
-						</tr>
-						<tr>
-							<td>NetBSD pkgsrc</td>
-							<td>
-							<a href="/ports-netbsd/mdocml.tar.gz">/ports-netbsd/mdocml.tar.gz</a> 
-							(<a href="/ports-netbsd/mdocml.md5">md5</a>)
-							</td>
-						</tr>
-						<tr>
-							<td>OpenBSD port</td>
-							<td>
-							<a href="/ports-openbsd/mdocml.tar.gz">/ports-openbsd/mdocml.tar.gz</a> 
-							(<a href="/ports-openbsd/mdocml.md5">md5</a>)
 							</td>
 						</tr>
 					</tbody>

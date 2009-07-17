@@ -54,25 +54,16 @@ XSLS	   = ChangeLog.xsl
 HTMLS	   = index.html ChangeLog.html
 XMLS	   = ChangeLog.xml
 STATICS	   = style.css external.png
-MD5S	   = mdocml-$(VERSION).md5 \
-	     mdocml-oport-$(VERSION).md5 \
-	     mdocml-fport-$(VERSION).md5 \
-	     mdocml-nport-$(VERSION).md5
-TARGZS	   = mdocml-$(VERSION).tar.gz \
-	     mdocml-oport-$(VERSION).tar.gz \
-	     mdocml-fport-$(VERSION).tar.gz \
-	     mdocml-nport-$(VERSION).tar.gz
+MD5S	   = mdocml-$(VERSION).md5 
+TARGZS	   = mdocml-$(VERSION).tar.gz
 MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7 mandoc_char.7 \
 	     man.7 man.3
 TEXTS	   = mandoc.1.txt mdoc.3.txt mdoc.7.txt manuals.7.txt \
 	     mandoc_char.7.txt man.7.txt man.3.txt
 BINS	   = mandoc
 CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
-	     $(TARGZS) tags $(TEXTS) ChangeLog.html $(MD5S) \
-	     $(XMLS)
-MAKEFILES  = Makefile.netbsd Makefile.openbsd Makefile.freebsd \
-	     Makefile
-INSTALL	   = $(SRCS) $(HEADS) $(MAKEFILES) DESCR $(MANS) $(SGMLS) \
+	     $(TARGZS) tags $(TEXTS) $(MD5S) $(XMLS) 
+INSTALL	   = $(SRCS) $(HEADS) Makefile DESCR $(MANS) $(SGMLS) \
 	     $(STATICS) $(DATAS) $(XSLS)
 
 all:	$(BINS)
@@ -97,18 +88,6 @@ installwww: www
 	install -m 0444 mdocml-$(VERSION).md5 $(PREFIX)/snapshots/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz
 	install -m 0444 mdocml-$(VERSION).md5 $(PREFIX)/snapshots/mdocml.md5
-	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/
-	install -m 0444 mdocml-oport-$(VERSION).tar.gz $(PREFIX)/ports-openbsd/mdocml.tar.gz
-	install -m 0444 mdocml-oport-$(VERSION).md5 $(PREFIX)/ports-openbsd/
-	install -m 0444 mdocml-oport-$(VERSION).md5 $(PREFIX)/ports-openbsd/mdocml.md5
-	install -m 0444 mdocml-nport-$(VERSION).tar.gz $(PREFIX)/ports-netbsd/
-	install -m 0444 mdocml-nport-$(VERSION).tar.gz $(PREFIX)/ports-netbsd/mdocml.tar.gz
-	install -m 0444 mdocml-nport-$(VERSION).md5 $(PREFIX)/ports-netbsd/
-	install -m 0444 mdocml-nport-$(VERSION).md5 $(PREFIX)/ports-netbsd/mdocml.md5
-	install -m 0444 mdocml-fport-$(VERSION).tar.gz $(PREFIX)/ports-freebsd/
-	install -m 0444 mdocml-fport-$(VERSION).tar.gz $(PREFIX)/ports-freebsd/mdocml.tar.gz
-	install -m 0444 mdocml-fport-$(VERSION).md5 $(PREFIX)/ports-freebsd/
-	install -m 0444 mdocml-fport-$(VERSION).md5 $(PREFIX)/ports-freebsd/mdocml.md5
 
 install:
 	mkdir -p $(BINDIR)
@@ -196,50 +175,6 @@ ChangeLog.xml:
 
 ChangeLog.html: ChangeLog.xml ChangeLog.xsl
 	xsltproc -o $@ ChangeLog.xsl ChangeLog.xml
-
-mdocml-nport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.netbsd DESCR
-	mkdir -p .dist/mdocml/
-	sed -e "s!@VERSION@!$(VERSION)!" Makefile.netbsd > \
-		.dist/mdocml/Makefile
-	md5 mdocml-$(VERSION).tar.gz > .dist/mdocml/distinfo
-	rmd160 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
-	sha1 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
-	install -m 0644 DESCR .dist/mdocml/
-	echo @comment $$NetBSD$$ > .dist/mdocml/PLIST
-	echo bin/mandoc >> .dist/mdocml/PLIST
-	echo man/man1/mandoc.1 >> .dist/mdocml/PLIST
-	echo man/man7/mdoc.7 >> .dist/mdocml/PLIST
-	( cd .dist/ && tar zcf ../$@ mdocml/ )
-	rm -rf .dist/
-
-mdocml-oport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.openbsd DESCR
-	mkdir -p .dist/mdocml/pkg
-	sed -e "s!@VERSION@!$(VERSION)!" Makefile.openbsd > \
-		.dist/mdocml/Makefile
-	md5 mdocml-$(VERSION).tar.gz > .dist/mdocml/distinfo
-	rmd160 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
-	sha1 mdocml-$(VERSION).tar.gz >> .dist/mdocml/distinfo
-	install -m 0644 DESCR .dist/mdocml/pkg/DESCR
-	echo @comment $$OpenBSD$$ > .dist/mdocml/pkg/PLIST
-	echo bin/mandoc >> .dist/mdocml/pkg/PLIST
-	echo @man man/man1/mandoc.1 >> .dist/mdocml/pkg/PLIST
-	echo @man man/man7/mdoc.7 >> .dist/mdocml/pkg/PLIST
-	( cd .dist/ && tar zcf ../$@ mdocml/ )
-	rm -rf .dist/
-
-mdocml-fport-$(VERSION).tar.gz: mdocml-$(VERSION).tar.gz Makefile.freebsd DESCR
-	mkdir -p .dist/mdocml
-	sed -e "s!@VERSION@!$(VERSION)!" Makefile.freebsd > \
-		.dist/mdocml/Makefile
-	( md5 mdocml-$(VERSION).tar.gz; \
-	  cksum -a SHA256 mdocml-$(VERSION).tar.gz; \
-	  echo -n "SIZE (mdocml-$(VERSION).tar.gz) = "; \
-	  ls -l mdocml-$(VERSION).tar.gz | awk '{print $$5}' \
-	  ) > .dist/mdocml/distinfo
-	install -m 0644 DESCR .dist/mdocml/pkg-descr
-	( echo; echo "WWW: http://mdocml.bsd.lv/") >> .dist/mdocml/pkg-descr
-	( cd .dist/ && tar zcf ../$@ mdocml/ )
-	rm -rf .dist/
 
 mdocml-$(VERSION).tar.gz: $(INSTALL)
 	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
