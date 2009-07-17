@@ -1138,6 +1138,8 @@ post_sp(POST_ARGS)
 
 	if (NULL == mdoc->last->child)
 		return(1);
+	else if ( ! eerr_eq1(mdoc))
+		return(0);
 
 	assert(MDOC_TEXT == mdoc->last->child->type);
 	buf = mdoc->last->child->string;
@@ -1150,7 +1152,7 @@ post_sp(POST_ARGS)
 		return(mdoc_nerr(mdoc, mdoc->last->child, ENUMFMT));
 
 	if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN)) ||
-			(lval > INT_MAX || lval < INT_MIN))
+			(lval > INT_MAX || lval < 0))
 		return(mdoc_nerr(mdoc, mdoc->last->child, ENUMFMT));
 
 	return(1);

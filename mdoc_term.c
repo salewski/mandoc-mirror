@@ -164,6 +164,7 @@ static	int	  termp_rs_pre(DECL_ARGS);
 static	int	  termp_rv_pre(DECL_ARGS);
 static	int	  termp_sh_pre(DECL_ARGS);
 static	int	  termp_sm_pre(DECL_ARGS);
+static	int	  termp_sp_pre(DECL_ARGS);
 static	int	  termp_sq_pre(DECL_ARGS);
 static	int	  termp_ss_pre(DECL_ARGS);
 static	int	  termp_sx_pre(DECL_ARGS);
@@ -294,7 +295,7 @@ static const struct termact termacts[MDOC_MAX] = {
 	{ termp_xx_pre, NULL }, /* Dx */ 
 	{ NULL, NULL }, /* %Q */ 
 	{ termp_br_pre, NULL }, /* br */
-	{ NULL, NULL }, /* sp */ 
+	{ termp_sp_pre, NULL }, /* sp */ 
 };
 
 #ifdef __linux__
@@ -1828,6 +1829,27 @@ termp_in_post(DECL_ARGS)
 	 */
 	if (node->next && MDOC_In != node->next->tok)
 		term_vspace(p);
+}
+
+
+/* ARGSUSED */
+static int
+termp_sp_pre(DECL_ARGS)
+{
+	int		 i, len;
+
+	if (NULL == node->child) {
+		term_vspace(p);
+		return(0);
+	}
+
+	len = atoi(node->child->string);
+	if (0 == len)
+		term_newln(p);
+	for (i = 0; i < len; i++)
+		term_vspace(p);
+
+	return(0);
 }
 
 

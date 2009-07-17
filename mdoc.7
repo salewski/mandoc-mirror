@@ -414,6 +414,7 @@ then the macro accepts an arbitrary number of arguments.
 .It \&Vt     Ta    Yes      Ta    Yes      Ta    >0
 .It \&Xr     Ta    Yes      Ta    Yes      Ta    >0, <3
 .It \&br     Ta    \&No     Ta    \&No     Ta    0
+.It \&sp     Ta    \&No     Ta    \&No     Ta    1
 .El
 .\" SECTION---------------------------------------------
 .Sh COMPATIBILITY
@@ -429,6 +430,11 @@ file re-write
 .\" PARAGRAPH------------
 .Pp
 .Bl -dash -compact
+.\" LIST-ITEM
+.It
+The 
+.Sq \&sp
+macro does not accept negative numbers.
 .\" LIST-ITEM
 .It
 Some character sequences in groff are not handled depending on escape
@@ -457,25 +463,25 @@ made historic groff
 but is a proper delimiter in this implementation.
 .\" LIST-ITEM
 .It
-.Sq \&.It \-nested
+.Sq \&It \-nested
 is assumed for all lists (it wasn't in historic groff): any list may be
 nested and
 .Sq \-enum
 lists will restart the sequence only for the sub-list.
 .\" LIST-ITEM
 .It
-.Sq \&.It \-column
+.Sq \&It \-column
 syntax where column widths may be preceded by other arguments (instead
 of proceeded) is not supported.
 .\" LIST-ITEM
 .It
 The 
-.Sq \&.At
+.Sq \&At
 macro only accepts a single parameter.
 .\" LIST-ITEM
 .It
 Some manuals use
-.Sq \&.Li
+.Sq \&Li
 incorrectly by following it with a reserved character and expecting the
 delimiter to render.  This is not supported.
 .\" LIST-ITEM
@@ -487,7 +493,7 @@ versions of groff seem to dither on this.
 .\" LIST-ITEM
 .It
 In groff, the 
-.Sq \&.Fo
+.Sq \&Fo
 macro only produces the first parameter.  This is no longer the case.
 .El
 .\" SECTION---------------------------------------------
@@ -508,69 +514,69 @@ There are many ambiguous parts of mdoc.
 .Bl -dash -compact
 .\" LIST-ITEM
 .It
-.Sq \&.Fa
+.Sq \&Fa
 should be 
-.Sq \&.Va
+.Sq \&Va
 as function arguments are variables.
 .\" LIST-ITEM
 .It
-.Sq \&.Ft
+.Sq \&Ft
 should be
-.Sq \&.Vt
+.Sq \&Vt
 as function return types are still types.  Furthermore, the
-.Sq \&.Ft
+.Sq \&Ft
 should be removed and
-.Sq \&.Fo ,
+.Sq \&Fo ,
 which ostensibly follows it, should follow the same convention as
-.Sq \&.Va .
+.Sq \&Va .
 .\" LIST-ITEM
 .It
-.Sq \&.Va
+.Sq \&Va
 should formalise that only one or two arguments are acceptable: a
 variable name and optional, preceding type.
 .\" LIST-ITEM
 .It
-.Sq \&.Fd
+.Sq \&Fd
 is ambiguous.  It's commonly used to indicate an include file in the
 synopsis section.  
-.Sq \&.In
+.Sq \&In
 should be used, instead.
 .\" LIST-ITEM
 .It
 Only the
 .Sq \-literal
 argument to
-.Sq \&.Bd
+.Sq \&Bd
 makes sense.  The remaining ones should be removed.
 .\" LIST-ITEM
 .It
 The 
-.Sq \&.Xo
+.Sq \&Xo
 and
-.Sq \&.Xc
+.Sq \&Xc
 macros should be deprecated.
 .\" LIST-ITEM
 .It
 The
-.Sq \&.Dt
+.Sq \&Dt
 macro lacks clarity.  It should be absolutely clear which title will
 render when formatting the manual page.
 .\" LIST-ITEM
 .It
 A
-.Sq \&.Lx
+.Sq \&Lx
 should be provided for Linux (\(`a la 
-.Sq \&.Ox ,
-.Sq \&.Nx 
+.Sq \&Ox ,
+.Sq \&Nx 
 etc.).
 .\" LIST-ITEM
 .It
 There's no way to refer to references in
-.Sq \&.Rs/.Re
+.Sq \&Rs/Re
 blocks.
 .\" LIST-ITEM
 .It
 The \-split and \-nosplit arguments to 
-.Sq \&.An
+.Sq \&An
 are inane.
 .El
