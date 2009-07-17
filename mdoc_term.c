@@ -130,6 +130,7 @@ static	int	  termp_ar_pre(DECL_ARGS);
 static	int	  termp_bd_pre(DECL_ARGS);
 static	int	  termp_bf_pre(DECL_ARGS);
 static	int	  termp_bq_pre(DECL_ARGS);
+static	int	  termp_br_pre(DECL_ARGS);
 static	int	  termp_brq_pre(DECL_ARGS);
 static	int	  termp_bt_pre(DECL_ARGS);
 static	int	  termp_cd_pre(DECL_ARGS);
@@ -292,6 +293,8 @@ static const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* En */ 
 	{ termp_xx_pre, NULL }, /* Dx */ 
 	{ NULL, NULL }, /* %Q */ 
+	{ termp_br_pre, NULL }, /* br */
+	{ NULL, NULL }, /* sp */ 
 };
 
 #ifdef __linux__
@@ -1825,6 +1828,16 @@ termp_in_post(DECL_ARGS)
 	 */
 	if (node->next && MDOC_In != node->next->tok)
 		term_vspace(p);
+}
+
+
+/* ARGSUSED */
+static int
+termp_br_pre(DECL_ARGS)
+{
+
+	term_newln(p);
+	return(1);
 }
 
 

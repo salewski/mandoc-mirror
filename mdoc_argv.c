@@ -208,6 +208,8 @@ static	int mdoc_argflags[MDOC_MAX] = {
 	0, /* En */
 	0, /* Dx */
 	ARGS_QUOTED, /* %Q */
+	0, /* br */
+	0, /* sp */
 };
 
 

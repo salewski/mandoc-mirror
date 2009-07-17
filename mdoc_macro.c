@@ -172,6 +172,8 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ obsolete, 0 }, /* En */
 	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* Dx */
 	{ in_line_eoln, 0 }, /* %Q */
+	{ in_line_eoln, 0 }, /* br */
+	{ in_line_eoln, 0 }, /* sp */
 };
 
 const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;

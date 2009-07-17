@@ -147,7 +147,9 @@
 #define	MDOC_En	 	 115
 #define	MDOC_Dx	 	 116
 #define	MDOC__Q	 	 117
-#define	MDOC_MAX	 118
+#define MDOC_br		 118
+#define MDOC_sp		 119
+#define	MDOC_MAX	 120
 
 /* What follows is a list of ALL possible macro arguments. */
 

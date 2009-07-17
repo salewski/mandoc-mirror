@@ -172,6 +172,8 @@ const	struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* En */
 	{ NULL, NULL }, /* Dx */
 	{ NULL, NULL }, /* %Q */
+	{ NULL, NULL }, /* br */
+	{ NULL, NULL }, /* sp */
 };
 
 static	int	  concat(struct mdoc *, const struct mdoc_node *, 
