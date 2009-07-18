@@ -131,6 +131,11 @@ also be text-decorated using the
 .Sq \ef
 escape followed by an indicator: B (bold), I, (italic), or P and R
 (Roman, or reset).  This form is not recommended.
+.Pp
+Lastly, a standalone double-quote may be produced in a macro line by
+using two consecutive double-quotes within a quoted literal.  See
+.Sx Quotation
+for details.
 .\" SUB-SECTION----------------------
 .Ss Whitespace
 In non-literal free-form lines, consecutive blocks of whitespace are
@@ -144,9 +149,7 @@ These         are              not.
 .\" PARAGRAPH------------
 .Pp
 In macro lines, whitespace delimits arguments and is discarded.  If
-arguments are quoted, whitespace is conditionally retained within the
-quotes.
-.\" TODO: which do and which don't?
+arguments are quoted, whitespace within the quotes is retained.
 .\" PARAGRAPH------------
 .Pp
 Blank lines are only permitted within literal contexts, as are lines
@@ -159,7 +162,32 @@ or when in a literal context.
 Macro arguments may be quoted with a double-quote to group
 space-delimited terms or to retain blocks of whitespace.  A quoted
 argument begins with a double-quote preceded by whitespace.  The next
-double-quote terminates the term, regardless of surrounding whitespace.
+double-quote that is 
+.Em
+preceded by a double-quote terminates the term, regardless of
+surrounding whitespace.  Thus, the following construction produces 
+.Sq "a""b" ,
+since, as mentioned in
+.Sx Special Characters ,
+two consecutive double-quotes in a quoted literal produce a standalone
+double-quote:
+.Bd -literal -offset indent
+\&.Em "a""""b"
+.Ed
+.\" PARAGRAPH------------
+.Pp
+This produces tokens 
+.Sq a" ,
+.Sq b c ,
+.Sq de ,
+and
+.Sq fg" .
+Note that any quoted term, be it argument or macro, is indiscriminately
+considered literal text.  Thus, the following produces 
+.Sq \&Em a :
+.Bd -literal -offset indent
+\&.Em "Em a"
+.Ed
 .\" PARAGRAPH------------
 .Pp
 In free-form mode, quotes are regarded as opaque text.
