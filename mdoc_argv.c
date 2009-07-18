@@ -501,8 +501,9 @@ args(struct mdoc *m, int line, int *pos,
 		}
 
 		if (0 == buf[*pos]) {
-			(void)mdoc_perr(m, line, *pos, EQUOTTERM);
-			return(ARGS_ERROR);
+			if ( ! mdoc_pwarn(m, line, *pos, EQUOTTERM))
+				return(ARGS_ERROR);
+			return(ARGS_QWORD);
 		}
 
 		buf[(*pos)++] = 0;
