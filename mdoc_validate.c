@@ -862,7 +862,7 @@ post_bf(POST_ARGS)
 		return(1);
 	else if (0 == strcmp(p, "Li"))
 		return(1);
-	else if (0 == strcmp(p, "Sm"))
+	else if (0 == strcmp(p, "Sy"))
 		return(1);
 
 	return(mdoc_nerr(mdoc, head, EFONT));
