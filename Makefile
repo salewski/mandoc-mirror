@@ -63,8 +63,8 @@ TEXTS	   = mandoc.1.txt mdoc.3.txt mdoc.7.txt manuals.7.txt \
 BINS	   = mandoc
 CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
 	     $(TARGZS) tags $(TEXTS) $(MD5S) $(XMLS) 
-INSTALL	   = $(SRCS) $(HEADS) Makefile DESCR $(MANS) $(SGMLS) \
-	     $(STATICS) $(DATAS) $(XSLS)
+INSTALL	   = $(SRCS) $(HEADS) Makefile $(MANS) $(SGMLS) $(STATICS) \
+	     $(DATAS) $(XSLS)
 
 all:	$(BINS)
 
