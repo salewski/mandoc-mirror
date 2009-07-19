@@ -171,7 +171,7 @@ mdoc_action.o: mdoc_action.c libmdoc.h
 libmdoc.h: mdoc.h
 
 ChangeLog.xml:
-	cvs2cl --xml --xml-encoding iso-8859-15 --noxmlns -f $@
+	cvs2cl --xml --xml-encoding iso-8859-15 -t --noxmlns -f $@
 
 ChangeLog.html: ChangeLog.xml ChangeLog.xsl
 	xsltproc -o $@ ChangeLog.xsl ChangeLog.xml

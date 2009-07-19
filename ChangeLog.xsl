@@ -27,6 +27,10 @@
 										<xsl:value-of select="revision"/>
 										<xsl:text>, Status: </xsl:text>
 										<xsl:value-of select="cvsstate"/>
+										<xsl:if test="tag">
+											<xsl:text>, Tag: </xsl:text>
+											<xsl:value-of select="tag" />
+										</xsl:if>
 									</span>
 								</li>
 							</xsl:for-each>
