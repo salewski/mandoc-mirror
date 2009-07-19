@@ -327,6 +327,14 @@ mdoc_argv_free(struct mdoc_arg *p)
 
 
 int
+mdoc_zargs(struct mdoc *m, int line, int *pos, char *buf, char **v)
+{
+
+	return(args(m, line, pos, buf, 0, v));
+}
+
+
+int
 mdoc_args(struct mdoc *m, int line, 
 		int *pos, char *buf, int tok, char **v)
 {

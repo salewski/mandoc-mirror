@@ -174,6 +174,8 @@ int		  mdoc_argv(struct mdoc *, int, int,
 void		  mdoc_argv_free(struct mdoc_arg *);
 int		  mdoc_args(struct mdoc *, int,
 			int *, char *, int, char **);
+int		  mdoc_zargs(struct mdoc *, int, 
+			int *, char *, char **);
 #define	ARGS_ERROR	(-1)
 #define	ARGS_EOLN	(0)
 #define	ARGS_WORD	(1)

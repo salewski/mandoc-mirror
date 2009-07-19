@@ -204,7 +204,10 @@ term_isopendelim(const char *p)
  *  possible).
  *
  *  FIXME: newline breaks occur (in groff) also occur when a single
- *  space follows a NOBREAK!
+ *  space follows a NOBREAK (try `Bl -tag')
+ *
+ *  FIXME: there's a newline error where a `Bl -diag' will have a
+ *  trailing newline if the line is exactly 73 chars long.
  */
 void
 term_flushln(struct termp *p)
