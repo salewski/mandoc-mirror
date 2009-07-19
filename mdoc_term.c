@@ -364,6 +364,13 @@ print_node(DECL_ARGS)
 	npair.flag = 0;
 	npair.count = 0;
 
+	/*
+	 * Note on termpair.  This allows a pre function to set a termp
+	 * flag that is automatically unset after the body, but before
+	 * the post function.  Thus, if a pre uses a termpair flag, it
+	 * must be reapplied in the post for use.
+	 */
+
 	if (MDOC_TEXT != node->type) {
 		if (termacts[node->tok].pre)
 			if ( ! (*termacts[node->tok].pre)(p, &npair, meta, node))
@@ -378,6 +385,8 @@ print_node(DECL_ARGS)
 	if (dochild && node->child)
 		print_body(p, &npair, meta, node->child);
 
+	p->flags &= ~npair.flag;
+
 	/* Post-processing. */
 
 	if (MDOC_TEXT != node->type)
@@ -386,7 +395,6 @@ print_node(DECL_ARGS)
 
 	p->offset = offset;
 	p->rmargin = rmargin;
-	p->flags &= ~npair.flag;
 }
 
 
@@ -1814,8 +1822,9 @@ static void
 termp_in_post(DECL_ARGS)
 {
 
-	p->flags |= TERMP_NOSPACE;
+	p->flags |= TERMP_NOSPACE | ttypes[TTYPE_INCLUDE];
 	term_word(p, ">");
+	p->flags &= ~ttypes[TTYPE_INCLUDE];
 
 	if (SEC_SYNOPSIS != node->sec)
 		return;
