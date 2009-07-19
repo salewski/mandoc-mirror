@@ -662,13 +662,13 @@ blk_exp_close(MACRO_PROT_ARGS)
 	}
 
 	if ( ! (MDOC_CALLABLE & mdoc_macros[tok].flags)) {
-		if (0 == buf[*pos]) {
-			if ( ! rew_subblock(MDOC_BODY, mdoc, 
-						tok, line, ppos))
+		if (buf[*pos]) 
+			if ( ! mdoc_pwarn(mdoc, line, ppos, ENOLINE))
 				return(0);
-			return(rew_expblock(mdoc, tok, line, ppos));
-		}
-		return(mdoc_perr(mdoc, line, ppos, ENOLINE));
+
+		if ( ! rew_subblock(MDOC_BODY, mdoc, tok, line, ppos))
+			return(0);
+		return(rew_expblock(mdoc, tok, line, ppos));
 	}
 
 	if ( ! rew_subblock(MDOC_BODY, mdoc, tok, line, ppos))
