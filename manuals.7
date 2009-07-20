@@ -13,7 +13,7 @@
 .\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-.\" 
+.\"
 .Dd $Mdocdate$
 .Dt MANUALS 7
 .Os
@@ -28,15 +28,15 @@
 .Pp
 A system component's documentation describes the utility of that
 component, whether it's a device driver, an executable or, most
-importantly, a game.  
+importantly, a game.
 .Pp
-This document serves as a tutorial to writing 
-.Ux 
+This document serves as a tutorial to writing
+.Ux
 documentation
 .Pq Dq manuals .
 .\" SECTION
 .Sh ENVIRONMENT
-First, copy over the manual template from 
+First, copy over the manual template from
 .Pa /usr/share/misc/mdoc.template
 into your source directory.
 .Pp
@@ -66,7 +66,7 @@ file and wire protocol formats
 games
 .It 7
 tutorials, documents and papers
-.It 8 
+.It 8
 administrator utilities
 .It 9
 in-kernel routines
@@ -95,7 +95,7 @@ other manuals by that same name before committing:
 .Pp
 .Dl % apropos myname
 .Pp
-Manual files are named 
+Manual files are named
 .Pa myname.mysection ,
 such as
 .Pa manuals.7
@@ -112,13 +112,13 @@ You may spell-check your work as follows:
 .Pp
 .Dl % deroff name.1 | spell
 .Pp
-If 
+If
 .Xr ispell 1
 is installed, it has a special mode for manuals:
 .Pp
 .Dl % ispell \-n name.1
 .Pp
-Use 
+Use
 .Xr cvs 1
 or
 .Xr rcs 1
@@ -128,7 +128,7 @@ your document's date, use the following RCS tag for the date macro:
 .Dl \&.Dd $Mdocdate$
 .\" SUBSECTION
 .Ss Viewing
-mdoc documents may be paged to your terminal with 
+mdoc documents may be paged to your terminal with
 .Xr mandoc 1 .
 If you plan on distributing your work to systems without this tool,
 check it against
@@ -139,7 +139,7 @@ check it against
 .Ed
 .\" SUBSECTION
 .Ss Automation
-Consider adding your mdoc documents to 
+Consider adding your mdoc documents to
 .Xr make 1
 Makefiles in order to automatically check your input:
 .Bd -literal -offset indent
@@ -155,8 +155,8 @@ Your manual must have a license.  It should be listed at the start of
 your document, just as in source code.
 .\" SECTION
 .Sh COMPOSITION
-Manuals should 
-.Em always 
+Manuals should
+.Em always
 be written in the
 .Xr mdoc 7
 formatting language.
@@ -167,7 +167,7 @@ Open the template you've copied into
 and begin editing.
 .\" SUBSECTION
 .Ss Language
-.Bl -enum 
+.Bl -enum
 .It
 Use clear, concise language.  Favour simplicity.
 .It
@@ -187,15 +187,15 @@ symbols and so on), use the escapes dictated in
 .Ss Style
 The structure of the mdoc language makes it very hard to have any
 particular format style.  Keep your lines under 72 characters in length.
-If you must have long option lines, use 
+If you must have long option lines, use
 .Sq \&Oo/Oc .
 The same goes for function prototypes.
 .Em \&Do not
-use 
+use
 .Sq \&Xo/Xc .
 Find another way to structure your line.
 .\" SUBSECTION
-.Ss References 
+.Ss References
 Other components may be referenced with the
 .Sq \&Xr
 and
