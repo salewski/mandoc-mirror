@@ -672,6 +672,9 @@ fmt_block_vspace(struct termp *p,
 
 	if (arg_hasattr(MDOC_Compact, bl))
 		return(1);
+	/* XXX - not documented! */
+	else if (arg_hasattr(MDOC_Column, bl))
+		return(1);
 
 	for (n = node; n; n = n->parent) {
 		if (MDOC_BLOCK != n->type)
