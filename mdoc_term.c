@@ -798,6 +798,8 @@ termp_it_pre(DECL_ARGS)
 		if (0 == width)
 			width = 8;
 		break;
+	case (MDOC_Column):
+		/* FALLTHROUGH */
 	case (MDOC_Tag):
 		if (0 == width)
 			width = 10;
@@ -916,12 +918,14 @@ termp_it_pre(DECL_ARGS)
 	case (MDOC_Hang):
 		/* FALLTHROUGH */
 	case (MDOC_Tag):
+		assert(width);
 		if (MDOC_HEAD == node->type)
 			p->rmargin = p->offset + width;
 		else 
 			p->offset += width;
 		break;
 	case (MDOC_Column):
+		assert(width);
 		p->rmargin = p->offset + width;
 		break;
 	default:
