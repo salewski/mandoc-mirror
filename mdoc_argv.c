@@ -376,7 +376,7 @@ static int
 args(struct mdoc *m, int line, int *pos, 
 		char *buf, int fl, char **v)
 {
-	int		  i, psv;
+	int		  i;
 	char		 *p, *pp;
 
 	assert(*pos);
@@ -421,8 +421,6 @@ args(struct mdoc *m, int line, int *pos,
 	 */
 
 	if (ARGS_TABSEP & fl) {
-		psv = *pos;
-
 		/* Scan ahead to tab (can't be escaped). */
 		p = strchr(*v, '\t');
 
@@ -436,6 +434,10 @@ args(struct mdoc *m, int line, int *pos,
 				break;
 		}
 
+		/* 
+		 * Adjust new-buffer position to be beyond delimiter
+		 * mark (e.g., Ta -> end + 2).
+		 */
 		if (p && pp) {
 			*pos += pp < p ? 2 : 1;
 			p = pp < p ? pp : p;
@@ -447,15 +449,14 @@ args(struct mdoc *m, int line, int *pos,
 		} else
 			p = strchr(*v, 0);
 
+		/* Whitespace check for eoln case... */
 		if (0 == *p && ' ' == *(p - 1))
 			if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
 				return(ARGS_ERROR);
 
-		*p = 0;
 		*pos += (int)(p - *v);
 
 		/* Strip delimiter's preceding whitespace. */
-
 		pp = p - 1;
 		while (pp > *v && ' ' == *pp) {
 			if (pp > *v && '\\' == *(pp - 1))
@@ -465,7 +466,6 @@ args(struct mdoc *m, int line, int *pos,
 		*(pp + 1) = 0;
 
 		/* Strip delimiter's proceeding whitespace. */
-
 		for (pp = &buf[*pos]; ' ' == *pp; pp++, (*pos)++)
 			/* Skip ahead. */ ;
 
