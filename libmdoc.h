@@ -43,7 +43,6 @@ struct	mdoc {
 
 enum	merr {
 	ETAILWS = 0,
-	ECOLEMPTY,
 	EQUOTPARM,
 	EQUOTTERM,
 	EMALLOC,

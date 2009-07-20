@@ -25,7 +25,6 @@
 
 const	char *const __mdoc_merrnames[MERRMAX] = {		 
 	"trailing whitespace", /* ETAILWS */
-	"empty last list column", /* ECOLEMPTY */
 	"unexpected quoted parameter", /* EQUOTPARM */
 	"unterminated quoted parameter", /* EQUOTTERM */
 	"system: malloc error", /* EMALLOC */

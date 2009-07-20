@@ -376,7 +376,7 @@ static int
 args(struct mdoc *m, int line, int *pos, 
 		char *buf, int fl, char **v)
 {
-	int		  i;
+	int		  i, psv;
 	char		 *p, *pp;
 
 	assert(*pos);
@@ -421,7 +421,9 @@ args(struct mdoc *m, int line, int *pos,
 	 */
 
 	if (ARGS_TABSEP & fl) {
-		/* Scan ahead to unescaped tab. */
+		psv = *pos;
+
+		/* Scan ahead to tab (can't be escaped). */
 		p = strchr(*v, '\t');
 
 		/* Scan ahead to unescaped `Ta'. */
@@ -434,59 +436,38 @@ args(struct mdoc *m, int line, int *pos,
 				break;
 		}
 
-		/* Choose delimiter tab/Ta. */
-		if (p && pp)
-			p = (p < pp ? p : pp);
-		else if ( ! p && pp)
+		if (p && pp) {
+			*pos += pp < p ? 2 : 1;
+			p = pp < p ? pp : p;
+		} else if (p && ! pp) {
+			*pos += 1;
+		} else if (pp && ! p) {
 			p = pp;
+			*pos += 2;
+		} else
+			p = strchr(*v, 0);
+
+		if (0 == *p && ' ' == *(p - 1))
+			if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
+				return(ARGS_ERROR);
+
+		*p = 0;
+		*pos += (int)(p - *v);
 
 		/* Strip delimiter's preceding whitespace. */
-		/* FIXME: escaped whitespace? */
-		if (p && p > *v) {
-			pp = p - 1;
-			while (pp > *v && ' ' == *pp)
-				pp--;
-			if (pp == *v && ' ' == *pp) 
-				*pp = 0;
-			else if (' ' == *pp)
-				*(pp + 1) = 0;
+
+		pp = p - 1;
+		while (pp > *v && ' ' == *pp) {
+			if (pp > *v && '\\' == *(pp - 1))
+				break;
+			pp--;
 		}
+		*(pp + 1) = 0;
 
-		/* ...in- and proceding whitespace. */
-		if (p && ('\t' != *p)) {
-			*p++ = 0;
-			*p++ = 0;
-		} else if (p)
-			*p++ = 0;
+		/* Strip delimiter's proceeding whitespace. */
 
-		if (p) {
-			while (' ' == *p)
-				p++;
-			if (0 != *p)
-				*(p - 1) = 0;
-			*pos += (int)(p - *v);
-		} 
-
-		/* Some warnings, if applicable. */
-		if (p && 0 == *p)
-			if ( ! mdoc_pwarn(m, line, *pos, ECOLEMPTY))
-				return(ARGS_ERROR);
-		if (p && 0 == *p && p > *v && ' ' == *(p - 1))
-			if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
-				return(ARGS_ERROR);
-
-		/* Non-eoln case returns now. */
-		if (p)
-			return(ARGS_PHRASE);
-
-		/* Configure the eoln case, too. */
-		p = strchr(*v, 0);
-		assert(p);
-
-		if (p > *v && ' ' == *(p - 1))
-			if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
-				return(ARGS_ERROR);
-		*pos += (int)(p - *v);
+		for (pp = &buf[*pos]; ' ' == *pp; pp++, (*pos)++)
+			/* Skip ahead. */ ;
 
 		return(ARGS_PHRASE);
 	} 
