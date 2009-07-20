@@ -122,24 +122,6 @@
 							<a href="/snapshots/">/snapshots/</a> 
 							</td>
 						</tr>
-						<tr>
-							<td>FreeBSD port</td>
-							<td>
-							<a href="/ports-freebsd/">/ports-freebsd/</a> 
-							</td>
-						</tr>
-						<tr>
-							<td>NetBSD pkgsrc</td>
-							<td>
-							<a href="/ports-netbsd/">/ports-netbsd/</a> 
-							</td>
-						</tr>
-						<tr>
-							<td>OpenBSD port</td>
-							<td>
-							<a href="/ports-openbsd/">/ports-openbsd/</a> 
-							</td>
-						</tr>
 					</tbody>
 					</table>
 				</td>
