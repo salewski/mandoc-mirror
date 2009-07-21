@@ -308,7 +308,7 @@ static	int	  arg_getattr(int, const struct mdoc_node *);
 static	size_t	  arg_offset(const struct mdoc_argv *);
 static	size_t	  arg_width(const struct mdoc_argv *, int);
 static	int	  arg_listtype(const struct mdoc_node *);
-static	int	  fmt_block_vspace(struct termp *,
+static	void	  fmt_block_vspace(struct termp *,
 			const struct mdoc_node *,
 			const struct mdoc_node *);
 static	void  	  print_node(DECL_ARGS);
@@ -659,7 +659,7 @@ arg_getattrs(const int *keys, int *vals,
 
 
 /* ARGSUSED */
-static int
+static void
 fmt_block_vspace(struct termp *p, 
 		const struct mdoc_node *bl, 
 		const struct mdoc_node *node)
@@ -669,25 +669,35 @@ fmt_block_vspace(struct termp *p,
 	term_newln(p);
 
 	if (arg_hasattr(MDOC_Compact, bl))
-		return(1);
-	/* XXX - not documented! */
-	else if (arg_hasattr(MDOC_Column, bl))
-		return(1);
+		return;
+
+	/*
+	 * Search through our prior nodes.  If we follow a `Ss' or `Sh',
+	 * then don't vspace.
+	 */
 
 	for (n = node; n; n = n->parent) {
 		if (MDOC_BLOCK != n->type)
 			continue;
 		if (MDOC_Ss == n->tok)
-			break;
+			return;
 		if (MDOC_Sh == n->tok)
-			break;
+			return;
 		if (NULL == n->prev)
 			continue;
-		term_vspace(p);
 		break;
 	}
 
-	return(1);
+	/* 
+	 * XXX - not documented: a `-column' does not ever assert
+	 * vertical space within the list.
+	 */
+
+	if (arg_hasattr(MDOC_Column, bl))
+		if (node->prev && MDOC_It == node->prev->tok)
+			return;
+
+	term_vspace(p);
 }
 
 
@@ -727,8 +737,10 @@ termp_it_pre(DECL_ARGS)
 	int		        i, type, keys[3], vals[3];
 	size_t		        width, offset;
 
-	if (MDOC_BLOCK == node->type)
-		return(fmt_block_vspace(p, node->parent->parent, node));
+	if (MDOC_BLOCK == node->type) {
+		fmt_block_vspace(p, node->parent->parent, node);
+		return(1);
+	}
 
 	bl = node->parent->parent->parent;
 
@@ -1531,9 +1543,10 @@ termp_bd_pre(DECL_ARGS)
 	 * line.  Blank lines are allowed.
 	 */
 
-	if (MDOC_BLOCK == node->type)
-		return(fmt_block_vspace(p, node, node));
-	else if (MDOC_BODY != node->type)
+	if (MDOC_BLOCK == node->type) {
+		fmt_block_vspace(p, node, node);
+		return(1);
+	} else if (MDOC_BODY != node->type)
 		return(1);
 
 	/* FIXME: display type should be mandated by parser. */
