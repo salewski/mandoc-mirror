@@ -812,17 +812,21 @@ termp_it_pre(DECL_ARGS)
 	 * while diagonal bodies need two.
 	 */
 
+	p->flags |= TERMP_NOSPACE;
+
 	switch (type) {
+	case (MDOC_Diag):
+		term_word(p, "\\ \\ ");
+		break;
 	case (MDOC_Inset):
 		if (MDOC_BODY == node->type) 
-			p->flags &= ~TERMP_NOSPACE;
-		else
-			p->flags |= TERMP_NOSPACE;
+			term_word(p, "\\ ");
 		break;
 	default:
-		p->flags |= TERMP_NOSPACE;
 		break;
 	}
+
+	p->flags |= TERMP_NOSPACE;
 
 	/*
 	 * Style flags.  Diagnostic heads need TTYPE_DIAG.
@@ -869,7 +873,7 @@ termp_it_pre(DECL_ARGS)
 		break;
 	case (MDOC_Tag):
 		if (MDOC_HEAD == node->type)
-			p->flags |= TERMP_NOBREAK;
+			p->flags |= TERMP_NOBREAK | TERMP_TWOSPACE;
 		else
 			p->flags |= TERMP_NOLPAD;
 
@@ -1009,9 +1013,6 @@ termp_it_post(DECL_ARGS)
 	assert(-1 != type);
 
 	switch (type) {
-	case (MDOC_Diag):
-		term_word(p, "\\ ");
-		/* FALLTHROUGH */
 	case (MDOC_Item):
 		/* FALLTHROUGH */
 	case (MDOC_Inset):
