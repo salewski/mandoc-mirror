@@ -47,7 +47,7 @@ struct	termp {
 #define	TERMP_NONOSPACE	 (1 << 7)	/* No space (no autounset). */
 #define	TERMP_DANGLE	 (1 << 8)	/* See term_flushln(). */
 #define	TERMP_HANG	 (1 << 9)	/* See term_flushln(). */
-#define	TERMP_TWOSPACE	 (1 << 9)	/* See term_flushln(). */
+#define	TERMP_TWOSPACE	 (1 << 10)	/* See term_flushln(). */
 	char		 *buf;		/* Output buffer. */
 	enum termenc	  enc;		/* Type of encoding. */
 	void		 *symtab;	/* Encoded-symbol table. */
