@@ -130,7 +130,7 @@ replaced on output by a single space.  Thus, if you wish to preserve
 multiple spaces, they must be space-escaped
 .Sq \e\
 or used in a literal display mode, e.g.,
-.Sq \&.Bd \-literal
+.Sq \&Bd \-literal
 in
 .Xr mdoc 7 .
 .\" SUB-SECTION
@@ -157,9 +157,9 @@ A third option,
 .Fl m Ns Ar andoc ,
 which is also the default, determines encoding on-the-fly: if the first
 non-comment macro is
-.Sq \&.Dd
+.Sq \&Dd
 or
-.Sq \&.Dt ,
+.Sq \&Dt ,
 the
 .Xr mdoc 7
 parser is used; otherwise, the
@@ -254,13 +254,22 @@ compatibility with
 .Pp
 .Bl -bullet -compact
 .It
+In 
+.Xr groff 1 ,
+the
+.Sq \&Pa
+macro does not underline when under a
+.Sq \&It .
+This behaves correctly in
+.Nm .
+.It
 A list or display following
-.Sq \&.Ss
+.Sq \&Ss
 does not assert a prior vertical break, just as it doesn't with
-.Sq \&.Sh .
+.Sq \&Sh .
 .It
 The \-literal and \-unfilled
-.Sq \&.Bd
+.Sq \&Bd
 displays types are synonyms, as are \-filled and \-ragged.
 .It
 Words aren't hyphenated.
