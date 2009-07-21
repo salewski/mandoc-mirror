@@ -748,6 +748,8 @@ in_line(MACRO_PROT_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Lk):
 		/* FALLTHROUGH */
+	case (MDOC_Pa):
+		/* FALLTHROUGH */
 	case (MDOC_Ar):
 		nc = 1;
 		break;
