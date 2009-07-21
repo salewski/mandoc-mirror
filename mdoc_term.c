@@ -50,8 +50,9 @@
 #define	TTYPE_LINK_ANCHOR 19
 #define	TTYPE_LINK_TEXT	  20
 #define	TTYPE_REF_JOURNAL 21
-#define	TTYPE_LIST	  22
-#define	TTYPE_NMAX	  23
+#define	TTYPE_REF_TITLE	  22
+#define	TTYPE_LIST	  23
+#define	TTYPE_NMAX	  24
 
 const	int ttypes[TTYPE_NMAX] = {
 	TERMP_BOLD, 		/* TTYPE_PROG */
@@ -76,6 +77,7 @@ const	int ttypes[TTYPE_NMAX] = {
 	TERMP_UNDER, 		/* TTYPE_LINK_ANCHOR */
 	TERMP_BOLD,	 	/* TTYPE_LINK_TEXT */
 	TERMP_UNDER,	 	/* TTYPE_REF_JOURNAL */
+	TERMP_UNDER,	 	/* TTYPE_REF_TITLE */
 	TERMP_BOLD		/* TTYPE_LIST */
 };
 
@@ -96,7 +98,6 @@ struct	termact {
 };
 
 static	void	  termp____post(DECL_ARGS);
-static	void	  termp__t_post(DECL_ARGS);
 static	void	  termp_aq_post(DECL_ARGS);
 static	void	  termp_bd_post(DECL_ARGS);
 static	void	  termp_bl_post(DECL_ARGS);
@@ -224,7 +225,7 @@ static const struct termact termacts[MDOC_MAX] = {
 	{ NULL, termp____post }, /* %O */
 	{ NULL, termp____post }, /* %P */
 	{ NULL, termp____post }, /* %R */
-	{ termp__t_pre, termp__t_post }, /* %T */
+	{ termp__t_pre, termp____post }, /* %T */
 	{ NULL, termp____post }, /* %V */
 	{ NULL, NULL }, /* Ac */
 	{ termp_aq_pre, termp_aq_post }, /* Ao */
@@ -2105,20 +2106,8 @@ static int
 termp__t_pre(DECL_ARGS)
 {
 
-	term_word(p, "\"");
-	p->flags |= TERMP_NOSPACE;
+	pair->flag |= ttypes[TTYPE_REF_TITLE];
 	return(1);
-}
-
-
-/* ARGSUSED */
-static void
-termp__t_post(DECL_ARGS)
-{
-
-	p->flags |= TERMP_NOSPACE;
-	term_word(p, "\"");
-	termp____post(p, pair, meta, node);
 }
 
 
