@@ -27,7 +27,6 @@
 #include "mdoc.h"
 
 /* FIXME: macro arguments can be escaped. */
-/* FIXME: support more offset/width tokens. */
 
 #define	TTYPE_PROG	  0
 #define	TTYPE_CMD_FLAG	  1
@@ -927,6 +926,13 @@ termp_it_pre(DECL_ARGS)
 	case (MDOC_Column):
 		assert(width);
 		p->rmargin = p->offset + width;
+		/* 
+		 * XXX - this behaviour is not documented: the
+		 * right-most column is filled to the right margin.
+		 */
+		if (MDOC_HEAD == node->type &&
+				MDOC_BODY == node->next->type)
+			p->rmargin = p->maxrmargin;
 		break;
 	default:
 		break;
