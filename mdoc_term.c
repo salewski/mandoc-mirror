@@ -689,13 +689,24 @@ fmt_block_vspace(struct termp *p,
 	}
 
 	/* 
-	 * XXX - not documented: a `-column' does not ever assert
-	 * vertical space within the list.
+	 * XXX - not documented: a `-column' does not ever assert vspace
+	 * within the list.
 	 */
 
 	if (arg_hasattr(MDOC_Column, bl))
 		if (node->prev && MDOC_It == node->prev->tok)
 			return;
+
+	/*
+	 * XXX - not documented: a `-diag' without a body does not
+	 * assert a vspace prior to the next element. 
+	 */
+	if (arg_hasattr(MDOC_Diag, bl)) 
+		if (node->prev && MDOC_It == node->prev->tok) {
+			assert(node->prev->body);
+			if (NULL == node->prev->body->child)
+				return;
+		}
 
 	term_vspace(p);
 }
