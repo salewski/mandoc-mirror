@@ -1014,6 +1014,8 @@ termp_it_post(DECL_ARGS)
 	switch (type) {
 	case (MDOC_Item):
 		/* FALLTHROUGH */
+	case (MDOC_Diag):
+		/* FALLTHROUGH */
 	case (MDOC_Inset):
 		if (MDOC_BODY == node->type)
 			term_flushln(p);
