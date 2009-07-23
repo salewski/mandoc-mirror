@@ -227,8 +227,13 @@ term_flushln(struct termp *p)
 	 */
 
 	assert(p->offset < p->rmargin);
-	maxvis = p->rmargin - p->offset - overstep;
-	mmax = p->maxrmargin - p->offset - overstep;
+	assert((int)(p->rmargin - p->offset) - overstep > 0);
+
+	maxvis = /* LINTED */
+		p->rmargin - p->offset - overstep;
+	mmax = /* LINTED */
+		p->maxrmargin - p->offset - overstep;
+
 	bp = TERMP_NOBREAK & p->flags ? mmax : maxvis;
 	vis = 0;
 	overstep = 0;
@@ -309,30 +314,36 @@ term_flushln(struct termp *p)
 	}
 
 	if (TERMP_HANG & p->flags) {
-
 		/* We need one blank after the tag. */
-		overstep = vis - maxvis + 1;
+		overstep = /* LINTED */
+			vis - maxvis + 1;
 
 		/*
 		 * Behave exactly the same way as groff:
-		 * If we have overstepped the margin, temporarily move it
-		 * to the right and flag the rest of the line to be shorter.
+		 * If we have overstepped the margin, temporarily move
+		 * it to the right and flag the rest of the line to be
+		 * shorter.
 		 * If we landed right at the margin, be happy.
-		 * If we are one step before the margin, temporarily move it
-		 * one step LEFT and flag the rest of the line to be longer.
+		 * If we are one step before the margin, temporarily
+		 * move it one step LEFT and flag the rest of the line
+		 * to be longer.
 		 */
-		if (overstep >= -1)
+		if (overstep >= -1) {
+			assert((int)maxvis + overstep >= 0);
+			/* LINTED */
 			maxvis += overstep;
-		else
+		} else
 			overstep = 0;
 
 	} else if (TERMP_DANGLE & p->flags)
 		return;
 
-	if (maxvis > vis + ((TERMP_TWOSPACE & p->flags) ? 1 : 0))  /* pad */
+	/* Right-pad. */
+	if (maxvis > vis + /* LINTED */
+			((TERMP_TWOSPACE & p->flags) ? 1 : 0))  
 		for ( ; vis < maxvis; vis++)
 			putchar(' ');
-	else {	/* break */
+	else {	/* ...or newline break. */
 		putchar('\n');
 		for (i = 0; i < (int)p->rmargin; i++)
 			putchar(' ');
