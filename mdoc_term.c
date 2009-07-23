@@ -670,7 +670,7 @@ fmt_block_vspace(struct termp *p,
 
 	term_newln(p);
 
-	if (arg_hasattr(MDOC_Compact, bl))
+	if (MDOC_Bl == bl->tok && arg_hasattr(MDOC_Compact, bl))
 		return;
 
 	/*
@@ -695,7 +695,7 @@ fmt_block_vspace(struct termp *p,
 	 * within the list.
 	 */
 
-	if (arg_hasattr(MDOC_Column, bl))
+	if (MDOC_Bl == bl->tok && arg_hasattr(MDOC_Column, bl))
 		if (node->prev && MDOC_It == node->prev->tok)
 			return;
 
@@ -703,7 +703,7 @@ fmt_block_vspace(struct termp *p,
 	 * XXX - not documented: a `-diag' without a body does not
 	 * assert a vspace prior to the next element. 
 	 */
-	if (arg_hasattr(MDOC_Diag, bl)) 
+	if (MDOC_Bl == bl->tok && arg_hasattr(MDOC_Diag, bl)) 
 		if (node->prev && MDOC_It == node->prev->tok) {
 			assert(node->prev->body);
 			if (NULL == node->prev->body->child)
@@ -908,7 +908,21 @@ termp_it_pre(DECL_ARGS)
 		else
 			p->flags |= TERMP_NOLPAD;
 
-		if (MDOC_HEAD == node->type)
+		if (MDOC_HEAD != node->type)
+			break;
+
+		/*
+		 * This is ugly.  If `-hang' is specified and the body
+		 * is a `Bl' or `Bd', then we want basically to nullify
+		 * the "overstep" effect in term_flushln() and treat
+		 * this as a `-ohang' list instead.
+		 */
+		if (node->next->child && 
+				(MDOC_Bl == node->next->child->tok ||
+				 MDOC_Bd == node->next->child->tok)) {
+			p->flags &= ~TERMP_NOBREAK;
+			p->flags &= ~TERMP_NOLPAD;
+		} else
 			p->flags |= TERMP_HANG;
 		break;
 	case (MDOC_Tag):
@@ -950,6 +964,17 @@ termp_it_pre(DECL_ARGS)
 	p->offset += offset;
 
 	switch (type) {
+	case (MDOC_Hang):
+		/*
+		 * Same stipulation as above, regarding `-hang'.  We
+		 * don't want to recalculate rmargin and offsets when
+		 * using `Bd' or `Bl' within `-hang' overstep lists.
+		 */
+		if (MDOC_HEAD == node->type && node->next->child &&
+				(MDOC_Bl == node->next->child->tok || 
+				 MDOC_Bd == node->next->child->tok))
+			break;
+		/* FALLTHROUGH */
 	case (MDOC_Bullet):
 		/* FALLTHROUGH */
 	case (MDOC_Dash):
@@ -957,8 +982,6 @@ termp_it_pre(DECL_ARGS)
 	case (MDOC_Enum):
 		/* FALLTHROUGH */
 	case (MDOC_Hyphen):
-		/* FALLTHROUGH */
-	case (MDOC_Hang):
 		/* FALLTHROUGH */
 	case (MDOC_Tag):
 		assert(width);
