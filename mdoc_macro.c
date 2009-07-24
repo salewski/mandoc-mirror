@@ -742,15 +742,17 @@ in_line(MACRO_PROT_ARGS)
 	 * usually because of reserved words) to squeak by.
 	 */
 	switch (tok) {
-	case (MDOC_Nm):
+	case (MDOC_An):
+		/* FALLTHROUGH */
+	case (MDOC_Ar):
 		/* FALLTHROUGH */
 	case (MDOC_Fl):
 		/* FALLTHROUGH */
 	case (MDOC_Lk):
 		/* FALLTHROUGH */
-	case (MDOC_Pa):
+	case (MDOC_Nm):
 		/* FALLTHROUGH */
-	case (MDOC_Ar):
+	case (MDOC_Pa):
 		nc = 1;
 		break;
 	default:
