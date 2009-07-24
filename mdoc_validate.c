@@ -912,7 +912,7 @@ post_an(POST_ARGS)
 	if (mdoc->last->args) {
 		if (NULL == mdoc->last->child)
 			return(1);
-		return(mdoc_nerr(mdoc, mdoc->last, ELINE));
+		return(mdoc_nerr(mdoc, mdoc->last, ENOLINE));
 	}
 
 	if (mdoc->last->child)
