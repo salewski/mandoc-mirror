@@ -259,7 +259,7 @@ term_flushln(struct termp *p)
 
 		/* LINTED */
 		for (j = i, vsz = 0; j < (int)p->col; j++) {
-			if (' ' == p->buf[j]) 
+			if (j && ' ' == p->buf[j]) 
 				break;
 			else if (8 == p->buf[j])
 				vsz--;
