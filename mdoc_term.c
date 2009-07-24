@@ -858,7 +858,8 @@ termp_it_pre(DECL_ARGS)
 
 	switch (type) {
 	case (MDOC_Diag):
-		term_word(p, "\\ \\ ");
+		if (MDOC_BODY == node->type)
+			term_word(p, "\\ \\ ");
 		break;
 	case (MDOC_Inset):
 		if (MDOC_BODY == node->type) 
