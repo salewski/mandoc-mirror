@@ -49,6 +49,7 @@ enum	merr {
 	WNODATA,
 	WNOTITLE,
 	WESCAPE,
+	WNUMFMT,
 	WERRMAX
 };
 

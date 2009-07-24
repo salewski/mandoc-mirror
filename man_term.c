@@ -81,6 +81,7 @@ static const struct termact termacts[MAN_MAX] = {
 	{ pre_RI, NULL }, /* RI */
 	{ NULL, NULL }, /* na */
 	{ pre_I, post_I }, /* i */
+	{ NULL, NULL }, /* sp */
 };
 
 static	void		  print_head(struct termp *, 

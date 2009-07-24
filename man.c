@@ -34,6 +34,7 @@ const	char *const __man_merrnames[WERRMAX] = {
 	"document has no body", /* WNODATA */
 	"document has no title/section", /* WNOTITLE */
 	"invalid escape sequence", /* WESCAPE */
+	"invalid number format", /* WNUMFMT */
 };
 
 const	char *const __man_macronames[MAN_MAX] = {		 
@@ -42,7 +43,7 @@ const	char *const __man_macronames[MAN_MAX] = {
 	"IP",		"HP",		"SM",		"SB",
 	"BI",		"IB",		"BR",		"RB",
 	"R",		"B",		"I",		"IR",
-	"RI",		"na",		"i"
+	"RI",		"na",		"i",		"sp"
 	};
 
 const	char * const *man_macronames = __man_macronames;
