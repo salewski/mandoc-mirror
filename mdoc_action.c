@@ -845,7 +845,12 @@ pre_bd(PRE_ARGS)
 	if (MDOC_BODY != n->type)
 		return(1);
 
-	/* Enter literal context if `Bd -literal' or * -unfilled'. */
+	/* Enter literal context if `Bd -literal' or `-unfilled'. */
+
+	/* 
+	 * TODO: `-offset' without an argument should be the width of
+	 * the literal "<string>".
+	 */
 
 	for (n = n->parent, i = 0; i < (int)n->args->argc; i++)
 		if (MDOC_Literal == n->args->argv[i].arg)
