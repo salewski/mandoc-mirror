@@ -1582,7 +1582,7 @@ termp_va_pre(DECL_ARGS)
 static int
 termp_bd_pre(DECL_ARGS)
 {
-	int	         i, type, ln;
+	int	         i, type;
 
 	/*
 	 * This is fairly tricky due primarily to crappy documentation.
@@ -1601,12 +1601,9 @@ termp_bd_pre(DECL_ARGS)
 	} else if (MDOC_BODY != node->type)
 		return(1);
 
-	/* FIXME: display type should be mandated by parser. */
+	assert(node->parent->args);
 
-	if (NULL == node->parent->args)
-		errx(1, "missing display type");
-
-	for (type = -1, i = 0; 
+	for (type = -1, i = 0; -1 == type && 
 			i < (int)node->parent->args->argc; i++) {
 		switch (node->parent->args->argv[i].arg) {
 		case (MDOC_Ragged):
@@ -1617,22 +1614,17 @@ termp_bd_pre(DECL_ARGS)
 			/* FALLTHROUGH */
 		case (MDOC_Literal):
 			type = node->parent->args->argv[i].arg;
-			i = (int)node->parent->args->argc;
 			break;
 		default:
 			break;
 		}
 	}
-
-	if (NULL == node->parent->args)
-		errx(1, "missing display type");
+	
+	assert(type > -1);
 
 	i = arg_getattr(MDOC_Offset, node->parent);
-	if (-1 != i) {
-		if (1 != node->parent->args->argv[i].sz)
-			errx(1, "expected single value");
+	if (-1 != i)
 		p->offset += arg_offset(&node->parent->args->argv[i]);
-	}
 
 	switch (type) {
 	case (MDOC_Literal):
@@ -1643,21 +1635,11 @@ termp_bd_pre(DECL_ARGS)
 		return(1);
 	}
 
-	/*
-	 * Tricky.  Iterate through all children.  If we're on a
-	 * different parse line, append a newline and then the contents.
-	 * Ew.
-	 */
-
-	ln = node->child ? node->child->line : 0;
-
 	for (node = node->child; node; node = node->next) {
-		if (ln < node->line) {
-			term_flushln(p);
-			p->flags |= TERMP_NOSPACE;
-		}
-		ln = node->line;
+		p->flags |= TERMP_NOSPACE;
 		print_node(p, pair, meta, node);
+		if (node->next)
+			term_flushln(p);
 	}
 
 	return(0);
@@ -1671,6 +1653,7 @@ termp_bd_post(DECL_ARGS)
 
 	if (MDOC_BODY != node->type) 
 		return;
+	p->flags |= TERMP_NOSPACE;
 	term_flushln(p);
 }
 
