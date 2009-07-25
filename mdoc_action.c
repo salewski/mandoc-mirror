@@ -487,7 +487,6 @@ post_dt(POST_ARGS)
 		free(m->meta.vol);
 		if (NULL == (m->meta.vol = strdup(cp)))
 			return(mdoc_nerr(m, m->last, EMALLOC));
-		n = n->next;
 	} else {
 		cp = mdoc_a2arch(n->string);
 		if (NULL == cp) {

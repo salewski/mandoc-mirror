@@ -674,6 +674,7 @@ fmt_block_vspace(struct termp *p,
 
 	if (MDOC_Bl == bl->tok && arg_hasattr(MDOC_Compact, bl))
 		return;
+	assert(node);
 
 	/*
 	 * Search through our prior nodes.  If we follow a `Ss' or `Sh',

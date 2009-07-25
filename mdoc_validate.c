@@ -1219,6 +1219,7 @@ post_sh_body(POST_ARGS)
 			return(0);
 	}
 
+	assert(n);
 	if (MDOC_BLOCK == n->type && MDOC_Nd == n->tok)
 		return(1);
 	return(mdoc_nwarn(mdoc, mdoc->last, ENAMESECINC));
