@@ -530,7 +530,6 @@ post_os(POST_ARGS)
 	if (NULL == (m->meta.os = strdup(buf)))
 		return(mdoc_nerr(m, m->last, EMALLOC));
 
-	m->flags |= MDOC_PBODY;
 	return(post_prol(m));
 }
 
@@ -822,6 +821,9 @@ post_prol(POST_ARGS)
 	}
 
 	mdoc_node_freelist(n);
+
+	if (m->meta.title && m->meta.date && m->meta.os)
+		m->flags |= MDOC_PBODY;
 	return(1);
 }
 
@@ -832,6 +834,7 @@ pre_dl(PRE_ARGS)
 
 	if (MDOC_BODY == n->type)
 		m->flags |= MDOC_LITERAL;
+
 	return(1);
 }
 
