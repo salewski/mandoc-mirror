@@ -23,7 +23,7 @@
 .Nd mandoc special characters
 .\" SECTION
 .Sh DESCRIPTION
-This documents the special characters accepted by 
+This documents the special characters and predefined strings accepted by 
 .Xr mandoc 1
 to format
 .Xr mdoc 7
@@ -34,12 +34,13 @@ documents.  Specific output devices of
 dictated by the
 .Fl T Ns Ar output
 argument, will properly render these sequences.
+.\" PARAGRAPH
 .Pp
 Both
 .Xr mdoc 7
 and
 .Xr man 7
-encode these special characters with 
+encode special characters with 
 .Sq \eX
 .Pq for a one-character escape ,
 .Sq \e(XX
@@ -50,7 +51,30 @@ and
 One may generalise
 .Sq \e(XX
 as
-.Sq \e[XX] .
+.Sq \e[XX] 
+and
+.Sq \eX
+as
+.Sq \e[X] .
+Predefined strings are functionally similar to special characters, using 
+.Sq \e*X
+.Pq for a one-character escape ,
+.Sq \e*(XX
+.Pq two-character ,
+and
+.Sq \e*[N]
+.Pq N-character .
+One may generalise
+.Sq \e*(XX
+as
+.Sq \e*[XX]
+and
+.Sq \e*X
+as
+.Sq \e*[X] .
+.\" SECTION
+.Sh Special Characters
+These are the preferred input symbols for producing special characters.
 .\" PARAGRAPH
 .Pp
 Typographic:
@@ -119,8 +143,6 @@ Enclosures:
 .Pq right bracket
 .It \e(lB
 .Pq left bracket
-.It \eq
-.Pq double-quote
 .It \e(lq
 .Pq left double-quote
 .It \e(rq
@@ -230,7 +252,7 @@ Mathematical:
 .It \e(if
 .Pq infinity
 .It \e(na
-.Pq NaN , an extension
+.Pq NaN, an extension
 .It \e(+-
 .Pq plus-minus
 .It \e(**
@@ -458,6 +480,56 @@ Special symbols:
 .It \ee
 .Pq escape
 .El 
+.\" SECTION
+.Sh PREDEFINED STRINGS
+These are not recommended for use, as they differ across
+implementations:
+.Pp
+Mathematical:
+.Bl -tag -width Ds -offset indent -compact
+.It \e*(Ne
+.Pq not equal
+.It \e*(Ge
+.Pq greater-than-equal
+.It \e*(Le
+.Pq less-than-equal
+.It \e*(Gt
+.Pq greater-than
+.It \e*(Lt
+.Pq greater-than
+.It \e*(Pm
+.Pq plus-minus
+.It \e*(If
+.Pq infinity
+.It \e*(Pi
+.Pq pi
+.It \e*(Na
+.Pq NaN
+.El
+.\" PARAGRAPH
+.Pp
+Special symbols:
+.Bl -tag -width Ds -offset indent -compact
+.It \e*(Ba
+.Pq vertical bar
+.It \e*(Am
+.Pq ampersand
+.El
+.\" PARAGRAPH
+.Pp
+Enclosures:
+.Bl -tag -width Ds -offset indent -compact
+.It \e*q
+.Pq double-quote
+.It \e*(Rq
+.Pq right-double-quote
+.It \e*(Lq
+.Pq left-double-quote
+.It \e*(lp
+.Pq right-parenthesis
+.It \e*(rp
+.Pq left-parenthesis
+.El
 .\" SECTION
 .Sh COMPATIBILITY
 This section documents compatibility of
