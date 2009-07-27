@@ -391,8 +391,15 @@ do_special(struct termp *p, const char *word, size_t len)
 
 	rhs = term_a2ascii(p->symtab, word, len, &sz);
 
-	if (NULL == rhs)
+	if (NULL == rhs) {
+#if 1
+		fputs("Unknown special character: ", stderr);
+		for (i = 0; i < (int)len; i++)
+			fputc(word[i], stderr);
+		fputc('\n', stderr);
+#endif
 		return;
+	}
 	for (i = 0; i < (int)sz; i++) 
 		encode(p, rhs[i]);
 }
@@ -407,8 +414,15 @@ do_reserved(struct termp *p, const char *word, size_t len)
 
 	rhs = term_a2res(p->symtab, word, len, &sz);
 
-	if (NULL == rhs)
+	if (NULL == rhs) {
+#if 0
+		fputs("Unknown reserved word: ", stderr);
+		for (i = 0; i < (int)len; i++)
+			fputc(word[i], stderr);
+		fputc('\n', stderr);
+#endif
 		return;
+	}
 	for (i = 0; i < (int)sz; i++) 
 		encode(p, rhs[i]);
 }
