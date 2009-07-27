@@ -39,8 +39,18 @@ Both
 .Xr mdoc 7
 and
 .Xr man 7
-encode special characters with slightly different semantics; consult the
-respective manuals for these escapes.
+encode these special characters with 
+.Sq \eX
+.Pq for a one-character escape ,
+.Sq \e(XX
+.Pq two-character ,
+and
+.Sq \e[N]
+.Pq N-character .
+One may generalise
+.Sq \e(XX
+as
+.Sq \e[XX] .
 .\" PARAGRAPH
 .Pp
 Typographic:
@@ -51,9 +61,11 @@ Typographic:
 .Pq space
 .It \e^
 .Pq zero-width space
-.It \e^
+.It \e%
 .Pq zero-width space
 .It \e&
+.Pq zero-width space
+.It \e|
 .Pq zero-width space
 .El
 .\" PARAGRAPH
@@ -111,12 +123,8 @@ Enclosures:
 .Pq double-quote
 .It \e(lq
 .Pq left double-quote
-.It \e(Lq
-.Pq left double-quote, deprecated
 .It \e(rq
 .Pq right double-quote
-.It \e(Rq
-.Pq right double-quote, deprecated
 .It \e(oq
 .Pq left single-quote
 .It \e(aq
@@ -211,36 +219,20 @@ Mathematical:
 .Pq approximately equals
 .It \e(=~
 .Pq congruent
-.It \e(Gt
-.Pq greater-than, deprecated
-.It \e(Lt
-.Pq less-than, deprecated
 .It \e(<=
 .Pq less-than-equal
-.It \e(Le
-.Pq less-than-equal, deprecated
 .It \e(>=
-.Pq greater-than-equal
-.It \e(Ge
 .Pq greater-than-equal
 .It \e(==
 .Pq equal
 .It \e(!=
 .Pq not equal
-.It \e(Ne
-.Pq not equal, deprecated
 .It \e(if
 .Pq infinity
-.It \e(If
-.Pq infinity, deprecated
 .It \e(na
 .Pq NaN , an extension
-.It \e(Na
-.Pq NaN, deprecated
 .It \e(+-
 .Pq plus-minus
-.It \e(Pm
-.Pq plus-minus, deprecated
 .It \e(**
 .Pq asterisk
 .El
@@ -457,20 +449,14 @@ Special symbols:
 .Pq bar
 .It \e(bb
 .Pq broken bar
-.It \e(Ba
-.Pq bar, deprecated
 .It \e(co
 .Pq copyright
 .It \e(rg
 .Pq registered
 .It \e(tm
 .Pq trademarked
-.It \e&
-.Pq non-breaking space
 .It \ee
 .Pq escape
-.It \e(Am
-.Pq ampersand, deprecated
 .El 
 .\" SECTION
 .Sh COMPATIBILITY

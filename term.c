@@ -34,6 +34,8 @@ static	void		  term_free(struct termp *);
 static	void		  term_pescape(struct termp *, const char **);
 static	void		  term_nescape(struct termp *,
 				const char *, size_t);
+static	void		  term_sescape(struct termp *,
+				const char *, size_t);
 static	void		  term_chara(struct termp *, char);
 static	void		  term_encodea(struct termp *, char);
 static	int		  term_isopendelim(const char *);
@@ -399,9 +401,26 @@ term_nescape(struct termp *p, const char *word, size_t len)
 
 	rhs = term_a2ascii(p->symtab, word, len, &sz);
 
-	if (rhs)
-		for (i = 0; i < (int)sz; i++) 
-			term_encodea(p, rhs[i]);
+	if (NULL == rhs)
+		return;
+	for (i = 0; i < (int)sz; i++) 
+		term_encodea(p, rhs[i]);
+}
+
+
+static void
+term_sescape(struct termp *p, const char *word, size_t len)
+{
+	const char	*rhs;
+	size_t		 sz;
+	int		 i;
+
+	rhs = term_a2res(p->symtab, word, len, &sz);
+
+	if (NULL == rhs)
+		return;
+	for (i = 0; i < (int)sz; i++) 
+		term_encodea(p, rhs[i]);
 }
 
 
@@ -448,13 +467,13 @@ term_pescape(struct termp *p, const char **word)
 				return;
 			}
 
-			term_nescape(p, wp, 2);
+			term_sescape(p, wp, 2);
 			*word = ++wp;
 			return;
 		case ('['):
 			break;
 		default:
-			term_nescape(p, wp, 1);
+			term_sescape(p, wp, 1);
 			*word = wp;
 			return;
 		}
