@@ -418,7 +418,8 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 	/* NOTE a parser may not have been assigned, yet. */
 
 	if ( ! (man || mdoc)) {
-		(void)fprintf(stderr, "%s: not a manual", curp->file);
+		(void)fprintf(stderr, "%s: not a manual\n", 
+				curp->file);
 		return(0);
 	}
 
