@@ -47,7 +47,8 @@ static	int	  rew_subblock(enum mdoc_type,
 			struct mdoc *, int, int, int);
 static	int	  rew_last(struct mdoc *, struct mdoc_node *);
 static	int	  append_delims(struct mdoc *, int, int *, char *);
-static	int	  lookup(struct mdoc *, int, int, int, const char *);
+static	int	  lookup(struct mdoc *, int, const char *);
+static	int	  lookup_raw(struct mdoc *, const char *);
 static	int	  swarn(struct mdoc *, enum mdoc_type, int, int, 
 			const struct mdoc_node *);
 
@@ -253,17 +254,24 @@ mdoc_macroend(struct mdoc *mdoc)
 }
 
 static int
-lookup(struct mdoc *mdoc, int line, int pos, int from, const char *p)
+lookup(struct mdoc *mdoc, int from, const char *p)
+{
+
+	if ( ! (MDOC_PARSED & mdoc_macros[from].flags))
+		return(MDOC_MAX);
+	return(lookup_raw(mdoc, p));
+}
+
+
+static int
+lookup_raw(struct mdoc *mdoc, const char *p)
 {
 	int		 res;
 
-	res = mdoc_hash_find(mdoc->htab, p);
-	if (MDOC_PARSED & mdoc_macros[from].flags)
+	if (MDOC_MAX == (res = mdoc_hash_find(mdoc->htab, p)))
+		return(MDOC_MAX);
+	if (MDOC_CALLABLE & mdoc_macros[res].flags)
 		return(res);
-	if (MDOC_MAX == res)
-		return(res);
-	if ( ! mdoc_pwarn(mdoc, line, pos, EMACPARM))
-		return(-1);
 	return(MDOC_MAX);
 }
 
@@ -699,7 +707,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
+		if (-1 == (c = lookup(mdoc, tok, p)))
 			return(0);
 		else if (MDOC_MAX != c) {
 			if ( ! flushed) {
@@ -790,8 +798,7 @@ in_line(MACRO_PROT_ARGS)
 
 		/* Quoted words shouldn't be looked-up. */
 
-		c = ARGS_QWORD == w ? MDOC_MAX :
-			lookup(mdoc, line, la, tok, p);
+		c = ARGS_QWORD == w ? MDOC_MAX : lookup(mdoc, tok, p);
 
 		/* 
 		 * In this case, we've located a submacro and must
@@ -988,7 +995,7 @@ blk_full(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
+		if (-1 == (c = lookup(mdoc, tok, p)))
 			return(0);
 
 		if (MDOC_MAX == c) {
@@ -1058,7 +1065,7 @@ blk_part_imp(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
+		if (-1 == (c = lookup(mdoc, tok, p)))
 			return(0);
 		else if (MDOC_MAX == c) {
 			if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
@@ -1162,7 +1169,7 @@ blk_part_exp(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
+		if (-1 == (c = lookup(mdoc, tok, p)))
 			return(0);
 		else if (MDOC_MAX != c) {
 			if ( ! flushed) {
@@ -1282,7 +1289,7 @@ in_line_argn(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		if (-1 == (c = lookup(mdoc, line, lastarg, tok, p)))
+		if (-1 == (c = lookup(mdoc, tok, p)))
 			return(0);
 		else if (MDOC_MAX != c) {
 			if ( ! flushed && ! rew_elem(mdoc, tok))
@@ -1360,8 +1367,7 @@ in_line_eoln(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == w)
 			break;
 
-		c = ARGS_QWORD == w ? MDOC_MAX :
-			lookup(mdoc, line, la, tok, p);
+		c = ARGS_QWORD == w ? MDOC_MAX : lookup(mdoc, tok, p);
 
 		if (MDOC_MAX != c && -1 != c) {
 			if ( ! rew_elem(mdoc, tok))

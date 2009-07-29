@@ -1398,7 +1398,10 @@ termp_fd_post(DECL_ARGS)
 static int
 termp_sh_pre(DECL_ARGS)
 {
-
+	/* 
+	 * FIXME: using two `Sh' macros in sequence has no vspace
+	 * between calls, only a newline.
+	 */
 	switch (node->type) {
 	case (MDOC_HEAD):
 		term_vspace(p);
