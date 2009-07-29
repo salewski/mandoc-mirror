@@ -715,8 +715,10 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 	while (buf[i] && ' ' == buf[i])
 		i++;
 
-	/* Begin recursive parse sequence. */
-
+	/* 
+	 * Begin recursive parse sequence.  Since we're at the start of
+	 * the line, we don't need to do callable/parseable checks.
+	 */
 	if ( ! mdoc_macro(m, c, ln, 1, &i, buf)) 
 		goto err;
 

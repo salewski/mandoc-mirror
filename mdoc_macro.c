@@ -707,9 +707,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		if (-1 == (c = lookup(mdoc, tok, p)))
-			return(0);
-		else if (MDOC_MAX != c) {
+		if (MDOC_MAX != (c = lookup(mdoc, tok, p))) {
 			if ( ! flushed) {
 				if ( ! rew_expblock(mdoc, tok, 
 							line, ppos))
@@ -807,7 +805,7 @@ in_line(MACRO_PROT_ARGS)
 		 * or raise a warning.
 		 */
 
-		if (MDOC_MAX != c && -1 != c) {
+		if (MDOC_MAX != c) {
 			if (0 == lastpunct && ! rew_elem(mdoc, tok))
 				return(0);
 			if (nc && 0 == cnt) {
@@ -827,8 +825,7 @@ in_line(MACRO_PROT_ARGS)
 			if (ppos > 1)
 				return(1);
 			return(append_delims(mdoc, line, pos, buf));
-		} else if (-1 == c)
-			return(0);
+		} 
 
 		/* 
 		 * Non-quote-enclosed punctuation.  Set up our scope, if
@@ -995,10 +992,7 @@ blk_full(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		if (-1 == (c = lookup(mdoc, tok, p)))
-			return(0);
-
-		if (MDOC_MAX == c) {
+		if (MDOC_MAX == (c = lookup(mdoc, tok, p))) {
 			if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
 				return(0);
 			mdoc->next = MDOC_NEXT_SIBLING;
@@ -1065,9 +1059,7 @@ blk_part_imp(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		if (-1 == (c = lookup(mdoc, tok, p)))
-			return(0);
-		else if (MDOC_MAX == c) {
+		if (MDOC_MAX == (c = lookup(mdoc, tok, p))) {
 			if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
 				return(0);
 			mdoc->next = MDOC_NEXT_SIBLING;
@@ -1169,9 +1161,7 @@ blk_part_exp(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		if (-1 == (c = lookup(mdoc, tok, p)))
-			return(0);
-		else if (MDOC_MAX != c) {
+		if (MDOC_MAX != (c = lookup(mdoc, tok, p))) {
 			if ( ! flushed) {
 				if ( ! rew_subblock(MDOC_HEAD, mdoc, 
 							tok, line, ppos))
@@ -1289,9 +1279,7 @@ in_line_argn(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
-		if (-1 == (c = lookup(mdoc, tok, p)))
-			return(0);
-		else if (MDOC_MAX != c) {
+		if (MDOC_MAX != (c = lookup(mdoc, tok, p))) {
 			if ( ! flushed && ! rew_elem(mdoc, tok))
 				return(0);
 			flushed = 1;
@@ -1369,12 +1357,11 @@ in_line_eoln(MACRO_PROT_ARGS)
 
 		c = ARGS_QWORD == w ? MDOC_MAX : lookup(mdoc, tok, p);
 
-		if (MDOC_MAX != c && -1 != c) {
+		if (MDOC_MAX != c) {
 			if ( ! rew_elem(mdoc, tok))
 				return(0);
 			return(mdoc_macro(mdoc, c, line, la, pos, buf));
-		} else if (-1 == c)
-			return(0);
+		} 
 
 		if ( ! mdoc_word_alloc(mdoc, line, la, p))
 			return(0);
@@ -1416,15 +1403,13 @@ phrase(struct mdoc *mdoc, int line, int ppos, char *buf)
 		if (ARGS_EOLN == w)
 			break;
 
-		c = ARGS_QWORD == w ? MDOC_MAX :
-			mdoc_hash_find(mdoc->htab, p);
+		c = ARGS_QWORD == w ? MDOC_MAX : lookup_raw(mdoc, p);
 
-		if (MDOC_MAX != c && -1 != c) {
+		if (MDOC_MAX != c) {
 			if ( ! mdoc_macro(mdoc, c, line, la, &pos, buf))
 				return(0);
 			return(append_delims(mdoc, line, &pos, buf));
-		} else if (-1 == c)
-			return(0);
+		} 
 
 		if ( ! mdoc_word_alloc(mdoc, line, la, p))
 			return(0);
