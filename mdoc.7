@@ -242,10 +242,21 @@ closes it out.
 The
 .Em Callable
 column indicates that the macro may be called subsequent to the initial
-line-macro.  The
+line-macro.  If a macro is not callable, then its invocation after the
+initial line macro is interpreted as opaque text, such that
+.Sq \&.Fl Sh
+produces
+.Sq Fl Sh .
+.\" PARAGRAPH------------
+.Pp
+The
 .Em Parsable
 column indicates whether the macro may be followed by further
-(ostensibly callable) macros.  The
+(ostensibly callable) macros.  If a macro is not parsable, subsequent
+macro invocations on the line will be interpreted as opaque text.
+.\" PARAGRAPH------------
+.Pp
+The
 .Em Scope
 column, if applicable, describes closure rules.
 .\" SUB-SECTION----------------------
