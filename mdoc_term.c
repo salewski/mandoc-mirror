@@ -26,6 +26,9 @@
 #include "term.h"
 #include "mdoc.h"
 
+#define	INDENT		  5
+#define	HALFINDENT	  3
+
 /* FIXME: macro arguments can be escaped. */
 
 #define	TTYPE_PROG	  0

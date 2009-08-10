@@ -15,6 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include <assert.h>
+#include <ctype.h>
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +23,9 @@
 
 #include "term.h"
 #include "man.h"
+
+#define	INDENT		  7
+#define	HALFINDENT	  3
 
 #ifdef __linux__
 extern	size_t		  strlcpy(char *, const char *, size_t);
@@ -90,6 +94,9 @@ static	void		  print_body(DECL_ARGS);
 static	void		  print_node(DECL_ARGS);
 static	void		  print_foot(struct termp *, 
 				const struct man_meta *);
+static	void		  fmt_block_vspace(struct termp *, 
+				const struct man_node *);
+static	int		  arg_width(const struct man_node *);
 
 
 int
@@ -105,6 +112,51 @@ man_run(struct termp *p, const struct man *m)
 	print_foot(p, man_meta(m));
 
 	return(1);
+}
+
+
+static void
+fmt_block_vspace(struct termp *p, const struct man_node *n)
+{
+	term_newln(p);
+
+	if (NULL == n->prev)
+		return;
+
+	if (MAN_SS == n->prev->tok)
+		return;
+	if (MAN_SH == n->prev->tok)
+		return;
+
+	term_vspace(p);
+}
+
+
+static int
+arg_width(const struct man_node *n)
+{
+	int		 i, len;
+	const char	*p;
+
+	assert(MAN_TEXT == n->type);
+	assert(n->string);
+
+	p = n->string;
+
+	if (0 == (len = (int)strlen(p)))
+		return(-1);
+
+	for (i = 0; i < len; i++) 
+		if ( ! isdigit((u_char)p[i]))
+			break;
+
+	if (i == len - 1)  {
+		if ('n' == p[len - 1] || 'm' == p[len - 1])
+			return(atoi(p));
+	} else if (i == len)
+		return(atoi(p));
+
+	return(-1);
 }
 
 
@@ -278,7 +330,9 @@ pre_PP(DECL_ARGS)
 {
 
 	term_vspace(p);
+	term_vspace(p);
 	p->offset = INDENT;
+	p->flags |= TERMP_NOSPACE;
 	return(0);
 }
 
@@ -287,32 +341,48 @@ pre_PP(DECL_ARGS)
 static int
 pre_IP(DECL_ARGS)
 {
-#if 0
 	const struct man_node *nn;
-	size_t		 offs;
-#endif
+	size_t		 offs, sv;
+	int		 ival;
 
-	term_vspace(p);
-	p->offset = INDENT;
-
-#if 0
-	if (NULL == (nn = n->child))
-		return(1);
-	if (MAN_TEXT != nn->type)
-		errx(1, "expected text line argument");
-
-	if (nn->next) {
-		if (MAN_TEXT != nn->next->type)
-			errx(1, "expected text line argument");
-		offs = (size_t)atoi(nn->next->string);
-	} else
-		offs = strlen(nn->string);
+	fmt_block_vspace(p, n);
 
 	p->flags |= TERMP_NOSPACE;
-	/* FIXME */
-	if ((p->offset += offs) > p->rmargin)
-		errx(1, "line too long");
-#endif
+
+	sv = p->offset;
+	p->offset = INDENT;
+
+	if (NULL == n->child)
+		return(1);
+
+	p->flags |= TERMP_NOBREAK;
+
+	offs = sv;
+
+	/*
+	 * If the last token is number-looking (3m, 3n, 3) then
+	 * interpret it as the width specifier, else we stick with the
+	 * prior saved offset.  XXX - obviously not documented.
+	 */
+	for (nn = n->child; nn; nn = nn->next) {
+		if (NULL == nn->next) {
+			ival = arg_width(nn);
+			if (ival >= 0) {
+				offs = (size_t)ival;
+				break;
+			}
+		}
+		print_node(p, nn, m);
+	}
+
+	p->rmargin = p->offset + offs;
+
+	term_flushln(p);
+
+	p->offset = offs;
+	p->rmargin = p->maxrmargin;
+
+	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 
 	return(0);
 }

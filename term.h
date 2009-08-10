@@ -17,11 +17,6 @@
 #ifndef TERM_H
 #define TERM_H
 
-/* FIXME - clean up tabs. */
-
-#define	INDENT		  5
-#define	HALFINDENT	  3
-
 __BEGIN_DECLS
 
 enum	termenc {
