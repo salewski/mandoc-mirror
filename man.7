@@ -262,7 +262,7 @@ and
 This section is a canonical reference to all macros, arranged
 alphabetically.  For the scoping of individual macros, see
 .Sx MACRO SYNTAX .
-.Bl -tag -width Ds -offset indent
+.Bl -tag -width Ds
 .It \&B
 Text is rendered in bold face.
 .It \&BI
@@ -281,6 +281,8 @@ render in italics.  Whitespace between arguments is omitted in output.
 Text is rendered alternately in bold face and roman (the default font).
 Whitespace between arguments is omitted in output.
 .It \&HP
+Begin a paragraph whose initial output line is left-justified, but
+subsequent output lines are indented.
 .\" TODO.
 .It \&I
 Text is rendered in italics.
@@ -363,9 +365,23 @@ macro.
 .El
 .\" SECTION
 .Sh COMPATIBILITY
-See
-.Xr mdoc 7
-for groff compatibility notes.
+This section documents compatibility with other roff implementations, at
+this time limited to
+.Xr groff 1 .
+.Bl -hyphen
+.It
+In quoted literals, groff allowed pair-wise double-quotes to produce a
+standalone double-quote in formatted output.  This idiosyncratic
+behaviour is no longer applicable.
+.It
+The
+.Sq \&sp
+macro does not accept negative numbers.
+.It
+Blocks of whitespace are stripped from both macro and free-form text
+lines (except when in literal mode), while groff would retain whitespace
+in free-form text lines.
+.El
 .\" SECTION
 .Sh SEE ALSO
 .Xr mandoc 1 ,
@@ -374,7 +390,7 @@ for groff compatibility notes.
 .Sh AUTHORS
 The
 .Nm
-utility was written by
+reference was written by
 .An Kristaps Dzonsons Aq kristaps@kth.se .
 .\" SECTION
 .Sh CAVEATS

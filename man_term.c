@@ -66,6 +66,7 @@ static	int		  pre_sp(DECL_ARGS);
 
 static	void		  post_B(DECL_ARGS);
 static	void		  post_I(DECL_ARGS);
+static	void		  post_HP(DECL_ARGS);
 static	void		  post_SH(DECL_ARGS);
 static	void		  post_SS(DECL_ARGS);
 static	void		  post_i(DECL_ARGS);
@@ -80,7 +81,7 @@ static const struct termact termacts[MAN_MAX] = {
 	{ pre_PP, NULL }, /* PP */
 	{ pre_PP, NULL }, /* P */
 	{ pre_IP, NULL }, /* IP */
-	{ pre_HP, NULL }, /* HP */ 
+	{ pre_HP, post_HP }, /* HP */ 
 	{ NULL, NULL }, /* SM */
 	{ pre_B, post_B }, /* SB */
 	{ pre_BI, NULL }, /* BI */
@@ -407,8 +408,40 @@ static int
 pre_HP(DECL_ARGS)
 {
 
-	/* TODO */
+	switch (n->type) {
+	case (MAN_BLOCK):
+		fmt_block_vspace(p, n);
+		break;
+	case (MAN_BODY):
+		p->flags |= TERMP_NOBREAK;
+		p->flags |= TERMP_TWOSPACE;
+		p->offset = INDENT;
+		p->rmargin = INDENT * 2;
+		break;
+	default:
+		return(0);
+	}
+
 	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+post_HP(DECL_ARGS)
+{
+
+	switch (n->type) {
+	case (MAN_BODY):
+		term_flushln(p);
+		p->flags &= ~TERMP_NOBREAK;
+		p->flags &= ~TERMP_TWOSPACE;
+		p->offset = INDENT;
+		p->rmargin = p->maxrmargin;
+		break;
+	default:
+		break;
+	}
 }
 
 
