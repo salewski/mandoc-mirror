@@ -675,6 +675,8 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 
 	/* Empty lines are ignored. */
 
+	/* FIXME: this can accept `.    xx' like libman! */
+
 	if (0 == buf[1])
 		return(1);
 
