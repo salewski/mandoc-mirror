@@ -60,6 +60,9 @@ const	struct actions man_actions[MAN_MAX] = {
 	{ NULL }, /* na */
 	{ NULL }, /* i */
 	{ NULL }, /* sp */
+	{ NULL }, /* nf */
+	{ NULL }, /* fi */
+	{ NULL }, /* r*/
 };
 
 
@@ -151,12 +154,10 @@ post_TH(struct man *m)
 	 */
 
 	if (m->last->parent->child == m->last) {
-		assert(MAN_ROOT == m->last->parent->type);
 		m->last->parent->child = NULL;
 		n = m->last;
 		m->last = m->last->parent;
 		m->next = MAN_NEXT_CHILD;
-		assert(m->last == m->first);
 	} else {
 		assert(m->last->prev);
 		m->last->prev->next = NULL;

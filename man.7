@@ -71,11 +71,12 @@ subsequent word isn't off-set by whitespace.
 .\" SUB-SECTION
 .Ss Comments
 Text following a
-.Sq \e" ,
+.Sq \e\*" ,
 whether in a macro or free-form text line, is ignored to the end of
 line.  A macro line with only a control character and comment escape,
 .Sq \&.\e" ,
-is also ignored.
+is also ignored.  Macro lines with only a control charater and
+optionally whitespace are stripped from input.
 .\" SUB-SECTION
 .Ss Special Characters
 Special characters may occur in both macro and free-form lines.
@@ -108,20 +109,47 @@ from input.  These are later re-added, if applicable, by a front-end
 utility such as
 .Xr mandoc 1 .
 .\" SECTION
-.Sh STRUCTURE
+.Sh MANUAL STRUCTURE
 Each
 .Nm
 document must contain contains at least the
-.Sq \&.TH
+.Sq \&TH
 macro describing the document's section and title.  It may occur
 anywhere in the document, although conventionally, it appears as the
 first macro.
 .Pp
-Beyond the
-.Sq \&.TH ,
-at least one macro or text node must appear in the document.
+Beyond
+.Sq \&TH ,
+at least one macro or text node must appear in the document.  Documents
+are generally structured as follows:
+.Bd -literal -offset indent
+\&.TH FOO 1 "13 Aug 2009"
+\&.
+\&.SH NAME
+foo \e- a description goes here
+\&.
+\&.SH SYNOPSIS
+\efBfoo\efR [\efB\e-options\efR] arguments...
+\&.
+\&.SH DESCRIPTION
+The \efBfoo\efR utility does...
+\&.
+\&.\e\*q .SH RETURN VALUES
+\&.\e\*q .SH ENVIRONMENT
+\&.\e\*q .SH FILES
+\&.\e\*q .SH EXAMPLES
+\&.\e\*q .SH DIAGNOSTICS
+\&.\e\*q .SH ERRORS
+\&.\e\*q .SH SEE ALSO
+\&.\e\*q \efBbar\efR(1)
+\&.\e\*q .SH STANDARDS
+\&.\e\*q .SH HISTORY
+\&.\e\*q .SH AUTHORS
+\&.\e\*q .SH CAVEATS
+\&.\e\*q .SH BUGS
+.Ed
 .\" SECTION
-.Sh SYNTAX
+.Sh MACRO SYNTAX
 Macros are one to three three characters in length and begin with a
 control character ,
 .Sq \&. ,
@@ -132,96 +160,207 @@ and
 .Sq \&.\ \ \ \&PP
 are equivalent.
 .Pp
-All
-.Nm
-macros follow the same structural rules:
-.Bd -literal -offset indent
-\&.YO \(lBbody...\(rB
-.Ed
-.Pp
 The
-.Dq body
-consists of zero or more arguments to the macro.
-.Pp
 .Nm
-has a primitive notion of multi-line scope for the following macros:
-.Sq \&.TM ,
-.Sq \&.SM ,
-.Sq \&.SB ,
-.Sq \&.BI ,
-.Sq \&.IB ,
-.Sq \&.BR ,
-.Sq \&.RB ,
-.Sq \&.R ,
-.Sq \&.B ,
-.Sq \&.I ,
-.Sq \&.IR
-and
-.Sq \&.RI .
-When these macros are invoked without arguments, the subsequent line is
-considered a continuation of the macro.  Thus:
+macros are classified by scope: line scope or block scope.  Line-scoped
+macros are only scoped to the current line (and, in some situations,
+the subsequent line).  Block macros are scoped to the current line and
+subsequent lines until closed by another block macro.
+.\" SUBSECTION
+.Ss Line Macros
+Line-macros are scoped to the current line, with the body consisting of
+zero or more arguments.  If a macro is next-line scoped and the line
+arguments are empty, the next line is used instead.  Thus:
 .Bd -literal -offset indent
 \&.RI
 foo
 .Ed
+.\" PARAGRAPH
 .Pp
 is equivalent to
 .Sq \&.RI foo .
-If two consecutive lines exhibit the latter behaviour,
-an error is raised.  Thus, the following is not acceptable:
+.\" PARAGRAPH
+Consecutive next-line invocations are disallowed.
 .Bd -literal -offset indent
-\&.RI
-\&.I
-Hello, world.
+\&.YO \(lBbody...\(rB
+\(lBbody...\(rB
+.Ed
+.\" PARAGRAPH
+.Pp
+.Bl -column -compact -offset indent "MacroX" "ArgumentsX" "ScopeXXXXX"
+.It Em Macro Ta Em Arguments Ta Em Scope
+.It  \&B     Ta    n         Ta    next-line
+.It  \&BI    Ta    n         Ta    current
+.It  \&BR    Ta    n         Ta    current
+.It  \&I     Ta    n         Ta    next-line
+.It  \&IB    Ta    n         Ta    current
+.It  \&IR    Ta    n         Ta    current
+.It  \&R     Ta    n         Ta    next-line
+.It  \&RB    Ta    n         Ta    current
+.It  \&RI    Ta    n         Ta    current
+.It  \&SB    Ta    n         Ta    next-line
+.It  \&SM    Ta    n         Ta    next-line
+.It  \&TH    Ta    >1, <6    Ta    current
+.It  \&br    Ta    0         Ta    current
+.It  \&fi    Ta    0         Ta    current
+.It  \&i     Ta    n         Ta    current
+.It  \&na    Ta    0         Ta    current
+.It  \&nf    Ta    0         Ta    current
+.It  \&r     Ta    0         Ta    current
+.It  \&sp    Ta    1         Ta    current
+.El
+.\" PARAGRAPH
+.Pp
+The lower-case 
+.Sq \&br ,
+.Sq \&fi ,
+.Sq \&i ,
+.Sq \&na ,
+.Sq \&nf ,
+.Sq \&r ,
+and
+.Sq \&sp
+macros aren't historically part of
+.Nm
+and should not be used.  They're included for compatibility.
+.\" SUBSECTION
+.Ss Block Macros
+Block macros are comprised of a head and body.  The head is scoped to
+the current line and, in one circumstance, the next line; the body is
+scoped to subsequent lines and is closed out by a subsequent block macro
+invocation.
+.Bd -literal -offset indent
+\&.YO \(lBhead...\(rB
+\(lBhead...\(rB
+\(lBbody...\(rB
+.Ed
+.\" PARAGRAPH
+.Pp
+If a block macro is next-line scoped, it may only be followed by in-line
+macros (excluding
+.Sq na ,
+.Sq sp ,
+.Sq nf ,
+.Sq fi ,
+and
+.Sq TH ) .
+.\" PARAGRAPH
+.Pp
+.Bl -column "MacroX" "Arguments" "ScopeXXXX" -compact -offset indent
+.It Em Macro Ta Em Arguments Ta Em Scope
+.It \&HP     Ta    <2        Ta    current
+.It \&IP     Ta    <3        Ta    current
+.It \&LP     Ta    0         Ta    current
+.It \&P      Ta    0         Ta    current
+.It \&PP     Ta    0         Ta    current
+.It \&SH     Ta    >0        Ta    current
+.It \&SS     Ta    >0        Ta    current
+.It \&TP     Ta    n         Ta    next-line
+.El
+.\" SECTION
+.Sh REFERENCE
+This section is a canonical reference to all macros, arranged
+alphabetically.  For the scoping of individual macros, see
+.Sx MACRO SYNTAX .
+.Bl -tag -width Ds -offset indent
+.It \&B
+Text is rendered in bold face.
+.It \&BI
+Text is rendered alternately in bold face and italic.  Thus, 
+.Sq \&.BI this word and that
+causes
+.Sq this
+and
+.Sq and
+to render in bold face, while 
+.Sq word
+and
+.Sq that
+render in italics.  Whitespace between arguments is omitted in output.
+.It \&BR
+Text is rendered alternately in bold face and roman (the default font).
+Whitespace between arguments is omitted in output.
+.It \&HP
+.\" TODO.
+.It \&I
+Text is rendered in italics.
+.It \&IB
+Text is rendered alternately in italics and bold face.  Whitespace
+between arguments is omitted in output.
+.It \&IP
+.\" TODO.
+.It \&IR
+Text is rendered alternately in italics and roman (the default font).
+Whitespace between arguments is omitted in output.
+.It \&LP, \&P, \&PP
+Begin an undecorated paragraph.  The scope of a paragraph is closed by a
+subsequent paragraph, sub-section, section, or end of file.
+.It \&R
+Text is rendered in roman (the default font).
+.It \&RB
+Text is rendered alternately in roman (the default font) and bold face.
+Whitespace between arguments is omitted in output.
+.It \&RI
+Text is rendered alternately in roman (the default font) and italics.
+Whitespace between arguments is omitted in output.
+.It \&SB
+Text is rendered in small size (one point smaller than the default font)
+bold face.
+.It \&SH
+Begin a section.  The scope of a section is only closed by another
+section or the end of file.
+.It \&SM
+Text is rendered in small size (one point smaller than the default
+font).
+.It \&SS
+Begin a sub-section.  The scope of a sub-section is closed by a
+subsequent sub-section, section, or end of file.
+.It \&TH
+Sets the title of the manual page with the following syntax:
+.Bd -literal -offset indent
+\&.TH title section date source volume
 .Ed
 .Pp
+At least the 
+.Va title
+and
+.Va section
+arguments must be provided.  The
+.Va date
+argument should be formatted as
+.Qq %b [%d] %Y
+format, described in
+.Xr strptime 3 .
 The
-.Sq \&.TP
-macro is similar, but does not need an empty argument line to trigger
-the behaviour.
-.\" SECTION
-.Sh MACROS
-This section contains a complete list of all
-.Nm
-macros and corresponding number of arguments.
-.Pp
-.Bl -column "MacroX" "Arguments" -compact -offset indent
-.It Em Macro Ta Em Arguments
-.It \&.TH    Ta    >1, <6
-.It \&.SH    Ta    >0
-.It \&.SS    Ta    >0
-.It \&.TP    Ta    n
-.It \&.LP    Ta    0
-.It \&.PP    Ta    0
-.It \&.P     Ta    0
-.It \&.IP    Ta    <3
-.It \&.HP    Ta    <2
-.It \&.SM    Ta    n
-.It \&.SB    Ta    n
-.It \&.BI    Ta    n
-.It \&.IB    Ta    n
-.It \&.BR    Ta    n
-.It \&.RB    Ta    n
-.It \&.R     Ta    n
-.It \&.B     Ta    n
-.It \&.I     Ta    n
-.It \&.IR    Ta    n
-.It \&.RI    Ta    n
+.Va source
+string specifies the organisation providing the utility.  The
+.Va volume
+replaces the default rendered volume as dictated by the manual section.
+.It \&TP
+.\" TODO.
+.It \&br
+Breaks the current line.  Consecutive invocations have no further effect.
+.\" TODO.
+.It \&fi
+End literal mode begun by
+.Sq \&nf .
+.It \&i
+Italicise arguments.  If no arguments are specified, all subsequent text
+is italicised.
+.It \&na
+No alignment to the right margin.
+.It \&nf
+Begin literal mode: all subsequent free-form lines have their end of
+line boundaries preserved.  May be ended by
+.Sq \&fi .
+.It \&r
+Fonts and styles (bold face, italics) reset to roman (default font).
+.It \&sp
+Insert n spaces, where n is the macro's positive numeric argument.  If
+0, this is equivalent to the
+.Sq br
+macro.
 .El
-.Pp
-Although not historically part of the
-.Nm
-system, the following macros are also supported:
-.Pp
-.Bl -column "MacroX" "Arguments" -compact -offset indent
-.It Em Macro Ta Em Arguments
-.It \&.br    Ta    0
-.It \&.i     Ta    n
-.El
-.Pp
-These follow the same calling conventions as the above
-.Nm
-macros.
 .\" SECTION
 .Sh COMPATIBILITY
 See

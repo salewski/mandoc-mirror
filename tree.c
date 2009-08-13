@@ -163,6 +163,15 @@ print_man(const struct man_node *n, int indent)
 	case (MAN_TEXT):
 		t = "text";
 		break;
+	case (MAN_BLOCK):
+		t = "block";
+		break;
+	case (MAN_HEAD):
+		t = "block-head";
+		break;
+	case (MAN_BODY):
+		t = "block-body";
+		break;
 	default:
 		abort();
 		/* NOTREACHED */
@@ -173,6 +182,12 @@ print_man(const struct man_node *n, int indent)
 		p = n->string;
 		break;
 	case (MAN_ELEM):
+		/* FALLTHROUGH */
+	case (MAN_BLOCK):
+		/* FALLTHROUGH */
+	case (MAN_HEAD):
+		/* FALLTHROUGH */
+	case (MAN_BODY):
 		p = man_macronames[n->tok];
 		break;
 	case (MAN_ROOT):
