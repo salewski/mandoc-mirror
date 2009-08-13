@@ -69,6 +69,7 @@ static	void		  post_I(DECL_ARGS);
 static	void		  post_HP(DECL_ARGS);
 static	void		  post_SH(DECL_ARGS);
 static	void		  post_SS(DECL_ARGS);
+static	void		  post_TP(DECL_ARGS);
 static	void		  post_i(DECL_ARGS);
 
 static const struct termact termacts[MAN_MAX] = {
@@ -76,7 +77,7 @@ static const struct termact termacts[MAN_MAX] = {
 	{ NULL, NULL }, /* TH */
 	{ pre_SH, post_SH }, /* SH */
 	{ pre_SS, post_SS }, /* SS */
-	{ pre_TP, NULL }, /* TP */
+	{ pre_TP, post_TP }, /* TP */
 	{ pre_PP, NULL }, /* LP */
 	{ pre_PP, NULL }, /* PP */
 	{ pre_PP, NULL }, /* P */
@@ -522,35 +523,49 @@ pre_IP(DECL_ARGS)
 static int
 pre_TP(DECL_ARGS)
 {
-	/* TODO */
-#if 0
-	const struct man_node *nn;
-	size_t		 offs;
 
-	term_vspace(p);
+	switch (n->type) {
+	case (MAN_BLOCK):
+		fmt_block_vspace(p, n);
+		break;
+	case (MAN_HEAD):
+		p->rmargin = INDENT * 2;
+		p->offset = INDENT;
+		p->flags |= TERMP_NOBREAK;
+		p->flags |= TERMP_TWOSPACE;
+		break;
+	case (MAN_BODY):
+		p->flags |= TERMP_NOLPAD;
+		p->flags |= TERMP_NOSPACE;
+		p->offset = INDENT * 2;
+		break;
+	default:
+		break;
+	}
 
-	p->offset = INDENT;
-
-	if (NULL == (nn = n->child))
-		return(1);
-
-	if (nn->line == n->line) {
-		if (MAN_TEXT != nn->type)
-			errx(1, "expected text line argument");
-		offs = (size_t)atoi(nn->string);
-		nn = nn->next;
-	} else
-		offs = INDENT;
-
-	for ( ; nn; nn = nn->next)
-		print_node(p, fl, nn, m);
-
-	term_flushln(p);
-	p->flags |= TERMP_NOSPACE;
-	p->offset += offs;
-	return(0);
-#endif
 	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+post_TP(DECL_ARGS)
+{
+
+	switch (n->type) {
+	case (MAN_HEAD):
+		term_flushln(p);
+		p->flags &= ~TERMP_NOBREAK;
+		p->flags &= ~TERMP_TWOSPACE;
+		p->rmargin = p->maxrmargin;
+		break;
+	case (MAN_BODY):
+		term_flushln(p);
+		p->flags &= ~TERMP_NOLPAD;
+		break;
+	default:
+		break;
+	}
 }
 
 
