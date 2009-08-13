@@ -283,14 +283,24 @@ Whitespace between arguments is omitted in output.
 .It \&HP
 Begin a paragraph whose initial output line is left-justified, but
 subsequent output lines are indented.
-.\" TODO.
 .It \&I
 Text is rendered in italics.
 .It \&IB
 Text is rendered alternately in italics and bold face.  Whitespace
 between arguments is omitted in output.
 .It \&IP
-.\" TODO.
+Begin a paragraph with the following syntax:
+.Bd -literal -offset indent
+\&.IP [head [width]]
+.Ed
+.Pp
+This follows the behaviour of the
+.Sq \&TP
+macro except that 
+.Va width ,
+which is only considered as such if properly-formed (e.g., 24n, 4,
+etc.), is used as the indentation offset instead of the default
+indentation value.
 .It \&IR
 Text is rendered alternately in italics and roman (the default font).
 Whitespace between arguments is omitted in output.
@@ -339,12 +349,11 @@ string specifies the organisation providing the utility.  The
 .Va volume
 replaces the default rendered volume as dictated by the manual section.
 .It \&TP
-Begin a paragraph where the head, if exceeding the indentation point, is
+Begin a paragraph where the head, if exceeding the indentation width, is
 followed by a newline; if not, the body follows on the same line after a
-buffer to the indentation point.  Subsequent output lines are indented.
+buffer to the indentation width.  Subsequent output lines are indented.
 .It \&br
 Breaks the current line.  Consecutive invocations have no further effect.
-.\" TODO.
 .It \&fi
 End literal mode begun by
 .Sq \&nf .

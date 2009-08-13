@@ -66,6 +66,7 @@ static	int		  pre_sp(DECL_ARGS);
 
 static	void		  post_B(DECL_ARGS);
 static	void		  post_I(DECL_ARGS);
+static	void		  post_IP(DECL_ARGS);
 static	void		  post_HP(DECL_ARGS);
 static	void		  post_SH(DECL_ARGS);
 static	void		  post_SS(DECL_ARGS);
@@ -81,7 +82,7 @@ static const struct termact termacts[MAN_MAX] = {
 	{ pre_PP, NULL }, /* LP */
 	{ pre_PP, NULL }, /* PP */
 	{ pre_PP, NULL }, /* P */
-	{ pre_IP, NULL }, /* IP */
+	{ pre_IP, post_IP }, /* IP */
 	{ pre_HP, post_HP }, /* HP */ 
 	{ NULL, NULL }, /* SM */
 	{ pre_B, post_B }, /* SB */
@@ -468,54 +469,81 @@ pre_PP(DECL_ARGS)
 static int
 pre_IP(DECL_ARGS)
 {
-	/* TODO */
-#if 0
-	const struct man_node *nn;
-	size_t		 offs, sv;
-	int		 ival;
+	const struct man_node	*nn;
+	size_t			 len;
+	int			 ival;
 
-	fmt_block_vspace(p, n);
-
-	p->flags |= TERMP_NOSPACE;
-
-	sv = p->offset;
-	p->offset = INDENT;
-
-	if (NULL == n->child)
+	switch (n->type) {
+	case (MAN_BLOCK):
+		fmt_block_vspace(p, n);
 		return(1);
-
-	p->flags |= TERMP_NOBREAK;
-
-	offs = sv;
-
-	/*
-	 * If the last token is number-looking (3m, 3n, 3) then
-	 * interpret it as the width specifier, else we stick with the
-	 * prior saved offset.  XXX - obviously not documented.
-	 */
-	for (nn = n->child; nn; nn = nn->next) {
-		if (NULL == nn->next) {
-			ival = arg_width(nn);
-			if (ival >= 0) {
-				offs = (size_t)ival;
-				break;
-			}
-		}
-		print_node(p, fl, nn, m);
+	case (MAN_BODY):
+		p->flags |= TERMP_NOLPAD;
+		p->flags |= TERMP_NOSPACE;
+		break;
+	case (MAN_HEAD):
+		p->flags |= TERMP_NOBREAK;
+		p->flags |= TERMP_TWOSPACE;
+		break;
+	default:
+		return(1);
 	}
 
-	p->rmargin = p->offset + offs;
+	len = INDENT * 2;
+	ival = -1;
 
-	term_flushln(p);
+	/* Calculate offset. */
 
-	p->offset = offs;
-	p->rmargin = p->maxrmargin;
+	if (NULL != (nn = n->parent->head->child))
+		if (NULL != (nn = nn->next)) {
+			for ( ; nn->next; nn = nn->next)
+				/* Do nothing. */ ;
+			if ((ival = arg_width(nn)) >= 0)
+				len = (size_t)ival;
+		}
 
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+	switch (n->type) {
+	case (MAN_BODY):
+		p->offset = INDENT + len;
+		p->rmargin = p->maxrmargin;
+		break;
+	case (MAN_HEAD):
+		p->offset = INDENT;
+		p->rmargin = INDENT + len;
+		if (ival < 0)
+			break;
 
-	return(0);
-#endif
+		/* Don't print the length value. */
+		for (nn = n->child; nn->next; nn = nn->next)
+			print_node(p, fl, nn, m);
+		return(0);
+	default:
+		break;
+	}
+
 	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+post_IP(DECL_ARGS)
+{
+
+	switch (n->type) {
+	case (MAN_HEAD):
+		term_flushln(p);
+		p->flags &= ~TERMP_NOBREAK;
+		p->flags &= ~TERMP_TWOSPACE;
+		p->rmargin = p->maxrmargin;
+		break;
+	case (MAN_BODY):
+		term_flushln(p);
+		p->flags &= ~TERMP_NOLPAD;
+		break;
+	default:
+		break;
+	}
 }
 
 
@@ -613,12 +641,10 @@ post_SS(DECL_ARGS)
 static int
 pre_SH(DECL_ARGS)
 {
-	/* 
-	 * XXX: undocumented: using two `SH' macros in sequence has no
-	 * vspace between calls, only a newline.
-	 */
+
 	switch (n->type) {
 	case (MAN_BLOCK):
+		/* If following a prior empty `SH', no vspace. */
 		if (n->prev && MAN_SH == n->prev->tok)
 			if (NULL == n->prev->body->child)
 				break;
