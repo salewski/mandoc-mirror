@@ -262,6 +262,18 @@ and
 This section is a canonical reference to all macros, arranged
 alphabetically.  For the scoping of individual macros, see
 .Sx MACRO SYNTAX .
+.\" SUBSECTION
+.Ss Terms
+In this reference, a numerical width may be either a standalone natural
+number (such as 3, 4, 10, etc.) or a natural number followed by a width
+multiplier 
+.Qq n ,
+corresponding to the width of the formatted letter n, or
+.Qq m ,
+corresponding to the width of the formatted letter m.  The latter is the
+default, if unspecified.
+.\" SUBSECTION
+.Ss Macro Reference
 .Bl -tag -width Ds
 .It \&B
 Text is rendered in bold face.
@@ -296,11 +308,8 @@ Begin a paragraph with the following syntax:
 .Pp
 This follows the behaviour of the
 .Sq \&TP
-macro except that 
-.Va width ,
-which is only considered as such if properly-formed (e.g., 24n, 4,
-etc.), is used as the indentation offset instead of the default
-indentation value.
+except for the macro syntax (all arguments on the line, instead of
+having next-line scope).
 .It \&IR
 Text is rendered alternately in italics and roman (the default font).
 Whitespace between arguments is omitted in output.
@@ -352,6 +361,16 @@ replaces the default rendered volume as dictated by the manual section.
 Begin a paragraph where the head, if exceeding the indentation width, is
 followed by a newline; if not, the body follows on the same line after a
 buffer to the indentation width.  Subsequent output lines are indented.
+.Pp
+The indentation width may be set as follows:
+.Bd -literal -offset indent
+\&.TP [width]
+.Ed
+.Pp
+Where
+.Va width
+must be a properly-formed numeric width.  If unspecified or improperly
+formed, the default indentation width is used.
 .It \&br
 Breaks the current line.  Consecutive invocations have no further effect.
 .It \&fi

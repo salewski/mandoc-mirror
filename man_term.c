@@ -474,9 +474,6 @@ pre_IP(DECL_ARGS)
 	int			 ival;
 
 	switch (n->type) {
-	case (MAN_BLOCK):
-		fmt_block_vspace(p, n);
-		return(1);
 	case (MAN_BODY):
 		p->flags |= TERMP_NOLPAD;
 		p->flags |= TERMP_NOSPACE;
@@ -485,11 +482,14 @@ pre_IP(DECL_ARGS)
 		p->flags |= TERMP_NOBREAK;
 		p->flags |= TERMP_TWOSPACE;
 		break;
+	case (MAN_BLOCK):
+		fmt_block_vspace(p, n);
+		/* FALLTHROUGH */
 	default:
 		return(1);
 	}
 
-	len = INDENT * 2;
+	len = INDENT;
 	ival = -1;
 
 	/* Calculate offset. */
@@ -503,11 +503,11 @@ pre_IP(DECL_ARGS)
 		}
 
 	switch (n->type) {
-	case (MAN_BODY):
-		p->offset = INDENT + len;
-		p->rmargin = p->maxrmargin;
-		break;
 	case (MAN_HEAD):
+		/* Handle zero-width lengths. */
+		if (0 == len)
+			len = 1;
+
 		p->offset = INDENT;
 		p->rmargin = INDENT + len;
 		if (ival < 0)
@@ -517,6 +517,10 @@ pre_IP(DECL_ARGS)
 		for (nn = n->child; nn->next; nn = nn->next)
 			print_node(p, fl, nn, m);
 		return(0);
+	case (MAN_BODY):
+		p->offset = INDENT + len;
+		p->rmargin = p->maxrmargin;
+		break;
 	default:
 		break;
 	}
@@ -551,21 +555,53 @@ post_IP(DECL_ARGS)
 static int
 pre_TP(DECL_ARGS)
 {
+	const struct man_node	*nn;
+	size_t			 len;
+	int			 ival;
 
 	switch (n->type) {
-	case (MAN_BLOCK):
-		fmt_block_vspace(p, n);
-		break;
 	case (MAN_HEAD):
-		p->rmargin = INDENT * 2;
-		p->offset = INDENT;
 		p->flags |= TERMP_NOBREAK;
 		p->flags |= TERMP_TWOSPACE;
 		break;
 	case (MAN_BODY):
 		p->flags |= TERMP_NOLPAD;
 		p->flags |= TERMP_NOSPACE;
-		p->offset = INDENT * 2;
+		break;
+	case (MAN_BLOCK):
+		fmt_block_vspace(p, n);
+		/* FALLTHROUGH */
+	default:
+		return(1);
+	}
+
+	len = INDENT;
+	ival = -1;
+
+	/* Calculate offset. */
+
+	if (NULL != (nn = n->parent->head->child))
+		if (NULL != nn->next)
+			if ((ival = arg_width(nn)) >= 0)
+				len = (size_t)ival;
+
+	switch (n->type) {
+	case (MAN_HEAD):
+		/* Handle zero-length properly. */
+		if (0 == len)
+			len = 1;
+
+		p->offset = INDENT;
+		p->rmargin = INDENT + len;
+
+		/* Don't print same-line elements. */
+		for (nn = n->child; nn; nn = nn->next) 
+			if (nn->line > n->line)
+				print_node(p, fl, nn, m);
+		return(0);
+	case (MAN_BODY):
+		p->offset = INDENT + len;
+		p->rmargin = p->maxrmargin;
 		break;
 	default:
 		break;
