@@ -220,7 +220,13 @@ where capitalised non-terminals represent nodes.
 .It ROOT
 \(<- mnode+
 .It mnode
-\(<- ELEMENT | TEXT
+\(<- ELEMENT | TEXT | BLOCK
+.It BLOCK
+\(<- HEAD BODY
+.It HEAD
+\(<- mnode*
+.It BODY
+\(<- mnode*
 .It ELEMENT
 \(<- ELEMENT | TEXT*
 .It TEXT
