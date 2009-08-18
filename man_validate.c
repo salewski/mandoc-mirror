@@ -289,9 +289,9 @@ static int
 check_eline(CHKARGS)
 {
 
-	if ( ! (MAN_ELINE & m->flags))
-		return(1);
-	return(man_nerr(m, n, WLNSCOPE));
+	if (MAN_ELINE & m->flags)
+		return(man_nerr(m, n, WLNSCOPE));
+	return(1);
 }
 
 
@@ -299,8 +299,10 @@ static int
 check_bline(CHKARGS)
 {
 
-	if ( ! (MAN_BLINE & m->flags))
-		return(1);
-	return(man_nerr(m, n, WLNSCOPE));
+	if (MAN_BLINE & m->flags)
+		return(man_nerr(m, n, WLNSCOPE));
+	if (MAN_ELINE & m->flags)
+		return(man_nerr(m, n, WLNSCOPE));
+	return(1);
 }
 
