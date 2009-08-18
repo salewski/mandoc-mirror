@@ -27,15 +27,14 @@
 #define	INDENT		  7
 #define	HALFINDENT	  3
 
-#ifdef __linux__
-extern	size_t		  strlcpy(char *, const char *, size_t);
-extern	size_t		  strlcat(char *, const char *, size_t);
-#endif
-
+struct	mtermp {
+	int		  fl;
 #define	MANT_LITERAL	 (1 << 0)
+	int		  lmargin;
+};
 
 #define	DECL_ARGS 	  struct termp *p, \
-			  int *fl, \
+			  struct mtermp *mt, \
 			  const struct man_node *n, \
 			  const struct man_meta *m
 
@@ -103,6 +102,11 @@ static const struct termact termacts[MAN_MAX] = {
 	{ pre_r, NULL }, /* r */
 };
 
+#ifdef __linux__
+extern	size_t		  strlcpy(char *, const char *, size_t);
+extern	size_t		  strlcat(char *, const char *, size_t);
+#endif
+
 static	void		  print_head(struct termp *, 
 				const struct man_meta *);
 static	void		  print_body(DECL_ARGS);
@@ -117,16 +121,18 @@ static	int		  arg_width(const struct man_node *);
 int
 man_run(struct termp *p, const struct man *m)
 {
-	int		 fl;
+	struct mtermp	 mt;
 
 	print_head(p, man_meta(m));
 	p->flags |= TERMP_NOSPACE;
 	assert(man_node(m));
 	assert(MAN_ROOT == man_node(m)->type);
 
-	fl = 0;
+	mt.fl = 0;
+	mt.lmargin = INDENT;
+
 	if (man_node(m)->child)
-		print_body(p, &fl, man_node(m)->child, man_meta(m));
+		print_body(p, &mt, man_node(m)->child, man_meta(m));
 	print_foot(p, man_meta(m));
 
 	return(1);
@@ -223,7 +229,7 @@ static int
 pre_fi(DECL_ARGS)
 {
 
-	*fl &= ~MANT_LITERAL;
+	mt->fl &= ~MANT_LITERAL;
 	return(1);
 }
 
@@ -234,7 +240,7 @@ pre_nf(DECL_ARGS)
 {
 
 	term_newln(p);
-	*fl |= MANT_LITERAL;
+	mt->fl |= MANT_LITERAL;
 	return(1);
 }
 
@@ -251,7 +257,7 @@ pre_IR(DECL_ARGS)
 			p->flags |= TERMP_UNDER;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
-		print_node(p, fl, nn, m);
+		print_node(p, mt, nn, m);
 		if ( ! (i % 2))
 			p->flags &= ~TERMP_UNDER;
 	}
@@ -270,7 +276,7 @@ pre_IB(DECL_ARGS)
 		p->flags |= i % 2 ? TERMP_BOLD : TERMP_UNDER;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
-		print_node(p, fl, nn, m);
+		print_node(p, mt, nn, m);
 		p->flags &= i % 2 ? ~TERMP_BOLD : ~TERMP_UNDER;
 	}
 	return(0);
@@ -289,7 +295,7 @@ pre_RB(DECL_ARGS)
 			p->flags |= TERMP_BOLD;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
-		print_node(p, fl, nn, m);
+		print_node(p, mt, nn, m);
 		if (i % 2)
 			p->flags &= ~TERMP_BOLD;
 	}
@@ -309,7 +315,7 @@ pre_RI(DECL_ARGS)
 			p->flags |= TERMP_UNDER;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
-		print_node(p, fl, nn, m);
+		print_node(p, mt, nn, m);
 		if ( ! (i % 2))
 			p->flags &= ~TERMP_UNDER;
 	}
@@ -329,7 +335,7 @@ pre_BR(DECL_ARGS)
 			p->flags |= TERMP_BOLD;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
-		print_node(p, fl, nn, m);
+		print_node(p, mt, nn, m);
 		if ( ! (i % 2))
 			p->flags &= ~TERMP_BOLD;
 	}
@@ -348,7 +354,7 @@ pre_BI(DECL_ARGS)
 		p->flags |= i % 2 ? TERMP_UNDER : TERMP_BOLD;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
-		print_node(p, fl, nn, m);
+		print_node(p, mt, nn, m);
 		p->flags &= i % 2 ? ~TERMP_UNDER : ~TERMP_BOLD;
 	}
 	return(0);
@@ -409,20 +415,39 @@ pre_br(DECL_ARGS)
 static int
 pre_HP(DECL_ARGS)
 {
+	size_t			 len;
+	int			 ival;
+	const struct man_node	*nn;
 
 	switch (n->type) {
 	case (MAN_BLOCK):
 		fmt_block_vspace(p, n);
-		break;
+		return(1);
 	case (MAN_BODY):
 		p->flags |= TERMP_NOBREAK;
 		p->flags |= TERMP_TWOSPACE;
-		p->offset = INDENT;
-		p->rmargin = INDENT * 2;
 		break;
 	default:
 		return(0);
 	}
+
+	len = (size_t)mt->lmargin;
+	ival = -1;
+
+	/* Calculate offset. */
+
+	if (NULL != (nn = n->parent->head->child))
+		if ((ival = arg_width(nn)) >= 0)
+			len = (size_t)ival;
+
+	if (0 == len)
+		len = 1;
+
+	p->offset = INDENT;
+	p->rmargin = INDENT + len;
+
+	if (ival >= 0)
+		mt->lmargin = ival;
 
 	return(1);
 }
@@ -434,6 +459,9 @@ post_HP(DECL_ARGS)
 {
 
 	switch (n->type) {
+	case (MAN_BLOCK):
+		term_flushln(p);
+		break;
 	case (MAN_BODY):
 		term_flushln(p);
 		p->flags &= ~TERMP_NOBREAK;
@@ -454,6 +482,7 @@ pre_PP(DECL_ARGS)
 
 	switch (n->type) {
 	case (MAN_BLOCK):
+		mt->lmargin = INDENT;
 		fmt_block_vspace(p, n);
 		break;
 	default:
@@ -489,7 +518,7 @@ pre_IP(DECL_ARGS)
 		return(1);
 	}
 
-	len = INDENT;
+	len = (size_t)mt->lmargin;
 	ival = -1;
 
 	/* Calculate offset. */
@@ -513,9 +542,12 @@ pre_IP(DECL_ARGS)
 		if (ival < 0)
 			break;
 
+		/* Set the saved left-margin. */
+		mt->lmargin = ival;
+
 		/* Don't print the length value. */
 		for (nn = n->child; nn->next; nn = nn->next)
-			print_node(p, fl, nn, m);
+			print_node(p, mt, nn, m);
 		return(0);
 	case (MAN_BODY):
 		p->offset = INDENT + len;
@@ -575,7 +607,7 @@ pre_TP(DECL_ARGS)
 		return(1);
 	}
 
-	len = INDENT;
+	len = (size_t)mt->lmargin;
 	ival = -1;
 
 	/* Calculate offset. */
@@ -597,7 +629,11 @@ pre_TP(DECL_ARGS)
 		/* Don't print same-line elements. */
 		for (nn = n->child; nn; nn = nn->next) 
 			if (nn->line > n->line)
-				print_node(p, fl, nn, m);
+				print_node(p, mt, nn, m);
+
+		if (ival >= 0)
+			mt->lmargin = ival;
+
 		return(0);
 	case (MAN_BODY):
 		p->offset = INDENT + len;
@@ -640,16 +676,23 @@ pre_SS(DECL_ARGS)
 
 	switch (n->type) {
 	case (MAN_BLOCK):
-		term_newln(p);
-		if (n->prev)
-			term_vspace(p);
+		mt->lmargin = INDENT;
+		/* If following a prior empty `SS', no vspace. */
+		if (n->prev && MAN_SS == n->prev->tok)
+			if (NULL == n->prev->body->child)
+				break;
+		if (NULL == n->prev)
+			break;
+		term_vspace(p);
 		break;
 	case (MAN_HEAD):
 		p->flags |= TERMP_BOLD;
 		p->offset = HALFINDENT;
 		break;
-	default:
+	case (MAN_BODY):
 		p->offset = INDENT;
+		break;
+	default:
 		break;
 	}
 
@@ -667,6 +710,9 @@ post_SS(DECL_ARGS)
 		term_newln(p);
 		p->flags &= ~TERMP_BOLD;
 		break;
+	case (MAN_BODY):
+		term_newln(p);
+		break;
 	default:
 		break;
 	}
@@ -680,6 +726,7 @@ pre_SH(DECL_ARGS)
 
 	switch (n->type) {
 	case (MAN_BLOCK):
+		mt->lmargin = INDENT;
 		/* If following a prior empty `SH', no vspace. */
 		if (n->prev && MAN_SH == n->prev->tok)
 			if (NULL == n->prev->body->child)
@@ -745,23 +792,23 @@ print_node(DECL_ARGS)
 				n->string[sz - 2] == '\\')
 			p->flags |= TERMP_NOSPACE;
 		/* FIXME: this means that macro lines are munged!  */
-		if (MANT_LITERAL & *fl) {
+		if (MANT_LITERAL & mt->fl) {
 			p->flags |= TERMP_NOSPACE;
 			term_flushln(p);
 		}
 		break;
 	default:
 		if (termacts[n->tok].pre)
-			c = (*termacts[n->tok].pre)(p, fl, n, m);
+			c = (*termacts[n->tok].pre)(p, mt, n, m);
 		break;
 	}
 
 	if (c && n->child)
-		print_body(p, fl, n->child, m);
+		print_body(p, mt, n->child, m);
 
 	if (MAN_TEXT != n->type)
 		if (termacts[n->tok].post)
-			(*termacts[n->tok].post)(p, fl, n, m);
+			(*termacts[n->tok].post)(p, mt, n, m);
 }
 
 
@@ -769,10 +816,10 @@ static void
 print_body(DECL_ARGS)
 {
 
-	print_node(p, fl, n, m);
+	print_node(p, mt, n, m);
 	if ( ! n->next)
 		return;
-	print_body(p, fl, n->next, m);
+	print_body(p, mt, n->next, m);
 }
 
 

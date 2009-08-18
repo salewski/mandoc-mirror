@@ -107,24 +107,39 @@ rew_dohalt(int tok, enum man_type type, const struct man_node *n)
 
 	switch (tok) {
 	case (MAN_SH):
-		/* Break at root. */
+		/* Rewind to ourselves. */
 		if (type == n->type && tok == n->tok)
 			return(REW_REWIND);
 		break;
 	case (MAN_SS):
-		/* Break at section. */
+		/* Rewind to ourselves. */
 		if (type == n->type && tok == n->tok)
 			return(REW_REWIND);
-		if (MAN_BODY == n->type && MAN_SH == n->tok)
+		/* Rewind to a section, if a block. */
+		if (MAN_BLOCK == type && MAN_SH == n->parent->tok && 
+				MAN_BODY == n->parent->type)
+			return(REW_REWIND);
+		/* Don't go beyond a section. */
+		if (MAN_SH == n->tok)
 			return(REW_HALT);
 		break;
 	default:
-		/* Break at subsection. */
+		/* Rewind to ourselves. */
 		if (type == n->type && tok == n->tok)
 			return(REW_REWIND);
-		if (MAN_BODY == n->type && MAN_SS == n->tok)
+		/* Rewind to a subsection, if a block. */
+		if (MAN_BLOCK == type && MAN_SS == n->parent->tok && 
+				MAN_BODY == n->parent->type)
+			return(REW_REWIND);
+		/* Don't go beyond a subsection. */
+		if (MAN_SS == n->tok)
 			return(REW_HALT);
-		if (MAN_BODY == n->type && MAN_SH == n->tok)
+		/* Rewind to a section, if a block. */
+		if (MAN_BLOCK == type && MAN_SH == n->parent->tok && 
+				MAN_BODY == n->parent->type)
+			return(REW_REWIND);
+		/* Don't go beyond a section. */
+		if (MAN_SH == n->tok)
 			return(REW_HALT);
 		break;
 	}

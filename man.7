@@ -238,6 +238,7 @@ invocation.
 .Pp
 If a block macro is next-line scoped, it may only be followed by in-line
 macros (excluding
+.Sq br ,
 .Sq na ,
 .Sq sp ,
 .Sq nf ,
@@ -271,7 +272,15 @@ multiplier
 corresponding to the width of the formatted letter n, or
 .Qq m ,
 corresponding to the width of the formatted letter m.  The latter is the
-default, if unspecified.
+default, if unspecified.  Thus,
+.Bd -literal -offset indent
+\&.HP 12n
+.Ed
+.Pp
+indicates an offset of 12 
+.Qq n
+.Ns -sized
+letters.
 .\" SUBSECTION
 .Ss Macro Reference
 .Bl -tag -width Ds
@@ -294,7 +303,15 @@ Text is rendered alternately in bold face and roman (the default font).
 Whitespace between arguments is omitted in output.
 .It \&HP
 Begin a paragraph whose initial output line is left-justified, but
-subsequent output lines are indented.
+subsequent output lines are indented, with the following syntax:
+.Bd -literal -offset indent
+\&.HP [width]
+.Ed
+.Pp
+If 
+.Va width
+is specified, it's saved for later paragraph left-margins; if
+unspecified, the saved or default width is used.
 .It \&I
 Text is rendered in italics.
 .It \&IB
@@ -309,13 +326,17 @@ Begin a paragraph with the following syntax:
 This follows the behaviour of the
 .Sq \&TP
 except for the macro syntax (all arguments on the line, instead of
-having next-line scope).
+having next-line scope).  If
+.Va width
+is specified, it's saved for later paragraph left-margins; if
+unspecified, the saved or default width is used.
 .It \&IR
 Text is rendered alternately in italics and roman (the default font).
 Whitespace between arguments is omitted in output.
 .It \&LP, \&P, \&PP
 Begin an undecorated paragraph.  The scope of a paragraph is closed by a
-subsequent paragraph, sub-section, section, or end of file.
+subsequent paragraph, sub-section, section, or end of file.  The saved
+paragraph left-margin width is re-set to the default.
 .It \&R
 Text is rendered in roman (the default font).
 .It \&RB
@@ -329,13 +350,15 @@ Text is rendered in small size (one point smaller than the default font)
 bold face.
 .It \&SH
 Begin a section.  The scope of a section is only closed by another
-section or the end of file.
+section or the end of file.  The paragraph left-margin width is re-set
+to the default.
 .It \&SM
 Text is rendered in small size (one point smaller than the default
 font).
 .It \&SS
 Begin a sub-section.  The scope of a sub-section is closed by a
-subsequent sub-section, section, or end of file.
+subsequent sub-section, section, or end of file.  The paragraph
+left-margin width is re-set to the default.
 .It \&TH
 Sets the title of the manual page with the following syntax:
 .Bd -literal -offset indent
@@ -369,8 +392,10 @@ The indentation width may be set as follows:
 .Pp
 Where
 .Va width
-must be a properly-formed numeric width.  If unspecified or improperly
-formed, the default indentation width is used.
+must be a properly-formed numeric width.  If
+.Va width
+is specified, it's saved for later paragraph left-margins; if
+unspecified, the saved or default width is used.
 .It \&br
 Breaks the current line.  Consecutive invocations have no further effect.
 .It \&fi
