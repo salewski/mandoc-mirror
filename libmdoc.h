@@ -92,7 +92,6 @@ enum	merr {
 	EOPEN,
 	EQUOTPHR,
 	ENOCTX,
-	ESPACE,
 	ELIB,
 	MERRMAX
 };

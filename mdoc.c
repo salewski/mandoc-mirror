@@ -74,7 +74,6 @@ const	char *const __mdoc_merrnames[MERRMAX] = {
 	"unclosed explicit scope", /* EOPEN */
 	"unterminated quoted phrase", /* EQUOTPHR */
 	"closure macro without prior context", /* ENOCTX */
-	"invalid whitespace after control character", /* ESPACE */
 	"no description found for library" /* ELIB */
 };
 
@@ -670,37 +669,40 @@ macrowarn(struct mdoc *m, int ln, const char *buf)
 int
 parsemacro(struct mdoc *m, int ln, char *buf)
 {
-	int		  i, c;
+	int		  i, j, c, ppos;
 	char		  mac[5];
 
 	/* Empty lines are ignored. */
 
-	/* FIXME: this can accept `.    xx' like libman! */
-
 	if (0 == buf[1])
 		return(1);
 
-	if (' ' == buf[1]) {
-		i = 2;
+	i = 1;
+
+	/* Accept whitespace after the initial control char. */
+
+	if (' ' == buf[i]) {
+		i++;
 		while (buf[i] && ' ' == buf[i])
 			i++;
 		if (0 == buf[i])
 			return(1);
-		return(mdoc_perr(m, ln, 1, ESPACE));
 	}
+
+	ppos = i;
 
 	/* Copy the first word into a nil-terminated buffer. */
 
-	for (i = 1; i < 5; i++) {
-		if (0 == (mac[i - 1] = buf[i]))
+	for (j = 0; j < 4; j++, i++) {
+		if (0 == (mac[j] = buf[i]))
 			break;
 		else if (' ' == buf[i])
 			break;
 	}
 
-	mac[i - 1] = 0;
+	mac[j] = 0;
 
-	if (i == 5 || i <= 2) {
+	if (j == 4 || j < 2) {
 		if ( ! macrowarn(m, ln, mac))
 			goto err;
 		return(1);
@@ -721,7 +723,7 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 	 * Begin recursive parse sequence.  Since we're at the start of
 	 * the line, we don't need to do callable/parseable checks.
 	 */
-	if ( ! mdoc_macro(m, c, ln, 1, &i, buf)) 
+	if ( ! mdoc_macro(m, c, ln, ppos, &i, buf)) 
 		goto err;
 
 	return(1);
@@ -731,3 +733,5 @@ err:	/* Error out. */
 	m->flags |= MDOC_HALT;
 	return(0);
 }
+
+
