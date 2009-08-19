@@ -29,8 +29,6 @@
 #define	INDENT		  5
 #define	HALFINDENT	  3
 
-/* FIXME: macro arguments can be escaped. */
-
 #define	TTYPE_PROG	  0
 #define	TTYPE_CMD_FLAG	  1
 #define	TTYPE_CMD_ARG	  2
@@ -823,7 +821,7 @@ termp_it_pre(DECL_ARGS)
 	/* 
 	 * List-type can override the width in the case of fixed-head
 	 * values (bullet, dash/hyphen, enum).  Tags need a non-zero
-	 * offset.  FIXME: double-check that correct.
+	 * offset.
 	 */
 
 	switch (type) {
