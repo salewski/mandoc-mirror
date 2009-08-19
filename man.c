@@ -68,6 +68,10 @@ static	int		 man_alloc1(struct man *);
 static	int		 pstring(struct man *, int, int, 
 				const char *, size_t);
 
+#ifdef __linux__
+extern	size_t	  	  strlcpy(char *, const char *, size_t);
+#endif
+
 
 const struct man_node *
 man_node(const struct man *m)
