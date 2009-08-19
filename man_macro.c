@@ -27,9 +27,12 @@
 
 static	int		 in_line_eoln(MACRO_PROT_ARGS);
 static	int		 blk_imp(MACRO_PROT_ARGS);
+static	int		 blk_close(MACRO_PROT_ARGS);
 
 static	int		 rew_scope(enum man_type, struct man *, int);
 static	int 		 rew_dohalt(int, enum man_type, 
+				const struct man_node *);
+static	int		 rew_block(int, enum man_type, 
 				const struct man_node *);
 
 const	struct man_macro __man_macros[MAN_MAX] = {
@@ -60,6 +63,8 @@ const	struct man_macro __man_macros[MAN_MAX] = {
 	{ in_line_eoln, 0 }, /* nf */
 	{ in_line_eoln, 0 }, /* fi */
 	{ in_line_eoln, 0 }, /* r */
+	{ blk_close, 0 }, /* RE */
+	{ blk_imp, 0 }, /* RS */
 };
 
 const	struct man_macro * const man_macros = __man_macros;
@@ -88,6 +93,17 @@ man_unscope(struct man *m, const struct man_node *n)
 }
 
 
+static int
+rew_block(int ntok, enum man_type type, const struct man_node *n)
+{
+
+	if (MAN_BLOCK == type && ntok == n->parent->tok && 
+			MAN_BODY == n->parent->type)
+		return(REW_REWIND);
+	return(ntok == n->tok ? REW_HALT : REW_NOHALT);
+}
+
+
 /*
  * There are three scope levels: scoped to the root (all), scoped to the
  * section (all less sections), and scoped to subsections (all less
@@ -96,6 +112,7 @@ man_unscope(struct man *m, const struct man_node *n)
 static int 
 rew_dohalt(int tok, enum man_type type, const struct man_node *n)
 {
+	int		 c;
 
 	if (MAN_ROOT == n->type)
 		return(REW_HALT);
@@ -105,42 +122,36 @@ rew_dohalt(int tok, enum man_type type, const struct man_node *n)
 	if (MAN_VALID & n->flags)
 		return(REW_NOHALT);
 
+	/* Rewind to ourselves, first. */
+	if (type == n->type && tok == n->tok)
+		return(REW_REWIND);
+
 	switch (tok) {
 	case (MAN_SH):
-		/* Rewind to ourselves. */
-		if (type == n->type && tok == n->tok)
-			return(REW_REWIND);
 		break;
 	case (MAN_SS):
-		/* Rewind to ourselves. */
-		if (type == n->type && tok == n->tok)
-			return(REW_REWIND);
 		/* Rewind to a section, if a block. */
-		if (MAN_BLOCK == type && MAN_SH == n->parent->tok && 
-				MAN_BODY == n->parent->type)
-			return(REW_REWIND);
-		/* Don't go beyond a section. */
-		if (MAN_SH == n->tok)
-			return(REW_HALT);
+		if (REW_NOHALT != (c = rew_block(MAN_SH, type, n)))
+			return(c);
+		break;
+	case (MAN_RS):
+		/* Rewind to a subsection, if a block. */
+		if (REW_NOHALT != (c = rew_block(MAN_SS, type, n)))
+			return(c);
+		/* Rewind to a section, if a block. */
+		if (REW_NOHALT != (c = rew_block(MAN_SH, type, n)))
+			return(c);
 		break;
 	default:
-		/* Rewind to ourselves. */
-		if (type == n->type && tok == n->tok)
-			return(REW_REWIND);
+		/* Rewind to an offsetter, if a block. */
+		if (REW_NOHALT != (c = rew_block(MAN_RS, type, n)))
+			return(c);
 		/* Rewind to a subsection, if a block. */
-		if (MAN_BLOCK == type && MAN_SS == n->parent->tok && 
-				MAN_BODY == n->parent->type)
-			return(REW_REWIND);
-		/* Don't go beyond a subsection. */
-		if (MAN_SS == n->tok)
-			return(REW_HALT);
+		if (REW_NOHALT != (c = rew_block(MAN_SS, type, n)))
+			return(c);
 		/* Rewind to a section, if a block. */
-		if (MAN_BLOCK == type && MAN_SH == n->parent->tok && 
-				MAN_BODY == n->parent->type)
-			return(REW_REWIND);
-		/* Don't go beyond a section. */
-		if (MAN_SH == n->tok)
-			return(REW_HALT);
+		if (REW_NOHALT != (c = rew_block(MAN_SH, type, n)))
+			return(c);
 		break;
 	}
 
@@ -177,6 +188,39 @@ rew_scope(enum man_type type, struct man *m, int tok)
 
 	assert(n);
 	return(man_unscope(m, n));
+}
+
+
+/* ARGSUSED */
+int
+blk_close(MACRO_PROT_ARGS)
+{
+	int 		 	 ntok;
+	const struct man_node	*nn;
+
+	switch (tok) {
+	case (MAN_RE):
+		ntok = MAN_RS;
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	for (nn = m->last->parent; nn; nn = nn->parent)
+		if (ntok == nn->tok)
+			break;
+
+	if (NULL == nn)
+		if ( ! man_pwarn(m, line, ppos, WNOSCOPE))
+			return(0);
+
+	if ( ! rew_scope(MAN_BODY, m, ntok))
+		return(0);
+	if ( ! rew_scope(MAN_BLOCK, m, ntok))
+		return(0);
+	m->next = MAN_NEXT_SIBLING;
+	return(1);
 }
 
 
@@ -219,7 +263,6 @@ blk_imp(MACRO_PROT_ARGS)
 
 		if ( ! man_word_alloc(m, line, la, p))
 			return(0);
-		m->next = MAN_NEXT_SIBLING;
 	}
 
 	/* Close out head and open body (unless MAN_SCOPE). */
@@ -245,7 +288,6 @@ in_line_eoln(MACRO_PROT_ARGS)
 		return(0);
 
 	n = m->last;
-	m->next = MAN_NEXT_CHILD;
 
 	for (;;) {
 		la = *pos;
@@ -258,7 +300,6 @@ in_line_eoln(MACRO_PROT_ARGS)
 
 		if ( ! man_word_alloc(m, line, la, p))
 			return(0);
-		m->next = MAN_NEXT_SIBLING;
 	}
 
 	if (n == m->last && (MAN_SCOPED & man_macros[tok].flags)) {

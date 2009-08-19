@@ -83,6 +83,8 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ pres_bline, posts_eq0 }, /* nf */
 	{ pres_bline, posts_eq0 }, /* fi */
 	{ NULL, NULL }, /* r */
+	{ NULL, NULL }, /* RE */
+	{ NULL, NULL }, /* RS */
 };
 
 
@@ -136,6 +138,8 @@ man_valid_post(struct man *m)
 static int
 check_root(CHKARGS) 
 {
+
+	/* FIXME: closing out explicit scope! */
 
 	/* XXX - make this into a warning? */
 	if (MAN_BLINE & m->flags)

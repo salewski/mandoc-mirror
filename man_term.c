@@ -100,6 +100,8 @@ static const struct termact termacts[MAN_MAX] = {
 	{ pre_nf, NULL }, /* nf */
 	{ pre_fi, NULL }, /* fi */
 	{ pre_r, NULL }, /* r */
+	{ NULL, NULL }, /* RE */
+	{ NULL, NULL }, /* RS */
 };
 
 #ifdef __linux__

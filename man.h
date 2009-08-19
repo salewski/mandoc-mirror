@@ -46,7 +46,9 @@
 #define	MAN_nf		 24
 #define	MAN_fi		 25
 #define	MAN_r		 26
-#define	MAN_MAX	 	 27
+#define	MAN_RE		 27
+#define	MAN_RS		 28
+#define	MAN_MAX	 	 29
 
 enum	man_type {
 	MAN_TEXT,

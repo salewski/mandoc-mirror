@@ -40,7 +40,8 @@ const	char *const __man_merrnames[WERRMAX] = {
 	"expected empty block head", /* WNHEADARGS */
 	"unknown macro", /* WMACRO */
 	"ill-formed macro", /* WMACROFORM */
-	"scope open on exit" /* WEXITSCOPE */
+	"scope open on exit", /* WEXITSCOPE */
+	"no scope context" /* WNOSCOPE */
 };
 
 const	char *const __man_macronames[MAN_MAX] = {		 
@@ -50,7 +51,8 @@ const	char *const __man_macronames[MAN_MAX] = {
 	"BI",		"IB",		"BR",		"RB",
 	"R",		"B",		"I",		"IR",
 	"RI",		"na",		"i",		"sp",
-	"nf",		"fi",		"r"
+	"nf",		"fi",		"r",		"RE",
+	"RS"
 	};
 
 const	char * const *man_macronames = __man_macronames;
@@ -257,14 +259,17 @@ man_node_alloc(int line, int pos, enum man_type type, int tok)
 
 
 int
-man_elem_alloc(struct man *man, int line, int pos, int tok)
+man_elem_alloc(struct man *m, int line, int pos, int tok)
 {
 	struct man_node *p;
 
 	p = man_node_alloc(line, pos, MAN_ELEM, tok);
 	if (NULL == p)
 		return(0);
-	return(man_node_append(man, p));
+	if ( ! man_node_append(m, p))
+		return(0);
+	m->next = MAN_NEXT_CHILD;
+	return(1);
 }
 
 
@@ -314,8 +319,7 @@ man_block_alloc(struct man *m, int line, int pos, int tok)
 
 
 int
-man_word_alloc(struct man *man, 
-		int line, int pos, const char *word)
+man_word_alloc(struct man *m, int line, int pos, const char *word)
 {
 	struct man_node	*p;
 
@@ -324,7 +328,10 @@ man_word_alloc(struct man *man,
 		return(0);
 	if (NULL == (p->string = strdup(word)))
 		return(0);
-	return(man_node_append(man, p));
+	if ( ! man_node_append(m, p))
+		return(0);
+	m->next = MAN_NEXT_SIBLING;
+	return(1);
 }
 
 
@@ -359,6 +366,8 @@ man_ptext(struct man *m, int line, char *buf)
 {
 
 	/* First allocate word. */
+
+	/* FIXME: dechunk words! */
 
 	if ( ! man_word_alloc(m, line, 0, buf))
 		return(0);

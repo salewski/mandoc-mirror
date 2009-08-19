@@ -57,6 +57,7 @@ enum	merr {
 	WMACRO,
 	WMACROFORM,
 	WEXITSCOPE,
+	WNOSCOPE,
 	WERRMAX
 };
 
