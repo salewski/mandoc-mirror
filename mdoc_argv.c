@@ -32,8 +32,6 @@
  * There's no limit to the number or arguments that may be allocated.
  */
 
-/* FIXME .Bf Li raises "macro-like parameter". */
-
 #define	ARGS_DELIM	(1 << 1)
 #define	ARGS_TABSEP	(1 << 2)
 
