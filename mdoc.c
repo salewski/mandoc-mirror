@@ -543,7 +543,10 @@ pstring(struct mdoc *m, int line, int pos, const char *p, size_t len)
 	/* Prohibit truncation. */
 	assert(sv < len + 1);
 
-	return(node_append(m, n));
+	if ( ! node_append(m, n))
+		return(0);
+	m->next = MDOC_NEXT_SIBLING;
+	return(1);
 }
 
 
@@ -600,12 +603,8 @@ parsetext(struct mdoc *m, int line, char *buf)
 	 * back-end, as it should be preserved as a single term.
 	 */
 
-	if (MDOC_LITERAL & m->flags) {
-		if ( ! mdoc_word_alloc(m, line, 0, buf))
-			return(0);
-		m->next = MDOC_NEXT_SIBLING;
-		return(1);
-	}
+	if (MDOC_LITERAL & m->flags)
+		return(mdoc_word_alloc(m, line, 0, buf));
 
 	/* Disallow blank/white-space lines in non-literal mode. */
 
@@ -630,7 +629,6 @@ parsetext(struct mdoc *m, int line, char *buf)
 		buf[i++] = 0;
 		if ( ! pstring(m, line, j, &buf[j], (size_t)(i - j)))
 			return(0);
-		m->next = MDOC_NEXT_SIBLING;
 
 		for ( ; ' ' == buf[i]; i++)
 			/* Skip trailing whitespace. */ ;

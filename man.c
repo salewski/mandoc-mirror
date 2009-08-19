@@ -65,6 +65,8 @@ static	int		 man_ptext(struct man *, int, char *);
 static	int		 man_pmacro(struct man *, int, char *);
 static	void		 man_free1(struct man *);
 static	int		 man_alloc1(struct man *);
+static	int		 pstring(struct man *, int, int, 
+				const char *, size_t);
 
 
 const struct man_node *
@@ -318,20 +320,40 @@ man_block_alloc(struct man *m, int line, int pos, int tok)
 }
 
 
-int
-man_word_alloc(struct man *m, int line, int pos, const char *word)
+static int
+pstring(struct man *m, int line, int pos, 
+		const char *p, size_t len)
 {
-	struct man_node	*p;
+	struct man_node	*n;
+	size_t		 sv;
 
-	p = man_node_alloc(line, pos, MAN_TEXT, -1);
-	if (NULL == p)
+	n = man_node_alloc(line, pos, MAN_TEXT, -1);
+	if (NULL == n)
 		return(0);
-	if (NULL == (p->string = strdup(word)))
+
+	n->string = malloc(len + 1);
+	if (NULL == n->string) {
+		free(n);
 		return(0);
-	if ( ! man_node_append(m, p))
+	}
+
+	sv = strlcpy(n->string, p, len + 1);
+
+	/* Prohibit truncation. */
+	assert(sv < len + 1);
+
+	if ( ! man_node_append(m, n))
 		return(0);
 	m->next = MAN_NEXT_SIBLING;
 	return(1);
+}
+
+
+int
+man_word_alloc(struct man *m, int line, int pos, const char *word)
+{
+
+	return(pstring(m, line, pos, word, strlen(word)));
 }
 
 
@@ -364,14 +386,42 @@ man_node_freelist(struct man_node *p)
 static int
 man_ptext(struct man *m, int line, char *buf)
 {
+	int		 i, j;
 
-	/* First allocate word. */
+	/* First de-chunk and allocate words. */
 
-	/* FIXME: dechunk words! */
+	for (i = 0; ' ' == buf[i]; i++)
+		/* Skip leading whitespace. */ ;
+	if (0 == buf[i]) {
+		if ( ! pstring(m, line, 0, &buf[i], 0))
+			return(0);
+		goto descope;
+	}
 
-	if ( ! man_word_alloc(m, line, 0, buf))
+	for (j = i; buf[i]; i++) {
+		if (' ' != buf[i])
+			continue;
+
+		/* Escaped whitespace. */
+		if (i && ' ' == buf[i] && '\\' == buf[i - 1])
+			continue;
+
+		buf[i++] = 0;
+		if ( ! pstring(m, line, j, &buf[j], (size_t)(i - j)))
+			return(0);
+
+		for ( ; ' ' == buf[i]; i++)
+			/* Skip trailing whitespace. */ ;
+
+		j = i;
+		if (0 == buf[i])
+			break;
+	}
+
+	if (j != i && ! pstring(m, line, j, &buf[j], (size_t)(i - j)))
 		return(0);
-	m->next = MAN_NEXT_SIBLING;
+
+descope:
 
 	/*
 	 * Co-ordinate what happens with having a next-line scope open:

@@ -645,7 +645,6 @@ append_delims(struct mdoc *mdoc, int line, int *pos, char *buf)
 		assert(mdoc_isdelim(p));
 		if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
 			return(0);
-		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
 	return(1);
@@ -722,7 +721,6 @@ blk_exp_close(MACRO_PROT_ARGS)
 
 		if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
 			return(0);
-		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
 	if ( ! flushed && ! rew_expblock(mdoc, tok, line, ppos))
@@ -852,7 +850,6 @@ in_line(MACRO_PROT_ARGS)
 			cnt++;
 		if ( ! mdoc_word_alloc(mdoc, line, la, p))
 			return(0);
-		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
 	if (0 == lastpunct && ! rew_elem(mdoc, tok))
@@ -996,7 +993,6 @@ blk_full(MACRO_PROT_ARGS)
 		if (MDOC_MAX == (c = lookup(mdoc, tok, p))) {
 			if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
 				return(0);
-			mdoc->next = MDOC_NEXT_SIBLING;
 			continue;
 		} 
 
@@ -1063,7 +1059,6 @@ blk_part_imp(MACRO_PROT_ARGS)
 		if (MDOC_MAX == (c = lookup(mdoc, tok, p))) {
 			if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
 				return(0);
-			mdoc->next = MDOC_NEXT_SIBLING;
 			continue;
 		} 
 
@@ -1191,7 +1186,6 @@ blk_part_exp(MACRO_PROT_ARGS)
 	
 		if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
 			return(0);
-		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
 	if ( ! flushed) {
@@ -1298,7 +1292,6 @@ in_line_argn(MACRO_PROT_ARGS)
 	
 		if ( ! mdoc_word_alloc(mdoc, line, lastarg, p))
 			return(0);
-		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
 	if ( ! flushed && ! rew_elem(mdoc, tok))
@@ -1366,7 +1359,6 @@ in_line_eoln(MACRO_PROT_ARGS)
 
 		if ( ! mdoc_word_alloc(mdoc, line, la, p))
 			return(0);
-		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
 	return(rew_elem(mdoc, tok));
@@ -1414,7 +1406,6 @@ phrase(struct mdoc *mdoc, int line, int ppos, char *buf)
 
 		if ( ! mdoc_word_alloc(mdoc, line, la, p))
 			return(0);
-		mdoc->next = MDOC_NEXT_SIBLING;
 	}
 
 	return(1);
