@@ -96,7 +96,7 @@ enum	merr {
 	MERRMAX
 };
 
-#define	MACRO_PROT_ARGS	struct mdoc *mdoc, int tok, int line, \
+#define	MACRO_PROT_ARGS	struct mdoc *m, int tok, int line, \
 			int ppos, int *pos, char *buf
 
 struct	mdoc_macro {

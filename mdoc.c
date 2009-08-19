@@ -459,7 +459,10 @@ mdoc_tail_alloc(struct mdoc *m, int line, int pos, int tok)
 	p = node_alloc(m, line, pos, tok, MDOC_TAIL);
 	if (NULL == p)
 		return(0);
-	return(node_append(m, p));
+	if ( ! node_append(m, p))
+		return(0);
+	m->next = MDOC_NEXT_CHILD;
+	return(1);
 }
 
 
@@ -474,7 +477,10 @@ mdoc_head_alloc(struct mdoc *m, int line, int pos, int tok)
 	p = node_alloc(m, line, pos, tok, MDOC_HEAD);
 	if (NULL == p)
 		return(0);
-	return(node_append(m, p));
+	if ( ! node_append(m, p))
+		return(0);
+	m->next = MDOC_NEXT_CHILD;
+	return(1);
 }
 
 
@@ -486,7 +492,10 @@ mdoc_body_alloc(struct mdoc *m, int line, int pos, int tok)
 	p = node_alloc(m, line, pos, tok, MDOC_BODY);
 	if (NULL == p)
 		return(0);
-	return(node_append(m, p));
+	if ( ! node_append(m, p))
+		return(0);
+	m->next = MDOC_NEXT_CHILD;
+	return(1);
 }
 
 
@@ -502,7 +511,10 @@ mdoc_block_alloc(struct mdoc *m, int line, int pos,
 	p->args = args;
 	if (p->args)
 		(args->refcnt)++;
-	return(node_append(m, p));
+	if ( ! node_append(m, p))
+		return(0);
+	m->next = MDOC_NEXT_CHILD;
+	return(1);
 }
 
 
@@ -518,7 +530,10 @@ mdoc_elem_alloc(struct mdoc *m, int line, int pos,
 	p->args = args;
 	if (p->args)
 		(args->refcnt)++;
-	return(node_append(m, p));
+	if ( ! node_append(m, p))
+		return(0);
+	m->next = MDOC_NEXT_CHILD;
+	return(1);
 }
 
 
