@@ -64,7 +64,7 @@ const	struct man_macro __man_macros[MAN_MAX] = {
 	{ in_line_eoln, 0 }, /* fi */
 	{ in_line_eoln, 0 }, /* r */
 	{ blk_close, 0 }, /* RE */
-	{ blk_imp, 0 }, /* RS */
+	{ blk_imp, MAN_EXPLICIT }, /* RS */
 };
 
 const	struct man_macro * const man_macros = __man_macros;
@@ -312,8 +312,6 @@ in_line_eoln(MACRO_PROT_ARGS)
 	 * make sure that we don't clobber as its sibling.
 	 */
 
-	/* FIXME: clean this to use man_unscope(). */
-
 	for ( ; m->last; m->last = m->last->parent) {
 		if (m->last == n)
 			break;
@@ -345,6 +343,18 @@ in_line_eoln(MACRO_PROT_ARGS)
 int
 man_macroend(struct man *m)
 {
+	struct man_node	*n;
+
+	n = MAN_VALID & m->last->flags ?
+		m->last->parent : m->last;
+
+	for ( ; n; n = n->parent) {
+		if (MAN_BLOCK != n->type)
+			continue;
+		if ( ! (MAN_EXPLICIT & man_macros[n->tok].flags))
+			continue;
+		return(man_nerr(m, n, WEXITSCOPE));
+	}
 
 	return(man_unscope(m, m->first));
 }

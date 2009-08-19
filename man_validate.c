@@ -139,8 +139,6 @@ static int
 check_root(CHKARGS) 
 {
 
-	/* FIXME: closing out explicit scope! */
-
 	/* XXX - make this into a warning? */
 	if (MAN_BLINE & m->flags)
 		return(man_nerr(m, n, WEXITSCOPE));
