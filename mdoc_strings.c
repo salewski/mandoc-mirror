@@ -30,7 +30,7 @@ struct mdoc_secname {
 	enum mdoc_sec	 sec;	/* Corresponding section. */
 };
 
-#define	SECNAME_MAX	(18)
+#define	SECNAME_MAX	(20)
 
 static	const struct mdoc_secname secnames[SECNAME_MAX] = {
 	{ "NAME", SEC_NAME },
@@ -38,6 +38,7 @@ static	const struct mdoc_secname secnames[SECNAME_MAX] = {
 	{ "SYNOPSIS", SEC_SYNOPSIS },
 	{ "DESCRIPTION", SEC_DESCRIPTION },
 	{ "IMPLEMENTATION NOTES", SEC_IMPLEMENTATION },
+	{ "EXIT STATUS", SEC_EXIT_STATUS },
 	{ "RETURN VALUES", SEC_RETURN_VALUES },
 	{ "ENVIRONMENT", SEC_ENVIRONMENT },
 	{ "FILES", SEC_FILES },
@@ -51,6 +52,7 @@ static	const struct mdoc_secname secnames[SECNAME_MAX] = {
 	{ "AUTHORS", SEC_AUTHORS },
 	{ "CAVEATS", SEC_CAVEATS },
 	{ "BUGS", SEC_BUGS },
+	{ "SECURITY CONSIDERATIONS", SEC_SECURITY }
 };
 
 #ifdef __linux__

@@ -18,6 +18,7 @@
 .\" .Sh LIBRARY
 .Sh SYNOPSIS
 .Sh DESCRIPTION
+.\" .Sh IMPLEMENTATION NOTES
 .\" The next is for sections 1 & 8 only.
 .\" .Sh EXIT STATUS
 .\" The next is for sections 2, 3, & 9 only.
