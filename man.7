@@ -120,13 +120,13 @@ utility such as
 Each
 . Nm
 document must contain contains at least the
-. Sq \&TH
+. Sq TH
 macro describing the document's section and title.  It may occur
 anywhere in the document, although conventionally, it appears as the
 first macro.
 . Pp
 Beyond
-. Sq \&TH ,
+. Sq TH ,
 at least one macro or text node must appear in the document.  Documents
 are generally structured as follows:
 . Bd -literal -offset indent
@@ -163,84 +163,122 @@ control character ,
 . Sq \&. ,
 at the beginning of the line.  An arbitrary amount of whitespace may
 sit between the control character and the macro name.  Thus,
-. Sq \&.PP
+. Sq .PP
 and
-. Sq \&.\ \ \ \&PP
+. Sq \&.\ \ \ PP
 are equivalent.
 . Pp
 The
 . Nm
-macros are classified by scope: line scope or block scope.  Line-scoped
+macros are classified by scope: line scope or block scope.  Line
 macros are only scoped to the current line (and, in some situations,
 the subsequent line).  Block macros are scoped to the current line and
 subsequent lines until closed by another block macro.
 .
 .
 . Ss Line Macros
-Line-macros are scoped to the current line, with the body consisting of
-zero or more arguments.  If a macro is next-line scoped and the line
-arguments are empty, the next line is used instead.  Thus:
+Line macros are generally scoped to the current line, with the body
+consisting of zero or more arguments.  If a macro is scoped to the next
+line and the line arguments are empty, the next line is used instead,
+else the general syntax is used.  Thus:
 .  Bd -literal -offset indent
-\&.RI
+\&.I
 foo
 .  Ed
 .  Pp
 is equivalent to
-.  Sq \&.RI foo .
+.  Sq \&.I foo .
 .\" PARAGRAPH
-Consecutive next-line invocations are disallowed.
+Consecutive next-line scope invocations are disallowed.
 .  Bd -literal -offset indent
 \&.YO \(lBbody...\(rB
 \(lBbody...\(rB
 .  Ed
 .  Pp
+It is considered an error when next-line scope is open at the end of
+file.
+.  Pp
 .  Bl -column -compact -offset indent "MacroX" "ArgumentsX" "ScopeXXXXX"
 .   It Em Macro Ta Em Arguments Ta Em Scope
-.   It  \&B     Ta    n         Ta    next-line
-.   It  \&BI    Ta    n         Ta    current
-.   It  \&BR    Ta    n         Ta    current
-.   It  \&I     Ta    n         Ta    next-line
-.   It  \&IB    Ta    n         Ta    current
-.   It  \&IR    Ta    n         Ta    current
-.   It  \&R     Ta    n         Ta    next-line
-.   It  \&RB    Ta    n         Ta    current
-.   It  \&RI    Ta    n         Ta    current
-.   It  \&SB    Ta    n         Ta    next-line
-.   It  \&SM    Ta    n         Ta    next-line
-.   It  \&TH    Ta    >1, <6    Ta    current
-.   It  \&br    Ta    0         Ta    current
-.   It  \&fi    Ta    0         Ta    current
-.   It  \&i     Ta    n         Ta    current
-.   It  \&na    Ta    0         Ta    current
-.   It  \&nf    Ta    0         Ta    current
-.   It  \&r     Ta    0         Ta    current
-.   It  \&sp    Ta    1         Ta    current
+.   It    B     Ta    n         Ta    next-line
+.   It    BI    Ta    n         Ta    current
+.   It    BR    Ta    n         Ta    current
+.   It    I     Ta    n         Ta    next-line
+.   It    IB    Ta    n         Ta    current
+.   It    IR    Ta    n         Ta    current
+.   It    R     Ta    n         Ta    next-line
+.   It    RB    Ta    n         Ta    current
+.   It    RI    Ta    n         Ta    current
+.   It    SB    Ta    n         Ta    next-line
+.   It    SM    Ta    n         Ta    next-line
+.   It    TH    Ta    >1, <6    Ta    current
+.   It    br    Ta    0         Ta    current
+.   It    fi    Ta    0         Ta    current
+.   It    i     Ta    n         Ta    current
+.   It    na    Ta    0         Ta    current
+.   It    nf    Ta    0         Ta    current
+.   It    r     Ta    0         Ta    current
+.   It    sp    Ta    1         Ta    current
 .  El
 .  Pp
 The lower-case 
-.  Sq \&br ,
-.  Sq \&fi ,
-.  Sq \&i ,
-.  Sq \&na ,
-.  Sq \&nf ,
-.  Sq \&r ,
+.  Sq br ,
+.  Sq fi ,
+.  Sq i ,
+.  Sq na ,
+.  Sq nf ,
+.  Sq r ,
 and
-.  Sq \&sp
+.  Sq sp
 macros aren't historically part of
 .  Nm
 and should not be used.  They're included for compatibility.
 .
 .
 . Ss Block Macros
-Block macros are comprised of a head and body.  The head is scoped to
-the current line and, in one circumstance, the next line; the body is
-scoped to subsequent lines and is closed out by a subsequent block macro
-invocation.
+Block macros are comprised of a head and body.  Like for in-line macros,
+the head is scoped to the current line and, in one circumstance, the
+next line; the body is scoped to subsequent lines and is closed out by a
+subsequent block macro invocation.
 .  Bd -literal -offset indent
 \&.YO \(lBhead...\(rB
 \(lBhead...\(rB
 \(lBbody...\(rB
 .  Ed
+.  Pp
+The closure of body scope may be to the section, where a macro is closed
+by
+.  Sq SH ;
+sub-section, closed by a section or
+.  Sq SS ;
+part, closed by a section, sub-section, or
+.  Sq RE ;
+or paragraph, closed by a section, sub-section, part, 
+.  Sq HP ,
+.  Sq IP ,
+.  Sq LP ,
+.  Sq P ,
+.  Sq PP ,
+or
+.  Sq TP .
+No closure refers to an explicit block closing macro.
+.  Pp
+It is considered an error when part or next-line scope is open at the
+end of file.
+.  Pp
+.  Bl -column "MacroX" "ArgumentsX" "Head ScopeX" "sub-sectionX" -compact -offset indent
+.   It Em Macro Ta Em Arguments Ta Em Head Scope Ta Em Body Scope
+.   It   HP     Ta    <2        Ta    current    Ta    paragraph
+.   It   IP     Ta    <3        Ta    current    Ta    paragraph
+.   It   LP     Ta    0         Ta    current    Ta    paragraph
+.   It   P      Ta    0         Ta    current    Ta    paragraph
+.   It   PP     Ta    0         Ta    current    Ta    paragraph
+.   It   RE     Ta    0         Ta    current    Ta    none
+.   It   RS     Ta    1         Ta    current    Ta    part
+.   It   SH     Ta    >0        Ta    current    Ta    section
+.   It   SS     Ta    >0        Ta    current    Ta    sub-section
+.   It   TP     Ta    n         Ta    next-line  Ta    paragraph
+.  El
 .  Pp
 If a block macro is next-line scoped, it may only be followed by in-line
 macros (excluding
@@ -251,18 +289,6 @@ macros (excluding
 .  Sq fi ,
 and
 .  Sq TH ) .
-.  Pp
-.  Bl -column "MacroX" "Arguments" "ScopeXXXX" -compact -offset indent
-.   It Em Macro Ta Em Arguments Ta Em Scope
-.   It \&HP     Ta    <2        Ta    current
-.   It \&IP     Ta    <3        Ta    current
-.   It \&LP     Ta    0         Ta    current
-.   It \&P      Ta    0         Ta    current
-.   It \&PP     Ta    0         Ta    current
-.   It \&SH     Ta    >0        Ta    current
-.   It \&SS     Ta    >0        Ta    current
-.   It \&TP     Ta    n         Ta    next-line
-.  El
 .
 .
 .Sh REFERENCE
@@ -271,7 +297,7 @@ alphabetically.  For the scoping of individual macros, see
 . Sx MACRO SYNTAX .
 .
 .
-. Ss Terms
+. Ss Definitions
 In this reference, a numerical width may be either a standalone natural
 number (such as 3, 4, 10, etc.) or a natural number followed by a width
 multiplier 
@@ -292,11 +318,11 @@ letters.
 .
 . Ss Macro Reference
 .  Bl -tag -width Ds
-.   It \&B
+.   It B
 Text is rendered in bold face.
-.   It \&BI
+.   It BI
 Text is rendered alternately in bold face and italic.  Thus, 
-.    Sq \&.BI this word and that
+.    Sq .BI this word and that
 causes
 .    Sq this
 and
@@ -306,10 +332,10 @@ to render in bold face, while
 and
 .    Sq that
 render in italics.  Whitespace between arguments is omitted in output.
-.   It \&BR
+.   It BR
 Text is rendered alternately in bold face and roman (the default font).
 Whitespace between arguments is omitted in output.
-.   It \&HP
+.   It HP
 Begin a paragraph whose initial output line is left-justified, but
 subsequent output lines are indented, with the following syntax:
 .    Bd -literal -offset indent
@@ -320,57 +346,73 @@ If
 .    Va width
 is specified, it's saved for later paragraph left-margins; if
 unspecified, the saved or default width is used.
-.   It \&I
+.   It I
 Text is rendered in italics.
-.   It \&IB
+.   It IB
 Text is rendered alternately in italics and bold face.  Whitespace
 between arguments is omitted in output.
-.   It \&IP
+.   It IP
 Begin a paragraph with the following syntax:
 .    Bd -literal -offset indent
 \&.IP [head [width]]
 .    Ed
 .    Pp
 This follows the behaviour of the
-.    Sq \&TP
+.    Sq TP
 except for the macro syntax (all arguments on the line, instead of
 having next-line scope).  If
 .    Va width
 is specified, it's saved for later paragraph left-margins; if
 unspecified, the saved or default width is used.
-.   It \&IR
+.   It IR
 Text is rendered alternately in italics and roman (the default font).
 Whitespace between arguments is omitted in output.
-.   It \&LP, \&P, \&PP
+.   It LP, P, PP
 Begin an undecorated paragraph.  The scope of a paragraph is closed by a
 subsequent paragraph, sub-section, section, or end of file.  The saved
 paragraph left-margin width is re-set to the default.
-.   It \&R
+.   It R
 Text is rendered in roman (the default font).
-.   It \&RB
+.   It RB
 Text is rendered alternately in roman (the default font) and bold face.
 Whitespace between arguments is omitted in output.
-.   It \&RI
+.   It RE
+Explicitly close out the scope of a prior
+.    Sq RS .
+.   It RI
 Text is rendered alternately in roman (the default font) and italics.
 Whitespace between arguments is omitted in output.
-.   It \&SB
+.   It RS
+Begin a part setting the left margin.  The left margin controls the
+offset, following an initial indentation, to un-indented text such as
+that of
+.    Sq PP .
+The width may be specified as following:
+.    Bd -literal -offset indent
+\&.RS [width]
+.    Ed
+.    Pp
+If
+.    Va width
+is not specified, the saved or default width is used. 
+.   It SB
 Text is rendered in small size (one point smaller than the default font)
 bold face.
-.   It \&SH
+.   It SH
 Begin a section.  The scope of a section is only closed by another
 section or the end of file.  The paragraph left-margin width is re-set
 to the default.
-.   It \&SM
+.   It SM
 Text is rendered in small size (one point smaller than the default
 font).
-.   It \&SS
+.   It SS
 Begin a sub-section.  The scope of a sub-section is closed by a
 subsequent sub-section, section, or end of file.  The paragraph
 left-margin width is re-set to the default.
-.   It \&TH
+.   It TH
 Sets the title of the manual page with the following syntax:
 .    Bd -literal -offset indent
-\&.TH title section date source volume
+\&.TH title section [date [source [volume]]]
 .    Ed
 .    Pp
 At least the 
@@ -388,7 +430,7 @@ The
 string specifies the organisation providing the utility.  The
 .    Va volume
 replaces the default rendered volume as dictated by the manual section.
-.   It \&TP
+.   It TP
 Begin a paragraph where the head, if exceeding the indentation width, is
 followed by a newline; if not, the body follows on the same line after a
 buffer to the indentation width.  Subsequent output lines are indented.
@@ -404,23 +446,23 @@ must be a properly-formed numeric width.  If
 .    Va width
 is specified, it's saved for later paragraph left-margins; if
 unspecified, the saved or default width is used.
-.   It \&br
+.   It br
 Breaks the current line.  Consecutive invocations have no further effect.
-.   It \&fi
+.   It fi
 End literal mode begun by
-.    Sq \&nf .
-.   It \&i
+.    Sq nf .
+.   It i
 Italicise arguments.  If no arguments are specified, all subsequent text
 is italicised.
-.   It \&na
+.   It na
 No alignment to the right margin.
-.   It \&nf
+.   It nf
 Begin literal mode: all subsequent free-form lines have their end of
 line boundaries preserved.  May be ended by
-.    Sq \&fi .
-.   It \&r
+.    Sq fi .
+.   It r
 Fonts and styles (bold face, italics) reset to roman (default font).
-.   It \&sp
+.   It sp
 Insert n spaces, where n is the macro's positive numeric argument.  If
 0, this is equivalent to the
 .    Sq br
@@ -439,7 +481,7 @@ standalone double-quote in formatted output.  This idiosyncratic
 behaviour is no longer applicable.
 .  It
 The
-.   Sq \&sp
+.   Sq sp
 macro does not accept negative numbers.
 .  It
 Blocks of whitespace are stripped from both macro and free-form text

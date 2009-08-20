@@ -682,7 +682,7 @@ macrowarn(struct mdoc *m, int ln, const char *buf)
 int
 parsemacro(struct mdoc *m, int ln, char *buf)
 {
-	int		  i, j, c, ppos;
+	int		  i, j, c;
 	char		  mac[5];
 
 	/* Empty lines are ignored. */
@@ -701,8 +701,6 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 		if (0 == buf[i])
 			return(1);
 	}
-
-	ppos = i;
 
 	/* Copy the first word into a nil-terminated buffer. */
 
@@ -736,7 +734,7 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 	 * Begin recursive parse sequence.  Since we're at the start of
 	 * the line, we don't need to do callable/parseable checks.
 	 */
-	if ( ! mdoc_macro(m, c, ln, ppos, &i, buf)) 
+	if ( ! mdoc_macro(m, c, ln, 1, &i, buf)) 
 		goto err;
 
 	return(1);
