@@ -600,7 +600,7 @@ append_delims(struct mdoc *mdoc, int line, int *pos, char *buf)
 
 	for (;;) {
 		lastarg = *pos;
-		c = mdoc_args(mdoc, line, pos, buf, 0, &p);
+		c = mdoc_zargs(mdoc, line, pos, buf, ARGS_NOWARN, &p);
 		assert(ARGS_PHRASE != c);
 
 		if (ARGS_ERROR == c)
@@ -1326,7 +1326,7 @@ phrase(struct mdoc *m, int line, int ppos, char *buf)
 		la = pos;
 
 		/* Note: no calling context! */
-		w = mdoc_zargs(m, line, &pos, buf, &p);
+		w = mdoc_zargs(m, line, &pos, buf, 0, &p);
 
 		if (ARGS_ERROR == w)
 			return(0);

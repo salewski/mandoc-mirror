@@ -32,9 +32,6 @@
  * There's no limit to the number or arguments that may be allocated.
  */
 
-#define	ARGS_DELIM	(1 << 1)
-#define	ARGS_TABSEP	(1 << 2)
-
 #define	ARGV_NONE	(1 << 0)
 #define	ARGV_SINGLE	(1 << 1)
 #define	ARGV_MULTI	(1 << 2)
@@ -325,10 +322,11 @@ mdoc_argv_free(struct mdoc_arg *p)
 
 
 int
-mdoc_zargs(struct mdoc *m, int line, int *pos, char *buf, char **v)
+mdoc_zargs(struct mdoc *m, int line, int *pos, 
+		char *buf, int flags, char **v)
 {
 
-	return(args(m, line, pos, buf, 0, v));
+	return(args(m, line, pos, buf, flags, v));
 }
 
 
@@ -401,10 +399,14 @@ args(struct mdoc *m, int line, int *pos,
 				i++;
 		}
 
-		/* FIXME: warn about trailing whitespace. */
-
 		if (0 == buf[i]) {
 			*v = &buf[*pos];
+			if (' ' != buf[i - 1])
+				return(ARGS_PUNCT);
+			if (ARGS_NOWARN & fl)
+				return(ARGS_PUNCT);
+			if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
+				return(ARGS_ERROR);
 			return(ARGS_PUNCT);
 		}
 	}
@@ -448,7 +450,7 @@ args(struct mdoc *m, int line, int *pos,
 			p = strchr(*v, 0);
 
 		/* Whitespace check for eoln case... */
-		if (0 == *p && ' ' == *(p - 1))
+		if (0 == *p && ' ' == *(p - 1) && ! (ARGS_NOWARN & fl))
 			if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
 				return(ARGS_ERROR);
 
@@ -488,6 +490,8 @@ args(struct mdoc *m, int line, int *pos,
 		}
 
 		if (0 == buf[*pos]) {
+			if (ARGS_NOWARN & fl)
+				return(ARGS_QWORD);
 			if ( ! mdoc_pwarn(m, line, *pos, EQUOTTERM))
 				return(ARGS_ERROR);
 			return(ARGS_QWORD);
@@ -501,7 +505,7 @@ args(struct mdoc *m, int line, int *pos,
 		while (' ' == buf[*pos])
 			(*pos)++;
 
-		if (0 == buf[*pos])
+		if (0 == buf[*pos] && ! (ARGS_NOWARN & fl))
 			if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
 				return(ARGS_ERROR);
 
@@ -525,7 +529,7 @@ args(struct mdoc *m, int line, int *pos,
 	while (' ' == buf[*pos])
 		(*pos)++;
 
-	if (0 == buf[*pos])
+	if (0 == buf[*pos] && ! (ARGS_NOWARN & fl))
 		if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
 			return(ARGS_ERROR);
 
