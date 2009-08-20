@@ -38,8 +38,8 @@ static	int		 rew_block(int, enum man_type,
 const	struct man_macro __man_macros[MAN_MAX] = {
 	{ in_line_eoln, 0 }, /* br */
 	{ in_line_eoln, 0 }, /* TH */
-	{ blk_imp, 0 }, /* SH */
-	{ blk_imp, 0 }, /* SS */
+	{ blk_imp, MAN_SCOPED }, /* SH */
+	{ blk_imp, MAN_SCOPED }, /* SS */
 	{ blk_imp, MAN_SCOPED }, /* TP */
 	{ blk_imp, 0 }, /* LP */
 	{ blk_imp, 0 }, /* PP */
