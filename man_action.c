@@ -65,6 +65,7 @@ const	struct actions man_actions[MAN_MAX] = {
 	{ NULL }, /* r */
 	{ NULL }, /* RE */
 	{ NULL }, /* RS */
+	{ NULL }, /* DT */
 };
 
 

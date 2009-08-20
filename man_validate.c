@@ -84,7 +84,8 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ pres_bline, posts_eq0 }, /* fi */
 	{ NULL, NULL }, /* r */
 	{ NULL, NULL }, /* RE */
-	{ NULL, NULL }, /* RS */
+	{ NULL, NULL }, /* RS */ /* FIXME: warn if empty body. */
+	{ NULL, NULL }, /* DT */
 };
 
 

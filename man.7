@@ -203,6 +203,7 @@ file.
 .   It    B     Ta    n         Ta    next-line
 .   It    BI    Ta    n         Ta    current
 .   It    BR    Ta    n         Ta    current
+.   It    DT    Ta    0         Ta    current
 .   It    I     Ta    n         Ta    next-line
 .   It    IB    Ta    n         Ta    current
 .   It    IR    Ta    n         Ta    current
@@ -221,7 +222,9 @@ file.
 .   It    sp    Ta    1         Ta    current
 .  El
 .  Pp
-The lower-case 
+The
+.  Sq RS ,
+.  Sq RE ,
 .  Sq br ,
 .  Sq fi ,
 .  Sq i ,
@@ -282,13 +285,14 @@ end of file.
 .  Pp
 If a block macro is next-line scoped, it may only be followed by in-line
 macros (excluding
+.  Sq DT ,
+.  Sq TH ,
 .  Sq br ,
 .  Sq na ,
 .  Sq sp ,
 .  Sq nf ,
-.  Sq fi ,
 and
-.  Sq TH ) .
+.  Sq fi ) .
 .
 .
 .Sh REFERENCE
@@ -335,6 +339,8 @@ render in italics.  Whitespace between arguments is omitted in output.
 .   It BR
 Text is rendered alternately in bold face and roman (the default font).
 Whitespace between arguments is omitted in output.
+.   It DT
+Re-set the tab spacing to 0.5 inches.
 .   It HP
 Begin a paragraph whose initial output line is left-justified, but
 subsequent output lines are indented, with the following syntax:
@@ -455,7 +461,7 @@ End literal mode begun by
 Italicise arguments.  If no arguments are specified, all subsequent text
 is italicised.
 .   It na
-No alignment to the right margin.
+Don't alignment the right margin.
 .   It nf
 Begin literal mode: all subsequent free-form lines have their end of
 line boundaries preserved.  May be ended by

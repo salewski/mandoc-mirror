@@ -110,7 +110,7 @@ static const struct termact termacts[MAN_MAX] = {
 	{ pre_I, post_I }, /* I */
 	{ pre_IR, NULL }, /* IR */
 	{ pre_RI, NULL }, /* RI */
-	{ NULL, NULL }, /* na */ /* TODO: document that has no effect */
+	{ NULL, NULL }, /* na */
 	{ pre_I, post_i }, /* i */
 	{ pre_sp, NULL }, /* sp */
 	{ pre_nf, NULL }, /* nf */
@@ -118,6 +118,7 @@ static const struct termact termacts[MAN_MAX] = {
 	{ pre_r, NULL }, /* r */
 	{ NULL, NULL }, /* RE */
 	{ pre_RS, post_RS }, /* RS */
+	{ NULL, NULL }, /* DT */
 };
 
 #ifdef __linux__
