@@ -236,6 +236,7 @@ blk_imp(MACRO_PROT_ARGS)
 {
 	int		 w, la;
 	char		*p;
+	struct man_node	*n;
 
 	/* Close out prior scopes. */
 
@@ -250,6 +251,8 @@ blk_imp(MACRO_PROT_ARGS)
 		return(0);
 	if ( ! man_head_alloc(m, line, ppos, tok))
 		return(0);
+
+	n = m->last;
 
 	/* Add line arguments. */
 
@@ -268,7 +271,7 @@ blk_imp(MACRO_PROT_ARGS)
 
 	/* Close out head and open body (unless MAN_SCOPE). */
 
-	if (MAN_SCOPED & man_macros[tok].flags) {
+	if (n == m->last && MAN_SCOPED & man_macros[tok].flags) {
 		m->flags |= MAN_BLINE;
 		return(1);
 	} else if ( ! rew_scope(MAN_HEAD, m, tok))
@@ -303,7 +306,7 @@ in_line_eoln(MACRO_PROT_ARGS)
 			return(0);
 	}
 
-	if (n == m->last && (MAN_SCOPED & man_macros[tok].flags)) {
+	if (n == m->last && MAN_SCOPED & man_macros[tok].flags) {
 		m->flags |= MAN_ELINE;
 		return(1);
 	} 
