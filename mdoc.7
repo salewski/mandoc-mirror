@@ -67,7 +67,8 @@ Text following a
 whether in a macro or free-form text line, is ignored to the end of
 line.  A macro line with only a control character and comment escape,
 .Sq \&.\e" ,
-is also ignored.
+is also ignored.  Macro lines with only a control charater and optionally
+whitespace are stripped from input.
 .
 .
 .Ss Reserved Characters
@@ -224,9 +225,42 @@ followed by
 \&.Dd $\&Mdocdate$
 \&.Dt mdoc 7
 \&.Os
+\&.
 \&.Sh NAME
-\&.Nm mdoc
-\&.Nd mdoc language reference
+\&.Nm foo
+\&.Nd a description goes here
+\&.\e\*q The next is for sections 2 & 3 only.
+\&.\e\*q .Sh LIBRARY
+\&.
+\&.Sh SYNOPSIS
+\&.Nm foo
+\&.Op Fl options
+\&.Ar
+\&.
+\&.Sh DESCRIPTION
+The
+\&.Nm
+utility processes files ...
+\&.\e\*q The next is for sections 1 & 8 only.
+\&.\e\*q .Sh EXIT STATUS
+\&.\e\*q The next is for sections 2, 3, & 9 only.
+\&.\e\*q .Sh RETURN VALUES
+\&.\e\*q The next is for sections 1, 6, 7, & 8 only.
+\&.\e\*q .Sh ENVIRONMENT
+\&.\e\*q .Sh FILES
+\&.\e\*q .Sh EXAMPLES
+\&.\e\*q The next is for sections 1, 4, 6, 7, & 8 only.
+\&.\e\*q .Sh DIAGNOSTICS
+\&.\e\*q The next is for sections 2, 3, & 9 only.
+\&.\e\*q .Sh ERRORS
+\&.\e\*q .Sh SEE ALSO
+\&.\e\*q .Xr foobar 1
+\&.\e\*q .Sh STANDARDS
+\&.\e\*q .Sh HISTORY
+\&.\e\*q .Sh AUTHORS
+\&.\e\*q .Sh CAVEATS
+\&.\e\*q .Sh BUGS
+\&.\e\*q .Sh SECURITY CONSIDERATIONS
 .Ed
 .
 .Pp
@@ -453,7 +487,7 @@ then the macro accepts an arbitrary number of arguments.
 .It \&Er     Ta    Yes      Ta    Yes      Ta    >0
 .It \&Es     Ta    \&No     Ta    \&No     Ta    0
 .It \&Ev     Ta    Yes      Ta    Yes      Ta    n
-.It \&Ex     Ta    \&No     Ta    \&No     Ta    0
+.It \&Ex     Ta    \&No     Ta    \&No     Ta    n
 .It \&Fa     Ta    Yes      Ta    Yes      Ta    n
 .It \&Fd     Ta    \&No     Ta    \&No     Ta    >0
 .It \&Fl     Ta    Yes      Ta    Yes      Ta    n
@@ -480,7 +514,7 @@ then the macro accepts an arbitrary number of arguments.
 .It \&Pa     Ta    Yes      Ta    Yes      Ta    n
 .It \&Pf     Ta    \&No     Ta    Yes      Ta    1
 .It \&Pp     Ta    \&No     Ta    \&No     Ta    0
-.It \&Rv     Ta    \&No     Ta    \&No     Ta    0
+.It \&Rv     Ta    \&No     Ta    \&No     Ta    n
 .It \&Sm     Ta    \&No     Ta    \&No     Ta    1
 .It \&St     Ta    \&No     Ta    Yes      Ta    1
 .It \&Sx     Ta    Yes      Ta    Yes      Ta    >0

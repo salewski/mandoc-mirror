@@ -74,7 +74,7 @@ static	int mdoc_argvflags[MDOC_ARG_MAX] = {
 	ARGV_MULTI,	/* MDOC_Column */
 	ARGV_SINGLE,	/* MDOC_Width */
 	ARGV_NONE,	/* MDOC_Compact */
-	ARGV_OPT_SINGLE, /* MDOC_Std */
+	ARGV_NONE,	/* MDOC_Std */
 	ARGV_NONE,	/* MDOC_Filled */
 	ARGV_NONE,	/* MDOC_Words */
 	ARGV_NONE,	/* MDOC_Emphasis */

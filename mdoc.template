@@ -2,36 +2,36 @@
 .\"
 .\" Copyright notice goes here.
 .\"
-.\" The uncommented requests are required for all man pages.
+.\" The uncommented requests are required for all manual pages.
 .\" The commented requests should be uncommented and used where appropriate.
 .\"
 .\" See mdoc(7) for further reference.
 .\"
 .Dd $\&Mdocdate$
-.Dt <document_title> <section>
+.Dt title section
 .Os
+.
 .Sh NAME
-.Nm <name>
-.Nd <description>
-.\" The next request should be used for sections 2 and 3 only.
+.Nm name
+.Nd short description
+.\" The next is for sections 2 & 3 only.
 .\" .Sh LIBRARY
 .Sh SYNOPSIS
 .Sh DESCRIPTION
-.\" This next request is for sections 1 and 8 exit statuses only.
+.\" The next is for sections 1 & 8 only.
 .\" .Sh EXIT STATUS
-.\" This next request is for sections 2 and 3 function return values only.
+.\" The next is for sections 2, 3, & 9 only.
 .\" .Sh RETURN VALUES
-.\" This next request is for sections 1, 6, 7 & 8 only.
+.\" The next is for sections 1, 6, 7 & 8 only.
 .\" .Sh ENVIRONMENT
 .\" .Sh FILES
 .\" .Sh EXAMPLES
-.\" This next request is for sections 1, 6, 7 & 8 only
+.\" The next is for sections 1, 4, 6, 7, & 8 only
 .\" .Sh DIAGNOSTICS
-.\" The next request is for sections 2 and 3 error and signal handling only.
+.\" The next is for sections 2, 3, & 9 only.
 .\" .Sh ERRORS
 .\" .Sh SEE ALSO
-.\" Cross-references should be ordered by section (low to high), then in
-.\"     alphabetical order.
+.\" .Xr foobar 1
 .\" .Sh STANDARDS
 .\" .Sh HISTORY
 .\" .Sh AUTHORS
