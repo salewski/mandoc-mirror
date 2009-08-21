@@ -443,8 +443,6 @@ descope:
 	 * out the block scope (also if applicable).
 	 */
 
-	/* XXX - this should be in man_action.c. */
-
 	if (MAN_ELINE & m->flags) {
 		m->flags &= ~MAN_ELINE;
 		if ( ! man_unscope(m, m->last->parent))
