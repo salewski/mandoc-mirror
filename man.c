@@ -454,8 +454,9 @@ descope:
 int
 man_pmacro(struct man *m, int ln, char *buf)
 {
-	int		  i, j, c, ppos, fl;
-	char		  mac[5];
+	int		 i, j, c, ppos, fl;
+	char		 mac[5];
+	struct man_node	*n;
 
 	/* Comments and empties are quickly ignored. */
 
@@ -512,6 +513,29 @@ man_pmacro(struct man *m, int ln, char *buf)
 	while (buf[i] && ' ' == buf[i])
 		i++;
 
+	/* Remove prior ELINE macro, if applicable. */
+
+	if (m->flags & MAN_ELINE) {
+		n = m->last;
+		assert(NULL == n->child);
+		if ( ! man_nwarn(m, n, WLNSCOPE))
+			return(0);
+
+		if (n->prev) {
+			assert(n != n->parent->child);
+			assert(n == n->prev->next);
+			n->prev->next = NULL;
+			m->last = n->prev;
+		} else {
+			assert(n == n->parent->child);
+			n->parent->child = NULL;
+			m->last = n->parent;
+		}
+
+		man_node_free(n);
+		m->flags &= ~MAN_ELINE;
+	}
+
 	/* Begin recursive parse sequence. */
 
 	assert(man_macros[c].fp);
@@ -532,8 +556,6 @@ out:
 		return(1);
 
 	/* Close out the block scope opened in the prior line.  */
-
-	/* XXX - this should be in man_action.c. */
 
 	assert(MAN_BLINE & m->flags);
 	m->flags &= ~MAN_BLINE;

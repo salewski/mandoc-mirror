@@ -357,7 +357,8 @@ man_macroend(struct man *m)
 			continue;
 		if ( ! (MAN_EXPLICIT & man_macros[n->tok].flags))
 			continue;
-		return(man_nerr(m, n, WEXITSCOPE));
+		if ( ! man_nwarn(m, n, WEXITSCOPE))
+			return(0);
 	}
 
 	return(man_unscope(m, m->first));
