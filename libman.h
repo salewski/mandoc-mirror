@@ -71,7 +71,8 @@ struct	man_macro {
 	int		(*fp)(MACRO_PROT_ARGS);
 	int		  flags;
 #define	MAN_SCOPED	 (1 << 0)
-#define	MAN_EXPLICIT	 (1 << 1)
+#define	MAN_EXPLICIT	 (1 << 1)	/* See blk_imp(). */
+#define	MAN_FSCOPED	 (1 << 2)	/* See blk_imp(). */
 };
 
 extern	const struct man_macro *const man_macros;
