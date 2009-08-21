@@ -23,17 +23,13 @@
 
 #include "libman.h"
 
-#ifdef __linux__
-extern	char		*strptime(const char *, const char *, struct tm *);
-#endif
-
 struct	actions {
 	int	(*post)(struct man *);
 };
 
-
 static	int	  post_TH(struct man *);
-static	time_t	  man_atotime(const char *);
+static	int	  post_fi(struct man *);
+static	int	  post_nf(struct man *);
 
 const	struct actions man_actions[MAN_MAX] = {
 	{ NULL }, /* br */
@@ -60,13 +56,18 @@ const	struct actions man_actions[MAN_MAX] = {
 	{ NULL }, /* na */
 	{ NULL }, /* i */
 	{ NULL }, /* sp */
-	{ NULL }, /* nf */
-	{ NULL }, /* fi */
+	{ post_nf }, /* nf */
+	{ post_fi }, /* fi */
 	{ NULL }, /* r */
 	{ NULL }, /* RE */
 	{ NULL }, /* RS */
 	{ NULL }, /* DT */
 };
+
+static	time_t	  man_atotime(const char *);
+#ifdef __linux__
+extern	char	 *strptime(const char *, const char *, struct tm *);
+#endif
 
 
 int
@@ -79,14 +80,39 @@ man_action_post(struct man *m)
 
 	switch (m->last->type) {
 	case (MAN_TEXT):
-		break;
+		/* FALLTHROUGH */
 	case (MAN_ROOT):
-		break;
+		return(1);
 	default:
-		if (NULL == man_actions[m->last->tok].post)
-			break;
-		return((*man_actions[m->last->tok].post)(m));
+		break;
 	}
+
+	if (NULL == man_actions[m->last->tok].post)
+		return(1);
+	return((*man_actions[m->last->tok].post)(m));
+}
+
+
+static int
+post_fi(struct man *m)
+{
+
+	if ( ! (MAN_LITERAL & m->flags))
+		if ( ! man_nwarn(m, m->last, WNLITERAL))
+			return(0);
+	m->flags &= ~MAN_LITERAL;
+	return(1);
+}
+
+
+static int
+post_nf(struct man *m)
+{
+
+	if (MAN_LITERAL & m->flags)
+		if ( ! man_nwarn(m, m->last, WOLITERAL))
+			return(0);
+	m->flags |= MAN_LITERAL;
 	return(1);
 }
 

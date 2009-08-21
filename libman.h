@@ -33,6 +33,7 @@ struct	man {
 #define	MAN_HALT	(1 << 0)
 #define	MAN_ELINE	(1 << 1) 	/* Next-line element scope. */
 #define	MAN_BLINE	(1 << 2) 	/* Next-line block scope. */
+#define	MAN_LITERAL	(1 << 3)	/* Literal input. */
 	enum man_next	 next;
 	struct man_node	*last;
 	struct man_node	*first;
@@ -58,6 +59,8 @@ enum	merr {
 	WMACROFORM,
 	WEXITSCOPE,
 	WNOSCOPE,
+	WOLITERAL,
+	WNLITERAL,
 	WERRMAX
 };
 
@@ -106,6 +109,7 @@ int		  man_verr(struct man *, int, int, const char *, ...);
 int		  man_valid_post(struct man *);
 int		  man_valid_pre(struct man *, const struct man_node *);
 int		  man_action_post(struct man *);
+int		  man_action_pre(struct man *, struct man_node *);
 int		  man_unscope(struct man *, const struct man_node *);
 
 __END_DECLS
