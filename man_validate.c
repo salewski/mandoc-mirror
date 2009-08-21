@@ -41,6 +41,7 @@ static	int	  check_eq1(CHKARGS);
 static	int	  check_ge2(CHKARGS);
 static	int	  check_le5(CHKARGS);
 static	int	  check_par(CHKARGS);
+static	int	  check_part(CHKARGS);
 static	int	  check_root(CHKARGS);
 static	int	  check_sec(CHKARGS);
 static	int	  check_sp(CHKARGS);
@@ -49,6 +50,7 @@ static	int	  check_text(CHKARGS);
 static	v_check	  posts_eq0[] = { check_eq0, NULL };
 static	v_check	  posts_ge2_le5[] = { check_ge2, check_le5, NULL };
 static	v_check	  posts_par[] = { check_par, NULL };
+static	v_check	  posts_part[] = { check_part, NULL };
 static	v_check	  posts_sec[] = { check_sec, NULL };
 static	v_check	  posts_sp[] = { check_sp, NULL };
 static	v_check	  pres_bline[] = { check_bline, NULL };
@@ -82,7 +84,7 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ pres_bline, posts_eq0 }, /* fi */
 	{ NULL, NULL }, /* r */
 	{ NULL, NULL }, /* RE */
-	{ NULL, NULL }, /* RS */ /* FIXME: warn if empty body. */
+	{ NULL, posts_part }, /* RS */
 	{ NULL, NULL }, /* DT */
 };
 
@@ -245,6 +247,16 @@ check_sec(CHKARGS)
 		return(man_nwarn(m, n, WBODYARGS));
 	if (MAN_HEAD == n->type && 0 == n->nchild)
 		return(man_nerr(m, n, WHEADARGS));
+	return(1);
+}
+
+
+static int
+check_part(CHKARGS)
+{
+
+	if (MAN_BODY == n->type && 0 == n->nchild)
+		return(man_nwarn(m, n, WBODYARGS));
 	return(1);
 }
 
