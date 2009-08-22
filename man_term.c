@@ -76,6 +76,7 @@ static	int		  pre_SS(DECL_ARGS);
 static	int		  pre_TP(DECL_ARGS);
 static	int		  pre_br(DECL_ARGS);
 static	int		  pre_fi(DECL_ARGS);
+static	int		  pre_ign(DECL_ARGS);
 static	int		  pre_nf(DECL_ARGS);
 static	int		  pre_r(DECL_ARGS);
 static	int		  pre_sp(DECL_ARGS);
@@ -120,7 +121,8 @@ static const struct termact termacts[MAN_MAX] = {
 	{ pre_r, NULL }, /* r */
 	{ NULL, NULL }, /* RE */
 	{ pre_RS, post_RS }, /* RS */
-	{ NULL, NULL }, /* DT */
+	{ pre_ign, NULL }, /* DT */
+	{ pre_ign, NULL }, /* UC */
 };
 
 #ifdef __linux__
@@ -203,6 +205,15 @@ arg_width(const struct man_node *n)
 		return(atoi(p));
 
 	return(-1);
+}
+
+
+/* ARGSUSED */
+static int
+pre_ign(DECL_ARGS)
+{
+
+	return(0);
 }
 
 
