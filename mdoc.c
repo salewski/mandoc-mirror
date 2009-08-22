@@ -709,6 +709,12 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 			break;
 		else if (' ' == buf[i])
 			break;
+
+		/* Check for invalid characters. */
+
+		if (isgraph((u_char)buf[i]))
+			continue;
+		return(mdoc_perr(m, ln, i, EPRINT));
 	}
 
 	mac[j] = 0;

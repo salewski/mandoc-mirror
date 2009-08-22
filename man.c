@@ -493,6 +493,12 @@ man_pmacro(struct man *m, int ln, char *buf)
 			break;
 		else if (' ' == buf[i])
 			break;
+
+		/* Check for invalid characters. */
+
+		if (isgraph((u_char)buf[i]))
+			continue;
+		return(man_perr(m, ln, i, WNPRINT));
 	}
 
 	mac[j] = 0;
