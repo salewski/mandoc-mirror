@@ -467,8 +467,6 @@ buffer to the indentation width.  Subsequent output lines are indented.
 The indentation width may be set as follows:
 .Bd -literal -offset indent
 \&.TP [width]
-.It UC
-Has no effect.  Included for compatibility.
 .Ed
 .
 .Pp
@@ -478,6 +476,8 @@ must be a properly-formed numeric width.  If
 .Va width
 is specified, it's saved for later paragraph left-margins; if
 unspecified, the saved or default width is used.
+.It UC
+Has no effect.  Included for compatibility.
 .It br
 Breaks the current line.  Consecutive invocations have no further effect.
 .It fi
