@@ -18,7 +18,6 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -130,11 +129,11 @@ extern	size_t		  strlcpy(char *, const char *, size_t);
 extern	size_t		  strlcat(char *, const char *, size_t);
 #endif
 
-static	void		  print_head(struct termp *, 
+static	int		  print_head(struct termp *, 
 				const struct man_meta *);
 static	void		  print_body(DECL_ARGS);
 static	void		  print_node(DECL_ARGS);
-static	void		  print_foot(struct termp *, 
+static	int		  print_foot(struct termp *, 
 				const struct man_meta *);
 static	void		  fmt_block_vspace(struct termp *, 
 				const struct man_node *);
@@ -146,7 +145,8 @@ man_run(struct termp *p, const struct man *m)
 {
 	struct mtermp	 mt;
 
-	print_head(p, man_meta(m));
+	if ( ! print_head(p, man_meta(m)))
+		return(0);
 	p->flags |= TERMP_NOSPACE;
 	assert(man_node(m));
 	assert(MAN_ROOT == man_node(m)->type);
@@ -157,7 +157,8 @@ man_run(struct termp *p, const struct man *m)
 
 	if (man_node(m)->child)
 		print_body(p, &mt, man_node(m)->child, man_meta(m));
-	print_foot(p, man_meta(m));
+	if ( ! print_foot(p, man_meta(m)))
+		return(0);
 
 	return(1);
 }
@@ -222,7 +223,7 @@ static int
 pre_I(DECL_ARGS)
 {
 
-	p->flags |= TERMP_UNDER;
+	p->under++;
 	return(1);
 }
 
@@ -232,8 +233,7 @@ static int
 pre_r(DECL_ARGS)
 {
 
-	p->flags &= ~TERMP_UNDER;
-	p->flags &= ~TERMP_BOLD;
+	p->bold = p->under = 0;
 	return(1);
 }
 
@@ -244,7 +244,7 @@ post_i(DECL_ARGS)
 {
 
 	if (n->nchild)
-		p->flags &= ~TERMP_UNDER;
+		p->under--;
 }
 
 
@@ -253,7 +253,7 @@ static void
 post_I(DECL_ARGS)
 {
 
-	p->flags &= ~TERMP_UNDER;
+	p->under--;
 }
 
 
@@ -287,12 +287,12 @@ pre_IR(DECL_ARGS)
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		if ( ! (i % 2))
-			p->flags |= TERMP_UNDER;
+			p->under++;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
 		print_node(p, mt, nn, m);
 		if ( ! (i % 2))
-			p->flags &= ~TERMP_UNDER;
+			p->under--;
 	}
 	return(0);
 }
@@ -306,11 +306,17 @@ pre_IB(DECL_ARGS)
 	int		 i;
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
-		p->flags |= i % 2 ? TERMP_BOLD : TERMP_UNDER;
+		if (i % 2)
+			p->bold++;
+		else
+			p->under++;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
 		print_node(p, mt, nn, m);
-		p->flags &= i % 2 ? ~TERMP_BOLD : ~TERMP_UNDER;
+		if (i % 2)
+			p->bold--;
+		else
+			p->under--;
 	}
 	return(0);
 }
@@ -325,12 +331,12 @@ pre_RB(DECL_ARGS)
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		if (i % 2)
-			p->flags |= TERMP_BOLD;
+			p->bold++;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
 		print_node(p, mt, nn, m);
 		if (i % 2)
-			p->flags &= ~TERMP_BOLD;
+			p->bold--;
 	}
 	return(0);
 }
@@ -345,12 +351,12 @@ pre_RI(DECL_ARGS)
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		if ( ! (i % 2))
-			p->flags |= TERMP_UNDER;
+			p->under++;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
 		print_node(p, mt, nn, m);
 		if ( ! (i % 2))
-			p->flags &= ~TERMP_UNDER;
+			p->under--;
 	}
 	return(0);
 }
@@ -365,12 +371,12 @@ pre_BR(DECL_ARGS)
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		if ( ! (i % 2))
-			p->flags |= TERMP_BOLD;
+			p->bold++;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
 		print_node(p, mt, nn, m);
 		if ( ! (i % 2))
-			p->flags &= ~TERMP_BOLD;
+			p->bold--;
 	}
 	return(0);
 }
@@ -384,11 +390,17 @@ pre_BI(DECL_ARGS)
 	int		 i;
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
-		p->flags |= i % 2 ? TERMP_UNDER : TERMP_BOLD;
+		if (i % 2)
+			p->under++;
+		else
+			p->bold++;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
 		print_node(p, mt, nn, m);
-		p->flags &= i % 2 ? ~TERMP_UNDER : ~TERMP_BOLD;
+		if (i % 2)
+			p->under--;
+		else
+			p->bold--;
 	}
 	return(0);
 }
@@ -399,7 +411,7 @@ static int
 pre_B(DECL_ARGS)
 {
 
-	p->flags |= TERMP_BOLD;
+	p->bold++;
 	return(1);
 }
 
@@ -409,7 +421,7 @@ static void
 post_B(DECL_ARGS)
 {
 
-	p->flags &= ~TERMP_BOLD;
+	p->bold--;
 }
 
 
@@ -720,7 +732,7 @@ pre_SS(DECL_ARGS)
 		term_vspace(p);
 		break;
 	case (MAN_HEAD):
-		p->flags |= TERMP_BOLD;
+		p->bold++;
 		p->offset = HALFINDENT;
 		break;
 	case (MAN_BODY):
@@ -742,7 +754,7 @@ post_SS(DECL_ARGS)
 	switch (n->type) {
 	case (MAN_HEAD):
 		term_newln(p);
-		p->flags &= ~TERMP_BOLD;
+		p->bold--;
 		break;
 	case (MAN_BODY):
 		term_newln(p);
@@ -769,7 +781,7 @@ pre_SH(DECL_ARGS)
 		term_vspace(p);
 		break;
 	case (MAN_HEAD):
-		p->flags |= TERMP_BOLD;
+		p->bold++;
 		p->offset = 0;
 		break;
 	case (MAN_BODY):
@@ -791,7 +803,7 @@ post_SH(DECL_ARGS)
 	switch (n->type) {
 	case (MAN_HEAD):
 		term_newln(p);
-		p->flags &= ~TERMP_BOLD;
+		p->bold--;
 		break;
 	case (MAN_BODY):
 		term_newln(p);
@@ -908,19 +920,19 @@ print_body(DECL_ARGS)
 }
 
 
-static void
+static int
 print_foot(struct termp *p, const struct man_meta *meta)
 {
 	struct tm	*tm;
 	char		*buf;
 
 	if (NULL == (buf = malloc(p->rmargin)))
-		err(1, "malloc");
+		return(0);
 
 	tm = localtime(&meta->date);
 
 	if (0 == strftime(buf, p->rmargin, "%B %d, %Y", tm))
-		err(1, "strftime");
+		buf[0] = 0;
 
 	term_vspace(p);
 
@@ -943,10 +955,11 @@ print_foot(struct termp *p, const struct man_meta *meta)
 	term_flushln(p);
 
 	free(buf);
+	return(1);
 }
 
 
-static void
+static int
 print_head(struct termp *p, const struct man_meta *meta)
 {
 	char		*buf, *title;
@@ -955,9 +968,9 @@ print_head(struct termp *p, const struct man_meta *meta)
 	p->offset = 0;
 
 	if (NULL == (buf = malloc(p->rmargin)))
-		err(1, "malloc");
+		return(0);
 	if (NULL == (title = malloc(p->rmargin)))
-		err(1, "malloc");
+		return(0);
 
 	if (meta->vol)
 		(void)strlcpy(buf, meta->vol, p->rmargin);
@@ -995,5 +1008,6 @@ print_head(struct termp *p, const struct man_meta *meta)
 
 	free(title);
 	free(buf);
+	return(1);
 }
 

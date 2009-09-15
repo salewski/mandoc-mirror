@@ -156,6 +156,9 @@ compat.o: compat.c
 term.ln: term.c term.h man.h mdoc.h
 term.o: term.c term.h man.h mdoc.h
 
+tree.ln: tree.c man.h mdoc.h
+tree.o: tree.c man.h mdoc.h
+
 mdoc_argv.ln: mdoc_argv.c libmdoc.h
 mdoc_argv.o: mdoc_argv.c libmdoc.h
 

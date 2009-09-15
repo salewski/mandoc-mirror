@@ -104,7 +104,7 @@ term_alloc(enum termenc enc)
 	struct termp *p;
 
 	if (NULL == (p = malloc(sizeof(struct termp))))
-		err(1, "malloc");
+		return(NULL);
 	bzero(p, sizeof(struct termp));
 	p->maxrmargin = 78;
 	p->enc = enc;
@@ -492,15 +492,15 @@ do_escaped(struct termp *p, const char **word)
 
 		switch (*wp) {
 		case ('B'):
-			p->flags |= TERMP_BOLD;
+			p->bold++;
 			break;
 		case ('I'):
-			p->flags |= TERMP_UNDER;
+			p->under++;
 			break;
 		case ('P'):
 			/* FALLTHROUGH */
 		case ('R'):
-			p->flags &= ~TERMP_STYLE;
+			p->bold = p->under = 0;
 			break;
 		default:
 			break;
@@ -579,7 +579,7 @@ buffer(struct termp *p, char c)
 		s = p->maxcols * 2;
 		p->buf = realloc(p->buf, s);
 		if (NULL == p->buf)
-			err(1, "realloc");
+			err(1, "realloc"); /* FIXME: shouldn't be here! */
 		p->maxcols = s;
 	}
 	p->buf[(int)(p->col)++] = c;
@@ -590,12 +590,12 @@ static void
 encode(struct termp *p, char c)
 {
 	
-	if (' ' != c && TERMP_STYLE & p->flags) {
-		if (TERMP_BOLD & p->flags) {
+	if (' ' != c) {
+		if (p->bold) {
 			buffer(p, c);
 			buffer(p, 8);
 		}
-		if (TERMP_UNDER & p->flags) {
+		if (p->under) {
 			buffer(p, '_');
 			buffer(p, 8);
 		}
