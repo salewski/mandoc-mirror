@@ -14,6 +14,8 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <sys/queue.h>
+
 #include <assert.h>
 #include <err.h>
 #include <stdio.h>
@@ -37,6 +39,8 @@ enum	htmltag {
 	TAG_P,
 	TAG_SPAN,
 	TAG_LINK,
+	TAG_BR,
+	TAG_A,
 	TAG_MAX
 };
 
@@ -55,21 +59,24 @@ enum	htmlattr {
 struct	htmldata {
 	char		 *name;
 	int		  flags;
-#define	HTML_BLOCK	 (1 << 0)
+#define	HTML_CLRLINE	 (1 << 0)
+#define	HTML_NOSTACK	 (1 << 1)
 };
 
 static	const struct htmldata htmltags[TAG_MAX] = {
-	{"html",	HTML_BLOCK}, /* TAG_HTML */
-	{"head",	HTML_BLOCK}, /* TAG_HEAD */
-	{"body",	HTML_BLOCK}, /* TAG_BODY */
-	{"meta",	HTML_BLOCK}, /* TAG_META */
-	{"title",	HTML_BLOCK}, /* TAG_TITLE */
-	{"div",		HTML_BLOCK}, /* TAG_DIV */
+	{"html",	HTML_CLRLINE}, /* TAG_HTML */
+	{"head",	HTML_CLRLINE}, /* TAG_HEAD */
+	{"body",	HTML_CLRLINE}, /* TAG_BODY */
+	{"meta",	HTML_CLRLINE | HTML_NOSTACK}, /* TAG_META */
+	{"title",	HTML_CLRLINE | HTML_NOSTACK}, /* TAG_TITLE */
+	{"div",		HTML_CLRLINE}, /* TAG_DIV */
 	{"h1",		0}, /* TAG_H1 */
 	{"h2",		0}, /* TAG_H2 */
-	{"p",		HTML_BLOCK}, /* TAG_P */
+	{"p",		HTML_CLRLINE}, /* TAG_P */
 	{"span",	0}, /* TAG_SPAN */
-	{"link",	HTML_BLOCK}, /* TAG_LINK */
+	{"link",	HTML_CLRLINE | HTML_NOSTACK}, /* TAG_LINK */
+	{"br",		HTML_CLRLINE | HTML_NOSTACK}, /* TAG_LINK */
+	{"a",		0}, /* TAG_A */
 };
 
 static	const char	 *const htmlattrs[ATTR_MAX] = {
@@ -88,9 +95,18 @@ struct	htmlpair {
 	char		 *val;
 };
 
+struct	tag {
+	enum htmltag	  tag;
+	SLIST_ENTRY(tag)  entry;
+};
+
+SLIST_HEAD(tagq, tag);
+
 struct	html {
 	int		  flags;
 #define	HTML_NOSPACE	 (1 << 0)
+#define	HTML_NEWLINE	 (1 << 1)
+	struct tagq	  stack;
 };
 
 #define	MDOC_ARGS	  const struct mdoc_meta *m, \
@@ -108,34 +124,37 @@ static	void		  print_gen_doctype(struct html *);
 static	void		  print_gen_head(struct html *);
 static	void		  print_mdoc(MDOC_ARGS);
 static	void		  print_mdoc_head(MDOC_ARGS);
+static	void		  print_mdoc_title(MDOC_ARGS);
 static	void		  print_mdoc_node(MDOC_ARGS);
 static	void		  print_man(MAN_ARGS);
 static	void		  print_man_head(MAN_ARGS);
 static	void		  print_man_body(MAN_ARGS);
-static	void		  print_otag(struct html *, enum htmltag, 
+static	struct tag	 *print_otag(struct html *, enum htmltag, 
 				int, const struct htmlpair *);
+static	void		  print_tagq(struct html *, const struct tag *);
+static	void		  print_stagq(struct html *, const struct tag *);
 static	void		  print_ctag(struct html *, enum htmltag);
 static	void		  print_encode(const char *);
 static	void		  print_text(struct html *, const char *);
 static	int		  mdoc_root_pre(MDOC_ARGS);
-static	void		  mdoc_root_post(MDOC_ARGS);
 
+static	int		  mdoc_fl_pre(MDOC_ARGS);
 static	int		  mdoc_nd_pre(MDOC_ARGS);
 static	int		  mdoc_nm_pre(MDOC_ARGS);
-static	void		  mdoc_nm_post(MDOC_ARGS);
+static	int		  mdoc_op_pre(MDOC_ARGS);
+static	void		  mdoc_op_post(MDOC_ARGS);
 static	int		  mdoc_pp_pre(MDOC_ARGS);
 static	int		  mdoc_sh_pre(MDOC_ARGS);
-static	void		  mdoc_sh_post(MDOC_ARGS);
 static	int		  mdoc_ss_pre(MDOC_ARGS);
-static	void		  mdoc_ss_post(MDOC_ARGS);
+static	int		  mdoc_xr_pre(MDOC_ARGS);
 
 static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Ap */
 	{NULL, NULL}, /* Dd */
 	{NULL, NULL}, /* Dt */
 	{NULL, NULL}, /* Os */
-	{mdoc_sh_pre, mdoc_sh_post }, /* Sh */
-	{mdoc_ss_pre, mdoc_ss_post }, /* Ss */ 
+	{mdoc_sh_pre, NULL }, /* Sh */
+	{mdoc_ss_pre, NULL }, /* Ss */ 
 	{mdoc_pp_pre, NULL}, /* Pp */ 
 	{NULL, NULL}, /* D1 */
 	{NULL, NULL}, /* Dl */
@@ -155,22 +174,22 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Ex */
 	{NULL, NULL}, /* Fa */ 
 	{NULL, NULL}, /* Fd */ 
-	{NULL, NULL}, /* Fl */
+	{mdoc_fl_pre, NULL}, /* Fl */
 	{NULL, NULL}, /* Fn */ 
 	{NULL, NULL}, /* Ft */ 
 	{NULL, NULL}, /* Ic */ 
 	{NULL, NULL}, /* In */ 
 	{NULL, NULL}, /* Li */
 	{mdoc_nd_pre, NULL}, /* Nd */ 
-	{mdoc_nm_pre, mdoc_nm_post}, /* Nm */ 
-	{NULL, NULL}, /* Op */
+	{mdoc_nm_pre, NULL}, /* Nm */ 
+	{mdoc_op_pre, mdoc_op_post}, /* Op */
 	{NULL, NULL}, /* Ot */
 	{NULL, NULL}, /* Pa */
 	{NULL, NULL}, /* Rv */
 	{NULL, NULL}, /* St */ 
 	{NULL, NULL}, /* Va */
 	{NULL, NULL}, /* Vt */ 
-	{NULL, NULL}, /* Xr */
+	{mdoc_xr_pre, NULL}, /* Xr */
 	{NULL, NULL}, /* %A */
 	{NULL, NULL}, /* %B */
 	{NULL, NULL}, /* %D */
@@ -253,64 +272,83 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 };
 
 
-int
+void
 html_mdoc(void *arg, const struct mdoc *m)
 {
 	struct html 	*h;
+	struct tag	*t;
 
 	h = (struct html *)arg;
 
 	print_gen_doctype(h);
-	print_otag(h, TAG_HTML, 0, NULL);
+	t = print_otag(h, TAG_HTML, 0, NULL);
 	print_mdoc(mdoc_meta(m), mdoc_node(m), h);
-	print_ctag(h, TAG_HTML);
+	print_tagq(h, t);
+
 	printf("\n");
-	return(1);
 }
 
 
-int
+void
 html_man(void *arg, const struct man *m)
 {
 	struct html	*h;
+	struct tag	*t;
 
 	h = (struct html *)arg;
 
 	print_gen_doctype(h);
-	print_otag(h, TAG_HTML, 0, NULL);
+	t = print_otag(h, TAG_HTML, 0, NULL);
 	print_man(man_meta(m), man_node(m), h);
-	print_ctag(h, TAG_HTML);
+	print_tagq(h, t);
+
 	printf("\n");
-	return(1);
 }
 
 
 void *
 html_alloc(void)
 {
+	struct html	*h;
 
-	return(calloc(1, sizeof(struct html)));
+	if (NULL == (h = calloc(1, sizeof(struct html))))
+		return(NULL);
+
+	SLIST_INIT(&h->stack);
+	return(h);
 }
 
 
 void
 html_free(void *p)
 {
+	struct tag	*tag;
+	struct html	*h;
 
-	free(p);
+	h = (struct html *)p;
+
+	while ( ! SLIST_EMPTY(&h->stack)) {
+		tag = SLIST_FIRST(&h->stack);
+		SLIST_REMOVE_HEAD(&h->stack, entry);
+		free(tag);
+	}
+	free(h);
 }
 
 
 static void
 print_mdoc(MDOC_ARGS)
 {
+	struct tag	*t;
 
-	print_otag(h, TAG_HEAD, 0, NULL);
+	t = print_otag(h, TAG_HEAD, 0, NULL);
 	print_mdoc_head(m, n, h);
-	print_ctag(h, TAG_HEAD);
-	print_otag(h, TAG_BODY, 0, NULL);
+	print_tagq(h, t);
+
+	t = print_otag(h, TAG_BODY, 0, NULL);
+	print_mdoc_title(m, n, h);
 	print_mdoc_node(m, n, h);
-	print_ctag(h, TAG_BODY);
+	print_tagq(h, t);
 }
 
 
@@ -334,7 +372,7 @@ print_gen_head(struct html *h)
 	link[0].key = ATTR_REL;
 	link[0].val = "stylesheet";
 	link[1].key = ATTR_HREF;
-	link[1].val = "style.css";
+	link[1].val = "style.css"; /* XXX */
 	link[2].key = ATTR_TYPE;
 	link[2].val = "text/css";
 	link[3].key = ATTR_MEDIA;
@@ -346,6 +384,7 @@ print_gen_head(struct html *h)
 }
 
 
+/* ARGSUSED */
 static void
 print_mdoc_head(MDOC_ARGS)
 {
@@ -353,117 +392,15 @@ print_mdoc_head(MDOC_ARGS)
 	print_gen_head(h);
 	print_otag(h, TAG_TITLE, 0, NULL);
 	print_encode(m->title);
-	print_ctag(h, TAG_TITLE);
 }
 
 
-static int
-mdoc_root_pre(MDOC_ARGS)
-{
-	struct htmlpair	 div;
-
-	div.key = ATTR_CLASS;
-	div.val = "body";
-
-	print_otag(h, TAG_DIV, 1, &div);
-	return(1);
-}
-
-
+/* ARGSUSED */
 static void
-mdoc_root_post(MDOC_ARGS)
+print_mdoc_title(MDOC_ARGS)
 {
 
-	print_ctag(h, TAG_DIV);
-}
-
-
-static int
-mdoc_ss_pre(MDOC_ARGS)
-{
-
-	if (MDOC_BODY == n->type)
-		print_otag(h, TAG_P, 0, NULL);
-	if (MDOC_HEAD == n->type)
-		print_otag(h, TAG_H2, 0, NULL);
-	return(1);
-}
-
-
-static void
-mdoc_ss_post(MDOC_ARGS)
-{
-
-	if (MDOC_BODY == n->type)
-		print_ctag(h, TAG_P);
-	if (MDOC_HEAD == n->type)
-		print_ctag(h, TAG_H2);
-}
-
-
-static int
-mdoc_pp_pre(MDOC_ARGS)
-{
-
-	print_otag(h, TAG_P, 0, NULL);
-	return(0);
-}
-
-
-static int
-mdoc_nd_pre(MDOC_ARGS)
-{
-
-	if (MDOC_BODY == n->type)
-		print_text(h, "--");
-	return(1);
-}
-
-
-static int
-mdoc_nm_pre(MDOC_ARGS)
-{
-	struct htmlpair	class;
-
-	class.key = ATTR_CLASS;
-	class.val = "name";
-
-	print_otag(h, TAG_SPAN, 1, &class);
-	if (NULL == n->child)
-		print_text(h, m->name);
-
-	return(1);
-}
-
-
-static void
-mdoc_nm_post(MDOC_ARGS)
-{
-
-	print_ctag(h, TAG_SPAN);
-}
-
-
-static int
-mdoc_sh_pre(MDOC_ARGS)
-{
-
-	if (MDOC_BODY == n->type)
-		print_otag(h, TAG_P, 0, NULL);
-	if (MDOC_HEAD == n->type)
-		print_otag(h, TAG_H1, 0, NULL);
-	return(1);
-}
-
-
-static void
-mdoc_sh_post(MDOC_ARGS)
-{
-
-	if (MDOC_BODY == n->type)
-		print_ctag(h, TAG_P);
-	if (MDOC_HEAD == n->type)
-		print_ctag(h, TAG_H1);
+	/* TODO */
 }
 
 
@@ -471,8 +408,10 @@ static void
 print_mdoc_node(MDOC_ARGS)
 {
 	int		 child;
+	struct tag	*t;
 
 	child = 1;
+	t = SLIST_FIRST(&h->stack);
 
 	switch (n->type) {
 	case (MDOC_ROOT):
@@ -490,9 +429,10 @@ print_mdoc_node(MDOC_ARGS)
 	if (child && n->child)
 		print_mdoc_node(m, n->child, h);
 
+	print_stagq(h, t);
+
 	switch (n->type) {
 	case (MDOC_ROOT):
-		mdoc_root_post(m, n, h);
 		break;
 	case (MDOC_TEXT):
 		break;
@@ -510,16 +450,19 @@ print_mdoc_node(MDOC_ARGS)
 static void
 print_man(MAN_ARGS)
 {
+	struct tag	*t;
 
-	print_otag(h, TAG_HEAD, 0, NULL);
+	t = print_otag(h, TAG_HEAD, 0, NULL);
 	print_man_head(m, n, h);
-	print_ctag(h, TAG_HEAD);
-	print_otag(h, TAG_BODY, 0, NULL);
+	print_tagq(h, t);
+
+	t = print_otag(h, TAG_BODY, 0, NULL);
 	print_man_body(m, n, h);
-	print_ctag(h, TAG_BODY);
+	print_tagq(h, t);
 }
 
 
+/* ARGSUSED */
 static void
 print_man_head(MAN_ARGS)
 {
@@ -527,13 +470,15 @@ print_man_head(MAN_ARGS)
 	print_gen_head(h);
 	print_otag(h, TAG_TITLE, 0, NULL);
 	print_encode(m->title);
-	print_ctag(h, TAG_TITLE);
 }
 
 
+/* ARGSUSED */
 static void
 print_man_body(MAN_ARGS)
 {
+
+	/* TODO */
 }
 
 
@@ -545,14 +490,23 @@ print_encode(const char *p)
 }
 
 
-static void
+static struct tag *
 print_otag(struct html *h, enum htmltag tag, 
 		int sz, const struct htmlpair *p)
 {
 	int		 i;
+	struct tag	*t;
+
+	if ( ! (HTML_NOSTACK & htmltags[tag].flags)) {
+		if (NULL == (t = malloc(sizeof(struct tag))))
+			err(EXIT_FAILURE, "malloc");
+		t->tag = tag;
+		SLIST_INSERT_HEAD(&h->stack, t, entry);
+	} else
+		t = NULL;
 
 	if ( ! (HTML_NOSPACE & h->flags))
-		if ( ! (HTML_BLOCK & htmltags[tag].flags))
+		if ( ! (HTML_CLRLINE & htmltags[tag].flags))
 			printf(" ");
 
 	printf("<%s", htmltags[tag].name);
@@ -565,7 +519,12 @@ print_otag(struct html *h, enum htmltag tag,
 	printf(">");
 
 	h->flags |= HTML_NOSPACE;
+	if (HTML_CLRLINE & htmltags[tag].flags)
+		h->flags |= HTML_NEWLINE;
+	else
+		h->flags &= ~HTML_NEWLINE;
 
+	return(t);
 }
 
 
@@ -575,8 +534,12 @@ print_ctag(struct html *h, enum htmltag tag)
 {
 	
 	printf("</%s>", htmltags[tag].name);
-	if (HTML_BLOCK & htmltags[tag].flags)
+	if (HTML_CLRLINE & htmltags[tag].flags)
 		h->flags |= HTML_NOSPACE;
+	if (HTML_CLRLINE & htmltags[tag].flags)
+		h->flags |= HTML_NEWLINE;
+	else
+		h->flags &= ~HTML_NEWLINE;
 }
 
 
@@ -613,13 +576,16 @@ print_text(struct html *h, const char *p)
 			/* FALLTHROUGH */
 		case('}'):
 			h->flags |= HTML_NOSPACE;
+			break;
 		default:
 			break;
 		}
 
 	if ( ! (h->flags & HTML_NOSPACE))
 		printf(" ");
+
 	h->flags &= ~HTML_NOSPACE;
+	h->flags &= ~HTML_NEWLINE;
 
 	if (p)
 		print_encode(p);
@@ -632,7 +598,190 @@ print_text(struct html *h, const char *p)
 			/* FALLTHROUGH */
 		case('{'):
 			h->flags |= HTML_NOSPACE;
+			break;
 		default:
 			break;
 		}
+}
+
+
+static void
+print_tagq(struct html *h, const struct tag *until)
+{
+	struct tag	*tag;
+
+	while ( ! SLIST_EMPTY(&h->stack)) {
+		tag = SLIST_FIRST(&h->stack);
+		print_ctag(h, tag->tag);
+		SLIST_REMOVE_HEAD(&h->stack, entry);
+		free(tag);
+		if (until && tag == until)
+			return;
+	}
+}
+
+
+static void
+print_stagq(struct html *h, const struct tag *suntil)
+{
+	struct tag	*tag;
+
+	while ( ! SLIST_EMPTY(&h->stack)) {
+		tag = SLIST_FIRST(&h->stack);
+		if (suntil && tag == suntil)
+			return;
+		print_ctag(h, tag->tag);
+		SLIST_REMOVE_HEAD(&h->stack, entry);
+		free(tag);
+	}
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_root_pre(MDOC_ARGS)
+{
+	struct htmlpair	 tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "body";
+
+	print_otag(h, TAG_DIV, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_ss_pre(MDOC_ARGS)
+{
+
+	if (MDOC_BODY == n->type)
+		print_otag(h, TAG_P, 0, NULL);
+	if (MDOC_HEAD == n->type)
+		print_otag(h, TAG_H2, 0, NULL);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_fl_pre(MDOC_ARGS)
+{
+	struct htmlpair	 tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "flag";
+
+	print_otag(h, TAG_SPAN, 1, &tag);
+	print_text(h, "\\-");
+	h->flags |= HTML_NOSPACE;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_pp_pre(MDOC_ARGS)
+{
+
+	print_otag(h, TAG_BR, 0, NULL);
+	print_otag(h, TAG_BR, 0, NULL);
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_nd_pre(MDOC_ARGS)
+{
+
+	if (MDOC_BODY == n->type)
+		print_text(h, "--");
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_op_pre(MDOC_ARGS)
+{
+
+	if (MDOC_BODY == n->type) {
+		print_text(h, "\\(lB");
+		h->flags |= HTML_NOSPACE;
+	}
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+mdoc_op_post(MDOC_ARGS)
+{
+
+	if (MDOC_BODY != n->type) 
+		return;
+	h->flags |= HTML_NOSPACE;
+	print_text(h, "\\(rB");
+}
+
+
+static int
+mdoc_nm_pre(MDOC_ARGS)
+{
+	struct htmlpair	class;
+
+	if ( ! (HTML_NEWLINE & h->flags))
+		if (SEC_SYNOPSIS == n->sec)
+			print_otag(h, TAG_BR, 0, NULL);
+
+	class.key = ATTR_CLASS;
+	class.val = "name";
+
+	print_otag(h, TAG_SPAN, 1, &class);
+	if (NULL == n->child)
+		print_text(h, m->name);
+
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_sh_pre(MDOC_ARGS)
+{
+
+	if (MDOC_BODY == n->type)
+		print_otag(h, TAG_P, 0, NULL);
+	if (MDOC_HEAD == n->type)
+		print_otag(h, TAG_H1, 0, NULL);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_xr_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_HREF;
+	tag.val = "#"; /* TODO */
+
+	print_otag(h, TAG_A, 1, &tag);
+
+	n = n->child;
+	print_text(h, n->string);
+	if (NULL == (n = n->next))
+		return(0);
+
+	h->flags |= HTML_NOSPACE;
+	print_text(h, "(");
+	h->flags |= HTML_NOSPACE;
+	print_text(h, n->string);
+	h->flags |= HTML_NOSPACE;
+	print_text(h, ")");
+
+	return(0);
 }
