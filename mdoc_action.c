@@ -53,7 +53,7 @@ static	int	  post_tilde(POST_ARGS);
 static	int	  pre_bd(PRE_ARGS);
 static	int	  pre_dl(PRE_ARGS);
 
-const	struct actions mdoc_actions[MDOC_MAX] = {
+static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ap */
 	{ NULL, post_dd }, /* Dd */ 
 	{ NULL, post_dt }, /* Dt */ 

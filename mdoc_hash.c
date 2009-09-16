@@ -25,7 +25,7 @@
 
 #include "libmdoc.h"
 
-static	unsigned char	table[27 * 12];
+static	u_char		 table[27 * 12];
 
 
 void
@@ -46,7 +46,7 @@ mdoc_hash_init(void)
 
 		for (j = 0; j < 12; j++)
 			if (UCHAR_MAX == table[major + j]) {
-				table[major + j] = i;
+				table[major + j] = (u_char)i;
 				break;
 			}
 
