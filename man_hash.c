@@ -15,39 +15,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include <assert.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "libman.h"
 
 
-/* ARGUSED */
+static	unsigned char	table[26 * 6];
+
+
 void
-man_hash_free(void *htab)
+man_hash_init(void)
 {
-
-	free(htab);
-}
-
-
-/* ARGUSED */
-void *
-man_hash_alloc(void)
-{
-	int		*htab;
 	int		 i, j, x;
 
-	/* Initialised to -1. */
-
-	htab = malloc(26 * 6 * sizeof(int));
-	if (NULL == htab)
-		return(NULL);
-	for (i = 0; i < 26 * 6; i++)
-		htab[i] = -1;
+	memset(table, UCHAR_MAX, sizeof(table));
 
 	for (i = 0; i < MAN_MAX; i++) {
 		x = man_macronames[i][0];
-
 		assert((x >= 65 && x <= 90) ||
 				(x >= 97 && x <= 122));
 
@@ -55,25 +41,19 @@ man_hash_alloc(void)
 		x *= 6;
 
 		for (j = 0; j < 6; j++)
-			if (-1 == htab[x + j]) {
-				htab[x + j] = i;
+			if (UCHAR_MAX == table[x + j]) {
+				table[x + j] = i;
 				break;
 			}
-
 		assert(j < 6);
 	}
-
-	return((void *)htab);
 }
 
 
 int
-man_hash_find(const void *arg, const char *tmp)
+man_hash_find(const char *tmp)
 {
 	int		 x, i, tok;
-	const int	*htab;
-
-	htab = (const int *)arg;
 
 	if (0 == (x = tmp[0]))
 		return(MAN_MAX);
@@ -84,7 +64,7 @@ man_hash_find(const void *arg, const char *tmp)
 	x *= 6;
 
 	for (i = 0; i < 6; i++) {
-		if (-1 == (tok = htab[x + i]))
+		if (UCHAR_MAX == (tok = table[x + i]))
 			return(MAN_MAX);
 		if (0 == strcmp(tmp, man_macronames[tok]))
 			return(tok);
@@ -92,4 +72,3 @@ man_hash_find(const void *arg, const char *tmp)
 
 	return(MAN_MAX);
 }
-

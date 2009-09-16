@@ -27,7 +27,6 @@ enum	man_next {
 struct	man {
 	void		*data;
 	struct man_cb	 cb;
-	void		*htab;
 	int		 pflags;
 	int		 flags;
 #define	MAN_HALT	(1 << 0)
@@ -95,9 +94,8 @@ int		  man_body_alloc(struct man *, int, int, int);
 int		  man_elem_alloc(struct man *, int, int, int);
 void		  man_node_free(struct man_node *);
 void		  man_node_freelist(struct man_node *);
-void		 *man_hash_alloc(void);
-int		  man_hash_find(const void *, const char *);
-void		  man_hash_free(void *);
+void		  man_hash_init(void);
+int		  man_hash_find(const char *);
 int		  man_macroend(struct man *);
 int		  man_args(struct man *, int, int *, char *, char **);
 #define	ARGS_ERROR	(-1)

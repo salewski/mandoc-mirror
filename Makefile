@@ -184,7 +184,7 @@ ChangeLog.html: ChangeLog.xml ChangeLog.xsl
 
 mdocml-$(VERSION).tar.gz: $(INSTALL)
 	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
-	install -m 0644 $(INSTALL) .dist/mdocml/mdocml-$(VERSION)/
+	cp -f $(INSTALL) .dist/mdocml/mdocml-$(VERSION)/
 	( cd .dist/mdocml/ && tar zcf ../../$@ mdocml-$(VERSION)/ )
 	rm -rf .dist/
 

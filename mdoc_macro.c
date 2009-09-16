@@ -275,7 +275,7 @@ lookup_raw(struct mdoc *mdoc, const char *p)
 {
 	int		 res;
 
-	if (MDOC_MAX == (res = mdoc_hash_find(mdoc->htab, p)))
+	if (MDOC_MAX == (res = mdoc_hash_find(p)))
 		return(MDOC_MAX);
 	if (MDOC_CALLABLE & mdoc_macros[res].flags)
 		return(res);
