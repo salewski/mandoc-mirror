@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -129,27 +130,24 @@ extern	size_t		  strlcpy(char *, const char *, size_t);
 extern	size_t		  strlcat(char *, const char *, size_t);
 #endif
 
-static	int		  print_head(struct termp *, 
+static	void		  print_head(struct termp *, 
 				const struct man_meta *);
 static	void		  print_body(DECL_ARGS);
 static	void		  print_node(DECL_ARGS);
-static	int		  print_foot(struct termp *, 
+static	void		  print_foot(struct termp *, 
 				const struct man_meta *);
 static	void		  fmt_block_vspace(struct termp *, 
 				const struct man_node *);
 static	int		  arg_width(const struct man_node *);
 
 
-int
+void
 man_run(struct termp *p, const struct man *m)
 {
 	struct mtermp	 mt;
 
-	if ( ! print_head(p, man_meta(m)))
-		return(0);
+	print_head(p, man_meta(m));
 	p->flags |= TERMP_NOSPACE;
-	assert(man_node(m));
-	assert(MAN_ROOT == man_node(m)->type);
 
 	mt.fl = 0;
 	mt.lmargin = INDENT;
@@ -157,10 +155,7 @@ man_run(struct termp *p, const struct man *m)
 
 	if (man_node(m)->child)
 		print_body(p, &mt, man_node(m)->child, man_meta(m));
-	if ( ! print_foot(p, man_meta(m)))
-		return(0);
-
-	return(1);
+	print_foot(p, man_meta(m));
 }
 
 
@@ -920,19 +915,19 @@ print_body(DECL_ARGS)
 }
 
 
-static int
+static void
 print_foot(struct termp *p, const struct man_meta *meta)
 {
 	struct tm	*tm;
 	char		*buf;
 
 	if (NULL == (buf = malloc(p->rmargin)))
-		return(0);
+		err(EXIT_FAILURE, "malloc");
 
 	tm = localtime(&meta->date);
 
 	if (0 == strftime(buf, p->rmargin, "%B %d, %Y", tm))
-		buf[0] = 0;
+		err(EXIT_FAILURE, "strftime");
 
 	term_vspace(p);
 
@@ -955,11 +950,10 @@ print_foot(struct termp *p, const struct man_meta *meta)
 	term_flushln(p);
 
 	free(buf);
-	return(1);
 }
 
 
-static int
+static void
 print_head(struct termp *p, const struct man_meta *meta)
 {
 	char		*buf, *title;
@@ -968,9 +962,9 @@ print_head(struct termp *p, const struct man_meta *meta)
 	p->offset = 0;
 
 	if (NULL == (buf = malloc(p->rmargin)))
-		return(0);
+		err(EXIT_FAILURE, "malloc");
 	if (NULL == (title = malloc(p->rmargin)))
-		return(0);
+		err(EXIT_FAILURE, "malloc");
 
 	if (meta->vol)
 		(void)strlcpy(buf, meta->vol, p->rmargin);
@@ -1008,6 +1002,5 @@ print_head(struct termp *p, const struct man_meta *meta)
 
 	free(title);
 	free(buf);
-	return(1);
 }
 

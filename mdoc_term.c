@@ -113,7 +113,7 @@ static	int	  termp_ud_pre(DECL_ARGS);
 static	int	  termp_xr_pre(DECL_ARGS);
 static	int	  termp_xx_pre(DECL_ARGS);
 
-static const struct termact termacts[MDOC_MAX] = {
+static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_ap_pre, NULL }, /* Ap */
 	{ NULL, NULL }, /* Dd */
 	{ NULL, NULL }, /* Dt */
@@ -153,7 +153,7 @@ static const struct termact termacts[MDOC_MAX] = {
 	{ termp_rv_pre, NULL }, /* Rv */
 	{ NULL, NULL }, /* St */ 
 	{ termp_under_pre, NULL }, /* Va */
-	{ termp_under_pre, termp_vt_post }, /* Vt */  /* FIXME: type name */
+	{ termp_under_pre, termp_vt_post }, /* Vt */
 	{ termp_xr_pre, NULL }, /* Xr */
 	{ NULL, termp____post }, /* %A */
 	{ NULL, termp____post }, /* %B */
@@ -252,27 +252,24 @@ static	void	  fmt_block_vspace(struct termp *,
 			const struct mdoc_node *,
 			const struct mdoc_node *);
 static	void  	  print_node(DECL_ARGS);
-static	void	  print_head(struct termp *, 
-			const struct mdoc_meta *);
+static	void	  print_head(DECL_ARGS);
 static	void	  print_body(DECL_ARGS);
-static	void	  print_foot(struct termp *, 
-			const struct mdoc_meta *);
+static	void	  print_foot(DECL_ARGS);
 
 
-int
-mdoc_run(struct termp *p, const struct mdoc *m)
+void
+mdoc_run(struct termp *p, const struct mdoc *mdoc)
 {
-	/*
-	 * Main output function.  When this is called, assume that the
-	 * tree is properly formed.
-	 */
-	print_head(p, mdoc_meta(m));
-	assert(mdoc_node(m));
-	assert(MDOC_ROOT == mdoc_node(m)->type);
-	if (mdoc_node(m)->child)
-		print_body(p, NULL, mdoc_meta(m), mdoc_node(m)->child);
-	print_foot(p, mdoc_meta(m));
-	return(1);
+	const struct mdoc_node	*n;
+	const struct mdoc_meta	*m;
+
+	n = mdoc_node(mdoc);
+	m = mdoc_meta(mdoc);
+
+	print_head(p, NULL, m, n);
+	if (n->child)
+		print_body(p, NULL, m, n->child);
+	print_foot(p, NULL, m, n);
 }
 
 
@@ -281,64 +278,60 @@ print_body(DECL_ARGS)
 {
 
 	print_node(p, pair, meta, node);
-	if ( ! node->next)
-		return;
-	print_body(p, pair, meta, node->next);
+	if (node->next)
+		print_body(p, pair, meta, node->next);
 }
 
 
+/* ARGSUSED */
 static void
 print_node(DECL_ARGS)
 {
-	int		 dochild, bold, under;
+	int		 chld, bold, under;
 	struct termpair	 npair;
 	size_t		 offset, rmargin;
 
-	dochild = 1;
+	chld = 1;
 	offset = p->offset;
 	rmargin = p->rmargin;
 	bold = p->bold;
 	under = p->under;
 
+	bzero(&npair, sizeof(struct termpair));
 	npair.ppair = pair;
-	npair.flag = 0;
-	npair.count = 0;
-
-	/*
-	 * Note on termpair.  This allows a pre function to set a termp
-	 * flag that is automatically unset after the body, but before
-	 * the post function.  Thus, if a pre uses a termpair flag, it
-	 * must be reapplied in the post for use.
-	 */
 
 	if (MDOC_TEXT != node->type) {
 		if (termacts[node->tok].pre)
-			if ( ! (*termacts[node->tok].pre)(p, &npair, meta, node))
-				dochild = 0;
-	} else /* MDOC_TEXT == node->type */
+			chld = (*termacts[node->tok].pre)
+				(p, &npair, meta, node);
+	} else 
 		term_word(p, node->string);
 
-	/* Children. */
-
-	if (dochild && node->child)
+	if (chld && node->child)
 		print_body(p, &npair, meta, node->child);
+
+	/*
+	 * XXX - if bold/under were to span scopes, this wouldn't be
+	 * possible, but because decoration is always in-scope, we can
+	 * get away with this.
+	 */
 
 	p->bold = bold;
 	p->under = under;
 
-	/* Post-processing. */
-
 	if (MDOC_TEXT != node->type)
 		if (termacts[node->tok].post)
-			(*termacts[node->tok].post)(p, &npair, meta, node);
+			(*termacts[node->tok].post)
+				(p, &npair, meta, node);
 
 	p->offset = offset;
 	p->rmargin = rmargin;
 }
 
 
+/* ARGSUSED */
 static void
-print_foot(struct termp *p, const struct mdoc_meta *meta)
+print_foot(DECL_ARGS)
 {
 	struct tm	*tm;
 	char		*buf, *os;
@@ -352,14 +345,14 @@ print_foot(struct termp *p, const struct mdoc_meta *meta)
 	 */
 
 	if (NULL == (buf = malloc(p->rmargin)))
-		err(1, "malloc");
+		err(EXIT_FAILURE, "malloc");
 	if (NULL == (os = malloc(p->rmargin)))
-		err(1, "malloc");
+		err(EXIT_FAILURE, "malloc");
 
 	tm = localtime(&meta->date);
 
 	if (0 == strftime(buf, p->rmargin, "%B %e, %Y", tm))
-		err(1, "strftime");
+		err(EXIT_FAILURE, "strftime");
 
 	(void)strlcpy(os, meta->os, p->rmargin);
 
@@ -396,8 +389,9 @@ print_foot(struct termp *p, const struct mdoc_meta *meta)
 }
 
 
+/* ARGSUSED */
 static void
-print_head(struct termp *p, const struct mdoc_meta *meta)
+print_head(DECL_ARGS)
 {
 	char		*buf, *title;
 
@@ -405,9 +399,9 @@ print_head(struct termp *p, const struct mdoc_meta *meta)
 	p->offset = 0;
 
 	if (NULL == (buf = malloc(p->rmargin)))
-		err(1, "malloc");
+		err(EXIT_FAILURE, "malloc");
 	if (NULL == (title = malloc(p->rmargin)))
-		err(1, "malloc");
+		err(EXIT_FAILURE, "malloc");
 
 	/*
 	 * The header is strange.  It has three components, which are
@@ -431,8 +425,7 @@ print_head(struct termp *p, const struct mdoc_meta *meta)
 		(void)strlcat(buf, ")", p->rmargin);
 	}
 
-	(void)snprintf(title, p->rmargin, "%s(%d)", 
-			meta->title, meta->msec);
+	snprintf(title, p->rmargin, "%s(%d)", meta->title, meta->msec);
 
 	p->offset = 0;
 	p->rmargin = (p->maxrmargin - strlen(buf) + 1) / 2;

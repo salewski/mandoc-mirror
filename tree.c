@@ -27,22 +27,20 @@ static	void	print_man(const struct man_node *, int);
 
 
 /* ARGSUSED */
-int
+void
 tree_mdoc(void *arg, const struct mdoc *mdoc)
 {
 
 	print_mdoc(mdoc_node(mdoc), 0);
-	return(1);
 }
 
 
 /* ARGSUSED */
-int
+void
 tree_man(void *arg, const struct man *man)
 {
 
 	print_man(man_node(man), 0);
-	return(1);
 }
 
 
