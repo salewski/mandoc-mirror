@@ -27,7 +27,10 @@
 
 static	u_char		 table[27 * 12];
 
-
+/*
+ * XXX - this hash has global scope, so if intended for use as a library
+ * with multiple callers, it will need re-invocation protection.
+ */
 void
 mdoc_hash_init(void)
 {
@@ -53,7 +56,6 @@ mdoc_hash_init(void)
 		assert(j < 12);
 	}
 }
-
 
 int
 mdoc_hash_find(const char *p)
@@ -84,4 +86,3 @@ mdoc_hash_find(const char *p)
 
 	return(MDOC_MAX);
 }
-

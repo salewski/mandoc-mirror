@@ -26,7 +26,8 @@
  * right-hand side is what's produced by the front-end, with the fourth
  * element being its length.
  *
- * Be sure to C-escape strings!
+ * XXX - C-escape strings!
+ * XXX - update LINES_MAX if adding more!
  */
 
 STRING("Am",			2,	"&",		1)

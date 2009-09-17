@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "chars.h"
 #include "term.h"
 #include "man.h"
 #include "mdoc.h"
@@ -56,7 +57,7 @@ terminal_man(void *arg, const struct man *man)
 
 	p = (struct termp *)arg;
 	if (NULL == p->symtab)
-		p->symtab = term_ascii2htab();
+		p->symtab = chars_init(CHARS_ASCII);
 
 	man_run(p, man);
 }
@@ -69,7 +70,7 @@ terminal_mdoc(void *arg, const struct mdoc *mdoc)
 
 	p = (struct termp *)arg;
 	if (NULL == p->symtab)
-		p->symtab = term_ascii2htab();
+		p->symtab = chars_init(CHARS_ASCII);
 
 	mdoc_run(p, mdoc);
 }
@@ -90,7 +91,7 @@ term_free(struct termp *p)
 	if (p->buf)
 		free(p->buf);
 	if (TERMENC_ASCII == p->enc && p->symtab)
-		term_asciifree(p->symtab);
+		chars_free(p->symtab);
 
 	free(p);
 }
@@ -331,7 +332,7 @@ do_special(struct termp *p, const char *word, size_t len)
 	size_t		 sz;
 	int		 i;
 
-	rhs = term_a2ascii(p->symtab, word, len, &sz);
+	rhs = chars_a2ascii(p->symtab, word, len, &sz);
 
 	if (NULL == rhs) {
 #if 0
@@ -354,7 +355,7 @@ do_reserved(struct termp *p, const char *word, size_t len)
 	size_t		 sz;
 	int		 i;
 
-	rhs = term_a2res(p->symtab, word, len, &sz);
+	rhs = chars_a2res(p->symtab, word, len, &sz);
 
 	if (NULL == rhs) {
 #if 0

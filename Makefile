@@ -35,11 +35,11 @@ MANOBJS	   = man_macro.o man.o man_hash.o man_validate.o \
 MANSRCS	   = man_macro.c man.c man_hash.c man_validate.c \
 	     man_action.c mandoc.c man_argv.c
 
-MAINLNS	   = main.ln mdoc_term.ln ascii.ln term.ln tree.ln \
+MAINLNS	   = main.ln mdoc_term.ln chars.ln term.ln tree.ln \
 	     compat.ln man_term.ln html.ln
-MAINOBJS   = main.o mdoc_term.o ascii.o term.o tree.o compat.o \
+MAINOBJS   = main.o mdoc_term.o chars.o term.o tree.o compat.o \
 	     man_term.o html.o
-MAINSRCS   = main.c mdoc_term.c ascii.c term.c tree.c compat.c \
+MAINSRCS   = main.c mdoc_term.c chars.c term.c tree.c compat.c \
 	     man_term.c html.c
 
 LLNS	   = llib-llibmdoc.ln llib-llibman.ln llib-lmandoc.ln
@@ -47,7 +47,7 @@ LNS	   = $(MAINLNS) $(MDOCLNS) $(MANLNS)
 LIBS	   = libmdoc.a libman.a
 OBJS	   = $(MDOCOBJS) $(MAINOBJS) $(MANOBJS)
 SRCS	   = $(MDOCSRCS) $(MAINSRCS) $(MANSRCS)
-DATAS	   = arch.in att.in lib.in msec.in st.in vol.in ascii.in
+DATAS	   = arch.in att.in lib.in msec.in st.in vol.in chars.in
 HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h libmandoc.h
 SGMLS	   = index.sgml 
 XSLS	   = ChangeLog.xsl
@@ -117,8 +117,8 @@ arch.o: arch.c arch.in libmdoc.h
 vol.ln: vol.c vol.in libmdoc.h
 vol.o: vol.c vol.in libmdoc.h
 
-ascii.ln: ascii.c ascii.in term.h
-ascii.o: ascii.c ascii.in term.h
+chars.ln: chars.c chars.in chars.h
+chars.o: chars.c chars.in chars.h
 
 msec.ln: msec.c msec.in libmdoc.h
 msec.o: msec.c msec.in libmdoc.h

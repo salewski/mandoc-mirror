@@ -19,69 +19,66 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "term.h"
+#include "chars.h"
 
 #define	ASCII_PRINT_HI	 126
 #define	ASCII_PRINT_LO	 32
 
-struct	line {
+struct	ln {
+	struct ln	 *next;
 	const char	 *code;
 	const char	 *out;
 	size_t		  codesz;
 	size_t		  outsz;
 	int		  type;
-#define	ASCII_CHAR	 (1 << 0)
-#define	ASCII_STRING	 (1 << 1)
-#define ASCII_BOTH	 (0x03)
+#define	CHARS_CHAR	 (1 << 0)
+#define	CHARS_STRING	 (1 << 1)
+#define CHARS_BOTH	 (0x03)
 };
 
-struct	linep {
-	const struct line *line;
-	struct linep	 *next;
-};
+#define	LINES_MAX	  266
 
 #define CHAR(w, x, y, z) \
-	{ (w), (y), (x), (z), ASCII_CHAR },
+	{ NULL, (w), (y), (x), (z), CHARS_CHAR },
 #define STRING(w, x, y, z) \
-	{ (w), (y), (x), (z), ASCII_STRING },
+	{ NULL, (w), (y), (x), (z), CHARS_STRING },
 #define BOTH(w, x, y, z) \
-	{ (w), (y), (x), (z), ASCII_BOTH },
-static	const struct line lines[] = {
-#include "ascii.in"
+	{ NULL, (w), (y), (x), (z), CHARS_BOTH },
+
+static	struct ln lines[LINES_MAX] = {
+#include "chars.in"
 };
 
-struct	asciitab {
-	struct linep	 *lines;
-	void		**htab;
+struct	tbl {
+	struct ln	**htab;
 };
 
-
-static	inline int	  match(const struct line *,
+static	inline int	  match(const struct ln *,
 				const char *, size_t, int);
-static	const char *	  lookup(struct asciitab *, const char *, 
+static	const char	 *find(struct tbl *, const char *, 
 				size_t, size_t *, int);
 
 
 void
-term_asciifree(void *arg)
+chars_free(void *arg)
 {
-	struct asciitab	*tab;
+	struct tbl	*tab;
 
-	tab = (struct asciitab *)arg;
+	tab = (struct tbl *)arg;
 
-	free(tab->lines);
 	free(tab->htab);
 	free(tab);
 }
 
 
+/* ARGSUSED */
 void *
-term_ascii2htab(void)
+chars_init(enum chars type)
 {
-	struct asciitab  *tab;
-	void		**htab;
-	struct linep	 *pp, *p;
-	int		  i, len, hash;
+	struct tbl	 *tab;
+	struct ln	**htab;
+	struct ln	 *pp;
+	int		  i, hash;
 
 	/*
 	 * Constructs a very basic chaining hashtable.  The hash routine
@@ -90,71 +87,59 @@ term_ascii2htab(void)
 	 * (they're in-line re-ordered during lookup).
 	 */
 
-	if (NULL == (tab = malloc(sizeof(struct asciitab))))
-		err(1, "malloc");
-
-	len = sizeof(lines) / sizeof(struct line);
-
-	if (NULL == (p = calloc((size_t)len, sizeof(struct linep))))
+	if (NULL == (tab = malloc(sizeof(struct tbl))))
 		err(1, "malloc");
 
 	htab = calloc(ASCII_PRINT_HI - ASCII_PRINT_LO + 1, 
-			sizeof(struct linep **));
+			sizeof(struct ln **));
 
 	if (NULL == htab)
 		err(1, "malloc");
 
-	for (i = 0; i < len; i++) {
+	for (i = 0; i < LINES_MAX; i++) {
 		assert(lines[i].codesz > 0);
 		assert(lines[i].code);
 		assert(lines[i].out);
 
-		p[i].line = &lines[i];
-
 		hash = (int)lines[i].code[0] - ASCII_PRINT_LO;
 
-		if (NULL == (pp = ((struct linep **)htab)[hash])) {
-			htab[hash] = &p[i];
+		if (NULL == (pp = htab[hash])) {
+			htab[hash] = &lines[i];
 			continue;
 		}
 
 		for ( ; pp->next; pp = pp->next)
 			/* Scan ahead. */ ;
 
-		pp->next = &p[i];
+		pp->next = &lines[i];
 	}
 
 	tab->htab = htab;
-	tab->lines = p;
-
 	return(tab);
 }
 
 
 const char *
-term_a2ascii(void *arg, const char *p, size_t sz, size_t *rsz)
+chars_a2ascii(void *arg, const char *p, size_t sz, size_t *rsz)
 {
 
-	return(lookup((struct asciitab *)arg, p, 
-				sz, rsz, ASCII_CHAR));
+	return(find((struct tbl *)arg, p, sz, rsz, CHARS_CHAR));
 }
 
 
 const char *
-term_a2res(void *arg, const char *p, size_t sz, size_t *rsz)
+chars_a2res(void *arg, const char *p, size_t sz, size_t *rsz)
 {
 
-	return(lookup((struct asciitab *)arg, p, 
-				sz, rsz, ASCII_STRING));
+	return(find((struct tbl *)arg, p, sz, rsz, CHARS_STRING));
 }
 
 
 static const char *
-lookup(struct asciitab *tab, const char *p, 
-		size_t sz, size_t *rsz, int type)
+find(struct tbl *tab, const char *p, size_t sz, size_t *rsz, int type)
 {
-	struct linep	 *pp, *prev;
-	void		**htab;
+	struct ln	 *pp, *prev;
+	struct ln	**htab;
 	int		  hash;
 
 	assert(p);
@@ -162,7 +147,6 @@ lookup(struct asciitab *tab, const char *p,
 
 	if (p[0] < ASCII_PRINT_LO || p[0] > ASCII_PRINT_HI)
 		return(NULL);
-
 
 	/*
 	 * Lookup the symbol in the symbol hash.  See ascii2htab for the
@@ -173,18 +157,18 @@ lookup(struct asciitab *tab, const char *p,
 	hash = (int)p[0] - ASCII_PRINT_LO;
 	htab = tab->htab;
 
-	if (NULL == (pp = ((struct linep **)htab)[hash]))
+	if (NULL == (pp = htab[hash]))
 		return(NULL);
 
 	if (NULL == pp->next) {
-		if ( ! match(pp->line, p, sz, type)) 
+		if ( ! match(pp, p, sz, type)) 
 			return(NULL);
-		*rsz = pp->line->outsz;
-		return(pp->line->out);
+		*rsz = pp->outsz;
+		return(pp->out);
 	}
 
 	for (prev = NULL; pp; pp = pp->next) {
-		if ( ! match(pp->line, p, sz, type)) {
+		if ( ! match(pp, p, sz, type)) {
 			prev = pp;
 			continue;
 		}
@@ -193,12 +177,12 @@ lookup(struct asciitab *tab, const char *p,
 
 		if (prev) {
 			prev->next = pp->next;
-			pp->next = ((struct linep **)htab)[hash];
+			pp->next = htab[hash];
 			htab[hash] = pp;
 		}
 
-		*rsz = pp->line->outsz;
-		return(pp->line->out);
+		*rsz = pp->outsz;
+		return(pp->out);
 	}
 
 	return(NULL);
@@ -206,12 +190,12 @@ lookup(struct asciitab *tab, const char *p,
 
 
 static inline int
-match(const struct line *line, const char *p, size_t sz, int type)
+match(const struct ln *ln, const char *p, size_t sz, int type)
 {
 
-	if ( ! (line->type & type))
+	if ( ! (ln->type & type))
 		return(0);
-	if (line->codesz != sz)
+	if (ln->codesz != sz)
 		return(0);
-	return(0 == strncmp(line->code, p, sz));
+	return(0 == strncmp(ln->code, p, sz));
 }

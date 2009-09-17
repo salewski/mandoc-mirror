@@ -48,11 +48,6 @@ struct	termp {
 	void		 *symtab;	/* Encoded-symbol table. */
 };
 
-void		 *term_ascii2htab(void);
-const char	 *term_a2ascii(void *, const char *, size_t, size_t *);
-const char	 *term_a2res(void *, const char *, size_t, size_t *);
-void		  term_asciifree(void *);
-
 void		  term_newln(struct termp *);
 void		  term_vspace(struct termp *);
 void		  term_word(struct termp *, const char *);

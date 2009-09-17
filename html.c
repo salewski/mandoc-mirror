@@ -138,9 +138,11 @@ static	void		  print_encode(const char *);
 static	void		  print_text(struct html *, const char *);
 static	int		  mdoc_root_pre(MDOC_ARGS);
 
+static	int		  mdoc_ar_pre(MDOC_ARGS);
 static	int		  mdoc_fl_pre(MDOC_ARGS);
 static	int		  mdoc_nd_pre(MDOC_ARGS);
 static	int		  mdoc_nm_pre(MDOC_ARGS);
+static	int		  mdoc_ns_pre(MDOC_ARGS);
 static	int		  mdoc_op_pre(MDOC_ARGS);
 static	void		  mdoc_op_post(MDOC_ARGS);
 static	int		  mdoc_pp_pre(MDOC_ARGS);
@@ -165,7 +167,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* It */
 	{NULL, NULL}, /* Ad */ 
 	{NULL, NULL}, /* An */
-	{NULL, NULL}, /* Ar */
+	{mdoc_ar_pre, NULL}, /* Ar */
 	{NULL, NULL}, /* Cd */
 	{NULL, NULL}, /* Cm */
 	{NULL, NULL}, /* Dv */ 
@@ -222,7 +224,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Fx */
 	{NULL, NULL}, /* Ms */
 	{NULL, NULL}, /* No */
-	{NULL, NULL}, /* Ns */
+	{mdoc_ns_pre, NULL}, /* Ns */
 	{NULL, NULL}, /* Nx */
 	{NULL, NULL}, /* Ox */
 	{NULL, NULL}, /* Pc */
@@ -697,7 +699,7 @@ mdoc_nd_pre(MDOC_ARGS)
 {
 
 	if (MDOC_BODY == n->type)
-		print_text(h, "--");
+		print_text(h, "\\(en");
 	return(1);
 }
 
@@ -784,4 +786,28 @@ mdoc_xr_pre(MDOC_ARGS)
 	print_text(h, ")");
 
 	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_ns_pre(MDOC_ARGS)
+{
+
+	h->flags |= HTML_NOSPACE;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_ar_pre(MDOC_ARGS)
+{
+	struct htmlpair tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "arg";
+
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
 }

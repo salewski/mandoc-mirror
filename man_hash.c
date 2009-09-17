@@ -21,10 +21,12 @@
 
 #include "libman.h"
 
-
 static	u_char		table[26 * 6];
 
-
+/*
+ * XXX - this hash has global scope, so if intended for use as a library
+ * with multiple callers, it will need re-invocation protection.
+ */
 void
 man_hash_init(void)
 {
@@ -48,7 +50,6 @@ man_hash_init(void)
 		assert(j < 6);
 	}
 }
-
 
 int
 man_hash_find(const char *tmp)
