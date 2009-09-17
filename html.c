@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "chars.h"
 #include "mdoc.h"
 #include "man.h"
 
@@ -107,6 +108,7 @@ struct	html {
 #define	HTML_NOSPACE	 (1 << 0)
 #define	HTML_NEWLINE	 (1 << 1)
 	struct tagq	  stack;
+	void		 *symtab;
 };
 
 #define	MDOC_ARGS	  const struct mdoc_meta *m, \
@@ -134,8 +136,11 @@ static	struct tag	 *print_otag(struct html *, enum htmltag,
 static	void		  print_tagq(struct html *, const struct tag *);
 static	void		  print_stagq(struct html *, const struct tag *);
 static	void		  print_ctag(struct html *, enum htmltag);
-static	void		  print_encode(const char *);
+static	void		  print_encode(struct html *, const char *);
+static	void		  print_escape(struct html *, const char **);
 static	void		  print_text(struct html *, const char *);
+static	void		  print_res(struct html *, const char *, int);
+static	void		  print_spec(struct html *, const char *, int);
 static	int		  mdoc_root_pre(MDOC_ARGS);
 
 static	int		  mdoc_ar_pre(MDOC_ARGS);
@@ -273,7 +278,6 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* sp */ 
 };
 
-
 void
 html_mdoc(void *arg, const struct mdoc *m)
 {
@@ -289,7 +293,6 @@ html_mdoc(void *arg, const struct mdoc *m)
 
 	printf("\n");
 }
-
 
 void
 html_man(void *arg, const struct man *m)
@@ -307,7 +310,6 @@ html_man(void *arg, const struct man *m)
 	printf("\n");
 }
 
-
 void *
 html_alloc(void)
 {
@@ -317,9 +319,12 @@ html_alloc(void)
 		return(NULL);
 
 	SLIST_INIT(&h->stack);
+	if (NULL == (h->symtab = chars_init(CHARS_HTML))) {
+		free(h);
+		return(NULL);
+	}
 	return(h);
 }
-
 
 void
 html_free(void *p)
@@ -337,7 +342,6 @@ html_free(void *p)
 	free(h);
 }
 
-
 static void
 print_mdoc(MDOC_ARGS)
 {
@@ -352,7 +356,6 @@ print_mdoc(MDOC_ARGS)
 	print_mdoc_node(m, n, h);
 	print_tagq(h, t);
 }
-
 
 static void
 print_gen_head(struct html *h)
@@ -385,7 +388,6 @@ print_gen_head(struct html *h)
 	print_otag(h, TAG_LINK, 4, link);
 }
 
-
 /* ARGSUSED */
 static void
 print_mdoc_head(MDOC_ARGS)
@@ -393,9 +395,8 @@ print_mdoc_head(MDOC_ARGS)
 
 	print_gen_head(h);
 	print_otag(h, TAG_TITLE, 0, NULL);
-	print_encode(m->title);
+	print_encode(h, m->title);
 }
-
 
 /* ARGSUSED */
 static void
@@ -404,7 +405,6 @@ print_mdoc_title(MDOC_ARGS)
 
 	/* TODO */
 }
-
 
 static void
 print_mdoc_node(MDOC_ARGS)
@@ -448,7 +448,6 @@ print_mdoc_node(MDOC_ARGS)
 		print_mdoc_node(m, n->next, h);
 }
 
-
 static void
 print_man(MAN_ARGS)
 {
@@ -463,7 +462,6 @@ print_man(MAN_ARGS)
 	print_tagq(h, t);
 }
 
-
 /* ARGSUSED */
 static void
 print_man_head(MAN_ARGS)
@@ -471,9 +469,8 @@ print_man_head(MAN_ARGS)
 
 	print_gen_head(h);
 	print_otag(h, TAG_TITLE, 0, NULL);
-	print_encode(m->title);
+	print_encode(h, m->title);
 }
-
 
 /* ARGSUSED */
 static void
@@ -483,12 +480,147 @@ print_man_body(MAN_ARGS)
 	/* TODO */
 }
 
+static void
+print_spec(struct html *h, const char *p, int len)
+{
+	const char	*rhs;
+	int		 i;
+	size_t		 sz;
+
+	rhs = chars_a2ascii(h->symtab, p, (size_t)len, &sz);
+
+	if (NULL == rhs) 
+		return;
+	for (i = 0; i < (int)sz; i++) 
+		putchar(rhs[i]);
+}
 
 static void
-print_encode(const char *p)
+print_res(struct html *h, const char *p, int len)
+{
+	const char	*rhs;
+	int		 i;
+	size_t		 sz;
+
+	rhs = chars_a2res(h->symtab, p, (size_t)len, &sz);
+
+	if (NULL == rhs)
+		return;
+	for (i = 0; i < (int)sz; i++) 
+		putchar(rhs[i]);
+}
+
+static void
+print_escape(struct html *h, const char **p)
+{
+	int		 j, type;
+	const char	*wp;
+
+	wp = *p;
+	type = 1;
+
+	if (0 == *(++wp)) {
+		*p = wp;
+		return;
+	}
+
+	if ('(' == *wp) {
+		wp++;
+		if (0 == *wp || 0 == *(wp + 1)) {
+			*p = 0 == *wp ? wp : wp + 1;
+			return;
+		}
+
+		print_spec(h, wp, 2);
+		*p = ++wp;
+		return;
+
+	} else if ('*' == *wp) {
+		if (0 == *(++wp)) {
+			*p = wp;
+			return;
+		}
+
+		switch (*wp) {
+		case ('('):
+			wp++;
+			if (0 == *wp || 0 == *(wp + 1)) {
+				*p = 0 == *wp ? wp : wp + 1;
+				return;
+			}
+
+			print_res(h, wp, 2);
+			*p = ++wp;
+			return;
+		case ('['):
+			type = 0;
+			break;
+		default:
+			print_res(h, wp, 1);
+			*p = wp;
+			return;
+		}
+	
+	} else if ('f' == *wp) {
+		if (0 == *(++wp)) {
+			*p = wp;
+			return;
+		}
+
+		switch (*wp) {
+		case ('B'):
+			/* TODO */
+			break;
+		case ('I'):
+			/* TODO */
+			break;
+		case ('P'):
+			/* FALLTHROUGH */
+		case ('R'):
+			/* TODO */
+			break;
+		default:
+			break;
+		}
+
+		*p = wp;
+		return;
+
+	} else if ('[' != *wp) {
+		print_spec(h, wp, 1);
+		*p = wp;
+		return;
+	}
+
+	wp++;
+	for (j = 0; *wp && ']' != *wp; wp++, j++)
+		/* Loop... */ ;
+
+	if (0 == *wp) {
+		*p = wp;
+		return;
+	}
+
+	if (type)
+		print_spec(h, wp - j, j);
+	else
+		print_res(h, wp - j, j);
+
+	*p = wp;
+}
+
+
+static void
+print_encode(struct html *h, const char *p)
 {
 
-	printf("%s", p); /* XXX */
+	for (; *p; p++) {
+		if ('\\' != *p) {
+			putchar(*p);
+			continue;
+		}
+		print_escape(h, &p);
+	}
 }
 
 
@@ -515,7 +647,7 @@ print_otag(struct html *h, enum htmltag tag,
 	for (i = 0; i < sz; i++) {
 		printf(" %s=\"", htmlattrs[p[i].key]);
 		assert(p->val);
-		print_encode(p[i].val);
+		print_encode(h, p[i].val);
 		printf("\"");
 	}
 	printf(">");
@@ -590,7 +722,7 @@ print_text(struct html *h, const char *p)
 	h->flags &= ~HTML_NEWLINE;
 
 	if (p)
-		print_encode(p);
+		print_encode(h, p);
 
 	if (*p && 0 == *(p + 1))
 		switch (*p) {

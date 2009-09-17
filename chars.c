@@ -21,15 +21,17 @@
 
 #include "chars.h"
 
-#define	ASCII_PRINT_HI	 126
-#define	ASCII_PRINT_LO	 32
+#define	PRINT_HI	 126
+#define	PRINT_LO	 32
 
 struct	ln {
 	struct ln	 *next;
 	const char	 *code;
-	const char	 *out;
+	const char	 *ascii;
+	const char	 *html;
 	size_t		  codesz;
-	size_t		  outsz;
+	size_t		  asciisz;
+	size_t		  htmlsz;
 	int		  type;
 #define	CHARS_CHAR	 (1 << 0)
 #define	CHARS_STRING	 (1 << 1)
@@ -38,18 +40,19 @@ struct	ln {
 
 #define	LINES_MAX	  266
 
-#define CHAR(w, x, y, z) \
-	{ NULL, (w), (y), (x), (z), CHARS_CHAR },
-#define STRING(w, x, y, z) \
-	{ NULL, (w), (y), (x), (z), CHARS_STRING },
-#define BOTH(w, x, y, z) \
-	{ NULL, (w), (y), (x), (z), CHARS_BOTH },
+#define CHAR(w, x, y, z, a, b) \
+	{ NULL, (w), (y), (a), (x), (z), (b), CHARS_CHAR },
+#define STRING(w, x, y, z, a, b) \
+	{ NULL, (w), (y), (a), (x), (z), (b), CHARS_STRING },
+#define BOTH(w, x, y, z, a, b) \
+	{ NULL, (w), (y), (a), (x), (z), (b), CHARS_BOTH },
 
 static	struct ln lines[LINES_MAX] = {
 #include "chars.in"
 };
 
 struct	tbl {
+	enum chars	  type;
 	struct ln	**htab;
 };
 
@@ -71,7 +74,6 @@ chars_free(void *arg)
 }
 
 
-/* ARGSUSED */
 void *
 chars_init(enum chars type)
 {
@@ -89,19 +91,14 @@ chars_init(enum chars type)
 
 	if (NULL == (tab = malloc(sizeof(struct tbl))))
 		err(1, "malloc");
+	tab->type = type;
 
-	htab = calloc(ASCII_PRINT_HI - ASCII_PRINT_LO + 1, 
-			sizeof(struct ln **));
-
+	htab = calloc(PRINT_HI - PRINT_LO + 1, sizeof(struct ln **));
 	if (NULL == htab)
 		err(1, "malloc");
 
 	for (i = 0; i < LINES_MAX; i++) {
-		assert(lines[i].codesz > 0);
-		assert(lines[i].code);
-		assert(lines[i].out);
-
-		hash = (int)lines[i].code[0] - ASCII_PRINT_LO;
+		hash = (int)lines[i].code[0] - PRINT_LO;
 
 		if (NULL == (pp = htab[hash])) {
 			htab[hash] = &lines[i];
@@ -110,7 +107,6 @@ chars_init(enum chars type)
 
 		for ( ; pp->next; pp = pp->next)
 			/* Scan ahead. */ ;
-
 		pp->next = &lines[i];
 	}
 
@@ -145,7 +141,7 @@ find(struct tbl *tab, const char *p, size_t sz, size_t *rsz, int type)
 	assert(p);
 	assert(sz > 0);
 
-	if (p[0] < ASCII_PRINT_LO || p[0] > ASCII_PRINT_HI)
+	if (p[0] < PRINT_LO || p[0] > PRINT_HI)
 		return(NULL);
 
 	/*
@@ -154,7 +150,7 @@ find(struct tbl *tab, const char *p, size_t sz, size_t *rsz, int type)
 	 * to optimise for repeat hits.
 	 */
 
-	hash = (int)p[0] - ASCII_PRINT_LO;
+	hash = (int)p[0] - PRINT_LO;
 	htab = tab->htab;
 
 	if (NULL == (pp = htab[hash]))
@@ -163,8 +159,13 @@ find(struct tbl *tab, const char *p, size_t sz, size_t *rsz, int type)
 	if (NULL == pp->next) {
 		if ( ! match(pp, p, sz, type)) 
 			return(NULL);
-		*rsz = pp->outsz;
-		return(pp->out);
+
+		if (CHARS_HTML == tab->type) {
+			*rsz = pp->htmlsz;
+			return(pp->html);
+		}
+		*rsz = pp->asciisz;
+		return(pp->ascii);
 	}
 
 	for (prev = NULL; pp; pp = pp->next) {
@@ -173,16 +174,18 @@ find(struct tbl *tab, const char *p, size_t sz, size_t *rsz, int type)
 			continue;
 		}
 
-		/* Re-order the hash chain. */
-
 		if (prev) {
 			prev->next = pp->next;
 			pp->next = htab[hash];
 			htab[hash] = pp;
 		}
 
-		*rsz = pp->outsz;
-		return(pp->out);
+		if (CHARS_HTML == tab->type) {
+			*rsz = pp->htmlsz;
+			return(pp->html);
+		}
+		*rsz = pp->asciisz;
+		return(pp->ascii);
 	}
 
 	return(NULL);
