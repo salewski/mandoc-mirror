@@ -1271,6 +1271,8 @@ mdoc_tbl_block_pre(MDOC_ARGS, int t, int w, int o, int c)
 	struct htmlpair	 tag;
 
 	switch (t) {
+	case (MDOC_Column):
+		/* FALLTHROUGH */
 	case (MDOC_Item):
 		/* FALLTHROUGH */
 	case (MDOC_Ohang):
@@ -1280,7 +1282,6 @@ mdoc_tbl_block_pre(MDOC_ARGS, int t, int w, int o, int c)
 		buffmt("margin-left: %dem; clear: both;", w + o);
 		break;
 	}
-
 
 	if ( ! c && n->prev && n->prev->body->child)
 		bufcat("padding-top: 1em;");
@@ -1315,6 +1316,15 @@ mdoc_tbl_head_pre(MDOC_ARGS, int t, int w)
 		/* FALLTHROUGH */
 	case (MDOC_Ohang):
 		print_otag(h, TAG_DIV, 0, NULL);
+		break;
+	case (MDOC_Column):
+		buffmt("min-width: %dem;", w);
+		bufcat("clear: none;");
+		if (n->next && MDOC_HEAD == n->next->type)
+			bufcat("float: left;");
+		tag.key = ATTR_STYLE;
+		tag.val = buf;
+		print_otag(h, TAG_DIV, 1, &tag);
 		break;
 	default:
 		buffmt("margin-left: -%dem;", w);
@@ -1360,8 +1370,8 @@ mdoc_tbl_head_pre(MDOC_ARGS, int t, int w)
 static int
 mdoc_tbl_pre(MDOC_ARGS, int type)
 {
-	int			 i, w, o, c;
-	const struct mdoc_node	*bl;
+	int			 i, w, o, c, wp;
+	const struct mdoc_node	*bl, *nn;
 
 	bl = n->parent->parent;
 	if (MDOC_BLOCK != n->type) 
@@ -1372,16 +1382,28 @@ mdoc_tbl_pre(MDOC_ARGS, int type)
 	assert(bl->args);
 
 	w = o = c = 0;
+	wp = -1;
 
 	for (i = 0; i < (int)bl->args->argc; i++) 
 		if (MDOC_Width == bl->args->argv[i].arg) {
 			assert(bl->args->argv[i].sz);
+			wp = i;
 			w = a2width(bl->args->argv[i].value[0]);
 		} else if (MDOC_Offset == bl->args->argv[i].arg) {
 			assert(bl->args->argv[i].sz);
 			o = a2offs(bl->args->argv[i].value[0]);
 		} else if (MDOC_Compact == bl->args->argv[i].arg) 
 			c = 1;
+	
+	if (MDOC_HEAD == n->type && MDOC_Column == type) {
+		nn = n->parent->child;
+		assert(nn && MDOC_HEAD == nn->type);
+		for (i = 0; nn && nn != n; nn = nn->next, i++)
+			/* Counter... */ ;
+		assert(nn);
+		if (wp >= 0 && i < (int)bl->args[wp].argv->sz)
+			w = a2width(bl->args->argv[wp].value[i]);
+	}
 
 	switch (type) {
 	case (MDOC_Enum):

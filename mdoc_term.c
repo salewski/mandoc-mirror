@@ -762,7 +762,7 @@ termp_it_pre(DECL_ARGS)
 		 * the 0 will be adjusted to default 10 or, if in the
 		 * last column case, set to stretch to the margin).
 		 */
-		for (i = 0, n = node->prev; n && n && 
+		for (i = 0, n = node->prev; n && 
 				i < (int)bl->args[vals[2]].argv->sz; 
 				n = n->prev, i++)
 			offset += arg_width 
