@@ -994,7 +994,7 @@ static void
 mdoc_root_post(MDOC_ARGS)
 {
 	struct tm	*tm;
-	struct htmlpair	 tag[2];
+	struct htmlpair	 tag;
 	struct tag	*t;
 	char		 b[BUFSIZ], os[BUFSIZ];
 
@@ -1003,32 +1003,24 @@ mdoc_root_post(MDOC_ARGS)
 	if (0 == strftime(b, BUFSIZ - 1, "%B %e, %Y", tm))
 		err(EXIT_FAILURE, "strftime");
 
-	(void)strlcpy(os, m->os, BUFSIZ);
+	strlcpy(os, m->os, BUFSIZ);
 
-	tag[0].key = ATTR_STYLE;
-	tag[0].val = "width: 100%; margin-top: 1em;";
-	tag[1].key = ATTR_CLASS;
-	tag[1].val = "foot";
+	tag.key = ATTR_CLASS;
+	tag.val = "foot";
 
-	t = print_otag(h, TAG_DIV, 2, tag);
+	t = print_otag(h, TAG_DIV, 1, &tag);
 
-	bufinit();
-	bufcat("width: 50%;");
-	bufcat("text-align: left;");
-	bufcat("float: left;");
-	tag[0].key = ATTR_STYLE;
-	tag[0].val = buf;
-	print_otag(h, TAG_SPAN, 1, tag);
+	tag.key = ATTR_STYLE;
+	tag.val = "width: 49%; display: "
+		"inline-block; text-align: left;";
+	print_otag(h, TAG_SPAN, 1, &tag);
 	print_text(h, b);
 	print_stagq(h, t);
 
-	bufinit();
-	bufcat("width: 50%;");
-	bufcat("text-align: right;");
-	bufcat("float: left;");
-	tag[0].key = ATTR_STYLE;
-	tag[0].val = buf;
-	print_otag(h, TAG_SPAN, 1, tag);
+	tag.key = ATTR_STYLE;
+	tag.val = "width: 49%; display: "
+		"inline-block; text-align: right;";
+	print_otag(h, TAG_SPAN, 1, &tag);
 	print_text(h, os);
 	print_tagq(h, t);
 
@@ -1040,7 +1032,7 @@ mdoc_root_post(MDOC_ARGS)
 static int
 mdoc_root_pre(MDOC_ARGS)
 {
-	struct htmlpair	 tag[2];
+	struct htmlpair	 tag;
 	struct tag	*t, *tt;
 	char		 b[BUFSIZ], title[BUFSIZ];
 
@@ -1048,54 +1040,42 @@ mdoc_root_pre(MDOC_ARGS)
 	(void)strlcpy(b, m->vol, BUFSIZ);
 
 	if (m->arch) {
-		(void)strlcat(b, " (", BUFSIZ);
-		(void)strlcat(b, m->arch, BUFSIZ);
-		(void)strlcat(b, ")", BUFSIZ);
+		strlcat(b, " (", BUFSIZ);
+		strlcat(b, m->arch, BUFSIZ);
+		strlcat(b, ")", BUFSIZ);
 	}
 
-	(void)snprintf(title, BUFSIZ - 1, "%s(%d)", m->title, m->msec);
+	snprintf(title, BUFSIZ - 1, "%s(%d)", m->title, m->msec);
 
-	tag[0].key = ATTR_CLASS;
-	tag[0].val = "body";
+	tag.key = ATTR_CLASS;
+	tag.val = "body";
 
-	t = print_otag(h, TAG_DIV, 1, tag);
+	t = print_otag(h, TAG_DIV, 1, &tag);
 
-	tag[0].key = ATTR_CLASS;
-	tag[0].val = "head";
-	tag[1].key = ATTR_STYLE;
-	tag[1].val = "margin-bottom: 1em; clear: both;";
+	tag.key = ATTR_CLASS;
+	tag.val = "head";
 
-	tt = print_otag(h, TAG_DIV, 2, tag);
+	tt = print_otag(h, TAG_DIV, 1, &tag);
 
-	bufinit();
-	bufcat("width: 30%;");
-	bufcat("text-align: left;");
-	bufcat("float: left;");
-	tag[0].key = ATTR_STYLE;
-	tag[0].val = buf;
-	print_otag(h, TAG_SPAN, 1, tag);
+	tag.key = ATTR_STYLE;
+	tag.val = "width: 32%; text-align: left; "
+		"display: inline-block;";
+	print_otag(h, TAG_SPAN, 1, &tag);
 	print_text(h, b);
 	print_stagq(h, tt);
 
-	bufinit();
-	bufcat("width: 30%;");
-	bufcat("text-align: center;");
-	bufcat("float: left;");
-	tag[0].key = ATTR_STYLE;
-	tag[0].val = buf;
-	print_otag(h, TAG_SPAN, 1, tag);
+	tag.key = ATTR_STYLE;
+	tag.val = "width: 32%; text-align: center; "
+		"display: inline-block;";
+	print_otag(h, TAG_SPAN, 1, &tag);
 	print_text(h, title);
 	print_stagq(h, tt);
 
-	bufinit();
-	bufcat("width: 30%;");
-	bufcat("text-align: right;");
-	bufcat("float: left;");
-	tag[0].key = ATTR_STYLE;
-	tag[0].val = buf;
-	print_otag(h, TAG_SPAN, 1, tag);
+	tag.key = ATTR_STYLE;
+	tag.val = "width: 32%; text-align: right; "
+		"display: inline-block;";
+	print_otag(h, TAG_SPAN, 1, &tag);
 	print_text(h, b);
-
 	print_stagq(h, t);
 
 	return(1);
@@ -1123,8 +1103,12 @@ mdoc_sh_pre(MDOC_ARGS)
 			return(1);
 		}
 
+		bufcat("margin-top: 1em;");
+		if (NULL == n->next)
+			bufcat("margin-bottom: 1em;");
+
 		tag[1].key = ATTR_STYLE;
-		tag[1].val = "margin-top: 1em;";
+		tag[1].val = buf;
 
 		print_otag(h, TAG_DIV, 2, tag);
 		return(1);
