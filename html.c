@@ -402,6 +402,9 @@ html_free(void *p)
 		SLIST_REMOVE_HEAD(&h->stack, entry);
 		free(tag);
 	}
+	
+	if (h->symtab)
+		chars_free(h->symtab);
 	free(h);
 }
 

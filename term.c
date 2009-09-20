@@ -90,7 +90,7 @@ term_free(struct termp *p)
 
 	if (p->buf)
 		free(p->buf);
-	if (TERMENC_ASCII == p->enc && p->symtab)
+	if (p->symtab)
 		chars_free(p->symtab);
 
 	free(p);
