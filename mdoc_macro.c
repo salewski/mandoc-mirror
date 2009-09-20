@@ -260,6 +260,7 @@ mdoc_macroend(struct mdoc *m)
 static int
 lookup(int from, const char *p)
 {
+	/* FIXME: make -diag lists be un-PARSED. */
 
 	if ( ! (MDOC_PARSED & mdoc_macros[from].flags))
 		return(MDOC_MAX);

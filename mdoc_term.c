@@ -520,6 +520,7 @@ arg_width(const struct mdoc_argv *arg, int pos)
 }
 
 
+/* FIXME: put in utility file for front-ends. */
 static int
 arg_listtype(const struct mdoc_node *n)
 {
