@@ -493,7 +493,7 @@ print_head(DECL_ARGS)
 }
 
 
-/* TODO: put into util file. */
+/* FIXME: put in utility file for front-ends. */
 static size_t
 arg_width(const struct mdoc_argv *arg, int pos)
 {
@@ -561,6 +561,7 @@ arg_listtype(const struct mdoc_node *n)
 }
 
 
+/* FIXME: put in utility file for front-ends. */
 static size_t
 arg_offset(const struct mdoc_argv *arg)
 {
