@@ -424,6 +424,7 @@ print_foot(DECL_ARGS)
 }
 
 
+/* FIXME: put in utility library. */
 /* ARGSUSED */
 static void
 print_head(DECL_ARGS)
