@@ -167,8 +167,6 @@ static	void		  print_mdoc(MDOC_ARGS);
 static	void		  print_mdoc_head(MDOC_ARGS);
 static	void		  print_mdoc_node(MDOC_ARGS);
 static	void		  print_mdoc_nodelist(MDOC_ARGS);
-static	void		  print_man(MAN_ARGS);
-static	void		  print_man_head(MAN_ARGS);
 static	struct tag	 *print_otag(struct html *, enum htmltag, 
 				int, const struct htmlpair *);
 static	void		  print_tagq(struct html *, const struct tag *);
@@ -386,20 +384,10 @@ html_mdoc(void *arg, const struct mdoc *m)
 }
 
 
+/* ARGSUSED */
 void
 html_man(void *arg, const struct man *m)
 {
-	struct html	*h;
-	struct tag	*t;
-
-	h = (struct html *)arg;
-
-	print_gen_doctype(h);
-	t = print_otag(h, TAG_HTML, 0, NULL);
-	print_man(man_meta(m), man_node(m), h);
-	print_tagq(h, t);
-
-	printf("\n");
 }
 
 
@@ -616,10 +604,21 @@ print_gen_head(struct html *h)
 static void
 print_mdoc_head(MDOC_ARGS)
 {
+	char		b[BUFSIZ];
 
 	print_gen_head(h);
+
+	(void)snprintf(b, BUFSIZ - 1, 
+			"%s(%d)", m->title, m->msec);
+
+	if (m->arch) {
+		(void)strlcat(b, " (", BUFSIZ);
+		(void)strlcat(b, m->arch, BUFSIZ);
+		(void)strlcat(b, ")", BUFSIZ);
+	}
+
 	print_otag(h, TAG_TITLE, 0, NULL);
-	print_text(h, m->title);
+	print_text(h, b);
 }
 
 
@@ -675,32 +674,6 @@ print_mdoc_node(MDOC_ARGS)
 			(*mdocs[n->tok].post)(m, n, h);
 		break;
 	}
-}
-
-
-static void
-print_man(MAN_ARGS)
-{
-	struct tag	*t;
-
-	t = print_otag(h, TAG_HEAD, 0, NULL);
-	print_man_head(m, n, h);
-	print_tagq(h, t);
-
-	t = print_otag(h, TAG_BODY, 0, NULL);
-	/*print_man_body(m, n, h);*/
-	print_tagq(h, t);
-}
-
-
-/* ARGSUSED */
-static void
-print_man_head(MAN_ARGS)
-{
-
-	print_gen_head(h);
-	print_otag(h, TAG_TITLE, 0, NULL);
-	print_text(h, m->title);
 }
 
 
