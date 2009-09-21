@@ -10,11 +10,11 @@ span.arg	{ font-style: italic; }
 span.config	{ font-weight: bold; }
 span.diag	{ font-weight: bold; }
 span.emph	{ font-style: italic; }
-span.farg	{ font-style: underline; }
+span.farg	{ text-decoration: underline; }
 span.file	{ font-style: italic; }
 span.flag	{ font-weight: bold; }
 span.name	{ font-weight: bold; } 
-span.type	{ font-weight: italic; }
+span.type	{ font-style: italic; }
 span.utility	{ font-weight: bold; }
 table.header	{ border-bottom: 1px dotted #cccccc; }
 table.footer	{ border-top: 1px dotted #cccccc; }

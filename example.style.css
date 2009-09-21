@@ -20,18 +20,20 @@ span.diag	{ font-weight: bold; } /* Diagnostic (Bl -diag). */
 span.emph	{ font-style: italic; } /* Emphasis (Em). */
 span.env	{ } /* Environment variables (Ev). */
 span.errno	{ } /* Error string (Er). */
-span.farg	{ font-style: underline; } /* Function argument (Fa, Fn). */
+span.farg	{ text-decoration: underline; } /* Function argument (Fa, Fn). */
 span.file	{ font-style: italic; } /* File (Pa). */
 span.flag	{ font-weight: bold; } /* Flag (Fl, Cm). */
 span.macro	{ } /* Macro-ish thing (Fd). */
 span.name	{ font-weight: bold; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
-span.type	{ font-weight: italic; } /* Variable types (Vt, Ft, Fn). */
+span.type	{ font-style: italic; } /* Variable types (Vt, Ft, Fn). */
 span.unix	{ } /* Unices (Ux, Ox, Nx, Fx, Bx, Bsx, Dx). */
 span.utility	{ font-weight: bold; } /* Name of utility (Ex). */
 
 a.link-man	{ } /* Manual links (Xr). */
 a.link-sec	{ } /* Section links (Sx). */
+a.link-mail	{ } /* Mailto links (Mt). */
+a.link-ext	{ } /* Off-site link (Lk). */
 
 div.lit-block	{ font-family: monospace; } /* Literal block (D1, Bd -literal, Dl). */
 
