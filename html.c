@@ -14,6 +14,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <sys/types.h>
 #include <sys/queue.h>
 
 #include <assert.h>
@@ -26,13 +27,13 @@
 #include "chars.h"
 #include "mdoc.h"
 #include "man.h"
+#include "out.h"
 
 #define	DOCTYPE		"-//W3C//DTD HTML 4.01//EN"
 #define	DTD		"http://www.w3.org/TR/html4/strict.dtd"
 
 #define	INDENT		 5
 #define	HALFINDENT	 3
-#define	PX_MULT		 8
 
 enum	htmltag {
 	TAG_HTML,
@@ -55,6 +56,7 @@ enum	htmltag {
 	TAG_LI,
 	TAG_UL,
 	TAG_OL,
+	TAG_BASE,
 	TAG_MAX
 };
 
@@ -101,6 +103,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"li",		HTML_CLRLINE}, /* TAG_LI */
 	{"ul",		HTML_CLRLINE}, /* TAG_UL */
 	{"ol",		HTML_CLRLINE}, /* TAG_OL */
+	{"base",	HTML_CLRLINE | HTML_NOSTACK}, /* TAG_BASE */
 };
 
 static	const char	 *const htmlattrs[ATTR_MAX] = {
@@ -143,6 +146,8 @@ struct	html {
 	struct tagq	  tags;
 	struct ordq	  ords;
 	void		 *symtab;
+	char		 *base;
+	char		 *style;
 };
 
 #define	MDOC_ARGS	  const struct mdoc_meta *m, \
@@ -160,12 +165,10 @@ static	void		  print_gen_doctype(struct html *);
 static	void		  print_gen_head(struct html *);
 static	void		  print_mdoc(MDOC_ARGS);
 static	void		  print_mdoc_head(MDOC_ARGS);
-static	void		  print_mdoc_title(MDOC_ARGS);
 static	void		  print_mdoc_node(MDOC_ARGS);
 static	void		  print_mdoc_nodelist(MDOC_ARGS);
 static	void		  print_man(MAN_ARGS);
 static	void		  print_man_head(MAN_ARGS);
-static	void		  print_man_body(MAN_ARGS);
 static	struct tag	 *print_otag(struct html *, enum htmltag, 
 				int, const struct htmlpair *);
 static	void		  print_tagq(struct html *, const struct tag *);
@@ -177,10 +180,6 @@ static	void		  print_text(struct html *, const char *);
 static	void		  print_res(struct html *, const char *, int);
 static	void		  print_spec(struct html *, const char *, int);
 
-static	int		  a2width(const char *);
-static	int		  a2offs(const char *);
-static	int		  a2list(const struct mdoc_node *);
-
 static	void		  mdoc_root_post(MDOC_ARGS);
 static	int		  mdoc_root_pre(MDOC_ARGS);
 static	int		  mdoc_tbl_pre(MDOC_ARGS, int);
@@ -188,17 +187,27 @@ static	int		  mdoc_tbl_block_pre(MDOC_ARGS, int, int, int, int);
 static	int		  mdoc_tbl_body_pre(MDOC_ARGS, int, int);
 static	int		  mdoc_tbl_head_pre(MDOC_ARGS, int, int);
 
+static	int		  mdoc_ad_pre(MDOC_ARGS);
+static	int		  mdoc_an_pre(MDOC_ARGS);
 static	void		  mdoc_aq_post(MDOC_ARGS);
 static	int		  mdoc_aq_pre(MDOC_ARGS);
 static	int		  mdoc_ar_pre(MDOC_ARGS);
 static	int		  mdoc_bd_pre(MDOC_ARGS);
 static	void		  mdoc_bl_post(MDOC_ARGS);
 static	int		  mdoc_bl_pre(MDOC_ARGS);
+static	int		  mdoc_cd_pre(MDOC_ARGS);
 static	int		  mdoc_d1_pre(MDOC_ARGS);
 static	void		  mdoc_dq_post(MDOC_ARGS);
 static	int		  mdoc_dq_pre(MDOC_ARGS);
+static	int		  mdoc_dv_pre(MDOC_ARGS);
+static	int		  mdoc_fa_pre(MDOC_ARGS);
+static	int		  mdoc_fd_pre(MDOC_ARGS);
 static	int		  mdoc_fl_pre(MDOC_ARGS);
+static	int		  mdoc_fn_pre(MDOC_ARGS);
+static	int		  mdoc_ft_pre(MDOC_ARGS);
 static	int		  mdoc_em_pre(MDOC_ARGS);
+static	int		  mdoc_er_pre(MDOC_ARGS);
+static	int		  mdoc_ev_pre(MDOC_ARGS);
 static	int		  mdoc_ex_pre(MDOC_ARGS);
 static	int		  mdoc_it_pre(MDOC_ARGS);
 static	int		  mdoc_nd_pre(MDOC_ARGS);
@@ -217,6 +226,7 @@ static	void		  mdoc_sq_post(MDOC_ARGS);
 static	int		  mdoc_sq_pre(MDOC_ARGS);
 static	int		  mdoc_ss_pre(MDOC_ARGS);
 static	int		  mdoc_sx_pre(MDOC_ARGS);
+static	int		  mdoc_vt_pre(MDOC_ARGS);
 static	int		  mdoc_xr_pre(MDOC_ARGS);
 static	int		  mdoc_xx_pre(MDOC_ARGS);
 
@@ -240,20 +250,20 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_bl_pre, mdoc_bl_post}, /* Bl */
 	{NULL, NULL}, /* El */
 	{mdoc_it_pre, NULL}, /* It */
-	{NULL, NULL}, /* Ad */ 
-	{NULL, NULL}, /* An */
+	{mdoc_ad_pre, NULL}, /* Ad */ 
+	{mdoc_an_pre, NULL}, /* An */
 	{mdoc_ar_pre, NULL}, /* Ar */
-	{NULL, NULL}, /* Cd */
-	{NULL, NULL}, /* Cm */
-	{NULL, NULL}, /* Dv */ 
-	{NULL, NULL}, /* Er */ 
-	{NULL, NULL}, /* Ev */ 
+	{mdoc_cd_pre, NULL}, /* Cd */
+	{mdoc_fl_pre, NULL}, /* Cm */
+	{mdoc_dv_pre, NULL}, /* Dv */ 
+	{mdoc_er_pre, NULL}, /* Er */ 
+	{mdoc_ev_pre, NULL}, /* Ev */ 
 	{mdoc_ex_pre, NULL}, /* Ex */
-	{NULL, NULL}, /* Fa */ 
-	{NULL, NULL}, /* Fd */ 
+	{mdoc_fa_pre, NULL}, /* Fa */ 
+	{mdoc_fd_pre, NULL}, /* Fd */ 
 	{mdoc_fl_pre, NULL}, /* Fl */
-	{NULL, NULL}, /* Fn */ 
-	{NULL, NULL}, /* Ft */ 
+	{mdoc_fn_pre, NULL}, /* Fn */ 
+	{mdoc_ft_pre, NULL}, /* Ft */ 
 	{NULL, NULL}, /* Ic */ 
 	{NULL, NULL}, /* In */ 
 	{NULL, NULL}, /* Li */
@@ -265,7 +275,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Rv */
 	{NULL, NULL}, /* St */ 
 	{NULL, NULL}, /* Va */
-	{NULL, NULL}, /* Vt */ 
+	{mdoc_vt_pre, NULL}, /* Vt */ 
 	{mdoc_xr_pre, NULL}, /* Xr */
 	{NULL, NULL}, /* %A */
 	{NULL, NULL}, /* %B */
@@ -403,6 +413,9 @@ html_alloc(void)
 		free(h);
 		return(NULL);
 	}
+
+	/* h->base = xxx; */
+	/* h->style = xxx; */
 	return(h);
 }
 
@@ -444,7 +457,6 @@ print_mdoc(MDOC_ARGS)
 	print_tagq(h, t);
 
 	t = print_otag(h, TAG_BODY, 0, NULL);
-	print_mdoc_title(m, n, h);
 	print_mdoc_nodelist(m, n, h);
 	print_tagq(h, t);
 }
@@ -453,32 +465,37 @@ print_mdoc(MDOC_ARGS)
 static void
 print_gen_head(struct html *h)
 {
-	struct htmlpair	 meta0[2];
-	struct htmlpair	 meta1[2];
-	struct htmlpair	 link[4];
+	struct htmlpair	 tag[4];
 
-	meta0[0].key = ATTR_HTTPEQUIV;
-	meta0[0].val = "Content-Type";
-	meta0[1].key = ATTR_CONTENT;
-	meta0[1].val = "text/html; charset=utf-8";
+	tag[0].key = ATTR_HTTPEQUIV;
+	tag[0].val = "Content-Type";
+	tag[1].key = ATTR_CONTENT;
+	tag[1].val = "text/html; charset=utf-8";
+	print_otag(h, TAG_META, 2, tag);
 
-	meta1[0].key = ATTR_NAME;
-	meta1[0].val = "resource-type";
-	meta1[1].key = ATTR_CONTENT;
-	meta1[1].val = "document";
+	tag[0].key = ATTR_NAME;
+	tag[0].val = "resource-type";
+	tag[1].key = ATTR_CONTENT;
+	tag[1].val = "document";
+	print_otag(h, TAG_META, 2, tag);
 
-	link[0].key = ATTR_REL;
-	link[0].val = "stylesheet";
-	link[1].key = ATTR_HREF;
-	link[1].val = "style.css"; /* XXX */
-	link[2].key = ATTR_TYPE;
-	link[2].val = "text/css";
-	link[3].key = ATTR_MEDIA;
-	link[3].val = "all";
+	if (h->style) {
+		tag[0].key = ATTR_REL;
+		tag[0].val = "stylesheet";
+		tag[1].key = ATTR_HREF;
+		tag[1].val = h->style;
+		tag[2].key = ATTR_TYPE;
+		tag[2].val = "text/css";
+		tag[3].key = ATTR_MEDIA;
+		tag[3].val = "all";
+		print_otag(h, TAG_LINK, 4, tag);
+	}
 
-	print_otag(h, TAG_META, 2, meta0);
-	print_otag(h, TAG_META, 2, meta1);
-	print_otag(h, TAG_LINK, 4, link);
+	if (h->base) {
+		tag[0].key = ATTR_HREF;
+		tag[1].val = h->base;
+		print_otag(h, TAG_BASE, 1, tag);
+	}
 }
 
 
@@ -489,16 +506,7 @@ print_mdoc_head(MDOC_ARGS)
 
 	print_gen_head(h);
 	print_otag(h, TAG_TITLE, 0, NULL);
-	print_encode(h, m->title);
-}
-
-
-/* ARGSUSED */
-static void
-print_mdoc_title(MDOC_ARGS)
-{
-
-	/* TODO */
+	print_text(h, m->title);
 }
 
 
@@ -567,7 +575,7 @@ print_man(MAN_ARGS)
 	print_tagq(h, t);
 
 	t = print_otag(h, TAG_BODY, 0, NULL);
-	print_man_body(m, n, h);
+	/*print_man_body(m, n, h);*/
 	print_tagq(h, t);
 }
 
@@ -579,16 +587,7 @@ print_man_head(MAN_ARGS)
 
 	print_gen_head(h);
 	print_otag(h, TAG_TITLE, 0, NULL);
-	print_encode(h, m->title);
-}
-
-
-/* ARGSUSED */
-static void
-print_man_body(MAN_ARGS)
-{
-
-	/* TODO */
+	print_text(h, m->title);
 }
 
 
@@ -898,183 +897,86 @@ print_stagq(struct html *h, const struct tag *suntil)
 }
 
 
-/* FIXME: put in utility file for front-ends. */
-static int
-a2offs(const char *p)
-{
-	int		 len, i;
-
-	if (0 == strcmp(p, "left"))
-		return(0);
-	if (0 == strcmp(p, "indent"))
-		return(INDENT + 1);
-	if (0 == strcmp(p, "indent-two"))
-		return((INDENT + 1) * 2);
-
-	if (0 == (len = (int)strlen(p)))
-		return(0);
-
-	for (i = 0; i < len - 1; i++) 
-		if ( ! isdigit((u_char)p[i]))
-			break;
-
-	if (i == len - 1) 
-		if ('n' == p[len - 1] || 'm' == p[len - 1])
-			return(atoi(p));
-
-	return(len);
-}
-
-
-/* FIXME: put in utility file for front-ends. */
-static int
-a2list(const struct mdoc_node *bl)
-{
-	int		 i;
-
-	assert(MDOC_BLOCK == bl->type && MDOC_Bl == bl->tok);
-	assert(bl->args);
-
-	for (i = 0; i < (int)bl->args->argc; i++) 
-		switch (bl->args->argv[i].arg) {
-		case (MDOC_Enum):
-			/* FALLTHROUGH */
-		case (MDOC_Dash):
-			/* FALLTHROUGH */
-		case (MDOC_Hyphen):
-			/* FALLTHROUGH */
-		case (MDOC_Bullet):
-			/* FALLTHROUGH */
-		case (MDOC_Tag):
-			/* FALLTHROUGH */
-		case (MDOC_Hang):
-			/* FALLTHROUGH */
-		case (MDOC_Inset):
-			/* FALLTHROUGH */
-		case (MDOC_Diag):
-			/* FALLTHROUGH */
-		case (MDOC_Item):
-			/* FALLTHROUGH */
-		case (MDOC_Column):
-			/* FALLTHROUGH */
-		case (MDOC_Ohang):
-			return(bl->args->argv[i].arg);
-		default:
-			break;
-		}
-
-	abort();
-	/* NOTREACHED */
-}
-
-
-/* FIXME: put in utility file for front-ends. */
-static int
-a2width(const char *p)
-{
-	int		 i, len;
-
-	if (0 == (len = (int)strlen(p)))
-		return(0);
-	for (i = 0; i < len - 1; i++) 
-		if ( ! isdigit((u_char)p[i]))
-			break;
-
-	if (i == len - 1) 
-		if ('n' == p[len - 1] || 'm' == p[len - 1])
-			return(atoi(p) + 2);
-
-	return(len + 2);
-}
-
-
-/* FIXME: parts should be in a utility file for front-ends. */
 /* ARGSUSED */
 static void
 mdoc_root_post(MDOC_ARGS)
 {
-	struct tm	*tm;
-	struct htmlpair	 tag;
-	struct tag	*t;
-	char		 b[BUFSIZ], os[BUFSIZ];
+	struct tm	 tm;
+	struct htmlpair	 tag[2];
+	struct tag	*t, *tt;
+	char		 b[BUFSIZ];
 
-	tm = localtime(&m->date);
+	(void)localtime_r(&m->date, &tm);
 
-	if (0 == strftime(b, BUFSIZ - 1, "%B %e, %Y", tm))
+	if (0 == strftime(b, BUFSIZ - 1, "%B %e, %Y", &tm))
 		err(EXIT_FAILURE, "strftime");
 
-	strlcpy(os, m->os, BUFSIZ);
+	tag[0].key = ATTR_CLASS;
+	tag[0].val = "footer";
+	tag[1].key = ATTR_STYLE;
+	tag[1].val = "width: 100%;";
+	t = print_otag(h, TAG_TABLE, 2, tag);
+	tt = print_otag(h, TAG_TR, 0, NULL);
 
-	tag.key = ATTR_CLASS;
-	tag.val = "foot";
-
-	t = print_otag(h, TAG_DIV, 1, &tag);
-
-	tag.key = ATTR_STYLE;
-	tag.val = "width: 49%; display: "
-		"inline-block; text-align: left;";
-	print_otag(h, TAG_SPAN, 1, &tag);
+	tag[0].key = ATTR_STYLE;
+	tag[0].val = "width: 50%;";
+	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, b);
-	print_stagq(h, t);
+	print_stagq(h, tt);
 
-	tag.key = ATTR_STYLE;
-	tag.val = "width: 49%; display: "
-		"inline-block; text-align: right;";
-	print_otag(h, TAG_SPAN, 1, &tag);
-	print_text(h, os);
+	tag[0].key = ATTR_STYLE;
+	tag[0].val = "width: 50%; text-align: right;";
+	print_otag(h, TAG_TD, 1, tag);
+	print_text(h, m->os);
 	print_tagq(h, t);
-
 }
 
 
-/* FIXME: parts should be in a utility file for front-ends. */
 /* ARGSUSED */
 static int
 mdoc_root_pre(MDOC_ARGS)
 {
-	struct htmlpair	 tag;
+	struct htmlpair	 tag[2];
 	struct tag	*t, *tt;
 	char		 b[BUFSIZ], title[BUFSIZ];
 
-	assert(m->vol);
 	(void)strlcpy(b, m->vol, BUFSIZ);
 
 	if (m->arch) {
-		strlcat(b, " (", BUFSIZ);
-		strlcat(b, m->arch, BUFSIZ);
-		strlcat(b, ")", BUFSIZ);
+		(void)strlcat(b, " (", BUFSIZ);
+		(void)strlcat(b, m->arch, BUFSIZ);
+		(void)strlcat(b, ")", BUFSIZ);
 	}
 
-	snprintf(title, BUFSIZ - 1, "%s(%d)", m->title, m->msec);
+	(void)snprintf(title, BUFSIZ - 1, 
+			"%s(%d)", m->title, m->msec);
 
-	tag.key = ATTR_CLASS;
-	tag.val = "body";
+	tag[0].key = ATTR_CLASS;
+	tag[0].val = "body";
+	t = print_otag(h, TAG_DIV, 1, tag);
 
-	t = print_otag(h, TAG_DIV, 1, &tag);
+	tag[0].key = ATTR_CLASS;
+	tag[0].val = "header";
+	tag[1].key = ATTR_STYLE;
+	tag[1].val = "width: 100%;";
+	print_otag(h, TAG_TABLE, 2, tag);
+	tt = print_otag(h, TAG_TR, 0, NULL);
 
-	tag.key = ATTR_CLASS;
-	tag.val = "head";
-
-	tt = print_otag(h, TAG_DIV, 1, &tag);
-
-	tag.key = ATTR_STYLE;
-	tag.val = "width: 32%; text-align: left; "
-		"display: inline-block;";
-	print_otag(h, TAG_SPAN, 1, &tag);
+	tag[0].key = ATTR_STYLE;
+	tag[0].val = "width: 33%;";
+	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, b);
 	print_stagq(h, tt);
 
-	tag.key = ATTR_STYLE;
-	tag.val = "width: 32%; text-align: center; "
-		"display: inline-block;";
-	print_otag(h, TAG_SPAN, 1, &tag);
+	tag[0].key = ATTR_STYLE;
+	tag[0].val = "width: 33%; text-align: center;";
+	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, title);
 	print_stagq(h, tt);
 
-	tag.key = ATTR_STYLE;
-	tag.val = "width: 32%; text-align: right; "
-		"display: inline-block;";
-	print_otag(h, TAG_SPAN, 1, &tag);
+	tag[0].key = ATTR_STYLE;
+	tag[0].val = "width: 33%; text-align: right;";
+	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, b);
 	print_stagq(h, t);
 
@@ -1086,13 +988,23 @@ mdoc_root_pre(MDOC_ARGS)
 static int
 mdoc_sh_pre(MDOC_ARGS)
 {
-	struct htmlpair	tag[2];
+	struct htmlpair		 tag[2];
+	const struct mdoc_node	*nn;
 
 	if (MDOC_HEAD == n->type) {
 		tag[0].key = ATTR_CLASS;
 		tag[0].val = "sec-head";
 		print_otag(h, TAG_DIV, 1, tag);
 		print_otag(h, TAG_SPAN, 1, tag);
+
+		for (nn = n->child; nn; nn = nn->next) {
+			bufcat(nn->string);
+			if (nn->next)
+				bufcat(" ");
+		}
+		tag[0].key = ATTR_NAME;
+		tag[0].val = buf;
+		print_otag(h, TAG_A, 1, tag);
 		return(1);
 	} else if (MDOC_BLOCK == n->type) {
 		tag[0].key = ATTR_CLASS;
@@ -1130,8 +1042,9 @@ mdoc_sh_pre(MDOC_ARGS)
 static int
 mdoc_ss_pre(MDOC_ARGS)
 {
-	struct htmlpair	 tag[2];
-	int		 i;
+	struct htmlpair	 	 tag[2];
+	int		 	 i;
+	const struct mdoc_node	*nn;
 
 	i = 0;
 
@@ -1166,6 +1079,17 @@ mdoc_ss_pre(MDOC_ARGS)
 
 	print_otag(h, TAG_DIV, 2, tag);
 	print_otag(h, TAG_SPAN, 1, tag);
+
+	bufinit();
+	for (nn = n->child; nn; nn = nn->next) {
+		bufcat(nn->string);
+		if (nn->next)
+			bufcat(" ");
+	}
+	tag[0].key = ATTR_NAME;
+	tag[0].val = buf;
+	print_otag(h, TAG_A, 1, tag);
+
 	return(1);
 }
 
@@ -1180,8 +1104,10 @@ mdoc_fl_pre(MDOC_ARGS)
 	tag.val = "flag";
 
 	print_otag(h, TAG_SPAN, 1, &tag);
-	print_text(h, "\\-");
-	h->flags |= HTML_NOSPACE;
+	if (MDOC_Fl == n->tok) {
+		print_text(h, "\\-");
+		h->flags |= HTML_NOSPACE;
+	}
 	return(1);
 }
 
@@ -1192,12 +1118,8 @@ mdoc_pp_pre(MDOC_ARGS)
 {
 	struct htmlpair	tag;
 
-	bufcat("clear: both;");
-	bufcat("height: 1em;");
-
 	tag.key = ATTR_STYLE;
-	tag.val = buf;
-
+	tag.val = "clear: both; height: 1em;";
 	print_otag(h, TAG_DIV, 1, &tag);
 	return(0);
 }
@@ -1278,24 +1200,32 @@ mdoc_nm_pre(MDOC_ARGS)
 static int
 mdoc_xr_pre(MDOC_ARGS)
 {
-	struct htmlpair	tag[2];
+	struct htmlpair	 	 tag[2];
+	const char		*name, *sec;
+	const struct mdoc_node	*nn;
+
+	nn = n->child;
+	name = nn && nn->string ? nn->string : "";
+	nn = nn ? nn->next : NULL;
+	sec = nn && nn->string ? nn->string : "";
+
+	buffmt("%s%s%s.html", name, name && sec ? "." : "", sec);
 
 	tag[0].key = ATTR_CLASS;
 	tag[0].val = "link-man";
 	tag[1].key = ATTR_HREF;
-	tag[1].val = "#"; /* TODO */
-
+	tag[1].val = buf;
 	print_otag(h, TAG_A, 2, tag);
 
-	n = n->child;
-	print_text(h, n->string);
-	if (NULL == (n = n->next))
+	nn = n->child;
+	print_text(h, nn->string);
+	if (NULL == (nn = nn->next))
 		return(0);
 
 	h->flags |= HTML_NOSPACE;
 	print_text(h, "(");
 	h->flags |= HTML_NOSPACE;
-	print_text(h, n->string);
+	print_text(h, nn->string);
 	h->flags |= HTML_NOSPACE;
 	print_text(h, ")");
 
@@ -1490,10 +1420,11 @@ mdoc_tbl_pre(MDOC_ARGS, int type)
 		if (MDOC_Width == bl->args->argv[i].arg) {
 			assert(bl->args->argv[i].sz);
 			wp = i;
-			w = a2width(bl->args->argv[i].value[0]);
+			w = out_a2width(bl->args->argv[i].value[0]);
 		} else if (MDOC_Offset == bl->args->argv[i].arg) {
 			assert(bl->args->argv[i].sz);
-			o = a2offs(bl->args->argv[i].value[0]);
+			o = out_a2offs
+				(bl->args->argv[i].value[0], INDENT);
 		} else if (MDOC_Compact == bl->args->argv[i].arg) 
 			c = 1;
 	
@@ -1504,7 +1435,7 @@ mdoc_tbl_pre(MDOC_ARGS, int type)
 			/* Counter... */ ;
 		assert(nn);
 		if (wp >= 0 && i < (int)bl->args[wp].argv->sz)
-			w = a2width(bl->args->argv[wp].value[i]);
+			w = out_a2width(bl->args->argv[wp].value[i]);
 	}
 
 	switch (type) {
@@ -1545,6 +1476,7 @@ mdoc_tbl_pre(MDOC_ARGS, int type)
 }
 
 
+/* ARGSUSED */
 static int
 mdoc_bl_pre(MDOC_ARGS)
 {
@@ -1552,7 +1484,7 @@ mdoc_bl_pre(MDOC_ARGS)
 
 	if (MDOC_BLOCK != n->type)
 		return(1);
-	if (MDOC_Enum != a2list(n))
+	if (MDOC_Enum != out_a2list(n))
 		return(1);
 
 	ord = malloc(sizeof(struct ord));
@@ -1566,6 +1498,7 @@ mdoc_bl_pre(MDOC_ARGS)
 }
 
 
+/* ARGSUSED */
 static void
 mdoc_bl_post(MDOC_ARGS)
 {
@@ -1573,7 +1506,7 @@ mdoc_bl_post(MDOC_ARGS)
 
 	if (MDOC_BLOCK != n->type)
 		return;
-	if (MDOC_Enum != a2list(n))
+	if (MDOC_Enum != out_a2list(n))
 		return;
 
 	ord = SLIST_FIRST(&h->ords);
@@ -1589,9 +1522,9 @@ mdoc_it_pre(MDOC_ARGS)
 	int		 type;
 
 	if (MDOC_BLOCK == n->type)
-		type = a2list(n->parent->parent);
+		type = out_a2list(n->parent->parent);
 	else
-		type = a2list(n->parent->parent->parent);
+		type = out_a2list(n->parent->parent->parent);
 
 	return(mdoc_tbl_pre(m, n, h, type));
 }
@@ -1748,10 +1681,18 @@ mdoc_d1_pre(MDOC_ARGS)
 static int
 mdoc_sx_pre(MDOC_ARGS)
 {
-	struct htmlpair	tag[2];
+	struct htmlpair		 tag[2];
+	const struct mdoc_node	*nn;
+
+	bufcat("#");
+	for (nn = n->child; nn; nn = nn->next) {
+		bufcat(nn->string);
+		if (nn->next)
+			bufcat(" ");
+	}
 
 	tag[0].key = ATTR_HREF;
-	tag[0].val = "#"; /* XXX */
+	tag[0].val = buf;
 	tag[1].key = ATTR_CLASS;
 	tag[1].val = "link-sec";
 
@@ -1808,7 +1749,8 @@ mdoc_bd_pre(MDOC_ARGS)
 		switch (bl->args->argv[i].arg) {
 		case (MDOC_Offset):
 			assert(bl->args->argv[i].sz);
-			o = a2offs(bl->args->argv[i].value[0]);
+			o = out_a2offs
+				(bl->args->argv[i].value[0], INDENT);
 			break;
 		case (MDOC_Compact):
 			c = 1;
@@ -1897,4 +1839,224 @@ mdoc_qq_post(MDOC_ARGS)
 		return;
 	h->flags |= HTML_NOSPACE;
 	print_text(h, "\\*q");
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_ad_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "addr";
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_an_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "author";
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_cd_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "config";
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_dv_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "define";
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_ev_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "env";
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_er_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "errno";
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_fa_pre(MDOC_ARGS)
+{
+	const struct mdoc_node	*nn;
+	struct htmlpair		 tag;
+	struct tag		*t;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "farg";
+
+	if (n->parent->tok != MDOC_Fo) {
+		print_otag(h, TAG_SPAN, 1, &tag);
+		return(1);
+	}
+
+	for (nn = n->child; nn; nn = nn->next) {
+		t = print_otag(h, TAG_SPAN, 1, &tag);
+		print_text(h, nn->string);
+		print_tagq(h, t);
+		if (nn->next)
+			print_text(h, ",");
+	}
+
+	if (n->child && n->next && n->next->tok == MDOC_Fa)
+		print_text(h, ",");
+
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_fd_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	if (SEC_SYNOPSIS == n->sec) {
+		if (n->next && MDOC_Fd != n->next->tok) {
+			tag.key = ATTR_STYLE;
+			tag.val = "margin-bottom: 1em;";
+			print_otag(h, TAG_DIV, 1, &tag);
+		} else
+			print_otag(h, TAG_DIV, 0, NULL);
+	}
+
+	tag.key = ATTR_CLASS;
+	tag.val = "macro";
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_vt_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	if (SEC_SYNOPSIS == n->sec) {
+		if (n->next && MDOC_Vt != n->next->tok) {
+			tag.key = ATTR_STYLE;
+			tag.val = "margin-bottom: 1em;";
+			print_otag(h, TAG_DIV, 1, &tag);
+		} else
+			print_otag(h, TAG_DIV, 0, NULL);
+	}
+
+	tag.key = ATTR_CLASS;
+	tag.val = "type";
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+/* ARGSUSED */
+static int
+mdoc_ft_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	if (SEC_SYNOPSIS == n->sec) {
+		if (n->prev && MDOC_Fo == n->prev->tok) {
+			tag.key = ATTR_STYLE;
+			tag.val = "magin-bottom: 1em;";
+			print_otag(h, TAG_DIV, 1, &tag);
+		} else
+			print_otag(h, TAG_DIV, 0, NULL);
+	}
+
+	tag.key = ATTR_CLASS;
+	tag.val = "type";
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_fn_pre(MDOC_ARGS)
+{
+	struct tag		*t;
+	struct htmlpair	 	 tag;
+	const struct mdoc_node	*nn;
+
+	if (SEC_SYNOPSIS == n->sec) {
+		if (n->next) {
+			tag.key = ATTR_STYLE;
+			tag.val = "margin-bottom: 1em";
+			print_otag(h, TAG_DIV, 1, &tag);
+		} else
+			print_otag(h, TAG_DIV, 0, NULL);
+	}
+
+	tag.key = ATTR_CLASS;
+	tag.val = "type";
+
+	t = print_otag(h, TAG_SPAN, 1, &tag);
+	print_text(h, n->child->string);
+	print_tagq(h, t);
+
+	h->flags |= HTML_NOSPACE;
+	print_text(h, "(");
+
+	for (nn = n->child->next; nn; nn = nn->next) {
+		tag.key = ATTR_CLASS;
+		tag.val = "farg";
+		t = print_otag(h, TAG_SPAN, 1, &tag);
+		print_text(h, nn->string);
+		print_tagq(h, t);
+		if (nn->next)
+			print_text(h, ",");
+	}
+
+	print_text(h, ")");
+
+	if (SEC_SYNOPSIS == n->sec)
+		print_text(h, ";");
+
+	return(0);
 }
