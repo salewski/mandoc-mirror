@@ -49,12 +49,13 @@ LIBS	   = libmdoc.a libman.a
 OBJS	   = $(MDOCOBJS) $(MAINOBJS) $(MANOBJS)
 SRCS	   = $(MDOCSRCS) $(MAINSRCS) $(MANSRCS)
 DATAS	   = arch.in att.in lib.in msec.in st.in vol.in chars.in
-HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h libmandoc.h
+HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h libmandoc.h html.h
 SGMLS	   = index.sgml 
 XSLS	   = ChangeLog.xsl
 HTMLS	   = index.html ChangeLog.html mandoc.1.html mdoc.3.html \
 	     man.3.html mdoc.7.html man.7.html mandoc_char.7.html \
 	     manuals.7.html
+EXAMPLES   = example.style.css
 XMLS	   = ChangeLog.xml
 STATICS	   = index.css style.css external.png
 MD5S	   = mdocml-$(VERSION).md5 
@@ -65,7 +66,7 @@ BINS	   = mandoc
 CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
 	     $(TARGZS) tags $(MD5S) $(XMLS) 
 INSTALL	   = $(SRCS) $(HEADS) Makefile $(MANS) $(SGMLS) $(STATICS) \
-	     $(DATAS) $(XSLS)
+	     $(DATAS) $(XSLS) $(EXAMPLES)
 
 all:	$(BINS)
 
