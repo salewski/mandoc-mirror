@@ -415,7 +415,7 @@ html_alloc(void)
 	}
 
 	/* h->base = xxx; */
-	/* h->style = xxx; */
+	h->style = "style.css"; /* XXX */
 	return(h);
 }
 
