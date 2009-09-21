@@ -424,7 +424,7 @@ html_alloc(char *outopts)
 		return(NULL);
 	}
 
-	while (*outopts)
+	while (outopts && *outopts)
 		switch (getsubopt(&outopts, toks, &v)) {
 		case (0):
 			h->style = v;
