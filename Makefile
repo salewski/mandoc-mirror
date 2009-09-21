@@ -36,11 +36,12 @@ MANSRCS	   = man_macro.c man.c man_hash.c man_validate.c \
 	     man_action.c mandoc.c man_argv.c
 
 MAINLNS	   = main.ln mdoc_term.ln chars.ln term.ln tree.ln \
-	     compat.ln man_term.ln html.ln
+	     compat.ln man_term.ln html.ln mdoc_html.ln \
+	     man_html.ln
 MAINOBJS   = main.o mdoc_term.o chars.o term.o tree.o compat.o \
-	     man_term.o html.o
+	     man_term.o html.o mdoc_html.o man_html.o
 MAINSRCS   = main.c mdoc_term.c chars.c term.c tree.c compat.c \
-	     man_term.c html.c
+	     man_term.c html.c mdoc_html.c man_html.c
 
 LLNS	   = llib-llibmdoc.ln llib-llibman.ln llib-lmandoc.ln
 LNS	   = $(MAINLNS) $(MDOCLNS) $(MANLNS)
@@ -151,11 +152,17 @@ main.o: main.c mdoc.h
 compat.ln: compat.c 
 compat.o: compat.c
 
-term.ln: term.c term.h man.h mdoc.h
-term.o: term.c term.h man.h mdoc.h
+term.ln: term.c term.h man.h mdoc.h chars.h
+term.o: term.c term.h man.h mdoc.h chars.h
 
-html.ln: html.c man.h mdoc.h
-html.o: html.c man.h mdoc.h
+html.ln: html.c html.h chars.h
+html.o: html.c html.h chars.h
+
+mdoc_html.ln: mdoc_html.c html.h mdoc.h
+mdoc_html.o: mdoc_html.c html.h mdoc.h
+
+man_html.ln: man_html.c html.h man.h
+man_html.o: man_html.c html.h man.h
 
 tree.ln: tree.c man.h mdoc.h
 tree.o: tree.c man.h mdoc.h
