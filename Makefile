@@ -48,8 +48,10 @@ LNS	   = $(MAINLNS) $(MDOCLNS) $(MANLNS)
 LIBS	   = libmdoc.a libman.a
 OBJS	   = $(MDOCOBJS) $(MAINOBJS) $(MANOBJS)
 SRCS	   = $(MDOCSRCS) $(MAINSRCS) $(MANSRCS)
-DATAS	   = arch.in att.in lib.in msec.in st.in vol.in chars.in
-HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h libmandoc.h html.h
+DATAS	   = arch.in att.in lib.in msec.in st.in \
+	     vol.in chars.in
+HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
+	     libmandoc.h html.h chars.h
 SGMLS	   = index.sgml 
 XSLS	   = ChangeLog.xsl
 HTMLS	   = index.html ChangeLog.html mandoc.1.html mdoc.3.html \
