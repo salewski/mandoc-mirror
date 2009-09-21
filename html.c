@@ -558,12 +558,18 @@ static void
 print_mdoc(MDOC_ARGS)
 {
 	struct tag	*t;
+	struct htmlpair	 tag;
 
 	t = print_otag(h, TAG_HEAD, 0, NULL);
 	print_mdoc_head(m, n, h);
 	print_tagq(h, t);
 
 	t = print_otag(h, TAG_BODY, 0, NULL);
+
+	tag.key = ATTR_CLASS;
+	tag.val = "body";
+	print_otag(h, TAG_DIV, 1, &tag);
+
 	print_mdoc_nodelist(m, n, h);
 	print_tagq(h, t);
 }
@@ -915,7 +921,7 @@ static void
 print_gen_doctype(struct html *h)
 {
 	
-	printf("<!DOCTYPE HTML PUBLIC \"%s\" \"%s\">\n", DOCTYPE, DTD);
+	printf("<!DOCTYPE HTML PUBLIC \"%s\" \"%s\">", DOCTYPE, DTD);
 }
 
 
@@ -1059,14 +1065,10 @@ mdoc_root_pre(MDOC_ARGS)
 			"%s(%d)", m->title, m->msec);
 
 	tag[0].key = ATTR_CLASS;
-	tag[0].val = "body";
-	t = print_otag(h, TAG_DIV, 1, tag);
-
-	tag[0].key = ATTR_CLASS;
 	tag[0].val = "header";
 	tag[1].key = ATTR_STYLE;
 	tag[1].val = "width: 100%;";
-	print_otag(h, TAG_TABLE, 2, tag);
+	t = print_otag(h, TAG_TABLE, 2, tag);
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
 	tag[0].key = ATTR_STYLE;
@@ -1085,7 +1087,7 @@ mdoc_root_pre(MDOC_ARGS)
 	tag[0].val = "width: 33%; text-align: right;";
 	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, b);
-	print_stagq(h, t);
+	print_tagq(h, t);
 
 	return(1);
 }
@@ -1261,6 +1263,7 @@ mdoc_op_pre(MDOC_ARGS)
 
 	/* XXX - this can contain block elements! */
 	print_text(h, "\\(lB");
+	h->flags |= HTML_NOSPACE;
 	tag.key = ATTR_CLASS;
 	tag.val = "opt";
 	print_otag(h, TAG_SPAN, 1, &tag);
@@ -1422,8 +1425,12 @@ mdoc_tbl_block_pre(MDOC_ARGS, int t, int w, int o, int c)
 		break;
 	}
 
-	if ( ! c && n->prev && n->prev->body->child)
-		bufcat("padding-top: 1em;");
+	if ( ! c && MDOC_Column != t) {
+	       if (n->prev && n->prev->body->child)
+		       bufcat("padding-top: 1em;");
+	       else if (NULL == n->prev)
+		       bufcat("padding-top: 1em;");
+	}
 
 	tag.key = ATTR_STYLE;
 	tag.val = buf;

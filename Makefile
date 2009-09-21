@@ -1,4 +1,4 @@
-.SUFFIXES:	.html .xml .sgml .1.txt .3.txt .7.txt .1 .3 .7 .md5 .tar.gz .1.html .3.html .7.html
+.SUFFIXES:	.html .xml .sgml .1 .3 .7 .md5 .tar.gz .1.html .3.html .7.html
 
 BINDIR		= $(PREFIX)/bin
 INCLUDEDIR	= $(PREFIX)/include
@@ -55,16 +55,14 @@ HTMLS	   = index.html ChangeLog.html mandoc.1.html mdoc.3.html \
 	     man.3.html mdoc.7.html man.7.html mandoc_char.7.html \
 	     manuals.7.html
 XMLS	   = ChangeLog.xml
-STATICS	   = style.css external.png
+STATICS	   = index.css style.css external.png
 MD5S	   = mdocml-$(VERSION).md5 
 TARGZS	   = mdocml-$(VERSION).tar.gz
 MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7 mandoc_char.7 \
 	     man.7 man.3
-TEXTS	   = mandoc.1.txt mdoc.3.txt mdoc.7.txt manuals.7.txt \
-	     mandoc_char.7.txt man.7.txt man.3.txt
 BINS	   = mandoc
 CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
-	     $(TARGZS) tags $(TEXTS) $(MD5S) $(XMLS) 
+	     $(TARGZS) tags $(MD5S) $(XMLS) 
 INSTALL	   = $(SRCS) $(HEADS) Makefile $(MANS) $(SGMLS) $(STATICS) \
 	     $(DATAS) $(XSLS)
 
@@ -80,10 +78,10 @@ cleanlint:
 
 dist:	mdocml-$(VERSION).tar.gz
 
-www:	all $(HTMLS) $(MD5S) $(TARGZS) $(TEXTS) 
+www:	all $(HTMLS) $(MD5S) $(TARGZS)
 
 installwww: www
-	install -m 0444 $(TEXTS) $(HTMLS) $(STATICS) $(PREFIX)/
+	install -m 0444 $(HTMLS) $(STATICS) $(PREFIX)/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/
 	install -m 0444 mdocml-$(VERSION).md5 $(PREFIX)/snapshots/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz

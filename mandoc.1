@@ -277,6 +277,12 @@ To page manuals to the terminal:
 .D1 % mandoc mandoc.1 mdoc.3 mdoc.7 | less
 .
 .Pp
+To produce HTML manuals with 
+.Pa http://localhost/
+as the base URI:
+.Pp
+.D1 % mandoc \-Thtml -obase=http://localhost/ mdoc.7 > mdoc.7.html
+.Pp
 To check over a large set of manuals:
 .
 .Pp

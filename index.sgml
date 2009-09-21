@@ -133,7 +133,7 @@
 					</h1>
 
 					<p>
-					These manuals are generated automatically (with <a href="mandoc.1.txt">mandoc(1)</a>) and refer to the
+					These manuals are generated automatically (with <a href="mandoc.1.html">mandoc(1)</a> -Thtml) and refer to the
 					current snapshot.
 					</p>
 
@@ -142,31 +142,31 @@
 					<col>
 					<tbody>
 						<tr>
-							<td><a href="mandoc.1.txt">mandoc(1)</a></td>
+							<td><a href="mandoc.1.html">mandoc(1)</a></td>
 							<td>format and display UNIX manuals</td>
 						</tr>
 						<tr>
-							<td><a href="mandoc_char.7.txt">mandoc_char(7)</a></td>
+							<td><a href="mandoc_char.7.html">mandoc_char(7)</a></td>
 							<td>mandoc special characters</td>
 						</tr>
 						<tr>
-							<td><a href="mdoc.7.txt">mdoc(7)</a></td>
+							<td><a href="mdoc.7.html">mdoc(7)</a></td>
 							<td>mdoc language reference</td>
 						</tr>
 						<tr>
-							<td><a href="man.7.txt">man(7)</a></td>
+							<td><a href="man.7.html">man(7)</a></td>
 							<td>man language reference</td>
 						</tr>
 						<tr>
-							<td><a href="manuals.7.txt">manuals(7)</a></td>
+							<td><a href="manuals.7.html">manuals(7)</a></td>
 							<td>a guide to writing UNIX manuals</td>
 						</tr>
 						<tr>
-							<td><a href="mdoc.3.txt">mdoc(3)</a></td>
+							<td><a href="mdoc.3.html">mdoc(3)</a></td>
 							<td>mdoc macro compiler library</td>
 						</tr>
 						<tr>
-							<td><a href="man.3.txt">man(3)</a></td>
+							<td><a href="man.3.html">man(3)</a></td>
 							<td>man macro compiler library</td>
 						</tr>
 					</tbody>

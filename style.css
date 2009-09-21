@@ -1,40 +1,21 @@
-div.body	{ } /* Wraps entire body file. */
-
-span.sec-head	{ font-weight: bold; } /* Sections (Sh). */
-div.sec-head	{ }		
-div.sec-body	{ }
-div.sec-block	{ }
-
-span.ssec-head	{ font-weight: bold; } /* Sub-sections (Ss). */
-div.ssec-head	{ }
-div.ssec-body	{ }
-div.ssec-block	{ }
-
-span.addr	{ text-decoration: underline; } /* Address (Ad). */
-span.arg	{ font-style: italic; } /* Command argument (Ar). */
-span.author	{ } /* Author name (An). */
-span.config	{ font-weight: bold; } /* Config statement (Cd). */
-span.define	{ } /* Defines (Dv). */
-span.desc	{ } /* Nd.  After em-dash. */
-span.diag	{ font-weight: bold; } /* Diagnostic (Bl -diag). */
-span.emph	{ font-style: italic; } /* Emphasis (Em). */
-span.env	{ } /* Environment variables (Ev). */
-span.errno	{ } /* Error string (Er). */
-span.farg	{ font-style: underline; } /* Function argument (Fa, Fn). */
-span.file	{ font-style: italic; } /* File (Pa). */
-span.flag	{ font-weight: bold; } /* Flag (Fl, Cm). */
-span.macro	{ } /* Macro-ish thing (Fd). */
-span.name	{ font-weight: bold; } /* Name of utility (Nm). */
-span.opt	{ } /* Options (Op, Oo/Oc). */
-span.type	{ font-weight: italic; } /* Variable types (Vt, Ft, Fn). */
-span.unix	{ } /* Unices (Ux, Ox, Nx, Fx, Bx, Bsx, Dx). */
-span.utility	{ font-weight: bold; } /* Name of utility (Ex). */
-
-a.link-man	{ } /* Manual links (Xr). */
-a.link-sec	{ } /* Section links (Sx). */
-
-div.lit-block	{ font-family: monospace; } /* Literal block (D1, Bd -literal, Dl). */
-
-table.header	{ } /* Document header. */
-table.footer	{ } /* Document footer. */
+div.body	{ color: #333333; 
+		  max-width: 800px;
+		  padding-left: 10px;
+		  font-size: smaller; 
+		  font-family: Verdana, Tahoma, Arial, sans-serif; }
+span.sec-head	{ font-weight: bold; color: blue; } 
+span.ssec-head	{ font-weight: bold; color: blue; }
+span.addr	{ text-decoration: underline; }
+span.arg	{ font-style: italic; }
+span.config	{ font-weight: bold; }
+span.diag	{ font-weight: bold; }
+span.emph	{ font-style: italic; }
+span.farg	{ font-style: underline; }
+span.file	{ font-style: italic; }
+span.flag	{ font-weight: bold; }
+span.name	{ font-weight: bold; } 
+span.type	{ font-weight: italic; }
+span.utility	{ font-weight: bold; }
+table.header	{ border-bottom: 1px dotted #cccccc; }
+table.footer	{ border-top: 1px dotted #cccccc; }
 
