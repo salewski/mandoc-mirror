@@ -58,9 +58,7 @@ enum	intt {
 enum	outt {
 	OUTT_ASCII = 0,
 	OUTT_TREE,
-#if 1
 	OUTT_HTML,
-#endif
 	OUTT_LINT
 };
 
@@ -86,14 +84,13 @@ struct	curparse {
 	out_man	  	  outman;
 	out_free	  outfree;
 	void		 *outdata;
+	char		 *outopts;
 };
 
-#if 1
-extern	void		 *html_alloc(void);
+extern	void		 *html_alloc(char *);
 extern	void		  html_mdoc(void *, const struct mdoc *);
 extern	void		  html_man(void *, const struct man *);
 extern	void		  html_free(void *);
-#endif
 extern	void		 *ascii_alloc(void);
 extern	void		  tree_mdoc(void *, const struct mdoc *);
 extern	void		  tree_man(void *, const struct man *);
@@ -134,7 +131,7 @@ main(int argc, char *argv[])
 	curp.outtype = OUTT_ASCII;
 
 	/* LINTED */
-	while (-1 != (c = getopt(argc, argv, "f:m:VW:T:")))
+	while (-1 != (c = getopt(argc, argv, "f:m:o:T:VW:")))
 		switch (c) {
 		case ('f'):
 			if ( ! foptions(&curp.fflags, optarg))
@@ -143,6 +140,9 @@ main(int argc, char *argv[])
 		case ('m'):
 			if ( ! moptions(&curp.inttype, optarg))
 				return(EXIT_FAILURE);
+			break;
+		case ('o'):
+			curp.outopts = optarg;
 			break;
 		case ('T'):
 			if ( ! toptions(&curp.outtype, optarg))
@@ -441,14 +441,12 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 
 	if ( ! (curp->outman && curp->outmdoc)) {
 		switch (curp->outtype) {
-#if 1
 		case (OUTT_HTML):
-			curp->outdata = html_alloc();
+			curp->outdata = html_alloc(curp->outopts);
 			curp->outman = html_man;
 			curp->outmdoc = html_mdoc;
 			curp->outfree = html_free;
 			break;
-#endif
 		case (OUTT_TREE):
 			curp->outman = tree_man;
 			curp->outmdoc = tree_mdoc;
@@ -563,10 +561,8 @@ toptions(enum outt *tflags, char *arg)
 		*tflags = OUTT_LINT;
 	else if (0 == strcmp(arg, "tree"))
 		*tflags = OUTT_TREE;
-#if 1
 	else if (0 == strcmp(arg, "html"))
 		*tflags = OUTT_HTML;
-#endif
 	else {
 		warnx("bad argument: -T%s", arg);
 		return(0);

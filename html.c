@@ -27,7 +27,6 @@
 #include "chars.h"
 #include "mdoc.h"
 #include "man.h"
-#include "out.h"
 
 #define	DOCTYPE		"-//W3C//DTD HTML 4.01//EN"
 #define	DTD		"http://www.w3.org/TR/html4/strict.dtd"
@@ -180,6 +179,10 @@ static	void		  print_text(struct html *, const char *);
 static	void		  print_res(struct html *, const char *, int);
 static	void		  print_spec(struct html *, const char *, int);
 
+static	int		  a2width(const char *);
+static	int		  a2offs(const char *);
+static	int		  a2list(const struct mdoc_node *);
+
 static	void		  mdoc_root_post(MDOC_ARGS);
 static	int		  mdoc_root_pre(MDOC_ARGS);
 static	int		  mdoc_tbl_pre(MDOC_ARGS, int);
@@ -231,6 +234,7 @@ static	int		  mdoc_xr_pre(MDOC_ARGS);
 static	int		  mdoc_xx_pre(MDOC_ARGS);
 
 #ifdef __linux__
+extern	int		  getsubopt(char **, char * const *, char **);
 extern	size_t	  	  strlcpy(char *, const char *, size_t);
 extern	size_t	  	  strlcat(char *, const char *, size_t);
 #endif
@@ -399,9 +403,14 @@ html_man(void *arg, const struct man *m)
 
 
 void *
-html_alloc(void)
+html_alloc(char *outopts)
 {
 	struct html	*h;
+	char		*toks[3], *o, *v;
+
+	toks[0] = "style";
+	toks[1] = "base";
+	toks[2] = NULL;
 
 	if (NULL == (h = calloc(1, sizeof(struct html))))
 		return(NULL);
@@ -414,8 +423,20 @@ html_alloc(void)
 		return(NULL);
 	}
 
-	/* h->base = xxx; */
-	h->style = "style.css"; /* XXX */
+	while (*outopts) {
+		o = outopts;
+		switch (getsubopt(&outopts, toks, &v)) {
+		case (0):
+			h->style = v;
+			break;
+		case (1):
+			h->base = v;
+			break;
+		default:
+			break;
+		}
+	}
+
 	return(h);
 }
 
@@ -444,6 +465,93 @@ html_free(void *p)
 	if (h->symtab)
 		chars_free(h->symtab);
 	free(h);
+}
+
+
+static int
+a2list(const struct mdoc_node *n)
+{
+	int		 i;
+
+	assert(MDOC_BLOCK == n->type && MDOC_Bl == n->tok);
+	assert(n->args);
+
+	for (i = 0; i < (int)n->args->argc; i++) 
+		switch (n->args->argv[i].arg) {
+		case (MDOC_Enum):
+			/* FALLTHROUGH */
+		case (MDOC_Dash):
+			/* FALLTHROUGH */
+		case (MDOC_Hyphen):
+			/* FALLTHROUGH */
+		case (MDOC_Bullet):
+			/* FALLTHROUGH */
+		case (MDOC_Tag):
+			/* FALLTHROUGH */
+		case (MDOC_Hang):
+			/* FALLTHROUGH */
+		case (MDOC_Inset):
+			/* FALLTHROUGH */
+		case (MDOC_Diag):
+			/* FALLTHROUGH */
+		case (MDOC_Item):
+			/* FALLTHROUGH */
+		case (MDOC_Column):
+			/* FALLTHROUGH */
+		case (MDOC_Ohang):
+			return(n->args->argv[i].arg);
+		default:
+			break;
+		}
+
+	abort();
+	/* NOTREACHED */
+}
+
+
+static int
+a2width(const char *p)
+{
+	int		 i, len;
+
+	if (0 == (len = (int)strlen(p)))
+		return(0);
+	for (i = 0; i < len - 1; i++) 
+		if ( ! isdigit((u_char)p[i]))
+			break;
+
+	if (i == len - 1) 
+		if ('n' == p[len - 1] || 'm' == p[len - 1])
+			return(atoi(p) + 2);
+
+	return(len + 2);
+}
+
+
+static int
+a2offs(const char *p)
+{
+	int		 len, i;
+
+	if (0 == strcmp(p, "left"))
+		return(0);
+	if (0 == strcmp(p, "indent"))
+		return(INDENT + 1);
+	if (0 == strcmp(p, "indent-two"))
+		return((INDENT + 1) * 2);
+
+	if (0 == (len = (int)strlen(p)))
+		return(0);
+
+	for (i = 0; i < len - 1; i++) 
+		if ( ! isdigit((u_char)p[i]))
+			break;
+
+	if (i == len - 1) 
+		if ('n' == p[len - 1] || 'm' == p[len - 1])
+			return(atoi(p));
+
+	return(len);
 }
 
 
@@ -1420,11 +1528,10 @@ mdoc_tbl_pre(MDOC_ARGS, int type)
 		if (MDOC_Width == bl->args->argv[i].arg) {
 			assert(bl->args->argv[i].sz);
 			wp = i;
-			w = out_a2width(bl->args->argv[i].value[0]);
+			w = a2width(bl->args->argv[i].value[0]);
 		} else if (MDOC_Offset == bl->args->argv[i].arg) {
 			assert(bl->args->argv[i].sz);
-			o = out_a2offs
-				(bl->args->argv[i].value[0], INDENT);
+			o = a2offs(bl->args->argv[i].value[0]);
 		} else if (MDOC_Compact == bl->args->argv[i].arg) 
 			c = 1;
 	
@@ -1435,7 +1542,7 @@ mdoc_tbl_pre(MDOC_ARGS, int type)
 			/* Counter... */ ;
 		assert(nn);
 		if (wp >= 0 && i < (int)bl->args[wp].argv->sz)
-			w = out_a2width(bl->args->argv[wp].value[i]);
+			w = a2width(bl->args->argv[wp].value[i]);
 	}
 
 	switch (type) {
@@ -1484,7 +1591,7 @@ mdoc_bl_pre(MDOC_ARGS)
 
 	if (MDOC_BLOCK != n->type)
 		return(1);
-	if (MDOC_Enum != out_a2list(n))
+	if (MDOC_Enum != a2list(n))
 		return(1);
 
 	ord = malloc(sizeof(struct ord));
@@ -1506,7 +1613,7 @@ mdoc_bl_post(MDOC_ARGS)
 
 	if (MDOC_BLOCK != n->type)
 		return;
-	if (MDOC_Enum != out_a2list(n))
+	if (MDOC_Enum != a2list(n))
 		return;
 
 	ord = SLIST_FIRST(&h->ords);
@@ -1522,9 +1629,9 @@ mdoc_it_pre(MDOC_ARGS)
 	int		 type;
 
 	if (MDOC_BLOCK == n->type)
-		type = out_a2list(n->parent->parent);
+		type = a2list(n->parent->parent);
 	else
-		type = out_a2list(n->parent->parent->parent);
+		type = a2list(n->parent->parent->parent);
 
 	return(mdoc_tbl_pre(m, n, h, type));
 }
@@ -1749,8 +1856,7 @@ mdoc_bd_pre(MDOC_ARGS)
 		switch (bl->args->argv[i].arg) {
 		case (MDOC_Offset):
 			assert(bl->args->argv[i].sz);
-			o = out_a2offs
-				(bl->args->argv[i].value[0], INDENT);
+			o = a2offs (bl->args->argv[i].value[0]);
 			break;
 		case (MDOC_Compact):
 			c = 1;

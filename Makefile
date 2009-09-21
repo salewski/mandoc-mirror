@@ -1,4 +1,4 @@
-.SUFFIXES:	.html .xml .sgml .1.txt .3.txt .7.txt .1 .3 .7 .md5 .tar.gz 
+.SUFFIXES:	.html .xml .sgml .1.txt .3.txt .7.txt .1 .3 .7 .md5 .tar.gz .1.html .3.html .7.html
 
 BINDIR		= $(PREFIX)/bin
 INCLUDEDIR	= $(PREFIX)/include
@@ -36,11 +36,11 @@ MANSRCS	   = man_macro.c man.c man_hash.c man_validate.c \
 	     man_action.c mandoc.c man_argv.c
 
 MAINLNS	   = main.ln mdoc_term.ln chars.ln term.ln tree.ln \
-	     compat.ln man_term.ln html.ln out.ln
+	     compat.ln man_term.ln html.ln
 MAINOBJS   = main.o mdoc_term.o chars.o term.o tree.o compat.o \
-	     man_term.o html.o out.o
+	     man_term.o html.o
 MAINSRCS   = main.c mdoc_term.c chars.c term.c tree.c compat.c \
-	     man_term.c html.c out.c
+	     man_term.c html.c
 
 LLNS	   = llib-llibmdoc.ln llib-llibman.ln llib-lmandoc.ln
 LNS	   = $(MAINLNS) $(MDOCLNS) $(MANLNS)
@@ -51,7 +51,9 @@ DATAS	   = arch.in att.in lib.in msec.in st.in vol.in chars.in
 HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h libmandoc.h
 SGMLS	   = index.sgml 
 XSLS	   = ChangeLog.xsl
-HTMLS	   = index.html ChangeLog.html
+HTMLS	   = index.html ChangeLog.html mandoc.1.html mdoc.3.html \
+	     man.3.html mdoc.7.html man.7.html mandoc_char.7.html \
+	     manuals.7.html
 XMLS	   = ChangeLog.xml
 STATICS	   = style.css external.png
 MD5S	   = mdocml-$(VERSION).md5 
@@ -77,8 +79,6 @@ cleanlint:
 	rm -f $(LNS) $(LLNS)
 
 dist:	mdocml-$(VERSION).tar.gz
-
-html:	$(HTMLS)
 
 www:	all $(HTMLS) $(MD5S) $(TARGZS) $(TEXTS) 
 
@@ -156,11 +156,8 @@ compat.o: compat.c
 term.ln: term.c term.h man.h mdoc.h
 term.o: term.c term.h man.h mdoc.h
 
-html.ln: html.c out.h man.h mdoc.h
-html.o: html.c out.h man.h mdoc.h
-
-out.ln: out.c out.h man.h mdoc.h
-out.o: out.c out.h man.h mdoc.h
+html.ln: html.c man.h mdoc.h
+html.o: html.c man.h mdoc.h
 
 tree.ln: tree.c man.h mdoc.h
 tree.o: tree.c man.h mdoc.h
@@ -219,11 +216,20 @@ mandoc: $(MAINOBJS) libmdoc.a libman.a
 .1.1.txt:
 	./mandoc -Wall,error -fstrict $< | col -b > $@
 
+.1.1.html:
+	./mandoc -Thtml -ostyle=style.css -Wall,error -fstrict $< > $@
+
 .3.3.txt:
 	./mandoc -Wall,error -fstrict $< | col -b > $@
 
+.3.3.html:
+	./mandoc -Thtml -ostyle=style.css -Wall,error -fstrict $< > $@
+
 .7.7.txt:
 	./mandoc -Wall,error -fstrict $< | col -b > $@
+
+.7.7.html:
+	./mandoc -Thtml -ostyle=style.css -Wall,error -fstrict $< > $@
 
 .tar.gz.md5:
 	md5 $< > $@
