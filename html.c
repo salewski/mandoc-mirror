@@ -2168,13 +2168,19 @@ mdoc_sp_pre(MDOC_ARGS)
 	int		len;
 	struct htmlpair	tag;
 
-	if (MDOC_sp == n->tok)
+	switch (n->tok) {
+	case (MDOC_sp):
 		len = n->child ? atoi(n->child->string) : 1;
-	else
+		break;
+	case (MDOC_br):
+		len = 0;
+		break;
+	default:
 		len = 1;
+		break;
+	}
 
 	buffmt("height: %dem", len);
-
 	tag.key = ATTR_STYLE;
 	tag.val = buf;
 	print_otag(h, TAG_DIV, 1, &tag);

@@ -1866,7 +1866,7 @@ termp_sp_pre(DECL_ARGS)
 {
 	int		 i, len;
 
-	switch (node->type) {
+	switch (node->tok) {
 	case (MDOC_sp):
 		len = node->child ? atoi(node->child->string) : 1;
 		break;
