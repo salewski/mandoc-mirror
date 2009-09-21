@@ -220,12 +220,12 @@ static	int		  mdoc_ns_pre(MDOC_ARGS);
 static	void		  mdoc_op_post(MDOC_ARGS);
 static	int		  mdoc_op_pre(MDOC_ARGS);
 static	int		  mdoc_pa_pre(MDOC_ARGS);
-static	int		  mdoc_pp_pre(MDOC_ARGS);
 static	void		  mdoc_pq_post(MDOC_ARGS);
 static	int		  mdoc_pq_pre(MDOC_ARGS);
 static	void		  mdoc_qq_post(MDOC_ARGS);
 static	int		  mdoc_qq_pre(MDOC_ARGS);
 static	int		  mdoc_sh_pre(MDOC_ARGS);
+static	int		  mdoc_sp_pre(MDOC_ARGS);
 static	void		  mdoc_sq_post(MDOC_ARGS);
 static	int		  mdoc_sq_pre(MDOC_ARGS);
 static	int		  mdoc_ss_pre(MDOC_ARGS);
@@ -241,13 +241,13 @@ extern	size_t	  	  strlcat(char *, const char *, size_t);
 #endif
 
 static	const struct htmlmdoc mdocs[MDOC_MAX] = {
-	{mdoc_pp_pre, NULL}, /* Ap */
+	{NULL, NULL}, /* Ap */
 	{NULL, NULL}, /* Dd */
 	{NULL, NULL}, /* Dt */
 	{NULL, NULL}, /* Os */
 	{mdoc_sh_pre, NULL }, /* Sh */
 	{mdoc_ss_pre, NULL }, /* Ss */ 
-	{mdoc_pp_pre, NULL}, /* Pp */ 
+	{mdoc_sp_pre, NULL}, /* Pp */ 
 	{mdoc_d1_pre, NULL}, /* D1 */
 	{mdoc_d1_pre, NULL}, /* Dl */
 	{mdoc_bd_pre, NULL}, /* Bd */
@@ -348,7 +348,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Fr */
 	{NULL, NULL}, /* Ud */
 	{NULL, NULL}, /* Lb */
-	{NULL, NULL}, /* Lp */ 
+	{mdoc_sp_pre, NULL}, /* Lp */ 
 	{NULL, NULL}, /* Lk */ 
 	{NULL, NULL}, /* Mt */ 
 	{NULL, NULL}, /* Brq */ 
@@ -359,8 +359,8 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* En */ 
 	{mdoc_xx_pre, NULL}, /* Dx */ 
 	{NULL, NULL}, /* %Q */ 
-	{NULL, NULL}, /* br */
-	{NULL, NULL}, /* sp */ 
+	{mdoc_sp_pre, NULL}, /* br */
+	{mdoc_sp_pre, NULL}, /* sp */ 
 };
 
 static	char		  buf[BUFSIZ]; /* XXX */
@@ -1218,19 +1218,6 @@ mdoc_fl_pre(MDOC_ARGS)
 		h->flags |= HTML_NOSPACE;
 	}
 	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-mdoc_pp_pre(MDOC_ARGS)
-{
-	struct htmlpair	tag;
-
-	tag.key = ATTR_STYLE;
-	tag.val = "clear: both; height: 1em;";
-	print_otag(h, TAG_DIV, 1, &tag);
-	return(0);
 }
 
 
@@ -2171,4 +2158,26 @@ mdoc_fn_pre(MDOC_ARGS)
 		print_text(h, ";");
 
 	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_sp_pre(MDOC_ARGS)
+{
+	int		len;
+	struct htmlpair	tag;
+
+	if (MDOC_sp == n->tok)
+		len = n->child ? atoi(n->child->string) : 1;
+	else
+		len = 1;
+
+	buffmt("height: %dem", len);
+
+	tag.key = ATTR_STYLE;
+	tag.val = buf;
+	print_otag(h, TAG_DIV, 1, &tag);
+	return(1);
+
 }

@@ -113,7 +113,6 @@ static	int	  termp_bd_pre(DECL_ARGS);
 static	int	  termp_bf_pre(DECL_ARGS);
 static	int	  termp_bold_pre(DECL_ARGS);
 static	int	  termp_bq_pre(DECL_ARGS);
-static	int	  termp_br_pre(DECL_ARGS);
 static	int	  termp_brq_pre(DECL_ARGS);
 static	int	  termp_bt_pre(DECL_ARGS);
 static	int	  termp_cd_pre(DECL_ARGS);
@@ -133,7 +132,6 @@ static	int	  termp_nm_pre(DECL_ARGS);
 static	int	  termp_ns_pre(DECL_ARGS);
 static	int	  termp_op_pre(DECL_ARGS);
 static	int	  termp_pf_pre(DECL_ARGS);
-static	int	  termp_pp_pre(DECL_ARGS);
 static	int	  termp_pq_pre(DECL_ARGS);
 static	int	  termp_qq_pre(DECL_ARGS);
 static	int	  termp_rs_pre(DECL_ARGS);
@@ -155,7 +153,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Os */
 	{ termp_sh_pre, termp_sh_post }, /* Sh */
 	{ termp_ss_pre, termp_ss_post }, /* Ss */ 
-	{ termp_pp_pre, NULL }, /* Pp */ 
+	{ termp_sp_pre, NULL }, /* Pp */ 
 	{ termp_d1_pre, termp_d1_post }, /* D1 */
 	{ termp_d1_pre, termp_d1_post }, /* Dl */
 	{ termp_bd_pre, termp_bd_post }, /* Bd */
@@ -256,7 +254,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Fr */
 	{ termp_ud_pre, NULL }, /* Ud */
 	{ NULL, termp_lb_post }, /* Lb */
-	{ termp_pp_pre, NULL }, /* Lp */ 
+	{ termp_sp_pre, NULL }, /* Lp */ 
 	{ termp_lk_pre, NULL }, /* Lk */ 
 	{ termp_under_pre, NULL }, /* Mt */ 
 	{ termp_brq_pre, termp_brq_post }, /* Brq */ 
@@ -267,7 +265,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* En */ 
 	{ termp_xx_pre, NULL }, /* Dx */ 
 	{ NULL, NULL }, /* %Q */ 
-	{ termp_br_pre, NULL }, /* br */
+	{ termp_sp_pre, NULL }, /* br */
 	{ termp_sp_pre, NULL }, /* sp */ 
 };
 
@@ -1163,16 +1161,6 @@ termp_ns_pre(DECL_ARGS)
 
 /* ARGSUSED */
 static int
-termp_pp_pre(DECL_ARGS)
-{
-
-	term_vspace(p);
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
 termp_rs_pre(DECL_ARGS)
 {
 
@@ -1878,28 +1866,24 @@ termp_sp_pre(DECL_ARGS)
 {
 	int		 i, len;
 
-	if (NULL == node->child) {
-		term_vspace(p);
-		return(0);
+	switch (node->type) {
+	case (MDOC_sp):
+		len = node->child ? atoi(node->child->string) : 1;
+		break;
+	case (MDOC_br):
+		len = 0;
+		break;
+	default:
+		len = 1;
+		break;
 	}
 
-	len = atoi(node->child->string);
 	if (0 == len)
 		term_newln(p);
 	for (i = 0; i < len; i++)
 		term_vspace(p);
 
 	return(0);
-}
-
-
-/* ARGSUSED */
-static int
-termp_br_pre(DECL_ARGS)
-{
-
-	term_newln(p);
-	return(1);
 }
 
 
