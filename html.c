@@ -406,7 +406,7 @@ void *
 html_alloc(char *outopts)
 {
 	struct html	*h;
-	char		*toks[3], *o, *v;
+	char		*toks[3], *v;
 
 	toks[0] = "style";
 	toks[1] = "base";
@@ -423,8 +423,7 @@ html_alloc(char *outopts)
 		return(NULL);
 	}
 
-	while (*outopts) {
-		o = outopts;
+	while (*outopts)
 		switch (getsubopt(&outopts, toks, &v)) {
 		case (0):
 			h->style = v;
@@ -435,7 +434,6 @@ html_alloc(char *outopts)
 		default:
 			break;
 		}
-	}
 
 	return(h);
 }
