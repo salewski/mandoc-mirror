@@ -5,7 +5,7 @@
 <html>
 	<head>
 		<title>mdocml - CVS-ChangeLog</title>
-		<link rel="stylesheet" href="style.css" type="text/css" media="all" />
+		<link rel="stylesheet" href="index.css" type="text/css" media="all" />
 	</head>
 	<body>
 				<xsl:for-each select="entry">
