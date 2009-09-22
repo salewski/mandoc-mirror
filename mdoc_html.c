@@ -892,7 +892,7 @@ mdoc_tbl_head_pre(MDOC_ARGS, int t, int w)
 		print_otag(h, TAG_DIV, 1, &tag);
 		break;
 	default:
-		buffmt("margin-left: -%dem;", w);
+		buffmt("margin-left: -%dem; width: %dem;", w, w);
 		bufcat("clear: left;");
 		if (n->next && n->next->child)
 			bufcat("float: left;");
