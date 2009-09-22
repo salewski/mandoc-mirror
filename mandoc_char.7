@@ -91,6 +91,8 @@ Typographic:
 .Pq zero-width space
 .It \e|
 .Pq zero-width space
+.It \e0
+.Pq white-space
 .El
 .\" PARAGRAPH
 .Pp
@@ -147,44 +149,83 @@ Indicatives:
 .El
 .\" PARAGRAPH
 .Pp
-Mathematical:
+Logical:
 .Bl -offset indent -column 10n 10n 10n
-.It \e(es      Ta \(es     Ta empty set
-.It \e(ca      Ta \(ca     Ta intersection
-.It \e(cu      Ta \(cu     Ta union
-.It \e(gr      Ta \(gr     Ta gradient
-.It \e(pd      Ta \(dd     Ta partial differential
-.It \e(ap      Ta \(ap     Ta similarity
-.It \e(sp      Ta \(sp     Ta proper superset
-.It \e(sb      Ta \(sb     Ta proper subset
-.It \e(eq      Ta \(eq     Ta equals
-.It \e(di      Ta \(di     Ta division
-.It \e(mu      Ta \(mu     Ta multiplication
-.It \e(pl      Ta \(pl     Ta addition
-.It \e-        Ta \-       Ta subtraction
-.It \e(nm      Ta \(nm     Ta not element
-.It \e(mo      Ta \(mo     Ta element
-.It \e(Im      Ta \(Im     Ta imaginary
-.It \e(Re      Ta \(Re     Ta real
-.It \e(Ah      Ta \(Ah     Ta aleph
+.It \e(AN      Ta \(AN     Ta logical and
+.It \e(OR      Ta \(OR     Ta logical or
+.It \e(no      Ta \(no     Ta logical not
+.It \e[tno]    Ta \[tno]   Ta logical not (text)
 .It \e(te      Ta \(te     Ta existential quantifier
 .It \e(fa      Ta \(fa     Ta universal quantifier
-.It \e(AN      Ta \(AN     Ta logical AND
-.It \e(OR      Ta \(OR     Ta logical OR
-.It \e(no      Ta \(no     Ta logical NOT
 .It \e(st      Ta \(st     Ta such that
 .It \e(tf      Ta \(tf     Ta therefore
-.It \e(~~      Ta \(~~     Ta approximate
-.It \e(~=      Ta \(~=     Ta approximately equals
-.It \e(=~      Ta \(=~     Ta congruent
+.It \e(3d      Ta \(3d     Ta therefore
+.It \e(or      Ta \(or     Ta bitwise or
+.El
+.\" PARAGRAPH
+.Pp
+Mathematical:
+.Bl -offset indent -column 10n 10n 10n
+.It \e(pl      Ta \(pl     Ta plus
+.It \e(mi      Ta \(mi     Ta minus
+.It \e-        Ta \-       Ta minus (text)
+.It \e(-+      Ta \(-+     Ta minus-plus
+.It \e(+-      Ta \(+-     Ta plus-minus
+.It \e[t+-]    Ta \[t+-]   Ta plus-minus (text)
+.It \e(pc      Ta \(pc     Ta centre-dot
+.It \e(mu      Ta \(mu     Ta multiply
+.It \e[tmu]    Ta \[tmu]   Ta multiply (text)
+.It \e(c*      Ta \(c*     Ta circle-multiply
+.It \e(c+      Ta \(c+     Ta circle-plus
+.It \e(di      Ta \(di     Ta divide
+.It \e[tdi]    Ta \[tdi]   Ta divide (text)
+.It \e(f/      Ta \(f/     Ta fraction
+.It \e(**      Ta \(**     Ta asterisk
 .It \e(<=      Ta \(<=     Ta less-than-equal
 .It \e(>=      Ta \(>=     Ta greater-than-equal
-.It \e(==      Ta \(==     Ta equal
+.It \e(<<      Ta \(<<     Ta much less
+.It \e(>>      Ta \(>>     Ta much greater
+.It \e(eq      Ta \(eq     Ta equal
 .It \e(!=      Ta \(!=     Ta not equal
+.It \e(==      Ta \(==     Ta equivalent
+.It \e(ne      Ta \(ne     Ta not equivalent
+.It \e(=~      Ta \(=~     Ta congruent
+.It \e(-~      Ta \(-~     Ta asymptotically congruent
+.It \e(ap      Ta \(ap     Ta asymptotically similar
+.It \e(~~      Ta \(~~     Ta approximately similar
+.It \e(~=      Ta \(~=     Ta approximately equal
+.It \e(pt      Ta \(pt     Ta proportionate
+.It \e(es      Ta \(es     Ta empty set
+.It \e(mo      Ta \(mo     Ta element
+.It \e(nm      Ta \(nm     Ta not element
+.It \e(sb      Ta \(sb     Ta proper subset
+.It \e(nb      Ta \(nb     Ta not subset
+.It \e(sp      Ta \(sp     Ta proper superset
+.It \e(nc      Ta \(nc     Ta not superset
+.It \e(ib      Ta \(ib     Ta reflexive subset
+.It \e(ip      Ta \(ip     Ta reflexive superset
+.It \e(ca      Ta \(ca     Ta intersection
+.It \e(cu      Ta \(cu     Ta union
+.It \e(/_      Ta \(/_     Ta angle
+.It \e(pp      Ta \(pp     Ta perpendicular
+.It \e(is      Ta \(is     Ta integral
+.It \e[integral] Ta \[integral] Ta integral
+.It \e[sum]    Ta \[sum]   Ta summation
+.It \e[product] Ta \[product] Ta product
+.It \e[coproduct] Ta \[coproduct] Ta coproduct
+.It \e(gr      Ta \(gr     Ta gradient
+.It \e(sr      Ta \(sr     Ta square root
+.It \e[sqrt]   Ta \[sqrt]  Ta square root
+.It \e(lc      Ta \(lc     Ta left-ceiling
+.It \e(rc      Ta \(rc     Ta right-ceiling
+.It \e(lf      Ta \(lf     Ta left-floor
+.It \e(rf      Ta \(rf     Ta right-floor
 .It \e(if      Ta \(if     Ta infinity
-.It \e(na      Ta \(na     Ta NaN, an extension
-.It \e(+-      Ta \(+-     Ta plus-minus
-.It \e(**      Ta \(**     Ta asterisk
+.It \e(Ah      Ta \(Ah     Ta aleph
+.It \e(Im      Ta \(Im     Ta imaginary
+.It \e(Re      Ta \(Re     Ta real
+.It \e(pd      Ta \(pd     Ta partial differential
+.It \e(-h      Ta \(-h     Ta Planck constant over 2\(*p
 .El
 .\" PARAGRAPH
 .Pp
@@ -282,7 +323,6 @@ Diacritics and accented letters:
 .Pp
 Monetary:
 .Bl -offset indent -column 10n 10n 10n
-.It \e0        Ta \0       Ta white-space
 .It \e(Cs      Ta \(Cs     Ta Scandinavian
 .It \e(Do      Ta \(Do     Ta dollar
 .It \e(Po      Ta \(Po     Ta pound
@@ -296,65 +336,64 @@ Monetary:
 .Pp
 Greek letters:
 .Bl -offset indent -column 10n 10n 10n
-.It \e0        Ta \0       Ta white-space
 .It \e(*A      Ta \(*A     Ta Alpha
 .It \e(*B      Ta \(*B     Ta Beta
-.It \e(*C      Ta \(*C     Ta Xi
+.It \e(*G      Ta \(*G     Ta Gamma
 .It \e(*D      Ta \(*D     Ta Delta
 .It \e(*E      Ta \(*E     Ta Epsilon
-.It \e(*F      Ta \(*F     Ta Phi
-.It \e(*G      Ta \(*G     Ta Gamma
+.It \e(*Z      Ta \(*Z     Ta Zeta
+.It \e(*Y      Ta \(*Y     Ta Eta
 .It \e(*H      Ta \(*H     Ta Theta
 .It \e(*I      Ta \(*I     Ta Iota
 .It \e(*K      Ta \(*K     Ta Kappa
 .It \e(*L      Ta \(*L     Ta Lambda
 .It \e(*M      Ta \(*M     Ta Mu
 .It \e(*N      Ta \(*N     Ta Nu
+.It \e(*C      Ta \(*C     Ta Xi
 .It \e(*O      Ta \(*O     Ta Omicron
 .It \e(*P      Ta \(*P     Ta Pi
-.It \e(*Q      Ta \(*Q     Ta Psi
 .It \e(*R      Ta \(*R     Ta Rho
 .It \e(*S      Ta \(*S     Ta Sigma
 .It \e(*T      Ta \(*T     Ta Tau
 .It \e(*U      Ta \(*U     Ta Upsilon
-.It \e(*W      Ta \(*W     Ta Omega
+.It \e(*F      Ta \(*F     Ta Phi
 .It \e(*X      Ta \(*X     Ta Chi
-.It \e(*Y      Ta \(*Y     Ta Eta
-.It \e(*Z      Ta \(*Z     Ta Zeta
+.It \e(*Q      Ta \(*Q     Ta Psi
+.It \e(*W      Ta \(*W     Ta Omega
 .It \e(*a      Ta \(*a     Ta alpha
 .It \e(*b      Ta \(*b     Ta beta
-.It \e(*c      Ta \(*c     Ta xi
+.It \e(*g      Ta \(*g     Ta gamma
 .It \e(*d      Ta \(*d     Ta delta
 .It \e(*e      Ta \(*e     Ta epsilon
-.It \e(*f      Ta \(*f     Ta phi
-.It \e(+f      Ta \(+f     Ta phi variant
-.It \e(*g      Ta \(*g     Ta gamma
+.It \e(*z      Ta \(*z     Ta zeta
+.It \e(*y      Ta \(*y     Ta eta
 .It \e(*h      Ta \(*h     Ta theta
-.It \e(+h      Ta \(+h     Ta theta variant
 .It \e(*i      Ta \(*i     Ta iota
 .It \e(*k      Ta \(*k     Ta kappa
 .It \e(*l      Ta \(*l     Ta lambda
 .It \e(*m      Ta \(*m     Ta mu
 .It \e(*n      Ta \(*n     Ta nu
+.It \e(*c      Ta \(*c     Ta xi
 .It \e(*o      Ta \(*o     Ta omicron
 .It \e(*p      Ta \(*p     Ta pi
-.It \e(+p      Ta \(+p     Ta pi variant
-.It \e(*q      Ta \(*q     Ta psi
 .It \e(*r      Ta \(*r     Ta rho
 .It \e(*s      Ta \(*s     Ta sigma
 .It \e(*t      Ta \(*t     Ta tau
 .It \e(*u      Ta \(*u     Ta upsilon
-.It \e(*w      Ta \(*w     Ta omega
+.It \e(*f      Ta \(*f     Ta phi
 .It \e(*x      Ta \(*x     Ta chi
-.It \e(*y      Ta \(*y     Ta eta
-.It \e(*z      Ta \(*z     Ta zeta
+.It \e(*q      Ta \(*q     Ta psi
+.It \e(*w      Ta \(*w     Ta omega
+.It \e(+h      Ta \(+h     Ta theta variant
+.It \e(+f      Ta \(+f     Ta phi variant
+.It \e(+p      Ta \(+p     Ta pi variant
+.It \e(+e      Ta \(+e     Ta epsilon variant
 .It \e(ts      Ta \(ts     Ta sigma terminal
 .El
 .\" PARAGRAPH
 .Pp
 Special symbols:
 .Bl -offset indent -column 10n 10n 10n
-.It \e0        Ta \0       Ta white-space
 .It \e(de      Ta \(de     Ta degree
 .It \e(ps      Ta \(ps     Ta paragraph
 .It \e(sc      Ta \(sc     Ta section
@@ -410,14 +449,28 @@ Enclosures:
 This section documents compatibility of
 .Nm
 with older or existing versions of
-.Xr groff 1 :
+.Xr groff 1 .
 .Pp
-.Bl -tag -width Ds -offset indent -compact
-.It \e(ss
-Renders differently in
+The following render differently in
 .Fl T Ns Ar ascii
-mode.
-.El
+output mode:
+.Bd -ragged -offset indent
+\e(ss, \e(nm, \e(nb, \e(nc, \e(ib, \e(ip, \e(pp, \e[sum], \e[product],
+\e[coproduct], \e(gr, \e(-h
+.Ed
+.Pp
+The following render differently in
+.Fl T Ns Ar html
+output mode:
+.Bd -ragged -offset indent
+\e(~=, \e(nb, \e(nc
+.Ed
+.Pp
+Finally, the following have been omitted by being poorly documented or
+having no known representation:
+.Bd -ragged -offset indent
+\e[radicalex], \e[sqrtex]
+.Ed
 .\" SECTION
 .Sh SEE ALSO
 .Xr mandoc 1
