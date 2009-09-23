@@ -38,7 +38,7 @@ struct	ln {
 #define CHARS_BOTH	 (0x03)
 };
 
-#define	LINES_MAX	  337
+#define	LINES_MAX	  351
 
 #define CHAR(w, x, y, z, a, b) \
 	{ NULL, (w), (y), (a), (x), (z), (b), CHARS_CHAR },

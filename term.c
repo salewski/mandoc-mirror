@@ -25,6 +25,9 @@
 #include "man.h"
 #include "mdoc.h"
 
+/* FIXME: accomodate non-breaking, non-collapsing white-space. */
+/* FIXME: accomodate non-breaking, collapsing white-space. */
+
 extern	void		  man_run(struct termp *, 
 				const struct man *);
 extern	void		  mdoc_run(struct termp *, 

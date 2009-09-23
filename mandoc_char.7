@@ -77,12 +77,12 @@ as
 These are the preferred input symbols for producing special characters.
 .\" PARAGRAPH
 .Pp
-Typographic:
-.Bl -tag -width Ds -offset indent -compact
+Spacing:
+.Bl -compact -tag -width Ds -offset indent
 .It \e~
-.Pq non-breaking space
+.Pq non-breaking, non-collapsing space
 .It \e
-.Pq space
+.Pq breaking, non-collapsing n-width space
 .It \e^
 .Pq zero-width space
 .It \e%
@@ -92,19 +92,56 @@ Typographic:
 .It \e|
 .Pq zero-width space
 .It \e0
-.Pq white-space
+.Pq breaking, non-collapsing digit-width space
 .El
 .\" PARAGRAPH
 .Pp
-Grammatic:
-.Bl -offset indent -column 10n 10n 10n
+Lines:
+.Bl -compact -offset indent -column 10n 10n 10n
+.It \e(ba      Ta \(ba     Ta bar
+.It \e(br      Ta \(br     Ta box rule
+.It \e(ul      Ta \(ul     Ta underscore
+.It \e(rl      Ta \(rl     Ta overline
+.It \e(bb      Ta \(bb     Ta broken bar
+.It \e(sl      Ta \(sl     Ta forward slash
+.It \e(rs      Ta \(rs     Ta backward slash
+.El
+.\" PARAGRAPH
+.Pp
+Text markers:
+.Bl -compact -offset indent -column 10n 10n 10n
+.It \e(ci      Ta \(ci     Ta circle
+.It \e(bu      Ta \(bu     Ta bullet
+.It \e(dd      Ta \(dd     Ta double dagger
+.It \e(dg      Ta \(dg     Ta dagger
+.It \e(lz      Ta \(lz     Ta lozenge
+.It \e(sq      Ta \(sq     Ta white square
+.It \e(ps      Ta \(ps     Ta paragraph
+.It \e(sc      Ta \(sc     Ta section
+.It \e(lh      Ta \(lh     Ta left hand
+.It \e(rh      Ta \(rh     Ta right hand
+.It \e(at      Ta \(at     Ta at
+.It \e(sh      Ta \(sh     Ta hash (pound)
+.It \e(CR      Ta \(CR     Ta carriage return
+.It \e(OK      Ta \(OK     Ta check mark
+.El
+.\" PARAGRAPH
+.Pp
+Legal symbols:
+.Bl -compact -offset indent -column 10n 10n 10n
+.It \e(co      Ta \(co     Ta copyright
+.It \e(rg      Ta \(rg     Ta registered
+.It \e(tm      Ta \(tm     Ta trademarked
+.El
+.\" PARAGRAPH
+.Pp
+Punctuation:
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e(em      Ta \(em     Ta em-dash
 .It \e(en      Ta \(en     Ta en-dash
 .It \e(hy      Ta \(hy     Ta hyphen
 .It \e\e       Ta \\       Ta back-slash
-.It \\e        Ta \e       Ta back-slash
-.It \e'        Ta \'       Ta apostrophe
-.It \e`        Ta \`       Ta back-tick
+.It \ee        Ta \e       Ta back-slash
 .It \e.        Ta \.       Ta period
 .It \e(r!      Ta \(r!     Ta upside-down exclamation
 .It \e(r?      Ta \(r?     Ta upside-down question
@@ -112,7 +149,7 @@ Grammatic:
 .\" PARAGRAPH
 .Pp
 Quotes:
-.Bl -offset indent -column 10n 10n 10n
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e(Bq      Ta \(Bq     Ta right low double-quote
 .It \e(bq      Ta \(bq     Ta right low single-quote
 .It \e(lq      Ta \(lq     Ta left double-quote
@@ -129,7 +166,7 @@ Quotes:
 .\" PARAGRAPH
 .Pp
 Brackets:
-.Bl -offset indent -column 10n 10n 10n
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e(lB      Ta \(lB     Ta left bracket
 .It \e(rB      Ta \(rB     Ta right bracket
 .It \e(lC      Ta \(lC     Ta left brace
@@ -168,7 +205,7 @@ Brackets:
 .\" PARAGRAPH
 .Pp
 Arrows:
-.Bl -offset indent -column 10n 10n 10n
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e(<-      Ta \(<-     Ta left arrow
 .It \e(->      Ta \(->     Ta right arrow
 .It \e(<>      Ta \(<>     Ta left-right arrow
@@ -185,7 +222,7 @@ Arrows:
 .\" PARAGRAPH
 .Pp
 Logical:
-.Bl -offset indent -column 10n 10n 10n
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e(AN      Ta \(AN     Ta logical and
 .It \e(OR      Ta \(OR     Ta logical or
 .It \e(no      Ta \(no     Ta logical not
@@ -200,7 +237,7 @@ Logical:
 .\" PARAGRAPH
 .Pp
 Mathematical:
-.Bl -offset indent -column 10n 10n 10n
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e(pl      Ta \(pl     Ta plus
 .It \e(mi      Ta \(mi     Ta minus
 .It \e-        Ta \-       Ta minus (text)
@@ -265,7 +302,7 @@ Mathematical:
 .\" PARAGRAPH
 .Pp
 Ligatures:
-.Bl -offset indent -column 10n 10n 10n
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e(ff      Ta \(ff     Ta ff ligature
 .It \e(fi      Ta \(fi     Ta fi ligature
 .It \e(fl      Ta \(fl     Ta fl ligature
@@ -282,13 +319,15 @@ Ligatures:
 .\" PARAGRAPH
 .Pp
 Accents:
-.Bl -offset indent -column 10n 10n 10n
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e(a"      Ta \(a"     Ta Hungarian umlaut
 .It \e(a-      Ta \(a-     Ta macron
 .It \e(a.      Ta \(a.     Ta dotted
 .It \e(a^      Ta \(a^     Ta circumflex
 .It \e(aa      Ta \(aa     Ta acute
+.It \e'        Ta \'       Ta acute
 .It \e(ga      Ta \(ga     Ta grave
+.It \e`        Ta \`       Ta grave
 .It \e(ab      Ta \(ab     Ta breve
 .It \e(ac      Ta \(ac     Ta cedilla
 .It \e(ad      Ta \(ad     Ta dieresis
@@ -302,7 +341,7 @@ Accents:
 .\" PARAGRAPH
 .Pp
 Accented letters:
-.Bl -offset indent -column 10n 10n 10n
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e('A      Ta \('A     Ta acute A
 .It \e('E      Ta \('E     Ta acute E
 .It \e('I      Ta \('I     Ta acute I
@@ -362,7 +401,7 @@ Accented letters:
 .\" PARAGRAPH
 .Pp
 Special letters:
-.Bl -offset indent -column 10n 10n 10n
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e(-D      Ta \(-D     Ta Eth
 .It \e(Sd      Ta \(Sd     Ta eth
 .It \e(TP      Ta \(TP     Ta Thorn
@@ -373,7 +412,7 @@ Special letters:
 .\" PARAGRAPH
 .Pp
 Currency:
-.Bl -offset indent -column 10n 10n 10n
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e(Do      Ta \(Do     Ta dollar
 .It \e(ct      Ta \(ct     Ta cent
 .It \e(Eu      Ta \(Eu     Ta Euro symbol
@@ -385,8 +424,18 @@ Currency:
 .El
 .\" PARAGRAPH
 .Pp
+Units:
+.Bl -compact -offset indent -column 10n 10n 10n
+.It \e(de      Ta \(de     Ta degree
+.It \e(%0      Ta \(%0     Ta per-thousand
+.It \e(fm      Ta \(fm     Ta minute
+.It \e(sd      Ta \(sd     Ta second
+.It \e(mc      Ta \(mc     Ta micro
+.El
+.\" PARAGRAPH
+.Pp
 Greek letters:
-.Bl -offset indent -column 10n 10n 10n
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e(*A      Ta \(*A     Ta Alpha
 .It \e(*B      Ta \(*B     Ta Beta
 .It \e(*G      Ta \(*G     Ta Gamma
@@ -441,32 +490,12 @@ Greek letters:
 .It \e(+e      Ta \(+e     Ta epsilon variant
 .It \e(ts      Ta \(ts     Ta sigma terminal
 .El
-.\" PARAGRAPH
-.Pp
-Special symbols:
-.Bl -offset indent -column 10n 10n 10n
-.It \e(de      Ta \(de     Ta degree
-.It \e(ps      Ta \(ps     Ta paragraph
-.It \e(sc      Ta \(sc     Ta section
-.It \e(dg      Ta \(dg     Ta dagger
-.It \e(dd      Ta \(dd     Ta double dagger
-.It \e(ci      Ta \(ci     Ta circle
-.It \e(ba      Ta \(ba     Ta bar
-.It \e(bb      Ta \(bb     Ta broken bar
-.It \e(co      Ta \(co     Ta copyright
-.It \e(rg      Ta \(rg     Ta registered
-.It \e(tm      Ta \(tm     Ta trademarked
-.It \ee        Ta \e       Ta escape
-.It \e(lh      Ta \(lh     Ta left hand
-.It \e(rh      Ta \(rh     Ta right hand
-.El 
 .\" SECTION
 .Sh PREDEFINED STRINGS
 These are not recommended for use, as they differ across
 implementations:
 .Pp
-Mathematical:
-.Bl -offset indent -column 10n 10n 10n
+.Bl -compact -offset indent -column 10n 10n 10n
 .It \e*(Ba     Ta \*(Ba    Ta vertical bar
 .It \e*(Ne     Ta \*(Ne    Ta not equal
 .It \e*(Ge     Ta \*(Ge    Ta greater-than-equal
@@ -477,25 +506,22 @@ Mathematical:
 .It \e*(If     Ta \*(If    Ta infinity
 .It \e*(Pi     Ta \*(Pi    Ta pi
 .It \e*(Na     Ta \*(Na    Ta NaN
-.El
-.\" PARAGRAPH
-.Pp
-Special symbols:
-.Bl -offset indent -column 10n 10n 10n
-.It \e*(Ba     Ta \*(Ba    Ta vertical bar
 .It \e*(Am     Ta \*(Am    Ta ampersand
 .It \e*R       Ta \*R      Ta restricted mark
 .It \e*(Tm     Ta \*(Tm    Ta trade mark
-.El
-.\" PARAGRAPH
-.Pp
-Enclosures:
-.Bl -offset indent -column 10n 10n 10n
 .It \e*q       Ta \*q      Ta double-quote
 .It \e*(Rq     Ta \*(Rq    Ta right-double-quote
 .It \e*(Lq     Ta \*(Lq    Ta left-double-quote
 .It \e*(lp     Ta \*(lp    Ta right-parenthesis
 .It \e*(rp     Ta \*(rp    Ta left-parenthesis
+.It \e*(lq     Ta \*(lq    Ta left double-quote
+.It \e*(rq     Ta \*(rq    Ta right double-quote
+.It \e*(ua     Ta \*(ua    Ta up arrow
+.It \e*(va     Ta \*(va    Ta up-down arrow
+.It \e*(<=     Ta \*(<=    Ta less-than-equal
+.It \e*(>=     Ta \*(>=    Ta greater-than-equal
+.It \e*(aa     Ta \*(aa    Ta acute
+.It \e*(ga     Ta \*(ga    Ta grave
 .El
 .\" SECTION
 .Sh COMPATIBILITY
@@ -522,7 +548,7 @@ output mode:
 Finally, the following have been omitted by being poorly documented or
 having no known representation:
 .Bd -ragged -offset indent
-\e[radicalex], \e[sqrtex]
+\e[radicalex], \e[sqrtex], \e(ru
 .Ed
 .\" SECTION
 .Sh SEE ALSO
