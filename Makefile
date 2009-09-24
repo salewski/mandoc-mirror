@@ -1,4 +1,4 @@
-.SUFFIXES:	.html .xml .sgml .1 .3 .7 .md5 .tar.gz .1.html .3.html .7.html .1.txt .3.txt .7.txt
+.SUFFIXES:	.html .xml .sgml .1 .3 .7 .md5 .tar.gz .1.txt .3.txt .7.txt .1.sgml .3.sgml .7.sgml
 
 BINDIR		= $(PREFIX)/bin
 INCLUDEDIR	= $(PREFIX)/include
@@ -52,7 +52,9 @@ DATAS	   = arch.in att.in lib.in msec.in st.in \
 	     vol.in chars.in
 HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
 	     libmandoc.h html.h chars.h
-SGMLS	   = index.sgml 
+GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml manuals.7.sgml \
+	     mandoc_char.7.sgml man.7.sgml man.3.sgml
+SGMLS	   = index.sgml $(GSGMLS)
 XSLS	   = ChangeLog.xsl
 HTMLS	   = index.html ChangeLog.html mandoc.1.html mdoc.3.html \
 	     man.3.html mdoc.7.html man.7.html mandoc_char.7.html \
@@ -68,7 +70,7 @@ MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7 mandoc_char.7 \
 	     man.7 man.3
 BINS	   = mandoc
 CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
-	     $(TARGZS) tags $(MD5S) $(XMLS) $(TEXTS)
+	     $(TARGZS) tags $(MD5S) $(XMLS) $(TEXTS) $(GSGMLS)
 INSTALL	   = $(SRCS) $(HEADS) Makefile $(MANS) $(SGMLS) $(STATICS) \
 	     $(DATAS) $(XSLS) $(EXAMPLES)
 
@@ -226,19 +228,19 @@ mandoc: $(MAINOBJS) libmdoc.a libman.a
 .1.1.txt:
 	./mandoc -Wall,error -fstrict $< | col -b > $@
 
-.1.1.html:
+.1.1.sgml:
 	./mandoc -Thtml -ostyle=style.css -Wall,error -fstrict $< > $@
 
 .3.3.txt:
 	./mandoc -Wall,error -fstrict $< | col -b > $@
 
-.3.3.html:
+.3.3.sgml:
 	./mandoc -Thtml -ostyle=style.css -Wall,error -fstrict $< > $@
 
 .7.7.txt:
 	./mandoc -Wall,error -fstrict $< | col -b > $@
 
-.7.7.html:
+.7.7.sgml:
 	./mandoc -Thtml -ostyle=style.css -Wall,error -fstrict $< > $@
 
 .tar.gz.md5:

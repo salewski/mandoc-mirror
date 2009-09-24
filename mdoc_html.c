@@ -67,8 +67,11 @@ static	int		  mdoc_ar_pre(MDOC_ARGS);
 static	int		  mdoc_bd_pre(MDOC_ARGS);
 static	void		  mdoc_bl_post(MDOC_ARGS);
 static	int		  mdoc_bl_pre(MDOC_ARGS);
+static	void		  mdoc_bq_post(MDOC_ARGS);
+static	int		  mdoc_bq_pre(MDOC_ARGS);
 static	void		  mdoc_brq_post(MDOC_ARGS);
 static	int		  mdoc_brq_pre(MDOC_ARGS);
+static	int		  mdoc_bx_pre(MDOC_ARGS);
 static	int		  mdoc_cd_pre(MDOC_ARGS);
 static	int		  mdoc_d1_pre(MDOC_ARGS);
 static	void		  mdoc_dq_post(MDOC_ARGS);
@@ -83,6 +86,10 @@ static	int		  mdoc_em_pre(MDOC_ARGS);
 static	int		  mdoc_er_pre(MDOC_ARGS);
 static	int		  mdoc_ev_pre(MDOC_ARGS);
 static	int		  mdoc_ex_pre(MDOC_ARGS);
+static	void		  mdoc_fo_post(MDOC_ARGS);
+static	int		  mdoc_fo_pre(MDOC_ARGS);
+static	int		  mdoc_ic_pre(MDOC_ARGS);
+static	int		  mdoc_in_pre(MDOC_ARGS);
 static	int		  mdoc_it_pre(MDOC_ARGS);
 static	int		  mdoc_lk_pre(MDOC_ARGS);
 static	int		  mdoc_mt_pre(MDOC_ARGS);
@@ -96,12 +103,14 @@ static	void		  mdoc_pq_post(MDOC_ARGS);
 static	int		  mdoc_pq_pre(MDOC_ARGS);
 static	void		  mdoc_qq_post(MDOC_ARGS);
 static	int		  mdoc_qq_pre(MDOC_ARGS);
+static	int		  mdoc_rv_pre(MDOC_ARGS);
 static	int		  mdoc_sh_pre(MDOC_ARGS);
 static	int		  mdoc_sp_pre(MDOC_ARGS);
 static	void		  mdoc_sq_post(MDOC_ARGS);
 static	int		  mdoc_sq_pre(MDOC_ARGS);
 static	int		  mdoc_ss_pre(MDOC_ARGS);
 static	int		  mdoc_sx_pre(MDOC_ARGS);
+static	int		  mdoc_va_pre(MDOC_ARGS);
 static	int		  mdoc_vt_pre(MDOC_ARGS);
 static	int		  mdoc_xr_pre(MDOC_ARGS);
 static	int		  mdoc_xx_pre(MDOC_ARGS);
@@ -140,17 +149,17 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_fl_pre, NULL}, /* Fl */
 	{mdoc_fn_pre, NULL}, /* Fn */ 
 	{mdoc_ft_pre, NULL}, /* Ft */ 
-	{NULL, NULL}, /* Ic */ 
-	{NULL, NULL}, /* In */ 
+	{mdoc_ic_pre, NULL}, /* Ic */ 
+	{mdoc_in_pre, NULL}, /* In */ 
 	{NULL, NULL}, /* Li */
 	{mdoc_nd_pre, NULL}, /* Nd */ 
 	{mdoc_nm_pre, NULL}, /* Nm */ 
 	{mdoc_op_pre, mdoc_op_post}, /* Op */
 	{NULL, NULL}, /* Ot */
 	{mdoc_pa_pre, NULL}, /* Pa */
-	{NULL, NULL}, /* Rv */
+	{mdoc_rv_pre, NULL}, /* Rv */
 	{NULL, NULL}, /* St */ 
-	{NULL, NULL}, /* Va */
+	{mdoc_va_pre, NULL}, /* Va */
 	{mdoc_vt_pre, NULL}, /* Vt */ 
 	{mdoc_xr_pre, NULL}, /* Xr */
 	{NULL, NULL}, /* %A */
@@ -170,13 +179,13 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* At */
 	{NULL, NULL}, /* Bc */
 	{NULL, NULL}, /* Bf */ 
-	{NULL, NULL}, /* Bo */
-	{NULL, NULL}, /* Bq */
+	{mdoc_bq_pre, mdoc_bq_post}, /* Bo */
+	{mdoc_bq_pre, mdoc_bq_post}, /* Bq */
 	{mdoc_xx_pre, NULL}, /* Bsx */
-	{NULL, NULL}, /* Bx */
+	{mdoc_bx_pre, NULL}, /* Bx */
 	{NULL, NULL}, /* Db */
 	{NULL, NULL}, /* Dc */
-	{NULL, NULL}, /* Do */
+	{mdoc_dq_pre, mdoc_dq_post}, /* Do */
 	{mdoc_dq_pre, mdoc_dq_post}, /* Dq */
 	{NULL, NULL}, /* Ec */
 	{NULL, NULL}, /* Ef */
@@ -193,7 +202,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_pq_pre, mdoc_pq_post}, /* Po */
 	{mdoc_pq_pre, mdoc_pq_post}, /* Pq */
 	{NULL, NULL}, /* Qc */
-	{NULL, NULL}, /* Ql */
+	{mdoc_sq_pre, mdoc_sq_post}, /* Ql */
 	{mdoc_qq_pre, mdoc_qq_post}, /* Qo */
 	{mdoc_qq_pre, mdoc_qq_post}, /* Qq */
 	{NULL, NULL}, /* Re */
@@ -208,9 +217,9 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_xx_pre, NULL}, /* Ux */
 	{NULL, NULL}, /* Xc */
 	{NULL, NULL}, /* Xo */
-	{NULL, NULL}, /* Fo */ 
+	{mdoc_fo_pre, mdoc_fo_post}, /* Fo */ 
 	{NULL, NULL}, /* Fc */ 
-	{NULL, NULL}, /* Oo */
+	{mdoc_op_pre, mdoc_op_post}, /* Oo */
 	{NULL, NULL}, /* Oc */
 	{NULL, NULL}, /* Bk */
 	{NULL, NULL}, /* Ek */
@@ -827,6 +836,29 @@ mdoc_xx_pre(MDOC_ARGS)
 
 /* ARGSUSED */
 static int
+mdoc_bx_pre(MDOC_ARGS)
+{
+	const struct mdoc_node	*nn;
+	struct htmlpair		 tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "unix";
+
+	print_otag(h, TAG_SPAN, 1, &tag);
+
+	for (nn = n->child; nn; nn = nn->next)
+		print_mdoc_node(m, nn, h);
+
+	if (n->child)
+		h->flags |= HTML_NOSPACE;
+
+	print_text(h, "BSD");
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
 mdoc_tbl_block_pre(MDOC_ARGS, int t, int w, int o, int c)
 {
 	struct htmlpair	 tag;
@@ -892,7 +924,8 @@ mdoc_tbl_head_pre(MDOC_ARGS, int t, int w)
 		print_otag(h, TAG_DIV, 1, &tag);
 		break;
 	default:
-		buffmt("margin-left: -%dem; width: %dem;", w, w);
+		buffmt("margin-left: -%dem; min-width: %dem;", 
+				w, w ? w - 1 : 0);
 		bufcat("clear: left;");
 		if (n->next && n->next->child)
 			bufcat("float: left;");
@@ -920,7 +953,7 @@ mdoc_tbl_head_pre(MDOC_ARGS, int t, int w)
 		print_text(h, "\\(en");
 		return(0);
 	case (MDOC_Hyphen):
-		print_text(h, "\\-");
+		print_text(h, "\\(hy");
 		return(0);
 	case (MDOC_Bullet):
 		print_text(h, "\\(bu");
@@ -1536,7 +1569,7 @@ mdoc_ft_pre(MDOC_ARGS)
 	if (SEC_SYNOPSIS == n->sec) {
 		if (n->prev && MDOC_Fo == n->prev->tok) {
 			tag.key = ATTR_STYLE;
-			tag.val = "magin-bottom: 1em;";
+			tag.val = "margin-top: 1em;";
 			print_otag(h, TAG_DIV, 1, &tag);
 		} else
 			print_otag(h, TAG_DIV, 0, NULL);
@@ -1568,6 +1601,8 @@ mdoc_fn_pre(MDOC_ARGS)
 
 	tag.key = ATTR_CLASS;
 	tag.val = "type";
+
+	/* FIXME: can be "type funcname" "type varname"... */
 
 	t = print_otag(h, TAG_SPAN, 1, &tag);
 	print_text(h, n->child->string);
@@ -1699,4 +1734,175 @@ mdoc_mt_pre(MDOC_ARGS)
 	}
 	
 	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_fo_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	if (MDOC_BODY == n->type) {
+		h->flags |= HTML_NOSPACE;
+		print_text(h, "(");
+		h->flags |= HTML_NOSPACE;
+		return(1);
+	} else if (MDOC_BLOCK == n->type)
+		return(1);
+
+	tag.key = ATTR_CLASS;
+	tag.val = "fname";
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+mdoc_fo_post(MDOC_ARGS)
+{
+	if (MDOC_BODY != n->type)
+		return;
+	h->flags |= HTML_NOSPACE;
+	print_text(h, ")");
+	h->flags |= HTML_NOSPACE;
+	print_text(h, ";");
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_in_pre(MDOC_ARGS)
+{
+	const struct mdoc_node	*nn;
+	struct htmlpair		 tag;
+
+	if (SEC_SYNOPSIS == n->sec) {
+		if (n->next && MDOC_In != n->next->tok) {
+			tag.key = ATTR_STYLE;
+			tag.val = "margin-bottom: 1em;";
+			print_otag(h, TAG_DIV, 1, &tag);
+		} else
+			print_otag(h, TAG_DIV, 0, NULL);
+	}
+
+	tag.key = ATTR_CLASS;
+	tag.val = "includes";
+
+	print_otag(h, TAG_SPAN, 1, &tag);
+
+	if (SEC_SYNOPSIS == n->sec)
+		print_text(h, "#include");
+
+	print_text(h, "<");
+	h->flags |= HTML_NOSPACE;
+
+	/* XXX -- see warning in termp_in_post(). */
+
+	for (nn = n->child; nn; nn = nn->next)
+		print_mdoc_node(m, nn, h);
+
+	h->flags |= HTML_NOSPACE;
+	print_text(h, ">");
+
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_ic_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "cmd";
+
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_rv_pre(MDOC_ARGS)
+{
+	const struct mdoc_node	*nn;
+	struct htmlpair		 tag;
+	struct tag		*t;
+
+	print_otag(h, TAG_DIV, 0, NULL);
+
+	print_text(h, "The");
+
+	for (nn = n->child; nn; nn = nn->next) {
+		tag.key = ATTR_CLASS;
+		tag.val = "fname";
+		t = print_otag(h, TAG_SPAN, 1, &tag);
+		print_text(h, nn->string);
+		print_tagq(h, t);
+
+		h->flags |= HTML_NOSPACE;
+		if (nn->next && NULL == nn->next->next)
+			print_text(h, "(), and");
+		else if (nn->next)
+			print_text(h, "(),");
+		else
+			print_text(h, "()");
+	}
+
+	if (n->child->next)
+		print_text(h, "functions return");
+	else
+		print_text(h, "function returns");
+
+       	print_text(h, "the value 0 if successful; otherwise the value "
+			"-1 is returned and the global variable");
+
+	tag.key = ATTR_CLASS;
+	tag.val = "var";
+	t = print_otag(h, TAG_SPAN, 1, &tag);
+	print_text(h, "errno");
+	print_tagq(h, t);
+       	print_text(h, "is set to indicate the error.");
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_va_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "var";
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_bq_pre(MDOC_ARGS)
+{
+	
+	if (MDOC_BODY != n->type)
+		return(1);
+	print_text(h, "\\(lB");
+	h->flags |= HTML_NOSPACE;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+mdoc_bq_post(MDOC_ARGS)
+{
+	
+	if (MDOC_BODY != n->type)
+		return;
+	h->flags |= HTML_NOSPACE;
+	print_text(h, "\\(rB");
 }

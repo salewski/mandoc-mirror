@@ -13,6 +13,7 @@ div.ssec-block	{ }
 span.addr	{ text-decoration: underline; } /* Address (Ad). */
 span.arg	{ font-style: italic; } /* Command argument (Ar). */
 span.author	{ } /* Author name (An). */
+span.cmd	{ font-weight: bold; } /* Command (Cm). */
 span.config	{ font-weight: bold; } /* Config statement (Cd). */
 span.define	{ } /* Defines (Dv). */
 span.desc	{ } /* Nd.  After em-dash. */
@@ -21,14 +22,17 @@ span.emph	{ font-style: italic; } /* Emphasis (Em). */
 span.env	{ } /* Environment variables (Ev). */
 span.errno	{ } /* Error string (Er). */
 span.farg	{ text-decoration: underline; } /* Function argument (Fa, Fn). */
+span.fname	{ text-decoration: underline; } /* Function name (Fa, Fn, Rv). */
 span.file	{ font-style: italic; } /* File (Pa). */
 span.flag	{ font-weight: bold; } /* Flag (Fl, Cm). */
+span.includes	{ font-weight: bold; } /* Header includes (In). */
 span.macro	{ } /* Macro-ish thing (Fd). */
 span.name	{ font-weight: bold; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
 span.type	{ font-style: italic; } /* Variable types (Vt, Ft, Fn). */
 span.unix	{ } /* Unices (Ux, Ox, Nx, Fx, Bx, Bsx, Dx). */
 span.utility	{ font-weight: bold; } /* Name of utility (Ex). */
+span.var	{ font-weight: bold; } /* Variables (Rv). */
 
 a.link-man	{ } /* Manual links (Xr). */
 a.link-sec	{ } /* Section links (Sx). */

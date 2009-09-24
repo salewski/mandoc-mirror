@@ -1842,6 +1842,7 @@ termp_in_post(DECL_ARGS)
 {
 
 	p->bold++;
+	p->flags |= TERMP_NOSPACE;
 	term_word(p, ">");
 	p->bold--;
 

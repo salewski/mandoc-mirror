@@ -7,15 +7,20 @@ span.sec-head	{ font-weight: bold; color: blue; }
 span.ssec-head	{ font-weight: bold; color: blue; }
 span.addr	{ text-decoration: underline; }
 span.arg	{ font-style: italic; }
+span.cmd	{ font-weight: bold; }
 span.config	{ font-weight: bold; }
 span.diag	{ font-weight: bold; }
 span.emph	{ font-style: italic; }
 span.farg	{ text-decoration: underline; }
+span.fname	{ font-style: italic; }
 span.file	{ font-style: italic; }
 span.flag	{ font-weight: bold; }
+span.includes	{ font-weight: bold; }
 span.name	{ font-weight: bold; } 
 span.type	{ font-style: italic; }
 span.utility	{ font-weight: bold; }
+span.var	{ font-weight: bold; }
+
 table.header	{ border-bottom: 1px dotted #cccccc; }
 table.footer	{ border-top: 1px dotted #cccccc; }
 
