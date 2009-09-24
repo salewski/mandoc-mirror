@@ -60,7 +60,7 @@ static	int mdoc_argvflags[MDOC_ARG_MAX] = {
 	ARGV_NONE,	/* MDOC_Unfilled */
 	ARGV_NONE,	/* MDOC_Literal */
 	ARGV_NONE,	/* MDOC_File */
-	ARGV_SINGLE,	/* MDOC_Offset */
+	ARGV_OPT_SINGLE, /* MDOC_Offset */
 	ARGV_NONE,	/* MDOC_Bullet */
 	ARGV_NONE,	/* MDOC_Dash */
 	ARGV_NONE,	/* MDOC_Hyphen */
@@ -309,9 +309,13 @@ mdoc_argv_free(struct mdoc_arg *p)
 	for (i = 0; i < (int)p->argc; i++) {
 		if (0 == p->argv[i].sz)
 			continue;
+		if (NULL == p->argv[i].value)
+			continue;
+
 		/* LINTED */
 		for (j = 0; j < (int)p->argv[i].sz; j++) 
-			free(p->argv[i].value[j]);
+			if (p->argv[i].value[j])
+				free(p->argv[i].value[j]);
 
 		free(p->argv[i].value);
 	}
