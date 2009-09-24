@@ -1596,8 +1596,8 @@ mdoc_fn_pre(MDOC_ARGS)
 	assert(n->child->string);
 	sp = n->child->string;
 	while ((ep = strchr(sp, ' '))) {
-		sz = MIN(ep - sp, BUFSIZ - 1);
-		(void)memcpy(nbuf, sp, sz);
+		sz = MIN((int)(ep - sp), BUFSIZ - 1);
+		(void)memcpy(nbuf, sp, (size_t)sz);
 		nbuf[sz] = '\0';
 		print_text(h, nbuf);
 		sp = ++ep;
