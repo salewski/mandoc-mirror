@@ -2015,26 +2015,20 @@ mdoc_pf_post(MDOC_ARGS)
 static int
 mdoc_rs_pre(MDOC_ARGS)
 {
-	struct htmlpair	tag[2];
-	int		i;
+	struct htmlpair	tag;
 
 	if (MDOC_BLOCK != n->type)
 		return(1);
 
-	tag[i = 0].key = ATTR_CLASS;
-	tag[i++].val = "ref";
-
-	if (n->prev && SEC_SYNOPSIS == n->sec) {
-		tag[i].key = ATTR_STYLE;
-		tag[i++].val = "margin-top: 1em;";
-	} else if (SEC_SYNOPSIS != n->sec) {
-		tag[i].key = ATTR_STYLE;
-		tag[i++].val = "display: inline; margin-right: 1em";
+	if (n->prev && SEC_SEE_ALSO == n->sec) {
+		tag.key = ATTR_STYLE;
+		tag.val = "margin-top: 1em;";
+		print_otag(h, TAG_DIV, 1, &tag);
 	}
 
-	/* FIXME: div's have spaces stripped--we want them. */
-
-	print_otag(h, TAG_DIV, i, tag);
+	tag.key = ATTR_CLASS;
+	tag.val = "ref";
+	print_otag(h, TAG_SPAN, 1, &tag);
 	return(1);
 }
 

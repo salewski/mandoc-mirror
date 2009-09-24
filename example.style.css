@@ -33,6 +33,7 @@ span.lit	{ font-family: monospace; } /* Literals (Bf -literal). */
 span.macro	{ font-weight: bold; } /* Macro-ish thing (Fd). */
 span.name	{ font-weight: bold; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
+span.ref	{ } /* Citations (Rs). */
 span.symb	{ font-weight: bold; } /* Symbols. */
 span.type	{ font-style: italic; } /* Variable types (Vt). */
 span.unix	{ } /* Unices (Ux, Ox, Nx, Fx, Bx, Bsx, Dx). */
