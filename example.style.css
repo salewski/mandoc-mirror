@@ -34,6 +34,19 @@ span.macro	{ font-weight: bold; } /* Macro-ish thing (Fd). */
 span.name	{ font-weight: bold; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
 span.ref	{ } /* Citations (Rs). */
+span.ref-auth	{ } /* Reference author (%A). */
+span.ref-book	{ font-style: italic; } /* Reference book (%B). */
+span.ref-city	{ } /* Reference city (%C). */
+span.ref-date	{ } /* Reference date (%D). */
+span.ref-issue	{ font-style: italic; } /* Reference issuer/publisher (%I). */
+span.ref-jrnl	{ font-style: italic; } /* Reference journal (%J). */
+span.ref-num	{ } /* Reference number (%N). */
+span.ref-opt	{ } /* Reference optionals (%O). */
+span.ref-page	{ } /* Reference page (%P). */
+span.ref-corp	{ } /* Reference corporate/foreign author (%Q). */
+span.ref-rep	{ } /* Reference report (%R). */
+span.ref-title	{ } /* Reference title (%T). */
+span.ref-vol	{ } /* Reference volume (%V). */
 span.symb	{ font-weight: bold; } /* Symbols. */
 span.type	{ font-style: italic; } /* Variable types (Vt). */
 span.unix	{ } /* Unices (Ux, Ox, Nx, Fx, Bx, Bsx, Dx). */

@@ -60,6 +60,8 @@ static	int		  mdoc_tbl_block_pre(MDOC_ARGS, int, int, int, int);
 static	int		  mdoc_tbl_body_pre(MDOC_ARGS, int, int);
 static	int		  mdoc_tbl_head_pre(MDOC_ARGS, int, int);
 
+static	void		  mdoc__x_post(MDOC_ARGS);
+static	int		  mdoc__x_pre(MDOC_ARGS);
 static	int		  mdoc_ad_pre(MDOC_ARGS);
 static	int		  mdoc_an_pre(MDOC_ARGS);
 static	int		  mdoc_ap_pre(MDOC_ARGS);
@@ -172,17 +174,17 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_va_pre, NULL}, /* Va */
 	{mdoc_vt_pre, NULL}, /* Vt */ 
 	{mdoc_xr_pre, NULL}, /* Xr */
-	{NULL, NULL}, /* %A */
-	{NULL, NULL}, /* %B */
-	{NULL, NULL}, /* %D */
-	{NULL, NULL}, /* %I */
-	{NULL, NULL}, /* %J */
-	{NULL, NULL}, /* %N */
-	{NULL, NULL}, /* %O */
-	{NULL, NULL}, /* %P */
-	{NULL, NULL}, /* %R */
-	{NULL, NULL}, /* %T */
-	{NULL, NULL}, /* %V */
+	{mdoc__x_pre, mdoc__x_post}, /* %A */
+	{mdoc__x_pre, mdoc__x_post}, /* %B */
+	{mdoc__x_pre, mdoc__x_post}, /* %D */
+	{mdoc__x_pre, mdoc__x_post}, /* %I */
+	{mdoc__x_pre, mdoc__x_post}, /* %J */
+	{mdoc__x_pre, mdoc__x_post}, /* %N */
+	{mdoc__x_pre, mdoc__x_post}, /* %O */
+	{mdoc__x_pre, mdoc__x_post}, /* %P */
+	{mdoc__x_pre, mdoc__x_post}, /* %R */
+	{mdoc__x_pre, mdoc__x_post}, /* %T */
+	{mdoc__x_pre, mdoc__x_post}, /* %V */
 	{NULL, NULL}, /* Ac */
 	{mdoc_aq_pre, mdoc_aq_post}, /* Ao */
 	{mdoc_aq_pre, mdoc_aq_post}, /* Aq */
@@ -244,11 +246,11 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_brq_pre, mdoc_brq_post}, /* Brq */ 
 	{mdoc_brq_pre, mdoc_brq_post}, /* Bro */ 
 	{NULL, NULL}, /* Brc */ 
-	{NULL, NULL}, /* %C */ 
+	{mdoc__x_pre, mdoc__x_post}, /* %C */ 
 	{NULL, NULL}, /* Es */  /* TODO */
 	{NULL, NULL}, /* En */  /* TODO */
 	{mdoc_xx_pre, NULL}, /* Dx */ 
-	{NULL, NULL}, /* %Q */ 
+	{mdoc__x_pre, mdoc__x_post}, /* %Q */ 
 	{mdoc_sp_pre, NULL}, /* br */
 	{mdoc_sp_pre, NULL}, /* sp */ 
 };
@@ -2096,4 +2098,82 @@ mdoc_lb_pre(MDOC_ARGS)
 
 	print_otag(h, TAG_SPAN, 1, &tag);
 	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc__x_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+
+	switch (n->tok) {
+	case(MDOC__A):
+		tag.val = "ref-auth";
+		break;
+	case(MDOC__B):
+		tag.val = "ref-book";
+		break;
+	case(MDOC__C):
+		tag.val = "ref-city";
+		break;
+	case(MDOC__D):
+		tag.val = "ref-date";
+		break;
+	case(MDOC__I):
+		tag.val = "ref-issue";
+		break;
+	case(MDOC__J):
+		tag.val = "ref-jrnl";
+		break;
+	case(MDOC__N):
+		tag.val = "ref-num";
+		break;
+	case(MDOC__O):
+		tag.val = "ref-opt";
+		break;
+	case(MDOC__P):
+		tag.val = "ref-page";
+		break;
+	case(MDOC__Q):
+		tag.val = "ref-corp";
+		break;
+	case(MDOC__R):
+		tag.val = "ref-rep";
+		break;
+	case(MDOC__T):
+		print_text(h, "\\(lq");
+		h->flags |= HTML_NOSPACE;
+		tag.val = "ref-title";
+		break;
+	case(MDOC__V):
+		tag.val = "ref-vol";
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+mdoc__x_post(MDOC_ARGS)
+{
+
+	h->flags |= HTML_NOSPACE;
+	switch (n->tok) {
+	case (MDOC__T):
+		print_text(h, "\\(rq");
+		h->flags |= HTML_NOSPACE;
+		break;
+	default:
+		break;
+	}
+	print_text(h, n->next ? "," : ".");
 }

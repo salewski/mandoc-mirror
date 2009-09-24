@@ -106,6 +106,7 @@ static	void	  termp_sq_post(DECL_ARGS);
 static	void	  termp_ss_post(DECL_ARGS);
 static	void	  termp_vt_post(DECL_ARGS);
 
+static	int	  termp__t_pre(DECL_ARGS);
 static	int	  termp_an_pre(DECL_ARGS);
 static	int	  termp_ap_pre(DECL_ARGS);
 static	int	  termp_aq_pre(DECL_ARGS);
@@ -189,15 +190,15 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_under_pre, termp_vt_post }, /* Vt */
 	{ termp_xr_pre, NULL }, /* Xr */
 	{ NULL, termp____post }, /* %A */
-	{ NULL, termp____post }, /* %B */
+	{ termp_under_pre, termp____post }, /* %B */
 	{ NULL, termp____post }, /* %D */
-	{ NULL, termp____post }, /* %I */
+	{ termp_under_pre, termp____post }, /* %I */
 	{ termp_under_pre, termp____post }, /* %J */
 	{ NULL, termp____post }, /* %N */
 	{ NULL, termp____post }, /* %O */
 	{ NULL, termp____post }, /* %P */
 	{ NULL, termp____post }, /* %R */
-	{ termp_under_pre, termp____post }, /* %T */
+	{ termp__t_pre, termp____post }, /* %T */
 	{ NULL, termp____post }, /* %V */
 	{ NULL, NULL }, /* Ac */
 	{ termp_aq_pre, termp_aq_post }, /* Ao */
@@ -2065,6 +2066,14 @@ termp____post(DECL_ARGS)
 {
 
 	p->flags |= TERMP_NOSPACE;
+	switch (node->tok) {
+	case (MDOC__T):
+		term_word(p, "\\(rq");
+		p->flags |= TERMP_NOSPACE;
+		break;
+	default:
+		break;
+	}
 	term_word(p, node->next ? "," : ".");
 }
 
@@ -2107,3 +2116,13 @@ termp_under_pre(DECL_ARGS)
 	return(1);
 }
 
+
+/* ARGSUSED */
+static int
+termp__t_pre(DECL_ARGS)
+{
+
+	term_word(p, "\\(lq");
+	p->flags |= TERMP_NOSPACE;
+	return(1);
+}
