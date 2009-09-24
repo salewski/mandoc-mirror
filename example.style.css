@@ -1,4 +1,5 @@
-div.body	{ font-family: monospace; min-width: 580px; width: 580px; } /* Top-most div tag. */
+div.body	{ font-family: monospace; 
+		  min-width: 580px; width: 580px; } /* Top-most div tag. */
 
 span.sec-head	{ font-weight: bold; } /* Sections (Sh). */
 div.sec-head	{ }		
@@ -22,9 +23,10 @@ span.emph	{ font-style: italic; } /* Emphasis (Em). */
 span.env	{ } /* Environment variables (Ev). */
 span.errno	{ } /* Error string (Er). */
 span.farg	{ font-style: italic; } /* Function argument (Fa, Fn). */
-span.fname	{ font-style: italic; } /* Function name (Fa, Fn, Rv). */
 span.file	{ font-style: italic; } /* File (Pa). */
 span.flag	{ font-weight: bold; } /* Flag (Fl, Cm). */
+span.fname	{ font-weight: bold; } /* Function name (Fa, Fn, Rv). */
+span.ftype	{ font-style: italic; } /* Function types (Ft, Fn). */
 span.includes	{ font-weight: bold; } /* Header includes (In). */
 span.lib	{ } /* Library (Lb). */
 span.lit	{ font-family: monospace; } /* Literals (Bf -literal). */
@@ -32,20 +34,19 @@ span.macro	{ font-weight: bold; } /* Macro-ish thing (Fd). */
 span.name	{ font-weight: bold; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
 span.symb	{ font-weight: bold; } /* Symbols. */
-span.type	{ font-style: italic; } /* Variable types (Vt, Ft, Fn). */
+span.type	{ font-style: italic; } /* Variable types (Vt). */
 span.unix	{ } /* Unices (Ux, Ox, Nx, Fx, Bx, Bsx, Dx). */
 span.utility	{ font-weight: bold; } /* Name of utility (Ex). */
 span.var	{ font-weight: bold; } /* Variables (Rv). */
 
+a.link-ext	{ } /* Off-site link (Lk). */
+a.link-mail	{ } /* Mailto links (Mt). */
 a.link-man	{ } /* Manual links (Xr). */
 a.link-sec	{ } /* Section links (Sx). */
-a.link-mail	{ } /* Mailto links (Mt). */
-a.link-ext	{ } /* Off-site link (Lk). */
 
-div.lit		{ } /* Literal (D1, Bd -literal, Dl, Bd -literal). */
 div.emph	{ font-style: italic; } /* Emphasis (Bl -emphasis). */
+div.lit		{ } /* Literal (D1, Bd -literal, Dl, Bd -literal). */
 div.symb	{ font-weight: bold; } /* Symbols (Bl -symbolic). */
 
-table.header	{ } /* Document header. */
 table.footer	{ } /* Document footer. */
-
+table.header	{ } /* Document header. */

@@ -15,6 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include <sys/types.h>
+#include <sys/param.h>
 #include <sys/queue.h>
 
 #include <assert.h>
@@ -1560,7 +1561,7 @@ mdoc_ft_pre(MDOC_ARGS)
 	}
 
 	tag.key = ATTR_CLASS;
-	tag.val = "type";
+	tag.val = "ftype";
 	print_otag(h, TAG_SPAN, 1, &tag);
 	return(1);
 }
@@ -1573,6 +1574,9 @@ mdoc_fn_pre(MDOC_ARGS)
 	struct tag		*t;
 	struct htmlpair	 	 tag;
 	const struct mdoc_node	*nn;
+	char			 nbuf[BUFSIZ];
+	const char		*sp, *ep;
+	int			 sz;
 
 	if (SEC_SYNOPSIS == n->sec) {
 		if (n->next) {
@@ -1583,13 +1587,33 @@ mdoc_fn_pre(MDOC_ARGS)
 			print_otag(h, TAG_DIV, 0, NULL);
 	}
 
+	/* Split apart into type and name. */
+
 	tag.key = ATTR_CLASS;
-	tag.val = "type";
-
-	/* FIXME: can be "type funcname" "type varname"... */
-
+	tag.val = "ftype";
 	t = print_otag(h, TAG_SPAN, 1, &tag);
-	print_text(h, n->child->string);
+
+	assert(n->child->string);
+	sp = n->child->string;
+	while ((ep = strchr(sp, ' '))) {
+		sz = MIN(ep - sp, BUFSIZ - 1);
+		(void)memcpy(nbuf, sp, sz);
+		nbuf[sz] = '\0';
+		print_text(h, nbuf);
+		sp = ++ep;
+	}
+
+	print_tagq(h, t);
+
+	tag.key = ATTR_CLASS;
+	tag.val = "fname";
+	t = print_otag(h, TAG_SPAN, 1, &tag);
+
+	if (sp) {
+		(void)strlcpy(nbuf, sp, BUFSIZ);
+		print_text(h, nbuf);
+	}
+
 	print_tagq(h, t);
 
 	h->flags |= HTML_NOSPACE;

@@ -1519,10 +1519,6 @@ termp_fn_pre(DECL_ARGS)
 {
 	const struct mdoc_node *n;
 
-	assert(node->child && MDOC_TEXT == node->child->type);
-
-	/* FIXME: can be "type funcname" "type varname"... */
-
 	p->bold++;
 	term_word(p, node->child->string);
 	p->bold--;
