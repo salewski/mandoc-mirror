@@ -218,7 +218,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_under_pre, NULL }, /* Em */ 
 	{ NULL, NULL }, /* Eo */
 	{ termp_xx_pre, NULL }, /* Fx */
-	{ termp_bold_pre, NULL }, /* Ms */
+	{ termp_bold_pre, NULL }, /* Ms */ /* FIXME: convert to symbol? */
 	{ NULL, NULL }, /* No */
 	{ termp_ns_pre, NULL }, /* Ns */
 	{ termp_xx_pre, NULL }, /* Nx */
@@ -1164,6 +1164,8 @@ static int
 termp_rs_pre(DECL_ARGS)
 {
 
+	if (SEC_SEE_ALSO != node->sec)
+		return(1);
 	if (MDOC_BLOCK == node->type && node->prev)
 		term_vspace(p);
 	return(1);

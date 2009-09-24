@@ -424,7 +424,8 @@ print_text(struct html *h, const char *p)
 		case(']'):
 			/* FALLTHROUGH */
 		case('}'):
-			h->flags |= HTML_NOSPACE;
+			if ( ! (HTML_IGNDELIM & h->flags))
+				h->flags |= HTML_NOSPACE;
 			break;
 		default:
 			break;

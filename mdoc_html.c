@@ -61,10 +61,12 @@ static	int		  mdoc_tbl_head_pre(MDOC_ARGS, int, int);
 
 static	int		  mdoc_ad_pre(MDOC_ARGS);
 static	int		  mdoc_an_pre(MDOC_ARGS);
+static	int		  mdoc_ap_pre(MDOC_ARGS);
 static	void		  mdoc_aq_post(MDOC_ARGS);
 static	int		  mdoc_aq_pre(MDOC_ARGS);
 static	int		  mdoc_ar_pre(MDOC_ARGS);
 static	int		  mdoc_bd_pre(MDOC_ARGS);
+static	int		  mdoc_bf_pre(MDOC_ARGS);
 static	void		  mdoc_bl_post(MDOC_ARGS);
 static	int		  mdoc_bl_pre(MDOC_ARGS);
 static	void		  mdoc_bq_post(MDOC_ARGS);
@@ -93,16 +95,18 @@ static	int		  mdoc_in_pre(MDOC_ARGS);
 static	int		  mdoc_it_pre(MDOC_ARGS);
 static	int		  mdoc_lk_pre(MDOC_ARGS);
 static	int		  mdoc_mt_pre(MDOC_ARGS);
+static	int		  mdoc_ms_pre(MDOC_ARGS);
 static	int		  mdoc_nd_pre(MDOC_ARGS);
 static	int		  mdoc_nm_pre(MDOC_ARGS);
 static	int		  mdoc_ns_pre(MDOC_ARGS);
 static	void		  mdoc_op_post(MDOC_ARGS);
 static	int		  mdoc_op_pre(MDOC_ARGS);
 static	int		  mdoc_pa_pre(MDOC_ARGS);
+static	void		  mdoc_pf_post(MDOC_ARGS);
+static	int		  mdoc_pf_pre(MDOC_ARGS);
 static	void		  mdoc_pq_post(MDOC_ARGS);
 static	int		  mdoc_pq_pre(MDOC_ARGS);
-static	void		  mdoc_qq_post(MDOC_ARGS);
-static	int		  mdoc_qq_pre(MDOC_ARGS);
+static	int		  mdoc_rs_pre(MDOC_ARGS);
 static	int		  mdoc_rv_pre(MDOC_ARGS);
 static	int		  mdoc_sh_pre(MDOC_ARGS);
 static	int		  mdoc_sp_pre(MDOC_ARGS);
@@ -121,7 +125,7 @@ extern	size_t	  	  strlcat(char *, const char *, size_t);
 #endif
 
 static	const struct htmlmdoc mdocs[MDOC_MAX] = {
-	{NULL, NULL}, /* Ap */
+	{mdoc_ap_pre, NULL}, /* Ap */
 	{NULL, NULL}, /* Dd */
 	{NULL, NULL}, /* Dt */
 	{NULL, NULL}, /* Os */
@@ -178,7 +182,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_aq_pre, mdoc_aq_post}, /* Aq */
 	{NULL, NULL}, /* At */
 	{NULL, NULL}, /* Bc */
-	{NULL, NULL}, /* Bf */ 
+	{mdoc_bf_pre, NULL}, /* Bf */ 
 	{mdoc_bq_pre, mdoc_bq_post}, /* Bo */
 	{mdoc_bq_pre, mdoc_bq_post}, /* Bq */
 	{mdoc_xx_pre, NULL}, /* Bsx */
@@ -192,21 +196,21 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_em_pre, NULL}, /* Em */ 
 	{NULL, NULL}, /* Eo */
 	{mdoc_xx_pre, NULL}, /* Fx */
-	{NULL, NULL}, /* Ms */
+	{mdoc_ms_pre, NULL}, /* Ms */ /* FIXME: convert to symbol? */
 	{NULL, NULL}, /* No */
 	{mdoc_ns_pre, NULL}, /* Ns */
 	{mdoc_xx_pre, NULL}, /* Nx */
 	{mdoc_xx_pre, NULL}, /* Ox */
 	{NULL, NULL}, /* Pc */
-	{NULL, NULL}, /* Pf */
+	{mdoc_pf_pre, mdoc_pf_post}, /* Pf */
 	{mdoc_pq_pre, mdoc_pq_post}, /* Po */
 	{mdoc_pq_pre, mdoc_pq_post}, /* Pq */
 	{NULL, NULL}, /* Qc */
 	{mdoc_sq_pre, mdoc_sq_post}, /* Ql */
-	{mdoc_qq_pre, mdoc_qq_post}, /* Qo */
-	{mdoc_qq_pre, mdoc_qq_post}, /* Qq */
+	{mdoc_dq_pre, mdoc_dq_post}, /* Qo */
+	{mdoc_dq_pre, mdoc_dq_post}, /* Qq */
 	{NULL, NULL}, /* Re */
-	{NULL, NULL}, /* Rs */
+	{mdoc_rs_pre, NULL}, /* Rs */
 	{NULL, NULL}, /* Sc */
 	{mdoc_sq_pre, mdoc_sq_post}, /* So */
 	{mdoc_sq_pre, mdoc_sq_post}, /* Sq */
@@ -1234,7 +1238,7 @@ mdoc_d1_pre(MDOC_ARGS)
 	buffmt("margin-left: %dem;", INDENT);
 
 	tag[0].key = ATTR_CLASS;
-	tag[0].val = "lit-block";
+	tag[0].val = "lit";
 	tag[1].key = ATTR_STYLE;
 	tag[1].val = buf;
 
@@ -1353,7 +1357,7 @@ mdoc_bd_pre(MDOC_ARGS)
 	tag[0].key = ATTR_STYLE;
 	tag[0].val = buf;
 	tag[1].key = ATTR_CLASS;
-	tag[1].val = "lit-block";
+	tag[1].val = "lit";
 
 	print_otag(h, TAG_DIV, 2, tag);
 
@@ -1379,31 +1383,6 @@ mdoc_pa_pre(MDOC_ARGS)
 
 	print_otag(h, TAG_SPAN, 1, &tag);
 	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-mdoc_qq_pre(MDOC_ARGS)
-{
-
-	if (MDOC_BODY != n->type)
-		return(1);
-	print_text(h, "\\*q");
-	h->flags |= HTML_NOSPACE;
-	return(1);
-}
-
-
-/* ARGSUSED */
-static void
-mdoc_qq_post(MDOC_ARGS)
-{
-
-	if (MDOC_BODY != n->type)
-		return;
-	h->flags |= HTML_NOSPACE;
-	print_text(h, "\\*q");
 }
 
 
@@ -1905,4 +1884,127 @@ mdoc_bq_post(MDOC_ARGS)
 		return;
 	h->flags |= HTML_NOSPACE;
 	print_text(h, "\\(rB");
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_ap_pre(MDOC_ARGS)
+{
+	
+	h->flags |= HTML_NOSPACE;
+	print_text(h, "\\(aq");
+	h->flags |= HTML_NOSPACE;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_bf_pre(MDOC_ARGS)
+{
+	int		i;
+	struct htmlpair	tag[2];
+
+	if (MDOC_HEAD == n->type)
+		return(0);
+	else if (MDOC_BLOCK != n->type)
+		return(1);
+
+	tag[0].key = ATTR_CLASS;
+	tag[0].val = NULL;
+
+	if (n->head->child) {
+		if ( ! strcmp("Em", n->head->child->string))
+			tag[0].val = "emph";
+		else if ( ! strcmp("Sy", n->head->child->string))
+			tag[0].val = "symb";
+		else if ( ! strcmp("Li", n->head->child->string))
+			tag[0].val = "lit";
+	} else {
+		assert(n->args);
+		for (i = 0; i < (int)n->args->argc; i++) 
+			switch (n->args->argv[i].arg) {
+			case (MDOC_Symbolic):
+				tag[0].val = "symb";
+				break;
+			case (MDOC_Literal):
+				tag[0].val = "lit";
+				break;
+			case (MDOC_Emphasis):
+				tag[0].val = "emph";
+				break;
+			default:
+				break;
+			}
+	}
+
+	/* FIXME: div's have spaces stripped--we want them. */
+
+	assert(tag[0].val);
+	tag[1].key = ATTR_STYLE;
+	tag[1].val = "display: inline; margin-right: 1em;";
+	print_otag(h, TAG_DIV, 2, tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_ms_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "symb";
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_pf_pre(MDOC_ARGS)
+{
+
+	h->flags |= HTML_IGNDELIM;
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+mdoc_pf_post(MDOC_ARGS)
+{
+
+	h->flags &= ~HTML_IGNDELIM;
+	h->flags |= HTML_NOSPACE;
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_rs_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag[2];
+	int		i;
+
+	if (MDOC_BLOCK != n->type)
+		return(1);
+
+	tag[i = 0].key = ATTR_CLASS;
+	tag[i++].val = "ref";
+
+	if (n->prev && SEC_SYNOPSIS == n->sec) {
+		tag[i].key = ATTR_STYLE;
+		tag[i++].val = "margin-top: 1em;";
+	} else if (SEC_SYNOPSIS != n->sec) {
+		tag[i].key = ATTR_STYLE;
+		tag[i++].val = "display: inline; margin-right: 1em";
+	}
+
+	/* FIXME: div's have spaces stripped--we want them. */
+
+	print_otag(h, TAG_DIV, i, tag);
+	return(1);
 }

@@ -82,6 +82,7 @@ struct	html {
 	int		  flags;
 #define	HTML_NOSPACE	 (1 << 0)
 #define	HTML_NEWLINE	 (1 << 1)
+#define	HTML_IGNDELIM	 (1 << 2)
 	struct tagq	  tags;
 	struct ordq	  ords;
 	void		 *symtab;
