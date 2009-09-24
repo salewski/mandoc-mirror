@@ -260,11 +260,11 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_brq_pre, termp_brq_post }, /* Brq */ 
 	{ termp_brq_pre, termp_brq_post }, /* Bro */ 
 	{ NULL, NULL }, /* Brc */ 
-	{ NULL, NULL }, /* %C */ 
+	{ NULL, termp____post }, /* %C */ 
 	{ NULL, NULL }, /* Es */ /* TODO */
 	{ NULL, NULL }, /* En */ /* TODO */
 	{ termp_xx_pre, NULL }, /* Dx */ 
-	{ NULL, NULL }, /* %Q */ 
+	{ NULL, termp____post }, /* %Q */ 
 	{ termp_sp_pre, NULL }, /* br */
 	{ termp_sp_pre, NULL }, /* sp */ 
 };
@@ -2106,3 +2106,4 @@ termp_under_pre(DECL_ARGS)
 	p->under++;
 	return(1);
 }
+

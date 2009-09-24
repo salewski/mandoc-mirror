@@ -76,7 +76,8 @@ const	char *const __mdoc_merrnames[MERRMAX] = {
 	"unclosed explicit scope", /* EOPEN */
 	"unterminated quoted phrase", /* EQUOTPHR */
 	"closure macro without prior context", /* ENOCTX */
-	"no description found for library" /* ELIB */
+	"no description found for library", /* ELIB */
+	"bad child for parent context", /* EBADCHILD */
 };
 
 const	char *const __mdoc_macronames[MDOC_MAX] = {		 

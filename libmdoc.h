@@ -92,6 +92,7 @@ enum	merr {
 	EQUOTPHR,
 	ENOCTX,
 	ELIB,
+	EBADCHILD,
 	MERRMAX
 };
 
