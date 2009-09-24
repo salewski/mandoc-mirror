@@ -73,6 +73,7 @@ static	void		  mdoc_bq_post(MDOC_ARGS);
 static	int		  mdoc_bq_pre(MDOC_ARGS);
 static	void		  mdoc_brq_post(MDOC_ARGS);
 static	int		  mdoc_brq_pre(MDOC_ARGS);
+static	int		  mdoc_bt_pre(MDOC_ARGS);
 static	int		  mdoc_bx_pre(MDOC_ARGS);
 static	int		  mdoc_cd_pre(MDOC_ARGS);
 static	int		  mdoc_d1_pre(MDOC_ARGS);
@@ -93,6 +94,8 @@ static	int		  mdoc_fo_pre(MDOC_ARGS);
 static	int		  mdoc_ic_pre(MDOC_ARGS);
 static	int		  mdoc_in_pre(MDOC_ARGS);
 static	int		  mdoc_it_pre(MDOC_ARGS);
+static	int		  mdoc_lb_pre(MDOC_ARGS);
+static	int		  mdoc_li_pre(MDOC_ARGS);
 static	int		  mdoc_lk_pre(MDOC_ARGS);
 static	int		  mdoc_mt_pre(MDOC_ARGS);
 static	int		  mdoc_ms_pre(MDOC_ARGS);
@@ -114,6 +117,8 @@ static	void		  mdoc_sq_post(MDOC_ARGS);
 static	int		  mdoc_sq_pre(MDOC_ARGS);
 static	int		  mdoc_ss_pre(MDOC_ARGS);
 static	int		  mdoc_sx_pre(MDOC_ARGS);
+static	int		  mdoc_sy_pre(MDOC_ARGS);
+static	int		  mdoc_ud_pre(MDOC_ARGS);
 static	int		  mdoc_va_pre(MDOC_ARGS);
 static	int		  mdoc_vt_pre(MDOC_ARGS);
 static	int		  mdoc_xr_pre(MDOC_ARGS);
@@ -155,7 +160,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_ft_pre, NULL}, /* Ft */ 
 	{mdoc_ic_pre, NULL}, /* Ic */ 
 	{mdoc_in_pre, NULL}, /* In */ 
-	{NULL, NULL}, /* Li */
+	{mdoc_li_pre, NULL}, /* Li */
 	{mdoc_nd_pre, NULL}, /* Nd */ 
 	{mdoc_nm_pre, NULL}, /* Nm */ 
 	{mdoc_op_pre, mdoc_op_post}, /* Op */
@@ -214,9 +219,9 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Sc */
 	{mdoc_sq_pre, mdoc_sq_post}, /* So */
 	{mdoc_sq_pre, mdoc_sq_post}, /* Sq */
-	{NULL, NULL}, /* Sm */
+	{NULL, NULL}, /* Sm */ /* FIXME - no idea. */
 	{mdoc_sx_pre, NULL}, /* Sx */
-	{NULL, NULL}, /* Sy */
+	{mdoc_sy_pre, NULL}, /* Sy */
 	{NULL, NULL}, /* Tn */
 	{mdoc_xx_pre, NULL}, /* Ux */
 	{NULL, NULL}, /* Xc */
@@ -227,11 +232,11 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Oc */
 	{NULL, NULL}, /* Bk */
 	{NULL, NULL}, /* Ek */
-	{NULL, NULL}, /* Bt */
+	{mdoc_bt_pre, NULL}, /* Bt */
 	{NULL, NULL}, /* Hf */
 	{NULL, NULL}, /* Fr */
-	{NULL, NULL}, /* Ud */
-	{NULL, NULL}, /* Lb */
+	{mdoc_ud_pre, NULL}, /* Ud */
+	{mdoc_lb_pre, NULL}, /* Lb */
 	{mdoc_sp_pre, NULL}, /* Lp */ 
 	{mdoc_lk_pre, NULL}, /* Lk */ 
 	{mdoc_mt_pre, NULL}, /* Mt */ 
@@ -2006,5 +2011,71 @@ mdoc_rs_pre(MDOC_ARGS)
 	/* FIXME: div's have spaces stripped--we want them. */
 
 	print_otag(h, TAG_DIV, i, tag);
+	return(1);
+}
+
+
+
+/* ARGSUSED */
+static int
+mdoc_li_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "lit";
+
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_sy_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "symb";
+
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_bt_pre(MDOC_ARGS)
+{
+
+	print_text(h, "is currently in beta test.");
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_ud_pre(MDOC_ARGS)
+{
+
+	print_text(h, "currently under development.");
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_lb_pre(MDOC_ARGS)
+{
+	struct htmlpair	tag;
+
+	tag.key = ATTR_CLASS;
+	tag.val = "lib";
+
+	if (SEC_SYNOPSIS == n->sec)
+		print_otag(h, TAG_DIV, 0, NULL);
+
+	print_otag(h, TAG_SPAN, 1, &tag);
 	return(1);
 }

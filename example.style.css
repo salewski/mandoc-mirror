@@ -1,4 +1,4 @@
-div.body	{ } /* Wraps entire body file. */
+div.body	{ font-family: monospace; min-width: 580px; width: 580px; } /* Top-most div tag. */
 
 span.sec-head	{ font-weight: bold; } /* Sections (Sh). */
 div.sec-head	{ }		
@@ -10,7 +10,7 @@ div.ssec-head	{ }
 div.ssec-body	{ }
 div.ssec-block	{ }
 
-span.addr	{ text-decoration: underline; } /* Address (Ad). */
+span.addr	{ } /* Address (Ad). */
 span.arg	{ font-style: italic; } /* Command argument (Ar). */
 span.author	{ } /* Author name (An). */
 span.cmd	{ font-weight: bold; } /* Command (Cm). */
@@ -21,13 +21,14 @@ span.diag	{ font-weight: bold; } /* Diagnostic (Bl -diag). */
 span.emph	{ font-style: italic; } /* Emphasis (Em). */
 span.env	{ } /* Environment variables (Ev). */
 span.errno	{ } /* Error string (Er). */
-span.farg	{ text-decoration: underline; } /* Function argument (Fa, Fn). */
-span.fname	{ text-decoration: underline; } /* Function name (Fa, Fn, Rv). */
+span.farg	{ font-style: italic; } /* Function argument (Fa, Fn). */
+span.fname	{ font-style: italic; } /* Function name (Fa, Fn, Rv). */
 span.file	{ font-style: italic; } /* File (Pa). */
 span.flag	{ font-weight: bold; } /* Flag (Fl, Cm). */
 span.includes	{ font-weight: bold; } /* Header includes (In). */
+span.lib	{ } /* Library (Lb). */
 span.lit	{ font-family: monospace; } /* Literals (Bf -literal). */
-span.macro	{ } /* Macro-ish thing (Fd). */
+span.macro	{ font-weight: bold; } /* Macro-ish thing (Fd). */
 span.name	{ font-weight: bold; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
 span.symb	{ font-weight: bold; } /* Symbols. */
@@ -41,7 +42,7 @@ a.link-sec	{ } /* Section links (Sx). */
 a.link-mail	{ } /* Mailto links (Mt). */
 a.link-ext	{ } /* Off-site link (Lk). */
 
-div.lit		{ font-family: monospace; } /* Literal (D1, Bd -literal, Dl, Bd -literal). */
+div.lit		{ } /* Literal (D1, Bd -literal, Dl, Bd -literal). */
 div.emph	{ font-style: italic; } /* Emphasis (Bl -emphasis). */
 div.symb	{ font-weight: bold; } /* Symbols (Bl -symbolic). */
 
