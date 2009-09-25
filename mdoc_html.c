@@ -525,19 +525,19 @@ mdoc_root_pre(MDOC_ARGS)
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
 	tag[0].key = ATTR_STYLE;
-	tag[0].val = "width: 33%;";
+	tag[0].val = "width: 10%;";
 	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, title);
 	print_stagq(h, tt);
 
 	tag[0].key = ATTR_STYLE;
-	tag[0].val = "width: 33%; text-align: center;";
+	tag[0].val = "width: 80%; white-space: nowrap; text-align: center;";
 	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, b);
 	print_stagq(h, tt);
 
 	tag[0].key = ATTR_STYLE;
-	tag[0].val = "width: 33%; text-align: right;";
+	tag[0].val = "width: 10%; text-align: right;";
 	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, title);
 	print_tagq(h, t);
