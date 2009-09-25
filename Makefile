@@ -56,11 +56,11 @@ GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml manuals.7.sgml \
 	     mandoc_char.7.sgml man.7.sgml man.3.sgml
 SGMLS	   = index.sgml $(GSGMLS)
 XSLS	   = ChangeLog.xsl
-HTMLS	   = index.html ChangeLog.html mandoc.1.html mdoc.3.html \
+HTMLS	   = index.html mandoc.1.html mdoc.3.html \
 	     man.3.html mdoc.7.html man.7.html mandoc_char.7.html \
 	     manuals.7.html
 TEXTS	   = mandoc.1.txt mdoc.3.txt man.3.txt mdoc.7.txt man.7.txt \
-	     mandoc_char.7.txt manuals.7.html
+	     mandoc_char.7.txt manuals.7.txt ChangeLog.txt
 EXAMPLES   = example.style.css
 XMLS	   = ChangeLog.xml
 STATICS	   = index.css style.css external.png
@@ -193,6 +193,9 @@ libmdoc.h: mdoc.h
 
 ChangeLog.xml:
 	cvs2cl --xml --xml-encoding iso-8859-15 -t --noxmlns -f $@
+
+ChangeLog.txt:
+	cvs2cl -t -f $@
 
 ChangeLog.html: ChangeLog.xml ChangeLog.xsl
 	xsltproc -o $@ ChangeLog.xsl ChangeLog.xml
