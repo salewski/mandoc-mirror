@@ -934,6 +934,7 @@ order_rs(int t)
 }
 
 
+/* ARGSUSED */
 static int
 post_rs(POST_ARGS)
 {
