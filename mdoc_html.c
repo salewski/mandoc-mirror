@@ -1603,26 +1603,27 @@ static int
 mdoc_fn_pre(MDOC_ARGS)
 {
 	struct tag		*t;
-	struct htmlpair	 	 tag;
+	struct htmlpair	 	 tag[2];
 	const struct mdoc_node	*nn;
 	char			 nbuf[BUFSIZ];
 	const char		*sp, *ep;
-	int			 sz;
+	int			 sz, i;
 
 	if (SEC_SYNOPSIS == n->sec) {
-		if (n->next) {
-			tag.key = ATTR_STYLE;
-			tag.val = "margin-bottom: 1em";
-			print_otag(h, TAG_DIV, 1, &tag);
-		} else
-			print_otag(h, TAG_DIV, 0, NULL);
+		bufcat("margin-left: 6em;");
+		bufcat("text-indent: -6em;");
+		if (n->next) 
+			bufcat("margin-bottom: 1em;");
+		tag[0].key = ATTR_STYLE;
+		tag[0].val = buf;
+		print_otag(h, TAG_DIV, 1, tag);
 	}
 
 	/* Split apart into type and name. */
 
-	tag.key = ATTR_CLASS;
-	tag.val = "ftype";
-	t = print_otag(h, TAG_SPAN, 1, &tag);
+	tag[0].key = ATTR_CLASS;
+	tag[0].val = "ftype";
+	t = print_otag(h, TAG_SPAN, 1, tag);
 
 	assert(n->child->string);
 	sp = n->child->string;
@@ -1636,9 +1637,9 @@ mdoc_fn_pre(MDOC_ARGS)
 
 	print_tagq(h, t);
 
-	tag.key = ATTR_CLASS;
-	tag.val = "fname";
-	t = print_otag(h, TAG_SPAN, 1, &tag);
+	tag[0].key = ATTR_CLASS;
+	tag[0].val = "fname";
+	t = print_otag(h, TAG_SPAN, 1, tag);
 
 	if (sp) {
 		(void)strlcpy(nbuf, sp, BUFSIZ);
@@ -1651,9 +1652,15 @@ mdoc_fn_pre(MDOC_ARGS)
 	print_text(h, "(");
 
 	for (nn = n->child->next; nn; nn = nn->next) {
-		tag.key = ATTR_CLASS;
-		tag.val = "farg";
-		t = print_otag(h, TAG_SPAN, 1, &tag);
+		i = 0;
+		tag[i].key = ATTR_CLASS;
+		tag[i++].val = "farg";
+		if (SEC_SYNOPSIS == n->sec) {
+			tag[i].key = ATTR_STYLE;
+			tag[i++].val = "white-space: nowrap;";
+		}
+			
+		t = print_otag(h, TAG_SPAN, i, tag);
 		print_text(h, nn->string);
 		print_tagq(h, t);
 		if (nn->next)
