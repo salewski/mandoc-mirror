@@ -873,7 +873,8 @@ mdoc_bx_pre(MDOC_ARGS)
 static int
 mdoc_tbl_block_pre(MDOC_ARGS, int t, int w, int o, int c)
 {
-	struct htmlpair	 tag;
+	struct htmlpair	 	 tag;
+	const struct mdoc_node	*nn;
 
 	switch (t) {
 	case (MDOC_Column):
@@ -889,10 +890,26 @@ mdoc_tbl_block_pre(MDOC_ARGS, int t, int w, int o, int c)
 	}
 
 	if ( ! c && MDOC_Column != t) {
-	       if (n->prev && n->prev->body->child)
-		       bufcat("padding-top: 1em;");
-	       else if (NULL == n->prev)
-		       bufcat("padding-top: 1em;");
+		for (nn = n; nn; nn = nn->parent) {
+			if (MDOC_BLOCK != nn->type)
+				continue;
+			switch (nn->tok) {
+			case (MDOC_Ss):
+				/* FALLTHROUGH */
+			case (MDOC_Sh):
+				c = 1;
+				break;
+			default:
+				break;
+			}
+			if (nn->prev)
+				break;
+		}
+		if (MDOC_Diag == t && n->prev)
+			if (NULL == n->prev->body->child)
+				c = 1;
+		if ( ! c)
+			bufcat("padding-top: 1em;");
 	}
 
 	tag.key = ATTR_STYLE;
@@ -988,8 +1005,6 @@ mdoc_tbl_pre(MDOC_ARGS, int type)
 	if (MDOC_BLOCK != n->type) 
 		bl = bl->parent;
 
-	/* FIXME: fmt_vspace() equivalent. */
-
 	assert(bl->args);
 
 	w = o = c = 0;
@@ -1064,6 +1079,8 @@ mdoc_bl_pre(MDOC_ARGS)
 		return(1);
 	if (MDOC_Enum != a2list(n))
 		return(1);
+
+	/* Allocate an -enum on the stack of indices. */
 
 	ord = malloc(sizeof(struct ord));
 	if (NULL == ord)
@@ -1310,9 +1327,7 @@ mdoc_bd_pre(MDOC_ARGS)
 {
 	struct htmlpair	 	 tag[2];
 	int		 	 t, c, o, i;
-	const struct mdoc_node	*bl;
-
-	/* FIXME: fmt_vspace() shit. */
+	const struct mdoc_node	*bl, *nn;
 
 	if (MDOC_BLOCK == n->type)
 		bl = n;
@@ -1346,20 +1361,33 @@ mdoc_bd_pre(MDOC_ARGS)
 	if (MDOC_BLOCK == n->type) {
 		if (o)
 			buffmt("margin-left: %dem;", o);
-		bufcat("margin-top: 1em;");
+		if ( ! c) {
+			for (nn = n; nn; nn = nn->parent) {
+				if (MDOC_BLOCK != nn->type)
+					continue;
+				switch (nn->tok) {
+				case (MDOC_Ss):
+					/* FALLTHROUGH */
+				case (MDOC_Sh):
+					c = 1;
+					break;
+				default:
+					break;
+				}
+				if (nn->prev)
+					break;
+			}
+			if ( ! c) 
+				bufcat("margin-top: 1em;");
+		}
 		tag[0].key = ATTR_STYLE;
 		tag[0].val = buf;
 		print_otag(h, TAG_DIV, 1, tag);
 		return(1);
 	}
 
-	switch (t) {
-	case (MDOC_Unfilled):
-	case (MDOC_Literal):
-		break;
-	default:
+	if (MDOC_Unfilled != t && MDOC_Literal != t)
 		return(1);
-	}
 
 	bufcat("white-space: pre;");
 	tag[0].key = ATTR_STYLE;
@@ -1369,10 +1397,11 @@ mdoc_bd_pre(MDOC_ARGS)
 
 	print_otag(h, TAG_DIV, 2, tag);
 
-	for (n = n->child; n; n = n->next) {
-		h->flags |= HTML_NOSPACE;
-		print_mdoc_node(m, n, h);
-		if (n->next)
+	for (nn = n->child; nn; nn = nn->next) {
+		print_mdoc_node(m, nn, h);
+		if (NULL == nn->next)
+			continue;
+		if (nn->prev && nn->prev->line < nn->line)
 			print_text(h, "\n");
 	}
 
