@@ -1327,7 +1327,7 @@ mdoc_bd_pre(MDOC_ARGS)
 		switch (bl->args->argv[i].arg) {
 		case (MDOC_Offset):
 			assert(bl->args->argv[i].sz);
-			o = a2offs (bl->args->argv[i].value[0]);
+			o = a2offs(bl->args->argv[i].value[0]);
 			break;
 		case (MDOC_Compact):
 			c = 1;

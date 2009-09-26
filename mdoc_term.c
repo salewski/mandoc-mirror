@@ -639,15 +639,10 @@ fmt_block_vspace(struct termp *p,
 	const struct mdoc_node *n;
 
 	term_newln(p);
-
-	if (MDOC_Bl == bl->tok && arg_hasattr(MDOC_Compact, bl))
+	if (arg_hasattr(MDOC_Compact, bl))
 		return;
-	assert(node);
 
-	/*
-	 * Search through our prior nodes.  If we follow a `Ss' or `Sh',
-	 * then don't vspace.
-	 */
+	/* Do not vspace directly after Ss/Sh. */
 
 	for (n = node; n; n = n->parent) {
 		if (MDOC_BLOCK != n->type)
@@ -661,19 +656,14 @@ fmt_block_vspace(struct termp *p,
 		break;
 	}
 
-	/* 
-	 * XXX - not documented: a `-column' does not ever assert vspace
-	 * within the list.
-	 */
+	/* A `-column' does not assert vspace within the list. */
 
 	if (MDOC_Bl == bl->tok && arg_hasattr(MDOC_Column, bl))
 		if (node->prev && MDOC_It == node->prev->tok)
 			return;
 
-	/*
-	 * XXX - not documented: a `-diag' without a body does not
-	 * assert a vspace prior to the next element. 
-	 */
+	/* A `-diag' without body does not vspace. */
+
 	if (MDOC_Bl == bl->tok && arg_hasattr(MDOC_Diag, bl)) 
 		if (node->prev && MDOC_It == node->prev->tok) {
 			assert(node->prev->body);
@@ -1100,13 +1090,12 @@ termp_an_pre(DECL_ARGS)
 		return(1);
 
 	/*
-	 * XXX: this is poorly documented.  If not in the AUTHORS
-	 * section, `An -split' will cause newlines to occur before the
-	 * author name.  If in the AUTHORS section, by default, the
-	 * first `An' invocation is nosplit, then all subsequent ones,
-	 * regardless of whether interspersed with other macros/text,
-	 * are split.  -split, in this case, will override the condition
-	 * of the implied first -nosplit.
+	 * If not in the AUTHORS section, `An -split' will cause
+	 * newlines to occur before the author name.  If in the AUTHORS
+	 * section, by default, the first `An' invocation is nosplit,
+	 * then all subsequent ones, regardless of whether interspersed
+	 * with other macros/text, are split.  -split, in this case,
+	 * will override the condition of the implied first -nosplit.
 	 */
 	
 	if (node->sec == SEC_AUTHORS) {
@@ -1352,10 +1341,9 @@ termp_fd_post(DECL_ARGS)
 static int
 termp_sh_pre(DECL_ARGS)
 {
-	/* 
-	 * XXX: undocumented: using two `Sh' macros in sequence has no
-	 * vspace between calls, only a newline.
-	 */
+
+	/* No vspace between consecutive `Sh' calls. */
+
 	switch (node->type) {
 	case (MDOC_BLOCK):
 		if (node->prev && MDOC_Sh == node->prev->tok)
@@ -1584,18 +1572,8 @@ termp_fa_pre(DECL_ARGS)
 static int
 termp_bd_pre(DECL_ARGS)
 {
-	int	         i, type;
-
-	/*
-	 * This is fairly tricky due primarily to crappy documentation.
-	 * If -ragged or -filled are specified, the block does nothing
-	 * but change the indentation.
-	 *
-	 * If, on the other hand, -unfilled or -literal are specified,
-	 * then the game changes.  Text is printed exactly as entered in
-	 * the display: if a macro line, a newline is appended to the
-	 * line.  Blank lines are allowed.
-	 */
+	int	         	 i, type;
+	const struct mdoc_node	*nn;
 
 	if (MDOC_BLOCK == node->type) {
 		fmt_block_vspace(p, node, node);
@@ -1603,11 +1581,10 @@ termp_bd_pre(DECL_ARGS)
 	} else if (MDOC_BODY != node->type)
 		return(1);
 
-	assert(node->parent->args);
+	nn = node->parent;
 
-	for (type = -1, i = 0; -1 == type && 
-			i < (int)node->parent->args->argc; i++) {
-		switch (node->parent->args->argv[i].arg) {
+	for (type = -1, i = 0; i < (int)nn->args->argc; i++) {
+		switch (nn->args->argv[i].arg) {
 		case (MDOC_Ragged):
 			/* FALLTHROUGH */
 		case (MDOC_Filled):
@@ -1615,32 +1592,33 @@ termp_bd_pre(DECL_ARGS)
 		case (MDOC_Unfilled):
 			/* FALLTHROUGH */
 		case (MDOC_Literal):
-			type = node->parent->args->argv[i].arg;
+			type = nn->args->argv[i].arg;
+			break;
+		case (MDOC_Offset):
+			p->offset += arg_offset(&nn->args->argv[i]);
 			break;
 		default:
 			break;
 		}
 	}
+
+	/*
+	 * If -ragged or -filled are specified, the block does nothing
+	 * but change the indentation.  If -unfilled or -literal are
+	 * specified, text is printed exactly as entered in the display:
+	 * for macro lines, a newline is appended to the line.  Blank
+	 * lines are allowed.
+	 */
 	
 	assert(type > -1);
-
-	i = arg_getattr(MDOC_Offset, node->parent);
-	if (-1 != i)
-		p->offset += arg_offset(&node->parent->args->argv[i]);
-
-	switch (type) {
-	case (MDOC_Literal):
-		/* FALLTHROUGH */
-	case (MDOC_Unfilled):
-		break;
-	default:
+	if (MDOC_Literal != type && MDOC_Unfilled != type)
 		return(1);
-	}
 
-	for (node = node->child; node; node = node->next) {
-		p->flags |= TERMP_NOSPACE;
-		print_node(p, pair, meta, node);
-		if (node->next)
+	for (nn = node->child; nn; nn = nn->next) {
+		print_node(p, pair, meta, nn);
+		if (NULL == nn->next)
+			continue;
+		if (nn->prev && nn->prev->line < nn->line)
 			term_flushln(p);
 	}
 
