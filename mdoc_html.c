@@ -35,9 +35,6 @@
 #define	MDOC_ARGS	  const struct mdoc_meta *m, \
 			  const struct mdoc_node *n, \
 			  struct html *h
-#define	MAN_ARGS	  const struct man_meta *m, \
-			  const struct man_node *n, \
-			  struct html *h
 
 struct	htmlmdoc {
 	int		(*pre)(MDOC_ARGS);
@@ -385,21 +382,19 @@ print_mdoc(MDOC_ARGS)
 static void
 print_mdoc_head(MDOC_ARGS)
 {
-	char		b[BUFSIZ];
 
 	print_gen_head(h);
-
-	(void)snprintf(b, BUFSIZ - 1, 
-			"%s(%d)", m->title, m->msec);
+	bufinit(h);
+	buffmt(h, "%s(%d)", m->title, m->msec);
 
 	if (m->arch) {
-		(void)strlcat(b, " (", BUFSIZ);
-		(void)strlcat(b, m->arch, BUFSIZ);
-		(void)strlcat(b, ")", BUFSIZ);
+		bufcat(h, " (");
+		bufcat(h, m->arch);
+		bufcat(h, ")");
 	}
 
 	print_otag(h, TAG_TITLE, 0, NULL);
-	print_text(h, b);
+	print_text(h, h->buf);
 }
 
 

@@ -91,7 +91,7 @@ static	void		  post_SS(DECL_ARGS);
 static	void		  post_TP(DECL_ARGS);
 static	void		  post_i(DECL_ARGS);
 
-static const struct termact termacts[MAN_MAX] = {
+static	const struct termact termacts[MAN_MAX] = {
 	{ pre_br, NULL }, /* br */
 	{ NULL, NULL }, /* TH */
 	{ pre_SH, post_SH }, /* SH */
@@ -160,6 +160,7 @@ man_run(struct termp *p, const struct man *m)
 
 
 static void
+
 fmt_block_vspace(struct termp *p, const struct man_node *n)
 {
 	term_newln(p);
