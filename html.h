@@ -56,6 +56,7 @@ enum	htmlattr {
 	ATTR_STYLE,
 	ATTR_WIDTH,
 	ATTR_VALIGN,
+	ATTR_TARGET,
 	ATTR_MAX
 };
 
@@ -88,6 +89,7 @@ struct	html {
 	void		 *symtab;
 	char		 *base;
 	char		 *base_man;
+	char		 *base_includes;
 	char		 *style;
 	char		  buf[BUFSIZ];
 	size_t		  buflen;

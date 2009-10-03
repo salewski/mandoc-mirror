@@ -56,6 +56,7 @@ static	int		  a2list(const struct mdoc_node *);
 
 static	void		  buffmt_man(struct html *, 
 				const char *, const char *);
+static	void		  buffmt_includes(struct html *, const char *);
 static	void		  buffmt(struct html *, const char *, ...);
 static	void		  bufcat(struct html *, const char *);
 static	void		  bufncat(struct html *, const char *, size_t);
@@ -326,15 +327,35 @@ bufncat(struct html *h, const char *p, size_t sz)
 
 
 static void
+buffmt_includes(struct html *h, const char *name)
+{
+	const char	*p, *pp;
+
+	pp = h->base_includes;
+	while ((p = strchr(pp, '%'))) {
+		bufncat(h, pp, p - pp);
+		switch (*(p + 1)) {
+		case('I'):
+			bufcat(h, name);
+			break;
+		default:
+			bufncat(h, p, 2);
+			break;
+		}
+		pp = p + 2;
+	}
+	if (pp)
+		bufcat(h, pp);
+}
+
+
+static void
 buffmt_man(struct html *h, 
 		const char *name, const char *sec)
 {
 	const char	*p, *pp;
 
 	pp = h->base_man;
-
-	/* FIXME: URL-encode contents. */
-
 	while ((p = strchr(pp, '%'))) {
 		bufncat(h, pp, p - pp);
 		switch (*(p + 1)) {
@@ -829,16 +850,20 @@ mdoc_xr_pre(MDOC_ARGS)
 {
 	struct htmlpair	 	 tag[2];
 	const struct mdoc_node	*nn;
+	int			 i;
 
-	buffmt_man(h, n->child->string, 
-			n->child->next ? 
-			n->child->next->string : NULL);
+	i = 0;
+	tag[i].key = ATTR_CLASS;
+	tag[i++].val = "link-man";
 
-	tag[0].key = ATTR_CLASS;
-	tag[0].val = "link-man";
-	tag[1].key = ATTR_HREF;
-	tag[1].val = h->buf;
-	print_otag(h, TAG_A, 2, tag);
+	if (h->base_man) {
+		buffmt_man(h, n->child->string, n->child->next ? 
+				n->child->next->string : NULL);
+		tag[i].key = ATTR_HREF;
+		tag[i++].val = h->buf;
+	}
+
+	print_otag(h, TAG_A, i, tag);
 
 	nn = n->child;
 	print_text(h, nn->string);
@@ -1350,7 +1375,7 @@ mdoc_d1_pre(MDOC_ARGS)
 static int
 mdoc_sx_pre(MDOC_ARGS)
 {
-	struct htmlpair		 tag[2];
+	struct htmlpair		 tag[3];
 	const struct mdoc_node	*nn;
 
 	bufcat(h, "#");
@@ -1364,8 +1389,10 @@ mdoc_sx_pre(MDOC_ARGS)
 	tag[0].val = h->buf;
 	tag[1].key = ATTR_CLASS;
 	tag[1].val = "link-sec";
+	tag[2].key = ATTR_TARGET;
+	tag[2].val = "_self";
 
-	print_otag(h, TAG_A, 2, tag);
+	print_otag(h, TAG_A, 3, tag);
 	return(1);
 }
 
@@ -1896,21 +1923,23 @@ static int
 mdoc_in_pre(MDOC_ARGS)
 {
 	const struct mdoc_node	*nn;
-	struct htmlpair		 tag;
+	struct htmlpair		 tag[2];
+	struct tag		*t;
+	int			 i;
 
 	if (SEC_SYNOPSIS == n->sec) {
 		if (n->next && MDOC_In != n->next->tok) {
-			tag.key = ATTR_STYLE;
-			tag.val = "margin-bottom: 1em;";
-			print_otag(h, TAG_DIV, 1, &tag);
+			tag[0].key = ATTR_STYLE;
+			tag[0].val = "margin-bottom: 1em;";
+			print_otag(h, TAG_DIV, 1, tag);
 		} else
 			print_otag(h, TAG_DIV, 0, NULL);
 	}
 
-	tag.key = ATTR_CLASS;
-	tag.val = "includes";
+	tag[0].key = ATTR_CLASS;
+	tag[0].val = "includes";
 
-	print_otag(h, TAG_SPAN, 1, &tag);
+	print_otag(h, TAG_SPAN, 1, tag);
 
 	if (SEC_SYNOPSIS == n->sec)
 		print_text(h, "#include");
@@ -1920,8 +1949,20 @@ mdoc_in_pre(MDOC_ARGS)
 
 	/* XXX -- see warning in termp_in_post(). */
 
-	for (nn = n->child; nn; nn = nn->next)
+	for (nn = n->child; nn; nn = nn->next) {
+		assert(MDOC_TEXT == nn->type);
+		i = 0;
+		tag[i].key = ATTR_CLASS;
+		tag[i++].val = "link-includes";
+		if (h->base_includes) {
+			buffmt_includes(h, nn->string);
+			tag[i].key = ATTR_HREF;
+			tag[i++].val = h->buf;
+		}
+		t = print_otag(h, TAG_A, i, tag);
 		print_mdoc_node(m, nn, h);
+		print_tagq(h, t);
+	}
 
 	h->flags |= HTML_NOSPACE;
 	print_text(h, ">");

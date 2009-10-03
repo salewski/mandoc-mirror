@@ -260,6 +260,17 @@ The file
 .Ar style.css
 is used for an external style-sheet.  This must be a valid absolute or
 relative URI.
+.It Fl o Ns Ar includes=fmt
+The string
+.Ar fmt ,
+for example, 
+.Ar ../src/%I.html ,
+is used as a template for linked header files (usually via the
+.Sq \&In
+macro).  Instances of
+.Sq %I
+are replaced with the include filename.  The default is not to present a
+hyperlink.
 .It Fl o Ns Ar man=fmt
 The string
 .Ar fmt ,
@@ -267,8 +278,13 @@ for example,
 .Ar ../html%S/%N.%S.html ,
 is used as a template for linked manuals (usually via the
 .Sq \&Xr
-macro).  The default is
-.Ar %N.%S.html .
+macro).  Instances of
+.Sq %N
+and
+.Sq %S
+are replaced with the linked manual's name and section, respectively.
+If no section is included, section 1 is assumed.  The default is not to
+present a hyperlink.
 .El
 .
 .Sh EXAMPLES
