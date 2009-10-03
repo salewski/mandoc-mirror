@@ -1438,6 +1438,8 @@ mdoc_an_pre(MDOC_ARGS)
 {
 	struct htmlpair	tag;
 
+	/* TODO: -split and -nosplit (see termp_an_pre()). */
+
 	tag.key = ATTR_CLASS;
 	tag.val = "author";
 	print_otag(h, TAG_SPAN, 1, &tag);
@@ -1616,22 +1618,25 @@ mdoc_fn_pre(MDOC_ARGS)
 	}
 
 	/* Split apart into type and name. */
-
-	tag[0].key = ATTR_CLASS;
-	tag[0].val = "ftype";
-	t = print_otag(h, TAG_SPAN, 1, tag);
-
 	assert(n->child->string);
 	sp = n->child->string;
-	while (NULL != (ep = strchr(sp, ' '))) {
-		sz = MIN((int)(ep - sp), BUFSIZ - 1);
-		(void)memcpy(nbuf, sp, (size_t)sz);
-		nbuf[sz] = '\0';
-		print_text(h, nbuf);
-		sp = ++ep;
-	}
 
-	print_tagq(h, t);
+	if ((ep = strchr(sp, ' '))) {
+		tag[0].key = ATTR_CLASS;
+		tag[0].val = "ftype";
+	
+		t = print_otag(h, TAG_SPAN, 1, tag);
+	
+		while (ep) {
+			sz = MIN((int)(ep - sp), BUFSIZ - 1);
+			(void)memcpy(nbuf, sp, (size_t)sz);
+			nbuf[sz] = '\0';
+			print_text(h, nbuf);
+			sp = ++ep;
+			ep = strchr(sp, ' ');
+		}
+		print_tagq(h, t);
+	}
 
 	tag[0].key = ATTR_CLASS;
 	tag[0].val = "fname";
