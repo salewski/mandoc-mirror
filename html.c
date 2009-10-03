@@ -511,11 +511,10 @@ buffmt(struct html *h, const char *fmt, ...)
 	va_list		 ap;
 
 	va_start(ap, fmt);
-	(void)vsnprintf(h->buf + h->buflen, 
+	(void)vsnprintf(h->buf + (int)h->buflen, 
 			BUFSIZ - h->buflen - 1, fmt, ap);
 	va_end(ap);
 	h->buflen = strlen(h->buf);
-	assert('\0' == h->buf[h->buflen]);
 }
 
 
@@ -528,7 +527,6 @@ bufncat(struct html *h, const char *p, size_t sz)
 
 	(void)strncat(h->buf, p, sz);
 	h->buflen += sz;
-	assert('\0' == h->buf[h->buflen]);
 }
 
 
@@ -539,7 +537,7 @@ buffmt_includes(struct html *h, const char *name)
 
 	pp = h->base_includes;
 	while ((p = strchr(pp, '%'))) {
-		bufncat(h, pp, p - pp);
+		bufncat(h, pp, (size_t)(p - pp));
 		switch (*(p + 1)) {
 		case('I'):
 			bufcat(h, name);
@@ -563,7 +561,7 @@ buffmt_man(struct html *h,
 
 	pp = h->base_man;
 	while ((p = strchr(pp, '%'))) {
-		bufncat(h, pp, p - pp);
+		bufncat(h, pp, (size_t)(p - pp));
 		switch (*(p + 1)) {
 		case('S'):
 			bufcat(h, sec);
