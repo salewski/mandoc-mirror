@@ -87,7 +87,10 @@ struct	html {
 	struct ordq	  ords;
 	void		 *symtab;
 	char		 *base;
+	char		 *base_man;
 	char		 *style;
+	char		  buf[BUFSIZ];
+	size_t		  buflen;
 };
 
 void		  print_gen_doctype(struct html *);

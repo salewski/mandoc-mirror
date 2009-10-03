@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <err.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -52,6 +53,13 @@ static	void		  print_mdoc_nodelist(MDOC_ARGS);
 static	int		  a2width(const char *);
 static	int		  a2offs(const char *);
 static	int		  a2list(const struct mdoc_node *);
+
+static	void		  buffmt_man(struct html *, 
+				const char *, const char *);
+static	void		  buffmt(struct html *, const char *, ...);
+static	void		  bufcat(struct html *, const char *);
+static	void		  bufncat(struct html *, const char *, size_t);
+
 
 static	void		  mdoc_root_post(MDOC_ARGS);
 static	int		  mdoc_root_pre(MDOC_ARGS);
@@ -255,11 +263,6 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_sp_pre, NULL}, /* sp */ 
 };
 
-static	char		  buf[BUFSIZ]; /* XXX */
-
-#define	bufcat(x)	  (void)strlcat(buf, (x), BUFSIZ) 
-#define	bufinit()	  buf[0] = 0
-#define	buffmt(...)	  (void)snprintf(buf, BUFSIZ - 1, __VA_ARGS__)
 
 void
 html_mdoc(void *arg, const struct mdoc *m)
@@ -275,6 +278,80 @@ html_mdoc(void *arg, const struct mdoc *m)
 	print_tagq(h, t);
 
 	printf("\n");
+}
+
+
+static void
+bufinit(struct html *h)
+{
+
+	h->buf[0] = '\0';
+	h->buflen = 0;
+}
+
+
+static void
+bufcat(struct html *h, const char *p)
+{
+
+	bufncat(h, p, strlen(p));
+}
+
+
+static void
+buffmt(struct html *h, const char *fmt, ...)
+{
+	va_list		 ap;
+
+	va_start(ap, fmt);
+	(void)vsnprintf(h->buf + h->buflen, 
+			BUFSIZ - h->buflen - 1, fmt, ap);
+	va_end(ap);
+	h->buflen = strlen(h->buf);
+	assert('\0' == h->buf[h->buflen]);
+}
+
+
+static void
+bufncat(struct html *h, const char *p, size_t sz)
+{
+
+	if (h->buflen + sz > BUFSIZ - 1)
+		sz = BUFSIZ - 1 - h->buflen;
+
+	(void)strncat(h->buf, p, sz);
+	h->buflen += sz;
+	assert('\0' == h->buf[h->buflen]);
+}
+
+
+static void
+buffmt_man(struct html *h, 
+		const char *name, const char *sec)
+{
+	const char	*p, *pp;
+
+	pp = h->base_man;
+
+	/* FIXME: URL-encode contents. */
+
+	while ((p = strchr(pp, '%'))) {
+		bufncat(h, pp, p - pp);
+		switch (*(p + 1)) {
+		case('S'):
+			bufcat(h, sec);
+			break;
+		case('N'):
+			buffmt(h, name ? name : "1");
+			break;
+		default:
+			bufncat(h, p, 2);
+			break;
+		}
+		pp = p + 2;
+	}
+	if (pp)
+		bufcat(h, pp);
 }
 
 
@@ -427,7 +504,7 @@ print_mdoc_node(MDOC_ARGS)
 	child = 1;
 	t = SLIST_FIRST(&h->tags);
 
-	bufinit();
+	bufinit(h);
 
 	switch (n->type) {
 	case (MDOC_ROOT):
@@ -447,7 +524,7 @@ print_mdoc_node(MDOC_ARGS)
 
 	print_stagq(h, t);
 
-	bufinit();
+	bufinit(h);
 
 	switch (n->type) {
 	case (MDOC_ROOT):
@@ -560,12 +637,12 @@ mdoc_sh_pre(MDOC_ARGS)
 		print_otag(h, TAG_SPAN, 1, tag);
 
 		for (nn = n->child; nn; nn = nn->next) {
-			bufcat(nn->string);
+			bufcat(h, nn->string);
 			if (nn->next)
-				bufcat(" ");
+				bufncat(h, " ", 1);
 		}
 		tag[0].key = ATTR_NAME;
-		tag[0].val = buf;
+		tag[0].val = h->buf;
 		print_otag(h, TAG_A, 1, tag);
 		return(1);
 	} else if (MDOC_BLOCK == n->type) {
@@ -577,23 +654,23 @@ mdoc_sh_pre(MDOC_ARGS)
 			return(1);
 		}
 
-		bufcat("margin-top: 1em;");
+		bufcat(h, "margin-top: 1em;");
 		if (NULL == n->next)
-			bufcat("margin-bottom: 1em;");
+			bufcat(h, "margin-bottom: 1em;");
 
 		tag[1].key = ATTR_STYLE;
-		tag[1].val = buf;
+		tag[1].val = h->buf;
 
 		print_otag(h, TAG_DIV, 2, tag);
 		return(1);
 	}
 
-	buffmt("margin-left: %dem;", INDENT);
+	buffmt(h, "margin-left: %dem;", INDENT);
 	
 	tag[0].key = ATTR_CLASS;
 	tag[0].val = "sec-body";
 	tag[1].key = ATTR_STYLE;
-	tag[1].val = buf;
+	tag[1].val = h->buf;
 
 	print_otag(h, TAG_DIV, 2, tag);
 	return(1);
@@ -614,9 +691,9 @@ mdoc_ss_pre(MDOC_ARGS)
 		tag[i].key = ATTR_CLASS;
 		tag[i++].val = "ssec-body";
 		if (n->parent->next && n->child) {
-			bufcat("margin-bottom: 1em;");
+			bufcat(h, "margin-bottom: 1em;");
 			tag[i].key = ATTR_STYLE;
-			tag[i++].val = buf;
+			tag[i++].val = h->buf;
 		}
 		print_otag(h, TAG_DIV, i, tag);
 		return(1);
@@ -624,32 +701,32 @@ mdoc_ss_pre(MDOC_ARGS)
 		tag[i].key = ATTR_CLASS;
 		tag[i++].val = "ssec-block";
 		if (n->prev) {
-			bufcat("margin-top: 1em;");
+			bufcat(h, "margin-top: 1em;");
 			tag[i].key = ATTR_STYLE;
-			tag[i++].val = buf;
+			tag[i++].val = h->buf;
 		}
 		print_otag(h, TAG_DIV, i, tag);
 		return(1);
 	}
 
-	buffmt("margin-left: -%dem;", INDENT - HALFINDENT);
+	buffmt(h, "margin-left: -%dem;", INDENT - HALFINDENT);
 
 	tag[0].key = ATTR_CLASS;
 	tag[0].val = "ssec-head";
 	tag[1].key = ATTR_STYLE;
-	tag[1].val = buf;
+	tag[1].val = h->buf;
 
 	print_otag(h, TAG_DIV, 2, tag);
 	print_otag(h, TAG_SPAN, 1, tag);
 
-	bufinit();
+	bufinit(h);
 	for (nn = n->child; nn; nn = nn->next) {
-		bufcat(nn->string);
+		bufcat(h, nn->string);
 		if (nn->next)
-			bufcat(" ");
+			bufcat(h, " ");
 	}
 	tag[0].key = ATTR_NAME;
-	tag[0].val = buf;
+	tag[0].val = h->buf;
 	print_otag(h, TAG_A, 1, tag);
 
 	return(1);
@@ -751,24 +828,21 @@ static int
 mdoc_xr_pre(MDOC_ARGS)
 {
 	struct htmlpair	 	 tag[2];
-	const char		*name, *sec;
 	const struct mdoc_node	*nn;
 
-	nn = n->child;
-	name = nn && nn->string ? nn->string : "";
-	nn = nn ? nn->next : NULL;
-	sec = nn && nn->string ? nn->string : "";
-
-	buffmt("%s%s%s.html", name, name && sec ? "." : "", sec);
+	buffmt_man(h, n->child->string, 
+			n->child->next ? 
+			n->child->next->string : NULL);
 
 	tag[0].key = ATTR_CLASS;
 	tag[0].val = "link-man";
 	tag[1].key = ATTR_HREF;
-	tag[1].val = buf;
+	tag[1].val = h->buf;
 	print_otag(h, TAG_A, 2, tag);
 
 	nn = n->child;
 	print_text(h, nn->string);
+
 	if (NULL == (nn = nn->next))
 		return(0);
 
@@ -882,10 +956,10 @@ mdoc_tbl_block_pre(MDOC_ARGS, int t, int w, int o, int c)
 	case (MDOC_Item):
 		/* FALLTHROUGH */
 	case (MDOC_Ohang):
-		buffmt("margin-left: %dem; clear: both;", o);
+		buffmt(h, "margin-left: %dem; clear: both;", o);
 		break;
 	default:
-		buffmt("margin-left: %dem; clear: both;", w + o);
+		buffmt(h, "margin-left: %dem; clear: both;", w + o);
 		break;
 	}
 
@@ -909,11 +983,11 @@ mdoc_tbl_block_pre(MDOC_ARGS, int t, int w, int o, int c)
 			if (NULL == n->prev->body->child)
 				c = 1;
 		if ( ! c)
-			bufcat("padding-top: 1em;");
+			bufcat(h, "padding-top: 1em;");
 	}
 
 	tag.key = ATTR_STYLE;
-	tag.val = buf;
+	tag.val = h->buf;
 	print_otag(h, TAG_DIV, 1, &tag);
 	return(1);
 }
@@ -944,23 +1018,23 @@ mdoc_tbl_head_pre(MDOC_ARGS, int t, int w)
 		print_otag(h, TAG_DIV, 0, NULL);
 		break;
 	case (MDOC_Column):
-		buffmt("min-width: %dem;", w);
-		bufcat("clear: none;");
+		buffmt(h, "min-width: %dem;", w);
+		bufcat(h, "clear: none;");
 		if (n->next && MDOC_HEAD == n->next->type)
-			bufcat("float: left;");
+			bufcat(h, "float: left;");
 		tag.key = ATTR_STYLE;
-		tag.val = buf;
+		tag.val = h->buf;
 		print_otag(h, TAG_DIV, 1, &tag);
 		break;
 	default:
-		buffmt("margin-left: -%dem; min-width: %dem;", 
+		buffmt(h, "margin-left: -%dem; min-width: %dem;", 
 				w, w ? w - 1 : 0);
-		bufcat("clear: left;");
+		bufcat(h, "clear: left;");
 		if (n->next && n->next->child)
-			bufcat("float: left;");
-		bufcat("padding-right: 1em;");
+			bufcat(h, "float: left;");
+		bufcat(h, "padding-right: 1em;");
 		tag.key = ATTR_STYLE;
-		tag.val = buf;
+		tag.val = h->buf;
 		print_otag(h, TAG_DIV, 1, &tag);
 		break;
 	}
@@ -1260,12 +1334,12 @@ mdoc_d1_pre(MDOC_ARGS)
 	if (MDOC_BLOCK != n->type)
 		return(1);
 
-	buffmt("margin-left: %dem;", INDENT);
+	buffmt(h, "margin-left: %dem;", INDENT);
 
 	tag[0].key = ATTR_CLASS;
 	tag[0].val = "lit";
 	tag[1].key = ATTR_STYLE;
-	tag[1].val = buf;
+	tag[1].val = h->buf;
 
 	print_otag(h, TAG_DIV, 2, tag);
 	return(1);
@@ -1279,15 +1353,15 @@ mdoc_sx_pre(MDOC_ARGS)
 	struct htmlpair		 tag[2];
 	const struct mdoc_node	*nn;
 
-	bufcat("#");
+	bufcat(h, "#");
 	for (nn = n->child; nn; nn = nn->next) {
-		bufcat(nn->string);
+		bufcat(h, nn->string);
 		if (nn->next)
-			bufcat(" ");
+			bufcat(h, " ");
 	}
 
 	tag[0].key = ATTR_HREF;
-	tag[0].val = buf;
+	tag[0].val = h->buf;
 	tag[1].key = ATTR_CLASS;
 	tag[1].val = "link-sec";
 
@@ -1360,7 +1434,7 @@ mdoc_bd_pre(MDOC_ARGS)
 
 	if (MDOC_BLOCK == n->type) {
 		if (o)
-			buffmt("margin-left: %dem;", o);
+			buffmt(h, "margin-left: %dem;", o);
 		if ( ! c) {
 			for (nn = n; nn; nn = nn->parent) {
 				if (MDOC_BLOCK != nn->type)
@@ -1378,10 +1452,10 @@ mdoc_bd_pre(MDOC_ARGS)
 					break;
 			}
 			if ( ! c) 
-				bufcat("margin-top: 1em;");
+				bufcat(h, "margin-top: 1em;");
 		}
 		tag[0].key = ATTR_STYLE;
-		tag[0].val = buf;
+		tag[0].val = h->buf;
 		print_otag(h, TAG_DIV, 1, tag);
 		return(1);
 	}
@@ -1389,9 +1463,9 @@ mdoc_bd_pre(MDOC_ARGS)
 	if (MDOC_Unfilled != t && MDOC_Literal != t)
 		return(1);
 
-	bufcat("white-space: pre;");
+	bufcat(h, "white-space: pre;");
 	tag[0].key = ATTR_STYLE;
-	tag[0].val = buf;
+	tag[0].val = h->buf;
 	tag[1].key = ATTR_CLASS;
 	tag[1].val = "lit";
 
@@ -1610,12 +1684,12 @@ mdoc_fn_pre(MDOC_ARGS)
 	int			 sz, i;
 
 	if (SEC_SYNOPSIS == n->sec) {
-		bufcat("margin-left: 6em;");
-		bufcat("text-indent: -6em;");
+		bufcat(h, "margin-left: 6em;");
+		bufcat(h, "text-indent: -6em;");
 		if (n->next) 
-			bufcat("margin-bottom: 1em;");
+			bufcat(h, "margin-bottom: 1em;");
 		tag[0].key = ATTR_STYLE;
-		tag[0].val = buf;
+		tag[0].val = h->buf;
 		print_otag(h, TAG_DIV, 1, tag);
 	}
 
@@ -1695,9 +1769,9 @@ mdoc_sp_pre(MDOC_ARGS)
 		break;
 	}
 
-	buffmt("height: %dem", len);
+	buffmt(h, "height: %dem", len);
 	tag.key = ATTR_STYLE;
-	tag.val = buf;
+	tag.val = h->buf;
 	print_otag(h, TAG_DIV, 1, &tag);
 	return(1);
 
@@ -1767,12 +1841,12 @@ mdoc_mt_pre(MDOC_ARGS)
 	tag[0].val = "link-mail";
 
 	for (nn = n->child; nn; nn = nn->next) {
-		bufinit();
-		bufcat("mailto:");
-		bufcat(nn->string);
+		bufinit(h);
+		bufcat(h, "mailto:");
+		bufcat(h, nn->string);
 
 		tag[1].key = ATTR_HREF;
-		tag[1].val = buf;
+		tag[1].val = h->buf;
 
 		t = print_otag(h, TAG_A, 2, tag);
 		print_text(h, nn->string);

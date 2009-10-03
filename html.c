@@ -83,10 +83,10 @@ void *
 html_alloc(char *outopts)
 {
 	struct html	*h;
-	char		*toks[3], *v;
+	char		*toks[4], *v;
 
 	toks[0] = "style";
-	toks[1] = "base";
+	toks[1] = "man";
 	toks[2] = NULL;
 
 	if (NULL == (h = calloc(1, sizeof(struct html))))
@@ -100,13 +100,15 @@ html_alloc(char *outopts)
 		return(NULL);
 	}
 
+	h->base_man = "%N.%S.html";
+
 	while (outopts && *outopts)
 		switch (getsubopt(&outopts, toks, &v)) {
 		case (0):
 			h->style = v;
 			break;
 		case (1):
-			h->base = v;
+			h->base_man = v;
 			break;
 		default:
 			break;
@@ -137,8 +139,11 @@ html_free(void *p)
 		free(tag);
 	}
 	
+	if (h->buf)
+		free(h->buf);
 	if (h->symtab)
 		chars_free(h->symtab);
+
 	free(h);
 }
 
@@ -170,12 +175,6 @@ print_gen_head(struct html *h)
 		tag[3].key = ATTR_MEDIA;
 		tag[3].val = "all";
 		print_otag(h, TAG_LINK, 4, tag);
-	}
-
-	if (h->base) {
-		tag[0].key = ATTR_HREF;
-		tag[1].val = h->base;
-		print_otag(h, TAG_BASE, 1, tag);
 	}
 }
 

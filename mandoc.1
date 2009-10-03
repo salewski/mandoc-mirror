@@ -260,13 +260,15 @@ The file
 .Ar style.css
 is used for an external style-sheet.  This must be a valid absolute or
 relative URI.
-.It Fl o Ns Ar base=http://base/
-The URL
-.Ar http://base/
-is used as a base URL for all relative links.  This is useful when
-linking between documents via the
+.It Fl o Ns Ar man=fmt
+The string
+.Ar fmt ,
+for example, 
+.Ar ../html%S/%N.%S.html ,
+is used as a template for linked manuals (usually via the
 .Sq \&Xr
-macro.
+macro).  The default is
+.Ar %N.%S.html .
 .El
 .
 .Sh EXAMPLES
@@ -361,9 +363,18 @@ Sentences are unilaterally monospaced.
 .Xr mandoc_char 7 ,
 .Xr mdoc 7 ,
 .Xr man 7
-.\" SECTION
+.
 .Sh AUTHORS
 The
 .Nm
 utility was written by
 .An Kristaps Dzonsons Aq kristaps@kth.se .
+.
+.Sh CAVEATS
+In
+.Fl T Ns Ar html ,
+the maximum size of an element attribute is determined by
+.Dv BUFSIZ ,
+which is usually 1024 bytes.  Be aware of this when setting long link
+formats with
+.Fl o Ns Ar man=fmt .
