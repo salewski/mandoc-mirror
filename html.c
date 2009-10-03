@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <err.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -142,8 +143,6 @@ html_free(void *p)
 		free(tag);
 	}
 	
-	if (h->buf)
-		free(h->buf);
 	if (h->symtab)
 		chars_free(h->symtab);
 
@@ -486,4 +485,98 @@ print_stagq(struct html *h, const struct tag *suntil)
 		SLIST_REMOVE_HEAD(&h->tags, entry);
 		free(tag);
 	}
+}
+
+
+void
+bufinit(struct html *h)
+{
+
+	h->buf[0] = '\0';
+	h->buflen = 0;
+}
+
+
+void
+bufcat(struct html *h, const char *p)
+{
+
+	bufncat(h, p, strlen(p));
+}
+
+
+void
+buffmt(struct html *h, const char *fmt, ...)
+{
+	va_list		 ap;
+
+	va_start(ap, fmt);
+	(void)vsnprintf(h->buf + h->buflen, 
+			BUFSIZ - h->buflen - 1, fmt, ap);
+	va_end(ap);
+	h->buflen = strlen(h->buf);
+	assert('\0' == h->buf[h->buflen]);
+}
+
+
+void
+bufncat(struct html *h, const char *p, size_t sz)
+{
+
+	if (h->buflen + sz > BUFSIZ - 1)
+		sz = BUFSIZ - 1 - h->buflen;
+
+	(void)strncat(h->buf, p, sz);
+	h->buflen += sz;
+	assert('\0' == h->buf[h->buflen]);
+}
+
+
+void
+buffmt_includes(struct html *h, const char *name)
+{
+	const char	*p, *pp;
+
+	pp = h->base_includes;
+	while ((p = strchr(pp, '%'))) {
+		bufncat(h, pp, p - pp);
+		switch (*(p + 1)) {
+		case('I'):
+			bufcat(h, name);
+			break;
+		default:
+			bufncat(h, p, 2);
+			break;
+		}
+		pp = p + 2;
+	}
+	if (pp)
+		bufcat(h, pp);
+}
+
+
+void
+buffmt_man(struct html *h, 
+		const char *name, const char *sec)
+{
+	const char	*p, *pp;
+
+	pp = h->base_man;
+	while ((p = strchr(pp, '%'))) {
+		bufncat(h, pp, p - pp);
+		switch (*(p + 1)) {
+		case('S'):
+			bufcat(h, sec);
+			break;
+		case('N'):
+			buffmt(h, name ? name : "1");
+			break;
+		default:
+			bufncat(h, p, 2);
+			break;
+		}
+		pp = p + 2;
+	}
+	if (pp)
+		bufcat(h, pp);
 }

@@ -54,7 +54,7 @@ Input format.  See
 for available formats.  Defaults to
 .Fl m Ns Ar andoc .
 .
-.It Fl o Ns Ar format
+.It Fl o Ns Ar option...
 Comma-separated output options.  See
 .Sx Output Options
 for details.
@@ -295,11 +295,11 @@ To page manuals to the terminal:
 .D1 % mandoc mandoc.1 mdoc.3 mdoc.7 | less
 .
 .Pp
-To produce HTML manuals with 
-.Pa http://localhost/
-as the base URI:
+To produce HTML manuals with
+.Ar style.css
+as the style-sheet:
 .Pp
-.D1 % mandoc \-Thtml -obase=http://localhost/ mdoc.7 > mdoc.7.html
+.D1 % mandoc \-Thtml -ostyle=style.css mdoc.7 > mdoc.7.html
 .Pp
 To check over a large set of manuals:
 .

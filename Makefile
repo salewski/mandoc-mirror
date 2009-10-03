@@ -17,6 +17,9 @@ CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
 CFLAGS    += $(VFLAGS)
 LINTFLAGS += $(VFLAGS)
 
+MANDOCFLAGS	= -Wall -fstrict
+MANDOCHTML	= -Thtml -ostyle=style.css,man=%N.%S.html,includes=%I.html
+
 MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln mdoc_strings.ln \
 	     mdoc_argv.ln mdoc_validate.ln mdoc_action.ln \
 	     lib.ln att.ln arch.ln vol.ln msec.ln st.ln \
@@ -229,22 +232,22 @@ mandoc: $(MAINOBJS) libmdoc.a libman.a
 	sed -e "s!@VERSION@!$(VERSION)!" -e "s!@VDATE@!$(VDATE)!" $< > $@
 
 .1.1.txt:
-	./mandoc -Wall,error -fstrict $< | col -b > $@
+	./mandoc $(MANDOCFLAGS) $< | col -b > $@
 
 .1.1.sgml:
-	./mandoc -Thtml -ostyle=style.css -Wall,error -fstrict $< > $@
+	./mandoc $(MANDOCFLAGS) $(MANDOCHTML) $< > $@
 
 .3.3.txt:
-	./mandoc -Wall,error -fstrict $< | col -b > $@
+	./mandoc $(MANDOCFLAGS) $< | col -b > $@
 
 .3.3.sgml:
-	./mandoc -Thtml -ostyle=style.css -Wall,error -fstrict $< > $@
+	./mandoc $(MANDOCFLAGS) $(MANDOCHTML) $< > $@
 
 .7.7.txt:
-	./mandoc -Wall,error -fstrict $< | col -b > $@
+	./mandoc $(MANDOCFLAGS) $< | col -b > $@
 
 .7.7.sgml:
-	./mandoc -Thtml -ostyle=style.css -Wall,error -fstrict $< > $@
+	./mandoc $(MANDOCFLAGS) $(MANDOCHTML) $< > $@
 
 .tar.gz.md5:
 	md5 $< > $@

@@ -21,7 +21,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <err.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,14 +52,6 @@ static	void		  print_mdoc_nodelist(MDOC_ARGS);
 static	int		  a2width(const char *);
 static	int		  a2offs(const char *);
 static	int		  a2list(const struct mdoc_node *);
-
-static	void		  buffmt_man(struct html *, 
-				const char *, const char *);
-static	void		  buffmt_includes(struct html *, const char *);
-static	void		  buffmt(struct html *, const char *, ...);
-static	void		  bufcat(struct html *, const char *);
-static	void		  bufncat(struct html *, const char *, size_t);
-
 
 static	void		  mdoc_root_post(MDOC_ARGS);
 static	int		  mdoc_root_pre(MDOC_ARGS);
@@ -279,100 +270,6 @@ html_mdoc(void *arg, const struct mdoc *m)
 	print_tagq(h, t);
 
 	printf("\n");
-}
-
-
-static void
-bufinit(struct html *h)
-{
-
-	h->buf[0] = '\0';
-	h->buflen = 0;
-}
-
-
-static void
-bufcat(struct html *h, const char *p)
-{
-
-	bufncat(h, p, strlen(p));
-}
-
-
-static void
-buffmt(struct html *h, const char *fmt, ...)
-{
-	va_list		 ap;
-
-	va_start(ap, fmt);
-	(void)vsnprintf(h->buf + h->buflen, 
-			BUFSIZ - h->buflen - 1, fmt, ap);
-	va_end(ap);
-	h->buflen = strlen(h->buf);
-	assert('\0' == h->buf[h->buflen]);
-}
-
-
-static void
-bufncat(struct html *h, const char *p, size_t sz)
-{
-
-	if (h->buflen + sz > BUFSIZ - 1)
-		sz = BUFSIZ - 1 - h->buflen;
-
-	(void)strncat(h->buf, p, sz);
-	h->buflen += sz;
-	assert('\0' == h->buf[h->buflen]);
-}
-
-
-static void
-buffmt_includes(struct html *h, const char *name)
-{
-	const char	*p, *pp;
-
-	pp = h->base_includes;
-	while ((p = strchr(pp, '%'))) {
-		bufncat(h, pp, p - pp);
-		switch (*(p + 1)) {
-		case('I'):
-			bufcat(h, name);
-			break;
-		default:
-			bufncat(h, p, 2);
-			break;
-		}
-		pp = p + 2;
-	}
-	if (pp)
-		bufcat(h, pp);
-}
-
-
-static void
-buffmt_man(struct html *h, 
-		const char *name, const char *sec)
-{
-	const char	*p, *pp;
-
-	pp = h->base_man;
-	while ((p = strchr(pp, '%'))) {
-		bufncat(h, pp, p - pp);
-		switch (*(p + 1)) {
-		case('S'):
-			bufcat(h, sec);
-			break;
-		case('N'):
-			buffmt(h, name ? name : "1");
-			break;
-		default:
-			bufncat(h, p, 2);
-			break;
-		}
-		pp = p + 2;
-	}
-	if (pp)
-		bufcat(h, pp);
 }
 
 
@@ -1375,7 +1272,7 @@ mdoc_d1_pre(MDOC_ARGS)
 static int
 mdoc_sx_pre(MDOC_ARGS)
 {
-	struct htmlpair		 tag[3];
+	struct htmlpair		 tag[2];
 	const struct mdoc_node	*nn;
 
 	bufcat(h, "#");
@@ -1389,10 +1286,8 @@ mdoc_sx_pre(MDOC_ARGS)
 	tag[0].val = h->buf;
 	tag[1].key = ATTR_CLASS;
 	tag[1].val = "link-sec";
-	tag[2].key = ATTR_TARGET;
-	tag[2].val = "_self";
 
-	print_otag(h, TAG_A, 3, tag);
+	print_otag(h, TAG_A, 2, tag);
 	return(1);
 }
 

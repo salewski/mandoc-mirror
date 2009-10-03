@@ -103,6 +103,13 @@ void		  print_tagq(struct html *, const struct tag *);
 void		  print_stagq(struct html *, const struct tag *);
 void		  print_text(struct html *, const char *);
 
+void		  buffmt_man(struct html *, const char *, const char *);
+void		  buffmt_includes(struct html *, const char *);
+void		  buffmt(struct html *, const char *, ...);
+void		  bufcat(struct html *, const char *);
+void		  bufncat(struct html *, const char *, size_t);
+void		  bufinit(struct html *);
+
 __END_DECLS
 
 #endif /*!HTML_H*/
