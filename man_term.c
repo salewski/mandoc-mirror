@@ -160,7 +160,6 @@ man_run(struct termp *p, const struct man *m)
 
 
 static void
-
 fmt_block_vspace(struct termp *p, const struct man_node *n)
 {
 	term_newln(p);

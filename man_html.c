@@ -27,7 +27,9 @@
 #include "html.h"
 #include "man.h"
 
-#define	INDENT		  7
+/* TODO: preserve ident widths. */
+
+#define	INDENT		  5
 #define	HALFINDENT	  3
 
 #define	MAN_ARGS	  const struct man_meta *m, \
@@ -47,6 +49,7 @@ static	void		  print_man_node(MAN_ARGS);
 static	int		  a2width(const struct man_node *);
 
 static	int		  man_br_pre(MAN_ARGS);
+static	int		  man_HP_pre(MAN_ARGS);
 static	int		  man_IP_pre(MAN_ARGS);
 static	int		  man_PP_pre(MAN_ARGS);
 static	void		  man_root_post(MAN_ARGS);
@@ -64,12 +67,12 @@ static	const struct htmlman mans[MAN_MAX] = {
 	{ NULL, NULL }, /* TH */
 	{ man_SH_pre, NULL }, /* SH */
 	{ man_SS_pre, NULL }, /* SS */
-	{ NULL, NULL }, /* TP */
+	{ man_IP_pre, NULL }, /* TP */
 	{ man_PP_pre, NULL }, /* LP */
 	{ man_PP_pre, NULL }, /* PP */
 	{ man_PP_pre, NULL }, /* P */
 	{ man_IP_pre, NULL }, /* IP */
-	{ NULL, NULL }, /* HP */ 
+	{ man_HP_pre, NULL }, /* HP */ 
 	{ NULL, NULL }, /* SM */
 	{ NULL, NULL }, /* SB */
 	{ NULL, NULL }, /* BI */
@@ -209,8 +212,8 @@ a2width(const struct man_node *n)
 	int		 i, len;
 	const char	*p;
 
-	assert(MAN_TEXT == n->type);
-	assert(n->string);
+	if (MAN_TEXT != n->type)
+		return(-1);
 
 	p = n->string;
 
@@ -468,8 +471,19 @@ man_IP_pre(MAN_ARGS)
 	int		 	 len, ival;
 	const struct man_node	*nn;
 
-	len = 1;
-	if (NULL != (nn = n->parent->head->child))
+	if (MAN_BODY == n->type) {
+		print_otag(h, TAG_DIV, 0, NULL);
+		return(1);
+	}
+
+	nn = MAN_BLOCK == n->type ? 
+		n->head->child : n->parent->head->child;
+	len = INDENT;
+	ival = -1;
+
+	/* Calculate the indentation length. */
+
+	if (NULL != nn)
 		if (NULL != (nn = nn->next)) {
 			for ( ; nn->next; nn = nn->next)
 				/* Do nothing. */ ;
@@ -483,24 +497,67 @@ man_IP_pre(MAN_ARGS)
 		tag.val = h->buf;
 		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
-	} else if (MAN_HEAD == n->type) {
-		buffmt(h, "margin-left: -%dem; min-width: %dem;", 
-				len, len - 1);
-		bufcat(h, "clear: left;");
-		bufcat(h, "padding-right: 1em;");
-		if (n->next && n->next->child)
-			bufcat(h, "float: left;");
+	} 
+
+	/* If there's an indent string, print it out. */
+
+	buffmt(h, "margin-left: -%dem; min-width: %dem;", 
+			len, len - 1);
+	bufcat(h, "clear: left; padding-right: 1em;");
+
+	if (n->next && n->next->child)
+		bufcat(h, "float: left;");
+
+	tag.key = ATTR_STYLE;
+	tag.val = h->buf;
+	print_otag(h, TAG_DIV, 1, &tag);
+
+	if (ival < 0)
+		return(1);
+
+	/* With a length string, omit the last child. */
+
+	for (nn = n->child; nn->next; nn = nn->next)
+		print_man_node(m, nn, h);
+
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+man_HP_pre(MAN_ARGS)
+{
+	int			 ival, len;
+	const struct man_node	*nn;
+	struct htmlpair	 	 tag;
+
+	if (MAN_HEAD == n->type)
+		return(0);
+
+	nn = MAN_BLOCK == n->type ?
+		n->head->child : n->parent->head->child;
+
+	len = INDENT;
+
+	if (NULL != nn)
+		if ((ival = a2width(nn)) >= 0)
+			len = ival;
+
+	if (MAN_BLOCK == n->type) {
+		buffmt(h, "clear: both; margin-left: %dem;", len);
 		tag.key = ATTR_STYLE;
 		tag.val = h->buf;
 		print_otag(h, TAG_DIV, 1, &tag);
-
-		/* Don't print the length value. */
-
-		for (nn = n->child; nn->next; nn = nn->next)
-			print_man_node(m, nn, h);
-		return(0);
+		return(1);
 	}
 
-	print_otag(h, TAG_DIV, 0, &tag);
+	buffmt(h, "text-indent: -%dem;", len);
+
+	tag.key = ATTR_STYLE;
+	tag.val = h->buf;
+	print_otag(h, TAG_DIV, 1, &tag);
+
 	return(1);
 }
+

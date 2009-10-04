@@ -580,6 +580,8 @@ mdoc_sh_pre(MDOC_ARGS)
 			(void)strlcat(link, "_", BUFSIZ);
 	}
 
+	/* FIXME: make sure no duplicates! */
+
 	tag[0].key = ATTR_CLASS;
 	tag[0].val = "sec-head";
 	tag[1].key = ATTR_ID;
@@ -635,6 +637,8 @@ mdoc_ss_pre(MDOC_ARGS)
 	}
 
 	buffmt(h, "margin-left: -%dem;", INDENT - HALFINDENT);
+
+	/* FIXME: make sure no duplicates! */
 
 	tag[0].key = ATTR_CLASS;
 	tag[0].val = "ssec-head";
