@@ -17,6 +17,8 @@
 #include <sys/types.h>
 #include <sys/queue.h>
 
+#include <assert.h>
+#include <ctype.h>
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,7 +44,10 @@ static	void		  print_man_head(MAN_ARGS);
 static	void		  print_man_nodelist(MAN_ARGS);
 static	void		  print_man_node(MAN_ARGS);
 
+static	int		  a2width(const struct man_node *);
+
 static	int		  man_br_pre(MAN_ARGS);
+static	int		  man_IP_pre(MAN_ARGS);
 static	int		  man_PP_pre(MAN_ARGS);
 static	void		  man_root_post(MAN_ARGS);
 static	int		  man_root_pre(MAN_ARGS);
@@ -63,7 +68,7 @@ static	const struct htmlman mans[MAN_MAX] = {
 	{ man_PP_pre, NULL }, /* LP */
 	{ man_PP_pre, NULL }, /* PP */
 	{ man_PP_pre, NULL }, /* P */
-	{ NULL, NULL }, /* IP */
+	{ man_IP_pre, NULL }, /* IP */
 	{ NULL, NULL }, /* HP */ 
 	{ NULL, NULL }, /* SM */
 	{ NULL, NULL }, /* SB */
@@ -195,6 +200,34 @@ print_man_node(MAN_ARGS)
 			(*mans[n->tok].post)(m, n, h);
 		break;
 	}
+}
+
+
+static int
+a2width(const struct man_node *n)
+{
+	int		 i, len;
+	const char	*p;
+
+	assert(MAN_TEXT == n->type);
+	assert(n->string);
+
+	p = n->string;
+
+	if (0 == (len = (int)strlen(p)))
+		return(-1);
+
+	for (i = 0; i < len; i++) 
+		if ( ! isdigit((u_char)p[i]))
+			break;
+
+	if (i == len - 1)  {
+		if ('n' == p[len - 1] || 'm' == p[len - 1])
+			return(atoi(p));
+	} else if (i == len)
+		return(atoi(p));
+
+	return(-1);
 }
 
 
@@ -403,17 +436,71 @@ man_SS_pre(MAN_ARGS)
 static int
 man_PP_pre(MAN_ARGS)
 {
-	struct htmlpair	tag;
+	struct htmlpair	 tag;
+	int		 i;
 
 	if (MAN_BLOCK != n->type)
 		return(1);
 
-	buffmt(h, "margin-left: %dem;", INDENT);
-	if (n->next && n->next->child) 
+	i = 0;
+
+	if (MAN_ROOT == n->parent->tok) {
+		buffmt(h, "margin-left: %dem;", INDENT);
+		i = 1;
+	}
+	if (n->next && n->next->child) {
+		i = 1;
 		bufcat(h, "margin-bottom: 1em;");
+	}
 
 	tag.key = ATTR_STYLE;
 	tag.val = h->buf;
-	print_otag(h, TAG_DIV, 1, &tag);
+	print_otag(h, TAG_DIV, i, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+man_IP_pre(MAN_ARGS)
+{
+	struct htmlpair	 	 tag;
+	int		 	 len, ival;
+	const struct man_node	*nn;
+
+	len = 1;
+	if (NULL != (nn = n->parent->head->child))
+		if (NULL != (nn = nn->next)) {
+			for ( ; nn->next; nn = nn->next)
+				/* Do nothing. */ ;
+			if ((ival = a2width(nn)) >= 0)
+				len = ival;
+		}
+
+	if (MAN_BLOCK == n->type) {
+		buffmt(h, "clear: both; margin-left: %dem;", len);
+		tag.key = ATTR_STYLE;
+		tag.val = h->buf;
+		print_otag(h, TAG_DIV, 1, &tag);
+		return(1);
+	} else if (MAN_HEAD == n->type) {
+		buffmt(h, "margin-left: -%dem; min-width: %dem;", 
+				len, len - 1);
+		bufcat(h, "clear: left;");
+		bufcat(h, "padding-right: 1em;");
+		if (n->next && n->next->child)
+			bufcat(h, "float: left;");
+		tag.key = ATTR_STYLE;
+		tag.val = h->buf;
+		print_otag(h, TAG_DIV, 1, &tag);
+
+		/* Don't print the length value. */
+
+		for (nn = n->child; nn->next; nn = nn->next)
+			print_man_node(m, nn, h);
+		return(0);
+	}
+
+	print_otag(h, TAG_DIV, 0, &tag);
 	return(1);
 }
