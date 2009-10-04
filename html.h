@@ -57,6 +57,7 @@ enum	htmlattr {
 	ATTR_WIDTH,
 	ATTR_VALIGN,
 	ATTR_TARGET,
+	ATTR_ID,
 	ATTR_MAX
 };
 

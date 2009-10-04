@@ -1,13 +1,11 @@
 div.body	{ font-family: monospace; 
 		  min-width: 580px; width: 580px; } /* Top-most div tag. */
 
-span.sec-head	{ font-weight: bold; } /* Sections (Sh). */
-div.sec-head	{ }		
+div.sec-head	{ font-weight: bold; } /* Sections (Sh). */
 div.sec-body	{ }
 div.sec-block	{ }
 
-span.ssec-head	{ font-weight: bold; } /* Sub-sections (Ss). */
-div.ssec-head	{ }
+div.ssec-head	{ font-weight: bold; } /* Sub-sections (Ss). */
 div.ssec-body	{ }
 div.ssec-block	{ }
 

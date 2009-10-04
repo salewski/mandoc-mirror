@@ -75,6 +75,7 @@ static	const char	 *const htmlattrs[ATTR_MAX] = {
 	"width",
 	"valign",
 	"target",
+	"id",
 };
 
 #ifdef __linux__
