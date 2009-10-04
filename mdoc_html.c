@@ -542,21 +542,17 @@ mdoc_sh_pre(MDOC_ARGS)
 {
 	struct htmlpair		 tag[2];
 	const struct mdoc_node	*nn;
+	char			 link[BUFSIZ];
 
-	if (MDOC_HEAD == n->type) {
+	if (MDOC_BODY == n->type) {
+		buffmt(h, "margin-left: %dem;", INDENT);
+
 		tag[0].key = ATTR_CLASS;
-		tag[0].val = "sec-head";
-		print_otag(h, TAG_DIV, 1, tag);
-		print_otag(h, TAG_SPAN, 1, tag);
+		tag[0].val = "sec-body";
+		tag[1].key = ATTR_STYLE;
+		tag[1].val = h->buf;
 
-		for (nn = n->child; nn; nn = nn->next) {
-			bufcat(h, nn->string);
-			if (nn->next)
-				bufncat(h, " ", 1);
-		}
-		tag[0].key = ATTR_NAME;
-		tag[0].val = h->buf;
-		print_otag(h, TAG_A, 1, tag);
+		print_otag(h, TAG_DIV, 2, tag);
 		return(1);
 	} else if (MDOC_BLOCK == n->type) {
 		tag[0].key = ATTR_CLASS;
@@ -573,17 +569,21 @@ mdoc_sh_pre(MDOC_ARGS)
 
 		tag[1].key = ATTR_STYLE;
 		tag[1].val = h->buf;
-
 		print_otag(h, TAG_DIV, 2, tag);
 		return(1);
 	}
 
-	buffmt(h, "margin-left: %dem;", INDENT);
-	
+	link[0] = 0;
+	for (nn = n->child; nn; nn = nn->next) {
+		(void)strlcat(link, nn->string, BUFSIZ);
+		if (nn->next)
+			(void)strlcat(link, "_", BUFSIZ);
+	}
+
 	tag[0].key = ATTR_CLASS;
-	tag[0].val = "sec-body";
-	tag[1].key = ATTR_STYLE;
-	tag[1].val = h->buf;
+	tag[0].val = "sec-head";
+	tag[1].key = ATTR_ID;
+	tag[1].val = link;
 
 	print_otag(h, TAG_DIV, 2, tag);
 	return(1);
@@ -594,32 +594,44 @@ mdoc_sh_pre(MDOC_ARGS)
 static int
 mdoc_ss_pre(MDOC_ARGS)
 {
-	struct htmlpair	 	 tag[2];
+	struct htmlpair	 	 tag[3];
 	int		 	 i;
 	const struct mdoc_node	*nn;
+	char			 link[BUFSIZ];
 
 	i = 0;
 
 	if (MDOC_BODY == n->type) {
 		tag[i].key = ATTR_CLASS;
 		tag[i++].val = "ssec-body";
+
 		if (n->parent->next && n->child) {
 			bufcat(h, "margin-bottom: 1em;");
 			tag[i].key = ATTR_STYLE;
 			tag[i++].val = h->buf;
 		}
+
 		print_otag(h, TAG_DIV, i, tag);
 		return(1);
 	} else if (MDOC_BLOCK == n->type) {
 		tag[i].key = ATTR_CLASS;
 		tag[i++].val = "ssec-block";
+
 		if (n->prev) {
 			bufcat(h, "margin-top: 1em;");
 			tag[i].key = ATTR_STYLE;
 			tag[i++].val = h->buf;
 		}
+
 		print_otag(h, TAG_DIV, i, tag);
 		return(1);
+	}
+
+	link[0] = 0;
+	for (nn = n->child; nn; nn = nn->next) {
+		(void)strlcat(link, nn->string, BUFSIZ);
+		if (nn->next)
+			(void)strlcat(link, "_", BUFSIZ);
 	}
 
 	buffmt(h, "margin-left: -%dem;", INDENT - HALFINDENT);
@@ -628,20 +640,10 @@ mdoc_ss_pre(MDOC_ARGS)
 	tag[0].val = "ssec-head";
 	tag[1].key = ATTR_STYLE;
 	tag[1].val = h->buf;
+	tag[2].key = ATTR_ID;
+	tag[2].val = link;
 
-	print_otag(h, TAG_DIV, 2, tag);
-	print_otag(h, TAG_SPAN, 1, tag);
-
-	bufinit(h);
-	for (nn = n->child; nn; nn = nn->next) {
-		bufcat(h, nn->string);
-		if (nn->next)
-			bufcat(h, " ");
-	}
-	tag[0].key = ATTR_NAME;
-	tag[0].val = h->buf;
-	print_otag(h, TAG_A, 1, tag);
-
+	print_otag(h, TAG_DIV, 3, tag);
 	return(1);
 }
 
@@ -1269,18 +1271,19 @@ mdoc_sx_pre(MDOC_ARGS)
 {
 	struct htmlpair		 tag[2];
 	const struct mdoc_node	*nn;
+	char			 link[BUFSIZ];
 
-	bufcat(h, "#");
+	(void)strlcpy(link, "#", BUFSIZ);
 	for (nn = n->child; nn; nn = nn->next) {
-		bufcat(h, nn->string);
+		(void)strlcat(link, nn->string, BUFSIZ);
 		if (nn->next)
-			bufcat(h, " ");
+			(void)strlcat(link, "_", BUFSIZ);
 	}
 
-	tag[0].key = ATTR_HREF;
-	tag[0].val = h->buf;
-	tag[1].key = ATTR_CLASS;
-	tag[1].val = "link-sec";
+	tag[0].key = ATTR_CLASS;
+	tag[0].val = "link-sec";
+	tag[1].key = ATTR_HREF;
+	tag[1].val = link;
 
 	print_otag(h, TAG_A, 2, tag);
 	return(1);
@@ -1691,7 +1694,7 @@ mdoc_sp_pre(MDOC_ARGS)
 		break;
 	}
 
-	buffmt(h, "height: %dem", len);
+	buffmt(h, "height: %dem;", len);
 	tag.key = ATTR_STYLE;
 	tag.val = h->buf;
 	print_otag(h, TAG_DIV, 1, &tag);
