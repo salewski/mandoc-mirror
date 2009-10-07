@@ -326,8 +326,10 @@ static void
 a2width(const char *p, struct roffsu *su)
 {
 
-	if ( ! a2roffsu(p, su))
-		SCALE_HS_INIT(su, (int)strlen(p));
+	if (a2roffsu(p, su))
+		return;
+	su->unit = SCALE_EM;
+	su->scale = (int)strlen(p);
 }
 
 
@@ -346,8 +348,10 @@ a2offs(const char *p, struct roffsu *su)
 		SCALE_HS_INIT(su, INDENT);
 	else if (0 == strcmp(p, "indent-two"))
 		SCALE_HS_INIT(su, INDENT * 2);
-	else if ( ! a2roffsu(p, su))
-		SCALE_HS_INIT(su, (int)strlen(p));
+	else if ( ! a2roffsu(p, su)) {
+		su->unit = SCALE_EM;
+		su->scale = (int)strlen(p);
+	}
 }
 
 
@@ -673,7 +677,8 @@ mdoc_nd_pre(MDOC_ARGS)
 	if (MDOC_BODY != n->type)
 		return(1);
 
-	/* XXX - this can contain block elements! */
+	/* XXX: this tag in theory can contain block elements. */
+
 	print_text(h, "\\(em");
 	PAIR_CLASS_INIT(&tag, "desc-body");
 	print_otag(h, TAG_SPAN, 1, &tag);
@@ -690,7 +695,8 @@ mdoc_op_pre(MDOC_ARGS)
 	if (MDOC_BODY != n->type)
 		return(1);
 
-	/* XXX - this can contain block elements! */
+	/* XXX: this tag in theory can contain block elements. */
+
 	print_text(h, "\\(lB");
 	h->flags |= HTML_NOSPACE;
 	PAIR_CLASS_INIT(&tag, "opt");
@@ -859,18 +865,28 @@ mdoc_it_block_pre(MDOC_ARGS, int type, struct roffsu *offs,
 	nn = n->parent->parent;
 	assert(nn->args);
 
-	if (MDOC_Column == type)
-		comp = 0;
+	/* XXX: see notes in mdoc_it_pre(). */
+
+	if (MDOC_Column == type) {
+		/* Don't width-pad on the left. */
+		SCALE_HS_INIT(width, 0);
+		/* Also disallow non-compact. */
+		comp = 1;
+	}
 	if (MDOC_Diag == type)
+		/* Mandate non-compact with empty prior. */
 		if (n->prev && NULL == n->prev->body->child)
 			comp = 1;
 
+	bufcat_style(h, "clear", "both");
 	if (offs->scale > 0)
 		bufcat_su(h, "margin-left", offs);
 	if (width->scale > 0)
 		bufcat_su(h, "padding-left", width);
 
 	PAIR_STYLE_INIT(&tag, h);
+
+	/* Mandate compact following `Ss' and `Sh' starts. */
 
 	for (nn = n; nn && ! comp; nn = nn->parent) {
 		if (MDOC_BLOCK != nn->type)
@@ -906,6 +922,10 @@ mdoc_it_body_pre(MDOC_ARGS, int type)
 	case (MDOC_Column):
 		break;
 	default:
+		/* 
+		 * XXX: this tricks CSS into aligning the bodies with
+		 * the right-padding in the head. 
+		 */
 		SCALE_HS_INIT(&su, 2);
 		bufcat_su(h, "margin-left", &su);
 		PAIR_STYLE_INIT(&tag, h);
@@ -944,6 +964,8 @@ mdoc_it_head_pre(MDOC_ARGS, int type, struct roffsu *width)
 		bufcat_su(h, "margin-left", width);
 		if (n->next && n->next->child)
 			bufcat_style(h, "float", "left");
+
+		/* XXX: buffer if we run into body. */
 		SCALE_HS_INIT(width, 1);
 		bufcat_su(h, "margin-right", width);
 		PAIR_STYLE_INIT(&tag, h);
@@ -987,7 +1009,11 @@ mdoc_it_pre(MDOC_ARGS)
 	const struct mdoc_node	*bl, *nn;
 	struct roffsu		 width, offs;
 
-	/* This is the `Bl' block parent. */
+	/* 
+	 * XXX: be very careful in changing anything, here.  Lists in
+	 * mandoc have many peculiarities; furthermore, they don't
+	 * translate well into HTML and require a bit of mangling.
+	 */
 
 	bl = n->parent->parent;
 	if (MDOC_BLOCK != n->type)
@@ -996,6 +1022,8 @@ mdoc_it_pre(MDOC_ARGS)
 	type = a2list(bl);
 
 	/* Set default width and offset. */
+
+	SCALE_HS_INIT(&offs, 0);
 
 	switch (type) {
 	case (MDOC_Enum):
@@ -1012,14 +1040,14 @@ mdoc_it_pre(MDOC_ARGS)
 		break;
 	}
 
-	SCALE_HS_INIT(&offs, 0);
-
 	/* Get width, offset, and compact arguments. */
 
 	for (wp = -1, comp = i = 0; i < (int)bl->args->argc; i++) 
 		switch (bl->args->argv[i].arg) {
+		case (MDOC_Column):
+			wp = i; /* Save for later. */
+			break;
 		case (MDOC_Width):
-			wp = i; /* Save offset. */
 			a2width(bl->args->argv[i].value[0], &width);
 			break;
 		case (MDOC_Offset):
@@ -1060,7 +1088,7 @@ mdoc_it_pre(MDOC_ARGS)
 		nn = n->parent->child;
 		for (i = 0; nn && nn != n; nn = nn->next, i++)
 			/* Counter... */ ;
-		if (wp >= 0 && i < (int)bl->args[wp].argv->sz)
+		if (i < (int)bl->args->argv[wp].sz)
 			a2width(bl->args->argv[wp].value[i], &width);
 	}
 
@@ -1315,12 +1343,13 @@ mdoc_bd_pre(MDOC_ARGS)
 	else
 		bl = n->parent;
 
+	SCALE_VS_INIT(&su, 0);
+
 	type = comp = 0;
 	for (i = 0; i < (int)bl->args->argc; i++) 
 		switch (bl->args->argv[i].arg) {
 		case (MDOC_Offset):
 			a2offs(bl->args->argv[i].value[0], &su);
-			bufcat_su(h, "margin-left", &su);
 			break;
 		case (MDOC_Compact):
 			comp = 1;
@@ -1337,6 +1366,7 @@ mdoc_bd_pre(MDOC_ARGS)
 		}
 
 	if (MDOC_BLOCK == n->type) {
+		bufcat_su(h, "margin-left", &su);
 		for (nn = n; nn && ! comp; nn = nn->parent) {
 			if (MDOC_BLOCK != nn->type)
 				continue;
