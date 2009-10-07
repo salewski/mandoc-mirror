@@ -549,7 +549,8 @@ buffmt_includes(struct html *h, const char *name)
 	const char	*p, *pp;
 
 	pp = h->base_includes;
-	while ((p = strchr(pp, '%'))) {
+	p = strchr(pp, '%');
+	while (NULL != p) {
 		bufncat(h, pp, (size_t)(p - pp));
 		switch (*(p + 1)) {
 		case('I'):
@@ -573,7 +574,8 @@ buffmt_man(struct html *h,
 	const char	*p, *pp;
 
 	pp = h->base_man;
-	while ((p = strchr(pp, '%'))) {
+	p = strchr(pp, '%');
+	while (NULL != p) {
 		bufncat(h, pp, (size_t)(p - pp));
 		switch (*(p + 1)) {
 		case('S'):

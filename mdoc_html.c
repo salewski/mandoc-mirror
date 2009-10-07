@@ -1624,7 +1624,8 @@ mdoc_fn_pre(MDOC_ARGS)
 	assert(n->child->string);
 	sp = n->child->string;
 
-	if ((ep = strchr(sp, ' '))) {
+	ep = strchr(sp, ' ');
+	if (NULL != ep) {
 		PAIR_CLASS_INIT(&tag[0], "ftype");
 		t = print_otag(h, TAG_SPAN, 1, tag);
 	
