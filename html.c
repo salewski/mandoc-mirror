@@ -25,6 +25,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "out.h"
 #include "chars.h"
 #include "html.h"
 
@@ -499,6 +500,17 @@ bufinit(struct html *h)
 
 
 void
+bufcat_style(struct html *h, const char *key, const char *val)
+{
+
+	bufcat(h, key);
+	bufncat(h, ":", 1);
+	bufcat(h, val);
+	bufncat(h, ";", 1);
+}
+
+
+void
 bufcat(struct html *h, const char *p)
 {
 
@@ -565,10 +577,10 @@ buffmt_man(struct html *h,
 		bufncat(h, pp, (size_t)(p - pp));
 		switch (*(p + 1)) {
 		case('S'):
-			bufcat(h, sec);
+			bufcat(h, sec ? sec : "1");
 			break;
 		case('N'):
-			buffmt(h, name ? name : "1");
+			buffmt(h, name);
 			break;
 		default:
 			bufncat(h, p, 2);
@@ -578,4 +590,44 @@ buffmt_man(struct html *h,
 	}
 	if (pp)
 		bufcat(h, pp);
+}
+
+
+void
+bufcat_su(struct html *h, const char *p, const struct roffsu *su)
+{
+	int		 v;
+	char		*u;
+
+	v = su->scale;
+
+	switch (su->unit) {
+	case (SCALE_CM):
+		u = "cm";
+		break;
+	case (SCALE_IN):
+		u = "in";
+		break;
+	case (SCALE_PC):
+		u = "pc";
+		break;
+	case (SCALE_PT):
+		u = "pt";
+		break;
+	case (SCALE_MM):
+		if (0 == (v /= 100))
+			v = 1;
+		u = "em";
+		break;
+	case (SCALE_VS):
+		/* FALLTHROUGH */
+	case (SCALE_EM):
+		u = "em";
+		break;
+	default:
+		u = "ex";
+		break;
+	}
+
+	buffmt(h, "%s: %d%s;", p, v, u);
 }

@@ -40,11 +40,11 @@ MANSRCS	   = man_macro.c man.c man_hash.c man_validate.c \
 
 MAINLNS	   = main.ln mdoc_term.ln chars.ln term.ln tree.ln \
 	     compat.ln man_term.ln html.ln mdoc_html.ln \
-	     man_html.ln
+	     man_html.ln out.ln
 MAINOBJS   = main.o mdoc_term.o chars.o term.o tree.o compat.o \
-	     man_term.o html.o mdoc_html.o man_html.o
+	     man_term.o html.o mdoc_html.o man_html.o out.o
 MAINSRCS   = main.c mdoc_term.c chars.c term.c tree.c compat.c \
-	     man_term.c html.c mdoc_html.c man_html.c
+	     man_term.c html.c mdoc_html.c man_html.c out.c
 
 LLNS	   = llib-llibmdoc.ln llib-llibman.ln llib-lmandoc.ln
 LNS	   = $(MAINLNS) $(MDOCLNS) $(MANLNS)
@@ -54,7 +54,7 @@ SRCS	   = $(MDOCSRCS) $(MAINSRCS) $(MANSRCS)
 DATAS	   = arch.in att.in lib.in msec.in st.in \
 	     vol.in chars.in
 HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
-	     libmandoc.h html.h chars.h
+	     libmandoc.h html.h chars.h out.h
 GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml manuals.7.sgml \
 	     mandoc_char.7.sgml man.7.sgml man.3.sgml
 SGMLS	   = index.sgml $(GSGMLS)
@@ -171,8 +171,11 @@ html.o: html.c html.h chars.h
 mdoc_html.ln: mdoc_html.c html.h mdoc.h
 mdoc_html.o: mdoc_html.c html.h mdoc.h
 
-man_html.ln: man_html.c html.h man.h
-man_html.o: man_html.c html.h man.h
+man_html.ln: man_html.c html.h man.h out.h
+man_html.o: man_html.c html.h man.h out.h
+
+out.ln: out.c out.h
+out.o: out.c out.h
 
 tree.ln: tree.c man.h mdoc.h
 tree.o: tree.c man.h mdoc.h

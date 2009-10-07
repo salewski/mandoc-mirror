@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "out.h"
 #include "html.h"
 #include "man.h"
 
@@ -46,7 +47,8 @@ static	void		  print_man_head(MAN_ARGS);
 static	void		  print_man_nodelist(MAN_ARGS);
 static	void		  print_man_node(MAN_ARGS);
 
-static	int		  a2width(const struct man_node *);
+static	int		  a2width(const struct man_node *,
+				struct roffsu *);
 
 static	int		  man_br_pre(MAN_ARGS);
 static	int		  man_HP_pre(MAN_ARGS);
@@ -207,30 +209,15 @@ print_man_node(MAN_ARGS)
 
 
 static int
-a2width(const struct man_node *n)
+a2width(const struct man_node *n, struct roffsu *su)
 {
-	int		 i, len;
-	const char	*p;
 
 	if (MAN_TEXT != n->type)
-		return(-1);
+		return(0);
+	if (a2roffsu(n->string, su))
+		return(1);
 
-	p = n->string;
-
-	if (0 == (len = (int)strlen(p)))
-		return(-1);
-
-	for (i = 0; i < len; i++) 
-		if ( ! isdigit((u_char)p[i]))
-			break;
-
-	if (i == len - 1)  {
-		if ('n' == p[len - 1] || 'm' == p[len - 1])
-			return(atoi(p));
-	} else if (i == len)
-		return(atoi(p));
-
-	return(-1);
+	return(0);
 }
 
 
@@ -249,31 +236,35 @@ man_root_pre(MAN_ARGS)
 	(void)snprintf(title, BUFSIZ - 1, 
 			"%s(%d)", m->title, m->msec);
 
-	tag[0].key = ATTR_CLASS;
-	tag[0].val = "header";
-	tag[1].key = ATTR_STYLE;
-	tag[1].val = "width: 100%;";
+	PAIR_CLASS_INIT(&tag[0], "header");
+	bufcat_style(h, "width", "100%");
+	PAIR_STYLE_INIT(&tag[1], h);
 	t = print_otag(h, TAG_TABLE, 2, tag);
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
-	tag[0].key = ATTR_STYLE;
-	tag[0].val = "width: 10%;";
+	bufinit(h);
+	bufcat_style(h, "width", "10%");
+	PAIR_STYLE_INIT(&tag[0], h);
 	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, title);
 	print_stagq(h, tt);
 
-	tag[0].key = ATTR_STYLE;
-	tag[0].val = "width: 80%; white-space: nowrap; text-align: center;";
+	bufinit(h);
+	bufcat_style(h, "width", "80%");
+	bufcat_style(h, "white-space", "nowrap");
+	bufcat_style(h, "text-align", "center");
+	PAIR_STYLE_INIT(&tag[0], h);
 	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, b);
 	print_stagq(h, tt);
 
-	tag[0].key = ATTR_STYLE;
-	tag[0].val = "width: 10%; text-align: right;";
+	bufinit(h);
+	bufcat_style(h, "width", "10%");
+	bufcat_style(h, "text-align", "right");
+	PAIR_STYLE_INIT(&tag[0], h);
 	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, title);
 	print_tagq(h, t);
-
 	return(1);
 }
 
@@ -292,21 +283,23 @@ man_root_post(MAN_ARGS)
 	if (0 == strftime(b, BUFSIZ - 1, "%B %e, %Y", &tm))
 		err(EXIT_FAILURE, "strftime");
 
-	tag[0].key = ATTR_CLASS;
-	tag[0].val = "footer";
-	tag[1].key = ATTR_STYLE;
-	tag[1].val = "width: 100%;";
+	PAIR_CLASS_INIT(&tag[0], "footer");
+	bufcat_style(h, "width", "100%");
+	PAIR_STYLE_INIT(&tag[1], h);
 	t = print_otag(h, TAG_TABLE, 2, tag);
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
-	tag[0].key = ATTR_STYLE;
-	tag[0].val = "width: 50%;";
+	bufinit(h);
+	bufcat_style(h, "width", "50%");
+	PAIR_STYLE_INIT(&tag[0], h);
 	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, b);
 	print_stagq(h, tt);
 
-	tag[0].key = ATTR_STYLE;
-	tag[0].val = "width: 50%; text-align: right;";
+	bufinit(h);
+	bufcat_style(h, "width", "50%");
+	bufcat_style(h, "text-align", "right");
+	PAIR_STYLE_INIT(&tag[0], h);
 	print_otag(h, TAG_TD, 1, tag);
 	if (m->source)
 		print_text(h, m->source);
@@ -319,26 +312,22 @@ man_root_post(MAN_ARGS)
 static int
 man_br_pre(MAN_ARGS)
 {
-	int		len;
-	struct htmlpair	tag;
+	struct roffsu	 su;
+	struct htmlpair	 tag;
 
-	switch (n->tok) {
-	case (MAN_sp):
-		len = n->child ? atoi(n->child->string) : 1;
-		break;
-	case (MAN_br):
-		len = 0;
-		break;
-	default:
-		len = 1;
-		break;
-	}
+	SCALE_VS_INIT(&su, 1);
 
-	buffmt(h, "height: %dem;", len);
-	tag.key = ATTR_STYLE;
-	tag.val = h->buf;
+	if (MAN_sp == n->tok) {
+		su.scale = 1;
+		if (n->child)
+			a2roffsu(n->child->string, &su);
+	} else if (MAN_br == n->tok)
+		su.scale = 0;
+
+	bufcat_su(h, "height", &su);
+	PAIR_STYLE_INIT(&tag, h);
 	print_otag(h, TAG_DIV, 1, &tag);
-	return(1);
+	return(0);
 }
 
 
@@ -346,42 +335,34 @@ man_br_pre(MAN_ARGS)
 static int
 man_SH_pre(MAN_ARGS)
 {
-	struct htmlpair		tag[2];
+	struct htmlpair	 tag[2];
+	struct roffsu	 su;
 
 	if (MAN_BODY == n->type) {
-		buffmt(h, "margin-left: %dem;", INDENT);
-
-		tag[0].key = ATTR_CLASS;
-		tag[0].val = "sec-body";
-		tag[1].key = ATTR_STYLE;
-		tag[1].val = h->buf;
-
+		SCALE_HS_INIT(&su, INDENT);
+		bufcat_su(h, "margin-left", &su);
+		PAIR_CLASS_INIT(&tag[0], "sec-body");
+		PAIR_STYLE_INIT(&tag[1], h);
 		print_otag(h, TAG_DIV, 2, tag);
 		return(1);
 	} else if (MAN_BLOCK == n->type) {
-		tag[0].key = ATTR_CLASS;
-		tag[0].val = "sec-block";
-
+		PAIR_CLASS_INIT(&tag[0], "sec-block");
 		if (n->prev && MAN_SH == n->prev->tok)
 			if (NULL == n->prev->body->child) {
 				print_otag(h, TAG_DIV, 1, tag);
 				return(1);
 			}
 
-		bufcat(h, "margin-top: 1em;");
+		SCALE_VS_INIT(&su, 1);
+		bufcat_su(h, "margin-top", &su);
 		if (NULL == n->next)
-			bufcat(h, "margin-bottom: 1em;");
-
-		tag[1].key = ATTR_STYLE;
-		tag[1].val = h->buf;
-
+			bufcat_su(h, "margin-bottom", &su);
+		PAIR_STYLE_INIT(&tag[1], h);
 		print_otag(h, TAG_DIV, 2, tag);
 		return(1);
 	}
 
-	tag[0].key = ATTR_CLASS;
-	tag[0].val = "sec-head";
-
+	PAIR_CLASS_INIT(&tag[0], "sec-head");
 	print_otag(h, TAG_DIV, 1, tag);
 	return(1);
 }
@@ -392,44 +373,39 @@ static int
 man_SS_pre(MAN_ARGS)
 {
 	struct htmlpair	 tag[3];
-	int		 i;
+	struct roffsu	 su;
 
-	i = 0;
+	SCALE_VS_INIT(&su, 1);
 
 	if (MAN_BODY == n->type) {
-		tag[i].key = ATTR_CLASS;
-		tag[i++].val = "ssec-body";
-
+		PAIR_CLASS_INIT(&tag[0], "ssec-body");
 		if (n->parent->next && n->child) {
-			bufcat(h, "margin-bottom: 1em;");
-			tag[i].key = ATTR_STYLE;
-			tag[i++].val = h->buf;
+			bufcat_su(h, "margin-bottom", &su);
+			PAIR_STYLE_INIT(&tag[1], h);
+			print_otag(h, TAG_DIV, 2, tag);
+			return(1);
 		}
 
-		print_otag(h, TAG_DIV, i, tag);
+		print_otag(h, TAG_DIV, 1, tag);
 		return(1);
 	} else if (MAN_BLOCK == n->type) {
-		tag[i].key = ATTR_CLASS;
-		tag[i++].val = "ssec-block";
-
+		PAIR_CLASS_INIT(&tag[0], "ssec-block");
 		if (n->prev && MAN_SS == n->prev->tok) 
 			if (n->prev->body->child) {
-				bufcat(h, "margin-top: 1em;");
-				tag[i].key = ATTR_STYLE;
-				tag[i++].val = h->buf;
+				bufcat_su(h, "margin-top", &su);
+				PAIR_STYLE_INIT(&tag[1], h);
+				print_otag(h, TAG_DIV, 2, tag);
+				return(1);
 			}
 
-		print_otag(h, TAG_DIV, i, tag);
+		print_otag(h, TAG_DIV, 1, tag);
 		return(1);
 	}
 
-	buffmt(h, "margin-left: -%dem;", INDENT - HALFINDENT);
-
-	tag[0].key = ATTR_CLASS;
-	tag[0].val = "ssec-head";
-	tag[1].key = ATTR_STYLE;
-	tag[1].val = h->buf;
-
+	SCALE_HS_INIT(&su, INDENT - HALFINDENT);
+	bufcat_su(h, "margin-left", &su);
+	PAIR_CLASS_INIT(&tag[0], "ssec-head");
+	PAIR_STYLE_INIT(&tag[1], h);
 	print_otag(h, TAG_DIV, 2, tag);
 	return(1);
 }
@@ -440,6 +416,7 @@ static int
 man_PP_pre(MAN_ARGS)
 {
 	struct htmlpair	 tag;
+	struct roffsu	 su;
 	int		 i;
 
 	if (MAN_BLOCK != n->type)
@@ -448,17 +425,18 @@ man_PP_pre(MAN_ARGS)
 	i = 0;
 
 	if (MAN_ROOT == n->parent->tok) {
-		buffmt(h, "margin-left: %dem;", INDENT);
-		i = 1;
+		SCALE_HS_INIT(&su, INDENT);
+		bufcat_su(h, "margin-left", &su);
+		i++;
 	}
 	if (n->next && n->next->child) {
-		i = 1;
-		bufcat(h, "margin-bottom: 1em;");
+		SCALE_VS_INIT(&su, 1);
+		bufcat_su(h, "margin-bottom", &su);
+		i++;
 	}
 
-	tag.key = ATTR_STYLE;
-	tag.val = h->buf;
-	print_otag(h, TAG_DIV, i, &tag);
+	PAIR_STYLE_INIT(&tag, h);
+	print_otag(h, TAG_DIV, i ? 1 : 0, &tag);
 	return(1);
 }
 
@@ -467,58 +445,74 @@ man_PP_pre(MAN_ARGS)
 static int
 man_IP_pre(MAN_ARGS)
 {
+	struct roffsu		 su;
 	struct htmlpair	 	 tag;
-	int		 	 len, ival;
 	const struct man_node	*nn;
+	int			 width;
 
-	if (MAN_BODY == n->type) {
-		print_otag(h, TAG_DIV, 0, NULL);
+	/*
+	 * This scattering of 1-BU margins and pads is to make sure that
+	 * when text overruns its box, the subsequent text isn't flush
+	 * up against it.  However, the rest of the right-hand box must
+	 * also be adjusted in consideration of this 1-BU space.
+	 */
+
+	if (MAN_BODY == n->type) { 
+		SCALE_HS_INIT(&su, INDENT);
+		bufcat_su(h, "margin-left", &su);
+		PAIR_STYLE_INIT(&tag, h);
+		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
 	}
 
 	nn = MAN_BLOCK == n->type ? 
 		n->head->child : n->parent->head->child;
-	len = INDENT;
-	ival = -1;
 
-	/* Calculate the indentation length. */
+	SCALE_HS_INIT(&su, INDENT);
+	width = 0;
 
-	if (NULL != nn)
+	if (MAN_IP == n->tok && NULL != nn)
 		if (NULL != (nn = nn->next)) {
 			for ( ; nn->next; nn = nn->next)
 				/* Do nothing. */ ;
-			if ((ival = a2width(nn)) >= 0)
-				len = ival;
+			width = a2width(nn, &su);
 		}
 
+	if (MAN_TP == n->tok && NULL != nn)
+		width = a2width(nn, &su);
+
 	if (MAN_BLOCK == n->type) {
-		buffmt(h, "clear: both; margin-left: %dem;", len);
-		tag.key = ATTR_STYLE;
-		tag.val = h->buf;
+		bufcat_su(h, "margin-left", &su);
+		bufcat_style(h, "clear", "both");
+		PAIR_STYLE_INIT(&tag, h);
 		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
 	} 
 
-	/* If there's an indent string, print it out. */
-
-	buffmt(h, "margin-left: -%dem; min-width: %dem;", 
-			len, len - 1);
-	bufcat(h, "clear: left; padding-right: 1em;");
+	bufcat_su(h, "min-width", &su);
+	SCALE_INVERT(&su);
+	bufcat_su(h, "margin-left", &su);
+	SCALE_HS_INIT(&su, 1);
+	bufcat_su(h, "margin-right", &su);
+	bufcat_style(h, "clear", "left");
 
 	if (n->next && n->next->child)
-		bufcat(h, "float: left;");
+		bufcat_style(h, "float", "left");
 
-	tag.key = ATTR_STYLE;
-	tag.val = h->buf;
+	PAIR_STYLE_INIT(&tag, h);
 	print_otag(h, TAG_DIV, 1, &tag);
 
-	if (ival < 0)
+	/* With a length string, manually omit the last child. */
+
+	if ( ! width)
 		return(1);
 
-	/* With a length string, omit the last child. */
-
-	for (nn = n->child; nn->next; nn = nn->next)
-		print_man_node(m, nn, h);
+	if (MAN_IP == n->tok)
+		for (nn = n->child; nn->next; nn = nn->next)
+			print_man_node(m, nn, h);
+	if (MAN_TP == n->tok)
+		for (nn = n->child->next; nn; nn = nn->next)
+			print_man_node(m, nn, h);
 
 	return(0);
 }
@@ -528,9 +522,9 @@ man_IP_pre(MAN_ARGS)
 static int
 man_HP_pre(MAN_ARGS)
 {
-	int			 ival, len;
 	const struct man_node	*nn;
 	struct htmlpair	 	 tag;
+	struct roffsu		 su;
 
 	if (MAN_HEAD == n->type)
 		return(0);
@@ -538,26 +532,25 @@ man_HP_pre(MAN_ARGS)
 	nn = MAN_BLOCK == n->type ?
 		n->head->child : n->parent->head->child;
 
-	len = INDENT;
+	SCALE_HS_INIT(&su, INDENT);
 
 	if (NULL != nn)
-		if ((ival = a2width(nn)) >= 0)
-			len = ival;
+		(void)a2width(nn, &su);
 
 	if (MAN_BLOCK == n->type) {
-		buffmt(h, "clear: both; margin-left: %dem;", len);
-		tag.key = ATTR_STYLE;
-		tag.val = h->buf;
+		bufcat_su(h, "margin-left", &su);
+		bufcat_style(h, "clear", "both");
+		PAIR_STYLE_INIT(&tag, h);
 		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
 	}
 
-	buffmt(h, "text-indent: -%dem;", len);
+	bufcat_su(h, "margin-left", &su);
+	SCALE_INVERT(&su);
+	bufcat_su(h, "text-indent", &su);
 
-	tag.key = ATTR_STYLE;
-	tag.val = h->buf;
+	PAIR_STYLE_INIT(&tag, h);
 	print_otag(h, TAG_DIV, 1, &tag);
-
 	return(1);
 }
 

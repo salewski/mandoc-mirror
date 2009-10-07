@@ -80,6 +80,16 @@ struct	htmlpair {
 	char		 *val;
 };
 
+#define	PAIR_CLASS_INIT(p, v) \
+	do { (p)->key = ATTR_CLASS; \
+	(p)->val = (v); } while (/* CONSTCOND */ 0)
+#define	PAIR_HREF_INIT(p, v) \
+	do { (p)->key = ATTR_HREF; \
+	(p)->val = (v); } while (/* CONSTCOND */ 0)
+#define	PAIR_STYLE_INIT(p, h) \
+	do { (p)->key = ATTR_STYLE; \
+	(p)->val = (h)->buf; } while (/* CONSTCOND */ 0)
+
 struct	html {
 	int		  flags;
 #define	HTML_NOSPACE	 (1 << 0)
@@ -96,6 +106,8 @@ struct	html {
 	size_t		  buflen;
 };
 
+struct	roffsu;
+
 void		  print_gen_doctype(struct html *);
 void		  print_gen_head(struct html *);
 struct tag	 *print_otag(struct html *, enum htmltag, 
@@ -104,10 +116,15 @@ void		  print_tagq(struct html *, const struct tag *);
 void		  print_stagq(struct html *, const struct tag *);
 void		  print_text(struct html *, const char *);
 
-void		  buffmt_man(struct html *, const char *, const char *);
+void		  bufcat_su(struct html *, const char *, 
+			const struct roffsu *);
+void		  buffmt_man(struct html *, 
+			const char *, const char *);
 void		  buffmt_includes(struct html *, const char *);
 void		  buffmt(struct html *, const char *, ...);
 void		  bufcat(struct html *, const char *);
+void		  bufcat_style(struct html *, 
+			const char *, const char *);
 void		  bufncat(struct html *, const char *, size_t);
 void		  bufinit(struct html *);
 
