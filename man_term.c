@@ -919,15 +919,12 @@ static void
 print_foot(struct termp *p, const struct man_meta *meta)
 {
 	struct tm	*tm;
-	char		*buf;
-
-	if (NULL == (buf = malloc(p->rmargin)))
-		err(EXIT_FAILURE, "malloc");
+	char		 buf[BUFSIZ];
 
 	tm = localtime(&meta->date);
 
 	if (0 == strftime(buf, p->rmargin, "%B %d, %Y", tm))
-		err(EXIT_FAILURE, "strftime");
+		(void)strlcpy(buf, "(invalid date)", BUFSIZ);
 
 	term_vspace(p);
 
@@ -948,8 +945,6 @@ print_foot(struct termp *p, const struct man_meta *meta)
 
 	term_word(p, buf);
 	term_flushln(p);
-
-	free(buf);
 }
 
 
