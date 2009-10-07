@@ -1609,10 +1609,13 @@ termp_bd_pre(DECL_ARGS)
 		return(1);
 
 	for (nn = n->child; nn; nn = nn->next) {
+		p->flags |= TERMP_NOSPACE;
 		print_node(p, pair, m, nn);
 		if (NULL == nn->next)
 			continue;
 		if (nn->prev && nn->prev->line < nn->line)
+			term_flushln(p);
+		else if (NULL == nn->prev)
 			term_flushln(p);
 	}
 
