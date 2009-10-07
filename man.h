@@ -107,7 +107,6 @@ struct	man	 *man_alloc(void *, int, const struct man_cb *);
 int		  man_reset(struct man *);
 int	 	  man_parseln(struct man *, int, char *buf);
 int		  man_endparse(struct man *);
-int		  man_valid_post(struct man *);
 
 const struct man_node *man_node(const struct man *);
 const struct man_meta *man_meta(const struct man *);
