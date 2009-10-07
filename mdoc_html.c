@@ -552,7 +552,7 @@ mdoc_sh_pre(MDOC_ARGS)
 {
 	struct htmlpair		 tag[2];
 	const struct mdoc_node	*nn;
-	char			 link[BUFSIZ];
+	char			 lbuf[BUFSIZ];
 	struct roffsu		 su;
 
 	if (MDOC_BODY == n->type) {
@@ -579,11 +579,11 @@ mdoc_sh_pre(MDOC_ARGS)
 		return(1);
 	}
 
-	link[0] = 0;
+	lbuf[0] = 0;
 	for (nn = n->child; nn; nn = nn->next) {
-		(void)strlcat(link, nn->string, BUFSIZ);
+		(void)strlcat(lbuf, nn->string, BUFSIZ);
 		if (nn->next)
-			(void)strlcat(link, "_", BUFSIZ);
+			(void)strlcat(lbuf, "_", BUFSIZ);
 	}
 
 	/* 
@@ -593,7 +593,7 @@ mdoc_sh_pre(MDOC_ARGS)
 
 	PAIR_CLASS_INIT(&tag[0], "sec-head");
 	tag[1].key = ATTR_ID;
-	tag[1].val = link;
+	tag[1].val = lbuf;
 	print_otag(h, TAG_DIV, 2, tag);
 	return(1);
 }
@@ -605,7 +605,7 @@ mdoc_ss_pre(MDOC_ARGS)
 {
 	struct htmlpair	 	 tag[3];
 	const struct mdoc_node	*nn;
-	char			 link[BUFSIZ];
+	char			 lbuf[BUFSIZ];
 	struct roffsu		 su;
 
 	SCALE_VS_INIT(&su, 1);
@@ -632,11 +632,11 @@ mdoc_ss_pre(MDOC_ARGS)
 
 	/* TODO: see note in mdoc_sh_pre() about duplicates. */
 
-	link[0] = 0;
+	lbuf[0] = 0;
 	for (nn = n->child; nn; nn = nn->next) {
-		(void)strlcat(link, nn->string, BUFSIZ);
+		(void)strlcat(lbuf, nn->string, BUFSIZ);
 		if (nn->next)
-			(void)strlcat(link, "_", BUFSIZ);
+			(void)strlcat(lbuf, "_", BUFSIZ);
 	}
 
 	SCALE_HS_INIT(&su, INDENT - HALFINDENT);
@@ -646,7 +646,7 @@ mdoc_ss_pre(MDOC_ARGS)
 	PAIR_CLASS_INIT(&tag[0], "ssec-head");
 	PAIR_STYLE_INIT(&tag[1], h);
 	tag[2].key = ATTR_ID;
-	tag[2].val = link;
+	tag[2].val = lbuf;
 	print_otag(h, TAG_DIV, 3, tag);
 	return(1);
 }
@@ -908,6 +908,7 @@ mdoc_it_block_pre(MDOC_ARGS, int type, struct roffsu *offs,
 }
 
 
+/* ARGSUSED */
 static int
 mdoc_it_body_pre(MDOC_ARGS, int type)
 {
@@ -937,6 +938,7 @@ mdoc_it_body_pre(MDOC_ARGS, int type)
 }
 
 
+/* ARGSUSED */
 static int
 mdoc_it_head_pre(MDOC_ARGS, int type, struct roffsu *width)
 {
@@ -1282,20 +1284,20 @@ mdoc_sx_pre(MDOC_ARGS)
 {
 	struct htmlpair		 tag[2];
 	const struct mdoc_node	*nn;
-	char			 link[BUFSIZ];
+	char			 lbuf[BUFSIZ];
 
 	/* FIXME: duplicates? */
 
-	(void)strlcpy(link, "#", BUFSIZ);
+	(void)strlcpy(lbuf, "#", BUFSIZ);
 	for (nn = n->child; nn; nn = nn->next) {
-		(void)strlcat(link, nn->string, BUFSIZ);
+		(void)strlcat(lbuf, nn->string, BUFSIZ);
 		if (nn->next)
-			(void)strlcat(link, "_", BUFSIZ);
+			(void)strlcat(lbuf, "_", BUFSIZ);
 	}
 
 	PAIR_CLASS_INIT(&tag[0], "link-sec");
 	tag[1].key = ATTR_HREF;
-	tag[1].val = link;
+	tag[1].val = lbuf;
 
 	print_otag(h, TAG_A, 2, tag);
 	return(1);
