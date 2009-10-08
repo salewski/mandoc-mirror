@@ -49,16 +49,11 @@ static	void		  print_mdoc_nodelist(MDOC_ARGS);
 
 static	void		  a2width(const char *, struct roffsu *);
 static	void		  a2offs(const char *, struct roffsu *);
+
 static	int		  a2list(const struct mdoc_node *);
 
 static	void		  mdoc_root_post(MDOC_ARGS);
 static	int		  mdoc_root_pre(MDOC_ARGS);
-static	int		  mdoc_it_block_pre(MDOC_ARGS, int, 
-				struct roffsu *, int, 
-				struct roffsu *);
-static	int		  mdoc_it_head_pre(MDOC_ARGS, int, 
-				struct roffsu *);
-static	int		  mdoc_it_body_pre(MDOC_ARGS, int);
 
 static	void		  mdoc__x_post(MDOC_ARGS);
 static	int		  mdoc__x_pre(MDOC_ARGS);
@@ -96,6 +91,11 @@ static	void		  mdoc_fo_post(MDOC_ARGS);
 static	int		  mdoc_fo_pre(MDOC_ARGS);
 static	int		  mdoc_ic_pre(MDOC_ARGS);
 static	int		  mdoc_in_pre(MDOC_ARGS);
+static	int		  mdoc_it_block_pre(MDOC_ARGS, int, int,
+				struct roffsu *, struct roffsu *);
+static	int		  mdoc_it_head_pre(MDOC_ARGS, int, 
+				struct roffsu *);
+static	int		  mdoc_it_body_pre(MDOC_ARGS, int);
 static	int		  mdoc_it_pre(MDOC_ARGS);
 static	int		  mdoc_lb_pre(MDOC_ARGS);
 static	int		  mdoc_li_pre(MDOC_ARGS);
@@ -855,8 +855,8 @@ mdoc_bx_pre(MDOC_ARGS)
 
 /* ARGSUSED */
 static int
-mdoc_it_block_pre(MDOC_ARGS, int type, struct roffsu *offs, 
-		int comp, struct roffsu *width)
+mdoc_it_block_pre(MDOC_ARGS, int type, int comp,
+		struct roffsu *offs, struct roffsu *width)
 {
 	struct htmlpair	 	 tag;
 	const struct mdoc_node	*nn;
@@ -1081,8 +1081,8 @@ mdoc_it_pre(MDOC_ARGS)
 	if (MDOC_BODY == n->type)
 		return(mdoc_it_body_pre(m, n, h, type));
 	if (MDOC_BLOCK == n->type)
-		return(mdoc_it_block_pre(m, n, h, type, 
-					&offs, comp, &width));
+		return(mdoc_it_block_pre(m, n, h, type, comp,
+					&offs, &width));
 
 	/* Override column widths. */
 

@@ -50,13 +50,19 @@ static	void		  print_man_node(MAN_ARGS);
 static	int		  a2width(const struct man_node *,
 				struct roffsu *);
 
+static	int		  man_alt_pre(MAN_ARGS);
 static	int		  man_br_pre(MAN_ARGS);
-static	int		  man_HP_pre(MAN_ARGS);
-static	int		  man_IP_pre(MAN_ARGS);
-static	int		  man_PP_pre(MAN_ARGS);
+static	int		  man_ign_pre(MAN_ARGS);
 static	void		  man_root_post(MAN_ARGS);
 static	int		  man_root_pre(MAN_ARGS);
+static	int		  man_B_pre(MAN_ARGS);
+static	int		  man_HP_pre(MAN_ARGS);
+static	int		  man_I_pre(MAN_ARGS);
+static	int		  man_IP_pre(MAN_ARGS);
+static	int		  man_PP_pre(MAN_ARGS);
+static	int		  man_SB_pre(MAN_ARGS);
 static	int		  man_SH_pre(MAN_ARGS);
+static	int		  man_SM_pre(MAN_ARGS);
 static	int		  man_SS_pre(MAN_ARGS);
 
 #ifdef __linux__
@@ -75,17 +81,17 @@ static	const struct htmlman mans[MAN_MAX] = {
 	{ man_PP_pre, NULL }, /* P */
 	{ man_IP_pre, NULL }, /* IP */
 	{ man_HP_pre, NULL }, /* HP */ 
-	{ NULL, NULL }, /* SM */
-	{ NULL, NULL }, /* SB */
-	{ NULL, NULL }, /* BI */
-	{ NULL, NULL }, /* IB */
-	{ NULL, NULL }, /* BR */
-	{ NULL, NULL }, /* RB */
+	{ man_SM_pre, NULL }, /* SM */
+	{ man_SB_pre, NULL }, /* SB */
+	{ man_alt_pre, NULL }, /* BI */
+	{ man_alt_pre, NULL }, /* IB */
+	{ man_alt_pre, NULL }, /* BR */
+	{ man_alt_pre, NULL }, /* RB */
 	{ NULL, NULL }, /* R */
-	{ NULL, NULL }, /* B */
-	{ NULL, NULL }, /* I */
-	{ NULL, NULL }, /* IR */
-	{ NULL, NULL }, /* RI */
+	{ man_B_pre, NULL }, /* B */
+	{ man_I_pre, NULL }, /* I */
+	{ man_alt_pre, NULL }, /* IR */
+	{ man_alt_pre, NULL }, /* RI */
 	{ NULL, NULL }, /* na */
 	{ NULL, NULL }, /* i */
 	{ man_br_pre, NULL }, /* sp */
@@ -94,8 +100,8 @@ static	const struct htmlman mans[MAN_MAX] = {
 	{ NULL, NULL }, /* r */
 	{ NULL, NULL }, /* RE */
 	{ NULL, NULL }, /* RS */
-	{ NULL, NULL }, /* DT */
-	{ NULL, NULL }, /* UC */
+	{ man_ign_pre, NULL }, /* DT */
+	{ man_ign_pre, NULL }, /* UC */
 };
 
 
@@ -370,6 +376,82 @@ man_SH_pre(MAN_ARGS)
 
 /* ARGSUSED */
 static int
+man_alt_pre(MAN_ARGS)
+{
+	const struct man_node	*nn;
+	struct tag		*t;
+	int			 i;
+	struct htmlpair		 tagi, tagb, *tagp;
+
+	PAIR_CLASS_INIT(&tagi, "italic");
+	PAIR_CLASS_INIT(&tagb, "bold");
+
+	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
+		switch (n->tok) {
+		case (MAN_BI):
+			tagp = i % 2 ? &tagi : &tagb;
+			break;
+		case (MAN_IB):
+			tagp = i % 2 ? &tagb : &tagi;
+			break;
+		case (MAN_RI):
+			tagp = i % 2 ? &tagi : NULL;
+			break;
+		case (MAN_IR):
+			tagp = i % 2 ? NULL : &tagi;
+			break;
+		case (MAN_BR):
+			tagp = i % 2 ? NULL : &tagb;
+			break;
+		case (MAN_RB):
+			tagp = i % 2 ? &tagb : NULL;
+			break;
+		default:
+			abort();
+			/* NOTREACHED */
+		}
+
+		if (i)
+			h->flags |= HTML_NOSPACE;
+
+		if (tagp) {
+			t = print_otag(h, TAG_SPAN, 1, tagp);
+			print_man_node(m, nn, h);
+			print_tagq(h, t);
+		} else
+			print_man_node(m, nn, h);
+	}
+
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+man_SB_pre(MAN_ARGS)
+{
+	struct htmlpair	 tag;
+	
+	PAIR_CLASS_INIT(&tag, "small bold");
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+man_SM_pre(MAN_ARGS)
+{
+	struct htmlpair	 tag;
+	
+	PAIR_CLASS_INIT(&tag, "small");
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
 man_SS_pre(MAN_ARGS)
 {
 	struct htmlpair	 tag[3];
@@ -554,3 +636,35 @@ man_HP_pre(MAN_ARGS)
 	return(1);
 }
 
+
+/* ARGSUSED */
+static int
+man_B_pre(MAN_ARGS)
+{
+	struct htmlpair	 tag;
+
+	PAIR_CLASS_INIT(&tag, "bold");
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+man_I_pre(MAN_ARGS)
+{
+	struct htmlpair	 tag;
+
+	PAIR_CLASS_INIT(&tag, "italic");
+	print_otag(h, TAG_SPAN, 1, &tag);
+	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+man_ign_pre(MAN_ARGS)
+{
+
+	return(0);
+}
