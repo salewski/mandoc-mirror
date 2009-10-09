@@ -60,6 +60,7 @@ static	int		  man_HP_pre(MAN_ARGS);
 static	int		  man_I_pre(MAN_ARGS);
 static	int		  man_IP_pre(MAN_ARGS);
 static	int		  man_PP_pre(MAN_ARGS);
+static	int		  man_RS_pre(MAN_ARGS);
 static	int		  man_SB_pre(MAN_ARGS);
 static	int		  man_SH_pre(MAN_ARGS);
 static	int		  man_SM_pre(MAN_ARGS);
@@ -99,7 +100,7 @@ static	const struct htmlman mans[MAN_MAX] = {
 	{ NULL, NULL }, /* fi */
 	{ NULL, NULL }, /* r */
 	{ NULL, NULL }, /* RE */
-	{ NULL, NULL }, /* RS */
+	{ man_RS_pre, NULL }, /* RS */
 	{ man_ign_pre, NULL }, /* DT */
 	{ man_ign_pre, NULL }, /* UC */
 };
@@ -565,6 +566,8 @@ man_IP_pre(MAN_ARGS)
 
 	if (MAN_BLOCK == n->type) {
 		bufcat_su(h, "margin-left", &su);
+		SCALE_VS_INIT(&su, 1);
+		bufcat_su(h, "margin-top", &su);
 		bufcat_style(h, "clear", "both");
 		PAIR_STYLE_INIT(&tag, h);
 		print_otag(h, TAG_DIV, 1, &tag);
@@ -621,6 +624,8 @@ man_HP_pre(MAN_ARGS)
 
 	if (MAN_BLOCK == n->type) {
 		bufcat_su(h, "margin-left", &su);
+		SCALE_VS_INIT(&su, 1);
+		bufcat_su(h, "margin-top", &su);
 		bufcat_style(h, "clear", "both");
 		PAIR_STYLE_INIT(&tag, h);
 		print_otag(h, TAG_DIV, 1, &tag);
@@ -667,4 +672,31 @@ man_ign_pre(MAN_ARGS)
 {
 
 	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+man_RS_pre(MAN_ARGS)
+{
+	struct htmlpair	 tag;
+	struct roffsu	 su;
+
+	if (MAN_HEAD == n->type)
+		return(0);
+	else if (MAN_BODY == n->type)
+		return(1);
+
+	SCALE_HS_INIT(&su, INDENT);
+	bufcat_su(h, "margin-left", &su);
+
+	if (n->head->child) {
+		SCALE_VS_INIT(&su, 1);
+		a2width(n->head->child, &su);
+		bufcat_su(h, "margin-top", &su);
+	}
+
+	PAIR_STYLE_INIT(&tag, h);
+	print_otag(h, TAG_DIV, 1, &tag);
+	return(1);
 }
