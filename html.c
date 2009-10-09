@@ -599,7 +599,7 @@ buffmt_man(struct html *h,
 void
 bufcat_su(struct html *h, const char *p, const struct roffsu *su)
 {
-	int		 v;
+	double		 v;
 	char		*u;
 
 	v = su->scale;
@@ -639,5 +639,9 @@ bufcat_su(struct html *h, const char *p, const struct roffsu *su)
 		break;
 	}
 
-	buffmt(h, "%s: %d%s;", p, v, u);
+	if (su->pt)
+		buffmt(h, "%s: %f%s;", p, v, u);
+	else
+		/* LINTED */
+		buffmt(h, "%s: %d%s;", p, (int)v, u);
 }

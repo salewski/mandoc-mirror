@@ -35,17 +35,20 @@ enum	roffscale {
 
 struct	roffsu {
 	enum roffscale	  unit;
-	int		  scale;
+	double		  scale;
+	int		  pt;
 };
 
 #define	SCALE_INVERT(p) \
 	do { (p)->scale = -(p)->scale; } while (/*CONSTCOND*/0)
 #define	SCALE_VS_INIT(p, v) \
 	do { (p)->unit = SCALE_VS; \
-	     (p)->scale = (v); } while (/*CONSTCOND*/0)
+	     (p)->scale = (v); \
+	     (p)->pt = 0; } while (/*CONSTCOND*/0)
 #define	SCALE_HS_INIT(p, v) \
 	do { (p)->unit = SCALE_BU; \
-	     (p)->scale = (v); } while (/*CONSTCOND*/0)
+	     (p)->scale = (v); \
+	     (p)->pt = 0; } while (/*CONSTCOND*/0)
 
 int		  a2roffsu(const char *, struct roffsu *);
 
