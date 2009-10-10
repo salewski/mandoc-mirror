@@ -1455,6 +1455,7 @@ mdoc_cd_pre(MDOC_ARGS)
 {
 	struct htmlpair	tag;
 
+	print_otag(h, TAG_DIV, 0, NULL);
 	PAIR_CLASS_INIT(&tag, "config");
 	print_otag(h, TAG_SPAN, 1, &tag);
 	return(1);
