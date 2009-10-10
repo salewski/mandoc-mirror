@@ -159,7 +159,7 @@ void
 term_flushln(struct termp *p)
 {
 	int		 i, j;
-	size_t		 vbl, vsz, vis, maxvis, mmax, bp;
+	size_t		 vbl, vsz, vis, maxvis, mmax, bp, os;
 	static int	 overstep = 0;
 
 	/*
@@ -171,6 +171,9 @@ term_flushln(struct termp *p)
 
 	assert(p->offset < p->rmargin);
 	assert((int)(p->rmargin - p->offset) - overstep > 0);
+
+	/* Save the overstep. */
+	os = (size_t)overstep;
 
 	maxvis = /* LINTED */
 		p->rmargin - p->offset - overstep;
@@ -233,6 +236,9 @@ term_flushln(struct termp *p)
 					putchar(' ');
 				vis = 0;
 			}
+			/* Remove the overstep width. */
+			bp += os;
+			os = 0;
 		} else {
 			for (j = 0; j < (int)vbl; j++)
 				putchar(' ');

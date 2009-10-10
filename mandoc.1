@@ -374,6 +374,26 @@ retains spaces.
 .It
 Sentences are unilaterally monospaced.
 .El
+.
+.Ss HTML output
+.Bl -bullet -compact
+.It
+The
+.Xr mdoc 7
+.Sq \&Bl \-hang
+and
+.Sq \&Bl \-tag
+list types render similarly (no break following overreached left-hand
+side) due to the expressive constraints of HTML.
+.
+.It
+The
+.Xr man 7
+.Sq IP
+and
+.Sq TP
+lists render similarly.
+.El
 .\" SECTION
 .Sh SEE ALSO
 .Xr mandoc_char 7 ,
