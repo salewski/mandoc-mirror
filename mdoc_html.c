@@ -29,6 +29,7 @@
 #include "out.h"
 #include "html.h"
 #include "mdoc.h"
+#include "main.h"
 
 #define	INDENT		 5
 #define	HALFINDENT	 3

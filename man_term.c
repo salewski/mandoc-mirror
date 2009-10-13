@@ -23,8 +23,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "term.h"
 #include "man.h"
+#include "term.h"
+#include "chars.h"
+#include "main.h"
 
 #define	INDENT		  7
 #define	HALFINDENT	  3
@@ -140,20 +142,38 @@ static	int		  arg_width(const struct man_node *);
 
 
 void
-man_run(struct termp *p, const struct man *m)
+terminal_man(void *arg, const struct man *man)
 {
-	struct mtermp	 mt;
+	struct termp		*p;
+	const struct man_node	*n;
+	const struct man_meta	*m;
+	struct mtermp		 mt;
 
-	print_head(p, man_meta(m));
+	p = (struct termp *)arg;
+
+	if (NULL == p->symtab)
+		switch (p->enc) {
+		case (TERMENC_ASCII):
+			p->symtab = chars_init(CHARS_ASCII);
+			break;
+		default:
+			abort();
+			/* NOTREACHED */
+		}
+
+	n = man_node(man);
+	m = man_meta(man);
+
+	print_head(p, m);
 	p->flags |= TERMP_NOSPACE;
 
 	mt.fl = 0;
 	mt.lmargin = INDENT;
 	mt.offset = INDENT;
 
-	if (man_node(m)->child)
-		print_body(p, &mt, man_node(m)->child, man_meta(m));
-	print_foot(p, man_meta(m));
+	if (n->child)
+		print_body(p, &mt, n->child, m);
+	print_foot(p, m);
 }
 
 

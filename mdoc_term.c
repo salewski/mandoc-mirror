@@ -25,6 +25,8 @@
 
 #include "term.h"
 #include "mdoc.h"
+#include "chars.h"
+#include "main.h"
 
 #define	INDENT		  5
 #define	HALFINDENT	  3
@@ -257,10 +259,23 @@ static	void	  print_foot(DECL_ARGS);
 
 
 void
-mdoc_run(struct termp *p, const struct mdoc *mdoc)
+terminal_mdoc(void *arg, const struct mdoc *mdoc)
 {
 	const struct mdoc_node	*n;
 	const struct mdoc_meta	*m;
+	struct termp		*p;
+
+	p = (struct termp *)arg;
+
+	if (NULL == p->symtab)
+		switch (p->enc) {
+		case (TERMENC_ASCII):
+			p->symtab = chars_init(CHARS_ASCII);
+			break;
+		default:
+			abort();
+			/* NOTREACHED */
+		}
 
 	n = mdoc_node(mdoc);
 	m = mdoc_meta(mdoc);

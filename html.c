@@ -29,6 +29,7 @@
 #include "out.h"
 #include "chars.h"
 #include "html.h"
+#include "main.h"
 
 #define	UNCONST(a)	((void *)(uintptr_t)(const void *)(a))
 

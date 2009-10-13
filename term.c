@@ -24,14 +24,10 @@
 #include "term.h"
 #include "man.h"
 #include "mdoc.h"
+#include "main.h"
 
 /* FIXME: accomodate non-breaking, non-collapsing white-space. */
 /* FIXME: accomodate non-breaking, collapsing white-space. */
-
-extern	void		  man_run(struct termp *, 
-				const struct man *);
-extern	void		  mdoc_run(struct termp *, 
-				const struct mdoc *);
 
 static	struct termp	 *term_alloc(enum termenc);
 static	void		  term_free(struct termp *);
@@ -50,32 +46,6 @@ ascii_alloc(void)
 {
 
 	return(term_alloc(TERMENC_ASCII));
-}
-
-
-void
-terminal_man(void *arg, const struct man *man)
-{
-	struct termp	*p;
-
-	p = (struct termp *)arg;
-	if (NULL == p->symtab)
-		p->symtab = chars_init(CHARS_ASCII);
-
-	man_run(p, man);
-}
-
-
-void
-terminal_mdoc(void *arg, const struct mdoc *mdoc)
-{
-	struct termp	*p;
-
-	p = (struct termp *)arg;
-	if (NULL == p->symtab)
-		p->symtab = chars_init(CHARS_ASCII);
-
-	mdoc_run(p, mdoc);
 }
 
 

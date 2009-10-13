@@ -27,6 +27,7 @@
 #include "out.h"
 #include "html.h"
 #include "man.h"
+#include "main.h"
 
 /* TODO: preserve ident widths. */
 

@@ -21,6 +21,7 @@
 
 #include "mdoc.h"
 #include "man.h"
+#include "main.h"
 
 static	void	print_mdoc(const struct mdoc_node *, int);
 static	void	print_man(const struct man_node *, int);

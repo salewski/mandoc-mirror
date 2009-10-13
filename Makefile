@@ -54,7 +54,7 @@ SRCS	   = $(MDOCSRCS) $(MAINSRCS) $(MANSRCS)
 DATAS	   = arch.in att.in lib.in msec.in st.in \
 	     vol.in chars.in
 HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
-	     libmandoc.h html.h chars.h out.h
+	     libmandoc.h html.h chars.h out.h main.h
 GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml manuals.7.sgml \
 	     mandoc_char.7.sgml man.7.sgml man.3.sgml
 SGMLS	   = index.sgml $(GSGMLS)
