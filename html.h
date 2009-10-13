@@ -77,7 +77,7 @@ SLIST_HEAD(ordq, ord);
 
 struct	htmlpair {
 	enum htmlattr	  key;
-	char		 *val;
+	const char	 *val;
 };
 
 #define	PAIR_CLASS_INIT(p, v) \

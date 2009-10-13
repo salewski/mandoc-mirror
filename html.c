@@ -21,6 +21,7 @@
 #include <err.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -29,11 +30,13 @@
 #include "chars.h"
 #include "html.h"
 
+#define	UNCONST(a)	((void *)(uintptr_t)(const void *)(a))
+
 #define	DOCTYPE		"-//W3C//DTD HTML 4.01//EN"
 #define	DTD		"http://www.w3.org/TR/html4/strict.dtd"
 
 struct	htmldata {
-	char		 *name;
+	const char	 *name;
 	int		  flags;
 #define	HTML_CLRLINE	 (1 << 0)
 #define	HTML_NOSTACK	 (1 << 1)
@@ -87,7 +90,8 @@ void *
 html_alloc(char *outopts)
 {
 	struct html	*h;
-	char		*toks[4], *v;
+	const char	*toks[4];
+	char		*v;
 
 	toks[0] = "style";
 	toks[1] = "man";
@@ -106,7 +110,7 @@ html_alloc(char *outopts)
 	}
 
 	while (outopts && *outopts)
-		switch (getsubopt(&outopts, toks, &v)) {
+		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
 		case (0):
 			h->style = v;
 			break;
@@ -600,7 +604,7 @@ void
 bufcat_su(struct html *h, const char *p, const struct roffsu *su)
 {
 	double		 v;
-	char		*u;
+	const char	*u;
 
 	v = su->scale;
 

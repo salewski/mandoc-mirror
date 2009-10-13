@@ -20,12 +20,15 @@
 #include <err.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "mdoc.h"
 #include "man.h"
+
+#define	UNCONST(a)	((void *)(uintptr_t)(const void *)(a))
 
 /* Account for FreeBSD and Linux in our declarations. */
 
@@ -576,7 +579,7 @@ static int
 foptions(int *fflags, char *arg)
 {
 	char		*v, *o;
-	char		*toks[7];
+	const char	*toks[7];
 
 	toks[0] = "ign-scope";
 	toks[1] = "no-ign-escape";
@@ -588,7 +591,7 @@ foptions(int *fflags, char *arg)
 
 	while (*arg) {
 		o = arg;
-		switch (getsubopt(&arg, toks, &v)) {
+		switch (getsubopt(&arg, UNCONST(toks), &v)) {
 		case (0):
 			*fflags |= IGN_SCOPE;
 			break;
@@ -622,7 +625,7 @@ static int
 woptions(int *wflags, char *arg)
 {
 	char		*v, *o;
-	char		*toks[3]; 
+	const char	*toks[3]; 
 
 	toks[0] = "all";
 	toks[1] = "error";
@@ -630,7 +633,7 @@ woptions(int *wflags, char *arg)
 
 	while (*arg) {
 		o = arg;
-		switch (getsubopt(&arg, toks, &v)) {
+		switch (getsubopt(&arg, UNCONST(toks), &v)) {
 		case (0):
 			*wflags |= WARN_WALL;
 			break;

@@ -13,7 +13,7 @@ VERSION	   = 1.9.8
 VDATE	   = 10 October 2009
 
 VFLAGS     = -DVERSION=\"$(VERSION)\"
-CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -g
+CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -g
 CFLAGS    += $(VFLAGS)
 LINTFLAGS += $(VFLAGS)
 
