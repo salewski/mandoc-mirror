@@ -76,13 +76,32 @@ Note that each output mode will have a different rendering of the
 characters.  It's guaranteed that each input symbol will correspond to a
 (more or less) meaningful output rendering, regardless the mode.
 .
+.Ss ASCII output
+Formatting documents with ASCII output results in a 7-bit ASCII
+approximation of zero or more characters, for example, the
+.Dq aleph
+character
+.Sq \e(Ah
+will render as
+.Sq N .
+Approximations are a best-effort, and naturally some clarity will be lost.
 .
-.Sh Special Characters
+.Ss HTML output
+The HTML output mode uses decimal-encoded UTF-8 for sequences, for
+example, the
+.Dq aleph
+character
+.Sq \e(Ah
+will render as
+.Sq &#8501; .
+.
+.
+.Sh SPECIAL CHARACTERS
 These are the preferred input symbols for producing special characters.
 .
 .Pp
 Spacing:
-.Bl -compact -offset indent -column 10m 20m
+.Bl -column -compact -offset indent 10m 20m
 .It Em Input Ta Em Description
 .It \e~      Ta non-breaking, non-collapsing space
 .It \e       Ta breaking, non-collapsing n-width space
@@ -95,7 +114,7 @@ Spacing:
 .
 .Pp
 Lines:
-.Bl -compact -offset indent -column 10m 10m 10m
+.Bl -column -compact -offset indent 10m 10m 10m
 .It Em Input Ta Em Rendered Ta Em Description
 .It \e(ba    Ta \(ba        Ta bar
 .It \e(br    Ta \(br        Ta box rule
@@ -108,7 +127,7 @@ Lines:
 .
 .Pp
 Text markers:
-.Bl -compact -offset indent -column 10m 10m 10m
+.Bl -column -compact -offset indent 10m 10m 10m
 .It Em Input Ta Em Rendered Ta Em Description
 .It \e(ci    Ta \(ci        Ta circle
 .It \e(bu    Ta \(bu        Ta bullet
@@ -575,6 +594,19 @@ having no known representation:
 .
 .Sh SEE ALSO
 .Xr mandoc 1
+.
+.
+.Sh STANDARDS
+.Rs
+.%A The Unicode Consortium
+.%T The Unicode Standard: Worldwide Character Encoding, Version 5.2
+.%D 1991
+.Re
+.Rs
+.%A W3C
+.%T HTML 4.01 Specification
+.%D December, 1999
+.Re
 .
 .
 .Sh AUTHORS
