@@ -1357,6 +1357,8 @@ mdoc_bd_pre(MDOC_ARGS)
 		case (MDOC_Compact):
 			comp = 1;
 			break;
+		case (MDOC_Centred):
+			/* FALLTHROUGH */
 		case (MDOC_Ragged):
 			/* FALLTHROUGH */
 		case (MDOC_Filled):
@@ -1365,6 +1367,8 @@ mdoc_bd_pre(MDOC_ARGS)
 			/* FALLTHROUGH */
 		case (MDOC_Literal):
 			type = bl->args->argv[i].arg;
+			break;
+		default:
 			break;
 		}
 

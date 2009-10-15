@@ -1559,6 +1559,8 @@ termp_bd_pre(DECL_ARGS)
 
 	for (type = -1, i = 0; i < (int)nn->args->argc; i++) {
 		switch (nn->args->argv[i].arg) {
+		case (MDOC_Centred):
+			/* FALLTHROUGH */
 		case (MDOC_Ragged):
 			/* FALLTHROUGH */
 		case (MDOC_Filled):

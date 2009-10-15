@@ -591,6 +591,8 @@ argv_a2arg(int tok, const char *p)
 			return(MDOC_Offset);
 		else if (0 == strcmp(p, "compact"))
 			return(MDOC_Compact);
+		else if (0 == strcmp(p, "centered"))
+			return(MDOC_Centred);
 		break;
 
 	case (MDOC_Bf):
