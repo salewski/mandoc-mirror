@@ -621,25 +621,33 @@ pre_bl(PRE_ARGS)
 		case (MDOC_Inset):
 			/* FALLTHROUGH */
 		case (MDOC_Column):
-			if (-1 != type) 
+			if (type >= 0) 
 				return(mdoc_nerr(mdoc, n, EMULTILIST));
 			type = n->args->argv[pos].arg;
 			break;
+		case (MDOC_Compact):
+			if (type < 0 && ! mdoc_nwarn(mdoc, n, ENOTYPE))
+				return(0);
+			break;
 		case (MDOC_Width):
-			if (-1 != width)
+			if (width >= 0)
 				return(mdoc_nerr(mdoc, n, EARGREP));
+			if (type < 0 && ! mdoc_nwarn(mdoc, n, ENOTYPE))
+				return(0);
 			width = n->args->argv[pos].arg;
 			break;
 		case (MDOC_Offset):
-			if (-1 != offset)
+			if (offset >= 0)
 				return(mdoc_nerr(mdoc, n, EARGREP));
+			if (type < 0 && ! mdoc_nwarn(mdoc, n, ENOTYPE))
+				return(0);
 			offset = n->args->argv[pos].arg;
 			break;
 		default:
 			break;
 		}
 
-	if (-1 == type)
+	if (type < 0)
 		return(mdoc_nerr(mdoc, n, ELISTTYPE));
 
 	/* 
@@ -650,7 +658,7 @@ pre_bl(PRE_ARGS)
 
 	switch (type) {
 	case (MDOC_Tag):
-		if (-1 == width && ! mdoc_nwarn(mdoc, n, EMISSWIDTH))
+		if (width < 0 && ! mdoc_nwarn(mdoc, n, EMISSWIDTH))
 			return(0);
 		break;
 	case (MDOC_Column):
@@ -660,7 +668,7 @@ pre_bl(PRE_ARGS)
 	case (MDOC_Inset):
 		/* FALLTHROUGH */
 	case (MDOC_Item):
-		if (-1 != width && ! mdoc_nwarn(mdoc, n, ENOWIDTH))
+		if (width >= 0 && ! mdoc_nwarn(mdoc, n, ENOWIDTH))
 			return(0);
 		break;
 	default:

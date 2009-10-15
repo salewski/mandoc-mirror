@@ -93,6 +93,7 @@ enum	merr {
 	ENOCTX,
 	ELIB,
 	EBADCHILD,
+	ENOTYPE,
 	MERRMAX
 };
 
