@@ -234,22 +234,10 @@ mandoc: $(MAINOBJS) libmdoc.a libman.a
 	validate $<
 	sed -e "s!@VERSION@!$(VERSION)!" -e "s!@VDATE@!$(VDATE)!" $< > $@
 
-.1.1.txt:
+.1.1.txt .3.3.txt .7.7.txt:
 	./mandoc $(MANDOCFLAGS) $< | col -b > $@
 
-.1.1.sgml:
-	./mandoc $(MANDOCFLAGS) $(MANDOCHTML) $< > $@
-
-.3.3.txt:
-	./mandoc $(MANDOCFLAGS) $< | col -b > $@
-
-.3.3.sgml:
-	./mandoc $(MANDOCFLAGS) $(MANDOCHTML) $< > $@
-
-.7.7.txt:
-	./mandoc $(MANDOCFLAGS) $< | col -b > $@
-
-.7.7.sgml:
+.1.1.sgml 3.3.sgml .7.7.sgml:
 	./mandoc $(MANDOCFLAGS) $(MANDOCHTML) $< > $@
 
 .tar.gz.md5:
