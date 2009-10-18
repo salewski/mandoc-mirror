@@ -74,6 +74,7 @@ static	int	 eerr_eq0(POST_ARGS);
 static	int	 eerr_eq1(POST_ARGS);
 static	int	 eerr_ge1(POST_ARGS);
 static	int	 eerr_le2(POST_ARGS);
+static	int	 eerr_le1(POST_ARGS);
 static	int	 ewarn_ge1(POST_ARGS);
 static	int	 herr_eq0(POST_ARGS);
 static	int	 herr_ge1(POST_ARGS);
@@ -93,7 +94,6 @@ static	int	 post_rs(POST_ARGS);
 static	int	 post_sh(POST_ARGS);
 static	int	 post_sh_body(POST_ARGS);
 static	int	 post_sh_head(POST_ARGS);
-static	int	 post_sp(POST_ARGS);
 static	int	 post_st(POST_ARGS);
 static	int	 pre_an(PRE_ARGS);
 static	int	 pre_bd(PRE_ARGS);
@@ -128,7 +128,7 @@ static	v_post	 posts_notext[] = { eerr_eq0, NULL };
 static	v_post	 posts_pf[] = { eerr_eq1, NULL };
 static	v_post	 posts_rs[] = { berr_ge1, herr_eq0, post_rs, NULL };
 static	v_post	 posts_sh[] = { herr_ge1, bwarn_ge1, post_sh, NULL };
-static	v_post	 posts_sp[] = { post_sp, NULL };
+static	v_post	 posts_sp[] = { eerr_le1, NULL };
 static	v_post	 posts_ss[] = { herr_ge1, NULL };
 static	v_post	 posts_st[] = { eerr_eq1, post_st, NULL };
 static	v_post	 posts_text[] = { eerr_ge1, NULL };
@@ -408,6 +408,7 @@ CHECK_BODY_DEFN(ge1, err, err_child_gt, 0)	/* berr_ge1() */
 CHECK_ELEM_DEFN(ge1, warn, warn_child_gt, 0)	/* ewarn_gt1() */
 CHECK_ELEM_DEFN(eq1, err, err_child_eq, 1)	/* eerr_eq1() */
 CHECK_ELEM_DEFN(le2, err, err_child_lt, 3)	/* eerr_le2() */
+CHECK_ELEM_DEFN(le1, err, err_child_lt, 2)	/* eerr_le1() */
 CHECK_ELEM_DEFN(eq0, err, err_child_eq, 0)	/* eerr_eq0() */
 CHECK_ELEM_DEFN(ge1, err, err_child_gt, 0)	/* eerr_ge1() */
 CHECK_HEAD_DEFN(eq0, err, err_child_eq, 0)	/* herr_eq0() */
@@ -1132,37 +1133,6 @@ post_root(POST_ARGS)
 
 	return(1);
 }
-
-
-static int
-post_sp(POST_ARGS)
-{
-	long		 lval;
-	char		*ep, *buf;
-
-	if (NULL == mdoc->last->child)
-		return(1);
-	else if ( ! eerr_eq1(mdoc))
-		return(0);
-
-	assert(MDOC_TEXT == mdoc->last->child->type);
-	buf = mdoc->last->child->string;
-	assert(buf);
-	
-	/* From OpenBSD's strtol(3). */
-	errno = 0;
-	lval = strtol(buf, &ep, 10);
-	if (buf[0] == '\0' || *ep != '\0')
-		return(mdoc_nerr(mdoc, mdoc->last->child, ENUMFMT));
-
-	if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN)) ||
-			(lval > INT_MAX || lval < 0))
-		return(mdoc_nerr(mdoc, mdoc->last->child, ENUMFMT));
-
-	return(1);
-}
-
-
 
 
 static int
