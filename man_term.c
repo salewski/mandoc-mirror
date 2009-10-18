@@ -140,6 +140,7 @@ static	void		  print_foot(struct termp *,
 static	void		  fmt_block_vspace(struct termp *, 
 				const struct man_node *);
 static	int		  a2width(const char *);
+static	int		  a2height(const char *);
 
 
 void
@@ -192,6 +193,46 @@ fmt_block_vspace(struct termp *p, const struct man_node *n)
 		return;
 
 	term_vspace(p);
+}
+
+
+static int
+a2height(const char *p)
+{
+	struct roffsu	 su;
+	double		 r;
+
+	if ( ! a2roffsu(p, &su)) 
+		return(1);
+
+	switch (su.unit) {
+	case (SCALE_CM):
+		r = su.scale * 2;
+		break;
+	case (SCALE_IN):
+		r = su.scale * 6;
+		break;
+	case (SCALE_PC):
+		r = su.scale;
+		break;
+	case (SCALE_PT):
+		r = su.scale / 8;
+		break;
+	case (SCALE_MM):
+		r = su.scale / 1000;
+		break;
+	case (SCALE_VS):
+		r = su.scale;
+		break;
+	default:
+		r = su.scale - 1;
+		break;
+	}
+
+	if (r < 0.0)
+		r = 0.0;
+	return(/* LINTED */(int)
+			r);
 }
 
 
@@ -435,7 +476,9 @@ pre_sp(DECL_ARGS)
 		return(0);
 	}
 
-	len = atoi(n->child->string);
+	assert(MAN_TEXT == n->child->type);
+	len = a2height(n->child->string);
+
 	if (0 == len)
 		term_newln(p);
 	for (i = 0; i < len; i++)
