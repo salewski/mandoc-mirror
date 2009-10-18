@@ -25,30 +25,17 @@
 
 /* 
  * Convert a `scaling unit' to a consistent form, or fail.  Scaling
- * units are documented in groff.7, which stipulates the following:
- *
- *  (1) A scaling unit is a signed/unsigned integer/float with or
- *      without a unit.
- *
- *  (2) The following units exist:
- *	c	Centimeter
- *	i	Inch
- *	P	Pica = 1/6 inch
- *	p	Point = 1/72 inch
- *	m	Em = the font size in points (width of letter m)
- *	M	100th of an Em 
- *	n	En = Em/2 
- *	u	Basic unit for actual output device
- *	v	Vertical line space in basic units scaled point =
- *		1/sizescale of a point (defined in font DESC file)
- *	f	Scale by 65536.
+ * units are documented in groff.7, mdoc.7, man.7.
  */
 int
-a2roffsu(const char *src, struct roffsu *dst)
+a2roffsu(const char *src, struct roffsu *dst, enum roffscale def)
 {
 	char		 buf[BUFSIZ], hasd;
 	int		 i;
 	enum roffscale	 unit;
+
+	if ('\0' == *src)
+		return(0);
 
 	i = hasd = 0;
 
@@ -62,6 +49,9 @@ a2roffsu(const char *src, struct roffsu *dst)
 	default:
 		break;
 	}
+
+	if ('\0' == *src)
+		return(0);
 
 	while (i < BUFSIZ) {
 		if ( ! isdigit((u_char)*src)) {
@@ -103,7 +93,10 @@ a2roffsu(const char *src, struct roffsu *dst)
 		unit = SCALE_EM;
 		break;
 	case ('\0'):
-		/* FALLTHROUGH */
+		if (SCALE_MAX == def)
+			return(0);
+		unit = SCALE_BU;
+		break;
 	case ('u'):
 		unit = SCALE_BU;
 		break;

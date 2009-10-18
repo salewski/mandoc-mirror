@@ -50,7 +50,8 @@ struct	roffsu {
 	     (p)->scale = (v); \
 	     (p)->pt = 0; } while (/*CONSTCOND*/0)
 
-int		  a2roffsu(const char *, struct roffsu *);
+int		  a2roffsu(const char *, 
+			struct roffsu *, enum roffscale);
 
 __END_DECLS
 
