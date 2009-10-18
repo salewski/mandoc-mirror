@@ -55,7 +55,7 @@
 					Sources correctly build and install on FreeBSD, OpenBSD, NetBSD and Linux operating systems, tested
 					variously on i386, AMD64, alpha, and others.  The most current version is <span
 					class="attn">@VERSION@</span>, dated <span class="attn">@VDATE@</span>.  A full <a
-					href="ChangeLog.txt">ChangeLog</a> is written with each release.
+					href="ChangeLog.html">ChangeLog</a> [<a href="ChangeLog.txt">txt</a>] is written with each release.
 					</p>
 
 					<h2>
