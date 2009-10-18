@@ -27,6 +27,7 @@
 #include "term.h"
 #include "chars.h"
 #include "main.h"
+#include "out.h"
 
 #define	INDENT		  7
 #define	HALFINDENT	  3
@@ -138,7 +139,7 @@ static	void		  print_foot(struct termp *,
 				const struct man_meta *);
 static	void		  fmt_block_vspace(struct termp *, 
 				const struct man_node *);
-static	int		  arg_width(const struct man_node *);
+static	int		  a2width(const char *);
 
 
 void
@@ -195,30 +196,42 @@ fmt_block_vspace(struct termp *p, const struct man_node *n)
 
 
 static int
-arg_width(const struct man_node *n)
+a2width(const char *p)
 {
-	int		 i, len;
-	const char	*p;
+	struct roffsu	 su;
+	double		 r;
 
-	assert(MAN_TEXT == n->type);
-	assert(n->string);
-
-	p = n->string;
-
-	if (0 == (len = (int)strlen(p)))
+	if ( ! a2roffsu(p, &su)) 
 		return(-1);
 
-	for (i = 0; i < len; i++) 
-		if ( ! isdigit((u_char)p[i]))
-			break;
+	switch (su.unit) {
+	case (SCALE_CM):
+		r = 4 * su.scale;
+		break;
+	case (SCALE_IN):
+		r = 10 * su.scale;
+		break;
+	case (SCALE_PC):
+		r = 2 * su.scale;
+		break;
+	case (SCALE_PT):
+		r = (su.scale / 10) + 1;
+		break;
+	case (SCALE_MM):
+		r = su.scale / 1000;
+		break;
+	case (SCALE_VS):
+		r = su.scale * 2 - 1;
+		break;
+	default:
+		r = su.scale + 1;
+		break;
+	}
 
-	if (i == len - 1)  {
-		if ('n' == p[len - 1] || 'm' == p[len - 1])
-			return(atoi(p));
-	} else if (i == len)
-		return(atoi(p));
-
-	return(-1);
+	if (r < 0.0)
+		r = 0.0;
+	return((int)/* LINTED */
+			r);
 }
 
 
@@ -467,9 +480,11 @@ pre_HP(DECL_ARGS)
 
 	/* Calculate offset. */
 
-	if (NULL != (nn = n->parent->head->child))
-		if ((ival = arg_width(nn)) >= 0)
+	if (NULL != (nn = n->parent->head->child)) {
+		assert(MAN_TEXT == nn->type);
+		if ((ival = a2width(nn->string)) >= 0)
 			len = (size_t)ival;
+	}
 
 	if (0 == len)
 		len = 1;
@@ -558,7 +573,8 @@ pre_IP(DECL_ARGS)
 		if (NULL != (nn = nn->next)) {
 			for ( ; nn->next; nn = nn->next)
 				/* Do nothing. */ ;
-			if ((ival = arg_width(nn)) >= 0)
+			assert(MAN_TEXT == nn->type);
+			if ((ival = a2width(nn->string)) >= 0)
 				len = (size_t)ival;
 		}
 
@@ -644,9 +660,11 @@ pre_TP(DECL_ARGS)
 	/* Calculate offset. */
 
 	if (NULL != (nn = n->parent->head->child))
-		if (NULL != nn->next)
-			if ((ival = arg_width(nn)) >= 0)
+		if (NULL != nn->next) {
+			assert(MAN_TEXT == nn->type);
+			if ((ival = a2width(nn->string)) >= 0)
 				len = (size_t)ival;
+		}
 
 	switch (n->type) {
 	case (MAN_HEAD):
@@ -823,7 +841,8 @@ pre_RS(DECL_ARGS)
 		return(1);
 	}
 
-	if ((ival = arg_width(nn)) < 0)
+	assert(MAN_TEXT == nn->type);
+	if ((ival = a2width(nn->string)) < 0)
 		return(1);
 
 	mt->offset = INDENT + (size_t)ival;

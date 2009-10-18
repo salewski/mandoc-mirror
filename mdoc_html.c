@@ -343,6 +343,8 @@ static void
 a2offs(const char *p, struct roffsu *su)
 {
 
+	/* FIXME: "right"? */
+
 	if (0 == strcmp(p, "left"))
 		SCALE_HS_INIT(su, 0);
 	else if (0 == strcmp(p, "indent"))
@@ -1371,6 +1373,8 @@ mdoc_bd_pre(MDOC_ARGS)
 		default:
 			break;
 		}
+
+	/* FIXME: -centered, etc. formatting. */
 
 	if (MDOC_BLOCK == n->type) {
 		bufcat_su(h, "margin-left", &su);
