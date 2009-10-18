@@ -73,6 +73,7 @@ whitespace are stripped from input.
 .
 .Ss Reserved Characters
 Within a macro line, the following characters are reserved:
+.Pp
 .Bl -tag -width Ds -offset indent -compact
 .It \&.
 .Pq period
@@ -207,6 +208,59 @@ considered literal text.  Thus, the following produces
 .
 .Pp
 In free-form mode, quotes are regarded as opaque text.
+.
+.Ss Scaling Widths
+Many macros support scaled widths for their arguments, such as
+stipulating a two-inch list indentation with the following:
+.Bd -literal -offset indent
+\&.Bl -tag -width 2i
+.Ed
+.
+.Pp
+The syntax for scaled widths is
+.Sq Li [+-]?[0-9]*.[0-9]*[unit] ,
+where a decimal must be preceded or proceeded by at least one digit.
+Negative numbers, while accepted, are truncated to zero.  The following
+scaling units are accepted:
+.Pp
+.Bl -tag -width Ds -offset indent -compact
+.It c
+centimetre
+.It i
+inch
+.It P
+pica (~1/6 inch)
+.It p
+point (~1/72 inch)
+.It f
+synonym for
+.Sq u
+.It v
+default vertical span
+.It m
+width of rendered
+.Sq m
+.Pq em
+character
+.It n
+width of rendered
+.Sq n
+.Pq en
+character
+.It u
+default horizontal span
+.It M
+mini-em (~1/100 em)
+.El
+.Pp
+Using anything other than
+.Sq m ,
+.Sq n ,
+.Sq u ,
+or
+.Sq v
+is necessarily non-portable across output media.  See
+.Sx COMPATIBILITY .
 .
 .
 .Sh MANUAL STRUCTURE
@@ -544,6 +598,13 @@ file re-write
 .
 .Pp
 .Bl -dash -compact
+.It
+Negative scaling units are now truncated to zero instead of creating
+interesting conditions, such as with
+.Sq \&sp -1i .
+Furthermore, the
+.Sq f
+scaling unit, while accepted, is rendered as the default unit.
 .It
 The
 .Sq \-split

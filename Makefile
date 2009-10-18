@@ -237,7 +237,7 @@ mandoc: $(MAINOBJS) libmdoc.a libman.a
 .1.1.txt .3.3.txt .7.7.txt:
 	./mandoc $(MANDOCFLAGS) $< | col -b > $@
 
-.1.1.sgml 3.3.sgml .7.7.sgml:
+.1.1.sgml .3.3.sgml .7.7.sgml:
 	./mandoc $(MANDOCFLAGS) $(MANDOCHTML) $< > $@
 
 .tar.gz.md5:
