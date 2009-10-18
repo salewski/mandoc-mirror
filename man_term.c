@@ -27,7 +27,6 @@
 #include "term.h"
 #include "chars.h"
 #include "main.h"
-#include "out.h"
 
 #define	INDENT		  7
 #define	HALFINDENT	  3
@@ -61,6 +60,23 @@ struct	termact {
 	int		(*pre)(DECL_ARGS);
 	void		(*post)(DECL_ARGS);
 };
+
+#ifdef __linux__
+extern	size_t		  strlcpy(char *, const char *, size_t);
+extern	size_t		  strlcat(char *, const char *, size_t);
+#endif
+
+static	int		  arg2width(const struct man_node *);
+static	int		  arg2height(const struct man_node *);
+
+static	void		  print_head(struct termp *, 
+				const struct man_meta *);
+static	void		  print_body(DECL_ARGS);
+static	void		  print_node(DECL_ARGS);
+static	void		  print_foot(struct termp *, 
+				const struct man_meta *);
+static	void		  print_bvspace(struct termp *, 
+				const struct man_node *);
 
 static	int		  pre_B(DECL_ARGS);
 static	int		  pre_BI(DECL_ARGS);
@@ -126,21 +142,6 @@ static	const struct termact termacts[MAN_MAX] = {
 	{ pre_ign, NULL }, /* UC */
 };
 
-#ifdef __linux__
-extern	size_t		  strlcpy(char *, const char *, size_t);
-extern	size_t		  strlcat(char *, const char *, size_t);
-#endif
-
-static	void		  print_head(struct termp *, 
-				const struct man_meta *);
-static	void		  print_body(DECL_ARGS);
-static	void		  print_node(DECL_ARGS);
-static	void		  print_foot(struct termp *, 
-				const struct man_meta *);
-static	void		  fmt_block_vspace(struct termp *, 
-				const struct man_node *);
-static	int		  a2width(const char *);
-static	int		  a2height(const char *);
 
 
 void
@@ -179,8 +180,33 @@ terminal_man(void *arg, const struct man *man)
 }
 
 
+static int
+arg2height(const struct man_node *n)
+{
+	int		r;
+
+	assert(MAN_TEXT == n->type);
+	assert(n->string);
+
+	if ((r = a2height(n->string)) < 0)
+		return(1);
+
+	return(r);
+}
+
+
+static int
+arg2width(const struct man_node *n)
+{
+
+	assert(MAN_TEXT == n->type);
+	assert(n->string);
+	return(a2width(n->string));
+}
+
+
 static void
-fmt_block_vspace(struct termp *p, const struct man_node *n)
+print_bvspace(struct termp *p, const struct man_node *n)
 {
 	term_newln(p);
 
@@ -193,86 +219,6 @@ fmt_block_vspace(struct termp *p, const struct man_node *n)
 		return;
 
 	term_vspace(p);
-}
-
-
-static int
-a2height(const char *p)
-{
-	struct roffsu	 su;
-	double		 r;
-
-	if ( ! a2roffsu(p, &su)) 
-		return(1);
-
-	switch (su.unit) {
-	case (SCALE_CM):
-		r = su.scale * 2;
-		break;
-	case (SCALE_IN):
-		r = su.scale * 6;
-		break;
-	case (SCALE_PC):
-		r = su.scale;
-		break;
-	case (SCALE_PT):
-		r = su.scale / 8;
-		break;
-	case (SCALE_MM):
-		r = su.scale / 1000;
-		break;
-	case (SCALE_VS):
-		r = su.scale;
-		break;
-	default:
-		r = su.scale - 1;
-		break;
-	}
-
-	if (r < 0.0)
-		r = 0.0;
-	return(/* LINTED */(int)
-			r);
-}
-
-
-static int
-a2width(const char *p)
-{
-	struct roffsu	 su;
-	double		 r;
-
-	if ( ! a2roffsu(p, &su)) 
-		return(-1);
-
-	switch (su.unit) {
-	case (SCALE_CM):
-		r = 4 * su.scale;
-		break;
-	case (SCALE_IN):
-		r = 10 * su.scale;
-		break;
-	case (SCALE_PC):
-		r = 2 * su.scale;
-		break;
-	case (SCALE_PT):
-		r = (su.scale / 10) + 1;
-		break;
-	case (SCALE_MM):
-		r = su.scale / 1000;
-		break;
-	case (SCALE_VS):
-		r = su.scale * 2 - 1;
-		break;
-	default:
-		r = su.scale + 1;
-		break;
-	}
-
-	if (r < 0.0)
-		r = 0.0;
-	return((int)/* LINTED */
-			r);
 }
 
 
@@ -471,13 +417,7 @@ pre_sp(DECL_ARGS)
 {
 	int		 i, len;
 
-	if (NULL == n->child) {
-		term_vspace(p);
-		return(0);
-	}
-
-	assert(MAN_TEXT == n->child->type);
-	len = a2height(n->child->string);
+	len = n->child ? arg2height(n->child) : 1;
 
 	if (0 == len)
 		term_newln(p);
@@ -508,7 +448,7 @@ pre_HP(DECL_ARGS)
 
 	switch (n->type) {
 	case (MAN_BLOCK):
-		fmt_block_vspace(p, n);
+		print_bvspace(p, n);
 		return(1);
 	case (MAN_BODY):
 		p->flags |= TERMP_NOBREAK;
@@ -523,11 +463,9 @@ pre_HP(DECL_ARGS)
 
 	/* Calculate offset. */
 
-	if (NULL != (nn = n->parent->head->child)) {
-		assert(MAN_TEXT == nn->type);
-		if ((ival = a2width(nn->string)) >= 0)
+	if (NULL != (nn = n->parent->head->child))
+		if ((ival = arg2width(nn)) >= 0)
 			len = (size_t)ival;
-	}
 
 	if (0 == len)
 		len = 1;
@@ -572,7 +510,7 @@ pre_PP(DECL_ARGS)
 	switch (n->type) {
 	case (MAN_BLOCK):
 		mt->lmargin = INDENT;
-		fmt_block_vspace(p, n);
+		print_bvspace(p, n);
 		break;
 	default:
 		p->offset = mt->offset;
@@ -601,7 +539,7 @@ pre_IP(DECL_ARGS)
 		p->flags |= TERMP_TWOSPACE;
 		break;
 	case (MAN_BLOCK):
-		fmt_block_vspace(p, n);
+		print_bvspace(p, n);
 		/* FALLTHROUGH */
 	default:
 		return(1);
@@ -616,8 +554,7 @@ pre_IP(DECL_ARGS)
 		if (NULL != (nn = nn->next)) {
 			for ( ; nn->next; nn = nn->next)
 				/* Do nothing. */ ;
-			assert(MAN_TEXT == nn->type);
-			if ((ival = a2width(nn->string)) >= 0)
+			if ((ival = arg2width(nn)) >= 0)
 				len = (size_t)ival;
 		}
 
@@ -691,7 +628,7 @@ pre_TP(DECL_ARGS)
 		p->flags |= TERMP_NOSPACE;
 		break;
 	case (MAN_BLOCK):
-		fmt_block_vspace(p, n);
+		print_bvspace(p, n);
 		/* FALLTHROUGH */
 	default:
 		return(1);
@@ -703,11 +640,9 @@ pre_TP(DECL_ARGS)
 	/* Calculate offset. */
 
 	if (NULL != (nn = n->parent->head->child))
-		if (NULL != nn->next) {
-			assert(MAN_TEXT == nn->type);
-			if ((ival = a2width(nn->string)) >= 0)
+		if (NULL != nn->next)
+			if ((ival = arg2width(nn)) >= 0)
 				len = (size_t)ival;
-		}
 
 	switch (n->type) {
 	case (MAN_HEAD):
@@ -884,8 +819,7 @@ pre_RS(DECL_ARGS)
 		return(1);
 	}
 
-	assert(MAN_TEXT == nn->type);
-	if ((ival = a2width(nn->string)) < 0)
+	if ((ival = arg2width(nn)) < 0)
 		return(1);
 
 	mt->offset = INDENT + (size_t)ival;

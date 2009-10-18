@@ -25,6 +25,7 @@
 #include "man.h"
 #include "mdoc.h"
 #include "main.h"
+#include "out.h"
 
 /* FIXME: accomodate non-breaking, non-collapsing white-space. */
 /* FIXME: accomodate non-breaking, collapsing white-space. */
@@ -558,3 +559,85 @@ encode(struct termp *p, char c)
 	}
 	buffer(p, c);
 }
+
+
+int
+a2height(const char *p)
+{
+	struct roffsu	 su;
+	double		 r;
+
+	if ( ! a2roffsu(p, &su)) 
+		return(-1);
+
+	switch (su.unit) {
+	case (SCALE_CM):
+		r = su.scale * 2;
+		break;
+	case (SCALE_IN):
+		r = su.scale * 6;
+		break;
+	case (SCALE_PC):
+		r = su.scale;
+		break;
+	case (SCALE_PT):
+		r = su.scale / 8;
+		break;
+	case (SCALE_MM):
+		r = su.scale / 1000;
+		break;
+	case (SCALE_VS):
+		r = su.scale;
+		break;
+	default:
+		r = su.scale - 1;
+		break;
+	}
+
+	if (r < 0.0)
+		r = 0.0;
+	return(/* LINTED */(int)
+			r);
+}
+
+
+int
+a2width(const char *p)
+{
+	struct roffsu	 su;
+	double		 r;
+
+	if ( ! a2roffsu(p, &su)) 
+		return(-1);
+
+	switch (su.unit) {
+	case (SCALE_CM):
+		r = (4 * su.scale) + 2; /* FIXME: double-check. */
+		break;
+	case (SCALE_IN):
+		r = (10 * su.scale) + 2; /* FIXME: double-check. */
+		break;
+	case (SCALE_PC):
+		r = (10 * su.scale) / 6; /* FIXME: double-check. */
+		break;
+	case (SCALE_PT):
+		r = (10 * su.scale) / 72; /* FIXME: double-check. */
+		break;
+	case (SCALE_MM):
+		r = su.scale / 1000; /* FIXME: double-check. */
+		break;
+	case (SCALE_VS):
+		r = su.scale * 2 - 1; /* FIXME: double-check. */
+		break;
+	default:
+		r = su.scale + 2;
+		break;
+	}
+
+	if (r < 0.0)
+		r = 0.0;
+	return((int)/* LINTED */
+			r);
+}
+
+

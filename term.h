@@ -53,6 +53,9 @@ void		  term_vspace(struct termp *);
 void		  term_word(struct termp *, const char *);
 void		  term_flushln(struct termp *);
 
+int		  a2width(const char *);
+int		  a2height(const char *);
+
 __END_DECLS
 
 #endif /*!TERM_H*/

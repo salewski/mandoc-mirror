@@ -242,14 +242,16 @@ extern	size_t	  strlcpy(char *, const char *, size_t);
 extern	size_t	  strlcat(char *, const char *, size_t);
 #endif
 
+static	size_t	  arg2width(const struct mdoc_argv *, int);
+static	size_t	  arg2height(const struct mdoc_node *);
+static	size_t	  arg2offs(const struct mdoc_argv *);
+
 static	int	  arg_hasattr(int, const struct mdoc_node *);
 static	int	  arg_getattrs(const int *, int *, size_t,
 			const struct mdoc_node *);
 static	int	  arg_getattr(int, const struct mdoc_node *);
-static	size_t	  arg_offset(const struct mdoc_argv *);
-static	size_t	  arg_width(const struct mdoc_argv *, int);
 static	int	  arg_listtype(const struct mdoc_node *);
-static	void	  fmt_block_vspace(struct termp *,
+static	void	  print_bvspace(struct termp *,
 			const struct mdoc_node *,
 			const struct mdoc_node *);
 static	void  	  print_node(DECL_ARGS);
@@ -470,30 +472,34 @@ print_head(DECL_ARGS)
 }
 
 
-/* FIXME: put in utility file for front-ends. */
 static size_t
-arg_width(const struct mdoc_argv *arg, int pos)
+arg2height(const struct mdoc_node *n)
 {
-	int		 i, len;
-	const char	*p;
+	int		 r;
 
-	assert(pos < (int)arg->sz && pos >= 0);
+	assert(MDOC_TEXT == n->type);
+	assert(n->string);
+
+	if ((r = a2height(n->string)) < 0)
+		return(1);
+
+	return((size_t)r);
+}
+
+
+static size_t
+arg2width(const struct mdoc_argv *arg, int pos)
+{
+	int		 r;
+
 	assert(arg->value[pos]);
+	if ('\0' == arg->value[pos][0])
+		return(2);
 
-	p = arg->value[pos];
+	if ((r = a2width(arg->value[pos])) >= 0)
+		return((size_t)r);
 
-	if (0 == (len = (int)strlen(p)))
-		return(0);
-
-	for (i = 0; i < len - 1; i++) 
-		if ( ! isdigit((u_char)p[i]))
-			break;
-
-	if (i == len - 1) 
-		if ('n' == p[len - 1] || 'm' == p[len - 1])
-			return((size_t)atoi(p) + 2);
-
-	return((size_t)len + 2);
+	return(strlen(arg->value[pos]) + 2);
 }
 
 
@@ -539,35 +545,23 @@ arg_listtype(const struct mdoc_node *n)
 }
 
 
-/* FIXME: put in utility file for front-ends. */
 static size_t
-arg_offset(const struct mdoc_argv *arg)
+arg2offs(const struct mdoc_argv *arg)
 {
-	int		 len, i;
-	const char	*p;
+	int		 r;
 
-	assert(*arg->value);
-	p = *arg->value;
-
-	if (0 == strcmp(p, "left"))
+	if ('\0' == arg->value[0][0])
 		return(0);
-	if (0 == strcmp(p, "indent"))
+	else if (0 == strcmp(arg->value[0], "left"))
+		return(0);
+	else if (0 == strcmp(arg->value[0], "indent"))
 		return(INDENT + 1);
-	if (0 == strcmp(p, "indent-two"))
+	else if (0 == strcmp(arg->value[0], "indent-two"))
 		return((INDENT + 1) * 2);
+	else if ((r = a2width(arg->value[0])) >= 0)
+		return((size_t)r);
 
-	if (0 == (len = (int)strlen(p)))
-		return(0);
-
-	for (i = 0; i < len - 1; i++) 
-		if ( ! isdigit((u_char)p[i]))
-			break;
-
-	if (i == len - 1) 
-		if ('n' == p[len - 1] || 'm' == p[len - 1])
-			return((size_t)atoi(p));
-
-	return((size_t)len);
+	return(strlen(arg->value[0]));
 }
 
 
@@ -607,9 +601,8 @@ arg_getattrs(const int *keys, int *vals,
 }
 
 
-/* ARGSUSED */
 static void
-fmt_block_vspace(struct termp *p, 
+print_bvspace(struct termp *p, 
 		const struct mdoc_node *bl, 
 		const struct mdoc_node *n)
 {
@@ -689,7 +682,7 @@ termp_it_pre(DECL_ARGS)
 	size_t		        width, offset;
 
 	if (MDOC_BLOCK == n->type) {
-		fmt_block_vspace(p, n->parent->parent, n);
+		print_bvspace(p, n->parent->parent, n);
 		return(1);
 	}
 
@@ -732,23 +725,23 @@ termp_it_pre(DECL_ARGS)
 		for (i = 0, nn = n->prev; nn && 
 				i < (int)bl->args->argv[vals[2]].sz; 
 				nn = nn->prev, i++)
-			offset += arg_width 
+			offset += arg2width 
 				(&bl->args->argv[vals[2]], i);
 
 		/* Whether exceeds maximum column. */
 		if (i < (int)bl->args->argv[vals[2]].sz)
-			width = arg_width(&bl->args->argv[vals[2]], i);
+			width = arg2width(&bl->args->argv[vals[2]], i);
 		else
 			width = 0;
 
 		if (vals[1] >= 0) 
-			offset += arg_offset(&bl->args->argv[vals[1]]);
+			offset += arg2offs(&bl->args->argv[vals[1]]);
 		break;
 	default:
 		if (vals[0] >= 0) 
-			width = arg_width(&bl->args->argv[vals[0]], 0);
+			width = arg2width(&bl->args->argv[vals[0]], 0);
 		if (vals[1] >= 0) 
-			offset += arg_offset(&bl->args->argv[vals[1]]);
+			offset += arg2offs(&bl->args->argv[vals[1]]);
 		break;
 	}
 
@@ -1550,7 +1543,7 @@ termp_bd_pre(DECL_ARGS)
 	const struct mdoc_node	*nn;
 
 	if (MDOC_BLOCK == n->type) {
-		fmt_block_vspace(p, n, n);
+		print_bvspace(p, n, n);
 		return(1);
 	} else if (MDOC_BODY != n->type)
 		return(1);
@@ -1571,7 +1564,7 @@ termp_bd_pre(DECL_ARGS)
 			type = nn->args->argv[i].arg;
 			break;
 		case (MDOC_Offset):
-			p->offset += arg_offset(&nn->args->argv[i]);
+			p->offset += arg2offs(&nn->args->argv[i]);
 			break;
 		default:
 			break;
@@ -1822,11 +1815,11 @@ termp_in_post(DECL_ARGS)
 static int
 termp_sp_pre(DECL_ARGS)
 {
-	int		 i, len;
+	size_t		 i, len;
 
 	switch (n->tok) {
 	case (MDOC_sp):
-		len = n->child ? atoi(n->child->string) : 1;
+		len = n->child ? arg2height(n->child) : 1;
 		break;
 	case (MDOC_br):
 		len = 0;
