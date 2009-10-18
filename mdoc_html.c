@@ -327,10 +327,10 @@ static void
 a2width(const char *p, struct roffsu *su)
 {
 
-	if (a2roffsu(p, su))
-		return;
-	su->unit = SCALE_EM;
-	su->scale = (int)strlen(p);
+	if ( ! a2roffsu(p, su, SCALE_MAX)) {
+		su->unit = SCALE_EM;
+		su->scale = (int)strlen(p);
+	}
 }
 
 
@@ -351,7 +351,7 @@ a2offs(const char *p, struct roffsu *su)
 		SCALE_HS_INIT(su, INDENT);
 	else if (0 == strcmp(p, "indent-two"))
 		SCALE_HS_INIT(su, INDENT * 2);
-	else if ( ! a2roffsu(p, su)) {
+	else if ( ! a2roffsu(p, su, SCALE_MAX)) {
 		su->unit = SCALE_EM;
 		su->scale = (int)strlen(p);
 	}

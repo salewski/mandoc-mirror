@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "out.h"
 #include "term.h"
 #include "mdoc.h"
 #include "chars.h"
@@ -475,31 +476,27 @@ print_head(DECL_ARGS)
 static size_t
 arg2height(const struct mdoc_node *n)
 {
-	int		 r;
+	struct roffsu	 su;
 
 	assert(MDOC_TEXT == n->type);
 	assert(n->string);
+	if ( ! a2roffsu(n->string, &su, SCALE_VS))
+		SCALE_VS_INIT(&su, strlen(n->string));
 
-	if ((r = a2height(n->string)) < 0)
-		return(1);
-
-	return((size_t)r);
+	return(term_vspan(&su));
 }
 
 
 static size_t
 arg2width(const struct mdoc_argv *arg, int pos)
 {
-	int		 r;
+	struct roffsu	 su;
 
 	assert(arg->value[pos]);
-	if ('\0' == arg->value[pos][0])
-		return(2);
+	if ( ! a2roffsu(arg->value[pos], &su, SCALE_MAX))
+		SCALE_HS_INIT(&su, strlen(arg->value[pos]) + 2);
 
-	if ((r = a2width(arg->value[pos])) >= 0)
-		return((size_t)r);
-
-	return(strlen(arg->value[pos]) + 2);
+	return(term_hspan(&su));
 }
 
 
@@ -548,7 +545,7 @@ arg_listtype(const struct mdoc_node *n)
 static size_t
 arg2offs(const struct mdoc_argv *arg)
 {
-	int		 r;
+	struct roffsu	 su;
 
 	if ('\0' == arg->value[0][0])
 		return(0);
@@ -558,10 +555,10 @@ arg2offs(const struct mdoc_argv *arg)
 		return(INDENT + 1);
 	else if (0 == strcmp(arg->value[0], "indent-two"))
 		return((INDENT + 1) * 2);
-	else if ((r = a2width(arg->value[0])) >= 0)
-		return((size_t)r);
+	else if ( ! a2roffsu(arg->value[0], &su, SCALE_MAX))
+		SCALE_HS_INIT(&su, strlen(arg->value[0]));
 
-	return(strlen(arg->value[0]));
+	return(term_hspan(&su));
 }
 
 

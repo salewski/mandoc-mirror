@@ -53,8 +53,8 @@ void		  term_vspace(struct termp *);
 void		  term_word(struct termp *, const char *);
 void		  term_flushln(struct termp *);
 
-int		  a2width(const char *);
-int		  a2height(const char *);
+size_t		  term_hspan(const struct roffsu *);
+size_t		  term_vspan(const struct roffsu *);
 
 __END_DECLS
 
