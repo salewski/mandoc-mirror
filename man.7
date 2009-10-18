@@ -119,6 +119,73 @@ from input.  These are later re-added, if applicable, by a front-end
 utility such as
 .Xr mandoc 1 .
 .
+.Ss Scaling Widths
+Many macros support scaled widths for their arguments, such as
+stipulating a two-inch paragraph indentation with the following:
+.Bd -literal -offset indent
+\&.HP 2i
+.Ed
+.
+.Pp
+The syntax for scaled widths is
+.Sq Li [+-]?[0-9]*.[0-9]*[:unit:]? ,
+where a decimal must be preceded or proceeded by at least one digit.
+Negative numbers, while accepted, are truncated to zero.  The following
+scaling units are accepted:
+.
+.Pp
+.Bl -tag -width Ds -offset indent -compact
+.It c
+centimetre
+.It i
+inch
+.It P
+pica (~1/6 inch)
+.It p
+point (~1/72 inch)
+.It f
+synonym for
+.Sq u
+.It v
+default vertical span
+.It m
+width of rendered
+.Sq m
+.Pq em
+character
+.It n
+width of rendered
+.Sq n
+.Pq en
+character
+.It u
+default horizontal span
+.It M
+mini-em (~1/100 em)
+.El
+.Pp
+Using anything other than
+.Sq m ,
+.Sq n ,
+.Sq u ,
+or
+.Sq v
+is necessarily non-portable across output media.  See 
+.Sx COMPATIBILITY .
+.
+.Pp
+If a scaling unit is not provided, the numerical value is interpreted
+under the default rules of
+.Sq v
+for vertical spaces and
+.Sq u
+for horizontal ones.
+.Em Note :
+this differs from
+.Xr mdoc 7 ,
+which, if a unit is not provided, will instead interpret the string as
+literal text.
+.
 .
 .Sh MANUAL STRUCTURE
 Each
@@ -317,28 +384,6 @@ This section is a canonical reference to all macros, arranged
 alphabetically.  For the scoping of individual macros, see
 .Sx MACRO SYNTAX .
 .
-.
-.Ss Definitions
-In this reference, a numerical width may be either a standalone natural
-number (such as 3, 4, 10, etc.) or a natural number followed by a width
-multiplier 
-.Qq n ,
-corresponding to the width of the formatted letter n, or
-.Qq m ,
-corresponding to the width of the formatted letter m.  The latter is the
-default, if unspecified.  Thus,
-.Bd -literal -offset indent
-\&.HP 12n
-.Ed
-.
-.Pp
-indicates an offset of 12 
-.Qq n
-.Ns -sized
-letters.
-.
-.
-.Ss Macro Reference
 .Bl -tag -width Ds
 .It B
 Text is rendered in bold face.
@@ -367,7 +412,7 @@ subsequent output lines are indented, with the following syntax:
 .Ed
 .
 .Pp
-If 
+If scaling width
 .Va width
 is specified, it's saved for later paragraph left-margins; if
 unspecified, the saved or default width is used.
@@ -413,7 +458,7 @@ Begin a part setting the left margin.  The left margin controls the
 offset, following an initial indentation, to un-indented text such as
 that of
 .Sq PP .
-The width may be specified as following:
+A scaling width may be specified as following:
 .Bd -literal -offset indent
 \&.RS [width]
 .Ed
@@ -464,15 +509,13 @@ followed by a newline; if not, the body follows on the same line after a
 buffer to the indentation width.  Subsequent output lines are indented.
 .
 .Pp
-The indentation width may be set as follows:
+The indentation scaling width may be set as follows:
 .Bd -literal -offset indent
 \&.TP [width]
 .Ed
 .
 .Pp
-Where
-.Va width
-must be a properly-formed numeric width.  If
+If
 .Va width
 is specified, it's saved for later paragraph left-margins; if
 unspecified, the saved or default width is used.
