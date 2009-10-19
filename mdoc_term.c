@@ -494,13 +494,13 @@ arg2width(const struct mdoc_argv *arg, int pos)
 
 	assert(arg->value[pos]);
 	if ( ! a2roffsu(arg->value[pos], &su, SCALE_MAX))
-		SCALE_HS_INIT(&su, strlen(arg->value[pos]) + 2);
+		SCALE_HS_INIT(&su, strlen(arg->value[pos]));
 
-	return(term_hspan(&su));
+	/* XXX: pachemu? */
+	return(term_hspan(&su) + 2);
 }
 
 
-/* FIXME: put in utility file for front-ends. */
 static int
 arg_listtype(const struct mdoc_node *n)
 {
