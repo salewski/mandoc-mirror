@@ -703,8 +703,6 @@ pre_bd(PRE_ARGS)
 		case (MDOC_Filled):
 			/* FALLTHROUGH */
 		case (MDOC_Literal):
-			/* FALLTHROUGH */
-		case (MDOC_File):
 			if (0 == type++) 
 				break;
 			return(mdoc_nerr(mdoc, n, EMULTIDISP));

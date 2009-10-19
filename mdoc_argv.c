@@ -59,7 +59,7 @@ static	int mdoc_argvflags[MDOC_ARG_MAX] = {
 	ARGV_NONE,	/* MDOC_Ragged */
 	ARGV_NONE,	/* MDOC_Unfilled */
 	ARGV_NONE,	/* MDOC_Literal */
-	ARGV_NONE,	/* MDOC_File */
+	ARGV_SINGLE,	/* MDOC_File */
 	ARGV_OPT_SINGLE, /* MDOC_Offset */
 	ARGV_NONE,	/* MDOC_Bullet */
 	ARGV_NONE,	/* MDOC_Dash */
