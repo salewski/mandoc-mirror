@@ -620,7 +620,7 @@ Publication city or location of an
 .Sx \&Rs
 block.
 .Pp
-.Em Compatibility remark :
+.Em Remarks :
 this macro is not implemented in
 .Xr groff 1 .
 .
@@ -799,6 +799,15 @@ Examples:
 \&.At 
 \&.At V.1
 .Ed
+.Pp
+See also
+.Sx \&Bx ,
+.Sx \&Bsx ,
+.Sx \&Fx ,
+.Sx \&Nx ,
+.Sx \&Ox ,
+and
+.Sx \&Ux .
 .
 .Ss \&Bc
 Closes a
@@ -874,31 +883,115 @@ before any text or macros within the block.
 .Pp
 Examples:
 .Bd -literal -offset indent
-\&.Bd \-literal \-offset indent
-int 
-main(void) 
-{
-        printf("Hello, world!\en");
-}
-\&.Ed
-
 \&.Bd \-unfilled \-offset two-indent \-compact
-Hello
-      world.
+   Hello       world.
 \&.Ed
 .Ed
 .
 .Ss \&Bf
 .Ss \&Bk
 .Ss \&Bl
+.
 .Ss \&Bo
+Begins a block enclosed by square brackets.  Does not have any head
+arguments.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Bo 1 ,
+\&.Dv BUFSIZ Bc
+.Ed
+.Pp
+See also
+.Sx \&Bq .
+.
 .Ss \&Bq
+Encloses its arguments in square brackets.  
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Bq 1 , Dv BUFSIZ
+.Ed
+.Pp
+.Em Remarks :
+this macro is sometimes abused to emulate optional arguments for
+commands; the correct macros to use for this purpose are
+.Sx \&Op ,
+.Sx \&Oo ,
+and
+.Sx \&Oc .
+.Pp
+See also
+.Sx \&Bo .
+.
 .Ss \&Brc
+Closes a
+.Sx \&Bro
+block.  Does not have any tail arguments.
+.
 .Ss \&Bro
+Begins a block enclosed by curly braces.  Does not have any head
+arguments.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Bro 1 , ... ,
+\&.Va n Brc
+.Ed
+.Pp
+See also
+.Sx \&Brq .
+.
 .Ss \&Brq
+Encloses its arguments in curly braces.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Brq 1 , ... , Va n
+.Ed
+.Pp
+See also
+.Sx \&Bro .
+.
 .Ss \&Bsx
+Format the BSD/OS version provided as an argument, or a default value if
+no argument is provided.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Bsx 1.0
+\&.Bsx
+.Ed
+.Pp
+See also
+.Sx \&At ,
+.Sx \&Bx ,
+.Sx \&Fx ,
+.Sx \&Nx ,
+.Sx \&Ox ,
+and
+.Sx \&Ux .
+.
 .Ss \&Bt
 .Ss \&Bx
+Format the BSD version provided as an argument, or a default value if no
+argument is provided.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Bx 4.4
+\&.Bx
+.Ed
+.Pp
+See also
+.Sx \&At ,
+.Sx \&Bsx ,
+.Sx \&Fx ,
+.Sx \&Nx ,
+.Sx \&Ox ,
+and
+.Sx \&Ux .
+.
 .Ss \&Cd
 .Ss \&Cm
 .Ss \&D1
@@ -932,6 +1025,24 @@ Hello
 .Ss \&Fr
 .Ss \&Ft
 .Ss \&Fx
+Format the FreeBSD version provided as an argument, or a default value
+if no argument is provided.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Fx 7.1
+\&.Fx
+.Ed
+.Pp
+See also
+.Sx \&At ,
+.Sx \&Bx ,
+.Sx \&Bsx ,
+.Sx \&Nx ,
+.Sx \&Ox ,
+and
+.Sx \&Ux .
+.
 .Ss \&Hf
 .Ss \&Ic
 .Ss \&In
@@ -947,12 +1058,48 @@ Hello
 .Ss \&No
 .Ss \&Ns
 .Ss \&Nx
+Format the NetBSD version provided as an argument, or a default value if
+no argument is provided.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Nx 5.01
+\&.Nx
+.Ed
+.Pp
+See also
+.Sx \&At ,
+.Sx \&Bx ,
+.Sx \&Bsx ,
+.Sx \&Fx ,
+.Sx \&Ox ,
+and
+.Sx \&Ux .
+.
 .Ss \&Oc
 .Ss \&Oo
 .Ss \&Op
 .Ss \&Os
 .Ss \&Ot
 .Ss \&Ox
+Format the OpenBSD version provided as an argument, or a default value
+if no argument is provided.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Ox 4.5
+\&.Ox
+.Ed
+.Pp
+See also
+.Sx \&At ,
+.Sx \&Bsx ,
+.Sx \&Bx ,
+.Sx \&Fx ,
+.Sx \&Nx ,
+and
+.Sx \&Ux .
+.
 .Ss \&Pa
 .Ss \&Pc
 .Ss \&Pf
@@ -1021,6 +1168,22 @@ line.
 .Ss \&Tn
 .Ss \&Ud
 .Ss \&Ux
+Format the UNIX name.  Accepts no argument.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Ux
+.Ed
+.Pp
+See also
+.Sx \&At ,
+.Sx \&Bx ,
+.Sx \&Bsx ,
+.Sx \&Fx ,
+.Sx \&Nx ,
+and
+.Sx \&Ox .
+.
 .Ss \&Va
 .Ss \&Vt
 .Ss \&Xc

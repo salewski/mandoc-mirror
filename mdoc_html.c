@@ -1842,6 +1842,8 @@ mdoc_in_pre(MDOC_ARGS)
 			print_otag(h, TAG_DIV, 0, NULL);
 	}
 
+	/* FIXME: there's a buffer bug in here somewhere. */
+
 	PAIR_CLASS_INIT(&tag[0], "includes");
 	print_otag(h, TAG_SPAN, 1, tag);
 
