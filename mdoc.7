@@ -270,14 +270,14 @@ is necessarily non-portable across output media.  See
 Each
 .Nm
 document must begin with a document prologue, containing, in order,
-.Sq \&Dd ,
-.Sq \&Dt ,
+.Sx \&Dd ,
+.Sx \&Dt ,
 and
-.Sq \&Os ,
+.Sx \&Os ,
 then the NAME section containing at least one
-.Sq \&Nm
+.Sx \&Nm
 followed by
-.Sq \&Nd :
+.Sx \&Nd :
 .Bd -literal -offset indent
 \&.Dd $\&Mdocdate$
 \&.Dt mdoc 7
@@ -331,11 +331,12 @@ Macros are one to three three characters in length and begin with a
 control character ,
 .Sq \&. ,
 at the beginning of the line.  An arbitrary amount of whitespace may
-sit between the control character and the macro name.  Thus,
-.Sq \&.Pp
-and
-.Sq \&.\ \ \ \&Pp
-are equivalent.  Macro names are two or three characters in length.
+sit between the control character and the macro name.  Thus, the
+following are equivalent:
+.Bd -literal -offset indent
+\&.Pp
+\&.\ \ \ \&Pp
+.Ed
 .
 .Pp
 The syntax of a macro depends on its classification.  In this section,
@@ -374,7 +375,7 @@ column, if applicable, describes closure rules.
 .Ss Block full-explicit
 Multi-line scope closed by an explicit closing macro.  All macros
 contains bodies; only
-.Pq Sq \&Bf
+.Sx \&Bf
 contains a head.
 .Bd -literal -offset indent
 \&.Yo \(lB\-arg \(lBparm...\(rB\(rB \(lBhead...\(rB
@@ -385,14 +386,14 @@ contains a head.
 .Pp
 .Bl -column -compact -offset indent "MacroX" "CallableX" "ParsableX" "closed by XXX"
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Scope
-.It \&Bd     Ta    \&No     Ta    \&No     Ta    closed by \&Ed
-.It \&Bf     Ta    \&No     Ta    \&No     Ta    closed by \&Ef
-.It \&Bk     Ta    \&No     Ta    \&No     Ta    closed by \&Ek
-.It \&Bl     Ta    \&No     Ta    \&No     Ta    closed by \&El
-.It \&Ed     Ta    \&No     Ta    \&No     Ta    opened by \&Bd
-.It \&Ef     Ta    \&No     Ta    \&No     Ta    opened by \&Bf
-.It \&Ek     Ta    \&No     Ta    \&No     Ta    opened by \&Bk
-.It \&El     Ta    \&No     Ta    \&No     Ta    opened by \&Bl
+.It Sx \&Bd  Ta    \&No     Ta    \&No     Ta    closed by Sx \&Ed
+.It Sx \&Bf  Ta    \&No     Ta    \&No     Ta    closed by Sx \&Ef
+.It Sx \&Bk  Ta    \&No     Ta    \&No     Ta    closed by Sx \&Ek
+.It Sx \&Bl  Ta    \&No     Ta    \&No     Ta    closed by Sx \&El
+.It Sx \&Ed  Ta    \&No     Ta    \&No     Ta    opened by Sx \&Bd
+.It Sx \&Ef  Ta    \&No     Ta    \&No     Ta    opened by Sx \&Bf
+.It Sx \&Ek  Ta    \&No     Ta    \&No     Ta    opened by Sx \&Bk
+.It Sx \&El  Ta    \&No     Ta    \&No     Ta    opened by Sx \&Bl
 .El
 .
 .
@@ -400,15 +401,17 @@ contains a head.
 Multi-line scope closed by end-of-file or implicitly by another macro.
 All macros have bodies; some
 .Po
-.Sq \&It \-bullet ,
-.Sq \-hyphen ,
-.Sq \-dash ,
-.Sq \-enum ,
-.Sq \-item
+.Sx \&It Fl bullet ,
+.Fl hyphen ,
+.Fl dash ,
+.Fl enum ,
+.Fl item
 .Pc
-don't have heads, while
-.Sq \&It \-column
-may have multiple heads.
+don't have heads; only one
+.Po
+.Sx \&It Fl column
+.Pc 
+has multiple heads.
 .Bd -literal -offset indent
 \&.Yo \(lB\-arg \(lBparm...\(rB\(rB \(lBhead... \(lBTa head...\(rB\(rB
 \(lBbody...\(rB
@@ -417,19 +420,22 @@ may have multiple heads.
 .Pp
 .Bl -column -compact -offset indent "MacroX" "CallableX" "ParsableX" "closed by XXXXXXXXXXX"
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Scope
-.It \&It     Ta    \&No     Ta    Yes      Ta    closed by \&It, \&El
-.It \&Nd     Ta    \&No     Ta    \&No     Ta    closed by \&Sh
-.It \&Sh     Ta    \&No     Ta    \&No     Ta    closed by \&Sh
-.It \&Ss     Ta    \&No     Ta    \&No     Ta    closed by \&Sh, \&Ss
+.It Sx \&It  Ta    \&No     Ta    Yes      Ta    closed by Sx \&It , Sx \&El
+.It Sx \&Nd  Ta    \&No     Ta    \&No     Ta    closed by Sx \&Sh
+.It Sx \&Sh  Ta    \&No     Ta    \&No     Ta    closed by Sx \&Sh
+.It Sx \&Ss  Ta    \&No     Ta    \&No     Ta    closed by Sx \&Sh , Sx \&Ss
 .El
 .
 .
 .Ss Block partial-explicit
 Like block full-explicit, but also with single-line scope.  Each
 has at least a body and, in limited circumstances, a head
-.Pq So \&Fo Sc , So \&Eo Sc
+.Po
+.Sx \&Fo ,
+.Sx \&Eo
+.Pc
 and/or tail
-.Pq So \&Ec Sc .
+.Pq Sx \&Ec .
 .Bd -literal -offset indent
 \&.Yo \(lB\-arg \(lBparm...\(rB\(rB \(lBhead...\(rB
 \(lBbody...\(rB
@@ -442,30 +448,30 @@ and/or tail
 .Pp
 .Bl -column "MacroX" "CallableX" "ParsableX" "closed by XXXX" -compact -offset indent
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Scope
-.It \&Ac     Ta    Yes      Ta    Yes      Ta    opened by Sx \&Ao
+.It Sx \&Ac  Ta    Yes      Ta    Yes      Ta    opened by Sx \&Ao
 .It Sx \&Ao  Ta    Yes      Ta    Yes      Ta    closed by Sx \&Ac
-.It \&Bc     Ta    Yes      Ta    Yes      Ta    closed by \&Bo
-.It \&Bo     Ta    Yes      Ta    Yes      Ta    opened by \&Bc
-.It \&Brc    Ta    Yes      Ta    Yes      Ta    opened by \&Bro
-.It \&Bro    Ta    Yes      Ta    Yes      Ta    closed by \&Brc
-.It \&Dc     Ta    Yes      Ta    Yes      Ta    opened by \&Do
-.It \&Do     Ta    Yes      Ta    Yes      Ta    closed by \&Dc
-.It \&Ec     Ta    Yes      Ta    Yes      Ta    opened by \&Eo
-.It \&Eo     Ta    Yes      Ta    Yes      Ta    closed by \&Ec
-.It \&Fc     Ta    Yes      Ta    Yes      Ta    opened by \&Fo
-.It \&Fo     Ta    \&No     Ta    \&No     Ta    closed by \&Fc
-.It \&Oc     Ta    Yes      Ta    Yes      Ta    closed by \&Oo
-.It \&Oo     Ta    Yes      Ta    Yes      Ta    opened by \&Oc
-.It \&Pc     Ta    Yes      Ta    Yes      Ta    closed by \&Po
-.It \&Po     Ta    Yes      Ta    Yes      Ta    opened by \&Pc
-.It \&Qc     Ta    Yes      Ta    Yes      Ta    opened by \&Oo
-.It \&Qo     Ta    Yes      Ta    Yes      Ta    closed by \&Oc
+.It Sx \&Bc  Ta    Yes      Ta    Yes      Ta    closed by Sx \&Bo
+.It Sx \&Bo  Ta    Yes      Ta    Yes      Ta    opened by Sx \&Bc
+.It Sx \&Brc Ta    Yes      Ta    Yes      Ta    opened by Sx \&Bro
+.It Sx \&Bro Ta    Yes      Ta    Yes      Ta    closed by Sx \&Brc
+.It Sx \&Dc  Ta    Yes      Ta    Yes      Ta    opened by Sx \&Do
+.It Sx \&Do  Ta    Yes      Ta    Yes      Ta    closed by Sx \&Dc
+.It Sx \&Ec  Ta    Yes      Ta    Yes      Ta    opened by Sx \&Eo
+.It Sx \&Eo  Ta    Yes      Ta    Yes      Ta    closed by Sx \&Ec
+.It Sx \&Fc  Ta    Yes      Ta    Yes      Ta    opened by Sx \&Fo
+.It Sx \&Fo  Ta    \&No     Ta    \&No     Ta    closed by Sx \&Fc
+.It Sx \&Oc  Ta    Yes      Ta    Yes      Ta    closed by Sx \&Oo
+.It Sx \&Oo  Ta    Yes      Ta    Yes      Ta    opened by Sx \&Oc
+.It Sx \&Pc  Ta    Yes      Ta    Yes      Ta    closed by Sx \&Po
+.It Sx \&Po  Ta    Yes      Ta    Yes      Ta    opened by Sx \&Pc
+.It Sx \&Qc  Ta    Yes      Ta    Yes      Ta    opened by Sx \&Oo
+.It Sx \&Qo  Ta    Yes      Ta    Yes      Ta    closed by Sx \&Oc
 .It Sx \&Re  Ta    \&No     Ta    \&No     Ta    opened by Sx \&Rs
 .It Sx \&Rs  Ta    \&No     Ta    \&No     Ta    closed by Sx \&Re
-.It \&Sc     Ta    Yes      Ta    Yes      Ta    opened by \&So
-.It \&So     Ta    Yes      Ta    Yes      Ta    closed by \&Sc
-.It \&Xc     Ta    Yes      Ta    Yes      Ta    opened by \&Xo
-.It \&Xo     Ta    Yes      Ta    Yes      Ta    closed by \&Xc
+.It Sx \&Sc  Ta    Yes      Ta    Yes      Ta    opened by Sx \&So
+.It Sx \&So  Ta    Yes      Ta    Yes      Ta    closed by Sx \&Sc
+.It Sx \&Xc  Ta    Yes      Ta    Yes      Ta    opened by Sx \&Xo
+.It Sx \&Xo  Ta    Yes      Ta    Yes      Ta    closed by Sx \&Xc
 .El
 .
 .
@@ -480,17 +486,17 @@ or end of line.
 .Pp
 .Bl -column "MacroX" "CallableX" "ParsableX" -compact -offset indent
 .It Em Macro Ta Em Callable Ta Em Parsable
-.It \&Aq     Ta    Yes      Ta    Yes
-.It \&Bq     Ta    Yes      Ta    Yes
-.It \&Brq    Ta    Yes      Ta    Yes
-.It \&D1     Ta    \&No     Ta    \&Yes
-.It \&Dl     Ta    \&No     Ta    Yes
-.It \&Dq     Ta    Yes      Ta    Yes
-.It \&Op     Ta    Yes      Ta    Yes
-.It \&Pq     Ta    Yes      Ta    Yes
-.It \&Ql     Ta    Yes      Ta    Yes
-.It \&Qq     Ta    Yes      Ta    Yes
-.It \&Sq     Ta    Yes      Ta    Yes
+.It Sx \&Aq  Ta    Yes      Ta    Yes
+.It Sx \&Bq  Ta    Yes      Ta    Yes
+.It Sx \&Brq Ta    Yes      Ta    Yes
+.It Sx \&D1  Ta    \&No     Ta    \&Yes
+.It Sx \&Dl  Ta    \&No     Ta    Yes
+.It Sx \&Dq  Ta    Yes      Ta    Yes
+.It Sx \&Op  Ta    Yes      Ta    Yes
+.It Sx \&Pq  Ta    Yes      Ta    Yes
+.It Sx \&Ql  Ta    Yes      Ta    Yes
+.It Sx \&Qq  Ta    Yes      Ta    Yes
+.It Sx \&Sq  Ta    Yes      Ta    Yes
 .El
 .
 .
@@ -525,66 +531,66 @@ then the macro accepts an arbitrary number of arguments.
 .It Sx \&%R  Ta    \&No     Ta    \&No     Ta    >0
 .It Sx \&%T  Ta    \&No     Ta    \&No     Ta    >0
 .It Sx \&%V  Ta    \&No     Ta    \&No     Ta    >0
-.It \&Ad     Ta    Yes      Ta    Yes      Ta    n
-.It \&An     Ta    Yes      Ta    Yes      Ta    n
-.It \&Ap     Ta    Yes      Ta    Yes      Ta    0
-.It \&Ar     Ta    Yes      Ta    Yes      Ta    n
-.It \&At     Ta    Yes      Ta    Yes      Ta    1
-.It \&Bsx    Ta    Yes      Ta    Yes      Ta    n
-.It \&Bt     Ta    \&No     Ta    \&No     Ta    0
-.It \&Bx     Ta    Yes      Ta    Yes      Ta    n
-.It \&Cd     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Cm     Ta    Yes      Ta    Yes      Ta    n
-.It \&Db     Ta    \&No     Ta    \&No     Ta    1
-.It \&Dd     Ta    \&No     Ta    \&No     Ta    >0
-.It \&Dt     Ta    \&No     Ta    \&No     Ta    n
-.It \&Dv     Ta    Yes      Ta    Yes      Ta    n
-.It \&Dx     Ta    Yes      Ta    Yes      Ta    n
-.It \&Em     Ta    Yes      Ta    Yes      Ta    >0
-.It \&En     Ta    \&No     Ta    \&No     Ta    0
-.It \&Er     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Es     Ta    \&No     Ta    \&No     Ta    0
-.It \&Ev     Ta    Yes      Ta    Yes      Ta    n
-.It \&Ex     Ta    \&No     Ta    \&No     Ta    n
-.It \&Fa     Ta    Yes      Ta    Yes      Ta    n
-.It \&Fd     Ta    \&No     Ta    \&No     Ta    >0
-.It \&Fl     Ta    Yes      Ta    Yes      Ta    n
-.It \&Fn     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Fr     Ta    \&No     Ta    \&No     Ta    n
-.It \&Ft     Ta    Yes      Ta    Yes      Ta    n
-.It \&Fx     Ta    Yes      Ta    Yes      Ta    n
-.It \&Hf     Ta    \&No     Ta    \&No     Ta    n
-.It \&Ic     Ta    Yes      Ta    Yes      Ta    >0
-.It \&In     Ta    \&No     Ta    \&No     Ta    n
-.It \&Lb     Ta    \&No     Ta    \&No     Ta    1
-.It \&Li     Ta    Yes      Ta    Yes      Ta    n
-.It \&Lk     Ta    Yes      Ta    Yes      Ta    n
-.It \&Lp     Ta    \&No     Ta    \&No     Ta    0
-.It \&Ms     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Mt     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Nm     Ta    Yes      Ta    Yes      Ta    n
-.It \&No     Ta    Yes      Ta    Yes      Ta    0
-.It \&Ns     Ta    Yes      Ta    Yes      Ta    0
-.It \&Nx     Ta    Yes      Ta    Yes      Ta    n
-.It \&Os     Ta    \&No     Ta    \&No     Ta    n
-.It \&Ot     Ta    \&No     Ta    \&No     Ta    n
-.It \&Ox     Ta    Yes      Ta    Yes      Ta    n
-.It \&Pa     Ta    Yes      Ta    Yes      Ta    n
-.It \&Pf     Ta    \&No     Ta    Yes      Ta    1
-.It \&Pp     Ta    \&No     Ta    \&No     Ta    0
-.It \&Rv     Ta    \&No     Ta    \&No     Ta    n
-.It \&Sm     Ta    \&No     Ta    \&No     Ta    1
-.It \&St     Ta    \&No     Ta    Yes      Ta    1
-.It \&Sx     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Sy     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Tn     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Ud     Ta    \&No     Ta    \&No     Ta    0
-.It \&Ux     Ta    Yes      Ta    Yes      Ta    n
-.It \&Va     Ta    Yes      Ta    Yes      Ta    n
-.It \&Vt     Ta    Yes      Ta    Yes      Ta    >0
-.It \&Xr     Ta    Yes      Ta    Yes      Ta    >0, <3
-.It \&br     Ta    \&No     Ta    \&No     Ta    0
-.It \&sp     Ta    \&No     Ta    \&No     Ta    1
+.It Sx \&Ad  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&An  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Ap  Ta    Yes      Ta    Yes      Ta    0
+.It Sx \&Ar  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&At  Ta    Yes      Ta    Yes      Ta    1
+.It Sx \&Bsx Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Bt  Ta    \&No     Ta    \&No     Ta    0
+.It Sx \&Bx  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Cd  Ta    Yes      Ta    Yes      Ta    >0
+.It Sx \&Cm  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Db  Ta    \&No     Ta    \&No     Ta    1
+.It Sx \&Dd  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&Dt  Ta    \&No     Ta    \&No     Ta    n
+.It Sx \&Dv  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Dx  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Em  Ta    Yes      Ta    Yes      Ta    >0
+.It Sx \&En  Ta    \&No     Ta    \&No     Ta    0
+.It Sx \&Er  Ta    Yes      Ta    Yes      Ta    >0
+.It Sx \&Es  Ta    \&No     Ta    \&No     Ta    0
+.It Sx \&Ev  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Ex  Ta    \&No     Ta    \&No     Ta    n
+.It Sx \&Fa  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Fd  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&Fl  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Fn  Ta    Yes      Ta    Yes      Ta    >0
+.It Sx \&Fr  Ta    \&No     Ta    \&No     Ta    n
+.It Sx \&Ft  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Fx  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Hf  Ta    \&No     Ta    \&No     Ta    n
+.It Sx \&Ic  Ta    Yes      Ta    Yes      Ta    >0
+.It Sx \&In  Ta    \&No     Ta    \&No     Ta    n
+.It Sx \&Lb  Ta    \&No     Ta    \&No     Ta    1
+.It Sx \&Li  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Lk  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Lp  Ta    \&No     Ta    \&No     Ta    0
+.It Sx \&Ms  Ta    Yes      Ta    Yes      Ta    >0
+.It Sx \&Mt  Ta    Yes      Ta    Yes      Ta    >0
+.It Sx \&Nm  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&No  Ta    Yes      Ta    Yes      Ta    0
+.It Sx \&Ns  Ta    Yes      Ta    Yes      Ta    0
+.It Sx \&Nx  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Os  Ta    \&No     Ta    \&No     Ta    n
+.It Sx \&Ot  Ta    \&No     Ta    \&No     Ta    n
+.It Sx \&Ox  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Pa  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Pf  Ta    \&No     Ta    Yes      Ta    1
+.It Sx \&Pp  Ta    \&No     Ta    \&No     Ta    0
+.It Sx \&Rv  Ta    \&No     Ta    \&No     Ta    n
+.It Sx \&Sm  Ta    \&No     Ta    \&No     Ta    1
+.It Sx \&St  Ta    \&No     Ta    Yes      Ta    1
+.It Sx \&Sx  Ta    Yes      Ta    Yes      Ta    >0
+.It Sx \&Sy  Ta    Yes      Ta    Yes      Ta    >0
+.It Sx \&Tn  Ta    Yes      Ta    Yes      Ta    >0
+.It Sx \&Ud  Ta    \&No     Ta    \&No     Ta    0
+.It Sx \&Ux  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Va  Ta    Yes      Ta    Yes      Ta    n
+.It Sx \&Vt  Ta    Yes      Ta    Yes      Ta    >0
+.It Sx \&Xr  Ta    Yes      Ta    Yes      Ta    >0, <3
+.It Sx \&br  Ta    \&No     Ta    \&No     Ta    0
+.It Sx \&sp  Ta    \&No     Ta    \&No     Ta    1
 .El   
 .
 .
@@ -597,16 +603,18 @@ alphabetically.  For the scoping of individual macros, see
 Author name of an
 .Sx \&Rs
 block.  Multiple authors should each be accorded their own
-.Sq \%%A
+.Sx \%%A
 line.
 .Pp
 Author names should be ordered with full or abbreviated forename(s)
 first, then full surname.
+.
 .Ss \&%B
 Book title of an
 .Sx \&Rs
 block.  This macro may also be used in a non-bibliographic context when
 referring to book titles.
+.
 .Ss \&%C
 Publication city or location of an
 .Sx \&Rs
@@ -615,84 +623,271 @@ block.
 .Em Compatibility remark :
 this macro is not implemented in
 .Xr groff 1 .
+.
 .Ss \&%D
 Publication date of an
 .Sx \&Rs
 block.  This should follow the canonical syntax for 
 .Sx Dates .
+.
 .Ss \&%I
 Publisher or issuer name of an
 .Sx \&Rs
 block.
+.
 .Ss \&%J
 Journal name of an
 .Sx \&Rs
 block.
+.
 .Ss \&%N
 Issue number (usually for journals) of an
 .Sx \&Rs
 block.
+.
 .Ss \&%O
 Optional information of an
 .Sx \&Rs
 block.
+.
 .Ss \&%P
 Book or journal page number of an
 .Sx \&Rs
 block.
+.
 .Ss \&%Q
 Institutional author (school, government, etc.) of an
 .Sx \&Rs
 block.  Multiple institutional authors should each be accorded their own
-.Sq \&%Q
+.Sx \&%Q
 line.
+.
 .Ss \&%R
 Technical report name of an
 .Sx \&Rs
 block.
+.
 .Ss \&%T
 Article title of an
 .Sx \&Rs
 block.  This macro may also be used in a non-bibliographical context
 when referring to article titles.
+.
 .Ss \&%V
 Volume number of an
 .Sx \&Rs
 block.
+.
 .Ss \&Ac
 Closes an
 .Sx \&Ao
 block.  Does not have any tail arguments.
+.
 .Ss \&Ad
 Address construct: usually in the context of an computational address in
 memory, not a physical (post) address.
 .Pp
-Example:
+Examples:
 .Bd -literal -offset indent
 \&.Ad [0,$]
 \&.Ad 0x00000000
 .Ed
+.
 .Ss \&An
+Author name.  This macro may alternatively accepts the following
+arguments, although these may not be specified along with a parameter:
+.Bl -tag -width 12n -offset indent
+.It Fl split
+Renders a line break is rendered before each author listing.
+.It Fl nosplit
+The opposite of
+.Fl split .
+.El
+.Pp
+In the AUTHORS section, the default is not to split the first author
+listing, but all subsequent author listings, whether or not they're
+interspersed by other macros or text, are split.  Thus, specifying
+.Fl split
+will cause the first listing also to be split.  If not in the AUTHORS
+section, the default is not to split.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.An -nosplit
+\&.An J. E. Hopcraft ,
+\&.An J. D. Ullman .
+.Ed
+.Pp
+.Em Remarks :
+the effects of
+.Fl split
+or
+.Fl nosplit
+are re-set when entering the AUTHORS section, so if one specifies
+.Sx \&An Fl nosplit
+in the general document body, it must be re-specified in the AUTHORS
+section.
+.
 .Ss \&Ao
 Begins a block enclosed by angled brackets.  Does not have any head
 arguments.
 .Pp
-Example:
+Examples:
 .Bd -literal -offset indent
 \&.Fl -key= Ns Ao Ar val Ac
 .Ed
 .Pp
-Note that, although this is overwhelmingly used to note URIs, the
-.Sx \&Lk
-and
-.Sx \&Mt
-macros are better suited for this purpose.
+See also
+.Sx \&Aq .
+.
 .Ss \&Ap
+Inserts an apostrophe without any surrounding white-space.  This is
+generally used as a grammatic device when referring to the verb form of
+a function:
+.Bd -literal -offset indent
+\&.Fn execve Ap d
+.Ed
+.
 .Ss \&Aq
+Encloses its arguments in angled brackets.  
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Fl -key= Ns Aq Ar val
+.Ed
+.Pp
+.Em Remarks :
+this macro is often abused for rendering URIs, which should instead use
+.Sx \&Lk
+or
+.Sx \&Mt ,
+or to note pre-processor
+.Dq Li #include
+statements, which should use
+.Sx \&In .
+.Pp
+See also
+.Sx \&Ao .
+.
 .Ss \&Ar
+Command arguments.  If an argument is not provided, the strings
+.Dq file ...
+are used as a default.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Fl o Ns Ar file1
+\&.Ar
+\&.Ar arg1 , arg2 .
+.Ed
+.
 .Ss \&At
+Formats an AT&T version.  Accepts at most one parameter:
+.Bl -tag -width 12n -offset indent
+.It Cm v[1-7] | 32v
+A version of
+.At .
+.It Cm V[.[1-4]]?
+A system version of
+.At .
+.El
+.Pp
+Note that these parameters do not begin with a hyphen.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.At 
+\&.At V.1
+.Ed
+.
 .Ss \&Bc
+Closes a
+.Sx \&Bo
+block.  Does not have any tail arguments.
+.
 .Ss \&Bd
+Begins a display block.  A display is collection of macros or text which
+may be collectively offset or justified in a manner different from that
+of the enclosing context.  By default, the block is preceded by a
+vertical space.
+.Pp
+Each display is associated with a type, which must be one of the
+following arguments:
+.Bl -tag -width 12n -offset indent
+.It Fl ragged
+Only left-justify the block.
+.It Fl unfilled
+Do not justify the block at all.
+.It Fl filled
+Left- and right-justify the block.
+.It Fl literal
+Alias for
+.Fl unfilled .
+.It Fl centered
+Centre-justify each line.
+.El
+.Pp
+The type must be provided first.  Secondary arguments are as follows:
+.Bl -tag -width 12n -offset indent
+.It Fl offset Ar width
+Offset by the value of
+.Ar width ,
+which is interpreted as one of the following, specified in order:
+.Bl -item
+.It
+As one of the pre-defined strings
+.Ar indent ,
+the width of standard indentation;
+.Ar indent-two ,
+twice
+.Ar indent ;
+.Ar left ,
+which has no effect ;
+.Ar right ,
+which justifies to the right margin; and
+.Ar center ,
+which aligns around an imagined centre axis.
+.It
+As a precalculated width for a named macro.  The most popular is the
+imaginary macro
+.Ar Ds ,
+which resolves to
+.Ar 6n .
+.It
+As a scaling unit following the syntax described in
+.Sx Scaling Widths .
+.It
+As the calculated string length of the opaque string.
+.El
+.Pp
+If unset, it will revert to the value of
+.Ar 8n
+as described in
+.Sx Scaling Widths .
+.It Fl compact
+Do not assert a vertical space before the block.
+.It Fl file Ar file
+Prepend the file
+.Ar file
+before any text or macros within the block.
+.El
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Bd \-literal \-offset indent
+int 
+main(void) 
+{
+        printf("Hello, world!\en");
+}
+\&.Ed
+
+\&.Bd \-unfilled \-offset two-indent \-compact
+Hello
+      world.
+\&.Ed
+.Ed
+.
 .Ss \&Bf
 .Ss \&Bk
 .Ss \&Bl
@@ -768,10 +963,12 @@ macros are better suited for this purpose.
 .Ss \&Ql
 .Ss \&Qo
 .Ss \&Qq
+.
 .Ss \&Re
 Closes a
 .Sx \&Rs
 block.  Does not have any tail arguments.
+.
 .Ss \&Rs
 Begins a bibliographic
 .Pq Dq reference
@@ -793,7 +990,7 @@ and
 .Sx \&%V
 child macros (at least one must be specified).
 .Pp
-Example:
+Examples:
 .Bd -literal -offset indent
 \&.Rs
 \&.%A J. E. Hopcroft
@@ -810,6 +1007,7 @@ If an
 block is used within a SEE ALSO section, a vertical space is asserted
 before the rendered output, else the block continues on the current
 line.
+.
 .Ss \&Rv
 .Ss \&Sc
 .Ss \&Sh
@@ -853,22 +1051,26 @@ Furthermore, the
 .Sq f
 scaling unit, while accepted, is rendered as the default unit.
 .It
-The
-.Sq \-split
-or
-.Sq \-nosplit
-argument to 
-.Sq \&An
-applies to the whole document, not just to the current section as it
-does in groff.
-.It
 In quoted literals, groff allowed pair-wise double-quotes to produce a
 standalone double-quote in formatted output.  This idiosyncratic
 behaviour is no longer applicable.
 .It
+Display types
+.Sx \&Bd Fl center
+and
+.Fl right
+are aliases for
+.Fl left .
 The
-.Sq \&sp
-macro does not accept negative numbers.
+.Fl file Ar file
+argument is ignored.  Since text is not right-justified,
+.Fl ragged
+and
+.Fl filled
+are aliases, as are
+.Fl literal
+and
+.Fl unfilled .
 .It
 Blocks of whitespace are stripped from both macro and free-form text
 lines (except when in literal mode), while groff would retain whitespace
@@ -884,27 +1086,19 @@ made historic groff
 .Qq go orbital
 but is a proper delimiter in this implementation.
 .It
-.Sq \&It \-nested
+.Sx \&It Fl nested
 is assumed for all lists (it wasn't in historic groff): any list may be
 nested and
-.Sq \-enum
+.Fl enum
 lists will restart the sequence only for the sub-list.
 .It
-.Sq \&It \-column
-syntax where column widths may be preceded by other arguments (instead
-of proceeded) is not supported.
-.It
-The
-.Sq \&At
-macro only accepts a single parameter.
-.It
 Some manuals use
-.Sq \&Li
+.Sx \&Li
 incorrectly by following it with a reserved character and expecting the
 delimiter to render.  This is not supported.
 .It
 In groff, the
-.Sq \&Fo
+.Sx \&Fo
 macro only produces the first parameter.  This is no longer the case.
 .El
 .
@@ -919,69 +1113,71 @@ The
 .Nm
 reference was written by
 .An Kristaps Dzonsons Aq kristaps@kth.se .
-.
-.
-.Sh CAVEATS
-There are many ambiguous parts of mdoc.
-.
-.Pp
-.Bl -dash -compact
-.It
-.Sq \&Fa
-should be
-.Sq \&Va
-as function arguments are variables.
-.It
-.Sq \&Ft
-should be
-.Sq \&Vt
-as function return types are still types.  Furthermore, the
-.Sq \&Ft
-should be removed and
-.Sq \&Fo ,
-which ostensibly follows it, should follow the same convention as
-.Sq \&Va .
-.It
-.Sq \&Va
-should formalise that only one or two arguments are acceptable: a
-variable name and optional, preceding type.
-.It
-.Sq \&Fd
-is ambiguous.  It's commonly used to indicate an include file in the
-synopsis section.
-.Sq \&In
-should be used, instead.
-.It
-Only the
-.Sq \-literal
-argument to
-.Sq \&Bd
-makes sense.  The remaining ones should be removed.
-.It
-The
-.Sq \&Xo
-and
-.Sq \&Xc
-macros should be deprecated.
-.It
-The
-.Sq \&Dt
-macro lacks clarity.  It should be absolutely clear which title will
-render when formatting the manual page.
-.It
-A
-.Sq \&Lx
-should be provided for Linux (\(`a la
-.Sq \&Ox ,
-.Sq \&Nx
-etc.).
-.It
-There's no way to refer to references in
-.Sq \&Rs/Re
-blocks.
-.It
-The \-split and \-nosplit dictates via
-.Sq \&An
-are re-set when entering and leaving the AUTHORS section.
-.El
-.
+.\"
+.\" XXX: this really isn't the place for these caveats.
+.\" .
+.\" .
+.\" .Sh CAVEATS
+.\" There are many ambiguous parts of mdoc.
+.\" .
+.\" .Pp
+.\" .Bl -dash -compact
+.\" .It
+.\" .Sq \&Fa
+.\" should be
+.\" .Sq \&Va
+.\" as function arguments are variables.
+.\" .It
+.\" .Sq \&Ft
+.\" should be
+.\" .Sq \&Vt
+.\" as function return types are still types.  Furthermore, the
+.\" .Sq \&Ft
+.\" should be removed and
+.\" .Sq \&Fo ,
+.\" which ostensibly follows it, should follow the same convention as
+.\" .Sq \&Va .
+.\" .It
+.\" .Sq \&Va
+.\" should formalise that only one or two arguments are acceptable: a
+.\" variable name and optional, preceding type.
+.\" .It
+.\" .Sq \&Fd
+.\" is ambiguous.  It's commonly used to indicate an include file in the
+.\" synopsis section.
+.\" .Sq \&In
+.\" should be used, instead.
+.\" .It
+.\" Only the
+.\" .Sq \-literal
+.\" argument to
+.\" .Sq \&Bd
+.\" makes sense.  The remaining ones should be removed.
+.\" .It
+.\" The
+.\" .Sq \&Xo
+.\" and
+.\" .Sq \&Xc
+.\" macros should be deprecated.
+.\" .It
+.\" The
+.\" .Sq \&Dt
+.\" macro lacks clarity.  It should be absolutely clear which title will
+.\" render when formatting the manual page.
+.\" .It
+.\" A
+.\" .Sq \&Lx
+.\" should be provided for Linux (\(`a la
+.\" .Sq \&Ox ,
+.\" .Sq \&Nx
+.\" etc.).
+.\" .It
+.\" There's no way to refer to references in
+.\" .Sq \&Rs/Re
+.\" blocks.
+.\" .It
+.\" The \-split and \-nosplit dictates via
+.\" .Sq \&An
+.\" are re-set when entering and leaving the AUTHORS section.
+.\" .El
+.\" .

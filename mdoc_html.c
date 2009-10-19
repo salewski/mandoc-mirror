@@ -1068,6 +1068,8 @@ mdoc_it_pre(MDOC_ARGS)
 	/* Override width in some cases. */
 
 	switch (type) {
+	case (MDOC_Item):
+		/* FALLTHROUGH */
 	case (MDOC_Inset):
 		/* FALLTHROUGH */
 	case (MDOC_Diag):
