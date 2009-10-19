@@ -209,6 +209,9 @@ considered literal text.  Thus, the following produces
 .Pp
 In free-form mode, quotes are regarded as opaque text.
 .
+.Ss Dates
+TODO.
+.
 .Ss Scaling Widths
 Many macros support scaled widths for their arguments, such as
 stipulating a two-inch list indentation with the following:
@@ -439,8 +442,8 @@ and/or tail
 .Pp
 .Bl -column "MacroX" "CallableX" "ParsableX" "closed by XXXX" -compact -offset indent
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Scope
-.It \&Ac     Ta    Yes      Ta    Yes      Ta    opened by \&Ao
-.It \&Ao     Ta    Yes      Ta    Yes      Ta    closed by \&Ac
+.It \&Ac     Ta    Yes      Ta    Yes      Ta    opened by Sx \&Ao
+.It Sx \&Ao  Ta    Yes      Ta    Yes      Ta    closed by Sx \&Ac
 .It \&Bc     Ta    Yes      Ta    Yes      Ta    closed by \&Bo
 .It \&Bo     Ta    Yes      Ta    Yes      Ta    opened by \&Bc
 .It \&Brc    Ta    Yes      Ta    Yes      Ta    opened by \&Bro
@@ -457,8 +460,8 @@ and/or tail
 .It \&Po     Ta    Yes      Ta    Yes      Ta    opened by \&Pc
 .It \&Qc     Ta    Yes      Ta    Yes      Ta    opened by \&Oo
 .It \&Qo     Ta    Yes      Ta    Yes      Ta    closed by \&Oc
-.It \&Re     Ta    \&No     Ta    \&No     Ta    opened by \&Rs
-.It \&Rs     Ta    \&No     Ta    \&No     Ta    closed by \&Re
+.It Sx \&Re  Ta    \&No     Ta    \&No     Ta    opened by Sx \&Rs
+.It Sx \&Rs  Ta    \&No     Ta    \&No     Ta    closed by Sx \&Re
 .It \&Sc     Ta    Yes      Ta    Yes      Ta    opened by \&So
 .It \&So     Ta    Yes      Ta    Yes      Ta    closed by \&Sc
 .It \&Xc     Ta    Yes      Ta    Yes      Ta    opened by \&Xo
@@ -510,18 +513,18 @@ then the macro accepts an arbitrary number of arguments.
 .Pp
 .Bl -column "MacroX" "CallableX" "ParsableX" "Arguments" -compact -offset indent
 .It Em Macro Ta Em Callable Ta Em Parsable Ta Em Arguments
-.It \&%A     Ta    \&No     Ta    \&No     Ta    >0
-.It \&%B     Ta    \&No     Ta    \&No     Ta    >0
-.It \&%C     Ta    \&No     Ta    \&No     Ta    >0
-.It \&%D     Ta    \&No     Ta    \&No     Ta    >0
-.It \&%I     Ta    \&No     Ta    \&No     Ta    >0
-.It \&%J     Ta    \&No     Ta    \&No     Ta    >0
-.It \&%N     Ta    \&No     Ta    \&No     Ta    >0
-.It \&%O     Ta    \&No     Ta    \&No     Ta    >0
-.It \&%P     Ta    \&No     Ta    \&No     Ta    >0
-.It \&%R     Ta    \&No     Ta    \&No     Ta    >0
-.It \&%T     Ta    \&No     Ta    \&No     Ta    >0
-.It \&%V     Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&%A  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&%B  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&%C  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&%D  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&%I  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&%J  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&%N  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&%O  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&%P  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&%R  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&%T  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&%V  Ta    \&No     Ta    \&No     Ta    >0
 .It \&Ad     Ta    Yes      Ta    Yes      Ta    n
 .It \&An     Ta    Yes      Ta    Yes      Ta    n
 .It \&Ap     Ta    Yes      Ta    Yes      Ta    0
@@ -583,6 +586,250 @@ then the macro accepts an arbitrary number of arguments.
 .It \&br     Ta    \&No     Ta    \&No     Ta    0
 .It \&sp     Ta    \&No     Ta    \&No     Ta    1
 .El   
+.
+.
+.Sh REFERENCE
+This section is a canonical reference of all macros, arranged
+alphabetically.  For the scoping of individual macros, see
+.Sx MACRO SYNTAX .
+.
+.Ss \&%A
+Author name of an
+.Sx \&Rs
+block.  Multiple authors should each be accorded their own
+.Sq \%%A
+line.
+.Pp
+Author names should be ordered with full or abbreviated forename(s)
+first, then full surname.
+.Ss \&%B
+Book title of an
+.Sx \&Rs
+block.  This macro may also be used in a non-bibliographic context when
+referring to book titles.
+.Ss \&%C
+Publication city or location of an
+.Sx \&Rs
+block.
+.Pp
+.Em Compatibility remark :
+this macro is not implemented in
+.Xr groff 1 .
+.Ss \&%D
+Publication date of an
+.Sx \&Rs
+block.  This should follow the canonical syntax for 
+.Sx Dates .
+.Ss \&%I
+Publisher or issuer name of an
+.Sx \&Rs
+block.
+.Ss \&%J
+Journal name of an
+.Sx \&Rs
+block.
+.Ss \&%N
+Issue number (usually for journals) of an
+.Sx \&Rs
+block.
+.Ss \&%O
+Optional information of an
+.Sx \&Rs
+block.
+.Ss \&%P
+Book or journal page number of an
+.Sx \&Rs
+block.
+.Ss \&%Q
+Institutional author (school, government, etc.) of an
+.Sx \&Rs
+block.  Multiple institutional authors should each be accorded their own
+.Sq \&%Q
+line.
+.Ss \&%R
+Technical report name of an
+.Sx \&Rs
+block.
+.Ss \&%T
+Article title of an
+.Sx \&Rs
+block.  This macro may also be used in a non-bibliographical context
+when referring to article titles.
+.Ss \&%V
+Volume number of an
+.Sx \&Rs
+block.
+.Ss \&Ac
+Closes an
+.Sx \&Ao
+block.  Does not have any tail arguments.
+.Ss \&Ad
+Address construct: usually in the context of an computational address in
+memory, not a physical (post) address.
+.Pp
+Example:
+.Bd -literal -offset indent
+\&.Ad [0,$]
+\&.Ad 0x00000000
+.Ed
+.Ss \&An
+.Ss \&Ao
+Begins a block enclosed by angled brackets.  Does not have any head
+arguments.
+.Pp
+Example:
+.Bd -literal -offset indent
+\&.Fl -key= Ns Ao Ar val Ac
+.Ed
+.Pp
+Note that, although this is overwhelmingly used to note URIs, the
+.Sx \&Lk
+and
+.Sx \&Mt
+macros are better suited for this purpose.
+.Ss \&Ap
+.Ss \&Aq
+.Ss \&Ar
+.Ss \&At
+.Ss \&Bc
+.Ss \&Bd
+.Ss \&Bf
+.Ss \&Bk
+.Ss \&Bl
+.Ss \&Bo
+.Ss \&Bq
+.Ss \&Brc
+.Ss \&Bro
+.Ss \&Brq
+.Ss \&Bsx
+.Ss \&Bt
+.Ss \&Bx
+.Ss \&Cd
+.Ss \&Cm
+.Ss \&D1
+.Ss \&Db
+.Ss \&Dc
+.Ss \&Dd
+.Ss \&Dl
+.Ss \&Do
+.Ss \&Dq
+.Ss \&Dt
+.Ss \&Dv
+.Ss \&Dx
+.Ss \&Ec
+.Ss \&Ed
+.Ss \&Ef
+.Ss \&Ek
+.Ss \&El
+.Ss \&Em
+.Ss \&En
+.Ss \&Eo
+.Ss \&Er
+.Ss \&Es
+.Ss \&Ev
+.Ss \&Ex
+.Ss \&Fa
+.Ss \&Fc
+.Ss \&Fd
+.Ss \&Fl
+.Ss \&Fn
+.Ss \&Fo
+.Ss \&Fr
+.Ss \&Ft
+.Ss \&Fx
+.Ss \&Hf
+.Ss \&Ic
+.Ss \&In
+.Ss \&It
+.Ss \&Lb
+.Ss \&Li
+.Ss \&Lk
+.Ss \&Lp
+.Ss \&Ms
+.Ss \&Mt
+.Ss \&Nd
+.Ss \&Nm
+.Ss \&No
+.Ss \&Ns
+.Ss \&Nx
+.Ss \&Oc
+.Ss \&Oo
+.Ss \&Op
+.Ss \&Os
+.Ss \&Ot
+.Ss \&Ox
+.Ss \&Pa
+.Ss \&Pc
+.Ss \&Pf
+.Ss \&Po
+.Ss \&Pp
+.Ss \&Pq
+.Ss \&Qc
+.Ss \&Ql
+.Ss \&Qo
+.Ss \&Qq
+.Ss \&Re
+Closes a
+.Sx \&Rs
+block.  Does not have any tail arguments.
+.Ss \&Rs
+Begins a bibliographic
+.Pq Dq reference
+block.  Does not have any head arguments.  The block macro and may only
+contain
+.Sx \&%A ,
+.Sx \&%B ,
+.Sx \&%C ,
+.Sx \&%D ,
+.Sx \&%I ,
+.Sx \&%J ,
+.Sx \&%N ,
+.Sx \&%O ,
+.Sx \&%P ,
+.Sx \&%Q ,
+.Sx \&%R ,
+.Sx \&%T ,
+and
+.Sx \&%V
+child macros (at least one must be specified).
+.Pp
+Example:
+.Bd -literal -offset indent
+\&.Rs
+\&.%A J. E. Hopcroft
+\&.%A J. D. Ullman
+\&.%B Introduction to Automata Theory, Languages, and Computation
+\&.%I Addison-Wesley
+\&.%C Reading, Massachusettes
+\&.%D 1979
+\&.Re
+.Ed
+.Pp
+If an
+.Sx \&Rs
+block is used within a SEE ALSO section, a vertical space is asserted
+before the rendered output, else the block continues on the current
+line.
+.Ss \&Rv
+.Ss \&Sc
+.Ss \&Sh
+.Ss \&Sm
+.Ss \&So
+.Ss \&Sq
+.Ss \&Ss
+.Ss \&St
+.Ss \&Sx
+.Ss \&Sy
+.Ss \&Tn
+.Ss \&Ud
+.Ss \&Ux
+.Ss \&Va
+.Ss \&Vt
+.Ss \&Xc
+.Ss \&Xo
+.Ss \&Xr
+.Ss \&br
+.Ss \&sp
 .
 .
 .Sh COMPATIBILITY

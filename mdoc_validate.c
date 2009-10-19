@@ -195,7 +195,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_text },			/* Vt */ 
 	{ NULL, posts_xr },			/* Xr */ 
 	{ NULL, posts_text },			/* %A */
-	{ NULL, posts_text },			/* %B */
+	{ NULL, posts_text },			/* %B */ /* FIXME: can be used outside Rs/Re. */
 	{ NULL, posts_text },			/* %D */
 	{ NULL, posts_text },			/* %I */
 	{ NULL, posts_text },			/* %J */
@@ -203,7 +203,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_text },			/* %O */
 	{ NULL, posts_text },			/* %P */
 	{ NULL, posts_text },			/* %R */
-	{ NULL, posts_text },			/* %T */
+	{ NULL, posts_text },			/* %T */ /* FIXME: can be used outside Rs/Re. */
 	{ NULL, posts_text },			/* %V */
 	{ NULL, NULL },				/* Ac */
 	{ NULL, NULL },				/* Ao */
