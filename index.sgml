@@ -55,7 +55,7 @@
 					Sources correctly build and install on FreeBSD, OpenBSD, NetBSD and Linux operating systems, tested
 					variously on i386, AMD64, alpha, and others.  The most current version is <span
 					class="attn">@VERSION@</span>, dated <span class="attn">@VDATE@</span>.  A full <a
-					href="ChangeLog.html">ChangeLog</a> [<a href="ChangeLog.txt">txt</a>] is written with each release.
+					href="ChangeLog.html">ChangeLog</a> (<a href="ChangeLog.txt">txt</a>) is written with each release.
 					</p>
 
 					<h2>
@@ -148,31 +148,31 @@
 					<col>
 					<tbody>
 						<tr>
-							<td><a href="mandoc.1.html">mandoc(1)</a> [<a href="mandoc.1.txt">text</a>]</td>
+							<td><a href="mandoc.1.html">mandoc(1)</a> (<a href="mandoc.1.txt">text</a>)</td>
 							<td>format and display UNIX manuals</td>
 						</tr>
 						<tr>
-							<td><a href="mandoc_char.7.html">mandoc_char(7)</a> [<a href="mandoc_char.7.txt">text</a>]</td>
+							<td><a href="mandoc_char.7.html">mandoc_char(7)</a> (<a href="mandoc_char.7.txt">text</a>)</td>
 							<td>mandoc special characters</td>
 						</tr>
 						<tr>
-							<td><a href="mdoc.7.html">mdoc(7)</a> [<a href="mdoc.7.txt">text</a>]</td>
+							<td><a href="mdoc.7.html">mdoc(7)</a> (<a href="mdoc.7.txt">text</a>)</td>
 							<td>mdoc language reference</td>
 						</tr>
 						<tr>
-							<td><a href="man.7.html">man(7)</a> [<a href="man.7.txt">text</a>]</td>
+							<td><a href="man.7.html">man(7)</a> (<a href="man.7.txt">text</a>)</td>
 							<td>man language reference</td>
 						</tr>
 						<tr>
-							<td><a href="manuals.7.html">manuals(7)</a> [<a href="manuals.7.txt">text</a>]</td>
+							<td><a href="manuals.7.html">manuals(7)</a> (<a href="manuals.7.txt">text</a>)</td>
 							<td>a guide to writing UNIX manuals</td>
 						</tr>
 						<tr>
-							<td><a href="mdoc.3.html">mdoc(3)</a> [<a href="mdoc.3.txt">text</a>]</td>
+							<td><a href="mdoc.3.html">mdoc(3)</a> (<a href="mdoc.3.txt">text</a>)</td>
 							<td>mdoc macro compiler library</td>
 						</tr>
 						<tr>
-							<td><a href="man.3.html">man(3)</a> [<a href="man.3.txt">text</a>]</td>
+							<td><a href="man.3.html">man(3)</a> (<a href="man.3.txt">text</a>)</td>
 							<td>man macro compiler library</td>
 						</tr>
 					</tbody>
