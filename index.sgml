@@ -48,7 +48,7 @@
 			<tr>
 				<td>
 					<h1>
-					DOWNLOADS
+					SOURCES
 					</h1>
 
 					<p>
@@ -71,6 +71,12 @@
 							<td>
 							<a href="/snapshots/mdocml.tar.gz">/snapshots/mdocml.tar.gz</a> 
 							(<a href="/snapshots/mdocml.md5">md5</a>)
+							</td>
+						</tr>
+						<tr>
+							<td>Online source</td>
+							<td>
+							<a class="external" href="http://bsd.lv/cgi-bin/cvsweb.cgi/?cvsroot=mdocml">cvsweb</a>
 							</td>
 						</tr>
 					</tbody>
