@@ -9,16 +9,16 @@ INSTALL_DATA	= install -m 0444
 INSTALL_LIB	= install -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
-VERSION	   = 1.9.8
-VDATE	   = 10 October 2009
+VERSION	   = 1.9.9
+VDATE	   = 21 October 2009
 
 VFLAGS     = -DVERSION=\"$(VERSION)\"
 CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -g
 CFLAGS    += $(VFLAGS)
 LINTFLAGS += $(VFLAGS)
 
-MANDOCFLAGS	= -Wall -fstrict
-MANDOCHTML	= -Thtml -ostyle=style.css,man=%N.%S.html,includes=%I.html
+MANDOCFLAGS = -Wall -fstrict
+MANDOCHTML = -Thtml -ostyle=style.css,man=%N.%S.html,includes=%I.html
 
 MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln mdoc_strings.ln \
 	     mdoc_argv.ln mdoc_validate.ln mdoc_action.ln \
