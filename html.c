@@ -650,3 +650,4 @@ bufcat_su(struct html *h, const char *p, const struct roffsu *su)
 		/* LINTED */
 		buffmt(h, "%s: %d%s;", p, (int)v, u);
 }
+

@@ -210,7 +210,42 @@ considered literal text.  Thus, the following produces
 In free-form mode, quotes are regarded as opaque text.
 .
 .Ss Dates
-TODO.
+There are several macros in
+.Nm
+that require a date argument.  The 
+.Em canonical form
+for dates is the American format:
+.Pp
+.D1 Cm Month Day , Year
+.Pp
+The
+.Cm Day
+value is an optionally zero-padded numeral.  The
+.Cm Month
+value is the full month name.  The
+.Cm Year
+value is the full four-digit year.
+.Pp
+The
+.Em non-canonical form
+is the same as the canonical form, but without the comma between the
+.Cm Day
+and
+.Cm Year
+field.
+.Pp
+Lastly,
+.Em reduced form
+dates range from only a
+.Cm Year
+to the full canonical or non-canonical form.
+.Pp
+Some examples of valid dates follow:
+.Pp
+.D1 "May, 2009" Pq reduced form
+.D1 "2009" Pq reduced form
+.D1 "May 20, 2009" Pq canonical form
+.D1 "May 20 2009" Pq non-canonical form
 .
 .Ss Scaling Widths
 Many macros support scaled widths for their arguments, such as
@@ -267,17 +302,31 @@ is necessarily non-portable across output media.  See
 .
 .
 .Sh MANUAL STRUCTURE
-Each
+A well-formed
 .Nm
-document must begin with a document prologue, containing, in order,
+document consists of a document prologue followed by one or more
+sections.
+.Pp
+The prologue, which consists of (in order) the
 .Sx \&Dd ,
 .Sx \&Dt ,
 and
-.Sx \&Os ,
-then the NAME section containing at least one
+.Sx \&Os
+macros, is required for every document.
+.Pp
+The first section (sections are denoted by 
+.Sx \&Sh )
+must be the NAME section, consisting of at least one
 .Sx \&Nm
 followed by
-.Sx \&Nd :
+.Sx \&Nd .
+.Pp
+Following that, convention dictates specifying at least the SYNOPSIS and
+DESCRIPTION sections, although this varies between manual sections.
+.Pp
+The following is a well-formed skeleton
+.Nm
+file:
 .Bd -literal -offset indent
 \&.Dd $\&Mdocdate$
 \&.Dt mdoc 7
@@ -320,10 +369,44 @@ utility processes files ...
 \&.\e\*q .Sh BUGS
 \&.\e\*q .Sh SECURITY CONSIDERATIONS
 .Ed
-.
 .Pp
-Subsequent SYNOPSIS and DESCRIPTION sections are strongly encouraged,
-but non-compulsory.
+The sections in a
+.Nm
+document are conventionally ordered as they appear above.  Sections
+should be composed as follows:
+.Bl -tag -width Ds -offset Ds
+.It NAME
+Must contain at least one
+.Sx \&Nm
+followed by
+.Sx \&Nd .
+The name needs re-stating since one
+.Nm
+documents can be used for more than one utility or function, such as
+.Xr grep 1
+also being referenced as
+.Xr egrep 1
+and
+.Xr fgrep 1 .
+.It LIBRARY
+.It SYNOPSIS
+.It DESCRIPTION
+.It IMPLEMENTATION NOTES
+.It EXIT STATUS
+.It RETURN VALUES
+.It ENVIRONMENT
+.It FILES
+.It EXAMPLES
+.It DIAGNOSTICS
+.It ERRORS
+.It SEE ALSO
+.It STANDARDS
+.It HISTORY
+.It AUTHORS
+.It CAVEATS
+.It BUGS
+.It SECURITY CONSIDERATIONS
+.El
 .
 .
 .Sh MACRO SYNTAX
@@ -604,10 +687,8 @@ Author name of an
 .Sx \&Rs
 block.  Multiple authors should each be accorded their own
 .Sx \%%A
-line.
-.Pp
-Author names should be ordered with full or abbreviated forename(s)
-first, then full surname.
+line.  Author names should be ordered with full or abbreviated
+forename(s) first, then full surname.
 .
 .Ss \&%B
 Book title of an
@@ -627,8 +708,10 @@ this macro is not implemented in
 .Ss \&%D
 Publication date of an
 .Sx \&Rs
-block.  This should follow the canonical syntax for 
+block.  This should follow the reduced syntax for 
 .Sx Dates .
+Canonical or non-canonical form is not necessary since publications are
+often referenced only by year, or month and year.
 .
 .Ss \&%I
 Publisher or issuer name of an
@@ -698,7 +781,7 @@ Author name.  This macro may alternatively accepts the following
 arguments, although these may not be specified along with a parameter:
 .Bl -tag -width 12n -offset indent
 .It Fl split
-Renders a line break is rendered before each author listing.
+Renders a line break before each author listing.
 .It Fl nosplit
 The opposite of
 .Fl split .
@@ -770,9 +853,9 @@ See also
 .Sx \&Ao .
 .
 .Ss \&Ar
-Command arguments.  If an argument is not provided, the strings
+Command arguments.  If an argument is not provided, the string
 .Dq file ...
-are used as a default.
+is used as a default.
 .Pp
 Examples:
 .Bd -literal -offset indent
@@ -801,8 +884,9 @@ Examples:
 .Ed
 .Pp
 See also
-.Sx \&Bx ,
 .Sx \&Bsx ,
+.Sx \&Bx ,
+.Sx \&Dx ,
 .Sx \&Fx ,
 .Sx \&Nx ,
 .Sx \&Ox ,
@@ -887,6 +971,11 @@ Examples:
    Hello       world.
 \&.Ed
 .Ed
+.Pp
+See also
+.Sx \&D1
+and
+.Sx \&Dl .
 .
 .Ss \&Bf
 .Ss \&Bk
@@ -966,6 +1055,7 @@ Examples:
 See also
 .Sx \&At ,
 .Sx \&Bx ,
+.Sx \&Dx ,
 .Sx \&Fx ,
 .Sx \&Nx ,
 .Sx \&Ox ,
@@ -973,6 +1063,9 @@ and
 .Sx \&Ux .
 .
 .Ss \&Bt
+Prints
+.Dq is currently in beta test.
+.
 .Ss \&Bx
 Format the BSD version provided as an argument, or a default value if no
 argument is provided.
@@ -986,6 +1079,7 @@ Examples:
 See also
 .Sx \&At ,
 .Sx \&Bsx ,
+.Sx \&Dx ,
 .Sx \&Fx ,
 .Sx \&Nx ,
 .Sx \&Ox ,
@@ -993,29 +1087,330 @@ and
 .Sx \&Ux .
 .
 .Ss \&Cd
+Configuration declaration (suggested for use only in section four
+manuals).  This denotes strings accepted by
+.Xr config 8 .
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Cd device le0 at scode?
+.Ed
+.Pp
+.Em Remarks :
+this macro is commonly abused by using quoted literals to retain
+white-space and align consecutive
+.Sx \&Cd
+declarations.  This practise is discouraged.
+.
 .Ss \&Cm
+Command modifiers.  Useful when specifying configuration options or
+keys.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Cm ControlPath
+\&.Cm ControlMaster
+.Ed
+.Pp
+See also
+.Sx \&Fl .
+.
 .Ss \&D1
+One-line indented display.  This is formatted by the default rules and
+is useful for simple indented statements.  It is followed by a newline.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.D1 Fl abcdefgh
+.Ed
+.Pp
+See also
+.Sx \&Bd
+and
+.Sx \&Dl .
+.
 .Ss \&Db
 .Ss \&Dc
+Closes a
+.Sx \&Do
+block.  Does not have any tail arguments.
+.
 .Ss \&Dd
+Document date.  This is the mandatory first macro of any
+.Nm
+manual.  Its calling syntax is as follows:
+.Pp
+.D1 \. Ns Sx \&Dd Cm date
+.Pp
+The 
+.Cm date
+field may be either
+.Ar $\&Mdocdate$ ,
+which signifies the current manual revision date dictated by
+.Xr cvs 1
+or instead a valid canonical date as specified by
+.Sx Dates .
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Dd $\&Mdocdate$
+\&.Dd $\&Mdocdate: July 21 2007$
+\&.Dd July 21, 2007
+.Ed
+.Pp
+See also
+.Sx \&Dt
+and
+.Sx \&Os .
+.
 .Ss \&Dl
+One-line intended display.  This is formatted as literal text and is
+useful for commands and invocations.  It is followed by a newline.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Dl % mandoc mdoc.7 | less
+.Ed
+.Pp
+See also
+.Sx \&Bd
+and
+.Sx \&D1 .
+.
 .Ss \&Do
+Begins a block enclosed by double quotes.  Does not have any head
+arguments.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.D1 Do April is the cruellest month Dc \e(em T.S. Eliot
+.Ed
+.Pp
+See also
+.Sx \&Dq .
+.
 .Ss \&Dq
+Encloses its arguments in double quotes.  
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Dq April is the cruellest month
+\e(em T.S. Eliot
+.Ed
+.Pp
+See also
+.Sx \&Do .
+.
 .Ss \&Dt
+Document title.  This is the mandatory second macro of any
+.Nm
+file.  Its calling syntax is as follows:
+.Pp
+.D1 \. Ns Sx \&Dt Cm title section Op Cm volume | arch
+.Pp
+Its arguments are as follows:
+.Bl -tag -width Ds -offset Ds
+.It Cm title
+The document's title (name).  This should be capitalised and is
+required.
+.It Cm section
+The manual section.  This may be one of
+.Ar 1
+.Pq utilities ,
+.Ar 2
+.Pq system calls ,
+.Ar 3
+.Pq libraries ,
+.Ar 3p
+.Pq Perl libraries ,
+.Ar 4
+.Pq devices ,
+.Ar 5
+.Pq file formats ,
+.Ar 6
+.Pq games ,
+.Ar 7
+.Pq miscellaneous ,
+.Ar 8
+.Pq system utilities ,
+.Ar 9
+.Pq kernel functions ,
+.Ar X11
+.Pq X Window System ,
+.Ar X11R6
+.Pq X Window System ,
+.Ar unass
+.Pq unassociated ,
+.Ar local
+.Pq local system ,
+.Ar draft
+.Pq draft manual ,
+or
+.Ar paper
+.Pq paper .
+It is also required and should correspond to the manual's filename
+suffix.
+.It Cm volume
+This overrides the volume inferred from
+.Ar section .
+This field is optional, and if specified, must be one of
+.Ar USD
+.Pq users' supplementary documents ,
+.Ar PS1
+.Pq programmers' supplementary documents ,
+.Ar AMD
+.Pq administrators' supplementary documents ,
+.Ar SMM
+.Pq system managers' manuals ,
+.Ar URM
+.Pq users' reference manuals ,
+.Ar PRM
+.Pq programmers' reference manuals ,
+.Ar KM
+.Pq kernel manuals ,
+.Ar IND
+.Pq master index ,
+.Ar MMI
+.Pq master index ,
+.Ar LOCAL
+.Pq local manuals ,
+.Ar LOC
+.Pq local manuals ,
+or
+.Ar CON
+.Pq contributed manuals .
+.It Cm arch
+This specifies a specific relevant architecture.  If
+.Cm volume
+is not provided, it may be used in its place, else it may be used
+subsequent that.  It, too, is optional.  It must be one of
+.Ar alpha ,
+.Ar amd64 ,
+.Ar amiga ,
+.Ar arc ,
+.Ar arm ,
+.Ar armish ,
+.Ar aviion ,
+.Ar hp300 ,
+.Ar hppa ,
+.Ar hppa64 ,
+.Ar i386 ,
+.Ar landisk ,
+.Ar luna88k ,
+.Ar mac68k ,
+.Ar macppc ,
+.Ar mvme68k ,
+.Ar mvme88k ,
+.Ar mvmeppc ,
+.Ar pmax ,
+.Ar sgi ,
+.Ar socppc ,
+.Ar sparc ,
+.Ar sparc64 ,
+.Ar sun3 ,
+.Ar vax ,
+or
+.Ar zaurus .
+.El
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Dt FOO 1
+\&.Dt FOO 4 KM
+\&.Dt FOO 9 i386
+\&.Dt FOO 9 KM i386
+.Ed
+.Pp
+See also
+.Sx \&Dd
+and
+.Sx \&Os .
+.
 .Ss \&Dv
+Defined variables such as preprocessor constants.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Dv BUFSIZ
+\&.Dv STDOUT_FILENO
+.Ed
+.Pp
+See also
+.Sx \&Er .
+.
 .Ss \&Dx
+Format the DragonFlyBSD version provided as an argument, or a default
+value if no argument is provided.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Dx 2.4.1
+\&.Dx
+.Ed
+.Pp
+See also
+.Sx \&At ,
+.Sx \&Bsx ,
+.Sx \&Bx ,
+.Sx \&Fx ,
+.Sx \&Nx ,
+.Sx \&Ox ,
+and
+.Sx \&Ux .
+.
 .Ss \&Ec
 .Ss \&Ed
 .Ss \&Ef
 .Ss \&Ek
 .Ss \&El
 .Ss \&Em
+Denotes text that should be emphasised.  Note that this is a
+presentation term and should not be used for stylistically decorating
+technical terms.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Ed Warnings!
+\&.Ed Remarks :
+.Ed
+.
 .Ss \&En
 .Ss \&Eo
 .Ss \&Er
+Error constants (suggested for use only in section two manuals).
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Er EPERM
+\&.Er ENOENT
+.Ed
+.Pp
+See also
+.Sx \&Dv .
+.
 .Ss \&Es
+.
 .Ss \&Ev
+Environmental variables such as those specified in
+.Xr environ 7 .
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Ev DISPLAY
+\&.Ev PATH
+.Ed
+.
 .Ss \&Ex
+Inserts text regarding a utility's exit values.  This macro must have
+first the
+.Fl std
+argument specified, then an optional
+.Ar utility .
+If
+.Ar utility
+is not provided, the document's name as stipulated in
+.Sx \&Nm
+is provided.
 .Ss \&Fa
 .Ss \&Fc
 .Ss \&Fd
@@ -1036,8 +1431,9 @@ Examples:
 .Pp
 See also
 .Sx \&At ,
-.Sx \&Bx ,
 .Sx \&Bsx ,
+.Sx \&Bx ,
+.Sx \&Dx ,
 .Sx \&Nx ,
 .Sx \&Ox ,
 and
@@ -1069,8 +1465,9 @@ Examples:
 .Pp
 See also
 .Sx \&At ,
-.Sx \&Bx ,
 .Sx \&Bsx ,
+.Sx \&Bx ,
+.Sx \&Dx ,
 .Sx \&Fx ,
 .Sx \&Ox ,
 and
@@ -1080,7 +1477,37 @@ and
 .Ss \&Oo
 .Ss \&Op
 .Ss \&Os
+Document operating system version.  This is the mandatory third macro of
+any
+.Nm
+file.  Its calling syntax is as follows:
+.Pp
+.D1 \. Ns Sx \&Os Op Cm system
+.Pp
+The optional
+.Cm system
+parameter specifies the relevant operating system or environment.  Left
+unspecified, it defaults to the local operating system version.  This is
+the suggested form.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Os
+\&.Os KTH/CSC/TCS
+\&.Os BSD 4.3
+.Ed
+.Pp
+See also
+.Sx \&Dd
+and
+.Sx \&Dt .
+.
 .Ss \&Ot
+Unknown usage.
+.Pp
+.Em Remarks :
+this macro has been deprecated.
+.
 .Ss \&Ox
 Format the OpenBSD version provided as an argument, or a default value
 if no argument is provided.
@@ -1095,6 +1522,7 @@ See also
 .Sx \&At ,
 .Sx \&Bsx ,
 .Sx \&Bx ,
+.Sx \&Dx ,
 .Sx \&Fx ,
 .Sx \&Nx ,
 and
@@ -1177,8 +1605,9 @@ Examples:
 .Pp
 See also
 .Sx \&At ,
-.Sx \&Bx ,
 .Sx \&Bsx ,
+.Sx \&Bx ,
+.Sx \&Dx ,
 .Sx \&Fx ,
 .Sx \&Nx ,
 and

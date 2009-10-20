@@ -1274,6 +1274,8 @@ mdoc_d1_pre(MDOC_ARGS)
 	if (MDOC_BLOCK != n->type)
 		return(1);
 
+	/* FIXME: D1 shouldn't be literal. */
+
 	SCALE_VS_INIT(&su, INDENT - 2);
 	bufcat_su(h, "margin-left", &su);
 	PAIR_CLASS_INIT(&tag[0], "lit");
@@ -1289,20 +1291,20 @@ mdoc_sx_pre(MDOC_ARGS)
 {
 	struct htmlpair		 tag[2];
 	const struct mdoc_node	*nn;
-	char			 lbuf[BUFSIZ];
+	char			 buf[BUFSIZ];
 
 	/* FIXME: duplicates? */
 
-	(void)strlcpy(lbuf, "#", BUFSIZ);
+	(void)strlcpy(buf, "#", BUFSIZ);
 	for (nn = n->child; nn; nn = nn->next) {
-		(void)strlcat(lbuf, nn->string, BUFSIZ);
+		(void)strlcat(buf, nn->string, BUFSIZ);
 		if (nn->next)
-			(void)strlcat(lbuf, "_", BUFSIZ);
+			(void)strlcat(buf, "_", BUFSIZ);
 	}
 
 	PAIR_CLASS_INIT(&tag[0], "link-sec");
 	tag[1].key = ATTR_HREF;
-	tag[1].val = lbuf;
+	tag[1].val = buf;
 
 	print_otag(h, TAG_A, 2, tag);
 	return(1);
