@@ -914,7 +914,7 @@ print_foot(struct termp *p, const struct man_meta *meta)
 
 	tm = localtime(&meta->date);
 
-	if (0 == strftime(buf, p->rmargin, "%B %d, %Y", tm))
+	if (0 == strftime(buf, p->rmargin, "%B %e, %Y", tm))
 		(void)strlcpy(buf, "(invalid date)", BUFSIZ);
 
 	term_vspace(p);
