@@ -696,6 +696,8 @@ pre_bd(PRE_ARGS)
 	for (i = 0, err = type = 0; ! err && 
 			i < (int)n->args->argc; i++)
 		switch (n->args->argv[i].arg) {
+		case (MDOC_Centred):
+			/* FALLTHROUGH */
 		case (MDOC_Ragged):
 			/* FALLTHROUGH */
 		case (MDOC_Unfilled):
