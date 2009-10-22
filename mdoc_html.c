@@ -456,21 +456,17 @@ print_mdoc_node(MDOC_ARGS)
 static void
 mdoc_root_post(MDOC_ARGS)
 {
-	struct tm	 tm;
 	struct htmlpair	 tag[2];
 	struct tag	*t, *tt;
-	char		 b[BUFSIZ];
+	char		 b[DATESIZ];
+
+	time2a(m->date, b, DATESIZ);
 
 	/*
 	 * XXX: this should use divs, but in Firefox, divs with nested
 	 * divs for some reason puke when trying to put a border line
 	 * below.  So I use tables, instead.
 	 */
-
-	(void)localtime_r(&m->date, &tm);
-
-	if (0 == strftime(b, BUFSIZ - 1, "%B %e, %Y", &tm))
-		err(EXIT_FAILURE, "strftime");
 
 	PAIR_CLASS_INIT(&tag[0], "footer");
 	bufcat_style(h, "width", "100%");

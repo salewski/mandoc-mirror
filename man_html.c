@@ -281,15 +281,11 @@ man_root_pre(MAN_ARGS)
 static void
 man_root_post(MAN_ARGS)
 {
-	struct tm	 tm;
 	struct htmlpair	 tag[2];
 	struct tag	*t, *tt;
-	char		 b[BUFSIZ];
+	char		 b[DATESIZ];
 
-	(void)localtime_r(&m->date, &tm);
-
-	if (0 == strftime(b, BUFSIZ - 1, "%B %e, %Y", &tm))
-		err(EXIT_FAILURE, "strftime");
+	time2a(m->date, b, DATESIZ);
 
 	PAIR_CLASS_INIT(&tag[0], "footer");
 	bufcat_style(h, "width", "100%");

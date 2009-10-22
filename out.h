@@ -17,6 +17,8 @@
 #ifndef OUT_H
 #define OUT_H
 
+#define	DATESIZ		24
+
 __BEGIN_DECLS
 
 enum	roffscale {
@@ -52,6 +54,7 @@ struct	roffsu {
 
 int		  a2roffsu(const char *, 
 			struct roffsu *, enum roffscale);
+void		  time2a(time_t, char *, size_t);
 
 __END_DECLS
 

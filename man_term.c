@@ -909,13 +909,9 @@ print_body(DECL_ARGS)
 static void
 print_foot(struct termp *p, const struct man_meta *meta)
 {
-	struct tm	*tm;
-	char		 buf[BUFSIZ];
+	char		buf[DATESIZ];
 
-	tm = localtime(&meta->date);
-
-	if (0 == strftime(buf, p->rmargin, "%B %e, %Y", tm))
-		(void)strlcpy(buf, "(invalid date)", BUFSIZ);
+	time2a(meta->date, buf, DATESIZ);
 
 	term_vspace(p);
 
