@@ -12,9 +12,10 @@ INSTALL_MAN	= $(INSTALL_DATA)
 VERSION	   = 1.9.9
 VDATE	   = 21 October 2009
 
-VFLAGS     = -DVERSION=\"$(VERSION)\"
+VFLAGS     = -DVERSION="\"$(VERSION)\""
 CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -g
 CFLAGS    += $(VFLAGS)
+#CFLAGS	  += -DOSNAME="\"OpenBSD 4.5\""
 LINTFLAGS += $(VFLAGS)
 
 MANDOCFLAGS = -Wall -fstrict
