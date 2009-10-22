@@ -21,9 +21,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "out.h"
 
+#ifdef __linux__
+extern	size_t	  strlcat(char *, const char *, size_t);
+#endif
 
 /* 
  * Convert a `scaling unit' to a consistent form, or fail.  Scaling
