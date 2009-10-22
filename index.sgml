@@ -100,8 +100,8 @@
 						<tr>
 							<td>NetBSD</td>
 							<td>
-							<a href="http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/textproc/mdocml/"
-								class="external">pkgsrc/textproc/mdocml</a> 
+							<a href="http://cvsweb.netbsd.org/bsdweb.cgi/src/external/bsd/mdocml/"
+								class="external">src/external/bsd/mdocml<a/>
 							</td>
 						</tr>
 						<tr>
