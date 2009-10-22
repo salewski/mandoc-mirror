@@ -548,12 +548,12 @@ encode(struct termp *p, char c)
 {
 	
 	if (' ' != c) {
-		if (p->bold) {
-			buffer(p, c);
-			buffer(p, 8);
-		}
 		if (p->under) {
 			buffer(p, '_');
+			buffer(p, 8);
+		}
+		if (p->bold) {
+			buffer(p, c);
 			buffer(p, 8);
 		}
 	}
