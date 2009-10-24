@@ -186,6 +186,7 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* %Q */
 	{ NULL, NULL }, /* br */
 	{ NULL, NULL }, /* sp */
+	{ NULL, NULL }, /* %U */
 };
 
 #define	RSORD_MAX 13

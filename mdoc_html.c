@@ -254,6 +254,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc__x_pre, mdoc__x_post}, /* %Q */ 
 	{mdoc_sp_pre, NULL}, /* br */
 	{mdoc_sp_pre, NULL}, /* sp */ 
+	{mdoc__x_pre, mdoc__x_post}, /* %U */ 
 };
 
 
@@ -2147,6 +2148,8 @@ static int
 mdoc__x_pre(MDOC_ARGS)
 {
 	struct htmlpair	tag;
+
+	/* TODO: %U. */
 
 	switch (n->tok) {
 	case(MDOC__A):
