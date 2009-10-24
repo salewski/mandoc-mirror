@@ -63,6 +63,7 @@ const	struct actions man_actions[MAN_MAX] = {
 	{ NULL }, /* RS */
 	{ NULL }, /* DT */
 	{ NULL }, /* UC */
+	{ NULL }, /* PD */
 };
 
 static	time_t	  man_atotime(const char *);

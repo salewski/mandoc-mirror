@@ -30,6 +30,7 @@
 #include "main.h"
 
 /* TODO: preserve ident widths. */
+/* FIXME: have PD set the default vspace width. */
 
 #define	INDENT		  5
 #define	HALFINDENT	  3
@@ -104,6 +105,7 @@ static	const struct htmlman mans[MAN_MAX] = {
 	{ man_RS_pre, NULL }, /* RS */
 	{ man_ign_pre, NULL }, /* DT */
 	{ man_ign_pre, NULL }, /* UC */
+	{ man_ign_pre, NULL }, /* PD */
 };
 
 

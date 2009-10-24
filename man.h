@@ -50,7 +50,8 @@
 #define	MAN_RS		 28
 #define	MAN_DT		 29
 #define	MAN_UC		 30
-#define	MAN_MAX	 	 31
+#define	MAN_PD		 31
+#define	MAN_MAX	 	 32
 
 enum	man_type {
 	MAN_TEXT,

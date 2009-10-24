@@ -86,6 +86,7 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, posts_part }, /* RS */
 	{ NULL, NULL }, /* DT */
 	{ NULL, NULL }, /* UC */
+	{ NULL, NULL }, /* PD */
 };
 
 
