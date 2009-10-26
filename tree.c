@@ -18,6 +18,7 @@
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "mdoc.h"
 #include "man.h"
