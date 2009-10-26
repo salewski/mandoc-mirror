@@ -16,7 +16,6 @@
  */
 #include <sys/types.h>
 #include <sys/param.h>
-#include <sys/queue.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -417,7 +416,7 @@ print_mdoc_node(MDOC_ARGS)
 	struct tag	*t;
 
 	child = 1;
-	t = SLIST_FIRST(&h->tags);
+	t = h->tags.head;
 
 	bufinit(h);
 	switch (n->type) {
@@ -981,7 +980,7 @@ mdoc_it_head_pre(MDOC_ARGS, int type, struct roffsu *width)
 		print_otag(h, TAG_SPAN, 1, &tag);
 		break;
 	case (MDOC_Enum):
-		ord = SLIST_FIRST(&h->ords);
+		ord = h->ords.head;
 		assert(ord);
 		nbuf[BUFSIZ - 1] = 0;
 		(void)snprintf(nbuf, BUFSIZ - 1, "%d.", ord->pos++);
@@ -1116,7 +1115,8 @@ mdoc_bl_pre(MDOC_ARGS)
 		err(EXIT_FAILURE, "malloc");
 	ord->cookie = n;
 	ord->pos = 1;
-	SLIST_INSERT_HEAD(&h->ords, ord, entry);
+	ord->next = h->ords.head;
+	h->ords.head = ord;
 	return(1);
 }
 
@@ -1132,9 +1132,9 @@ mdoc_bl_post(MDOC_ARGS)
 	if (MDOC_Enum != a2list(n))
 		return;
 
-	ord = SLIST_FIRST(&h->ords);
+	ord = h->ords.head;
 	assert(ord);
-	SLIST_REMOVE_HEAD(&h->ords, entry);
+	h->ords.head = ord->next;
 	free(ord);
 }
 

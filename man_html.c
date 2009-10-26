@@ -15,7 +15,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include <sys/types.h>
-#include <sys/queue.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -180,7 +179,7 @@ print_man_node(MAN_ARGS)
 	struct tag	*t;
 
 	child = 1;
-	t = SLIST_FIRST(&h->tags);
+	t = h->tags.head;
 
 	bufinit(h);
 

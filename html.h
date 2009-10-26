@@ -62,18 +62,22 @@ enum	htmlattr {
 };
 
 struct	tag {
+	struct tag	 *next;
 	enum htmltag	  tag;
-	SLIST_ENTRY(tag)  entry;
 };
 
 struct	ord {
-	int		  pos;
+	struct ord	 *next;
 	const void	 *cookie;
-	SLIST_ENTRY(ord)  entry;
+	int		  pos;
 };
 
-SLIST_HEAD(tagq, tag);
-SLIST_HEAD(ordq, ord);
+struct tagq {
+	struct tag	 *head;
+};
+struct ordq {
+	struct ord	 *head;
+};
 
 struct	htmlpair {
 	enum htmlattr	  key;

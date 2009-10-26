@@ -134,7 +134,7 @@ main(int argc, char *argv[])
 			if ( ! moptions(&curp.inttype, optarg))
 				return(EXIT_FAILURE);
 			break;
-		case ('o'):
+		case ('O'):
 			curp.outopts = optarg;
 			break;
 		case ('T'):
@@ -221,8 +221,8 @@ usage(void)
 {
 
 	(void)fprintf(stderr, "usage: %s [-V] [-foption...] "
-			"[-mformat] [-Toutput] [-Werr...]\n", 
-			__progname);
+			"[-mformat] [-Ooption] [-Toutput] "
+			"[-Werr...]\n", __progname);
 	exit(EXIT_FAILURE);
 }
 
