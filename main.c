@@ -571,7 +571,7 @@ static int
 foptions(int *fflags, char *arg)
 {
 	char		*v, *o;
-	const char	*toks[7];
+	const char	*toks[8];
 
 	toks[0] = "ign-scope";
 	toks[1] = "no-ign-escape";
@@ -579,7 +579,8 @@ foptions(int *fflags, char *arg)
 	toks[3] = "no-ign-chars";
 	toks[4] = "ign-errors";
 	toks[5] = "strict";
-	toks[6] = NULL;
+	toks[6] = "ign-escape";
+	toks[7] = NULL;
 
 	while (*arg) {
 		o = arg;
@@ -602,6 +603,9 @@ foptions(int *fflags, char *arg)
 		case (5):
 			*fflags |= NO_IGN_ESCAPE | 
 			 	   NO_IGN_MACRO | NO_IGN_CHARS;
+			break;
+		case (6):
+			*fflags &= ~NO_IGN_ESCAPE;
 			break;
 		default:
 			warnx("bad argument: -f%s", o);
