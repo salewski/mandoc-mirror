@@ -222,14 +222,15 @@ term_flushln(struct termp *p)
 		}
 		vis += vsz;
 	}
+
 	p->col = 0;
+	overstep = 0;
 
 	if ( ! (TERMP_NOBREAK & p->flags)) {
 		putchar('\n');
 		return;
 	}
 
-	overstep = 0;
 	if (TERMP_HANG & p->flags) {
 		/* We need one blank after the tag. */
 		overstep = /* LINTED */
