@@ -124,7 +124,7 @@ main(int argc, char *argv[])
 	curp.outtype = OUTT_ASCII;
 
 	/* LINTED */
-	while (-1 != (c = getopt(argc, argv, "f:m:o:T:VW:")))
+	while (-1 != (c = getopt(argc, argv, "f:m:O:T:VW:")))
 		switch (c) {
 		case ('f'):
 			if ( ! foptions(&curp.fflags, optarg))

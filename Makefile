@@ -19,7 +19,7 @@ CFLAGS    += $(VFLAGS)
 LINTFLAGS += $(VFLAGS)
 
 MANDOCFLAGS = -Wall -fstrict
-MANDOCHTML = -Thtml -ostyle=style.css,man=%N.%S.html,includes=%I.html
+MANDOCHTML = -Thtml -Ostyle=style.css,man=%N.%S.html,includes=%I.html
 
 MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln mdoc_strings.ln \
 	     mdoc_argv.ln mdoc_validate.ln mdoc_action.ln \
