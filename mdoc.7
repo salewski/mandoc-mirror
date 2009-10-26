@@ -759,7 +759,7 @@ block.  This macro may also be used in a non-bibliographical context
 when referring to article titles.
 .
 .Ss \&%U
-URI of current document.
+URI of reference document.
 .
 .Ss \&%V
 Volume number of an
@@ -1451,6 +1451,19 @@ and
 .Ss \&Lb
 .Ss \&Li
 .Ss \&Lk
+Format a hyperlink.  The calling syntax is as follows:
+.Pp
+.D1 \. Ns Sx \&Lk Cm uri Op Cm name
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Lk http://bsd.lv "The BSD.lv Project"
+\&.Lk http://bsd.lv
+.Ed
+.Pp
+See also
+.Sx \&Mt .
+.
 .Ss \&Lp
 .Ss \&Ms
 .Ss \&Mt

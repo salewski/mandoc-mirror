@@ -1757,6 +1757,9 @@ mdoc_lk_pre(MDOC_ARGS)
 	tag[1].val = nn->string;
 	print_otag(h, TAG_A, 2, tag);
 
+	if (NULL == nn->next) 
+		return(1);
+
 	for (nn = nn->next; nn; nn = nn->next) 
 		print_text(h, nn->string);
 
@@ -2147,58 +2150,65 @@ mdoc_lb_pre(MDOC_ARGS)
 static int
 mdoc__x_pre(MDOC_ARGS)
 {
-	struct htmlpair	tag;
-
-	/* TODO: %U. */
+	struct htmlpair	tag[2];
 
 	switch (n->tok) {
 	case(MDOC__A):
-		PAIR_CLASS_INIT(&tag, "ref-auth");
+		PAIR_CLASS_INIT(&tag[0], "ref-auth");
 		break;
 	case(MDOC__B):
-		PAIR_CLASS_INIT(&tag, "ref-book");
+		PAIR_CLASS_INIT(&tag[0], "ref-book");
 		break;
 	case(MDOC__C):
-		PAIR_CLASS_INIT(&tag, "ref-city");
+		PAIR_CLASS_INIT(&tag[0], "ref-city");
 		break;
 	case(MDOC__D):
-		PAIR_CLASS_INIT(&tag, "ref-date");
+		PAIR_CLASS_INIT(&tag[0], "ref-date");
 		break;
 	case(MDOC__I):
-		PAIR_CLASS_INIT(&tag, "ref-issue");
+		PAIR_CLASS_INIT(&tag[0], "ref-issue");
 		break;
 	case(MDOC__J):
-		PAIR_CLASS_INIT(&tag, "ref-jrnl");
+		PAIR_CLASS_INIT(&tag[0], "ref-jrnl");
 		break;
 	case(MDOC__N):
-		PAIR_CLASS_INIT(&tag, "ref-num");
+		PAIR_CLASS_INIT(&tag[0], "ref-num");
 		break;
 	case(MDOC__O):
-		PAIR_CLASS_INIT(&tag, "ref-opt");
+		PAIR_CLASS_INIT(&tag[0], "ref-opt");
 		break;
 	case(MDOC__P):
-		PAIR_CLASS_INIT(&tag, "ref-page");
+		PAIR_CLASS_INIT(&tag[0], "ref-page");
 		break;
 	case(MDOC__Q):
-		PAIR_CLASS_INIT(&tag, "ref-corp");
+		PAIR_CLASS_INIT(&tag[0], "ref-corp");
 		break;
 	case(MDOC__R):
-		PAIR_CLASS_INIT(&tag, "ref-rep");
+		PAIR_CLASS_INIT(&tag[0], "ref-rep");
 		break;
 	case(MDOC__T):
-		PAIR_CLASS_INIT(&tag, "ref-title");
+		PAIR_CLASS_INIT(&tag[0], "ref-title");
 		print_text(h, "\\(lq");
 		h->flags |= HTML_NOSPACE;
 		break;
+	case(MDOC__U):
+		PAIR_CLASS_INIT(&tag[0], "link-ref");
+		break;
 	case(MDOC__V):
-		PAIR_CLASS_INIT(&tag, "ref-vol");
+		PAIR_CLASS_INIT(&tag[0], "ref-vol");
 		break;
 	default:
 		abort();
 		/* NOTREACHED */
 	}
 
-	print_otag(h, TAG_SPAN, 1, &tag);
+	if (MDOC__U != n->tok) {
+		print_otag(h, TAG_SPAN, 1, tag);
+		return(1);
+	}
+
+	PAIR_HREF_INIT(&tag[1], n->child->string);
+	print_otag(h, TAG_A, 2, tag);
 	return(1);
 }
 

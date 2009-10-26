@@ -58,6 +58,7 @@ a.link-ext	{ } /* Off-site link (Lk). */
 a.link-includes	{ } /* Include-file link (In). */
 a.link-mail	{ } /* Mailto links (Mt). */
 a.link-man	{ } /* Manual links (Xr). */
+a.link-ref	{ } /* Reference section links (%Q). */
 a.link-sec	{ } /* Section links (Sx). */
 
 div.emph	{ font-style: italic; } /* Emphasis (Bl -emphasis). */
