@@ -204,7 +204,8 @@ term_flushln(struct termp *p)
 				vis = 0;
 			}
 			/* Remove the overstep width. */
-			bp += overstep;
+			bp += (int)/* LINTED */
+				overstep;
 			overstep = 0;
 		} else {
 			for (j = 0; j < (int)vbl; j++)
