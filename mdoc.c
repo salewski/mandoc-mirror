@@ -665,7 +665,6 @@ parsetext(struct mdoc *m, int line, char *buf)
 
 
 
-
 static int
 macrowarn(struct mdoc *m, int ln, const char *buf)
 {
