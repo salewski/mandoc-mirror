@@ -198,7 +198,7 @@ static int
 mdoc_alloc1(struct mdoc *mdoc)
 {
 
-	bzero(&mdoc->meta, sizeof(struct mdoc_meta));
+	memset(&mdoc->meta, 0, sizeof(struct mdoc_meta));
 	mdoc->flags = 0;
 	mdoc->lastnamed = mdoc->lastsec = SEC_NONE;
 	mdoc->last = calloc(1, sizeof(struct mdoc_node));

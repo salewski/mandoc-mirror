@@ -131,7 +131,7 @@ mdoc_atotime(const char *p)
 	struct tm	 tm;
 	char		*pp;
 
-	bzero(&tm, sizeof(struct tm));
+	memset(&tm, 0, sizeof(struct tm));
 
 	if (0 == strcmp(p, "$" "Mdocdate$"))
 		return(time(NULL));

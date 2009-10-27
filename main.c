@@ -119,7 +119,7 @@ main(int argc, char *argv[])
 	struct buf	 ln, blk;
 	struct curparse	 curp;
 
-	bzero(&curp, sizeof(struct curparse));
+	memset(&curp, 0, sizeof(struct curparse));
 
 	curp.inttype = INTT_AUTO;
 	curp.outtype = OUTT_ASCII;
@@ -158,8 +158,8 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	bzero(&ln, sizeof(struct buf));
-	bzero(&blk, sizeof(struct buf));
+	memset(&ln, 0, sizeof(struct buf));
+	memset(&blk, 0, sizeof(struct buf));
 
 	rc = 1;
 

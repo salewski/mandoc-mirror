@@ -208,7 +208,7 @@ man_atotime(const char *p)
 	struct tm	 tm;
 	char		*pp;
 
-	bzero(&tm, sizeof(struct tm));
+	memset(&tm, 0, sizeof(struct tm));
 
 	if ((pp = strptime(p, "%b %d %Y", &tm)) && 0 == *pp)
 		return(mktime(&tm));

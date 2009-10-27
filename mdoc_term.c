@@ -315,7 +315,7 @@ print_node(DECL_ARGS)
 	bold = p->bold;
 	under = p->under;
 
-	bzero(&npair, sizeof(struct termpair));
+	memset(&npair, 0, sizeof(struct termpair));
 	npair.ppair = pair;
 
 	if (MDOC_TEXT != n->type) {

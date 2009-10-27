@@ -175,7 +175,7 @@ static int
 man_alloc1(struct man *m)
 {
 
-	bzero(&m->meta, sizeof(struct man_meta));
+	memset(&m->meta, 0, sizeof(struct man_meta));
 	m->flags = 0;
 	m->last = calloc(1, sizeof(struct man_node));
 	if (NULL == m->last)
