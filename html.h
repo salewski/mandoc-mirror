@@ -58,6 +58,7 @@ enum	htmlattr {
 	ATTR_VALIGN,
 	ATTR_TARGET,
 	ATTR_ID,
+	ATTR_SUMMARY,
 	ATTR_MAX
 };
 
@@ -93,6 +94,9 @@ struct	htmlpair {
 #define	PAIR_STYLE_INIT(p, h) \
 	do { (p)->key = ATTR_STYLE; \
 	(p)->val = (h)->buf; } while (/* CONSTCOND */ 0)
+#define	PAIR_SUMMARY_INIT(p, v) \
+	do { (p)->key = ATTR_SUMMARY; \
+	(p)->val = (v); } while (/* CONSTCOND */ 0)
 
 struct	html {
 	int		  flags;

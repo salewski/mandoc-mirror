@@ -456,7 +456,7 @@ print_mdoc_node(MDOC_ARGS)
 static void
 mdoc_root_post(MDOC_ARGS)
 {
-	struct htmlpair	 tag[2];
+	struct htmlpair	 tag[3];
 	struct tag	*t, *tt;
 	char		 b[DATESIZ];
 
@@ -471,7 +471,9 @@ mdoc_root_post(MDOC_ARGS)
 	PAIR_CLASS_INIT(&tag[0], "footer");
 	bufcat_style(h, "width", "100%");
 	PAIR_STYLE_INIT(&tag[1], h);
-	t = print_otag(h, TAG_TABLE, 2, tag);
+	PAIR_SUMMARY_INIT(&tag[2], "footer");
+
+	t = print_otag(h, TAG_TABLE, 3, tag);
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
 	bufinit(h);
@@ -495,7 +497,7 @@ mdoc_root_post(MDOC_ARGS)
 static int
 mdoc_root_pre(MDOC_ARGS)
 {
-	struct htmlpair	 tag[2];
+	struct htmlpair	 tag[3];
 	struct tag	*t, *tt;
 	char		 b[BUFSIZ], title[BUFSIZ];
 
@@ -515,7 +517,10 @@ mdoc_root_pre(MDOC_ARGS)
 	PAIR_CLASS_INIT(&tag[0], "header");
 	bufcat_style(h, "width", "100%");
 	PAIR_STYLE_INIT(&tag[1], h);
-	t = print_otag(h, TAG_TABLE, 2, tag);
+	PAIR_SUMMARY_INIT(&tag[2], "header");
+
+	t = print_otag(h, TAG_TABLE, 3, tag);
+
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
 	bufinit(h);
