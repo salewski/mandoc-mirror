@@ -120,18 +120,19 @@ term_alloc(enum termenc enc)
  *  If TERMP_NOBREAK is specified and the line overruns the right
  *  margin, it will break and pad-right to the right margin after
  *  writing.  If maxrmargin is violated, it will break and continue
- *  writing from the right-margin, which will lead to the above
- *  scenario upon exit.
- *
- *  Otherwise, the line will break at the right margin.  Extremely long
- *  lines will cause the system to emit a warning (TODO: hyphenate, if
- *  possible).
+ *  writing from the right-margin, which will lead to the above scenario
+ *  upon exit.  Otherwise, the line will break at the right margin.
  */
 void
 term_flushln(struct termp *p)
 {
-	int		 i, j;
-	size_t		 vbl, vsz, vis, maxvis, mmax, bp;
+	int		 i;     /* current input position in p->buf */
+	size_t		 vis;   /* current visual position on output */
+	size_t		 vbl;   /* number of blanks to prepend to output */
+	size_t		 vsz;   /* visual characters to write to output */
+	size_t		 bp;    /* visual right border position */
+	int		 j;     /* temporary loop index */
+	size_t		 maxvis, mmax;
 	static int	 overstep = 0;
 
 	/*
@@ -142,12 +143,11 @@ term_flushln(struct termp *p)
 	 */
 
 	assert(p->offset < p->rmargin);
-	assert((int)(p->rmargin - p->offset) - overstep > 0);
 
-	maxvis = /* LINTED */
-		p->rmargin - p->offset - overstep;
-	mmax = /* LINTED */
-		p->maxrmargin - p->offset - overstep;
+	maxvis = (int)(p->rmargin - p->offset) - overstep < 0 ?
+			0 : p->rmargin - p->offset - overstep;
+	mmax = (int)(p->maxrmargin - p->offset) - overstep < 0 ?
+			0 : p->maxrmargin - p->offset - overstep;
 
 	bp = TERMP_NOBREAK & p->flags ? mmax : maxvis;
 	vis = 0;
