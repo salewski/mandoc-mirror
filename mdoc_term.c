@@ -348,8 +348,7 @@ print_node(DECL_ARGS)
 static void
 print_foot(DECL_ARGS)
 {
-	char		 buf[DATESIZ];
-	char		*os;
+	char		buf[DATESIZ], os[BUFSIZ];
 
 	/* 
 	 * Output the footer in new-groff style, that is, three columns
@@ -359,12 +358,8 @@ print_foot(DECL_ARGS)
 	 * SYSTEM                  DATE                    SYSTEM
 	 */
 
-	if (NULL == (os = malloc(p->rmargin)))
-		err(EXIT_FAILURE, "malloc");
-
 	time2a(m->date, buf, DATESIZ);
-
-	(void)strlcpy(os, m->os, p->rmargin);
+	strlcpy(os, m->os, BUFSIZ);
 
 	term_vspace(p);
 
@@ -393,8 +388,6 @@ print_foot(DECL_ARGS)
 	p->offset = 0;
 	p->rmargin = p->maxrmargin;
 	p->flags = 0;
-
-	free(os);
 }
 
 
@@ -403,15 +396,10 @@ print_foot(DECL_ARGS)
 static void
 print_head(DECL_ARGS)
 {
-	char		*buf, *title;
+	char		buf[BUFSIZ], title[BUFSIZ];
 
 	p->rmargin = p->maxrmargin;
 	p->offset = 0;
-
-	if (NULL == (buf = malloc(p->rmargin)))
-		err(EXIT_FAILURE, "malloc");
-	if (NULL == (title = malloc(p->rmargin)))
-		err(EXIT_FAILURE, "malloc");
 
 	/*
 	 * The header is strange.  It has three components, which are
@@ -427,15 +415,15 @@ print_head(DECL_ARGS)
 	 */
 
 	assert(m->vol);
-	(void)strlcpy(buf, m->vol, p->rmargin);
+	strlcpy(buf, m->vol, BUFSIZ);
 
 	if (m->arch) {
-		(void)strlcat(buf, " (", p->rmargin);
-		(void)strlcat(buf, m->arch, p->rmargin);
-		(void)strlcat(buf, ")", p->rmargin);
+		strlcat(buf, " (", BUFSIZ);
+		strlcat(buf, m->arch, BUFSIZ);
+		strlcat(buf, ")", BUFSIZ);
 	}
 
-	snprintf(title, p->rmargin, "%s(%d)", m->title, m->msec);
+	snprintf(title, BUFSIZ, "%s(%d)", m->title, m->msec);
 
 	p->offset = 0;
 	p->rmargin = (p->maxrmargin - strlen(buf) + 1) / 2;
@@ -462,9 +450,6 @@ print_head(DECL_ARGS)
 	p->offset = 0;
 	p->rmargin = p->maxrmargin;
 	p->flags &= ~TERMP_NOSPACE;
-
-	free(title);
-	free(buf);
 }
 
 
