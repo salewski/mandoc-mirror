@@ -670,26 +670,24 @@ html_idcat(char *dst, const char *src, int sz)
 	for (i = 0; *dst != '\0' && i < sz - 1; dst++, i++)
 		/* Jump to end. */ ;
 
-	for ( ; *src != '\0' && i < sz - 1; src++, i++) {
+	for ( ; *src != '\0' && i < sz - 1; src++, i++, dst++) {
 		if (isalnum((u_char)*src)) {
-			*dst++ = *src;
+			*dst = *src;
 			continue;
 		}
 
 		switch (*src) {
 		case (';'):
-			*dst++ = ';';
+			*dst = ';';
 			break;
 		case ('-'):
-			*dst++ = '-';
+			*dst = '-';
 			break;
 		case (':'):
-			*dst++ = ':';
+			*dst = ':';
 			break;
-		case ('_'):
-			/* FALLTHROUGH */
 		default:
-			*dst++ = '_';
+			*dst = '_';
 			break;
 		}
 	}
