@@ -19,6 +19,8 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "libmandoc.h"
 
@@ -103,3 +105,74 @@ mandoc_special(const char *p)
 	return(*p == ']' ? c : 0);
 }
 
+
+void *
+mandoc_calloc(size_t num, size_t size)
+{
+	void		*ptr;
+
+	ptr = calloc(num, size);
+	if (NULL == ptr) {
+		fprintf(stderr, "memory exhausted\n");
+		exit(EXIT_FAILURE);
+	}
+
+	return(ptr);
+}
+
+
+void *
+mandoc_malloc(size_t size)
+{
+	void		*ptr;
+
+	ptr = malloc(size);
+	if (NULL == ptr) {
+		fprintf(stderr, "memory exhausted\n");
+		exit(EXIT_FAILURE);
+	}
+
+	return(ptr);
+}
+
+
+void *
+mandoc_realloc(void *ptr, size_t size)
+{
+
+	ptr = realloc(ptr, size);
+	if (NULL == ptr) {
+		fprintf(stderr, "memory exhausted\n");
+		exit(EXIT_FAILURE);
+	}
+
+	return(ptr);
+}
+
+
+void *
+mandoc_reallocf(void *old_ptr, size_t size) /* FIXME: remove (not used) */
+{
+	void		*ptr;
+
+	ptr = realloc(old_ptr, size);
+	if (NULL == ptr)
+		free(old_ptr);
+
+	return(ptr);
+}
+
+
+char *
+mandoc_strdup(const char *ptr)
+{
+	char		*p;
+
+	p = strdup(ptr);
+	if (NULL == p) {
+		fprintf(stderr, "memory exhausted\n");
+		exit(EXIT_FAILURE);
+	}
+
+	return(p);
+}

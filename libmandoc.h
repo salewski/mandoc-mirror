@@ -20,6 +20,11 @@
 __BEGIN_DECLS
 
 int		 mandoc_special(const char *);
+void		*mandoc_calloc(size_t, size_t);
+char		*mandoc_strdup(const char *);
+void		*mandoc_malloc(size_t);
+void		*mandoc_realloc(void *, size_t);
+void		*mandoc_reallocf(void *, size_t);
 
 __END_DECLS
 
