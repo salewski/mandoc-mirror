@@ -235,7 +235,7 @@ mandoc: $(MAINOBJS) libmdoc.a libman.a
 	$(CC) $(CFLAGS) -o $@ $(MAINOBJS) libmdoc.a libman.a
 
 .sgml.html:
-	validate $<
+	validate --warn $<
 	sed -e "s!@VERSION@!$(VERSION)!" -e "s!@VDATE@!$(VDATE)!" $< > $@
 
 .1.1.txt .3.3.txt .7.7.txt:

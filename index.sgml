@@ -7,7 +7,7 @@
 		<title>mdocml.bsd.lv</title>
 	</head>
 	<body>
-	<table class="frame">
+	<table class="frame" summary="[frame]">
 		<col width="100%">
 		<tbody>
 			<tr>
@@ -62,7 +62,7 @@
 					Current
 					</h2>
 
-					<table width="100%">
+					<table width="100%" summary="Current Sources">
 					<col width="200">
 					<col>
 					<tbody>
@@ -86,7 +86,7 @@
 					Downstream
 					</h2>
 
-					<table width="100%">
+					<table width="100%" summary="Downstream Sources">
 					<col width="200">
 					<col>
 					<tbody>
@@ -118,7 +118,7 @@
 					Historical
 					</h2>
 
-					<table width="100%">
+					<table width="100%" summary="Archived Sources">
 					<col width="200">
 					<col>
 					<tbody>
@@ -143,7 +143,7 @@
 					current snapshot.
 					</p>
 
-					<table width="100%">
+					<table width="100%" summary="Documentation">
 					<col width="200">
 					<col>
 					<tbody>
