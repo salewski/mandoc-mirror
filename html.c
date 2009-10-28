@@ -651,46 +651,28 @@ bufcat_su(struct html *h, const char *p, const struct roffsu *su)
 
 
 void
-html_idcpy(char *dst, const char *src, int sz)
-{
-
-	assert(sz);
-	dst[0] = '\0';
-	html_idcat(dst, src, sz);
-}
-
-
-void
 html_idcat(char *dst, const char *src, int sz)
 {
-	int		 i;
+	int		 ssz;
+
+	assert(sz);
 
 	/* Cf. <http://www.w3.org/TR/html4/types.html#h-6.2>. */
 
-	for (i = 0; *dst != '\0' && i < sz - 1; dst++, i++)
+	for ( ; *dst != '\0' && sz; dst++, sz--)
 		/* Jump to end. */ ;
 
-	for ( ; *src != '\0' && i < sz - 1; src++, i++, dst++) {
-		if (isalnum((u_char)*src)) {
-			*dst = *src;
-			continue;
-		}
+	assert(sz > 2);
 
-		switch (*src) {
-		case (';'):
-			*dst = ';';
-			break;
-		case ('-'):
-			*dst = '-';
-			break;
-		case (':'):
-			*dst = ':';
-			break;
-		default:
-			*dst = '_';
-			break;
-		}
-	}
+	/* We can't start with a number (bah). */
 
+	*dst++ = 'x';
 	*dst = '\0';
+	sz--;
+
+	for ( ; *src != '\0' && sz > 1; src++) {
+		ssz = snprintf(dst, sz, "%.2x", *src);
+		sz -= ssz;
+		dst += ssz;
+	}
 }

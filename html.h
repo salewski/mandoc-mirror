@@ -137,7 +137,6 @@ void		  bufncat(struct html *, const char *, size_t);
 void		  bufinit(struct html *);
 
 void		  html_idcat(char *, const char *, int);
-void		  html_idcpy(char *, const char *, int);
 
 __END_DECLS
 

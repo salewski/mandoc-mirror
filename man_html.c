@@ -334,6 +334,9 @@ man_br_pre(MAN_ARGS)
 	bufcat_su(h, "height", &su);
 	PAIR_STYLE_INIT(&tag, h);
 	print_otag(h, TAG_DIV, 1, &tag);
+	/* So the div isn't empty: */
+	print_text(h, "\\~");
+
 	return(0);
 }
 

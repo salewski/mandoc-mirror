@@ -583,11 +583,11 @@ mdoc_sh_pre(MDOC_ARGS)
 		return(1);
 	}
 
-	html_idcpy(buf, "id_", BUFSIZ);
+	buf[0] = '\0';
 	for (nn = n->child; nn; nn = nn->next) {
 		html_idcat(buf, nn->string, BUFSIZ);
 		if (nn->next)
-			html_idcat(buf, "_", BUFSIZ);
+			html_idcat(buf, " ", BUFSIZ);
 	}
 
 	/* 
@@ -636,11 +636,11 @@ mdoc_ss_pre(MDOC_ARGS)
 
 	/* TODO: see note in mdoc_sh_pre() about duplicates. */
 
-	html_idcpy(buf, "id_", BUFSIZ);
+	buf[0] = '\0';
 	for (nn = n->child; nn; nn = nn->next) {
 		html_idcat(buf, nn->string, BUFSIZ);
 		if (nn->next)
-			html_idcat(buf, "_", BUFSIZ);
+			html_idcat(buf, " ", BUFSIZ);
 	}
 
 	SCALE_HS_INIT(&su, INDENT - HALFINDENT);
@@ -954,8 +954,7 @@ mdoc_it_head_pre(MDOC_ARGS, int type, struct roffsu *width)
 	case (MDOC_Item):
 		/* FALLTHROUGH */
 	case (MDOC_Ohang):
-		print_otag(h, TAG_DIV, 0, NULL);
-		break;
+		return(0);
 	case (MDOC_Column):
 		bufcat_su(h, "min-width", width);
 		bufcat_style(h, "clear", "none");
@@ -1298,11 +1297,10 @@ mdoc_sx_pre(MDOC_ARGS)
 	/* FIXME: duplicates? */
 
 	strlcpy(buf, "#", BUFSIZ);
-	html_idcat(buf, "id_", BUFSIZ);
 	for (nn = n->child; nn; nn = nn->next) {
 		html_idcat(buf, nn->string, BUFSIZ);
 		if (nn->next)
-			html_idcat(buf, "_", BUFSIZ);
+			html_idcat(buf, " ", BUFSIZ);
 	}
 
 	PAIR_CLASS_INIT(&tag[0], "link-sec");
@@ -1719,7 +1717,10 @@ mdoc_sp_pre(MDOC_ARGS)
 	bufcat_su(h, "height", &su);
 	PAIR_STYLE_INIT(&tag, h);
 	print_otag(h, TAG_DIV, 1, &tag);
-	return(1);
+	/* So the div isn't empty: */
+	print_text(h, "\\~");
+
+	return(0);
 
 }
 
