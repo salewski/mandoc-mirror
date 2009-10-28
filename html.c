@@ -17,6 +17,7 @@
 #include <sys/types.h>
 
 #include <assert.h>
+#include <ctype.h>
 #include <err.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -648,3 +649,50 @@ bufcat_su(struct html *h, const char *p, const struct roffsu *su)
 		buffmt(h, "%s: %d%s;", p, (int)v, u);
 }
 
+
+void
+html_idcpy(char *dst, const char *src, int sz)
+{
+
+	assert(sz);
+	dst[0] = '\0';
+	html_idcat(dst, src, sz);
+}
+
+
+void
+html_idcat(char *dst, const char *src, int sz)
+{
+	int		 i;
+
+	/* Cf. <http://www.w3.org/TR/html4/types.html#h-6.2>. */
+
+	for (i = 0; *dst != '\0' && i < sz - 1; dst++, i++)
+		/* Jump to end. */ ;
+
+	for ( ; *src != '\0' && i < sz - 1; src++, i++) {
+		if (isalnum((u_char)*src)) {
+			*dst++ = *src;
+			continue;
+		}
+
+		switch (*src) {
+		case (';'):
+			*dst++ = ';';
+			break;
+		case ('-'):
+			*dst++ = '-';
+			break;
+		case (':'):
+			*dst++ = ':';
+			break;
+		case ('_'):
+			/* FALLTHROUGH */
+		default:
+			*dst++ = '_';
+			break;
+		}
+	}
+
+	*dst = '\0';
+}

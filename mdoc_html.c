@@ -556,7 +556,7 @@ mdoc_sh_pre(MDOC_ARGS)
 {
 	struct htmlpair		 tag[2];
 	const struct mdoc_node	*nn;
-	char			 lbuf[BUFSIZ];
+	char			 buf[BUFSIZ];
 	struct roffsu		 su;
 
 	if (MDOC_BODY == n->type) {
@@ -583,11 +583,11 @@ mdoc_sh_pre(MDOC_ARGS)
 		return(1);
 	}
 
-	lbuf[0] = 0;
+	html_idcpy(buf, "id_", BUFSIZ);
 	for (nn = n->child; nn; nn = nn->next) {
-		(void)strlcat(lbuf, nn->string, BUFSIZ);
+		html_idcat(buf, nn->string, BUFSIZ);
 		if (nn->next)
-			(void)strlcat(lbuf, "_", BUFSIZ);
+			html_idcat(buf, "_", BUFSIZ);
 	}
 
 	/* 
@@ -597,7 +597,7 @@ mdoc_sh_pre(MDOC_ARGS)
 
 	PAIR_CLASS_INIT(&tag[0], "sec-head");
 	tag[1].key = ATTR_ID;
-	tag[1].val = lbuf;
+	tag[1].val = buf;
 	print_otag(h, TAG_DIV, 2, tag);
 	return(1);
 }
@@ -609,7 +609,7 @@ mdoc_ss_pre(MDOC_ARGS)
 {
 	struct htmlpair	 	 tag[3];
 	const struct mdoc_node	*nn;
-	char			 lbuf[BUFSIZ];
+	char			 buf[BUFSIZ];
 	struct roffsu		 su;
 
 	SCALE_VS_INIT(&su, 1);
@@ -636,11 +636,11 @@ mdoc_ss_pre(MDOC_ARGS)
 
 	/* TODO: see note in mdoc_sh_pre() about duplicates. */
 
-	lbuf[0] = 0;
+	html_idcpy(buf, "id_", BUFSIZ);
 	for (nn = n->child; nn; nn = nn->next) {
-		(void)strlcat(lbuf, nn->string, BUFSIZ);
+		html_idcat(buf, nn->string, BUFSIZ);
 		if (nn->next)
-			(void)strlcat(lbuf, "_", BUFSIZ);
+			html_idcat(buf, "_", BUFSIZ);
 	}
 
 	SCALE_HS_INIT(&su, INDENT - HALFINDENT);
@@ -650,7 +650,7 @@ mdoc_ss_pre(MDOC_ARGS)
 	PAIR_CLASS_INIT(&tag[0], "ssec-head");
 	PAIR_STYLE_INIT(&tag[1], h);
 	tag[2].key = ATTR_ID;
-	tag[2].val = lbuf;
+	tag[2].val = buf;
 	print_otag(h, TAG_DIV, 3, tag);
 	return(1);
 }
@@ -1297,11 +1297,12 @@ mdoc_sx_pre(MDOC_ARGS)
 
 	/* FIXME: duplicates? */
 
-	(void)strlcpy(buf, "#", BUFSIZ);
+	strlcpy(buf, "#", BUFSIZ);
+	html_idcat(buf, "id_", BUFSIZ);
 	for (nn = n->child; nn; nn = nn->next) {
-		(void)strlcat(buf, nn->string, BUFSIZ);
+		html_idcat(buf, nn->string, BUFSIZ);
 		if (nn->next)
-			(void)strlcat(buf, "_", BUFSIZ);
+			html_idcat(buf, "_", BUFSIZ);
 	}
 
 	PAIR_CLASS_INIT(&tag[0], "link-sec");
@@ -1865,6 +1866,7 @@ mdoc_in_pre(MDOC_ARGS)
 	for (nn = n->child; nn; nn = nn->next) {
 		PAIR_CLASS_INIT(&tag[0], "link-includes");
 		i = 1;
+		bufinit(h);
 		if (h->base_includes) {
 			buffmt_includes(h, nn->string);
 			tag[i].key = ATTR_HREF;
