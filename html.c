@@ -391,11 +391,11 @@ print_ctag(struct html *h, enum htmltag tag)
 {
 	
 	printf("</%s>", htmltags[tag].name);
-	if (HTML_CLRLINE & htmltags[tag].flags)
+	if (HTML_CLRLINE & htmltags[tag].flags) {
 		h->flags |= HTML_NOSPACE;
-	if (HTML_CLRLINE & htmltags[tag].flags)
 		h->flags |= HTML_NEWLINE;
-	else
+		printf("\n");
+	} else
 		h->flags &= ~HTML_NEWLINE;
 }
 
