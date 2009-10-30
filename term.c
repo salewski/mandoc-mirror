@@ -77,8 +77,11 @@ term_alloc(enum termenc enc)
 {
 	struct termp *p;
 
-	if (NULL == (p = calloc(1, sizeof(struct termp))))
-		return(NULL);
+	p = calloc(1, sizeof(struct termp));
+	if (NULL == p) {
+		fprintf(stderr, "memory exhausted\n");
+		exit(EXIT_FAILURE);
+	}
 	p->maxrmargin = 78;
 	p->enc = enc;
 	return(p);

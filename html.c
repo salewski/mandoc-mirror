@@ -100,16 +100,15 @@ html_alloc(char *outopts)
 	toks[2] = "includes";
 	toks[3] = NULL;
 
-	if (NULL == (h = calloc(1, sizeof(struct html))))
-		return(NULL);
+	h = calloc(1, sizeof(struct html));
+	if (NULL == h) {
+		fprintf(stderr, "memory exhausted\n");
+		exit(EXIT_FAILURE);
+	}
 
 	h->tags.head = NULL;
 	h->ords.head = NULL;
-
-	if (NULL == (h->symtab = chars_init(CHARS_HTML))) {
-		free(h);
-		return(NULL);
-	}
+	h->symtab = chars_init(CHARS_HTML);
 
 	while (outopts && *outopts)
 		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
@@ -354,8 +353,11 @@ print_otag(struct html *h, enum htmltag tag,
 	struct tag	*t;
 
 	if ( ! (HTML_NOSTACK & htmltags[tag].flags)) {
-		if (NULL == (t = malloc(sizeof(struct tag))))
-			err(EXIT_FAILURE, "malloc");
+		t = malloc(sizeof(struct tag));
+		if (NULL == t) {
+			fprintf(stderr, "memory exhausted\n");
+			exit(EXIT_FAILURE);
+		}
 		t->tag = tag;
 		t->next = h->tags.head;
 		h->tags.head = t;
