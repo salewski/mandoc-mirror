@@ -41,7 +41,6 @@ struct	man {
 
 enum	merr {
 	WNPRINT = 0,
-	WNMEM,
 	WMSEC,
 	WDATE,
 	WLNSCOPE,

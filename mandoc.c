@@ -150,19 +150,6 @@ mandoc_realloc(void *ptr, size_t size)
 }
 
 
-void *
-mandoc_reallocf(void *old_ptr, size_t size) /* FIXME: remove (not used) */
-{
-	void		*ptr;
-
-	ptr = realloc(old_ptr, size);
-	if (NULL == ptr)
-		free(old_ptr);
-
-	return(ptr);
-}
-
-
 char *
 mandoc_strdup(const char *ptr)
 {

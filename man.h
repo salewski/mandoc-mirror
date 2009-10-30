@@ -105,7 +105,7 @@ struct	man;
 
 void	 	  man_free(struct man *);
 struct	man	 *man_alloc(void *, int, const struct man_cb *);
-int		  man_reset(struct man *);
+void		  man_reset(struct man *);
 int	 	  man_parseln(struct man *, int, char *buf);
 int		  man_endparse(struct man *);
 

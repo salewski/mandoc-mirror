@@ -268,7 +268,7 @@ mdoc_argv(struct mdoc *m, int line, int tok,
 		return(ARGV_ERROR);
 
 	if (NULL == (arg = *v))
-		arg = mandoc_calloc(1, sizeof(struct mdoc_arg));
+		arg = *v = mandoc_calloc(1, sizeof(struct mdoc_arg));
 
 	arg->argc++;
 	arg->argv = mandoc_realloc

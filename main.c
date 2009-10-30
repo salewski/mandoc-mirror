@@ -184,11 +184,9 @@ main(int argc, char *argv[])
 		argv++;
 		if (*argv && rc) {
 			if (curp.lastman)
-				if ( ! man_reset(curp.lastman))
-					rc = 0;
+				man_reset(curp.lastman);
 			if (curp.lastmdoc)
-				if ( ! mdoc_reset(curp.lastmdoc))
-					rc = 0;
+				mdoc_reset(curp.lastmdoc);
 			curp.lastman = NULL;
 			curp.lastmdoc = NULL;
 		}
@@ -233,7 +231,6 @@ static struct man *
 man_init(struct curparse *curp)
 {
 	int		 pflags;
-	struct man	*man;
 	struct man_cb	 mancb;
 
 	mancb.man_err = merr;
@@ -250,10 +247,7 @@ man_init(struct curparse *curp)
 	if (curp->fflags & NO_IGN_ESCAPE)
 		pflags &= ~MAN_IGN_ESCAPE;
 
-	if (NULL == (man = man_alloc(curp, pflags, &mancb)))
-		warnx("memory exhausted");
-
-	return(man);
+	return(man_alloc(curp, pflags, &mancb));
 }
 
 
@@ -261,7 +255,6 @@ static struct mdoc *
 mdoc_init(struct curparse *curp)
 {
 	int		 pflags;
-	struct mdoc	*mdoc;
 	struct mdoc_cb	 mdoccb;
 
 	mdoccb.mdoc_err = merr;
@@ -280,10 +273,7 @@ mdoc_init(struct curparse *curp)
 	if (curp->fflags & NO_IGN_CHARS)
 		pflags &= ~MDOC_IGN_CHARS;
 
-	if (NULL == (mdoc = mdoc_alloc(curp, pflags, &mdoccb)))
-		warnx("memory exhausted");
-
-	return(mdoc);
+	return(mdoc_alloc(curp, pflags, &mdoccb));
 }
 
 
