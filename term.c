@@ -543,8 +543,10 @@ buffer(struct termp *p, char c)
 			p->maxcols = 256;
 		s = p->maxcols * 2;
 		p->buf = realloc(p->buf, s);
-		if (NULL == p->buf)
-			err(1, "realloc"); /* FIXME: shouldn't be here! */
+		if (NULL == p->buf) {
+			fprintf(stderr, "memory exhausted\n");
+			exit(EXIT_FAILURE);
+		}
 		p->maxcols = s;
 	}
 	p->buf[(int)(p->col)++] = c;

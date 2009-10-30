@@ -890,6 +890,7 @@ pre_dl(PRE_ARGS)
 }
 
 
+/* ARGSUSED */
 static int
 pre_offset(PRE_ARGS)
 {

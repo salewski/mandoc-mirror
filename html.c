@@ -673,7 +673,7 @@ html_idcat(char *dst, const char *src, int sz)
 	sz--;
 
 	for ( ; *src != '\0' && sz > 1; src++) {
-		ssz = snprintf(dst, sz, "%.2x", *src);
+		ssz = snprintf(dst, (size_t)sz, "%.2x", *src);
 		sz -= ssz;
 		dst += ssz;
 	}
