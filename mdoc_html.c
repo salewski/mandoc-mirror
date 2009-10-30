@@ -19,7 +19,6 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1115,8 +1114,10 @@ mdoc_bl_pre(MDOC_ARGS)
 		return(1);
 
 	ord = malloc(sizeof(struct ord));
-	if (NULL == ord)
-		err(EXIT_FAILURE, "malloc");
+	if (NULL == ord) {
+		fprintf(stderr, "memory exhausted\n");
+		exit(EXIT_FAILURE);
+	}
 	ord->cookie = n;
 	ord->pos = 1;
 	ord->next = h->ords.head;
