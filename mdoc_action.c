@@ -19,7 +19,6 @@
 #endif
 
 #include <assert.h>
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -504,7 +503,6 @@ post_dt(POST_ARGS)
 	if (cp) {
 		/* FIXME: where is strtonum!? */
 		m->meta.vol = mandoc_strdup(cp);
-		errno = 0;
 		lval = strtol(nn->string, &ep, 10);
 		if (nn->string[0] != '\0' && *ep == '\0')
 			m->meta.msec = (int)lval;

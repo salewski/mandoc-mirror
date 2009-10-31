@@ -17,7 +17,6 @@
 #include <sys/utsname.h>
 
 #include <assert.h>
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -149,7 +148,6 @@ post_TH(struct man *m)
 	n = n->next;
 	assert(n);
 
-	errno = 0;
 	lval = strtol(n->string, &ep, 10);
 	if (n->string[0] != '\0' && *ep == '\0')
 		m->meta.msec = (int)lval;

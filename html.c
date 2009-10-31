@@ -101,7 +101,7 @@ html_alloc(char *outopts)
 
 	h = calloc(1, sizeof(struct html));
 	if (NULL == h) {
-		fprintf(stderr, "memory exhausted\n");
+		perror(NULL);
 		exit(EXIT_FAILURE);
 	}
 
@@ -354,7 +354,7 @@ print_otag(struct html *h, enum htmltag tag,
 	if ( ! (HTML_NOSTACK & htmltags[tag].flags)) {
 		t = malloc(sizeof(struct tag));
 		if (NULL == t) {
-			fprintf(stderr, "memory exhausted\n");
+			perror(NULL);
 			exit(EXIT_FAILURE);
 		}
 		t->tag = tag;

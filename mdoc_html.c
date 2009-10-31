@@ -1115,7 +1115,7 @@ mdoc_bl_pre(MDOC_ARGS)
 
 	ord = malloc(sizeof(struct ord));
 	if (NULL == ord) {
-		fprintf(stderr, "memory exhausted\n");
+		perror(NULL);
 		exit(EXIT_FAILURE);
 	}
 	ord->cookie = n;

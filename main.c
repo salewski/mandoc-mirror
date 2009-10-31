@@ -17,7 +17,6 @@
 #include <sys/stat.h>
 
 #include <assert.h>
-#include <err.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -285,14 +284,14 @@ ffile(struct buf *blk, struct buf *ln,
 
 	curp->file = file;
 	if (-1 == (curp->fd = open(curp->file, O_RDONLY, 0))) {
-		warn("%s", curp->file);
+		perror(curp->file);
 		return(-1);
 	}
 
 	c = fdesc(blk, ln, curp);
 
 	if (-1 == close(curp->fd))
-		warn("%s", curp->file);
+		perror(curp->file);
 
 	return(c);
 }
@@ -319,15 +318,15 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 	 */
 
 	if (-1 == fstat(curp->fd, &st))
-		warn("%s", curp->file);
+		perror(curp->file);
 	else if ((size_t)st.st_blksize > sz)
 		sz = st.st_blksize;
 
 	if (sz > blk->sz) {
 		blk->buf = realloc(blk->buf, sz);
 		if (NULL == blk->buf) {
-			warn("realloc");
-			return(-1);
+			perror(NULL);
+			exit(EXIT_FAILURE);
 		}
 		blk->sz = sz;
 	}
@@ -336,7 +335,7 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 
 	for (lnn = pos = comment = 0; ; ) {
 		if (-1 == (ssz = read(curp->fd, blk->buf, sz))) {
-			warn("%s", curp->file);
+			perror(curp->file);
 			return(-1);
 		} else if (0 == ssz) 
 			break;
@@ -348,8 +347,8 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 				ln->sz += 256; /* Step-size. */
 				ln->buf = realloc(ln->buf, ln->sz);
 				if (NULL == ln->buf) {
-					warn("realloc");
-					return(-1);
+					perror(NULL);
+					return(EXIT_FAILURE);
 				}
 			}
 
@@ -412,8 +411,7 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 	/* NOTE a parser may not have been assigned, yet. */
 
 	if ( ! (man || mdoc)) {
-		(void)fprintf(stderr, "%s: not a manual\n", 
-				curp->file);
+		fprintf(stderr, "%s: Not a manual\n", curp->file);
 		return(0);
 	}
 
@@ -528,7 +526,7 @@ moptions(enum intt *tflags, char *arg)
 	else if (0 == strcmp(arg, "an"))
 		*tflags = INTT_MAN;
 	else {
-		warnx("bad argument: -m%s", arg);
+		fprintf(stderr, "%s: Bad argument", arg);
 		return(0);
 	}
 
@@ -549,7 +547,7 @@ toptions(enum outt *tflags, char *arg)
 	else if (0 == strcmp(arg, "html"))
 		*tflags = OUTT_HTML;
 	else {
-		warnx("bad argument: -T%s", arg);
+		fprintf(stderr, "%s: Bad argument", arg);
 		return(0);
 	}
 
@@ -598,7 +596,7 @@ foptions(int *fflags, char *arg)
 			*fflags &= ~NO_IGN_ESCAPE;
 			break;
 		default:
-			warnx("bad argument: -f%s", o);
+			fprintf(stderr, "%s: Bad argument", o);
 			return(0);
 		}
 	}
@@ -627,7 +625,7 @@ woptions(int *wflags, char *arg)
 			*wflags |= WARN_WERR;
 			break;
 		default:
-			warnx("bad argument: -W%s", o);
+			fprintf(stderr, "%s: Bad argument", o);
 			return(0);
 		}
 	}

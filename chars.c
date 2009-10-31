@@ -91,13 +91,13 @@ chars_init(enum chars type)
 
 	tab = malloc(sizeof(struct tbl));
 	if (NULL == tab) {
-		fprintf(stderr, "memory exhausted\n");
+		perror(NULL);
 		exit(EXIT_FAILURE);
 	}
 
 	htab = calloc(PRINT_HI - PRINT_LO + 1, sizeof(struct ln **));
 	if (NULL == htab) {
-		fprintf(stderr, "memory exhausted\n");
+		perror(NULL);
 		exit(EXIT_FAILURE);
 	}
 

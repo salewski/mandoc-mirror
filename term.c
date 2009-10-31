@@ -78,7 +78,7 @@ term_alloc(enum termenc enc)
 
 	p = calloc(1, sizeof(struct termp));
 	if (NULL == p) {
-		fprintf(stderr, "memory exhausted\n");
+		perror(NULL);
 		exit(EXIT_FAILURE);
 	}
 	p->maxrmargin = 78;
@@ -545,7 +545,7 @@ buffer(struct termp *p, char c)
 		s = p->maxcols * 2;
 		p->buf = realloc(p->buf, s);
 		if (NULL == p->buf) {
-			fprintf(stderr, "memory exhausted\n");
+			perror(NULL);
 			exit(EXIT_FAILURE);
 		}
 		p->maxcols = s;
