@@ -665,6 +665,8 @@ pre_bl(PRE_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Diag):
 		/* FALLTHROUGH */
+	case (MDOC_Ohang):
+		/* FALLTHROUGH */
 	case (MDOC_Inset):
 		/* FALLTHROUGH */
 	case (MDOC_Item):

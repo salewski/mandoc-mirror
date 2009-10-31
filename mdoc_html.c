@@ -951,9 +951,10 @@ mdoc_it_head_pre(MDOC_ARGS, int type, struct roffsu *width)
 
 	switch (type) {
 	case (MDOC_Item):
-		/* FALLTHROUGH */
-	case (MDOC_Ohang):
 		return(0);
+	case (MDOC_Ohang):
+		print_otag(h, TAG_DIV, 0, &tag);
+		return(1);
 	case (MDOC_Column):
 		bufcat_su(h, "min-width", width);
 		bufcat_style(h, "clear", "none");
@@ -1067,6 +1068,8 @@ mdoc_it_pre(MDOC_ARGS)
 	/* Override width in some cases. */
 
 	switch (type) {
+	case (MDOC_Ohang):
+		/* FALLTHROUGH */
 	case (MDOC_Item):
 		/* FALLTHROUGH */
 	case (MDOC_Inset):
