@@ -58,7 +58,7 @@ HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
 	     libmandoc.h html.h chars.h out.h main.h
 GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml manuals.7.sgml \
 	     mandoc_char.7.sgml man.7.sgml man.3.sgml
-SGMLS	   = index.sgml $(GSGMLS)
+SGMLS	   = index.sgml
 XSLS	   = ChangeLog.xsl
 HTMLS	   = index.html mandoc.1.html mdoc.3.html ChangeLog.html \
 	     man.3.html mdoc.7.html man.7.html mandoc_char.7.html \
