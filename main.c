@@ -108,7 +108,7 @@ static	struct mdoc	 *mdoc_init(struct curparse *);
 __dead	static void	  version(void);
 __dead	static void	  usage(void);
 
-extern	char		 *__progname;
+static	const char	 *progname;
 
 
 int
@@ -117,6 +117,12 @@ main(int argc, char *argv[])
 	int		 c, rc;
 	struct buf	 ln, blk;
 	struct curparse	 curp;
+
+	progname = strrchr(argv[0], '/');
+	if (progname == NULL)
+		progname = argv[0];
+	else
+		++progname;
 
 	memset(&curp, 0, sizeof(struct curparse));
 
@@ -210,7 +216,7 @@ __dead static void
 version(void)
 {
 
-	(void)printf("%s %s\n", __progname, VERSION);
+	(void)printf("%s %s\n", progname, VERSION);
 	exit(EXIT_SUCCESS);
 }
 
@@ -221,7 +227,7 @@ usage(void)
 
 	(void)fprintf(stderr, "usage: %s [-V] [-foption...] "
 			"[-mformat] [-Ooption] [-Toutput] "
-			"[-Werr...]\n", __progname);
+			"[-Werr...]\n", progname);
 	exit(EXIT_FAILURE);
 }
 
