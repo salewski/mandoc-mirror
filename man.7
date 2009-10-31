@@ -229,7 +229,7 @@ The \efBfoo\efR utility processes files...
 \&.\e\*q The next is for sections 2, 3, & 9 only.
 \&.\e\*q .SH ERRORS
 \&.\e\*q .SH SEE ALSO
-\&.\e\*q \efBbar\efR(1)
+\&.\e\*q .BR foo ( 1 )
 \&.\e\*q .SH STANDARDS
 \&.\e\*q .SH HISTORY
 \&.\e\*q .SH AUTHORS
@@ -242,19 +242,19 @@ The sections in a
 .Nm
 document are conventionally ordered as they appear above.  Sections
 should be composed as follows:
-.Bl -tag -width Ds -offset Ds
-.It NAME
+.Bl -ohang -offset indent
+.It Em NAME
 The name(s) and a short description of the documented material.  The
 syntax for this is generally as follows:
 .Pp
 .D1 \efBname\efR \e(en description
-.It LIBRARY
+.It Em LIBRARY
 The name of the library containing the documented material, which is
 assumed to be a function in a section 2 or 3 manual.  For functions in
 the C library, this may be as follows:
 .Pp
 .D1 Standard C Library (libc, -lc)
-.It SYNOPSIS
+.It Em SYNOPSIS
 Documents the utility invocation syntax, function call syntax, or device
 configuration. 
 .Pp
@@ -271,28 +271,93 @@ And for the third, configurations (section 4):
 .Pp
 .D1 \. Ns Sx \&B No name* at cardbus ? function ?
 .Pp
-Manuals not in these sections generally don't need a SYNOPSIS.
-.It DESCRIPTION
-This expands upon the brief, one-line description in NAME.  It usually
-contains a break-down of the options (if documenting a command).
-.It IMPLEMENTATION NOTES
+Manuals not in these sections generally don't need a 
+.Em SYNOPSIS .
+.It Em DESCRIPTION
+This expands upon the brief, one-line description in 
+.Em NAME .
+It usually contains a break-down of the options (if documenting a
+command).
+.It Em IMPLEMENTATION NOTES
 Implementation-specific notes should be kept here.  This is useful when
 implementing standard functions that may have side effects or notable
 algorithmic implications.
-.It EXIT STATUS
-.It RETURN VALUES
-.It ENVIRONMENT
-.It FILES
-.It EXAMPLES
-.It DIAGNOSTICS
-.It ERRORS
-.It SEE ALSO
-.It STANDARDS
-.It HISTORY
-.It AUTHORS
-.It CAVEATS
-.It BUGS
-.It SECURITY CONSIDERATIONS
+.It Em EXIT STATUS
+Command exit status for section 1, 6, and 8 manuals.  This section is
+the dual of
+.Em RETURN VALUES ,
+which is used for functions.  Historically, this information was
+described in
+.Em DIAGNOSTICS ,
+a practise that is now discouraged.
+.
+.It Em RETURN VALUES
+This section is the dual of
+.Em EXIT STATUS ,
+which is used for commands.  It documents the return values of functions
+in sections 2, 3, and 9.
+.
+.It Em ENVIRONMENT
+Documents any usages of environment variables, e.g.,
+.Xr environ 7 .
+.
+.It Em FILES
+Documents files used.  It's helpful to document both the file and a
+short description of how the file is used (created, modified, etc.).
+.
+.It Em EXAMPLES
+Example usages.  This often contains snippets of well-formed,
+well-tested invocations.  Make doubly sure that your examples work
+properly!  Assume that users will skip to this section and use your
+example verbatim.
+.
+.It Em DIAGNOSTICS
+Documents error conditions.  This is most useful in section 4 manuals.
+Historically, this section was used in place of
+.Em EXIT STATUS
+for manuals in sections 1, 6, and 8; however, this practise is
+discouraged.
+.
+.It Em ERRORS
+Documents error handling in sections 2, 3, and 9.
+.
+.It Em SEE ALSO
+References other manuals with related topics.  This section should exist
+for most manuals.  Cross-references should conventionally be ordered
+first by section, then alphabetically.
+.Pp
+.D1 \. Ns Sx \&BR No bar \&( 1 \&),
+.D1 \. Ns Sx \&BR No foo \&( 1 \&),
+.D1 \. Ns Sx \&BR No baz \&( 2 \&).
+.
+.It Em STANDARDS
+References any standards implemented or used, such as
+.Pp
+.D1 IEEE Std 1003.2 (\e(lqPOSIX.2\e(rq)
+.Pp
+If not adhering to any standards, the
+.Em HISTORY
+section should be used.
+.
+.It Em HISTORY
+The history of any manual without a
+.Em STANDARDS
+section should be described in this section.
+.
+.It Em AUTHORS
+Credits to authors, if applicable, should appear in this section.
+Authors should generally be noted by both name and an e-mail address.
+.
+.It Em CAVEATS
+Explanations of common misuses and misunderstandings should be explained
+in this section.
+.
+.It Em BUGS
+Extant bugs should be described in this section.
+.
+.It Em SECURITY CONSIDERATIONS
+Documents any security precautions that operators should consider.
+.
 .El
 .
 .

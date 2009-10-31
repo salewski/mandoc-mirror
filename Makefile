@@ -59,10 +59,10 @@ HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
 GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml manuals.7.sgml \
 	     mandoc_char.7.sgml man.7.sgml man.3.sgml
 SGMLS	   = index.sgml
+HTMLS	   = ChangeLog.html index.html
 XSLS	   = ChangeLog.xsl
-HTMLS	   = index.html mandoc.1.html mdoc.3.html ChangeLog.html \
-	     man.3.html mdoc.7.html man.7.html mandoc_char.7.html \
-	     manuals.7.html
+GHTMLS	   = mandoc.1.html mdoc.3.html man.3.html mdoc.7.html \
+	     man.7.html mandoc_char.7.html manuals.7.html
 TEXTS	   = mandoc.1.txt mdoc.3.txt man.3.txt mdoc.7.txt man.7.txt \
 	     mandoc_char.7.txt manuals.7.txt ChangeLog.txt
 EXAMPLES   = example.style.css
@@ -74,7 +74,8 @@ MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7 mandoc_char.7 \
 	     man.7 man.3
 BINS	   = mandoc
 CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
-	     $(TARGZS) tags $(MD5S) $(XMLS) $(TEXTS) $(GSGMLS)
+	     $(TARGZS) tags $(MD5S) $(XMLS) $(TEXTS) $(GSGMLS) \
+	     $(GHTMLS)
 INSTALL	   = $(SRCS) $(HEADS) Makefile $(MANS) $(SGMLS) $(STATICS) \
 	     $(DATAS) $(XSLS) $(EXAMPLES)
 
@@ -89,14 +90,16 @@ cleanlint:
 	rm -f $(LNS) $(LLNS)
 
 cleanhtml:
-	rm -f $(HTML) $(GSGMLS)
+	rm -f $(HTMLS) $(GSGMLS) $(GHTMLS)
 
 dist:	mdocml-$(VERSION).tar.gz
 
-www:	all $(HTMLS) $(TEXTS) $(MD5S) $(TARGZS)
+www:	all $(GSGMLS) $(GHTMLS) $(HTMLS) $(TEXTS) $(MD5S) $(TARGZS)
+
+htmls:	all $(GSGMLS) $(GHTMLS)
 
 installwww: www
-	install -m 0444 $(HTMLS) $(TEXTS) $(STATICS) $(PREFIX)/
+	install -m 0444 $(GHTMLS) $(HTMLS) $(TEXTS) $(STATICS) $(PREFIX)/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/
 	install -m 0444 mdocml-$(VERSION).md5 $(PREFIX)/snapshots/
 	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz
