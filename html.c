@@ -18,8 +18,8 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -189,15 +189,13 @@ static void
 print_spec(struct html *h, const char *p, int len)
 {
 	const char	*rhs;
-	int		 i;
 	size_t		 sz;
 
 	rhs = chars_a2ascii(h->symtab, p, (size_t)len, &sz);
 
 	if (NULL == rhs) 
 		return;
-	for (i = 0; i < (int)sz; i++) 
-		putchar(rhs[i]);
+	fwrite(rhs, 1, sz, stdout);
 }
 
 
@@ -205,15 +203,13 @@ static void
 print_res(struct html *h, const char *p, int len)
 {
 	const char	*rhs;
-	int		 i;
 	size_t		 sz;
 
 	rhs = chars_a2res(h->symtab, p, (size_t)len, &sz);
 
 	if (NULL == rhs)
 		return;
-	for (i = 0; i < (int)sz; i++) 
-		putchar(rhs[i]);
+	fwrite(rhs, 1, sz, stdout);
 }
 
 

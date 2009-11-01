@@ -35,7 +35,7 @@ struct	ln {
 	int		  type;
 #define	CHARS_CHAR	 (1 << 0)
 #define	CHARS_STRING	 (1 << 1)
-#define CHARS_BOTH	 (0x03)
+#define CHARS_BOTH	 (CHARS_CHAR | CHARS_STRING)
 };
 
 #define	LINES_MAX	  351
