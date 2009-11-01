@@ -322,7 +322,7 @@ print_encode(struct html *h, const char *p)
 		sz = strcspn(p, "\\<>&");
 
 		fwrite(p, 1, sz, stdout);
-		p += sz;
+		p += (int)sz;
 
 		if ('\\' == *p) {
 			print_escape(h, &p);
