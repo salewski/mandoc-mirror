@@ -361,16 +361,16 @@ print_otag(struct html *h, enum htmltag tag,
 
 	if ( ! (HTML_NOSPACE & h->flags))
 		if ( ! (HTML_CLRLINE & htmltags[tag].flags))
-			printf(" ");
+			putchar(' ');
 
 	printf("<%s", htmltags[tag].name);
 	for (i = 0; i < sz; i++) {
 		printf(" %s=\"", htmlattrs[p[i].key]);
 		assert(p->val);
 		print_encode(h, p[i].val);
-		printf("\"");
+		putchar('\"');
 	}
-	printf(">");
+	putchar('>');
 
 	h->flags |= HTML_NOSPACE;
 	if (HTML_CLRLINE & htmltags[tag].flags)
@@ -391,7 +391,7 @@ print_ctag(struct html *h, enum htmltag tag)
 	if (HTML_CLRLINE & htmltags[tag].flags) {
 		h->flags |= HTML_NOSPACE;
 		h->flags |= HTML_NEWLINE;
-		printf("\n");
+		putchar('\n');
 	} else
 		h->flags &= ~HTML_NEWLINE;
 }
@@ -437,7 +437,7 @@ print_text(struct html *h, const char *p)
 		}
 
 	if ( ! (h->flags & HTML_NOSPACE))
-		printf(" ");
+		putchar(' ');
 
 	h->flags &= ~HTML_NOSPACE;
 	h->flags &= ~HTML_NEWLINE;
