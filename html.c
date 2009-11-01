@@ -316,26 +316,26 @@ print_escape(struct html *h, const char **p)
 static void
 print_encode(struct html *h, const char *p)
 {
+	size_t		 sz;
 
 	for (; *p; p++) {
+		sz = strcspn(p, "\\<>&");
+
+		fwrite(p, 1, sz, stdout);
+		p += sz;
+
 		if ('\\' == *p) {
 			print_escape(h, &p);
 			continue;
-		}
-		switch (*p) {
-		case ('<'):
+		} else if ('\0' == *p)
+			break;
+
+		if ('<' == *p)
 			printf("&lt;");
-			break;
-		case ('>'):
+		else if ('>' == *p)
 			printf("&gt;");
-			break;
-		case ('&'):
+		else if ('&' == *p)
 			printf("&amp;");
-			break;
-		default:
-			putchar(*p);
-			break;
-		}
 	}
 }
 
