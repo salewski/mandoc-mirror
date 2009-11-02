@@ -30,18 +30,15 @@
 
 #define	UNCONST(a)	((void *)(uintptr_t)(const void *)(a))
 
-/* Account for FreeBSD and Linux in our declarations. */
+/* FIXME: Intel's compiler?  LLVM?  pcc?  */
+
+#if !defined(__GNUC__) || (__GNUC__ < 2)
+# define __attribute__(x)
+#endif /* !defined(__GNUC__) || (__GNUC__ < 2) */
 
 #ifdef __linux__
 extern	int		  getsubopt(char **, char * const *, char **);
 extern	size_t	  	  strlcat(char *, const char *, size_t);
-# ifndef __dead
-#  define __dead __attribute__((__noreturn__))
-# endif
-#elif defined(__dead2)
-# ifndef __dead
-#  define __dead __dead2
-# endif
 #endif
 
 typedef	void		(*out_mdoc)(void *, const struct mdoc *);
@@ -105,8 +102,8 @@ static	int		  pset(const char *, int, struct curparse *,
 				struct man **, struct mdoc **);
 static	struct man	 *man_init(struct curparse *);
 static	struct mdoc	 *mdoc_init(struct curparse *);
-__dead	static void	  version(void);
-__dead	static void	  usage(void);
+static	void		  version(void) __attribute__((noreturn));
+static	void		  usage(void) __attribute__((noreturn));
 
 static	const char	 *progname;
 
@@ -212,7 +209,7 @@ main(int argc, char *argv[])
 }
 
 
-__dead static void
+static void
 version(void)
 {
 
@@ -221,7 +218,7 @@ version(void)
 }
 
 
-__dead static void
+static void
 usage(void)
 {
 
