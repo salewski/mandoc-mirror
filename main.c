@@ -33,7 +33,9 @@
 /* FIXME: Intel's compiler?  LLVM?  pcc?  */
 
 #if !defined(__GNUC__) || (__GNUC__ < 2)
-# define __attribute__(x)
+# if !defined(lint)
+#  define __attribute__(x)
+# endif
 #endif /* !defined(__GNUC__) || (__GNUC__ < 2) */
 
 #ifdef __linux__
