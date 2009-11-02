@@ -212,9 +212,8 @@ In free-form mode, quotes are regarded as opaque text.
 .Ss Dates
 There are several macros in
 .Nm
-that require a date argument.  The 
-.Em canonical form
-for dates is the American format:
+that require a date argument.  The canonical form for dates is the
+American format:
 .Pp
 .D1 Cm Month Day , Year
 .Pp
@@ -226,26 +225,16 @@ value is the full month name.  The
 .Cm Year
 value is the full four-digit year.
 .Pp
-The
-.Em non-canonical form
-is the same as the canonical form, but without the comma between the
-.Cm Day
-and
-.Cm Year
-field.
+Reduced form dates are broken-down canonical form dates:
 .Pp
-Lastly,
-.Em reduced form
-dates range from only a
-.Cm Year
-to the full canonical or non-canonical form.
+.D1 Cm Month , Year
+.D1 Cm Year
 .Pp
 Some examples of valid dates follow:
 .Pp
 .D1 "May, 2009" Pq reduced form
 .D1 "2009" Pq reduced form
 .D1 "May 20, 2009" Pq canonical form
-.D1 "May 20 2009" Pq non-canonical form
 .
 .Ss Scaling Widths
 Many macros support scaled widths for their arguments, such as
@@ -710,10 +699,9 @@ this macro is not implemented in
 .Ss \&%D
 Publication date of an
 .Sx \&Rs
-block.  This should follow the reduced syntax for 
+block.  This should follow the reduced or canonical form syntax
+described in
 .Sx Dates .
-Canonical or non-canonical form is not necessary since publications are
-often referenced only by year, or month and year.
 .
 .Ss \&%I
 Publisher or issuer name of an
@@ -1152,9 +1140,10 @@ The
 field may be either
 .Ar $\&Mdocdate$ ,
 which signifies the current manual revision date dictated by
-.Xr cvs 1
+.Xr cvs 1 ,
 or instead a valid canonical date as specified by
 .Sx Dates .
+If a date does not conform, the current date is used instead.
 .Pp
 Examples:
 .Bd -literal -offset indent

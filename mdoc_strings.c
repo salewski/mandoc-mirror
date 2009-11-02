@@ -56,10 +56,6 @@ static	const struct mdoc_secname secnames[SECNAME_MAX] = {
 	{ "SECURITY CONSIDERATIONS", SEC_SECURITY }
 };
 
-#ifdef __linux__
-extern	char		*strptime(const char *, const char *, struct tm *);
-#endif
-
 
 int
 mdoc_iscdelim(char p)
@@ -122,28 +118,6 @@ mdoc_atosec(const char *p)
 			return(secnames[i].sec);
 
 	return(SEC_CUSTOM);
-}
-
-
-time_t
-mdoc_atotime(const char *p)
-{
-	struct tm	 tm;
-	char		*pp;
-
-	memset(&tm, 0, sizeof(struct tm));
-
-	if (0 == strcmp(p, "$" "Mdocdate$"))
-		return(time(NULL));
-	if ((pp = strptime(p, "$" "Mdocdate: %b %d %Y $", &tm)) && 0 == *pp)
-		return(mktime(&tm));
-	/* XXX - this matches "June 1999", which is wrong. */
-	if ((pp = strptime(p, "%b %d %Y", &tm)) && 0 == *pp)
-		return(mktime(&tm));
-	if ((pp = strptime(p, "%b %d, %Y", &tm)) && 0 == *pp)
-		return(mktime(&tm));
-
-	return(0);
 }
 
 

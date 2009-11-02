@@ -119,6 +119,23 @@ from input.  These are later re-added, if applicable, by a front-end
 utility such as
 .Xr mandoc 1 .
 .
+.Ss Dates
+The
+.Sx \&TH
+macro is the only
+.Nm
+macro that requires a date.  The form for this date is the ISO-8601
+standard
+.Cm YYYY-MM-DD .
+.
+.Ss Scaling Widths
+Many macros support scaled widths for their arguments, such as
+stipulating a two-inch list indentation with the following:
+.Bd -literal -offset indent
+\&.Bl -tag -width 2i
+.Ed
+.
+.
 .Ss Scaling Widths
 Many macros support scaled widths for their arguments, such as
 stipulating a two-inch paragraph indentation with the following:
@@ -202,7 +219,7 @@ Beyond
 at least one macro or text node must appear in the document.  Documents
 are generally structured as follows:
 .Bd -literal -offset indent
-\&.TH FOO 1 "13 Aug 2009"
+\&.TH FOO 1 2009-10-10
 \&.
 \&.SH NAME
 \efBfoo\efR \e(en a description goes here
@@ -614,26 +631,29 @@ subsequent sub-section, section, or end of file.  The paragraph
 left-margin width is re-set to the default.
 .Ss \&TH
 Sets the title of the manual page with the following syntax:
+.Pp
+.D1 \. Ns Sx \&TH No Cm title msec Op Cm date Op Cm src Op Cm vol
+.Pp
+At least the upper-case document title
+.Cm title
+and numeric manual section
+.Cm msec
+arguments must be provided.  The
+.Cm date
+argument should be formatted as described in
+.Sx Dates :
+if it does not conform, the current date is used instead.  The
+.Cm src
+string specifies the organisation providing the utility.  The
+.Cm vol
+string replaces the default rendered volume, which is dictated by the
+manual section.
+.Pp
+Examples:
 .Bd -literal -offset indent
-\&.TH title section [date [source [volume]]]
+\&.TH CVS 5 "1992-02-12" GNU
 .Ed
 .
-.Pp
-At least the 
-.Va title
-and
-.Va section
-arguments must be provided.  The
-.Va date
-argument should be formatted as
-.Qq %b [%d] %Y
-format, described in
-.Xr strptime 3 .
-The
-.Va source
-string specifies the organisation providing the utility.  The
-.Va volume
-replaces the default rendered volume as dictated by the manual section.
 .Ss \&TP
 Begin a paragraph where the head, if exceeding the indentation width, is
 followed by a newline; if not, the body follows on the same line after a

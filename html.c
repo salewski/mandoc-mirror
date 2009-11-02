@@ -322,7 +322,8 @@ print_encode(struct html *h, const char *p)
 		sz = strcspn(p, "\\<>&");
 
 		fwrite(p, 1, sz, stdout);
-		p += (int)sz;
+		p += /* LINTED */
+			sz;
 
 		if ('\\' == *p) {
 			print_escape(h, &p);

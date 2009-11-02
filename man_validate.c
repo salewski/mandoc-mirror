@@ -56,7 +56,7 @@ static	v_check	  pres_bline[] = { check_bline, NULL };
 
 static	const struct man_valid man_valids[MAN_MAX] = {
 	{ pres_bline, posts_eq0 }, /* br */
-	{ pres_bline, posts_ge2_le5 }, /* TH */
+	{ pres_bline, posts_ge2_le5 }, /* TH */ /* FIXME: make sure capitalised. */
 	{ pres_bline, posts_sec }, /* SH */
 	{ pres_bline, posts_sec }, /* SS */
 	{ pres_bline, posts_par }, /* TP */
