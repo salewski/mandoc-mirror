@@ -531,7 +531,7 @@ moptions(enum intt *tflags, char *arg)
 	else if (0 == strcmp(arg, "an"))
 		*tflags = INTT_MAN;
 	else {
-		fprintf(stderr, "%s: Bad argument", arg);
+		fprintf(stderr, "%s: Bad argument\n", arg);
 		return(0);
 	}
 
@@ -552,7 +552,7 @@ toptions(enum outt *tflags, char *arg)
 	else if (0 == strcmp(arg, "html"))
 		*tflags = OUTT_HTML;
 	else {
-		fprintf(stderr, "%s: Bad argument", arg);
+		fprintf(stderr, "%s: Bad argument\n", arg);
 		return(0);
 	}
 
@@ -601,7 +601,7 @@ foptions(int *fflags, char *arg)
 			*fflags &= ~NO_IGN_ESCAPE;
 			break;
 		default:
-			fprintf(stderr, "%s: Bad argument", o);
+			fprintf(stderr, "%s: Bad argument\n", o);
 			return(0);
 		}
 	}
@@ -630,7 +630,7 @@ woptions(int *wflags, char *arg)
 			*wflags |= WARN_WERR;
 			break;
 		default:
-			fprintf(stderr, "%s: Bad argument", o);
+			fprintf(stderr, "%s: Bad argument\n", o);
 			return(0);
 		}
 	}
