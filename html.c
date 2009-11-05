@@ -270,21 +270,19 @@ print_escape(struct html *h, const char **p)
 			return;
 		}
 
-		switch (*wp) {
-		case ('B'):
-			/* TODO */
-			break;
-		case ('I'):
-			/* TODO */
-			break;
-		case ('P'):
-			/* FALLTHROUGH */
-		case ('R'):
-			/* TODO */
-			break;
-		default:
-			break;
-		}
+		/* 
+		 * These aren't supported, as they're symmetry-breaking
+		 * constructs that don't play well with hierarchical
+		 * mark-up.  Consider:
+		 *
+		 * \fBHello.
+		 * .PP
+		 * World.
+		 *
+		 * The style started before "Hello" wouldn't be able to
+		 * propogate into the next `PP' because we'd exit the
+		 * current paragraph's scope.
+		 */
 
 		*p = wp;
 		return;
