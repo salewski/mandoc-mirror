@@ -85,7 +85,6 @@ static	int		  pre_BI(DECL_ARGS);
 static	int		  pre_HP(DECL_ARGS);
 static	int		  pre_I(DECL_ARGS);
 static	int		  pre_IP(DECL_ARGS);
-static	int		  pre_IR(DECL_ARGS);
 static	int		  pre_PP(DECL_ARGS);
 static	int		  pre_RB(DECL_ARGS);
 static	int		  pre_RI(DECL_ARGS);
@@ -130,7 +129,7 @@ static	const struct termact termacts[MAN_MAX] = {
 	{ NULL, NULL }, /* R */
 	{ pre_B, post_B }, /* B */
 	{ pre_I, post_I }, /* I */
-	{ pre_IR, NULL }, /* IR */
+	{ pre_RI, NULL }, /* IR */
 	{ pre_RI, NULL }, /* RI */
 	{ NULL, NULL }, /* na */
 	{ pre_I, post_i }, /* i */
@@ -299,26 +298,6 @@ pre_nf(DECL_ARGS)
 
 /* ARGSUSED */
 static int
-pre_IR(DECL_ARGS)
-{
-	const struct man_node *nn;
-	int		 i;
-
-	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
-		if ( ! (i % 2))
-			p->under++;
-		if (i > 0)
-			p->flags |= TERMP_NOSPACE;
-		print_man_node(p, mt, nn, m);
-		if ( ! (i % 2))
-			p->under--;
-	}
-	return(0);
-}
-
-
-/* ARGSUSED */
-static int
 pre_RB(DECL_ARGS)
 {
 	const struct man_node *nn;
@@ -352,12 +331,18 @@ pre_RI(DECL_ARGS)
 	int		 i;
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
-		if (i % 2)
+		if (i % 2 && MAN_RI == n->tok)
 			p->under++;
+		else if ( ! (i % 2) && MAN_RI != n->tok)
+			p->under++;
+
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
 		print_man_node(p, mt, nn, m);
-		if (i % 2)
+
+		if (i % 2 && MAN_RI == n->tok)
+			p->under--;
+		else if ( ! (i % 2) && MAN_RI != n->tok)
 			p->under--;
 	}
 	return(0);
