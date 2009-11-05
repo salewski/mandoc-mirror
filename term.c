@@ -229,7 +229,12 @@ term_flushln(struct termp *p)
 		for ( ; i < (int)p->col; i++) {
 			if (' ' == p->buf[i])
 				break;
-			putchar(p->buf[i]);
+
+			/* The unit sep. is a non-breaking space. */
+			if (31 == p->buf[i])
+				putchar(' ');
+			else
+				putchar(p->buf[i]);
 		}
 		vis += vsz;
 	}

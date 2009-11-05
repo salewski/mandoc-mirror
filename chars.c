@@ -47,9 +47,10 @@ struct	ln {
 #define BOTH(w, x, y, z, a, b) \
 	{ NULL, (w), (y), (a), (x), (z), (b), CHARS_BOTH },
 
-static	struct ln lines[LINES_MAX] = {
+#define	CHAR_TBL_START	  static struct ln lines[LINES_MAX] = {
+#define	CHAR_TBL_END	  };
+
 #include "chars.in"
-};
 
 struct	tbl {
 	enum chars	  type;
