@@ -352,12 +352,12 @@ pre_RI(DECL_ARGS)
 	int		 i;
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
-		if ( ! (i % 2))
+		if (i % 2)
 			p->under++;
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
 		print_man_node(p, mt, nn, m);
-		if ( ! (i % 2))
+		if (i % 2)
 			p->under--;
 	}
 	return(0);
