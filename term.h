@@ -43,6 +43,10 @@ struct	termp {
 #define	TERMP_ANPREC	 (1 << 13)	/* See termp_an_pre(). */
 	int		  bold;
 	int		  under;
+	int		  metafont;	/* See do_escaped(). */
+#define	METAF_BOLD	 (1 << 0)
+#define	METAF_UNDER	 (1 << 1)
+	int		  metamask;	/* See do_escaped(). */
 	char		 *buf;		/* Output buffer. */
 	enum termenc	  enc;		/* Type of encoding. */
 	void		 *symtab;	/* Encoded-symbol table. */
