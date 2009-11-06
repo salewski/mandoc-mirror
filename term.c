@@ -374,21 +374,21 @@ do_reserved(struct termp *p, const char *word, size_t len)
 static void
 do_escaped(struct termp *p, const char **word)
 {
-	int		 j, type, sv;
+	int		 j, type, sv, t, lim;
 	const char	*wp;
 
 	wp = *word;
 	type = 1;
 
-	if (0 == *(++wp)) {
+	if ('\0' == *(++wp)) {
 		*word = wp;
 		return;
 	}
 
 	if ('(' == *wp) {
 		wp++;
-		if (0 == *wp || 0 == *(wp + 1)) {
-			*word = 0 == *wp ? wp : wp + 1;
+		if ('\0' == *wp || '\0' == *(wp + 1)) {
+			*word = '\0' == *wp ? wp : wp + 1;
 			return;
 		}
 
@@ -397,7 +397,7 @@ do_escaped(struct termp *p, const char **word)
 		return;
 
 	} else if ('*' == *wp) {
-		if (0 == *(++wp)) {
+		if ('\0' == *(++wp)) {
 			*word = wp;
 			return;
 		}
@@ -405,8 +405,8 @@ do_escaped(struct termp *p, const char **word)
 		switch (*wp) {
 		case ('('):
 			wp++;
-			if (0 == *wp || 0 == *(wp + 1)) {
-				*word = 0 == *wp ? wp : wp + 1;
+			if ('\0' == *wp || '\0' == *(wp + 1)) {
+				*word = '\0' == *wp ? wp : wp + 1;
 				return;
 			}
 
@@ -421,9 +421,87 @@ do_escaped(struct termp *p, const char **word)
 			*word = wp;
 			return;
 		}
-	
+
+	} else if ('s' == *wp) {
+		/* This closely follows mandoc_special(). */
+		if ('\0' == *(++wp)) {
+			*word = wp;
+			return;
+		}
+
+		t = 0;
+		lim = 1;
+
+		if (*wp == '\'') {
+			lim = 0;
+			t = 1;
+			++wp;
+		} else if (*wp == '[') {
+			lim = 0;
+			t = 2;
+			++wp;
+		} else if (*wp == '(') {
+			lim = 2;
+			t = 3;
+			++wp;
+		}
+
+		if (*wp == '+' || *wp == '-')
+			++wp;
+
+		if (*wp == '\'') {
+			if (t) {
+				*word = wp;
+				return;
+			}
+			lim = 0;
+			t = 1;
+			++wp;
+		} else if (*wp == '[') {
+			if (t) {
+				*word = wp;
+				return;
+			}
+			lim = 0;
+			t = 2;
+			++wp;
+		} else if (*wp == '(') {
+			if (t) {
+				*word = wp;
+				return;
+			}
+			lim = 2;
+			t = 3;
+			++wp;
+		}
+
+		if ( ! isdigit((u_char)*wp)) {
+			*word = --wp;
+			return;
+		}
+
+		for (j = 0; isdigit((u_char)*wp); j++) {
+			if (lim && j >= lim)
+				break;
+			++wp;
+		}
+
+		if (t && t < 3) {
+			if (1 == t && *wp != '\'') {
+				*word = --wp;
+				return;
+			}
+			if (2 == t && *wp != ']') {
+				*word = --wp;
+				return;
+			}
+			++wp;
+		}
+		*word = --wp;
+		return;
+
 	} else if ('f' == *wp) {
-		if (0 == *(++wp)) {
+		if ('\0' == *(++wp)) {
 			*word = wp;
 			return;
 		}
@@ -470,7 +548,7 @@ do_escaped(struct termp *p, const char **word)
 	for (j = 0; *wp && ']' != *wp; wp++, j++)
 		/* Loop... */ ;
 
-	if (0 == *wp) {
+	if ('\0' == *wp) {
 		*word = wp;
 		return;
 	}
@@ -495,7 +573,7 @@ term_word(struct termp *p, const char *word)
 
 	sv = word;
 
-	if (word[0] && 0 == word[1])
+	if (word[0] && '\0' == word[1])
 		switch (word[0]) {
 		case('.'):
 			/* FALLTHROUGH */
