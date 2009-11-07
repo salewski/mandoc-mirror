@@ -176,7 +176,6 @@ a2roffdeco(enum roffdeco *d,
 	const char	*wp;
 
 	*d = DECO_NONE;
-
 	wp = *word;
 	type = 1;
 
@@ -223,7 +222,7 @@ a2roffdeco(enum roffdeco *d,
 			*d = DECO_RESERVED;
 			*sz = 1;
 			*word = wp;
-			return(3);
+			return(2);
 		}
 		break;
 

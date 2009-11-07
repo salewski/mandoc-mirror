@@ -34,7 +34,6 @@
 static	struct termp	 *term_alloc(enum termenc);
 static	void		  term_free(struct termp *);
 
-static	void		  do_escaped(struct termp *, const char **);
 static	void		  do_special(struct termp *,
 				const char *, size_t);
 static	void		  do_reserved(struct termp *,
@@ -367,201 +366,6 @@ do_reserved(struct termp *p, const char *word, size_t len)
 
 
 /*
- * Handle an escape sequence: determine its length and pass it to the
- * escape-symbol look table.  Note that we assume mdoc(3) has validated
- * the escape sequence (we assert upon badly-formed escape sequences).
- */
-static void
-do_escaped(struct termp *p, const char **word)
-{
-	int		 j, type, sv, t, lim;
-	const char	*wp;
-
-	wp = *word;
-	type = 1;
-
-	if ('\0' == *(++wp)) {
-		*word = wp;
-		return;
-	}
-
-	if ('(' == *wp) {
-		wp++;
-		if ('\0' == *wp || '\0' == *(wp + 1)) {
-			*word = '\0' == *wp ? wp : wp + 1;
-			return;
-		}
-
-		do_special(p, wp, 2);
-		*word = ++wp;
-		return;
-
-	} else if ('*' == *wp) {
-		if ('\0' == *(++wp)) {
-			*word = wp;
-			return;
-		}
-
-		switch (*wp) {
-		case ('('):
-			wp++;
-			if ('\0' == *wp || '\0' == *(wp + 1)) {
-				*word = '\0' == *wp ? wp : wp + 1;
-				return;
-			}
-
-			do_reserved(p, wp, 2);
-			*word = ++wp;
-			return;
-		case ('['):
-			type = 0;
-			break;
-		default:
-			do_reserved(p, wp, 1);
-			*word = wp;
-			return;
-		}
-
-	} else if ('s' == *wp) {
-		/* This closely follows mandoc_special(). */
-		if ('\0' == *(++wp)) {
-			*word = wp;
-			return;
-		}
-
-		t = 0;
-		lim = 1;
-
-		if (*wp == '\'') {
-			lim = 0;
-			t = 1;
-			++wp;
-		} else if (*wp == '[') {
-			lim = 0;
-			t = 2;
-			++wp;
-		} else if (*wp == '(') {
-			lim = 2;
-			t = 3;
-			++wp;
-		}
-
-		if (*wp == '+' || *wp == '-')
-			++wp;
-
-		if (*wp == '\'') {
-			if (t) {
-				*word = wp;
-				return;
-			}
-			lim = 0;
-			t = 1;
-			++wp;
-		} else if (*wp == '[') {
-			if (t) {
-				*word = wp;
-				return;
-			}
-			lim = 0;
-			t = 2;
-			++wp;
-		} else if (*wp == '(') {
-			if (t) {
-				*word = wp;
-				return;
-			}
-			lim = 2;
-			t = 3;
-			++wp;
-		}
-
-		if ( ! isdigit((u_char)*wp)) {
-			*word = --wp;
-			return;
-		}
-
-		for (j = 0; isdigit((u_char)*wp); j++) {
-			if (lim && j >= lim)
-				break;
-			++wp;
-		}
-
-		if (t && t < 3) {
-			if (1 == t && *wp != '\'') {
-				*word = --wp;
-				return;
-			}
-			if (2 == t && *wp != ']') {
-				*word = --wp;
-				return;
-			}
-			++wp;
-		}
-		*word = --wp;
-		return;
-
-	} else if ('f' == *wp) {
-		if ('\0' == *(++wp)) {
-			*word = wp;
-			return;
-		}
-
-		switch (*wp) {
-		case ('3'):
-			/* FALLTHROUGH */
-		case ('B'):
-			p->metamask = p->metafont;
-			p->metafont |= METAF_BOLD;
-			break;
-		case ('2'):
-			/* FALLTHROUGH */
-		case ('I'):
-			p->metamask = p->metafont;
-			p->metafont |= METAF_UNDER;
-			break;
-		case ('P'):
-			sv = p->metamask;
-			p->metamask = p->metafont;
-			p->metafont = sv;
-			break;
-		case ('1'):
-			/* FALLTHROUGH */
-		case ('R'):
-			p->metamask = p->metafont;
-			p->metafont &= ~METAF_UNDER;
-			p->metafont &= ~METAF_BOLD;
-			break;
-		default:
-			break;
-		}
-
-		*word = wp;
-		return;
-
-	} else if ('[' != *wp) {
-		do_special(p, wp, 1);
-		*word = wp;
-		return;
-	}
-
-	wp++;
-	for (j = 0; *wp && ']' != *wp; wp++, j++)
-		/* Loop... */ ;
-
-	if ('\0' == *wp) {
-		*word = wp;
-		return;
-	}
-
-	if (type)
-		do_special(p, wp - j, (size_t)j);
-	else
-		do_reserved(p, wp - j, (size_t)j);
-	*word = wp;
-}
-
-
-/*
  * Handle pwords, partial words, which may be either a single word or a
  * phrase that cannot be broken down (such as a literal string).  This
  * handles word styling.
@@ -569,7 +373,10 @@ do_escaped(struct termp *p, const char **word)
 void
 term_word(struct termp *p, const char *word)
 {
-	const char	 *sv;
+	const char	*sv, *seq;
+	int		 sz, meta;
+	size_t		 ssz;
+	enum roffdeco	 deco;
 
 	sv = word;
 
@@ -605,11 +412,52 @@ term_word(struct termp *p, const char *word)
 	if ( ! (p->flags & TERMP_NONOSPACE))
 		p->flags &= ~TERMP_NOSPACE;
 
-	for ( ; *word; word++)
-		if ('\\' != *word)
+	/*
+	 * FIXME: it's faster to put the metafont conditional here,
+	 * because most of the time we're not a metafont and can use
+	 * strcspn and fwrite.
+	 */
+
+	while (*word) {
+		if ('\\' != *word) {
 			encode(p, *word);
-		else
-			do_escaped(p, &word);
+			word++;
+			continue;
+		}
+
+		seq = ++word;
+		sz = a2roffdeco(&deco, &seq, &ssz);
+
+		switch (deco) {
+		case (DECO_RESERVED):
+			do_reserved(p, seq, ssz);
+			break;
+		case (DECO_SPECIAL):
+			do_special(p, seq, ssz);
+			break;
+		case (DECO_BOLD):
+			p->metamask = p->metafont;
+			p->metafont |= METAF_BOLD;
+			break;
+		case (DECO_ITALIC):
+			p->metamask = p->metafont;
+			p->metafont |= METAF_UNDER;
+			break;
+		case (DECO_ROMAN):
+			p->metamask = p->metafont;
+			p->metafont &= ~METAF_UNDER;
+			p->metafont &= ~METAF_BOLD;
+			break;
+		case (DECO_PREVIOUS):
+			meta = p->metamask;
+			p->metamask = p->metafont;
+			p->metafont = meta;
+			break;
+		default:
+			break;
+		}
+		word += sz;
+	}
 
 	if (sv[0] && 0 == sv[1])
 		switch (sv[0]) {
