@@ -35,6 +35,17 @@ enum	roffscale {
 	SCALE_MAX
 };
 
+enum	roffdeco {
+	DECO_NONE,
+	DECO_SPECIAL,
+	DECO_RESERVED,
+	DECO_BOLD,
+	DECO_ITALIC,
+	DECO_ROMAN,
+	DECO_PREVIOUS,
+	DECO_MAX
+};
+
 struct	roffsu {
 	enum roffscale	  unit;
 	double		  scale;
@@ -54,6 +65,7 @@ struct	roffsu {
 
 int		  a2roffsu(const char *, 
 			struct roffsu *, enum roffscale);
+int		  a2roffdeco(enum roffdeco *, const char **, size_t *);
 void		  time2a(time_t, char *, size_t);
 
 __END_DECLS
