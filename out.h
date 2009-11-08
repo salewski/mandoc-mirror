@@ -43,6 +43,7 @@ enum	roffdeco {
 	DECO_ITALIC,
 	DECO_ROMAN,
 	DECO_PREVIOUS,
+	DECO_SIZE,
 	DECO_MAX
 };
 
@@ -53,15 +54,20 @@ struct	roffsu {
 };
 
 #define	SCALE_INVERT(p) \
-	do { (p)->scale = -(p)->scale; } while (/*CONSTCOND*/0)
+	do { (p)->scale = -(p)->scale; } \
+	while (/* CONSTCOND */ 0)
+
 #define	SCALE_VS_INIT(p, v) \
 	do { (p)->unit = SCALE_VS; \
 	     (p)->scale = (v); \
-	     (p)->pt = 0; } while (/*CONSTCOND*/0)
+	     (p)->pt = 0; } \
+	while (/* CONSTCOND */ 0)
+
 #define	SCALE_HS_INIT(p, v) \
 	do { (p)->unit = SCALE_BU; \
 	     (p)->scale = (v); \
-	     (p)->pt = 0; } while (/*CONSTCOND*/0)
+	     (p)->pt = 0; } \
+	while (/* CONSTCOND */ 0)
 
 int		  a2roffsu(const char *, 
 			struct roffsu *, enum roffscale);

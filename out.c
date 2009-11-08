@@ -25,6 +25,26 @@
 
 #include "out.h"
 
+/* See a2roffdeco(). */
+#define	C2LIM(c, l) do { \
+	(l) = 1; \
+	if ('[' == (c) || '\'' == (c)) \
+		(l) = 0; \
+	else if ('(' == (c)) \
+		(l) = 2; } \
+	while (/* CONSTCOND */ 0)
+
+/* See a2roffdeco(). */
+#define	C2TERM(c, t) do { \
+	(t) = 0; \
+	if ('\'' == (c)) \
+		(t) = 1; \
+	else if ('[' == (c)) \
+		(t) = 2; \
+	else if ('(' == (c)) \
+		(t) = 3; } \
+	while (/* CONSTCOND */ 0)
+
 #ifdef __linux__
 extern	size_t	  strlcat(char *, const char *, size_t);
 #endif
@@ -167,13 +187,18 @@ time2a(time_t t, char *dst, size_t sz)
 }
 
 
-/* Returns length of parsed string. */
+/* 
+ * Returns length of parsed string (the leading "\" should NOT be
+ * included).  This can be zero if the current character is the nil
+ * terminator.  "d" is set to the type of parsed decorator, which may
+ * have an adjoining "word" of size "sz" (e.g., "(ab" -> "ab", 2).
+ */
 int
 a2roffdeco(enum roffdeco *d,
 		const char **word, size_t *sz)
 {
-	int		 j, type, sv, t, lim;
-	const char	*wp;
+	int		 j, type, term, lim;
+	const char	*wp, *sp;
 
 	*d = DECO_NONE;
 	wp = *word;
@@ -184,8 +209,7 @@ a2roffdeco(enum roffdeco *d,
 		return(0);
 
 	case ('('):
-		wp++;
-		if ('\0' == *wp)
+		if ('\0' == *(++wp))
 			return(1);
 		if ('\0' == *(wp + 1))
 			return(2);
@@ -196,15 +220,12 @@ a2roffdeco(enum roffdeco *d,
 		return(3);
 
 	case ('*'):
-		wp++;
-
-		switch (*wp) {
+		switch (*(++wp)) {
 		case ('\0'):
 			return(1);
 
 		case ('('):
-			wp++;
-			if ('\0' == *wp)
+			if ('\0' == *(++wp))
 				return(2);
 			if ('\0' == *(wp + 1))
 				return(3);
@@ -226,64 +247,41 @@ a2roffdeco(enum roffdeco *d,
 		}
 		break;
 
-#if 0
 	case ('s'):
-		wp++;
-
-		/* This closely follows mandoc_special(). */
-		if ('\0' == *wp) 
+		sp = wp;
+		if ('\0' == *(++wp))
 			return(1);
 
-		t = 0;
-		lim = 1;
+		C2LIM(*wp, lim);
+		C2TERM(*wp, term);
 
-		if (*wp == '\'') {
-			lim = 0;
-			t = 1;
-			++wp;
-		} else if (*wp == '[') {
-			lim = 0;
-			t = 2;
-			++wp;
-		} else if (*wp == '(') {
-			lim = 2;
-			t = 3;
-			++wp;
-		}
+		if (term) 
+			wp++;
+
+		*word = wp;
 
 		if (*wp == '+' || *wp == '-')
 			++wp;
 
-		if (*wp == '\'') {
-			if (t) {
-				*word = wp;
-				return;
-			}
-			lim = 0;
-			t = 1;
-			++wp;
-		} else if (*wp == '[') {
-			if (t) {
-				*word = wp;
-				return;
-			}
-			lim = 0;
-			t = 2;
-			++wp;
-		} else if (*wp == '(') {
-			if (t) {
-				*word = wp;
-				return;
-			}
-			lim = 2;
-			t = 3;
-			++wp;
+		switch (*wp) {
+		case ('\''):
+			/* FALLTHROUGH */
+		case ('['):
+			/* FALLTHROUGH */
+		case ('('):
+			if (term) 
+				return((int)(wp - sp));
+
+			C2LIM(*wp, lim);
+			C2TERM(*wp, term);
+			wp++;
+			break;
+		default:
+			break;
 		}
 
-		if ( ! isdigit((u_char)*wp)) {
-			*word = --wp;
-			return;
-		}
+		if ( ! isdigit((u_char)*wp))
+			return((int)(wp - sp));
 
 		for (j = 0; isdigit((u_char)*wp); j++) {
 			if (lim && j >= lim)
@@ -291,25 +289,19 @@ a2roffdeco(enum roffdeco *d,
 			++wp;
 		}
 
-		if (t && t < 3) {
-			if (1 == t && *wp != '\'') {
-				*word = --wp;
-				return;
-			}
-			if (2 == t && *wp != ']') {
-				*word = --wp;
-				return;
-			}
+		if (term && term < 3) {
+			if (1 == term && *wp != '\'')
+				return((int)(wp - sp));
+			if (2 == term && *wp != ']')
+				return((int)(wp - sp));
 			++wp;
 		}
-		*word = --wp;
-		return;
-#endif
+
+		*d = DECO_SIZE;
+		return((int)(wp - sp));
 
 	case ('f'):
-		wp++;
-
-		switch (*wp) {
+		switch (*(++wp)) {
 		case ('\0'):
 			return(1);
 		case ('3'):
@@ -354,6 +346,6 @@ a2roffdeco(enum roffdeco *d,
 		return(j + 1);
 
 	*d = type ? DECO_SPECIAL : DECO_RESERVED;
-	*sz = j;
+	*sz = (size_t)j;
 	return (j + 2);
 }
