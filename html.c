@@ -66,7 +66,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"base",	HTML_CLRLINE | HTML_NOSTACK}, /* TAG_BASE */
 };
 
-static	const char	 *const htmlattrs[ATTR_MAX] = {
+static	const char	*const htmlattrs[ATTR_MAX] = {
 	"http-equiv",
 	"content",
 	"name",
@@ -86,6 +86,13 @@ static	const char	 *const htmlattrs[ATTR_MAX] = {
 #ifdef __linux__
 extern	int		  getsubopt(char **, char * const *, char **);
 #endif
+
+
+static	void		  print_spec(struct html *, const char *, int);
+static	void		  print_res(struct html *, const char *, int);
+static	void		  print_ctag(struct html *, enum htmltag);
+static	void		  print_encode(struct html *, const char *);
+
 
 void *
 html_alloc(char *outopts)
@@ -214,107 +221,12 @@ print_res(struct html *h, const char *p, int len)
 
 
 static void
-print_escape(struct html *h, const char **p)
-{
-	int		 j, type;
-	const char	*wp;
-
-	wp = *p;
-	type = 1;
-
-	if (0 == *(++wp)) {
-		*p = wp;
-		return;
-	}
-
-	if ('(' == *wp) {
-		wp++;
-		if (0 == *wp || 0 == *(wp + 1)) {
-			*p = 0 == *wp ? wp : wp + 1;
-			return;
-		}
-
-		print_spec(h, wp, 2);
-		*p = ++wp;
-		return;
-
-	} else if ('*' == *wp) {
-		if (0 == *(++wp)) {
-			*p = wp;
-			return;
-		}
-
-		switch (*wp) {
-		case ('('):
-			wp++;
-			if (0 == *wp || 0 == *(wp + 1)) {
-				*p = 0 == *wp ? wp : wp + 1;
-				return;
-			}
-
-			print_res(h, wp, 2);
-			*p = ++wp;
-			return;
-		case ('['):
-			type = 0;
-			break;
-		default:
-			print_res(h, wp, 1);
-			*p = wp;
-			return;
-		}
-	
-	} else if ('f' == *wp) {
-		if (0 == *(++wp)) {
-			*p = wp;
-			return;
-		}
-
-		/* 
-		 * These aren't supported, as they're symmetry-breaking
-		 * constructs that don't play well with hierarchical
-		 * mark-up.  Consider:
-		 *
-		 * \fBHello.
-		 * .PP
-		 * World.
-		 *
-		 * The style started before "Hello" wouldn't be able to
-		 * propogate into the next `PP' because we'd exit the
-		 * current paragraph's scope.
-		 */
-
-		*p = wp;
-		return;
-
-	} else if ('[' != *wp) {
-		print_spec(h, wp, 1);
-		*p = wp;
-		return;
-	}
-
-	wp++;
-	for (j = 0; *wp && ']' != *wp; wp++, j++)
-		/* Loop... */ ;
-
-	if (0 == *wp) {
-		*p = wp;
-		return;
-	}
-
-	if (type)
-		print_spec(h, wp - j, j);
-	else
-		print_res(h, wp - j, j);
-
-	*p = wp;
-}
-
-
-static void
 print_encode(struct html *h, const char *p)
 {
 	size_t		 sz;
+	int		 len;
+	const char	*seq;
+	enum roffdeco	 deco;
 
 	for (; *p; p++) {
 		sz = strcspn(p, "\\<>&");
@@ -323,18 +235,33 @@ print_encode(struct html *h, const char *p)
 		p += /* LINTED */
 			sz;
 
-		if ('\\' == *p) {
-			print_escape(h, &p);
+		if ('<' == *p) {
+			printf("&lt;");
+			continue;
+		} else if ('>' == *p) {
+			printf("&gt;");
+			continue;
+		} else if ('&' == *p) {
+			printf("&amp;");
 			continue;
 		} else if ('\0' == *p)
 			break;
 
-		if ('<' == *p)
-			printf("&lt;");
-		else if ('>' == *p)
-			printf("&gt;");
-		else if ('&' == *p)
-			printf("&amp;");
+		seq = ++p;
+		len = a2roffdeco(&deco, &seq, &sz);
+
+		switch (deco) {
+		case (DECO_RESERVED):
+			print_res(h, seq, sz);
+			break;
+		case (DECO_SPECIAL):
+			print_spec(h, seq, sz);
+			break;
+		default:
+			break;
+		}
+
+		p += len - 1;
 	}
 }
 

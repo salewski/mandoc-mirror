@@ -132,10 +132,37 @@ and
 Terms may be text-decorated using the
 .Sq \ef
 escape followed by an indicator: B (bold), I, (italic), R (Roman), or P
-(revert to previous mode).  A numerical representation 3, 2, or 1
-(bold, italic, and Roman, respectively) may be used instead.  
+(revert to previous mode):  
 .Pp
-These form is not recommended for 
+.D1 \efBbold\efR \efIitalic\efP
+.Pp
+A numerical representation 3, 2, or 1 (bold, italic, and Roman,
+respectively) may be used instead.
+.Pp
+Text may also be sized with the
+.Sq \es
+escape, whose syntax is one of
+.Sq \es+-n
+for one-digit numerals;
+.Sq \es(+-nn
+or
+.Sq \es+-(nn
+for two-digit numerals; and
+.Sq \es[+-N] ,
+.Sq \es+-[N] ,
+.Sq \es'+-N' ,
+or
+.Sq \es+-'N'
+for arbitrary-digit numerals:
+.Pp
+.D1 \es+1bigger\es-1
+.D1 \es[+10]much bigger\es[-10]
+.D1 \es+(10much bigger\es-(10
+.D1 \es+'100'much much bigger\es-'100'
+.Pp
+Note these forms are 
+.Em not
+recommended for 
 .Nm ,
 which encourages semantic annotation.
 .
