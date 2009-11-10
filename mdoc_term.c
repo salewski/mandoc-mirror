@@ -349,6 +349,9 @@ print_foot(DECL_ARGS)
 {
 	char		buf[DATESIZ], os[BUFSIZ];
 
+	/* Disable meta-fonts. */
+	p->metafont = 0;
+
 	/* 
 	 * Output the footer in new-groff style, that is, three columns
 	 * with the middle being the manual date and flanking columns

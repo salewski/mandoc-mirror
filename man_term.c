@@ -898,6 +898,8 @@ print_man_foot(struct termp *p, const struct man_meta *meta)
 {
 	char		buf[DATESIZ];
 
+	p->metafont = 0;
+
 	time2a(meta->date, buf, DATESIZ);
 
 	term_vspace(p);
