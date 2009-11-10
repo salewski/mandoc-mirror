@@ -88,8 +88,8 @@ extern	int		  getsubopt(char **, char * const *, char **);
 #endif
 
 
-static	void		  print_spec(struct html *, const char *, int);
-static	void		  print_res(struct html *, const char *, int);
+static	void		  print_spec(struct html *, const char *, size_t);
+static	void		  print_res(struct html *, const char *, size_t);
 static	void		  print_ctag(struct html *, enum htmltag);
 static	void		  print_encode(struct html *, const char *);
 
@@ -193,12 +193,12 @@ print_gen_head(struct html *h)
 
 
 static void
-print_spec(struct html *h, const char *p, int len)
+print_spec(struct html *h, const char *p, size_t len)
 {
 	const char	*rhs;
 	size_t		 sz;
 
-	rhs = chars_a2ascii(h->symtab, p, (size_t)len, &sz);
+	rhs = chars_a2ascii(h->symtab, p, len, &sz);
 
 	if (NULL == rhs) 
 		return;
@@ -207,12 +207,12 @@ print_spec(struct html *h, const char *p, int len)
 
 
 static void
-print_res(struct html *h, const char *p, int len)
+print_res(struct html *h, const char *p, size_t len)
 {
 	const char	*rhs;
 	size_t		 sz;
 
-	rhs = chars_a2res(h->symtab, p, (size_t)len, &sz);
+	rhs = chars_a2res(h->symtab, p, len, &sz);
 
 	if (NULL == rhs)
 		return;
