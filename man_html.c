@@ -211,6 +211,9 @@ print_man_node(MAN_ARGS)
 	default:
 		if (mans[n->tok].post)
 			(*mans[n->tok].post)(m, n, h);
+
+		/* Reset metafont upon exit from macro. */
+		h->metafont = 0;
 		break;
 	}
 }

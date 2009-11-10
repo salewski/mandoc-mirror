@@ -876,9 +876,13 @@ print_man_node(DECL_ARGS)
 	if (c && n->child)
 		print_man_body(p, mt, n->child, m);
 
-	if (MAN_TEXT != n->type)
+	if (MAN_TEXT != n->type) {
 		if (termacts[n->tok].post)
 			(*termacts[n->tok].post)(p, mt, n, m);
+
+		/* Reset metafont upon exit from macro. */
+		p->metafont = 0;
+	}
 }
 
 
