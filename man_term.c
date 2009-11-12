@@ -783,7 +783,7 @@ post_RS(DECL_ARGS)
 static void
 print_man_node(DECL_ARGS)
 {
-	int		 c, sz;
+	int		 c;
 
 	c = 1;
 
@@ -793,17 +793,8 @@ print_man_node(DECL_ARGS)
 			term_vspace(p);
 			break;
 		}
-		/*
-		 * Note!  This is hacky.  Here, we recognise the `\c'
-		 * escape embedded in so many -man pages.  It's supposed
-		 * to remove the subsequent space, so we mark NOSPACE if
-		 * it's encountered in the string.
-		 */
-		sz = (int)strlen(n->string);
+
 		term_word(p, n->string);
-		if (sz >= 2 && n->string[sz - 1] == 'c' &&
-				n->string[sz - 2] == '\\')
-			p->flags |= TERMP_NOSPACE;
 
 		/* FIXME: this means that macro lines are munged!  */
 

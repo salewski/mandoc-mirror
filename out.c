@@ -331,6 +331,11 @@ a2roffdeco(enum roffdeco *d,
 	case ('['):
 		break;
 
+	case ('c'):
+		*d = DECO_NOSPACE;
+		*sz = 1;
+		return(1);
+
 	default:
 		*d = DECO_SPECIAL;
 		*word = wp;

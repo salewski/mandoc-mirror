@@ -487,7 +487,10 @@ term_word(struct termp *p, const char *word)
 		default:
 			break;
 		}
+
 		word += sz;
+		if (DECO_NOSPACE == deco && '\0' == *word)
+			p->flags |= TERMP_NOSPACE;
 	}
 
 	if (sv[0] && 0 == sv[1])

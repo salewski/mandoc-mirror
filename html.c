@@ -262,6 +262,9 @@ print_encode(struct html *h, const char *p)
 		}
 
 		p += len - 1;
+
+		if (DECO_NOSPACE == deco && '\0' == *(p + 1))
+			h->flags |= HTML_NOSPACE;
 	}
 }
 
