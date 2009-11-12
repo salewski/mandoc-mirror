@@ -14,6 +14,8 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <sys/types.h>
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -527,7 +529,7 @@ buffera(struct termp *p, const char *word, size_t sz)
 	if (p->col + sz >= p->maxcols) 
 		adjbuf(p, p->col + sz);
 
-	memcpy(&p->buf[p->col], word, sz);
+	memcpy(&p->buf[(int)p->col], word, sz);
 	p->col += sz;
 }
 
@@ -539,7 +541,7 @@ bufferc(struct termp *p, char c)
 	if (p->col + 1 >= p->maxcols)
 		adjbuf(p, p->col + 1);
 
-	p->buf[p->col++] = c;
+	p->buf[(int)p->col++] = c;
 }
 
 
