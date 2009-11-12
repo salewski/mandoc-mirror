@@ -925,8 +925,8 @@ End literal mode begun by
 .
 .
 .Ss \&i
-Italicise arguments.  If no arguments are specified, all subsequent text
-is italicised.
+Italicise arguments.  Synonym for
+.Sx \&I .
 .Pp
 See also
 .Sx \&B ,
@@ -982,14 +982,21 @@ See also
 This section documents compatibility with other roff implementations, at
 this time limited to
 .Xr groff 1 .
-.Bl -hyphen
+.Pp
+.Bl -dash -compact
+.It
+The
+.Xr groff 1
+.Sx \&i
+macro will italicise all subsequent text if a line argument is not
+provided.  This behaviour is not implemented.
 .It
 In quoted literals, groff allowed pair-wise double-quotes to produce a
 standalone double-quote in formatted output.  This idiosyncratic
 behaviour is no longer applicable.
 .It
 The
-.Sq sp
+.Sx \&sp
 macro does not accept negative numbers.
 .It
 Blocks of whitespace are stripped from both macro and free-form text

@@ -104,7 +104,6 @@ static	void		  post_RS(DECL_ARGS);
 static	void		  post_SH(DECL_ARGS);
 static	void		  post_SS(DECL_ARGS);
 static	void		  post_TP(DECL_ARGS);
-static	void		  post_i(DECL_ARGS);
 
 static	const struct termact termacts[MAN_MAX] = {
 	{ pre_br, NULL }, /* br */
@@ -129,7 +128,7 @@ static	const struct termact termacts[MAN_MAX] = {
 	{ pre_RI, NULL }, /* IR */
 	{ pre_RI, NULL }, /* RI */
 	{ NULL, NULL }, /* na */
-	{ pre_I, post_i }, /* i */
+	{ pre_I, NULL }, /* i */
 	{ pre_sp, NULL }, /* sp */
 	{ pre_nf, NULL }, /* nf */
 	{ pre_fi, NULL }, /* fi */
@@ -240,17 +239,6 @@ pre_I(DECL_ARGS)
 
 	term_fontrepl(p, TERMFONT_UNDER);
 	return(1);
-}
-
-
-/* ARGSUSED */
-static void
-post_i(DECL_ARGS)
-{
-
-	/* FIXME */
-	/*if (n->nchild)
-		p->under--;*/
 }
 
 
