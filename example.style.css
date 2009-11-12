@@ -29,7 +29,7 @@ span.ftype	{ font-style: italic; font-weight: normal; } /* Function types (Ft, F
 span.includes	{ font-weight: bold; font-style: normal; } /* Header includes (In). */
 span.italic	{ font-style: italic; font-weight: normal; } /* Generically italic (BI, IB, I). */
 span.lib	{ } /* Library (Lb). */
-span.lit	{ font-family: monospace; } /* Literals (Bf -literal). */
+span.lit	{ } /* Literals (Bf -literal). */
 span.macro	{ font-weight: bold; font-style: normal; } /* Macro-ish thing (Fd). */
 span.name	{ font-weight: bold; font-style: normal; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
@@ -62,7 +62,7 @@ a.link-ref	{ } /* Reference section links (%Q). */
 a.link-sec	{ } /* Section links (Sx). */
 
 div.emph	{ font-style: italic; font-weight: normal; } /* Emphasis (Bl -emphasis). */
-div.lit		{ font-family: monospace; } /* Literal (D1, Bd -literal, Dl, Bd -literal). */
+div.lit		{ } /* Literal (D1, Bd -literal, Dl, Bd -literal). */
 div.symb	{ font-weight: bold; font-style: normal; } /* Symbols (Bl -symbolic). */
 
 table.footer	{ } /* Document footer. */
