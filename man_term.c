@@ -73,7 +73,7 @@ static	int		  a2height(const struct man_node *);
 
 static	void		  print_man_head(struct termp *, 
 				const struct man_meta *);
-static	void		  print_man_body(DECL_ARGS);
+static	void		  print_man_nodelist(DECL_ARGS);
 static	void		  print_man_node(DECL_ARGS);
 static	void		  print_man_foot(struct termp *, 
 				const struct man_meta *);
@@ -96,11 +96,8 @@ static	int		  pre_br(DECL_ARGS);
 static	int		  pre_fi(DECL_ARGS);
 static	int		  pre_ign(DECL_ARGS);
 static	int		  pre_nf(DECL_ARGS);
-static	int		  pre_r(DECL_ARGS);
 static	int		  pre_sp(DECL_ARGS);
 
-static	void		  post_B(DECL_ARGS);
-static	void		  post_I(DECL_ARGS);
 static	void		  post_IP(DECL_ARGS);
 static	void		  post_HP(DECL_ARGS);
 static	void		  post_RS(DECL_ARGS);
@@ -121,14 +118,14 @@ static	const struct termact termacts[MAN_MAX] = {
 	{ pre_IP, post_IP }, /* IP */
 	{ pre_HP, post_HP }, /* HP */ 
 	{ NULL, NULL }, /* SM */
-	{ pre_B, post_B }, /* SB */
+	{ pre_B, NULL }, /* SB */
 	{ pre_BI, NULL }, /* BI */
 	{ pre_BI, NULL }, /* IB */
 	{ pre_RB, NULL }, /* BR */
 	{ pre_RB, NULL }, /* RB */
 	{ NULL, NULL }, /* R */
-	{ pre_B, post_B }, /* B */
-	{ pre_I, post_I }, /* I */
+	{ pre_B, NULL }, /* B */
+	{ pre_I, NULL }, /* I */
 	{ pre_RI, NULL }, /* IR */
 	{ pre_RI, NULL }, /* RI */
 	{ NULL, NULL }, /* na */
@@ -136,7 +133,7 @@ static	const struct termact termacts[MAN_MAX] = {
 	{ pre_sp, NULL }, /* sp */
 	{ pre_nf, NULL }, /* nf */
 	{ pre_fi, NULL }, /* fi */
-	{ pre_r, NULL }, /* r */
+	{ NULL, NULL }, /* r */
 	{ NULL, NULL }, /* RE */
 	{ pre_RS, post_RS }, /* RS */
 	{ pre_ign, NULL }, /* DT */
@@ -177,7 +174,7 @@ terminal_man(void *arg, const struct man *man)
 	mt.offset = INDENT;
 
 	if (n->child)
-		print_man_body(p, &mt, n->child, m);
+		print_man_nodelist(p, &mt, n->child, m);
 	print_man_foot(p, m);
 }
 
@@ -241,17 +238,7 @@ static int
 pre_I(DECL_ARGS)
 {
 
-	p->under++;
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-pre_r(DECL_ARGS)
-{
-
-	p->bold = p->under = 0;
+	term_fontrepl(p, TERMFONT_UNDER);
 	return(1);
 }
 
@@ -261,17 +248,9 @@ static void
 post_i(DECL_ARGS)
 {
 
-	if (n->nchild)
-		p->under--;
-}
-
-
-/* ARGSUSED */
-static void
-post_I(DECL_ARGS)
-{
-
-	p->under--;
+	/* FIXME */
+	/*if (n->nchild)
+		p->under--;*/
 }
 
 
@@ -305,19 +284,16 @@ pre_RB(DECL_ARGS)
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		if (i % 2 && MAN_RB == n->tok)
-			p->bold++;
+			term_fontrepl(p, TERMFONT_BOLD);
 		else if ( ! (i % 2) && MAN_RB != n->tok)
-			p->bold++;
+			term_fontrepl(p, TERMFONT_BOLD);
+		else
+			term_fontrepl(p, TERMFONT_NONE);
 
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
 
 		print_man_node(p, mt, nn, m);
-
-		if (i % 2 && MAN_RB == n->tok)
-			p->bold--;
-		else if ( ! (i % 2) && MAN_RB != n->tok)
-			p->bold--;
 	}
 	return(0);
 }
@@ -332,18 +308,16 @@ pre_RI(DECL_ARGS)
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		if (i % 2 && MAN_RI == n->tok)
-			p->under++;
+			term_fontrepl(p, TERMFONT_UNDER);
 		else if ( ! (i % 2) && MAN_RI != n->tok)
-			p->under++;
+			term_fontrepl(p, TERMFONT_UNDER);
+		else
+			term_fontrepl(p, TERMFONT_NONE);
 
 		if (i > 0)
 			p->flags |= TERMP_NOSPACE;
-		print_man_node(p, mt, nn, m);
 
-		if (i % 2 && MAN_RI == n->tok)
-			p->under--;
-		else if ( ! (i % 2) && MAN_RI != n->tok)
-			p->under--;
+		print_man_node(p, mt, nn, m);
 	}
 	return(0);
 }
@@ -358,26 +332,18 @@ pre_BI(DECL_ARGS)
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		if (i % 2 && MAN_BI == n->tok)
-			p->under++;
+			term_fontrepl(p, TERMFONT_UNDER);
 		else if (i % 2)
-			p->bold++;
+			term_fontrepl(p, TERMFONT_BOLD);
 		else if (MAN_BI == n->tok)
-			p->bold++;
+			term_fontrepl(p, TERMFONT_BOLD);
 		else
-			p->under++;
+			term_fontrepl(p, TERMFONT_UNDER);
 
 		if (i)
 			p->flags |= TERMP_NOSPACE;
-		print_man_node(p, mt, nn, m);
 
-		if (i % 2 && MAN_BI == n->tok)
-			p->under--;
-		else if (i % 2)
-			p->bold--;
-		else if (MAN_BI == n->tok)
-			p->bold--;
-		else
-			p->under--;
+		print_man_node(p, mt, nn, m);
 	}
 	return(0);
 }
@@ -388,17 +354,8 @@ static int
 pre_B(DECL_ARGS)
 {
 
-	p->bold++;
+	term_fontrepl(p, TERMFONT_BOLD);
 	return(1);
-}
-
-
-/* ARGSUSED */
-static void
-post_B(DECL_ARGS)
-{
-
-	p->bold--;
 }
 
 
@@ -705,7 +662,7 @@ pre_SS(DECL_ARGS)
 		term_vspace(p);
 		break;
 	case (MAN_HEAD):
-		p->bold++;
+		term_fontrepl(p, TERMFONT_BOLD);
 		p->offset = HALFINDENT;
 		break;
 	case (MAN_BODY):
@@ -727,7 +684,6 @@ post_SS(DECL_ARGS)
 	switch (n->type) {
 	case (MAN_HEAD):
 		term_newln(p);
-		p->bold--;
 		break;
 	case (MAN_BODY):
 		term_newln(p);
@@ -754,7 +710,7 @@ pre_SH(DECL_ARGS)
 		term_vspace(p);
 		break;
 	case (MAN_HEAD):
-		p->bold++;
+		term_fontrepl(p, TERMFONT_BOLD);
 		p->offset = 0;
 		break;
 	case (MAN_BODY):
@@ -776,7 +732,6 @@ post_SH(DECL_ARGS)
 	switch (n->type) {
 	case (MAN_HEAD):
 		term_newln(p);
-		p->bold--;
 		break;
 	case (MAN_BODY):
 		term_newln(p);
@@ -861,39 +816,40 @@ print_man_node(DECL_ARGS)
 		if (sz >= 2 && n->string[sz - 1] == 'c' &&
 				n->string[sz - 2] == '\\')
 			p->flags |= TERMP_NOSPACE;
+
 		/* FIXME: this means that macro lines are munged!  */
+
 		if (MANT_LITERAL & mt->fl) {
 			p->flags |= TERMP_NOSPACE;
 			term_flushln(p);
 		}
 		break;
 	default:
+		term_fontrepl(p, TERMFONT_NONE);
 		if (termacts[n->tok].pre)
 			c = (*termacts[n->tok].pre)(p, mt, n, m);
 		break;
 	}
 
 	if (c && n->child)
-		print_man_body(p, mt, n->child, m);
+		print_man_nodelist(p, mt, n->child, m);
 
 	if (MAN_TEXT != n->type) {
 		if (termacts[n->tok].post)
 			(*termacts[n->tok].post)(p, mt, n, m);
-
-		/* Reset metafont upon exit from macro. */
-		p->metafont = 0;
+		term_fontrepl(p, TERMFONT_NONE);
 	}
 }
 
 
 static void
-print_man_body(DECL_ARGS)
+print_man_nodelist(DECL_ARGS)
 {
 
 	print_man_node(p, mt, n, m);
 	if ( ! n->next)
 		return;
-	print_man_body(p, mt, n->next, m);
+	print_man_nodelist(p, mt, n->next, m);
 }
 
 
@@ -902,7 +858,7 @@ print_man_foot(struct termp *p, const struct man_meta *meta)
 {
 	char		buf[DATESIZ];
 
-	p->metafont = 0;
+	term_fontrepl(p, TERMFONT_NONE);
 
 	time2a(meta->date, buf, DATESIZ);
 

@@ -115,7 +115,9 @@ escape followed by an indicator: B (bold), I, (italic), R (Roman), or P
 .D1 \efBbold\efR \efIitalic\efP
 .Pp
 A numerical representation 3, 2, or 1 (bold, italic, and Roman,
-respectively) may be used instead.
+respectively) may be used instead.  A text decoration is only valid, if
+specified in free-form text, until the next macro invocation; if
+specified within a macro, it's only valid until the macro closes scope.
 .Pp
 Text may also be sized with the
 .Sq \es

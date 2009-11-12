@@ -137,7 +137,17 @@ escape followed by an indicator: B (bold), I, (italic), R (Roman), or P
 .D1 \efBbold\efR \efIitalic\efP
 .Pp
 A numerical representation 3, 2, or 1 (bold, italic, and Roman,
-respectively) may be used instead.
+respectively) may be used instead.  A text decoration is valid within
+the current font scope only:  if a macro opens a font scope alongside
+its own scope, such as
+.Sx \&Bf 
+.Cm \&Sy ,
+in-scope invocations of
+.Sq \ef
+are only valid within the font scope of the macro.  If
+.Sq \ef
+is specified outside of any font scope, such as in unenclosed, free-form
+text, it will affect the remainder of the document.
 .Pp
 Text may also be sized with the
 .Sq \es
@@ -1820,9 +1830,16 @@ file re-write
 .Pp
 .Bl -dash -compact
 .It
+.Xr groff 1
+behaves strangely (even between versions) when specifying
+.Sq \ef
+escapes within line-macro scopes.  These aberrations have been
+normalised.
+.It
 Negative scaling units are now truncated to zero instead of creating
 interesting conditions, such as with
-.Sq \&sp -1i .
+.Sx \&sp 
+.Cm \-1i .
 Furthermore, the
 .Sq f
 scaling unit, while accepted, is rendered as the default unit.
@@ -1832,7 +1849,8 @@ standalone double-quote in formatted output.  This idiosyncratic
 behaviour is no longer applicable.
 .It
 Display types
-.Sx \&Bd Fl center
+.Sx \&Bd 
+.Fl center
 and
 .Fl right
 are aliases for
@@ -1862,7 +1880,8 @@ made historic groff
 .Qq go orbital
 but is a proper delimiter in this implementation.
 .It
-.Sx \&It Fl nested
+.Sx \&It 
+.Fl nested
 is assumed for all lists (it wasn't in historic groff): any list may be
 nested and
 .Fl enum

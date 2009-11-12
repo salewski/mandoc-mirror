@@ -23,6 +23,12 @@ enum	termenc {
 	TERMENC_ASCII
 };
 
+enum	termfont {
+	TERMFONT_NONE = 0,
+	TERMFONT_BOLD,
+	TERMFONT_UNDER
+};
+
 struct	termp {
 	size_t		  rmargin;	/* Current right margin. */
 	size_t		  maxrmargin;	/* Max right margin. */
@@ -41,15 +47,12 @@ struct	termp {
 #define	TERMP_NOSPLIT	 (1 << 11)	/* See termp_an_pre/post(). */
 #define	TERMP_SPLIT	 (1 << 12)	/* See termp_an_pre/post(). */
 #define	TERMP_ANPREC	 (1 << 13)	/* See termp_an_pre(). */
-	int		  bold;
-	int		  under;
-	int		  metafont;	/* See do_escaped(). */
-#define	METAF_BOLD	 (1 << 0)
-#define	METAF_UNDER	 (1 << 1)
-	int		  metamask;	/* See do_escaped(). */
 	char		 *buf;		/* Output buffer. */
 	enum termenc	  enc;		/* Type of encoding. */
 	void		 *symtab;	/* Encoded-symbol table. */
+	enum termfont	  fontl;	/* Last font set. */
+	enum termfont	  fontq[10];	/* Symmetric fonts. */
+	int		  fonti;	/* Index of font stack. */
 };
 
 void		  term_newln(struct termp *);
@@ -59,6 +62,14 @@ void		  term_flushln(struct termp *);
 
 size_t		  term_hspan(const struct roffsu *);
 size_t		  term_vspan(const struct roffsu *);
+
+enum termfont	  term_fonttop(struct termp *);
+const void	 *term_fontq(struct termp *);
+void		  term_fontpush(struct termp *, enum termfont);
+void		  term_fontpop(struct termp *);
+void		  term_fontpopq(struct termp *, const void *);
+void		  term_fontrepl(struct termp *, enum termfont);
+void		  term_fontlast(struct termp *);
 
 __END_DECLS
 
