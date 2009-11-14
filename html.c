@@ -372,11 +372,11 @@ print_text(struct html *h, const char *p)
 	if ( ! (h->flags & HTML_NOSPACE))
 		putchar(' ');
 
-	h->flags &= ~HTML_NOSPACE;
 	h->flags &= ~HTML_NEWLINE;
 
-	if (p)
-		print_encode(h, p);
+	assert(p);
+	if ( ! print_encode(h, p))
+		h->flags &= ~HTML_NOSPACE;
 
 	if (*p && 0 == *(p + 1))
 		switch (*p) {
