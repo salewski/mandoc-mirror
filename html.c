@@ -91,7 +91,8 @@ extern	int		  getsubopt(char **, char * const *, char **);
 static	void		  print_spec(struct html *, const char *, size_t);
 static	void		  print_res(struct html *, const char *, size_t);
 static	void		  print_ctag(struct html *, enum htmltag);
-static	int		  print_encode(struct html *, const char *);
+static	int		  print_encode(struct html *, const char *, int);
+static	void		  print_metaf(struct html *, enum roffdeco);
 
 
 void *
@@ -220,8 +221,40 @@ print_res(struct html *h, const char *p, size_t len)
 }
 
 
+static void
+print_metaf(struct html *h, enum roffdeco deco)
+{
+	const char	*class;
+	struct htmlpair	 tag;
+
+	switch (deco) {
+	case (DECO_BOLD):
+		class = "bold";
+		break;
+	case (DECO_ITALIC):
+		class = "italic";
+		break;
+	case (DECO_ROMAN):
+		class = "roman";
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	if (h->metaf) {
+		assert(h->tags.head);
+		assert(h->metaf == h->tags.head);
+		print_tagq(h, h->metaf);
+	}
+	
+	PAIR_CLASS_INIT(&tag, class);
+	h->metaf = print_otag(h, TAG_SPAN, 1, &tag);
+}
+
+
 static int
-print_encode(struct html *h, const char *p)
+print_encode(struct html *h, const char *p, int norecurse)
 {
 	size_t		 sz;
 	int		 len, nospace;
@@ -258,6 +291,15 @@ print_encode(struct html *h, const char *p)
 			break;
 		case (DECO_SPECIAL):
 			print_spec(h, seq, sz);
+			break;
+		case (DECO_BOLD):
+			/* FALLTHROUGH */
+		case (DECO_ITALIC):
+			/* FALLTHROUGH */
+		case (DECO_ROMAN):
+			if (norecurse)
+				break;
+			print_metaf(h, deco);
 			break;
 		default:
 			break;
@@ -300,7 +342,7 @@ print_otag(struct html *h, enum htmltag tag,
 	for (i = 0; i < sz; i++) {
 		printf(" %s=\"", htmlattrs[p[i].key]);
 		assert(p->val);
-		(void)print_encode(h, p[i].val);
+		(void)print_encode(h, p[i].val, 1);
 		putchar('\"');
 	}
 	putchar('>');
@@ -366,7 +408,7 @@ print_text(struct html *h, const char *p)
 		putchar(' ');
 
 	assert(p);
-	if ( ! print_encode(h, p))
+	if ( ! print_encode(h, p, 0))
 		h->flags &= ~HTML_NOSPACE;
 
 	if (*p && 0 == *(p + 1))

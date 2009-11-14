@@ -190,13 +190,15 @@ print_man_node(MAN_ARGS)
 		print_text(h, n->string);
 		return;
 	default:
+		if (h->metaf) {
+			assert(h->metaf == t);
+			print_tagq(h, h->metaf);
+			t = h->tags.head;
+		}
 		if (mans[n->tok].pre)
 			child = (*mans[n->tok].pre)(m, n, h);
 		break;
 	}
-
-	if (child && n->child)
-		print_man_nodelist(m, n->child, h);
 
 	print_stagq(h, t);
 
