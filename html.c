@@ -306,11 +306,6 @@ print_otag(struct html *h, enum htmltag tag,
 	putchar('>');
 
 	h->flags |= HTML_NOSPACE;
-	if (HTML_CLRLINE & htmltags[tag].flags)
-		h->flags |= HTML_NEWLINE;
-	else
-		h->flags &= ~HTML_NEWLINE;
-
 	return(t);
 }
 
@@ -323,10 +318,8 @@ print_ctag(struct html *h, enum htmltag tag)
 	printf("</%s>", htmltags[tag].name);
 	if (HTML_CLRLINE & htmltags[tag].flags) {
 		h->flags |= HTML_NOSPACE;
-		h->flags |= HTML_NEWLINE;
 		putchar('\n');
-	} else
-		h->flags &= ~HTML_NEWLINE;
+	} 
 }
 
 
@@ -371,8 +364,6 @@ print_text(struct html *h, const char *p)
 
 	if ( ! (h->flags & HTML_NOSPACE))
 		putchar(' ');
-
-	h->flags &= ~HTML_NEWLINE;
 
 	assert(p);
 	if ( ! print_encode(h, p))

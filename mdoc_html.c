@@ -725,12 +725,11 @@ mdoc_nm_pre(MDOC_ARGS)
 {
 	struct htmlpair	tag;
 
-	if ( ! (HTML_NEWLINE & h->flags))
-		if (SEC_SYNOPSIS == n->sec) {
-			bufcat_style(h, "clear", "both");
-			PAIR_STYLE_INIT(&tag, h);
-			print_otag(h, TAG_BR, 1, &tag);
-		}
+	if (SEC_SYNOPSIS == n->sec && n->prev) {
+		bufcat_style(h, "clear", "both");
+		PAIR_STYLE_INIT(&tag, h);
+		print_otag(h, TAG_BR, 1, &tag);
+	}
 
 	PAIR_CLASS_INIT(&tag, "name");
 	print_otag(h, TAG_SPAN, 1, &tag);
