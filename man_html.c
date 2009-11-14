@@ -188,7 +188,7 @@ print_man_node(MAN_ARGS)
 		break;
 	case (MAN_TEXT):
 		print_text(h, n->string);
-		break;
+		return;
 	default:
 		if (mans[n->tok].pre)
 			child = (*mans[n->tok].pre)(m, n, h);
@@ -211,9 +211,6 @@ print_man_node(MAN_ARGS)
 	default:
 		if (mans[n->tok].post)
 			(*mans[n->tok].post)(m, n, h);
-
-		/* Reset metafont upon exit from macro. */
-		h->metafont = 0;
 		break;
 	}
 }

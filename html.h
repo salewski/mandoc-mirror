@@ -112,10 +112,7 @@ struct	html {
 	char		 *style;
 	char		  buf[BUFSIZ];
 	size_t		  buflen;
-	int		  metafont;
-#define	METAF_BOLD	 (1 << 0)
-#define	METAF_UNDER	 (1 << 1)
-	int		  metamask;
+	struct tag	 *metaf;
 };
 
 struct	roffsu;

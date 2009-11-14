@@ -91,7 +91,7 @@ extern	int		  getsubopt(char **, char * const *, char **);
 static	void		  print_spec(struct html *, const char *, size_t);
 static	void		  print_res(struct html *, const char *, size_t);
 static	void		  print_ctag(struct html *, enum htmltag);
-static	void		  print_encode(struct html *, const char *);
+static	int		  print_encode(struct html *, const char *);
 
 
 void *
@@ -220,13 +220,15 @@ print_res(struct html *h, const char *p, size_t len)
 }
 
 
-static void
+static int
 print_encode(struct html *h, const char *p)
 {
 	size_t		 sz;
-	int		 len;
+	int		 len, nospace;
 	const char	*seq;
 	enum roffdeco	 deco;
+
+	nospace = 0;
 
 	for (; *p; p++) {
 		sz = strcspn(p, "\\<>&");
@@ -264,8 +266,10 @@ print_encode(struct html *h, const char *p)
 		p += len - 1;
 
 		if (DECO_NOSPACE == deco && '\0' == *(p + 1))
-			h->flags |= HTML_NOSPACE;
+			nospace = 1;
 	}
+
+	return(nospace);
 }
 
 
@@ -296,7 +300,7 @@ print_otag(struct html *h, enum htmltag tag,
 	for (i = 0; i < sz; i++) {
 		printf(" %s=\"", htmlattrs[p[i].key]);
 		assert(p->val);
-		print_encode(h, p[i].val);
+		(void)print_encode(h, p[i].val);
 		putchar('\"');
 	}
 	putchar('>');
