@@ -190,15 +190,24 @@ print_man_node(MAN_ARGS)
 		print_text(h, n->string);
 		return;
 	default:
+		/* 
+		 * Close out scope of font prior to opening a macro
+		 * scope.  Assert that the metafont is on the top of the
+		 * stack (it's never nested).
+		 */
 		if (h->metaf) {
 			assert(h->metaf == t);
 			print_tagq(h, h->metaf);
+			assert(NULL == h->metaf);
 			t = h->tags.head;
 		}
 		if (mans[n->tok].pre)
 			child = (*mans[n->tok].pre)(m, n, h);
 		break;
 	}
+
+	if (child && n->child)
+		print_man_nodelist(m, n->child, h);
 
 	print_stagq(h, t);
 
@@ -386,10 +395,11 @@ man_alt_pre(MAN_ARGS)
 	const struct man_node	*nn;
 	struct tag		*t;
 	int			 i;
-	struct htmlpair		 tagi, tagb, *tagp;
+	struct htmlpair		 tagi, tagb, tagr, *tagp;
 
 	PAIR_CLASS_INIT(&tagi, "italic");
 	PAIR_CLASS_INIT(&tagb, "bold");
+	PAIR_CLASS_INIT(&tagr, "roman");
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		switch (n->tok) {
@@ -400,16 +410,16 @@ man_alt_pre(MAN_ARGS)
 			tagp = i % 2 ? &tagb : &tagi;
 			break;
 		case (MAN_RI):
-			tagp = i % 2 ? &tagi : NULL;
+			tagp = i % 2 ? &tagi : &tagr;
 			break;
 		case (MAN_IR):
-			tagp = i % 2 ? NULL : &tagi;
+			tagp = i % 2 ? &tagr : &tagi;
 			break;
 		case (MAN_BR):
-			tagp = i % 2 ? NULL : &tagb;
+			tagp = i % 2 ? &tagr : &tagb;
 			break;
 		case (MAN_RB):
-			tagp = i % 2 ? &tagb : NULL;
+			tagp = i % 2 ? &tagb : &tagr;
 			break;
 		default:
 			abort();
@@ -419,12 +429,9 @@ man_alt_pre(MAN_ARGS)
 		if (i)
 			h->flags |= HTML_NOSPACE;
 
-		if (tagp) {
-			t = print_otag(h, TAG_SPAN, 1, tagp);
-			print_man_node(m, nn, h);
-			print_tagq(h, t);
-		} else
-			print_man_node(m, nn, h);
+		t = print_otag(h, TAG_SPAN, 1, tagp);
+		print_man_node(m, nn, h);
+		print_tagq(h, t);
 	}
 
 	return(0);
