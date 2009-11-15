@@ -518,19 +518,19 @@ man_PP_pre(MAN_ARGS)
 
 	i = 0;
 
-	if (MAN_ROOT == n->parent->tok) {
+	if (MAN_ROOT == n->parent->type) {
 		SCALE_HS_INIT(&su, INDENT);
 		bufcat_su(h, "margin-left", &su);
-		i++;
+		i = 1;
 	}
-	if (n->next && n->next->child) {
+	if (n->prev) {
 		SCALE_VS_INIT(&su, 1);
-		bufcat_su(h, "margin-bottom", &su);
-		i++;
+		bufcat_su(h, "margin-top", &su);
+		i = 1;
 	}
 
 	PAIR_STYLE_INIT(&tag, h);
-	print_otag(h, TAG_DIV, i ? 1 : 0, &tag);
+	print_otag(h, TAG_DIV, i, &tag);
 	return(1);
 }
 
