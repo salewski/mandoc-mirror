@@ -424,7 +424,7 @@ print_mdoc_node(MDOC_ARGS)
 		break;
 	case (MDOC_TEXT):
 		print_text(h, n->string);
-		break;
+		return;
 	default:
 		if (mdocs[n->tok].pre)
 			child = (*mdocs[n->tok].pre)(m, n, h);
@@ -440,8 +440,6 @@ print_mdoc_node(MDOC_ARGS)
 	switch (n->type) {
 	case (MDOC_ROOT):
 		mdoc_root_post(m, n, h);
-		break;
-	case (MDOC_TEXT):
 		break;
 	default:
 		if (mdocs[n->tok].post)

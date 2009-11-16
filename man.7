@@ -110,6 +110,9 @@ A numerical representation 3, 2, or 1 (bold, italic, and Roman,
 respectively) may be used instead.  A text decoration is only valid, if
 specified in free-form text, until the next macro invocation; if
 specified within a macro, it's only valid until the macro closes scope.
+Note that macros like
+.Sx \&BR
+open and close a font scope with each argument.
 .Pp
 Text may also be sized with the
 .Sq \es

@@ -209,6 +209,7 @@ print_man_node(MAN_ARGS)
 	if (child && n->child)
 		print_man_nodelist(m, n->child, h);
 
+	/* This will automatically close out any font scope. */
 	print_stagq(h, t);
 
 	bufinit(h);
@@ -252,8 +253,7 @@ man_root_pre(MAN_ARGS)
 	if (m->vol)
 		(void)strlcat(b, m->vol, BUFSIZ);
 
-	(void)snprintf(title, BUFSIZ - 1, 
-			"%s(%d)", m->title, m->msec);
+	snprintf(title, BUFSIZ - 1, "%s(%d)", m->title, m->msec);
 
 	PAIR_CLASS_INIT(&tag[0], "header");
 	bufcat_style(h, "width", "100%");
@@ -344,6 +344,7 @@ man_br_pre(MAN_ARGS)
 	bufcat_su(h, "height", &su);
 	PAIR_STYLE_INIT(&tag, h);
 	print_otag(h, TAG_DIV, 1, &tag);
+
 	/* So the div isn't empty: */
 	print_text(h, "\\~");
 
@@ -425,6 +426,11 @@ man_alt_pre(MAN_ARGS)
 		if (i)
 			h->flags |= HTML_NOSPACE;
 
+		/* 
+		 * Open and close the scope with each argument, so that
+		 * internal \f escapes, which are common, are also
+		 * closed out with the scope.
+		 */
 		t = print_ofont(h, fp);
 		print_man_node(m, nn, h);
 		print_tagq(h, t);

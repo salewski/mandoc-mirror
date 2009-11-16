@@ -384,6 +384,16 @@ Sentences are unilaterally monospaced.
 .Bl -bullet -compact
 .It
 The
+.Sq \efP
+escape will revert the font to the previous
+.Sq \ef
+escape, not to the last rendered decoration, which is now dictated by
+CSS instead of hard-coded.  It also will not span past the current
+scope, for the same reason.  Note that in 
+.Sx ASCII Output
+mode, this will work fine.
+.It
+The
 .Xr mdoc 7
 .Sq \&Bl \-hang
 and
@@ -422,11 +432,9 @@ formats with
 .Pp
 The
 .Fl T Ns Ar html
-utility doesn't support the
-.Sq \ef
-and
+utility doesn't yet render the
 .Sq \es
-text decorations documented in
+font size escape documented in
 .Xr mdoc 7
 and
 .Xr man 7 .
