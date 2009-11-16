@@ -4,6 +4,7 @@ BINDIR		= $(PREFIX)/bin
 INCLUDEDIR	= $(PREFIX)/include
 LIBDIR		= $(PREFIX)/lib
 MANDIR		= $(PREFIX)/man
+EXAMPLEDIR	= $(PREFIX)/share/examples/mandoc
 INSTALL_PROGRAM	= install -m 0755
 INSTALL_DATA	= install -m 0444
 INSTALL_LIB	= install -m 0644
@@ -112,6 +113,7 @@ install:
 	$(INSTALL_PROGRAM) mandoc $(BINDIR)
 	$(INSTALL_MAN) mandoc.1 $(MANDIR)/man1
 	$(INSTALL_MAN) mdoc.7 $(MANDIR)/man7
+	$(INSTALL_DATA) example.style.css $(EXAMPLEDIR)
 
 uninstall:
 	rm -f $(BINDIR)/mandoc

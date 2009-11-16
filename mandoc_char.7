@@ -76,25 +76,6 @@ Note that each output mode will have a different rendering of the
 characters.  It's guaranteed that each input symbol will correspond to a
 (more or less) meaningful output rendering, regardless the mode.
 .
-.Ss ASCII output
-Formatting documents with ASCII output results in a 7-bit ASCII
-approximation of zero or more characters, for example, the
-.Dq aleph
-character
-.Sq \e(Ah
-will render as
-.Sq N .
-Approximations are a best-effort, and naturally some clarity will be lost.
-.
-.Ss HTML output
-The HTML output mode uses decimal-encoded UTF-8 for sequences, for
-example, the
-.Dq aleph
-character
-.Sq \e(Ah
-will render as
-.Sq &#8501; .
-.
 .
 .Sh SPECIAL CHARACTERS
 These are the preferred input symbols for producing special characters.
