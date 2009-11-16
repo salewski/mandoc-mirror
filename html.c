@@ -66,6 +66,12 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"base",	HTML_CLRLINE | HTML_NOSTACK}, /* TAG_BASE */
 };
 
+static	const char	*const htmlfonts[HTMLFONT_MAX] = {
+	"roman",
+	"bold",
+	"italic"
+};
+
 static	const char	*const htmlattrs[ATTR_MAX] = {
 	"http-equiv",
 	"content",
@@ -221,35 +227,49 @@ print_res(struct html *h, const char *p, size_t len)
 }
 
 
+struct tag *
+print_ofont(struct html *h, enum htmlfont font)
+{
+	struct htmlpair	 tag;
+
+	h->metal = h->metac;
+	h->metac = font;
+
+	/* FIXME: DECO_ROMAN should just close out preexisting. */
+
+	if (h->metaf)
+		print_tagq(h, h->metaf);
+
+	PAIR_CLASS_INIT(&tag, htmlfonts[font]);
+	h->metaf = print_otag(h, TAG_SPAN, 1, &tag);
+	return(h->metaf);
+}
+
+
 static void
 print_metaf(struct html *h, enum roffdeco deco)
 {
-	const char	*class;
-	struct htmlpair	 tag;
+	enum htmlfont	 font;
 
 	switch (deco) {
-	case (DECO_BOLD):
-		class = "bold";
+	case (DECO_PREVIOUS):
+		font = h->metal;
 		break;
 	case (DECO_ITALIC):
-		class = "italic";
+		font = HTMLFONT_ITALIC;
+		break;
+	case (DECO_BOLD):
+		font = HTMLFONT_BOLD;
 		break;
 	case (DECO_ROMAN):
-		class = "roman";
+		font = HTMLFONT_NONE;
 		break;
 	default:
 		abort();
 		/* NOTREACHED */
 	}
 
-	if (h->metaf) {
-		assert(h->tags.head);
-		assert(h->metaf == h->tags.head);
-		print_tagq(h, h->metaf);
-	}
-
-	PAIR_CLASS_INIT(&tag, class);
-	h->metaf = print_otag(h, TAG_SPAN, 1, &tag);
+	(void)print_ofont(h, font);
 }
 
 
@@ -292,6 +312,8 @@ print_encode(struct html *h, const char *p, int norecurse)
 		case (DECO_SPECIAL):
 			print_spec(h, seq, sz);
 			break;
+		case (DECO_PREVIOUS):
+			/* FALLTHROUGH */
 		case (DECO_BOLD):
 			/* FALLTHROUGH */
 		case (DECO_ITALIC):
@@ -352,7 +374,6 @@ print_otag(struct html *h, enum htmltag tag,
 }
 
 
-/* ARGSUSED */
 static void
 print_ctag(struct html *h, enum htmltag tag)
 {

@@ -62,6 +62,13 @@ enum	htmlattr {
 	ATTR_MAX
 };
 
+enum	htmlfont {
+	HTMLFONT_NONE = 0,
+	HTMLFONT_BOLD,
+	HTMLFONT_ITALIC,
+	HTMLFONT_MAX
+};
+
 struct	tag {
 	struct tag	 *next;
 	enum htmltag	  tag;
@@ -112,12 +119,15 @@ struct	html {
 	char		  buf[BUFSIZ];
 	size_t		  buflen;
 	struct tag	 *metaf;
+	enum htmlfont	  metal;
+	enum htmlfont	  metac;
 };
 
 struct	roffsu;
 
 void		  print_gen_doctype(struct html *);
 void		  print_gen_head(struct html *);
+struct tag	 *print_ofont(struct html *, enum htmlfont);
 struct tag	 *print_otag(struct html *, enum htmltag, 
 				int, const struct htmlpair *);
 void		  print_tagq(struct html *, const struct tag *);
