@@ -1573,9 +1573,9 @@ mdoc_vt_pre(MDOC_ARGS)
 	struct roffsu	 su;
 
 	if (SEC_SYNOPSIS == n->sec) {
-		if (n->next && MDOC_Vt != n->next->tok) {
+		if (n->prev && MDOC_Vt != n->prev->tok) {
 			SCALE_VS_INIT(&su, 1);
-			bufcat_su(h, "margin-bottom", &su);
+			bufcat_su(h, "margin-top", &su);
 			PAIR_STYLE_INIT(&tag, h);
 			print_otag(h, TAG_DIV, 1, &tag);
 		} else

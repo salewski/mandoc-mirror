@@ -108,17 +108,20 @@ installwww: www
 
 install:
 	mkdir -p $(BINDIR)
+	mkdir -p $(EXAMPLEDIR)
 	mkdir -p $(MANDIR)/man1
 	mkdir -p $(MANDIR)/man7
 	$(INSTALL_PROGRAM) mandoc $(BINDIR)
 	$(INSTALL_MAN) mandoc.1 $(MANDIR)/man1
-	$(INSTALL_MAN) mdoc.7 $(MANDIR)/man7
+	$(INSTALL_MAN) man.7 mdoc.7 $(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(EXAMPLEDIR)
 
 uninstall:
 	rm -f $(BINDIR)/mandoc
 	rm -f $(MANDIR)/man1/mandoc.1
 	rm -f $(MANDIR)/man7/mdoc.7
+	rm -f $(MANDIR)/man7/man.7
+	rm -f $(EXAMPLEDIR)/example.style.css
 
 man_macro.ln: man_macro.c libman.h
 man_macro.o: man_macro.c libman.h
