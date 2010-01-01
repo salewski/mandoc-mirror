@@ -37,7 +37,6 @@
 
 struct	termpair {
 	struct termpair	 *ppair;
-	int	  	  flag;	
 	int		  count;
 };
 
@@ -677,10 +676,6 @@ termp_it_pre(DECL_ARGS)
 
 	bl = n->parent->parent->parent;
 
-	/* Save parent attributes. */
-
-	pair->flag = p->flags;
-
 	/* Get list width, offset, and list type from argument list. */
 
 	keys[0] = MDOC_Width;
@@ -822,11 +817,10 @@ termp_it_pre(DECL_ARGS)
 	}
 
 	/*
-	 * Pad and break control.  This is the tricker part.  Lists with
-	 * set right-margins for the head get TERMP_NOBREAK because, if
-	 * they overrun the margin, they wrap to the new margin.
-	 * Correspondingly, the body for these types don't left-pad, as
-	 * the head will pad out to to the right.
+	 * Pad and break control.  This is the tricky part.  These flags
+	 * are documented in term_flushln() in term.c.  Note that we're
+	 * going to unset all of these flags in termp_it_post() when we
+	 * exit.
 	 */
 
 	switch (type) {
@@ -967,7 +961,7 @@ termp_it_pre(DECL_ARGS)
 			break;
 		case (MDOC_Enum):
 			(pair->ppair->ppair->count)++;
-			(void)snprintf(buf, sizeof(buf), "%d.", 
+			snprintf(buf, sizeof(buf), "%d.", 
 					pair->ppair->ppair->count);
 			term_word(p, buf);
 			break;
@@ -1010,7 +1004,7 @@ termp_it_post(DECL_ARGS)
 {
 	int		   type;
 
-	if (MDOC_BODY != n->type && MDOC_HEAD != n->type)
+	if (MDOC_BLOCK == n->type)
 		return;
 
 	type = arg_listtype(n->parent->parent->parent);
@@ -1034,7 +1028,17 @@ termp_it_post(DECL_ARGS)
 		break;
 	}
 
-	p->flags = pair->flag;
+	/* 
+	 * Now that our output is flushed, we can reset our tags.  Since
+	 * only `It' sets these flags, we're free to assume that nobody
+	 * has munged them in the meanwhile.
+	 */
+
+	p->flags &= ~TERMP_DANGLE;
+	p->flags &= ~TERMP_NOBREAK;
+	p->flags &= ~TERMP_TWOSPACE;
+	p->flags &= ~TERMP_NOLPAD;
+	p->flags &= ~TERMP_HANG;
 }
 
 
@@ -2015,10 +2019,9 @@ termp_sm_pre(DECL_ARGS)
 {
 
 	assert(n->child && MDOC_TEXT == n->child->type);
-	if (0 == strcmp("on", n->child->string)) {
+	if (0 == strcmp("on", n->child->string))
 		p->flags &= ~TERMP_NONOSPACE;
-		p->flags &= ~TERMP_NOSPACE;
-	} else
+	else
 		p->flags |= TERMP_NONOSPACE;
 
 	return(0);
