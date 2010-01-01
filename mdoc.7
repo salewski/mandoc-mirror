@@ -1596,6 +1596,22 @@ is provided.
 .Ss \&Fc
 .Ss \&Fd
 .Ss \&Fl
+Command-line flag.  Used when listing arguments to command-line
+utilities.  Prints a fixed-width hyphen
+.Sq \-
+before each delimited argument.  If no arguments are provided, a hyphen
+is still printed.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Fl a b c
+\&.Fl
+\&.Op Fl o Ns Ar file
+.Ed
+.Pp
+See also
+.Sx \&Cm .
+.
 .Ss \&Fn
 .Ss \&Fo
 .Ss \&Fr
@@ -1829,6 +1845,12 @@ file re-write
 .
 .Pp
 .Bl -dash -compact
+.It
+Historic 
+.Xr groff 1
+does not print a dash for empty 
+.Sx \&Fl
+arguments.  This behaviour has been discontinued.
 .It
 .Xr groff 1
 behaves strangely (even between versions) when specifying

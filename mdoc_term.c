@@ -1019,16 +1019,6 @@ termp_fl_pre(DECL_ARGS)
 {
 
 	term_fontpush(p, TERMFONT_BOLD);
-
-	/* A zero-length child shouldn't get a dash. */
-
-	if (n->child) {
-		assert(MDOC_TEXT == n->child->type);
-		assert(n->child->string);
-		if ('\0' == *n->child->string)
-			return(0);
-	}
-
 	term_word(p, "\\-");
 
 	/* A blank `Fl' should incur a subsequent space. */
