@@ -659,12 +659,33 @@ mdoc_fl_pre(MDOC_ARGS)
 {
 	struct htmlpair	 tag;
 
+	/* `Cm' has no leading hyphen. */
+
+	if (MDOC_Cm == n->tok) {
+		PAIR_CLASS_INIT(&tag, "flag");
+		print_otag(h, TAG_SPAN, 1, &tag);
+		return(1);
+	}
+
+	/* A zero-length child shouldn't get a dash. */
+
+	if (n->child) {
+		assert(MDOC_TEXT == n->child->type);
+		assert(n->child->string);
+		if ('\0' == *n->child->string)
+			return(0);
+	}
+
 	PAIR_CLASS_INIT(&tag, "flag");
 	print_otag(h, TAG_SPAN, 1, &tag);
-	if (MDOC_Fl == n->tok) {
-		print_text(h, "\\-");
+
+	print_text(h, "\\-");
+
+	/* A blank `Fl' should incur a subsequent space. */
+
+	if (n->child)
 		h->flags |= HTML_NOSPACE;
-	}
+
 	return(1);
 }
 
