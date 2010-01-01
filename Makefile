@@ -263,11 +263,11 @@ config.h: config.h.pre config.h.post
 	rm -f config.log
 	( cat config.h.pre; \
 	echo; \
-	if $(CC) $(CFLAGS) -c test-strlcat.c >> config.log 2>&1; then \
+	if $(CC) $(CFLAGS) -Werror -c test-strlcat.c >> config.log 2>&1; then \
 		echo '#define HAVE_STRLCAT'; \
 		rm test-strlcat.o; \
 	fi; \
-	if $(CC) $(CFLAGS) -c test-strlcpy.c >> config.log 2>&1; then \
+	if $(CC) $(CFLAGS) -Werror -c test-strlcpy.c >> config.log 2>&1; then \
 		echo '#define HAVE_STRLCPY'; \
 		rm test-strlcpy.o; \
 	fi; \
