@@ -14,6 +14,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sys/types.h>
 
 #include <assert.h>
@@ -63,11 +67,6 @@ static	void  	  print_mdoc_node(DECL_ARGS);
 static	void	  print_mdoc_head(DECL_ARGS);
 static	void	  print_mdoc_nodelist(DECL_ARGS);
 static	void	  print_foot(DECL_ARGS);
-
-#ifdef __linux__
-extern	size_t	  strlcpy(char *, const char *, size_t);
-extern	size_t	  strlcat(char *, const char *, size_t);
-#endif
 
 static	void	  termp____post(DECL_ARGS);
 static	void	  termp_an_post(DECL_ARGS);

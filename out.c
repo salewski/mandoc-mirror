@@ -14,6 +14,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sys/types.h>
 
 #include <assert.h>
@@ -44,10 +48,6 @@
 	else if ('(' == (c)) \
 		(t) = 3; } \
 	while (/* CONSTCOND */ 0)
-
-#ifdef __linux__
-extern	size_t	  strlcat(char *, const char *, size_t);
-#endif
 
 /* 
  * Convert a `scaling unit' to a consistent form, or fail.  Scaling

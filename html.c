@@ -14,6 +14,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sys/types.h>
 
 #include <assert.h>
@@ -88,11 +92,6 @@ static	const char	*const htmlattrs[ATTR_MAX] = {
 	"id",
 	"summary",
 };
-
-#ifdef __linux__
-extern	int		  getsubopt(char **, char * const *, char **);
-#endif
-
 
 static	void		  print_spec(struct html *, const char *, size_t);
 static	void		  print_res(struct html *, const char *, size_t);

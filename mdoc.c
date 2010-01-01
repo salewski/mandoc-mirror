@@ -14,6 +14,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sys/types.h>
 
 #include <assert.h>
@@ -93,11 +97,11 @@ const	char *const __mdoc_macronames[MDOC_MAX] = {
 	"Nm",		"Op",		"Ot",		"Pa",
 	"Rv",		"St",		"Va",		"Vt",
 	/* LINTED */
-	"Xr",		"\%A",		"\%B",		"\%D",
+	"Xr",		"%A",		"%B",		"%D",
 	/* LINTED */
-	"\%I",		"\%J",		"\%N",		"\%O",
+	"%I",		"%J",		"%N",		"%O",
 	/* LINTED */
-	"\%P",		"\%R",		"\%T",		"\%V",
+	"%P",		"%R",		"%T",		"%V",
 	"Ac",		"Ao",		"Aq",		"At",
 	"Bc",		"Bf",		"Bo",		"Bq",
 	"Bsx",		"Bx",		"Db",		"Dc",
@@ -114,11 +118,11 @@ const	char *const __mdoc_macronames[MDOC_MAX] = {
 	"Fr",		"Ud",		"Lb",		"Lp",
 	"Lk",		"Mt",		"Brq",		"Bro",
 	/* LINTED */
-	"Brc",		"\%C",		"Es",		"En",
+	"Brc",		"%C",		"Es",		"En",
 	/* LINTED */
-	"Dx",		"\%Q",		"br",		"sp",
+	"Dx",		"%Q",		"br",		"sp",
 	/* LINTED */
-	"\%U"
+	"%U"
 	};
 
 const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {		 
@@ -147,11 +151,6 @@ static	int		  parsemacro(struct mdoc *, int, char *);
 static	int		  macrowarn(struct mdoc *, int, const char *);
 static	int		  pstring(struct mdoc *, int, int, 
 				const char *, size_t);
-
-#ifdef __linux__
-extern	size_t	  	  strlcpy(char *, const char *, size_t);
-#endif
-
 
 const struct mdoc_node *
 mdoc_node(const struct mdoc *m)

@@ -14,6 +14,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sys/types.h>
 
 #include <assert.h>
@@ -65,11 +69,6 @@ static	int		  man_SB_pre(MAN_ARGS);
 static	int		  man_SH_pre(MAN_ARGS);
 static	int		  man_SM_pre(MAN_ARGS);
 static	int		  man_SS_pre(MAN_ARGS);
-
-#ifdef __linux__
-extern	size_t	  	  strlcpy(char *, const char *, size_t);
-extern	size_t	  	  strlcat(char *, const char *, size_t);
-#endif
 
 static	const struct htmlman mans[MAN_MAX] = {
 	{ man_br_pre, NULL }, /* br */

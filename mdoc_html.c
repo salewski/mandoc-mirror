@@ -14,8 +14,11 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sys/types.h>
-#include <sys/param.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -35,6 +38,10 @@
 #define	MDOC_ARGS	  const struct mdoc_meta *m, \
 			  const struct mdoc_node *n, \
 			  struct html *h
+
+#ifndef MIN
+#define	MIN(a,b)	((/*CONSTCOND*/(a)<(b))?(a):(b))
+#endif
 
 struct	htmlmdoc {
 	int		(*pre)(MDOC_ARGS);
@@ -125,11 +132,6 @@ static	int		  mdoc_va_pre(MDOC_ARGS);
 static	int		  mdoc_vt_pre(MDOC_ARGS);
 static	int		  mdoc_xr_pre(MDOC_ARGS);
 static	int		  mdoc_xx_pre(MDOC_ARGS);
-
-#ifdef __linux__
-extern	size_t	  	  strlcpy(char *, const char *, size_t);
-extern	size_t	  	  strlcat(char *, const char *, size_t);
-#endif
 
 static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_ap_pre, NULL}, /* Ap */

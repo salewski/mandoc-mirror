@@ -13,9 +13,9 @@ INSTALL_MAN	= $(INSTALL_DATA)
 VERSION	   = 1.9.14
 VDATE	   = 16 November 2009
 
-VFLAGS     = -DVERSION="\"$(VERSION)\""
-CFLAGS    += -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings -g
-CFLAGS    += $(VFLAGS)
+VFLAGS     = -DVERSION="\"$(VERSION)\"" -DHAVE_CONFIG_H
+WFLAGS     = -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
+CFLAGS    += -g $(VFLAGS) $(WFLAGS)
 #CFLAGS	  += -DOSNAME="\"OpenBSD 4.5\""
 LINTFLAGS += $(VFLAGS)
 
@@ -74,11 +74,13 @@ TARGZS	   = mdocml-$(VERSION).tar.gz
 MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7 mandoc_char.7 \
 	     man.7 man.3
 BINS	   = mandoc
+TESTS	   = test-strlcat.c test-strlcpy.c
+CONFIGS	   = config.h.pre config.h.post
 CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
 	     $(TARGZS) tags $(MD5S) $(XMLS) $(TEXTS) $(GSGMLS) \
-	     $(GHTMLS)
+	     $(GHTMLS) config.h config.log
 INSTALL	   = $(SRCS) $(HEADS) Makefile $(MANS) $(SGMLS) $(STATICS) \
-	     $(DATAS) $(XSLS) $(EXAMPLES)
+	     $(DATAS) $(XSLS) $(EXAMPLES) $(TESTS) $(CONFIGS)
 
 all:	$(BINS)
 
@@ -122,6 +124,8 @@ uninstall:
 	rm -f $(MANDIR)/man7/mdoc.7
 	rm -f $(MANDIR)/man7/man.7
 	rm -f $(EXAMPLEDIR)/example.style.css
+
+$(OBJS): config.h
 
 man_macro.ln: man_macro.c libman.h
 man_macro.o: man_macro.c libman.h
@@ -254,3 +258,19 @@ mandoc: $(MAINOBJS) libmdoc.a libman.a
 
 .tar.gz.md5:
 	md5 $< > $@
+
+config.h: config.h.pre config.h.post
+	rm -f config.log
+	( cat config.h.pre; \
+	echo; \
+	if $(CC) $(CFLAGS) -c test-strlcat.c >> config.log 2>&1; then \
+		echo '#define HAVE_STRLCAT'; \
+		rm test-strlcat.o; \
+	fi; \
+	if $(CC) $(CFLAGS) -c test-strlcpy.c >> config.log 2>&1; then \
+		echo '#define HAVE_STRLCPY'; \
+		rm test-strlcpy.o; \
+	fi; \
+	echo; \
+	cat config.h.post \
+	) > $@

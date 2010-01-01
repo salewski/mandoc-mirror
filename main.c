@@ -14,6 +14,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sys/stat.h>
 
 #include <assert.h>
@@ -37,11 +41,6 @@
 #  define __attribute__(x)
 # endif
 #endif /* !defined(__GNUC__) || (__GNUC__ < 2) */
-
-#ifdef __linux__
-extern	int		  getsubopt(char **, char * const *, char **);
-extern	size_t	  	  strlcat(char *, const char *, size_t);
-#endif
 
 typedef	void		(*out_mdoc)(void *, const struct mdoc *);
 typedef	void		(*out_man)(void *, const struct man *);
