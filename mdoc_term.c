@@ -471,7 +471,11 @@ a2width(const struct mdoc_argv *arg, int pos)
 	if ( ! a2roffsu(arg->value[pos], &su, SCALE_MAX))
 		SCALE_HS_INIT(&su, strlen(arg->value[pos]));
 
-	/* XXX: pachemu? */
+	/*
+	 * This is a bit if a magic number on groff's part.  Be careful
+	 * in changing it, as the MDOC_Column handler will subtract one
+	 * from this for >5 columns (don't go below zero!).
+	 */
 	return(term_hspan(&su) + 2);
 }
 
@@ -651,7 +655,8 @@ termp_it_pre(DECL_ARGS)
 	const struct mdoc_node *bl, *nn;
 	char		        buf[7];
 	int		        i, type, keys[3], vals[3];
-	size_t		        width, offset, ncols, dcol;
+	size_t		        width, offset, ncols;
+	int			dcol;
 
 	if (MDOC_BLOCK == n->type) {
 		print_bvspace(p, n->parent->parent, n);
@@ -694,26 +699,22 @@ termp_it_pre(DECL_ARGS)
 		 * For each earlier column, add its width.
 		 * For less than 5 columns, add two more blanks per column.
 		 * For exactly 5 columns, add only one more blank per column.
-		 * For more than 5 columns, add no blanks per column.
+		 * For more than 5 columns, SUBTRACT one column.  We can
+		 * do this because a2width() pads exactly 2 spaces.
 		 */
 		ncols = bl->args->argv[vals[2]].sz;
-		/* LINTED */
-		dcol = ncols < 5 ? 2 : ncols == 5 ? 1 : 0;
+		dcol = ncols < 5 ? 2 : ncols == 5 ? 1 : -1;
 		for (i=0, nn=n->prev; nn && i < (int)ncols; nn=nn->prev, i++)
-			offset += a2width(&bl->args->argv[vals[2]], i) + dcol;
-
-		/*
-		 * FIXME: newer groff only wants one space between
-		 * columns > 5; however, a2width will have min. two
-		 * spaces.  For now, let this slide.
-		 */
+			offset += a2width(&bl->args->argv[vals[2]], i) + 
+				(size_t)dcol;
 
 		/*
 		 * Use the declared column widths,
 		 * extended as explained in the preceding paragraph.
 		 */
 		if (i < (int)ncols)
-			width = a2width(&bl->args->argv[vals[2]], i) + dcol;
+			width = a2width(&bl->args->argv[vals[2]], i) + 
+				(size_t)dcol;
 
 		/*
 		 * When exceeding the declared number of columns,
