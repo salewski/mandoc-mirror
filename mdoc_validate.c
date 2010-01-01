@@ -1086,11 +1086,18 @@ post_bl(POST_ARGS)
 	if (NULL == mdoc->last->child)
 		return(1);
 
+	/*
+	 * We only allow certain children of `Bl'.  This is usually on
+	 * `It', but apparently `Sm' occurs here and there, so we let
+	 * that one through, too.
+	 */
+
 	/* LINTED */
 	for (n = mdoc->last->child; n; n = n->next) {
-		if (MDOC_BLOCK == n->type) 
-			if (MDOC_It == n->tok)
-				continue;
+		if (MDOC_BLOCK == n->type && MDOC_It == n->tok)
+			continue;
+		if (MDOC_Sm == n->tok)
+			continue;
 		return(mdoc_nerr(mdoc, n, EBADCHILD));
 	}
 
