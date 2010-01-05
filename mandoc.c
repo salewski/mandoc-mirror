@@ -43,8 +43,6 @@ mandoc_special(const char *p)
 		return(0);
 
 	switch (*p) {
-	case ('\\'):
-		/* FALLTHROUGH */
 	case ('\''):
 		/* FALLTHROUGH */
 	case ('`'):
