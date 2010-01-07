@@ -378,6 +378,7 @@ man_ptext(struct man *m, int line, char *buf)
 
 	for (i = 0; ' ' == buf[i]; i++)
 		/* Skip leading whitespace. */ ;
+
 	if (0 == buf[i]) {
 		if ( ! pstring(m, line, 0, &buf[i], 0))
 			return(0);
@@ -463,7 +464,7 @@ man_pmacro(struct man *m, int ln, char *buf)
 		i++;
 		while (buf[i] && ' ' == buf[i])
 			i++;
-		if (0 == buf[i])
+		if ('\0' == buf[i])
 			goto out;
 	}
 
@@ -472,7 +473,7 @@ man_pmacro(struct man *m, int ln, char *buf)
 	/* Copy the first word into a nil-terminated buffer. */
 
 	for (j = 0; j < 4; j++, i++) {
-		if (0 == (mac[j] = buf[i]))
+		if ('\0' == (mac[j] = buf[i]))
 			break;
 		else if (' ' == buf[i])
 			break;
@@ -506,6 +507,12 @@ man_pmacro(struct man *m, int ln, char *buf)
 
 	while (buf[i] && ' ' == buf[i])
 		i++;
+
+	/* Trailing whitespace? */
+
+	if ('\0' == buf[i] && ' ' == buf[i - 1])
+		if ( ! man_pwarn(m, ln, i - 1, WTSPACE))
+			goto err;
 
 	/* Remove prior ELINE macro, if applicable. */
 

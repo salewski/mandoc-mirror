@@ -597,7 +597,8 @@ parsetext(struct mdoc *m, int line, char *buf)
 
 	for (i = 0; ' ' == buf[i]; i++)
 		/* Skip leading whitespace. */ ;
-	if (0 == buf[i])
+
+	if ('\0' == buf[i])
 		return(mdoc_perr(m, line, 0, ENOBLANK));
 
 	/*
@@ -613,7 +614,8 @@ parsetext(struct mdoc *m, int line, char *buf)
 		if (i && ' ' == buf[i] && '\\' == buf[i - 1])
 			continue;
 
-		buf[i++] = 0;
+		buf[i++] = '\0';
+
 		if ( ! pstring(m, line, j, &buf[j], (size_t)(i - j)))
 			return(0);
 
@@ -621,7 +623,7 @@ parsetext(struct mdoc *m, int line, char *buf)
 			/* Skip trailing whitespace. */ ;
 
 		j = i;
-		if (0 == buf[i])
+		if ('\0' == buf[i])
 			break;
 	}
 
@@ -658,7 +660,7 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 
 	/* Empty lines are ignored. */
 
-	if (0 == buf[1])
+	if ('\0' == buf[1])
 		return(1);
 
 	i = 1;
@@ -669,14 +671,14 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 		i++;
 		while (buf[i] && ' ' == buf[i])
 			i++;
-		if (0 == buf[i])
+		if ('\0' == buf[i])
 			return(1);
 	}
 
 	/* Copy the first word into a nil-terminated buffer. */
 
 	for (j = 0; j < 4; j++, i++) {
-		if (0 == (mac[j] = buf[i]))
+		if ('\0' == (mac[j] = buf[i]))
 			break;
 		else if (' ' == buf[i])
 			break;
@@ -706,6 +708,12 @@ parsemacro(struct mdoc *m, int ln, char *buf)
 
 	while (buf[i] && ' ' == buf[i])
 		i++;
+
+	/* Trailing whitespace? */
+
+	if ('\0' == buf[i] && ' ' == buf[i - 1])
+		if ( ! mdoc_pwarn(m, ln, i - 1, ETAILWS))
+			goto err;
 
 	/* 
 	 * Begin recursive parse sequence.  Since we're at the start of
