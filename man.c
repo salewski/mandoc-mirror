@@ -365,6 +365,7 @@ static int
 man_ptext(struct man *m, int line, char *buf)
 {
 	int		 i, j;
+	char		 sv;
 
 	/* Literal free-form text whitespace is preserved. */
 
@@ -379,7 +380,11 @@ man_ptext(struct man *m, int line, char *buf)
 	for (i = 0; ' ' == buf[i]; i++)
 		/* Skip leading whitespace. */ ;
 
-	if (0 == buf[i]) {
+	if ('\0' == buf[i]) {
+		/* Trailing whitespace? */
+		if (i && ' ' == buf[i - 1])
+			if ( ! man_pwarn(m, line, i - 1, WTSPACE))
+				return(0);
 		if ( ! pstring(m, line, 0, &buf[i], 0))
 			return(0);
 		goto descope;
@@ -393,15 +398,30 @@ man_ptext(struct man *m, int line, char *buf)
 		if (i && ' ' == buf[i] && '\\' == buf[i - 1])
 			continue;
 
-		buf[i++] = 0;
+		sv = buf[i];
+		buf[i++] = '\0';
+
 		if ( ! pstring(m, line, j, &buf[j], (size_t)(i - j)))
 			return(0);
+
+		/* Trailing whitespace?  Check at overwritten byte. */
+
+		if (' ' == sv && '\0' == buf[i])
+			if ( ! man_pwarn(m, line, i - 1, WTSPACE))
+				return(0);
 
 		for ( ; ' ' == buf[i]; i++)
 			/* Skip trailing whitespace. */ ;
 
 		j = i;
-		if (0 == buf[i])
+
+		/* Trailing whitespace? */
+
+		if (' ' == buf[i - 1] && '\0' == buf[i])
+			if ( ! man_pwarn(m, line, i - 1, WTSPACE))
+				return(0);
+
+		if ('\0' == buf[i])
 			break;
 	}
 

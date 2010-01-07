@@ -581,6 +581,7 @@ static int
 parsetext(struct mdoc *m, int line, char *buf)
 {
 	int		 i, j;
+	char		 sv;
 
 	if (SEC_NONE == m->lastnamed)
 		return(mdoc_perr(m, line, 0, ETEXTPROL));
@@ -614,15 +615,29 @@ parsetext(struct mdoc *m, int line, char *buf)
 		if (i && ' ' == buf[i] && '\\' == buf[i - 1])
 			continue;
 
+		sv = buf[i];
 		buf[i++] = '\0';
 
 		if ( ! pstring(m, line, j, &buf[j], (size_t)(i - j)))
 			return(0);
 
+		/* Trailing whitespace?  Check at overwritten byte. */
+
+		if (' ' == sv && '\0' == buf[i])
+			if ( ! mdoc_pwarn(m, line, i - 1, ETAILWS))
+				return(0);
+
 		for ( ; ' ' == buf[i]; i++)
 			/* Skip trailing whitespace. */ ;
 
 		j = i;
+
+		/* Trailing whitespace? */
+
+		if (' ' == buf[i - 1] && '\0' == buf[i])
+			if ( ! mdoc_pwarn(m, line, i - 1, ETAILWS))
+				return(0);
+
 		if ('\0' == buf[i])
 			break;
 	}
