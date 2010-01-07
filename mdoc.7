@@ -132,7 +132,7 @@ and
 Terms may be text-decorated using the
 .Sq \ef
 escape followed by an indicator: B (bold), I, (italic), R (Roman), or P
-(revert to previous mode):  
+(revert to previous mode):
 .Pp
 .D1 \efBbold\efR \efIitalic\efP
 .Pp
@@ -170,19 +170,19 @@ for arbitrary-digit numerals:
 .D1 \es+(10much bigger\es-(10
 .D1 \es+'100'much much bigger\es-'100'
 .Pp
-Note these forms are 
+Note these forms are
 .Em not
-recommended for 
+recommended for
 .Nm ,
 which encourages semantic annotation.
 .
 .
 .Ss Predefined Strings
-Historically, 
+Historically,
 .Xr groff 1
-also defined a set of package-specific 
+also defined a set of package-specific
 .Dq predefined strings ,
-which, like 
+which, like
 .Sx Special Characters ,
 demark special output characters and strings by way of input codes.
 Predefined strings are escaped with the slash-asterisk,
@@ -343,7 +343,7 @@ and
 .Sx \&Os
 macros, is required for every document.
 .Pp
-The first section (sections are denoted by 
+The first section (sections are denoted by
 .Sx \&Sh )
 must be the NAME section, consisting of at least one
 .Sx \&Nm
@@ -420,7 +420,7 @@ macro(s) must precede the
 .Sx \&Nd
 macro.
 .Pp
-See 
+See
 .Sx \&Nm
 and
 .Sx \&Nd .
@@ -438,7 +438,7 @@ See
 .
 .It Em SYNOPSIS
 Documents the utility invocation syntax, function call syntax, or device
-configuration. 
+configuration.
 .Pp
 For the first, utilities (sections 1, 6, and 8), this is
 generally structured as follows:
@@ -469,10 +469,10 @@ And for the third, configurations (section 4):
 \&.Cd \*qit* at isa? port 0x4e\*q
 .Ed
 .Pp
-Manuals not in these sections generally don't need a 
+Manuals not in these sections generally don't need a
 .Em SYNOPSIS .
 .Pp
-See 
+See
 .Sx \&Op ,
 .Sx \&Cd ,
 .Sx \&Fn ,
@@ -481,7 +481,7 @@ and
 .Sx \&Vt .
 .
 .It Em DESCRIPTION
-This expands upon the brief, one-line description in 
+This expands upon the brief, one-line description in
 .Em NAME .
 It usually contains a break-down of the options (if documenting a
 command), such as:
@@ -683,7 +683,7 @@ All macros have bodies; some
 don't have heads; only one
 .Po
 .Sx \&It Fl column
-.Pc 
+.Pc
 has multiple heads.
 .Bd -literal -offset indent
 \&.Yo \(lB\-arg \(lBparm...\(rB\(rB \(lBhead... \(lBTa head...\(rB\(rB
@@ -866,7 +866,7 @@ then the macro accepts an arbitrary number of arguments.
 .It Sx \&Xr  Ta    Yes      Ta    Yes      Ta    >0, <3
 .It Sx \&br  Ta    \&No     Ta    \&No     Ta    0
 .It Sx \&sp  Ta    \&No     Ta    \&No     Ta    1
-.El   
+.El
 .
 .
 .Sh REFERENCE
@@ -1026,7 +1026,7 @@ a function:
 .Ed
 .
 .Ss \&Aq
-Encloses its arguments in angled brackets.  
+Encloses its arguments in angled brackets.
 .Pp
 Examples:
 .Bd -literal -offset indent
@@ -1073,7 +1073,7 @@ Note that these parameters do not begin with a hyphen.
 .Pp
 Examples:
 .Bd -literal -offset indent
-\&.At 
+\&.At
 \&.At V.1
 .Ed
 .Pp
@@ -1242,7 +1242,7 @@ See also
 .Sx \&Bq .
 .
 .Ss \&Bq
-Encloses its arguments in square brackets.  
+Encloses its arguments in square brackets.
 .Pp
 Examples:
 .Bd -literal -offset indent
@@ -1389,7 +1389,7 @@ manual.  Its calling syntax is as follows:
 .Pp
 .D1 \. Ns Sx \&Dd Cm date
 .Pp
-The 
+The
 .Cm date
 field may be either
 .Ar $\&Mdocdate$ ,
@@ -1438,7 +1438,7 @@ See also
 .Sx \&Dq .
 .
 .Ss \&Dq
-Encloses its arguments in double quotes.  
+Encloses its arguments in double quotes.
 .Pp
 Examples:
 .Bd -literal -offset indent
@@ -1924,9 +1924,9 @@ the
 macro does not format its arguments when used in the FILES section under
 certain list types.  This irregular behaviour has been discontinued.
 .It
-Historic 
+Historic
 .Xr groff 1
-does not print a dash for empty 
+does not print a dash for empty
 .Sx \&Fl
 arguments.  This behaviour has been discontinued.
 .It

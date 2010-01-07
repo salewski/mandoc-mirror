@@ -257,7 +257,7 @@ line = 1;
 man = man_alloc(NULL, 0, NULL);
 
 while ((buf = fgetln(fp, &len))) {
-	buf[len - 1] = '\\0';
+	buf[len - 1] = '\e0';
 	if ( ! man_parseln(man, line, buf))
 		errx(1, "man_parseln");
 	line++;

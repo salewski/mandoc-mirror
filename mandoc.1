@@ -231,7 +231,7 @@ relative URI.
 .It Fl O Ns Ar includes=fmt
 The string
 .Ar fmt ,
-for example, 
+for example,
 .Ar ../src/%I.html ,
 is used as a template for linked header files (usually via the
 .Sq \&In
@@ -242,7 +242,7 @@ hyperlink.
 .It Fl O Ns Ar man=fmt
 The string
 .Ar fmt ,
-for example, 
+for example,
 .Ar ../html%S/%N.%S.html ,
 is used as a template for linked manuals (usually via the
 .Sq \&Xr
@@ -260,7 +260,7 @@ present a hyperlink.
 This section documents output details of
 .Nm .
 In general, output conforms to the traditional manual style of a header,
-a body composed of sections and sub-sections, and a footer.  
+a body composed of sections and sub-sections, and a footer.
 .Pp
 The text style of output characters (non-macro characters, punctuation,
 and white-space) is dictated by context.
@@ -307,7 +307,7 @@ however, these rules are also applied to macro arguments when appropriate.
 .
 .
 .Ss ASCII Output
-Output produced by 
+Output produced by
 .Fl T Ns Ar ascii ,
 which is the default, is rendered in standard 7-bit ASCII documented in
 .Xr ascii 7 .
@@ -379,15 +379,15 @@ Each input and output format is separately noted.
 .Ss ASCII Compatibility
 .Bl -bullet -compact
 .It
-The 
+The
 .Sq \e~
-special character doesn't produce expected behaviour in 
+special character doesn't produce expected behaviour in
 .Fl T Ns Ar ascii .
 .
 .It
-The 
+The
 .Sq \&Bd \-literal
-and 
+and
 .Sq \&Bd \-unfilled
 macros of
 .Xr mdoc 7
@@ -396,7 +396,7 @@ in
 are synonyms, as are \-filled and \-ragged.
 .
 .It
-In 
+In
 .Xr groff 1 ,
 the
 .Sq \&Pa
@@ -446,7 +446,7 @@ escape will revert the font to the previous
 .Sq \ef
 escape, not to the last rendered decoration, which is now dictated by
 CSS instead of hard-coded.  It also will not span past the current
-scope, for the same reason.  Note that in 
+scope, for the same reason.  Note that in
 .Sx ASCII Output
 mode, this will work fine.
 .It

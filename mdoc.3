@@ -274,7 +274,7 @@ line = 1;
 mdoc = mdoc_alloc(NULL, 0, NULL);
 
 while ((buf = fgetln(fp, &len))) {
-	buf[len - 1] = '\\0';
+	buf[len - 1] = '\e0';
 	if ( ! mdoc_parseln(mdoc, line, buf))
 		errx(1, "mdoc_parseln");
 	line++;
