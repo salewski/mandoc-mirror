@@ -166,18 +166,6 @@ find(struct tbl *tab, const char *p, size_t sz, size_t *rsz, int type)
 	if (NULL == (pp = htab[hash]))
 		return(NULL);
 
-	if (NULL == pp->next) {
-		if ( ! match(pp, p, sz, type)) 
-			return(NULL);
-
-		if (CHARS_HTML == tab->type) {
-			*rsz = pp->htmlsz;
-			return(pp->html);
-		}
-		*rsz = pp->asciisz;
-		return(pp->ascii);
-	}
-
 	for (prev = NULL; pp; pp = pp->next) {
 		if ( ! match(pp, p, sz, type)) {
 			prev = pp;
