@@ -266,7 +266,7 @@ html_mdoc(void *arg, const struct mdoc *m)
 
 	h = (struct html *)arg;
 
-	print_gen_doctype(h);
+	print_gen_decls(h);
 	t = print_otag(h, TAG_HTML, 0, NULL);
 	print_mdoc(mdoc_meta(m), mdoc_node(m), h);
 	print_tagq(h, t);

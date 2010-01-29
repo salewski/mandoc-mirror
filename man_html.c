@@ -114,7 +114,7 @@ html_man(void *arg, const struct man *m)
 
 	h = (struct html *)arg;
 
-	print_gen_doctype(h);
+	print_gen_decls(h);
 
 	t = print_otag(h, TAG_HTML, 0, NULL);
 	print_man(man_meta(m), man_node(m), h);

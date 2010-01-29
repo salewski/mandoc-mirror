@@ -127,6 +127,8 @@ uninstall:
 
 $(OBJS): config.h
 
+$(LNS): config.h
+
 man_macro.ln: man_macro.c libman.h
 man_macro.o: man_macro.c libman.h
 
