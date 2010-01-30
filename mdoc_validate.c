@@ -94,6 +94,7 @@ static	int	 post_sh(POST_ARGS);
 static	int	 post_sh_body(POST_ARGS);
 static	int	 post_sh_head(POST_ARGS);
 static	int	 post_st(POST_ARGS);
+static	int	 post_vt(POST_ARGS);
 static	int	 pre_an(PRE_ARGS);
 static	int	 pre_bd(PRE_ARGS);
 static	int	 pre_bl(PRE_ARGS);
@@ -130,6 +131,7 @@ static	v_post	 posts_ss[] = { herr_ge1, NULL };
 static	v_post	 posts_st[] = { eerr_eq1, post_st, NULL };
 static	v_post	 posts_text[] = { eerr_ge1, NULL };
 static	v_post	 posts_text1[] = { eerr_eq1, NULL };
+static	v_post	 posts_vt[] = { post_vt, NULL };
 static	v_post	 posts_wline[] = { bwarn_ge1, herr_eq0, NULL };
 static	v_post	 posts_wtext[] = { ewarn_ge1, NULL };
 static	v_post	 posts_xr[] = { eerr_ge1, eerr_le2, NULL };
@@ -190,7 +192,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pres_rv, NULL },			/* Rv */
 	{ NULL, posts_st },			/* St */ 
 	{ NULL, NULL },				/* Va */
-	{ NULL, posts_text },			/* Vt */ 
+	{ NULL, posts_vt },			/* Vt */ 
 	{ NULL, posts_xr },			/* Xr */ 
 	{ NULL, posts_text },			/* %A */
 	{ NULL, posts_text },			/* %B */ /* FIXME: can be used outside Rs/Re. */
@@ -887,6 +889,32 @@ post_lb(POST_ARGS)
 	if (mdoc_a2lib(mdoc->last->child->string))
 		return(1);
 	return(mdoc_nwarn(mdoc, mdoc->last, ELIB));
+}
+
+
+static int
+post_vt(POST_ARGS)
+{
+	const struct mdoc_node *n;
+
+	/*
+	 * The Vt macro comes in both ELEM and BLOCK form, both of which
+	 * have different syntaxes (yet more context-sensitive
+	 * behaviour).  ELEM types must have a child; BLOCK types,
+	 * specifically the BODY, should only have TEXT children.
+	 */
+
+	if (MDOC_ELEM == mdoc->last->type)
+		return(eerr_ge1(mdoc));
+	if (MDOC_BODY != mdoc->last->type)
+		return(1);
+	
+	for (n = mdoc->last->child; n; n = n->next)
+		if (MDOC_TEXT != n->type) 
+			if ( ! mdoc_nwarn(mdoc, n, EBADCHILD))
+				return(0);
+
+	return(1);
 }
 
 

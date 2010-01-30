@@ -312,7 +312,6 @@ print_encode(struct html *h, const char *p, int norecurse)
 		} else if ('>' == *p) {
 			printf("&gt;");
 			continue;
-		/* FIXME: already escaped? */
 		} else if ('&' == *p) {
 			printf("&amp;");
 			continue;
