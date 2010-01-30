@@ -96,6 +96,8 @@ static	void		  print_doctype(struct html *);
 static	void		  print_xmltype(struct html *);
 static	int		  print_encode(struct html *, const char *, int);
 static	void		  print_metaf(struct html *, enum roffdeco);
+static	void		  print_attr(struct html *, 
+				const char *, const char *);
 static	void		 *ml_alloc(char *, enum htmltype);
 
 
@@ -310,6 +312,7 @@ print_encode(struct html *h, const char *p, int norecurse)
 		} else if ('>' == *p) {
 			printf("&gt;");
 			continue;
+		/* FIXME: already escaped? */
 		} else if ('&' == *p) {
 			printf("&amp;");
 			continue;
@@ -351,12 +354,23 @@ print_encode(struct html *h, const char *p, int norecurse)
 }
 
 
+static void
+print_attr(struct html *h, const char *key, const char *val)
+{
+	printf(" %s=\"", key);
+	(void)print_encode(h, val, 1);
+	putchar('\"');
+}
+
+
 struct tag *
 print_otag(struct html *h, enum htmltag tag, 
 		int sz, const struct htmlpair *p)
 {
 	int		 i;
 	struct tag	*t;
+
+	/* Push this tags onto the stack of open scopes. */
 
 	if ( ! (HTML_NOSTACK & htmltags[tag].flags)) {
 		t = malloc(sizeof(struct tag));
@@ -374,13 +388,21 @@ print_otag(struct html *h, enum htmltag tag,
 		if ( ! (HTML_CLRLINE & htmltags[tag].flags))
 			putchar(' ');
 
+	/* Print out the tag name and attributes. */
+
 	printf("<%s", htmltags[tag].name);
-	for (i = 0; i < sz; i++) {
-		printf(" %s=\"", htmlattrs[p[i].key]);
-		assert(p->val);
-		(void)print_encode(h, p[i].val, 1);
-		putchar('\"');
+	for (i = 0; i < sz; i++)
+		print_attr(h, htmlattrs[p[i].key], p[i].val);
+
+	/* Add non-overridable attributes. */
+
+	if (TAG_HTML == tag && HTML_XHTML_1_0_STRICT == h->type) {
+		print_attr(h, "xmlns", "http://www.w3.org/1999/xhtml");
+		print_attr(h, "xml:lang", "en");
+		print_attr(h, "lang", "en");
 	}
+
+	/* Accomodate for XML "well-formed" singleton escaping. */
 
 	if (HTML_AUTOCLOSE & htmltags[tag].flags)
 		switch (h->type) {
