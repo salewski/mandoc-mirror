@@ -770,7 +770,16 @@ or end of line.
 .It Sx \&Ql  Ta    Yes      Ta    Yes
 .It Sx \&Qq  Ta    Yes      Ta    Yes
 .It Sx \&Sq  Ta    Yes      Ta    Yes
+.It Sx \&Vt  Ta    Yes      Ta    Yes
 .El
+.Pp
+Note that the
+.Sx \&Vt
+macro is a
+.Sx Block partial-implicit
+only when invoked as the first macro
+in a SYNOPSIS section line, else it is
+.Sx In-line .
 .
 .
 .Ss In-line
@@ -1892,11 +1901,29 @@ and
 .
 .Ss \&Va
 .Ss \&Vt
-.Ss \&Xc
-.Ss \&Xo
-.Ss \&Xr
-.Ss \&br
-.Ss \&sp
+A variable type.  This is also used for indicating global variables in the
+SYNOPSIS section, in which case a variable name is also specified.  Note that
+it accepts
+.Sx Block partial-implicit
+syntax when invoked as the first macro in the SYNOPSIS section, else it
+accepts ordinary
+.Sx In-line
+syntax.
+.Pp
+Note that this should not be confused with
+.Sx \&Ft ,
+which is used for function return types.
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Vt unsigned char
+\&.Vt extern const char * const sys_signame[] ;
+.Ed
+.Pp
+See also
+.Sx \&Ft
+and
+.Sx \&Va .
 .
 .
 .Sh COMPATIBILITY
