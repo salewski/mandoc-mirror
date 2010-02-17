@@ -466,19 +466,23 @@ print_doctype(struct html *h)
 {
 	const char	*doctype;
 	const char	*dtd;
+	const char	*name;
 
 	switch (h->type) {
 	case (HTML_HTML_4_01_STRICT):
+		name = "HTML";
 		doctype = "-//W3C//DTD HTML 4.01//EN";
 		dtd = "http://www.w3.org/TR/html4/strict.dtd";
 		break;
 	default:
+		name = "html";
 		doctype = "-//W3C//DTD XHTML 1.0 Strict//EN";
 		dtd = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd";
 		break;
 	}
 
-	printf("<!DOCTYPE HTML PUBLIC \"%s\" \"%s\">\n", doctype, dtd);
+	printf("<!DOCTYPE %s PUBLIC \"%s\" \"%s\">\n", 
+			name, doctype, dtd);
 }
 
 
