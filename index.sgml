@@ -219,10 +219,15 @@
 						<COL STYLE="width: 8em;">
 						<TBODY>
 							<TR>
-								<TD VALIGN="top"><SPAN CLASS="date">15-02-2010</SPAN></TD>
+								<TD VALIGN="top"><SPAN CLASS="date">18-02-2010</SPAN></TD>
 								<TD VALIGN="top">
 								Moved to our new <A HREF="http://bsd.lv" CLASS="external">BSD.lv</A> home.
-								Version <SPAN CLASS="rev">1.9.15</SPAN>.
+								Version <SPAN CLASS="rev">1.9.15</SPAN> highlights: XHTML is now an acceptable
+								output mode for <A HREF="mandoc.1.html">mandoc(1)</A>;  <Q>Xr</Q> made more
+								compatible with groff; <Q>Vt</Q> fixed when invoked in SYNOPSIS;  <Q>\\</Q>
+								escape removed; end-of-line white-space detected for all lines;  subtle bug
+								fixed in list display for some modes;  compatibility layer checked in for
+								compilation in diverse UNIX systems;  and column lengths handled correctly.
 								</TD>
 							</TR>
 						</TBODY>
