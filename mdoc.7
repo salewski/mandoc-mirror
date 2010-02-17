@@ -872,7 +872,7 @@ then the macro accepts an arbitrary number of arguments.
 .It Sx \&Ux  Ta    Yes      Ta    Yes      Ta    n
 .It Sx \&Va  Ta    Yes      Ta    Yes      Ta    n
 .It Sx \&Vt  Ta    Yes      Ta    Yes      Ta    >0
-.It Sx \&Xr  Ta    Yes      Ta    Yes      Ta    >0, <3
+.It Sx \&Xr  Ta    Yes      Ta    Yes      Ta    >0
 .It Sx \&br  Ta    \&No     Ta    \&No     Ta    0
 .It Sx \&sp  Ta    \&No     Ta    \&No     Ta    1
 .El
@@ -1924,6 +1924,37 @@ See also
 .Sx \&Ft
 and
 .Sx \&Va .
+.
+.Ss \&Xc
+.Ss \&Xo
+.Ss \&Xr
+Link to another manual
+.Pq Qq cross-reference .
+Its calling syntax is
+.Pp
+.D1 \. Ns Sx \&Xr Cm name section
+.Pp
+The
+.Cm name
+and
+.Cm section
+are the name and section of the linked manual.  If
+.Cm section
+is followed by non-punctuation, an
+.Sx \&Ns
+is inserted into the token stream.  This behaviour is for compatibility
+with
+.Xr groff 1 .
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Xr mandoc 1
+\&.Xr mandoc 1 ;
+\&.Xr mandoc 1 s behaviour
+.Ed
+.
+.Ss \&br
+.Ss \&sp
 .
 .
 .Sh COMPATIBILITY
