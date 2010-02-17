@@ -100,7 +100,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* St */ 
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Va */
 	{ ctx_synopsis, MDOC_CALLABLE | MDOC_PARSED }, /* Vt */ 
-	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Xr */
+	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* Xr */
 	{ in_line_eoln, 0 }, /* %A */
 	{ in_line_eoln, 0 }, /* %B */
 	{ in_line_eoln, 0 }, /* %D */
@@ -1180,6 +1180,9 @@ in_line_argn(MACRO_PROT_ARGS)
 	case (MDOC_Ux):
 		maxargs = 0;
 		break;
+	case (MDOC_Xr):
+		maxargs = 2;
+		break;
 	default:
 		maxargs = 1;
 		break;
@@ -1245,7 +1248,20 @@ in_line_argn(MACRO_PROT_ARGS)
 				return(0);
 			flushed = 1;
 		}
-	
+
+		/* 
+		 * XXX: this is a hack to work around groff's ugliness
+		 * as regards `Xr' and extraneous arguments.  It should
+		 * ideally be deprecated behaviour, but because this is
+		 * code is no here, it's unlikely to be removed.
+		 */
+		if (MDOC_Xr == tok && j == maxargs) {
+			if ( ! mdoc_elem_alloc(m, line, ppos, MDOC_Ns, NULL))
+				return(0);
+			if ( ! rew_elem(m, MDOC_Ns))
+				return(0);
+		}
+
 		if ( ! mdoc_word_alloc(m, line, la, p))
 			return(0);
 	}
