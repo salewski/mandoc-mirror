@@ -1,217 +1,242 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<meta name="resource-type" content="document">
-		<link rel="stylesheet" href="index.css" type="text/css" media="all">
-		<title>mdocml.bsd.lv</title>
-	</head>
-	<body>
-	<table class="frame" summary="[frame]">
-		<col width="100%">
-		<tbody>
-			<tr>
-				<td>
-					<div class="head">
-						<b>mdocml</b> &#8211; mdoc macro compiler
-					</div>
-				</td>
-			</tr>
-			<tr>
-				<td valign="top">
-					<h1>
+<HTML>
+	<HEAD>
+		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+		<META NAME="resource-type" CONTENT="document">
+		<LINK REL="stylesheet" HREF="index.css" TYPE="text/css" MEDIA="all">
+		<TITLE>mdocml.bsd.lv</TITLE>
+	</HEAD>
+	<BODY>
+	<TABLE CLASS="frame" SUMMARY="[frame]">
+		<COL WIDTH="100%">
+		<TBODY>
+			<TR>
+				<TD>
+					<DIV CLASS="head">
+						<B>mdocml</B> &#8211; mdoc macro compiler
+					</DIV>
+				</TD>
+			</TR>
+			<TR>
+				<TD VALIGN="top">
+					<H1>
 					DESCRIPTION
-					</h1>
+					</H1>
 
-					<p>
-					<span class="nm">mdocml</span> is a suite of tools compiling &#8220;-mdoc&#8221;, the roff macro package
-					of choice for BSD manual pages, and &#8220;-man&#8221;, the predominant historical package for UNIX
-					manuals.  The mission of <span class="nm">mdocml</span> is to deprecate <a
-					href="http://www.gnu.org/software/groff/" class="external">groff</a>, the GNU roff implementation, for
+					<P>
+					<SPAN CLASS="nm">mdocml</SPAN> is a suite of tools compiling <Q>-mdoc</Q>, the roff macro package
+					of choice for BSD manual pages, and <Q>-man</Q>, the predominant historical package for UNIX
+					manuals.  The mission of <SPAN CLASS="nm">mdocml</SPAN> is to deprecate <A
+					HREF="http://www.gnu.org/software/groff/" CLASS="external">groff</A>, the GNU roff implementation, for
 					displaying -mdoc pages whilst providing token support for -man.
-					</p>
+					</P>
 
-					<p>
+					<P>
 					Why?  groff amounts to over 5 MB of source code, most of which is C++ and all of which is GPL.  It runs
 					slowly, produces uncertain output, and varies in operation from system to system.  mdocml strives to fix
 					this (respectively small, C, ISC-licensed, fast and regular).
-					</p>
+					</P>
 
-					<p>
-					The core of <span class="nm">mdocml</span> is composed of the <i>libmdoc</i> and <i>libman</i>
+					<P>
+					The core of <SPAN CLASS="nm">mdocml</SPAN> is composed of the <i>libmdoc</i> and <i>libman</i>
 					validating compiler libraries.  Both are simple, fast libraries operating on memory buffers, so they may
 					be used for a variety of front-ends (terminal-based, CGI and so on).  The primary front-end is <i>
 					mandoc</i>, which formats manuals for display on the terminal.
-					</p>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<h1>
+					</P>
+
+					<P>
+					The <SPAN CLASS="nm">mdocml</SPAN> utility is a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv
+					Project</A> member.
+					</P>
+				</TD>
+			</TR>
+			<TR>
+				<TD>
+					<H1>
 					SOURCES
-					</h1>
+					</H1>
 
-					<p>
+					<P>
 					Sources correctly build and install on DragonFly BSD, FreeBSD, OpenBSD, NetBSD, and GNU/Linux operating
-					systems, tested variously on i386, AMD64, alpha, and others.  The most current version is <span
-					class="attn">@VERSION@</span>, dated <span class="attn">@VDATE@</span>.  A full <a
-					href="ChangeLog.html">ChangeLog</a> (<a href="ChangeLog.txt">txt</a>) is written with each release.
-					</p>
+					systems, tested variously on i386, AMD64, alpha, and others.  The most current version is <SPAN
+					CLASS="attn">@VERSION@</SPAN>, dated <SPAN class="attn">@VDATE@</SPAN>.  A full <A
+					HREF="ChangeLog.html">ChangeLog</A> (<A HREF="ChangeLog.txt">txt</A>) is written with each release.
+					</P>
 
-					<h2>
+					<H2>
 					Current
-					</h2>
+					</H2>
 
-					<table width="100%" summary="Current Sources">
-					<col width="200">
-					<col>
-					<tbody>
-						<tr>
-							<td>Source archive</td>
-							<td>
-							<a href="/snapshots/mdocml.tar.gz">/snapshots/mdocml.tar.gz</a> 
-							(<a href="/snapshots/mdocml.md5">md5</a>)
-							</td>
-						</tr>
-						<tr>
-							<td>Online source</td>
-							<td>
-							<a class="external" href="http://bsd.lv/cgi-bin/cvsweb.cgi/?cvsroot=mdocml">cvsweb</a>
-							</td>
-						</tr>
-					</tbody>
-					</table>
+					<TABLE WIDTH="100%" SUMMARY="Current Sources">
+					<COL WIDTH="200">
+					<COL>
+					<TBODY>
+						<TR>
+							<TD>Source archive</TD>
+							<TD>
+							<A HREF="/snapshots/mdocml.tar.gz">/snapshots/mdocml.tar.gz</A> 
+							(<A HREF="/snapshots/mdocml.md5">md5</A>)
+							</TD>
+						</TR>
+						<TR>
+							<TD>Online source</TD>
+							<TD>
+							<A CLASS="external" HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/?cvsroot=mdocml">cvsweb</A>
+							</TD>
+						</TR>
+					</TBODY>
+					</TABLE>
 
-					<h2>
+					<H2>
 					Downstream
-					</h2>
+					</H2>
 
-					<table width="100%" summary="Downstream Sources">
-					<col width="200">
-					<col>
-					<tbody>
-						<tr>
-							<td>DragonFly BSD</td>
-							<td>
-							<a href="http://gitweb.dragonflybsd.org/dragonfly.git/tree/HEAD:/usr.bin/mandoc"
-								class="external">usr.bin/mandoc</a>
-							</td>
-						</tr>
-						<tr>
-							<td>FreeBSD</td>
-							<td>
-							<a href="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/" 
-								class="external">ports/textproc/mdocml</a>
-							</td>
-						</tr>
-						<tr>
-							<td>NetBSD</td>
-							<td>
-							<a href="http://cvsweb.netbsd.org/bsdweb.cgi/src/external/bsd/mdocml/"
-								class="external">src/external/bsd/mdocml</a>
-							</td>
-						</tr>
-						<tr>
-							<td>OpenBSD</td>
-							<td>
-							<a href="http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/mandoc/"
-								class="external">src/usr.bin/mandoc</a> 
-							</td>
-						</tr>
-					</tbody>
-					</table>
+					<TABLE WIDTH="100%" SUMMARY="Downstream Sources">
+					<COL WIDTH="200">
+					<COL>
+					<TBODY>
+						<TR>
+							<TD>DragonFly BSD</TD>
+							<TD>
+							<A HREF="http://gitweb.dragonflybsd.org/dragonfly.git/tree/HEAD:/usr.bin/mandoc"
+								CLASS="external">usr.bin/mandoc</A>
+							</TD>
+						</TR>
+						<TR>
+							<TD>FreeBSD</TD>
+							<TD>
+							<A HREF="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/" 
+								CLASS="external">ports/textproc/mdocml</A>
+							</TD>
+						</TR>
+						<TR>
+							<TD>NetBSD</TD>
+							<TD>
+							<A HREF="http://cvsweb.netbsd.org/bsdweb.cgi/src/external/bsd/mdocml/"
+								CLASS="external">src/external/bsd/mdocml</A>
+							</TD>
+						</TR>
+						<TR>
+							<TD>OpenBSD</TD>
+							<TD>
+							<A HREF="http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/mandoc/"
+								CLASS="external">src/usr.bin/mandoc</A> 
+							</TD>
+						</TR>
+					</TBODY>
+					</TABLE>
 
-					<h2>
+					<H2>
 					Historical
-					</h2>
+					</H2>
 
-					<table width="100%" summary="Archived Sources">
-					<col width="200">
-					<col>
-					<tbody>
-						<tr>
-							<td>Source archive</td>
-							<td>
-							<a href="/snapshots/">/snapshots/</a> 
-							</td>
-						</tr>
-					</tbody>
-					</table>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<h1>
+					<TABLE WIDTH="100%" SUMMARY="Archived Sources">
+					<COL WIDTH="200">
+					<COL>
+					<TBODY>
+						<TR>
+							<TD>Source archive</TD>
+							<TD>
+							<A HREF="/snapshots/">/snapshots/</A> 
+							</TD>
+						</TR>
+					</TBODY>
+					</TABLE>
+				</TD>
+			</TR>
+			<TR>
+				<TD>
+					<H1>
 					DOCUMENTATION
-					</h1>
+					</H1>
 
-					<p>
+					<P>
 					These manuals are generated automatically and refer to the current snapshot.
-					</p>
+					</P>
 
-					<table width="100%" summary="Documentation">
-					<col width="200">
-					<col>
-					<tbody>
-						<tr>
-							<td><a href="mandoc.1.html">mandoc(1)</a> (<a href="mandoc.1.txt">text</a>)</td>
-							<td>format and display UNIX manuals</td>
-						</tr>
-						<tr>
-							<td><a href="mandoc_char.7.html">mandoc_char(7)</a> (<a href="mandoc_char.7.txt">text</a>)</td>
-							<td>mandoc special characters</td>
-						</tr>
-						<tr>
-							<td><a href="mdoc.7.html">mdoc(7)</a> (<a href="mdoc.7.txt">text</a>)</td>
-							<td>mdoc language reference</td>
-						</tr>
-						<tr>
-							<td><a href="man.7.html">man(7)</a> (<a href="man.7.txt">text</a>)</td>
-							<td>man language reference</td>
-						</tr>
-						<tr>
-							<td><a href="manuals.7.html">manuals(7)</a> (<a href="manuals.7.txt">text</a>)</td>
-							<td>a guide to writing UNIX manuals</td>
-						</tr>
-						<tr>
-							<td><a href="mdoc.3.html">mdoc(3)</a> (<a href="mdoc.3.txt">text</a>)</td>
-							<td>mdoc macro compiler library</td>
-						</tr>
-						<tr>
-							<td><a href="man.3.html">man(3)</a> (<a href="man.3.txt">text</a>)</td>
-							<td>man macro compiler library</td>
-						</tr>
-					</tbody>
-					</table>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<h1>
+					<TABLE WIDTH="100%" SUMMARY="Documentation">
+					<COL WIDTH="200">
+					<COL>
+					<TBODY>
+						<TR>
+							<TD><A HREF="mandoc.1.html">mandoc(1)</A> (<A HREF="mandoc.1.txt">text</A>)</TD>
+							<TD>format and display UNIX manuals</TD>
+						</TR>
+						<TR>
+							<TD><A HREF="mandoc_char.7.html">mandoc_char(7)</A> (<A HREF="mandoc_char.7.txt">text</A>)</TD>
+							<TD>mandoc special characters</TD>
+						</TR>
+						<TR>
+							<TD><A HREF="mdoc.7.html">mdoc(7)</A> (<A HREF="mdoc.7.txt">text</A>)</TD>
+							<TD>mdoc language reference</TD>
+						</TR>
+						<TR>
+							<TD><A HREF="man.7.html">man(7)</A> (<A HREF="man.7.txt">text</A>)</TD>
+							<TD>man language reference</TD>
+						</TR>
+						<TR>
+							<TD><A HREF="manuals.7.html">manuals(7)</A> (<A HREF="manuals.7.txt">text</A>)</TD>
+							<TD>a guide to writing UNIX manuals</TD>
+						</TR>
+						<TR>
+							<TD><A HREF="mdoc.3.html">mdoc(3)</A> (<A HREF="mdoc.3.txt">text</A>)</TD>
+							<TD>mdoc macro compiler library</TD>
+						</TR>
+						<TR>
+							<TD><A HREF="man.3.html">man(3)</A> (<A HREF="man.3.txt">text</A>)</TD>
+							<TD>man macro compiler library</TD>
+						</TR>
+					</TBODY>
+					</TABLE>
+				</TD>
+			</TR>
+			<TR>
+				<TD>
+					<H1>
 					CONTACT
-					</h1>
+					</H1>
 
-					<p>
-					For all issues related to <span class="nm">mdocml</span>, contact Kristaps D&#382;onsons, kris<a
-					class="external"
-					href="http://mailhide.recaptcha.net/d?k=01jt88xIsFONwVjHZmGpc4AQ==&amp;c=sb5E6ulipc-eTnpTVqI-BQ=="
-					title="Reveal this e-mail address">...</a>@kth.se.
-					</p>
+					<P>
+					For all issues related to <SPAN CLASS="nm">mdocml</SPAN>, contact Kristaps Dzonsons, kris<A
+					CLASS="external"
+					HREF="http://mailhide.recaptcha.net/d?k=01M6h_w7twDp58ZgH57eWC_w==&amp;c=Q2DBUt401ePlSeupJFrq_Q=="
+					TITLE="Reveal this e-mail address">...</A>@bsd.lv.
+					</P>
 
-					<p>
+					<P>
 					If you want to receive a semi-automated mail-out of new releases, then please write with a message
-					subject of <i>subscribe mdocml</i> (or <i>unsubscribe mdocml</i>).
-					</p>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<div class="foot">
-						Copyright &#169; 2008, 2009 Kristaps D&#382;onsons, $Date$
-					</div>
-				</td>
-			</tr>
-		</tbody>
-	</table>
-	</body>
-</html>
+					subject of <I>subscribe mdocml</I> (or <I>unsubscribe mdocml</I>).
+					</P>
+				</TD>
+			</TR>
+			<TR>
+				<TD>
+					<H1>
+					NEWS
+					</H1>
+
+					<TABLE WIDTH="100%" CELLPADDING="2">
+						<COL STYLE="width: 8em;">
+						<TBODY>
+							<TR>
+								<TD VALIGN="top"><SPAN CLASS="date">15-02-2010</SPAN></TD>
+								<TD VALIGN="top">
+								Moved to our new <A HREF="http://bsd.lv" CLASS="external">BSD.lv</A> home.
+								Version <SPAN CLASS="rev">1.9.15</SPAN>.
+								</TD>
+							</TR>
+						</TBODY>
+					</TABLE>
+				</TD>
+			</TR>
+			<TR>
+				<TD>
+					<DIV CLASS="foot">
+						Copyright &#169; 2008&#8211;2010 Kristaps Dzonsons, $Date$
+					</DIV>
+				</TD>
+			</TR>
+		</TBODY>
+	</TABLE>
+	</BODY>
+</HTML>

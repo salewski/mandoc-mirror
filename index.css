@@ -26,7 +26,7 @@ div.clbody	{ margin-left: 2px; }
 
 ul.clbody	{ margin-top: 4px; }
 
-span.rev	{ color: #808080; }
+span.rev	{ font-weight: bold; }
 
 span.nm		{ color: #000000; font-weight: bold; }
 
@@ -42,3 +42,5 @@ div.foot	{ border-top: 1px dotted #cccccc;
 		  text-align: right; }
 
 a.external 	{ background: transparent url(external.png) center right no-repeat; padding-right: 12px; }
+
+span.date	{ color: #808080; }
