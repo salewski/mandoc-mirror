@@ -216,8 +216,18 @@
 					</H1>
 
 					<TABLE WIDTH="100%" CELLPADDING="2">
-						<COL STYLE="width: 8em;">
+						<COL CLASS="date">
 						<TBODY>
+							<TR>
+								<TD VALIGN="top"><SPAN CLASS="date">22-03-2010</SPAN></TD>
+								<TD VALIGN="top">
+								Version <SPAN CLASS="rev">1.9.16</SPAN> highlights: inspired by patches and bug
+								reports by Ingo Schwarze, allowed <SPAN CLASS="flag">-man</SPAN> to accept
+								non-printing elements to be nested within next-line scopes, such as <Q>br</Q>
+								within <Q>B</Q> or <Q>TH</Q>, which is valid roff.  Longsoon architecture also
+								noted and Makefile cleaned up.
+								</TD>
+							</TR>
 							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">18-02-2010</SPAN></TD>
 								<TD VALIGN="top">

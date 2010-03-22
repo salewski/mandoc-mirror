@@ -20,17 +20,13 @@ h2		{ font-weight: bold;
 		  margin-bottom: 0px; 
 		  font-family: Verdana, Tahoma, Arial, sans-serif; }
 
-div.clhead	{ background-color: #E6E6FA; color: #000000; padding: 2px; font-weight: bold; }
-
-div.clbody	{ margin-left: 2px; }
-
-ul.clbody	{ margin-top: 4px; }
-
 span.rev	{ font-weight: bold; }
 
 span.nm		{ color: #000000; font-weight: bold; }
 
 span.attn	{ color: #000000; font-weight: bold; }
+
+span.flag	{ font-weight: bold; }
 
 div.head	{ border-bottom: 1px dotted #cccccc; 
 		  padding-bottom: 5px;
@@ -44,3 +40,5 @@ div.foot	{ border-top: 1px dotted #cccccc;
 a.external 	{ background: transparent url(external.png) center right no-repeat; padding-right: 12px; }
 
 span.date	{ color: #808080; }
+
+col.date	{ width: 8em; }
