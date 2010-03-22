@@ -35,6 +35,7 @@ const	char *const __man_merrnames[WERRMAX] = {
 	"invalid manual section", /* WMSEC */
 	"invalid date format", /* WDATE */
 	"scope of prior line violated", /* WLNSCOPE */
+	"over-zealous prior line scope violation", /* WLNSCOPE2 */
 	"trailing whitespace", /* WTSPACE */
 	"unterminated quoted parameter", /* WTQUOTE */
 	"document has no body", /* WNODATA */
@@ -535,41 +536,37 @@ man_pmacro(struct man *m, int ln, char *buf)
 			goto err;
 
 	/* 
-	 * Remove prior ELINE macro, as a macro is clobbering it by
-	 * being invoked without prior text.  Note that NSCOPED macros
-	 * do not close out ELINE macros, as they print no text.
+	 * Remove prior ELINE macro, as it's being clobbering by a new
+	 * macro.  Note that NSCOPED macros do not close out ELINE
+	 * macros---they don't print text---so we let those slip by.
 	 */
 
-	if (m->flags & MAN_ELINE && 
-			! (MAN_NSCOPED & man_macros[c].flags)) {
+	if ( ! (MAN_NSCOPED & man_macros[c].flags) &&
+			m->flags & MAN_ELINE) {
+		assert(MAN_TEXT != m->last->type);
+
+		/*
+		 * This occurs in the following construction:
+		 *   .B
+		 *   .br
+		 *   .B
+		 *   .br
+		 *   I hate man macros.
+		 * Flat-out disallow this madness.
+		 */
+		if (MAN_NSCOPED & man_macros[m->last->tok].flags)
+			return(man_perr(m, ln, ppos, WLNSCOPE));
+
 		n = m->last;
+
+		assert(n);
 		assert(NULL == n->child);
 		assert(0 == n->nchild);
+
 		if ( ! man_nwarn(m, n, WLNSCOPE))
 			return(0);
 
-		/* FIXME: when called as in:
-		 *
-		 * .B
-		 * .br
-		 * .B
-		 * .br
-		 * hello
-		 */
-
-		if (n->prev) {
-			assert(n != n->parent->child);
-			assert(n == n->prev->next);
-			n->prev->next = NULL;
-			m->last = n->prev;
-			m->next = MAN_NEXT_SIBLING;
-		} else {
-			assert(n == n->parent->child);
-			n->parent->child = NULL;
-			m->last = n->parent;
-			m->next = MAN_NEXT_CHILD;
-		}
-
+		man_node_unlink(m, n);
 		man_node_free(n);
 		m->flags &= ~MAN_ELINE;
 	}
@@ -670,4 +667,29 @@ man_err(struct man *m, int line, int pos, int iserr, enum merr type)
 		return(man_verr(m, line, pos, p));
 
 	return(man_vwarn(m, line, pos, p));
+}
+
+
+void
+man_node_unlink(struct man *m, struct man_node *n)
+{
+
+	if (n->prev) {
+		n->prev->next = n->next;
+		if (m->last == n) {
+			assert(NULL == n->next);
+			m->last = n->prev;
+			m->next = MAN_NEXT_SIBLING;
+		}
+	} else {
+		n->parent->child = n->next;
+		if (m->last == n) {
+			assert(NULL == n->next);
+			m->last = n->parent;
+			m->next = MAN_NEXT_CHILD;
+		}
+	}
+
+	if (n->next)
+		n->next->prev = n->prev;
 }
