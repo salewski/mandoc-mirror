@@ -40,7 +40,7 @@ static	int		 rew_block(int, enum man_type,
 				const struct man_node *);
 
 const	struct man_macro __man_macros[MAN_MAX] = {
-	{ in_line_eoln, 0 }, /* br */
+	{ in_line_eoln, MAN_NSCOPED }, /* br */
 	{ in_line_eoln, 0 }, /* TH */
 	{ blk_imp, MAN_SCOPED }, /* SH */
 	{ blk_imp, MAN_SCOPED }, /* SS */
@@ -61,9 +61,9 @@ const	struct man_macro __man_macros[MAN_MAX] = {
 	{ in_line_eoln, MAN_SCOPED }, /* I */
 	{ in_line_eoln, 0 }, /* IR */
 	{ in_line_eoln, 0 }, /* RI */
-	{ in_line_eoln, 0 }, /* na */
+	{ in_line_eoln, MAN_NSCOPED }, /* na */
 	{ in_line_eoln, 0 }, /* i */
-	{ in_line_eoln, 0 }, /* sp */
+	{ in_line_eoln, MAN_NSCOPED }, /* sp */
 	{ in_line_eoln, 0 }, /* nf */
 	{ in_line_eoln, 0 }, /* fi */
 	{ in_line_eoln, 0 }, /* r */
@@ -320,14 +320,29 @@ in_line_eoln(MACRO_PROT_ARGS)
 			return(0);
 	}
 
+	/*
+	 * If no arguments are specified and this is MAN_SCOPED (i.e.,
+	 * next-line scoped), then set our mode to indicate that we're
+	 * waiting for terms to load into our context.
+	 */
+
 	if (n == m->last && MAN_SCOPED & man_macros[tok].flags) {
+		assert( ! (MAN_NSCOPED & man_macros[tok].flags));
 		m->flags |= MAN_ELINE;
 		return(1);
 	} 
 
+	/* Set ignorable context, if applicable. */
+
+	if (MAN_NSCOPED & man_macros[tok].flags) {
+		assert( ! (MAN_SCOPED & man_macros[tok].flags));
+		m->flags |= MAN_ILINE;
+	}
+	
 	/*
-	 * Note that when TH is pruned, we'll be back at the root, so
-	 * make sure that we don't clobber as its sibling.
+	 * Rewind our element scope.  Note that when TH is pruned, we'll
+	 * be back at the root, so make sure that we don't clobber as
+	 * its sibling.
 	 */
 
 	for ( ; m->last; m->last = m->last->parent) {

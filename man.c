@@ -534,14 +534,28 @@ man_pmacro(struct man *m, int ln, char *buf)
 		if ( ! man_pwarn(m, ln, i - 1, WTSPACE))
 			goto err;
 
-	/* Remove prior ELINE macro, if applicable. */
+	/* 
+	 * Remove prior ELINE macro, as a macro is clobbering it by
+	 * being invoked without prior text.  Note that NSCOPED macros
+	 * do not close out ELINE macros, as they print no text.
+	 */
 
-	if (m->flags & MAN_ELINE) {
+	if (m->flags & MAN_ELINE && 
+			! (MAN_NSCOPED & man_macros[c].flags)) {
 		n = m->last;
 		assert(NULL == n->child);
 		assert(0 == n->nchild);
 		if ( ! man_nwarn(m, n, WLNSCOPE))
 			return(0);
+
+		/* FIXME: when called as in:
+		 *
+		 * .B
+		 * .br
+		 * .B
+		 * .br
+		 * hello
+		 */
 
 		if (n->prev) {
 			assert(n != n->parent->child);
@@ -568,8 +582,25 @@ man_pmacro(struct man *m, int ln, char *buf)
 		goto err;
 
 out:
-	if ( ! (MAN_BLINE & fl))
+	/* 
+	 * We weren't in a block-line scope when entering the
+	 * above-parsed macro, so return.
+	 */
+
+	if ( ! (MAN_BLINE & fl)) {
+		m->flags &= ~MAN_ILINE; 
 		return(1);
+	}
+
+	/*
+	 * If we're in a block scope, then allow this macro to slip by
+	 * without closing scope around it.
+	 */
+
+	if (MAN_ILINE & m->flags) {
+		m->flags &= ~MAN_ILINE;
+		return(1);
+	}
 
 	/* 
 	 * If we've opened a new next-line element scope, then return

@@ -30,9 +30,10 @@ struct	man {
 	int		 pflags;
 	int		 flags;
 #define	MAN_HALT	(1 << 0)
-#define	MAN_ELINE	(1 << 1) 	/* Next-line element scope. */
-#define	MAN_BLINE	(1 << 2) 	/* Next-line block scope. */
-#define	MAN_LITERAL	(1 << 3)	/* Literal input. */
+#define	MAN_ELINE	(1 << 1) /* Next-line element scope. */
+#define	MAN_BLINE	(1 << 2) /* Next-line block scope. */
+#define	MAN_ILINE	(1 << 3) /* Ignored in next-line scope. */
+#define	MAN_LITERAL	(1 << 4) /* Literal input. */
 	enum man_next	 next;
 	struct man_node	*last;
 	struct man_node	*first;
@@ -70,6 +71,7 @@ struct	man_macro {
 #define	MAN_SCOPED	 (1 << 0)
 #define	MAN_EXPLICIT	 (1 << 1)	/* See blk_imp(). */
 #define	MAN_FSCOPED	 (1 << 2)	/* See blk_imp(). */
+#define	MAN_NSCOPED	 (1 << 3)	/* See in_line_eoln(). */
 };
 
 extern	const struct man_macro *const man_macros;
