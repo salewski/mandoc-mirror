@@ -35,6 +35,7 @@ struct	termp {
 	size_t		  maxcols;	/* Max size of buf. */
 	size_t		  offset;	/* Margin offest. */
 	size_t		  col;		/* Bytes in buf. */
+	int		  overstep;	/* See termp_flushln(). */
 	int		  flags;
 #define	TERMP_NOSPACE	 (1 << 2)	/* No space before words. */
 #define	TERMP_NOLPAD	 (1 << 3)	/* See term_flushln(). */

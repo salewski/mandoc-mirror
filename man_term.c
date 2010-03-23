@@ -156,10 +156,12 @@ terminal_man(void *arg, const struct man *man)
 
 	p = (struct termp *)arg;
 
+	p->overstep = 0;
+	p->maxrmargin = 65;
+
 	if (NULL == p->symtab)
 		switch (p->enc) {
 		case (TERMENC_ASCII):
-			p->maxrmargin = 65;
 			p->symtab = chars_init(CHARS_ASCII);
 			break;
 		default:
@@ -883,6 +885,7 @@ print_man_head(struct termp *p, const struct man_meta *m)
 	size_t		buflen, titlen;
 
 	p->rmargin = p->maxrmargin;
+
 	p->offset = 0;
 	buf[0] = title[0] = '\0';
 
