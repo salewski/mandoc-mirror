@@ -219,6 +219,13 @@
 						<COL CLASS="date">
 						<TBODY>
 							<TR>
+								<TD VALIGN="top"><SPAN CLASS="date">xx-03-2010</SPAN></TD>
+								<TD VALIGN="top">
+								Version <SPAN CLASS="rev">1.9.17</SPAN> highlights: accept <A
+								HREF="http://perldoc.perl.org/" CLASS="external">perlpod</A> macros.
+								</TD>
+							</TR>
+							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">22-03-2010</SPAN></TD>
 								<TD VALIGN="top">
 								Version <SPAN CLASS="rev">1.9.16</SPAN> highlights: inspired by patches and bug
