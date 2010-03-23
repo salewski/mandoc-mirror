@@ -139,6 +139,9 @@ static	const struct termact termacts[MAN_MAX] = {
 	{ pre_ign, NULL, 0 }, /* DT */
 	{ pre_ign, NULL, 0 }, /* UC */
 	{ pre_ign, NULL, 0 }, /* PD */
+ 	{ pre_sp, NULL, MAN_NOTEXT }, /* Sp */
+ 	{ pre_nf, NULL, 0 }, /* Vb */
+ 	{ pre_fi, NULL, 0 }, /* Ve */
 };
 
 
@@ -156,6 +159,7 @@ terminal_man(void *arg, const struct man *man)
 	if (NULL == p->symtab)
 		switch (p->enc) {
 		case (TERMENC_ASCII):
+			p->maxrmargin = 65;
 			p->symtab = chars_init(CHARS_ASCII);
 			break;
 		default:
@@ -248,6 +252,7 @@ static int
 pre_fi(DECL_ARGS)
 {
 
+	p->rmargin = p->maxrmargin = 65;
 	mt->fl &= ~MANT_LITERAL;
 	return(1);
 }
@@ -258,9 +263,11 @@ static int
 pre_nf(DECL_ARGS)
 {
 
+	p->rmargin = p->maxrmargin = 78;
 	term_newln(p);
 	mt->fl |= MANT_LITERAL;
-	return(1);
+
+	return(MAN_Vb != n->tok);
 }
 
 
@@ -873,6 +880,7 @@ static void
 print_man_head(struct termp *p, const struct man_meta *m)
 {
 	char		buf[BUFSIZ], title[BUFSIZ];
+	size_t		buflen, titlen;
 
 	p->rmargin = p->maxrmargin;
 	p->offset = 0;
@@ -880,11 +888,15 @@ print_man_head(struct termp *p, const struct man_meta *m)
 
 	if (m->vol)
 		strlcpy(buf, m->vol, BUFSIZ);
+	buflen = strlen(buf);
 
 	snprintf(title, BUFSIZ, "%s(%d)", m->title, m->msec);
+	titlen = strlen(title);
 
 	p->offset = 0;
-	p->rmargin = (p->maxrmargin - strlen(buf) + 1) / 2;
+	p->rmargin = 2 * (titlen+1) + buflen < p->maxrmargin ?
+	    (p->maxrmargin - strlen(buf) + 1) / 2 :
+	    p->maxrmargin - buflen;
 	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
 
 	term_word(p, title);
@@ -892,18 +904,20 @@ print_man_head(struct termp *p, const struct man_meta *m)
 
 	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 	p->offset = p->rmargin;
-	p->rmargin = p->maxrmargin - strlen(title);
+	p->rmargin = p->offset + buflen + titlen < p->maxrmargin ?
+	    p->maxrmargin - titlen : p->maxrmargin;
 
 	term_word(p, buf);
 	term_flushln(p);
 
-	p->offset = p->rmargin;
-	p->rmargin = p->maxrmargin;
 	p->flags &= ~TERMP_NOBREAK;
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
-
-	term_word(p, title);
-	term_flushln(p);
+	if (p->rmargin + titlen <= p->maxrmargin) {
+		p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+		p->offset = p->rmargin;
+		p->rmargin = p->maxrmargin;
+		term_word(p, title);
+		term_flushln(p);
+	}
 
 	p->rmargin = p->maxrmargin;
 	p->offset = 0;

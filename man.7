@@ -438,6 +438,7 @@ If a next-line macro is followed by a non-next-line macro, an error is
 raised (unless in the case of
 .Sx \&br ,
 .Sx \&sp ,
+.Sx \&Sp ,
 or
 .Sx \&na ) .
 .Pp
@@ -448,54 +449,49 @@ The syntax is as follows:
 .Ed
 .
 .Pp
-.Bl -column -compact -offset indent "MacroX" "ArgumentsX" "ScopeXXXXX"
-.It Em Macro Ta Em Arguments Ta Em Scope
-.It Sx \&B   Ta    n         Ta    next-line
-.It Sx \&BI  Ta    n         Ta    current
-.It Sx \&BR  Ta    n         Ta    current
-.It Sx \&DT  Ta    0         Ta    current
-.It Sx \&I   Ta    n         Ta    next-line
-.It Sx \&IB  Ta    n         Ta    current
-.It Sx \&IR  Ta    n         Ta    current
-.It Sx \&PD  Ta    n         Ta    current
-.It Sx \&R   Ta    n         Ta    next-line
-.It Sx \&RB  Ta    n         Ta    current
-.It Sx \&RI  Ta    n         Ta    current
-.It Sx \&SB  Ta    n         Ta    next-line
-.It Sx \&SM  Ta    n         Ta    next-line
-.It Sx \&TH  Ta    >1, <6    Ta    current
-.It Sx \&UC  Ta    n         Ta    current
-.It Sx \&br  Ta    0         Ta    current
-.It Sx \&fi  Ta    0         Ta    current
-.It Sx \&i   Ta    n         Ta    current
-.It Sx \&na  Ta    0         Ta    current
-.It Sx \&nf  Ta    0         Ta    current
-.It Sx \&r   Ta    0         Ta    current
-.It Sx \&sp  Ta    1         Ta    current
+.Bl -column -compact -offset indent "MacroX" "ArgumentsX" "ScopeXXXXX" "CompatX"
+.It Em Macro Ta Em Arguments Ta Em Scope     Ta Em Notes
+.It Sx \&B   Ta    n         Ta    next-line Ta    \&
+.It Sx \&BI  Ta    n         Ta    current   Ta    \&
+.It Sx \&BR  Ta    n         Ta    current   Ta    \&
+.It Sx \&DT  Ta    0         Ta    current   Ta    \&
+.It Sx \&I   Ta    n         Ta    next-line Ta    \&
+.It Sx \&IB  Ta    n         Ta    current   Ta    \&
+.It Sx \&IR  Ta    n         Ta    current   Ta    \&
+.It Sx \&PD  Ta    n         Ta    current   Ta    compat
+.It Sx \&R   Ta    n         Ta    next-line Ta    \&
+.It Sx \&RB  Ta    n         Ta    current   Ta    \&
+.It Sx \&RI  Ta    n         Ta    current   Ta    \&
+.It Sx \&SB  Ta    n         Ta    next-line Ta    \&
+.It Sx \&SM  Ta    n         Ta    next-line Ta    \&
+.It Sx \&TH  Ta    >1, <6    Ta    current   Ta    \&
+.It Sx \&UC  Ta    n         Ta    current   Ta    compat
+.It Sx \&br  Ta    0         Ta    current   Ta    compat
+.It Sx \&fi  Ta    0         Ta    current   Ta    compat
+.It Sx \&i   Ta    n         Ta    current   Ta    compat
+.It Sx \&na  Ta    0         Ta    current   Ta    compat
+.It Sx \&nf  Ta    0         Ta    current   Ta    compat
+.It Sx \&r   Ta    0         Ta    current   Ta    compat
+.It Sx \&sp  Ta    1         Ta    current   Ta    compat
+.It Sx \&Sp  Ta    0         Ta    current   Ta    compat
+.It Sx \&Vb  Ta    <1        Ta    current   Ta    compat
+.It Sx \&Ve  Ta    0         Ta    current   Ta    compat
 .El
 .
 .Pp
-The
-.Sx \&PD ,
-.Sx \&RS ,
-.Sx \&RE ,
-.Sx \&UC ,
-.Sx \&br ,
-.Sx \&fi ,
-.Sx \&i ,
-.Sx \&na ,
-.Sx \&nf ,
-.Sx \&r ,
-and
-.Sx \&sp
-macros should not be used.  They're included for compatibility.
+Macros marked as
+.Qq compat
+are included for compatibility with the significant corpus of existing
+manuals that mix dialects of roff.  These macros should not be used for
+portable manuals.
 .
 .
 .Ss Block Macros
 Block macros are comprised of a head and body.  Like for in-line macros,
 the head is scoped to the current line and, in one circumstance, the
-next line (the next-line stipulations for line macros apply here as
-well).
+next line (the next-line stipulations as in
+.Sx Line Macros
+apply here as well).
 .Pp
 The syntax is as follows:
 .Bd -literal -offset indent
@@ -523,33 +519,29 @@ or
 No closure refers to an explicit block closing macro.
 .
 .Pp
-.Bl -column "MacroX" "ArgumentsX" "Head ScopeX" "sub-sectionX" -compact -offset indent
-.It Em Macro Ta Em Arguments Ta Em Head Scope Ta Em Body Scope
-.It Sx \&HP  Ta    <2        Ta    current    Ta    paragraph
-.It Sx \&IP  Ta    <3        Ta    current    Ta    paragraph
-.It Sx \&LP  Ta    0         Ta    current    Ta    paragraph
-.It Sx \&P   Ta    0         Ta    current    Ta    paragraph
-.It Sx \&PP  Ta    0         Ta    current    Ta    paragraph
-.It Sx \&RE  Ta    0         Ta    current    Ta    none
-.It Sx \&RS  Ta    1         Ta    current    Ta    part
-.It Sx \&SH  Ta    >0        Ta    next-line  Ta    section
-.It Sx \&SS  Ta    >0        Ta    next-line  Ta    sub-section
-.It Sx \&TP  Ta    n         Ta    next-line  Ta    paragraph
+.Bl -column -compact -offset indent "MacroX" "ArgumentsX" "Head ScopeX" "sub-sectionX" "compatX"
+.It Em Macro Ta Em Arguments Ta Em Head Scope Ta Em Body Scope  Ta Em Notes
+.It Sx \&HP  Ta    <2        Ta    current    Ta    paragraph   Ta    \&
+.It Sx \&IP  Ta    <3        Ta    current    Ta    paragraph   Ta    \&
+.It Sx \&LP  Ta    0         Ta    current    Ta    paragraph   Ta    \&
+.It Sx \&P   Ta    0         Ta    current    Ta    paragraph   Ta    \&
+.It Sx \&PP  Ta    0         Ta    current    Ta    paragraph   Ta    \&
+.It Sx \&RE  Ta    0         Ta    current    Ta    none        Ta    compat
+.It Sx \&RS  Ta    1         Ta    current    Ta    part        Ta    compat
+.It Sx \&SH  Ta    >0        Ta    next-line  Ta    section     Ta    \&
+.It Sx \&SS  Ta    >0        Ta    next-line  Ta    sub-section Ta    \&
+.It Sx \&TP  Ta    n         Ta    next-line  Ta    paragraph   Ta    \&
 .El
+.Pp
+.
+Macros marked
+.Qq compat
+are as mentioned in
+.Sx Line Macros .
 .
 .Pp
 If a block macro is next-line scoped, it may only be followed by in-line
-macros (excluding
-.Sx \&DT ,
-.Sx \&PD ,
-.Sx \&TH ,
-.Sx \&UC ,
-.Sx \&br ,
-.Sx \&na ,
-.Sx \&sp ,
-.Sx \&nf ,
-and
-.Sx \&fi ) .
+macros for decorating text.
 .
 .
 .Sh REFERENCE
@@ -978,6 +970,21 @@ macro.  Defaults to 1, if unspecified.
 .Pp
 See also
 .Sx \&br .
+.
+.Ss \&Sp
+A synonym for
+.Sx \&sp
+.Cm 0.5v .
+.
+.Ss \&Vb
+A synonym for
+.Sx \&nf .
+Accepts an argument (the height of the formatted space) which is
+disregarded.
+.
+.Ss \&Ve
+A synonym for
+.Sx \&fi .
 .
 .
 .Sh COMPATIBILITY

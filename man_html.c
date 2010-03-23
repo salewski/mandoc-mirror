@@ -103,6 +103,9 @@ static	const struct htmlman mans[MAN_MAX] = {
 	{ man_ign_pre, NULL }, /* DT */
 	{ man_ign_pre, NULL }, /* UC */
 	{ man_ign_pre, NULL }, /* PD */
+	{ man_br_pre, NULL }, /* Sp */
+	{ man_ign_pre, NULL }, /* Vb */
+	{ NULL, NULL }, /* Vi */
 };
 
 
@@ -341,10 +344,18 @@ man_br_pre(MAN_ARGS)
 
 	SCALE_VS_INIT(&su, 1);
 
-	if (MAN_sp == n->tok && n->child)
-		a2roffsu(n->child->string, &su, SCALE_VS);
-	else if (MAN_br == n->tok)
+	switch (n->tok) {
+	case (MAN_Sp):
+		SCALE_VS_INIT(&su, 0.5);
+		break;
+	case (MAN_sp):
+		if (n->child)
+			a2roffsu(n->child->string, &su, SCALE_VS);
+		break;
+	default:
 		su.scale = 0;
+		break;
+	}
 
 	bufcat_su(h, "height", &su);
 	PAIR_STYLE_INIT(&tag, h);

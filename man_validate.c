@@ -55,7 +55,7 @@ static	v_check	  posts_ge2_le5[] = { check_ge2, check_le5, NULL };
 static	v_check	  posts_par[] = { check_par, NULL };
 static	v_check	  posts_part[] = { check_part, NULL };
 static	v_check	  posts_sec[] = { check_sec, NULL };
-static	v_check	  posts_sp[] = { check_le1, NULL };
+static	v_check	  posts_le1[] = { check_le1, NULL };
 static	v_check	  pres_bline[] = { check_bline, NULL };
 
 static	const struct man_valid man_valids[MAN_MAX] = {
@@ -82,7 +82,7 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, NULL }, /* RI */
 	{ NULL, posts_eq0 }, /* na */
 	{ NULL, NULL }, /* i */
-	{ NULL, posts_sp }, /* sp */
+	{ NULL, posts_le1 }, /* sp */
 	{ pres_bline, posts_eq0 }, /* nf */
 	{ pres_bline, posts_eq0 }, /* fi */
 	{ NULL, NULL }, /* r */
@@ -91,6 +91,9 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, NULL }, /* DT */
 	{ NULL, NULL }, /* UC */
 	{ NULL, NULL }, /* PD */
+	{ NULL, posts_eq0 }, /* Sp */
+	{ pres_bline, posts_le1 }, /* Vb */
+	{ pres_bline, posts_eq0 }, /* Ve */
 };
 
 
