@@ -67,7 +67,7 @@ const	char *const __man_macronames[MAN_MAX] = {
 const	char * const *man_macronames = __man_macronames;
 
 static	struct man_node	*man_node_alloc(int, int, 
-				enum man_type, int);
+				enum man_type, enum mant);
 static	int		 man_node_append(struct man *, 
 				struct man_node *);
 static	int		 man_ptext(struct man *, int, char *);
@@ -242,7 +242,7 @@ man_node_append(struct man *man, struct man_node *p)
 
 
 static struct man_node *
-man_node_alloc(int line, int pos, enum man_type type, int tok)
+man_node_alloc(int line, int pos, enum man_type type, enum mant tok)
 {
 	struct man_node *p;
 
@@ -256,7 +256,7 @@ man_node_alloc(int line, int pos, enum man_type type, int tok)
 
 
 int
-man_elem_alloc(struct man *m, int line, int pos, int tok)
+man_elem_alloc(struct man *m, int line, int pos, enum mant tok)
 {
 	struct man_node *p;
 
@@ -269,7 +269,7 @@ man_elem_alloc(struct man *m, int line, int pos, int tok)
 
 
 int
-man_head_alloc(struct man *m, int line, int pos, int tok)
+man_head_alloc(struct man *m, int line, int pos, enum mant tok)
 {
 	struct man_node *p;
 
@@ -282,7 +282,7 @@ man_head_alloc(struct man *m, int line, int pos, int tok)
 
 
 int
-man_body_alloc(struct man *m, int line, int pos, int tok)
+man_body_alloc(struct man *m, int line, int pos, enum mant tok)
 {
 	struct man_node *p;
 
@@ -295,7 +295,7 @@ man_body_alloc(struct man *m, int line, int pos, int tok)
 
 
 int
-man_block_alloc(struct man *m, int line, int pos, int tok)
+man_block_alloc(struct man *m, int line, int pos, enum mant tok)
 {
 	struct man_node *p;
 
@@ -314,7 +314,7 @@ pstring(struct man *m, int line, int pos,
 	struct man_node	*n;
 	size_t		 sv;
 
-	n = man_node_alloc(line, pos, MAN_TEXT, -1);
+	n = man_node_alloc(line, pos, MAN_TEXT, MAN_MAX);
 	n->string = mandoc_malloc(len + 1);
 	sv = strlcpy(n->string, p, len + 1);
 
@@ -469,7 +469,8 @@ macrowarn(struct man *m, int ln, const char *buf)
 int
 man_pmacro(struct man *m, int ln, char *buf)
 {
-	int		 i, j, c, ppos, fl;
+	int		 i, j, ppos, fl;
+	enum mant	 tok;
 	char		 mac[5];
 	struct man_node	*n;
 
@@ -519,7 +520,7 @@ man_pmacro(struct man *m, int ln, char *buf)
 		return(1);
 	}
 	
-	if (MAN_MAX == (c = man_hash_find(mac))) {
+	if (MAN_MAX == (tok = man_hash_find(mac))) {
 		if ( ! macrowarn(m, ln, mac))
 			goto err;
 		return(1);
@@ -542,7 +543,7 @@ man_pmacro(struct man *m, int ln, char *buf)
 	 * macros---they don't print text---so we let those slip by.
 	 */
 
-	if ( ! (MAN_NSCOPED & man_macros[c].flags) &&
+	if ( ! (MAN_NSCOPED & man_macros[tok].flags) &&
 			m->flags & MAN_ELINE) {
 		assert(MAN_TEXT != m->last->type);
 
@@ -574,9 +575,9 @@ man_pmacro(struct man *m, int ln, char *buf)
 
 	/* Begin recursive parse sequence. */
 
-	assert(man_macros[c].fp);
+	assert(man_macros[tok].fp);
 
-	if ( ! (*man_macros[c].fp)(m, c, ln, ppos, &i, buf))
+	if ( ! (*man_macros[tok].fp)(m, tok, ln, ppos, &i, buf))
 		goto err;
 
 out:

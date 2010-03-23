@@ -63,7 +63,7 @@ enum	merr {
 	WERRMAX
 };
 
-#define	MACRO_PROT_ARGS	  struct man *m, int tok, int line, \
+#define	MACRO_PROT_ARGS	  struct man *m, enum mant tok, int line, \
 			  int ppos, int *pos, char *buf
 
 struct	man_macro {
@@ -89,15 +89,15 @@ __BEGIN_DECLS
 		  man_err((m), (n)->line, (n)->pos, 0, (t))
 
 int		  man_word_alloc(struct man *, int, int, const char *);
-int		  man_block_alloc(struct man *, int, int, int);
-int		  man_head_alloc(struct man *, int, int, int);
-int		  man_body_alloc(struct man *, int, int, int);
-int		  man_elem_alloc(struct man *, int, int, int);
+int		  man_block_alloc(struct man *, int, int, enum mant);
+int		  man_head_alloc(struct man *, int, int, enum mant);
+int		  man_body_alloc(struct man *, int, int, enum mant);
+int		  man_elem_alloc(struct man *, int, int, enum mant);
 void		  man_node_free(struct man_node *);
 void		  man_node_freelist(struct man_node *);
 void		  man_node_unlink(struct man *, struct man_node *);
 void		  man_hash_init(void);
-int		  man_hash_find(const char *);
+enum	mant	  man_hash_find(const char *);
 int		  man_macroend(struct man *);
 int		  man_args(struct man *, int, int *, char *, char **);
 #define	ARGS_ERROR	(-1)

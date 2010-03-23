@@ -33,10 +33,11 @@ static	int		 in_line_eoln(MACRO_PROT_ARGS);
 static	int		 blk_imp(MACRO_PROT_ARGS);
 static	int		 blk_close(MACRO_PROT_ARGS);
 
-static	int		 rew_scope(enum man_type, struct man *, int);
-static	int 		 rew_dohalt(int, enum man_type, 
+static	int		 rew_scope(enum man_type, 
+				struct man *, enum mant);
+static	int 		 rew_dohalt(enum mant, enum man_type, 
 				const struct man_node *);
-static	int		 rew_block(int, enum man_type, 
+static	int		 rew_block(enum mant, enum man_type, 
 				const struct man_node *);
 
 const	struct man_macro __man_macros[MAN_MAX] = {
@@ -104,7 +105,7 @@ man_unscope(struct man *m, const struct man_node *n)
 
 
 static int
-rew_block(int ntok, enum man_type type, const struct man_node *n)
+rew_block(enum mant ntok, enum man_type type, const struct man_node *n)
 {
 
 	if (MAN_BLOCK == type && ntok == n->parent->tok && 
@@ -120,7 +121,7 @@ rew_block(int ntok, enum man_type type, const struct man_node *n)
  * sections and subsections).
  */
 static int 
-rew_dohalt(int tok, enum man_type type, const struct man_node *n)
+rew_dohalt(enum mant tok, enum man_type type, const struct man_node *n)
 {
 	int		 c;
 
@@ -175,7 +176,7 @@ rew_dohalt(int tok, enum man_type type, const struct man_node *n)
  * scopes.  When a scope is closed, it must be validated and actioned.
  */
 static int
-rew_scope(enum man_type type, struct man *m, int tok)
+rew_scope(enum man_type type, struct man *m, enum mant tok)
 {
 	struct man_node	*n;
 	int		 c;
@@ -205,7 +206,7 @@ rew_scope(enum man_type type, struct man *m, int tok)
 int
 blk_close(MACRO_PROT_ARGS)
 {
-	int 		 	 ntok;
+	enum mant	 	 ntok;
 	const struct man_node	*nn;
 
 	switch (tok) {
