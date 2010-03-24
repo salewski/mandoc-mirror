@@ -142,6 +142,12 @@ static	const struct termact termacts[MAN_MAX] = {
  	{ pre_sp, NULL, MAN_NOTEXT }, /* Sp */
  	{ pre_nf, NULL, 0 }, /* Vb */
  	{ pre_fi, NULL, 0 }, /* Ve */
+ 	{ pre_ign, NULL, MAN_NOTEXT }, /* de */
+ 	{ pre_ign, NULL, MAN_NOTEXT }, /* dei */
+ 	{ pre_ign, NULL, MAN_NOTEXT }, /* am */
+ 	{ pre_ign, NULL, MAN_NOTEXT }, /* ami */
+ 	{ pre_ign, NULL, MAN_NOTEXT }, /* ig */
+ 	{ NULL, NULL, 0 }, /* . */
 };
 
 
@@ -784,6 +790,8 @@ post_RS(DECL_ARGS)
 	switch (n->type) {
 	case (MAN_BLOCK):
 		mt->offset = mt->lmargin = INDENT;
+		break;
+	case (MAN_HEAD):
 		break;
 	default:
 		term_newln(p);

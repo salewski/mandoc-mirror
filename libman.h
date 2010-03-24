@@ -60,6 +60,7 @@ enum	merr {
 	WNOSCOPE,
 	WOLITERAL,
 	WNLITERAL,
+	WROFFNEST,
 	WERRMAX
 };
 
@@ -73,6 +74,7 @@ struct	man_macro {
 #define	MAN_EXPLICIT	 (1 << 1)	/* See blk_imp(). */
 #define	MAN_FSCOPED	 (1 << 2)	/* See blk_imp(). */
 #define	MAN_NSCOPED	 (1 << 3)	/* See in_line_eoln(). */
+#define	MAN_NOCLOSE	 (1 << 4)	/* See blk_exp(). */
 };
 
 extern	const struct man_macro *const man_macros;
@@ -93,9 +95,7 @@ int		  man_block_alloc(struct man *, int, int, enum mant);
 int		  man_head_alloc(struct man *, int, int, enum mant);
 int		  man_body_alloc(struct man *, int, int, enum mant);
 int		  man_elem_alloc(struct man *, int, int, enum mant);
-void		  man_node_free(struct man_node *);
-void		  man_node_freelist(struct man_node *);
-void		  man_node_unlink(struct man *, struct man_node *);
+void		  man_node_delete(struct man *, struct man_node *);
 void		  man_hash_init(void);
 enum	mant	  man_hash_find(const char *);
 int		  man_macroend(struct man *);
