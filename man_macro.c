@@ -25,9 +25,11 @@
 
 #include "libman.h"
 
-#define	REW_REWIND	(0)		/* See rew_scope(). */
-#define	REW_NOHALT	(1)		/* See rew_scope(). */
-#define	REW_HALT	(2)		/* See rew_scope(). */
+enum	rew {
+	REW_REWIND,
+	REW_NOHALT,
+	REW_HALT,
+};
 
 static	int		 in_line_eoln(MACRO_PROT_ARGS);
 static	int		 blk_imp(MACRO_PROT_ARGS);
@@ -35,9 +37,9 @@ static	int		 blk_close(MACRO_PROT_ARGS);
 
 static	int		 rew_scope(enum man_type, 
 				struct man *, enum mant);
-static	int 		 rew_dohalt(enum mant, enum man_type, 
+static	enum rew	 rew_dohalt(enum mant, enum man_type, 
 				const struct man_node *);
-static	int		 rew_block(enum mant, enum man_type, 
+static	enum rew	 rew_block(enum mant, enum man_type, 
 				const struct man_node *);
 
 const	struct man_macro __man_macros[MAN_MAX] = {
@@ -104,7 +106,7 @@ man_unscope(struct man *m, const struct man_node *n)
 }
 
 
-static int
+static enum rew
 rew_block(enum mant ntok, enum man_type type, const struct man_node *n)
 {
 
@@ -120,10 +122,10 @@ rew_block(enum mant ntok, enum man_type type, const struct man_node *n)
  * section (all less sections), and scoped to subsections (all less
  * sections and subsections).
  */
-static int 
+static enum rew 
 rew_dohalt(enum mant tok, enum man_type type, const struct man_node *n)
 {
-	int		 c;
+	enum rew	 c;
 
 	if (MAN_ROOT == n->type)
 		return(REW_HALT);
@@ -179,7 +181,7 @@ static int
 rew_scope(enum man_type type, struct man *m, enum mant tok)
 {
 	struct man_node	*n;
-	int		 c;
+	enum rew	 c;
 
 	/* LINTED */
 	for (n = m->last; n; n = n->parent) {
@@ -319,11 +321,6 @@ in_line_eoln(MACRO_PROT_ARGS)
 			return(0);
 		if (0 == w)
 			break;
-
-		/* XXX ignore Vb arguments for now */
-		if (MAN_Vb == tok)
-			continue;
-
 		if ( ! man_word_alloc(m, line, la, p))
 			return(0);
 	}

@@ -18,8 +18,6 @@
 #include "config.h"
 #endif
 
-#include <sys/utsname.h>
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
