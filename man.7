@@ -458,14 +458,14 @@ The syntax is as follows:
 .It Sx \&I   Ta    n         Ta    next-line Ta    \&
 .It Sx \&IB  Ta    n         Ta    current   Ta    \&
 .It Sx \&IR  Ta    n         Ta    current   Ta    \&
-.It Sx \&PD  Ta    n         Ta    current   Ta    compat
+.\" .It Sx \&PD  Ta    n         Ta    current   Ta    compat
 .It Sx \&R   Ta    n         Ta    next-line Ta    \&
 .It Sx \&RB  Ta    n         Ta    current   Ta    \&
 .It Sx \&RI  Ta    n         Ta    current   Ta    \&
 .It Sx \&SB  Ta    n         Ta    next-line Ta    \&
 .It Sx \&SM  Ta    n         Ta    next-line Ta    \&
 .It Sx \&TH  Ta    >1, <6    Ta    current   Ta    \&
-.It Sx \&UC  Ta    n         Ta    current   Ta    compat
+.\" .It Sx \&UC  Ta    n         Ta    current   Ta    compat
 .It Sx \&br  Ta    0         Ta    current   Ta    compat
 .It Sx \&fi  Ta    0         Ta    current   Ta    compat
 .It Sx \&i   Ta    n         Ta    current   Ta    compat
@@ -473,9 +473,9 @@ The syntax is as follows:
 .It Sx \&nf  Ta    0         Ta    current   Ta    compat
 .It Sx \&r   Ta    0         Ta    current   Ta    compat
 .It Sx \&sp  Ta    1         Ta    current   Ta    compat
-.It Sx \&Sp  Ta    0         Ta    current   Ta    compat
-.It Sx \&Vb  Ta    <1        Ta    current   Ta    compat
-.It Sx \&Ve  Ta    0         Ta    current   Ta    compat
+.\" .It Sx \&Sp  Ta    0         Ta    current   Ta    compat
+.\" .It Sx \&Vb  Ta    <1        Ta    current   Ta    compat
+.\" .It Sx \&Ve  Ta    0         Ta    current   Ta    compat
 .El
 .
 .Pp
@@ -483,7 +483,9 @@ Macros marked as
 .Qq compat
 are included for compatibility with the significant corpus of existing
 manuals that mix dialects of roff.  These macros should not be used for
-portable manuals.
+portable
+.Nm
+manuals.
 .
 .
 .Ss Block Macros
@@ -517,6 +519,11 @@ or paragraph, closed by a section, sub-section, part,
 or
 .Sx \&TP .
 No closure refers to an explicit block closing macro.
+.
+.Pp
+As a rule, block macros may not be nested; thus, calling a block macro
+while another block macro scope is open, and the open scope is not
+implicitly closed, is syntactically incorrect.
 .
 .Pp
 .Bl -column -compact -offset indent "MacroX" "ArgumentsX" "Head ScopeX" "sub-sectionX" "compatX"
@@ -896,14 +903,14 @@ See also
 .Sx \&P ,
 and
 .Sx \&PP .
-.
-.
-.Ss \&PD
-Has no effect.  Included for compatibility.
-.
-.
-.Ss \&UC
-Has no effect.  Included for compatibility.
+.\" .
+.\" .
+.\" .Ss \&PD
+.\" Has no effect.  Included for compatibility.
+.\" .
+.\" .
+.\" .Ss \&UC
+.\" Has no effect.  Included for compatibility.
 .
 .
 .Ss \&br
@@ -971,46 +978,43 @@ macro.  Defaults to 1, if unspecified.
 See also
 .Sx \&br .
 .
-.Ss \&Sp
-A synonym for
-.Sx \&sp
-.Cm 0.5v .
-.
-.Ss \&Vb
-A synonym for
-.Sx \&nf .
-Accepts an argument (the height of the formatted space) which is
-disregarded.
-.
-.Ss \&Ve
-A synonym for
-.Sx \&fi .
-.
+.\" .Ss \&Sp
+.\" A synonym for
+.\" .Sx \&sp
+.\" .Cm 0.5v .
+.\" .
+.\" .Ss \&Vb
+.\" A synonym for
+.\" .Sx \&nf .
+.\" Accepts an argument (the height of the formatted space) which is
+.\" disregarded.
+.\" .
+.\" .Ss \&Ve
+.\" A synonym for
+.\" .Sx \&fi .
+.\" .
 .
 .Sh COMPATIBILITY
-This section documents compatibility with other roff implementations, at
-this time limited to
-.Xr groff 1 .
+This section documents areas of questionable portability between
+implementations of the
+.Nm
+language.
 .Pp
 .Bl -dash -compact
 .It
-The
-.Xr groff 1
-.Sx \&i
-macro will italicise all subsequent text if a line argument is not
-provided.  This behaviour is not implemented.
+In quoted literals, GNU troff allowed pair-wise double-quotes to produce
+a standalone double-quote in formatted output.  It is not known whether
+this behaviour is exhibited by other formatters.
 .It
-In quoted literals, groff allowed pair-wise double-quotes to produce a
-standalone double-quote in formatted output.  This idiosyncratic
-behaviour is no longer applicable.
+Blocks of whitespace are stripped from macro and free-form text lines
+(except when in literal mode) in mandoc.  This is not the case for GNU
+troff: for maximum portability, whitespace sensitive blocks should be
+enclosed in literal contexts.
 .It
 The
 .Sx \&sp
-macro does not accept negative numbers.
-.It
-Blocks of whitespace are stripped from both macro and free-form text
-lines (except when in literal mode), while groff would retain whitespace
-in free-form text lines.
+macro does not accept negative values in mandoc.  In GNU troff, this
+would result in strange behaviour.
 .El
 .
 .

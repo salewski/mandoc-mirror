@@ -217,7 +217,11 @@ rew_scope(enum man_type type, struct man *m, enum mant tok)
 }
 
 
-/* ARGSUSED */
+/*
+ * Closure for dotted macros (de, dei, am, ami, ign).  This must handle
+ * any of these as the parent node, so it needs special handling.
+ * Beyond this, it's the same as blk_close().
+ */
 int
 blk_dotted(MACRO_PROT_ARGS)
 {
@@ -248,7 +252,9 @@ blk_dotted(MACRO_PROT_ARGS)
 }
 
 
-/* ARGSUSED */
+/*
+ * Close out a generic explicit macro.
+ */
 int
 blk_close(MACRO_PROT_ARGS)
 {
@@ -286,7 +292,6 @@ blk_exp(MACRO_PROT_ARGS)
 {
 	int		 w, la;
 	char		*p;
-	struct man_node	*n;
 
 	/* 
 	 * Close out prior scopes.  "Regular" explicit macros cannot be
@@ -305,8 +310,6 @@ blk_exp(MACRO_PROT_ARGS)
 		return(0);
 	if ( ! man_head_alloc(m, line, ppos, tok))
 		return(0);
-
-	n = m->last;
 
 	for (;;) {
 		la = *pos;

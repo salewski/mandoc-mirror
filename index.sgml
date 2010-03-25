@@ -221,8 +221,10 @@
 							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">xx-03-2010</SPAN></TD>
 								<TD VALIGN="top">
-								Version <SPAN CLASS="rev">1.9.17</SPAN> highlights: accept <A
-								HREF="http://perldoc.perl.org/" CLASS="external">perlpod</A> macros.
+								Version <SPAN CLASS="rev">1.9.17</SPAN> highlights: accept all <A
+								HREF="http://perldoc.perl.org/" CLASS="external">perlpod</A> macros.  Also
+								accept and ignore <Q>de</Q>, <Q>dei</Q>, <Q>am</Q>, <Q>ami</Q>, and <Q>ig</Q>
+								roff macro blocks.
 								</TD>
 							</TR>
 							<TR>
