@@ -60,7 +60,8 @@ man_hash_init(void)
 
 	memset(table, UCHAR_MAX, sizeof(table));
 
-	assert(/* CONSTCOND */ MAN_MAX < UCHAR_MAX);
+	assert(/* LINTED */ 
+			MAN_MAX < UCHAR_MAX);
 
 	for (i = 0; i < MAN_MAX; i++) {
 		x = man_macronames[i][0];

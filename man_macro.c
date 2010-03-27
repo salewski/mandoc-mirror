@@ -28,7 +28,7 @@
 enum	rew {
 	REW_REWIND,
 	REW_NOHALT,
-	REW_HALT,
+	REW_HALT
 };
 
 static	int		 blk_close(MACRO_PROT_ARGS);

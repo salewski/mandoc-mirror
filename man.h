@@ -61,7 +61,7 @@ enum	mant {
 	MAN_ami,
 	MAN_ig,
 	MAN_dot,
-	MAN_MAX,
+	MAN_MAX
 };
 
 enum	man_type {
