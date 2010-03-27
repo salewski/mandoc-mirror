@@ -559,10 +559,6 @@ in_line_eoln(MACRO_PROT_ARGS)
 int
 man_macroend(struct man *m)
 {
-	struct man_node	*n;
-
-	n = MAN_VALID & m->last->flags ?
-		m->last->parent : m->last;
 
 	return(man_unscope(m, m->first, WEXITSCOPE));
 }
