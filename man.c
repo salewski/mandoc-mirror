@@ -51,6 +51,8 @@ const	char *const __man_merrnames[WERRMAX] = {
 	"literal context already open", /* WOLITERAL */
 	"no literal context open", /* WNLITERAL */
 	"invalid nesting of roff declarations", /* WROFFNEST */
+	"scope in roff instructions broken", /* WROFFSCOPE */
+	"document title should be uppercase", /* WTITLECASE */
 };
 
 const	char *const __man_macronames[MAN_MAX] = {		 
@@ -155,7 +157,7 @@ int
 man_parseln(struct man *m, int ln, char *buf)
 {
 
-	return('.' == *buf ? 
+	return('.' == *buf || '\'' == *buf ? 
 			man_pmacro(m, ln, buf) : 
 			man_ptext(m, ln, buf));
 }
@@ -447,7 +449,7 @@ descope:
 
 	if (MAN_ELINE & m->flags) {
 		m->flags &= ~MAN_ELINE;
-		if ( ! man_unscope(m, m->last->parent))
+		if ( ! man_unscope(m, m->last->parent, WERRMAX))
 			return(0);
 	}
 
@@ -455,7 +457,7 @@ descope:
 		return(1);
 	m->flags &= ~MAN_BLINE;
 
-	if ( ! man_unscope(m, m->last->parent))
+	if ( ! man_unscope(m, m->last->parent, WERRMAX))
 		return(0);
 	return(man_body_alloc(m, line, 0, m->last->tok));
 }
@@ -623,7 +625,7 @@ out:
 	assert(MAN_BLINE & m->flags);
 	m->flags &= ~MAN_BLINE;
 
-	if ( ! man_unscope(m, m->last->parent))
+	if ( ! man_unscope(m, m->last->parent, WERRMAX))
 		return(0);
 	return(man_body_alloc(m, ln, 0, m->last->tok));
 

@@ -124,7 +124,6 @@ post_de(struct man *m)
 	 */
 	if (MAN_BLOCK == m->last->type)
 		man_node_delete(m, m->last);
-
 	return(1);
 }
 
