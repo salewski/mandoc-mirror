@@ -496,7 +496,7 @@ man_pmacro(struct man *m, int ln, char *buf)
 	 * Skip whitespace between the control character and initial
 	 * text.  "Whitespace" is both spaces and tabs.
 	 */
-	if (' ' == buf[i]) {
+	if (' ' == buf[i] || '\t' == buf[i]) {
 		i++;
 		while (buf[i] && (' ' == buf[i] || '\t' == buf[i]))
 			i++;
