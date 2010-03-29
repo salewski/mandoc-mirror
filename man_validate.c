@@ -59,7 +59,7 @@ static	v_check	  posts_part[] = { check_part, NULL };
 static	v_check	  posts_sec[] = { check_sec, NULL };
 static	v_check	  posts_le1[] = { check_le1, NULL };
 static	v_check	  pres_bline[] = { check_bline, NULL };
-static	v_check	  pres_roff[] = { check_bline, check_roff, NULL };
+static	v_check	  pres_roff[] = { check_roff, NULL };
 
 static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, posts_eq0 }, /* br */
