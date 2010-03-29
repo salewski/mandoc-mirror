@@ -401,9 +401,9 @@ args(struct mdoc *m, int line, int *pos,
 	 * follows the pattern of [[::delim::][ ]+]+.
 	 */
 
-	if ((fl & ARGS_DELIM) && mdoc_iscdelim(buf[*pos])) {
+	if ((fl & ARGS_DELIM) && mdoc_iscdelim(buf[*pos]) > 1) {
 		for (i = *pos; buf[i]; ) {
-			if ( ! mdoc_iscdelim(buf[i]))
+			if ( mdoc_iscdelim(buf[i]) < 2)
 				break;
 			i++;
 			if (0 == buf[i] || ' ' != buf[i])

@@ -200,7 +200,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Dc */
 	{mdoc_dq_pre, mdoc_dq_post}, /* Do */
 	{mdoc_dq_pre, mdoc_dq_post}, /* Dq */
-	{NULL, NULL}, /* Ec */
+	{NULL, NULL}, /* Ec */ /* FIXME: no space */
 	{NULL, NULL}, /* Ef */
 	{mdoc_em_pre, NULL}, /* Em */ 
 	{NULL, NULL}, /* Eo */
