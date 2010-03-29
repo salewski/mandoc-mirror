@@ -478,14 +478,15 @@ macrowarn(struct man *m, int ln, const char *buf)
 int
 man_pmacro(struct man *m, int ln, char *buf)
 {
-	int		 i, j, ppos, fl;
+	int		 i, j, ppos;
 	enum mant	 tok;
 	char		 mac[5];
 	struct man_node	*n;
 
 	/* Comments and empties are quickly ignored. */
 
-	fl = m->flags;
+	if (MAN_BLINE & m->flags)
+		m->flags |= MAN_BPLINE;
 
 	if ('\0' == buf[1])
 		return(1);
@@ -601,10 +602,11 @@ out:
 	 * family) within BLINE or ELINE systems.  This is annoying.
 	 */
 
-	if ( ! (MAN_BLINE & fl)) {
+	if ( ! (MAN_BPLINE & m->flags)) {
 		m->flags &= ~MAN_ILINE; 
 		return(1);
 	}
+	m->flags &= ~MAN_BPLINE;
 
 	/*
 	 * If we're in a block scope, then allow this macro to slip by

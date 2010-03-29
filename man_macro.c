@@ -328,6 +328,14 @@ blk_dotted(MACRO_PROT_ARGS)
 		break;
 	}
 
+	/*
+	 * Restore flags set when we got here and also stipulate that we
+	 * don't post-process the line when exiting the macro op
+	 * function in man_pmacro().
+	 */
+	m->flags = m->svflags;
+	m->flags |= MAN_ILINE;
+
 	return(1);
 }
 
@@ -385,6 +393,13 @@ blk_exp(MACRO_PROT_ARGS)
 			return(0);
 		if ( ! rew_scope(MAN_BLOCK, m, tok))
 			return(0);
+	} else {
+		/*
+		 * Save our state; we restore it when exiting from the
+		 * roff instruction block.
+		 */
+		m->svflags = m->flags;
+		m->flags = 0;
 	}
 
 	if ( ! man_block_alloc(m, line, ppos, tok))
