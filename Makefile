@@ -10,8 +10,8 @@ INSTALL_DATA	= install -m 0444
 INSTALL_LIB	= install -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
-VERSION	   = 1.9.18
-VDATE	   = 27 March 2010
+VERSION	   = 1.9.20
+VDATE	   = 30 March 2010
 
 VFLAGS     = -DVERSION="\"$(VERSION)\"" -DHAVE_CONFIG_H
 WFLAGS     = -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings

@@ -219,13 +219,13 @@
 						<COL CLASS="date">
 						<TBODY>
 							<TR>
-								<TD VALIGN="top"><SPAN CLASS="date">29-03-2010</SPAN></TD>
+								<TD VALIGN="top"><SPAN CLASS="date">30-03-2010</SPAN></TD>
 								<TD VALIGN="top">
 								Version <SPAN CLASS="rev">1.9.20</SPAN>: more efforts to get roff instructions
-								in -man documents under control.  This seems to be working for all manuals I can
-								find.  Please let me know if you find ill-formatted -man manuals.  Note that
-								roff instructions embedded in line-scoped, next-line macros (e.g. <Q>B</Q>) are
-								not supported.
+								in -man documents under control.  Note that roff instructions embedded in
+								line-scoped, next-line macros (e.g. <Q>B</Q>) are not supported.  Leading
+								punctuation for -mdoc macros, such as <Q>Fl ( ( a</Q>, are now correctly
+								handled.
 								</TD>
 							</TR>
 							<TR>

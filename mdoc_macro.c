@@ -1209,7 +1209,13 @@ in_line_argn(MACRO_PROT_ARGS)
 	struct mdoc_arg	 *arg;
 	char		 *p;
 
-	/* Fixed maximum arguments per macro, if applicable. */
+	/*
+	 * A line macro that has a fixed number of arguments (maxargs).
+	 * Only open the scope once the first non-leading-punctuation is
+	 * found (unless MDOC_IGNDELIM is noted, like in `Pf'), then
+	 * keep it open until the maximum number of arguments are
+	 * exhausted.
+	 */
 
 	switch (tok) {
 	case (MDOC_Ap):
@@ -1229,9 +1235,7 @@ in_line_argn(MACRO_PROT_ARGS)
 		break;
 	}
 
-	/* Macro argument processing. */
-
-	for (arg = NULL;; ) {
+	for (arg = NULL; ; ) {
 		la = *pos;
 		c = mdoc_argv(m, line, tok, &arg, pos, buf);
 
@@ -1249,22 +1253,8 @@ in_line_argn(MACRO_PROT_ARGS)
 		return(0);
 	}
 
-	/* Open the element scope. */
-
-	if ( ! mdoc_elem_alloc(m, line, ppos, tok, arg))
-		return(0);
-
-	/* Process element arguments. */
-
-	for (flushed = j = 0; ; j++) {
+	for (flushed = j = 0; ; ) {
 		la = *pos;
-
-		if (j == maxargs && ! flushed) {
-			if ( ! rew_elem(m, tok))
-				return(0);
-			flushed = 1;
-		}
-
 		c = mdoc_args(m, line, pos, buf, tok, &p);
 
 		if (ARGS_ERROR == c)
@@ -1274,12 +1264,28 @@ in_line_argn(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == c)
 			break;
 
+		if ( ! (MDOC_IGNDELIM & mdoc_macros[tok].flags) && 
+				0 == j && 1 == mdoc_isdelim(p)) {
+			if ( ! mdoc_word_alloc(m, line, la, p))
+				return(0);
+			continue;
+		} else if (0 == j)
+		       if ( ! mdoc_elem_alloc(m, line, la, tok, arg))
+			       return(0);
+
+		if (j == maxargs && ! flushed) {
+			if ( ! rew_elem(m, tok))
+				return(0);
+			flushed = 1;
+		}
+
 		if (MDOC_MAX != (c = lookup(tok, p))) {
 			if ( ! flushed && ! rew_elem(m, tok))
 				return(0);
 			flushed = 1;
 			if ( ! mdoc_macro(m, c, line, la, pos, buf))
 				return(0);
+			j++;
 			break;
 		}
 
@@ -1297,18 +1303,24 @@ in_line_argn(MACRO_PROT_ARGS)
 		 * code is no here, it's unlikely to be removed.
 		 */
 
+#ifdef __OpenBSD__
 		if (MDOC_Xr == tok && j == maxargs) {
-			if ( ! mdoc_elem_alloc(m, line, ppos, MDOC_Ns, NULL))
+			if ( ! mdoc_elem_alloc(m, line, la, MDOC_Ns, NULL))
 				return(0);
 			if ( ! rew_elem(m, MDOC_Ns))
 				return(0);
 		}
+#endif
 
 		if ( ! mdoc_word_alloc(m, line, la, p))
 			return(0);
+		j++;
 	}
 
-	/* Close out and append delimiters. */
+	if (0 == j && ! mdoc_elem_alloc(m, line, la, tok, arg))
+	       return(0);
+
+	/* Close out in a consistent state. */
 
 	if ( ! flushed && ! rew_elem(m, tok))
 		return(0);
