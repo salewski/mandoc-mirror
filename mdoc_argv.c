@@ -336,7 +336,6 @@ mdoc_args(struct mdoc *m, int line, int *pos,
 	int		  fl, c, i;
 	struct mdoc_node *n;
 
-	assert(tok && tok < MDOC_MAX);
 	fl = mdoc_argflags[tok];
 
 	if (MDOC_It != tok)

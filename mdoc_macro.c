@@ -538,10 +538,8 @@ rew_dobreak(enum mdoct tok, const struct mdoc_node *p)
 			return(1);
 		break;
 	case (MDOC_Oc):
-#ifdef UGLY
 		if (MDOC_Op == p->tok)
 			return(1);
-#endif
 		break;
 	default:
 		break;
@@ -881,7 +879,9 @@ blk_full(MACRO_PROT_ARGS)
 	int		  c, la;
 	struct mdoc_arg	 *arg;
 	struct mdoc_node *head; /* save of head macro */
+#ifdef	UGLY
 	struct mdoc_node *n;
+#endif
 	char		 *p;
 
 	/* Close out prior implicit scope. */
@@ -1102,7 +1102,6 @@ blk_part_imp(MACRO_PROT_ARGS)
 		body = m->last;
 	}
 
-#ifdef	UGLY
 	/* 
 	 * If we can't rewind to our body, then our scope has already
 	 * been closed by another macro (like `Oc' closing `Op').  This
@@ -1112,7 +1111,6 @@ blk_part_imp(MACRO_PROT_ARGS)
 	for (n = m->last; n; n = n->parent)
 		if (body == n)
 			break;
-#endif
 
 	if (NULL == n && ! mdoc_nwarn(m, body, EIMPBRK))
 		return(0);

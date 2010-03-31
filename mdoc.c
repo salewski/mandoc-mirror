@@ -436,6 +436,7 @@ node_alloc(struct mdoc *m, int line, int pos,
 	p->line = line;
 	p->pos = pos;
 	p->tok = tok;
+	p->type = type;
 
 	return(p);
 }
