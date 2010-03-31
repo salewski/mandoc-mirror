@@ -42,13 +42,13 @@ static	int	  blk_exp_close(MACRO_PROT_ARGS);
 static	int	  blk_part_imp(MACRO_PROT_ARGS);
 
 static	int	  phrase(struct mdoc *, int, int, char *);
-static	int	  rew_dohalt(int, enum mdoc_type, 
+static	int	  rew_dohalt(enum mdoct, enum mdoc_type, 
 			const struct mdoc_node *);
-static	int	  rew_alt(int);
-static	int	  rew_dobreak(int, const struct mdoc_node *);
-static	int	  rew_elem(struct mdoc *, int);
+static	enum mdoct rew_alt(enum mdoct);
+static	int	  rew_dobreak(enum mdoct, const struct mdoc_node *);
+static	int	  rew_elem(struct mdoc *, enum mdoct);
 static	int	  rew_sub(enum mdoc_type, struct mdoc *, 
-			int, int, int);
+			enum mdoct, int, int);
 static	int	  rew_last(struct mdoc *, 
 			const struct mdoc_node *);
 static	int	  append_delims(struct mdoc *, int, int *, char *);
@@ -318,8 +318,8 @@ rew_last(struct mdoc *mdoc, const struct mdoc_node *to)
  * Return the opening macro of a closing one, e.g., `Ec' has `Eo' as its
  * matching pair.
  */
-static int
-rew_alt(int tok)
+static enum mdoct
+rew_alt(enum mdoct tok)
 {
 	switch (tok) {
 	case (MDOC_Ac):
@@ -369,7 +369,8 @@ rew_alt(int tok)
  * The scope-closing and so on occurs in the various rew_* routines.
  */
 static int 
-rew_dohalt(int tok, enum mdoc_type type, const struct mdoc_node *p)
+rew_dohalt(enum mdoct tok, enum mdoc_type type, 
+		const struct mdoc_node *p)
 {
 
 	if (MDOC_ROOT == p->type)
@@ -508,7 +509,7 @@ rew_dohalt(int tok, enum mdoc_type type, const struct mdoc_node *p)
  * REWIND_NOHALT). 
  */
 static int
-rew_dobreak(int tok, const struct mdoc_node *p)
+rew_dobreak(enum mdoct tok, const struct mdoc_node *p)
 {
 
 	assert(MDOC_ROOT != p->type);
@@ -537,9 +538,10 @@ rew_dobreak(int tok, const struct mdoc_node *p)
 			return(1);
 		break;
 	case (MDOC_Oc):
-		/* XXX - experimental! */
+#ifdef UGLY
 		if (MDOC_Op == p->tok)
 			return(1);
+#endif
 		break;
 	default:
 		break;
@@ -555,7 +557,7 @@ rew_dobreak(int tok, const struct mdoc_node *p)
 
 
 static int
-rew_elem(struct mdoc *mdoc, int tok)
+rew_elem(struct mdoc *mdoc, enum mdoct tok)
 {
 	struct mdoc_node *n;
 
@@ -571,7 +573,7 @@ rew_elem(struct mdoc *mdoc, int tok)
 
 static int
 rew_sub(enum mdoc_type t, struct mdoc *m, 
-		int tok, int line, int ppos)
+		enum mdoct tok, int line, int ppos)
 {
 	struct mdoc_node *n;
 	int		  c;
@@ -595,7 +597,25 @@ rew_sub(enum mdoc_type t, struct mdoc *m,
 	}
 
 	assert(n);
-	return(rew_last(m, n));
+	if ( ! rew_last(m, n))
+		return(0);
+
+#ifdef	UGLY
+	/*
+	 * The current block extends an enclosing block beyond a line
+	 * break.  Now that the current block ends, close the enclosing
+	 * block, too.
+	 */
+	if (NULL != (n = n->pending)) {
+		assert(MDOC_HEAD == n->type);
+		if ( ! rew_last(m, n))
+			return(0);
+		if ( ! mdoc_body_alloc(m, n->line, n->pos, n->tok))
+			return(0);
+	}
+#endif
+
+	return(1);
 }
 
 
@@ -861,6 +881,7 @@ blk_full(MACRO_PROT_ARGS)
 	int		  c, la;
 	struct mdoc_arg	 *arg;
 	struct mdoc_node *head; /* save of head macro */
+	struct mdoc_node *n;
 	char		 *p;
 
 	/* Close out prior implicit scope. */
@@ -978,6 +999,21 @@ blk_full(MACRO_PROT_ARGS)
 	if (MDOC_Nd == tok)
 		return(1);
 
+#ifdef	UGLY
+	/*
+	 * If there is an open sub-block requiring explicit close-out,
+	 * postpone switching the current block from head to body until
+	 * the rew_sub() call closing out that sub-block.
+	 */
+	for (n = m->last; n && n != head; n = n->parent) {
+		if (MDOC_EXPLICIT & mdoc_macros[n->tok].flags && 
+				MDOC_BLOCK == n->type) {
+			n->pending = head;
+			return(1);
+		}
+	}
+#endif
+
 	/* Close out scopes to remain in a consistent state. */
 
 	if ( ! rew_sub(MDOC_HEAD, m, tok, line, ppos))
@@ -1066,16 +1102,17 @@ blk_part_imp(MACRO_PROT_ARGS)
 		body = m->last;
 	}
 
+#ifdef	UGLY
 	/* 
 	 * If we can't rewind to our body, then our scope has already
 	 * been closed by another macro (like `Oc' closing `Op').  This
 	 * is ugly behaviour nodding its head to OpenBSD's overwhelming
-	 * crufty use of `Op' breakage.  XXX: DEPRECATE.
+	 * crufty use of `Op' breakage.
 	 */
-
 	for (n = m->last; n; n = n->parent)
 		if (body == n)
 			break;
+#endif
 
 	if (NULL == n && ! mdoc_nwarn(m, body, EIMPBRK))
 		return(0);

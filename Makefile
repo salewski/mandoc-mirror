@@ -13,7 +13,7 @@ INSTALL_MAN	= $(INSTALL_DATA)
 VERSION	   = 1.9.21
 VDATE	   = 31 March 2010
 
-VFLAGS     = -DVERSION="\"$(VERSION)\"" -DHAVE_CONFIG_H
+VFLAGS     = -DVERSION="\"$(VERSION)\"" -DHAVE_CONFIG_H -DUGLY
 WFLAGS     = -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 CFLAGS    += -g $(VFLAGS) $(WFLAGS)
 #CFLAGS	  += -DOSNAME="\"OpenBSD 4.5\""

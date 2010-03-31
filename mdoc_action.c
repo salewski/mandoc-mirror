@@ -647,7 +647,8 @@ static int
 post_bl_width(POST_ARGS)
 {
 	size_t		  width;
-	int		  i, tok;
+	int		  i;
+	enum mdoct	  tok;
 	char		  buf[NUMSIZ];
 	char		 *p;
 
