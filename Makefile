@@ -10,13 +10,21 @@ INSTALL_DATA	= install -m 0444
 INSTALL_LIB	= install -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
-VERSION	   = 1.9.21
+VERSION	   = 1.9.22
 VDATE	   = 31 March 2010
 
-VFLAGS     = -DVERSION="\"$(VERSION)\"" -DHAVE_CONFIG_H  -DUGLY
+VFLAGS	   = -DVERSION="\"$(VERSION)\""
 WFLAGS     = -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
-CFLAGS    += -g $(VFLAGS) $(WFLAGS)
-#CFLAGS	  += -DOSNAME="\"OpenBSD 4.5\""
+CFLAGS    += -g $(WFLAGS) $(VFLAGS) -DHAVE_CONFIG_H
+
+# Specify this if you want to hard-code the operating system to appear
+# in the lower-left hand corner of -mdoc manuals.
+# CFLAGS += -DOSNAME="\"OpenBSD 4.5\""
+
+# Specify this if you want to accept Xo/Xc macros extending the head of
+# block full-implicit macros.
+# CFLAGS += -DUGLY
+
 LINTFLAGS += $(VFLAGS)
 
 MANDOCFLAGS = -Wall -fstrict

@@ -219,6 +219,16 @@
 						<COL CLASS="date">
 						<TBODY>
 							<TR>
+								<TD VALIGN="top"><SPAN CLASS="date">31-03-2010</SPAN></TD>
+								<TD VALIGN="top">
+								Version <SPAN CLASS="rev">1.9.22</SPAN>: adjusted merge of the significant work
+								by Ingo Schwarze in getting <Q>Xo</Q> blocks (block full implicit, e.g.,
+								<Q>It</Q> for non-columnar lists) to work properly.  This isn't enabled by
+								default: you must specify <SPAN CLASS="flag">-DUGLY</SPAN> as a compiler flag
+								(see the Makefile for details).
+								</TD>
+							</TR>
+							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">30-03-2010</SPAN></TD>
 								<TD VALIGN="top">
 								Version <SPAN CLASS="rev">1.9.20</SPAN>: more efforts to get roff instructions
