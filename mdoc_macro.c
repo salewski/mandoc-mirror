@@ -879,6 +879,7 @@ blk_full(MACRO_PROT_ARGS)
 	int		  c, la;
 	struct mdoc_arg	 *arg;
 	struct mdoc_node *head; /* save of head macro */
+	struct mdoc_node *body; /* save of body macro */
 #ifdef	UGLY
 	struct mdoc_node *n;
 #endif
@@ -923,7 +924,7 @@ blk_full(MACRO_PROT_ARGS)
 	if ( ! mdoc_block_alloc(m, line, ppos, tok, arg))
 		return(0);
 
-	head = NULL;
+	head = body = NULL;
 
 	/*
 	 * The `Nd' macro has all arguments in its body: it's a hybrid
@@ -938,6 +939,7 @@ blk_full(MACRO_PROT_ARGS)
 			return(0);
 		if ( ! mdoc_body_alloc(m, line, ppos, tok))
 			return(0);
+		body = m->last;
 	} 
 
 	for (;;) {
@@ -994,20 +996,23 @@ blk_full(MACRO_PROT_ARGS)
 	if (1 == ppos && ! append_delims(m, line, pos, buf))
 		return(0);
 
-	/* See notes on `Nd' hybrid, above. */
+	/* If we've already opened our body, exit now. */
 
-	if (MDOC_Nd == tok)
+	if (NULL != body)
 		return(1);
 
 #ifdef	UGLY
 	/*
-	 * If there is an open sub-block requiring explicit close-out,
-	 * postpone switching the current block from head to body until
-	 * the rew_sub() call closing out that sub-block.
+	 * If there is an open (i.e., unvalidated) sub-block requiring
+	 * explicit close-out, postpone switching the current block from
+	 * head to body until the rew_sub() call closing out that
+	 * sub-block.
 	 */
 	for (n = m->last; n && n != head; n = n->parent) {
-		if (MDOC_EXPLICIT & mdoc_macros[n->tok].flags && 
-				MDOC_BLOCK == n->type) {
+		if (MDOC_BLOCK == n->type && 
+				MDOC_EXPLICIT & mdoc_macros[n->tok].flags &&
+				! (MDOC_VALID & n->flags)) {
+			assert( ! (MDOC_ACTED & n->flags));
 			n->pending = head;
 			return(1);
 		}
