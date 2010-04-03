@@ -1308,8 +1308,9 @@ post_sh_head(POST_ARGS)
 	 * non-CUSTOM has a conventional order to be followed.
 	 */
 
-	if (SEC_NAME != sec && SEC_NONE == mdoc->lastnamed)
-		return(mdoc_nerr(mdoc, mdoc->last, ESECNAME));
+	if (SEC_NAME != sec && SEC_NONE == mdoc->lastnamed && 
+			! mdoc_nwarn(mdoc, mdoc->last, ESECNAME))
+		return(0);
 	if (SEC_CUSTOM == sec)
 		return(1);
 	if (sec == mdoc->lastnamed)

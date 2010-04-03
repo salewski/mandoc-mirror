@@ -600,8 +600,18 @@ parsetext(struct mdoc *m, int line, char *buf)
 	for (i = 0; ' ' == buf[i]; i++)
 		/* Skip leading whitespace. */ ;
 
-	if ('\0' == buf[i])
-		return(mdoc_perr(m, line, 0, ENOBLANK));
+	if ('\0' == buf[i]) {
+		if ( ! mdoc_pwarn(m, line, 0, ENOBLANK))
+			return(0);
+		/*
+		 * Assume that a `Pp' should be inserted in the case of
+		 * a blank line.  Technically, blank lines aren't
+		 * allowed, but enough manuals assume this behaviour
+		 * that we want to work around it.
+		 */
+		if ( ! mdoc_elem_alloc(m, line, 0, MDOC_Pp, NULL))
+			return(0);
+	}
 
 	/*
 	 * Break apart a free-form line into tokens.  Spaces are
