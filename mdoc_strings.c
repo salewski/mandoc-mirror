@@ -61,18 +61,20 @@ static	const struct mdoc_secname secnames[SECNAME_MAX] = {
 };
 
 
+/* 
+ * FIXME: this is repeated in print_text() (html.c) and term_word()
+ * (term.c).
+ */
 int
 mdoc_iscdelim(char p)
 {
 
 	switch (p) {
-	case('|'):
+	case('|'): /* FIXME! */
 		/* FALLTHROUGH */
 	case('('):
 		/* FALLTHROUGH */
 	case('['):
-		/* FALLTHROUGH */
-	case('{'):
 		return(1);
 	case('.'):
 		/* FALLTHROUGH */
@@ -89,8 +91,6 @@ mdoc_iscdelim(char p)
 	case(')'):
 		/* FALLTHROUGH */
 	case(']'):
-		/* FALLTHROUGH */
-	case('}'):
 		return(2);
 	default:
 		break;

@@ -507,8 +507,6 @@ print_text(struct html *h, const char *p)
 		case(')'):
 			/* FALLTHROUGH */
 		case(']'):
-			/* FALLTHROUGH */
-		case('}'):
 			if ( ! (HTML_IGNDELIM & h->flags))
 				h->flags |= HTML_NOSPACE;
 			break;
@@ -525,11 +523,11 @@ print_text(struct html *h, const char *p)
 
 	if (*p && 0 == *(p + 1))
 		switch (*p) {
+		case('|'):
+			/* FALLTHROUGH */
 		case('('):
 			/* FALLTHROUGH */
 		case('['):
-			/* FALLTHROUGH */
-		case('{'):
 			h->flags |= HTML_NOSPACE;
 			break;
 		default:
