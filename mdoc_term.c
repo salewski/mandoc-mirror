@@ -1277,7 +1277,10 @@ termp_xr_pre(DECL_ARGS)
 {
 	const struct mdoc_node *nn;
 
-	assert(n->child && MDOC_TEXT == n->child->type);
+	if (NULL == n->child)
+		return(0);
+
+	assert(MDOC_TEXT == n->child->type);
 	nn = n->child;
 
 	term_word(p, nn->string);

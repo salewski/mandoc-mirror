@@ -756,6 +756,9 @@ mdoc_xr_pre(MDOC_ARGS)
 	struct htmlpair	 	 tag[2];
 	const struct mdoc_node	*nn;
 
+	if (NULL == n->child)
+		return(0);
+
 	PAIR_CLASS_INIT(&tag[0], "link-man");
 
 	if (h->base_man) {
