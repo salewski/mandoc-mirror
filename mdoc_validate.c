@@ -621,8 +621,19 @@ pre_bl(PRE_ARGS)
 		case (MDOC_Inset):
 			/* FALLTHROUGH */
 		case (MDOC_Column):
-			if (type >= 0) 
-				return(mdoc_nerr(mdoc, n, EMULTILIST));
+			/*
+			 * Note that if a duplicate is detected, we
+			 * remove the duplicate instead of passing it
+			 * over.  If we don't do this, mdoc_action will
+			 * become confused when it scans over multiple
+			 * types whilst setting its bitmasks.
+			 */
+			if (type >= 0) {
+				if ( ! mdoc_nwarn(mdoc, n, EMULTILIST))
+					return(0);
+				mdoc_argn_free(n->args, pos);
+				break;
+			}
 			type = n->args->argv[pos].arg;
 			break;
 		case (MDOC_Compact):

@@ -167,6 +167,7 @@ int		  mdoc_argv(struct mdoc *, int, enum mdoct,
 #define	ARGV_ARG	(1)
 #define	ARGV_WORD	(2)
 void		  mdoc_argv_free(struct mdoc_arg *);
+void		  mdoc_argn_free(struct mdoc_arg *, int);
 int		  mdoc_args(struct mdoc *, int,
 			int *, char *, enum mdoct, char **);
 int		  mdoc_zargs(struct mdoc *, int, 
