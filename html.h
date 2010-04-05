@@ -90,18 +90,17 @@ struct	htmlpair {
 	const char	 *val;
 };
 
-#define	PAIR_CLASS_INIT(p, v) \
-	do { (p)->key = ATTR_CLASS; \
-	(p)->val = (v); } while (/* CONSTCOND */ 0)
-#define	PAIR_HREF_INIT(p, v) \
-	do { (p)->key = ATTR_HREF; \
-	(p)->val = (v); } while (/* CONSTCOND */ 0)
-#define	PAIR_STYLE_INIT(p, h) \
-	do { (p)->key = ATTR_STYLE; \
-	(p)->val = (h)->buf; } while (/* CONSTCOND */ 0)
-#define	PAIR_SUMMARY_INIT(p, v) \
-	do { (p)->key = ATTR_SUMMARY; \
-	(p)->val = (v); } while (/* CONSTCOND */ 0)
+#define	PAIR_INIT(p, t, v) \
+	do { \
+		(p)->key = (t); \
+		(p)->val = (v); \
+	} while (/* CONSTCOND */ 0)
+
+#define	PAIR_ID_INIT(p, v)	PAIR_INIT(p, ATTR_ID, v)
+#define	PAIR_CLASS_INIT(p, v)	PAIR_INIT(p, ATTR_CLASS, v)
+#define	PAIR_HREF_INIT(p, v)	PAIR_INIT(p, ATTR_HREF, v)
+#define	PAIR_STYLE_INIT(p, h)	PAIR_INIT(p, ATTR_STYLE, (h)->buf)
+#define	PAIR_SUMMARY_INIT(p, v)	PAIR_INIT(p, ATTR_SUMMARY, v)
 
 enum	htmltype {
 	HTML_HTML_4_01_STRICT,
