@@ -1,4 +1,4 @@
-.SUFFIXES:	.html .xml .sgml .1 .3 .7 .md5 .tar.gz .1.txt .3.txt .7.txt .1.sgml .3.sgml .7.sgml
+.SUFFIXES:	.html .xml .sgml .1 .3 .7 .md5 .tar.gz .1.txt .3.txt .7.txt .1.sgml .3.sgml .7.sgml .h .h.html
 
 BINDIR		= $(PREFIX)/bin
 INCLUDEDIR	= $(PREFIX)/include
@@ -68,7 +68,7 @@ HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
 GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml manuals.7.sgml \
 	     mandoc_char.7.sgml man.7.sgml man.3.sgml
 SGMLS	   = index.sgml
-HTMLS	   = ChangeLog.html index.html
+HTMLS	   = ChangeLog.html index.html man.h.html mdoc.h.html
 XSLS	   = ChangeLog.xsl
 GHTMLS	   = mandoc.1.html mdoc.3.html man.3.html mdoc.7.html \
 	     man.7.html mandoc_char.7.html manuals.7.html
@@ -240,6 +240,9 @@ mandoc: $(MAINOBJS) libmdoc.a libman.a
 
 .tar.gz.md5:
 	md5 $< > $@
+
+.h.h.html:
+	highlight -I $< >$@
 
 config.h: config.h.pre config.h.post
 	rm -f config.log
