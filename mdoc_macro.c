@@ -818,7 +818,7 @@ in_line(MACRO_PROT_ARGS)
 		 * the word. 
 		 */
 
-		d = mdoc_isdelim(p);
+		d = ARGS_QWORD == w ? 0 : mdoc_isdelim(p);
 
 		if (ARGS_QWORD != w && d) {
 			if (0 == lastpunct && ! rew_elem(m, tok))
@@ -954,6 +954,7 @@ blk_full(MACRO_PROT_ARGS)
 		/* Don't emit leading punct. for phrases. */
 
 		if (NULL == head && ARGS_PHRASE != c &&
+				ARGS_QWORD != c &&
 				1 == mdoc_isdelim(p)) {
 			if ( ! mdoc_word_alloc(m, line, la, p))
 				return(0);
@@ -1077,7 +1078,8 @@ blk_part_imp(MACRO_PROT_ARGS)
 		if (ARGS_PUNCT == c)
 			break;
 
-		if (NULL == body && 1 == mdoc_isdelim(p)) {
+		if (NULL == body && ARGS_QWORD != c &&
+				1 == mdoc_isdelim(p)) {
 			if ( ! mdoc_word_alloc(m, line, la, p))
 				return(0);
 			continue;
@@ -1169,7 +1171,8 @@ blk_part_exp(MACRO_PROT_ARGS)
 
 		/* Flush out leading punctuation. */
 
-		if (NULL == head && 1 == mdoc_isdelim(p)) {
+		if (NULL == head && ARGS_QWORD != c &&
+				1 == mdoc_isdelim(p)) {
 			assert(NULL == body);
 			if ( ! mdoc_word_alloc(m, line, la, p))
 				return(0);
@@ -1305,6 +1308,7 @@ in_line_argn(MACRO_PROT_ARGS)
 			break;
 
 		if ( ! (MDOC_IGNDELIM & mdoc_macros[tok].flags) && 
+				ARGS_QWORD != c &&
 				0 == j && 1 == mdoc_isdelim(p)) {
 			if ( ! mdoc_word_alloc(m, line, la, p))
 				return(0);
@@ -1330,6 +1334,7 @@ in_line_argn(MACRO_PROT_ARGS)
 		}
 
 		if ( ! (MDOC_IGNDELIM & mdoc_macros[tok].flags) &&
+				ARGS_QWORD != c &&
 				! flushed && mdoc_isdelim(p)) {
 			if ( ! rew_elem(m, tok))
 				return(0);
