@@ -27,9 +27,11 @@
 
 #include "libmdoc.h"
 
-#define	REWIND_REWIND	(1 << 0)
-#define	REWIND_NOHALT	(1 << 1)
-#define	REWIND_HALT	(1 << 2)
+enum	rew {
+	REWIND_REWIND,
+	REWIND_NOHALT,
+	REWIND_HALT
+};
 
 static	int	  ctx_synopsis(MACRO_PROT_ARGS);
 static	int	  obsolete(MACRO_PROT_ARGS);
@@ -42,7 +44,7 @@ static	int	  blk_exp_close(MACRO_PROT_ARGS);
 static	int	  blk_part_imp(MACRO_PROT_ARGS);
 
 static	int	  phrase(struct mdoc *, int, int, char *);
-static	int	  rew_dohalt(enum mdoct, enum mdoc_type, 
+static	enum rew  rew_dohalt(enum mdoct, enum mdoc_type, 
 			const struct mdoc_node *);
 static	enum mdoct rew_alt(enum mdoct);
 static	int	  rew_dobreak(enum mdoct, const struct mdoc_node *);
@@ -368,7 +370,7 @@ rew_alt(enum mdoct tok)
  * close our current scope (REWIND_REWIND), or continue (REWIND_NOHALT).
  * The scope-closing and so on occurs in the various rew_* routines.
  */
-static int 
+static enum rew
 rew_dohalt(enum mdoct tok, enum mdoc_type type, 
 		const struct mdoc_node *p)
 {
@@ -574,7 +576,7 @@ rew_sub(enum mdoc_type t, struct mdoc *m,
 		enum mdoct tok, int line, int ppos)
 {
 	struct mdoc_node *n;
-	int		  c;
+	enum rew	  c;
 
 	/* LINTED */
 	for (n = m->last; n; n = n->parent) {
