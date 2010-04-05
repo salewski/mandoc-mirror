@@ -123,7 +123,7 @@ install:
 	mkdir -p $(MANDIR)/man7
 	$(INSTALL_PROGRAM) mandoc $(BINDIR)
 	$(INSTALL_MAN) mandoc.1 $(MANDIR)/man1
-	$(INSTALL_MAN) man.7 mdoc.7 $(MANDIR)/man7
+	$(INSTALL_MAN) man.7 mdoc.7 mandoc_char.7 $(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(EXAMPLEDIR)
 
 uninstall:
@@ -131,6 +131,7 @@ uninstall:
 	rm -f $(MANDIR)/man1/mandoc.1
 	rm -f $(MANDIR)/man7/mdoc.7
 	rm -f $(MANDIR)/man7/man.7
+	rm -f $(MANDIR)/man7/mandoc_char.7
 	rm -f $(EXAMPLEDIR)/example.style.css
 
 $(OBJS): config.h
