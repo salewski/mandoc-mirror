@@ -141,6 +141,9 @@ const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {
 const	char * const *mdoc_macronames = __mdoc_macronames;
 const	char * const *mdoc_argnames = __mdoc_argnames;
 
+static	void		  mdoc_node_free(struct mdoc_node *);
+static	void		  mdoc_node_unlink(struct mdoc *, 
+				struct mdoc_node *);
 static	void		  mdoc_free1(struct mdoc *);
 static	void		  mdoc_alloc1(struct mdoc *);
 static	struct mdoc_node *node_alloc(struct mdoc *, int, int, 
@@ -177,7 +180,7 @@ mdoc_free1(struct mdoc *mdoc)
 {
 
 	if (mdoc->first)
-		mdoc_node_freelist(mdoc->first);
+		mdoc_node_delete(mdoc, mdoc->first);
 	if (mdoc->meta.title)
 		free(mdoc->meta.title);
 	if (mdoc->meta.os)
@@ -565,8 +568,6 @@ void
 mdoc_node_free(struct mdoc_node *p)
 {
 
-	if (p->parent)
-		p->parent->nchild--;
 	if (p->string)
 		free(p->string);
 	if (p->args)
@@ -575,16 +576,53 @@ mdoc_node_free(struct mdoc_node *p)
 }
 
 
-void
-mdoc_node_freelist(struct mdoc_node *p)
+static void
+mdoc_node_unlink(struct mdoc *m, struct mdoc_node *n)
 {
 
-	if (p->child)
-		mdoc_node_freelist(p->child);
-	if (p->next)
-		mdoc_node_freelist(p->next);
+	/* Adjust siblings. */
 
+	if (n->prev)
+		n->prev->next = n->next;
+	if (n->next)
+		n->next->prev = n->prev;
+
+	/* Adjust parent. */
+
+	if (n->parent) {
+		n->parent->nchild--;
+		if (n->parent->child == n)
+			n->parent->child = n->prev ? n->prev : n->next;
+	}
+
+	/* Adjust parse point, if applicable. */
+
+	if (m && m->last == n) {
+		if (n->prev) {
+			m->last = n->prev;
+			m->next = MDOC_NEXT_SIBLING;
+		} else {
+			m->last = n->parent;
+			m->next = MDOC_NEXT_CHILD;
+		}
+	}
+
+	if (m && m->first == n)
+		m->first = NULL;
+}
+
+
+void
+mdoc_node_delete(struct mdoc *m, struct mdoc_node *p)
+{
+
+	while (p->child) {
+		assert(p->nchild);
+		mdoc_node_delete(m, p->child);
+	}
 	assert(0 == p->nchild);
+
+	mdoc_node_unlink(m, p);
 	mdoc_node_free(p);
 }
 

@@ -729,7 +729,7 @@ post_bl_head(POST_ARGS)
 		nn->string = NULL;
 		nnp = nn;
 		nn = nn->next;
-		mdoc_node_free(nnp);
+		mdoc_node_delete(NULL, nnp);
 	}
 
 	n->nchild = 0;
@@ -854,29 +854,10 @@ post_dd(POST_ARGS)
 static int
 post_prol(POST_ARGS)
 {
-	struct mdoc_node *np;
 
-	if (n->parent->child == n)
-		n->parent->child = n->prev;
-	if (n->prev)
-		n->prev->next = NULL;
-
-	np = n;
-	assert(NULL == n->next);
-
-	if (n->prev) {
-		m->last = n->prev;
-		m->next = MDOC_NEXT_SIBLING;
-	} else {
-		m->last = n->parent;
-		m->next = MDOC_NEXT_CHILD;
-	}
-
-	mdoc_node_freelist(np);
-
+	mdoc_node_delete(m, n);
 	if (m->meta.title && m->meta.date && m->meta.os)
 		m->flags |= MDOC_PBODY;
-
 	return(1);
 }
 
