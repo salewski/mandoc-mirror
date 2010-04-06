@@ -666,9 +666,9 @@ mdoc_fl_pre(MDOC_ARGS)
 
 	print_text(h, "\\-");
 
-	/* A blank `Fl' should incur a subsequent space. */
-
 	if (n->child)
+		h->flags |= HTML_NOSPACE;
+	else if (n->next && n->next->line == n->line)
 		h->flags |= HTML_NOSPACE;
 
 	return(1);

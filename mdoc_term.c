@@ -1070,9 +1070,9 @@ termp_fl_pre(DECL_ARGS)
 	term_fontpush(p, TERMFONT_BOLD);
 	term_word(p, "\\-");
 
-	/* A blank `Fl' should incur a subsequent space. */
-
 	if (n->child)
+		p->flags |= TERMP_NOSPACE;
+	else if (n->next && n->next->line == n->line)
 		p->flags |= TERMP_NOSPACE;
 
 	return(1);
