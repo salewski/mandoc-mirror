@@ -1116,6 +1116,8 @@ mdoc_bl_pre(MDOC_ARGS)
 {
 	struct ord	*ord;
 
+	if (MDOC_HEAD == n->type)
+		return(0);
 	if (MDOC_BLOCK != n->type)
 		return(1);
 	if (MDOC_Enum != a2list(n))

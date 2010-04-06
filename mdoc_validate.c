@@ -1103,8 +1103,9 @@ post_bl_head(POST_ARGS)
 		if (n->args->argv[i].arg == MDOC_Column)
 			break;
 
-	if (i == (int)n->args->argc)
-		return(1);
+	if (i == (int)n->args->argc && n->nchild)
+		return(warn_count(mdoc, "==", 0, 
+				"line arguments", n->nchild));
 
 	if (n->args->argv[i].sz && mdoc->last->child)
 		return(mdoc_nerr(mdoc, n, ECOLMIS));
