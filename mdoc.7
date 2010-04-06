@@ -1676,12 +1676,14 @@ is provided.
 Command-line flag.  Used when listing arguments to command-line
 utilities.  Prints a fixed-width hyphen
 .Sq \-
-before each delimited argument.  If no arguments are provided, a hyphen
-is still printed.
+directly followed by each argument.  If no arguments are provided, a hyphen is
+printed followed by a space.  If the argument is a macro, a hyphen is
+prefixed to the subsequent macro output.
 .Pp
 Examples:
 .Bd -literal -offset indent
 \&.Fl a b c
+\&.Fl Pf a b
 \&.Fl
 \&.Op Fl o Ns Ar file
 .Ed
