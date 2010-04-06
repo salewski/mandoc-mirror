@@ -77,6 +77,7 @@ static	int	 ewarn_ge1(POST_ARGS);
 static	int	 herr_eq0(POST_ARGS);
 static	int	 herr_ge1(POST_ARGS);
 static	int	 hwarn_eq1(POST_ARGS);
+static	int	 hwarn_eq0(POST_ARGS);
 static	int	 hwarn_le1(POST_ARGS);
 
 static	int	 post_an(POST_ARGS);
@@ -113,7 +114,7 @@ static	int	 pre_ss(PRE_ARGS);
 
 static	v_post	 posts_an[] = { post_an, NULL };
 static	v_post	 posts_at[] = { post_at, NULL };
-static	v_post	 posts_bd[] = { herr_eq0, bwarn_ge1, NULL };
+static	v_post	 posts_bd[] = { hwarn_eq0, bwarn_ge1, NULL };
 static	v_post	 posts_bf[] = { hwarn_le1, post_bf, NULL };
 static	v_post	 posts_bl[] = { bwarn_ge1, post_bl, NULL };
 static	v_post	 posts_bool[] = { eerr_eq1, ebool, NULL };
@@ -414,6 +415,7 @@ CHECK_HEAD_DEFN(eq0, err, err_child_eq, 0)	/* herr_eq0() */
 CHECK_HEAD_DEFN(le1, warn, warn_child_lt, 2)	/* hwarn_le1() */
 CHECK_HEAD_DEFN(ge1, err, err_child_gt, 0)	/* herr_ge1() */
 CHECK_HEAD_DEFN(eq1, warn, warn_child_eq, 1)	/* hwarn_eq1() */
+CHECK_HEAD_DEFN(eq0, warn, warn_child_eq, 0)	/* hwarn_eq0() */
 
 
 static int

@@ -1604,8 +1604,8 @@ termp_bd_pre(DECL_ARGS)
 	if (MDOC_BLOCK == n->type) {
 		print_bvspace(p, n, n);
 		return(1);
-	} else if (MDOC_BODY != n->type)
-		return(1);
+	} else if (MDOC_HEAD == n->type)
+		return(0);
 
 	nn = n->parent;
 
