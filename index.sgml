@@ -219,6 +219,21 @@
 						<COL CLASS="date">
 						<TBODY>
 							<TR>
+								<TD VALIGN="top"><SPAN CLASS="date">06-04-2010</SPAN></TD>
+								<TD VALIGN="top">
+								<SPAN CLASS="nm">mdocml</SPAN> has been linked to the <A CLASS="external"
+								HREF="http://www.openbsd.org/faq/current.html#20100403">OpenBSD build</a>.  This
+								version incorporates many small changes, mostly from patches by OpenBSD,
+								allowing crufty manuals to slip by with warnings instead of erroring-out.  Some
+								subtle semantic issues, such as punctuation scope, have also been fixed.
+								Lastly, some issues with <SPAN CLASS="flag">-Thtml</SPAN> have been fixed, which
+								prompted an update to the <A HREF="mandoc.1.html">online</A> <A
+								HREF="mandoc_char.7.html">manual</A> <A HREF="man.7.html">pages</A> style
+								layout.
+								</TD>
+							</TR>
+
+							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">31-03-2010</SPAN></TD>
 								<TD VALIGN="top">
 								Version <SPAN CLASS="rev">1.9.22</SPAN>: adjusted merge of the significant work
