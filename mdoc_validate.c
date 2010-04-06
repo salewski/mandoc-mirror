@@ -102,7 +102,6 @@ static	int	 pre_cd(PRE_ARGS);
 static	int	 pre_dd(PRE_ARGS);
 static	int	 pre_display(PRE_ARGS);
 static	int	 pre_dt(PRE_ARGS);
-static	int	 pre_er(PRE_ARGS);
 static	int	 pre_ex(PRE_ARGS);
 static	int	 pre_fd(PRE_ARGS);
 static	int	 pre_it(PRE_ARGS);
@@ -142,7 +141,7 @@ static	v_pre	 pres_cd[] = { pre_cd, NULL };
 static	v_pre	 pres_d1[] = { pre_display, NULL };
 static	v_pre	 pres_dd[] = { pre_dd, NULL };
 static	v_pre	 pres_dt[] = { pre_dt, NULL };
-static	v_pre	 pres_er[] = { pre_er, NULL };
+static	v_pre	 pres_er[] = { NULL, NULL };
 static	v_pre	 pres_ex[] = { pre_ex, NULL };
 static	v_pre	 pres_fd[] = { pre_fd, NULL };
 static	v_pre	 pres_it[] = { pre_it, NULL };
@@ -800,14 +799,6 @@ pre_ex(PRE_ARGS)
 	if ( ! check_msec(mdoc, n, 1, 6, 8, 0))
 		return(0);
 	return(check_stdarg(mdoc, n));
-}
-
-
-static int
-pre_er(PRE_ARGS)
-{
-
-	return(check_msec(mdoc, n, 2, 3, 9, 0));
 }
 
 
