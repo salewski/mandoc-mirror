@@ -197,13 +197,12 @@ int
 a2roffdeco(enum roffdeco *d,
 		const char **word, size_t *sz)
 {
-	int		 j, offs, term, lim;
+	int		 j, term, lim;
 	char		 set;
 	const char	*wp, *sp;
 
 	*d = DECO_NONE;
 	wp = *word;
-	offs = 0;
 
 	switch ((set = *wp)) {
 	case ('\0'):
