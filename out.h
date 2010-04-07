@@ -45,6 +45,8 @@ enum	roffdeco {
 	DECO_PREVIOUS,
 	DECO_SIZE,
 	DECO_NOSPACE,
+	DECO_FONT, /* font */
+	DECO_FFONT, /* font family */
 	DECO_MAX
 };
 
