@@ -806,7 +806,7 @@ static int
 pre_cd(PRE_ARGS)
 {
 
-	return(check_msec(mdoc, n, 4, 0));
+	return(check_msec(mdoc, n, 4, 9, 0));
 }
 
 
