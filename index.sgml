@@ -229,7 +229,7 @@
 								Lastly, some issues with <SPAN CLASS="flag">-Thtml</SPAN> have been fixed, which
 								prompted an update to the <A HREF="mandoc.1.html">online</A> <A
 								HREF="mandoc_char.7.html">manual</A> <A HREF="man.7.html">pages</A> style
-								layout.
+								layout.  Version: <SPAN CLASS="rev">1.9.23</SPAN>.
 								</TD>
 							</TR>
 
