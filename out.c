@@ -197,12 +197,12 @@ int
 a2roffdeco(enum roffdeco *d,
 		const char **word, size_t *sz)
 {
-	int		 j, type, term, lim;
+	int		 j, offs, term, lim;
 	const char	*wp, *sp;
 
 	*d = DECO_NONE;
 	wp = *word;
-	type = 1;
+	offs = 0;
 
 	switch (*wp) {
 	case ('\0'):
@@ -236,7 +236,7 @@ a2roffdeco(enum roffdeco *d,
 			return(4);
 
 		case ('['):
-			type = 0;
+			offs = 1;
 			break;
 
 		default:
@@ -344,13 +344,15 @@ a2roffdeco(enum roffdeco *d,
 	}
 
 	*word = ++wp;
+
 	for (j = 0; *wp && ']' != *wp; wp++, j++)
 		/* Loop... */ ;
 
 	if ('\0' == *wp)
-		return(j + 1);
+		return(j + 1 + offs);
 
-	*d = type ? DECO_SPECIAL : DECO_RESERVED;
+	*d = offs ? DECO_RESERVED : DECO_SPECIAL;
 	*sz = (size_t)j;
-	return (j + 2);
+
+	return (j + 2 + offs);
 }

@@ -1388,6 +1388,7 @@ mdoc_bd_pre(MDOC_ARGS)
 		}
 
 	/* FIXME: -centered, etc. formatting. */
+	/* FIXME: does not respect -offset ??? */
 
 	if (MDOC_BLOCK == n->type) {
 		bufcat_su(h, "margin-left", &su);
