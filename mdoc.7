@@ -31,12 +31,9 @@ language is used to format
 .Bx
 .Ux
 manuals.  In this reference document, we describe its syntax, structure,
-and usage.  Our reference implementation is
-.Xr mandoc 1 .
-The
+and usage.  Our reference implementation is mandoc; the
 .Sx COMPATIBILITY
-section describes compatibility with
-.Xr groff 1 .
+section describes compatibility with other troff \-mdoc implementations.
 .
 .Pp
 An
@@ -1322,8 +1319,7 @@ and
 .Sx \&Ux .
 .
 .Ss \&Cd
-Configuration declaration (suggested for use in section four and nine
-manuals).  This denotes strings accepted by
+Configuration declaration.  This denotes strings accepted by
 .Xr config 8 .
 .Pp
 Examples:
@@ -1906,15 +1902,19 @@ Examples:
 .
 .
 .Sh COMPATIBILITY
-This section documents compatibility with other roff implementations, at
-this time limited to
-.Xr groff 1 .
+This section documents compatibility between mandoc and other other
+troff implementations, at this time limited to GNU troff
+.Pq Qq groff .
 The term
 .Qq historic groff
-refers to those versions before the
+refers to groff versions before the
 .Pa doc.tmac
 file re-write
 .Pq somewhere between 1.15 and 1.19 .
+.
+.Pp
+Heirloom troff, the other significant troff implementation accepting
+\-mdoc, is similar to historic groff.
 .
 .Pp
 .Bl -dash -compact
@@ -1922,37 +1922,34 @@ file re-write
 The comment syntax
 .Sq \e."
 is no longer accepted.
+.
 .It
-In
-.Xr groff 1 ,
-the
+In groff, the
 .Sx \&Pa
 macro does not format its arguments when used in the FILES section under
-certain list types.  This irregular behaviour has been discontinued.
+certain list types.  mandoc does.
+.
 .It
-Historic
-.Xr groff 1
-does not print a dash for empty
+Historic groff does not print a dash for empty
 .Sx \&Fl
-arguments.  This behaviour has been discontinued.
+arguments.  mandoc and newer groff implementations do.
 .It
-.Xr groff 1
-behaves strangely (even between versions) when specifying
+groff behaves irregularly when specifying
 .Sq \ef
-escapes within line-macro scopes.  These aberrations have been
-normalised.
+.Sx Text Decoration
+within line-macro scopes.  mandoc follows a consistent system.
+.
 .It
-Negative scaling units are now truncated to zero instead of creating
-interesting conditions, such as with
-.Sx \&sp
-.Fl 1i .
-Furthermore, the
+In mandoc, negative scaling units are truncated to zero; groff would
+move to prior lines.  Furthermore, the
 .Sq f
 scaling unit, while accepted, is rendered as the default unit.
+.
 .It
 In quoted literals, groff allowed pair-wise double-quotes to produce a
 standalone double-quote in formatted output.  This idiosyncratic
-behaviour is no longer applicable.
+behaviour is not applicable in mandoc.
+.
 .It
 Display types
 .Sx \&Bd
@@ -1960,10 +1957,11 @@ Display types
 and
 .Fl right
 are aliases for
-.Fl left .
-The
+.Fl left
+in manodc.  Furthermore, the
 .Fl file Ar file
-argument is ignored.  Since text is not right-justified,
+argument is ignored.  Lastly, since text is not right-justified in
+mandoc (or even groff),
 .Fl ragged
 and
 .Fl filled
@@ -1971,36 +1969,50 @@ are aliases, as are
 .Fl literal
 and
 .Fl unfilled .
+.
 .It
-Blocks of whitespace are stripped from both macro and free-form text
-lines (except when in literal mode), while groff would retain whitespace
-in free-form text lines.
+In mandoc, blocks of whitespace are stripped from both macro and
+free-form text lines (except when in literal mode); groff would retain
+whitespace in free-form text lines.
+.
 .It
 Historic groff has many un-callable macros.  Most of these (excluding
-some block-level macros) are now callable, conforming to the
-non-historic groff version.
+some block-level macros) are now callable.
+.
 .It
 The vertical bar
 .Sq \(ba
 made historic groff
 .Qq go orbital
-but is a proper delimiter in this implementation.
+but has been a proper delimiter since then.
+.
 .It
-.Sx \&It
-.Fl nested
+.Sx \&It Fl nested
 is assumed for all lists (it wasn't in historic groff): any list may be
 nested and
 .Fl enum
 lists will restart the sequence only for the sub-list.
+.
 .It
 Some manuals use
 .Sx \&Li
 incorrectly by following it with a reserved character and expecting the
-delimiter to render.  This is not supported.
+delimiter to render.  This is not supported in mandoc.
+.
 .It
 In groff, the
 .Sx \&Fo
-macro only produces the first parameter.  This is no longer the case.
+macro only produces the first parameter.  This is not the case in
+mandoc.
+.
+.It
+In groff, the
+.Sx \&Cd ,
+.Sx \&Er ,
+and
+.Sx \&Ex
+macros were stipulated only to occur in certain manual sections.  mandoc
+does not have these restrictions.
 .El
 .
 .
