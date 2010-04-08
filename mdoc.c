@@ -348,19 +348,20 @@ int
 mdoc_macro(struct mdoc *m, enum mdoct tok, 
 		int ln, int pp, int *pos, char *buf)
 {
-
 	assert(tok < MDOC_MAX);
-	/*
-	 * If we're in the prologue, deny "body" macros.  Similarly, if
-	 * we're in the body, deny prologue calls.
-	 */
+
+	/* If we're in the body, deny prologue calls. */
+
 	if (MDOC_PROLOGUE & mdoc_macros[tok].flags && 
-			MDOC_PBODY & m->flags) {
+			MDOC_PBODY & m->flags)
+		return(mdoc_perr(m, ln, pp, EPROLBODY));
+
+	/* If we're in the prologue, deny "body" macros.  */
+
+	if ( ! (MDOC_PROLOGUE & mdoc_macros[tok].flags) && 
+			! (MDOC_PBODY & m->flags)) {
 		if ( ! mdoc_pwarn(m, ln, pp, EBODYPROL))
 			return(0);
-		/*
-		 * FIXME: do this in mdoc_action.c.
-		 */
 		if (NULL == m->meta.title)
 			m->meta.title = mandoc_strdup("unknown");
 		if (NULL == m->meta.vol)
@@ -371,9 +372,6 @@ mdoc_macro(struct mdoc *m, enum mdoct tok,
 			m->meta.date = time(NULL);
 		m->flags |= MDOC_PBODY;
 	}
-	if ( ! (MDOC_PROLOGUE & mdoc_macros[tok].flags) && 
-			! (MDOC_PBODY & m->flags))
-		return(mdoc_perr(m, ln, pp, EBODYPROL));
 
 	return((*mdoc_macros[tok].fp)(m, tok, ln, pp, pos, buf));
 }
