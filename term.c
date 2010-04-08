@@ -526,10 +526,12 @@ term_word(struct termp *p, const char *word)
 			p->flags |= TERMP_NOSPACE;
 	}
 
+	/* 
+	 * Note that we don't process the pipe: the parser sees it as
+	 * punctuation, but we don't in terms of typography.
+	 */
 	if (sv[0] && 0 == sv[1])
 		switch (sv[0]) {
-		case('|'):
-			/* FALLTHROUGH */
 		case('('):
 			/* FALLTHROUGH */
 		case('['):
