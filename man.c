@@ -53,6 +53,7 @@ const	char *const __man_merrnames[WERRMAX] = {
 	"invalid nesting of roff declarations", /* WROFFNEST */
 	"scope in roff instructions broken", /* WROFFSCOPE */
 	"document title should be uppercase", /* WTITLECASE */
+	"deprecated comment style", /* WBADCOMMENT */
 };
 
 const	char *const __man_macronames[MAN_MAX] = {		 
@@ -377,6 +378,11 @@ man_ptext(struct man *m, int line, char *buf)
 {
 	int		 i, j;
 	char		 sv;
+
+	/* Ignore bogus comments. */
+
+	if ('\\' == buf[0] && '.' == buf[1] && '\"' == buf[2])
+		return(man_pwarn(m, line, 0, WBADCOMMENT));
 
 	/* Literal free-form text whitespace is preserved. */
 

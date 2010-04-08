@@ -93,6 +93,7 @@ enum	merr {
 	ELIB,
 	EBADCHILD,
 	ENOTYPE,
+	EBADCOMMENT,
 	MERRMAX
 };
 
