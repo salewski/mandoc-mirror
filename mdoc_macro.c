@@ -623,7 +623,7 @@ static int
 append_delims(struct mdoc *mdoc, int line, int *pos, char *buf)
 {
 	int		 lastarg;
-	enum margerr	 ac;
+	enum margserr	 ac;
 	char		*p;
 
 	if (0 == buf[*pos])
@@ -654,7 +654,7 @@ static int
 blk_exp_close(MACRO_PROT_ARGS)
 {
 	int	 	 j, lastarg, maxargs, flushed;
-	enum margerr	 ac;
+	enum margserr	 ac;
 	enum mdoct	 ntok;
 	char		*p;
 
@@ -734,7 +734,7 @@ in_line(MACRO_PROT_ARGS)
 {
 	int		 la, lastpunct, c, cnt, d, nc;
 	enum mdoct	 ntok;
-	enum margerr	 ac;
+	enum margserr	 ac;
 	struct mdoc_arg	*arg;
 	char		*p;
 
@@ -891,7 +891,7 @@ blk_full(MACRO_PROT_ARGS)
 	struct mdoc_node *n;
 #endif
 	enum mdoct	  ntok;
-	enum margerr	  ac;
+	enum margserr	  ac;
 	char		 *p;
 
 	/* Close out prior implicit scope. */
@@ -1047,7 +1047,7 @@ blk_part_imp(MACRO_PROT_ARGS)
 {
 	int		  la;
 	enum mdoct	  ntok;
-	enum margerr	  ac;
+	enum margserr	  ac;
 	char		 *p;
 	struct mdoc_node *blk; /* saved block context */
 	struct mdoc_node *body; /* saved body context */
@@ -1159,7 +1159,7 @@ static int
 blk_part_exp(MACRO_PROT_ARGS)
 {
 	int		  la;
-	enum margerr	  ac;
+	enum margserr	  ac;
 	struct mdoc_node *head; /* keep track of head */
 	struct mdoc_node *body; /* keep track of body */
 	char		 *p;
@@ -1270,7 +1270,7 @@ static int
 in_line_argn(MACRO_PROT_ARGS)
 {
 	int		 la, flushed, j, c, maxargs;
-	enum margerr	 ac;
+	enum margserr	 ac;
 	struct mdoc_arg	*arg;
 	char		*p;
 	enum mdoct	 ntok;
@@ -1405,7 +1405,7 @@ static int
 in_line_eoln(MACRO_PROT_ARGS)
 {
 	int		 c, la;
-	enum margerr	 ac;
+	enum margserr	 ac;
 	struct mdoc_arg	*arg;
 	char		*p;
 	enum mdoct	 ntok;
@@ -1507,7 +1507,7 @@ static int
 phrase(struct mdoc *m, int line, int ppos, char *buf)
 {
 	int		 la, pos;
-	enum margerr	 ac;
+	enum margserr	 ac;
 	enum mdoct	 ntok;
 	char		*p;
 

@@ -45,7 +45,7 @@
 #define	MULTI_STEP	 5
 
 static	int		 argv_a2arg(enum mdoct, const char *);
-static	enum margerr	 args(struct mdoc *, int, int *, 
+static	enum margserr	 args(struct mdoc *, int, int *, 
 				char *, int, char **);
 static	int		 argv(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
@@ -325,7 +325,7 @@ mdoc_argn_free(struct mdoc_arg *p, int iarg)
 }
 
 
-enum margerr
+enum margserr
 mdoc_zargs(struct mdoc *m, int line, int *pos, 
 		char *buf, int flags, char **v)
 {
@@ -334,7 +334,7 @@ mdoc_zargs(struct mdoc *m, int line, int *pos,
 }
 
 
-enum margerr
+enum margserr
 mdoc_args(struct mdoc *m, int line, int *pos, 
 		char *buf, enum mdoct tok, char **v)
 {
@@ -372,7 +372,7 @@ mdoc_args(struct mdoc *m, int line, int *pos,
 }
 
 
-static enum margerr
+static enum margserr
 args(struct mdoc *m, int line, int *pos, 
 		char *buf, int fl, char **v)
 {

@@ -111,7 +111,7 @@ struct	mdoc_macro {
 	/* Reserved words in arguments treated as text. */
 };
 
-enum	margerr {
+enum	margserr {
 	ARGS_ERROR,
 	ARGS_EOLN,
 	ARGS_WORD,
@@ -177,9 +177,9 @@ int		  mdoc_argv(struct mdoc *, int, enum mdoct,
 #define	ARGV_WORD	(2)
 void		  mdoc_argv_free(struct mdoc_arg *);
 void		  mdoc_argn_free(struct mdoc_arg *, int);
-enum margerr	  mdoc_args(struct mdoc *, int,
+enum margserr	  mdoc_args(struct mdoc *, int,
 			int *, char *, enum mdoct, char **);
-enum margerr	  mdoc_zargs(struct mdoc *, int, 
+enum margserr	  mdoc_zargs(struct mdoc *, int, 
 			int *, char *, int, char **);
 #define	ARGS_DELIM	(1 << 1)	/* See args(). */
 #define	ARGS_TABSEP	(1 << 2)	/* See args(). */
