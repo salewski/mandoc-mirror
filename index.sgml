@@ -219,6 +219,16 @@
 						<COL CLASS="date">
 						<TBODY>
 							<TR>
+								<TD VALIGN="top"><SPAN CLASS="date">xx-05-2010</SPAN></TD>
+								<TD VALIGN="top">
+								Clean-up in internal <SPAN CLASS="flag">-mdoc</SPAN> library.  Rolled back
+								break-at-hyphen (broken).  <SPAN CLASS="flag">-DUGLY</SPAN> is now the default
+								(why not).
+								Version: <SPAN CLASS="rev">1.9.24</SPAN>.
+								</TD>
+							</TR>
+
+							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">07-04-2010</SPAN></TD>
 								<TD VALIGN="top">
 								<SPAN CLASS="nm">mdocml</SPAN> has been linked to the <A CLASS="external"
@@ -232,7 +242,6 @@
 								layout.  Version: <SPAN CLASS="rev">1.9.23</SPAN>.
 								</TD>
 							</TR>
-
 							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">31-03-2010</SPAN></TD>
 								<TD VALIGN="top">

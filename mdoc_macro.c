@@ -632,7 +632,6 @@ append_delims(struct mdoc *mdoc, int line, int *pos, char *buf)
 	for (;;) {
 		lastarg = *pos;
 		ac = mdoc_zargs(mdoc, line, pos, buf, ARGS_NOWARN, &p);
-		assert(ARGS_PHRASE != ac);
 
 		if (ARGS_ERROR == ac)
 			return(0);
@@ -965,6 +964,7 @@ blk_full(MACRO_PROT_ARGS)
 		/* Don't emit leading punct. for phrases. */
 
 		if (NULL == head && ARGS_PHRASE != ac &&
+				ARGS_PPHRASE != ac &&
 				ARGS_QWORD != ac &&
 				1 == mdoc_isdelim(p)) {
 			if ( ! mdoc_word_alloc(m, line, la, p))
@@ -974,13 +974,14 @@ blk_full(MACRO_PROT_ARGS)
 
 		/* Always re-open head for phrases. */
 
-		if (NULL == head || ARGS_PHRASE == ac) {
+		if (NULL == head || ARGS_PHRASE == ac || 
+				ARGS_PPHRASE == ac) {
 			if ( ! mdoc_head_alloc(m, line, ppos, tok))
 				return(0);
 			head = m->last;
 		}
 
-		if (ARGS_PHRASE == ac) {
+		if (ARGS_PHRASE == ac || ARGS_PPHRASE == ac) {
 			if ( ! phrase(m, line, la, buf))
 				return(0);
 			if ( ! rew_sub(MDOC_HEAD, m, tok, line, ppos))
@@ -1084,8 +1085,6 @@ blk_part_imp(MACRO_PROT_ARGS)
 		la = *pos;
 		ac = mdoc_args(m, line, pos, buf, tok, &p);
 
-		assert(ARGS_PHRASE != ac);
-
 		if (ARGS_ERROR == ac)
 			return(0);
 		if (ARGS_EOLN == ac)
@@ -1186,8 +1185,6 @@ blk_part_exp(MACRO_PROT_ARGS)
 			break;
 		if (ARGS_EOLN == ac)
 			break;
-
-		assert(ARGS_PHRASE != ac);
 
 		/* Flush out leading punctuation. */
 

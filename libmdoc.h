@@ -117,7 +117,8 @@ enum	margserr {
 	ARGS_WORD,
 	ARGS_PUNCT,
 	ARGS_QWORD,
-	ARGS_PHRASE
+	ARGS_PHRASE,
+	ARGS_PPHRASE
 };
 
 enum	margverr {

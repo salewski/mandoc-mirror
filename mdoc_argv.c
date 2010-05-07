@@ -378,6 +378,7 @@ args(struct mdoc *m, int line, int *pos,
 {
 	int		  i;
 	char		 *p, *pp;
+	enum margserr	  rc;
 
 	/*
 	 * Parse out the terms (like `val' in `.Xx -arg val' or simply
@@ -440,6 +441,7 @@ args(struct mdoc *m, int line, int *pos,
 	 */
 
 	if (ARGS_TABSEP & fl) {
+		rc = ARGS_PHRASE;
 		/* Scan ahead to tab (can't be escaped). */
 		p = strchr(*v, '\t');
 
@@ -488,7 +490,7 @@ args(struct mdoc *m, int line, int *pos,
 		for (pp = &buf[*pos]; ' ' == *pp; pp++, (*pos)++)
 			/* Skip ahead. */ ;
 
-		return(ARGS_PHRASE);
+		return(rc);
 	} 
 
 	/* 
