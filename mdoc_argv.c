@@ -217,7 +217,7 @@ static	int mdoc_argflags[MDOC_MAX] = {
  * [value0...], which may either have a single mandatory value, at least
  * one mandatory value, an optional single value, or no value.
  */
-int
+enum margverr
 mdoc_argv(struct mdoc *m, int line, enum mdoct tok,
 		struct mdoc_arg **v, int *pos, char *buf)
 {

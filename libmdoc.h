@@ -120,6 +120,13 @@ enum	margserr {
 	ARGS_PHRASE
 };
 
+enum	margverr {
+	ARGV_ERROR,
+	ARGV_EOLN,
+	ARGV_ARG,
+	ARGV_WORD
+};
+
 extern	const struct mdoc_macro *const mdoc_macros;
 
 __BEGIN_DECLS
@@ -169,12 +176,8 @@ int		  mdoc_valid_post(struct mdoc *);
 int		  mdoc_action_pre(struct mdoc *, 
 			const struct mdoc_node *);
 int		  mdoc_action_post(struct mdoc *);
-int		  mdoc_argv(struct mdoc *, int, enum mdoct,
+enum margverr	  mdoc_argv(struct mdoc *, int, enum mdoct,
 			struct mdoc_arg **, int *, char *);
-#define	ARGV_ERROR	(-1)
-#define	ARGV_EOLN	(0)
-#define	ARGV_ARG	(1)
-#define	ARGV_WORD	(2)
 void		  mdoc_argv_free(struct mdoc_arg *);
 void		  mdoc_argn_free(struct mdoc_arg *, int);
 enum margserr	  mdoc_args(struct mdoc *, int,

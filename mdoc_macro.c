@@ -732,7 +732,8 @@ blk_exp_close(MACRO_PROT_ARGS)
 static int
 in_line(MACRO_PROT_ARGS)
 {
-	int		 la, lastpunct, c, cnt, d, nc;
+	int		 la, lastpunct, cnt, d, nc;
+	enum margverr	 av;
 	enum mdoct	 ntok;
 	enum margserr	 ac;
 	struct mdoc_arg	*arg;
@@ -764,15 +765,15 @@ in_line(MACRO_PROT_ARGS)
 
 	for (arg = NULL;; ) {
 		la = *pos;
-		c = mdoc_argv(m, line, tok, &arg, pos, buf);
+		av = mdoc_argv(m, line, tok, &arg, pos, buf);
 
-		if (ARGV_WORD == c) {
+		if (ARGV_WORD == av) {
 			*pos = la;
 			break;
 		} 
-		if (ARGV_EOLN == c)
+		if (ARGV_EOLN == av)
 			break;
-		if (ARGV_ARG == c)
+		if (ARGV_ARG == av)
 			continue;
 
 		mdoc_argv_free(arg);
@@ -883,7 +884,7 @@ in_line(MACRO_PROT_ARGS)
 static int
 blk_full(MACRO_PROT_ARGS)
 {
-	int		  c, la;
+	int		  la;
 	struct mdoc_arg	 *arg;
 	struct mdoc_node *head; /* save of head macro */
 	struct mdoc_node *body; /* save of body macro */
@@ -892,6 +893,7 @@ blk_full(MACRO_PROT_ARGS)
 #endif
 	enum mdoct	  ntok;
 	enum margserr	  ac;
+	enum margverr	  av;
 	char		 *p;
 
 	/* Close out prior implicit scope. */
@@ -914,16 +916,16 @@ blk_full(MACRO_PROT_ARGS)
 
 	for (arg = NULL;; ) {
 		la = *pos;
-		c = mdoc_argv(m, line, tok, &arg, pos, buf);
+		av = mdoc_argv(m, line, tok, &arg, pos, buf);
 
-		if (ARGV_WORD == c) {
+		if (ARGV_WORD == av) {
 			*pos = la;
 			break;
 		} 
 
-		if (ARGV_EOLN == c)
+		if (ARGV_EOLN == av)
 			break;
-		if (ARGV_ARG == c)
+		if (ARGV_ARG == av)
 			continue;
 
 		mdoc_argv_free(arg);
@@ -1269,8 +1271,9 @@ blk_part_exp(MACRO_PROT_ARGS)
 static int
 in_line_argn(MACRO_PROT_ARGS)
 {
-	int		 la, flushed, j, c, maxargs;
+	int		 la, flushed, j, maxargs;
 	enum margserr	 ac;
+	enum margverr	 av;
 	struct mdoc_arg	*arg;
 	char		*p;
 	enum mdoct	 ntok;
@@ -1303,16 +1306,16 @@ in_line_argn(MACRO_PROT_ARGS)
 
 	for (arg = NULL; ; ) {
 		la = *pos;
-		c = mdoc_argv(m, line, tok, &arg, pos, buf);
+		av = mdoc_argv(m, line, tok, &arg, pos, buf);
 
-		if (ARGV_WORD == c) {
+		if (ARGV_WORD == av) {
 			*pos = la;
 			break;
 		} 
 
-		if (ARGV_EOLN == c)
+		if (ARGV_EOLN == av)
 			break;
-		if (ARGV_ARG == c)
+		if (ARGV_ARG == av)
 			continue;
 
 		mdoc_argv_free(arg);
@@ -1404,8 +1407,9 @@ in_line_argn(MACRO_PROT_ARGS)
 static int
 in_line_eoln(MACRO_PROT_ARGS)
 {
-	int		 c, la;
+	int		 la;
 	enum margserr	 ac;
+	enum margverr	 av;
 	struct mdoc_arg	*arg;
 	char		*p;
 	enum mdoct	 ntok;
@@ -1416,15 +1420,15 @@ in_line_eoln(MACRO_PROT_ARGS)
 
 	for (arg = NULL; ; ) {
 		la = *pos;
-		c = mdoc_argv(m, line, tok, &arg, pos, buf);
+		av = mdoc_argv(m, line, tok, &arg, pos, buf);
 
-		if (ARGV_WORD == c) {
+		if (ARGV_WORD == av) {
 			*pos = la;
 			break;
 		}
-		if (ARGV_EOLN == c) 
+		if (ARGV_EOLN == av) 
 			break;
-		if (ARGV_ARG == c)
+		if (ARGV_ARG == av)
 			continue;
 
 		mdoc_argv_free(arg);
