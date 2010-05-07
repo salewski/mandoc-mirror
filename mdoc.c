@@ -154,8 +154,7 @@ static	int		  node_append(struct mdoc *,
 static	int		  mdoc_ptext(struct mdoc *, int, char *);
 static	int		  mdoc_pmacro(struct mdoc *, int, char *);
 static	int		  macrowarn(struct mdoc *, int, const char *);
-static	int		  pstring(struct mdoc *, int, int, 
-				const char *, size_t);
+
 
 const struct mdoc_node *
 mdoc_node(const struct mdoc *m)
@@ -535,11 +534,13 @@ mdoc_elem_alloc(struct mdoc *m, int line, int pos,
 }
 
 
-static int
-pstring(struct mdoc *m, int line, int pos, const char *p, size_t len)
+int
+mdoc_word_alloc(struct mdoc *m, int line, int pos, const char *p)
 {
 	struct mdoc_node *n;
-	size_t		  sv;
+	size_t		  sv, len;
+
+	len = strlen(p);
 
 	n = node_alloc(m, line, pos, -1, MDOC_TEXT);
 	n->string = mandoc_malloc(len + 1);
@@ -550,16 +551,9 @@ pstring(struct mdoc *m, int line, int pos, const char *p, size_t len)
 
 	if ( ! node_append(m, n))
 		return(0);
+
 	m->next = MDOC_NEXT_SIBLING;
 	return(1);
-}
-
-
-int
-mdoc_word_alloc(struct mdoc *m, int line, int pos, const char *p)
-{
-
-	return(pstring(m, line, pos, p, strlen(p)));
 }
 
 
@@ -633,88 +627,57 @@ mdoc_node_delete(struct mdoc *m, struct mdoc_node *p)
 static int
 mdoc_ptext(struct mdoc *m, int line, char *buf)
 {
-	int		 i, j;
-	char		 sv;
+	int		 i;
 
 	/* Ignore bogus comments. */
 
 	if ('\\' == buf[0] && '.' == buf[1] && '\"' == buf[2])
 		return(mdoc_pwarn(m, line, 0, EBADCOMMENT));
 
+	/* No text before an initial macro. */
+
 	if (SEC_NONE == m->lastnamed)
 		return(mdoc_perr(m, line, 0, ETEXTPROL));
-	
-	/*
-	 * If in literal mode, then pass the buffer directly to the
-	 * back-end, as it should be preserved as a single term.
-	 */
 
+	/* Literal just gets pulled in as-is. */
+	
 	if (MDOC_LITERAL & m->flags)
 		return(mdoc_word_alloc(m, line, 0, buf));
 
-	/* Disallow blank/white-space lines in non-literal mode. */
+	/* Check for a blank line, which may also consist of spaces. */
 
 	for (i = 0; ' ' == buf[i]; i++)
-		/* Skip leading whitespace. */ ;
+		/* Skip to first non-space. */ ;
 
 	if ('\0' == buf[i]) {
 		if ( ! mdoc_pwarn(m, line, 0, ENOBLANK))
 			return(0);
+
 		/*
-		 * Assume that a `Pp' should be inserted in the case of
-		 * a blank line.  Technically, blank lines aren't
-		 * allowed, but enough manuals assume this behaviour
-		 * that we want to work around it.
+		 * Insert a `Pp' in the case of a blank line.  Technically,
+		 * blank lines aren't allowed, but enough manuals assume this
+		 * behaviour that we want to work around it.
 		 */
 		if ( ! mdoc_elem_alloc(m, line, 0, MDOC_Pp, NULL))
 			return(0);
+
+		m->next = MDOC_NEXT_SIBLING;
+		return(1);
 	}
 
-	/*
-	 * Break apart a free-form line into tokens.  Spaces are
-	 * stripped out of the input.
-	 */
+	/* Warn if the last un-escaped character is whitespace. */
 
-	for (j = i; buf[i]; i++) {
-		if (' ' != buf[i])
-			continue;
+	i = (int)strlen(buf);
+	assert(i);
 
-		/* Escaped whitespace. */
-		if (i && ' ' == buf[i] && '\\' == buf[i - 1])
-			continue;
-
-		sv = buf[i];
-		buf[i++] = '\0';
-
-		if ( ! pstring(m, line, j, &buf[j], (size_t)(i - j)))
-			return(0);
-
-		/* Trailing whitespace?  Check at overwritten byte. */
-
-		if (' ' == sv && '\0' == buf[i])
+	if (' ' == buf[i - 1] || '\t' == buf[i - 1])
+		if (1 == i || ('\\' != buf[i - 2]))
 			if ( ! mdoc_pwarn(m, line, i - 1, ETAILWS))
 				return(0);
 
-		for ( ; ' ' == buf[i]; i++)
-			/* Skip trailing whitespace. */ ;
+	/* Allocate the whole word. */
 
-		j = i;
-
-		/* Trailing whitespace? */
-
-		if (' ' == buf[i - 1] && '\0' == buf[i])
-			if ( ! mdoc_pwarn(m, line, i - 1, ETAILWS))
-				return(0);
-
-		if ('\0' == buf[i])
-			break;
-	}
-
-	if (j != i && ! pstring(m, line, j, &buf[j], (size_t)(i - j)))
-		return(0);
-
-	m->next = MDOC_NEXT_SIBLING;
-	return(1);
+	return(mdoc_word_alloc(m, line, 0, buf));
 }
 
 

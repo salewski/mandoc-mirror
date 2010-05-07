@@ -83,8 +83,6 @@ static	int		 man_ptext(struct man *, int, char *);
 static	int		 man_pmacro(struct man *, int, char *);
 static	void		 man_free1(struct man *);
 static	void		 man_alloc1(struct man *);
-static	int		 pstring(struct man *, int, int, 
-				const char *, size_t);
 static	int		 macrowarn(struct man *, int, const char *);
 
 
@@ -318,32 +316,26 @@ man_block_alloc(struct man *m, int line, int pos, enum mant tok)
 }
 
 
-static int
-pstring(struct man *m, int line, int pos, 
-		const char *p, size_t len)
+int
+man_word_alloc(struct man *m, int line, int pos, const char *word)
 {
 	struct man_node	*n;
-	size_t		 sv;
+	size_t		 sv, len;
+
+	len = strlen(word);
 
 	n = man_node_alloc(line, pos, MAN_TEXT, MAN_MAX);
 	n->string = mandoc_malloc(len + 1);
-	sv = strlcpy(n->string, p, len + 1);
+	sv = strlcpy(n->string, word, len + 1);
 
 	/* Prohibit truncation. */
 	assert(sv < len + 1);
 
 	if ( ! man_node_append(m, n))
 		return(0);
+
 	m->next = MAN_NEXT_SIBLING;
 	return(1);
-}
-
-
-int
-man_word_alloc(struct man *m, int line, int pos, const char *word)
-{
-
-	return(pstring(m, line, pos, word, strlen(word)));
 }
 
 
@@ -376,8 +368,7 @@ man_node_delete(struct man *m, struct man_node *p)
 static int
 man_ptext(struct man *m, int line, char *buf)
 {
-	int		 i, j;
-	char		 sv;
+	int		 i;
 
 	/* Ignore bogus comments. */
 
@@ -392,61 +383,32 @@ man_ptext(struct man *m, int line, char *buf)
 		goto descope;
 	}
 
-	/* First de-chunk and allocate words. */
+	/* Pump blank lines directly into the backend. */
 
 	for (i = 0; ' ' == buf[i]; i++)
 		/* Skip leading whitespace. */ ;
 
 	if ('\0' == buf[i]) {
-		/* Trailing whitespace? */
-		if (i && ' ' == buf[i - 1])
-			if ( ! man_pwarn(m, line, i - 1, WTSPACE))
-				return(0);
-		if ( ! pstring(m, line, 0, &buf[i], 0))
+		/* Allocate a blank entry. */
+		if ( ! man_word_alloc(m, line, 0, ""))
 			return(0);
 		goto descope;
 	}
 
-	for (j = i; buf[i]; i++) {
-		if (' ' != buf[i])
-			continue;
+	/* Warn if the last un-escaped character is whitespace. */
 
-		/* Escaped whitespace. */
-		if (i && ' ' == buf[i] && '\\' == buf[i - 1])
-			continue;
+	i = (int)strlen(buf);
+	assert(i);
 
-		sv = buf[i];
-		buf[i++] = '\0';
-
-		if ( ! pstring(m, line, j, &buf[j], (size_t)(i - j)))
-			return(0);
-
-		/* Trailing whitespace?  Check at overwritten byte. */
-
-		if (' ' == sv && '\0' == buf[i])
+	if (' ' == buf[i - 1] || '\t' == buf[i - 1])
+		if (1 == i || ('\\' != buf[i - 2]))
 			if ( ! man_pwarn(m, line, i - 1, WTSPACE))
 				return(0);
 
-		for ( ; ' ' == buf[i]; i++)
-			/* Skip trailing whitespace. */ ;
-
-		j = i;
-
-		/* Trailing whitespace? */
-
-		if (' ' == buf[i - 1] && '\0' == buf[i])
-			if ( ! man_pwarn(m, line, i - 1, WTSPACE))
-				return(0);
-
-		if ('\0' == buf[i])
-			break;
-	}
-
-	if (j != i && ! pstring(m, line, j, &buf[j], (size_t)(i - j)))
+	if ( ! man_word_alloc(m, line, 0, buf))
 		return(0);
 
 descope:
-
 	/*
 	 * Co-ordinate what happens with having a next-line scope open:
 	 * first close out the element scope (if applicable), then close
