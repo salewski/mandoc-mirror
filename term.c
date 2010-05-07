@@ -131,7 +131,6 @@ term_flushln(struct termp *p)
 	size_t		 vbl;   /* number of blanks to prepend to output */
 	size_t		 vsz;   /* visual characters to write to output */
 	size_t		 bp;    /* visual right border position */
-	size_t		 hyph;	/* visible position of hyphen */
 	int		 j;     /* temporary loop index */
 	size_t		 maxvis, mmax;
 
@@ -177,23 +176,16 @@ term_flushln(struct termp *p)
 		 * (starting with the CSI) aren't counted.  A space
 		 * generates a non-printing word, which is valid (the
 		 * space is printed according to regular spacing rules).
-		 * Collect the number of printable characters until the
-		 * first hyphen, if found.  Hyphens aren't included if
-		 * they're the first character (so `Fl' doesn't break)
-		 * or second consecutive character (`Fl -').
 		 */
 
 		/* LINTED */
-		for (j = i, vsz = 0, hyph = 0; j < (int)p->col; j++) {
+		for (j = i, vsz = 0; j < (int)p->col; j++) {
 			if (j && ' ' == p->buf[j]) 
 				break;
 			if (8 == p->buf[j])
 				vsz--;
 			else
 				vsz++;
-			if (j > i && '-' == p->buf[j] && 0 == hyph)
-			       if ('-' != p->buf[j - 1])
-					hyph = vsz;
 		}
 
 		/*
@@ -206,38 +198,11 @@ term_flushln(struct termp *p)
 
 		/*
 		 * Find out whether we would exceed the right margin.
-		 * If so, break to the next line, possibly after
-		 * emittign character up to a hyphen.  Otherwise, write
-		 * the chosen number of blanks.
+		 * If so, break to the next line.  Otherwise, write the chosen
+		 * number of blanks.
 		 */
 
 		if (vis && vis + vbl + vsz > bp) {
-			/*
-			 * Has a hyphen been found before the breakpoint
-			 * that we can use?
-			 */
-			if (hyph && vis + vbl + hyph <= bp) {
-				/* First prepend blanks. */
-				for (j = 0; j < (int)vbl; j++)
-					putchar(' ');
-				
-				/* Emit up to the character. */
-				do {
-					if (31 == p->buf[i])
-						putchar(' ');
-					else
-						putchar(p->buf[i]);
-					if (8 != p->buf[i])
-						vsz--;
-				} while ('-' != p->buf[i++]);
-
-				/* Emit trailing decoration. */
-				if (8 == p->buf[i]) {
-					putchar(p->buf[i]);
-					putchar(p->buf[i + 1]);
-				}
-			} 
-
 			putchar('\n');
 			if (TERMP_NOBREAK & p->flags) {
 				for (j = 0; j < (int)p->rmargin; j++)
