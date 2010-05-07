@@ -702,19 +702,22 @@ blk_exp_close(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == ac)
 			break;
 
-		if (MDOC_MAX != (ntok = lookup(tok, p))) {
-			if ( ! flushed) {
-				if ( ! rew_sub(MDOC_BLOCK, m, tok, line, ppos))
-					return(0);
-				flushed = 1;
-			}
-			if ( ! mdoc_macro(m, ntok, line, lastarg, pos, buf))
-				return(0);
-			break;
-		} 
+		ntok = ARGS_QWORD == ac ? MDOC_MAX : lookup(tok, p);
 
-		if ( ! mdoc_word_alloc(m, line, lastarg, p))
+		if (MDOC_MAX == ntok) {
+			if ( ! mdoc_word_alloc(m, line, lastarg, p))
+				return(0);
+			continue;
+		}
+
+		if ( ! flushed) {
+			if ( ! rew_sub(MDOC_BLOCK, m, tok, line, ppos))
+				return(0);
+			flushed = 1;
+		}
+		if ( ! mdoc_macro(m, ntok, line, lastarg, pos, buf))
 			return(0);
+		break;
 	}
 
 	if ( ! flushed && ! rew_sub(MDOC_BLOCK, m, tok, line, ppos))
@@ -786,8 +789,6 @@ in_line(MACRO_PROT_ARGS)
 			break;
 		if (ARGS_PUNCT == ac)
 			break;
-
-		/* Quoted words shouldn't be looked-up. */
 
 		ntok = ARGS_QWORD == ac ? MDOC_MAX : lookup(tok, p);
 
@@ -985,7 +986,9 @@ blk_full(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		if (MDOC_MAX == (ntok = lookup(tok, p))) {
+		ntok = ARGS_QWORD == ac ? MDOC_MAX : lookup(tok, p);
+
+		if (MDOC_MAX == ntok) {
 			if ( ! mdoc_word_alloc(m, line, la, p))
 				return(0);
 			continue;
@@ -1101,7 +1104,9 @@ blk_part_imp(MACRO_PROT_ARGS)
 			body = m->last;
 		}
 
-		if (MDOC_MAX == (ntok = lookup(tok, p))) {
+		ntok = ARGS_QWORD == ac ? MDOC_MAX : lookup(tok, p);
+
+		if (MDOC_MAX == ntok) {
 			if ( ! mdoc_word_alloc(m, line, la, p))
 				return(0);
 			continue;
@@ -1223,7 +1228,9 @@ blk_part_exp(MACRO_PROT_ARGS)
 
 		assert(NULL != head && NULL != body);
 
-		if (MDOC_MAX == (ntok = lookup(tok, p))) {
+		ntok = ARGS_QWORD == ac ? MDOC_MAX : lookup(tok, p);
+
+		if (MDOC_MAX == ntok) {
 			if ( ! mdoc_word_alloc(m, line, la, p))
 				return(0);
 			continue;
@@ -1339,7 +1346,9 @@ in_line_argn(MACRO_PROT_ARGS)
 			flushed = 1;
 		}
 
-		if (MDOC_MAX != (ntok = lookup(tok, p))) {
+		ntok = ARGS_QWORD == ac ? MDOC_MAX : lookup(tok, p);
+
+		if (MDOC_MAX != ntok) {
 			if ( ! flushed && ! rew_elem(m, tok))
 				return(0);
 			flushed = 1;

@@ -5,9 +5,10 @@ INCLUDEDIR	= $(PREFIX)/include
 LIBDIR		= $(PREFIX)/lib
 MANDIR		= $(PREFIX)/man
 EXAMPLEDIR	= $(PREFIX)/share/examples/mandoc
-INSTALL_PROGRAM	= install -m 0755
-INSTALL_DATA	= install -m 0444
-INSTALL_LIB	= install -m 0644
+INSTALL		?= install
+INSTALL_PROGRAM	= $(INSTALL) -m 0755
+INSTALL_DATA	= $(INSTALL) -m 0444
+INSTALL_LIB	= $(INSTALL) -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
 VERSION	   = 1.9.23
@@ -84,10 +85,10 @@ MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7 mandoc_char.7 \
 BINS	   = mandoc
 TESTS	   = test-strlcat.c test-strlcpy.c
 CONFIGS	   = config.h.pre config.h.post
-CLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
+DOCLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
 	     $(TARGZS) tags $(MD5S) $(XMLS) $(TEXTS) $(GSGMLS) \
 	     $(GHTMLS) config.h config.log
-INSTALL	   = $(SRCS) $(HEADS) Makefile $(MANS) $(SGMLS) $(STATICS) \
+DOINSTALL  = $(SRCS) $(HEADS) Makefile $(MANS) $(SGMLS) $(STATICS) \
 	     $(DATAS) $(XSLS) $(EXAMPLES) $(TESTS) $(CONFIGS)
 
 all:	$(BINS)
@@ -95,7 +96,7 @@ all:	$(BINS)
 lint:	$(LLNS)
 
 clean:
-	rm -f $(CLEAN)
+	rm -f $(DOCLEAN)
 
 cleanlint:
 	rm -f $(LNS) $(LLNS)
@@ -110,11 +111,11 @@ www:	all $(GSGMLS) $(GHTMLS) $(HTMLS) $(TEXTS) $(MD5S) $(TARGZS)
 htmls:	all $(GSGMLS) $(GHTMLS)
 
 installwww: www
-	install -m 0444 $(GHTMLS) $(HTMLS) $(TEXTS) $(STATICS) $(PREFIX)/
-	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/
-	install -m 0444 mdocml-$(VERSION).md5 $(PREFIX)/snapshots/
-	install -m 0444 mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz
-	install -m 0444 mdocml-$(VERSION).md5 $(PREFIX)/snapshots/mdocml.md5
+	$(INSTALL_DATA) $(GHTMLS) $(HTMLS) $(TEXTS) $(STATICS) $(PREFIX)/
+	$(INSTALL_DATA) mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/
+	$(INSTALL_DATA) mdocml-$(VERSION).md5 $(PREFIX)/snapshots/
+	$(INSTALL_DATA) mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz
+	$(INSTALL_DATA) mdocml-$(VERSION).md5 $(PREFIX)/snapshots/mdocml.md5
 
 install:
 	mkdir -p $(BINDIR)
@@ -205,9 +206,9 @@ ChangeLog.txt:
 ChangeLog.html: ChangeLog.xml ChangeLog.xsl
 	xsltproc -o $@ ChangeLog.xsl ChangeLog.xml
 
-mdocml-$(VERSION).tar.gz: $(INSTALL)
+mdocml-$(VERSION).tar.gz: $(DOINSTALL)
 	mkdir -p .dist/mdocml/mdocml-$(VERSION)/
-	cp -f $(INSTALL) .dist/mdocml/mdocml-$(VERSION)/
+	cp -f $(DOINSTALL) .dist/mdocml/mdocml-$(VERSION)/
 	( cd .dist/mdocml/ && tar zcf ../../$@ mdocml-$(VERSION)/ )
 	rm -rf .dist/
 
