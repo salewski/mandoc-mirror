@@ -126,10 +126,13 @@ and
 .Sq \ef
 attributes are forgotten when entering or exiting a macro block.
 .Ss Whitespace
-Unless specifically escaped, consecutive blocks of whitespace are pruned
-from input.  These are later re-added, if applicable, by a front-end
-utility such as
-.Xr mandoc 1 .
+In free-form lines, whitespace is preserved within a line; un-escaped
+trailing spaces are stripped from input (unless in a literal context).
+Blank free-form lines, which may include spaces, are permitted and
+rendered as an empty line.
+.Pp
+In macro lines, whitespace delimits arguments and is discarded.  If
+arguments are quoted, whitespace within the quotes is retained.
 .Ss Dates
 The
 .Sx \&TH

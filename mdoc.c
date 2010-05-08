@@ -665,15 +665,29 @@ mdoc_ptext(struct mdoc *m, int line, char *buf)
 		return(1);
 	}
 
-	/* Warn if the last un-escaped character is whitespace. */
+	/* 
+	 * Warn if the last un-escaped character is whitespace. Then
+	 * strip away the remaining spaces (tabs stay!).   
+	 */
 
 	i = (int)strlen(buf);
 	assert(i);
 
-	if (' ' == buf[i - 1] || '\t' == buf[i - 1])
-		if (1 == i || ('\\' != buf[i - 2]))
+	if (' ' == buf[i - 1] || '\t' == buf[i - 1]) {
+		assert(i > 1);
+		if ('\\' != buf[i - 2])
 			if ( ! mdoc_pwarn(m, line, i - 1, ETAILWS))
 				return(0);
+
+		for (--i; i && ' ' == buf[i]; i--)
+			/* Spin back to non-space. */ ;
+
+		/* Jump ahead of escaped whitespace. */
+		assert(i);
+		i += '\\' == buf[i] ? 2 : 1;
+
+		buf[i] = '\0';
+	}
 
 	/* Allocate the whole word. */
 
