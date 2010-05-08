@@ -204,9 +204,22 @@
 					</P>
 
 					<P>
-					If you want to receive a semi-automated mail-out of new releases, then please write with a message
-					subject of <I>subscribe mdocml</I> (or <I>unsubscribe mdocml</I>).
+					You may also subscribe to several mailing lists:
 					</P>
+
+					<TABLE WIDTH="100%" SUMMARY="Mailing Lists">
+						<COL WIDTH="200">
+						<COL>
+						<TBODY>
+							<TR>
+								<TD>
+									sou<A CLASS="external" TITLE="Reveal this e-mail address"
+									HREF="http://www.google.com/recaptcha/mailhide/d?k=01prQrAZhhl2EbIwVcRfABsQ==&amp;c=KtTW4Yic9xk-8g40KzJoca4fR3MYXv28g8NC6OQV-T8=">...</a>@mdocml.bsd.lv
+								</TD>
+								<TD>mailing out commit messages</TD>
+							</TR>
+						</TBODY>
+					</TABLE>
 				</TD>
 			</TR>
 			<TR>
