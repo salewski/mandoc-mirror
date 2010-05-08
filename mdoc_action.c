@@ -44,7 +44,7 @@ struct	actions {
 
 static	int	  concat(struct mdoc *, char *,
 			const struct mdoc_node *, size_t);
-static	inline int order_rs(int);
+static	inline int order_rs(enum mdoct);
 
 static	int	  post_ar(POST_ARGS);
 static	int	  post_at(POST_ARGS);
@@ -196,7 +196,7 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 
 #define	RSORD_MAX 14
 
-static	const int rsord[RSORD_MAX] = {
+static	const enum mdoct rsord[RSORD_MAX] = {
 	MDOC__A,
 	MDOC__T,
 	MDOC__B,
@@ -945,11 +945,11 @@ post_display(POST_ARGS)
 
 
 static inline int
-order_rs(int t)
+order_rs(enum mdoct t)
 {
 	int		i;
 
-	for (i = 0; i < RSORD_MAX; i++)
+	for (i = 0; i < (int)RSORD_MAX; i++)
 		if (rsord[i] == t)
 			return(i);
 

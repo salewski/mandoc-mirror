@@ -542,7 +542,7 @@ mdoc_word_alloc(struct mdoc *m, int line, int pos, const char *p)
 
 	len = strlen(p);
 
-	n = node_alloc(m, line, pos, -1, MDOC_TEXT);
+	n = node_alloc(m, line, pos, MDOC_MAX, MDOC_TEXT);
 	n->string = mandoc_malloc(len + 1);
 	sv = strlcpy(n->string, p, len + 1);
 
@@ -681,13 +681,11 @@ mdoc_ptext(struct mdoc *m, int line, char *buf)
 }
 
 
-
 static int
 macrowarn(struct mdoc *m, int ln, const char *buf)
 {
 	if ( ! (MDOC_IGN_MACRO & m->pflags))
-		return(mdoc_verr(m, ln, 0, 
-				"unknown macro: %s%s", 
+		return(mdoc_verr(m, ln, 0, "unknown macro: %s%s", 
 				buf, strlen(buf) > 3 ? "..." : ""));
 	return(mdoc_vwarn(m, ln, 0, "unknown macro: %s%s",
 				buf, strlen(buf) > 3 ? "..." : ""));
@@ -701,8 +699,9 @@ macrowarn(struct mdoc *m, int ln, const char *buf)
 int
 mdoc_pmacro(struct mdoc *m, int ln, char *buf)
 {
-	int		  i, j, c;
-	char		  mac[5];
+	enum mdoct	tok;
+	int		i, j;
+	char		mac[5];
 
 	/* Empty lines are ignored. */
 
@@ -744,7 +743,7 @@ mdoc_pmacro(struct mdoc *m, int ln, char *buf)
 		return(1);
 	} 
 	
-	if (MDOC_MAX == (c = mdoc_hash_find(mac))) {
+	if (MDOC_MAX == (tok = mdoc_hash_find(mac))) {
 		if ( ! macrowarn(m, ln, mac))
 			goto err;
 		return(1);
@@ -755,7 +754,10 @@ mdoc_pmacro(struct mdoc *m, int ln, char *buf)
 	while (buf[i] && ' ' == buf[i])
 		i++;
 
-	/* Trailing whitespace? */
+	/* 
+	 * Trailing whitespace.  Note that tabs are allowed to be passed
+	 * into the parser as "text", so we only warn about spaces here.
+	 */
 
 	if ('\0' == buf[i] && ' ' == buf[i - 1])
 		if ( ! mdoc_pwarn(m, ln, i - 1, ETAILWS))
@@ -765,7 +767,7 @@ mdoc_pmacro(struct mdoc *m, int ln, char *buf)
 	 * Begin recursive parse sequence.  Since we're at the start of
 	 * the line, we don't need to do callable/parseable checks.
 	 */
-	if ( ! mdoc_macro(m, c, ln, 1, &i, buf)) 
+	if ( ! mdoc_macro(m, tok, ln, 1, &i, buf)) 
 		goto err;
 
 	return(1);

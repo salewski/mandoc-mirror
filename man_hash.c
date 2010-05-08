@@ -63,7 +63,7 @@ man_hash_init(void)
 	assert(/* LINTED */ 
 			MAN_MAX < UCHAR_MAX);
 
-	for (i = 0; i < MAN_MAX; i++) {
+	for (i = 0; i < (int)MAN_MAX; i++) {
 		x = man_macronames[i][0];
 
 		assert(isalpha((u_char)x) || '.' == x);

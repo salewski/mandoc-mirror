@@ -747,7 +747,7 @@ pre_sh(PRE_ARGS)
 
 	if (MDOC_BLOCK != n->type)
 		return(1);
-	return(check_parent(mdoc, n, -1, MDOC_ROOT));
+	return(check_parent(mdoc, n, MDOC_MAX, MDOC_ROOT));
 }
 
 

@@ -435,8 +435,7 @@ static int
 macrowarn(struct man *m, int ln, const char *buf)
 {
 	if ( ! (MAN_IGN_MACRO & m->pflags))
-		return(man_verr(m, ln, 0, 
-				"unknown macro: %s%s", 
+		return(man_verr(m, ln, 0, "unknown macro: %s%s", 
 				buf, strlen(buf) > 3 ? "..." : ""));
 	return(man_vwarn(m, ln, 0, "unknown macro: %s%s",
 				buf, strlen(buf) > 3 ? "..." : ""));
@@ -462,6 +461,7 @@ man_pmacro(struct man *m, int ln, char *buf)
 	 * Skip whitespace between the control character and initial
 	 * text.  "Whitespace" is both spaces and tabs.
 	 */
+
 	if (' ' == buf[i] || '\t' == buf[i]) {
 		i++;
 		while (buf[i] && (' ' == buf[i] || '\t' == buf[i]))
@@ -510,7 +510,10 @@ man_pmacro(struct man *m, int ln, char *buf)
 	while (buf[i] && ' ' == buf[i])
 		i++;
 
-	/* Trailing whitespace? */
+	/* 
+	 * Trailing whitespace.  Note that tabs are allowed to be passed
+	 * into the parser as "text", so we only warn about spaces here.
+	 */
 
 	if ('\0' == buf[i] && ' ' == buf[i - 1])
 		if ( ! man_pwarn(m, ln, i - 1, WTSPACE))

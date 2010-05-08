@@ -43,7 +43,7 @@ mdoc_hash_init(void)
 
 	memset(table, UCHAR_MAX, sizeof(table));
 
-	for (i = 0; i < MDOC_MAX; i++) {
+	for (i = 0; i < (int)MDOC_MAX; i++) {
 		p = mdoc_macronames[i];
 
 		if (isalpha((u_char)p[1]))

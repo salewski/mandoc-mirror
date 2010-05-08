@@ -127,7 +127,7 @@ mdoc_atosec(const char *p)
 
 /* FIXME: move this into an editable .in file. */
 size_t
-mdoc_macro2len(int macro)
+mdoc_macro2len(enum mdoct macro)
 {
 
 	switch (macro) {

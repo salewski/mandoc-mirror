@@ -666,16 +666,16 @@ static int
 argv_multi(struct mdoc *m, int line, 
 		struct mdoc_argv *v, int *pos, char *buf)
 {
-	int		 c;
+	enum margserr	 ac;
 	char		*p;
 
 	for (v->sz = 0; ; v->sz++) {
 		if ('-' == buf[*pos])
 			break;
-		c = args(m, line, pos, buf, 0, &p);
-		if (ARGS_ERROR == c)
+		ac = args(m, line, pos, buf, 0, &p);
+		if (ARGS_ERROR == ac)
 			return(0);
-		else if (ARGS_EOLN == c)
+		else if (ARGS_EOLN == ac)
 			break;
 
 		if (0 == v->sz % MULTI_STEP)
@@ -693,16 +693,16 @@ static int
 argv_opt_single(struct mdoc *m, int line, 
 		struct mdoc_argv *v, int *pos, char *buf)
 {
-	int		 c;
+	enum margserr	 ac;
 	char		*p;
 
 	if ('-' == buf[*pos])
 		return(1);
 
-	c = args(m, line, pos, buf, 0, &p);
-	if (ARGS_ERROR == c)
+	ac = args(m, line, pos, buf, 0, &p);
+	if (ARGS_ERROR == ac)
 		return(0);
-	if (ARGS_EOLN == c)
+	if (ARGS_EOLN == ac)
 		return(1);
 
 	v->sz = 1;
@@ -720,15 +720,16 @@ static int
 argv_single(struct mdoc *m, int line, 
 		struct mdoc_argv *v, int *pos, char *buf)
 {
-	int		 c, ppos;
+	int		 ppos;
+	enum margserr	 ac;
 	char		*p;
 
 	ppos = *pos;
 
-	c = args(m, line, pos, buf, 0, &p);
-	if (ARGS_ERROR == c)
+	ac = args(m, line, pos, buf, 0, &p);
+	if (ARGS_ERROR == ac)
 		return(0);
-	if (ARGS_EOLN == c)
+	if (ARGS_EOLN == ac)
 		return(mdoc_perr(m, line, ppos, EARGVAL));
 
 	v->sz = 1;

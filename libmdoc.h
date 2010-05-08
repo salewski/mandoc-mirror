@@ -163,8 +163,7 @@ int		  mdoc_isdelim(const char *);
 size_t		  mdoc_isescape(const char *);
 enum	mdoc_sec  mdoc_atosec(const char *);
 time_t		  mdoc_atotime(const char *);
-
-size_t		  mdoc_macro2len(int);
+size_t		  mdoc_macro2len(enum mdoct);
 const char	 *mdoc_a2att(const char *);
 const char	 *mdoc_a2lib(const char *);
 const char	 *mdoc_a2st(const char *);

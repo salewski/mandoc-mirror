@@ -45,7 +45,7 @@ static	int	  	obsolete(MACRO_PROT_ARGS);
 
 static	int	  	append_delims(struct mdoc *, 
 				int, int *, char *);
-static	enum mdoct	lookup(int, const char *);
+static	enum mdoct	lookup(enum mdoct, const char *);
 static	enum mdoct	lookup_raw(const char *);
 static	int	  	phrase(struct mdoc *, int, int, char *);
 static	enum mdoct 	rew_alt(enum mdoct);
@@ -267,7 +267,7 @@ mdoc_macroend(struct mdoc *m)
  * Look up a macro from within a subsequent context.
  */
 static enum mdoct
-lookup(int from, const char *p)
+lookup(enum mdoct from, const char *p)
 {
 	/* FIXME: make -diag lists be un-PARSED. */
 
@@ -283,7 +283,7 @@ lookup(int from, const char *p)
 static enum mdoct
 lookup_raw(const char *p)
 {
-	int		 res;
+	enum mdoct	 res;
 
 	if (MDOC_MAX == (res = mdoc_hash_find(p)))
 		return(MDOC_MAX);
