@@ -219,7 +219,7 @@
 						<COL CLASS="date">
 						<TBODY>
 							<TR>
-								<TD VALIGN="top"><SPAN CLASS="date">XX-05-2010</SPAN></TD>
+								<TD VALIGN="top"><SPAN CLASS="date">XX-XX-2010</SPAN></TD>
 								<TD VALIGN="top">
 								Rolled back break-at-hyphen (broken).  <SPAN CLASS="flag">-DUGLY</SPAN> is now
 								the default (I don't like feature splits).  Free-form text is not de-chunked any
