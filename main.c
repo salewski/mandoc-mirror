@@ -75,7 +75,6 @@ struct	curparse {
 #define	FL_IGN_SCOPE	 (1 << 0) 	/* Ignore scope errors. */
 #define	FL_NIGN_ESCAPE	 (1 << 1) 	/* Don't ignore bad escapes. */
 #define	FL_NIGN_MACRO	 (1 << 2) 	/* Don't ignore bad macros. */
-#define	FL_NIGN_CHARS	 (1 << 3)	/* Don't ignore bad chars. */
 #define	FL_IGN_ERRORS	 (1 << 4)	/* Ignore failed parse. */
 	enum intt	  inttype;	/* Input parsers... */
 	struct man	 *man;
@@ -91,8 +90,7 @@ struct	curparse {
 };
 
 #define	FL_STRICT	  FL_NIGN_ESCAPE | \
-			  FL_NIGN_MACRO | \
- 			  FL_NIGN_CHARS
+			  FL_NIGN_MACRO
 
 static	int		  foptions(int *, char *);
 static	int		  toptions(struct curparse *, char *);
@@ -246,12 +244,10 @@ man_init(struct curparse *curp)
 
 	/* Defaults from mandoc.1. */
 
-	pflags = MAN_IGN_MACRO | MAN_IGN_ESCAPE | MAN_IGN_CHARS;
+	pflags = MAN_IGN_MACRO | MAN_IGN_ESCAPE;
 
 	if (curp->fflags & FL_NIGN_MACRO)
 		pflags &= ~MAN_IGN_MACRO;
-	if (curp->fflags & FL_NIGN_CHARS)
-		pflags &= ~MAN_IGN_CHARS;
 	if (curp->fflags & FL_NIGN_ESCAPE)
 		pflags &= ~MAN_IGN_ESCAPE;
 
@@ -270,7 +266,7 @@ mdoc_init(struct curparse *curp)
 
 	/* Defaults from mandoc.1. */
 
-	pflags = MDOC_IGN_MACRO | MDOC_IGN_ESCAPE | MDOC_IGN_CHARS;
+	pflags = MDOC_IGN_MACRO | MDOC_IGN_ESCAPE;
 
 	if (curp->fflags & FL_IGN_SCOPE)
 		pflags |= MDOC_IGN_SCOPE;
@@ -278,8 +274,6 @@ mdoc_init(struct curparse *curp)
 		pflags &= ~MDOC_IGN_ESCAPE;
 	if (curp->fflags & FL_NIGN_MACRO)
 		pflags &= ~MDOC_IGN_MACRO;
-	if (curp->fflags & FL_NIGN_CHARS)
-		pflags &= ~MDOC_IGN_CHARS;
 
 	return(mdoc_alloc(curp, pflags, &mdoccb));
 }
@@ -590,11 +584,10 @@ foptions(int *fflags, char *arg)
 	toks[0] = "ign-scope";
 	toks[1] = "no-ign-escape";
 	toks[2] = "no-ign-macro";
-	toks[3] = "no-ign-chars";
-	toks[4] = "ign-errors";
-	toks[5] = "strict";
-	toks[6] = "ign-escape";
-	toks[7] = NULL;
+	toks[3] = "ign-errors";
+	toks[4] = "strict";
+	toks[5] = "ign-escape";
+	toks[6] = NULL;
 
 	while (*arg) {
 		o = arg;
@@ -609,15 +602,12 @@ foptions(int *fflags, char *arg)
 			*fflags |= FL_NIGN_MACRO;
 			break;
 		case (3):
-			*fflags |= FL_NIGN_CHARS;
-			break;
-		case (4):
 			*fflags |= FL_IGN_ERRORS;
 			break;
-		case (5):
+		case (4):
 			*fflags |= FL_STRICT;
 			break;
-		case (6):
+		case (5):
 			*fflags &= ~FL_NIGN_ESCAPE;
 			break;
 		default:

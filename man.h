@@ -100,7 +100,6 @@ struct	man_node {
 };
 
 #define	MAN_IGN_MACRO	 (1 << 0)
-#define	MAN_IGN_CHARS	 (1 << 1)
 #define	MAN_IGN_ESCAPE	 (1 << 2)
 
 extern	const char *const *man_macronames;

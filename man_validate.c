@@ -229,9 +229,7 @@ check_text(CHKARGS)
 		if ('\t' == *p || isprint((u_char)*p)) 
 			continue;
 
-		if (MAN_IGN_CHARS & m->pflags)
-			return(man_pwarn(m, n->line, pos, WNPRINT));
-		return(man_perr(m, n->line, pos, WNPRINT));
+		return(man_pwarn(m, n->line, pos, WNPRINT));
 	}
 
 	return(1);
