@@ -204,7 +204,7 @@
 					</P>
 
 					<P>
-					You may also subscribe to several mailing lists:
+					You may also subscribe to several mailing lists (these require subscription):
 					</P>
 
 					<TABLE WIDTH="100%" SUMMARY="Mailing Lists">
@@ -213,17 +213,17 @@
 						<TBODY>
 							<TR>
 								<TD>
-									sou<A CLASS="external" TITLE="Reveal this e-mail address"
-									HREF="http://www.google.com/recaptcha/mailhide/d?k=01prQrAZhhl2EbIwVcRfABsQ==&amp;c=KtTW4Yic9xk-8g40KzJoca4fR3MYXv28g8NC6OQV-T8=">...</a>@mdocml.bsd.lv
+									discuss<A CLASS="external" TITLE="Reveal this e-mail address"
+									HREF="http://www.google.com/recaptcha/mailhide/d?k=01KQ80PFH5n3BBNpF5Gs4sRg==&amp;c=EV1QytpQqTHSItc2IXvZyocgYLPnG5K0JKw_gwMC9yc=">...</a>@mdocml.bsd.lv
 								</TD>
-								<TD>announcement of new versions and general discussion</TD>
+								<TD>discussions and announcements</TD>
 							</TR>
 							<TR>
 								<TD>
 									sou<A CLASS="external" TITLE="Reveal this e-mail address"
 									HREF="http://www.google.com/recaptcha/mailhide/d?k=01prQrAZhhl2EbIwVcRfABsQ==&amp;c=KtTW4Yic9xk-8g40KzJoca4fR3MYXv28g8NC6OQV-T8=">...</a>@mdocml.bsd.lv
 								</TD>
-								<TD>mailing out commit messages</TD>
+								<TD>source commit messages</TD>
 							</TR>
 						</TBODY>
 					</TABLE>
@@ -239,11 +239,18 @@
 						<COL CLASS="date">
 						<TBODY>
 							<TR>
-								<TD VALIGN="top"><SPAN CLASS="date">XX-XX-2010</SPAN></TD>
+								<TD VALIGN="top"><SPAN CLASS="date">09-05-2010</SPAN></TD>
 								<TD VALIGN="top">
-								Rolled back break-at-hyphen (broken).  <SPAN CLASS="flag">-DUGLY</SPAN> is now
-								the default (I don't like feature splits).  Free-form text is not de-chunked any
-								more: lines are passed whole-sale into the front-end, including whitespace.
+								Rolled back break-at-hyphen.  <SPAN CLASS="flag">-DUGLY</SPAN> is now the
+								default (no feature splits!).  Free-form text is not de-chunked any more: lines
+								are passed whole-sale into the front-end, including whitespace.  Added mailing
+								lists.  Lastly, <SPAN CLASS="nm">mdocml</SPAN> is the focus of two <A
+								CLASS="external" HREF="http://socghop.appspot.com/">Google Summer of Code</A>
+								projects this year: <Q><A CLASS="external"
+								HREF="http://netbsd-soc.sourceforge.net/projects/mandoc_ps/">mandoc -Tps</A></Q>
+								(NetBSD) and <Q><A CLASS="external"
+								HREF="http://wiki.freebsd.org/SummerOfCode2010Projects">BSD-licensed
+								Text-Processing Tools</A></Q> (FreeBSD).
 								Version: <SPAN CLASS="rev">1.9.24</SPAN>.
 								</TD>
 							</TR>
