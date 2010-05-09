@@ -242,7 +242,8 @@
 								<TD VALIGN="top"><SPAN CLASS="date">09-05-2010</SPAN></TD>
 								<TD VALIGN="top">
 								Fixed handling of <Q>\*(Ba</Q> escape.  Backed out <SPAN
-								CLASS="flag">-fno-ign-chars</SPAN> (pointless complexity).
+								CLASS="flag">-fno-ign-chars</SPAN> (pointless complexity).  Fixed breaking of
+								literal lines (for <SPAN CLASS="fl">-mdoc</SPAN> only).
 								Version: <SPAN CLASS="rev">1.9.24</SPAN>.
 							</TR>
 							<TR>
