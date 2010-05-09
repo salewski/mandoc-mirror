@@ -1629,7 +1629,7 @@ static int
 termp_bd_pre(DECL_ARGS)
 {
 	int	         	 i, type;
-	size_t			 sv;
+	size_t			 rm, rmax;
 	const struct mdoc_node	*nn;
 
 	if (MDOC_BLOCK == n->type) {
@@ -1657,8 +1657,9 @@ termp_bd_pre(DECL_ARGS)
 	if (MDOC_Literal != type && MDOC_Unfilled != type)
 		return(1);
 
-	sv = p->rmargin;
-	p->rmargin = 100000; /* FIXME */
+	rm = p->rmargin;
+	rmax = p->maxrmargin;
+	p->rmargin = p->maxrmargin = 100000; /* FIXME */
 
 	for (nn = n->child; nn; nn = nn->next) {
 		p->flags |= TERMP_NOSPACE;
@@ -1671,7 +1672,8 @@ termp_bd_pre(DECL_ARGS)
 			term_flushln(p);
 	}
 
-	p->rmargin = sv;
+	p->rmargin = rm;
+	p->maxrmargin = rmax;
 	return(0);
 }
 
@@ -1681,7 +1683,7 @@ static void
 termp_bd_post(DECL_ARGS)
 {
 	int		 type;
-	size_t		 sv;
+	size_t		 rm, rmax;
 
 	if (MDOC_BODY != n->type) 
 		return;
@@ -1689,15 +1691,17 @@ termp_bd_post(DECL_ARGS)
 	type = arg_disptype(n->parent);
 	assert(-1 != type);
 
-	sv = p->rmargin;
+	rm = p->rmargin;
+	rmax = p->maxrmargin;
 
 	if (MDOC_Literal == type || MDOC_Unfilled == type)
-		p->rmargin = 100000; /* FIXME */
+		p->rmargin = p->maxrmargin = 100000; /* FIXME */
 
 	p->flags |= TERMP_NOSPACE;
 	term_flushln(p);
 
-	p->rmargin = sv;
+	p->rmargin = rm;
+	p->maxrmargin = rmax;
 }
 
 
