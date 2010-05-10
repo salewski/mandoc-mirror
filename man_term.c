@@ -893,13 +893,13 @@ print_man_head(struct termp *p, const struct man_meta *m)
 	char		buf[BUFSIZ], title[BUFSIZ];
 	size_t		buflen, titlen;
 
-	p->rmargin = p->maxrmargin;
+	/*
+	 * Note that old groff would spit out some spaces before the
+	 * header.  We discontinue this strange behaviour, but at one
+	 * point we did so here.
+	 */
 
-#ifdef	__OpenBSD__
-	term_vspace(p);
-	term_vspace(p);
-	term_vspace(p);
-#endif
+	p->rmargin = p->maxrmargin;
 
 	p->offset = 0;
 	buf[0] = title[0] = '\0';
@@ -941,12 +941,12 @@ print_man_head(struct termp *p, const struct man_meta *m)
 	p->offset = 0;
 	p->flags &= ~TERMP_NOSPACE;
 
-#ifdef	__OpenBSD__
+	/* 
+	 * Groff likes to have some leading spaces before content.  Well
+	 * that's fine by me.
+	 */
+
 	term_vspace(p);
 	term_vspace(p);
-#else
 	term_vspace(p);
-	term_vspace(p);
-	term_vspace(p);
-#endif
 }
