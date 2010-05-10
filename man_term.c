@@ -369,7 +369,7 @@ pre_sp(DECL_ARGS)
 
 	if (0 == len)
 		term_newln(p);
-	for (i = 0; i < len; i++)
+	for (i = 0; i <= len; i++)
 		term_vspace(p);
 
 	return(0);
@@ -710,6 +710,9 @@ pre_SH(DECL_ARGS)
 		if (n->prev && MAN_SH == n->prev->tok)
 			if (NULL == n->prev->body->child)
 				break;
+		/* If the first macro, no vspae. */
+		if (NULL == n->prev)
+			break;
 		term_vspace(p);
 		break;
 	case (MAN_HEAD):
@@ -892,6 +895,12 @@ print_man_head(struct termp *p, const struct man_meta *m)
 
 	p->rmargin = p->maxrmargin;
 
+#ifdef	__OpenBSD__
+	term_vspace(p);
+	term_vspace(p);
+	term_vspace(p);
+#endif
+
 	p->offset = 0;
 	buf[0] = title[0] = '\0';
 
@@ -931,4 +940,13 @@ print_man_head(struct termp *p, const struct man_meta *m)
 	p->rmargin = p->maxrmargin;
 	p->offset = 0;
 	p->flags &= ~TERMP_NOSPACE;
+
+#ifdef	__OpenBSD__
+	term_vspace(p);
+	term_vspace(p);
+#else
+	term_vspace(p);
+	term_vspace(p);
+	term_vspace(p);
+#endif
 }
