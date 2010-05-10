@@ -1659,7 +1659,7 @@ termp_bd_pre(DECL_ARGS)
 
 	rm = p->rmargin;
 	rmax = p->maxrmargin;
-	p->rmargin = p->maxrmargin = 100000; /* FIXME */
+	p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
 
 	for (nn = n->child; nn; nn = nn->next) {
 		p->flags |= TERMP_NOSPACE;
@@ -1695,7 +1695,7 @@ termp_bd_post(DECL_ARGS)
 	rmax = p->maxrmargin;
 
 	if (MDOC_Literal == type || MDOC_Unfilled == type)
-		p->rmargin = p->maxrmargin = 100000; /* FIXME */
+		p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
 
 	p->flags |= TERMP_NOSPACE;
 	term_flushln(p);

@@ -29,6 +29,8 @@ enum	termfont {
 	TERMFONT_UNDER
 };
 
+#define	TERM_MAXMARGIN	  100000 /* FIXME */
+
 struct	termp {
 	size_t		  rmargin;	/* Current right margin. */
 	size_t		  maxrmargin;	/* Max right margin. */
