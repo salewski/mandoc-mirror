@@ -419,7 +419,7 @@ post_sh(POST_ARGS)
 
 	if ( ! concat(m, buf, n->child, BUFSIZ))
 		return(0);
-	sec = mdoc_atosec(buf);
+	sec = mdoc_str2sec(buf);
 	/*
 	 * The first section should always make us move into a non-new
 	 * state.

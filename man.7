@@ -232,13 +232,13 @@ are generally structured as follows:
 The \efBfoo\efR utility processes files...
 \&.
 \&.\e\*q .SH IMPLEMENTATION NOTES
-\&.\e\*q The next is for sections 1 & 8 only.
-\&.\e\*q .SH EXIT STATUS
 \&.\e\*q The next is for sections 2, 3, & 9 only.
 \&.\e\*q .SH RETURN VALUES
 \&.\e\*q The next is for sections 1, 6, 7, & 8 only.
 \&.\e\*q .SH ENVIRONMENT
 \&.\e\*q .SH FILES
+\&.\e\*q The next is for sections 1 & 8 only.
+\&.\e\*q .SH EXIT STATUS
 \&.\e\*q .SH EXAMPLES
 \&.\e\*q The next is for sections 1, 4, 6, 7, & 8 only.
 \&.\e\*q .SH DIAGNOSTICS
@@ -298,14 +298,6 @@ command).
 Implementation-specific notes should be kept here.  This is useful when
 implementing standard functions that may have side effects or notable
 algorithmic implications.
-.It Em EXIT STATUS
-Command exit status for section 1, 6, and 8 manuals.  This section is
-the dual of
-.Em RETURN VALUES ,
-which is used for functions.  Historically, this information was
-described in
-.Em DIAGNOSTICS ,
-a practise that is now discouraged.
 .It Em RETURN VALUES
 This section is the dual of
 .Em EXIT STATUS ,
@@ -317,6 +309,14 @@ Documents any usages of environment variables, e.g.,
 .It Em FILES
 Documents files used.  It's helpful to document both the file and a
 short description of how the file is used (created, modified, etc.).
+.It Em EXIT STATUS
+Command exit status for section 1, 6, and 8 manuals.  This section is
+the dual of
+.Em RETURN VALUES ,
+which is used for functions.  Historically, this information was
+described in
+.Em DIAGNOSTICS ,
+a practise that is now discouraged.
 .It Em EXAMPLES
 Example usages.  This often contains snippets of well-formed,
 well-tested invocations.  Make doubly sure that your examples work

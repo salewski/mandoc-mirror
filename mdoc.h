@@ -202,10 +202,10 @@ enum	mdoc_sec {
 	SEC_SYNOPSIS,
 	SEC_DESCRIPTION,
 	SEC_IMPLEMENTATION,
-	SEC_EXIT_STATUS,
 	SEC_RETURN_VALUES,
 	SEC_ENVIRONMENT, 
 	SEC_FILES,
+	SEC_EXIT_STATUS,
 	SEC_EXAMPLES,
 	SEC_DIAGNOSTICS,
 	SEC_COMPATIBILITY,
@@ -217,7 +217,8 @@ enum	mdoc_sec {
 	SEC_CAVEATS,
 	SEC_BUGS,
 	SEC_SECURITY,
-	SEC_CUSTOM		/* User-defined. */
+	SEC_CUSTOM,		/* User-defined. */
+	SEC__MAX
 };
 
 /* Information from prologue. */
