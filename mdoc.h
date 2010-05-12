@@ -260,6 +260,7 @@ struct	mdoc_node {
 	int		  flags;
 #define	MDOC_VALID	 (1 << 0)
 #define	MDOC_ACTED	 (1 << 1)
+#define	MDOC_EOS	 (1 << 2)
 	enum mdoc_type	  type;
 	enum mdoc_sec	  sec;
 

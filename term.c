@@ -445,11 +445,16 @@ term_word(struct termp *p, const char *word)
 			break;
 		}
 
-	if ( ! (TERMP_NOSPACE & p->flags))
+	if ( ! (TERMP_NOSPACE & p->flags)) {
 		bufferc(p, ' ');
+		if (TERMP_SENTENCE & p->flags)
+			bufferc(p, ' ');
+	}
 
 	if ( ! (p->flags & TERMP_NONOSPACE))
 		p->flags &= ~TERMP_NOSPACE;
+
+	p->flags &= ~TERMP_SENTENCE;
 
 	/* FIXME: use strcspn. */
 

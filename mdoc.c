@@ -689,7 +689,33 @@ mdoc_ptext(struct mdoc *m, int line, char *buf)
 
 	/* Allocate the whole word. */
 
-	return(mdoc_word_alloc(m, line, 0, buf));
+	if ( ! mdoc_word_alloc(m, line, 0, buf))
+		return(0);
+
+	/*
+	 * End-of-sentence check.  If the last character is an unescaped
+	 * EOS character, then flag the node as being the end of a
+	 * sentence.  The front-end will know how to interpret this.
+	 */
+
+	assert(i);
+
+	switch (buf[i - 1]) {
+	case ('.'):
+		if (i > 1 && '\\' == buf[i - 2])
+			break;
+		/* FALLTHROUGH */
+	case ('!'):
+		/* FALLTHROUGH */
+	case ('?'):
+		m->last->flags |= MDOC_EOS;
+		break;
+	default:
+		break;
+
+	}
+
+	return(1);
 }
 
 

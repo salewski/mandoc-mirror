@@ -337,6 +337,9 @@ print_mdoc_node(DECL_ARGS)
 		if (termacts[n->tok].post)
 			(*termacts[n->tok].post)(p, &npair, m, n);
 
+	if (MDOC_EOS & n->flags)
+		p->flags |= TERMP_SENTENCE;
+
 	p->offset = offset;
 	p->rmargin = rmargin;
 }
