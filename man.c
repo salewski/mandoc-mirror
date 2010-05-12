@@ -420,6 +420,29 @@ man_ptext(struct man *m, int line, char *buf)
 	if ( ! man_word_alloc(m, line, 0, buf))
 		return(0);
 
+	/*
+	 * End-of-sentence check.  If the last character is an unescaped
+	 * EOS character, then flag the node as being the end of a
+	 * sentence.  The front-end will know how to interpret this.
+	 */
+
+	assert(i);
+
+	switch (buf[i - 1]) {
+	case ('.'):
+		if (i > 1 && '\\' == buf[i - 2])
+			break;
+		/* FALLTHROUGH */
+	case ('!'):
+		/* FALLTHROUGH */
+	case ('?'):
+		m->last->flags |= MAN_EOS;
+		break;
+	default:
+		break;
+
+	}
+
 descope:
 	/*
 	 * Co-ordinate what happens with having a next-line scope open:

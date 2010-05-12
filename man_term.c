@@ -842,6 +842,9 @@ print_man_node(DECL_ARGS)
 		if ( ! (MAN_NOTEXT & termacts[n->tok].flags))
 			term_fontrepl(p, TERMFONT_NONE);
 	}
+
+	if (MAN_EOS & n->flags)
+		p->flags |= TERMP_SENTENCE;
 }
 
 
