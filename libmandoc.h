@@ -29,6 +29,7 @@ time_t		 mandoc_a2time(int, const char *);
 #define		 MTIME_REDUCED		(1 << 1)
 #define		 MTIME_MDOCDATE		(1 << 2)
 #define		 MTIME_ISO_8601		(1 << 3)
+int		 mandoc_eos(const char *, size_t);
 
 __END_DECLS
 

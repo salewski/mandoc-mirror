@@ -428,20 +428,8 @@ man_ptext(struct man *m, int line, char *buf)
 
 	assert(i);
 
-	switch (buf[i - 1]) {
-	case ('.'):
-		if (i > 1 && '\\' == buf[i - 2])
-			break;
-		/* FALLTHROUGH */
-	case ('!'):
-		/* FALLTHROUGH */
-	case ('?'):
+	if (mandoc_eos(buf, (size_t)i))
 		m->last->flags |= MAN_EOS;
-		break;
-	default:
-		break;
-
-	}
 
 descope:
 	/*

@@ -700,20 +700,8 @@ mdoc_ptext(struct mdoc *m, int line, char *buf)
 
 	assert(i);
 
-	switch (buf[i - 1]) {
-	case ('.'):
-		if (i > 1 && '\\' == buf[i - 2])
-			break;
-		/* FALLTHROUGH */
-	case ('!'):
-		/* FALLTHROUGH */
-	case ('?'):
+	if (mandoc_eos(buf, (size_t)i))
 		m->last->flags |= MDOC_EOS;
-		break;
-	default:
-		break;
-
-	}
 
 	return(1);
 }
