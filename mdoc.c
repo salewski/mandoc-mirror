@@ -289,7 +289,9 @@ mdoc_parseln(struct mdoc *m, int ln, char *buf)
 	if (MDOC_HALT & m->flags)
 		return(0);
 
-	return('.' == *buf ? mdoc_pmacro(m, ln, buf) :
+	m->flags |= MDOC_NEWLINE;
+	return('.' == *buf ? 
+			mdoc_pmacro(m, ln, buf) :
 			mdoc_ptext(m, ln, buf));
 }
 
@@ -453,7 +455,9 @@ node_alloc(struct mdoc *m, int line, int pos,
 	p->pos = pos;
 	p->tok = tok;
 	p->type = type;
-
+	if (MDOC_NEWLINE & m->flags)
+		p->flags |= MDOC_LINE;
+	m->flags &= ~MDOC_NEWLINE;
 	return(p);
 }
 
@@ -726,7 +730,7 @@ int
 mdoc_pmacro(struct mdoc *m, int ln, char *buf)
 {
 	enum mdoct	tok;
-	int		i, j;
+	int		i, j, sv;
 	char		mac[5];
 
 	/* Empty lines are ignored. */
@@ -745,6 +749,8 @@ mdoc_pmacro(struct mdoc *m, int ln, char *buf)
 		if ('\0' == buf[i])
 			return(1);
 	}
+
+	sv = i;
 
 	/* Copy the first word into a nil-terminated buffer. */
 
@@ -793,7 +799,7 @@ mdoc_pmacro(struct mdoc *m, int ln, char *buf)
 	 * Begin recursive parse sequence.  Since we're at the start of
 	 * the line, we don't need to do callable/parseable checks.
 	 */
-	if ( ! mdoc_macro(m, tok, ln, 1, &i, buf)) 
+	if ( ! mdoc_macro(m, tok, ln, sv, &i, buf)) 
 		goto err;
 
 	return(1);

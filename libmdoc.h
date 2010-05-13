@@ -28,9 +28,10 @@ struct	mdoc {
 	void		 *data;
 	struct mdoc_cb	  cb;
 	int		  flags;
-#define	MDOC_HALT	 (1 << 0)	/* Error in parse. Halt. */
-#define	MDOC_LITERAL	 (1 << 1)	/* In a literal scope. */
-#define	MDOC_PBODY	 (1 << 2)	/* In the document body. */
+#define	MDOC_HALT	 (1 << 0) /* error in parse: halt */
+#define	MDOC_LITERAL	 (1 << 1) /* in a literal scope */
+#define	MDOC_PBODY	 (1 << 2) /* in the document body */
+#define	MDOC_NEWLINE	 (1 << 3) /* first macro/text in a line */
 	int		  pflags;
 	enum mdoc_next	  next;
 	struct mdoc_node *last;

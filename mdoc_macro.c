@@ -653,10 +653,12 @@ append_delims(struct mdoc *mdoc, int line, int *pos, char *buf)
 static int
 blk_exp_close(MACRO_PROT_ARGS)
 {
-	int	 	 j, lastarg, maxargs, flushed;
+	int	 	 j, lastarg, maxargs, flushed, nl;
 	enum margserr	 ac;
 	enum mdoct	 ntok;
 	char		*p;
+
+	nl = MDOC_NEWLINE & m->flags;
 
 	switch (tok) {
 	case (MDOC_Ec):
@@ -723,7 +725,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 	if ( ! flushed && ! rew_sub(MDOC_BLOCK, m, tok, line, ppos))
 		return(0);
 
-	if (ppos > 1)
+	if ( ! nl)
 		return(1);
 	return(append_delims(m, line, pos, buf));
 }
@@ -732,12 +734,14 @@ blk_exp_close(MACRO_PROT_ARGS)
 static int
 in_line(MACRO_PROT_ARGS)
 {
-	int		 la, lastpunct, cnt, d, nc;
+	int		 la, lastpunct, cnt, d, nc, nl;
 	enum margverr	 av;
 	enum mdoct	 ntok;
 	enum margserr	 ac;
 	struct mdoc_arg	*arg;
 	char		*p;
+
+	nl = MDOC_NEWLINE & m->flags;
 
 	/*
 	 * Whether we allow ignored elements (those without content,
@@ -815,7 +819,7 @@ in_line(MACRO_PROT_ARGS)
 			}
 			if ( ! mdoc_macro(m, ntok, line, la, pos, buf))
 				return(0);
-			if (ppos > 1)
+			if ( ! nl)
 				return(1);
 			return(append_delims(m, line, pos, buf));
 		} 
@@ -875,7 +879,7 @@ in_line(MACRO_PROT_ARGS)
 			return(0);
 	}
 
-	if (ppos > 1)
+	if ( ! nl)
 		return(1);
 	return(append_delims(m, line, pos, buf));
 }
@@ -1180,12 +1184,14 @@ blk_part_imp(MACRO_PROT_ARGS)
 static int
 blk_part_exp(MACRO_PROT_ARGS)
 {
-	int		  la;
+	int		  la, nl;
 	enum margserr	  ac;
 	struct mdoc_node *head; /* keep track of head */
 	struct mdoc_node *body; /* keep track of body */
 	char		 *p;
 	enum mdoct	  ntok;
+
+	nl = MDOC_NEWLINE & m->flags;
 
 	/*
 	 * The opening of an explicit macro having zero or more leading
@@ -1279,9 +1285,8 @@ blk_part_exp(MACRO_PROT_ARGS)
 
 	/* Standard appending of delimiters. */
 
-	if (ppos > 1)
+	if ( ! nl)
 		return(1);
-
 	return(append_delims(m, line, pos, buf));
 }
 
@@ -1289,12 +1294,14 @@ blk_part_exp(MACRO_PROT_ARGS)
 static int
 in_line_argn(MACRO_PROT_ARGS)
 {
-	int		 la, flushed, j, maxargs;
+	int		 la, flushed, j, maxargs, nl;
 	enum margserr	 ac;
 	enum margverr	 av;
 	struct mdoc_arg	*arg;
 	char		*p;
 	enum mdoct	 ntok;
+
+	nl = MDOC_NEWLINE & m->flags;
 
 	/*
 	 * A line macro that has a fixed number of arguments (maxargs).
@@ -1415,8 +1422,7 @@ in_line_argn(MACRO_PROT_ARGS)
 
 	if ( ! flushed && ! rew_elem(m, tok))
 		return(0);
-
-	if (ppos > 1)
+	if ( ! nl)
 		return(1);
 	return(append_delims(m, line, pos, buf));
 }
@@ -1492,13 +1498,16 @@ in_line_eoln(MACRO_PROT_ARGS)
 static int
 ctx_synopsis(MACRO_PROT_ARGS)
 {
+	int		 nl;
+
+	nl = MDOC_NEWLINE & m->flags;
 
 	/* If we're not in the SYNOPSIS, go straight to in-line. */
 	if (SEC_SYNOPSIS != m->lastsec)
 		return(in_line(m, tok, line, ppos, pos, buf));
 
 	/* If we're a nested call, same place. */
-	if (ppos > 1)
+	if ( ! nl)
 		return(in_line(m, tok, line, ppos, pos, buf));
 
 	/*

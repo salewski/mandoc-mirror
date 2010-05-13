@@ -729,7 +729,8 @@ mdoc_nm_pre(MDOC_ARGS)
 {
 	struct htmlpair	tag;
 
-	if (SEC_SYNOPSIS == n->sec && n->prev) {
+	if (SEC_SYNOPSIS == n->sec && 
+			n->prev && MDOC_LINE & n->flags) {
 		bufcat_style(h, "clear", "both");
 		PAIR_STYLE_INIT(&tag, h);
 		print_otag(h, TAG_BR, 1, &tag);
@@ -1557,7 +1558,7 @@ mdoc_fd_pre(MDOC_ARGS)
 	struct htmlpair	 tag;
 	struct roffsu	 su;
 
-	if (SEC_SYNOPSIS == n->sec) {
+	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags) {
 		if (n->next && MDOC_Fd != n->next->tok) {
 			SCALE_VS_INIT(&su, 1);
 			bufcat_su(h, "margin-bottom", &su);
@@ -1605,7 +1606,7 @@ mdoc_ft_pre(MDOC_ARGS)
 {
 	struct htmlpair	 tag;
 
-	if (SEC_SYNOPSIS == n->sec)
+	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags)
 		print_otag(h, TAG_DIV, 0, NULL);
 
 	PAIR_CLASS_INIT(&tag, "ftype");
@@ -1626,7 +1627,7 @@ mdoc_fn_pre(MDOC_ARGS)
 	int			 sz, i;
 	struct roffsu		 su;
 
-	if (SEC_SYNOPSIS == n->sec) {
+	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags) {
 		SCALE_HS_INIT(&su, INDENT);
 		bufcat_su(h, "margin-left", &su);
 		su.scale = -su.scale;
@@ -1867,7 +1868,7 @@ mdoc_in_pre(MDOC_ARGS)
 	int			 i;
 	struct roffsu		 su;
 
-	if (SEC_SYNOPSIS == n->sec) {
+	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags) {
 		if (n->next && MDOC_In != n->next->tok) {
 			SCALE_VS_INIT(&su, 1);
 			bufcat_su(h, "margin-bottom", &su);
@@ -2172,7 +2173,7 @@ mdoc_lb_pre(MDOC_ARGS)
 {
 	struct htmlpair	tag;
 
-	if (SEC_SYNOPSIS == n->sec)
+	if (SEC_LIBRARY == n->sec && MDOC_LINE & n->flags)
 		print_otag(h, TAG_DIV, 0, NULL);
 	PAIR_CLASS_INIT(&tag, "lib");
 	print_otag(h, TAG_SPAN, 1, &tag);

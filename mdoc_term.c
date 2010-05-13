@@ -1085,7 +1085,7 @@ static int
 termp_nm_pre(DECL_ARGS)
 {
 
-	if (SEC_SYNOPSIS == n->sec)
+	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags)
 		term_newln(p);
 
 	term_fontpush(p, TERMFONT_BOLD);
@@ -1384,7 +1384,7 @@ static void
 termp_fd_post(DECL_ARGS)
 {
 
-	if (n->sec != SEC_SYNOPSIS)
+	if (n->sec != SEC_SYNOPSIS || ! (MDOC_LINE & n->flags))
 		return;
 
 	term_newln(p);
@@ -1471,7 +1471,7 @@ static void
 termp_lb_post(DECL_ARGS)
 {
 
-	if (SEC_LIBRARY == n->sec)
+	if (SEC_LIBRARY == n->sec && MDOC_LINE & n->flags)
 		term_newln(p);
 }
 
@@ -1540,7 +1540,7 @@ static int
 termp_ft_pre(DECL_ARGS)
 {
 
-	if (SEC_SYNOPSIS == n->sec)
+	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags)
 		if (n->prev && MDOC_Fo == n->prev->tok)
 			term_vspace(p);
 
@@ -1554,7 +1554,7 @@ static void
 termp_ft_post(DECL_ARGS)
 {
 
-	if (SEC_SYNOPSIS == n->sec)
+	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags)
 		term_newln(p);
 }
 
@@ -1595,7 +1595,7 @@ static void
 termp_fn_post(DECL_ARGS)
 {
 
-	if (n->sec == SEC_SYNOPSIS && n->next)
+	if (n->sec == SEC_SYNOPSIS && n->next && MDOC_LINE & n->flags)
 		term_vspace(p);
 }
 
@@ -1894,7 +1894,7 @@ termp_in_post(DECL_ARGS)
 	term_word(p, ">");
 	term_fontpop(p);
 
-	if (SEC_SYNOPSIS != n->sec)
+	if (SEC_SYNOPSIS != n->sec && ! (MDOC_LINE & n->flags))
 		return;
 
 	term_newln(p);
