@@ -1291,6 +1291,7 @@ blk_part_exp(MACRO_PROT_ARGS)
 }
 
 
+/* ARGSUSED */
 static int
 in_line_argn(MACRO_PROT_ARGS)
 {
