@@ -239,12 +239,16 @@
 						<COL CLASS="date">
 						<TBODY>
 							<TR>
-								<TD VALIGN="top"><SPAN CLASS="date">09-05-2010</SPAN></TD>
+								<TD VALIGN="top"><SPAN CLASS="date">13-05-2010</SPAN></TD>
 								<TD VALIGN="top">
 								Fixed handling of <Q>\*(Ba</Q> escape.  Backed out <SPAN
-								CLASS="flag">-fno-ign-chars</SPAN> (pointless complexity).  Fixed breaking of
-								literal lines (for <SPAN CLASS="fl">-mdoc</SPAN> only).
-								Version: <SPAN CLASS="rev">1.9.24</SPAN>.
+								CLASS="flag">-fno-ign-chars</SPAN> (pointless complexity).  Fixed erroneous
+								breaking of literal lines.  Fixed SYNOPSIS breaking lines before non-initial
+								macros.  Changed default section ordering.  Most importantly, the framework for
+								end-of-sentence double-spacing is in place, now implemented for the
+								<Q>end-of-sentence, end-of-line</Q> rule.  This is a stable roll-back point
+								before the mandoc hackathon in Rostock!
+								Version: <SPAN CLASS="rev">1.9.25</SPAN>.
 							</TR>
 							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">09-05-2010</SPAN></TD>
