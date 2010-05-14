@@ -888,7 +888,7 @@ in_line(MACRO_PROT_ARGS)
 static int
 blk_full(MACRO_PROT_ARGS)
 {
-	int		  la;
+	int		  la, nl;
 	struct mdoc_arg	 *arg;
 	struct mdoc_node *head; /* save of head macro */
 	struct mdoc_node *body; /* save of body macro */
@@ -899,6 +899,8 @@ blk_full(MACRO_PROT_ARGS)
 	enum margserr	  ac, lac;
 	enum margverr	  av;
 	char		 *p;
+
+	nl = MDOC_NEWLINE & m->flags;
 
 	/* Close out prior implicit scope. */
 
@@ -1033,7 +1035,7 @@ blk_full(MACRO_PROT_ARGS)
 		head = m->last;
 	}
 	
-	if (1 == ppos && ! append_delims(m, line, pos, buf))
+	if (nl && ! append_delims(m, line, pos, buf))
 		return(0);
 
 	/* If we've already opened our body, exit now. */
@@ -1073,13 +1075,15 @@ blk_full(MACRO_PROT_ARGS)
 static int
 blk_part_imp(MACRO_PROT_ARGS)
 {
-	int		  la;
+	int		  la, nl;
 	enum mdoct	  ntok;
 	enum margserr	  ac;
 	char		 *p;
 	struct mdoc_node *blk; /* saved block context */
 	struct mdoc_node *body; /* saved body context */
 	struct mdoc_node *n;
+
+	nl = MDOC_NEWLINE & m->flags;
 
 	/*
 	 * A macro that spans to the end of the line.  This is generally
@@ -1156,6 +1160,8 @@ blk_part_imp(MACRO_PROT_ARGS)
 	 * been closed by another macro (like `Oc' closing `Op').  This
 	 * is ugly behaviour nodding its head to OpenBSD's overwhelming
 	 * crufty use of `Op' breakage.
+	 *
+	 * FIXME - this should be ifdef'd OpenBSD?
 	 */
 	for (n = m->last; n; n = n->parent)
 		if (body == n)
@@ -1169,7 +1175,7 @@ blk_part_imp(MACRO_PROT_ARGS)
 
 	/* Standard appending of delimiters. */
 
-	if (1 == ppos && ! append_delims(m, line, pos, buf))
+	if (nl && ! append_delims(m, line, pos, buf))
 		return(0);
 
 	/* Rewind scope, if applicable. */
