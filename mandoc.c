@@ -305,7 +305,8 @@ int
 mandoc_eos(const char *p, size_t sz)
 {
 
-	assert(sz);
+	if (0 == sz)
+		return(0);
 
 	switch (p[(int)sz - 1]) {
 	case ('.'):
