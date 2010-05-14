@@ -98,9 +98,9 @@ static	int		  moptions(enum intt *, char *);
 static	int		  woptions(int *, char *);
 static	int		  merr(void *, int, int, const char *);
 static	int		  mwarn(void *, int, int, const char *);
-static	int		  ffile(struct buf *, struct buf *, 
+static	void		  ffile(struct buf *, struct buf *, 
 				const char *, struct curparse *);
-static	int		  fdesc(struct buf *, struct buf *,
+static	void		  fdesc(struct buf *, struct buf *,
 				struct curparse *);
 static	int		  pset(const char *, int, struct curparse *,
 				struct man **, struct mdoc **);
@@ -110,12 +110,12 @@ static	void		  version(void) __attribute__((noreturn));
 static	void		  usage(void) __attribute__((noreturn));
 
 static	const char	 *progname;
-
+static 	int		  with_error, with_warning;
 
 int
 main(int argc, char *argv[])
 {
-	int		 c, rc;
+	int		 c;
 	struct buf	 ln, blk;
 	struct curparse	 curp;
 
@@ -167,35 +167,19 @@ main(int argc, char *argv[])
 	memset(&ln, 0, sizeof(struct buf));
 	memset(&blk, 0, sizeof(struct buf));
 
-	rc = 1;
-
 	if (NULL == *argv) {
 		curp.file = "<stdin>";
 		curp.fd = STDIN_FILENO;
 
-		c = fdesc(&blk, &ln, &curp);
-		if ( ! (FL_IGN_ERRORS & curp.fflags)) 
-			rc = 1 == c ? 1 : 0;
-		else
-			rc = -1 == c ? 0 : 1;
+		fdesc(&blk, &ln, &curp);
 	}
 
-	while (rc && *argv) {
-		c = ffile(&blk, &ln, *argv, &curp);
-		if ( ! (FL_IGN_ERRORS & curp.fflags)) 
-			rc = 1 == c ? 1 : 0;
-		else
-			rc = -1 == c ? 0 : 1;
+	while (*argv) {
+		ffile(&blk, &ln, *argv, &curp);
 
-		argv++;
-		if (*argv && rc) {
-			if (curp.lastman)
-				man_reset(curp.lastman);
-			if (curp.lastmdoc)
-				mdoc_reset(curp.lastmdoc);
-			curp.lastman = NULL;
-			curp.lastmdoc = NULL;
-		}
+		if (with_error && !(curp.fflags & FL_IGN_ERRORS))
+			break;
+		++argv;
 	}
 
 	if (blk.buf)
@@ -204,12 +188,8 @@ main(int argc, char *argv[])
 		free(ln.buf);
 	if (curp.outfree)
 		(*curp.outfree)(curp.outdata);
-	if (curp.mdoc)
-		mdoc_free(curp.mdoc);
-	if (curp.man)
-		man_free(curp.man);
 
-	return(rc ? EXIT_SUCCESS : EXIT_FAILURE);
+	return((with_warning || with_error) ? EXIT_FAILURE :  EXIT_SUCCESS );
 }
 
 
@@ -279,28 +259,26 @@ mdoc_init(struct curparse *curp)
 }
 
 
-static int
+static void
 ffile(struct buf *blk, struct buf *ln, 
 		const char *file, struct curparse *curp)
 {
-	int		 c;
 
 	curp->file = file;
 	if (-1 == (curp->fd = open(curp->file, O_RDONLY, 0))) {
 		perror(curp->file);
-		return(-1);
+		with_error = 1;
+		return;
 	}
 
-	c = fdesc(blk, ln, curp);
+	fdesc(blk, ln, curp);
 
 	if (-1 == close(curp->fd))
 		perror(curp->file);
-
-	return(c);
 }
 
 
-static int
+static void
 fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 {
 	size_t		 sz;
@@ -320,17 +298,23 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 	 * growable, hence passed in by ptr-ptr.
 	 */
 
-	if (-1 == fstat(curp->fd, &st))
+	if (-1 == fstat(curp->fd, &st)) {
 		perror(curp->file);
-	else if ((size_t)st.st_blksize > sz)
+		with_error = 1;
+		return;
+	}
+	if ((size_t)st.st_blksize > sz)
 		sz = st.st_blksize;
 
 	if (sz > blk->sz) {
-		blk->buf = realloc(blk->buf, sz);
-		if (NULL == blk->buf) {
+		void *buf = realloc(blk->buf, sz);
+
+		if (NULL == buf) {
 			perror(NULL);
-			exit(EXIT_FAILURE);
+			with_error = 1;
+			return;
 		}
+		blk->buf = buf;
 		blk->sz = sz;
 	}
 
@@ -339,7 +323,7 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 	for (lnn = pos = comment = 0; ; ) {
 		if (-1 == (ssz = read(curp->fd, blk->buf, sz))) {
 			perror(curp->file);
-			return(-1);
+			goto bailout;
 		} else if (0 == ssz) 
 			break;
 
@@ -351,7 +335,7 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 				ln->buf = realloc(ln->buf, ln->sz);
 				if (NULL == ln->buf) {
 					perror(NULL);
-					return(EXIT_FAILURE);
+					goto bailout;
 				}
 			}
 
@@ -404,16 +388,16 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 
 			if ( ! (man || mdoc) && ! pset(ln->buf, 
 						pos, curp, &man, &mdoc))
-				return(-1);
+				goto bailout;
 
 			pos = comment = 0;
 
 			/* Pass down into parsers. */
 
 			if (man && ! man_parseln(man, lnn, ln->buf))
-				return(0);
+				goto bailout;
 			if (mdoc && ! mdoc_parseln(mdoc, lnn, ln->buf))
-				return(0);
+				goto bailout;
 		}
 	}
 
@@ -421,13 +405,13 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 
 	if ( ! (man || mdoc)) {
 		fprintf(stderr, "%s: Not a manual\n", curp->file);
-		return(0);
+		goto bailout;
 	}
 
 	if (mdoc && ! mdoc_endparse(mdoc))
-		return(0);
+		goto bailout;
 	if (man && ! man_endparse(man))
-		return(0);
+		goto bailout;
 
 	/* If unset, allocate output dev now (if applicable). */
 
@@ -467,7 +451,20 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 	if (mdoc && curp->outmdoc)
 		(*curp->outmdoc)(curp->outdata, mdoc);
 
-	return(1);
+ cleanup:
+	if (curp->mdoc) {
+		mdoc_free(curp->mdoc);
+		curp->mdoc = NULL;
+	}
+	if (curp->man) {
+		man_free(curp->man);
+		curp->man = NULL;
+	}
+	return;
+
+ bailout:
+	with_error = 1;
+	goto cleanup;
 }
 
 
@@ -660,6 +657,8 @@ merr(void *arg, int line, int col, const char *msg)
 	(void)fprintf(stderr, "%s:%d:%d: error: %s\n", 
 			curp->file, line, col + 1, msg);
 
+	with_error = 1;
+
 	return(0);
 }
 
@@ -677,9 +676,12 @@ mwarn(void *arg, int line, int col, const char *msg)
 	(void)fprintf(stderr, "%s:%d:%d: warning: %s\n", 
 			curp->file, line, col + 1, msg);
 
-	if ( ! (curp->wflags & WARN_WERR))
-		return(1);
-	
-	return(0);
+	with_warning = 1;
+	if (curp->wflags & WARN_WERR) {
+		with_error = 1;
+		return(0);
+	}
+
+	return(1);
 }
 
