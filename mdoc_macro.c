@@ -48,7 +48,7 @@ static	int	  	append_delims(struct mdoc *,
 static	enum mdoct	lookup(enum mdoct, const char *);
 static	enum mdoct	lookup_raw(const char *);
 static	int	  	phrase(struct mdoc *, int, int, 
-				char *, enum margserr, int);
+				char *, enum margserr);
 static	enum mdoct 	rew_alt(enum mdoct);
 static	int	  	rew_dobreak(enum mdoct, 
 				const struct mdoc_node *);
@@ -888,7 +888,7 @@ in_line(MACRO_PROT_ARGS)
 static int
 blk_full(MACRO_PROT_ARGS)
 {
-	int		  la, pcnt;
+	int		  la;
 	struct mdoc_arg	 *arg;
 	struct mdoc_node *head; /* save of head macro */
 	struct mdoc_node *body; /* save of body macro */
@@ -959,7 +959,7 @@ blk_full(MACRO_PROT_ARGS)
 
 	ac = ARGS_ERROR;
 
-	for (pcnt = 0; ; ) {
+	for ( ; ; ) {
 		la = *pos;
 		lac = ac;
 		ac = mdoc_args(m, line, pos, buf, tok, &p);
@@ -1007,7 +1007,7 @@ blk_full(MACRO_PROT_ARGS)
 			else if (ARGS_PEND == ac && ARGS_PHRASE == lac)
 				ac = ARGS_PHRASE;
 
-			if ( ! phrase(m, line, la, buf, ac, pcnt++))
+			if ( ! phrase(m, line, la, buf, ac))
 				return(0);
 			if ( ! rew_sub(MDOC_HEAD, m, tok, line, ppos))
 				return(0);
@@ -1536,8 +1536,7 @@ obsolete(MACRO_PROT_ARGS)
  * macro is encountered.
  */
 static int
-phrase(struct mdoc *m, int line, int ppos, char *buf, 
-		enum margserr ac, int count)
+phrase(struct mdoc *m, int line, int ppos, char *buf, enum margserr ac)
 {
 	int		 la, pos;
 	enum margserr	 aac;
@@ -1548,14 +1547,10 @@ phrase(struct mdoc *m, int line, int ppos, char *buf,
 			ARGS_PEND == ac ||
 			ARGS_PPHRASE == ac);
 
-	if (count && ARGS_PPHRASE == ac)
-		return(mdoc_word_alloc(m, line, ppos, &buf[ppos]));
-
 	for (pos = ppos; ; ) {
 		la = pos;
 
-		/* Note: no calling context! */
-		aac = mdoc_zargs(m, line, &pos, buf, 0, &p);
+		aac = mdoc_zargs(m, line, &pos, buf, ARGS_PPHRASED, &p);
 
 		if (ARGS_ERROR == aac)
 			return(0);

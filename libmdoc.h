@@ -32,6 +32,7 @@ struct	mdoc {
 #define	MDOC_LITERAL	 (1 << 1) /* in a literal scope */
 #define	MDOC_PBODY	 (1 << 2) /* in the document body */
 #define	MDOC_NEWLINE	 (1 << 3) /* first macro/text in a line */
+#define	MDOC_PHRASELIT	 (1 << 4) /* in a literal within a phrase */
 	int		  pflags;
 	enum mdoc_next	  next;
 	struct mdoc_node *last;
@@ -186,9 +187,10 @@ enum margserr	  mdoc_args(struct mdoc *, int,
 			int *, char *, enum mdoct, char **);
 enum margserr	  mdoc_zargs(struct mdoc *, int, 
 			int *, char *, int, char **);
-#define	ARGS_DELIM	(1 << 1)	/* See args(). */
-#define	ARGS_TABSEP	(1 << 2)	/* See args(). */
-#define	ARGS_NOWARN	(1 << 3)	/* See args(). */
+#define	ARGS_DELIM	(1 << 1)
+#define	ARGS_TABSEP	(1 << 2)
+#define	ARGS_NOWARN	(1 << 3)
+#define ARGS_PPHRASED	(1 << 4)
 
 int		  mdoc_macroend(struct mdoc *);
 
