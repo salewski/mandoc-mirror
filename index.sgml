@@ -240,6 +240,11 @@
 						<COL CLASS="date">
 						<TBODY>
 							<TR>
+								<TD VALIGN="top"><SPAN CLASS="date">xx-05-2010</SPAN></TD>
+								
+								<TD VALIGN="top">
+							</TR>
+							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">13-05-2010</SPAN></TD>
 								<TD VALIGN="top">
 								Fixed handling of <Q>\*(Ba</Q> escape.  Backed out <SPAN
