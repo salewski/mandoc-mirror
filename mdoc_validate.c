@@ -45,7 +45,6 @@ struct	valids {
 };
 
 static	int	 check_parent(PRE_ARGS, enum mdoct, enum mdoc_type);
-static	int	 check_msec(PRE_ARGS, ...);
 static	int	 check_sec(PRE_ARGS, ...);
 static	int	 check_stdarg(PRE_ARGS);
 static	int	 check_text(struct mdoc *, int, int, const char *);
@@ -100,7 +99,6 @@ static	int	 pre_bl(PRE_ARGS);
 static	int	 pre_dd(PRE_ARGS);
 static	int	 pre_display(PRE_ARGS);
 static	int	 pre_dt(PRE_ARGS);
-static	int	 pre_ex(PRE_ARGS);
 static	int	 pre_fd(PRE_ARGS);
 static	int	 pre_it(PRE_ARGS);
 static	int	 pre_lb(PRE_ARGS);
@@ -139,7 +137,7 @@ static	v_pre	 pres_d1[] = { pre_display, NULL };
 static	v_pre	 pres_dd[] = { pre_dd, NULL };
 static	v_pre	 pres_dt[] = { pre_dt, NULL };
 static	v_pre	 pres_er[] = { NULL, NULL };
-static	v_pre	 pres_ex[] = { pre_ex, NULL };
+static	v_pre	 pres_ex[] = { NULL, NULL };
 static	v_pre	 pres_fd[] = { pre_fd, NULL };
 static	v_pre	 pres_it[] = { pre_it, NULL };
 static	v_pre	 pres_lb[] = { pre_lb, NULL };
@@ -436,28 +434,6 @@ check_sec(PRE_ARGS, ...)
 
 	va_end(ap);
 	return(mdoc_nwarn(mdoc, n, EBADSEC));
-}
-
-
-static int
-check_msec(PRE_ARGS, ...)
-{
-	va_list		 ap;
-	int		 msec;
-
-	va_start(ap, n);
-	for (;;) {
-		/* LINTED */
-		if (0 == (msec = va_arg(ap, int)))
-			break;
-		if (msec != mdoc->meta.msec)
-			continue;
-		va_end(ap);
-		return(1);
-	}
-
-	va_end(ap);
-	return(mdoc_nwarn(mdoc, n, EBADMSEC));
 }
 
 
@@ -773,16 +749,6 @@ static int
 pre_rv(PRE_ARGS)
 {
 
-	return(check_stdarg(mdoc, n));
-}
-
-
-static int
-pre_ex(PRE_ARGS)
-{
-
-	if ( ! check_msec(mdoc, n, 1, 6, 8, 0))
-		return(0);
 	return(check_stdarg(mdoc, n));
 }
 
