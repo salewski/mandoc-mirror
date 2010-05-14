@@ -1162,7 +1162,7 @@ post_st(POST_ARGS)
 
 	if (mdoc_a2st(mdoc->last->child->string))
 		return(1);
-	return(mdoc_nerr(mdoc, mdoc->last, EBADSTAND));
+	return(mdoc_nwarn(mdoc, mdoc->last, EBADSTAND));
 }
 
 
