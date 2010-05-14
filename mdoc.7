@@ -1093,6 +1093,18 @@ and
 .Ss \&Bk
 .Ss \&Bl
 Begins a list composed of one or more list entries.
+A list is associated with a type, which is a required argument.
+Other arguments are
+.Fl width ,
+defined per-type as accepting a literal or
+.Sx Scaling Widths
+value;
+.Fl offset ,
+also accepting a literal or
+.Sx Scaling Widths
+value setting the list's global offset; and
+.Fl compact ,
+suppressing the default vertical space printed before each list entry.
 A list entry is specified by the
 .Sx \&It
 macro, which consists of a head and optional body (depending on the list
@@ -1103,8 +1115,14 @@ A list must specify one of the following list types:
 A list offset by a bullet.
 The head of list entries must be empty.
 List entry bodies are positioned after the bullet.
+The
+.Fl width
+argument varies the width of list bodies' left-margins.
 .It Fl column
 A columnated list.
+The
+.Fl width
+argument has no effect.
 The number of columns is specified as parameters to the
 .Sx \&Bl
 macro.
@@ -1131,29 +1149,50 @@ will preserve the semicolon whitespace except for the last.
 A list offset by a dash (hyphen).
 The head of list entries must be empty.
 List entry bodies are positioned past the dash.
+The
+.Fl width
+argument varies the width of list bodies' left-margins.
 .It Fl diag
 Like
 .Fl inset ,
 but with additional formatting to the head.
+The
+.Fl width
+argument varies the width of list bodies' left-margins.
 .It Fl enum
 An enumerated list offset by the enumeration from 1.
 The head of list entries must be empty.
 List entry bodies are positioned after the enumeration.
+The
+.Fl width
+argument varies the width of list bodies' left-margins.
 .It Fl hang
 Like
 .Fl tag ,
 but instead of list bodies positioned after the head, they trail the
 head text.
+The
+.Fl width
+argument varies the width of list bodies' left-margins.
 .It Fl hyphen
 Synonym for
 .Fl dash .
 .It Fl inset
 List bodies follow the list head.
+The
+.Fl width
+argument is ignored.
 .It Fl item
 This produces blocks of text.
 The head of list entries must be empty.
+The
+.Fl width
+argument is ignored.
 .It Fl ohang
 List bodies are positioned on the line following the head.
+The
+.Fl width
+argument is ignored.
 .It Fl tag
 A list offset by list entry heads.  List entry bodies are positioned
 after the head as specified by the
