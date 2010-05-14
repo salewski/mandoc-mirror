@@ -375,9 +375,9 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 				comment = 1;
 				pos -= 2;
 				for (; pos > 0; --pos) {
-					if (ln->buf[pos] != ' ')
+					if (ln->buf[pos - 1] != ' ')
 						break;
-					if (ln->buf[pos - 1] == '\\')
+					if (pos > 2 && ln->buf[pos - 2] == '\\')
 						break;
 				}
 				continue;
