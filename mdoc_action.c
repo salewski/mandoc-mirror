@@ -382,15 +382,27 @@ post_st(POST_ARGS)
 static int
 post_at(POST_ARGS)
 {
-	struct mdoc_node	*nn;
-	const char		*p;
+	struct mdoc_node *nn;
+	const char	 *p, *q;
+	char		 *buf;
+	size_t		  sz;
 
 	if (n->child) {
 		assert(MDOC_TEXT == n->child->type);
 		p = mdoc_a2att(n->child->string);
-		assert(p);
-		free(n->child->string);
-		n->child->string = mandoc_strdup(p);
+		if (p) {
+			free(n->child->string);
+			n->child->string = mandoc_strdup(p);
+		} else {
+			p = "AT&T UNIX ";
+			q = n->child->string;
+			sz = strlen(p) + strlen(q) + 1;
+			buf = mandoc_malloc(sz);
+			strlcpy(buf, p, sz);
+			strlcat(buf, q, sz);
+			free(n->child->string);
+			n->child->string = buf;
+		}
 		return(1);
 	}
 

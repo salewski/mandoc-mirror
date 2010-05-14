@@ -921,7 +921,7 @@ post_at(POST_ARGS)
 		return(mdoc_nerr(mdoc, mdoc->last, EATT));
 	if (mdoc_a2att(mdoc->last->child->string))
 		return(1);
-	return(mdoc_nerr(mdoc, mdoc->last, EATT));
+	return(mdoc_nwarn(mdoc, mdoc->last, EATT));
 }
 
 
