@@ -1039,14 +1039,14 @@ post_it(POST_ARGS)
 		for (i = 0; c && MDOC_HEAD == c->type; c = c->next)
 			i++;
 
-		if (i < cols || i == (cols + 1)) {
+		if (i < cols) {
 			if ( ! mdoc_vwarn(mdoc, mdoc->last->line, 
 					mdoc->last->pos, "column "
 					"mismatch: have %d, want %d", 
 					i, cols))
 				return(0);
 			break;
-		} else if (i == cols)
+		} else if (i == cols || i == cols + 1)
 			break;
 
 		return(mdoc_verr(mdoc, mdoc->last->line, 
