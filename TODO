@@ -72,11 +72,6 @@
 - do not break the line after "--", it's probably a long option
   reminded by stsp in net/pptp pptp.8  Fri, 23 Apr 2010 20:32:39 +0200
 
-- in .Bl -column .It, "\t" seems to be synonymous to " Ta ",
-  see sysctl(3) for many examples;
-  mishandling this results in spurious quotes at EOL
-  reminded by guenther@  Mon, 26 Apr 2010 01:16:52 -0700
-
 - URGENT, this is making many kernel manuals look bad:
   .Ft/.Fn should MAYBE behave in custom section like in SYNOPSIS?
   autoconf.9:
@@ -105,11 +100,6 @@
 ************************************************************************
 * formatting issues: gratuitious differences
 ************************************************************************
-
-- in literal context, groff disables the right margin
-  an example: syslog.conf.5 EXAMPLES section
-  reported by jmc Tue, 13 Apr 2010 10:12:15 +0100
-  solution: raise termp->maxrmargin in literal context
 
 - lines containing blank characters, and nothing else,
   in literal context (.Bd -literal):
