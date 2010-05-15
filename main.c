@@ -78,9 +78,7 @@ struct	curparse {
 #define	FL_IGN_ERRORS	 (1 << 4)	/* Ignore failed parse. */
 	enum intt	  inttype;	/* Input parsers... */
 	struct man	 *man;
-	struct man	 *lastman;
 	struct mdoc	 *mdoc;
-	struct mdoc	 *lastmdoc;
 	enum outt	  outtype;	/* Output devices... */
 	out_mdoc	  outmdoc;
 	out_man	  	  outman;
@@ -496,14 +494,12 @@ pset(const char *buf, int pos, struct curparse *curp,
 			curp->mdoc = mdoc_init(curp);
 		if (NULL == (*mdoc = curp->mdoc))
 			return(0);
-		curp->lastmdoc = *mdoc;
 		return(1);
 	case (INTT_MAN):
 		if (NULL == curp->man) 
 			curp->man = man_init(curp);
 		if (NULL == (*man = curp->man))
 			return(0);
-		curp->lastman = *man;
 		return(1);
 	default:
 		break;
@@ -514,7 +510,6 @@ pset(const char *buf, int pos, struct curparse *curp,
 			curp->mdoc = mdoc_init(curp);
 		if (NULL == (*mdoc = curp->mdoc))
 			return(0);
-		curp->lastmdoc = *mdoc;
 		return(1);
 	} 
 
@@ -522,7 +517,6 @@ pset(const char *buf, int pos, struct curparse *curp,
 		curp->man = man_init(curp);
 	if (NULL == (*man = curp->man))
 		return(0);
-	curp->lastman = *man;
 	return(1);
 }
 
