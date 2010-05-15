@@ -1,11 +1,3 @@
-
-Before trying to fix anything from this list,
-check against -current mandoc from OpenBSD CVS.
-Sometimes, i'm a bit behind marking entries FIXED.
-
-In general, i keep FIXED entries for some time
-and remove them when they turn into old news.
-
 ************************************************************************
 * missing features
 ************************************************************************
@@ -52,21 +44,14 @@ and remove them when they turn into old news.
 - FIXED OpenBSD term.h 1.16 term.c 1.30 mdoc_term.c 1.75 schwarze 23.4.10
   handle tab characters outside literal context, e.g. usb(4)
   reported by jmc@  Mon, 19 Apr 2010 07:42:12 +0100
+  NEEDS MERGING TO bsd.lv
 
 - FIXED OpenBSD man.h 1.15 libman.h 1.16 man_hash.c 1.9 
   man.c 1.25 man_macro.c 1.15 man_validate.c 1.19 man_action.c 1.15 
   man_term.c 1.28 man_html.c 1.9 schwarze 25.4.
   implement .if .ie .el
   noticed by espie@  Fri, 23 Apr 2010 17:10:35 +0200
-
-- FIXED bsd.lv libman.h 1.31 libmdoc.h 1.34 man.c 1.60 mdoc.c 1.123
-        kristaps@ 8.4.10
-  FIXED OpenBSD libman.h 1.17 libmdoc.h 1.28 man.c 1.26 mdoc.c 1.45
-        schwarze@ 8.5.10
-  groff handles \." just like .\"
-  Thus, mandoc must also ignore such lines.
-  For an example, see tr(1).
-  reported by Claus Assmann Mon, 5 Apr 2010 08:46:30 -0700
+  NEEDS MERGING TO bsd.lv
 
 
 ************************************************************************
@@ -117,23 +102,6 @@ and remove them when they turn into old news.
   reported by millert Fri, 02 Apr 2010 16:13:46 -0400
 
 
-- FIXED on bsd.lv for mdoc, need to merge and test in OpenBSD
-    kristaps@  Mon, 10 May 2010 03:12:44 +0200
-    man fix still pending!
-  in literal displays, ignore the right margin
-  reminded by stsp in net/pptp pptp.8  Fri, 23 Apr 2010 20:32:39 +0200
-
-- FIXED on bsd.lv, need to merge and test in OpenBSD
-    kristaps@  Mon, 10 May 2010 02:59:40 +0200
-  do not mark \*(Ba and | up
-  e.g. .Op Fl c Ar string \*(Ba Fl s \*(Ba Ar file Op Ar argument ...
-  The first should not be in an .Ar font.
-  The second must not end up as -|.
-  When fixing, check whether this is a specific problem with this
-  character, or whether other characters are affected, too.
-  reminded by jmc@  Sat, 24 Apr 2010 06:54:26 +0100
-
-
 ************************************************************************
 * formatting issues: gratuitious differences
 ************************************************************************
@@ -148,12 +116,6 @@ and remove them when they turn into old news.
   groff outputs just blank lines "\n"
   mandoc outputs blanks to the left margin,
   then the number of balnks minus one
-
-
-- FIXED bsd.lv mdoc_html.c 1.61 mdoc_term.c 1.117 kristaps@ 8.4.10
-  FIXED OpenBSD mdoc_html.c 1.12 mdoc_term.c 1.76 schwarze@ 8.5.10
-  mandoc .%T changed from quoted to underlined
-  reported by jmc Mon, 10 Aug 2009 05:50:21 +0100
 
 
 ************************************************************************
