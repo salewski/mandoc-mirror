@@ -789,6 +789,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 static int
 mmsg(enum mandocerr t, void *arg, int ln, int col, const char *msg)
 {
+#if 0
 	struct curparse *cp;
 
 	cp = (struct curparse *)arg;
@@ -800,5 +801,6 @@ mmsg(enum mandocerr t, void *arg, int ln, int col, const char *msg)
 		fprintf(stderr, ": %s", msg);
 
 	fputc('\n', stderr);
+#endif
 	return(1);
 }

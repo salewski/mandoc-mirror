@@ -349,14 +349,14 @@ roff_new_ig(ROFF_ARGS)
 	 * Merry fucking Christmas.
 	 */
 
-	r->last->end = malloc((size_t)i - ppos + 1);
+	r->last->end = malloc((size_t)(i - ppos) + 1);
 	if (NULL == r->last->end) {
 		(*r->msg)(MANDOCERR_MEM, r->data, ln, ppos, NULL);
 		return(ROFF_ERR);
 	}
 
-	memcpy(r->last->end, &(*bufp)[ppos], (size_t)i - ppos);
-	r->last->end[(size_t)i - ppos] = '\0';
+	memcpy(r->last->end, &(*bufp)[ppos], (size_t)(i - ppos));
+	r->last->end[i - ppos] = '\0';
 
 	return(ROFF_IGN);
 }
