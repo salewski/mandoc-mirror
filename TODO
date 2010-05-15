@@ -21,8 +21,9 @@
   reminded by Ludo Smissaert  Mon, 10 May 2010 12:15:11 +0200
   also reported by jmc@ earlier
 
-- man(7) .TH should recognize "3p" as a section number
+- FIXED man(7) .TH should recognize "3p" as a section number
   found in usr.bin/pkg_add OpenBSD::Getopt
+  NEEDS MERGING TO openbsd.org
 
 - implement \\
   in plain text, identical to \e

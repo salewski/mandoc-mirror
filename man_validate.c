@@ -178,7 +178,7 @@ check_root(CHKARGS)
 		 */
 	        m->meta.title = mandoc_strdup("unknown");
 		m->meta.date = time(NULL);
-		m->meta.msec = 1;
+		m->meta.msec = mandoc_strdup("1");
 	}
 
 	return(1);

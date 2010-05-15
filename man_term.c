@@ -911,7 +911,7 @@ print_man_head(struct termp *p, const struct man_meta *m)
 		strlcpy(buf, m->vol, BUFSIZ);
 	buflen = strlen(buf);
 
-	snprintf(title, BUFSIZ, "%s(%d)", m->title, m->msec);
+	snprintf(title, BUFSIZ, "%s(%s)", m->title, m->msec);
 	titlen = strlen(title);
 
 	p->offset = 0;

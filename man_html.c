@@ -162,7 +162,7 @@ print_man_head(MAN_ARGS)
 
 	print_gen_head(h);
 	bufinit(h);
-	buffmt(h, "%s(%d)", m->title, m->msec);
+	buffmt(h, "%s(%s)", m->title, m->msec);
 
 	print_otag(h, TAG_TITLE, 0, NULL);
 	print_text(h, h->buf);
@@ -267,7 +267,7 @@ man_root_pre(MAN_ARGS)
 	if (m->vol)
 		(void)strlcat(b, m->vol, BUFSIZ);
 
-	snprintf(title, BUFSIZ - 1, "%s(%d)", m->title, m->msec);
+	snprintf(title, BUFSIZ - 1, "%s(%s)", m->title, m->msec);
 
 	PAIR_CLASS_INIT(&tag[0], "header");
 	bufcat_style(h, "width", "100%");
