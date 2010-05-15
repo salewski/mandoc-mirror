@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2008, 2009 Kristaps Dzonsons <kristaps@kth.se>
+ * Copyright (c) 2008, 2009 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -151,6 +151,8 @@ post_TH(struct man *m)
 		free(m->meta.vol);
 	if (m->meta.source)
 		free(m->meta.source);
+	if (m->meta.msec)
+		free(m->meta.msec);
 
 	m->meta.title = m->meta.vol = 
 		m->meta.msec = m->meta.source = NULL;
