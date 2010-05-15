@@ -44,6 +44,7 @@ struct	roff {
 struct	roffnode {
 	enum rofft	 tok; /* type of node */
 	struct roffnode	*parent; /* up one in stack */
+	char		*end; /* custom end-token */
 	int		 line; /* parse line */
 	int		 col; /* parse col */
 };
@@ -267,21 +268,52 @@ roff_ignore(ROFF_ARGS)
 static enum rofferr
 roff_sub_ig(ROFF_ARGS)
 {
-	enum rofft	 t;
-	int		 pos;
+	int		 i, j;
 
 	/* Ignore free-text lines. */
 
 	if ('.' != (*bufp)[ppos])
 		return(ROFF_IGN);
 
-	/* Ignore macros unless it's a closing macro. */
+	if (r->last->end) {
+		/*
+		 * Allow a macro to break us, if we've defined a special
+		 * one for the case.  Old groff didn't allow spaces to
+		 * buffer the macro, but new groff does.  Whee!
+		 */
+		i = ppos + 1;
+		while ((*bufp)[i] && ' ' == (*bufp)[i])
+			i++;
 
-	t = roff_parse(*bufp, &pos);
-	if (ROFF_close != t)
+		if ('\0' == (*bufp)[i])
+			return(ROFF_IGN);
+
+		for (j = 0; r->last->end[j]; i++, j++)
+			if ((*bufp)[i] != r->last->end[j])
+				return(ROFF_IGN);
+
+		if (r->last->end[j])
+			return(ROFF_IGN);
+		if ((*bufp)[i] && ' ' != (*bufp)[i])
+			return(ROFF_IGN);
+
+		while (' ' == (*bufp)[i])
+			i++;
+	} else if (ROFF_close != roff_parse(*bufp, &i))
 		return(ROFF_IGN);
 
+	/*
+	 * Pop off the ignoring context and warn if we're going to lose
+	 * any of our remaining arguments.
+	 */
+
 	roffnode_pop(r);
+
+	if ('\0' == (*bufp)[i])
+		return(ROFF_IGN);
+	if ( ! (*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, i, NULL))
+		return(ROFF_ERR);
+
 	return(ROFF_IGN);
 }
 
@@ -303,9 +335,42 @@ roff_new_close(ROFF_ARGS)
 static enum rofferr
 roff_new_ig(ROFF_ARGS)
 {
+	int		 i;
 
-	return(roffnode_push(r, ROFF_ig, ln, ppos) ? 
-			ROFF_IGN : ROFF_ERR);
+	if ( ! roffnode_push(r, ROFF_ig, ln, ppos))
+		return(ROFF_ERR);
+
+	i = (int)ppos;
+	while ((*bufp)[i] && ' ' != (*bufp)[i])
+		i++;
+
+	if (i == (int)ppos)
+		return(ROFF_IGN);
+	if ((*bufp)[i])
+		if ( ! (*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, i, NULL))
+			return(ROFF_ERR);
+
+	/*
+	 * If `.ig' has arguments, the first argument (up to the next
+	 * whitespace) is interpreted as an argument marking the macro
+	 * close.  Thus, `.ig foo' will close at `.foo'.
+	 *
+	 * NOTE: the closing macro `.foo' in the above case is not
+	 * allowed to have leading spaces with old groff!  Thus `.foo'
+	 * != `. foo'.  Oh yeah, everything after the `.foo' is lost.
+	 * Merry fucking Christmas.
+	 */
+
+	r->last->end = malloc((size_t)i - ppos + 1);
+	if (NULL == r->last->end) {
+		(*r->msg)(MANDOCERR_MEM, r->data, ln, ppos, NULL);
+		return(ROFF_ERR);
+	}
+
+	memcpy(r->last->end, &(*bufp)[ppos], (size_t)i - ppos);
+	r->last->end[(size_t)i - ppos] = '\0';
+
+	return(ROFF_IGN);
 }
 
 

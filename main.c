@@ -773,6 +773,14 @@ mwarn(void *arg, int line, int col, const char *msg)
 	return(1);
 }
 
+static	const char * const	mandocerrs[MANDOCERR_MAX] = {
+	"ok",
+	"multi-line scope open on exit",
+	"request for scope closure when no matching scope is open",
+	"line arguments will be lost",
+	"memory exhausted"
+};
+
 /*
  * XXX: this is experimental code that will eventually become the
  * generic means of covering all warnings and errors!
@@ -785,7 +793,12 @@ mmsg(enum mandocerr t, void *arg, int ln, int col, const char *msg)
 
 	cp = (struct curparse *)arg;
 
-	/*fprintf(stderr, "%s:%d:%d: %s\n", cp->file, ln, col + 1, msg);*/
+	fprintf(stderr, "%s:%d:%d: %s", cp->file, 
+			ln, col + 1, mandocerrs[t]);
 
+	if (msg)
+		fprintf(stderr, ": %s", msg);
+
+	fputc('\n', stderr);
 	return(1);
 }

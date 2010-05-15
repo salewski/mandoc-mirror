@@ -25,6 +25,9 @@ enum	mandocerr {
 	MANDOCERR_NOSCOPE, /* request scope close w/none open */
 #define	MANDOCERR_WARNING	MANDOCERR_SCOPEEXIT
 
+	MANDOCERR_ARGSLOST, /* line arguments will be lost */
+#define	MANDOCERR_ERROR		MANDOCERR_ARGSLOST
+
 	MANDOCERR_MEM, /* memory exhausted */
 #define	MANDOCERR_FATAL		MANDOCERR_MEM
 
