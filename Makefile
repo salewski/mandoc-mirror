@@ -31,63 +31,97 @@ LINTFLAGS += $(VFLAGS)
 MANDOCFLAGS = -Wall -fstrict
 MANDOCHTML = -Thtml -Ostyle=style.css,man=%N.%S.html,includes=%I.html
 
+MANDOCLNS  = mandoc.ln
+
+MANDOCSRCS = mandoc.c
+
+MANDOCOBJS = mandoc.o
+
 MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln mdoc_strings.ln \
 	     mdoc_argv.ln mdoc_validate.ln mdoc_action.ln \
-	     lib.ln att.ln arch.ln vol.ln msec.ln st.ln \
-	     mandoc.ln
+	     lib.ln att.ln arch.ln vol.ln msec.ln st.ln
+
 MDOCOBJS   = mdoc_macro.o mdoc.o mdoc_hash.o mdoc_strings.o \
 	     mdoc_argv.o mdoc_validate.o mdoc_action.o lib.o att.o \
-	     arch.o vol.o msec.o st.o mandoc.o
+	     arch.o vol.o msec.o st.o
+
 MDOCSRCS   = mdoc_macro.c mdoc.c mdoc_hash.c mdoc_strings.c \
 	     mdoc_argv.c mdoc_validate.c mdoc_action.c lib.c att.c \
-	     arch.c vol.c msec.c st.c mandoc.c
+	     arch.c vol.c msec.c st.c
 
 MANLNS	   = man_macro.ln man.ln man_hash.ln man_validate.ln \
-	     man_action.ln mandoc.ln man_argv.ln
+	     man_action.ln man_argv.ln
+
 MANOBJS	   = man_macro.o man.o man_hash.o man_validate.o \
-	     man_action.o mandoc.o man_argv.o
+	     man_action.o man_argv.o
 MANSRCS	   = man_macro.c man.c man_hash.c man_validate.c \
 	     man_action.c mandoc.c man_argv.c
 
 MAINLNS	   = main.ln mdoc_term.ln chars.ln term.ln tree.ln \
 	     compat.ln man_term.ln html.ln mdoc_html.ln \
 	     man_html.ln out.ln
+
 MAINOBJS   = main.o mdoc_term.o chars.o term.o tree.o compat.o \
 	     man_term.o html.o mdoc_html.o man_html.o out.o
+
 MAINSRCS   = main.c mdoc_term.c chars.c term.c tree.c compat.c \
 	     man_term.c html.c mdoc_html.c man_html.c out.c
 
-LLNS	   = llib-llibmdoc.ln llib-llibman.ln llib-lmandoc.ln
-LNS	   = $(MAINLNS) $(MDOCLNS) $(MANLNS)
-LIBS	   = libmdoc.a libman.a
-OBJS	   = $(MDOCOBJS) $(MAINOBJS) $(MANOBJS)
-SRCS	   = $(MDOCSRCS) $(MAINSRCS) $(MANSRCS)
+LLNS	   = llib-llibmdoc.ln llib-llibman.ln llib-lmandoc.ln \
+	     llib-llibmandoc.ln
+
+LNS	   = $(MAINLNS) $(MDOCLNS) $(MANLNS) $(MANDOCLNS)
+
+LIBS	   = libmdoc.a libman.a libmandoc.a
+
+OBJS	   = $(MDOCOBJS) $(MAINOBJS) $(MANOBJS) $(MANDOCOBJS)
+
+SRCS	   = $(MDOCSRCS) $(MAINSRCS) $(MANSRCS) $(MANDOCSRCS)
+
 DATAS	   = arch.in att.in lib.in msec.in st.in \
 	     vol.in chars.in
+
 HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
 	     libmandoc.h html.h chars.h out.h main.h
+
 GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml manuals.7.sgml \
 	     mandoc_char.7.sgml man.7.sgml man.3.sgml
+
 SGMLS	   = index.sgml
+
 HTMLS	   = ChangeLog.html index.html man.h.html mdoc.h.html
+
 XSLS	   = ChangeLog.xsl
+
 GHTMLS	   = mandoc.1.html mdoc.3.html man.3.html mdoc.7.html \
 	     man.7.html mandoc_char.7.html manuals.7.html
+
 TEXTS	   = mandoc.1.txt mdoc.3.txt man.3.txt mdoc.7.txt man.7.txt \
 	     mandoc_char.7.txt manuals.7.txt ChangeLog.txt
+
 EXAMPLES   = example.style.css
+
 XMLS	   = ChangeLog.xml
+
 STATICS	   = index.css style.css external.png
+
 MD5S	   = mdocml-$(VERSION).md5 
+
 TARGZS	   = mdocml-$(VERSION).tar.gz
+
 MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7 mandoc_char.7 \
 	     man.7 man.3
+
 BINS	   = mandoc
+
 TESTS	   = test-strlcat.c test-strlcpy.c
+
 CONFIGS	   = config.h.pre config.h.post
+
 DOCLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
 	     $(TARGZS) tags $(MD5S) $(XMLS) $(TEXTS) $(GSGMLS) \
 	     $(GHTMLS) config.h config.log
+
 DOINSTALL  = $(SRCS) $(HEADS) Makefile $(MANS) $(SGMLS) $(STATICS) \
 	     $(DATAS) $(XSLS) $(EXAMPLES) $(TESTS) $(CONFIGS)
 
@@ -183,6 +217,8 @@ man_html.ln man_html.o: man_html.c html.h man.h out.h
 
 out.ln out.o: out.c out.h
 
+mandoc.ln mandoc.o: mandoc.c libmandoc.h
+
 tree.ln tree.o: tree.c man.h mdoc.h
 
 mdoc_argv.ln mdoc_argv.o: mdoc_argv.c libmdoc.h
@@ -218,8 +254,11 @@ llib-llibmdoc.ln: $(MDOCLNS)
 llib-llibman.ln: $(MANLNS)
 	$(LINT) -Clibman $(MANLNS)
 
-llib-lmandoc.ln: $(MAINLNS) llib-llibmdoc.ln
-	$(LINT) -Cmandoc $(MAINLNS) llib-llibmdoc.ln
+llib-llibmandoc.ln: $(MANDOCLNS)
+	$(LINT) -Clibmandoc $(MANDOCLNS)
+
+llib-lmandoc.ln: $(MAINLNS) llib-llibmdoc.ln llib-llibman.ln llib-llibmandoc.ln
+	$(LINT) -Cmandoc $(MAINLNS) llib-llibmdoc.ln llib-llibman.ln llib-llibmandoc.ln
 
 libmdoc.a: $(MDOCOBJS)
 	$(AR) rs $@ $(MDOCOBJS)
@@ -227,8 +266,11 @@ libmdoc.a: $(MDOCOBJS)
 libman.a: $(MANOBJS)
 	$(AR) rs $@ $(MANOBJS)
 
-mandoc: $(MAINOBJS) libmdoc.a libman.a
-	$(CC) $(CFLAGS) -o $@ $(MAINOBJS) libmdoc.a libman.a
+libmandoc.a: $(MANDOCOBJS)
+	$(AR) rs $@ $(MANDOCOBJS)
+
+mandoc: $(MAINOBJS) libmdoc.a libman.a libmandoc.a
+	$(CC) $(CFLAGS) -o $@ $(MAINOBJS) libmdoc.a libman.a libmandoc.a
 
 .sgml.html:
 	validate --warn $<
