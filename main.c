@@ -785,7 +785,7 @@ mmsg(enum mandocerr t, void *arg, int ln, int col, const char *msg)
 
 	cp = (struct curparse *)arg;
 
-	fprintf(stderr, "%s:%d:%d: %s\n", cp->file, ln, col + 1, msg);
+	/*fprintf(stderr, "%s:%d:%d: %s\n", cp->file, ln, col + 1, msg);*/
 
 	return(1);
 }
