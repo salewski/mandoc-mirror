@@ -97,6 +97,8 @@
   try e.g. .Bl -column It Ta Ta
   reported by millert Fri, 02 Apr 2010 16:13:46 -0400
 
+- nroff inserts a space before :, mandoc doesn't:
+    .Dl expr "/$a" Li : '.*/\e(.*\e)'
 
 ************************************************************************
 * formatting issues: gratuitious differences
