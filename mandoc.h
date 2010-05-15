@@ -14,25 +14,26 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef ROFF_H
-#define ROFF_H
-
-enum	rofferr {
-	ROFF_CONT, /* re-process line with libmdoc or libman */
-	ROFF_IGN, /* ignore line */
-	ROFF_ERR, /* badness */
-};
+#ifndef MANDOC_H
+#define MANDOC_H
 
 __BEGIN_DECLS
 
-struct	roff;
+enum	mandocerr {
+	MANDOCERR_OK,
+	MANDOCERR_SCOPEEXIT, /* scope open on exit */
+	MANDOCERR_NOSCOPE, /* request scope close w/none open */
+#define	MANDOCERR_WARNING	MANDOCERR_SCOPEEXIT
 
-void	 	  roff_free(struct roff *);
-struct	roff	 *roff_alloc(mandocmsg, void *);
-void		  roff_reset(struct roff *);
-enum	rofferr	  roff_parseln(struct roff *, int, char **, size_t *);
-int		  roff_endparse(struct roff *);
+	MANDOCERR_MEM, /* memory exhausted */
+#define	MANDOCERR_FATAL		MANDOCERR_MEM
+
+	MANDOCERR_MAX
+};
+
+typedef	int	(*mandocmsg)(enum mandocerr, 
+			void *, int, int, const char *);
 
 __END_DECLS
 
-#endif /*!ROFF_H*/
+#endif /*!MANDOC_H*/
