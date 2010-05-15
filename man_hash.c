@@ -31,9 +31,7 @@
 #define	HASH_DEPTH	 6
 
 #define	HASH_ROW(x) do { \
-		if ('.' == (x)) \
-			(x) = 26; \
-		else if (isupper((u_char)(x))) \
+		if (isupper((u_char)(x))) \
 			(x) -= 65; \
 		else \
 			(x) -= 97; \
@@ -47,7 +45,7 @@
  * macro (the integer value of the enum stored as a char to save a bit
  * of space).
  */
-static	u_char		 table[27 * HASH_DEPTH];
+static	u_char		 table[26 * HASH_DEPTH];
 
 /*
  * XXX - this hash has global scope, so if intended for use as a library
@@ -66,7 +64,7 @@ man_hash_init(void)
 	for (i = 0; i < (int)MAN_MAX; i++) {
 		x = man_macronames[i][0];
 
-		assert(isalpha((u_char)x) || '.' == x);
+		assert(isalpha((u_char)x));
 
 		HASH_ROW(x);
 
@@ -89,7 +87,7 @@ man_hash_find(const char *tmp)
 
 	if ('\0' == (x = tmp[0]))
 		return(MAN_MAX);
-	if ( ! (isalpha((u_char)x) || '.' == x))
+	if ( ! (isalpha((u_char)x)))
 		return(MAN_MAX);
 
 	HASH_ROW(x);
