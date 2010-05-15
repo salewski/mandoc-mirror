@@ -308,19 +308,33 @@ mandoc_eos(const char *p, size_t sz)
 	if (0 == sz)
 		return(0);
 
-	switch (p[(int)sz - 1]) {
-	case ('.'):
-		/* Escaped periods. */
-		if (sz > 1 && '\\' == p[(int)sz - 2])
+	/*
+	 * End-of-sentence recognition must include situations where
+	 * some symbols, such as `)', allow prior EOS punctuation to
+	 * propogate outward.
+	 */
+
+	for ( ; sz; sz--) {
+		switch (p[(int)sz - 1]) {
+		case ('\"'):
+			/* FALLTHROUGH */
+		case ('\''):
+			/* FALLTHROUGH */
+		case (')'):
+			break;
+		case ('.'):
+			/* Escaped periods. */
+			if (sz > 1 && '\\' == p[(int)sz - 2])
+				return(0);
+			/* FALLTHROUGH */
+		case ('!'):
+			/* FALLTHROUGH */
+		case ('?'):
+			return(1);
+		default:
 			return(0);
-		/* FALLTHROUGH */
-	case ('!'):
-		/* FALLTHROUGH */
-	case ('?'):
-		break;
-	default:
-		return(0);
+		}
 	}
 
-	return(1);
+	return(0);
 }

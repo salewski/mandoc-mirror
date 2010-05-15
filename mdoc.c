@@ -701,6 +701,8 @@ mdoc_ptext(struct mdoc *m, int line, char *buf)
 	 * sentence.  The front-end will know how to interpret this.
 	 */
 
+	/* FIXME: chain of close delims. */
+
 	assert(i);
 
 	if (mandoc_eos(buf, (size_t)i))
