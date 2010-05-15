@@ -268,11 +268,31 @@ ffile(const char *file, struct curparse *curp)
 
 
 static int
+resize_buf(struct buf *buf, size_t initial)
+{
+	void *tmp;
+	size_t sz;
+
+	if (buf->sz == 0)
+		sz = initial;
+	else
+		sz = 2 * buf->sz;
+	tmp = realloc(buf->buf, sz);
+	if (NULL == tmp) {
+		perror(NULL);
+		return(0);
+	}
+	buf->buf = tmp;
+	buf->sz = sz;
+	return(1);
+}
+
+
+static int
 read_whole_file(struct curparse *curp, struct buf *fb, int *with_mmap)
 {
 	struct stat	 st;
-	char		*buf;
-	size_t		 sz, off;
+	size_t		 off;
 	ssize_t		 ssz;
 
 	if (-1 == fstat(curp->fd, &st)) {
@@ -319,17 +339,8 @@ read_whole_file(struct curparse *curp, struct buf *fb, int *with_mmap)
 						curp->file);
 				break;
 			}
-			if (fb->sz == 0)
-				sz = 65536;
-			else
-				sz = 2 * fb->sz;
-			buf = realloc(fb->buf, sz);
-			if (NULL == buf) {
-				perror(NULL);
+			if (! resize_buf(fb, 65536))
 				break;
-			}
-			fb->buf = buf;
-			fb->sz = sz;
 		}
 		ssz = read(curp->fd, fb->buf + off, fb->sz - off);
 		if (ssz == 0) {
@@ -353,13 +364,11 @@ read_whole_file(struct curparse *curp, struct buf *fb, int *with_mmap)
 static void
 fdesc(struct curparse *curp)
 {
-	size_t		 sz;
 	struct buf	 ln, blk;
 	int		 j, i, pos, lnn, comment, with_mmap;
 	struct man	*man;
 	struct mdoc	*mdoc;
 
-	sz = BUFSIZ;
 	man = NULL;
 	mdoc = NULL;
 	memset(&ln, 0, sizeof(struct buf));
@@ -377,12 +386,8 @@ fdesc(struct curparse *curp)
 
 	for (i = lnn = pos = comment = 0; i < (int)blk.sz; ++i) {
 		if (pos >= (int)ln.sz) {
-			ln.sz += 256; /* Step-size. */
-			ln.buf = realloc(ln.buf, ln.sz);
-			if (NULL == ln.buf) {
-				perror(NULL);
+			if (! resize_buf(&ln, 256))
 				goto bailout;
-			}
 		}
 
 		if ('\n' != blk.buf[i]) {
