@@ -86,7 +86,6 @@ const	struct man_macro __man_macros[MAN_MAX] = {
 	{ blk_exp, MAN_EXPLICIT | MAN_NOCLOSE}, /* dei */
 	{ blk_exp, MAN_EXPLICIT | MAN_NOCLOSE}, /* am */
 	{ blk_exp, MAN_EXPLICIT | MAN_NOCLOSE}, /* ami */
-	{ blk_exp, MAN_EXPLICIT | MAN_NOCLOSE}, /* ig */
 	{ blk_dotted, 0 }, /* . */
 };
 
@@ -297,8 +296,7 @@ blk_dotted(MACRO_PROT_ARGS)
 	for (nn = m->last->parent; nn; nn = nn->parent)
 		if (nn->tok == MAN_de || nn->tok == MAN_dei ||
 				nn->tok == MAN_am ||
-				nn->tok == MAN_ami ||
-				nn->tok == MAN_ig) {
+				nn->tok == MAN_ami) {
 			ntok = nn->tok;
 			break;
 		}

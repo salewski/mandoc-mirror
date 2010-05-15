@@ -59,7 +59,6 @@ enum	mant {
 	MAN_dei,
 	MAN_am,
 	MAN_ami,
-	MAN_ig,
 	MAN_dot,
 	MAN_MAX
 };

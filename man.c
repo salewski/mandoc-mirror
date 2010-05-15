@@ -65,8 +65,7 @@ const	char *const __man_macronames[MAN_MAX] = {
 	"nf",		"fi",		"r",		"RE",
 	"RS",		"DT",		"UC",		"PD",
 	"Sp",		"Vb",		"Ve",		"de",
-	"dei",		"am",		"ami",		"ig",
-	".",
+	"dei",		"am",		"ami",		".",
 	};
 
 const	char * const *man_macronames = __man_macronames;

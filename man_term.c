@@ -146,7 +146,6 @@ static	const struct termact termacts[MAN_MAX] = {
  	{ pre_ign, NULL, MAN_NOTEXT }, /* dei */
  	{ pre_ign, NULL, MAN_NOTEXT }, /* am */
  	{ pre_ign, NULL, MAN_NOTEXT }, /* ami */
- 	{ pre_ign, NULL, MAN_NOTEXT }, /* ig */
  	{ NULL, NULL, 0 }, /* . */
 };
 

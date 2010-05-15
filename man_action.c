@@ -74,7 +74,6 @@ const	struct actions man_actions[MAN_MAX] = {
 	{ post_de }, /* dei */
 	{ post_de }, /* am */
 	{ post_de }, /* ami */
-	{ post_de }, /* ig */
 	{ NULL }, /* . */
 };
 

@@ -76,7 +76,6 @@ const	struct roffmac	 roffs[ROFF_MAX] = {
 	{ ".", NULL, roff_new_close },
 };
 
-static	void		 roff_alloc1(struct roff *);
 static	void		 roff_free1(struct roff *);
 static	enum rofft	 roff_hash_find(const char *);
 static	int		 roffnode_push(struct roff *, 
@@ -153,20 +152,11 @@ roff_free1(struct roff *r)
 }
 
 
-static void
-roff_alloc1(struct roff *r)
-{
-
-	/* Do nothing for now. */
-}
-
-
 void
 roff_reset(struct roff *r)
 {
 
 	roff_free1(r);
-	roff_alloc1(r);
 }
 
 

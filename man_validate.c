@@ -101,7 +101,6 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ pres_roff, NULL }, /* dei */
 	{ pres_roff, NULL }, /* am */
 	{ pres_roff, NULL }, /* ami */
-	{ pres_roff, NULL }, /* ig */
 	{ NULL, NULL }, /* . */
 };
 
@@ -335,8 +334,7 @@ check_roff(CHKARGS)
 	for (n = n->parent; n; n = n->parent)
 		if (MAN_de == n->tok || MAN_dei == n->tok ||
 				MAN_am == n->tok || 
-				MAN_ami == n->tok ||
-				MAN_ig == n->tok)
+				MAN_ami == n->tok)
 			return(man_nerr(m, n, WROFFNEST));
 
 	return(1);
