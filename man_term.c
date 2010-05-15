@@ -163,7 +163,7 @@ terminal_man(void *arg, const struct man *man)
 	p = (struct termp *)arg;
 
 	p->overstep = 0;
-	p->maxrmargin = 65;
+	p->maxrmargin = p->defrmargin;
 
 	if (NULL == p->symtab)
 		switch (p->enc) {
@@ -803,6 +803,7 @@ post_RS(DECL_ARGS)
 static void
 print_man_node(DECL_ARGS)
 {
+	size_t		 rm, rmax;
 	int		 c;
 
 	c = 1;
@@ -819,10 +820,13 @@ print_man_node(DECL_ARGS)
 		/* FIXME: this means that macro lines are munged!  */
 
 		if (MANT_LITERAL & mt->fl) {
+			rm = p->rmargin;
+			rmax = p->maxrmargin;
 			p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
 			p->flags |= TERMP_NOSPACE;
 			term_flushln(p);
-			p->rmargin = p->maxrmargin = 65;
+			p->rmargin = rm;
+			p->maxrmargin = rmax;
 		}
 		break;
 	default:

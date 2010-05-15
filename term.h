@@ -32,6 +32,7 @@ enum	termfont {
 #define	TERM_MAXMARGIN	  100000 /* FIXME */
 
 struct	termp {
+	size_t		  defrmargin;	/* Right margin of the device.. */
 	size_t		  rmargin;	/* Current right margin. */
 	size_t		  maxrmargin;	/* Max right margin. */
 	size_t		  maxcols;	/* Max size of buf. */

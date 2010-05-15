@@ -273,7 +273,7 @@ terminal_mdoc(void *arg, const struct mdoc *mdoc)
 	p = (struct termp *)arg;
 
 	p->overstep = 0;
-	p->maxrmargin = 78;
+	p->maxrmargin = p->defrmargin;
 
 	if (NULL == p->symtab)
 		switch (p->enc) {
