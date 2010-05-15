@@ -30,7 +30,6 @@ struct	actions {
 };
 
 static	int	  post_TH(struct man *);
-static	int	  post_de(struct man *);
 static	int	  post_fi(struct man *);
 static	int	  post_nf(struct man *);
 
@@ -70,11 +69,6 @@ const	struct actions man_actions[MAN_MAX] = {
 	{ NULL }, /* Sp */
 	{ post_nf }, /* Vb */
 	{ post_fi }, /* Ve */
-	{ post_de }, /* de */
-	{ post_de }, /* dei */
-	{ post_de }, /* am */
-	{ post_de }, /* ami */
-	{ NULL }, /* . */
 };
 
 
@@ -109,20 +103,6 @@ post_fi(struct man *m)
 		if ( ! man_nwarn(m, m->last, WNLITERAL))
 			return(0);
 	m->flags &= ~MAN_LITERAL;
-	return(1);
-}
-
-
-static int
-post_de(struct man *m)
-{
-
-	/*
-	 * XXX: for the time being, we indiscriminately remove roff
-	 * instructions from the parse stream.
-	 */
-	if (MAN_BLOCK == m->last->type)
-		man_node_delete(m, m->last);
 	return(1);
 }
 

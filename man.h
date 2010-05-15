@@ -55,11 +55,6 @@ enum	mant {
 	MAN_Sp,
 	MAN_Vb,
 	MAN_Ve,
-	MAN_de,
-	MAN_dei,
-	MAN_am,
-	MAN_ami,
-	MAN_dot,
 	MAN_MAX
 };
 
