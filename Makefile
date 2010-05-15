@@ -29,7 +29,14 @@ CFLAGS	  += -DUGLY
 LINTFLAGS += $(VFLAGS)
 
 MANDOCFLAGS = -Wall -fstrict
+
 MANDOCHTML = -Thtml -Ostyle=style.css,man=%N.%S.html,includes=%I.html
+
+ROFFLNS    = roff.ln
+
+ROFFSRCS   = roff.c
+
+ROFFOBJS   = roff.o
 
 MANDOCLNS  = mandoc.ln
 
@@ -68,21 +75,24 @@ MAINSRCS   = main.c mdoc_term.c chars.c term.c tree.c compat.c \
 	     man_term.c html.c mdoc_html.c man_html.c out.c
 
 LLNS	   = llib-llibmdoc.ln llib-llibman.ln llib-lmandoc.ln \
-	     llib-llibmandoc.ln
+	     llib-llibmandoc.ln llib-llibroff.ln
 
-LNS	   = $(MAINLNS) $(MDOCLNS) $(MANLNS) $(MANDOCLNS)
+LNS	   = $(MAINLNS) $(MDOCLNS) $(MANLNS) \
+	     $(MANDOCLNS) $(ROFFLNS)
 
-LIBS	   = libmdoc.a libman.a libmandoc.a
+LIBS	   = libmdoc.a libman.a libmandoc.a libroff.a
 
-OBJS	   = $(MDOCOBJS) $(MAINOBJS) $(MANOBJS) $(MANDOCOBJS)
+OBJS	   = $(MDOCOBJS) $(MAINOBJS) $(MANOBJS) \
+	     $(MANDOCOBJS) $(ROFFOBJS)
 
-SRCS	   = $(MDOCSRCS) $(MAINSRCS) $(MANSRCS) $(MANDOCSRCS)
+SRCS	   = $(MDOCSRCS) $(MAINSRCS) $(MANSRCS) \
+	     $(MANDOCSRCS) $(ROFFSRCS)
 
 DATAS	   = arch.in att.in lib.in msec.in st.in \
 	     vol.in chars.in
 
 HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
-	     libmandoc.h html.h chars.h out.h main.h
+	     libmandoc.h html.h chars.h out.h main.h roff.h
 
 GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml manuals.7.sgml \
 	     mandoc_char.7.sgml man.7.sgml man.3.sgml
@@ -203,7 +213,7 @@ mdoc.ln mdoc.o: mdoc.c libmdoc.h
 
 man.ln man.o: man.c libman.h
 
-main.ln main.o: main.c mdoc.h
+main.ln main.o: main.c mdoc.h man.h roff.h
 
 compat.ln compat.o: compat.c 
 
@@ -257,8 +267,11 @@ llib-llibman.ln: $(MANLNS)
 llib-llibmandoc.ln: $(MANDOCLNS)
 	$(LINT) -Clibmandoc $(MANDOCLNS)
 
-llib-lmandoc.ln: $(MAINLNS) llib-llibmdoc.ln llib-llibman.ln llib-llibmandoc.ln
-	$(LINT) -Cmandoc $(MAINLNS) llib-llibmdoc.ln llib-llibman.ln llib-llibmandoc.ln
+llib-llibroff.ln: $(ROFFLNS)
+	$(LINT) -Clibroff $(ROFFLNS)
+
+llib-lmandoc.ln: $(MAINLNS) llib-llibmdoc.ln llib-llibman.ln llib-llibmandoc.ln llib-llibroff.ln
+	$(LINT) -Cmandoc $(MAINLNS) llib-llibmdoc.ln llib-llibman.ln llib-llibmandoc.ln llib-llibroff.ln
 
 libmdoc.a: $(MDOCOBJS)
 	$(AR) rs $@ $(MDOCOBJS)
@@ -269,8 +282,11 @@ libman.a: $(MANOBJS)
 libmandoc.a: $(MANDOCOBJS)
 	$(AR) rs $@ $(MANDOCOBJS)
 
-mandoc: $(MAINOBJS) libmdoc.a libman.a libmandoc.a
-	$(CC) $(CFLAGS) -o $@ $(MAINOBJS) libmdoc.a libman.a libmandoc.a
+libroff.a: $(ROFFOBJS)
+	$(AR) rs $@ $(ROFFOBJS)
+
+mandoc: $(MAINOBJS) libroff.a libmdoc.a libman.a libmandoc.a
+	$(CC) $(CFLAGS) -o $@ $(MAINOBJS) libroff.a libmdoc.a libman.a libmandoc.a
 
 .sgml.html:
 	validate --warn $<
