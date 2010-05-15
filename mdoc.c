@@ -68,7 +68,7 @@ const	char *const __mdoc_merrnames[MERRMAX] = {
 	"line arguments discouraged", /* ENOLINE */
 	"prologue macro out of conventional order", /* EPROLOOO */
 	"prologue macro repeated", /* EPROLREP */
-	"invalid section", /* EBADSEC */
+	"invalid manual section", /* EBADMSEC */
 	"invalid font mode", /* EFONT */
 	"invalid date syntax", /* EBADDATE */
 	"invalid number format", /* ENUMFMT */
@@ -190,6 +190,8 @@ mdoc_free1(struct mdoc *mdoc)
 		free(mdoc->meta.arch);
 	if (mdoc->meta.vol)
 		free(mdoc->meta.vol);
+	if (mdoc->meta.msec)
+		free(mdoc->meta.msec);
 }
 
 

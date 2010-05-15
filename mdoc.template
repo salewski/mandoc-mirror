@@ -14,7 +14,7 @@
 .Sh NAME
 .Nm name
 .Nd short description
-.\" The next is for sections 2 & 3 only.
+.\" The next is for sections 2, 3, & 9 only.
 .\" .Sh LIBRARY
 .Sh SYNOPSIS
 .Sh DESCRIPTION

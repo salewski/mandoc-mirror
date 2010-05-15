@@ -425,7 +425,7 @@ print_mdoc_head(DECL_ARGS)
 		strlcat(buf, ")", BUFSIZ);
 	}
 
-	snprintf(title, BUFSIZ, "%s(%d)", m->title, m->msec);
+	snprintf(title, BUFSIZ, "%s(%s)", m->title, m->msec);
 
 	p->offset = 0;
 	p->rmargin = (p->maxrmargin - strlen(buf) + 1) / 2;

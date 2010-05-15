@@ -1240,20 +1240,19 @@ post_sh_head(POST_ARGS)
 
 	/* 
 	 * Check particular section/manual conventions.  LIBRARY can
-	 * only occur in msec 2, 3 (TODO: are there more of these?).
+	 * only occur in manual section 2, 3, and 9.
 	 */
 
 	switch (sec) {
 	case (SEC_LIBRARY):
-		switch (mdoc->meta.msec) {
-		case (2):
-			/* FALLTHROUGH */
-		case (3):
+		assert(mdoc->meta.msec);
+		if (*mdoc->meta.msec == '2')
 			break;
-		default:
-			return(mdoc_nwarn(mdoc, mdoc->last, EWRONGMSEC));
-		}
-		break;
+		if (*mdoc->meta.msec == '3')
+			break;
+		if (*mdoc->meta.msec == '9')
+			break;
+		return(mdoc_nwarn(mdoc, mdoc->last, EWRONGMSEC));
 	default:
 		break;
 	}

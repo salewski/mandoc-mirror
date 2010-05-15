@@ -387,7 +387,7 @@ print_mdoc_head(MDOC_ARGS)
 
 	print_gen_head(h);
 	bufinit(h);
-	buffmt(h, "%s(%d)", m->title, m->msec);
+	buffmt(h, "%s(%s)", m->title, m->msec);
 
 	if (m->arch) {
 		bufcat(h, " (");
@@ -509,7 +509,7 @@ mdoc_root_pre(MDOC_ARGS)
 	}
 
 	(void)snprintf(title, BUFSIZ - 1, 
-			"%s(%d)", m->title, m->msec);
+			"%s(%s)", m->title, m->msec);
 
 	/* XXX: see note in mdoc_root_post() about divs. */
 

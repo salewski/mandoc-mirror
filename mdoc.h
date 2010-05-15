@@ -223,7 +223,7 @@ enum	mdoc_sec {
 
 /* Information from prologue. */
 struct	mdoc_meta {
-	int		  msec;
+	char		 *msec;
 	char		 *vol;
 	char		 *arch;
 	time_t		  date;
