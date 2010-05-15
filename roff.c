@@ -305,7 +305,7 @@ roff_new_close(ROFF_ARGS)
 	if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
 		return(ROFF_ERR);
 	*/
-	return(ROFF_CONT);
+	return(ROFF_IGN);
 }
 
 
