@@ -484,7 +484,6 @@ pre_IP(DECL_ARGS)
 		break;
 	case (MAN_HEAD):
 		p->flags |= TERMP_NOBREAK;
-		p->flags |= TERMP_TWOSPACE;
 		break;
 	case (MAN_BLOCK):
 		print_bvspace(p, n);
@@ -545,7 +544,6 @@ post_IP(DECL_ARGS)
 	case (MAN_HEAD):
 		term_flushln(p);
 		p->flags &= ~TERMP_NOBREAK;
-		p->flags &= ~TERMP_TWOSPACE;
 		p->rmargin = p->maxrmargin;
 		break;
 	case (MAN_BODY):
