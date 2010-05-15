@@ -640,7 +640,7 @@ append_delims(struct mdoc *m, int line, int *pos, char *buf)
 		else if (ARGS_EOLN == ac)
 			break;
 
-		assert(mdoc_isdelim(p));
+		assert(DELIM_NONE != mdoc_isdelim(p));
 		if ( ! mdoc_word_alloc(m, line, la, p))
 			return(0);
 
@@ -750,10 +750,11 @@ blk_exp_close(MACRO_PROT_ARGS)
 static int
 in_line(MACRO_PROT_ARGS)
 {
-	int		 la, lastpunct, cnt, d, nc, nl;
+	int		 la, lastpunct, cnt, nc, nl;
 	enum margverr	 av;
 	enum mdoct	 ntok;
 	enum margserr	 ac;
+	enum mdelim	 d;
 	struct mdoc_arg	*arg;
 	char		*p;
 
@@ -846,9 +847,9 @@ in_line(MACRO_PROT_ARGS)
 		 * the word. 
 		 */
 
-		d = ARGS_QWORD == ac ? 0 : mdoc_isdelim(p);
+		d = ARGS_QWORD == ac ? DELIM_NONE : mdoc_isdelim(p);
 
-		if (ARGS_QWORD != ac && d) {
+		if (ARGS_QWORD != ac && DELIM_NONE != d) {
 			if (0 == lastpunct && ! rew_elem(m, tok))
 				return(0);
 			lastpunct = 1;
@@ -858,7 +859,7 @@ in_line(MACRO_PROT_ARGS)
 			lastpunct = 0;
 		}
 
-		if ( ! d)
+		if (DELIM_NONE == d)
 			cnt++;
 		if ( ! mdoc_word_alloc(m, line, la, p))
 			return(0);
@@ -1000,7 +1001,7 @@ blk_full(MACRO_PROT_ARGS)
 				ARGS_PHRASE != ac &&
 				ARGS_PPHRASE != ac &&
 				ARGS_QWORD != ac &&
-				1 == mdoc_isdelim(p)) {
+				DELIM_OPEN == mdoc_isdelim(p)) {
 			if ( ! mdoc_word_alloc(m, line, la, p))
 				return(0);
 			continue;
@@ -1133,7 +1134,7 @@ blk_part_imp(MACRO_PROT_ARGS)
 			break;
 
 		if (NULL == body && ARGS_QWORD != ac &&
-				1 == mdoc_isdelim(p)) {
+		    DELIM_OPEN == mdoc_isdelim(p)) {
 			if ( ! mdoc_word_alloc(m, line, la, p))
 				return(0);
 			continue;
@@ -1252,7 +1253,7 @@ blk_part_exp(MACRO_PROT_ARGS)
 		/* Flush out leading punctuation. */
 
 		if (NULL == head && ARGS_QWORD != ac &&
-				1 == mdoc_isdelim(p)) {
+		    DELIM_OPEN == mdoc_isdelim(p)) {
 			assert(NULL == body);
 			if ( ! mdoc_word_alloc(m, line, la, p))
 				return(0);
@@ -1397,7 +1398,7 @@ in_line_argn(MACRO_PROT_ARGS)
 
 		if ( ! (MDOC_IGNDELIM & mdoc_macros[tok].flags) && 
 				ARGS_QWORD != ac &&
-				0 == j && 1 == mdoc_isdelim(p)) {
+				0 == j && DELIM_OPEN == mdoc_isdelim(p)) {
 			if ( ! mdoc_word_alloc(m, line, la, p))
 				return(0);
 			continue;
@@ -1425,7 +1426,8 @@ in_line_argn(MACRO_PROT_ARGS)
 
 		if ( ! (MDOC_IGNDELIM & mdoc_macros[tok].flags) &&
 				ARGS_QWORD != ac &&
-				! flushed && mdoc_isdelim(p)) {
+				! flushed &&
+				DELIM_NONE != mdoc_isdelim(p)) {
 			if ( ! rew_elem(m, tok))
 				return(0);
 			flushed = 1;

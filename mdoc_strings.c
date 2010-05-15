@@ -57,17 +57,17 @@ static	const char * const secnames[SEC__MAX] = {
  * FIXME: this is repeated in print_text() (html.c) and term_word()
  * (term.c).
  */
-int
+enum mdelim
 mdoc_iscdelim(char p)
 {
 
 	switch (p) {
-	case('|'):
-		/* FALLTHROUGH */
 	case('('):
 		/* FALLTHROUGH */
 	case('['):
-		return(1);
+		return(DELIM_OPEN);
+	case('|'):
+		return(DELIM_MIDDLE);
 	case('.'):
 		/* FALLTHROUGH */
 	case(','):
@@ -83,16 +83,16 @@ mdoc_iscdelim(char p)
 	case(')'):
 		/* FALLTHROUGH */
 	case(']'):
-		return(2);
+		return(DELIM_CLOSE);
 	default:
 		break;
 	}
 
-	return(0);
+	return(DELIM_NONE);
 }
 
 
-int
+enum mdelim
 mdoc_isdelim(const char *p)
 {
 
@@ -106,7 +106,7 @@ mdoc_isdelim(const char *p)
 	 * is treated in exactly the same way as the vertical bar.  This
 	 * is the only function that checks for this.
 	 */
-	return(0 == strcmp(p, "\\*(Ba"));
+	return(strcmp(p, "\\*(Ba") ? DELIM_NONE : DELIM_MIDDLE);
 }
 
 

@@ -421,9 +421,10 @@ args(struct mdoc *m, int line, int *pos,
 	 * we ONLY care about closing delimiters.
 	 */
 
-	if ((fl & ARGS_DELIM) && mdoc_iscdelim(buf[*pos]) > 1) {
+	if ((fl & ARGS_DELIM) && DELIM_CLOSE == mdoc_iscdelim(buf[*pos])) {
 		for (i = *pos; buf[i]; ) {
-			if (mdoc_iscdelim(buf[i]) < 2)
+			enum mdelim d = mdoc_iscdelim(buf[i]);
+			if (DELIM_NONE == d || DELIM_OPEN == d)
 				break;
 			i++;
 			if ('\0' == buf[i] || ' ' != buf[i])
