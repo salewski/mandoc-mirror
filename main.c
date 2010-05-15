@@ -18,6 +18,7 @@
 #include "config.h"
 #endif
 
+#include <sys/mman.h>
 #include <sys/stat.h>
 
 #include <assert.h>
@@ -76,6 +77,8 @@ struct	curparse {
 #define	FL_NIGN_ESCAPE	 (1 << 1) 	/* Don't ignore bad escapes. */
 #define	FL_NIGN_MACRO	 (1 << 2) 	/* Don't ignore bad macros. */
 #define	FL_IGN_ERRORS	 (1 << 4)	/* Ignore failed parse. */
+#define	FL_STRICT	  FL_NIGN_ESCAPE | \
+			  FL_NIGN_MACRO
 	enum intt	  inttype;	/* Input parsers... */
 	struct man	 *man;
 	struct mdoc	 *mdoc;
@@ -87,34 +90,29 @@ struct	curparse {
 	char		  outopts[BUFSIZ];
 };
 
-#define	FL_STRICT	  FL_NIGN_ESCAPE | \
-			  FL_NIGN_MACRO
-
+static	void		  fdesc(struct curparse *);
+static	void		  ffile(const char *, struct curparse *);
 static	int		  foptions(int *, char *);
-static	int		  toptions(struct curparse *, char *);
-static	int		  moptions(enum intt *, char *);
-static	int		  woptions(int *, char *);
-static	int		  merr(void *, int, int, const char *);
-static	int		  mwarn(void *, int, int, const char *);
-static	void		  ffile(struct buf *, struct buf *, 
-				const char *, struct curparse *);
-static	void		  fdesc(struct buf *, struct buf *,
-				struct curparse *);
-static	int		  pset(const char *, int, struct curparse *,
-				struct man **, struct mdoc **);
 static	struct man	 *man_init(struct curparse *);
 static	struct mdoc	 *mdoc_init(struct curparse *);
-static	void		  version(void) __attribute__((noreturn));
+static	int		  merr(void *, int, int, const char *);
+static	int		  moptions(enum intt *, char *);
+static	int		  mwarn(void *, int, int, const char *);
+static	int		  pset(const char *, int, struct curparse *,
+				struct man **, struct mdoc **);
+static	int		  toptions(struct curparse *, char *);
 static	void		  usage(void) __attribute__((noreturn));
+static	void		  version(void) __attribute__((noreturn));
+static	int		  woptions(int *, char *);
 
 static	const char	 *progname;
-static 	int		  with_error, with_warning;
+static 	int		  with_error;
+static	int		  with_warning;
 
 int
 main(int argc, char *argv[])
 {
 	int		 c;
-	struct buf	 ln, blk;
 	struct curparse	 curp;
 
 	progname = strrchr(argv[0], '/');
@@ -162,32 +160,26 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	memset(&ln, 0, sizeof(struct buf));
-	memset(&blk, 0, sizeof(struct buf));
-
 	if (NULL == *argv) {
 		curp.file = "<stdin>";
 		curp.fd = STDIN_FILENO;
 
-		fdesc(&blk, &ln, &curp);
+		fdesc(&curp);
 	}
 
 	while (*argv) {
-		ffile(&blk, &ln, *argv, &curp);
+		ffile(*argv, &curp);
 
 		if (with_error && !(curp.fflags & FL_IGN_ERRORS))
 			break;
 		++argv;
 	}
 
-	if (blk.buf)
-		free(blk.buf);
-	if (ln.buf)
-		free(ln.buf);
 	if (curp.outfree)
 		(*curp.outfree)(curp.outdata);
 
-	return((with_warning || with_error) ? EXIT_FAILURE :  EXIT_SUCCESS );
+	return((with_warning || with_error) ? 
+			EXIT_FAILURE :  EXIT_SUCCESS);
 }
 
 
@@ -258,8 +250,7 @@ mdoc_init(struct curparse *curp)
 
 
 static void
-ffile(struct buf *blk, struct buf *ln, 
-		const char *file, struct curparse *curp)
+ffile(const char *file, struct curparse *curp)
 {
 
 	curp->file = file;
@@ -269,26 +260,109 @@ ffile(struct buf *blk, struct buf *ln,
 		return;
 	}
 
-	fdesc(blk, ln, curp);
+	fdesc(curp);
 
 	if (-1 == close(curp->fd))
 		perror(curp->file);
 }
 
 
+static int
+read_whole_file(struct curparse *curp, struct buf *fb, int *with_mmap)
+{
+	struct stat	 st;
+	char		*buf;
+	size_t		 sz, off;
+	ssize_t		 ssz;
+
+	if (-1 == fstat(curp->fd, &st)) {
+		perror(curp->file);
+		with_error = 1;
+		return(0);
+	}
+
+	/*
+	 * If we're a regular file, try just reading in the whole entry
+	 * via mmap().  This is faster than reading it into blocks, and
+	 * since each file is only a few bytes to begin with, I'm not
+	 * concerned that this is going to tank any machines.
+	 */
+
+	if (S_ISREG(st.st_mode)) {
+		if (st.st_size >= (1U << 31)) {
+			fprintf(stderr, "%s: input too large\n", 
+					curp->file);
+			with_error = 1;
+			return(0);
+		}
+		*with_mmap = 1;
+		fb->sz = st.st_size;
+		fb->buf = mmap(NULL, fb->sz, PROT_READ, 
+				MAP_FILE, curp->fd, 0);
+		if (fb->buf != MAP_FAILED)
+			return(1);
+	}
+
+	/*
+	 * If this isn't a regular file (like, say, stdin), then we must
+	 * go the old way and just read things in bit by bit.
+	 */
+
+	*with_mmap = 0;
+	off = 0;
+	fb->sz = 0;
+	fb->buf = NULL;
+	for (;;) {
+		if (off == fb->sz) {
+			if (fb->sz == (1U << 31)) {
+				fprintf(stderr, "%s: input too large\n", 
+						curp->file);
+				break;
+			}
+			if (fb->sz == 0)
+				sz = 65536;
+			else
+				sz = 2 * fb->sz;
+			buf = realloc(fb->buf, sz);
+			if (NULL == buf) {
+				perror(NULL);
+				break;
+			}
+			fb->buf = buf;
+			fb->sz = sz;
+		}
+		ssz = read(curp->fd, fb->buf + off, fb->sz - off);
+		if (ssz == 0) {
+			fb->sz = off;
+			return(1);
+		}
+		if (ssz == -1) {
+			perror(curp->file);
+			break;
+		}
+		off += ssz;
+	}
+
+	free(fb->buf);
+	fb->buf = NULL;
+	with_error = 1;
+	return(0);
+}
+
+
 static void
-fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
+fdesc(struct curparse *curp)
 {
 	size_t		 sz;
-	ssize_t		 ssz;
-	struct stat	 st;
-	int		 j, i, pos, lnn, comment;
+	struct buf	 ln, blk;
+	int		 j, i, pos, lnn, comment, with_mmap;
 	struct man	*man;
 	struct mdoc	*mdoc;
 
 	sz = BUFSIZ;
 	man = NULL;
 	mdoc = NULL;
+	memset(&ln, 0, sizeof(struct buf));
 
 	/*
 	 * Two buffers: ln and buf.  buf is the input buffer optimised
@@ -296,59 +370,33 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 	 * growable, hence passed in by ptr-ptr.
 	 */
 
-	if (-1 == fstat(curp->fd, &st)) {
-		perror(curp->file);
-		with_error = 1;
+	if (!read_whole_file(curp, &blk, &with_mmap))
 		return;
-	}
-	if ((size_t)st.st_blksize > sz)
-		sz = st.st_blksize;
-
-	if (sz > blk->sz) {
-		void *buf = realloc(blk->buf, sz);
-
-		if (NULL == buf) {
-			perror(NULL);
-			with_error = 1;
-			return;
-		}
-		blk->buf = buf;
-		blk->sz = sz;
-	}
 
 	/* Fill buf with file blocksize. */
 
-	for (lnn = pos = comment = 0; ; ) {
-		if (-1 == (ssz = read(curp->fd, blk->buf, sz))) {
-			perror(curp->file);
-			goto bailout;
-		} else if (0 == ssz) 
-			break;
-
-		/* Parse the read block into partial or full lines. */
-
-		for (i = 0; i < (int)ssz; i++) {
-			if (pos >= (int)ln->sz) {
-				ln->sz += 256; /* Step-size. */
-				ln->buf = realloc(ln->buf, ln->sz);
-				if (NULL == ln->buf) {
+	for (i = lnn = pos = comment = 0; i < (int)blk.sz; ++i) {
+			if (pos >= (int)ln.sz) {
+				ln.sz += 256; /* Step-size. */
+				ln.buf = realloc(ln.buf, ln.sz);
+				if (NULL == ln.buf) {
 					perror(NULL);
 					goto bailout;
 				}
 			}
 
-			if ('\n' != blk->buf[i]) {
+			if ('\n' != blk.buf[i]) {
 				if (comment)
 					continue;
-				ln->buf[pos++] = blk->buf[i];
+				ln.buf[pos++] = blk.buf[i];
 
 				/* Handle in-line `\"' comments. */
 
-				if (1 == pos || '\"' != ln->buf[pos - 1])
+				if (1 == pos || '\"' != ln.buf[pos - 1])
 					continue;
 
 				for (j = pos - 2; j >= 0; j--)
-					if ('\\' != ln->buf[j])
+					if ('\\' != ln.buf[j])
 						break;
 
 				if ( ! ((pos - 2 - j) % 2))
@@ -357,9 +405,9 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 				comment = 1;
 				pos -= 2;
 				for (; pos > 0; --pos) {
-					if (ln->buf[pos - 1] != ' ')
+					if (ln.buf[pos - 1] != ' ')
 						break;
-					if (pos > 2 && ln->buf[pos - 2] == '\\')
+					if (pos > 2 && ln.buf[pos - 2] == '\\')
 						break;
 				}
 				continue;
@@ -368,9 +416,9 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 			/* Handle escaped `\\n' newlines. */
 
 			if (pos > 0 && 0 == comment && 
-					'\\' == ln->buf[pos - 1]) {
+					'\\' == ln.buf[pos - 1]) {
 				for (j = pos - 1; j >= 0; j--)
-					if ('\\' != ln->buf[j])
+					if ('\\' != ln.buf[j])
 						break;
 				if ( ! ((pos - j) % 2)) {
 					pos--;
@@ -379,12 +427,12 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 				}
 			}
 
-			ln->buf[pos] = 0;
+			ln.buf[pos] = 0;
 			lnn++;
 
 			/* If unset, assign parser in pset(). */
 
-			if ( ! (man || mdoc) && ! pset(ln->buf, 
+			if ( ! (man || mdoc) && ! pset(ln.buf, 
 						pos, curp, &man, &mdoc))
 				goto bailout;
 
@@ -392,11 +440,10 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 
 			/* Pass down into parsers. */
 
-			if (man && ! man_parseln(man, lnn, ln->buf))
+			if (man && ! man_parseln(man, lnn, ln.buf))
 				goto bailout;
-			if (mdoc && ! mdoc_parseln(mdoc, lnn, ln->buf))
+			if (mdoc && ! mdoc_parseln(mdoc, lnn, ln.buf))
 				goto bailout;
-		}
 	}
 
 	/* NOTE a parser may not have been assigned, yet. */
@@ -458,6 +505,12 @@ fdesc(struct buf *blk, struct buf *ln, struct curparse *curp)
 		man_free(curp->man);
 		curp->man = NULL;
 	}
+	if (ln.buf)
+		free(ln.buf);
+	if (with_mmap)
+		munmap(blk.buf, blk.sz);
+	else
+		free(blk.buf);
 	return;
 
  bailout:
