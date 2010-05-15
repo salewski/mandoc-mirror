@@ -216,8 +216,13 @@ literal text.
 When composing a manual, make sure that your sentences end at the end of
 a line.
 By doing so, front-ends will be able to apply the proper amount of
-spacing after the end of sentence (unescaped) period, exclamation, or question
-mark.
+spacing after the end of sentence (unescaped) period, exclamation mark,
+or question mark followed by zero or more non-sentence closing
+delimiters (
+.Ns Sq \&) ,
+.Sq \&] ,
+.Sq \&' ,
+.Sq \&" ) .
 .Sh MANUAL STRUCTURE
 Each
 .Nm

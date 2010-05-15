@@ -320,6 +320,8 @@ mandoc_eos(const char *p, size_t sz)
 			/* FALLTHROUGH */
 		case ('\''):
 			/* FALLTHROUGH */
+		case (']'):
+			/* FALLTHROUGH */
 		case (')'):
 			break;
 		case ('.'):
