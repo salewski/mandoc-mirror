@@ -376,74 +376,72 @@ fdesc(struct curparse *curp)
 	/* Fill buf with file blocksize. */
 
 	for (i = lnn = pos = comment = 0; i < (int)blk.sz; ++i) {
-			if (pos >= (int)ln.sz) {
-				ln.sz += 256; /* Step-size. */
-				ln.buf = realloc(ln.buf, ln.sz);
-				if (NULL == ln.buf) {
-					perror(NULL);
-					goto bailout;
-				}
+		if (pos >= (int)ln.sz) {
+			ln.sz += 256; /* Step-size. */
+			ln.buf = realloc(ln.buf, ln.sz);
+			if (NULL == ln.buf) {
+				perror(NULL);
+				goto bailout;
 			}
+		}
 
-			if ('\n' != blk.buf[i]) {
-				if (comment)
-					continue;
-				ln.buf[pos++] = blk.buf[i];
-
-				/* Handle in-line `\"' comments. */
-
-				if (1 == pos || '\"' != ln.buf[pos - 1])
-					continue;
-
-				for (j = pos - 2; j >= 0; j--)
-					if ('\\' != ln.buf[j])
-						break;
-
-				if ( ! ((pos - 2 - j) % 2))
-					continue;
-
-				comment = 1;
-				pos -= 2;
-				for (; pos > 0; --pos) {
-					if (ln.buf[pos - 1] != ' ')
-						break;
-					if (pos > 2 && ln.buf[pos - 2] == '\\')
-						break;
-				}
+		if ('\n' != blk.buf[i]) {
+			if (comment)
 				continue;
-			} 
+			ln.buf[pos++] = blk.buf[i];
 
-			/* Handle escaped `\\n' newlines. */
+			/* Handle in-line `\"' comments. */
 
-			if (pos > 0 && 0 == comment && 
-					'\\' == ln.buf[pos - 1]) {
-				for (j = pos - 1; j >= 0; j--)
-					if ('\\' != ln.buf[j])
-						break;
-				if ( ! ((pos - j) % 2)) {
-					pos--;
-					lnn++;
-					continue;
-				}
+			if (1 == pos || '\"' != ln.buf[pos - 1])
+				continue;
+
+			for (j = pos - 2; j >= 0; j--)
+				if ('\\' != ln.buf[j])
+					break;
+
+			if ( ! ((pos - 2 - j) % 2))
+				continue;
+
+			comment = 1;
+			pos -= 2;
+			for (; pos > 0; --pos) {
+				if (ln.buf[pos - 1] != ' ')
+					break;
+				if (pos > 2 && ln.buf[pos - 2] == '\\')
+					break;
 			}
+			continue;
+		} 
 
-			ln.buf[pos] = 0;
-			lnn++;
+		/* Handle escaped `\\n' newlines. */
 
-			/* If unset, assign parser in pset(). */
+		if (pos > 0 && 0 == comment && '\\' == ln.buf[pos - 1]) {
+			for (j = pos - 1; j >= 0; j--)
+				if ('\\' != ln.buf[j])
+					break;
+			if ( ! ((pos - j) % 2)) {
+				pos--;
+				lnn++;
+				continue;
+			}
+		}
 
-			if ( ! (man || mdoc) && ! pset(ln.buf, 
-						pos, curp, &man, &mdoc))
-				goto bailout;
+		ln.buf[pos] = 0;
+		lnn++;
 
-			pos = comment = 0;
+		/* If unset, assign parser in pset(). */
 
-			/* Pass down into parsers. */
+		if ( ! (man || mdoc) && ! pset(ln.buf, pos, curp, &man, &mdoc))
+			goto bailout;
 
-			if (man && ! man_parseln(man, lnn, ln.buf))
-				goto bailout;
-			if (mdoc && ! mdoc_parseln(mdoc, lnn, ln.buf))
-				goto bailout;
+		pos = comment = 0;
+
+		/* Pass down into parsers. */
+
+		if (man && ! man_parseln(man, lnn, ln.buf))
+			goto bailout;
+		if (mdoc && ! mdoc_parseln(mdoc, lnn, ln.buf))
+			goto bailout;
 	}
 
 	/* NOTE a parser may not have been assigned, yet. */
