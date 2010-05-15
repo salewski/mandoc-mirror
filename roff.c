@@ -50,6 +50,7 @@ struct	roffnode {
 };
 
 #define	ROFF_ARGS	 struct roff *r, /* parse ctx */ \
+			 enum rofft tok, /* tok of macro */ \
 		 	 char **bufp, /* input buffer */ \
 			 size_t *szp, /* size of input buffer */ \
 			 int ln, /* parse line */ \
@@ -63,16 +64,15 @@ struct	roffmac {
 	roffproc	 new; /* root of stack (type = ROFF_MAX) */
 };
 
-static	enum rofferr	 roff_ignore(ROFF_ARGS);
 static	enum rofferr	 roff_new_close(ROFF_ARGS);
 static	enum rofferr	 roff_new_ig(ROFF_ARGS);
 static	enum rofferr	 roff_sub_ig(ROFF_ARGS);
 
 const	struct roffmac	 roffs[ROFF_MAX] = {
-	{ "de", NULL, roff_ignore },
-	{ "dei", NULL, roff_ignore },
-	{ "am", NULL, roff_ignore },
-	{ "ami", NULL, roff_ignore },
+	{ "de", roff_sub_ig, roff_new_ig },
+	{ "dei", roff_sub_ig, roff_new_ig },
+	{ "am", roff_sub_ig, roff_new_ig },
+	{ "ami", roff_sub_ig, roff_new_ig },
 	{ "ig", roff_sub_ig, roff_new_ig },
 	{ ".", NULL, roff_new_close },
 };
@@ -199,7 +199,7 @@ roff_parseln(struct roff *r, int ln, char **bufp, size_t *szp)
 		 */
 		t = r->last->tok;
 		assert(roffs[t].sub);
-		return((*roffs[t].sub)(r, bufp, szp, ln, 0));
+		return((*roffs[t].sub)(r, t, bufp, szp, ln, 0));
 	} else if ('.' != (*bufp)[0] && NULL == r->last)
 		/* Return when in free text without a context. */
 		return(ROFF_CONT);
@@ -210,7 +210,7 @@ roff_parseln(struct roff *r, int ln, char **bufp, size_t *szp)
 		return(ROFF_CONT);
 
 	assert(roffs[t].new);
-	return((*roffs[t].new)(r, bufp, szp, ln, ppos));
+	return((*roffs[t].new)(r, t, bufp, szp, ln, ppos));
 }
 
 
@@ -257,15 +257,6 @@ roff_parse(const char *buf, int *pos)
 
 /* ARGSUSED */
 static enum rofferr
-roff_ignore(ROFF_ARGS)
-{
-
-	return(ROFF_IGN);
-}
-
-
-/* ARGSUSED */
-static enum rofferr
 roff_sub_ig(ROFF_ARGS)
 {
 	int		 i, j;
@@ -276,17 +267,10 @@ roff_sub_ig(ROFF_ARGS)
 		return(ROFF_IGN);
 
 	if (r->last->end) {
-		/*
-		 * Allow a macro to break us, if we've defined a special
-		 * one for the case.  Old groff didn't allow spaces to
-		 * buffer the macro, but new groff does.  Whee!
-		 */
 		i = ppos + 1;
+
 		while ((*bufp)[i] && ' ' == (*bufp)[i])
 			i++;
-
-		if ('\0' == (*bufp)[i])
-			return(ROFF_IGN);
 
 		for (j = 0; r->last->end[j]; i++, j++)
 			if ((*bufp)[i] != r->last->end[j])
@@ -299,13 +283,9 @@ roff_sub_ig(ROFF_ARGS)
 
 		while (' ' == (*bufp)[i])
 			i++;
+
 	} else if (ROFF_close != roff_parse(*bufp, &i))
 		return(ROFF_IGN);
-
-	/*
-	 * Pop off the ignoring context and warn if we're going to lose
-	 * any of our remaining arguments.
-	 */
 
 	roffnode_pop(r);
 
@@ -323,10 +303,9 @@ static enum rofferr
 roff_new_close(ROFF_ARGS)
 {
 
-	/*
 	if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
 		return(ROFF_ERR);
-	*/
+
 	return(ROFF_IGN);
 }
 
@@ -337,23 +316,32 @@ roff_new_ig(ROFF_ARGS)
 {
 	int		 i;
 
-	if ( ! roffnode_push(r, ROFF_ig, ln, ppos))
+	if ( ! roffnode_push(r, tok, ln, ppos))
 		return(ROFF_ERR);
 
+	if (ROFF_ig != tok) {
+		while ((*bufp)[ppos] && ' ' != (*bufp)[ppos])
+			ppos++;
+		while (' ' == (*bufp)[ppos])
+			ppos++;
+	}
+
 	i = (int)ppos;
+
 	while ((*bufp)[i] && ' ' != (*bufp)[i])
 		i++;
 
 	if (i == (int)ppos)
 		return(ROFF_IGN);
+
 	if ((*bufp)[i])
 		if ( ! (*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, i, NULL))
 			return(ROFF_ERR);
 
 	/*
-	 * If `.ig' has arguments, the first argument (up to the next
-	 * whitespace) is interpreted as an argument marking the macro
-	 * close.  Thus, `.ig foo' will close at `.foo'.
+	 * If the macro has arguments, the first argument (up to the
+	 * next whitespace) is interpreted as an argument marking the
+	 * macro close.  Thus, `.ig foo' will close at `.foo'.
 	 *
 	 * NOTE: the closing macro `.foo' in the above case is not
 	 * allowed to have leading spaces with old groff!  Thus `.foo'
