@@ -972,12 +972,18 @@ blk_full(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == ac)
 			break;
 
+		if (ARGS_PEND == ac) {
+			if (ARGS_PPHRASE == lac)
+				ac = ARGS_PPHRASE;
+			else
+				ac = ARGS_PHRASE;
+		}
+
 		/* Don't emit leading punct. for phrases. */
 
 		if (NULL == head && 
 				ARGS_PHRASE != ac &&
 				ARGS_PPHRASE != ac &&
-				ARGS_PEND != ac &&
 				ARGS_QWORD != ac &&
 				1 == mdoc_isdelim(p)) {
 			if ( ! mdoc_word_alloc(m, line, la, p))
@@ -989,29 +995,18 @@ blk_full(MACRO_PROT_ARGS)
 
 		if (NULL == head || 
 				ARGS_PHRASE == ac || 
-				ARGS_PEND == ac || 
 				ARGS_PPHRASE == ac) {
 			if ( ! mdoc_head_alloc(m, line, ppos, tok))
 				return(0);
 			head = m->last;
 		}
 
-		if (ARGS_PHRASE == ac || 
-				ARGS_PEND == ac ||
-				ARGS_PPHRASE == ac) {
-			/*
-			 * Special treatment for the last phrase.  A
-			 * prior ARGS_PHRASE gets is handled as a
-			 * regular ARGS_PHRASE, but a prior ARGS_PPHRASE
-			 * has special handling.
-			 */
-			if (ARGS_PEND == ac && ARGS_ERROR == lac)
-				ac = ARGS_PHRASE;
-			else if (ARGS_PEND == ac && ARGS_PHRASE == lac)
-				ac = ARGS_PHRASE;
-
+		if (ARGS_PHRASE == ac || ARGS_PPHRASE == ac) {
+			if (ARGS_PPHRASE == ac)
+				m->flags |= MDOC_PPHRASE;
 			if ( ! phrase(m, line, la, buf, ac))
 				return(0);
+			m->flags &= ~MDOC_PPHRASE;
 			if ( ! rew_sub(MDOC_HEAD, m, tok, line, ppos))
 				return(0);
 			continue;
@@ -1569,22 +1564,19 @@ phrase(struct mdoc *m, int line, int ppos, char *buf, enum margserr ac)
 	enum mdoct	 ntok;
 	char		*p;
 
-	assert(ARGS_PHRASE == ac || 
-			ARGS_PEND == ac ||
-			ARGS_PPHRASE == ac);
+	assert(ARGS_PHRASE == ac || ARGS_PPHRASE == ac);
 
 	for (pos = ppos; ; ) {
 		la = pos;
 
-		aac = mdoc_zargs(m, line, &pos, buf, ARGS_PPHRASED, &p);
+		aac = mdoc_zargs(m, line, &pos, buf, 0, &p);
 
 		if (ARGS_ERROR == aac)
 			return(0);
 		if (ARGS_EOLN == aac)
 			break;
 
-		ntok = ARGS_QWORD == aac || ARGS_PEND == ac ? 
-			MDOC_MAX : lookup_raw(p);
+		ntok = ARGS_QWORD == aac ? MDOC_MAX : lookup_raw(p);
 
 		if (MDOC_MAX == ntok) {
 			if ( ! mdoc_word_alloc(m, line, la, p))
