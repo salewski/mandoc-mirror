@@ -291,7 +291,7 @@ mdoc_parseln(struct mdoc *m, int ln, char *buf)
 		return(0);
 
 	m->flags |= MDOC_NEWLINE;
-	return('.' == *buf ? 
+	return(('.' == *buf || '\'' == *buf) ? 
 			mdoc_pmacro(m, ln, buf) :
 			mdoc_ptext(m, ln, buf));
 }

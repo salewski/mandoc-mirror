@@ -151,7 +151,7 @@ int
 man_parseln(struct man *m, int ln, char *buf)
 {
 
-	return('.' == *buf || '\'' == *buf ? 
+	return(('.' == *buf || '\'' == *buf) ? 
 			man_pmacro(m, ln, buf) : 
 			man_ptext(m, ln, buf));
 }
