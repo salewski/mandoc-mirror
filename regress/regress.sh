@@ -23,9 +23,11 @@ for file in */*.in */*/*.in; do
 	printf "%s: " "$file"
 	${MANDOC} "$file" > test.mandoc 2> /dev/null
 	${NROFF} ${OUTPUT} -mandoc "$file" > test.nroff 2> /dev/null
-	mandoclen=`head -n 1 test.mandoc | wc -c`
-	nrofflen=`head -n 1 test.nroff | wc -c`
-	if cmp -s test.mandoc test.nroff $mandoclen $nrofflen; then
+	l=`wc -l < test.mandoc`
+	head -n `expr $l - 1` test.mandoc | tail -n `expr $l - 2` > test.mandoc_
+	l=`wc -l < test.nroff`
+	head -n `expr $l - 1` test.nroff| tail -n `expr $l - 2` > test.nroff_
+	if cmp -s test.mandoc_ test.nroff_; then
 		rm -f test.mandoc test.nroff
 		echo "passed"
 		pass=`expr $pass + 1`
@@ -39,4 +41,5 @@ for file in */*.in */*/*.in; do
 		diff -u "${file2}".nroff "${file2}".mandoc > "${file2}".diff
 	fi
 done
+rm -f test.mandoc_ test.nroff_
 echo "Total: $pass passed, $failed failed"
