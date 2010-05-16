@@ -1,0 +1,64 @@
+.Dd May 16, 2010
+.Dt BL-BULLET-BASIC 1
+.Os
+.Sh NAME
+.Nm Bl-bullet-basic
+.Nd tests bullet lists
+.Sh DESCRIPTION
+.Ss Line breaks in items:
+.Bl -bullet -width 5n
+.It
+x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x
+x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x
+.El
+.Ss Nesting of ".Bl -bullet" and empty ".Bd -literal"
+.Bl -bullet
+.It
+.Bd -literal
+.Ed
+y
+.It
+.El
+.Ss Nesting of ".Bl -bullet" and ".Bd -literal":
+.Bl -bullet
+.It
+.Bd -literal
+xy
+.Ed
+y
+.It
+.El
+.Ss Nesting of ".Bl -bullet" and empty ".Bd -compact -literal":
+.Bl -bullet
+.It
+.Bd -literal -compact
+.Ed
+y
+.It
+.El
+.Ss Nesting of ".Bl -bullet" and ".Bd -compact -literal":
+.Bl -bullet
+.It
+.Bd -literal -compact
+xy
+.Ed
+y
+.It
+.El
+.Ss Nesting of ".Bl -bullet -compact" and empty ".Bd -compact -literal":
+.Bl -bullet -compact
+.It
+.Bd -literal -compact
+.Ed
+y
+.It
+.El
+.Ss Nesting of ".Bl -bullet -compact" and ".Bd -compact -literal":
+.Bl -bullet -compact
+.It
+.Bd -literal -compact
+xy
+.Ed
+y
+.It
+.El
