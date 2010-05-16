@@ -28,7 +28,7 @@
 
 #define	ROFF_CTL(c) \
 	('.' == (c) || '\'' == (c))
-#ifdef	ROFF_DEBUG
+#if	0
 #define	ROFF_MDEBUG(p, str) \
 	fprintf(stderr, "%s: %s (%d:%d)\n", (str), \
 		roffs[(p)->last->tok].name, \
@@ -39,13 +39,14 @@
 
 enum	rofft {
 	ROFF_if,
+	ROFF_ig,
+	ROFF_cblock,
 	ROFF_ccond,
 #if 0
 	ROFF_am,
 	ROFF_ami,
 	ROFF_de,
 	ROFF_dei,
-	ROFF_ig,
 	ROFF_close,
 #endif
 	ROFF_MAX
@@ -83,28 +84,26 @@ struct	roffmac {
 };
 
 static	enum rofferr	 roff_if(ROFF_ARGS);
+static	enum rofferr	 roff_ig(ROFF_ARGS);
+static	enum rofferr	 roff_cblock(ROFF_ARGS);
 static	enum rofferr	 roff_ccond(ROFF_ARGS);
-#if 0
-static	enum rofferr	 roff_new_close(ROFF_ARGS);
-static	enum rofferr	 roff_new_ig(ROFF_ARGS);
-static	enum rofferr	 roff_sub_ig(ROFF_ARGS);
-#endif
 
 const	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "if", roff_if },
+	{ "ig", roff_ig },
+	{ ".", roff_cblock },
 	{ "\\}", roff_ccond },
 #if 0
 	{ "am", roff_sub_ig, roff_new_ig },
 	{ "ami", roff_sub_ig, roff_new_ig },
 	{ "de", roff_sub_ig, roff_new_ig },
 	{ "dei", roff_sub_ig, roff_new_ig },
-	{ "ig", roff_sub_ig, roff_new_ig },
-	{ ".", NULL, roff_new_close },
 #endif
 };
 
 static	void		 roff_free1(struct roff *);
 static	enum rofft	 roff_hash_find(const char *);
+static	void		 roffnode_cleanscope(struct roff *);
 static	int		 roffnode_push(struct roff *, 
 				enum rofft, int, int);
 static	void		 roffnode_pop(struct roff *);
@@ -221,16 +220,11 @@ roff_parseln(struct roff *r, int ln,
 	enum rofft	 t;
 	int		 ppos;
 
-	/* Return when in free text without a context. */
-
 	if (r->last && ! ROFF_CTL((*bufp)[pos])) {
-		/* XXX: this assumes we're just discarding. */
-		while (r->last) {
-			if (r->last->endspan-- < 0)
-				break;
-			ROFF_MDEBUG(r, "closing implicit scope");
-			roffnode_pop(r);
-		}
+		if (ROFF_ig == r->last->tok)
+			return(ROFF_IGN);
+		roffnode_cleanscope(r);
+		/* FIXME: this assumes we're discarding! */
 		return(ROFF_IGN);
 	} else if ( ! ROFF_CTL((*bufp)[pos]))
 		return(ROFF_CONT);
@@ -238,8 +232,11 @@ roff_parseln(struct roff *r, int ln,
 	/* There's nothing on the stack: make us anew. */
 
 	ppos = pos;
-	if (ROFF_MAX == (t = roff_parse(*bufp, &pos)))
+	if (ROFF_MAX == (t = roff_parse(*bufp, &pos))) {
+		if (r->last && ROFF_ig == r->last->tok)
+			return(ROFF_IGN);
 		return(ROFF_CONT);
+	}
 
 	assert(roffs[t].proc);
 	return((*roffs[t].proc)(r, t, bufp, szp, ln, ppos, pos, offs));
@@ -298,61 +295,46 @@ roff_parse(const char *buf, int *pos)
 }
 
 
-#if 0
 /* ARGSUSED */
 static enum rofferr
-roff_sub_ig(ROFF_ARGS)
+roff_cblock(ROFF_ARGS)
 {
-	int		 i, j;
 
-	/* Ignore free-text lines. */
-
-	if ('.' != (*bufp)[ppos] && '\'' != (*bufp)[ppos])
+	if (NULL == r->last) {
+		if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
+			return(ROFF_ERR);
 		return(ROFF_IGN);
+	}
 
-	if (r->last->end) {
-		i = ppos + 1;
-
-		while ((*bufp)[i] && ' ' == (*bufp)[i])
-			i++;
-
-		for (j = 0; r->last->end[j]; i++, j++)
-			if ((*bufp)[i] != r->last->end[j])
-				return(ROFF_IGN);
-
-		if (r->last->end[j])
-			return(ROFF_IGN);
-		if ((*bufp)[i] && ' ' != (*bufp)[i])
-			return(ROFF_IGN);
-
-		while (' ' == (*bufp)[i])
-			i++;
-
-	} else if (ROFF_close != roff_parse(*bufp, &i))
+	if (ROFF_ig != r->last->tok) {
+		if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
+			return(ROFF_ERR);
 		return(ROFF_IGN);
+	}
 
+	if ((*bufp)[pos])
+		if ( ! (*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, pos, NULL))
+			return(ROFF_ERR);
+
+	ROFF_MDEBUG(r, "closing ignore block");
 	roffnode_pop(r);
-
-	if ('\0' == (*bufp)[i])
-		return(ROFF_IGN);
-	if ( ! (*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, i, NULL))
-		return(ROFF_ERR);
-
+	roffnode_cleanscope(r);
 	return(ROFF_IGN);
+
 }
 
 
-/* ARGSUSED */
-static enum rofferr
-roff_new_close(ROFF_ARGS)
+static void
+roffnode_cleanscope(struct roff *r)
 {
 
-	if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
-		return(ROFF_ERR);
-
-	return(ROFF_IGN);
+	while (r->last) {
+		if (--r->last->endspan < 0)
+			break;
+		ROFF_MDEBUG(r, "closing implicit scope");
+		roffnode_pop(r);
+	}
 }
-#endif
 
 
 /* ARGSUSED */
@@ -360,22 +342,46 @@ static enum rofferr
 roff_ccond(ROFF_ARGS)
 {
 
-	if (NULL == r->last || ROFF_if != r->last->tok || r->last->endspan > -1) {
+	if (NULL == r->last) {
 		if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
 			return(ROFF_ERR);
 		return(ROFF_IGN);
 	}
 
+	if (ROFF_if != r->last->tok) {
+		if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
+			return(ROFF_ERR);
+		return(ROFF_IGN);
+	}
+
+	if (r->last->endspan > -1) {
+		if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
+			return(ROFF_ERR);
+		return(ROFF_IGN);
+	}
+
+	if ((*bufp)[pos])
+		if ( ! (*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, pos, NULL))
+			return(ROFF_ERR);
+
 	ROFF_MDEBUG(r, "closing explicit scope");
 	roffnode_pop(r);
+	roffnode_cleanscope(r);
+	return(ROFF_IGN);
+}
 
-	while (r->last) {
-		if (--r->last->endspan < 0)
-			break;
 
-		ROFF_MDEBUG(r, "closing implicit scope");
-		roffnode_pop(r);
-	}
+/* ARGSUSED */
+static enum rofferr
+roff_ig(ROFF_ARGS)
+{
+
+	if ( ! roffnode_push(r, tok, ln, ppos))
+		return(ROFF_ERR);
+
+	ROFF_MDEBUG(r, "opening ignore block");
+
+	/* FIXME: warn about end of line. */
 
 	return(ROFF_IGN);
 }
@@ -418,61 +424,3 @@ roff_if(ROFF_ARGS)
 	*offs = pos;
 	return(ROFF_RERUN);
 }
-
-
-#if 0
-static enum rofferr
-roff_new_ig(ROFF_ARGS)
-{
-	int		 i;
-
-	if ( ! roffnode_push(r, tok, ln, ppos))
-		return(ROFF_ERR);
-	
-	/*
-	 * Other macros (not `ig') using this routine have additional
-	 * crap here that we discard. 
-	 */
-
-	if (ROFF_ig != tok) {
-		while ((*bufp)[ppos] && ' ' != (*bufp)[ppos])
-			ppos++;
-		while (' ' == (*bufp)[ppos])
-			ppos++;
-	}
-
-	i = (int)ppos;
-
-	while ((*bufp)[i] && ' ' != (*bufp)[i])
-		i++;
-
-	if (i == (int)ppos)
-		return(ROFF_IGN);
-
-	if ((*bufp)[i])
-		if ( ! (*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, i, NULL))
-			return(ROFF_ERR);
-
-	/*
-	 * If the macro has arguments, the first argument (up to the
-	 * next whitespace) is interpreted as an argument marking the
-	 * macro close.  Thus, `.ig foo' will close at `.foo'.
-	 *
-	 * NOTE: the closing macro `.foo' in the above case is not
-	 * allowed to have leading spaces with old groff!  Thus `.foo'
-	 * != `. foo'.  Oh yeah, everything after the `.foo' is lost.
-	 * Merry fucking Christmas.
-	 */
-
-	r->last->end = malloc((size_t)(i - ppos) + 1);
-	if (NULL == r->last->end) {
-		(*r->msg)(MANDOCERR_MEM, r->data, ln, ppos, NULL);
-		return(ROFF_ERR);
-	}
-
-	memcpy(r->last->end, &(*bufp)[ppos], (size_t)(i - ppos));
-	r->last->end[i - ppos] = '\0';
-
-	return(ROFF_IGN);
-}
-#endif
