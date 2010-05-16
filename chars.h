@@ -17,6 +17,8 @@
 #ifndef CHARS_H
 #define CHARS_H
 
+#define ASCII_NBRSP	 31  /* non-breaking space */
+
 __BEGIN_DECLS
 
 enum	chars {

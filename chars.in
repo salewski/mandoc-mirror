@@ -31,7 +31,7 @@
  */
 
 /* Non-breaking, non-collapsing space uses unit separator. */
-static const char ascii_nbrsp[2] = { 31, 0 };
+static const char ascii_nbrsp[2] = { ASCII_NBRSP, 0 };
 
 CHAR_TBL_START
 

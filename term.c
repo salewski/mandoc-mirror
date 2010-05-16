@@ -233,7 +233,7 @@ term_flushln(struct termp *p)
 		for ( ; i < (int)p->col; i++)
 			if (' ' == p->buf[i])
 				break;
-			else if (31 == p->buf[i])
+			else if (ASCII_NBRSP == p->buf[i])
 				putchar(' ');
 			else
 				putchar(p->buf[i]);
