@@ -1,0 +1,15 @@
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+123
+.ig
+hello
+.if t \{\
+hello
+.\}
+..
+12124

@@ -22,10 +22,10 @@ __BEGIN_DECLS
 enum	mandocerr {
 	MANDOCERR_OK,
 	MANDOCERR_SCOPEEXIT, /* scope open on exit */
-	MANDOCERR_NOSCOPE, /* request scope close w/none open */
-	MANDOCERR_NOARGS, /* macro requires argument(s) */
 #define	MANDOCERR_WARNING	MANDOCERR_SCOPEEXIT
 
+	MANDOCERR_NOSCOPE, /* request scope close w/none open */
+	MANDOCERR_NOARGS, /* macro requires argument(s) */
 	MANDOCERR_ARGSLOST, /* line arguments will be lost */
 #define	MANDOCERR_ERROR		MANDOCERR_ARGSLOST
 

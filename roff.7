@@ -76,6 +76,10 @@ BODY...
 .Ed
 .Bd -literal -offset indent -compact
 \&.if COND \e{ BODY
+BODY... \e}
+.Ed
+.Bd -literal -offset indent -compact
+\&.if COND \e{ BODY
 BODY...
 \&.\e}
 .Ed
@@ -112,15 +116,71 @@ The scope of a conditional is always parsed, but only executed if the
 conditional evaluates to true.
 .Pp
 Note that text subsequent a
+.Sq \&.\e}
+macro is discarded.
+Furthermore, if an explicit closing sequence
 .Sq \e}
-is discarded.
+is specified in a free-form line, the entire line is accepted within the
+scope of the prior macro, not only the text preceding the close.
 .Ss \&ig
-Ignore input until a
-.Sq \.\.
+Ignore input.
+Accepts the following syntax:
+.Pp
+.Bd -literal -offset indent -compact
+\&.ig
+BODY...
+\&..
+.Ed
+.Bd -literal -offset indent -compact
+\&.ig END
+BODY...
+\&.END
+.Ed
+.Pp
+In the first case, input is ignored until a
+.Sq \&..
 macro is encountered on its own line.
-Note that text subsequent the
-.Sq \.\.
+In the second case, input is ignored until a
+.Sq \&.END
+is encountered.
+Text subsequent the
+.Sq \&.END
+or
+.Sq \&..
 is discarded.
+.Pp
+Do not use the escape
+.Sq \e
+anywhere in the definition of END.
+It causes very strange behaviour.
+Furthermore, if you redefine a
+.Nm
+macro, such as
+.Pp
+.D1 \&.ig if
+.Pp
+the subsequent invocation of
+.Sx \&if
+will first signify the end of comment, then be invoked as a macro.
+This behaviour really shouldn't be counted upon.
+.Sh COMPATIBILITY
+This section documents compatibility between mandoc and other other
+troff implementations, at this time limited to GNU troff
+.Pq Qq groff .
+The term
+.Qq historic groff
+refers to groff versions before the
+.Pa doc.tmac
+file re-write
+.Pq somewhere between 1.15 and 1.19 .
+.Pp
+.Bl -dash -compact
+.It
+Historic groff did not accept white-space buffering the custom END tag
+for the
+.Sx \&ig
+macro.
+.El
 .Sh AUTHORS
 The
 .Nm

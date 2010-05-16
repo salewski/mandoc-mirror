@@ -798,8 +798,8 @@ mwarn(void *arg, int line, int col, const char *msg)
 static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"ok",
 	"multi-line scope open on exit",
-	"request for scope closure when no matching scope is open",
-	"macro requires line argument(s)",
+	"request for scope closure when no matching scope is open: ignored",
+	"macro requires line argument(s): ignored",
 	"line arguments will be lost",
 	"memory exhausted"
 };
