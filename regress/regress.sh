@@ -17,11 +17,11 @@ rm -rf output
 echo "Starting regression tests..."
 pass=0
 failed=0
-for file in */*.1 */*/*.1; do
+for file in */*.in */*/*.in; do
 	[ -f "$file" ] || continue
 	check_skip_list "$file" && break
 	printf "%s: " "$file"
-	mandoc "$file" > test.mandoc 2> /dev/null
+	${MANDOC} "$file" > test.mandoc 2> /dev/null
 	${NROFF} ${OUTPUT} -mandoc "$file" > test.nroff 2> /dev/null
 	if cmp -s test.mandoc test.nroff; then
 		rm -f test.mandoc test.nroff
