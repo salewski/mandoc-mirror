@@ -381,7 +381,9 @@ roff_ig(ROFF_ARGS)
 
 	ROFF_MDEBUG(r, "opening ignore block");
 
-	/* FIXME: warn about end of line. */
+	if ((*bufp)[pos])
+		if ( ! (*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, pos, NULL))
+			return(ROFF_ERR);
 
 	return(ROFF_IGN);
 }
@@ -391,6 +393,7 @@ roff_ig(ROFF_ARGS)
 static enum rofferr
 roff_if(ROFF_ARGS)
 {
+	int		 sv;
 
 	/*
 	 * Read ahead past the conditional.
@@ -399,13 +402,28 @@ roff_if(ROFF_ARGS)
 	 * It's good enough for now, however.
 	 */
 
-	if ( ! roffnode_push(r, tok, ln, ppos))
-		return(ROFF_ERR);
-
 	while ((*bufp)[pos] && ' ' != (*bufp)[pos])
 		pos++;
+
+	sv = pos;
 	while (' ' == (*bufp)[pos])
 		pos++;
+
+	/*
+	 * Roff is weird.  If we have just white-space after the
+	 * conditional, it's considered the BODY and we exit without
+	 * really doing anything.  Warn about this.  It's probably
+	 * wrong.
+	 */
+
+	if ('\0' == (*bufp)[pos] && sv != pos) {
+		if ( ! (*r->msg)(MANDOCERR_NOARGS, r->data, ln, ppos, NULL))
+			return(ROFF_ERR);
+		return(ROFF_IGN);
+	}
+
+	if ( ! roffnode_push(r, tok, ln, ppos))
+		return(ROFF_ERR);
 
 	/* Don't evaluate: just assume NO. */
 
@@ -418,8 +436,15 @@ roff_if(ROFF_ARGS)
 	} else
 		ROFF_MDEBUG(r, "opening implicit scope");
 
+	/*
+	 * If there are no arguments on the line, the next-line scope is
+	 * assumed.
+	 */
+
 	if ('\0' == (*bufp)[pos])
 		return(ROFF_IGN);
+
+	/* Otherwise re-run the roff parser after recalculating. */
 
 	*offs = pos;
 	return(ROFF_RERUN);

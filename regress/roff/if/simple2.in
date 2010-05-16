@@ -1,0 +1,11 @@
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+123
+.\" Note that this has whitespace...
+.if t  
+asdf

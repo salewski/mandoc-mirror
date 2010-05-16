@@ -1,0 +1,128 @@
+.\"	$Id$
+.\"
+.\" Copyright (c) 2010 Kristaps Dzonsons <kristaps@bsd.lv>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt ROFF 7
+.Os
+.Sh NAME
+.Nm roff
+.Nd roff language reference
+.Sh DESCRIPTION
+The
+.Nm roff
+language is a general-purpose text-formatting language.  The purpose of
+this document is to consistently describe those language constructs
+accepted by the
+.Xr mandoc 1
+utility.  It is a work in progress.
+.Pp
+An
+.Nm
+document follows simple rules:  lines beginning with the control
+characters
+.Sq \.
+or
+.Sq \(aq
+are parsed for macros.  Other lines are interpreted within the scope of
+prior macros:
+.Bd -literal -offset indent
+\&.xx Macro lines change control state.
+Other lines are interpreted within the current state.
+.Ed
+.Sh LANGUAGE SYNTAX
+.Nm
+documents may contain only graphable 7-bit ASCII characters, the space
+character, and, in certain circumstances, the tab character.  All
+manuals must have
+.Ux
+line terminators.
+.Sh MACRO SYNTAX
+Macros are arbitrary in length and begin with a control character ,
+.Sq \.
+or
+.Sq \(aq ,
+at the beginning of the line.
+An arbitrary amount of whitespace may sit between the control character
+and the macro name.
+Thus, the following are equivalent:
+.Bd -literal -offset indent
+\&.if
+\&.\ \ \ \&if
+.Ed
+.Sh REFERENCE
+This section is a canonical reference of all macros, arranged
+alphabetically.
+.Ss \&if
+Begins a conditional.
+Has the following syntax:
+.Pp
+.Bd -literal -offset indent -compact
+\&.if COND \e{\e
+BODY...
+\&.\e}
+.Ed
+.Bd -literal -offset indent -compact
+\&.if COND \e{ BODY
+BODY...
+\&.\e}
+.Ed
+.Bd -literal -offset indent -compact
+\&.if COND \e
+BODY
+.Ed
+.Pp
+COND is a conditional (TODO: document).
+.Pp
+If the BODY section is begun by an escaped brace
+.Sq \e{ ,
+scope continues until a closing-brace macro
+.Sq \.\e} .
+If the BODY is not enclosed in braces, scope continues until the next
+macro or word.
+If the COND is followed by a BODY on the same line, whether after a
+brace or not, then macros
+.Em must
+begin with a control character.
+It is generally more intuitive, in this case, to write
+.Bd -literal -offset indent
+\&.if COND \e{\e
+\&.foo
+bar
+\&.\e}
+.Ed
+.Pp
+than having the macro follow as
+.Pp
+.D1 \&.if COND \e{ .foo
+.Pp
+The scope of a conditional is always parsed, but only executed if the
+conditional evaluates to true.
+.Pp
+Note that text subsequent a
+.Sq \e}
+is discarded.
+.Ss \&ig
+Ignore input until a
+.Sq \.\.
+macro is encountered on its own line.
+Note that text subsequent the
+.Sq \.\.
+is discarded.
+.Sh AUTHORS
+The
+.Nm
+reference was written by
+.An Kristaps Dzonsons Aq kristaps@bsd.lv .

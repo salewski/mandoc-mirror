@@ -799,6 +799,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"ok",
 	"multi-line scope open on exit",
 	"request for scope closure when no matching scope is open",
+	"macro requires line argument(s)",
 	"line arguments will be lost",
 	"memory exhausted"
 };
