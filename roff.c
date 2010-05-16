@@ -21,17 +21,30 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "mandoc.h"
 #include "roff.h"
 
+#define	ROFF_CTL(c) \
+	('.' == (c) || '\'' == (c))
+#ifdef	ROFF_DEBUG
+#define	ROFF_MDEBUG(p, str) \
+	fprintf(stderr, "%s: %s (%d:%d)\n", (str), \
+		roffs[(p)->last->tok].name, \
+	       	(p)->last->line, (p)->last->col)
+#else
+#define	ROFF_MDEBUG(p, str) while (/* CONSTCOND */ 0)
+#endif
+
 enum	rofft {
+	ROFF_if,
+	ROFF_ccond,
 #if 0
 	ROFF_am,
 	ROFF_ami,
 	ROFF_de,
 	ROFF_dei,
-	ROFF_if,
 	ROFF_ig,
 	ROFF_close,
 #endif
@@ -50,8 +63,7 @@ struct	roffnode {
 	char		*end; /* end-token: custom */
 	int		 line; /* parse line */
 	int		 col; /* parse col */
-	int		 flags;
-#define	ROFF_PARSEONLY	(1 << 0)
+	int		 endspan;
 };
 
 #define	ROFF_ARGS	 struct roff *r, /* parse ctx */ \
@@ -59,32 +71,33 @@ struct	roffnode {
 		 	 char **bufp, /* input buffer */ \
 			 size_t *szp, /* size of input buffer */ \
 			 int ln, /* parse line */ \
-			 int ppos, /* current pos in buffer */ \
+			 int ppos, /* original pos in buffer */ \
+			 int pos, /* current pos in buffer */ \
 			 int *offs /* reset offset of buffer data */
 
 typedef	enum rofferr (*roffproc)(ROFF_ARGS);
 
 struct	roffmac {
 	const char	*name; /* macro name */
-	roffproc	 sub; /* child of control black */
-	roffproc	 new; /* root of stack (type = ROFF_MAX) */
+	roffproc	 proc;
 };
 
+static	enum rofferr	 roff_if(ROFF_ARGS);
+static	enum rofferr	 roff_ccond(ROFF_ARGS);
 #if 0
 static	enum rofferr	 roff_new_close(ROFF_ARGS);
-static	enum rofferr	 roff_new_if(ROFF_ARGS);
-static	enum rofferr	 roff_sub_if(ROFF_ARGS);
 static	enum rofferr	 roff_new_ig(ROFF_ARGS);
 static	enum rofferr	 roff_sub_ig(ROFF_ARGS);
 #endif
 
 const	struct roffmac	 roffs[ROFF_MAX] = {
+	{ "if", roff_if },
+	{ "\\}", roff_ccond },
 #if 0
 	{ "am", roff_sub_ig, roff_new_ig },
 	{ "ami", roff_sub_ig, roff_new_ig },
 	{ "de", roff_sub_ig, roff_new_ig },
 	{ "dei", roff_sub_ig, roff_new_ig },
-	{ "if", roff_sub_if, roff_new_if },
 	{ "ig", roff_sub_ig, roff_new_ig },
 	{ ".", NULL, roff_new_close },
 #endif
@@ -126,9 +139,9 @@ roffnode_pop(struct roff *r)
 {
 	struct roffnode	*p;
 
-	if (NULL == (p = r->last))
-		return;
-	r->last = p->parent;
+	assert(r->last);
+	p = r->last; 
+	r->last = r->last->parent;
 	if (p->end)
 		free(p->end);
 	free(p);
@@ -206,27 +219,30 @@ roff_parseln(struct roff *r, int ln,
 		char **bufp, size_t *szp, int pos, int *offs)
 {
 	enum rofft	 t;
+	int		 ppos;
 
-	/* If stacked, jump directly into its processing function. */
-
-	if (NULL != r->last) {
-		t = r->last->tok;
-		assert(roffs[t].sub);
-		return((*roffs[t].sub)(r, t, bufp, szp, ln, pos, offs));
-	} 
-	
 	/* Return when in free text without a context. */
 
-	if ('.' != (*bufp)[0] && '\'' != (*bufp)[0] && NULL == r->last)
+	if (r->last && ! ROFF_CTL((*bufp)[pos])) {
+		/* XXX: this assumes we're just discarding. */
+		while (r->last) {
+			if (r->last->endspan-- < 0)
+				break;
+			ROFF_MDEBUG(r, "closing implicit scope");
+			roffnode_pop(r);
+		}
+		return(ROFF_IGN);
+	} else if ( ! ROFF_CTL((*bufp)[pos]))
 		return(ROFF_CONT);
 
 	/* There's nothing on the stack: make us anew. */
 
+	ppos = pos;
 	if (ROFF_MAX == (t = roff_parse(*bufp, &pos)))
 		return(ROFF_CONT);
 
-	assert(roffs[t].new);
-	return((*roffs[t].new)(r, t, bufp, szp, ln, pos, offs));
+	assert(roffs[t].proc);
+	return((*roffs[t].proc)(r, t, bufp, szp, ln, ppos, pos, offs));
 }
 
 
@@ -252,8 +268,8 @@ roff_parse(const char *buf, int *pos)
 	char		 mac[5];
 	enum rofft	 t;
 
-	assert('.' == buf[0] || '\'' == buf[0]);
-	*pos = 1;
+	assert(ROFF_CTL(buf[*pos]));
+	(*pos)++;
 
 	while (buf[*pos] && (' ' == buf[*pos] || '\t' == buf[*pos]))
 		(*pos)++;
@@ -336,28 +352,39 @@ roff_new_close(ROFF_ARGS)
 
 	return(ROFF_IGN);
 }
+#endif
 
 
+/* ARGSUSED */
 static enum rofferr
-roff_sub_if(ROFF_ARGS)
+roff_ccond(ROFF_ARGS)
 {
-	int		 i;
-	enum rofft	 t;
 
-	i = (int)strlen(*bufp);
+	if (NULL == r->last || ROFF_if != r->last->tok || r->last->endspan > -1) {
+		if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
+			return(ROFF_ERR);
+		return(ROFF_IGN);
+	}
 
-	if (i > 1 && '}' == (*bufp)[i - 1] && '\\' == (*bufp)[i - 2])
+	ROFF_MDEBUG(r, "closing explicit scope");
+	roffnode_pop(r);
+
+	while (r->last) {
+		if (--r->last->endspan < 0)
+			break;
+
+		ROFF_MDEBUG(r, "closing implicit scope");
 		roffnode_pop(r);
+	}
 
 	return(ROFF_IGN);
 }
 
 
+/* ARGSUSED */
 static enum rofferr
-roff_new_if(ROFF_ARGS)
+roff_if(ROFF_ARGS)
 {
-	struct roffnode	*n;
-	enum rofferr	 re;
 
 	/*
 	 * Read ahead past the conditional.
@@ -366,33 +393,34 @@ roff_new_if(ROFF_ARGS)
 	 * It's good enough for now, however.
 	 */
 
-	while ((*bufp)[ppos] && ' ' != (*bufp)[ppos])
-		ppos++;
-	while (' ' == (*bufp)[ppos])
-		ppos++;
-
 	if ( ! roffnode_push(r, tok, ln, ppos))
 		return(ROFF_ERR);
 
-	n = r->last;
+	while ((*bufp)[pos] && ' ' != (*bufp)[pos])
+		pos++;
+	while (' ' == (*bufp)[pos])
+		pos++;
 
 	/* Don't evaluate: just assume NO. */
 
-	r->last->flags |= ROFF_PARSEONLY;
+	r->last->endspan = 1;
 
-	if ('\\' == (*bufp)[ppos] && '{' == (*bufp)[ppos + 1]) {
-		re = roff_parseln(r, ln, bufp, szp, pos);
-		if (ROFF_ERR == re)
-			return(re);
-		if (r->last == n)
-			roffnode_pop(r, tok, ln, ppos);
-		return(re);
-	}
+	if ('\\' == (*bufp)[pos] && '{' == (*bufp)[pos + 1]) {
+		ROFF_MDEBUG(r, "opening explicit scope");
+		r->last->endspan = -1;
+		pos += 2;
+	} else
+		ROFF_MDEBUG(r, "opening implicit scope");
 
-	return(ROFF_IGN);
+	if ('\0' == (*bufp)[pos])
+		return(ROFF_IGN);
+
+	*offs = pos;
+	return(ROFF_RERUN);
 }
 
 
+#if 0
 static enum rofferr
 roff_new_ig(ROFF_ARGS)
 {
