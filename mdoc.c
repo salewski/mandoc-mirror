@@ -150,9 +150,10 @@ static	struct mdoc_node *node_alloc(struct mdoc *, int, int,
 				enum mdoct, enum mdoc_type);
 static	int		  node_append(struct mdoc *, 
 				struct mdoc_node *);
-static	int		  mdoc_ptext(struct mdoc *, int, char *);
-static	int		  mdoc_pmacro(struct mdoc *, int, char *);
-static	int		  macrowarn(struct mdoc *, int, const char *);
+static	int		  mdoc_ptext(struct mdoc *, int, char *, int);
+static	int		  mdoc_pmacro(struct mdoc *, int, char *, int);
+static	int		  macrowarn(struct mdoc *, int, 
+				const char *, int);
 
 
 const struct mdoc_node *
@@ -284,16 +285,16 @@ mdoc_endparse(struct mdoc *m)
  * the macro (mdoc_pmacro()) or text parser (mdoc_ptext()).
  */
 int
-mdoc_parseln(struct mdoc *m, int ln, char *buf)
+mdoc_parseln(struct mdoc *m, int ln, char *buf, int offs)
 {
 
 	if (MDOC_HALT & m->flags)
 		return(0);
 
 	m->flags |= MDOC_NEWLINE;
-	return(('.' == *buf || '\'' == *buf) ? 
-			mdoc_pmacro(m, ln, buf) :
-			mdoc_ptext(m, ln, buf));
+	return(('.' == buf[offs] || '\'' == buf[offs]) ? 
+			mdoc_pmacro(m, ln, buf, offs) :
+			mdoc_ptext(m, ln, buf, offs));
 }
 
 
@@ -630,32 +631,34 @@ mdoc_node_delete(struct mdoc *m, struct mdoc_node *p)
  * control character.
  */
 static int
-mdoc_ptext(struct mdoc *m, int line, char *buf)
+mdoc_ptext(struct mdoc *m, int line, char *buf, int offs)
 {
 	int		 i;
 
 	/* Ignore bogus comments. */
 
-	if ('\\' == buf[0] && '.' == buf[1] && '\"' == buf[2])
-		return(mdoc_pwarn(m, line, 0, EBADCOMMENT));
+	if ('\\' == buf[offs] && 
+			'.' == buf[offs + 1] && 
+			'"' == buf[offs + 2])
+		return(mdoc_pwarn(m, line, offs, EBADCOMMENT));
 
 	/* No text before an initial macro. */
 
 	if (SEC_NONE == m->lastnamed)
-		return(mdoc_perr(m, line, 0, ETEXTPROL));
+		return(mdoc_perr(m, line, offs, ETEXTPROL));
 
 	/* Literal just gets pulled in as-is. */
 	
 	if (MDOC_LITERAL & m->flags)
-		return(mdoc_word_alloc(m, line, 0, buf));
+		return(mdoc_word_alloc(m, line, offs, buf + offs));
 
 	/* Check for a blank line, which may also consist of spaces. */
 
-	for (i = 0; ' ' == buf[i]; i++)
+	for (i = offs; ' ' == buf[i]; i++)
 		/* Skip to first non-space. */ ;
 
 	if ('\0' == buf[i]) {
-		if ( ! mdoc_pwarn(m, line, 0, ENOBLANK))
+		if ( ! mdoc_pwarn(m, line, offs, ENOBLANK))
 			return(0);
 
 		/*
@@ -663,7 +666,7 @@ mdoc_ptext(struct mdoc *m, int line, char *buf)
 		 * blank lines aren't allowed, but enough manuals assume this
 		 * behaviour that we want to work around it.
 		 */
-		if ( ! mdoc_elem_alloc(m, line, 0, MDOC_Pp, NULL))
+		if ( ! mdoc_elem_alloc(m, line, offs, MDOC_Pp, NULL))
 			return(0);
 
 		m->next = MDOC_NEXT_SIBLING;
@@ -694,7 +697,7 @@ mdoc_ptext(struct mdoc *m, int line, char *buf)
 
 	/* Allocate the whole word. */
 
-	if ( ! mdoc_word_alloc(m, line, 0, buf))
+	if ( ! mdoc_word_alloc(m, line, offs, buf + offs))
 		return(0);
 
 	/*
@@ -703,10 +706,7 @@ mdoc_ptext(struct mdoc *m, int line, char *buf)
 	 * sentence.  The front-end will know how to interpret this.
 	 */
 
-	/* FIXME: chain of close delims. */
-
 	assert(i);
-
 	if (mandoc_eos(buf, (size_t)i))
 		m->last->flags |= MDOC_EOS;
 
@@ -715,12 +715,12 @@ mdoc_ptext(struct mdoc *m, int line, char *buf)
 
 
 static int
-macrowarn(struct mdoc *m, int ln, const char *buf)
+macrowarn(struct mdoc *m, int ln, const char *buf, int offs)
 {
 	if ( ! (MDOC_IGN_MACRO & m->pflags))
-		return(mdoc_verr(m, ln, 0, "unknown macro: %s%s", 
+		return(mdoc_verr(m, ln, offs, "unknown macro: %s%s", 
 				buf, strlen(buf) > 3 ? "..." : ""));
-	return(mdoc_vwarn(m, ln, 0, "unknown macro: %s%s",
+	return(mdoc_vwarn(m, ln, offs, "unknown macro: %s%s",
 				buf, strlen(buf) > 3 ? "..." : ""));
 }
 
@@ -730,7 +730,7 @@ macrowarn(struct mdoc *m, int ln, const char *buf)
  * character.
  */
 int
-mdoc_pmacro(struct mdoc *m, int ln, char *buf)
+mdoc_pmacro(struct mdoc *m, int ln, char *buf, int offs)
 {
 	enum mdoct	tok;
 	int		i, j, sv;
@@ -738,10 +738,12 @@ mdoc_pmacro(struct mdoc *m, int ln, char *buf)
 
 	/* Empty lines are ignored. */
 
-	if ('\0' == buf[1])
+	offs++;
+
+	if ('\0' == buf[offs])
 		return(1);
 
-	i = 1;
+	i = offs;
 
 	/* Accept whitespace after the initial control char. */
 
@@ -770,16 +772,16 @@ mdoc_pmacro(struct mdoc *m, int ln, char *buf)
 		return(mdoc_perr(m, ln, i, EPRINT));
 	}
 
-	mac[j] = 0;
+	mac[j] = '\0';
 
 	if (j == 4 || j < 2) {
-		if ( ! macrowarn(m, ln, mac))
+		if ( ! macrowarn(m, ln, mac, sv))
 			goto err;
 		return(1);
 	} 
 	
 	if (MDOC_MAX == (tok = mdoc_hash_find(mac))) {
-		if ( ! macrowarn(m, ln, mac))
+		if ( ! macrowarn(m, ln, mac, sv))
 			goto err;
 		return(1);
 	}
