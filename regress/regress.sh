@@ -24,6 +24,7 @@ for file in */*.1 */*/*.1; do
 	mandoc "$file" > test.mandoc 2> /dev/null
 	${NROFF} ${OUTPUT} -mandoc "$file" > test.nroff 2> /dev/null
 	if cmp -s test.mandoc test.nroff; then
+		rm -f test.mandoc test.nroff
 		echo "passed"
 		pass=`expr $pass + 1`
 	else
