@@ -177,7 +177,7 @@ int		  mdoc_valid_pre(struct mdoc *,
 			const struct mdoc_node *);
 int		  mdoc_valid_post(struct mdoc *);
 int		  mdoc_action_pre(struct mdoc *, 
-			const struct mdoc_node *);
+			struct mdoc_node *);
 int		  mdoc_action_post(struct mdoc *);
 enum margverr	  mdoc_argv(struct mdoc *, int, enum mdoct,
 			struct mdoc_arg **, int *, char *);

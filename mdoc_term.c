@@ -61,7 +61,6 @@ static	int	  arg_getattrs(const int *, int *, size_t,
 			const struct mdoc_node *);
 static	int	  arg_getattr(int, const struct mdoc_node *);
 static	int	  arg_disptype(const struct mdoc_node *);
-static	int	  arg_listtype(const struct mdoc_node *);
 static	void	  print_bvspace(struct termp *,
 			const struct mdoc_node *,
 			const struct mdoc_node *);
@@ -512,47 +511,6 @@ arg_disptype(const struct mdoc_node *n)
 }
 
 
-static int
-arg_listtype(const struct mdoc_node *n)
-{
-	int		 i, len;
-
-	assert(MDOC_BLOCK == n->type);
-
-	len = (int)(n->args ? n->args->argc : 0);
-
-	for (i = 0; i < len; i++) 
-		switch (n->args->argv[i].arg) {
-		case (MDOC_Bullet):
-			/* FALLTHROUGH */
-		case (MDOC_Dash):
-			/* FALLTHROUGH */
-		case (MDOC_Enum):
-			/* FALLTHROUGH */
-		case (MDOC_Hyphen):
-			/* FALLTHROUGH */
-		case (MDOC_Tag):
-			/* FALLTHROUGH */
-		case (MDOC_Inset):
-			/* FALLTHROUGH */
-		case (MDOC_Diag):
-			/* FALLTHROUGH */
-		case (MDOC_Item):
-			/* FALLTHROUGH */
-		case (MDOC_Column):
-			/* FALLTHROUGH */
-		case (MDOC_Hang):
-			/* FALLTHROUGH */
-		case (MDOC_Ohang):
-			return(n->args->argv[i].arg);
-		default:
-			break;
-		}
-
-	return(-1);
-}
-
-
 static size_t
 a2offs(const struct mdoc_argv *arg)
 {
@@ -655,13 +613,13 @@ print_bvspace(struct termp *p,
 
 	/* A `-column' does not assert vspace within the list. */
 
-	if (MDOC_Bl == bl->tok && arg_hasattr(MDOC_Column, bl))
+	if (MDOC_Bl == bl->tok && LIST_diag == bl->data.list)
 		if (n->prev && MDOC_It == n->prev->tok)
 			return;
 
 	/* A `-diag' without body does not vspace. */
 
-	if (MDOC_Bl == bl->tok && arg_hasattr(MDOC_Diag, bl)) 
+	if (MDOC_Bl == bl->tok && LIST_diag == bl->data.list)
 		if (n->prev && MDOC_It == n->prev->tok) {
 			assert(n->prev->body);
 			if (NULL == n->prev->body->child)
@@ -705,8 +663,9 @@ termp_it_pre(DECL_ARGS)
 {
 	const struct mdoc_node *bl, *nn;
 	char		        buf[7];
-	int		        i, type, keys[3], vals[3];
+	int		        i, keys[3], vals[3];
 	size_t		        width, offset, ncols, dcol;
+	enum mdoc_list		type;
 
 	if (MDOC_BLOCK == n->type) {
 		print_bvspace(p, n->parent->parent, n);
@@ -725,8 +684,7 @@ termp_it_pre(DECL_ARGS)
 
 	arg_getattrs(keys, vals, 3, bl);
 
-	type = arg_listtype(bl);
-	assert(-1 != type);
+	type = bl->data.list;
 
 	/* 
 	 * First calculate width and offset.  This is pretty easy unless
@@ -740,7 +698,7 @@ termp_it_pre(DECL_ARGS)
 		offset = a2offs(&bl->args->argv[vals[1]]);
 
 	switch (type) {
-	case (MDOC_Column):
+	case (LIST_column):
 		if (MDOC_BODY == n->type)
 			break;
 		/*
@@ -798,25 +756,25 @@ termp_it_pre(DECL_ARGS)
 	 */
 
 	switch (type) {
-	case (MDOC_Bullet):
+	case (LIST_bullet):
 		/* FALLTHROUGH */
-	case (MDOC_Dash):
+	case (LIST_dash):
 		/* FALLTHROUGH */
-	case (MDOC_Hyphen):
+	case (LIST_hyphen):
 		if (width < 4)
 			width = 4;
 		break;
-	case (MDOC_Enum):
+	case (LIST_enum):
 		if (width < 5)
 			width = 5;
 		break;
-	case (MDOC_Hang):
+	case (LIST_hang):
 		if (0 == width)
 			width = 8;
 		break;
-	case (MDOC_Column):
+	case (LIST_column):
 		/* FALLTHROUGH */
-	case (MDOC_Tag):
+	case (LIST_tag):
 		if (0 == width)
 			width = 10;
 		break;
@@ -832,11 +790,11 @@ termp_it_pre(DECL_ARGS)
 	p->flags |= TERMP_NOSPACE;
 
 	switch (type) {
-	case (MDOC_Diag):
+	case (LIST_diag):
 		if (MDOC_BODY == n->type)
 			term_word(p, "\\ \\ ");
 		break;
-	case (MDOC_Inset):
+	case (LIST_inset):
 		if (MDOC_BODY == n->type) 
 			term_word(p, "\\ ");
 		break;
@@ -847,7 +805,7 @@ termp_it_pre(DECL_ARGS)
 	p->flags |= TERMP_NOSPACE;
 
 	switch (type) {
-	case (MDOC_Diag):
+	case (LIST_diag):
 		if (MDOC_HEAD == n->type)
 			term_fontpush(p, TERMFONT_BOLD);
 		break;
@@ -863,19 +821,19 @@ termp_it_pre(DECL_ARGS)
 	 */
 
 	switch (type) {
-	case (MDOC_Bullet):
+	case (LIST_bullet):
 		/* FALLTHROUGH */
-	case (MDOC_Dash):
+	case (LIST_dash):
 		/* FALLTHROUGH */
-	case (MDOC_Enum):
+	case (LIST_enum):
 		/* FALLTHROUGH */
-	case (MDOC_Hyphen):
+	case (LIST_hyphen):
 		if (MDOC_HEAD == n->type)
 			p->flags |= TERMP_NOBREAK;
 		else
 			p->flags |= TERMP_NOLPAD;
 		break;
-	case (MDOC_Hang):
+	case (LIST_hang):
 		if (MDOC_HEAD == n->type)
 			p->flags |= TERMP_NOBREAK;
 		else
@@ -898,7 +856,7 @@ termp_it_pre(DECL_ARGS)
 		} else
 			p->flags |= TERMP_HANG;
 		break;
-	case (MDOC_Tag):
+	case (LIST_tag):
 		if (MDOC_HEAD == n->type)
 			p->flags |= TERMP_NOBREAK | TERMP_TWOSPACE;
 		else
@@ -909,7 +867,7 @@ termp_it_pre(DECL_ARGS)
 		if (NULL == n->next || NULL == n->next->child)
 			p->flags |= TERMP_DANGLE;
 		break;
-	case (MDOC_Column):
+	case (LIST_column):
 		if (MDOC_HEAD == n->type) {
 			assert(n->next);
 			if (MDOC_BODY == n->next->type)
@@ -920,7 +878,7 @@ termp_it_pre(DECL_ARGS)
 				p->flags |= TERMP_NOLPAD;
 		}
 		break;
-	case (MDOC_Diag):
+	case (LIST_diag):
 		if (MDOC_HEAD == n->type)
 			p->flags |= TERMP_NOBREAK;
 		break;
@@ -937,7 +895,7 @@ termp_it_pre(DECL_ARGS)
 	p->offset += offset;
 
 	switch (type) {
-	case (MDOC_Hang):
+	case (LIST_hang):
 		/*
 		 * Same stipulation as above, regarding `-hang'.  We
 		 * don't want to recalculate rmargin and offsets when
@@ -948,22 +906,22 @@ termp_it_pre(DECL_ARGS)
 				 MDOC_Bd == n->next->child->tok))
 			break;
 		/* FALLTHROUGH */
-	case (MDOC_Bullet):
+	case (LIST_bullet):
 		/* FALLTHROUGH */
-	case (MDOC_Dash):
+	case (LIST_dash):
 		/* FALLTHROUGH */
-	case (MDOC_Enum):
+	case (LIST_enum):
 		/* FALLTHROUGH */
-	case (MDOC_Hyphen):
+	case (LIST_hyphen):
 		/* FALLTHROUGH */
-	case (MDOC_Tag):
+	case (LIST_tag):
 		assert(width);
 		if (MDOC_HEAD == n->type)
 			p->rmargin = p->offset + width;
 		else 
 			p->offset += width;
 		break;
-	case (MDOC_Column):
+	case (LIST_column):
 		assert(width);
 		p->rmargin = p->offset + width;
 		/* 
@@ -986,19 +944,19 @@ termp_it_pre(DECL_ARGS)
 
 	if (MDOC_HEAD == n->type)
 		switch (type) {
-		case (MDOC_Bullet):
+		case (LIST_bullet):
 			term_fontpush(p, TERMFONT_BOLD);
 			term_word(p, "\\[bu]");
 			term_fontpop(p);
 			break;
-		case (MDOC_Dash):
+		case (LIST_dash):
 			/* FALLTHROUGH */
-		case (MDOC_Hyphen):
+		case (LIST_hyphen):
 			term_fontpush(p, TERMFONT_BOLD);
 			term_word(p, "\\(hy");
 			term_fontpop(p);
 			break;
-		case (MDOC_Enum):
+		case (LIST_enum):
 			(pair->ppair->ppair->count)++;
 			snprintf(buf, sizeof(buf), "%d.", 
 					pair->ppair->ppair->count);
@@ -1013,19 +971,19 @@ termp_it_pre(DECL_ARGS)
 	 */
 
 	switch (type) {
-	case (MDOC_Bullet):
+	case (LIST_bullet):
 		/* FALLTHROUGH */
-	case (MDOC_Item):
+	case (LIST_item):
 		/* FALLTHROUGH */
-	case (MDOC_Dash):
+	case (LIST_dash):
 		/* FALLTHROUGH */
-	case (MDOC_Hyphen):
+	case (LIST_hyphen):
 		/* FALLTHROUGH */
-	case (MDOC_Enum):
+	case (LIST_enum):
 		if (MDOC_HEAD == n->type)
 			return(0);
 		break;
-	case (MDOC_Column):
+	case (LIST_column):
 		if (MDOC_BODY == n->type)
 			return(0);
 		break;
@@ -1041,24 +999,23 @@ termp_it_pre(DECL_ARGS)
 static void
 termp_it_post(DECL_ARGS)
 {
-	int		   type;
+	enum mdoc_list	   type;
 
 	if (MDOC_BLOCK == n->type)
 		return;
 
-	type = arg_listtype(n->parent->parent->parent);
-	assert(-1 != type);
+	type = n->parent->parent->parent->data.list;
 
 	switch (type) {
-	case (MDOC_Item):
+	case (LIST_item):
 		/* FALLTHROUGH */
-	case (MDOC_Diag):
+	case (LIST_diag):
 		/* FALLTHROUGH */
-	case (MDOC_Inset):
+	case (LIST_inset):
 		if (MDOC_BODY == n->type)
 			term_flushln(p);
 		break;
-	case (MDOC_Column):
+	case (LIST_column):
 		if (MDOC_HEAD == n->type)
 			term_flushln(p);
 		break;

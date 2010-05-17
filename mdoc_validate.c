@@ -568,27 +568,19 @@ pre_bl(PRE_ARGS)
 		case (MDOC_Inset):
 			/* FALLTHROUGH */
 		case (MDOC_Column):
-			/*
-			 * Note that if a duplicate is detected, we
-			 * remove the duplicate instead of passing it
-			 * over.  If we don't do this, mdoc_action will
-			 * become confused when it scans over multiple
-			 * types whilst setting its bitmasks.
-			 *
-			 * FIXME: this should occur in mdoc_action.c.
-			 */
-			if (type >= 0) {
-				if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTREP))
-					return(0);
-				mdoc_argn_free(n->args, pos);
+			if (type < 0) {
+				type = n->args->argv[pos].arg;
 				break;
 			}
-			type = n->args->argv[pos].arg;
-			break;
+			if (mdoc_nmsg(mdoc, n, MANDOCERR_LISTREP))
+				break;
+			return(0);
 		case (MDOC_Compact):
-			if (type < 0 && ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTFIRST))
-				return(0);
-			break;
+			if (type >= 0)
+				break;
+			if (mdoc_nmsg(mdoc, n, MANDOCERR_LISTFIRST))
+				break;
+			return(0);
 		case (MDOC_Width):
 			if (width >= 0)
 				if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_ARGVREP))
