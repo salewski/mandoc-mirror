@@ -1,0 +1,5 @@
+.TH AT-5 1 "2010-05-17" "MANDOC"
+.AT 5
+.SH DESCRIPTION
+.SS Test case for AT
+foo

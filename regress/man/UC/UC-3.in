@@ -1,0 +1,5 @@
+.TH UC-3 1 "2010-05-17" "MANDOC"
+.UC 3
+.SH DESCRIPTION
+.SS Test case for UC
+foo
