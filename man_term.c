@@ -865,6 +865,8 @@ print_man_foot(struct termp *p, const struct man_meta *meta)
 	time2a(meta->date, buf, DATESIZ);
 
 	term_vspace(p);
+	term_vspace(p);
+	term_vspace(p);
 
 	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
 	p->rmargin = p->maxrmargin - strlen(buf);
