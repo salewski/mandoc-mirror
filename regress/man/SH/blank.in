@@ -1,0 +1,19 @@
+.TH SH-blank 1 "2010-05-17" "MANDOC"
+.SH DESCRIPTION
+.SH NO EMPTY LINE BEFORE THIS
+.AT
+.SH NO EMPTY LINE BEFORE THIS EITHER
+.SS Before this, yes
+.SS Before this, no
+foo
+.SS Before this, one
+xxx
+.PP
+.SS Before this, two empty lines
+.PP
+.SS Before this, no
+xxx
+.SS Before this, one
+.IP foo
+.SS Before this, yes
+xxx
