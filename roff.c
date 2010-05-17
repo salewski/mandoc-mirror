@@ -340,7 +340,22 @@ roff_cblock(ROFF_ARGS)
 		return(ROFF_IGN);
 	}
 
-	if (ROFF_ig != r->last->tok) {
+	switch (r->last->tok) {
+	case (ROFF_am):
+		/* FALLTHROUGH */
+	case (ROFF_ami):
+		/* FALLTHROUGH */
+	case (ROFF_am1):
+		/* FALLTHROUGH */
+	case (ROFF_de):
+		/* FALLTHROUGH */
+	case (ROFF_dei):
+		/* FALLTHROUGH */
+	case (ROFF_de1):
+		/* FALLTHROUGH */
+	case (ROFF_ig):
+		break;
+	default:
 		if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
 			return(ROFF_ERR);
 		return(ROFF_IGN);
