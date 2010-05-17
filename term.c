@@ -133,7 +133,7 @@ term_flushln(struct termp *p)
 	int		 i;     /* current input position in p->buf */
 	size_t		 vis;   /* current visual position on output */
 	size_t		 vbl;   /* number of blanks to prepend to output */
-	size_t		 vsz;   /* visual characters to write to output */
+	size_t		 vend;	/* end of word visual position on output */
 	size_t		 bp;    /* visual right border position */
 	int		 j;     /* temporary loop index */
 	size_t		 maxvis, mmax;
@@ -156,25 +156,19 @@ term_flushln(struct termp *p)
 
 	bp = TERMP_NOBREAK & p->flags ? mmax : maxvis;
 
+	/*
+	 * Indent the first line of a paragraph.
+	 */
+	vbl = p->flags & TERMP_NOLPAD ? 0 : p->offset;
+
 	/* 
 	 * FIXME: if bp is zero, we still output the first word before
 	 * breaking the line.
 	 */
 
-	vis = 0;
+	vis = vend = i = 0;
+	while (i < (int)p->col) {
 
-	/*
-	 * If in the standard case (left-justified), then begin with our
-	 * indentation, otherwise (columns, etc.) just start spitting
-	 * out text.
-	 */
-
-	if ( ! (p->flags & TERMP_NOLPAD))
-		/* LINTED */
-		for (j = 0; j < (int)p->offset; j++)
-			putchar(' ');
-
-	for (i = 0; i < (int)p->col; i++) {
 		/*
 		 * Count up visible word characters.  Control sequences
 		 * (starting with the CSI) aren't counted.  A space
@@ -183,39 +177,28 @@ term_flushln(struct termp *p)
 		 */
 
 		/* LINTED */
-		for (j = i, vsz = 0; j < (int)p->col; j++) {
+		for (j = i; j < (int)p->col; j++) {
 			if (j && ' ' == p->buf[j]) 
 				break;
 			if (8 == p->buf[j])
-				vsz--;
+				vend--;
 			else
-				vsz++;
+				vend++;
 		}
 
 		/*
-		 * Choose the number of blanks to prepend: no blank at the
-		 * beginning of a line, one between words -- but do not
-		 * actually write them yet.
-		 */
-
-		vbl = (size_t)(0 == vis ? 0 : 1);
-
-		/*
 		 * Find out whether we would exceed the right margin.
-		 * If so, break to the next line.  Otherwise, write the chosen
-		 * number of blanks.
+		 * If so, break to the next line.
 		 */
-
-		if (vis && vis + vbl + vsz > bp) {
+		if (vend > bp && vis > 0) {
+			vend -= vis;
 			putchar('\n');
 			if (TERMP_NOBREAK & p->flags) {
 				for (j = 0; j < (int)p->rmargin; j++)
 					putchar(' ');
-				vis = p->rmargin - p->offset;
+				vend += p->rmargin - p->offset;
 			} else {
-				for (j = 0; j < (int)p->offset; j++)
-					putchar(' ');
-				vis = 0;
+				vbl = p->offset;
 			}
 
 			/* Remove the p->overstep width. */
@@ -223,22 +206,36 @@ term_flushln(struct termp *p)
 			bp += (int)/* LINTED */
 				p->overstep;
 			p->overstep = 0;
-		} else {
-			for (j = 0; j < (int)vbl; j++)
-				putchar(' ');
-			vis += vbl;
 		}
 
 		/* Write out the [remaining] word. */
-		for ( ; i < (int)p->col; i++)
-			if (' ' == p->buf[i])
+		for ( ; i < (int)p->col; i++) {
+			if (' ' == p->buf[i]) {
+				while (' ' == p->buf[i]) {
+					vbl++;
+					i++;
+				}
 				break;
-			else if (ASCII_NBRSP == p->buf[i])
-				putchar(' ');
-			else
-				putchar(p->buf[i]);
+			}
+			if (ASCII_NBRSP == p->buf[i]) {
+				vbl++;
+				continue;
+			}
 
-		vis += vsz;
+			/*
+			 * Now we definitely know there will be
+			 * printable characters to output,
+			 * so write preceding white space now.
+			 */
+			if (vbl) {
+				for (j = 0; j < (int)vbl; j++)
+					putchar(' ');
+				vbl = 0;
+			}
+			putchar(p->buf[i]);
+		}
+		vend += vbl;
+		vis = vend;
 	}
 
 	p->col = 0;
