@@ -1,0 +1,16 @@
+.\" Copyright (c) 1991, 1992, 1993, 1994 Free Software Foundation    -*-Text-*-
+.\" See section COPYING for conditions for redistribution
+.\"
+.\" Set up \*(lq, \*(rq if -man hasn't already set it up.
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+garglebats!
+.ig .
+foo
+..
+bar
