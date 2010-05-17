@@ -96,7 +96,7 @@ HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
 	     libmandoc.h html.h chars.h out.h main.h roff.h
 
 GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml manuals.7.sgml \
-	     mandoc_char.7.sgml man.7.sgml man.3.sgml
+	     mandoc_char.7.sgml man.7.sgml man.3.sgml roff.7.sgml
 
 SGMLS	   = index.sgml
 
@@ -105,10 +105,10 @@ HTMLS	   = ChangeLog.html index.html man.h.html mdoc.h.html
 XSLS	   = ChangeLog.xsl
 
 GHTMLS	   = mandoc.1.html mdoc.3.html man.3.html mdoc.7.html \
-	     man.7.html mandoc_char.7.html manuals.7.html
+	     man.7.html mandoc_char.7.html manuals.7.html roff.7.html
 
 TEXTS	   = mandoc.1.txt mdoc.3.txt man.3.txt mdoc.7.txt man.7.txt \
-	     mandoc_char.7.txt manuals.7.txt ChangeLog.txt
+	     mandoc_char.7.txt manuals.7.txt ChangeLog.txt roff.7.txt
 
 EXAMPLES   = example.style.css
 
@@ -120,8 +120,8 @@ MD5S	   = mdocml-$(VERSION).md5
 
 TARGZS	   = mdocml-$(VERSION).tar.gz
 
-MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7 mandoc_char.7 \
-	     man.7 man.3
+MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7 mandoc_char.7 man.7 \
+	     man.3 roff.7
 
 BINS	   = mandoc
 
@@ -169,13 +169,14 @@ install:
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_PROGRAM) mandoc $(DESTDIR)$(BINDIR)
 	$(INSTALL_MAN) mandoc.1 $(DESTDIR)$(MANDIR)/man1
-	$(INSTALL_MAN) man.7 mdoc.7 mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
+	$(INSTALL_MAN) man.7 mdoc.7 roff.7 mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
 
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/mandoc
 	rm -f $(DESTDIR)$(MANDIR)/man1/mandoc.1
 	rm -f $(DESTDIR)$(MANDIR)/man7/mdoc.7
+	rm -f $(DESTDIR)$(MANDIR)/man7/roff.7
 	rm -f $(DESTDIR)$(MANDIR)/man7/man.7
 	rm -f $(DESTDIR)$(MANDIR)/man7/mandoc_char.7
 	rm -f $(DESTDIR)$(EXAMPLEDIR)/example.style.css

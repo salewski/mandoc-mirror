@@ -95,6 +95,30 @@ The syntax of this macro is the same as that of
 .Sx \&ig ,
 except that a leading argument must be specified.
 It is ignored, as are its children.
+.Ss \&el
+The
+.Qq else
+half of an if/else conditional.
+Pops a result off the stack of conditional evaluations pushed by
+.Sx \&ie
+and uses it as its conditional.
+If no stack entries are present (e.g., due to no prior
+.Sx \&ie
+calls)
+then false is assumed.
+The syntax of this macro is similar to
+.Sx \&if
+except that the conditional is missing.
+.Ss \&ie
+The
+.Qq if
+half of an if/else conditional.
+The result of the conditional is pushed into a stack used by subsequent
+invocations of
+.Sx \&el ,
+which may be separated by any intervening input (or not exist at all).
+Its syntax is equivalent to
+.Sx \&if .
 .Ss \&if
 Begins a conditional that always evaluates to false.
 If a conditional is false, its children are not processed, but are
