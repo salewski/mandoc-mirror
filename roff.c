@@ -30,15 +30,17 @@
 	('.' == (c) || '\'' == (c))
 
 enum	rofft {
+	ROFF_am,
+	ROFF_ami,
+	ROFF_am1,
+	ROFF_de,
+	ROFF_dei,
+	ROFF_de1,
 	ROFF_if,
 	ROFF_ig,
 	ROFF_cblock,
 	ROFF_ccond,
 #if 0
-	ROFF_am,
-	ROFF_ami,
-	ROFF_de,
-	ROFF_dei,
 	ROFF_ie,
 	ROFF_el,
 #endif
@@ -86,18 +88,24 @@ struct	roffmac {
 #define	ROFFMAC_STRUCT	(1 << 0) /* always interpret */
 };
 
+static	enum rofferr	 roff_block(ROFF_ARGS);
+static	enum rofferr	 roff_block_text(ROFF_ARGS);
+static	enum rofferr	 roff_block_sub(ROFF_ARGS);
+static	enum rofferr	 roff_cblock(ROFF_ARGS);
+static	enum rofferr	 roff_ccond(ROFF_ARGS);
 static	enum rofferr	 roff_if(ROFF_ARGS);
 static	enum rofferr	 roff_if_text(ROFF_ARGS);
 static	enum rofferr	 roff_if_sub(ROFF_ARGS);
-static	enum rofferr	 roff_ig(ROFF_ARGS);
-static	enum rofferr	 roff_ig_text(ROFF_ARGS);
-static	enum rofferr	 roff_ig_sub(ROFF_ARGS);
-static	enum rofferr	 roff_cblock(ROFF_ARGS);
-static	enum rofferr	 roff_ccond(ROFF_ARGS);
 
 const	struct roffmac	 roffs[ROFF_MAX] = {
+	{ "am", roff_block, roff_block_text, roff_block_sub, 0 },
+	{ "ami", roff_block, roff_block_text, roff_block_sub, 0 },
+	{ "am1", roff_block, roff_block_text, roff_block_sub, 0 },
+	{ "de", roff_block, roff_block_text, roff_block_sub, 0 },
+	{ "dei", roff_block, roff_block_text, roff_block_sub, 0 },
+	{ "de1", roff_block, roff_block_text, roff_block_sub, 0 },
 	{ "if", roff_if, roff_if_text, roff_if_sub, ROFFMAC_STRUCT },
-	{ "ig", roff_ig, roff_ig_text, roff_ig_sub, 0 },
+	{ "ig", roff_block, roff_block_text, roff_block_sub, 0 },
 	{ ".", roff_cblock, NULL, NULL, 0 },
 	{ "\\}", roff_ccond, NULL, NULL, 0 },
 };
@@ -396,10 +404,21 @@ roff_ccond(ROFF_ARGS)
 
 /* ARGSUSED */
 static enum rofferr
-roff_ig(ROFF_ARGS)
+roff_block(ROFF_ARGS)
 {
 	int		sv;
 	size_t		sz;
+
+	if (ROFF_ig != tok && '\0' == (*bufp)[pos]) {
+		if ( ! (*r->msg)(MANDOCERR_NOARGS, r->data, ln, ppos, NULL))
+			return(ROFF_ERR);
+		return(ROFF_IGN);
+	} else if (ROFF_ig != tok) {
+		while ((*bufp)[pos] && ' ' != (*bufp)[pos])
+			pos++;
+		while (' ' == (*bufp)[pos])
+			pos++;
+	}
 
 	if ( ! roffnode_push(r, tok, ln, ppos))
 		return(ROFF_ERR);
@@ -474,7 +493,7 @@ roff_if_sub(ROFF_ARGS)
 
 /* ARGSUSED */
 static enum rofferr
-roff_ig_sub(ROFF_ARGS)
+roff_block_sub(ROFF_ARGS)
 {
 	enum rofft	t;
 	int		i, j;
@@ -530,7 +549,7 @@ roff_ig_sub(ROFF_ARGS)
 
 /* ARGSUSED */
 static enum rofferr
-roff_ig_text(ROFF_ARGS)
+roff_block_text(ROFF_ARGS)
 {
 
 	return(ROFF_IGN);
