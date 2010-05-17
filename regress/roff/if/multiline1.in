@@ -6,7 +6,7 @@
 .Nd bar
 .Sh DESCRIPTION
 123
-.if t \
+.if 0 \
 \{\
 asdf
 .\}

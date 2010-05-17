@@ -8,6 +8,6 @@
 a
 .ig if
 asdf
-.if t \
+.if 0 \
 b
 c

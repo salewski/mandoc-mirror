@@ -10,7 +10,7 @@
 .Nd bar
 .Sh DESCRIPTION
 garglebats!
-.if t \
+.if 0 \
 .ig .
 foo
 ..

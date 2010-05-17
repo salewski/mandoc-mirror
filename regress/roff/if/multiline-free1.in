@@ -5,7 +5,7 @@
 .Nm foo
 .Nd bar
 .Sh DESCRIPTION
-.if t \{\
+.if 0 \{\
 there  \\}   dude
 .\}
 fdsa

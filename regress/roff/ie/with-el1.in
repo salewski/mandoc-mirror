@@ -5,8 +5,11 @@
 .Nm foo
 .Nd bar
 .Sh DESCRIPTION
-123
-.if 0 \{\
 asdf
+.ie 0 \{\
+1
+2
 .\}
+.el \
+3
 fdsa

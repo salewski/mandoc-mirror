@@ -7,5 +7,5 @@
 .Sh DESCRIPTION
 123
 .\" Note this has no whitespace...
-.if t
+.if 0
 asdf
