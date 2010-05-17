@@ -27,6 +27,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include "mandoc.h"
 #include "libman.h"
 #include "libmandoc.h"
 
@@ -151,17 +152,18 @@ check_root(CHKARGS)
 {
 
 	if (MAN_BLINE & m->flags)
-		return(man_nwarn(m, n, WEXITSCOPE));
+		return(man_nmsg(m, n, MANDOCERR_SCOPEEXIT));
 	if (MAN_ELINE & m->flags)
-		return(man_nwarn(m, n, WEXITSCOPE));
+		return(man_nmsg(m, n, MANDOCERR_SCOPEEXIT));
 
 	m->flags &= ~MAN_BLINE;
 	m->flags &= ~MAN_ELINE;
 
-	if (NULL == m->first->child)
-		return(man_nerr(m, n, WNODATA));
-	if (NULL == m->meta.title) {
-		if ( ! man_nwarn(m, n, WNOTITLE))
+	if (NULL == m->first->child) {
+		man_nmsg(m, n, MANDOCERR_NODOCBODY);
+		return(0);
+	} else if (NULL == m->meta.title) {
+		if ( ! man_nmsg(m, n, MANDOCERR_NOTITLE))
 			return(0);
 		/*
 		 * If a title hasn't been set, do so now (by
@@ -184,12 +186,15 @@ check_title(CHKARGS)
 	const char	*p;
 
 	assert(n->child);
-	if ('\0' == *n->child->string)
-		return(man_nerr(m, n, WNOTITLE));
+	/* FIXME: is this sufficient? */
+	if ('\0' == *n->child->string) {
+		man_nmsg(m, n, MANDOCERR_SYNTARGCOUNT);
+		return(0);
+	}
 
 	for (p = n->child->string; '\0' != *p; p++)
 		if (isalpha((u_char)*p) && ! isupper((u_char)*p))
-			if ( ! man_nwarn(m, n, WTITLECASE))
+			if ( ! man_nmsg(m, n, MANDOCERR_UPPERCASE))
 				return(0);
 
 	return(1);
@@ -212,17 +217,16 @@ check_text(CHKARGS)
 				pos += c - 1;
 				continue;
 			}
-			if ( ! (MAN_IGN_ESCAPE & m->pflags))
-				return(man_perr(m, n->line, pos, WESCAPE));
-			if ( ! man_pwarn(m, n->line, pos, WESCAPE))
-				return(0);
-			continue;
+
+			c = man_pmsg(m, n->line, pos, MANDOCERR_BADESCAPE);
+			if ( ! (MAN_IGN_ESCAPE & m->pflags) && ! c)
+				return(c);
 		}
 
 		if ('\t' == *p || isprint((u_char)*p)) 
 			continue;
-
-		return(man_pwarn(m, n->line, pos, WNPRINT));
+		if ( ! man_pmsg(m, n->line, pos, MANDOCERR_BADCHAR))
+			return(0);
 	}
 
 	return(1);
@@ -235,9 +239,10 @@ check_##name(CHKARGS) \
 { \
 	if (n->nchild ineq (x)) \
 		return(1); \
-	return(man_verr(m, n->line, n->pos, \
-			"expected line arguments %s %d, have %d", \
-			#ineq, (x), n->nchild)); \
+	man_vmsg(m, MANDOCERR_SYNTARGCOUNT, n->line, n->pos, \
+			"line arguments %s %d (have %d)", \
+			#ineq, (x), n->nchild); \
+	return(0); \
 }
 
 INEQ_DEFINE(0, ==, eq0)
@@ -250,10 +255,12 @@ static int
 check_sec(CHKARGS)
 {
 
-	if (MAN_BODY == n->type && 0 == n->nchild)
-		return(man_nwarn(m, n, WBODYARGS));
-	if (MAN_HEAD == n->type && 0 == n->nchild)
-		return(man_nerr(m, n, WHEADARGS));
+	if (MAN_HEAD == n->type && 0 == n->nchild) {
+		man_nmsg(m, n, MANDOCERR_SYNTARGCOUNT);
+		return(0);
+	} else if (MAN_BODY == n->type && 0 == n->nchild)
+		return(man_nmsg(m, n, MANDOCERR_NOBODY));
+
 	return(1);
 }
 
@@ -263,7 +270,7 @@ check_part(CHKARGS)
 {
 
 	if (MAN_BODY == n->type && 0 == n->nchild)
-		return(man_nwarn(m, n, WBODYARGS));
+		return(man_nmsg(m, n, MANDOCERR_NOBODY));
 	return(1);
 }
 
@@ -284,7 +291,7 @@ check_par(CHKARGS)
 		default:
 			if (n->nchild)
 				break;
-			return(man_nwarn(m, n, WBODYARGS));
+			return(man_nmsg(m, n, MANDOCERR_NOBODY));
 		}
 	if (MAN_HEAD == n->type)
 		switch (n->tok) {
@@ -295,11 +302,11 @@ check_par(CHKARGS)
 		case (MAN_LP):
 			if (0 == n->nchild)
 				break;
-			return(man_nwarn(m, n, WNHEADARGS));
+			return(man_nmsg(m, n, MANDOCERR_ARGSLOST));
 		default:
 			if (n->nchild)
 				break;
-			return(man_nwarn(m, n, WHEADARGS));
+			return(man_nmsg(m, n, MANDOCERR_NOARGS));
 		}
 
 	return(1);
@@ -311,8 +318,10 @@ check_bline(CHKARGS)
 {
 
 	assert( ! (MAN_ELINE & m->flags));
-	if (MAN_BLINE & m->flags)
-		return(man_nerr(m, n, WLNSCOPE));
+	if (MAN_BLINE & m->flags) {
+		man_nmsg(m, n, MANDOCERR_SYNTLINESCOPE);
+		return(0);
+	}
 
 	return(1);
 }

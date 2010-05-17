@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mandoc.h"
 #include "libmdoc.h"
 
 #define LINE(x, y) \

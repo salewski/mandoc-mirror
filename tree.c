@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "mandoc.h"
 #include "mdoc.h"
 #include "man.h"
 #include "main.h"

@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mandoc.h"
 #include "out.h"
 #include "man.h"
 #include "term.h"

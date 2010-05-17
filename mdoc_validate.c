@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mandoc.h"
 #include "libmdoc.h"
 #include "libmandoc.h"
 
@@ -321,8 +322,9 @@ warn_count(struct mdoc *m, const char *k,
 		int want, const char *v, int has)
 {
 
-	return(mdoc_vwarn(m, m->last->line, m->last->pos, 
-		"suggests %s %s %d (has %d)", v, k, want, has));
+	return(mdoc_vmsg(m, MANDOCERR_ARGCOUNT, 
+				m->last->line, m->last->pos, 
+				"%s %s %d (have %d)", v, k, want, has));
 }
 
 
@@ -331,8 +333,11 @@ err_count(struct mdoc *m, const char *k,
 		int want, const char *v, int has)
 {
 
-	return(mdoc_verr(m, m->last->line, m->last->pos,
-		"requires %s %s %d (has %d)", v, k, want, has));
+	mdoc_vmsg(m, MANDOCERR_SYNTARGCOUNT, 
+			m->last->line, m->last->pos, 
+			"%s %s %d (have %d)", 
+			v, k, want, has);
+	return(0);
 }
 
 
@@ -405,7 +410,7 @@ check_stdarg(PRE_ARGS)
 	if (n->args && 1 == n->args->argc)
 		if (MDOC_Std == n->args->argv[0].arg)
 			return(1);
-	return(mdoc_nwarn(mdoc, n, EARGVAL));
+	return(mdoc_nmsg(mdoc, n, MANDOCERR_NOARGV));
 }
 
 
@@ -437,10 +442,10 @@ check_argv(struct mdoc *m, const struct mdoc_node *n,
 			return(0);
 
 	if (MDOC_Std == v->arg) {
-		/* `Nm' name must be set. */
 		if (v->sz || m->meta.name)
 			return(1);
-		return(mdoc_nerr(m, n, ENAME));
+		if ( ! mdoc_nmsg(m, n, MANDOCERR_NONAME))
+			return(0);
 	}
 
 	return(1);
@@ -455,10 +460,10 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 	for ( ; *p; p++, pos++) {
 		if ('\t' == *p) {
 			if ( ! (MDOC_LITERAL & mdoc->flags))
-				if ( ! mdoc_pwarn(mdoc, line, pos, EPRINT))
+				if ( ! mdoc_pmsg(mdoc, line, pos, MANDOCERR_BADCHAR))
 					return(0);
 		} else if ( ! isprint((u_char)*p))
-			if ( ! mdoc_pwarn(mdoc, line, pos, EPRINT))
+			if ( ! mdoc_pmsg(mdoc, line, pos, MANDOCERR_BADCHAR))
 				return(0);
 
 		if ('\\' != *p)
@@ -470,10 +475,10 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 			pos += c - 1;
 			continue;
 		}
-		if ( ! (MDOC_IGN_ESCAPE & mdoc->pflags))
-			return(mdoc_perr(mdoc, line, pos, EESCAPE));
-		if ( ! mdoc_pwarn(mdoc, line, pos, EESCAPE))
-			return(0);
+
+		c = mdoc_pmsg(mdoc, line, pos, MANDOCERR_BADESCAPE);
+		if ( ! (MDOC_IGN_ESCAPE & mdoc->pflags) && ! c)
+			return(c);
 	}
 
 	return(1);
@@ -491,8 +496,11 @@ check_parent(PRE_ARGS, enum mdoct tok, enum mdoc_type t)
 			(t == n->parent->type))
 		return(1);
 
-	return(mdoc_verr(mdoc, n->line, n->pos, "require parent %s",
-		MDOC_ROOT == t ? "<root>" : mdoc_macronames[tok]));
+	mdoc_vmsg(mdoc, MANDOCERR_SYNTCHILD,
+				n->line, n->pos, "want parent %s",
+				MDOC_ROOT == t ? "<root>" : 
+					mdoc_macronames[tok]);
+	return(0);
 }
 
 
@@ -515,7 +523,8 @@ pre_display(PRE_ARGS)
 	if (NULL == node)
 		return(1);
 
-	return(mdoc_nerr(mdoc, n, ENESTDISP));
+	mdoc_nmsg(mdoc, n, MANDOCERR_NESTEDDISP);
+	return(0);
 }
 
 
@@ -526,8 +535,10 @@ pre_bl(PRE_ARGS)
 
 	if (MDOC_BLOCK != n->type)
 		return(1);
-	if (NULL == n->args)
-		return(mdoc_nerr(mdoc, n, ELISTTYPE));
+	if (NULL == n->args) {
+		mdoc_nmsg(mdoc, n, MANDOCERR_LISTTYPE);
+		return(0);
+	}
 
 	/* Make sure that only one type of list is specified.  */
 
@@ -567,7 +578,7 @@ pre_bl(PRE_ARGS)
 			 * FIXME: this should occur in mdoc_action.c.
 			 */
 			if (type >= 0) {
-				if ( ! mdoc_nwarn(mdoc, n, EMULTILIST))
+				if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTREP))
 					return(0);
 				mdoc_argn_free(n->args, pos);
 				break;
@@ -575,20 +586,22 @@ pre_bl(PRE_ARGS)
 			type = n->args->argv[pos].arg;
 			break;
 		case (MDOC_Compact):
-			if (type < 0 && ! mdoc_nwarn(mdoc, n, ENOTYPE))
+			if (type < 0 && ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTFIRST))
 				return(0);
 			break;
 		case (MDOC_Width):
 			if (width >= 0)
-				return(mdoc_nerr(mdoc, n, EARGREP));
-			if (type < 0 && ! mdoc_nwarn(mdoc, n, ENOTYPE))
+				if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_ARGVREP))
+					return(0);
+			if (type < 0 && ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTFIRST))
 				return(0);
 			width = n->args->argv[pos].arg;
 			break;
 		case (MDOC_Offset):
 			if (offset >= 0)
-				return(mdoc_nerr(mdoc, n, EARGREP));
-			if (type < 0 && ! mdoc_nwarn(mdoc, n, ENOTYPE))
+				if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_ARGVREP))
+					return(0);
+			if (type < 0 && ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTFIRST))
 				return(0);
 			offset = n->args->argv[pos].arg;
 			break;
@@ -596,8 +609,10 @@ pre_bl(PRE_ARGS)
 			break;
 		}
 
-	if (type < 0)
-		return(mdoc_nerr(mdoc, n, ELISTTYPE));
+	if (type < 0) {
+		mdoc_nmsg(mdoc, n, MANDOCERR_LISTTYPE);
+		return(0);
+	}
 
 	/* 
 	 * Validate the width field.  Some list types don't need width
@@ -607,7 +622,7 @@ pre_bl(PRE_ARGS)
 
 	switch (type) {
 	case (MDOC_Tag):
-		if (width < 0 && ! mdoc_nwarn(mdoc, n, EMISSWIDTH))
+		if (width < 0 && ! mdoc_nmsg(mdoc, n, MANDOCERR_NOWIDTHARG))
 			return(0);
 		break;
 	case (MDOC_Column):
@@ -619,7 +634,7 @@ pre_bl(PRE_ARGS)
 	case (MDOC_Inset):
 		/* FALLTHROUGH */
 	case (MDOC_Item):
-		if (width >= 0 && ! mdoc_nwarn(mdoc, n, ENOWIDTH))
+		if (width >= 0 && ! mdoc_nmsg(mdoc, n, MANDOCERR_WIDTHARG))
 			return(0);
 		break;
 	default:
@@ -637,8 +652,10 @@ pre_bd(PRE_ARGS)
 
 	if (MDOC_BLOCK != n->type)
 		return(1);
-	if (NULL == n->args) 
-		return(mdoc_nerr(mdoc, n, EDISPTYPE));
+	if (NULL == n->args) {
+		mdoc_nmsg(mdoc, n, MANDOCERR_DISPTYPE);
+		return(0);
+	}
 
 	/* Make sure that only one type of display is specified.  */
 
@@ -657,14 +674,17 @@ pre_bd(PRE_ARGS)
 		case (MDOC_Literal):
 			if (0 == type++) 
 				break;
-			return(mdoc_nerr(mdoc, n, EMULTIDISP));
+			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_DISPREP))
+				return(0);
+			break;
 		default:
 			break;
 		}
 
 	if (type)
 		return(1);
-	return(mdoc_nerr(mdoc, n, EDISPTYPE));
+	mdoc_nmsg(mdoc, n, MANDOCERR_DISPTYPE);
+	return(0);
 }
 
 
@@ -694,6 +714,10 @@ pre_it(PRE_ARGS)
 
 	if (MDOC_BLOCK != n->type)
 		return(1);
+	/* 
+	 * FIXME: this can probably be lifted if we make the It into
+	 * something else on-the-fly?
+	 */
 	return(check_parent(mdoc, n, MDOC_Bl, MDOC_BODY));
 }
 
@@ -704,8 +728,11 @@ pre_an(PRE_ARGS)
 
 	if (NULL == n->args || 1 == n->args->argc)
 		return(1);
-	return(mdoc_verr(mdoc, n->line, n->pos, 
-				"only one argument allowed"));
+	mdoc_vmsg(mdoc, MANDOCERR_SYNTARGCOUNT, 
+				n->line, n->pos,
+				"line arguments == 1 (have %d)",
+				n->args->argc);
+	return(0);
 }
 
 
@@ -724,10 +751,10 @@ pre_dt(PRE_ARGS)
 	/* FIXME: make sure is capitalised. */
 
 	if (0 == mdoc->meta.date || mdoc->meta.os)
-		if ( ! mdoc_nwarn(mdoc, n, EPROLOOO))
+		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_PROLOGOOO))
 			return(0);
 	if (mdoc->meta.title)
-		if ( ! mdoc_nwarn(mdoc, n, EPROLREP))
+		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_PROLOGREP))
 			return(0);
 	return(1);
 }
@@ -738,10 +765,10 @@ pre_os(PRE_ARGS)
 {
 
 	if (NULL == mdoc->meta.title || 0 == mdoc->meta.date)
-		if ( ! mdoc_nwarn(mdoc, n, EPROLOOO))
+		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_PROLOGOOO))
 			return(0);
 	if (mdoc->meta.os)
-		if ( ! mdoc_nwarn(mdoc, n, EPROLREP))
+		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_PROLOGREP))
 			return(0);
 	return(1);
 }
@@ -752,10 +779,10 @@ pre_dd(PRE_ARGS)
 {
 
 	if (mdoc->meta.title || mdoc->meta.os)
-		if ( ! mdoc_nwarn(mdoc, n, EPROLOOO))
+		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_PROLOGOOO))
 			return(0);
 	if (mdoc->meta.date)
-		if ( ! mdoc_nwarn(mdoc, n, EPROLREP))
+		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_PROLOGREP))
 			return(0);
 	return(1);
 }
@@ -772,13 +799,18 @@ post_bf(POST_ARGS)
 
 	head = mdoc->last->head;
 
-	if (mdoc->last->args && head->child)
-		return(mdoc_nerr(mdoc, mdoc->last, ELINE));
-	else if (mdoc->last->args)
+	if (mdoc->last->args && head->child) {
+		/* FIXME: this should provide a default. */
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SYNTARGVCOUNT);
+		return(0);
+	} else if (mdoc->last->args)
 		return(1);
 
-	if (NULL == head->child || MDOC_TEXT != head->child->type)
-		return(mdoc_nerr(mdoc, mdoc->last, ELINE));
+	if (NULL == head->child || MDOC_TEXT != head->child->type) {
+		/* FIXME: this should provide a default. */
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SYNTARGVCOUNT);
+		return(0);
+	}
 
 	p = head->child->string;
 
@@ -789,7 +821,8 @@ post_bf(POST_ARGS)
 	else if (0 == strcmp(p, "Sy"))
 		return(1);
 
-	return(mdoc_nerr(mdoc, head, EFONT));
+	mdoc_nmsg(mdoc, head, MANDOCERR_FONTTYPE);
+	return(0);
 }
 
 
@@ -799,7 +832,7 @@ post_lb(POST_ARGS)
 
 	if (mdoc_a2lib(mdoc->last->child->string))
 		return(1);
-	return(mdoc_nwarn(mdoc, mdoc->last, ELIB));
+	return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADLIB));
 }
 
 
@@ -822,7 +855,7 @@ post_vt(POST_ARGS)
 	
 	for (n = mdoc->last->child; n; n = n->next)
 		if (MDOC_TEXT != n->type) 
-			if ( ! mdoc_nwarn(mdoc, n, EBADCHILD))
+			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_CHILD))
 				return(0);
 
 	return(1);
@@ -837,7 +870,7 @@ post_nm(POST_ARGS)
 		return(1);
 	if (mdoc->meta.name)
 		return(1);
-	return(mdoc_nerr(mdoc, mdoc->last, ENAME));
+	return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NONAME));
 }
 
 
@@ -847,11 +880,10 @@ post_at(POST_ARGS)
 
 	if (NULL == mdoc->last->child)
 		return(1);
-	if (MDOC_TEXT != mdoc->last->child->type)
-		return(mdoc_nerr(mdoc, mdoc->last, EATT));
+	assert(MDOC_TEXT == mdoc->last->child->type);
 	if (mdoc_a2att(mdoc->last->child->string))
 		return(1);
-	return(mdoc_nwarn(mdoc, mdoc->last, EATT));
+	return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADATT));
 }
 
 
@@ -862,12 +894,12 @@ post_an(POST_ARGS)
 	if (mdoc->last->args) {
 		if (NULL == mdoc->last->child)
 			return(1);
-		return(mdoc_nerr(mdoc, mdoc->last, ENOLINE));
+		return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_ARGCOUNT));
 	}
 
 	if (mdoc->last->child)
 		return(1);
-	return(mdoc_nerr(mdoc, mdoc->last, ELINE));
+	return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOARGS));
 }
 
 
@@ -881,8 +913,10 @@ post_it(POST_ARGS)
 		return(1);
 
 	n = mdoc->last->parent->parent;
-	if (NULL == n->args)
-		return(mdoc_nerr(mdoc, mdoc->last, ELISTTYPE));
+	if (NULL == n->args) {
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_LISTTYPE);
+		return(0);
+	}
 
 	/* Some types require block-head, some not. */
 
@@ -919,13 +953,15 @@ post_it(POST_ARGS)
 			break;
 		}
 
-	if (-1 == type)
-		return(mdoc_nerr(mdoc, mdoc->last, ELISTTYPE));
+	if (-1 == type) {
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_LISTTYPE);
+		return(0);
+	}
 
 	switch (type) {
 	case (MDOC_Tag):
 		if (NULL == mdoc->last->head->child)
-			if ( ! mdoc_nwarn(mdoc, mdoc->last, ELINE))
+			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOARGS))
 				return(0);
 		break;
 	case (MDOC_Hang):
@@ -936,10 +972,10 @@ post_it(POST_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Diag):
 		if (NULL == mdoc->last->head->child)
-			if ( ! mdoc_nwarn(mdoc, mdoc->last, ELINE))
+			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOARGS))
 				return(0);
 		if (NULL == mdoc->last->body->child)
-			if ( ! mdoc_nwarn(mdoc, mdoc->last, EMULTILINE))
+			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOBODY))
 				return(0);
 		break;
 	case (MDOC_Bullet):
@@ -952,36 +988,38 @@ post_it(POST_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Item):
 		if (mdoc->last->head->child)
-			if ( ! mdoc_nwarn(mdoc, mdoc->last, ENOLINE))
+			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_ARGSLOST))
 				return(0);
 		if (NULL == mdoc->last->body->child)
-			if ( ! mdoc_nwarn(mdoc, mdoc->last, EMULTILINE))
+			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOBODY))
 				return(0);
 		break;
 	case (MDOC_Column):
 		if (NULL == mdoc->last->head->child)
-			if ( ! mdoc_nwarn(mdoc, mdoc->last, ELINE))
+			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOARGS))
 				return(0);
 		if (mdoc->last->body->child)
-			if ( ! mdoc_nwarn(mdoc, mdoc->last, ENOMULTILINE))
+			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BODYLOST))
 				return(0);
 		c = mdoc->last->child;
 		for (i = 0; c && MDOC_HEAD == c->type; c = c->next)
 			i++;
 
 		if (i < cols) {
-			if ( ! mdoc_vwarn(mdoc, mdoc->last->line, 
-					mdoc->last->pos, "column "
-					"mismatch: have %d, want %d", 
-					i, cols))
+			if ( ! mdoc_vmsg(mdoc, MANDOCERR_ARGCOUNT,
+					mdoc->last->line, 
+					mdoc->last->pos, 
+					"columns == %d (have %d)",
+					cols, i))
 				return(0);
 			break;
 		} else if (i == cols || i == cols + 1)
 			break;
 
-		return(mdoc_verr(mdoc, mdoc->last->line, 
-				mdoc->last->pos, "column mismatch: "
-				"have %d, want %d", i, cols));
+		mdoc_vmsg(mdoc, MANDOCERR_SYNTARGCOUNT,
+				mdoc->last->line, mdoc->last->pos, 
+				"columns == %d (have %d)", cols, i);
+		return(0);
 	default:
 		break;
 	}
@@ -1004,7 +1042,7 @@ post_bl_head(POST_ARGS)
 		a = &n->args->argv[i];
 		if (a->arg == MDOC_Column) {
 			if (a->sz && mdoc->last->nchild)
-				return(mdoc_nerr(mdoc, n, ECOLMIS));
+				return(mdoc_nmsg(mdoc, n, MANDOCERR_COLUMNS));
 			return(1);
 		}
 	}
@@ -1039,7 +1077,8 @@ post_bl(POST_ARGS)
 			continue;
 		if (MDOC_Sm == n->tok)
 			continue;
-		return(mdoc_nerr(mdoc, n, EBADCHILD));
+		mdoc_nmsg(mdoc, n, MANDOCERR_SYNTCHILD);
+		return(0);
 	}
 
 	return(1);
@@ -1064,7 +1103,7 @@ ebool(struct mdoc *mdoc)
 
 	if (NULL == n)
 		return(1);
-	return(mdoc_nerr(mdoc, n, EBOOL));
+	return(mdoc_nmsg(mdoc, n, MANDOCERR_BADBOOL));
 }
 
 
@@ -1073,16 +1112,17 @@ post_root(POST_ARGS)
 {
 
 	if (NULL == mdoc->first->child)
-		return(mdoc_nerr(mdoc, mdoc->first, ENODAT));
-	if ( ! (MDOC_PBODY & mdoc->flags))
-		return(mdoc_nerr(mdoc, mdoc->first, ENOPROLOGUE));
+		mdoc_nmsg(mdoc, mdoc->first, MANDOCERR_NODOCBODY);
+	else if ( ! (MDOC_PBODY & mdoc->flags))
+		mdoc_nmsg(mdoc, mdoc->first, MANDOCERR_NODOCPROLOG);
+	else if (MDOC_BLOCK != mdoc->first->child->type)
+		mdoc_nmsg(mdoc, mdoc->first, MANDOCERR_NODOCBODY);
+	else if (MDOC_Sh != mdoc->first->child->tok)
+		mdoc_nmsg(mdoc, mdoc->first, MANDOCERR_NODOCBODY);
+	else
+		return(1);
 
-	if (MDOC_BLOCK != mdoc->first->child->type)
-		return(mdoc_nerr(mdoc, mdoc->first, ENODAT));
-	if (MDOC_Sh != mdoc->first->child->tok)
-		return(mdoc_nerr(mdoc, mdoc->first, ENODAT));
-
-	return(1);
+	return(0);
 }
 
 
@@ -1092,7 +1132,7 @@ post_st(POST_ARGS)
 
 	if (mdoc_a2st(mdoc->last->child->string))
 		return(1);
-	return(mdoc_nwarn(mdoc, mdoc->last, EBADSTAND));
+	return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADSTANDARD));
 }
 
 
@@ -1135,7 +1175,8 @@ post_rs(POST_ARGS)
 		case(MDOC__V):
 			break;
 		default:
-			return(mdoc_nerr(mdoc, nn, EBADCHILD));
+			mdoc_nmsg(mdoc, nn, MANDOCERR_SYNTCHILD);
+			return(0);
 		}
 
 	return(1);
@@ -1170,21 +1211,21 @@ post_sh_body(POST_ARGS)
 	 */
 
 	if (NULL == (n = mdoc->last->child))
-		return(mdoc_nwarn(mdoc, mdoc->last, ENAMESECINC));
+		return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADNAMESEC));
 
 	for ( ; n && n->next; n = n->next) {
 		if (MDOC_ELEM == n->type && MDOC_Nm == n->tok)
 			continue;
 		if (MDOC_TEXT == n->type)
 			continue;
-		if ( ! mdoc_nwarn(mdoc, mdoc->last, ENAMESECINC))
+		if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADNAMESEC))
 			return(0);
 	}
 
 	assert(n);
 	if (MDOC_BLOCK == n->type && MDOC_Nd == n->tok)
 		return(1);
-	return(mdoc_nwarn(mdoc, mdoc->last, ENAMESECINC));
+	return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADNAMESEC));
 }
 
 
@@ -1202,18 +1243,27 @@ post_sh_head(POST_ARGS)
 	 * certain manual sections.
 	 */
 
-	buf[0] = 0;
+	buf[0] = '\0';
+
+	/*
+	 * FIXME: yes, these can use a dynamic buffer, but I don't do so
+	 * in the interests of simplicity.
+	 */
 
 	for (n = mdoc->last->child; n; n = n->next) {
 		/* XXX - copied from compact(). */
 		assert(MDOC_TEXT == n->type);
 
-		if (strlcat(buf, n->string, 64) >= 64)
-			return(mdoc_nerr(mdoc, n, ETOOLONG));
+		if (strlcat(buf, n->string, 64) >= 64) {
+			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
+			return(0);
+		}
 		if (NULL == n->next)
 			continue;
-		if (strlcat(buf, " ", 64) >= 64)
-			return(mdoc_nerr(mdoc, n, ETOOLONG));
+		if (strlcat(buf, " ", 64) >= 64) {
+			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
+			return(0);
+		}
 	}
 
 	sec = mdoc_str2sec(buf);
@@ -1224,18 +1274,18 @@ post_sh_head(POST_ARGS)
 	 */
 
 	if (SEC_NAME != sec && SEC_NONE == mdoc->lastnamed)
-		if ( ! mdoc_nwarn(mdoc, mdoc->last, ESECNAME))
+		if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NAMESECFIRST))
 			return(0);
 
 	if (SEC_CUSTOM == sec)
 		return(1);
 
 	if (sec == mdoc->lastnamed)
-		if ( ! mdoc_nwarn(mdoc, mdoc->last, ESECREP))
+		if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SECREP))
 			return(0);
 
 	if (sec < mdoc->lastnamed)
-		if ( ! mdoc_nwarn(mdoc, mdoc->last, ESECOOO))
+		if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SECOOO))
 			return(0);
 
 	/* 
@@ -1252,7 +1302,7 @@ post_sh_head(POST_ARGS)
 			break;
 		if (*mdoc->meta.msec == '9')
 			break;
-		return(mdoc_nwarn(mdoc, mdoc->last, EWRONGMSEC));
+		return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SECMSEC));
 	default:
 		break;
 	}

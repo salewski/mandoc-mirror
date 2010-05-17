@@ -26,6 +26,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "mandoc.h"
 #include "libmdoc.h"
 
 static	const char * const secnames[SEC__MAX] = {

@@ -27,6 +27,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "mandoc.h"
 #include "out.h"
 #include "html.h"
 #include "mdoc.h"
@@ -729,6 +730,9 @@ mdoc_nm_pre(MDOC_ARGS)
 {
 	struct htmlpair	tag;
 
+	if (NULL == n->child && NULL == m->name)
+		return(1);
+
 	if (SEC_SYNOPSIS == n->sec && 
 			n->prev && MDOC_LINE & n->flags) {
 		bufcat_style(h, "clear", "both");
@@ -1181,7 +1185,7 @@ mdoc_ex_pre(MDOC_ARGS)
 			h->flags &= ~HTML_NOSPACE;
 	}
 
-	if (n->child->next)
+	if (n->child && n->child->next)
 		print_text(h, "utilities exit");
 	else
 		print_text(h, "utility exits");
@@ -1951,7 +1955,7 @@ mdoc_rv_pre(MDOC_ARGS)
 			print_text(h, "()");
 	}
 
-	if (n->child->next)
+	if (n->child && n->child->next)
 		print_text(h, "functions return");
 	else
 		print_text(h, "function returns");

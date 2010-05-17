@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "mandoc.h"
 #include "libmdoc.h"
 #include "libmandoc.h"
 
@@ -407,7 +408,7 @@ args(struct mdoc *m, int line, int *pos,
 		 * is unterminated.
 		 */
 		if (MDOC_PHRASELIT & m->flags)
-			if ( ! mdoc_pwarn(m, line, *pos, EQUOTTERM))
+			if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_BADQUOTE))
 				return(ARGS_ERROR);
 
 		m->flags &= ~MDOC_PHRASELIT;
@@ -440,7 +441,7 @@ args(struct mdoc *m, int line, int *pos,
 				return(ARGS_PUNCT);
 			if (ARGS_NOWARN & fl)
 				return(ARGS_PUNCT);
-			if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
+			if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE))
 				return(ARGS_ERROR);
 			return(ARGS_PUNCT);
 		}
@@ -495,7 +496,7 @@ args(struct mdoc *m, int line, int *pos,
 
 		/* Whitespace check for eoln case... */
 		if (0 == *p && ' ' == *(p - 1) && ! (ARGS_NOWARN & fl))
-			if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
+			if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE))
 				return(ARGS_ERROR);
 
 		*pos += (int)(p - *v);
@@ -540,7 +541,7 @@ args(struct mdoc *m, int line, int *pos,
 		if ('\0' == buf[*pos]) {
 			if (ARGS_NOWARN & fl || MDOC_PPHRASE & m->flags)
 				return(ARGS_QWORD);
-			if ( ! mdoc_pwarn(m, line, *pos, EQUOTTERM))
+			if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_BADQUOTE))
 				return(ARGS_ERROR);
 			return(ARGS_QWORD);
 		}
@@ -555,7 +556,7 @@ args(struct mdoc *m, int line, int *pos,
 			(*pos)++;
 
 		if (0 == buf[*pos] && ! (ARGS_NOWARN & fl))
-			if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
+			if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE))
 				return(ARGS_ERROR);
 
 		return(ARGS_QWORD);
@@ -579,7 +580,7 @@ args(struct mdoc *m, int line, int *pos,
 		(*pos)++;
 
 	if ('\0' == buf[*pos] && ! (ARGS_NOWARN & fl))
-		if ( ! mdoc_pwarn(m, line, *pos, ETAILWS))
+		if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE))
 			return(ARGS_ERROR);
 
 	return(ARGS_WORD);
@@ -751,10 +752,11 @@ argv_single(struct mdoc *m, int line,
 	ppos = *pos;
 
 	ac = args(m, line, pos, buf, 0, &p);
-	if (ARGS_ERROR == ac)
+	if (ARGS_EOLN == ac) {
+		mdoc_pmsg(m, line, ppos, MANDOCERR_SYNTARGVCOUNT);
 		return(0);
-	if (ARGS_EOLN == ac)
-		return(mdoc_perr(m, line, ppos, EARGVAL));
+	} else if (ARGS_ERROR == ac)
+		return(0);
 
 	v->sz = 1;
 	v->value = mandoc_malloc(sizeof(char *));
