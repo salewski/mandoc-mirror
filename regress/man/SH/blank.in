@@ -12,6 +12,9 @@ xxx
 .SS Before this, two empty lines
 .PP
 .SS Before this, no
+.PP
+.PP
+.SS Before this, no
 xxx
 .SS Before this, one
 .IP foo
