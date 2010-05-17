@@ -1,5 +1,6 @@
 .SUFFIXES:	.html .xml .sgml .1 .3 .7 .md5 .tar.gz .1.txt .3.txt .7.txt .1.sgml .3.sgml .7.sgml .h .h.html
 
+PREFIX		= /usr/local
 BINDIR		= $(PREFIX)/bin
 INCLUDEDIR	= $(PREFIX)/include
 LIBDIR		= $(PREFIX)/lib
@@ -155,29 +156,29 @@ www:	all $(GSGMLS) $(GHTMLS) $(HTMLS) $(TEXTS) $(MD5S) $(TARGZS)
 htmls:	all $(GSGMLS) $(GHTMLS)
 
 installwww: www
-	$(INSTALL_DATA) $(GHTMLS) $(HTMLS) $(TEXTS) $(STATICS) $(PREFIX)/
-	$(INSTALL_DATA) mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/
-	$(INSTALL_DATA) mdocml-$(VERSION).md5 $(PREFIX)/snapshots/
-	$(INSTALL_DATA) mdocml-$(VERSION).tar.gz $(PREFIX)/snapshots/mdocml.tar.gz
-	$(INSTALL_DATA) mdocml-$(VERSION).md5 $(PREFIX)/snapshots/mdocml.md5
+	$(INSTALL_DATA) $(GHTMLS) $(HTMLS) $(TEXTS) $(STATICS) $(DESTDIR)$(PREFIX)/
+	$(INSTALL_DATA) mdocml-$(VERSION).tar.gz $(DESTDIR)$(PREFIX)/snapshots/
+	$(INSTALL_DATA) mdocml-$(VERSION).md5 $(DESTDIR)$(PREFIX)/snapshots/
+	$(INSTALL_DATA) mdocml-$(VERSION).tar.gz $(DESTDIR)$(PREFIX)/snapshots/mdocml.tar.gz
+	$(INSTALL_DATA) mdocml-$(VERSION).md5 $(DESTDIR)$(PREFIX)/snapshots/mdocml.md5
 
 install:
-	mkdir -p $(BINDIR)
-	mkdir -p $(EXAMPLEDIR)
-	mkdir -p $(MANDIR)/man1
-	mkdir -p $(MANDIR)/man7
-	$(INSTALL_PROGRAM) mandoc $(BINDIR)
-	$(INSTALL_MAN) mandoc.1 $(MANDIR)/man1
-	$(INSTALL_MAN) man.7 mdoc.7 mandoc_char.7 $(MANDIR)/man7
-	$(INSTALL_DATA) example.style.css $(EXAMPLEDIR)
+	mkdir -p $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(EXAMPLEDIR)
+	mkdir -p $(DESTDIR)$(MANDIR)/man1
+	mkdir -p $(DESTDIR)$(MANDIR)/man7
+	$(INSTALL_PROGRAM) mandoc $(DESTDIR)$(BINDIR)
+	$(INSTALL_MAN) mandoc.1 $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL_MAN) man.7 mdoc.7 mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
+	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
 
 uninstall:
-	rm -f $(BINDIR)/mandoc
-	rm -f $(MANDIR)/man1/mandoc.1
-	rm -f $(MANDIR)/man7/mdoc.7
-	rm -f $(MANDIR)/man7/man.7
-	rm -f $(MANDIR)/man7/mandoc_char.7
-	rm -f $(EXAMPLEDIR)/example.style.css
+	rm -f $(DESTDIR)$(BINDIR)/mandoc
+	rm -f $(DESTDIR)$(MANDIR)/man1/mandoc.1
+	rm -f $(DESTDIR)$(MANDIR)/man7/mdoc.7
+	rm -f $(DESTDIR)$(MANDIR)/man7/man.7
+	rm -f $(DESTDIR)$(MANDIR)/man7/mandoc_char.7
+	rm -f $(DESTDIR)$(EXAMPLEDIR)/example.style.css
 
 $(OBJS): config.h
 
