@@ -1044,6 +1044,7 @@ termp_nm_pre(DECL_ARGS)
 {
 
 	if (NULL == n->child && NULL == m->name)
+		return(1);
 
 	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags)
 		term_newln(p);
