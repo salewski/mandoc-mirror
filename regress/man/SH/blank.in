@@ -3,6 +3,8 @@
 .SH NO EMPTY LINE BEFORE THIS
 .AT
 .SH NO EMPTY LINE BEFORE THIS EITHER
+.PP
+.SH STILL NO EMPTY LINE BEFORE THIS
 .SS Before this, yes
 .SS Before this, no
 foo
@@ -18,5 +20,6 @@ xxx
 xxx
 .SS Before this, one
 .IP foo
+xx
 .SS Before this, yes
 xxx
