@@ -21,15 +21,6 @@
   reminded by Ludo Smissaert  Mon, 10 May 2010 12:15:11 +0200
   also reported by jmc@ earlier
 
-- .Bl -tag -compact
-  .Sm off
-  .It ...
-  .Sm on
-  .El
-  triggers the assertion in mdoc_action.c:618 (post_bl_tagwidth).
-  It should probably assume a default tag width?
-  reported by Joerg Sonnenberger 18.5.10 (Re: .Bl and .Pp)
-
 - implement \\
   in plain text, identical to \e
   as a macro argument, identical to \ i.e. escaping the next character
