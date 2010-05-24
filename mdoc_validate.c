@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -1224,7 +1225,7 @@ post_sh_body(POST_ARGS)
 static int
 post_sh_head(POST_ARGS)
 {
-	char		        buf[64];
+	char		        buf[BUFSIZ];
 	enum mdoc_sec	        sec;
 	const struct mdoc_node *n;
 
@@ -1246,13 +1247,13 @@ post_sh_head(POST_ARGS)
 		/* XXX - copied from compact(). */
 		assert(MDOC_TEXT == n->type);
 
-		if (strlcat(buf, n->string, 64) >= 64) {
+		if (strlcat(buf, n->string, BUFSIZ) >= BUFSIZ) {
 			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
 			return(0);
 		}
 		if (NULL == n->next)
 			continue;
-		if (strlcat(buf, " ", 64) >= 64) {
+		if (strlcat(buf, " ", BUFSIZ) >= BUFSIZ) {
 			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
 			return(0);
 		}
