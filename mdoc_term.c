@@ -613,7 +613,7 @@ print_bvspace(struct termp *p,
 
 	/* A `-column' does not assert vspace within the list. */
 
-	if (MDOC_Bl == bl->tok && LIST_diag == bl->data.list)
+	if (MDOC_Bl == bl->tok && LIST_column == bl->data.list)
 		if (n->prev && MDOC_It == n->prev->tok)
 			return;
 
