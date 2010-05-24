@@ -207,10 +207,12 @@ term_flushln(struct termp *p)
 			vend -= vis;
 			putchar('\n');
 			if (TERMP_NOBREAK & p->flags) {
+				p->viscol = p->rmargin;
 				for (j = 0; j < (int)p->rmargin; j++)
 					putchar(' ');
 				vend += p->rmargin - p->offset;
 			} else {
+				p->viscol = 0;
 				vbl = p->offset;
 			}
 
@@ -251,9 +253,11 @@ term_flushln(struct termp *p)
 			if (vbl) {
 				for (j = 0; j < (int)vbl; j++)
 					putchar(' ');
+				p->viscol += vbl;
 				vbl = 0;
 			}
 			putchar(p->buf[i]);
+			p->viscol += 1;
 		}
 		vend += vbl;
 		vis = vend;
@@ -263,6 +267,7 @@ term_flushln(struct termp *p)
 	p->overstep = 0;
 
 	if ( ! (TERMP_NOBREAK & p->flags)) {
+		p->viscol = 0;
 		putchar('\n');
 		return;
 	}
@@ -294,11 +299,13 @@ term_flushln(struct termp *p)
 
 	/* Right-pad. */
 	if (maxvis > vis + /* LINTED */
-			((TERMP_TWOSPACE & p->flags) ? 1 : 0))  
+			((TERMP_TWOSPACE & p->flags) ? 1 : 0)) {
+		p->viscol += maxvis - vis;
 		for ( ; vis < maxvis; vis++)
 			putchar(' ');
-	else {	/* ...or newline break. */
+	} else {	/* ...or newline break. */
 		putchar('\n');
+		p->viscol = p->rmargin;
 		for (i = 0; i < (int)p->rmargin; i++)
 			putchar(' ');
 	}
@@ -315,7 +322,7 @@ term_newln(struct termp *p)
 {
 
 	p->flags |= TERMP_NOSPACE;
-	if (0 == p->col) {
+	if (0 == p->col && 0 == p->viscol) {
 		p->flags &= ~TERMP_NOLPAD;
 		return;
 	}
@@ -335,6 +342,7 @@ term_vspace(struct termp *p)
 {
 
 	term_newln(p);
+	p->viscol = 0;
 	putchar('\n');
 }
 
