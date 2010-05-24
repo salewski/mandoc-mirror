@@ -219,6 +219,9 @@ post_AT(struct man *m)
 			p = unix_versions[0];
 	}
 
+	if (m->meta.source)
+		free(m->meta.source);
+
 	m->meta.source = mandoc_strdup(p);
 
 	return(1);
