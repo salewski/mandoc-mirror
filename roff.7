@@ -126,7 +126,15 @@ which may be separated by any intervening input (or not exist at all).
 Its syntax is equivalent to
 .Sx \&if .
 .Ss \&if
-Begins a conditional that always evaluates to false.
+Begins a conditional.
+Right now, the conditional evaluates to true
+if and only if it starts with the letter
+.Sy n ,
+indicating processing in
+.Xr nroff 1
+style as opposed to
+.Xr troff 1
+style.
 If a conditional is false, its children are not processed, but are
 syntactically interpreted to preserve the integrity of the input
 document.
@@ -249,7 +257,7 @@ Currently, it is ignored including its arguments,
 and the number of arguments is not checked.
 .Ss \&tr
 Output character translation.
-This macro is intended to have one argument, 
+This macro is intended to have one argument,
 consisting of an even number of characters.
 Currently, it is ignored including its arguments,
 and the number of arguments is not checked.

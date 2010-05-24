@@ -575,7 +575,7 @@ roff_cond_sub(ROFF_ARGS)
 	ppos = pos;
 	rr = r->last->rule;
 
-	roffnode_cleanscope(r);
+	roff_cond_text(r, tok, bufp, szp, ln, ppos, pos, offs);
 
 	if (ROFF_MAX == (t = roff_parse(*bufp, &pos)))
 		return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
@@ -616,8 +616,10 @@ roff_cond_text(ROFF_ARGS)
 		return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
 	}
 
-	if (ep > st && '\\' != *(ep - 1))
+	if (ep > st && '\\' != *(ep - 1)) {
+		ep = '\0';
 		roffnode_pop(r);
+	}
 
 	roffnode_cleanscope(r);
 	return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
@@ -628,6 +630,7 @@ roff_cond_text(ROFF_ARGS)
 static enum rofferr
 roff_cond(ROFF_ARGS)
 {
+	int		 cpos;  /* position of the condition */
 	int		 sv;
 
 	/* Stack overflow! */
@@ -636,6 +639,8 @@ roff_cond(ROFF_ARGS)
 		(*r->msg)(MANDOCERR_MEM, r->data, ln, ppos, NULL);
 		return(ROFF_ERR);
 	}
+
+	cpos = pos;
 
 	if (ROFF_if == tok || ROFF_ie == tok) {
 		/*
@@ -667,9 +672,12 @@ roff_cond(ROFF_ARGS)
 	if ( ! roffnode_push(r, tok, ln, ppos))
 		return(ROFF_ERR);
 
-	/* TODO: here we would evaluate the conditional. */
+	/* XXX: Implement more conditionals. */
 
-	if (ROFF_el == tok) {
+	if (ROFF_if == tok || ROFF_ie == tok)
+		r->last->rule = 'n' == (*bufp)[cpos] ?
+		    ROFFRULE_ALLOW : ROFFRULE_DENY;
+	else if (ROFF_el == tok) {
 		/* 
 		 * An `.el' will get the value of the current rstack
 		 * entry set in prior `ie' calls or defaults to DENY.
@@ -678,7 +686,8 @@ roff_cond(ROFF_ARGS)
 			r->last->rule = ROFFRULE_DENY;
 		else
 			r->last->rule = r->rstack[r->rstackpos];
-	} else if (ROFF_ie == tok) {
+	}
+	if (ROFF_ie == tok) {
 		/*
 		 * An if-else will put the NEGATION of the current
 		 * evaluated conditional into the stack.
@@ -689,6 +698,8 @@ roff_cond(ROFF_ARGS)
 		else
 			r->rstack[r->rstackpos] = ROFFRULE_DENY;
 	}
+	if (r->last->parent && ROFFRULE_DENY == r->last->parent->rule)
+		r->last->rule = ROFFRULE_DENY;
 
 	r->last->endspan = 1;
 
