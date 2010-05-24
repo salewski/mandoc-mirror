@@ -72,7 +72,7 @@ enum	mandocerr {
 	MANDOCERR_NOTITLE, /* no title in document */
 	MANDOCERR_ARGSLOST, /* line argument(s) will be lost */
 	MANDOCERR_BODYLOST, /* body argument(s) will be lost */
-#define	MANDOCERR_ERROR		MANDOCERR_ARGSLOST
+#define	MANDOCERR_ERROR		MANDOCERR_BODYLOST
 
 	/* FIXME: this should be a MANDOCERR_ERROR */
 	MANDOCERR_FONTTYPE, /* missing font type */
