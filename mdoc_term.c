@@ -274,6 +274,7 @@ terminal_mdoc(void *arg, const struct mdoc *mdoc)
 
 	p->overstep = 0;
 	p->maxrmargin = p->defrmargin;
+	p->tabwidth = 5;
 
 	if (NULL == p->symtab)
 		switch (p->enc) {
@@ -1593,6 +1594,7 @@ termp_fa_pre(DECL_ARGS)
 static int
 termp_bd_pre(DECL_ARGS)
 {
+	size_t			 tabwidth;
 	int	         	 i, type;
 	size_t			 rm, rmax;
 	const struct mdoc_node	*nn;
@@ -1622,6 +1624,8 @@ termp_bd_pre(DECL_ARGS)
 	if (MDOC_Literal != type && MDOC_Unfilled != type)
 		return(1);
 
+	tabwidth = p->tabwidth;
+	p->tabwidth = 8;
 	rm = p->rmargin;
 	rmax = p->maxrmargin;
 	p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
@@ -1636,6 +1640,7 @@ termp_bd_pre(DECL_ARGS)
 		else if (NULL == nn->prev)
 			term_flushln(p);
 	}
+	p->tabwidth = tabwidth;
 
 	p->rmargin = rm;
 	p->maxrmargin = rmax;

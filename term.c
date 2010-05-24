@@ -84,6 +84,7 @@ term_alloc(enum termenc enc, size_t width)
 		perror(NULL);
 		exit(EXIT_FAILURE);
 	}
+	p->tabwidth = 5;
 	p->enc = enc;
 	/* Enforce some lower boundary. */
 	if (width < 60)
@@ -171,6 +172,17 @@ term_flushln(struct termp *p)
 	while (i < (int)p->col) {
 
 		/*
+		 * Handle literal tab characters.
+		 */
+		for (j = i; j < (int)p->col; j++) {
+			if ('\t' != p->buf[j])
+				break;
+			vend = (vis/p->tabwidth+1)*p->tabwidth;
+			vbl += vend - vis;
+			vis = vend;
+		}
+
+		/*
 		 * Count up visible word characters.  Control sequences
 		 * (starting with the CSI) aren't counted.  A space
 		 * generates a non-printing word, which is valid (the
@@ -178,8 +190,8 @@ term_flushln(struct termp *p)
 		 */
 
 		/* LINTED */
-		for (j = i; j < (int)p->col; j++) {
-			if (j && ' ' == p->buf[j]) 
+		for ( ; j < (int)p->col; j++) {
+			if ((j && ' ' == p->buf[j]) || '\t' == p->buf[j])
 				break;
 			if (8 == p->buf[j])
 				vend--;
@@ -209,8 +221,16 @@ term_flushln(struct termp *p)
 			p->overstep = 0;
 		}
 
+		/*
+		 * Skip leading tabs, they were handled above.
+		 */
+		while (i < (int)p->col && '\t' == p->buf[i])
+			i++;
+
 		/* Write out the [remaining] word. */
 		for ( ; i < (int)p->col; i++) {
+			if ('\t' == p->buf[i])
+				break;
 			if (' ' == p->buf[i]) {
 				while (' ' == p->buf[i]) {
 					vbl++;
