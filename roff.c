@@ -38,10 +38,13 @@ enum	rofft {
 	ROFF_de,
 	ROFF_dei,
 	ROFF_de1,
+	ROFF_ds,
 	ROFF_el,
 	ROFF_ie,
 	ROFF_if,
 	ROFF_ig,
+	ROFF_rm,
+	ROFF_tr,
 	ROFF_cblock,
 	ROFF_ccond,
 	ROFF_MAX
@@ -98,6 +101,7 @@ static	enum rofferr	 roff_ccond(ROFF_ARGS);
 static	enum rofferr	 roff_cond(ROFF_ARGS);
 static	enum rofferr	 roff_cond_text(ROFF_ARGS);
 static	enum rofferr	 roff_cond_sub(ROFF_ARGS);
+static	enum rofferr	 roff_line(ROFF_ARGS);
 
 const	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "am", roff_block, roff_block_text, roff_block_sub, 0 },
@@ -106,10 +110,13 @@ const	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "de", roff_block, roff_block_text, roff_block_sub, 0 },
 	{ "dei", roff_block, roff_block_text, roff_block_sub, 0 },
 	{ "de1", roff_block, roff_block_text, roff_block_sub, 0 },
+	{ "ds", roff_line, NULL, NULL, 0 },
 	{ "el", roff_cond, roff_cond_text, roff_cond_sub, ROFFMAC_STRUCT },
 	{ "ie", roff_cond, roff_cond_text, roff_cond_sub, ROFFMAC_STRUCT },
 	{ "if", roff_cond, roff_cond_text, roff_cond_sub, ROFFMAC_STRUCT },
 	{ "ig", roff_block, roff_block_text, roff_block_sub, 0 },
+	{ "rm", roff_line, NULL, NULL, 0 },
+	{ "tr", roff_line, NULL, NULL, 0 },
 	{ ".", roff_cblock, NULL, NULL, 0 },
 	{ "\\}", roff_ccond, NULL, NULL, 0 },
 };
@@ -702,4 +709,13 @@ roff_cond(ROFF_ARGS)
 
 	*offs = pos;
 	return(ROFF_RERUN);
+}
+
+
+/* ARGSUSED */
+static enum rofferr
+roff_line(ROFF_ARGS)
+{
+
+	return(ROFF_IGN);
 }
