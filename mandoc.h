@@ -17,6 +17,10 @@
 #ifndef MANDOC_H
 #define MANDOC_H
 
+#define ASCII_NBRSP	 31  /* non-breaking space */
+#define	ASCII_HYPH	 30  /* breakable hyphen */
+
+
 __BEGIN_DECLS
 
 enum	mandocerr {

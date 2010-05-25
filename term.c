@@ -138,6 +138,7 @@ term_flushln(struct termp *p)
 	size_t		 vend;	/* end of word visual position on output */
 	size_t		 bp;    /* visual right border position */
 	int		 j;     /* temporary loop index */
+	int		 jhy;	/* last hyphen before line overflow */
 	size_t		 maxvis, mmax;
 
 	/*
@@ -190,20 +191,23 @@ term_flushln(struct termp *p)
 		 */
 
 		/* LINTED */
-		for ( ; j < (int)p->col; j++) {
+		for (jhy = 0; j < (int)p->col; j++) {
 			if ((j && ' ' == p->buf[j]) || '\t' == p->buf[j])
 				break;
-			if (8 == p->buf[j])
-				vend--;
-			else
+			if (8 != p->buf[j]) {
+				if (vend > vis && vend < bp &&
+				    ASCII_HYPH == p->buf[j])
+					jhy = j;
 				vend++;
+			} else
+				vend--;
 		}
 
 		/*
 		 * Find out whether we would exceed the right margin.
 		 * If so, break to the next line.
 		 */
-		if (vend > bp && vis > 0) {
+		if (vend > bp && 0 == jhy && vis > 0) {
 			vend -= vis;
 			putchar('\n');
 			if (TERMP_NOBREAK & p->flags) {
@@ -231,6 +235,8 @@ term_flushln(struct termp *p)
 
 		/* Write out the [remaining] word. */
 		for ( ; i < (int)p->col; i++) {
+			if (vend > bp && jhy > 0 && i > jhy)
+				break;
 			if ('\t' == p->buf[i])
 				break;
 			if (' ' == p->buf[i]) {
@@ -256,7 +262,12 @@ term_flushln(struct termp *p)
 				p->viscol += vbl;
 				vbl = 0;
 			}
-			putchar(p->buf[i]);
+
+			if (ASCII_HYPH == p->buf[i])
+				putchar('-');
+			else
+				putchar(p->buf[i]);
+
 			p->viscol += 1;
 		}
 		vend += vbl;

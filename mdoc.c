@@ -563,6 +563,10 @@ mdoc_ptext(struct mdoc *m, int line, char *buf, int offs)
 	ws = NULL;
 	for (c = end = buf + offs; *c; c++) {
 		switch (*c) {
+		case '-':
+			if (mandoc_hyph(buf + offs, c))
+				*c = ASCII_HYPH;
+			break;
 		case ' ':
 			if (NULL == ws)
 				ws = c;

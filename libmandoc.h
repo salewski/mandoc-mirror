@@ -30,6 +30,7 @@ time_t		 mandoc_a2time(int, const char *);
 #define		 MTIME_MDOCDATE		(1 << 2)
 #define		 MTIME_ISO_8601		(1 << 3)
 int		 mandoc_eos(const char *, size_t);
+int		 mandoc_hyph(const char *, const char *);
 
 __END_DECLS
 
