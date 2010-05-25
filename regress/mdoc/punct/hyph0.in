@@ -1,0 +1,20 @@
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+asdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhsadflkjhsadflkjhasf d-asdf
+.Pp
+asdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhsadflkjhsadflkjhasf d\(hyasdf
+.Pp
+asdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhsadflkjhsadflkjhasf d--yasdf
+.Pp
+asdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhsadflkjhsadfhsasf d---yasdf
+.Pp
+asdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhsadflkjhsadfhsasf "d-yasdf"
+.Pp
+asdflkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhsadflkjhsadfhsasf d\-yasdf
+.Pp
+.Qq lkjhasdflkjhasdflkjhasdflkjhasdflkjhasdflkjhsadflkjhsadflkjhasfasas d-asdf
