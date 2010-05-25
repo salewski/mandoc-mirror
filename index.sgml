@@ -38,14 +38,15 @@
 					</P>
 
 					<P>
-					The core of <SPAN CLASS="nm">mdocml</SPAN> is composed of the <i>libmdoc</i> and <i>libman</i>
-					validating compiler libraries.  Both are simple, fast libraries operating on memory buffers, so they may
-					be used for a variety of front-ends (terminal-based, CGI and so on).  The primary front-end is <i>
-					mandoc</i>, which formats manuals for display on the terminal.
+					The core of <SPAN CLASS="nm">mdocml</SPAN> is composed of the <A HREF="mdoc.3.html">libmdoc</A>, <A
+					HREF="man.3.html">libman</A>, and <A HREF="roff.3.html">libroff</A> validating compiler libraries.  All
+					are simple, fast libraries operating on memory buffers, so they may be used for a variety of front-ends
+					(terminal-based, CGI and so on).  The front-end is <A HREF="mandoc.1.html">mandoc</A>, which formats
+					manuals for display.
 					</P>
 
 					<P>
-					The <SPAN CLASS="nm">mdocml</SPAN> utility is a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv
+					The <SPAN CLASS="nm">mdocml</SPAN> suite is a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv
 					Project</A> member.
 					</P>
 				</TD>
@@ -57,9 +58,9 @@
 					</H1>
 
 					<P>
-					Sources correctly build and install on DragonFly BSD, FreeBSD, OpenBSD, NetBSD, and GNU/Linux operating
-					systems, tested variously on i386, AMD64, alpha, and others.  The most current version is <SPAN
-					CLASS="attn">@VERSION@</SPAN>, dated <SPAN class="attn">@VDATE@</SPAN>.  A full <A
+					Sources correctly build and install on DragonFly BSD, FreeBSD, OpenBSD, NetBSD, GNU/Linux, and many
+					other operating systems, tested variously on i386, AMD64, alpha, and others.  The most current version
+					is <SPAN CLASS="attn">@VERSION@</SPAN>, dated <SPAN class="attn">@VDATE@</SPAN>.  A full <A
 					HREF="ChangeLog.html">ChangeLog</A> (<A HREF="ChangeLog.txt">txt</A>) is written with each release.
 					</P>
 
@@ -81,7 +82,7 @@
 						<TR>
 							<TD>Online source</TD>
 							<TD>
-							<A CLASS="external" HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/?cvsroot=mdocml">cvsweb</A>
+							<A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/?cvsroot=mdocml">cvsweb</A>
 							</TD>
 						</TR>
 					</TBODY>
@@ -159,20 +160,20 @@
 					<COL>
 					<TBODY>
 						<TR>
+							<TD><A HREF="man.3.html">man(3)</A> (<A HREF="man.3.txt">text</A>)</TD>
+							<TD>man macro compiler library</TD>
+						</TR>
+						<TR>
+							<TD><A HREF="man.7.html">man(7)</A> (<A HREF="man.7.txt">text</A>)</TD>
+							<TD>man language reference</TD>
+						</TR>
+						<TR>
 							<TD><A HREF="mandoc.1.html">mandoc(1)</A> (<A HREF="mandoc.1.txt">text</A>)</TD>
 							<TD>format and display UNIX manuals</TD>
 						</TR>
 						<TR>
 							<TD><A HREF="mandoc_char.7.html">mandoc_char(7)</A> (<A HREF="mandoc_char.7.txt">text</A>)</TD>
 							<TD>mandoc special characters</TD>
-						</TR>
-						<TR>
-							<TD><A HREF="mdoc.7.html">mdoc(7)</A> (<A HREF="mdoc.7.txt">text</A>)</TD>
-							<TD>mdoc language reference</TD>
-						</TR>
-						<TR>
-							<TD><A HREF="man.7.html">man(7)</A> (<A HREF="man.7.txt">text</A>)</TD>
-							<TD>man language reference</TD>
 						</TR>
 						<TR>
 							<TD><A HREF="manuals.7.html">manuals(7)</A> (<A HREF="manuals.7.txt">text</A>)</TD>
@@ -183,12 +184,16 @@
 							<TD>mdoc macro compiler library</TD>
 						</TR>
 						<TR>
-							<TD><A HREF="man.3.html">man(3)</A> (<A HREF="man.3.txt">text</A>)</TD>
-							<TD>man macro compiler library</TD>
+							<TD><A HREF="mdoc.7.html">mdoc(7)</A> (<A HREF="mdoc.7.txt">text</A>)</TD>
+							<TD>mdoc language reference</TD>
+						</TR>
+						<TR>
+							<TD><A HREF="roff.3.html">roff(3)</A> (<A HREF="roff.3.txt">text</A>)</TD>
+							<TD>roff macro compiler library</TD>
 						</TR>
 						<TR>
 							<TD><A HREF="roff.7.html">roff(7)</A> (<A HREF="roff.7.txt">text</A>)</TD>
-							<TD>roff language reference</TD>
+							<TD>roff-mandoc language reference</TD>
 						</TR>
 					</TBODY>
 					</TABLE>
@@ -209,7 +214,7 @@
 
 					<P>
 					You may also subscribe to several mailing lists (these require subscription, which is moderated).  An
-					archive is not yet available.
+					archive is not yet available on-line, although you may request one once subscribed.
 					</P>
 
 					<TABLE WIDTH="100%" SUMMARY="Mailing Lists">
@@ -253,13 +258,40 @@
 							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">xx-05-2010</SPAN></TD>
 								<TD VALIGN="top">
-								Day 1 of Rostock hackathon: proper handling of quotations in tab-separated
-								column lists, finished patching of SYNOPSIS breaking (1.9.25), fixed pre-comment
-								white-space stripping, added end-of-sentence spacing to black partial-implicit
-								macros, relaxed column warnings, relaxed acceptence of bad standards arguments,
-								significant documentation of lists in <A HREF="mdoc.7.html">mdoc(7)</A>.
-								Version: <SPAN CLASS="rev">1.9.26</SPAN>.
-								<TD VALIGN="top">
+								Release consisting of the results from the m2k10 hackathon and up-merge from
+								OpenBSD.  This requires a significant note of thanks to Ingo Schwarze (OpenBSD)
+								and Joerg Sonnenberger (NetBSD) for their hard work, and again to Joerg for
+								hosting m2k10.  Highlights (mostly cribbed from Ingo's m2k10 report) follow in
+								no particular order:
+								<UL>
+								<LI>a <A HREF="roff.3.html">libroff</A> preprocessor in front of <A
+								HREF="mdoc.3.html">libmdoc</A> and <A HREF="man.3.html">libman</A> stripping out
+								<A HREF="roff.7.html">roff</A> instructions;</LI>
+								<LI>end-of-sentence (EOS) detection in free-form and macro lines;</LI>
+								<LI>correct handling of tab-separated columnar lists in <SPAN
+								CLASS="flag">-mdoc</SPAN>;</LI>
+								<LI>improved main calling routines to optionally use mmap() for better
+								performance;</LI>
+								<LI>cleaned up exiting when invoked as <SPAN CLASS="flag">-Tlint</SPAN> or over
+								multiple files with <SPAN CLASS="flag">-fign-errors</SPAN>;</LI>
+								<LI>error and warning message handling re-written to be unified for <A
+								HREF="roff.3.html">libroff</A>, <A HREF="mdoc.3.html">libmdoc</A>, and <A
+								HREF="man.3.html">libman</A>;</LI>
+								<LI>handling of badly-nested explicit-scoped macros;</LI>
+								<LI>improved free-form text parsing in <A HREF="man.3.html">libman</A> and <A
+								HREF="mdoc.3.html">libmdoc</A>;</LI>
+								<LI>significant GNU troff compatibility improvements in <SPAN
+								CLASS="flag">-Tascii</SPAN>, largely in terms of spacing;</LI>
+								<LI>a regression framework for making sure the many fragilities of GNU troff
+								aren't trampled in subsequent work;</LI>
+								<LI>support for <SPAN CLASS="flag">-Tascii</SPAN> breaking at hyphens
+								encountered in free-form text;</LI>
+								<LI>and many more minor fixes and improvements (no really, consult <A
+								HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/?cvsroot=mdocml">cvsweb</A> and see
+								for yourself!).</LI>
+								</UL>
+								Version: <SPAN CLASS="rev">1.10.0</SPAN>.
+								</TD>
 							</TR>
 							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">13-05-2010</SPAN></TD>
@@ -272,6 +304,7 @@
 								<Q>end-of-sentence, end-of-line</Q> rule.  This is a stable roll-back point
 								before the mandoc hackathon in Rostock!
 								Version: <SPAN CLASS="rev">1.9.25</SPAN>.
+								</TD>
 							</TR>
 							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">09-05-2010</SPAN></TD>
@@ -305,63 +338,12 @@
 								</TD>
 							</TR>
 							<TR>
-								<TD VALIGN="top"><SPAN CLASS="date">31-03-2010</SPAN></TD>
+								<TD VALIGN="top"></TD>
 								<TD VALIGN="top">
-								Version <SPAN CLASS="rev">1.9.22</SPAN>: adjusted merge of the significant work
-								by Ingo Schwarze in getting <Q>Xo</Q> blocks (block full implicit, e.g.,
-								<Q>It</Q> for non-columnar lists) to work properly.  This isn't enabled by
-								default: you must specify <SPAN CLASS="flag">-DUGLY</SPAN> as a compiler flag
-								(see the Makefile for details).
-								</TD>
-							</TR>
-							<TR>
-								<TD VALIGN="top"><SPAN CLASS="date">30-03-2010</SPAN></TD>
-								<TD VALIGN="top">
-								Version <SPAN CLASS="rev">1.9.20</SPAN>: more efforts to get roff instructions
-								in -man documents under control.  Note that roff instructions embedded in
-								line-scoped, next-line macros (e.g. <Q>B</Q>) are not supported.  Leading
-								punctuation for -mdoc macros, such as <Q>Fl ( ( a</Q>, are now correctly
-								handled.
-								</TD>
-							</TR>
-							<TR>
-								<TD VALIGN="top"><SPAN CLASS="date">27-03-2010</SPAN></TD>
-								<TD VALIGN="top">
-								Version <SPAN CLASS="rev">1.9.18</SPAN>: many fixes (largely pertaining to
-								scope) and improvements (e.g., handling of apostrophe-control macros, which
-								fixes the strange <Q>BR</Q> seen in some macro output) to handling roff
-								instructions in -man documents.
-								</TD>
-							</TR>
-							<TR>
-								<TD VALIGN="top"><SPAN CLASS="date">25-03-2010</SPAN></TD>
-								<TD VALIGN="top">
-								Version <SPAN CLASS="rev">1.9.17</SPAN> highlights: accept <A
-								HREF="http://perldoc.perl.org/" CLASS="external">perlpod</A> standard preamble.
-								Also accept (and discard) <Q>de</Q>, <Q>dei</Q>, <Q>am</Q>, <Q>ami</Q>, and
-								<Q>ig</Q> roff macro blocks.
-								</TD>
-							</TR>
-							<TR>
-								<TD VALIGN="top"><SPAN CLASS="date">22-03-2010</SPAN></TD>
-								<TD VALIGN="top">
-								Version <SPAN CLASS="rev">1.9.16</SPAN> highlights: inspired by patches and bug
-								reports by Ingo Schwarze, allowed <SPAN CLASS="flag">-man</SPAN> to accept
-								non-printing elements to be nested within next-line scopes, such as <Q>br</Q>
-								within <Q>B</Q> or <Q>TH</Q>, which is valid roff.  Longsoon architecture also
-								noted and Makefile cleaned up.
-								</TD>
-							</TR>
-							<TR>
-								<TD VALIGN="top"><SPAN CLASS="date">18-02-2010</SPAN></TD>
-								<TD VALIGN="top">
-								Moved to our new <A HREF="http://bsd.lv" CLASS="external">BSD.lv</A> home.
-								Version <SPAN CLASS="rev">1.9.15</SPAN> highlights: XHTML is now an acceptable
-								output mode for <A HREF="mandoc.1.html">mandoc(1)</A>;  <Q>Xr</Q> made more
-								compatible with groff; <Q>Vt</Q> fixed when invoked in SYNOPSIS;  <Q>\\</Q>
-								escape removed; end-of-line white-space detected for all lines;  subtle bug
-								fixed in list display for some modes;  compatibility layer checked in for
-								compilation in diverse UNIX systems;  and column lengths handled correctly.
+								See 
+								<A
+								HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/index.sgml?cvsroot=mdocml">cvsweb</A>
+								for historical notes.
 								</TD>
 							</TR>
 						</TBODY>
