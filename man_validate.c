@@ -223,7 +223,7 @@ check_text(CHKARGS)
 				return(c);
 		}
 
-		if ('\t' == *p || isprint((u_char)*p)) 
+		if ('\t' == *p || isprint((u_char)*p) || ASCII_HYPH == *p) 
 			continue;
 		if ( ! man_pmsg(m, n->line, pos, MANDOCERR_BADCHAR))
 			return(0);

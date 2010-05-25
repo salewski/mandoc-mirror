@@ -252,6 +252,7 @@
 						<TBODY>
 							<TR>
 								<TD VALIGN="top"><SPAN CLASS="date">xx-05-2010</SPAN></TD>
+								<TD VALIGN="top">
 								Day 1 of Rostock hackathon: proper handling of quotations in tab-separated
 								column lists, finished patching of SYNOPSIS breaking (1.9.25), fixed pre-comment
 								white-space stripping, added end-of-sentence spacing to black partial-implicit

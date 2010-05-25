@@ -463,7 +463,7 @@ check_text(struct mdoc *mdoc, int line, int pos, const char *p)
 			if ( ! (MDOC_LITERAL & mdoc->flags))
 				if ( ! mdoc_pmsg(mdoc, line, pos, MANDOCERR_BADCHAR))
 					return(0);
-		} else if ( ! isprint((u_char)*p))
+		} else if ( ! isprint((u_char)*p) && ASCII_HYPH != *p)
 			if ( ! mdoc_pmsg(mdoc, line, pos, MANDOCERR_BADCHAR))
 				return(0);
 
