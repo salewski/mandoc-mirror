@@ -115,3 +115,19 @@
 
 - OpenBSD::PackageName(3p) has "if (block) 90:1" in the parse tree
 
+************************************************************************
+* performance issues
+************************************************************************
+
+Several areas can be cleaned up to make mandoc even faster.  These are 
+
+- cache `Bd' display types as `Bl' types are cached (this primarily
+  improves code-size by removing the a2disp type functions)
+
+- improve caching mechanism to handle other per-element arguments so
+  that they need not be recalculated between front- and back-ends (also
+  reduces code size and complexity)
+
+- improve hashing mechanism for macros (quite important: performance)
+
+- improve hashing mechanism for characters (not as important)
