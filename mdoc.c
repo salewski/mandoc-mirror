@@ -560,6 +560,8 @@ mdoc_ptext(struct mdoc *m, int line, char *buf, int offs)
 	 * Search for the beginning of unescaped trailing whitespace (ws)
 	 * and for the first character not to be output (end).
 	 */
+
+	/* FIXME: replace with strcspn(). */
 	ws = NULL;
 	for (c = end = buf + offs; *c; c++) {
 		switch (*c) {

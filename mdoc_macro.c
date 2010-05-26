@@ -171,7 +171,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ in_line_eoln, 0 }, /* Hf */
 	{ obsolete, 0 }, /* Fr */
 	{ in_line_eoln, 0 }, /* Ud */
-	{ in_line_eoln, 0 }, /* Lb */
+	{ in_line, 0 }, /* Lb */
 	{ in_line_eoln, 0 }, /* Lp */ 
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Lk */ 
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Mt */ 

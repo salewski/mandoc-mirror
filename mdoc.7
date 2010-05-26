@@ -731,7 +731,9 @@ Note that the
 macro is a
 .Sx Block partial-implicit
 only when invoked as the first macro
-in a SYNOPSIS section line, else it is
+in a
+.Em SYNOPSIS
+section line, else it is
 .Sx In-line .
 .Ss In-line
 Closed by
@@ -1644,6 +1646,28 @@ and
 .Ss \&In
 .Ss \&It
 .Ss \&Lb
+Specify a library.
+The calling syntax is as follows:
+.Pp
+.D1 \. Ns Sx \&Lb Cm library
+.Pp
+The
+.Cm library
+parameter may be a system library, such as
+.Cm libz
+or
+.Cm libpam ,
+in which case a small library description is printed next to the linker
+invocation; or a custom library, in which case the library name is
+printed in quotes.
+This is most commonly used in the
+.Em SYNOPSIS
+section as described in
+.Sx MANUAL STRUCTURE .
+.Pp
+Examples:
+.D1 \&.Lb libz
+.D1 \&.Lb mdoc
 .Ss \&Li
 .Ss \&Lk
 Format a hyperlink.

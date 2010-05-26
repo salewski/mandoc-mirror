@@ -1,0 +1,19 @@
+.\"
+.\" WARNING: THIS TEST WILL NOT WORK ON OLD GROFF.
+.\" (IT DOES NOT SUPPORT THE `Lb' MACRO.)
+.\"
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh LIBRARY
+.Lb libz
+.Sh DESCRIPTION
+has been optimized for use by applications expecting system scope thread
+semantics, and can provide significant performance improvements
+compared to
+.Lb libkse .
+.Sh SEE ALSO
+.Xr pthread 3
