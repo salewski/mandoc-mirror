@@ -71,6 +71,7 @@ enum	man_type {
 struct	man_meta {
 	char		*msec;
 	time_t		 date;
+	char		*rawdate;
 	char		*vol;
 	char		*title;
 	char		*source;

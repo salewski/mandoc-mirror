@@ -864,7 +864,10 @@ print_man_foot(struct termp *p, const struct man_meta *meta)
 
 	term_fontrepl(p, TERMFONT_NONE);
 
-	time2a(meta->date, buf, DATESIZ);
+	if (meta->rawdate)
+		strlcpy(buf, meta->rawdate, DATESIZ);
+	else
+		time2a(meta->date, buf, DATESIZ);
 
 	term_vspace(p);
 	term_vspace(p);

@@ -146,6 +146,8 @@ man_free1(struct man *man)
 		free(man->meta.title);
 	if (man->meta.source)
 		free(man->meta.source);
+	if (man->meta.rawdate)
+		free(man->meta.rawdate);
 	if (man->meta.vol)
 		free(man->meta.vol);
 	if (man->meta.msec)

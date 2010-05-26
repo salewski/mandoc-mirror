@@ -308,7 +308,10 @@ man_root_post(MAN_ARGS)
 	struct tag	*t, *tt;
 	char		 b[DATESIZ];
 
-	time2a(m->date, b, DATESIZ);
+	if (m->rawdate)
+		strlcpy(b, m->rawdate, DATESIZ);
+	else
+		time2a(m->date, b, DATESIZ);
 
 	PAIR_CLASS_INIT(&tag[0], "footer");
 	bufcat_style(h, "width", "100%");
