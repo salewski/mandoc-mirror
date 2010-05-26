@@ -1,0 +1,11 @@
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+blah blah blah
+.Ud asdf
+blah blah blah
+.Ud ) ;
