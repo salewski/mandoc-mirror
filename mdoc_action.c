@@ -57,6 +57,7 @@ static	int	  post_dd(POST_ARGS);
 static	int	  post_display(POST_ARGS);
 static	int	  post_dt(POST_ARGS);
 static	int	  post_lb(POST_ARGS);
+static	int	  post_li(POST_ARGS);
 static	int	  post_nm(POST_ARGS);
 static	int	  post_os(POST_ARGS);
 static	int	  post_pa(POST_ARGS);
@@ -102,7 +103,7 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ft */ 
 	{ NULL, NULL }, /* Ic */ 
 	{ NULL, NULL }, /* In */ 
-	{ NULL, NULL }, /* Li */
+	{ NULL, post_li }, /* Li */
 	{ NULL, NULL }, /* Nd */ 
 	{ NULL, post_nm }, /* Nm */ 
 	{ NULL, NULL }, /* Op */
@@ -830,6 +831,27 @@ post_pa(POST_ARGS)
 	m->next = MDOC_NEXT_CHILD;
 	/* XXX: make into macro value. */
 	if ( ! mdoc_word_alloc(m, n->line, n->pos, "~"))
+		return(0);
+	m->last = np;
+	return(1);
+}
+
+
+/*
+ * Empty `Li' macros get an empty string to make front-ends add an extra
+ * space.
+ */
+static int
+post_li(POST_ARGS)
+{
+	struct mdoc_node *np;
+
+	if (n->child)
+		return(1);
+	
+	np = n;
+	m->next = MDOC_NEXT_CHILD;
+	if ( ! mdoc_word_alloc(m, n->line, n->pos, ""))
 		return(0);
 	m->last = np;
 	return(1);
