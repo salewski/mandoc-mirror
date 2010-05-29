@@ -1,0 +1,10 @@
+.\" THIS WILL FAIL ON OLD GROFF!
+.\" IT DOESN'T PROCESS EMPTY `AR' MACROS CORRECTLY.
+.Dd May 16, 2010
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+.Ar [ ( : ( :
