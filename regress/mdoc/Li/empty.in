@@ -1,0 +1,14 @@
+.Dd May 16, 2010
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+.Li . a
+.Pp
+.Li ;
+.Pp
+.Ar expr1 Li : expr2
+.Pp
+.Ar expr1 Li . ; expr2 ( expr3 )

@@ -2091,6 +2091,8 @@ mdoc_li_pre(MDOC_ARGS)
 
 	PAIR_CLASS_INIT(&tag, "lit");
 	print_otag(h, TAG_SPAN, 1, &tag);
+	if (NULL == n->child)
+		print_text(h, "");
 	return(1);
 }
 

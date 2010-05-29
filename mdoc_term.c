@@ -2098,6 +2098,8 @@ termp_li_pre(DECL_ARGS)
 {
 
 	term_fontpush(p, TERMFONT_NONE);
+	if (NULL == n->child)
+		term_word(p, "");
 	return(1);
 }
 
