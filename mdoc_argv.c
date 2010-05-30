@@ -339,7 +339,7 @@ enum margserr
 mdoc_args(struct mdoc *m, int line, int *pos, 
 		char *buf, enum mdoct tok, char **v)
 {
-	int		  fl, c, i;
+	int		  fl;
 	struct mdoc_node *n;
 
 	fl = mdoc_argflags[tok];
@@ -347,26 +347,13 @@ mdoc_args(struct mdoc *m, int line, int *pos,
 	if (MDOC_It != tok)
 		return(args(m, line, pos, buf, fl, v));
 
-	/* 
-	 * The `It' macro is a special case, as it acquires parameters from its
-	 * parent `Bl' context, specifically, we're concerned with -column.
-	 */
-
 	for (n = m->last; n; n = n->parent)
-		if (MDOC_BLOCK == n->type && MDOC_Bl == n->tok)
+		if (MDOC_Bl == n->tok)
 			break;
 
-	assert(n);
-	c = (int)(n->args ? n->args->argc : 0);
-	assert(c > 0);
-
-	/* LINTED */
-	for (i = 0; i < c; i++) {
-		if (MDOC_Column != n->args->argv[i].arg) 
-			continue;
+	if (n && LIST_column == n->data.list) {
 		fl |= ARGS_TABSEP;
 		fl &= ~ARGS_DELIM;
-		break;
 	}
 
 	return(args(m, line, pos, buf, fl, v));
