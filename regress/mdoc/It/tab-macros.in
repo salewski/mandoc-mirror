@@ -6,7 +6,7 @@
 .Nd bar
 .Sh DESCRIPTION
 .Bl -column asdfasdf asdfasdf asdfasdf
-.It Fl asdf	asdf	asdf
+.It asdf	asdf	asdf
 .El
 .Bl -column asdfasdf asdfasdf asdfasdf
 .It Ar asdf ; Ta Fl asdf ; Ta asdf
