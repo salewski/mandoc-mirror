@@ -221,9 +221,7 @@ where capitalised non-terminals represent nodes.
 .It mnode
 \(<- BLOCK | ELEMENT | TEXT
 .It BLOCK
-\(<- (HEAD [TEXT])+ [BODY [TEXT]] [TAIL [TEXT]]
-.It BLOCK
-\(<- BODY [TEXT] [TAIL [TEXT]]
+\(<- HEAD [TEXT] (BODY [TEXT])+ [TAIL [TEXT]]
 .It ELEMENT
 \(<- TEXT*
 .It HEAD
@@ -237,12 +235,14 @@ where capitalised non-terminals represent nodes.
 .El
 .Pp
 Of note are the TEXT nodes following the HEAD, BODY and TAIL nodes of
-the BLOCK production.
-These refer to punctuation marks.
+the BLOCK production: these refer to punctuation marks.
 Furthermore, although a TEXT node will generally have a non-zero-length
 string, in the specific case of
 .Sq \&.Bd \-literal ,
 an empty line will produce a zero-length string.
+Multiple body parts are only found in invocations of
+.Sq \&Bl \-column ,
+where a new body introduces a new phrase.
 .Sh EXAMPLES
 The following example reads lines from stdin and parses them, operating
 on the finished parse tree with

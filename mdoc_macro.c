@@ -937,6 +937,7 @@ blk_full(MACRO_PROT_ARGS)
 #ifdef	UGLY
 	struct mdoc_node *n;
 #endif
+	enum mdoc_type	  mtt;
 	enum mdoct	  ntok;
 	enum margserr	  ac, lac;
 	enum margverr	  av;
@@ -1030,15 +1031,9 @@ blk_full(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		/* 
-		 * Open a head if one hasn't been opened. Re-open head
-		 * for phrases. 
-		 */
+		/* Open a head if one hasn't been opened. */
 
-		if (NULL == head || 
-				ARGS_PEND == ac ||
-				ARGS_PHRASE == ac || 
-				ARGS_PPHRASE == ac) {
+		if (NULL == head) {
 			if ( ! mdoc_head_alloc(m, line, ppos, tok))
 				return(0);
 			head = m->last;
@@ -1048,10 +1043,26 @@ blk_full(MACRO_PROT_ARGS)
 				ARGS_PEND == ac ||
 				ARGS_PPHRASE == ac) {
 			/*
+			 * If we haven't opened a body yet, rewind the
+			 * head; if we have, rewind that instead.
+			 */
+
+			mtt = body ? MDOC_BODY : MDOC_HEAD;
+			if ( ! rew_sub(mtt, m, tok, line, ppos))
+				return(0);
+			
+			/* Then allocate our body context. */
+
+			if ( ! mdoc_body_alloc(m, line, ppos, tok))
+				return(0);
+			body = m->last;
+
+			/*
 			 * Process phrases: set whether we're in a
 			 * partial-phrase (this effects line handling)
 			 * then call down into the phrase parser.
 			 */
+
 			if (ARGS_PPHRASE == ac)
 				m->flags |= MDOC_PPHRASE;
 			if (ARGS_PEND == ac && ARGS_PPHRASE == lac)
@@ -1064,11 +1075,6 @@ blk_full(MACRO_PROT_ARGS)
 				return(0);
 
 			m->flags &= ~MDOC_PPHRASE;
-
-			/* Close out active phrase. */
-
-			if ( ! rew_sub(MDOC_HEAD, m, tok, line, ppos))
-				return(0);
 			continue;
 		}
 

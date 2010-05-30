@@ -1,0 +1,17 @@
+.Dd $Mdocdate$
+.Dt FOO
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+.Bl -column asdfasdf asdfasdf asdfasdf
+.It Fl asdf	asdf	asdf
+.El
+.Bl -column asdfasdf asdfasdf asdfasdf
+.It Ar asdf ; Ta Fl asdf ; Ta asdf
+.El
+.Bl -tag -width Ds
+.It asdf
+asdf
+.El

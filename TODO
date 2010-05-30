@@ -50,7 +50,11 @@
   noticed by espie@  Fri, 23 Apr 2010 17:10:35 +0200
   NEEDS MERGING TO bsd.lv
 
-
+- implement blank `Bl -column', such as
+  .Bl -column
+  .It foo Ta bar
+  .El
+  
 ************************************************************************
 * formatting issues: ugly output
 ************************************************************************

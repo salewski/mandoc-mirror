@@ -928,6 +928,7 @@ post_an(POST_ARGS)
 static int
 post_it(POST_ARGS)
 {
+	/* FIXME: use mdoc_list! */
 	int		  type, i, cols;
 	struct mdoc_node *n, *c;
 
@@ -1017,15 +1018,16 @@ post_it(POST_ARGS)
 				return(0);
 		break;
 	case (MDOC_Column):
-		if (NULL == mdoc->last->head->child)
-			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOARGS))
+		assert(NULL == mdoc->last->head->child);
+		if (NULL == mdoc->last->body->child)
+			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOBODY))
 				return(0);
-		if (mdoc->last->body->child)
-			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BODYLOST))
-				return(0);
+
+		/* Count up the number of columns.  */
 		c = mdoc->last->child;
-		for (i = 0; c && MDOC_HEAD == c->type; c = c->next)
-			i++;
+		for (i = 0; c; c = c->next)
+			if (MDOC_BODY == c->type)
+				i++;
 
 		if (i < cols) {
 			if ( ! mdoc_vmsg(mdoc, MANDOCERR_ARGCOUNT,

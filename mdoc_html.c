@@ -100,7 +100,8 @@ static	int		  mdoc_it_block_pre(MDOC_ARGS, enum mdoc_list,
 				int, struct roffsu *, struct roffsu *);
 static	int		  mdoc_it_head_pre(MDOC_ARGS, enum mdoc_list, 
 				struct roffsu *);
-static	int		  mdoc_it_body_pre(MDOC_ARGS, enum mdoc_list);
+static	int		  mdoc_it_body_pre(MDOC_ARGS, enum mdoc_list,
+				struct roffsu *);
 static	int		  mdoc_it_pre(MDOC_ARGS);
 static	int		  mdoc_lb_pre(MDOC_ARGS);
 static	int		  mdoc_li_pre(MDOC_ARGS);
@@ -877,7 +878,7 @@ mdoc_it_block_pre(MDOC_ARGS, enum mdoc_list type, int comp,
 
 /* ARGSUSED */
 static int
-mdoc_it_body_pre(MDOC_ARGS, enum mdoc_list type)
+mdoc_it_body_pre(MDOC_ARGS, enum mdoc_list type, struct roffsu *width)
 {
 	struct htmlpair	 tag;
 	struct roffsu	 su;
@@ -888,6 +889,12 @@ mdoc_it_body_pre(MDOC_ARGS, enum mdoc_list type)
 	case (LIST_ohang):
 		/* FALLTHROUGH */
 	case (LIST_column):
+		bufcat_su(h, "min-width", width);
+		bufcat_style(h, "clear", "none");
+		if (n->next)
+			bufcat_style(h, "float", "left");
+		PAIR_STYLE_INIT(&tag, h);
+		print_otag(h, TAG_DIV, 1, &tag);
 		break;
 	default:
 		/* 
@@ -920,12 +927,6 @@ mdoc_it_head_pre(MDOC_ARGS, enum mdoc_list type, struct roffsu *width)
 		print_otag(h, TAG_DIV, 0, &tag);
 		return(1);
 	case (LIST_column):
-		bufcat_su(h, "min-width", width);
-		bufcat_style(h, "clear", "none");
-		if (n->next && MDOC_HEAD == n->next->type)
-			bufcat_style(h, "float", "left");
-		PAIR_STYLE_INIT(&tag, h);
-		print_otag(h, TAG_DIV, 1, &tag);
 		break;
 	default:
 		bufcat_su(h, "min-width", width);
@@ -1048,25 +1049,21 @@ mdoc_it_pre(MDOC_ARGS)
 		break;
 	}
 
-	/* Flip to body/block processing. */
-
-	if (MDOC_BODY == n->type)
-		return(mdoc_it_body_pre(m, n, h, type));
-	if (MDOC_BLOCK == n->type)
-		return(mdoc_it_block_pre(m, n, h, type, comp,
-					&offs, &width));
-
-	/* Override column widths. */
-
-	if (LIST_column == type) {
+	if (LIST_column == type && MDOC_BODY == n->type) {
 		nn = n->parent->child;
-		for (i = 0; nn && nn != n; nn = nn->next, i++)
-			/* Counter... */ ;
+		for (i = 0; nn && nn != n; nn = nn->next)
+			if (MDOC_BODY == nn->type)
+				i++;
 		if (i < (int)bl->args->argv[wp].sz)
 			a2width(bl->args->argv[wp].value[i], &width);
 	}
 
-	return(mdoc_it_head_pre(m, n, h, type, &width));
+	if (MDOC_HEAD == n->type)
+		return(mdoc_it_head_pre(m, n, h, type, &width));
+	else if (MDOC_BODY == n->type)
+		return(mdoc_it_body_pre(m, n, h, type, &width));
+
+	return(mdoc_it_block_pre(m, n, h, type, comp, &offs, &width));
 }
 
 

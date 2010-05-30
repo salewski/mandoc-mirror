@@ -700,7 +700,7 @@ termp_it_pre(DECL_ARGS)
 
 	switch (type) {
 	case (LIST_column):
-		if (MDOC_BODY == n->type)
+		if (MDOC_HEAD == n->type)
 			break;
 		/*
 		 * Imitate groff's column handling:
@@ -715,8 +715,13 @@ termp_it_pre(DECL_ARGS)
 		/* LINTED */
 		dcol = ncols < 5 ? 4 : ncols == 5 ? 3 : 1;
 
+		/*
+		 * Calculate the offset by applying all prior MDOC_BODY,
+		 * so we stop at the MDOC_HEAD (NULL == nn->prev).
+		 */
+
 		for (i = 0, nn = n->prev; 
-				nn && i < (int)ncols; 
+				nn->prev && i < (int)ncols; 
 				nn = nn->prev, i++)
 			offset += dcol + a2width
 				(&bl->args->argv[vals[2]], i);
@@ -869,15 +874,18 @@ termp_it_pre(DECL_ARGS)
 			p->flags |= TERMP_DANGLE;
 		break;
 	case (LIST_column):
-		if (MDOC_HEAD == n->type) {
-			assert(n->next);
-			if (MDOC_BODY == n->next->type)
-				p->flags &= ~TERMP_NOBREAK;
-			else
-				p->flags |= TERMP_NOBREAK;
-			if (n->prev) 
-				p->flags |= TERMP_NOLPAD;
-		}
+		if (MDOC_HEAD == n->type)
+			break;
+
+		if (NULL == n->next)
+			p->flags &= ~TERMP_NOBREAK;
+		else
+			p->flags |= TERMP_NOBREAK;
+
+		assert(n->prev);
+		if (MDOC_BODY == n->prev->type) 
+			p->flags |= TERMP_NOLPAD;
+
 		break;
 	case (LIST_diag):
 		if (MDOC_HEAD == n->type)
@@ -929,9 +937,9 @@ termp_it_pre(DECL_ARGS)
 		 * XXX - this behaviour is not documented: the
 		 * right-most column is filled to the right margin.
 		 */
-		if (MDOC_HEAD == n->type &&
-				MDOC_BODY == n->next->type &&
-				p->rmargin < p->maxrmargin)
+		if (MDOC_HEAD == n->type)
+			break;
+		if (NULL == n->next && p->rmargin < p->maxrmargin)
 			p->rmargin = p->maxrmargin;
 		break;
 	default:
@@ -985,7 +993,7 @@ termp_it_pre(DECL_ARGS)
 			return(0);
 		break;
 	case (LIST_column):
-		if (MDOC_BODY == n->type)
+		if (MDOC_HEAD == n->type)
 			return(0);
 		break;
 	default:
@@ -1017,7 +1025,7 @@ termp_it_post(DECL_ARGS)
 			term_newln(p);
 		break;
 	case (LIST_column):
-		if (MDOC_HEAD == n->type)
+		if (MDOC_BODY == n->type)
 			term_flushln(p);
 		break;
 	default:
