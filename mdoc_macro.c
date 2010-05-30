@@ -1002,6 +1002,7 @@ blk_full(MACRO_PROT_ARGS)
 	} 
 
 	ac = ARGS_ERROR;
+	lac = ARGS_PHRASE;
 
 	for ( ; ; ) {
 		la = *pos;
@@ -1013,16 +1014,10 @@ blk_full(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == ac)
 			break;
 
-		if (ARGS_PEND == ac) {
-			if (ARGS_PPHRASE == lac)
-				ac = ARGS_PPHRASE;
-			else
-				ac = ARGS_PHRASE;
-		}
-
 		/* Don't emit leading punct. for phrases. */
 
 		if (NULL == head && 
+				ARGS_PEND != ac &&
 				ARGS_PHRASE != ac &&
 				ARGS_PPHRASE != ac &&
 				ARGS_QWORD != ac &&
@@ -1035,6 +1030,7 @@ blk_full(MACRO_PROT_ARGS)
 		/* Always re-open head for phrases. */
 
 		if (NULL == head || 
+				ARGS_PEND == ac ||
 				ARGS_PHRASE == ac || 
 				ARGS_PPHRASE == ac) {
 			if ( ! mdoc_head_alloc(m, line, ppos, tok))
@@ -1045,9 +1041,17 @@ blk_full(MACRO_PROT_ARGS)
 		if (ARGS_PHRASE == ac || ARGS_PPHRASE == ac) {
 			if (ARGS_PPHRASE == ac)
 				m->flags |= MDOC_PPHRASE;
-			if ( ! phrase(m, line, la, buf, ac))
+			if (ARGS_PEND == ac && ARGS_PPHRASE == lac)
+				m->flags |= MDOC_PPHRASE;
+
+			if (ARGS_PEND == ac) {
+				if ( ! phrase(m, line, la, buf, lac))
+					return(0);
+			} else if ( ! phrase(m, line, la, buf, ac))
 				return(0);
+
 			m->flags &= ~MDOC_PPHRASE;
+
 			if ( ! rew_sub(MDOC_HEAD, m, tok, line, ppos))
 				return(0);
 			continue;
