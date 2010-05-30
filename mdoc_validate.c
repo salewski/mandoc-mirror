@@ -83,6 +83,7 @@ static	int	 post_at(POST_ARGS);
 static	int	 post_bf(POST_ARGS);
 static	int	 post_bl(POST_ARGS);
 static	int	 post_bl_head(POST_ARGS);
+static	int	 post_dt(POST_ARGS);
 static	int	 post_it(POST_ARGS);
 static	int	 post_lb(POST_ARGS);
 static	int	 post_nm(POST_ARGS);
@@ -113,6 +114,7 @@ static	v_post	 posts_bf[] = { hwarn_le1, post_bf, NULL };
 static	v_post	 posts_bl[] = { bwarn_ge1, post_bl, NULL };
 static	v_post	 posts_bool[] = { eerr_eq1, ebool, NULL };
 static	v_post	 posts_eoln[] = { post_eoln, NULL };
+static	v_post	 posts_dt[] = { post_dt, NULL };
 static	v_post	 posts_fo[] = { hwarn_eq1, bwarn_ge1, NULL };
 static	v_post	 posts_it[] = { post_it, NULL };
 static	v_post	 posts_lb[] = { eerr_eq1, post_lb, NULL };
@@ -147,7 +149,7 @@ static	v_pre	 pres_ss[] = { pre_ss, NULL };
 const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Ap */
 	{ pres_dd, posts_text },		/* Dd */
-	{ pres_dt, NULL },			/* Dt */
+	{ pres_dt, posts_dt },			/* Dt */
 	{ pres_os, NULL },			/* Os */
 	{ pres_sh, posts_sh },			/* Sh */ 
 	{ pres_ss, posts_ss },			/* Ss */ 
@@ -738,10 +740,29 @@ pre_rv(PRE_ARGS)
 
 
 static int
+post_dt(POST_ARGS)
+{
+	const struct mdoc_node *nn;
+	const char	*p;
+
+	if (NULL != (nn = mdoc->last->child))
+		for (p = nn->string; *p; p++) {
+			if ( ! isalpha((u_char)*p))
+				continue;
+			if (isupper((u_char)*p))
+				continue;
+			if ( ! mdoc_nmsg(mdoc, nn, MANDOCERR_UPPERCASE))
+				return(0);
+			break;
+		}
+
+	return(1);
+}
+
+
+static int
 pre_dt(PRE_ARGS)
 {
-
-	/* FIXME: make sure is capitalised. */
 
 	if (0 == mdoc->meta.date || mdoc->meta.os)
 		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_PROLOGOOO))

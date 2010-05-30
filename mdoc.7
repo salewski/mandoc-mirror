@@ -1408,13 +1408,15 @@ This is the mandatory second macro of any
 file.
 Its calling syntax is as follows:
 .Pp
-.D1 \. Ns Sx \&Dt Cm title section Op Cm volume | arch
+.D1 \. Ns Sx \&Dt Op Cm title Op Cm section Op Cm volume | arch
 .Pp
 Its arguments are as follows:
 .Bl -tag -width Ds -offset Ds
 .It Cm title
-The document's title (name).
-This should be capitalised and is required.
+The document's title (name), defaulting to
+.Qq UNKNOWN
+if unspecified.
+It should be capitalised.
 .It Cm section
 The manual section.
 This may be one of
@@ -1451,8 +1453,9 @@ This may be one of
 or
 .Ar paper
 .Pq paper .
-It is also required and should correspond to the manual's filename
-suffix.
+It should correspond to the manual's filename suffix and defaults to
+.Qq 1
+if unspecified.
 .It Cm volume
 This overrides the volume inferred from
 .Ar section .
@@ -1524,7 +1527,6 @@ Examples:
 .D1 \&.Dt FOO 1
 .D1 \&.Dt FOO 4 KM
 .D1 \&.Dt FOO 9 i386
-.D1 \&.Dt FOO 9 KM i386
 .Pp
 See also
 .Sx \&Dd

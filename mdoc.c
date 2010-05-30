@@ -276,11 +276,11 @@ mdoc_macro(struct mdoc *m, enum mdoct tok,
 		if ( ! mdoc_pmsg(m, ln, pp, MANDOCERR_BADPROLOG))
 			return(0);
 		if (NULL == m->meta.title)
-			m->meta.title = mandoc_strdup("unknown");
+			m->meta.title = mandoc_strdup("UNKNOWN");
 		if (NULL == m->meta.vol)
-			m->meta.vol = mandoc_strdup("local");
+			m->meta.vol = mandoc_strdup("LOCAL");
 		if (NULL == m->meta.os)
-			m->meta.os = mandoc_strdup("local");
+			m->meta.os = mandoc_strdup("LOCAL");
 		if (0 == m->meta.date)
 			m->meta.date = time(NULL);
 		m->flags |= MDOC_PBODY;
