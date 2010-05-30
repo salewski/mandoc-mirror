@@ -1038,7 +1038,9 @@ blk_full(MACRO_PROT_ARGS)
 			head = m->last;
 		}
 
-		if (ARGS_PHRASE == ac || ARGS_PPHRASE == ac) {
+		if (ARGS_PHRASE == ac || 
+				ARGS_PEND == ac ||
+				ARGS_PPHRASE == ac) {
 			if (ARGS_PPHRASE == ac)
 				m->flags |= MDOC_PPHRASE;
 			if (ARGS_PEND == ac && ARGS_PPHRASE == lac)
