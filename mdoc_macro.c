@@ -1002,11 +1002,11 @@ blk_full(MACRO_PROT_ARGS)
 	} 
 
 	ac = ARGS_ERROR;
-	lac = ARGS_PHRASE;
 
 	for ( ; ; ) {
 		la = *pos;
-		lac = ac;
+		/* Initialise last-phrase-type with ARGS_PHRASE. */
+		lac = ARGS_ERROR == ac ? ARGS_PHRASE : ac;
 		ac = mdoc_args(m, line, pos, buf, tok, &p);
 
 		if (ARGS_ERROR == ac)
@@ -1014,7 +1014,10 @@ blk_full(MACRO_PROT_ARGS)
 		if (ARGS_EOLN == ac)
 			break;
 
-		/* Don't emit leading punct. for phrases. */
+		/* 
+		 * Emit leading punctuation (i.e., punctuation before
+		 * the MDOC_HEAD) for non-phrase types.
+		 */
 
 		if (NULL == head && 
 				ARGS_PEND != ac &&
@@ -1027,7 +1030,10 @@ blk_full(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		/* Always re-open head for phrases. */
+		/* 
+		 * Open a head if one hasn't been opened. Re-open head
+		 * for phrases. 
+		 */
 
 		if (NULL == head || 
 				ARGS_PEND == ac ||
@@ -1041,6 +1047,11 @@ blk_full(MACRO_PROT_ARGS)
 		if (ARGS_PHRASE == ac || 
 				ARGS_PEND == ac ||
 				ARGS_PPHRASE == ac) {
+			/*
+			 * Process phrases: set whether we're in a
+			 * partial-phrase (this effects line handling)
+			 * then call down into the phrase parser.
+			 */
 			if (ARGS_PPHRASE == ac)
 				m->flags |= MDOC_PPHRASE;
 			if (ARGS_PEND == ac && ARGS_PPHRASE == lac)
@@ -1053,6 +1064,8 @@ blk_full(MACRO_PROT_ARGS)
 				return(0);
 
 			m->flags &= ~MDOC_PPHRASE;
+
+			/* Close out active phrase. */
 
 			if ( ! rew_sub(MDOC_HEAD, m, tok, line, ppos))
 				return(0);
