@@ -747,9 +747,7 @@ post_dt(POST_ARGS)
 
 	if (NULL != (nn = mdoc->last->child))
 		for (p = nn->string; *p; p++) {
-			if ( ! isalpha((u_char)*p))
-				continue;
-			if (isupper((u_char)*p))
+			if (toupper((u_char)*p) == *p)
 				continue;
 			if ( ! mdoc_nmsg(mdoc, nn, MANDOCERR_UPPERCASE))
 				return(0);
