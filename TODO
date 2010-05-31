@@ -57,6 +57,8 @@
 
 - explicitly disallow nested `Bl -column', which would clobber internal
   flags defined for struct mdoc_macro
+
+- set a meaningful default if no `Bl' list type is assigned
   
 ************************************************************************
 * formatting issues: ugly output

@@ -1,0 +1,12 @@
+.Dd $Mdocdate$
+.Dt FOO
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+hello
+.Bl -column asdfasdf asdfasdf
+.Fl foo Ta bar
+baz	xyzzy
+.El
