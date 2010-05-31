@@ -567,7 +567,8 @@ mdoc_ptext(struct mdoc *m, int line, char *buf, int offs)
 	 * should process within its context).
 	 */
 
-	if (MDOC_Bl == n->tok && LIST_column == n->data.list) {
+	if (MDOC_Bl == n->tok && MDOC_BODY == n->type &&
+			LIST_column == n->data.list) {
 		m->flags |= MDOC_FREECOL;
 		return(mdoc_macro(m, MDOC_It, line, offs, &offs, buf));
 	}
