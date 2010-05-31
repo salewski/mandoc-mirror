@@ -210,6 +210,7 @@ static	int mdoc_argflags[MDOC_MAX] = {
 	0, /* br */
 	0, /* sp */
 	0, /* %U */
+	0, /* Ta */
 };
 
 
@@ -347,6 +348,13 @@ mdoc_args(struct mdoc *m, int line, int *pos,
 	if (MDOC_It != tok)
 		return(args(m, line, pos, buf, fl, v));
 
+	/*
+	 * We know that we're in an `It', so it's reasonable to expect
+	 * us to be sitting in a `Bl'.  Someday this may not be the case
+	 * (if we allow random `It's sitting out there), so provide a
+	 * safe fall-back into the default behaviour.
+	 */
+
 	for (n = m->last; n; n = n->parent)
 		if (MDOC_Bl == n->tok)
 			break;
@@ -455,7 +463,7 @@ args(struct mdoc *m, int line, int *pos,
 					break;
 				if (pp > *v && ' ' != *(pp - 1))
 					continue;
-				if (' ' == *(pp + 2) || 0 == *(pp + 2))
+				if (' ' == *(pp + 2) || '\0' == *(pp + 2))
 					break;
 			}
 

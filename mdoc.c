@@ -69,7 +69,7 @@ const	char *const __mdoc_macronames[MDOC_MAX] = {
 	/* LINTED */
 	"Dx",		"%Q",		"br",		"sp",
 	/* LINTED */
-	"%U"
+	"%U",		"Ta"
 	};
 
 const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {		 
