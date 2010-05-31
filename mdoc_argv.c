@@ -227,7 +227,7 @@ mdoc_argv(struct mdoc *m, int line, enum mdoct tok,
 	struct mdoc_argv tmp;
 	struct mdoc_arg	 *arg;
 
-	if (0 == buf[*pos])
+	if ('\0' == buf[*pos])
 		return(ARGV_EOLN);
 
 	assert(' ' != buf[*pos]);
@@ -248,10 +248,10 @@ mdoc_argv(struct mdoc *m, int line, enum mdoct tok,
 
 	/* XXX - save zeroed byte, if not an argument. */
 
-	sv = 0;
+	sv = '\0';
 	if (buf[*pos]) {
 		sv = buf[*pos];
-		buf[(*pos)++] = 0;
+		buf[(*pos)++] = '\0';
 	}
 
 	(void)memset(&tmp, 0, sizeof(struct mdoc_argv));
@@ -372,9 +372,10 @@ static enum margserr
 args(struct mdoc *m, int line, int *pos, 
 		char *buf, int fl, char **v)
 {
-	int		  i;
-	char		 *p, *pp;
-	enum margserr	  rc;
+	int		 i;
+	char		*p, *pp;
+	enum margserr	 rc;
+	enum mdelim	 d;
 
 	/*
 	 * Parse out the terms (like `val' in `.Xx -arg val' or simply
@@ -391,7 +392,6 @@ args(struct mdoc *m, int line, int *pos,
 	 *   phrases like in `Bl -column'.
 	 */
 
-	assert(*pos);
 	assert(' ' != buf[*pos]);
 
 	if ('\0' == buf[*pos]) {
@@ -419,7 +419,7 @@ args(struct mdoc *m, int line, int *pos,
 
 	if ((fl & ARGS_DELIM) && DELIM_CLOSE == mdoc_iscdelim(buf[*pos])) {
 		for (i = *pos; buf[i]; ) {
-			enum mdelim d = mdoc_iscdelim(buf[i]);
+			d = mdoc_iscdelim(buf[i]);
 			if (DELIM_NONE == d || DELIM_OPEN == d)
 				break;
 			i++;
@@ -432,7 +432,7 @@ args(struct mdoc *m, int line, int *pos,
 
 		if ('\0' == buf[i]) {
 			*v = &buf[*pos];
-			if (' ' != buf[i - 1])
+			if (i && ' ' != buf[i - 1])
 				return(ARGS_PUNCT);
 			if (ARGS_NOWARN & fl)
 				return(ARGS_PUNCT);
@@ -490,7 +490,7 @@ args(struct mdoc *m, int line, int *pos,
 		}
 
 		/* Whitespace check for eoln case... */
-		if (0 == *p && ' ' == *(p - 1) && ! (ARGS_NOWARN & fl))
+		if ('\0' == *p && ' ' == *(p - 1) && ! (ARGS_NOWARN & fl))
 			if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE))
 				return(ARGS_ERROR);
 
@@ -563,7 +563,7 @@ args(struct mdoc *m, int line, int *pos,
 	 */
 
 	for ( ; buf[*pos]; (*pos)++)
-		if (' ' == buf[*pos] && '\\' != buf[*pos - 1])
+		if (*pos && ' ' == buf[*pos] && '\\' != buf[*pos - 1])
 			break;
 
 	if ('\0' == buf[*pos])
