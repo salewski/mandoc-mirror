@@ -1700,26 +1700,6 @@ phrase_ta(MACRO_PROT_ARGS)
 	n = m->last;
 	if ( ! rew_sub(MDOC_BODY, m, MDOC_It, line, ppos))
 		return(0);
-
-	/* 
-	 * FIXME: this is necessary in bogus constructions like
-	 *  .Bl -column foo bar
-	 *  .Sy foo Ta bar
-	 * It is, however, an ugly way to do it.
-	 *
-	 * XXX; remove this when the above construct builds an implied
-	 * `It' marker.
-	 */ 
-	if (NULL == m->last || 
-			MDOC_BODY != m->last->type ||
-			MDOC_It != m->last->tok ||
-			NULL == m->last->parent->parent ||
-			MDOC_Bl != m->last->parent->parent->tok ||
-			LIST_column != m->last->parent->parent->data.list) {
-		swarn(m, tok, line, ppos, n);
-		return(0);
-	}
-
 	if ( ! mdoc_body_alloc(m, line, ppos, MDOC_It))
 		return(0);
 
