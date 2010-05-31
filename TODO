@@ -59,6 +59,8 @@
   flags defined for struct mdoc_macro
 
 - set a meaningful default if no `Bl' list type is assigned
+
+- have a blank `It' head for `Bl -tag' not puke
   
 ************************************************************************
 * formatting issues: ugly output

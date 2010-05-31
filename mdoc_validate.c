@@ -1024,20 +1024,23 @@ post_it(POST_ARGS)
 static int
 post_bl_head(POST_ARGS) 
 {
-	int			i;
-	const struct mdoc_node *n;
-	const struct mdoc_argv *a;
+	int		  i;
+	struct mdoc_node *n;
 
+	assert(mdoc->last->parent);
 	n = mdoc->last->parent;
-	assert(n->args);
 
-	for (i = 0; i < (int)n->args->argc; i++) {
-		a = &n->args->argv[i];
-		if (a->arg == MDOC_Column) {
-			if (a->sz && mdoc->last->nchild)
-				return(mdoc_nmsg(mdoc, n, MANDOCERR_COLUMNS));
-			return(1);
+	if (LIST_column == n->data.list) {
+		for (i = 0; i < (int)n->args->argc; i++)
+			if (MDOC_Column == n->args->argv[i].arg)
+				break;
+		assert(i < (int)n->args->argc);
+
+		if (n->args->argv[i].sz && mdoc->last->nchild) {
+			mdoc_nmsg(mdoc, n, MANDOCERR_COLUMNS);
+			return(0);
 		}
+		return(1);
 	}
 
 	if (0 == (i = mdoc->last->nchild))
