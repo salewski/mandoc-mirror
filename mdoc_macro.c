@@ -1702,7 +1702,10 @@ phrase_ta(MACRO_PROT_ARGS)
 	 */ 
 	if (NULL == m->last || 
 			MDOC_BODY != m->last->type ||
-			MDOC_It != m->last->tok) {
+			MDOC_It != m->last->tok ||
+			NULL == m->last->parent->parent ||
+			MDOC_Bl != m->last->parent->parent->tok ||
+			LIST_column != m->last->parent->parent->data.list) {
 		swarn(m, tok, line, ppos, n);
 		return(0);
 	}
