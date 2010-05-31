@@ -1,0 +1,21 @@
+.\" NOTE: OLD GROFF WILL PUKE ON THE FIRST LIST, AS IT ADDS AN ERRONEOUS
+.\" TO THE TAB-EOLN COLUMN.
+.Dd $Mdocdate$
+.Dt FOO
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+.Bl -column asdfasdf asdfasdf asdfasdf
+.It asdf	asdf	
+asdf
+.El
+.Bl -column asdfasdf asdfasdf asdfasdf
+.It asdf Ta asdf Ta
+asdf
+.El
+.Bl -tag -width Ds
+.It asdf
+asdf
+.El
