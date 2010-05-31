@@ -54,6 +54,9 @@
   .Bl -column
   .It foo Ta bar
   .El
+
+- explicitly disallow nested `Bl -column', which would clobber internal
+  flags defined for struct mdoc_macro
   
 ************************************************************************
 * formatting issues: ugly output
