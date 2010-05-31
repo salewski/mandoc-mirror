@@ -595,6 +595,7 @@ mdoc_ptext(struct mdoc *m, int line, char *buf, int offs)
 		case '-':
 			if (mandoc_hyph(buf + offs, c))
 				*c = ASCII_HYPH;
+			ws = NULL;
 			break;
 		case ' ':
 			if (NULL == ws)
