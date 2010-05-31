@@ -929,72 +929,37 @@ post_an(POST_ARGS)
 static int
 post_it(POST_ARGS)
 {
-	/* FIXME: use mdoc_list! */
-	int		  type, i, cols;
+	int		  i, cols, rc;
+	enum mdoc_list	  lt;
 	struct mdoc_node *n, *c;
+	enum mandocerr	  er;
 
 	if (MDOC_BLOCK != mdoc->last->type)
 		return(1);
 
 	n = mdoc->last->parent->parent;
-	if (NULL == n->args) {
+	lt = n->data.list;
+
+	if (LIST__NONE == lt) {
 		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_LISTTYPE);
 		return(0);
 	}
 
-	/* Some types require block-head, some not. */
-
-	/* LINTED */
-	for (cols = type = -1, i = 0; -1 == type && 
-			i < (int)n->args->argc; i++)
-		switch (n->args->argv[i].arg) {
-		case (MDOC_Tag):
-			/* FALLTHROUGH */
-		case (MDOC_Diag):
-			/* FALLTHROUGH */
-		case (MDOC_Hang):
-			/* FALLTHROUGH */
-		case (MDOC_Ohang):
-			/* FALLTHROUGH */
-		case (MDOC_Inset):
-			/* FALLTHROUGH */
-		case (MDOC_Bullet):
-			/* FALLTHROUGH */
-		case (MDOC_Dash):
-			/* FALLTHROUGH */
-		case (MDOC_Enum):
-			/* FALLTHROUGH */
-		case (MDOC_Hyphen):
-			/* FALLTHROUGH */
-		case (MDOC_Item):
-			type = n->args->argv[i].arg;
+	switch (lt) {
+	case (LIST_tag):
+		if (mdoc->last->head->child)
 			break;
-		case (MDOC_Column):
-			type = n->args->argv[i].arg;
-			cols = (int)n->args->argv[i].sz;
-			break;
-		default:
-			break;
-		}
-
-	if (-1 == type) {
-		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_LISTTYPE);
-		return(0);
-	}
-
-	switch (type) {
-	case (MDOC_Tag):
-		if (NULL == mdoc->last->head->child)
-			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOARGS))
-				return(0);
+		/* FIXME: give this a dummy value. */
+		if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOARGS))
+			return(0);
 		break;
-	case (MDOC_Hang):
+	case (LIST_hang):
 		/* FALLTHROUGH */
-	case (MDOC_Ohang):
+	case (LIST_ohang):
 		/* FALLTHROUGH */
-	case (MDOC_Inset):
+	case (LIST_inset):
 		/* FALLTHROUGH */
-	case (MDOC_Diag):
+	case (LIST_diag):
 		if (NULL == mdoc->last->head->child)
 			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOARGS))
 				return(0);
@@ -1002,15 +967,15 @@ post_it(POST_ARGS)
 			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOBODY))
 				return(0);
 		break;
-	case (MDOC_Bullet):
+	case (LIST_bullet):
 		/* FALLTHROUGH */
-	case (MDOC_Dash):
+	case (LIST_dash):
 		/* FALLTHROUGH */
-	case (MDOC_Enum):
+	case (LIST_enum):
 		/* FALLTHROUGH */
-	case (MDOC_Hyphen):
+	case (LIST_hyphen):
 		/* FALLTHROUGH */
-	case (MDOC_Item):
+	case (LIST_item):
 		if (mdoc->last->head->child)
 			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_ARGSLOST))
 				return(0);
@@ -1018,33 +983,36 @@ post_it(POST_ARGS)
 			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOBODY))
 				return(0);
 		break;
-	case (MDOC_Column):
+	case (LIST_column):
+		cols = -1;
+		for (i = 0; i < (int)n->args->argc; i++)
+			if (MDOC_Column == n->args->argv[i].arg) {
+				cols = (int)n->args->argv[i].sz;
+				break;
+			}
+
+		assert(-1 != cols);
 		assert(NULL == mdoc->last->head->child);
+
 		if (NULL == mdoc->last->body->child)
 			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOBODY))
 				return(0);
 
-		/* Count up the number of columns.  */
-		c = mdoc->last->child;
-		for (i = 0; c; c = c->next)
+		for (i = 0, c = mdoc->last->child; c; c = c->next)
 			if (MDOC_BODY == c->type)
 				i++;
 
-		if (i < cols) {
-			if ( ! mdoc_vmsg(mdoc, MANDOCERR_ARGCOUNT,
-					mdoc->last->line, 
-					mdoc->last->pos, 
-					"columns == %d (have %d)",
-					cols, i))
-				return(0);
+		if (i < cols)
+			er = MANDOCERR_ARGCOUNT;
+		else if (i == cols || i == cols + 1)
 			break;
-		} else if (i == cols || i == cols + 1)
-			break;
+		else
+			er = MANDOCERR_SYNTARGCOUNT;
 
-		mdoc_vmsg(mdoc, MANDOCERR_SYNTARGCOUNT,
+		rc = mdoc_vmsg(mdoc, er, 
 				mdoc->last->line, mdoc->last->pos, 
 				"columns == %d (have %d)", cols, i);
-		return(0);
+		return(rc);
 	default:
 		break;
 	}
