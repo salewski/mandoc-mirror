@@ -2,6 +2,10 @@
 * missing features
 ************************************************************************
 
+- .` "macro" not implemented (see gnu/usr.bin/cvs/man/cvs.1)
+  found by Anthony Bentley (anthonyjbentley@gmail.com)
+  06/01/10 23:48 on tech@openbsd
+
 - explicit blocks with missing end macro should be implicitely closed
   at the end of the enclosing block, e.g. .Bl It (El) Sh
   reminded by stsp@  in net/pptp pptp.8  Fri, 23 Apr 2010 20:32:39 +0200
