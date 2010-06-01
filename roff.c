@@ -666,10 +666,8 @@ roff_cond_text(ROFF_ARGS)
 		return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
 	}
 
-	if (ep > st && '\\' != *(ep - 1)) {
-		ep = '\0';
+	if (ep == st || (ep > st && '\\' != *(ep - 1)))
 		roffnode_pop(r);
-	}
 
 	roffnode_cleanscope(r);
 	return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
