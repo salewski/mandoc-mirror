@@ -26,7 +26,7 @@ __BEGIN_DECLS
 enum	mandocerr {
 	MANDOCERR_OK,
 	MANDOCERR_UPPERCASE, /* text should be uppercase */
-	MANDOCERR_SECOOO, /* sections out of conentional order */
+	MANDOCERR_SECOOO, /* sections out of conventional order */
 	MANDOCERR_SECREP, /* section name repeats */
 	MANDOCERR_PROLOGOOO, /* out of order prologue */
 	MANDOCERR_PROLOGREP, /* repeated prologue entry */
@@ -39,7 +39,7 @@ enum	mandocerr {
 	MANDOCERR_WIDTHARG, /* superfluous width argument */
 	MANDOCERR_BADDATE, /* bad date argument */
 	MANDOCERR_BADWIDTH, /* bad width argument */
-	MANDOCERR_BADMSEC, /* unknown manual sction */
+	MANDOCERR_BADMSEC, /* unknown manual section */
 	MANDOCERR_SECMSEC, /* section not in conventional manual section */
 	MANDOCERR_EOLNSPACE, /* end of line whitespace */
 	MANDOCERR_SCOPEEXIT, /* scope open on exit */

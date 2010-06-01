@@ -97,7 +97,7 @@ struct	curparse {
 static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"ok",
 	"text should be uppercase",
-	"sections out of conentional order",
+	"sections out of conventional order",
 	"section name repeats",
 	"out of order prologue",
 	"repeated prologue entry",
@@ -110,7 +110,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"superfluous width argument",
 	"bad date argument",
 	"bad width argument",
-	"unknown manual sction",
+	"unknown manual section",
 	"section not in conventional manual section",
 	"end of line whitespace",
 	"scope open on exit",
