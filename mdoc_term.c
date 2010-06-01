@@ -1872,7 +1872,7 @@ termp_in_post(DECL_ARGS)
 	term_word(p, ">");
 	term_fontpop(p);
 
-	if (SEC_SYNOPSIS != n->sec && ! (MDOC_LINE & n->flags))
+	if (SEC_SYNOPSIS != n->sec || ! (MDOC_LINE & n->flags))
 		return;
 
 	term_newln(p);
