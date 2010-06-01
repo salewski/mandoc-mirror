@@ -207,7 +207,9 @@ macro is discarded.
 Furthermore, if an explicit closing sequence
 .Sq \e}
 is specified in a free-form line, the entire line is accepted within the
-scope of the prior macro, not only the text preceding the close.
+scope of the prior macro, not only the text preceding the close, with the
+.Sq \e}
+collapsing into a zero-width space.
 .Ss \&ig
 Ignore input.
 Accepts the following syntax:
