@@ -37,8 +37,6 @@
 .Nm erfc ,
 .Nm erfcf
 .Nd error function operators
-.Sh LIBRARY
-.Lb libm
 .Sh SYNOPSIS
 .In math.h
 .Ft double
