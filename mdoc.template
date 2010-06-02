@@ -10,7 +10,6 @@
 .Dd $\&Mdocdate$
 .Dt title section
 .Os
-.
 .Sh NAME
 .Nm name
 .Nd short description
