@@ -183,10 +183,6 @@
 							<TD>mandoc special characters</TD>
 						</TR>
 						<TR>
-							<TD><A HREF="manuals.7.html">manuals(7)</A> (<A HREF="manuals.7.txt">text</A>)</TD>
-							<TD>a guide to writing UNIX manuals</TD>
-						</TR>
-						<TR>
 							<TD><A HREF="mdoc.3.html">mdoc(3)</A> (<A HREF="mdoc.3.txt">text</A>)</TD>
 							<TD>mdoc macro compiler library</TD>
 						</TR>
@@ -266,7 +262,8 @@
 						<P>
 							This primarily focusses on the <Q>Bl</Q> and <Q>It</Q> macros described in <A
 							HREF="mdoc.7.html">mdoc</A>.  Multi-line column support is now fully compatible with
-							groff, as are implicit list entries for columns. 
+							groff, as are implicit list entries for columns.  Removed manuals.7 in favour of <A
+							CLASS="external" HREF="http://manpages.bsd.lv">http://manpages.bsd.lv</A>.
 						</P>
 					</DIV>
 					<DIV CLASS="news">

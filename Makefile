@@ -96,7 +96,7 @@ HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
 	     libmandoc.h html.h chars.h out.h main.h roff.h \
 	     mandoc.h
 
-GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml manuals.7.sgml \
+GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml \
 	     mandoc_char.7.sgml man.7.sgml man.3.sgml roff.7.sgml \
 	     roff.3.sgml
 
@@ -105,12 +105,12 @@ SGMLS	   = index.sgml
 HTMLS	   = ChangeLog.html index.html man.h.html mdoc.h.html \
 	     mandoc.h.html roff.h.html mandoc.1.html mdoc.3.html \
 	     man.3.html mdoc.7.html man.7.html mandoc_char.7.html \
-	     manuals.7.html roff.7.html roff.3.html
+	     roff.7.html roff.3.html
 
 XSLS	   = ChangeLog.xsl
 
 TEXTS	   = mandoc.1.txt mdoc.3.txt man.3.txt mdoc.7.txt man.7.txt \
-	     mandoc_char.7.txt manuals.7.txt ChangeLog.txt \
+	     mandoc_char.7.txt ChangeLog.txt \
 	     roff.7.txt roff.3.txt
 
 EXAMPLES   = example.style.css
@@ -123,7 +123,7 @@ MD5S	   = mdocml-$(VERSION).md5
 
 TARGZS	   = mdocml-$(VERSION).tar.gz
 
-MANS	   = mandoc.1 mdoc.3 mdoc.7 manuals.7 mandoc_char.7 man.7 \
+MANS	   = mandoc.1 mdoc.3 mdoc.7 mandoc_char.7 man.7 \
 	     man.3 roff.7 roff.3
 
 BINS	   = mandoc
