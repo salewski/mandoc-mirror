@@ -258,7 +258,17 @@
 					<H1>
 					<A NAME="news">NEWS</A>
 					</H1>
-
+					<DIV CLASS="news">
+						<P>
+							<SPAN CLASS="date">xx-06-2010</SPAN>:
+							version 1.10.1
+						</P>
+						<P>
+							This primarily focusses on the <Q>Bl</Q> and <Q>It</Q> macros described in <A
+							HREF="mdoc.7.html">mdoc</A>.  Multi-line column support is now fully compatible with
+							groff, as are implicit list entries for columns. 
+						</P>
+					</DIV>
 					<DIV CLASS="news">
 						<P>
 							<SPAN CLASS="date">29-05-2010</SPAN>:

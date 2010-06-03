@@ -12,8 +12,8 @@ INSTALL_DATA	= $(INSTALL) -m 0444
 INSTALL_LIB	= $(INSTALL) -m 0644
 INSTALL_MAN	= $(INSTALL_DATA)
 
-VERSION	   = 1.10.0
-VDATE	   = 29 May 2010
+VERSION	   = 1.10.1
+VDATE	   = 03 June 2010
 
 VFLAGS	   = -DVERSION="\"$(VERSION)\""
 WFLAGS     = -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
