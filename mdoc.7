@@ -1136,22 +1136,18 @@ macro.
 These dictate the width of columns either as
 .Sx Scaling Widths
 or literal text.
-List entry bodies must be left empty.
-Column bodies have the following syntax:
-.Pp
-.D1 .It col1 <TAB> ... coln
-.D1 .It col1 \&Ta ... coln
-.D1 .It col1 <TAB> col2 \&Ta coln
-.Pp
-where columns may be separated by tabs, the literal string
-.Qq \&Ta ,
-or a mixture of both.
-These are equivalent except that quoted sections propogate over tabs,
-for example,
-.Pp
-.D1 .It \(dqcol1 ; <TAB> col2 ;\(dq ;
-.Pp
-will preserve the semicolon whitespace except for the last.
+If the initial macro of a
+.Fl column
+list is not an
+.Sx \&It ,
+an
+.Sx \&It
+context spanning each line is implied until an
+.Sx \&It
+line macro is encountered, at which point list bodies are interpreted as
+described in the
+.Sx \&It
+documentation.
 .It Fl dash
 A list offset by a dash (hyphen).
 The head of list entries must be empty.
@@ -1206,6 +1202,9 @@ after the head as specified by the
 .Fl width
 argument.
 .El
+.Pp
+See also
+.Sx \&It .
 .Ss \&Bo
 Begins a block enclosed by square brackets.
 Does not have any head arguments.
@@ -1644,6 +1643,86 @@ and
 .Ss \&Ic
 .Ss \&In
 .Ss \&It
+A list item.  The syntax of this macro depends on the list type.
+.Pp
+Lists
+of type
+.Fl hang ,
+.Fl ohang ,
+.Fl inset ,
+and
+.Fl diag
+have the following calling syntax:
+.Pp
+.D1 \. Ns Sx \&It Cm args
+.Pp
+Lists of type
+.Fl bullet ,
+.Fl dash ,
+.Fl enum ,
+.Fl hyphen
+and
+.Fl item
+have the following calling syntax:
+.Pp
+.D1 \. Ns Sx \&It
+.Pp
+with subsequent lines interpreted within the scope of the
+.Sx \&It
+until either a closing
+.Sx \&El
+or another
+.Sx \&It .
+.Pp
+The
+.Fl tag
+list has syntax
+.Pp
+.D1 \. Ns Sx \&It Op Cm args
+.Pp
+with subsequent lines interpreted as with
+.Fl bullet
+and family.
+The line arguments correspond to the list's left-hand side; body
+arguments correspond to the list's contents.
+.Pp
+The
+.Fl column
+list is the most complicated.
+Its syntax is
+.Pp
+.D1 \. Ns Sx \&It Op Cm args
+.Pp
+where
+.Cm args
+are phrases, a mix of macros and text corresponding to a line column,
+delimited by tabs or the special
+.Sq \&Ta
+pseudo-macro.
+Lines subsequent the
+.Sx \&It
+are interpreted within the scope of the last phrase.
+Calling the pseudo-macro
+.Sq \&Ta
+will open a new phrase scope (this must occur on a macro line to be
+interpreted as a macro).  Note that the tab phrase delimiter may only be
+used within the
+.Sx \&It
+line itself.
+Subsequent this, only the
+.Sq \&Ta
+pseudo-macro may be used to delimit phrases.
+Furthermore, note that quoted sections propogate over tab-delimited
+phrases on an
+.Sx \&It ,
+for example,
+.Pp
+.D1 .It \(dqcol1 ; <TAB> col2 ;\(dq ;
+.Pp
+will preserve the semicolon whitespace except for the last.
+.Pp
+See also
+.Sx \&Bl .
 .Ss \&Lb
 Specify a library.
 The calling syntax is as follows:
