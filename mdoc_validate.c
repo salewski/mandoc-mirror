@@ -34,7 +34,7 @@
 /* FIXME: .Bl -diag can't have non-text children in HEAD. */
 /* TODO: ignoring Pp (it's superfluous in some invocations). */
 
-#define	PRE_ARGS  struct mdoc *mdoc, const struct mdoc_node *n
+#define	PRE_ARGS  struct mdoc *mdoc, struct mdoc_node *n
 #define	POST_ARGS struct mdoc *mdoc
 
 typedef	int	(*v_pre)(PRE_ARGS);
@@ -273,7 +273,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 
 
 int
-mdoc_valid_pre(struct mdoc *mdoc, const struct mdoc_node *n)
+mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *n)
 {
 	v_pre		*p;
 	int		 line, pos;
@@ -535,79 +535,117 @@ pre_display(PRE_ARGS)
 static int
 pre_bl(PRE_ARGS)
 {
-	int		 pos, type, width, offset;
+	int		 i, width, offs, cmpt, dupl;
+	enum mdoc_list	 lt;
 
-	if (MDOC_BLOCK != n->type)
+	if (MDOC_BLOCK != n->type) {
+		assert(n->parent);
+		assert(MDOC_BLOCK == n->parent->type);
+		assert(MDOC_Bl == n->parent->tok);
+		assert(LIST__NONE != n->parent->data.list);
+		n->data.list = n->parent->data.list;
 		return(1);
-	if (NULL == n->args) {
-		mdoc_nmsg(mdoc, n, MANDOCERR_LISTTYPE);
-		return(0);
 	}
 
-	/* Make sure that only one type of list is specified.  */
+	/* 
+	 * First figure out which kind of list to use: bind ourselves to
+	 * the first mentioned list type and warn about any remaining
+	 * ones.  If we find no list type, we default to LIST_item.
+	 */
 
-	type = offset = width = -1;
+	assert(LIST__NONE == n->data.list);
+	offs = width = cmpt = -1;
 
 	/* LINTED */
-	for (pos = 0; pos < (int)n->args->argc; pos++)
-		switch (n->args->argv[pos].arg) {
+	for (i = 0; n->args && i < (int)n->args->argc; i++) {
+		lt = LIST__NONE;
+		dupl = 0;
+		switch (n->args->argv[i].arg) {
+		/* Set list types. */
 		case (MDOC_Bullet):
-			/* FALLTHROUGH */
+			lt = LIST_bullet;
+			break;
 		case (MDOC_Dash):
-			/* FALLTHROUGH */
+			lt = LIST_dash;
+			break;
 		case (MDOC_Enum):
-			/* FALLTHROUGH */
+			lt = LIST_enum;
+			break;
 		case (MDOC_Hyphen):
-			/* FALLTHROUGH */
+			lt = LIST_hyphen;
+			break;
 		case (MDOC_Item):
-			/* FALLTHROUGH */
+			lt = LIST_item;
+			break;
 		case (MDOC_Tag):
-			/* FALLTHROUGH */
+			lt = LIST_tag;
+			break;
 		case (MDOC_Diag):
-			/* FALLTHROUGH */
+			lt = LIST_diag;
+			break;
 		case (MDOC_Hang):
-			/* FALLTHROUGH */
+			lt = LIST_hang;
+			break;
 		case (MDOC_Ohang):
-			/* FALLTHROUGH */
+			lt = LIST_ohang;
+			break;
 		case (MDOC_Inset):
-			/* FALLTHROUGH */
+			lt = LIST_inset;
+			break;
 		case (MDOC_Column):
-			if (type < 0) {
-				type = n->args->argv[pos].arg;
-				break;
-			}
-			if (mdoc_nmsg(mdoc, n, MANDOCERR_LISTREP))
-				break;
-			return(0);
+			lt = LIST_column;
+			break;
+		/* Set list arguments. */
 		case (MDOC_Compact):
-			if (type >= 0)
-				break;
-			if (mdoc_nmsg(mdoc, n, MANDOCERR_LISTFIRST))
-				break;
-			return(0);
+			if (cmpt >= 0) 
+				dupl++;
+			cmpt = i;
+			break;
 		case (MDOC_Width):
 			if (width >= 0)
-				if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_ARGVREP))
-					return(0);
-			if (type < 0 && ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTFIRST))
-				return(0);
-			width = n->args->argv[pos].arg;
+				dupl++;
+			width = i;
 			break;
 		case (MDOC_Offset):
-			if (offset >= 0)
-				if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_ARGVREP))
-					return(0);
-			if (type < 0 && ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTFIRST))
-				return(0);
-			offset = n->args->argv[pos].arg;
-			break;
-		default:
+			if (offs >= 0)
+				dupl++;
+			offs = i;
 			break;
 		}
 
-	if (type < 0) {
-		mdoc_nmsg(mdoc, n, MANDOCERR_LISTTYPE);
-		return(0);
+		/* Check: duplicate auxiliary arguments. */
+
+		if (dupl)
+			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_ARGVREP))
+				return(0);
+
+		/* Check: multiple list types. */
+
+		if (LIST__NONE != lt && n->data.list != LIST__NONE)
+			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTREP))
+				return(0);
+
+		/* Assign list type. */
+
+		if (LIST__NONE != lt && n->data.list == LIST__NONE)
+			n->data.list = lt;
+
+		/* The list type should come first. */
+
+		if (n->data.list == LIST__NONE)
+			if (width >= 0 || offs >= 0 || cmpt >= 0)
+				if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTFIRST))
+					return(0);
+
+		continue;
+	}
+
+	/* Allow lists to default to LIST_item. */
+
+	if (LIST__NONE == n->data.list) {
+		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTTYPE))
+			return(0);
+		n->data.list = LIST_item;
 	}
 
 	/* 
@@ -616,23 +654,27 @@ pre_bl(PRE_ARGS)
 	 * and must also be warned.
 	 */
 
-	switch (type) {
-	case (MDOC_Tag):
-		if (width < 0 && ! mdoc_nmsg(mdoc, n, MANDOCERR_NOWIDTHARG))
-			return(0);
-		break;
-	case (MDOC_Column):
+	switch (n->data.list) {
+	case (LIST_tag):
+		if (width >= 0)
+			break;
+		if (mdoc_nmsg(mdoc, n, MANDOCERR_NOWIDTHARG))
+			break;
+		return(0);
+	case (LIST_column):
 		/* FALLTHROUGH */
-	case (MDOC_Diag):
+	case (LIST_diag):
 		/* FALLTHROUGH */
-	case (MDOC_Ohang):
+	case (LIST_ohang):
 		/* FALLTHROUGH */
-	case (MDOC_Inset):
+	case (LIST_inset):
 		/* FALLTHROUGH */
-	case (MDOC_Item):
-		if (width >= 0 && ! mdoc_nmsg(mdoc, n, MANDOCERR_WIDTHARG))
-			return(0);
-		break;
+	case (LIST_item):
+		if (width < 0)
+			break;
+		if (mdoc_nmsg(mdoc, n, MANDOCERR_WIDTHARG))
+			break;
+		return(0);
 	default:
 		break;
 	}

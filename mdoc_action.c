@@ -948,8 +948,7 @@ pre_offset(PRE_ARGS)
 	 * stipulated by mdoc.samples. 
 	 */
 
-	assert(n->args);
-	for (i = 0; i < (int)n->args->argc; i++) {
+	for (i = 0; n->args && i < (int)n->args->argc; i++) {
 		if (MDOC_Offset != n->args->argv[i].arg) 
 			continue;
 		if (n->args->argv[i].sz)
@@ -969,63 +968,10 @@ pre_offset(PRE_ARGS)
 static int
 pre_bl(PRE_ARGS)
 {
-	int		 pos;
 
-	if (MDOC_BLOCK != n->type) {
-		assert(n->parent);
-		assert(MDOC_BLOCK == n->parent->type);
-		assert(MDOC_Bl == n->parent->tok);
-		assert(LIST__NONE != n->parent->data.list);
-		n->data.list = n->parent->data.list;
-		return(1);
-	}
-
-	assert(LIST__NONE == n->data.list);
-
-	for (pos = 0; pos < (int)n->args->argc; pos++) {
-		switch (n->args->argv[pos].arg) {
-		case (MDOC_Bullet):
-			n->data.list = LIST_bullet;
-			break;
-		case (MDOC_Dash):
-			n->data.list = LIST_dash;
-			break;
-		case (MDOC_Enum):
-			n->data.list = LIST_enum;
-			break;
-		case (MDOC_Hyphen):
-			n->data.list = LIST_hyphen;
-			break;
-		case (MDOC_Item):
-			n->data.list = LIST_item;
-			break;
-		case (MDOC_Tag):
-			n->data.list = LIST_tag;
-			break;
-		case (MDOC_Diag):
-			n->data.list = LIST_diag;
-			break;
-		case (MDOC_Hang):
-			n->data.list = LIST_hang;
-			break;
-		case (MDOC_Ohang):
-			n->data.list = LIST_ohang;
-			break;
-		case (MDOC_Inset):
-			n->data.list = LIST_inset;
-			break;
-		case (MDOC_Column):
-			n->data.list = LIST_column;
-			break;
-		default:
-			break;
-		}
-		if (LIST__NONE != n->data.list)
-			break;
-	}
-
-	assert(LIST__NONE != n->data.list);
-	return(pre_offset(m, n));
+	if (MDOC_BLOCK == n->type)
+		return(pre_offset(m, n));
+	return(1);
 }
 
 

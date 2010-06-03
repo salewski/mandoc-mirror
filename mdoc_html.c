@@ -832,7 +832,6 @@ mdoc_it_block_pre(MDOC_ARGS, enum mdoc_list type, int comp,
 	struct roffsu		 su;
 
 	nn = n->parent->parent;
-	assert(nn->args);
 
 	/* XXX: see notes in mdoc_it_pre(). */
 
@@ -1014,7 +1013,8 @@ mdoc_it_pre(MDOC_ARGS)
 
 	/* Get width, offset, and compact arguments. */
 
-	for (wp = -1, comp = i = 0; i < (int)bl->args->argc; i++) 
+	wp = -1;
+	for (comp = i = 0; bl->args && i < (int)bl->args->argc; i++) 
 		switch (bl->args->argv[i].arg) {
 		case (MDOC_Column):
 			wp = i; /* Save for later. */
@@ -1322,7 +1322,7 @@ mdoc_bd_pre(MDOC_ARGS)
 	SCALE_VS_INIT(&su, 0);
 
 	type = comp = 0;
-	for (i = 0; i < (int)bl->args->argc; i++) 
+	for (i = 0; bl->args && i < (int)bl->args->argc; i++) 
 		switch (bl->args->argv[i].arg) {
 		case (MDOC_Offset):
 			a2offs(bl->args->argv[i].value[0], &su);
@@ -1997,8 +1997,7 @@ mdoc_bf_pre(MDOC_ARGS)
 		else if ( ! strcmp("Li", n->head->child->string))
 			PAIR_CLASS_INIT(&tag[0], "lit");
 	} else {
-		assert(n->args);
-		for (i = 0; i < (int)n->args->argc; i++) 
+		for (i = 0; n->args && i < (int)n->args->argc; i++) 
 			switch (n->args->argv[i].arg) {
 			case (MDOC_Symbolic):
 				PAIR_CLASS_INIT(&tag[0], "symb");
