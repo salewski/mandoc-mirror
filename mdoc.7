@@ -1332,6 +1332,11 @@ See also
 and
 .Sx \&Dl .
 .Ss \&Db
+Start a debugging context.
+This macro is parsed, but generally ignored.
+Its calling syntax is as follows:
+.Pp
+.D1 \. Ns Sx \&Db Cm on | off
 .Ss \&Dc
 Closes a
 .Sx \&Do
@@ -1559,6 +1564,13 @@ and
 .Ss \&Ef
 .Ss \&Ek
 .Ss \&El
+Ends a list context started by
+.Sx \&Bl .
+.Pp
+See also
+.Sx \&Bl
+and
+.Sx \&It .
 .Ss \&Em
 Denotes text that should be emphasised.
 Note that this is a presentation term and should not be used for
@@ -1598,8 +1610,33 @@ is not provided, the document's name as stipulated in
 .Sx \&Nm
 is provided.
 .Ss \&Fa
+Function argument.
+This may be invoked for names with or without the corresponding type.
+It is also used to specify the field name of a structure.
+Most often, the
+.Sx \&Fa
+macro is used in the
+.Em SYNOPSIS
+section when documenting multi-line function prototypes.
+If invoked with multiple arguments, the arguments are separated by a
+comma.
+Furthermore, if the following macro is another
+.Sx \&Fa ,
+the last argument will also have a trailing comma.
+.Pp
+Examples:
+.D1 \&.Fa \(dqconst char *p\(dq
+.D1 \&.Fa \(dqint a\(dq \(dqint b\(dq \(dqint c\(dq
+.D1 \&.Fa foo
 .Ss \&Fc
 .Ss \&Fd
+Historically used to document include files.
+This usage has been deprecated in favour of
+.Sx \&In .
+Do not use this macro.
+.Pp
+See also
+.Sx \&In .
 .Ss \&Fl
 Command-line flag.
 Used when listing arguments to command-line utilities.
