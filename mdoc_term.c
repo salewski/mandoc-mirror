@@ -1538,7 +1538,9 @@ termp_fn_pre(DECL_ARGS)
 
 	/* NB: MDOC_LINE has no effect on this macro! */
 	if (SEC_SYNOPSIS == n->sec) {
-		if (n->prev)
+		if (n->prev && MDOC_Ft == n->prev->tok)
+			term_newln(p);
+		else if (n->prev)
 			term_vspace(p);
 	}
 

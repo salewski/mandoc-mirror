@@ -1590,6 +1590,10 @@ mdoc_fn_pre(MDOC_ARGS)
 		bufcat_su(h, "margin-left", &su);
 		su.scale = -su.scale;
 		bufcat_su(h, "text-indent", &su);
+		if (n->prev && MDOC_Ft != n->prev->tok) {
+			SCALE_VS_INIT(&su, 1);
+			bufcat_su(h, "margin-top", &su);
+		} 
 		if (n->next) {
 			SCALE_VS_INIT(&su, 1);
 			bufcat_su(h, "margin-bottom", &su);
