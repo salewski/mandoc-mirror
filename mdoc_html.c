@@ -84,6 +84,7 @@ static	void		  mdoc_dq_post(MDOC_ARGS);
 static	int		  mdoc_dq_pre(MDOC_ARGS);
 static	int		  mdoc_dv_pre(MDOC_ARGS);
 static	int		  mdoc_fa_pre(MDOC_ARGS);
+static	void		  mdoc_fd_post(MDOC_ARGS);
 static	int		  mdoc_fd_pre(MDOC_ARGS);
 static	int		  mdoc_fl_pre(MDOC_ARGS);
 static	int		  mdoc_fn_pre(MDOC_ARGS);
@@ -158,7 +159,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_ev_pre, NULL}, /* Ev */ 
 	{mdoc_ex_pre, NULL}, /* Ex */
 	{mdoc_fa_pre, NULL}, /* Fa */ 
-	{mdoc_fd_pre, NULL}, /* Fd */ 
+	{mdoc_fd_pre, mdoc_fd_post}, /* Fd */ 
 	{mdoc_fl_pre, NULL}, /* Fl */
 	{mdoc_fn_pre, NULL}, /* Fn */ 
 	{mdoc_ft_pre, NULL}, /* Ft */ 
@@ -1510,21 +1511,19 @@ mdoc_fa_pre(MDOC_ARGS)
 
 
 /* ARGSUSED */
+static void
+mdoc_fd_post(MDOC_ARGS)
+{
+
+	print_otag(h, TAG_BR, 0, NULL);
+}
+
+
+/* ARGSUSED */
 static int
 mdoc_fd_pre(MDOC_ARGS)
 {
 	struct htmlpair	 tag;
-	struct roffsu	 su;
-
-	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags) {
-		if (n->next && MDOC_Fd != n->next->tok) {
-			SCALE_VS_INIT(&su, 1);
-			bufcat_su(h, "margin-bottom", &su);
-			PAIR_STYLE_INIT(&tag, h);
-			print_otag(h, TAG_DIV, 1, &tag);
-		} else
-			print_otag(h, TAG_DIV, 0, NULL);
-	}
 
 	PAIR_CLASS_INIT(&tag, "macro");
 	print_otag(h, TAG_SPAN, 1, &tag);

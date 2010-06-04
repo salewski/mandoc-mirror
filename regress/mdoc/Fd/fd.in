@@ -1,0 +1,22 @@
+.Dd $Mdocdate$
+.Dt FOO
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh SYNOPSIS
+1
+.Fl
+.Fd 2 3 4
+.Fd 3
+4
+.Sh DESCRIPTION
+1
+.Fd 2
+.Fd 3
+4
+.Sh BLAH
+1
+.Fd 2
+.Fd 3
+4

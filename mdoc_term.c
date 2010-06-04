@@ -1358,12 +1358,7 @@ static void
 termp_fd_post(DECL_ARGS)
 {
 
-	if (n->sec != SEC_SYNOPSIS || ! (MDOC_LINE & n->flags))
-		return;
-
 	term_newln(p);
-	if (n->next && MDOC_Fd != n->next->tok)
-		term_vspace(p);
 }
 
 
