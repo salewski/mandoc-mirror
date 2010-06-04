@@ -1823,30 +1823,15 @@ mdoc_in_pre(MDOC_ARGS)
 	struct tag		*t;
 	struct htmlpair		 tag[2];
 	int			 i;
-	struct roffsu		 su;
-
-	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags) {
-		if (n->next && MDOC_In != n->next->tok) {
-			SCALE_VS_INIT(&su, 1);
-			bufcat_su(h, "margin-bottom", &su);
-			PAIR_STYLE_INIT(&tag[0], h);
-			print_otag(h, TAG_DIV, 1, tag);
-		} else
-			print_otag(h, TAG_DIV, 0, NULL);
-	}
-
-	/* FIXME: there's a buffer bug in here somewhere. */
 
 	PAIR_CLASS_INIT(&tag[0], "includes");
 	print_otag(h, TAG_SPAN, 1, tag);
 
-	if (SEC_SYNOPSIS == n->sec)
+	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags)
 		print_text(h, "#include");
 
 	print_text(h, "<");
 	h->flags |= HTML_NOSPACE;
-
-	/* XXX -- see warning in termp_in_post(). */
 
 	for (nn = n->child; nn; nn = nn->next) {
 		PAIR_CLASS_INIT(&tag[0], "link-includes");
@@ -1864,6 +1849,9 @@ mdoc_in_pre(MDOC_ARGS)
 
 	h->flags |= HTML_NOSPACE;
 	print_text(h, ">");
+
+	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags) 
+		print_otag(h, TAG_BR, 0, NULL);
 
 	return(0);
 }

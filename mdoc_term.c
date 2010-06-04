@@ -1847,11 +1847,15 @@ static int
 termp_in_pre(DECL_ARGS)
 {
 
-	term_fontpush(p, TERMFONT_BOLD);
-	if (SEC_SYNOPSIS == n->sec)
+	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags) {
+		term_fontpush(p, TERMFONT_BOLD);
 		term_word(p, "#include");
+		term_word(p, "<");
+	} else {
+		term_word(p, "<");
+		term_fontpush(p, TERMFONT_UNDER);
+	}
 
-	term_word(p, "<");
 	p->flags |= TERMP_NOSPACE;
 	return(1);
 }
@@ -1862,23 +1866,16 @@ static void
 termp_in_post(DECL_ARGS)
 {
 
-	term_fontpush(p, TERMFONT_BOLD);
+	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags)
+		term_fontpush(p, TERMFONT_BOLD);
+
 	p->flags |= TERMP_NOSPACE;
 	term_word(p, ">");
-	term_fontpop(p);
 
-	if (SEC_SYNOPSIS != n->sec || ! (MDOC_LINE & n->flags))
-		return;
-
-	term_newln(p);
-	/* 
-	 * XXX Not entirely correct.  If `.In foo bar' is specified in
-	 * the SYNOPSIS section, then it produces a single break after
-	 * the <foo>; mandoc asserts a vertical space.  Since this
-	 * construction is rarely used, I think it's fine.
-	 */
-	if (n->next && MDOC_In != n->next->tok)
-		term_vspace(p);
+	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags) {
+		term_fontpop(p);
+		term_newln(p);
+	}
 }
 
 

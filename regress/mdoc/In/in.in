@@ -1,0 +1,24 @@
+.\" THIS WILL PUKE HORRIBLY ON OLD GROFF, WHICH HAS COMPLETELY
+.\" DIFFERENT ("BAD") BEHAVIOUR.
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh SYNOPSIS
+1
+.In 2 3
+6
+.In 2 3
+.Qq In 2
+.Fd a
+6
+.In 4
+5
+.Sh DESCRIPTION
+1
+.In 2 3
+6
+.In 4
+5

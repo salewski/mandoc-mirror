@@ -33,7 +33,7 @@ section describes compatibility with other troff \-mdoc implementations.
 .Pp
 An
 .Nm
-document follows simple rules:  lines beginning with the control
+document follows simple rules: lines beginning with the control
 character
 .Sq \.
 are parsed for macros.  Other lines are interpreted within the scope of
@@ -122,7 +122,7 @@ escape followed by an indicator: B (bold), I, (italic), R (Roman), or P
 A numerical representation 3, 2, or 1 (bold, italic, and Roman,
 respectively) may be used instead.
 A text decoration is valid within
-the current font scope only:  if a macro opens a font scope alongside
+the current font scope only: if a macro opens a font scope alongside
 its own scope, such as
 .Sx \&Bf
 .Cm \&Sy ,
@@ -1679,6 +1679,19 @@ and
 .Ss \&Hf
 .Ss \&Ic
 .Ss \&In
+An
+.Qq include
+file.
+In the
+.Em SYNOPSIS
+section (only if invoked as the line macro), the first argument is
+preceded by
+.Qq #include ,
+the arguments is enclosed in angled braces, and a newline is asserted.
+In all other invocations, only angled braces will enclose the argument.
+.Pp
+Examples
+.D1 \&.In sys/types
 .Ss \&It
 A list item.  The syntax of this macro depends on the list type.
 .Pp
@@ -2034,6 +2047,12 @@ Heirloom troff, the other significant troff implementation accepting
 \-mdoc, is similar to historic groff.
 .Pp
 .Bl -dash -compact
+.It
+Historic groff formats the
+.Sx \&In
+badly: trailing arguments are trashed and
+.Em SYNOPSIS
+is not specially treated.
 .It
 groff does not accept the
 .Sq \&Ta
