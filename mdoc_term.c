@@ -1536,6 +1536,12 @@ termp_fn_pre(DECL_ARGS)
 {
 	const struct mdoc_node	*nn;
 
+	/* NB: MDOC_LINE has no effect on this macro! */
+	if (SEC_SYNOPSIS == n->sec) {
+		if (n->prev)
+			term_vspace(p);
+	}
+
 	term_fontpush(p, TERMFONT_BOLD);
 	term_word(p, n->child->string);
 	term_fontpop(p);
@@ -1566,8 +1572,9 @@ static void
 termp_fn_post(DECL_ARGS)
 {
 
-	if (n->sec == SEC_SYNOPSIS && n->next && MDOC_LINE & n->flags)
-		term_vspace(p);
+	/* NB: MDOC_LINE has no effect on this macro! */
+	if (SEC_SYNOPSIS == n->sec)
+		term_newln(p);
 }
 
 

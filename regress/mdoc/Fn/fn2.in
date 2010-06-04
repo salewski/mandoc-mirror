@@ -1,0 +1,16 @@
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh SYNOPSIS
+.Fn 1
+.Fn "1 2"
+.Fn "1 2" "3 4"
+.Fn "1 2" "4"
+.Sh DESCRIPTION
+.Fn 1
+.Fn "1 2"
+.Fn "1 2" "3 4"
+.Fn "1 2" "4"

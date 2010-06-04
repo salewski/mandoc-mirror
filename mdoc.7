@@ -1656,6 +1656,33 @@ Examples:
 See also
 .Sx \&Cm .
 .Ss \&Fn
+A function name.
+Its calling syntax is as follows:
+.Bd -ragged -offset indent
+.Pf \. Ns Sx \&Fn
+.Op Cm functype
+.Cm funcname
+.Op Oo Cm argtype Oc Cm argname
+.Ed
+If invoked in the
+.Em SYNOPSIS
+section, vertical space is asserted before and after the macro.
+In all cases, the function arguments are surrounded in parenthesis and
+are delimited by commas.
+If no arguments are specified, blank parenthesis are output.
+.Pp
+Examples:
+.D1 \&.Fn "int funcname" "int arg0" "int arg1"
+.D1 \&.Fn funcname
+.D1 \&.Fn funcname "int arg0"
+.D1 \&.Fn funcname arg0
+.Pp
+See also
+.Sx \&Fa ,
+.Sx \&Fo ,
+.Sx \&Fc ,
+and
+.Sx \&Ft .
 .Ss \&Fo
 .Ss \&Fr
 .Ss \&Ft
@@ -2047,6 +2074,12 @@ Heirloom troff, the other significant troff implementation accepting
 \-mdoc, is similar to historic groff.
 .Pp
 .Bl -dash -compact
+.It
+Historic groff does not break before an
+.Sx \&Fn
+when not invoked as the line macro in the
+.Em SYNOPSIS
+section.
 .It
 Historic groff formats the
 .Sx \&In

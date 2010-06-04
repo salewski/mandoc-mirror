@@ -1584,7 +1584,8 @@ mdoc_fn_pre(MDOC_ARGS)
 	int			 sz, i;
 	struct roffsu		 su;
 
-	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags) {
+	/* NB: MDOC_LINE has no effect on this macro! */
+	if (SEC_SYNOPSIS == n->sec) {
 		SCALE_HS_INIT(&su, INDENT);
 		bufcat_su(h, "margin-left", &su);
 		su.scale = -su.scale;
