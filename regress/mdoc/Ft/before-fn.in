@@ -1,0 +1,21 @@
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh SYNOPSIS
+.Fn b \" Get this out of the way.
+.Ft a
+.Fn b "c d"
+.Ft 1
+.Ft 2
+.Fn b "c d"
+.Fn b "c d"
+.Sh DESCRIPTION
+.Ft a
+.Fn b "c d"
+.Ft 1
+.Ft 2
+.Fn b "c d"
+.Fn b "c d"

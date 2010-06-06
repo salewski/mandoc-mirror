@@ -1247,7 +1247,7 @@ mdoc_d1_pre(MDOC_ARGS)
 
 	/* FIXME: D1 shouldn't be literal. */
 
-	SCALE_VS_INIT(&su, INDENT - 1);
+	SCALE_VS_INIT(&su, INDENT - 2);
 	bufcat_su(h, "margin-left", &su);
 	PAIR_CLASS_INIT(&tag[0], "lit");
 	PAIR_STYLE_INIT(&tag[1], h);
@@ -1563,8 +1563,8 @@ mdoc_ft_pre(MDOC_ARGS)
 {
 	struct htmlpair	 tag;
 
-	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags)
-		print_otag(h, TAG_DIV, 0, NULL);
+	if (SEC_SYNOPSIS == n->sec && n->prev)
+		print_otag(h, TAG_BR, 0, NULL);
 
 	PAIR_CLASS_INIT(&tag, "ftype");
 	print_otag(h, TAG_SPAN, 1, &tag);
@@ -1594,10 +1594,6 @@ mdoc_fn_pre(MDOC_ARGS)
 			SCALE_VS_INIT(&su, 1);
 			bufcat_su(h, "margin-top", &su);
 		} 
-		if (n->next) {
-			SCALE_VS_INIT(&su, 1);
-			bufcat_su(h, "margin-bottom", &su);
-		}
 		PAIR_STYLE_INIT(&tag[0], h);
 		print_otag(h, TAG_DIV, 1, tag);
 	}
@@ -1785,25 +1781,39 @@ mdoc_mt_pre(MDOC_ARGS)
 static int
 mdoc_fo_pre(MDOC_ARGS)
 {
-	struct htmlpair	tag;
-	struct roffsu	su;
+	struct htmlpair	 tag;
+	struct roffsu	 su;
+	struct tag	*t;
 
 	if (MDOC_BODY == n->type) {
 		h->flags |= HTML_NOSPACE;
 		print_text(h, "(");
 		h->flags |= HTML_NOSPACE;
 		return(1);
-	} else if (MDOC_BLOCK == n->type && n->next) {
+	} else if (MDOC_BLOCK == n->type) {
+		if (SEC_SYNOPSIS != n->sec)
+			return(1);
+		if (NULL == n->prev || MDOC_Ft == n->prev->tok) {
+			print_otag(h, TAG_DIV, 0, NULL);
+			return(1);
+		}
 		SCALE_VS_INIT(&su, 1);
-		bufcat_su(h, "margin-bottom", &su);
+		bufcat_su(h, "margin-top", &su);
 		PAIR_STYLE_INIT(&tag, h);
 		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
 	}
 
+	/* XXX: we drop non-initial arguments as per groff. */
+
+	assert(n->child);
+	assert(n->child->string);
+
 	PAIR_CLASS_INIT(&tag, "fname");
-	print_otag(h, TAG_SPAN, 1, &tag);
-	return(1);
+	t = print_otag(h, TAG_SPAN, 1, &tag);
+	print_text(h, n->child->string);
+	print_tagq(h, t);
+	return(0);
 }
 
 

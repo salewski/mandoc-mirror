@@ -82,7 +82,6 @@ static	void	  termp_dq_post(DECL_ARGS);
 static	void	  termp_fd_post(DECL_ARGS);
 static	void	  termp_fn_post(DECL_ARGS);
 static	void	  termp_fo_post(DECL_ARGS);
-static	void	  termp_ft_post(DECL_ARGS);
 static	void	  termp_in_post(DECL_ARGS);
 static	void	  termp_it_post(DECL_ARGS);
 static	void	  termp_lb_post(DECL_ARGS);
@@ -166,7 +165,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_bold_pre, termp_fd_post }, /* Fd */ 
 	{ termp_fl_pre, NULL }, /* Fl */
 	{ termp_fn_pre, termp_fn_post }, /* Fn */ 
-	{ termp_ft_pre, termp_ft_post }, /* Ft */ 
+	{ termp_ft_pre, NULL }, /* Ft */ 
 	{ termp_bold_pre, NULL }, /* Ic */ 
 	{ termp_in_pre, termp_in_post }, /* In */ 
 	{ termp_li_pre, NULL }, /* Li */
@@ -1511,22 +1510,12 @@ static int
 termp_ft_pre(DECL_ARGS)
 {
 
-	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags)
-		if (n->prev && MDOC_Fo == n->prev->tok)
-			term_vspace(p);
+	/* NB: MDOC_LINE does not effect this! */
+	if (SEC_SYNOPSIS == n->sec && n->prev)
+		term_vspace(p);
 
 	term_fontpush(p, TERMFONT_UNDER);
 	return(1);
-}
-
-
-/* ARGSUSED */
-static void
-termp_ft_post(DECL_ARGS)
-{
-
-	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags)
-		term_newln(p);
 }
 
 
@@ -1993,23 +1982,29 @@ termp_pq_post(DECL_ARGS)
 static int
 termp_fo_pre(DECL_ARGS)
 {
-	const struct mdoc_node *nn;
 
-	if (MDOC_BODY == n->type) {
+	if (MDOC_BLOCK == n->type) {
+		/* NB: MDOC_LINE has no effect on this macro! */
+		if (SEC_SYNOPSIS != n->sec)
+			return(1);
+		if (n->prev && MDOC_Ft == n->prev->tok)
+			term_newln(p);
+		else if (n->prev)
+			term_vspace(p);
+		return(1);
+	} else if (MDOC_BODY == n->type) {
 		p->flags |= TERMP_NOSPACE;
 		term_word(p, "(");
 		p->flags |= TERMP_NOSPACE;
 		return(1);
-	} else if (MDOC_HEAD != n->type) 
-		return(1);
+	} 
 
+	/* XXX: we drop non-initial arguments as per groff. */
+
+	assert(n->child);
+	assert(n->child->string);
 	term_fontpush(p, TERMFONT_BOLD);
-	for (nn = n->child; nn; nn = nn->next) {
-		assert(MDOC_TEXT == nn->type);
-		term_word(p, nn->string);
-	}
-	term_fontpop(p);
-
+	term_word(p, n->child->string);
 	return(0);
 }
 
@@ -2019,13 +2014,18 @@ static void
 termp_fo_post(DECL_ARGS)
 {
 
-	if (MDOC_BODY != n->type)
-		return;
-	p->flags |= TERMP_NOSPACE;
-	term_word(p, ")");
-	p->flags |= TERMP_NOSPACE;
-	term_word(p, ";");
-	term_newln(p);
+	if (MDOC_BLOCK == n->type) {
+		/* NB: MDOC_LINE has no effect on this macro! */
+		if (SEC_SYNOPSIS == n->sec)
+			term_newln(p);
+	} else if (MDOC_BODY == n->type) {
+		p->flags |= TERMP_NOSPACE;
+		term_word(p, ")");
+		if (SEC_SYNOPSIS == n->sec) {
+			p->flags |= TERMP_NOSPACE;
+			term_word(p, ";");
+		}
+	}
 }
 
 
