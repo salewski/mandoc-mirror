@@ -1845,6 +1845,9 @@ static int
 termp_in_pre(DECL_ARGS)
 {
 
+	if (SEC_SYNOPSIS == n->sec && n->prev && MDOC_In != n->prev->tok)
+		term_vspace(p);
+
 	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags) {
 		term_fontpush(p, TERMFONT_BOLD);
 		term_word(p, "#include");
