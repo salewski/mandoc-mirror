@@ -4,6 +4,12 @@ MANDOC=${MANDOC:-../mandoc}
 NROFF=${NROFF:-nroff}
 OUTPUT=${NROFF_OUTPUT:--Tascii}
 
+if [ ! -x $MANDOC ]
+then
+	echo "regress.sh: command not found: $MANDOC" 1>&2
+	return 0
+fi
+
 check_skip_list() {
 	[ -f skip_list ] || return 1
 	while read file; do
