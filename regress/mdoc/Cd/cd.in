@@ -1,0 +1,14 @@
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh SYNOPSIS
+.Cd "it* at isa? port 0x2e"
+.Cd "it* at isa? port 0x2e"
+.Cd "it* at isa? port 0x2e"
+.Sh DESCRIPTION
+.Cd "it* at isa? port 0x2e"
+.Cd "it* at isa? port 0x2e"
+.Cd "it* at isa? port 0x2e"
