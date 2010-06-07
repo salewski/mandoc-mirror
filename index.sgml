@@ -167,36 +167,76 @@
 					<COL>
 					<TBODY>
 						<TR>
-							<TD><A HREF="man.3.html">man(3)</A> (<A HREF="man.3.txt">text</A>)</TD>
-							<TD>man macro compiler library</TD>
+							<TD VALIGN="top"><A HREF="man.3.html">man(3)</A></TD>
+							<TD VALIGN="top">
+								man macro compiler library
+								<DIV STYLE="font-size: smaller;">
+									<A HREF="man.3.txt">text</A> | <A HREF="man.3.ps">postscript</A>
+								</DIV>
+							</TD>
 						</TR>
 						<TR>
-							<TD><A HREF="man.7.html">man(7)</A> (<A HREF="man.7.txt">text</A>)</TD>
-							<TD>man language reference</TD>
+							<TD VALIGN="top"><A HREF="man.7.html">man(7)</A></TD>
+							<TD VALIGN="top">
+								man language reference
+								<DIV STYLE="font-size: smaller;">
+									<A HREF="man.7.txt">text</A> | <A HREF="man.7.ps">postscript</A>
+								</DIV>
+							</TD>
 						</TR>
 						<TR>
-							<TD><A HREF="mandoc.1.html">mandoc(1)</A> (<A HREF="mandoc.1.txt">text</A>)</TD>
-							<TD>format and display UNIX manuals</TD>
+							<TD VALIGN="top"><A HREF="mandoc.1.html">mandoc(1)</A></TD>
+							<TD VALIGN="top">
+								format and display UNIX manuals
+								<DIV STYLE="font-size: smaller;">
+									<A HREF="mandoc.1.txt">text</A> | <A HREF="mandoc.1.ps">postscript</A>
+								</DIV>
+							</TD>
 						</TR>
 						<TR>
-							<TD><A HREF="mandoc_char.7.html">mandoc_char(7)</A> (<A HREF="mandoc_char.7.txt">text</A>)</TD>
-							<TD>mandoc special characters</TD>
+							<TD VALIGN="top"><A HREF="mandoc_char.7.html">mandoc_char(7)</A></TD>
+							<TD VALIGN="top">
+								mandoc special characters
+								<DIV STYLE="font-size: smaller;">
+									<A HREF="mandoc_char.7.txt">text</A> | <A HREF="mandoc_char.7.ps">postscript</A>
+								</DIV>
+							</TD>
 						</TR>
 						<TR>
-							<TD><A HREF="mdoc.3.html">mdoc(3)</A> (<A HREF="mdoc.3.txt">text</A>)</TD>
-							<TD>mdoc macro compiler library</TD>
+							<TD VALIGN="top"><A HREF="mdoc.3.html">mdoc(3)</A></TD>
+							<TD VALIGN="top">
+								mdoc macro compiler library
+								<DIV STYLE="font-size: smaller;">
+									<A HREF="mdoc.3.txt">text</A> | <A HREF="mdoc.3.ps">postscript</A>
+								</DIV>
+							</TD>
 						</TR>
 						<TR>
-							<TD><A HREF="mdoc.7.html">mdoc(7)</A> (<A HREF="mdoc.7.txt">text</A>)</TD>
-							<TD>mdoc language reference</TD>
+							<TD VALIGN="top"><A HREF="mdoc.7.html">mdoc(7)</A></TD>
+							<TD VALIGN="top">
+								mdoc language reference
+								<DIV STYLE="font-size: smaller;">
+									<A HREF="mdoc.7.txt">text</A> | <A HREF="mdoc.7.ps">postscript</A>
+								</DIV>
+							</TD>
 						</TR>
 						<TR>
-							<TD><A HREF="roff.3.html">roff(3)</A> (<A HREF="roff.3.txt">text</A>)</TD>
-							<TD>roff macro compiler library</TD>
+							<TD VALIGN="top"><A HREF="roff.3.html">roff(3)</A></TD>
+							<TD VALIGN="top">
+								roff macro compiler library
+								<DIV STYLE="font-size: smaller;">
+									<A HREF="roff.3.txt">text</A> | <A HREF="roff.3.ps">postscript</A>
+								</DIV>
+							</TD>
 						</TR>
 						<TR>
-							<TD><A HREF="roff.7.html">roff(7)</A> (<A HREF="roff.7.txt">text</A>)</TD>
-							<TD>roff-mandoc language reference</TD>
+							<TD VALIGN="top"><A HREF="roff.7.html">roff(7)</A></TD>
+							<TD VALIGN="top">
+								roff-mandoc language reference
+								<DIV STYLE="font-size: smaller;">
+									<A HREF="roff.7.txt">text</A> | <A HREF="roff.7.ps">postscript</A>
+								</DIV>
+							</TD>
 						</TR>
 					</TBODY>
 					</TABLE>
@@ -259,6 +299,7 @@
 					<A NAME="news">NEWS</A>
 					</H1>
 					<DIV CLASS="news">
+					</DIV>
 						<P>
 							<SPAN CLASS="date">07-06-2010</SPAN>:
 							version 1.10.1
@@ -270,9 +311,12 @@
 							CLASS="external" HREF="http://manpages.bsd.lv">http://manpages.bsd.lv</A>.  The way we
 							handle the SYNOPSIS section (see the SYNOPSIS documentation in <A
 							HREF="mdoc.7.html#x4d414e55414cx20x535452554354555245">MANUAL STRUCTURE</A>) has also
-							been considerably simplified compared to groff's method.  Lastly, the <SPAN
+							been considerably simplified compared to groff's method.  Furthermore, the <SPAN
 							CLASS="flag">-Owidth=width</SPAN> output option has been added to <SPAN
-							CLASS="flag">-Tascii</SPAN> (see <A HREF="mandoc.1.html">mandoc</A>).
+							CLASS="flag">-Tascii</SPAN> (see <A HREF="mandoc.1.html">mandoc</A>).  Lastly, initial
+							PostScript output has been added with the <SPAN CLASS="flag">-Tps</SPAN> option to <A
+							HREF="mandoc.1.html">mandoc</A>.  It's brutally simple at the moment: fixed-font, with
+							no font decorations.
 						</P>
 					</DIV>
 					<DIV CLASS="news">
@@ -345,24 +389,6 @@
 							(NetBSD) and <Q><A CLASS="external"
 							HREF="http://wiki.freebsd.org/SummerOfCode2010Projects">BSD-licensed
 							Text-Processing Tools</A></Q> (FreeBSD).
-						</P>
-					</DIV>
-
-					<DIV CLASS="news">
-						<P>
-							<SPAN CLASS="date">07-04-2010</SPAN>:
-							version 1.9.23
-						</P>
-						<P>
-							<SPAN CLASS="nm">mdocml</SPAN> has been linked to the <A CLASS="external"
-							HREF="http://www.openbsd.org/faq/current.html#20100403">OpenBSD build</a>.  This
-							version incorporates many small changes, mostly from patches by OpenBSD,
-							allowing crufty manuals to slip by with warnings instead of erroring-out.  Some
-							subtle semantic issues, such as punctuation scope, have also been fixed.
-							Lastly, some issues with <SPAN CLASS="flag">-Thtml</SPAN> have been fixed, which
-							prompted an update to the <A HREF="mandoc.1.html">online</A> <A
-							HREF="mandoc_char.7.html">manual</A> <A HREF="man.7.html">pages</A> style
-							layout.
 						</P>
 					</DIV>
 					<P>
