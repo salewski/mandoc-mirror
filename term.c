@@ -22,6 +22,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,7 +36,7 @@
 #include "mdoc.h"
 #include "main.h"
 
-static	struct termp	 *term_alloc(enum termenc, size_t);
+static	struct termp	 *term_alloc(char *, enum termenc);
 static	void		  term_free(struct termp *);
 static	void		  spec(struct termp *, const char *, size_t);
 static	void		  res(struct termp *, const char *, size_t);
@@ -46,10 +47,10 @@ static	void		  encode(struct termp *, const char *, size_t);
 
 
 void *
-ascii_alloc(size_t width)
+ascii_alloc(char *outopts)
 {
 
-	return(term_alloc(TERMENC_ASCII, width));
+	return(term_alloc(outopts, TERMENC_ASCII));
 }
 
 
@@ -75,17 +76,35 @@ term_free(struct termp *p)
 
 
 static struct termp *
-term_alloc(enum termenc enc, size_t width)
+term_alloc(char *outopts, enum termenc enc)
 {
-	struct termp *p;
+	struct termp	*p;
+	const char	*toks[2];
+	char		*v;
+	size_t		 width;
+
+	toks[0] = "width";
+	toks[1] = NULL;
 
 	p = calloc(1, sizeof(struct termp));
 	if (NULL == p) {
 		perror(NULL);
 		exit(EXIT_FAILURE);
 	}
+
 	p->tabwidth = 5;
 	p->enc = enc;
+	width = 80;
+
+	while (outopts && *outopts)
+		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
+		case (0):
+			width = atoi(v);
+			break;
+		default:
+			break;
+		}
+
 	/* Enforce some lower boundary. */
 	if (width < 60)
 		width = 60;
