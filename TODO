@@ -65,6 +65,9 @@
 - set a meaningful default if no `Bl' list type is assigned
 
 - have a blank `It' head for `Bl -tag' not puke
+
+- ignore horrendous m[] font colouring
+  reported by J.C. Roberts
   
 ************************************************************************
 * formatting issues: ugly output

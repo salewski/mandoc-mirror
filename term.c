@@ -315,7 +315,7 @@ alloc(char *outopts, enum termenc enc, enum termtype type)
 	while (outopts && *outopts)
 		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
 		case (0):
-			width = atoi(v);
+			width = (size_t)atoi(v);
 			break;
 		default:
 			break;
