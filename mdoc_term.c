@@ -65,9 +65,9 @@ static	void	  print_bvspace(struct termp *,
 			const struct mdoc_node *,
 			const struct mdoc_node *);
 static	void  	  print_mdoc_node(DECL_ARGS);
-static	void	  print_mdoc_head(DECL_ARGS);
+static	void	  print_mdoc_head(struct termp *, const void *);
 static	void	  print_mdoc_nodelist(DECL_ARGS);
-static	void	  print_foot(DECL_ARGS);
+static	void	  print_foot(struct termp *, const void *);
 static	void	  synopsis_pre(struct termp *, 
 			const struct mdoc_node *);
 
@@ -276,6 +276,8 @@ terminal_mdoc(void *arg, const struct mdoc *mdoc)
 	p->maxrmargin = p->defrmargin;
 	p->tabwidth = 5;
 
+	term_begin(p, print_mdoc_head, print_foot, mdoc_meta(mdoc));
+
 	if (NULL == p->symtab)
 		switch (p->enc) {
 		case (TERMENC_ASCII):
@@ -289,10 +291,10 @@ terminal_mdoc(void *arg, const struct mdoc *mdoc)
 	n = mdoc_node(mdoc);
 	m = mdoc_meta(mdoc);
 
-	print_mdoc_head(p, NULL, m, n);
 	if (n->child)
 		print_mdoc_nodelist(p, NULL, m, n->child);
-	print_foot(p, NULL, m, n);
+
+	term_end(p);
 }
 
 
@@ -348,9 +350,12 @@ print_mdoc_node(DECL_ARGS)
 
 /* ARGSUSED */
 static void
-print_foot(DECL_ARGS)
+print_foot(struct termp *p, const void *arg)
 {
 	char		buf[DATESIZ], os[BUFSIZ];
+	const struct mdoc_meta *m;
+
+	m = (const struct mdoc_meta *)arg;
 
 	term_fontrepl(p, TERMFONT_NONE);
 
@@ -397,9 +402,12 @@ print_foot(DECL_ARGS)
 
 /* ARGSUSED */
 static void
-print_mdoc_head(DECL_ARGS)
+print_mdoc_head(struct termp *p, const void *arg)
 {
 	char		buf[BUFSIZ], title[BUFSIZ];
+	const struct mdoc_meta *m;
+
+	m = (const struct mdoc_meta *)arg;
 
 	p->rmargin = p->maxrmargin;
 	p->offset = 0;

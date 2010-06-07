@@ -42,6 +42,7 @@ void		  tree_mdoc(void *, const struct mdoc *);
 void		  tree_man(void *, const struct man *);
 
 void		 *ascii_alloc(char *);
+void		 *ps_alloc(void);
 void		  terminal_mdoc(void *, const struct mdoc *);
 void		  terminal_man(void *, const struct man *);
 void		  terminal_free(void *);
