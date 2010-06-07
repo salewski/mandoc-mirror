@@ -200,6 +200,10 @@
 						</TR>
 					</TBODY>
 					</TABLE>
+
+					<P>
+					See <Q><A CLASS="external" HREF="http://manpages.bsd.lv">Writing UNIX Manual Pages</A></Q> for a general
+					introduction to manpages and mdoc.
 				</TD>
 			</TR>
 			<TR>
@@ -256,14 +260,19 @@
 					</H1>
 					<DIV CLASS="news">
 						<P>
-							<SPAN CLASS="date">xx-06-2010</SPAN>:
+							<SPAN CLASS="date">07-06-2010</SPAN>:
 							version 1.10.1
 						</P>
 						<P>
 							This primarily focusses on the <Q>Bl</Q> and <Q>It</Q> macros described in <A
 							HREF="mdoc.7.html">mdoc</A>.  Multi-line column support is now fully compatible with
 							groff, as are implicit list entries for columns.  Removed manuals.7 in favour of <A
-							CLASS="external" HREF="http://manpages.bsd.lv">http://manpages.bsd.lv</A>.
+							CLASS="external" HREF="http://manpages.bsd.lv">http://manpages.bsd.lv</A>.  The way we
+							handle the SYNOPSIS section (see the SYNOPSIS documentation in <A
+							HREF="mdoc.7.html#x4d414e55414cx20x535452554354555245">MANUAL STRUCTURE</A>) has also
+							been considerably simplified compared to groff's method.  Lastly, the <SPAN
+							CLASS="flag">-Owidth=width</SPAN> output option has been added to <SPAN
+							CLASS="flag">-Tascii</SPAN> (see <A HREF="mandoc.1.html">mandoc</A>).
 						</P>
 					</DIV>
 					<DIV CLASS="news">
