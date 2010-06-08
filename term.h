@@ -81,6 +81,8 @@ struct	termp {
 	size_t		  pspage;	/* -Tps: current page */
 };
 
+struct termp	 *term_alloc(enum termenc);
+void		  term_free(struct termp *);
 void		  term_newln(struct termp *);
 void		  term_vspace(struct termp *);
 void		  term_word(struct termp *, const char *);

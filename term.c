@@ -45,8 +45,6 @@
 #define	PS_CHAR_BOTMARG	  24
 #define	PS_CHAR_BOT	 (PS_CHAR_BOTMARG + 36)
 
-static	struct termp	 *alloc(char *, enum termenc, enum termtype);
-static	void		  term_free(struct termp *);
 static	void		  spec(struct termp *, const char *, size_t);
 static	void		  res(struct termp *, const char *, size_t);
 static	void		  buffera(struct termp *, const char *, size_t);
@@ -62,28 +60,44 @@ static	void		  pageopen(struct termp *);
 void *
 ascii_alloc(char *outopts)
 {
+	struct termp	*p;
+	const char	*toks[2];
+	char		*v;
 
-	return(alloc(outopts, TERMENC_ASCII, TERMTYPE_CHAR));
-}
+	if (NULL == (p = term_alloc(TERMENC_ASCII)))
+		return(NULL);
 
+	p->type = TERMTYPE_CHAR;
 
-void *
-ps_alloc(void)
-{
+	toks[0] = "width";
+	toks[1] = NULL;
 
-	return(alloc(NULL, TERMENC_ASCII, TERMTYPE_PS));
+	while (outopts && *outopts)
+		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
+		case (0):
+			p->defrmargin = (size_t)atoi(v);
+			break;
+		default:
+			break;
+		}
+
+	/* Enforce a lower boundary. */
+	if (p->defrmargin < 58)
+		p->defrmargin = 58;
+
+	return(p);
 }
 
 
 void
-terminal_free(void *arg)
+ascii_free(void *arg)
 {
 
 	term_free((struct termp *)arg);
 }
 
 
-static void
+void
 term_free(struct termp *p)
 {
 
@@ -91,6 +105,7 @@ term_free(struct termp *p)
 		free(p->buf);
 	if (p->symtab)
 		chars_free(p->symtab);
+
 	free(p);
 }
 
@@ -290,16 +305,10 @@ advance(struct termp *p, size_t len)
 }
 
 
-static struct termp *
-alloc(char *outopts, enum termenc enc, enum termtype type)
+struct termp *
+term_alloc(enum termenc enc)
 {
 	struct termp	*p;
-	const char	*toks[2];
-	char		*v;
-	size_t		 width;
-
-	toks[0] = "width";
-	toks[1] = NULL;
 
 	p = calloc(1, sizeof(struct termp));
 	if (NULL == p) {
@@ -307,25 +316,9 @@ alloc(char *outopts, enum termenc enc, enum termtype type)
 		exit(EXIT_FAILURE);
 	}
 
-	p->type = type;
 	p->tabwidth = 5;
 	p->enc = enc;
-
-	width = 80;
-
-	while (outopts && *outopts)
-		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
-		case (0):
-			width = (size_t)atoi(v);
-			break;
-		default:
-			break;
-		}
-
-	/* Enforce some lower boundary. */
-	if (width < 60)
-		width = 60;
-	p->defrmargin = width - 2;
+	p->defrmargin = 78;
 	return(p);
 }
 

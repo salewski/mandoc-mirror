@@ -42,10 +42,13 @@ void		  tree_mdoc(void *, const struct mdoc *);
 void		  tree_man(void *, const struct man *);
 
 void		 *ascii_alloc(char *);
+void		  ascii_free(void *);
+
 void		 *ps_alloc(void);
+void		  ps_free(void *);
+
 void		  terminal_mdoc(void *, const struct mdoc *);
 void		  terminal_man(void *, const struct man *);
-void		  terminal_free(void *);
 
 __END_DECLS
 

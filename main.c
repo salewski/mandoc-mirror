@@ -591,9 +591,11 @@ fdesc(struct curparse *curp)
 			break;
 		case (OUTT_ASCII):
 			curp->outdata = ascii_alloc(curp->outopts);
+			curp->outfree = ascii_free;
 			break;
 		case (OUTT_PS):
 			curp->outdata = ps_alloc();
+			curp->outfree = ps_free;
 			break;
 		default:
 			break;
@@ -616,7 +618,6 @@ fdesc(struct curparse *curp)
 		case (OUTT_PS):
 			curp->outman = terminal_man;
 			curp->outmdoc = terminal_mdoc;
-			curp->outfree = terminal_free;
 			break;
 		default:
 			break;
