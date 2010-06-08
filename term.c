@@ -22,12 +22,10 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <getopt.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "mandoc.h"
 #include "chars.h"
@@ -37,64 +35,12 @@
 #include "mdoc.h"
 #include "main.h"
 
-#define	PS_CHAR_WIDTH	  6
-#define	PS_CHAR_HEIGHT	  12
-#define	PS_CHAR_TOPMARG	 (792 - 24)
-#define	PS_CHAR_TOP	 (PS_CHAR_TOPMARG - 36)
-#define	PS_CHAR_LEFT	  36
-#define	PS_CHAR_BOTMARG	  24
-#define	PS_CHAR_BOT	 (PS_CHAR_BOTMARG + 36)
-
 static	void		  spec(struct termp *, const char *, size_t);
 static	void		  res(struct termp *, const char *, size_t);
 static	void		  buffera(struct termp *, const char *, size_t);
 static	void		  bufferc(struct termp *, char);
 static	void		  adjbuf(struct termp *p, size_t);
 static	void		  encode(struct termp *, const char *, size_t);
-static	void		  advance(struct termp *, size_t);
-static	void		  endline(struct termp *);
-static	void		  letter(struct termp *, char);
-static	void		  pageopen(struct termp *);
-
-
-void *
-ascii_alloc(char *outopts)
-{
-	struct termp	*p;
-	const char	*toks[2];
-	char		*v;
-
-	if (NULL == (p = term_alloc(TERMENC_ASCII)))
-		return(NULL);
-
-	p->type = TERMTYPE_CHAR;
-
-	toks[0] = "width";
-	toks[1] = NULL;
-
-	while (outopts && *outopts)
-		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
-		case (0):
-			p->defrmargin = (size_t)atoi(v);
-			break;
-		default:
-			break;
-		}
-
-	/* Enforce a lower boundary. */
-	if (p->defrmargin < 58)
-		p->defrmargin = 58;
-
-	return(p);
-}
-
-
-void
-ascii_free(void *arg)
-{
-
-	term_free((struct termp *)arg);
-}
 
 
 void
@@ -110,61 +56,6 @@ term_free(struct termp *p)
 }
 
 
-/*
- * Push a single letter into our output engine.
- */
-static void
-letter(struct termp *p, char c)
-{
-	
-	if (TERMTYPE_CHAR == p->type) {
-		/*
-		 * If using the terminal device, just push the letter
-		 * out into the screen.
-		 */
-		putchar(c);
-		return;
-	}
-
-	if ( ! (PS_INLINE & p->psstate)) {
-		/*
-		 * If we're not in a PostScript "word" context, then
-		 * open one now at the current cursor.
-		 */
-		printf("%zu %zu moveto\n", p->pscol, p->psrow);
-		putchar('(');
-		p->psstate |= PS_INLINE;
-	}
-
-	/*
-	 * We need to escape these characters as per the PostScript
-	 * specification.  We would also escape non-graphable characters
-	 * (like tabs), but none of them would get to this point and
-	 * it's superfluous to abort() on them.
-	 */
-
-	switch (c) {
-	case ('('):
-		/* FALLTHROUGH */
-	case (')'):
-		/* FALLTHROUGH */
-	case ('\\'):
-		putchar('\\');
-		break;
-	default:
-		break;
-	}
-
-	/* Write the character and adjust where we are on the page. */
-	putchar(c);
-	p->pscol += PS_CHAR_WIDTH;
-}
-
-
-/*
- * Begin a "terminal" context.  Since terminal encompasses PostScript,
- * the actual terminal, etc., there are a few things we can do here.
- */
 void
 term_begin(struct termp *p, term_margin head, 
 		term_margin foot, const void *arg)
@@ -173,64 +64,7 @@ term_begin(struct termp *p, term_margin head,
 	p->headf = head;
 	p->footf = foot;
 	p->argf = arg;
-
-	if (TERMTYPE_CHAR == p->type) {
-		/* Emit the header and be done. */
-		(*p->headf)(p, p->argf);
-		return;
-	}
-	
-	/*
-	 * Emit the standard PostScript prologue, set our initial page
-	 * position, then run pageopen() on the initial page.
-	 */
-
-	printf("%s\n", "%!PS");
-	printf("%s\n", "/Courier");
-	printf("%s\n", "10 selectfont");
-
-	p->pspage = 1;
-	p->psstate = 0;
-	pageopen(p);
-}
-
-
-/*
- * Open a page.  This is only used for -Tps at the moment.  It opens a
- * page context, printing the header and the footer.  THE OUTPUT BUFFER
- * MUST BE EMPTY.  If it is not, output will ghost on the next line and
- * we'll be all gross and out of state.
- */
-static void
-pageopen(struct termp *p)
-{
-	
-	assert(TERMTYPE_PS == p->type);
-	assert(0 == p->psstate);
-
-	p->pscol = PS_CHAR_LEFT;
-	p->psrow = PS_CHAR_TOPMARG;
-	p->psstate |= PS_MARGINS;
-
-	(*p->headf)(p, p->argf);
-	endline(p);
-
-	p->psstate &= ~PS_MARGINS;
-	assert(0 == p->psstate);
-
-	p->pscol = PS_CHAR_LEFT;
-	p->psrow = PS_CHAR_BOTMARG;
-	p->psstate |= PS_MARGINS;
-
-	(*p->footf)(p, p->argf);
-	endline(p);
-
-	p->psstate &= ~PS_MARGINS;
-	assert(0 == p->psstate);
-
-	p->pscol = PS_CHAR_LEFT;
-	p->psrow = PS_CHAR_TOP;
-
+	(*p->begin)(p);
 }
 
 
@@ -238,70 +72,7 @@ void
 term_end(struct termp *p)
 {
 
-	if (TERMTYPE_CHAR == p->type) {
-		(*p->footf)(p, p->argf);
-		return;
-	}
-
-	printf("%s\n", "%%END");
-}
-
-
-static void
-endline(struct termp *p)
-{
-
-	if (TERMTYPE_CHAR == p->type) {
-		putchar('\n');
-		return;
-	}
-
-	if (PS_INLINE & p->psstate) {
-		printf(") show\n");
-		p->psstate &= ~PS_INLINE;
-	} 
-
-	if (PS_MARGINS & p->psstate)
-		return;
-
-	p->pscol = PS_CHAR_LEFT;
-	if (p->psrow >= PS_CHAR_HEIGHT + PS_CHAR_BOT) {
-		p->psrow -= PS_CHAR_HEIGHT;
-		return;
-	}
-
-	/* 
-	 * XXX: can't run pageopen() until we're certain a flushln() has
-	 * occured, else the buf will reopen in an awkward state on the
-	 * next line.
-	 */
-	printf("showpage\n");
-	p->psrow = PS_CHAR_TOP;
-}
-
-
-/*
- * Advance the output engine by a certain amount of whitespace.
- */
-static void
-advance(struct termp *p, size_t len)
-{
-	size_t	 	i;
-
-	if (TERMTYPE_CHAR == p->type) {
-		/* Just print whitespace on the terminal. */
-		for (i = 0; i < len; i++)
-			putchar(' ');
-		return;
-	}
-
-	if (PS_INLINE & p->psstate) {
-		/* Dump out any existing line scope. */
-		printf(") show\n");
-		p->psstate &= ~PS_INLINE;
-	}
-
-	p->pscol += len ? len * PS_CHAR_WIDTH : 0;
+	(*p->end)(p);
 }
 
 
@@ -438,10 +209,10 @@ term_flushln(struct termp *p)
 		 */
 		if (vend > bp && 0 == jhy && vis > 0) {
 			vend -= vis;
-			endline(p);
+			(*p->endline)(p);
 			if (TERMP_NOBREAK & p->flags) {
 				p->viscol = p->rmargin;
-				advance(p, p->rmargin);
+				(*p->advance)(p, p->rmargin);
 				vend += p->rmargin - p->offset;
 			} else {
 				p->viscol = 0;
@@ -485,15 +256,15 @@ term_flushln(struct termp *p)
 			 * so write preceding white space now.
 			 */
 			if (vbl) {
-				advance(p, vbl);
+				(*p->advance)(p, vbl);
 				p->viscol += vbl;
 				vbl = 0;
 			}
 
 			if (ASCII_HYPH == p->buf[i])
-				letter(p, '-');
+				(*p->letter)(p, '-');
 			else
-				letter(p, p->buf[i]);
+				(*p->letter)(p, p->buf[i]);
 
 			p->viscol += 1;
 		}
@@ -506,7 +277,7 @@ term_flushln(struct termp *p)
 
 	if ( ! (TERMP_NOBREAK & p->flags)) {
 		p->viscol = 0;
-		endline(p);
+		(*p->endline)(p);
 		return;
 	}
 
@@ -539,12 +310,12 @@ term_flushln(struct termp *p)
 	if (maxvis > vis + /* LINTED */
 			((TERMP_TWOSPACE & p->flags) ? 1 : 0)) {
 		p->viscol += maxvis - vis;
-		advance(p, maxvis - vis);
+		(*p->advance)(p, maxvis - vis);
 		vis += (maxvis - vis);
 	} else {	/* ...or newline break. */
-		endline(p);
+		(*p->endline)(p);
 		p->viscol = p->rmargin;
-		advance(p, p->rmargin);
+		(*p->advance)(p, p->rmargin);
 	}
 }
 
@@ -580,7 +351,7 @@ term_vspace(struct termp *p)
 
 	term_newln(p);
 	p->viscol = 0;
-	endline(p);
+	(*p->endline)(p);
 }
 
 
