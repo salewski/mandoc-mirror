@@ -68,6 +68,7 @@ ps_free(void *arg)
 }
 
 
+/* ARGSUSED */
 static void
 ps_end(struct termp *p)
 {
