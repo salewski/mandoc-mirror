@@ -41,12 +41,15 @@ enum	termfont {
 typedef void	(*term_margin)(struct termp *, const void *);
 
 struct	termp_ps {
-	int		  psstate;	/* -Tps: state of ps output */
-#define	PS_INLINE	 (1 << 0)	
-#define	PS_MARGINS	 (1 << 1)	
-	size_t		  pscol;	/* -Tps: visible column */
-	size_t		  psrow;	/* -Tps: visible row */
-	size_t		  pspage;	/* -Tps: current page */
+	int		  psstate;	/* state of ps output */
+#define	PS_INLINE	 (1 << 0)	/* we're in a word */
+#define	PS_MARGINS	 (1 << 1)	/* we're in the margins */
+	size_t		  pscol;	/* visible column */
+	size_t		  psrow;	/* visible row */
+	char		 *psmarg;	/* margin buf */
+	size_t		  psmargsz;	/* margin buf size */
+	size_t		  psmargcur;	/* current pos in margin buf */
+	size_t	 	  pspage;	/* current page */
 };
 
 struct	termp {

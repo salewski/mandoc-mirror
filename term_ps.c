@@ -18,9 +18,13 @@
 #include "config.h"
 #endif
 
+#include <sys/param.h>
+
 #include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "out.h"
 #include "main.h"
@@ -34,12 +38,28 @@
 #define	PS_CHAR_BOTMARG	  24
 #define	PS_CHAR_BOT	 (PS_CHAR_BOTMARG + 36)
 
+#define	PS_BUFSLOP	  128
+#define	PS_GROWBUF(p, sz) \
+	do if ((p)->engine.ps.psmargcur + (sz) > \
+			(p)->engine.ps.psmargsz) { \
+		(p)->engine.ps.psmargsz += /* CONSTCOND */ \
+			MAX(PS_BUFSLOP, (sz)); \
+		(p)->engine.ps.psmarg = realloc \
+			((p)->engine.ps.psmarg,  \
+			 (p)->engine.ps.psmargsz); \
+		if (NULL == (p)->engine.ps.psmarg) { \
+			perror(NULL); \
+			exit(EXIT_FAILURE); \
+		} \
+	} while (/* CONSTCOND */ 0)
+
 static	void		  ps_letter(struct termp *, char);
 static	void		  ps_begin(struct termp *);
 static	void		  ps_end(struct termp *);
-static	void		  ps_pageopen(struct termp *);
 static	void		  ps_advance(struct termp *, size_t);
 static	void		  ps_endline(struct termp *);
+static	void		  ps_printf(struct termp *, const char *, ...);
+static	void		  ps_putchar(struct termp *, char);
 
 
 void *
@@ -63,8 +83,68 @@ ps_alloc(void)
 void
 ps_free(void *arg)
 {
+	struct termp	*p;
 
-	term_free((struct termp *)arg);
+	p = (struct termp *)arg;
+
+	if (p->engine.ps.psmarg)
+		free(p->engine.ps.psmarg);
+
+	term_free(p);
+}
+
+
+static void
+ps_printf(struct termp *p, const char *fmt, ...)
+{
+	va_list		 ap;
+	int		 pos;
+
+	va_start(ap, fmt);
+
+	/*
+	 * If we're running in regular mode, then pipe directly into
+	 * vprintf().  If we're processing margins, then push the data
+	 * into our growable margin buffer.
+	 */
+
+	if ( ! (PS_MARGINS & p->engine.ps.psstate)) {
+		vprintf(fmt, ap);
+		va_end(ap);
+		return;
+	}
+
+	/* 
+	 * XXX: I assume that the in-margin print won't exceed
+	 * PS_BUFSLOP (128 bytes), which is reasonable but still an
+	 * assumption that will cause pukeage if it's not the case.
+	 */
+
+	PS_GROWBUF(p, PS_BUFSLOP);
+
+	pos = (int)p->engine.ps.psmargcur;
+	vsnprintf(&p->engine.ps.psmarg[pos], PS_BUFSLOP, fmt, ap);
+	p->engine.ps.psmargcur = strlen(p->engine.ps.psmarg);
+}
+
+
+static void
+ps_putchar(struct termp *p, char c)
+{
+	int		 pos;
+
+	/* See ps_printf(). */
+
+	if ( ! (PS_MARGINS & p->engine.ps.psstate)) {
+		putchar(c);
+		return;
+	}
+
+	PS_GROWBUF(p, 2);
+
+	pos = (int)p->engine.ps.psmargcur++;
+	p->engine.ps.psmarg[pos] = c;
+	p->engine.ps.psmarg[pos] = '\0';
 }
 
 
@@ -73,6 +153,15 @@ static void
 ps_end(struct termp *p)
 {
 
+	/*
+	 * At the end of the file, do one last showpage.  This is the
+	 * same behaviour as groff(1) and works for multiple pages as
+	 * well as just one.
+	 */
+
+	assert(p->engine.ps.psmarg && p->engine.ps.psmarg[0]);
+	printf("%s", p->engine.ps.psmarg);
+	printf("showpage\n");
 	printf("%s\n", "%%EOF");
 }
 
@@ -90,68 +179,24 @@ ps_begin(struct termp *p)
 	printf("%s\n", "/Courier");
 	printf("%s\n", "10 selectfont");
 
-	p->engine.ps.pspage = 1;
 	p->engine.ps.psstate = 0;
-	ps_pageopen(p);
-}
 
-
-static void
-ps_letter(struct termp *p, char c)
-{
-	
-	if ( ! (PS_INLINE & p->engine.ps.psstate)) {
-		/*
-		 * If we're not in a PostScript "word" context, then
-		 * open one now at the current cursor.
-		 */
-		printf("%zu %zu moveto\n", 
-				p->engine.ps.pscol, 
-				p->engine.ps.psrow);
-		putchar('(');
-		p->engine.ps.psstate |= PS_INLINE;
+	if (p->engine.ps.psmarg) {
+		assert(p->engine.ps.psmargsz);
+		p->engine.ps.psmarg[0] = '\0';
 	}
+
+	p->engine.ps.psmargcur = 0;
 
 	/*
-	 * We need to escape these characters as per the PostScript
-	 * specification.  We would also escape non-graphable characters
-	 * (like tabs), but none of them would get to this point and
-	 * it's superfluous to abort() on them.
+	 * Now dump the margins into our margin buffer.  If we don't do
+	 * this, we'd break any current state to run the header and
+	 * footer with each and evern new page.
 	 */
-
-	switch (c) {
-	case ('('):
-		/* FALLTHROUGH */
-	case (')'):
-		/* FALLTHROUGH */
-	case ('\\'):
-		putchar('\\');
-		break;
-	default:
-		break;
-	}
-
-	/* Write the character and adjust where we are on the page. */
-	putchar(c);
-	p->engine.ps.pscol += PS_CHAR_WIDTH;
-}
-
-
-/*
- * Open a page.  This is only used for -Tps at the moment.  It opens a
- * page context, printing the header and the footer.  THE OUTPUT BUFFER
- * MUST BE EMPTY.  If it is not, output will ghost on the next line and
- * we'll be all gross and out of state.
- */
-static void
-ps_pageopen(struct termp *p)
-{
-	
-	assert(TERMTYPE_PS == p->type);
-	assert(0 == p->engine.ps.psstate);
 
 	p->engine.ps.pscol = PS_CHAR_LEFT;
 	p->engine.ps.psrow = PS_CHAR_TOPMARG;
+
 	p->engine.ps.psstate |= PS_MARGINS;
 
 	(*p->headf)(p, p->argf);
@@ -173,6 +218,48 @@ ps_pageopen(struct termp *p)
 	p->engine.ps.pscol = PS_CHAR_LEFT;
 	p->engine.ps.psrow = PS_CHAR_TOP;
 
+	assert(p->engine.ps.psmarg);
+	assert('\0' != p->engine.ps.psmarg[0]);
+}
+
+
+static void
+ps_letter(struct termp *p, char c)
+{
+	
+	if ( ! (PS_INLINE & p->engine.ps.psstate)) {
+		/*
+		 * If we're not in a PostScript "word" context, then
+		 * open one now at the current cursor.
+		 */
+		ps_printf(p, "%zu %zu moveto\n(", 
+				p->engine.ps.pscol, 
+				p->engine.ps.psrow);
+		p->engine.ps.psstate |= PS_INLINE;
+	}
+
+	/*
+	 * We need to escape these characters as per the PostScript
+	 * specification.  We would also escape non-graphable characters
+	 * (like tabs), but none of them would get to this point and
+	 * it's superfluous to abort() on them.
+	 */
+
+	switch (c) {
+	case ('('):
+		/* FALLTHROUGH */
+	case (')'):
+		/* FALLTHROUGH */
+	case ('\\'):
+		ps_putchar(p, '\\');
+		break;
+	default:
+		break;
+	}
+
+	/* Write the character and adjust where we are on the page. */
+	ps_putchar(p, c);
+	p->engine.ps.pscol += PS_CHAR_WIDTH;
 }
 
 
@@ -182,7 +269,7 @@ ps_advance(struct termp *p, size_t len)
 
 	if (PS_INLINE & p->engine.ps.psstate) {
 		/* Dump out any existing line scope. */
-		printf(") show\n");
+		ps_printf(p, ") show\n");
 		p->engine.ps.psstate &= ~PS_INLINE;
 	}
 
@@ -195,7 +282,7 @@ ps_endline(struct termp *p)
 {
 
 	if (PS_INLINE & p->engine.ps.psstate) {
-		printf(") show\n");
+		ps_printf(p, ") show\n");
 		p->engine.ps.psstate &= ~PS_INLINE;
 	} 
 
@@ -208,11 +295,8 @@ ps_endline(struct termp *p)
 		return;
 	}
 
-	/* 
-	 * XXX: can't run pageopen() until we're certain a flushln() has
-	 * occured, else the buf will reopen in an awkward state on the
-	 * next line.
-	 */
+	assert(p->engine.ps.psmarg && p->engine.ps.psmarg[0]);
+	printf("%s", p->engine.ps.psmarg);
 	printf("showpage\n");
 	p->engine.ps.psrow = PS_CHAR_TOP;
 }

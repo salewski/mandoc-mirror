@@ -73,9 +73,9 @@ struct	termact {
 static	int		  a2width(const struct man_node *);
 static	int		  a2height(const struct man_node *);
 
-static	void		  print_man_head(struct termp *, const void *);
 static	void		  print_man_nodelist(DECL_ARGS);
 static	void		  print_man_node(DECL_ARGS);
+static	void		  print_man_head(struct termp *, const void *);
 static	void		  print_man_foot(struct termp *, const void *);
 static	void		  print_bvspace(struct termp *, 
 				const struct man_node *);

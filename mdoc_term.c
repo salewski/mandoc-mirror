@@ -65,9 +65,9 @@ static	void	  print_bvspace(struct termp *,
 			const struct mdoc_node *,
 			const struct mdoc_node *);
 static	void  	  print_mdoc_node(DECL_ARGS);
-static	void	  print_mdoc_head(struct termp *, const void *);
 static	void	  print_mdoc_nodelist(DECL_ARGS);
-static	void	  print_foot(struct termp *, const void *);
+static	void	  print_mdoc_head(struct termp *, const void *);
+static	void	  print_mdoc_foot(struct termp *, const void *);
 static	void	  synopsis_pre(struct termp *, 
 			const struct mdoc_node *);
 
@@ -276,7 +276,8 @@ terminal_mdoc(void *arg, const struct mdoc *mdoc)
 	p->maxrmargin = p->defrmargin;
 	p->tabwidth = 5;
 
-	term_begin(p, print_mdoc_head, print_foot, mdoc_meta(mdoc));
+	term_begin(p, print_mdoc_head, 
+			print_mdoc_foot, mdoc_meta(mdoc));
 
 	if (NULL == p->symtab)
 		switch (p->enc) {
@@ -348,9 +349,8 @@ print_mdoc_node(DECL_ARGS)
 }
 
 
-/* ARGSUSED */
 static void
-print_foot(struct termp *p, const void *arg)
+print_mdoc_foot(struct termp *p, const void *arg)
 {
 	char		buf[DATESIZ], os[BUFSIZ];
 	const struct mdoc_meta *m;
@@ -400,7 +400,6 @@ print_foot(struct termp *p, const void *arg)
 }
 
 
-/* ARGSUSED */
 static void
 print_mdoc_head(struct termp *p, const void *arg)
 {
