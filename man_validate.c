@@ -31,7 +31,7 @@
 #include "libman.h"
 #include "libmandoc.h"
 
-#define	CHKARGS	  struct man *m, const struct man_node *n
+#define	CHKARGS	  struct man *m, struct man_node *n
 
 typedef	int	(*v_check)(CHKARGS);
 
@@ -101,7 +101,7 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 
 
 int
-man_valid_pre(struct man *m, const struct man_node *n)
+man_valid_pre(struct man *m, struct man_node *n)
 {
 	v_check		*cp;
 
@@ -204,7 +204,7 @@ check_title(CHKARGS)
 static int
 check_text(CHKARGS) 
 {
-	const char	*p;
+	char		*p;
 	int		 pos, c;
 
 	assert(n->string);

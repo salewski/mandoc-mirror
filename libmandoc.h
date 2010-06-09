@@ -19,7 +19,7 @@
 
 __BEGIN_DECLS
 
-int		 mandoc_special(const char *);
+int		 mandoc_special(char *);
 void		*mandoc_calloc(size_t, size_t);
 char		*mandoc_strdup(const char *);
 void		*mandoc_malloc(size_t);

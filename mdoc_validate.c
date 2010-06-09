@@ -47,12 +47,10 @@ struct	valids {
 
 static	int	 check_parent(PRE_ARGS, enum mdoct, enum mdoc_type);
 static	int	 check_stdarg(PRE_ARGS);
-static	int	 check_text(struct mdoc *, int, int, const char *);
+static	int	 check_text(struct mdoc *, int, int, char *);
 static	int	 check_argv(struct mdoc *, 
-			const struct mdoc_node *,
-			const struct mdoc_argv *);
-static	int	 check_args(struct mdoc *, 
-			const struct mdoc_node *);
+			struct mdoc_node *, struct mdoc_argv *);
+static	int	 check_args(struct mdoc *, struct mdoc_node *);
 static	int	 err_child_lt(struct mdoc *, const char *, int);
 static	int	 warn_child_lt(struct mdoc *, const char *, int);
 static	int	 err_child_gt(struct mdoc *, const char *, int);
@@ -277,7 +275,7 @@ mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *n)
 {
 	v_pre		*p;
 	int		 line, pos;
-	const char	*tp;
+	char		*tp;
 
 	if (MDOC_TEXT == n->type) {
 		tp = n->string;
@@ -419,7 +417,7 @@ check_stdarg(PRE_ARGS)
 
 
 static int
-check_args(struct mdoc *m, const struct mdoc_node *n)
+check_args(struct mdoc *m, struct mdoc_node *n)
 {
 	int		 i;
 
@@ -436,8 +434,7 @@ check_args(struct mdoc *m, const struct mdoc_node *n)
 
 
 static int
-check_argv(struct mdoc *m, const struct mdoc_node *n, 
-		const struct mdoc_argv *v)
+check_argv(struct mdoc *m, struct mdoc_node *n, struct mdoc_argv *v)
 {
 	int		 i;
 
@@ -457,7 +454,7 @@ check_argv(struct mdoc *m, const struct mdoc_node *n,
 
 
 static int
-check_text(struct mdoc *mdoc, int line, int pos, const char *p)
+check_text(struct mdoc *mdoc, int line, int pos, char *p)
 {
 	int		 c;
 
