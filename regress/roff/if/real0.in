@@ -1,0 +1,30 @@
+.Dd June 9, 2010
+.Dt TITLE 1
+.Os
+.Sh NAME
+.Nm test
+.Nd test
+.Sh SYNOPSIS
+foo
+.Sh DESCRIPTION
+to polar
+.if n\
+(r,theta)
+.if t\
+(r,\(*h)
+coordinates 
+.if n\
+r\(**cos theta
+.if t\
+r\(**cos\(*h
+and y =
+.if n\
+r\(**sin theta.
+.if t\
+r\(**sin\(*h.
+These 
+.if n \
+(r=0,theta=0).
+.if t \
+(r=0,\(*h=0).
+In 
