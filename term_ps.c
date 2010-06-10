@@ -268,11 +268,12 @@ ps_letter(struct termp *p, char c)
 static void
 ps_advance(struct termp *p, size_t len)
 {
+	size_t		 i;
 
 	if (PS_INLINE & p->engine.ps.psstate) {
-		/* Dump out any existing line scope. */
-		ps_printf(p, ") show\n");
-		p->engine.ps.psstate &= ~PS_INLINE;
+		for (i = 0; i < len; i++) 
+			ps_letter(p, ' ');
+		return;
 	}
 
 	p->engine.ps.pscol += len ? len * PS_CHAR_WIDTH : 0;
