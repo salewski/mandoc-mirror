@@ -58,6 +58,7 @@ static	void		  ps_begin(struct termp *);
 static	void		  ps_end(struct termp *);
 static	void		  ps_advance(struct termp *, size_t);
 static	void		  ps_endline(struct termp *);
+static	void		  ps_pletter(struct termp *, char);
 static	void		  ps_printf(struct termp *, const char *, ...);
 static	void		  ps_putchar(struct termp *, char);
 
@@ -161,6 +162,8 @@ ps_end(struct termp *p)
 	 * well as just one.
 	 */
 
+	assert(0 == p->engine.ps.psstate);
+	assert('\0' == p->engine.ps.last);
 	assert(p->engine.ps.psmarg && p->engine.ps.psmarg[0]);
 	printf("%s", p->engine.ps.psmarg);
 	printf("showpage\n");
@@ -226,9 +229,8 @@ ps_begin(struct termp *p)
 
 
 static void
-ps_letter(struct termp *p, char c)
+ps_pletter(struct termp *p, char c)
 {
-	char		cc;
 	
 	if ( ! (PS_INLINE & p->engine.ps.psstate)) {
 		/*
@@ -239,24 +241,6 @@ ps_letter(struct termp *p, char c)
 				p->engine.ps.pscol, 
 				p->engine.ps.psrow);
 		p->engine.ps.psstate |= PS_INLINE;
-	}
-
-	if ('\0' == p->engine.ps.last) {
-		assert(8 != c);
-		p->engine.ps.last = c;
-		return;
-	} else if (8 == p->engine.ps.last) {
-		assert(8 != c);
-		p->engine.ps.last = c;
-		return;
-	} else if (8 == c) {
-		assert(8 != p->engine.ps.last);
-		p->engine.ps.last = c;
-		return;
-	} else {
-		cc = p->engine.ps.last;
-		p->engine.ps.last = c;
-		c = cc;
 	}
 
 	/*
@@ -285,9 +269,41 @@ ps_letter(struct termp *p, char c)
 
 
 static void
+ps_letter(struct termp *p, char c)
+{
+	char		cc;
+	
+	if ('\0' == p->engine.ps.last) {
+		assert(8 != c);
+		p->engine.ps.last = c;
+		return;
+	} else if (8 == p->engine.ps.last) {
+		assert(8 != c);
+		p->engine.ps.last = c;
+		return;
+	} else if (8 == c) {
+		assert(8 != p->engine.ps.last);
+		p->engine.ps.last = c;
+		return;
+	} else {
+		cc = p->engine.ps.last;
+		p->engine.ps.last = c;
+		c = cc;
+	}
+
+	return(ps_pletter(p, c));
+}
+
+
+static void
 ps_advance(struct termp *p, size_t len)
 {
 	size_t		 i;
+
+	if ('\0' != p->engine.ps.last) {
+		ps_pletter(p, p->engine.ps.last);
+		p->engine.ps.last = '\0';
+	}
 
 	if (PS_INLINE & p->engine.ps.psstate) {
 		assert(8 != p->engine.ps.last);
@@ -307,6 +323,11 @@ ps_advance(struct termp *p, size_t len)
 static void
 ps_endline(struct termp *p)
 {
+
+	if ('\0' != p->engine.ps.last) {
+		ps_pletter(p, p->engine.ps.last);
+		p->engine.ps.last = '\0';
+	}
 
 	if (PS_INLINE & p->engine.ps.psstate) {
 		assert(8 != p->engine.ps.last);
