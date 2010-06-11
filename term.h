@@ -50,6 +50,7 @@ struct	termp_ps {
 	size_t		  psmargsz;	/* margin buf size */
 	size_t		  psmargcur;	/* current pos in margin buf */
 	size_t	 	  pspage;	/* current page */
+	char		  last;		/* character buffer */
 };
 
 struct	termp {

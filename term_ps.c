@@ -228,6 +228,7 @@ ps_begin(struct termp *p)
 static void
 ps_letter(struct termp *p, char c)
 {
+	char		cc;
 	
 	if ( ! (PS_INLINE & p->engine.ps.psstate)) {
 		/*
@@ -238,6 +239,24 @@ ps_letter(struct termp *p, char c)
 				p->engine.ps.pscol, 
 				p->engine.ps.psrow);
 		p->engine.ps.psstate |= PS_INLINE;
+	}
+
+	if ('\0' == p->engine.ps.last) {
+		assert(8 != c);
+		p->engine.ps.last = c;
+		return;
+	} else if (8 == p->engine.ps.last) {
+		assert(8 != c);
+		p->engine.ps.last = c;
+		return;
+	} else if (8 == c) {
+		assert(8 != p->engine.ps.last);
+		p->engine.ps.last = c;
+		return;
+	} else {
+		cc = p->engine.ps.last;
+		p->engine.ps.last = c;
+		c = cc;
 	}
 
 	/*
@@ -271,11 +290,16 @@ ps_advance(struct termp *p, size_t len)
 	size_t		 i;
 
 	if (PS_INLINE & p->engine.ps.psstate) {
+		assert(8 != p->engine.ps.last);
+		if (p->engine.ps.last)
+			ps_letter(p, p->engine.ps.last);
+		p->engine.ps.last = '\0';
 		for (i = 0; i < len; i++) 
 			ps_letter(p, ' ');
 		return;
 	}
 
+	assert('\0' == p->engine.ps.last);
 	p->engine.ps.pscol += len ? len * PS_CHAR_WIDTH : 0;
 }
 
@@ -285,9 +309,14 @@ ps_endline(struct termp *p)
 {
 
 	if (PS_INLINE & p->engine.ps.psstate) {
+		assert(8 != p->engine.ps.last);
+		if (p->engine.ps.last)
+			ps_letter(p, p->engine.ps.last);
+		p->engine.ps.last = '\0';
 		ps_printf(p, ") show\n");
 		p->engine.ps.psstate &= ~PS_INLINE;
-	} 
+	} else
+		assert('\0' == p->engine.ps.last);
 
 	if (PS_MARGINS & p->engine.ps.psstate)
 		return;

@@ -603,10 +603,7 @@ encode(struct termp *p, const char *word, size_t sz)
 	 * character by character.
 	 */
 
-	if (TERMTYPE_PS == p->type) {
-		buffera(p, word, sz);
-		return;
-	} else if (TERMFONT_NONE == (f = term_fonttop(p))) {
+	if (TERMFONT_NONE == (f = term_fonttop(p))) {
 		buffera(p, word, sz);
 		return;
 	}
