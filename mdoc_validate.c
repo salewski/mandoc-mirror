@@ -683,43 +683,65 @@ pre_bl(PRE_ARGS)
 static int
 pre_bd(PRE_ARGS)
 {
-	int		 i, type, err;
+	int		 i;
+	enum mdoc_disp 	 dt;
 
-	if (MDOC_BLOCK != n->type)
+	if (MDOC_BLOCK != n->type) {
+		assert(n->parent);
+		assert(MDOC_BLOCK == n->parent->type);
+		assert(MDOC_Bd == n->parent->tok);
+		assert(DISP__NONE != n->parent->data.disp);
+		n->data.disp = n->parent->data.disp;
 		return(1);
-	if (NULL == n->args) {
-		mdoc_nmsg(mdoc, n, MANDOCERR_DISPTYPE);
-		return(0);
 	}
 
-	/* Make sure that only one type of display is specified.  */
+	assert(DISP__NONE == n->data.disp);
 
 	/* LINTED */
-	for (i = 0, err = type = 0; ! err && 
-			i < (int)n->args->argc; i++)
+	for (i = 0; n->args && i < (int)n->args->argc; i++) {
+		dt = DISP__NONE;
 		switch (n->args->argv[i].arg) {
 		case (MDOC_Centred):
-			/* FALLTHROUGH */
-		case (MDOC_Ragged):
-			/* FALLTHROUGH */
-		case (MDOC_Unfilled):
-			/* FALLTHROUGH */
-		case (MDOC_Filled):
-			/* FALLTHROUGH */
-		case (MDOC_Literal):
-			if (0 == type++) 
-				break;
-			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_DISPREP))
-				return(0);
+			dt = DISP_centred;
 			break;
+		case (MDOC_Ragged):
+			dt = DISP_ragged;
+			break;
+		case (MDOC_Unfilled):
+			dt = DISP_unfilled;
+			break;
+		case (MDOC_Filled):
+			dt = DISP_filled;
+			break;
+		case (MDOC_Literal):
+			dt = DISP_literal;
+			break;
+		case (MDOC_File):
+			mdoc_nmsg(mdoc, n, MANDOCERR_BADDISP);
+			return(0);
+		case (MDOC_Offset):
+			/* FALLTHROUGH */
+		case (MDOC_Compact):
+			/* FALLTHROUGH */
 		default:
 			break;
 		}
 
-	if (type)
-		return(1);
-	mdoc_nmsg(mdoc, n, MANDOCERR_DISPTYPE);
-	return(0);
+		if (DISP__NONE != dt && n->data.disp != DISP__NONE)
+			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_DISPREP))
+				return(0);
+
+		if (DISP__NONE != dt && n->data.disp == DISP__NONE)
+			n->data.disp = dt;
+	}
+
+	if (DISP__NONE == n->data.disp) {
+		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_DISPTYPE))
+			return(0);
+		n->data.disp = DISP_ragged;
+	}
+
+	return(1);
 }
 
 

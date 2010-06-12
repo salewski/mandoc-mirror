@@ -1353,7 +1353,7 @@ static int
 mdoc_bd_pre(MDOC_ARGS)
 {
 	struct htmlpair	 	 tag[2];
-	int		 	 type, comp, i;
+	int		 	 comp, i;
 	const struct mdoc_node	*bl, *nn;
 	struct roffsu		 su;
 
@@ -1366,7 +1366,7 @@ mdoc_bd_pre(MDOC_ARGS)
 
 	SCALE_VS_INIT(&su, 0);
 
-	type = comp = 0;
+	comp = 0;
 	for (i = 0; bl->args && i < (int)bl->args->argc; i++) 
 		switch (bl->args->argv[i].arg) {
 		case (MDOC_Offset):
@@ -1374,17 +1374,6 @@ mdoc_bd_pre(MDOC_ARGS)
 			break;
 		case (MDOC_Compact):
 			comp = 1;
-			break;
-		case (MDOC_Centred):
-			/* FALLTHROUGH */
-		case (MDOC_Ragged):
-			/* FALLTHROUGH */
-		case (MDOC_Filled):
-			/* FALLTHROUGH */
-		case (MDOC_Unfilled):
-			/* FALLTHROUGH */
-		case (MDOC_Literal):
-			type = bl->args->argv[i].arg;
 			break;
 		default:
 			break;
@@ -1415,7 +1404,8 @@ mdoc_bd_pre(MDOC_ARGS)
 		return(1);
 	}
 
-	if (MDOC_Unfilled != type && MDOC_Literal != type)
+	if (DISP_unfilled != n->data.disp && 
+			DISP_literal != n->data.disp)
 		return(1);
 
 	PAIR_CLASS_INIT(&tag[0], "lit");

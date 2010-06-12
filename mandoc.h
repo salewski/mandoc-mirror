@@ -74,6 +74,7 @@ enum	mandocerr {
 	MANDOCERR_NOARGV, /* macro requires argument(s) */
 	MANDOCERR_NOTITLE, /* no title in document */
 	MANDOCERR_LISTTYPE, /* missing list type */
+	MANDOCERR_DISPTYPE, /* missing display type */
 	MANDOCERR_ARGSLOST, /* line argument(s) will be lost */
 	MANDOCERR_BODYLOST, /* body argument(s) will be lost */
 #define	MANDOCERR_ERROR		MANDOCERR_BODYLOST
@@ -82,9 +83,8 @@ enum	mandocerr {
 	/* FIXME: this should be a MANDOCERR_ERROR */
 	MANDOCERR_FONTTYPE, /* missing font type */
 	/* FIXME: this should be a MANDOCERR_ERROR */
-	MANDOCERR_DISPTYPE, /* missing display type */
-	/* FIXME: this should be a MANDOCERR_ERROR */
 	MANDOCERR_NESTEDDISP, /* displays may not be nested */
+	MANDOCERR_BADDISP, /* unsupported display type */
 	MANDOCERR_SYNTNOSCOPE, /* request scope close w/none open */
 	MANDOCERR_SYNTSCOPE, /* scope broken, syntax violated */
 	MANDOCERR_SYNTLINESCOPE, /* line scope broken, syntax violated */

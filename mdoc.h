@@ -263,6 +263,15 @@ enum	mdoc_list {
 	LIST_tag
 };
 
+enum	mdoc_disp {
+	DISP__NONE = 0,
+	DISP_centred,
+	DISP_ragged,
+	DISP_unfilled,
+	DISP_filled,
+	DISP_literal
+};
+
 /* Node in AST. */
 struct	mdoc_node {
 	struct mdoc_node *parent; /* parent AST node */
@@ -290,7 +299,8 @@ struct	mdoc_node {
 	char		 *string;	/* TEXT */
 
 	union {
-		enum mdoc_list list; /* for `Bl' nodes */
+		enum mdoc_list list; /* `Bl' nodes */
+		enum mdoc_disp disp; /* `Bd' nodes */
 	} data;
 };
 

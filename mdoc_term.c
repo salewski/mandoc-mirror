@@ -60,7 +60,6 @@ static	int	  arg_hasattr(int, const struct mdoc_node *);
 static	int	  arg_getattrs(const int *, int *, size_t,
 			const struct mdoc_node *);
 static	int	  arg_getattr(int, const struct mdoc_node *);
-static	int	  arg_disptype(const struct mdoc_node *);
 static	void	  print_bvspace(struct termp *,
 			const struct mdoc_node *,
 			const struct mdoc_node *);
@@ -486,35 +485,6 @@ a2width(const struct mdoc_argv *arg, int pos)
 		SCALE_HS_INIT(&su, strlen(arg->value[pos]));
 
 	return(term_hspan(&su));
-}
-
-
-static int
-arg_disptype(const struct mdoc_node *n)
-{
-	int		 i, len;
-
-	assert(MDOC_BLOCK == n->type);
-
-	len = (int)(n->args ? n->args->argc : 0);
-
-	for (i = 0; i < len; i++)
-		switch (n->args->argv[i].arg) {
-		case (MDOC_Centred):
-			/* FALLTHROUGH */
-		case (MDOC_Ragged):
-			/* FALLTHROUGH */
-		case (MDOC_Filled):
-			/* FALLTHROUGH */
-		case (MDOC_Unfilled):
-			/* FALLTHROUGH */
-		case (MDOC_Literal):
-			return(n->args->argv[i].arg);
-		default:
-			break;
-		}
-
-	return(-1);
 }
 
 
@@ -1632,7 +1602,7 @@ static int
 termp_bd_pre(DECL_ARGS)
 {
 	size_t			 tabwidth;
-	int	         	 i, type;
+	int	         	 i;
 	size_t			 rm, rmax;
 	const struct mdoc_node	*nn;
 
@@ -1643,9 +1613,6 @@ termp_bd_pre(DECL_ARGS)
 		return(0);
 
 	nn = n->parent;
-
-	type = arg_disptype(nn);
-	assert(-1 != type);
 
 	if (-1 != (i = arg_getattr(MDOC_Offset, nn)))
 		p->offset += a2offs(&nn->args->argv[i]);
@@ -1658,7 +1625,8 @@ termp_bd_pre(DECL_ARGS)
 	 * lines are allowed.
 	 */
 	
-	if (MDOC_Literal != type && MDOC_Unfilled != type)
+	if (DISP_literal != n->data.disp && 
+			DISP_unfilled != n->data.disp)
 		return(1);
 
 	tabwidth = p->tabwidth;
@@ -1675,8 +1643,8 @@ termp_bd_pre(DECL_ARGS)
 		    NULL == nn->next)
 			term_flushln(p);
 	}
-	p->tabwidth = tabwidth;
 
+	p->tabwidth = tabwidth;
 	p->rmargin = rm;
 	p->maxrmargin = rmax;
 	return(0);
@@ -1687,19 +1655,16 @@ termp_bd_pre(DECL_ARGS)
 static void
 termp_bd_post(DECL_ARGS)
 {
-	int		 type;
 	size_t		 rm, rmax;
 
 	if (MDOC_BODY != n->type) 
 		return;
 
-	type = arg_disptype(n->parent);
-	assert(-1 != type);
-
 	rm = p->rmargin;
 	rmax = p->maxrmargin;
 
-	if (MDOC_Literal == type || MDOC_Unfilled == type)
+	if (DISP_literal == n->data.disp || 
+			DISP_unfilled == n->data.disp)
 		p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
 
 	p->flags |= TERMP_NOSPACE;

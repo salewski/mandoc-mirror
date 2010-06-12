@@ -978,20 +978,16 @@ pre_bl(PRE_ARGS)
 static int
 pre_bd(PRE_ARGS)
 {
-	int		 i;
 
 	if (MDOC_BLOCK == n->type)
 		return(pre_offset(m, n));
 	if (MDOC_BODY != n->type)
 		return(1);
 
-	/* Enter literal context if `Bd -literal' or `-unfilled'. */
-
-	for (n = n->parent, i = 0; i < (int)n->args->argc; i++)
-		if (MDOC_Literal == n->args->argv[i].arg)
-			m->flags |= MDOC_LITERAL;
-		else if (MDOC_Unfilled == n->args->argv[i].arg)
-			m->flags |= MDOC_LITERAL;
+	if (DISP_literal == n->data.disp)
+		m->flags |= MDOC_LITERAL;
+	if (DISP_unfilled == n->data.disp)
+		m->flags |= MDOC_LITERAL;
 
 	return(1);
 }
