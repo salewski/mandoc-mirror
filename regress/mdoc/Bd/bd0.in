@@ -1,0 +1,28 @@
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+1
+.Em who are you?
+.Bd -ragged
+a b
+c d
+.Ed
+2
+.Bd -unfilled
+a b
+c d
+.Ed
+3
+.Bd -filled
+a b
+c d
+.Ed
+4
+.Bd -literal
+a b
+c d
+.Ed

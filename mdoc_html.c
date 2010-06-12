@@ -1353,31 +1353,19 @@ static int
 mdoc_bd_pre(MDOC_ARGS)
 {
 	struct htmlpair	 	 tag[2];
-	int		 	 comp, i;
-	const struct mdoc_node	*bl, *nn;
+	int		 	 comp;
+	const struct mdoc_node	*nn;
 	struct roffsu		 su;
 
-	if (MDOC_BLOCK == n->type)
-		bl = n;
-	else if (MDOC_HEAD == n->type)
+	if (MDOC_HEAD == n->type)
 		return(0);
-	else
-		bl = n->parent;
 
 	SCALE_VS_INIT(&su, 0);
 
-	comp = 0;
-	for (i = 0; bl->args && i < (int)bl->args->argc; i++) 
-		switch (bl->args->argv[i].arg) {
-		case (MDOC_Offset):
-			a2offs(bl->args->argv[i].value[0], &su);
-			break;
-		case (MDOC_Compact):
-			comp = 1;
-			break;
-		default:
-			break;
-		}
+	if (n->data.Bd.offs)
+		a2offs(n->data.Bd.offs, &su);
+
+	comp = n->data.Bd.comp;
 
 	/* FIXME: -centered, etc. formatting. */
 	/* FIXME: does not respect -offset ??? */
@@ -1404,8 +1392,8 @@ mdoc_bd_pre(MDOC_ARGS)
 		return(1);
 	}
 
-	if (DISP_unfilled != n->data.disp && 
-			DISP_literal != n->data.disp)
+	if (DISP_unfilled != n->data.Bd.type && 
+			DISP_literal != n->data.Bd.type)
 		return(1);
 
 	PAIR_CLASS_INIT(&tag[0], "lit");

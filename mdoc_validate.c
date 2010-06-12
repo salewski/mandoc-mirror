@@ -683,23 +683,28 @@ pre_bl(PRE_ARGS)
 static int
 pre_bd(PRE_ARGS)
 {
-	int		 i;
+	int		 i, dup, comp;
 	enum mdoc_disp 	 dt;
+	const char	*offs;
 
 	if (MDOC_BLOCK != n->type) {
 		assert(n->parent);
 		assert(MDOC_BLOCK == n->parent->type);
 		assert(MDOC_Bd == n->parent->tok);
-		assert(DISP__NONE != n->parent->data.disp);
-		n->data.disp = n->parent->data.disp;
+		assert(DISP__NONE != n->parent->data.Bd.type);
+		memcpy(&n->data.Bd, &n->parent->data.Bd, 
+				sizeof(struct mdoc_bd));
 		return(1);
 	}
 
-	assert(DISP__NONE == n->data.disp);
+	assert(DISP__NONE == n->data.Bd.type);
 
 	/* LINTED */
 	for (i = 0; n->args && i < (int)n->args->argc; i++) {
 		dt = DISP__NONE;
+		dup = comp = 0;
+		offs = NULL;
+
 		switch (n->args->argv[i].arg) {
 		case (MDOC_Centred):
 			dt = DISP_centred;
@@ -720,25 +725,67 @@ pre_bd(PRE_ARGS)
 			mdoc_nmsg(mdoc, n, MANDOCERR_BADDISP);
 			return(0);
 		case (MDOC_Offset):
-			/* FALLTHROUGH */
-		case (MDOC_Compact):
-			/* FALLTHROUGH */
-		default:
+			/* NB: this can be empty! */
+			if (n->args->argv[i].sz) {
+				offs = n->args->argv[i].value[0];
+				dup = (NULL != n->data.Bd.offs);
+				break;
+			}
+			/*
+			 * If empty, assign it to a sane default, which
+			 * groff stipulates is about 8n.
+			 */
+			/*
+			 * FIXME: remove this.
+			 *
+			 * Where the hell did I get the idea that this
+			 * happens?
+			 */
+			assert(1 == n->args->refcnt);
+			n->args->argv[i].sz++;
+			n->args->argv[i].value = 
+				mandoc_malloc(sizeof(char *));
+			n->args->argv[i].value[0] = 
+				mandoc_strdup("8n");
+			offs = n->args->argv[i].value[0];
 			break;
+		case (MDOC_Compact):
+			comp = 1;
+			dup = n->data.Bd.comp;
+			break;
+		default:
+			abort();
+			/* NOTREACHED */
 		}
 
-		if (DISP__NONE != dt && n->data.disp != DISP__NONE)
+		/* Check whether we have duplicates. */
+
+		if (dup && ! mdoc_nmsg(mdoc, n, MANDOCERR_ARGVREP))
+			return(0);
+
+		/* Make our auxiliary assignments. */
+
+		if (offs && ! dup)
+			n->data.Bd.offs = offs;
+		if (comp && ! dup)
+			n->data.Bd.comp = comp;
+
+		/* Check whether a type has already been assigned. */
+
+		if (DISP__NONE != dt && n->data.Bd.type != DISP__NONE)
 			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_DISPREP))
 				return(0);
 
-		if (DISP__NONE != dt && n->data.disp == DISP__NONE)
-			n->data.disp = dt;
+		/* Make our type assignment. */
+
+		if (DISP__NONE != dt && n->data.Bd.type == DISP__NONE)
+			n->data.Bd.type = dt;
 	}
 
-	if (DISP__NONE == n->data.disp) {
+	if (DISP__NONE == n->data.Bd.type) {
 		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_DISPTYPE))
 			return(0);
-		n->data.disp = DISP_ragged;
+		n->data.Bd.type = DISP_ragged;
 	}
 
 	return(1);

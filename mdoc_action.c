@@ -979,14 +979,12 @@ static int
 pre_bd(PRE_ARGS)
 {
 
-	if (MDOC_BLOCK == n->type)
-		return(pre_offset(m, n));
 	if (MDOC_BODY != n->type)
 		return(1);
 
-	if (DISP_literal == n->data.disp)
+	if (DISP_literal == n->data.Bd.type)
 		m->flags |= MDOC_LITERAL;
-	if (DISP_unfilled == n->data.disp)
+	if (DISP_unfilled == n->data.Bd.type)
 		m->flags |= MDOC_LITERAL;
 
 	return(1);

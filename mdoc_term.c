@@ -54,7 +54,7 @@ struct	termact {
 
 static	size_t	  a2width(const struct mdoc_argv *, int);
 static	size_t	  a2height(const struct mdoc_node *);
-static	size_t	  a2offs(const struct mdoc_argv *);
+static	size_t	  a2offs(const char *);
 
 static	int	  arg_hasattr(int, const struct mdoc_node *);
 static	int	  arg_getattrs(const int *, int *, size_t,
@@ -489,20 +489,20 @@ a2width(const struct mdoc_argv *arg, int pos)
 
 
 static size_t
-a2offs(const struct mdoc_argv *arg)
+a2offs(const char *v)
 {
 	struct roffsu	 su;
 
-	if ('\0' == arg->value[0][0])
+	if ('\0' == *v)
 		return(0);
-	else if (0 == strcmp(arg->value[0], "left"))
+	else if (0 == strcmp(v, "left"))
 		return(0);
-	else if (0 == strcmp(arg->value[0], "indent"))
+	else if (0 == strcmp(v, "indent"))
 		return(INDENT + 1);
-	else if (0 == strcmp(arg->value[0], "indent-two"))
+	else if (0 == strcmp(v, "indent-two"))
 		return((INDENT + 1) * 2);
-	else if ( ! a2roffsu(arg->value[0], &su, SCALE_MAX))
-		SCALE_HS_INIT(&su, strlen(arg->value[0]));
+	else if ( ! a2roffsu(v, &su, SCALE_MAX))
+		SCALE_HS_INIT(&su, strlen(v));
 
 	return(term_hspan(&su));
 }
@@ -672,7 +672,7 @@ termp_it_pre(DECL_ARGS)
 	width = offset = 0;
 
 	if (vals[1] >= 0) 
-		offset = a2offs(&bl->args->argv[vals[1]]);
+		offset = a2offs(bl->args->argv[vals[1]].value[0]);
 
 	switch (type) {
 	case (LIST_column):
@@ -1602,7 +1602,6 @@ static int
 termp_bd_pre(DECL_ARGS)
 {
 	size_t			 tabwidth;
-	int	         	 i;
 	size_t			 rm, rmax;
 	const struct mdoc_node	*nn;
 
@@ -1612,10 +1611,8 @@ termp_bd_pre(DECL_ARGS)
 	} else if (MDOC_HEAD == n->type)
 		return(0);
 
-	nn = n->parent;
-
-	if (-1 != (i = arg_getattr(MDOC_Offset, nn)))
-		p->offset += a2offs(&nn->args->argv[i]);
+	if (n->data.Bd.offs)
+		p->offset += a2offs(n->data.Bd.offs);
 
 	/*
 	 * If -ragged or -filled are specified, the block does nothing
@@ -1625,8 +1622,8 @@ termp_bd_pre(DECL_ARGS)
 	 * lines are allowed.
 	 */
 	
-	if (DISP_literal != n->data.disp && 
-			DISP_unfilled != n->data.disp)
+	if (DISP_literal != n->data.Bd.type && 
+			DISP_unfilled != n->data.Bd.type)
 		return(1);
 
 	tabwidth = p->tabwidth;
@@ -1663,8 +1660,8 @@ termp_bd_post(DECL_ARGS)
 	rm = p->rmargin;
 	rmax = p->maxrmargin;
 
-	if (DISP_literal == n->data.disp || 
-			DISP_unfilled == n->data.disp)
+	if (DISP_literal == n->data.Bd.type || 
+			DISP_unfilled == n->data.Bd.type)
 		p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
 
 	p->flags |= TERMP_NOSPACE;
