@@ -278,6 +278,10 @@ struct	mdoc_bd {
 	int		  comp;
 };
 
+struct	mdoc_bl {
+	enum mdoc_list	  type;
+};
+
 /* Node in AST. */
 struct	mdoc_node {
 	struct mdoc_node *parent; /* parent AST node */
@@ -305,7 +309,7 @@ struct	mdoc_node {
 	char		 *string;	/* TEXT */
 
 	union {
-		enum mdoc_list list; /* `Bl' nodes */
+		struct mdoc_bl Bl;
 		struct mdoc_bd Bd;
 	} data;
 };

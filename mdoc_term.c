@@ -570,6 +570,7 @@ print_bvspace(struct termp *p,
 {
 	const struct mdoc_node	*nn;
 
+	/* FIXME: MDOC_Bd == bl->tok && bl->data.Bd.comp */
 	term_newln(p);
 	if (arg_hasattr(MDOC_Compact, bl))
 		return;
@@ -590,13 +591,13 @@ print_bvspace(struct termp *p,
 
 	/* A `-column' does not assert vspace within the list. */
 
-	if (MDOC_Bl == bl->tok && LIST_column == bl->data.list)
+	if (MDOC_Bl == bl->tok && LIST_column == bl->data.Bl.type)
 		if (n->prev && MDOC_It == n->prev->tok)
 			return;
 
 	/* A `-diag' without body does not vspace. */
 
-	if (MDOC_Bl == bl->tok && LIST_diag == bl->data.list)
+	if (MDOC_Bl == bl->tok && LIST_diag == bl->data.Bl.type)
 		if (n->prev && MDOC_It == n->prev->tok) {
 			assert(n->prev->body);
 			if (NULL == n->prev->body->child)
@@ -661,7 +662,7 @@ termp_it_pre(DECL_ARGS)
 
 	arg_getattrs(keys, vals, 3, bl);
 
-	type = bl->data.list;
+	type = bl->data.Bl.type;
 
 	/* 
 	 * First calculate width and offset.  This is pretty easy unless
@@ -989,7 +990,7 @@ termp_it_post(DECL_ARGS)
 	if (MDOC_BLOCK == n->type)
 		return;
 
-	type = n->parent->parent->parent->data.list;
+	type = n->parent->parent->parent->data.Bl.type;
 
 	switch (type) {
 	case (LIST_item):

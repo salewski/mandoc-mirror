@@ -539,8 +539,9 @@ pre_bl(PRE_ARGS)
 		assert(n->parent);
 		assert(MDOC_BLOCK == n->parent->type);
 		assert(MDOC_Bl == n->parent->tok);
-		assert(LIST__NONE != n->parent->data.list);
-		n->data.list = n->parent->data.list;
+		assert(LIST__NONE != n->parent->data.Bl.type);
+		memcpy(&n->data.Bl, &n->parent->data.Bl,
+				sizeof(struct mdoc_bl));
 		return(1);
 	}
 
@@ -550,7 +551,7 @@ pre_bl(PRE_ARGS)
 	 * ones.  If we find no list type, we default to LIST_item.
 	 */
 
-	assert(LIST__NONE == n->data.list);
+	assert(LIST__NONE == n->data.Bl.type);
 	offs = width = cmpt = -1;
 
 	/* LINTED */
@@ -618,18 +619,18 @@ pre_bl(PRE_ARGS)
 
 		/* Check: multiple list types. */
 
-		if (LIST__NONE != lt && n->data.list != LIST__NONE)
+		if (LIST__NONE != lt && n->data.Bl.type != LIST__NONE)
 			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTREP))
 				return(0);
 
 		/* Assign list type. */
 
-		if (LIST__NONE != lt && n->data.list == LIST__NONE)
-			n->data.list = lt;
+		if (LIST__NONE != lt && n->data.Bl.type == LIST__NONE)
+			n->data.Bl.type = lt;
 
 		/* The list type should come first. */
 
-		if (n->data.list == LIST__NONE)
+		if (n->data.Bl.type == LIST__NONE)
 			if (width >= 0 || offs >= 0 || cmpt >= 0)
 				if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTFIRST))
 					return(0);
@@ -639,10 +640,10 @@ pre_bl(PRE_ARGS)
 
 	/* Allow lists to default to LIST_item. */
 
-	if (LIST__NONE == n->data.list) {
+	if (LIST__NONE == n->data.Bl.type) {
 		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTTYPE))
 			return(0);
-		n->data.list = LIST_item;
+		n->data.Bl.type = LIST_item;
 	}
 
 	/* 
@@ -651,7 +652,7 @@ pre_bl(PRE_ARGS)
 	 * and must also be warned.
 	 */
 
-	switch (n->data.list) {
+	switch (n->data.Bl.type) {
 	case (LIST_tag):
 		if (width >= 0)
 			break;
@@ -1031,7 +1032,7 @@ post_it(POST_ARGS)
 		return(1);
 
 	n = mdoc->last->parent->parent;
-	lt = n->data.list;
+	lt = n->data.Bl.type;
 
 	if (LIST__NONE == lt) {
 		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_LISTTYPE);
@@ -1123,7 +1124,7 @@ post_bl_head(POST_ARGS)
 	assert(mdoc->last->parent);
 	n = mdoc->last->parent;
 
-	if (LIST_column == n->data.list) {
+	if (LIST_column == n->data.Bl.type) {
 		for (i = 0; i < (int)n->args->argc; i++)
 			if (MDOC_Column == n->args->argv[i].arg)
 				break;
