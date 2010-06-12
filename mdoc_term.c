@@ -643,7 +643,7 @@ termp_it_pre(DECL_ARGS)
 {
 	const struct mdoc_node *bl, *nn;
 	char		        buf[7];
-	int		        i, keys[3], vals[3];
+	int		        i, keys[2], vals[2];
 	size_t		        width, offset, ncols, dcol;
 	enum mdoc_list		type;
 
@@ -657,12 +657,11 @@ termp_it_pre(DECL_ARGS)
 	/* Get list width, offset, and list type from argument list. */
 
 	keys[0] = MDOC_Width;
-	keys[1] = MDOC_Offset;
-	keys[2] = MDOC_Column;
+	keys[1] = MDOC_Column;
 
-	vals[0] = vals[1] = vals[2] = -1;
+	vals[0] = vals[1] = -1;
 
-	arg_getattrs(keys, vals, 3, bl);
+	arg_getattrs(keys, vals, 2, bl);
 
 	type = bl->data.Bl.type;
 
@@ -674,8 +673,9 @@ termp_it_pre(DECL_ARGS)
 
 	width = offset = 0;
 
-	if (vals[1] >= 0) 
-		offset = a2offs(bl->args->argv[vals[1]].value[0]);
+	if (bl->data.Bl.offs)
+		offset = a2offs(bl->data.Bl.offs);
+
 
 	switch (type) {
 	case (LIST_column):
@@ -690,7 +690,7 @@ termp_it_pre(DECL_ARGS)
 		 *   column.
 		 * - For more than 5 columns, add only one column.
 		 */
-		ncols = bl->args->argv[vals[2]].sz;
+		ncols = bl->args->argv[vals[1]].sz;
 		/* LINTED */
 		dcol = ncols < 5 ? 4 : ncols == 5 ? 3 : 1;
 
@@ -703,7 +703,7 @@ termp_it_pre(DECL_ARGS)
 				nn->prev && i < (int)ncols; 
 				nn = nn->prev, i++)
 			offset += dcol + a2width
-				(&bl->args->argv[vals[2]], i);
+				(&bl->args->argv[vals[1]], i);
 
 
 		/*
@@ -719,7 +719,7 @@ termp_it_pre(DECL_ARGS)
 		 * Use the declared column widths, extended as explained
 		 * in the preceding paragraph.
 		 */
-		width = a2width(&bl->args->argv[vals[2]], i) + dcol;
+		width = a2width(&bl->args->argv[vals[1]], i) + dcol;
 		break;
 	default:
 		if (vals[0] < 0) 

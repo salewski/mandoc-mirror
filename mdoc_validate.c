@@ -532,7 +532,8 @@ pre_display(PRE_ARGS)
 static int
 pre_bl(PRE_ARGS)
 {
-	int		 i, width, offs, comp, dup;
+	int		 i, width, comp, dup;
+	const char	*offs;
 	enum mdoc_list	 lt;
 
 	if (MDOC_BLOCK != n->type) {
@@ -552,12 +553,13 @@ pre_bl(PRE_ARGS)
 	 */
 
 	assert(LIST__NONE == n->data.Bl.type);
-	offs = width = -1;
+	width = -1;
 
 	/* LINTED */
 	for (i = 0; n->args && i < (int)n->args->argc; i++) {
 		lt = LIST__NONE;
 		dup = comp = 0;
+		offs = NULL;
 		switch (n->args->argv[i].arg) {
 		/* Set list types. */
 		case (MDOC_Bullet):
@@ -604,9 +606,14 @@ pre_bl(PRE_ARGS)
 			width = i;
 			break;
 		case (MDOC_Offset):
-			if (offs >= 0)
-				dup++;
-			offs = i;
+			/* NB: this can be empty! */
+			if (n->args->argv[i].sz) {
+				offs = n->args->argv[i].value[0];
+				dup = (NULL != n->data.Bd.offs);
+				break;
+			}
+			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_IGNARGV))
+				return(0);
 			break;
 		}
 
@@ -617,6 +624,8 @@ pre_bl(PRE_ARGS)
 
 		if (comp && ! dup)
 			n->data.Bl.comp = comp;
+		if (offs && ! dup)
+			n->data.Bl.offs = offs;
 
 		/* Check: multiple list types. */
 
@@ -632,7 +641,7 @@ pre_bl(PRE_ARGS)
 		/* The list type should come first. */
 
 		if (n->data.Bl.type == LIST__NONE)
-			if (width >= 0 || offs >= 0 || n->data.Bl.comp)
+			if (width >= 0 || n->data.Bl.offs || n->data.Bl.comp)
 				if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTFIRST))
 					return(0);
 

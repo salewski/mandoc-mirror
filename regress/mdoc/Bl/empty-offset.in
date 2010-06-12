@@ -1,0 +1,15 @@
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+.Bl -tag -width Ds -offset
+.It foo
+bar
+.El
+.Bl -tag -width Ds
+.It foo
+bar
+.El

@@ -68,9 +68,7 @@ static	int	  post_st(POST_ARGS);
 static	int	  post_std(POST_ARGS);
 
 static	int	  pre_bd(PRE_ARGS);
-static	int	  pre_bl(PRE_ARGS);
 static	int	  pre_dl(PRE_ARGS);
-static	int	  pre_offset(PRE_ARGS);
 
 static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ap */
@@ -84,7 +82,7 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ pre_dl, post_display }, /* Dl */
 	{ pre_bd, post_display }, /* Bd */ 
 	{ NULL, NULL }, /* Ed */
-	{ pre_bl, post_bl }, /* Bl */ 
+	{ NULL, post_bl }, /* Bl */ 
 	{ NULL, NULL }, /* El */
 	{ NULL, NULL }, /* It */
 	{ NULL, NULL }, /* Ad */ 
@@ -933,44 +931,6 @@ pre_dl(PRE_ARGS)
 
 	if (MDOC_BODY == n->type)
 		m->flags |= MDOC_LITERAL;
-	return(1);
-}
-
-
-/* ARGSUSED */
-static int
-pre_offset(PRE_ARGS)
-{
-	int		 i;
-
-	/* 
-	 * Make sure that an empty offset produces an 8n length space as
-	 * stipulated by mdoc.samples. 
-	 */
-
-	for (i = 0; n->args && i < (int)n->args->argc; i++) {
-		if (MDOC_Offset != n->args->argv[i].arg) 
-			continue;
-		if (n->args->argv[i].sz)
-			break;
-		assert(1 == n->args->refcnt);
-		/* If no value set, length of <string>. */
-		n->args->argv[i].sz++;
-		n->args->argv[i].value = mandoc_malloc(sizeof(char *));
-		n->args->argv[i].value[0] = mandoc_strdup("8n");
-		break;
-	}
-
-	return(1);
-}
-
-
-static int
-pre_bl(PRE_ARGS)
-{
-
-	if (MDOC_BLOCK == n->type)
-		return(pre_offset(m, n));
 	return(1);
 }
 
