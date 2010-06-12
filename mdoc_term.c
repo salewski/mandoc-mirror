@@ -61,6 +61,7 @@ static	int	  arg_getattrs(const int *, int *, size_t,
 			const struct mdoc_node *);
 static	int	  arg_getattr(int, const struct mdoc_node *);
 static	void	  print_bvspace(struct termp *,
+			const struct mdoc_node *,
 			const struct mdoc_node *);
 static	void  	  print_mdoc_node(DECL_ARGS);
 static	void	  print_mdoc_nodelist(DECL_ARGS);
@@ -563,15 +564,17 @@ arg_getattrs(const int *keys, int *vals,
  * too.
  */
 static void
-print_bvspace(struct termp *p, const struct mdoc_node *n)
+print_bvspace(struct termp *p, 
+		const struct mdoc_node *bl, 
+		const struct mdoc_node *n)
 {
 	const struct mdoc_node	*nn;
 
 	term_newln(p);
 
-	if (MDOC_Bl == n->tok && n->data.Bl.comp)
+	if (MDOC_Bd == bl->tok && bl->data.Bd.comp)
 		return;
-	if (MDOC_Bd == n->tok && n->data.Bd.comp)
+	if (MDOC_Bl == bl->tok && bl->data.Bl.comp)
 		return;
 
 	/* Do not vspace directly after Ss/Sh. */
@@ -590,13 +593,13 @@ print_bvspace(struct termp *p, const struct mdoc_node *n)
 
 	/* A `-column' does not assert vspace within the list. */
 
-	if (MDOC_Bl == n->tok && LIST_column == n->data.Bl.type)
+	if (MDOC_Bl == bl->tok && LIST_column == bl->data.Bl.type)
 		if (n->prev && MDOC_It == n->prev->tok)
 			return;
 
 	/* A `-diag' without body does not vspace. */
 
-	if (MDOC_Bl == n->tok && LIST_diag == n->data.Bl.type)
+	if (MDOC_Bl == bl->tok && LIST_diag == bl->data.Bl.type)
 		if (n->prev && MDOC_It == n->prev->tok) {
 			assert(n->prev->body);
 			if (NULL == n->prev->body->child)
@@ -645,7 +648,7 @@ termp_it_pre(DECL_ARGS)
 	enum mdoc_list		type;
 
 	if (MDOC_BLOCK == n->type) {
-		print_bvspace(p, n);
+		print_bvspace(p, n->parent->parent, n);
 		return(1);
 	}
 
@@ -1606,7 +1609,7 @@ termp_bd_pre(DECL_ARGS)
 	const struct mdoc_node	*nn;
 
 	if (MDOC_BLOCK == n->type) {
-		print_bvspace(p, n);
+		print_bvspace(p, n, n);
 		return(1);
 	} else if (MDOC_HEAD == n->type)
 		return(0);
