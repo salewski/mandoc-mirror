@@ -532,7 +532,7 @@ pre_display(PRE_ARGS)
 static int
 pre_bl(PRE_ARGS)
 {
-	int		 i, width, offs, cmpt, dupl;
+	int		 i, width, offs, comp, dup;
 	enum mdoc_list	 lt;
 
 	if (MDOC_BLOCK != n->type) {
@@ -552,12 +552,12 @@ pre_bl(PRE_ARGS)
 	 */
 
 	assert(LIST__NONE == n->data.Bl.type);
-	offs = width = cmpt = -1;
+	offs = width = -1;
 
 	/* LINTED */
 	for (i = 0; n->args && i < (int)n->args->argc; i++) {
 		lt = LIST__NONE;
-		dupl = 0;
+		dup = comp = 0;
 		switch (n->args->argv[i].arg) {
 		/* Set list types. */
 		case (MDOC_Bullet):
@@ -595,27 +595,28 @@ pre_bl(PRE_ARGS)
 			break;
 		/* Set list arguments. */
 		case (MDOC_Compact):
-			if (cmpt >= 0) 
-				dupl++;
-			cmpt = i;
+			dup = n->data.Bl.comp;
+			comp = 1;
 			break;
 		case (MDOC_Width):
 			if (width >= 0)
-				dupl++;
+				dup++;
 			width = i;
 			break;
 		case (MDOC_Offset):
 			if (offs >= 0)
-				dupl++;
+				dup++;
 			offs = i;
 			break;
 		}
 
 		/* Check: duplicate auxiliary arguments. */
 
-		if (dupl)
-			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_ARGVREP))
-				return(0);
+		if (dup && ! mdoc_nmsg(mdoc, n, MANDOCERR_ARGVREP))
+			return(0);
+
+		if (comp && ! dup)
+			n->data.Bl.comp = comp;
 
 		/* Check: multiple list types. */
 
@@ -631,7 +632,7 @@ pre_bl(PRE_ARGS)
 		/* The list type should come first. */
 
 		if (n->data.Bl.type == LIST__NONE)
-			if (width >= 0 || offs >= 0 || cmpt >= 0)
+			if (width >= 0 || offs >= 0 || n->data.Bl.comp)
 				if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_LISTFIRST))
 					return(0);
 
