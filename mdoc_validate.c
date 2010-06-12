@@ -731,23 +731,8 @@ pre_bd(PRE_ARGS)
 				dup = (NULL != n->data.Bd.offs);
 				break;
 			}
-			/*
-			 * If empty, assign it to a sane default, which
-			 * groff stipulates is about 8n.
-			 */
-			/*
-			 * FIXME: remove this.
-			 *
-			 * Where the hell did I get the idea that this
-			 * happens?
-			 */
-			assert(1 == n->args->refcnt);
-			n->args->argv[i].sz++;
-			n->args->argv[i].value = 
-				mandoc_malloc(sizeof(char *));
-			n->args->argv[i].value[0] = 
-				mandoc_strdup("8n");
-			offs = n->args->argv[i].value[0];
+			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_IGNARGV))
+				return(0);
 			break;
 		case (MDOC_Compact):
 			comp = 1;

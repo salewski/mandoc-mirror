@@ -1,0 +1,33 @@
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+1
+.Bd -literal -compact
+a b
+c d
+.Ed
+2
+1
+.Bd -filled -compact
+a b
+c d
+.Ed
+2
+3
+.\" NOTE: OLD GROFF WILL PUKE HERE, AS IT BUGGILY FORGETS TO EMIT A
+.\" NEWLINE BEFORE THE DISPLAY.
+.Bd -ragged -compact
+a b
+c d
+.Ed
+2
+1
+.Bd -unfilled -compact
+a b
+c d
+.Ed
+2

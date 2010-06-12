@@ -36,7 +36,9 @@ enum	mandocerr {
 	MANDOCERR_BADESCAPE, /* bad escape sequence */
 	MANDOCERR_BADQUOTE, /* unterminated quoted string */
 	MANDOCERR_NOWIDTHARG, /* argument requires the width argument */
+	/* FIXME: merge with MANDOCERR_IGNARGV. */
 	MANDOCERR_WIDTHARG, /* superfluous width argument */
+	MANDOCERR_IGNARGV, /* macro ignoring argv */
 	MANDOCERR_BADDATE, /* bad date argument */
 	MANDOCERR_BADWIDTH, /* bad width argument */
 	MANDOCERR_BADMSEC, /* unknown manual section */

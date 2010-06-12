@@ -1,0 +1,31 @@
+.Dd $Mdocdate$
+.Dt FOO 1
+.Os
+.Sh NAME
+.Nm foo
+.Nd bar
+.Sh DESCRIPTION
+1
+.Bd -literal -offset
+a b
+c d
+.Ed
+2
+1
+.Bd -filled -offset
+a b
+c d
+.Ed
+2
+1
+.Bd -ragged -offset
+a b
+c d
+.Ed
+2
+1
+.Bd -unfilled -offset
+a b
+c d
+.Ed
+2
