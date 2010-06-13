@@ -52,8 +52,7 @@ static	int	  post_at(POST_ARGS);
 static	int	  post_bl(POST_ARGS);
 static	int	  post_bl_head(POST_ARGS);
 static	int	  post_bl_tagwidth(POST_ARGS);
-static	int	  post_bl_width(struct mdoc *, 
-			struct mdoc_node *, int);
+static	int	  post_bl_width(POST_ARGS);
 static	int	  post_dd(POST_ARGS);
 static	int	  post_display(POST_ARGS);
 static	int	  post_dt(POST_ARGS);
@@ -667,19 +666,21 @@ post_bl_tagwidth(POST_ARGS)
 	 * We're guaranteed that a MDOC_Width doesn't already exist.
 	 */
 
-	nn = n;
-	assert(nn->args);
-	i = (int)(nn->args->argc)++;
+	assert(n->args);
+	i = (int)(n->args->argc)++;
 
-	nn->args->argv = mandoc_realloc(nn->args->argv, 
-			nn->args->argc * sizeof(struct mdoc_argv));
+	n->args->argv = mandoc_realloc(n->args->argv, 
+			n->args->argc * sizeof(struct mdoc_argv));
 
-	nn->args->argv[i].arg = MDOC_Width;
-	nn->args->argv[i].line = n->line;
-	nn->args->argv[i].pos = n->pos;
-	nn->args->argv[i].sz = 1;
-	nn->args->argv[i].value = mandoc_malloc(sizeof(char *));
-	nn->args->argv[i].value[0] = mandoc_strdup(buf);
+	n->args->argv[i].arg = MDOC_Width;
+	n->args->argv[i].line = n->line;
+	n->args->argv[i].pos = n->pos;
+	n->args->argv[i].sz = 1;
+	n->args->argv[i].value = mandoc_malloc(sizeof(char *));
+	n->args->argv[i].value[0] = mandoc_strdup(buf);
+
+	/* Set our width! */
+	n->data.Bl.width = n->args->argv[i].value[0];
 	return(1);
 }
 
@@ -690,33 +691,41 @@ post_bl_tagwidth(POST_ARGS)
  * scaling width.
  */
 static int
-post_bl_width(struct mdoc *m, struct mdoc_node *n, int pos)
+post_bl_width(POST_ARGS)
 {
 	size_t		  width;
+	int		  i;
 	enum mdoct	  tok;
 	char		  buf[NUMSIZ];
-	char		 *p;
-
-	assert(n->args);
-	p = n->args->argv[pos].value[0];
 
 	/*
 	 * If the value to -width is a macro, then we re-write it to be
 	 * the macro's width as set in share/tmac/mdoc/doc-common.
 	 */
 
-	if (0 == strcmp(p, "Ds"))
+	if (0 == strcmp(n->data.Bl.width, "Ds"))
 		width = 6;
-	else if (MDOC_MAX == (tok = mdoc_hash_find(p)))
+	else if (MDOC_MAX == (tok = mdoc_hash_find(n->data.Bl.width)))
 		return(1);
 	else if (0 == (width = mdoc_macro2len(tok))) 
 		return(mdoc_nmsg(m, n, MANDOCERR_BADWIDTH));
 
 	/* The value already exists: free and reallocate it. */
 
+	assert(n->args);
+
+	for (i = 0; i < (int)n->args->argc; i++) 
+		if (MDOC_Width == n->args->argv[i].arg)
+			break;
+
+	assert(i < (int)n->args->argc);
+
 	snprintf(buf, NUMSIZ, "%zun", width);
-	free(n->args->argv[pos].value[0]);
-	n->args->argv[pos].value[0] = mandoc_strdup(buf);
+	free(n->args->argv[i].value[0]);
+	n->args->argv[i].value[0] = mandoc_strdup(buf);
+
+	/* Set our width! */
+	n->data.Bl.width = n->args->argv[i].value[0];
 	return(1);
 }
 
@@ -774,7 +783,8 @@ post_bl_head(POST_ARGS)
 static int
 post_bl(POST_ARGS)
 {
-	int		  i, r, len, width;
+	struct mdoc_node *nn;
+	const char	 *ww;
 
 	if (MDOC_HEAD == n->type)
 		return(post_bl_head(m, n));
@@ -789,25 +799,27 @@ post_bl(POST_ARGS)
 	 * rewritten into real lengths).
 	 */
 
-	len = (int)(n->args ? n->args->argc : 0);
+	ww = n->data.Bl.width;
 
-	width = -1;
-
-	for (r = i = 0; i < len; i++) {
-		if (MDOC_Tag == n->args->argv[i].arg)
-			r |= 1 << 0;
-		if (MDOC_Width == n->args->argv[i].arg) {
-			width = i;
-			r |= 1 << 1;
-		}
-	}
-
-	if (r & (1 << 0) && ! (r & (1 << 1))) {
+	if (LIST_tag == n->data.Bl.type && NULL == n->data.Bl.width) {
 		if ( ! post_bl_tagwidth(m, n))
 			return(0);
-	} else if (r & (1 << 1))
-		if ( ! post_bl_width(m, n, width))
+	} else if (NULL != n->data.Bl.width) {
+		if ( ! post_bl_width(m, n))
 			return(0);
+	} else 
+		return(1);
+
+	assert(n->data.Bl.width);
+
+	/* If it has changed, propogate new width to children. */
+
+	if (ww == n->data.Bl.width)
+		return(1);
+
+	for (nn = n->child; nn; nn = nn->next)
+		if (MDOC_Bl == nn->tok)
+			nn->data.Bl.width = n->data.Bl.width;
 
 	return(1);
 }
@@ -827,7 +839,6 @@ post_pa(POST_ARGS)
 	
 	np = n;
 	m->next = MDOC_NEXT_CHILD;
-	/* XXX: make into macro value. */
 	if ( ! mdoc_word_alloc(m, n->line, n->pos, "~"))
 		return(0);
 	m->last = np;

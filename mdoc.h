@@ -279,6 +279,7 @@ struct	mdoc_bd {
 };
 
 struct	mdoc_bl {
+	const char	 *width; /* -width */
 	const char	 *offs; /* -offset */
 	enum mdoc_list	  type; /* -tag, -enum, etc. */
 	int		  comp; /* -compact */

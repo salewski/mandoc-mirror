@@ -731,6 +731,7 @@ termp_it_pre(DECL_ARGS)
 		 * handling for column for how this changes.
 		 */
 		width = a2width(&bl->args->argv[vals[0]], 0) + 2;
+		assert(bl->data.Bl.width);
 		break;
 	}
 
