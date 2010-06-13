@@ -52,7 +52,7 @@ struct	termact {
 	void	(*post)(DECL_ARGS);
 };
 
-static	size_t	  a2width(const struct mdoc_argv *, int);
+static	size_t	  a2width(const char *);
 static	size_t	  a2height(const struct mdoc_node *);
 static	size_t	  a2offs(const char *);
 
@@ -476,13 +476,13 @@ a2height(const struct mdoc_node *n)
 
 
 static size_t
-a2width(const struct mdoc_argv *arg, int pos)
+a2width(const char *v)
 {
 	struct roffsu	 su;
 
-	assert(arg->value[pos]);
-	if ( ! a2roffsu(arg->value[pos], &su, SCALE_MAX))
-		SCALE_HS_INIT(&su, strlen(arg->value[pos]));
+	assert(v);
+	if ( ! a2roffsu(v, &su, SCALE_MAX))
+		SCALE_HS_INIT(&su, strlen(v));
 
 	return(term_hspan(&su));
 }
@@ -703,7 +703,7 @@ termp_it_pre(DECL_ARGS)
 				nn->prev && i < (int)ncols; 
 				nn = nn->prev, i++)
 			offset += dcol + a2width
-				(&bl->args->argv[vals[1]], i);
+				(bl->args->argv[vals[1]].value[i]);
 
 
 		/*
@@ -719,10 +719,11 @@ termp_it_pre(DECL_ARGS)
 		 * Use the declared column widths, extended as explained
 		 * in the preceding paragraph.
 		 */
-		width = a2width(&bl->args->argv[vals[1]], i) + dcol;
+		width = a2width
+			(bl->args->argv[vals[1]].value[i]) + dcol;
 		break;
 	default:
-		if (vals[0] < 0) 
+		if (NULL == bl->data.Bl.width)
 			break;
 
 		/* 
@@ -730,8 +731,8 @@ termp_it_pre(DECL_ARGS)
 		 * number for buffering single arguments.  See the above
 		 * handling for column for how this changes.
 		 */
-		width = a2width(&bl->args->argv[vals[0]], 0) + 2;
 		assert(bl->data.Bl.width);
+		width = a2width(bl->data.Bl.width) + 2;
 		break;
 	}
 

@@ -1058,14 +1058,14 @@ mdoc_it_pre(MDOC_ARGS)
 		break;
 	}
 
+	if (bl->data.Bl.width)
+		a2width(bl->data.Bl.width, &width);
+
 	wp = -1;
 	for (i = 0; bl->args && i < (int)bl->args->argc; i++) 
 		switch (bl->args->argv[i].arg) {
 		case (MDOC_Column):
 			wp = i; /* Save for later. */
-			break;
-		case (MDOC_Width):
-			a2width(bl->args->argv[i].value[0], &width);
 			break;
 		default:
 			break;
