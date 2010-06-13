@@ -2,10 +2,6 @@
 * missing features
 ************************************************************************
 
-- .` "macro" not implemented (see gnu/usr.bin/cvs/man/cvs.1)
-  found by Anthony Bentley (anthonyjbentley@gmail.com)
-  06/01/10 23:48 on tech@openbsd
-
 - explicit blocks with missing end macro should be implicitely closed
   at the end of the enclosing block, e.g. .Bl It (El) Sh
   reminded by stsp@  in net/pptp pptp.8  Fri, 23 Apr 2010 20:32:39 +0200
@@ -41,19 +37,6 @@
   noted by stsp@  Sat, 24 Apr 2010 09:17:55 +0200
   reminded by nicm@  Mon, 3 May 2010 09:52:41 +0100
 
-
-- FIXED OpenBSD term.h 1.16 term.c 1.30 mdoc_term.c 1.75 schwarze 23.4.10
-  handle tab characters outside literal context, e.g. usb(4)
-  reported by jmc@  Mon, 19 Apr 2010 07:42:12 +0100
-  NEEDS MERGING TO bsd.lv
-
-- FIXED OpenBSD man.h 1.15 libman.h 1.16 man_hash.c 1.9 
-  man.c 1.25 man_macro.c 1.15 man_validate.c 1.19 man_action.c 1.15 
-  man_term.c 1.28 man_html.c 1.9 schwarze 25.4.
-  implement .if .ie .el
-  noticed by espie@  Fri, 23 Apr 2010 17:10:35 +0200
-  NEEDS MERGING TO bsd.lv
-
 - implement blank `Bl -column', such as
   .Bl -column
   .It foo Ta bar
@@ -84,9 +67,6 @@
         or by enclosing
   reported by jmc Tue, 13 Apr 2010 08:48:14 +0100
 
-- do not break the line after "--", it's probably a long option
-  reminded by stsp in net/pptp pptp.8  Fri, 23 Apr 2010 20:32:39 +0200
-
 - URGENT, this is making many kernel manuals look bad:
   .Ft/.Fn should MAYBE behave in custom section like in SYNOPSIS?
   autoconf.9:
@@ -110,9 +90,6 @@
 - empty phrases in .Bl column produce too few blanks
   try e.g. .Bl -column It Ta Ta
   reported by millert Fri, 02 Apr 2010 16:13:46 -0400
-
-- nroff inserts a space before :, mandoc doesn't:
-    .Dl expr "/$a" Li : '.*/\e(.*\e)'
 
 ************************************************************************
 * formatting issues: gratuitious differences
@@ -139,12 +116,11 @@
 
 Several areas can be cleaned up to make mandoc even faster.  These are 
 
-- cache `Bd' display types as `Bl' types are cached (this primarily
-  improves code-size by removing the a2disp type functions)
-
 - improve caching mechanism to handle other per-element arguments so
   that they need not be recalculated between front- and back-ends (also
-  reduces code size and complexity)
+  reduces code size and complexity):
+    `Bl -column' pointer
+    `Bf' font type
 
 - improve hashing mechanism for macros (quite important: performance)
 
