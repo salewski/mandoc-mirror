@@ -57,8 +57,6 @@ static	size_t	  a2height(const struct mdoc_node *);
 static	size_t	  a2offs(const char *);
 
 static	int	  arg_hasattr(int, const struct mdoc_node *);
-static	int	  arg_getattrs(const int *, int *, size_t,
-			const struct mdoc_node *);
 static	int	  arg_getattr(int, const struct mdoc_node *);
 static	void	  print_bvspace(struct termp *,
 			const struct mdoc_node *,
@@ -522,39 +520,21 @@ arg_hasattr(int arg, const struct mdoc_node *n)
 
 /*
  * Get the index of an argument in a node's argument list or -1 if it
- * does not exist.  See arg_getattrs().
+ * does not exist.
  */
 static int
 arg_getattr(int v, const struct mdoc_node *n)
 {
-	int		 val;
-
-	return(arg_getattrs(&v, &val, 1, n) ? val : -1);
-}
-
-
-/*
- * Walk through the argument list for a node and fill an array "vals"
- * with the positions of the argument structures listed in "keys".
- * Return the number of elements that were written into "vals", which
- * can be zero.
- */
-static int
-arg_getattrs(const int *keys, int *vals, 
-		size_t sz, const struct mdoc_node *n)
-{
-	int		 i, j, k;
+	int		 i;
 
 	if (NULL == n->args)
 		return(0);
 
-	for (k = i = 0; i < (int)n->args->argc; i++) 
-		for (j = 0; j < (int)sz; j++)
-			if (n->args->argv[i].arg == keys[j]) {
-				vals[j] = i;
-				k++;
-			}
-	return(k);
+	for (i = 0; i < (int)n->args->argc; i++) 
+		if (n->args->argv[i].arg == v)
+			return(i);
+
+	return(-1);
 }
 
 
@@ -643,7 +623,7 @@ termp_it_pre(DECL_ARGS)
 {
 	const struct mdoc_node *bl, *nn;
 	char		        buf[7];
-	int		        i, keys[2], vals[2];
+	int		        i, col;
 	size_t		        width, offset, ncols, dcol;
 	enum mdoc_list		type;
 
@@ -653,16 +633,6 @@ termp_it_pre(DECL_ARGS)
 	}
 
 	bl = n->parent->parent->parent;
-
-	/* Get list width, offset, and list type from argument list. */
-
-	keys[0] = MDOC_Width;
-	keys[1] = MDOC_Column;
-
-	vals[0] = vals[1] = -1;
-
-	arg_getattrs(keys, vals, 2, bl);
-
 	type = bl->data.Bl.type;
 
 	/* 
@@ -676,11 +646,13 @@ termp_it_pre(DECL_ARGS)
 	if (bl->data.Bl.offs)
 		offset = a2offs(bl->data.Bl.offs);
 
-
 	switch (type) {
 	case (LIST_column):
 		if (MDOC_HEAD == n->type)
 			break;
+
+		col = arg_getattr(MDOC_Column, bl);
+
 		/*
 		 * Imitate groff's column handling:
 		 * - For each earlier column, add its width.
@@ -690,7 +662,7 @@ termp_it_pre(DECL_ARGS)
 		 *   column.
 		 * - For more than 5 columns, add only one column.
 		 */
-		ncols = bl->args->argv[vals[1]].sz;
+		ncols = bl->args->argv[col].sz;
 		/* LINTED */
 		dcol = ncols < 5 ? 4 : ncols == 5 ? 3 : 1;
 
@@ -703,8 +675,7 @@ termp_it_pre(DECL_ARGS)
 				nn->prev && i < (int)ncols; 
 				nn = nn->prev, i++)
 			offset += dcol + a2width
-				(bl->args->argv[vals[1]].value[i]);
-
+				(bl->args->argv[col].value[i]);
 
 		/*
 		 * When exceeding the declared number of columns, leave
@@ -719,8 +690,7 @@ termp_it_pre(DECL_ARGS)
 		 * Use the declared column widths, extended as explained
 		 * in the preceding paragraph.
 		 */
-		width = a2width
-			(bl->args->argv[vals[1]].value[i]) + dcol;
+		width = a2width(bl->args->argv[col].value[i]) + dcol;
 		break;
 	default:
 		if (NULL == bl->data.Bl.width)
