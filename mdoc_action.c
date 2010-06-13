@@ -52,7 +52,8 @@ static	int	  post_at(POST_ARGS);
 static	int	  post_bl(POST_ARGS);
 static	int	  post_bl_head(POST_ARGS);
 static	int	  post_bl_tagwidth(POST_ARGS);
-static	int	  post_bl_width(POST_ARGS);
+static	int	  post_bl_width(struct mdoc *, 
+			struct mdoc_node *, int);
 static	int	  post_dd(POST_ARGS);
 static	int	  post_display(POST_ARGS);
 static	int	  post_dt(POST_ARGS);
@@ -631,32 +632,33 @@ static int
 post_bl_tagwidth(POST_ARGS)
 {
 	struct mdoc_node *nn;
-	size_t		  sz;
+	size_t		  sz, ssz;
 	int		  i;
 	char		  buf[NUMSIZ];
 
-	/* Defaults to ten ens. */
-
-	sz = 10; /* XXX: make this a macro value. */
+	sz = 10;
 
 	for (nn = n->body->child; nn; nn = nn->next) {
-		if (MDOC_It == nn->tok)
-			break;
-	}
+		if (MDOC_It != nn->tok)
+			continue;
 
-	if (nn) {
 		assert(MDOC_BLOCK == nn->type);
 		nn = nn->head->child;
-		if (MDOC_TEXT != nn->type) {
-			sz = mdoc_macro2len(nn->tok);
-			if (sz == 0) {
-				if ( ! mdoc_nmsg(m, n, MANDOCERR_NOWIDTHARG))
-					return(0);
-				sz = 10;
-			}
-		} else
+
+		if (MDOC_TEXT == nn->type) {
 			sz = strlen(nn->string) + 1;
+			break;
+		}
+
+		if (0 != (ssz = mdoc_macro2len(nn->tok)))
+			sz = ssz;
+		else if ( ! mdoc_nmsg(m, n, MANDOCERR_NOWIDTHARG))
+			return(0);
+
+		break;
 	} 
+
+	/* Defaults to ten ens. */
 
 	snprintf(buf, NUMSIZ, "%zun", sz);
 
@@ -688,24 +690,15 @@ post_bl_tagwidth(POST_ARGS)
  * scaling width.
  */
 static int
-post_bl_width(POST_ARGS)
+post_bl_width(struct mdoc *m, struct mdoc_node *n, int pos)
 {
 	size_t		  width;
-	int		  i;
 	enum mdoct	  tok;
 	char		  buf[NUMSIZ];
 	char		 *p;
 
-	if (NULL == n->args)
-		return(1);
-
-	for (i = 0; i < (int)n->args->argc; i++)
-		if (MDOC_Width == n->args->argv[i].arg)
-			break;
-
-	if (i == (int)n->args->argc)
-		return(1);
-	p = n->args->argv[i].value[0];
+	assert(n->args);
+	p = n->args->argv[pos].value[0];
 
 	/*
 	 * If the value to -width is a macro, then we re-write it to be
@@ -722,8 +715,8 @@ post_bl_width(POST_ARGS)
 	/* The value already exists: free and reallocate it. */
 
 	snprintf(buf, NUMSIZ, "%zun", width);
-	free(n->args->argv[i].value[0]);
-	n->args->argv[i].value[0] = mandoc_strdup(buf);
+	free(n->args->argv[pos].value[0]);
+	n->args->argv[pos].value[0] = mandoc_strdup(buf);
 	return(1);
 }
 
@@ -739,7 +732,9 @@ post_bl_head(POST_ARGS)
 	int			 i, c;
 	struct mdoc_node	*np, *nn, *nnp;
 
-	if (NULL == n->child)
+	if (LIST_column != n->data.Bl.type)
+		return(1);
+	else if (NULL == n->child)
 		return(1);
 
 	np = n->parent;
@@ -749,8 +744,7 @@ post_bl_head(POST_ARGS)
 		if (MDOC_Column == np->args->argv[c].arg)
 			break;
 
-	if (c == (int)np->args->argc)
-		return(1);
+	assert(c < (int)np->args->argc);
 	assert(0 == np->args->argv[c].sz);
 
 	/*
@@ -780,7 +774,7 @@ post_bl_head(POST_ARGS)
 static int
 post_bl(POST_ARGS)
 {
-	int		  i, r, len;
+	int		  i, r, len, width;
 
 	if (MDOC_HEAD == n->type)
 		return(post_bl_head(m, n));
@@ -797,18 +791,22 @@ post_bl(POST_ARGS)
 
 	len = (int)(n->args ? n->args->argc : 0);
 
+	width = -1;
+
 	for (r = i = 0; i < len; i++) {
 		if (MDOC_Tag == n->args->argv[i].arg)
 			r |= 1 << 0;
-		if (MDOC_Width == n->args->argv[i].arg)
+		if (MDOC_Width == n->args->argv[i].arg) {
+			width = i;
 			r |= 1 << 1;
+		}
 	}
 
 	if (r & (1 << 0) && ! (r & (1 << 1))) {
 		if ( ! post_bl_tagwidth(m, n))
 			return(0);
 	} else if (r & (1 << 1))
-		if ( ! post_bl_width(m, n))
+		if ( ! post_bl_width(m, n, width))
 			return(0);
 
 	return(1);
