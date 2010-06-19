@@ -160,7 +160,7 @@ www:	all $(GSGMLS) $(HTMLS) $(TEXTS) $(MD5S) $(TARGZS) $(PSS)
 ps:	$(PSS)
 
 installwww: www
-	$(INSTALL_DATA) $(HTMLS) $(TEXTS) $(STATICS) $(DESTDIR)$(PREFIX)/
+	$(INSTALL_DATA) $(HTMLS) $(PSS) $(TEXTS) $(STATICS) $(DESTDIR)$(PREFIX)/
 	$(INSTALL_DATA) mdocml-$(VERSION).tar.gz $(DESTDIR)$(PREFIX)/snapshots/
 	$(INSTALL_DATA) mdocml-$(VERSION).md5 $(DESTDIR)$(PREFIX)/snapshots/
 	$(INSTALL_DATA) mdocml-$(VERSION).tar.gz $(DESTDIR)$(PREFIX)/snapshots/mdocml.tar.gz
