@@ -244,6 +244,7 @@
 					<P>
 					See <Q><A CLASS="external" HREF="http://manpages.bsd.lv">Writing UNIX Manual Pages</A></Q> for a general
 					introduction to manpages and mdoc.
+					</P>
 				</TD>
 			</TR>
 			<TR>
@@ -298,6 +299,16 @@
 					<H1>
 					<A NAME="news">NEWS</A>
 					</H1>
+					<DIV CLASS="news">
+						<P>
+							<SPAN CLASS="date">19-06-2010</SPAN>:
+							version 1.10.2
+						</P>
+						<P>
+							Small release featuring text-decoration in <SPAN CLASS="flag">-Tps</SPAN> output, a few
+							minor relaxations of errors, and some optimisations.
+						</P>
+					</DIV>
 					<DIV CLASS="news">
 						<P>
 							<SPAN CLASS="date">07-06-2010</SPAN>:
