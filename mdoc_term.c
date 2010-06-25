@@ -52,9 +52,9 @@ struct	termact {
 	void	(*post)(DECL_ARGS);
 };
 
-static	size_t	  a2width(const char *);
-static	size_t	  a2height(const struct mdoc_node *);
-static	size_t	  a2offs(const char *);
+static	size_t	  a2width(const struct termp *, const char *);
+static	size_t	  a2height(const struct termp *, const char *);
+static	size_t	  a2offs(const struct termp *, const char *);
 
 static	int	  arg_hasattr(int, const struct mdoc_node *);
 static	int	  arg_getattr(int, const struct mdoc_node *);
@@ -271,7 +271,7 @@ terminal_mdoc(void *arg, const struct mdoc *mdoc)
 
 	p->overstep = 0;
 	p->maxrmargin = p->defrmargin;
-	p->tabwidth = 5;
+	p->tabwidth = term_len(p, 5);
 
 	if (NULL == p->symtab)
 		switch (p->enc) {
@@ -369,14 +369,15 @@ print_mdoc_foot(struct termp *p, const void *arg)
 	term_vspace(p);
 
 	p->offset = 0;
-	p->rmargin = (p->maxrmargin - strlen(buf) + 1) / 2;
+	p->rmargin = (p->maxrmargin - 
+			term_strlen(p, buf) + term_len(p, 1)) / 2;
 	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
 
 	term_word(p, os);
 	term_flushln(p);
 
 	p->offset = p->rmargin;
-	p->rmargin = p->maxrmargin - strlen(os);
+	p->rmargin = p->maxrmargin - term_strlen(p, os);
 	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 
 	term_word(p, buf);
@@ -432,14 +433,15 @@ print_mdoc_head(struct termp *p, const void *arg)
 	snprintf(title, BUFSIZ, "%s(%s)", m->title, m->msec);
 
 	p->offset = 0;
-	p->rmargin = (p->maxrmargin - strlen(buf) + 1) / 2;
+	p->rmargin = (p->maxrmargin - 
+			term_strlen(p, buf) + term_len(p, 1)) / 2;
 	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
 
 	term_word(p, title);
 	term_flushln(p);
 
 	p->offset = p->rmargin;
-	p->rmargin = p->maxrmargin - strlen(title);
+	p->rmargin = p->maxrmargin - term_strlen(p, title);
 	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
 
 	term_word(p, buf);
@@ -460,34 +462,33 @@ print_mdoc_head(struct termp *p, const void *arg)
 
 
 static size_t
-a2height(const struct mdoc_node *n)
+a2height(const struct termp *p, const char *v)
 {
 	struct roffsu	 su;
 
-	assert(MDOC_TEXT == n->type);
-	assert(n->string);
-	if ( ! a2roffsu(n->string, &su, SCALE_VS))
-		SCALE_VS_INIT(&su, strlen(n->string));
+	assert(v);
+	if ( ! a2roffsu(v, &su, SCALE_VS))
+		SCALE_VS_INIT(&su, term_len(p, 1));
 
-	return(term_vspan(&su));
+	return(term_vspan(p, &su));
 }
 
 
 static size_t
-a2width(const char *v)
+a2width(const struct termp *p, const char *v)
 {
 	struct roffsu	 su;
 
 	assert(v);
 	if ( ! a2roffsu(v, &su, SCALE_MAX))
-		SCALE_HS_INIT(&su, strlen(v));
+		SCALE_HS_INIT(&su, term_strlen(p, v));
 
-	return(term_hspan(&su));
+	return(term_hspan(p, &su));
 }
 
 
 static size_t
-a2offs(const char *v)
+a2offs(const struct termp *p, const char *v)
 {
 	struct roffsu	 su;
 
@@ -496,13 +497,13 @@ a2offs(const char *v)
 	else if (0 == strcmp(v, "left"))
 		return(0);
 	else if (0 == strcmp(v, "indent"))
-		return(INDENT + 1);
+		return(term_len(p, INDENT + 1));
 	else if (0 == strcmp(v, "indent-two"))
-		return((INDENT + 1) * 2);
+		return(term_len(p, (INDENT + 1) * 2));
 	else if ( ! a2roffsu(v, &su, SCALE_MAX))
-		SCALE_HS_INIT(&su, strlen(v));
+		SCALE_HS_INIT(&su, term_strlen(p, v));
 
-	return(term_hspan(&su));
+	return(term_hspan(p, &su));
 }
 
 
@@ -644,7 +645,7 @@ termp_it_pre(DECL_ARGS)
 	width = offset = 0;
 
 	if (bl->data.Bl.offs)
-		offset = a2offs(bl->data.Bl.offs);
+		offset = a2offs(p, bl->data.Bl.offs);
 
 	switch (type) {
 	case (LIST_column):
@@ -664,7 +665,8 @@ termp_it_pre(DECL_ARGS)
 		 */
 		ncols = bl->args->argv[col].sz;
 		/* LINTED */
-		dcol = ncols < 5 ? 4 : ncols == 5 ? 3 : 1;
+		dcol = ncols < 5 ? term_len(p, 4) : 
+			ncols == 5 ? term_len(p, 3) : term_len(p, 1);
 
 		/*
 		 * Calculate the offset by applying all prior MDOC_BODY,
@@ -675,7 +677,7 @@ termp_it_pre(DECL_ARGS)
 				nn->prev && i < (int)ncols; 
 				nn = nn->prev, i++)
 			offset += dcol + a2width
-				(bl->args->argv[col].value[i]);
+				(p, bl->args->argv[col].value[i]);
 
 		/*
 		 * When exceeding the declared number of columns, leave
@@ -690,7 +692,7 @@ termp_it_pre(DECL_ARGS)
 		 * Use the declared column widths, extended as explained
 		 * in the preceding paragraph.
 		 */
-		width = a2width(bl->args->argv[col].value[i]) + dcol;
+		width = a2width(p, bl->args->argv[col].value[i]) + dcol;
 		break;
 	default:
 		if (NULL == bl->data.Bl.width)
@@ -702,7 +704,7 @@ termp_it_pre(DECL_ARGS)
 		 * handling for column for how this changes.
 		 */
 		assert(bl->data.Bl.width);
-		width = a2width(bl->data.Bl.width) + 2;
+		width = a2width(p, bl->data.Bl.width) + term_len(p, 2);
 		break;
 	}
 
@@ -718,22 +720,22 @@ termp_it_pre(DECL_ARGS)
 	case (LIST_dash):
 		/* FALLTHROUGH */
 	case (LIST_hyphen):
-		if (width < 4)
-			width = 4;
+		if (width < term_len(p, 4))
+			width = term_len(p, 4);
 		break;
 	case (LIST_enum):
-		if (width < 5)
-			width = 5;
+		if (width < term_len(p, 5))
+			width = term_len(p, 5);
 		break;
 	case (LIST_hang):
 		if (0 == width)
-			width = 8;
+			width = term_len(p, 8);
 		break;
 	case (LIST_column):
 		/* FALLTHROUGH */
 	case (LIST_tag):
 		if (0 == width)
-			width = 10;
+			width = term_len(p, 10);
 		break;
 	default:
 		break;
@@ -1374,7 +1376,7 @@ termp_sh_pre(DECL_ARGS)
 		term_fontpush(p, TERMFONT_BOLD);
 		break;
 	case (MDOC_BODY):
-		p->offset = INDENT;
+		p->offset = term_len(p, INDENT);
 		break;
 	default:
 		break;
@@ -1459,7 +1461,7 @@ termp_d1_pre(DECL_ARGS)
 	if (MDOC_BLOCK != n->type)
 		return(1);
 	term_newln(p);
-	p->offset += (INDENT + 1);
+	p->offset += term_len(p, (INDENT + 1));
 	return(1);
 }
 
@@ -1587,7 +1589,7 @@ termp_bd_pre(DECL_ARGS)
 		return(0);
 
 	if (n->data.Bd.offs)
-		p->offset += a2offs(n->data.Bd.offs);
+		p->offset += a2offs(p, n->data.Bd.offs);
 
 	/*
 	 * If -ragged or -filled are specified, the block does nothing
@@ -1602,7 +1604,7 @@ termp_bd_pre(DECL_ARGS)
 		return(1);
 
 	tabwidth = p->tabwidth;
-	p->tabwidth = 8;
+	p->tabwidth = term_len(p, 8);
 	rm = p->rmargin;
 	rmax = p->maxrmargin;
 	p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
@@ -1777,7 +1779,7 @@ termp_ss_pre(DECL_ARGS)
 		break;
 	case (MDOC_HEAD):
 		term_fontpush(p, TERMFONT_BOLD);
-		p->offset = HALFINDENT;
+		p->offset = term_len(p, HALFINDENT);
 		break;
 	default:
 		break;
@@ -1853,7 +1855,7 @@ termp_sp_pre(DECL_ARGS)
 
 	switch (n->tok) {
 	case (MDOC_sp):
-		len = n->child ? a2height(n->child) : 1;
+		len = n->child ? a2height(p, n->child->string) : 1;
 		break;
 	case (MDOC_br):
 		len = 0;

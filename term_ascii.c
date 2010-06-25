@@ -35,6 +35,7 @@ static	void		  ascii_letter(struct termp *, char);
 static	void		  ascii_begin(struct termp *);
 static	void		  ascii_advance(struct termp *, size_t);
 static	void		  ascii_end(struct termp *);
+static	size_t		  ascii_width(const struct termp *, char);
 
 
 void *
@@ -47,12 +48,16 @@ ascii_alloc(char *outopts)
 	if (NULL == (p = term_alloc(TERMENC_ASCII)))
 		return(NULL);
 
+	p->tabwidth = 5;
+	p->defrmargin = 78;
+
 	p->type = TERMTYPE_CHAR;
 	p->letter = ascii_letter;
 	p->begin = ascii_begin;
 	p->end = ascii_end;
 	p->endline = ascii_endline;
 	p->advance = ascii_advance;
+	p->width = ascii_width;
 
 	toks[0] = "width";
 	toks[1] = NULL;
@@ -71,6 +76,14 @@ ascii_alloc(char *outopts)
 		p->defrmargin = 58;
 
 	return(p);
+}
+
+
+static size_t
+ascii_width(const struct termp *p, char c)
+{
+
+	return(1);
 }
 
 

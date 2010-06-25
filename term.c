@@ -87,9 +87,7 @@ term_alloc(enum termenc enc)
 		exit(EXIT_FAILURE);
 	}
 
-	p->tabwidth = 5;
 	p->enc = enc;
-	p->defrmargin = 78;
 	return(p);
 }
 
@@ -626,7 +624,27 @@ encode(struct termp *p, const char *word, size_t sz)
 
 
 size_t
-term_vspan(const struct roffsu *su)
+term_len(const struct termp *p, size_t sz)
+{
+
+	return((*p->width)(p, ' ') * sz);
+}
+
+
+size_t
+term_strlen(const struct termp *p, const char *cp)
+{
+	size_t		 sz;
+
+	for (sz = 0; *cp; cp++)
+		sz += (*p->width)(p, *cp);
+
+	return(sz);
+}
+
+
+size_t
+term_vspan(const struct termp *p, const struct roffsu *su)
 {
 	double		 r;
 
@@ -662,7 +680,7 @@ term_vspan(const struct roffsu *su)
 
 
 size_t
-term_hspan(const struct roffsu *su)
+term_hspan(const struct termp *p, const struct roffsu *su)
 {
 	double		 r;
 
