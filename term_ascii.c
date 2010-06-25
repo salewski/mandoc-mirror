@@ -79,6 +79,7 @@ ascii_alloc(char *outopts)
 }
 
 
+/* ARGSUSED */
 static size_t
 ascii_width(const struct termp *p, char c)
 {

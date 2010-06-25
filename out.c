@@ -139,8 +139,6 @@ a2roffsu(const char *src, struct roffsu *dst, enum roffscale def)
 	if ((dst->scale = atof(buf)) < 0)
 		dst->scale = 0;
 	dst->unit = unit;
-	dst->pt = hasd;
-
 	return(1);
 }
 

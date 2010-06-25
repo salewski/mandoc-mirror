@@ -431,6 +431,7 @@ ps_setfont(struct termp *p, enum termfont f)
 }
 
 
+/* ARGSUSED */
 static size_t
 ps_width(const struct termp *p, char c)
 {
