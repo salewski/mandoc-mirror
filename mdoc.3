@@ -29,6 +29,7 @@
 .Nd mdoc macro compiler library
 .Sh SYNOPSIS
 .In mandoc.h
+.In regs.h
 .In mdoc.h
 .Vt extern const char * const * mdoc_macronames;
 .Vt extern const char * const * mdoc_argnames;
@@ -43,7 +44,12 @@
 .Ft "const struct mdoc_node *"
 .Fn mdoc_node "const struct mdoc *mdoc"
 .Ft int
-.Fn mdoc_parseln "struct mdoc *mdoc" "int line" "char *buf"
+.Fo mdoc_parseln
+.Fa "struct mdoc *mdoc"
+.Fa "const struct regset *regs"
+.Fa "int line"
+.Fa "char *buf"
+.Fc
 .Ft int
 .Fn mdoc_reset "struct mdoc *mdoc"
 .Sh DESCRIPTION

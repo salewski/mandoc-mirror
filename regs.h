@@ -24,10 +24,6 @@ enum	regs {
 	REG__MAX
 };
 
-/*
- * Registers are passed into libmdoc and libman.  They refer to some
- * sort of external state.
- */
 struct	regset {
 	union {
 		int	 i; /* integer value */

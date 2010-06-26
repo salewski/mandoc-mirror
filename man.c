@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "mandoc.h"
+#include "regs.h"
 #include "libman.h"
 #include "libmandoc.h"
 
@@ -124,7 +125,8 @@ man_endparse(struct man *m)
 
 
 int
-man_parseln(struct man *m, int ln, char *buf, int offs)
+man_parseln(struct man *m, const struct regset *regs,
+		int ln, char *buf, int offs)
 {
 
 	if (MAN_HALT & m->flags)

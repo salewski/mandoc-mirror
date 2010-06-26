@@ -30,6 +30,7 @@
 #include "mandoc.h"
 #include "out.h"
 #include "term.h"
+#include "regs.h"
 #include "mdoc.h"
 #include "chars.h"
 #include "main.h"

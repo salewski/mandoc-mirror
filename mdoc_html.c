@@ -30,6 +30,7 @@
 #include "mandoc.h"
 #include "out.h"
 #include "html.h"
+#include "regs.h"
 #include "mdoc.h"
 #include "main.h"
 

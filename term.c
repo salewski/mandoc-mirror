@@ -31,8 +31,6 @@
 #include "chars.h"
 #include "out.h"
 #include "term.h"
-#include "man.h"
-#include "mdoc.h"
 #include "main.h"
 
 static	void		  spec(struct termp *, const char *, size_t);

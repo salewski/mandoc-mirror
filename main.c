@@ -562,9 +562,9 @@ fdesc(struct curparse *curp)
 
 		/* Lastly, push down into the parsers themselves. */
 
-		if (man && ! man_parseln(man, lnn_start, ln.buf, of))
+		if (man && ! man_parseln(man, &regs, lnn_start, ln.buf, of))
 			goto bailout;
-		if (mdoc && ! mdoc_parseln(mdoc, lnn_start, ln.buf, of))
+		if (mdoc && ! mdoc_parseln(mdoc, &regs, lnn_start, ln.buf, of))
 			goto bailout;
 	}
 

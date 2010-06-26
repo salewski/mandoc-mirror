@@ -29,6 +29,7 @@
 #include <time.h>
 
 #include "mandoc.h"
+#include "regs.h"
 #include "libmdoc.h"
 #include "libmandoc.h"
 
@@ -229,7 +230,8 @@ mdoc_endparse(struct mdoc *m)
  * the macro (mdoc_pmacro()) or text parser (mdoc_ptext()).
  */
 int
-mdoc_parseln(struct mdoc *m, int ln, char *buf, int offs)
+mdoc_parseln(struct mdoc *m, const struct regset *regs,
+		int ln, char *buf, int offs)
 {
 
 	if (MDOC_HALT & m->flags)

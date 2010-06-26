@@ -28,6 +28,7 @@
 
 #include "mandoc.h"
 #include "out.h"
+#include "regs.h"
 #include "man.h"
 #include "term.h"
 #include "chars.h"

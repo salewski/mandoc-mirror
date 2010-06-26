@@ -17,6 +17,7 @@
 #ifndef LIBMDOC_H
 #define LIBMDOC_H
 
+#include "regs.h"
 #include "mdoc.h"
 
 enum	mdoc_next {
