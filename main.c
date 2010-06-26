@@ -30,10 +30,11 @@
 #include <unistd.h>
 
 #include "mandoc.h"
+#include "regs.h"
+#include "main.h"
 #include "mdoc.h"
 #include "man.h"
 #include "roff.h"
-#include "main.h"
 
 #define	UNCONST(a)	((void *)(uintptr_t)(const void *)(a))
 
@@ -450,11 +451,13 @@ fdesc(struct curparse *curp)
 	struct man	*man;
 	struct mdoc	*mdoc;
 	struct roff	*roff;
+	struct regset	 regs;
 
 	man = NULL;
 	mdoc = NULL;
 	roff = NULL;
 	memset(&ln, 0, sizeof(struct buf));
+	memset(&regs, 0, sizeof(struct regset));
 
 	/*
 	 * Two buffers: ln and buf.  buf is the input file and may be
@@ -537,7 +540,7 @@ fdesc(struct curparse *curp)
 
 		of = 0;
 		do {
-			re = roff_parseln(roff, lnn_start, 
+			re = roff_parseln(roff, &regs, lnn_start, 
 					&ln.buf, &ln.sz, of, &of);
 		} while (ROFF_RERUN == re);
 

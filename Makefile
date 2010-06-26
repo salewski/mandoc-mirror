@@ -98,7 +98,7 @@ DATAS	   = arch.in att.in lib.in msec.in st.in \
 
 HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
 	     libmandoc.h html.h chars.h out.h main.h roff.h \
-	     mandoc.h
+	     mandoc.h regs.h
 
 GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml \
 	     mandoc_char.7.sgml man.7.sgml man.3.sgml roff.7.sgml \

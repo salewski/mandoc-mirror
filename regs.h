@@ -14,27 +14,26 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef ROFF_H
-#define ROFF_H
-
-enum	rofferr {
-	ROFF_CONT, /* continue processing line */
-	ROFF_RERUN, /* re-run roff interpreter with offset */
-	ROFF_IGN, /* ignore current line */
-	ROFF_ERR /* badness: puke and stop */
-};
+#ifndef REGS_H
+#define REGS_H
 
 __BEGIN_DECLS
 
-struct	roff;
+enum	regs {
+	REG_nS = 0,	/* nS */
+	REG__MAX
+};
 
-void	 	  roff_free(struct roff *);
-struct	roff	 *roff_alloc(mandocmsg, void *);
-void		  roff_reset(struct roff *);
-enum	rofferr	  roff_parseln(struct roff *, struct regset *,
-			int, char **, size_t *, int, int *);
-int		  roff_endparse(struct roff *);
+/*
+ * Registers are passed into libmdoc and libman.  They refer to some
+ * sort of external state.
+ */
+struct	regset {
+	union {
+		int	 i; /* integer value */
+	} regs[REG__MAX];
+};
 
 __END_DECLS
 
-#endif /*!ROFF_H*/
+#endif /*!REGS_H*/

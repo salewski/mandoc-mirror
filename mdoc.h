@@ -155,6 +155,7 @@ enum	mdoct {
 
 /* What follows is a list of ALL possible macro arguments. */
 
+/* FIXME: make this into an enum. */
 #define	MDOC_Split	 0
 #define	MDOC_Nosplit	 1
 #define	MDOC_Ragged	 2
