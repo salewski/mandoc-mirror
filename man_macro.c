@@ -290,6 +290,7 @@ blk_close(MACRO_PROT_ARGS)
 }
 
 
+/* ARGSUSED */
 int
 blk_exp(MACRO_PROT_ARGS)
 {
@@ -341,6 +342,7 @@ blk_exp(MACRO_PROT_ARGS)
  * scopes, such as `SH' closing out an `SS', are defined in the rew
  * routines.
  */
+/* ARGSUSED */
 int
 blk_imp(MACRO_PROT_ARGS)
 {
@@ -398,6 +400,7 @@ blk_imp(MACRO_PROT_ARGS)
 }
 
 
+/* ARGSUSED */
 int
 in_line_eoln(MACRO_PROT_ARGS)
 {

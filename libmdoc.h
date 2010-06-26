@@ -45,8 +45,13 @@ struct	mdoc {
 	enum mdoc_sec	  lastsec;
 };
 
-#define	MACRO_PROT_ARGS	struct mdoc *m, enum mdoct tok, \
-			int line, int ppos, int *pos, char *buf
+#define	MACRO_PROT_ARGS	struct mdoc *m, \
+			const struct regset *regs, \
+			enum mdoct tok, \
+			int line, \
+			int ppos, \
+			int *pos, \
+			char *buf
 
 struct	mdoc_macro {
 	int		(*fp)(MACRO_PROT_ARGS);

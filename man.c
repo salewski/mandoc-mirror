@@ -54,7 +54,9 @@ static	void		 man_node_free(struct man_node *);
 static	void		 man_node_unlink(struct man *, 
 				struct man_node *);
 static	int		 man_ptext(struct man *, int, char *, int);
-static	int		 man_pmacro(struct man *, int, char *, int);
+static	int		 man_pmacro(struct man *, 
+				const struct regset *regs,
+				int, char *, int);
 static	void		 man_free1(struct man *);
 static	void		 man_alloc1(struct man *);
 static	int		 macrowarn(struct man *, int, const char *, int);
@@ -133,7 +135,7 @@ man_parseln(struct man *m, const struct regset *regs,
 		return(0);
 
 	return(('.' == buf[offs] || '\'' == buf[offs]) ? 
-			man_pmacro(m, ln, buf, offs) : 
+			man_pmacro(m, regs, ln, buf, offs) : 
 			man_ptext(m, ln, buf, offs));
 }
 
@@ -449,7 +451,8 @@ macrowarn(struct man *m, int ln, const char *buf, int offs)
 
 
 int
-man_pmacro(struct man *m, int ln, char *buf, int offs)
+man_pmacro(struct man *m, const struct regset *regs,
+		int ln, char *buf, int offs)
 {
 	int		 i, j, ppos;
 	enum mant	 tok;
@@ -574,7 +577,7 @@ man_pmacro(struct man *m, int ln, char *buf, int offs)
 	/* Call to handler... */
 
 	assert(man_macros[tok].fp);
-	if ( ! (*man_macros[tok].fp)(m, tok, ln, ppos, &i, buf))
+	if ( ! (*man_macros[tok].fp)(m, regs, tok, ln, ppos, &i, buf))
 		goto err;
 
 out:

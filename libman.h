@@ -42,8 +42,13 @@ struct	man {
 	struct man_meta	 meta;
 };
 
-#define	MACRO_PROT_ARGS	  struct man *m, enum mant tok, int line, \
-			  int ppos, int *pos, char *buf
+#define	MACRO_PROT_ARGS	  struct man *m, \
+			  const struct regset *regs, \
+			  enum mant tok, \
+			  int line, \
+			  int ppos, \
+			  int *pos, \
+			  char *buf
 
 struct	man_macro {
 	int		(*fp)(MACRO_PROT_ARGS);
