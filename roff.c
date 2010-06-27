@@ -155,7 +155,7 @@ static	int		 roffnode_push(struct roff *,
 				enum rofft, int, int);
 static	void		 roffnode_pop(struct roff *);
 static	enum rofft	 roff_parse(const char *, int *);
-static	int		 roff_parse_nat(const char *, int *);
+static	int		 roff_parse_nat(const char *, unsigned int *);
 
 /* See roff_hash_find() */
 #define	ROFF_HASH(p)	(p[0] - ASCII_LO)
@@ -425,7 +425,7 @@ roff_parse(const char *buf, int *pos)
 
 
 static int
-roff_parse_nat(const char *buf, int *res)
+roff_parse_nat(const char *buf, unsigned int *res)
 {
 	char		*ep;
 	long		 lval;
@@ -436,10 +436,10 @@ roff_parse_nat(const char *buf, int *res)
 		return(0);
 	if ((errno == ERANGE && 
 			(lval == LONG_MAX || lval == LONG_MIN)) ||
-			(lval > INT_MAX || lval <= 0))
+			(lval > INT_MAX || lval < 0))
 		return(0);
 
-	*res = (int)lval;
+	*res = (unsigned int)lval;
 	return(1);
 }
 
@@ -882,8 +882,10 @@ static enum rofferr
 roff_nr(ROFF_ARGS)
 {
 	const char	*key, *val;
+	struct reg	*rg;
 
 	key = &(*bufp)[pos];
+	rg = r->regs->regs;
 
 	/* Parse register request. */
 	while ((*bufp)[pos] && ' ' != (*bufp)[pos])
@@ -905,11 +907,12 @@ roff_nr(ROFF_ARGS)
 	/* Process register token. */
 
 	if (0 == strcmp(key, "nS")) {
-		if ( ! roff_parse_nat(val, &r->regs->regs[(int)REG_nS].i))
-			r->regs->regs[(int)REG_nS].i = 0;
+		rg[(int)REG_nS].set = 1;
+		if ( ! roff_parse_nat(val, &rg[(int)REG_nS].v.u))
+			rg[(int)REG_nS].v.u = 0;
 
-		ROFF_DEBUG("roff: register nS: %d\n", 
-				r->regs->regs[(int)REG_nS].i);
+		ROFF_DEBUG("roff: register nS: %u\n", 
+				rg[(int)REG_nS].v.u);
 	} else
 		ROFF_DEBUG("roff: ignoring register: %s\n", key);
 

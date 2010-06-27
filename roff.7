@@ -289,12 +289,15 @@ requests are recognised:
 .It Cm nS
 If set to a positive integer value, certain
 .Xr mdoc 7
-macros will behave as if they are defined in the
+macros will behave as if they were defined in the
 .Em SYNOPSIS
-section to a manual.
+section.
 Otherwise, this behaviour is unset (even if called within the
 .Em SYNOPSIS
 section itself).
+Note that invoking a new
+.Xr mdoc 7
+section will unset this value.
 .El
 .Ss \&tr
 Output character translation.

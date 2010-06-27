@@ -380,6 +380,15 @@ node_alloc(struct mdoc *m, int line, int pos,
 	if (SEC_SYNOPSIS == p->sec)
 		p->flags |= MDOC_SYNPRETTY;
 
+	/* Register analysis. */
+
+	if (m->regs->regs[(int)REG_nS].set) {
+		if (m->regs->regs[(int)REG_nS].v.u)
+			p->flags |= MDOC_SYNPRETTY;
+		else
+			p->flags &= ~MDOC_SYNPRETTY;
+	}
+
 	return(p);
 }
 
