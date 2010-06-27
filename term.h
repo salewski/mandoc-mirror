@@ -78,6 +78,8 @@ struct	termp {
 #define	TERMP_NOSPLIT	 (1 << 11)	/* See termp_an_pre/post(). */
 #define	TERMP_SPLIT	 (1 << 12)	/* See termp_an_pre/post(). */
 #define	TERMP_ANPREC	 (1 << 13)	/* See termp_an_pre(). */
+#define	TERMP_KEEP	 (1 << 14)	/* Keep words together. */
+#define	TERMP_PREKEEP	 (1 << 15)	/* ...starting with the next one. */
 	char		 *buf;		/* Output buffer. */
 	enum termenc	  enc;		/* Type of encoding. */
 	void		 *symtab;	/* Encoded-symbol table. */
