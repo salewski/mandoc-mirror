@@ -1278,7 +1278,7 @@ synopsis_pre(struct termp *p, const struct mdoc_node *n)
 	 * Obviously, if we're not in a SYNOPSIS or no prior macros
 	 * exist, do nothing.
 	 */
-	if (NULL == n->prev || SEC_SYNOPSIS != n->sec)
+	if (NULL == n->prev || ! (MDOC_SYNPRETTY & n->flags))
 		return;
 
 	/*
@@ -1543,7 +1543,7 @@ termp_fn_pre(DECL_ARGS)
 
 	term_word(p, ")");
 
-	if (SEC_SYNOPSIS == n->sec)
+	if (MDOC_SYNPRETTY & n->flags)
 		term_word(p, ";");
 
 	return(0);
@@ -1820,7 +1820,7 @@ termp_in_pre(DECL_ARGS)
 
 	synopsis_pre(p, n);
 
-	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags) {
+	if (MDOC_SYNPRETTY & n->flags && MDOC_LINE & n->flags) {
 		term_fontpush(p, TERMFONT_BOLD);
 		term_word(p, "#include");
 		term_word(p, "<");
@@ -1839,13 +1839,13 @@ static void
 termp_in_post(DECL_ARGS)
 {
 
-	if (SEC_SYNOPSIS == n->sec)
+	if (MDOC_SYNPRETTY & n->flags)
 		term_fontpush(p, TERMFONT_BOLD);
 
 	p->flags |= TERMP_NOSPACE;
 	term_word(p, ">");
 
-	if (SEC_SYNOPSIS == n->sec)
+	if (MDOC_SYNPRETTY & n->flags)
 		term_fontpop(p);
 }
 
@@ -1987,7 +1987,7 @@ termp_fo_post(DECL_ARGS)
 	p->flags |= TERMP_NOSPACE;
 	term_word(p, ")");
 
-	if (SEC_SYNOPSIS == n->sec) {
+	if (MDOC_SYNPRETTY & n->flags) {
 		p->flags |= TERMP_NOSPACE;
 		term_word(p, ";");
 	}

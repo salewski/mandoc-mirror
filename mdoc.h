@@ -301,6 +301,7 @@ struct	mdoc_node {
 #define	MDOC_ACTED	 (1 << 1) /* has been acted upon */
 #define	MDOC_EOS	 (1 << 2) /* at sentence boundary */
 #define	MDOC_LINE	 (1 << 3) /* first macro/text on line */
+#define	MDOC_SYNPRETTY	 (1 << 4) /* SYNOPSIS-style formatting */
 	enum mdoc_type	  type; /* AST node type */
 	enum mdoc_sec	  sec; /* current named section */
 	/* FIXME: these can be union'd to shave a few bytes. */
@@ -333,7 +334,7 @@ struct	mdoc;
 /* See mdoc.3 for documentation. */
 
 void	 	  mdoc_free(struct mdoc *);
-struct	mdoc	 *mdoc_alloc(const struct regset *, void *, int, mandocmsg);
+struct	mdoc	 *mdoc_alloc(struct regset *, void *, int, mandocmsg);
 void		  mdoc_reset(struct mdoc *);
 int	 	  mdoc_parseln(struct mdoc *, int, char *, int);
 const struct mdoc_node *mdoc_node(const struct mdoc *);

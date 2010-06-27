@@ -35,7 +35,7 @@
 .Vt extern const char * const * mdoc_argnames;
 .Ft "struct mdoc *"
 .Fo mdoc_alloc
-.Fa "const struct regset *regs"
+.Fa "struct regset *regs"
 .Fa "void *data"
 .Fa "int pflags"
 .Fa "mandocmsg msgs"
@@ -259,14 +259,16 @@ on the finished parse tree with
 .Fn parsed .
 This example does not error-check nor free memory upon failure.
 .Bd -literal -offset indent
+struct regset regs;
 struct mdoc *mdoc;
 const struct mdoc_node *node;
 char *buf;
 size_t len;
 int line;
 
+bzero(&regs, sizeof(struct regset));
 line = 1;
-mdoc = mdoc_alloc(NULL, 0, NULL);
+mdoc = mdoc_alloc(&regs, NULL, 0, NULL);
 buf = NULL;
 alloc_len = 0;
 

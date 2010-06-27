@@ -40,7 +40,7 @@ struct	man {
 	struct man_node	*last; /* the last parsed node */
 	struct man_node	*first; /* the first parsed node */
 	struct man_meta	 meta; /* document meta-data */
-	const struct regset *regs; /* readonly registers */
+	struct regset	*regs; /* registers */
 };
 
 #define	MACRO_PROT_ARGS	  struct man *m, \

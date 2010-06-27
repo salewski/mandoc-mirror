@@ -43,7 +43,7 @@ struct	mdoc {
 	struct mdoc_meta  meta; /* document meta-data */
 	enum mdoc_sec	  lastnamed;
 	enum mdoc_sec	  lastsec;
-	const struct regset *regs; /* readonly registers */
+	struct regset	 *regs; /* registers */
 };
 
 #define	MACRO_PROT_ARGS	struct mdoc *m, \

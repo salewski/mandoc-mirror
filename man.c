@@ -95,8 +95,8 @@ man_free(struct man *man)
 
 
 struct man *
-man_alloc(const struct regset *regs,
-		void *data, int pflags, mandocmsg msg)
+man_alloc(struct regset *regs, void *data, 
+		int pflags, mandocmsg msg)
 {
 	struct man	*p;
 

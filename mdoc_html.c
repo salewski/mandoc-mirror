@@ -304,7 +304,7 @@ synopsis_pre(struct html *h, const struct mdoc_node *n)
 	struct roffsu	 su;
 	struct htmlpair	 tag;
 
-	if (NULL == n->prev || SEC_SYNOPSIS != n->sec)
+	if (NULL == n->prev || ! (MDOC_SYNPRETTY & n->flags))
 		return;
 
 	SCALE_VS_INIT(&su, 1);
@@ -1614,7 +1614,7 @@ mdoc_fn_pre(MDOC_ARGS)
 	 */
 
 #if 0
-	if (SEC_SYNOPSIS == n->sec) {
+	if (MDOC_SYNPRETTY & n->flags) {
 		nbuf[0] = '\0';
 		html_idcat(nbuf, sp, BUFSIZ);
 		PAIR_ID_INIT(&tag[1], nbuf);
@@ -1644,7 +1644,7 @@ mdoc_fn_pre(MDOC_ARGS)
 
 	for (nn = n->child->next; nn; nn = nn->next) {
 		i = 1;
-		if (SEC_SYNOPSIS == n->sec)
+		if (MDOC_SYNPRETTY & n->flags)
 			i = 2;
 		t = print_otag(h, TAG_SPAN, i, tag);
 		print_text(h, nn->string);
@@ -1654,7 +1654,7 @@ mdoc_fn_pre(MDOC_ARGS)
 	}
 
 	print_text(h, ")");
-	if (SEC_SYNOPSIS == n->sec)
+	if (MDOC_SYNPRETTY & n->flags)
 		print_text(h, ";");
 
 	return(0);
@@ -1824,7 +1824,7 @@ mdoc_in_pre(MDOC_ARGS)
 	PAIR_CLASS_INIT(&tag[0], "includes");
 	print_otag(h, TAG_SPAN, 1, tag);
 
-	if (SEC_SYNOPSIS == n->sec && MDOC_LINE & n->flags)
+	if (MDOC_SYNPRETTY & n->flags && MDOC_LINE & n->flags)
 		print_text(h, "#include");
 
 	print_text(h, "<");
