@@ -34,7 +34,12 @@
 .Vt extern const char * const * mdoc_macronames;
 .Vt extern const char * const * mdoc_argnames;
 .Ft "struct mdoc *"
-.Fn mdoc_alloc "void *data" "int pflags" "mandocmsg msgs"
+.Fo mdoc_alloc
+.Fa "const struct regset *regs"
+.Fa "void *data"
+.Fa "int pflags"
+.Fa "mandocmsg msgs"
+.Fc
 .Ft int
 .Fn mdoc_endparse "struct mdoc *mdoc"
 .Ft void
@@ -46,7 +51,6 @@
 .Ft int
 .Fo mdoc_parseln
 .Fa "struct mdoc *mdoc"
-.Fa "const struct regset *regs"
 .Fa "int line"
 .Fa "char *buf"
 .Fc

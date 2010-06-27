@@ -32,6 +32,11 @@
 #include "libmdoc.h"
 #include "libmandoc.h"
 
+/* 
+ * FIXME: this file is deprecated.  All future "actions" should be
+ * pushed into mdoc_validate.c.
+ */
+
 #define	POST_ARGS struct mdoc *m, struct mdoc_node *n
 #define	PRE_ARGS  struct mdoc *m, struct mdoc_node *n
 

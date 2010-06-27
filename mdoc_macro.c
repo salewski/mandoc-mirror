@@ -50,9 +50,7 @@ static	int	  	append_delims(struct mdoc *,
 				int, int *, char *);
 static	enum mdoct	lookup(enum mdoct, const char *);
 static	enum mdoct	lookup_raw(const char *);
-static	int	  	phrase(struct mdoc *, 
-				const struct regset *,
-				int, int, char *);
+static	int	  	phrase(struct mdoc *, int, int, char *);
 static	enum mdoct 	rew_alt(enum mdoct);
 static	int	  	rew_dobreak(enum mdoct, 
 				const struct mdoc_node *);
@@ -609,7 +607,6 @@ rew_sub(enum mdoc_type t, struct mdoc *m,
 	if ( ! rew_last(m, n))
 		return(0);
 
-#ifdef	UGLY
 	/*
 	 * The current block extends an enclosing block beyond a line
 	 * break.  Now that the current block ends, close the enclosing
@@ -622,7 +619,6 @@ rew_sub(enum mdoc_type t, struct mdoc *m,
 		if ( ! mdoc_body_alloc(m, n->line, n->pos, n->tok))
 			return(0);
 	}
-#endif
 
 	return(1);
 }
@@ -741,7 +737,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 				return(0);
 			flushed = 1;
 		}
-		if ( ! mdoc_macro(m, regs, ntok, line, lastarg, pos, buf))
+		if ( ! mdoc_macro(m, ntok, line, lastarg, pos, buf))
 			return(0);
 		break;
 	}
@@ -842,7 +838,7 @@ in_line(MACRO_PROT_ARGS)
 				if ( ! mdoc_pmsg(m, line, ppos, MANDOCERR_MACROEMPTY))
 					return(0);
 			}
-			if ( ! mdoc_macro(m, regs, ntok, line, la, pos, buf))
+			if ( ! mdoc_macro(m, ntok, line, la, pos, buf))
 				return(0);
 			if ( ! nl)
 				return(1);
@@ -938,9 +934,7 @@ blk_full(MACRO_PROT_ARGS)
 	struct mdoc_arg	 *arg;
 	struct mdoc_node *head; /* save of head macro */
 	struct mdoc_node *body; /* save of body macro */
-#ifdef	UGLY
 	struct mdoc_node *n;
-#endif
 	enum mdoc_type	  mtt;
 	enum mdoct	  ntok;
 	enum margserr	  ac, lac;
@@ -1088,7 +1082,7 @@ blk_full(MACRO_PROT_ARGS)
 			if (ARGS_PEND == ac && ARGS_PPHRASE == lac)
 				m->flags |= MDOC_PPHRASE;
 
-			if ( ! phrase(m, regs, line, la, buf))
+			if ( ! phrase(m, line, la, buf))
 				return(0);
 
 			m->flags &= ~MDOC_PPHRASE;
@@ -1103,7 +1097,7 @@ blk_full(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		if ( ! mdoc_macro(m, regs, ntok, line, la, pos, buf))
+		if ( ! mdoc_macro(m, ntok, line, la, pos, buf))
 			return(0);
 		break;
 	}
@@ -1122,7 +1116,6 @@ blk_full(MACRO_PROT_ARGS)
 	if (NULL != body)
 		goto out;
 
-#ifdef	UGLY
 	/*
 	 * If there is an open (i.e., unvalidated) sub-block requiring
 	 * explicit close-out, postpone switching the current block from
@@ -1138,7 +1131,6 @@ blk_full(MACRO_PROT_ARGS)
 			return(1);
 		}
 	}
-#endif
 
 	/* Close out scopes to remain in a consistent state. */
 
@@ -1231,7 +1223,7 @@ blk_part_imp(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		if ( ! mdoc_macro(m, regs, ntok, line, la, pos, buf))
+		if ( ! mdoc_macro(m, ntok, line, la, pos, buf))
 			return(0);
 		break;
 	}
@@ -1376,7 +1368,7 @@ blk_part_exp(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		if ( ! mdoc_macro(m, regs, ntok, line, la, pos, buf))
+		if ( ! mdoc_macro(m, ntok, line, la, pos, buf))
 			return(0);
 		break;
 	}
@@ -1495,7 +1487,7 @@ in_line_argn(MACRO_PROT_ARGS)
 			if ( ! flushed && ! rew_elem(m, tok))
 				return(0);
 			flushed = 1;
-			if ( ! mdoc_macro(m, regs, ntok, line, la, pos, buf))
+			if ( ! mdoc_macro(m, ntok, line, la, pos, buf))
 				return(0);
 			j++;
 			break;
@@ -1601,7 +1593,7 @@ in_line_eoln(MACRO_PROT_ARGS)
 
 		if ( ! rew_elem(m, tok))
 			return(0);
-		return(mdoc_macro(m, regs, ntok, line, la, pos, buf));
+		return(mdoc_macro(m, ntok, line, la, pos, buf));
 	}
 
 	/* Close out (no delimiters). */
@@ -1620,11 +1612,11 @@ ctx_synopsis(MACRO_PROT_ARGS)
 
 	/* If we're not in the SYNOPSIS, go straight to in-line. */
 	if (SEC_SYNOPSIS != m->lastsec)
-		return(in_line(m, regs, tok, line, ppos, pos, buf));
+		return(in_line(m, tok, line, ppos, pos, buf));
 
 	/* If we're a nested call, same place. */
 	if ( ! nl)
-		return(in_line(m, regs, tok, line, ppos, pos, buf));
+		return(in_line(m, tok, line, ppos, pos, buf));
 
 	/*
 	 * XXX: this will open a block scope; however, if later we end
@@ -1632,7 +1624,7 @@ ctx_synopsis(MACRO_PROT_ARGS)
 	 * the formatting.  Be careful.
 	 */
 
-	return(blk_part_imp(m, regs, tok, line, ppos, pos, buf));
+	return(blk_part_imp(m, tok, line, ppos, pos, buf));
 }
 
 
@@ -1651,8 +1643,7 @@ obsolete(MACRO_PROT_ARGS)
  * macro is encountered.
  */
 static int
-phrase(struct mdoc *m, const struct regset *regs,
-		int line, int ppos, char *buf)
+phrase(struct mdoc *m, int line, int ppos, char *buf)
 {
 	int		 la, pos;
 	enum margserr	 ac;
@@ -1677,7 +1668,7 @@ phrase(struct mdoc *m, const struct regset *regs,
 			continue;
 		}
 
-		if ( ! mdoc_macro(m, regs, ntok, line, la, &pos, buf))
+		if ( ! mdoc_macro(m, ntok, line, la, &pos, buf))
 			return(0);
 		return(append_delims(m, line, &pos, buf));
 	}
@@ -1722,7 +1713,7 @@ phrase_ta(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		if ( ! mdoc_macro(m, regs, ntok, line, la, pos, buf))
+		if ( ! mdoc_macro(m, ntok, line, la, pos, buf))
 			return(0);
 		return(append_delims(m, line, pos, buf));
 	}

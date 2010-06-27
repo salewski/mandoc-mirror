@@ -97,12 +97,8 @@ static	struct mdoc_node *node_alloc(struct mdoc *, int, int,
 				enum mdoct, enum mdoc_type);
 static	int		  node_append(struct mdoc *, 
 				struct mdoc_node *);
-static	int		  mdoc_ptext(struct mdoc *, 
-				const struct regset *,
-				int, char *, int);
-static	int		  mdoc_pmacro(struct mdoc *, 
-				const struct regset *,
-				int, char *, int);
+static	int		  mdoc_ptext(struct mdoc *, int, char *, int);
+static	int		  mdoc_pmacro(struct mdoc *, int, char *, int);
 static	int		  macrowarn(struct mdoc *, int, 
 				const char *, int);
 
@@ -196,7 +192,8 @@ mdoc_free(struct mdoc *mdoc)
  * Allocate volatile and non-volatile parse resources.  
  */
 struct mdoc *
-mdoc_alloc(void *data, int pflags, mandocmsg msg)
+mdoc_alloc(const struct regset *regs, 
+		void *data, int pflags, mandocmsg msg)
 {
 	struct mdoc	*p;
 
@@ -205,6 +202,7 @@ mdoc_alloc(void *data, int pflags, mandocmsg msg)
 	p->msg = msg;
 	p->data = data;
 	p->pflags = pflags;
+	p->regs = regs;
 
 	mdoc_hash_init();
 	mdoc_alloc1(p);
@@ -234,8 +232,7 @@ mdoc_endparse(struct mdoc *m)
  * the macro (mdoc_pmacro()) or text parser (mdoc_ptext()).
  */
 int
-mdoc_parseln(struct mdoc *m, const struct regset *regs,
-		int ln, char *buf, int offs)
+mdoc_parseln(struct mdoc *m, int ln, char *buf, int offs)
 {
 
 	if (MDOC_HALT & m->flags)
@@ -243,8 +240,8 @@ mdoc_parseln(struct mdoc *m, const struct regset *regs,
 
 	m->flags |= MDOC_NEWLINE;
 	return(('.' == buf[offs] || '\'' == buf[offs]) ? 
-			mdoc_pmacro(m, regs, ln, buf, offs) :
-			mdoc_ptext(m, regs, ln, buf, offs));
+			mdoc_pmacro(m, ln, buf, offs) :
+			mdoc_ptext(m, ln, buf, offs));
 }
 
 
@@ -291,8 +288,7 @@ mdoc_macro(MACRO_PROT_ARGS)
 		m->flags |= MDOC_PBODY;
 	}
 
-	return((*mdoc_macros[tok].fp)
-			(m, regs, tok, line, ppos, pos, buf));
+	return((*mdoc_macros[tok].fp)(m, tok, line, ppos, pos, buf));
 }
 
 
@@ -546,8 +542,7 @@ mdoc_node_delete(struct mdoc *m, struct mdoc_node *p)
  * control character.
  */
 static int
-mdoc_ptext(struct mdoc *m, const struct regset *regs,
-		int line, char *buf, int offs)
+mdoc_ptext(struct mdoc *m, int line, char *buf, int offs)
 {
 	char		 *c, *ws, *end;
 	struct mdoc_node *n;
@@ -578,8 +573,7 @@ mdoc_ptext(struct mdoc *m, const struct regset *regs,
 			LIST_column == n->data.Bl.type) {
 		/* `Bl' is open without any children. */
 		m->flags |= MDOC_FREECOL;
-		return(mdoc_macro(m, regs, MDOC_It, 
-					line, offs, &offs, buf));
+		return(mdoc_macro(m, MDOC_It, line, offs, &offs, buf));
 	}
 
 	if (MDOC_It == n->tok && MDOC_BLOCK == n->type &&
@@ -588,8 +582,7 @@ mdoc_ptext(struct mdoc *m, const struct regset *regs,
 			LIST_column == n->parent->data.Bl.type) {
 		/* `Bl' has block-level `It' children. */
 		m->flags |= MDOC_FREECOL;
-		return(mdoc_macro(m, regs, MDOC_It, 
-					line, offs, &offs, buf));
+		return(mdoc_macro(m, MDOC_It, line, offs, &offs, buf));
 	}
 
 	/*
@@ -699,8 +692,7 @@ macrowarn(struct mdoc *m, int ln, const char *buf, int offs)
  * character.
  */
 int
-mdoc_pmacro(struct mdoc *m, const struct regset *regs,
-		int ln, char *buf, int offs)
+mdoc_pmacro(struct mdoc *m, int ln, char *buf, int offs)
 {
 	enum mdoct	  tok;
 	int		  i, j, sv;
@@ -779,7 +771,7 @@ mdoc_pmacro(struct mdoc *m, const struct regset *regs,
 	 */
 
 	if (NULL == m->last || MDOC_It == tok || MDOC_El == tok) {
-		if ( ! mdoc_macro(m, regs, tok, ln, sv, &i, buf)) 
+		if ( ! mdoc_macro(m, tok, ln, sv, &i, buf)) 
 			goto err;
 		return(1);
 	}
@@ -795,7 +787,7 @@ mdoc_pmacro(struct mdoc *m, const struct regset *regs,
 	if (MDOC_Bl == n->tok && MDOC_BODY == n->type &&
 			LIST_column == n->data.Bl.type) {
 		m->flags |= MDOC_FREECOL;
-		if ( ! mdoc_macro(m, regs, MDOC_It, ln, sv, &sv, buf))
+		if ( ! mdoc_macro(m, MDOC_It, ln, sv, &sv, buf))
 			goto err;
 		return(1);
 	}
@@ -811,14 +803,14 @@ mdoc_pmacro(struct mdoc *m, const struct regset *regs,
 			MDOC_Bl == n->parent->tok &&
 			LIST_column == n->parent->data.Bl.type) {
 		m->flags |= MDOC_FREECOL;
-		if ( ! mdoc_macro(m, regs, MDOC_It, ln, sv, &sv, buf)) 
+		if ( ! mdoc_macro(m, MDOC_It, ln, sv, &sv, buf)) 
 			goto err;
 		return(1);
 	}
 
 	/* Normal processing of a macro. */
 
-	if ( ! mdoc_macro(m, regs, tok, ln, sv, &i, buf)) 
+	if ( ! mdoc_macro(m, tok, ln, sv, &i, buf)) 
 		goto err;
 
 	return(1);

@@ -30,7 +30,11 @@
 .In regs.h
 .In roff.h
 .Ft "struct roff *"
-.Fn roff_alloc "mandocmsg msgs" "void *data"
+.Fo roff_alloc
+.Fa "struct regset *regs"
+.Fa "mandocmsg msgs"
+.Fa "void *data"
+.Fc
 .Ft int
 .Fn roff_endparse "struct roff *roff"
 .Ft void

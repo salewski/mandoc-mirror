@@ -23,10 +23,6 @@ CFLAGS    += -g $(WFLAGS) $(VFLAGS) -DHAVE_CONFIG_H
 # in the lower-left hand corner of -mdoc manuals.
 # CFLAGS += -DOSNAME="\"OpenBSD 4.5\""
 
-# Unset this if you don't want Xo/Xc allowing split `It' lines, which
-# breaks symmetry.
-CFLAGS	  += -DUGLY
-
 LINTFLAGS += $(VFLAGS)
 
 MANDOCFLAGS = -Wall -fstrict

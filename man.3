@@ -33,7 +33,12 @@
 .In man.h
 .Vt extern const char * const * man_macronames;
 .Ft "struct man *"
-.Fn man_alloc "void *data" "int pflags" "mandocmsg msgs"
+.Fo man_alloc
+.Fa "const struct regset *regs"
+.Fa "void *data"
+.Fa "int pflags"
+.Fa "mandocmsg msgs"
+.Fc
 .Ft int
 .Fn man_endparse "struct man *man"
 .Ft void
@@ -45,7 +50,6 @@
 .Ft int
 .Fo man_parseln
 .Fa "struct man *man"
-.Fa "const struct regset *regs"
 .Fa "int line"
 .Fa "char *buf"
 .Fc

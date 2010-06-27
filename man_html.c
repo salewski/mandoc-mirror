@@ -252,7 +252,6 @@ a2width(const struct man_node *n, struct roffsu *su)
 }
 
 
-/* ARGSUSED */
 static int
 man_root_pre(MAN_ARGS)
 {

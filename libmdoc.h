@@ -26,8 +26,8 @@ enum	mdoc_next {
 };
 
 struct	mdoc {
-	void		 *data;
-	mandocmsg	  msg;
+	void		 *data; /* private application data */
+	mandocmsg	  msg; /* message callback */
 	int		  flags;
 #define	MDOC_HALT	 (1 << 0) /* error in parse: halt */
 #define	MDOC_LITERAL	 (1 << 1) /* in a literal scope */
@@ -37,16 +37,16 @@ struct	mdoc {
 #define	MDOC_PPHRASE	 (1 << 5) /* within a partial phrase */
 #define	MDOC_FREECOL	 (1 << 6) /* `It' invocation should close */
 	int		  pflags;
-	enum mdoc_next	  next;
-	struct mdoc_node *last;
-	struct mdoc_node *first;
-	struct mdoc_meta  meta;
+	enum mdoc_next	  next; /* where to put the next node */
+	struct mdoc_node *last; /* the last node parsed */
+	struct mdoc_node *first; /* the first node parsed */
+	struct mdoc_meta  meta; /* document meta-data */
 	enum mdoc_sec	  lastnamed;
 	enum mdoc_sec	  lastsec;
+	const struct regset *regs; /* readonly registers */
 };
 
 #define	MACRO_PROT_ARGS	struct mdoc *m, \
-			const struct regset *regs, \
 			enum mdoct tok, \
 			int line, \
 			int ppos, \

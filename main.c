@@ -88,6 +88,7 @@ struct	curparse {
 	struct man	 *man;		/* man parser */
 	struct mdoc	 *mdoc;		/* mdoc parser */
 	struct roff	 *roff;		/* roff parser (!NULL) */
+	struct regset	  regs;		/* roff registers */
 	enum outt	  outtype; 	/* which output to use */
 	out_mdoc	  outmdoc;	/* mdoc output ptr */
 	out_man	  	  outman;	/* man output ptr */
@@ -298,7 +299,7 @@ man_init(struct curparse *curp)
 	if (curp->fflags & FL_NIGN_ESCAPE)
 		pflags &= ~MAN_IGN_ESCAPE;
 
-	return(man_alloc(curp, pflags, mmsg));
+	return(man_alloc(&curp->regs, curp, pflags, mmsg));
 }
 
 
@@ -306,7 +307,7 @@ static struct roff *
 roff_init(struct curparse *curp)
 {
 
-	return(roff_alloc(mmsg, curp));
+	return(roff_alloc(&curp->regs, mmsg, curp));
 }
 
 
@@ -326,7 +327,7 @@ mdoc_init(struct curparse *curp)
 	if (curp->fflags & FL_NIGN_MACRO)
 		pflags &= ~MDOC_IGN_MACRO;
 
-	return(mdoc_alloc(curp, pflags, mmsg));
+	return(mdoc_alloc(&curp->regs, curp, pflags, mmsg));
 }
 
 
@@ -451,13 +452,12 @@ fdesc(struct curparse *curp)
 	struct man	*man;
 	struct mdoc	*mdoc;
 	struct roff	*roff;
-	struct regset	 regs;
 
 	man = NULL;
 	mdoc = NULL;
 	roff = NULL;
+
 	memset(&ln, 0, sizeof(struct buf));
-	memset(&regs, 0, sizeof(struct regset));
 
 	/*
 	 * Two buffers: ln and buf.  buf is the input file and may be
@@ -540,7 +540,7 @@ fdesc(struct curparse *curp)
 
 		of = 0;
 		do {
-			re = roff_parseln(roff, &regs, lnn_start, 
+			re = roff_parseln(roff, lnn_start, 
 					&ln.buf, &ln.sz, of, &of);
 		} while (ROFF_RERUN == re);
 
@@ -562,9 +562,9 @@ fdesc(struct curparse *curp)
 
 		/* Lastly, push down into the parsers themselves. */
 
-		if (man && ! man_parseln(man, &regs, lnn_start, ln.buf, of))
+		if (man && ! man_parseln(man, lnn_start, ln.buf, of))
 			goto bailout;
-		if (mdoc && ! mdoc_parseln(mdoc, &regs, lnn_start, ln.buf, of))
+		if (mdoc && ! mdoc_parseln(mdoc, lnn_start, ln.buf, of))
 			goto bailout;
 	}
 
@@ -637,6 +637,7 @@ fdesc(struct curparse *curp)
 		(*curp->outmdoc)(curp->outdata, mdoc);
 
  cleanup:
+	memset(&curp->regs, 0, sizeof(struct regset));
 	if (mdoc)
 		mdoc_reset(mdoc);
 	if (man)

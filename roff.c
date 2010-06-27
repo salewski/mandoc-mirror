@@ -74,6 +74,7 @@ struct	roff {
 	void		*data; /* privdata for messages */
 	enum roffrule	 rstack[RSTACK_MAX]; /* stack of !`ie' rules */
 	int		 rstackpos; /* position in rstack */
+	struct regset	*regs; /* read/writable registers */
 };
 
 struct	roffnode {
@@ -87,7 +88,6 @@ struct	roffnode {
 };
 
 #define	ROFF_ARGS	 struct roff *r, /* parse ctx */ \
-			 struct regset *regs, /* registers */ \
 			 enum rofft tok, /* tok of macro */ \
 		 	 char **bufp, /* input buffer */ \
 			 size_t *szp, /* size of input buffer */ \
@@ -289,7 +289,7 @@ roff_free(struct roff *r)
 
 
 struct roff *
-roff_alloc(const mandocmsg msg, void *data)
+roff_alloc(struct regset *regs, const mandocmsg msg, void *data)
 {
 	struct roff	*r;
 
@@ -298,6 +298,7 @@ roff_alloc(const mandocmsg msg, void *data)
 		return(0);
 	}
 
+	r->regs = regs;
 	r->msg = msg;
 	r->data = data;
 	r->rstackpos = -1;
@@ -308,8 +309,8 @@ roff_alloc(const mandocmsg msg, void *data)
 
 
 enum rofferr
-roff_parseln(struct roff *r, struct regset *regs, int ln, 
-		char **bufp, size_t *szp, int pos, int *offs)
+roff_parseln(struct roff *r, int ln, char **bufp, 
+		size_t *szp, int pos, int *offs)
 {
 	enum rofft	 t;
 	int		 ppos;
@@ -326,8 +327,8 @@ roff_parseln(struct roff *r, struct regset *regs, int ln,
 		ROFF_DEBUG("roff: intercept scoped text: %s, [%s]\n", 
 				roffs[t].name, &(*bufp)[pos]);
 		return((*roffs[t].text)
-				(r, regs, t, bufp, 
-				 szp, ln, pos, pos, offs));
+				(r, t, bufp, szp, 
+				 ln, pos, pos, offs));
 	} else if ( ! ROFF_CTL((*bufp)[pos])) {
 		ROFF_DEBUG("roff: pass non-scoped text: [%s]\n", 
 				&(*bufp)[pos]);
@@ -345,8 +346,8 @@ roff_parseln(struct roff *r, struct regset *regs, int ln,
 		ROFF_DEBUG("roff: intercept scoped context: %s\n", 
 				roffs[t].name);
 		return((*roffs[t].sub)
-				(r, regs, t, bufp, 
-				 szp, ln, pos, pos, offs));
+				(r, t, bufp, szp, 
+				 ln, pos, pos, offs));
 	}
 
 	/*
@@ -366,8 +367,8 @@ roff_parseln(struct roff *r, struct regset *regs, int ln,
 			roffs[t].name, &(*bufp)[pos]);
 	assert(roffs[t].proc);
 	return((*roffs[t].proc)
-			(r, regs, t, bufp, 
-			 szp, ln, ppos, pos, offs));
+			(r, t, bufp, szp, 
+			 ln, ppos, pos, offs));
 }
 
 
@@ -653,8 +654,8 @@ roff_block_sub(ROFF_ARGS)
 		return(ROFF_IGN);
 
 	assert(roffs[t].proc);
-	return((*roffs[t].proc)(r, regs, t, bufp, 
-			szp, ln, ppos, pos, offs));
+	return((*roffs[t].proc)(r, t, bufp, szp, 
+				ln, ppos, pos, offs));
 }
 
 
@@ -703,8 +704,8 @@ roff_cond_sub(ROFF_ARGS)
 				return(ROFF_IGN);
 
 	assert(roffs[t].proc);
-	return((*roffs[t].proc)
-			(r, regs, t, bufp, szp, ln, ppos, pos, offs));
+	return((*roffs[t].proc)(r, t, bufp, szp, 
+				ln, ppos, pos, offs));
 }
 
 
@@ -904,11 +905,11 @@ roff_nr(ROFF_ARGS)
 	/* Process register token. */
 
 	if (0 == strcmp(key, "nS")) {
-		if ( ! roff_parse_nat(val, &regs->regs[(int)REG_nS].i))
-			regs->regs[(int)REG_nS].i = 0;
+		if ( ! roff_parse_nat(val, &r->regs->regs[(int)REG_nS].i))
+			r->regs->regs[(int)REG_nS].i = 0;
 
 		ROFF_DEBUG("roff: register nS: %d\n", 
-				regs->regs[(int)REG_nS].i);
+				r->regs->regs[(int)REG_nS].i);
 	} else
 		ROFF_DEBUG("roff: ignoring register: %s\n", key);
 
