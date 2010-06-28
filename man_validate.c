@@ -223,6 +223,11 @@ check_text(CHKARGS)
 				return(c);
 		}
 
+		/* 
+		 * FIXME: we absolutely cannot let \b get through or it
+		 * will destroy some assumptions in terms of format.
+	 	 */
+
 		if ('\t' == *p || isprint((u_char)*p) || ASCII_HYPH == *p) 
 			continue;
 		if ( ! man_pmsg(m, n->line, pos, MANDOCERR_BADCHAR))

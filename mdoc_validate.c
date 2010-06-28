@@ -458,6 +458,11 @@ check_text(struct mdoc *mdoc, int line, int pos, char *p)
 {
 	int		 c;
 
+	/* 
+	 * FIXME: we absolutely cannot let \b get through or it will
+	 * destroy some assumptions in terms of format.
+	 */
+
 	for ( ; *p; p++, pos++) {
 		if ('\t' == *p) {
 			if ( ! (MDOC_LITERAL & mdoc->flags))
