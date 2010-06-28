@@ -25,12 +25,323 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "out.h"
 #include "main.h"
 #include "term.h"
 
-#define	PS_CHAR_WIDTH	  6
+struct	glyph {
+	int		  wx; /* WX in AFM */
+};
+
+#define	MAXCHAR		  95
+
+struct	font {
+	const char	 *name; /* FontName in AFM */
+	struct glyph	  gly[MAXCHAR]; /* glyph metrics */
+};
+
+/*
+ * We define, for the time being, three fonts: bold, oblique/italic, and
+ * normal (roman).  The following table hard-codes the font metrics for
+ * ASCII, i.e., 32--127.
+ */
+
+static	const struct font fonts[3] = {
+	{ "Courier", {
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+	} },
+	{ "Courier-Bold", {
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+	} },
+	{ "Courier-Oblique", {
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+		{ 600 },
+	} },
+};
+
 #define	PS_CHAR_HEIGHT	  12
 #define	PS_CHAR_TOPMARG	 (792 - 24)
 #define	PS_CHAR_TOP	 (PS_CHAR_TOPMARG - 36)
@@ -62,7 +373,7 @@ static	void		  ps_endline(struct termp *);
 static	void		  ps_fclose(struct termp *);
 static	size_t		  ps_width(const struct termp *, char);
 static	void		  ps_pclose(struct termp *);
-static	void		  ps_pletter(struct termp *, char);
+static	void		  ps_pletter(struct termp *, int);
 static	void		  ps_printf(struct termp *, const char *, ...);
 static	void		  ps_putchar(struct termp *, char);
 static	void		  ps_setfont(struct termp *, enum termfont);
@@ -183,6 +494,7 @@ ps_end(struct termp *p)
 static void
 ps_begin(struct termp *p)
 {
+	time_t		 t;
 
 	/* 
 	 * Print margins into margin buffer.  Nothing gets output to the
@@ -221,7 +533,15 @@ ps_begin(struct termp *p)
 	 * stuff gets printed to the screen, so make sure we're sane.
 	 */
 
-	printf("%s\n", "%!PS");
+	t = time(NULL);
+
+	printf("%%!PS\n");
+	printf("%%%%Creator: mandoc-%s\n", VERSION);
+	printf("%%%%CreationDate: %s", ctime(&t));
+	printf("%%%%PageOrder: Ascend\n");
+	printf("%%%%Orientation: Portrait\n");
+	printf("%%%%EndComments\n");
+
 	ps_setfont(p, TERMFONT_NONE);
 	p->engine.ps.pscol = PS_CHAR_LEFT;
 	p->engine.ps.psrow = PS_CHAR_TOP;
@@ -229,7 +549,7 @@ ps_begin(struct termp *p)
 
 
 static void
-ps_pletter(struct termp *p, char c)
+ps_pletter(struct termp *p, int c)
 {
 	
 	/*
@@ -265,8 +585,21 @@ ps_pletter(struct termp *p, char c)
 
 	/* Write the character and adjust where we are on the page. */
 
+	/* 
+	 * FIXME: at this time we emit only blacnks on non-ASCII
+	 * letters.
+	 */
+
+	if (c < 32 || (c - 32 > MAXCHAR)) {
+		ps_putchar(p, ' ');
+		p->engine.ps.pscol += 
+			(fonts[p->engine.ps.lastf].gly[32].wx / 100);
+		return;
+	} 
+
 	ps_putchar(p, c);
-	p->engine.ps.pscol += PS_CHAR_WIDTH;
+	p->engine.ps.pscol += 
+		(fonts[p->engine.ps.lastf].gly[(int)c - 32].wx / 100);
 }
 
 
@@ -376,7 +709,8 @@ ps_advance(struct termp *p, size_t len)
 	 */
 
 	ps_fclose(p);
-	p->engine.ps.pscol += len ? len * PS_CHAR_WIDTH : 0;
+	p->engine.ps.pscol += 0 == len ? 0 :
+		len * (fonts[p->engine.ps.lastf].gly[0].wx / 100);
 }
 
 
@@ -419,14 +753,7 @@ static void
 ps_setfont(struct termp *p, enum termfont f)
 {
 
-	if (TERMFONT_BOLD == f) 
-		ps_printf(p, "/Courier-Bold\n");
-	else if (TERMFONT_UNDER == f)
-		ps_printf(p, "/Courier-Oblique\n");
-	else
-		ps_printf(p, "/Courier\n");
-
-	ps_printf(p, "10 selectfont\n");
+	ps_printf(p, "/%s 10 selectfont\n", fonts[(int)f].name);
 	p->engine.ps.lastf = f;
 }
 
