@@ -387,9 +387,7 @@ ps_alloc(void)
 	if (NULL == (p = term_alloc(TERMENC_ASCII)))
 		return(NULL);
 
-	p->defrmargin = 78;
-	p->tabwidth = 5;
-
+	p->defrmargin = 612 - (PS_CHAR_LEFT * 2);
 	p->type = TERMTYPE_PS;
 	p->letter = ps_letter;
 	p->begin = ps_begin;
@@ -551,6 +549,7 @@ ps_begin(struct termp *p)
 static void
 ps_pletter(struct termp *p, int c)
 {
+	int		 f;
 	
 	/*
 	 * If we're not in a PostScript "word" context, then open one
@@ -585,21 +584,17 @@ ps_pletter(struct termp *p, int c)
 
 	/* Write the character and adjust where we are on the page. */
 
-	/* 
-	 * FIXME: at this time we emit only blacnks on non-ASCII
-	 * letters.
-	 */
+	f = (int)p->engine.ps.lastf;
 
-	if (c < 32 || (c - 32 > MAXCHAR)) {
+	if (c <= 32 || (c - 32 > MAXCHAR)) {
 		ps_putchar(p, ' ');
-		p->engine.ps.pscol += 
-			(fonts[p->engine.ps.lastf].gly[32].wx / 100);
+		p->engine.ps.pscol += (fonts[f].gly[0].wx / 100);
 		return;
 	} 
 
 	ps_putchar(p, c);
-	p->engine.ps.pscol += 
-		(fonts[p->engine.ps.lastf].gly[(int)c - 32].wx / 100);
+	c -= 32;
+	p->engine.ps.pscol += (fonts[f].gly[c].wx / 100);
 }
 
 
@@ -709,8 +704,7 @@ ps_advance(struct termp *p, size_t len)
 	 */
 
 	ps_fclose(p);
-	p->engine.ps.pscol += 0 == len ? 0 :
-		len * (fonts[p->engine.ps.lastf].gly[0].wx / 100);
+	p->engine.ps.pscol += len;
 }
 
 
@@ -763,5 +757,9 @@ static size_t
 ps_width(const struct termp *p, char c)
 {
 
-	return(1);
+	if (c <= 32 || c - 32 >= MAXCHAR)
+		return(fonts[(int)TERMFONT_NONE].gly[0].wx / 100);
+
+	c -= 32;
+	return(fonts[(int)TERMFONT_NONE].gly[(int)c].wx / 100);
 }

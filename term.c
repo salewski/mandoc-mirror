@@ -195,9 +195,11 @@ term_flushln(struct termp *p)
 				if (vend > vis && vend < bp &&
 				    ASCII_HYPH == p->buf[j])
 					jhy = j;
-				vend++;
-			} else
-				vend--;
+				vend += (*p->width)(p, p->buf[j]);
+			} else {
+				assert(j);
+				vend -= (*p->width)(p, p->buf[j - 1]);
+			}
 		}
 
 		/*
@@ -237,13 +239,13 @@ term_flushln(struct termp *p)
 				break;
 			if (' ' == p->buf[i]) {
 				while (' ' == p->buf[i]) {
-					vbl++;
+					vbl += (*p->width)(p, p->buf[i]);
 					i++;
 				}
 				break;
 			}
 			if (ASCII_NBRSP == p->buf[i]) {
-				vbl++;
+				vbl += (*p->width)(p, ' ');
 				continue;
 			}
 
@@ -258,12 +260,13 @@ term_flushln(struct termp *p)
 				vbl = 0;
 			}
 
-			if (ASCII_HYPH == p->buf[i])
+			if (ASCII_HYPH == p->buf[i]) {
 				(*p->letter)(p, '-');
-			else
+				p->viscol += (*p->width)(p, '-');
+			} else {
 				(*p->letter)(p, p->buf[i]);
-
-			p->viscol += 1;
+				p->viscol += (*p->width)(p, p->buf[i]);
+			}
 		}
 		vend += vbl;
 		vis = vend;
@@ -281,7 +284,7 @@ term_flushln(struct termp *p)
 	if (TERMP_HANG & p->flags) {
 		/* We need one blank after the tag. */
 		p->overstep = /* LINTED */
-			vis - maxvis + 1;
+			vis - maxvis + (*p->width)(p, ' ');
 
 		/*
 		 * Behave exactly the same way as groff:
@@ -305,7 +308,7 @@ term_flushln(struct termp *p)
 
 	/* Right-pad. */
 	if (maxvis > vis + /* LINTED */
-			((TERMP_TWOSPACE & p->flags) ? 1 : 0)) {
+			((TERMP_TWOSPACE & p->flags) ? (*p->width)(p, ' ') : 0)) {
 		p->viscol += maxvis - vis;
 		(*p->advance)(p, maxvis - vis);
 		vis += (maxvis - vis);
