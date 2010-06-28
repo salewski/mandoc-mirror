@@ -161,21 +161,17 @@ term_flushln(struct termp *p)
 	 */
 	vbl = p->flags & TERMP_NOLPAD ? 0 : p->offset;
 
-	/* 
-	 * FIXME: if bp is zero, we still output the first word before
-	 * breaking the line.
-	 */
-
 	vis = vend = i = 0;
-	while (i < (int)p->col) {
 
+	while (i < (int)p->col) {
 		/*
-		 * Handle literal tab characters.
+		 * Handle literal tab characters: collapse all
+		 * subsequent tabs into a single huge set of spaces.
 		 */
 		for (j = i; j < (int)p->col; j++) {
 			if ('\t' != p->buf[j])
 				break;
-			vend = (vis/p->tabwidth+1)*p->tabwidth;
+			vend = (vis / p->tabwidth + 1) * p->tabwidth;
 			vbl += vend - vis;
 			vis = vend;
 		}
@@ -191,15 +187,21 @@ term_flushln(struct termp *p)
 		for (jhy = 0; j < (int)p->col; j++) {
 			if ((j && ' ' == p->buf[j]) || '\t' == p->buf[j])
 				break;
-			if (8 != p->buf[j]) {
-				if (vend > vis && vend < bp &&
-				    ASCII_HYPH == p->buf[j])
-					jhy = j;
-				vend += (*p->width)(p, p->buf[j]);
-			} else {
+
+			/* Back over the the last printed character. */
+			if (8 == p->buf[j]) {
 				assert(j);
 				vend -= (*p->width)(p, p->buf[j - 1]);
+				continue;
 			}
+
+			/* Regular word. */
+			/* Break at the hyphen point if we overrun. */
+			if (vend > vis && vend < bp && 
+					ASCII_HYPH == p->buf[j])
+				jhy = j;
+
+			vend += (*p->width)(p, p->buf[j]);
 		}
 
 		/*
@@ -308,7 +310,8 @@ term_flushln(struct termp *p)
 
 	/* Right-pad. */
 	if (maxvis > vis + /* LINTED */
-			((TERMP_TWOSPACE & p->flags) ? (*p->width)(p, ' ') : 0)) {
+			((TERMP_TWOSPACE & p->flags) ? 
+			 (*p->width)(p, ' ') : 0)) {
 		p->viscol += maxvis - vis;
 		(*p->advance)(p, maxvis - vis);
 		vis += (maxvis - vis);

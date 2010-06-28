@@ -49,7 +49,6 @@ struct	termp_ps {
 	char		 *psmarg;	/* margin buf */
 	size_t		  psmargsz;	/* margin buf size */
 	size_t		  psmargcur;	/* current pos in margin buf */
-	size_t	 	  pspage;	/* current page */
 	char		  last;		/* character buffer */
 	enum termfont	  lastf;	/* last set font */
 };

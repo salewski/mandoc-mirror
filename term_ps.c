@@ -31,14 +31,21 @@
 #include "main.h"
 #include "term.h"
 
+/* TODO: all this will go away with different paper sizes. */
+#define	PS_CHAR_HEIGHT	  12
+#define	PS_CHAR_TOPMARG	 (792 - 24)
+#define	PS_CHAR_TOP	 (PS_CHAR_TOPMARG - 36)
+#define	PS_CHAR_LEFT	  36
+#define	PS_CHAR_BOTMARG	  24
+#define	PS_CHAR_BOT	 (PS_CHAR_BOTMARG + 36)
+
 struct	glyph {
 	int		  wx; /* WX in AFM */
 };
 
-#define	MAXCHAR		  95
-
 struct	font {
 	const char	 *name; /* FontName in AFM */
+#define	MAXCHAR		  95 /* total characters we can handle */
 	struct glyph	  gly[MAXCHAR]; /* glyph metrics */
 };
 
@@ -342,13 +349,7 @@ static	const struct font fonts[3] = {
 	} },
 };
 
-#define	PS_CHAR_HEIGHT	  12
-#define	PS_CHAR_TOPMARG	 (792 - 24)
-#define	PS_CHAR_TOP	 (PS_CHAR_TOPMARG - 36)
-#define	PS_CHAR_LEFT	  36
-#define	PS_CHAR_BOTMARG	  24
-#define	PS_CHAR_BOT	 (PS_CHAR_BOTMARG + 36)
-
+/* These work the buffer used by the header and footer. */
 #define	PS_BUFSLOP	  128
 #define	PS_GROWBUF(p, sz) \
 	do if ((p)->engine.ps.psmargcur + (sz) > \
@@ -388,6 +389,7 @@ ps_alloc(void)
 		return(NULL);
 
 	p->defrmargin = 612 - (PS_CHAR_LEFT * 2);
+
 	p->type = TERMTYPE_PS;
 	p->letter = ps_letter;
 	p->begin = ps_begin;
