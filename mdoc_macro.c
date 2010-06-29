@@ -52,7 +52,7 @@ static	int	  	append_delims(struct mdoc *,
 				int, int *, char *);
 static	enum mdoct	lookup(enum mdoct, const char *);
 static	enum mdoct	lookup_raw(const char *);
-static	int		make_pending(struct mdoc_node *, enum mdoc_type,
+static	int		make_pending(struct mdoc_node *, enum mdoct,
 				struct mdoc *, int, int);
 static	int	  	phrase(struct mdoc *, int, int, char *);
 static	enum mdoct 	rew_alt(enum mdoct);
