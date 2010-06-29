@@ -109,6 +109,9 @@ int		  mdoc_block_alloc(struct mdoc *, int, int,
 int		  mdoc_head_alloc(struct mdoc *, int, int, enum mdoct);
 int		  mdoc_tail_alloc(struct mdoc *, int, int, enum mdoct);
 int		  mdoc_body_alloc(struct mdoc *, int, int, enum mdoct);
+int		  mdoc_endbody_alloc(struct mdoc *m, int line, int pos,
+			enum mdoct tok, struct mdoc_node *body,
+			enum mdoc_endbody end);
 void		  mdoc_node_delete(struct mdoc *, struct mdoc_node *);
 void		  mdoc_hash_init(void);
 enum mdoct	  mdoc_hash_find(const char *);

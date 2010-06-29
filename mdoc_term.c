@@ -325,20 +325,37 @@ print_mdoc_node(DECL_ARGS)
 	memset(&npair, 0, sizeof(struct termpair));
 	npair.ppair = pair;
 
-	if (MDOC_TEXT != n->type) {
-		if (termacts[n->tok].pre)
-			chld = (*termacts[n->tok].pre)(p, &npair, m, n);
-	} else 
+	if (MDOC_TEXT == n->type)
 		term_word(p, n->string); 
+	else if (termacts[n->tok].pre && !n->end)
+		chld = (*termacts[n->tok].pre)(p, &npair, m, n);
 
 	if (chld && n->child)
 		print_mdoc_nodelist(p, &npair, m, n->child);
 
 	term_fontpopq(p, font);
 
-	if (MDOC_TEXT != n->type)
-		if (termacts[n->tok].post)
-			(*termacts[n->tok].post)(p, &npair, m, n);
+	if (MDOC_TEXT != n->type &&
+	    termacts[n->tok].post &&
+	    ! (MDOC_ENDED & n->flags)) {
+		(*termacts[n->tok].post)(p, &npair, m, n);
+
+		/*
+		 * Explicit end tokens not only call the post
+		 * handler, but also tell the respective block
+		 * that it must not call the post handler again.
+		 */
+		if (n->end)
+			n->pending->flags |= MDOC_ENDED;
+
+		/*
+		 * End of line terminating an implicit block
+		 * while an explicit block is still open.
+		 * Continue the explicit block without spacing.
+		 */
+		if (ENDBODY_NOSPACE == n->end)
+			p->flags |= TERMP_NOSPACE;
+	}
 
 	if (MDOC_EOS & n->flags)
 		p->flags |= TERMP_SENTENCE;

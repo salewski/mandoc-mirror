@@ -75,7 +75,10 @@ print_mdoc(const struct mdoc_node *n, int indent)
 		t = "block-head";
 		break;
 	case (MDOC_BODY):
-		t = "block-body";
+		if (n->end)
+			t = "body-end";
+		else
+			t = "block-body";
 		break;
 	case (MDOC_TAIL):
 		t = "block-tail";

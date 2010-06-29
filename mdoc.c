@@ -332,6 +332,8 @@ node_append(struct mdoc *mdoc, struct mdoc_node *p)
 		p->parent->tail = p;
 		break;
 	case (MDOC_BODY):
+		if (p->end)
+			break;
 		assert(MDOC_BLOCK == p->parent->type);
 		p->parent->body = p;
 		break;
@@ -431,6 +433,22 @@ mdoc_body_alloc(struct mdoc *m, int line, int pos, enum mdoct tok)
 	if ( ! node_append(m, p))
 		return(0);
 	m->next = MDOC_NEXT_CHILD;
+	return(1);
+}
+
+
+int
+mdoc_endbody_alloc(struct mdoc *m, int line, int pos, enum mdoct tok,
+		struct mdoc_node *body, enum mdoc_endbody end)
+{
+	struct mdoc_node *p;
+
+	p = node_alloc(m, line, pos, tok, MDOC_BODY);
+	p->pending = body;
+	p->end = end;
+	if ( ! node_append(m, p))
+		return(0);
+	m->next = MDOC_NEXT_SIBLING;
 	return(1);
 }
 
