@@ -31,14 +31,6 @@
 #include "main.h"
 #include "term.h"
 
-/* TODO: all this will go away with different paper sizes. */
-#define	PS_CHAR_HEIGHT	  12
-#define	PS_CHAR_TOPMARG	 (792 - 24)
-#define	PS_CHAR_TOP	 (PS_CHAR_TOPMARG - 36)
-#define	PS_CHAR_LEFT	  36
-#define	PS_CHAR_BOTMARG	  24
-#define	PS_CHAR_BOT	 (PS_CHAR_BOTMARG + 36)
-
 struct	glyph {
 	int		  wx; /* WX in AFM */
 };
@@ -55,7 +47,7 @@ struct	font {
  * ASCII, i.e., 32--127.
  */
 
-static	const struct font fonts[3] = {
+static	const struct font fonts[TERMFONT__MAX] = {
 	{ "Courier", {
 		{ 600 },
 		{ 600 },
@@ -384,11 +376,14 @@ void *
 ps_alloc(void)
 {
 	struct termp	*p;
+	size_t		 pagex, pagey, margin;
 
 	if (NULL == (p = term_alloc(TERMENC_ASCII)))
 		return(NULL);
 
-	p->defrmargin = 612 - (PS_CHAR_LEFT * 2);
+	pagex = 612;
+	pagey = 792;
+	margin = 72;
 
 	p->type = TERMTYPE_PS;
 	p->letter = ps_letter;
@@ -397,6 +392,20 @@ ps_alloc(void)
 	p->advance = ps_advance;
 	p->endline = ps_endline;
 	p->width = ps_width;
+
+	assert(margin * 2 < pagex);
+	assert(margin * 2 < pagey);
+
+	p->engine.ps.width = pagex;
+	p->engine.ps.height = pagey;
+	p->engine.ps.header = pagey - (margin / 2);
+	p->engine.ps.top = pagey - margin;
+	p->engine.ps.footer = (margin / 2);
+	p->engine.ps.bottom = margin;
+	p->engine.ps.left = margin;
+	p->engine.ps.lineheight = 12;
+
+	p->defrmargin = pagex - (margin * 2);
 	return(p);
 }
 
@@ -486,8 +495,12 @@ ps_end(struct termp *p)
 	assert('\0' == p->engine.ps.last);
 	assert(p->engine.ps.psmarg && p->engine.ps.psmarg[0]);
 	printf("%s", p->engine.ps.psmarg);
+	p->engine.ps.pages++;
 	printf("showpage\n");
-	printf("%s\n", "%%EOF");
+
+	printf("%%%%Trailer\n");
+	printf("%%%%Pages: %zu\n", p->engine.ps.pages);
+	printf("%%%%EOF\n");
 }
 
 
@@ -495,6 +508,7 @@ static void
 ps_begin(struct termp *p)
 {
 	time_t		 t;
+	int		 i;
 
 	/* 
 	 * Print margins into margin buffer.  Nothing gets output to the
@@ -508,16 +522,16 @@ ps_begin(struct termp *p)
 
 	p->engine.ps.psmargcur = 0;
 	p->engine.ps.psstate = PS_MARGINS;
-	p->engine.ps.pscol = PS_CHAR_LEFT;
-	p->engine.ps.psrow = PS_CHAR_TOPMARG;
+	p->engine.ps.pscol = p->engine.ps.left;
+	p->engine.ps.psrow = p->engine.ps.header;
 
 	ps_setfont(p, TERMFONT_NONE);
 
 	(*p->headf)(p, p->argf);
 	(*p->endline)(p);
 
-	p->engine.ps.pscol = PS_CHAR_LEFT;
-	p->engine.ps.psrow = PS_CHAR_BOTMARG;
+	p->engine.ps.pscol = p->engine.ps.left;
+	p->engine.ps.psrow = p->engine.ps.footer;
 
 	(*p->footf)(p, p->argf);
 	(*p->endline)(p);
@@ -535,16 +549,29 @@ ps_begin(struct termp *p)
 
 	t = time(NULL);
 
-	printf("%%!PS\n");
+	printf("%%!PS-Adobe-3.0\n");
 	printf("%%%%Creator: mandoc-%s\n", VERSION);
 	printf("%%%%CreationDate: %s", ctime(&t));
+	printf("%%%%DocumentData: Clean7Bit\n");
+	printf("%%%%Orientation: Portrait\n");
+	printf("%%%%Pages: (atend)\n");
 	printf("%%%%PageOrder: Ascend\n");
 	printf("%%%%Orientation: Portrait\n");
-	printf("%%%%EndComments\n");
+	printf("%%%%DocumentMedia: Default %zu %zu 0 () ()\n",
+			p->engine.ps.width,
+			p->engine.ps.height);
+	printf("%%%%DocumentNeededResources: font");
+	for (i = 0; i < (int)TERMFONT__MAX; i++)
+		printf(" %s", fonts[i].name);
+	printf("\n%%%%EndComments\n");
+
+	printf("%%%%Page: %zu %zu\n", 
+			p->engine.ps.pages + 1, 
+			p->engine.ps.pages + 1);
 
 	ps_setfont(p, TERMFONT_NONE);
-	p->engine.ps.pscol = PS_CHAR_LEFT;
-	p->engine.ps.psrow = PS_CHAR_TOP;
+	p->engine.ps.pscol = p->engine.ps.left;
+	p->engine.ps.psrow = p->engine.ps.top;
 }
 
 
@@ -732,16 +759,21 @@ ps_endline(struct termp *p)
 	 * showpage and restart our row.
 	 */
 
-	p->engine.ps.pscol = PS_CHAR_LEFT;
-	if (p->engine.ps.psrow >= PS_CHAR_HEIGHT + PS_CHAR_BOT) {
-		p->engine.ps.psrow -= PS_CHAR_HEIGHT;
+	p->engine.ps.pscol = p->engine.ps.left;
+	if (p->engine.ps.psrow >= p->engine.ps.lineheight + 
+			p->engine.ps.bottom) {
+		p->engine.ps.psrow -= p->engine.ps.lineheight;
 		return;
 	}
 
 	assert(p->engine.ps.psmarg && p->engine.ps.psmarg[0]);
 	printf("%s", p->engine.ps.psmarg);
+	printf("%%%%Page: %zu %zu\n", 
+			p->engine.ps.pages + 1, 
+			p->engine.ps.pages + 1);
 	printf("showpage\n");
-	p->engine.ps.psrow = PS_CHAR_TOP;
+	p->engine.ps.pages++;
+	p->engine.ps.psrow = p->engine.ps.top;
 }
 
 
@@ -749,6 +781,7 @@ static void
 ps_setfont(struct termp *p, enum termfont f)
 {
 
+	assert(f < TERMFONT__MAX);
 	ps_printf(p, "/%s 10 selectfont\n", fonts[(int)f].name);
 	p->engine.ps.lastf = f;
 }
