@@ -6,6 +6,9 @@
   at the end of the enclosing block, e.g. .Bl It (El) Sh
   reminded by stsp@  in net/pptp pptp.8  Fri, 23 Apr 2010 20:32:39 +0200
 
+- fix bad block nesting involving multiple identical explicit blocks
+  see the OpenBSD mdoc_macro.c 1.47 commit message
+
 - we need real .ds; for example, terminfo.3 has
   .ds n 5
   and then later
