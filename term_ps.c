@@ -22,6 +22,7 @@
 
 #include <assert.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -373,14 +374,17 @@ static	void		  ps_setfont(struct termp *, enum termfont);
 
 
 void *
-ps_alloc(void)
+ps_alloc(char *outopts)
 {
 	struct termp	*p;
 	size_t		 pagex, pagey, margin;
+	const char	*toks[2];
+	char		*v;
 
 	if (NULL == (p = term_alloc(TERMENC_ASCII)))
 		return(NULL);
 
+	/* Default is USA letter. */
 	pagex = 612;
 	pagey = 792;
 	margin = 72;
@@ -392,6 +396,24 @@ ps_alloc(void)
 	p->advance = ps_advance;
 	p->endline = ps_endline;
 	p->width = ps_width;
+
+	toks[0] = "paper";
+	toks[1] = NULL;
+
+	while (outopts && *outopts)
+		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
+		case (0):
+			if (0 == strcasecmp(v, "a4")) {
+				pagex = 595;
+				pagey = 842;
+			} else if (0 == strcasecmp(v, "letter")) {
+				pagex = 612;
+				pagey = 792;
+			}
+			break;
+		default:
+			break;
+		}
 
 	assert(margin * 2 < pagex);
 	assert(margin * 2 < pagey);
