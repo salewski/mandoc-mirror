@@ -32,6 +32,14 @@
 #include "main.h"
 #include "term.h"
 
+/* Convert PostScript point "x" to an AFM unit. */
+#define	PNT2AFM(p, x) \
+	(size_t)((double)(x) * (1000.0 / (double)(p)->engine.ps.scale))
+
+/* Convert an AFM unit "x" to a PostScript points */
+#define	AFM2PNT(p, x) \
+	(size_t)((double)(x) / (1000.0 / (double)(p)->engine.ps.scale))
+
 struct	glyph {
 	int		  wx; /* WX in AFM */
 };
@@ -395,6 +403,8 @@ ps_alloc(char *outopts)
 	p->letter = ps_letter;
 	p->type = TERMTYPE_PS;
 	p->width = ps_width;
+	
+	p->engine.ps.scale = 10;
 
 	toks[0] = "paper";
 	toks[1] = NULL;
@@ -410,16 +420,16 @@ ps_alloc(char *outopts)
 			break;
 		}
 
-	if (0 == strcasecmp(paper, "a4")) {
-		pagex = 595 * 100;
-		pagey = 842 * 100;
-	} else {
-		pagex = 612 * 100;
-		pagey = 792 * 100;
-	}
+	margin = PNT2AFM(p, 72);
+	lineheight = PNT2AFM(p, 12);
 
-	margin = 72 * 100;
-	lineheight = 12 * 100;
+	if (0 == strcasecmp(paper, "a4")) {
+		pagex = PNT2AFM(p, 595);
+		pagey = PNT2AFM(p, 842);
+	} else {
+		pagex = PNT2AFM(p, 612);
+		pagey = PNT2AFM(p, 792);
+	}
 
 	assert(margin * 2 < pagex);
 	assert(margin * 2 < pagey);
@@ -615,8 +625,8 @@ ps_pletter(struct termp *p, int c)
 
 	if ( ! (PS_INLINE & p->engine.ps.psstate)) {
 		ps_printf(p, "%zu %zu moveto\n(", 
-				(size_t)(p->engine.ps.pscol / 100), 
-				(size_t)(p->engine.ps.psrow / 100));
+				AFM2PNT(p, p->engine.ps.pscol),
+				AFM2PNT(p, p->engine.ps.psrow));
 		p->engine.ps.psstate |= PS_INLINE;
 	}
 
@@ -810,7 +820,8 @@ ps_setfont(struct termp *p, enum termfont f)
 {
 
 	assert(f < TERMFONT__MAX);
-	ps_printf(p, "/%s 10 selectfont\n", fonts[(int)f].name);
+	ps_printf(p, "/%s %zu selectfont\n", 
+			fonts[(int)f].name, p->engine.ps.scale);
 	p->engine.ps.lastf = f;
 }
 
@@ -835,29 +846,28 @@ ps_hspan(const struct termp *p, const struct roffsu *su)
 	
 	/*
 	 * All of these measurements are derived by converting from the
-	 * native measurement to AFM units, which are (scalesize/1000).
-	 * Since scalesize is 10 for us, we can just skip to (x/100).
+	 * native measurement to AFM units.
 	 */
 
 	switch (su->unit) {
 	case (SCALE_CM):
-		r = su->scale * 28.34 * 100;
+		r = PNT2AFM(p, su->scale * 28.34);
 		break;
 	case (SCALE_IN):
-		r = su->scale * 72 * 100;
+		r = PNT2AFM(p, su->scale * 72);
 		break;
 	case (SCALE_PC):
-		r = su->scale * 12 * 100;
+		r = PNT2AFM(p, su->scale * 12);
 		break;
 	case (SCALE_PT):
-		r = su->scale * 100;
+		r = PNT2AFM(p, su->scale * 100);
 		break;
 	case (SCALE_EM):
 		r = su->scale * 
 			fonts[(int)TERMFONT_NONE].gly[109 - 32].wx;
 		break;
 	case (SCALE_MM):
-		r = su->scale * 2.834 * 100;
+		r = PNT2AFM(p, su->scale * 2.834);
 		break;
 	case (SCALE_EN):
 		r = su->scale * 

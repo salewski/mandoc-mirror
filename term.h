@@ -52,6 +52,7 @@ struct	termp_ps {
 	size_t		  psmargcur;	/* cur index in margin buf */
 	char		  last;		/* character buffer */
 	enum termfont	  lastf;	/* last set font */
+	size_t		  scale;	/* font scaling factor */
 	size_t		  pages;	/* number of pages shown */
 	size_t		  lineheight;	/* line height (AFM units) */
 	size_t		  top;		/* body top (AFM units) */
