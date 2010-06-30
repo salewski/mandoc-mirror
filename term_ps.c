@@ -377,17 +377,13 @@ void *
 ps_alloc(char *outopts)
 {
 	struct termp	*p;
-	size_t		 pagex, pagey, margin;
+	size_t		 pagex, pagey, margin, lineheight;
 	const char	*toks[2];
+	const char	*paper;
 	char		*v;
 
 	if (NULL == (p = term_alloc(TERMENC_ASCII)))
 		return(NULL);
-
-	/* Default is USA letter. */
-	pagex = 612;
-	pagey = 792;
-	margin = 72;
 
 	p->type = TERMTYPE_PS;
 	p->letter = ps_letter;
@@ -403,17 +399,22 @@ ps_alloc(char *outopts)
 	while (outopts && *outopts)
 		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
 		case (0):
-			if (0 == strcasecmp(v, "a4")) {
-				pagex = 595;
-				pagey = 842;
-			} else if (0 == strcasecmp(v, "letter")) {
-				pagex = 612;
-				pagey = 792;
-			}
+			paper = v;
 			break;
 		default:
 			break;
 		}
+
+	if (0 == strcasecmp(paper, "a4")) {
+		pagex = 595 * 100;
+		pagey = 842 * 100;
+	} else {
+		pagex = 612 * 100;
+		pagey = 792 * 100;
+	}
+
+	margin = 72 * 100;
+	lineheight = 12 * 100;
 
 	assert(margin * 2 < pagex);
 	assert(margin * 2 < pagey);
@@ -425,7 +426,7 @@ ps_alloc(char *outopts)
 	p->engine.ps.footer = (margin / 2);
 	p->engine.ps.bottom = margin;
 	p->engine.ps.left = margin;
-	p->engine.ps.lineheight = 12;
+	p->engine.ps.lineheight = lineheight;
 
 	p->defrmargin = pagex - (margin * 2);
 	return(p);
@@ -609,8 +610,8 @@ ps_pletter(struct termp *p, int c)
 
 	if ( ! (PS_INLINE & p->engine.ps.psstate)) {
 		ps_printf(p, "%zu %zu moveto\n(", 
-				p->engine.ps.pscol, 
-				p->engine.ps.psrow);
+				(size_t)(p->engine.ps.pscol / 100), 
+				(size_t)(p->engine.ps.psrow / 100));
 		p->engine.ps.psstate |= PS_INLINE;
 	}
 
@@ -639,13 +640,13 @@ ps_pletter(struct termp *p, int c)
 
 	if (c <= 32 || (c - 32 > MAXCHAR)) {
 		ps_putchar(p, ' ');
-		p->engine.ps.pscol += (fonts[f].gly[0].wx / 100);
+		p->engine.ps.pscol += fonts[f].gly[0].wx;
 		return;
 	} 
 
 	ps_putchar(p, c);
 	c -= 32;
-	p->engine.ps.pscol += (fonts[f].gly[c].wx / 100);
+	p->engine.ps.pscol += fonts[f].gly[c].wx;
 }
 
 
@@ -815,8 +816,8 @@ ps_width(const struct termp *p, char c)
 {
 
 	if (c <= 32 || c - 32 >= MAXCHAR)
-		return(fonts[(int)TERMFONT_NONE].gly[0].wx / 100);
+		return(fonts[(int)TERMFONT_NONE].gly[0].wx);
 
 	c -= 32;
-	return(fonts[(int)TERMFONT_NONE].gly[(int)c].wx / 100);
+	return(fonts[(int)TERMFONT_NONE].gly[(int)c].wx);
 }
