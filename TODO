@@ -74,19 +74,6 @@
         or by enclosing
   reported by jmc Tue, 13 Apr 2010 08:48:14 +0100
 
-- URGENT, this is making many kernel manuals look bad:
-  .Ft/.Fn should MAYBE behave in custom section like in SYNOPSIS?
-  autoconf.9:
-    .Sh DIRECT CONFIGURATION
-    .nr nS 1
-    .Ft "struct device *"
-    .Fn config_found_sm "struct device *parent"
-  groff:
-    DIRECT CONFIGURATION
-      struct device *
-      config_found_sm(struct device *parent, ...
-  reported by sthen  Tue, 20 Apr 2010 13:42:51 +0100
-
 - indentation got lost in SYNOPSIS, e.g.
    SYNOPSIS
         date [-ajnu] [-d dst] [-r seconds] [-t minutes_west] [+format]
@@ -102,20 +89,7 @@
 * formatting issues: gratuitious differences
 ************************************************************************
 
-- FIXED OpenBSD mdoc.c 1.52 schwarze 16.5.10
-  lines containing blank characters, and nothing else,
-  in literal context (.Bd -literal):
-  groff outputs just blank lines "\n"
-  mandoc outputs blanks to the left margin,
-  then the number of balnks minus one
-  NEEDS MERGING TO bsd.lv
-
-
-************************************************************************
-* parser errors without any effect on formatting
-************************************************************************
-
-- OpenBSD::PackageName(3p) has "if (block) 90:1" in the parse tree
+- none reported right now (yet schwarze@ knows of some)
 
 ************************************************************************
 * performance issues
