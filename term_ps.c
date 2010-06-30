@@ -359,7 +359,7 @@ static	const struct font fonts[TERMFONT__MAX] = {
 	} while (/* CONSTCOND */ 0)
 
 
-static	size_t		  ps_hspan(const struct termp *,
+static	double		  ps_hspan(const struct termp *,
 				const struct roffsu *);
 static	size_t		  ps_width(const struct termp *, char);
 static	void		  ps_advance(struct termp *, size_t);
@@ -828,7 +828,7 @@ ps_width(const struct termp *p, char c)
 }
 
 
-static size_t
+static double
 ps_hspan(const struct termp *p, const struct roffsu *su)
 {
 	double		 r;
@@ -871,12 +871,6 @@ ps_hspan(const struct termp *p, const struct roffsu *su)
 		break;
 	}
 
-	/* Explicitly disallow negative values. */
-
-	if (r < 0.0)
-		r = 0.0;
-
-	return((size_t)/* LINTED */
-			r);
+	return(r);
 }
 

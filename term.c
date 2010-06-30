@@ -692,6 +692,11 @@ term_vspan(const struct termp *p, const struct roffsu *su)
 size_t
 term_hspan(const struct termp *p, const struct roffsu *su)
 {
+	double		 v;
 
-	return((*p->hspan)(p, su));
+	v = ((*p->hspan)(p, su));
+	if (v < 0.0)
+		v = 0.0;
+	return((size_t) /* LINTED */
+			v);
 }
