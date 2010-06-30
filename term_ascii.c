@@ -30,12 +30,14 @@
 #include "term.h"
 #include "main.h"
 
+static	size_t		  ascii_hspan(const struct termp *,
+				const struct roffsu *);
+static	size_t		  ascii_width(const struct termp *, char);
+static	void		  ascii_advance(struct termp *, size_t);
+static	void		  ascii_begin(struct termp *);
+static	void		  ascii_end(struct termp *);
 static	void		  ascii_endline(struct termp *);
 static	void		  ascii_letter(struct termp *, char);
-static	void		  ascii_begin(struct termp *);
-static	void		  ascii_advance(struct termp *, size_t);
-static	void		  ascii_end(struct termp *);
-static	size_t		  ascii_width(const struct termp *, char);
 
 
 void *
@@ -51,12 +53,13 @@ ascii_alloc(char *outopts)
 	p->tabwidth = 5;
 	p->defrmargin = 78;
 
-	p->type = TERMTYPE_CHAR;
-	p->letter = ascii_letter;
+	p->advance = ascii_advance;
 	p->begin = ascii_begin;
 	p->end = ascii_end;
 	p->endline = ascii_endline;
-	p->advance = ascii_advance;
+	p->hspan = ascii_hspan;
+	p->letter = ascii_letter;
+	p->type = TERMTYPE_CHAR;
 	p->width = ascii_width;
 
 	toks[0] = "width";
@@ -140,3 +143,49 @@ ascii_advance(struct termp *p, size_t len)
 	for (i = 0; i < len; i++)
 		putchar(' ');
 }
+
+
+/* ARGSUSED */
+static size_t
+ascii_hspan(const struct termp *p, const struct roffsu *su)
+{
+	double		 r;
+
+	/*
+	 * Approximate based on character width.  These are generated
+	 * entirely by eyeballing the screen, but appear to be correct.
+	 */
+
+	switch (su->unit) {
+	case (SCALE_CM):
+		r = 4 * su->scale;
+		break;
+	case (SCALE_IN):
+		r = 10 * su->scale;
+		break;
+	case (SCALE_PC):
+		r = (10 * su->scale) / 6;
+		break;
+	case (SCALE_PT):
+		r = (10 * su->scale) / 72;
+		break;
+	case (SCALE_MM):
+		r = su->scale / 1000;
+		break;
+	case (SCALE_VS):
+		r = su->scale * 2 - 1;
+		break;
+	default:
+		r = su->scale;
+		break;
+	}
+
+	/* Explicitly disallow negative values. */
+
+	if (r < 0.0)
+		r = 0.0;
+
+	return((size_t)/* LINTED */
+			r);
+}
+

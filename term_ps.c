@@ -359,13 +359,15 @@ static	const struct font fonts[TERMFONT__MAX] = {
 	} while (/* CONSTCOND */ 0)
 
 
-static	void		  ps_letter(struct termp *, char);
+static	size_t		  ps_hspan(const struct termp *,
+				const struct roffsu *);
+static	size_t		  ps_width(const struct termp *, char);
+static	void		  ps_advance(struct termp *, size_t);
 static	void		  ps_begin(struct termp *);
 static	void		  ps_end(struct termp *);
-static	void		  ps_advance(struct termp *, size_t);
 static	void		  ps_endline(struct termp *);
 static	void		  ps_fclose(struct termp *);
-static	size_t		  ps_width(const struct termp *, char);
+static	void		  ps_letter(struct termp *, char);
 static	void		  ps_pclose(struct termp *);
 static	void		  ps_pletter(struct termp *, int);
 static	void		  ps_printf(struct termp *, const char *, ...);
@@ -385,16 +387,19 @@ ps_alloc(char *outopts)
 	if (NULL == (p = term_alloc(TERMENC_ASCII)))
 		return(NULL);
 
-	p->type = TERMTYPE_PS;
-	p->letter = ps_letter;
+	p->advance = ps_advance;
 	p->begin = ps_begin;
 	p->end = ps_end;
-	p->advance = ps_advance;
 	p->endline = ps_endline;
+	p->hspan = ps_hspan;
+	p->letter = ps_letter;
+	p->type = TERMTYPE_PS;
 	p->width = ps_width;
 
 	toks[0] = "paper";
 	toks[1] = NULL;
+
+	paper = "letter";
 
 	while (outopts && *outopts)
 		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
@@ -821,3 +826,57 @@ ps_width(const struct termp *p, char c)
 	c -= 32;
 	return(fonts[(int)TERMFONT_NONE].gly[(int)c].wx);
 }
+
+
+static size_t
+ps_hspan(const struct termp *p, const struct roffsu *su)
+{
+	double		 r;
+	
+	/*
+	 * All of these measurements are derived by converting from the
+	 * native measurement to AFM units, which are (scalesize/1000).
+	 * Since scalesize is 10 for us, we can just skip to (x/100).
+	 */
+
+	switch (su->unit) {
+	case (SCALE_CM):
+		r = su->scale * 28.34 * 100;
+		break;
+	case (SCALE_IN):
+		r = su->scale * 72 * 100;
+		break;
+	case (SCALE_PC):
+		r = su->scale * 12 * 100;
+		break;
+	case (SCALE_PT):
+		r = su->scale * 100;
+		break;
+	case (SCALE_EM):
+		r = su->scale * 
+			fonts[(int)TERMFONT_NONE].gly[109 - 32].wx;
+		break;
+	case (SCALE_MM):
+		r = su->scale * 2.834 * 100;
+		break;
+	case (SCALE_EN):
+		r = su->scale * 
+			fonts[(int)TERMFONT_NONE].gly[110 - 32].wx;
+		break;
+	case (SCALE_VS):
+		r = su->scale * p->engine.ps.lineheight;
+		break;
+	default:
+		r = su->scale;
+		break;
+	}
+
+	/* Explicitly disallow negative values. */
+
+	if (r < 0.0)
+		r = 0.0;
+
+	return((size_t)/* LINTED */
+			r);
+}
+

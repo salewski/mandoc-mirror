@@ -103,6 +103,8 @@ struct	termp {
 	void		(*endline)(struct termp *);
 	void		(*advance)(struct termp *, size_t);
 	size_t		(*width)(const struct termp *, char);
+	size_t		(*hspan)(const struct termp *,
+				const struct roffsu *);
 	const void	 *argf;		/* arg for headf/footf */
 	union {
 		struct termp_ps ps;
