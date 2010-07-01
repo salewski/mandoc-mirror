@@ -543,6 +543,8 @@ pre_bl(PRE_ARGS)
 
 	if (MDOC_BLOCK != n->type) {
 		assert(n->parent);
+		if (ENDBODY_NOT != n->end)
+			return(1);
 		assert(MDOC_BLOCK == n->parent->type);
 		assert(MDOC_Bl == n->parent->tok);
 		assert(LIST__NONE != n->parent->data.Bl.type);
