@@ -514,9 +514,17 @@ mdoc_word_alloc(struct mdoc *m, int line, int pos, const char *p)
 }
 
 
+/* FIXME: put in mdoc_node_delete(). */
 void
 mdoc_node_free(struct mdoc_node *p)
 {
+
+	if (MDOC_Bd == p->tok && MDOC_BLOCK == p->type)
+		if (p->data.Bd)
+			free(p->data.Bd);
+	if (MDOC_Bl == p->tok && MDOC_BLOCK == p->type)
+		if (p->data.Bl)
+			free(p->data.Bl);
 
 	if (p->string)
 		free(p->string);
@@ -610,7 +618,7 @@ mdoc_ptext(struct mdoc *m, int line, char *buf, int offs)
 	 */
 
 	if (MDOC_Bl == n->tok && MDOC_BODY == n->type &&
-			LIST_column == n->data.Bl.type) {
+			LIST_column == n->data.Bl->type) {
 		/* `Bl' is open without any children. */
 		m->flags |= MDOC_FREECOL;
 		return(mdoc_macro(m, MDOC_It, line, offs, &offs, buf));
@@ -619,7 +627,7 @@ mdoc_ptext(struct mdoc *m, int line, char *buf, int offs)
 	if (MDOC_It == n->tok && MDOC_BLOCK == n->type &&
 			NULL != n->parent &&
 			MDOC_Bl == n->parent->tok &&
-			LIST_column == n->parent->data.Bl.type) {
+			LIST_column == n->parent->data.Bl->type) {
 		/* `Bl' has block-level `It' children. */
 		m->flags |= MDOC_FREECOL;
 		return(mdoc_macro(m, MDOC_It, line, offs, &offs, buf));
@@ -825,7 +833,7 @@ mdoc_pmacro(struct mdoc *m, int ln, char *buf, int offs)
 	 */
 
 	if (MDOC_Bl == n->tok && MDOC_BODY == n->type &&
-			LIST_column == n->data.Bl.type) {
+			LIST_column == n->data.Bl->type) {
 		m->flags |= MDOC_FREECOL;
 		if ( ! mdoc_macro(m, MDOC_It, ln, sv, &sv, buf))
 			goto err;
@@ -841,7 +849,7 @@ mdoc_pmacro(struct mdoc *m, int ln, char *buf, int offs)
 	if (MDOC_It == n->tok && MDOC_BLOCK == n->type &&
 			NULL != n->parent &&
 			MDOC_Bl == n->parent->tok &&
-			LIST_column == n->parent->data.Bl.type) {
+			LIST_column == n->parent->data.Bl->type) {
 		m->flags |= MDOC_FREECOL;
 		if ( ! mdoc_macro(m, MDOC_It, ln, sv, &sv, buf)) 
 			goto err;

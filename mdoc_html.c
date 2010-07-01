@@ -1038,11 +1038,12 @@ mdoc_it_pre(MDOC_ARGS)
 
 	SCALE_HS_INIT(&offs, 0);
 
-	type = bl->data.Bl.type;
-	comp = bl->data.Bl.comp;
+	assert(bl->data.Bl);
+	type = bl->data.Bl->type;
+	comp = bl->data.Bl->comp;
 
-	if (bl->data.Bl.offs)
-		a2offs(bl->data.Bl.offs, &offs);
+	if (bl->data.Bl->offs)
+		a2offs(bl->data.Bl->offs, &offs);
 
 	switch (type) {
 	case (LIST_enum):
@@ -1059,8 +1060,8 @@ mdoc_it_pre(MDOC_ARGS)
 		break;
 	}
 
-	if (bl->data.Bl.width)
-		a2width(bl->data.Bl.width, &width);
+	if (bl->data.Bl->width)
+		a2width(bl->data.Bl->width, &width);
 
 	wp = -1;
 	for (i = 0; bl->args && i < (int)bl->args->argc; i++) 
@@ -1118,7 +1119,8 @@ mdoc_bl_pre(MDOC_ARGS)
 		return(0);
 	if (MDOC_BLOCK != n->type)
 		return(1);
-	if (LIST_enum != n->data.Bl.type)
+	assert(n->data.Bl);
+	if (LIST_enum != n->data.Bl->type)
 		return(1);
 
 	ord = malloc(sizeof(struct ord));
@@ -1142,7 +1144,7 @@ mdoc_bl_post(MDOC_ARGS)
 
 	if (MDOC_BLOCK != n->type)
 		return;
-	if (LIST_enum != n->data.Bl.type)
+	if (LIST_enum != n->data.Bl->type)
 		return;
 
 	ord = h->ords.head;
@@ -1357,10 +1359,11 @@ mdoc_bd_pre(MDOC_ARGS)
 
 	SCALE_VS_INIT(&su, 0);
 
-	if (n->data.Bd.offs)
-		a2offs(n->data.Bd.offs, &su);
+	assert(n->data.Bd);
+	if (n->data.Bd->offs)
+		a2offs(n->data.Bd->offs, &su);
 
-	comp = n->data.Bd.comp;
+	comp = n->data.Bd->comp;
 
 	/* FIXME: -centered, etc. formatting. */
 	/* FIXME: does not respect -offset ??? */
@@ -1387,8 +1390,8 @@ mdoc_bd_pre(MDOC_ARGS)
 		return(1);
 	}
 
-	if (DISP_unfilled != n->data.Bd.type && 
-			DISP_literal != n->data.Bd.type)
+	if (DISP_unfilled != n->data.Bd->type && 
+			DISP_literal != n->data.Bd->type)
 		return(1);
 
 	PAIR_CLASS_INIT(&tag[0], "lit");

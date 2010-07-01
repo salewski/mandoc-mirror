@@ -336,17 +336,16 @@ print_mdoc_node(DECL_ARGS)
 
 	term_fontpopq(p, font);
 
-	if (MDOC_TEXT != n->type &&
-	    termacts[n->tok].post &&
-	    ! (MDOC_ENDED & n->flags)) {
-		(*termacts[n->tok].post)(p, &npair, m, n);
+	if (MDOC_TEXT != n->type && termacts[n->tok].post && 
+			! (MDOC_ENDED & n->flags)) {
+		(void)(*termacts[n->tok].post)(p, &npair, m, n);
 
 		/*
 		 * Explicit end tokens not only call the post
 		 * handler, but also tell the respective block
 		 * that it must not call the post handler again.
 		 */
-		if (n->end)
+		if (ENDBODY_NOT != n->end)
 			n->pending->flags |= MDOC_ENDED;
 
 		/*
@@ -574,9 +573,9 @@ print_bvspace(struct termp *p,
 
 	term_newln(p);
 
-	if (MDOC_Bd == bl->tok && bl->data.Bd.comp)
+	if (MDOC_Bd == bl->tok && bl->data.Bd->comp)
 		return;
-	if (MDOC_Bl == bl->tok && bl->data.Bl.comp)
+	if (MDOC_Bl == bl->tok && bl->data.Bl->comp)
 		return;
 
 	/* Do not vspace directly after Ss/Sh. */
@@ -595,13 +594,13 @@ print_bvspace(struct termp *p,
 
 	/* A `-column' does not assert vspace within the list. */
 
-	if (MDOC_Bl == bl->tok && LIST_column == bl->data.Bl.type)
+	if (MDOC_Bl == bl->tok && LIST_column == bl->data.Bl->type)
 		if (n->prev && MDOC_It == n->prev->tok)
 			return;
 
 	/* A `-diag' without body does not vspace. */
 
-	if (MDOC_Bl == bl->tok && LIST_diag == bl->data.Bl.type)
+	if (MDOC_Bl == bl->tok && LIST_diag == bl->data.Bl->type)
 		if (n->prev && MDOC_It == n->prev->tok) {
 			assert(n->prev->body);
 			if (NULL == n->prev->body->child)
@@ -655,7 +654,8 @@ termp_it_pre(DECL_ARGS)
 	}
 
 	bl = n->parent->parent->parent;
-	type = bl->data.Bl.type;
+	assert(bl->data.Bl);
+	type = bl->data.Bl->type;
 
 	/* 
 	 * First calculate width and offset.  This is pretty easy unless
@@ -665,8 +665,8 @@ termp_it_pre(DECL_ARGS)
 
 	width = offset = 0;
 
-	if (bl->data.Bl.offs)
-		offset = a2offs(p, bl->data.Bl.offs);
+	if (bl->data.Bl->offs)
+		offset = a2offs(p, bl->data.Bl->offs);
 
 	switch (type) {
 	case (LIST_column):
@@ -716,7 +716,7 @@ termp_it_pre(DECL_ARGS)
 		width = a2width(p, bl->args->argv[col].value[i]) + dcol;
 		break;
 	default:
-		if (NULL == bl->data.Bl.width)
+		if (NULL == bl->data.Bl->width)
 			break;
 
 		/* 
@@ -724,8 +724,8 @@ termp_it_pre(DECL_ARGS)
 		 * number for buffering single arguments.  See the above
 		 * handling for column for how this changes.
 		 */
-		assert(bl->data.Bl.width);
-		width = a2width(p, bl->data.Bl.width) + term_len(p, 2);
+		assert(bl->data.Bl->width);
+		width = a2width(p, bl->data.Bl->width) + term_len(p, 2);
 		break;
 	}
 
@@ -987,7 +987,7 @@ termp_it_post(DECL_ARGS)
 	if (MDOC_BLOCK == n->type)
 		return;
 
-	type = n->parent->parent->parent->data.Bl.type;
+	type = n->parent->parent->parent->data.Bl->type;
 
 	switch (type) {
 	case (LIST_item):
@@ -1648,8 +1648,9 @@ termp_bd_pre(DECL_ARGS)
 	} else if (MDOC_HEAD == n->type)
 		return(0);
 
-	if (n->data.Bd.offs)
-		p->offset += a2offs(p, n->data.Bd.offs);
+	assert(n->data.Bd);
+	if (n->data.Bd->offs)
+		p->offset += a2offs(p, n->data.Bd->offs);
 
 	/*
 	 * If -ragged or -filled are specified, the block does nothing
@@ -1659,8 +1660,8 @@ termp_bd_pre(DECL_ARGS)
 	 * lines are allowed.
 	 */
 	
-	if (DISP_literal != n->data.Bd.type && 
-			DISP_unfilled != n->data.Bd.type)
+	if (DISP_literal != n->data.Bd->type && 
+			DISP_unfilled != n->data.Bd->type)
 		return(1);
 
 	tabwidth = p->tabwidth;
@@ -1697,8 +1698,9 @@ termp_bd_post(DECL_ARGS)
 	rm = p->rmargin;
 	rmax = p->maxrmargin;
 
-	if (DISP_literal == n->data.Bd.type || 
-			DISP_unfilled == n->data.Bd.type)
+	assert(n->data.Bd);
+	if (DISP_literal == n->data.Bd->type || 
+			DISP_unfilled == n->data.Bd->type)
 		p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
 
 	p->flags |= TERMP_NOSPACE;

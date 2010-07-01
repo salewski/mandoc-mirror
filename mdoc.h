@@ -321,8 +321,8 @@ struct	mdoc_node {
 	enum mdoc_endbody end;		/* BODY */
 
 	union {
-		struct mdoc_bl Bl;
-		struct mdoc_bd Bd;
+		struct mdoc_bl *Bl;
+		struct mdoc_bd *Bd;
 	} data;
 };
 
