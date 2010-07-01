@@ -437,7 +437,7 @@ print_mdoc_node(MDOC_ARGS)
 		print_text(h, n->string);
 		return;
 	default:
-		if (mdocs[n->tok].pre && !n->end)
+		if (mdocs[n->tok].pre && ENDBODY_NOT == n->end)
 			child = (*mdocs[n->tok].pre)(m, n, h);
 		break;
 	}
@@ -453,7 +453,7 @@ print_mdoc_node(MDOC_ARGS)
 		mdoc_root_post(m, n, h);
 		break;
 	default:
-		if (mdocs[n->tok].post && !n->end)
+		if (mdocs[n->tok].post && ENDBODY_NOT == n->end)
 			(*mdocs[n->tok].post)(m, n, h);
 		break;
 	}

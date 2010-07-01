@@ -327,7 +327,7 @@ print_mdoc_node(DECL_ARGS)
 
 	if (MDOC_TEXT == n->type)
 		term_word(p, n->string); 
-	else if (termacts[n->tok].pre && !n->end)
+	else if (termacts[n->tok].pre && ENDBODY_NOT == n->end)
 		chld = (*termacts[n->tok].pre)(p, &npair, m, n);
 
 	if (chld && n->child)
