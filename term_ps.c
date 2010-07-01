@@ -33,15 +33,15 @@
 #include "term.h"
 
 /* Convert PostScript point "x" to an AFM unit. */
-#define	PNT2AFM(p, x) \
+#define	PNT2AFM(p, x) /* LINTED */ \
 	(size_t)((double)(x) * (1000.0 / (double)(p)->engine.ps.scale))
 
 /* Convert an AFM unit "x" to a PostScript points */
-#define	AFM2PNT(p, x) \
+#define	AFM2PNT(p, x) /* LINTED */ \
 	(size_t)((double)(x) / (1000.0 / (double)(p)->engine.ps.scale))
 
 struct	glyph {
-	int		  wx; /* WX in AFM */
+	size_t		  wx; /* WX in AFM */
 };
 
 struct	font {
@@ -389,7 +389,7 @@ ps_alloc(char *outopts)
 	struct termp	*p;
 	size_t		 pagex, pagey, margin, lineheight;
 	const char	*toks[2];
-	const char	*paper;
+	const char	*pp;
 	char		*v;
 
 	if (NULL == (p = term_alloc(TERMENC_ASCII)))
@@ -404,17 +404,17 @@ ps_alloc(char *outopts)
 	p->type = TERMTYPE_PS;
 	p->width = ps_width;
 	
-	p->engine.ps.scale = 10;
+	p->engine.ps.scale = 11;
 
 	toks[0] = "paper";
 	toks[1] = NULL;
 
-	paper = "letter";
+	pp = NULL;
 
 	while (outopts && *outopts)
 		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
 		case (0):
-			paper = v;
+			pp = v;
 			break;
 		default:
 			break;
@@ -423,13 +423,39 @@ ps_alloc(char *outopts)
 	margin = PNT2AFM(p, 72);
 	lineheight = PNT2AFM(p, 12);
 
-	if (0 == strcasecmp(paper, "a4")) {
-		pagex = PNT2AFM(p, 595);
-		pagey = PNT2AFM(p, 842);
-	} else {
-		pagex = PNT2AFM(p, 612);
-		pagey = PNT2AFM(p, 792);
+	/* Default to US letter (millimetres). */
+
+	pagex = 216;
+	pagey = 279;
+
+	/*
+	 * The ISO-269 paper sizes can be calculated automatically, but
+	 * it would require bringing in -lm for pow() and I'd rather not
+	 * do that.  So just do it the easy way for now.  Since this
+	 * only happens once, I'm not terribly concerned.
+	 */
+
+	if (pp && strcasecmp(pp, "letter")) {
+		if (0 == strcasecmp(pp, "a3")) {
+			pagex = 297;
+			pagey = 420;
+		} else if (0 == strcasecmp(pp, "a4")) {
+			pagex = 210;
+			pagey = 297;
+		} else if (0 == strcasecmp(pp, "a5")) {
+			pagex = 148;
+			pagey = 210;
+		} else if (0 == strcasecmp(pp, "legal")) {
+			pagex = 216;
+			pagey = 356;
+		} else if (2 != sscanf(pp, "%zux%zu", &pagex, &pagey))
+			fprintf(stderr, "%s: Unknown paper\n", pp);
 	}
+
+	/* Remember millimetres -> AFM units. */
+
+	pagex = PNT2AFM(p, ((double)pagex * 2.834));
+	pagey = PNT2AFM(p, ((double)pagey * 2.834));
 
 	assert(margin * 2 < pagex);
 	assert(margin * 2 < pagey);
@@ -658,7 +684,7 @@ ps_pletter(struct termp *p, int c)
 		return;
 	} 
 
-	ps_putchar(p, c);
+	ps_putchar(p, (char)c);
 	c -= 32;
 	p->engine.ps.pscol += fonts[f].gly[c].wx;
 }
