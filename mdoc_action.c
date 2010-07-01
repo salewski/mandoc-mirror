@@ -457,6 +457,17 @@ post_sh(POST_ARGS)
 	if (SEC_NONE == m->lastnamed || SEC_CUSTOM != sec)
 		m->lastnamed = sec;
 
+	/*
+	 * Switch the parser's SYNOPSIS mode, to be copied
+	 * into individual nodes when creating them.
+	 * Note that this mode can also be set and unset
+	 * using the roff nS register.
+	 */
+	if (SEC_SYNOPSIS == sec)
+		m->flags |= MDOC_SYNOPSIS;
+	else
+		m->flags &= ~MDOC_SYNOPSIS;
+
 	/* Some sections only live in certain manual sections. */
 
 	switch ((m->lastsec = sec)) {

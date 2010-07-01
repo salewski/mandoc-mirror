@@ -1582,6 +1582,9 @@ in_line_eoln(MACRO_PROT_ARGS)
 
 	assert( ! (MDOC_PARSED & mdoc_macros[tok].flags));
 
+	if (tok == MDOC_Pp)
+		rew_sub(MDOC_BLOCK, m, MDOC_Nm, line, ppos);
+
 	/* Parse macro arguments. */
 
 	for (arg = NULL; ; ) {
@@ -1645,7 +1648,7 @@ ctx_synopsis(MACRO_PROT_ARGS)
 	nl = MDOC_NEWLINE & m->flags;
 
 	/* If we're not in the SYNOPSIS, go straight to in-line. */
-	if (SEC_SYNOPSIS != m->lastsec)
+	if ( ! (MDOC_SYNOPSIS & m->flags))
 		return(in_line(m, tok, line, ppos, pos, buf));
 
 	/* If we're a nested call, same place. */

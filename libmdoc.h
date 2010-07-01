@@ -36,6 +36,7 @@ struct	mdoc {
 #define	MDOC_PHRASELIT	 (1 << 4) /* literal within a partila phrase */
 #define	MDOC_PPHRASE	 (1 << 5) /* within a partial phrase */
 #define	MDOC_FREECOL	 (1 << 6) /* `It' invocation should close */
+#define	MDOC_SYNOPSIS	 (1 << 7) /* SYNOPSIS-style formatting */
 	int		  pflags;
 	enum mdoc_next	  next; /* where to put the next node */
 	struct mdoc_node *last; /* the last node parsed */
