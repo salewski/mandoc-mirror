@@ -1025,6 +1025,9 @@ blk_full(MACRO_PROT_ARGS)
 		lac = ARGS_ERROR == ac ? ARGS_PEND : ac;
 		ac = mdoc_args(m, line, pos, buf, tok, &p);
 
+		if (ARGS_PUNCT == ac)
+			break;
+
 		if (ARGS_ERROR == ac)
 			return(0);
 
