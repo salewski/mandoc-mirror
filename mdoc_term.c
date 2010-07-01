@@ -85,6 +85,7 @@ static	void	  termp_fo_post(DECL_ARGS);
 static	void	  termp_in_post(DECL_ARGS);
 static	void	  termp_it_post(DECL_ARGS);
 static	void	  termp_lb_post(DECL_ARGS);
+static	void	  termp_nm_post(DECL_ARGS);
 static	void	  termp_op_post(DECL_ARGS);
 static	void	  termp_pf_post(DECL_ARGS);
 static	void	  termp_pq_post(DECL_ARGS);
@@ -170,7 +171,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_in_pre, termp_in_post }, /* In */ 
 	{ termp_li_pre, NULL }, /* Li */
 	{ termp_nd_pre, NULL }, /* Nd */ 
-	{ termp_nm_pre, NULL }, /* Nm */ 
+	{ termp_nm_pre, termp_nm_post }, /* Nm */ 
 	{ termp_op_pre, termp_op_post }, /* Op */
 	{ NULL, NULL }, /* Ot */
 	{ termp_under_pre, NULL }, /* Pa */
@@ -1025,10 +1026,34 @@ static int
 termp_nm_pre(DECL_ARGS)
 {
 
-	if (NULL == n->child && NULL == m->name)
+	if (MDOC_BLOCK == n->type)
 		return(1);
 
+	if (MDOC_BODY == n->type) {
+		if (NULL == n->child)
+			return(0);
+		p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+		p->offset += term_len(p, 1) +
+		    (NULL == n->prev->child ? term_strlen(p, m->name) :
+		     MDOC_TEXT == n->prev->child->type ?
+			term_strlen(p, n->prev->child->string) :
+		     term_len(p, 5));
+		return(1);
+	}
+
+	if (NULL == n->child && NULL == m->name)
+		return(0);
+
 	synopsis_pre(p, n);
+
+	if (MDOC_HEAD == n->type && n->next->child) {
+		p->flags |= TERMP_NOSPACE | TERMP_NOBREAK | TERMP_HANG;
+		p->rmargin = p->offset + term_len(p, 1) +
+		    (NULL == n->child ? term_strlen(p, m->name) :
+		     MDOC_TEXT == n->child->type ?
+			term_strlen(p, n->child->string) :
+		     term_len(p, 5));
+	}
 
 	term_fontpush(p, TERMFONT_BOLD);
 	if (NULL == n->child)
@@ -1037,6 +1062,21 @@ termp_nm_pre(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
+static void
+termp_nm_post(DECL_ARGS)
+{
+
+	if (MDOC_HEAD == n->type && n->next->child) {
+		term_flushln(p);
+		p->flags &= ~(TERMP_NOBREAK | TERMP_HANG);
+	} else if (MDOC_BODY == n->type && n->child) {
+		term_flushln(p);
+		p->flags &= ~TERMP_NOLPAD;
+	}
+}
+
+		
 /* ARGSUSED */
 static int
 termp_fl_pre(DECL_ARGS)

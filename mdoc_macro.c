@@ -97,7 +97,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* In */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Li */
 	{ blk_full, 0 }, /* Nd */ 
-	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Nm */ 
+	{ ctx_synopsis, MDOC_CALLABLE | MDOC_PARSED }, /* Nm */ 
 	{ blk_part_imp, MDOC_CALLABLE | MDOC_PARSED }, /* Op */
 	{ obsolete, 0 }, /* Ot */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Pa */
@@ -392,6 +392,8 @@ rew_dohalt(enum mdoct tok, enum mdoc_type type,
 		if (MDOC_Op == p->tok)
 			return(REWIND_MORE);
 		break;
+	case (MDOC_Nm):
+		return(REWIND_NONE);
 	case (MDOC_Nd):
 		/* FALLTHROUGH */
 	case (MDOC_Ss):
@@ -409,9 +411,11 @@ rew_dohalt(enum mdoct tok, enum mdoc_type type,
 
 	/*
 	 * Default block rewinding rules.
-	 * In particular, always skip block end markers.
+	 * In particular, always skip block end markers,
+	 * and let all blocks rewind Nm children.
 	 */
-	if (ENDBODY_NOT != p->end || (MDOC_BLOCK == p->type &&
+	if (ENDBODY_NOT != p->end || MDOC_Nm == p->tok ||
+	    (MDOC_BLOCK == p->type &&
 	    ! (MDOC_EXPLICIT & mdoc_macros[tok].flags)))
 		return(REWIND_MORE);
 
@@ -507,8 +511,9 @@ make_pending(struct mdoc_node *broken, enum mdoct tok,
 			taker->pending = broken->pending;
 		}
 		broken->pending = breaker;
-		mdoc_vmsg(m, MANDOCERR_SCOPE, line, ppos, "%s breaks %s",
-		    mdoc_macronames[tok], mdoc_macronames[broken->tok]);
+		mdoc_vmsg(m, MANDOCERR_SCOPENEST, line, ppos,
+		    "%s breaks %s", mdoc_macronames[tok],
+		    mdoc_macronames[broken->tok]);
 		return(1);
 	}
 
@@ -542,7 +547,9 @@ rew_sub(enum mdoc_type t, struct mdoc *m,
 			return(make_pending(n, tok, m, line, ppos));
 		case (REWIND_ERROR):
 			/* XXX Make this non-fatal. */
-			mdoc_pmsg(m, line, ppos, MANDOCERR_SYNTNOSCOPE);
+			mdoc_vmsg(m, MANDOCERR_SCOPEFATAL, line, ppos,
+			    "%s cannot break %s", mdoc_macronames[tok],
+			    mdoc_macronames[n->tok]);
 			return 0;
 		}
 		break;
@@ -653,7 +660,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		if (MDOC_BLOCK != n->type)
+		if (MDOC_BLOCK != n->type || MDOC_Nm == n->tok)
 			continue;
 		if (atok == n->tok) {
 			assert(body);
@@ -1290,8 +1297,8 @@ blk_part_imp(MACRO_PROT_ARGS)
 	 * is ugly behaviour nodding its head to OpenBSD's overwhelming
 	 * crufty use of `Op' breakage.
 	 */
-	if (n != body && ! mdoc_vmsg(m, MANDOCERR_SCOPE, line, ppos,
-	    "%s broken", mdoc_macronames[tok]))
+	if (n != body && ! mdoc_vmsg(m, MANDOCERR_SCOPENEST,
+	    line, ppos, "%s broken", mdoc_macronames[tok]))
 		return(0);
 
 	if (n && ! rew_sub(MDOC_BODY, m, tok, line, ppos))
@@ -1647,7 +1654,9 @@ ctx_synopsis(MACRO_PROT_ARGS)
 	 * up formatting the block scope, then child nodes will inherit
 	 * the formatting.  Be careful.
 	 */
-
+	if (MDOC_Nm == tok)
+		return(blk_full(m, tok, line, ppos, pos, buf));
+	assert(MDOC_Vt == tok);
 	return(blk_part_imp(m, tok, line, ppos, pos, buf));
 }
 
