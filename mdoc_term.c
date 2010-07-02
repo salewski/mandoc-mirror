@@ -2170,15 +2170,18 @@ termp_bk_pre(DECL_ARGS)
 
 	switch (n->type) {
 	case (MDOC_BLOCK):
-		return(1);
+		break;
 	case (MDOC_HEAD):
 		return(0);
 	case (MDOC_BODY):
 		p->flags |= TERMP_PREKEEP;
-		return(1);
+		break;
 	default:
 		abort();
+		/* NOTREACHED */
 	}
+
+	return(1);
 }
 
 

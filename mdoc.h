@@ -252,7 +252,7 @@ struct 	mdoc_arg {
 enum	mdoc_endbody {
 	ENDBODY_NOT = 0,
 	ENDBODY_SPACE,
-	ENDBODY_NOSPACE,
+	ENDBODY_NOSPACE
 };
 
 enum	mdoc_list {

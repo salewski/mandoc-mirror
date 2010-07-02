@@ -34,7 +34,7 @@ enum	rew {	/* see rew_dohalt() */
 	REWIND_THIS,
 	REWIND_MORE,
 	REWIND_LATER,
-	REWIND_ERROR,
+	REWIND_ERROR
 };
 
 static	int	  	blk_full(MACRO_PROT_ARGS);
