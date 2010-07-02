@@ -849,13 +849,20 @@ static int
 pre_an(PRE_ARGS)
 {
 
-	if (NULL == n->args || 1 == n->args->argc)
+	if (NULL == n->args)
 		return(1);
-	mdoc_vmsg(mdoc, MANDOCERR_SYNTARGCOUNT, 
-				n->line, n->pos,
-				"line arguments == 1 (have %d)",
-				n->args->argc);
-	return(0);
+	if (n->args->argc > 1)
+		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_ARGCOUNT))
+			return(0);
+
+	if (MDOC_Split == n->args->argv[0].arg)
+		n->data.An.auth = AUTH_split;
+	else if (MDOC_Nosplit == n->args->argv[0].arg)
+		n->data.An.auth = AUTH_nosplit;
+	else
+		abort();
+
+	return(1);
 }
 
 
@@ -1076,16 +1083,14 @@ post_at(POST_ARGS)
 static int
 post_an(POST_ARGS)
 {
+	struct mdoc_node *np;
 
-	if (mdoc->last->args) {
-		if (NULL == mdoc->last->child)
-			return(1);
-		return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_ARGCOUNT));
-	}
-
-	if (mdoc->last->child)
+	np = mdoc->last;
+	if (AUTH__NONE != np->data.An.auth && np->child)
+		return(mdoc_nmsg(mdoc, np, MANDOCERR_ARGCOUNT));
+	if (AUTH__NONE != np->data.An.auth || np->child)
 		return(1);
-	return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOARGS));
+	return(mdoc_nmsg(mdoc, np, MANDOCERR_NOARGS));
 }
 
 

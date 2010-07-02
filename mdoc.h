@@ -279,6 +279,12 @@ enum	mdoc_disp {
 	DISP_literal
 };
 
+enum	mdoc_auth {
+	AUTH__NONE = 0,
+	AUTH_split,
+	AUTH_nosplit
+};
+
 enum	mdoc_font {
 	FONT__NONE = 0,
 	FONT_Em,
@@ -301,6 +307,10 @@ struct	mdoc_bl {
 
 struct	mdoc_bf {
 	enum mdoc_font	  font; /* font */
+};
+
+struct	mdoc_an {
+	enum mdoc_auth	  auth; /* -split, etc. */
 };
 
 /* Node in AST. */
@@ -332,6 +342,7 @@ struct	mdoc_node {
 	enum mdoc_endbody end;		/* BODY */
 
 	union {
+		struct mdoc_an  An;
 		struct mdoc_bd *Bd;
 		struct mdoc_bf *Bf;
 		struct mdoc_bl *Bl;

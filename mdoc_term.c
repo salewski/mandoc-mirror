@@ -57,7 +57,6 @@ static	size_t	  a2width(const struct termp *, const char *);
 static	size_t	  a2height(const struct termp *, const char *);
 static	size_t	  a2offs(const struct termp *, const char *);
 
-static	int	  arg_hasattr(int, const struct mdoc_node *);
 static	int	  arg_getattr(int, const struct mdoc_node *);
 static	void	  print_bvspace(struct termp *,
 			const struct mdoc_node *,
@@ -524,18 +523,6 @@ a2offs(const struct termp *p, const char *v)
 		SCALE_HS_INIT(&su, term_strlen(p, v));
 
 	return(term_hspan(p, &su));
-}
-
-
-/*
- * Return 1 if an argument has a particular argument value or 0 if it
- * does not.  See arg_getattr().
- */
-static int
-arg_hasattr(int arg, const struct mdoc_node *n)
-{
-
-	return(-1 != arg_getattr(arg, n));
 }
 
 
@@ -1141,10 +1128,10 @@ termp_an_post(DECL_ARGS)
 		return;
 	}
 
-	if (arg_hasattr(MDOC_Split, n)) {
+	if (AUTH_split == n->data.An.auth) {
 		p->flags &= ~TERMP_NOSPLIT;
 		p->flags |= TERMP_SPLIT;
-	} else {
+	} else if (AUTH_nosplit == n->data.An.auth) {
 		p->flags &= ~TERMP_SPLIT;
 		p->flags |= TERMP_NOSPLIT;
 	}
