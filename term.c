@@ -653,6 +653,7 @@ term_strlen(const struct termp *p, const char *cp)
 }
 
 
+/* ARGSUSED */
 size_t
 term_vspan(const struct termp *p, const struct roffsu *su)
 {
