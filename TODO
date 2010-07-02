@@ -58,6 +58,10 @@
 
 - ignore horrendous m[] font colouring
   reported by J.C. Roberts
+
+- prohibit `Nm' from having non-text HEAD children
+  (e.g., NetBSD mDNSShared/dns-sd.1)
+  (mdoc_html.c and mdoc_term.c `Nm' handlers can be slightly simplified)
   
 ************************************************************************
 * formatting issues: ugly output
