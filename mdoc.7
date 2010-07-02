@@ -1139,6 +1139,39 @@ See also
 and
 .Sx \&Dl .
 .Ss \&Bf
+Change the font mode for a scoped block of text.
+Its syntax is as follows:
+.Bd -ragged -offset indent
+.Pf \. Sx \&Bf
+.Oo
+.Fl emphasis | literal | symbolic |
+.Cm \&Em | \&Li | \&Sy
+.Oc
+.Ed
+.Pp
+The
+.Fl emphasis
+and
+.Cm \&Em
+argument are equivalent, as are
+.Fl symbolic
+and
+.Cm \&Sy,
+and
+.Fl literal
+and
+.Cm \&Li .
+Without an argument, this macro does nothing.
+The font mode continues until broken by a new font mode in a nested
+scope or
+.Sx \&Ef
+is encountered.
+.Pp
+See also
+.Sx \&Li ,
+.Sx \&Ef ,
+and
+.Sx \&Sy .
 .Ss \&Bk
 Begins a keep block, containing a collection of macros or text
 to be kept together in the output.
@@ -1159,6 +1192,9 @@ Examples:
 \&.Op o Ar output_file
 \&.Ek
 .Ed
+.Pp
+See also
+.Sx \&Ek .
 .Ss \&Bl
 Begins a list composed of one or more list entries.
 A list is associated with a type, which is a required argument.
@@ -1631,6 +1667,8 @@ and
 .Ss \&Ec
 .Ss \&Ed
 .Ss \&Ef
+Ends a font mode context started by
+.Sx \&Bf .
 .Ss \&Ek
 Ends a keep context started by
 .Sx \&Bk .
