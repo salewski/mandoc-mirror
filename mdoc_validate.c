@@ -957,6 +957,8 @@ post_bf(POST_ARGS)
 	}
 
 	np = mdoc->last;
+	assert(MDOC_BLOCK == np->parent->type);
+	assert(MDOC_Bf == np->parent->tok);
 	np->data.Bf = mandoc_calloc(1, sizeof(struct mdoc_bf));
 
 	/* 
@@ -964,16 +966,16 @@ post_bf(POST_ARGS)
 	 * If neither is specified, let it through with a warning. 
 	 */
 
-	if (np->args && np->child) {
+	if (np->parent->args && np->child) {
 		mdoc_nmsg(mdoc, np, MANDOCERR_SYNTARGVCOUNT);
 		return(0);
-	} else if (NULL == np->args && NULL == np->child)
+	} else if (NULL == np->parent->args && NULL == np->child)
 		return(mdoc_nmsg(mdoc, np, MANDOCERR_FONTTYPE));
 
 	/* Extract argument into data. */
 	
-	if (np->args) {
-		arg = np->args->argv[0].arg;
+	if (np->parent->args) {
+		arg = np->parent->args->argv[0].arg;
 		if (MDOC_Emphasis == arg)
 			np->data.Bf->font = FONT_Em;
 		else if (MDOC_Literal == arg)
