@@ -153,13 +153,13 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"no title in document",
 	"missing list type",
 	"missing display type",
+	"missing font type",
 	"line argument(s) will be lost",
 	"body argument(s) will be lost",
 
 	"generic fatal error",
 
 	"column syntax is inconsistent",
-	"missing font type",
 	"displays may not be nested",
 	"unsupported display type",
 	"blocks badly nested",

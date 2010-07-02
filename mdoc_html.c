@@ -2015,46 +2015,33 @@ mdoc_ap_pre(MDOC_ARGS)
 static int
 mdoc_bf_pre(MDOC_ARGS)
 {
-	int		 i;
 	struct htmlpair	 tag[2];
 	struct roffsu	 su;
 
 	if (MDOC_HEAD == n->type)
 		return(0);
-	else if (MDOC_BLOCK != n->type)
+	else if (MDOC_BODY != n->type)
 		return(1);
 
-	PAIR_CLASS_INIT(&tag[0], "lit");
+	assert(n->data.Bf);
 
-	if (n->head->child) {
-		if ( ! strcmp("Em", n->head->child->string))
-			PAIR_CLASS_INIT(&tag[0], "emph");
-		else if ( ! strcmp("Sy", n->head->child->string))
-			PAIR_CLASS_INIT(&tag[0], "symb");
-		else if ( ! strcmp("Li", n->head->child->string))
-			PAIR_CLASS_INIT(&tag[0], "lit");
-	} else {
-		for (i = 0; n->args && i < (int)n->args->argc; i++) 
-			switch (n->args->argv[i].arg) {
-			case (MDOC_Symbolic):
-				PAIR_CLASS_INIT(&tag[0], "symb");
-				break;
-			case (MDOC_Literal):
-				PAIR_CLASS_INIT(&tag[0], "lit");
-				break;
-			case (MDOC_Emphasis):
-				PAIR_CLASS_INIT(&tag[0], "emph");
-				break;
-			default:
-				break;
-			}
-	}
+	if (FONT_Em == n->data.Bf->font) 
+		PAIR_CLASS_INIT(&tag[0], "emph");
+	else if (FONT_Sy == n->data.Bf->font) 
+		PAIR_CLASS_INIT(&tag[0], "symb");
+	else if (FONT_Li == n->data.Bf->font) 
+		PAIR_CLASS_INIT(&tag[0], "lit");
+	else
+		PAIR_CLASS_INIT(&tag[0], "none");
 
-	/* FIXME: div's have spaces stripped--we want them. */
-
+	/* 
+	 * We want this to be inline-formatted, but needs to be div to
+	 * accept block children. 
+	 */
 	bufcat_style(h, "display", "inline");
 	SCALE_HS_INIT(&su, 1);
-	bufcat_su(h, "margin-right", &su);
+	/* Needs a left-margin for spacing. */
+	bufcat_su(h, "margin-left", &su);
 	PAIR_STYLE_INIT(&tag[1], h);
 	print_otag(h, TAG_DIV, 2, tag);
 	return(1);

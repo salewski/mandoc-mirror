@@ -105,7 +105,6 @@ Several areas can be cleaned up to make mandoc even faster.  These are
   that they need not be recalculated between front- and back-ends (also
   reduces code size and complexity):
     `Bl -column' pointer
-    `Bf' font type
 
 - improve hashing mechanism for macros (quite important: performance)
 

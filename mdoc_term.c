@@ -2057,30 +2057,19 @@ termp_fo_post(DECL_ARGS)
 static int
 termp_bf_pre(DECL_ARGS)
 {
-	const struct mdoc_node	*nn;
 
 	if (MDOC_HEAD == n->type)
 		return(0);
 	else if (MDOC_BLOCK != n->type)
 		return(1);
 
-	if (NULL == (nn = n->head->child)) {
-		if (arg_hasattr(MDOC_Emphasis, n))
-			term_fontpush(p, TERMFONT_UNDER);
-		else if (arg_hasattr(MDOC_Symbolic, n))
-			term_fontpush(p, TERMFONT_BOLD);
-		else
-			term_fontpush(p, TERMFONT_NONE);
+	assert(n->data.Bf);
 
-		return(1);
-	} 
-
-	assert(MDOC_TEXT == nn->type);
-	if (0 == strcmp("Em", nn->string))
+	if (FONT_Em == n->data.Bf->font) 
 		term_fontpush(p, TERMFONT_UNDER);
-	else if (0 == strcmp("Sy", nn->string))
+	else if (FONT_Sy == n->data.Bf->font) 
 		term_fontpush(p, TERMFONT_BOLD);
-	else
+	else 
 		term_fontpush(p, TERMFONT_NONE);
 
 	return(1);

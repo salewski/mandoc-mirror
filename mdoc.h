@@ -279,6 +279,13 @@ enum	mdoc_disp {
 	DISP_literal
 };
 
+enum	mdoc_font {
+	FONT__NONE = 0,
+	FONT_Em,
+	FONT_Li,
+	FONT_Sy
+};
+
 struct	mdoc_bd {
 	const char	 *offs; /* -offset */
 	enum mdoc_disp	  type; /* -ragged, etc. */
@@ -290,6 +297,10 @@ struct	mdoc_bl {
 	const char	 *offs; /* -offset */
 	enum mdoc_list	  type; /* -tag, -enum, etc. */
 	int		  comp; /* -compact */
+};
+
+struct	mdoc_bf {
+	enum mdoc_font	  font; /* font */
 };
 
 /* Node in AST. */
@@ -321,8 +332,9 @@ struct	mdoc_node {
 	enum mdoc_endbody end;		/* BODY */
 
 	union {
-		struct mdoc_bl *Bl;
 		struct mdoc_bd *Bd;
+		struct mdoc_bf *Bf;
+		struct mdoc_bl *Bl;
 	} data;
 };
 

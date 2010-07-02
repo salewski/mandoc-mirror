@@ -931,38 +931,72 @@ pre_dd(PRE_ARGS)
 static int
 post_bf(POST_ARGS)
 {
-	char		 *p;
-	struct mdoc_node *head;
+	struct mdoc_node *np;
+	int		  arg;
 
-	if (MDOC_BLOCK != mdoc->last->type)
+	/*
+	 * Unlike other data pointers, these are "housed" by the HEAD
+	 * element, which contains the goods.
+	 */
+
+	if (MDOC_HEAD != mdoc->last->type) {
+		if (ENDBODY_NOT != mdoc->last->end) {
+			assert(mdoc->last->pending);
+			np = mdoc->last->pending->parent->head;
+		} else if (MDOC_BLOCK != mdoc->last->type) {
+			np = mdoc->last->parent->head;
+		} else 
+			np = mdoc->last->head;
+
+		assert(np);
+		assert(MDOC_HEAD == np->type);
+		assert(MDOC_Bf == np->tok);
+		assert(np->data.Bf);
+		mdoc->last->data.Bf = np->data.Bf;
 		return(1);
-
-	head = mdoc->last->head;
-
-	if (mdoc->last->args && head->child) {
-		/* FIXME: this should provide a default. */
-		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SYNTARGVCOUNT);
-		return(0);
-	} else if (mdoc->last->args)
-		return(1);
-
-	if (NULL == head->child || MDOC_TEXT != head->child->type) {
-		/* FIXME: this should provide a default. */
-		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SYNTARGVCOUNT);
-		return(0);
 	}
 
-	p = head->child->string;
+	np = mdoc->last;
+	np->data.Bf = mandoc_calloc(1, sizeof(struct mdoc_bf));
 
-	if (0 == strcmp(p, "Em"))
-		return(1);
-	else if (0 == strcmp(p, "Li"))
-		return(1);
-	else if (0 == strcmp(p, "Sy"))
-		return(1);
+	/* 
+	 * Cannot have both argument and parameter.
+	 * If neither is specified, let it through with a warning. 
+	 */
 
-	mdoc_nmsg(mdoc, head, MANDOCERR_FONTTYPE);
-	return(0);
+	if (np->args && np->child) {
+		mdoc_nmsg(mdoc, np, MANDOCERR_SYNTARGVCOUNT);
+		return(0);
+	} else if (NULL == np->args && NULL == np->child)
+		return(mdoc_nmsg(mdoc, np, MANDOCERR_FONTTYPE));
+
+	/* Extract argument into data. */
+	
+	if (np->args) {
+		arg = np->args->argv[0].arg;
+		if (MDOC_Emphasis == arg)
+			np->data.Bf->font = FONT_Em;
+		else if (MDOC_Literal == arg)
+			np->data.Bf->font = FONT_Li;
+		else if (MDOC_Symbolic == arg)
+			np->data.Bf->font = FONT_Sy;
+		else
+			abort();
+		return(1);
+	}
+
+	/* Extract parameter into data. */
+
+	if (0 == strcmp(np->child->string, "Em"))
+		np->data.Bf->font = FONT_Em;
+	else if (0 == strcmp(np->child->string, "Li"))
+		np->data.Bf->font = FONT_Li;
+	else if (0 == strcmp(np->child->string, "Sy"))
+		np->data.Bf->font = FONT_Sy;
+	else if ( ! mdoc_nmsg(mdoc, np, MANDOCERR_FONTTYPE))
+		return(0);
+
+	return(1);
 }
 
 

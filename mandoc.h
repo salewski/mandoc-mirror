@@ -81,14 +81,13 @@ enum	mandocerr {
 	MANDOCERR_NOTITLE, /* no title in document */
 	MANDOCERR_LISTTYPE, /* missing list type */
 	MANDOCERR_DISPTYPE, /* missing display type */
+	MANDOCERR_FONTTYPE, /* missing font type */
 	MANDOCERR_ARGSLOST, /* line argument(s) will be lost */
 	MANDOCERR_BODYLOST, /* body argument(s) will be lost */
 
 	MANDOCERR_FATAL, /* ===== end of fatal errors ===== */
 
 	MANDOCERR_COLUMNS, /* column syntax is inconsistent */
-	/* FIXME: this should be a MANDOCERR_ERROR */
-	MANDOCERR_FONTTYPE, /* missing font type */
 	/* FIXME: this should be a MANDOCERR_ERROR */
 	MANDOCERR_NESTEDDISP, /* displays may not be nested */
 	MANDOCERR_BADDISP, /* unsupported display type */

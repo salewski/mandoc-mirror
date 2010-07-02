@@ -518,12 +518,21 @@ static void
 mdoc_node_free(struct mdoc_node *p)
 {
 
+	/*
+	 * XXX: if these end up being problematic in terms of memory
+	 * management and dereferencing freed blocks, then make them
+	 * into reference-counted double-pointers.
+	 */
+
 	if (MDOC_Bd == p->tok && MDOC_BLOCK == p->type)
 		if (p->data.Bd)
 			free(p->data.Bd);
 	if (MDOC_Bl == p->tok && MDOC_BLOCK == p->type)
 		if (p->data.Bl)
 			free(p->data.Bl);
+	if (MDOC_Bf == p->tok && MDOC_HEAD == p->type)
+		if (p->data.Bf)
+			free(p->data.Bf);
 
 	if (p->string)
 		free(p->string);
