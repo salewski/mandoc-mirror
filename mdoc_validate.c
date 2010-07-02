@@ -1132,9 +1132,6 @@ post_it(POST_ARGS)
 		if (NULL == mdoc->last->head->child)
 			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOARGS))
 				return(0);
-		if (NULL == mdoc->last->body->child)
-			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOBODY))
-				return(0);
 		break;
 	case (LIST_bullet):
 		/* FALLTHROUGH */
@@ -1143,13 +1140,13 @@ post_it(POST_ARGS)
 	case (LIST_enum):
 		/* FALLTHROUGH */
 	case (LIST_hyphen):
+		if (NULL == mdoc->last->body->child)
+			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOBODY))
+				return(0);
 		/* FALLTHROUGH */
 	case (LIST_item):
 		if (mdoc->last->head->child)
 			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_ARGSLOST))
-				return(0);
-		if (NULL == mdoc->last->body->child)
-			if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NOBODY))
 				return(0);
 		break;
 	case (LIST_column):
