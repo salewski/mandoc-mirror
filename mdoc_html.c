@@ -736,17 +736,70 @@ mdoc_op_post(MDOC_ARGS)
 static int
 mdoc_nm_pre(MDOC_ARGS)
 {
-	struct htmlpair	tag;
+	struct htmlpair	 tag;
+	struct roffsu	 su;
+	const char	*cp;
 
-	if (NULL == n->child && NULL == m->name)
-		return(1);
+	/*
+	 * Accomodate for `Nm' being both an element (which may have
+	 * NULL children AND no m->name) and a block.
+	 */
 
-	synopsis_pre(h, n);
+	cp = NULL;
 
-	PAIR_CLASS_INIT(&tag, "name");
-	print_otag(h, TAG_SPAN, 1, &tag);
-	if (NULL == n->child)
-		print_text(h, m->name);
+	if (MDOC_ELEM == n->type) {
+		if (NULL == n->child && NULL == m->name)
+			return(1);
+		synopsis_pre(h, n);
+		PAIR_CLASS_INIT(&tag, "name");
+		print_otag(h, TAG_SPAN, 1, &tag);
+		if (NULL == n->child)
+			print_text(h, m->name);
+	} else if (MDOC_BLOCK == n->type) {
+		synopsis_pre(h, n);
+
+		bufcat_style(h, "clear", "both");
+		if (n->head->child || m->name) {
+			if (n->head->child && MDOC_TEXT == 
+					n->head->child->type)
+				cp = n->head->child->string;
+			if (NULL == cp || '\0' == *cp)
+				cp = m->name;
+
+			SCALE_HS_INIT(&su, (double)strlen(cp));
+			bufcat_su(h, "padding-left", &su);
+		}
+
+		PAIR_STYLE_INIT(&tag, h);
+		print_otag(h, TAG_DIV, 1, &tag);
+	} else if (MDOC_HEAD == n->type) { 
+		if (NULL == n->child && NULL == m->name)
+			return(1);
+
+		if (n->child && MDOC_TEXT == n->child->type)
+			cp = n->child->string;
+		if (NULL == cp || '\0' == *cp)
+			cp = m->name;
+
+		SCALE_HS_INIT(&su, (double)strlen(cp));
+
+		bufcat_style(h, "float", "left");
+		bufcat_su(h, "min-width", &su);
+		SCALE_INVERT(&su);
+		bufcat_su(h, "margin-left", &su);
+
+		PAIR_STYLE_INIT(&tag, h);
+		print_otag(h, TAG_DIV, 1, &tag);
+
+		if (NULL == n->child)
+			print_text(h, m->name);
+	} else if (MDOC_BODY == n->type) {
+		SCALE_HS_INIT(&su, 2);
+		bufcat_su(h, "margin-left", &su);
+		PAIR_STYLE_INIT(&tag, h);
+		print_otag(h, TAG_DIV, 1, &tag);
+	}
+
 	return(1);
 }
 
