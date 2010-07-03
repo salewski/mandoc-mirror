@@ -2012,9 +2012,11 @@ termp_fo_pre(DECL_ARGS)
 		return(1);
 	} 
 
+	if (NULL == n->child)
+		return(0);
+
 	/* XXX: we drop non-initial arguments as per groff. */
 
-	assert(n->child);
 	assert(n->child->string);
 	term_fontpush(p, TERMFONT_BOLD);
 	term_word(p, n->child->string);
