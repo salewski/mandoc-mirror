@@ -33,6 +33,15 @@
   \\ must behave in a macro def like in a macro argument,
   and when using the macro, it must expand yet again.
 
+- implement \s (physical font size)
+  \sN - set to N
+  \s+N - increment by N, 1 <= N <= 8
+  \s-N - decrement by N, 1 <= N <= 8
+  \s0 - restore previous size
+  \s(nn \s+-(nn \s'+-nn' \s+-'nn' \s[+-nn] \s+-[nn] - disambiguate
+  registers: .s .ps .sr .psr
+  used by e.g. cu(1), tip(1)
+
 - look at bsd.lv tbl(1)
   from kristaps@  Fri, 11 Sep 2009 17:10:53 +0200
   also look at the mail from Thomas Klausner wiz at NetBSD
