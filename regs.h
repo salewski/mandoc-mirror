@@ -41,6 +41,11 @@ struct	regset {
 	struct reg	 regs[REG__MAX];
 };
 
+char		 *roff_setstr(const char *, const char *);
+char		 *roff_getstr(const char *);
+char		 *roff_getstrn(const char *, size_t);
+void		  roff_freestr(void);
+
 __END_DECLS
 
 #endif /*!REGS_H*/
