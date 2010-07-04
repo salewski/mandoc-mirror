@@ -1074,7 +1074,7 @@ mdoc_it_head_pre(MDOC_ARGS, enum mdoc_list type, struct roffsu *width)
 static int
 mdoc_it_pre(MDOC_ARGS)
 {
-	int			 i, wp, comp;
+	int			 i, comp;
 	const struct mdoc_node	*bl, *nn;
 	struct roffsu		 width, offs;
 	enum mdoc_list		 type;
@@ -1116,16 +1116,6 @@ mdoc_it_pre(MDOC_ARGS)
 	if (bl->data.Bl->width)
 		a2width(bl->data.Bl->width, &width);
 
-	wp = -1;
-	for (i = 0; bl->args && i < (int)bl->args->argc; i++) 
-		switch (bl->args->argv[i].arg) {
-		case (MDOC_Column):
-			wp = i; /* Save for later. */
-			break;
-		default:
-			break;
-		}
-
 	/* Override width in some cases. */
 
 	switch (type) {
@@ -1149,8 +1139,8 @@ mdoc_it_pre(MDOC_ARGS)
 		for (i = 0; nn && nn != n; nn = nn->next)
 			if (MDOC_BODY == nn->type)
 				i++;
-		if (i < (int)bl->args->argv[wp].sz)
-			a2width(bl->args->argv[wp].value[i], &width);
+		if (i < (int)bl->data.Bl->ncols)
+			a2width(bl->data.Bl->cols[i], &width);
 	}
 
 	if (MDOC_HEAD == n->type)

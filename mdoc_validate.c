@@ -647,8 +647,16 @@ pre_bl(PRE_ARGS)
 
 		/* Assign list type. */
 
-		if (LIST__NONE != lt && n->data.Bl->type == LIST__NONE)
+		if (LIST__NONE != lt && n->data.Bl->type == LIST__NONE) {
 			n->data.Bl->type = lt;
+			/* Set column information, too. */
+			if (LIST_column == lt) {
+				n->data.Bl->ncols = 
+					n->args->argv[i].sz;
+				n->data.Bl->cols = (const char **)
+					n->args->argv[i].value;
+			}
+		}
 
 		/* The list type should come first. */
 
@@ -1150,14 +1158,8 @@ post_it(POST_ARGS)
 				return(0);
 		break;
 	case (LIST_column):
-		cols = -1;
-		for (i = 0; i < (int)n->args->argc; i++)
-			if (MDOC_Column == n->args->argv[i].arg) {
-				cols = (int)n->args->argv[i].sz;
-				break;
-			}
+		cols = (int)n->data.Bl->ncols;
 
-		assert(-1 != cols);
 		assert(NULL == mdoc->last->head->child);
 
 		if (NULL == mdoc->last->body->child)
@@ -1197,12 +1199,7 @@ post_bl_head(POST_ARGS)
 	n = mdoc->last->parent;
 
 	if (LIST_column == n->data.Bl->type) {
-		for (i = 0; i < (int)n->args->argc; i++)
-			if (MDOC_Column == n->args->argv[i].arg)
-				break;
-		assert(i < (int)n->args->argc);
-
-		if (n->args->argv[i].sz && mdoc->last->nchild) {
+		if (n->data.Bl->ncols && mdoc->last->nchild) {
 			mdoc_nmsg(mdoc, n, MANDOCERR_COLUMNS);
 			return(0);
 		}

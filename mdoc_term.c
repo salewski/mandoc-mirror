@@ -57,7 +57,6 @@ static	size_t	  a2width(const struct termp *, const char *);
 static	size_t	  a2height(const struct termp *, const char *);
 static	size_t	  a2offs(const struct termp *, const char *);
 
-static	int	  arg_getattr(int, const struct mdoc_node *);
 static	void	  print_bvspace(struct termp *,
 			const struct mdoc_node *,
 			const struct mdoc_node *);
@@ -527,26 +526,6 @@ a2offs(const struct termp *p, const char *v)
 
 
 /*
- * Get the index of an argument in a node's argument list or -1 if it
- * does not exist.
- */
-static int
-arg_getattr(int v, const struct mdoc_node *n)
-{
-	int		 i;
-
-	if (NULL == n->args)
-		return(0);
-
-	for (i = 0; i < (int)n->args->argc; i++) 
-		if (n->args->argv[i].arg == v)
-			return(i);
-
-	return(-1);
-}
-
-
-/*
  * Determine how much space to print out before block elements of `It'
  * (and thus `Bl') and `Bd'.  And then go ahead and print that space,
  * too.
@@ -631,7 +610,7 @@ termp_it_pre(DECL_ARGS)
 {
 	const struct mdoc_node *bl, *nn;
 	char		        buf[7];
-	int		        i, col;
+	int		        i;
 	size_t		        width, offset, ncols, dcol;
 	enum mdoc_list		type;
 
@@ -660,8 +639,6 @@ termp_it_pre(DECL_ARGS)
 		if (MDOC_HEAD == n->type)
 			break;
 
-		col = arg_getattr(MDOC_Column, bl);
-
 		/*
 		 * Imitate groff's column handling:
 		 * - For each earlier column, add its width.
@@ -671,7 +648,8 @@ termp_it_pre(DECL_ARGS)
 		 *   column.
 		 * - For more than 5 columns, add only one column.
 		 */
-		ncols = bl->args->argv[col].sz;
+		ncols = bl->data.Bl->ncols;
+
 		/* LINTED */
 		dcol = ncols < 5 ? term_len(p, 4) : 
 			ncols == 5 ? term_len(p, 3) : term_len(p, 1);
@@ -685,7 +663,7 @@ termp_it_pre(DECL_ARGS)
 				nn->prev && i < (int)ncols; 
 				nn = nn->prev, i++)
 			offset += dcol + a2width
-				(p, bl->args->argv[col].value[i]);
+				(p, bl->data.Bl->cols[i]);
 
 		/*
 		 * When exceeding the declared number of columns, leave
@@ -700,7 +678,7 @@ termp_it_pre(DECL_ARGS)
 		 * Use the declared column widths, extended as explained
 		 * in the preceding paragraph.
 		 */
-		width = a2width(p, bl->args->argv[col].value[i]) + dcol;
+		width = a2width(p, bl->data.Bl->cols[i]) + dcol;
 		break;
 	default:
 		if (NULL == bl->data.Bl->width)

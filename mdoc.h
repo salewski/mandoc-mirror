@@ -303,6 +303,8 @@ struct	mdoc_bl {
 	const char	 *offs; /* -offset */
 	enum mdoc_list	  type; /* -tag, -enum, etc. */
 	int		  comp; /* -compact */
+	size_t		  ncols; /* -column arg count */
+	const char	**cols; /* -column val ptr */
 };
 
 struct	mdoc_bf {

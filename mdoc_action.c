@@ -782,6 +782,9 @@ post_bl_head(POST_ARGS)
 	np->args->argv[c].value = mandoc_malloc
 		((size_t)n->nchild * sizeof(char *));
 
+	n->data.Bl->ncols = np->args->argv[c].sz;
+	n->data.Bl->cols = (const char **)np->args->argv[c].value;
+
 	for (i = 0, nn = n->child; nn; i++) {
 		np->args->argv[c].value[i] = nn->string;
 		nn->string = NULL;
