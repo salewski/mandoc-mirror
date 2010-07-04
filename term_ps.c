@@ -33,6 +33,11 @@
 #include "main.h"
 #include "term.h"
 
+#define	MINMARGIN_MM	20	/* Minimum 2cm margins. */
+#define	MINMARGIN_PNT	56.68
+#define	DEFPAGEX_MM	216	/* Default page size is US-letter. */
+#define	DEFPAGEY_MM	279
+
 /* Convert PostScript point "x" to an AFM unit. */
 #define	PNT2AFM(p, x) /* LINTED */ \
 	(size_t)((double)(x) * (1000.0 / (double)(p)->engine.ps.scale))
@@ -388,7 +393,7 @@ void *
 ps_alloc(char *outopts)
 {
 	struct termp	*p;
-	size_t		 pagex, pagey, margin, lineheight;
+	size_t		 pagex, pagey, margin, lineheight, m1, m2;
 	const char	*toks[2];
 	const char	*pp;
 	char		*v;
@@ -405,8 +410,6 @@ ps_alloc(char *outopts)
 	p->type = TERMTYPE_PS;
 	p->width = ps_width;
 	
-	p->engine.ps.scale = 11;
-
 	toks[0] = "paper";
 	toks[1] = NULL;
 
@@ -421,13 +424,10 @@ ps_alloc(char *outopts)
 			break;
 		}
 
-	margin = PNT2AFM(p, 72);
-	lineheight = PNT2AFM(p, 12);
-
 	/* Default to US letter (millimetres). */
 
-	pagex = 216;
-	pagey = 279;
+	pagex = DEFPAGEX_MM;
+	pagey = DEFPAGEY_MM;
 
 	/*
 	 * The ISO-269 paper sizes can be calculated automatically, but
@@ -451,21 +451,48 @@ ps_alloc(char *outopts)
 			pagey = 356;
 		} else if (2 != sscanf(pp, "%zux%zu", &pagex, &pagey))
 			fprintf(stderr, "%s: Unknown paper\n", pp);
+	} else if (NULL == pp)
+		pp = "letter";
+
+	/* Enforce minimum page size >= (2 times) min-margin. */
+
+	if ((2 * MINMARGIN_MM) >= pagex) {
+		fprintf(stderr, "%s: Insufficient page width\n", pp);
+		pagex = DEFPAGEX_MM;
+	} else if ((2 * MINMARGIN_MM >= pagey)) {
+		fprintf(stderr, "%s: Insufficient page length\n", pp);
+		pagey = DEFPAGEY_MM;
 	}
+
+	/* 
+	 * This MUST be defined before any PNT2AFM or AFM2PNT
+	 * calculations occur.
+	 */
+
+	p->engine.ps.scale = 11;
 
 	/* Remember millimetres -> AFM units. */
 
 	pagex = PNT2AFM(p, ((double)pagex * 2.834));
 	pagey = PNT2AFM(p, ((double)pagey * 2.834));
 
-	assert(margin * 2 < pagex);
-	assert(margin * 2 < pagey);
+	/* 
+	 * Calculate margins.  First get the minimum text width: either
+	 * page minus margins or width of 65 'm' characters.  Set total
+	 * margins to page size minus text width.
+	 */
+
+	m1 = ps_width(p, 'm') * 65;
+	m2 = pagex - (2 * PNT2AFM(p, MINMARGIN_PNT));
+	margin = (pagex - (m1 < m2 ? m1 : m2)) / 2;
+
+	lineheight = PNT2AFM(p, 16);
 
 	p->engine.ps.width = pagex;
 	p->engine.ps.height = pagey;
-	p->engine.ps.header = pagey - (margin / 2);
+	p->engine.ps.header = pagey - (margin / 2) - (lineheight / 2);
 	p->engine.ps.top = pagey - margin;
-	p->engine.ps.footer = (margin / 2);
+	p->engine.ps.footer = (margin / 2) - (lineheight / 2);
 	p->engine.ps.bottom = margin;
 	p->engine.ps.left = margin;
 	p->engine.ps.lineheight = lineheight;
