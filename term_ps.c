@@ -478,8 +478,10 @@ ps_alloc(char *outopts)
 
 	/* Margins are 1/9 the page x and y. */
 
-	marginx = (size_t)((double)pagex / 9.0);
-	marginy = (size_t)((double)pagey / 9.0);
+	marginx = /* LINTED */
+		(size_t)((double)pagex / 9.0);
+	marginy = /* LINTED */
+		(size_t)((double)pagey / 9.0);
 
 	lineheight = PNT2AFM(p, 16);
 
@@ -525,7 +527,7 @@ ps_printf(struct termp *p, const char *fmt, ...)
 	 * into our growable margin buffer.
 	 */
 
-	if ( ! (PS_MARGINS & p->engine.ps.psstate)) {
+	if ( ! (PS_MARGINS & p->engine.ps.flags)) {
 		vprintf(fmt, ap);
 		va_end(ap);
 		return;
@@ -554,7 +556,7 @@ ps_putchar(struct termp *p, char c)
 
 	/* See ps_printf(). */
 
-	if ( ! (PS_MARGINS & p->engine.ps.psstate)) {
+	if ( ! (PS_MARGINS & p->engine.ps.flags)) {
 		putchar(c);
 		return;
 	}
@@ -578,7 +580,7 @@ ps_end(struct termp *p)
 	 * well as just one.
 	 */
 
-	assert(0 == p->engine.ps.psstate);
+	assert(0 == p->engine.ps.flags);
 	assert('\0' == p->engine.ps.last);
 	assert(p->engine.ps.psmarg && p->engine.ps.psmarg[0]);
 	printf("%s", p->engine.ps.psmarg);
@@ -608,7 +610,7 @@ ps_begin(struct termp *p)
 	}
 
 	p->engine.ps.psmargcur = 0;
-	p->engine.ps.psstate = PS_MARGINS;
+	p->engine.ps.flags = PS_MARGINS;
 	p->engine.ps.pscol = p->engine.ps.left;
 	p->engine.ps.psrow = p->engine.ps.header;
 
@@ -623,9 +625,9 @@ ps_begin(struct termp *p)
 	(*p->footf)(p, p->argf);
 	(*p->endline)(p);
 
-	p->engine.ps.psstate &= ~PS_MARGINS;
+	p->engine.ps.flags &= ~PS_MARGINS;
 
-	assert(0 == p->engine.ps.psstate);
+	assert(0 == p->engine.ps.flags);
 	assert(p->engine.ps.psmarg);
 	assert('\0' != p->engine.ps.psmarg[0]);
 
@@ -658,6 +660,7 @@ ps_begin(struct termp *p)
 	ps_setfont(p, TERMFONT_NONE);
 	p->engine.ps.pscol = p->engine.ps.left;
 	p->engine.ps.psrow = p->engine.ps.top;
+	p->engine.ps.flags |= PS_NEWPAGE;
 }
 
 
@@ -671,12 +674,15 @@ ps_pletter(struct termp *p, int c)
 	 * now at the current cursor.
 	 */
 
-	if ( ! (PS_INLINE & p->engine.ps.psstate)) {
+	if ( ! (PS_INLINE & p->engine.ps.flags)) {
 		ps_printf(p, "%zu %zu moveto\n(", 
 				AFM2PNT(p, p->engine.ps.pscol),
 				AFM2PNT(p, p->engine.ps.psrow));
-		p->engine.ps.psstate |= PS_INLINE;
+		p->engine.ps.flags |= PS_INLINE;
+		p->engine.ps.flags &= ~PS_NEWPAGE;
 	}
+
+	assert( ! (PS_NEWPAGE & p->engine.ps.flags));
 
 	/*
 	 * We need to escape these characters as per the PostScript
@@ -723,11 +729,11 @@ ps_pclose(struct termp *p)
 	 * or anything).
 	 */
 
-	if ( ! (PS_INLINE & p->engine.ps.psstate))
+	if ( ! (PS_INLINE & p->engine.ps.flags))
 		return;
 	
 	ps_printf(p, ") show\n");
-	p->engine.ps.psstate &= ~PS_INLINE;
+	p->engine.ps.flags &= ~PS_INLINE;
 }
 
 
@@ -752,7 +758,7 @@ ps_fclose(struct termp *p)
 		p->engine.ps.last = '\0';
 	}
 
-	if ( ! (PS_INLINE & p->engine.ps.psstate))
+	if ( ! (PS_INLINE & p->engine.ps.flags))
 		return;
 
 	ps_pclose(p);
@@ -837,7 +843,16 @@ ps_endline(struct termp *p)
 	 * lines, we'll do nasty stuff. 
 	 */
 
-	if (PS_MARGINS & p->engine.ps.psstate)
+	if (PS_MARGINS & p->engine.ps.flags)
+		return;
+
+	/* Left-justify. */
+
+	p->engine.ps.pscol = p->engine.ps.left;
+
+	/* If we haven't printed anything, return. */
+
+	if (PS_NEWPAGE & p->engine.ps.flags)
 		return;
 
 	/*
@@ -845,7 +860,6 @@ ps_endline(struct termp *p)
 	 * showpage and restart our row.
 	 */
 
-	p->engine.ps.pscol = p->engine.ps.left;
 	if (p->engine.ps.psrow >= p->engine.ps.lineheight + 
 			p->engine.ps.bottom) {
 		p->engine.ps.psrow -= p->engine.ps.lineheight;
@@ -860,6 +874,8 @@ ps_endline(struct termp *p)
 			p->engine.ps.pages + 1, 
 			p->engine.ps.pages + 1);
 	p->engine.ps.psrow = p->engine.ps.top;
+	assert( ! (PS_NEWPAGE & p->engine.ps.flags));
+	p->engine.ps.flags |= PS_NEWPAGE;
 }
 
 
