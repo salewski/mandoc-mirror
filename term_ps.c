@@ -657,23 +657,32 @@ static void
 ps_pletter(struct termp *p, int c)
 {
 	int		 f;
+
+	/*
+	 * If we haven't opened a page context, then output that we're
+	 * in a new page and make sure the font is correctly set.
+	 */
+
+	if (PS_NEWPAGE & p->engine.ps.flags) {
+		printf("%%%%Page: %zu %zu\n", 
+				p->engine.ps.pages + 1, 
+				p->engine.ps.pages + 1);
+		ps_printf(p, "/%s %zu selectfont\n", 
+				fonts[(int)p->engine.ps.lastf].name, 
+				p->engine.ps.scale);
+		p->engine.ps.flags &= ~PS_NEWPAGE;
+	}
 	
 	/*
 	 * If we're not in a PostScript "word" context, then open one
 	 * now at the current cursor.
 	 */
 
-	if (PS_NEWPAGE & p->engine.ps.flags)
-		printf("%%%%Page: %zu %zu\n", 
-				p->engine.ps.pages + 1, 
-				p->engine.ps.pages + 1);
-
 	if ( ! (PS_INLINE & p->engine.ps.flags)) {
 		ps_printf(p, "%zu %zu moveto\n(", 
 				AFM2PNT(p, p->engine.ps.pscol),
 				AFM2PNT(p, p->engine.ps.psrow));
 		p->engine.ps.flags |= PS_INLINE;
-		p->engine.ps.flags &= ~PS_NEWPAGE;
 	}
 
 	assert( ! (PS_NEWPAGE & p->engine.ps.flags));
@@ -875,9 +884,18 @@ ps_setfont(struct termp *p, enum termfont f)
 {
 
 	assert(f < TERMFONT__MAX);
+	p->engine.ps.lastf = f;
+	
+	/*
+	 * If we're still at the top of the page, let the font-setting
+	 * be delayed until we actually have stuff to print.
+	 */
+
+	if (PS_NEWPAGE & p->engine.ps.flags)
+		return;
+
 	ps_printf(p, "/%s %zu selectfont\n", 
 			fonts[(int)f].name, p->engine.ps.scale);
-	p->engine.ps.lastf = f;
 }
 
 
