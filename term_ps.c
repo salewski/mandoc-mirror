@@ -393,7 +393,7 @@ void *
 ps_alloc(char *outopts)
 {
 	struct termp	*p;
-	size_t		 pagex, pagey, margin, lineheight, m1, m2;
+	size_t		 pagex, pagey, marginx, marginy, lineheight;
 	const char	*toks[2];
 	const char	*pp;
 	char		*v;
@@ -476,28 +476,23 @@ ps_alloc(char *outopts)
 	pagex = PNT2AFM(p, ((double)pagex * 2.834));
 	pagey = PNT2AFM(p, ((double)pagey * 2.834));
 
-	/* 
-	 * Calculate margins.  First get the minimum text width: either
-	 * page minus margins or width of 65 'm' characters.  Set total
-	 * margins to page size minus text width.
-	 */
+	/* Margins are 1/9 the page x and y. */
 
-	m1 = ps_width(p, 'm') * 65;
-	m2 = pagex - (2 * PNT2AFM(p, MINMARGIN_PNT));
-	margin = (pagex - (m1 < m2 ? m1 : m2)) / 2;
+	marginx = (size_t)((double)pagex / 9.0);
+	marginy = (size_t)((double)pagey / 9.0);
 
 	lineheight = PNT2AFM(p, 16);
 
 	p->engine.ps.width = pagex;
 	p->engine.ps.height = pagey;
-	p->engine.ps.header = pagey - (margin / 2) - (lineheight / 2);
-	p->engine.ps.top = pagey - margin;
-	p->engine.ps.footer = (margin / 2) - (lineheight / 2);
-	p->engine.ps.bottom = margin;
-	p->engine.ps.left = margin;
+	p->engine.ps.header = pagey - (marginy / 2) - (lineheight / 2);
+	p->engine.ps.top = pagey - marginy;
+	p->engine.ps.footer = (marginy / 2) - (lineheight / 2);
+	p->engine.ps.bottom = marginy;
+	p->engine.ps.left = marginx;
 	p->engine.ps.lineheight = lineheight;
 
-	p->defrmargin = pagex - (margin * 2);
+	p->defrmargin = pagex - (marginx * 2);
 	return(p);
 }
 
