@@ -580,12 +580,14 @@ ps_end(struct termp *p)
 	 * well as just one.
 	 */
 
-	assert(0 == p->engine.ps.flags);
-	assert('\0' == p->engine.ps.last);
-	assert(p->engine.ps.psmarg && p->engine.ps.psmarg[0]);
-	printf("%s", p->engine.ps.psmarg);
-	p->engine.ps.pages++;
-	printf("showpage\n");
+	if ( ! (PS_NEWPAGE & p->engine.ps.flags)) {
+		assert(0 == p->engine.ps.flags);
+		assert('\0' == p->engine.ps.last);
+		assert(p->engine.ps.psmarg && p->engine.ps.psmarg[0]);
+		printf("%s", p->engine.ps.psmarg);
+		p->engine.ps.pages++;
+		printf("showpage\n");
+	}
 
 	printf("%%%%Trailer\n");
 	printf("%%%%Pages: %zu\n", p->engine.ps.pages);
@@ -673,6 +675,11 @@ ps_pletter(struct termp *p, int c)
 	 * If we're not in a PostScript "word" context, then open one
 	 * now at the current cursor.
 	 */
+
+	if (PS_NEWPAGE & p->engine.ps.flags)
+		printf("%%%%Page: %zu %zu\n", 
+				p->engine.ps.pages + 1, 
+				p->engine.ps.pages + 1);
 
 	if ( ! (PS_INLINE & p->engine.ps.flags)) {
 		ps_printf(p, "%zu %zu moveto\n(", 
@@ -870,9 +877,6 @@ ps_endline(struct termp *p)
 	printf("%s", p->engine.ps.psmarg);
 	printf("showpage\n");
 	p->engine.ps.pages++;
-	printf("%%%%Page: %zu %zu\n", 
-			p->engine.ps.pages + 1, 
-			p->engine.ps.pages + 1);
 	p->engine.ps.psrow = p->engine.ps.top;
 	assert( ! (PS_NEWPAGE & p->engine.ps.flags));
 	p->engine.ps.flags |= PS_NEWPAGE;
