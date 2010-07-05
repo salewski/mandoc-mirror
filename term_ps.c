@@ -642,14 +642,10 @@ ps_begin(struct termp *p)
 		printf(" %s", fonts[i].name);
 	printf("\n%%%%EndComments\n");
 
-	printf("%%%%Page: %zu %zu\n", 
-			p->engine.ps.pages + 1, 
-			p->engine.ps.pages + 1);
-
-	ps_setfont(p, TERMFONT_NONE);
 	p->engine.ps.pscol = p->engine.ps.left;
 	p->engine.ps.psrow = p->engine.ps.top;
 	p->engine.ps.flags |= PS_NEWPAGE;
+	ps_setfont(p, TERMFONT_NONE);
 }
 
 
