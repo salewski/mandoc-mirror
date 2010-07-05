@@ -37,11 +37,11 @@ ROFFSRCS   = roff.c
 
 ROFFOBJS   = roff.o
 
-MANDOCLNS  = mandoc.ln
+MANDOCLNS  = libmandoc.ln
 
-MANDOCSRCS = mandoc.c
+MANDOCSRCS = libmandoc.c
 
-MANDOCOBJS = mandoc.o
+MANDOCOBJS = libmandoc.o
 
 MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln mdoc_strings.ln \
 	     mdoc_argv.ln mdoc_validate.ln mdoc_action.ln \
@@ -61,7 +61,7 @@ MANLNS	   = man_macro.ln man.ln man_hash.ln man_validate.ln \
 MANOBJS	   = man_macro.o man.o man_hash.o man_validate.o \
 	     man_action.o man_argv.o
 MANSRCS	   = man_macro.c man.c man_hash.c man_validate.c \
-	     man_action.c mandoc.c man_argv.c
+	     man_action.c libmandoc.c man_argv.c
 
 MAINLNS	   = main.ln mdoc_term.ln chars.ln term.ln tree.ln \
 	     compat.ln man_term.ln html.ln mdoc_html.ln \
@@ -233,7 +233,7 @@ man_html.ln man_html.o: man_html.c html.h man.h out.h
 
 out.ln out.o: out.c out.h
 
-mandoc.ln mandoc.o: mandoc.c libmandoc.h
+libmandoc.ln libmandoc.o: libmandoc.c libmandoc.h
 
 tree.ln tree.o: tree.c man.h mdoc.h
 
