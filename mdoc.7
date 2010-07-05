@@ -1064,6 +1064,14 @@ Closes a
 block.  Does not have any tail arguments.
 .Ss \&Bd
 Begins a display block.
+Its syntax is as follows:
+.Bd -ragged -offset indent
+.Pf \. Sx \&Bd
+.Fl type
+.Op Fl offset Ar width
+.Op Fl compact
+.Ed
+.Pp
 A display is collection of macros or text which may be collectively
 offset or justified in a manner different from that
 of the enclosing context.
@@ -1088,9 +1096,9 @@ Centre-justify each line.
 The type must be provided first.
 Secondary arguments are as follows:
 .Bl -tag -width 12n -offset indent
-.It Fl offset Ar width
+.It Fl offset Ar val
 Offset by the value of
-.Ar width ,
+.Ar val ,
 which is interpreted as one of the following, specified in order:
 .Bl -item
 .It
@@ -1101,7 +1109,7 @@ the width of standard indentation;
 twice
 .Ar indent ;
 .Ar left ,
-which has no effect ;
+which has no effect;
 .Ar right ,
 which justifies to the right margin; and
 .Ar center ,
@@ -1122,10 +1130,6 @@ As the calculated string length of the opaque string.
 If not provided an argument, it will be ignored.
 .It Fl compact
 Do not assert a vertical space before the block.
-.It Fl file Ar file
-Prepend the file
-.Ar file
-before any text or macros within the block.
 .El
 .Pp
 Examples:
@@ -1176,16 +1180,15 @@ and
 .Ss \&Bk
 Begins a keep block, containing a collection of macros or text
 to be kept together in the output.
-One argument is required; additional arguments are ignored.
+Its syntax is as follows:
+.Pp
+.D1 Pf \. Sx \&Bk Fl words
+.Pp
 Currently, the only argument implemented is
 .Fl words ,
 requesting to keep together all words of the contained text
 on the same output line.
-A
-.Fl lines
-argument to keep together all lines of the contained text
-on the same page has been desired for a long time,
-but has never been implemented.
+Subsequent arguments are ignored.
 .Pp
 Examples:
 .Bd -literal -offset indent
@@ -1198,6 +1201,16 @@ See also
 .Sx \&Ek .
 .Ss \&Bl
 Begins a list composed of one or more list entries.
+Its syntax is as follows:
+.Bd -ragged -offset indent
+.Pf \. Sx \&Bl
+.Fl type
+.Op Fl width Ar val
+.Op Fl offset Ar val
+.Op Fl compact
+.Op HEAD ...
+.Ed
+.Pp
 A list is associated with a type, which is a required argument.
 Other arguments are
 .Fl width ,
@@ -1666,7 +1679,20 @@ See also
 and
 .Sx \&Ux .
 .Ss \&Ec
+Close a scope started by
+.Sx \&Eo .
+Its syntax is as follows:
+.Pp
+.D1 Pf \. Sx \&Ec Op Cm TERM
+.Pp
+The
+.Cm TERM
+argument is used as the enclosure tail, for example, specifying \e(rq
+will emulate
+.Sx \&Dc .
 .Ss \&Ed
+End a display context started by
+.Sx \&Bd .
 .Ss \&Ef
 Ends a font mode context started by
 .Sx \&Bf .
@@ -1691,6 +1717,16 @@ Examples:
 .D1 \&.Em Remarks :
 .Ss \&En
 .Ss \&Eo
+An arbitrary enclosure.
+Its syntax is as follows:
+.Pp
+.D1 Pf \. Sx \&Eo Op Cm TERM
+.Pp
+The
+.Cm TERM
+argument is used as the enclosure head, for example, specifying \e(lq
+will emulate
+.Sx \&Do .
 .Ss \&Er
 Display error constants.
 .Pp
@@ -1751,6 +1787,8 @@ Examples:
 See also
 .Sx \&Fo .
 .Ss \&Fc
+Ends a function context started by
+.Sx \&Fo .
 .Ss \&Fd
 Historically used to document include files.
 This usage has been deprecated in favour of
@@ -1995,6 +2033,9 @@ Examples:
 .D1 \&.Lb libz
 .D1 \&.Lb mdoc
 .Ss \&Li
+Denotes text that should be in a literal font mode.
+Note that this is a presentation term and should not be used for
+stylistically decorating technical terms.
 .Ss \&Lk
 Format a hyperlink.
 Its syntax is as follows:
@@ -2369,9 +2410,9 @@ Display offsets
 and
 .Fl offset Ar right
 are disregarded in mandoc.
-Furthermore, the
+Furthermore, troff specifies a
 .Fl file Ar file
-argument is not supported in mandoc.
+argument that is not supported in mandoc.
 Lastly, since text is not right-justified in mandoc (or even groff),
 .Fl ragged
 and
