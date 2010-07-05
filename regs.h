@@ -20,28 +20,6 @@
 
 __BEGIN_DECLS
 
-enum	regs {
-	REG_nS = 0,	/* nS */
-	REG__MAX
-};
-
-struct	reg {
-	int		 set; /* whether set or not */
-	union {
-		unsigned u; /* unsigned integer */
-	} v;
-};
-
-/*
- * Registers are non-scoped state.  These can be manipulated directly in
- * libroff or indirectly in libman or libmdoc by macros.  These should
- * be implemented sparingly (we are NOT roffdoc!) and documented fully
- * in roff.7.
- */
-struct	regset {
-	struct reg	 regs[REG__MAX];
-};
-
 char		 *roff_setstr(const char *, const char *);
 char		 *roff_getstr(const char *);
 char		 *roff_getstrn(const char *, size_t);
