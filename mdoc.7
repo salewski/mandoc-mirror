@@ -1716,6 +1716,7 @@ Examples:
 .D1 \&.Em Warnings!
 .D1 \&.Em Remarks :
 .Ss \&En
+This macro is obsolete and not implemented.
 .Ss \&Eo
 An arbitrary enclosure.
 Its syntax is as follows:
@@ -1737,6 +1738,7 @@ Examples:
 See also
 .Sx \&Dv .
 .Ss \&Es
+This macro is obsolete and not implemented.
 .Ss \&Ev
 Environmental variables such as those specified in
 .Xr environ 7 .
@@ -1910,7 +1912,24 @@ See also
 and
 .Sx \&Ux .
 .Ss \&Hf
+This macro is obsolete and not implemented.
 .Ss \&Ic
+Designate an internal or interactive command.
+This is similar to
+.Sx \&Cm
+but used for instructions rather than values.
+.Pp
+Examples:
+.D1 \&.Ic hash
+.D1 \&.Ic alias
+.Pp
+Note that using
+.Sx \&Bd No Fl literal
+or
+.Sx \&D1
+is preferred for displaying code; the
+.Sx \&Ic
+macro is used when referring to specific instructions.
 .Ss \&In
 An
 .Qq include
@@ -2049,6 +2068,8 @@ Examples:
 See also
 .Sx \&Mt .
 .Ss \&Lp
+Synonym for
+.Sx \&Pp .
 .Ss \&Ms
 .Ss \&Mt
 Format a
@@ -2061,6 +2082,29 @@ Its syntax is as follows:
 Examples:
 .D1 \&.Mt discuss@manpages.bsd.lv
 .Ss \&Nd
+A one-line description of the manual's content.
+This may only be invoked in the
+.Em SYNOPSIS
+section subsequent the
+.Sx \&Nm
+macro.
+.Pp
+Examples:
+.D1 \&.Sx \&Nd mdoc language reference
+.D1 \&.Sx \&Nd format and display UNIX manuals
+.Pp
+The
+.Sx \&Nd
+macro technically accepts child macros and terminates with a subsequent
+.Sx \&Sh
+invocation.
+Do not assume this behaviour: some
+.Xr whatis 1
+database generators are not smart enough to parse more than the line
+arguments and will display macros verbatim.
+.Pp
+See also
+.Sx \&Nm .
 .Ss \&Nm
 The name of the manual page, or \(em in particular in section 1, 6,
 and 8 pages \(em of an additional command or feature documented in
@@ -2099,6 +2143,12 @@ macro rather than
 .Sx \&Nm
 to mark up the name of the manual page.
 .Ss \&No
+A
+.Qq noop
+macro used to terminate prior macro contexts.
+.Pp
+Examples:
+.D1 \&.Sx \&Fl ab \&No cd \&Fl ef
 .Ss \&Ns
 .Ss \&Nx
 Format the NetBSD version provided as an argument, or a default value if
@@ -2118,8 +2168,30 @@ See also
 and
 .Sx \&Ux .
 .Ss \&Oc
+Closes multi-line
+.Sx \&Oo
+context.
 .Ss \&Oo
+Multi-line version of
+.Sx \&Op .
+.Pp
+Examples:
+.Bd -literal -offset indent
+\&.Oo
+\&.Op Fl flag Ns Ar value
+\&.Oc
+.Ed
 .Ss \&Op
+Command-line option.
+Used when listing options to command-line utilities.
+Prints the argument(s) in brackets.
+.Pp
+Examples:
+.D1 \&.Op \&Fl a \&Ar b
+.D1 \&.Op \&Ar a | b
+.Pp
+See also
+.Sx \&Oo .
 .Ss \&Os
 Document operating system version.
 This is the mandatory third macro of
@@ -2168,11 +2240,43 @@ See also
 and
 .Sx \&Ux .
 .Ss \&Pa
+A file-system path.
+.Pp
+Examples:
+.D1 \&.Pa /usr/bin/mandoc
+.D1 \&.Pa /usr/share/man/man7/mdoc.7
+.Pp
+See also
+.Sx \&Lk .
 .Ss \&Pc
+Close parenthesised context opened by
+.Sx \&Po .
 .Ss \&Pf
+Removes the space
+.Pq Qq prefix
+between its arguments.
+Its syntax is as follows:
+.Pp
+.D1 Pf \. \&Pf Cm prefix suffix
+.Pp
+The
+.Cm suffix
+argument may be a macro.
+.Pp
+Examples:
+.D1 \&.Pf \e. \&Sx \&Pf \&Cm prefix suffix
 .Ss \&Po
+Multi-line version of
+.Sx \&Pq .
 .Ss \&Pp
+Break a paragraph.
+This will assert vertical space between prior and subsequent macros
+and/or text.
 .Ss \&Pq
+Parenthesised enclosure.
+.Pp
+See also
+.Sx \&Po .
 .Ss \&Qc
 .Ss \&Ql
 .Ss \&Qo
@@ -2253,6 +2357,11 @@ See also
 and
 .Sx \&Ox .
 .Ss \&Va
+A variable name.
+.Pp
+Examples:
+.D1 \&.Va foo
+.D1 \&.Va const char *bar ;
 .Ss \&Vt
 A variable type.
 This is also used for indicating global variables in the
