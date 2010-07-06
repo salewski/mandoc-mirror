@@ -1178,27 +1178,29 @@ See also
 and
 .Sx \&Sy .
 .Ss \&Bk
-Begins a keep block, containing a collection of macros or text
-to be kept together in the output.
+Begins a collection of macros or text not breaking the line.
 Its syntax is as follows:
 .Pp
 .D1 Pf \. Sx \&Bk Fl words
 .Pp
-Currently, the only argument implemented is
-.Fl words ,
-requesting to keep together all words of the contained text
-on the same output line.
 Subsequent arguments are ignored.
+The
+.Fl words
+argument is required.
 .Pp
-Examples:
+Each line within a keep block is kept intact, so the following example
+will not break within each
+.Sx \&Op
+macro line:
 .Bd -literal -offset indent
 \&.Bk \-words
-\&.Op o Ar output_file
+\&.Op Fl f Ar flags
+\&.Op Fl o Ar output
 \&.Ek
 .Ed
 .Pp
-See also
-.Sx \&Ek .
+Be careful in using over-long lines within a keep block!
+Doing so will clobber the right margin.
 .Ss \&Bl
 Begins a list composed of one or more list entries.
 Its syntax is as follows:
