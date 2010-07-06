@@ -73,6 +73,8 @@ static	int		  mdoc_aq_pre(MDOC_ARGS);
 static	int		  mdoc_ar_pre(MDOC_ARGS);
 static	int		  mdoc_bd_pre(MDOC_ARGS);
 static	int		  mdoc_bf_pre(MDOC_ARGS);
+static	void		  mdoc_bk_post(MDOC_ARGS);
+static	int		  mdoc_bk_pre(MDOC_ARGS);
 static	void		  mdoc_bl_post(MDOC_ARGS);
 static	int		  mdoc_bl_pre(MDOC_ARGS);
 static	void		  mdoc_bq_post(MDOC_ARGS);
@@ -237,7 +239,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Fc */ 
 	{mdoc_op_pre, mdoc_op_post}, /* Oo */
 	{NULL, NULL}, /* Oc */
-	{NULL, NULL}, /* Bk */
+	{mdoc_bk_pre, mdoc_bk_post}, /* Bk */
 	{NULL, NULL}, /* Ek */
 	{mdoc_bt_pre, NULL}, /* Bt */
 	{NULL, NULL}, /* Hf */
@@ -440,6 +442,18 @@ print_mdoc_node(MDOC_ARGS)
 		if (mdocs[n->tok].pre && ENDBODY_NOT == n->end)
 			child = (*mdocs[n->tok].pre)(m, n, h);
 		break;
+	}
+
+	if (HTML_KEEP & h->flags) {
+		if (n->prev && n->prev->line != n->line) {
+			h->flags &= ~HTML_KEEP;
+			h->flags |= HTML_PREKEEP;
+		} else if (NULL == n->prev) {
+			if (n->parent && n->parent->line != n->line) {
+				h->flags &= ~HTML_KEEP;
+				h->flags |= HTML_PREKEEP;
+			}
+		}
 	}
 
 	if (child && n->child)
@@ -2226,4 +2240,36 @@ mdoc__x_post(MDOC_ARGS)
 
 	h->flags |= HTML_NOSPACE;
 	print_text(h, n->next ? "," : ".");
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_bk_pre(MDOC_ARGS)
+{
+
+	switch (n->type) {
+	case (MDOC_BLOCK):
+		break;
+	case (MDOC_HEAD):
+		return(0);
+	case (MDOC_BODY):
+		h->flags |= HTML_PREKEEP;
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+
+	return(1);
+}
+
+
+/* ARGSUSED */
+static void
+mdoc_bk_post(MDOC_ARGS)
+{
+
+	if (MDOC_BODY == n->type)
+		h->flags &= ~(HTML_KEEP | HTML_PREKEEP);
 }

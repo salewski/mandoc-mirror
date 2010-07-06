@@ -110,7 +110,9 @@ enum	htmltype {
 struct	html {
 	int		  flags;
 #define	HTML_NOSPACE	 (1 << 0)
-#define	HTML_IGNDELIM	 (1 << 2)
+#define	HTML_IGNDELIM	 (1 << 1)
+#define	HTML_KEEP	 (1 << 2)
+#define	HTML_PREKEEP	 (1 << 3)
 	struct tagq	  tags;
 	struct ordq	  ords;
 	void		 *symtab;
