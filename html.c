@@ -484,11 +484,11 @@ print_doctype(struct html *h)
 
 
 void
-print_text(struct html *h, const char *p)
+print_text(struct html *h, const char *word)
 {
 
-	if (*p && 0 == *(p + 1))
-		switch (*p) {
+	if (word[0] && '\0' == word[1])
+		switch (word[0]) {
 		case('.'):
 			/* FALLTHROUGH */
 		case(','):
@@ -514,16 +514,16 @@ print_text(struct html *h, const char *p)
 	if ( ! (h->flags & HTML_NOSPACE))
 		putchar(' ');
 
-	assert(p);
-	if ( ! print_encode(h, p, 0))
+	assert(word);
+	if ( ! print_encode(h, word, 0))
 		h->flags &= ~HTML_NOSPACE;
 
 	/* 
 	 * Note that we don't process the pipe: the parser sees it as
 	 * punctuation, but we don't in terms of typography.
 	 */
-	if (*p && 0 == *(p + 1))
-		switch (*p) {
+	if (word[0] && '\0' == word[1])
+		switch (word[0]) {
 		case('('):
 			/* FALLTHROUGH */
 		case('['):
