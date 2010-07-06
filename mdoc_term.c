@@ -330,6 +330,23 @@ print_mdoc_node(DECL_ARGS)
 	else if (termacts[n->tok].pre && ENDBODY_NOT == n->end)
 		chld = (*termacts[n->tok].pre)(p, &npair, m, n);
 
+	/*
+	 * Keeps only work until the end of a line.  If a keep was
+	 * invoked in a prior line, revert it to PREKEEP.
+	 */
+
+	if (TERMP_KEEP & p->flags) {
+		if (n->prev && n->prev->line != n->line) {
+			p->flags &= ~TERMP_KEEP;
+			p->flags |= TERMP_PREKEEP;
+		} else if (NULL == n->prev) {
+			if (n->parent && n->parent->line != n->line) {
+				p->flags &= ~TERMP_KEEP;
+				p->flags |= TERMP_PREKEEP;
+			}
+		}
+	}
+
 	if (chld && n->child)
 		print_mdoc_nodelist(p, &npair, m, n->child);
 
