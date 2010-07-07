@@ -29,7 +29,6 @@
 #include "mandoc.h"
 #include "out.h"
 #include "html.h"
-#include "regs.h"
 #include "man.h"
 #include "main.h"
 

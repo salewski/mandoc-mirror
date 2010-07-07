@@ -24,7 +24,6 @@
 #include <time.h>
 
 #include "mandoc.h"
-#include "regs.h"
 #include "mdoc.h"
 #include "man.h"
 #include "main.h"

@@ -31,7 +31,6 @@
 #include <unistd.h>
 
 #include "mandoc.h"
-#include "regs.h"
 #include "main.h"
 #include "mdoc.h"
 #include "man.h"

@@ -30,7 +30,6 @@
 #include <time.h>
 
 #include "mandoc.h"
-#include "regs.h"
 #include "libmdoc.h"
 #include "libmandoc.h"
 

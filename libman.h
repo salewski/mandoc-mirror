@@ -17,7 +17,6 @@
 #ifndef LIBMAN_H
 #define LIBMAN_H
 
-#include "regs.h"
 #include "man.h"
 
 enum	man_next {

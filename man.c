@@ -28,7 +28,6 @@
 #include <string.h>
 
 #include "mandoc.h"
-#include "regs.h"
 #include "libman.h"
 #include "libmandoc.h"
 
