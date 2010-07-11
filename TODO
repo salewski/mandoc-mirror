@@ -9,16 +9,6 @@
 - fix bad block nesting involving multiple identical explicit blocks
   see the OpenBSD mdoc_macro.c 1.47 commit message
 
-- we need real .ds; for example, terminfo.3 has
-  .ds n 5
-  and then later
-  \fBterminfo\fR(\*n)
-  reported orally by halex@ during c2k10
-
-- \*(Pu is not implemented, but used in mdoc.samples
-  implementing .ds would solve this as well
-  reminded by jmc@, last on Sun, 27 Jun 2010 15:29:18 +0100
-
 - .Bl -column .Xo support is missing
   ultimate goal:
   restore .Xr and .Dv to
@@ -86,13 +76,6 @@
         .Sm on
         or by enclosing
   reported by jmc Tue, 13 Apr 2010 08:48:14 +0100
-
-- indentation got lost in SYNOPSIS, e.g.
-   SYNOPSIS
-        date [-ajnu] [-d dst] [-r seconds] [-t minutes_west] [+format]
-  -          [[[[[[cc]yy]mm]dd]HH]MM[.SS]]
-  +     [[[[[[cc]yy]mm]dd]HH]MM[.SS]]
-  reminded by Ludo Smissaert  Mon, 10 May 2010 12:15:11 +0200
 
 - empty phrases in .Bl column produce too few blanks
   try e.g. .Bl -column It Ta Ta
