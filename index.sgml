@@ -301,6 +301,27 @@
 					</H1>
 					<DIV CLASS="news">
 						<P>
+							<SPAN CLASS="date">12-07-2010</SPAN>:
+							version 1.10.4
+						</P>
+						<P>
+							Lots of features developed during both <A CLASS="external"
+							HREF="http://netbsd-soc.sourceforge.net/projects/mandoc_ps/">Summer of Code</A> and the
+							<A CLASS="external" HREF="http://www.openbsd.org">OpenBSD</A> c2k10 hackathon:
+						</P>
+						<UL>
+							<LI>minimal <Q>ds</Q> <A HREF="roff.7.html">roff</A> symbols are supported</LI>
+							<LI><Q>Bk</Q> <A HREF="mdoc.7.html">mdoc</A> support</LI>
+							<LI>beautified SYNOPSIS section output</LI>
+							<LI>variable font-width and paper-size support in <A HREF="mandoc.1.html">mandoc</A>
+								-Tps output</LI>
+							<LI>acceptance of scope-block breakage in <A HREF="mdoc.7.html">mdoc</A></LI>
+							<LI>clarify error message status</LI>
+							<LI>many minor bug-fixes and formatting issues resolved</LI>
+						</UL>
+					</DIV>
+					<DIV CLASS="news">
+						<P>
 							<SPAN CLASS="date">19-06-2010</SPAN>:
 							version 1.10.2
 						</P>
