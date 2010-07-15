@@ -2332,6 +2332,18 @@ line.
 .Ss \&Sc
 .Ss \&Sh
 .Ss \&Sm
+Switches the spacing mode for output generated from macros.
+Its syntax is as follows:
+.Pp
+.D1 Pf \. Sx \&Sm Cm on | off
+.Pp
+By default, spacing is
+.Cm on .
+When switched
+.Cm off ,
+no white space is inserted between macro arguments and between the
+output generated from adjacent macros, but free-form text lines
+still get normal spacing between words and sentences.
 .Ss \&So
 .Ss \&Sq
 .Ss \&Ss
