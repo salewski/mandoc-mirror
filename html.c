@@ -217,28 +217,36 @@ print_gen_head(struct html *h)
 static void
 print_spec(struct html *h, const char *p, size_t len)
 {
+	int		 cp;
 	const char	*rhs;
 	size_t		 sz;
 
-	rhs = chars_a2ascii(h->symtab, p, len, &sz);
-
-	if (NULL == rhs) 
+	if ((cp = chars_spec2cp(h->symtab, p, len)) > 0) {
+		printf("&#%d;", cp);
 		return;
-	fwrite(rhs, 1, sz, stdout);
+	} else if (-1 == cp)
+		return;
+
+	if (NULL != (rhs = chars_spec2str(h->symtab, p, len, &sz)))
+		fwrite(rhs, 1, sz, stdout);
 }
 
 
 static void
 print_res(struct html *h, const char *p, size_t len)
 {
+	int		 cp;
 	const char	*rhs;
 	size_t		 sz;
 
-	rhs = chars_a2res(h->symtab, p, len, &sz);
-
-	if (NULL == rhs)
+	if ((cp = chars_res2cp(h->symtab, p, len)) > 0) {
+		printf("&#%d;", cp);
 		return;
-	fwrite(rhs, 1, sz, stdout);
+	} else if (-1 == cp)
+		return;
+
+	if (NULL != (rhs = chars_res2str(h->symtab, p, len, &sz)))
+		fwrite(rhs, 1, sz, stdout);
 }
 
 

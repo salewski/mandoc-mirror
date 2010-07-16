@@ -365,7 +365,7 @@ spec(struct termp *p, const char *word, size_t len)
 	const char	*rhs;
 	size_t		 sz;
 
-	rhs = chars_a2ascii(p->symtab, word, len, &sz);
+	rhs = chars_spec2str(p->symtab, word, len, &sz);
 	if (rhs) 
 		encode(p, rhs, sz);
 }
@@ -377,7 +377,7 @@ res(struct termp *p, const char *word, size_t len)
 	const char	*rhs;
 	size_t		 sz;
 
-	rhs = chars_a2res(p->symtab, word, len, &sz);
+	rhs = chars_res2str(p->symtab, word, len, &sz);
 	if (rhs)
 		encode(p, rhs, sz);
 }

@@ -25,8 +25,10 @@ enum	chars {
 };
 
 void		 *chars_init(enum chars);
-const char	 *chars_a2ascii(void *, const char *, size_t, size_t *);
-const char	 *chars_a2res(void *, const char *, size_t, size_t *);
+const char	 *chars_spec2str(void *, const char *, size_t, size_t *);
+int		  chars_spec2cp(void *, const char *, size_t);
+const char	 *chars_res2str(void *, const char *, size_t, size_t *);
+int		  chars_res2cp(void *, const char *, size_t);
 void		  chars_free(void *);
 
 __END_DECLS
