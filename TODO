@@ -101,7 +101,3 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 * structural issues
 ************************************************************************
 
-- The regs.h functionality and the roff_getstrn() family should be moved
-  into mandoc.c, which should be accessable by libroff, libmdoc, and
-  libman.  Right now there's pollution between these libraries.
-
