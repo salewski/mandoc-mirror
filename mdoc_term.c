@@ -2066,9 +2066,11 @@ termp_sm_pre(DECL_ARGS)
 {
 
 	assert(n->child && MDOC_TEXT == n->child->type);
-	if (0 == strcmp("on", n->child->string))
+	if (0 == strcmp("on", n->child->string)) {
+		if (p->col)
+			p->flags &= ~TERMP_NOSPACE;
 		p->flags &= ~TERMP_NONOSPACE;
-	else
+	} else
 		p->flags |= TERMP_NONOSPACE;
 
 	return(0);
