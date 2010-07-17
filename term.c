@@ -503,14 +503,13 @@ term_word(struct termp *p, const char *word)
 
 	p->flags &= ~TERMP_SENTENCE;
 
-	/* FIXME: use strcspn. */
-
 	while (*word) {
-		if ('\\' != *word) {
-			encode(p, word, 1);
-			word++;
+		if ((ssz = strcspn(word, "\\")) > 0)
+			encode(p, word, ssz);
+
+		word += ssz;
+		if ('\\' != *word)
 			continue;
-		}
 
 		seq = ++word;
 		sz = a2roffdeco(&deco, &seq, &ssz);
@@ -547,7 +546,7 @@ term_word(struct termp *p, const char *word)
 	 * Note that we don't process the pipe: the parser sees it as
 	 * punctuation, but we don't in terms of typography.
 	 */
-	if (sv[0] && 0 == sv[1])
+	if (sv[0] && '\0' == sv[1])
 		switch (sv[0]) {
 		case('('):
 			/* FALLTHROUGH */
