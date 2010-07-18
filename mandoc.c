@@ -240,8 +240,10 @@ mandoc_a2time(int flags, const char *p)
 
 
 int
-mandoc_eos(const char *p, size_t sz)
+mandoc_eos(const char *p, size_t sz, int enclosed)
 {
+	const char *q;
+	int found;
 
 	if (0 == sz)
 		return(0);
@@ -252,8 +254,9 @@ mandoc_eos(const char *p, size_t sz)
 	 * propogate outward.
 	 */
 
-	for ( ; sz; sz--) {
-		switch (p[(int)sz - 1]) {
+	found = 0;
+	for (q = p + sz - 1; q >= p; q--) {
+		switch (*q) {
 		case ('\"'):
 			/* FALLTHROUGH */
 		case ('\''):
@@ -261,22 +264,22 @@ mandoc_eos(const char *p, size_t sz)
 		case (']'):
 			/* FALLTHROUGH */
 		case (')'):
+			if (0 == found)
+				enclosed = 1;
 			break;
 		case ('.'):
-			/* Escaped periods. */
-			if (sz > 1 && '\\' == p[(int)sz - 2])
-				return(0);
 			/* FALLTHROUGH */
 		case ('!'):
 			/* FALLTHROUGH */
 		case ('?'):
-			return(1);
+			found = 1;
+			break;
 		default:
-			return(0);
+			return(found && (!enclosed || isalnum(*q)));
 		}
 	}
 
-	return(0);
+	return(found && !enclosed);
 }
 
 

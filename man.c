@@ -409,7 +409,7 @@ man_ptext(struct man *m, int line, char *buf, int offs)
 	 */
 
 	assert(i);
-	if (mandoc_eos(buf, (size_t)i))
+	if (mandoc_eos(buf, (size_t)i, 0))
 		m->last->flags |= MAN_EOS;
 
 descope:
