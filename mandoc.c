@@ -48,6 +48,49 @@ mandoc_special(char *p)
 	p++;
 
 	switch (*p++) {
+#if 0
+	case ('Z'):
+		/* FALLTHROUGH */
+	case ('X'):
+		/* FALLTHROUGH */
+	case ('x'):
+		/* FALLTHROUGH */
+	case ('w'):
+		/* FALLTHROUGH */
+	case ('v'):
+		/* FALLTHROUGH */
+	case ('S'):
+		/* FALLTHROUGH */
+	case ('R'):
+		/* FALLTHROUGH */
+	case ('o'):
+		/* FALLTHROUGH */
+	case ('N'):
+		/* FALLTHROUGH */
+	case ('l'):
+		/* FALLTHROUGH */
+	case ('L'):
+		/* FALLTHROUGH */
+	case ('H'):
+		/* FALLTHROUGH */
+	case ('h'):
+		/* FALLTHROUGH */
+	case ('D'):
+		/* FALLTHROUGH */
+	case ('C'):
+		/* FALLTHROUGH */
+	case ('b'):
+		/* FALLTHROUGH */
+	case ('B'):
+		/* FALLTHROUGH */
+	case ('a'):
+		/* FALLTHROUGH */
+	case ('A'):
+		if (*p++ != '\'')
+			return(0);
+		term = '\'';
+		break;
+#endif
 	case ('s'):
 		if (ASCII_HYPH == *p)
 			*p = '-';
@@ -83,6 +126,22 @@ mandoc_special(char *p)
 		if (0 == i)
 			return(0);
 		break;
+#if 0
+	case ('Y'):
+		/* FALLTHROUGH */
+	case ('V'):
+		/* FALLTHROUGH */
+	case ('$'):
+		/* FALLTHROUGH */
+	case ('n'):
+		/* FALLTHROUGH */
+	case ('k'):
+		/* FALLTHROUGH */
+#endif
+	case ('M'):
+		/* FALLTHROUGH */
+	case ('m'):
+		/* FALLTHROUGH */
 	case ('f'):
 		/* FALLTHROUGH */
 	case ('F'):
@@ -117,13 +176,13 @@ mandoc_special(char *p)
 		for ( ; *p && term != *p; p++)
 			if (ASCII_HYPH == *p)
 				*p = '-';
-		return(*p ? p - sv : 0);
+		return(*p ? (int)(p - sv) : 0);
 	}
 
 	for (i = 0; *p && i < len; i++, p++)
 		if (ASCII_HYPH == *p)
 			*p = '-';
-	return(i == len ? p - sv : 0);
+	return(i == len ? (int)(p - sv) : 0);
 }
 
 

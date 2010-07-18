@@ -43,7 +43,6 @@ enum	roffdeco {
 	DECO_ITALIC,
 	DECO_ROMAN,
 	DECO_PREVIOUS,
-	DECO_SIZE,
 	DECO_NOSPACE,
 	DECO_FONT, /* font */
 	DECO_FFONT, /* font family */
