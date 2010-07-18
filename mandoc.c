@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2008, 2009 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2008, 2009, 2010 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,187 +31,99 @@
 #include "libmandoc.h"
 
 static	int	 a2time(time_t *, const char *, const char *);
-static	int	 spec_norm(char *, int);
-
-
-/*
- * "Normalise" a special string by converting its ASCII_HYPH entries
- * into actual hyphens.
- */
-static int
-spec_norm(char *p, int sz)
-{
-	int		 i;
-
-	for (i = 0; i < sz; i++)
-		if (ASCII_HYPH == p[i])
-			p[i] = '-';
-
-	return(sz);
-}
 
 
 int
 mandoc_special(char *p)
 {
-	int		 terminator;	/* Terminator for \s. */
-	int		 lim;		/* Limit for N in \s. */
-	int		 c, i;
+	int		 len, i;
+	char		 term;
 	char		*sv;
 	
+	len = 0;
+	term = '\0';
 	sv = p;
 
-	if ('\\' != *p++)
-		return(spec_norm(sv, 0));
+	assert('\\' == *p);
+	p++;
 
-	switch (*p) {
-	case ('\''):
-		/* FALLTHROUGH */
-	case ('`'):
-		/* FALLTHROUGH */
-	case ('q'):
-		/* FALLTHROUGH */
-	case (ASCII_HYPH):
-		/* FALLTHROUGH */
-	case ('-'):
-		/* FALLTHROUGH */
-	case ('~'):
-		/* FALLTHROUGH */
-	case ('^'):
-		/* FALLTHROUGH */
-	case ('%'):
-		/* FALLTHROUGH */
-	case ('0'):
-		/* FALLTHROUGH */
-	case (' '):
-		/* FALLTHROUGH */
-	case ('}'):
-		/* FALLTHROUGH */
-	case ('|'):
-		/* FALLTHROUGH */
-	case ('&'):
-		/* FALLTHROUGH */
-	case ('.'):
-		/* FALLTHROUGH */
-	case (':'):
-		/* FALLTHROUGH */
-	case ('c'):
-		/* FALLTHROUGH */
-	case ('e'):
-		return(spec_norm(sv, 2));
+	switch (*p++) {
 	case ('s'):
-		if ('\0' == *++p)
-			return(spec_norm(sv, 2));
+		if (ASCII_HYPH == *p)
+			*p = '-';
+		if ('+' == *p || '-' == *p)
+			p++;
 
-		c = 2;
-		terminator = 0;
-		lim = 1;
+		i = ('s' != *(p - 1));
 
-		if (*p == '\'') {
-			lim = 0;
-			terminator = 1;
-			++p;
-			++c;
-		} else if (*p == '[') {
-			lim = 0;
-			terminator = 2;
-			++p;
-			++c;
-		} else if (*p == '(') {
-			lim = 2;
-			terminator = 3;
-			++p;
-			++c;
+		switch (*p++) {
+		case ('('):
+			len = 2;
+			break;
+		case ('['):
+			term = ']';
+			break;
+		case ('\''):
+			term = '\'';
+			break;
+		default:
+			len = 1;
+			p--;
+			break;
 		}
 
-		if (*p == '+' || *p == '-') {
-			++p;
-			++c;
-		}
-
-		if (*p == '\'') {
-			if (terminator)
-				return(spec_norm(sv, 0));
-			lim = 0;
-			terminator = 1;
-			++p;
-			++c;
-		} else if (*p == '[') {
-			if (terminator)
-				return(spec_norm(sv, 0));
-			lim = 0;
-			terminator = 2;
-			++p;
-			++c;
-		} else if (*p == '(') {
-			if (terminator)
-				return(spec_norm(sv, 0));
-			lim = 2;
-			terminator = 3;
-			++p;
-			++c;
-		}
-
-		/* TODO: needs to handle floating point. */
-
-		if ( ! isdigit((u_char)*p))
-			return(spec_norm(sv, 0));
-
-		for (i = 0; isdigit((u_char)*p); i++) {
-			if (lim && i >= lim)
-				break;
-			++p;
-			++c;
-		}
-
-		if (terminator && terminator < 3) {
-			if (1 == terminator && *p != '\'')
-				return(spec_norm(sv, 0));
-			if (2 == terminator && *p != ']')
-				return(spec_norm(sv, 0));
-			++p;
-			++c;
-		}
-
-		return(spec_norm(sv, c));
+		if (ASCII_HYPH == *p)
+			*p = '-';
+		if ('+' == *p || '-' == *p) {
+			if (i++)
+				return(0);
+			p++;
+		} 
+		
+		if (0 == i)
+			return(0);
+		break;
 	case ('f'):
 		/* FALLTHROUGH */
 	case ('F'):
 		/* FALLTHROUGH */
 	case ('*'):
-		if ('\0' == *++p || isspace((u_char)*p))
-			return(spec_norm(sv, 0));
-		switch (*p) {
+		switch (*p++) {
 		case ('('):
-			if ('\0' == *++p || isspace((u_char)*p))
-				return(spec_norm(sv, 0));
-			return(spec_norm(sv, 4));
+			len = 2;
+			break;
 		case ('['):
-			for (c = 3, p++; *p && ']' != *p; p++, c++)
-				if (isspace((u_char)*p))
-					break;
-			return(spec_norm(sv, *p == ']' ? c : 0));
+			term = ']';
+			break;
 		default:
+			len = 1;
+			p--;
 			break;
 		}
-		return(spec_norm(sv, 3));
+		break;
 	case ('('):
-		if ('\0' == *++p || isspace((u_char)*p))
-			return(spec_norm(sv, 0));
-		if ('\0' == *++p || isspace((u_char)*p))
-			return(spec_norm(sv, 0));
-		return(spec_norm(sv, 4));
+		len = 2;
+		break;
 	case ('['):
+		term = ']';
 		break;
 	default:
-		return(spec_norm(sv, 0));
+		len = 1;
+		p--;
+		break;
 	}
 
-	for (c = 3, p++; *p && ']' != *p; p++, c++)
-		if (isspace((u_char)*p))
-			break;
+	if (term) {
+		for ( ; *p && term != *p; p++)
+			if (ASCII_HYPH == *p)
+				*p = '-';
+		return(*p ? p - sv : 0);
+	}
 
-	return(spec_norm(sv, *p == ']' ? c : 0));
+	for (i = 0; *p && i < len; i++, p++)
+		if (ASCII_HYPH == *p)
+			*p = '-';
+	return(i == len ? p - sv : 0);
 }
 
 

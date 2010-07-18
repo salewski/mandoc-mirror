@@ -195,7 +195,8 @@ find(struct tbl *tab, const char *p, size_t sz, int type)
 	int		  hash;
 
 	assert(p);
-	assert(sz > 0);
+	if (0 == sz)
+		return(NULL);
 
 	if (p[0] < PRINT_LO || p[0] > PRINT_HI)
 		return(NULL);
