@@ -21,6 +21,14 @@
   lib/libc/gen/signal.3
   lib/libc/sys/sigaction.2
 
+- edge case: decide how to deal with blk_full bad nesting, e.g.
+  .Sh .Nm .Bk .Nm .Ek .Sh found by jmc@ in ssh-keygen(1)
+  from jmc@  Wed, 14 Jul 2010 18:10:32 +0100
+
+- auto-Bk in the SYNOPSIS
+  patch from kristaps@  Fri, 16 Jul 2010 14:51:24 +0200
+  to be revisited after OpenBSD 4.8 tree unlock
+
 - implement \\
   in plain text, identical to \e
   as a macro argument, identical to \ i.e. escaping the next character
@@ -71,20 +79,16 @@
 * formatting issues: ugly output
 ************************************************************************
 
-- outside list context, text following .Sm off
-  seems to follow without a blank (TERM_NOBLANK reset late?) e.g.
-        .Sm off
-        .Xo
-        .Op Ar bind_address No /
-        .Ar port
-        .Xc
-        .Sm on
-        or by enclosing
-  reported by jmc Tue, 13 Apr 2010 08:48:14 +0100
+- perl(1) SYNOPSIS looks bad; reported by deraadt@
+  1) "\ " is non-breaking
+  2) man(7) seems to need SYNOPSIS .Nm blocks, too
 
 - empty phrases in .Bl column produce too few blanks
   try e.g. .Bl -column It Ta Ta
   reported by millert Fri, 02 Apr 2010 16:13:46 -0400
+
+- .Pp before and after .Sh (and .Ss) produces a spurious blank line;
+  reported by jmc@  Thu, 15 Jul 2010 23:00:28 +0100
 
 ************************************************************************
 * formatting issues: gratuitious differences
