@@ -233,6 +233,22 @@ a2roffdeco(enum roffdeco *d, const char **word, size_t *sz)
 			break;
 		}
 		break;
+	case ('M'):
+		/* FALLTHROUGH */
+	case ('m'):
+		switch (wp[i++]) {
+		case ('('):
+			lim = 2;
+			break;
+		case ('['):
+			term = ']';
+			break;
+		default:
+			i--;
+			lim = 1;
+			break;
+		}
+		break;
 	case ('s'):
 		if ('+' == wp[i] || '-' == wp[i])
 			i++;
