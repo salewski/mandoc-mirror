@@ -38,7 +38,7 @@ CHAR_TBL_START
 /* Spacing. */
 CHAR("c",			"",		0,	-1)
 CHAR("0",			" ",		1,	8194)
-CHAR(" ",			" ",		1,	8194)
+CHAR(" ",			ascii_nbrsp,	1,	160)
 CHAR("~",			ascii_nbrsp,	1,	160)
 CHAR("%",			"",		0,	-1)
 CHAR("&",			"",		0,	-1)
