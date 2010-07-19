@@ -1509,10 +1509,11 @@ Examples:
 .Ed
 .Pp
 See also
-.Ss \&Qq ,
-.Ss \&Sq ,
+.Sx \&Qq ,
+.Sx \&Sq ,
 and
 .Sx \&Do .
+.Ss \&Dt
 Document title.
 This is the mandatory second macro of any
 .Nm
@@ -1752,16 +1753,19 @@ Examples:
 .D1 \&.Ev DISPLAY
 .D1 \&.Ev PATH
 .Ss \&Ex
-Inserts text regarding a utility's exit values.
-This macro must have first the
+Inserts text regarding a utility's exit value.
+This macro must consist of the
 .Fl std
-argument specified, then an optional
+argument followed by an optional
 .Ar utility .
 If
 .Ar utility
 is not provided, the document's name as stipulated in
 .Sx \&Nm
 is provided.
+.Pp
+See also
+.Sx \&Rv .
 .Ss \&Fa
 Function argument.
 Its syntax is as follows:
@@ -1881,6 +1885,7 @@ See also
 .Sx \&Fa ,
 .Sx \&Fc ,
 and
+.Sx \&Ft .
 .Ss \&Ft
 A function type.
 Its syntax is as follows:
@@ -2374,6 +2379,19 @@ block is used within a SEE ALSO section, a vertical space is asserted
 before the rendered output, else the block continues on the current
 line.
 .Ss \&Rv
+Inserts text regarding a function call's return value.
+This macro must consist of the
+.Fl std
+argument followed by an optional
+.Ar function .
+If
+.Ar function
+is not provided, the document's name as stipulated by the first
+.Sx \&Nm
+is provided.
+.Pp
+See also
+.Sx \&Ex .
 .Ss \&Sc
 Close single-quoted context opened by
 .Sx \&So .
@@ -2436,6 +2454,102 @@ See also
 and
 .Sx \&Sx .
 .Ss \&St
+Replace an abbreviation for a standard with the full form.
+The following standards are recognised:
+.Pp
+.Bl -tag -width "-p1003.1g-2000X" -compact
+.It \-p1003.1-88
+.St -p1003.1-88
+.It \-p1003.1-90
+.St -p1003.1-90
+.It \-p1003.1-96
+.St -p1003.1-96
+.It \-p1003.1-2001
+.St -p1003.1-2001
+.It \-p1003.1-2004
+.St -p1003.1-2004
+.It \-p1003.1-2008
+.St -p1003.1-2008
+.It \-p1003.1
+.St -p1003.1
+.It \-p1003.1b
+.St -p1003.1b
+.It \-p1003.1b-93
+.St -p1003.1b-93
+.It \-p1003.1c-95
+.St -p1003.1c-95
+.It \-p1003.1g-2000
+.St -p1003.1g-2000
+.It \-p1003.1i-95
+.St -p1003.1i-95
+.It \-p1003.2-92
+.St -p1003.2-92
+.It \-p1003.2a-92
+.St -p1003.2a-92
+.It \-p1387.2-95
+.St -p1387.2-95
+.It \-p1003.2
+.St -p1003.2
+.It \-p1387.2
+.St -p1387.2
+.It \-isoC
+.St -isoC
+.It \-isoC-90
+.St -isoC-90
+.It \-isoC-amd1
+.St -isoC-amd1
+.It \-isoC-tcor1
+.St -isoC-tcor1
+.It \-isoC-tcor2
+.St -isoC-tcor2
+.It \-isoC-99
+.St -isoC-99
+.It \-iso9945-1-90
+.St -iso9945-1-90
+.It \-iso9945-1-96
+.St -iso9945-1-96
+.It \-iso9945-2-93
+.St -iso9945-2-93
+.It \-ansiC
+.St -ansiC
+.It \-ansiC-89
+.St -ansiC-89
+.It \-ansiC-99
+.St -ansiC-99
+.It \-ieee754
+.St -ieee754
+.It \-iso8802-3
+.St -iso8802-3
+.It \-ieee1275-94
+.St -ieee1275-94
+.It \-xpg3
+.St -xpg3
+.It \-xpg4
+.St -xpg4
+.It \-xpg4.2
+.St -xpg4.2
+.St -xpg4.3
+.It \-xbd5
+.St -xbd5
+.It \-xcu5
+.St -xcu5
+.It \-xsh5
+.St -xsh5
+.It \-xns5
+.St -xns5
+.It \-xns5.2
+.St -xns5.2
+.It \-xns5.2d2.0
+.St -xns5.2d2.0
+.It \-xcurses4.2
+.St -xcurses4.2
+.It \-susv2
+.St -susv2
+.It \-susv3
+.St -susv3
+.It \-svid4
+.St -svid4
+.El
 .Ss \&Sx
 Reference a section or sub-section.
 The referenced section or sub-section name must be identical to the
@@ -2458,7 +2572,7 @@ and
 Format a tradename.
 .Pp
 Examples:
-.D1 \&.Tn IBM .
+.D1 \&.Tn IBM
 .Ss \&Ud
 Prints out
 .Dq currently under development.

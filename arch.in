@@ -22,6 +22,8 @@
  * formatted output.
  *
  * Be sure to escape strings.
+ *
+ * REMEMBER TO ADD NEW ARCHITECTURES TO MDOC.7!
  */
 
 LINE("alpha",		"Alpha")

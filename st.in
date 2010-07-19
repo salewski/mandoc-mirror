@@ -22,6 +22,8 @@
  * the formatted output string.
  *
  * Be sure to escape strings.
+ *
+ * REMEMBER TO ADD NEW STANDARDS TO MDOC.7!
  */
 
 LINE("-p1003.1-88",	"IEEE Std 1003.1-1988 (\\(lqPOSIX.1\\(rq)")
