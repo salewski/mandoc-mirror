@@ -948,7 +948,8 @@ Examples:
 Author name.
 This macro may alternatively accepts the following arguments, although
 these may not be specified along with a parameter:
-.Bl -tag -width 12n -offset indent
+.Pp
+.Bl -tag -width "-nosplitX" -offset indent -compact
 .It Fl split
 Renders a line break before each author listing.
 .It Fl nosplit
@@ -956,13 +957,17 @@ The opposite of
 .Fl split .
 .El
 .Pp
-In the AUTHORS section, the default is not to split the first author
+In the
+.Em AUTHORS
+section, the default is not to split the first author
 listing, but all subsequent author listings, whether or not they're
 interspersed by other macros or text, are split.
 Thus, specifying
 .Fl split
 will cause the first listing also to be split.
-If not in the AUTHORS section, the default is not to split.
+If not in the
+.Em AUTHORS
+section, the default is not to split.
 .Pp
 Examples:
 .D1 \&.An -nosplit
@@ -973,9 +978,12 @@ the effects of
 .Fl split
 or
 .Fl nosplit
-are re-set when entering the AUTHORS section, so if one specifies
+are re-set when entering the
+.Em AUTHORS
+section, so if one specifies
 .Sx \&An Fl nosplit
-in the general document body, it must be re-specified in the AUTHORS
+in the general document body, it must be re-specified in the
+.Em AUTHORS
 section.
 .Ss \&Ao
 Begins a block enclosed by angled brackets.
@@ -989,10 +997,10 @@ See also
 .Ss \&Ap
 Inserts an apostrophe without any surrounding whitespace.
 This is generally used as a grammatical device when referring to the verb
-form of a function:
-.Bd -literal -offset indent
-\&.Fn execve Ap d
-.Ed
+form of a function.
+.Pp
+Examples:
+.D1 \&.Fn execve \&Ap d
 .Ss \&Aq
 Encloses its arguments in angled brackets.
 .Pp
@@ -1024,7 +1032,8 @@ Examples:
 .Ss \&At
 Formats an AT&T version.
 Accepts at most one parameter:
-.Bl -tag -width 12n -offset indent
+.Pp
+.Bl -tag -width "v[1-7] | 32vX" -offset indent -compact
 .It Cm v[1-7] | 32v
 A version of
 .At .
@@ -1314,7 +1323,7 @@ Begins a block enclosed by square brackets.
 Does not have any head arguments.
 .Pp
 Examples:
-.Bd -literal -offset indent
+.Bd -literal -offset indent -compact
 \&.Bo 1 ,
 \&.Dv BUFSIZ \&Bc
 .Ed
@@ -1347,7 +1356,7 @@ Begins a block enclosed by curly braces.
 Does not have any head arguments.
 .Pp
 Examples:
-.Bd -literal -offset indent
+.Bd -literal -offset indent -compact
 \&.Bro 1 , ... ,
 \&.Va n \&Brc
 .Ed
@@ -1482,7 +1491,7 @@ invocations.
 It is followed by a newline.
 .Pp
 Examples:
-.D1 \&.Dl % mandoc mdoc.7 | less
+.D1 \&.Dl % mandoc mdoc.7 \e(ba less
 .Pp
 See also
 .Sx \&Bd
@@ -1493,7 +1502,12 @@ Begins a block enclosed by double quotes.
 Does not have any head arguments.
 .Pp
 Examples:
-.D1 \&.D1 \&Do April is the cruellest month \&Dc \e(em T.S. Eliot
+.Bd -literal -offset indent -compact
+\&.Do
+April is the cruellest month
+\&.Dc
+\e(em T.S. Eliot
+.Ed
 .Pp
 See also
 .Sx \&Dq .
@@ -2088,6 +2102,9 @@ Synonym for
 .Sx \&Pp .
 .Ss \&Ms
 Display a mathematical symbol.
+Its syntax is as follows:
+.Pp
+.D1 Pf \. Sx \&Ms Cm symbol
 .Pp
 Examples:
 .D1 \&.Ms sigma
@@ -2655,7 +2672,28 @@ Examples:
 .D1 \&.Xr mandoc 1 \&;
 .D1 \&.Xr mandoc 1 \&Ns s behaviour
 .Ss \&br
+Emits a line-break.
+This macro should not be used; it is implemented for compatibility with
+historical manuals.
+.Pp
+Consider using
+.Sx \&Pp
+in the event of natural paragraph breaks.
 .Ss \&sp
+Emits vertical space.
+This macro should not be used; it is implemented for compatibility with
+historical manuals.
+Its syntax is as follows:
+.Pp
+.D1 Pf \. Sx \&sp Op Cm height
+.Pp
+The
+.Cm height
+argument must be formatted as described in
+.Sx Scaling Widths .
+If unspecified,
+.Sx \&sp
+asserts a single vertical space.
 .Sh COMPATIBILITY
 This section documents compatibility between mandoc and other other
 troff implementations, at this time limited to GNU troff
