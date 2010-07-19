@@ -32,7 +32,6 @@
 #include "libmandoc.h"
 
 /* FIXME: .Bl -diag can't have non-text children in HEAD. */
-/* TODO: ignoring Pp (it's superfluous in some invocations). */
 
 #define	PRE_ARGS  struct mdoc *mdoc, struct mdoc_node *n
 #define	POST_ARGS struct mdoc *mdoc

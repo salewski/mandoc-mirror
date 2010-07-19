@@ -209,7 +209,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_em_pre, NULL}, /* Em */ 
 	{NULL, NULL}, /* Eo */
 	{mdoc_xx_pre, NULL}, /* Fx */
-	{mdoc_ms_pre, NULL}, /* Ms */ /* FIXME: convert to symbol? */
+	{mdoc_ms_pre, NULL}, /* Ms */
 	{NULL, NULL}, /* No */
 	{mdoc_ns_pre, NULL}, /* Ns */
 	{mdoc_xx_pre, NULL}, /* Nx */
