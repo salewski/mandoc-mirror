@@ -2429,6 +2429,9 @@ Heirloom troff, the other significant troff implementation accepting
 .Pp
 .Bl -dash -compact
 .It
+The \es (font size), \em (font colour), and \eM (font filling colour)
+font decoration escapes are all discarded in mandoc.
+.It
 Old groff fails to assert a newline before
 .Sx \&Bd Fl ragged compact .
 .It
@@ -2476,7 +2479,7 @@ pseudo-macro as a line macro.
 mandoc does.
 .It
 The comment syntax
-.Sq \e."
+.Sq \e\."
 is no longer accepted.
 .It
 In groff, the
