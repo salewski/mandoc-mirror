@@ -74,9 +74,6 @@
   try e.g. .Bl -column It Ta Ta
   reported by millert Fri, 02 Apr 2010 16:13:46 -0400
 
-- .Pp before and after .Sh (and .Ss) produces a spurious blank line;
-  reported by jmc@  Thu, 15 Jul 2010 23:00:28 +0100
-
 ************************************************************************
 * formatting issues: gratuitious differences
 ************************************************************************
