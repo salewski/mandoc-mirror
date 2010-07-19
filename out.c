@@ -218,24 +218,14 @@ a2roffdeco(enum roffdeco *d, const char **word, size_t *sz)
 			break;
 		}
 		break;
-	case ('*'):
-		*d = DECO_RESERVED;
-		switch (wp[i++]) {
-		case ('('):
-			lim = 2;
-			break;
-		case ('['):
-			term = ']';
-			break;
-		default:
-			i--;
-			lim = 1;
-			break;
-		}
-		break;
 	case ('M'):
 		/* FALLTHROUGH */
 	case ('m'):
+		/* FALLTHROUGH */
+	case ('*'):
+		if ('*' == c)
+			*d = DECO_RESERVED;
+
 		switch (wp[i++]) {
 		case ('('):
 			lim = 2;
