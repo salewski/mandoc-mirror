@@ -39,7 +39,7 @@
 
 /* Convert an AFM unit "x" to a PostScript points */
 #define	AFM2PNT(p, x) /* LINTED */ \
-	(size_t)((double)(x) / (1000.0 / (double)(p)->engine.ps.scale))
+	((double)(x) / (1000.0 / (double)(p)->engine.ps.scale))
 
 struct	glyph {
 	size_t		  wx; /* WX in AFM */
@@ -635,8 +635,8 @@ ps_begin(struct termp *p)
 	printf("%%%%Pages: (atend)\n");
 	printf("%%%%PageOrder: Ascend\n");
 	printf("%%%%DocumentMedia: Default %zu %zu 0 () ()\n",
-			AFM2PNT(p, p->engine.ps.width),
-			AFM2PNT(p, p->engine.ps.height));
+			(size_t)AFM2PNT(p, p->engine.ps.width),
+			(size_t)AFM2PNT(p, p->engine.ps.height));
 	printf("%%%%DocumentNeededResources: font");
 	for (i = 0; i < (int)TERMFONT__MAX; i++)
 		printf(" %s", fonts[i].name);
@@ -675,7 +675,7 @@ ps_pletter(struct termp *p, int c)
 	 */
 
 	if ( ! (PS_INLINE & p->engine.ps.flags)) {
-		ps_printf(p, "%zu %zu moveto\n(", 
+		ps_printf(p, "%.3f %.3f moveto\n(", 
 				AFM2PNT(p, p->engine.ps.pscol),
 				AFM2PNT(p, p->engine.ps.psrow));
 		p->engine.ps.flags |= PS_INLINE;
