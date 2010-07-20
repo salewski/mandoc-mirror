@@ -26,6 +26,7 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "mandoc.h"
 #include "libman.h"
@@ -206,32 +207,37 @@ check_text(CHKARGS)
 {
 	char		*p;
 	int		 pos, c;
-
-	assert(n->string);
+	size_t		 sz;
 
 	for (p = n->string, pos = n->pos + 1; *p; p++, pos++) {
-		if ('\\' == *p) {
-			c = mandoc_special(p);
-			if (c) {
-				p += c - 1;
-				pos += c - 1;
-				continue;
-			}
+		sz = strcspn(p, "\t\\");
+		p += (int)sz;
 
-			c = man_pmsg(m, n->line, pos, MANDOCERR_BADESCAPE);
-			if ( ! (MAN_IGN_ESCAPE & m->pflags) && ! c)
-				return(c);
+		if ('\0' == *p)
+			break;
+
+		pos += (int)sz;
+
+		if ('\t' == *p) {
+			if (MAN_LITERAL & m->flags)
+				continue;
+			if (man_pmsg(m, n->line, pos, MANDOCERR_BADTAB))
+				continue;
+			return(0);
 		}
 
-		/* 
-		 * FIXME: we absolutely cannot let \b get through or it
-		 * will destroy some assumptions in terms of format.
-	 	 */
+		/* Check the special character. */
 
-		if ('\t' == *p || isprint((u_char)*p) || ASCII_HYPH == *p) 
+		c = mandoc_special(p);
+		if (c) {
+			p += c - 1;
+			pos += c - 1;
 			continue;
-		if ( ! man_pmsg(m, n->line, pos, MANDOCERR_BADCHAR))
-			return(0);
+		}
+
+		c = man_pmsg(m, n->line, pos, MANDOCERR_BADESCAPE);
+		if ( ! (MAN_IGN_ESCAPE & m->pflags) && ! c)
+			return(c);
 	}
 
 	return(1);

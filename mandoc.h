@@ -39,6 +39,7 @@ enum	mandocerr {
 	MANDOCERR_LISTFIRST, /* list type must come first */
 	MANDOCERR_BADSTANDARD, /* bad standard */
 	MANDOCERR_BADLIB, /* bad library */
+	MANDOCERR_BADTAB, /* tab in non-literal context */
 	MANDOCERR_BADESCAPE, /* bad escape sequence */
 	MANDOCERR_BADQUOTE, /* unterminated quoted string */
 	MANDOCERR_NOWIDTHARG, /* argument requires the width argument */

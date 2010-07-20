@@ -453,26 +453,29 @@ check_argv(struct mdoc *m, struct mdoc_node *n, struct mdoc_argv *v)
 
 
 static int
-check_text(struct mdoc *mdoc, int line, int pos, char *p)
+check_text(struct mdoc *m, int ln, int pos, char *p)
 {
 	int		 c;
-
-	/* 
-	 * FIXME: we absolutely cannot let \b get through or it will
-	 * destroy some assumptions in terms of format.
-	 */
+	size_t		 sz;
 
 	for ( ; *p; p++, pos++) {
-		if ('\t' == *p) {
-			if ( ! (MDOC_LITERAL & mdoc->flags))
-				if ( ! mdoc_pmsg(mdoc, line, pos, MANDOCERR_BADCHAR))
-					return(0);
-		} else if ( ! isprint((u_char)*p) && ASCII_HYPH != *p)
-			if ( ! mdoc_pmsg(mdoc, line, pos, MANDOCERR_BADCHAR))
-				return(0);
+		sz = strcspn(p, "\t\\");
+		p += (int)sz;
 
-		if ('\\' != *p)
-			continue;
+		if ('\0' == *p)
+			break;
+
+		pos += (int)sz;
+
+		if ('\t' == *p) {
+			if (MDOC_LITERAL & m->flags)
+				continue;
+			if (mdoc_pmsg(m, ln, pos, MANDOCERR_BADTAB))
+				continue;
+			return(0);
+		}
+
+		/* Check the special character. */
 
 		c = mandoc_special(p);
 		if (c) {
@@ -481,15 +484,13 @@ check_text(struct mdoc *mdoc, int line, int pos, char *p)
 			continue;
 		}
 
-		c = mdoc_pmsg(mdoc, line, pos, MANDOCERR_BADESCAPE);
-		if ( ! (MDOC_IGN_ESCAPE & mdoc->pflags) && ! c)
+		c = mdoc_pmsg(m, ln, pos, MANDOCERR_BADESCAPE);
+		if ( ! (MDOC_IGN_ESCAPE & m->pflags) && ! c)
 			return(c);
 	}
 
 	return(1);
 }
-
-
 
 
 static int
@@ -507,7 +508,6 @@ check_parent(PRE_ARGS, enum mdoct tok, enum mdoc_type t)
 					mdoc_macronames[tok]);
 	return(0);
 }
-
 
 
 static int
