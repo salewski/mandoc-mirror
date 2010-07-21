@@ -313,8 +313,10 @@ mdoc_argv_free(struct mdoc_arg *p)
 void
 mdoc_argn_free(struct mdoc_arg *p, int iarg)
 {
-	struct mdoc_argv *arg = &p->argv[iarg]; /* FIXME: decl/assign */
+	struct mdoc_argv *arg;
 	int		  j;
+
+	arg = &p->argv[iarg];
 
 	if (arg->sz && arg->value) {
 		for (j = (int)arg->sz - 1; j >= 0; j--) 
