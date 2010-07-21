@@ -15,13 +15,6 @@
 					<DIV CLASS="head">
 						<B>mdocml</B> &#8211; mdoc macro compiler
 					</DIV>
-					<DIV CLASS="subhead">
-						<A HREF="#description">Description</A> |
-						<A HREF="#sources">Sources</A> |
-						<A HREF="#documentation">Documentation</A> |
-						<A HREF="#contact">Contact</A> |
-						<A HREF="#news">News</A>
-					</DIV>
 				</TD>
 			</TR>
 			<TR>
@@ -31,30 +24,31 @@
 					</H1>
 
 					<P>
-					<SPAN CLASS="nm">mdocml</SPAN> is a suite of tools compiling <Q>-mdoc</Q>, the roff macro package
-					of choice for BSD manual pages, and <Q>-man</Q>, the predominant historical package for UNIX
-					manuals.  The mission of <SPAN CLASS="nm">mdocml</SPAN> is to deprecate <A
-					HREF="http://www.gnu.org/software/groff/" CLASS="external">groff</A>, the GNU roff implementation, for
-					displaying -mdoc pages whilst providing token support for -man.
+					<SPAN CLASS="nm">mdocml</SPAN> is a suite of tools compiling <Q>-<A HREF="mdoc.7.html">mdoc</A></Q>, the
+					roff macro package of choice for BSD manual pages, and <Q>-<A HREF="man.7.html">man</A></Q>, the
+					predominant historical package for UNIX manuals.  The mission of <SPAN CLASS="nm">mdocml</SPAN> is to
+					deprecate <A HREF="http://www.gnu.org/software/groff/" CLASS="external">groff</A>, the GNU troff
+					implementation, for displaying -mdoc pages whilst providing token support for -man.
 					</P>
 
 					<P>
 					Why?  groff amounts to over 5 MB of source code, most of which is C++ and all of which is GPL.  It runs
 					slowly, produces uncertain output, and varies in operation from system to system.  mdocml strives to fix
-					this (respectively small, C, ISC-licensed, fast and regular).
+					this (respectively small, C, <A CLASS="external"
+					HREF="http://www.isc.org/software/license">ISC</A>-licensed, fast and regular).
 					</P>
 
 					<P>
-					The core of <SPAN CLASS="nm">mdocml</SPAN> is composed of the <A HREF="mdoc.3.html">libmdoc</A>, <A
-					HREF="man.3.html">libman</A>, and <A HREF="roff.3.html">libroff</A> validating compiler libraries.  All
-					are simple, fast libraries operating on memory buffers, so they may be used for a variety of front-ends
-					(terminal-based, CGI and so on).  The front-end is <A HREF="mandoc.1.html">mandoc</A>, which formats
-					manuals for display.
+					<SPAN CLASS="nm">mdocml</SPAN> consists of the <A HREF="mdoc.3.html">libmdoc</A>, <A
+					HREF="man.3.html">libman</A>, and <A HREF="roff.3.html">libroff</A> validating compilers; and <A
+					HREF="mandoc.1.html">mandoc</A>, which interfaces with the compiler libraries to format output for UNIX
+					terminals, XHTML, HTML, and PostScript.  <SPAN CLASS="nm">mdocml</SPAN> is a <A CLASS="external"
+					HREF="http://bsd.lv/">BSD.lv</A> project.  
 					</P>
 
 					<P>
-					The <SPAN CLASS="nm">mdocml</SPAN> suite is a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv
-					Project</A> member.
+					<I>Disambiguation</I>: <SPAN CLASS="nm">mdocml</SPAN> is often referred to by its installed binary,
+					<Q>mandoc</Q>.
 					</P>
 				</TD>
 			</TR>
@@ -65,10 +59,9 @@
 					</H1>
 
 					<P>
-					Sources correctly build and install on DragonFly BSD, FreeBSD, OpenBSD, NetBSD, GNU/Linux, and many
-					other operating systems, tested variously on i386, AMD64, alpha, and others.  The most current version
-					is <SPAN CLASS="attn">@VERSION@</SPAN>, dated <SPAN class="attn">@VDATE@</SPAN>.  A full <A
-					HREF="ChangeLog.html">ChangeLog</A> (<A HREF="ChangeLog.txt">txt</A>) is written with each release.
+					<SPAN CLASS="nm">mdocml</SPAN> is architecture- and system-neutral, written in plain-old C.  The most
+					current version is <SPAN CLASS="attn">@VERSION@</SPAN>, dated <SPAN class="attn">@VDATE@</SPAN>.  A full
+					<A HREF="ChangeLog.html">ChangeLog</A> (<A HREF="ChangeLog.txt">txt</A>) is written with each release.
 					</P>
 
 					<H2>
@@ -159,7 +152,7 @@
 					</H1>
 
 					<P>
-					These manuals are generated automatically and refer to the current snapshot.
+						These manuals are generated automatically and refer to the current snapshot.
 					</P>
 
 					<TABLE WIDTH="100%" SUMMARY="Documentation">
@@ -170,72 +163,73 @@
 							<TD VALIGN="top"><A HREF="man.3.html">man(3)</A></TD>
 							<TD VALIGN="top">
 								man macro compiler library
-								<DIV STYLE="font-size: smaller;">
-									<A HREF="man.3.txt">text</A> | <A HREF="man.3.ps">postscript</A>
-								</DIV>
+								<SPAN STYLE="font-size: smaller;">
+									(<A HREF="man.3.txt">text</A> | <A HREF="man.3.ps">postscript</A>)
+								</SPAN>
 							</TD>
 						</TR>
 						<TR>
 							<TD VALIGN="top"><A HREF="man.7.html">man(7)</A></TD>
 							<TD VALIGN="top">
 								man language reference
-								<DIV STYLE="font-size: smaller;">
-									<A HREF="man.7.txt">text</A> | <A HREF="man.7.ps">postscript</A>
-								</DIV>
+								<SPAN STYLE="font-size: smaller;">
+									(<A HREF="man.7.txt">text</A> | <A HREF="man.7.ps">postscript</A>)
+								</SPAN>
 							</TD>
 						</TR>
 						<TR>
 							<TD VALIGN="top"><A HREF="mandoc.1.html">mandoc(1)</A></TD>
 							<TD VALIGN="top">
 								format and display UNIX manuals
-								<DIV STYLE="font-size: smaller;">
-									<A HREF="mandoc.1.txt">text</A> | <A HREF="mandoc.1.ps">postscript</A>
-								</DIV>
+								<SPAN STYLE="font-size: smaller;">
+									(<A HREF="mandoc.1.txt">text</A> | <A HREF="mandoc.1.ps">postscript</A>)
+								</SPAN>
 							</TD>
 						</TR>
 						<TR>
 							<TD VALIGN="top"><A HREF="mandoc_char.7.html">mandoc_char(7)</A></TD>
 							<TD VALIGN="top">
 								mandoc special characters
-								<DIV STYLE="font-size: smaller;">
-									<A HREF="mandoc_char.7.txt">text</A> | <A HREF="mandoc_char.7.ps">postscript</A>
-								</DIV>
+								<SPAN STYLE="font-size: smaller;">
+									(<A HREF="mandoc_char.7.txt">text</A> | <A
+									HREF="mandoc_char.7.ps">postscript</A>)
+								</SPAN>
 							</TD>
 						</TR>
 						<TR>
 							<TD VALIGN="top"><A HREF="mdoc.3.html">mdoc(3)</A></TD>
 							<TD VALIGN="top">
 								mdoc macro compiler library
-								<DIV STYLE="font-size: smaller;">
-									<A HREF="mdoc.3.txt">text</A> | <A HREF="mdoc.3.ps">postscript</A>
-								</DIV>
+								<SPAN STYLE="font-size: smaller;">
+									(<A HREF="mdoc.3.txt">text</A> | <A HREF="mdoc.3.ps">postscript</A>)
+								</SPAN>
 							</TD>
 						</TR>
 						<TR>
 							<TD VALIGN="top"><A HREF="mdoc.7.html">mdoc(7)</A></TD>
 							<TD VALIGN="top">
 								mdoc language reference
-								<DIV STYLE="font-size: smaller;">
-									<A HREF="mdoc.7.txt">text</A> | <A HREF="mdoc.7.ps">postscript</A>
-								</DIV>
+								<SPAN STYLE="font-size: smaller;">
+									(<A HREF="mdoc.7.txt">text</A> | <A HREF="mdoc.7.ps">postscript</A>)
+								</SPAN>
 							</TD>
 						</TR>
 						<TR>
 							<TD VALIGN="top"><A HREF="roff.3.html">roff(3)</A></TD>
 							<TD VALIGN="top">
 								roff macro compiler library
-								<DIV STYLE="font-size: smaller;">
-									<A HREF="roff.3.txt">text</A> | <A HREF="roff.3.ps">postscript</A>
-								</DIV>
+								<SPAN STYLE="font-size: smaller;">
+									(<A HREF="roff.3.txt">text</A> | <A HREF="roff.3.ps">postscript</A>)
+								</SPAN>
 							</TD>
 						</TR>
 						<TR>
 							<TD VALIGN="top"><A HREF="roff.7.html">roff(7)</A></TD>
 							<TD VALIGN="top">
 								roff-mandoc language reference
-								<DIV STYLE="font-size: smaller;">
-									<A HREF="roff.7.txt">text</A> | <A HREF="roff.7.ps">postscript</A>
-								</DIV>
+								<SPAN STYLE="font-size: smaller;">
+									(<A HREF="roff.7.txt">text</A> | <A HREF="roff.7.ps">postscript</A>)
+								</SPAN>
 							</TD>
 						</TR>
 					</TBODY>
@@ -254,15 +248,16 @@
 					</H1>
 
 					<P>
-					For all issues related to <SPAN CLASS="nm">mdocml</SPAN>, contact Kristaps Dzonsons, kris<A
-					CLASS="external"
-					HREF="http://mailhide.recaptcha.net/d?k=01M6h_w7twDp58ZgH57eWC_w==&amp;c=Q2DBUt401ePlSeupJFrq_Q=="
-					TITLE="Reveal this e-mail address">...</A>@bsd.lv.
+						Please use the mailing lists for bug-reports, patches, questions, etc.  Beyond that, contact
+						Kristaps at <A
+						HREF="http://mailhide.recaptcha.net/d?k=01M6h_w7twDp58ZgH57eWC_w==&amp;c=Q2DBUt401ePlSeupJFrq_Q=="
+						TITLE="Reveal this e-mail address">kris...</A>@bsd.lv.
 					</P>
 
 					<P>
-					You may also subscribe to several mailing lists (these require subscription, which is moderated).  An
-					archive is not yet available on-line, although you may request one once subscribed.
+						You may also subscribe to several mailing lists (these require subscription, which is
+						moderated).  An archive is not yet available on-line, although you may request one once
+						subscribed.
 					</P>
 
 					<TABLE WIDTH="100%" SUMMARY="Mailing Lists">
@@ -388,39 +383,6 @@
 							HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/?cvsroot=mdocml">cvsweb</A> and see
 							for yourself!).</LI>
 						</UL>
-					</DIV>
-					<DIV CLASS="news">
-						<P>
-							<SPAN CLASS="date">13-05-2010</SPAN>:
-							version 1.9.25
-						</P>
-						<P>
-							Fixed handling of <Q>\*(Ba</Q> escape.  Backed out <SPAN
-							CLASS="flag">-fno-ign-chars</SPAN> (pointless complexity).  Fixed erroneous
-							breaking of literal lines.  Fixed SYNOPSIS breaking lines before non-initial
-							macros.  Changed default section ordering.  Most importantly, the framework for
-							end-of-sentence double-spacing is in place, now implemented for the
-							<Q>end-of-sentence, end-of-line</Q> rule.  This is a stable roll-back point
-							before the mandoc hackathon in Rostock!
-						</P>
-					</DIV>
-					<DIV CLASS="news">
-						<P>
-							<SPAN CLASS="date">09-05-2010</SPAN>:
-							version 1.9.24
-						</P>
-						<P>
-							Rolled back break-at-hyphen.  <SPAN CLASS="flag">-DUGLY</SPAN> is now the
-							default (no feature splits!).  Free-form text is not de-chunked any more: lines
-							are passed whole-sale into the front-end, including whitespace.  Added mailing
-							lists.  Lastly, <SPAN CLASS="nm">mdocml</SPAN> is the focus of two <A
-							CLASS="external" HREF="http://socghop.appspot.com/">Google Summer of Code</A>
-							projects this year: <Q><A CLASS="external"
-							HREF="http://netbsd-soc.sourceforge.net/projects/mandoc_ps/">mandoc -Tps</A></Q>
-							(NetBSD) and <Q><A CLASS="external"
-							HREF="http://wiki.freebsd.org/SummerOfCode2010Projects">BSD-licensed
-							Text-Processing Tools</A></Q> (FreeBSD).
-						</P>
 					</DIV>
 					<P>
 						See <A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/index.sgml?cvsroot=mdocml">cvsweb</A> for

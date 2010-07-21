@@ -20,7 +20,7 @@ h2		{ font-weight: bold;
 		  margin-bottom: 0px; 
 		  font-family: Verdana, Tahoma, Arial, sans-serif; }
 
-span.nm		{ color: #000000; font-weight: bold; }
+span.nm		{ font-weight: bold; }
 
 span.attn	{ color: #000000; font-weight: bold; }
 
@@ -29,9 +29,6 @@ span.flag	{ font-weight: bold; }
 div.head	{ border-bottom: 1px solid #dddddd; 
 		  padding-bottom: 5px;
 		  text-align: right; }
-
-div.subhead	{ font-size: smaller;
-		  margin-bottom: 1em; }
 
 div.foot	{ border-top: 1px solid #dddddd; 
 		  padding-top: 5px;
