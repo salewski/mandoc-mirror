@@ -88,7 +88,8 @@ static	const char	*const htmlattrs[ATTR_MAX] = {
 	"summary",
 };
 
-static	void		  print_spec(struct html *, const char *, size_t);
+static	void		  print_spec(struct html *, enum roffdeco,
+				const char *, size_t);
 static	void		  print_res(struct html *, const char *, size_t);
 static	void		  print_ctag(struct html *, enum htmltag);
 static	void		  print_doctype(struct html *);
@@ -215,7 +216,7 @@ print_gen_head(struct html *h)
 
 
 static void
-print_spec(struct html *h, const char *p, size_t len)
+print_spec(struct html *h, enum roffdeco d, const char *p, size_t len)
 {
 	int		 cp;
 	const char	*rhs;
@@ -223,6 +224,9 @@ print_spec(struct html *h, const char *p, size_t len)
 
 	if ((cp = chars_spec2cp(h->symtab, p, len)) > 0) {
 		printf("&#%d;", cp);
+		return;
+	} else if (-1 == cp && DECO_SSPECIAL == d) {
+		fwrite(p, 1, len, stdout);
 		return;
 	} else if (-1 == cp)
 		return;
@@ -342,8 +346,10 @@ print_encode(struct html *h, const char *p, int norecurse)
 		case (DECO_RESERVED):
 			print_res(h, seq, sz);
 			break;
+		case (DECO_SSPECIAL):
+			/* FALLTHROUGH */
 		case (DECO_SPECIAL):
-			print_spec(h, seq, sz);
+			print_spec(h, deco, seq, sz);
 			break;
 		case (DECO_PREVIOUS):
 			/* FALLTHROUGH */

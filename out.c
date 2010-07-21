@@ -278,7 +278,7 @@ a2roffdeco(enum roffdeco *d, const char **word, size_t *sz)
 		*d = DECO_NOSPACE;
 		return(i);
 	default:
-		*d = DECO_SPECIAL;
+		*d = DECO_SSPECIAL;
 		i--;
 		lim = 1;
 		break;

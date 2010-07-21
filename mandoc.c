@@ -314,7 +314,7 @@ mandoc_eos(const char *p, size_t sz, int enclosed)
 	 */
 
 	found = 0;
-	for (q = p + sz - 1; q >= p; q--) {
+	for (q = p + (int)sz - 1; q >= p; q--) {
 		switch (*q) {
 		case ('\"'):
 			/* FALLTHROUGH */
