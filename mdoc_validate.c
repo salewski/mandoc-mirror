@@ -624,6 +624,8 @@ pre_bl(PRE_ARGS)
 			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_IGNARGV))
 				return(0);
 			break;
+		default:
+			continue;
 		}
 
 		/* Check: duplicate auxiliary arguments. */
@@ -946,7 +948,7 @@ static int
 post_bf(POST_ARGS)
 {
 	struct mdoc_node *np;
-	int		  arg;
+	enum mdocargt	  arg;
 
 	/*
 	 * Unlike other data pointers, these are "housed" by the HEAD
