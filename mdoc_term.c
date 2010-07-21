@@ -1026,7 +1026,8 @@ termp_nm_pre(DECL_ARGS)
 	if (NULL == n->child && NULL == m->name)
 		return(0);
 
-	synopsis_pre(p, n);
+	if (MDOC_HEAD == n->type)
+		synopsis_pre(p, n->parent);
 
 	if (MDOC_HEAD == n->type && n->next->child) {
 		p->flags |= TERMP_NOSPACE | TERMP_NOBREAK | TERMP_HANG;
