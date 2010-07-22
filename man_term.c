@@ -92,7 +92,6 @@ static	int		  pre_RS(DECL_ARGS);
 static	int		  pre_SH(DECL_ARGS);
 static	int		  pre_SS(DECL_ARGS);
 static	int		  pre_TP(DECL_ARGS);
-static	int		  pre_br(DECL_ARGS);
 static	int		  pre_fi(DECL_ARGS);
 static	int		  pre_ign(DECL_ARGS);
 static	int		  pre_nf(DECL_ARGS);
@@ -106,7 +105,7 @@ static	void		  post_SS(DECL_ARGS);
 static	void		  post_TP(DECL_ARGS);
 
 static	const struct termact termacts[MAN_MAX] = {
-	{ pre_br, NULL, MAN_NOTEXT }, /* br */
+	{ pre_sp, NULL, MAN_NOTEXT }, /* br */
 	{ NULL, NULL, 0 }, /* TH */
 	{ pre_SH, post_SH, 0 }, /* SH */
 	{ pre_SS, post_SS, 0 }, /* SS */
@@ -359,24 +358,20 @@ pre_sp(DECL_ARGS)
 {
 	size_t		 i, len;
 
-	len = n->child ? 
-		a2height(p, n->child->string) : term_len(p, 1);
+	switch (n->tok) {
+	case (MAN_br):
+		len = 0;
+		break;
+	default:
+		len = n->child ? a2height(p, n->child->string) : 1;
+		break;
+	}
 
 	if (0 == len)
 		term_newln(p);
-	for (i = 0; i <= len; i++)
+	for (i = 0; i < len; i++)
 		term_vspace(p);
 
-	return(0);
-}
-
-
-/* ARGSUSED */
-static int
-pre_br(DECL_ARGS)
-{
-
-	term_newln(p);
 	return(0);
 }
 
