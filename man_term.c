@@ -252,6 +252,7 @@ static int
 pre_fi(DECL_ARGS)
 {
 
+	term_newln(p);
 	mt->fl &= ~MANT_LITERAL;
 	return(1);
 }
@@ -262,6 +263,7 @@ static int
 pre_nf(DECL_ARGS)
 {
 
+	term_newln(p);
 	mt->fl |= MANT_LITERAL;
 	return(MAN_Vb != n->tok);
 }
