@@ -116,6 +116,7 @@ a2roffsu(const char *src, struct roffsu *dst, enum roffscale def)
 		return(0);
 	}
 
+	/* FIXME: do this in the caller. */
 	if ((dst->scale = atof(buf)) < 0)
 		dst->scale = 0;
 	dst->unit = unit;

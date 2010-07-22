@@ -94,6 +94,7 @@ static	int		  pre_SS(DECL_ARGS);
 static	int		  pre_TP(DECL_ARGS);
 static	int		  pre_fi(DECL_ARGS);
 static	int		  pre_ign(DECL_ARGS);
+static	int		  pre_in(DECL_ARGS);
 static	int		  pre_nf(DECL_ARGS);
 static	int		  pre_sp(DECL_ARGS);
 
@@ -141,6 +142,7 @@ static	const struct termact termacts[MAN_MAX] = {
  	{ pre_nf, NULL, 0 }, /* Vb */
  	{ pre_fi, NULL, 0 }, /* Ve */
 	{ pre_ign, NULL, 0 }, /* AT */
+	{ pre_in, NULL, MAN_NOTEXT }, /* in */
 };
 
 
@@ -349,6 +351,47 @@ pre_B(DECL_ARGS)
 
 	term_fontrepl(p, TERMFONT_BOLD);
 	return(1);
+}
+
+
+/* ARGSUSED */
+static int
+pre_in(DECL_ARGS)
+{
+	int		 len, less;
+	size_t		 v;
+	const char	*cp;
+
+	term_newln(p);
+
+	if (NULL == n->child) {
+		p->offset = mt->offset;
+		return(0);
+	}
+
+	cp = n->child->string;
+	less = 0;
+
+	if ('-' == *cp)
+		less = -1;
+	else if ('+' == *cp)
+		less = 1;
+	else
+		cp--;
+
+	if ((len = a2width(p, ++cp)) < 0)
+		return(0);
+
+	v = (size_t)len;
+
+	if (less < 0)
+		p->offset -= p->offset > v ? v : p->offset;
+	else if (less > 0)
+		p->offset += v;
+	else 
+		p->offset = v;
+
+	return(0);
 }
 
 

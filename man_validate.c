@@ -83,9 +83,9 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, NULL }, /* I */
 	{ NULL, NULL }, /* IR */
 	{ NULL, NULL }, /* RI */
-	{ NULL, posts_eq0 }, /* na */
+	{ NULL, posts_eq0 }, /* na */ /* FIXME: should warn only. */
 	{ NULL, NULL }, /* i */
-	{ NULL, posts_le1 }, /* sp */
+	{ NULL, posts_le1 }, /* sp */ /* FIXME: should warn only. */
 	{ pres_bline, posts_eq0 }, /* nf */
 	{ pres_bline, posts_eq0 }, /* fi */
 	{ NULL, NULL }, /* r */
@@ -94,10 +94,11 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, NULL }, /* DT */
 	{ NULL, NULL }, /* UC */
 	{ NULL, NULL }, /* PD */
-	{ NULL, posts_le1 }, /* Sp */
-	{ pres_bline, posts_le1 }, /* Vb */
+	{ NULL, posts_le1 }, /* Sp */ /* FIXME: should warn only. */
+	{ pres_bline, posts_le1 }, /* Vb */ /* FIXME: should warn only. */
 	{ pres_bline, posts_eq0 }, /* Ve */
 	{ NULL, NULL }, /* AT */
+	{ NULL, NULL }, /* in */
 };
 
 
