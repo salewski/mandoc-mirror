@@ -296,6 +296,24 @@
 					</H1>
 					<DIV CLASS="news">
 						<P>
+							<SPAN CLASS="date">XX-07-2010</SPAN>:
+							version 1.10.5
+						</P>
+						<P>
+							Purely a bug-fix and polish release.  Highlights:
+						</P>
+						<UL>
+							<LI>fix <Q>Sm</Q> handling</LI>
+							<LI>fix end-of-sentence handling for embedded sentences</LI>
+							<LI>polish <A HREF="man.7.html">man</A> documentation</LI>
+							<LI>document all <A HREF="mdoc.7.html">mdoc</A> macros</LI>
+							<LI>polish <A HREF="mandoc.1.html">mandoc</A> -Tps output</LI>
+							<LI>lots of internal clean-ups in character escapes</LI>
+							<LI>un-break literal contexts in <A HREF="man.7.html">man</A> documents</LI>
+						</UL>
+					</DIV>
+					<DIV CLASS="news">
+						<P>
 							<SPAN CLASS="date">12-07-2010</SPAN>:
 							version 1.10.4
 						</P>
