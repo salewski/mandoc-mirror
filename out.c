@@ -255,6 +255,9 @@ a2roffdeco(enum roffdeco *d, const char **word, size_t *sz)
 		case ('\''):
 			term = '\'';
 			break;
+		case ('0'):
+			j++;
+			/* FALLTHROUGH */
 		default:
 			i--;
 			lim = 1;

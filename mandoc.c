@@ -109,6 +109,9 @@ mandoc_special(char *p)
 		case ('\''):
 			term = '\'';
 			break;
+		case ('0'):
+			i++;
+			/* FALLTHROUGH */
 		default:
 			len = 1;
 			p--;
