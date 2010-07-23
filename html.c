@@ -417,6 +417,9 @@ print_otag(struct html *h, enum htmltag tag,
 				printf("&#160;");
 		}
 
+	if ( ! (h->flags & HTML_NONOSPACE))
+		h->flags &= ~HTML_NOSPACE;
+
 	/* Print out the tag name and attributes. */
 
 	printf("<%s", htmltags[tag].name);
@@ -544,7 +547,8 @@ print_text(struct html *h, const char *word)
 
 	assert(word);
 	if ( ! print_encode(h, word, 0))
-		h->flags &= ~HTML_NOSPACE;
+		if ( ! (h->flags & HTML_NONOSPACE))
+			h->flags &= ~HTML_NOSPACE;
 
 	/* 
 	 * Note that we don't process the pipe: the parser sees it as

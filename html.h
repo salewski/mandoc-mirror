@@ -113,6 +113,7 @@ struct	html {
 #define	HTML_IGNDELIM	 (1 << 1)
 #define	HTML_KEEP	 (1 << 2)
 #define	HTML_PREKEEP	 (1 << 3)
+#define	HTML_NONOSPACE	 (1 << 4)
 	struct tagq	  tags;
 	struct ordq	  ords;
 	void		 *symtab;

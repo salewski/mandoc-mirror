@@ -125,6 +125,7 @@ static	int		  mdoc_pq_pre(MDOC_ARGS);
 static	int		  mdoc_rs_pre(MDOC_ARGS);
 static	int		  mdoc_rv_pre(MDOC_ARGS);
 static	int		  mdoc_sh_pre(MDOC_ARGS);
+static	int		  mdoc_sm_pre(MDOC_ARGS);
 static	int		  mdoc_sp_pre(MDOC_ARGS);
 static	void		  mdoc_sq_post(MDOC_ARGS);
 static	int		  mdoc_sq_pre(MDOC_ARGS);
@@ -227,7 +228,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Sc */
 	{mdoc_sq_pre, mdoc_sq_post}, /* So */
 	{mdoc_sq_pre, mdoc_sq_post}, /* Sq */
-	{NULL, NULL}, /* Sm */ /* FIXME - no idea. */
+	{mdoc_sm_pre, NULL}, /* Sm */ 
 	{mdoc_sx_pre, NULL}, /* Sx */
 	{mdoc_sy_pre, NULL}, /* Sy */
 	{NULL, NULL}, /* Tn */
@@ -1715,6 +1716,23 @@ mdoc_fn_pre(MDOC_ARGS)
 	print_text(h, ")");
 	if (MDOC_SYNPRETTY & n->flags)
 		print_text(h, ";");
+
+	return(0);
+}
+
+
+/* ARGSUSED */
+static int
+mdoc_sm_pre(MDOC_ARGS)
+{
+
+	assert(n->child && MDOC_TEXT == n->child->type);
+	if (0 == strcmp("on", n->child->string)) {
+		/* FIXME: no p->col to check... */
+		h->flags &= ~HTML_NOSPACE;
+		h->flags &= ~HTML_NONOSPACE;
+	} else
+		h->flags |= HTML_NONOSPACE;
 
 	return(0);
 }
