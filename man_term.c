@@ -92,10 +92,9 @@ static	int		  pre_RS(DECL_ARGS);
 static	int		  pre_SH(DECL_ARGS);
 static	int		  pre_SS(DECL_ARGS);
 static	int		  pre_TP(DECL_ARGS);
-static	int		  pre_fi(DECL_ARGS);
 static	int		  pre_ign(DECL_ARGS);
 static	int		  pre_in(DECL_ARGS);
-static	int		  pre_nf(DECL_ARGS);
+static	int		  pre_literal(DECL_ARGS);
 static	int		  pre_sp(DECL_ARGS);
 
 static	void		  post_IP(DECL_ARGS);
@@ -130,8 +129,8 @@ static	const struct termact termacts[MAN_MAX] = {
 	{ NULL, NULL, MAN_NOTEXT }, /* na */
 	{ pre_I, NULL, 0 }, /* i */
 	{ pre_sp, NULL, MAN_NOTEXT }, /* sp */
-	{ pre_nf, NULL, 0 }, /* nf */
-	{ pre_fi, NULL, 0 }, /* fi */
+	{ pre_literal, NULL, 0 }, /* nf */
+	{ pre_literal, NULL, 0 }, /* fi */
 	{ NULL, NULL, 0 }, /* r */
 	{ NULL, NULL, 0 }, /* RE */
 	{ pre_RS, post_RS, 0 }, /* RS */
@@ -139,8 +138,8 @@ static	const struct termact termacts[MAN_MAX] = {
 	{ pre_ign, NULL, 0 }, /* UC */
 	{ pre_ign, NULL, 0 }, /* PD */
  	{ pre_sp, NULL, MAN_NOTEXT }, /* Sp */
- 	{ pre_nf, NULL, 0 }, /* Vb */
- 	{ pre_fi, NULL, 0 }, /* Ve */
+ 	{ pre_literal, NULL, 0 }, /* Vb */
+ 	{ pre_literal, NULL, 0 }, /* Ve */
 	{ pre_ign, NULL, 0 }, /* AT */
 	{ pre_in, NULL, MAN_NOTEXT }, /* in */
 };
@@ -250,24 +249,24 @@ pre_I(DECL_ARGS)
 
 /* ARGSUSED */
 static int
-pre_fi(DECL_ARGS)
+pre_literal(DECL_ARGS)
 {
 
 	term_newln(p);
-	mt->fl &= ~MANT_LITERAL;
+	switch (n->tok) {
+	case (MAN_Vb):
+		/* FALLTHROUGH */
+	case (MAN_nf):
+		mt->fl |= MANT_LITERAL;
+		return(MAN_Vb != n->tok);
+	default:
+		mt->fl &= ~MANT_LITERAL;
+		break;
+	}
+
 	return(1);
 }
 
-
-/* ARGSUSED */
-static int
-pre_nf(DECL_ARGS)
-{
-
-	term_newln(p);
-	mt->fl |= MANT_LITERAL;
-	return(MAN_Vb != n->tok);
-}
 
 
 /* ARGSUSED */
