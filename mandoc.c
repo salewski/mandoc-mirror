@@ -337,7 +337,7 @@ mandoc_eos(const char *p, size_t sz, int enclosed)
 			found = 1;
 			break;
 		default:
-			return(found && (!enclosed || isalnum(*q)));
+			return(found && (!enclosed || isalnum((unsigned char)*q)));
 		}
 	}
 
