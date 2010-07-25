@@ -242,10 +242,10 @@ term_flushln(struct termp *p)
 			if ('\t' == p->buf[i])
 				break;
 			if (' ' == p->buf[i]) {
-				while (' ' == p->buf[i]) {
-					vbl += (*p->width)(p, p->buf[i]);
+				j = i;
+				while (' ' == p->buf[i])
 					i++;
-				}
+				vbl += (i - j) * (*p->width)(p, ' ');
 				break;
 			}
 			if (ASCII_NBRSP == p->buf[i]) {
