@@ -67,6 +67,17 @@
 * formatting issues: ugly output
 ************************************************************************
 
+- boot_config.8
+    .Bd -literal
+    .No UKC> Ic find ne
+    24 ne0 at isa0
+  should be
+    UKC> find ne
+    24 ne0 at isa0
+  but is
+    UKC>find ne24 ne0 at isa0
+  from jmc@  Wed, 21 Jul 2010 22:40:02 +0100
+
 - perl(1) SYNOPSIS looks bad; reported by deraadt@
   1) man(7) seems to need SYNOPSIS .Nm blocks, too
 
@@ -93,3 +104,9 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 ************************************************************************
 * structural issues
 ************************************************************************
+
+- rendering frontend code can calculate widths only for plain strings,
+  not for strings containing escape sequences.  For example, this
+  hinders calculation of the indent required for .Nm \&[ in text(1).
+  comments from kristaps@  Wed, 21 Jul 2010 23:26:08 +0200
+
