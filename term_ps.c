@@ -391,10 +391,9 @@ pdf_alloc(char *outopts)
 {
 	struct termp	*p;
 
-	if (NULL == (p = pspdf_alloc(outopts)))
-		return(p);
+	if (NULL != (p = pspdf_alloc(outopts)))
+		p->type = TERMTYPE_PDF;
 
-	p->type = TERMTYPE_PDF;
 	return(p);
 }
 
@@ -404,10 +403,9 @@ ps_alloc(char *outopts)
 {
 	struct termp	*p;
 
-	if (NULL == (p = pspdf_alloc(outopts)))
-		return(p);
+	if (NULL != (p = pspdf_alloc(outopts)))
+		p->type = TERMTYPE_PS;
 
-	p->type = TERMTYPE_PS;
 	return(p);
 }
 
@@ -593,48 +591,47 @@ static void
 ps_closepage(struct termp *p)
 {
 	int		 i;
-	size_t		 len;
+	size_t		 len, base;
+
+	/*
+	 * Close out a page that we've already flushed to output.  In
+	 * PostScript, we simply note that the page must be showed.  In
+	 * PDF, we must now create the Length, Resource, and Page node
+	 * for the page contents.
+	 */
 
 	assert(p->engine.ps.psmarg && p->engine.ps.psmarg[0]);
 	ps_printf(p, "%s", p->engine.ps.psmarg);
 
-	if (TERMTYPE_PS == p->type) {
-		ps_printf(p, "showpage\n");
-	} else {
+	if (TERMTYPE_PS != p->type) {
 		ps_printf(p, "ET\n");
+
 		len = p->engine.ps.pdfbytes - p->engine.ps.pdflastpg;
-		ps_printf(p, "endstream\n");
-		ps_printf(p, "endobj\n");
-		ps_printf(p, "%zu 0 obj\n", 
-				p->engine.ps.pdfbody +
-				(p->engine.ps.pages + 1) * 4 + 1);
-		ps_printf(p, "%zu\n", len);
-		ps_printf(p, "endobj\n");
-		ps_printf(p, "%zu 0 obj\n", 
-				p->engine.ps.pdfbody +
-				(p->engine.ps.pages + 1) * 4 + 2);
-		ps_printf(p, "<<\n");
-		ps_printf(p, "/ProcSet [/PDF /Text]\n");
+		base = p->engine.ps.pages * 4 + p->engine.ps.pdfbody;
+
+		ps_printf(p, "endstream\nendobj\n");
+
+		/* Length of content. */
+		ps_printf(p, "%zu 0 obj\n", base + 1);
+		ps_printf(p, "%zu\nendobj\n", len);
+
+		/* Resource for content. */
+		ps_printf(p, "%zu 0 obj\n", base + 2);
+		ps_printf(p, "<<\n/ProcSet [/PDF /Text]\n");
 		ps_printf(p, "/Font <<\n");
-		for (i = 0; i < (int)TERMFONT__MAX; i++) 
+		for (i = 0; i < TERMFONT__MAX; i++) 
 			ps_printf(p, "/F%d %d 0 R\n", i, 3 + i);
-		ps_printf(p, ">>\n");
-		ps_printf(p, ">>\n");
-		ps_printf(p, "%zu 0 obj\n", 
-				p->engine.ps.pdfbody +
-				(p->engine.ps.pages + 1) * 4 + 3);
-		ps_printf(p, "<<\n");
+		ps_printf(p, ">>\n>>\n");
+
+		/* Page node. */
+		ps_printf(p, "%zu 0 obj\n<<\n", base + 3);
 		ps_printf(p, "/Type /Page\n");
 		ps_printf(p, "/Parent 2 0 R\n");
-		ps_printf(p, "/Resources %zu 0 R\n",
-				p->engine.ps.pdfbody +
-				(p->engine.ps.pages + 1) * 4 + 2);
-		ps_printf(p, "/Contents %zu 0 R\n",
-				p->engine.ps.pdfbody +
-				(p->engine.ps.pages + 1) * 4);
-		ps_printf(p, ">>\n");
-		ps_printf(p, "endobj\n");
-	}
+		ps_printf(p, "/Resources %zu 0 R\n", base + 2);
+		ps_printf(p, "/Contents %zu 0 R\n", base);
+		ps_printf(p, ">>\nendobj\n");
+	} else
+		ps_printf(p, "showpage\n");
 
 	p->engine.ps.pages++;
 	p->engine.ps.psrow = p->engine.ps.top;
@@ -647,7 +644,7 @@ ps_closepage(struct termp *p)
 static void
 ps_end(struct termp *p)
 {
-	size_t		 i, xref;
+	size_t		 i, xref, base;
 
 	/*
 	 * At the end of the file, do one last showpage.  This is the
@@ -668,9 +665,7 @@ ps_end(struct termp *p)
 		return;
 	} 
 
-	ps_printf(p, "2 0 obj\n");
-	ps_printf(p, "<<\n");
-	ps_printf(p, "/Type /Pages\n");
+	ps_printf(p, "2 0 obj\n<<\n/Type /Pages\n");
 	ps_printf(p, "/MediaBox [0 0 %zu %zu]\n",
 			(size_t)AFM2PNT(p, p->engine.ps.width),
 			(size_t)AFM2PNT(p, p->engine.ps.height));
@@ -679,33 +674,26 @@ ps_end(struct termp *p)
 	ps_printf(p, "/Kids [");
 
 	for (i = 0; i < p->engine.ps.pages; i++)
-		ps_printf(p, " %zu 0 R", 
-				p->engine.ps.pdfbody +
-				(i + 1) * 4 + 3);
-	ps_printf(p, "]\n");
-	ps_printf(p, ">>\n");
-	ps_printf(p, "endobj\n");
-	ps_printf(p, "%zu 0 obj\n",
-			p->engine.ps.pdfbody +
-			(p->engine.ps.pages * 4) + 4);
+		ps_printf(p, " %zu 0 R", i * 4 +
+				p->engine.ps.pdfbody + 3);
+
+	base = (p->engine.ps.pages - 1) * 4 + 
+		p->engine.ps.pdfbody + 4;
+
+	ps_printf(p, "]\n>>\nendobj\n");
+	ps_printf(p, "%zu 0 obj\n", base);
 	ps_printf(p, "<<\n");
 	ps_printf(p, "/Type /Catalog\n");
 	ps_printf(p, "/Pages 2 0 R\n");
 	ps_printf(p, ">>\n");
 	xref = p->engine.ps.pdfbytes;
 	ps_printf(p, "xref\n");
-	ps_printf(p, "0 %zu\n",
-			p->engine.ps.pdfbody +
-			(p->engine.ps.pages * 4) + 5);
+	ps_printf(p, "0 %zu\n", base + 1);
 	ps_printf(p, "0000000000 65535 f\n");
 	ps_printf(p, "trailer\n");
 	ps_printf(p, "<<\n");
-	ps_printf(p, "/Size %zu\n", 
-			p->engine.ps.pdfbody +
-			(p->engine.ps.pages * 4) + 5);
-	ps_printf(p, "/Root %zu 0 R\n", 
-			p->engine.ps.pdfbody +
-			(p->engine.ps.pages * 4) + 4);
+	ps_printf(p, "/Size %zu\n", base + 1);
+	ps_printf(p, "/Root %zu 0 R\n", base);
 	ps_printf(p, "/Info 1 0 R\n");
 	ps_printf(p, ">>\n");
 	ps_printf(p, "startxref\n");
@@ -826,11 +814,11 @@ ps_pletter(struct termp *p, int c)
 		} else {
 			ps_printf(p, "%zu 0 obj\n", 
 					p->engine.ps.pdfbody +
-					(p->engine.ps.pages + 1) * 4);
+					p->engine.ps.pages * 4);
 			ps_printf(p, "<<\n");
 			ps_printf(p, "/Length %zu 0 R\n", 
-					p->engine.ps.pdfbody +
-					(p->engine.ps.pages + 1) * 4 + 1);
+					p->engine.ps.pdfbody + 1 +
+					p->engine.ps.pages * 4);
 			ps_printf(p, ">>\nstream\n");
 		}
 		p->engine.ps.pdflastpg = p->engine.ps.pdfbytes;
