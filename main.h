@@ -44,8 +44,9 @@ void		  tree_man(void *, const struct man *);
 void		 *ascii_alloc(char *);
 void		  ascii_free(void *);
 
+void		 *pdf_alloc(char *);
 void		 *ps_alloc(char *);
-void		  ps_free(void *);
+void		  pspdf_free(void *);
 
 void		  terminal_mdoc(void *, const struct mdoc *);
 void		  terminal_man(void *, const struct man *);

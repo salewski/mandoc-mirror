@@ -27,7 +27,8 @@ enum	termenc {
 
 enum	termtype {
 	TERMTYPE_CHAR,
-	TERMTYPE_PS
+	TERMTYPE_PS,
+	TERMTYPE_PDF
 };
 
 enum	termfont {
@@ -63,6 +64,9 @@ struct	termp_ps {
 	size_t		  left;		/* body left (AFM units) */
 	size_t		  header;	/* header pos (AFM units) */
 	size_t		  footer;	/* footer pos (AFM units) */
+	size_t		  pdfbytes;
+	size_t		  pdflastpg;
+	size_t		  pdfbody;
 };
 
 struct	termp {
