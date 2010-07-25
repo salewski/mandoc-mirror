@@ -384,6 +384,7 @@ static	void		  ps_printf(struct termp *, const char *, ...);
 static	void		  ps_putchar(struct termp *, char);
 static	void		  ps_setfont(struct termp *, enum termfont);
 static	struct termp	 *pspdf_alloc(char *);
+static	void		  pdf_obj(struct termp *, size_t);
 
 
 void *
@@ -520,6 +521,8 @@ pspdf_free(void *arg)
 
 	if (p->engine.ps.psmarg)
 		free(p->engine.ps.psmarg);
+	if (p->engine.ps.pdfobjs)
+		free(p->engine.ps.pdfobjs);
 
 	term_free(p);
 }
@@ -561,8 +564,6 @@ ps_printf(struct termp *p, const char *fmt, ...)
 	va_end(ap);
 
 	p->engine.ps.psmargcur = strlen(p->engine.ps.psmarg);
-	p->engine.ps.pdfbytes += /* LINTED */
-		len < 0 ? 0 : (size_t)len;
 }
 
 
@@ -584,6 +585,28 @@ ps_putchar(struct termp *p, char c)
 	pos = (int)p->engine.ps.psmargcur++;
 	p->engine.ps.psmarg[pos++] = c;
 	p->engine.ps.psmarg[pos] = '\0';
+}
+
+
+static void
+pdf_obj(struct termp *p, size_t obj)
+{
+
+	assert(obj > 0);
+
+	if ((obj - 1) >= p->engine.ps.pdfobjsz) {
+		p->engine.ps.pdfobjsz = obj + 128;
+		p->engine.ps.pdfobjs = realloc
+			(p->engine.ps.pdfobjs, 
+			 p->engine.ps.pdfobjsz * sizeof(size_t));
+		if (NULL == p->engine.ps.pdfobjs) {
+			perror(NULL);
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	p->engine.ps.pdfobjs[(int)obj - 1] = p->engine.ps.pdfbytes;
+	ps_printf(p, "%zu 0 obj\n", obj);
 }
 
 
@@ -612,19 +635,20 @@ ps_closepage(struct termp *p)
 		ps_printf(p, "endstream\nendobj\n");
 
 		/* Length of content. */
-		ps_printf(p, "%zu 0 obj\n", base + 1);
+		pdf_obj(p, base + 1);
 		ps_printf(p, "%zu\nendobj\n", len);
 
 		/* Resource for content. */
-		ps_printf(p, "%zu 0 obj\n", base + 2);
+		pdf_obj(p, base + 2);
 		ps_printf(p, "<<\n/ProcSet [/PDF /Text]\n");
 		ps_printf(p, "/Font <<\n");
-		for (i = 0; i < TERMFONT__MAX; i++) 
+		for (i = 0; i < (int)TERMFONT__MAX; i++) 
 			ps_printf(p, "/F%d %d 0 R\n", i, 3 + i);
 		ps_printf(p, ">>\n>>\n");
 
 		/* Page node. */
-		ps_printf(p, "%zu 0 obj\n<<\n", base + 3);
+		pdf_obj(p, base + 3);
+		ps_printf(p, "<<\n");
 		ps_printf(p, "/Type /Page\n");
 		ps_printf(p, "/Parent 2 0 R\n");
 		ps_printf(p, "/Resources %zu 0 R\n", base + 2);
@@ -665,7 +689,8 @@ ps_end(struct termp *p)
 		return;
 	} 
 
-	ps_printf(p, "2 0 obj\n<<\n/Type /Pages\n");
+	pdf_obj(p, 2);
+	ps_printf(p, "<<\n/Type /Pages\n");
 	ps_printf(p, "/MediaBox [0 0 %zu %zu]\n",
 			(size_t)AFM2PNT(p, p->engine.ps.width),
 			(size_t)AFM2PNT(p, p->engine.ps.height));
@@ -681,7 +706,7 @@ ps_end(struct termp *p)
 		p->engine.ps.pdfbody + 4;
 
 	ps_printf(p, "]\n>>\nendobj\n");
-	ps_printf(p, "%zu 0 obj\n", base);
+	pdf_obj(p, base);
 	ps_printf(p, "<<\n");
 	ps_printf(p, "/Type /Catalog\n");
 	ps_printf(p, "/Pages 2 0 R\n");
@@ -689,7 +714,12 @@ ps_end(struct termp *p)
 	xref = p->engine.ps.pdfbytes;
 	ps_printf(p, "xref\n");
 	ps_printf(p, "0 %zu\n", base + 1);
-	ps_printf(p, "0000000000 65535 f\n");
+	ps_printf(p, "0000000000 65535 f \n");
+
+	for (i = 0; i < base; i++)
+		ps_printf(p, "%.10zu 00000 n \n", 
+				p->engine.ps.pdfobjs[(int)i]);
+
 	ps_printf(p, "trailer\n");
 	ps_printf(p, "<<\n");
 	ps_printf(p, "/Size %zu\n", base + 1);
@@ -718,7 +748,7 @@ ps_begin(struct termp *p)
 		p->engine.ps.psmarg[0] = '\0';
 	}
 
-	p->engine.ps.pdfbytes = 0;
+	/*p->engine.ps.pdfbytes = 0;*/
 	p->engine.ps.psmargcur = 0;
 	p->engine.ps.flags = PS_MARGINS;
 	p->engine.ps.pscol = p->engine.ps.left;
@@ -768,14 +798,14 @@ ps_begin(struct termp *p)
 		ps_printf(p, "\n%%%%EndComments\n");
 	} else {
 		ps_printf(p, "%%PDF-1.1\n");
-		ps_printf(p, "1 0 obj\n");
+		pdf_obj(p, 1);
 		ps_printf(p, "<<\n");
 		ps_printf(p, "/Creator mandoc-%s\n", VERSION);
 		ps_printf(p, ">>\n");
 		ps_printf(p, "endobj\n");
 
 		for (i = 0; i < (int)TERMFONT__MAX; i++) {
-			ps_printf(p, "%d 0 obj\n", i + 3);
+			pdf_obj(p, (size_t)i + 3);
 			ps_printf(p, "<<\n");
 			ps_printf(p, "/Type /Font\n");
 			ps_printf(p, "/Subtype /Type1\n");
@@ -812,8 +842,7 @@ ps_pletter(struct termp *p, int c)
 					fonts[(int)p->engine.ps.lastf].name, 
 					p->engine.ps.scale);
 		} else {
-			ps_printf(p, "%zu 0 obj\n", 
-					p->engine.ps.pdfbody +
+			pdf_obj(p, p->engine.ps.pdfbody + 
 					p->engine.ps.pages * 4);
 			ps_printf(p, "<<\n");
 			ps_printf(p, "/Length %zu 0 R\n", 

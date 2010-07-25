@@ -64,9 +64,11 @@ struct	termp_ps {
 	size_t		  left;		/* body left (AFM units) */
 	size_t		  header;	/* header pos (AFM units) */
 	size_t		  footer;	/* footer pos (AFM units) */
-	size_t		  pdfbytes;
-	size_t		  pdflastpg;
-	size_t		  pdfbody;
+	size_t		  pdfbytes; 	/* current output byte */
+	size_t		  pdflastpg;	/* byte of last page mark */
+	size_t		  pdfbody;	/* start of body object */
+	size_t		 *pdfobjs;	/* table of object offsets */
+	size_t		  pdfobjsz;	/* size of pdfobjs */
 };
 
 struct	termp {
