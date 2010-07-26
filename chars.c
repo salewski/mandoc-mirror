@@ -33,7 +33,6 @@ struct	ln {
 	struct ln	 *next;
 	const char	 *code;
 	const char	 *ascii;
-	size_t		  asciisz;
 	int		  unicode;
 	int		  type;
 #define	CHARS_CHAR	 (1 << 0)
@@ -43,12 +42,12 @@ struct	ln {
 
 #define	LINES_MAX	  370
 
-#define CHAR(in, ch, chsz, code) \
-	{ NULL, (in), (ch), (chsz), (code), CHARS_CHAR },
-#define STRING(in, ch, chsz, code) \
-	{ NULL, (in), (ch), (chsz), (code), CHARS_STRING },
-#define BOTH(in, ch, chsz, code) \
-	{ NULL, (in), (ch), (chsz), (code), CHARS_BOTH },
+#define CHAR(in, ch, code) \
+	{ NULL, (in), (ch), (code), CHARS_CHAR },
+#define STRING(in, ch, code) \
+	{ NULL, (in), (ch), (code), CHARS_STRING },
+#define BOTH(in, ch, code) \
+	{ NULL, (in), (ch), (code), CHARS_BOTH },
 
 #define	CHAR_TBL_START	  static struct ln lines[LINES_MAX] = {
 #define	CHAR_TBL_END	  };
@@ -165,7 +164,7 @@ chars_spec2str(void *arg, const char *p, size_t sz, size_t *rsz)
 	if (NULL == ln)
 		return(NULL);
 
-	*rsz = ln->asciisz;
+	*rsz = strlen(ln->ascii);
 	return(ln->ascii);
 }
 
@@ -182,7 +181,7 @@ chars_res2str(void *arg, const char *p, size_t sz, size_t *rsz)
 	if (NULL == ln)
 		return(NULL);
 
-	*rsz = ln->asciisz;
+	*rsz = strlen(ln->ascii);
 	return(ln->ascii);
 }
 
