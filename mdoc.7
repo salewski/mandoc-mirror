@@ -805,7 +805,7 @@ then the macro accepts an arbitrary number of arguments.
 .It Sx \&Cd  Ta    Yes      Ta    Yes      Ta    >0
 .It Sx \&Cm  Ta    Yes      Ta    Yes      Ta    n
 .It Sx \&Db  Ta    \&No     Ta    \&No     Ta    1
-.It Sx \&Dd  Ta    \&No     Ta    \&No     Ta    >0
+.It Sx \&Dd  Ta    \&No     Ta    \&No     Ta    n
 .It Sx \&Dt  Ta    \&No     Ta    \&No     Ta    n
 .It Sx \&Dv  Ta    Yes      Ta    Yes      Ta    n
 .It Sx \&Dx  Ta    Yes      Ta    Yes      Ta    n
@@ -1470,7 +1470,7 @@ This is the mandatory first macro of any
 manual.
 Its syntax is as follows:
 .Pp
-.D1 Pf \. Sx \&Dd Ar date
+.D1 Pf \. Sx \&Dd Op Ar date
 .Pp
 The
 .Ar date
@@ -1480,7 +1480,7 @@ which signifies the current manual revision date dictated by
 .Xr cvs 1 ,
 or instead a valid canonical date as specified by
 .Sx Dates .
-If a date does not conform, the current date is used instead.
+If a date does not conform or is empty, the current date is used.
 .Pp
 Examples:
 .D1 \&.Dd $\&Mdocdate$
@@ -2717,6 +2717,12 @@ Heirloom troff, the other significant troff implementation accepting
 \-mdoc, is similar to historic groff.
 .Pp
 .Bl -dash -compact
+.It
+An empty
+.Sq \&Dd
+macro in groff prints
+.Dq Epoch .
+In mandoc, it resolves to the current date.
 .It
 The \es (font size), \em (font colour), and \eM (font filling colour)
 font decoration escapes are all discarded in mandoc.

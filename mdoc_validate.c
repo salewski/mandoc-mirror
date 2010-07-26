@@ -145,7 +145,7 @@ static	v_pre	 pres_ss[] = { pre_ss, NULL };
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Ap */
-	{ pres_dd, posts_text },		/* Dd */
+	{ pres_dd, posts_wtext },		/* Dd */
 	{ pres_dt, posts_dt },			/* Dt */
 	{ pres_os, NULL },			/* Os */
 	{ pres_sh, posts_sh },			/* Sh */ 

@@ -904,6 +904,11 @@ post_dd(POST_ARGS)
 {
 	char		buf[DATESIZ];
 
+	if (NULL == n->child) {
+		m->meta.date = time(NULL);
+		return(post_prol(m, n));
+	}
+
 	if ( ! concat(m, buf, n->child, DATESIZ))
 		return(0);
 
