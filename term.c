@@ -502,6 +502,8 @@ term_word(struct termp *p, const char *word)
 
 	if ( ! (p->flags & TERMP_NONOSPACE))
 		p->flags &= ~TERMP_NOSPACE;
+	else
+		p->flags |= TERMP_NOSPACE;
 
 	p->flags &= ~TERMP_SENTENCE;
 

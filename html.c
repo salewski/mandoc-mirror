@@ -419,6 +419,8 @@ print_otag(struct html *h, enum htmltag tag,
 
 	if ( ! (h->flags & HTML_NONOSPACE))
 		h->flags &= ~HTML_NOSPACE;
+	else
+		h->flags |= HTML_NOSPACE;
 
 	/* Print out the tag name and attributes. */
 
