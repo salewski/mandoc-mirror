@@ -11,7 +11,7 @@ div.ssec-head	{ font-weight: bold; font-style: normal; } /* Sub-sections (Ss). *
 div.ssec-body	{ }
 div.ssec-block	{ }
 
-span.addr	{ } /* Address (Ad). */
+span.addr	{ font-style: italic; font-weight: normal; } /* Address (Ad). */
 span.arg	{ font-style: italic; font-weight: normal; } /* Command argument (Ar). */
 span.author	{ } /* Author name (An). */
 span.bold	{ font-weight: bold; font-style: normal; } /* Generically bold (SB, BI, IB, BR, RB, B). */
