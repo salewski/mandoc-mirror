@@ -311,6 +311,7 @@
 							<LI>lots of internal clean-ups in character escapes</LI>
 							<LI>un-break literal contexts in <A HREF="man.7.html">man</A> documents</LI>
 							<LI>improve -Thtml output for -man</LI>
+							<LI>add <A HREF="mandoc.1.html">mandoc</A> -Tpdf support</LI>
 						</UL>
 					</DIV>
 					<DIV CLASS="news">
