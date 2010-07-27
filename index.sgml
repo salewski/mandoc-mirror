@@ -313,7 +313,7 @@
 							<LI>polish <A HREF="mandoc.1.html">mandoc</A> <SPAN CLASS="flag">-Tps</SPAN> output</LI>
 							<LI>lots of internal clean-ups in character escapes</LI>
 							<LI>un-break literal contexts in <A HREF="man.7.html">man</A> documents</LI>
-							<LI>improve -Thtml output for -man</LI>
+							<LI>improve <SPAN CLASS="flag">-Thtml</SPAN> output for <SPAN CLASS="flag">-man</SPAN></LI>
 							<LI>add <A HREF="mandoc.1.html">mandoc</A> <SPAN CLASS="flag">-Tpdf</SPAN> support</LI>
 						</UL>
 					</DIV>
@@ -332,7 +332,7 @@
 							<LI><Q>Bk</Q> <A HREF="mdoc.7.html">mdoc</A> support</LI>
 							<LI>beautified SYNOPSIS section output</LI>
 							<LI>variable font-width and paper-size support in <A HREF="mandoc.1.html">mandoc</A>
-								<SPAN CLASS="flag">-Tps output</SPAN></LI>
+								<SPAN CLASS="flag">-Tps</SPAN> output</LI>
 							<LI>acceptance of scope-block breakage in <A HREF="mdoc.7.html">mdoc</A></LI>
 							<LI>clarify error message status</LI>
 							<LI>many minor bug-fixes and formatting issues resolved</LI>
