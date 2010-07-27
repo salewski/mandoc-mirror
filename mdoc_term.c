@@ -1621,8 +1621,7 @@ termp_fa_pre(DECL_ARGS)
 static int
 termp_bd_pre(DECL_ARGS)
 {
-	size_t			 tabwidth;
-	size_t			 rm, rmax;
+	size_t			 tabwidth, rm, rmax;
 	const struct mdoc_node	*nn;
 
 	if (MDOC_BLOCK == n->type) {
@@ -1654,12 +1653,9 @@ termp_bd_pre(DECL_ARGS)
 	p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
 
 	for (nn = n->child; nn; nn = nn->next) {
-		p->flags |= TERMP_NOSPACE;
+		if (nn->prev && nn->prev->line < nn->line)
+			term_newln(p);
 		print_mdoc_node(p, pair, m, nn);
-		if (NULL == nn->prev ||
-		    nn->prev->line < nn->line ||
-		    NULL == nn->next)
-			term_flushln(p);
 	}
 
 	p->tabwidth = tabwidth;
