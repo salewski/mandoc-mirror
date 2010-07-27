@@ -969,30 +969,40 @@ roff_cond(ROFF_ARGS)
 static enum rofferr
 roff_ds(ROFF_ARGS)
 {
-	char *name, *string, *end;
+	char		*name, *string;
+
+	/*
+	 * A symbol is named by the first word following the macro
+	 * invocation up to a space.  Its value is anything after the
+	 * name's trailing whitespace and optional double-quote.  Thus,
+	 *
+	 *  [.ds foo "bar  "     ]
+	 *
+	 * will have `bar  "     ' as its value.
+	 */
 
 	name = *bufp + pos;
 	if ('\0' == *name)
 		return(ROFF_IGN);
 
 	string = name;
+	/* Read until end of name. */
 	while (*string && ' ' != *string)
 		string++;
+
+	/* Nil-terminate name. */
 	if (*string)
-		*(string++) = NULL;
-	if (*string && '"' == *string)
-		string++;
+		*(string++) = '\0';
+	
+	/* Read past spaces. */
 	while (*string && ' ' == *string)
 		string++;
-	end = string;
-	while (*end)
-		end++;
-	if (string < end) {
-		end--;
-		if (*end == '"')
-			*end = '\0';
-	}
 
+	/* Read passed initial double-quote. */
+	if (*string && '"' == *string)
+		string++;
+
+	/* The rest is the value. */
 	roff_setstr(r, name, string);
 	return(ROFF_IGN);
 }
@@ -1060,6 +1070,7 @@ roff_setstr(struct roff *r, const char *name, const char *string)
 	} else
 		free(n->string);
 
+	ROFF_DEBUG("roff: new symbol: [%s] = [%s]\n", name, string);
 	n->string = string ? strdup(string) : NULL;
 }
 
