@@ -3,7 +3,8 @@ body		{ color: #333333;
 		  font-family: Verdana, Tahoma, Arial, sans-serif; }
 
 table.frame	{ max-width: 800px; 
-		  padding-left: 10px; }
+		  padding-right: 2em;
+		  padding-left: 1em; }
 
 table		{ padding-left: 40px; }
 
