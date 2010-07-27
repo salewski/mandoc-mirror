@@ -1081,7 +1081,7 @@ roff_getstrn(const struct roff *r, const char *name, size_t len)
 	const struct roffstr *n;
 
 	n = r->first_string;
-	while (n && (strncmp(name, n->name, len) || '\0' != n->name[len]))
+	while (n && (strncmp(name, n->name, len) || '\0' != n->name[(int)len]))
 		n = n->next;
 
 	return(n ? n->string : NULL);
