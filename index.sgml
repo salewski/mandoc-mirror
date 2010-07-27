@@ -164,7 +164,9 @@
 							<TD VALIGN="top">
 								man macro compiler library
 								<SPAN STYLE="font-size: smaller;">
-									(<A HREF="man.3.txt">text</A> | <A HREF="man.3.ps">postscript</A>)
+									(<A HREF="man.3.txt">text</A> | 
+									<A HREF="man.3.pdf">pdf</A> |
+									<A HREF="man.3.ps">postscript</A>)
 								</SPAN>
 							</TD>
 						</TR>
@@ -173,7 +175,9 @@
 							<TD VALIGN="top">
 								man language reference
 								<SPAN STYLE="font-size: smaller;">
-									(<A HREF="man.7.txt">text</A> | <A HREF="man.7.ps">postscript</A>)
+									(<A HREF="man.7.txt">text</A> | 
+									<A HREF="man.7.pdf">pdf</A> |
+									<A HREF="man.7.ps">postscript</A>)
 								</SPAN>
 							</TD>
 						</TR>
@@ -182,7 +186,9 @@
 							<TD VALIGN="top">
 								format and display UNIX manuals
 								<SPAN STYLE="font-size: smaller;">
-									(<A HREF="mandoc.1.txt">text</A> | <A HREF="mandoc.1.ps">postscript</A>)
+									(<A HREF="mandoc.1.txt">text</A> | 
+									<A HREF="mandoc.1.pdf">pdf</A> |
+									<A HREF="mandoc.1.ps">postscript</A>)
 								</SPAN>
 							</TD>
 						</TR>
@@ -191,8 +197,9 @@
 							<TD VALIGN="top">
 								mandoc special characters
 								<SPAN STYLE="font-size: smaller;">
-									(<A HREF="mandoc_char.7.txt">text</A> | <A
-									HREF="mandoc_char.7.ps">postscript</A>)
+									(<A HREF="mandoc_char.7.txt">text</A> | 
+									<A HREF="mandoc_char.7.pdf">pdf</A> |
+									<A HREF="mandoc_char.7.ps">postscript</A>)
 								</SPAN>
 							</TD>
 						</TR>
@@ -201,7 +208,9 @@
 							<TD VALIGN="top">
 								mdoc macro compiler library
 								<SPAN STYLE="font-size: smaller;">
-									(<A HREF="mdoc.3.txt">text</A> | <A HREF="mdoc.3.ps">postscript</A>)
+									(<A HREF="mdoc.3.txt">text</A> | 
+									<A HREF="mdoc.3.pdf">pdf</A> |
+									<A HREF="mdoc.3.ps">postscript</A>)
 								</SPAN>
 							</TD>
 						</TR>
@@ -210,7 +219,9 @@
 							<TD VALIGN="top">
 								mdoc language reference
 								<SPAN STYLE="font-size: smaller;">
-									(<A HREF="mdoc.7.txt">text</A> | <A HREF="mdoc.7.ps">postscript</A>)
+									(<A HREF="mdoc.7.txt">text</A> | 
+									<A HREF="mdoc.7.pdf">pdf</A> |
+									<A HREF="mdoc.7.ps">postscript</A>)
 								</SPAN>
 							</TD>
 						</TR>
@@ -219,7 +230,9 @@
 							<TD VALIGN="top">
 								roff macro compiler library
 								<SPAN STYLE="font-size: smaller;">
-									(<A HREF="roff.3.txt">text</A> | <A HREF="roff.3.ps">postscript</A>)
+									(<A HREF="roff.3.txt">text</A> | 
+									<A HREF="roff.3.pdf">pdf</A> |
+									<A HREF="roff.3.ps">postscript</A>)
 								</SPAN>
 							</TD>
 						</TR>
@@ -228,7 +241,9 @@
 							<TD VALIGN="top">
 								roff-mandoc language reference
 								<SPAN STYLE="font-size: smaller;">
-									(<A HREF="roff.7.txt">text</A> | <A HREF="roff.7.ps">postscript</A>)
+									(<A HREF="roff.7.txt">text</A> | 
+									<A HREF="roff.7.pdf">pdf</A> |
+									<A HREF="roff.7.ps">postscript</A>)
 								</SPAN>
 							</TD>
 						</TR>
