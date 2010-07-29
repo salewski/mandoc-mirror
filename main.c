@@ -37,6 +37,10 @@
 #include "man.h"
 #include "roff.h"
 
+#ifndef MAP_FILE
+#define	MAP_FILE	0
+#endif
+
 #define	UNCONST(a)	((void *)(uintptr_t)(const void *)(a))
 
 /* FIXME: Intel's compiler?  LLVM?  pcc?  */
