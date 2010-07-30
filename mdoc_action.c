@@ -660,6 +660,13 @@ post_bl_tagwidth(POST_ARGS)
 		assert(MDOC_BLOCK == nn->type);
 		nn = nn->head->child;
 
+		if (nn == NULL) {
+			/* No -width for .Bl and first .It is emtpy */
+			if ( ! mdoc_nmsg(m, n, MANDOCERR_NOWIDTHARG))
+				return(0);
+			break;
+		}
+
 		if (MDOC_TEXT == nn->type) {
 			sz = strlen(nn->string) + 1;
 			break;
