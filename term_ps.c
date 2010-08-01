@@ -353,20 +353,23 @@ static	const struct font fonts[TERMFONT__MAX] = {
 
 /* These work the buffer used by the header and footer. */
 #define	PS_BUFSLOP	  128
-#define	PS_GROWBUF(p, sz) \
-	do if ((p)->engine.ps.psmargcur + (sz) > \
-			(p)->engine.ps.psmargsz) { \
-		(p)->engine.ps.psmargsz += /* CONSTCOND */ \
-			MAX(PS_BUFSLOP, (sz)); \
-		(p)->engine.ps.psmarg = realloc \
-			((p)->engine.ps.psmarg,  \
-			 (p)->engine.ps.psmargsz); \
-		if (NULL == (p)->engine.ps.psmarg) { \
-			perror(NULL); \
-			exit(EXIT_FAILURE); \
-		} \
-	} while (/* CONSTCOND */ 0)
 
+static void
+ps_growbuf(struct termp *p, size_t sz)
+{
+	if (p->engine.ps.psmargcur + sz <= p->engine.ps.psmargsz)
+		return;
+
+	if (sz < PS_BUFSLOP)
+		sz = PS_BUFSLOP;
+	p->engine.ps.psmargsz += sz;
+
+	p->engine.ps.psmarg = realloc(p->engine.ps.psmarg,
+	    p->engine.ps.psmargsz);
+	if (NULL == p->engine.ps.psmarg)
+		perror(NULL);
+		exit(EXIT_FAILURE);
+}
 
 static	double		  ps_hspan(const struct termp *,
 				const struct roffsu *);
@@ -556,7 +559,7 @@ ps_printf(struct termp *p, const char *fmt, ...)
 	 * assumption that will cause pukeage if it's not the case.
 	 */
 
-	PS_GROWBUF(p, PS_BUFSLOP);
+	ps_growbuf(p, PS_BUFSLOP);
 
 	pos = (int)p->engine.ps.psmargcur;
 	len = vsnprintf(&p->engine.ps.psmarg[pos], PS_BUFSLOP, fmt, ap);
@@ -580,7 +583,7 @@ ps_putchar(struct termp *p, char c)
 		return;
 	}
 
-	PS_GROWBUF(p, 2);
+	ps_growbuf(p, 2);
 
 	pos = (int)p->engine.ps.psmargcur++;
 	p->engine.ps.psmarg[pos++] = c;
