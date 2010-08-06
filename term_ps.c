@@ -362,13 +362,17 @@ ps_growbuf(struct termp *p, size_t sz)
 
 	if (sz < PS_BUFSLOP)
 		sz = PS_BUFSLOP;
+
 	p->engine.ps.psmargsz += sz;
 
-	p->engine.ps.psmarg = realloc(p->engine.ps.psmarg,
-	    p->engine.ps.psmargsz);
-	if (NULL == p->engine.ps.psmarg)
+	p->engine.ps.psmarg = realloc
+		(p->engine.ps.psmarg,
+		 p->engine.ps.psmargsz);
+	
+	if (NULL == p->engine.ps.psmarg) {
 		perror(NULL);
 		exit(EXIT_FAILURE);
+	}
 }
 
 static	double		  ps_hspan(const struct termp *,
