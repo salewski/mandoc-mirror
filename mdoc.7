@@ -570,7 +570,7 @@ See
 Common misuses and misunderstandings should be explained
 in this section.
 .It Em BUGS
-Known bugs, limitations and work-arounds should be described
+Known bugs, limitations, and work-arounds should be described
 in this section.
 .It Em SECURITY CONSIDERATIONS
 Documents any security precautions that operators should consider.
@@ -876,10 +876,6 @@ referring to book titles.
 Publication city or location of an
 .Sx \&Rs
 block.
-.Pp
-.Em Remarks :
-this macro is not implemented in
-.Xr groff 1 .
 .Ss \&%D
 Publication date of an
 .Sx \&Rs
@@ -2720,6 +2716,10 @@ Heirloom troff, the other significant troff implementation accepting
 \-mdoc, is similar to historic groff.
 .Pp
 .Bl -dash -compact
+.It
+The
+.Sq \&%C
+macro is not implemented in GNU troff.
 .It
 An empty
 .Sq \&Dd
