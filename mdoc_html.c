@@ -1457,11 +1457,11 @@ mdoc_bd_pre(MDOC_ARGS)
 	print_otag(h, TAG_DIV, 2, tag);
 
 	for (nn = n->child; nn; nn = nn->next) {
-		if (nn->prev && nn->prev->line < nn->line) {
-			print_text(h, "\n");
-			h->flags |= HTML_NOSPACE;
-		}
 		print_mdoc_node(m, nn, h);
+		if (nn->next && nn->next->line == nn->line)
+			continue;
+		print_text(h, "\n");
+		h->flags |= HTML_NOSPACE;
 	}
 
 	return(0);
