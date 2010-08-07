@@ -21,7 +21,6 @@
 #include <sys/types.h>
 
 #include <assert.h>
-#include <ctype.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -483,20 +482,11 @@ man_pmacro(struct man *m, int ln, char *buf, int offs)
 
 	/* Copy the first word into a nil-terminated buffer. */
 
-	for (j = 0; j < 4; j++, i++) {
+	for (j = 0; j < 4; j++, i++)
 		if ('\0' == (mac[j] = buf[i]))
 			break;
 		else if (' ' == buf[i])
 			break;
-
-		/* Check for invalid characters. */
-
-		if (isgraph((u_char)buf[i]))
-			continue;
-		if ( ! man_pmsg(m, ln, i, MANDOCERR_BADCHAR))
-			return(0);
-		i--;
-	}
 
 	mac[j] = '\0';
 
