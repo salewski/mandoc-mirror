@@ -63,6 +63,9 @@
 - prohibit `Nm' from having non-text HEAD children
   (e.g., NetBSD mDNSShared/dns-sd.1)
   (mdoc_html.c and mdoc_term.c `Nm' handlers can be slightly simplified)
+
+- allow `Qq', `Dq', `Sq', `Aq', `Bq' to have 0 arguments
+  noted by Alex Kozlov 08/06/10 23:05
   
 ************************************************************************
 * formatting issues: ugly output
