@@ -1653,9 +1653,11 @@ termp_bd_pre(DECL_ARGS)
 	p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
 
 	for (nn = n->child; nn; nn = nn->next) {
-		if (nn->prev && nn->prev->line < nn->line)
-			term_newln(p);
 		print_mdoc_node(p, pair, m, nn);
+		if (nn->next && nn->next->line == nn->line)
+			continue;
+		term_flushln(p);
+		p->flags |= TERMP_NOSPACE;
 	}
 
 	p->tabwidth = tabwidth;
