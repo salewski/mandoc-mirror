@@ -480,14 +480,14 @@ man_pmacro(struct man *m, int ln, char *buf, int offs)
 
 	ppos = i;
 
-	/* Copy the first word into a nil-terminated buffer. */
+	/*
+	 * Copy the first word into a nil-terminated buffer.
+	 * Stop copying when a tab, space, or eoln is encountered.
+	 */
 
-	for (j = 0; j < 4; j++, i++)
-		if ('\0' == (mac[j] = buf[i]))
-			break;
-		else if (' ' == buf[i])
-			break;
-
+	j = 0;
+	while (j < 4 && '\0' != buf[i] && ' ' != buf[i] && '\t' != buf[i])
+		mac[j++] = buf[i++];
 	mac[j] = '\0';
 
 	if (j == 4 || j < 1) {
