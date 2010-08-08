@@ -466,6 +466,7 @@ fdesc(struct curparse *curp)
 	struct buf	 ln, blk;
 	int		 i, pos, lnn, lnn_start, with_mmap, of;
 	enum rofferr	 re;
+	unsigned char	 c;
 	struct man	*man;
 	struct mdoc	*mdoc;
 	struct roff	*roff;
@@ -508,8 +509,8 @@ fdesc(struct curparse *curp)
 			 * writers: use special characters.
 			 */
 
-			if ( ! isgraph((u_char)blk.buf[i]) &&
-					! isblank((u_char)blk.buf[i])) {
+			c = (unsigned char) blk.buf[i];
+			if ( ! (isascii(c) && (isgraph(c) || isblank(c)))) {
 				if ( ! mmsg(MANDOCERR_BADCHAR, curp, 
 						lnn_start, pos, 
 						"ignoring byte"))
