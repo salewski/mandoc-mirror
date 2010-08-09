@@ -2095,7 +2095,7 @@ Its syntax is as follows:
 .D1 Pf \. Sx \&Lk Cm uri Op Cm name
 .Pp
 Examples:
-.D1 \&.Lk http://bsd.lv "The BSD.lv Project"
+.D1 \&.Lk http://bsd.lv \*qThe BSD.lv Project\*q
 .D1 \&.Lk http://bsd.lv
 .Pp
 See also
@@ -2717,9 +2717,13 @@ Heirloom troff, the other significant troff implementation accepting
 .Pp
 .Bl -dash -compact
 .It
+groff only accepts a single
+.Sq \&Lk
+link-name argument; the remainder is misformatted.
+.It
 The
 .Sq \&%C
-macro is not implemented in GNU troff.
+macro is not implemented in groff.
 .It
 An empty
 .Sq \&Dd
