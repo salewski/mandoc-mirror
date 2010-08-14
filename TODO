@@ -1,5 +1,5 @@
 ************************************************************************
-* Official mandoc TODO.  May not be quite up to date.
+* Official mandoc TODO.
 * $Id$
 ************************************************************************
 
@@ -96,6 +96,8 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 
 - improve hashing mechanism for characters (not as important)
 
+- the PDF file is HUGE: this can be reduced by using relative offsets
+
 ************************************************************************
 * structural issues
 ************************************************************************
@@ -104,4 +106,3 @@ Several areas can be cleaned up to make mandoc even faster.  These are
   not for strings containing escape sequences.  For example, this
   hinders calculation of the indent required for .Nm \&[ in text(1).
   comments from kristaps@  Wed, 21 Jul 2010 23:26:08 +0200
-
