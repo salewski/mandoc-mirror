@@ -84,7 +84,40 @@
 * formatting issues: gratuitious differences
 ************************************************************************
 
-- none reported right now (yet schwarze@ knows of some)
+- .%T should be quoted, not underlined, when .%J is also present,
+  to better distinguish the contents of .%T and .%J,
+  see for example OpenBSD cat(1)
+
+- .It ${name Ns [ selector ] Ns }
+  should be "${name[selector]}" not "${name [selector]}"
+  This is parsed as
+  text("${name") text("[") Ns() text(selector)...
+  Opening punctuation should not fall out of .Ns.
+  see for example OpenBSD csh(1)
+
+- .%A should append the last author with " and " (if there are two)
+  or ", and " (if there are more), not ", "
+  see for example OpenBSD csh(1)
+
+- In .Bl -bullet, the groff bullet is "+\b+\bo\bo", the mandoc bullet
+  is just "o\bo".
+  see for example OpenBSD ksh(1)
+
+- .No text No ) is "text )", not "text)"
+  see the terrible example
+    case word in [[(]  pattern [| pattern] ... ) list ;; ] ... esac
+  in OpenBSD ksh(1)
+
+- .Sm should *not* produce as a blank line in .Bd -literal
+  see for example "Brace expansion" in OpenBSD ksh(1)
+
+- The characters "|" and "\*(Ba" should never be bold,
+  not even in the middle of a word, e.g. ".Cm b\*(Bac" in
+  "mknod [-m mode] name b|c major minor"
+  in OpenBSD ksh(1)
+
+- A bogus .Pp between two .It must not produce a double blank line,
+  see between -R and -r in OpenBSD rm(1).
 
 ************************************************************************
 * performance issues
@@ -106,3 +139,9 @@ Several areas can be cleaned up to make mandoc even faster.  These are
   not for strings containing escape sequences.  For example, this
   hinders calculation of the indent required for .Nm \&[ in text(1).
   comments from kristaps@  Wed, 21 Jul 2010 23:26:08 +0200
+
+- another example of the same problem:
+  .Bl -tag -width "\eD{format}XX" -compact
+  in OpenBSD ksh(1) gives the wrong width
+  because "\e" is one character in groff, two in mandoc
+
