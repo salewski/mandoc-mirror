@@ -74,6 +74,11 @@
 - perl(1) SYNOPSIS looks bad; reported by deraadt@
   1) man(7) seems to need SYNOPSIS .Nm blocks, too
 
+- In .Bl -column,
+  .It Em Authentication<tab>Key Length
+  ought to render "Key Length" with emphasis, too,
+  see OpenBSD iked.conf(5).
+
 - empty phrases in .Bl column produce too few blanks
   try e.g. .Bl -column It Ta Ta
   reported by millert Fri, 02 Apr 2010 16:13:46 -0400
@@ -117,7 +122,36 @@
   in OpenBSD ksh(1)
 
 - A bogus .Pp between two .It must not produce a double blank line,
-  see between -R and -r in OpenBSD rm(1).
+  see between -R and -r in OpenBSD rm(1), before "update" in mount(8),
+  or in DIAGNOSTICS in init(8).
+
+- .Bd -literal and .Bd -unfilled are *not* identical.
+  In -literal, tabs are 8 spaces.
+  In -unfilled, tabs are 5 spaces, just like in -filled and -ragged.
+  See the CCDF_* display in OpenBSD ccdconfig(8).
+
+- In .Bd -unfilled, .Pp should produce one blank line, not two;
+  see the ccd.conf display in OpenBSD ccdconfig(8).
+
+- .Nx 1.0a
+  should be "NetBSD 1.0A", not "NetBSD 1.0a",
+  see OpenBSD ccdconfig(8).
+
+- In .Bl -tag, if a tag exceeds the right margin and must be continued
+  on the next line, it must be indented by -width, not width+1;
+  see "rule block|pass" in OpenBSD ifconfig(8).
+
+- When .%T is used outside an .Rs context and with a trailing comma,
+  there is no point in rendering two commata,
+  see the first paragraph of the DESCRIPTION in OpenBSD mount_nfs(8).
+
+- When .%T is used outside an .Rs context and without a trailing comma,
+  no comma should be rendered at all,
+  see the first paragraph of the DESCRIPTION in OpenBSD exports(5).
+
+- Bogus .Pp before .Bl should not cause a double blank line,
+  see "The route utility provides the following simple commands:"
+  in OpenBSD route(8).
 
 ************************************************************************
 * performance issues
