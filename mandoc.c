@@ -57,8 +57,6 @@ mandoc_special(char *p)
 		/* FALLTHROUGH */
 	case ('w'):
 		/* FALLTHROUGH */
-	case ('v'):
-		/* FALLTHROUGH */
 	case ('S'):
 		/* FALLTHROUGH */
 	case ('R'):
@@ -91,13 +89,19 @@ mandoc_special(char *p)
 		term = '\'';
 		break;
 #endif
+	case ('h'):
+		/* FALLTHROUGH */
+	case ('v'):
+		/* FALLTHROUGH */
 	case ('s'):
 		if (ASCII_HYPH == *p)
 			*p = '-';
-		if ('+' == *p || '-' == *p)
-			p++;
 
-		i = ('s' != *(p - 1));
+		i = 0;
+		if ('+' == *p || '-' == *p) {
+			p++;
+			i = 1;
+		}
 
 		switch (*p++) {
 		case ('('):
@@ -110,7 +114,7 @@ mandoc_special(char *p)
 			term = '\'';
 			break;
 		case ('0'):
-			i++;
+			i = 1;
 			/* FALLTHROUGH */
 		default:
 			len = 1;
@@ -121,13 +125,11 @@ mandoc_special(char *p)
 		if (ASCII_HYPH == *p)
 			*p = '-';
 		if ('+' == *p || '-' == *p) {
-			if (i++)
+			if (i)
 				return(0);
 			p++;
 		} 
 		
-		if (0 == i)
-			return(0);
 		break;
 #if 0
 	case ('Y'):
