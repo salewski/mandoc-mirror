@@ -40,7 +40,7 @@ struct	ln {
 #define CHARS_BOTH	 (CHARS_CHAR | CHARS_STRING)
 };
 
-#define	LINES_MAX	  370
+#define	LINES_MAX	  369
 
 #define CHAR(in, ch, code) \
 	{ NULL, (in), (ch), (code), CHARS_CHAR },
