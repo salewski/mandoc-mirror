@@ -285,7 +285,7 @@
 								</TD>
 								<TD>
 									bug-reports, general questions, and announcements 
-									<SPAN STYLE="font-size: smaller;">(<A HREF="/archives/discuss">archive</A>)</SPAN>
+									<SPAN STYLE="font-size: smaller;">(<A HREF="/archives/discuss/summary.html">archive</A>)</SPAN>
 								</TD>
 							</TR>
 							<TR>
@@ -295,7 +295,7 @@
 								</TD>
 								<TD>
 									patches and system discussions 
-									<SPAN STYLE="font-size: smaller;">(<A HREF="/archives/tech">archive</A>)</SPAN>
+									<SPAN STYLE="font-size: smaller;">(<A HREF="/archives/tech/summary.html">archive</A>)</SPAN>
 								</TD>
 							</TR>
 							<TR>
@@ -305,7 +305,7 @@
 								</TD>
 								<TD>
 									source commit messages 
-									<SPAN STYLE="font-size: smaller;">(<A HREF="/archives/source">archive</A>)</SPAN>
+									<SPAN STYLE="font-size: smaller;">(<A HREF="/archives/source/summary.html">archive</A>)</SPAN>
 								</TD>
 							</TR>
 						</TBODY>
