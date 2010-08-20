@@ -551,14 +551,6 @@ fdesc(struct curparse *curp)
 		}
 	}
 
-	/*
-	 * With -Wstop and warnings or errors of at least
-	 * the requested level, do not produce output.
-	 */
-
-	if (MANDOCLEVEL_OK != exit_status && curp->wstop)
-		goto cleanup;
-
 	/* NOTE a parser may not have been assigned, yet. */
 
 	if ( ! (man || mdoc)) {
@@ -581,6 +573,14 @@ fdesc(struct curparse *curp)
 		assert(MANDOCLEVEL_FATAL <= exit_status);
 		goto cleanup;
 	}
+
+	/*
+	 * With -Wstop and warnings or errors of at least
+	 * the requested level, do not produce output.
+	 */
+
+	if (MANDOCLEVEL_OK != exit_status && curp->wstop)
+		goto cleanup;
 
 	/* If unset, allocate output dev now (if applicable). */
 
