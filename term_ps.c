@@ -29,6 +29,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "mandoc.h"
 #include "out.h"
 #include "main.h"
 #include "term.h"
@@ -371,7 +372,7 @@ ps_growbuf(struct termp *p, size_t sz)
 	
 	if (NULL == p->engine.ps.psmarg) {
 		perror(NULL);
-		exit(EXIT_FAILURE);
+		exit(MANDOCLEVEL_SYSERR);
 	}
 }
 
@@ -608,7 +609,7 @@ pdf_obj(struct termp *p, size_t obj)
 			 p->engine.ps.pdfobjsz * sizeof(size_t));
 		if (NULL == p->engine.ps.pdfobjs) {
 			perror(NULL);
-			exit(EXIT_FAILURE);
+			exit(MANDOCLEVEL_SYSERR);
 		}
 	}
 

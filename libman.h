@@ -27,7 +27,6 @@ enum	man_next {
 struct	man {
 	void		*data; /* private application data */
 	mandocmsg	 msg; /* output message handler */
-	int		 pflags; /* parse flags (see man.h) */
 	int		 flags; /* parse flags */
 #define	MAN_HALT	(1 << 0) /* badness happened: die */
 #define	MAN_ELINE	(1 << 1) /* Next-line element scope. */

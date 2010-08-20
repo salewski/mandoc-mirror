@@ -98,8 +98,6 @@ static	int		  node_append(struct mdoc *,
 				struct mdoc_node *);
 static	int		  mdoc_ptext(struct mdoc *, int, char *, int);
 static	int		  mdoc_pmacro(struct mdoc *, int, char *, int);
-static	int		  macrowarn(struct mdoc *, int, 
-				const char *, int);
 
 
 const struct mdoc_node *
@@ -191,8 +189,7 @@ mdoc_free(struct mdoc *mdoc)
  * Allocate volatile and non-volatile parse resources.  
  */
 struct mdoc *
-mdoc_alloc(struct regset *regs, void *data, 
-		int pflags, mandocmsg msg)
+mdoc_alloc(struct regset *regs, void *data, mandocmsg msg)
 {
 	struct mdoc	*p;
 
@@ -200,7 +197,6 @@ mdoc_alloc(struct regset *regs, void *data,
 
 	p->msg = msg;
 	p->data = data;
-	p->pflags = pflags;
 	p->regs = regs;
 
 	mdoc_hash_init();
@@ -727,21 +723,6 @@ mdoc_ptext(struct mdoc *m, int line, char *buf, int offs)
 }
 
 
-static int
-macrowarn(struct mdoc *m, int ln, const char *buf, int offs)
-{
-	int		 rc;
-
-	rc = mdoc_vmsg(m, MANDOCERR_MACRO, ln, offs, 
-			"unknown macro: %s%s", 
-			buf, strlen(buf) > 3 ? "..." : "");
-
-	/* FIXME: logic should be in driver. */
-	/* FIXME: broken, will error out and not omit a message. */
-	return(MDOC_IGN_MACRO & m->pflags ? rc : 0);
-}
-
-
 /*
  * Parse a macro line, that is, a line beginning with the control
  * character.
@@ -785,15 +766,11 @@ mdoc_pmacro(struct mdoc *m, int ln, char *buf, int offs)
 		mac[j++] = buf[i++];
 	mac[j] = '\0';
 
-	if (j == 4 || j < 2) {
-		if ( ! macrowarn(m, ln, mac, sv))
-			goto err;
-		return(1);
-	} 
-	
-	if (MDOC_MAX == (tok = mdoc_hash_find(mac))) {
-		if ( ! macrowarn(m, ln, mac, sv))
-			goto err;
+	tok = (j > 1 || j < 4) ? mdoc_hash_find(mac) : MDOC_MAX;
+	if (MDOC_MAX == tok) {
+		mdoc_vmsg(m, MANDOCERR_MACRO, ln, sv, 
+		    "unknown macro: %s%s", 
+		    buf, strlen(buf) > 3 ? "..." : "");
 		return(1);
 	}
 

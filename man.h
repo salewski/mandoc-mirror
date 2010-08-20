@@ -97,9 +97,6 @@ struct	man_node {
 	struct man_node	*body;
 };
 
-#define	MAN_IGN_MACRO	 (1 << 0)
-#define	MAN_IGN_ESCAPE	 (1 << 2)
-
 extern	const char *const *man_macronames;
 
 __BEGIN_DECLS
@@ -107,7 +104,7 @@ __BEGIN_DECLS
 struct	man;
 
 void	 	  man_free(struct man *);
-struct	man	 *man_alloc(struct regset *, void *, int, mandocmsg);
+struct	man	 *man_alloc(struct regset *, void *, mandocmsg);
 void		  man_reset(struct man *);
 int	 	  man_parseln(struct man *, int, char *, int);
 int		  man_endparse(struct man *);

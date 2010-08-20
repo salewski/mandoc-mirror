@@ -481,12 +481,8 @@ check_text(struct mdoc *m, int ln, int pos, char *p)
 		if (c) {
 			p += c - 1;
 			pos += c - 1;
-			continue;
-		}
-
-		c = mdoc_pmsg(m, ln, pos, MANDOCERR_BADESCAPE);
-		if ( ! (MDOC_IGN_ESCAPE & m->pflags) && ! c)
-			return(c);
+		} else
+			mdoc_pmsg(m, ln, pos, MANDOCERR_BADESCAPE);
 	}
 
 	return(1);

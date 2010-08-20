@@ -26,6 +26,17 @@
 
 __BEGIN_DECLS
 
+enum	mandoclevel {
+	MANDOCLEVEL_OK = 0,
+	MANDOCLEVEL_RESERVED,
+	MANDOCLEVEL_WARNING,
+	MANDOCLEVEL_ERROR,
+	MANDOCLEVEL_FATAL,
+	MANDOCLEVEL_BADARG,
+	MANDOCLEVEL_SYSERR,
+	MANDOCLEVEL_MAX
+};
+
 enum	mandocerr {
 	MANDOCERR_OK,
 
@@ -105,7 +116,7 @@ enum	mandocerr {
 	MANDOCERR_NODOCBODY, /* no document body */
 	MANDOCERR_NODOCPROLOG, /* no document prologue */
 	MANDOCERR_UTSNAME, /* utsname system call failed */
-	MANDOCERR_MEM, /* memory exhausted */
+	MANDOCERR_MEM, /* static buffer exhausted */
 
 	MANDOCERR_MAX
 };

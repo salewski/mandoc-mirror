@@ -31,8 +31,8 @@
 .Ft "struct roff *"
 .Fo roff_alloc
 .Fa "struct regset *regs"
-.Fa "mandocmsg msgs"
 .Fa "void *data"
+.Fa "mandocmsg msgs"
 .Fc
 .Ft int
 .Fn roff_endparse "struct roff *roff"
@@ -111,10 +111,6 @@ The
 .Fa data
 pointer is passed to
 .Fa msgs .
-The
-.Fa pflags
-arguments are defined in
-.Pa roff.h .
 Returns NULL on failure.
 If non-NULL, the pointer must be freed with
 .Fn roff_free .

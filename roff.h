@@ -29,7 +29,7 @@ __BEGIN_DECLS
 struct	roff;
 
 void	 	  roff_free(struct roff *);
-struct	roff	 *roff_alloc(struct regset *, mandocmsg, void *);
+struct	roff	 *roff_alloc(struct regset *, void *, mandocmsg);
 void		  roff_reset(struct roff *);
 enum	rofferr	  roff_parseln(struct roff *, int, 
 			char **, size_t *, int, int *);

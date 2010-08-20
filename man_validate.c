@@ -233,12 +233,8 @@ check_text(CHKARGS)
 		if (c) {
 			p += c - 1;
 			pos += c - 1;
-			continue;
-		}
-
-		c = man_pmsg(m, n->line, pos, MANDOCERR_BADESCAPE);
-		if ( ! (MAN_IGN_ESCAPE & m->pflags) && ! c)
-			return(c);
+		} else
+			man_pmsg(m, n->line, pos, MANDOCERR_BADESCAPE);
 	}
 
 	return(1);

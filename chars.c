@@ -94,13 +94,13 @@ chars_init(enum chars type)
 	tab = malloc(sizeof(struct tbl));
 	if (NULL == tab) {
 		perror(NULL);
-		exit(EXIT_FAILURE);
+		exit(MANDOCLEVEL_SYSERR);
 	}
 
 	htab = calloc(PRINT_HI - PRINT_LO + 1, sizeof(struct ln **));
 	if (NULL == htab) {
 		perror(NULL);
-		exit(EXIT_FAILURE);
+		exit(MANDOCLEVEL_SYSERR);
 	}
 
 	for (i = 0; i < LINES_MAX; i++) {

@@ -1183,7 +1183,7 @@ mdoc_bl_pre(MDOC_ARGS)
 	ord = malloc(sizeof(struct ord));
 	if (NULL == ord) {
 		perror(NULL);
-		exit(EXIT_FAILURE);
+		exit(MANDOCLEVEL_SYSERR);
 	}
 	ord->cookie = n;
 	ord->pos = 1;
