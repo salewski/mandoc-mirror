@@ -275,6 +275,12 @@ term_flushln(struct termp *p)
 		vis = vend;
 	}
 
+	/*
+	 * If there was trailing white space, it was not printed;
+	 * so reset the cursor position accordingly.
+	 */
+	vis -= vbl;
+
 	p->col = 0;
 	p->overstep = 0;
 
