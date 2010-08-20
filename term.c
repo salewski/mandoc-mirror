@@ -169,12 +169,11 @@ term_flushln(struct termp *p)
 		 * Handle literal tab characters: collapse all
 		 * subsequent tabs into a single huge set of spaces.
 		 */
-		for (j = i; j < (int)p->col; j++) {
-			if ('\t' != p->buf[j])
-				break;
+		while (i < (int)p->col && '\t' == p->buf[i]) {
 			vend = (vis / p->tabwidth + 1) * p->tabwidth;
 			vbl += vend - vis;
 			vis = vend;
+			i++;
 		}
 
 		/*
@@ -185,7 +184,7 @@ term_flushln(struct termp *p)
 		 */
 
 		/* LINTED */
-		for (jhy = 0; j < (int)p->col; j++) {
+		for (j = i, jhy = 0; j < (int)p->col; j++) {
 			if ((j && ' ' == p->buf[j]) || '\t' == p->buf[j])
 				break;
 
@@ -227,12 +226,6 @@ term_flushln(struct termp *p)
 				p->overstep;
 			p->overstep = 0;
 		}
-
-		/*
-		 * Skip leading tabs, they were handled above.
-		 */
-		while (i < (int)p->col && '\t' == p->buf[i])
-			i++;
 
 		/* Write out the [remaining] word. */
 		for ( ; i < (int)p->col; i++) {
