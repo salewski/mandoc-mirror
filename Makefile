@@ -298,16 +298,16 @@ mandoc: $(MAINOBJS) libroff.a libmdoc.a libman.a libmandoc.a
 	sed -e "s!@VERSION@!$(VERSION)!" -e "s!@VDATE@!$(VDATE)!" $< > $@
 
 .1.1.txt .3.3.txt .7.7.txt:
-	./mandoc -Tascii -Wall,error -fstrict $< | col -b > $@
+	./mandoc -Tascii -Wall,stop $< | col -b > $@
 
 .1.1.sgml .3.3.sgml .7.7.sgml:
-	./mandoc -Thtml -Wall,error -fstrict -Ostyle=style.css,man=%N.%S.html,includes=%I.html $< > $@
+	./mandoc -Thtml -Wall,stop -Ostyle=style.css,man=%N.%S.html,includes=%I.html $< > $@
 
 .1.1.ps .3.3.ps .7.7.ps:
-	./mandoc -Tps -Wall,error -fstrict $< > $@
+	./mandoc -Tps -Wall,stop $< > $@
 
 .1.1.pdf .3.3.pdf .7.7.pdf:
-	./mandoc -Tpdf -Wall,error -fstrict $< > $@
+	./mandoc -Tpdf -Wall,stop $< > $@
 
 .tar.gz.md5:
 	md5 $< > $@
