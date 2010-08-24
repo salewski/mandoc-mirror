@@ -138,9 +138,9 @@ mandoc_special(char *p)
 		/* FALLTHROUGH */
 	case ('n'):
 		/* FALLTHROUGH */
+#endif
 	case ('k'):
 		/* FALLTHROUGH */
-#endif
 	case ('M'):
 		/* FALLTHROUGH */
 	case ('m'):

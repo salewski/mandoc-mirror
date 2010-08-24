@@ -220,6 +220,8 @@ a2roffdeco(enum roffdeco *d, const char **word, size_t *sz)
 			break;
 		}
 		break;
+	case ('k'):
+		/* FALLTHROUGH */
 	case ('M'):
 		/* FALLTHROUGH */
 	case ('m'):
