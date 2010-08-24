@@ -279,6 +279,26 @@ a2roffdeco(enum roffdeco *d, const char **word, size_t *sz)
 			i++;
 		} 
 
+		/* Handle embedded numerical subexp or escape. */
+
+		if ('(' == wp[i]) {
+			while (wp[i] && ')' != wp[i])
+				if ('\\' == wp[i++]) {
+					/* Handle embedded escape. */
+					*word = &wp[i];
+					i += a2roffdeco(&dd, word, sz);
+				}
+
+			if (')' == wp[i++])
+				break;
+
+			*d = DECO_NONE;
+			return(i - 1);
+		} else if ('\\' == wp[i]) {
+			*word = &wp[++i];
+			i += a2roffdeco(&dd, word, sz);
+		}
+
 		break;
 	case ('['):
 		*d = DECO_SPECIAL;
