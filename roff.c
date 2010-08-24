@@ -136,6 +136,7 @@ static	int		 roff_res(struct roff *,
 				char **, size_t *, int);
 static	void		 roff_setstr(struct roff *,
 				const char *, const char *);
+static	char		*roff_strdup(const char *);
 
 /* See roff_hash_find() */
 
@@ -1035,6 +1036,27 @@ roff_nr(ROFF_ARGS)
 }
 
 
+static char *
+roff_strdup(const char *name)
+{
+	char		*namecopy, *sv;
+
+	/* 
+	 * This isn't a nice simple mandoc_strdup() because we must
+	 * handle roff's stupid double-escape rule. 
+	 */
+	sv = namecopy = mandoc_malloc(strlen(name) + 1);
+	while (*name) {
+		if ('\\' == *name && '\\' == *(name + 1))
+			name++;
+		*namecopy++ = *name++;
+	}
+
+	*namecopy = '\0';
+	return(sv);
+}
+
+
 static void
 roff_setstr(struct roff *r, const char *name, const char *string)
 {
@@ -1054,8 +1076,9 @@ roff_setstr(struct roff *r, const char *name, const char *string)
 	} else
 		free(n->string);
 
-	ROFF_DEBUG("roff: new symbol: [%s] = [%s]\n", name, string);
-	n->string = string ? strdup(string) : NULL;
+	/* Don't use mandoc_strdup: clean out double-escapes. */
+	n->string = string ? roff_strdup(string) : NULL;
+	ROFF_DEBUG("roff: new symbol: [%s] = [%s]\n", name, n->string);
 }
 
 
