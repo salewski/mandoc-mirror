@@ -171,6 +171,13 @@ mandoc_special(char *p)
 	case ('['):
 		term = ']';
 		break;
+	case ('z'):
+		len = 1;
+		if ('\\' == *p) {
+			p += mandoc_special(p);
+			return(*p ? (int)(p - sv) : 0);
+		}
+		break;
 	default:
 		len = 1;
 		p--;
