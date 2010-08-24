@@ -55,8 +55,6 @@ mandoc_special(char *p)
 		/* FALLTHROUGH */
 	case ('x'):
 		/* FALLTHROUGH */
-	case ('w'):
-		/* FALLTHROUGH */
 	case ('S'):
 		/* FALLTHROUGH */
 	case ('R'):
@@ -178,6 +176,12 @@ mandoc_special(char *p)
 			return(*p ? (int)(p - sv) : 0);
 		}
 		break;
+	case ('w'):
+		if ('\'' == *p++) {
+			term = '\'';
+			break;
+		}
+		/* FALLTHROUGH */
 	default:
 		len = 1;
 		p--;

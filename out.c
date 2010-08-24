@@ -293,6 +293,12 @@ a2roffdeco(enum roffdeco *d, const char **word, size_t *sz)
 		} else
 			lim = 1;
 		break;
+	case ('w'):
+		if ('\'' == wp[i++]) {
+			term = '\'';
+			break;
+		} 
+		/* FALLTHROUGH */
 	default:
 		*d = DECO_SSPECIAL;
 		i--;
