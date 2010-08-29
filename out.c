@@ -315,6 +315,8 @@ a2roffdeco(enum roffdeco *d, const char **word, size_t *sz)
 		} else
 			lim = 1;
 		break;
+	case ('o'):
+		/* FALLTHROUGH */
 	case ('w'):
 		if ('\'' == wp[i++]) {
 			term = '\'';
