@@ -758,11 +758,14 @@ mdoc_pmacro(struct mdoc *m, int ln, char *buf, int offs)
 
 	/* 
 	 * Copy the first word into a nil-terminated buffer.
-	 * Stop copying when a tab, space, or eoln is encountered.
+	 * Stop copying when a tab, space, backslash, or eoln is encountered.
 	 */
 
 	j = 0;
-	while (j < 4 && '\0' != buf[i] && ' ' != buf[i] && '\t' != buf[i])
+	while (j < 4 && '\0' != buf[i] && 
+			' ' != buf[i] && 
+			'\t' != buf[i] && 
+			'\\' != buf[i])
 		mac[j++] = buf[i++];
 	mac[j] = '\0';
 

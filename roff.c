@@ -59,7 +59,7 @@ enum	rofft {
 	ROFF_rm,
 	ROFF_tr,
 	ROFF_cblock,
-	ROFF_ccond,
+	ROFF_ccond, /* FIXME: remove this. */
 	ROFF_nr,
 	ROFF_MAX
 };
@@ -764,8 +764,13 @@ roff_cond_sub(ROFF_ARGS)
 	if (l != r->last)
 		return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
 
-	if (ROFF_MAX == (t = roff_parse(*bufp, &pos)))
+	if (ROFF_MAX == (t = roff_parse(*bufp, &pos))) {
+		if ('\\' == (*bufp)[pos] && '}' == (*bufp)[pos + 1])
+			return(roff_ccond
+				(r, ROFF_ccond, bufp, szp, 
+				 ln, pos, pos + 2, offs));
 		return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
+	}
 
 	/*
 	 * A denied conditional must evaluate its children if and only
@@ -796,6 +801,8 @@ roff_cond_text(ROFF_ARGS)
 	 * We display the value of the text if out current evaluation
 	 * scope permits us to do so.
 	 */
+
+	/* FIXME: use roff_ccond? */
 
 	st = &(*bufp)[pos];
 	if (NULL == (ep = strstr(st, "\\}"))) {
