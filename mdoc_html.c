@@ -2194,6 +2194,9 @@ mdoc__x_pre(MDOC_ARGS)
 	switch (n->tok) {
 	case(MDOC__A):
 		PAIR_CLASS_INIT(&tag[0], "ref-auth");
+		if (n->prev && MDOC__A == n->prev->tok)
+			if (NULL == n->next || MDOC__A != n->next->tok)
+				print_text(h, "and");
 		break;
 	case(MDOC__B):
 		PAIR_CLASS_INIT(&tag[0], "ref-book");
@@ -2246,6 +2249,7 @@ mdoc__x_pre(MDOC_ARGS)
 
 	PAIR_HREF_INIT(&tag[1], n->child->string);
 	print_otag(h, TAG_A, 2, tag);
+
 	return(1);
 }
 
@@ -2254,6 +2258,11 @@ mdoc__x_pre(MDOC_ARGS)
 static void
 mdoc__x_post(MDOC_ARGS)
 {
+
+	if (MDOC__A == n->tok && n->next && MDOC__A == n->next->tok)
+		if (NULL == n->next->next || MDOC__A != n->next->next->tok)
+			if (NULL == n->prev || MDOC__A != n->prev->tok)
+				return;
 
 	/* TODO: %U */
 

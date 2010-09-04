@@ -90,8 +90,6 @@
   try e.g. .Bl -column It Ta Ta
   reported by millert Fri, 02 Apr 2010 16:13:46 -0400
 
-- %A doesn't put an "and" before the final author name.
-
 ************************************************************************
 * formatting issues: gratuitious differences
 ************************************************************************
@@ -105,10 +103,6 @@
   This is parsed as
   text("${name") text("[") Ns() text(selector)...
   Opening punctuation should not fall out of .Ns.
-  see for example OpenBSD csh(1)
-
-- .%A should append the last author with " and " (if there are two)
-  or ", and " (if there are more), not ", "
   see for example OpenBSD csh(1)
 
 - In .Bl -bullet, the groff bullet is "+\b+\bo\bo", the mandoc bullet
