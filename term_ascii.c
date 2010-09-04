@@ -104,6 +104,7 @@ static void
 ascii_letter(struct termp *p, char c)
 {
 	
+	/* LINTED */
 	putchar(c);
 }
 

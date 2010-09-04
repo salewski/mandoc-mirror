@@ -231,7 +231,7 @@ main(int argc, char *argv[])
 		switch (c) {
 		case ('m'):
 			if ( ! moptions(&curp.inttype, optarg))
-				return(MANDOCLEVEL_BADARG);
+				return((int)MANDOCLEVEL_BADARG);
 			break;
 		case ('O'):
 			(void)strlcat(curp.outopts, optarg, BUFSIZ);
@@ -239,11 +239,11 @@ main(int argc, char *argv[])
 			break;
 		case ('T'):
 			if ( ! toptions(&curp, optarg))
-				return(MANDOCLEVEL_BADARG);
+				return((int)MANDOCLEVEL_BADARG);
 			break;
 		case ('W'):
 			if ( ! woptions(&curp, optarg))
-				return(MANDOCLEVEL_BADARG);
+				return((int)MANDOCLEVEL_BADARG);
 			break;
 		case ('V'):
 			version();
@@ -279,7 +279,7 @@ main(int argc, char *argv[])
 	if (curp.roff)
 		roff_free(curp.roff);
 
-	return(exit_status);
+	return((int)exit_status);
 }
 
 
@@ -288,7 +288,7 @@ version(void)
 {
 
 	(void)printf("%s %s\n", progname, VERSION);
-	exit(MANDOCLEVEL_OK);
+	exit((int)MANDOCLEVEL_OK);
 }
 
 
@@ -299,7 +299,7 @@ usage(void)
 	(void)fprintf(stderr, "usage: %s [-V] [-foption] "
 			"[-mformat] [-Ooption] [-Toutput] "
 			"[-Werr] [file...]\n", progname);
-	exit(MANDOCLEVEL_BADARG);
+	exit((int)MANDOCLEVEL_BADARG);
 }
 
 
@@ -329,7 +329,7 @@ resize_buf(struct buf *buf, size_t initial)
 	buf->buf = realloc(buf->buf, buf->sz);
 	if (NULL == buf->buf) {
 		perror(NULL);
-		exit(MANDOCLEVEL_SYSERR);
+		exit((int)MANDOCLEVEL_SYSERR);
 	}
 }
 
@@ -809,6 +809,7 @@ mmsg(enum mandocerr t, void *arg, int ln, int col, const char *msg)
 
 	level = MANDOCLEVEL_FATAL;
 	while (t < mandoclimits[level])
+		/* LINTED */
 		level--;
 
 	cp = (struct curparse *)arg;

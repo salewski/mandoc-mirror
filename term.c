@@ -83,7 +83,7 @@ term_alloc(enum termenc enc)
 	p = calloc(1, sizeof(struct termp));
 	if (NULL == p) {
 		perror(NULL);
-		exit(MANDOCLEVEL_SYSERR);
+		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
 	p->enc = enc;
@@ -576,7 +576,7 @@ adjbuf(struct termp *p, size_t sz)
 	p->buf = realloc(p->buf, p->maxcols);
 	if (NULL == p->buf) {
 		perror(NULL);
-		exit(MANDOCLEVEL_SYSERR);
+		exit((int)MANDOCLEVEL_SYSERR);
 	}
 }
 

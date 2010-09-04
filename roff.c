@@ -749,7 +749,6 @@ roff_cond_sub(ROFF_ARGS)
 {
 	enum rofft	 t;
 	enum roffrule	 rr;
-	struct roffnode	*l;
 
 	ppos = pos;
 	rr = r->last->rule;
@@ -759,7 +758,6 @@ roff_cond_sub(ROFF_ARGS)
 	 * continue. 
 	 */
 
-	l = r->last;
 	roffnode_cleanscope(r);
 
 	if (ROFF_MAX == (t = roff_parse(*bufp, &pos))) {
