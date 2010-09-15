@@ -172,11 +172,6 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 * structural issues
 ************************************************************************
 
-- rendering frontend code can calculate widths only for plain strings,
-  not for strings containing escape sequences.  For example, this
-  hinders calculation of the indent required for .Nm \&[ in text(1).
-  comments from kristaps@  Wed, 21 Jul 2010 23:26:08 +0200
-
 - another example of the same problem:
   .Bl -tag -width "\eD{format}XX" -compact
   in OpenBSD ksh(1) gives the wrong width

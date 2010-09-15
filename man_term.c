@@ -916,6 +916,10 @@ print_man_foot(struct termp *p, const void *arg)
 	p->rmargin = p->maxrmargin - term_strlen(p, buf);
 	p->offset = 0;
 
+	/* term_strlen() can return zero. */
+	if (p->rmargin == p->maxrmargin)
+		p->rmargin--;
+
 	if (meta->source)
 		term_word(p, meta->source);
 	if (meta->source)
