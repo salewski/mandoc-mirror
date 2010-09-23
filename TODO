@@ -90,6 +90,9 @@
   try e.g. .Bl -column It Ta Ta
   reported by millert Fri, 02 Apr 2010 16:13:46 -0400
 
+- in enclosures, mandoc sometimes fancies a bogus end of sentence
+  reminded by jmc@  Thu, 23 Sep 2010 18:13:39 +0059
+
 ************************************************************************
 * formatting issues: gratuitious differences
 ************************************************************************
