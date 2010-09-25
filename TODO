@@ -157,8 +157,6 @@
   see "The route utility provides the following simple commands:"
   in OpenBSD route(8).
 
-- In -T[x]html, Rs/Re need a div.
-
 ************************************************************************
 * performance issues
 ************************************************************************
