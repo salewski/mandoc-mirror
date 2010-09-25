@@ -2263,7 +2263,9 @@ mdoc__x_post(MDOC_ARGS)
 
 	/* TODO: %U */
 
-	h->flags |= HTML_NOSPACE;
+	if (NULL == n->parent || MDOC_Rs != n->parent->tok)
+		return;
+
 	print_text(h, n->next ? "," : ".");
 }
 
