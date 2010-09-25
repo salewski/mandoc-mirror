@@ -175,7 +175,3 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 * structural issues
 ************************************************************************
 
-- another example of the same problem:
-  .Bl -tag -width "\eD{format}XX" -compact
-  in OpenBSD ksh(1) gives the wrong width
-  because "\e" is one character in groff, two in mandoc
