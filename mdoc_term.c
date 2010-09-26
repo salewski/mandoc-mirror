@@ -1796,6 +1796,7 @@ termp_sp_pre(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
 static int
 termp_quote_pre(DECL_ARGS)
 {
@@ -1855,6 +1856,7 @@ termp_quote_pre(DECL_ARGS)
 }
 
 
+/* ARGSUSED */
 static void
 termp_quote_post(DECL_ARGS)
 {
