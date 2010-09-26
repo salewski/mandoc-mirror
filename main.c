@@ -139,7 +139,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"section not in conventional manual section",
 	"end of line whitespace",
 	"blocks badly nested",
-	"scope open on exit",
 
 	"generic error",
 
@@ -165,6 +164,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"argument count wrong",
 	"request scope close w/none open",
 	"scope already open",
+	"scope open on exit",
 	"macro requires line argument(s)",
 	"macro requires body argument(s)",
 	"macro requires argument(s)",
@@ -182,7 +182,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"unsupported display type",
 	"blocks badly nested",
 	"no such block is open",
-	"scope broken, syntax violated",
 	"line scope broken, syntax violated",
 	"argument count wrong, violates syntax",
 	"child violates parent syntax",

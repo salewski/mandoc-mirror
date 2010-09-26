@@ -207,14 +207,10 @@ mdoc_macroend(struct mdoc *m)
 
 	n = MDOC_VALID & m->last->flags ?  m->last->parent : m->last;
 
-	for ( ; n; n = n->parent) {
-		if (MDOC_BLOCK != n->type)
-			continue;
-		if ( ! (MDOC_EXPLICIT & mdoc_macros[n->tok].flags))
-			continue;
-		mdoc_nmsg(m, n, MANDOCERR_SYNTSCOPE);
-		return(0);
-	}
+	for ( ; n; n = n->parent)
+		if (MDOC_BLOCK == n->type &&
+		    MDOC_EXPLICIT & mdoc_macros[n->tok].flags)
+			mdoc_nmsg(m, n, MANDOCERR_SCOPEEXIT);
 
 	/* Rewind to the first. */
 
