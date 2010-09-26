@@ -227,13 +227,14 @@ Documents are generally structured as follows:
 \&.SH DESCRIPTION
 The \efBfoo\efR utility processes files...
 \&.\e\*q .SH IMPLEMENTATION NOTES
+\&.\e\*q Not used in OpenBSD.
 \&.\e\*q .SH RETURN VALUES
 \&.\e\*q For sections 2, 3, & 9 only.
 \&.\e\*q .SH ENVIRONMENT
 \&.\e\*q For sections 1, 6, 7, & 8 only.
 \&.\e\*q .SH FILES
 \&.\e\*q .SH EXIT STATUS
-\&.\e\*q For sections 1, 6 & 8 only.
+\&.\e\*q For sections 1, 6, & 8 only.
 \&.\e\*q .SH EXAMPLES
 \&.\e\*q .SH DIAGNOSTICS
 \&.\e\*q For sections 1, 4, 6, 7, & 8 only.
@@ -961,8 +962,10 @@ macro does not accept negative values in mandoc.
 In GNU troff, this would result in strange behaviour.
 .El
 .Sh SEE ALSO
+.Xr man 1 ,
 .Xr mandoc 1 ,
-.Xr mandoc_char 7
+.Xr mandoc_char 7 ,
+.Xr mdoc 7
 .Sh HISTORY
 The
 .Nm
