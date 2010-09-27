@@ -134,9 +134,6 @@
   In -unfilled, tabs are 5 spaces, just like in -filled and -ragged.
   See the CCDF_* display in OpenBSD ccdconfig(8).
 
-- In .Bd -unfilled, .Pp should produce one blank line, not two;
-  see the ccd.conf display in OpenBSD ccdconfig(8).
-
 - .Nx 1.0a
   should be "NetBSD 1.0A", not "NetBSD 1.0a",
   see OpenBSD ccdconfig(8).
