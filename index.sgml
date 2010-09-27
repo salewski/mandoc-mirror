@@ -319,6 +319,21 @@
 					</H1>
 					<DIV CLASS="news">
 						<P>
+							<SPAN CLASS="date">27-09-2010</SPAN>:
+							version 1.10.6
+						</P>
+						<P>
+							Calling conventions for <A HREF="mandoc.1.html">mandoc</A> have changed: <SPAN
+							CLASS="flag">-W</SPAN> improved and <SPAN CLASS="flag">-f</SPAN> deprecated.  Non-ASCII
+							characters are also now uniformly discarded.  Lots of documentation improvements.  Many
+							incremental fixes accomodating for groff's more interesting productions.  Lastly, <A
+							HREF="http://perldoc.perl.org/pod2man.html" CLASS="external">pod2man</A> preambles are
+							now fully accepted after some considerable <A HREF="roff.7.html">roff</A> and special
+							character support.
+						</P>
+					</DIV>
+					<DIV CLASS="news">
+						<P>
 							<SPAN CLASS="date">27-07-2010</SPAN>:
 							version 1.10.5
 						</P>
