@@ -160,5 +160,3 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 ************************************************************************
 * structural issues
 ************************************************************************
-
-- remove superfluous NOSPACE invocations (e.g., with term_word(p, "("))
