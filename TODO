@@ -142,6 +142,10 @@
   on the next line, it must be indented by -width, not width+1;
   see "rule block|pass" in OpenBSD ifconfig(8).
 
+- The \& zero-width character counts as output.
+  That is, when it is alone on a line between two .Pp,
+  we want three blank lines, not two as in mandoc.
+
 ************************************************************************
 * performance issues
 ************************************************************************
