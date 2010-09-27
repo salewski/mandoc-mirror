@@ -908,7 +908,7 @@ ps_pletter(struct termp *p, int c)
 
 	f = (int)p->engine.ps.lastf;
 
-	if (c <= 32 || (c - 32 > MAXCHAR)) {
+	if (c <= 32 || (c - 32 >= MAXCHAR)) {
 		ps_putchar(p, ' ');
 		p->engine.ps.pscol += (size_t)fonts[f].gly[0].wx;
 		return;

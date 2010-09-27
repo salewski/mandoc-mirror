@@ -81,7 +81,6 @@ static	void	  termp_lb_post(DECL_ARGS);
 static	void	  termp_nm_post(DECL_ARGS);
 static	void	  termp_pf_post(DECL_ARGS);
 static	void	  termp_quote_post(DECL_ARGS);
-static	void	  termp_quote_post(DECL_ARGS);
 static	void	  termp_sh_post(DECL_ARGS);
 static	void	  termp_ss_post(DECL_ARGS);
 
