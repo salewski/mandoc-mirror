@@ -1473,7 +1473,12 @@ static int
 pre_pp(PRE_ARGS)
 {
 
-	if (NULL == mdoc->last || MDOC_Pp != mdoc->last->tok)
+	if (NULL == mdoc->last)
+		return(1);
+
+	/* Don't allow prior `Lp' or `Pp'. */
+
+	if (MDOC_Pp != mdoc->last->tok && MDOC_Lp != mdoc->last->tok)
 		return(1);
 
 	if (MDOC_Bl == n->tok && n->data.Bl->comp)
