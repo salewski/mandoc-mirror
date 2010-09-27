@@ -174,6 +174,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"missing font type",
 	"line argument(s) will be lost",
 	"body argument(s) will be lost",
+	"paragraph macro ignored",
 
 	"generic fatal error",
 

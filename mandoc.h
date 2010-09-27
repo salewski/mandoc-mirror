@@ -99,6 +99,7 @@ enum	mandocerr {
 	MANDOCERR_FONTTYPE, /* missing font type */
 	MANDOCERR_ARGSLOST, /* line argument(s) will be lost */
 	MANDOCERR_BODYLOST, /* body argument(s) will be lost */
+	MANDOCERR_IGNPAR, /* paragraph macro ignored */
 
 	MANDOCERR_FATAL, /* ===== end of fatal errors ===== */
 

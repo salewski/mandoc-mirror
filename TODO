@@ -145,10 +145,6 @@
   on the next line, it must be indented by -width, not width+1;
   see "rule block|pass" in OpenBSD ifconfig(8).
 
-- Bogus .Pp before .Bl should not cause a double blank line,
-  see "The route utility provides the following simple commands:"
-  in OpenBSD route(8).
-
 ************************************************************************
 * performance issues
 ************************************************************************
