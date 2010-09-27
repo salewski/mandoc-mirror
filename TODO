@@ -74,6 +74,10 @@
 - allow `Qq', `Dq', `Sq', `Aq', `Bq' to have 0 arguments
   noted by Alex Kozlov 08/06/10 23:05
 
+- Have `Sh', `It', `Ss' and others complain if `Pp' is invoked prior to
+  close (in the post validation) or prior to open (pre).  This noted by
+  jmc@ a thousand years ago.
+
 ************************************************************************
 * formatting issues: ugly output
 ************************************************************************
