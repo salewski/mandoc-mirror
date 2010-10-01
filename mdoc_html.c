@@ -2157,6 +2157,7 @@ mdoc_quote_pre(MDOC_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Op):
 		print_text(h, "\\(lB");
+		h->flags |= HTML_NOSPACE;
 		PAIR_CLASS_INIT(&tag, "opt");
 		print_otag(h, TAG_SPAN, 1, &tag);
 		break;
