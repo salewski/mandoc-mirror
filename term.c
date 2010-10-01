@@ -505,7 +505,7 @@ term_word(struct termp *p, const char *word)
 	else
 		p->flags |= TERMP_NOSPACE;
 
-	p->flags &= ~TERMP_SENTENCE;
+	p->flags &= ~(TERMP_SENTENCE | TERMP_IGNDELIM);
 
 	while (*word) {
 		if ((ssz = strcspn(word, "\\")) > 0)

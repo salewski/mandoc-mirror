@@ -105,21 +105,9 @@
   to better distinguish the contents of .%T and .%J,
   see for example OpenBSD cat(1)
 
-- .It ${name Ns [ selector ] Ns }
-  should be "${name[selector]}" not "${name [selector]}"
-  This is parsed as
-  text("${name") text("[") Ns() text(selector)...
-  Opening punctuation should not fall out of .Ns.
-  see for example OpenBSD csh(1)
-
 - In .Bl -bullet, the groff bullet is "+\b+\bo\bo", the mandoc bullet
   is just "o\bo".
   see for example OpenBSD ksh(1)
-
-- .No text No ) is "text )", not "text)"
-  see the terrible example
-    case word in [[(]  pattern [| pattern] ... ) list ;; ] ... esac
-  in OpenBSD ksh(1)
 
 - .Sm should *not* produce as a blank line in .Bd -literal
   see for example "Brace expansion" in OpenBSD ksh(1)

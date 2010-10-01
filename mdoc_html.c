@@ -91,6 +91,7 @@ static	int		  mdoc_ex_pre(MDOC_ARGS);
 static	void		  mdoc_fo_post(MDOC_ARGS);
 static	int		  mdoc_fo_pre(MDOC_ARGS);
 static	int		  mdoc_ic_pre(MDOC_ARGS);
+static	int		  mdoc_igndelim_pre(MDOC_ARGS);
 static	int		  mdoc_in_pre(MDOC_ARGS);
 static	int		  mdoc_it_block_pre(MDOC_ARGS, enum mdoc_list,
 				int, struct roffsu *, struct roffsu *);
@@ -109,7 +110,6 @@ static	int		  mdoc_nm_pre(MDOC_ARGS);
 static	int		  mdoc_ns_pre(MDOC_ARGS);
 static	int		  mdoc_pa_pre(MDOC_ARGS);
 static	void		  mdoc_pf_post(MDOC_ARGS);
-static	int		  mdoc_pf_pre(MDOC_ARGS);
 static	void		  mdoc_quote_post(MDOC_ARGS);
 static	int		  mdoc_quote_pre(MDOC_ARGS);
 static	int		  mdoc_rs_pre(MDOC_ARGS);
@@ -199,12 +199,12 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Eo */
 	{mdoc_xx_pre, NULL}, /* Fx */
 	{mdoc_ms_pre, NULL}, /* Ms */
-	{NULL, NULL}, /* No */
+	{mdoc_igndelim_pre, NULL}, /* No */
 	{mdoc_ns_pre, NULL}, /* Ns */
 	{mdoc_xx_pre, NULL}, /* Nx */
 	{mdoc_xx_pre, NULL}, /* Ox */
 	{NULL, NULL}, /* Pc */
-	{mdoc_pf_pre, mdoc_pf_post}, /* Pf */
+	{mdoc_igndelim_pre, mdoc_pf_post}, /* Pf */
 	{mdoc_quote_pre, mdoc_quote_post}, /* Po */
 	{mdoc_quote_pre, mdoc_quote_post}, /* Pq */
 	{NULL, NULL}, /* Qc */
@@ -1911,7 +1911,7 @@ mdoc_ms_pre(MDOC_ARGS)
 
 /* ARGSUSED */
 static int
-mdoc_pf_pre(MDOC_ARGS)
+mdoc_igndelim_pre(MDOC_ARGS)
 {
 
 	h->flags |= HTML_IGNDELIM;
@@ -1924,7 +1924,6 @@ static void
 mdoc_pf_post(MDOC_ARGS)
 {
 
-	h->flags &= ~HTML_IGNDELIM;
 	h->flags |= HTML_NOSPACE;
 }
 

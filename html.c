@@ -552,6 +552,8 @@ print_text(struct html *h, const char *word)
 		if ( ! (h->flags & HTML_NONOSPACE))
 			h->flags &= ~HTML_NOSPACE;
 
+	h->flags &= ~HTML_IGNDELIM;
+
 	/* 
 	 * Note that we don't process the pipe: the parser sees it as
 	 * punctuation, but we don't in terms of typography.

@@ -138,8 +138,8 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ blk_part_exp, MDOC_CALLABLE | MDOC_PARSED | MDOC_EXPLICIT }, /* Eo */
 	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* Fx */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ms */
-	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* No */
-	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* Ns */
+	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED | MDOC_IGNDELIM }, /* No */
+	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED | MDOC_IGNDELIM }, /* Ns */
 	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* Nx */
 	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* Ox */
 	{ blk_exp_close, MDOC_EXPLICIT | MDOC_CALLABLE | MDOC_PARSED }, /* Pc */

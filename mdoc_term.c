@@ -102,6 +102,7 @@ static	int	  termp_fl_pre(DECL_ARGS);
 static	int	  termp_fn_pre(DECL_ARGS);
 static	int	  termp_fo_pre(DECL_ARGS);
 static	int	  termp_ft_pre(DECL_ARGS);
+static	int	  termp_igndelim_pre(DECL_ARGS);
 static	int	  termp_in_pre(DECL_ARGS);
 static	int	  termp_it_pre(DECL_ARGS);
 static	int	  termp_li_pre(DECL_ARGS);
@@ -109,7 +110,6 @@ static	int	  termp_lk_pre(DECL_ARGS);
 static	int	  termp_nd_pre(DECL_ARGS);
 static	int	  termp_nm_pre(DECL_ARGS);
 static	int	  termp_ns_pre(DECL_ARGS);
-static	int	  termp_pf_pre(DECL_ARGS);
 static	int	  termp_quote_pre(DECL_ARGS);
 static	int	  termp_rs_pre(DECL_ARGS);
 static	int	  termp_rv_pre(DECL_ARGS);
@@ -196,12 +196,12 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Eo */
 	{ termp_xx_pre, NULL }, /* Fx */
 	{ termp_bold_pre, NULL }, /* Ms */
-	{ NULL, NULL }, /* No */
+	{ termp_igndelim_pre, NULL }, /* No */
 	{ termp_ns_pre, NULL }, /* Ns */
 	{ termp_xx_pre, NULL }, /* Nx */
 	{ termp_xx_pre, NULL }, /* Ox */
 	{ NULL, NULL }, /* Pc */
-	{ termp_pf_pre, termp_pf_post }, /* Pf */
+	{ termp_igndelim_pre, termp_pf_post }, /* Pf */
 	{ termp_quote_pre, termp_quote_post }, /* Po */
 	{ termp_quote_pre, termp_quote_post }, /* Pq */
 	{ NULL, NULL }, /* Qc */
@@ -1684,7 +1684,7 @@ termp_xx_pre(DECL_ARGS)
 
 /* ARGSUSED */
 static int
-termp_pf_pre(DECL_ARGS)
+termp_igndelim_pre(DECL_ARGS)
 {
 
 	p->flags |= TERMP_IGNDELIM;
@@ -1697,7 +1697,6 @@ static void
 termp_pf_post(DECL_ARGS)
 {
 
-	p->flags &= ~TERMP_IGNDELIM;
 	p->flags |= TERMP_NOSPACE;
 }
 
