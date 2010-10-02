@@ -146,24 +146,21 @@ term_flushln(struct termp *p)
 	 * an indentation, but can be, for tagged lists or columns, a
 	 * small set of values. 
 	 */
-
-	assert(p->offset < p->rmargin);
-
-	maxvis = (int)(p->rmargin - p->offset) - p->overstep < 0 ?
-		/* LINTED */ 
-		0 : p->rmargin - p->offset - p->overstep;
-	mmax = (int)(p->maxrmargin - p->offset) - p->overstep < 0 ?
-		/* LINTED */
-		0 : p->maxrmargin - p->offset - p->overstep;
+	assert  (p->rmargin > p->offset);
+	dv     = p->rmargin - p->offset;
+	maxvis = (int)dv > p->overstep ? dv - (size_t)p->overstep : 0;
+	dv     = p->maxrmargin - p->offset;
+	mmax   = (int)dv > p->overstep ? dv - (size_t)p->overstep : 0;
 
 	bp = TERMP_NOBREAK & p->flags ? mmax : maxvis;
 
 	/*
 	 * Indent the first line of a paragraph.
 	 */
-	vbl = p->flags & TERMP_NOLPAD ? 0 : p->offset;
+	vbl = p->flags & TERMP_NOLPAD ? (size_t)0 : p->offset;
 
-	vis = vend = i = 0;
+	vis = vend = 0;
+	i = 0;
 
 	while (i < (int)p->col) {
 		/*
@@ -184,7 +181,6 @@ term_flushln(struct termp *p)
 		 * space is printed according to regular spacing rules).
 		 */
 
-		/* LINTED */
 		for (j = i, jhy = 0; j < (int)p->col; j++) {
 			if ((j && ' ' == p->buf[j]) || '\t' == p->buf[j])
 				break;
@@ -223,8 +219,7 @@ term_flushln(struct termp *p)
 
 			/* Remove the p->overstep width. */
 
-			bp += (int)/* LINTED */
-				p->overstep;
+			bp += (size_t)p->overstep;
 			p->overstep = 0;
 		}
 
@@ -238,7 +233,7 @@ term_flushln(struct termp *p)
 				j = i;
 				while (' ' == p->buf[i])
 					i++;
-				dv = (i - j) * (*p->width)(p, ' ');
+				dv = (size_t)(i - j) * (*p->width)(p, ' ');
 				vbl += dv;
 				vend += dv;
 				break;
@@ -287,8 +282,7 @@ term_flushln(struct termp *p)
 
 	if (TERMP_HANG & p->flags) {
 		/* We need one blank after the tag. */
-		p->overstep = /* LINTED */
-			vis - maxvis + (*p->width)(p, ' ');
+		p->overstep = (int)(vis - maxvis + (*p->width)(p, ' '));
 
 		/*
 		 * Behave exactly the same way as groff:
@@ -302,8 +296,7 @@ term_flushln(struct termp *p)
 		 */
 		if (p->overstep >= -1) {
 			assert((int)maxvis + p->overstep >= 0);
-			/* LINTED */
-			maxvis += p->overstep;
+			maxvis += (size_t)p->overstep;
 		} else
 			p->overstep = 0;
 
@@ -311,9 +304,8 @@ term_flushln(struct termp *p)
 		return;
 
 	/* Right-pad. */
-	if (maxvis > vis + /* LINTED */
-			((TERMP_TWOSPACE & p->flags) ? 
-			 (*p->width)(p, ' ') : 0)) {
+	if (maxvis > vis +
+	    ((TERMP_TWOSPACE & p->flags) ? (*p->width)(p, ' ') : 0)) {
 		p->viscol += maxvis - vis;
 		(*p->advance)(p, maxvis - vis);
 		vis += (maxvis - vis);
