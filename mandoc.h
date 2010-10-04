@@ -20,19 +20,27 @@
 #define ASCII_NBRSP	 31  /* non-breaking space */
 #define	ASCII_HYPH	 30  /* breakable hyphen */
 
-__BEGIN_DECLS
-
+/*
+ * Status level.  This refers to both internal status (i.e., whilst
+ * running, when warnings/errors are reported) and an indicator of a
+ * threshold of when to halt (when said internal state exceeds the
+ * threshold).
+ */
 enum	mandoclevel {
 	MANDOCLEVEL_OK = 0,
 	MANDOCLEVEL_RESERVED,
-	MANDOCLEVEL_WARNING,
-	MANDOCLEVEL_ERROR,
-	MANDOCLEVEL_FATAL,
-	MANDOCLEVEL_BADARG,
-	MANDOCLEVEL_SYSERR,
+	MANDOCLEVEL_WARNING, /* warnings: syntax, whitespace, etc. */
+	MANDOCLEVEL_ERROR, /* input has been thrown away */
+	MANDOCLEVEL_FATAL, /* input is borked */
+	MANDOCLEVEL_BADARG, /* bad argument in invocation */
+	MANDOCLEVEL_SYSERR, /* system error */
 	MANDOCLEVEL_MAX
 };
 
+/*
+ * All possible things that can go wrong within a parse, be it libroff,
+ * libmdoc, or libman.
+ */
 enum	mandocerr {
 	MANDOCERR_OK,
 
@@ -113,406 +121,20 @@ enum	mandocerr {
 	MANDOCERR_MAX
 };
 
+/*
+ * Available registers (set in libroff, accessed elsewhere).
+ */
 enum	regs {
-	REG_nS = 0,	/* register: nS */
+	REG_nS = 0,
 	REG__MAX
 };
 
-enum	mant {
-	MAN_br = 0,
-	MAN_TH,
-	MAN_SH,
-	MAN_SS,
-	MAN_TP,
-	MAN_LP,
-	MAN_PP,
-	MAN_P,
-	MAN_IP,
-	MAN_HP,
-	MAN_SM,
-	MAN_SB,
-	MAN_BI,
-	MAN_IB,
-	MAN_BR,
-	MAN_RB,
-	MAN_R,
-	MAN_B,
-	MAN_I,
-	MAN_IR,
-	MAN_RI,
-	MAN_na,
-	MAN_i,
-	MAN_sp,
-	MAN_nf,
-	MAN_fi,
-	MAN_r,
-	MAN_RE,
-	MAN_RS,
-	MAN_DT,
-	MAN_UC,
-	MAN_PD,
-	MAN_Sp,
-	MAN_Vb,
-	MAN_Ve,
-	MAN_AT,
-	MAN_in,
-	MAN_MAX
-};
-
-enum	man_type {
-	MAN_TEXT,
-	MAN_ELEM,
-	MAN_ROOT,
-	MAN_BLOCK,
-	MAN_HEAD,
-	MAN_BODY
-};
-
-enum	mdoct {
-	MDOC_Ap = 0,
-	MDOC_Dd,
-	MDOC_Dt,
-	MDOC_Os,
-	MDOC_Sh,
-	MDOC_Ss,
-	MDOC_Pp,
-	MDOC_D1,
-	MDOC_Dl,
-	MDOC_Bd,
-	MDOC_Ed,
-	MDOC_Bl,
-	MDOC_El,
-	MDOC_It,
-	MDOC_Ad,
-	MDOC_An,
-	MDOC_Ar,
-	MDOC_Cd,
-	MDOC_Cm,
-	MDOC_Dv,
-	MDOC_Er,
-	MDOC_Ev,
-	MDOC_Ex,
-	MDOC_Fa,
-	MDOC_Fd,
-	MDOC_Fl,
-	MDOC_Fn,
-	MDOC_Ft,
-	MDOC_Ic,
-	MDOC_In,
-	MDOC_Li,
-	MDOC_Nd,
-	MDOC_Nm,
-	MDOC_Op,
-	MDOC_Ot,
-	MDOC_Pa,
-	MDOC_Rv,
-	MDOC_St,
-	MDOC_Va,
-	MDOC_Vt,
-	MDOC_Xr,
-	MDOC__A,
-	MDOC__B,
-	MDOC__D,
-	MDOC__I,
-	MDOC__J,
-	MDOC__N,
-	MDOC__O,
-	MDOC__P,
-	MDOC__R,
-	MDOC__T,
-	MDOC__V,
-	MDOC_Ac,
-	MDOC_Ao,
-	MDOC_Aq,
-	MDOC_At,
-	MDOC_Bc,
-	MDOC_Bf,
-	MDOC_Bo,
-	MDOC_Bq,
-	MDOC_Bsx,
-	MDOC_Bx,
-	MDOC_Db,
-	MDOC_Dc,
-	MDOC_Do,
-	MDOC_Dq,
-	MDOC_Ec,
-	MDOC_Ef,
-	MDOC_Em,
-	MDOC_Eo,
-	MDOC_Fx,
-	MDOC_Ms,
-	MDOC_No,
-	MDOC_Ns,
-	MDOC_Nx,
-	MDOC_Ox,
-	MDOC_Pc,
-	MDOC_Pf,
-	MDOC_Po,
-	MDOC_Pq,
-	MDOC_Qc,
-	MDOC_Ql,
-	MDOC_Qo,
-	MDOC_Qq,
-	MDOC_Re,
-	MDOC_Rs,
-	MDOC_Sc,
-	MDOC_So,
-	MDOC_Sq,
-	MDOC_Sm,
-	MDOC_Sx,
-	MDOC_Sy,
-	MDOC_Tn,
-	MDOC_Ux,
-	MDOC_Xc,
-	MDOC_Xo,
-	MDOC_Fo,
-	MDOC_Fc,
-	MDOC_Oo,
-	MDOC_Oc,
-	MDOC_Bk,
-	MDOC_Ek,
-	MDOC_Bt,
-	MDOC_Hf,
-	MDOC_Fr,
-	MDOC_Ud,
-	MDOC_Lb,
-	MDOC_Lp,
-	MDOC_Lk,
-	MDOC_Mt,
-	MDOC_Brq,
-	MDOC_Bro,
-	MDOC_Brc,
-	MDOC__C,
-	MDOC_Es,
-	MDOC_En,
-	MDOC_Dx,
-	MDOC__Q,
-	MDOC_br,
-	MDOC_sp,
-	MDOC__U,
-	MDOC_Ta,
-	MDOC_MAX
-};
-
-enum	mdocargt {
-	MDOC_Split,
-	MDOC_Nosplit,
-	MDOC_Ragged,
-	MDOC_Unfilled,
-	MDOC_Literal,
-	MDOC_File,
-	MDOC_Offset,
-	MDOC_Bullet,
-	MDOC_Dash,
-	MDOC_Hyphen,
-	MDOC_Item,
-	MDOC_Enum,
-	MDOC_Tag,
-	MDOC_Diag,
-	MDOC_Hang,
-	MDOC_Ohang,
-	MDOC_Inset,
-	MDOC_Column,
-	MDOC_Width,
-	MDOC_Compact,
-	MDOC_Std,
-	MDOC_Filled,
-	MDOC_Words,
-	MDOC_Emphasis,
-	MDOC_Symbolic,
-	MDOC_Nested,
-	MDOC_Centred,
-	MDOC_ARG_MAX
-};
-
-enum	mdoc_type {
-	MDOC_TEXT,
-	MDOC_ELEM,
-	MDOC_HEAD,
-	MDOC_TAIL,
-	MDOC_BODY,
-	MDOC_BLOCK,
-	MDOC_ROOT
-};
-
-enum	mdoc_sec {
-	SEC_NONE,
-	SEC_NAME,
-	SEC_LIBRARY,
-	SEC_SYNOPSIS,
-	SEC_DESCRIPTION,
-	SEC_IMPLEMENTATION,
-	SEC_RETURN_VALUES,
-	SEC_ENVIRONMENT, 
-	SEC_FILES,
-	SEC_EXIT_STATUS,
-	SEC_EXAMPLES,
-	SEC_DIAGNOSTICS,
-	SEC_COMPATIBILITY,
-	SEC_ERRORS,
-	SEC_SEE_ALSO,
-	SEC_STANDARDS,
-	SEC_HISTORY,
-	SEC_AUTHORS,
-	SEC_CAVEATS,
-	SEC_BUGS,
-	SEC_SECURITY,
-	SEC_CUSTOM,
-	SEC__MAX
-};
-
-enum	mdoc_endbody {
-	ENDBODY_NOT = 0,
-	ENDBODY_SPACE,
-	ENDBODY_NOSPACE
-};
-
-enum	mdoc_list {
-	LIST__NONE = 0,
-	LIST_bullet,
-	LIST_column,
-	LIST_dash,
-	LIST_diag,
-	LIST_enum,
-	LIST_hang,
-	LIST_hyphen,
-	LIST_inset,
-	LIST_item,
-	LIST_ohang,
-	LIST_tag
-};
-
-enum	mdoc_disp {
-	DISP__NONE = 0,
-	DISP_centred,
-	DISP_ragged,
-	DISP_unfilled,
-	DISP_filled,
-	DISP_literal
-};
-
-enum	mdoc_auth {
-	AUTH__NONE = 0,
-	AUTH_split,
-	AUTH_nosplit
-};
-
-enum	mdoc_font {
-	FONT__NONE = 0,
-	FONT_Em,
-	FONT_Li,
-	FONT_Sy
-};
-
-struct	man_meta {
-	char		*msec; /* `TH' section (e.g., 1--9) */
-	time_t		 date; /* parsed `TH' date */
-	char		*rawdate; /* raw `TH' date */
-	char		*vol; /* `TH' volume (e.g., KM) */
-	char		*title; /* `TH' title (e.g., LS, CAT) */
-	char		*source; /* `TH' source (e.g., GNU) */
-};
-
-struct	man_node {
-	struct man_node	*parent;
-	struct man_node	*child;
-	struct man_node	*next;
-	struct man_node	*prev;
-	int		 nchild;
-	int		 line;
-	int		 pos;
-	enum mant	 tok;
-	int		 flags;
-#define	MAN_VALID	(1 << 0)
-#define	MAN_ACTED	(1 << 1)
-#define	MAN_EOS		(1 << 2)
-	enum man_type	 type;
-	char		*string;
-	struct man_node	*head;
-	struct man_node	*body;
-};
-
-struct	mdoc_meta {
-	char		 *msec; /* `Dt' section (e.g., 1--9) */
-	char		 *vol; /* `Dt' volume (e.g., LOCAL) */
-	char		 *arch; /* `Dt' architecture (e.g., i386) */
-	time_t		  date; /* `Dd' date */
-	char		 *title; /* `Dt' title (e.g., LS, CAT) */
-	char		 *os; /* `Os' system (e.g., OpenBSD) */
-	char		 *name; /* leading `Nm' (e.g., ls, cat) */
-};
-
-struct	mdoc_argv {
-	enum mdocargt  	  arg;
-	int		  line;
-	int		  pos;
-	size_t		  sz;
-	char		**value;
-};
-
-struct 	mdoc_arg {
-	size_t		  argc;
-	struct mdoc_argv *argv;
-	unsigned int	  refcnt;
-};
-
-
-struct	mdoc_bd {
-	const char	 *offs; /* -offset */
-	enum mdoc_disp	  type; /* -ragged, etc. */
-	int		  comp; /* -compact */
-};
-
-struct	mdoc_bl {
-	const char	 *width; /* -width */
-	const char	 *offs; /* -offset */
-	enum mdoc_list	  type; /* -tag, -enum, etc. */
-	int		  comp; /* -compact */
-	size_t		  ncols; /* -column arg count */
-	const char	**cols; /* -column val ptr */
-};
-
-struct	mdoc_bf {
-	enum mdoc_font	  font; /* font */
-};
-
-struct	mdoc_an {
-	enum mdoc_auth	  auth; /* -split, etc. */
-};
-
-struct	mdoc_node {
-	struct mdoc_node *parent; /* parent AST node */
-	struct mdoc_node *child; /* first child AST node */
-	struct mdoc_node *next; /* sibling AST node */
-	struct mdoc_node *prev; /* prior sibling AST node */
-	int		  nchild; /* number children */
-	int		  line; /* parse line */
-	int		  pos; /* parse column */
-	enum mdoct	  tok; /* tok or MDOC__MAX if none */
-	int		  flags;
-#define	MDOC_VALID	 (1 << 0) /* has been validated */
-#define	MDOC_ACTED	 (1 << 1) /* has been acted upon */
-#define	MDOC_EOS	 (1 << 2) /* at sentence boundary */
-#define	MDOC_LINE	 (1 << 3) /* first macro/text on line */
-#define	MDOC_SYNPRETTY	 (1 << 4) /* SYNOPSIS-style formatting */
-#define	MDOC_ENDED	 (1 << 5) /* rendering has been ended */
-	enum mdoc_type	  type; /* AST node type */
-	enum mdoc_sec	  sec; /* current named section */
-	/* XXX: these can be union'd to shave a few bytes. */
-	struct mdoc_arg	 *args; 	/* BLOCK/ELEM */
-	struct mdoc_node *pending;	/* BLOCK */
-	struct mdoc_node *head;		/* BLOCK */
-	struct mdoc_node *body;		/* BLOCK */
-	struct mdoc_node *tail;		/* BLOCK */
-	char		 *string;	/* TEXT */
-	enum mdoc_endbody end;		/* BODY */
-
-	union {
-		struct mdoc_an  An;
-		struct mdoc_bd *Bd;
-		struct mdoc_bf *Bf;
-		struct mdoc_bl *Bl;
-	} data;
+/*
+ * A register (struct reg) can consist of many types: this consists of
+ * normalised types from the original string form.
+ */
+union	regval {
+	unsigned  u; /* unsigned integer */
 };
 
 /*
@@ -523,9 +145,7 @@ struct	mdoc_node {
  */
 struct	reg {
 	int		  set; /* whether set or not */
-	union {
-		unsigned  u; /* unsigned integer */
-	} v;
+	union regval	  v; /* parsed data */
 };
 
 /*
@@ -536,6 +156,8 @@ struct	reg {
 struct	regset {
 	struct reg	  regs[REG__MAX];
 };
+
+__BEGIN_DECLS
 
 /*
  * Callback function for warnings, errors, and fatal errors as they
