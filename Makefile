@@ -1,4 +1,9 @@
-.SUFFIXES:	.html .xml .sgml .1 .3 .7 .md5 .tar.gz .1.txt .3.txt .7.txt .1.sgml .3.sgml .7.sgml .h .h.html .1.ps .3.ps .7.ps .1.pdf .3.pdf .7.pdf
+.SUFFIXES:	.html .xml .sgml .1 .3 .7 .md5 .tar.gz 
+.SUFFIXES:	.1.txt .3.txt .7.txt
+.SUFFIXES:	.1.sgml .3.sgml .7.sgml 
+.SUFFIXES:	.h .h.html 
+.SUFFIXES:	.1.ps .3.ps .7.ps
+.SUFFIXES:	.1.pdf .3.pdf .7.pdf
 
 PREFIX		= /usr/local
 BINDIR		= $(PREFIX)/bin
@@ -92,26 +97,26 @@ HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
 
 GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml \
 	     mandoc_char.7.sgml man.7.sgml man.3.sgml roff.7.sgml \
-	     roff.3.sgml
+	     roff.3.sgml 
 
 SGMLS	   = index.sgml
 
 HTMLS	   = ChangeLog.html index.html man.h.html mdoc.h.html \
 	     mandoc.h.html roff.h.html mandoc.1.html mdoc.3.html \
 	     man.3.html mdoc.7.html man.7.html mandoc_char.7.html \
-	     roff.7.html roff.3.html
+	     roff.7.html roff.3.html 
 
 PSS	   = mandoc.1.ps mdoc.3.ps man.3.ps mdoc.7.ps man.7.ps \
-	     mandoc_char.7.ps roff.7.ps roff.3.ps
+	     mandoc_char.7.ps roff.7.ps roff.3.ps 
 
 PDFS	   = mandoc.1.pdf mdoc.3.pdf man.3.pdf mdoc.7.pdf man.7.pdf \
-	     mandoc_char.7.pdf roff.7.pdf roff.3.pdf
+	     mandoc_char.7.pdf roff.7.pdf roff.3.pdf 
 
 XSLS	   = ChangeLog.xsl
 
 TEXTS	   = mandoc.1.txt mdoc.3.txt man.3.txt mdoc.7.txt man.7.txt \
 	     mandoc_char.7.txt ChangeLog.txt \
-	     roff.7.txt roff.3.txt
+	     roff.7.txt roff.3.txt 
 
 EXAMPLES   = example.style.css
 
@@ -124,7 +129,7 @@ MD5S	   = mdocml-$(VERSION).md5
 TARGZS	   = mdocml-$(VERSION).tar.gz
 
 MANS	   = mandoc.1 mdoc.3 mdoc.7 mandoc_char.7 man.7 \
-	     man.3 roff.7 roff.3
+	     man.3 roff.7 roff.3 
 
 BINS	   = mandoc
 
