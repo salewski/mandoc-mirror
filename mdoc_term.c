@@ -1584,6 +1584,8 @@ termp_bd_pre(DECL_ARGS)
 		 * anyway, so don't sweat it.
 		 */
 		switch (nn->tok) {
+		case (MDOC_Sm):
+			/* FALLTHROUGH */
 		case (MDOC_br):
 			/* FALLTHROUGH */
 		case (MDOC_sp):

@@ -109,9 +109,6 @@
   is just "o\bo".
   see for example OpenBSD ksh(1)
 
-- .Sm should *not* produce as a blank line in .Bd -literal
-  see for example "Brace expansion" in OpenBSD ksh(1)
-
 - The characters "|" and "\*(Ba" should never be bold,
   not even in the middle of a word, e.g. ".Cm b\*(Bac" in
   "mknod [-m mode] name b|c major minor"
