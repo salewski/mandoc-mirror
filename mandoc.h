@@ -59,7 +59,6 @@ enum	mandocerr {
 	MANDOCERR_NOWIDTHARG, /* argument requires the width argument */
 	/* FIXME: merge with MANDOCERR_IGNARGV. */
 	MANDOCERR_WIDTHARG, /* superfluous width argument */
-	MANDOCERR_IGNARGV, /* ignoring argument */
 	MANDOCERR_BADDATE, /* bad date argument */
 	MANDOCERR_BADWIDTH, /* bad width argument */
 	MANDOCERR_BADMSEC, /* unknown manual section */
@@ -75,6 +74,7 @@ enum	mandocerr {
 	MANDOCERR_LISTREP, /* list type repeated */
 	MANDOCERR_DISPREP, /* display type repeated */
 	MANDOCERR_ARGVREP, /* argument repeated */
+	MANDOCERR_IGNARGV, /* ignoring argument */
 	MANDOCERR_NONAME, /* manual name not yet set */
 	MANDOCERR_MACROOBS, /* obsolete macro ignored */
 	MANDOCERR_MACROEMPTY, /* empty macro ignored */
