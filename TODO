@@ -4,8 +4,21 @@
 ************************************************************************
 
 ************************************************************************
+* parser bugs
+************************************************************************
+
+- the roff parser doesn't tolerate additional characters between
+  a macro and the \} terminating a conditional block, e.g.
+  .if n \{
+  .br \}
+  reported by ulrich spoerlein  Tue, 19 Oct 2010 20:39:50 +0200
+
+************************************************************************
 * missing features
 ************************************************************************
+
+- deal with nested displays, e.g. D1 inside Bd
+  schwarze has an old patch somewhere and would need to brush it up
 
 - explicit blocks with missing end macro should be implicitely closed
   at the end of the enclosing block, e.g. .Bl It (El) Sh
