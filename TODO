@@ -17,9 +17,6 @@
 * missing features
 ************************************************************************
 
-- deal with nested displays, e.g. D1 inside Bd
-  schwarze has an old patch somewhere and would need to brush it up
-
 - explicit blocks with missing end macro should be implicitely closed
   at the end of the enclosing block, e.g. .Bl It (El) Sh
   reminded by stsp@  in net/pptp pptp.8  Fri, 23 Apr 2010 20:32:39 +0200
@@ -65,6 +62,13 @@
   .fi
   ..
   reported by naddy@ Sat, 16 Oct 2010 23:51:57 +0200
+
+- clean up escape sequence handling, creating three classes:
+  (1) fully implemented, or parsed and ignored without loss of content
+  (2) unimplemented, potentially causing loss of content
+      or serious mangling of formatting (e.g. \n) -> ERROR
+      see textproc/mgdiff(1) for nice examples
+  (3) undefined, just output the character -> perhaps WARNING
 
 - port OpenBSD tbl integration bsd.lv, probably cleaning it up
 
