@@ -1657,7 +1657,7 @@ termp_xx_pre(DECL_ARGS)
 	pp = NULL;
 	switch (n->tok) {
 	case (MDOC_Bsx):
-		pp = "BSDI BSD/OS";
+		pp = "BSD/OS";
 		break;
 	case (MDOC_Dx):
 		pp = "DragonFly";

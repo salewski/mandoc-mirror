@@ -843,7 +843,7 @@ mdoc_xx_pre(MDOC_ARGS)
 
 	switch (n->tok) {
 	case (MDOC_Bsx):
-		pp = "BSDI BSD/OS";
+		pp = "BSD/OS";
 		break;
 	case (MDOC_Dx):
 		pp = "DragonFly";
