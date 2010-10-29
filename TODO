@@ -13,6 +13,11 @@
   .br \}
   reported by ulrich spoerlein  Tue, 19 Oct 2010 20:39:50 +0200
 
+- .BI "string string " word punct in gettext(3)
+  add bogus line breaks (rep by naddy@)
+  committed; currently working on IP and TP?
+  and what about B and I?
+
 ************************************************************************
 * missing features
 ************************************************************************
@@ -108,6 +113,14 @@
   close (in the post validation) or prior to open (pre).  This noted by
   jmc@ a thousand years ago.
 
+- xloadimage(1) wants .ti (temporary indent), rep by naddy@
+
+- bashbug(1) complains "line scope broken" after
+  .SM
+  .B something
+  should either just work or be a warning
+  reported by naddy@
+
 ************************************************************************
 * formatting issues: ugly output
 ************************************************************************
@@ -164,6 +177,13 @@
 - The \& zero-width character counts as output.
   That is, when it is alone on a line between two .Pp,
   we want three blank lines, not two as in mandoc.
+
+- When .Fn arguments exceed one output line, all but the first
+  should be indented, see e.g. rpc(3);
+  reported by jmc@ on discuss@  Fri, 29 Oct 2010 13:48:33 +0100
+
+- It seems that .TP does not want TWOSPACE after the tag;
+  see bashbug(1); reported by naddy@
 
 ************************************************************************
 * performance issues
