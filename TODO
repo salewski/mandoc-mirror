@@ -68,6 +68,14 @@
   ..
   reported by naddy@ Sat, 16 Oct 2010 23:51:57 +0200
 
+- implement parametric .de to support e.g.
+  /usr/xenocara/lib/libXxf86vm/manXF86VM.man
+  .de ZN
+  .ie t \fB\^\\$1\^\fR\\$2
+  .el \fI\^\\$1\^\fP\\$2
+  ..
+  .ZN -lXxf86vm
+
 - clean up escape sequence handling, creating three classes:
   (1) fully implemented, or parsed and ignored without loss of content
   (2) unimplemented, potentially causing loss of content
@@ -184,6 +192,11 @@
 
 - It seems that .TP does not want TWOSPACE after the tag;
   see bashbug(1); reported by naddy@
+
+- Header lines of excessive length:
+  Port OpenBSD man_term.c rev. 1.25 to mdoc_term.c
+  and document it in mdoc(7) and man(7) COMPATIBILITY
+  found while talking to Chris Bennett
 
 ************************************************************************
 * performance issues
