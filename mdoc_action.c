@@ -56,17 +56,12 @@ static	int	  post_bl_head(POST_ARGS);
 static	int	  post_bl_tagwidth(POST_ARGS);
 static	int	  post_bl_width(POST_ARGS);
 static	int	  post_dd(POST_ARGS);
-static	int	  post_display(POST_ARGS);
 static	int	  post_dt(POST_ARGS);
 static	int	  post_nm(POST_ARGS);
 static	int	  post_os(POST_ARGS);
 static	int	  post_pa(POST_ARGS);
 static	int	  post_prol(POST_ARGS);
-static	int	  post_st(POST_ARGS);
 static	int	  post_std(POST_ARGS);
-
-static	int	  pre_bd(PRE_ARGS);
-static	int	  pre_dl(PRE_ARGS);
 
 static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ap */
@@ -77,8 +72,8 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ss */ 
 	{ NULL, NULL }, /* Pp */ 
 	{ NULL, NULL }, /* D1 */
-	{ pre_dl, post_display }, /* Dl */
-	{ pre_bd, post_display }, /* Bd */ 
+	{ NULL, NULL }, /* Dl */
+	{ NULL, NULL }, /* Bd */ 
 	{ NULL, NULL }, /* Ed */
 	{ NULL, post_bl }, /* Bl */ 
 	{ NULL, NULL }, /* El */
@@ -106,7 +101,7 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ot */
 	{ NULL, post_pa }, /* Pa */
 	{ NULL, post_std }, /* Rv */
-	{ NULL, post_st }, /* St */
+	{ NULL, NULL }, /* St */
 	{ NULL, NULL }, /* Va */
 	{ NULL, NULL }, /* Vt */ 
 	{ NULL, NULL }, /* Xr */
@@ -191,25 +186,6 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* sp */
 	{ NULL, NULL }, /* %U */
 	{ NULL, NULL }, /* Ta */
-};
-
-#define	RSORD_MAX 14
-
-static	const enum mdoct rsord[RSORD_MAX] = {
-	MDOC__A,
-	MDOC__T,
-	MDOC__B,
-	MDOC__I,
-	MDOC__J,
-	MDOC__R,
-	MDOC__N,
-	MDOC__V,
-	MDOC__P,
-	MDOC__Q,
-	MDOC__D,
-	MDOC__O,
-	MDOC__C,
-	MDOC__U
 };
 
 
@@ -329,27 +305,6 @@ post_nm(POST_ARGS)
 	m->meta.name = mandoc_strdup(buf);
 	return(1);
 }
-
-/*
- * Substitute the value of `St' for the corresponding formatted string.
- * We're guaranteed that this exists (it's been verified during the
- * validation phase).
- */
-/* ARGSUSED */
-static int
-post_st(POST_ARGS)
-{
-	const char	*p;
-
-	assert(MDOC_TEXT == n->child->type);
-	p = mdoc_a2st(n->child->string);
-	if (p != NULL) {
-		free(n->child->string);
-		n->child->string = mandoc_strdup(p);
-	}
-	return(1);
-}
-
 
 /*
  * Parse out the contents of `Dt'.  See in-line documentation for how we
@@ -761,45 +716,5 @@ post_prol(POST_ARGS)
 	mdoc_node_delete(m, n);
 	if (m->meta.title && m->meta.date && m->meta.os)
 		m->flags |= MDOC_PBODY;
-	return(1);
-}
-
-
-/*
- * Trigger a literal context.
- */
-static int
-pre_dl(PRE_ARGS)
-{
-
-	if (MDOC_BODY == n->type)
-		m->flags |= MDOC_LITERAL;
-	return(1);
-}
-
-
-static int
-pre_bd(PRE_ARGS)
-{
-
-	if (MDOC_BODY != n->type)
-		return(1);
-
-	assert(n->data.Bd);
-	if (DISP_literal == n->data.Bd->type)
-		m->flags |= MDOC_LITERAL;
-	if (DISP_unfilled == n->data.Bd->type)
-		m->flags |= MDOC_LITERAL;
-
-	return(1);
-}
-
-
-static int
-post_display(POST_ARGS)
-{
-
-	if (MDOC_BODY == n->type)
-		m->flags &= ~MDOC_LITERAL;
 	return(1);
 }

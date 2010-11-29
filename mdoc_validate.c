@@ -86,6 +86,7 @@ static	int	 post_bf(POST_ARGS);
 static	int	 post_bl(POST_ARGS);
 static	int	 post_bl_head(POST_ARGS);
 static	int	 post_defaults(POST_ARGS);
+static	int	 post_literal(POST_ARGS);
 static	int	 post_eoln(POST_ARGS);
 static	int	 post_dt(POST_ARGS);
 static	int	 post_it(POST_ARGS);
@@ -105,6 +106,7 @@ static	int	 pre_dd(PRE_ARGS);
 static	int	 pre_display(PRE_ARGS);
 static	int	 pre_dt(PRE_ARGS);
 static	int	 pre_it(PRE_ARGS);
+static	int	 pre_literal(PRE_ARGS);
 static	int	 pre_os(PRE_ARGS);
 static	int	 pre_par(PRE_ARGS);
 static	int	 pre_rv(PRE_ARGS);
@@ -113,12 +115,14 @@ static	int	 pre_ss(PRE_ARGS);
 
 static	v_post	 posts_an[] = { post_an, NULL };
 static	v_post	 posts_at[] = { post_at, post_defaults, NULL };
-static	v_post	 posts_bd_bk[] = { hwarn_eq0, bwarn_ge1, NULL };
+static	v_post	 posts_bd[] = { post_literal, hwarn_eq0, bwarn_ge1, NULL };
 static	v_post	 posts_bf[] = { hwarn_le1, post_bf, NULL };
+static	v_post	 posts_bk[] = { hwarn_eq0, bwarn_ge1, NULL };
 static	v_post	 posts_bl[] = { bwarn_ge1, post_bl, NULL };
 static	v_post	 posts_bool[] = { eerr_eq1, ebool, NULL };
 static	v_post	 posts_eoln[] = { post_eoln, NULL };
 static	v_post	 posts_defaults[] = { post_defaults, NULL };
+static	v_post	 posts_dl[] = { post_literal, bwarn_ge1, herr_eq0, NULL };
 static	v_post	 posts_dt[] = { post_dt, NULL };
 static	v_post	 posts_fo[] = { hwarn_eq1, bwarn_ge1, NULL };
 static	v_post	 posts_it[] = { post_it, NULL };
@@ -137,9 +141,10 @@ static	v_post	 posts_vt[] = { post_vt, NULL };
 static	v_post	 posts_wline[] = { bwarn_ge1, herr_eq0, NULL };
 static	v_post	 posts_wtext[] = { ewarn_ge1, NULL };
 static	v_pre	 pres_an[] = { pre_an, NULL };
-static	v_pre	 pres_bd[] = { pre_display, pre_bd, pre_par, NULL };
+static	v_pre	 pres_bd[] = { pre_display, pre_bd, pre_literal, pre_par, NULL };
 static	v_pre	 pres_bl[] = { pre_bl, pre_par, NULL };
 static	v_pre	 pres_d1[] = { pre_display, NULL };
+static	v_pre	 pres_dl[] = { pre_literal, pre_display, NULL };
 static	v_pre	 pres_dd[] = { pre_dd, NULL };
 static	v_pre	 pres_dt[] = { pre_dt, NULL };
 static	v_pre	 pres_er[] = { NULL, NULL };
@@ -161,8 +166,8 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pres_ss, posts_ss },			/* Ss */ 
 	{ pres_pp, posts_notext },		/* Pp */ 
 	{ pres_d1, posts_wline },		/* D1 */
-	{ pres_d1, posts_wline },		/* Dl */
-	{ pres_bd, posts_bd_bk },		/* Bd */
+	{ pres_dl, posts_dl },			/* Dl */
+	{ pres_bd, posts_bd },			/* Bd */
 	{ NULL, NULL },				/* Ed */
 	{ pres_bl, posts_bl },			/* Bl */ 
 	{ NULL, NULL },				/* El */
@@ -253,7 +258,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Fc */ 
 	{ NULL, NULL },				/* Oo */
 	{ NULL, NULL },				/* Oc */
-	{ NULL, posts_bd_bk },			/* Bk */
+	{ NULL, posts_bk },			/* Bk */
 	{ NULL, NULL },				/* Ek */
 	{ NULL, posts_eoln },			/* Bt */
 	{ NULL, NULL },				/* Hf */
@@ -582,6 +587,7 @@ pre_display(PRE_ARGS)
 		if (MDOC_BLOCK == node->type)
 			if (MDOC_Bd == node->tok)
 				break;
+
 	if (NULL == node)
 		return(1);
 
@@ -1157,6 +1163,23 @@ post_nm(POST_ARGS)
 }
 
 static int
+post_literal(POST_ARGS)
+{
+	
+	/*
+	 * The `Dl' (note "el" not "one") and `Bd' macros unset the
+	 * MDOC_LITERAL flag as they leave.  Note that `Bd' only sets
+	 * this in literal mode, but it doesn't hurt to just switch it
+	 * off in general since displays can't be nested.
+	 */
+
+	if (MDOC_BODY == mdoc->last->type)
+		mdoc->last->flags &= ~MDOC_LITERAL;
+
+	return(1);
+}
+
+static int
 post_defaults(POST_ARGS)
 {
 	struct mdoc_node *nn;
@@ -1438,16 +1461,25 @@ post_root(POST_ARGS)
 	return(0);
 }
 
-
 static int
 post_st(POST_ARGS)
 {
+	const char	*p;
 
-	if (mdoc_a2st(mdoc->last->child->string))
-		return(1);
-	return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADSTANDARD));
+	assert(MDOC_TEXT == mdoc->last->child->type);
+
+	p = mdoc_a2st(mdoc->last->child->string);
+
+	if (p == NULL) {
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADSTANDARD);
+		mdoc_node_delete(mdoc, mdoc->last);
+	} else {
+		free(mdoc->last->child->string);
+		mdoc->last->child->string = mandoc_strdup(p);
+	}
+
+	return(1);
 }
-
 
 static int
 post_rs(POST_ARGS)
@@ -1713,5 +1745,36 @@ pre_par(PRE_ARGS)
 
 	mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_IGNPAR);
 	mdoc_node_delete(mdoc, mdoc->last);
+	return(1);
+}
+
+static int
+pre_literal(PRE_ARGS)
+{
+
+	if (MDOC_BODY != n->type)
+		return(1);
+
+	/*
+	 * The `Dl' (note "el" not "one") and `Bd -literal' and `Bd
+	 * -unfilled' macros set MDOC_LITERAL on entrance to the body.
+	 */
+
+	switch (n->tok) {
+	case (MDOC_Dl):
+		mdoc->flags |= MDOC_LITERAL;
+		break;
+	case (MDOC_Bd):
+		assert(n->data.Bd);
+		if (DISP_literal == n->data.Bd->type)
+			mdoc->flags |= MDOC_LITERAL;
+		if (DISP_unfilled == n->data.Bd->type)
+			mdoc->flags |= MDOC_LITERAL;
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+	
 	return(1);
 }

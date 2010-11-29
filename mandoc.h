@@ -51,8 +51,6 @@ enum	mandocerr {
 	MANDOCERR_PROLOGOOO, /* out of order prologue */
 	MANDOCERR_PROLOGREP, /* repeated prologue entry */
 	MANDOCERR_LISTFIRST, /* list type must come first */
-	MANDOCERR_BADSTANDARD, /* bad standard */
-	MANDOCERR_BADLIB, /* bad library */
 	MANDOCERR_BADTAB, /* tab in non-literal context */
 	MANDOCERR_BADESCAPE, /* bad escape sequence */
 	MANDOCERR_BADQUOTE, /* unterminated quoted string */
@@ -71,6 +69,7 @@ enum	mandocerr {
 	MANDOCERR_BADBOOL, /* bad Boolean value */
 	MANDOCERR_CHILD, /* child violates parent syntax */
 	MANDOCERR_BADATT, /* bad AT&T symbol */
+	MANDOCERR_BADSTANDARD, /* bad standard */
 	MANDOCERR_LISTREP, /* list type repeated */
 	MANDOCERR_DISPREP, /* display type repeated */
 	MANDOCERR_ARGVREP, /* argument repeated */
