@@ -58,7 +58,6 @@ static	int	  post_bl_width(POST_ARGS);
 static	int	  post_dd(POST_ARGS);
 static	int	  post_display(POST_ARGS);
 static	int	  post_dt(POST_ARGS);
-static	int	  post_lb(POST_ARGS);
 static	int	  post_nm(POST_ARGS);
 static	int	  post_os(POST_ARGS);
 static	int	  post_pa(POST_ARGS);
@@ -176,7 +175,7 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Hf */
 	{ NULL, NULL }, /* Fr */
 	{ NULL, NULL }, /* Ud */
-	{ NULL, post_lb }, /* Lb */
+	{ NULL, NULL }, /* Lb */
 	{ NULL, NULL }, /* Lp */
 	{ NULL, NULL }, /* Lk */
 	{ NULL, NULL }, /* Mt */
@@ -330,39 +329,6 @@ post_nm(POST_ARGS)
 	m->meta.name = mandoc_strdup(buf);
 	return(1);
 }
-
-
-/*
- * Look up the value of `Lb' for matching predefined strings.  If it has
- * one, then substitute the current value for the formatted value.  Note
- * that the lookup may fail (we can provide arbitrary strings).
- */
-/* ARGSUSED */
-static int
-post_lb(POST_ARGS)
-{
-	const char	*p;
-	char		*buf;
-	size_t		 sz;
-
-	assert(MDOC_TEXT == n->child->type);
-	p = mdoc_a2lib(n->child->string);
-
-	if (p) {
-		free(n->child->string);
-		n->child->string = mandoc_strdup(p);
-		return(1);
-	}
-
-	sz = strlen(n->child->string) +
-		2 + strlen("\\(lqlibrary\\(rq");
-	buf = mandoc_malloc(sz);
-	snprintf(buf, sz, "library \\(lq%s\\(rq", n->child->string);
-	free(n->child->string);
-	n->child->string = buf;
-	return(1);
-}
-
 
 /*
  * Substitute the value of `St' for the corresponding formatted string.

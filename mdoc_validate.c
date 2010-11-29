@@ -1077,16 +1077,37 @@ post_bf(POST_ARGS)
 	return(1);
 }
 
-
 static int
 post_lb(POST_ARGS)
 {
+	const char	*p;
+	char		*buf;
+	size_t		 sz;
 
-	if (mdoc_a2lib(mdoc->last->child->string))
+	assert(mdoc->last->child);
+	assert(MDOC_TEXT == mdoc->last->child->type);
+
+	p = mdoc_a2lib(mdoc->last->child->string);
+
+	/* If lookup ok, replace with table value. */
+
+	if (p) {
+		free(mdoc->last->child->string);
+		mdoc->last->child->string = mandoc_strdup(p);
 		return(1);
-	return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADLIB));
-}
+	}
 
+	/* If not, use "library ``xxxx''. */
+
+	sz = strlen(mdoc->last->child->string) +
+		2 + strlen("\\(lqlibrary\\(rq");
+	buf = mandoc_malloc(sz);
+	snprintf(buf, sz, "library \\(lq%s\\(rq", 
+			mdoc->last->child->string);
+	free(mdoc->last->child->string);
+	mdoc->last->child->string = buf;
+	return(1);
+}
 
 static int
 post_eoln(POST_ARGS)
