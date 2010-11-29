@@ -57,9 +57,7 @@ static	int	  post_bl_tagwidth(POST_ARGS);
 static	int	  post_bl_width(POST_ARGS);
 static	int	  post_dd(POST_ARGS);
 static	int	  post_dt(POST_ARGS);
-static	int	  post_nm(POST_ARGS);
 static	int	  post_os(POST_ARGS);
-static	int	  post_pa(POST_ARGS);
 static	int	  post_prol(POST_ARGS);
 static	int	  post_std(POST_ARGS);
 
@@ -96,10 +94,10 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* In */ 
 	{ NULL, NULL }, /* Li */
 	{ NULL, NULL }, /* Nd */ 
-	{ NULL, post_nm }, /* Nm */ 
+	{ NULL, NULL }, /* Nm */ 
 	{ NULL, NULL }, /* Op */
 	{ NULL, NULL }, /* Ot */
-	{ NULL, post_pa }, /* Pa */
+	{ NULL, NULL }, /* Pa */
 	{ NULL, post_std }, /* Rv */
 	{ NULL, NULL }, /* St */
 	{ NULL, NULL }, /* Va */
@@ -285,24 +283,6 @@ post_std(POST_ARGS)
 	if ( ! mdoc_word_alloc(m, n->line, n->pos, m->meta.name))
 		return(0);
 	m->last = nn;
-	return(1);
-}
-
-
-/*
- * The `Nm' macro's first use sets the name of the document.  See also
- * post_std(), etc.
- */
-static int
-post_nm(POST_ARGS)
-{
-	char		 buf[BUFSIZ];
-
-	if (m->meta.name)
-		return(1);
-	if ( ! concat(m, buf, n->child, BUFSIZ))
-		return(0);
-	m->meta.name = mandoc_strdup(buf);
 	return(1);
 }
 
@@ -652,28 +632,6 @@ post_bl(POST_ARGS)
 	assert(n->data.Bl->width);
 	return(1);
 }
-
-
-/*
- * The `Pa' macro defaults to a tilde if no value is provided as an
- * argument.
- */
-static int
-post_pa(POST_ARGS)
-{
-	struct mdoc_node *np;
-
-	if (n->child)
-		return(1);
-	
-	np = n;
-	m->next = MDOC_NEXT_CHILD;
-	if ( ! mdoc_word_alloc(m, n->line, n->pos, "~"))
-		return(0);
-	m->last = np;
-	return(1);
-}
-
 
 /*
  * Parse the date field in `Dd'.

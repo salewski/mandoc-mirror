@@ -193,7 +193,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_nm },			/* Nm */
 	{ NULL, posts_wline },			/* Op */
 	{ NULL, NULL },				/* Ot */
-	{ NULL, NULL },				/* Pa */
+	{ NULL, posts_defaults },		/* Pa */
 	{ pres_rv, NULL },			/* Rv */
 	{ NULL, posts_st },			/* St */ 
 	{ NULL, NULL },				/* Va */
@@ -1154,12 +1154,41 @@ post_vt(POST_ARGS)
 static int
 post_nm(POST_ARGS)
 {
+	struct mdoc_node *nn;
+	char		  buf[BUFSIZ];
 
-	if (mdoc->last->child)
+	/* If no child specified, make sure we have the meta name. */
+
+	if (NULL == mdoc->last->child && NULL == mdoc->meta.name) {
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NONAME);
 		return(1);
-	if (mdoc->meta.name)
+	} else if (mdoc->meta.name)
 		return(1);
-	return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NONAME));
+
+	/* If no meta name, set it from the child. */
+
+	buf[0] = '\0';
+
+	for (nn = mdoc->last->child; nn; nn = nn->next) {
+		/* XXX - copied from concat(). */
+		assert(MDOC_TEXT == nn->type);
+
+		if (strlcat(buf, nn->string, BUFSIZ) >= BUFSIZ) {
+			mdoc_nmsg(mdoc, nn, MANDOCERR_MEM);
+			return(0);
+		}
+
+		if (NULL == nn->next)
+			continue;
+
+		if (strlcat(buf, " ", BUFSIZ) >= BUFSIZ) {
+			mdoc_nmsg(mdoc, nn, MANDOCERR_MEM);
+			return(0);
+		}
+	}
+
+	mdoc->meta.name = mandoc_strdup(buf);
+	return(1);
 }
 
 static int
@@ -1186,8 +1215,8 @@ post_defaults(POST_ARGS)
 
 	/*
 	 * The `Ar' defaults to "file ..." if no value is provided as an
-	 * argument; the `Mt' macro uses "~"; the `Li' just gets an
-	 * empty string.
+	 * argument; the `Mt' and `Pa' macros use "~"; the `Li' just
+	 * gets an empty string.
 	 */
 
 	if (mdoc->last->child)
@@ -1213,6 +1242,8 @@ post_defaults(POST_ARGS)
 		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, ""))
 			return(0);
 		break;
+	case (MDOC_Pa):
+		/* FALLTHROUGH */
 	case (MDOC_Mt):
 		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, "~"))
 			return(0);
