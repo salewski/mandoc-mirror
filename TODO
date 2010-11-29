@@ -152,6 +152,10 @@
 * formatting issues: gratuitious differences
 ************************************************************************
 
+- .Rv (and probably .Ex) print different text if an `Nm' has been named
+  or not (run a manual without `Nm blah' to see this).  I'm not sure
+  that this exists in the wild, but it's still an error.
+
 - .%T should be quoted, not underlined, when .%J is also present,
   to better distinguish the contents of .%T and .%J,
   see for example OpenBSD cat(1)
