@@ -112,7 +112,7 @@ static	int	 pre_sh(PRE_ARGS);
 static	int	 pre_ss(PRE_ARGS);
 
 static	v_post	 posts_an[] = { post_an, NULL };
-static	v_post	 posts_at[] = { post_at, NULL };
+static	v_post	 posts_at[] = { post_at, post_defaults, NULL };
 static	v_post	 posts_bd_bk[] = { hwarn_eq0, bwarn_ge1, NULL };
 static	v_post	 posts_bf[] = { hwarn_le1, post_bf, NULL };
 static	v_post	 posts_bl[] = { bwarn_ge1, post_bl, NULL };
@@ -1159,6 +1159,12 @@ post_defaults(POST_ARGS)
 		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, "..."))
 			return(0);
 		break;
+	case (MDOC_At):
+		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, "AT&T"))
+			return(0);
+		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, "UNIX"))
+			return(0);
+		break;
 	case (MDOC_Li):
 		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, ""))
 			return(0);
@@ -1179,15 +1185,39 @@ post_defaults(POST_ARGS)
 static int
 post_at(POST_ARGS)
 {
+	const char	 *p, *q;
+	char		 *buf;
+	size_t		  sz;
 
+	/*
+	 * If we have a child, look it up in the standard keys.  If a
+	 * key exist, use that instead of the child; if it doesn't,
+	 * prefix "AT&T UNIX " to the existing data.
+	 */
+	
 	if (NULL == mdoc->last->child)
 		return(1);
-	assert(MDOC_TEXT == mdoc->last->child->type);
-	if (mdoc_a2att(mdoc->last->child->string))
-		return(1);
-	return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADATT));
-}
 
+	assert(MDOC_TEXT == mdoc->last->child->type);
+	p = mdoc_a2att(mdoc->last->child->string);
+
+	if (p) {
+		free(mdoc->last->child->string);
+		mdoc->last->child->string = mandoc_strdup(p);
+	} else {
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADATT);
+		p = "AT&T UNIX ";
+		q = mdoc->last->child->string;
+		sz = strlen(p) + strlen(q) + 1;
+		buf = mandoc_malloc(sz);
+		strlcpy(buf, p, sz);
+		strlcat(buf, q, sz);
+		free(mdoc->last->child->string);
+		mdoc->last->child->string = buf;
+	}
+
+	return(1);
+}
 
 static int
 post_an(POST_ARGS)

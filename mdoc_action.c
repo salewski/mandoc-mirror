@@ -51,7 +51,6 @@ struct	actions {
 static	int	  concat(struct mdoc *, char *,
 			const struct mdoc_node *, size_t);
 
-static	int	  post_at(POST_ARGS);
 static	int	  post_bl(POST_ARGS);
 static	int	  post_bl_head(POST_ARGS);
 static	int	  post_bl_tagwidth(POST_ARGS);
@@ -126,7 +125,7 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ac */
 	{ NULL, NULL }, /* Ao */
 	{ NULL, NULL }, /* Aq */
-	{ NULL, post_at }, /* At */ 
+	{ NULL, NULL }, /* At */ 
 	{ NULL, NULL }, /* Bc */
 	{ NULL, NULL }, /* Bf */ 
 	{ NULL, NULL }, /* Bo */
@@ -382,47 +381,6 @@ post_st(POST_ARGS)
 		free(n->child->string);
 		n->child->string = mandoc_strdup(p);
 	}
-	return(1);
-}
-
-
-/*
- * Look up the standard string in a table.  We know that it exists from
- * the validation phase, so assert on failure.  If a standard key wasn't
- * supplied, supply the default ``AT&T UNIX''.
- */
-static int
-post_at(POST_ARGS)
-{
-	struct mdoc_node *nn;
-	const char	 *p, *q;
-	char		 *buf;
-	size_t		  sz;
-
-	if (n->child) {
-		assert(MDOC_TEXT == n->child->type);
-		p = mdoc_a2att(n->child->string);
-		if (p) {
-			free(n->child->string);
-			n->child->string = mandoc_strdup(p);
-		} else {
-			p = "AT&T UNIX ";
-			q = n->child->string;
-			sz = strlen(p) + strlen(q) + 1;
-			buf = mandoc_malloc(sz);
-			strlcpy(buf, p, sz);
-			strlcat(buf, q, sz);
-			free(n->child->string);
-			n->child->string = buf;
-		}
-		return(1);
-	}
-
-	nn = n;
-	m->next = MDOC_NEXT_CHILD;
-	if ( ! mdoc_word_alloc(m, nn->line, nn->pos, "AT&T UNIX"))
-		return(0);
-	m->last = nn;
 	return(1);
 }
 
