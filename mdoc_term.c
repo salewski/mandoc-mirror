@@ -2076,7 +2076,7 @@ termp_lk_pre(DECL_ARGS)
 
 	nn = sv = n->child;
 
-	if (NULL == nn->next)
+	if (NULL == nn || NULL == nn->next)
 		return(1);
 
 	for (nn = nn->next; nn; nn = nn->next) 

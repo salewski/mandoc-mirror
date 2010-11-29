@@ -790,7 +790,7 @@ in_line(MACRO_PROT_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Fl):
 		/* FALLTHROUGH */
-	case (MDOC_Lk):
+	case (MDOC_Mt):
 		/* FALLTHROUGH */
 	case (MDOC_Nm):
 		/* FALLTHROUGH */

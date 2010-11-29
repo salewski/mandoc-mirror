@@ -1675,7 +1675,7 @@ mdoc_lk_pre(MDOC_ARGS)
 	PAIR_HREF_INIT(&tag[1], nn->string);
 	print_otag(h, TAG_A, 2, tag);
 
-	if (NULL == nn->next) 
+	if (NULL == nn || NULL == nn->next) 
 		return(1);
 
 	for (nn = nn->next; nn; nn = nn->next) 

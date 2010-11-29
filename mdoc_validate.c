@@ -85,6 +85,8 @@ static	int	 post_at(POST_ARGS);
 static	int	 post_bf(POST_ARGS);
 static	int	 post_bl(POST_ARGS);
 static	int	 post_bl_head(POST_ARGS);
+static	int	 post_defaults(POST_ARGS);
+static	int	 post_eoln(POST_ARGS);
 static	int	 post_dt(POST_ARGS);
 static	int	 post_it(POST_ARGS);
 static	int	 post_lb(POST_ARGS);
@@ -95,7 +97,6 @@ static	int	 post_sh(POST_ARGS);
 static	int	 post_sh_body(POST_ARGS);
 static	int	 post_sh_head(POST_ARGS);
 static	int	 post_st(POST_ARGS);
-static	int	 post_eoln(POST_ARGS);
 static	int	 post_vt(POST_ARGS);
 static	int	 pre_an(PRE_ARGS);
 static	int	 pre_bd(PRE_ARGS);
@@ -117,6 +118,7 @@ static	v_post	 posts_bf[] = { hwarn_le1, post_bf, NULL };
 static	v_post	 posts_bl[] = { bwarn_ge1, post_bl, NULL };
 static	v_post	 posts_bool[] = { eerr_eq1, ebool, NULL };
 static	v_post	 posts_eoln[] = { post_eoln, NULL };
+static	v_post	 posts_defaults[] = { post_defaults, NULL };
 static	v_post	 posts_dt[] = { post_dt, NULL };
 static	v_post	 posts_fo[] = { hwarn_eq1, bwarn_ge1, NULL };
 static	v_post	 posts_it[] = { post_it, NULL };
@@ -167,7 +169,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ pres_it, posts_it },			/* It */
 	{ NULL, posts_text },			/* Ad */ 
 	{ pres_an, posts_an },			/* An */ 
-	{ NULL, NULL },				/* Ar */
+	{ NULL, posts_defaults },		/* Ar */
 	{ NULL, posts_text },			/* Cd */ 
 	{ NULL, NULL },				/* Cm */
 	{ NULL, NULL },				/* Dv */ 
@@ -181,7 +183,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_wtext },			/* Ft */ 
 	{ NULL, posts_text },			/* Ic */ 
 	{ NULL, posts_text1 },			/* In */ 
-	{ NULL, NULL },				/* Li */
+	{ NULL, posts_defaults },		/* Li */
 	{ NULL, posts_nd },			/* Nd */
 	{ NULL, posts_nm },			/* Nm */
 	{ NULL, posts_wline },			/* Op */
@@ -260,7 +262,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_lb },			/* Lb */
 	{ NULL, posts_notext },			/* Lp */ 
 	{ NULL, posts_text },			/* Lk */ 
-	{ NULL, posts_text },			/* Mt */ 
+	{ NULL, posts_defaults },		/* Mt */ 
 	{ NULL, posts_wline },			/* Brq */ 
 	{ NULL, NULL },				/* Bro */ 
 	{ NULL, NULL },				/* Brc */ 
@@ -1133,6 +1135,46 @@ post_nm(POST_ARGS)
 	return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NONAME));
 }
 
+static int
+post_defaults(POST_ARGS)
+{
+	struct mdoc_node *nn;
+
+	/*
+	 * The `Ar' defaults to "file ..." if no value is provided as an
+	 * argument; the `Mt' macro uses "~"; the `Li' just gets an
+	 * empty string.
+	 */
+
+	if (mdoc->last->child)
+		return(1);
+	
+	nn = mdoc->last;
+	mdoc->next = MDOC_NEXT_CHILD;
+
+	switch (nn->tok) {
+	case (MDOC_Ar):
+		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, "file"))
+			return(0);
+		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, "..."))
+			return(0);
+		break;
+	case (MDOC_Li):
+		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, ""))
+			return(0);
+		break;
+	case (MDOC_Mt):
+		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, "~"))
+			return(0);
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	} 
+
+	mdoc->last = nn;
+	return(1);
+}
 
 static int
 post_at(POST_ARGS)

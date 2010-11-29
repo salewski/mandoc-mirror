@@ -51,7 +51,6 @@ struct	actions {
 static	int	  concat(struct mdoc *, char *,
 			const struct mdoc_node *, size_t);
 
-static	int	  post_ar(POST_ARGS);
 static	int	  post_at(POST_ARGS);
 static	int	  post_bl(POST_ARGS);
 static	int	  post_bl_head(POST_ARGS);
@@ -61,7 +60,6 @@ static	int	  post_dd(POST_ARGS);
 static	int	  post_display(POST_ARGS);
 static	int	  post_dt(POST_ARGS);
 static	int	  post_lb(POST_ARGS);
-static	int	  post_li(POST_ARGS);
 static	int	  post_nm(POST_ARGS);
 static	int	  post_os(POST_ARGS);
 static	int	  post_pa(POST_ARGS);
@@ -90,7 +88,7 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* It */
 	{ NULL, NULL }, /* Ad */ 
 	{ NULL, NULL }, /* An */
-	{ NULL, post_ar }, /* Ar */
+	{ NULL, NULL }, /* Ar */
 	{ NULL, NULL }, /* Cd */
 	{ NULL, NULL }, /* Cm */
 	{ NULL, NULL }, /* Dv */ 
@@ -104,7 +102,7 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ft */ 
 	{ NULL, NULL }, /* Ic */ 
 	{ NULL, NULL }, /* In */ 
-	{ NULL, post_li }, /* Li */
+	{ NULL, NULL }, /* Li */
 	{ NULL, NULL }, /* Nd */ 
 	{ NULL, post_nm }, /* Nm */ 
 	{ NULL, NULL }, /* Op */
@@ -850,51 +848,6 @@ post_pa(POST_ARGS)
 	np = n;
 	m->next = MDOC_NEXT_CHILD;
 	if ( ! mdoc_word_alloc(m, n->line, n->pos, "~"))
-		return(0);
-	m->last = np;
-	return(1);
-}
-
-
-/*
- * Empty `Li' macros get an empty string to make front-ends add an extra
- * space.
- */
-static int
-post_li(POST_ARGS)
-{
-	struct mdoc_node *np;
-
-	if (n->child)
-		return(1);
-	
-	np = n;
-	m->next = MDOC_NEXT_CHILD;
-	if ( ! mdoc_word_alloc(m, n->line, n->pos, ""))
-		return(0);
-	m->last = np;
-	return(1);
-}
-
-
-/*
- * The `Ar' macro defaults to two strings "file ..." if no value is
- * provided as an argument.
- */
-static int
-post_ar(POST_ARGS)
-{
-	struct mdoc_node *np;
-
-	if (n->child)
-		return(1);
-	
-	np = n;
-	m->next = MDOC_NEXT_CHILD;
-	/* XXX: make into macro values. */
-	if ( ! mdoc_word_alloc(m, n->line, n->pos, "file"))
-		return(0);
-	if ( ! mdoc_word_alloc(m, n->line, n->pos, "..."))
 		return(0);
 	m->last = np;
 	return(1);
