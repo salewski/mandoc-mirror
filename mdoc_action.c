@@ -50,7 +50,6 @@ struct	actions {
 
 static	int	  concat(struct mdoc *, char *,
 			const struct mdoc_node *, size_t);
-static	inline int order_rs(enum mdoct);
 
 static	int	  post_ar(POST_ARGS);
 static	int	  post_at(POST_ARGS);
@@ -67,7 +66,6 @@ static	int	  post_nm(POST_ARGS);
 static	int	  post_os(POST_ARGS);
 static	int	  post_pa(POST_ARGS);
 static	int	  post_prol(POST_ARGS);
-static	int	  post_rs(POST_ARGS);
 static	int	  post_sh(POST_ARGS);
 static	int	  post_st(POST_ARGS);
 static	int	  post_std(POST_ARGS);
@@ -161,7 +159,7 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, NULL }, /* Qo */
 	{ NULL, NULL }, /* Qq */
 	{ NULL, NULL }, /* Re */
-	{ NULL, post_rs }, /* Rs */
+	{ NULL, NULL }, /* Rs */
 	{ NULL, NULL }, /* Sc */
 	{ NULL, NULL }, /* So */
 	{ NULL, NULL }, /* Sq */
@@ -984,69 +982,5 @@ post_display(POST_ARGS)
 
 	if (MDOC_BODY == n->type)
 		m->flags &= ~MDOC_LITERAL;
-	return(1);
-}
-
-
-static inline int
-order_rs(enum mdoct t)
-{
-	int		i;
-
-	for (i = 0; i < (int)RSORD_MAX; i++)
-		if (rsord[i] == t)
-			return(i);
-
-	abort();
-	/* NOTREACHED */
-}
-
-
-/* ARGSUSED */
-static int
-post_rs(POST_ARGS)
-{
-	struct mdoc_node	*nn, *next, *prev;
-	int			 o;
-
-	if (MDOC_BLOCK != n->type)
-		return(1);
-
-	assert(n->body->child);
-	for (next = NULL, nn = n->body->child->next; nn; nn = next) {
-		o = order_rs(nn->tok);
-
-		/* Remove `nn' from the chain. */
-		next = nn->next;
-		if (next)
-			next->prev = nn->prev;
-
-		prev = nn->prev;
-		if (prev)
-			prev->next = nn->next;
-
-		nn->prev = nn->next = NULL;
-
-		/* 
-		 * Scan back until we reach a node that's ordered before
-		 * us, then set ourselves as being the next. 
-		 */
-		for ( ; prev; prev = prev->prev)
-			if (order_rs(prev->tok) <= o)
-				break;
-
-		nn->prev = prev;
-		if (prev) {
-			if (prev->next)
-				prev->next->prev = nn;
-			nn->next = prev->next;
-			prev->next = nn;
-			continue;
-		} 
-
-		n->body->child->prev = nn;
-		nn->next = n->body->child;
-		n->body->child = nn;
-	}
 	return(1);
 }

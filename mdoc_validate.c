@@ -275,6 +275,25 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Ta */
 };
 
+#define	RSORD_MAX 14 /* Number of `Rs' blocks. */
+
+static	const enum mdoct rsord[RSORD_MAX] = {
+	MDOC__A,
+	MDOC__T,
+	MDOC__B,
+	MDOC__I,
+	MDOC__J,
+	MDOC__R,
+	MDOC__N,
+	MDOC__V,
+	MDOC__P,
+	MDOC__Q,
+	MDOC__D,
+	MDOC__O,
+	MDOC__C,
+	MDOC__U
+};
+
 
 int
 mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *n)
@@ -1340,45 +1359,95 @@ post_st(POST_ARGS)
 static int
 post_rs(POST_ARGS)
 {
-	struct mdoc_node	*nn;
+	struct mdoc_node *nn, *next, *prev;
+	int		  i, j;
 
 	if (MDOC_BODY != mdoc->last->type)
 		return(1);
 
-	for (nn = mdoc->last->child; nn; nn = nn->next)
-		switch (nn->tok) {
-		case(MDOC__U):
-			/* FALLTHROUGH */
-		case(MDOC__Q):
-			/* FALLTHROUGH */
-		case(MDOC__C):
-			/* FALLTHROUGH */
-		case(MDOC__A):
-			/* FALLTHROUGH */
-		case(MDOC__B):
-			/* FALLTHROUGH */
-		case(MDOC__D):
-			/* FALLTHROUGH */
-		case(MDOC__I):
-			/* FALLTHROUGH */
-		case(MDOC__J):
-			/* FALLTHROUGH */
-		case(MDOC__N):
-			/* FALLTHROUGH */
-		case(MDOC__O):
-			/* FALLTHROUGH */
-		case(MDOC__P):
-			/* FALLTHROUGH */
-		case(MDOC__R):
-			/* FALLTHROUGH */
-		case(MDOC__T):
-			/* FALLTHROUGH */
-		case(MDOC__V):
-			break;
-		default:
-			mdoc_nmsg(mdoc, nn, MANDOCERR_SYNTCHILD);
-			return(0);
+	/*
+	 * Make sure only certain types of nodes are allowed within the
+	 * the `Rs' body.  Delete offending nodes and raise a warning.
+	 * Do this before re-ordering for the sake of clarity.
+	 */
+
+	next = NULL;
+	for (nn = mdoc->last->child; nn; nn = next) {
+		for (i = 0; i < RSORD_MAX; i++)
+			if (nn->tok == rsord[i])
+				break;
+
+		if (i < RSORD_MAX) {
+			next = nn->next;
+			continue;
 		}
+
+		next = nn->next;
+		mdoc_nmsg(mdoc, nn, MANDOCERR_CHILD);
+		mdoc_node_delete(mdoc, nn);
+	}
+
+	/*
+	 * The full `Rs' block needs special handling to order the
+	 * sub-elements according to `rsord'.  Pick through each element
+	 * and correctly order it.  This is a insertion sort.
+	 */
+
+	next = NULL;
+	for (nn = mdoc->last->child->next; nn; nn = next) {
+		/* Determine order of `nn'. */
+		for (i = 0; i < RSORD_MAX; i++)
+			if (rsord[i] == nn->tok)
+				break;
+
+		/* 
+		 * Remove `nn' from the chain.  This somewhat
+		 * repeats mdoc_node_unlink(), but since we're
+		 * just re-ordering, there's no need for the
+		 * full unlink process.
+		 */
+		
+		if (NULL != (next = nn->next))
+			next->prev = nn->prev;
+
+		if (NULL != (prev = nn->prev))
+			prev->next = nn->next;
+
+		nn->prev = nn->next = NULL;
+
+		/* 
+		 * Scan back until we reach a node that's
+		 * ordered before `nn'.
+		 */
+
+		for ( ; prev ; prev = prev->prev) {
+			/* Determine order of `prev'. */
+			for (j = 0; j < RSORD_MAX; j++)
+				if (rsord[j] == prev->tok)
+					break;
+
+			if (j <= i)
+				break;
+		}
+
+		/*
+		 * Set `nn' back into its correct place in front
+		 * of the `prev' node.
+		 */
+
+		nn->prev = prev;
+
+		if (prev) {
+			if (prev->next)
+				prev->next->prev = nn;
+			nn->next = prev->next;
+			prev->next = nn;
+		} else {
+			mdoc->last->child->prev = nn;
+			nn->next = mdoc->last->child;
+			mdoc->last->child = nn;
+		}
+	}
 
 	return(1);
 }
