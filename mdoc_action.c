@@ -64,7 +64,6 @@ static	int	  post_nm(POST_ARGS);
 static	int	  post_os(POST_ARGS);
 static	int	  post_pa(POST_ARGS);
 static	int	  post_prol(POST_ARGS);
-static	int	  post_sh(POST_ARGS);
 static	int	  post_st(POST_ARGS);
 static	int	  post_std(POST_ARGS);
 
@@ -76,7 +75,7 @@ static	const struct actions mdoc_actions[MDOC_MAX] = {
 	{ NULL, post_dd }, /* Dd */ 
 	{ NULL, post_dt }, /* Dt */ 
 	{ NULL, post_os }, /* Os */ 
-	{ NULL, post_sh }, /* Sh */ 
+	{ NULL, NULL }, /* Sh */ 
 	{ NULL, NULL }, /* Ss */ 
 	{ NULL, NULL }, /* Pp */ 
 	{ NULL, NULL }, /* D1 */
@@ -424,63 +423,6 @@ post_at(POST_ARGS)
 	if ( ! mdoc_word_alloc(m, nn->line, nn->pos, "AT&T UNIX"))
 		return(0);
 	m->last = nn;
-	return(1);
-}
-
-
-/*
- * Mark the current section.  The ``named'' section (lastnamed) is set
- * whenever the current section isn't a custom section--we use this to
- * keep track of section ordering.  Also check that the section is
- * allowed within the document's manual section.
- */
-static int
-post_sh(POST_ARGS)
-{
-	enum mdoc_sec	 sec;
-	char		 buf[BUFSIZ];
-
-	if (MDOC_HEAD != n->type)
-		return(1);
-
-	if ( ! concat(m, buf, n->child, BUFSIZ))
-		return(0);
-	sec = mdoc_str2sec(buf);
-	/*
-	 * The first section should always make us move into a non-new
-	 * state.
-	 */
-	if (SEC_NONE == m->lastnamed || SEC_CUSTOM != sec)
-		m->lastnamed = sec;
-
-	/*
-	 * Switch the parser's SYNOPSIS mode, to be copied
-	 * into individual nodes when creating them.
-	 * Note that this mode can also be set and unset
-	 * using the roff nS register.
-	 */
-	if (SEC_SYNOPSIS == sec)
-		m->flags |= MDOC_SYNOPSIS;
-	else
-		m->flags &= ~MDOC_SYNOPSIS;
-
-	/* Some sections only live in certain manual sections. */
-
-	switch ((m->lastsec = sec)) {
-	case (SEC_RETURN_VALUES):
-		/* FALLTHROUGH */
-	case (SEC_ERRORS):
-		assert(m->meta.msec);
-		if (*m->meta.msec == '2')
-			break;
-		if (*m->meta.msec == '3')
-			break;
-		if (*m->meta.msec == '9')
-			break;
-		return(mdoc_nmsg(m, n, MANDOCERR_SECMSEC));
-	default:
-		break;
-	}
 	return(1);
 }
 

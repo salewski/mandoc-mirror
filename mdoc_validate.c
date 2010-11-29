@@ -1544,34 +1544,33 @@ post_sh_body(POST_ARGS)
 static int
 post_sh_head(POST_ARGS)
 {
-	char		        buf[BUFSIZ];
-	enum mdoc_sec	        sec;
-	const struct mdoc_node *n;
+	char		  buf[BUFSIZ];
+	enum mdoc_sec	  sec;
+	struct mdoc_node *n;
 
 	/*
 	 * Process a new section.  Sections are either "named" or
-	 * "custom"; custom sections are user-defined, while named ones
-	 * usually follow a conventional order and may only appear in
-	 * certain manual sections.
+	 * "custom".  Custom sections are user-defined, while named ones
+	 * follow a conventional order and may only appear in certain
+	 * manual sections.
 	 */
 
 	buf[0] = '\0';
 
-	/*
-	 * FIXME: yes, these can use a dynamic buffer, but I don't do so
-	 * in the interests of simplicity.
-	 */
+	/* FIXME: use dynamic buffer... */
 
 	for (n = mdoc->last->child; n; n = n->next) {
-		/* XXX - copied from compact(). */
+		/* XXX - copied from concat(). */
 		assert(MDOC_TEXT == n->type);
 
 		if (strlcat(buf, n->string, BUFSIZ) >= BUFSIZ) {
 			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
 			return(0);
 		}
+
 		if (NULL == n->next)
 			continue;
+
 		if (strlcat(buf, " ", BUFSIZ) >= BUFSIZ) {
 			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
 			return(0);
@@ -1580,41 +1579,60 @@ post_sh_head(POST_ARGS)
 
 	sec = mdoc_str2sec(buf);
 
-	/* 
-	 * Check: NAME should always be first, CUSTOM has no roles,
-	 * non-CUSTOM has a conventional order to be followed.
-	 */
+	/* The NAME should be first. */
 
 	if (SEC_NAME != sec && SEC_NONE == mdoc->lastnamed)
-		if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NAMESECFIRST))
-			return(0);
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NAMESECFIRST);
+
+	/* The SYNOPSIS gets special attention in other areas. */
+
+	if (SEC_SYNOPSIS == sec)
+		mdoc->flags |= MDOC_SYNOPSIS;
+	else
+		mdoc->flags &= ~MDOC_SYNOPSIS;
+
+	/* Mark our last section. */
+
+	mdoc->lastsec = sec;
+
+	/* We don't care about custom sections after this. */
 
 	if (SEC_CUSTOM == sec)
 		return(1);
 
-	if (sec == mdoc->lastnamed)
-		if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SECREP))
-			return(0);
-
-	if (sec < mdoc->lastnamed)
-		if ( ! mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SECOOO))
-			return(0);
-
-	/* 
-	 * Check particular section/manual conventions.  LIBRARY can
-	 * only occur in manual section 2, 3, and 9.
+	/*
+	 * Check whether our non-custom section is being repeated or is
+	 * out of order.
 	 */
 
+	if (sec == mdoc->lastnamed)
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SECREP);
+
+	if (sec < mdoc->lastnamed)
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SECOOO);
+
+	/* Mark the last named section. */
+
+	mdoc->lastnamed = sec;
+
+	/* Check particular section/manual conventions. */
+
+	assert(mdoc->meta.msec);
+
 	switch (sec) {
+	case (SEC_RETURN_VALUES):
+		/* FALLTHROUGH */
+	case (SEC_ERRORS):
+		/* FALLTHROUGH */
 	case (SEC_LIBRARY):
-		assert(mdoc->meta.msec);
 		if (*mdoc->meta.msec == '2')
 			break;
 		if (*mdoc->meta.msec == '3')
 			break;
 		if (*mdoc->meta.msec == '9')
 			break;
-		return(mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SECMSEC));
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_SECMSEC);
+		break;
 	default:
 		break;
 	}
