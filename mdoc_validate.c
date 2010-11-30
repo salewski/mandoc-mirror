@@ -18,6 +18,10 @@
 #include "config.h"
 #endif
 
+#ifndef	OSNAME
+#include <sys/utsname.h>
+#endif
+
 #include <sys/types.h>
 
 #include <assert.h>
@@ -26,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "mandoc.h"
 #include "libmdoc.h"
@@ -68,6 +73,9 @@ static	int	 check_argv(struct mdoc *,
 			struct mdoc_node *, struct mdoc_argv *);
 static	int	 check_args(struct mdoc *, struct mdoc_node *);
 
+static	int	 concat(struct mdoc *, char *, 
+			const struct mdoc_node *, size_t);
+
 static	int	 ebool(POST_ARGS);
 static	int	 berr_ge1(POST_ARGS);
 static	int	 bwarn_ge1(POST_ARGS);
@@ -91,19 +99,23 @@ static	int	 post_bl_block(POST_ARGS);
 static	int	 post_bl_block_width(POST_ARGS);
 static	int	 post_bl_block_tag(POST_ARGS);
 static	int	 post_bl_head(POST_ARGS);
+static	int	 post_dd(POST_ARGS);
+static	int	 post_dt(POST_ARGS);
 static	int	 post_defaults(POST_ARGS);
 static	int	 post_literal(POST_ARGS);
 static	int	 post_eoln(POST_ARGS);
-static	int	 post_dt(POST_ARGS);
 static	int	 post_it(POST_ARGS);
 static	int	 post_lb(POST_ARGS);
 static	int	 post_nm(POST_ARGS);
+static	int	 post_os(POST_ARGS);
+static	int	 post_prol(POST_ARGS);
 static	int	 post_root(POST_ARGS);
 static	int	 post_rs(POST_ARGS);
 static	int	 post_sh(POST_ARGS);
 static	int	 post_sh_body(POST_ARGS);
 static	int	 post_sh_head(POST_ARGS);
 static	int	 post_st(POST_ARGS);
+static	int	 post_std(POST_ARGS);
 static	int	 post_vt(POST_ARGS);
 static	int	 pre_an(PRE_ARGS);
 static	int	 pre_bd(PRE_ARGS);
@@ -128,19 +140,22 @@ static	v_post	 posts_bl[] = { bwarn_ge1, post_bl, NULL };
 static	v_post	 posts_bool[] = { eerr_eq1, ebool, NULL };
 static	v_post	 posts_eoln[] = { post_eoln, NULL };
 static	v_post	 posts_defaults[] = { post_defaults, NULL };
+static	v_post	 posts_dd[] = { ewarn_ge1, post_dd, post_prol, NULL };
 static	v_post	 posts_dl[] = { post_literal, bwarn_ge1, herr_eq0, NULL };
-static	v_post	 posts_dt[] = { post_dt, NULL };
+static	v_post	 posts_dt[] = { post_dt, post_prol, NULL };
 static	v_post	 posts_fo[] = { hwarn_eq1, bwarn_ge1, NULL };
 static	v_post	 posts_it[] = { post_it, NULL };
 static	v_post	 posts_lb[] = { eerr_eq1, post_lb, NULL };
 static	v_post	 posts_nd[] = { berr_ge1, NULL };
 static	v_post	 posts_nm[] = { post_nm, NULL };
 static	v_post	 posts_notext[] = { ewarn_eq0, NULL };
+static	v_post	 posts_os[] = { post_os, post_prol, NULL };
 static	v_post	 posts_rs[] = { berr_ge1, herr_eq0, post_rs, NULL };
 static	v_post	 posts_sh[] = { herr_ge1, bwarn_ge1, post_sh, NULL };
 static	v_post	 posts_sp[] = { eerr_le1, NULL };
 static	v_post	 posts_ss[] = { herr_ge1, NULL };
 static	v_post	 posts_st[] = { eerr_eq1, post_st, NULL };
+static	v_post	 posts_std[] = { post_std, NULL };
 static	v_post	 posts_text[] = { eerr_ge1, NULL };
 static	v_post	 posts_text1[] = { eerr_eq1, NULL };
 static	v_post	 posts_vt[] = { post_vt, NULL };
@@ -165,9 +180,9 @@ static	v_pre	 pres_ss[] = { pre_ss, NULL };
 
 const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Ap */
-	{ pres_dd, posts_wtext },		/* Dd */
+	{ pres_dd, posts_dd },			/* Dd */
 	{ pres_dt, posts_dt },			/* Dt */
-	{ pres_os, NULL },			/* Os */
+	{ pres_os, posts_os },			/* Os */
 	{ pres_sh, posts_sh },			/* Sh */ 
 	{ pres_ss, posts_ss },			/* Ss */ 
 	{ pres_pp, posts_notext },		/* Pp */ 
@@ -186,7 +201,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Dv */ 
 	{ pres_er, posts_text },		/* Er */ 
 	{ NULL, NULL },				/* Ev */ 
-	{ pres_ex, NULL },			/* Ex */ 
+	{ pres_ex, posts_std },			/* Ex */ 
 	{ NULL, NULL },				/* Fa */ 
 	{ pres_fd, posts_wtext },		/* Fd */
 	{ NULL, NULL },				/* Fl */
@@ -200,7 +215,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_wline },			/* Op */
 	{ NULL, NULL },				/* Ot */
 	{ NULL, posts_defaults },		/* Pa */
-	{ pres_rv, NULL },			/* Rv */
+	{ pres_rv, posts_std },			/* Rv */
 	{ NULL, posts_st },			/* St */ 
 	{ NULL, NULL },				/* Va */
 	{ NULL, posts_vt },			/* Vt */ 
@@ -946,33 +961,12 @@ pre_an(PRE_ARGS)
 	return(1);
 }
 
-
 static int
 pre_rv(PRE_ARGS)
 {
 
 	return(check_stdarg(mdoc, n));
 }
-
-
-static int
-post_dt(POST_ARGS)
-{
-	const struct mdoc_node *nn;
-	const char	*p;
-
-	if (NULL != (nn = mdoc->last->child))
-		for (p = nn->string; *p; p++) {
-			if (toupper((u_char)*p) == *p)
-				continue;
-			if ( ! mdoc_nmsg(mdoc, nn, MANDOCERR_UPPERCASE))
-				return(0);
-			break;
-		}
-
-	return(1);
-}
-
 
 static int
 pre_dt(PRE_ARGS)
@@ -987,7 +981,6 @@ pre_dt(PRE_ARGS)
 	return(1);
 }
 
-
 static int
 pre_os(PRE_ARGS)
 {
@@ -1000,7 +993,6 @@ pre_os(PRE_ARGS)
 			return(0);
 	return(1);
 }
-
 
 static int
 pre_dd(PRE_ARGS)
@@ -1160,8 +1152,7 @@ post_vt(POST_ARGS)
 static int
 post_nm(POST_ARGS)
 {
-	struct mdoc_node *nn;
-	char		  buf[BUFSIZ];
+	char		 buf[BUFSIZ];
 
 	/* If no child specified, make sure we have the meta name. */
 
@@ -1173,27 +1164,11 @@ post_nm(POST_ARGS)
 
 	/* If no meta name, set it from the child. */
 
-	buf[0] = '\0';
-
-	for (nn = mdoc->last->child; nn; nn = nn->next) {
-		/* XXX - copied from concat(). */
-		assert(MDOC_TEXT == nn->type);
-
-		if (strlcat(buf, nn->string, BUFSIZ) >= BUFSIZ) {
-			mdoc_nmsg(mdoc, nn, MANDOCERR_MEM);
-			return(0);
-		}
-
-		if (NULL == nn->next)
-			continue;
-
-		if (strlcat(buf, " ", BUFSIZ) >= BUFSIZ) {
-			mdoc_nmsg(mdoc, nn, MANDOCERR_MEM);
-			return(0);
-		}
-	}
+	if ( ! concat(mdoc, buf, mdoc->last->child, BUFSIZ))
+		return(0);
 
 	mdoc->meta.name = mandoc_strdup(buf);
+
 	return(1);
 }
 
@@ -1858,9 +1833,8 @@ post_sh_body(POST_ARGS)
 static int
 post_sh_head(POST_ARGS)
 {
-	char		  buf[BUFSIZ];
-	enum mdoc_sec	  sec;
-	struct mdoc_node *n;
+	char		 buf[BUFSIZ];
+	enum mdoc_sec	 sec;
 
 	/*
 	 * Process a new section.  Sections are either "named" or
@@ -1869,27 +1843,8 @@ post_sh_head(POST_ARGS)
 	 * manual sections.
 	 */
 
-	buf[0] = '\0';
-
-	/* FIXME: use dynamic buffer... */
-
-	for (n = mdoc->last->child; n; n = n->next) {
-		/* XXX - copied from concat(). */
-		assert(MDOC_TEXT == n->type);
-
-		if (strlcat(buf, n->string, BUFSIZ) >= BUFSIZ) {
-			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
-			return(0);
-		}
-
-		if (NULL == n->next)
-			continue;
-
-		if (strlcat(buf, " ", BUFSIZ) >= BUFSIZ) {
-			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
-			return(0);
-		}
-	}
+	if ( ! concat(mdoc, buf, mdoc->last->child, BUFSIZ))
+		return(0);
 
 	sec = mdoc_str2sec(buf);
 
@@ -2009,3 +1964,268 @@ pre_literal(PRE_ARGS)
 	
 	return(1);
 }
+
+static int
+post_dd(POST_ARGS)
+{
+	char		  buf[DATESIZ];
+	struct mdoc_node *n;
+
+	n = mdoc->last;
+
+	if (NULL == n->child) {
+		mdoc->meta.date = time(NULL);
+		return(post_prol(mdoc));
+	}
+
+	if ( ! concat(mdoc, buf, n->child, DATESIZ))
+		return(0);
+
+	mdoc->meta.date = mandoc_a2time
+		(MTIME_MDOCDATE | MTIME_CANONICAL, buf);
+
+	if (0 == mdoc->meta.date) {
+		if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_BADDATE))
+			return(0);
+		mdoc->meta.date = time(NULL);
+	}
+
+	return(1);
+}
+
+static int
+post_dt(POST_ARGS)
+{
+	struct mdoc_node *nn, *n;
+	const char	 *cp;
+	char		 *p;
+
+	n = mdoc->last;
+
+	if (mdoc->meta.title)
+		free(mdoc->meta.title);
+	if (mdoc->meta.vol)
+		free(mdoc->meta.vol);
+	if (mdoc->meta.arch)
+		free(mdoc->meta.arch);
+
+	mdoc->meta.title = mdoc->meta.vol = mdoc->meta.arch = NULL;
+
+	/* First make all characters uppercase. */
+
+	if (NULL != (nn = n->child))
+		for (p = nn->string; *p; p++) {
+			if (toupper((u_char)*p) == *p)
+				continue;
+			if ( ! mdoc_nmsg(mdoc, nn, MANDOCERR_UPPERCASE))
+				return(0);
+			break;
+		}
+
+	/* Handles: `.Dt' 
+	 *   --> title = unknown, volume = local, msec = 0, arch = NULL
+	 */
+
+	if (NULL == (nn = n->child)) {
+		/* XXX: make these macro values. */
+		/* FIXME: warn about missing values. */
+		mdoc->meta.title = mandoc_strdup("UNKNOWN");
+		mdoc->meta.vol = mandoc_strdup("LOCAL");
+		mdoc->meta.msec = mandoc_strdup("1");
+		return(1);
+	}
+
+	/* Handles: `.Dt TITLE' 
+	 *   --> title = TITLE, volume = local, msec = 0, arch = NULL
+	 */
+
+	mdoc->meta.title = mandoc_strdup
+		('\0' == nn->string[0] ? "UNKNOWN" : nn->string);
+
+	if (NULL == (nn = nn->next)) {
+		/* FIXME: warn about missing msec. */
+		/* XXX: make this a macro value. */
+		mdoc->meta.vol = mandoc_strdup("LOCAL");
+		mdoc->meta.msec = mandoc_strdup("1");
+		return(1);
+	}
+
+	/* Handles: `.Dt TITLE SEC'
+	 *   --> title = TITLE, volume = SEC is msec ? 
+	 *           format(msec) : SEC,
+	 *       msec = SEC is msec ? atoi(msec) : 0,
+	 *       arch = NULL
+	 */
+
+	cp = mdoc_a2msec(nn->string);
+	if (cp) {
+		mdoc->meta.vol = mandoc_strdup(cp);
+		mdoc->meta.msec = mandoc_strdup(nn->string);
+	} else if (mdoc_nmsg(mdoc, n, MANDOCERR_BADMSEC)) {
+		mdoc->meta.vol = mandoc_strdup(nn->string);
+		mdoc->meta.msec = mandoc_strdup(nn->string);
+	} else
+		return(0);
+
+	if (NULL == (nn = nn->next))
+		return(1);
+
+	/* Handles: `.Dt TITLE SEC VOL'
+	 *   --> title = TITLE, volume = VOL is vol ?
+	 *       format(VOL) : 
+	 *           VOL is arch ? format(arch) : 
+	 *               VOL
+	 */
+
+	cp = mdoc_a2vol(nn->string);
+	if (cp) {
+		free(mdoc->meta.vol);
+		mdoc->meta.vol = mandoc_strdup(cp);
+	} else {
+		/* FIXME: warn about bad arch. */
+		cp = mdoc_a2arch(nn->string);
+		if (NULL == cp) {
+			free(mdoc->meta.vol);
+			mdoc->meta.vol = mandoc_strdup(nn->string);
+		} else 
+			mdoc->meta.arch = mandoc_strdup(cp);
+	}	
+
+	/* Ignore any subsequent parameters... */
+	/* FIXME: warn about subsequent parameters. */
+
+	return(1);
+}
+
+static int
+post_prol(POST_ARGS)
+{
+	/*
+	 * Remove prologue macros from the document after they're
+	 * processed.  The final document uses mdoc_meta for these
+	 * values and discards the originals.
+	 */
+
+	mdoc_node_delete(mdoc, mdoc->last);
+	if (mdoc->meta.title && mdoc->meta.date && mdoc->meta.os)
+		mdoc->flags |= MDOC_PBODY;
+
+	return(1);
+}
+
+static int
+post_os(POST_ARGS)
+{
+	struct mdoc_node *n;
+	char		  buf[BUFSIZ];
+#ifndef OSNAME
+	struct utsname	  utsname;
+#endif
+
+	n = mdoc->last;
+
+	/*
+	 * Set the operating system by way of the `Os' macro.  Note that
+	 * if an argument isn't provided and -DOSNAME="\"foo\"" is
+	 * provided during compilation, this value will be used instead
+	 * of filling in "sysname release" from uname().
+ 	 */
+
+	if (mdoc->meta.os)
+		free(mdoc->meta.os);
+
+	if ( ! concat(mdoc, buf, n->child, BUFSIZ))
+		return(0);
+
+	/* XXX: yes, these can all be dynamically-adjusted buffers, but
+	 * it's really not worth the extra hackery.
+	 */
+
+	if ('\0' == buf[0]) {
+#ifdef OSNAME
+		if (strlcat(buf, OSNAME, BUFSIZ) >= BUFSIZ) {
+			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
+			return(0);
+		}
+#else /*!OSNAME */
+		if (-1 == uname(&utsname))
+			return(mdoc_nmsg(mdoc, n, MANDOCERR_UTSNAME));
+
+		if (strlcat(buf, utsname.sysname, BUFSIZ) >= BUFSIZ) {
+			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
+			return(0);
+		}
+		if (strlcat(buf, " ", 64) >= BUFSIZ) {
+			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
+			return(0);
+		}
+		if (strlcat(buf, utsname.release, BUFSIZ) >= BUFSIZ) {
+			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
+			return(0);
+		}
+#endif /*!OSNAME*/
+	}
+
+	mdoc->meta.os = mandoc_strdup(buf);
+	return(1);
+}
+
+static int
+post_std(POST_ARGS)
+{
+	struct mdoc_node *nn, *n;
+
+	n = mdoc->last;
+
+	/*
+	 * Macros accepting `-std' as an argument have the name of the
+	 * current document (`Nm') filled in as the argument if it's not
+	 * provided.
+	 */
+
+	if (n->child)
+		return(1);
+	if (NULL == mdoc->meta.name)
+		return(1);
+	
+	nn = n;
+	mdoc->next = MDOC_NEXT_CHILD;
+
+	if ( ! mdoc_word_alloc(mdoc, n->line, n->pos, mdoc->meta.name))
+		return(0);
+	mdoc->last = nn;
+	return(1);
+}
+
+static int
+concat(struct mdoc *m, char *p, const struct mdoc_node *n, size_t sz)
+{
+
+	p[0] = '\0';
+
+	/*
+	 * Concatenate sibling nodes together.  All siblings must be of
+	 * type MDOC_TEXT or an assertion is raised.  Concatenation is
+	 * separated by a single whitespace.
+	 */
+
+	for ( ; n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
+
+		if (strlcat(p, n->string, sz) >= sz) {
+			mdoc_nmsg(m, n, MANDOCERR_MEM);
+			return(0);
+		}
+
+		if (NULL == n->next)
+			continue;
+
+		if (strlcat(p, " ", sz) >= sz) {
+			mdoc_nmsg(m, n, MANDOCERR_MEM);
+			return(0);
+		}
+	}
+
+	return(1);
+}
+
