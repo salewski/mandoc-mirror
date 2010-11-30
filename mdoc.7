@@ -1,4 +1,4 @@
-.\"	$Id$
+.\"	$OpenBSD: mdoc.7,v 1.56 2010/11/28 15:45:26 schwarze Exp $
 .\"
 .\" Copyright (c) 2009, 2010 Kristaps Dzonsons <kristaps@bsd.lv>
 .\" Copyright (c) 2010 Ingo Schwarze <schwarze@openbsd.org>
@@ -604,20 +604,21 @@ closes it out.
 .Pp
 The
 .Em Callable
-column indicates that the macro may be called subsequent to the initial
-line-macro.
-If a macro is not callable, then its invocation after the initial line
-macro is interpreted as opaque text, such that
+column indicates that the macro may also be called by passing its name
+as an argument to another macro.
+If a macro is not callable but its name appears as an argument
+to another macro, it is interpreted as opaque text.
+For example,
 .Sq \&.Fl \&Sh
 produces
 .Sq Fl \&Sh .
 .Pp
 The
 .Em Parsed
-column indicates whether the macro may be followed by further
-(ostensibly callable) macros.
-If a macro is not parsed, subsequent macro invocations on the line
-will be interpreted as opaque text.
+column indicates whether the macro may call other macros by receiving
+their names as arguments.
+If a macro is not parsed but the name of another macro appears
+as an argument, it is interpreted as opaque text.
 .Pp
 The
 .Em Scope
@@ -2665,9 +2666,13 @@ and
 Close a scope opened by
 .Sx \&Xo .
 .Ss \&Xo
-Open an extension scope.
-This macro originally existed to extend the 9-argument limit of troff;
-since this limit has been lifted, the macro has been deprecated.
+Extend the header of an
+.Sx \&It
+macro or the body of a partial-implicit block macro
+beyond the end of the input line.
+This macro originally existed to work around the 9-argument limit
+of historic
+.Xr roff 7 .
 .Ss \&Xr
 Link to another manual
 .Pq Qq cross-reference .
@@ -2721,10 +2726,10 @@ troff implementations, at this time limited to GNU troff
 .Pq Qq groff .
 The term
 .Qq historic groff
-refers to groff versions before the
+refers to groff versions before 1.17,
+which featured a significant update of the
 .Pa doc.tmac
-file re-write
-.Pq somewhere between 1.15 and 1.19 .
+file.
 .Pp
 Heirloom troff, the other significant troff implementation accepting
 \-mdoc, is similar to historic groff.
@@ -2814,6 +2819,11 @@ can only be called by other macros, but not at the beginning of a line.
 .It
 .Sx \&%C
 is not implemented.
+.It
+Historic groff only allows up to eight or nine arguments per macro input
+line, depending on the exact situation.
+Providing more arguments causes garbled output.
+The number of arguments on one input line is not limited with mandoc.
 .It
 Historic groff has many un-callable macros.
 Most of these (excluding some block-level macros) are callable
