@@ -328,8 +328,6 @@ node_append(struct mdoc *mdoc, struct mdoc_node *p)
 
 	if ( ! mdoc_valid_pre(mdoc, p))
 		return(0);
-	if ( ! mdoc_action_pre(mdoc, p))
-		return(0);
 
 	switch (p->type) {
 	case (MDOC_HEAD):
@@ -355,8 +353,6 @@ node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	switch (p->type) {
 	case (MDOC_TEXT):
 		if ( ! mdoc_valid_post(mdoc))
-			return(0);
-		if ( ! mdoc_action_post(mdoc))
 			return(0);
 		break;
 	default:

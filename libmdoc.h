@@ -128,9 +128,6 @@ const char	 *mdoc_a2vol(const char *);
 const char	 *mdoc_a2msec(const char *);
 int		  mdoc_valid_pre(struct mdoc *, struct mdoc_node *);
 int		  mdoc_valid_post(struct mdoc *);
-int		  mdoc_action_pre(struct mdoc *, 
-			struct mdoc_node *);
-int		  mdoc_action_post(struct mdoc *);
 enum margverr	  mdoc_argv(struct mdoc *, int, enum mdoct,
 			struct mdoc_arg **, int *, char *);
 void		  mdoc_argv_free(struct mdoc_arg *);

@@ -43,15 +43,15 @@ MANDOCSRCS = mandoc.c
 MANDOCOBJS = mandoc.o
 
 MDOCLNS	   = mdoc_macro.ln mdoc.ln mdoc_hash.ln mdoc_strings.ln \
-	     mdoc_argv.ln mdoc_validate.ln mdoc_action.ln \
+	     mdoc_argv.ln mdoc_validate.ln \
 	     lib.ln att.ln arch.ln vol.ln msec.ln st.ln
 
 MDOCOBJS   = mdoc_macro.o mdoc.o mdoc_hash.o mdoc_strings.o \
-	     mdoc_argv.o mdoc_validate.o mdoc_action.o lib.o att.o \
+	     mdoc_argv.o mdoc_validate.o lib.o att.o \
 	     arch.o vol.o msec.o st.o
 
 MDOCSRCS   = mdoc_macro.c mdoc.c mdoc_hash.c mdoc_strings.c \
-	     mdoc_argv.c mdoc_validate.c mdoc_action.c lib.c att.c \
+	     mdoc_argv.c mdoc_validate.c lib.c att.c \
 	     arch.c vol.c msec.c st.c
 
 MANLNS	   = man_macro.ln man.ln man_hash.ln man_validate.ln \
@@ -248,8 +248,6 @@ man_argv.ln man_argv.o: man_argv.c libman.h
 man_validate.ln man_validate.o: man_validate.c libman.h
 
 mdoc_validate.ln mdoc_validate.o: mdoc_validate.c libmdoc.h
-
-mdoc_action.ln mdoc_action.o: mdoc_action.c libmdoc.h
 
 libmdoc.h: mdoc.h
 
