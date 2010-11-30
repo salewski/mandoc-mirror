@@ -36,6 +36,9 @@
 #define	PRE_ARGS  struct mdoc *mdoc, struct mdoc_node *n
 #define	POST_ARGS struct mdoc *mdoc
 
+#define	NUMSIZ	  32
+#define	DATESIZ	  32
+
 enum	check_ineq {
 	CHECK_LT,
 	CHECK_GT,
@@ -84,6 +87,9 @@ static	int	 post_an(POST_ARGS);
 static	int	 post_at(POST_ARGS);
 static	int	 post_bf(POST_ARGS);
 static	int	 post_bl(POST_ARGS);
+static	int	 post_bl_block(POST_ARGS);
+static	int	 post_bl_block_width(POST_ARGS);
+static	int	 post_bl_block_tag(POST_ARGS);
 static	int	 post_bl_head(POST_ARGS);
 static	int	 post_defaults(POST_ARGS);
 static	int	 post_literal(POST_ARGS);
@@ -1398,6 +1404,153 @@ post_it(POST_ARGS)
 	return(1);
 }
 
+static int
+post_bl_block(POST_ARGS) 
+{
+	struct mdoc_node *n;
+
+	/*
+	 * These are fairly complicated, so we've broken them into two
+	 * functions.  post_bl_block_tag() is called when a -tag is
+	 * specified, but no -width (it must be guessed).  The second
+	 * when a -width is specified (macro indicators must be
+	 * rewritten into real lengths).
+	 */
+
+	n = mdoc->last;
+
+	if (LIST_tag == n->data.Bl->type && 
+			NULL == n->data.Bl->width) {
+		if ( ! post_bl_block_tag(mdoc))
+			return(0);
+	} else if (NULL != n->data.Bl->width) {
+		if ( ! post_bl_block_width(mdoc))
+			return(0);
+	} else 
+		return(1);
+
+	assert(n->data.Bl->width);
+	return(1);
+}
+
+static int
+post_bl_block_width(POST_ARGS)
+{
+	size_t		  width;
+	int		  i;
+	enum mdoct	  tok;
+	struct mdoc_node *n;
+	char		  buf[NUMSIZ];
+
+	n = mdoc->last;
+
+	/*
+	 * Calculate the real width of a list from the -width string,
+	 * which may contain a macro (with a known default width), a
+	 * literal string, or a scaling width.
+	 *
+	 * If the value to -width is a macro, then we re-write it to be
+	 * the macro's width as set in share/tmac/mdoc/doc-common.
+	 */
+
+	if (0 == strcmp(n->data.Bl->width, "Ds"))
+		width = 6;
+	else if (MDOC_MAX == (tok = mdoc_hash_find(n->data.Bl->width)))
+		return(1);
+	else if (0 == (width = mdoc_macro2len(tok))) 
+		return(mdoc_nmsg(mdoc, n, MANDOCERR_BADWIDTH));
+
+	/* The value already exists: free and reallocate it. */
+
+	assert(n->args);
+
+	for (i = 0; i < (int)n->args->argc; i++) 
+		if (MDOC_Width == n->args->argv[i].arg)
+			break;
+
+	assert(i < (int)n->args->argc);
+
+	snprintf(buf, NUMSIZ, "%zun", width);
+	free(n->args->argv[i].value[0]);
+	n->args->argv[i].value[0] = mandoc_strdup(buf);
+
+	/* Set our width! */
+	n->data.Bl->width = n->args->argv[i].value[0];
+	return(1);
+}
+
+static int
+post_bl_block_tag(POST_ARGS)
+{
+	struct mdoc_node *n, *nn;
+	size_t		  sz, ssz;
+	int		  i;
+	char		  buf[NUMSIZ];
+
+	/*
+	 * Calculate the -width for a `Bl -tag' list if it hasn't been
+	 * provided.  Uses the first head macro.  NOTE AGAIN: this is
+	 * ONLY if the -width argument has NOT been provided.  See
+	 * post_bl_block_width() for converting the -width string.
+	 */
+
+	sz = 10;
+	n = mdoc->last;
+
+	for (nn = n->body->child; nn; nn = nn->next) {
+		if (MDOC_It != nn->tok)
+			continue;
+
+		assert(MDOC_BLOCK == nn->type);
+		nn = nn->head->child;
+
+		if (nn == NULL) {
+			/* No -width for .Bl and first .It is emtpy */
+			if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_NOWIDTHARG))
+				return(0);
+			break;
+		}
+
+		if (MDOC_TEXT == nn->type) {
+			sz = strlen(nn->string) + 1;
+			break;
+		}
+
+		if (0 != (ssz = mdoc_macro2len(nn->tok)))
+			sz = ssz;
+		else if ( ! mdoc_nmsg(mdoc, n, MANDOCERR_NOWIDTHARG))
+			return(0);
+
+		break;
+	} 
+
+	/* Defaults to ten ens. */
+
+	snprintf(buf, NUMSIZ, "%zun", sz);
+
+	/*
+	 * We have to dynamically add this to the macro's argument list.
+	 * We're guaranteed that a MDOC_Width doesn't already exist.
+	 */
+
+	assert(n->args);
+	i = (int)(n->args->argc)++;
+
+	n->args->argv = mandoc_realloc(n->args->argv, 
+			n->args->argc * sizeof(struct mdoc_argv));
+
+	n->args->argv[i].arg = MDOC_Width;
+	n->args->argv[i].line = n->line;
+	n->args->argv[i].pos = n->pos;
+	n->args->argv[i].sz = 1;
+	n->args->argv[i].value = mandoc_malloc(sizeof(char *));
+	n->args->argv[i].value[0] = mandoc_strdup(buf);
+
+	/* Set our width! */
+	n->data.Bl->width = n->args->argv[i].value[0];
+	return(1);
+}
+
 
 static int
 post_bl_head(POST_ARGS) 
@@ -1472,6 +1625,8 @@ post_bl(POST_ARGS)
 
 	if (MDOC_HEAD == mdoc->last->type) 
 		return(post_bl_head(mdoc));
+	if (MDOC_BLOCK == mdoc->last->type)
+		return(post_bl_block(mdoc));
 	if (MDOC_BODY != mdoc->last->type)
 		return(1);
 	if (NULL == mdoc->last->child)
