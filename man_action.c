@@ -31,15 +31,9 @@ struct	actions {
 	int	(*post)(struct man *);
 };
 
-static	int	  post_TH(struct man *);
-static	int	  post_fi(struct man *);
-static	int	  post_nf(struct man *);
-static	int	  post_AT(struct man *);
-static	int	  post_UC(struct man *);
-
 const	struct actions man_actions[MAN_MAX] = {
 	{ NULL }, /* br */
-	{ post_TH }, /* TH */
+	{ NULL }, /* TH */
 	{ NULL }, /* SH */
 	{ NULL }, /* SS */
 	{ NULL }, /* TP */
@@ -62,18 +56,18 @@ const	struct actions man_actions[MAN_MAX] = {
 	{ NULL }, /* na */
 	{ NULL }, /* i */
 	{ NULL }, /* sp */
-	{ post_nf }, /* nf */
-	{ post_fi }, /* fi */
+	{ NULL }, /* nf */
+	{ NULL }, /* fi */
 	{ NULL }, /* r */
 	{ NULL }, /* RE */
 	{ NULL }, /* RS */
 	{ NULL }, /* DT */
-	{ post_UC }, /* UC */
+	{ NULL }, /* UC */
 	{ NULL }, /* PD */
 	{ NULL }, /* Sp */
-	{ post_nf }, /* Vb */
-	{ post_fi }, /* Ve */
-	{ post_AT }, /* AT */
+	{ NULL }, /* Vb */
+	{ NULL }, /* Ve */
+	{ NULL }, /* AT */
 	{ NULL }, /* in */
 };
 
@@ -101,182 +95,5 @@ man_action_post(struct man *m)
 }
 
 
-static int
-post_fi(struct man *m)
-{
-
-	if ( ! (MAN_LITERAL & m->flags))
-		if ( ! man_nmsg(m, m->last, MANDOCERR_NOSCOPE))
-			return(0);
-	m->flags &= ~MAN_LITERAL;
-	return(1);
-}
 
 
-static int
-post_nf(struct man *m)
-{
-
-	if (MAN_LITERAL & m->flags)
-		if ( ! man_nmsg(m, m->last, MANDOCERR_SCOPEREP))
-			return(0);
-	m->flags |= MAN_LITERAL;
-	return(1);
-}
-
-
-static int
-post_TH(struct man *m)
-{
-	struct man_node	*n;
-
-	if (m->meta.title)
-		free(m->meta.title);
-	if (m->meta.vol)
-		free(m->meta.vol);
-	if (m->meta.source)
-		free(m->meta.source);
-	if (m->meta.msec)
-		free(m->meta.msec);
-	if (m->meta.rawdate)
-		free(m->meta.rawdate);
-
-	m->meta.title = m->meta.vol = m->meta.rawdate =
-		m->meta.msec = m->meta.source = NULL;
-	m->meta.date = 0;
-
-	/* ->TITLE<- MSEC DATE SOURCE VOL */
-
-	n = m->last->child;
-	assert(n);
-	m->meta.title = mandoc_strdup(n->string);
-
-	/* TITLE ->MSEC<- DATE SOURCE VOL */
-
-	n = n->next;
-	assert(n);
-	m->meta.msec = mandoc_strdup(n->string);
-
-	/* TITLE MSEC ->DATE<- SOURCE VOL */
-
-	/*
-	 * Try to parse the date.  If this works, stash the epoch (this
-	 * is optimal because we can reformat it in the canonical form).
-	 * If it doesn't parse, isn't specified at all, or is an empty
-	 * string, then use the current date.
-	 */
-
-	n = n->next;
-	if (n && n->string && *n->string) {
-		m->meta.date = mandoc_a2time
-			(MTIME_ISO_8601, n->string);
-		if (0 == m->meta.date) {
-			if ( ! man_nmsg(m, n, MANDOCERR_BADDATE))
-				return(0);
-			m->meta.rawdate = mandoc_strdup(n->string);
-		}
-	} else
-		m->meta.date = time(NULL);
-
-	/* TITLE MSEC DATE ->SOURCE<- VOL */
-
-	if (n && (n = n->next))
-		m->meta.source = mandoc_strdup(n->string);
-
-	/* TITLE MSEC DATE SOURCE ->VOL<- */
-
-	if (n && (n = n->next))
-		m->meta.vol = mandoc_strdup(n->string);
-
-	/*
-	 * Remove the `TH' node after we've processed it for our
-	 * meta-data.
-	 */
-	man_node_delete(m, m->last);
-	return(1);
-}
-
-
-static int
-post_AT(struct man *m)
-{
-	static const char * const unix_versions[] = {
-	    "7th Edition",
-	    "System III",
-	    "System V",
-	    "System V Release 2",
-	};
-
-	const char	*p, *s;
-	struct man_node	*n, *nn;
-
-	n = m->last->child;
-
-	if (NULL == n || MAN_TEXT != n->type)
-		p = unix_versions[0];
-	else {
-		s = n->string;
-		if (0 == strcmp(s, "3"))
-			p = unix_versions[0];
-		else if (0 == strcmp(s, "4"))
-			p = unix_versions[1];
-		else if (0 == strcmp(s, "5")) {
-			nn = n->next;
-			if (nn && MAN_TEXT == nn->type && nn->string[0])
-				p = unix_versions[3];
-			else
-				p = unix_versions[2];
-		} else
-			p = unix_versions[0];
-	}
-
-	if (m->meta.source)
-		free(m->meta.source);
-
-	m->meta.source = mandoc_strdup(p);
-
-	return(1);
-}
-
-
-static int
-post_UC(struct man *m)
-{
-	static const char * const bsd_versions[] = {
-	    "3rd Berkeley Distribution",
-	    "4th Berkeley Distribution",
-	    "4.2 Berkeley Distribution",
-	    "4.3 Berkeley Distribution",
-	    "4.4 Berkeley Distribution",
-	};
-
-	const char	*p, *s;
-	struct man_node	*n;
-
-	n = m->last->child;
-
-	if (NULL == n || MAN_TEXT != n->type)
-		p = bsd_versions[0];
-	else {
-		s = n->string;
-		if (0 == strcmp(s, "3"))
-			p = bsd_versions[0];
-		else if (0 == strcmp(s, "4"))
-			p = bsd_versions[1];
-		else if (0 == strcmp(s, "5"))
-			p = bsd_versions[2];
-		else if (0 == strcmp(s, "6"))
-			p = bsd_versions[3];
-		else if (0 == strcmp(s, "7"))
-			p = bsd_versions[4];
-		else
-			p = bsd_versions[0];
-	}
-
-	if (m->meta.source)
-		free(m->meta.source);
-
-	m->meta.source = mandoc_strdup(p);
-
-	return(1);
-}
