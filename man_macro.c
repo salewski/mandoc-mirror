@@ -123,8 +123,6 @@ man_unscope(struct man *m, const struct man_node *n,
 			return(0);
 		if ( ! man_valid_post(m))
 			return(0);
-		if ( ! man_action_post(m))
-			return(0);
 		m->last = m->last->parent;
 		assert(m->last);
 	}
@@ -132,8 +130,6 @@ man_unscope(struct man *m, const struct man_node *n,
 	if ( ! rew_warn(m, m->last, er))
 		return(0);
 	if ( ! man_valid_post(m))
-		return(0);
-	if ( ! man_action_post(m))
 		return(0);
 
 	m->next = MAN_ROOT == m->last->type ? 
@@ -458,8 +454,6 @@ in_line_eoln(MACRO_PROT_ARGS)
 			break;
 		if ( ! man_valid_post(m))
 			return(0);
-		if ( ! man_action_post(m))
-			return(0);
 	}
 
 	assert(m->last);
@@ -469,8 +463,6 @@ in_line_eoln(MACRO_PROT_ARGS)
 	 */
 
 	if (m->last->type != MAN_ROOT && ! man_valid_post(m))
-		return(0);
-	if (m->last->type != MAN_ROOT && ! man_action_post(m))
 		return(0);
 
 	m->next = MAN_ROOT == m->last->type ?

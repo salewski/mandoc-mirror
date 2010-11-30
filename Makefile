@@ -55,12 +55,12 @@ MDOCSRCS   = mdoc_macro.c mdoc.c mdoc_hash.c mdoc_strings.c \
 	     arch.c vol.c msec.c st.c
 
 MANLNS	   = man_macro.ln man.ln man_hash.ln man_validate.ln \
-	     man_action.ln man_argv.ln
+	     man_argv.ln
 
 MANOBJS	   = man_macro.o man.o man_hash.o man_validate.o \
-	     man_action.o man_argv.o
+	     man_argv.o
 MANSRCS	   = man_macro.c man.c man_hash.c man_validate.c \
-	     man_action.c man_argv.c
+	     man_argv.c
 
 MAINLNS	   = main.ln mdoc_term.ln chars.ln term.ln tree.ln \
 	     compat.ln man_term.ln html.ln mdoc_html.ln \

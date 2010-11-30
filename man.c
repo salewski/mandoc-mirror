@@ -216,8 +216,6 @@ man_node_append(struct man *man, struct man_node *p)
 	case (MAN_TEXT):
 		if ( ! man_valid_post(man))
 			return(0);
-		if ( ! man_action_post(man))
-			return(0);
 		break;
 	default:
 		break;
