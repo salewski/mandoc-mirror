@@ -1402,23 +1402,68 @@ post_it(POST_ARGS)
 static int
 post_bl_head(POST_ARGS) 
 {
-	struct mdoc_node *n;
+	struct mdoc_node *np, *nn, *nnp;
+	int		  i, j;
 
-	assert(mdoc->last->parent);
-	n = mdoc->last->parent;
+	if (LIST_column != mdoc->last->data.Bl->type)
+		/* FIXME: this should be ERROR class... */
+		return(hwarn_eq0(mdoc));
 
-	if (LIST_column == n->data.Bl->type) {
-		if (n->data.Bl->ncols && mdoc->last->nchild) {
-			mdoc_nmsg(mdoc, n, MANDOCERR_COLUMNS);
-			return(0);
-		}
+	/*
+	 * Convert old-style lists, where the column width specifiers
+	 * trail as macro parameters, to the new-style ("normal-form")
+	 * lists where they're argument values following -column.
+	 */
+
+	/* First, disallow both types and allow normal-form. */
+
+	/* 
+	 * TODO: technically, we can accept both and just merge the two
+	 * lists, but I'll leave that for another day.
+	 */
+
+	if (mdoc->last->data.Bl->ncols && mdoc->last->nchild) {
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_COLUMNS);
+		return(0);
+	} else if (NULL == mdoc->last->child)
 		return(1);
+
+	np = mdoc->last->parent;
+	assert(np->args);
+
+	for (j = 0; j < (int)np->args->argc; j++) 
+		if (MDOC_Column == np->args->argv[j].arg)
+			break;
+
+	assert(j < (int)np->args->argc);
+	assert(0 == np->args->argv[j].sz);
+
+	/*
+	 * Accomodate for new-style groff column syntax.  Shuffle the
+	 * child nodes, all of which must be TEXT, as arguments for the
+	 * column field.  Then, delete the head children.
+	 */
+
+	np->args->argv[j].sz = (size_t)mdoc->last->nchild;
+	np->args->argv[j].value = mandoc_malloc
+		((size_t)mdoc->last->nchild * sizeof(char *));
+
+	mdoc->last->data.Bl->ncols = np->args->argv[j].sz;
+	mdoc->last->data.Bl->cols = (const char **)np->args->argv[j].value;
+
+	for (i = 0, nn = mdoc->last->child; nn; i++) {
+		np->args->argv[j].value[i] = nn->string;
+		nn->string = NULL;
+		nnp = nn;
+		nn = nn->next;
+		mdoc_node_delete(NULL, nnp);
 	}
 
-	/* FIXME: should be ERROR class. */
-	return(hwarn_eq0(mdoc));
-}
+	mdoc->last->nchild = 0;
+	mdoc->last->child = NULL;
 
+	return(1);
+}
 
 static int
 post_bl(POST_ARGS)

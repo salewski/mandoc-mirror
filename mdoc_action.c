@@ -52,7 +52,6 @@ static	int	  concat(struct mdoc *, char *,
 			const struct mdoc_node *, size_t);
 
 static	int	  post_bl(POST_ARGS);
-static	int	  post_bl_head(POST_ARGS);
 static	int	  post_bl_tagwidth(POST_ARGS);
 static	int	  post_bl_width(POST_ARGS);
 static	int	  post_dd(POST_ARGS);
@@ -550,65 +549,10 @@ post_bl_width(POST_ARGS)
 }
 
 
-/*
- * Do processing for -column lists, which can have two distinct styles
- * of invocation.  Merge this two styles into a consistent form.
- */
-/* ARGSUSED */
-static int
-post_bl_head(POST_ARGS)
-{
-	int			 i, c;
-	struct mdoc_node	*np, *nn, *nnp;
-
-	if (LIST_column != n->data.Bl->type)
-		return(1);
-	else if (NULL == n->child)
-		return(1);
-
-	np = n->parent;
-	assert(np->args);
-
-	for (c = 0; c < (int)np->args->argc; c++) 
-		if (MDOC_Column == np->args->argv[c].arg)
-			break;
-
-	assert(c < (int)np->args->argc);
-	assert(0 == np->args->argv[c].sz);
-
-	/*
-	 * Accomodate for new-style groff column syntax.  Shuffle the
-	 * child nodes, all of which must be TEXT, as arguments for the
-	 * column field.  Then, delete the head children.
-	 */
-
-	np->args->argv[c].sz = (size_t)n->nchild;
-	np->args->argv[c].value = mandoc_malloc
-		((size_t)n->nchild * sizeof(char *));
-
-	n->data.Bl->ncols = np->args->argv[c].sz;
-	n->data.Bl->cols = (const char **)np->args->argv[c].value;
-
-	for (i = 0, nn = n->child; nn; i++) {
-		np->args->argv[c].value[i] = nn->string;
-		nn->string = NULL;
-		nnp = nn;
-		nn = nn->next;
-		mdoc_node_delete(NULL, nnp);
-	}
-
-	n->nchild = 0;
-	n->child = NULL;
-	return(1);
-}
-
-
 static int
 post_bl(POST_ARGS)
 {
 
-	if (MDOC_HEAD == n->type)
-		return(post_bl_head(m, n));
 	if (MDOC_BLOCK != n->type)
 		return(1);
 
