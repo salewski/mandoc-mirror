@@ -79,6 +79,7 @@ enum	outt {
 struct	curparse {
 	const char	 *file;		/* Current parse. */
 	int		  fd;		/* Current parse. */
+	int		  line;		/* Line number in the file. */
 	enum mandoclevel  wlevel;	/* Ignore messages below this. */
 	int		  wstop;	/* Stop after a file with a warning. */
 	enum intt	  inttype;	/* which parser to use */
@@ -193,8 +194,11 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"static buffer exhausted",
 };
 
+static	void		  parsebuf(struct curparse *, struct buf, int);
+static	void		  pdesc(struct curparse *);
 static	void		  fdesc(struct curparse *);
 static	void		  ffile(const char *, struct curparse *);
+static	int		  pfile(const char *, struct curparse *);
 static	int		  moptions(enum intt *, char *);
 static	int		  mmsg(enum mandocerr, void *, 
 				int, int, const char *);
@@ -320,6 +324,35 @@ ffile(const char *file, struct curparse *curp)
 		perror(curp->file);
 }
 
+static int
+pfile(const char *file, struct curparse *curp)
+{
+	const char	*savefile;
+	int		 fd, savefd;
+
+	if (-1 == (fd = open(file, O_RDONLY, 0))) {
+		perror(file);
+		exit_status = MANDOCLEVEL_SYSERR;
+		return(0);
+	}
+
+	savefile = curp->file;
+	savefd = curp->fd;
+
+	curp->file = file;
+	curp->fd = fd;
+
+	pdesc(curp);
+
+	curp->file = savefile;
+	curp->fd = savefd;
+
+	if (-1 == close(fd))
+		perror(file);
+
+	return(MANDOCLEVEL_FATAL > exit_status ? 1 : 0);
+}
+
 
 static void
 resize_buf(struct buf *buf, size_t initial)
@@ -406,150 +439,18 @@ read_whole_file(struct curparse *curp, struct buf *fb, int *with_mmap)
 static void
 fdesc(struct curparse *curp)
 {
-	struct buf	 ln, blk;
-	int		 i, pos, lnn, lnn_start, with_mmap, of;
-	enum rofferr	 re;
-	unsigned char	 c;
 	struct man	*man;
 	struct mdoc	*mdoc;
 	struct roff	*roff;
 
-	man = NULL;
-	mdoc = NULL;
-	roff = NULL;
+	pdesc(curp);
 
-	memset(&ln, 0, sizeof(struct buf));
-
-	/*
-	 * Two buffers: ln and buf.  buf is the input file and may be
-	 * memory mapped.  ln is a line buffer and grows on-demand.
-	 */
-
-	if ( ! read_whole_file(curp, &blk, &with_mmap)) {
-		exit_status = MANDOCLEVEL_SYSERR;
-		return;
-	}
-
-	if (NULL == curp->roff) 
-		curp->roff = roff_alloc(&curp->regs, curp, mmsg);
-	assert(curp->roff);
+	man  = curp->man;
+	mdoc = curp->mdoc;
 	roff = curp->roff;
 
-	for (i = 0, lnn = 1; i < (int)blk.sz;) {
-		pos = 0;
-		lnn_start = lnn;
-		while (i < (int)blk.sz) {
-			if ('\n' == blk.buf[i]) {
-				++i;
-				++lnn;
-				break;
-			}
-
-			/* 
-			 * Warn about bogus characters.  If you're using
-			 * non-ASCII encoding, you're screwing your
-			 * readers.  Since I'd rather this not happen,
-			 * I'll be helpful and drop these characters so
-			 * we don't display gibberish.  Note to manual
-			 * writers: use special characters.
-			 */
-
-			c = (unsigned char) blk.buf[i];
-			if ( ! (isascii(c) && (isgraph(c) || isblank(c)))) {
-				mmsg(MANDOCERR_BADCHAR, curp, 
-				    lnn_start, pos, "ignoring byte");
-				i++;
-				continue;
-			}
-
-			/* Trailing backslash is like a plain character. */
-			if ('\\' != blk.buf[i] || i + 1 == (int)blk.sz) {
-				if (pos >= (int)ln.sz)
-					resize_buf(&ln, 256);
-				ln.buf[pos++] = blk.buf[i++];
-				continue;
-			}
-			/* Found an escape and at least one other character. */
-			if ('\n' == blk.buf[i + 1]) {
-				/* Escaped newlines are skipped over */
-				i += 2;
-				++lnn;
-				continue;
-			}
-			if ('"' == blk.buf[i + 1]) {
-				i += 2;
-				/* Comment, skip to end of line */
-				for (; i < (int)blk.sz; ++i) {
-					if ('\n' == blk.buf[i]) {
-						++i;
-						++lnn;
-						break;
-					}
-				}
-				/* Backout trailing whitespaces */
-				for (; pos > 0; --pos) {
-					if (ln.buf[pos - 1] != ' ')
-						break;
-					if (pos > 2 && ln.buf[pos - 2] == '\\')
-						break;
-				}
-				break;
-			}
-			/* Some other escape sequence, copy and continue. */
-			if (pos + 1 >= (int)ln.sz)
-				resize_buf(&ln, 256);
-
-			ln.buf[pos++] = blk.buf[i++];
-			ln.buf[pos++] = blk.buf[i++];
-		}
-
- 		if (pos >= (int)ln.sz)
-			resize_buf(&ln, 256);
-		ln.buf[pos] = '\0';
-
-		/*
-		 * A significant amount of complexity is contained by
-		 * the roff preprocessor.  It's line-oriented but can be
-		 * expressed on one line, so we need at times to
-		 * readjust our starting point and re-run it.  The roff
-		 * preprocessor can also readjust the buffers with new
-		 * data, so we pass them in wholesale.
-		 */
-
-		of = 0;
-		do {
-			re = roff_parseln(roff, lnn_start, 
-					&ln.buf, &ln.sz, of, &of);
-		} while (ROFF_RERUN == re);
-
-		if (ROFF_IGN == re) {
-			continue;
-		} else if (ROFF_ERR == re) {
-			assert(MANDOCLEVEL_FATAL <= exit_status);
-			goto cleanup;
-		}
-
-		/*
-		 * If input parsers have not been allocated, do so now.
-		 * We keep these instanced betwen parsers, but set them
-		 * locally per parse routine since we can use different
-		 * parsers with each one.
-		 */
-
-		if ( ! (man || mdoc))
-			pset(ln.buf + of, pos - of, curp, &man, &mdoc);
-
-		/* Lastly, push down into the parsers themselves. */
-
-		if (man && ! man_parseln(man, lnn_start, ln.buf, of)) {
-			assert(MANDOCLEVEL_FATAL <= exit_status);
-			goto cleanup;
-		}
-		if (mdoc && ! mdoc_parseln(mdoc, lnn_start, ln.buf, of)) {
-			assert(MANDOCLEVEL_FATAL <= exit_status);
-			goto cleanup;
-		}
-	}
+	if (MANDOCLEVEL_FATAL <= exit_status)
+		goto cleanup;
 
 	/* NOTE a parser may not have been assigned, yet. */
 
@@ -648,14 +549,197 @@ fdesc(struct curparse *curp)
 		man_reset(man);
 	if (roff)
 		roff_reset(roff);
-	if (ln.buf)
-		free(ln.buf);
+
+	return;
+}
+
+
+static void
+pdesc(struct curparse *curp)
+{
+	struct buf	 blk;
+	int		 with_mmap;
+
+	if ( ! read_whole_file(curp, &blk, &with_mmap)) {
+		exit_status = MANDOCLEVEL_SYSERR;
+		return;
+	}
+
+	if (NULL == curp->roff) 
+		curp->roff = roff_alloc(&curp->regs, curp, mmsg);
+	assert(curp->roff);
+
+	curp->line = 1;
+	parsebuf(curp, blk, 1);
+
 	if (with_mmap)
 		munmap(blk.buf, blk.sz);
 	else
 		free(blk.buf);
+}
 
-	return;
+static void
+parsebuf(struct curparse *curp, struct buf blk, int start)
+{
+	struct buf	 ln;
+	int		 i, pos, lnn, of;
+	unsigned char	 c;
+	struct man	*man;
+	struct mdoc	*mdoc;
+	struct roff	*roff;
+
+	man  = curp->man;
+	mdoc = curp->mdoc;
+	roff = curp->roff;
+
+	memset(&ln, 0, sizeof(struct buf));
+
+	lnn = curp->line;  /* line number in the real file */
+	pos = 0;  /* byte number in the ln buffer */
+
+	for (i = 0; i < (int)blk.sz;) {
+		if (0 == pos && '\0' == blk.buf[i])
+			break;
+		if (start)
+			curp->line = lnn;
+
+		while (i < (int)blk.sz && (start || '\0' != blk.buf[i])) {
+			if ('\n' == blk.buf[i]) {
+				++i;
+				++lnn;
+				break;
+			}
+
+			/* 
+			 * Warn about bogus characters.  If you're using
+			 * non-ASCII encoding, you're screwing your
+			 * readers.  Since I'd rather this not happen,
+			 * I'll be helpful and drop these characters so
+			 * we don't display gibberish.  Note to manual
+			 * writers: use special characters.
+			 */
+
+			c = (unsigned char) blk.buf[i];
+			if ( ! (isascii(c) && (isgraph(c) || isblank(c)))) {
+				mmsg(MANDOCERR_BADCHAR, curp, 
+				    curp->line, pos, "ignoring byte");
+				i++;
+				continue;
+			}
+
+			/* Trailing backslash is like a plain character. */
+			if ('\\' != blk.buf[i] || i + 1 == (int)blk.sz) {
+				if (pos >= (int)ln.sz)
+					resize_buf(&ln, 256);
+				ln.buf[pos++] = blk.buf[i++];
+				continue;
+			}
+			/* Found an escape and at least one other character. */
+			if ('\n' == blk.buf[i + 1]) {
+				/* Escaped newlines are skipped over */
+				i += 2;
+				++lnn;
+				continue;
+			}
+			if ('"' == blk.buf[i + 1]) {
+				i += 2;
+				/* Comment, skip to end of line */
+				for (; i < (int)blk.sz; ++i) {
+					if ('\n' == blk.buf[i]) {
+						++i;
+						++lnn;
+						break;
+					}
+				}
+				/* Backout trailing whitespaces */
+				for (; pos > 0; --pos) {
+					if (ln.buf[pos - 1] != ' ')
+						break;
+					if (pos > 2 && ln.buf[pos - 2] == '\\')
+						break;
+				}
+				break;
+			}
+			/* Some other escape sequence, copy and continue. */
+			if (pos + 1 >= (int)ln.sz)
+				resize_buf(&ln, 256);
+
+			ln.buf[pos++] = blk.buf[i++];
+			ln.buf[pos++] = blk.buf[i++];
+		}
+
+ 		if (pos >= (int)ln.sz)
+			resize_buf(&ln, 256);
+		ln.buf[pos] = '\0';
+
+		/*
+		 * A significant amount of complexity is contained by
+		 * the roff preprocessor.  It's line-oriented but can be
+		 * expressed on one line, so we need at times to
+		 * readjust our starting point and re-run it.  The roff
+		 * preprocessor can also readjust the buffers with new
+		 * data, so we pass them in wholesale.
+		 */
+
+		of = 0;
+rerun:
+		switch (roff_parseln(roff, curp->line, &ln.buf, &ln.sz,
+		    of, &of)) {
+		case (ROFF_REPARSE):
+			parsebuf(curp, ln, 0);
+			pos = 0;
+			continue;
+		case (ROFF_APPEND):
+			pos = strlen(ln.buf);
+			continue;
+		case (ROFF_RERUN):
+			goto rerun;
+		case (ROFF_IGN):
+			pos = 0;
+			continue;
+		case (ROFF_ERR):
+			assert(MANDOCLEVEL_FATAL <= exit_status);
+			break;
+		case (ROFF_SO):
+			if (pfile(ln.buf + of, curp)) {
+				pos = 0;
+				continue;
+			} else
+				break;
+		case (ROFF_CONT):
+			break;
+		}
+
+		/*
+		 * If input parsers have not been allocated, do so now.
+		 * We keep these instanced betwen parsers, but set them
+		 * locally per parse routine since we can use different
+		 * parsers with each one.
+		 */
+
+		if ( ! (man || mdoc))
+			pset(ln.buf + of, pos - of, curp, &man, &mdoc);
+
+		/* Lastly, push down into the parsers themselves. */
+
+		if (man && ! man_parseln(man, curp->line, ln.buf, of)) {
+			assert(MANDOCLEVEL_FATAL <= exit_status);
+			break;
+		}
+		if (mdoc && ! mdoc_parseln(mdoc, curp->line, ln.buf, of)) {
+			assert(MANDOCLEVEL_FATAL <= exit_status);
+			break;
+		}
+
+		/* Temporary buffers typically are not full. */
+		if (0 == start && '\0' == blk.buf[i])
+			break;
+
+		/* Start the next input line. */
+		pos = 0;
+	}
+
+	free(ln.buf);
 }
 
 
