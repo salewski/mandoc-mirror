@@ -1158,7 +1158,7 @@ post_literal(POST_ARGS)
 	 */
 
 	if (MDOC_BODY == mdoc->last->type)
-		mdoc->last->flags &= ~MDOC_LITERAL;
+		mdoc->flags &= ~MDOC_LITERAL;
 
 	return(1);
 }
