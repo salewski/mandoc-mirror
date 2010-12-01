@@ -60,11 +60,11 @@ enum	rofft {
 	ROFF_ig,
 	ROFF_ne,
 	ROFF_nh,
+	ROFF_nr,
 	ROFF_rm,
 	ROFF_tr,
 	ROFF_cblock,
 	ROFF_ccond, /* FIXME: remove this. */
-	ROFF_nr,
 	ROFF_MAX
 };
 
@@ -135,6 +135,7 @@ static	void		 roff_freestr(struct roff *);
 static	const char	*roff_getstrn(const struct roff *, 
 				const char *, size_t);
 static	enum rofferr	 roff_line_ignore(ROFF_ARGS);
+static	enum rofferr	 roff_line_error(ROFF_ARGS);
 static	enum rofferr	 roff_nr(ROFF_ARGS);
 static	int		 roff_res(struct roff *, 
 				char **, size_t *, int);
@@ -166,11 +167,11 @@ static	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "ig", roff_block, roff_block_text, roff_block_sub, 0, NULL },
 	{ "ne", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ "nh", roff_line_ignore, NULL, NULL, 0, NULL },
-	{ "rm", roff_line_ignore, NULL, NULL, 0, NULL },
+	{ "nr", roff_nr, NULL, NULL, 0, NULL },
+	{ "rm", roff_line_error, NULL, NULL, 0, NULL },
 	{ "tr", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ ".", roff_cblock, NULL, NULL, 0, NULL },
 	{ "\\}", roff_ccond, NULL, NULL, 0, NULL },
-	{ "nr", roff_nr, NULL, NULL, 0, NULL },
 };
 
 static	void		 roff_free1(struct roff *);
@@ -846,7 +847,6 @@ roff_evalcond(const char *v, int *pos)
 	return(ROFFRULE_DENY);
 }
 
-
 /* ARGSUSED */
 static enum rofferr
 roff_line_ignore(ROFF_ARGS)
@@ -855,6 +855,14 @@ roff_line_ignore(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
+/* ARGSUSED */
+static enum rofferr
+roff_line_error(ROFF_ARGS)
+{
+
+	(*r->msg)(MANDOCERR_REQUEST, r->data, ln, ppos, roffs[tok].name);
+	return(ROFF_IGN);
+}
 
 /* ARGSUSED */
 static enum rofferr

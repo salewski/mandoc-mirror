@@ -159,6 +159,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"no text in this context",
 	"bad comment style",
 	"unknown macro will be lost",
+	"NOT IMPLEMENTED: skipping request",
 	"line scope broken",
 	"argument count wrong",
 	"request scope close w/none open",

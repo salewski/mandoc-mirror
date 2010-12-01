@@ -85,6 +85,7 @@ enum	mandocerr {
 	MANDOCERR_NOTEXT, /* no text in this context */
 	MANDOCERR_BADCOMMENT, /* bad comment style */
 	MANDOCERR_MACRO, /* unknown macro will be lost */
+	MANDOCERR_REQUEST, /* NOT IMPLEMENTED: skipping request */
 	MANDOCERR_LINESCOPE, /* line scope broken */
 	MANDOCERR_ARGCOUNT, /* argument count wrong */
 	MANDOCERR_NOSCOPE, /* no such block is open */
