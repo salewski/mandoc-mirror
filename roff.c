@@ -62,6 +62,7 @@ enum	rofft {
 	ROFF_nh,
 	ROFF_nr,
 	ROFF_rm,
+	ROFF_so,
 	ROFF_tr,
 	ROFF_cblock,
 	ROFF_ccond, /* FIXME: remove this. */
@@ -141,6 +142,7 @@ static	int		 roff_res(struct roff *,
 				char **, size_t *, int);
 static	void		 roff_setstr(struct roff *,
 				const char *, const char *);
+static	enum rofferr	 roff_so(ROFF_ARGS);
 static	char		*roff_strdup(const char *);
 
 /* See roff_hash_find() */
@@ -169,6 +171,7 @@ static	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "nh", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ "nr", roff_nr, NULL, NULL, 0, NULL },
 	{ "rm", roff_line_error, NULL, NULL, 0, NULL },
+	{ "so", roff_so, NULL, NULL, 0, NULL },
 	{ "tr", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ ".", roff_cblock, NULL, NULL, 0, NULL },
 	{ "\\}", roff_ccond, NULL, NULL, 0, NULL },
@@ -1054,6 +1057,30 @@ roff_nr(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
+/* ARGSUSED */
+static enum rofferr
+roff_so(ROFF_ARGS)
+{
+	char *name;
+
+	(*r->msg)(MANDOCERR_SO, r->data, ln, ppos, NULL);
+
+	/*
+	 * Handle `so'.  Be EXTREMELY careful, as we shouldn't be
+	 * opening anything that's not in our cwd or anything beneath
+	 * it.  Thus, explicitly disallow traversing up the file-system
+	 * or using absolute paths.
+	 */
+
+	name = *bufp + pos;
+	if ('/' == *name || strstr(name, "../") || strstr(name, "/..")) {
+		(*r->msg)(MANDOCERR_SOPATH, r->data, ln, pos, NULL);
+		return(ROFF_ERR);
+	}
+
+	*offs = pos;
+	return(ROFF_SO);
+}
 
 static char *
 roff_strdup(const char *name)

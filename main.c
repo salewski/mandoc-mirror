@@ -122,6 +122,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	"generic warning",
 
+	".so is fragile, better use ln(1)",
 	"text should be uppercase",
 	"sections out of conventional order",
 	"section name repeats",
@@ -190,6 +191,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"argument count wrong, violates syntax",
 	"child violates parent syntax",
 	"argument count wrong, violates syntax",
+	"NOT IMPLEMENTED: .so with absolute path or \"..\"",
 	"no document body",
 	"no document prologue",
 	"utsname system call failed",
