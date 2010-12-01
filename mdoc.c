@@ -286,6 +286,8 @@ mdoc_macro(MACRO_PROT_ARGS)
 			! (MDOC_PBODY & m->flags)) {
 		if ( ! mdoc_pmsg(m, line, ppos, MANDOCERR_BADPROLOG))
 			return(0);
+		if (NULL == m->meta.msec)
+			m->meta.msec = mandoc_strdup("1");
 		if (NULL == m->meta.title)
 			m->meta.title = mandoc_strdup("UNKNOWN");
 		if (NULL == m->meta.vol)
