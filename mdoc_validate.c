@@ -1448,11 +1448,8 @@ post_bl_block_tag(POST_ARGS)
 		assert(MDOC_BLOCK == nn->type);
 		nn = nn->head->child;
 
-		if (nn == NULL) {
-			/* No -width for .Bl and first .It is emtpy */
-			mdoc_nmsg(mdoc, n, MANDOCERR_NOWIDTHARG);
+		if (nn == NULL)
 			break;
-		}
 
 		if (MDOC_TEXT == nn->type) {
 			sz = strlen(nn->string) + 1;
@@ -1461,8 +1458,6 @@ post_bl_block_tag(POST_ARGS)
 
 		if (0 != (ssz = mdoc_macro2len(nn->tok)))
 			sz = ssz;
-		else 
-			mdoc_nmsg(mdoc, n, MANDOCERR_NOWIDTHARG);
 
 		break;
 	} 
