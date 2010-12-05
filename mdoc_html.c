@@ -1331,6 +1331,10 @@ mdoc_bd_pre(MDOC_ARGS)
 			/* FALLTHROUGH */
 		case (MDOC_Bl):
 			/* FALLTHROUGH */
+		case (MDOC_D1):
+			/* FALLTHROUGH */
+		case (MDOC_Dl):
+			/* FALLTHROUGH */
 		case (MDOC_Lp):
 			/* FALLTHROUGH */
 		case (MDOC_Pp):

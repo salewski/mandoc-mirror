@@ -69,6 +69,7 @@ enum	mandocerr {
 	MANDOCERR_NAMESECFIRST, /* NAME section must come first */
 	MANDOCERR_BADBOOL, /* bad Boolean value */
 	MANDOCERR_CHILD, /* child violates parent syntax */
+	MANDOCERR_NESTEDDISP, /* displays may not be nested */
 	MANDOCERR_BADATT, /* bad AT&T symbol */
 	MANDOCERR_BADSTANDARD, /* bad standard */
 	MANDOCERR_LISTREP, /* list type repeated */
@@ -106,8 +107,6 @@ enum	mandocerr {
 
 	MANDOCERR_FATAL, /* ===== start of fatal errors ===== */
 	MANDOCERR_COLUMNS, /* column syntax is inconsistent */
-	/* FIXME: this should be a MANDOCERR_ERROR */
-	MANDOCERR_NESTEDDISP, /* displays may not be nested */
 	MANDOCERR_BADDISP, /* unsupported display type */
 	MANDOCERR_SCOPEFATAL, /* blocks badly nested */
 	MANDOCERR_SYNTNOSCOPE, /* no scope to rewind: syntax violated */

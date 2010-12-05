@@ -1592,6 +1592,10 @@ termp_bd_pre(DECL_ARGS)
 			/* FALLTHROUGH */
 		case (MDOC_Bl):
 			/* FALLTHROUGH */
+		case (MDOC_D1):
+			/* FALLTHROUGH */
+		case (MDOC_Dl):
+			/* FALLTHROUGH */
 		case (MDOC_Lp):
 			/* FALLTHROUGH */
 		case (MDOC_Pp):

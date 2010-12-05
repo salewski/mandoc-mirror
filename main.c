@@ -146,6 +146,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"NAME section must come first",
 	"bad Boolean value",
 	"child violates parent syntax",
+	"displays may not be nested",
 	"bad AT&T symbol",
 	"bad standard",
 	"list type repeated",
@@ -183,7 +184,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"generic fatal error",
 
 	"column syntax is inconsistent",
-	"displays may not be nested",
 	"unsupported display type",
 	"blocks badly nested",
 	"no such block is open",

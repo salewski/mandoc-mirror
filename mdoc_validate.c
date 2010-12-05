@@ -42,7 +42,7 @@
 #define	POST_ARGS struct mdoc *mdoc
 
 #define	NUMSIZ	  32
-#define	DATESIZ	  32
+#define	DATESIZE  32
 
 enum	check_ineq {
 	CHECK_LT,
@@ -575,22 +575,18 @@ pre_display(PRE_ARGS)
 {
 	struct mdoc_node *node;
 
-	/* Display elements (`Bd', `D1'...) cannot be nested. */
-
 	if (MDOC_BLOCK != n->type)
 		return(1);
 
-	/* LINTED */
 	for (node = mdoc->last->parent; node; node = node->parent) 
 		if (MDOC_BLOCK == node->type)
 			if (MDOC_Bd == node->tok)
 				break;
 
-	if (NULL == node)
-		return(1);
+	if (node)
+		mdoc_nmsg(mdoc, n, MANDOCERR_NESTEDDISP);
 
-	mdoc_nmsg(mdoc, n, MANDOCERR_NESTEDDISP);
-	return(0);
+	return(1);
 }
 
 
@@ -1951,7 +1947,7 @@ pre_literal(PRE_ARGS)
 static int
 post_dd(POST_ARGS)
 {
-	char		  buf[DATESIZ];
+	char		  buf[DATESIZE];
 	struct mdoc_node *n;
 
 	n = mdoc->last;
@@ -1961,7 +1957,7 @@ post_dd(POST_ARGS)
 		return(1);
 	}
 
-	if ( ! concat(mdoc, buf, n->child, DATESIZ))
+	if ( ! concat(mdoc, buf, n->child, DATESIZE))
 		return(0);
 
 	mdoc->meta.date = mandoc_a2time
