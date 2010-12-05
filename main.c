@@ -133,7 +133,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"bad escape sequence",
 	"unterminated quoted string",
 	"argument requires the width argument",
-	"superfluous width argument",
 	"bad date argument",
 	"bad width argument",
 	"unknown manual section",
