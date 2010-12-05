@@ -53,9 +53,6 @@ enum	mant {
 	MAN_DT,
 	MAN_UC,
 	MAN_PD,
-	MAN_Sp,
-	MAN_Vb,
-	MAN_Ve,
 	MAN_AT,
 	MAN_in,
 	MAN_MAX

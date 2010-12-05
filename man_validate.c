@@ -70,7 +70,6 @@ static	v_check	  posts_part[] = { check_part, NULL };
 static	v_check	  posts_sec[] = { check_sec, NULL };
 static	v_check	  posts_th[] = { check_ge2, check_le5, check_title, post_TH, NULL };
 static	v_check	  posts_uc[] = { post_UC, NULL };
-static	v_check	  posts_vb[] = { check_le1, post_nf, NULL };
 static	v_check	  pres_bline[] = { check_bline, NULL };
 
 
@@ -107,9 +106,6 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, NULL }, /* DT */
 	{ NULL, posts_uc }, /* UC */
 	{ NULL, NULL }, /* PD */
-	{ NULL, posts_le1 }, /* Sp */ /* FIXME: should warn only. */
-	{ pres_bline, posts_vb }, /* Vb */ /* FIXME: should warn only. */
-	{ pres_bline, posts_fi }, /* Ve */
 	{ NULL, posts_at }, /* AT */
 	{ NULL, NULL }, /* in */
 };
