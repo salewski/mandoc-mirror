@@ -2130,14 +2130,17 @@ post_os(POST_ARGS)
 			return(0);
 		}
 #else /*!OSNAME */
-		if (-1 == uname(&utsname))
-			return(mdoc_nmsg(mdoc, n, MANDOCERR_UTSNAME));
+		if (uname(&utsname)) {
+			mdoc_nmsg(mdoc, n, MANDOCERR_UNAME);
+                        mdoc->meta.os = mandoc_strdup("UNKNOWN");
+                        return(post_prol(mdoc));
+                }
 
 		if (strlcat(buf, utsname.sysname, BUFSIZ) >= BUFSIZ) {
 			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
 			return(0);
 		}
-		if (strlcat(buf, " ", 64) >= BUFSIZ) {
+		if (strlcat(buf, " ", BUFSIZ) >= BUFSIZ) {
 			mdoc_nmsg(mdoc, n, MANDOCERR_MEM);
 			return(0);
 		}

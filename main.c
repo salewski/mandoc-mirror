@@ -170,6 +170,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"request scope close w/none open",
 	"scope already open",
 	"scope open on exit",
+	"uname(3) system call failed",
 	"macro requires line argument(s)",
 	"macro requires body argument(s)",
 	"macro requires argument(s)",
@@ -194,7 +195,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"NOT IMPLEMENTED: .so with absolute path or \"..\"",
 	"no document body",
 	"no document prologue",
-	"utsname system call failed",
 	"static buffer exhausted",
 };
 
