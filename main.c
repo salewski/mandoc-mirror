@@ -187,6 +187,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"unsupported display type",
 	"blocks badly nested",
 	"no such block is open",
+	"missing end of block",
 	"line scope broken, syntax violated",
 	"argument count wrong, violates syntax",
 	"child violates parent syntax",
