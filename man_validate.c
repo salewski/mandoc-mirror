@@ -321,9 +321,7 @@ check_par(CHKARGS)
 				break;
 			return(man_nmsg(m, n, MANDOCERR_ARGSLOST));
 		default:
-			if (n->nchild)
-				break;
-			return(man_nmsg(m, n, MANDOCERR_NOARGS));
+			break;
 		}
 
 	return(1);
