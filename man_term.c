@@ -492,7 +492,7 @@ pre_PP(DECL_ARGS)
 		break;
 	}
 
-	return(1);
+	return(MAN_HEAD != n->type);
 }
 
 

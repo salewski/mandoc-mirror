@@ -547,8 +547,10 @@ man_PP_pre(MAN_ARGS)
 	struct roffsu	 su;
 	int		 i;
 
-	if (MAN_BLOCK != n->type)
+	if (MAN_BODY == n->type)
 		return(1);
+	if (MAN_HEAD == n->type)
+		return(0);
 
 	i = 0;
 
@@ -565,6 +567,7 @@ man_PP_pre(MAN_ARGS)
 
 	PAIR_STYLE_INIT(&tag, h);
 	print_otag(h, TAG_DIV, i, &tag);
+
 	return(1);
 }
 
