@@ -473,9 +473,7 @@ man_pmacro(struct man *m, int ln, char *buf, int offs)
 
 	tok = (j > 0 && j < 4) ? man_hash_find(mac) : MAN_MAX;
 	if (MAN_MAX == tok) {
-		man_vmsg(m, MANDOCERR_MACRO, ln, ppos, 
-		    "unknown macro: %s%s",
-		    buf, strlen(buf) > 3 ? "..." : "");
+		man_vmsg(m, MANDOCERR_MACRO, ln, ppos, "%s", buf + ppos - 1);
 		return(1);
 	}
 
@@ -494,37 +492,23 @@ man_pmacro(struct man *m, int ln, char *buf, int offs)
 			goto err;
 
 	/* 
-	 * Remove prior ELINE macro, as it's being clobbering by a new
+	 * Remove prior ELINE macro, as it's being clobbered by a new
 	 * macro.  Note that NSCOPED macros do not close out ELINE
 	 * macros---they don't print text---so we let those slip by.
 	 */
 
 	if ( ! (MAN_NSCOPED & man_macros[tok].flags) &&
 			m->flags & MAN_ELINE) {
-		assert(MAN_TEXT != m->last->type);
-
-		/*
-		 * This occurs in the following construction:
-		 *   .B
-		 *   .br
-		 *   .B
-		 *   .br
-		 *   I hate man macros.
-		 * Flat-out disallow this madness.
-		 */
-		if (MAN_NSCOPED & man_macros[m->last->tok].flags) {
-			man_pmsg(m, ln, ppos, MANDOCERR_SYNTLINESCOPE);
-			return(0);
-		}
-
 		n = m->last;
+		assert(MAN_TEXT != n->type);
 
-		assert(n);
-		assert(NULL == n->child);
-		assert(0 == n->nchild);
+		/* Remove repeated NSCOPED macros causing ELINE. */
 
-		if ( ! man_nmsg(m, n, MANDOCERR_LINESCOPE))
-			return(0);
+		if (MAN_NSCOPED & man_macros[n->tok].flags)
+			n = n->parent;
+
+		man_vmsg(m, MANDOCERR_LINESCOPE, n->line, n->pos,
+				"%s", man_macronames[n->tok]);
 
 		man_node_delete(m, n);
 		m->flags &= ~MAN_ELINE;
