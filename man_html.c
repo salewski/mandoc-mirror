@@ -733,15 +733,11 @@ static int
 man_literal_pre(MAN_ARGS)
 {
 
-	switch (n->tok) {
-	case (MAN_nf):
+	if (MAN_nf == n->tok) {
 		print_otag(h, TAG_BR, 0, NULL);
 		mh->fl |= MANH_LITERAL;
-		break;
-	default:
+	} else
 		mh->fl &= ~MANH_LITERAL;
-		break;
-	}
 
 	return(1);
 }
