@@ -66,6 +66,7 @@ enum	mandocerr {
 	MANDOCERR_ERROR, /* ===== start of errors ===== */
 	MANDOCERR_NAMESECFIRST, /* NAME section must come first */
 	MANDOCERR_BADBOOL, /* bad Boolean value */
+	MANDOCERR_BADFONT, /* unknown font */
 	MANDOCERR_CHILD, /* child violates parent syntax */
 	MANDOCERR_NESTEDDISP, /* displays may not be nested */
 	MANDOCERR_BADATT, /* bad AT&T symbol */

@@ -414,7 +414,6 @@ The syntax is as follows:
 .It Sx \&I   Ta    n         Ta    next-line Ta    \&
 .It Sx \&IB  Ta    n         Ta    current   Ta    \&
 .It Sx \&IR  Ta    n         Ta    current   Ta    \&
-.\" .It Sx \&PD  Ta    n         Ta    current   Ta    compat
 .It Sx \&R   Ta    n         Ta    next-line Ta    \&
 .It Sx \&RB  Ta    n         Ta    current   Ta    \&
 .It Sx \&RI  Ta    n         Ta    current   Ta    \&
@@ -424,6 +423,7 @@ The syntax is as follows:
 .It Sx \&UC  Ta    <=1       Ta    current   Ta    \&
 .It Sx \&br  Ta    0         Ta    current   Ta    compat
 .It Sx \&fi  Ta    0         Ta    current   Ta    compat
+.It Sx \&ft  Ta    1         Ta    current   Ta    compat
 .It Sx \&i   Ta    n         Ta    current   Ta    compat
 .It Sx \&in  Ta    1         Ta    current   Ta    compat
 .It Sx \&na  Ta    0         Ta    current   Ta    compat
@@ -831,6 +831,11 @@ See also
 .Ss \&fi
 End literal mode begun by
 .Sx \&nf .
+.Ss \&ft
+Change the current font mode.
+See
+.Sx Text Decoration
+for a listing of available font modes.
 .Ss \&i
 Italicise arguments.
 Synonym for

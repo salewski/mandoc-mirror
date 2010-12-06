@@ -44,6 +44,7 @@ struct	man_valid {
 
 static	int	  check_bline(CHKARGS);
 static	int	  check_eq0(CHKARGS);
+static	int	  check_ft(CHKARGS);
 static	int	  check_le1(CHKARGS);
 static	int	  check_ge2(CHKARGS);
 static	int	  check_le5(CHKARGS);
@@ -64,6 +65,7 @@ static	v_check	  posts_at[] = { post_AT, NULL };
 static	v_check	  posts_eq0[] = { check_eq0, NULL };
 static	v_check	  posts_fi[] = { check_eq0, post_fi, NULL };
 static	v_check	  posts_le1[] = { check_le1, NULL };
+static	v_check	  posts_ft[] = { check_ft, NULL };
 static	v_check	  posts_nf[] = { check_eq0, post_nf, NULL };
 static	v_check	  posts_par[] = { check_par, NULL };
 static	v_check	  posts_part[] = { check_part, NULL };
@@ -108,6 +110,7 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, NULL }, /* PD */
 	{ NULL, posts_at }, /* AT */
 	{ NULL, NULL }, /* in */
+	{ NULL, posts_ft }, /* ft */
 };
 
 
@@ -268,6 +271,58 @@ INEQ_DEFINE(1, <=, le1)
 INEQ_DEFINE(2, >=, ge2)
 INEQ_DEFINE(5, <=, le5)
 
+static int
+check_ft(CHKARGS)
+{
+	char	*cp;
+	int	 ok;
+
+	if (0 == n->nchild)
+		return(1);
+
+	ok = 0;
+	cp = n->child->string;
+	switch (*cp) {
+	case ('1'):
+		/* FALLTHROUGH */
+	case ('2'):
+		/* FALLTHROUGH */
+	case ('3'):
+		/* FALLTHROUGH */
+	case ('4'):
+		/* FALLTHROUGH */
+	case ('I'):
+		/* FALLTHROUGH */
+	case ('P'):
+		/* FALLTHROUGH */
+	case ('R'):
+		if ('\0' == cp[1])
+			ok = 1;
+		break;
+	case ('B'):
+		if ('\0' == cp[1] || ('I' == cp[1] && '\0' == cp[2]))
+			ok = 1;
+		break;
+	case ('C'):
+		if ('W' == cp[1] && '\0' == cp[2])
+			ok = 1;
+		break;
+	default:
+		break;
+	}
+
+	if (0 == ok) {
+		man_vmsg(m, MANDOCERR_BADFONT, 
+				n->line, n->pos, "%s", cp);
+		*cp = '\0';
+	}
+
+	if (1 < n->nchild)
+		man_vmsg(m, MANDOCERR_ARGCOUNT, n->line, n->pos,
+				"want one child (have %d)", n->nchild);
+
+	return(1);
+}
 
 static int
 check_sec(CHKARGS)

@@ -144,6 +144,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	"NAME section must come first",
 	"bad Boolean value",
+	"unknown font",
 	"child violates parent syntax",
 	"displays may not be nested",
 	"bad AT&T symbol",
