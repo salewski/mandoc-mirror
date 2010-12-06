@@ -362,15 +362,11 @@ man_br_pre(MAN_ARGS)
 
 	SCALE_VS_INIT(&su, 1);
 
-	switch (n->tok) {
-	case (MAN_sp):
+	if (MAN_sp == n->tok) {
 		if (n->child)
 			a2roffsu(n->child->string, &su, SCALE_VS);
-		break;
-	default:
+	} else
 		su.scale = 0;
-		break;
-	}
 
 	bufcat_su(h, "height", &su);
 	PAIR_STYLE_INIT(&tag, h);
