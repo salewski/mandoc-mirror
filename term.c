@@ -146,7 +146,7 @@ term_flushln(struct termp *p)
 	 * an indentation, but can be, for tagged lists or columns, a
 	 * small set of values. 
 	 */
-	assert  (p->rmargin > p->offset);
+	assert  (p->rmargin >= p->offset);
 	dv     = p->rmargin - p->offset;
 	maxvis = (int)dv > p->overstep ? dv - (size_t)p->overstep : 0;
 	dv     = p->maxrmargin - p->offset;

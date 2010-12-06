@@ -463,8 +463,10 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 	if (ROFF_MAX == (t = roff_parse(r, *bufp, &pos)))
 		return(ROFF_CONT);
 
-	ROFF_DEBUG("roff: intercept new-scope: %s, [%s]\n", 
-			roffs[t].name, &(*bufp)[pos]);
+	ROFF_DEBUG("roff: intercept new-scope: [%s], [%s]\n", 
+			ROFF_USERDEF == t ? r->current_string : roffs[t].name, 
+			&(*bufp)[pos]);
+
 	assert(roffs[t].proc);
 	return((*roffs[t].proc)
 			(r, t, bufp, szp, 
@@ -650,6 +652,12 @@ roff_block(ROFF_ARGS)
 			(*r->msg)(MANDOCERR_NOARGS, r->data, ln, ppos, NULL);
 			return(ROFF_IGN);
 		}
+
+		/*
+		 * Re-write `de1', since we don't really care about
+		 * groff's strange compatibility mode, into `de'.
+		 */
+
 		if (ROFF_de1 == tok)
 			tok = ROFF_de;
 		if (ROFF_de == tok)
@@ -657,8 +665,10 @@ roff_block(ROFF_ARGS)
 		else
 			(*r->msg)(MANDOCERR_REQUEST, r->data, ln, ppos,
 			    roffs[tok].name);
+
 		while ((*bufp)[pos] && ' ' != (*bufp)[pos])
 			pos++;
+
 		while (' ' == (*bufp)[pos])
 			(*bufp)[pos++] = '\0';
 	}
@@ -670,14 +680,18 @@ roff_block(ROFF_ARGS)
 	 * with the same name, if there is one.  New content will be
 	 * added from roff_block_text() in multiline mode.
 	 */
+
 	if (ROFF_de == tok)
-		roff_setstr(r, name, "", 0);
+		roff_setstr(r, name, NULL, 0);
 
 	if ('\0' == (*bufp)[pos])
 		return(ROFF_IGN);
 
+	/* If present, process the custom end-of-line marker. */
+
 	sv = pos;
-	while ((*bufp)[pos] && ' ' != (*bufp)[pos] && 
+	while ((*bufp)[pos] && 
+			' ' != (*bufp)[pos] && 
 			'\t' != (*bufp)[pos])
 		pos++;
 
@@ -699,8 +713,7 @@ roff_block(ROFF_ARGS)
 	r->last->end[(int)sz] = '\0';
 
 	if ((*bufp)[pos])
-		if ( ! (*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, pos, NULL))
-			return(ROFF_ERR);
+		(*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, pos, NULL);
 
 	return(ROFF_IGN);
 }
@@ -933,9 +946,8 @@ roff_cond(ROFF_ARGS)
 	 */
 
 	if ('\0' == (*bufp)[pos] && sv != pos) {
-		if ((*r->msg)(MANDOCERR_NOARGS, r->data, ln, ppos, NULL))
-			return(ROFF_IGN);
-		return(ROFF_ERR);
+		(*r->msg)(MANDOCERR_NOARGS, r->data, ln, ppos, NULL);
+		return(ROFF_IGN);
 	}
 
 	roffnode_push(r, tok, NULL, ln, ppos);
