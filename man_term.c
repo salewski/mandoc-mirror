@@ -126,11 +126,9 @@ static	const struct termact termacts[MAN_MAX] = {
 	{ pre_alternate, NULL, 0 }, /* IR */
 	{ pre_alternate, NULL, 0 }, /* RI */
 	{ NULL, NULL, MAN_NOTEXT }, /* na */
-	{ pre_I, NULL, 0 }, /* i */
 	{ pre_sp, NULL, MAN_NOTEXT }, /* sp */
 	{ pre_literal, NULL, 0 }, /* nf */
 	{ pre_literal, NULL, 0 }, /* fi */
-	{ NULL, NULL, 0 }, /* r */
 	{ NULL, NULL, 0 }, /* RE */
 	{ pre_RS, post_RS, 0 }, /* RS */
 	{ pre_ign, NULL, 0 }, /* DT */

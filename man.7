@@ -424,11 +424,9 @@ The syntax is as follows:
 .It Sx \&br  Ta    0         Ta    current   Ta    compat
 .It Sx \&fi  Ta    0         Ta    current   Ta    compat
 .It Sx \&ft  Ta    1         Ta    current   Ta    compat
-.It Sx \&i   Ta    n         Ta    current   Ta    compat
 .It Sx \&in  Ta    1         Ta    current   Ta    compat
 .It Sx \&na  Ta    0         Ta    current   Ta    compat
 .It Sx \&nf  Ta    0         Ta    current   Ta    compat
-.It Sx \&r   Ta    0         Ta    current   Ta    compat
 .It Sx \&sp  Ta    1         Ta    current   Ta    compat
 .El
 .Pp
@@ -509,12 +507,9 @@ The optional arguments specify which release it is from.
 Text is rendered in bold face.
 .Pp
 See also
-.Sx \&I ,
-.Sx \&R ,
-.Sx \&b ,
-.Sx \&i ,
+.Sx \&I
 and
-.Sx \&r .
+.Sx \&R .
 .Ss \&BI
 Text is rendered alternately in bold face and italic.
 Thus,
@@ -591,12 +586,9 @@ and
 Text is rendered in italics.
 .Pp
 See also
-.Sx \&B ,
-.Sx \&R ,
-.Sx \&b ,
-.Sx \&i ,
+.Sx \&B
 and
-.Sx \&r .
+.Sx \&R .
 .Ss \&IB
 Text is rendered alternately in italics and bold face.
 Whitespace between arguments is omitted in output.
@@ -692,12 +684,9 @@ and
 Text is rendered in roman (the default font).
 .Pp
 See also
-.Sx \&I ,
-.Sx \&B ,
-.Sx \&b ,
-.Sx \&i ,
+.Sx \&I
 and
-.Sx \&r .
+.Sx \&B .
 .Ss \&RB
 Text is rendered alternately in roman (the default font) and bold face.
 Whitespace between arguments is omitted in output.
@@ -836,18 +825,6 @@ Change the current font mode.
 See
 .Sx Text Decoration
 for a listing of available font modes.
-.Ss \&i
-Italicise arguments.
-Synonym for
-.Sx \&I .
-.Pp
-See also
-.Sx \&B ,
-.Sx \&I ,
-.Sx \&R .
-.Sx \&b ,
-and
-.Sx \&r .
 .Ss \&in
 Indent relative to the current indentation:
 .Pp
@@ -865,16 +842,6 @@ Begin literal mode: all subsequent free-form lines have their end of
 line boundaries preserved.
 May be ended by
 .Sx \&fi .
-.Ss \&r
-Fonts and styles (bold face, italics) reset to roman (default font).
-.Pp
-See also
-.Sx \&B ,
-.Sx \&I ,
-.Sx \&R ,
-.Sx \&b ,
-and
-.Sx \&i .
 .Ss \&sp
 Insert vertical spaces into output with the following syntax:
 .Bd -filled -offset indent

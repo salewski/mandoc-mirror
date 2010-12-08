@@ -36,10 +36,10 @@ const	char *const __man_macronames[MAN_MAX] = {
 	"IP",		"HP",		"SM",		"SB",
 	"BI",		"IB",		"BR",		"RB",
 	"R",		"B",		"I",		"IR",
-	"RI",		"na",		"i",		"sp",
-	"nf",		"fi",		"r",		"RE",
-	"RS",		"DT",		"UC",		"PD",
-	"AT",		"in",		"ft"
+	"RI",		"na",		"sp",		"nf",
+	"fi",		"RE",		"RS",		"DT",
+	"UC",		"PD",		"AT",		"in",
+	"ft"
 	};
 
 const	char * const *man_macronames = __man_macronames;
