@@ -52,29 +52,8 @@
   and when using the macro, it must expand yet again.
 
 - implement basic non-parametric .de to support e.g. sox(1)
-  .de SP
-  .if t .sp .5
-  .if n .sp
-  ..
-  .de EX
-  .SP
-  .nf
-  .ft CW
-  ..
-  .de EE
-  .ft R
-  .SP
-  .fi
-  ..
   reported by naddy@ Sat, 16 Oct 2010 23:51:57 +0200
-
-- implement parametric .de to support e.g.
-  /usr/xenocara/lib/libXxf86vm/manXF86VM.man
-  .de ZN
-  .ie t \fB\^\\$1\^\fR\\$2
-  .el \fI\^\\$1\^\fP\\$2
-  ..
-  .ZN -lXxf86vm
+  *** sox(1) still doesn't work, tbl(1) errors need investigation
 
 - clean up escape sequence handling, creating three classes:
   (1) fully implemented, or parsed and ignored without loss of content
@@ -129,6 +108,10 @@
 ************************************************************************
 * formatting issues: ugly output
 ************************************************************************
+
+- double quotes inside double quotes are escaped by doubling them
+  implement this in man(7) and mdoc(7)
+  reminded by millert@  Thu, 09 Dec 2010 17:29:52 -0500
 
 - perl(1) SYNOPSIS looks bad; reported by deraadt@
   1) man(7) seems to need SYNOPSIS .Nm blocks, too
@@ -214,3 +197,7 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 ************************************************************************
 * structural issues
 ************************************************************************
+
+- Find better ways to prevent endless loops
+  in roff(7) macro and string expansion.
+  
