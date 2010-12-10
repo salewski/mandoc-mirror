@@ -41,6 +41,7 @@
 #define	MAP_FILE	0
 #endif
 
+#define	REPARSE_LIMIT	1000
 #define	UNCONST(a)	((void *)(uintptr_t)(const void *)(a))
 
 /* FIXME: Intel's compiler?  LLVM?  pcc?  */
@@ -89,6 +90,7 @@ struct	curparse {
 	struct mdoc	 *mdoc;		/* mdoc parser */
 	struct roff	 *roff;		/* roff parser (!NULL) */
 	struct regset	  regs;		/* roff registers */
+	int		  reparse_count; /* finite interpolation stack */
 	enum outt	  outtype; 	/* which output to use */
 	out_mdoc	  outmdoc;	/* mdoc output ptr */
 	out_man	  	  outman;	/* man output ptr */
@@ -177,6 +179,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	"generic error",
 
+	"input stack limit exceeded, infinite loop?",
 	"skipping bad character",
 	"skipping text before the first section header",
 	"skipping unknown macro",
@@ -665,8 +668,10 @@ parsebuf(struct curparse *curp, struct buf blk, int start)
 		if (0 == pos && '\0' == blk.buf[i])
 			break;
 
-		if (start)
+		if (start) {
 			curp->line = lnn;
+			curp->reparse_count = 0;
+		}
 
 		while (i < (int)blk.sz && (start || '\0' != blk.buf[i])) {
 			if ('\n' == blk.buf[i]) {
@@ -765,7 +770,11 @@ rerun:
 
 		switch (rr) {
 		case (ROFF_REPARSE):
-			parsebuf(curp, ln, 0);
+			if (REPARSE_LIMIT >= ++curp->reparse_count)
+				parsebuf(curp, ln, 0);
+			else
+				mmsg(MANDOCERR_ROFFLOOP, curp, 
+				    curp->line, pos, NULL);
 			pos = 0;
 			continue;
 		case (ROFF_APPEND):
