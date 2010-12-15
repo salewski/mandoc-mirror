@@ -552,6 +552,8 @@ mdoc_node_unlink(struct mdoc *m, struct mdoc_node *n)
 		n->parent->nchild--;
 		if (n->parent->child == n)
 			n->parent->child = n->prev ? n->prev : n->next;
+		if (n->parent->last == n)
+			n->parent->last = n->prev ? n->prev : NULL;
 	}
 
 	/* Adjust parse point, if applicable. */

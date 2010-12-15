@@ -107,6 +107,7 @@ static	int	 post_it(POST_ARGS);
 static	int	 post_lb(POST_ARGS);
 static	int	 post_nm(POST_ARGS);
 static	int	 post_os(POST_ARGS);
+static	int	 post_ignpar(POST_ARGS);
 static	int	 post_prol(POST_ARGS);
 static	int	 post_root(POST_ARGS);
 static	int	 post_rs(POST_ARGS);
@@ -150,9 +151,9 @@ static	v_post	 posts_nm[] = { post_nm, NULL };
 static	v_post	 posts_notext[] = { ewarn_eq0, NULL };
 static	v_post	 posts_os[] = { post_os, post_prol, NULL };
 static	v_post	 posts_rs[] = { berr_ge1, herr_eq0, post_rs, NULL };
-static	v_post	 posts_sh[] = { herr_ge1, bwarn_ge1, post_sh, NULL };
+static	v_post	 posts_sh[] = { post_ignpar, herr_ge1, bwarn_ge1, post_sh, NULL };
 static	v_post	 posts_sp[] = { eerr_le1, NULL };
-static	v_post	 posts_ss[] = { herr_ge1, NULL };
+static	v_post	 posts_ss[] = { post_ignpar, herr_ge1, bwarn_ge1, NULL };
 static	v_post	 posts_st[] = { eerr_eq1, post_st, NULL };
 static	v_post	 posts_std[] = { post_std, NULL };
 static	v_post	 posts_text[] = { eerr_ge1, NULL };
@@ -894,10 +895,6 @@ pre_it(PRE_ARGS)
 	if (MDOC_BLOCK != n->type)
 		return(1);
 
-	/* 
-	 * FIXME: this can probably be lifted if we make the It into
-	 * something else on-the-fly?
-	 */
 	return(check_parent(mdoc, n, MDOC_Bl, MDOC_BODY));
 }
 
@@ -1878,6 +1875,29 @@ post_sh_head(POST_ARGS)
 	default:
 		break;
 	}
+
+	return(1);
+}
+
+static int
+post_ignpar(POST_ARGS)
+{
+	struct mdoc_node *np;
+
+	if (MDOC_BODY != mdoc->last->type)
+		return(1);
+
+	if (NULL != (np = mdoc->last->child))
+		if (MDOC_Pp == np->tok || MDOC_Lp == np->tok) {
+			mdoc_nmsg(mdoc, np, MANDOCERR_IGNPAR);
+			mdoc_node_delete(mdoc, np);
+		}
+
+	if (NULL != (np = mdoc->last->last))
+		if (MDOC_Pp == np->tok || MDOC_Lp == np->tok) {
+			mdoc_nmsg(mdoc, np, MANDOCERR_IGNPAR);
+			mdoc_node_delete(mdoc, np);
+		}
 
 	return(1);
 }

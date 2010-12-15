@@ -371,6 +371,7 @@ union mdoc_data {
 struct	mdoc_node {
 	struct mdoc_node *parent; /* parent AST node */
 	struct mdoc_node *child; /* first child AST node */
+	struct mdoc_node *last; /* last child AST node */
 	struct mdoc_node *next; /* sibling AST node */
 	struct mdoc_node *prev; /* prior sibling AST node */
 	int		  nchild; /* number children */
