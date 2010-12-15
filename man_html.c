@@ -141,20 +141,13 @@ static void
 print_man(MAN_ARGS) 
 {
 	struct tag	*t;
-	struct htmlpair	 tag;
 
 	t = print_otag(h, TAG_HEAD, 0, NULL);
-
 	print_man_head(m, n, mh, h);
 	print_tagq(h, t);
+
 	t = print_otag(h, TAG_BODY, 0, NULL);
-
-	tag.key = ATTR_CLASS;
-	tag.val = "body";
-	print_otag(h, TAG_DIV, 1, &tag);
-
 	print_man_nodelist(m, n, mh, h);
-
 	print_tagq(h, t);
 }
 

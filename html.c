@@ -68,6 +68,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"dt",		HTML_CLRLINE}, /* TAG_DT */
 	{"dd",		HTML_CLRLINE}, /* TAG_DD */
 	{"blockquote",	HTML_CLRLINE}, /* TAG_BLOCKQUOTE */
+	{"p",		HTML_CLRLINE | HTML_NOSTACK | HTML_AUTOCLOSE}, /* TAG_P */
 };
 
 static	const char	*const htmlfonts[HTMLFONT_MAX] = {

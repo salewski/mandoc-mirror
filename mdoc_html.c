@@ -103,6 +103,7 @@ static	int		  mdoc_nm_pre(MDOC_ARGS);
 static	int		  mdoc_ns_pre(MDOC_ARGS);
 static	int		  mdoc_pa_pre(MDOC_ARGS);
 static	void		  mdoc_pf_post(MDOC_ARGS);
+static	int		  mdoc_pp_pre(MDOC_ARGS);
 static	void		  mdoc_quote_post(MDOC_ARGS);
 static	int		  mdoc_quote_pre(MDOC_ARGS);
 static	int		  mdoc_rs_pre(MDOC_ARGS);
@@ -126,7 +127,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Os */
 	{mdoc_sh_pre, NULL }, /* Sh */
 	{mdoc_ss_pre, NULL }, /* Ss */ 
-	{mdoc_sp_pre, NULL}, /* Pp */ 
+	{mdoc_pp_pre, NULL}, /* Pp */ 
 	{mdoc_d1_pre, NULL}, /* D1 */
 	{mdoc_d1_pre, NULL}, /* Dl */
 	{mdoc_bd_pre, NULL}, /* Bd */
@@ -227,7 +228,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Fr */
 	{mdoc_ud_pre, NULL}, /* Ud */
 	{mdoc_lb_pre, NULL}, /* Lb */
-	{mdoc_sp_pre, NULL}, /* Lp */ 
+	{mdoc_pp_pre, NULL}, /* Lp */ 
 	{mdoc_lk_pre, NULL}, /* Lk */ 
 	{mdoc_mt_pre, NULL}, /* Mt */ 
 	{mdoc_quote_pre, mdoc_quote_post}, /* Brq */ 
@@ -1132,12 +1133,15 @@ mdoc_d1_pre(MDOC_ARGS)
 	bufcat_su(h, "margin-top", &su);
 	bufcat_su(h, "margin-bottom", &su);
 	PAIR_STYLE_INIT(&tag[0], h);
+	print_otag(h, TAG_BLOCKQUOTE, 1, tag);
+
+	/* BLOCKQUOTE needs a block body. */
 
 	if (MDOC_Dl == n->tok) {
 		PAIR_CLASS_INIT(&tag[1], "lit");
-		print_otag(h, TAG_BLOCKQUOTE, 2, tag);
+		print_otag(h, TAG_DIV, 1, tag);
 	} else
-		print_otag(h, TAG_BLOCKQUOTE, 1, tag);
+		print_otag(h, TAG_DIV, 0, tag);
 
 	return(1);
 }
@@ -1533,44 +1537,46 @@ mdoc_sm_pre(MDOC_ARGS)
 	return(0);
 }
 
+/* ARGSUSED */
+static int
+mdoc_pp_pre(MDOC_ARGS)
+{
+
+	if ((NULL == n->next || NULL == n->prev) &&
+			(MDOC_Ss == n->parent->tok ||
+			 MDOC_Sh == n->parent->tok))
+		return(0);
+
+	print_otag(h, TAG_P, 0, NULL);
+	return(0);
+
+}
 
 /* ARGSUSED */
 static int
 mdoc_sp_pre(MDOC_ARGS)
 {
-	int		 len;
-	struct htmlpair	 tag;
 	struct roffsu	 su;
+	struct htmlpair	 tag;
 
-	switch (n->tok) {
-	case (MDOC_sp):
-		/* FIXME: can this have a scaling indicator? */
-		len = n->child ? atoi(n->child->string) : 1;
-		break;
-	case (MDOC_br):
-		len = 0;
-		break;
-	default:
-		assert(n->parent);
-		if ((NULL == n->next || NULL == n->prev) &&
-				(MDOC_Ss == n->parent->tok ||
-				 MDOC_Sh == n->parent->tok))
-			return(0);
-		len = 1;
-		break;
-	}
+	SCALE_VS_INIT(&su, 1);
 
-	SCALE_VS_INIT(&su, len);
+	if (MDOC_sp == n->tok) {
+		if (n->child)
+			a2roffsu(n->child->string, &su, SCALE_VS);
+	} else
+		su.scale = 0;
+
 	bufcat_su(h, "height", &su);
 	PAIR_STYLE_INIT(&tag, h);
 	print_otag(h, TAG_DIV, 1, &tag);
+
 	/* So the div isn't empty: */
 	print_text(h, "\\~");
 
 	return(0);
 
 }
-
 
 /* ARGSUSED */
 static int
@@ -1858,10 +1864,8 @@ mdoc_rs_pre(MDOC_ARGS)
 	if (MDOC_BLOCK != n->type)
 		return(1);
 
-	if (n->prev && SEC_SEE_ALSO == n->sec) {
-		print_otag(h, TAG_BR, 0, NULL);
-		print_otag(h, TAG_BR, 0, NULL);
-	} 
+	if (n->prev && SEC_SEE_ALSO == n->sec)
+		print_otag(h, TAG_P, 0, NULL);
 
 	PAIR_CLASS_INIT(&tag, "ref");
 	print_otag(h, TAG_SPAN, 1, &tag);

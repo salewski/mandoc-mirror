@@ -44,6 +44,7 @@ enum	htmltag {
 	TAG_DT,
 	TAG_DD,
 	TAG_BLOCKQUOTE,
+	TAG_P,
 	TAG_MAX
 };
 
