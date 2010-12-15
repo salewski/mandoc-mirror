@@ -369,17 +369,12 @@ static void
 print_mdoc(MDOC_ARGS)
 {
 	struct tag	*t;
-	struct htmlpair	 tag;
 
 	t = print_otag(h, TAG_HEAD, 0, NULL);
 	print_mdoc_head(m, n, h);
 	print_tagq(h, t);
 
 	t = print_otag(h, TAG_BODY, 0, NULL);
-
-	tag.key = ATTR_CLASS;
-	tag.val = "body";
-	print_otag(h, TAG_DIV, 1, &tag);
 
 	print_mdoc_nodelist(m, n, h);
 	print_tagq(h, t);
@@ -1043,7 +1038,6 @@ mdoc_bl_pre(MDOC_ARGS)
 		bufcat_su(h, "margin-left", &su);
 		PAIR_STYLE_INIT(&tag[1], h);
 		i = 2;
-
 	}
 
 	switch (n->data.Bl->type) {
