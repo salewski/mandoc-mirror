@@ -246,13 +246,13 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 
 static	const char * const lists[LIST_MAX] = {
 	NULL,
-	"list-bullet",
-	"list-column",
+	"list-bul",
+	"list-col",
 	"list-dash",
 	"list-diag",
 	"list-enum",
 	"list-hang",
-	"list-hyphen",
+	"list-hyph",
 	"list-inset",
 	"list-item",
 	"list-ohang",
@@ -903,7 +903,7 @@ mdoc_it_pre(MDOC_ARGS)
 {
 	struct roffsu	 su;
 	enum mdoc_list	 type;
-	struct htmlpair	 tag;
+	struct htmlpair	 tag[2];
 	const struct mdoc_node *bl;
 
 	bl = n->parent;
@@ -914,11 +914,12 @@ mdoc_it_pre(MDOC_ARGS)
 
 	type = bl->data.Bl->type;
 
-	/* Whether we're top-padded (not "compact"). */
+	assert(lists[type]);
+	PAIR_CLASS_INIT(&tag[0], lists[type]);
 
 	SCALE_VS_INIT(&su, ! bl->data.Bl->comp);
 	bufcat_su(h, "margin-top", &su);
-	PAIR_STYLE_INIT(&tag, h);
+	PAIR_STYLE_INIT(&tag[1], h);
 
 	if (MDOC_HEAD == n->type) {
 		switch (type) {
@@ -941,7 +942,7 @@ mdoc_it_pre(MDOC_ARGS)
 		case(LIST_ohang):
 			/* FALLTHROUGH */
 		case(LIST_tag):
-			print_otag(h, TAG_DT, 1, &tag);
+			print_otag(h, TAG_DT, 2, tag);
 			break;
 		case(LIST_column):
 			break;
@@ -960,7 +961,7 @@ mdoc_it_pre(MDOC_ARGS)
 			/* FALLTHROUGH */
 		case(LIST_item):
 			/* FALLTHROUGH */
-			print_otag(h, TAG_LI, 1, &tag);
+			print_otag(h, TAG_LI, 2, tag);
 			break;
 		case(LIST_diag):
 			/* FALLTHROUGH */
@@ -971,10 +972,10 @@ mdoc_it_pre(MDOC_ARGS)
 		case(LIST_ohang):
 			/* FALLTHROUGH */
 		case(LIST_tag):
-			print_otag(h, TAG_DD, 0, NULL);
+			print_otag(h, TAG_DD, 1, tag);
 			break;
 		case(LIST_column):
-			print_otag(h, TAG_TD, 1, &tag);
+			print_otag(h, TAG_TD, 2, tag);
 			break;
 		default:
 			break;
@@ -982,7 +983,7 @@ mdoc_it_pre(MDOC_ARGS)
 	} else {
 		switch (type) {
 		case (LIST_column):
-			print_otag(h, TAG_TR, 0, NULL);
+			print_otag(h, TAG_TR, 1, tag);
 			break;
 		default:
 			break;

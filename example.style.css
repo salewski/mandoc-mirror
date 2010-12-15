@@ -70,3 +70,44 @@ div.symb	{ font-weight: bold; font-style: normal; } /* Symbols (Bl -symbolic). *
 
 table.footer	{ } /* Document footer. */
 table.header	{ } /* Document header. */
+
+/* Formatting for lists. */
+
+dl.list-diag	{ }
+dt.list-diag	{ }
+dd.list-diag	{ }
+
+dl.list-hang	{ }
+dt.list-hang	{ }
+dd.list-hang	{ }
+
+dl.list-inset	{ }
+dt.list-inset	{ }
+dd.list-inset	{ }
+
+dl.list-ohang	{ }
+dt.list-ohang	{ }
+dd.list-ohang	{ }
+
+dl.list-tag	{ }
+dt.list-tag	{ }
+dd.list-tag	{ }
+
+table.list-col	{ }
+tr.list-col	{ }
+td.list-col	{ }
+
+ul.list-bul	{ }
+li.list-bul	{ }
+
+ul.list-dash	{ }
+li.list-dash	{ }
+
+ul.list-hyph	{ }
+li.list-hyph	{ }
+
+ul.list-item	{ }
+li.list-item	{ }
+
+ol.list-enum	{ }
+li.list-enum	{ }
