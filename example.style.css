@@ -12,6 +12,12 @@ div.ssec-head	{ font-weight: bold; font-style: normal; } /* Sub-sections (Ss). *
 div.ssec-body	{ }
 div.ssec-block	{ }
 
+/* General font modes. */
+
+.lit		{ } /* "Literal" text: Dl, Li, Bf -literal, Bl -literal, Bl -unfilled. */
+
+/* Context-specific modes. */
+
 span.addr	{ font-style: italic; font-weight: normal; } /* Address (Ad). */
 span.arg	{ font-style: italic; font-weight: normal; } /* Command argument (Ar). */
 span.author	{ } /* Author name (An). */
@@ -32,7 +38,6 @@ span.ftype	{ font-style: italic; font-weight: normal; } /* Function types (Ft, F
 span.includes	{ font-weight: bold; font-style: normal; } /* Header includes (In). */
 span.italic	{ font-style: italic; font-weight: normal; } /* Generically italic (BI, IB, I). */
 span.lib	{ } /* Library (Lb). */
-span.lit	{ } /* Literals (Dl). */
 span.macro	{ font-weight: bold; font-style: normal; } /* Macro-ish thing (Fd). */
 span.name	{ font-weight: bold; font-style: normal; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
@@ -66,7 +71,6 @@ a.link-ref	{ } /* Reference section links (%Q). */
 a.link-sec	{ } /* Section links (Sx). */
 
 div.emph	{ font-style: italic; font-weight: normal; } /* Emphasis (Bl -emphasis). */
-div.lit		{ } /* Literal (Bf -literal, Bd -literal, Bd -unfilled). */
 div.symb	{ font-weight: bold; font-style: normal; } /* Symbols (Bl -symbolic). */
 
 table.footer	{ } /* Document footer. */

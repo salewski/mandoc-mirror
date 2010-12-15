@@ -1133,13 +1133,17 @@ mdoc_d1_pre(MDOC_ARGS)
 	if (MDOC_BLOCK != n->type)
 		return(1);
 
-	/* FIXME: D1 shouldn't be literal. */
+	SCALE_VS_INIT(&su, 0);
+	bufcat_su(h, "margin-top", &su);
+	bufcat_su(h, "margin-bottom", &su);
+	PAIR_STYLE_INIT(&tag[0], h);
 
-	SCALE_VS_INIT(&su, INDENT - 2);
-	bufcat_su(h, "margin-left", &su);
-	PAIR_CLASS_INIT(&tag[0], "lit");
-	PAIR_STYLE_INIT(&tag[1], h);
-	print_otag(h, TAG_DIV, 2, tag);
+	if (MDOC_Dl == n->tok) {
+		PAIR_CLASS_INIT(&tag[1], "lit");
+		print_otag(h, TAG_BLOCKQUOTE, 2, tag);
+	} else
+		print_otag(h, TAG_BLOCKQUOTE, 1, tag);
+
 	return(1);
 }
 
