@@ -375,7 +375,6 @@ print_mdoc(MDOC_ARGS)
 	print_tagq(h, t);
 
 	t = print_otag(h, TAG_BODY, 0, NULL);
-
 	print_mdoc_nodelist(m, n, h);
 	print_tagq(h, t);
 }
@@ -474,12 +473,6 @@ mdoc_root_post(MDOC_ARGS)
 
 	time2a(m->date, b, DATESIZ);
 
-	/*
-	 * XXX: this should use divs, but in Firefox, divs with nested
-	 * divs for some reason puke when trying to put a border line
-	 * below.  So I use tables, instead.
-	 */
-
 	PAIR_CLASS_INIT(&tag[0], "footer");
 	bufcat_style(h, "width", "100%");
 	PAIR_STYLE_INIT(&tag[1], h);
@@ -513,18 +506,15 @@ mdoc_root_pre(MDOC_ARGS)
 	struct tag	*t, *tt;
 	char		 b[BUFSIZ], title[BUFSIZ];
 
-	(void)strlcpy(b, m->vol, BUFSIZ);
+	strlcpy(b, m->vol, BUFSIZ);
 
 	if (m->arch) {
-		(void)strlcat(b, " (", BUFSIZ);
-		(void)strlcat(b, m->arch, BUFSIZ);
-		(void)strlcat(b, ")", BUFSIZ);
+		strlcat(b, " (", BUFSIZ);
+		strlcat(b, m->arch, BUFSIZ);
+		strlcat(b, ")", BUFSIZ);
 	}
 
-	(void)snprintf(title, BUFSIZ - 1, 
-			"%s(%s)", m->title, m->msec);
-
-	/* XXX: see note in mdoc_root_post() about divs. */
+	snprintf(title, BUFSIZ - 1, "%s(%s)", m->title, m->msec);
 
 	PAIR_CLASS_INIT(&tag[0], "header");
 	bufcat_style(h, "width", "100%");
@@ -993,7 +983,7 @@ static int
 mdoc_bl_pre(MDOC_ARGS)
 {
 	size_t		 i;
-	struct htmlpair	 tag[2];
+	struct htmlpair	 tag[3];
 	struct roffsu	 su;
 
 	if (MDOC_BODY == n->type) {
@@ -1027,17 +1017,22 @@ mdoc_bl_pre(MDOC_ARGS)
 		return(0);
 	}
 
+	SCALE_VS_INIT(&su, 0);
+	bufcat_su(h, "margin-top", &su);
+	bufcat_su(h, "margin-bottom", &su);
+	PAIR_STYLE_INIT(&tag[0], h);
+
 	assert(lists[n->data.Bl->type]);
-	PAIR_CLASS_INIT(&tag[0], lists[n->data.Bl->type]);
-	i = 1;
+	PAIR_CLASS_INIT(&tag[1], lists[n->data.Bl->type]);
+	i = 2;
 
 	/* Set the block's left-hand margin. */
 
 	if (n->data.Bl->offs) {
 		a2offs(n->data.Bl->offs, &su);
 		bufcat_su(h, "margin-left", &su);
-		PAIR_STYLE_INIT(&tag[1], h);
-		i = 2;
+		PAIR_STYLE_INIT(&tag[2], h);
+		i = 3;
 	}
 
 	switch (n->data.Bl->type) {
