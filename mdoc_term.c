@@ -1815,11 +1815,6 @@ termp_sp_pre(DECL_ARGS)
 		len = 0;
 		break;
 	default:
-		assert(n->parent);
-		if ((NULL == n->next || NULL == n->prev) &&
-				(MDOC_Ss == n->parent->tok ||
-				 MDOC_Sh == n->parent->tok))
-			return(0);
 		len = 1;
 		break;
 	}

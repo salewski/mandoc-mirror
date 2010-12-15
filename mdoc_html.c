@@ -1542,11 +1542,6 @@ static int
 mdoc_pp_pre(MDOC_ARGS)
 {
 
-	if ((NULL == n->next || NULL == n->prev) &&
-			(MDOC_Ss == n->parent->tok ||
-			 MDOC_Sh == n->parent->tok))
-		return(0);
-
 	print_otag(h, TAG_P, 0, NULL);
 	return(0);
 
