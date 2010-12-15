@@ -57,12 +57,16 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"br",		HTML_CLRLINE | HTML_NOSTACK | HTML_AUTOCLOSE}, /* TAG_BR */
 	{"a",		0}, /* TAG_A */
 	{"table",	HTML_CLRLINE}, /* TAG_TABLE */
+	{"tbody",	HTML_CLRLINE}, /* TAG_TBODY */
 	{"col",		HTML_CLRLINE | HTML_NOSTACK | HTML_AUTOCLOSE}, /* TAG_COL */
 	{"tr",		HTML_CLRLINE}, /* TAG_TR */
 	{"td",		HTML_CLRLINE}, /* TAG_TD */
 	{"li",		HTML_CLRLINE}, /* TAG_LI */
 	{"ul",		HTML_CLRLINE}, /* TAG_UL */
 	{"ol",		HTML_CLRLINE}, /* TAG_OL */
+	{"dl",		HTML_CLRLINE}, /* TAG_DL */
+	{"dt",		HTML_CLRLINE}, /* TAG_DT */
+	{"dd",		HTML_CLRLINE}, /* TAG_DD */
 };
 
 static	const char	*const htmlfonts[HTMLFONT_MAX] = {
@@ -121,7 +125,6 @@ ml_alloc(char *outopts, enum htmltype type)
 
 	h->type = type;
 	h->tags.head = NULL;
-	h->ords.head = NULL;
 	h->symtab = chars_init(CHARS_HTML);
 
 	while (outopts && *outopts)
@@ -162,15 +165,9 @@ void
 html_free(void *p)
 {
 	struct tag	*tag;
-	struct ord	*ord;
 	struct html	*h;
 
 	h = (struct html *)p;
-
-	while ((ord = h->ords.head) != NULL) { 
-		h->ords.head = ord->next;
-		free(ord);
-	}
 
 	while ((tag = h->tags.head) != NULL) {
 		h->tags.head = tag->next;	

@@ -283,7 +283,8 @@ enum	mdoc_list {
 	LIST_inset,
 	LIST_item,
 	LIST_ohang,
-	LIST_tag
+	LIST_tag,
+	LIST_MAX
 };
 
 /*
