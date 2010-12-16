@@ -95,7 +95,7 @@ dd.list-inset	{ }
 
 dl.list-ohang	{ }
 dt.list-ohang	{ }
-dd.list-ohang	{ }
+dd.list-ohang	{ margin-left: 0em; }
 
 dl.list-tag	{ }
 dt.list-tag	{ }
@@ -105,17 +105,17 @@ table.list-col	{ }
 tr.list-col	{ }
 td.list-col	{ }
 
-ul.list-bul	{ }
+ul.list-bul	{ list-style-type: disc; padding-left: 1em; }
 li.list-bul	{ }
 
-ul.list-dash	{ }
-li.list-dash	{ }
+ul.list-dash	{ list-style-type: none; padding-left: 0em; }
+li.list-dash:before { content: "\2014  "; }
 
-ul.list-hyph	{ }
-li.list-hyph	{ }
+ul.list-hyph	{ list-style-type: none; padding-left: 0em; }
+li.list-hyph:before { content: "\2013  "; }
 
-ul.list-item	{ }
+ul.list-item	{ list-style-type: none; padding-left: 0em; }
 li.list-item	{ }
 
-ol.list-enum	{ }
+ol.list-enum	{ padding-left: 2em; }
 li.list-enum	{ }
