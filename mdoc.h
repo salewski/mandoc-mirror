@@ -359,7 +359,7 @@ struct	mdoc_an {
  * provided, etc.
  */
 union mdoc_data {
-	struct mdoc_an 	  An;
+	struct mdoc_an 	 *An;
 	struct mdoc_bd	 *Bd;
 	struct mdoc_bf	 *Bf;
 	struct mdoc_bl	 *Bl;

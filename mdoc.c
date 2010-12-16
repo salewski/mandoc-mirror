@@ -526,6 +526,9 @@ mdoc_node_free(struct mdoc_node *p)
 	if (MDOC_Bf == p->tok && MDOC_HEAD == p->type)
 		if (p->data.Bf)
 			free(p->data.Bf);
+	if (MDOC_An == p->tok)
+		if (p->data.An)
+			free(p->data.An);
 
 	if (p->string)
 		free(p->string);
