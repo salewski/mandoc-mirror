@@ -144,7 +144,7 @@ static	v_post	 posts_dd[] = { ewarn_ge1, post_dd, post_prol, NULL };
 static	v_post	 posts_dl[] = { post_literal, bwarn_ge1, herr_eq0, NULL };
 static	v_post	 posts_dt[] = { post_dt, post_prol, NULL };
 static	v_post	 posts_fo[] = { hwarn_eq1, bwarn_ge1, NULL };
-static	v_post	 posts_it[] = { post_it, NULL };
+static	v_post	 posts_it[] = { post_ignpar, post_it, NULL };
 static	v_post	 posts_lb[] = { eerr_eq1, post_lb, NULL };
 static	v_post	 posts_nd[] = { berr_ge1, NULL };
 static	v_post	 posts_nm[] = { post_nm, NULL };
@@ -1886,11 +1886,26 @@ post_ignpar(POST_ARGS)
 	if (MDOC_BODY != mdoc->last->type)
 		return(1);
 
-	if (NULL != (np = mdoc->last->child))
+	/*
+	 * Lists are allowed to have paragraphs as the first macro (I
+	 * have no idea why: it really uglifies things).
+	 */
+
+	np = mdoc->last->child;
+	if (NULL != np && MDOC_It != mdoc->last->tok)
 		if (MDOC_Pp == np->tok || MDOC_Lp == np->tok) {
 			mdoc_nmsg(mdoc, np, MANDOCERR_IGNPAR);
 			mdoc_node_delete(mdoc, np);
 		}
+
+	/*
+	 * Compact lists are allowed to have trailing paragraph macros;
+	 * however, nobody else is (including non-compact lists).
+	 */
+
+	np = mdoc->last;
+	if (MDOC_It == np->tok && ! np->parent->parent->data.Bl->comp)
+		return(1);
 
 	if (NULL != (np = mdoc->last->last))
 		if (MDOC_Pp == np->tok || MDOC_Lp == np->tok) {
