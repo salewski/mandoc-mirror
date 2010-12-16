@@ -159,13 +159,12 @@ utility accepts the following
 arguments, which correspond to output modes:
 .Bl -tag -width Ds
 .It Fl T Ns Cm ascii
-Produce 7-bit ASCII output, backspace-encoded for bold and underline
-styles.
+Produce 7-bit ASCII output.
 This is the default.
 See
 .Sx ASCII Output .
 .It Fl T Ns Cm html
-Produce strict HTML-4.01 output, with a sane default style.
+Produce strict CSS1/HTML-4.01 output.
 See
 .Sx HTML Output .
 .It Fl T Ns Cm lint
@@ -183,7 +182,7 @@ See
 .It Fl T Ns Cm tree
 Produce an indented parse tree.
 .It Fl T Ns Cm xhtml
-Produce strict XHTML-1.0 output, with a sane default style.
+Produce strict CSS1/XHTML-1.0 output.
 See
 .Sx XHTML Output .
 .El
@@ -228,9 +227,9 @@ Output produced by
 .Fl T Ns Cm html
 conforms to HTML-4.01 strict.
 .Pp
-Font styles and page structure are applied using CSS2.
+Font styles and page structure are applied using CSS1.
 By default, no font style is applied to any text,
-although CSS2 is hard-coded to format
+although CSS1 is hard-coded to format
 the basic structure of output.
 .Pp
 The
