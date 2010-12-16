@@ -93,10 +93,6 @@
   (e.g., NetBSD mDNSShared/dns-sd.1)
   (mdoc_html.c and mdoc_term.c `Nm' handlers can be slightly simplified)
 
-- Have `Sh', `It', `Ss' and others complain if `Pp' is invoked prior to
-  close (in the post validation) or prior to open (pre).  This noted by
-  jmc@ a thousand years ago.
-
 - xloadimage(1) wants .ti (temporary indent), rep by naddy@
 
 - bashbug(1) complains "line scope broken" after
@@ -152,6 +148,8 @@
 - A bogus .Pp between two .It must not produce a double blank line,
   see between -R and -r in OpenBSD rm(1), before "update" in mount(8),
   or in DIAGNOSTICS in init(8).
+  Also have `It' complain if `Pp' is invoked at certain times (not
+  -compact?).
 
 - .Bd -literal and .Bd -unfilled are *not* identical.
   In -literal, tabs are 8 spaces.
