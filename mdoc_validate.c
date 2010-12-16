@@ -170,7 +170,7 @@ static	v_pre	 pres_dd[] = { pre_dd, NULL };
 static	v_pre	 pres_dt[] = { pre_dt, NULL };
 static	v_pre	 pres_er[] = { NULL, NULL };
 static	v_pre	 pres_fd[] = { NULL, NULL };
-static	v_pre	 pres_it[] = { pre_it, NULL };
+static	v_pre	 pres_it[] = { pre_it, pre_par, NULL };
 static	v_pre	 pres_os[] = { pre_os, NULL };
 static	v_pre	 pres_pp[] = { pre_par, NULL };
 static	v_pre	 pres_sh[] = { pre_sh, NULL };
@@ -1564,21 +1564,20 @@ post_bl(POST_ARGS)
 		return(post_bl_block(mdoc));
 	if (MDOC_BODY != mdoc->last->type)
 		return(1);
-	if (NULL == mdoc->last->child)
-		return(1);
 
-	/*
-	 * We only allow certain children of `Bl'.  This is usually on
-	 * `It', but apparently `Sm' occurs here and there, so we let
-	 * that one through, too.
-	 */
-
-	/* LINTED */
 	for (n = mdoc->last->child; n; n = n->next) {
-		if (MDOC_BLOCK == n->type && MDOC_It == n->tok)
+		switch (n->tok) {
+		case (MDOC_It):
 			continue;
-		if (MDOC_Sm == n->tok)
+		case (MDOC_Sm):
+			/* FALLTHROUGH */
+		case (MDOC_Pp):
+			mdoc_nmsg(mdoc, n, MANDOCERR_CHILD);
 			continue;
+		default:
+			break;
+		}
+
 		mdoc_nmsg(mdoc, n, MANDOCERR_SYNTCHILD);
 		return(0);
 	}
@@ -1908,6 +1907,8 @@ pre_par(PRE_ARGS)
 
 	if (NULL == mdoc->last)
 		return(1);
+	if (MDOC_ELEM != n->type && MDOC_BLOCK != n->type)
+		return(1);
 
 	/* 
 	 * Don't allow prior `Lp' or `Pp' prior to a paragraph-type
@@ -1916,10 +1917,11 @@ pre_par(PRE_ARGS)
 
 	if (MDOC_Pp != mdoc->last->tok && MDOC_Lp != mdoc->last->tok)
 		return(1);
-
 	if (MDOC_Bl == n->tok && n->data.Bl->comp)
 		return(1);
 	if (MDOC_Bd == n->tok && n->data.Bd->comp)
+		return(1);
+	if (MDOC_It == n->tok && n->parent->data.Bl->comp)
 		return(1);
 
 	mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_IGNPAR);
