@@ -903,10 +903,6 @@ mdoc_it_pre(MDOC_ARGS)
 	assert(lists[type]);
 	PAIR_CLASS_INIT(&tag[0], lists[type]);
 
-	SCALE_VS_INIT(&su, ! bl->data.Bl->comp);
-	bufcat_su(h, "margin-top", &su);
-	PAIR_STYLE_INIT(&tag[1], h);
-
 	if (MDOC_HEAD == n->type) {
 		switch (type) {
 		case(LIST_bullet):
@@ -928,6 +924,9 @@ mdoc_it_pre(MDOC_ARGS)
 		case(LIST_ohang):
 			/* FALLTHROUGH */
 		case(LIST_tag):
+			SCALE_VS_INIT(&su, ! bl->data.Bl->comp);
+			bufcat_su(h, "margin-top", &su);
+			PAIR_STYLE_INIT(&tag[1], h);
 			print_otag(h, TAG_DT, 2, tag);
 			break;
 		case(LIST_column):
@@ -946,7 +945,9 @@ mdoc_it_pre(MDOC_ARGS)
 		case(LIST_enum):
 			/* FALLTHROUGH */
 		case(LIST_item):
-			/* FALLTHROUGH */
+			SCALE_VS_INIT(&su, ! bl->data.Bl->comp);
+			bufcat_su(h, "margin-top", &su);
+			PAIR_STYLE_INIT(&tag[1], h);
 			print_otag(h, TAG_LI, 2, tag);
 			break;
 		case(LIST_diag):
@@ -958,9 +959,19 @@ mdoc_it_pre(MDOC_ARGS)
 		case(LIST_ohang):
 			/* FALLTHROUGH */
 		case(LIST_tag):
-			print_otag(h, TAG_DD, 1, tag);
+			if (NULL == bl->data.Bl->width) {
+				print_otag(h, TAG_DD, 1, tag);
+				break;
+			}
+			a2width(bl->data.Bl->width, &su);
+			bufcat_su(h, "margin-left", &su);
+			PAIR_STYLE_INIT(&tag[1], h);
+			print_otag(h, TAG_DD, 2, tag);
 			break;
 		case(LIST_column):
+			SCALE_VS_INIT(&su, ! bl->data.Bl->comp);
+			bufcat_su(h, "margin-top", &su);
+			PAIR_STYLE_INIT(&tag[1], h);
 			print_otag(h, TAG_TD, 2, tag);
 			break;
 		default:
