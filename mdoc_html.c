@@ -945,7 +945,10 @@ mdoc_bl_pre(MDOC_ARGS)
 	PAIR_STYLE_INIT(&tag[0], h);
 
 	assert(lists[n->data.Bl->type]);
-	PAIR_CLASS_INIT(&tag[1], lists[n->data.Bl->type]);
+	bufinit(h);
+	bufcat(h, "list ");
+	bufcat(h, lists[n->data.Bl->type]);
+	PAIR_INIT(&tag[1], ATTR_CLASS, h->buf);
 	i = 2;
 
 	/* Set the block's left-hand margin. */

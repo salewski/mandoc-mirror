@@ -40,7 +40,8 @@ table		{ margin-top: 0px; margin-bottom: 0px; }
 
 /* Block modes. */
 
-.display	{ }
+.display	{ } /* Top of all Bd, D1, Dl. */
+.list		{ } /* Top of all Bl. */
 
 /* Context-specific modes. */
 
