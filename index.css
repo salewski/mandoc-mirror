@@ -1,6 +1,6 @@
 body		{ color: #333333;
-		  font-size: smaller;
-		  font-family: Verdana, Tahoma, Arial, sans-serif; }
+		  font-size: 0.93em;
+		  font-family: Times, sans-serif; }
 
 table.frame	{ max-width: 800px; 
 		  padding-right: 2em;
