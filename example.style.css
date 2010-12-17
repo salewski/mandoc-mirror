@@ -7,7 +7,7 @@ body		{ font-family: monospace; }
 
 table.foot	{ width: 100%; } /* Document footer. */
 td.foot-date	{ width: 50%; } /* Document footer: date. */
-td.foot-os	{ width: 50%; text-align: right; } /* Document footer: OS. */
+td.foot-os	{ width: 50%; text-align: right; } /* Document footer: OS/source. */
 table.head	{ width: 100%; } /* Document header. */
 td.head-ltitle	{ width: 10%; } /* Document header: left-title. */
 td.head-vol	{ width: 80%; text-align: center; } /* Document header: volume. */

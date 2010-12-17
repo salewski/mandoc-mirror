@@ -260,7 +260,7 @@ a2width(const struct man_node *n, struct roffsu *su)
 static int
 man_root_pre(MAN_ARGS)
 {
-	struct htmlpair	 tag[3];
+	struct htmlpair	 tag[2];
 	struct tag	*t, *tt;
 	char		 b[BUFSIZ], title[BUFSIZ];
 
@@ -270,35 +270,27 @@ man_root_pre(MAN_ARGS)
 
 	snprintf(title, BUFSIZ - 1, "%s(%s)", m->title, m->msec);
 
-	PAIR_CLASS_INIT(&tag[0], "header");
-	bufcat_style(h, "width", "100%");
-	PAIR_STYLE_INIT(&tag[1], h);
-	PAIR_SUMMARY_INIT(&tag[2], "header");
+	PAIR_CLASS_INIT(&tag[0], "head");
+	PAIR_SUMMARY_INIT(&tag[1], "Document Header");
+	t = print_otag(h, TAG_TABLE, 2, tag);
 
-	t = print_otag(h, TAG_TABLE, 3, tag);
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
-	bufinit(h);
-	bufcat_style(h, "width", "10%");
-	PAIR_STYLE_INIT(&tag[0], h);
+	PAIR_CLASS_INIT(&tag[0], "head-ltitle");
 	print_otag(h, TAG_TD, 1, tag);
+
 	print_text(h, title);
 	print_stagq(h, tt);
 
-	bufinit(h);
-	bufcat_style(h, "width", "80%");
-	bufcat_style(h, "white-space", "nowrap");
-	bufcat_style(h, "text-align", "center");
-	PAIR_STYLE_INIT(&tag[0], h);
+	PAIR_CLASS_INIT(&tag[0], "head-vol");
 	print_otag(h, TAG_TD, 1, tag);
+
 	print_text(h, b);
 	print_stagq(h, tt);
 
-	bufinit(h);
-	bufcat_style(h, "width", "10%");
-	bufcat_style(h, "text-align", "right");
-	PAIR_STYLE_INIT(&tag[0], h);
+	PAIR_CLASS_INIT(&tag[0], "head-rtitle");
 	print_otag(h, TAG_TD, 1, tag);
+
 	print_text(h, title);
 	print_tagq(h, t);
 	return(1);
@@ -309,7 +301,7 @@ man_root_pre(MAN_ARGS)
 static void
 man_root_post(MAN_ARGS)
 {
-	struct htmlpair	 tag[3];
+	struct htmlpair	 tag[2];
 	struct tag	*t, *tt;
 	char		 b[DATESIZ];
 
@@ -318,26 +310,21 @@ man_root_post(MAN_ARGS)
 	else
 		time2a(m->date, b, DATESIZ);
 
-	PAIR_CLASS_INIT(&tag[0], "footer");
-	bufcat_style(h, "width", "100%");
-	PAIR_STYLE_INIT(&tag[1], h);
-	PAIR_SUMMARY_INIT(&tag[2], "footer");
+	PAIR_CLASS_INIT(&tag[0], "foot");
+	PAIR_SUMMARY_INIT(&tag[1], "Document Footer");
+	t = print_otag(h, TAG_TABLE, 2, tag);
 
-	t = print_otag(h, TAG_TABLE, 3, tag);
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
-	bufinit(h);
-	bufcat_style(h, "width", "50%");
-	PAIR_STYLE_INIT(&tag[0], h);
+	PAIR_CLASS_INIT(&tag[0], "foot-date");
 	print_otag(h, TAG_TD, 1, tag);
+
 	print_text(h, b);
 	print_stagq(h, tt);
 
-	bufinit(h);
-	bufcat_style(h, "width", "50%");
-	bufcat_style(h, "text-align", "right");
-	PAIR_STYLE_INIT(&tag[0], h);
+	PAIR_CLASS_INIT(&tag[0], "foot-os");
 	print_otag(h, TAG_TD, 1, tag);
+
 	if (m->source)
 		print_text(h, m->source);
 	print_tagq(h, t);
