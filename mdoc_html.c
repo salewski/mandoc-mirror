@@ -1059,10 +1059,11 @@ mdoc_d1_pre(MDOC_ARGS)
 	/* BLOCKQUOTE needs a block body. */
 
 	if (MDOC_Dl == n->tok) {
-		PAIR_CLASS_INIT(&tag[1], "lit");
+		PAIR_CLASS_INIT(&tag[0], "lit display");
 		print_otag(h, TAG_DIV, 1, tag);
 	} else
-		print_otag(h, TAG_DIV, 0, tag);
+		PAIR_CLASS_INIT(&tag[0], "display");
+		print_otag(h, TAG_DIV, 1, tag);
 
 	return(1);
 }
@@ -1103,19 +1104,8 @@ mdoc_bd_pre(MDOC_ARGS)
 	if (MDOC_HEAD == n->type)
 		return(0);
 
-	SCALE_VS_INIT(&su, 0);
-
-	assert(n->data.Bd);
-	if (n->data.Bd->offs)
-		a2offs(n->data.Bd->offs, &su);
-
-	comp = n->data.Bd->comp;
-
-	/* FIXME: -centered, etc. formatting. */
-	/* FIXME: does not respect -offset ??? */
-
 	if (MDOC_BLOCK == n->type) {
-		bufcat_su(h, "margin-left", &su);
+		comp = n->data.Bd->comp;
 		for (nn = n; nn && ! comp; nn = nn->parent) {
 			if (MDOC_BLOCK != nn->type)
 				continue;
@@ -1124,26 +1114,27 @@ mdoc_bd_pre(MDOC_ARGS)
 			if (nn->prev)
 				break;
 		}
-		if (comp) {
-			PAIR_STYLE_INIT(&tag[0], h);
-			print_otag(h, TAG_DIV, 1, tag);
-			return(1);
-		}
-		SCALE_VS_INIT(&su, 1);
-		bufcat_su(h, "margin-top", &su);
-		PAIR_STYLE_INIT(&tag[0], h);
-		print_otag(h, TAG_DIV, 1, tag);
+		if ( ! comp)
+			print_otag(h, TAG_P, 0, NULL);
 		return(1);
 	}
 
-	if (DISP_unfilled != n->data.Bd->type && 
-			DISP_literal != n->data.Bd->type)
-		return(1);
+	SCALE_HS_INIT(&su, 0);
+	if (n->data.Bd->offs)
+		a2offs(n->data.Bd->offs, &su);
 
-	PAIR_CLASS_INIT(&tag[0], "lit");
-	bufcat_style(h, "white-space", "pre");
-	PAIR_STYLE_INIT(&tag[1], h);
-	print_otag(h, TAG_DIV, 2, tag);
+	bufcat_su(h, "margin-left", &su);
+	PAIR_STYLE_INIT(&tag[0], h);
+
+	if (DISP_unfilled != n->data.Bd->type && 
+			DISP_literal != n->data.Bd->type) {
+		PAIR_CLASS_INIT(&tag[1], "display");
+		print_otag(h, TAG_DIV, 2, tag);
+		return(1);
+	}
+
+	PAIR_CLASS_INIT(&tag[1], "lit display");
+	print_otag(h, TAG_PRE, 2, tag);
 
 	for (nn = n->child; nn; nn = nn->next) {
 		print_mdoc_node(m, nn, h);
@@ -1175,8 +1166,9 @@ mdoc_bd_pre(MDOC_ARGS)
 		}
 		if (nn->next && nn->next->line == nn->line)
 			continue;
+		else if (nn->next)
+			print_text(h, "\n");
 
-		print_text(h, "\n");
 		h->flags |= HTML_NOSPACE;
 	}
 

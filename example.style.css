@@ -38,6 +38,10 @@ table		{ margin-top: 0px; margin-bottom: 0px; }
 .roman		{ font-style: normal; font-weight: normal; } /* Roman: (implicit). */
 .small		{ font-style: normal; font-weight: normal; font-size: smaller; } /* Small: SB, SM. */
 
+/* Block modes. */
+
+.display	{ }
+
 /* Context-specific modes. */
 
 span.addr	{ font-style: italic; font-weight: normal; } /* Address (Ad). */
