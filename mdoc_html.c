@@ -1064,13 +1064,12 @@ mdoc_d1_pre(MDOC_ARGS)
 
 	/* BLOCKQUOTE needs a block body. */
 
-	if (MDOC_Dl == n->tok) {
+	if (MDOC_Dl == n->tok)
 		PAIR_CLASS_INIT(&tag[0], "lit display");
-		print_otag(h, TAG_DIV, 1, tag);
-	} else
+	else
 		PAIR_CLASS_INIT(&tag[0], "display");
-		print_otag(h, TAG_DIV, 1, tag);
 
+	print_otag(h, TAG_DIV, 1, tag);
 	return(1);
 }
 
