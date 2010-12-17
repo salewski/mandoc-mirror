@@ -1,18 +1,14 @@
 /* $Id$ */
 
 html		{ min-width: 580px; width: 580px; }
-
 body		{ font-family: monospace; }
 
 /* Sections. */
 
-div.sec-head	{ font-style: normal; font-weight: bold; } /* Sections (Sh). */
-div.sec-body	{ }
-div.sec-block	{ }
-
-div.ssec-head	{ font-style: normal; font-weight: bold; } /* Sub-sections (Ss). */
-div.ssec-body	{ }
-div.ssec-block	{ }
+h1		{ font-size: medium; margin-left: -4ex; } /* Section header (Sh, SH). */
+h2		{ font-size: medium; margin-left: -2ex; } /* Sub-section header (Ss, SS). */
+div.section	{ margin-bottom: 3ex; margin-left: 4ex; } /* Sections (Sh, SH). */
+div.subsection	{ } /* Sub-sections (Ss, SS). */
 
 /* Vertical spacing. */
 

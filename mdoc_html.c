@@ -557,46 +557,25 @@ mdoc_root_pre(MDOC_ARGS)
 static int
 mdoc_sh_pre(MDOC_ARGS)
 {
-	struct htmlpair		 tag[2];
-	const struct mdoc_node	*nn;
-	char			 buf[BUFSIZ];
-	struct roffsu		 su;
+	struct htmlpair	 tag;
+	char		 buf[BUFSIZ];
 
-	if (MDOC_BODY == n->type) {
-		SCALE_HS_INIT(&su, INDENT);
-		bufcat_su(h, "margin-left", &su);
-		PAIR_CLASS_INIT(&tag[0], "sec-body");
-		PAIR_STYLE_INIT(&tag[1], h);
-		print_otag(h, TAG_DIV, 2, tag);
+	if (MDOC_BLOCK == n->type) {
+		PAIR_CLASS_INIT(&tag, "section");
+		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
-	} else if (MDOC_BLOCK == n->type) {
-		PAIR_CLASS_INIT(&tag[0], "sec-block");
-		if (n->prev && NULL == n->prev->body->child) {
-			print_otag(h, TAG_DIV, 1, tag);
-			return(1);
-		}
-		
-		SCALE_VS_INIT(&su, 1);
-		bufcat_su(h, "margin-top", &su);
-		if (NULL == n->next)
-			bufcat_su(h, "margin-bottom", &su);
-
-		PAIR_STYLE_INIT(&tag[1], h);
-		print_otag(h, TAG_DIV, 2, tag);
+	} else if (MDOC_BODY == n->type)
 		return(1);
-	}
 
 	buf[0] = '\0';
-	for (nn = n->child; nn; nn = nn->next) {
-		html_idcat(buf, nn->string, BUFSIZ);
-		if (nn->next)
+	for (n = n->child; n; n = n->next) {
+		html_idcat(buf, n->string, BUFSIZ);
+		if (n->next)
 			html_idcat(buf, " ", BUFSIZ);
 	}
 
-	PAIR_CLASS_INIT(&tag[0], "sec-head");
-	PAIR_ID_INIT(&tag[1], buf);
-
-	print_otag(h, TAG_DIV, 2, tag);
+	PAIR_ID_INIT(&tag, buf);
+	print_otag(h, TAG_H1, 1, &tag);
 	return(1);
 }
 
@@ -605,51 +584,25 @@ mdoc_sh_pre(MDOC_ARGS)
 static int
 mdoc_ss_pre(MDOC_ARGS)
 {
-	struct htmlpair	 	 tag[3];
-	const struct mdoc_node	*nn;
-	char			 buf[BUFSIZ];
-	struct roffsu		 su;
+	struct htmlpair	 tag;
+	char		 buf[BUFSIZ];
 
-	SCALE_VS_INIT(&su, 1);
-
-	if (MDOC_BODY == n->type) {
-		PAIR_CLASS_INIT(&tag[0], "ssec-body");
-		if (n->parent->next && n->child) {
-			bufcat_su(h, "margin-bottom", &su);
-			PAIR_STYLE_INIT(&tag[1], h);
-			print_otag(h, TAG_DIV, 2, tag);
-		} else
-			print_otag(h, TAG_DIV, 1, tag);
+	if (MDOC_BLOCK == n->type) {
+		PAIR_CLASS_INIT(&tag, "subsection");
+		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
-	} else if (MDOC_BLOCK == n->type) {
-		PAIR_CLASS_INIT(&tag[0], "ssec-block");
-		if (n->prev) {
-			bufcat_su(h, "margin-top", &su);
-			PAIR_STYLE_INIT(&tag[1], h);
-			print_otag(h, TAG_DIV, 2, tag);
-		} else
-			print_otag(h, TAG_DIV, 1, tag);
+	} else if (MDOC_BODY == n->type)
 		return(1);
-	}
-
-	/* TODO: see note in mdoc_sh_pre() about duplicates. */
 
 	buf[0] = '\0';
-	for (nn = n->child; nn; nn = nn->next) {
-		html_idcat(buf, nn->string, BUFSIZ);
-		if (nn->next)
+	for (n = n->child; n; n = n->next) {
+		html_idcat(buf, n->string, BUFSIZ);
+		if (n->next)
 			html_idcat(buf, " ", BUFSIZ);
 	}
 
-	SCALE_HS_INIT(&su, INDENT - HALFINDENT);
-	su.scale = -su.scale;
-	bufcat_su(h, "margin-left", &su);
-
-	PAIR_CLASS_INIT(&tag[0], "ssec-head");
-	PAIR_STYLE_INIT(&tag[1], h);
-	PAIR_ID_INIT(&tag[2], buf);
-
-	print_otag(h, TAG_DIV, 3, tag);
+	PAIR_ID_INIT(&tag, buf);
+	print_otag(h, TAG_H2, 1, &tag);
 	return(1);
 }
 

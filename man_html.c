@@ -375,35 +375,16 @@ man_br_pre(MAN_ARGS)
 static int
 man_SH_pre(MAN_ARGS)
 {
-	struct htmlpair	 tag[2];
-	struct roffsu	 su;
+	struct htmlpair	 tag;
 
-	if (MAN_BODY == n->type) {
-		SCALE_HS_INIT(&su, INDENT);
-		bufcat_su(h, "margin-left", &su);
-		PAIR_CLASS_INIT(&tag[0], "sec-body");
-		PAIR_STYLE_INIT(&tag[1], h);
-		print_otag(h, TAG_DIV, 2, tag);
+	if (MAN_BLOCK == n->type) {
+		PAIR_CLASS_INIT(&tag, "section");
+		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
-	} else if (MAN_BLOCK == n->type) {
-		PAIR_CLASS_INIT(&tag[0], "sec-block");
-		if (n->prev && MAN_SH == n->prev->tok)
-			if (NULL == n->prev->body->child) {
-				print_otag(h, TAG_DIV, 1, tag);
-				return(1);
-			}
-
-		SCALE_VS_INIT(&su, 1);
-		bufcat_su(h, "margin-top", &su);
-		if (NULL == n->next)
-			bufcat_su(h, "margin-bottom", &su);
-		PAIR_STYLE_INIT(&tag[1], h);
-		print_otag(h, TAG_DIV, 2, tag);
+	} else if (MAN_BODY == n->type)
 		return(1);
-	}
 
-	PAIR_CLASS_INIT(&tag[0], "sec-head");
-	print_otag(h, TAG_DIV, 1, tag);
+	print_otag(h, TAG_H1, 0, NULL);
 	return(1);
 }
 
@@ -488,41 +469,16 @@ man_SM_pre(MAN_ARGS)
 static int
 man_SS_pre(MAN_ARGS)
 {
-	struct htmlpair	 tag[3];
-	struct roffsu	 su;
+	struct htmlpair	 tag;
 
-	SCALE_VS_INIT(&su, 1);
-
-	if (MAN_BODY == n->type) {
-		PAIR_CLASS_INIT(&tag[0], "ssec-body");
-		if (n->parent->next && n->child) {
-			bufcat_su(h, "margin-bottom", &su);
-			PAIR_STYLE_INIT(&tag[1], h);
-			print_otag(h, TAG_DIV, 2, tag);
-			return(1);
-		}
-
-		print_otag(h, TAG_DIV, 1, tag);
+	if (MAN_BLOCK == n->type) {
+		PAIR_CLASS_INIT(&tag, "subsection");
+		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
-	} else if (MAN_BLOCK == n->type) {
-		PAIR_CLASS_INIT(&tag[0], "ssec-block");
-		if (n->prev && MAN_SS == n->prev->tok) 
-			if (n->prev->body->child) {
-				bufcat_su(h, "margin-top", &su);
-				PAIR_STYLE_INIT(&tag[1], h);
-				print_otag(h, TAG_DIV, 2, tag);
-				return(1);
-			}
-
-		print_otag(h, TAG_DIV, 1, tag);
+	} else if (MAN_BODY == n->type)
 		return(1);
-	}
 
-	SCALE_HS_INIT(&su, INDENT - HALFINDENT);
-	bufcat_su(h, "margin-left", &su);
-	PAIR_CLASS_INIT(&tag[0], "ssec-head");
-	PAIR_STYLE_INIT(&tag[1], h);
-	print_otag(h, TAG_DIV, 2, tag);
+	print_otag(h, TAG_H2, 0, NULL);
 	return(1);
 }
 
