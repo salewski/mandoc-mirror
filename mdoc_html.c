@@ -1000,6 +1000,9 @@ mdoc_ex_pre(MDOC_ARGS)
 	struct tag		*t;
 	struct htmlpair		 tag;
 
+	if (n->prev)
+		print_otag(h, TAG_BR, 0, NULL);
+
 	PAIR_CLASS_INIT(&tag, "utility");
 
 	print_text(h, "The");
@@ -1637,7 +1640,9 @@ mdoc_rv_pre(MDOC_ARGS)
 	struct htmlpair		 tag;
 	struct tag		*t;
 
-	print_otag(h, TAG_DIV, 0, NULL);
+	if (n->prev)
+		print_otag(h, TAG_BR, 0, NULL);
+
 	print_text(h, "The");
 
 	for (nn = n->child; nn; nn = nn->next) {
@@ -1833,8 +1838,9 @@ mdoc_lb_pre(MDOC_ARGS)
 {
 	struct htmlpair	tag;
 
-	if (SEC_LIBRARY == n->sec && MDOC_LINE & n->flags)
-		print_otag(h, TAG_DIV, 0, NULL);
+	if (SEC_LIBRARY == n->sec && MDOC_LINE & n->flags && n->prev)
+		print_otag(h, TAG_BR, 0, NULL);
+
 	PAIR_CLASS_INIT(&tag, "lib");
 	print_otag(h, TAG_SPAN, 1, &tag);
 	return(1);
