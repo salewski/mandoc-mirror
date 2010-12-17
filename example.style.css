@@ -15,9 +15,9 @@ td.head-rtitle	{ width: 10%; text-align: right; } /* Document header: right-titl
 
 /* Sections. */
 
-h1		{ font-size: medium; margin-left: -4ex; } /* Section header (Sh, SH). */
-h2		{ font-size: medium; margin-left: -2ex; } /* Sub-section header (Ss, SS). */
-div.section	{ margin-bottom: 3ex; margin-left: 4ex; } /* Sections (Sh, SH). */
+h1		{ margin-bottom: 0px; font-size: medium; margin-left: -4ex; } /* Section header (Sh, SH). */
+h2		{ margin-bottom: 0px; font-size: medium; margin-left: -2ex; } /* Sub-section header (Ss, SS). */
+div.section	{ margin-bottom: 2ex; margin-left: 4ex; } /* Sections (Sh, SH). */
 div.subsection	{ } /* Sub-sections (Ss, SS). */
 table.synopsis	{ } /* SYNOPSIS section table. */
 table.synopsis td { vertical-align: top; } /* SYNOPSIS section table. */
