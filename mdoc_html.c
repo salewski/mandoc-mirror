@@ -644,7 +644,7 @@ mdoc_nd_pre(MDOC_ARGS)
 	/* XXX: this tag in theory can contain block elements. */
 
 	print_text(h, "\\(em");
-	PAIR_CLASS_INIT(&tag, "desc-body");
+	PAIR_CLASS_INIT(&tag, "desc");
 	print_otag(h, TAG_SPAN, 1, &tag);
 	return(1);
 }
@@ -655,68 +655,46 @@ mdoc_nm_pre(MDOC_ARGS)
 {
 	struct htmlpair	 tag;
 	struct roffsu	 su;
-	const char	*cp;
+	size_t		 len;
 
-	/*
-	 * Accomodate for `Nm' being both an element (which may have
-	 * NULL children AND no m->name) and a block.
-	 */
-
-	cp = NULL;
-
-	if (MDOC_ELEM == n->type) {
-		if (NULL == n->child && NULL == m->name)
-			return(1);
+	switch (n->type) {
+	case (MDOC_ELEM):
 		synopsis_pre(h, n);
 		PAIR_CLASS_INIT(&tag, "name");
 		print_otag(h, TAG_SPAN, 1, &tag);
-		if (NULL == n->child)
+		if (NULL == n->child && m->name)
 			print_text(h, m->name);
-	} else if (MDOC_BLOCK == n->type) {
-		synopsis_pre(h, n);
-
-		bufcat_style(h, "clear", "both");
-		if (n->head->child || m->name) {
-			if (n->head->child && MDOC_TEXT == 
-					n->head->child->type)
-				cp = n->head->child->string;
-			if (NULL == cp || '\0' == *cp)
-				cp = m->name;
-
-			SCALE_HS_INIT(&su, (double)strlen(cp));
-			bufcat_su(h, "padding-left", &su);
-		}
-
-		PAIR_STYLE_INIT(&tag, h);
-		print_otag(h, TAG_DIV, 1, &tag);
-	} else if (MDOC_HEAD == n->type) { 
-		if (NULL == n->child && NULL == m->name)
-			return(1);
-
-		if (n->child && MDOC_TEXT == n->child->type)
-			cp = n->child->string;
-		if (NULL == cp || '\0' == *cp)
-			cp = m->name;
-
-		SCALE_HS_INIT(&su, (double)strlen(cp));
-
-		bufcat_style(h, "float", "left");
-		bufcat_su(h, "min-width", &su);
-		SCALE_INVERT(&su);
-		bufcat_su(h, "margin-left", &su);
-
-		PAIR_STYLE_INIT(&tag, h);
-		print_otag(h, TAG_DIV, 1, &tag);
-
-		if (NULL == n->child)
+		return(1);
+	case (MDOC_HEAD):
+		print_otag(h, TAG_TD, 0, NULL);
+		if (NULL == n->child && m->name)
 			print_text(h, m->name);
-	} else if (MDOC_BODY == n->type) {
-		SCALE_HS_INIT(&su, 2);
-		bufcat_su(h, "margin-left", &su);
-		PAIR_STYLE_INIT(&tag, h);
-		print_otag(h, TAG_DIV, 1, &tag);
+		return(1);
+	case (MDOC_BODY):
+		print_otag(h, TAG_TD, 0, NULL);
+		return(1);
+	default:
+		break;
 	}
 
+	synopsis_pre(h, n);
+	PAIR_CLASS_INIT(&tag, "synopsis");
+	print_otag(h, TAG_TABLE, 1, &tag);
+
+	for (len = 0, n = n->child; n; n = n->next)
+		if (MDOC_TEXT == n->type)
+			len += strlen(n->string);
+
+	if (0 == len && m->name)
+		len = strlen(m->name);
+
+	SCALE_HS_INIT(&su, (double)len);
+	bufcat_su(h, "width", &su);
+	PAIR_STYLE_INIT(&tag, h);
+	print_otag(h, TAG_COL, 1, &tag);
+	print_otag(h, TAG_COL, 0, NULL);
+	print_otag(h, TAG_TBODY, 0, NULL);
+	print_otag(h, TAG_TR, 0, NULL);
 	return(1);
 }
 

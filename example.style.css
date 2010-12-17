@@ -3,12 +3,19 @@
 html		{ min-width: 580px; width: 580px; }
 body		{ font-family: monospace; }
 
+/* Preamble structure. */
+
+table.footer	{ } /* Document footer. */
+table.header	{ } /* Document header. */
+
 /* Sections. */
 
 h1		{ font-size: medium; margin-left: -4ex; } /* Section header (Sh, SH). */
 h2		{ font-size: medium; margin-left: -2ex; } /* Sub-section header (Ss, SS). */
 div.section	{ margin-bottom: 3ex; margin-left: 4ex; } /* Sections (Sh, SH). */
 div.subsection	{ } /* Sub-sections (Ss, SS). */
+table.synopsis	{ } /* SYNOPSIS section table. */
+table.synopsis td { vertical-align: top; } /* SYNOPSIS section table. */
 
 /* Vertical spacing. */
 
@@ -71,9 +78,6 @@ a.link-mail	{ } /* Mailto links (Mt). */
 a.link-man	{ } /* Manual links (Xr). */
 a.link-ref	{ } /* Reference section links (%Q). */
 a.link-sec	{ } /* Section links (Sx). */
-
-table.footer	{ } /* Document footer. */
-table.header	{ } /* Document header. */
 
 /* Formatting for lists. */
 
