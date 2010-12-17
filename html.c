@@ -449,6 +449,10 @@ print_otag(struct html *h, enum htmltag tag,
 	putchar('>');
 
 	h->flags |= HTML_NOSPACE;
+
+	if ((HTML_AUTOCLOSE | HTML_CLRLINE) & htmltags[tag].flags)
+		putchar('\n');
+
 	return(t);
 }
 
