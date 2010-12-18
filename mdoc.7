@@ -2665,9 +2665,13 @@ and
 Close a scope opened by
 .Sx \&Xo .
 .Ss \&Xo
-Open an extension scope.
-This macro originally existed to extend the 9-argument limit of troff;
-since this limit has been lifted, the macro has been deprecated.
+Extend the header of an
+.Sx \&It
+macro or the body of a partial-implicit block macro
+beyond the end of the input line.
+This macro originally existed to work around the 9-argument limit
+of historic
+.Xr roff 7 .
 .Ss \&Xr
 Link to another manual
 .Pq Qq cross-reference .
