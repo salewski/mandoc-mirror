@@ -1948,7 +1948,8 @@ mdoc_bk_pre(MDOC_ARGS)
 	case (MDOC_HEAD):
 		return(0);
 	case (MDOC_BODY):
-		h->flags |= HTML_PREKEEP;
+		if (n->parent->args || 0 == n->prev->nchild)
+			h->flags |= HTML_PREKEEP;
 		break;
 	default:
 		abort();
