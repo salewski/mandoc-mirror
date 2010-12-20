@@ -57,7 +57,7 @@ b.cmd		{ font-style: normal; } /* Command (Cm). */
 b.config	{ font-style: normal; } /* Config statement (Cd). */
 span.define	{ } /* Defines (Dv). */
 span.desc	{ } /* Nd.  After em-dash. */
-span.diag	{ font-style: normal; font-weight: bold; } /* Diagnostic (Bl -diag). */
+b.diag		{ font-style: normal; } /* Diagnostic (Bl -diag). */
 span.env	{ } /* Environment variables (Ev). */
 span.errno	{ } /* Error string (Er). */
 i.farg		{ font-weight: normal; } /* Function argument (Fa, Fn). */
@@ -67,6 +67,7 @@ b.fname		{ font-style: normal; } /* Function name (Fa, Fn, Rv). */
 i.ftype		{ font-weight: normal; } /* Function types (Ft, Fn). */
 b.includes	{ font-style: normal; } /* Header includes (In). */
 span.lib	{ } /* Library (Lb). */
+i.link-sec	{ font-weight: normal; } /* Section links (Sx). */
 b.macro		{ font-style: normal; } /* Macro-ish thing (Fd). */
 b.name		{ font-style: normal; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
@@ -94,7 +95,7 @@ a.link-includes	{ } /* Include-file link (In). */
 a.link-mail	{ } /* Mailto links (Mt). */
 a.link-man	{ } /* Manual links (Xr). */
 a.link-ref	{ } /* Reference section links (%Q). */
-a.link-sec	{ font-style: italic; font-weight: normal; } /* Section links (Sx). */
+a.link-sec	{ } /* Section links (Sx). */
 
 /* Formatting for lists. */
 

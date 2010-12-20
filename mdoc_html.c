@@ -857,7 +857,6 @@ mdoc_it_pre(MDOC_ARGS)
 		case(LIST_enum):
 			return(0);
 		case(LIST_diag):
-			/* FIXME: STYLE for diag! */
 			/* FALLTHROUGH */
 		case(LIST_hang):
 			/* FALLTHROUGH */
@@ -870,6 +869,10 @@ mdoc_it_pre(MDOC_ARGS)
 			bufcat_su(h, "margin-top", &su);
 			PAIR_STYLE_INIT(&tag[1], h);
 			print_otag(h, TAG_DT, 2, tag);
+			if (LIST_diag != type)
+				break;
+			PAIR_CLASS_INIT(&tag[0], "diag");
+			print_otag(h, TAG_B, 1, tag);
 			break;
 		case(LIST_column):
 			break;
@@ -939,6 +942,7 @@ mdoc_bl_pre(MDOC_ARGS)
 	size_t		 i;
 	struct htmlpair	 tag[3];
 	struct roffsu	 su;
+	char		 buf[BUFSIZ];
 
 	if (MDOC_BODY == n->type) {
 		if (LIST_column == n->data.Bl->type)
@@ -977,19 +981,15 @@ mdoc_bl_pre(MDOC_ARGS)
 	PAIR_STYLE_INIT(&tag[0], h);
 
 	assert(lists[n->data.Bl->type]);
-	bufinit(h);
-	bufcat(h, "list ");
-	bufcat(h, lists[n->data.Bl->type]);
-	PAIR_INIT(&tag[1], ATTR_CLASS, h->buf);
-	i = 2;
+	strlcpy(buf, "list ", BUFSIZ);
+	strlcat(buf, lists[n->data.Bl->type], BUFSIZ);
+	PAIR_INIT(&tag[1], ATTR_CLASS, buf);
 
 	/* Set the block's left-hand margin. */
 
 	if (n->data.Bl->offs) {
 		a2offs(n->data.Bl->offs, &su);
 		bufcat_su(h, "margin-left", &su);
-		PAIR_STYLE_INIT(&tag[2], h);
-		i = 3;
 	}
 
 	switch (n->data.Bl->type) {
@@ -1000,10 +1000,10 @@ mdoc_bl_pre(MDOC_ARGS)
 	case(LIST_hyphen):
 		/* FALLTHROUGH */
 	case(LIST_item):
-		print_otag(h, TAG_UL, i, tag);
+		print_otag(h, TAG_UL, 2, tag);
 		break;
 	case(LIST_enum):
-		print_otag(h, TAG_OL, i, tag);
+		print_otag(h, TAG_OL, 2, tag);
 		break;
 	case(LIST_diag):
 		/* FALLTHROUGH */
@@ -1014,10 +1014,10 @@ mdoc_bl_pre(MDOC_ARGS)
 	case(LIST_ohang):
 		/* FALLTHROUGH */
 	case(LIST_tag):
-		print_otag(h, TAG_DL, i, tag);
+		print_otag(h, TAG_DL, 2, tag);
 		break;
 	case(LIST_column):
-		print_otag(h, TAG_TABLE, i, tag);
+		print_otag(h, TAG_TABLE, 2, tag);
 		break;
 	default:
 		abort();
@@ -1124,6 +1124,7 @@ mdoc_sx_pre(MDOC_ARGS)
 	PAIR_CLASS_INIT(&tag[0], "link-sec");
 	PAIR_HREF_INIT(&tag[1], buf);
 
+	print_otag(h, TAG_I, 1, tag);
 	print_otag(h, TAG_A, 2, tag);
 	return(1);
 }
