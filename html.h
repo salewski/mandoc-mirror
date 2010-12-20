@@ -46,6 +46,7 @@ enum	htmltag {
 	TAG_BLOCKQUOTE,
 	TAG_P,
 	TAG_PRE,
+	TAG_B,
 	TAG_MAX
 };
 
@@ -60,10 +61,9 @@ enum	htmlattr {
 	ATTR_CLASS,
 	ATTR_STYLE,
 	ATTR_WIDTH,
-	ATTR_VALIGN,
-	ATTR_TARGET,
 	ATTR_ID,
 	ATTR_SUMMARY,
+	ATTR_ALIGN,
 	ATTR_MAX
 };
 

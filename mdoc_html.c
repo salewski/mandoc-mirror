@@ -461,15 +461,24 @@ print_mdoc_node(MDOC_ARGS)
 static void
 mdoc_root_post(MDOC_ARGS)
 {
-	struct htmlpair	 tag[2];
+	struct htmlpair	 tag[3];
 	struct tag	*t, *tt;
 	char		 b[DATESIZ];
 
 	time2a(m->date, b, DATESIZ);
 
-	PAIR_CLASS_INIT(&tag[0], "foot");
-	PAIR_SUMMARY_INIT(&tag[1], "Document Footer");
-	t = print_otag(h, TAG_TABLE, 2, tag);
+	PAIR_SUMMARY_INIT(&tag[0], "Document Footer");
+	PAIR_CLASS_INIT(&tag[1], "foot");
+	if (NULL == h->style) {
+		PAIR_INIT(&tag[1], ATTR_WIDTH, "100%");
+		t = print_otag(h, TAG_TABLE, 3, tag);
+		PAIR_INIT(&tag[0], ATTR_WIDTH, "50%");
+		print_otag(h, TAG_COL, 1, tag);
+		print_otag(h, TAG_COL, 1, tag);
+	} else
+		t = print_otag(h, TAG_TABLE, 2, tag);
+
+	t = print_otag(h, TAG_TBODY, 0, NULL);
 
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
@@ -480,7 +489,11 @@ mdoc_root_post(MDOC_ARGS)
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "foot-os");
-	print_otag(h, TAG_TD, 1, tag);
+	if (NULL == h->style) {
+		PAIR_INIT(&tag[1], ATTR_ALIGN, "right");
+		print_otag(h, TAG_TD, 2, tag);
+	} else 
+		print_otag(h, TAG_TD, 1, tag);
 
 	print_text(h, m->os);
 	print_tagq(h, t);
@@ -505,9 +518,19 @@ mdoc_root_pre(MDOC_ARGS)
 
 	snprintf(title, BUFSIZ - 1, "%s(%s)", m->title, m->msec);
 
-	PAIR_CLASS_INIT(&tag[0], "head");
-	PAIR_SUMMARY_INIT(&tag[1], "Document Header");
-	t = print_otag(h, TAG_TABLE, 2, tag);
+	PAIR_SUMMARY_INIT(&tag[0], "Document Header");
+	PAIR_CLASS_INIT(&tag[1], "head");
+	if (NULL == h->style) {
+		PAIR_INIT(&tag[2], ATTR_WIDTH, "100%");
+		t = print_otag(h, TAG_TABLE, 3, tag);
+		PAIR_INIT(&tag[0], ATTR_WIDTH, "30%");
+		print_otag(h, TAG_COL, 1, tag);
+		print_otag(h, TAG_COL, 1, tag);
+		print_otag(h, TAG_COL, 1, tag);
+	} else
+		t = print_otag(h, TAG_TABLE, 2, tag);
+
+	print_otag(h, TAG_TBODY, 0, NULL);
 
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
@@ -518,13 +541,21 @@ mdoc_root_pre(MDOC_ARGS)
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "head-vol");
-	print_otag(h, TAG_TD, 1, tag);
+	if (NULL == h->style) {
+		PAIR_INIT(&tag[1], ATTR_ALIGN, "center");
+		print_otag(h, TAG_TD, 2, tag);
+	} else 
+		print_otag(h, TAG_TD, 1, tag);
 
 	print_text(h, b);
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "head-rtitle");
-	print_otag(h, TAG_TD, 1, tag);
+	if (NULL == h->style) {
+		PAIR_INIT(&tag[1], ATTR_ALIGN, "right");
+		print_otag(h, TAG_TD, 2, tag);
+	} else 
+		print_otag(h, TAG_TD, 1, tag);
 
 	print_text(h, title);
 	print_tagq(h, t);
@@ -593,7 +624,7 @@ mdoc_fl_pre(MDOC_ARGS)
 	struct htmlpair	 tag;
 
 	PAIR_CLASS_INIT(&tag, "flag");
-	print_otag(h, TAG_SPAN, 1, &tag);
+	print_otag(h, TAG_B, 1, &tag);
 
 	/* `Cm' has no leading hyphen. */
 
@@ -640,7 +671,7 @@ mdoc_nm_pre(MDOC_ARGS)
 	case (MDOC_ELEM):
 		synopsis_pre(h, n);
 		PAIR_CLASS_INIT(&tag, "name");
-		print_otag(h, TAG_SPAN, 1, &tag);
+		print_otag(h, TAG_B, 1, &tag);
 		if (NULL == n->child && m->name)
 			print_text(h, m->name);
 		return(1);
@@ -826,6 +857,7 @@ mdoc_it_pre(MDOC_ARGS)
 		case(LIST_enum):
 			return(0);
 		case(LIST_diag):
+			/* FIXME: STYLE for diag! */
 			/* FALLTHROUGH */
 		case(LIST_hang):
 			/* FALLTHROUGH */
@@ -1010,7 +1042,7 @@ mdoc_ex_pre(MDOC_ARGS)
 
 	print_text(h, "The");
 	for (nn = n->child; nn; nn = nn->next) {
-		t = print_otag(h, TAG_SPAN, 1, &tag);
+		t = print_otag(h, TAG_B, 1, &tag);
 		print_text(h, nn->string);
 		print_tagq(h, t);
 
@@ -1227,7 +1259,7 @@ mdoc_cd_pre(MDOC_ARGS)
 
 	synopsis_pre(h, n);
 	PAIR_CLASS_INIT(&tag, "config");
-	print_otag(h, TAG_SPAN, 1, &tag);
+	print_otag(h, TAG_B, 1, &tag);
 	return(1);
 }
 
@@ -1306,7 +1338,7 @@ mdoc_fd_pre(MDOC_ARGS)
 	synopsis_pre(h, n);
 
 	PAIR_CLASS_INIT(&tag, "macro");
-	print_otag(h, TAG_SPAN, 1, &tag);
+	print_otag(h, TAG_B, 1, &tag);
 	return(1);
 }
 
@@ -1395,7 +1427,7 @@ mdoc_fn_pre(MDOC_ARGS)
 	}
 #endif
 
-	t = print_otag(h, TAG_SPAN, 1, tag);
+	t = print_otag(h, TAG_B, 1, tag);
 
 	if (sp) {
 		strlcpy(nbuf, sp, BUFSIZ);
@@ -1593,7 +1625,7 @@ mdoc_in_pre(MDOC_ARGS)
 	synopsis_pre(h, n);
 
 	PAIR_CLASS_INIT(&tag[0], "includes");
-	print_otag(h, TAG_SPAN, 1, tag);
+	print_otag(h, TAG_B, 1, tag);
 
 	if (MDOC_SYNPRETTY & n->flags && MDOC_LINE & n->flags)
 		print_text(h, "#include");
@@ -1629,7 +1661,7 @@ mdoc_ic_pre(MDOC_ARGS)
 	struct htmlpair	tag;
 
 	PAIR_CLASS_INIT(&tag, "cmd");
-	print_otag(h, TAG_SPAN, 1, &tag);
+	print_otag(h, TAG_B, 1, &tag);
 	return(1);
 }
 
@@ -1671,7 +1703,7 @@ mdoc_rv_pre(MDOC_ARGS)
 			"-1 is returned and the global variable");
 
 	PAIR_CLASS_INIT(&tag, "var");
-	t = print_otag(h, TAG_SPAN, 1, &tag);
+	t = print_otag(h, TAG_B, 1, &tag);
 	print_text(h, "errno");
 	print_tagq(h, t);
        	print_text(h, "is set to indicate the error.");
@@ -1686,7 +1718,7 @@ mdoc_va_pre(MDOC_ARGS)
 	struct htmlpair	tag;
 
 	PAIR_CLASS_INIT(&tag, "var");
-	print_otag(h, TAG_SPAN, 1, &tag);
+	print_otag(h, TAG_B, 1, &tag);
 	return(1);
 }
 

@@ -48,8 +48,8 @@ table		{ margin-top: 0px; margin-bottom: 0px; }
 span.addr	{ font-style: italic; font-weight: normal; } /* Address (Ad). */
 span.arg	{ font-style: italic; font-weight: normal; } /* Command argument (Ar). */
 span.author	{ } /* Author name (An). */
-span.cmd	{ font-style: normal; font-weight: bold; } /* Command (Cm). */ 
-span.config	{ font-style: normal; font-weight: bold; } /* Config statement (Cd). */
+b.cmd		{ font-style: normal; } /* Command (Cm). */ 
+b.config	{ font-style: normal; } /* Config statement (Cd). */
 span.define	{ } /* Defines (Dv). */
 span.desc	{ } /* Nd.  After em-dash. */
 span.diag	{ font-style: normal; font-weight: bold; } /* Diagnostic (Bl -diag). */
@@ -57,13 +57,13 @@ span.env	{ } /* Environment variables (Ev). */
 span.errno	{ } /* Error string (Er). */
 span.farg	{ font-style: italic; font-weight: normal; } /* Function argument (Fa, Fn). */
 span.file	{ font-style: italic; font-weight: normal; } /* File (Pa). */
-span.flag	{ font-style: normal; font-weight: bold; } /* Flag (Fl, Cm). */
-span.fname	{ font-style: normal; font-weight: bold; } /* Function name (Fa, Fn, Rv). */
+b.flag		{ font-style: normal; } /* Flag (Fl, Cm). */
+b.fname		{ font-style: normal; } /* Function name (Fa, Fn, Rv). */
 span.ftype	{ font-style: italic; font-weight: normal; } /* Function types (Ft, Fn). */
-span.includes	{ font-style: normal; font-weight: bold; } /* Header includes (In). */
+b.includes	{ font-style: normal; } /* Header includes (In). */
 span.lib	{ } /* Library (Lb). */
-span.macro	{ font-style: normal; font-weight: bold; } /* Macro-ish thing (Fd). */
-span.name	{ font-style: normal; font-weight: bold; } /* Name of utility (Nm). */
+b.macro		{ font-style: normal; } /* Macro-ish thing (Fd). */
+b.name		{ font-style: normal; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
 span.ref	{ } /* Citations (Rs). */
 span.ref-auth	{ } /* Reference author (%A). */
@@ -81,8 +81,8 @@ span.ref-title	{ text-decoration: underline; } /* Reference title (%T). */
 span.ref-vol	{ } /* Reference volume (%V). */
 span.type	{ font-style: italic; font-weight: normal; } /* Variable types (Vt). */
 span.unix	{ } /* Unices (Ux, Ox, Nx, Fx, Bx, Bsx, Dx). */
-span.utility	{ font-style: normal; font-weight: bold; } /* Name of utility (Ex). */
-span.var	{ font-style: normal; font-weight: bold; } /* Variables (Rv). */
+b.utility	{ font-style: normal; } /* Name of utility (Ex). */
+b.var		{ font-style: normal; } /* Variables (Rv). */
 
 a.link-ext	{ } /* Off-site link (Lk). */
 a.link-includes	{ } /* Include-file link (In). */
