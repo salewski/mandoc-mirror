@@ -47,6 +47,8 @@ enum	htmltag {
 	TAG_P,
 	TAG_PRE,
 	TAG_B,
+	TAG_I,
+	TAG_U,
 	TAG_MAX
 };
 

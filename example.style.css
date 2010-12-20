@@ -1,5 +1,10 @@
 /* $Id$ */
 
+/*
+ * This default style-sheet mimics the appearance of the traditional
+ * cvsweb output.
+ */
+
 html		{ min-width: 580px; width: 580px; }
 body		{ font-family: monospace; }
 
@@ -30,7 +35,7 @@ table		{ margin-top: 0px; margin-bottom: 0px; }
 
 /* General font modes. */
 
-.lit		{ font-style: normal; font-weight: normal; } /* Literal: Dl, Li, Bf -literal, Bl -literal, Bl -unfilled. */
+.lit		{ font-style: normal; font-weight: normal; font-family: monospace; } /* Literal: Dl, Li, Bf -literal, Bl -literal, Bl -unfilled. */
 .italic		{ font-style: italic; font-weight: normal; } /* Italic: BI, IB, I, (implicit). */
 .emph		{ font-style: italic; font-weight: normal; } /* Emphasis: Em, Bl -emphasis. */
 .bold		{ font-style: normal; font-weight: bold; } /* Bold: SB, BI, IB, BR, RB, B, (implicit). */
@@ -45,8 +50,8 @@ table		{ margin-top: 0px; margin-bottom: 0px; }
 
 /* Context-specific modes. */
 
-span.addr	{ font-style: italic; font-weight: normal; } /* Address (Ad). */
-span.arg	{ font-style: italic; font-weight: normal; } /* Command argument (Ar). */
+i.addr		{ font-weight: normal; } /* Address (Ad). */
+i.arg		{ font-weight: normal; } /* Command argument (Ar). */
 span.author	{ } /* Author name (An). */
 b.cmd		{ font-style: normal; } /* Command (Cm). */ 
 b.config	{ font-style: normal; } /* Config statement (Cd). */
@@ -55,11 +60,11 @@ span.desc	{ } /* Nd.  After em-dash. */
 span.diag	{ font-style: normal; font-weight: bold; } /* Diagnostic (Bl -diag). */
 span.env	{ } /* Environment variables (Ev). */
 span.errno	{ } /* Error string (Er). */
-span.farg	{ font-style: italic; font-weight: normal; } /* Function argument (Fa, Fn). */
-span.file	{ font-style: italic; font-weight: normal; } /* File (Pa). */
+i.farg		{ font-weight: normal; } /* Function argument (Fa, Fn). */
+i.file		{ font-weight: normal; } /* File (Pa). */
 b.flag		{ font-style: normal; } /* Flag (Fl, Cm). */
 b.fname		{ font-style: normal; } /* Function name (Fa, Fn, Rv). */
-span.ftype	{ font-style: italic; font-weight: normal; } /* Function types (Ft, Fn). */
+i.ftype		{ font-weight: normal; } /* Function types (Ft, Fn). */
 b.includes	{ font-style: normal; } /* Header includes (In). */
 span.lib	{ } /* Library (Lb). */
 b.macro		{ font-style: normal; } /* Macro-ish thing (Fd). */
@@ -67,17 +72,17 @@ b.name		{ font-style: normal; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
 span.ref	{ } /* Citations (Rs). */
 span.ref-auth	{ } /* Reference author (%A). */
-span.ref-book	{ font-style: italic; font-weight: normal; } /* Reference book (%B). */
+i.ref-book	{ font-weight: normal; } /* Reference book (%B). */
 span.ref-city	{ } /* Reference city (%C). */
 span.ref-date	{ } /* Reference date (%D). */
-span.ref-issue	{ font-style: italic; font-weight: normal; } /* Reference issuer/publisher (%I). */
-span.ref-jrnl	{ font-style: italic; font-weight: normal; } /* Reference journal (%J). */
+i.ref-issue	{ font-weight: normal; } /* Reference issuer/publisher (%I). */
+i.ref-jrnl	{ font-weight: normal; } /* Reference journal (%J). */
 span.ref-num	{ } /* Reference number (%N). */
 span.ref-opt	{ } /* Reference optionals (%O). */
 span.ref-page	{ } /* Reference page (%P). */
 span.ref-corp	{ } /* Reference corporate/foreign author (%Q). */
 span.ref-rep	{ } /* Reference report (%R). */
-span.ref-title	{ text-decoration: underline; } /* Reference title (%T). */
+u.ref-title	{ } /* Reference title (%T). */
 span.ref-vol	{ } /* Reference volume (%V). */
 span.type	{ font-style: italic; font-weight: normal; } /* Variable types (Vt). */
 span.unix	{ } /* Unices (Ux, Ox, Nx, Fx, Bx, Bsx, Dx). */
@@ -89,7 +94,7 @@ a.link-includes	{ } /* Include-file link (In). */
 a.link-mail	{ } /* Mailto links (Mt). */
 a.link-man	{ } /* Manual links (Xr). */
 a.link-ref	{ } /* Reference section links (%Q). */
-a.link-sec	{ } /* Section links (Sx). */
+a.link-sec	{ font-style: italic; font-weight: normal; } /* Section links (Sx). */
 
 /* Formatting for lists. */
 
