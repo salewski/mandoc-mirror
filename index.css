@@ -23,6 +23,8 @@ h2		{ font-weight: bold;
 
 span.nm		{ font-weight: bold; }
 
+span.file	{ font-style: italic; }
+
 span.attn	{ color: #000000; font-weight: bold; }
 
 span.flag	{ font-weight: bold; }

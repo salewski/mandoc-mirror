@@ -227,16 +227,14 @@ Output produced by
 .Fl T Ns Cm html
 conforms to HTML-4.01 strict.
 .Pp
-Font styles and page structure are applied using CSS1.
-By default, no font style is applied to any text,
-although CSS1 is hard-coded to format
-the basic structure of output.
-.Pp
 The
 .Pa example.style.css
-file documents the range of styles applied to output and, if used, will
-cause rendered documents to appear as they do in
-.Fl T Ns Cm ascii .
+file documents style-sheet classes available for customising output.
+If a style-sheet is not specified with
+.Fl O Ns Ar style ,
+.Fl T Ns Cm html
+defaults to simple output readable in any graphical or text-based web
+browser.
 .Pp
 Special characters are rendered in decimal-encoded UTF-8.
 .Pp
