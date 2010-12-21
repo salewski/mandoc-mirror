@@ -346,15 +346,40 @@ roff_alloc(struct regset *regs, void *data, const mandocmsg msg)
 static int
 roff_res(struct roff *r, char **bufp, size_t *szp, int pos)
 {
-	const char	*cp, *cpp, *st, *res;
+	const char	*stesc;	/* start of an escape sequence ('\\') */
+	const char	*stnam;	/* start of the name, after "[(*" */
+	const char	*cp;	/* end of the name, e.g. before ']' */
+	const char	*res;	/* the string to be substituted */
 	int		 i, maxl;
 	size_t		 nsz;
 	char		*n;
 
-	/* LINTED */
-	for (cp = &(*bufp)[pos]; (cpp = strstr(cp, "\\*")); cp++) {
-		cp = cpp + 2;
+	/* Search for a leading backslash and save a pointer to it. */
+
+	cp = *bufp + pos;
+	while (NULL != (cp = strchr(cp, '\\'))) {
+		stesc = cp++;
+
+		/*
+		 * The second character must be an asterisk.
+		 * If it isn't, skip it anyway:  It is escaped,
+		 * so it can't start another escape sequence.
+		 */
+
+		if ('\0' == *cp)
+			return(1);
+		if ('*' != *cp++)
+			continue;
+
+		/*
+		 * The third character decides the length
+		 * of the name of the string.
+		 * Save a pointer to the name.
+		 */
+
 		switch (*cp) {
+		case ('\0'):
+			return(1);
 		case ('('):
 			cp++;
 			maxl = 2;
@@ -367,8 +392,9 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int pos)
 			maxl = 1;
 			break;
 		}
+		stnam = cp;
 
-		st = cp;
+		/* Advance to the end of the name. */
 
 		for (i = 0; 0 == maxl || i < maxl; i++, cp++) {
 			if ('\0' == *cp)
@@ -377,21 +403,26 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int pos)
 				break;
 		}
 
-		res = roff_getstrn(r, st, (size_t)i);
+		/*
+		 * Retrieve the replacement string; if it is
+		 * undefined, resume searching for escapes.
+		 */
+
+		res = roff_getstrn(r, stnam, (size_t)i);
 
 		if (NULL == res) {
 			cp -= maxl ? 1 : 0;
 			continue;
 		}
 
+		/* Replace the escape sequence by the string. */
+
 		ROFF_DEBUG("roff: splicing reserved: [%.*s]\n", i, st);
 
 		nsz = *szp + strlen(res) + 1;
 		n = mandoc_malloc(nsz);
 
-		*n = '\0';
-
-		strlcat(n, *bufp, (size_t)(cpp - *bufp + 1));
+		strlcpy(n, *bufp, (size_t)(stesc - *bufp + 1));
 		strlcat(n, res, nsz);
 		strlcat(n, cp + (maxl ? 0 : 1), nsz);
 
@@ -563,6 +594,7 @@ roff_cblock(ROFF_ARGS)
 	case (ROFF_am1):
 		/* FALLTHROUGH */
 	case (ROFF_de):
+		/* ROFF_de1 is remapped to ROFF_de in roff_block(). */
 		/* FALLTHROUGH */
 	case (ROFF_dei):
 		/* FALLTHROUGH */
@@ -682,7 +714,7 @@ roff_block(ROFF_ARGS)
 	 */
 
 	if (ROFF_de == tok)
-		roff_setstr(r, name, NULL, 0);
+		roff_setstr(r, name, "", 0);
 
 	if ('\0' == (*bufp)[pos])
 		return(ROFF_IGN);
@@ -690,7 +722,7 @@ roff_block(ROFF_ARGS)
 	/* If present, process the custom end-of-line marker. */
 
 	sv = pos;
-	while ((*bufp)[pos] && 
+	while ((*bufp)[pos] &&
 			' ' != (*bufp)[pos] && 
 			'\t' != (*bufp)[pos])
 		pos++;
