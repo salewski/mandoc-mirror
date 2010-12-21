@@ -389,7 +389,7 @@ static void
 resize_buf(struct buf *buf, size_t initial)
 {
 
-	buf->sz = buf->sz ? 2 * buf->sz : initial;
+	buf->sz = buf->sz > initial/2 ? 2 * buf->sz : initial;
 	buf->buf = realloc(buf->buf, buf->sz);
 	if (NULL == buf->buf) {
 		perror(NULL);
