@@ -10,12 +10,14 @@ body		{ font-family: monospace;
 
 table.foot	{ width: 100%; 
 		  font-size: 0.8em;
+		  margin-top: 1em;
 		  border-top: 1px dotted #dddddd; 
 		  color: #999999; } /* Document footer. */
 td.foot-date	{ width: 50%; } /* Document footer: date. */
 td.foot-os	{ width: 50%; text-align: right; } /* Document footer: OS/source. */
 table.head	{ width: 100%; 
 		  font-size: 0.8em;
+		  margin-bottom: 1em;
 		  border-bottom: 1px dotted #dddddd; 
 		  color: #999999; } /* Document header. */
 td.head-ltitle	{ width: 10%; } /* Document header: left-title. */

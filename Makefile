@@ -1,5 +1,6 @@
 .SUFFIXES:	.html .xml .sgml .1 .3 .7 .md5 .tar.gz 
 .SUFFIXES:	.1.txt .3.txt .7.txt
+.SUFFIXES:	.1.xhtml .3.xhtml .7.xhtml
 .SUFFIXES:	.1.sgml .3.sgml .7.sgml 
 .SUFFIXES:	.h .h.html 
 .SUFFIXES:	.1.ps .3.ps .7.ps
@@ -308,6 +309,9 @@ mandoc: $(MAINOBJS) libroff.a libmdoc.a libman.a libmandoc.a
 
 .1.1.ps .3.3.ps .7.7.ps:
 	./mandoc -Tps -Wall,stop $< > $@
+
+.1.1.xhtml .3.3.xhtml .7.7.xhtml:
+	./mandoc -Txhtml -Wall,stop -Ostyle=style.css,man=%N.%S.xhtml,includes=%I.html $< > $@
 
 .1.1.pdf .3.3.pdf .7.7.pdf:
 	./mandoc -Tpdf -Wall,stop $< > $@
