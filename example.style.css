@@ -25,17 +25,16 @@ h2		{ margin-bottom: 0px; font-size: medium; margin-left: -2ex; } /* Sub-section
 div.section	{ margin-bottom: 2ex; margin-left: 4ex; } /* Sections (Sh, SH). */
 div.subsection	{ } /* Sub-sections (Ss, SS). */
 table.synopsis	{ } /* SYNOPSIS section table. */
-table.synopsis td { vertical-align: top; } /* SYNOPSIS section table. */
 
 /* Vertical spacing. */
 
 p		{ } /* Paragraph: Pp, Lp. */
 blockquote	{ margin-top: 0px; margin-bottom: 0px; }
 table		{ margin-top: 0px; margin-bottom: 0px; }
+td		{ vertical-align: top; }
 
 /* General font modes. */
 
-.lit		{ font-style: normal; font-weight: normal; font-family: monospace; } /* Literal: Dl, Li, Bf -literal, Bl -literal, Bl -unfilled. */
 .italic		{ font-style: italic; font-weight: normal; } /* Italic: BI, IB, I, (implicit). */
 .emph		{ font-style: italic; font-weight: normal; } /* Emphasis: Em, Bl -emphasis. */
 .bold		{ font-style: normal; font-weight: bold; } /* Bold: SB, BI, IB, BR, RB, B, (implicit). */
@@ -68,6 +67,7 @@ i.ftype		{ font-weight: normal; } /* Function types (Ft, Fn). */
 b.includes	{ font-style: normal; } /* Header includes (In). */
 span.lib	{ } /* Library (Lb). */
 i.link-sec	{ font-weight: normal; } /* Section links (Sx). */
+code.lit	{ font-style: normal; font-weight: normal; } /* Literal: Dl, Li, Bf -literal, Bl -literal, Bl -unfilled. */
 b.macro		{ font-style: normal; } /* Macro-ish thing (Fd). */
 b.name		{ font-style: normal; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */

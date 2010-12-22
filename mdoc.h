@@ -358,11 +358,20 @@ struct	mdoc_an {
  * of iterating through the mdoc_arg pointers of a node: defaults are
  * provided, etc.
  */
-union mdoc_data {
-	struct mdoc_an 	 *An;
-	struct mdoc_bd	 *Bd;
-	struct mdoc_bf	 *Bf;
-	struct mdoc_bl	 *Bl;
+union	mdoc_data {
+	struct mdoc_an 	  An;
+	struct mdoc_bd	  Bd;
+	struct mdoc_bf	  Bf;
+	struct mdoc_bl	  Bl;
+};
+
+/*
+ * Reference-counted structure for containing normalised arguments of
+ * certain macros (those listed in union mdoc_data).
+ */
+struct	mdoc_norm {
+	int		  refcnt;
+	union mdoc_data	  d;
 };
 
 /* 
@@ -387,6 +396,7 @@ struct	mdoc_node {
 #define	MDOC_ENDED	 (1 << 5) /* rendering has been ended */
 	enum mdoc_type	  type; /* AST node type */
 	enum mdoc_sec	  sec; /* current named section */
+	struct mdoc_norm *norm; /* ref-counted, normalised args */
 	/* FIXME: these can be union'd to shave a few bytes. */
 	struct mdoc_arg	 *args; /* BLOCK/ELEM */
 	struct mdoc_node *pending; /* BLOCK */
@@ -395,7 +405,6 @@ struct	mdoc_node {
 	struct mdoc_node *tail; /* BLOCK */
 	char		 *string; /* TEXT */
 	enum mdoc_endbody end; /* BODY */
-	union mdoc_data	  data;
 };
 
 /*

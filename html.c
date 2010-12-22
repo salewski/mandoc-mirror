@@ -73,6 +73,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"b",		0 }, /* TAG_B */
 	{"i",		0 }, /* TAG_I */
 	{"u",		0 }, /* TAG_U */
+	{"code",	0 }, /* TAG_CODE */
 };
 
 static	const char	*const htmlfonts[HTMLFONT_MAX] = {
@@ -486,7 +487,7 @@ print_xmltype(struct html *h)
 {
 
 	if (HTML_XHTML_1_0_STRICT == h->type)
-		printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+		puts("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 }
 
 
