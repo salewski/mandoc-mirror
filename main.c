@@ -145,6 +145,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	/* related to macros and nesting */
 	"skipping obsolete macro",
+	"skipping paragraph macro",
 	"blocks badly nested",
 	"child violates parent syntax",
 	"nested displays are not portable",
@@ -182,7 +183,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"skipping bad character",
 	"skipping text before the first section header",
 	"skipping unknown macro",
-	"skipping paragraph macro",
 	"NOT IMPLEMENTED: skipping request",
 	"line scope broken",
 	"argument count wrong",

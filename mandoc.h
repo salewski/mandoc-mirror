@@ -67,6 +67,7 @@ enum	mandocerr {
 
 	/* related to macros and nesting */
 	MANDOCERR_MACROOBS, /* skipping obsolete macro */
+	MANDOCERR_IGNPAR, /* skipping paragraph macro */
 	MANDOCERR_SCOPENEST, /* blocks badly nested */
 	MANDOCERR_CHILD, /* child violates parent syntax */
 	MANDOCERR_NESTEDDISP, /* nested displays are not portable */
@@ -104,7 +105,6 @@ enum	mandocerr {
 	MANDOCERR_BADCHAR, /* skipping bad character */
 	MANDOCERR_NOTEXT, /* skipping text before the first section header */
 	MANDOCERR_MACRO, /* skipping unknown macro */
-	MANDOCERR_IGNPAR, /* skipping paragraph macro */
 	MANDOCERR_REQUEST, /* NOT IMPLEMENTED: skipping request */
 	MANDOCERR_LINESCOPE, /* line scope broken */
 	MANDOCERR_ARGCOUNT, /* argument count wrong */
