@@ -1573,12 +1573,14 @@ post_bl(POST_ARGS)
 
 	for (n = mdoc->last->child; n; n = n->next) {
 		switch (n->tok) {
-		case (MDOC_It):
-			continue;
-		case (MDOC_Sm):
+		case (MDOC_Lp):
 			/* FALLTHROUGH */
 		case (MDOC_Pp):
 			mdoc_nmsg(mdoc, n, MANDOCERR_CHILD);
+			/* FALLTHROUGH */
+		case (MDOC_It):
+			/* FALLTHROUGH */
+		case (MDOC_Sm):
 			continue;
 		default:
 			break;
