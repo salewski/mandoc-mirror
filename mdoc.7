@@ -1201,7 +1201,7 @@ Be careful in using over-long lines within a keep block!
 Doing so will clobber the right margin.
 .Ss \&Bl
 Begin a list.
-Lists consist of items started by the
+Lists consist of items specified using the
 .Sx \&It
 macro, containing a head or a body or both.
 The list syntax is as follows:
@@ -2124,9 +2124,6 @@ Examples:
 Format a
 .Dq mailto:
 hyperlink.
-If an argument is not provided, the string
-.Dq \(ti
-is used as a default.
 Its syntax is as follows:
 .Pp
 .D1 Pf \. Sx \&Mt Cm address
@@ -2739,7 +2736,12 @@ The following problematic behaviour is found in groff:
 .Bl -dash -compact
 .It
 Display macros
-.Pq Sx \&Bd , Sx \&Dl , and Sx \&D1
+.Po
+.Sx \&Bd ,
+.Sx \&Dl ,
+and
+.Sx \&D1
+.Pc
 may not be nested.
 \*[hist]
 .It
