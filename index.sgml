@@ -42,7 +42,7 @@
 					<SPAN CLASS="nm">mdocml</SPAN> consists of the <A HREF="mdoc.3.html">libmdoc</A>, <A
 					HREF="man.3.html">libman</A>, and <A HREF="roff.3.html">libroff</A> validating compilers; and <A
 					HREF="mandoc.1.html">mandoc</A>, which interfaces with the compiler libraries to format output for UNIX
-					terminals, XHTML, HTML, and PostScript.  <SPAN CLASS="nm">mdocml</SPAN> is a <A CLASS="external"
+					terminals, XHTML, HTML, PostScript, and PDF.  <SPAN CLASS="nm">mdocml</SPAN> is a <A CLASS="external"
 					HREF="http://bsd.lv/">BSD.lv</A> project.  
 					</P>
 
@@ -69,7 +69,7 @@
 					</H2>
 
 					<TABLE WIDTH="100%" SUMMARY="Current Sources">
-					<COL WIDTH="200">
+					<COL WIDTH="175">
 					<COL>
 					<TBODY>
 						<TR>
@@ -93,7 +93,7 @@
 					</H2>
 
 					<TABLE WIDTH="100%" SUMMARY="Downstream Sources">
-					<COL WIDTH="200">
+					<COL WIDTH="175">
 					<COL>
 					<TBODY>
 						<TR>
@@ -132,7 +132,7 @@
 					</H2>
 
 					<TABLE WIDTH="100%" SUMMARY="Archived Sources">
-					<COL WIDTH="200">
+					<COL WIDTH="175">
 					<COL>
 					<TBODY>
 						<TR>
@@ -156,7 +156,7 @@
 					</P>
 
 					<TABLE WIDTH="100%" SUMMARY="Documentation">
-					<COL WIDTH="200">
+					<COL WIDTH="175">
 					<COL>
 					<TBODY>
 						<TR>
@@ -283,7 +283,7 @@
 					</P>
 
 					<TABLE WIDTH="100%" SUMMARY="Mailing Lists">
-						<COL WIDTH="200">
+						<COL WIDTH="175">
 						<COL>
 						<TBODY>
 							<TR>
@@ -327,7 +327,7 @@
 					</H1>
 					<DIV CLASS="news">
 						<P>
-							<SPAN CLASS="date">xx-12-2010</SPAN>:
+							<SPAN CLASS="date">23-12-2010</SPAN>:
 							version 1.10.8
 						</P>
 						<P>
@@ -345,11 +345,12 @@
 							Also overhauled the <SPAN CLASS="flag">-Thtml</SPAN> and <SPAN
 							CLASS="flag">-Txhtml</SPAN> output modes.  They now display readable output in arbitrary
 							browsers, including text-based ones like <A CLASS="external"
-							HREF="http://lynx.isc.org">lynx</A>. <SPAN CLASS="attn">Available style-sheet classes
-							have been considerably changed!</SPAN> See the <SPAN
-							CLASS="file">example.style.css</SPAN> file for details.  Lastly, <A
-							HREF="mdoc.3.html">libmdoc</A> and <A HREF="man.3.html">libman</A> have been cleaned up
-							and reduced in size and complexity.
+							HREF="http://lynx.isc.org">lynx</A>.  See HTML and XHTML manuals in the <A
+							HREF="#documentation">DOCUMENTATION</A> section for examples.  <SPAN
+							CLASS="attn">Attention: available style-sheet classes have been considerably
+							changed!</SPAN> See the <SPAN CLASS="file">example.style.css</SPAN> file for details.
+							Lastly, <A HREF="mdoc.3.html">libmdoc</A> and <A HREF="man.3.html">libman</A> have been
+							cleaned up and reduced in size and complexity.
 						</P>
 					</DIV>
 					<DIV CLASS="news">
