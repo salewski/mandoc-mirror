@@ -361,7 +361,7 @@ mdoc_args(struct mdoc *m, int line, int *pos,
 		if (MDOC_Bl == n->tok)
 			break;
 
-	if (n && LIST_column == n->norm->d.Bl.type) {
+	if (n && LIST_column == n->norm->Bl.type) {
 		fl |= ARGS_TABSEP;
 		fl &= ~ARGS_DELIM;
 	}
