@@ -1,8 +1,7 @@
 /* $Id$ */
 
 html		{ max-width: 800px; }
-body		{ font-family: monospace; 
-		  color: #333333;
+body		{ color: #333333;
 		  font-size: 0.93em;
 		  font-family: Times, serif; }
 
