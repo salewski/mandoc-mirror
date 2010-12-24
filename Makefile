@@ -102,6 +102,10 @@ GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml \
 
 SGMLS	   = index.sgml
 
+XHTMLS	   = mandoc.1.xhtml mdoc.3.xhtml \
+	     man.3.xhtml mdoc.7.xhtml man.7.xhtml mandoc_char.7.xhtml \
+	     roff.7.xhtml roff.3.xhtml 
+
 HTMLS	   = ChangeLog.html index.html man.h.html mdoc.h.html \
 	     mandoc.h.html roff.h.html mandoc.1.html mdoc.3.html \
 	     man.3.html mdoc.7.html man.7.html mandoc_char.7.html \
@@ -140,7 +144,7 @@ CONFIGS	   = config.h.pre config.h.post
 
 DOCLEAN	   = $(BINS) $(LNS) $(LLNS) $(LIBS) $(OBJS) $(HTMLS) \
 	     $(TARGZS) tags $(MD5S) $(XMLS) $(TEXTS) $(GSGMLS) \
-	     config.h config.log $(PSS) $(PDFS)
+	     config.h config.log $(PSS) $(PDFS) $(XHTMLS)
 
 DOINSTALL  = $(SRCS) $(HEADS) Makefile $(MANS) $(SGMLS) $(STATICS) \
 	     $(DATAS) $(XSLS) $(EXAMPLES) $(TESTS) $(CONFIGS)
@@ -154,14 +158,14 @@ clean:
 
 dist:	mdocml-$(VERSION).tar.gz
 
-www:	all $(GSGMLS) $(HTMLS) $(TEXTS) $(MD5S) $(TARGZS) $(PSS) $(PDFS)
+www:	all $(GSGMLS) $(HTMLS) $(XHTMLS) $(TEXTS) $(MD5S) $(TARGZS) $(PSS) $(PDFS)
 
 ps:	$(PSS)
 
 pdf:	$(PDFS)
 
 installwww: www
-	$(INSTALL_DATA) $(HTMLS) $(PSS) $(PDFS) $(TEXTS) $(STATICS) $(DESTDIR)$(PREFIX)/
+	$(INSTALL_DATA) $(HTMLS) $(XHTMLS) $(PSS) $(PDFS) $(TEXTS) $(STATICS) $(DESTDIR)$(PREFIX)/
 	$(INSTALL_DATA) mdocml-$(VERSION).tar.gz $(DESTDIR)$(PREFIX)/snapshots/
 	$(INSTALL_DATA) mdocml-$(VERSION).md5 $(DESTDIR)$(PREFIX)/snapshots/
 	$(INSTALL_DATA) mdocml-$(VERSION).tar.gz $(DESTDIR)$(PREFIX)/snapshots/mdocml.tar.gz
