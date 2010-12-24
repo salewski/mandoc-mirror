@@ -35,12 +35,11 @@ td		{ vertical-align: top; }
 
 /* General font modes. */
 
-.italic		{ font-style: italic; font-weight: normal; } /* Italic: BI, IB, I, (implicit). */
+i		{ } /* Italic: BI, IB, I, (implicit). */
 .emph		{ font-style: italic; font-weight: normal; } /* Emphasis: Em, Bl -emphasis. */
-.bold		{ font-style: normal; font-weight: bold; } /* Bold: SB, BI, IB, BR, RB, B, (implicit). */
+b		{ } /* Bold: SB, BI, IB, BR, RB, B, (implicit). */
 .symb		{ font-style: normal; font-weight: bold; } /* Symbolic: Sy, Ms, Bf -symbolic. */
-.roman		{ font-style: normal; font-weight: normal; } /* Roman: (implicit). */
-.small		{ font-style: normal; font-weight: normal; font-size: smaller; } /* Small: SB, SM. */
+small		{ } /* Small: SB, SM. */
 
 /* Block modes. */
 

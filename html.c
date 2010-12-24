@@ -74,12 +74,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"i",		0 }, /* TAG_I */
 	{"u",		0 }, /* TAG_U */
 	{"code",	0 }, /* TAG_CODE */
-};
-
-static	const char	*const htmlfonts[HTMLFONT_MAX] = {
-	"roman",
-	"bold",
-	"italic"
+	{"small",	0 }, /* TAG_SMALL */
 };
 
 static	const char	*const htmlattrs[ATTR_MAX] = {
@@ -257,25 +252,6 @@ print_res(struct html *h, const char *p, size_t len)
 }
 
 
-struct tag *
-print_ofont(struct html *h, enum htmlfont font)
-{
-	struct htmlpair	 tag;
-
-	h->metal = h->metac;
-	h->metac = font;
-
-	/* FIXME: DECO_ROMAN should just close out preexisting. */
-
-	if (h->metaf && h->tags.head == h->metaf)
-		print_tagq(h, h->metaf);
-
-	PAIR_CLASS_INIT(&tag, htmlfonts[font]);
-	h->metaf = print_otag(h, TAG_SPAN, 1, &tag);
-	return(h->metaf);
-}
-
-
 static void
 print_metaf(struct html *h, enum roffdeco deco)
 {
@@ -299,7 +275,18 @@ print_metaf(struct html *h, enum roffdeco deco)
 		/* NOTREACHED */
 	}
 
-	(void)print_ofont(h, font);
+	if (h->metaf) {
+		print_tagq(h, h->metaf);
+		h->metaf = NULL;
+	}
+
+	h->metal = h->metac;
+	h->metac = font;
+
+	if (HTMLFONT_NONE != font)
+		h->metaf = HTMLFONT_BOLD == font ?
+			print_otag(h, TAG_B, 0, NULL) :
+			print_otag(h, TAG_I, 0, NULL);
 }
 
 
@@ -554,10 +541,21 @@ print_text(struct html *h, const char *word)
 			printf("&#160;");
 	}
 
+	assert(NULL == h->metaf);
+	if (HTMLFONT_NONE != h->metac)
+		h->metaf = HTMLFONT_BOLD == h->metac ?
+			print_otag(h, TAG_B, 0, NULL) :
+			print_otag(h, TAG_I, 0, NULL);
+
 	assert(word);
 	if ( ! print_encode(h, word, 0))
 		if ( ! (h->flags & HTML_NONOSPACE))
 			h->flags &= ~HTML_NOSPACE;
+
+	if (h->metaf) {
+		print_tagq(h, h->metaf);
+		h->metaf = NULL;
+	}
 
 	h->flags &= ~HTML_IGNDELIM;
 
