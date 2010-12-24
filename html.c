@@ -72,7 +72,6 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"pre",		HTML_CLRLINE }, /* TAG_PRE */
 	{"b",		0 }, /* TAG_B */
 	{"i",		0 }, /* TAG_I */
-	{"u",		0 }, /* TAG_U */
 	{"code",	0 }, /* TAG_CODE */
 	{"small",	0 }, /* TAG_SMALL */
 };

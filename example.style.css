@@ -82,7 +82,7 @@ span.ref-opt	{ } /* Reference optionals (%O). */
 span.ref-page	{ } /* Reference page (%P). */
 span.ref-corp	{ } /* Reference corporate/foreign author (%Q). */
 span.ref-rep	{ } /* Reference report (%R). */
-u.ref-title	{ } /* Reference title (%T). */
+span.ref-title	{ text-decoration: underline; } /* Reference title (%T). */
 span.ref-vol	{ } /* Reference volume (%V). */
 span.type	{ font-style: italic; font-weight: normal; } /* Variable types (Vt). */
 span.unix	{ } /* Unices (Ux, Ox, Nx, Fx, Bx, Bsx, Dx). */
