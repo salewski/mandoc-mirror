@@ -1649,8 +1649,19 @@ post_rs(POST_ARGS)
 {
 	struct mdoc_node *nn, *next, *prev;
 	int		  i, j;
+	int		 *tj;
+#define	RS_JOURNAL	 (1 << 0)
+#define	RS_TITLE	 (1 << 1)
 
-	if (MDOC_BODY != mdoc->last->type)
+	/* Mark whether we're carrying both a %T and %J. */
+
+	tj = &mdoc->last->norm->Rs.titlejournal;
+
+	if (MDOC_BLOCK == mdoc->last->type) {
+		if ( ! (RS_JOURNAL & *tj && RS_TITLE & *tj))
+			*tj = 0;
+		return(1);
+	} else if (MDOC_BODY != mdoc->last->type)
 		return(1);
 
 	/*
@@ -1666,6 +1677,10 @@ post_rs(POST_ARGS)
 				break;
 
 		if (i < RSORD_MAX) {
+			if (MDOC__T == rsord[i])
+				*tj |= RS_TITLE;
+			else if (MDOC__J == rsord[i])
+				*tj |= RS_JOURNAL;
 			next = nn->next;
 			continue;
 		}

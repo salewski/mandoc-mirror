@@ -132,10 +132,6 @@
   or not (run a manual without `Nm blah' to see this).  I'm not sure
   that this exists in the wild, but it's still an error.
 
-- .%T should be quoted, not underlined, when .%J is also present,
-  to better distinguish the contents of .%T and .%J,
-  see for example OpenBSD cat(1)
-
 - In .Bl -bullet, the groff bullet is "+\b+\bo\bo", the mandoc bullet
   is just "o\bo".
   see for example OpenBSD ksh(1)
