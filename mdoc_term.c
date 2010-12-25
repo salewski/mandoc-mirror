@@ -1855,8 +1855,6 @@ termp_quote_pre(DECL_ARGS)
 	case (MDOC_Bq):
 		term_word(p, "[");
 		break;
-	case (MDOC__T):
-		/* FALLTHROUGH */
 	case (MDOC_Do):
 		/* FALLTHROUGH */
 	case (MDOC_Dq):
@@ -1867,6 +1865,8 @@ termp_quote_pre(DECL_ARGS)
 	case (MDOC_Pq):
 		term_word(p, "(");
 		break;
+	case (MDOC__T):
+		/* FALLTHROUGH */
 	case (MDOC_Qo):
 		/* FALLTHROUGH */
 	case (MDOC_Qq):
@@ -1919,8 +1919,6 @@ termp_quote_post(DECL_ARGS)
 	case (MDOC_Bq):
 		term_word(p, "]");
 		break;
-	case (MDOC__T):
-		/* FALLTHROUGH */
 	case (MDOC_Do):
 		/* FALLTHROUGH */
 	case (MDOC_Dq):
@@ -1931,6 +1929,8 @@ termp_quote_post(DECL_ARGS)
 	case (MDOC_Pq):
 		term_word(p, ")");
 		break;
+	case (MDOC__T):
+		/* FALLTHROUGH */
 	case (MDOC_Qo):
 		/* FALLTHROUGH */
 	case (MDOC_Qq):
