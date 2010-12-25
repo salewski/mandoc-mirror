@@ -2148,8 +2148,8 @@ termp__t_post(DECL_ARGS)
 	 * If we're in an `Rs' and there's a journal present, then quote
 	 * us instead of underlining us (for disambiguation).
 	 */
-	if (n->parent && MDOC_Rs == n->parent->tok &&
-			n->parent->norm->Rs.titlejournal)
+	if (n->parent && MDOC_Rs == n->parent->tok && 
+			n->parent->norm->Rs.child_J)
 		termp_quote_post(p, pair, m, n);
 
 	termp____post(p, pair, m, n);
@@ -2165,7 +2165,7 @@ termp__t_pre(DECL_ARGS)
 	 * us instead of underlining us (for disambiguation).
 	 */
 	if (n->parent && MDOC_Rs == n->parent->tok &&
-			n->parent->norm->Rs.titlejournal)
+			n->parent->norm->Rs.child_J)
 		return(termp_quote_pre(p, pair, m, n));
 
 	term_fontpush(p, TERMFONT_UNDER);

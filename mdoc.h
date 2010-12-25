@@ -354,7 +354,7 @@ struct	mdoc_an {
 };
 
 struct	mdoc_rs {
-	int		  titlejournal; /* whether %T and %J */
+	struct mdoc_node *child_J; /* pointer to %J */
 };
 
 /*
