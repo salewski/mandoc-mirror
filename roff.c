@@ -510,7 +510,8 @@ int
 roff_endparse(struct roff *r)
 {
 
-	if (r->last || r->tbl)
+	/* FIXME: if r->tbl */
+	if (r->last)
 		(*r->msg)(MANDOCERR_SCOPEEXIT, r->data, 
 				r->last->line, r->last->col, NULL);
 	return(1);
