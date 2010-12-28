@@ -64,7 +64,7 @@ tbl_read(struct tbl *tbl, int ln, const char *p, int offs)
 		if (';' != cp[len - 1])
 			tbl->part = TBL_PART_LAYOUT;
 	
-	return(1);
+	return(ROFF_CONT);
 }
 
 struct tbl *
