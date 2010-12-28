@@ -19,12 +19,46 @@
 
 __BEGIN_DECLS
 
-struct tbl;
+enum	tbl_tok {
+	TBL_TOK_OPENPAREN = 0,
+	TBL_TOK_CLOSEPAREN,
+	TBL_TOK_COMMA,
+	TBL_TOK_SEMICOLON,
+	TBL_TOK_PERIOD,
+	TBL_TOK_SPACE,
+	TBL_TOK_TAB,
+	TBL_TOK_NIL,
+	TBL_TOK__MAX
+};
+
+enum	tbl_part {
+	TBL_PART_OPTS, /* in options (first line) */
+	TBL_PART_LAYOUT, /* describing layout */
+	TBL_PART_DATA  /* creating data rows */
+};
+
+struct	tbl {
+	enum tbl_part	  part;
+	char		  buf[BUFSIZ];
+	char		  tab; /* cell-separator */
+	char		  decimal; /* decimal point */
+	int		  linesize;
+	char		  delims[2];
+	int		  opts;
+#define	TBL_OPT_CENTRE	 (1 << 0)
+#define	TBL_OPT_EXPAND	 (1 << 1)
+#define	TBL_OPT_BOX	 (1 << 2)
+#define	TBL_OPT_DBOX	 (1 << 3)
+#define	TBL_OPT_ALLBOX	 (1 << 4)
+#define	TBL_OPT_NOKEEP	 (1 << 5)
+#define	TBL_OPT_NOSPACE	 (1 << 6)
+};
 
 struct tbl	*tbl_alloc(void);
 void		 tbl_free(struct tbl *);
 void		 tbl_reset(struct tbl *);
 enum rofferr 	 tbl_read(struct tbl *, int, const char *, int);
+enum tbl_tok	 tbl_next(struct tbl *, const char *, int *);
 
 __END_DECLS
 

@@ -31,11 +31,11 @@ CFLAGS    += -g $(WFLAGS) $(VFLAGS) -DHAVE_CONFIG_H
 
 LINTFLAGS += $(VFLAGS)
 
-ROFFLNS    = roff.ln tbl.ln
+ROFFLNS    = roff.ln tbl.ln tbl_opts.ln
 
-ROFFSRCS   = roff.c tbl.c
+ROFFSRCS   = roff.c tbl.c tbl_opts.c
 
-ROFFOBJS   = roff.o tbl.o
+ROFFOBJS   = roff.o tbl.o tbl_opts.o
 
 MANDOCLNS  = mandoc.ln
 

@@ -15,6 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -24,19 +25,14 @@
 #include "libmandoc.h"
 #include "libroff.h"
 
-enum	tbl_part {
-	TBL_PART_OPTS, /* in options (first line) */
-	TBL_PART_LAYOUT, /* describing layout */
-	TBL_PART_DATA  /* creating data rows */
-};
-
-
-struct	tbl {
-	enum tbl_part	 part;
+static	const char	 tbl_toks[TBL_TOK__MAX] = {
+	'(',	')',	',',	';',	'.',
+	' ',	'\t',	'\0'
 };
 
 static	void		 tbl_init(struct tbl *);
 static	void		 tbl_clear(struct tbl *);
+static	enum tbl_tok	 tbl_next_char(char);
 
 static void
 tbl_clear(struct tbl *tbl)
@@ -92,3 +88,58 @@ tbl_reset(struct tbl *tbl)
 	tbl_clear(tbl);
 	tbl_init(tbl);
 }
+
+static enum tbl_tok
+tbl_next_char(char c)
+{
+	int		 i;
+
+	/*
+	 * These are delimiting tokens.  They separate out words in the
+	 * token stream.
+	 *
+	 * FIXME: make this into a hashtable for faster lookup.
+	 */
+	for (i = 0; i < TBL_TOK__MAX; i++)
+		if (c == tbl_toks[i])
+			return((enum tbl_tok)i);
+
+	return(TBL_TOK__MAX);
+}
+
+enum tbl_tok
+tbl_next(struct tbl *tbl, const char *p, int *pos)
+{
+	int		 i;
+	enum tbl_tok	 c;
+
+	tbl->buf[0] = '\0';
+
+	if (TBL_TOK__MAX != (c = tbl_next_char(p[*pos]))) {
+		if (TBL_TOK_NIL != c) {
+			tbl->buf[0] = p[*pos];
+			tbl->buf[1] = '\0';
+			(*pos)++;
+		}
+		return(c);
+	}
+
+	/*
+	 * Copy words into a nil-terminated buffer.  For now, we use a
+	 * static buffer.  FIXME: eventually this should be made into a
+	 * dynamic one living in struct tbl.
+	 */
+
+	for (i = 0; i < BUFSIZ; i++, (*pos)++)
+		if (TBL_TOK__MAX == tbl_next_char(p[*pos]))
+			tbl->buf[i] = p[*pos];
+		else
+			break;
+
+	assert(i < BUFSIZ);
+	tbl->buf[i] = '\0';
+
+	return(TBL_TOK__MAX);
+}
+
+
