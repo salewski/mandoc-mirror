@@ -29,20 +29,13 @@
 
 #include "mandoc.h"
 #include "roff.h"
+#include "libroff.h"
 #include "libmandoc.h"
 
 #define	RSTACK_MAX	128
 
 #define	ROFF_CTL(c) \
 	('.' == (c) || '\'' == (c))
-
-#if 1
-#define	ROFF_DEBUG(fmt, args...) \
-	do { /* Nothing. */ } while (/*CONSTCOND*/ 0)
-#else
-#define	ROFF_DEBUG(fmt, args...) \
-	do { fprintf(stderr, fmt , ##args); } while (/*CONSTCOND*/ 0)
-#endif
 
 enum	rofft {
 	ROFF_ad,
@@ -64,6 +57,8 @@ enum	rofft {
 	ROFF_rm,
 	ROFF_so,
 	ROFF_tr,
+	ROFF_TS,
+	ROFF_TE,
 	ROFF_cblock,
 	ROFF_ccond, /* FIXME: remove this. */
 	ROFF_USERDEF,
@@ -74,7 +69,6 @@ enum	roffrule {
 	ROFFRULE_ALLOW,
 	ROFFRULE_DENY
 };
-
 
 struct	roffstr {
 	char		*name; /* key of symbol */
@@ -91,6 +85,7 @@ struct	roff {
 	struct regset	*regs; /* read/writable registers */
 	struct roffstr	*first_string; /* user-defined strings & macros */
 	const char	*current_string; /* value of last called user macro */
+	struct tbl	*tbl;
 };
 
 struct	roffnode {
@@ -146,6 +141,8 @@ static	int		 roff_res(struct roff *,
 static	void		 roff_setstr(struct roff *,
 				const char *, const char *, int);
 static	enum rofferr	 roff_so(ROFF_ARGS);
+static	enum rofferr	 roff_TE(ROFF_ARGS);
+static	enum rofferr	 roff_TS(ROFF_ARGS);
 static	enum rofferr	 roff_userdef(ROFF_ARGS);
 
 /* See roff_hash_find() */
@@ -176,6 +173,8 @@ static	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "rm", roff_line_error, NULL, NULL, 0, NULL },
 	{ "so", roff_so, NULL, NULL, 0, NULL },
 	{ "tr", roff_line_ignore, NULL, NULL, 0, NULL },
+	{ "TS", roff_TS, NULL, NULL, 0, NULL },
+	{ "TE", roff_TE, NULL, NULL, 0, NULL },
 	{ ".", roff_cblock, NULL, NULL, 0, NULL },
 	{ "\\}", roff_ccond, NULL, NULL, 0, NULL },
 	{ NULL, roff_userdef, NULL, NULL, 0, NULL },
@@ -264,7 +263,6 @@ roffnode_pop(struct roff *r)
 		if (r->rstackpos > -1)
 			r->rstackpos--;
 
-	ROFF_DEBUG("roff: popping scope\n");
 	r->last = r->last->parent;
 	free(p->name);
 	free(p->end);
@@ -299,8 +297,14 @@ static void
 roff_free1(struct roff *r)
 {
 
+	if (r->tbl) {
+		tbl_free(r->tbl);
+		r->tbl = NULL;
+	}
+
 	while (r->last)
 		roffnode_pop(r);
+
 	roff_freestr(r);
 }
 
@@ -417,8 +421,6 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int pos)
 
 		/* Replace the escape sequence by the string. */
 
-		ROFF_DEBUG("roff: splicing reserved: [%.*s]\n", i, st);
-
 		nsz = *szp + strlen(res) + 1;
 		n = mandoc_malloc(nsz);
 
@@ -442,6 +444,7 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 		size_t *szp, int pos, int *offs)
 {
 	enum rofft	 t;
+	enum rofferr	 e;
 	int		 ppos;
 
 	/*
@@ -461,13 +464,17 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 	if (r->last && ! ROFF_CTL((*bufp)[pos])) {
 		t = r->last->tok;
 		assert(roffs[t].text);
-		ROFF_DEBUG("roff: intercept scoped text: %s, [%s]\n", 
-				roffs[t].name, &(*bufp)[pos]);
-		return((*roffs[t].text)
-				(r, t, bufp, szp, 
-				 ln, pos, pos, offs));
-	} else if ( ! ROFF_CTL((*bufp)[pos]))
+		e = (*roffs[t].text)
+			(r, t, bufp, szp, ln, pos, pos, offs);
+		assert(ROFF_IGN == e || ROFF_CONT == e);
+		if (ROFF_CONT == e && r->tbl)
+			return(tbl_read(r->tbl, ln, *bufp, *offs));
+		return(e);
+	} else if ( ! ROFF_CTL((*bufp)[pos])) {
+		if (r->tbl)
+			return(tbl_read(r->tbl, ln, *bufp, *offs));
 		return(ROFF_CONT);
+	}
 
 	/*
 	 * If a scope is open, go to the child handler for that macro,
@@ -477,8 +484,6 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 	if (r->last) {
 		t = r->last->tok;
 		assert(roffs[t].sub);
-		ROFF_DEBUG("roff: intercept scoped context: %s, [%s]\n", 
-				roffs[t].name, &(*bufp)[pos]);
 		return((*roffs[t].sub)
 				(r, t, bufp, szp, 
 				 ln, pos, pos, offs));
@@ -494,10 +499,6 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 	if (ROFF_MAX == (t = roff_parse(r, *bufp, &pos)))
 		return(ROFF_CONT);
 
-	ROFF_DEBUG("roff: intercept new-scope: [%s], [%s]\n", 
-			ROFF_USERDEF == t ? r->current_string : roffs[t].name, 
-			&(*bufp)[pos]);
-
 	assert(roffs[t].proc);
 	return((*roffs[t].proc)
 			(r, t, bufp, szp, 
@@ -509,10 +510,10 @@ int
 roff_endparse(struct roff *r)
 {
 
-	if (NULL == r->last)
-		return(1);
-	return((*r->msg)(MANDOCERR_SCOPEEXIT, r->data, r->last->line, 
-				r->last->col, NULL));
+	if (r->last || r->tbl)
+		(*r->msg)(MANDOCERR_SCOPEEXIT, r->data, 
+				r->last->line, r->last->col, NULL);
+	return(1);
 }
 
 
@@ -581,8 +582,7 @@ roff_cblock(ROFF_ARGS)
 	 */
 
 	if (NULL == r->last) {
-		if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
-			return(ROFF_ERR);
+		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
 		return(ROFF_IGN);
 	}
 
@@ -601,14 +601,12 @@ roff_cblock(ROFF_ARGS)
 	case (ROFF_ig):
 		break;
 	default:
-		if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
-			return(ROFF_ERR);
+		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
 		return(ROFF_IGN);
 	}
 
 	if ((*bufp)[pos])
-		if ( ! (*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, pos, NULL))
-			return(ROFF_ERR);
+		(*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, pos, NULL);
 
 	roffnode_pop(r);
 	roffnode_cleanscope(r);
@@ -635,8 +633,7 @@ roff_ccond(ROFF_ARGS)
 {
 
 	if (NULL == r->last) {
-		if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
-			return(ROFF_ERR);
+		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
 		return(ROFF_IGN);
 	}
 
@@ -648,20 +645,17 @@ roff_ccond(ROFF_ARGS)
 	case (ROFF_if):
 		break;
 	default:
-		if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
-			return(ROFF_ERR);
+		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
 		return(ROFF_IGN);
 	}
 
 	if (r->last->endspan > -1) {
-		if ( ! (*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL))
-			return(ROFF_ERR);
+		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
 		return(ROFF_IGN);
 	}
 
 	if ((*bufp)[pos])
-		if ( ! (*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, pos, NULL))
-			return(ROFF_ERR);
+		(*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, pos, NULL);
 
 	roffnode_pop(r);
 	roffnode_cleanscope(r);
@@ -986,9 +980,6 @@ roff_cond(ROFF_ARGS)
 
 	r->last->rule = rule;
 
-	ROFF_DEBUG("roff: cond: %s -> %s\n", roffs[tok].name, 
-			ROFFRULE_ALLOW == rule ?  "allow" : "deny");
-
 	if (ROFF_ie == tok) {
 		/*
 		 * An if-else will put the NEGATION of the current
@@ -1003,11 +994,8 @@ roff_cond(ROFF_ARGS)
 
 	/* If the parent has false as its rule, then so do we. */
 
-	if (r->last->parent && ROFFRULE_DENY == r->last->parent->rule) {
+	if (r->last->parent && ROFFRULE_DENY == r->last->parent->rule)
 		r->last->rule = ROFFRULE_DENY;
-		ROFF_DEBUG("roff: cond override: %s -> deny\n",
-				roffs[tok].name);
-	}
 
 	/*
 	 * Determine scope.  If we're invoked with "\{" trailing the
@@ -1020,11 +1008,7 @@ roff_cond(ROFF_ARGS)
 	if ('\\' == (*bufp)[pos] && '{' == (*bufp)[pos + 1]) {
 		r->last->endspan = -1;
 		pos += 2;
-		ROFF_DEBUG("roff: cond-scope: %s, multi-line\n", 
-				roffs[tok].name);
-	} else
-		ROFF_DEBUG("roff: cond-scope: %s, one-line\n", 
-				roffs[tok].name);
+	} 
 
 	/*
 	 * If there are no arguments on the line, the next-line scope is
@@ -1117,11 +1101,35 @@ roff_nr(ROFF_ARGS)
 		rg[(int)REG_nS].set = 1;
 		if ( ! roff_parse_nat(val, &rg[(int)REG_nS].v.u))
 			rg[(int)REG_nS].v.u = 0;
+	}
 
-		ROFF_DEBUG("roff: register nS: %u\n", 
-				rg[(int)REG_nS].v.u);
+	return(ROFF_IGN);
+}
+
+/* ARGSUSED */
+static enum rofferr
+roff_TE(ROFF_ARGS)
+{
+
+	if (NULL == r->tbl)
+		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
+	else
+		tbl_free(r->tbl);
+
+	r->tbl = NULL;
+	return(ROFF_IGN);
+}
+
+/* ARGSUSED */
+static enum rofferr
+roff_TS(ROFF_ARGS)
+{
+
+	if (r->tbl) {
+		(*r->msg)(MANDOCERR_SCOPEBROKEN, r->data, ln, ppos, NULL);
+		tbl_reset(r->tbl);
 	} else
-		ROFF_DEBUG("roff: ignoring register: %s\n", key);
+		r->tbl = tbl_alloc();
 
 	return(ROFF_IGN);
 }

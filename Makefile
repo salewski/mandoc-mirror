@@ -31,11 +31,11 @@ CFLAGS    += -g $(WFLAGS) $(VFLAGS) -DHAVE_CONFIG_H
 
 LINTFLAGS += $(VFLAGS)
 
-ROFFLNS    = roff.ln
+ROFFLNS    = roff.ln tbl.ln
 
-ROFFSRCS   = roff.c
+ROFFSRCS   = roff.c tbl.c
 
-ROFFOBJS   = roff.o
+ROFFOBJS   = roff.o tbl.o
 
 MANDOCLNS  = mandoc.ln
 
@@ -94,7 +94,7 @@ DATAS	   = arch.in att.in lib.in msec.in st.in \
 
 HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
 	     libmandoc.h html.h chars.h out.h main.h roff.h \
-	     mandoc.h
+	     mandoc.h libroff.h
 
 GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml \
 	     mandoc_char.7.sgml man.7.sgml man.3.sgml roff.7.sgml \

@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2010 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2009, 2010 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,31 +14,18 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef ROFF_H
-#define ROFF_H
-
-enum	rofferr {
-	ROFF_CONT, /* continue processing line */
-	ROFF_RERUN, /* re-run roff interpreter with offset */
-	ROFF_APPEND, /* re-run main parser, appending next line */
-	ROFF_REPARSE, /* re-run main parser on the result */
-	ROFF_SO, /* include another file */
-	ROFF_IGN, /* ignore current line */
-	ROFF_TBL, /* a table row was successfully parsed */
-	ROFF_ERR /* badness: puke and stop */
-};
+#ifndef LIBROFF_H
+#define LIBROFF_H
 
 __BEGIN_DECLS
 
-struct	roff;
+struct tbl;
 
-void	 	  roff_free(struct roff *);
-struct	roff	 *roff_alloc(struct regset *, void *, mandocmsg);
-void		  roff_reset(struct roff *);
-enum	rofferr	  roff_parseln(struct roff *, int, 
-			char **, size_t *, int, int *);
-int		  roff_endparse(struct roff *);
+struct tbl	*tbl_alloc(void);
+void		 tbl_free(struct tbl *);
+void		 tbl_reset(struct tbl *);
+enum rofferr 	 tbl_read(struct tbl *, int, const char *, int);
 
 __END_DECLS
 
-#endif /*!ROFF_H*/
+#endif /*LIBROFF_H*/
