@@ -235,9 +235,8 @@ again:	/*
 	if (KEY_MAXKEYS == i)
 		TBL_MSG(tbl, MANDOCERR_TBLOPT, ln, sv);
 
-	/* Try again... */
-
 	goto again;
+	/* NOTREACHED */
 }
 
 int
