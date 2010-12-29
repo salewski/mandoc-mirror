@@ -60,6 +60,24 @@ struct	tbl_row {
 	struct tbl_cell	 *last;
 };
 
+struct	tbl_dat {
+	struct tbl_dat	 *next;
+	char		 *string;
+	int		  flags;
+#define	TBL_DATA_HORIZ	 (1 << 0)
+#define	TBL_DATA_DHORIZ	 (1 << 1)
+#define	TBL_DATA_NHORIZ	 (1 << 2)
+#define	TBL_DATA_NDHORIZ (1 << 3)
+};
+
+struct	tbl_span {
+	struct tbl_dat	 *first;
+	struct tbl_dat	 *last;
+	int		  flags;
+#define	TBL_SPAN_HORIZ	(1 << 0)
+#define	TBL_SPAN_DHORIZ	(1 << 1)
+};
+
 struct	tbl {
 	mandocmsg	  msg; /* status messages */
 	void		 *data; /* privdata for messages */
@@ -90,6 +108,7 @@ void		 tbl_reset(struct tbl *);
 enum rofferr 	 tbl_read(struct tbl *, int, const char *, int);
 int		 tbl_option(struct tbl *, int, const char *);
 int		 tbl_layout(struct tbl *, int, const char *);
+struct tbl_span	*tbl_data(struct tbl *, int, const char *);
 
 __END_DECLS
 
