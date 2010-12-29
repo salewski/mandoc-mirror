@@ -50,7 +50,6 @@ struct tbl	*tbl_alloc(void *, mandocmsg);
 void		 tbl_free(struct tbl *);
 void		 tbl_reset(struct tbl *);
 enum rofferr 	 tbl_read(struct tbl *, int, const char *, int);
-enum tbl_tok	 tbl_next(struct tbl *, const char *, int *);
 int		 tbl_option(struct tbl *, int, const char *);
 
 __END_DECLS
