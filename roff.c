@@ -59,6 +59,7 @@ enum	rofft {
 	ROFF_tr,
 	ROFF_TS,
 	ROFF_TE,
+	ROFF_T_,
 	ROFF_cblock,
 	ROFF_ccond, /* FIXME: remove this. */
 	ROFF_USERDEF,
@@ -143,6 +144,7 @@ static	void		 roff_setstr(struct roff *,
 static	enum rofferr	 roff_so(ROFF_ARGS);
 static	enum rofferr	 roff_TE(ROFF_ARGS);
 static	enum rofferr	 roff_TS(ROFF_ARGS);
+static	enum rofferr	 roff_T_(ROFF_ARGS);
 static	enum rofferr	 roff_userdef(ROFF_ARGS);
 
 /* See roff_hash_find() */
@@ -175,6 +177,7 @@ static	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "tr", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ "TS", roff_TS, NULL, NULL, 0, NULL },
 	{ "TE", roff_TE, NULL, NULL, 0, NULL },
+	{ "T&", roff_T_, NULL, NULL, 0, NULL },
 	{ ".", roff_cblock, NULL, NULL, 0, NULL },
 	{ "\\}", roff_ccond, NULL, NULL, 0, NULL },
 	{ NULL, roff_userdef, NULL, NULL, 0, NULL },
@@ -1118,6 +1121,19 @@ roff_TE(ROFF_ARGS)
 		tbl_free(r->tbl);
 
 	r->tbl = NULL;
+	return(ROFF_IGN);
+}
+
+/* ARGSUSED */
+static enum rofferr
+roff_T_(ROFF_ARGS)
+{
+
+	if (NULL == r->tbl)
+		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
+	else
+		tbl_restart(r->tbl);
+
 	return(ROFF_IGN);
 }
 

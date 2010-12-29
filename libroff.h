@@ -84,6 +84,7 @@ struct	tbl {
 	(*(tblp)->msg)((type), (tblp)->data, (line), (col), NULL)
 
 struct tbl	*tbl_alloc(void *, mandocmsg);
+void		 tbl_restart(struct tbl *);
 void		 tbl_free(struct tbl *);
 void		 tbl_reset(struct tbl *);
 enum rofferr 	 tbl_read(struct tbl *, int, const char *, int);

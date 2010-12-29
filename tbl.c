@@ -120,3 +120,11 @@ tbl_reset(struct tbl *tbl)
 	tbl_init(tbl);
 }
 
+void
+tbl_restart(struct tbl *tbl)
+{
+
+	tbl_clear(tbl);
+	tbl->part = TBL_PART_LAYOUT;
+}
+
