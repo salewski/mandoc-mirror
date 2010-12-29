@@ -535,6 +535,52 @@ This request is intended to have one argument,
 consisting of an even number of characters.
 Currently, it is ignored including its arguments,
 and the number of arguments is not checked.
+.\" .Ss \&TE
+.\" End a table context.
+.\" See
+.\" .Sx \&TS .
+.\" .Ss \&TS
+.\" Begin a table, which formats input in aligned rows and columns.
+.\" A table consists of an optional single line of table options terminated
+.\" by a semicolon, followed by one or more lines of layout specification
+.\" terminated by a period, then table data.
+.\" A table block may also include
+.\" .Nm ,
+.\" .Xr mdoc 7 ,
+.\" or
+.\" .Xr man 7
+.\" macros.
+.\" .Pp
+.\" Table data is
+.\" .Em pre-processed ,
+.\" that is, data rows are parsed then inserted into the underlying stream
+.\" of input data.
+.\" This allows data rows to be interspersed by arbitrary macros, such as
+.\" .Bd -literal -offset indent
+.\" \&.TS
+.\" c c c.
+.\" 1 2 3
+.\" \&.Ao
+.\" 3 2 1
+.\" \&.Ac
+.\" \&.TE
+.\" .Ed
+.\" .Pp
+.\" in the case of
+.\" .Xr mdoc 7
+.\" or
+.\" .Bd -literal -offset indent
+.\" \&.TS
+.\" c c c.
+.\" \&.ds ab 2
+.\" 1 \e*(ab 3
+.\" \&.I
+.\" 3 2 1
+.\" \&.TE
+.\" .Ed
+.\" .Pp
+.\" in the case of
+.\" .Xr man 7 .
 .Sh COMPATIBILITY
 This section documents compatibility between mandoc and other other
 .Nm
