@@ -101,6 +101,8 @@ enum	mandocerr {
 
 	MANDOCERR_ERROR, /* ===== start of errors ===== */
 
+	MANDOCERR_TBL, /* bad table syntax */
+	MANDOCERR_TBLOPT, /* bad table option */
 	MANDOCERR_ROFFLOOP, /* input stack limit exceeded, infinite loop? */
 	MANDOCERR_BADCHAR, /* skipping bad character */
 	MANDOCERR_NOTEXT, /* skipping text before the first section header */

@@ -1130,7 +1130,7 @@ roff_TS(ROFF_ARGS)
 		(*r->msg)(MANDOCERR_SCOPEBROKEN, r->data, ln, ppos, NULL);
 		tbl_reset(r->tbl);
 	} else
-		r->tbl = tbl_alloc();
+		r->tbl = tbl_alloc(r->data, r->msg);
 
 	return(ROFF_IGN);
 }

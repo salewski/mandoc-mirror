@@ -25,14 +25,8 @@
 #include "libmandoc.h"
 #include "libroff.h"
 
-static	const char	 tbl_toks[TBL_TOK__MAX] = {
-	'(',	')',	',',	';',	'.',
-	' ',	'\t',	'\0'
-};
-
 static	void		 tbl_init(struct tbl *);
 static	void		 tbl_clear(struct tbl *);
-static	enum tbl_tok	 tbl_next_char(char);
 
 static void
 tbl_clear(struct tbl *tbl)
@@ -45,6 +39,9 @@ tbl_init(struct tbl *tbl)
 {
 
 	tbl->part = TBL_PART_OPTS;
+	tbl->tab = '\t';
+	tbl->linesize = 12;
+	tbl->decimal = '.';
 }
 
 enum rofferr
@@ -56,19 +53,37 @@ tbl_read(struct tbl *tbl, int ln, const char *p, int offs)
 	cp = &p[offs];
 	len = (int)strlen(cp);
 
-	if (len && TBL_PART_OPTS == tbl->part)
+	/*
+	 * If we're in the options section and we don't have a
+	 * terminating semicolon, assume we've moved directly into the
+	 * layout section.  No need to report a warning: this is,
+	 * apparently, standard behaviour.
+	 */
+
+	if (TBL_PART_OPTS == tbl->part && len)
 		if (';' != cp[len - 1])
 			tbl->part = TBL_PART_LAYOUT;
+
+	/* Now process each logical section of the table.  */
+
+	switch (tbl->part) {
+	case (TBL_PART_OPTS):
+		return(tbl_option(tbl, ln, p) ? ROFF_IGN : ROFF_ERR);
+	default:
+		break;
+	}
 	
 	return(ROFF_CONT);
 }
 
 struct tbl *
-tbl_alloc(void)
+tbl_alloc(void *data, const mandocmsg msg)
 {
 	struct tbl	*p;
 
 	p = mandoc_malloc(sizeof(struct tbl));
+	p->data = data;
+	p->msg = msg;
 	tbl_init(p);
 	return(p);
 }
@@ -88,58 +103,4 @@ tbl_reset(struct tbl *tbl)
 	tbl_clear(tbl);
 	tbl_init(tbl);
 }
-
-static enum tbl_tok
-tbl_next_char(char c)
-{
-	int		 i;
-
-	/*
-	 * These are delimiting tokens.  They separate out words in the
-	 * token stream.
-	 *
-	 * FIXME: make this into a hashtable for faster lookup.
-	 */
-	for (i = 0; i < TBL_TOK__MAX; i++)
-		if (c == tbl_toks[i])
-			return((enum tbl_tok)i);
-
-	return(TBL_TOK__MAX);
-}
-
-enum tbl_tok
-tbl_next(struct tbl *tbl, const char *p, int *pos)
-{
-	int		 i;
-	enum tbl_tok	 c;
-
-	tbl->buf[0] = '\0';
-
-	if (TBL_TOK__MAX != (c = tbl_next_char(p[*pos]))) {
-		if (TBL_TOK_NIL != c) {
-			tbl->buf[0] = p[*pos];
-			tbl->buf[1] = '\0';
-			(*pos)++;
-		}
-		return(c);
-	}
-
-	/*
-	 * Copy words into a nil-terminated buffer.  For now, we use a
-	 * static buffer.  FIXME: eventually this should be made into a
-	 * dynamic one living in struct tbl.
-	 */
-
-	for (i = 0; i < BUFSIZ; i++, (*pos)++)
-		if (TBL_TOK__MAX == tbl_next_char(p[*pos]))
-			tbl->buf[i] = p[*pos];
-		else
-			break;
-
-	assert(i < BUFSIZ);
-	tbl->buf[i] = '\0';
-
-	return(TBL_TOK__MAX);
-}
-
 

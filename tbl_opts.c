@@ -14,10 +14,12 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "mandoc.h"
 #include "libroff.h"
 
 enum	tbl_ident {
@@ -46,6 +48,12 @@ struct	tbl_phrase {
 /* Handle Commonwealth/American spellings. */
 #define	KEY_MAXKEYS	 14
 
+/* Maximum length of key name string. */
+#define	KEY_MAXNAME	 13
+
+/* Maximum length of key number size. */
+#define	KEY_MAXNUMSZ	 10
+
 static	const struct tbl_phrase keys[KEY_MAXKEYS] = {
 	{ "center",	 TBL_OPT_CENTRE,	KEY_CENTRE},
 	{ "centre",	 TBL_OPT_CENTRE,	KEY_CENTRE},
@@ -64,86 +72,99 @@ static	const struct tbl_phrase keys[KEY_MAXKEYS] = {
 };
 
 static	int		 arg(struct tbl *, int, const char *, int *, int);
-static	int		 opt(struct tbl *, int, const char *, int *);
+static	void		 opt(struct tbl *, int, const char *, int *);
 
 static int
 arg(struct tbl *tbl, int ln, const char *p, int *pos, int key)
 {
-	int		 sv;
+	int		 i;
+	char		 buf[KEY_MAXNUMSZ];
 
-again:
-	sv = *pos;
+	while (isspace((unsigned char)p[*pos]))
+		(*pos)++;
 
-	switch (tbl_next(tbl, p, pos)) {
-	case (TBL_TOK_OPENPAREN):
-		break;
-	case (TBL_TOK_SPACE):
-		/* FALLTHROUGH */
-	case (TBL_TOK_TAB):
-		goto again;
-	default:
+	/* Arguments always begin with a parenthesis. */
+
+	if ('(' != p[*pos]) {
+		TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos);
 		return(0);
 	}
 
-	sv = *pos;
+	(*pos)++;
 
-	switch (tbl_next(tbl, p, pos)) {
-	case (TBL_TOK__MAX):
-		break;
-	default:
-		return(0);
-	}
+	/*
+	 * The arguments can be ANY value, so we can't just stop at the
+	 * next close parenthesis (the argument can be a closed
+	 * parenthesis itself).
+	 */
 
 	switch (key) {
 	case (KEY_DELIM):
-		/* FIXME: cache this value. */
-		if (2 != strlen(tbl->buf))
+		if ('\0' == (tbl->delims[0] = p[(*pos)++])) {
+			TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos - 1);
 			return(0);
-		tbl->delims[0] = tbl->buf[0];
-		tbl->delims[1] = tbl->buf[1];
+		} 
+
+		if ('\0' == (tbl->delims[1] = p[(*pos)++])) {
+			TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos - 1);
+			return(0);
+		} 
 		break;
 	case (KEY_TAB):
-		/* FIXME: cache this value. */
-		if (1 != strlen(tbl->buf))
-			return(0);
-		tbl->tab = tbl->buf[0];
-		break;
+		if ('\0' != (tbl->tab = p[(*pos)++]))
+			break;
+
+		TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos - 1);
+		return(0);
 	case (KEY_LINESIZE):
-		if ((tbl->linesize = atoi(tbl->buf)) <= 0)
-			return(0);
-		break;
+		for (i = 0; i < KEY_MAXNUMSZ && p[*pos]; i++, (*pos)++) {
+			buf[i] = p[*pos];
+			if ( ! isdigit((unsigned char)buf[i]))
+				break;
+		}
+
+		if (i < KEY_MAXNUMSZ) {
+			buf[i] = '\0';
+			tbl->linesize = atoi(buf);
+			break;
+		}
+
+		(*tbl->msg)(MANDOCERR_TBL, tbl->data, ln, *pos, NULL);
+		return(0);
 	case (KEY_DPOINT):
-		/* FIXME: cache this value. */
-		if (1 != strlen(tbl->buf))
-			return(0);
-		tbl->decimal = tbl->buf[0];
-		break;
+		if ('\0' != (tbl->decimal = p[(*pos)++]))
+			break;
+
+		TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos - 1);
+		return(0);
 	default:
 		abort();
+		/* NOTREACHED */
 	}
 
-	sv = *pos;
+	/* End with a close parenthesis. */
 
-	switch (tbl_next(tbl, p, pos)) {
-	case (TBL_TOK_CLOSEPAREN):
-		break;
-	default:
-		return(0);
-	}
+	if (')' == p[(*pos)++])
+		return(1);
 
-	return(1);
+	TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos - 1);
+	return(0);
 }
 
-
-static int
+static void
 opt(struct tbl *tbl, int ln, const char *p, int *pos)
 {
 	int		 i, sv;
-
-again:
-	sv = *pos;
+	char		 buf[KEY_MAXNAME];
 
 	/*
+	 * Parse individual options from the stream as surrounded by
+	 * this goto.  Each pass through the routine parses out a single
+	 * option and registers it.  Option arguments are processed in
+	 * the arg() function.
+	 */
+
+again:	/*
 	 * EBNF describing this section:
 	 *
 	 * options	::= option_list [:space:]* [;][\n]
@@ -154,36 +175,69 @@ again:
 	 * args		::= [:space:]* [(] [:alpha:]+ [)]
 	 */
 
-	switch (tbl_next(tbl, p, pos)) {
-	case (TBL_TOK__MAX):
-		break;
-	case (TBL_TOK_SPACE):
-		/* FALLTHROUGH */
-	case (TBL_TOK_TAB):
-		goto again;
-	case (TBL_TOK_SEMICOLON):
-		tbl->part = TBL_PART_LAYOUT;
-		return(1);
-	default:
-		return(0);
+	while (isspace((unsigned char)p[*pos]))
+		(*pos)++;
+
+	/* Safe exit point. */
+
+	if (';' == p[*pos])
+		return;
+
+	/* Copy up to first non-alpha character. */
+
+	for (sv = *pos, i = 0; i < KEY_MAXNAME; i++, (*pos)++) {
+		buf[i] = tolower(p[*pos]);
+		if ( ! isalpha((unsigned char)buf[i]))
+			break;
 	}
 
+	/* Exit if buffer is empty (or overrun). */
+
+	if (KEY_MAXNAME == i || 0 == i) {
+		TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos);
+		return;
+	}
+
+	buf[i] = '\0';
+
+	while (isspace((unsigned char)p[*pos]))
+		(*pos)++;
+
+	/* 
+	 * Look through all of the available keys to find one that
+	 * matches the input.  FIXME: hashtable this.
+	 */
+
 	for (i = 0; i < KEY_MAXKEYS; i++) {
-		/* FIXME: hashtable this? */
-		if (strcasecmp(tbl->buf, keys[i].name))
+		if (strcmp(buf, keys[i].name))
 			continue;
+
+		/*
+		 * Note: this is more difficult to recover from, as we
+		 * can be anywhere in the option sequence and it's
+		 * harder to jump to the next.  Meanwhile, just bail out
+		 * of the sequence altogether.
+		 */
+
 		if (keys[i].key) 
 			tbl->opts |= keys[i].key;
 		else if ( ! arg(tbl, ln, p, pos, keys[i].ident))
-			return(0);
+			return;
 
 		break;
 	}
 
-	if (KEY_MAXKEYS == i)
-		return(0);
+	/* 
+	 * Allow us to recover from bad options by continuing to another
+	 * parse sequence.
+	 */
 
-	return(opt(tbl, ln, p, pos));
+	if (KEY_MAXKEYS == i)
+		TBL_MSG(tbl, MANDOCERR_TBLOPT, ln, sv);
+
+	/* Try again... */
+
+	goto again;
 }
 
 int
@@ -191,6 +245,15 @@ tbl_option(struct tbl *tbl, int ln, const char *p)
 {
 	int		 pos;
 
+	/*
+	 * Table options are always on just one line, so automatically
+	 * switch into the next input mode here.
+	 */
+	tbl->part = TBL_PART_LAYOUT;
+
 	pos = 0;
-	return(opt(tbl, ln, p, &pos));
+	opt(tbl, ln, p, &pos);
+
+	/* Always succeed. */
+	return(1);
 }

@@ -19,18 +19,6 @@
 
 __BEGIN_DECLS
 
-enum	tbl_tok {
-	TBL_TOK_OPENPAREN = 0,
-	TBL_TOK_CLOSEPAREN,
-	TBL_TOK_COMMA,
-	TBL_TOK_SEMICOLON,
-	TBL_TOK_PERIOD,
-	TBL_TOK_SPACE,
-	TBL_TOK_TAB,
-	TBL_TOK_NIL,
-	TBL_TOK__MAX
-};
-
 enum	tbl_part {
 	TBL_PART_OPTS, /* in options (first line) */
 	TBL_PART_LAYOUT, /* describing layout */
@@ -38,8 +26,9 @@ enum	tbl_part {
 };
 
 struct	tbl {
+	mandocmsg	 msg; /* status messages */
+	void		*data; /* privdata for messages */
 	enum tbl_part	  part;
-	char		  buf[BUFSIZ];
 	char		  tab; /* cell-separator */
 	char		  decimal; /* decimal point */
 	int		  linesize;
@@ -54,11 +43,15 @@ struct	tbl {
 #define	TBL_OPT_NOSPACE	 (1 << 6)
 };
 
-struct tbl	*tbl_alloc(void);
+#define	TBL_MSG(tblp, type, line, col) \
+	(*(tblp)->msg)((type), (tblp)->data, (line), (col), NULL)
+
+struct tbl	*tbl_alloc(void *, mandocmsg);
 void		 tbl_free(struct tbl *);
 void		 tbl_reset(struct tbl *);
 enum rofferr 	 tbl_read(struct tbl *, int, const char *, int);
 enum tbl_tok	 tbl_next(struct tbl *, const char *, int *);
+int		 tbl_option(struct tbl *, int, const char *);
 
 __END_DECLS
 

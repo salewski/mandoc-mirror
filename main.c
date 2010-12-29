@@ -179,6 +179,8 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	"generic error",
 
+	"bad table syntax",
+	"bad table option",
 	"input stack limit exceeded, infinite loop?",
 	"skipping bad character",
 	"skipping text before the first section header",
