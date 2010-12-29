@@ -535,6 +535,11 @@ This request is intended to have one argument,
 consisting of an even number of characters.
 Currently, it is ignored including its arguments,
 and the number of arguments is not checked.
+.\" .Ss \&T&
+.\" Re-start a table layout, retaining the options of the prior table
+.\" invocation.
+.\" See
+.\" .Sx \&TS .
 .\" .Ss \&TE
 .\" End a table context.
 .\" See
@@ -581,6 +586,81 @@ and the number of arguments is not checked.
 .\" .Pp
 .\" in the case of
 .\" .Xr man 7 .
+.\" .Pp
+.\" The first line of a table consists of its options, which consists of
+.\" space-separated keys and modifiers terminated by a semicolon.
+.\" If the first line does not have a terminating semicolon, it is assumed
+.\" that no options are specified and instead a layout is processed.
+.\" Some options accept arguments enclosed by paranthesis.
+.\" The following case-insensitive options are available:
+.\" .Bl -tag -width Ds
+.\" .It Cm center
+.\" This may also be invoked with
+.\" .Cm centre .
+.\" .It Cm delim
+.\" Accepts a two-character argument.
+.\" This option is ignored.
+.\" .It Cm expand
+.\" .It Cm box
+.\" This may also be invoked with
+.\" .Cm frame .
+.\" .It Cm doublebox
+.\" This may also be invoked with
+.\" .Cm doubleframe .
+.\" .It Cm allbox
+.\" .It Cm tab
+.\" Accepts a single character argument used as the delimiter for cells in
+.\" data rows.
+.\" .It Cm linesize
+.\" Accepts a natural number (all digits) used as the line width for drawing
+.\" boxes.
+.\" .It Cm nokeep
+.\" .It Cm decimalpoint
+.\" .It Cm nospaces
+.\" .El
+.\" .Pp
+.\" The table layout follows table options, except in the case of
+.\" .Sx \&T& ,
+.\" where it immediately procedes invocation.
+.\" Layout specifies how data rows are displayed on output.
+.\" Each layout line corresponds to a line of data; the last layout line
+.\" applies to all remaining data lines.
+.\" Layout lines may also be separated by a comma.
+.\" Each layout cell consists of one of the following case-insensitive keys:
+.\" .Bl -tag -width Ds
+.\" .It Cm c
+.\" .It Cm r
+.\" .It Cm l
+.\" .It Cm n
+.\" .It Cm s
+.\" .It Cm a
+.\" .It Cm ^
+.\" .It Cm \-
+.\" This may also be invoked with
+.\" .Cm _ .
+.\" .It Cm =
+.\" .It Cm \(ba
+.\" .It Cm \(ba\(ba
+.\" .El
+.\" Keys may be followed by a set of modifiers.
+.\" A modifier is either a modifier key or a natural number for specifying
+.\" spacing.
+.\" The following case-insensitive modifier keys are available:
+.\" .Bl -tag -width Ds
+.\" .It Cm z
+.\" .It Cm u
+.\" .It Cm e
+.\" .It Cm t
+.\" .It Cm d
+.\" .It Cm f
+.\" Must be followed by a case-insensitive font style:
+.\" .Cm b
+.\" for bold or
+.\" .Cm i
+.\" for italic.
+.\" .It Cm b
+.\" .It Cm i
+.\" .El
 .Sh COMPATIBILITY
 This section documents compatibility between mandoc and other other
 .Nm
@@ -612,6 +692,12 @@ using the next-line syntax.
 .Xr man 7 ,
 .Xr mandoc_char 7 ,
 .Xr mdoc 7
+.\" .Rs
+.\" .%A M. E. Lesk
+.\" .%T Tbl\(emA Program to Format Tables
+.\" .%D June 11, 1976
+.\" .%U http://www.kohala.com/start/troff/v7/man/tbl/tbl.ps
+.\" .Re
 .Rs
 .%A Joseph F. Ossanna
 .%A Brian W. Kernighan

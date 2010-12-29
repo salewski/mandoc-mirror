@@ -28,21 +28,15 @@ struct	tbl_phrase {
 	enum tbl_cellt	 key;
 };
 
-#define	KEYS_MAX	 17
+#define	KEYS_MAX	 11
 
 static	const struct tbl_phrase keys[KEYS_MAX] = {
 	{ 'c',		 TBL_CELL_CENTRE },
-	{ 'C',		 TBL_CELL_CENTRE },
 	{ 'r',		 TBL_CELL_RIGHT },
-	{ 'R',		 TBL_CELL_RIGHT },
 	{ 'l',		 TBL_CELL_LEFT },
-	{ 'L',		 TBL_CELL_LEFT },
 	{ 'n',		 TBL_CELL_NUMBER },
-	{ 'N',		 TBL_CELL_NUMBER },
 	{ 's',		 TBL_CELL_SPAN },
-	{ 'S',		 TBL_CELL_SPAN },
 	{ 'a',		 TBL_CELL_LONG },
-	{ 'A',		 TBL_CELL_LONG },
 	{ '^',		 TBL_CELL_DOWN },
 	{ '-',		 TBL_CELL_HORIZ },
 	{ '_',		 TBL_CELL_HORIZ },
@@ -111,56 +105,39 @@ mod:
 
 	/* TODO: GNU has many more extensions. */
 
-	switch (p[(*pos)++]) {
+	switch (tolower(p[(*pos)++])) {
 	case ('z'):
-		/* FALLTHROUGH */
-	case ('Z'):
 		cp->flags |= TBL_CELL_WIGN;
 		goto mod;
 	case ('u'):
-		/* FALLTHROUGH */
-	case ('U'):
 		cp->flags |= TBL_CELL_UP;
 		goto mod;
 	case ('e'):
-		/* FALLTHROUGH */
-	case ('E'):
 		cp->flags |= TBL_CELL_EQUAL;
 		goto mod;
 	case ('t'):
-		/* FALLTHROUGH */
-	case ('T'):
 		cp->flags |= TBL_CELL_TALIGN;
 		goto mod;
 	case ('d'):
-		/* FALLTHROUGH */
-	case ('D'):
 		cp->flags |= TBL_CELL_BALIGN;
 		goto mod;
 	case ('f'):
-		/* FALLTHROUGH */
-	case ('B'):
-		/* FALLTHROUGH */
-	case ('I'):
-		/* FALLTHROUGH */
+		break;
 	case ('b'):
 		/* FALLTHROUGH */
 	case ('i'):
+		(*pos)--;
 		break;
 	default:
 		TBL_MSG(tbl, MANDOCERR_TBLLAYOUT, ln, *pos - 1);
 		return(0);
 	}
 
-	switch (p[(*pos)++]) {
+	switch (tolower(p[(*pos)++])) {
 	case ('b'):
-		/* FALLTHROUGH */
-	case ('B'):
 		cp->flags |= TBL_CELL_BOLD;
 		goto mod;
 	case ('i'):
-		/* FALLTHROUGH */
-	case ('I'):
 		cp->flags |= TBL_CELL_ITALIC;
 		goto mod;
 	default:
@@ -182,7 +159,7 @@ cell(struct tbl *tbl, struct tbl_row *rp,
 	/* Parse the column position (`r', `R', `|', ...). */
 
 	for (i = 0; i < KEYS_MAX; i++)
-		if (p[*pos] == keys[i].name)
+		if (tolower(p[*pos]) == keys[i].name)
 			break;
 
 	if (KEYS_MAX == i) {
