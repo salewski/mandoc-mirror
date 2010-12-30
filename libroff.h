@@ -61,6 +61,7 @@ struct	tbl_row {
 };
 
 struct	tbl_dat {
+	struct tbl_cell	 *layout; /* layout cell: CAN BE NULL */
 	struct tbl_dat	 *next;
 	char		 *string;
 	int		  flags;
@@ -71,6 +72,7 @@ struct	tbl_dat {
 };
 
 struct	tbl_span {
+	struct tbl_row	 *layout; /* layout row: CAN BE NULL */
 	struct tbl_dat	 *first;
 	struct tbl_dat	 *last;
 	int		  flags;

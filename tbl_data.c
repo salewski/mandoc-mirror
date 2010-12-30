@@ -31,11 +31,25 @@ data(struct tbl *tbl, struct tbl_span *dp,
 		int ln, const char *p, int *pos)
 {
 	struct tbl_dat	*dat;
+	struct tbl_cell	*cp;
 	int		 sv;
+
+	cp = NULL;
+	if (dp->last && dp->last->layout)
+		cp = dp->last->layout->next;
+	else if (NULL == dp->last)
+		cp = dp->layout->first;
+
+	/* Skip over spanners to data formats. */
+
+	while (cp && (TBL_CELL_VERT == cp->pos || 
+				TBL_CELL_DVERT == cp->pos))
+		cp = cp->next;
 
 	/* FIXME: warn about losing data contents if cell is HORIZ. */
 
 	dat = mandoc_calloc(1, sizeof(struct tbl_dat));
+	dat->layout = cp;
 
 	if (dp->last) {
 		dp->last->next = dat;
@@ -70,6 +84,7 @@ int
 tbl_data(struct tbl *tbl, int ln, const char *p)
 {
 	struct tbl_span	*dp;
+	struct tbl_row	*rp;
 	int		 pos;
 
 	pos = 0;
@@ -79,7 +94,23 @@ tbl_data(struct tbl *tbl, int ln, const char *p)
 		return(1);
 	}
 
+	/* 
+	 * Choose a layout row: take the one following the last parsed
+	 * span's.  If that doesn't exist, use the last parsed span's.
+	 * If there's no last parsed span, use the first row.  This can
+	 * be NULL!
+	 */
+
+	if (tbl->last_span) {
+		assert(tbl->last_span->layout);
+		rp = tbl->last_span->layout->next;
+		if (NULL == rp)
+			rp = tbl->last_span->layout;
+	} else
+		rp = tbl->first_row;
+
 	dp = mandoc_calloc(1, sizeof(struct tbl_span));
+	dp->layout = rp;
 
 	if (tbl->last_span) {
 		tbl->last_span->next = dp;
