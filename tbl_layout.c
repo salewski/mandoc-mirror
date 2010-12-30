@@ -217,11 +217,11 @@ row:	/*
 	 */
 
 	rp = mandoc_calloc(1, sizeof(struct tbl_row));
-	if (tbl->last) {
-		tbl->last->next = rp;
-		tbl->last = rp;
+	if (tbl->last_row) {
+		tbl->last_row->next = rp;
+		tbl->last_row = rp;
 	} else
-		tbl->last = tbl->first = rp;
+		tbl->last_row = tbl->first_row = rp;
 
 cell:
 	while (isspace((unsigned char)p[*pos]))
@@ -231,7 +231,7 @@ cell:
 
 	if ('.' == p[*pos]) {
 		tbl->part = TBL_PART_DATA;
-		if (NULL == tbl->first) 
+		if (NULL == tbl->first_row) 
 			TBL_MSG(tbl, MANDOCERR_TBLNOLAYOUT, ln, *pos);
 		(*pos)++;
 		return;

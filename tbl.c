@@ -33,10 +33,12 @@ tbl_clear(struct tbl *tbl)
 {
 	struct tbl_row	*rp;
 	struct tbl_cell	*cp;
+	struct tbl_span	*sp;
+	struct tbl_dat	*dp;
 
-	while (tbl->first) {
-		rp = tbl->first;
-		tbl->first = rp->next;
+	while (tbl->first_row) {
+		rp = tbl->first_row;
+		tbl->first_row = rp->next;
 		while (rp->first) {
 			cp = rp->first;
 			rp->first = cp->next;
@@ -45,7 +47,22 @@ tbl_clear(struct tbl *tbl)
 		free(rp);
 	}
 
-	tbl->last = NULL;
+	tbl->last_row = NULL;
+
+	while (tbl->first_span) {
+		sp = tbl->first_span;
+		tbl->first_span = sp->next;
+		while (sp->first) {
+			dp = sp->first;
+			sp->first = dp->next;
+			if (dp->string)
+				free(dp->string);
+			free(dp);
+		}
+		free(sp);
+	}
+
+	tbl->last_span = NULL;
 }
 
 static void
@@ -63,8 +80,6 @@ tbl_read(struct tbl *tbl, int ln, const char *p, int offs)
 {
 	int		 len;
 	const char	*cp;
-	struct tbl_dat	*dp;
-	struct tbl_span	*sp;
 
 	cp = &p[offs];
 	len = (int)strlen(cp);
@@ -91,18 +106,11 @@ tbl_read(struct tbl *tbl, int ln, const char *p, int offs)
 		break;
 	}
 
-	/* XXX: throw away data for now. */
-	if (NULL != (sp = tbl_data(tbl, ln, p))) {
-		while (NULL != (dp = sp->first)) {
-			sp->first = sp->first->next;
-			if (dp->string)
-				free(dp->string);
-			free(dp);
-		}
-		free(sp);
-	}
-	
-	return(ROFF_CONT);
+	/* 
+	 * FIXME: allow the original string to slip through for the time
+	 * being. 
+	 */
+	return(tbl_data(tbl, ln, p) ? ROFF_CONT : ROFF_ERR);
 }
 
 struct tbl *
@@ -137,7 +145,6 @@ void
 tbl_restart(struct tbl *tbl)
 {
 
-	tbl_clear(tbl);
 	tbl->part = TBL_PART_LAYOUT;
 }
 

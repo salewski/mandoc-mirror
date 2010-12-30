@@ -66,7 +66,7 @@ data(struct tbl *tbl, struct tbl_span *dp,
 		dat->flags |= TBL_DATA_NDHORIZ;
 }
 
-struct tbl_span *
+int
 tbl_data(struct tbl *tbl, int ln, const char *p)
 {
 	struct tbl_span	*dp;
@@ -76,21 +76,27 @@ tbl_data(struct tbl *tbl, int ln, const char *p)
 
 	if ('\0' == p[pos]) {
 		TBL_MSG(tbl, MANDOCERR_TBL, ln, pos);
-		return(NULL);
+		return(1);
 	}
 
 	dp = mandoc_calloc(1, sizeof(struct tbl_span));
 
+	if (tbl->last_span) {
+		tbl->last_span->next = dp;
+		tbl->last_span = dp;
+	} else
+		tbl->last_span = tbl->first_span = dp;
+
 	if ( ! strcmp(p, "_")) {
 		dp->flags |= TBL_SPAN_HORIZ;
-		return(dp);
+		return(1);
 	} else if ( ! strcmp(p, "=")) {
 		dp->flags |= TBL_SPAN_DHORIZ;
-		return(dp);
+		return(1);
 	}
 
 	while ('\0' != p[pos])
 		data(tbl, dp, ln, p, &pos);
 
-	return(dp);
+	return(1);
 }

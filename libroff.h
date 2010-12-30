@@ -76,6 +76,7 @@ struct	tbl_span {
 	int		  flags;
 #define	TBL_SPAN_HORIZ	(1 << 0)
 #define	TBL_SPAN_DHORIZ	(1 << 1)
+	struct tbl_span	 *next;
 };
 
 struct	tbl {
@@ -94,8 +95,10 @@ struct	tbl {
 #define	TBL_OPT_ALLBOX	 (1 << 4)
 #define	TBL_OPT_NOKEEP	 (1 << 5)
 #define	TBL_OPT_NOSPACE	 (1 << 6)
-	struct tbl_row	 *first;
-	struct tbl_row	 *last;
+	struct tbl_row	 *first_row;
+	struct tbl_row	 *last_row;
+	struct tbl_span	 *first_span;
+	struct tbl_span	 *last_span;
 };
 
 #define	TBL_MSG(tblp, type, line, col) \
@@ -108,7 +111,7 @@ void		 tbl_reset(struct tbl *);
 enum rofferr 	 tbl_read(struct tbl *, int, const char *, int);
 int		 tbl_option(struct tbl *, int, const char *);
 int		 tbl_layout(struct tbl *, int, const char *);
-struct tbl_span	*tbl_data(struct tbl *, int, const char *);
+int		 tbl_data(struct tbl *, int, const char *);
 
 __END_DECLS
 
