@@ -103,6 +103,11 @@
   should either just work or be a warning
   reported by naddy@
 
+- check compatibility with Plan9:
+  http://swtch.com/usr/local/plan9/tmac/tmac.an
+  http://swtch.com/plan9port/man/man7/man.html
+  "Anthony J. Bentley" <anthonyjbentley@gmail.com> 28 Dec 2010 21:58:40 -0700
+
 ************************************************************************
 * formatting issues: ugly output
 ************************************************************************
