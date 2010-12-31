@@ -86,7 +86,9 @@ struct	roff {
 	struct regset	*regs; /* read/writable registers */
 	struct roffstr	*first_string; /* user-defined strings & macros */
 	const char	*current_string; /* value of last called user macro */
-	struct tbl	*tbl;
+	struct tbl	*first_tbl; /* first table parsed */
+	struct tbl	*last_tbl; /* last table parsed */
+	struct tbl	*tbl; /* current table being parsed */
 };
 
 struct	roffnode {
@@ -299,11 +301,15 @@ roffnode_push(struct roff *r, enum rofft tok, const char *name,
 static void
 roff_free1(struct roff *r)
 {
+	struct tbl	*t;
 
-	if (r->tbl) {
-		tbl_free(r->tbl);
-		r->tbl = NULL;
+	while (r->first_tbl) {
+		t = r->first_tbl;
+		r->first_tbl = t->next;
+		tbl_free(t);
 	}
+
+	r->first_tbl = r->last_tbl = r->tbl = NULL;
 
 	while (r->last)
 		roffnode_pop(r);
@@ -1117,8 +1123,6 @@ roff_TE(ROFF_ARGS)
 
 	if (NULL == r->tbl)
 		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
-	else
-		tbl_free(r->tbl);
 
 	r->tbl = NULL;
 	return(ROFF_IGN);
@@ -1141,13 +1145,19 @@ roff_T_(ROFF_ARGS)
 static enum rofferr
 roff_TS(ROFF_ARGS)
 {
+	struct tbl	*t;
 
-	if (r->tbl) {
+	if (r->tbl)
 		(*r->msg)(MANDOCERR_SCOPEBROKEN, r->data, ln, ppos, NULL);
-		tbl_reset(r->tbl);
-	} else
-		r->tbl = tbl_alloc(r->data, r->msg);
 
+	t = tbl_alloc(r->data, r->msg);
+
+	if (r->last_tbl)
+		r->last_tbl->next = t;
+	else
+		r->first_tbl = r->last_tbl = t;
+
+	r->tbl = r->last_tbl = t;
 	return(ROFF_IGN);
 }
 

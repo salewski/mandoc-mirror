@@ -25,56 +25,6 @@
 #include "libmandoc.h"
 #include "libroff.h"
 
-static	void		 tbl_init(struct tbl *);
-static	void		 tbl_clear(struct tbl *);
-
-static void
-tbl_clear(struct tbl *tbl)
-{
-	struct tbl_row	*rp;
-	struct tbl_cell	*cp;
-	struct tbl_span	*sp;
-	struct tbl_dat	*dp;
-
-	while (tbl->first_row) {
-		rp = tbl->first_row;
-		tbl->first_row = rp->next;
-		while (rp->first) {
-			cp = rp->first;
-			rp->first = cp->next;
-			free(cp);
-		}
-		free(rp);
-	}
-
-	tbl->last_row = NULL;
-
-	while (tbl->first_span) {
-		sp = tbl->first_span;
-		tbl->first_span = sp->next;
-		while (sp->first) {
-			dp = sp->first;
-			sp->first = dp->next;
-			if (dp->string)
-				free(dp->string);
-			free(dp);
-		}
-		free(sp);
-	}
-
-	tbl->last_span = NULL;
-}
-
-static void
-tbl_init(struct tbl *tbl)
-{
-
-	tbl->part = TBL_PART_OPTS;
-	tbl->tab = '\t';
-	tbl->linesize = 12;
-	tbl->decimal = '.';
-}
-
 enum rofferr
 tbl_read(struct tbl *tbl, int ln, const char *p, int offs)
 {
@@ -121,24 +71,46 @@ tbl_alloc(void *data, const mandocmsg msg)
 	p = mandoc_calloc(1, sizeof(struct tbl));
 	p->data = data;
 	p->msg = msg;
-	tbl_init(p);
+	p->part = TBL_PART_OPTS;
+	p->tab = '\t';
+	p->linesize = 12;
+	p->decimal = '.';
 	return(p);
 }
 
 void
 tbl_free(struct tbl *p)
 {
+	struct tbl_row	*rp;
+	struct tbl_cell	*cp;
+	struct tbl_span	*sp;
+	struct tbl_dat	*dp;
 
-	tbl_clear(p);
+	while (p->first_row) {
+		rp = p->first_row;
+		p->first_row = rp->next;
+		while (rp->first) {
+			cp = rp->first;
+			rp->first = cp->next;
+			free(cp);
+		}
+		free(rp);
+	}
+
+	while (p->first_span) {
+		sp = p->first_span;
+		p->first_span = sp->next;
+		while (sp->first) {
+			dp = sp->first;
+			sp->first = dp->next;
+			if (dp->string)
+				free(dp->string);
+			free(dp);
+		}
+		free(sp);
+	}
+
 	free(p);
-}
-
-void
-tbl_reset(struct tbl *tbl)
-{
-
-	tbl_clear(tbl);
-	tbl_init(tbl);
 }
 
 void
