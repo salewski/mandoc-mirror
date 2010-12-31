@@ -1375,3 +1375,10 @@ roff_freestr(struct roff *r)
 
 	r->first_string = NULL;
 }
+
+const struct tbl_span *
+roff_span(const struct roff *r)
+{
+	
+	return(r->tbl ? tbl_span(r->tbl) : NULL);
+}

@@ -139,6 +139,75 @@ enum	mandocerr {
 	MANDOCERR_MAX
 };
 
+enum	tbl_cellt {
+	TBL_CELL_CENTRE, /* c, C */
+	TBL_CELL_RIGHT, /* r, R */
+	TBL_CELL_LEFT, /* l, L */
+	TBL_CELL_NUMBER, /* n, N */
+	TBL_CELL_SPAN, /* s, S */
+	TBL_CELL_LONG, /* a, A */
+	TBL_CELL_DOWN, /* ^ */
+	TBL_CELL_HORIZ, /* _, - */
+	TBL_CELL_DHORIZ, /* = */
+	TBL_CELL_VERT, /* | */
+	TBL_CELL_DVERT, /* || */
+	TBL_CELL_MAX
+};
+
+/*
+ * A cell in a layout row.
+ */
+struct	tbl_cell {
+	struct tbl_cell	 *next;
+	enum tbl_cellt	  pos;
+	int		  spacing;
+	int		  flags;
+#define	TBL_CELL_TALIGN	 (1 << 0) /* t, T */
+#define	TBL_CELL_BALIGN	 (1 << 1) /* d, D */
+#define	TBL_CELL_BOLD	 (1 << 2) /* fB, B, b */
+#define	TBL_CELL_ITALIC	 (1 << 3) /* fI, I, i */
+#define	TBL_CELL_EQUAL	 (1 << 4) /* e, E */
+#define	TBL_CELL_UP	 (1 << 5) /* u, U */
+#define	TBL_CELL_WIGN	 (1 << 6) /* z, Z */
+};
+
+/*
+ * A layout row.
+ */
+struct	tbl_row {
+	struct tbl_row	 *next;
+	struct tbl_cell	 *first;
+	struct tbl_cell	 *last;
+};
+
+/*
+ * A cell within a row of data.  The "string" field contains the actual
+ * string value that's in the cell.  The rest is layout.
+ */
+struct	tbl_dat {
+	struct tbl_cell	 *layout; /* layout cell: CAN BE NULL */
+	struct tbl_dat	 *next;
+	char		 *string;
+	int		  flags;
+#define	TBL_DATA_HORIZ	 (1 << 0)
+#define	TBL_DATA_DHORIZ	 (1 << 1)
+#define	TBL_DATA_NHORIZ	 (1 << 2)
+#define	TBL_DATA_NDHORIZ (1 << 3)
+};
+
+/*
+ * A row of data in a table.
+ */
+struct	tbl_span {
+	struct tbl_row	 *layout; /* layout row: CAN BE NULL */
+	struct tbl_dat	 *first;
+	struct tbl_dat	 *last;
+	int		  flags;
+#define	TBL_SPAN_HORIZ	(1 << 0)
+#define	TBL_SPAN_DHORIZ	(1 << 1)
+	struct tbl_span	 *next;
+};
+
 /*
  * Available registers (set in libroff, accessed elsewhere).
  */

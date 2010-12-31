@@ -120,3 +120,10 @@ tbl_restart(struct tbl *tbl)
 	tbl->part = TBL_PART_LAYOUT;
 }
 
+const struct tbl_span *
+tbl_span(const struct tbl *tbl)
+{
+
+	assert(tbl);
+	return(tbl->last_span);
+}
