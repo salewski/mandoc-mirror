@@ -422,6 +422,8 @@ print_mdoc_node(MDOC_ARGS)
 	case (MDOC_TEXT):
 		print_text(h, n->string);
 		return;
+	case (MDOC_TBL):
+		return;
 	default:
 		if (mdocs[n->tok].pre && ENDBODY_NOT == n->end)
 			child = (*mdocs[n->tok].pre)(m, n, h);

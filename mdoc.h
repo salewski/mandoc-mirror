@@ -190,6 +190,7 @@ enum	mdoc_type {
 	MDOC_TAIL,
 	MDOC_BODY,
 	MDOC_BLOCK,
+	MDOC_TBL,
 	MDOC_ROOT
 };
 
@@ -399,6 +400,7 @@ struct	mdoc_node {
 	struct mdoc_node *body; /* BLOCK */
 	struct mdoc_node *tail; /* BLOCK */
 	char		 *string; /* TEXT */
+	const struct tbl_span *span; /* TBL */
 	enum mdoc_endbody end; /* BODY */
 };
 
@@ -426,6 +428,8 @@ int	 	  mdoc_parseln(struct mdoc *, int, char *, int);
 const struct mdoc_node *mdoc_node(const struct mdoc *);
 const struct mdoc_meta *mdoc_meta(const struct mdoc *);
 int		  mdoc_endparse(struct mdoc *);
+int		  mdoc_addspan(struct mdoc *,
+			const struct tbl_span *);
 
 __END_DECLS
 

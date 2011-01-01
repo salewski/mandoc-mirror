@@ -98,6 +98,8 @@ static	int		  node_append(struct mdoc *,
 				struct mdoc_node *);
 static	int		  mdoc_ptext(struct mdoc *, int, char *, int);
 static	int		  mdoc_pmacro(struct mdoc *, int, char *, int);
+static	int		  mdoc_span_alloc(struct mdoc *, 
+				const struct tbl_span *);
 
 
 const struct mdoc_node *
@@ -219,6 +221,24 @@ mdoc_endparse(struct mdoc *m)
 		return(1);
 	m->flags |= MDOC_HALT;
 	return(0);
+}
+
+int
+mdoc_addspan(struct mdoc *m, const struct tbl_span *sp)
+{
+
+	if (MDOC_HALT & m->flags)
+		return(0);
+
+	/* No text before an initial macro. */
+
+	if (SEC_NONE == m->lastnamed) {
+		/* FIXME: grab from span. */
+		mdoc_pmsg(m, 0, 0, MANDOCERR_NOTEXT);
+		return(1);
+	}
+
+	return(mdoc_span_alloc(m, sp));
 }
 
 
@@ -522,6 +542,22 @@ mdoc_elem_alloc(struct mdoc *m, int line, int pos,
 	if ( ! node_append(m, p))
 		return(0);
 	m->next = MDOC_NEXT_CHILD;
+	return(1);
+}
+
+static int
+mdoc_span_alloc(struct mdoc *m, const struct tbl_span *sp)
+{
+	struct mdoc_node *n;
+
+	/* FIXME: grab from tbl_span. */
+	n = node_alloc(m, 0, 0, MDOC_MAX, MDOC_TBL);
+	n->span = sp;
+
+	if ( ! node_append(m, n))
+		return(0);
+
+	m->next = MDOC_NEXT_SIBLING;
 	return(1);
 }
 
