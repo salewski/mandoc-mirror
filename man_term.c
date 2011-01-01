@@ -865,6 +865,8 @@ print_man_node(DECL_ARGS)
 			p->maxrmargin = rmax;
 		}
 		break;
+	case (MAN_TBL):
+		break;
 	default:
 		if ( ! (MAN_NOTEXT & termacts[n->tok].flags))
 			term_fontrepl(p, TERMFONT_NONE);
@@ -876,11 +878,17 @@ print_man_node(DECL_ARGS)
 	if (c && n->child)
 		print_man_nodelist(p, mt, n->child, m);
 
-	if (MAN_TEXT != n->type) {
+	switch (n->type) {
+	case (MAN_TEXT):
+		/* FALLTHROUGH */
+	case (MAN_TBL):
+		break;
+	default:
 		if (termacts[n->tok].post)
 			(*termacts[n->tok].post)(p, mt, n, m);
 		if ( ! (MAN_NOTEXT & termacts[n->tok].flags))
 			term_fontrepl(p, TERMFONT_NONE);
+		break;
 	}
 
 	if (MAN_EOS & n->flags)

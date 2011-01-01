@@ -391,6 +391,8 @@ node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	mdoc->last = p;
 
 	switch (p->type) {
+	case (MDOC_TBL):
+		/* FALLTHROUGH */
 	case (MDOC_TEXT):
 		if ( ! mdoc_valid_post(mdoc))
 			return(0);

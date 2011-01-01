@@ -66,7 +66,8 @@ enum	man_type {
 	MAN_ROOT,
 	MAN_BLOCK,
 	MAN_HEAD,
-	MAN_BODY
+	MAN_BODY,
+	MAN_TBL
 };
 
 /* 
@@ -100,6 +101,7 @@ struct	man_node {
 	char		*string; /* TEXT node argument */
 	struct man_node	*head; /* BLOCK node HEAD ptr */
 	struct man_node	*body; /* BLOCK node BODY ptr */
+	const struct tbl_span *span; /* TBL */
 };
 
 /*
@@ -117,6 +119,8 @@ struct	man	 *man_alloc(struct regset *, void *, mandocmsg);
 void		  man_reset(struct man *);
 int	 	  man_parseln(struct man *, int, char *, int);
 int		  man_endparse(struct man *);
+int		  man_addspan(struct man *,
+			const struct tbl_span *);
 
 const struct man_node *man_node(const struct man *);
 const struct man_meta *man_meta(const struct man *);

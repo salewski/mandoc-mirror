@@ -48,6 +48,8 @@ static	struct man_node	*man_node_alloc(int, int,
 				enum man_type, enum mant);
 static	int		 man_node_append(struct man *, 
 				struct man_node *);
+static	int		 man_span_alloc(struct man *, 
+				const struct tbl_span *);
 static	void		 man_node_free(struct man_node *);
 static	void		 man_node_unlink(struct man *, 
 				struct man_node *);
@@ -55,6 +57,7 @@ static	int		 man_ptext(struct man *, int, char *, int);
 static	int		 man_pmacro(struct man *, int, char *, int);
 static	void		 man_free1(struct man *);
 static	void		 man_alloc1(struct man *);
+static	int		 man_descope(struct man *, int, int);
 
 
 const struct man_node *
@@ -212,6 +215,8 @@ man_node_append(struct man *man, struct man_node *p)
 	man->last = p;
 
 	switch (p->type) {
+	case (MAN_TBL):
+		/* FALLTHROUGH */
 	case (MAN_TEXT):
 		if ( ! man_valid_post(man))
 			return(0);
@@ -289,6 +294,20 @@ man_block_alloc(struct man *m, int line, int pos, enum mant tok)
 	return(1);
 }
 
+static int
+man_span_alloc(struct man *m, const struct tbl_span *span)
+{
+	struct man_node	*n;
+
+	/* FIXME: grab from span */
+	n = man_node_alloc(0, 0, MAN_TBL, MAN_MAX);
+
+	if ( ! man_node_append(m, n))
+		return(0);
+
+	m->next = MAN_NEXT_SIBLING;
+	return(1);
+}
 
 int
 man_word_alloc(struct man *m, int line, int pos, const char *word)
@@ -339,6 +358,40 @@ man_node_delete(struct man *m, struct man_node *p)
 }
 
 
+int
+man_addspan(struct man *m, const struct tbl_span *sp)
+{
+
+	if ( ! man_span_alloc(m, sp))
+		return(0);
+	return(man_descope(m, 0, 0));
+}
+
+static int
+man_descope(struct man *m, int line, int offs)
+{
+	/*
+	 * Co-ordinate what happens with having a next-line scope open:
+	 * first close out the element scope (if applicable), then close
+	 * out the block scope (also if applicable).
+	 */
+
+	if (MAN_ELINE & m->flags) {
+		m->flags &= ~MAN_ELINE;
+		if ( ! man_unscope(m, m->last->parent, MANDOCERR_MAX))
+			return(0);
+	}
+
+	if ( ! (MAN_BLINE & m->flags))
+		return(1);
+	m->flags &= ~MAN_BLINE;
+
+	if ( ! man_unscope(m, m->last->parent, MANDOCERR_MAX))
+		return(0);
+	return(man_body_alloc(m, line, offs, m->last->tok));
+}
+
+
 static int
 man_ptext(struct man *m, int line, char *buf, int offs)
 {
@@ -358,7 +411,7 @@ man_ptext(struct man *m, int line, char *buf, int offs)
 	if (MAN_LITERAL & m->flags) {
 		if ( ! man_word_alloc(m, line, offs, buf + offs))
 			return(0);
-		goto descope;
+		return(man_descope(m, line, offs));
 	}
 
 	/* Pump blank lines directly into the backend. */
@@ -370,7 +423,7 @@ man_ptext(struct man *m, int line, char *buf, int offs)
 		/* Allocate a blank entry. */
 		if ( ! man_word_alloc(m, line, offs, ""))
 			return(0);
-		goto descope;
+		return(man_descope(m, line, offs));
 	}
 
 	/* 
@@ -407,26 +460,7 @@ man_ptext(struct man *m, int line, char *buf, int offs)
 	if (mandoc_eos(buf, (size_t)i, 0))
 		m->last->flags |= MAN_EOS;
 
-descope:
-	/*
-	 * Co-ordinate what happens with having a next-line scope open:
-	 * first close out the element scope (if applicable), then close
-	 * out the block scope (also if applicable).
-	 */
-
-	if (MAN_ELINE & m->flags) {
-		m->flags &= ~MAN_ELINE;
-		if ( ! man_unscope(m, m->last->parent, MANDOCERR_MAX))
-			return(0);
-	}
-
-	if ( ! (MAN_BLINE & m->flags))
-		return(1);
-	m->flags &= ~MAN_BLINE;
-
-	if ( ! man_unscope(m, m->last->parent, MANDOCERR_MAX))
-		return(0);
-	return(man_body_alloc(m, line, offs, m->last->tok));
+	return(man_descope(m, line, offs));
 }
 
 
