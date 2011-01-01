@@ -35,7 +35,7 @@
 .Fa "void *data"
 .Fa "mandocmsg msgs"
 .Fc
-.Ft int
+.Ft void
 .Fn roff_endparse "struct roff *roff"
 .Ft void
 .Fn roff_free "struct roff *roff"
@@ -141,7 +141,6 @@ This line should not contain the trailing newline.
 Returns 0 on failure, 1 on success.
 .It Fn roff_endparse
 Signals that the parse is complete.
-Returns 0 on failure, 1 on success.
 .It Fn roff_span
 If
 .Fn roff_parseln

@@ -527,10 +527,7 @@ fdesc(struct curparse *curp)
 	}
 
 	assert(curp->roff);
-	if ( ! roff_endparse(curp->roff)) {
-		assert(MANDOCLEVEL_FATAL <= file_status);
-		goto cleanup;
-	}
+	roff_endparse(curp->roff);
 
 	/*
 	 * With -Wstop and warnings or errors of at least

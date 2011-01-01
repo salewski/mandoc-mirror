@@ -515,15 +515,20 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 }
 
 
-int
+void
 roff_endparse(struct roff *r)
 {
 
-	/* FIXME: if r->tbl */
 	if (r->last)
 		(*r->msg)(MANDOCERR_SCOPEEXIT, r->data, 
 				r->last->line, r->last->col, NULL);
-	return(1);
+
+	if (r->tbl) {
+		(*r->msg)(MANDOCERR_SCOPEEXIT, r->data, 
+				r->tbl->line, r->tbl->pos, NULL);
+		tbl_end(r->tbl);
+		r->tbl = NULL;
+	}
 }
 
 
