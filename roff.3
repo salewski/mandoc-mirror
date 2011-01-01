@@ -23,7 +23,8 @@
 .Nm roff_endparse ,
 .Nm roff_free ,
 .Nm roff_parseln ,
-.Nm roff_reset
+.Nm roff_reset ,
+.Nm roff_span
 .Nd roff macro compiler library
 .Sh SYNOPSIS
 .In mandoc.h
@@ -49,6 +50,8 @@
 .Fc
 .Ft void
 .Fn roff_reset "struct roff *roff"
+.Ft "const struct tbl_span *"
+.Fn roff_span "const struct roff *roff"
 .Sh DESCRIPTION
 The
 .Nm
@@ -139,6 +142,13 @@ Returns 0 on failure, 1 on success.
 .It Fn roff_endparse
 Signals that the parse is complete.
 Returns 0 on failure, 1 on success.
+.It Fn roff_span
+If
+.Fn roff_parseln
+returned
+.Va ROFF_TBL ,
+return the last parsed table row.
+Returns NULL otherwise.
 .El
 .Sh EXAMPLES
 See

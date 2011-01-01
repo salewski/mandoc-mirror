@@ -1123,6 +1123,8 @@ roff_TE(ROFF_ARGS)
 
 	if (NULL == r->tbl)
 		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
+	else
+		tbl_end(r->tbl);
 
 	r->tbl = NULL;
 	return(ROFF_IGN);
@@ -1147,10 +1149,12 @@ roff_TS(ROFF_ARGS)
 {
 	struct tbl	*t;
 
-	if (r->tbl)
+	if (r->tbl) {
 		(*r->msg)(MANDOCERR_SCOPEBROKEN, r->data, ln, ppos, NULL);
+		tbl_end(r->tbl);
+	}
 
-	t = tbl_alloc(r->data, r->msg);
+	t = tbl_alloc(ppos, ln, r->data, r->msg);
 
 	if (r->last_tbl)
 		r->last_tbl->next = t;

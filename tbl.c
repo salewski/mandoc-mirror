@@ -64,11 +64,13 @@ tbl_read(struct tbl *tbl, int ln, const char *p, int offs)
 }
 
 struct tbl *
-tbl_alloc(void *data, const mandocmsg msg)
+tbl_alloc(int pos, int line, void *data, const mandocmsg msg)
 {
 	struct tbl	*p;
 
 	p = mandoc_calloc(1, sizeof(struct tbl));
+	p->line = line;
+	p->pos = pos;
 	p->data = data;
 	p->msg = msg;
 	p->part = TBL_PART_OPTS;
@@ -126,4 +128,12 @@ tbl_span(const struct tbl *tbl)
 
 	assert(tbl);
 	return(tbl->last_span);
+}
+
+void
+tbl_end(struct tbl *tbl)
+{
+
+	if (NULL == tbl->first_span || NULL == tbl->first_span->first)
+		TBL_MSG(tbl, MANDOCERR_TBLNODATA, tbl->line, tbl->pos);
 }

@@ -105,6 +105,7 @@ enum	mandocerr {
 	MANDOCERR_TBLOPT, /* bad table option */
 	MANDOCERR_TBLLAYOUT, /* bad table layout */
 	MANDOCERR_TBLNOLAYOUT, /* no table layout cells specified */
+	MANDOCERR_TBLNODATA, /* no table data cells specified */
 	MANDOCERR_ROFFLOOP, /* input stack limit exceeded, infinite loop? */
 	MANDOCERR_BADCHAR, /* skipping bad character */
 	MANDOCERR_NOTEXT, /* skipping text before the first section header */

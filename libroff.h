@@ -31,6 +31,8 @@ struct	tbl {
 	enum tbl_part	  part;
 	char		  tab; /* cell-separator */
 	char		  decimal; /* decimal point */
+	int		  pos; /* invocation column */
+	int		  line; /* invocation line */
 	int		  linesize;
 	char		  delims[2];
 	int		  opts;
@@ -51,7 +53,7 @@ struct	tbl {
 #define	TBL_MSG(tblp, type, line, col) \
 	(*(tblp)->msg)((type), (tblp)->data, (line), (col), NULL)
 
-struct tbl	*tbl_alloc(void *, mandocmsg);
+struct tbl	*tbl_alloc(int, int, void *, mandocmsg);
 void		 tbl_restart(struct tbl *);
 void		 tbl_free(struct tbl *);
 void		 tbl_reset(struct tbl *);
@@ -60,6 +62,7 @@ int		 tbl_option(struct tbl *, int, const char *);
 int		 tbl_layout(struct tbl *, int, const char *);
 int		 tbl_data(struct tbl *, int, const char *);
 const struct tbl_span *tbl_span(const struct tbl *);
+void		 tbl_end(struct tbl *);
 
 __END_DECLS
 
