@@ -348,8 +348,10 @@ man_ptext(struct man *m, int line, char *buf, int offs)
 
 	if ('\\' == buf[offs] && 
 			'.' == buf[offs + 1] && 
-			'"' == buf[offs + 2])
-		return(man_pmsg(m, line, offs, MANDOCERR_BADCOMMENT));
+			'"' == buf[offs + 2]) {
+		man_pmsg(m, line, offs, MANDOCERR_BADCOMMENT);
+		return(1);
+	}
 
 	/* Literal free-form text whitespace is preserved. */
 
@@ -381,8 +383,7 @@ man_ptext(struct man *m, int line, char *buf, int offs)
 
 	if (' ' == buf[i - 1] || '\t' == buf[i - 1]) {
 		if (i > 1 && '\\' != buf[i - 2])
-			if ( ! man_pmsg(m, line, i - 1, MANDOCERR_EOLNSPACE))
-				return(0);
+			man_pmsg(m, line, i - 1, MANDOCERR_EOLNSPACE);
 
 		for (--i; i && ' ' == buf[i]; i--)
 			/* Spin back to non-space. */ ;
@@ -488,8 +489,7 @@ man_pmacro(struct man *m, int ln, char *buf, int offs)
 	 */
 
 	if ('\0' == buf[i] && ' ' == buf[i - 1])
-		if ( ! man_pmsg(m, ln, i - 1, MANDOCERR_EOLNSPACE))
-			goto err;
+		man_pmsg(m, ln, i - 1, MANDOCERR_EOLNSPACE);
 
 	/* 
 	 * Remove prior ELINE macro, as it's being clobbered by a new
