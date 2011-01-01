@@ -68,16 +68,16 @@ data(struct tbl *tbl, struct tbl_span *dp,
 	if (p[*pos])
 		(*pos)++;
 
-	/* XXX: do the strcmps, then malloc(). */
-
 	if ( ! strcmp(dat->string, "_"))
-		dat->flags |= TBL_DATA_HORIZ;
+		dat->pos = TBL_DATA_HORIZ;
 	else if ( ! strcmp(dat->string, "="))
-		dat->flags |= TBL_DATA_DHORIZ;
+		dat->pos = TBL_DATA_DHORIZ;
 	else if ( ! strcmp(dat->string, "\\_"))
-		dat->flags |= TBL_DATA_NHORIZ;
+		dat->pos = TBL_DATA_NHORIZ;
 	else if ( ! strcmp(dat->string, "\\="))
-		dat->flags |= TBL_DATA_NDHORIZ;
+		dat->pos = TBL_DATA_NDHORIZ;
+	else
+		dat->pos = TBL_DATA_DATA;
 }
 
 int
@@ -119,12 +119,14 @@ tbl_data(struct tbl *tbl, int ln, const char *p)
 		tbl->last_span = tbl->first_span = dp;
 
 	if ( ! strcmp(p, "_")) {
-		dp->flags |= TBL_SPAN_HORIZ;
+		dp->pos = TBL_SPAN_HORIZ;
 		return(1);
 	} else if ( ! strcmp(p, "=")) {
-		dp->flags |= TBL_SPAN_DHORIZ;
+		dp->pos = TBL_SPAN_DHORIZ;
 		return(1);
 	}
+
+	dp->pos = TBL_SPAN_DATA;
 
 	while ('\0' != p[pos])
 		data(tbl, dp, ln, p, &pos);

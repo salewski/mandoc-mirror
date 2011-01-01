@@ -30,6 +30,7 @@
 
 static	void	print_mdoc(const struct mdoc_node *, int);
 static	void	print_man(const struct man_node *, int);
+static	void	print_span(const struct tbl_span *);
 
 
 /* ARGSUSED */
@@ -58,7 +59,6 @@ print_mdoc(const struct mdoc_node *n, int indent)
 	size_t		  argc, sz;
 	char		**params;
 	struct mdoc_argv *argv;
-	const struct tbl_dat *dp;
 
 	argv = NULL;
 	argc = sz = 0;
@@ -141,12 +141,7 @@ print_mdoc(const struct mdoc_node *n, int indent)
 
 	if (n->span) {
 		assert(NULL == p);
-		printf("tbl: ");
-		for (dp = n->span->first; dp; dp = dp->next) {
-			printf("[%s]", dp->string);
-			if (dp->next)
-				putchar(' ');
-		}
+		print_span(n->span);
 	} else {
 		printf("%s (%s)", p, t);
 
@@ -180,7 +175,6 @@ print_man(const struct man_node *n, int indent)
 {
 	const char	 *p, *t;
 	int		  i;
-	const struct tbl_dat *dp;
 
 	switch (n->type) {
 	case (MAN_ROOT):
@@ -239,13 +233,8 @@ print_man(const struct man_node *n, int indent)
 
 	if (n->span) {
 		assert(NULL == p);
-		printf("tbl: ");
-		for (dp = n->span->first; dp; dp = dp->next) {
-			printf("[%s]", dp->string);
-			if (dp->next)
-				putchar(' ');
-		}
-	} else 
+		print_span(n->span);
+	} else
 		printf("%s (%s) %d:%d", p, t, n->line, n->pos);
 
 	putchar('\n');
@@ -254,4 +243,43 @@ print_man(const struct man_node *n, int indent)
 		print_man(n->child, indent + 1);
 	if (n->next)
 		print_man(n->next, indent);
+}
+
+static void
+print_span(const struct tbl_span *sp)
+{
+	const struct tbl_dat *dp;
+
+	printf("tbl: ");
+
+	switch (sp->pos) {
+	case (TBL_SPAN_HORIZ):
+		putchar('-');
+		return;
+	case (TBL_SPAN_DHORIZ):
+		putchar('=');
+		return;
+	default:
+		break;
+	}
+
+	for (dp = sp->first; dp; dp = dp->next) {
+		switch (dp->pos) {
+		case (TBL_DATA_HORIZ):
+			/* FALLTHROUGH */
+		case (TBL_DATA_NHORIZ):
+			putchar('-');
+			continue;
+		case (TBL_DATA_DHORIZ):
+			/* FALLTHROUGH */
+		case (TBL_DATA_NDHORIZ):
+			putchar('=');
+			continue;
+		default:
+			break;
+		}
+		printf("[%s]", dp->string);
+		if (dp->next)
+			putchar(' ');
+	}
 }

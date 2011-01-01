@@ -181,6 +181,14 @@ struct	tbl_row {
 	struct tbl_cell	 *last;
 };
 
+enum	tbl_datt {
+	TBL_DATA_DATA,
+	TBL_DATA_HORIZ,
+	TBL_DATA_DHORIZ,
+	TBL_DATA_NHORIZ,
+	TBL_DATA_NDHORIZ
+};
+
 /*
  * A cell within a row of data.  The "string" field contains the actual
  * string value that's in the cell.  The rest is layout.
@@ -189,11 +197,13 @@ struct	tbl_dat {
 	struct tbl_cell	 *layout; /* layout cell: CAN BE NULL */
 	struct tbl_dat	 *next;
 	char		 *string;
-	int		  flags;
-#define	TBL_DATA_HORIZ	 (1 << 0)
-#define	TBL_DATA_DHORIZ	 (1 << 1)
-#define	TBL_DATA_NHORIZ	 (1 << 2)
-#define	TBL_DATA_NDHORIZ (1 << 3)
+	enum tbl_datt	  pos;
+};
+
+enum	tbl_spant {
+	TBL_SPAN_DATA, /* span consists of data */
+	TBL_SPAN_HORIZ, /* span is horizontal line */
+	TBL_SPAN_DHORIZ /* span is double horizontal line */
 };
 
 /*
@@ -203,9 +213,7 @@ struct	tbl_span {
 	struct tbl_row	 *layout; /* layout row: CAN BE NULL */
 	struct tbl_dat	 *first;
 	struct tbl_dat	 *last;
-	int		  flags;
-#define	TBL_SPAN_HORIZ	(1 << 0)
-#define	TBL_SPAN_DHORIZ	(1 << 1)
+	enum tbl_spant	  pos;
 	struct tbl_span	 *next;
 };
 
