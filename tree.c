@@ -239,8 +239,9 @@ print_man(const struct man_node *n, int indent)
 
 	if (n->span) {
 		assert(NULL == p);
+		printf("tbl: ");
 		for (dp = n->span->first; dp; dp = dp->next) {
-			printf("tbl: [%s]", dp->string);
+			printf("[%s]", dp->string);
 			if (dp->next)
 				putchar(' ');
 		}
