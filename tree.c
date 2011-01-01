@@ -58,6 +58,7 @@ print_mdoc(const struct mdoc_node *n, int indent)
 	size_t		  argc, sz;
 	char		**params;
 	struct mdoc_argv *argv;
+	const struct tbl_dat *dp;
 
 	argv = NULL;
 	argc = sz = 0;
@@ -96,6 +97,8 @@ print_mdoc(const struct mdoc_node *n, int indent)
 		/* NOTREACHED */
 	}
 
+	p = NULL;
+
 	switch (n->type) {
 	case (MDOC_TEXT):
 		p = n->string;
@@ -124,7 +127,6 @@ print_mdoc(const struct mdoc_node *n, int indent)
 		}
 		break;
 	case (MDOC_TBL):
-		p = "tbl";
 		break;
 	case (MDOC_ROOT):
 		p = "root";
@@ -135,23 +137,36 @@ print_mdoc(const struct mdoc_node *n, int indent)
 	}
 
 	for (i = 0; i < indent; i++)
-		(void)printf("    ");
-	(void)printf("%s (%s)", p, t);
+		putchar('\t');
 
-	for (i = 0; i < (int)argc; i++) {
-		(void)printf(" -%s", mdoc_argnames[argv[i].arg]);
-		if (argv[i].sz > 0)
-			(void)printf(" [");
-		for (j = 0; j < (int)argv[i].sz; j++)
-			(void)printf(" [%s]", argv[i].value[j]);
-		if (argv[i].sz > 0)
-			(void)printf(" ]");
+	if (n->span) {
+		assert(NULL == p);
+		printf("tbl: ");
+		for (dp = n->span->first; dp; dp = dp->next) {
+			printf("[%s]", dp->string);
+			if (dp->next)
+				putchar(' ');
+		}
+	} else {
+		printf("%s (%s)", p, t);
+
+		for (i = 0; i < (int)argc; i++) {
+			printf(" -%s", mdoc_argnames[argv[i].arg]);
+			if (argv[i].sz > 0)
+				printf(" [");
+			for (j = 0; j < (int)argv[i].sz; j++)
+				printf(" [%s]", argv[i].value[j]);
+			if (argv[i].sz > 0)
+				printf(" ]");
+		}
+		
+		for (i = 0; i < (int)sz; i++)
+			printf(" [%s]", params[i]);
+
+		printf(" %d:%d", n->line, n->pos);
 	}
 
-	for (i = 0; i < (int)sz; i++)
-		(void)printf(" [%s]", params[i]);
-
-	(void)printf(" %d:%d\n", n->line, n->pos);
+	putchar('\n');
 
 	if (n->child)
 		print_mdoc(n->child, indent + 1);
@@ -165,6 +180,7 @@ print_man(const struct man_node *n, int indent)
 {
 	const char	 *p, *t;
 	int		  i;
+	const struct tbl_dat *dp;
 
 	switch (n->type) {
 	case (MAN_ROOT):
@@ -193,6 +209,8 @@ print_man(const struct man_node *n, int indent)
 		/* NOTREACHED */
 	}
 
+	p = NULL;
+
 	switch (n->type) {
 	case (MAN_TEXT):
 		p = n->string;
@@ -210,7 +228,6 @@ print_man(const struct man_node *n, int indent)
 		p = "root";
 		break;
 	case (MAN_TBL):
-		p = "tbl";
 		break;
 	default:
 		abort();
@@ -218,8 +235,19 @@ print_man(const struct man_node *n, int indent)
 	}
 
 	for (i = 0; i < indent; i++)
-		(void)printf("    ");
-	(void)printf("%s (%s) %d:%d\n", p, t, n->line, n->pos);
+		putchar('\t');
+
+	if (n->span) {
+		assert(NULL == p);
+		for (dp = n->span->first; dp; dp = dp->next) {
+			printf("tbl: [%s]", dp->string);
+			if (dp->next)
+				putchar(' ');
+		}
+	} else 
+		printf("%s (%s) %d:%d", p, t, n->line, n->pos);
+
+	putchar('\n');
 
 	if (n->child)
 		print_man(n->child, indent + 1);

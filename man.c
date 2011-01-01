@@ -301,6 +301,7 @@ man_span_alloc(struct man *m, const struct tbl_span *span)
 
 	/* FIXME: grab from span */
 	n = man_node_alloc(0, 0, MAN_TBL, MAN_MAX);
+	n->span = span;
 
 	if ( ! man_node_append(m, n))
 		return(0);
