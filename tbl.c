@@ -87,9 +87,9 @@ tbl_free(struct tbl *p)
 	struct tbl_cell	*cp;
 	struct tbl_span	*sp;
 	struct tbl_dat	*dp;
+	struct tbl_head	*hp;
 
-	while (p->first_row) {
-		rp = p->first_row;
+	while (NULL != (rp = p->first_row)) {
 		p->first_row = rp->next;
 		while (rp->first) {
 			cp = rp->first;
@@ -99,8 +99,7 @@ tbl_free(struct tbl *p)
 		free(rp);
 	}
 
-	while (p->first_span) {
-		sp = p->first_span;
+	while (NULL != (sp = p->first_span)) {
 		p->first_span = sp->next;
 		while (sp->first) {
 			dp = sp->first;
@@ -110,6 +109,11 @@ tbl_free(struct tbl *p)
 			free(dp);
 		}
 		free(sp);
+	}
+
+	while (NULL != (hp = p->first_head)) {
+		p->first_head = hp->next;
+		free(hp);
 	}
 
 	free(p);

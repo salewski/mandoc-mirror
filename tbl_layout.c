@@ -45,11 +45,15 @@ static	const struct tbl_phrase keys[KEYS_MAX] = {
 	{ '|',		 TBL_CELL_VERT }
 };
 
-static	int	 mods(struct tbl *, struct tbl_cell *, 
-			int, const char *, int *);
-static	int	 cell(struct tbl *, struct tbl_row *, 
-			int, const char *, int *);
-static	void	 row(struct tbl *, int, const char *, int *);
+static	int		 mods(struct tbl *, struct tbl_cell *, 
+				int, const char *, int *);
+static	int		 cell(struct tbl *, struct tbl_row *, 
+				int, const char *, int *);
+static	void		 row(struct tbl *, int, const char *, int *);
+static	struct tbl_cell *cell_alloc(struct tbl *, 
+				struct tbl_row *, enum tbl_cellt);
+static	void		 head_adjust(const struct tbl_cell *, 
+				struct tbl_head *);
 
 static int
 mods(struct tbl *tbl, struct tbl_cell *cp, 
@@ -153,7 +157,6 @@ static int
 cell(struct tbl *tbl, struct tbl_row *rp, 
 		int ln, const char *p, int *pos)
 {
-	struct tbl_cell	*cp;
 	int		 i;
 	enum tbl_cellt	 c;
 
@@ -189,16 +192,7 @@ cell(struct tbl *tbl, struct tbl_row *rp,
 
 	/* Allocate cell then parse its modifiers. */
 
-	cp = mandoc_calloc(1, sizeof(struct tbl_cell));
-	cp->pos = c;
-
-	if (rp->last) {
-		rp->last->next = cp;
-		rp->last = cp;
-	} else
-		rp->last = rp->first = cp;
-
-	return(mods(tbl, cp, ln, p, pos));
+	return(mods(tbl, cell_alloc(tbl, rp, c), ln, p, pos));
 }
 
 
@@ -253,7 +247,6 @@ cell:
 	/* NOTREACHED */
 }
 
-
 int
 tbl_layout(struct tbl *tbl, int ln, const char *p)
 {
@@ -265,3 +258,114 @@ tbl_layout(struct tbl *tbl, int ln, const char *p)
 	/* Always succeed. */
 	return(1);
 }
+
+static struct tbl_cell *
+cell_alloc(struct tbl *tbl, struct tbl_row *rp, enum tbl_cellt pos)
+{
+	struct tbl_cell	*p, *pp;
+	struct tbl_head	*h, *hp;
+
+	p = mandoc_calloc(1, sizeof(struct tbl_cell));
+
+	if (NULL != (pp = rp->last)) {
+		rp->last->next = p;
+		rp->last = p;
+	} else
+		rp->last = rp->first = p;
+
+	p->pos = pos;
+
+	/*
+	 * This is a little bit complicated.  Here we determine the
+	 * header the corresponds to a cell.  We add headers dynamically
+	 * when need be or re-use them, otherwise.  As an example, given
+	 * the following:
+	 *
+	 * 	1  c || l 
+	 * 	2  | c | l
+	 * 	3  l l
+	 * 	3  || c | l |.
+	 *
+	 * We first add the new headers (as there are none) in (1); then
+	 * in (2) we insert the first spanner (as it doesn't match up
+	 * with the header); then we re-use the prior data headers,
+	 * skipping over the spanners; then we re-use everything and add
+	 * a last spanner.  Note that VERT headers are made into DVERT
+	 * ones.
+	 */
+
+	h = pp ? pp->head->prev : tbl->first_head;
+
+	if (h) {
+		/* Re-use data header. */
+		if (TBL_HEAD_DATA == h->pos && 
+				(TBL_CELL_VERT != p->pos &&
+				 TBL_CELL_DVERT != p->pos)) {
+			p->head = h;
+			return(p);
+		}
+
+		/* Re-use spanner header. */
+		if (TBL_HEAD_DATA != h->pos && 
+				(TBL_CELL_VERT == p->pos ||
+				 TBL_CELL_DVERT == p->pos)) {
+			head_adjust(p, h);
+			p->head = h;
+			return(p);
+		}
+
+		/* Right-shift headers with a new spanner. */
+		if (TBL_HEAD_DATA == h->pos && 
+				(TBL_CELL_VERT == p->pos ||
+				 TBL_CELL_DVERT == p->pos)) {
+			hp = mandoc_calloc(1, sizeof(struct tbl_head));
+			hp->prev = h->prev;
+			if (h->prev)
+				h->prev->next = hp;
+			h->prev = hp;
+			hp->next = h;
+			head_adjust(p, hp);
+			p->head = hp;
+			return(p);
+		}
+
+		if (NULL != (h = h->next)) {
+			head_adjust(p, h);
+			p->head = h;
+			return(p);
+		}
+
+		/* Fall through to default case... */
+	}
+
+	hp = mandoc_calloc(1, sizeof(struct tbl_head));
+
+	if (tbl->last_head) {
+		hp->prev = tbl->last_head;
+		tbl->last_head->next = hp;
+		tbl->last_head = hp;
+	} else
+		tbl->last_head = tbl->first_head = hp;
+
+	head_adjust(p, hp);
+	p->head = hp;
+	return(p);
+}
+
+static void
+head_adjust(const struct tbl_cell *cell, struct tbl_head *head)
+{
+	if (TBL_CELL_VERT != cell->pos &&
+			TBL_CELL_DVERT != cell->pos) {
+		head->pos = TBL_HEAD_DATA;
+		return;
+	}
+
+	if (TBL_CELL_VERT == cell->pos)
+		if (TBL_HEAD_DVERT != head->pos)
+			head->pos = TBL_HEAD_VERT;
+
+	if (TBL_CELL_DVERT == cell->pos)
+		head->pos = TBL_HEAD_DVERT;
+}
+

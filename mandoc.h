@@ -140,6 +140,25 @@ enum	mandocerr {
 	MANDOCERR_MAX
 };
 
+enum	tbl_headt {
+	TBL_HEAD_DATA, /* plug in data from tbl_dat */
+	TBL_HEAD_VERT, /* vertical spacer */
+	TBL_HEAD_DVERT  /* double-vertical spacer */
+};
+
+/*
+ * The head of a table specifies all of its columns.  When formatting a
+ * tbl_span, iterate over these and plug in data from the tbl_span when
+ * appropriate, using tbl_cell as a guide to placement.
+ */
+struct	tbl_head {
+	enum tbl_headt	  pos;
+	int		  width; /* width of cell in fixed chars */
+	int		  decimal; /* decimal point position */
+	struct tbl_head	 *next;
+	struct tbl_head	 *prev;
+};
+
 enum	tbl_cellt {
 	TBL_CELL_CENTRE, /* c, C */
 	TBL_CELL_RIGHT, /* r, R */
@@ -170,6 +189,7 @@ struct	tbl_cell {
 #define	TBL_CELL_EQUAL	 (1 << 4) /* e, E */
 #define	TBL_CELL_UP	 (1 << 5) /* u, U */
 #define	TBL_CELL_WIGN	 (1 << 6) /* z, Z */
+	struct tbl_head	 *head;
 };
 
 /*

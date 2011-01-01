@@ -47,6 +47,8 @@ struct	tbl {
 	struct tbl_row	 *last_row;
 	struct tbl_span	 *first_span;
 	struct tbl_span	 *last_span;
+	struct tbl_head	 *first_head;
+	struct tbl_head	 *last_head;
 	struct tbl	 *next;
 };
 
