@@ -798,7 +798,7 @@ rerun:
 				continue;
 			} else
 				break;
-		case (ROFF_CONT):
+		default:
 			break;
 		}
 
@@ -816,9 +816,20 @@ rerun:
 		 * Lastly, push down into the parsers themselves.  One
 		 * of these will have already been set in the pset()
 		 * routine.
+		 * If libroff returns ROFF_TBL, then add it to the
+		 * currently open parse.  Since we only get here if
+		 * there does exist data (see tbl_data.c), we're
+		 * guaranteed that something's been allocated.
 		 */
 
-		if (curp->man || curp->mdoc) {
+		if (ROFF_TBL == rr) {
+			assert(curp->man || curp->mdoc);
+			if (curp->man)
+				man_addspan(curp->man, roff_span(curp->roff));
+			else
+				mdoc_addspan(curp->mdoc, roff_span(curp->roff));
+
+		} else if (curp->man || curp->mdoc) {
 			rc = curp->man ?
 				man_parseln(curp->man, 
 					curp->line, ln.buf, of) :

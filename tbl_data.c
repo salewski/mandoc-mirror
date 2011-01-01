@@ -91,7 +91,7 @@ tbl_data(struct tbl *tbl, int ln, const char *p)
 
 	if ('\0' == p[pos]) {
 		TBL_MSG(tbl, MANDOCERR_TBL, ln, pos);
-		return(1);
+		return(0);
 	}
 
 	/* 

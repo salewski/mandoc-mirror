@@ -56,11 +56,11 @@ tbl_read(struct tbl *tbl, int ln, const char *p, int offs)
 		break;
 	}
 
-	/* 
-	 * FIXME: allow the original string to slip through for the time
-	 * being. 
+	/*
+	 * This only returns zero if the line is empty, so we ignore it
+	 * and continue on.
 	 */
-	return(tbl_data(tbl, ln, p) ? ROFF_CONT : ROFF_ERR);
+	return(tbl_data(tbl, ln, p) ? ROFF_TBL : ROFF_IGN);
 }
 
 struct tbl *
