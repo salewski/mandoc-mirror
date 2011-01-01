@@ -116,10 +116,15 @@ tbl_free(struct tbl *p)
 }
 
 void
-tbl_restart(struct tbl *tbl)
+tbl_restart(int line, int pos, struct tbl *tbl)
 {
 
 	tbl->part = TBL_PART_LAYOUT;
+	tbl->line = line;
+	tbl->pos = pos;
+
+	if (NULL == tbl->first_span || NULL == tbl->first_span->first)
+		TBL_MSG(tbl, MANDOCERR_TBLNODATA, tbl->line, tbl->pos);
 }
 
 const struct tbl_span *
@@ -137,3 +142,4 @@ tbl_end(struct tbl *tbl)
 	if (NULL == tbl->first_span || NULL == tbl->first_span->first)
 		TBL_MSG(tbl, MANDOCERR_TBLNODATA, tbl->line, tbl->pos);
 }
+

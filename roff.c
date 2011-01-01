@@ -1138,7 +1138,7 @@ roff_T_(ROFF_ARGS)
 	if (NULL == r->tbl)
 		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
 	else
-		tbl_restart(r->tbl);
+		tbl_restart(ppos, ln, r->tbl);
 
 	return(ROFF_IGN);
 }
