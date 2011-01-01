@@ -25,6 +25,12 @@
 #include "libmandoc.h"
 #include "libroff.h"
 
+static	void	 tbl_calc(struct tbl *);
+static	void	 tbl_calc_data(struct tbl *, struct tbl_dat *);
+static	void	 tbl_calc_data_literal(struct tbl_dat *);
+static	void	 tbl_calc_data_number(struct tbl *, struct tbl_dat *);
+static	void	 tbl_calc_data_spanner(struct tbl_dat *);
+
 enum rofferr
 tbl_read(struct tbl *tbl, int ln, const char *p, int offs)
 {
@@ -145,5 +151,164 @@ tbl_end(struct tbl *tbl)
 
 	if (NULL == tbl->first_span || NULL == tbl->first_span->first)
 		TBL_MSG(tbl, MANDOCERR_TBLNODATA, tbl->line, tbl->pos);
+	else
+		tbl_calc(tbl);
 }
+
+static void
+tbl_calc(struct tbl *tbl)
+{
+	struct tbl_span	*sp;
+	struct tbl_dat	*dp;
+	struct tbl_head	*hp;
+
+	/* Calculate width as the max of column cells' widths. */
+
+	for (sp = tbl->first_span; sp; sp = sp->next) {
+		switch (sp->pos) {
+		case (TBL_DATA_HORIZ):
+			/* FALLTHROUGH */
+		case (TBL_DATA_DHORIZ):
+			continue;
+		default:
+			break;
+		}
+		for (dp = sp->first; dp; dp = dp->next)
+			tbl_calc_data(tbl, dp);
+	}
+
+	/* Calculate width as the simple spanner value. */
+
+	for (hp = tbl->first_head; hp; hp = hp->next) 
+		switch (hp->pos) {
+		case (TBL_HEAD_VERT):
+			hp->width = 1;
+			break;
+		case (TBL_HEAD_DVERT):
+			hp->width = 2;
+			break;
+		default:
+			break;
+		}
+}
+
+static void
+tbl_calc_data(struct tbl *tbl, struct tbl_dat *data)
+{
+
+	/*
+	 * This is the case with overrunning cells... 
+	 */
+	if (NULL == data->layout)
+		return;
+
+	/* Branch down into data sub-types. */
+
+	switch (data->layout->pos) {
+	case (TBL_CELL_HORIZ):
+		/* FALLTHROUGH */
+	case (TBL_CELL_DHORIZ):
+		tbl_calc_data_spanner(data);
+		break;
+	case (TBL_CELL_LONG):
+		/* FALLTHROUGH */
+	case (TBL_CELL_CENTRE):
+		/* FALLTHROUGH */
+	case (TBL_CELL_LEFT):
+		/* FALLTHROUGH */
+	case (TBL_CELL_RIGHT):
+		tbl_calc_data_literal(data);
+		break;
+	case (TBL_CELL_NUMBER):
+		tbl_calc_data_number(tbl, data);
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+}
+
+static void
+tbl_calc_data_spanner(struct tbl_dat *data)
+{
+
+	/* N.B., these are horiz spanners (not vert) so always 1. */
+	data->layout->head->width = 1;
+}
+
+static void
+tbl_calc_data_number(struct tbl *tbl, struct tbl_dat *data)
+{
+	int 		 sz, d;
+	char		*dp, pnt;
+
+	/*
+	 * First calculate number width and decimal place (last + 1 for
+	 * no-decimal numbers).  If the stored decimal is subsequent
+	 * ours, make our size longer by that difference
+	 * (right-"shifting"); similarly, if ours is subsequent the
+	 * stored, then extend the stored size by the difference.
+	 * Finally, re-assign the stored values.
+	 */
+
+	/* TODO: use spacing modifier. */
+
+	assert(data->string);
+	sz = (int)strlen(data->string);
+	pnt = tbl->decimal;
+
+	if (NULL == (dp = strchr(data->string, pnt)))
+		d = sz + 1;
+	else
+		d = (int)(dp - data->string) + 1;
+
+	sz += 2;
+
+	if (data->layout->head->decimal > d) {
+		sz += data->layout->head->decimal - d;
+		d = data->layout->head->decimal;
+	} else
+		data->layout->head->width += 
+			d - data->layout->head->decimal;
+
+	if (sz > data->layout->head->width)
+		data->layout->head->width = sz;
+	if (d > data->layout->head->decimal)
+		data->layout->head->decimal = d;
+}
+
+static void
+tbl_calc_data_literal(struct tbl_dat *data)
+{
+	int		 sz, bufsz;
+
+	/* 
+	 * Calculate our width and use the spacing, with a minimum
+	 * spacing dictated by position (centre, e.g,. gets a space on
+	 * either side, while right/left get a single adjacent space).
+	 */
+
+	assert(data->string);
+	sz = (int)strlen(data->string);
+
+	switch (data->layout->pos) {
+	case (TBL_CELL_LONG):
+		/* FALLTHROUGH */
+	case (TBL_CELL_CENTRE):
+		bufsz = 2;
+		break;
+	default:
+		bufsz = 1;
+		break;
+	}
+
+	if (data->layout->spacing)
+		bufsz = bufsz > data->layout->spacing ? 
+			bufsz : data->layout->spacing;
+
+	sz += bufsz;
+	if (data->layout->head->width < sz)
+		data->layout->head->width = sz;
+}
+
 
