@@ -176,9 +176,13 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"bad comment style",
 	"unknown escape sequence",
 	"unterminated quoted string",
+	
+	/* related to tables */
+	"extra data cells",
 
 	"generic error",
 
+	/* related to tables */
 	"bad table syntax",
 	"bad table option",
 	"bad table layout",

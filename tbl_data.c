@@ -52,6 +52,9 @@ data(struct tbl *tbl, struct tbl_span *dp,
 	dat = mandoc_calloc(1, sizeof(struct tbl_dat));
 	dat->layout = cp;
 
+	if (NULL == dat->layout)
+		TBL_MSG(tbl, MANDOCERR_TBLEXTRADAT, ln, *pos);
+
 	if (dp->last) {
 		dp->last->next = dat;
 		dp->last = dat;

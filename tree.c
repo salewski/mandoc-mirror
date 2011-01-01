@@ -278,7 +278,7 @@ print_span(const struct tbl_span *sp)
 		default:
 			break;
 		}
-		printf("[%s]", dp->string);
+		printf("[%s%s]", dp->string, dp->layout ?  "" : "*");
 		if (dp->next)
 			putchar(' ');
 	}
