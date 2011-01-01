@@ -88,6 +88,9 @@ print_mdoc(const struct mdoc_node *n, int indent)
 	case (MDOC_TEXT):
 		t = "text";
 		break;
+	case (MDOC_TBL):
+		t = "tbl";
+		break;
 	default:
 		abort();
 		/* NOTREACHED */
@@ -119,6 +122,9 @@ print_mdoc(const struct mdoc_node *n, int indent)
 			argv = n->args->argv;
 			argc = n->args->argc;
 		}
+		break;
+	case (MDOC_TBL):
+		p = "tbl";
 		break;
 	case (MDOC_ROOT):
 		p = "root";
@@ -179,6 +185,9 @@ print_man(const struct man_node *n, int indent)
 	case (MAN_BODY):
 		t = "block-body";
 		break;
+	case (MAN_TBL):
+		t = "tbl";
+		break;
 	default:
 		abort();
 		/* NOTREACHED */
@@ -199,6 +208,9 @@ print_man(const struct man_node *n, int indent)
 		break;
 	case (MAN_ROOT):
 		p = "root";
+		break;
+	case (MAN_TBL):
+		p = "tbl";
 		break;
 	default:
 		abort();
