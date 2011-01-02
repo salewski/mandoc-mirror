@@ -114,13 +114,17 @@ tbl_data(struct tbl_node *tbl, int ln, const char *p)
 		rp = tbl->first_row;
 
 	dp = mandoc_calloc(1, sizeof(struct tbl_span));
+	dp->tbl = &tbl->opts;
 	dp->layout = rp;
+	dp->head = tbl->first_head;
 
 	if (tbl->last_span) {
 		tbl->last_span->next = dp;
 		tbl->last_span = dp;
-	} else
+	} else {
 		tbl->last_span = tbl->first_span = dp;
+		dp->flags |= TBL_SPAN_FIRST;
+	}
 
 	if ( ! strcmp(p, "_")) {
 		dp->pos = TBL_SPAN_HORIZ;

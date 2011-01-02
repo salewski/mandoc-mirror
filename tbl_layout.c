@@ -322,6 +322,8 @@ cell_alloc(struct tbl_node *tbl, struct tbl_row *rp, enum tbl_cellt pos)
 			hp->prev = h->prev;
 			if (h->prev)
 				h->prev->next = hp;
+			if (h == tbl->first_head)
+				tbl->first_head = hp;
 			h->prev = hp;
 			hp->next = h;
 			head_adjust(p, hp);

@@ -153,6 +153,9 @@ tbl_end(struct tbl_node *tbl)
 		TBL_MSG(tbl, MANDOCERR_TBLNODATA, tbl->line, tbl->pos);
 	else
 		tbl_calc(tbl);
+
+	if (tbl->last_span)
+		tbl->last_span->flags |= TBL_SPAN_LAST;
 }
 
 static void

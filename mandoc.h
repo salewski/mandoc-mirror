@@ -250,9 +250,14 @@ enum	tbl_spant {
  * A row of data in a table.
  */
 struct	tbl_span {
+	struct tbl	 *tbl;
+	struct tbl_head	 *head;
 	struct tbl_row	 *layout; /* layout row: CAN BE NULL */
 	struct tbl_dat	 *first;
 	struct tbl_dat	 *last;
+	int		  flags;
+#define	TBL_SPAN_FIRST	 (1 << 0)
+#define	TBL_SPAN_LAST	 (1 << 1)
 	enum tbl_spant	  pos;
 	struct tbl_span	 *next;
 };
