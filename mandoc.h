@@ -145,6 +145,21 @@ enum	mandocerr {
 	MANDOCERR_MAX
 };
 
+struct	tbl {
+	char		  tab; /* cell-separator */
+	char		  decimal; /* decimal point */
+	int		  linesize;
+	char		  delims[2];
+	int		  opts;
+#define	TBL_OPT_CENTRE	 (1 << 0)
+#define	TBL_OPT_EXPAND	 (1 << 1)
+#define	TBL_OPT_BOX	 (1 << 2)
+#define	TBL_OPT_DBOX	 (1 << 3)
+#define	TBL_OPT_ALLBOX	 (1 << 4)
+#define	TBL_OPT_NOKEEP	 (1 << 5)
+#define	TBL_OPT_NOSPACE	 (1 << 6)
+};
+
 enum	tbl_headt {
 	TBL_HEAD_DATA, /* plug in data from tbl_dat */
 	TBL_HEAD_VERT, /* vertical spacer */

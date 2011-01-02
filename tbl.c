@@ -25,14 +25,14 @@
 #include "libmandoc.h"
 #include "libroff.h"
 
-static	void	 tbl_calc(struct tbl *);
-static	void	 tbl_calc_data(struct tbl *, struct tbl_dat *);
+static	void	 tbl_calc(struct tbl_node *);
+static	void	 tbl_calc_data(struct tbl_node *, struct tbl_dat *);
 static	void	 tbl_calc_data_literal(struct tbl_dat *);
-static	void	 tbl_calc_data_number(struct tbl *, struct tbl_dat *);
+static	void	 tbl_calc_data_number(struct tbl_node *, struct tbl_dat *);
 static	void	 tbl_calc_data_spanner(struct tbl_dat *);
 
 enum rofferr
-tbl_read(struct tbl *tbl, int ln, const char *p, int offs)
+tbl_read(struct tbl_node *tbl, int ln, const char *p, int offs)
 {
 	int		 len;
 	const char	*cp;
@@ -69,25 +69,25 @@ tbl_read(struct tbl *tbl, int ln, const char *p, int offs)
 	return(tbl_data(tbl, ln, p) ? ROFF_TBL : ROFF_IGN);
 }
 
-struct tbl *
+struct tbl_node *
 tbl_alloc(int pos, int line, void *data, const mandocmsg msg)
 {
-	struct tbl	*p;
+	struct tbl_node	*p;
 
-	p = mandoc_calloc(1, sizeof(struct tbl));
+	p = mandoc_calloc(1, sizeof(struct tbl_node));
 	p->line = line;
 	p->pos = pos;
 	p->data = data;
 	p->msg = msg;
 	p->part = TBL_PART_OPTS;
-	p->tab = '\t';
-	p->linesize = 12;
-	p->decimal = '.';
+	p->opts.tab = '\t';
+	p->opts.linesize = 12;
+	p->opts.decimal = '.';
 	return(p);
 }
 
 void
-tbl_free(struct tbl *p)
+tbl_free(struct tbl_node *p)
 {
 	struct tbl_row	*rp;
 	struct tbl_cell	*cp;
@@ -126,7 +126,7 @@ tbl_free(struct tbl *p)
 }
 
 void
-tbl_restart(int line, int pos, struct tbl *tbl)
+tbl_restart(int line, int pos, struct tbl_node *tbl)
 {
 
 	tbl->part = TBL_PART_LAYOUT;
@@ -138,7 +138,7 @@ tbl_restart(int line, int pos, struct tbl *tbl)
 }
 
 const struct tbl_span *
-tbl_span(const struct tbl *tbl)
+tbl_span(const struct tbl_node *tbl)
 {
 
 	assert(tbl);
@@ -146,7 +146,7 @@ tbl_span(const struct tbl *tbl)
 }
 
 void
-tbl_end(struct tbl *tbl)
+tbl_end(struct tbl_node *tbl)
 {
 
 	if (NULL == tbl->first_span || NULL == tbl->first_span->first)
@@ -156,7 +156,7 @@ tbl_end(struct tbl *tbl)
 }
 
 static void
-tbl_calc(struct tbl *tbl)
+tbl_calc(struct tbl_node *tbl)
 {
 	struct tbl_span	*sp;
 	struct tbl_dat	*dp;
@@ -193,7 +193,7 @@ tbl_calc(struct tbl *tbl)
 }
 
 static void
-tbl_calc_data(struct tbl *tbl, struct tbl_dat *data)
+tbl_calc_data(struct tbl_node *tbl, struct tbl_dat *data)
 {
 
 	/*
@@ -237,7 +237,7 @@ tbl_calc_data_spanner(struct tbl_dat *data)
 }
 
 static void
-tbl_calc_data_number(struct tbl *tbl, struct tbl_dat *data)
+tbl_calc_data_number(struct tbl_node *tbl, struct tbl_dat *data)
 {
 	int 		 sz, d;
 	char		*dp, pnt;
@@ -255,7 +255,7 @@ tbl_calc_data_number(struct tbl *tbl, struct tbl_dat *data)
 
 	assert(data->string);
 	sz = (int)strlen(data->string);
-	pnt = tbl->decimal;
+	pnt = tbl->opts.decimal;
 
 	if (NULL == (dp = strchr(data->string, pnt)))
 		d = sz + 1;

@@ -24,11 +24,11 @@
 #include "libmandoc.h"
 #include "libroff.h"
 
-static	void	data(struct tbl *, struct tbl_span *, 
+static	void	data(struct tbl_node *, struct tbl_span *, 
 			int, const char *, int *);
 
 void
-data(struct tbl *tbl, struct tbl_span *dp, 
+data(struct tbl_node *tbl, struct tbl_span *dp, 
 		int ln, const char *p, int *pos)
 {
 	struct tbl_dat	*dat;
@@ -62,7 +62,7 @@ data(struct tbl *tbl, struct tbl_span *dp,
 		dp->last = dp->first = dat;
 
 	sv = *pos;
-	while (p[*pos] && p[*pos] != tbl->tab)
+	while (p[*pos] && p[*pos] != tbl->opts.tab)
 		(*pos)++;
 
 	dat->string = mandoc_malloc(*pos - sv + 1);
@@ -85,7 +85,7 @@ data(struct tbl *tbl, struct tbl_span *dp,
 }
 
 int
-tbl_data(struct tbl *tbl, int ln, const char *p)
+tbl_data(struct tbl_node *tbl, int ln, const char *p)
 {
 	struct tbl_span	*dp;
 	struct tbl_row	*rp;

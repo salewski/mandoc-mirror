@@ -45,18 +45,18 @@ static	const struct tbl_phrase keys[KEYS_MAX] = {
 	{ '|',		 TBL_CELL_VERT }
 };
 
-static	int		 mods(struct tbl *, struct tbl_cell *, 
+static	int		 mods(struct tbl_node *, struct tbl_cell *, 
 				int, const char *, int *);
-static	int		 cell(struct tbl *, struct tbl_row *, 
+static	int		 cell(struct tbl_node *, struct tbl_row *, 
 				int, const char *, int *);
-static	void		 row(struct tbl *, int, const char *, int *);
-static	struct tbl_cell *cell_alloc(struct tbl *, 
+static	void		 row(struct tbl_node *, int, const char *, int *);
+static	struct tbl_cell *cell_alloc(struct tbl_node *, 
 				struct tbl_row *, enum tbl_cellt);
 static	void		 head_adjust(const struct tbl_cell *, 
 				struct tbl_head *);
 
 static int
-mods(struct tbl *tbl, struct tbl_cell *cp, 
+mods(struct tbl_node *tbl, struct tbl_cell *cp, 
 		int ln, const char *p, int *pos)
 {
 	char		 buf[5];
@@ -154,7 +154,7 @@ mod:
 }
 
 static int
-cell(struct tbl *tbl, struct tbl_row *rp, 
+cell(struct tbl_node *tbl, struct tbl_row *rp, 
 		int ln, const char *p, int *pos)
 {
 	int		 i;
@@ -197,7 +197,7 @@ cell(struct tbl *tbl, struct tbl_row *rp,
 
 
 static void
-row(struct tbl *tbl, int ln, const char *p, int *pos)
+row(struct tbl_node *tbl, int ln, const char *p, int *pos)
 {
 	struct tbl_row	*rp;
 
@@ -248,7 +248,7 @@ cell:
 }
 
 int
-tbl_layout(struct tbl *tbl, int ln, const char *p)
+tbl_layout(struct tbl_node *tbl, int ln, const char *p)
 {
 	int		 pos;
 
@@ -260,7 +260,7 @@ tbl_layout(struct tbl *tbl, int ln, const char *p)
 }
 
 static struct tbl_cell *
-cell_alloc(struct tbl *tbl, struct tbl_row *rp, enum tbl_cellt pos)
+cell_alloc(struct tbl_node *tbl, struct tbl_row *rp, enum tbl_cellt pos)
 {
 	struct tbl_cell	*p, *pp;
 	struct tbl_head	*h, *hp;

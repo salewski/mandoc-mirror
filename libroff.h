@@ -25,46 +25,35 @@ enum	tbl_part {
 	TBL_PART_DATA  /* creating data rows */
 };
 
-struct	tbl {
+struct	tbl_node {
 	mandocmsg	  msg; /* status messages */
 	void		 *data; /* privdata for messages */
-	enum tbl_part	  part;
-	char		  tab; /* cell-separator */
-	char		  decimal; /* decimal point */
 	int		  pos; /* invocation column */
 	int		  line; /* invocation line */
-	int		  linesize;
-	char		  delims[2];
-	int		  opts;
-#define	TBL_OPT_CENTRE	 (1 << 0)
-#define	TBL_OPT_EXPAND	 (1 << 1)
-#define	TBL_OPT_BOX	 (1 << 2)
-#define	TBL_OPT_DBOX	 (1 << 3)
-#define	TBL_OPT_ALLBOX	 (1 << 4)
-#define	TBL_OPT_NOKEEP	 (1 << 5)
-#define	TBL_OPT_NOSPACE	 (1 << 6)
+	enum tbl_part	  part;
+	struct tbl	  opts;
 	struct tbl_row	 *first_row;
 	struct tbl_row	 *last_row;
 	struct tbl_span	 *first_span;
 	struct tbl_span	 *last_span;
 	struct tbl_head	 *first_head;
 	struct tbl_head	 *last_head;
-	struct tbl	 *next;
+	struct tbl_node	 *next;
 };
 
 #define	TBL_MSG(tblp, type, line, col) \
 	(*(tblp)->msg)((type), (tblp)->data, (line), (col), NULL)
 
-struct tbl	*tbl_alloc(int, int, void *, mandocmsg);
-void		 tbl_restart(int, int, struct tbl *);
-void		 tbl_free(struct tbl *);
-void		 tbl_reset(struct tbl *);
-enum rofferr 	 tbl_read(struct tbl *, int, const char *, int);
-int		 tbl_option(struct tbl *, int, const char *);
-int		 tbl_layout(struct tbl *, int, const char *);
-int		 tbl_data(struct tbl *, int, const char *);
-const struct tbl_span *tbl_span(const struct tbl *);
-void		 tbl_end(struct tbl *);
+struct tbl_node	*tbl_alloc(int, int, void *, mandocmsg);
+void		 tbl_restart(int, int, struct tbl_node *);
+void		 tbl_free(struct tbl_node *);
+void		 tbl_reset(struct tbl_node *);
+enum rofferr 	 tbl_read(struct tbl_node *, int, const char *, int);
+int		 tbl_option(struct tbl_node *, int, const char *);
+int		 tbl_layout(struct tbl_node *, int, const char *);
+int		 tbl_data(struct tbl_node *, int, const char *);
+const struct tbl_span *tbl_span(const struct tbl_node *);
+void		 tbl_end(struct tbl_node *);
 
 __END_DECLS
 

@@ -71,11 +71,13 @@ static	const struct tbl_phrase keys[KEY_MAXKEYS] = {
 	{ "nospaces",	 TBL_OPT_NOSPACE,	KEY_NOSPACE},
 };
 
-static	int		 arg(struct tbl *, int, const char *, int *, int);
-static	void		 opt(struct tbl *, int, const char *, int *);
+static	int		 arg(struct tbl_node *, int, 
+				const char *, int *, int);
+static	void		 opt(struct tbl_node *, int, 
+				const char *, int *);
 
 static int
-arg(struct tbl *tbl, int ln, const char *p, int *pos, int key)
+arg(struct tbl_node *tbl, int ln, const char *p, int *pos, int key)
 {
 	int		 i;
 	char		 buf[KEY_MAXNUMSZ];
@@ -100,18 +102,18 @@ arg(struct tbl *tbl, int ln, const char *p, int *pos, int key)
 
 	switch (key) {
 	case (KEY_DELIM):
-		if ('\0' == (tbl->delims[0] = p[(*pos)++])) {
+		if ('\0' == (tbl->opts.delims[0] = p[(*pos)++])) {
 			TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos - 1);
 			return(0);
 		} 
 
-		if ('\0' == (tbl->delims[1] = p[(*pos)++])) {
+		if ('\0' == (tbl->opts.delims[1] = p[(*pos)++])) {
 			TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos - 1);
 			return(0);
 		} 
 		break;
 	case (KEY_TAB):
-		if ('\0' != (tbl->tab = p[(*pos)++]))
+		if ('\0' != (tbl->opts.tab = p[(*pos)++]))
 			break;
 
 		TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos - 1);
@@ -125,14 +127,14 @@ arg(struct tbl *tbl, int ln, const char *p, int *pos, int key)
 
 		if (i < KEY_MAXNUMSZ) {
 			buf[i] = '\0';
-			tbl->linesize = atoi(buf);
+			tbl->opts.linesize = atoi(buf);
 			break;
 		}
 
 		(*tbl->msg)(MANDOCERR_TBL, tbl->data, ln, *pos, NULL);
 		return(0);
 	case (KEY_DPOINT):
-		if ('\0' != (tbl->decimal = p[(*pos)++]))
+		if ('\0' != (tbl->opts.decimal = p[(*pos)++]))
 			break;
 
 		TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos - 1);
@@ -152,7 +154,7 @@ arg(struct tbl *tbl, int ln, const char *p, int *pos, int key)
 }
 
 static void
-opt(struct tbl *tbl, int ln, const char *p, int *pos)
+opt(struct tbl_node *tbl, int ln, const char *p, int *pos)
 {
 	int		 i, sv;
 	char		 buf[KEY_MAXNAME];
@@ -220,7 +222,7 @@ again:	/*
 		 */
 
 		if (keys[i].key) 
-			tbl->opts |= keys[i].key;
+			tbl->opts.opts |= keys[i].key;
 		else if ( ! arg(tbl, ln, p, pos, keys[i].ident))
 			return;
 
@@ -240,7 +242,7 @@ again:	/*
 }
 
 int
-tbl_option(struct tbl *tbl, int ln, const char *p)
+tbl_option(struct tbl_node *tbl, int ln, const char *p)
 {
 	int		 pos;
 

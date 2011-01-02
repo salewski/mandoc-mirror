@@ -86,9 +86,9 @@ struct	roff {
 	struct regset	*regs; /* read/writable registers */
 	struct roffstr	*first_string; /* user-defined strings & macros */
 	const char	*current_string; /* value of last called user macro */
-	struct tbl	*first_tbl; /* first table parsed */
-	struct tbl	*last_tbl; /* last table parsed */
-	struct tbl	*tbl; /* current table being parsed */
+	struct tbl_node	*first_tbl; /* first table parsed */
+	struct tbl_node	*last_tbl; /* last table parsed */
+	struct tbl_node	*tbl; /* current table being parsed */
 };
 
 struct	roffnode {
@@ -301,7 +301,7 @@ roffnode_push(struct roff *r, enum rofft tok, const char *name,
 static void
 roff_free1(struct roff *r)
 {
-	struct tbl	*t;
+	struct tbl_node	*t;
 
 	while (r->first_tbl) {
 		t = r->first_tbl;
@@ -1152,7 +1152,7 @@ roff_T_(ROFF_ARGS)
 static enum rofferr
 roff_TS(ROFF_ARGS)
 {
-	struct tbl	*t;
+	struct tbl_node	*t;
 
 	if (r->tbl) {
 		(*r->msg)(MANDOCERR_SCOPEBROKEN, r->data, ln, ppos, NULL);
