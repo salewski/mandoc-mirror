@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "mandoc.h"
 #include "out.h"
 #include "term.h"
 #include "main.h"

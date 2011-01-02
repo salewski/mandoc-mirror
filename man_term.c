@@ -866,6 +866,7 @@ print_man_node(DECL_ARGS)
 		}
 		break;
 	case (MAN_TBL):
+		term_tbl(p, n->span);
 		break;
 	default:
 		if ( ! (MAN_NOTEXT & termacts[n->tok].flags))

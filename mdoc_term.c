@@ -318,6 +318,7 @@ print_mdoc_node(DECL_ARGS)
 		term_word(p, n->string);
 		break;
 	case (MDOC_TBL):
+		term_tbl(p, n->span);
 		break;
 	default:
 		if (termacts[n->tok].pre && ENDBODY_NOT == n->end)
