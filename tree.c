@@ -30,7 +30,7 @@
 
 static	void	print_mdoc(const struct mdoc_node *, int);
 static	void	print_man(const struct man_node *, int);
-static	void	print_span(const struct tbl_span *);
+static	void	print_span(const struct tbl_span *, int);
 
 
 /* ARGSUSED */
@@ -136,13 +136,13 @@ print_mdoc(const struct mdoc_node *n, int indent)
 		/* NOTREACHED */
 	}
 
-	for (i = 0; i < indent; i++)
-		putchar('\t');
-
 	if (n->span) {
 		assert(NULL == p);
-		print_span(n->span);
+		print_span(n->span, indent);
 	} else {
+		for (i = 0; i < indent; i++)
+			putchar('\t');
+
 		printf("%s (%s)", p, t);
 
 		for (i = 0; i < (int)argc; i++) {
@@ -228,14 +228,14 @@ print_man(const struct man_node *n, int indent)
 		/* NOTREACHED */
 	}
 
-	for (i = 0; i < indent; i++)
-		putchar('\t');
-
 	if (n->span) {
 		assert(NULL == p);
-		print_span(n->span);
-	} else
+		print_span(n->span, indent);
+	} else {
+		for (i = 0; i < indent; i++)
+			putchar('\t');
 		printf("%s (%s) %d:%d", p, t, n->line, n->pos);
+	}
 
 	putchar('\n');
 
@@ -246,9 +246,26 @@ print_man(const struct man_node *n, int indent)
 }
 
 static void
-print_span(const struct tbl_span *sp)
+print_span(const struct tbl_span *sp, int indent)
 {
 	const struct tbl_dat *dp;
+	const struct tbl_head *hp;
+	int		 i;
+
+	if (TBL_SPAN_FIRST & sp->flags) {
+		for (i = 0; i < indent; i++)
+			putchar('\t');
+		printf("tbl-head: ");
+		for (hp = sp->head; hp; hp = hp->next) {
+			printf("[%d]", hp->width);
+			if (hp->next)
+				putchar(' ');
+		}
+		putchar('\n');
+	}
+
+	for (i = 0; i < indent; i++)
+		putchar('\t');
 
 	printf("tbl: ");
 

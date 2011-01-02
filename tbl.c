@@ -199,9 +199,6 @@ static void
 tbl_calc_data(struct tbl_node *tbl, struct tbl_dat *data)
 {
 
-	/*
-	 * This is the case with overrunning cells... 
-	 */
 	if (NULL == data->layout)
 		return;
 
@@ -313,5 +310,3 @@ tbl_calc_data_literal(struct tbl_dat *data)
 	if (data->layout->head->width < sz)
 		data->layout->head->width = sz;
 }
-
-

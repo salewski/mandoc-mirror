@@ -294,7 +294,7 @@ cell_alloc(struct tbl_node *tbl, struct tbl_row *rp, enum tbl_cellt pos)
 	 * ones.
 	 */
 
-	h = pp ? pp->head->prev : tbl->first_head;
+	h = pp ? pp->head->next : tbl->first_head;
 
 	if (h) {
 		/* Re-use data header. */
