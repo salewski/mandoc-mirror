@@ -866,6 +866,8 @@ print_man_node(DECL_ARGS)
 		}
 		break;
 	case (MAN_TBL):
+		if (TBL_SPAN_FIRST & n->span->flags) 
+			term_newln(p);
 		term_tbl(p, n->span);
 		break;
 	default:
