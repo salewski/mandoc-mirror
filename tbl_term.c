@@ -397,26 +397,31 @@ tbl_data_number(struct termp *tp, const struct tbl *tbl,
 		const struct tbl_dat *dp,
 		const struct termp_tbl *tblp)
 {
-	char		*decp;
-	int		 d, padl, sz;
+	char		*decp, buf[2];
+	int		 d, padl, sz, psz, ssz, i;
 
 	/*
 	 * See calc_data_number().  Left-pad by taking the offset of our
 	 * and the maximum decimal; right-pad by the remaining amount.
 	 */
 
-	sz = (int)strlen(dp->string);
+	sz = term_strlen(tp, dp->string);
+	psz = term_strlen(tp, ".");
 
-	if (NULL == (decp = strchr(dp->string, tbl->decimal))) {
-		d = sz + 1;
-	} else {
-		d = (int)(decp - dp->string) + 1;
-	}
+	if (NULL != (decp = strchr(dp->string, tbl->decimal))) {
+		buf[1] = '\0';
+		for (ssz = i = 0; decp != &dp->string[i]; i++) {
+			buf[0] = dp->string[i];
+			ssz += term_strlen(tp, buf);
+		}
+		d = ssz + psz;
+	} else
+		d = sz + psz;
 
 	assert(d <= tblp->decimal);
 	assert(sz - d <= tblp->width - tblp->decimal);
 
-	padl = tblp->decimal - d + 1;
+	padl = tblp->decimal - d + term_len(tp, 1);
 	assert(tblp->width - sz - padl);
 
 	tbl_char(tp, ASCII_NBRSP, padl);
@@ -502,8 +507,8 @@ static void
 tbl_calc_data_number(struct termp *tp, const struct tbl *tbl, 
 		const struct tbl_dat *dp, struct termp_tbl *tblp)
 {
-	int 		 sz, d;
-	char		*cp;
+	int 		 sz, d, psz, i, ssz;
+	char		*cp, buf[2];
 
 	/*
 	 * First calculate number width and decimal place (last + 1 for
@@ -517,14 +522,20 @@ tbl_calc_data_number(struct termp *tp, const struct tbl *tbl,
 	/* TODO: use spacing modifier. */
 
 	assert(dp->string);
-	sz = (int)strlen(dp->string);
+	sz = term_strlen(tp, dp->string);
+	psz = term_strlen(tp, ".");
 
-	if (NULL == (cp = strchr(dp->string, tbl->decimal)))
-		d = sz + 1;
-	else
-		d = (int)(cp - dp->string) + 1;
+	if (NULL != (cp = strchr(dp->string, tbl->decimal))) {
+		buf[1] = '\0';
+		for (ssz = i = 0; cp != &dp->string[i]; i++) {
+			buf[0] = dp->string[i];
+			ssz += term_strlen(tp, buf);
+		}
+		d = ssz + psz;
+	} else
+		d = sz + psz;
 
-	sz += 2;
+	sz += term_len(tp, 2);
 
 	if (tblp->decimal > d) {
 		sz += tblp->decimal - d;
