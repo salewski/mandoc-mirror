@@ -72,6 +72,18 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	const struct tbl_head *hp;
 	const struct tbl_dat *dp;
 
+	/* Inhibit printing of spaces: we do padding ourselves. */
+
+	tp->flags |= TERMP_NONOSPACE;
+	tp->flags |= TERMP_NOSPACE;
+
+	/*
+	 * The first time we're invoked for a given table block, create
+	 * the termp_tbl structure.  This contains the column
+	 * configuration for the entire table, e.g., table-wide column
+	 * width, decimal point, etc.
+	 */
+
 	if (TBL_SPAN_FIRST & sp->flags) {
 		assert(NULL == tp->tbl);
 		tp->tbl = calloc
@@ -81,52 +93,63 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 			exit(EXIT_FAILURE);
 		}
 		tbl_calc(tp, sp);
+
+		/* Flush out any preceding data. */
 		term_flushln(tp);
 	}
+
+	/* Horizontal frame at the start of boxed tables. */
 
 	if (TBL_SPAN_FIRST & sp->flags)
 		tbl_hframe(tp, sp);
 
-	tp->flags |= TERMP_NONOSPACE;
-	tp->flags |= TERMP_NOSPACE;
+	/* Vertical frame at the start of each row. */
 
 	tbl_vframe(tp, sp->tbl);
+
+	/*
+	 * Now print the actual data itself depending on the span type.
+	 * Spanner spans get a horizontal rule; data spanners have their
+	 * data printed by matching data to header.
+	 */
 
 	switch (sp->pos) {
 	case (TBL_SPAN_HORIZ):
 		/* FALLTHROUGH */
 	case (TBL_SPAN_DHORIZ):
 		tbl_hrule(tp, sp);
-		tbl_vframe(tp, sp->tbl);
-		term_newln(tp);
-		goto end;
-	default:
 		break;
-	}
+	case (TBL_SPAN_DATA):
+		/* Iterate over template headers. */
+		dp = sp->first;
+		for (hp = sp->head; hp; hp = hp->next) {
+			switch (hp->pos) {
+			case (TBL_HEAD_VERT):
+				/* FALLTHROUGH */
+			case (TBL_HEAD_DVERT):
+				tbl_spanner(tp, hp);
+				continue;
+			case (TBL_HEAD_DATA):
+				break;
+			}
+			tbl_data(tp, sp->tbl, dp, 
+				&tp->tbl[hp->ident]);
 
-	dp = sp->first;
-	for (hp = sp->head; hp; hp = hp->next) {
-		switch (hp->pos) {
-		case (TBL_HEAD_VERT):
-			/* FALLTHROUGH */
-		case (TBL_HEAD_DVERT):
-			tbl_spanner(tp, hp);
-			break;
-		case (TBL_HEAD_DATA):
-			tbl_data(tp, sp->tbl, dp, &tp->tbl[hp->ident]);
+			/* Go to the next data cell. */
 			if (dp)
 				dp = dp->next;
-			break;
-		default:
-			abort();
-			/* NOTREACHED */
 		}
+		break;
 	}
 
 	tbl_vframe(tp, sp->tbl);
 	term_flushln(tp);
 
-end:
+	/*
+	 * If we're the last row, clean up after ourselves: clear the
+	 * existing table configuration and set it to NULL.
+	 */
+
 	if (TBL_SPAN_LAST & sp->flags) {
 		tbl_hframe(tp, sp);
 		assert(tp->tbl);
