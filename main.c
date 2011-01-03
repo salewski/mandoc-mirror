@@ -805,6 +805,14 @@ rerun:
 		}
 
 		/*
+		 * If we encounter errors in the recursive parsebuf()
+		 * call, make sure we don't continue parsing.
+		 */
+
+		if (MANDOCLEVEL_FATAL <= file_status)
+			break;
+
+		/*
 		 * If input parsers have not been allocated, do so now.
 		 * We keep these instanced betwen parsers, but set them
 		 * locally per parse routine since we can use different
