@@ -24,6 +24,7 @@ void		*mandoc_calloc(size_t, size_t);
 char		*mandoc_strdup(const char *);
 void		*mandoc_malloc(size_t);
 void		*mandoc_realloc(void *, size_t);
+char		*mandoc_getarg(char **, mandocmsg, void *, int, int *);
 time_t		 mandoc_a2time(int, const char *);
 #define		 MTIME_CANONICAL	(1 << 0)
 #define		 MTIME_REDUCED		(1 << 1)
