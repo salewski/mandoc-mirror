@@ -96,6 +96,16 @@ See
 for details.
 .El
 .Ss Functions
+If
+.Fn mdoc_addspan ,
+.Fn mdoc_parseln ,
+or
+.Fn mdoc_endparse
+return 0, calls to any function but
+.Fn mdoc_reset
+or
+.Fn mdoc_free
+will raise an assertion.
 .Bl -ohang
 .It Fn mdoc_addspan
 Add a table span to the parsing stream.
@@ -106,8 +116,8 @@ The
 .Fa data
 pointer is passed to
 .Fa msgs .
-Returns NULL on failure.
-If non-NULL, the pointer must be freed with
+Always returns a valid pointer.
+The pointer must be freed with
 .Fn mdoc_free .
 .It Fn mdoc_reset
 Reset the parser for another parse routine.
@@ -135,18 +145,8 @@ the resulting tree is incomplete.
 Returns 0 on failure, 1 on success.
 .It Fn mdoc_node
 Returns the first node of the parse.
-Note that if
-.Fn mdoc_parseln
-or
-.Fn mdoc_endparse
-return 0, the tree will be incomplete.
 .It Fn mdoc_meta
 Returns the document's parsed meta-data.
-If this information has not yet been supplied or
-.Fn mdoc_parseln
-or
-.Fn mdoc_endparse
-return 0, the data will be incomplete.
 .El
 .Ss Variables
 .Bl -ohang
