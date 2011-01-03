@@ -274,6 +274,7 @@ tbl_data(struct termp *tp, const struct tbl *tbl,
 	case (TBL_CELL_HORIZ):
 		/* FALLTHROUGH */
 	case (TBL_CELL_DHORIZ):
+		/* FIXME: THIS IS WRONG. */
 		tbl_data_spanner(tp, dp, tbp);
 		break;
 	case (TBL_CELL_LONG):
