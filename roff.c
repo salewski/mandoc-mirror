@@ -1209,7 +1209,7 @@ roff_userdef(ROFF_ARGS)
 	 */
 	cp = *bufp + pos;
 	for (i = 0; i < 9; i++)
-		arg[i] = '\0' == *cp ? NULL :
+		arg[i] = '\0' == *cp ? "" :
 		    mandoc_getarg(&cp, r->msg, r->data, ln, &pos);
 
 	/*
