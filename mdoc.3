@@ -137,11 +137,6 @@ The input buffer
 is modified by this function.
 .It Fn mdoc_endparse
 Signals that the parse is complete.
-Note that if
-.Fn mdoc_endparse
-is called subsequent to
-.Fn mdoc_node ,
-the resulting tree is incomplete.
 Returns 0 on failure, 1 on success.
 .It Fn mdoc_node
 Returns the first node of the parse.
