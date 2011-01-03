@@ -319,6 +319,7 @@ cell_alloc(struct tbl_node *tbl, struct tbl_row *rp, enum tbl_cellt pos)
 				(TBL_CELL_VERT == p->pos ||
 				 TBL_CELL_DVERT == p->pos)) {
 			hp = mandoc_calloc(1, sizeof(struct tbl_head));
+			hp->ident = tbl->opts.cols++;
 			hp->prev = h->prev;
 			if (h->prev)
 				h->prev->next = hp;
@@ -341,6 +342,7 @@ cell_alloc(struct tbl_node *tbl, struct tbl_row *rp, enum tbl_cellt pos)
 	}
 
 	hp = mandoc_calloc(1, sizeof(struct tbl_head));
+	hp->ident = tbl->opts.cols++;
 
 	if (tbl->last_head) {
 		hp->prev = tbl->last_head;

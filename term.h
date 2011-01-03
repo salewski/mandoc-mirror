@@ -71,9 +71,15 @@ struct	termp_ps {
 	size_t		  pdfobjsz;	/* size of pdfobjs */
 };
 
+struct	termp_tbl {
+	int		  width;	/* width in fixed chars */
+	int		  decimal;	/* decimal point position */
+};
+
 struct	termp {
 	enum termtype	  type;
-	size_t		  defrmargin;	/* Right margin of the device.. */
+	struct termp_tbl *tbl;		/* table configuration */
+	size_t		  defrmargin;	/* Right margin of the device. */
 	size_t		  rmargin;	/* Current right margin. */
 	size_t		  maxrmargin;	/* Max right margin. */
 	size_t		  maxcols;	/* Max size of buf. */

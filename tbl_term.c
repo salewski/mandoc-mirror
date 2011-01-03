@@ -35,18 +35,33 @@ static	void		 tbl_hframe(struct termp *,
 				const struct tbl_span *);
 static	void		 tbl_data_number(struct termp *, 
 				const struct tbl *, 
-				const struct tbl_dat *, int);
+				const struct tbl_dat *, 
+				const struct termp_tbl *);
 static	void		 tbl_data_literal(struct termp *, 
-				const struct tbl_dat *, int);
+				const struct tbl_dat *, 
+				const struct termp_tbl *);
 static	void		 tbl_data_spanner(struct termp *, 
-				const struct tbl_dat *, int);
+				const struct tbl_dat *, 
+				const struct termp_tbl *);
 static	void		 tbl_data(struct termp *, const struct tbl *,
-				const struct tbl_dat *, int);
+				const struct tbl_dat *, 
+				const struct termp_tbl *);
 static	void		 tbl_spanner(struct termp *, 
 				const struct tbl_head *);
 static	void		 tbl_hrule(struct termp *, 
 				const struct tbl_span *);
-static	void		 tbl_vframe(struct termp *, const struct tbl *);
+static	void		 tbl_vframe(struct termp *, 
+				const struct tbl *);
+static	void	 	 tbl_calc(const struct tbl_span *,
+				struct termp_tbl *);
+static	void	 	 tbl_calc_data(const struct tbl *, 
+				const struct tbl_dat *,
+				struct termp_tbl *);
+static	void	 	 tbl_calc_data_literal(const struct tbl_dat *,
+				struct termp_tbl *);
+static	void	 	 tbl_calc_data_number(const struct tbl *, 
+				const struct tbl_dat *,
+				struct termp_tbl *);
 
 void
 term_tbl(struct termp *tp, const struct tbl_span *sp)
@@ -54,8 +69,17 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	const struct tbl_head *hp;
 	const struct tbl_dat *dp;
 
-	if (TBL_SPAN_FIRST & sp->flags)
+	if (TBL_SPAN_FIRST & sp->flags) {
+		assert(NULL == tp->tbl);
+		tp->tbl = calloc
+			(sp->tbl->cols, sizeof(struct termp_tbl));
+		if (NULL == tp->tbl) {
+			perror(NULL);
+			exit(EXIT_FAILURE);
+		}
+		tbl_calc(sp, tp->tbl);
 		term_flushln(tp);
+	}
 
 	if (TBL_SPAN_FIRST & sp->flags)
 		tbl_hframe(tp, sp);
@@ -72,8 +96,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 		tbl_hrule(tp, sp);
 		tbl_vframe(tp, sp->tbl);
 		term_newln(tp);
-		tp->flags &= ~TERMP_NONOSPACE;
-		return;
+		goto end;
 	default:
 		break;
 	}
@@ -87,7 +110,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 			tbl_spanner(tp, hp);
 			break;
 		case (TBL_HEAD_DATA):
-			tbl_data(tp, sp->tbl, dp, hp->width);
+			tbl_data(tp, sp->tbl, dp, &tp->tbl[hp->ident]);
 			if (dp)
 				dp = dp->next;
 			break;
@@ -100,8 +123,13 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	tbl_vframe(tp, sp->tbl);
 	term_flushln(tp);
 
-	if (TBL_SPAN_LAST & sp->flags)
+end:
+	if (TBL_SPAN_LAST & sp->flags) {
 		tbl_hframe(tp, sp);
+		assert(tp->tbl);
+		free(tp->tbl);
+		tp->tbl = NULL;
+	}
 
 	tp->flags &= ~TERMP_NONOSPACE;
 
@@ -112,6 +140,7 @@ tbl_hrule(struct termp *tp, const struct tbl_span *sp)
 {
 	const struct tbl_head *hp;
 	char		 c;
+	int		 width;
 
 	/*
 	 * An hrule extends across the entire table and is demarked by a
@@ -126,15 +155,16 @@ tbl_hrule(struct termp *tp, const struct tbl_span *sp)
 	/* FIXME: don't use `+' between data and a spanner! */
 
 	for (hp = sp->head; hp; hp = hp->next) {
+		width = tp->tbl[hp->ident].width;
 		switch (hp->pos) {
 		case (TBL_HEAD_DATA):
-			tbl_char(tp, c, hp->width);
+			tbl_char(tp, c, width);
 			break;
 		case (TBL_HEAD_DVERT):
-			tbl_char(tp, '+', hp->width);
+			tbl_char(tp, '+', width);
 			/* FALLTHROUGH */
 		case (TBL_HEAD_VERT):
-			tbl_char(tp, '+', hp->width);
+			tbl_char(tp, '+', width);
 			break;
 		default:
 			abort();
@@ -147,6 +177,7 @@ static void
 tbl_hframe(struct termp *tp, const struct tbl_span *sp)
 {
 	const struct tbl_head *hp;
+	int		 width;
 
 	if ( ! (TBL_OPT_BOX & sp->tbl->opts || 
 			TBL_OPT_DBOX & sp->tbl->opts))
@@ -165,20 +196,23 @@ tbl_hframe(struct termp *tp, const struct tbl_span *sp)
 
 	if (TBL_OPT_DBOX & sp->tbl->opts) {
 		term_word(tp, "+");
-		for (hp = sp->head; hp; hp = hp->next)
-			tbl_char(tp, '-', hp->width);
+		for (hp = sp->head; hp; hp = hp->next) {
+			width = tp->tbl[hp->ident].width;
+			tbl_char(tp, '-', width);
+		}
 		term_word(tp, "+");
 		term_flushln(tp);
 	}
 
 	term_word(tp, "+");
 	for (hp = sp->head; hp; hp = hp->next) {
+		width = tp->tbl[hp->ident].width;
 		switch (hp->pos) {
 		case (TBL_HEAD_DATA):
-			tbl_char(tp, '-', hp->width);
+			tbl_char(tp, '-', width);
 			break;
 		default:
-			tbl_char(tp, '+', hp->width);
+			tbl_char(tp, '+', width);
 			break;
 		}
 	}
@@ -188,12 +222,13 @@ tbl_hframe(struct termp *tp, const struct tbl_span *sp)
 
 static void
 tbl_data(struct termp *tp, const struct tbl *tbl,
-		const struct tbl_dat *dp, int width)
+		const struct tbl_dat *dp, 
+		const struct termp_tbl *tbp)
 {
 	enum tbl_cellt	 pos;
 
 	if (NULL == dp) {
-		tbl_char(tp, ASCII_NBRSP, width);
+		tbl_char(tp, ASCII_NBRSP, tbp->width);
 		return;
 	}
 
@@ -201,7 +236,7 @@ tbl_data(struct termp *tp, const struct tbl *tbl,
 	case (TBL_DATA_HORIZ):
 		/* FALLTHROUGH */
 	case (TBL_DATA_DHORIZ):
-		tbl_data_spanner(tp, dp, width);
+		tbl_data_spanner(tp, dp, tbp);
 		return;
 	default:
 		break;
@@ -213,7 +248,7 @@ tbl_data(struct termp *tp, const struct tbl *tbl,
 	case (TBL_CELL_HORIZ):
 		/* FALLTHROUGH */
 	case (TBL_CELL_DHORIZ):
-		tbl_data_spanner(tp, dp, width);
+		tbl_data_spanner(tp, dp, tbp);
 		break;
 	case (TBL_CELL_LONG):
 		/* FALLTHROUGH */
@@ -222,10 +257,10 @@ tbl_data(struct termp *tp, const struct tbl *tbl,
 	case (TBL_CELL_LEFT):
 		/* FALLTHROUGH */
 	case (TBL_CELL_RIGHT):
-		tbl_data_literal(tp, dp, width);
+		tbl_data_literal(tp, dp, tbp);
 		break;
 	case (TBL_CELL_NUMBER):
-		tbl_data_number(tp, tbl, dp, width);
+		tbl_data_number(tp, tbl, dp, tbp);
 		break;
 	default:
 		abort();
@@ -272,17 +307,19 @@ tbl_char(struct termp *tp, char c, int len)
 }
 
 static void
-tbl_data_spanner(struct termp *tp, const struct tbl_dat *dp, int width)
+tbl_data_spanner(struct termp *tp, 
+		const struct tbl_dat *dp, 
+		const struct termp_tbl *tblp)
 {
 
 	switch (dp->pos) {
 	case (TBL_DATA_HORIZ):
 	case (TBL_DATA_NHORIZ):
-		tbl_char(tp, '-', width);
+		tbl_char(tp, '-', tblp->width);
 		break;
 	case (TBL_DATA_DHORIZ):
 	case (TBL_DATA_NDHORIZ):
-		tbl_char(tp, '=', width);
+		tbl_char(tp, '=', tblp->width);
 		break;
 	default:
 		break;
@@ -290,7 +327,9 @@ tbl_data_spanner(struct termp *tp, const struct tbl_dat *dp, int width)
 }
 
 static void
-tbl_data_literal(struct termp *tp, const struct tbl_dat *dp, int width)
+tbl_data_literal(struct termp *tp, 
+		const struct tbl_dat *dp, 
+		const struct termp_tbl *tblp)
 {
 	int		 padl, padr;
 	enum tbl_cellt	 pos;
@@ -302,20 +341,20 @@ tbl_data_literal(struct termp *tp, const struct tbl_dat *dp, int width)
 	switch (pos) {
 	case (TBL_CELL_LONG):
 		padl = 1;
-		padr = width - (int)strlen(dp->string) - 1;
+		padr = tblp->width - (int)strlen(dp->string) - 1;
 		break;
 	case (TBL_CELL_CENTRE):
-		padl = width - (int)strlen(dp->string);
+		padl = tblp->width - (int)strlen(dp->string);
 		if (padl % 2)
 			padr++;
 		padl /= 2;
 		padr += padl;
 		break;
 	case (TBL_CELL_RIGHT):
-		padl = width - (int)strlen(dp->string);
+		padl = tblp->width - (int)strlen(dp->string);
 		break;
 	default:
-		padr = width - (int)strlen(dp->string);
+		padr = tblp->width - (int)strlen(dp->string);
 		break;
 	}
 
@@ -326,7 +365,8 @@ tbl_data_literal(struct termp *tp, const struct tbl_dat *dp, int width)
 
 static void
 tbl_data_number(struct termp *tp, const struct tbl *tbl,
-		const struct tbl_dat *dp, int width)
+		const struct tbl_dat *dp,
+		const struct termp_tbl *tblp)
 {
 	char		*decp, pnt;
 	int		 d, padl, sz;
@@ -345,14 +385,163 @@ tbl_data_number(struct termp *tp, const struct tbl *tbl,
 		d = (int)(decp - dp->string) + 1;
 	}
 
-	assert(d <= dp->layout->head->decimal);
-	assert(sz - d <= dp->layout->head->width -
-			dp->layout->head->decimal);
+	assert(d <= tblp->decimal);
+	assert(sz - d <= tblp->width - tblp->decimal);
 
-	padl = dp->layout->head->decimal - d + 1;
-	assert(width - sz - padl);
+	padl = tblp->decimal - d + 1;
+	assert(tblp->width - sz - padl);
 
 	tbl_char(tp, ASCII_NBRSP, padl);
 	term_word(tp, dp->string);
-	tbl_char(tp, ASCII_NBRSP, width - sz - padl);
+	tbl_char(tp, ASCII_NBRSP, tblp->width - sz - padl);
+}
+
+static void
+tbl_calc(const struct tbl_span *sp, struct termp_tbl *tblp)
+{
+	const struct tbl_dat *dp;
+	const struct tbl_head *hp;
+	struct termp_tbl *p;
+
+	/* Calculate width as the max of column cells' widths. */
+
+	hp = sp->head;
+
+	for ( ; sp; sp = sp->next) {
+		switch (sp->pos) {
+		case (TBL_DATA_HORIZ):
+			/* FALLTHROUGH */
+		case (TBL_DATA_DHORIZ):
+			continue;
+		default:
+			break;
+		}
+		for (dp = sp->first; dp; dp = dp->next) {
+			if (NULL == dp->layout)
+				continue;
+			p = &tblp[dp->layout->head->ident];
+			tbl_calc_data(sp->tbl, dp, p);
+		}
+	}
+
+	/* Calculate width as the simple spanner value. */
+
+	for ( ; hp; hp = hp->next) 
+		switch (hp->pos) {
+		case (TBL_HEAD_VERT):
+			tblp[hp->ident].width = 1;
+			break;
+		case (TBL_HEAD_DVERT):
+			tblp[hp->ident].width = 2;
+			break;
+		default:
+			break;
+		}
+}
+
+static void
+tbl_calc_data(const struct tbl *tbl, 
+		const struct tbl_dat *dp,
+		struct termp_tbl *tblp)
+{
+
+	/* Branch down into data sub-types. */
+
+	switch (dp->layout->pos) {
+	case (TBL_CELL_HORIZ):
+		/* FALLTHROUGH */
+	case (TBL_CELL_DHORIZ):
+		tblp->width = 1;
+		break;
+	case (TBL_CELL_LONG):
+		/* FALLTHROUGH */
+	case (TBL_CELL_CENTRE):
+		/* FALLTHROUGH */
+	case (TBL_CELL_LEFT):
+		/* FALLTHROUGH */
+	case (TBL_CELL_RIGHT):
+		tbl_calc_data_literal(dp, tblp);
+		break;
+	case (TBL_CELL_NUMBER):
+		tbl_calc_data_number(tbl, dp, tblp);
+		break;
+	default:
+		abort();
+		/* NOTREACHED */
+	}
+}
+
+static void
+tbl_calc_data_number(const struct tbl *tbl, 
+		const struct tbl_dat *dp, struct termp_tbl *tblp)
+{
+	int 		 sz, d;
+	char		*cp, pnt;
+
+	/*
+	 * First calculate number width and decimal place (last + 1 for
+	 * no-decimal numbers).  If the stored decimal is subsequent
+	 * ours, make our size longer by that difference
+	 * (right-"shifting"); similarly, if ours is subsequent the
+	 * stored, then extend the stored size by the difference.
+	 * Finally, re-assign the stored values.
+	 */
+
+	/* TODO: use spacing modifier. */
+
+	assert(dp->string);
+	sz = (int)strlen(dp->string);
+	pnt = tbl->decimal;
+
+	if (NULL == (cp = strchr(dp->string, pnt)))
+		d = sz + 1;
+	else
+		d = (int)(cp - dp->string) + 1;
+
+	sz += 2;
+
+	if (tblp->decimal > d) {
+		sz += tblp->decimal - d;
+		d = tblp->decimal;
+	} else
+		tblp->width += d - tblp->decimal;
+
+	if (sz > tblp->width)
+		tblp->width = sz;
+	if (d > tblp->decimal)
+		tblp->decimal = d;
+}
+
+static void
+tbl_calc_data_literal(const struct tbl_dat *dp, struct termp_tbl *tblp)
+{
+	int		 sz, bufsz;
+
+	/* 
+	 * Calculate our width and use the spacing, with a minimum
+	 * spacing dictated by position (centre, e.g,. gets a space on
+	 * either side, while right/left get a single adjacent space).
+	 */
+
+	assert(dp->string);
+	sz = (int)strlen(dp->string);
+
+	switch (dp->layout->pos) {
+	case (TBL_CELL_LONG):
+		/* FALLTHROUGH */
+	case (TBL_CELL_CENTRE):
+		bufsz = 2;
+		break;
+	default:
+		bufsz = 1;
+		break;
+	}
+
+	if (dp->layout->spacing)
+		bufsz = bufsz > dp->layout->spacing ? 
+			bufsz : dp->layout->spacing;
+
+	sz += bufsz;
+	if (tblp->width < sz)
+		tblp->width = sz;
 }

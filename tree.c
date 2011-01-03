@@ -249,20 +249,7 @@ static void
 print_span(const struct tbl_span *sp, int indent)
 {
 	const struct tbl_dat *dp;
-	const struct tbl_head *hp;
 	int		 i;
-
-	if (TBL_SPAN_FIRST & sp->flags) {
-		for (i = 0; i < indent; i++)
-			putchar('\t');
-		printf("tbl-head: ");
-		for (hp = sp->head; hp; hp = hp->next) {
-			printf("[%d]", hp->width);
-			if (hp->next)
-				putchar(' ');
-		}
-		putchar('\n');
-	}
 
 	for (i = 0; i < indent; i++)
 		putchar('\t');
