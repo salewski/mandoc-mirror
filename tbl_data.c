@@ -14,6 +14,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -24,10 +28,10 @@
 #include "libmandoc.h"
 #include "libroff.h"
 
-static	void	data(struct tbl_node *, struct tbl_span *, 
+static	int	data(struct tbl_node *, struct tbl_span *, 
 			int, const char *, int *);
 
-void
+static int
 data(struct tbl_node *tbl, struct tbl_span *dp, 
 		int ln, const char *p, int *pos)
 {
@@ -47,10 +51,9 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 				TBL_CELL_DVERT == cp->pos))
 		cp = cp->next;
 
-	/* FIXME: warn about losing data contents if cell is HORIZ. */
-
 	dat = mandoc_calloc(1, sizeof(struct tbl_dat));
 	dat->layout = cp;
+	dat->pos = TBL_DATA_NONE;
 
 	if (NULL == dat->layout)
 		TBL_MSG(tbl, MANDOCERR_TBLEXTRADAT, ln, *pos);
@@ -64,6 +67,17 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 	sv = *pos;
 	while (p[*pos] && p[*pos] != tbl->opts.tab)
 		(*pos)++;
+
+	/*
+	 * Check for a continued-data scope opening.  This consists of a
+	 * trailing `T{' at the end of the line.  Subsequent lines,
+	 * until a standalone `T}', are included in our cell.
+	 */
+
+	if (*pos - sv == 2 && 'T' == p[sv] && '{' == p[sv + 1]) {
+		tbl->part = TBL_PART_CDATA;
+		return(0);
+	}
 
 	dat->string = mandoc_malloc(*pos - sv + 1);
 	memcpy(dat->string, &p[sv], *pos - sv);
@@ -83,10 +97,40 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 	else
 		dat->pos = TBL_DATA_DATA;
 
+	if (NULL == dat->layout)
+		return(1);
+
 	if (TBL_CELL_HORIZ == dat->layout->pos ||
 			TBL_CELL_DHORIZ == dat->layout->pos)
 		if (TBL_DATA_DATA == dat->pos && '\0' != *dat->string)
 			TBL_MSG(tbl, MANDOCERR_TBLIGNDATA, ln, sv);
+
+	return(1);
+}
+
+int
+tbl_cdata(struct tbl_node *tbl, int ln, const char *p)
+{
+	struct tbl_dat	*dat;
+	size_t	 	 sz;
+
+	if (0 == strcmp(p, "T}")) {
+		tbl->part = TBL_PART_DATA;
+		return(1);
+	}
+
+	dat = tbl->last_span->last;
+	dat->pos = TBL_DATA_DATA;
+
+	if (dat->string) {
+		sz = strlen(p) + strlen(dat->string) + 2;
+		dat->string = mandoc_realloc(dat->string, sz);
+		strlcat(dat->string, " ", sz);
+		strlcat(dat->string, p, sz);
+	} else
+		dat->string = mandoc_strdup(p);
+
+	return(0);
 }
 
 int
@@ -141,8 +185,11 @@ tbl_data(struct tbl_node *tbl, int ln, const char *p)
 
 	dp->pos = TBL_SPAN_DATA;
 
+	/* This returns 0 when TBL_PART_CDATA is entered. */
+
 	while ('\0' != p[pos])
-		data(tbl, dp, ln, p, &pos);
+		if ( ! data(tbl, dp, ln, p, &pos))
+			return(0);
 
 	return(1);
 }

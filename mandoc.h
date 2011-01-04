@@ -112,6 +112,7 @@ enum	mandocerr {
 	MANDOCERR_TBLNOLAYOUT, /* no table layout cells specified */
 	MANDOCERR_TBLNODATA, /* no table data cells specified */
 	MANDOCERR_TBLIGNDATA, /* ignore data in cell */
+	MANDOCERR_TBLBLOCK, /* data block still open */
 
 	MANDOCERR_ROFFLOOP, /* input stack limit exceeded, infinite loop? */
 	MANDOCERR_BADCHAR, /* skipping bad character */
@@ -224,6 +225,7 @@ struct	tbl_row {
 };
 
 enum	tbl_datt {
+	TBL_DATA_NONE,
 	TBL_DATA_DATA,
 	TBL_DATA_HORIZ,
 	TBL_DATA_DHORIZ,

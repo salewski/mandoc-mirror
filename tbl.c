@@ -52,7 +52,9 @@ tbl_read(struct tbl_node *tbl, int ln, const char *p, int offs)
 		return(tbl_option(tbl, ln, p) ? ROFF_IGN : ROFF_ERR);
 	case (TBL_PART_LAYOUT):
 		return(tbl_layout(tbl, ln, p) ? ROFF_IGN : ROFF_ERR);
-	case (TBL_PART_DATA):
+	case (TBL_PART_CDATA):
+		return(tbl_cdata(tbl, ln, p) ? ROFF_TBL : ROFF_IGN);
+	default:
 		break;
 	}
 
@@ -122,6 +124,8 @@ tbl_free(struct tbl_node *p)
 void
 tbl_restart(int line, int pos, struct tbl_node *tbl)
 {
+	if (TBL_PART_CDATA == tbl->part)
+		TBL_MSG(tbl, MANDOCERR_TBLBLOCK, tbl->line, tbl->pos);
 
 	tbl->part = TBL_PART_LAYOUT;
 	tbl->line = line;
@@ -148,5 +152,8 @@ tbl_end(struct tbl_node *tbl)
 
 	if (tbl->last_span)
 		tbl->last_span->flags |= TBL_SPAN_LAST;
+
+	if (TBL_PART_CDATA == tbl->part)
+		TBL_MSG(tbl, MANDOCERR_TBLBLOCK, tbl->line, tbl->pos);
 }
 

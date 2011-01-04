@@ -22,7 +22,8 @@ __BEGIN_DECLS
 enum	tbl_part {
 	TBL_PART_OPTS, /* in options (first line) */
 	TBL_PART_LAYOUT, /* describing layout */
-	TBL_PART_DATA  /* creating data rows */
+	TBL_PART_DATA, /* creating data rows */
+	TBL_PART_CDATA /* continue previous row */
 };
 
 struct	tbl_node {
@@ -52,6 +53,7 @@ enum rofferr 	 tbl_read(struct tbl_node *, int, const char *, int);
 int		 tbl_option(struct tbl_node *, int, const char *);
 int		 tbl_layout(struct tbl_node *, int, const char *);
 int		 tbl_data(struct tbl_node *, int, const char *);
+int		 tbl_cdata(struct tbl_node *, int, const char *);
 const struct tbl_span *tbl_span(const struct tbl_node *);
 void		 tbl_end(struct tbl_node *);
 

@@ -253,6 +253,9 @@ tbl_data(struct termp *tp, const struct tbl *tbl,
 	}
 
 	switch (dp->pos) {
+	case (TBL_DATA_NONE):
+		tbl_char(tp, ASCII_NBRSP, tbp->width);
+		return;
 	case (TBL_DATA_HORIZ):
 		/* FALLTHROUGH */
 	case (TBL_DATA_NHORIZ):
@@ -420,14 +423,9 @@ tbl_calc(struct termp *tp, const struct tbl_span *sp)
 	hp = sp->head;
 
 	for ( ; sp; sp = sp->next) {
-		switch (sp->pos) {
-		case (TBL_DATA_HORIZ):
-			/* FALLTHROUGH */
-		case (TBL_DATA_DHORIZ):
+		if (TBL_SPAN_DATA != sp->pos)
 			continue;
-		default:
-			break;
-		}
+
 		for (dp = sp->first; dp; dp = dp->next) {
 			if (NULL == dp->layout)
 				continue;

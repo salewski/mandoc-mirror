@@ -63,7 +63,8 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 		}
 		tt = print_otag(h, TAG_TD, 0, NULL);
 		if (dp) {
-			print_text(h, dp->string);
+			if (dp->string)
+				print_text(h, dp->string);
 			dp = dp->next;
 		}
 		print_tagq(h, tt);

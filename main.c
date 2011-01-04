@@ -190,6 +190,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"no table layout cells specified",
 	"no table data cells specified",
 	"ignore data in cell",
+	"data block still open",
 
 	"input stack limit exceeded, infinite loop?",
 	"skipping bad character",

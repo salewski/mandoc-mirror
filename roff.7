@@ -736,6 +736,11 @@ or
 .Cm \e=
 is specified, a line is drawn within the data field (i.e., terminating
 within the cell and not draw to the border).
+If the last cell of a line is
+.Cm T{ ,
+all subsequent lines are included as part of the cell until
+.Cm T}
+is specified on its own line.
 .Sh COMPATIBILITY
 This section documents compatibility between mandoc and other other
 .Nm
