@@ -455,6 +455,7 @@ static void
 tbl_calc_data(struct termp *tp, const struct tbl *tbl, 
 		const struct tbl_dat *dp, struct termp_tbl *tblp)
 {
+	int		 sz;
 
 	/* Branch down into data sub-types. */
 
@@ -462,7 +463,9 @@ tbl_calc_data(struct termp *tp, const struct tbl *tbl,
 	case (TBL_CELL_HORIZ):
 		/* FALLTHROUGH */
 	case (TBL_CELL_DHORIZ):
-		tblp->width = term_len(tp, 1);
+		sz = term_len(tp, 1);
+		if (tblp->width < sz)
+			tblp->width = sz;
 		break;
 	case (TBL_CELL_LONG):
 		/* FALLTHROUGH */
