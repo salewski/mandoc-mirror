@@ -126,6 +126,8 @@ mod:
 	case ('d'):
 		cp->flags |= TBL_CELL_BALIGN;
 		goto mod;
+	case ('w'):  /* XXX for now, ignore minimal column width */
+		goto mod;
 	case ('f'):
 		break;
 	case ('b'):
