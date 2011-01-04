@@ -227,10 +227,17 @@ print_man_node(MAN_ARGS)
 
 	bufinit(h);
 
-	if (MAN_ROOT == n->type) 
+	switch (n->type) {
+	case (MAN_ROOT):
 		man_root_post(m, n, mh, h);
-	else if (mans[n->tok].post)
-		(*mans[n->tok].post)(m, n, mh, h);
+		break;
+	case (MAN_TBL):
+		break;
+	default:
+		if (mans[n->tok].post)
+			(*mans[n->tok].post)(m, n, mh, h);
+		break;
+	}
 }
 
 
