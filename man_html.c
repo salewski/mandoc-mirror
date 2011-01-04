@@ -202,7 +202,8 @@ print_man_node(MAN_ARGS)
 			print_otag(h, TAG_BR, 0, NULL);
 		return;
 	case (MAN_TBL):
-		return;
+		print_tbl(h, n->span);
+		break;
 	default:
 		/* 
 		 * Close out scope of font prior to opening a macro

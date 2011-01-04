@@ -138,6 +138,7 @@ struct tag	 *print_otag(struct html *, enum htmltag,
 void		  print_tagq(struct html *, const struct tag *);
 void		  print_stagq(struct html *, const struct tag *);
 void		  print_text(struct html *, const char *);
+void		  print_tbl(struct html *, const struct tbl_span *);
 
 void		  bufcat_su(struct html *, const char *, 
 			const struct roffsu *);
