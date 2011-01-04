@@ -40,9 +40,6 @@ static	void		 tbl_data_number(struct termp *,
 static	void		 tbl_data_literal(struct termp *, 
 				const struct tbl_dat *, 
 				const struct termp_tbl *);
-static	void		 tbl_data_spanner(struct termp *, 
-				const struct tbl_dat *, 
-				const struct termp_tbl *);
 static	void		 tbl_data(struct termp *, const struct tbl *,
 				const struct tbl_dat *, 
 				const struct termp_tbl *);
@@ -261,8 +258,13 @@ tbl_data(struct termp *tp, const struct tbl *tbl,
 	switch (dp->pos) {
 	case (TBL_DATA_HORIZ):
 		/* FALLTHROUGH */
+	case (TBL_DATA_NHORIZ):
+		tbl_char(tp, '-', tbp->width);
+		return;
+	case (TBL_DATA_NDHORIZ):
+		/* FALLTHROUGH */
 	case (TBL_DATA_DHORIZ):
-		tbl_data_spanner(tp, dp, tbp);
+		tbl_char(tp, '=', tbp->width);
 		return;
 	default:
 		break;
@@ -272,10 +274,10 @@ tbl_data(struct termp *tp, const struct tbl *tbl,
 
 	switch (pos) {
 	case (TBL_CELL_HORIZ):
-		/* FALLTHROUGH */
+		tbl_char(tp, '-', tbp->width);
+		break;
 	case (TBL_CELL_DHORIZ):
-		/* FIXME: THIS IS WRONG. */
-		tbl_data_spanner(tp, dp, tbp);
+		tbl_char(tp, '=', tbp->width);
 		break;
 	case (TBL_CELL_LONG):
 		/* FALLTHROUGH */
@@ -319,7 +321,6 @@ tbl_vframe(struct termp *tp, const struct tbl *tbl)
 		term_word(tp, "|");
 }
 
-
 static inline void
 tbl_char(struct termp *tp, char c, int len)
 {
@@ -333,26 +334,6 @@ tbl_char(struct termp *tp, char c, int len)
 
 	for (i = 0; i < len; i += sz)
 		term_word(tp, cp);
-}
-
-static void
-tbl_data_spanner(struct termp *tp, 
-		const struct tbl_dat *dp, 
-		const struct termp_tbl *tblp)
-{
-
-	switch (dp->pos) {
-	case (TBL_DATA_HORIZ):
-	case (TBL_DATA_NHORIZ):
-		tbl_char(tp, '-', tblp->width);
-		break;
-	case (TBL_DATA_DHORIZ):
-	case (TBL_DATA_NDHORIZ):
-		tbl_char(tp, '=', tblp->width);
-		break;
-	default:
-		break;
-	}
 }
 
 static void

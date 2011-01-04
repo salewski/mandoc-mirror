@@ -82,6 +82,11 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 		dat->pos = TBL_DATA_NDHORIZ;
 	else
 		dat->pos = TBL_DATA_DATA;
+
+	if (TBL_CELL_HORIZ == dat->layout->pos ||
+			TBL_CELL_DHORIZ == dat->layout->pos)
+		if (TBL_DATA_DATA == dat->pos && '\0' != *dat->string)
+			TBL_MSG(tbl, MANDOCERR_TBLIGNDATA, ln, sv);
 }
 
 int

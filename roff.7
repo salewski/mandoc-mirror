@@ -681,34 +681,61 @@ This option is not supported by
 This option is not supported by
 .Xr mandoc 1 .
 .It Cm \-
+Replace the data cell (its contents will be lost) with a single
+horizontal line.
 This may also be invoked with
 .Cm _ .
 .It Cm =
+Replace the data cell (its contents will be lost) with a double
+horizontal line.
 .It Cm \(ba
 Emit a vertical bar instead of data.
 .It Cm \(ba\(ba
 Emit a double-vertical bar instead of data.
 .El
 .Pp
+For example, following layout specifies a centre-justified column of
+minimum width 10, followed by vertical bar, followed by a left-justified
+column of minimum width 10, another vertical bar, then a column
+justified about the decimal point in numbers:
+.Pp
+.Dl c10 | l10 | n
+.Pp
 Keys may be followed by a set of modifiers.
 A modifier is either a modifier key or a natural number for specifying
 spacing.
 The following case-insensitive modifier keys are available:
-.Bl -tag -width Ds
-.It Cm z
-.It Cm u
-.It Cm e
-.It Cm t
-.It Cm d
-.It Cm f
-Must be followed by a case-insensitive font style:
-.Cm b
-for bold or
-.Cm i
-for italic.
-.It Cm b
-.It Cm i
-.El
+.Cm z ,
+.Cm u ,
+.Cm e ,
+.Cm t ,
+.Cm d ,
+.Cm f ,
+.Cm b ,
+.Cm i ,
+.Cm b ,
+and
+.Cm i .
+All of these are ignored by
+.Xr mandoc 1 .
+.Pp
+The data section follows the last layout row.
+By default, cells in a data section are delimited by a tab.
+This behaviour may be changed with the
+.Cm tab
+option.
+If
+.Cm _
+or
+.Cm =
+is specified, a single or double line, respectively, is drawn across the
+data field.
+If
+.Cm \e-
+or
+.Cm \e=
+is specified, a line is drawn within the data field (i.e., terminating
+within the cell and not draw to the border).
 .Sh COMPATIBILITY
 This section documents compatibility between mandoc and other other
 .Nm
@@ -740,12 +767,12 @@ using the next-line syntax.
 .Xr man 7 ,
 .Xr mandoc_char 7 ,
 .Xr mdoc 7
-.\" .Rs
-.\" .%A M. E. Lesk
-.\" .%T Tbl\(emA Program to Format Tables
-.\" .%D June 11, 1976
-.\" .%U http://www.kohala.com/start/troff/v7/man/tbl/tbl.ps
-.\" .Re
+.Rs
+.%A M. E. Lesk
+.%T Tbl\(emA Program to Format Tables
+.%D June 11, 1976
+.%U http://www.kohala.com/start/troff/v7/man/tbl/tbl.ps
+.Re
 .Rs
 .%A Joseph F. Ossanna
 .%A Brian W. Kernighan
