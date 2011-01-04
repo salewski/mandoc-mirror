@@ -255,6 +255,18 @@
 								</SPAN>
 							</TD>
 						</TR>
+						<TR>
+							<TD VALIGN="top"><A HREF="tbl.7.html">tbl(7)</A></TD>
+							<TD VALIGN="top">
+								tbl-mandoc language reference
+								<SPAN STYLE="font-size: smaller;">
+									(<A HREF="tbl.7.txt">text</A> | 
+									<A HREF="tbl.7.xhtml">xhtml</A> |
+									<A HREF="tbl.7.pdf">pdf</A> |
+									<A HREF="tbl.7.ps">postscript</A>)
+								</SPAN>
+							</TD>
+						</TR>
 					</TBODY>
 					</TABLE>
 
@@ -331,11 +343,11 @@
 							version 1.10.9
 						</P>
 						<P>
-							Table functionality (see the <Q>TS</Q>, <Q>TE</Q>, and <Q>T&amp;</Q> macros in the <A
-							HREF="roff.7.html#x5c265453">roff</A> manual) has been merged from <A CLASS="external"
-							HREF="http://tbl.bsd.lv">tbl.bsd.lv</A>.  Many back-end fixes have also been
-							implemented, primarily in argument handling (quoting) and <A HREF="man.7.html">man</A>
-							documents.
+							<A HREF="tbl.7.html">tbl</A> functionality (see the <Q>TS</Q>, <Q>TE</Q>, and
+							<Q>T&amp;</Q> macros in the <A HREF="roff.7.html#x5c265453">roff</A> manual) has been
+							merged from <A CLASS="external" HREF="http://tbl.bsd.lv">tbl.bsd.lv</A>.  Many back-end
+							fixes have also been implemented, primarily in argument handling (quoting) and <A
+							HREF="man.7.html">man</A> documents.
 						</P>
 					</DIV>
 					<DIV CLASS="news">
@@ -365,134 +377,6 @@
 							Lastly, <A HREF="mdoc.3.html">libmdoc</A> and <A HREF="man.3.html">libman</A> have been
 							cleaned up and reduced in size and complexity.
 						</P>
-					</DIV>
-					<DIV CLASS="news">
-						<P>
-							<SPAN CLASS="date">27-09-2010</SPAN>:
-							version 1.10.6
-						</P>
-						<P>
-							Calling conventions for <A HREF="mandoc.1.html">mandoc</A> have changed: <SPAN
-							CLASS="flag">-W</SPAN> improved and <SPAN CLASS="flag">-f</SPAN> deprecated.  Non-ASCII
-							characters are also now uniformly discarded.  Lots of documentation improvements.  Many
-							incremental fixes accomodating for groff's more interesting productions.  Lastly, <A
-							HREF="http://perldoc.perl.org/pod2man.html" CLASS="external">pod2man</A> preambles are
-							now fully accepted after some considerable <A HREF="roff.7.html">roff</A> and special
-							character support.
-						</P>
-					</DIV>
-					<DIV CLASS="news">
-						<P>
-							<SPAN CLASS="date">27-07-2010</SPAN>:
-							version 1.10.5
-						</P>
-						<P>
-							Primarily a bug-fix and polish release, but including <SPAN CLASS="flag">-Tpdf</SPAN>
-							support in <A HREF="mandoc.1.html">mandoc</A> by way of <A CLASS="external"
-							HREF="http://netbsd-soc.sourceforge.net/projects/mandoc_ps/">Summer of Code</A>.
-							Highlights:
-						</P>
-						<UL>
-							<LI>fix <Q>Sm</Q> and <Q>Bd</Q> handling</LI>
-							<LI>fix end-of-sentence handling for embedded sentences</LI>
-							<LI>polish <A HREF="man.7.html">man</A> documentation</LI>
-							<LI>document all <A HREF="mdoc.7.html">mdoc</A> macros</LI>
-							<LI>polish <A HREF="mandoc.1.html">mandoc</A> <SPAN CLASS="flag">-Tps</SPAN> output</LI>
-							<LI>lots of internal clean-ups in character escapes</LI>
-							<LI>un-break literal contexts in <A HREF="man.7.html">man</A> documents</LI>
-							<LI>improve <SPAN CLASS="flag">-Thtml</SPAN> output for <SPAN CLASS="flag">-man</SPAN></LI>
-							<LI>add <A HREF="mandoc.1.html">mandoc</A> <SPAN CLASS="flag">-Tpdf</SPAN> support</LI>
-						</UL>
-					</DIV>
-					<DIV CLASS="news">
-						<P>
-							<SPAN CLASS="date">12-07-2010</SPAN>:
-							version 1.10.4
-						</P>
-						<P>
-							Lots of features developed during both <A CLASS="external"
-							HREF="http://netbsd-soc.sourceforge.net/projects/mandoc_ps/">Summer of Code</A> and the
-							<A CLASS="external" HREF="http://www.openbsd.org">OpenBSD</A> c2k10 hackathon:
-						</P>
-						<UL>
-							<LI>minimal <Q>ds</Q> <A HREF="roff.7.html">roff</A> symbols are supported</LI>
-							<LI><Q>Bk</Q> <A HREF="mdoc.7.html">mdoc</A> support</LI>
-							<LI>beautified SYNOPSIS section output</LI>
-							<LI>variable font-width and paper-size support in <A HREF="mandoc.1.html">mandoc</A>
-								<SPAN CLASS="flag">-Tps</SPAN> output</LI>
-							<LI>acceptance of scope-block breakage in <A HREF="mdoc.7.html">mdoc</A></LI>
-							<LI>clarify error message status</LI>
-							<LI>many minor bug-fixes and formatting issues resolved</LI>
-						</UL>
-					</DIV>
-					<DIV CLASS="news">
-						<P>
-							<SPAN CLASS="date">19-06-2010</SPAN>:
-							version 1.10.2
-						</P>
-						<P>
-							Small release featuring text-decoration in <SPAN CLASS="flag">-Tps</SPAN> output, a few
-							minor relaxations of errors, and some optimisations.
-						</P>
-					</DIV>
-					<DIV CLASS="news">
-						<P>
-							<SPAN CLASS="date">07-06-2010</SPAN>:
-							version 1.10.1
-						</P>
-						<P>
-							This primarily focusses on the <Q>Bl</Q> and <Q>It</Q> macros described in <A
-							HREF="mdoc.7.html">mdoc</A>.  Multi-line column support is now fully compatible with
-							groff, as are implicit list entries for columns.  Removed manuals.7 in favour of <A
-							CLASS="external" HREF="http://manpages.bsd.lv">http://manpages.bsd.lv</A>.  The way we
-							handle the SYNOPSIS section (see the SYNOPSIS documentation in <A
-							HREF="mdoc.7.html#x4d414e55414cx20x535452554354555245">MANUAL STRUCTURE</A>) has also
-							been considerably simplified compared to groff's method.  Furthermore, the <SPAN
-							CLASS="flag">-Owidth=width</SPAN> output option has been added to <SPAN
-							CLASS="flag">-Tascii</SPAN> (see <A HREF="mandoc.1.html">mandoc</A>).  Lastly, initial
-							PostScript output has been added with the <SPAN CLASS="flag">-Tps</SPAN> option to <A
-							HREF="mandoc.1.html">mandoc</A>.  It's brutally simple at the moment: fixed-font, with
-							no font decorations.
-						</P>
-					</DIV>
-					<DIV CLASS="news">
-						<P>
-							<SPAN CLASS="date">29-05-2010</SPAN>:
-							version 1.10.0
-						</P>
-						<P>
-							Release consisting of the results from the m2k10 hackathon and up-merge from OpenBSD.
-							This requires a significant note of thanks to Ingo Schwarze (OpenBSD) and Joerg
-							Sonnenberger (NetBSD) for their hard work, and again to Joerg for hosting m2k10.
-							Highlights (mostly cribbed from Ingo's m2k10 report) follow in no particular order:
-						</P>
-						<UL>
-							<LI>a <A HREF="roff.3.html">libroff</A> preprocessor in front of <A
-							HREF="mdoc.3.html">libmdoc</A> and <A HREF="man.3.html">libman</A> stripping out
-							<A HREF="roff.7.html">roff</A> instructions;</LI>
-							<LI>end-of-sentence (EOS) detection in free-form and macro lines;</LI>
-							<LI>correct handling of tab-separated columnar lists in <SPAN
-							CLASS="flag">-mdoc</SPAN>;</LI>
-							<LI>improved main calling routines to optionally use mmap() for better
-							performance;</LI>
-							<LI>cleaned up exiting when invoked as <SPAN CLASS="flag">-Tlint</SPAN> or over
-							multiple files with <SPAN CLASS="flag">-fign-errors</SPAN>;</LI>
-							<LI>error and warning message handling re-written to be unified for <A
-							HREF="roff.3.html">libroff</A>, <A HREF="mdoc.3.html">libmdoc</A>, and <A
-							HREF="man.3.html">libman</A>;</LI>
-							<LI>handling of badly-nested explicit-scoped macros;</LI>
-							<LI>improved free-form text parsing in <A HREF="man.3.html">libman</A> and <A
-							HREF="mdoc.3.html">libmdoc</A>;</LI>
-							<LI>significant GNU troff compatibility improvements in <SPAN
-							CLASS="flag">-Tascii</SPAN>, largely in terms of spacing;</LI>
-							<LI>a regression framework for making sure the many fragilities of GNU troff
-							aren't trampled in subsequent work;</LI>
-							<LI>support for <SPAN CLASS="flag">-Tascii</SPAN> breaking at hyphens
-							encountered in free-form text;</LI>
-							<LI>and many more minor fixes and improvements (no really, consult <A
-							HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/?cvsroot=mdocml">cvsweb</A> and see
-							for yourself!).</LI>
-						</UL>
 					</DIV>
 					<P>
 						See <A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/index.sgml?cvsroot=mdocml">cvsweb</A> for
