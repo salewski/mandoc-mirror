@@ -206,9 +206,6 @@ tbl_hframe(struct termp *tp, const struct tbl_span *sp)
 			TBL_OPT_DBOX & sp->tbl->opts))
 		return;
 
-	tp->flags |= TERMP_NONOSPACE;
-	tp->flags |= TERMP_NOSPACE;
-
 	/* 
 	 * Print out the horizontal part of a frame or double frame.  A
 	 * double frame has an unbroken `-' outer line the width of the
@@ -465,7 +462,7 @@ tbl_calc_data(struct termp *tp, const struct tbl *tbl,
 	case (TBL_CELL_HORIZ):
 		/* FALLTHROUGH */
 	case (TBL_CELL_DHORIZ):
-		tblp->width = 1;
+		tblp->width = term_len(tp, 1);
 		break;
 	case (TBL_CELL_LONG):
 		/* FALLTHROUGH */
@@ -536,7 +533,7 @@ tbl_calc_data_literal(struct termp *tp,
 		const struct tbl_dat *dp, 
 		struct termp_tbl *tblp)
 {
-	int		 sz, bufsz;
+	int		 sz, bufsz, spsz;
 
 	/* 
 	 * Calculate our width and use the spacing, with a minimum
@@ -551,16 +548,19 @@ tbl_calc_data_literal(struct termp *tp,
 	case (TBL_CELL_LONG):
 		/* FALLTHROUGH */
 	case (TBL_CELL_CENTRE):
-		bufsz = 2;
+		bufsz = term_len(tp, 2);
 		break;
 	default:
-		bufsz = 1;
+		bufsz = term_len(tp, 1);
 		break;
 	}
 
+	spsz = 0;
 	if (dp->layout->spacing)
-		bufsz = bufsz > dp->layout->spacing ? 
-			bufsz : dp->layout->spacing;
+		spsz = term_len(tp, dp->layout->spacing);
+
+	if (spsz)
+		bufsz = bufsz > spsz ?  bufsz : spsz;
 
 	sz += bufsz;
 	if (tblp->width < sz)

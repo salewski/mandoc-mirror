@@ -677,6 +677,12 @@ term_strlen(const struct termp *p, const char *cp)
 			if (rhs)
 				for (i = 0; i < rsz; i++)
 					sz += (*p->width)(p, *rhs++);
+		} else if (ASCII_NBRSP == *cp) {
+			sz += (*p->width)(p, ' ');
+			cp++;
+		} else if (ASCII_HYPH == *cp) {
+			sz += (*p->width)(p, '-');
+			cp++;
 		} else
 			sz += (*p->width)(p, *cp++);
 

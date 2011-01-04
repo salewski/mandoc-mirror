@@ -331,10 +331,11 @@
 							version 1.10.9
 						</P>
 						<P>
-							Table functionality (see the <A HREF="roff.7.html#x5c265453">roff</A> manual) has been
-							merged from <A CLASS="external" HREF="http://tbl.bsd.lv">tbl.bsd.lv</A>.  Many back-end
-							fixes have also been implemented, primarily in argument handling (quoting) and <A
-							HREF="man.7.html">man</A> documents.
+							Table functionality (see the <Q>TS</Q>, <Q>TE</Q>, and <Q>T&amp;</Q> macros in the <A
+							HREF="roff.7.html#x5c265453">roff</A> manual) has been merged from <A CLASS="external"
+							HREF="http://tbl.bsd.lv">tbl.bsd.lv</A>.  Many back-end fixes have also been
+							implemented, primarily in argument handling (quoting) and <A HREF="man.7.html">man</A>
+							documents.
 						</P>
 					</DIV>
 					<DIV CLASS="news">
