@@ -76,9 +76,12 @@ and
 .Sq TE
 .Xr roff 7
 macros.
-A table consists of an optional single line of table options terminated
-by a semicolon, followed by one or more lines of layout specification
-terminated by a period, then table data.
+A table consists of an optional single line of table
+.Sx Options
+terminated by a semicolon, followed by one or more lines of
+.Sx Layout
+specifications terminated by a period, then
+.Sx Data .
 All input must be 7-bit ASCII.
 Example:
 .Bd -literal -offset indent
@@ -128,11 +131,13 @@ c c c.
 .Pp
 in the case of
 .Xr man 7 .
-.Ss Table Options
-The first line of a table consists of its options, which consists of
-space-separated keys and modifiers terminated by a semicolon.
+.Ss Options
+The first line of a table consists of space-separated option keys and
+modifiers terminated by a semicolon.
 If the first line does not have a terminating semicolon, it is assumed
-that no options are specified and instead a layout is processed.
+that no options are specified and instead a
+.Sx Layout
+is processed.
 Some options accept arguments enclosed by paranthesis.
 The following case-insensitive options are available:
 .Bl -tag -width Ds
@@ -181,10 +186,12 @@ This option is not supported by
 This option is not supported by
 .Xr mandoc 1 .
 .El
-.Ss Table Layout
-The table layout follows table options, except in the case of
-.Sx \&T& ,
-where it immediately procedes invocation.
+.Ss Layout
+The table layout follows
+.Sx Options
+or a
+.Sq \&T&
+macro invocation.
 Layout specifies how data rows are displayed on output.
 Each layout line corresponds to a line of data; the last layout line
 applies to all remaining data lines.
@@ -248,7 +255,7 @@ and
 .Cm i .
 All of these are ignored by
 .Xr mandoc 1 .
-.Ss Table Data
+.Ss Data
 The data section follows the last layout row.
 By default, cells in a data section are delimited by a tab.
 This behaviour may be changed with the
