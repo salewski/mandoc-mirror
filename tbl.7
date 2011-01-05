@@ -98,7 +98,7 @@ Table data is
 .Em pre-processed ,
 that is, data rows are parsed then inserted into the underlying stream
 of input data.
-This allows data rows to be interspersed by arbitrary 
+This allows data rows to be interspersed by arbitrary
 .Xr roff 7 ,
 .Xr mdoc 7 ,
 and
@@ -138,7 +138,7 @@ If the first line does not have a terminating semicolon, it is assumed
 that no options are specified and instead a
 .Sx Layout
 is processed.
-Some options accept arguments enclosed by paranthesis.
+Some options accept arguments enclosed by parenthesis.
 The following case-insensitive options are available:
 .Bl -tag -width Ds
 .It Cm center
@@ -166,7 +166,7 @@ This option is not supported by
 .Xr mandoc 1 .
 .It Cm tab
 Accepts a single-character argument.
-This character is used a delimiter between data cells, which otherwise
+This character is used as a delimiter between data cells, which otherwise
 defaults to the tab character.
 .It Cm linesize
 Accepts a natural number (all digits).
@@ -231,7 +231,7 @@ Emit a vertical bar instead of data.
 Emit a double-vertical bar instead of data.
 .El
 .Pp
-For example, following layout specifies a centre-justified column of
+For example, the following layout specifies a centre-justified column of
 minimum width 10, followed by vertical bar, followed by a left-justified
 column of minimum width 10, another vertical bar, then a column
 justified about the decimal point in numbers:
@@ -271,7 +271,7 @@ If
 .Cm \e-
 or
 .Cm \e=
-is specified, a line is drawn within the data field (i.e., terminating
+is specified, a line is drawn within the data field (i.e. terminating
 within the cell and not draw to the border).
 If the last cell of a line is
 .Cm T{ ,
@@ -293,10 +293,10 @@ implementation allows them.
 .El
 .Sh SEE ALSO
 .Xr mandoc 1 ,
-.Xr mandoc_char 7 ,
-.Xr roff 7 ,
 .Xr man 7 ,
-.Xr mdoc 7
+.Xr mandoc_char 7 ,
+.Xr mdoc 7 ,
+.Xr roff 7
 .Rs
 .%A M. E. Lesk
 .%T Tbl\(emA Program to Format Tables
