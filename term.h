@@ -78,7 +78,7 @@ struct	termp_tbl {
 
 struct	termp {
 	enum termtype	  type;
-	struct termp_tbl *tbl;		/* table configuration */
+	struct rofftbl	  tbl;		/* table configuration */
 	size_t		  defrmargin;	/* Right margin of the device. */
 	size_t		  rmargin;	/* Current right margin. */
 	size_t		  maxrmargin;	/* Max right margin. */
