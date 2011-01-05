@@ -32,7 +32,8 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 {
 	const struct tbl_head *hp;
 	const struct tbl_dat *dp;
-	struct tag	 *tt;
+	struct tag	*tt;
+	struct htmlpair	 tag;
 
 	switch (sp->pos) {
 	case (TBL_SPAN_HORIZ):
@@ -48,7 +49,9 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 	h->flags |= HTML_NONOSPACE;
 	h->flags |= HTML_NOSPACE;
 
-	print_otag(h, TAG_TABLE, 0, NULL);
+	PAIR_CLASS_INIT(&tag, "tbl");
+
+	print_otag(h, TAG_TABLE, 1, &tag);
 	print_otag(h, TAG_TR, 0, NULL);
 
 	dp = sp->first;

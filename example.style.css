@@ -1,8 +1,12 @@
 /* $Id$ */
 
 /*
- * This default style-sheet mimics the appearance of the traditional
- * cvsweb output.
+ * This is an example style-sheet provided for mandoc(1) and the -Thtml
+ * or -Txhtml output mode.
+ *
+ * It mimics the appearance of the traditional cvsweb output.
+ *
+ * See mdoc(7) and man(7) for macro explanations.
  */
 
 html		{ min-width: 580px; width: 580px; }
@@ -96,7 +100,7 @@ a.link-man	{ } /* Manual links (Xr). */
 a.link-ref	{ } /* Reference section links (%Q). */
 a.link-sec	{ } /* Section links (Sx). */
 
-/* Formatting for lists. */
+/* Formatting for lists.  See mdoc(7). */
 
 dl.list-diag	{ }
 dt.list-diag	{ }
@@ -136,3 +140,7 @@ li.list-item	{ }
 
 ol.list-enum	{ padding-left: 2em; }
 li.list-enum	{ }
+
+/* Table modes.  See tbl(7). */
+
+table.tbl	{ }
