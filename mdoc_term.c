@@ -1599,7 +1599,9 @@ termp_bd_pre(DECL_ARGS)
 		return(1);
 
 	tabwidth = p->tabwidth;
-	p->tabwidth = term_len(p, 8);
+	if (DISP_literal == n->norm->Bd.type)
+		p->tabwidth = term_len(p, 8);
+
 	rm = p->rmargin;
 	rmax = p->maxrmargin;
 	p->rmargin = p->maxrmargin = TERM_MAXMARGIN;

@@ -152,11 +152,6 @@
   Also have `It' complain if `Pp' is invoked at certain times (not
   -compact?).
 
-- .Bd -literal and .Bd -unfilled are *not* identical.
-  In -literal, tabs are 8 spaces.
-  In -unfilled, tabs are 5 spaces, just like in -filled and -ragged.
-  See the CCDF_* display in OpenBSD ccdconfig(8).
-
 - .Nx 1.0a
   should be "NetBSD 1.0A", not "NetBSD 1.0a",
   see OpenBSD ccdconfig(8).
