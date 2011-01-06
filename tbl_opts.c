@@ -102,12 +102,12 @@ arg(struct tbl_node *tbl, int ln, const char *p, int *pos, int key)
 
 	switch (key) {
 	case (KEY_DELIM):
-		if ('\0' == (tbl->opts.delims[0] = p[(*pos)++])) {
+		if ('\0' == p[(*pos)++]) {
 			TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos - 1);
 			return(0);
 		} 
 
-		if ('\0' == (tbl->opts.delims[1] = p[(*pos)++])) {
+		if ('\0' == p[(*pos)++]) {
 			TBL_MSG(tbl, MANDOCERR_TBL, ln, *pos - 1);
 			return(0);
 		} 
