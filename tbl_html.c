@@ -27,6 +27,25 @@
 #include "out.h"
 #include "html.h"
 
+static	size_t	 html_tbl_len(size_t, void *);
+static	size_t	 html_tbl_strlen(const char *, void *);
+
+/* ARGSUSED */
+static size_t
+html_tbl_len(size_t sz, void *arg)
+{
+	
+	return(sz);
+}
+
+/* ARGSUSED */
+static size_t
+html_tbl_strlen(const char *p, void *arg)
+{
+
+	return(strlen(p));
+}
+
 void
 print_tbl(struct html *h, const struct tbl_span *sp)
 {
@@ -34,6 +53,8 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 	const struct tbl_dat *dp;
 	struct tag	*tt;
 	struct htmlpair	 tag;
+	struct roffsu	 su;
+	struct roffcol	*col;
 
 	switch (sp->pos) {
 	case (TBL_SPAN_HORIZ):
@@ -48,6 +69,14 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 
 	h->flags |= HTML_NONOSPACE;
 	h->flags |= HTML_NOSPACE;
+
+	/* First pass: calculate widths. */
+
+	if (TBL_SPAN_FIRST & sp->flags) {
+		h->tbl.len = html_tbl_len;
+		h->tbl.slen = html_tbl_strlen;
+		tblcalc(&h->tbl, sp);
+	}
 
 	PAIR_CLASS_INIT(&tag, "tbl");
 
@@ -64,7 +93,17 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 		case (TBL_HEAD_DATA):
 			break;
 		}
-		tt = print_otag(h, TAG_TD, 0, NULL);
+
+		/*
+		 * For the time being, use the simplest possible table
+		 * styling: setting the widths of data columns.
+		 */
+
+		col = &h->tbl.cols[hp->ident];
+		SCALE_HS_INIT(&su, col->width);
+		bufcat_su(h, "width", &su);
+		PAIR_STYLE_INIT(&tag, h);
+		tt = print_otag(h, TAG_TD, 1, &tag);
 		if (dp) {
 			if (dp->string)
 				print_text(h, dp->string);
@@ -73,4 +112,12 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 		print_tagq(h, tt);
 	}
 	h->flags &= ~HTML_NONOSPACE;
+
+	/* Close out column specifiers on the last span. */
+
+	if (TBL_SPAN_LAST & sp->flags) {
+		assert(h->tbl.cols);
+		free(h->tbl.cols);
+		h->tbl.cols = NULL;
+	}
 }
