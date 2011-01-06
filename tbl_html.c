@@ -56,15 +56,6 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 	struct roffsu	 su;
 	struct roffcol	*col;
 
-	switch (sp->pos) {
-	case (TBL_SPAN_HORIZ):
-		/* FALLTHROUGH */
-	case (TBL_SPAN_DHORIZ):
-		return;
-	default:
-		break;
-	}
-
 	/* Inhibit printing of spaces: we do padding ourselves. */
 
 	h->flags |= HTML_NONOSPACE;
@@ -78,39 +69,51 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 		tblcalc(&h->tbl, sp);
 	}
 
-	PAIR_CLASS_INIT(&tag, "tbl");
+	switch (sp->pos) {
+	case (TBL_SPAN_HORIZ):
+		/* FALLTHROUGH */
+	case (TBL_SPAN_DHORIZ):
+		break;
+	default:
+		PAIR_CLASS_INIT(&tag, "tbl");
+		print_otag(h, TAG_TABLE, 1, &tag);
+		print_otag(h, TAG_TR, 0, NULL);
 
-	print_otag(h, TAG_TABLE, 1, &tag);
-	print_otag(h, TAG_TR, 0, NULL);
+		/* Iterate over template headers. */
 
-	dp = sp->first;
-	for (hp = sp->head; hp; hp = hp->next) {
-		switch (hp->pos) {
-		case (TBL_HEAD_VERT):
-			/* FALLTHROUGH */
-		case (TBL_HEAD_DVERT):
-			continue;
-		case (TBL_HEAD_DATA):
-			break;
-		}
+		dp = sp->first;
+		for (hp = sp->head; hp; hp = hp->next) {
+			switch (hp->pos) {
+			case (TBL_HEAD_VERT):
+				/* FALLTHROUGH */
+			case (TBL_HEAD_DVERT):
+				continue;
+			case (TBL_HEAD_DATA):
+				break;
+			}
 
-		/*
-		 * For the time being, use the simplest possible table
-		 * styling: setting the widths of data columns.
-		 */
+			/*
+			 * For the time being, use the simplest possible
+			 * table styling: setting the widths of data
+			 * columns.
+			 */
 
-		col = &h->tbl.cols[hp->ident];
-		SCALE_HS_INIT(&su, col->width);
-		bufcat_su(h, "width", &su);
-		PAIR_STYLE_INIT(&tag, h);
-		tt = print_otag(h, TAG_TD, 1, &tag);
-		if (dp) {
-			if (dp->string)
+			col = &h->tbl.cols[hp->ident];
+			SCALE_HS_INIT(&su, col->width);
+			bufcat_su(h, "width", &su);
+			PAIR_STYLE_INIT(&tag, h);
+			tt = print_otag(h, TAG_TD, 1, &tag);
+
+			if (dp && dp->string) 
 				print_text(h, dp->string);
-			dp = dp->next;
+			if (dp)
+				dp = dp->next;
+
+			print_tagq(h, tt);
 		}
-		print_tagq(h, tt);
+		break;
 	}
+
 	h->flags &= ~HTML_NONOSPACE;
 
 	/* Close out column specifiers on the last span. */
