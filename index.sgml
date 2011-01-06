@@ -42,7 +42,7 @@
 					<SPAN CLASS="nm">mdocml</SPAN> consists of the <A HREF="mdoc.3.html">libmdoc</A>, <A
 					HREF="man.3.html">libman</A>, and <A HREF="roff.3.html">libroff</A> validating compilers; and <A
 					HREF="mandoc.1.html">mandoc</A>, which interfaces with the compiler libraries to format output for UNIX
-					terminals, XHTML, HTML, PostScript, and PDF.  <SPAN CLASS="nm">mdocml</SPAN> is a <A CLASS="external"
+					terminals, XHTML, HTML, PostScript, and PDF.  It is a <A CLASS="external"
 					HREF="http://bsd.lv/">BSD.lv</A> project.  
 					</P>
 
@@ -283,15 +283,10 @@
 					</H1>
 
 					<P>
-						Please use the mailing lists for bug-reports, patches, questions, etc.  Beyond that, contact
-						Kristaps at <A
+						Please use the mailing lists for bug-reports, patches, questions, etc. (these require
+						subscription).  Beyond that, contact Kristaps at <A
 						HREF="http://mailhide.recaptcha.net/d?k=01M6h_w7twDp58ZgH57eWC_w==&amp;c=Q2DBUt401ePlSeupJFrq_Q=="
 						TITLE="Reveal this e-mail address">kris...</A>@bsd.lv.
-					</P>
-
-					<P>
-						You may also subscribe to several mailing lists (these require subscription, which is
-						moderated).
 					</P>
 
 					<TABLE WIDTH="100%" SUMMARY="Mailing Lists">
@@ -343,11 +338,17 @@
 							version 1.10.9
 						</P>
 						<P>
+							Many back-end fixes have been implemented: argument handling (quoting), <A
+							HREF="man.7.html">man</A> improvements, error/warning classes, and many more.
+						</P>
+						<P>
 							<A HREF="tbl.7.html">tbl</A> functionality (see the <Q>TS</Q>, <Q>TE</Q>, and
 							<Q>T&amp;</Q> macros in the <A HREF="roff.7.html#x5c265453">roff</A> manual) has been
-							merged from <A CLASS="external" HREF="http://tbl.bsd.lv">tbl.bsd.lv</A>.  Many back-end
-							fixes have also been implemented, primarily in argument handling (quoting) and <A
-							HREF="man.7.html">man</A> documents.
+							merged from <A CLASS="external" HREF="http://tbl.bsd.lv">tbl.bsd.lv</A>.  Output is
+							still minimal for <SPAN CLASS="flag">-Thtml</SPAN> and <SPAN
+							CLASS="flag">-Txhtml</SPAN>, but manages to at least display data.  This means that <A
+							HREF="mandoc.1.html">mandoc</A> now has built-in support for two troff preprocessors via
+							<A HREF="roff.3.html">libroff</A>: soelim and tbl.
 						</P>
 					</DIV>
 					<DIV CLASS="news">
