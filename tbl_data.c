@@ -112,6 +112,7 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 	return(1);
 }
 
+/* ARGSUSED */
 int
 tbl_cdata(struct tbl_node *tbl, int ln, const char *p)
 {

@@ -32,7 +32,7 @@
 
 static	size_t	term_tbl_len(size_t, void *);
 static	size_t	term_tbl_strlen(const char *, void *);
-static	void	tbl_char(struct termp *, char, int);
+static	void	tbl_char(struct termp *, char, size_t);
 static	void	tbl_data(struct termp *, const struct tbl *,
 			const struct tbl_dat *, 
 			const struct roffcol *);
@@ -67,7 +67,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	const struct tbl_head	*hp;
 	const struct tbl_dat	*dp;
 	struct roffcol		*col;
-	int		   	 rmargin, maxrmargin;
+	size_t		   	 rmargin, maxrmargin;
 
 	rmargin = tp->rmargin;
 	maxrmargin = tp->maxrmargin;
@@ -165,7 +165,7 @@ tbl_hrule(struct termp *tp, const struct tbl_span *sp)
 {
 	const struct tbl_head *hp;
 	char		 c;
-	int		 width;
+	size_t		 width;
 
 	/*
 	 * An hrule extends across the entire table and is demarked by a
@@ -202,7 +202,7 @@ static void
 tbl_hframe(struct termp *tp, const struct tbl_span *sp)
 {
 	const struct tbl_head *hp;
-	int		 width;
+	size_t		 width;
 
 	if ( ! (TBL_OPT_BOX & sp->tbl->opts || 
 			TBL_OPT_DBOX & sp->tbl->opts))
@@ -324,10 +324,13 @@ tbl_vframe(struct termp *tp, const struct tbl *tbl)
 }
 
 static void
-tbl_char(struct termp *tp, char c, int len)
+tbl_char(struct termp *tp, char c, size_t len)
 {
-	int		i, sz;
-	const char	cp[2] = {c, '\0'};
+	size_t		i, sz;
+	char		cp[2];
+
+	cp[0] = c;
+	cp[1] = '\0';
 
 	sz = term_strlen(tp, cp);
 
@@ -339,7 +342,7 @@ static void
 tbl_literal(struct termp *tp, const struct tbl_dat *dp, 
 		const struct roffcol *col)
 {
-	int		 padl, padr, ssz;
+	size_t		 padl, padr, ssz;
 	enum tbl_cellt	 pos;
 
 	padl = padr = 0;

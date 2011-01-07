@@ -72,12 +72,12 @@ static	const struct tbl_phrase keys[KEY_MAXKEYS] = {
 };
 
 static	int		 arg(struct tbl_node *, int, 
-				const char *, int *, int);
+				const char *, int *, enum tbl_ident);
 static	void		 opt(struct tbl_node *, int, 
 				const char *, int *);
 
 static int
-arg(struct tbl_node *tbl, int ln, const char *p, int *pos, int key)
+arg(struct tbl_node *tbl, int ln, const char *p, int *pos, enum tbl_ident key)
 {
 	int		 i;
 	char		 buf[KEY_MAXNUMSZ];
