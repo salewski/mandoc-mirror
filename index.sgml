@@ -160,30 +160,6 @@
 					<COL>
 					<TBODY>
 						<TR>
-							<TD VALIGN="top"><A HREF="man.3.html">man(3)</A></TD>
-							<TD VALIGN="top">
-								man macro compiler library
-								<SPAN STYLE="font-size: smaller;">
-									(<A HREF="man.3.txt">text</A> | 
-									<A HREF="man.3.xhtml">xhtml</A> |
-									<A HREF="man.3.pdf">pdf</A> |
-									<A HREF="man.3.ps">postscript</A>)
-								</SPAN>
-							</TD>
-						</TR>
-						<TR>
-							<TD VALIGN="top"><A HREF="man.7.html">man(7)</A></TD>
-							<TD VALIGN="top">
-								man language reference
-								<SPAN STYLE="font-size: smaller;">
-									(<A HREF="man.7.txt">text</A> | 
-									<A HREF="man.7.xhtml">xhtml</A> |
-									<A HREF="man.7.pdf">pdf</A> |
-									<A HREF="man.7.ps">postscript</A>)
-								</SPAN>
-							</TD>
-						</TR>
-						<TR>
 							<TD VALIGN="top"><A HREF="mandoc.1.html">mandoc(1)</A></TD>
 							<TD VALIGN="top">
 								format and display UNIX manuals
@@ -196,14 +172,14 @@
 							</TD>
 						</TR>
 						<TR>
-							<TD VALIGN="top"><A HREF="mandoc_char.7.html">mandoc_char(7)</A></TD>
+							<TD VALIGN="top"><A HREF="man.3.html">man(3)</A></TD>
 							<TD VALIGN="top">
-								mandoc special characters
+								man macro compiler library
 								<SPAN STYLE="font-size: smaller;">
-									(<A HREF="mandoc_char.7.txt">text</A> | 
-									<A HREF="mandoc_char.7.xhtml">xhtml</A> |
-									<A HREF="mandoc_char.7.pdf">pdf</A> |
-									<A HREF="mandoc_char.7.ps">postscript</A>)
+									(<A HREF="man.3.txt">text</A> | 
+									<A HREF="man.3.xhtml">xhtml</A> |
+									<A HREF="man.3.pdf">pdf</A> |
+									<A HREF="man.3.ps">postscript</A>)
 								</SPAN>
 							</TD>
 						</TR>
@@ -220,18 +196,6 @@
 							</TD>
 						</TR>
 						<TR>
-							<TD VALIGN="top"><A HREF="mdoc.7.html">mdoc(7)</A></TD>
-							<TD VALIGN="top">
-								mdoc language reference
-								<SPAN STYLE="font-size: smaller;">
-									(<A HREF="mdoc.7.txt">text</A> | 
-									<A HREF="mdoc.7.xhtml">xhtml</A> |
-									<A HREF="mdoc.7.pdf">pdf</A> |
-									<A HREF="mdoc.7.ps">postscript</A>)
-								</SPAN>
-							</TD>
-						</TR>
-						<TR>
 							<TD VALIGN="top"><A HREF="roff.3.html">roff(3)</A></TD>
 							<TD VALIGN="top">
 								roff macro compiler library
@@ -240,6 +204,42 @@
 									<A HREF="roff.3.xhtml">xhtml</A> |
 									<A HREF="roff.3.pdf">pdf</A> |
 									<A HREF="roff.3.ps">postscript</A>)
+								</SPAN>
+							</TD>
+						</TR>
+						<TR>
+							<TD VALIGN="top"><A HREF="man.7.html">man(7)</A></TD>
+							<TD VALIGN="top">
+								man language reference
+								<SPAN STYLE="font-size: smaller;">
+									(<A HREF="man.7.txt">text</A> | 
+									<A HREF="man.7.xhtml">xhtml</A> |
+									<A HREF="man.7.pdf">pdf</A> |
+									<A HREF="man.7.ps">postscript</A>)
+								</SPAN>
+							</TD>
+						</TR>
+						<TR>
+							<TD VALIGN="top"><A HREF="mandoc_char.7.html">mandoc_char(7)</A></TD>
+							<TD VALIGN="top">
+								mandoc special characters
+								<SPAN STYLE="font-size: smaller;">
+									(<A HREF="mandoc_char.7.txt">text</A> | 
+									<A HREF="mandoc_char.7.xhtml">xhtml</A> |
+									<A HREF="mandoc_char.7.pdf">pdf</A> |
+									<A HREF="mandoc_char.7.ps">postscript</A>)
+								</SPAN>
+							</TD>
+						</TR>
+						<TR>
+							<TD VALIGN="top"><A HREF="mdoc.7.html">mdoc(7)</A></TD>
+							<TD VALIGN="top">
+								mdoc language reference
+								<SPAN STYLE="font-size: smaller;">
+									(<A HREF="mdoc.7.txt">text</A> | 
+									<A HREF="mdoc.7.xhtml">xhtml</A> |
+									<A HREF="mdoc.7.pdf">pdf</A> |
+									<A HREF="mdoc.7.ps">postscript</A>)
 								</SPAN>
 							</TD>
 						</TR>
@@ -334,7 +334,7 @@
 					</H1>
 					<DIV CLASS="news">
 						<P>
-							<SPAN CLASS="date">03-01-2011</SPAN>:
+							<SPAN CLASS="date">07-01-2011</SPAN>:
 							version 1.10.9
 						</P>
 						<P>
@@ -342,10 +342,10 @@
 							HREF="man.7.html">man</A> improvements, error/warning classes, and many more.
 						</P>
 						<P>
-							<A HREF="tbl.7.html">tbl</A> functionality (see the <Q>TS</Q>, <Q>TE</Q>, and
+							Initial <A HREF="tbl.7.html">tbl</A> functionality (see the <Q>TS</Q>, <Q>TE</Q>, and
 							<Q>T&amp;</Q> macros in the <A HREF="roff.7.html#x5c265453">roff</A> manual) has been
 							merged from <A CLASS="external" HREF="http://tbl.bsd.lv">tbl.bsd.lv</A>.  Output is
-							still minimal for <SPAN CLASS="flag">-Thtml</SPAN> and <SPAN
+							still minimal, especially for <SPAN CLASS="flag">-Thtml</SPAN> and <SPAN
 							CLASS="flag">-Txhtml</SPAN>, but manages to at least display data.  This means that <A
 							HREF="mandoc.1.html">mandoc</A> now has built-in support for two troff preprocessors via
 							<A HREF="roff.3.html">libroff</A>: soelim and tbl.
