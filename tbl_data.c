@@ -45,10 +45,14 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 	else if (NULL == dp->last)
 		cp = dp->layout->first;
 
-	/* Skip over spanners to data formats. */
+	/* 
+	 * Skip over spanners and vertical lines to data formats, since
+	 * we want to match data with data layout cells in the header.
+	 */
 
 	while (cp && (TBL_CELL_VERT == cp->pos || 
-				TBL_CELL_DVERT == cp->pos))
+				TBL_CELL_DVERT == cp->pos ||
+				TBL_CELL_SPAN == cp->pos))
 		cp = cp->next;
 
 	dat = mandoc_calloc(1, sizeof(struct tbl_dat));
