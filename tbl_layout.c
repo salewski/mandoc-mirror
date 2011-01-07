@@ -90,6 +90,20 @@ mod:
 		break;
 	}
 
+	/* Throw away parenthesised expression. */
+
+	if ('(' == p[*pos]) {
+		(*pos)++;
+		while (p[*pos] && ')' != p[*pos])
+			(*pos)++;
+		if (')' == p[*pos]) {
+			(*pos)++;
+			goto mod;
+		}
+		TBL_MSG(tbl, MANDOCERR_TBLLAYOUT, ln, *pos);
+		return(0);
+	}
+
 	/* Parse numerical spacing from modifier string. */
 
 	if (isdigit((unsigned char)p[*pos])) {

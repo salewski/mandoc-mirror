@@ -272,7 +272,7 @@ tbl_data(struct termp *tp, const struct tbl *tbl,
 		break;
 	}
 	
-	pos = dp->layout ? dp->layout->pos : TBL_CELL_LEFT;
+	pos = dp && dp->layout ? dp->layout->pos : TBL_CELL_LEFT;
 
 	switch (pos) {
 	case (TBL_CELL_HORIZ):
@@ -344,34 +344,37 @@ tbl_literal(struct termp *tp, const struct tbl_dat *dp,
 {
 	size_t		 padl, padr, ssz;
 	enum tbl_cellt	 pos;
+	const char	*str;
 
 	padl = padr = 0;
 
-	pos = dp->layout ? dp->layout->pos : TBL_CELL_LEFT;
+	pos = dp && dp->layout ? dp->layout->pos : TBL_CELL_LEFT;
+	str = dp && dp->string ? dp->string : "";
+
 	ssz = term_len(tp, 1);
 
 	switch (pos) {
 	case (TBL_CELL_LONG):
 		padl = ssz;
-		padr = col->width - term_strlen(tp, dp->string) - ssz;
+		padr = col->width - term_strlen(tp, str) - ssz;
 		break;
 	case (TBL_CELL_CENTRE):
-		padl = col->width - term_strlen(tp, dp->string);
+		padl = col->width - term_strlen(tp, str);
 		if (padl % 2)
 			padr++;
 		padl /= 2;
 		padr += padl;
 		break;
 	case (TBL_CELL_RIGHT):
-		padl = col->width - term_strlen(tp, dp->string);
+		padl = col->width - term_strlen(tp, str);
 		break;
 	default:
-		padr = col->width - term_strlen(tp, dp->string);
+		padr = col->width - term_strlen(tp, str);
 		break;
 	}
 
 	tbl_char(tp, ASCII_NBRSP, padl);
-	term_word(tp, dp->string);
+	term_word(tp, str);
 	tbl_char(tp, ASCII_NBRSP, padr);
 }
 
@@ -391,9 +394,7 @@ tbl_number(struct termp *tp, const struct tbl *tbl,
 	 * and the maximum decimal; right-pad by the remaining amount.
 	 */
 
-	str = "";
-	if (dp->string)
-		str = dp->string;
+	str = dp && dp->string ? dp->string : "";
 
 	sz = term_strlen(tp, str);
 
@@ -418,7 +419,7 @@ tbl_number(struct termp *tp, const struct tbl *tbl,
 	padl = col->decimal - d;
 
 	tbl_char(tp, ASCII_NBRSP, padl);
-	term_word(tp, dp->string);
+	term_word(tp, str);
 	tbl_char(tp, ASCII_NBRSP, col->width - sz - padl);
 }
 
