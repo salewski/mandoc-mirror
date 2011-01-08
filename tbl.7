@@ -231,16 +231,9 @@ Emit a vertical bar instead of data.
 Emit a double-vertical bar instead of data.
 .El
 .Pp
-For example, the following layout specifies a centre-justified column of
-minimum width 10, followed by vertical bar, followed by a left-justified
-column of minimum width 10, another vertical bar, then a column
-justified about the decimal point in numbers:
-.Pp
-.Dl c10 | l10 | n
-.Pp
 Keys may be followed by a set of modifiers.
 A modifier is either a modifier key or a natural number for specifying
-spacing.
+the minimum width of a column.
 The following case-insensitive modifier keys are available:
 .Cm z ,
 .Cm u ,
@@ -255,6 +248,13 @@ and
 .Cm i .
 All of these are ignored by
 .Xr mandoc 1 .
+.Pp
+For example, the following layout specifies a centre-justified column of
+minimum width 10, followed by vertical bar, followed by a left-justified
+column of minimum width 10, another vertical bar, then a column
+justified about the decimal point in numbers:
+.Pp
+.Dl c10 | l10 | n
 .Ss Data
 The data section follows the last layout row.
 By default, cells in a data section are delimited by a tab.

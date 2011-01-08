@@ -27,9 +27,6 @@
 #include "out.h"
 #include "term.h"
 
-/* FIXME: `n' modifier doesn't always do the right thing. */
-/* FIXME: `n' modifier doesn't use the cell-spacing buffer. */
-
 static	size_t	term_tbl_len(size_t, void *);
 static	size_t	term_tbl_strlen(const char *, void *);
 static	void	tbl_char(struct termp *, char, size_t);

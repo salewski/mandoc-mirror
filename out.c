@@ -503,12 +503,10 @@ tblcalc_number(struct rofftbl *tbl, struct roffcol *col,
 		const struct tbl *tp, const struct tbl_dat *dp)
 {
 	int 		 i;
-	size_t		 sz, psz, ssz, d;
+	size_t		 sz, psz, ssz, d, max;
 	char		*cp;
 	const char	*str;
 	char		 buf[2];
-
-	/* TODO: use spacing modifier. */
 
 	/*
 	 * First calculate number width and decimal place (last + 1 for
@@ -519,9 +517,8 @@ tblcalc_number(struct rofftbl *tbl, struct roffcol *col,
 	 * Finally, re-assign the stored values.
 	 */
 
-	str = "";
-	if (dp->string)
-		str = dp->string;
+	str = dp && dp->string ? dp->string : "";
+	max = dp && dp->layout ? dp->layout->spacing : 0;
 
 	sz = (*tbl->slen)(str, tbl->arg);
 
@@ -557,6 +554,11 @@ tblcalc_number(struct rofftbl *tbl, struct roffcol *col,
 		col->width = sz;
 	if (d > col->decimal)
 		col->decimal = d;
+
+	/* Adjust for stipulated width. */
+
+	if (col->width < max)
+		col->width = max;
 }
 
 
