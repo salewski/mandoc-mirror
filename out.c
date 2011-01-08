@@ -527,7 +527,7 @@ tblcalc_number(struct rofftbl *tbl, struct roffcol *col,
 
 	psz = (*tbl->slen)(buf, tbl->arg);
 
-	if (NULL != (cp = strchr(str, tp->decimal))) {
+	if (NULL != (cp = strrchr(str, tp->decimal))) {
 		buf[1] = '\0';
 		for (ssz = 0, i = 0; cp != &str[i]; i++) {
 			buf[0] = str[i];

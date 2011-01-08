@@ -400,7 +400,7 @@ tbl_number(struct termp *tp, const struct tbl *tbl,
 
 	psz = term_strlen(tp, buf);
 
-	if (NULL != (cp = strchr(str, tbl->decimal))) {
+	if (NULL != (cp = strrchr(str, tbl->decimal))) {
 		buf[1] = '\0';
 		for (ssz = 0, i = 0; cp != &str[i]; i++) {
 			buf[0] = str[i];
