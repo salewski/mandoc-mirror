@@ -130,7 +130,7 @@ mod:
 
 	/* TODO: GNU has many more extensions. */
 
-	switch (tolower(p[(*pos)++])) {
+	switch (tolower((unsigned char)p[(*pos)++])) {
 	case ('z'):
 		cp->flags |= TBL_CELL_WIGN;
 		goto mod;
@@ -160,7 +160,7 @@ mod:
 		return(0);
 	}
 
-	switch (tolower(p[(*pos)++])) {
+	switch (tolower((unsigned char)p[(*pos)++])) {
 	case ('b'):
 		cp->flags |= TBL_CELL_BOLD;
 		goto mod;
@@ -185,7 +185,7 @@ cell(struct tbl_node *tbl, struct tbl_row *rp,
 	/* Parse the column position (`r', `R', `|', ...). */
 
 	for (i = 0; i < KEYS_MAX; i++)
-		if (tolower(p[*pos]) == keys[i].name)
+		if (tolower((unsigned char)p[*pos]) == keys[i].name)
 			break;
 
 	if (KEYS_MAX == i) {

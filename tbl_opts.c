@@ -188,7 +188,7 @@ again:	/*
 	/* Copy up to first non-alpha character. */
 
 	for (sv = *pos, i = 0; i < KEY_MAXNAME; i++, (*pos)++) {
-		buf[i] = tolower(p[*pos]);
+		buf[i] = tolower((unsigned char)p[*pos]);
 		if ( ! isalpha((unsigned char)buf[i]))
 			break;
 	}
