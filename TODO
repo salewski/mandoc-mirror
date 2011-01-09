@@ -13,20 +13,19 @@
   .br \}
   reported by ulrich spoerlein  Tue, 19 Oct 2010 20:39:50 +0200
 
-- .BI "string string " word punct in gettext(3)
-  add bogus line breaks (rep by naddy@)
-  committed; currently working on IP and TP?
-  and what about B and I?
+************************************************************************
+* formatter bugs
+************************************************************************
+
+- in literal mode, the man(7) -Tascii formatter
+  breaks the line between macro arguments,
+  e.g. ".B #include <libintl.h>" in gettext(3)
 
 ************************************************************************
 * missing features
 ************************************************************************
 
 - pod2man expects `tr' to be implemented for \*(-- to work
-
-- explicit blocks with missing end macro should be implicitely closed
-  at the end of the enclosing block, e.g. .Bl It (El) Sh
-  reminded by stsp@  in net/pptp pptp.8  Fri, 23 Apr 2010 20:32:39 +0200
 
 - fix bad block nesting involving multiple identical explicit blocks
   see the OpenBSD mdoc_macro.c 1.47 commit message
@@ -42,16 +41,12 @@
   .Sh .Nm .Bk .Nm .Ek .Sh found by jmc@ in ssh-keygen(1)
   from jmc@  Wed, 14 Jul 2010 18:10:32 +0100
 
-- auto-Bk in the SYNOPSIS
-  patch from kristaps@  Fri, 16 Jul 2010 14:51:24 +0200
-  to be revisited after OpenBSD 4.8 tree unlock
-
-- implement \\
-  in plain text, identical to \e
-  as a macro argument, identical to \ i.e. escaping the next character
-  We do not have macro definitions yet; if we implement them,
-  \\ must behave in a macro def like in a macro argument,
-  and when using the macro, it must expand yet again.
+- \\ is now implemented correctly
+  * when defining strings and macros using .ds and .de
+  * when parsing roff(7) and man(7) macro arguments
+  It does not yet work in mdoc(7) macro arguments
+  because libmdoc does not yet use mandoc_getarg().
+  Also check what happens in plain text, it must be identical to \e.
 
 - implement basic non-parametric .de to support e.g. sox(1)
   reported by naddy@ Sat, 16 Oct 2010 23:51:57 +0200
@@ -111,7 +106,8 @@
 ************************************************************************
 
 - double quotes inside double quotes are escaped by doubling them
-  implement this in man(7) and mdoc(7)
+  implement this in mdoc(7), too
+  so far, we only have it in roff(7) and man(7)
   reminded by millert@  Thu, 09 Dec 2010 17:29:52 -0500
 
 - perl(1) SYNOPSIS looks bad; reported by deraadt@
@@ -167,9 +163,6 @@
 - When .Fn arguments exceed one output line, all but the first
   should be indented, see e.g. rpc(3);
   reported by jmc@ on discuss@  Fri, 29 Oct 2010 13:48:33 +0100
-
-- It seems that .TP does not want TWOSPACE after the tag;
-  see bashbug(1); reported by naddy@
 
 - Header lines of excessive length:
   Port OpenBSD man_term.c rev. 1.25 to mdoc_term.c
