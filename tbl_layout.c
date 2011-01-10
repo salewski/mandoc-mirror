@@ -122,7 +122,7 @@ mod:
 		}
 
 		*pos += i;
-		cp->spacing = atoi(buf);
+		cp->spacing = (size_t)atoi(buf);
 
 		goto mod;
 		/* NOTREACHED */

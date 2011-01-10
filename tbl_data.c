@@ -188,8 +188,6 @@ tbl_data(struct tbl_node *tbl, int ln, const char *p)
 	 * If there's no last parsed span, use the first row.  Lastly,
 	 * if the last span was a horizontal line, use the same layout
 	 * (it doesn't "consume" the layout).
-	 *
-	 * In the end, this can be NULL!
 	 */
 
 	if (tbl->last_span) {
@@ -198,10 +196,13 @@ tbl_data(struct tbl_node *tbl, int ln, const char *p)
 			rp = tbl->last_span->layout->next;
 		else
 			rp = tbl->last_span->layout;
+
 		if (NULL == rp)
 			rp = tbl->last_span->layout;
 	} else
 		rp = tbl->first_row;
+
+	assert(rp);
 
 	dp = mandoc_calloc(1, sizeof(struct tbl_span));
 	dp->tbl = &tbl->opts;
