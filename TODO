@@ -27,6 +27,9 @@
 
 - pod2man expects `tr' to be implemented for \*(-- to work
 
+- implement `rm' - it is easy to do and used in the pod2man preamble
+  reminded by brad@  Sun, Jan 09, 2011 at 09:45:58PM -0500
+
 - fix bad block nesting involving multiple identical explicit blocks
   see the OpenBSD mdoc_macro.c 1.47 commit message
 
@@ -168,6 +171,18 @@
   Port OpenBSD man_term.c rev. 1.25 to mdoc_term.c
   and document it in mdoc(7) and man(7) COMPATIBILITY
   found while talking to Chris Bennett
+
+************************************************************************
+* error reporting issues
+************************************************************************
+
+- .fi without preceding .nf need not be an ERROR,
+  a warning is sufficient; occurs in all postfix manuals
+  reported by brad@  Sun, Jan 09, 2011 at 09:45:58PM -0500
+
+- downgrade "ERROR: macro requires body argument(s)" to WARNING
+  for the typical man(7) cases, it keeps confusing people
+  reminded by brad@  Sun, Jan 09, 2011 at 09:45:58PM -0500
 
 ************************************************************************
 * performance issues
