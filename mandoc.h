@@ -100,9 +100,6 @@ enum	mandocerr {
 	MANDOCERR_BADESCAPE, /* unknown escape sequence */
 	MANDOCERR_BADQUOTE, /* unterminated quoted string */
 
-	/* related to tables */
-	MANDOCERR_TBLEXTRADAT, /* extra data cells */
-
 	MANDOCERR_ERROR, /* ===== start of errors ===== */
 
 	/* related to tables */
@@ -113,6 +110,7 @@ enum	mandocerr {
 	MANDOCERR_TBLNODATA, /* no table data cells specified */
 	MANDOCERR_TBLIGNDATA, /* ignore data in cell */
 	MANDOCERR_TBLBLOCK, /* data block still open */
+	MANDOCERR_TBLEXTRADAT, /* ignoring extra data cells */
 
 	MANDOCERR_ROFFLOOP, /* input stack limit exceeded, infinite loop? */
 	MANDOCERR_BADCHAR, /* skipping bad character */
@@ -238,6 +236,7 @@ enum	tbl_datt {
  */
 struct	tbl_dat {
 	struct tbl_cell	 *layout; /* layout cell: CAN BE NULL */
+	int		  spans; /* how many spans follow */
 	struct tbl_dat	 *next;
 	char		 *string;
 	enum tbl_datt	  pos;

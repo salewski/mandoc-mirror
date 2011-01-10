@@ -209,8 +209,12 @@ Justify a number around its last decimal point.
 If the decimal point is not found on the number, it's assumed to trail
 the number.
 .It Cm s
-This option is not supported by
-.Xr mandoc 1 .
+Span columns from the last non-span data cell.
+It is an error if spanning columns follow a
+.Cm \-
+or
+.Cm \(ba
+cell, or come first.
 .It Cm a
 Left-justify a literal string and pad with one space.
 .It Cm ^

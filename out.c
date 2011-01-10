@@ -399,8 +399,7 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp)
 		 * to data cells in the data section.
 		 */
 		for (dp = sp->first; dp; dp = dp->next) {
-			if (NULL == dp->layout)
-				continue;
+			assert(dp->layout);
 			col = &tbl->cols[dp->layout->head->ident];
 			tblcalc_data(tbl, col, sp->tbl, dp);
 		}

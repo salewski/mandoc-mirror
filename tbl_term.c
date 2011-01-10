@@ -64,6 +64,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	const struct tbl_head	*hp;
 	const struct tbl_dat	*dp;
 	struct roffcol		*col;
+	int			 spans;
 	size_t		   	 rmargin, maxrmargin;
 
 	rmargin = tp->rmargin;
@@ -115,23 +116,39 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	case (TBL_SPAN_DATA):
 		/* Iterate over template headers. */
 		dp = sp->first;
+		spans = 0;
 		for (hp = sp->head; hp; hp = hp->next) {
+			/* 
+			 * If the current data header is invoked during
+			 * a spanner ("spans" > 0), don't emit anything
+			 * at all.
+			 */
 			switch (hp->pos) {
 			case (TBL_HEAD_VERT):
 				/* FALLTHROUGH */
 			case (TBL_HEAD_DVERT):
-				tbl_vrule(tp, hp);
+				if (spans <= 0)
+					tbl_vrule(tp, hp);
 				continue;
 			case (TBL_HEAD_DATA):
 				break;
 			}
 
+			if (--spans >= 0)
+				continue;
+
 			col = &tp->tbl.cols[hp->ident];
 			tbl_data(tp, sp->tbl, dp, col);
 
-			/* Go to the next data cell. */
-			if (dp)
+			/* 
+			 * Go to the next data cell and assign the
+			 * number of subsequent spans, if applicable.
+			 */
+
+			if (dp) {
+				spans = dp->spans;
 				dp = dp->next;
+			}
 		}
 		break;
 	}
@@ -244,12 +261,12 @@ tbl_data(struct termp *tp, const struct tbl *tbl,
 		const struct tbl_dat *dp, 
 		const struct roffcol *col)
 {
-	enum tbl_cellt	 pos;
 
 	if (NULL == dp) {
 		tbl_char(tp, ASCII_NBRSP, col->width);
 		return;
 	}
+	assert(dp->layout);
 
 	switch (dp->pos) {
 	case (TBL_DATA_NONE):
@@ -269,9 +286,7 @@ tbl_data(struct termp *tp, const struct tbl *tbl,
 		break;
 	}
 	
-	pos = dp && dp->layout ? dp->layout->pos : TBL_CELL_LEFT;
-
-	switch (pos) {
+	switch (dp->layout->pos) {
 	case (TBL_CELL_HORIZ):
 		tbl_char(tp, '-', col->width);
 		break;
@@ -340,17 +355,15 @@ tbl_literal(struct termp *tp, const struct tbl_dat *dp,
 		const struct roffcol *col)
 {
 	size_t		 padl, padr, ssz;
-	enum tbl_cellt	 pos;
 	const char	*str;
 
 	padl = padr = 0;
 
-	pos = dp && dp->layout ? dp->layout->pos : TBL_CELL_LEFT;
-	str = dp && dp->string ? dp->string : "";
+	str = dp->string ? dp->string : "";
 
 	ssz = term_len(tp, 1);
 
-	switch (pos) {
+	switch (dp->layout->pos) {
 	case (TBL_CELL_LONG):
 		padl = ssz;
 		padr = col->width - term_strlen(tp, str) - ssz;
@@ -391,7 +404,7 @@ tbl_number(struct termp *tp, const struct tbl *tbl,
 	 * and the maximum decimal; right-pad by the remaining amount.
 	 */
 
-	str = dp && dp->string ? dp->string : "";
+	str = dp->string ? dp->string : "";
 
 	sz = term_strlen(tp, str);
 

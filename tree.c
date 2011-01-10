@@ -282,7 +282,12 @@ print_span(const struct tbl_span *sp, int indent)
 		default:
 			break;
 		}
-		printf("[%s%s]", dp->string, dp->layout ?  "" : "*");
+		printf("[\"%s\"", dp->string ? dp->string : "");
+		if (dp->spans)
+			printf("(%d)", dp->spans);
+		if (NULL == dp->layout)
+			putchar('*');
+		putchar(']');
 		if (dp->next)
 			putchar(' ');
 	}

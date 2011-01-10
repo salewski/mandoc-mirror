@@ -178,9 +178,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"unknown escape sequence",
 	"unterminated quoted string",
 	
-	/* related to tables */
-	"extra data cells",
-
 	"generic error",
 
 	/* related to tables */
@@ -191,6 +188,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"no table data cells specified",
 	"ignore data in cell",
 	"data block still open",
+	"ignoring extra data cells",
 
 	"input stack limit exceeded, infinite loop?",
 	"skipping bad character",

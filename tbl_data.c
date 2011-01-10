@@ -37,7 +37,7 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 {
 	struct tbl_dat	*dat;
 	struct tbl_cell	*cp;
-	int		 sv;
+	int		 sv, spans;
 
 	cp = NULL;
 	if (dp->last && dp->last->layout)
@@ -55,12 +55,32 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 				TBL_CELL_SPAN == cp->pos))
 		cp = cp->next;
 
+	/*
+	 * Stop processing when we reach the end of the available layout
+	 * cells.  This means that we have extra input.
+	 */
+
+	if (NULL == cp) {
+		TBL_MSG(tbl, MANDOCERR_TBLEXTRADAT, ln, *pos);
+		/* Skip to the end... */
+		while (p[*pos])
+			(*pos)++;
+		return(1);
+	}
+
 	dat = mandoc_calloc(1, sizeof(struct tbl_dat));
 	dat->layout = cp;
 	dat->pos = TBL_DATA_NONE;
 
-	if (NULL == dat->layout)
-		TBL_MSG(tbl, MANDOCERR_TBLEXTRADAT, ln, *pos);
+	assert(TBL_CELL_SPAN != cp->pos);
+
+	for (spans = 0, cp = cp->next; cp; cp = cp->next)
+		if (TBL_CELL_SPAN == cp->pos)
+			spans++;
+		else
+			break;
+	
+	dat->spans = spans;
 
 	if (dp->last) {
 		dp->last->next = dat;
@@ -100,9 +120,6 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 		dat->pos = TBL_DATA_NDHORIZ;
 	else
 		dat->pos = TBL_DATA_DATA;
-
-	if (NULL == dat->layout)
-		return(1);
 
 	if (TBL_CELL_HORIZ == dat->layout->pos ||
 			TBL_CELL_DHORIZ == dat->layout->pos)
