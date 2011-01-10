@@ -355,36 +355,35 @@ tbl_literal(struct termp *tp, const struct tbl_dat *dp,
 		const struct roffcol *col)
 {
 	size_t		 padl, padr, ssz;
-	const char	*str;
 
 	padl = padr = 0;
 
-	str = dp->string ? dp->string : "";
+	assert(dp->string);
 
 	ssz = term_len(tp, 1);
 
 	switch (dp->layout->pos) {
 	case (TBL_CELL_LONG):
 		padl = ssz;
-		padr = col->width - term_strlen(tp, str) - ssz;
+		padr = col->width - term_strlen(tp, dp->string) - ssz;
 		break;
 	case (TBL_CELL_CENTRE):
-		padl = col->width - term_strlen(tp, str);
+		padl = col->width - term_strlen(tp, dp->string);
 		if (padl % 2)
 			padr++;
 		padl /= 2;
 		padr += padl;
 		break;
 	case (TBL_CELL_RIGHT):
-		padl = col->width - term_strlen(tp, str);
+		padl = col->width - term_strlen(tp, dp->string);
 		break;
 	default:
-		padr = col->width - term_strlen(tp, str);
+		padr = col->width - term_strlen(tp, dp->string);
 		break;
 	}
 
 	tbl_char(tp, ASCII_NBRSP, padl);
-	term_word(tp, str);
+	term_word(tp, dp->string);
 	tbl_char(tp, ASCII_NBRSP, padr);
 }
 
@@ -395,7 +394,6 @@ tbl_number(struct termp *tp, const struct tbl *tbl,
 {
 	char		*cp;
 	char		 buf[2];
-	const char	*str;
 	size_t		 sz, psz, ssz, d, padl;
 	int		 i;
 
@@ -404,19 +402,19 @@ tbl_number(struct termp *tp, const struct tbl *tbl,
 	 * and the maximum decimal; right-pad by the remaining amount.
 	 */
 
-	str = dp->string ? dp->string : "";
+	assert(dp->string);
 
-	sz = term_strlen(tp, str);
+	sz = term_strlen(tp, dp->string);
 
 	buf[0] = tbl->decimal;
 	buf[1] = '\0';
 
 	psz = term_strlen(tp, buf);
 
-	if (NULL != (cp = strrchr(str, tbl->decimal))) {
+	if (NULL != (cp = strrchr(dp->string, tbl->decimal))) {
 		buf[1] = '\0';
-		for (ssz = 0, i = 0; cp != &str[i]; i++) {
-			buf[0] = str[i];
+		for (ssz = 0, i = 0; cp != &dp->string[i]; i++) {
+			buf[0] = dp->string[i];
 			ssz += term_strlen(tp, buf);
 		}
 		d = ssz + psz;
@@ -429,7 +427,7 @@ tbl_number(struct termp *tp, const struct tbl *tbl,
 	padl = col->decimal - d;
 
 	tbl_char(tp, ASCII_NBRSP, padl);
-	term_word(tp, str);
+	term_word(tp, dp->string);
 	tbl_char(tp, ASCII_NBRSP, col->width - sz - padl);
 }
 

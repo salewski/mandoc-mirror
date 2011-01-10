@@ -140,7 +140,6 @@ tbl_cdata(struct tbl_node *tbl, int ln, const char *p)
 	pos = 0;
 
 	dat = tbl->last_span->last;
-	dat->pos = TBL_DATA_DATA;
 
 	if (p[pos] == 'T' && p[pos + 1] == '}') {
 		pos += 2;
@@ -155,6 +154,8 @@ tbl_cdata(struct tbl_node *tbl, int ln, const char *p)
 
 		/* Fallthrough: T} is part of a word. */
 	}
+
+	dat->pos = TBL_DATA_DATA;
 
 	if (dat->string) {
 		sz = strlen(p) + strlen(dat->string) + 2;
