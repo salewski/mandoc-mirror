@@ -192,6 +192,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	"input stack limit exceeded, infinite loop?",
 	"skipping bad character",
+	"escaped character not allowed in a name",
 	"skipping text before the first section header",
 	"skipping unknown macro",
 	"NOT IMPLEMENTED: skipping request",
