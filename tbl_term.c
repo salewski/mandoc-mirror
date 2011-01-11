@@ -305,6 +305,9 @@ tbl_data(struct termp *tp, const struct tbl *tbl,
 	case (TBL_CELL_NUMBER):
 		tbl_number(tp, tbl, dp, col);
 		break;
+	case (TBL_CELL_DOWN):
+		tbl_char(tp, ASCII_NBRSP, col->width);
+		break;
 	default:
 		abort();
 		/* NOTREACHED */

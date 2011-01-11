@@ -220,6 +220,16 @@ cell(struct tbl_node *tbl, struct tbl_row *rp,
 			}
 	}
 
+	/*
+	 * If a vertical spanner is found, we may not be in the first
+	 * row.
+	 */
+
+	if (TBL_CELL_DOWN == c && rp == tbl->first_row) {
+		TBL_MSG(tbl, MANDOCERR_TBLLAYOUT, ln, *pos);
+		return(0);
+	}
+
 	(*pos)++;
 
 	/* Extra check for the double-vertical. */

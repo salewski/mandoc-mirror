@@ -122,7 +122,8 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 		dat->pos = TBL_DATA_DATA;
 
 	if (TBL_CELL_HORIZ == dat->layout->pos ||
-			TBL_CELL_DHORIZ == dat->layout->pos)
+			TBL_CELL_DHORIZ == dat->layout->pos ||
+			TBL_CELL_DOWN == dat->layout->pos)
 		if (TBL_DATA_DATA == dat->pos && '\0' != *dat->string)
 			TBL_MSG(tbl, MANDOCERR_TBLIGNDATA, ln, sv);
 
@@ -164,6 +165,9 @@ tbl_cdata(struct tbl_node *tbl, int ln, const char *p)
 		strlcat(dat->string, p, sz);
 	} else
 		dat->string = mandoc_strdup(p);
+
+	if (TBL_CELL_DOWN == dat->layout->pos) 
+		TBL_MSG(tbl, MANDOCERR_TBLIGNDATA, ln, pos);
 
 	return(0);
 }

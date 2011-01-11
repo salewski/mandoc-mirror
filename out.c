@@ -453,6 +453,8 @@ tblcalc_data(struct rofftbl *tbl, struct roffcol *col,
 	case (TBL_CELL_NUMBER):
 		tblcalc_number(tbl, col, tp, dp);
 		break;
+	case (TBL_CELL_DOWN):
+		break;
 	default:
 		abort();
 		/* NOTREACHED */
