@@ -226,6 +226,8 @@ Vertically span rows from the last non-
 .Ns Cm ^
 data cell.
 It is an error to invoke a vertical span on the first layout row.
+Unlike a horizontal spanner, you must specify an empty cell (if it not
+empty, the data is discarded) in the corresponding data cell.
 .It Cm \-
 Replace the data cell (its contents will be lost) with a single
 horizontal line.
