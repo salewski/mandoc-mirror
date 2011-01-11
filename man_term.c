@@ -397,6 +397,11 @@ pre_in(DECL_ARGS)
 	else 
 		p->offset = v;
 
+	/* Don't let this creep beyond the right margin. */
+
+	if (p->offset > p->rmargin)
+		p->offset = p->rmargin;
+
 	return(0);
 }
 
