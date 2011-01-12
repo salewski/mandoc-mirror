@@ -44,7 +44,7 @@ const	char *const __man_macronames[MAN_MAX] = {
 
 const	char * const *man_macronames = __man_macronames;
 
-static	struct man_node	*man_node_alloc(int, int, 
+static	struct man_node	*man_node_alloc(struct man *, int, int, 
 				enum man_type, enum mant);
 static	int		 man_node_append(struct man *, 
 				struct man_node *);
@@ -128,6 +128,8 @@ man_endparse(struct man *m)
 int
 man_parseln(struct man *m, int ln, char *buf, int offs)
 {
+
+	m->flags |= MAN_NEWLINE;
 
 	assert( ! (MAN_HALT & m->flags));
 	return(('.' == buf[offs] || '\'' == buf[offs]) ? 
@@ -229,7 +231,8 @@ man_node_append(struct man *man, struct man_node *p)
 
 
 static struct man_node *
-man_node_alloc(int line, int pos, enum man_type type, enum mant tok)
+man_node_alloc(struct man *m, int line, int pos, 
+		enum man_type type, enum mant tok)
 {
 	struct man_node *p;
 
@@ -238,6 +241,10 @@ man_node_alloc(int line, int pos, enum man_type type, enum mant tok)
 	p->pos = pos;
 	p->type = type;
 	p->tok = tok;
+
+	if (MAN_NEWLINE & m->flags)
+		p->flags |= MAN_LINE;
+	m->flags &= ~MAN_NEWLINE;
 	return(p);
 }
 
@@ -247,7 +254,7 @@ man_elem_alloc(struct man *m, int line, int pos, enum mant tok)
 {
 	struct man_node *p;
 
-	p = man_node_alloc(line, pos, MAN_ELEM, tok);
+	p = man_node_alloc(m, line, pos, MAN_ELEM, tok);
 	if ( ! man_node_append(m, p))
 		return(0);
 	m->next = MAN_NEXT_CHILD;
@@ -260,7 +267,7 @@ man_head_alloc(struct man *m, int line, int pos, enum mant tok)
 {
 	struct man_node *p;
 
-	p = man_node_alloc(line, pos, MAN_HEAD, tok);
+	p = man_node_alloc(m, line, pos, MAN_HEAD, tok);
 	if ( ! man_node_append(m, p))
 		return(0);
 	m->next = MAN_NEXT_CHILD;
@@ -273,7 +280,7 @@ man_body_alloc(struct man *m, int line, int pos, enum mant tok)
 {
 	struct man_node *p;
 
-	p = man_node_alloc(line, pos, MAN_BODY, tok);
+	p = man_node_alloc(m, line, pos, MAN_BODY, tok);
 	if ( ! man_node_append(m, p))
 		return(0);
 	m->next = MAN_NEXT_CHILD;
@@ -286,7 +293,7 @@ man_block_alloc(struct man *m, int line, int pos, enum mant tok)
 {
 	struct man_node *p;
 
-	p = man_node_alloc(line, pos, MAN_BLOCK, tok);
+	p = man_node_alloc(m, line, pos, MAN_BLOCK, tok);
 	if ( ! man_node_append(m, p))
 		return(0);
 	m->next = MAN_NEXT_CHILD;
@@ -299,7 +306,7 @@ man_span_alloc(struct man *m, const struct tbl_span *span)
 	struct man_node	*n;
 
 	/* FIXME: grab from span */
-	n = man_node_alloc(0, 0, MAN_TBL, MAN_MAX);
+	n = man_node_alloc(m, 0, 0, MAN_TBL, MAN_MAX);
 	n->span = span;
 
 	if ( ! man_node_append(m, n))
@@ -317,7 +324,7 @@ man_word_alloc(struct man *m, int line, int pos, const char *word)
 
 	len = strlen(word);
 
-	n = man_node_alloc(line, pos, MAN_TEXT, MAN_MAX);
+	n = man_node_alloc(m, line, pos, MAN_TEXT, MAN_MAX);
 	n->string = mandoc_malloc(len + 1);
 	sv = strlcpy(n->string, word, len + 1);
 

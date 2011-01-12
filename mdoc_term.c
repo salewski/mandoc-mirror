@@ -315,6 +315,8 @@ print_mdoc_node(DECL_ARGS)
 	
 	switch (n->type) {
 	case (MDOC_TEXT):
+		if (' ' == *n->string && MDOC_LINE & n->flags)
+			term_newln(p);
 		term_word(p, n->string);
 		break;
 	case (MDOC_TBL):

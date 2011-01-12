@@ -34,6 +34,7 @@ struct	man {
 #define	MAN_ILINE	(1 << 3) /* Ignored in next-line scope. */
 #define	MAN_LITERAL	(1 << 4) /* Literal input. */
 #define	MAN_BPLINE	(1 << 5)
+#define	MAN_NEWLINE	(1 << 6) /* first macro/text in a line */
 	enum man_next	 next; /* where to put the next node */
 	struct man_node	*last; /* the last parsed node */
 	struct man_node	*first; /* the first parsed node */

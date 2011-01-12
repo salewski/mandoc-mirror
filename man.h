@@ -97,6 +97,7 @@ struct	man_node {
 	int		 flags;
 #define	MAN_VALID	(1 << 0) /* has been validated */
 #define	MAN_EOS		(1 << 2) /* at sentence boundary */
+#define	MAN_LINE	(1 << 3) /* first macro/text on line */
 	enum man_type	 type; /* AST node type */
 	char		*string; /* TEXT node argument */
 	struct man_node	*head; /* BLOCK node HEAD ptr */

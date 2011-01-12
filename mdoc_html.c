@@ -420,6 +420,8 @@ print_mdoc_node(MDOC_ARGS)
 		child = mdoc_root_pre(m, n, h);
 		break;
 	case (MDOC_TEXT):
+		if (' ' == *n->string && MDOC_LINE & n->flags)
+			print_otag(h, TAG_BR, 0, NULL);
 		print_text(h, n->string);
 		return;
 	case (MDOC_TBL):
