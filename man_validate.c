@@ -489,7 +489,7 @@ post_fi(CHKARGS)
 {
 
 	if ( ! (MAN_LITERAL & m->flags))
-		man_nmsg(m, n, MANDOCERR_NOSCOPE);
+		man_nmsg(m, n, MANDOCERR_WNOSCOPE);
 
 	m->flags &= ~MAN_LITERAL;
 	return(1);

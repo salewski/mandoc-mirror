@@ -80,6 +80,7 @@ enum	mandocerr {
 	MANDOCERR_LISTFIRST, /* list type must come first */
 	MANDOCERR_NOWIDTHARG, /* tag lists require a width argument */
 	MANDOCERR_FONTTYPE, /* missing font type */
+	MANDOCERR_WNOSCOPE, /* skipping end of block that is not open */
 
 	/* related to bad macro arguments */
 	MANDOCERR_IGNARGV, /* skipping argument */

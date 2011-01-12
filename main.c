@@ -158,6 +158,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"list type must come first",
 	"tag lists require a width argument",
 	"missing font type",
+	"skipping end of block that is not open",
 
 	/* related to bad macro arguments */
 	"skipping argument",
