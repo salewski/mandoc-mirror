@@ -186,12 +186,6 @@ print_man_node(MAN_ARGS)
 
 	bufinit(h);
 
-	/*
-	 * FIXME: embedded elements within next-line scopes (e.g., `br'
-	 * within an empty `B') will cause formatting to be forgotten
-	 * due to scope closing out.
-	 */
-
 	switch (n->type) {
 	case (MAN_ROOT):
 		child = man_root_pre(m, n, mh, h);
@@ -200,19 +194,19 @@ print_man_node(MAN_ARGS)
 		if ('\0' == *n->string) {
 			print_otag(h, TAG_P, 0, NULL);
 			return;
-		}
-
-		if (' ' == *n->string && MAN_LINE & n->flags)
+		} else if (' ' == *n->string && MAN_LINE & n->flags)
 			print_otag(h, TAG_BR, 0, NULL);
 
 		print_text(h, n->string);
 
-		if (MANH_LITERAL & mh->fl)
+		if (MANH_LITERAL & mh->fl &&
+				(NULL == n->next ||
+				 n->next->line > n->line))
 			print_otag(h, TAG_BR, 0, NULL);
 		return;
 	case (MAN_TBL):
 		print_tbl(h, n->span);
-		break;
+		return;
 	default:
 		/* 
 		 * Close out scope of font prior to opening a macro
@@ -239,8 +233,6 @@ print_man_node(MAN_ARGS)
 	switch (n->type) {
 	case (MAN_ROOT):
 		man_root_post(m, n, mh, h);
-		break;
-	case (MAN_TBL):
 		break;
 	default:
 		if (mans[n->tok].post)

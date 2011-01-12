@@ -17,10 +17,6 @@
 * formatter bugs
 ************************************************************************
 
-- in literal mode, the man(7) -Tascii formatter
-  breaks the line between macro arguments,
-  e.g. ".B #include <libintl.h>" in gettext(3)
-
 ************************************************************************
 * missing features
 ************************************************************************
