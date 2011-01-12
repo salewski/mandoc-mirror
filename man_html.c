@@ -67,7 +67,7 @@ static	int		  man_ign_pre(MAN_ARGS);
 static	int		  man_in_pre(MAN_ARGS);
 static	int		  man_literal_pre(MAN_ARGS);
 static	void		  man_root_post(MAN_ARGS);
-static	int		  man_root_pre(MAN_ARGS);
+static	void		  man_root_pre(MAN_ARGS);
 static	int		  man_B_pre(MAN_ARGS);
 static	int		  man_HP_pre(MAN_ARGS);
 static	int		  man_I_pre(MAN_ARGS);
@@ -183,14 +183,18 @@ print_man_node(MAN_ARGS)
 
 	child = 1;
 	t = h->tags.head;
-
 	bufinit(h);
 
 	switch (n->type) {
 	case (MAN_ROOT):
-		child = man_root_pre(m, n, mh, h);
+		man_root_pre(m, n, mh, h);
 		break;
 	case (MAN_TEXT):
+		/*
+		 * If we have a blank line, output a vertical space.
+		 * If we have a space as the first character, break
+		 * before printing the line's data.
+		 */
 		if ('\0' == *n->string) {
 			print_otag(h, TAG_P, 0, NULL);
 			return;
@@ -199,6 +203,13 @@ print_man_node(MAN_ARGS)
 
 		print_text(h, n->string);
 
+		/*
+		 * If we're in a literal context, make sure that words
+		 * togehter on the same line stay together.  This is a
+		 * POST-printing call, so we check the NEXT word.  Since
+		 * -man doesn't have nested macros, we don't need to be
+		 * more specific than this.
+		 */
 		if (MANH_LITERAL & mh->fl &&
 				(NULL == n->next ||
 				 n->next->line > n->line))
@@ -256,7 +267,7 @@ a2width(const struct man_node *n, struct roffsu *su)
 
 
 /* ARGSUSED */
-static int
+static void
 man_root_pre(MAN_ARGS)
 {
 	struct htmlpair	 tag[3];
@@ -310,7 +321,6 @@ man_root_pre(MAN_ARGS)
 
 	print_text(h, title);
 	print_tagq(h, t);
-	return(1);
 }
 
 
