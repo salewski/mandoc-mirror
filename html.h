@@ -67,6 +67,7 @@ enum	htmlattr {
 	ATTR_ID,
 	ATTR_SUMMARY,
 	ATTR_ALIGN,
+	ATTR_COLSPAN,
 	ATTR_MAX
 };
 
@@ -117,6 +118,7 @@ struct	html {
 #define	HTML_NONOSPACE	 (1 << 4)
 	struct tagq	  tags; /* stack of open tags */
 	struct rofftbl	  tbl; /* current table */
+	struct tag	 *tblt; /* current open table scope */
 	void		 *symtab; /* character-escapes */
 	char		 *base_man; /* base for manpage href */
 	char		 *base_includes; /* base for include href */
@@ -136,6 +138,7 @@ struct tag	 *print_otag(struct html *, enum htmltag,
 void		  print_tagq(struct html *, const struct tag *);
 void		  print_stagq(struct html *, const struct tag *);
 void		  print_text(struct html *, const char *);
+void		  print_tblclose(struct html *);
 void		  print_tbl(struct html *, const struct tbl_span *);
 
 void		  bufcat_su(struct html *, const char *, 

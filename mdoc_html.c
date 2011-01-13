@@ -420,14 +420,32 @@ print_mdoc_node(MDOC_ARGS)
 		child = mdoc_root_pre(m, n, h);
 		break;
 	case (MDOC_TEXT):
+		/* No tables in this mode... */
+		assert(NULL == h->tblt);
 		if (' ' == *n->string && MDOC_LINE & n->flags)
 			print_otag(h, TAG_BR, 0, NULL);
 		print_text(h, n->string);
 		return;
 	case (MDOC_TBL):
+		/*
+		 * This will take care of initialising all of the table
+		 * state data for the first table, then tearing it down
+		 * for the last one.
+		 */
 		print_tbl(h, n->span);
-		break;
+		return;
 	default:
+		/*
+		 * Close out the current table, if it's open, and unset
+		 * the "meta" table state.  This will be reopened on the
+		 * next table element.
+		 */
+		if (h->tblt) {
+			print_tblclose(h);
+			t = h->tags.head;
+		}
+
+		assert(NULL == h->tblt);
 		if (mdocs[n->tok].pre && ENDBODY_NOT == n->end)
 			child = (*mdocs[n->tok].pre)(m, n, h);
 		break;
@@ -454,8 +472,6 @@ print_mdoc_node(MDOC_ARGS)
 	switch (n->type) {
 	case (MDOC_ROOT):
 		mdoc_root_post(m, n, h);
-		break;
-	case (MDOC_TBL):
 		break;
 	default:
 		if (mdocs[n->tok].post && ENDBODY_NOT == n->end)
