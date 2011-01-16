@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2008, 2009, 2010 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2010, 2011 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -864,7 +864,7 @@ print_man_node(DECL_ARGS)
 		 */
 		if ('\0' == *n->string) {
 			term_vspace(p);
-			break;
+			return;
 		} else if (' ' == *n->string && MAN_LINE & n->flags)
 			term_newln(p);
 
