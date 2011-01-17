@@ -53,7 +53,6 @@ static	int	  check_part(CHKARGS);
 static	int	  check_root(CHKARGS);
 static	int	  check_sec(CHKARGS);
 static	int	  check_text(CHKARGS);
-static	int	  check_title(CHKARGS);
 
 static	int	  post_AT(CHKARGS);
 static	int	  post_fi(CHKARGS);
@@ -70,7 +69,7 @@ static	v_check	  posts_nf[] = { check_eq0, post_nf, NULL };
 static	v_check	  posts_par[] = { check_par, NULL };
 static	v_check	  posts_part[] = { check_part, NULL };
 static	v_check	  posts_sec[] = { check_sec, NULL };
-static	v_check	  posts_th[] = { check_ge2, check_le5, check_title, post_TH, NULL };
+static	v_check	  posts_th[] = { check_ge2, check_le5, post_TH, NULL };
 static	v_check	  posts_uc[] = { post_UC, NULL };
 static	v_check	  pres_bline[] = { check_bline, NULL };
 
@@ -200,29 +199,6 @@ check_root(CHKARGS)
 
 
 static int
-check_title(CHKARGS) 
-{
-	const char	*p;
-
-	assert(n->child);
-	/* FIXME: is this sufficient? */
-	if ('\0' == *n->child->string) {
-		man_nmsg(m, n, MANDOCERR_SYNTARGCOUNT);
-		return(0);
-	}
-
-	for (p = n->child->string; '\0' != *p; p++)
-		/* Only warn about this once... */
-		if (isalpha((u_char)*p) && ! isupper((u_char)*p)) {
-			man_nmsg(m, n, MANDOCERR_UPPERCASE);
-			break;
-		}
-
-	return(1);
-}
-
-
-static int
 check_text(CHKARGS) 
 {
 	char		*p;
@@ -266,10 +242,10 @@ check_##name(CHKARGS) \
 { \
 	if (n->nchild ineq (x)) \
 		return(1); \
-	man_vmsg(m, MANDOCERR_SYNTARGCOUNT, n->line, n->pos, \
+	man_vmsg(m, MANDOCERR_ARGCOUNT, n->line, n->pos, \
 			"line arguments %s %d (have %d)", \
 			#ineq, (x), n->nchild); \
-	return(0); \
+	return(1); \
 }
 
 INEQ_DEFINE(0, ==, eq0)
@@ -396,6 +372,7 @@ check_bline(CHKARGS)
 static int
 post_TH(CHKARGS)
 {
+	const char	*p;
 
 	if (m->meta.title)
 		free(m->meta.title);
@@ -415,14 +392,26 @@ post_TH(CHKARGS)
 	/* ->TITLE<- MSEC DATE SOURCE VOL */
 
 	n = n->child;
-	assert(n);
-	m->meta.title = mandoc_strdup(n->string);
+	if (n && n->string) {
+		for (p = n->string; '\0' != *p; p++) {
+			/* Only warn about this once... */
+			if (isalpha((u_char)*p) && ! isupper((u_char)*p)) {
+				man_nmsg(m, n, MANDOCERR_UPPERCASE);
+				break;
+			}
+		}
+		m->meta.title = mandoc_strdup(n->string);
+	} else
+		m->meta.title = mandoc_strdup("");
 
 	/* TITLE ->MSEC<- DATE SOURCE VOL */
 
-	n = n->next;
-	assert(n);
-	m->meta.msec = mandoc_strdup(n->string);
+	if (n)
+		n = n->next;
+	if (n && n->string)
+		m->meta.msec = mandoc_strdup(n->string);
+	else
+		m->meta.msec = mandoc_strdup("");
 
 	/* TITLE MSEC ->DATE<- SOURCE VOL */
 
@@ -433,7 +422,8 @@ post_TH(CHKARGS)
 	 * string, then use the current date.
 	 */
 
-	n = n->next;
+	if (n)
+		n = n->next;
 	if (n && n->string && *n->string) {
 		m->meta.date = mandoc_a2time
 			(MTIME_ISO_8601, n->string);
