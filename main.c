@@ -196,7 +196,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"escaped character not allowed in a name",
 	"skipping text before the first section header",
 	"skipping unknown macro",
-	"NOT IMPLEMENTED: skipping request",
+	"NOT IMPLEMENTED, please use groff: skipping request",
 	"line scope broken",
 	"argument count wrong",
 	"skipping end of block that is not open",
