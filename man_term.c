@@ -889,6 +889,9 @@ print_man_node(DECL_ARGS)
 			p->rmargin = rm;
 			p->maxrmargin = rmax;
 		}
+
+		if (MAN_EOS & n->flags)
+			p->flags |= TERMP_SENTENCE;
 		return;
 	case (MAN_TBL):
 		/*
