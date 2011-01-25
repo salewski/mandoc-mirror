@@ -656,6 +656,7 @@ pdesc(struct curparse *curp)
 static void
 parsebuf(struct curparse *curp, struct buf blk, int start)
 {
+	const struct tbl_span	*span;
 	struct buf	 ln;
 	enum rofferr	 rr;
 	int		 i, of, rc;
@@ -855,11 +856,12 @@ rerun:
 
 		if (ROFF_TBL == rr) {
 			assert(curp->man || curp->mdoc);
-			if (curp->man)
-				man_addspan(curp->man, roff_span(curp->roff));
-			else
-				mdoc_addspan(curp->mdoc, roff_span(curp->roff));
-
+			while (NULL != (span = roff_span(curp->roff))) {
+				if (curp->man)
+					man_addspan(curp->man, span);
+				else
+					mdoc_addspan(curp->mdoc, span);
+			}
 		} else if (curp->man || curp->mdoc) {
 			rc = curp->man ?
 				man_parseln(curp->man, 

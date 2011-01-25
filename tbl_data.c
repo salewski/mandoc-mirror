@@ -190,6 +190,7 @@ newspan(struct tbl_node *tbl, struct tbl_row *rp)
 		tbl->last_span = dp;
 	} else {
 		tbl->last_span = tbl->first_span = dp;
+		tbl->current_span = NULL;
 		dp->flags |= TBL_SPAN_FIRST;
 	}
 
