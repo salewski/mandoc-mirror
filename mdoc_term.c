@@ -1728,9 +1728,13 @@ termp_xx_pre(DECL_ARGS)
 		break;
 	}
 
-	assert(pp);
 	term_word(p, pp);
-	return(1);
+	if (n->child) {
+		p->flags |= TERMP_KEEP;
+		term_word(p, n->child->string);
+		p->flags &= ~TERMP_KEEP;
+	}
+	return(0);
 }
 
 

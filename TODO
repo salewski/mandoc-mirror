@@ -225,9 +225,6 @@
   should be "NetBSD 1.0A", not "NetBSD 1.0a",
   see OpenBSD ccdconfig(8).
 
-- The space character joining .Dx .Fx .Nx .Ox (are these all?) to its
-  argument is non-breaking.  See the cdio(1) HISTORY and many others.
-
 - In .Bl -tag, if a tag exceeds the right margin and must be continued
   on the next line, it must be indented by -width, not width+1;
   see "rule block|pass" in OpenBSD ifconfig(8).
