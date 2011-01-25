@@ -1677,6 +1677,7 @@ termp_bd_post(DECL_ARGS)
 static int
 termp_bx_pre(DECL_ARGS)
 {
+	char		 buf[3];
 
 	if (NULL != (n = n->child)) {
 		term_word(p, n->string);
@@ -1688,10 +1689,14 @@ termp_bx_pre(DECL_ARGS)
 	}
 
 	if (NULL != (n = n->next)) {
+		buf[0] = '-';
+		buf[1] = toupper((unsigned char)*n->string);
+		buf[2] = '\0';
+
 		p->flags |= TERMP_NOSPACE;
-		term_word(p, "-");
+		term_word(p, buf);
 		p->flags |= TERMP_NOSPACE;
-		term_word(p, n->string);
+		term_word(p, n->string + 1);
 	}
 
 	return(0);
