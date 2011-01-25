@@ -1665,8 +1665,8 @@ post_rs(POST_ARGS)
 				break;
 
 		if (i < RSORD_MAX) {
-			if (MDOC__J == rsord[i])
-				mdoc->last->norm->Rs.child_J = nn;
+			if (MDOC__J == rsord[i] || MDOC__B == rsord[i])
+				mdoc->last->norm->Rs.quote_T++;
 			next = nn->next;
 			continue;
 		}

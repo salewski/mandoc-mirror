@@ -355,7 +355,7 @@ struct	mdoc_an {
 };
 
 struct	mdoc_rs {
-	struct mdoc_node *child_J; /* pointer to %J */
+	int		  quote_T; /* whether to quote %T */
 };
 
 /*

@@ -265,11 +265,6 @@
     .Xc
     The input text is appended after the specified line.
 
-- When we have both .%T and .%B in .Rs, .%T uses "", not underline, see
-  for example arp(4); admittedly, arp(4) is abusing both .%T and .%B,
-  but when dealing with anthologies, sensible use of of both in the
-  same .Rs can occur.
-
 - Header lines of excessive length:
   Port OpenBSD man_term.c rev. 1.25 to mdoc_term.c
   and document it in mdoc(7) and man(7) COMPATIBILITY
