@@ -1461,6 +1461,8 @@ in_line_argn(MACRO_PROT_ARGS)
 	case (MDOC_Ux):
 		maxargs = 0;
 		break;
+	case (MDOC_Bx):
+		/* FALLTHROUGH */
 	case (MDOC_Xr):
 		maxargs = 2;
 		break;
