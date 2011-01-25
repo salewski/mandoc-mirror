@@ -212,6 +212,9 @@ print_bvspace(struct termp *p, const struct man_node *n)
 {
 	term_newln(p);
 
+	if (n->body && n->body->child && MAN_TBL == n->body->child->type)
+		return;
+
 	if (NULL == n->prev)
 		return;
 
