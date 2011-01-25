@@ -95,6 +95,7 @@ static	int	 post_bl_block(POST_ARGS);
 static	int	 post_bl_block_width(POST_ARGS);
 static	int	 post_bl_block_tag(POST_ARGS);
 static	int	 post_bl_head(POST_ARGS);
+static	int	 post_bx(POST_ARGS);
 static	int	 post_dd(POST_ARGS);
 static	int	 post_dt(POST_ARGS);
 static	int	 post_defaults(POST_ARGS);
@@ -134,6 +135,7 @@ static	v_post	 posts_bd[] = { post_literal, hwarn_eq0, bwarn_ge1, NULL };
 static	v_post	 posts_bf[] = { hwarn_le1, post_bf, NULL };
 static	v_post	 posts_bk[] = { hwarn_eq0, bwarn_ge1, NULL };
 static	v_post	 posts_bl[] = { bwarn_ge1, post_bl, NULL };
+static	v_post	 posts_bx[] = { post_bx, NULL };
 static	v_post	 posts_bool[] = { ebool, NULL };
 static	v_post	 posts_eoln[] = { post_eoln, NULL };
 static	v_post	 posts_defaults[] = { post_defaults, NULL };
@@ -235,7 +237,7 @@ const	struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Bo */
 	{ NULL, NULL },				/* Bq */
 	{ NULL, NULL },				/* Bsx */
-	{ NULL, NULL },				/* Bx */
+	{ NULL, posts_bx },			/* Bx */
 	{ NULL, posts_bool },			/* Db */
 	{ NULL, NULL },				/* Dc */
 	{ NULL, NULL },				/* Do */
@@ -2095,6 +2097,24 @@ post_prol(POST_ARGS)
 	mdoc_node_delete(mdoc, mdoc->last);
 	if (mdoc->meta.title && mdoc->meta.date && mdoc->meta.os)
 		mdoc->flags |= MDOC_PBODY;
+
+	return(1);
+}
+
+static int
+post_bx(POST_ARGS)
+{
+	struct mdoc_node	*n;
+
+	/* 
+	 * Make `Bx's second argument always start with an uppercase
+	 * letter.  Groff checks if it's an "accepted" term, but we just
+	 * uppercase blindly.
+	 */
+
+	n = mdoc->last->child;
+	if (n && NULL != (n = n->next))
+		*n->string = toupper((unsigned char)*n->string);
 
 	return(1);
 }
