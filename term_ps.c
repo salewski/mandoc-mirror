@@ -428,8 +428,7 @@ pspdf_alloc(char *outopts)
 	const char	*pp;
 	char		*v;
 
-	if (NULL == (p = term_alloc(TERMENC_ASCII)))
-		return(NULL);
+	p = term_alloc(TERMENC_ASCII);
 
 	p->advance = ps_advance;
 	p->begin = ps_begin;
