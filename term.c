@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010, 2011 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -353,6 +353,17 @@ term_vspace(struct termp *p)
 
 
 static void
+numbered(struct termp *p, const char *word, size_t len)
+{
+	const char	*rhs;
+
+	rhs = chars_num2char(word, len);
+	if (rhs) 
+		encode(p, rhs, 1);
+}
+
+
+static void
 spec(struct termp *p, enum roffdeco d, const char *word, size_t len)
 {
 	const char	*rhs;
@@ -511,6 +522,9 @@ term_word(struct termp *p, const char *word)
 		word += a2roffdeco(&deco, &seq, &ssz);
 
 		switch (deco) {
+		case (DECO_NUMBERED):
+			numbered(p, seq, ssz);
+			break;
 		case (DECO_RESERVED):
 			res(p, seq, ssz);
 			break;
