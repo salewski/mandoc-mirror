@@ -160,6 +160,9 @@
 * formatting issues: ugly output
 ************************************************************************
 
+- a column list with blank `Ta' cells triggers a spurrious
+  start-with-whitespace printing of a newline
+
 - double quotes inside double quotes are escaped by doubling them
   implement this in mdoc(7), too
   so far, we only have it in roff(7) and man(7)
