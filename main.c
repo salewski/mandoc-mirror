@@ -146,6 +146,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	/* related to macros and nesting */
 	"skipping obsolete macro",
 	"skipping paragraph macro",
+	"skipping no-space macro",
 	"blocks badly nested",
 	"child violates parent syntax",
 	"nested displays are not portable",

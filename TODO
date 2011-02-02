@@ -246,10 +246,6 @@
   should be indented, see e.g. rpc(3);
   reported by jmc@ on discuss@  Fri, 29 Oct 2010 13:48:33 +0100
 
-- .Ns should only be effective when called by another macro,
-  not as a stand-alone macro at the beginning of a line;
-  see for example the awk(1) SYNOPSIS.
-
 - .Ns should work when called at the end of an input line, see
   the following code in vi(1):
     .It Xo

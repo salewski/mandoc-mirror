@@ -1151,7 +1151,8 @@ static int
 termp_ns_pre(DECL_ARGS)
 {
 
-	p->flags |= TERMP_NOSPACE;
+	if ( ! (MDOC_LINE & n->flags))
+		p->flags |= TERMP_NOSPACE;
 	return(1);
 }
 

@@ -780,7 +780,8 @@ static int
 mdoc_ns_pre(MDOC_ARGS)
 {
 
-	h->flags |= HTML_NOSPACE;
+	if ( ! (MDOC_LINE & n->flags))
+		h->flags |= HTML_NOSPACE;
 	return(1);
 }
 
