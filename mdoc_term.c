@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2008, 2009, 2010 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2010 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -312,24 +312,6 @@ print_mdoc_node(DECL_ARGS)
 
 	memset(&npair, 0, sizeof(struct termpair));
 	npair.ppair = pair;
-	
-	switch (n->type) {
-	case (MDOC_TEXT):
-		if (' ' == *n->string && MDOC_LINE & n->flags)
-			term_newln(p);
-		term_word(p, n->string);
-		break;
-	case (MDOC_EQN):
-		break;
-	case (MDOC_TBL):
-		term_tbl(p, n->span);
-		break;
-	default:
-		if (termacts[n->tok].pre && ENDBODY_NOT == n->end)
-			chld = (*termacts[n->tok].pre)
-				(p, &npair, m, n);
-		break;
-	}
 
 	/*
 	 * Keeps only work until the end of a line.  If a keep was
@@ -360,6 +342,29 @@ print_mdoc_node(DECL_ARGS)
 	    ((n->prev   && MDOC_SYNPRETTY & n->prev->flags) ||
 	     (n->parent && MDOC_SYNPRETTY & n->parent->flags)))
 		p->flags &= ~(TERMP_KEEP | TERMP_PREKEEP);
+
+	/*
+	 * After the keep flags have been set up, we may now
+	 * produce output.  Note that some pre-handlers do so.
+	 */
+
+	switch (n->type) {
+	case (MDOC_TEXT):
+		if (' ' == *n->string && MDOC_LINE & n->flags)
+			term_newln(p);
+		term_word(p, n->string);
+		break;
+	case (MDOC_EQN):
+		break;
+	case (MDOC_TBL):
+		term_tbl(p, n->span);
+		break;
+	default:
+		if (termacts[n->tok].pre && ENDBODY_NOT == n->end)
+			chld = (*termacts[n->tok].pre)
+				(p, &npair, m, n);
+		break;
+	}
 
 	if (chld && n->child)
 		print_mdoc_nodelist(p, &npair, m, n->child);
@@ -2191,7 +2196,7 @@ termp__t_post(DECL_ARGS)
 	 * If we're in an `Rs' and there's a journal present, then quote
 	 * us instead of underlining us (for disambiguation).
 	 */
-	if (n->parent && MDOC_Rs == n->parent->tok && 
+	if (n->parent && MDOC_Rs == n->parent->tok &&
 			n->parent->norm->Rs.quote_T)
 		termp_quote_post(p, pair, m, n);
 
