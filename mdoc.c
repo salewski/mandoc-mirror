@@ -551,8 +551,7 @@ mdoc_span_alloc(struct mdoc *m, const struct tbl_span *sp)
 {
 	struct mdoc_node *n;
 
-	/* FIXME: grab from tbl_span. */
-	n = node_alloc(m, 0, 0, MDOC_MAX, MDOC_TBL);
+	n = node_alloc(m, sp->line, 0, MDOC_MAX, MDOC_TBL);
 	n->span = sp;
 
 	if ( ! node_append(m, n))

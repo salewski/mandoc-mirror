@@ -260,6 +260,7 @@ struct	tbl_span {
 	struct tbl_row	 *layout; /* layout row */
 	struct tbl_dat	 *first;
 	struct tbl_dat	 *last;
+	int		  line; /* parse line */
 	int		  flags;
 #define	TBL_SPAN_FIRST	 (1 << 0)
 #define	TBL_SPAN_LAST	 (1 << 1)

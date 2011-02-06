@@ -266,8 +266,6 @@ print_span(const struct tbl_span *sp, int indent)
 	for (i = 0; i < indent; i++)
 		putchar('\t');
 
-	printf("tbl: ");
-
 	switch (sp->pos) {
 	case (TBL_SPAN_HORIZ):
 		putchar('-');
@@ -300,7 +298,8 @@ print_span(const struct tbl_span *sp, int indent)
 		if (NULL == dp->layout)
 			putchar('*');
 		putchar(']');
-		if (dp->next)
-			putchar(' ');
+		putchar(' ');
 	}
+
+	printf("(tbl) %d:1", sp->line);
 }
