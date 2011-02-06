@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2008, 2009, 2010 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -806,6 +806,7 @@ mdoc_xx_pre(MDOC_ARGS)
 {
 	const char	*pp;
 	struct htmlpair	 tag;
+	int		 flags;
 
 	switch (n->tok) {
 	case (MDOC_Bsx):
@@ -835,9 +836,10 @@ mdoc_xx_pre(MDOC_ARGS)
 
 	print_text(h, pp);
 	if (n->child) {
+		flags = h->flags;
 		h->flags |= HTML_KEEP;
 		print_text(h, n->child->string);
-		h->flags &= ~HTML_KEEP;
+		h->flags = flags;
 	}
 	return(0);
 }
