@@ -863,6 +863,8 @@ rerun:
 				else
 					mdoc_addspan(curp->mdoc, span);
 			}
+		} else if (ROFF_EQN == rr) {
+			assert(curp->man || curp->mdoc);
 		} else if (curp->man || curp->mdoc) {
 			rc = curp->man ?
 				man_parseln(curp->man, 

@@ -267,6 +267,11 @@ struct	tbl_span {
 	struct tbl_span	 *next;
 };
 
+struct	eqn {
+	size_t		  sz;
+	char		 *data;
+};
+
 /*
  * Available registers (set in libroff, accessed elsewhere).
  */
