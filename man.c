@@ -371,7 +371,7 @@ man_addspan(struct man *m, const struct tbl_span *sp)
 	assert( ! (MAN_HALT & m->flags));
 	if ( ! man_span_alloc(m, sp))
 		return(0);
-	return(man_descope(m, 0, 0));
+	return(man_descope(m, sp->line, 0));
 }
 
 static int

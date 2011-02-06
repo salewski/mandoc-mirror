@@ -233,8 +233,7 @@ mdoc_addspan(struct mdoc *m, const struct tbl_span *sp)
 	/* No text before an initial macro. */
 
 	if (SEC_NONE == m->lastnamed) {
-		/* FIXME: grab from span. */
-		mdoc_pmsg(m, 0, 0, MANDOCERR_NOTEXT);
+		mdoc_pmsg(m, sp->line, 0, MANDOCERR_NOTEXT);
 		return(1);
 	}
 
