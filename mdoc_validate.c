@@ -338,6 +338,8 @@ mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *n)
 		/* FALLTHROUGH */
 	case (MDOC_TBL):
 		/* FALLTHROUGH */
+	case (MDOC_EQN):
+		/* FALLTHROUGH */
 	case (MDOC_ROOT):
 		return(1);
 	default:

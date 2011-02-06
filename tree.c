@@ -92,6 +92,9 @@ print_mdoc(const struct mdoc_node *n, int indent)
 	case (MDOC_TBL):
 		t = "tbl";
 		break;
+	case (MDOC_EQN):
+		t = "eqn";
+		break;
 	default:
 		abort();
 		/* NOTREACHED */
@@ -127,6 +130,9 @@ print_mdoc(const struct mdoc_node *n, int indent)
 		}
 		break;
 	case (MDOC_TBL):
+		break;
+	case (MDOC_EQN):
+		p = "eqn";
 		break;
 	case (MDOC_ROOT):
 		p = "root";
@@ -198,6 +204,9 @@ print_man(const struct man_node *n, int indent)
 	case (MAN_TBL):
 		t = "tbl";
 		break;
+	case (MAN_EQN):
+		t = "eqn";
+		break;
 	default:
 		abort();
 		/* NOTREACHED */
@@ -222,6 +231,9 @@ print_man(const struct man_node *n, int indent)
 		p = "root";
 		break;
 	case (MAN_TBL):
+		break;
+	case (MAN_EQN):
+		p = "eqn";
 		break;
 	default:
 		abort();

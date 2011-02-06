@@ -121,6 +121,8 @@ man_valid_pre(struct man *m, struct man_node *n)
 		/* FALLTHROUGH */
 	case (MAN_ROOT):
 		/* FALLTHROUGH */
+	case (MAN_EQN):
+		/* FALLTHROUGH */
 	case (MAN_TBL):
 		return(1);
 	default:

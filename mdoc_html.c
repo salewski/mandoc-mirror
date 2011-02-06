@@ -432,6 +432,8 @@ print_mdoc_node(MDOC_ARGS)
 				print_otag(h, TAG_BR, 0, NULL);
 		print_text(h, n->string);
 		return;
+	case (MDOC_EQN):
+		return;
 	case (MDOC_TBL):
 		/*
 		 * This will take care of initialising all of the table

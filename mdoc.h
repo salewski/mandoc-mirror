@@ -191,6 +191,7 @@ enum	mdoc_type {
 	MDOC_BODY,
 	MDOC_BLOCK,
 	MDOC_TBL,
+	MDOC_EQN,
 	MDOC_ROOT
 };
 
