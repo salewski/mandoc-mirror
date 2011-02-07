@@ -1,6 +1,6 @@
 .\"	$Id$
 .\"
-.\" Copyright (c) 2009, 2010 Kristaps Dzonsons <kristaps@bsd.lv>
+.\" Copyright (c) 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
 .\" Copyright (c) 2010 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -283,11 +283,13 @@ a line.
 By doing so, front-ends will be able to apply the proper amount of
 spacing after the end of sentence (unescaped) period, exclamation mark,
 or question mark followed by zero or more non-sentence closing
-delimiters (
-.Ns Sq \&) ,
+delimiters
+.Po
+.Sq \&) ,
 .Sq \&] ,
 .Sq \&' ,
-.Sq \&" ) .
+.Sq \&"
+.Pc .
 .Pp
 The proper spacing is also intelligently preserved if a sentence ends at
 the boundary of a macro line.

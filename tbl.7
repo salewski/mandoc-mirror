@@ -1,6 +1,6 @@
 .\"	$Id$
 .\"
-.\" Copyright (c) 2010 Kristaps Dzonsons <kristaps@bsd.lv>
+.\" Copyright (c) 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -207,8 +207,8 @@ Justify a number around its last decimal point.
 If the decimal point is not found on the number, it's assumed to trail
 the number.
 .It Cm s
-Horizontally span columns from the last non-
-.Ns Cm s
+Horizontally span columns from the last
+.No non- Ns Cm s
 data cell.
 It is an error if spanning columns follow a
 .Cm \-
@@ -220,8 +220,8 @@ This option is not supported by
 .It Cm a
 Left-justify a literal string and pad with one space.
 .It Cm ^
-Vertically span rows from the last non-
-.Ns Cm ^
+Vertically span rows from the last
+.No non- Ns Cm ^
 data cell.
 It is an error to invoke a vertical span on the first layout row.
 Unlike a horizontal spanner, you must specify an empty cell (if it not
