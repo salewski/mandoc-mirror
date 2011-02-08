@@ -48,8 +48,6 @@ static	struct man_node	*man_node_alloc(struct man *, int, int,
 				enum man_type, enum mant);
 static	int		 man_node_append(struct man *, 
 				struct man_node *);
-static	int		 man_span_alloc(struct man *, 
-				const struct tbl_span *);
 static	void		 man_node_free(struct man_node *);
 static	void		 man_node_unlink(struct man *, 
 				struct man_node *);
@@ -300,21 +298,6 @@ man_block_alloc(struct man *m, int line, int pos, enum mant tok)
 	return(1);
 }
 
-static int
-man_span_alloc(struct man *m, const struct tbl_span *span)
-{
-	struct man_node	*n;
-
-	n = man_node_alloc(m, span->line, 0, MAN_TBL, MAN_MAX);
-	n->span = span;
-
-	if ( ! man_node_append(m, n))
-		return(0);
-
-	m->next = MAN_NEXT_SIBLING;
-	return(1);
-}
-
 int
 man_word_alloc(struct man *m, int line, int pos, const char *word)
 {
@@ -367,10 +350,17 @@ man_node_delete(struct man *m, struct man_node *p)
 int
 man_addspan(struct man *m, const struct tbl_span *sp)
 {
+	struct man_node	*n;
 
 	assert( ! (MAN_HALT & m->flags));
-	if ( ! man_span_alloc(m, sp))
+
+	n = man_node_alloc(m, sp->line, 0, MAN_TBL, MAN_MAX);
+	n->span = sp;
+
+	if ( ! man_node_append(m, n))
 		return(0);
+
+	m->next = MAN_NEXT_SIBLING;
 	return(man_descope(m, sp->line, 0));
 }
 
