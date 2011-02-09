@@ -346,6 +346,22 @@ man_node_delete(struct man *m, struct man_node *p)
 	man_node_free(p);
 }
 
+int
+man_addeqn(struct man *m, const struct eqn *ep)
+{
+	struct man_node	*n;
+
+	assert( ! (MAN_HALT & m->flags));
+
+	n = man_node_alloc(m, ep->line, ep->pos, MAN_EQN, MAN_MAX);
+	n->eqn = ep;
+
+	if ( ! man_node_append(m, n))
+		return(0);
+
+	m->next = MAN_NEXT_SIBLING;
+	return(man_descope(m, ep->line, ep->pos));
+}
 
 int
 man_addspan(struct man *m, const struct tbl_span *sp)

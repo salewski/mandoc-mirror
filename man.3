@@ -19,6 +19,8 @@
 .Os
 .Sh NAME
 .Nm man ,
+.Nm man_addeqn ,
+.Nm man_addspan ,
 .Nm man_alloc ,
 .Nm man_endparse ,
 .Nm man_free ,
@@ -31,6 +33,11 @@
 .In mandoc.h
 .In man.h
 .Vt extern const char * const * man_macronames;
+.Ft int
+.Fo man_addeqn
+.Fa "struct man *man"
+.Fa "const struct eqn *eqn"
+.Fc
 .Ft int
 .Fo man_addspan
 .Fa "struct man *man"
@@ -106,6 +113,7 @@ for details.
 .El
 .Ss Functions
 If
+.Fn man_addeqn ,
 .Fn man_addspan ,
 .Fn man_parseln ,
 or
@@ -116,6 +124,9 @@ or
 .Fn man_free
 will raise an assertion.
 .Bl -ohang
+.It Fn man_addeqn
+Add an equation to the parsing stream.
+Returns 0 on failure, 1 on success.
 .It Fn man_addspan
 Add a table span to the parsing stream.
 Returns 0 on failure, 1 on success.

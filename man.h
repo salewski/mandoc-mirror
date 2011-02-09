@@ -104,6 +104,7 @@ struct	man_node {
 	struct man_node	*head; /* BLOCK node HEAD ptr */
 	struct man_node	*body; /* BLOCK node BODY ptr */
 	const struct tbl_span *span; /* TBL */
+	const struct eqn *eqn; /* EQN */
 };
 
 /*
@@ -123,6 +124,7 @@ int	 	  man_parseln(struct man *, int, char *, int);
 int		  man_endparse(struct man *);
 int		  man_addspan(struct man *,
 			const struct tbl_span *);
+int		  man_addeqn(struct man *, const struct eqn *);
 
 const struct man_node *man_node(const struct man *);
 const struct man_meta *man_meta(const struct man *);

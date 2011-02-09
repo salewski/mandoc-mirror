@@ -152,6 +152,8 @@ man_valid_post(struct man *m)
 		return(check_text(m, m->last));
 	case (MAN_ROOT):
 		return(check_root(m, m->last));
+	case (MAN_EQN):
+		/* FALLTHROUGH */
 	case (MAN_TBL):
 		return(1);
 	default:

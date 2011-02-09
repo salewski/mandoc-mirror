@@ -233,7 +233,7 @@ print_man(const struct man_node *n, int indent)
 	case (MAN_TBL):
 		break;
 	case (MAN_EQN):
-		p = "eqn";
+		p = n->eqn->data;
 		break;
 	default:
 		abort();
