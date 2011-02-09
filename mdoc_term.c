@@ -355,6 +355,7 @@ print_mdoc_node(DECL_ARGS)
 		term_word(p, n->string);
 		break;
 	case (MDOC_EQN):
+		term_word(p, n->eqn->data);
 		break;
 	case (MDOC_TBL):
 		term_tbl(p, n->span);

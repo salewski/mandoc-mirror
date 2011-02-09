@@ -141,6 +141,10 @@ li.list-item	{ }
 ol.list-enum	{ padding-left: 2em; }
 li.list-enum	{ }
 
+/* Equation modes.  See eqn(7). */
+
+span.eqn	{ }
+
 /* Table modes.  See tbl(7). */
 
 table.tbl	{ }
