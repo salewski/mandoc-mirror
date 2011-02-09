@@ -34,6 +34,11 @@
 .Vt extern const char * const * mdoc_macronames;
 .Vt extern const char * const * mdoc_argnames;
 .Ft int
+.Fo mdoc_addeqn
+.Fa "struct mdoc *mdoc"
+.Fa "const struct eqn *eqn"
+.Fc
+.Ft int
 .Fo mdoc_addspan
 .Fa "struct mdoc *mdoc"
 .Fa "const struct tbl_span *span"
@@ -97,6 +102,7 @@ for details.
 .El
 .Ss Functions
 If
+.Fn mdoc_addeqn ,
 .Fn mdoc_addspan ,
 .Fn mdoc_parseln ,
 or
@@ -107,6 +113,9 @@ or
 .Fn mdoc_free
 will raise an assertion.
 .Bl -ohang
+.It Fn mdoc_addeqn
+Add an equation to the parsing stream.
+Returns 0 on failure, 1 on success.
 .It Fn mdoc_addspan
 Add a table span to the parsing stream.
 Returns 0 on failure, 1 on success.

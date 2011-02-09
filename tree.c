@@ -132,7 +132,7 @@ print_mdoc(const struct mdoc_node *n, int indent)
 	case (MDOC_TBL):
 		break;
 	case (MDOC_EQN):
-		p = "eqn";
+		p = n->eqn->data;
 		break;
 	case (MDOC_ROOT):
 		p = "root";

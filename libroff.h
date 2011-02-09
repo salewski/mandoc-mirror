@@ -44,8 +44,6 @@ struct	tbl_node {
 };
 
 struct	eqn_node {
-	int		  pos; /* invocation column */
-	int		  line; /* invocation line */
 	struct eqn	  eqn;
 	struct eqn_node	 *next;
 };

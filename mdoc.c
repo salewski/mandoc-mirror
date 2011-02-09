@@ -222,6 +222,30 @@ mdoc_endparse(struct mdoc *m)
 }
 
 int
+mdoc_addeqn(struct mdoc *m, const struct eqn *ep)
+{
+	struct mdoc_node *n;
+
+	assert( ! (MDOC_HALT & m->flags));
+
+	/* No text before an initial macro. */
+
+	if (SEC_NONE == m->lastnamed) {
+		mdoc_pmsg(m, ep->line, ep->pos, MANDOCERR_NOTEXT);
+		return(1);
+	}
+
+	n = node_alloc(m, ep->line, ep->pos, MDOC_MAX, MDOC_EQN);
+	n->eqn = ep;
+
+	if ( ! node_append(m, n))
+		return(0);
+
+	m->next = MDOC_NEXT_SIBLING;
+	return(1);
+}
+
+int
 mdoc_addspan(struct mdoc *m, const struct tbl_span *sp)
 {
 	struct mdoc_node *n;

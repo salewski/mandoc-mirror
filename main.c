@@ -865,6 +865,9 @@ rerun:
 			}
 		} else if (ROFF_EQN == rr) {
 			assert(curp->man || curp->mdoc);
+			assert(roff_eqn(curp->roff));
+			if (curp->mdoc)
+				mdoc_addeqn(curp->mdoc, roff_eqn(curp->roff));
 		} else if (curp->man || curp->mdoc) {
 			rc = curp->man ?
 				man_parseln(curp->man, 

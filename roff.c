@@ -560,7 +560,7 @@ roff_endparse(struct roff *r)
 
 	if (r->eqn) {
 		(*r->msg)(MANDOCERR_SCOPEEXIT, r->data, 
-				r->eqn->line, r->eqn->pos, NULL);
+				r->eqn->eqn.line, r->eqn->eqn.pos, NULL);
 		eqn_end(r->eqn);
 		r->eqn = NULL;
 	}

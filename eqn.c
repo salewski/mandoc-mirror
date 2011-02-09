@@ -59,8 +59,8 @@ eqn_alloc(int pos, int line)
 	struct eqn_node	*p;
 
 	p = mandoc_calloc(1, sizeof(struct eqn_node));
-	p->line = line;
-	p->pos = pos;
+	p->eqn.line = line;
+	p->eqn.pos = pos;
 
 	return(p);
 }

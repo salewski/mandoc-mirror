@@ -40,6 +40,7 @@ enum	rofferr	  roff_parseln(struct roff *, int,
 			char **, size_t *, int, int *);
 void		  roff_endparse(struct roff *);
 const struct tbl_span *roff_span(const struct roff *);
+const struct eqn *roff_eqn(const struct roff *);
 
 __END_DECLS
 
