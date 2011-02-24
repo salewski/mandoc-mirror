@@ -333,13 +333,13 @@ config.h: config.h.pre config.h.post
 	rm -f config.log
 	( cat config.h.pre; \
 	echo; \
-	if $(CC) $(CFLAGS) -Werror -c test-strlcat.c >> config.log 2>&1; then \
+	if $(CC) $(CFLAGS) -Werror -o test-strlcat test-strlcat.c >> config.log 2>&1; then \
 		echo '#define HAVE_STRLCAT'; \
-		rm test-strlcat.o; \
+		rm test-strlcat; \
 	fi; \
-	if $(CC) $(CFLAGS) -Werror -c test-strlcpy.c >> config.log 2>&1; then \
+	if $(CC) $(CFLAGS) -Werror -o test-strlcpy test-strlcpy.c >> config.log 2>&1; then \
 		echo '#define HAVE_STRLCPY'; \
-		rm test-strlcpy.o; \
+		rm test-strlcpy; \
 	fi; \
 	echo; \
 	cat config.h.post \
