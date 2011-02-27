@@ -305,4 +305,12 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 
 - Find better ways to prevent endless loops
   in roff(7) macro and string expansion.
-  
+ 
+- Clean up date handling.
+  Store dates as strings, not time numbers.
+  When the format is not recognized, just use the string from the input.
+  When the format is recognized, normalize the string to whatever
+  format is standard at the respective place.
+  Decide which formats should be recognized where.
+  Update both mdoc(7) and man(7) documentation.
+  Triggered by  Tim van der Molen  Tue, 22 Feb 2011 20:30:45 +0100
