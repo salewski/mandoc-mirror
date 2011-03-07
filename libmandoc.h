@@ -25,11 +25,7 @@ char		*mandoc_strdup(const char *);
 void		*mandoc_malloc(size_t);
 void		*mandoc_realloc(void *, size_t);
 char		*mandoc_getarg(char **, mandocmsg, void *, int, int *);
-time_t		 mandoc_a2time(int, const char *);
-#define		 MTIME_CANONICAL	(1 << 0)
-#define		 MTIME_REDUCED		(1 << 1)
-#define		 MTIME_MDOCDATE		(1 << 2)
-#define		 MTIME_ISO_8601		(1 << 3)
+char		*mandoc_normdate(char *, mandocmsg, void *, int, int);
 int		 mandoc_eos(const char *, size_t, int);
 int		 mandoc_hyph(const char *, const char *);
 

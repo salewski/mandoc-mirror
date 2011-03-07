@@ -17,8 +17,6 @@
 #ifndef OUT_H
 #define OUT_H
 
-#define	DATESIZ		24
-
 __BEGIN_DECLS
 
 struct	roffcol {

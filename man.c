@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2008, 2009, 2010 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -146,8 +146,8 @@ man_free1(struct man *man)
 		free(man->meta.title);
 	if (man->meta.source)
 		free(man->meta.source);
-	if (man->meta.rawdate)
-		free(man->meta.rawdate);
+	if (man->meta.date)
+		free(man->meta.date);
 	if (man->meta.vol)
 		free(man->meta.vol);
 	if (man->meta.msec)

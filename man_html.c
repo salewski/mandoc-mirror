@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2008, 2009, 2010 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -352,12 +352,6 @@ man_root_post(MAN_ARGS)
 {
 	struct htmlpair	 tag[3];
 	struct tag	*t, *tt;
-	char		 b[DATESIZ];
-
-	if (m->rawdate)
-		strlcpy(b, m->rawdate, DATESIZ);
-	else
-		time2a(m->date, b, DATESIZ);
 
 	PAIR_SUMMARY_INIT(&tag[0], "Document Footer");
 	PAIR_CLASS_INIT(&tag[1], "foot");
@@ -375,7 +369,7 @@ man_root_post(MAN_ARGS)
 	PAIR_CLASS_INIT(&tag[0], "foot-date");
 	print_otag(h, TAG_TD, 1, tag);
 
-	print_text(h, b);
+	print_text(h, m->date);
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "foot-os");

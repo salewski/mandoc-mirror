@@ -1,6 +1,7 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2008, 2009, 2010 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2010 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -194,8 +195,9 @@ check_root(CHKARGS)
 		 */
 
 	        m->meta.title = mandoc_strdup("unknown");
-		m->meta.date = time(NULL);
 		m->meta.msec = mandoc_strdup("1");
+		m->meta.date = mandoc_normdate(NULL,
+		    m->msg, m->data, n->line, n->pos);
 	}
 
 	return(1);
@@ -298,7 +300,7 @@ check_ft(CHKARGS)
 	}
 
 	if (0 == ok) {
-		man_vmsg(m, MANDOCERR_BADFONT, 
+		man_vmsg(m, MANDOCERR_BADFONT,
 				n->line, n->pos, "%s", cp);
 		*cp = '\0';
 	}
@@ -377,6 +379,7 @@ static int
 post_TH(CHKARGS)
 {
 	const char	*p;
+	int		 line, pos;
 
 	if (m->meta.title)
 		free(m->meta.title);
@@ -386,12 +389,13 @@ post_TH(CHKARGS)
 		free(m->meta.source);
 	if (m->meta.msec)
 		free(m->meta.msec);
-	if (m->meta.rawdate)
-		free(m->meta.rawdate);
+	if (m->meta.date)
+		free(m->meta.date);
 
-	m->meta.title = m->meta.vol = m->meta.rawdate =
+	line = n->line;
+	pos = n->pos;
+	m->meta.title = m->meta.vol = m->meta.date =
 		m->meta.msec = m->meta.source = NULL;
-	m->meta.date = 0;
 
 	/* ->TITLE<- MSEC DATE SOURCE VOL */
 
@@ -419,24 +423,12 @@ post_TH(CHKARGS)
 
 	/* TITLE MSEC ->DATE<- SOURCE VOL */
 
-	/*
-	 * Try to parse the date.  If this works, stash the epoch (this
-	 * is optimal because we can reformat it in the canonical form).
-	 * If it doesn't parse, isn't specified at all, or is an empty
-	 * string, then use the current date.
-	 */
-
 	if (n)
 		n = n->next;
-	if (n && n->string && *n->string) {
-		m->meta.date = mandoc_a2time
-			(MTIME_ISO_8601, n->string);
-		if (0 == m->meta.date) {
-			man_nmsg(m, n, MANDOCERR_BADDATE);
-			m->meta.rawdate = mandoc_strdup(n->string);
-		}
-	} else
-		m->meta.date = time(NULL);
+	if (n)
+		pos = n->pos;
+	m->meta.date = mandoc_normdate(n ? n->string : NULL,
+	    m->msg, m->data, line, pos);
 
 	/* TITLE MSEC DATE ->SOURCE<- VOL */
 

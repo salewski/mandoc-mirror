@@ -500,9 +500,6 @@ mdoc_root_post(MDOC_ARGS)
 {
 	struct htmlpair	 tag[3];
 	struct tag	*t, *tt;
-	char		 b[DATESIZ];
-
-	time2a(m->date, b, DATESIZ);
 
 	PAIR_SUMMARY_INIT(&tag[0], "Document Footer");
 	PAIR_CLASS_INIT(&tag[1], "foot");
@@ -522,7 +519,7 @@ mdoc_root_post(MDOC_ARGS)
 	PAIR_CLASS_INIT(&tag[0], "foot-date");
 	print_otag(h, TAG_TD, 1, tag);
 
-	print_text(h, b);
+	print_text(h, m->date);
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "foot-os");
