@@ -788,7 +788,6 @@ ps_begin(struct termp *p)
 
 	if (TERMTYPE_PS == p->type) {
 		ps_printf(p, "%%!PS-Adobe-3.0\n");
-		ps_printf(p, "%%%%Creator: mandoc-%s\n", VERSION);
 		ps_printf(p, "%%%%CreationDate: %s", ctime(&t));
 		ps_printf(p, "%%%%DocumentData: Clean7Bit\n");
 		ps_printf(p, "%%%%Orientation: Portrait\n");
@@ -808,7 +807,6 @@ ps_begin(struct termp *p)
 		ps_printf(p, "%%PDF-1.1\n");
 		pdf_obj(p, 1);
 		ps_printf(p, "<<\n");
-		ps_printf(p, "/Creator mandoc-%s\n", VERSION);
 		ps_printf(p, ">>\n");
 		ps_printf(p, "endobj\n");
 
