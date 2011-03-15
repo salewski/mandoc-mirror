@@ -42,7 +42,6 @@
 #endif
 
 #define	REPARSE_LIMIT	1000
-#define	UNCONST(a)	((void *)(uintptr_t)(const void *)(a))
 
 /* FIXME: Intel's compiler?  LLVM?  pcc?  */
 
