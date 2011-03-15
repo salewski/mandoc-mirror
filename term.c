@@ -514,7 +514,7 @@ term_word(struct termp *p, const char *word)
 		if ((ssz = strcspn(word, "\\")) > 0)
 			encode(p, word, ssz);
 
-		word += ssz;
+		word += (int)ssz;
 		if ('\\' != *word)
 			continue;
 

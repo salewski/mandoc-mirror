@@ -354,7 +354,7 @@ mandoc_getarg(char **cpp, mandocmsg msg, void *data, int ln, int *pos)
 		while (' ' == *cp)
 			cp++;
 	}
-	*pos += (cp - start) + (quoted ? 1 : 0);
+	*pos += (int)(cp - start) + (quoted ? 1 : 0);
 	*cpp = cp;
 
 	if ('\0' == *cp && msg && (white || ' ' == cp[-1]))

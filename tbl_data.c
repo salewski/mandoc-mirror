@@ -106,8 +106,10 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 		return(0);
 	}
 
-	dat->string = mandoc_malloc(*pos - sv + 1);
-	memcpy(dat->string, &p[sv], *pos - sv);
+	assert(*pos - sv >= 0);
+
+	dat->string = mandoc_malloc((size_t)(*pos - sv + 1));
+	memcpy(dat->string, &p[sv], (size_t)(*pos - sv));
 	dat->string[*pos - sv] = '\0';
 
 	if (p[*pos])

@@ -214,7 +214,7 @@ print_gen_head(struct html *h)
 	}
 }
 
-
+/* ARGSUSED */
 static void
 print_num(struct html *h, const char *p, size_t len)
 {
@@ -224,7 +224,6 @@ print_num(struct html *h, const char *p, size_t len)
 	if (rhs)
 		putchar((int)*rhs);
 }
-
 
 static void
 print_spec(struct html *h, enum roffdeco d, const char *p, size_t len)

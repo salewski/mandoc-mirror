@@ -806,7 +806,7 @@ rerun:
 			pos = 0;
 			continue;
 		case (ROFF_APPEND):
-			pos = strlen(ln.buf);
+			pos = (int)strlen(ln.buf);
 			continue;
 		case (ROFF_RERUN):
 			goto rerun;

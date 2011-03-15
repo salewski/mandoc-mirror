@@ -2127,7 +2127,8 @@ post_bx(POST_ARGS)
 
 	n = mdoc->last->child;
 	if (n && NULL != (n = n->next))
-		*n->string = toupper((unsigned char)*n->string);
+		*n->string = (char)toupper
+			((unsigned char)*n->string);
 
 	return(1);
 }
