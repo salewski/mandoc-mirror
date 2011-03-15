@@ -386,29 +386,35 @@ static char *
 time2a(time_t t)
 {
 	struct tm	 tm;
-	char		 buf[DATESIZE];
-	char		*p;
-	size_t		 nsz, rsz;
+	char		*buf, *p;
+	size_t		 ssz;
 	int		 isz;
 
 	localtime_r(&t, &tm);
 
-	p = buf;
-	rsz = DATESIZE;
+	/*
+	 * Reserve space:
+	 * up to 9 characters for the month (September) + blank
+	 * up to 2 characters for the day + comma + blank
+	 * 4 characters for the year and a terminating '\0'
+	 */
+	p = buf = mandoc_malloc(10 + 4 + 4 + 1);
 
-	if (0 == (nsz = strftime(p, rsz, "%B ", &tm)))
-		return(NULL);
+	if (0 == (ssz = strftime(p, 10 + 1, "%B ", &tm)))
+		goto fail;
+	p += (int)ssz;
 
-	p += (int)nsz;
-	rsz -= nsz;
-
-	if (-1 == (isz = snprintf(p, rsz, "%d, ", tm.tm_mday)))
-		return(NULL);
-
+	if (-1 == (isz = snprintf(p, 4 + 1, "%d, ", tm.tm_mday)))
+		goto fail;
 	p += isz;
-	rsz -= isz;
 
-	return(strftime(p, rsz, "%Y", &tm) ? buf : NULL);
+	if (0 == strftime(p, 4 + 1, "%Y", &tm))
+		goto fail;
+	return(buf);
+
+fail:
+	free(buf);
+	return(NULL);
 }
 
 
@@ -430,7 +436,7 @@ mandoc_normdate(char *in, mandocmsg msg, void *data, int ln, int pos)
 		t = 0;
 	}
 	out = t ? time2a(t) : NULL;
-	return(mandoc_strdup(out ? out : in));
+	return(out ? out : mandoc_strdup(in));
 }
 
 
