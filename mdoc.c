@@ -138,6 +138,8 @@ mdoc_free1(struct mdoc *mdoc)
 		free(mdoc->meta.vol);
 	if (mdoc->meta.msec)
 		free(mdoc->meta.msec);
+	if (mdoc->meta.date)
+		free(mdoc->meta.date);
 }
 
 
