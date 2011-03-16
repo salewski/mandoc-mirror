@@ -77,6 +77,7 @@ enum	outt {
 };
 
 struct	curparse {
+	enum mandoclevel  exit_status;	/* status of all file parses */
 	const char	 *file;		/* current file-name */
 	enum mandoclevel  file_status;	/* error status of current parse */
 	int		  fd;		/* current file-descriptor */
@@ -241,7 +242,6 @@ static	void		  version(void) __attribute__((noreturn));
 static	int		  woptions(struct curparse *, char *);
 
 static	const char	 *progname;
-static	enum mandoclevel  exit_status = MANDOCLEVEL_OK;
 
 int
 main(int argc, char *argv[])
@@ -260,6 +260,7 @@ main(int argc, char *argv[])
 	curp.inttype = INTT_AUTO;
 	curp.outtype = OUTT_ASCII;
 	curp.wlevel  = MANDOCLEVEL_FATAL;
+	curp.exit_status = MANDOCLEVEL_OK;
 
 	/* LINTED */
 	while (-1 != (c = getopt(argc, argv, "m:O:T:VW:")))
@@ -300,7 +301,7 @@ main(int argc, char *argv[])
 
 	while (*argv) {
 		ffile(*argv, &curp);
-		if (MANDOCLEVEL_OK != exit_status && curp.wstop)
+		if (MANDOCLEVEL_OK != curp.exit_status && curp.wstop)
 			break;
 		++argv;
 	}
@@ -314,7 +315,7 @@ main(int argc, char *argv[])
 	if (curp.roff)
 		roff_free(curp.roff);
 
-	return((int)exit_status);
+	return((int)curp.exit_status);
 }
 
 
@@ -359,7 +360,7 @@ ffile(const char *file, struct curparse *curp)
 
 	if (-1 == (curp->fd = open(curp->file, O_RDONLY, 0))) {
 		perror(curp->file);
-		exit_status = MANDOCLEVEL_SYSERR;
+		curp->exit_status = MANDOCLEVEL_SYSERR;
 		return;
 	}
 
@@ -618,8 +619,8 @@ fdesc(struct curparse *curp)
 	assert(curp->roff);
 	roff_reset(curp->roff);
 
-	if (exit_status < curp->file_status)
-		exit_status = curp->file_status;
+	if (curp->exit_status < curp->file_status)
+		curp->exit_status = curp->file_status;
 
 	return;
 }
