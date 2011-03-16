@@ -583,102 +583,71 @@ args(struct mdoc *m, int line, int *pos,
 	return(ARGS_WORD);
 }
 
-
+/*
+ * Match up an argument string (e.g., `-foo bar' having "foo") with the
+ * correrct identifier.  It must apply to the given macro.  If none was
+ * found (including bad matches), return MDOC_ARG_MAX.
+ */
 static enum mdocargt
 argv_a2arg(enum mdoct tok, const char *p)
 {
+	enum mdocargt	 args[MDOC_ARG_MAX];
+	int		 i, len;
 
-	/*
-	 * Parse an argument identifier from its text.  XXX - this
-	 * should really be table-driven to clarify the code.
-	 *
-	 * If you add an argument to the list, make sure that you
-	 * register it here with its one or more macros!
-	 */
+	len = 0;
 
 	switch (tok) {
 	case (MDOC_An):
-		if (0 == strcmp(p, "split"))
-			return(MDOC_Split);
-		else if (0 == strcmp(p, "nosplit"))
-			return(MDOC_Nosplit);
+		args[len++] = MDOC_Split;
+		args[len++] = MDOC_Nosplit;
 		break;
-
 	case (MDOC_Bd):
-		if (0 == strcmp(p, "ragged"))
-			return(MDOC_Ragged);
-		else if (0 == strcmp(p, "unfilled"))
-			return(MDOC_Unfilled);
-		else if (0 == strcmp(p, "filled"))
-			return(MDOC_Filled);
-		else if (0 == strcmp(p, "literal"))
-			return(MDOC_Literal);
-		else if (0 == strcmp(p, "file"))
-			return(MDOC_File);
-		else if (0 == strcmp(p, "offset"))
-			return(MDOC_Offset);
-		else if (0 == strcmp(p, "compact"))
-			return(MDOC_Compact);
-		else if (0 == strcmp(p, "centered"))
-			return(MDOC_Centred);
+		args[len++] = MDOC_Ragged;
+		args[len++] = MDOC_Unfilled;
+		args[len++] = MDOC_Filled;
+		args[len++] = MDOC_Literal;
+		args[len++] = MDOC_File;
+		args[len++] = MDOC_Offset;
+		args[len++] = MDOC_Compact;
+		args[len++] = MDOC_Centred;
 		break;
-
 	case (MDOC_Bf):
-		if (0 == strcmp(p, "emphasis"))
-			return(MDOC_Emphasis);
-		else if (0 == strcmp(p, "literal"))
-			return(MDOC_Literal);
-		else if (0 == strcmp(p, "symbolic"))
-			return(MDOC_Symbolic);
+		args[len++] = MDOC_Emphasis;
+		args[len++] = MDOC_Literal;
+		args[len++] = MDOC_Symbolic;
 		break;
-
 	case (MDOC_Bk):
-		if (0 == strcmp(p, "words"))
-			return(MDOC_Words);
+		args[len++] = MDOC_Words;
 		break;
-
 	case (MDOC_Bl):
-		if (0 == strcmp(p, "bullet"))
-			return(MDOC_Bullet);
-		else if (0 == strcmp(p, "dash"))
-			return(MDOC_Dash);
-		else if (0 == strcmp(p, "hyphen"))
-			return(MDOC_Hyphen);
-		else if (0 == strcmp(p, "item"))
-			return(MDOC_Item);
-		else if (0 == strcmp(p, "enum"))
-			return(MDOC_Enum);
-		else if (0 == strcmp(p, "tag"))
-			return(MDOC_Tag);
-		else if (0 == strcmp(p, "diag"))
-			return(MDOC_Diag);
-		else if (0 == strcmp(p, "hang"))
-			return(MDOC_Hang);
-		else if (0 == strcmp(p, "ohang"))
-			return(MDOC_Ohang);
-		else if (0 == strcmp(p, "inset"))
-			return(MDOC_Inset);
-		else if (0 == strcmp(p, "column"))
-			return(MDOC_Column);
-		else if (0 == strcmp(p, "width"))
-			return(MDOC_Width);
-		else if (0 == strcmp(p, "offset"))
-			return(MDOC_Offset);
-		else if (0 == strcmp(p, "compact"))
-			return(MDOC_Compact);
-		else if (0 == strcmp(p, "nested"))
-			return(MDOC_Nested);
+		args[len++] = MDOC_Bullet;
+		args[len++] = MDOC_Dash;
+		args[len++] = MDOC_Hyphen;
+		args[len++] = MDOC_Item;
+		args[len++] = MDOC_Enum;
+		args[len++] = MDOC_Tag;
+		args[len++] = MDOC_Diag;
+		args[len++] = MDOC_Hang;
+		args[len++] = MDOC_Ohang;
+		args[len++] = MDOC_Inset;
+		args[len++] = MDOC_Column;
+		args[len++] = MDOC_Width;
+		args[len++] = MDOC_Offset;
+		args[len++] = MDOC_Compact;
+		args[len++] = MDOC_Nested;
 		break;
-	
 	case (MDOC_Rv):
 		/* FALLTHROUGH */
 	case (MDOC_Ex):
-		if (0 == strcmp(p, "std"))
-			return(MDOC_Std);
+		args[len++] = MDOC_Std;
 		break;
 	default:
 		break;
 	}
+
+	for (i = 0; i < len; i++)
+		if (0 == strcmp(p, mdoc_argnames[args[i]]))
+			return(args[i]);
 
 	return(MDOC_ARG_MAX);
 }
