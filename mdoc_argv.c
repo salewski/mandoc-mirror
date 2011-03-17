@@ -35,7 +35,8 @@
 static	enum mdocargt	 argv_a2arg(enum mdoct, const char *);
 static	enum margserr	 args(struct mdoc *, int, int *, 
 				char *, int, char **);
-static	int		 args_checkpunct(const char *);
+static	int		 args_checkpunct(struct mdoc *,
+				const char *, int, int, int);
 static	int		 argv(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
 static	int		 argv_single(struct mdoc *, int, 
@@ -361,7 +362,6 @@ static enum margserr
 args(struct mdoc *m, int line, int *pos, 
 		char *buf, int fl, char **v)
 {
-	int		 i;
 	char		*p, *pp;
 	enum margserr	 rc;
 
@@ -399,15 +399,8 @@ args(struct mdoc *m, int line, int *pos,
 
 	*v = &buf[*pos];
 
-	if (ARGS_DELIM & fl && args_checkpunct(&buf[*pos])) {
-		i = strlen(&buf[*pos]) + *pos;
-		if (i && ' ' != buf[i - 1])
-			return(ARGS_PUNCT);
-		if (ARGS_NOWARN & fl)
-			return(ARGS_PUNCT);
-		mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE);
+	if (ARGS_DELIM & fl && args_checkpunct(m, buf, *pos, line, fl))
 		return(ARGS_PUNCT);
-	}
 
 	/*
 	 * First handle TABSEP items, restricted to `Bl -column'.  This
@@ -549,49 +542,50 @@ args(struct mdoc *m, int line, int *pos,
  * whitespace may separate these tokens.
  */
 static int
-args_checkpunct(const char *p)
+args_checkpunct(struct mdoc *m, const char *buf, int i, int ln, int fl)
 {
-	int		 i, j;
-	char		 buf[DELIMSZ];
+	int		 j;
+	char		 dbuf[DELIMSZ];
 	enum mdelim	 d;
-
-	i = 0;
 
 	/* First token must be a close-delimiter. */
 
-	for (j = 0; p[i] && ' ' != p[i] && j < DELIMSZ; j++, i++)
-		buf[j] = p[i];
+	for (j = 0; buf[i] && ' ' != buf[i] && j < DELIMSZ; j++, i++)
+		dbuf[j] = buf[i];
 
 	if (DELIMSZ == j)
 		return(0);
 
-	buf[j] = '\0';
-	if (DELIM_CLOSE != mandoc_isdelim(buf))
+	dbuf[j] = '\0';
+	if (DELIM_CLOSE != mandoc_isdelim(dbuf))
 		return(0);
 
-	while (' ' == p[i])
+	while (' ' == buf[i])
 		i++;
 
 	/* Remaining must NOT be open/none. */
 	
-	while (p[i]) {
+	while (buf[i]) {
 		j = 0;
-		while (p[i] && ' ' != p[i] && j < DELIMSZ)
-			buf[j++] = p[i++];
+		while (buf[i] && ' ' != buf[i] && j < DELIMSZ)
+			dbuf[j++] = buf[i++];
 
 		if (DELIMSZ == j)
 			return(0);
 
-		buf[j] = '\0';
-		d = mandoc_isdelim(buf);
+		dbuf[j] = '\0';
+		d = mandoc_isdelim(dbuf);
 		if (DELIM_NONE == d || DELIM_OPEN == d)
 			return(0);
 
-		while (' ' == p[i])
+		while (' ' == buf[i])
 			i++;
 	}
 
-	return('\0' == p[i]);
+	if ( ! (ARGS_NOWARN & fl) && i && ' ' == buf[i - 1])
+		mdoc_pmsg(m, ln, i - 1, MANDOCERR_EOLNSPACE);
+
+	return('\0' == buf[i]);
 }
 
 /*
