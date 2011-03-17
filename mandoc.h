@@ -328,7 +328,7 @@ enum	mdelim {
 	DELIM_CLOSE
 };
 
-typedef	int	(*mandocmsg)(enum mandocerr, void *,
+typedef	void	(*mandocmsg)(enum mandocerr, void *,
 			int, int, const char *);
 
 __BEGIN_DECLS

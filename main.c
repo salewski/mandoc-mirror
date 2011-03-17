@@ -233,7 +233,7 @@ static	void		  fdesc(struct curparse *);
 static	void		  ffile(const char *, struct curparse *);
 static	int		  pfile(const char *, struct curparse *);
 static	int		  moptions(enum intt *, char *);
-static	int		  mmsg(enum mandocerr, void *, 
+static	void		  mmsg(enum mandocerr, void *, 
 				int, int, const char *);
 static	void		  pset(const char *, int, struct curparse *);
 static	int		  toptions(struct curparse *, char *);
@@ -1036,7 +1036,7 @@ woptions(struct curparse *curp, char *arg)
 	return(1);
 }
 
-static int
+static void
 mmsg(enum mandocerr t, void *arg, int ln, int col, const char *msg)
 {
 	struct curparse *cp;
@@ -1049,7 +1049,7 @@ mmsg(enum mandocerr t, void *arg, int ln, int col, const char *msg)
 
 	cp = (struct curparse *)arg;
 	if (level < cp->wlevel)
-		return(1);
+		return;
 
 	fprintf(stderr, "%s:%d:%d: %s: %s",
 	    cp->file, ln, col + 1, mandoclevels[level], mandocerrs[t]);
@@ -1059,6 +1059,4 @@ mmsg(enum mandocerr t, void *arg, int ln, int col, const char *msg)
 
 	if (cp->file_status < level)
 		cp->file_status = level;
-	
-	return(level < MANDOCLEVEL_FATAL);
 }
