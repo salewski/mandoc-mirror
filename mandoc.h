@@ -312,14 +312,14 @@ struct	regset {
 	struct reg	  regs[REG__MAX];
 };
 
+typedef	int	(*mandocmsg)(enum mandocerr, void *,
+			int, int, const char *);
+
 __BEGIN_DECLS
 
-/*
- * Callback function for warnings, errors, and fatal errors as they
- * occur in the compilers libroff, libmdoc, and libman.
- */
-typedef	int		(*mandocmsg)(enum mandocerr, void *,
-				int, int, const char *);
+void		 *mandoc_calloc(size_t, size_t);
+void		 *mandoc_malloc(size_t);
+void		 *mandoc_realloc(void *, size_t);
 
 __END_DECLS
 

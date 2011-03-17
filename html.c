@@ -120,11 +120,7 @@ ml_alloc(char *outopts, enum htmltype type)
 	toks[2] = "includes";
 	toks[3] = NULL;
 
-	h = calloc(1, sizeof(struct html));
-	if (NULL == h) {
-		perror(NULL);
-		exit((int)MANDOCLEVEL_SYSERR);
-	}
+	h = mandoc_calloc(1, sizeof(struct html));
 
 	h->type = type;
 	h->tags.head = NULL;
@@ -400,11 +396,7 @@ print_otag(struct html *h, enum htmltag tag,
 	/* Push this tags onto the stack of open scopes. */
 
 	if ( ! (HTML_NOSTACK & htmltags[tag].flags)) {
-		t = malloc(sizeof(struct tag));
-		if (NULL == t) {
-			perror(NULL);
-			exit((int)MANDOCLEVEL_SYSERR);
-		}
+		t = mandoc_malloc(sizeof(struct tag));
 		t->tag = tag;
 		t->next = h->tags.head;
 		h->tags.head = t;

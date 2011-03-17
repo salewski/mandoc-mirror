@@ -20,10 +20,7 @@
 __BEGIN_DECLS
 
 int		 mandoc_special(char *);
-void		*mandoc_calloc(size_t, size_t);
 char		*mandoc_strdup(const char *);
-void		*mandoc_malloc(size_t);
-void		*mandoc_realloc(void *, size_t);
 char		*mandoc_getarg(char **, mandocmsg, void *, int, int *);
 char		*mandoc_normdate(char *, mandocmsg, void *, int, int);
 int		 mandoc_eos(const char *, size_t, int);

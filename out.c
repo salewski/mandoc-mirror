@@ -431,7 +431,7 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp)
 	 */
 
 	assert(NULL == tbl->cols);
-	tbl->cols = calloc
+	tbl->cols = mandoc_calloc
 		((size_t)sp->tbl->cols, sizeof(struct roffcol));
 
 	hp = sp->head;

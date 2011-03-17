@@ -366,14 +366,9 @@ ps_growbuf(struct termp *p, size_t sz)
 
 	p->engine.ps.psmargsz += sz;
 
-	p->engine.ps.psmarg = realloc
+	p->engine.ps.psmarg = mandoc_realloc
 		(p->engine.ps.psmarg,
 		 p->engine.ps.psmargsz);
-	
-	if (NULL == p->engine.ps.psmarg) {
-		perror(NULL);
-		exit((int)MANDOCLEVEL_SYSERR);
-	}
 }
 
 static	double		  ps_hspan(const struct termp *,
