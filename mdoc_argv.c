@@ -405,8 +405,7 @@ args(struct mdoc *m, int line, int *pos,
 		 * is unterminated.
 		 */
 		if (MDOC_PHRASELIT & m->flags)
-			if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_BADQUOTE))
-				return(ARGS_ERROR);
+			mdoc_pmsg(m, line, *pos, MANDOCERR_BADQUOTE);
 
 		m->flags &= ~MDOC_PHRASELIT;
 		return(ARGS_EOLN);
@@ -420,9 +419,7 @@ args(struct mdoc *m, int line, int *pos,
 			return(ARGS_PUNCT);
 		if (ARGS_NOWARN & fl)
 			return(ARGS_PUNCT);
-		/* FIXME: remove conditional messages... */
-		if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE))
-			return(ARGS_ERROR);
+		mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE);
 		return(ARGS_PUNCT);
 	}
 
@@ -473,8 +470,7 @@ args(struct mdoc *m, int line, int *pos,
 
 		/* Whitespace check for eoln case... */
 		if ('\0' == *p && ' ' == *(p - 1) && ! (ARGS_NOWARN & fl))
-			if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE))
-				return(ARGS_ERROR);
+			mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE);
 
 		*pos += (int)(p - *v);
 
@@ -518,8 +514,7 @@ args(struct mdoc *m, int line, int *pos,
 		if ('\0' == buf[*pos]) {
 			if (ARGS_NOWARN & fl || MDOC_PPHRASE & m->flags)
 				return(ARGS_QWORD);
-			if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_BADQUOTE))
-				return(ARGS_ERROR);
+			mdoc_pmsg(m, line, *pos, MANDOCERR_BADQUOTE);
 			return(ARGS_QWORD);
 		}
 
@@ -533,8 +528,7 @@ args(struct mdoc *m, int line, int *pos,
 			(*pos)++;
 
 		if (0 == buf[*pos] && ! (ARGS_NOWARN & fl))
-			if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE))
-				return(ARGS_ERROR);
+			mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE);
 
 		return(ARGS_QWORD);
 	}
@@ -557,8 +551,7 @@ args(struct mdoc *m, int line, int *pos,
 		(*pos)++;
 
 	if ('\0' == buf[*pos] && ! (ARGS_NOWARN & fl))
-		if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE))
-			return(ARGS_ERROR);
+		mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE);
 
 	return(ARGS_WORD);
 }
