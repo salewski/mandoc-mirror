@@ -81,7 +81,7 @@ int		  man_args(struct man *, int, int *, char *, char **);
 #define	ARGS_EOLN	(0)
 #define	ARGS_WORD	(1)
 #define	ARGS_QWORD	(1)
-int		  man_vmsg(struct man *, enum mandocerr,
+void		  man_vmsg(struct man *, enum mandocerr,
 			int, int, const char *, ...);
 int		  man_valid_post(struct man *);
 int		  man_valid_pre(struct man *, struct man_node *);

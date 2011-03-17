@@ -223,9 +223,8 @@ check_text(CHKARGS)
 		if ('\t' == *p) {
 			if (MAN_LITERAL & m->flags)
 				continue;
-			if (man_pmsg(m, n->line, pos, MANDOCERR_BADTAB))
-				continue;
-			return(0);
+			man_pmsg(m, n->line, pos, MANDOCERR_BADTAB);
+			continue;
 		}
 
 		/* Check the special character. */

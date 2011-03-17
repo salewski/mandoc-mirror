@@ -622,7 +622,7 @@ err:	/* Error out. */
 }
 
 
-int
+void
 man_vmsg(struct man *man, enum mandocerr t, 
 		int ln, int pos, const char *fmt, ...)
 {
@@ -632,7 +632,7 @@ man_vmsg(struct man *man, enum mandocerr t,
 	va_start(ap, fmt);
 	vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
 	va_end(ap);
-	return((*man->msg)(t, man->data, ln, pos, buf));
+	(*man->msg)(t, man->data, ln, pos, buf);
 }
 
 

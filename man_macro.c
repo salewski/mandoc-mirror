@@ -43,7 +43,7 @@ static	enum rew	 rew_dohalt(enum mant, enum man_type,
 				const struct man_node *);
 static	enum rew	 rew_block(enum mant, enum man_type, 
 				const struct man_node *);
-static	int		 rew_warn(struct man *, 
+static	void		 rew_warn(struct man *, 
 				struct man_node *, enum mandocerr);
 
 const	struct man_macro __man_macros[MAN_MAX] = {
@@ -88,17 +88,19 @@ const	struct man_macro * const man_macros = __man_macros;
 /*
  * Warn when "n" is an explicit non-roff macro.
  */
-static int
+static void
 rew_warn(struct man *m, struct man_node *n, enum mandocerr er)
 {
 
 	if (er == MANDOCERR_MAX || MAN_BLOCK != n->type)
-		return(1);
+		return;
 	if (MAN_VALID & n->flags)
-		return(1);
+		return;
 	if ( ! (MAN_EXPLICIT & man_macros[n->tok].flags))
-		return(1);
-	return(man_nmsg(m, n, er));
+		return;
+
+	assert(er < MANDOCERR_FATAL);
+	man_nmsg(m, n, er);
 }
 
 
@@ -123,16 +125,14 @@ man_unscope(struct man *m, const struct man_node *to,
 		 * out to be lost.
 		 */
 		n = m->last->parent;
-		if ( ! rew_warn(m, m->last, er))
-			return(0);
+		rew_warn(m, m->last, er);
 		if ( ! man_valid_post(m))
 			return(0);
 		m->last = n;
 		assert(m->last);
 	}
 
-	if ( ! rew_warn(m, m->last, er))
-		return(0);
+	rew_warn(m, m->last, er);
 	if ( ! man_valid_post(m))
 		return(0);
 
@@ -279,8 +279,7 @@ blk_close(MACRO_PROT_ARGS)
 			break;
 
 	if (NULL == nn)
-		if ( ! man_pmsg(m, line, ppos, MANDOCERR_NOSCOPE))
-			return(0);
+		man_pmsg(m, line, ppos, MANDOCERR_NOSCOPE);
 
 	if ( ! rew_scope(MAN_BODY, m, ntok))
 		return(0);
