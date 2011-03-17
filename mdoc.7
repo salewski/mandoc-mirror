@@ -65,12 +65,14 @@ A macro line with only a control character and comment escape,
 is also ignored.
 Macro lines with only a control character and optional whitespace are
 stripped from input.
-.Ss Reserved Characters
-Within a macro line, the following characters are reserved:
+.Ss Reserved Terms
+Within a macro line, the following terms are reserved:
 .Pp
 .Bl -tag -width Ds -offset indent -compact
 .It \&.
 .Pq period
+.It \e.
+.Pq escaped period
 .It \&,
 .Pq comma
 .It \&:
@@ -91,14 +93,15 @@ Within a macro line, the following characters are reserved:
 .Pq exclamation
 .It \&|
 .Pq vertical bar
+.It \e*(Ba
+.Pq reserved-word vertical bar
 .El
 .Pp
-Use of reserved characters is described in
+Use of reserved terms is described in
 .Sx MACRO SYNTAX .
-For general use in macro lines, these characters can either be escaped
-with a non-breaking space
-.Pq Sq \e&
-or, if applicable, an appropriate escape sequence can be used.
+For general use in macro lines, these can be escaped with a non-breaking
+space
+.Pq Sq \e& .
 .Ss Special Characters
 Special characters may occur in both macro and free-form lines.
 Sequences begin with the escape character
@@ -706,7 +709,7 @@ and/or tail
 .El
 .Ss Block partial-implicit
 Like block full-implicit, but with single-line scope closed by
-.Sx Reserved Characters
+.Sx Reserved Terms
 or end of line.
 .Bd -literal -offset indent
 \&.Yo \(lB\-arg \(lBval...\(rB\(rB \(lBbody...\(rB \(lBres...\(rB
@@ -739,7 +742,7 @@ section line, else it is
 .Sx In-line .
 .Ss In-line
 Closed by
-.Sx Reserved Characters ,
+.Sx Reserved Terms ,
 end of line, fixed argument lengths, and/or subsequent macros.
 In-line macros have only text children.
 If a number (or inequality) of arguments is
