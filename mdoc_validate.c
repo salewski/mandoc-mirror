@@ -446,10 +446,10 @@ check_count(struct mdoc *m, enum mdoc_type type,
 	}
 
 	t = lvl == CHECK_WARN ? MANDOCERR_ARGCWARN : MANDOCERR_ARGCOUNT;
-
-	return(mdoc_vmsg(m, t, m->last->line, m->last->pos,
+	mdoc_vmsg(m, t, m->last->line, m->last->pos,
 			"want %s%d children (have %d)",
-			p, val, m->last->nchild));
+			p, val, m->last->nchild);
+	return(1);
 }
 
 static int
@@ -1266,7 +1266,7 @@ post_an(POST_ARGS)
 static int
 post_it(POST_ARGS)
 {
-	int		  i, cols, rc;
+	int		  i, cols;
 	enum mdoc_list	  lt;
 	struct mdoc_node *n, *c;
 	enum mandocerr	  er;
@@ -1332,10 +1332,9 @@ post_it(POST_ARGS)
 		else
 			er = MANDOCERR_SYNTARGCOUNT;
 
-		rc = mdoc_vmsg(mdoc, er, 
-				mdoc->last->line, mdoc->last->pos, 
+		mdoc_vmsg(mdoc, er, mdoc->last->line, mdoc->last->pos, 
 				"columns == %d (have %d)", cols, i);
-		return(rc);
+		return(MANDOCERR_ARGCOUNT == er);
 	default:
 		break;
 	}

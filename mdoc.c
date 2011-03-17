@@ -303,7 +303,7 @@ mdoc_parseln(struct mdoc *m, int ln, char *buf, int offs)
 }
 
 
-int
+void
 mdoc_vmsg(struct mdoc *mdoc, enum mandocerr t, 
 		int ln, int pos, const char *fmt, ...)
 {
@@ -314,7 +314,7 @@ mdoc_vmsg(struct mdoc *mdoc, enum mandocerr t,
 	vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
 	va_end(ap);
 
-	return((*mdoc->msg)(t, mdoc->data, ln, pos, buf));
+	(*mdoc->msg)(t, mdoc->data, ln, pos, buf);
 }
 
 

@@ -710,8 +710,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 	if ( ! (MDOC_CALLABLE & mdoc_macros[tok].flags)) {
 		/* FIXME: do this in validate */
 		if (buf[*pos]) 
-			if ( ! mdoc_pmsg(m, line, ppos, MANDOCERR_ARGSLOST))
-				return(0);
+			mdoc_pmsg(m, line, ppos, MANDOCERR_ARGSLOST);
 
 		if ( ! rew_sub(MDOC_BODY, m, tok, line, ppos))
 			return(0);
@@ -854,9 +853,9 @@ in_line(MACRO_PROT_ARGS)
 					return(0);
 			} else if ( ! nc && 0 == cnt) {
 				mdoc_argv_free(arg);
-				if ( ! mdoc_pmsg(m, line, ppos, MANDOCERR_MACROEMPTY))
-					return(0);
+				mdoc_pmsg(m, line, ppos, MANDOCERR_MACROEMPTY);
 			}
+
 			if ( ! mdoc_macro(m, ntok, line, la, pos, buf))
 				return(0);
 			if ( ! nl)
@@ -936,8 +935,7 @@ in_line(MACRO_PROT_ARGS)
 			return(0);
 	} else if ( ! nc && 0 == cnt) {
 		mdoc_argv_free(arg);
-		if ( ! mdoc_pmsg(m, line, ppos, MANDOCERR_MACROEMPTY))
-			return(0);
+		mdoc_pmsg(m, line, ppos, MANDOCERR_MACROEMPTY);
 	}
 
 	if ( ! nl)
@@ -1299,9 +1297,9 @@ blk_part_imp(MACRO_PROT_ARGS)
 	 * is ugly behaviour nodding its head to OpenBSD's overwhelming
 	 * crufty use of `Op' breakage.
 	 */
-	if (n != body && ! mdoc_vmsg(m, MANDOCERR_SCOPENEST,
-	    line, ppos, "%s broken", mdoc_macronames[tok]))
-		return(0);
+	if (n != body)
+		mdoc_vmsg(m, MANDOCERR_SCOPENEST, line, ppos, 
+				"%s broken", mdoc_macronames[tok]);
 
 	if (n && ! rew_sub(MDOC_BODY, m, tok, line, ppos))
 		return(0);
@@ -1673,7 +1671,8 @@ static int
 obsolete(MACRO_PROT_ARGS)
 {
 
-	return(mdoc_pmsg(m, line, ppos, MANDOCERR_MACROOBS));
+	mdoc_pmsg(m, line, ppos, MANDOCERR_MACROOBS);
+	return(1);
 }
 
 
