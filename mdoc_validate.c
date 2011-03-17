@@ -74,6 +74,7 @@ static	void	 check_args(struct mdoc *, struct mdoc_node *);
 
 static	int	 concat(struct mdoc *, char *, 
 			const struct mdoc_node *, size_t);
+static	enum mdoc_sec a2sec(const char *);
 
 static	int	 ebool(POST_ARGS);
 static	int	 berr_ge1(POST_ARGS);
@@ -321,6 +322,30 @@ static	const enum mdoct rsord[RSORD_MAX] = {
 	MDOC__U
 };
 
+static	const char * const secnames[SEC__MAX] = {
+	NULL,
+	"NAME",
+	"LIBRARY",
+	"SYNOPSIS",
+	"DESCRIPTION",
+	"IMPLEMENTATION NOTES",
+	"RETURN VALUES",
+	"ENVIRONMENT",
+	"FILES",
+	"EXIT STATUS",
+	"EXAMPLES",
+	"DIAGNOSTICS",
+	"COMPATIBILITY",
+	"ERRORS",
+	"SEE ALSO",
+	"STANDARDS",
+	"HISTORY",
+	"AUTHORS",
+	"CAVEATS",
+	"BUGS",
+	"SECURITY CONSIDERATIONS",
+	NULL
+};
 
 int
 mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *n)
@@ -1821,7 +1846,7 @@ post_sh_head(POST_ARGS)
 	if ( ! concat(mdoc, buf, mdoc->last->child, BUFSIZ))
 		return(0);
 
-	sec = mdoc_str2sec(buf);
+	sec = a2sec(buf);
 
 	/* The NAME should be first. */
 
@@ -2253,5 +2278,17 @@ concat(struct mdoc *m, char *p, const struct mdoc_node *n, size_t sz)
 	}
 
 	return(1);
+}
+
+static enum mdoc_sec 
+a2sec(const char *p)
+{
+	int		 i;
+
+	for (i = 0; i < (int)SEC__MAX; i++) 
+		if (secnames[i] && 0 == strcmp(p, secnames[i]))
+			return((enum mdoc_sec)i);
+
+	return(SEC_CUSTOM);
 }
 
