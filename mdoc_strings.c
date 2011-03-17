@@ -54,53 +54,40 @@ static	const char * const secnames[SEC__MAX] = {
 	NULL
 };
 
-/* 
- * FIXME: this is repeated in print_text() (html.c) and term_word()
- * (term.c).
- */
-enum mdelim
-mdoc_iscdelim(char p)
-{
-
-	switch (p) {
-	case('('):
-		/* FALLTHROUGH */
-	case('['):
-		return(DELIM_OPEN);
-	case('|'):
-		return(DELIM_MIDDLE);
-	case('.'):
-		/* FALLTHROUGH */
-	case(','):
-		/* FALLTHROUGH */
-	case(';'):
-		/* FALLTHROUGH */
-	case(':'):
-		/* FALLTHROUGH */
-	case('?'):
-		/* FALLTHROUGH */
-	case('!'):
-		/* FALLTHROUGH */
-	case(')'):
-		/* FALLTHROUGH */
-	case(']'):
-		return(DELIM_CLOSE);
-	default:
-		break;
-	}
-
-	return(DELIM_NONE);
-}
-
-
 enum mdelim
 mdoc_isdelim(const char *p)
 {
 
 	if ('\0' == p[0])
 		return(DELIM_NONE);
+
 	if ('\0' == p[1])
-		return(mdoc_iscdelim(p[0]));
+		switch (p[0]) {
+		case('('):
+			/* FALLTHROUGH */
+		case('['):
+			return(DELIM_OPEN);
+		case('|'):
+			return(DELIM_MIDDLE);
+		case('.'):
+			/* FALLTHROUGH */
+		case(','):
+			/* FALLTHROUGH */
+		case(';'):
+			/* FALLTHROUGH */
+		case(':'):
+			/* FALLTHROUGH */
+		case('?'):
+			/* FALLTHROUGH */
+		case('!'):
+			/* FALLTHROUGH */
+		case(')'):
+			/* FALLTHROUGH */
+		case(']'):
+			return(DELIM_CLOSE);
+		default:
+			return(DELIM_NONE);
+		}
 
 	/*
 	 * XXX; account for groff bubu where the \*(Ba reserved string

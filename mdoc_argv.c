@@ -412,13 +412,6 @@ args(struct mdoc *m, int line, int *pos,
 		return(ARGS_EOLN);
 	}
 
-	/* 
-	 * If the first character is a closing delimiter and we're to
-	 * look for delimited strings, then pass down the buffer seeing
-	 * if it follows the pattern of [[::delim::][ ]+]+.  Note that
-	 * we ONLY care about closing delimiters.
-	 */
-
 	*v = &buf[*pos];
 
 	if (ARGS_DELIM & fl && args_checkpunct(&buf[*pos])) {
@@ -572,28 +565,50 @@ args(struct mdoc *m, int line, int *pos,
 
 /* 
  * Check if the string consists only of space-separated closing
- * delimiters.
+ * delimiters.  This is a bit of a dance: the first must be a close
+ * delimiter, but it may be followed by middle delimiters.  Arbitrary
+ * whitespace may separate these tokens.
  */
 static int
 args_checkpunct(const char *p)
 {
-	int		 i;
+	int		 i, j;
+	char		 buf[DELIMSZ];
 	enum mdelim	 d;
 
 	i = 0;
 
-	if (DELIM_CLOSE != mdoc_iscdelim(p[i]))
+	/* First token must be a close-delimiter. */
+
+	for (j = 0; p[i] && ' ' != p[i] && j < DELIMSZ; j++, i++)
+		buf[j] = p[i];
+
+	if (DELIMSZ == j)
 		return(0);
 
-	while ('\0' != p[i]) {
-		d = mdoc_iscdelim(p[i]);
+	buf[j] = '\0';
+	if (DELIM_CLOSE != mdoc_isdelim(buf))
+		return(0);
+
+	while (' ' == p[i])
+		i++;
+
+	/* Remaining must NOT be open/none. */
+	
+	while (p[i]) {
+		j = 0;
+		while (p[i] && ' ' != p[i] && j < DELIMSZ)
+			buf[j++] = p[i++];
+
+		if (DELIMSZ == j)
+			return(0);
+
+		buf[j] = '\0';
+		d = mdoc_isdelim(buf);
 		if (DELIM_NONE == d || DELIM_OPEN == d)
-			break;
-		i++;
-		if ('\0' == p[i] || ' ' != p[i])
-			break;
-		i++;
-		while (p[i] && ' ' == p[i])
+			return(0);
+
+		while (' ' == p[i])
 			i++;
 	}
 
