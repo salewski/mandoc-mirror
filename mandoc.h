@@ -312,6 +312,22 @@ struct	regset {
 	struct reg	  regs[REG__MAX];
 };
 
+/*
+ * A punctuation delimiter, used only in mdoc(7) documents, is opening,
+ * closing, or "middle mark" punctuation.  These govern spacing.
+ * Opening punctuation (e.g., the opening parenthesis) suppresses the
+ * following space; closing punctuation (e.g., the closing parenthesis)
+ * suppresses the leading space; middle punctuation (e.g., the vertical
+ * bar) can do either.  The middle punctuation delimiter bends the rules
+ * depending on usage.
+ */
+enum	mdelim {
+	DELIM_NONE = 0,
+	DELIM_OPEN,
+	DELIM_MIDDLE,
+	DELIM_CLOSE
+};
+
 typedef	int	(*mandocmsg)(enum mandocerr, void *,
 			int, int, const char *);
 
@@ -320,6 +336,8 @@ __BEGIN_DECLS
 void		 *mandoc_calloc(size_t, size_t);
 void		 *mandoc_malloc(size_t);
 void		 *mandoc_realloc(void *, size_t);
+#define	DELIMSZ	  6 /* hint: max possible size of a delimiter */
+enum mdelim	  mandoc_isdelim(const char *);
 
 __END_DECLS
 

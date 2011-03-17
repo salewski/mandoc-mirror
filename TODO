@@ -10,15 +10,6 @@
 - .TP before .SH is still FATAL in man(7)
   reported by brad@  Sat, 15 Jan 2011 15:54:54 -0500
 
-- The mdoc(7) parser should handle `\.' as punctuation:
-    .Ql .if ${VAR} op something \.
-  should produce
-    `.if ${VAR} op something'.
-  not
-    `.if ${VAR} op something .'
-  as seen in make(1).
-  To escape the dot, one would use `\&.'.
-
 - the roff parser doesn't tolerate additional characters between
   a macro and the \} terminating a conditional block, e.g.
   .if n \{

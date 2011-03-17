@@ -587,7 +587,7 @@ args_checkpunct(const char *p)
 		return(0);
 
 	buf[j] = '\0';
-	if (DELIM_CLOSE != mdoc_isdelim(buf))
+	if (DELIM_CLOSE != mandoc_isdelim(buf))
 		return(0);
 
 	while (' ' == p[i])
@@ -604,7 +604,7 @@ args_checkpunct(const char *p)
 			return(0);
 
 		buf[j] = '\0';
-		d = mdoc_isdelim(buf);
+		d = mandoc_isdelim(buf);
 		if (DELIM_NONE == d || DELIM_OPEN == d)
 			return(0);
 

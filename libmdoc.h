@@ -81,13 +81,6 @@ enum	margverr {
 	ARGV_WORD
 };
 
-enum	mdelim {
-	DELIM_NONE = 0,
-	DELIM_OPEN,
-	DELIM_MIDDLE,
-	DELIM_CLOSE
-};
-
 extern	const struct mdoc_macro *const mdoc_macros;
 
 __BEGIN_DECLS
@@ -114,8 +107,6 @@ int		  mdoc_endbody_alloc(struct mdoc *m, int line, int pos,
 void		  mdoc_node_delete(struct mdoc *, struct mdoc_node *);
 void		  mdoc_hash_init(void);
 enum mdoct	  mdoc_hash_find(const char *);
-#define	DELIMSZ	  6 /* maximum size of a delimiter string */
-enum mdelim	  mdoc_isdelim(const char *);
 size_t		  mdoc_isescape(const char *);
 enum	mdoc_sec  mdoc_str2sec(const char *);
 time_t		  mdoc_atotime(const char *);
