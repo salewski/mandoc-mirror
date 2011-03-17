@@ -74,7 +74,8 @@ static	void	 check_args(struct mdoc *, struct mdoc_node *);
 
 static	int	 concat(struct mdoc *, char *, 
 			const struct mdoc_node *, size_t);
-static	enum mdoc_sec a2sec(const char *);
+static	enum mdoc_sec	a2sec(const char *);
+static	size_t		macro2len(enum mdoct);
 
 static	int	 ebool(POST_ARGS);
 static	int	 berr_ge1(POST_ARGS);
@@ -1395,7 +1396,7 @@ post_bl_block_width(POST_ARGS)
 		width = 6;
 	else if (MDOC_MAX == (tok = mdoc_hash_find(n->norm->Bl.width)))
 		return(1);
-	else if (0 == (width = mdoc_macro2len(tok)))  {
+	else if (0 == (width = macro2len(tok)))  {
 		mdoc_nmsg(mdoc, n, MANDOCERR_BADWIDTH);
 		return(1);
 	}
@@ -1452,7 +1453,7 @@ post_bl_block_tag(POST_ARGS)
 			break;
 		}
 
-		if (0 != (ssz = mdoc_macro2len(nn->tok)))
+		if (0 != (ssz = macro2len(nn->tok)))
 			sz = ssz;
 
 		break;
@@ -2292,3 +2293,95 @@ a2sec(const char *p)
 	return(SEC_CUSTOM);
 }
 
+static size_t
+macro2len(enum mdoct macro)
+{
+
+	switch (macro) {
+	case(MDOC_Ad):
+		return(12);
+	case(MDOC_Ao):
+		return(12);
+	case(MDOC_An):
+		return(12);
+	case(MDOC_Aq):
+		return(12);
+	case(MDOC_Ar):
+		return(12);
+	case(MDOC_Bo):
+		return(12);
+	case(MDOC_Bq):
+		return(12);
+	case(MDOC_Cd):
+		return(12);
+	case(MDOC_Cm):
+		return(10);
+	case(MDOC_Do):
+		return(10);
+	case(MDOC_Dq):
+		return(12);
+	case(MDOC_Dv):
+		return(12);
+	case(MDOC_Eo):
+		return(12);
+	case(MDOC_Em):
+		return(10);
+	case(MDOC_Er):
+		return(17);
+	case(MDOC_Ev):
+		return(15);
+	case(MDOC_Fa):
+		return(12);
+	case(MDOC_Fl):
+		return(10);
+	case(MDOC_Fo):
+		return(16);
+	case(MDOC_Fn):
+		return(16);
+	case(MDOC_Ic):
+		return(10);
+	case(MDOC_Li):
+		return(16);
+	case(MDOC_Ms):
+		return(6);
+	case(MDOC_Nm):
+		return(10);
+	case(MDOC_No):
+		return(12);
+	case(MDOC_Oo):
+		return(10);
+	case(MDOC_Op):
+		return(14);
+	case(MDOC_Pa):
+		return(32);
+	case(MDOC_Pf):
+		return(12);
+	case(MDOC_Po):
+		return(12);
+	case(MDOC_Pq):
+		return(12);
+	case(MDOC_Ql):
+		return(16);
+	case(MDOC_Qo):
+		return(12);
+	case(MDOC_So):
+		return(12);
+	case(MDOC_Sq):
+		return(12);
+	case(MDOC_Sy):
+		return(6);
+	case(MDOC_Sx):
+		return(16);
+	case(MDOC_Tn):
+		return(10);
+	case(MDOC_Va):
+		return(12);
+	case(MDOC_Vt):
+		return(12);
+	case(MDOC_Xr):
+		return(10);
+	default:
+		break;
+	};
+	return(0);
+}
