@@ -549,9 +549,9 @@ mandoc_isdelim(const char *p)
 	if ('\\' != p[0])
 		return(DELIM_NONE);
 
-	if (0 == strcmp(p, "\\."))
+	if (0 == strcmp(p + 1, "."))
 		return(DELIM_CLOSE);
-	if (0 == strcmp(p, "\\*(Ba"))
+	if (0 == strcmp(p + 1, "*(Ba"))
 		return(DELIM_MIDDLE);
 
 	return(DELIM_NONE);
