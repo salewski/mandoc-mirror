@@ -30,20 +30,7 @@
 #include "libmdoc.h"
 #include "libmandoc.h"
 
-/*
- * Routines to parse arguments of macros.  Arguments follow the syntax
- * of `-arg [val [valN...]]'.  Arguments come in all types:  quoted
- * arguments, multiple arguments per value, no-value arguments, etc.
- *
- * There's no limit to the number or arguments that may be allocated.
- */
-
-#define	ARGV_NONE	(1 << 0)
-#define	ARGV_SINGLE	(1 << 1)
-#define	ARGV_MULTI	(1 << 2)
-#define	ARGV_OPT_SINGLE	(1 << 3)
-
-#define	MULTI_STEP	 5
+#define	MULTI_STEP	 5 /* pre-allocate argument values */
 
 static	enum mdocargt	 argv_a2arg(enum mdoct, const char *);
 static	enum margserr	 args(struct mdoc *, int, int *, 
@@ -58,9 +45,14 @@ static	int		 argv_opt_single(struct mdoc *, int,
 static	int		 argv_multi(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
 
-/* Per-argument flags. */
+enum	argvflag {
+	ARGV_NONE, /* no args to flag (e.g., -split) */
+	ARGV_SINGLE, /* one arg to flag (e.g., -file xxx)  */
+	ARGV_MULTI, /* multiple args (e.g., -column xxx yyy) */
+	ARGV_OPT_SINGLE /* optional arg (e.g., -offset [xxx]) */
+};
 
-static	int mdoc_argvflags[MDOC_ARG_MAX] = {
+static	const enum argvflag argvflags[MDOC_ARG_MAX] = {
 	ARGV_NONE,	/* MDOC_Split */
 	ARGV_NONE,	/* MDOC_Nosplit */
 	ARGV_NONE,	/* MDOC_Ragged */
@@ -89,7 +81,7 @@ static	int mdoc_argvflags[MDOC_ARG_MAX] = {
 	ARGV_NONE	/* MDOC_Symbolic */
 };
 
-static	int mdoc_argflags[MDOC_MAX] = {
+static	const int argflags[MDOC_MAX] = {
 	0, /* Ap */
 	0, /* Dd */
 	0, /* Dt */
@@ -214,7 +206,6 @@ static	int mdoc_argflags[MDOC_MAX] = {
 	0, /* Ta */
 };
 
-
 /*
  * Parse an argument from line text.  This comes in the form of -key
  * [value0...], which may either have a single mandatory value, at least
@@ -255,7 +246,7 @@ mdoc_argv(struct mdoc *m, int line, enum mdoct tok,
 		buf[(*pos)++] = '\0';
 	}
 
-	(void)memset(&tmp, 0, sizeof(struct mdoc_argv));
+	memset(&tmp, 0, sizeof(struct mdoc_argv));
 	tmp.line = line;
 	tmp.pos = *pos;
 
@@ -281,12 +272,11 @@ mdoc_argv(struct mdoc *m, int line, enum mdoct tok,
 	arg->argv = mandoc_realloc
 		(arg->argv, arg->argc * sizeof(struct mdoc_argv));
 
-	(void)memcpy(&arg->argv[(int)arg->argc - 1], 
+	memcpy(&arg->argv[(int)arg->argc - 1], 
 			&tmp, sizeof(struct mdoc_argv));
 
 	return(ARGV_ARG);
 }
-
 
 void
 mdoc_argv_free(struct mdoc_arg *p)
@@ -310,7 +300,6 @@ mdoc_argv_free(struct mdoc_arg *p)
 	free(p);
 }
 
-
 void
 mdoc_argn_free(struct mdoc_arg *p, int iarg)
 {
@@ -329,7 +318,6 @@ mdoc_argn_free(struct mdoc_arg *p, int iarg)
 		p->argv[iarg] = p->argv[iarg+1];
 }
 
-
 enum margserr
 mdoc_zargs(struct mdoc *m, int line, int *pos, 
 		char *buf, int flags, char **v)
@@ -338,7 +326,6 @@ mdoc_zargs(struct mdoc *m, int line, int *pos,
 	return(args(m, line, pos, buf, flags, v));
 }
 
-
 enum margserr
 mdoc_args(struct mdoc *m, int line, int *pos, 
 		char *buf, enum mdoct tok, char **v)
@@ -346,7 +333,7 @@ mdoc_args(struct mdoc *m, int line, int *pos,
 	int		  fl;
 	struct mdoc_node *n;
 
-	fl = mdoc_argflags[tok];
+	fl = argflags[tok];
 
 	if (MDOC_It != tok)
 		return(args(m, line, pos, buf, fl, v));
@@ -369,7 +356,6 @@ mdoc_args(struct mdoc *m, int line, int *pos,
 
 	return(args(m, line, pos, buf, fl, v));
 }
-
 
 static enum margserr
 args(struct mdoc *m, int line, int *pos, 
@@ -677,7 +663,6 @@ argv_a2arg(enum mdoct tok, const char *p)
 	return(MDOC_ARG_MAX);
 }
 
-
 static int
 argv_multi(struct mdoc *m, int line, 
 		struct mdoc_argv *v, int *pos, char *buf)
@@ -704,7 +689,6 @@ argv_multi(struct mdoc *m, int line,
 	return(1);
 }
 
-
 static int
 argv_opt_single(struct mdoc *m, int line, 
 		struct mdoc_argv *v, int *pos, char *buf)
@@ -727,7 +711,6 @@ argv_opt_single(struct mdoc *m, int line,
 
 	return(1);
 }
-
 
 /*
  * Parse a single, mandatory value from the stream.
@@ -756,7 +739,6 @@ argv_single(struct mdoc *m, int line,
 	return(1);
 }
 
-
 /*
  * Determine rules for parsing arguments.  Arguments can either accept
  * no parameters, an optional single parameter, one parameter, or
@@ -770,16 +752,18 @@ argv(struct mdoc *mdoc, int line,
 	v->sz = 0;
 	v->value = NULL;
 
-	switch (mdoc_argvflags[v->arg]) {
+	switch (argvflags[v->arg]) {
 	case (ARGV_SINGLE):
 		return(argv_single(mdoc, line, v, pos, buf));
 	case (ARGV_MULTI):
 		return(argv_multi(mdoc, line, v, pos, buf));
 	case (ARGV_OPT_SINGLE):
 		return(argv_opt_single(mdoc, line, v, pos, buf));
-	default:
-		/* ARGV_NONE */
+	case (ARGV_NONE):
 		break;
+	default:
+		abort();
+		/* NOTREACHED */
 	}
 
 	return(1);
