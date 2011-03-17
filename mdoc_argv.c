@@ -48,6 +48,7 @@
 static	enum mdocargt	 argv_a2arg(enum mdoct, const char *);
 static	enum margserr	 args(struct mdoc *, int, int *, 
 				char *, int, char **);
+static	int		 args_checkpunct(const char *);
 static	int		 argv(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
 static	int		 argv_single(struct mdoc *, int, 
@@ -377,7 +378,6 @@ args(struct mdoc *m, int line, int *pos,
 	int		 i;
 	char		*p, *pp;
 	enum margserr	 rc;
-	enum mdelim	 d;
 
 	/*
 	 * Parse out the terms (like `val' in `.Xx -arg val' or simply
@@ -419,32 +419,19 @@ args(struct mdoc *m, int line, int *pos,
 	 * we ONLY care about closing delimiters.
 	 */
 
-	if ((fl & ARGS_DELIM) && DELIM_CLOSE == mdoc_iscdelim(buf[*pos])) {
-		for (i = *pos; buf[i]; ) {
-			d = mdoc_iscdelim(buf[i]);
-			if (DELIM_NONE == d || DELIM_OPEN == d)
-				break;
-			i++;
-			if ('\0' == buf[i] || ' ' != buf[i])
-				break;
-			i++;
-			while (buf[i] && ' ' == buf[i])
-				i++;
-		}
-
-		if ('\0' == buf[i]) {
-			*v = &buf[*pos];
-			if (i && ' ' != buf[i - 1])
-				return(ARGS_PUNCT);
-			if (ARGS_NOWARN & fl)
-				return(ARGS_PUNCT);
-			if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE))
-				return(ARGS_ERROR);
-			return(ARGS_PUNCT);
-		}
-	}
-
 	*v = &buf[*pos];
+
+	if (ARGS_DELIM & fl && args_checkpunct(&buf[*pos])) {
+		i = strlen(&buf[*pos]) + *pos;
+		if (i && ' ' != buf[i - 1])
+			return(ARGS_PUNCT);
+		if (ARGS_NOWARN & fl)
+			return(ARGS_PUNCT);
+		/* FIXME: remove conditional messages... */
+		if ( ! mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE))
+			return(ARGS_ERROR);
+		return(ARGS_PUNCT);
+	}
 
 	/*
 	 * First handle TABSEP items, restricted to `Bl -column'.  This
@@ -581,6 +568,36 @@ args(struct mdoc *m, int line, int *pos,
 			return(ARGS_ERROR);
 
 	return(ARGS_WORD);
+}
+
+/* 
+ * Check if the string consists only of space-separated closing
+ * delimiters.
+ */
+static int
+args_checkpunct(const char *p)
+{
+	int		 i;
+	enum mdelim	 d;
+
+	i = 0;
+
+	if (DELIM_CLOSE != mdoc_iscdelim(p[i]))
+		return(0);
+
+	while ('\0' != p[i]) {
+		d = mdoc_iscdelim(p[i]);
+		if (DELIM_NONE == d || DELIM_OPEN == d)
+			break;
+		i++;
+		if ('\0' == p[i] || ' ' != p[i])
+			break;
+		i++;
+		while (p[i] && ' ' == p[i])
+			i++;
+	}
+
+	return('\0' == p[i]);
 }
 
 /*
