@@ -58,8 +58,6 @@ struct	mparse {
 	int		  reparse_count; /* finite interp. stack */
 	mandocmsg	  mmsg; /* warning/error message handler */
 	void		 *arg; /* argument to mmsg */
-	mevt_open	  evt_open; /* file-open event */
-	mevt_close	  evt_close; /* file-close event */
 	const char	 *file; 
 };
 
@@ -518,11 +516,6 @@ mparse_readfd_r(struct mparse *curp, int fd, const char *file, int re)
 {
 	const char	*svfile;
 
-	if ( ! (*curp->evt_open)(curp->arg, file)) {
-		curp->file_status = MANDOCLEVEL_SYSERR;
-		return;
-	}
-
 	if (-1 == fd)
 		if (-1 == (fd = open(file, O_RDONLY, 0))) {
 			perror(file);
@@ -541,7 +534,6 @@ mparse_readfd_r(struct mparse *curp, int fd, const char *file, int re)
 	if (STDIN_FILENO != fd && -1 == close(fd))
 		perror(file);
 
-	(*curp->evt_close)(curp->arg, file);
 	curp->file = svfile;
 }
 
@@ -554,8 +546,7 @@ mparse_readfd(struct mparse *curp, int fd, const char *file)
 }
 
 struct mparse *
-mparse_alloc(enum mparset inttype, mevt_open eopen, 
-		mevt_close eclose, enum mandoclevel wlevel, mandocmsg mmsg, void *arg)
+mparse_alloc(enum mparset inttype, enum mandoclevel wlevel, mandocmsg mmsg, void *arg)
 {
 	struct mparse	*curp;
 
@@ -565,8 +556,6 @@ mparse_alloc(enum mparset inttype, mevt_open eopen,
 	curp->mmsg = mmsg;
 	curp->arg = arg;
 	curp->inttype = inttype;
-	curp->evt_open = eopen;
-	curp->evt_close = eclose;
 
 	curp->roff = roff_alloc(&curp->regs, curp);
 	return(curp);
