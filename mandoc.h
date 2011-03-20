@@ -328,10 +328,35 @@ enum	mdelim {
 	DELIM_CLOSE
 };
 
+/*
+ * The type of parse sequence.  This value is usually passed via the
+ * mandoc(1) command line of -man and -mdoc.  It's almost exclusively
+ * -mandoc but the others have been retained for compatibility.
+ */
+enum	mparset {
+	MPARSE_AUTO, /* magically determine the document type */
+	MPARSE_MDOC, /* assume -mdoc */
+	MPARSE_MAN /* assume -man */
+};
+
 typedef	void	(*mandocmsg)(enum mandocerr, void *,
 			int, int, const char *);
+typedef	int	(*mevt_open)(void *, const char *);
+typedef	void	(*mevt_close)(void *, const char *);
+
+struct	mparse;
+struct	mdoc;
+struct	man;
 
 __BEGIN_DECLS
+
+void		  mparse_free(struct mparse *);
+void		  mparse_reset(struct mparse *);
+struct mparse	 *mparse_alloc(enum mparset, mevt_open, 
+			mevt_close, mandocmsg, void *);
+void		  mparse_setstatus(struct mparse *, enum mandoclevel);
+enum mandoclevel  mparse_readfd(struct mparse *, int, const char *);
+void		  mparse_result(struct mparse *, struct mdoc **, struct man **);
 
 void		 *mandoc_calloc(size_t, size_t);
 void		 *mandoc_malloc(size_t);

@@ -66,15 +66,15 @@ MANSRCS	   = man_macro.c man.c man_hash.c man_validate.c \
 MAINLNS	   = main.ln mdoc_term.ln chars.ln term.ln tree.ln \
 	     compat.ln man_term.ln html.ln mdoc_html.ln \
 	     man_html.ln out.ln term_ps.ln term_ascii.ln \
-	     tbl_term.ln tbl_html.ln
+	     tbl_term.ln tbl_html.ln read.ln
 
 MAINOBJS   = main.o mdoc_term.o chars.o term.o tree.o compat.o \
 	     man_term.o html.o mdoc_html.o man_html.o out.o \
-	     term_ps.o term_ascii.o tbl_term.o tbl_html.o
+	     term_ps.o term_ascii.o tbl_term.o tbl_html.o read.o
 
 MAINSRCS   = main.c mdoc_term.c chars.c term.c tree.c compat.c \
 	     man_term.c html.c mdoc_html.c man_html.c out.c \
-	     term_ps.c term_ascii.c tbl_term.c tbl_html.c
+	     term_ps.c term_ascii.c tbl_term.c tbl_html.c read.c
 
 LLNS	   = llib-llibmdoc.ln llib-llibman.ln llib-lmandoc.ln \
 	     llib-llibmandoc.ln llib-llibroff.ln
