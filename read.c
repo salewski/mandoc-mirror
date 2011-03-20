@@ -15,8 +15,8 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 
 #include <assert.h>
 #include <ctype.h>
