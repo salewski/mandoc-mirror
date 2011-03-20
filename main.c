@@ -75,16 +75,6 @@ static	const char * const	mandoclevels[MANDOCLEVEL_MAX] = {
 	"SYSERR"
 };
 
-static	const enum mandocerr	mandoclimits[MANDOCLEVEL_MAX] = {
-	MANDOCERR_OK,
-	MANDOCERR_WARNING,
-	MANDOCERR_WARNING,
-	MANDOCERR_ERROR,
-	MANDOCERR_FATAL,
-	MANDOCERR_MAX,
-	MANDOCERR_MAX
-};
-
 static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"ok",
 
@@ -195,8 +185,8 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 static	void		  evt_close(void *, const char *);
 static	int		  evt_open(void *, const char *);
 static	int		  moptions(enum mparset *, char *);
-static	void		  mmsg(enum mandocerr, void *, 
-				int, int, const char *);
+static	void		  mmsg(enum mandocerr, enum mandoclevel,
+				const char *, int, int, const char *);
 static	void		  parse(struct curparse *, int, 
 				const char *, enum mandoclevel *);
 static	int		  toptions(struct curparse *, char *);
@@ -253,7 +243,7 @@ main(int argc, char *argv[])
 			/* NOTREACHED */
 		}
 
-	curp.mp = mparse_alloc(type, evt_open, evt_close, mmsg, &curp);
+	curp.mp = mparse_alloc(type, evt_open, evt_close, curp.wlevel, mmsg, &curp);
 
 	argc -= optind;
 	argv += optind;
@@ -501,27 +491,16 @@ woptions(struct curparse *curp, char *arg)
 }
 
 static void
-mmsg(enum mandocerr t, void *arg, int ln, int col, const char *msg)
+mmsg(enum mandocerr t, enum mandoclevel lvl, 
+		const char *file, int line, int col, const char *msg)
 {
-	struct curparse *cp;
-	enum mandoclevel level;
 
-	level = MANDOCLEVEL_FATAL;
-	while (t < mandoclimits[level])
-		/* LINTED */
-		level--;
-
-	cp = (struct curparse *)arg;
-	if (level < cp->wlevel)
-		return;
-
-	fprintf(stderr, "%s:%d:%d: %s: %s", cp->file, ln, col + 1, 
-			mandoclevels[level], mandocerrs[t]);
+	fprintf(stderr, "%s:%d:%d: %s: %s", 
+			file, line, col + 1, 
+			mandoclevels[lvl], mandocerrs[t]);
 
 	if (msg)
 		fprintf(stderr, ": %s", msg);
 
 	fputc('\n', stderr);
-
-	mparse_setstatus(cp->mp, level);
 }

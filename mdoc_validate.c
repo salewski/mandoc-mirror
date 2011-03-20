@@ -446,7 +446,7 @@ check_count(struct mdoc *m, enum mdoc_type type,
 	}
 
 	t = lvl == CHECK_WARN ? MANDOCERR_ARGCWARN : MANDOCERR_ARGCOUNT;
-	mdoc_vmsg(m, t, m->last->line, m->last->pos,
+	mandoc_vmsg(t, m->parse, m->last->line, m->last->pos,
 			"want %s%d children (have %d)",
 			p, val, m->last->nchild);
 	return(1);
@@ -581,10 +581,9 @@ check_parent(PRE_ARGS, enum mdoct tok, enum mdoc_type t)
 			(t == n->parent->type))
 		return(1);
 
-	mdoc_vmsg(mdoc, MANDOCERR_SYNTCHILD,
-				n->line, n->pos, "want parent %s",
-				MDOC_ROOT == t ? "<root>" : 
-					mdoc_macronames[tok]);
+	mandoc_vmsg(MANDOCERR_SYNTCHILD, mdoc->parse, n->line, 
+			n->pos, "want parent %s", MDOC_ROOT == t ? 
+			"<root>" : mdoc_macronames[tok]);
 	return(0);
 }
 
@@ -1332,7 +1331,8 @@ post_it(POST_ARGS)
 		else
 			er = MANDOCERR_SYNTARGCOUNT;
 
-		mdoc_vmsg(mdoc, er, mdoc->last->line, mdoc->last->pos, 
+		mandoc_vmsg(er, mdoc->parse, mdoc->last->line, 
+				mdoc->last->pos, 
 				"columns == %d (have %d)", cols, i);
 		return(MANDOCERR_ARGCOUNT == er);
 	default:
@@ -2001,16 +2001,16 @@ post_dd(POST_ARGS)
 
 	n = mdoc->last;
 	if (NULL == n->child || '\0' == n->child->string[0]) {
-		mdoc->meta.date = mandoc_normdate(NULL,
-		    mdoc->msg, mdoc->data, n->line, n->pos);
+		mdoc->meta.date = mandoc_normdate
+			(mdoc->parse, NULL, n->line, n->pos);
 		return(1);
 	}
 
 	if ( ! concat(mdoc, buf, n->child, DATESIZE))
 		return(0);
 
-	mdoc->meta.date = mandoc_normdate(buf,
-	    mdoc->msg, mdoc->data, n->line, n->pos);
+	mdoc->meta.date = mandoc_normdate
+		(mdoc->parse, buf, n->line, n->pos);
 
 	return(1);
 }

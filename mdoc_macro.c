@@ -513,9 +513,9 @@ make_pending(struct mdoc_node *broken, enum mdoct tok,
 			taker->pending = broken->pending;
 		}
 		broken->pending = breaker;
-		mdoc_vmsg(m, MANDOCERR_SCOPENEST, line, ppos,
-		    "%s breaks %s", mdoc_macronames[tok],
-		    mdoc_macronames[broken->tok]);
+		mandoc_vmsg(MANDOCERR_SCOPENEST, m->parse, line, ppos,
+				"%s breaks %s", mdoc_macronames[tok],
+				mdoc_macronames[broken->tok]);
 		return(1);
 	}
 
@@ -541,9 +541,10 @@ rew_sub(enum mdoc_type t, struct mdoc *m,
 		case (REWIND_THIS):
 			break;
 		case (REWIND_FORCE):
-			mdoc_vmsg(m, MANDOCERR_SCOPEBROKEN, line, ppos,
-			    "%s breaks %s", mdoc_macronames[tok],
-			    mdoc_macronames[n->tok]);
+			mandoc_vmsg(MANDOCERR_SCOPEBROKEN, m->parse, 
+					line, ppos, "%s breaks %s", 
+					mdoc_macronames[tok],
+					mdoc_macronames[n->tok]);
 			/* FALLTHROUGH */
 		case (REWIND_MORE):
 			n = n->parent;
@@ -1298,7 +1299,7 @@ blk_part_imp(MACRO_PROT_ARGS)
 	 * crufty use of `Op' breakage.
 	 */
 	if (n != body)
-		mdoc_vmsg(m, MANDOCERR_SCOPENEST, line, ppos, 
+		mandoc_vmsg(MANDOCERR_SCOPENEST, m->parse, line, ppos, 
 				"%s broken", mdoc_macronames[tok]);
 
 	if (n && ! rew_sub(MDOC_BODY, m, tok, line, ppos))

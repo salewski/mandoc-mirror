@@ -192,14 +192,13 @@ mdoc_free(struct mdoc *mdoc)
  * Allocate volatile and non-volatile parse resources.  
  */
 struct mdoc *
-mdoc_alloc(struct regset *regs, void *data, mandocmsg msg)
+mdoc_alloc(struct regset *regs, struct mparse *parse)
 {
 	struct mdoc	*p;
 
 	p = mandoc_calloc(1, sizeof(struct mdoc));
 
-	p->msg = msg;
-	p->data = data;
+	p->parse = parse;
 	p->regs = regs;
 
 	mdoc_hash_init();
@@ -302,22 +301,6 @@ mdoc_parseln(struct mdoc *m, int ln, char *buf, int offs)
 			mdoc_ptext(m, ln, buf, offs));
 }
 
-
-void
-mdoc_vmsg(struct mdoc *mdoc, enum mandocerr t, 
-		int ln, int pos, const char *fmt, ...)
-{
-	char		 buf[256];
-	va_list		 ap;
-
-	va_start(ap, fmt);
-	vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
-	va_end(ap);
-
-	(*mdoc->msg)(t, mdoc->data, ln, pos, buf);
-}
-
-
 int
 mdoc_macro(MACRO_PROT_ARGS)
 {
@@ -345,8 +328,8 @@ mdoc_macro(MACRO_PROT_ARGS)
 		if (NULL == m->meta.os)
 			m->meta.os = mandoc_strdup("LOCAL");
 		if (NULL == m->meta.date)
-			m->meta.date = mandoc_normdate(NULL,
-			    m->msg, m->data, line, ppos);
+			m->meta.date = mandoc_normdate
+				(m->parse, NULL, line, ppos);
 		m->flags |= MDOC_PBODY;
 	}
 
@@ -849,7 +832,8 @@ mdoc_pmacro(struct mdoc *m, int ln, char *buf, int offs)
 
 	tok = (j > 1 || j < 4) ? mdoc_hash_find(mac) : MDOC_MAX;
 	if (MDOC_MAX == tok) {
-		mdoc_vmsg(m, MANDOCERR_MACRO, ln, sv, "%s", buf + sv - 1);
+		mandoc_vmsg(MANDOCERR_MACRO, m->parse, 
+				ln, sv, "%s", buf + sv - 1);
 		return(1);
 	}
 

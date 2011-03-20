@@ -117,7 +117,7 @@ __BEGIN_DECLS
 struct	man;
 
 void	 	  man_free(struct man *);
-struct	man	 *man_alloc(struct regset *, void *, mandocmsg);
+struct	man	 *man_alloc(struct regset *, struct mparse *);
 void		  man_reset(struct man *);
 int	 	  man_parseln(struct man *, int, char *, int);
 int		  man_endparse(struct man *);

@@ -95,15 +95,14 @@ man_free(struct man *man)
 
 
 struct man *
-man_alloc(struct regset *regs, void *data, mandocmsg msg)
+man_alloc(struct regset *regs, struct mparse *parse)
 {
 	struct man	*p;
 
 	p = mandoc_calloc(1, sizeof(struct man));
 
 	man_hash_init();
-	p->data = data;
-	p->msg = msg;
+	p->parse = parse;
 	p->regs = regs;
 
 	man_alloc1(p);
@@ -521,7 +520,8 @@ man_pmacro(struct man *m, int ln, char *buf, int offs)
 
 	tok = (j > 0 && j < 4) ? man_hash_find(mac) : MAN_MAX;
 	if (MAN_MAX == tok) {
-		man_vmsg(m, MANDOCERR_MACRO, ln, ppos, "%s", buf + ppos - 1);
+		mandoc_vmsg(MANDOCERR_MACRO, m->parse, ln, 
+				ppos, "%s", buf + ppos - 1);
 		return(1);
 	}
 
@@ -554,8 +554,8 @@ man_pmacro(struct man *m, int ln, char *buf, int offs)
 		if (MAN_NSCOPED & man_macros[n->tok].flags)
 			n = n->parent;
 
-		man_vmsg(m, MANDOCERR_LINESCOPE, n->line, n->pos,
-				"%s", man_macronames[n->tok]);
+		mandoc_vmsg(MANDOCERR_LINESCOPE, m->parse, n->line, 
+				n->pos, "%s", man_macronames[n->tok]);
 
 		man_node_delete(m, n);
 		m->flags &= ~MAN_ELINE;
@@ -620,21 +620,6 @@ err:	/* Error out. */
 	m->flags |= MAN_HALT;
 	return(0);
 }
-
-
-void
-man_vmsg(struct man *man, enum mandocerr t, 
-		int ln, int pos, const char *fmt, ...)
-{
-	char		 buf[256];
-	va_list		 ap;
-
-	va_start(ap, fmt);
-	vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
-	va_end(ap);
-	(*man->msg)(t, man->data, ln, pos, buf);
-}
-
 
 /*
  * Unlink a node from its context.  If "m" is provided, the last parse

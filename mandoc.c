@@ -296,7 +296,7 @@ mandoc_strdup(const char *ptr)
  * or to the null byte terminating the argument line.
  */
 char *
-mandoc_getarg(char **cpp, mandocmsg msg, void *data, int ln, int *pos)
+mandoc_getarg(struct mparse *parse, char **cpp, int ln, int *pos)
 {
 	char	 *start, *cp;
 	int	  quoted, pairs, white;
@@ -343,8 +343,8 @@ mandoc_getarg(char **cpp, mandocmsg msg, void *data, int ln, int *pos)
 	}
 
 	/* Quoted argument without a closing quote. */
-	if (1 == quoted && msg)
-		(*msg)(MANDOCERR_BADQUOTE, data, ln, *pos, NULL);
+	if (1 == quoted)
+		mandoc_msg(MANDOCERR_BADQUOTE, parse, ln, *pos, NULL);
 
 	/* Null-terminate this argument and move to the next one. */
 	if (pairs)
@@ -357,8 +357,8 @@ mandoc_getarg(char **cpp, mandocmsg msg, void *data, int ln, int *pos)
 	*pos += (int)(cp - start) + (quoted ? 1 : 0);
 	*cpp = cp;
 
-	if ('\0' == *cp && msg && (white || ' ' == cp[-1]))
-		(*msg)(MANDOCERR_EOLNSPACE, data, ln, *pos, NULL);
+	if ('\0' == *cp && (white || ' ' == cp[-1]))
+		mandoc_msg(MANDOCERR_EOLNSPACE, parse, ln, *pos, NULL);
 
 	return(start);
 }
@@ -416,20 +416,20 @@ fail:
 }
 
 char *
-mandoc_normdate(char *in, mandocmsg msg, void *data, int ln, int pos)
+mandoc_normdate(struct mparse *parse, char *in, int ln, int pos)
 {
 	char		*out;
 	time_t		 t;
 
 	if (NULL == in || '\0' == *in ||
 	    0 == strcmp(in, "$" "Mdocdate$")) {
-		(*msg)(MANDOCERR_NODATE, data, ln, pos, NULL);
+		mandoc_msg(MANDOCERR_NODATE, parse, ln, pos, NULL);
 		time(&t);
 	}
 	else if (!a2time(&t, "$" "Mdocdate: %b %d %Y $", in) &&
 	    !a2time(&t, "%b %d, %Y", in) &&
 	    !a2time(&t, "%Y-%m-%d", in)) {
-		(*msg)(MANDOCERR_BADDATE, data, ln, pos, NULL);
+		mandoc_msg(MANDOCERR_BADDATE, parse, ln, pos, NULL);
 		t = 0;
 	}
 	out = t ? time2a(t) : NULL;

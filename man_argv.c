@@ -39,6 +39,6 @@ man_args(struct man *m, int line, int *pos, char *buf, char **v)
 	if ('\0' == *start)
 		return(ARGS_EOLN);
 
-	*v = mandoc_getarg(v, m->msg, m->data, line, pos);
+	*v = mandoc_getarg(m->parse, v, line, pos);
 	return('"' == *start ? ARGS_QWORD : ARGS_WORD);
 }

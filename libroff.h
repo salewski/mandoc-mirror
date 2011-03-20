@@ -27,8 +27,7 @@ enum	tbl_part {
 };
 
 struct	tbl_node {
-	mandocmsg	  msg; /* status messages */
-	void		 *data; /* privdata for messages */
+	struct mparse	 *parse; /* parse point */
 	int		  pos; /* invocation column */
 	int		  line; /* invocation line */
 	enum tbl_part	  part;
@@ -48,10 +47,7 @@ struct	eqn_node {
 	struct eqn_node	 *next;
 };
 
-#define	TBL_MSG(tblp, type, line, col) \
-	(*(tblp)->msg)((type), (tblp)->data, (line), (col), NULL)
-
-struct tbl_node	*tbl_alloc(int, int, void *, mandocmsg);
+struct tbl_node	*tbl_alloc(int, int, struct mparse *);
 void		 tbl_restart(int, int, struct tbl_node *);
 void		 tbl_free(struct tbl_node *);
 void		 tbl_reset(struct tbl_node *);

@@ -424,7 +424,7 @@ __BEGIN_DECLS
 struct	mdoc;
 
 void	 	  mdoc_free(struct mdoc *);
-struct	mdoc	 *mdoc_alloc(struct regset *, void *, mandocmsg);
+struct	mdoc	 *mdoc_alloc(struct regset *, struct mparse *);
 void		  mdoc_reset(struct mdoc *);
 int	 	  mdoc_parseln(struct mdoc *, int, char *, int);
 const struct mdoc_node *mdoc_node(const struct mdoc *);

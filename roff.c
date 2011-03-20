@@ -84,9 +84,8 @@ struct	roffstr {
 };
 
 struct	roff {
+	struct mparse	*parse; /* parse point */
 	struct roffnode	*last; /* leaf of stack */
-	mandocmsg	 msg; /* err/warn/fatal messages */
-	void		*data; /* privdata for messages */
 	enum roffrule	 rstack[RSTACK_MAX]; /* stack of !`ie' rules */
 	int		 rstackpos; /* position in rstack */
 	struct regset	*regs; /* read/writable registers */
@@ -361,14 +360,13 @@ roff_free(struct roff *r)
 
 
 struct roff *
-roff_alloc(struct regset *regs, void *data, const mandocmsg msg)
+roff_alloc(struct regset *regs, struct mparse *parse)
 {
 	struct roff	*r;
 
 	r = mandoc_calloc(1, sizeof(struct roff));
 	r->regs = regs;
-	r->msg = msg;
-	r->data = data;
+	r->parse = parse;
 	r->rstackpos = -1;
 	
 	roff_hash_init();
@@ -555,18 +553,18 @@ roff_endparse(struct roff *r)
 {
 
 	if (r->last)
-		(*r->msg)(MANDOCERR_SCOPEEXIT, r->data,
+		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse,
 				r->last->line, r->last->col, NULL);
 
 	if (r->eqn) {
-		(*r->msg)(MANDOCERR_SCOPEEXIT, r->data, 
+		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse, 
 				r->eqn->eqn.line, r->eqn->eqn.pos, NULL);
 		eqn_end(r->eqn);
 		r->eqn = NULL;
 	}
 
 	if (r->tbl) {
-		(*r->msg)(MANDOCERR_SCOPEEXIT, r->data, 
+		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse, 
 				r->tbl->line, r->tbl->pos, NULL);
 		tbl_end(r->tbl);
 		r->tbl = NULL;
@@ -639,7 +637,7 @@ roff_cblock(ROFF_ARGS)
 	 */
 
 	if (NULL == r->last) {
-		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
 		return(ROFF_IGN);
 	}
 
@@ -658,12 +656,12 @@ roff_cblock(ROFF_ARGS)
 	case (ROFF_ig):
 		break;
 	default:
-		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
 		return(ROFF_IGN);
 	}
 
 	if ((*bufp)[pos])
-		(*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, pos, NULL);
+		mandoc_msg(MANDOCERR_ARGSLOST, r->parse, ln, pos, NULL);
 
 	roffnode_pop(r);
 	roffnode_cleanscope(r);
@@ -690,7 +688,7 @@ roff_ccond(ROFF_ARGS)
 {
 
 	if (NULL == r->last) {
-		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
 		return(ROFF_IGN);
 	}
 
@@ -702,17 +700,17 @@ roff_ccond(ROFF_ARGS)
 	case (ROFF_if):
 		break;
 	default:
-		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
 		return(ROFF_IGN);
 	}
 
 	if (r->last->endspan > -1) {
-		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
 		return(ROFF_IGN);
 	}
 
 	if ((*bufp)[pos])
-		(*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, pos, NULL);
+		mandoc_msg(MANDOCERR_ARGSLOST, r->parse, ln, pos, NULL);
 
 	roffnode_pop(r);
 	roffnode_cleanscope(r);
@@ -732,7 +730,7 @@ roff_block(ROFF_ARGS)
 
 	if (ROFF_ig != tok) {
 		if ('\0' == (*bufp)[pos]) {
-			(*r->msg)(MANDOCERR_NOARGS, r->data, ln, ppos, NULL);
+			mandoc_msg(MANDOCERR_NOARGS, r->parse, ln, ppos, NULL);
 			return(ROFF_IGN);
 		}
 
@@ -746,7 +744,7 @@ roff_block(ROFF_ARGS)
 		if (ROFF_de == tok)
 			name = *bufp + pos;
 		else
-			(*r->msg)(MANDOCERR_REQUEST, r->data, ln, ppos,
+			mandoc_msg(MANDOCERR_REQUEST, r->parse, ln, ppos,
 			    roffs[tok].name);
 
 		while ((*bufp)[pos] && ' ' != (*bufp)[pos])
@@ -796,7 +794,7 @@ roff_block(ROFF_ARGS)
 	r->last->end[(int)sz] = '\0';
 
 	if ((*bufp)[pos])
-		(*r->msg)(MANDOCERR_ARGSLOST, r->data, ln, pos, NULL);
+		mandoc_msg(MANDOCERR_ARGSLOST, r->parse, ln, pos, NULL);
 
 	return(ROFF_IGN);
 }
@@ -977,7 +975,7 @@ roff_line_ignore(ROFF_ARGS)
 {
 
 	if (ROFF_it == tok)
-		(*r->msg)(MANDOCERR_REQUEST, r->data, ln, ppos, "it");
+		mandoc_msg(MANDOCERR_REQUEST, r->parse, ln, ppos, "it");
 
 	return(ROFF_IGN);
 }
@@ -992,7 +990,7 @@ roff_cond(ROFF_ARGS)
 	/* Stack overflow! */
 
 	if (ROFF_ie == tok && r->rstackpos == RSTACK_MAX - 1) {
-		(*r->msg)(MANDOCERR_MEM, r->data, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_MEM, r->parse, ln, ppos, NULL);
 		return(ROFF_ERR);
 	}
 
@@ -1023,7 +1021,7 @@ roff_cond(ROFF_ARGS)
 	 */
 
 	if ('\0' == (*bufp)[pos] && sv != pos) {
-		(*r->msg)(MANDOCERR_NOARGS, r->data, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_NOARGS, r->parse, ln, ppos, NULL);
 		return(ROFF_IGN);
 	}
 
@@ -1150,7 +1148,7 @@ roff_TE(ROFF_ARGS)
 {
 
 	if (NULL == r->tbl)
-		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
 	else
 		tbl_end(r->tbl);
 
@@ -1164,7 +1162,7 @@ roff_T_(ROFF_ARGS)
 {
 
 	if (NULL == r->tbl)
-		(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
 	else
 		tbl_restart(ppos, ln, r->tbl);
 
@@ -1194,7 +1192,7 @@ static enum rofferr
 roff_EN(ROFF_ARGS)
 {
 
-	(*r->msg)(MANDOCERR_NOSCOPE, r->data, ln, ppos, NULL);
+	mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
 	return(ROFF_IGN);
 }
 
@@ -1205,11 +1203,11 @@ roff_TS(ROFF_ARGS)
 	struct tbl_node	*t;
 
 	if (r->tbl) {
-		(*r->msg)(MANDOCERR_SCOPEBROKEN, r->data, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_SCOPEBROKEN, r->parse, ln, ppos, NULL);
 		tbl_end(r->tbl);
 	}
 
-	t = tbl_alloc(ppos, ln, r->data, r->msg);
+	t = tbl_alloc(ppos, ln, r->parse);
 
 	if (r->last_tbl)
 		r->last_tbl->next = t;
@@ -1226,7 +1224,7 @@ roff_so(ROFF_ARGS)
 {
 	char *name;
 
-	(*r->msg)(MANDOCERR_SO, r->data, ln, ppos, NULL);
+	mandoc_msg(MANDOCERR_SO, r->parse, ln, ppos, NULL);
 
 	/*
 	 * Handle `so'.  Be EXTREMELY careful, as we shouldn't be
@@ -1237,7 +1235,7 @@ roff_so(ROFF_ARGS)
 
 	name = *bufp + pos;
 	if ('/' == *name || strstr(name, "../") || strstr(name, "/..")) {
-		(*r->msg)(MANDOCERR_SOPATH, r->data, ln, pos, NULL);
+		mandoc_msg(MANDOCERR_SOPATH, r->parse, ln, pos, NULL);
 		return(ROFF_ERR);
 	}
 
@@ -1260,7 +1258,7 @@ roff_userdef(ROFF_ARGS)
 	cp = *bufp + pos;
 	for (i = 0; i < 9; i++)
 		arg[i] = '\0' == *cp ? "" :
-		    mandoc_getarg(&cp, r->msg, r->data, ln, &pos);
+		    mandoc_getarg(r->parse, &cp, ln, &pos);
 
 	/*
 	 * Expand macro arguments.
@@ -1316,7 +1314,7 @@ roff_getname(struct roff *r, char **cpp, int ln, int pos)
 		cp++;
 		if ('\\' == *cp)
 			continue;
-		(*r->msg)(MANDOCERR_NAMESC, r->data, ln, pos, NULL);
+		mandoc_msg(MANDOCERR_NAMESC, r->parse, ln, pos, NULL);
 		*cp = '\0';
 		name = cp;
 	}

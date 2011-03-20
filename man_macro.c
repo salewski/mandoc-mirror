@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "mandoc.h"
+#include "libmandoc.h"
 #include "libman.h"
 
 enum	rew {

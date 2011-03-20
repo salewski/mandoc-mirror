@@ -19,12 +19,16 @@
 
 __BEGIN_DECLS
 
-int		 mandoc_special(char *);
-char		*mandoc_strdup(const char *);
-char		*mandoc_getarg(char **, mandocmsg, void *, int, int *);
-char		*mandoc_normdate(char *, mandocmsg, void *, int, int);
-int		 mandoc_eos(const char *, size_t, int);
-int		 mandoc_hyph(const char *, const char *);
+void	 mandoc_msg(enum mandocerr, struct mparse *, 
+		int, int, const char *);
+void	 mandoc_vmsg(enum mandocerr, struct mparse *, 
+		int, int, const char *, ...);
+int	 mandoc_special(char *);
+char	*mandoc_strdup(const char *);
+char	*mandoc_getarg(struct mparse *, char **, int, int *);
+char	*mandoc_normdate(struct mparse *, char *, int, int);
+int	 mandoc_eos(const char *, size_t, int);
+int	 mandoc_hyph(const char *, const char *);
 
 __END_DECLS
 

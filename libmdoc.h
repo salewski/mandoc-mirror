@@ -25,9 +25,8 @@ enum	mdoc_next {
 };
 
 struct	mdoc {
-	void		 *data; /* private application data */
-	mandocmsg	  msg; /* message callback */
-	int		  flags;
+	struct mparse	 *parse; /* parse pointer */
+	int		  flags; /* parse flags */
 #define	MDOC_HALT	 (1 << 0) /* error in parse: halt */
 #define	MDOC_LITERAL	 (1 << 1) /* in a literal scope */
 #define	MDOC_PBODY	 (1 << 2) /* in the document body */
@@ -86,11 +85,9 @@ extern	const struct mdoc_macro *const mdoc_macros;
 __BEGIN_DECLS
 
 #define		  mdoc_pmsg(m, l, p, t) \
-		  (*(m)->msg)((t), (m)->data, (l), (p), NULL)
+		  mandoc_msg((t), (m)->parse, (l), (p), NULL)
 #define		  mdoc_nmsg(m, n, t) \
-		  (*(m)->msg)((t), (m)->data, (n)->line, (n)->pos, NULL)
-void		  mdoc_vmsg(struct mdoc *, enum mandocerr, 
-			int, int, const char *, ...);
+		  mandoc_msg((t), (m)->parse, (n)->line, (n)->pos, NULL)
 int		  mdoc_macro(MACRO_PROT_ARGS);
 int		  mdoc_word_alloc(struct mdoc *, 
 			int, int, const char *);

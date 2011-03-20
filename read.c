@@ -21,12 +21,14 @@
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "mandoc.h"
+#include "libmandoc.h"
 #include "mdoc.h"
 #include "man.h"
 #include "roff.h"
@@ -44,6 +46,7 @@ struct	buf {
 
 struct	mparse {
 	enum mandoclevel  file_status; /* status of current parse */
+	enum mandoclevel  wlevel; /* ignore messages below this */
 	int		  line; /* line number in the file */
 	enum mparset	  inttype; /* which parser to use */
 	struct man	 *pman; /* persistent man parser */
@@ -57,7 +60,7 @@ struct	mparse {
 	void		 *arg; /* argument to mmsg */
 	mevt_open	  evt_open; /* file-open event */
 	mevt_close	  evt_close; /* file-close event */
-	const char	 *svfile; 
+	const char	 *file; 
 };
 
 static	void	  resize_buf(struct buf *, size_t);
@@ -67,6 +70,16 @@ static	void	  pset(const char *, int, struct mparse *);
 static	void	  pdesc(struct mparse *, const char *, int);
 static	int	  read_whole_file(const char *, int, struct buf *, int *);
 static	void	  mparse_end(struct mparse *);
+
+static	const enum mandocerr	mandoclimits[MANDOCLEVEL_MAX] = {
+	MANDOCERR_OK,
+	MANDOCERR_WARNING,
+	MANDOCERR_WARNING,
+	MANDOCERR_ERROR,
+	MANDOCERR_FATAL,
+	MANDOCERR_MAX,
+	MANDOCERR_MAX
+};
 
 static void
 resize_buf(struct buf *buf, size_t initial)
@@ -103,15 +116,13 @@ pset(const char *buf, int pos, struct mparse *curp)
 	switch (curp->inttype) {
 	case (MPARSE_MDOC):
 		if (NULL == curp->pmdoc) 
-			curp->pmdoc = mdoc_alloc
-				(&curp->regs, curp->arg, curp->mmsg);
+			curp->pmdoc = mdoc_alloc(&curp->regs, curp);
 		assert(curp->pmdoc);
 		curp->mdoc = curp->pmdoc;
 		return;
 	case (MPARSE_MAN):
 		if (NULL == curp->pman) 
-			curp->pman = man_alloc
-				(&curp->regs, curp->arg, curp->mmsg);
+			curp->pman = man_alloc(&curp->regs, curp);
 		assert(curp->pman);
 		curp->man = curp->pman;
 		return;
@@ -121,16 +132,14 @@ pset(const char *buf, int pos, struct mparse *curp)
 
 	if (pos >= 3 && 0 == memcmp(buf, ".Dd", 3))  {
 		if (NULL == curp->pmdoc) 
-			curp->pmdoc = mdoc_alloc
-				(&curp->regs, curp->arg, curp->mmsg);
+			curp->pmdoc = mdoc_alloc(&curp->regs, curp);
 		assert(curp->pmdoc);
 		curp->mdoc = curp->pmdoc;
 		return;
 	} 
 
 	if (NULL == curp->pman) 
-		curp->pman = man_alloc
-			(&curp->regs, curp->arg, curp->mmsg);
+		curp->pman = man_alloc(&curp->regs, curp);
 	assert(curp->pman);
 	curp->man = curp->pman;
 }
@@ -195,7 +204,7 @@ mparse_buf_r(struct mparse *curp, struct buf blk, int start)
 
 			if ( ! (isascii(c) && 
 					(isgraph(c) || isblank(c)))) {
-				curp->mmsg(MANDOCERR_BADCHAR, curp->arg, 
+				mandoc_msg(MANDOCERR_BADCHAR, curp,
 						curp->line, pos, "ignoring byte");
 				i++;
 				continue;
@@ -282,7 +291,7 @@ rerun:
 			if (REPARSE_LIMIT >= ++curp->reparse_count)
 				mparse_buf_r(curp, ln, 0);
 			else
-				curp->mmsg(MANDOCERR_ROFFLOOP, curp->arg, 
+				mandoc_msg(MANDOCERR_ROFFLOOP, curp,
 					curp->line, pos, NULL);
 			pos = 0;
 			continue;
@@ -491,7 +500,7 @@ mparse_end(struct mparse *curp)
 	}
 
 #if 0
-	/* NOTE a parser may not have been assigned, yet. */
+	/* FIXME: NOTE a parser may not have been assigned, yet. */
 
 	if ( ! (curp->man || curp->mdoc)) {
 		/* FIXME: make into an mandoc.h error. */
@@ -521,8 +530,8 @@ mparse_readfd_r(struct mparse *curp, int fd, const char *file, int re)
 			return;
 		}
 
-	svfile = curp->svfile;
-	curp->svfile = file;
+	svfile = curp->file;
+	curp->file = file;
 
 	pdesc(curp, file, fd);
 
@@ -532,8 +541,8 @@ mparse_readfd_r(struct mparse *curp, int fd, const char *file, int re)
 	if (STDIN_FILENO != fd && -1 == close(fd))
 		perror(file);
 
-	(*curp->evt_close)(curp->arg, svfile);
-	curp->svfile = svfile;
+	(*curp->evt_close)(curp->arg, file);
+	curp->file = svfile;
 }
 
 enum mandoclevel
@@ -544,29 +553,22 @@ mparse_readfd(struct mparse *curp, int fd, const char *file)
 	return(curp->file_status);
 }
 
-void
-mparse_setstatus(struct mparse *curp, enum mandoclevel lvl)
-{
-
-	if (curp->file_status < lvl)
-		curp->file_status = lvl;
-}
-
 struct mparse *
 mparse_alloc(enum mparset inttype, mevt_open eopen, 
-		mevt_close eclose, mandocmsg mmsg, void *arg)
+		mevt_close eclose, enum mandoclevel wlevel, mandocmsg mmsg, void *arg)
 {
 	struct mparse	*curp;
 
 	curp = mandoc_calloc(1, sizeof(struct mparse));
 
+	curp->wlevel = wlevel;
 	curp->mmsg = mmsg;
 	curp->arg = arg;
 	curp->inttype = inttype;
 	curp->evt_open = eopen;
 	curp->evt_close = eclose;
 
-	curp->roff = roff_alloc(&curp->regs, arg, mmsg);
+	curp->roff = roff_alloc(&curp->regs, curp);
 	return(curp);
 }
 
@@ -608,4 +610,37 @@ mparse_result(struct mparse *curp, struct mdoc **mdoc, struct man **man)
 
 	*mdoc = curp->mdoc;
 	*man = curp->man;
+}
+
+void
+mandoc_vmsg(enum mandocerr t, struct mparse *m,
+		int ln, int pos, const char *fmt, ...)
+{
+	char		 buf[256];
+	va_list		 ap;
+
+	va_start(ap, fmt);
+	vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
+	va_end(ap);
+
+	mandoc_msg(t, m, ln, pos, buf);
+}
+
+void
+mandoc_msg(enum mandocerr er, struct mparse *m, 
+		int ln, int col, const char *msg)
+{
+	enum mandoclevel level;
+
+	level = MANDOCLEVEL_FATAL;
+	while (er < mandoclimits[level])
+		level--;
+
+	if (level < m->wlevel)
+		return;
+
+	(*m->mmsg)(er, level, m->file, ln, col, msg);
+
+	if (m->file_status < level)
+		m->file_status = level;
 }

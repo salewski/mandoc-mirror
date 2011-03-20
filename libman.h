@@ -25,8 +25,7 @@ enum	man_next {
 };
 
 struct	man {
-	void		*data; /* private application data */
-	mandocmsg	 msg; /* output message handler */
+	struct mparse	*parse; /* parse pointer */
 	int		 flags; /* parse flags */
 #define	MAN_HALT	(1 << 0) /* badness happened: die */
 #define	MAN_ELINE	(1 << 1) /* Next-line element scope. */
@@ -64,9 +63,9 @@ extern	const struct man_macro *const man_macros;
 __BEGIN_DECLS
 
 #define		  man_pmsg(m, l, p, t) \
-		  (*(m)->msg)((t), (m)->data, (l), (p), NULL)
+		  mandoc_msg((t), (m)->parse, (l), (p), NULL)
 #define		  man_nmsg(m, n, t) \
-		  (*(m)->msg)((t), (m)->data, (n)->line, (n)->pos, NULL)
+		  mandoc_msg((t), (m)->parse, (n)->line, (n)->pos, NULL)
 int		  man_word_alloc(struct man *, int, int, const char *);
 int		  man_block_alloc(struct man *, int, int, enum mant);
 int		  man_head_alloc(struct man *, int, int, enum mant);
@@ -81,8 +80,6 @@ int		  man_args(struct man *, int, int *, char *, char **);
 #define	ARGS_EOLN	(0)
 #define	ARGS_WORD	(1)
 #define	ARGS_QWORD	(1)
-void		  man_vmsg(struct man *, enum mandocerr,
-			int, int, const char *, ...);
 int		  man_valid_post(struct man *);
 int		  man_valid_pre(struct man *, struct man_node *);
 int		  man_unscope(struct man *, 
