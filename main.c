@@ -30,7 +30,6 @@
 #include "main.h"
 #include "mdoc.h"
 #include "man.h"
-#include "roff.h"
 
 #if !defined(__GNUC__) || (__GNUC__ < 2)
 # if !defined(lint)
