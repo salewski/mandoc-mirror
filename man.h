@@ -17,9 +17,6 @@
 #ifndef MAN_H
 #define MAN_H
 
-/* 
- * What follows is a list of ALL possible macros. 
- */
 enum	mant {
 	MAN_br = 0,
 	MAN_TH,
@@ -57,9 +54,6 @@ enum	mant {
 	MAN_MAX
 };
 
-/* 
- * Type of a syntax node. 
- */
 enum	man_type {
 	MAN_TEXT,
 	MAN_ELEM,
@@ -71,9 +65,6 @@ enum	man_type {
 	MAN_EQN
 };
 
-/* 
- * Information from prologue. 
- */
 struct	man_meta {
 	char		*msec; /* `TH' section (1, 3p, etc.) */
 	char		*date; /* `TH' normalised date */
@@ -82,9 +73,6 @@ struct	man_meta {
 	char		*source; /* `TH' source (e.g., GNU) */
 };
 
-/* 
- * Single node in tree-linked AST. 
- */
 struct	man_node {
 	struct man_node	*parent; /* parent AST node */
 	struct man_node	*child; /* first child AST node */
@@ -106,10 +94,7 @@ struct	man_node {
 	const struct eqn *eqn; /* EQN */
 };
 
-/*
- * Names of macros.  Index is enum mant.  Indexing into this returns
- * the normalised name, e.g., man_macronames[MAN_SH] -> "SH".
- */
+/* Names of macros.  Index is enum mant. */
 extern	const char *const *man_macronames;
 
 __BEGIN_DECLS
