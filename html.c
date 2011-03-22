@@ -32,7 +32,6 @@
 
 #include "mandoc.h"
 #include "out.h"
-#include "chars.h"
 #include "html.h"
 #include "main.h"
 

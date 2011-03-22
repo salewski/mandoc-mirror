@@ -31,7 +31,6 @@
 #include "out.h"
 #include "man.h"
 #include "term.h"
-#include "chars.h"
 #include "main.h"
 
 #define	INDENT		  7

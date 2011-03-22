@@ -32,7 +32,6 @@
 #include "out.h"
 #include "term.h"
 #include "mdoc.h"
-#include "chars.h"
 #include "main.h"
 
 #define	INDENT		  5

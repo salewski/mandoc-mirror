@@ -25,7 +25,7 @@
 #include <string.h>
 
 #include "mandoc.h"
-#include "chars.h"
+#include "out.h"
 
 #define	PRINT_HI	 126
 #define	PRINT_LO	 32

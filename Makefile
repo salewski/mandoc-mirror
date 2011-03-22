@@ -94,7 +94,7 @@ DATAS	   = arch.in att.in lib.in msec.in st.in \
 	     vol.in chars.in
 
 HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
-	     libmandoc.h html.h chars.h out.h main.h \
+	     libmandoc.h html.h out.h main.h \
 	     mandoc.h libroff.h
 
 GSGMLS	   = mandoc.1.sgml mdoc.7.sgml \
@@ -207,7 +207,7 @@ arch.ln arch.o: arch.c arch.in libmdoc.h
 
 vol.ln vol.o: vol.c vol.in libmdoc.h
 
-chars.ln chars.o: chars.c chars.in chars.h
+chars.ln chars.o: chars.c chars.in 
 
 msec.ln msec.o: msec.c msec.in libmdoc.h
 
@@ -229,13 +229,13 @@ main.ln main.o: main.c mdoc.h man.h
 
 compat.ln compat.o: compat.c 
 
-term.ln term.o: term.c term.h man.h mdoc.h chars.h
+term.ln term.o: term.c term.h man.h mdoc.h 
 
 term_ps.ln term_ps.o: term_ps.c term.h main.h
 
 term_ascii.ln term_ascii.o: term_ascii.c term.h main.h
 
-html.ln html.o: html.c html.h chars.h
+html.ln html.o: html.c html.h
 
 mdoc_html.ln mdoc_html.o: mdoc_html.c html.h mdoc.h
 
