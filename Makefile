@@ -17,8 +17,8 @@ CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
 BINDIR		 = $(PREFIX)/bin
-INCLUDEDIR	 = $(PREFIX)/include
-LIBDIR		 = $(PREFIX)/lib
+INCLUDEDIR	 = $(PREFIX)/include/mandoc
+LIBDIR		 = $(PREFIX)/lib/mandoc
 MANDIR		 = $(PREFIX)/man
 EXAMPLEDIR	 = $(PREFIX)/share/examples/mandoc
 INSTALL		 = install
@@ -141,7 +141,7 @@ vol.o: vol.in
 $(LIBMAN_OBJS): libmdoc.h
 $(LIBMDOC_OBJS): libmdoc.h
 $(LIBROFF_OBJS): libroff.h
-$(LIBMANDOC_OBJS): mandoc.h libmandoc.h config.h
+$(LIBMANDOC_OBJS): mandoc.h mdoc.h man.h libmandoc.h config.h
 
 MANDOC_HTML_OBJS = html.o \
 		   man_html.o \
@@ -164,7 +164,7 @@ chars.o: chars.in
 
 $(MANDOC_HTML_OBJS): html.h
 $(MANDOC_TERM_OBJS): term.h
-$(MANDOC_OBJS): main.h mandoc.h config.h out.h
+$(MANDOC_OBJS): main.h mandoc.h mdoc.h man.h config.h out.h
 
 compat.o: config.h
 
