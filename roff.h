@@ -17,30 +17,7 @@
 #ifndef ROFF_H
 #define ROFF_H
 
-enum	rofferr {
-	ROFF_CONT, /* continue processing line */
-	ROFF_RERUN, /* re-run roff interpreter with offset */
-	ROFF_APPEND, /* re-run main parser, appending next line */
-	ROFF_REPARSE, /* re-run main parser on the result */
-	ROFF_SO, /* include another file */
-	ROFF_IGN, /* ignore current line */
-	ROFF_TBL, /* a table row was successfully parsed */
-	ROFF_EQN, /* an equation was successfully parsed */
-	ROFF_ERR /* badness: puke and stop */
-};
-
 __BEGIN_DECLS
-
-struct	roff;
-
-void	 	  roff_free(struct roff *);
-struct	roff	 *roff_alloc(struct regset *, struct mparse *);
-void		  roff_reset(struct roff *);
-enum	rofferr	  roff_parseln(struct roff *, int, 
-			char **, size_t *, int, int *);
-void		  roff_endparse(struct roff *);
-const struct tbl_span *roff_span(const struct roff *);
-const struct eqn *roff_eqn(const struct roff *);
 
 __END_DECLS
 

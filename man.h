@@ -116,15 +116,6 @@ __BEGIN_DECLS
 
 struct	man;
 
-void	 	  man_free(struct man *);
-struct	man	 *man_alloc(struct regset *, struct mparse *);
-void		  man_reset(struct man *);
-int	 	  man_parseln(struct man *, int, char *, int);
-int		  man_endparse(struct man *);
-int		  man_addspan(struct man *,
-			const struct tbl_span *);
-int		  man_addeqn(struct man *, const struct eqn *);
-
 const struct man_node *man_node(const struct man *);
 const struct man_meta *man_meta(const struct man *);
 
