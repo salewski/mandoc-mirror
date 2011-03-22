@@ -58,8 +58,8 @@
 					</H1>
 
 					<P>
-					<SPAN CLASS="nm">mdocml</SPAN> is architecture- and system-neutral, written in plain-old C.  The most
-					current version is <SPAN CLASS="attn">@VERSION@</SPAN>, dated <SPAN class="attn">@VDATE@</SPAN>.
+					<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any UNIX system.
+					The most current version is <SPAN CLASS="attn">@VERSION@</SPAN>, dated <SPAN class="attn">@VDATE@</SPAN>.
 					</P>
 
 					<H2>
