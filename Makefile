@@ -242,9 +242,9 @@ install: all
 
 installwww: www
 	mkdir -p $(PREFIX)/snapshots
-	$(INSTALL_DATA) $(INDEX_MANS) $(PREFIX)
+	$(INSTALL_DATA) index.html external.png index.css $(PREFIX)
+	$(INSTALL_DATA) $(INDEX_MANS) style.css $(PREFIX)
 	$(INSTALL_DATA) mandoc.h.html man.h.html mdoc.h.html $(PREFIX)
-	$(INSTALL_DATA) external.png style.css index.css $(PREFIX)
 	$(INSTALL_DATA) mdocml.tar.gz $(PREFIX)/snapshots
 	$(INSTALL_DATA) mdocml.md5 $(PREFIX)/snapshots
 	$(INSTALL_DATA) mdocml.tar.gz $(PREFIX)/snapshots/mdocml-$(VERSION).tar.gz
