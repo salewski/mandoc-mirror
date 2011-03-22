@@ -22,10 +22,10 @@
 
 #include <assert.h>
 
+#include "man.h"
 #include "mandoc.h"
 #include "libman.h"
 #include "libmandoc.h"
-
 
 int
 man_args(struct man *m, int line, int *pos, char *buf, char **v)

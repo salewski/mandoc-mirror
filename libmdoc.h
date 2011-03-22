@@ -17,8 +17,6 @@
 #ifndef LIBMDOC_H
 #define LIBMDOC_H
 
-#include "mdoc.h"
-
 enum	mdoc_next {
 	MDOC_NEXT_SIBLING = 0,
 	MDOC_NEXT_CHILD

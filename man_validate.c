@@ -30,6 +30,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "man.h"
 #include "mandoc.h"
 #include "libman.h"
 #include "libmandoc.h"

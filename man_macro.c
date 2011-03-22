@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "man.h"
 #include "mandoc.h"
 #include "libmandoc.h"
 #include "libman.h"

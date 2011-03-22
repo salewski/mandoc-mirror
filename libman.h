@@ -17,8 +17,6 @@
 #ifndef LIBMAN_H
 #define LIBMAN_H
 
-#include "man.h"
-
 enum	man_next {
 	MAN_NEXT_SIBLING = 0,
 	MAN_NEXT_CHILD
