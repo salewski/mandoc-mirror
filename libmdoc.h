@@ -80,6 +80,23 @@ enum	margverr {
 	ARGV_WORD
 };
 
+/*
+ * A punctuation delimiter is opening, closing, or "middle mark"
+ * punctuation.  These govern spacing.
+ * Opening punctuation (e.g., the opening parenthesis) suppresses the
+ * following space; closing punctuation (e.g., the closing parenthesis)
+ * suppresses the leading space; middle punctuation (e.g., the vertical
+ * bar) can do either.  The middle punctuation delimiter bends the rules
+ * depending on usage.
+ */
+enum	mdelim {
+	DELIM_NONE = 0,
+	DELIM_OPEN,
+	DELIM_MIDDLE,
+	DELIM_CLOSE,
+	DELIM_MAX
+};
+
 extern	const struct mdoc_macro *const mdoc_macros;
 
 __BEGIN_DECLS
@@ -125,6 +142,9 @@ enum margserr	  mdoc_zargs(struct mdoc *, int,
 #define	ARGS_NOWARN	(1 << 3)
 
 int		  mdoc_macroend(struct mdoc *);
+
+#define	DELIMSZ	  6 /* hint: max possible size of a delimiter */
+enum mdelim	  mdoc_isdelim(const char *);
 
 __END_DECLS
 

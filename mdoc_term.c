@@ -351,7 +351,11 @@ print_mdoc_node(DECL_ARGS)
 	case (MDOC_TEXT):
 		if (' ' == *n->string && MDOC_LINE & n->flags)
 			term_newln(p);
+		if (MDOC_DELIMC & n->flags)
+			p->flags |= TERMP_NOSPACE;
 		term_word(p, n->string);
+		if (MDOC_DELIMO & n->flags)
+			p->flags |= TERMP_NOSPACE;
 		break;
 	case (MDOC_EQN):
 		term_word(p, n->eqn->data);
@@ -1302,7 +1306,9 @@ termp_xr_pre(DECL_ARGS)
 		return(0);
 	p->flags |= TERMP_NOSPACE;
 	term_word(p, "(");
+	p->flags |= TERMP_NOSPACE;
 	term_word(p, nn->string);
+	p->flags |= TERMP_NOSPACE;
 	term_word(p, ")");
 
 	return(0);
@@ -1532,20 +1538,26 @@ termp_fn_pre(DECL_ARGS)
 
 	p->flags |= TERMP_NOSPACE;
 	term_word(p, "(");
+	p->flags |= TERMP_NOSPACE;
 
 	for (nn = n->child->next; nn; nn = nn->next) {
 		term_fontpush(p, TERMFONT_UNDER);
 		term_word(p, nn->string);
 		term_fontpop(p);
 
-		if (nn->next)
+		if (nn->next) {
+			p->flags |= TERMP_NOSPACE;
 			term_word(p, ",");
+		}
 	}
 
+	p->flags |= TERMP_NOSPACE;
 	term_word(p, ")");
 
-	if (MDOC_SYNPRETTY & n->flags)
+	if (MDOC_SYNPRETTY & n->flags) {
+		p->flags |= TERMP_NOSPACE;
 		term_word(p, ";");
+	}
 
 	return(0);
 }
@@ -1567,12 +1579,16 @@ termp_fa_pre(DECL_ARGS)
 		term_word(p, nn->string);
 		term_fontpop(p);
 
-		if (nn->next)
+		if (nn->next) {
+			p->flags |= TERMP_NOSPACE;
 			term_word(p, ",");
+		}
 	}
 
-	if (n->child && n->next && n->next->tok == MDOC_Fa)
+	if (n->child && n->next && n->next->tok == MDOC_Fa) {
+		p->flags |= TERMP_NOSPACE;
 		term_word(p, ",");
+	}
 
 	return(0);
 }
@@ -2007,6 +2023,7 @@ termp_fo_pre(DECL_ARGS)
 	} else if (MDOC_BODY == n->type) {
 		p->flags |= TERMP_NOSPACE;
 		term_word(p, "(");
+		p->flags |= TERMP_NOSPACE;
 		return(1);
 	} 
 
@@ -2030,10 +2047,13 @@ termp_fo_post(DECL_ARGS)
 	if (MDOC_BODY != n->type) 
 		return;
 
+	p->flags |= TERMP_NOSPACE;
 	term_word(p, ")");
 
-	if (MDOC_SYNPRETTY & n->flags)
+	if (MDOC_SYNPRETTY & n->flags) {
+		p->flags |= TERMP_NOSPACE;
 		term_word(p, ";");
+	}
 }
 
 
@@ -2107,6 +2127,7 @@ termp____post(DECL_ARGS)
 	if (NULL == n->parent || MDOC_Rs != n->parent->tok)
 		return;
 
+	p->flags |= TERMP_NOSPACE;
 	if (NULL == n->next) {
 		term_word(p, ".");
 		p->flags |= TERMP_SENTENCE;
@@ -2143,6 +2164,7 @@ termp_lk_pre(DECL_ARGS)
 
 	term_fontpop(p);
 
+	p->flags |= TERMP_NOSPACE;
 	term_word(p, ":");
 
 	term_fontpush(p, TERMFONT_BOLD);

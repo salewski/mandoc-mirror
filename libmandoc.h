@@ -29,17 +29,15 @@ enum	rofferr {
 	ROFF_ERR /* badness: puke and stop */
 };
 
-/*
- * Available registers (set in libroff, accessed elsewhere).
- */
 enum	regs {
-	REG_nS = 0,
+	REG_nS = 0, /* nS register */
 	REG__MAX
 };
 
 /*
  * A register (struct reg) can consist of many types: this consists of
- * normalised types from the original string form.
+ * normalised types from the original string form.  For the time being,
+ * there's only an unsigned integer type.
  */
 union	regval {
 	unsigned  u; /* unsigned integer */
@@ -76,9 +74,9 @@ void		 mandoc_msg(enum mandocerr, struct mparse *,
 void		 mandoc_vmsg(enum mandocerr, struct mparse *, 
 			int, int, const char *, ...);
 int		 mandoc_special(char *);
-char		 *mandoc_strdup(const char *);
-char		 *mandoc_getarg(struct mparse *, char **, int, int *);
-char		 *mandoc_normdate(struct mparse *, char *, int, int);
+char		*mandoc_strdup(const char *);
+char		*mandoc_getarg(struct mparse *, char **, int, int *);
+char		*mandoc_normdate(struct mparse *, char *, int, int);
 int		 mandoc_eos(const char *, size_t, int);
 int		 mandoc_hyph(const char *, const char *);
 
@@ -103,11 +101,10 @@ struct roff	*roff_alloc(struct regset *, struct mparse *);
 void		 roff_reset(struct roff *);
 enum rofferr	 roff_parseln(struct roff *, int, 
 			char **, size_t *, int, int *);
-void		  roff_endparse(struct roff *);
+void		 roff_endparse(struct roff *);
 
-const struct tbl_span *roff_span(const struct roff *);
-const struct eqn *roff_eqn(const struct roff *);
-
+const struct tbl_span	*roff_span(const struct roff *);
+const struct eqn	*roff_eqn(const struct roff *);
 
 __END_DECLS
 

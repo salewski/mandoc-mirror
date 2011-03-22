@@ -911,4 +911,48 @@ err:	/* Error out. */
 	return(0);
 }
 
+enum mdelim
+mdoc_isdelim(const char *p)
+{
 
+	if ('\0' == p[0])
+		return(DELIM_NONE);
+
+	if ('\0' == p[1])
+		switch (p[0]) {
+		case('('):
+			/* FALLTHROUGH */
+		case('['):
+			return(DELIM_OPEN);
+		case('|'):
+			return(DELIM_MIDDLE);
+		case('.'):
+			/* FALLTHROUGH */
+		case(','):
+			/* FALLTHROUGH */
+		case(';'):
+			/* FALLTHROUGH */
+		case(':'):
+			/* FALLTHROUGH */
+		case('?'):
+			/* FALLTHROUGH */
+		case('!'):
+			/* FALLTHROUGH */
+		case(')'):
+			/* FALLTHROUGH */
+		case(']'):
+			return(DELIM_CLOSE);
+		default:
+			return(DELIM_NONE);
+		}
+
+	if ('\\' != p[0])
+		return(DELIM_NONE);
+
+	if (0 == strcmp(p + 1, "."))
+		return(DELIM_CLOSE);
+	if (0 == strcmp(p + 1, "*(Ba"))
+		return(DELIM_MIDDLE);
+
+	return(DELIM_NONE);
+}

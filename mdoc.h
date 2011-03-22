@@ -357,6 +357,8 @@ struct	mdoc_node {
 #define	MDOC_LINE	 (1 << 3) /* first macro/text on line */
 #define	MDOC_SYNPRETTY	 (1 << 4) /* SYNOPSIS-style formatting */
 #define	MDOC_ENDED	 (1 << 5) /* rendering has been ended */
+#define	MDOC_DELIMO	 (1 << 6)
+#define	MDOC_DELIMC	 (1 << 7)
 	enum mdoc_type	  type; /* AST node type */
 	enum mdoc_sec	  sec; /* current named section */
 	union mdoc_data	 *norm; /* normalised args */
