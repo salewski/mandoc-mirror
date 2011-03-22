@@ -168,6 +168,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	"generic fatal error",
 
+	"not a manual",
 	"column syntax is inconsistent",
 	"NOT IMPLEMENTED: .Bd -file",
 	"line scope broken, syntax violated",

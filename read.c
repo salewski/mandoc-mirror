@@ -496,16 +496,11 @@ mparse_end(struct mparse *curp)
 		return;
 	}
 
-#if 0
-	/* FIXME: NOTE a parser may not have been assigned, yet. */
-
 	if ( ! (curp->man || curp->mdoc)) {
-		/* FIXME: make into an mandoc.h error. */
-		fprintf(stderr, "%s: Not a manual\n", curp->file);
+		mandoc_msg(MANDOCERR_NOTMANUAL, curp, 1, 0, NULL);
 		curp->file_status = MANDOCLEVEL_FATAL;
-		goto cleanup;
+		return;
 	}
-#endif
 
 	roff_endparse(curp->roff);
 }
