@@ -323,7 +323,8 @@ check_sec(CHKARGS)
 		man_nmsg(m, n, MANDOCERR_SYNTARGCOUNT);
 		return(0);
 	} else if (MAN_BODY == n->type && 0 == n->nchild)
-		man_nmsg(m, n, MANDOCERR_NOBODY);
+		mandoc_msg(MANDOCERR_ARGCWARN, m->parse, n->line, 
+				n->pos, "want children (have none)");
 
 	return(1);
 }
@@ -334,7 +335,8 @@ check_part(CHKARGS)
 {
 
 	if (MAN_BODY == n->type && 0 == n->nchild)
-		man_nmsg(m, n, MANDOCERR_NOBODY);
+		mandoc_msg(MANDOCERR_ARGCWARN, m->parse, n->line, 
+				n->pos, "want children (have none)");
 
 	return(1);
 }

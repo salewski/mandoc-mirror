@@ -278,10 +278,6 @@
 * error reporting issues
 ************************************************************************
 
-- empty .RS blocks in man(7) should be warnings, not errors,
-  see for example qemu(1);
-  brad@comstyle.com  Sat Mar 19 00:36:56 2011
-
 ************************************************************************
 * performance issues
 ************************************************************************

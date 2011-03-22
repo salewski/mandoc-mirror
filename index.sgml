@@ -40,7 +40,7 @@
 
 					<P>
 					<SPAN CLASS="nm">mdocml</SPAN> consists of the <A HREF="mandoc.3.html">libmandoc</A> validating
-					compilers and <A HREF="mandoc.1.html">mandoc</A>, which interfaces with the compiler library to format
+					compiler and <A HREF="mandoc.1.html">mandoc</A>, which interfaces with the compiler library to format
 					output for UNIX terminals, XHTML, HTML, PostScript, and PDF.  It is a <A CLASS="external"
 					HREF="http://bsd.lv/">BSD.lv</A> project.  
 					</P>
