@@ -28,7 +28,6 @@
 #include <stdio.h>
 
 #include "mandoc.h"
-#include "roff.h"
 #include "libroff.h"
 #include "libmandoc.h"
 

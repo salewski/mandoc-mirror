@@ -94,7 +94,7 @@ DATAS	   = arch.in att.in lib.in msec.in st.in \
 	     vol.in chars.in
 
 HEADS	   = mdoc.h libmdoc.h man.h libman.h term.h \
-	     libmandoc.h html.h chars.h out.h main.h roff.h \
+	     libmandoc.h html.h chars.h out.h main.h \
 	     mandoc.h libroff.h
 
 GSGMLS	   = mandoc.1.sgml mdoc.3.sgml mdoc.7.sgml \
@@ -108,7 +108,7 @@ XHTMLS	   = mandoc.1.xhtml mdoc.3.xhtml \
 	     roff.7.xhtml roff.3.xhtml tbl.7.xhtml eqn.7.xhtml
 
 HTMLS	   = ChangeLog.html index.html man.h.html mdoc.h.html \
-	     mandoc.h.html roff.h.html mandoc.1.html mdoc.3.html \
+	     mandoc.h.html mandoc.1.html mdoc.3.html \
 	     man.3.html mdoc.7.html man.7.html mandoc_char.7.html \
 	     roff.7.html roff.3.html tbl.7.html eqn.7.html
 
@@ -225,7 +225,7 @@ mdoc.ln mdoc.o: mdoc.c libmdoc.h
 
 man.ln man.o: man.c libman.h
 
-main.ln main.o: main.c mdoc.h man.h roff.h
+main.ln main.o: main.c mdoc.h man.h 
 
 compat.ln compat.o: compat.c 
 

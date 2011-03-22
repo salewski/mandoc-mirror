@@ -31,7 +31,6 @@
 #include "libmandoc.h"
 #include "mdoc.h"
 #include "man.h"
-#include "roff.h"
 
 #ifndef MAP_FILE
 #define	MAP_FILE	0
