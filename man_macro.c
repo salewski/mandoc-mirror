@@ -38,6 +38,8 @@ static	int		 blk_close(MACRO_PROT_ARGS);
 static	int		 blk_exp(MACRO_PROT_ARGS);
 static	int		 blk_imp(MACRO_PROT_ARGS);
 static	int		 in_line_eoln(MACRO_PROT_ARGS);
+static	int		 man_args(struct man *, int, 
+				int *, char *, char **);
 
 static	int		 rew_scope(enum man_type, 
 				struct man *, enum mant);
@@ -317,7 +319,7 @@ blk_exp(MACRO_PROT_ARGS)
 
 	for (;;) {
 		la = *pos;
-		if (ARGS_EOLN == man_args(m, line, pos, buf, &p))
+		if ( ! man_args(m, line, pos, buf, &p))
 			break;
 		if ( ! man_word_alloc(m, line, la, p))
 			return(0);
@@ -367,7 +369,7 @@ blk_imp(MACRO_PROT_ARGS)
 
 	for (;;) {
 		la = *pos;
-		if (ARGS_EOLN == man_args(m, line, pos, buf, &p))
+		if ( ! man_args(m, line, pos, buf, &p))
 			break;
 		if ( ! man_word_alloc(m, line, la, p))
 			return(0);
@@ -407,7 +409,7 @@ in_line_eoln(MACRO_PROT_ARGS)
 
 	for (;;) {
 		la = *pos;
-		if (ARGS_EOLN == man_args(m, line, pos, buf, &p))
+		if ( ! man_args(m, line, pos, buf, &p))
 			break;
 		if ( ! man_word_alloc(m, line, la, p))
 			return(0);
@@ -470,3 +472,18 @@ man_macroend(struct man *m)
 	return(man_unscope(m, m->first, MANDOCERR_SCOPEEXIT));
 }
 
+static int
+man_args(struct man *m, int line, int *pos, char *buf, char **v)
+{
+	char	 *start;
+
+	assert(*pos);
+	*v = start = buf + *pos;
+	assert(' ' != *start);
+
+	if ('\0' == *start)
+		return(0);
+
+	*v = mandoc_getarg(m->parse, v, line, pos);
+	return(1);
+}

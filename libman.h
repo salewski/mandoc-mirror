@@ -56,12 +56,6 @@ struct	man_macro {
 #define	MAN_NOCLOSE	 (1 << 4)	/* See blk_exp(). */
 };
 
-enum	margserr {
-	ARGS_EOLN,
-	ARGS_WORD,
-	ARGS_QWORD
-};
-
 extern	const struct man_macro *const man_macros;
 
 __BEGIN_DECLS
@@ -80,7 +74,6 @@ void		  man_node_delete(struct man *, struct man_node *);
 void		  man_hash_init(void);
 enum mant	  man_hash_find(const char *);
 int		  man_macroend(struct man *);
-enum margserr	  man_args(struct man *, int, int *, char *, char **);
 int		  man_valid_post(struct man *);
 int		  man_valid_pre(struct man *, struct man_node *);
 int		  man_unscope(struct man *, 

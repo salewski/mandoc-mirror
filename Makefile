@@ -57,7 +57,6 @@ SRCS		 = Makefile \
 		   main.h \
 		   man.7 \
 		   man.c \
-		   man_argv.c \
 		   man_hash.c \
 		   man_html.c \
 		   man_macro.c \
@@ -104,7 +103,6 @@ SRCS		 = Makefile \
 		   vol.in
 
 LIBMAN_OBJS	 = man.o \
-		   man_argv.o \
 		   man_hash.o \
 		   man_macro.o \
 		   man_validate.o
