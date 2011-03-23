@@ -138,7 +138,7 @@ msec.o: msec.in
 st.o: st.in
 vol.o: vol.in
 
-$(LIBMAN_OBJS): libmdoc.h
+$(LIBMAN_OBJS): libman.h
 $(LIBMDOC_OBJS): libmdoc.h
 $(LIBROFF_OBJS): libroff.h
 $(LIBMANDOC_OBJS): mandoc.h mdoc.h man.h libmandoc.h config.h
