@@ -201,6 +201,9 @@ print_man(const struct man_node *n, int indent)
 	case (MAN_BODY):
 		t = "block-body";
 		break;
+	case (MAN_TAIL):
+		t = "block-tail";
+		break;
 	case (MAN_TBL):
 		t = "tbl";
 		break;
@@ -223,6 +226,8 @@ print_man(const struct man_node *n, int indent)
 	case (MAN_BLOCK):
 		/* FALLTHROUGH */
 	case (MAN_HEAD):
+		/* FALLTHROUGH */
+	case (MAN_TAIL):
 		/* FALLTHROUGH */
 	case (MAN_BODY):
 		p = man_macronames[n->tok];

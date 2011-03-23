@@ -67,6 +67,7 @@ __BEGIN_DECLS
 int		  man_word_alloc(struct man *, int, int, const char *);
 int		  man_block_alloc(struct man *, int, int, enum mant);
 int		  man_head_alloc(struct man *, int, int, enum mant);
+int		  man_tail_alloc(struct man *, int, int, enum mant);
 int		  man_body_alloc(struct man *, int, int, enum mant);
 int		  man_elem_alloc(struct man *, int, int, enum mant);
 void		  man_node_delete(struct man *, struct man_node *);

@@ -203,6 +203,10 @@ man_node_append(struct man *man, struct man_node *p)
 		assert(MAN_BLOCK == p->parent->type);
 		p->parent->head = p;
 		break;
+	case (MAN_TAIL):
+		assert(MAN_BLOCK == p->parent->type);
+		p->parent->tail = p;
+		break;
 	case (MAN_BODY):
 		assert(MAN_BLOCK == p->parent->type);
 		p->parent->body = p;
@@ -253,6 +257,19 @@ man_elem_alloc(struct man *m, int line, int pos, enum mant tok)
 	struct man_node *p;
 
 	p = man_node_alloc(m, line, pos, MAN_ELEM, tok);
+	if ( ! man_node_append(m, p))
+		return(0);
+	m->next = MAN_NEXT_CHILD;
+	return(1);
+}
+
+
+int
+man_tail_alloc(struct man *m, int line, int pos, enum mant tok)
+{
+	struct man_node *p;
+
+	p = man_node_alloc(m, line, pos, MAN_TAIL, tok);
 	if ( ! man_node_append(m, p))
 		return(0);
 	m->next = MAN_NEXT_CHILD;
