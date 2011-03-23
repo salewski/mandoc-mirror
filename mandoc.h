@@ -74,6 +74,7 @@ enum	mandocerr {
 	MANDOCERR_CHILD, /* child violates parent syntax */
 	MANDOCERR_NESTEDDISP, /* nested displays are not portable */
 	MANDOCERR_SCOPEREP, /* already in literal mode */
+	MANDOCERR_LINESCOPE, /* line scope broken */
 
 	/* related to missing macro arguments */
 	MANDOCERR_MACROEMPTY, /* skipping empty macro */
@@ -121,7 +122,6 @@ enum	mandocerr {
 	MANDOCERR_NOTEXT, /* skipping text before the first section header */
 	MANDOCERR_MACRO, /* skipping unknown macro */
 	MANDOCERR_REQUEST, /* NOT IMPLEMENTED: skipping request */
-	MANDOCERR_LINESCOPE, /* line scope broken */
 	MANDOCERR_ARGCOUNT, /* argument count wrong */
 	MANDOCERR_NOSCOPE, /* skipping end of block that is not open */
 	MANDOCERR_SCOPEBROKEN, /* missing end of block */

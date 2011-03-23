@@ -106,6 +106,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"child violates parent syntax",
 	"nested displays are not portable",
 	"already in literal mode",
+	"line scope broken",
 
 	/* related to missing macro arguments */
 	"skipping empty macro",
@@ -153,7 +154,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"skipping text before the first section header",
 	"skipping unknown macro",
 	"NOT IMPLEMENTED, please use groff: skipping request",
-	"line scope broken",
 	"argument count wrong",
 	"skipping end of block that is not open",
 	"missing end of block",

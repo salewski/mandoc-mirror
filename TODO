@@ -103,12 +103,6 @@
 
 --- missing man features -----------------------------------------------
 
-- bashbug(1) complains "line scope broken" after
-  .SM
-  .B something
-  should either just work or be a warning
-  reported by naddy@
-
 - groff an-ext.tmac macros (.UR, .UE) occur in xine(5)
   reported by brad@  Sat, 15 Jan 2011 15:45:23 -0500
 
