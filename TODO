@@ -16,6 +16,11 @@
   .br \}
   reported by ulrich spoerlein  Tue, 19 Oct 2010 20:39:50 +0200
 
+- \. at the start of the line does *not* prevent interpretation
+  of the following word as a macro.
+  Werner LEMBERG on bug-groff@  Tue, 22 Mar 2011 14:21:28 +0100
+  http://lists.gnu.org/archive/html/bug-groff/2011-03/msg00011.html
+
 ************************************************************************
 * formatter bugs
 ************************************************************************
@@ -291,11 +296,7 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 - Find better ways to prevent endless loops
   in roff(7) macro and string expansion.
  
-- Clean up date handling.
-  Store dates as strings, not time numbers.
-  When the format is not recognized, just use the string from the input.
-  When the format is recognized, normalize the string to whatever
-  format is standard at the respective place.
+- Finish cleanup of date handling.
   Decide which formats should be recognized where.
   Update both mdoc(7) and man(7) documentation.
   Triggered by  Tim van der Molen  Tue, 22 Feb 2011 20:30:45 +0100
