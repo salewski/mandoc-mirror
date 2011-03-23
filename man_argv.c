@@ -18,8 +18,6 @@
 #include "config.h"
 #endif
 
-#include <sys/types.h>
-
 #include <assert.h>
 
 #include "man.h"
@@ -27,7 +25,7 @@
 #include "libman.h"
 #include "libmandoc.h"
 
-int
+enum margserr
 man_args(struct man *m, int line, int *pos, char *buf, char **v)
 {
 	char	 *start;
