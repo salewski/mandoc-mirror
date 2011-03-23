@@ -209,6 +209,60 @@ static	const int argflags[MDOC_MAX] = {
 	0, /* Ta */
 };
 
+static	const enum mdocargt args_Ex[] = {
+	MDOC_Std,
+	MDOC_ARG_MAX
+};
+
+static	const enum mdocargt args_An[] = {
+	MDOC_Split,
+	MDOC_Nosplit,
+	MDOC_ARG_MAX
+};
+
+static	const enum mdocargt args_Bd[] = {
+	MDOC_Ragged,
+	MDOC_Unfilled,
+	MDOC_Filled,
+	MDOC_Literal,
+	MDOC_File,
+	MDOC_Offset,
+	MDOC_Compact,
+	MDOC_Centred,
+	MDOC_ARG_MAX
+};
+
+static	const enum mdocargt args_Bf[] = {
+	MDOC_Emphasis,
+	MDOC_Literal,
+	MDOC_Symbolic,
+	MDOC_ARG_MAX
+};
+
+static	const enum mdocargt args_Bk[] = {
+	MDOC_Words,
+	MDOC_ARG_MAX
+};
+
+static	const enum mdocargt args_Bl[] = {
+	MDOC_Bullet,
+	MDOC_Dash,
+	MDOC_Hyphen,
+	MDOC_Item,
+	MDOC_Enum,
+	MDOC_Tag,
+	MDOC_Diag,
+	MDOC_Hang,
+	MDOC_Ohang,
+	MDOC_Inset,
+	MDOC_Column,
+	MDOC_Width,
+	MDOC_Offset,
+	MDOC_Compact,
+	MDOC_Nested,
+	MDOC_ARG_MAX
+};
+
 /*
  * Parse an argument from line text.  This comes in the form of -key
  * [value0...], which may either have a single mandatory value, at least
@@ -598,63 +652,40 @@ args_checkpunct(struct mdoc *m, const char *buf, int i, int ln, int fl)
 static enum mdocargt
 argv_a2arg(enum mdoct tok, const char *p)
 {
-	enum mdocargt	 args[MDOC_ARG_MAX];
-	int		 i, len;
+	const enum mdocargt *args;
 
-	len = 0;
+	args = NULL;
 
 	switch (tok) {
 	case (MDOC_An):
-		args[len++] = MDOC_Split;
-		args[len++] = MDOC_Nosplit;
+		args = args_An;
 		break;
 	case (MDOC_Bd):
-		args[len++] = MDOC_Ragged;
-		args[len++] = MDOC_Unfilled;
-		args[len++] = MDOC_Filled;
-		args[len++] = MDOC_Literal;
-		args[len++] = MDOC_File;
-		args[len++] = MDOC_Offset;
-		args[len++] = MDOC_Compact;
-		args[len++] = MDOC_Centred;
+		args = args_Bd;
 		break;
 	case (MDOC_Bf):
-		args[len++] = MDOC_Emphasis;
-		args[len++] = MDOC_Literal;
-		args[len++] = MDOC_Symbolic;
+		args = args_Bf;
 		break;
 	case (MDOC_Bk):
-		args[len++] = MDOC_Words;
+		args = args_Bk;
 		break;
 	case (MDOC_Bl):
-		args[len++] = MDOC_Bullet;
-		args[len++] = MDOC_Dash;
-		args[len++] = MDOC_Hyphen;
-		args[len++] = MDOC_Item;
-		args[len++] = MDOC_Enum;
-		args[len++] = MDOC_Tag;
-		args[len++] = MDOC_Diag;
-		args[len++] = MDOC_Hang;
-		args[len++] = MDOC_Ohang;
-		args[len++] = MDOC_Inset;
-		args[len++] = MDOC_Column;
-		args[len++] = MDOC_Width;
-		args[len++] = MDOC_Offset;
-		args[len++] = MDOC_Compact;
-		args[len++] = MDOC_Nested;
+		args = args_Bl;
 		break;
 	case (MDOC_Rv):
 		/* FALLTHROUGH */
 	case (MDOC_Ex):
-		args[len++] = MDOC_Std;
+		args = args_Ex;
 		break;
 	default:
-		break;
+		return(MDOC_ARG_MAX);
 	}
 
-	for (i = 0; i < len; i++)
-		if (0 == strcmp(p, mdoc_argnames[args[i]]))
-			return(args[i]);
+	assert(args);
+
+	for ( ; MDOC_ARG_MAX != *args ; args++)
+		if (0 == strcmp(p, mdoc_argnames[*args]))
+			return(*args);
 
 	return(MDOC_ARG_MAX);
 }
