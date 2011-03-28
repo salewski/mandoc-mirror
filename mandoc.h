@@ -303,6 +303,8 @@ struct mparse	 *mparse_alloc(enum mparset,
 			enum mandoclevel, mandocmsg, void *);
 enum mandoclevel  mparse_readfd(struct mparse *, int, const char *);
 void		  mparse_result(struct mparse *, struct mdoc **, struct man **);
+const char	 *mparse_strerror(enum mandocerr);
+const char	 *mparse_strlevel(enum mandoclevel);
 
 void		 *mandoc_calloc(size_t, size_t);
 void		 *mandoc_malloc(size_t);

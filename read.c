@@ -78,6 +78,124 @@ static	const enum mandocerr	mandoclimits[MANDOCLEVEL_MAX] = {
 	MANDOCERR_MAX
 };
 
+static	const char * const	mandocerrs[MANDOCERR_MAX] = {
+	"ok",
+
+	"generic warning",
+
+	/* related to the prologue */
+	"no title in document",
+	"document title should be all caps",
+	"unknown manual section",
+	"date missing, using today's date",
+	"cannot parse date, using it verbatim",
+	"prologue macros out of order",
+	"duplicate prologue macro",
+	"macro not allowed in prologue",
+	"macro not allowed in body",
+
+	/* related to document structure */
+	".so is fragile, better use ln(1)",
+	"NAME section must come first",
+	"bad NAME section contents",
+	"manual name not yet set",
+	"sections out of conventional order",
+	"duplicate section name",
+	"section not in conventional manual section",
+
+	/* related to macros and nesting */
+	"skipping obsolete macro",
+	"skipping paragraph macro",
+	"skipping no-space macro",
+	"blocks badly nested",
+	"child violates parent syntax",
+	"nested displays are not portable",
+	"already in literal mode",
+	"line scope broken",
+
+	/* related to missing macro arguments */
+	"skipping empty macro",
+	"argument count wrong",
+	"missing display type",
+	"list type must come first",
+	"tag lists require a width argument",
+	"missing font type",
+	"skipping end of block that is not open",
+
+	/* related to bad macro arguments */
+	"skipping argument",
+	"duplicate argument",
+	"duplicate display type",
+	"duplicate list type",
+	"unknown AT&T UNIX version",
+	"bad Boolean value",
+	"unknown font",
+	"unknown standard specifier",
+	"bad width argument",
+
+	/* related to plain text */
+	"blank line in non-literal context",
+	"tab in non-literal context",
+	"end of line whitespace",
+	"bad comment style",
+	"unknown escape sequence",
+	"unterminated quoted string",
+	
+	"generic error",
+
+	/* related to tables */
+	"bad table syntax",
+	"bad table option",
+	"bad table layout",
+	"no table layout cells specified",
+	"no table data cells specified",
+	"ignore data in cell",
+	"data block still open",
+	"ignoring extra data cells",
+
+	"input stack limit exceeded, infinite loop?",
+	"skipping bad character",
+	"escaped character not allowed in a name",
+	"skipping text before the first section header",
+	"skipping unknown macro",
+	"NOT IMPLEMENTED, please use groff: skipping request",
+	"argument count wrong",
+	"skipping end of block that is not open",
+	"missing end of block",
+	"scope open on exit",
+	"uname(3) system call failed",
+	"macro requires line argument(s)",
+	"macro requires body argument(s)",
+	"macro requires argument(s)",
+	"missing list type",
+	"line argument(s) will be lost",
+	"body argument(s) will be lost",
+
+	"generic fatal error",
+
+	"not a manual",
+	"column syntax is inconsistent",
+	"NOT IMPLEMENTED: .Bd -file",
+	"line scope broken, syntax violated",
+	"argument count wrong, violates syntax",
+	"child violates parent syntax",
+	"argument count wrong, violates syntax",
+	"NOT IMPLEMENTED: .so with absolute path or \"..\"",
+	"no document body",
+	"no document prologue",
+	"static buffer exhausted",
+};
+
+static	const char * const	mandoclevels[MANDOCLEVEL_MAX] = {
+	"SUCCESS",
+	"RESERVED",
+	"WARNING",
+	"ERROR",
+	"FATAL",
+	"BADARG",
+	"SYSERR"
+};
+
 static void
 resize_buf(struct buf *buf, size_t initial)
 {
@@ -626,4 +744,17 @@ mandoc_msg(enum mandocerr er, struct mparse *m,
 
 	if (m->file_status < level)
 		m->file_status = level;
+}
+
+const char *
+mparse_strerror(enum mandocerr er)
+{
+
+	return(mandocerrs[er]);
+}
+
+const char *
+mparse_strlevel(enum mandoclevel lvl)
+{
+	return(mandoclevels[lvl]);
 }

@@ -232,7 +232,7 @@ install: all
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_PROGRAM) mandoc $(DESTDIR)$(BINDIR)
-	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)/
+	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
 	$(INSTALL_MAN) mandoc.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) mandoc.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 $(DESTDIR)$(MANDIR)/man7

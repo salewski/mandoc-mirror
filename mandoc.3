@@ -28,7 +28,9 @@
 .Nm mparse_free ,
 .Nm mparse_readfd ,
 .Nm mparse_reset ,
-.Nm mparse_result
+.Nm mparse_result ,
+.Nm mparse_strerror ,
+.Nm mparse_strlevel
 .Nd mandoc macro compiler library
 .Sh SYNOPSIS
 .In man.h
@@ -76,6 +78,14 @@
 .Fa "struct mparse *parse"
 .Fa "struct mdoc **mdoc"
 .Fa "struct man **man"
+.Fc
+.Ft "const char *"
+.Fo mparse_strerror
+.Fa "enum mandocerr"
+.Fc
+.Ft "const char *"
+.Fo mparse_strlevel
+.Fa "enum mandoclevel"
 .Fc
 .Vt extern const char * const * man_macronames;
 .Vt extern const char * const * mdoc_argnames;
