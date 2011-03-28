@@ -79,6 +79,7 @@ char		*mandoc_getarg(struct mparse *, char **, int, int *);
 char		*mandoc_normdate(struct mparse *, char *, int, int);
 int		 mandoc_eos(const char *, size_t, int);
 int		 mandoc_hyph(const char *, const char *);
+int		 mandoc_getcontrol(const char *, int *);
 
 void	 	 mdoc_free(struct mdoc *);
 struct	mdoc	*mdoc_alloc(struct regset *, struct mparse *);

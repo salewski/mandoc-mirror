@@ -506,3 +506,28 @@ mandoc_hyph(const char *start, const char *c)
 	return(1);
 }
 
+/*
+ * Find out whether a line is a macro line or not.  If it is, adjust the
+ * current position and return one; if it isn't, return zero and don't
+ * change the current position.
+ */
+int
+mandoc_getcontrol(const char *cp, int *ppos)
+{
+	int		pos;
+
+	pos = *ppos;
+
+	if ('\\' == cp[pos] && '.' == cp[pos + 1])
+		pos += 2;
+	else if ('.' == cp[pos] || '\'' == cp[pos])
+		pos++;
+	else
+		return(0);
+
+	while (' ' == cp[pos] || '\t' == cp[pos])
+		pos++;
+
+	*ppos = pos;
+	return(1);
+}
