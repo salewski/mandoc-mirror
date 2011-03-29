@@ -106,6 +106,11 @@ LIBMAN_OBJS	 = man.o \
 		   man_hash.o \
 		   man_macro.o \
 		   man_validate.o
+LIBMAN_LNS	 = man.ln \
+		   man_hash.ln \
+		   man_macro.ln \
+		   man_validate.ln
+
 LIBMDOC_OBJS	 = arch.o \
 		   att.o \
 		   lib.o \
@@ -117,54 +122,96 @@ LIBMDOC_OBJS	 = arch.o \
 		   msec.o \
 		   st.o \
 		   vol.o
+LIBMDOC_LNS	 = arch.ln \
+		   att.ln \
+		   lib.ln \
+		   mdoc.ln \
+		   mdoc_argv.ln \
+		   mdoc_hash.ln \
+		   mdoc_macro.ln \
+		   mdoc_validate.ln \
+		   msec.ln \
+		   st.ln \
+		   vol.ln
+
 LIBROFF_OBJS	 = eqn.o \
 		   roff.o \
 		   tbl.o \
 		   tbl_data.o \
 		   tbl_layout.o \
 		   tbl_opts.o
+LIBROFF_LNS	 = eqn.ln \
+		   roff.ln \
+		   tbl.ln \
+		   tbl_data.ln \
+		   tbl_layout.ln \
+		   tbl_opts.ln
+
 LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 		   $(LIBMDOC_OBJS) \
 		   $(LIBROFF_OBJS) \
 		   mandoc.o \
 		   read.o
+LIBMANDOC_LNS	 = $(LIBMAN_LNS) \
+		   $(LIBMDOC_LNS) \
+		   $(LIBROFF_LNS) \
+		   mandoc.ln \
+		   read.ln
 
-arch.o: arch.in
-att.o: att.in
-lib.o: lib.in
-msec.o: msec.in
-st.o: st.in
-vol.o: vol.in
+arch.o arch.ln: arch.in
+att.o att.ln: att.in
+lib.o lib.ln: lib.in
+msec.o msec.ln: msec.in
+st.o st.ln: st.in
+vol.o vol.ln: vol.in
 
-$(LIBMAN_OBJS): libman.h
-$(LIBMDOC_OBJS): libmdoc.h
-$(LIBROFF_OBJS): libroff.h
-$(LIBMANDOC_OBJS): mandoc.h mdoc.h man.h libmandoc.h config.h
+$(LIBMAN_OBJS) $(LIBMAN_LNS): libman.h
+$(LIBMDOC_OBJS) $(LIBMDOC_LNS): libmdoc.h
+$(LIBROFF_OBJS) $(LIBROFF_LNS): libroff.h
+$(LIBMANDOC_OBJS) $(LIBMANDOC_LNS): mandoc.h mdoc.h man.h libmandoc.h config.h
 
 MANDOC_HTML_OBJS = html.o \
 		   man_html.o \
 		   mdoc_html.o \
 		   tbl_html.o
+MANDOC_HTML_LNS	 = html.ln \
+		   man_html.ln \
+		   mdoc_html.ln \
+		   tbl_html.ln
+
 MANDOC_TERM_OBJS = man_term.o \
 		   mdoc_term.o \
 		   term.o \
 		   term_ascii.o \
 		   term_ps.o \
 		   tbl_term.o
+MANDOC_TERM_LNS	 = man_term.ln \
+		   mdoc_term.ln \
+		   term.ln \
+		   term_ascii.ln \
+		   term_ps.ln \
+		   tbl_term.ln
+
 MANDOC_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   $(MANDOC_TERM_OBJS) \
 		   chars.o \
 		   main.o \
 		   out.o \
 		   tree.o
+MANDOC_LNS	 = $(MANDOC_HTML_LNS) \
+		   $(MANDOC_TERM_LNS) \
+		   chars.ln \
+		   main.ln \
+		   out.ln \
+		   tree.ln
 
-chars.o: chars.in
+chars.o chars.ln: chars.in
 
-$(MANDOC_HTML_OBJS): html.h
-$(MANDOC_TERM_OBJS): term.h
-$(MANDOC_OBJS): main.h mandoc.h mdoc.h man.h config.h out.h
+$(MANDOC_HTML_OBJS) $(MANDOC_HTML_LNS): html.h
+$(MANDOC_TERM_OBJS) $(MANDOC_TERM_LNS): term.h
+$(MANDOC_OBJS) $(MANDOC_LNS): main.h mandoc.h mdoc.h man.h config.h out.h
 
-compat.o: config.h
+compat.o compat.ln: config.h
 
 INDEX_MANS	 = mandoc.1.html \
 		   mandoc.1.xhtml \
@@ -218,10 +265,14 @@ INDEX_OBJS	 = $(INDEX_MANS) \
 
 www: index.html
 
+lint: llib-llibmandoc.ln llib-lmandoc.ln
+
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS)
+	rm -f llib-llibmandoc.ln $(LIBMANDOC_LNS)
 	rm -f mandoc $(MANDOC_OBJS)
-	rm -f config.h compat.o config.log
+	rm -f llib-lmandoc.ln $(MANDOC_LNS)
+	rm -f config.h config.log compat.o compat.ln
 	rm -f mdocml.tar.gz
 	rm -f index.html $(INDEX_OBJS)
 
@@ -251,8 +302,14 @@ installwww: www
 libmandoc.a: compat.o $(LIBMANDOC_OBJS)
 	$(AR) rs $@ compat.o $(LIBMANDOC_OBJS)
 
+llib-llibmandoc.ln: compat.ln $(LIBMANDOC_LNS)
+	$(LINT) $(LINTFLAGS) -Clibmandoc compat.ln $(LIBMANDOC_LNS)
+
 mandoc: $(MANDOC_OBJS) libmandoc.a
 	$(CC) -o $@ $(MANDOC_OBJS) libmandoc.a
+
+llib-lmandoc.ln: $(MANDOC_LNS)
+	$(LINT) $(LINTFLAGS) -Cmandoc $(MANDOC_LNS)
 
 mdocml.md5: mdocml.tar.gz
 	md5 mdocml.tar.gz >$@
