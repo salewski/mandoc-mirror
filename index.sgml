@@ -324,6 +324,27 @@
 					</H1>
 					<DIV CLASS="news">
 						<P>
+							<SPAN CLASS="date">28-03-2011</SPAN>:
+							version 1.11.1
+						</P>
+						<P>
+							The earlier <I>libroff</I>, <I>libmdoc</I>, and <I>libman</I> soup have been merged into
+							a single library, <A HREF="mandoc.3.html">libmandoc</A>, which manages all aspects of
+							parsing real manuals (from line-handling to <A HREF="tbl.7.html">tbl</A> parsing).
+						</P>
+						<P>
+							Beyond this structural change, initial <A HREF="eqn.7.html">eqn</A> functionality is in
+							place.  For the time being, this is limited to the recognition of equation blocks;
+							future version of <SPAN CLASS="nm">mdocml</SPAN> will expand upon this framework.
+						</P>
+						<P>
+							As usual, many general fixes and improvements have also occured.  In particular, a great
+							deal of redundancy and superfluous code has been removed with the merging of the backend
+							libraries.
+						</P>
+					</DIV>
+					<DIV CLASS="news">
+						<P>
 							<SPAN CLASS="date">07-01-2011</SPAN>:
 							version 1.10.9
 						</P>
