@@ -16,11 +16,6 @@
   .br \}
   reported by ulrich spoerlein  Tue, 19 Oct 2010 20:39:50 +0200
 
-- \. at the start of the line does *not* prevent interpretation
-  of the following word as a macro.
-  Werner LEMBERG on bug-groff@  Tue, 22 Mar 2011 14:21:28 +0100
-  http://lists.gnu.org/archive/html/bug-groff/2011-03/msg00011.html
-
 ************************************************************************
 * formatter bugs
 ************************************************************************
