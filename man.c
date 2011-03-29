@@ -130,7 +130,8 @@ man_parseln(struct man *m, int ln, char *buf, int offs)
 	m->flags |= MAN_NEWLINE;
 
 	assert( ! (MAN_HALT & m->flags));
-	return(('.' == buf[offs] || '\'' == buf[offs]) ? 
+
+	return (mandoc_getcontrol(buf, &offs) ?
 			man_pmacro(m, ln, buf, offs) : 
 			man_ptext(m, ln, buf, offs));
 }
@@ -421,20 +422,10 @@ man_descope(struct man *m, int line, int offs)
 	return(man_body_alloc(m, line, offs, m->last->tok));
 }
 
-
 static int
 man_ptext(struct man *m, int line, char *buf, int offs)
 {
 	int		 i;
-
-	/* Ignore bogus comments. */
-
-	if ('\\' == buf[offs] && 
-			'.' == buf[offs + 1] && 
-			'"' == buf[offs + 2]) {
-		man_pmsg(m, line, offs, MANDOCERR_BADCOMMENT);
-		return(1);
-	}
 
 	/* Literal free-form text whitespace is preserved. */
 
@@ -493,50 +484,36 @@ man_ptext(struct man *m, int line, char *buf, int offs)
 	return(man_descope(m, line, offs));
 }
 
-
 static int
 man_pmacro(struct man *m, int ln, char *buf, int offs)
 {
-	int		 i, j, ppos;
+	int		 i, ppos;
 	enum mant	 tok;
 	char		 mac[5];
 	struct man_node	*n;
 
-	/* Comments and empties are quickly ignored. */
-
-	offs++;
-
-	if ('\0' == buf[offs])
+	if ('"' == buf[offs]) {
+		man_pmsg(m, ln, offs, MANDOCERR_BADCOMMENT);
+		return(1);
+	} else if ('\0' == buf[offs])
 		return(1);
 
-	i = offs;
-
-	/*
-	 * Skip whitespace between the control character and initial
-	 * text.  "Whitespace" is both spaces and tabs.
-	 */
-
-	if (' ' == buf[i] || '\t' == buf[i]) {
-		i++;
-		while (buf[i] && (' ' == buf[i] || '\t' == buf[i]))
-			i++;
-		if ('\0' == buf[i])
-			goto out;
-	}
-
-	ppos = i;
+	ppos = offs;
 
 	/*
 	 * Copy the first word into a nil-terminated buffer.
 	 * Stop copying when a tab, space, or eoln is encountered.
 	 */
 
-	j = 0;
-	while (j < 4 && '\0' != buf[i] && ' ' != buf[i] && '\t' != buf[i])
-		mac[j++] = buf[i++];
-	mac[j] = '\0';
+	i = 0;
+	while (i < 4 && '\0' != buf[offs] && 
+			' ' != buf[offs] && '\t' != buf[offs])
+		mac[i++] = buf[offs++];
 
-	tok = (j > 0 && j < 4) ? man_hash_find(mac) : MAN_MAX;
+	mac[i] = '\0';
+
+	tok = (i > 0 && i < 4) ? man_hash_find(mac) : MAN_MAX;
+
 	if (MAN_MAX == tok) {
 		mandoc_vmsg(MANDOCERR_MACRO, m->parse, ln, 
 				ppos, "%s", buf + ppos - 1);
@@ -545,16 +522,16 @@ man_pmacro(struct man *m, int ln, char *buf, int offs)
 
 	/* The macro is sane.  Jump to the next word. */
 
-	while (buf[i] && ' ' == buf[i])
-		i++;
+	while (buf[offs] && ' ' == buf[offs])
+		offs++;
 
 	/* 
 	 * Trailing whitespace.  Note that tabs are allowed to be passed
 	 * into the parser as "text", so we only warn about spaces here.
 	 */
 
-	if ('\0' == buf[i] && ' ' == buf[i - 1])
-		man_pmsg(m, ln, i - 1, MANDOCERR_EOLNSPACE);
+	if ('\0' == buf[offs] && ' ' == buf[offs - 1])
+		man_pmsg(m, ln, offs - 1, MANDOCERR_EOLNSPACE);
 
 	/* 
 	 * Remove prior ELINE macro, as it's being clobbered by a new
@@ -591,10 +568,9 @@ man_pmacro(struct man *m, int ln, char *buf, int offs)
 	/* Call to handler... */
 
 	assert(man_macros[tok].fp);
-	if ( ! (*man_macros[tok].fp)(m, tok, ln, ppos, &i, buf))
+	if ( ! (*man_macros[tok].fp)(m, tok, ln, ppos, &offs, buf))
 		goto err;
 
-out:
 	/* 
 	 * We weren't in a block-line scope when entering the
 	 * above-parsed macro, so return.
@@ -631,7 +607,7 @@ out:
 
 	if ( ! man_unscope(m, m->last->parent, MANDOCERR_MAX))
 		return(0);
-	return(man_body_alloc(m, ln, offs, m->last->tok));
+	return(man_body_alloc(m, ln, ppos, m->last->tok));
 
 err:	/* Error out. */
 
