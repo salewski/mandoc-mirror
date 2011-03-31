@@ -165,7 +165,7 @@ usage(void)
 			"[-mformat] "
 			"[-Ooption] "
 			"[-Toutput] "
-			"[-Werr] "
+			"[-Wlevel] "
 			"[file...]\n", 
 			progname);
 
