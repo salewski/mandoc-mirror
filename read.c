@@ -740,7 +740,8 @@ mandoc_msg(enum mandocerr er, struct mparse *m,
 	if (level < m->wlevel)
 		return;
 
-	(*m->mmsg)(er, level, m->file, ln, col, msg);
+	if (m->mmsg)
+		(*m->mmsg)(er, level, m->file, ln, col, msg);
 
 	if (m->file_status < level)
 		m->file_status = level;
