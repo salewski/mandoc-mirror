@@ -1861,8 +1861,8 @@ are delimited by commas.
 If no arguments are specified, blank parenthesis are output.
 .Pp
 Examples:
-.Dl \&.Fn "int funcname" "int arg0" "int arg1"
-.Dl \&.Fn funcname "int arg0"
+.Dl \&.Fn \*qint funcname\*q \*qint arg0\*q \*qint arg1\*q
+.Dl \&.Fn funcname \*qint arg0\*q
 .Dl \&.Fn funcname arg0
 .Bd -literal -offset indent -compact
 \&.Ft functype
@@ -1892,7 +1892,7 @@ Invocations usually occur in the following context:
 .br
 .Pf \. Sx \&Fa Oo Cm argtype Oc Cm argname
 .br
-\.\.\.
+\&.\.\.
 .br
 .Pf \. Sx \&Fc
 .Ed
