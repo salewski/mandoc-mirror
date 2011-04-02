@@ -213,6 +213,11 @@ $(MANDOC_OBJS) $(MANDOC_LNS): main.h mandoc.h mdoc.h man.h config.h out.h
 
 compat.o compat.ln: config.h
 
+MANDOCDB_OBJS	 = mandoc-db.o
+MANDOCDB_LNS	 = mandoc-db.ln
+
+$(MANDOCDB_OBJS) $(MANDOCDB_LNS): mandoc.h mdoc.h man.h
+
 INDEX_MANS	 = mandoc.1.html \
 		   mandoc.1.xhtml \
 		   mandoc.1.ps \
@@ -270,6 +275,8 @@ lint: llib-llibmandoc.ln llib-lmandoc.ln
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS)
 	rm -f llib-llibmandoc.ln $(LIBMANDOC_LNS)
+	rm -f mandoc-db $(MANDOCDB_OBJS)
+	rm -f llib-lmandoc-db.ln $(MANDOCDB_LNS)
 	rm -f mandoc $(MANDOC_OBJS)
 	rm -f llib-lmandoc.ln $(MANDOC_LNS)
 	rm -f config.h config.log compat.o compat.ln
@@ -308,8 +315,15 @@ llib-llibmandoc.ln: compat.ln $(LIBMANDOC_LNS)
 mandoc: $(MANDOC_OBJS) libmandoc.a
 	$(CC) -o $@ $(MANDOC_OBJS) libmandoc.a
 
+# You'll need -ldb for Linux.
+mandoc-db: mandoc-db.o libmandoc.a
+	$(CC) -o $@ mandoc-db.o libmandoc.a 
+
 llib-lmandoc.ln: $(MANDOC_LNS)
 	$(LINT) $(LINTFLAGS) -Cmandoc $(MANDOC_LNS)
+
+llib-lmandoc-db.ln: $(MANDOCDB_LNS)
+	$(LINT) $(LINTFLAGS) -Cmandoc-db $(MANDOCDB_LNS)
 
 mdocml.md5: mdocml.tar.gz
 	md5 mdocml.tar.gz >$@
