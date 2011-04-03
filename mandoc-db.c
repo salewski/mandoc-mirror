@@ -38,7 +38,9 @@
 #include "mandoc.h"
 
 #define	MANDOC_DB	 "mandoc.db"
+#define	MANDOC_IDX	 "mandoc.index"
 #define	MANDOC_BUFSZ	  BUFSIZ
+#define	MANDOC_FLAGS	  O_CREAT|O_TRUNC|O_RDWR
 
 enum	type {
 	MANDOC_NONE = 0,
@@ -62,8 +64,7 @@ static	void		  dbt_init(DBT *, size_t *);
 static	void		  version(void);
 static	void		  usage(void);
 static	void		  pmdoc(DB *, const char *, 
-				DBT *, size_t *, 
-				DBT *, size_t *, 
+				DBT *, size_t *, DBT *, 
 				const char *, struct mdoc *);
 static	void		  pmdoc_node(MDOC_ARGS);
 static	void		  pmdoc_Fd(MDOC_ARGS);
@@ -207,15 +208,21 @@ main(int argc, char *argv[])
 {
 	struct mparse	*mp; /* parse sequence */
 	struct mdoc	*mdoc; /* resulting mdoc */
-	const char	*fn, 
-	      		*dir; /* result dir (default: cwd) */
-	char		 fbuf[MAXPATHLEN],  /* btree fname */
+	char		*fn;
+	const char	*dir; /* result dir (default: cwd) */
+	char		 ibuf[MAXPATHLEN], /* index fname */
+			 ibbuf[MAXPATHLEN], /* index backup fname */
+			 fbuf[MAXPATHLEN],  /* btree fname */
 			 fbbuf[MAXPATHLEN]; /* btree backup fname */
 	int		 c;
-	DB		*db; /* open database */
-	DBT		 key, val; /* persistent entries */
-	size_t		 ksz, vsz; /* entry buffer sizes */
+	DB		*index, /* index database */
+			*db; /* keyword database */
+	DBT		 rkey, rval, /* recno entries */
+			 key, val; /* persistent keyword entries */
+	size_t		 ksz; /* entry buffer size */
+	char		 vbuf[8];
 	BTREEINFO	 info; /* btree configuration */
+	recno_t		 rec;
 	extern int	 optind;
 	extern char	*optarg;
 
@@ -225,7 +232,7 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
-	dir = "./";
+	dir = "";
 
 	while (-1 != (c = getopt(argc, argv, "d:V")))
 		switch (c) {
@@ -244,75 +251,119 @@ main(int argc, char *argv[])
 	argv += optind;
 
 	/*
-	 * Set up a temporary file-name into which we're going to write
-	 * all of our data.  This is securely renamed to the real
-	 * file-name after we've written all of our data.
+	 * Set up temporary file-names into which we're going to write
+	 * all of our data (both for the index and database).  These
+	 * will be securely renamed to the real file-names after we've
+	 * written all of our data.
 	 */
 
-	fbuf[0] = fbuf[MAXPATHLEN - 2] = 
-		fbbuf[0] = fbbuf[MAXPATHLEN - 1] = '\0';
+	ibuf[0] = ibuf[MAXPATHLEN - 2] =
+		ibbuf[0] = ibbuf[MAXPATHLEN - 2] = 
+		fbuf[0] = fbuf[MAXPATHLEN - 2] = 
+		fbbuf[0] = fbbuf[MAXPATHLEN - 2] = '\0';
 
 	strlcat(fbuf, dir, MAXPATHLEN);
 	strlcat(fbuf, MANDOC_DB, MAXPATHLEN);
+
 	strlcat(fbbuf, fbuf, MAXPATHLEN);
 	strlcat(fbbuf, "~", MAXPATHLEN);
 
+	strlcat(ibuf, dir, MAXPATHLEN);
+	strlcat(ibuf, MANDOC_IDX, MAXPATHLEN);
+
+	strlcat(ibbuf, ibuf, MAXPATHLEN);
+	strlcat(ibbuf, "~", MAXPATHLEN);
+
 	if ('\0' != fbuf[MAXPATHLEN - 2] ||
-			'\0' != fbbuf[MAXPATHLEN - 2]) {
-		fprintf(stderr, "%s: Bad filename\n", progname);
+			'\0' != fbbuf[MAXPATHLEN - 2] ||
+			'\0' != ibuf[MAXPATHLEN - 2] ||
+			'\0' != ibbuf[MAXPATHLEN - 2]) {
+		fprintf(stderr, "%s: Path too long\n", progname);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
 	/*
-	 * Open a BTREE database that allows duplicates.  If the
-	 * database already exists (it's a backup anyway), then blow it
-	 * away with O_TRUNC.
+	 * For the keyword database, open a BTREE database that allows
+	 * duplicates.  For the index database, use a standard RECNO
+	 * database type.
 	 */
 
 	memset(&info, 0, sizeof(BTREEINFO));
 	info.flags = R_DUP;
-
-	db = dbopen(fbbuf, O_CREAT|O_TRUNC|O_RDWR, 
-			0644, DB_BTREE, &info);
+	db = dbopen(fbbuf, MANDOC_FLAGS, 0644, DB_BTREE, &info);
 
 	if (NULL == db) {
 		perror(fbbuf);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
-	/* Use the auto-parser and don't report any errors. */
+	index = dbopen(ibbuf, MANDOC_FLAGS, 0644, DB_RECNO, NULL);
 
-	mp = mparse_alloc(MPARSE_AUTO, MANDOCLEVEL_FATAL, NULL, NULL);
+	if (NULL == db) {
+		perror(ibbuf);
+		(*db->close)(db);
+		exit((int)MANDOCLEVEL_SYSERR);
+	}
 
 	/*
 	 * Try parsing the manuals given on the command line.  If we
 	 * totally fail, then just keep on going.  Take resulting trees
 	 * and push them down into the database code.
+	 * Use the auto-parser and don't report any errors.
 	 */
+
+	mp = mparse_alloc(MPARSE_AUTO, MANDOCLEVEL_FATAL, NULL, NULL);
 
 	memset(&key, 0, sizeof(DBT));
 	memset(&val, 0, sizeof(DBT));
-	ksz = vsz = 0;
+	memset(&rkey, 0, sizeof(DBT));
+	memset(&rval, 0, sizeof(DBT));
+
+	val.size = sizeof(vbuf);
+	val.data = vbuf;
+	rkey.size = sizeof(recno_t);
+
+	rec = 1;
+	ksz = 0;
 
 	while (NULL != (fn = *argv++)) {
 		mparse_reset(mp);
+
 		if (mparse_readfd(mp, -1, fn) >= MANDOCLEVEL_FATAL)
 			continue;
+
 		mparse_result(mp, &mdoc, NULL);
-		if (mdoc)
-			pmdoc(db, fbbuf, &key, &ksz, 
-				&val, &vsz, fn, mdoc);
+		if (NULL == mdoc)
+			continue;
+
+		rkey.data = &rec;
+		rval.data = fn;
+		rval.size = strlen(fn) + 1;
+
+		if (-1 == (*index->put)(index, &rkey, &rval, 0)) {
+			perror(ibbuf);
+			break;
+		}
+
+		memset(val.data, 0, sizeof(uint32_t));
+		memcpy(val.data + 4, &rec, sizeof(uint32_t));
+
+		pmdoc(db, fbbuf, &key, &ksz, &val, fn, mdoc);
+		rec++;
 	}
 
 	(*db->close)(db);
+	(*index->close)(index);
+
 	mparse_free(mp);
 
 	free(key.data);
-	free(val.data);
 
 	/* Atomically replace the file with our temporary one. */
 
 	if (-1 == rename(fbbuf, fbuf))
+		perror(fbuf);
+	if (-1 == rename(ibbuf, ibuf))
 		perror(fbuf);
 
 	return((int)MANDOCLEVEL_OK);
@@ -351,7 +402,6 @@ dbt_appendb(DBT *key, size_t *ksz, const void *cp, size_t sz)
 
 	while (key->size + sz >= *ksz) {
 		*ksz = key->size + sz + MANDOC_BUFSZ;
-		*ksz = *ksz + (4 - (*ksz % 4));
 		key->data = mandoc_realloc(key->data, *ksz);
 	}
 
@@ -369,27 +419,15 @@ dbt_append(DBT *key, size_t *ksz, const char *cp)
 {
 	size_t		 sz;
 
-	assert(key->data);
-	assert(key->size <= *ksz);
-
 	if (0 == (sz = strlen(cp)))
 		return;
 
-	/* Overshoot by MANDOC_BUFSZ (and nil terminator). */
-
-	while (key->size + sz + 1 >= *ksz) {
-		*ksz = key->size + sz + 1 + MANDOC_BUFSZ;
-		*ksz = *ksz + (4 - (*ksz % 4));
-		key->data = mandoc_realloc(key->data, *ksz);
-	}
-
-	/* Space-separate appended tokens. */
+	assert(key->data);
 
 	if (key->size)
 		((char *)key->data)[(int)key->size - 1] = ' ';
 
-	memcpy(key->data + (int)key->size, cp, sz + 1);
-	key->size += sz + 1;
+	dbt_appendb(key, ksz, cp, sz + 1);
 }
 
 /* ARGSUSED */
@@ -604,23 +642,9 @@ pmdoc_node(MDOC_ARGS)
 
 static void
 pmdoc(DB *db, const char *dbn, 
-		DBT *key, size_t *ksz, 
-		DBT *val, size_t *valsz,
+		DBT *key, size_t *ksz, DBT *val, 
 		const char *path, struct mdoc *m)
 {
-	uint32_t	 flag;
-
-	flag = MANDOC_NONE;
-
-	/* 
-	 * Database values are a 4-byte bit-field followed by the path
-	 * of the manual.  Allocate all the space we'll need now; we
-	 * change the bit-field depending on the key type.
-	 */
-
-	dbt_init(val, valsz);
-	dbt_appendb(val, valsz, &flag, 4);
-	dbt_append(val, valsz, path);
 
 	pmdoc_node(db, dbn, key, ksz, val, mdoc_node(m));
 }
