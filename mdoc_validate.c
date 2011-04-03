@@ -2194,7 +2194,7 @@ post_os(POST_ARGS)
 			return(0);
 		}
 #else /*!OSNAME */
-		if (uname(&utsname)) {
+		if (-1 == uname(&utsname)) {
 			mdoc_nmsg(mdoc, n, MANDOCERR_UNAME);
                         mdoc->meta.os = mandoc_strdup("UNKNOWN");
                         return(post_prol(mdoc));
