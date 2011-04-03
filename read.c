@@ -709,8 +709,10 @@ void
 mparse_result(struct mparse *curp, struct mdoc **mdoc, struct man **man)
 {
 
-	*mdoc = curp->mdoc;
-	*man = curp->man;
+	if (mdoc)
+		*mdoc = curp->mdoc;
+	if (man)
+		*man = curp->man;
 }
 
 void
