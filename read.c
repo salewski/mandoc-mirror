@@ -662,6 +662,8 @@ mparse_alloc(enum mparset inttype, enum mandoclevel wlevel, mandocmsg mmsg, void
 {
 	struct mparse	*curp;
 
+	assert(wlevel <= MANDOCLEVEL_FATAL);
+
 	curp = mandoc_calloc(1, sizeof(struct mparse));
 
 	curp->wlevel = wlevel;
