@@ -14,6 +14,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <sys/param.h>
 
 #include <assert.h>
@@ -34,7 +38,7 @@
 #include "mandoc.h"
 
 #define	MANDOC_DB	 "mandoc.db"
-#define	MANDOC_BUFSZ	  10
+#define	MANDOC_BUFSZ	  BUFSIZ
 
 enum	type {
 	MANDOC_NONE = 0,
@@ -201,21 +205,19 @@ static	const pmdoc_nf	  mdocs[MDOC_MAX] = {
 int
 main(int argc, char *argv[])
 {
-	struct mparse	*mp;
-	struct mdoc	*mdoc;
-	struct man	*man;
-	const char	*f, *fn;
-	size_t		 sz;
-	char		 fbuf[MAXPATHLEN];
+	struct mparse	*mp; /* parse sequence */
+	struct mdoc	*mdoc; /* resulting mdoc */
+	const char	*fn, 
+	      		*dir; /* result dir (default: cwd) */
+	char		 fbuf[MAXPATHLEN],  /* btree fname */
+			 fbbuf[MAXPATHLEN]; /* btree backup fname */
 	int		 c;
-	DB		*db;
-	DBT		 key, val;
-	size_t		 ksz, vsz;
-	BTREEINFO	 info;
+	DB		*db; /* open database */
+	DBT		 key, val; /* persistent entries */
+	size_t		 ksz, vsz; /* entry buffer sizes */
+	BTREEINFO	 info; /* btree configuration */
 	extern int	 optind;
 	extern char	*optarg;
-
-	f = MANDOC_DB;
 
 	progname = strrchr(argv[0], '/');
 	if (progname == NULL)
@@ -223,10 +225,12 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
-	while (-1 != (c = getopt(argc, argv, "f:V")))
+	dir = "./";
+
+	while (-1 != (c = getopt(argc, argv, "d:V")))
 		switch (c) {
-		case ('f'):
-			f = optarg;
+		case ('d'):
+			dir = optarg;
 			break;
 		case ('V'):
 			version();
@@ -245,14 +249,19 @@ main(int argc, char *argv[])
 	 * file-name after we've written all of our data.
 	 */
 
-	if (0 == (sz = strlen(f)) || sz + 5 >= MAXPATHLEN) {
+	fbuf[0] = fbuf[MAXPATHLEN - 2] = 
+		fbbuf[0] = fbbuf[MAXPATHLEN - 1] = '\0';
+
+	strlcat(fbuf, dir, MAXPATHLEN);
+	strlcat(fbuf, MANDOC_DB, MAXPATHLEN);
+	strlcat(fbbuf, fbuf, MAXPATHLEN);
+	strlcat(fbbuf, "~", MAXPATHLEN);
+
+	if ('\0' != fbuf[MAXPATHLEN - 2] ||
+			'\0' != fbbuf[MAXPATHLEN - 2]) {
 		fprintf(stderr, "%s: Bad filename\n", progname);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
-
-	memcpy(fbuf, f, sz);
-	memcpy(fbuf + (int)sz, ".bak", 4);
-	fbuf[(int)sz + 4] = '\0';
 
 	/*
 	 * Open a BTREE database that allows duplicates.  If the
@@ -263,11 +272,11 @@ main(int argc, char *argv[])
 	memset(&info, 0, sizeof(BTREEINFO));
 	info.flags = R_DUP;
 
-	db = dbopen(fbuf, O_CREAT|O_TRUNC|O_RDWR, 
+	db = dbopen(fbbuf, O_CREAT|O_TRUNC|O_RDWR, 
 			0644, DB_BTREE, &info);
 
 	if (NULL == db) {
-		perror(f);
+		perror(fbbuf);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
@@ -286,13 +295,12 @@ main(int argc, char *argv[])
 	ksz = vsz = 0;
 
 	while (NULL != (fn = *argv++)) {
-		printf("Trying: %s\n", fn);
 		mparse_reset(mp);
 		if (mparse_readfd(mp, -1, fn) >= MANDOCLEVEL_FATAL)
 			continue;
-		mparse_result(mp, &mdoc, &man);
+		mparse_result(mp, &mdoc, NULL);
 		if (mdoc)
-			pmdoc(db, fbuf, &key, &ksz, 
+			pmdoc(db, fbbuf, &key, &ksz, 
 				&val, &vsz, fn, mdoc);
 	}
 
@@ -304,8 +312,8 @@ main(int argc, char *argv[])
 
 	/* Atomically replace the file with our temporary one. */
 
-	if (-1 == rename(fbuf, f))
-		perror(f);
+	if (-1 == rename(fbbuf, fbuf))
+		perror(fbuf);
 
 	return((int)MANDOCLEVEL_OK);
 }
@@ -630,7 +638,7 @@ usage(void)
 
 	fprintf(stderr, "usage: %s "
 			"[-V] "
-			"[-f path] "
+			"[-d path] "
 			"[file...]\n", 
 			progname);
 }

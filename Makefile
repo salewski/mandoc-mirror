@@ -216,7 +216,7 @@ compat.o compat.ln: config.h
 MANDOCDB_OBJS	 = mandoc-db.o
 MANDOCDB_LNS	 = mandoc-db.ln
 
-$(MANDOCDB_OBJS) $(MANDOCDB_LNS): mandoc.h mdoc.h man.h
+$(MANDOCDB_OBJS) $(MANDOCDB_LNS): mandoc.h mdoc.h man.h config.h
 
 INDEX_MANS	 = mandoc.1.html \
 		   mandoc.1.xhtml \
@@ -316,8 +316,8 @@ mandoc: $(MANDOC_OBJS) libmandoc.a
 	$(CC) -o $@ $(MANDOC_OBJS) libmandoc.a
 
 # You'll need -ldb for Linux.
-mandoc-db: mandoc-db.o libmandoc.a
-	$(CC) -o $@ mandoc-db.o libmandoc.a 
+mandoc-db: $(MANDOCDB_OBJS) libmandoc.a
+	$(CC) -o $@ $(MANDOCDB_OBJS) libmandoc.a
 
 llib-lmandoc.ln: $(MANDOC_LNS)
 	$(LINT) $(LINTFLAGS) -Cmandoc $(MANDOC_LNS)
