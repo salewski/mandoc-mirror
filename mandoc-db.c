@@ -61,7 +61,6 @@ static	void		  dbt_append(DBT *, size_t *, const char *);
 static	void		  dbt_appendb(DBT *, size_t *, 
 				const void *, size_t);
 static	void		  dbt_init(DBT *, size_t *);
-static	void		  version(void);
 static	void		  usage(void);
 static	void		  pmdoc(DB *, const char *, 
 				DBT *, size_t *, DBT *, 
@@ -234,14 +233,11 @@ main(int argc, char *argv[])
 
 	dir = "";
 
-	while (-1 != (c = getopt(argc, argv, "d:V")))
+	while (-1 != (c = getopt(argc, argv, "d:")))
 		switch (c) {
 		case ('d'):
 			dir = optarg;
 			break;
-		case ('V'):
-			version();
-			return((int)MANDOCLEVEL_OK);
 		default:
 			usage();
 			return((int)MANDOCLEVEL_BADARG);
@@ -329,8 +325,10 @@ main(int argc, char *argv[])
 	while (NULL != (fn = *argv++)) {
 		mparse_reset(mp);
 
-		if (mparse_readfd(mp, -1, fn) >= MANDOCLEVEL_FATAL)
+		if (mparse_readfd(mp, -1, fn) >= MANDOCLEVEL_FATAL) {
+			fprintf(stderr, "%s: Parse failure\n", fn);
 			continue;
+		}
 
 		mparse_result(mp, &mdoc, NULL);
 		if (NULL == mdoc)
@@ -443,10 +441,21 @@ pmdoc_Fd(MDOC_ARGS)
 		return;
 	if (NULL == (n = n->child) || MDOC_TEXT != n->type)
 		return;
+
+	/*
+	 * Only consider those `Fd' macro fields that begin with an
+	 * "inclusion" token (versus, e.g., #define).
+	 */
 	if (strcmp("#include", n->string))
 		return;
+
 	if (NULL == (n = n->next) || MDOC_TEXT != n->type)
 		return;
+
+	/*
+	 * Strip away the enclosing angle brackets and make sure we're
+	 * not zero-length.
+	 */
 
 	start = n->string;
 	if ('<' == *start)
@@ -501,7 +510,7 @@ pmdoc_Fn(MDOC_ARGS)
 	if (NULL == cp)
 		cp = n->child->string;
 
-	/* Ignore pointers. */
+	/* Strip away pointer symbol. */
 
 	while ('*' == *cp)
 		cp++;
@@ -528,7 +537,7 @@ pmdoc_Vt(MDOC_ARGS)
 		return;
 
 	/*
-	 * Strip away leading '*' and trailing ';'.
+	 * Strip away leading pointer symbol '*' and trailing ';'.
 	 */
 
 	start = n->last->string;
@@ -650,18 +659,10 @@ pmdoc(DB *db, const char *dbn,
 }
 
 static void
-version(void)
-{
-
-	printf("%s %s\n", progname, VERSION);
-}
-
-static void
 usage(void)
 {
 
 	fprintf(stderr, "usage: %s "
-			"[-V] "
 			"[-d path] "
 			"[file...]\n", 
 			progname);
