@@ -1086,9 +1086,9 @@ mdoc_bl_pre(MDOC_ARGS)
 static int
 mdoc_ex_pre(MDOC_ARGS)
 {
-	const struct mdoc_node	*nn;
-	struct tag		*t;
-	struct htmlpair		 tag;
+	struct tag	*t;
+	struct htmlpair	 tag;
+	int		 nchild;
 
 	if (n->prev)
 		print_otag(h, TAG_BR, 0, NULL);
@@ -1096,22 +1096,25 @@ mdoc_ex_pre(MDOC_ARGS)
 	PAIR_CLASS_INIT(&tag, "utility");
 
 	print_text(h, "The");
-	for (nn = n->child; nn; nn = nn->next) {
+
+	nchild = n->nchild;
+	for (n = n->child; n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
+
 		t = print_otag(h, TAG_B, 1, &tag);
-		print_text(h, nn->string);
+		print_text(h, n->string);
 		print_tagq(h, t);
 
-		h->flags |= HTML_NOSPACE;
-
-		if (nn->next && NULL == nn->next->next)
-			print_text(h, ", and");
-		else if (nn->next)
+		if (nchild > 2 && n->next) {
+			h->flags |= HTML_NOSPACE;
 			print_text(h, ",");
-		else
-			h->flags &= ~HTML_NOSPACE;
+		}
+
+		if (n->next && NULL == n->next->next)
+			print_text(h, "and");
 	}
 
-	if (n->child && n->child->next)
+	if (nchild > 1)
 		print_text(h, "utilities exit");
 	else
 		print_text(h, "utility exits");
@@ -1775,16 +1778,18 @@ mdoc_rv_pre(MDOC_ARGS)
 	if (n->prev)
 		print_otag(h, TAG_BR, 0, NULL);
 
+	PAIR_CLASS_INIT(&tag, "fname");
+
 	print_text(h, "The");
 
 	nchild = n->nchild;
 	for (n = n->child; n; n = n->next) {
 		assert(MDOC_TEXT == n->type);
-		PAIR_CLASS_INIT(&tag, "fname");
 
 		t = print_otag(h, TAG_B, 1, &tag);
 		print_text(h, n->string);
 		print_tagq(h, t);
+
 		h->flags |= HTML_NOSPACE;
 		print_text(h, "()");
 

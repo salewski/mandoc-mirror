@@ -1189,11 +1189,11 @@ termp_rv_pre(DECL_ARGS)
 	term_word(p, "The");
 
 	nchild = n->nchild;
-
 	for (n = n->child; n; n = n->next) {
 		term_fontpush(p, TERMFONT_BOLD);
 		term_word(p, n->string);
 		term_fontpop(p);
+
 		p->flags |= TERMP_NOSPACE;
 		term_word(p, "()");
 
@@ -1229,31 +1229,34 @@ termp_rv_pre(DECL_ARGS)
 static int
 termp_ex_pre(DECL_ARGS)
 {
-	const struct mdoc_node	*nn;
+	int		 nchild;
 
+	term_newln(p);
 	term_word(p, "The");
 
-	for (nn = n->child; nn; nn = nn->next) {
+	nchild = n->nchild;
+	for (n = n->child; n; n = n->next) {
 		term_fontpush(p, TERMFONT_BOLD);
-		term_word(p, nn->string);
+		term_word(p, n->string);
 		term_fontpop(p);
-		p->flags |= TERMP_NOSPACE;
-		if (nn->next && NULL == nn->next->next)
-			term_word(p, ", and");
-		else if (nn->next)
+
+		if (nchild > 2 && n->next) {
+			p->flags |= TERMP_NOSPACE;
 			term_word(p, ",");
-		else
-			p->flags &= ~TERMP_NOSPACE;
+		}
+
+		if (n->next && NULL == n->next->next)
+			term_word(p, "and");
 	}
 
-	if (n->child && n->child->next)
+	if (nchild > 1)
 		term_word(p, "utilities exit");
 	else
 		term_word(p, "utility exits");
 
        	term_word(p, "0 on success, and >0 if an error occurs.");
-	p->flags |= TERMP_SENTENCE;
 
+	p->flags |= TERMP_SENTENCE;
 	return(0);
 }
 
