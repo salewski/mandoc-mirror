@@ -1558,6 +1558,7 @@ mdoc_fn_pre(MDOC_ARGS)
 
 	h->flags |= HTML_NOSPACE;
 	print_text(h, "(");
+	h->flags |= HTML_NOSPACE;
 
 	bufinit(h);
 	PAIR_CLASS_INIT(&tag[0], "farg");
