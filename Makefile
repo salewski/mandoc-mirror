@@ -55,6 +55,7 @@ SRCS		 = Makefile \
 		   libroff.h \
 		   main.c \
 		   main.h \
+		   man.h \
 		   man.7 \
 		   man.c \
 		   man_hash.c \
@@ -66,7 +67,10 @@ SRCS		 = Makefile \
 		   mandoc.3 \
 		   mandoc.c \
 		   mandoc.h \
+		   mandoc-db.1 \
+		   mandoc-db.c \
 		   mandoc_char.7 \
+		   mdoc.h \
 		   mdoc.7 \
 		   mdoc.c \
 		   mdoc_argv.c \
