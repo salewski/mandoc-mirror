@@ -456,11 +456,9 @@ term_fontpop(struct termp *p)
 void
 term_word(struct termp *p, const char *word)
 {
-	const char	*sv, *seq;
+	const char	*seq;
 	size_t		 ssz;
 	enum roffdeco	 deco;
-
-	sv = word;
 
 	if ( ! (TERMP_NOSPACE & p->flags)) {
 		if ( ! (TERMP_KEEP & p->flags)) {
