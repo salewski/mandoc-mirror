@@ -751,8 +751,7 @@ mdoc_nm_pre(MDOC_ARGS)
 static int
 mdoc_xr_pre(MDOC_ARGS)
 {
-	struct htmlpair	 	 tag[2];
-	const struct mdoc_node	*nn;
+	struct htmlpair	 tag[2];
 
 	if (NULL == n->child)
 		return(0);
@@ -768,16 +767,16 @@ mdoc_xr_pre(MDOC_ARGS)
 	} else
 		print_otag(h, TAG_A, 1, tag);
 
-	nn = n->child;
-	print_text(h, nn->string);
+	n = n->child;
+	print_text(h, n->string);
 
-	if (NULL == (nn = nn->next))
+	if (NULL == (n = n->next))
 		return(0);
 
 	h->flags |= HTML_NOSPACE;
 	print_text(h, "(");
 	h->flags |= HTML_NOSPACE;
-	print_text(h, nn->string);
+	print_text(h, n->string);
 	h->flags |= HTML_NOSPACE;
 	print_text(h, ")");
 	return(0);
@@ -1168,14 +1167,13 @@ mdoc_d1_pre(MDOC_ARGS)
 static int
 mdoc_sx_pre(MDOC_ARGS)
 {
-	struct htmlpair		 tag[2];
-	const struct mdoc_node	*nn;
-	char			 buf[BUFSIZ];
+	struct htmlpair	 tag[2];
+	char		 buf[BUFSIZ];
 
 	strlcpy(buf, "#", BUFSIZ);
-	for (nn = n->child; nn; nn = nn->next) {
-		html_idcat(buf, nn->string, BUFSIZ);
-		if (nn->next)
+	for (n = n->child; n; n = n->next) {
+		html_idcat(buf, n->string, BUFSIZ);
+		if (n->next)
 			html_idcat(buf, " ", BUFSIZ);
 	}
 
@@ -1451,13 +1449,13 @@ mdoc_ft_pre(MDOC_ARGS)
 static int
 mdoc_fn_pre(MDOC_ARGS)
 {
-	struct tag		*t;
-	struct htmlpair	 	 tag[2];
-	const struct mdoc_node	*nn;
-	char			 nbuf[BUFSIZ];
-	const char		*sp, *ep;
-	int			 sz, i;
+	struct tag	*t;
+	struct htmlpair	 tag[2];
+	char		 nbuf[BUFSIZ];
+	const char	*sp, *ep;
+	int		 sz, i, pretty;
 
+	pretty = MDOC_SYNPRETTY & n->flags;
 	synopsis_pre(h, n);
 
 	/* Split apart into type and name. */
@@ -1515,14 +1513,14 @@ mdoc_fn_pre(MDOC_ARGS)
 	bufcat_style(h, "white-space", "nowrap");
 	PAIR_STYLE_INIT(&tag[1], h);
 
-	for (nn = n->child->next; nn; nn = nn->next) {
+	for (n = n->child->next; n; n = n->next) {
 		i = 1;
 		if (MDOC_SYNPRETTY & n->flags)
 			i = 2;
 		t = print_otag(h, TAG_I, i, tag);
-		print_text(h, nn->string);
+		print_text(h, n->string);
 		print_tagq(h, t);
-		if (nn->next) {
+		if (n->next) {
 			h->flags |= HTML_NOSPACE;
 			print_text(h, ",");
 		}
@@ -1531,7 +1529,7 @@ mdoc_fn_pre(MDOC_ARGS)
 	h->flags |= HTML_NOSPACE;
 	print_text(h, ")");
 
-	if (MDOC_SYNPRETTY & n->flags) {
+	if (pretty) {
 		h->flags |= HTML_NOSPACE;
 		print_text(h, ";");
 	}
