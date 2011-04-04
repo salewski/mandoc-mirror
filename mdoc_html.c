@@ -1733,7 +1733,8 @@ mdoc_in_pre(MDOC_ARGS)
 
 		if (h->base_includes) {
 			buffmt_includes(h, n->string);
-			PAIR_HREF_INIT(&tag[i++], h->buf);
+			PAIR_HREF_INIT(&tag[i], h->buf);
+			i++;
 		} 
 
 		t = print_otag(h, TAG_A, i, tag);
