@@ -1296,32 +1296,32 @@ termp_bl_post(DECL_ARGS)
 		term_newln(p);
 }
 
-
 /* ARGSUSED */
 static int
 termp_xr_pre(DECL_ARGS)
 {
-	const struct mdoc_node *nn;
 
-	if (NULL == n->child)
+	if (NULL == (n = n->child))
 		return(0);
 
-	assert(MDOC_TEXT == n->child->type);
-	nn = n->child;
+	assert(MDOC_TEXT == n->type);
+	term_word(p, n->string);
 
-	term_word(p, nn->string);
-	if (NULL == (nn = nn->next)) 
+	if (NULL == (n = n->next)) 
 		return(0);
+
 	p->flags |= TERMP_NOSPACE;
 	term_word(p, "(");
 	p->flags |= TERMP_NOSPACE;
-	term_word(p, nn->string);
+
+	assert(MDOC_TEXT == n->type);
+	term_word(p, n->string);
+
 	p->flags |= TERMP_NOSPACE;
 	term_word(p, ")");
 
 	return(0);
 }
-
 
 /*
  * This decides how to assert whitespace before any of the SYNOPSIS set
