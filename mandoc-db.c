@@ -458,14 +458,14 @@ pmdoc_Fd(MDOC_ARGS)
 	 */
 
 	start = n->string;
-	if ('<' == *start)
+	if ('<' == *start || '"' == *start)
 		start++;
 
 	if (0 == (sz = strlen(start)))
 		return;
 
 	end = &start[(int)sz - 1];
-	if ('>' == *end)
+	if ('>' == *end || '"' == *end)
 		end--;
 
 	nil = '\0';
