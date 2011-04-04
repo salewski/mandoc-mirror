@@ -1628,19 +1628,21 @@ mdoc_lk_pre(MDOC_ARGS)
 static int
 mdoc_mt_pre(MDOC_ARGS)
 {
-	struct htmlpair	 	 tag[2];
-	struct tag		*t;
-	const struct mdoc_node	*nn;
+	struct htmlpair	 tag[2];
+	struct tag	*t;
 
 	PAIR_CLASS_INIT(&tag[0], "link-mail");
 
-	for (nn = n->child; nn; nn = nn->next) {
+	for (n = n->child; n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
+
 		bufinit(h);
 		bufcat(h, "mailto:");
-		bufcat(h, nn->string);
+		bufcat(h, n->string);
+
 		PAIR_HREF_INIT(&tag[1], h->buf);
 		t = print_otag(h, TAG_A, 2, tag);
-		print_text(h, nn->string);
+		print_text(h, n->string);
 		print_tagq(h, t);
 	}
 	
@@ -1766,31 +1768,36 @@ mdoc_ic_pre(MDOC_ARGS)
 static int
 mdoc_rv_pre(MDOC_ARGS)
 {
-	const struct mdoc_node	*nn;
-	struct htmlpair		 tag;
-	struct tag		*t;
+	struct htmlpair	 tag;
+	struct tag	*t;
+	int		 nchild;
 
 	if (n->prev)
 		print_otag(h, TAG_BR, 0, NULL);
 
 	print_text(h, "The");
 
-	for (nn = n->child; nn; nn = nn->next) {
+	nchild = n->nchild;
+	for (n = n->child; n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
 		PAIR_CLASS_INIT(&tag, "fname");
-		t = print_otag(h, TAG_B, 1, &tag);
-		print_text(h, nn->string);
-		print_tagq(h, t);
 
+		t = print_otag(h, TAG_B, 1, &tag);
+		print_text(h, n->string);
+		print_tagq(h, t);
 		h->flags |= HTML_NOSPACE;
-		if (nn->next && NULL == nn->next->next)
-			print_text(h, "(), and");
-		else if (nn->next)
-			print_text(h, "(),");
-		else
-			print_text(h, "()");
+		print_text(h, "()");
+
+		if (nchild > 2 && n->next) {
+			h->flags |= HTML_NOSPACE;
+			print_text(h, ",");
+		}
+
+		if (n->next && NULL == n->next->next)
+			print_text(h, "and");
 	}
 
-	if (n->child && n->child->next)
+	if (nchild > 1)
 		print_text(h, "functions return");
 	else
 		print_text(h, "function returns");
