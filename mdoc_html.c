@@ -1696,15 +1696,21 @@ mdoc_fo_post(MDOC_ARGS)
 static int
 mdoc_in_pre(MDOC_ARGS)
 {
-	const struct mdoc_node	*nn;
-	struct tag		*t;
-	struct htmlpair		 tag[2];
-	int			 i;
+	struct tag	*t;
+	struct htmlpair	 tag[2];
+	int		 i;
 
 	synopsis_pre(h, n);
 
 	PAIR_CLASS_INIT(&tag[0], "includes");
 	print_otag(h, TAG_B, 1, tag);
+
+	/*
+	 * The first argument of the `In' gets special treatment as
+	 * being a linked value.  Subsequent values are printed
+	 * afterward.  groff does similarly.  This also handles the case
+	 * of no children.
+	 */
 
 	if (MDOC_SYNPRETTY & n->flags && MDOC_LINE & n->flags)
 		print_text(h, "#include");
@@ -1712,22 +1718,33 @@ mdoc_in_pre(MDOC_ARGS)
 	print_text(h, "<");
 	h->flags |= HTML_NOSPACE;
 
-	for (nn = n->child; nn; nn = nn->next) {
+	if (NULL != (n = n->child)) {
+		assert(MDOC_TEXT == n->type);
+
 		PAIR_CLASS_INIT(&tag[0], "link-includes");
-		i = 1;
 		bufinit(h);
+
+		i = 1;
+
 		if (h->base_includes) {
-			buffmt_includes(h, nn->string);
-			PAIR_HREF_INIT(&tag[i], h->buf);
-			i++;
-		}
+			buffmt_includes(h, n->string);
+			PAIR_HREF_INIT(&tag[i++], h->buf);
+		} 
+
 		t = print_otag(h, TAG_A, i, tag);
-		print_mdoc_node(m, nn, h);
+		print_text(h, n->string);
 		print_tagq(h, t);
+
+		n = n->next;
 	}
 
 	h->flags |= HTML_NOSPACE;
 	print_text(h, ">");
+
+	for ( ; n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
+		print_text(h, n->string);
+	}
 
 	return(0);
 }
