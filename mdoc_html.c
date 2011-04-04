@@ -1405,13 +1405,61 @@ mdoc_fa_pre(MDOC_ARGS)
 static int
 mdoc_fd_pre(MDOC_ARGS)
 {
-	struct htmlpair	 tag;
+	struct htmlpair	 tag[2];
+	char		 buf[BUFSIZ];
+	size_t		 sz;
+	int		 i;
+	struct tag	*t;
 
 	synopsis_pre(h, n);
 
-	PAIR_CLASS_INIT(&tag, "macro");
-	print_otag(h, TAG_B, 1, &tag);
-	return(1);
+	if (NULL == (n = n->child))
+		return(0);
+
+	assert(MDOC_TEXT == n->type);
+
+	if (strcmp(n->string, "#include")) {
+		PAIR_CLASS_INIT(&tag[0], "macro");
+		print_otag(h, TAG_B, 1, tag);
+		return(1);
+	}
+
+	PAIR_CLASS_INIT(&tag[0], "includes");
+	print_otag(h, TAG_B, 1, tag);
+	print_text(h, n->string);
+
+	if (NULL != (n = n->next)) {
+		assert(MDOC_TEXT == n->type);
+		strlcpy(buf, '<' == *n->string || '"' == *n->string ? 
+				n->string + 1 : n->string, BUFSIZ);
+
+		sz = strlen(buf);
+		if (sz && ('>' == buf[sz - 1] || '"' == buf[sz - 1]))
+			buf[sz - 1] = '\0';
+
+		PAIR_CLASS_INIT(&tag[0], "link-includes");
+		bufinit(h);
+		
+		i = 1;
+		if (h->base_includes) {
+			buffmt_includes(h, buf);
+			PAIR_HREF_INIT(&tag[i], h->buf);
+			i++;
+		} 
+
+		t = print_otag(h, TAG_A, i, tag);
+		print_text(h, n->string);
+		print_tagq(h, t);
+
+		n = n->next;
+	}
+
+	for ( ; n; n = n->next) {
+		assert(MDOC_TEXT == n->type);
+		print_text(h, n->string);
+	}
+
+	return(0);
 }
 
 
