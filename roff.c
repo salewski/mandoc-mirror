@@ -739,10 +739,10 @@ roff_block(ROFF_ARGS)
 			mandoc_msg(MANDOCERR_REQUEST, r->parse, ln, ppos,
 			    roffs[tok].name);
 
-		while ((*bufp)[pos] && ' ' != (*bufp)[pos])
+		while ((*bufp)[pos] && ! isspace((unsigned char)(*bufp)[pos]))
 			pos++;
 
-		while (' ' == (*bufp)[pos])
+		while (isspace((unsigned char)(*bufp)[pos]))
 			(*bufp)[pos++] = '\0';
 	}
 
@@ -763,9 +763,7 @@ roff_block(ROFF_ARGS)
 	/* If present, process the custom end-of-line marker. */
 
 	sv = pos;
-	while ((*bufp)[pos] &&
-			' ' != (*bufp)[pos] && 
-			'\t' != (*bufp)[pos])
+	while ((*bufp)[pos] && ! isspace((unsigned char)(*bufp)[pos]))
 		pos++;
 
 	/*
