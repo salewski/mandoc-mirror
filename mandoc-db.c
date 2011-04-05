@@ -68,13 +68,11 @@ static	void		  dbt_appendb(DBT *, size_t *,
 static	void		  dbt_init(DBT *, size_t *);
 static	void		  dbt_put(DB *, const char *, DBT *, DBT *);
 static	void		  usage(void);
-static	void		  pman(DB *, const char *, 
-				DBT *, size_t *, DBT *, 
-				const char *, struct man *);
+static	void		  pman(DB *, const char *, DBT *, 
+				size_t *, DBT *, struct man *);
 static	int		  pman_node(MAN_ARGS);
-static	void		  pmdoc(DB *, const char *, 
-				DBT *, size_t *, DBT *, 
-				const char *, struct mdoc *);
+static	void		  pmdoc(DB *, const char *, DBT *, 
+				size_t *, DBT *, struct mdoc *);
 static	void		  pmdoc_node(MDOC_ARGS);
 static	void		  pmdoc_Fd(MDOC_ARGS);
 static	void		  pmdoc_In(MDOC_ARGS);
@@ -225,7 +223,7 @@ main(int argc, char *argv[])
 			 fbuf[MAXPATHLEN],  /* btree fname */
 			 fbbuf[MAXPATHLEN]; /* btree backup fname */
 	int		 c;
-	DB		*index, /* index database */
+	DB		*idx, /* index database */
 			*db; /* keyword database */
 	DBT		 rkey, rval, /* recno entries */
 			 key, val; /* persistent keyword entries */
@@ -304,7 +302,7 @@ main(int argc, char *argv[])
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
-	index = dbopen(ibbuf, MANDOC_FLAGS, 0644, DB_RECNO, NULL);
+	idx = dbopen(ibbuf, MANDOC_FLAGS, 0644, DB_RECNO, NULL);
 
 	if (NULL == db) {
 		perror(ibbuf);
@@ -349,7 +347,7 @@ main(int argc, char *argv[])
 		rval.data = fn;
 		rval.size = strlen(fn) + 1;
 
-		if (-1 == (*index->put)(index, &rkey, &rval, 0)) {
+		if (-1 == (*idx->put)(idx, &rkey, &rval, 0)) {
 			perror(ibbuf);
 			break;
 		}
@@ -358,14 +356,14 @@ main(int argc, char *argv[])
 		memcpy(val.data + 4, &rec, sizeof(uint32_t));
 
 		if (mdoc)
-			pmdoc(db, fbbuf, &key, &ksz, &val, fn, mdoc);
+			pmdoc(db, fbbuf, &key, &ksz, &val, mdoc);
 		else 
-			pman(db, fbbuf, &key, &ksz, &val, fn, man);
+			pman(db, fbbuf, &key, &ksz, &val, man);
 		rec++;
 	}
 
 	(*db->close)(db);
-	(*index->close)(index);
+	(*idx->close)(idx);
 
 	mparse_free(mp);
 
@@ -754,9 +752,8 @@ pman_node(MAN_ARGS)
 }
 
 static void
-pman(DB *db, const char *dbn, 
-		DBT *key, size_t *ksz, DBT *val, 
-		const char *path, struct man *m)
+pman(DB *db, const char *dbn, DBT *key, 
+		size_t *ksz, DBT *val, struct man *m)
 {
 
 	pman_node(db, dbn, key, ksz, val, man_node(m));
@@ -764,9 +761,8 @@ pman(DB *db, const char *dbn,
 
 
 static void
-pmdoc(DB *db, const char *dbn, 
-		DBT *key, size_t *ksz, DBT *val, 
-		const char *path, struct mdoc *m)
+pmdoc(DB *db, const char *dbn, DBT *key, 
+		size_t *ksz, DBT *val, struct mdoc *m)
 {
 
 	pmdoc_node(db, dbn, key, ksz, val, mdoc_node(m));
