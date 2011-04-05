@@ -290,6 +290,7 @@ clean:
 install: all
 	mkdir -p $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(EXAMPLEDIR)
+	mkdir -p $(DESTDIR)$(LIBDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
