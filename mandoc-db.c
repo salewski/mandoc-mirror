@@ -546,7 +546,7 @@ pmdoc_Vt(MDOC_ARGS)
 		return;
 	if (MDOC_Vt == n->tok && MDOC_BODY != n->type)
 		return;
-	if (NULL == n->child || MDOC_TEXT != n->child->type)
+	if (NULL == n->last || MDOC_TEXT != n->last->type)
 		return;
 
 	/*
