@@ -66,6 +66,7 @@ static	void		  dbt_append(DBT *, size_t *, const char *);
 static	void		  dbt_appendb(DBT *, size_t *, 
 				const void *, size_t);
 static	void		  dbt_init(DBT *, size_t *);
+static	void		  dbt_put(DB *, const char *, DBT *, DBT *);
 static	void		  usage(void);
 static	void		  pman(DB *, const char *, 
 				DBT *, size_t *, DBT *, 
@@ -619,6 +620,25 @@ pmdoc_Nm(MDOC_ARGS)
 	memcpy(val->data, &fl, 4);
 }
 
+static void
+dbt_put(DB *db, const char *dbn, DBT *key, DBT *val)
+{
+
+	if (0 == key->size)
+		return;
+
+	assert(key->data);
+	assert(8 == val->size);
+	assert(val->data);
+
+	if (0 == (*db->put)(db, key, val, 0))
+		return;
+	
+	perror(dbn);
+	exit((int)MANDOCLEVEL_SYSERR);
+	/* NOTREACHED */
+}
+
 /*
  * Call out to per-macro handlers after clearing the persistent database
  * key.  If the macro sets the database key, flush it to the database.
@@ -646,14 +666,8 @@ pmdoc_node(MDOC_ARGS)
 		dbt_init(key, ksz);
 		(*mdocs[n->tok])(db, dbn, key, ksz, val, n);
 
-		if (0 == key->size)
-			break;
-		if (0 == (*db->put)(db, key, val, 0))
-			break;
-		
-		perror(dbn);
-		exit((int)MANDOCLEVEL_SYSERR);
-		/* NOTREACHED */
+		dbt_put(db, dbn, key, val);
+		break;
 	default:
 		break;
 	}
@@ -666,8 +680,9 @@ static int
 pman_node(MAN_ARGS)
 {
 	const struct man_node *head, *body;
-	const char	*end, *start;
+	const char	*start;
 	char		 nil;
+	size_t		 sz;
 	uint32_t	 fl;
 
 	if (NULL == n)
@@ -692,15 +707,40 @@ pman_node(MAN_ARGS)
 				MAN_TEXT == body->type) {
 			nil = '\0';
 
-			start = body->string;
-			if (NULL == (end = strchr(start, ' ')))
-				end = start + strlen(start);
-
-			dbt_init(key, ksz);
-			dbt_appendb(key, ksz, start, end - start + 1);
-			dbt_appendb(key, ksz, &nil, 1);
 			fl = MANDOC_NAME;
 			memcpy(val->data, &fl, 4);
+
+			start = body->string;
+
+			/* 
+			 * Go through a special heuristic dance here.
+			 * This is why -man manuals are great!
+			 * Conventionally, one or more manual names are
+			 * comma-specified prior to a whitespace, then a
+			 * dash, then a description.  Try to puzzle out
+			 * the name parts here.
+			 */
+
+			while (start) {
+				sz = strcspn(start, " ,");
+				if ('\0' == start[(int)sz])
+					break;
+
+				dbt_init(key, ksz);
+				dbt_appendb(key, ksz, start, sz);
+				dbt_appendb(key, ksz, &nil, 1);
+
+				dbt_put(db, dbn, key, val);
+
+				if (' ' == start[(int)sz])
+					break;
+
+				assert(',' == start[(int)sz]);
+				start += (int)sz + 1;
+				while (' ' == *start)
+					start++;
+			}
+
 			return(1);
 		}
 	}
