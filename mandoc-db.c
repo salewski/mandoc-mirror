@@ -51,6 +51,11 @@ enum	type {
 	MANDOC_VARIABLE
 };
 
+#define	MAN_ARGS	  DB *db, \
+			  const char *dbn, \
+			  DBT *key, size_t *ksz, \
+			  DBT *val, \
+			  const struct man_node *n
 #define	MDOC_ARGS	  DB *db, \
 			  const char *dbn, \
 			  DBT *key, size_t *ksz, \
@@ -62,6 +67,10 @@ static	void		  dbt_appendb(DBT *, size_t *,
 				const void *, size_t);
 static	void		  dbt_init(DBT *, size_t *);
 static	void		  usage(void);
+static	void		  pman(DB *, const char *, 
+				DBT *, size_t *, DBT *, 
+				const char *, struct man *);
+static	int		  pman_node(MAN_ARGS);
 static	void		  pmdoc(DB *, const char *, 
 				DBT *, size_t *, DBT *, 
 				const char *, struct mdoc *);
@@ -207,6 +216,7 @@ main(int argc, char *argv[])
 {
 	struct mparse	*mp; /* parse sequence */
 	struct mdoc	*mdoc; /* resulting mdoc */
+	struct man	*man; /* resulting man */
 	char		*fn;
 	const char	*dir; /* result dir (default: cwd) */
 	char		 ibuf[MAXPATHLEN], /* index fname */
@@ -330,8 +340,8 @@ main(int argc, char *argv[])
 			continue;
 		}
 
-		mparse_result(mp, &mdoc, NULL);
-		if (NULL == mdoc)
+		mparse_result(mp, &mdoc, &man);
+		if (NULL == mdoc && NULL == man)
 			continue;
 
 		rkey.data = &rec;
@@ -346,7 +356,10 @@ main(int argc, char *argv[])
 		memset(val.data, 0, sizeof(uint32_t));
 		memcpy(val.data + 4, &rec, sizeof(uint32_t));
 
-		pmdoc(db, fbbuf, &key, &ksz, &val, fn, mdoc);
+		if (mdoc)
+			pmdoc(db, fbbuf, &key, &ksz, &val, fn, mdoc);
+		else 
+			pman(db, fbbuf, &key, &ksz, &val, fn, man);
 		rec++;
 	}
 
@@ -648,6 +661,67 @@ pmdoc_node(MDOC_ARGS)
 	pmdoc_node(db, dbn, key, ksz, val, n->child);
 	pmdoc_node(db, dbn, key, ksz, val, n->next);
 }
+
+static int
+pman_node(MAN_ARGS)
+{
+	const struct man_node *head, *body;
+	const char	*end, *start;
+	char		 nil;
+	uint32_t	 fl;
+
+	if (NULL == n)
+		return(0);
+
+	/*
+	 * We're only searching for one thing: the first text child in
+	 * the BODY of a NAME section.  Since we don't keep track of
+	 * sections in -man, run some hoops to find out whether we're in
+	 * the correct section or not.
+	 */
+
+	if (MAN_BODY == n->type && MAN_SH == n->tok) {
+		body = n;
+		assert(body->parent);
+		if (NULL != (head = body->parent->head) &&
+				1 == head->nchild &&
+				NULL != (head = (head->child)) &&
+				MAN_TEXT == head->type &&
+				0 == strcmp(head->string, "NAME") &&
+				NULL != (body = body->child) &&
+				MAN_TEXT == body->type) {
+			nil = '\0';
+
+			start = body->string;
+			if (NULL == (end = strchr(start, ' ')))
+				end = start + strlen(start);
+
+			dbt_init(key, ksz);
+			dbt_appendb(key, ksz, start, end - start + 1);
+			dbt_appendb(key, ksz, &nil, 1);
+			fl = MANDOC_NAME;
+			memcpy(val->data, &fl, 4);
+			return(1);
+		}
+	}
+
+	if (pman_node(db, dbn, key, ksz, val, n->child))
+		return(1);
+	if (pman_node(db, dbn, key, ksz, val, n->next))
+		return(1);
+
+	return(0);
+}
+
+static void
+pman(DB *db, const char *dbn, 
+		DBT *key, size_t *ksz, DBT *val, 
+		const char *path, struct man *m)
+{
+
+	pman_node(db, dbn, key, ksz, val, man_node(m));
+}
+
 
 static void
 pmdoc(DB *db, const char *dbn, 
