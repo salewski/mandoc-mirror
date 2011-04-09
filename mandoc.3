@@ -20,6 +20,7 @@
 .Os
 .Sh NAME
 .Nm mandoc ,
+.Nm mandoc_escape ,
 .Nm man_meta ,
 .Nm man_node ,
 .Nm mdoc_meta ,
@@ -36,6 +37,12 @@
 .In man.h
 .In mdoc.h
 .In mandoc.h
+.Ft "enum mandoc_esc"
+.Fo mandoc_escape
+.Fa "const char **in"
+.Fa "const char **seq"
+.Fa "int *len"
+.Fc
 .Ft "const struct man_meta *"
 .Fo man_meta
 .Fa "const struct man *man"
@@ -130,6 +137,40 @@ free all allocated memory with
 or invoke
 .Fn mparse_reset
 and parse new files.
+.El
+.Sh REFERENCE
+This section documents the functions, types, and variables available
+via
+.In mandoc.h .
+.Ss Types
+.Bl -ohang
+.It Vt "enum mandoc_esc"
+.It Vt "enum mandocerr"
+.It Vt "enum mandoclevel"
+.It Vt "enum mparset"
+.It Vt "struct mparse"
+.It Vt "mandocmsg"
+.El
+.Ss Functions
+.Bl -ohang
+.It Fn mandoc_escape
+.It Fn man_meta
+.It Fn man_node
+.It Fn mdoc_meta
+.It Fn mdoc_node
+.It Fn mparse_alloc
+.It Fn mparse_free
+.It Fn mparse_readfd
+.It Fn mparse_reset
+.It Fn mparse_result
+.It Fn mparse_strerror
+.It Fn mparse_strlevel
+.El
+.Ss Variables
+.Bl -ohang
+.It Va man_macronames
+.It Va mdoc_argnames
+.It Va mdoc_macronames
 .El
 .Sh IMPLEMENTATION NOTES
 This section consists of structural documentation for
