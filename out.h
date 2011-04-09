@@ -31,22 +31,6 @@ enum	roffscale {
 	SCALE_MAX
 };
 
-enum	roffdeco {
-	DECO_NONE,
-	DECO_NUMBERED, /* numbered character */
-	DECO_SPECIAL, /* special character */
-	DECO_SSPECIAL, /* single-char special */
-	DECO_RESERVED, /* reserved word */
-	DECO_BOLD, /* bold font */
-	DECO_ITALIC, /* italic font */
-	DECO_ROMAN, /* "normal" undecorated font */
-	DECO_PREVIOUS, /* revert to previous font */
-	DECO_NOSPACE, /* suppress spacing */
-	DECO_FONT, /* font */
-	DECO_FFONT, /* font family */
-	DECO_MAX
-};
-
 enum	chars {
 	CHARS_ASCII, /* 7-bit ascii representation */
 	CHARS_HTML /* unicode values */
@@ -85,7 +69,6 @@ __BEGIN_DECLS
 	while (/* CONSTCOND */ 0)
 
 int	  	  a2roffsu(const char *, struct roffsu *, enum roffscale);
-int	  	  a2roffdeco(enum roffdeco *, const char **, size_t *);
 void	  	  time2a(time_t, char *, size_t);
 void	  	  tblcalc(struct rofftbl *tbl, const struct tbl_span *);
 

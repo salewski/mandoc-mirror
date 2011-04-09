@@ -94,14 +94,13 @@ static	const char	*const htmlattrs[ATTR_MAX] = {
 };
 
 static	void		  print_num(struct html *, const char *, size_t);
-static	void		  print_spec(struct html *, enum roffdeco,
-				const char *, size_t);
+static	void		  print_spec(struct html *, const char *, size_t);
 static	void		  print_res(struct html *, const char *, size_t);
 static	void		  print_ctag(struct html *, enum htmltag);
 static	void		  print_doctype(struct html *);
 static	void		  print_xmltype(struct html *);
 static	int		  print_encode(struct html *, const char *, int);
-static	void		  print_metaf(struct html *, enum roffdeco);
+static	void		  print_metaf(struct html *, enum mandoc_esc);
 static	void		  print_attr(struct html *, 
 				const char *, const char *);
 static	void		 *ml_alloc(char *, enum htmltype);
@@ -221,7 +220,7 @@ print_num(struct html *h, const char *p, size_t len)
 }
 
 static void
-print_spec(struct html *h, enum roffdeco d, const char *p, size_t len)
+print_spec(struct html *h, const char *p, size_t len)
 {
 	int		 cp;
 	const char	*rhs;
@@ -230,7 +229,7 @@ print_spec(struct html *h, enum roffdeco d, const char *p, size_t len)
 	if ((cp = chars_spec2cp(h->symtab, p, len)) > 0) {
 		printf("&#%d;", cp);
 		return;
-	} else if (-1 == cp && DECO_SSPECIAL == d) {
+	} else if (-1 == cp && 1 == len) {
 		fwrite(p, 1, len, stdout);
 		return;
 	} else if (-1 == cp)
@@ -260,21 +259,21 @@ print_res(struct html *h, const char *p, size_t len)
 
 
 static void
-print_metaf(struct html *h, enum roffdeco deco)
+print_metaf(struct html *h, enum mandoc_esc deco)
 {
 	enum htmlfont	 font;
 
 	switch (deco) {
-	case (DECO_PREVIOUS):
+	case (ESCAPE_FONTPREV):
 		font = h->metal;
 		break;
-	case (DECO_ITALIC):
+	case (ESCAPE_FONTITALIC):
 		font = HTMLFONT_ITALIC;
 		break;
-	case (DECO_BOLD):
+	case (ESCAPE_FONTBOLD):
 		font = HTMLFONT_BOLD;
 		break;
-	case (DECO_ROMAN):
+	case (ESCAPE_FONTROMAN):
 		font = HTMLFONT_NONE;
 		break;
 	default:
@@ -303,73 +302,69 @@ print_encode(struct html *h, const char *p, int norecurse)
 	size_t		 sz;
 	int		 len, nospace;
 	const char	*seq;
-	enum roffdeco	 deco;
+	enum mandoc_esc	 esc;
 	static const char rejs[6] = { '\\', '<', '>', '&', ASCII_HYPH, '\0' };
 
 	nospace = 0;
 
-	for (; *p; p++) {
+	while ('\0' != *p) {
 		sz = strcspn(p, rejs);
 
 		fwrite(p, 1, sz, stdout);
-		p += /* LINTED */
-			sz;
+		p += (int)sz;
 
-		if ('<' == *p) {
+		if ('\0' == *p)
+			break;
+
+		switch (*p++) {
+		case ('<'):
 			printf("&lt;");
 			continue;
-		} else if ('>' == *p) {
+		case ('>'):
 			printf("&gt;");
 			continue;
-		} else if ('&' == *p) {
+		case ('&'):
 			printf("&amp;");
 			continue;
-		} else if (ASCII_HYPH == *p) {
-			/*
-			 * Note: "soft hyphens" aren't graphically
-			 * displayed when not breaking the text; we want
-			 * them to be displayed.
-			 */
-			/*printf("&#173;");*/
+		case (ASCII_HYPH):
 			putchar('-');
 			continue;
-		} else if ('\0' == *p)
-			break;
-
-		seq = ++p;
-		len = a2roffdeco(&deco, &seq, &sz);
-
-		switch (deco) {
-		case (DECO_NUMBERED):
-			print_num(h, seq, sz);
-			break;
-		case (DECO_RESERVED):
-			print_res(h, seq, sz);
-			break;
-		case (DECO_SSPECIAL):
-			/* FALLTHROUGH */
-		case (DECO_SPECIAL):
-			print_spec(h, deco, seq, sz);
-			break;
-		case (DECO_PREVIOUS):
-			/* FALLTHROUGH */
-		case (DECO_BOLD):
-			/* FALLTHROUGH */
-		case (DECO_ITALIC):
-			/* FALLTHROUGH */
-		case (DECO_ROMAN):
-			if (norecurse)
-				break;
-			print_metaf(h, deco);
-			break;
 		default:
 			break;
 		}
 
-		p += len - 1;
+		esc = mandoc_escape(&p, &seq, &len);
+		if (ESCAPE_ERROR == esc)
+			break;
 
-		if (DECO_NOSPACE == deco && '\0' == *(p + 1))
-			nospace = 1;
+		switch (esc) {
+		case (ESCAPE_NUMBERED):
+			print_num(h, seq, len);
+			break;
+		case (ESCAPE_PREDEF):
+			print_res(h, seq, len);
+			break;
+		case (ESCAPE_SPECIAL):
+			print_spec(h, seq, len);
+			break;
+		case (ESCAPE_FONTPREV):
+			/* FALLTHROUGH */
+		case (ESCAPE_FONTBOLD):
+			/* FALLTHROUGH */
+		case (ESCAPE_FONTITALIC):
+			/* FALLTHROUGH */
+		case (ESCAPE_FONTROMAN):
+			if (norecurse)
+				break;
+			print_metaf(h, esc);
+			break;
+		case (ESCAPE_NOSPACE):
+			if ('\0' == *p)
+				nospace = 1;
+			break;
+		default:
+			break;
+		}
 	}
 
 	return(nospace);

@@ -142,7 +142,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"tab in non-literal context",
 	"end of line whitespace",
 	"bad comment style",
-	"unknown escape sequence",
+	"bad escape sequence",
 	"unterminated quoted string",
 	
 	"generic error",

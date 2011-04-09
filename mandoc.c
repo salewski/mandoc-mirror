@@ -35,198 +35,362 @@
 
 static	int	 a2time(time_t *, const char *, const char *);
 static	char	*time2a(time_t);
+static	int	 numescape(const char *);
 
-int
-mandoc_special(char *p)
+/*
+ * Pass over recursive numerical expressions.  This context of this
+ * function is important: it's only called within character-terminating
+ * escapes (e.g., \s[xxxyyy]), so all we need to do is handle initial
+ * recursion: we don't care about what's in these blocks. 
+ * This returns the number of characters skipped or -1 if an error
+ * occurs (the caller should bail).
+ */
+static int
+numescape(const char *start)
 {
-	int		 len, i;
-	char		 term;
-	char		*sv;
-	
-	len = 0;
+	int		 i;
+	size_t		 sz;
+	const char	*cp;
+
+	i = 0;
+
+	/* The expression consists of a subexpression. */
+
+	if ('\\' == start[i]) {
+		cp = &start[++i];
+		/*
+		 * Read past the end of the subexpression.
+		 * Bail immediately on errors.
+		 */
+		if (ESCAPE_ERROR == mandoc_escape(&cp, NULL, NULL))
+			return(-1);
+		return(i + cp - &start[i]);
+	} 
+
+	if ('(' != start[i++])
+		return(0);
+
+	/*
+	 * A parenthesised subexpression.  Read until the closing
+	 * parenthesis, making sure to handle any nested subexpressions
+	 * that might ruin our parse.
+	 */
+
+	while (')' != start[i]) {
+		sz = strcspn(&start[i], ")\\");
+		i += (int)sz;
+
+		if ('\0' == start[i])
+			return(-1);
+		else if ('\\' != start[i])
+			continue;
+
+		cp = &start[++i];
+		if (ESCAPE_ERROR == mandoc_escape(&cp, NULL, NULL))
+			return(-1);
+		i += cp - &start[i];
+	}
+
+	/* Read past the terminating ')'. */
+	return(++i);
+}
+
+/*
+ * Handle an escaped sequeence.  This should be called with any
+ * string subsequent a `\'.  Pass a pointer to this substring as "end";
+ * it will be set to the supremum of the parsed escape sequence.  If
+ * this returns ESCAPE_ERROR, the string is bogus and should be thrown
+ * away.  If not ESCAPE_ERROR or ESCAPE_IGNORE, "start" is set to the
+ * first relevant character of the substring (font, glyph, whatever) of
+ * length sz.  Both "start" and "sz" may be NULL.
+ */
+enum mandoc_esc
+mandoc_escape(const char **end, const char **start, int *sz)
+{
+	char		 c, term, numeric;
+	int		 i, lim, ssz, rlim;
+	const char	*cp, *rstart;
+	enum mandoc_esc	 gly; 
+
+	cp = *end;
+	rstart = cp;
+	if (start)
+		*start = rstart;
+	i = 0;
+	gly = ESCAPE_ERROR;
 	term = '\0';
-	sv = p;
+	numeric = 0;
 
-	assert('\\' == *p);
-	p++;
-
-	switch (*p++) {
-#if 0
-	case ('Z'):
-		/* FALLTHROUGH */
-	case ('X'):
-		/* FALLTHROUGH */
-	case ('x'):
-		/* FALLTHROUGH */
-	case ('S'):
-		/* FALLTHROUGH */
-	case ('R'):
-		/* FALLTHROUGH */
-	case ('N'):
-		/* FALLTHROUGH */
-	case ('l'):
-		/* FALLTHROUGH */
-	case ('L'):
-		/* FALLTHROUGH */
-	case ('H'):
-		/* FALLTHROUGH */
-	case ('h'):
-		/* FALLTHROUGH */
-	case ('D'):
-		/* FALLTHROUGH */
+	switch ((c = cp[i++])) {
+	/*
+	 * First the glyphs.  There are several different forms of
+	 * these, but each eventually returns a substring of the glyph
+	 * name.
+	 */
+	case ('('):
+		gly = ESCAPE_SPECIAL;
+		lim = 2;
+		break;
+	case ('['):
+		gly = ESCAPE_SPECIAL;
+		term = ']';
+		break;
 	case ('C'):
-		/* FALLTHROUGH */
-	case ('b'):
-		/* FALLTHROUGH */
-	case ('B'):
-		/* FALLTHROUGH */
-	case ('a'):
-		/* FALLTHROUGH */
-	case ('A'):
-		if (*p++ != '\'')
-			return(0);
+		if ('\'' != cp[i])
+			return(ESCAPE_ERROR);
+		gly = ESCAPE_SPECIAL;
 		term = '\'';
 		break;
-#endif
-	case ('h'):
+
+	/*
+	 * Handle all triggers matching \X(xy, \Xx, and \X[xxxx], where
+	 * 'X' is the trigger.  These have opaque sub-strings.
+	 */
+	case ('F'):
 		/* FALLTHROUGH */
-	case ('v'):
+	case ('g'):
 		/* FALLTHROUGH */
-	case ('s'):
-		if (ASCII_HYPH == *p)
-			*p = '-';
-
-		i = 0;
-		if ('+' == *p || '-' == *p) {
-			p++;
-			i = 1;
-		}
-
-		switch (*p++) {
-		case ('('):
-			len = 2;
-			break;
-		case ('['):
-			term = ']';
-			break;
-		case ('\''):
-			term = '\'';
-			break;
-		case ('0'):
-			i = 1;
-			/* FALLTHROUGH */
-		default:
-			len = 1;
-			p--;
-			break;
-		}
-
-		if (ASCII_HYPH == *p)
-			*p = '-';
-		if ('+' == *p || '-' == *p) {
-			if (i)
-				return(0);
-			p++;
-		} 
-		
-		/* Handle embedded numerical subexp or escape. */
-
-		if ('(' == *p) {
-			while (*p && ')' != *p)
-				if ('\\' == *p++) {
-					i = mandoc_special(--p);
-					if (0 == i)
-						return(0);
-					p += i;
-				}
-
-			if (')' == *p++)
-				break;
-
-			return(0);
-		} else if ('\\' == *p) {
-			if (0 == (i = mandoc_special(p)))
-				return(0);
-			p += i;
-		}
-
-		break;
-#if 0
-	case ('Y'):
-		/* FALLTHROUGH */
-	case ('V'):
-		/* FALLTHROUGH */
-	case ('$'):
-		/* FALLTHROUGH */
-	case ('n'):
-		/* FALLTHROUGH */
-#endif
 	case ('k'):
 		/* FALLTHROUGH */
 	case ('M'):
 		/* FALLTHROUGH */
 	case ('m'):
 		/* FALLTHROUGH */
-	case ('f'):
+	case ('n'):
 		/* FALLTHROUGH */
-	case ('F'):
+	case ('V'):
+		/* FALLTHROUGH */
+	case ('Y'):
+		if (ESCAPE_ERROR == gly)
+			gly = ESCAPE_IGNORE;
 		/* FALLTHROUGH */
 	case ('*'):
-		switch (*p++) {
+		if (ESCAPE_ERROR == gly)
+			gly = ESCAPE_PREDEF;
+		/* FALLTHROUGH */
+	case ('f'):
+		if (ESCAPE_ERROR == gly)
+			gly = ESCAPE_FONT;
+
+		rstart= &cp[i];
+		if (start) 
+			*start = rstart;
+
+		switch (cp[i++]) {
 		case ('('):
-			len = 2;
+			lim = 2;
 			break;
 		case ('['):
 			term = ']';
 			break;
 		default:
-			len = 1;
-			p--;
+			lim = 1;
+			i--;
 			break;
 		}
 		break;
-	case ('('):
-		len = 2;
-		break;
-	case ('['):
-		term = ']';
-		break;
-	case ('z'):
-		len = 1;
-		if ('\\' == *p) {
-			if (0 == (i = mandoc_special(p)))
-				return(0);
-			p += i;
-			return(*p ? (int)(p - sv) : 0);
-		}
-		break;
+
+	/*
+	 * These escapes are of the form \X'Y', where 'X' is the trigger
+	 * and 'Y' is any string.  These have opaque sub-strings.
+	 */
+	case ('A'):
+		/* FALLTHROUGH */
+	case ('b'):
+		/* FALLTHROUGH */
+	case ('D'):
+		/* FALLTHROUGH */
 	case ('o'):
 		/* FALLTHROUGH */
+	case ('R'):
+		/* FALLTHROUGH */
+	case ('X'):
+		/* FALLTHROUGH */
+	case ('Z'):
+		if ('\'' != cp[i++])
+			return(ESCAPE_ERROR);
+		gly = ESCAPE_IGNORE;
+		term = '\'';
+		break;
+
+	/*
+	 * These escapes are of the form \X'N', where 'X' is the trigger
+	 * and 'N' resolves to a numerical expression.
+	 */
+	case ('B'):
+		/* FALLTHROUGH */
+	case ('h'):
+		/* FALLTHROUGH */
+	case ('H'):
+		/* FALLTHROUGH */
+	case ('L'):
+		/* FALLTHROUGH */
+	case ('l'):
+		/* FALLTHROUGH */
+	case ('N'):
+		if (ESCAPE_ERROR == gly)
+			gly = ESCAPE_NUMBERED;
+		/* FALLTHROUGH */
+	case ('S'):
+		/* FALLTHROUGH */
+	case ('v'):
+		/* FALLTHROUGH */
 	case ('w'):
-		if ('\'' == *p++) {
-			term = '\'';
+		/* FALLTHROUGH */
+	case ('x'):
+		if (ESCAPE_ERROR == gly)
+			gly = ESCAPE_IGNORE;
+		if ('\'' != cp[i++])
+			return(ESCAPE_ERROR);
+		term = numeric = '\'';
+		break;
+
+	/* 
+	 * Sizes get a special category of their own.
+	 */
+	case ('s'):
+		gly = ESCAPE_IGNORE;
+
+		rstart = &cp[i];
+		if (start) 
+			*start = rstart;
+
+		/* See +/- counts as a sign. */
+		c = cp[i];
+		if ('+' == c || '-' == c || ASCII_HYPH == c)
+			++i;
+
+		switch (cp[i++]) {
+		case ('('):
+			lim = 2;
+			break;
+		case ('['):
+			term = numeric = ']';
+			break;
+		case ('\''):
+			term = numeric = '\'';
+			break;
+		default:
+			lim = 1;
+			i--;
 			break;
 		}
-		/* FALLTHROUGH */
+
+		/* See +/- counts as a sign. */
+		c = cp[i];
+		if ('+' == c || '-' == c || ASCII_HYPH == c)
+			++i;
+
+		break;
+
+	/*
+	 * Anything else is assumed to be a glyph.
+	 */
 	default:
-		len = 1;
-		p--;
+		gly = ESCAPE_SPECIAL;
+		lim = 1;
+		i--;
 		break;
 	}
 
-	if (term) {
-		for ( ; *p && term != *p; p++)
-			if (ASCII_HYPH == *p)
-				*p = '-';
-		return(*p ? (int)(p - sv) : 0);
+	assert(ESCAPE_ERROR != gly);
+
+	rstart = &cp[i];
+	if (start)
+		*start = rstart;
+
+	/*
+	 * If a terminating block has been specified, we need to
+	 * handle the case of recursion, which could have their
+	 * own terminating blocks that mess up our parse.  This, by the
+	 * way, means that the "start" and "size" values will be
+	 * effectively meaningless.
+	 */
+
+	ssz = 0;
+	if (numeric && -1 == (ssz = numescape(&cp[i])))
+		return(ESCAPE_ERROR);
+
+	i += ssz;
+	rlim = -1;
+
+	/*
+	 * We have a character terminator.  Try to read up to that
+	 * character.  If we can't (i.e., we hit the nil), then return
+	 * an error; if we can, calculate our length, read past the
+	 * terminating character, and exit.
+	 */
+
+	if ('\0' != term) {
+		*end = strchr(&cp[i], term);
+		if ('\0' == *end)
+			return(ESCAPE_ERROR);
+
+		rlim = *end - &cp[i];
+		if (sz)
+			*sz = rlim;
+		(*end)++;
+		goto out;
 	}
 
-	for (i = 0; *p && i < len; i++, p++)
-		if (ASCII_HYPH == *p)
-			*p = '-';
-	return(i == len ? (int)(p - sv) : 0);
-}
+	assert(lim > 0);
 
+	/*
+	 * We have a numeric limit.  If the string is shorter than that,
+	 * stop and return an error.  Else adjust our endpoint, length,
+	 * and return the current glyph.
+	 */
+
+	if ((size_t)lim > strlen(&cp[i]))
+		return(ESCAPE_ERROR);
+
+	rlim = lim;
+	if (sz)
+		*sz = rlim;
+
+	*end = &cp[i] + lim;
+
+out:
+	assert(rlim >= 0 && rstart);
+
+	/* Run post-processors. */
+
+	switch (gly) {
+	case (ESCAPE_FONT):
+		if (1 != rlim)
+			break;
+		switch (*rstart) {
+		case ('3'):
+			/* FALLTHROUGH */
+		case ('B'):
+			gly = ESCAPE_FONTBOLD;
+			break;
+		case ('2'):
+			/* FALLTHROUGH */
+		case ('I'):
+			gly = ESCAPE_FONTITALIC;
+			break;
+		case ('P'):
+			gly = ESCAPE_FONTPREV;
+			break;
+		case ('1'):
+			/* FALLTHROUGH */
+		case ('R'):
+			gly = ESCAPE_FONTROMAN;
+			break;
+		}
+	case (ESCAPE_SPECIAL):
+		if (1 != rlim)
+			break;
+		if ('c' == *rstart)
+			gly = ESCAPE_NOSPACE;
+		break;
+	default:
+		break;
+	}
+
+	return(gly);
+}
 
 void *
 mandoc_calloc(size_t num, size_t size)

@@ -33,8 +33,7 @@
 #include "term.h"
 #include "main.h"
 
-static	void		  spec(struct termp *, enum roffdeco,
-				const char *, size_t);
+static	void		  spec(struct termp *, const char *, size_t);
 static	void		  res(struct termp *, const char *, size_t);
 static	void		  bufferc(struct termp *, char);
 static	void		  adjbuf(struct termp *p, size_t);
@@ -358,7 +357,7 @@ numbered(struct termp *p, const char *word, size_t len)
 
 
 static void
-spec(struct termp *p, enum roffdeco d, const char *word, size_t len)
+spec(struct termp *p, const char *word, size_t len)
 {
 	const char	*rhs;
 	size_t		 sz;
@@ -366,7 +365,7 @@ spec(struct termp *p, enum roffdeco d, const char *word, size_t len)
 	rhs = chars_spec2str(p->symtab, word, len, &sz);
 	if (rhs) 
 		encode(p, rhs, sz);
-	else if (DECO_SSPECIAL == d)
+	else if (1 == len)
 		encode(p, word, len);
 }
 
@@ -457,8 +456,9 @@ void
 term_word(struct termp *p, const char *word)
 {
 	const char	*seq;
+	int		 sz;
 	size_t		 ssz;
-	enum roffdeco	 deco;
+	enum mandoc_esc	 esc;
 
 	if ( ! (TERMP_NOSPACE & p->flags)) {
 		if ( ! (TERMP_KEEP & p->flags)) {
@@ -478,7 +478,7 @@ term_word(struct termp *p, const char *word)
 
 	p->flags &= ~(TERMP_SENTENCE | TERMP_IGNDELIM);
 
-	while (*word) {
+	while ('\0' != *word) {
 		if ((ssz = strcspn(word, "\\")) > 0)
 			encode(p, word, ssz);
 
@@ -486,39 +486,40 @@ term_word(struct termp *p, const char *word)
 		if ('\\' != *word)
 			continue;
 
-		seq = ++word;
-		word += a2roffdeco(&deco, &seq, &ssz);
+		word++;
+		esc = mandoc_escape(&word, &seq, &sz);
+		if (ESCAPE_ERROR == esc)
+			break;
 
-		switch (deco) {
-		case (DECO_NUMBERED):
-			numbered(p, seq, ssz);
+		switch (esc) {
+		case (ESCAPE_NUMBERED):
+			numbered(p, seq, sz);
 			break;
-		case (DECO_RESERVED):
-			res(p, seq, ssz);
+		case (ESCAPE_PREDEF):
+			res(p, seq, sz);
 			break;
-		case (DECO_SPECIAL):
-			/* FALLTHROUGH */
-		case (DECO_SSPECIAL):
-			spec(p, deco, seq, ssz);
+		case (ESCAPE_SPECIAL):
+			spec(p, seq, sz);
 			break;
-		case (DECO_BOLD):
+		case (ESCAPE_FONTBOLD):
 			term_fontrepl(p, TERMFONT_BOLD);
 			break;
-		case (DECO_ITALIC):
+		case (ESCAPE_FONTITALIC):
 			term_fontrepl(p, TERMFONT_UNDER);
 			break;
-		case (DECO_ROMAN):
+		case (ESCAPE_FONTROMAN):
 			term_fontrepl(p, TERMFONT_NONE);
 			break;
-		case (DECO_PREVIOUS):
+		case (ESCAPE_FONTPREV):
 			term_fontlast(p);
+			break;
+		case (ESCAPE_NOSPACE):
+			if ('\0' == *word)
+				p->flags |= TERMP_NOSPACE;
 			break;
 		default:
 			break;
 		}
-
-		if (DECO_NOSPACE == deco && '\0' == *word)
-			p->flags |= TERMP_NOSPACE;
 	}
 }
 
@@ -600,33 +601,36 @@ term_len(const struct termp *p, size_t sz)
 size_t
 term_strlen(const struct termp *p, const char *cp)
 {
-	size_t		 sz, ssz, rsz, i;
-	enum roffdeco	 d;
+	size_t		 sz, rsz, i;
+	int		 ssz;
+	enum mandoc_esc	 esc;
 	const char	*seq, *rhs;
 
-	for (sz = 0; '\0' != *cp; )
-		/*
-		 * Account for escaped sequences within string length
-		 * calculations.  This follows the logic in term_word()
-		 * as we must calculate the width of produced strings.
-		 */
-		if ('\\' == *cp) {
-			seq = ++cp;
-			cp += a2roffdeco(&d, &seq, &ssz);
+	/*
+	 * Account for escaped sequences within string length
+	 * calculations.  This follows the logic in term_word() as we
+	 * must calculate the width of produced strings.
+	 */
 
-			switch (d) {
-			case (DECO_RESERVED):
+	sz = 0;
+	while ('\0' != *cp)
+		switch (*cp) {
+		case ('\\'):
+			++cp;
+			esc = mandoc_escape(&cp, &seq, &ssz);
+			if (ESCAPE_ERROR == esc)
+				return(sz);
+
+			switch (esc) {
+			case (ESCAPE_PREDEF):
 				rhs = chars_res2str
 					(p->symtab, seq, ssz, &rsz);
 				break;
-			case (DECO_SPECIAL):
-				/* FALLTHROUGH */
-			case (DECO_SSPECIAL):
+			case (ESCAPE_SPECIAL):
 				rhs = chars_spec2str
 					(p->symtab, seq, ssz, &rsz);
 
-				/* Allow for one-char escapes. */
-				if (DECO_SSPECIAL != d || rhs)
+				if (ssz != 1 || rhs)
 					break;
 
 				rhs = seq;
@@ -637,17 +641,24 @@ term_strlen(const struct termp *p, const char *cp)
 				break;
 			}
 
-			if (rhs)
-				for (i = 0; i < rsz; i++)
-					sz += (*p->width)(p, *rhs++);
-		} else if (ASCII_NBRSP == *cp) {
+			if (NULL == rhs)
+				break;
+
+			for (i = 0; i < rsz; i++)
+				sz += (*p->width)(p, *rhs++);
+			break;
+		case (ASCII_NBRSP):
 			sz += (*p->width)(p, ' ');
 			cp++;
-		} else if (ASCII_HYPH == *cp) {
+			break;
+		case (ASCII_HYPH):
 			sz += (*p->width)(p, '-');
 			cp++;
-		} else
+			break;
+		default:
 			sz += (*p->width)(p, *cp++);
+			break;
+		}
 
 	return(sz);
 }

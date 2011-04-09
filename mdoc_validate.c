@@ -545,31 +545,39 @@ check_argv(struct mdoc *m, struct mdoc_node *n, struct mdoc_argv *v)
 static void
 check_text(struct mdoc *m, int ln, int pos, char *p)
 {
-	int		 c;
+	char		*cpp, *pp;
 	size_t		 sz;
 
-	for ( ; *p; p++, pos++) {
+	while ('\0' != *p) {
 		sz = strcspn(p, "\t\\");
+
 		p += (int)sz;
-
-		if ('\0' == *p)
-			break;
-
 		pos += (int)sz;
 
 		if ('\t' == *p) {
 			if ( ! (MDOC_LITERAL & m->flags))
 				mdoc_pmsg(m, ln, pos, MANDOCERR_BADTAB);
+			p++;
+			pos++;
 			continue;
-		}
+		} else if ('\0' == *p)
+			break;
 
-		if (0 == (c = mandoc_special(p))) {
+		pos++;
+		pp = ++p;
+
+		if (ESCAPE_ERROR == mandoc_escape
+				((const char **)&pp, NULL, NULL)) {
 			mdoc_pmsg(m, ln, pos, MANDOCERR_BADESCAPE);
-			continue;
+			break;
 		}
 
-		p += c - 1;
-		pos += c - 1;
+		cpp = p;
+		while (NULL != (cpp = memchr(cpp, ASCII_HYPH, pp - cpp)))
+			*cpp = '-';
+
+		pos += pp - p;
+		p = pp;
 	}
 }
 

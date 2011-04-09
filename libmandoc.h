@@ -73,7 +73,6 @@ void		 mandoc_msg(enum mandocerr, struct mparse *,
 			int, int, const char *);
 void		 mandoc_vmsg(enum mandocerr, struct mparse *, 
 			int, int, const char *, ...);
-int		 mandoc_special(char *);
 char		*mandoc_strdup(const char *);
 char		*mandoc_getarg(struct mparse *, char **, int, int *);
 char		*mandoc_normdate(struct mparse *, char *, int, int);
