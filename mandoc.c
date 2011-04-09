@@ -116,10 +116,9 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	rstart = cp;
 	if (start)
 		*start = rstart;
-	i = 0;
+	i = lim = 0;
 	gly = ESCAPE_ERROR;
-	term = '\0';
-	numeric = 0;
+	term = numeric = '\0';
 
 	switch ((c = cp[i++])) {
 	/*
@@ -379,6 +378,7 @@ out:
 			gly = ESCAPE_FONTROMAN;
 			break;
 		}
+		break;
 	case (ESCAPE_SPECIAL):
 		if (1 != rlim)
 			break;
