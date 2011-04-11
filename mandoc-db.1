@@ -59,9 +59,18 @@ The index database,
 .Pa mandoc.index ,
 is a
 .Xr recno 3
-database of nil-terminated filenames (record length is non-zero string
-length plus one) passed to
-.Nm .
+database with record values consisting of
+.Pp
+.Bl -enum -compact
+.It
+a nil-terminated filename,
+.It
+a nil-terminated manual section,
+.It
+and a nil-terminated description.
+.El
+.Pp
+Both the manual section and description may be zero-length.
 Entries are sequentially-numbered, but the filenames are unordered.
 .Ss Keyword Database
 The keyword database,
