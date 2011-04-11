@@ -55,11 +55,13 @@ enum	type {
 			  const char *dbn, \
 			  DBT *key, size_t *ksz, \
 			  DBT *val, \
+			  DBT *rval, size_t *rsz, \
 			  const struct man_node *n
 #define	MDOC_ARGS	  DB *db, \
 			  const char *dbn, \
 			  DBT *key, size_t *ksz, \
 			  DBT *val, \
+			  DBT *rval, size_t *rsz, \
 			  const struct mdoc_node *n
 
 static	void		  dbt_append(DBT *, size_t *, const char *);
@@ -68,16 +70,17 @@ static	void		  dbt_appendb(DBT *, size_t *,
 static	void		  dbt_init(DBT *, size_t *);
 static	void		  dbt_put(DB *, const char *, DBT *, DBT *);
 static	void		  usage(void);
-static	void		  pman(DB *, const char *, DBT *, 
-				size_t *, DBT *, struct man *);
+static	void		  pman(DB *, const char *, DBT *, size_t *, 
+				DBT *, DBT *, size_t *, struct man *);
 static	int		  pman_node(MAN_ARGS);
-static	void		  pmdoc(DB *, const char *, DBT *, 
-				size_t *, DBT *, struct mdoc *);
+static	void		  pmdoc(DB *, const char *, DBT *, size_t *, 
+				DBT *, DBT *, size_t *, struct mdoc *);
 static	void		  pmdoc_node(MDOC_ARGS);
 static	void		  pmdoc_Fd(MDOC_ARGS);
 static	void		  pmdoc_In(MDOC_ARGS);
 static	void		  pmdoc_Fn(MDOC_ARGS);
 static	void		  pmdoc_Fo(MDOC_ARGS);
+static	void		  pmdoc_Nd(MDOC_ARGS);
 static	void		  pmdoc_Nm(MDOC_ARGS);
 static	void		  pmdoc_Vt(MDOC_ARGS);
 
@@ -117,7 +120,7 @@ static	const pmdoc_nf	  mdocs[MDOC_MAX] = {
 	NULL, /* Ic */ 
 	pmdoc_In, /* In */ 
 	NULL, /* Li */
-	NULL, /* Nd */
+	pmdoc_Nd, /* Nd */
 	pmdoc_Nm, /* Nm */
 	NULL, /* Op */
 	NULL, /* Ot */
@@ -216,22 +219,23 @@ main(int argc, char *argv[])
 	struct mparse	*mp; /* parse sequence */
 	struct mdoc	*mdoc; /* resulting mdoc */
 	struct man	*man; /* resulting man */
-	char		*fn;
-	const char	*msec,
+	char		*fn; /* current file being parsed */
+	const char	*msec, /* manual section */
 	      		*dir; /* result dir (default: cwd) */
 	char		 ibuf[MAXPATHLEN], /* index fname */
 			 ibbuf[MAXPATHLEN], /* index backup fname */
 			 fbuf[MAXPATHLEN],  /* btree fname */
 			 fbbuf[MAXPATHLEN]; /* btree backup fname */
-	int		 c;
+	int		 ch;
 	DB		*idx, /* index database */
 			*db; /* keyword database */
 	DBT		 rkey, rval, /* recno entries */
 			 key, val; /* persistent keyword entries */
-	size_t		 ksz, rsz; /* entry buffer size */
-	char		 vbuf[8];
+	size_t		 sv,
+			 ksz, rsz; /* entry buffer size */
+	char		 vbuf[8]; /* stringified record number */
 	BTREEINFO	 info; /* btree configuration */
-	recno_t		 rec;
+	recno_t		 rec; /* current record number */
 	extern int	 optind;
 	extern char	*optarg;
 
@@ -243,8 +247,8 @@ main(int argc, char *argv[])
 
 	dir = "";
 
-	while (-1 != (c = getopt(argc, argv, "d:")))
-		switch (c) {
+	while (-1 != (ch = getopt(argc, argv, "d:")))
+		switch (ch) {
 		case ('d'):
 			dir = optarg;
 			break;
@@ -335,34 +339,61 @@ main(int argc, char *argv[])
 	while (NULL != (fn = *argv++)) {
 		mparse_reset(mp);
 
+		/* Parse and get (non-empty) AST. */
+
 		if (mparse_readfd(mp, -1, fn) >= MANDOCLEVEL_FATAL) {
 			fprintf(stderr, "%s: Parse failure\n", fn);
 			continue;
 		}
-
 		mparse_result(mp, &mdoc, &man);
 		if (NULL == mdoc && NULL == man)
 			continue;
+
+		/* Manual section: can be empty string. */
 
 		msec = NULL != mdoc ? 
 			mdoc_meta(mdoc)->msec :
 			man_meta(man)->msec;
 
-		rkey.data = &rec;
+		assert(msec);
+
+		/* 
+		 * The index record value consists of a nil-terminated
+		 * filename, a nil-terminated manual section, and a
+		 * nil-terminated description.  Since the description
+		 * may not be set, we set a sentinel to see if we're
+		 * going to write a nil byte in its place.
+		 */
 
 		dbt_init(&rval, &rsz);
 		dbt_appendb(&rval, &rsz, fn, strlen(fn) + 1);
 		dbt_appendb(&rval, &rsz, msec, strlen(msec) + 1);
+		sv = rval.size;
 
-		dbt_put(idx, ibbuf, &rkey, &rval);
+		/* Fix the record number in the btree value. */
 
 		memset(val.data, 0, sizeof(uint32_t));
 		memcpy(val.data + 4, &rec, sizeof(uint32_t));
 
 		if (mdoc)
-			pmdoc(db, fbbuf, &key, &ksz, &val, mdoc);
+			pmdoc(db, fbbuf, &key, &ksz, 
+				&val, &rval, &rsz, mdoc);
 		else 
-			pman(db, fbbuf, &key, &ksz, &val, man);
+			pman(db, fbbuf, &key, &ksz, 
+				&val, &rval, &rsz, man);
+		
+		/*
+		 * Apply this to the index.  If we haven't had a
+		 * description set, put an empty one in now.
+		 */
+
+		if (rval.size == sv)
+			dbt_appendb(&rval, &rsz, "", 1);
+
+		rkey.data = &rec;
+		dbt_put(idx, ibbuf, &rkey, &rval);
+
+		printf("Indexed: %s\n", fn);
 		rec++;
 	}
 
@@ -593,6 +624,25 @@ pmdoc_Fo(MDOC_ARGS)
 	memcpy(val->data, &fl, 4);
 }
 
+
+/* ARGSUSED */
+static void
+pmdoc_Nd(MDOC_ARGS)
+{
+	int		 first;
+	
+	for (first = 1, n = n->child; n; n = n->next) {
+		if (MDOC_TEXT != n->type)
+			continue;
+		if (first) 
+			dbt_appendb(rval, rsz, n->string, strlen(n->string) + 1);
+		else
+			dbt_append(rval, rsz, n->string);
+
+		first = 0;
+	}
+}
+
 /* ARGSUSED */
 static void
 pmdoc_Nm(MDOC_ARGS)
@@ -665,7 +715,7 @@ pmdoc_node(MDOC_ARGS)
 			break;
 
 		dbt_init(key, ksz);
-		(*mdocs[n->tok])(db, dbn, key, ksz, val, n);
+		(*mdocs[n->tok])(db, dbn, key, ksz, val, rval, rsz, n);
 
 		dbt_put(db, dbn, key, val);
 		break;
@@ -673,8 +723,8 @@ pmdoc_node(MDOC_ARGS)
 		break;
 	}
 
-	pmdoc_node(db, dbn, key, ksz, val, n->child);
-	pmdoc_node(db, dbn, key, ksz, val, n->next);
+	pmdoc_node(db, dbn, key, ksz, val, rval, rsz, n->child);
+	pmdoc_node(db, dbn, key, ksz, val, rval, rsz, n->next);
 }
 
 static int
@@ -745,29 +795,29 @@ pman_node(MAN_ARGS)
 		}
 	}
 
-	if (pman_node(db, dbn, key, ksz, val, n->child))
+	if (pman_node(db, dbn, key, ksz, val, rval, rsz, n->child))
 		return(1);
-	if (pman_node(db, dbn, key, ksz, val, n->next))
+	if (pman_node(db, dbn, key, ksz, val, rval, rsz, n->next))
 		return(1);
 
 	return(0);
 }
 
 static void
-pman(DB *db, const char *dbn, DBT *key, 
-		size_t *ksz, DBT *val, struct man *m)
+pman(DB *db, const char *dbn, DBT *key, size_t *ksz, 
+		DBT *val, DBT *rval, size_t *rsz, struct man *m)
 {
 
-	pman_node(db, dbn, key, ksz, val, man_node(m));
+	pman_node(db, dbn, key, ksz, val, rval, rsz, man_node(m));
 }
 
 
 static void
-pmdoc(DB *db, const char *dbn, DBT *key, 
-		size_t *ksz, DBT *val, struct mdoc *m)
+pmdoc(DB *db, const char *dbn, DBT *key, size_t *ksz, 
+		DBT *val, DBT *rval, size_t *rsz, struct mdoc *m)
 {
 
-	pmdoc_node(db, dbn, key, ksz, val, mdoc_node(m));
+	pmdoc_node(db, dbn, key, ksz, val, rval, rsz, mdoc_node(m));
 }
 
 static void
