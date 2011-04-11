@@ -354,7 +354,7 @@ mparse_buf_r(struct mparse *curp, struct buf blk, int start)
 				continue;
 			}
 
-			if ('"' == blk.buf[i + 1]) {
+			if ('"' == blk.buf[i + 1] || '#' == blk.buf[i + 1]) {
 				i += 2;
 				/* Comment, skip to end of line */
 				for (; i < (int)blk.sz; ++i) {
