@@ -217,7 +217,8 @@ main(int argc, char *argv[])
 	struct mdoc	*mdoc; /* resulting mdoc */
 	struct man	*man; /* resulting man */
 	char		*fn;
-	const char	*dir; /* result dir (default: cwd) */
+	const char	*msec,
+	      		*dir; /* result dir (default: cwd) */
 	char		 ibuf[MAXPATHLEN], /* index fname */
 			 ibbuf[MAXPATHLEN], /* index backup fname */
 			 fbuf[MAXPATHLEN],  /* btree fname */
@@ -227,7 +228,7 @@ main(int argc, char *argv[])
 			*db; /* keyword database */
 	DBT		 rkey, rval, /* recno entries */
 			 key, val; /* persistent keyword entries */
-	size_t		 ksz; /* entry buffer size */
+	size_t		 ksz, rsz; /* entry buffer size */
 	char		 vbuf[8];
 	BTREEINFO	 info; /* btree configuration */
 	recno_t		 rec;
@@ -329,7 +330,7 @@ main(int argc, char *argv[])
 	rkey.size = sizeof(recno_t);
 
 	rec = 1;
-	ksz = 0;
+	ksz = rsz = 0;
 
 	while (NULL != (fn = *argv++)) {
 		mparse_reset(mp);
@@ -343,14 +344,17 @@ main(int argc, char *argv[])
 		if (NULL == mdoc && NULL == man)
 			continue;
 
-		rkey.data = &rec;
-		rval.data = fn;
-		rval.size = strlen(fn) + 1;
+		msec = NULL != mdoc ? 
+			mdoc_meta(mdoc)->msec :
+			man_meta(man)->msec;
 
-		if (-1 == (*idx->put)(idx, &rkey, &rval, 0)) {
-			perror(ibbuf);
-			break;
-		}
+		rkey.data = &rec;
+
+		dbt_init(&rval, &rsz);
+		dbt_appendb(&rval, &rsz, fn, strlen(fn) + 1);
+		dbt_appendb(&rval, &rsz, msec, strlen(msec) + 1);
+
+		dbt_put(idx, ibbuf, &rkey, &rval);
 
 		memset(val.data, 0, sizeof(uint32_t));
 		memcpy(val.data + 4, &rec, sizeof(uint32_t));
@@ -368,6 +372,7 @@ main(int argc, char *argv[])
 	mparse_free(mp);
 
 	free(key.data);
+	free(rval.data);
 
 	/* Atomically replace the file with our temporary one. */
 
@@ -447,7 +452,7 @@ pmdoc_Fd(MDOC_ARGS)
 	uint32_t	 fl;
 	const char	*start, *end;
 	size_t		 sz;
-	char		 nil;
+	const char	 nil = '\0';
 	
 	if (SEC_SYNOPSIS != n->sec)
 		return;
@@ -480,7 +485,6 @@ pmdoc_Fd(MDOC_ARGS)
 	if ('>' == *end || '"' == *end)
 		end--;
 
-	nil = '\0';
 	dbt_appendb(key, ksz, start, end - start + 1);
 	dbt_appendb(key, ksz, &nil, 1);
 
@@ -539,7 +543,7 @@ pmdoc_Vt(MDOC_ARGS)
 	uint32_t	 fl;
 	const char	*start, *end;
 	size_t		 sz;
-	char		 nil;
+	const char	 nil = '\0';
 	
 	if (SEC_SYNOPSIS != n->sec)
 		return;
@@ -567,7 +571,6 @@ pmdoc_Vt(MDOC_ARGS)
 	if (end == start)
 		return;
 
-	nil = '\0';
 	dbt_appendb(key, ksz, start, end - start + 1);
 	dbt_appendb(key, ksz, &nil, 1);
 	fl = MANDOC_VARIABLE;
@@ -626,7 +629,7 @@ dbt_put(DB *db, const char *dbn, DBT *key, DBT *val)
 		return;
 
 	assert(key->data);
-	assert(8 == val->size);
+	assert(val->size);
 	assert(val->data);
 
 	if (0 == (*db->put)(db, key, val, 0))
@@ -679,7 +682,7 @@ pman_node(MAN_ARGS)
 {
 	const struct man_node *head, *body;
 	const char	*start;
-	char		 nil;
+	const char	 nil = '\0';
 	size_t		 sz;
 	uint32_t	 fl;
 
@@ -703,7 +706,6 @@ pman_node(MAN_ARGS)
 				0 == strcmp(head->string, "NAME") &&
 				NULL != (body = body->child) &&
 				MAN_TEXT == body->type) {
-			nil = '\0';
 
 			fl = MANDOC_NAME;
 			memcpy(val->data, &fl, 4);
