@@ -320,6 +320,13 @@
 * error reporting issues
 ************************************************************************
 
+- In man(7), an empty subsection (.SS) should not be an error, probably
+  not even a warning.  For example, in ExtUtils::CChecker(3p), this is
+  used in a way similar to empty .It -tag in mdoc(7), that is, explaining
+  two commands (both presented with .SS markup) in one paragraph of text.
+  Reported by Gleydson Soares <gsoares at trusted dot com dot br>
+  on ports@  Tue, 12 Apr 2011 15:39:26 -0300
+
 ************************************************************************
 * performance issues
 ************************************************************************
