@@ -731,7 +731,7 @@ static int
 pman_node(MAN_ARGS)
 {
 	const struct man_node *head, *body;
-	const char	*start;
+	const char	*start, *sv;
 	const char	 nil = '\0';
 	size_t		 sz;
 	uint32_t	 fl;
@@ -760,7 +760,8 @@ pman_node(MAN_ARGS)
 			fl = MANDOC_NAME;
 			memcpy(val->data, &fl, 4);
 
-			start = body->string;
+			assert(body->string);
+			start = sv = body->string;
 
 			/* 
 			 * Go through a special heuristic dance here.
@@ -771,7 +772,7 @@ pman_node(MAN_ARGS)
 			 * the name parts here.
 			 */
 
-			while (start) {
+			for ( ;; ) {
 				sz = strcspn(start, " ,");
 				if ('\0' == start[(int)sz])
 					break;
@@ -782,8 +783,10 @@ pman_node(MAN_ARGS)
 
 				dbt_put(db, dbn, key, val);
 
-				if (' ' == start[(int)sz])
+				if (' ' == start[(int)sz]) {
+					start += (int)sz + 1;
 					break;
+				}
 
 				assert(',' == start[(int)sz]);
 				start += (int)sz + 1;
@@ -791,7 +794,24 @@ pman_node(MAN_ARGS)
 					start++;
 			}
 
-			return(1);
+			if (sv == start) {
+				dbt_init(key, ksz);
+				dbt_append(key, ksz, start);
+				return(1);
+			}
+
+			while (' ' == *start)
+				start++;
+
+			if ('\\' == *start && '-' == *(start + 1))
+				start += 2;
+			else if ('-' == *start)
+				start++;
+
+			while (' ' == *start)
+				start++;
+
+			dbt_appendb(rval, rsz, start, strlen(start) + 1);
 		}
 	}
 
