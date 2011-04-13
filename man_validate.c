@@ -325,14 +325,11 @@ static int
 check_sec(CHKARGS)
 {
 
-	if (MAN_HEAD == n->type && 0 == n->nchild) {
-		man_nmsg(m, n, MANDOCERR_SYNTARGCOUNT);
-		return(0);
-	} else if (MAN_BODY == n->type && 0 == n->nchild)
-		mandoc_msg(MANDOCERR_ARGCWARN, m->parse, n->line, 
-				n->pos, "want children (have none)");
+	if ( ! (MAN_HEAD == n->type && 0 == n->nchild)) 
+		return(1);
 
-	return(1);
+	man_nmsg(m, n, MANDOCERR_SYNTARGCOUNT);
+	return(0);
 }
 
 
