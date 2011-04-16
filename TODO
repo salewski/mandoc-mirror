@@ -96,6 +96,16 @@
 - explicitly disallow nested `Bl -column', which would clobber internal
   flags defined for struct mdoc_macro
 
+- In .Bl -column .It, the end of the line probably has to be regarded
+  as an implicit .Ta, if there could be one, see the following mildly
+  ugly code from login.conf(5):
+    .Bl -column minpasswordlen program xetcxmotd
+    .It path Ta path Ta value of Dv _PATH_DEFPATH
+    .br
+    Default search path.
+  reported by Michal Mazurek <akfaew at jasminek dot net>
+  via jmc@ Thu, 7 Apr 2011 16:00:53 +0059
+
 - inside `.Bl -column' phrases, punctuation is handled like normal
   text, e.g. `.Bl -column .It Fl x . Ta ...' should give "-x -."
 
