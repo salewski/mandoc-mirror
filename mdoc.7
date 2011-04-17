@@ -1176,8 +1176,9 @@ See also
 and
 .Sx \&Sy .
 .Ss \&Bk
-Keep the output generated from each macro input line together
-on one single output line.
+For each macro, keep its output together on the same output line,
+until the end of the macro or the end of the input line is reached,
+whichever comes first.
 Line breaks in text lines are unaffected.
 The syntax is as follows:
 .Pp
