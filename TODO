@@ -224,6 +224,10 @@
   Also have `It' complain if `Pp' is invoked at certain times (not
   -compact?).
 
+- .Pp between two .It in .Bl -column should produce one,
+  not two blank lines, see e.g. login.conf(5).
+  reported by jmc@  Sun, 17 Apr 2011 14:04:58 +0059
+
 - If the *first* line after .It is .Pp, break the line right after
   the tag, do not pad with space characters before breaking.
   See the description of the a, c, and i commands in sed(1).
