@@ -568,25 +568,9 @@ args(struct mdoc *m, int line, int *pos,
 		return(ARGS_QWORD);
 	}
 
-	/* 
-	 * A non-quoted term progresses until either the end of line or
-	 * a non-escaped whitespace.
-	 */
-
-	for ( ; buf[*pos]; (*pos)++)
-		if (*pos && ' ' == buf[*pos] && '\\' != buf[*pos - 1])
-			break;
-
-	if ('\0' == buf[*pos])
-		return(ARGS_WORD);
-
-	buf[(*pos)++] = '\0';
-
-	while (' ' == buf[*pos])
-		(*pos)++;
-
-	if ('\0' == buf[*pos] && ! (ARGS_NOWARN & fl))
-		mdoc_pmsg(m, line, *pos, MANDOCERR_EOLNSPACE);
+	p = &buf[*pos];
+	*v = mandoc_getarg(m->parse, &p, line, 
+			! (ARGS_NOWARN & fl), pos);
 
 	return(ARGS_WORD);
 }
