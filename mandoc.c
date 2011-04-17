@@ -460,18 +460,19 @@ mandoc_strdup(const char *ptr)
  * or to the null byte terminating the argument line.
  */
 char *
-mandoc_getarg(struct mparse *parse, char **cpp, int ln, int *pos)
+mandoc_getarg(struct mparse *parse, 
+		char **cpp, int ln, int dowarn, int *pos)
 {
 	char	 *start, *cp;
 	int	  quoted, pairs, white;
 
 	/* Quoting can only start with a new word. */
 	start = *cpp;
+	quoted = 0;
 	if ('"' == *start) {
 		quoted = 1;
 		start++;
-	} else
-		quoted = 0;
+	} 
 
 	pairs = 0;
 	white = 0;
@@ -507,7 +508,7 @@ mandoc_getarg(struct mparse *parse, char **cpp, int ln, int *pos)
 	}
 
 	/* Quoted argument without a closing quote. */
-	if (1 == quoted)
+	if (dowarn && 1 == quoted)
 		mandoc_msg(MANDOCERR_BADQUOTE, parse, ln, *pos, NULL);
 
 	/* Null-terminate this argument and move to the next one. */
@@ -521,7 +522,7 @@ mandoc_getarg(struct mparse *parse, char **cpp, int ln, int *pos)
 	*pos += (int)(cp - start) + (quoted ? 1 : 0);
 	*cpp = cp;
 
-	if ('\0' == *cp && (white || ' ' == cp[-1]))
+	if (dowarn && '\0' == *cp && (white || ' ' == cp[-1]))
 		mandoc_msg(MANDOCERR_EOLNSPACE, parse, ln, *pos, NULL);
 
 	return(start);

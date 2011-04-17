@@ -62,20 +62,20 @@ struct	mdoc_macro {
 
 enum	margserr {
 	ARGS_ERROR,
-	ARGS_EOLN,
-	ARGS_WORD,
-	ARGS_PUNCT,
-	ARGS_QWORD,
-	ARGS_PHRASE,
-	ARGS_PPHRASE,
-	ARGS_PEND
+	ARGS_EOLN, /* end-of-line */
+	ARGS_WORD, /* normal word */
+	ARGS_PUNCT, /* series of punctuation */
+	ARGS_QWORD, /* quoted word */
+	ARGS_PHRASE, /* Ta'd phrase (-column) */
+	ARGS_PPHRASE, /* tabbed phrase (-column) */
+	ARGS_PEND /* last phrase (-column) */
 };
 
 enum	margverr {
 	ARGV_ERROR,
-	ARGV_EOLN,
-	ARGV_ARG,
-	ARGV_WORD
+	ARGV_EOLN, /* end of line */
+	ARGV_ARG, /* valid argument */
+	ARGV_WORD /* normal word (or bad argument---same thing) */
 };
 
 /*
