@@ -1238,7 +1238,7 @@ roff_userdef(ROFF_ARGS)
 	cp = *bufp + pos;
 	for (i = 0; i < 9; i++)
 		arg[i] = '\0' == *cp ? "" :
-		    mandoc_getarg(r->parse, &cp, ln, 1, &pos);
+		    mandoc_getarg(r->parse, &cp, ln, &pos);
 
 	/*
 	 * Expand macro arguments.

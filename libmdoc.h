@@ -133,14 +133,8 @@ void		  mdoc_argv_free(struct mdoc_arg *);
 enum margserr	  mdoc_args(struct mdoc *, int,
 			int *, char *, enum mdoct, char **);
 enum margserr	  mdoc_zargs(struct mdoc *, int, 
-			int *, char *, int, char **);
-#define	ARGS_DELIM	(1 << 1)
-#define	ARGS_TABSEP	(1 << 2)
-#define	ARGS_NOWARN	(1 << 3)
-
+			int *, char *, char **);
 int		  mdoc_macroend(struct mdoc *);
-
-#define	DELIMSZ	  6 /* hint: max possible size of a delimiter */
 enum mdelim	  mdoc_isdelim(const char *);
 
 __END_DECLS

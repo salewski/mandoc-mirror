@@ -618,7 +618,7 @@ append_delims(struct mdoc *m, int line, int *pos, char *buf)
 
 	for (;;) {
 		la = *pos;
-		ac = mdoc_zargs(m, line, pos, buf, ARGS_NOWARN, &p);
+		ac = mdoc_zargs(m, line, pos, buf, &p);
 
 		if (ARGS_ERROR == ac)
 			return(0);
@@ -1717,7 +1717,7 @@ phrase(struct mdoc *m, int line, int ppos, char *buf)
 	for (pos = ppos; ; ) {
 		la = pos;
 
-		ac = mdoc_zargs(m, line, &pos, buf, 0, &p);
+		ac = mdoc_zargs(m, line, &pos, buf, &p);
 
 		if (ARGS_ERROR == ac)
 			return(0);
@@ -1762,7 +1762,7 @@ phrase_ta(MACRO_PROT_ARGS)
 
 	for (;;) {
 		la = *pos;
-		ac = mdoc_zargs(m, line, pos, buf, 0, &p);
+		ac = mdoc_zargs(m, line, pos, buf, &p);
 
 		if (ARGS_ERROR == ac)
 			return(0);

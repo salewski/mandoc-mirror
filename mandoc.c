@@ -95,15 +95,6 @@ numescape(const char *start)
 	return(++i);
 }
 
-/*
- * Handle an escaped sequeence.  This should be called with any
- * string subsequent a `\'.  Pass a pointer to this substring as "end";
- * it will be set to the supremum of the parsed escape sequence.  If
- * this returns ESCAPE_ERROR, the string is bogus and should be thrown
- * away.  If not ESCAPE_ERROR or ESCAPE_IGNORE, "start" is set to the
- * first relevant character of the substring (font, glyph, whatever) of
- * length sz.  Both "start" and "sz" may be NULL.
- */
 enum mandoc_esc
 mandoc_escape(const char **end, const char **start, int *sz)
 {
@@ -460,8 +451,7 @@ mandoc_strdup(const char *ptr)
  * or to the null byte terminating the argument line.
  */
 char *
-mandoc_getarg(struct mparse *parse, 
-		char **cpp, int ln, int dowarn, int *pos)
+mandoc_getarg(struct mparse *parse, char **cpp, int ln, int *pos)
 {
 	char	 *start, *cp;
 	int	  quoted, pairs, white;
@@ -508,7 +498,7 @@ mandoc_getarg(struct mparse *parse,
 	}
 
 	/* Quoted argument without a closing quote. */
-	if (dowarn && 1 == quoted)
+	if (1 == quoted)
 		mandoc_msg(MANDOCERR_BADQUOTE, parse, ln, *pos, NULL);
 
 	/* Null-terminate this argument and move to the next one. */
@@ -522,7 +512,7 @@ mandoc_getarg(struct mparse *parse,
 	*pos += (int)(cp - start) + (quoted ? 1 : 0);
 	*cpp = cp;
 
-	if (dowarn && '\0' == *cp && (white || ' ' == cp[-1]))
+	if ('\0' == *cp && (white || ' ' == cp[-1]))
 		mandoc_msg(MANDOCERR_EOLNSPACE, parse, ln, *pos, NULL);
 
 	return(start);
