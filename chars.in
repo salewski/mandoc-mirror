@@ -375,6 +375,8 @@ STRING("right-parenthesis",	")",		41)
 STRING("right-singlequote",	"\'",		8217)
 STRING("rp",			")",		41)
 STRING("Tm",			"(Tm)",		8482)
+STRING("Px",			"POSIX",	0)
+STRING("Ai",			"ANSI",		0)
 
 /* Lines. */
 CHAR("ba",			"|",		124)

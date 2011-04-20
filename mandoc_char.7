@@ -481,8 +481,13 @@ Greek letters:
 .It \e(ts    Ta \(ts        Ta sigma terminal
 .El
 .Sh PREDEFINED STRINGS
-These are not recommended for use, as they differ across
-implementations:
+Predefined strings are inherited from the macro packages of historical
+troff implementations.
+They are
+.Em not recommended
+for use, as they differ across implementations.
+Manuals using these predefined strings are almost certainly not
+portable.
 .Pp
 .Bl -column -compact -offset indent "Input" "Rendered" "Description"
 .It Em Input Ta Em Rendered Ta Em Description
@@ -512,6 +517,8 @@ implementations:
 .It \e*(>=   Ta \*(>=       Ta greater-than-equal
 .It \e*(aa   Ta \*(aa       Ta acute
 .It \e*(ga   Ta \*(ga       Ta grave
+.It \e*(Px   Ta \*(Px       Ta POSIX standard name
+.It \e*(Ai   Ta \*(Ai       Ta ANSI standard name
 .El
 .Sh NUMBERED CHARACTERS
 For backward compatibility with existing manuals,
