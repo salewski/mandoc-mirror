@@ -737,7 +737,7 @@ mdoc_nm_pre(MDOC_ARGS)
 		len = strlen(m->name);
 
 	SCALE_HS_INIT(&su, (double)len);
-	bufcat_su(h, "min-width", &su);
+	bufcat_su(h, "width", &su);
 	PAIR_STYLE_INIT(&tag, h);
 	print_otag(h, TAG_COL, 1, &tag);
 	print_otag(h, TAG_COL, 0, NULL);
