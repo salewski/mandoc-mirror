@@ -829,8 +829,7 @@ roff_block_sub(ROFF_ARGS)
 	 * pulling it out of the hashtable.
 	 */
 
-	if (ROFF_MAX == (t = roff_parse(r, *bufp, &pos)))
-		return(ROFF_IGN);
+	t = roff_parse(r, *bufp, &pos);
 
 	/*
 	 * Macros other than block-end are only significant
