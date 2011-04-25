@@ -600,7 +600,19 @@ dword(struct mdoc *m, int line,
 
 	if (DELIM_OPEN == d)
 		m->last->flags |= MDOC_DELIMO;
-	else if (DELIM_CLOSE == d)
+
+	/*
+	 * Closing delimiters only suppress the preceding space
+	 * when they follow something, not when they start a new
+	 * block or element, and not when they follow `No'.
+	 *
+	 * XXX	Explicitly special-casing MDOC_No here feels
+	 *	like a layering violation.  Find a better way
+	 *	and solve this in the code related to `No'!
+	 */
+
+	else if (DELIM_CLOSE == d && m->last->prev &&
+			m->last->prev->tok != MDOC_No)
 		m->last->flags |= MDOC_DELIMC;
 
 	return(1);
