@@ -48,7 +48,8 @@ enum	type {
 	MANDOC_FUNCTION,
 	MANDOC_UTILITY,
 	MANDOC_INCLUDES,
-	MANDOC_VARIABLE
+	MANDOC_VARIABLE,
+	MANDOC_STANDARD
 };
 
 #define	MAN_ARGS	  DB *db, \
@@ -82,6 +83,7 @@ static	void		  pmdoc_Fn(MDOC_ARGS);
 static	void		  pmdoc_Fo(MDOC_ARGS);
 static	void		  pmdoc_Nd(MDOC_ARGS);
 static	void		  pmdoc_Nm(MDOC_ARGS);
+static	void		  pmdoc_St(MDOC_ARGS);
 static	void		  pmdoc_Vt(MDOC_ARGS);
 
 typedef	void		(*pmdoc_nf)(MDOC_ARGS);
@@ -126,7 +128,7 @@ static	const pmdoc_nf	  mdocs[MDOC_MAX] = {
 	NULL, /* Ot */
 	NULL, /* Pa */
 	NULL, /* Rv */
-	NULL, /* St */ 
+	pmdoc_St, /* St */ 
 	pmdoc_Vt, /* Va */
 	pmdoc_Vt, /* Vt */ 
 	NULL, /* Xr */ 
@@ -564,6 +566,22 @@ pmdoc_Fn(MDOC_ARGS)
 
 	dbt_append(key, ksz, cp);
 	fl = MANDOC_FUNCTION;
+	memcpy(val->data, &fl, 4);
+}
+
+/* ARGSUSED */
+static void
+pmdoc_St(MDOC_ARGS)
+{
+	uint32_t	 fl;
+	
+	if (SEC_STANDARDS != n->sec)
+		return;
+	if (NULL == n->child || MDOC_TEXT != n->child->type)
+		return;
+
+	dbt_append(key, ksz, n->child->string);
+	fl = MANDOC_STANDARD;
 	memcpy(val->data, &fl, 4);
 }
 
