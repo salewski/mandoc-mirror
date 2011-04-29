@@ -25,7 +25,6 @@
 #include <string.h>
 
 #include "mandoc.h"
-#include "out.h"
 
 #define	PRINT_HI	 126
 #define	PRINT_LO	 32
@@ -55,32 +54,27 @@ struct	ln {
 
 #include "chars.in"
 
-struct	ctab {
-	enum chars	  type;
+struct	mchars {
+	enum mcharst	  type;
 	struct ln	**htab;
 };
 
 static	inline int	  match(const struct ln *,
 				const char *, size_t, int);
-static	const struct ln	 *find(struct ctab *, const char *, size_t, int);
-
+static	const struct ln	 *find(struct mchars *, const char *, size_t, int);
 
 void
-chars_free(void *arg)
+mchars_free(struct mchars *arg)
 {
-	struct ctab	*tab;
 
-	tab = (struct ctab *)arg;
-
-	free(tab->htab);
-	free(tab);
+	free(arg->htab);
+	free(arg);
 }
 
-
-void *
-chars_init(enum chars type)
+struct mchars *
+mchars_init(enum mcharst type)
 {
-	struct ctab	 *tab;
+	struct mchars	 *tab;
 	struct ln	**htab;
 	struct ln	 *pp;
 	int		  i, hash;
@@ -92,7 +86,7 @@ chars_init(enum chars type)
 	 * (they're in-line re-ordered during lookup).
 	 */
 
-	tab = mandoc_malloc(sizeof(struct ctab));
+	tab = mandoc_malloc(sizeof(struct mchars));
 	htab = mandoc_calloc(PRINT_HI - PRINT_LO + 1, sizeof(struct ln **));
 
 	for (i = 0; i < LINES_MAX; i++) {
@@ -118,11 +112,11 @@ chars_init(enum chars type)
  * Special character to Unicode codepoint.
  */
 int
-chars_spec2cp(void *arg, const char *p, size_t sz)
+mchars_spec2cp(struct mchars *arg, const char *p, size_t sz)
 {
 	const struct ln	*ln;
 
-	ln = find((struct ctab *)arg, p, sz, CHARS_CHAR);
+	ln = find(arg, p, sz, CHARS_CHAR);
 	if (NULL == ln)
 		return(-1);
 	return(ln->unicode);
@@ -133,11 +127,11 @@ chars_spec2cp(void *arg, const char *p, size_t sz)
  * Reserved word to Unicode codepoint.
  */
 int
-chars_res2cp(void *arg, const char *p, size_t sz)
+mchars_res2cp(struct mchars *arg, const char *p, size_t sz)
 {
 	const struct ln	*ln;
 
-	ln = find((struct ctab *)arg, p, sz, CHARS_STRING);
+	ln = find(arg, p, sz, CHARS_STRING);
 	if (NULL == ln)
 		return(-1);
 	return(ln->unicode);
@@ -149,7 +143,7 @@ chars_res2cp(void *arg, const char *p, size_t sz)
  * represented as a null-terminated string for additional safety.
  */
 const char *
-chars_num2char(const char *p, size_t sz)
+mchars_num2char(const char *p, size_t sz)
 {
 	int		  i;
 	static char	  c[2];
@@ -169,11 +163,11 @@ chars_num2char(const char *p, size_t sz)
  * Special character to string array.
  */
 const char *
-chars_spec2str(void *arg, const char *p, size_t sz, size_t *rsz)
+mchars_spec2str(struct mchars *arg, const char *p, size_t sz, size_t *rsz)
 {
 	const struct ln	*ln;
 
-	ln = find((struct ctab *)arg, p, sz, CHARS_CHAR);
+	ln = find(arg, p, sz, CHARS_CHAR);
 	if (NULL == ln)
 		return(NULL);
 
@@ -186,11 +180,11 @@ chars_spec2str(void *arg, const char *p, size_t sz, size_t *rsz)
  * Reserved word to string array.
  */
 const char *
-chars_res2str(void *arg, const char *p, size_t sz, size_t *rsz)
+mchars_res2str(struct mchars *arg, const char *p, size_t sz, size_t *rsz)
 {
 	const struct ln	*ln;
 
-	ln = find((struct ctab *)arg, p, sz, CHARS_STRING);
+	ln = find(arg, p, sz, CHARS_STRING);
 	if (NULL == ln)
 		return(NULL);
 
@@ -198,9 +192,8 @@ chars_res2str(void *arg, const char *p, size_t sz, size_t *rsz)
 	return(ln->ascii);
 }
 
-
 static const struct ln *
-find(struct ctab *tab, const char *p, size_t sz, int type)
+find(struct mchars *tab, const char *p, size_t sz, int type)
 {
 	struct ln	 *pp, *prev;
 	struct ln	**htab;
@@ -242,7 +235,6 @@ find(struct ctab *tab, const char *p, size_t sz, int type)
 
 	return(NULL);
 }
-
 
 static inline int
 match(const struct ln *ln, const char *p, size_t sz, int type)

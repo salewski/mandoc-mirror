@@ -122,7 +122,7 @@ ml_alloc(char *outopts, enum htmltype type)
 
 	h->type = type;
 	h->tags.head = NULL;
-	h->symtab = chars_init(CHARS_HTML);
+	h->symtab = mchars_init(MCHARS_HTML);
 
 	while (outopts && *outopts)
 		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
@@ -172,7 +172,7 @@ html_free(void *p)
 	}
 	
 	if (h->symtab)
-		chars_free(h->symtab);
+		mchars_free(h->symtab);
 
 	free(h);
 }
@@ -214,7 +214,7 @@ print_num(struct html *h, const char *p, size_t len)
 {
 	const char	*rhs;
 
-	rhs = chars_num2char(p, len);
+	rhs = mchars_num2char(p, len);
 	if (rhs)
 		putchar((int)*rhs);
 }
@@ -226,7 +226,7 @@ print_spec(struct html *h, const char *p, size_t len)
 	const char	*rhs;
 	size_t		 sz;
 
-	if ((cp = chars_spec2cp(h->symtab, p, len)) > 0) {
+	if ((cp = mchars_spec2cp(h->symtab, p, len)) > 0) {
 		printf("&#%d;", cp);
 		return;
 	} else if (-1 == cp && 1 == len) {
@@ -235,7 +235,7 @@ print_spec(struct html *h, const char *p, size_t len)
 	} else if (-1 == cp)
 		return;
 
-	if (NULL != (rhs = chars_spec2str(h->symtab, p, len, &sz)))
+	if (NULL != (rhs = mchars_spec2str(h->symtab, p, len, &sz)))
 		fwrite(rhs, 1, sz, stdout);
 }
 
@@ -247,13 +247,13 @@ print_res(struct html *h, const char *p, size_t len)
 	const char	*rhs;
 	size_t		 sz;
 
-	if ((cp = chars_res2cp(h->symtab, p, len)) > 0) {
+	if ((cp = mchars_res2cp(h->symtab, p, len)) > 0) {
 		printf("&#%d;", cp);
 		return;
 	} else if (-1 == cp)
 		return;
 
-	if (NULL != (rhs = chars_res2str(h->symtab, p, len, &sz)))
+	if (NULL != (rhs = mchars_res2str(h->symtab, p, len, &sz)))
 		fwrite(rhs, 1, sz, stdout);
 }
 

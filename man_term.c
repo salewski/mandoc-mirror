@@ -158,7 +158,7 @@ terminal_man(void *arg, const struct man *man)
 	if (NULL == p->symtab)
 		switch (p->enc) {
 		case (TERMENC_ASCII):
-			p->symtab = chars_init(CHARS_ASCII);
+			p->symtab = mchars_init(MCHARS_ASCII);
 			break;
 		default:
 			abort();

@@ -302,10 +302,16 @@ enum	mandoc_esc {
 	ESCAPE_NOSPACE /* suppress space if the last on a line */
 };
 
+enum	mcharst {
+	MCHARS_ASCII, /* 7-bit ascii representation */
+	MCHARS_HTML /* unicode values */
+};
+
 typedef	void	(*mandocmsg)(enum mandocerr, enum mandoclevel,
 			const char *, int, int, const char *);
 
 struct	mparse;
+struct	mchars;
 struct	mdoc;
 struct	man;
 
@@ -325,6 +331,15 @@ void		 *mandoc_malloc(size_t);
 void		 *mandoc_realloc(void *, size_t);
 
 enum mandoc_esc	  mandoc_escape(const char **, const char **, int *);
+
+struct mchars	 *mchars_init(enum mcharst);
+const char	 *mchars_num2char(const char *, size_t);
+const char	 *mchars_spec2str(struct mchars *, const char *, size_t, size_t *);
+int		  mchars_spec2cp(struct mchars *, const char *, size_t);
+const char	 *mchars_res2str(struct mchars *, const char *, size_t, size_t *);
+int		  mchars_res2cp(struct mchars *, const char *, size_t);
+void		  mchars_free(struct mchars *);
+
 
 __END_DECLS
 

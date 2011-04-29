@@ -31,11 +31,6 @@ enum	roffscale {
 	SCALE_MAX
 };
 
-enum	chars {
-	CHARS_ASCII, /* 7-bit ascii representation */
-	CHARS_HTML /* unicode values */
-};
-
 struct	roffcol {
 	size_t		 width; /* width of cell */
 	size_t		 decimal; /* decimal position in cell */
@@ -71,14 +66,6 @@ __BEGIN_DECLS
 int	  	  a2roffsu(const char *, struct roffsu *, enum roffscale);
 void	  	  time2a(time_t, char *, size_t);
 void	  	  tblcalc(struct rofftbl *tbl, const struct tbl_span *);
-
-void		 *chars_init(enum chars);
-const char	 *chars_num2char(const char *, size_t);
-const char	 *chars_spec2str(void *, const char *, size_t, size_t *);
-int		  chars_spec2cp(void *, const char *, size_t);
-const char	 *chars_res2str(void *, const char *, size_t, size_t *);
-int		  chars_res2cp(void *, const char *, size_t);
-void		  chars_free(void *);
 
 __END_DECLS
 

@@ -154,16 +154,19 @@ LIBROFF_LNS	 = eqn.ln \
 LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 		   $(LIBMDOC_OBJS) \
 		   $(LIBROFF_OBJS) \
+		   chars.o \
 		   mandoc.o \
 		   read.o
 LIBMANDOC_LNS	 = $(LIBMAN_LNS) \
 		   $(LIBMDOC_LNS) \
 		   $(LIBROFF_LNS) \
+		   chars.ln \
 		   mandoc.ln \
 		   read.ln
 
 arch.o arch.ln: arch.in
 att.o att.ln: att.in
+chars.o chars.ln: chars.in
 lib.o lib.ln: lib.in
 msec.o msec.ln: msec.in
 st.o st.ln: st.in
@@ -198,18 +201,14 @@ MANDOC_TERM_LNS	 = man_term.ln \
 
 MANDOC_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   $(MANDOC_TERM_OBJS) \
-		   chars.o \
 		   main.o \
 		   out.o \
 		   tree.o
 MANDOC_LNS	 = $(MANDOC_HTML_LNS) \
 		   $(MANDOC_TERM_LNS) \
-		   chars.ln \
 		   main.ln \
 		   out.ln \
 		   tree.ln
-
-chars.o chars.ln: chars.in
 
 $(MANDOC_HTML_OBJS) $(MANDOC_HTML_LNS): html.h
 $(MANDOC_TERM_OBJS) $(MANDOC_TERM_LNS): term.h
@@ -322,7 +321,7 @@ mandoc: $(MANDOC_OBJS) libmandoc.a
 
 # You'll need -ldb for Linux.
 mandoc-db: $(MANDOCDB_OBJS) libmandoc.a
-	$(CC) -o $@ $(MANDOCDB_OBJS) libmandoc.a
+	$(CC) -o $@ $(MANDOCDB_OBJS) libmandoc.a -ldb
 
 llib-lmandoc.ln: $(MANDOC_LNS)
 	$(LINT) $(LINTFLAGS) -Cmandoc $(MANDOC_LNS)

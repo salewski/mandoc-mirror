@@ -47,7 +47,7 @@ term_free(struct termp *p)
 	if (p->buf)
 		free(p->buf);
 	if (p->symtab)
-		chars_free(p->symtab);
+		mchars_free(p->symtab);
 
 	free(p);
 }
@@ -350,7 +350,7 @@ numbered(struct termp *p, const char *word, size_t len)
 {
 	const char	*rhs;
 
-	rhs = chars_num2char(word, len);
+	rhs = mchars_num2char(word, len);
 	if (rhs) 
 		encode(p, rhs, 1);
 }
@@ -362,7 +362,7 @@ spec(struct termp *p, const char *word, size_t len)
 	const char	*rhs;
 	size_t		 sz;
 
-	rhs = chars_spec2str(p->symtab, word, len, &sz);
+	rhs = mchars_spec2str(p->symtab, word, len, &sz);
 	if (rhs) 
 		encode(p, rhs, sz);
 	else if (1 == len)
@@ -376,7 +376,7 @@ res(struct termp *p, const char *word, size_t len)
 	const char	*rhs;
 	size_t		 sz;
 
-	rhs = chars_res2str(p->symtab, word, len, &sz);
+	rhs = mchars_res2str(p->symtab, word, len, &sz);
 	if (rhs)
 		encode(p, rhs, sz);
 }
@@ -623,11 +623,11 @@ term_strlen(const struct termp *p, const char *cp)
 
 			switch (esc) {
 			case (ESCAPE_PREDEF):
-				rhs = chars_res2str
+				rhs = mchars_res2str
 					(p->symtab, seq, ssz, &rsz);
 				break;
 			case (ESCAPE_SPECIAL):
-				rhs = chars_spec2str
+				rhs = mchars_spec2str
 					(p->symtab, seq, ssz, &rsz);
 
 				if (ssz != 1 || rhs)

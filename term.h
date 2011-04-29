@@ -105,7 +105,7 @@ struct	termp {
 #define	TERMP_PREKEEP	 (1 << 15)	/* ...starting with the next one. */
 	char		 *buf;		/* Output buffer. */
 	enum termenc	  enc;		/* Type of encoding. */
-	void		 *symtab;	/* Encoded-symbol table. */
+	struct mchars	 *symtab;	/* Encoded-symbol table. */
 	enum termfont	  fontl;	/* Last font set. */
 	enum termfont	  fontq[10];	/* Symmetric fonts. */
 	int		  fonti;	/* Index of font stack. */
