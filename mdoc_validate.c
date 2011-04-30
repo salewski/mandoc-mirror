@@ -1535,7 +1535,7 @@ post_bl_head(POST_ARGS)
 	assert(0 == np->args->argv[j].sz);
 
 	/*
-	 * Accomodate for new-style groff column syntax.  Shuffle the
+	 * Accommodate for new-style groff column syntax.  Shuffle the
 	 * child nodes, all of which must be TEXT, as arguments for the
 	 * column field.  Then, delete the head children.
 	 */

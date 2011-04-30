@@ -201,7 +201,7 @@
   reminded by jmc@  Thu, 23 Sep 2010 18:13:39 +0059
 
 ************************************************************************
-* formatting issues: gratuitious differences
+* formatting issues: gratuitous differences
 ************************************************************************
 
 - .Rv (and probably .Ex) print different text if an `Nm' has been named

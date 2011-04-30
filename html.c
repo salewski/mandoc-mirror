@@ -427,7 +427,7 @@ print_otag(struct html *h, enum htmltag tag,
 		print_attr(h, "lang", "en");
 	}
 
-	/* Accomodate for XML "well-formed" singleton escaping. */
+	/* Accommodate for XML "well-formed" singleton escaping. */
 
 	if (HTML_AUTOCLOSE & htmltags[tag].flags)
 		switch (h->type) {

@@ -603,7 +603,7 @@ mandoc_eos(const char *p, size_t sz, int enclosed)
 	/*
 	 * End-of-sentence recognition must include situations where
 	 * some symbols, such as `)', allow prior EOS punctuation to
-	 * propogate outward.
+	 * propagate outward.
 	 */
 
 	found = 0;

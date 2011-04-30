@@ -643,12 +643,12 @@ append_delims(struct mdoc *m, int line, int *pos, char *buf)
 		 * If we encounter end-of-sentence symbols, then trigger
 		 * the double-space.
 		 *
-		 * XXX: it's easy to allow this to propogate outward to
+		 * XXX: it's easy to allow this to propagate outward to
 		 * the last symbol, such that `. )' will cause the
 		 * correct double-spacing.  However, (1) groff isn't
 		 * smart enough to do this and (2) it would require
 		 * knowing which symbols break this behaviour, for
-		 * example, `.  ;' shouldn't propogate the double-space.
+		 * example, `.  ;' shouldn't propagate the double-space.
 		 */
 		if (mandoc_eos(p, strlen(p), 0))
 			m->last->flags |= MDOC_EOS;
@@ -1007,7 +1007,7 @@ blk_full(MACRO_PROT_ARGS)
 	}
 
 	/*
-	 * This routine accomodates implicitly- and explicitly-scoped
+	 * This routine accommodates implicitly- and explicitly-scoped
 	 * macro openings.  Implicit ones first close out prior scope
 	 * (seen above).  Delay opening the head until necessary to
 	 * allow leading punctuation to print.  Special consideration
@@ -1304,7 +1304,7 @@ blk_part_imp(MACRO_PROT_ARGS)
 		if (mandoc_eos(n->string, strlen(n->string), 1))
 			n->flags |= MDOC_EOS;
 
-	/* Up-propogate the end-of-space flag. */
+	/* Up-propagate the end-of-space flag. */
 
 	if (n && (MDOC_EOS & n->flags)) {
 		body->flags |= MDOC_EOS;

@@ -305,7 +305,7 @@
 			future version of <SPAN CLASS="nm">mdocml</SPAN> will expand upon this framework.
 		</P>
 		<P>
-			As usual, many general fixes and improvements have also occured.  In particular, a great
+			As usual, many general fixes and improvements have also occurred.  In particular, a great
 			deal of redundancy and superfluous code has been removed with the merging of the backend
 			libraries.
 		</P>
