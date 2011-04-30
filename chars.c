@@ -71,7 +71,7 @@ mchars_free(struct mchars *arg)
 }
 
 struct mchars *
-mchars_init(void)
+mchars_alloc(void)
 {
 	struct mchars	 *tab;
 	struct ln	**htab;

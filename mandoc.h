@@ -327,7 +327,7 @@ void		 *mandoc_realloc(void *, size_t);
 
 enum mandoc_esc	  mandoc_escape(const char **, const char **, int *);
 
-struct mchars	 *mchars_init(void);
+struct mchars	 *mchars_alloc(void);
 const char	 *mchars_num2char(const char *, size_t);
 const char	 *mchars_spec2str(struct mchars *, const char *, size_t, size_t *);
 int		  mchars_spec2cp(struct mchars *, const char *, size_t);
