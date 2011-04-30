@@ -137,23 +137,23 @@ mchars_res2cp(struct mchars *arg, const char *p, size_t sz)
 
 
 /*
- * Numbered character to literal character,
- * represented as a null-terminated string for additional safety.
+ * Numbered character to literal character.
  */
-const char *
+char
 mchars_num2char(const char *p, size_t sz)
 {
 	int		  i;
-	static char	  c[2];
 
 	if (sz > 3)
-		return(NULL);
+		return('\0');
+
 	i = atoi(p);
-	if (i < 0 || i > 255)
-		return(NULL);
-	c[0] = (char)i;
-	c[1] = '\0';
-	return(c);
+	/* 
+	 * FIXME:
+	 * This is wrong.  Anything could be written here!
+	 * This should be carefully screened for possible characters.
+	 */
+	return(i <= 0 || i > 255 ? '\0' : (char)i);
 }
 
 

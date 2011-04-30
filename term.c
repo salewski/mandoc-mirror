@@ -348,11 +348,10 @@ term_vspace(struct termp *p)
 static void
 numbered(struct termp *p, const char *word, size_t len)
 {
-	const char	*rhs;
+	char		 c;
 
-	rhs = mchars_num2char(word, len);
-	if (rhs) 
-		encode(p, rhs, 1);
+	if ('\0' != (c = mchars_num2char(word, len)))
+		encode(p, &c, 1);
 }
 
 

@@ -212,11 +212,10 @@ print_gen_head(struct html *h)
 static void
 print_num(struct html *h, const char *p, size_t len)
 {
-	const char	*rhs;
+	char		 c;
 
-	rhs = mchars_num2char(p, len);
-	if (rhs)
-		putchar((int)*rhs);
+	if ('\0' != (c = mchars_num2char(p, len)))
+		putchar((int)c);
 }
 
 static void
