@@ -266,7 +266,7 @@ terminal_mdoc(void *arg, const struct mdoc *mdoc)
 	if (NULL == p->symtab)
 		switch (p->enc) {
 		case (TERMENC_ASCII):
-			p->symtab = mchars_init(MCHARS_ASCII);
+			p->symtab = mchars_init();
 			break;
 		default:
 			abort();

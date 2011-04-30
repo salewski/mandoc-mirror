@@ -122,7 +122,7 @@ ml_alloc(char *outopts, enum htmltype type)
 
 	h->type = type;
 	h->tags.head = NULL;
-	h->symtab = mchars_init(MCHARS_HTML);
+	h->symtab = mchars_init();
 
 	while (outopts && *outopts)
 		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
