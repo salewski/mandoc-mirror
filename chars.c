@@ -20,6 +20,7 @@
 #endif
 
 #include <assert.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -135,9 +136,11 @@ mchars_res2cp(struct mchars *arg, const char *p, size_t sz)
 	return(ln->unicode);
 }
 
-
 /*
  * Numbered character to literal character.
+ * This can only be a printable character (i.e., alnum, punct, space) so
+ * prevent the character from ruining our state (backspace, newline, and
+ * so on).
  */
 char
 mchars_num2char(const char *p, size_t sz)
@@ -148,14 +151,8 @@ mchars_num2char(const char *p, size_t sz)
 		return('\0');
 
 	i = atoi(p);
-	/* 
-	 * FIXME:
-	 * This is wrong.  Anything could be written here!
-	 * This should be carefully screened for possible characters.
-	 */
-	return(i <= 0 || i > 255 ? '\0' : (char)i);
+	return(isprint(i) ? (char)i : '\0');
 }
-
 
 /* 
  * Special character to string array.
@@ -172,7 +169,6 @@ mchars_spec2str(struct mchars *arg, const char *p, size_t sz, size_t *rsz)
 	*rsz = strlen(ln->ascii);
 	return(ln->ascii);
 }
-
 
 /* 
  * Reserved word to string array.
