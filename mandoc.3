@@ -23,6 +23,13 @@
 .Nm mandoc_escape ,
 .Nm man_meta ,
 .Nm man_node ,
+.Nm mchars_alloc ,
+.Nm mchars_free ,
+.Nm mchars_num2char ,
+.Nm mchars_res2cp ,
+.Nm mchars_res2str ,
+.Nm mchars_spec2cp ,
+.Nm mchars_spec2str ,
 .Nm mdoc_meta ,
 .Nm mdoc_node ,
 .Nm mparse_alloc ,
@@ -50,6 +57,40 @@
 .Ft "const struct man_node *"
 .Fo man_node
 .Fa "const struct man *man"
+.Fc
+.Ft "struct mchars *"
+.Fn mchars_alloc
+.Ft void
+.Fn mchars_free "struct mchars *p"
+.Ft char
+.Fn mchars_num2char "const char *cp" "size_t sz"
+.Ft "const char *"
+.Fo mchars_res2str
+.Fa "struct mchars *p"
+.Fa "const char *cp"
+.Fa "size_t sz"
+.Fa "size_t *rsz"
+.Fc
+.Ft int
+.Fo mchars_res2cp
+.Fa "struct mchars *p"
+.Fa "const char *cp"
+.Fa "size_t sz"
+.Ft "const char *"
+.Fc
+.Ft "const char *"
+.Fo mchars_spec2str
+.Fa "struct mchars *p"
+.Fa "const char *cp"
+.Fa "size_t sz"
+.Fa "size_t *rsz"
+.Fc
+.Ft int
+.Fo mchars_spec2cp
+.Fa "struct mchars *p"
+.Fa "const char *cp"
+.Fa "size_t sz"
+.Ft "const char *"
 .Fc
 .Ft "const struct mdoc_meta *"
 .Fo mdoc_meta
@@ -140,6 +181,13 @@ or invoke
 .Fn mparse_reset
 and parse new files.
 .El
+.Pp
+The
+.Nm
+library also contains routines for translating character strings into glyphs
+.Pq see Fn mchars_alloc
+and parsing escape sequences from strings
+.Pq see Fn mandoc_escape .
 .Sh REFERENCE
 This section documents the functions, types, and variables available
 via
@@ -149,6 +197,11 @@ via
 .It Vt "enum mandoc_esc"
 .It Vt "enum mandocerr"
 .It Vt "enum mandoclevel"
+.It Vt "struct mchars"
+An opaque pointer to an object allowing for translation between
+character strings and glyphs.
+See
+.Fn mchars_alloc .
 .It Vt "enum mparset"
 .It Vt "struct mparse"
 .It Vt "mandocmsg"
@@ -181,6 +234,38 @@ This may only be used on a pointer returned by
 Obtain the root node of a successful parse.
 This may only be used on a pointer returned by
 .Fn mparse_result .
+.It Fn mchars_alloc
+Allocate an
+.Vt "struct mchars *"
+object for translating special characters into glyphs.
+See
+.Xr mandoc_char 7
+for an overview of special characters.
+The object must be freed with
+.Fn mchars_free .
+.It Fn mchars_free
+Free an object created with
+.Fn mchars_alloc .
+.It Fn mchars_num2char
+Convert a character index as found in \eN\(aq\(aq into a printable
+character.
+Returns \e0 (the nil character) if the input sequence is malformed.
+.It Fn mchars_res2cp
+Convert a predefined character into a valid Unicode codepoint.
+Returns \-1 on failure and 0 if no code-point exists (if this occurs,
+the caller should fall back to
+.Fn mchars_res2str ) .
+.It Fn mchars_res2str
+Convert a predefined character into an ASCII string.
+Returns NULL on failure.
+.It Fn mchars_spec2cp
+Convert a special character into a valid Unicode codepoint.
+Returns \-1 on failure and 0 if no code-point exists (if this occurs,
+the caller should fall back to
+.Fn mchars_spec2str ) .
+.It Fn mchars_spec2str
+Convert a special character into an ASCII string.
+Returns NULL on failure.
 .It Fn mdoc_meta
 Obtain the meta-data of a successful parse.
 This may only be used on a pointer returned by
@@ -436,6 +521,7 @@ levels of badly-nested blocks.
 .Xr mandoc 1 ,
 .Xr eqn 7 ,
 .Xr man 7 ,
+.Xr mandoc_char 7 ,
 .Xr mdoc 7 ,
 .Xr roff 7 ,
 .Xr tbl 7
