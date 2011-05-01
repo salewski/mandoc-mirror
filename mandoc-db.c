@@ -443,6 +443,9 @@ dbt_init(DBT *key, size_t *ksz)
 static void
 dbt_appendb(DBT *key, size_t *ksz, const void *cp, size_t sz)
 {
+	void		*dstp, *endp;
+	int		 ssz;
+	enum mandoc_esc	 esc;
 
 	assert(key->data);
 
@@ -453,7 +456,47 @@ dbt_appendb(DBT *key, size_t *ksz, const void *cp, size_t sz)
 		key->data = mandoc_realloc(key->data, *ksz);
 	}
 
-	memcpy(key->data + (int)key->size, cp, sz);
+	dstp = key->data + (int)key->size;
+
+	while (NULL != (endp = memchr(cp, '\\', sz))) {
+		ssz = endp - cp;
+		memcpy(dstp, cp, ssz);
+
+		dstp += ssz;
+		key->size += ssz;
+		sz -= ssz;
+
+		cp = endp++;
+		/* FIXME: expects nil-terminated string! */
+		esc = mandoc_escape((const char **)&endp, NULL, NULL);
+
+		switch (esc) {
+		case (ESCAPE_ERROR):
+			/* Nil-terminate this point. */
+			memcpy(dstp, "", 1);
+			key->size++;
+			return;
+		case (ESCAPE_PREDEF):
+			/* FALLTHROUGH */
+		case (ESCAPE_SPECIAL):
+			break;
+		default:
+			sz -= endp - cp;
+			cp = endp;
+			continue;
+		}
+
+		ssz = endp - cp;
+		memcpy(dstp, cp, ssz);
+
+		dstp += ssz;
+		key->size += ssz;
+		sz -= ssz;
+
+		cp = endp;
+	}
+
+	memcpy(dstp, cp, sz);
 	key->size += sz;
 }
 
@@ -485,7 +528,6 @@ pmdoc_Fd(MDOC_ARGS)
 	uint32_t	 fl;
 	const char	*start, *end;
 	size_t		 sz;
-	const char	 nil = '\0';
 	
 	if (SEC_SYNOPSIS != n->sec)
 		return;
@@ -519,7 +561,7 @@ pmdoc_Fd(MDOC_ARGS)
 		end--;
 
 	dbt_appendb(key, ksz, start, end - start + 1);
-	dbt_appendb(key, ksz, &nil, 1);
+	dbt_appendb(key, ksz, "", 1);
 
 	fl = MANDOC_INCLUDES;
 	memcpy(val->data, &fl, 4);
@@ -590,9 +632,8 @@ static void
 pmdoc_Vt(MDOC_ARGS)
 {
 	uint32_t	 fl;
-	const char	*start, *end;
+	const char	*start;
 	size_t		 sz;
-	const char	 nil = '\0';
 	
 	if (SEC_SYNOPSIS != n->sec)
 		return;
@@ -613,15 +654,15 @@ pmdoc_Vt(MDOC_ARGS)
 	if (0 == (sz = strlen(start)))
 		return;
 
-	end = &start[sz - 1];
-	while (end > start && ';' == *end)
-		end--;
+	if (';' == start[sz - 1])
+		sz--;
 
-	if (end == start)
+	if (0 == sz)
 		return;
 
-	dbt_appendb(key, ksz, start, end - start + 1);
-	dbt_appendb(key, ksz, &nil, 1);
+	dbt_appendb(key, ksz, start, sz);
+	dbt_appendb(key, ksz, "", 1);
+
 	fl = MANDOC_VARIABLE;
 	memcpy(val->data, &fl, 4);
 }
@@ -656,7 +697,6 @@ pmdoc_Nd(MDOC_ARGS)
 			dbt_appendb(rval, rsz, n->string, strlen(n->string) + 1);
 		else
 			dbt_append(rval, rsz, n->string);
-
 		first = 0;
 	}
 }
@@ -733,8 +773,8 @@ pmdoc_node(MDOC_ARGS)
 			break;
 
 		dbt_init(key, ksz);
-		(*mdocs[n->tok])(db, dbn, key, ksz, val, rval, rsz, n);
 
+		(*mdocs[n->tok])(db, dbn, key, ksz, val, rval, rsz, n);
 		dbt_put(db, dbn, key, val);
 		break;
 	default:
@@ -750,7 +790,6 @@ pman_node(MAN_ARGS)
 {
 	const struct man_node *head, *body;
 	const char	*start, *sv;
-	const char	 nil = '\0';
 	size_t		 sz;
 	uint32_t	 fl;
 
@@ -797,7 +836,7 @@ pman_node(MAN_ARGS)
 
 				dbt_init(key, ksz);
 				dbt_appendb(key, ksz, start, sz);
-				dbt_appendb(key, ksz, &nil, 1);
+				dbt_appendb(key, ksz, "", 1);
 
 				dbt_put(db, dbn, key, val);
 
