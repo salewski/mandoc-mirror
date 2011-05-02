@@ -443,9 +443,6 @@ dbt_init(DBT *key, size_t *ksz)
 static void
 dbt_appendb(DBT *key, size_t *ksz, const void *cp, size_t sz)
 {
-	void		*dstp, *endp;
-	int		 ssz;
-	enum mandoc_esc	 esc;
 
 	assert(key->data);
 
@@ -456,6 +453,7 @@ dbt_appendb(DBT *key, size_t *ksz, const void *cp, size_t sz)
 		key->data = mandoc_realloc(key->data, *ksz);
 	}
 
+#if 0
 	dstp = key->data + (int)key->size;
 
 	while (NULL != (endp = memchr(cp, '\\', sz))) {
@@ -495,8 +493,9 @@ dbt_appendb(DBT *key, size_t *ksz, const void *cp, size_t sz)
 
 		cp = endp;
 	}
+#endif
 
-	memcpy(dstp, cp, sz);
+	memcpy(key->data + (int)key->size, cp, sz);
 	key->size += sz;
 }
 
