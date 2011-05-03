@@ -223,6 +223,7 @@ main(int argc, char *argv[])
 	struct man	*man; /* resulting man */
 	char		*fn; /* current file being parsed */
 	const char	*msec, /* manual section */
+	      	 	*mtitle, /* manual title */
 	      		*dir; /* result dir (default: cwd) */
 	char		 ibuf[MAXPATHLEN], /* index fname */
 			 ibbuf[MAXPATHLEN], /* index backup fname */
@@ -356,8 +357,12 @@ main(int argc, char *argv[])
 		msec = NULL != mdoc ? 
 			mdoc_meta(mdoc)->msec :
 			man_meta(man)->msec;
+		mtitle = NULL != mdoc ? 
+			mdoc_meta(mdoc)->title :
+			man_meta(man)->title;
 
 		assert(msec);
+		assert(mtitle);
 
 		/* 
 		 * The index record value consists of a nil-terminated
@@ -370,6 +375,7 @@ main(int argc, char *argv[])
 		dbt_init(&rval, &rsz);
 		dbt_appendb(&rval, &rsz, fn, strlen(fn) + 1);
 		dbt_appendb(&rval, &rsz, msec, strlen(msec) + 1);
+		dbt_appendb(&rval, &rsz, mtitle, strlen(mtitle) + 1);
 		sv = rval.size;
 
 		/* Fix the record number in the btree value. */
