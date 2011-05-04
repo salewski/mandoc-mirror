@@ -69,6 +69,9 @@ a nil-terminated manual section,
 .It
 a nil-terminated manual title,
 .It
+a nil-terminated architecture
+.Pq this is not often available
+.It
 and a nil-terminated description.
 .El
 .Pp
@@ -102,6 +105,8 @@ A variable name as given in the SYNOPSIS section.
 A standard as given in the STANDARDS section.
 .It Li 0x07
 An author as given in the AUTHORS section.
+.It Li 0x08
+A configuration as given in the SYNOPSIS section.
 .El
 .Pp
 If a value is encountered outside of this range, the database is
