@@ -44,7 +44,13 @@
 
 		<P>
 			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any UNIX system.  The most current
-			version is <SPAN CLASS="attn">@VERSION@</SPAN>, dated <SPAN class="attn">@VDATE@</SPAN>.
+			version is <SPAN CLASS="attn">@VERSION@</SPAN>, dated <SPAN class="attn">@VDATE@</SPAN>.  If your system doesn't come
+			with <SPAN CLASS="nm">mdocml</SPAN> (see <Q>Downstream</Q>), run <CODE>make</CODE> to compile and <CODE>make
+			install</CODE> to install into <I>/usr/local</I>.
+		</P>
+		<P>
+			Note that <A HREF="mandoc-db.1.html">mandoc-db</A> is not yet linked to the build.  You must run <CODE>make
+			mandoc-db</CODE> to build it.
 		</P>
 
 		<H2>
@@ -148,6 +154,18 @@
 							<A HREF="mandoc.1.xhtml">xhtml</A> |
 							<A HREF="mandoc.1.pdf">pdf</A> |
 							<A HREF="mandoc.1.ps">postscript</A>)
+						</SMALL>
+					</TD>
+				</TR>
+				<TR>
+					<TD VALIGN="top"><A HREF="mandoc.1.html">mandoc-db(1)</A></TD>
+					<TD VALIGN="top">
+						index UNIX manuals
+						<SMALL>
+							(<A HREF="mandoc-db.1.txt">text</A> | 
+							<A HREF="mandoc-db.1.xhtml">xhtml</A> |
+							<A HREF="mandoc-db.1.pdf">pdf</A> |
+							<A HREF="mandoc-db.1.ps">postscript</A>)
 						</SMALL>
 					</TD>
 				</TR>
