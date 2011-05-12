@@ -591,7 +591,8 @@ pmdoc_Fd(MDOC_ARGS)
 	if ('>' == *end || '"' == *end)
 		end--;
 
-	dbt_appendb(key, ksz, start, end - start + 1);
+	assert(end >= start);
+	dbt_appendb(key, ksz, start, (size_t)(end - start + 1));
 	dbt_appendb(key, ksz, "", 1);
 
 	fl = MANDOC_INCLUDES;
@@ -702,7 +703,7 @@ pmdoc_Vt(MDOC_ARGS)
 	if (0 == (sz = strlen(start)))
 		return;
 
-	if (';' == start[sz - 1])
+	if (';' == start[(int)sz - 1])
 		sz--;
 
 	if (0 == sz)
