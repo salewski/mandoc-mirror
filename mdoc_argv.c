@@ -50,8 +50,7 @@ enum	argvflag {
 static	enum mdocargt	 argv_a2arg(enum mdoct, const char *);
 static	enum margserr	 args(struct mdoc *, int, int *, 
 				char *, enum argsflag, char **);
-static	int		 args_checkpunct(struct mdoc *,
-				const char *, int, int);
+static	int		 args_checkpunct(const char *, int);
 static	int		 argv(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
 static	int		 argv_single(struct mdoc *, int, 
@@ -445,7 +444,7 @@ args(struct mdoc *m, int line, int *pos,
 	*v = &buf[*pos];
 
 	if (ARGSFL_DELIM == fl)
-		if (args_checkpunct(m, buf, *pos, line))
+		if (args_checkpunct(buf, *pos))
 			return(ARGS_PUNCT);
 
 	/*
@@ -571,7 +570,7 @@ args(struct mdoc *m, int line, int *pos,
  * whitespace may separate these tokens.
  */
 static int
-args_checkpunct(struct mdoc *m, const char *buf, int i, int ln)
+args_checkpunct(const char *buf, int i)
 {
 	int		 j;
 	char		 dbuf[DELIMSZ];
@@ -670,7 +669,7 @@ argv_multi(struct mdoc *m, int line,
 	for (v->sz = 0; ; v->sz++) {
 		if ('-' == buf[*pos])
 			break;
-		ac = args(m, line, pos, buf, 0, &p);
+		ac = args(m, line, pos, buf, ARGSFL_NONE, &p);
 		if (ARGS_ERROR == ac)
 			return(0);
 		else if (ARGS_EOLN == ac)
@@ -696,7 +695,7 @@ argv_opt_single(struct mdoc *m, int line,
 	if ('-' == buf[*pos])
 		return(1);
 
-	ac = args(m, line, pos, buf, 0, &p);
+	ac = args(m, line, pos, buf, ARGSFL_NONE, &p);
 	if (ARGS_ERROR == ac)
 		return(0);
 	if (ARGS_EOLN == ac)
@@ -722,7 +721,7 @@ argv_single(struct mdoc *m, int line,
 
 	ppos = *pos;
 
-	ac = args(m, line, pos, buf, 0, &p);
+	ac = args(m, line, pos, buf, ARGSFL_NONE, &p);
 	if (ARGS_EOLN == ac) {
 		mdoc_pmsg(m, line, ppos, MANDOCERR_SYNTARGVCOUNT);
 		return(0);
