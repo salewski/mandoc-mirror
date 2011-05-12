@@ -871,6 +871,7 @@ pman_node(MAN_ARGS)
 			/* 
 			 * Go through a special heuristic dance here.
 			 * This is why -man manuals are great!
+			 * (I'm being sarcastic: my eyes are bleeding.)
 			 * Conventionally, one or more manual names are
 			 * comma-specified prior to a whitespace, then a
 			 * dash, then a description.  Try to puzzle out
@@ -908,10 +909,14 @@ pman_node(MAN_ARGS)
 			while (' ' == *start)
 				start++;
 
-			if ('\\' == *start && '-' == *(start + 1))
+			if (0 == strncmp(start, "-", 1))
+				start += 1;
+			else if (0 == strncmp(start, "\\-", 2))
 				start += 2;
-			else if ('-' == *start)
-				start++;
+			else if (0 == strncmp(start, "\\(en", 4))
+				start += 4;
+			else if (0 == strncmp(start, "\\(em", 4))
+				start += 4;
 
 			while (' ' == *start)
 				start++;
