@@ -158,7 +158,7 @@
 					</TD>
 				</TR>
 				<TR>
-					<TD VALIGN="top"><A HREF="mandoc.1.html">makewhatis(1)</A></TD>
+					<TD VALIGN="top"><A HREF="makewhatis.1.html">makewhatis(1)</A></TD>
 					<TD VALIGN="top">
 						index UNIX manuals
 						<SMALL>
