@@ -314,6 +314,7 @@
 		</P>
 		<P>
 			Corrected some installation issues in version 1.11.1.
+			Further migration to <A HREF="mandoc.3.html">libmandoc</A>.
 			Initial public release (this utility is very much under development) of <A HREF="makewhatis.1.html">makewhatis</A>,
 			initially named mandoc-db.
 			This utility produces keyword databases of manual content
