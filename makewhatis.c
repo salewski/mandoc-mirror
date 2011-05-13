@@ -548,7 +548,7 @@ pmdoc_An(MDOC_ARGS)
 		if (MDOC_TEXT == n->type)
 			dbt_append(key, ksz, n->string);
 
-	fl = MANDOC_AUTHOR;
+	fl = (uint32_t)MANDOC_AUTHOR;
 	memcpy(val->data, &fl, 4);
 }
 
@@ -595,7 +595,7 @@ pmdoc_Fd(MDOC_ARGS)
 	dbt_appendb(key, ksz, start, (size_t)(end - start + 1));
 	dbt_appendb(key, ksz, "", 1);
 
-	fl = MANDOC_INCLUDES;
+	fl = (uint32_t)MANDOC_INCLUDES;
 	memcpy(val->data, &fl, 4);
 }
 
@@ -612,7 +612,7 @@ pmdoc_Cd(MDOC_ARGS)
 		if (MDOC_TEXT == n->type)
 			dbt_append(key, ksz, n->string);
 
-	fl = MANDOC_CONFIG;
+	fl = (uint32_t)MANDOC_CONFIG;
 	memcpy(val->data, &fl, 4);
 }
 
@@ -628,7 +628,7 @@ pmdoc_In(MDOC_ARGS)
 		return;
 
 	dbt_append(key, ksz, n->child->string);
-	fl = MANDOC_INCLUDES;
+	fl = (uint32_t)MANDOC_INCLUDES;
 	memcpy(val->data, &fl, 4);
 }
 
@@ -656,7 +656,7 @@ pmdoc_Fn(MDOC_ARGS)
 		cp++;
 
 	dbt_append(key, ksz, cp);
-	fl = MANDOC_FUNCTION;
+	fl = (uint32_t)MANDOC_FUNCTION;
 	memcpy(val->data, &fl, 4);
 }
 
@@ -672,7 +672,7 @@ pmdoc_St(MDOC_ARGS)
 		return;
 
 	dbt_append(key, ksz, n->child->string);
-	fl = MANDOC_STANDARD;
+	fl = (uint32_t)MANDOC_STANDARD;
 	memcpy(val->data, &fl, 4);
 }
 
@@ -712,7 +712,7 @@ pmdoc_Vt(MDOC_ARGS)
 	dbt_appendb(key, ksz, start, sz);
 	dbt_appendb(key, ksz, "", 1);
 
-	fl = MANDOC_VARIABLE;
+	fl = (uint32_t)MANDOC_VARIABLE;
 	memcpy(val->data, &fl, 4);
 }
 
@@ -728,7 +728,7 @@ pmdoc_Fo(MDOC_ARGS)
 		return;
 
 	dbt_append(key, ksz, n->child->string);
-	fl = MANDOC_FUNCTION;
+	fl = (uint32_t)MANDOC_FUNCTION;
 	memcpy(val->data, &fl, 4);
 }
 
@@ -762,7 +762,7 @@ pmdoc_Nm(MDOC_ARGS)
 				continue;
 			dbt_append(key, ksz, n->string);
 		}
-		fl = MANDOC_NAME;
+		fl = (uint32_t)MANDOC_NAME;
 		memcpy(val->data, &fl, 4);
 		return;
 	} else if (SEC_SYNOPSIS != n->sec || MDOC_HEAD != n->type)
@@ -774,7 +774,7 @@ pmdoc_Nm(MDOC_ARGS)
 		dbt_append(key, ksz, n->string);
 	}
 
-	fl = MANDOC_UTILITY;
+	fl = (uint32_t)MANDOC_UTILITY;
 	memcpy(val->data, &fl, 4);
 }
 
@@ -863,7 +863,7 @@ pman_node(MAN_ARGS)
 				NULL != (body = body->child) &&
 				MAN_TEXT == body->type) {
 
-			fl = MANDOC_NAME;
+			fl = (uint32_t)MANDOC_NAME;
 			memcpy(val->data, &fl, 4);
 
 			assert(body->string);

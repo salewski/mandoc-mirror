@@ -67,8 +67,8 @@ SRCS		 = Makefile \
 		   mandoc.3 \
 		   mandoc.c \
 		   mandoc.h \
-		   mandoc-db.1 \
-		   mandoc-db.c \
+		   makewhatis.1 \
+		   makewhatis.c \
 		   mandoc_char.7 \
 		   mdoc.h \
 		   mdoc.7 \
@@ -216,10 +216,10 @@ $(MANDOC_OBJS) $(MANDOC_LNS): main.h mandoc.h mdoc.h man.h config.h out.h
 
 compat.o compat.ln: config.h
 
-MANDOCDB_OBJS	 = mandoc-db.o
-MANDOCDB_LNS	 = mandoc-db.ln
+MAKEWHATIS_OBJS	 = makewhatis.o
+MAKEWHATIS_LNS	 = makewhatis.ln
 
-$(MANDOCDB_OBJS) $(MANDOCDB_LNS): mandoc.h mdoc.h man.h config.h
+$(MAKEWHATIS_OBJS) $(MAKEWHATIS_LNS): mandoc.h mdoc.h man.h config.h
 
 INDEX_MANS	 = mandoc.1.html \
 		   mandoc.1.xhtml \
@@ -278,8 +278,8 @@ lint: llib-llibmandoc.ln llib-lmandoc.ln
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS)
 	rm -f llib-llibmandoc.ln $(LIBMANDOC_LNS)
-	rm -f mandoc-db $(MANDOCDB_OBJS)
-	rm -f llib-lmandoc-db.ln $(MANDOCDB_LNS)
+	rm -f makewhatis $(MAKEWHATIS_OBJS)
+	rm -f llib-lmakewhatis.ln $(MAKEWHATIS_LNS)
 	rm -f mandoc $(MANDOC_OBJS)
 	rm -f llib-lmandoc.ln $(MANDOC_LNS)
 	rm -f config.h config.log compat.o compat.ln
@@ -322,14 +322,14 @@ mandoc: $(MANDOC_OBJS) libmandoc.a
 	$(CC) -o $@ $(MANDOC_OBJS) libmandoc.a
 
 # You'll need -ldb for Linux.
-mandoc-db: $(MANDOCDB_OBJS) libmandoc.a
-	$(CC) -o $@ $(MANDOCDB_OBJS) libmandoc.a
+makewhatis: $(MAKEWHATIS_OBJS) libmandoc.a
+	$(CC) -o $@ $(MAKEWHATIS_OBJS) libmandoc.a
 
 llib-lmandoc.ln: $(MANDOC_LNS)
 	$(LINT) $(LINTFLAGS) -Cmandoc $(MANDOC_LNS)
 
-llib-lmandoc-db.ln: $(MANDOCDB_LNS)
-	$(LINT) $(LINTFLAGS) -Cmandoc-db $(MANDOCDB_LNS)
+llib-lmakewhatis.ln: $(MAKEWHATIS_LNS)
+	$(LINT) $(LINTFLAGS) -Cmakewhatis $(MAKEWHATIS_LNS)
 
 mdocml.md5: mdocml.tar.gz
 	md5 mdocml.tar.gz >$@

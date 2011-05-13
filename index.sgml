@@ -49,8 +49,8 @@
 			install</CODE> to install into <I>/usr/local</I>.
 		</P>
 		<P>
-			Note that <A HREF="mandoc-db.1.html">mandoc-db</A> is not yet linked to the build.  You must run <CODE>make
-			mandoc-db</CODE> to build it.
+			Note that <A HREF="makewhatis.1.html">makewhatis</A> is not yet linked to the build.  You must run <CODE>make
+			makewhatis</CODE> to build it.
 		</P>
 
 		<H2>
@@ -158,14 +158,14 @@
 					</TD>
 				</TR>
 				<TR>
-					<TD VALIGN="top"><A HREF="mandoc.1.html">mandoc-db(1)</A></TD>
+					<TD VALIGN="top"><A HREF="mandoc.1.html">makewhatis(1)</A></TD>
 					<TD VALIGN="top">
 						index UNIX manuals
 						<SMALL>
-							(<A HREF="mandoc-db.1.txt">text</A> | 
-							<A HREF="mandoc-db.1.xhtml">xhtml</A> |
-							<A HREF="mandoc-db.1.pdf">pdf</A> |
-							<A HREF="mandoc-db.1.ps">postscript</A>)
+							(<A HREF="makewhatis.1.txt">text</A> | 
+							<A HREF="makewhatis.1.xhtml">xhtml</A> |
+							<A HREF="makewhatis.1.pdf">pdf</A> |
+							<A HREF="makewhatis.1.ps">postscript</A>)
 						</SMALL>
 					</TD>
 				</TR>
@@ -308,6 +308,17 @@
 		<H1>
 			<A NAME="news">NEWS</A>
 		</H1>
+
+		<P CLASS="news">
+			12-05-2011: version 1.11.2
+		</P>
+		<P>
+			Corrected some installation issues in version 1.11.1.
+			Initial public release (this utility is very much under development) of <A HREF="makewhatis.1.html">makewhatis</A>,
+			initially named mandoc-db.
+			This utility produces keyword databases of manual content
+			<A HREF="http://mdocml.bsd.lv/mandoc-cgi/index.html">mandoc-cgi</A>, which features semantic querying of manual content.
+		</P>
 
 		<P CLASS="news">
 			04-04-2011: version 1.11.1
