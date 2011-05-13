@@ -221,7 +221,12 @@ MAKEWHATIS_LNS	 = makewhatis.ln
 
 $(MAKEWHATIS_OBJS) $(MAKEWHATIS_LNS): mandoc.h mdoc.h man.h config.h
 
-INDEX_MANS	 = mandoc.1.html \
+INDEX_MANS	 = makewhatis.1.html \
+		   makewhatis.1.xhtml \
+		   makewhatis.1.ps \
+		   makewhatis.1.pdf \
+		   makewhatis.1.txt \
+		   mandoc.1.html \
 		   mandoc.1.xhtml \
 		   mandoc.1.ps \
 		   mandoc.1.pdf \
