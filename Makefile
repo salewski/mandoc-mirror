@@ -11,8 +11,8 @@
 # in the lower-left hand corner of -mdoc manuals.
 # CFLAGS	+= -DOSNAME="\"OpenBSD 4.5\""
 
-VERSION		 = 1.11.1
-VDATE		 = 04 April 2011
+VERSION		 = 1.11.2
+VDATE		 = 12 May 2011
 CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
