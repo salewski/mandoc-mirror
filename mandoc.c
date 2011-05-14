@@ -704,7 +704,7 @@ mandoc_strntou(const char *p, size_t sz, int base)
 		return(-1);
 
 	memcpy(buf, p, sz);
-	buf[sz] = '\0';
+	buf[(int)sz] = '\0';
 
 	errno = 0;
 	v = strtol(buf, &ep, base);

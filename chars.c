@@ -151,7 +151,8 @@ mchars_num2char(const char *p, size_t sz)
 		return('\0');
 
 	i = atoi(p);
-	return(isprint(i) ? (char)i : '\0');
+	/* LINTED */
+	return(isprint(i) ? i : '\0');
 }
 
 /* 

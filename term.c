@@ -532,7 +532,7 @@ adjbuf(struct termp *p, size_t sz)
 	while (sz >= p->maxcols)
 		p->maxcols <<= 2;
 
-	p->buf = mandoc_realloc(p->buf, p->maxcols);
+	p->buf = mandoc_realloc(p->buf, sizeof(int) * p->maxcols);
 }
 
 
@@ -562,8 +562,8 @@ encode(struct termp *p, const char *word, size_t sz)
 	if (TERMFONT_NONE == (f = term_fonttop(p))) {
 		if (p->col + sz >= p->maxcols) 
 			adjbuf(p, p->col + sz);
-		memcpy(&p->buf[(int)p->col], word, sz);
-		p->col += sz;
+		for (i = 0; i < (int)sz; i++)
+			p->buf[(int)p->col++] = word[i];
 		return;
 	}
 

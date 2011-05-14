@@ -103,7 +103,7 @@ struct	termp {
 #define	TERMP_ANPREC	 (1 << 13)	/* See termp_an_pre(). */
 #define	TERMP_KEEP	 (1 << 14)	/* Keep words together. */
 #define	TERMP_PREKEEP	 (1 << 15)	/* ...starting with the next one. */
-	char		 *buf;		/* Output buffer. */
+	int		 *buf;		/* Output buffer. */
 	enum termenc	  enc;		/* Type of encoding. */
 	struct mchars	 *symtab;	/* Encoded-symbol table. */
 	enum termfont	  fontl;	/* Last font set. */
@@ -111,12 +111,12 @@ struct	termp {
 	int		  fonti;	/* Index of font stack. */
 	term_margin	  headf;	/* invoked to print head */
 	term_margin	  footf;	/* invoked to print foot */
-	void		(*letter)(struct termp *, char);
+	void		(*letter)(struct termp *, int);
 	void		(*begin)(struct termp *);
 	void		(*end)(struct termp *);
 	void		(*endline)(struct termp *);
 	void		(*advance)(struct termp *, size_t);
-	size_t		(*width)(const struct termp *, char);
+	size_t		(*width)(const struct termp *, int);
 	double		(*hspan)(const struct termp *,
 				const struct roffsu *);
 	const void	 *argf;		/* arg for headf/footf */

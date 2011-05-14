@@ -33,12 +33,12 @@
 
 static	double		  ascii_hspan(const struct termp *,
 				const struct roffsu *);
-static	size_t		  ascii_width(const struct termp *, char);
+static	size_t		  ascii_width(const struct termp *, int);
 static	void		  ascii_advance(struct termp *, size_t);
 static	void		  ascii_begin(struct termp *);
 static	void		  ascii_end(struct termp *);
 static	void		  ascii_endline(struct termp *);
-static	void		  ascii_letter(struct termp *, char);
+static	void		  ascii_letter(struct termp *, int);
 
 
 void *
@@ -84,7 +84,7 @@ ascii_alloc(char *outopts)
 
 /* ARGSUSED */
 static size_t
-ascii_width(const struct termp *p, char c)
+ascii_width(const struct termp *p, int c)
 {
 
 	return(1);
@@ -101,7 +101,7 @@ ascii_free(void *arg)
 
 /* ARGSUSED */
 static void
-ascii_letter(struct termp *p, char c)
+ascii_letter(struct termp *p, int c)
 {
 	
 	/* LINTED */

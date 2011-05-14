@@ -373,14 +373,14 @@ ps_growbuf(struct termp *p, size_t sz)
 
 static	double		  ps_hspan(const struct termp *,
 				const struct roffsu *);
-static	size_t		  ps_width(const struct termp *, char);
+static	size_t		  ps_width(const struct termp *, int);
 static	void		  ps_advance(struct termp *, size_t);
 static	void		  ps_begin(struct termp *);
 static	void		  ps_closepage(struct termp *);
 static	void		  ps_end(struct termp *);
 static	void		  ps_endline(struct termp *);
 static	void		  ps_fclose(struct termp *);
-static	void		  ps_letter(struct termp *, char);
+static	void		  ps_letter(struct termp *, int);
 static	void		  ps_pclose(struct termp *);
 static	void		  ps_pletter(struct termp *, int);
 static	void		  ps_printf(struct termp *, const char *, ...);
@@ -963,9 +963,12 @@ ps_fclose(struct termp *p)
 
 
 static void
-ps_letter(struct termp *p, char c)
+ps_letter(struct termp *p, int arg)
 {
-	char		cc;
+	char		cc, c;
+
+	/* LINTED */
+	c = arg >= 128 || arg <= 0 ? '?' : arg;
 
 	/*
 	 * State machine dictates whether to buffer the last character
@@ -1095,14 +1098,14 @@ ps_setfont(struct termp *p, enum termfont f)
 
 /* ARGSUSED */
 static size_t
-ps_width(const struct termp *p, char c)
+ps_width(const struct termp *p, int c)
 {
 
 	if (c <= 32 || c - 32 >= MAXCHAR)
 		return((size_t)fonts[(int)TERMFONT_NONE].gly[0].wx);
 
 	c -= 32;
-	return((size_t)fonts[(int)TERMFONT_NONE].gly[(int)c].wx);
+	return((size_t)fonts[(int)TERMFONT_NONE].gly[c].wx);
 }
 
 
