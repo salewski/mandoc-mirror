@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include "mandoc.h"
+#include "libmandoc.h"
 #include "out.h"
 #include "html.h"
 #include "main.h"
@@ -294,6 +295,41 @@ print_metaf(struct html *h, enum mandoc_esc deco)
 			print_otag(h, TAG_I, 0, NULL);
 }
 
+int
+html_strlen(const char *cp)
+{
+	int		 ssz, sz;
+	const char	*seq, *p;
+
+	/*
+	 * Account for escaped sequences within string length
+	 * calculations.  This follows the logic in term_strlen() as we
+	 * must calculate the width of produced strings.
+	 * Assume that characters are always width of "1".  This is
+	 * hacky, but it gets the job done for approximation of widths.
+	 */
+
+	sz = 0;
+	while (NULL != (p = strchr(cp, '\\'))) {
+		sz += (int)(p - cp);
+		++cp;
+		switch (mandoc_escape(&cp, &seq, &ssz)) {
+		case (ESCAPE_ERROR):
+			return(sz);
+		case (ESCAPE_PREDEF):
+			sz++;
+			break;
+		case (ESCAPE_SPECIAL):
+			sz++;
+			break;
+		default:
+			break;
+		}
+	}
+
+	assert(sz >= 0);
+	return(sz + strlen(cp));
+}
 
 static int
 print_encode(struct html *h, const char *p, int norecurse)

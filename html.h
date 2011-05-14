@@ -155,6 +155,7 @@ void		  bufncat(struct html *, const char *, size_t);
 void		  bufinit(struct html *);
 
 void		  html_idcat(char *, const char *, int);
+int		  html_strlen(const char *);
 
 __END_DECLS
 
