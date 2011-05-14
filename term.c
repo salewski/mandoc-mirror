@@ -36,7 +36,7 @@
 static	void		  spec(struct termp *, const char *, size_t);
 static	void		  res(struct termp *, const char *, size_t);
 static	void		  bufferc(struct termp *, char);
-static	void		  adjbuf(struct termp *p, size_t);
+static	void		  adjbuf(struct termp *p, int);
 static	void		  encode(struct termp *, const char *, size_t);
 
 
@@ -155,12 +155,12 @@ term_flushln(struct termp *p)
 	vis = vend = 0;
 	i = 0;
 
-	while (i < (int)p->col) {
+	while (i < p->col) {
 		/*
 		 * Handle literal tab characters: collapse all
 		 * subsequent tabs into a single huge set of spaces.
 		 */
-		while (i < (int)p->col && '\t' == p->buf[i]) {
+		while (i < p->col && '\t' == p->buf[i]) {
 			vend = (vis / p->tabwidth + 1) * p->tabwidth;
 			vbl += vend - vis;
 			vis = vend;
@@ -174,7 +174,7 @@ term_flushln(struct termp *p)
 		 * space is printed according to regular spacing rules).
 		 */
 
-		for (j = i, jhy = 0; j < (int)p->col; j++) {
+		for (j = i, jhy = 0; j < p->col; j++) {
 			if ((j && ' ' == p->buf[j]) || '\t' == p->buf[j])
 				break;
 
@@ -217,7 +217,7 @@ term_flushln(struct termp *p)
 		}
 
 		/* Write out the [remaining] word. */
-		for ( ; i < (int)p->col; i++) {
+		for ( ; i < p->col; i++) {
 			if (vend > bp && jhy > 0 && i > jhy)
 				break;
 			if ('\t' == p->buf[i])
@@ -524,7 +524,7 @@ term_word(struct termp *p, const char *word)
 
 
 static void
-adjbuf(struct termp *p, size_t sz)
+adjbuf(struct termp *p, int sz)
 {
 
 	if (0 == p->maxcols)
@@ -532,7 +532,8 @@ adjbuf(struct termp *p, size_t sz)
 	while (sz >= p->maxcols)
 		p->maxcols <<= 2;
 
-	p->buf = mandoc_realloc(p->buf, sizeof(int) * p->maxcols);
+	p->buf = mandoc_realloc
+		(p->buf, sizeof(int) * (size_t)p->maxcols);
 }
 
 
@@ -543,7 +544,7 @@ bufferc(struct termp *p, char c)
 	if (p->col + 1 >= p->maxcols)
 		adjbuf(p, p->col + 1);
 
-	p->buf[(int)p->col++] = c;
+	p->buf[p->col++] = c;
 }
 
 
@@ -551,7 +552,10 @@ static void
 encode(struct termp *p, const char *word, size_t sz)
 {
 	enum termfont	  f;
-	int		  i;
+	int		  i, len;
+
+	/* LINTED */
+	len = sz;
 
 	/*
 	 * Encode and buffer a string of characters.  If the current
@@ -560,31 +564,31 @@ encode(struct termp *p, const char *word, size_t sz)
 	 */
 
 	if (TERMFONT_NONE == (f = term_fonttop(p))) {
-		if (p->col + sz >= p->maxcols) 
-			adjbuf(p, p->col + sz);
-		for (i = 0; i < (int)sz; i++)
-			p->buf[(int)p->col++] = word[i];
+		if (p->col + len >= p->maxcols) 
+			adjbuf(p, p->col + len);
+		for (i = 0; i < len; i++)
+			p->buf[p->col++] = word[i];
 		return;
 	}
 
 	/* Pre-buffer, assuming worst-case. */
 
-	if (p->col + 1 + (sz * 3) >= p->maxcols)
-		adjbuf(p, p->col + 1 + (sz * 3));
+	if (p->col + 1 + (len * 3) >= p->maxcols)
+		adjbuf(p, p->col + 1 + (len * 3));
 
-	for (i = 0; i < (int)sz; i++) {
-		if ( ! isgraph((u_char)word[i])) {
-			p->buf[(int)p->col++] = word[i];
+	for (i = 0; i < len; i++) {
+		if ( ! isgraph((unsigned char)word[i])) {
+			p->buf[p->col++] = word[i];
 			continue;
 		}
 
 		if (TERMFONT_UNDER == f)
-			p->buf[(int)p->col++] = '_';
+			p->buf[p->col++] = '_';
 		else
-			p->buf[(int)p->col++] = word[i];
+			p->buf[p->col++] = word[i];
 
-		p->buf[(int)p->col++] = 8;
-		p->buf[(int)p->col++] = word[i];
+		p->buf[p->col++] = 8;
+		p->buf[p->col++] = word[i];
 	}
 }
 

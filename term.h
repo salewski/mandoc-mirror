@@ -82,10 +82,10 @@ struct	termp {
 	size_t		  defrmargin;	/* Right margin of the device. */
 	size_t		  rmargin;	/* Current right margin. */
 	size_t		  maxrmargin;	/* Max right margin. */
-	size_t		  maxcols;	/* Max size of buf. */
+	int		  maxcols;	/* Max size of buf. */
 	size_t		  offset;	/* Margin offest. */
 	size_t		  tabwidth;	/* Distance of tab positions. */
-	size_t		  col;		/* Bytes in buf. */
+	int		  col;		/* Bytes in buf. */
 	size_t		  viscol;	/* Chars on current line. */
 	int		  overstep;	/* See termp_flushln(). */
 	int		  flags;
