@@ -1,37 +1,39 @@
 html		{ min-width: 40em;
-		  max-width: 60em;
-		  width: 60%;
-		  margin-left: 4em; }
+		  margin-top: 2em;
+		  margin-left: auto;
+		  margin-right: auto;
+		  width: 80%; }
 
-body		{ color: #333333;
-		  text-align: justify;
-		  font-size: 0.93em;
-		  font-family: Times, serif; }
+body		{ text-align: justify; 
+		  font-family: Helvetica,Arial,sans-serif;
+		  line-height: 120%;
+		  font-size: small; }
 
-h1, h2		{ font-size: inherit; }
+p,ul,table	{ margin-left: 3em; }
 
-h1		{ margin-left: -3.0em; }
+p.head, p.foot	{ margin-left: 0.0em; margin-right: 0.0em; }
 
-h2		{ margin-left: -1.5em; }
+p.news		{ margin-left: 2.0em; }
 
-p.head, p.foot	{ margin-left: -3.0em;
-		  text-align: right; }
+li		{ margin: 0.25em; }
 
-p.head		{ border-bottom: 1px solid #dddddd; 
+h1		{ font-size: 110%; }
+h2		{ font-size: 105%; margin-left: 1.5em }
+
+p.head		{ margin-bottom: 1.75em;
+		  border-bottom: 1px solid #dddddd; 
 		  padding-bottom: 0.2em; }
 
 p.foot		{ border-top: 1px solid #dddddd; 
+		  color: #666666;
 		  padding-top: 0.2em;
-		  font-size: smaller; }
+		  margin-top: 1.75em; }
 
-p.news		{ color: #000000; 
-		  margin-left: -0.5em; }
-
-span.nm		{ font-weight: bold; }
+span.nm		{ color: green; }
 
 span.file	{ font-style: italic; }
 
-span.attn	{ color: #000000; font-weight: bold; }
+span.attn	{ font-weight: bold; }
 
 span.flag	{ font-weight: bold; }
 
