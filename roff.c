@@ -20,12 +20,9 @@
 #endif
 
 #include <assert.h>
-#include <errno.h>
 #include <ctype.h>
-#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "mandoc.h"
 #include "libroff.h"
@@ -206,7 +203,6 @@ static	void		 roffnode_push(struct roff *, enum rofft,
 				const char *, int, int);
 static	void		 roffnode_pop(struct roff *);
 static	enum rofft	 roff_parse(struct roff *, const char *, int *);
-static	int		 roff_parse_nat(const char *, unsigned int *);
 
 /* See roff_hash_find() */
 #define	ROFF_HASH(p)	(p[0] - ASCII_LO)
@@ -592,27 +588,6 @@ roff_parse(struct roff *r, const char *buf, int *pos)
 
 	return(t);
 }
-
-
-static int
-roff_parse_nat(const char *buf, unsigned int *res)
-{
-	char		*ep;
-	long		 lval;
-
-	errno = 0;
-	lval = strtol(buf, &ep, 10);
-	if (buf[0] == '\0' || *ep != '\0')
-		return(0);
-	if ((errno == ERANGE && 
-			(lval == LONG_MAX || lval == LONG_MIN)) ||
-			(lval > INT_MAX || lval < 0))
-		return(0);
-
-	*res = (unsigned int)lval;
-	return(1);
-}
-
 
 /* ARGSUSED */
 static enum rofferr
@@ -1090,6 +1065,7 @@ roff_nr(ROFF_ARGS)
 {
 	const char	*key;
 	char		*val;
+	int		 iv;
 	struct reg	*rg;
 
 	val = *bufp + pos;
@@ -1098,8 +1074,10 @@ roff_nr(ROFF_ARGS)
 
 	if (0 == strcmp(key, "nS")) {
 		rg[(int)REG_nS].set = 1;
-		if ( ! roff_parse_nat(val, &rg[(int)REG_nS].v.u))
-			rg[(int)REG_nS].v.u = 0;
+		if ((iv = mandoc_strntou(val, strlen(val), 10)) >= 0)
+			rg[REG_nS].v.u = (unsigned)iv;
+		else
+			rg[(int)REG_nS].v.u = 0u;
 	}
 
 	return(ROFF_IGN);
