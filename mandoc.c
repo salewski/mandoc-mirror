@@ -125,6 +125,14 @@ mandoc_escape(const char **end, const char **start, int *sz)
 		break;
 	case ('['):
 		gly = ESCAPE_SPECIAL;
+		/*
+		 * Unicode escapes are defined in groff as \[uXXXX] to
+		 * \[u10FFFF], where the contained value must be a valid
+		 * Unicode codepoint.  Here, however, only check whether
+		 * it's not a zero-width escape.
+		 */
+		if ('u' == cp[i] && ']' != cp[i + 1])
+			gly = ESCAPE_UNICODE;
 		term = ']';
 		break;
 	case ('C'):
