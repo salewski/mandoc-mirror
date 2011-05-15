@@ -33,12 +33,9 @@
 #include "term.h"
 #include "main.h"
 
-static	void		  spec(struct termp *, const char *, size_t);
-static	void		  res(struct termp *, const char *, size_t);
-static	void		  bufferc(struct termp *, char);
-static	void		  adjbuf(struct termp *p, int);
-static	void		  encode(struct termp *, const char *, size_t);
-
+static	void		 adjbuf(struct termp *p, int);
+static	void		 bufferc(struct termp *, char);
+static	void		 encode(struct termp *, const char *, size_t);
 
 void
 term_free(struct termp *p)
@@ -344,43 +341,6 @@ term_vspace(struct termp *p)
 	(*p->endline)(p);
 }
 
-
-static void
-numbered(struct termp *p, const char *word, size_t len)
-{
-	char		 c;
-
-	if ('\0' != (c = mchars_num2char(word, len)))
-		encode(p, &c, 1);
-}
-
-
-static void
-spec(struct termp *p, const char *word, size_t len)
-{
-	const char	*rhs;
-	size_t		 sz;
-
-	rhs = mchars_spec2str(p->symtab, word, len, &sz);
-	if (rhs) 
-		encode(p, rhs, sz);
-	else if (1 == len)
-		encode(p, word, len);
-}
-
-
-static void
-res(struct termp *p, const char *word, size_t len)
-{
-	const char	*rhs;
-	size_t		 sz;
-
-	rhs = mchars_res2str(p->symtab, word, len, &sz);
-	if (rhs)
-		encode(p, rhs, sz);
-}
-
-
 void
 term_fontlast(struct termp *p)
 {
@@ -445,7 +405,6 @@ term_fontpop(struct termp *p)
 	p->fonti--;
 }
 
-
 /*
  * Handle pwords, partial words, which may be either a single word or a
  * phrase that cannot be broken down (such as a literal string).  This
@@ -454,7 +413,8 @@ term_fontpop(struct termp *p)
 void
 term_word(struct termp *p, const char *word)
 {
-	const char	*seq;
+	const char	*seq, *cp;
+	char		 c;
 	int		 sz;
 	size_t		 ssz;
 	enum mandoc_esc	 esc;
@@ -492,13 +452,20 @@ term_word(struct termp *p, const char *word)
 
 		switch (esc) {
 		case (ESCAPE_NUMBERED):
-			numbered(p, seq, sz);
+			if ('\0' != (c = mchars_num2char(seq, sz)))
+				encode(p, &c, 1);
 			break;
 		case (ESCAPE_PREDEF):
-			res(p, seq, sz);
+			cp = mchars_res2str(p->symtab, seq, sz, &ssz);
+			if (NULL != cp)
+				encode(p, cp, ssz);
 			break;
 		case (ESCAPE_SPECIAL):
-			spec(p, seq, sz);
+			cp = mchars_spec2str(p->symtab, seq, sz, &ssz);
+			if (NULL != cp) 
+				encode(p, cp, ssz);
+			else if (1 == ssz)
+				encode(p, seq, sz);
 			break;
 		case (ESCAPE_FONTBOLD):
 			term_fontrepl(p, TERMFONT_BOLD);
@@ -522,7 +489,6 @@ term_word(struct termp *p, const char *word)
 	}
 }
 
-
 static void
 adjbuf(struct termp *p, int sz)
 {
@@ -536,7 +502,6 @@ adjbuf(struct termp *p, int sz)
 		(p->buf, sizeof(int) * (size_t)p->maxcols);
 }
 
-
 static void
 bufferc(struct termp *p, char c)
 {
@@ -546,7 +511,6 @@ bufferc(struct termp *p, char c)
 
 	p->buf[p->col++] = c;
 }
-
 
 static void
 encode(struct termp *p, const char *word, size_t sz)
@@ -591,7 +555,6 @@ encode(struct termp *p, const char *word, size_t sz)
 		p->buf[p->col++] = word[i];
 	}
 }
-
 
 size_t
 term_len(const struct termp *p, size_t sz)
