@@ -42,35 +42,6 @@ enum	termfont {
 
 typedef void	(*term_margin)(struct termp *, const void *);
 
-struct	termp_ps {
-	int		  flags;
-#define	PS_INLINE	 (1 << 0)	/* we're in a word */
-#define	PS_MARGINS	 (1 << 1)	/* we're in the margins */
-#define	PS_NEWPAGE	 (1 << 2)	/* new page, no words yet */
-	size_t		  pscol;	/* visible column (AFM units) */
-	size_t		  psrow;	/* visible row (AFM units) */
-	char		 *psmarg;	/* margin buf */
-	size_t		  psmargsz;	/* margin buf size */
-	size_t		  psmargcur;	/* cur index in margin buf */
-	char		  last;		/* character buffer */
-	enum termfont	  lastf;	/* last set font */
-	size_t		  scale;	/* font scaling factor */
-	size_t		  pages;	/* number of pages shown */
-	size_t		  lineheight;	/* line height (AFM units) */
-	size_t		  top;		/* body top (AFM units) */
-	size_t		  bottom;	/* body bottom (AFM units) */
-	size_t		  height;	/* page height (AFM units */
-	size_t		  width;	/* page width (AFM units) */
-	size_t		  left;		/* body left (AFM units) */
-	size_t		  header;	/* header pos (AFM units) */
-	size_t		  footer;	/* footer pos (AFM units) */
-	size_t		  pdfbytes; 	/* current output byte */
-	size_t		  pdflastpg;	/* byte of last page mark */
-	size_t		  pdfbody;	/* start of body object */
-	size_t		 *pdfobjs;	/* table of object offsets */
-	size_t		  pdfobjsz;	/* size of pdfobjs */
-};
-
 struct	termp_tbl {
 	int		  width;	/* width in fixed chars */
 	int		  decimal;	/* decimal point position */
@@ -120,9 +91,7 @@ struct	termp {
 	double		(*hspan)(const struct termp *,
 				const struct roffsu *);
 	const void	 *argf;		/* arg for headf/footf */
-	union {
-		struct termp_ps ps;
-	} engine;
+	struct termp_ps	 *ps;
 };
 
 struct termp	 *term_alloc(enum termenc);
