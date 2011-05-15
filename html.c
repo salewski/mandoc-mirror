@@ -316,9 +316,10 @@ html_strlen(const char *cp)
 		switch (mandoc_escape(&cp, &seq, &ssz)) {
 		case (ESCAPE_ERROR):
 			return(sz);
+		case (ESCAPE_NUMBERED):
+			/* FALLTHROUGH */
 		case (ESCAPE_PREDEF):
-			sz++;
-			break;
+			/* FALLTHROUGH */
 		case (ESCAPE_SPECIAL):
 			sz++;
 			break;

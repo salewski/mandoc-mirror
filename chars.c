@@ -141,6 +141,7 @@ mchars_res2cp(struct mchars *arg, const char *p, size_t sz)
  * This can only be a printable character (i.e., alnum, punct, space) so
  * prevent the character from ruining our state (backspace, newline, and
  * so on).
+ * If the character is illegal, returns '\0'.
  */
 char
 mchars_num2char(const char *p, size_t sz)
