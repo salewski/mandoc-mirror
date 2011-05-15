@@ -606,8 +606,8 @@ term_strlen(const struct termp *p, const char *cp)
 {
 	size_t		 sz, rsz, i;
 	int		 ssz;
-	enum mandoc_esc	 esc;
 	const char	*seq, *rhs;
+	static const char rej[] = { '\\', ASCII_HYPH, ASCII_NBRSP, '\0' };
 
 	/*
 	 * Account for escaped sequences within string length
@@ -616,15 +616,17 @@ term_strlen(const struct termp *p, const char *cp)
 	 */
 
 	sz = 0;
-	while ('\0' != *cp)
+	while ('\0' != *cp) {
+		rsz = strcspn(cp, rej);
+		for (i = 0; i < rsz; i++)
+			sz += (*p->width)(p, *cp++);
+
 		switch (*cp) {
 		case ('\\'):
-			++cp;
-			esc = mandoc_escape(&cp, &seq, &ssz);
-			if (ESCAPE_ERROR == esc)
+			cp++;
+			switch (mandoc_escape(&cp, &seq, &ssz)) {
+			case (ESCAPE_ERROR):
 				return(sz);
-
-			switch (esc) {
 			case (ESCAPE_PREDEF):
 				rhs = mchars_res2str
 					(p->symtab, seq, ssz, &rsz);
@@ -659,13 +661,12 @@ term_strlen(const struct termp *p, const char *cp)
 			cp++;
 			break;
 		default:
-			sz += (*p->width)(p, *cp++);
 			break;
 		}
+	}
 
 	return(sz);
 }
-
 
 /* ARGSUSED */
 size_t
@@ -702,7 +703,6 @@ term_vspan(const struct termp *p, const struct roffsu *su)
 	return(/* LINTED */(size_t)
 			r);
 }
-
 
 size_t
 term_hspan(const struct termp *p, const struct roffsu *su)
