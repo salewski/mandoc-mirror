@@ -451,6 +451,9 @@ term_word(struct termp *p, const char *word)
 			break;
 
 		switch (esc) {
+		case (ESCAPE_UNICODE):
+			encode(p, "?", 1);
+			break;
 		case (ESCAPE_NUMBERED):
 			if ('\0' != (c = mchars_num2char(seq, sz)))
 				encode(p, &c, 1);
@@ -584,6 +587,7 @@ term_strlen(const struct termp *p, const char *cp)
 		for (i = 0; i < rsz; i++)
 			sz += (*p->width)(p, *cp++);
 
+		c = 0;
 		switch (*cp) {
 		case ('\\'):
 			cp++;
@@ -591,8 +595,12 @@ term_strlen(const struct termp *p, const char *cp)
 			switch (mandoc_escape(&cp, &seq, &ssz)) {
 			case (ESCAPE_ERROR):
 				return(sz);
+			case (ESCAPE_UNICODE):
+				c = '?';
+				/* FALLTHROUGH */
 			case (ESCAPE_NUMBERED):
-				c = mchars_num2char(seq, ssz);
+				if ('\0' != c)
+					c = mchars_num2char(seq, ssz);
 				if ('\0' != c)
 					sz += (*p->width)(p, c);
 				break;
