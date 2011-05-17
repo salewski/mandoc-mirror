@@ -36,6 +36,7 @@
 static	void		 adjbuf(struct termp *p, int);
 static	void		 bufferc(struct termp *, char);
 static	void		 encode(struct termp *, const char *, size_t);
+static	void		 encode1(struct termp *, int);
 
 void
 term_free(struct termp *p)
@@ -403,7 +404,7 @@ term_word(struct termp *p, const char *word)
 {
 	const char	*seq, *cp;
 	char		 c;
-	int		 sz;
+	int		 sz, uc;
 	size_t		 ssz;
 	enum mandoc_esc	 esc;
 
@@ -440,7 +441,13 @@ term_word(struct termp *p, const char *word)
 
 		switch (esc) {
 		case (ESCAPE_UNICODE):
-			encode(p, "?", 1);
+			if (TERMENC_ASCII == p->enc) {
+				encode1(p, '?');
+				break;
+			}
+			uc = mchars_num2uc(seq + 1, sz - 1);
+			if ('\0' != uc)
+				encode1(p, uc);
 			break;
 		case (ESCAPE_NUMBERED):
 			if ('\0' != (c = mchars_num2char(seq, sz)))
@@ -500,6 +507,33 @@ bufferc(struct termp *p, char c)
 	if (p->col + 1 >= p->maxcols)
 		adjbuf(p, p->col + 1);
 
+	p->buf[p->col++] = c;
+}
+
+/*
+ * See encode().
+ * Do this for a single (probably unicode) value.
+ * Does not check for non-decorated glyphs.
+ */
+static void
+encode1(struct termp *p, int c)
+{
+	enum termfont	  f;
+
+	if (p->col + 4 >= p->maxcols)
+		adjbuf(p, p->col + 4);
+
+	f = term_fonttop(p);
+
+	if (TERMFONT_NONE == f) {
+		p->buf[p->col++] = c;
+		return;
+	} else if (TERMFONT_UNDER == f) {
+		p->buf[p->col++] = '_';
+	} else
+		p->buf[p->col++] = c;
+
+	p->buf[p->col++] = 8;
 	p->buf[p->col++] = c;
 }
 
@@ -584,11 +618,16 @@ term_strlen(const struct termp *p, const char *cp)
 			case (ESCAPE_ERROR):
 				return(sz);
 			case (ESCAPE_UNICODE):
-				c = '?';
-				/* FALLTHROUGH */
-			case (ESCAPE_NUMBERED):
+				if (TERMENC_ASCII != p->enc) {
+					sz += (*p->width)(p, '?');
+					break;
+				}
+				c = mchars_num2uc(seq + 1, ssz - 1);
 				if ('\0' != c)
-					c = mchars_num2char(seq, ssz);
+					sz += (*p->width)(p, c);
+				break;
+			case (ESCAPE_NUMBERED):
+				c = mchars_num2char(seq, ssz);
 				if ('\0' != c)
 					sz += (*p->width)(p, c);
 				break;

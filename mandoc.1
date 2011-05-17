@@ -158,6 +158,12 @@ utility accepts the following
 .Fl T
 arguments, which correspond to output modes:
 .Bl -tag -width Ds
+.It Fl T Ns Cm locale
+This option encodes output characters using the current
+.Xr locale 1
+configuration.
+See
+.Sx Locale Output .
 .It Fl T Ns Cm ascii
 Produce 7-bit ASCII output.
 This is the default.
@@ -189,6 +195,16 @@ See
 .Pp
 If multiple input files are specified, these will be processed by the
 corresponding filter in-order.
+.Ss Locale Output
+Locale-depending output encoding is triggered with
+.Fl T Ns Cm locale .
+This option is not available on all systems: systems without locale
+support, or those whose internal representation is not natively UCS-4,
+will fall back to
+.Fl T Ns Cm ascii .
+See
+.Sx ASCII Output
+for font style specification and available command-line arguments.
 .Ss ASCII Output
 Output produced by
 .Fl T Ns Cm ascii ,
@@ -209,6 +225,9 @@ Emboldened characters are rendered as
 The special characters documented in
 .Xr mandoc_char 7
 are rendered best-effort in an ASCII equivalent.
+If no equivalent is found,
+.Sq \&?
+is used instead.
 .Pp
 Output width is limited to 78 visible columns unless literal input lines
 exceed this limit.
@@ -460,7 +479,7 @@ Each input and output format is separately noted.
 .Ss ASCII Compatibility
 .Bl -bullet -compact
 .It
-Unicode codepoints specified with
+Unrenderable unicode codepoints specified with
 .Sq \e[uNNNN]
 escapes are printed as
 .Sq \&?
