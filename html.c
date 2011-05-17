@@ -107,18 +107,14 @@ static	const char	*const roffscales[SCALE_MAX] = {
 	"ex", /* SCALE_FS */
 };
 
-static	void		  print_num(struct html *, const char *, size_t);
-static	void		  print_spec(struct html *, const char *, size_t);
-static	void		  print_res(struct html *, const char *, size_t);
-static	void		  print_ctag(struct html *, enum htmltag);
-static	void		  print_doctype(struct html *);
-static	void		  print_xmltype(struct html *);
-static	int		  print_encode(struct html *, const char *, int);
-static	void		  print_metaf(struct html *, enum mandoc_esc);
-static	void		  print_attr(struct html *, 
-				const char *, const char *);
-static	void		 *ml_alloc(char *, enum htmltype);
-
+static	void	 bufncat(struct html *, const char *, size_t);
+static	void	 print_spec(struct html *, const char *, size_t);
+static	void	 print_res(struct html *, const char *, size_t);
+static	void	 print_ctag(struct html *, enum htmltag);
+static	int	 print_encode(struct html *, const char *, int);
+static	void	 print_metaf(struct html *, enum mandoc_esc);
+static	void	 print_attr(struct html *, const char *, const char *);
+static	void	 *ml_alloc(char *, enum htmltype);
 
 static void *
 ml_alloc(char *outopts, enum htmltype type)
@@ -220,16 +216,6 @@ print_gen_head(struct html *h)
 		tag[3].val = "all";
 		print_otag(h, TAG_LINK, 4, tag);
 	}
-}
-
-/* ARGSUSED */
-static void
-print_num(struct html *h, const char *p, size_t len)
-{
-	char		 c;
-
-	if ('\0' != (c = mchars_num2char(p, len)))
-		putchar((int)c);
 }
 
 static void
@@ -349,7 +335,7 @@ static int
 print_encode(struct html *h, const char *p, int norecurse)
 {
 	size_t		 sz;
-	int		 len, nospace;
+	int		 c, len, nospace;
 	const char	*seq;
 	enum mandoc_esc	 esc;
 	static const char rejs[6] = { '\\', '<', '>', '&', ASCII_HYPH, '\0' };
@@ -388,7 +374,9 @@ print_encode(struct html *h, const char *p, int norecurse)
 
 		switch (esc) {
 		case (ESCAPE_NUMBERED):
-			print_num(h, seq, len);
+			c = mchars_num2char(seq, len);
+			if ('\0' != c)
+				putchar(c);
 			break;
 		case (ESCAPE_PREDEF):
 			print_res(h, seq, len);
@@ -509,27 +497,8 @@ print_ctag(struct html *h, enum htmltag tag)
 	} 
 }
 
-
 void
 print_gen_decls(struct html *h)
-{
-
-	print_xmltype(h);
-	print_doctype(h);
-}
-
-
-static void
-print_xmltype(struct html *h)
-{
-
-	if (HTML_XHTML_1_0_STRICT == h->type)
-		puts("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-}
-
-
-static void
-print_doctype(struct html *h)
 {
 	const char	*doctype;
 	const char	*dtd;
@@ -542,6 +511,7 @@ print_doctype(struct html *h)
 		dtd = "http://www.w3.org/TR/html4/strict.dtd";
 		break;
 	default:
+		puts("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 		name = "html";
 		doctype = "-//W3C//DTD XHTML 1.0 Strict//EN";
 		dtd = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd";
@@ -631,7 +601,6 @@ print_stagq(struct html *h, const struct tag *suntil)
 	}
 }
 
-
 void
 bufinit(struct html *h)
 {
@@ -640,28 +609,27 @@ bufinit(struct html *h)
 	h->buflen = 0;
 }
 
-
 void
 bufcat_style(struct html *h, const char *key, const char *val)
 {
 
 	bufcat(h, key);
-	bufncat(h, ":", 1);
+	bufcat(h, ":");
 	bufcat(h, val);
-	bufncat(h, ";", 1);
+	bufcat(h, ";");
 }
-
 
 void
 bufcat(struct html *h, const char *p)
 {
 
-	bufncat(h, p, strlen(p));
+	h->buflen = strlcat(h->buf, p, BUFSIZ);
+	assert(h->buflen < BUFSIZ);
+	h->buflen--;
 }
 
-
 void
-buffmt(struct html *h, const char *fmt, ...)
+bufcat_fmt(struct html *h, const char *fmt, ...)
 {
 	va_list		 ap;
 
@@ -672,18 +640,14 @@ buffmt(struct html *h, const char *fmt, ...)
 	h->buflen = strlen(h->buf);
 }
 
-
-void
+static void
 bufncat(struct html *h, const char *p, size_t sz)
 {
 
-	if (h->buflen + sz > BUFSIZ - 1)
-		sz = BUFSIZ - 1 - h->buflen;
-
-	(void)strncat(h->buf, p, sz);
+	assert(h->buflen + sz + 1 < BUFSIZ);
+	strncat(h->buf, p, sz);
 	h->buflen += sz;
 }
-
 
 void
 buffmt_includes(struct html *h, const char *name)
@@ -708,7 +672,6 @@ buffmt_includes(struct html *h, const char *name)
 		bufcat(h, pp);
 }
 
-
 void
 buffmt_man(struct html *h, 
 		const char *name, const char *sec)
@@ -725,7 +688,7 @@ buffmt_man(struct html *h,
 			bufcat(h, sec ? sec : "1");
 			break;
 		case('N'):
-			buffmt(h, name);
+			bufcat_fmt(h, name);
 			break;
 		default:
 			bufncat(h, p, 2);
@@ -737,7 +700,6 @@ buffmt_man(struct html *h,
 		bufcat(h, pp);
 }
 
-
 void
 bufcat_su(struct html *h, const char *p, const struct roffsu *su)
 {
@@ -747,9 +709,8 @@ bufcat_su(struct html *h, const char *p, const struct roffsu *su)
 	if (SCALE_MM == su->unit && 0.0 == (v /= 100.0))
 		v = 1.0;
 
-	buffmt(h, "%s: %.2f%s;", p, v, roffscales[su->unit]);
+	bufcat_fmt(h, "%s: %.2f%s;", p, v, roffscales[su->unit]);
 }
-
 
 void
 html_idcat(char *dst, const char *src, int sz)

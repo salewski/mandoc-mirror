@@ -158,7 +158,7 @@ print_man_head(MAN_ARGS)
 
 	print_gen_head(h);
 	bufinit(h);
-	buffmt(h, "%s(%s)", m->title, m->msec);
+	bufcat_fmt(h, "%s(%s)", m->title, m->msec);
 
 	print_otag(h, TAG_TITLE, 0, NULL);
 	print_text(h, h->buf);

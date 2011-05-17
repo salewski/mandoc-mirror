@@ -382,7 +382,7 @@ print_mdoc_head(MDOC_ARGS)
 
 	print_gen_head(h);
 	bufinit(h);
-	buffmt(h, "%s(%s)", m->title, m->msec);
+	bufcat_fmt(h, "%s(%s)", m->title, m->msec);
 
 	if (m->arch) {
 		bufcat(h, " (");

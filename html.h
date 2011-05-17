@@ -147,11 +147,10 @@ void		  bufcat_su(struct html *, const char *,
 void		  buffmt_man(struct html *, 
 			const char *, const char *);
 void		  buffmt_includes(struct html *, const char *);
-void		  buffmt(struct html *, const char *, ...);
+void		  bufcat_fmt(struct html *, const char *, ...);
 void		  bufcat(struct html *, const char *);
 void		  bufcat_style(struct html *, 
 			const char *, const char *);
-void		  bufncat(struct html *, const char *, size_t);
 void		  bufinit(struct html *);
 
 void		  html_idcat(char *, const char *, int);
