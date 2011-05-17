@@ -460,6 +460,13 @@ Each input and output format is separately noted.
 .Ss ASCII Compatibility
 .Bl -bullet -compact
 .It
+Unicode codepoints specified with
+.Sq \e[uNNNN]
+escapes are printed as
+.Sq \&?
+in mandoc.
+In GNU troff, these raise an error.
+.It
 The
 .Sq \&Bd \-literal
 and
@@ -470,7 +477,7 @@ in
 .Fl T Ns Cm ascii
 are synonyms, as are \-filled and \-ragged.
 .It
-In GNU troff, the
+In historic GNU troff, the
 .Sq \&Pa
 .Xr mdoc 7
 macro does not underline when scoped under an
@@ -495,8 +502,6 @@ macro in
 has no effect.
 .It
 Words aren't hyphenated.
-.It
-Sentences are unilaterally monospaced.
 .El
 .Ss HTML/XHTML Compatibility
 .Bl -bullet -compact
