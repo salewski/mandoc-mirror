@@ -69,18 +69,6 @@ term_end(struct termp *p)
 	(*p->end)(p);
 }
 
-
-struct termp *
-term_alloc(enum termenc enc)
-{
-	struct termp	*p;
-
-	p = mandoc_calloc(1, sizeof(struct termp));
-	p->enc = enc;
-	return(p);
-}
-
-
 /*
  * Flush a line of text.  A "line" is loosely defined as being something
  * that should be followed by a newline, regardless of whether it's

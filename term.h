@@ -22,7 +22,8 @@ __BEGIN_DECLS
 struct	termp;
 
 enum	termenc {
-	TERMENC_ASCII
+	TERMENC_ASCII,
+	TERMENC_LOCALE
 };
 
 enum	termtype {
@@ -94,7 +95,6 @@ struct	termp {
 	struct termp_ps	 *ps;
 };
 
-struct termp	 *term_alloc(enum termenc);
 void		  term_tbl(struct termp *, const struct tbl_span *);
 void		  term_free(struct termp *);
 void		  term_newln(struct termp *);

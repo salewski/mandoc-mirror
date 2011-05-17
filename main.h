@@ -41,6 +41,7 @@ void		  html_free(void *);
 void		  tree_mdoc(void *, const struct mdoc *);
 void		  tree_man(void *, const struct man *);
 
+void		 *locale_alloc(char *);
 void		 *ascii_alloc(char *);
 void		  ascii_free(void *);
 

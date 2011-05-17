@@ -31,6 +31,7 @@
 #include "term.h"
 #include "main.h"
 
+static	struct termp	 *ascii_init(enum termenc, char *);
 static	double		  ascii_hspan(const struct termp *,
 				const struct roffsu *);
 static	size_t		  ascii_width(const struct termp *, int);
@@ -40,15 +41,15 @@ static	void		  ascii_end(struct termp *);
 static	void		  ascii_endline(struct termp *);
 static	void		  ascii_letter(struct termp *, int);
 
-
-void *
-ascii_alloc(char *outopts)
+static struct termp *
+ascii_init(enum termenc enc, char *outopts)
 {
-	struct termp	*p;
 	const char	*toks[2];
 	char		*v;
+	struct termp	*p;
 
-	p = term_alloc(TERMENC_ASCII);
+	p = mandoc_calloc(1, sizeof(struct termp));
+	p->enc = enc;
 
 	p->tabwidth = 5;
 	p->defrmargin = 78;
@@ -81,6 +82,19 @@ ascii_alloc(char *outopts)
 	return(p);
 }
 
+void *
+ascii_alloc(char *outopts)
+{
+
+	return(ascii_init(TERMENC_ASCII, outopts));
+}
+
+void *
+locale_alloc(char *outopts)
+{
+
+	return(ascii_init(TERMENC_LOCALE, outopts));
+}
 
 /* ARGSUSED */
 static size_t

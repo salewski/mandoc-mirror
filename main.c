@@ -43,6 +43,7 @@ typedef	void		(*out_free)(void *);
 
 enum	outt {
 	OUTT_ASCII = 0,	/* -Tascii */
+	OUTT_LOCALE,	/* -Tlocale */
 	OUTT_TREE,	/* -Ttree */
 	OUTT_HTML,	/* -Thtml */
 	OUTT_XHTML,	/* -Txhtml */
@@ -206,9 +207,15 @@ parse(struct curparse *curp, int fd,
 		switch (curp->outtype) {
 		case (OUTT_XHTML):
 			curp->outdata = xhtml_alloc(curp->outopts);
+			curp->outfree = html_free;
 			break;
 		case (OUTT_HTML):
 			curp->outdata = html_alloc(curp->outopts);
+			curp->outfree = html_free;
+			break;
+		case (OUTT_LOCALE):
+			curp->outdata = locale_alloc(curp->outopts);
+			curp->outfree = ascii_free;
 			break;
 		case (OUTT_ASCII):
 			curp->outdata = ascii_alloc(curp->outopts);
@@ -232,7 +239,6 @@ parse(struct curparse *curp, int fd,
 		case (OUTT_XHTML):
 			curp->outman = html_man;
 			curp->outmdoc = html_mdoc;
-			curp->outfree = html_free;
 			break;
 		case (OUTT_TREE):
 			curp->outman = tree_man;
@@ -241,6 +247,8 @@ parse(struct curparse *curp, int fd,
 		case (OUTT_PDF):
 			/* FALLTHROUGH */
 		case (OUTT_ASCII):
+			/* FALLTHROUGH */
+		case (OUTT_LOCALE):
 			/* FALLTHROUGH */
 		case (OUTT_PS):
 			curp->outman = terminal_man;
@@ -299,6 +307,8 @@ toptions(struct curparse *curp, char *arg)
 		curp->outtype = OUTT_TREE;
 	else if (0 == strcmp(arg, "html"))
 		curp->outtype = OUTT_HTML;
+	else if (0 == strcmp(arg, "locale"))
+		curp->outtype = OUTT_LOCALE;
 	else if (0 == strcmp(arg, "xhtml"))
 		curp->outtype = OUTT_XHTML;
 	else if (0 == strcmp(arg, "ps"))

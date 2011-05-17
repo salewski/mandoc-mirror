@@ -434,7 +434,8 @@ pspdf_alloc(char *outopts)
 	const char	*pp;
 	char		*v;
 
-	p = term_alloc(TERMENC_ASCII);
+	p = mandoc_calloc(1, sizeof(struct termp));
+	p->enc = TERMENC_ASCII;
 	p->ps = mandoc_calloc(1, sizeof(struct termp_ps));
 
 	p->advance = ps_advance;
