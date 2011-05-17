@@ -94,6 +94,19 @@ static	const char	*const htmlattrs[ATTR_MAX] = {
 	"colspan", /* ATTR_COLSPAN */
 };
 
+static	const char	*const roffscales[SCALE_MAX] = {
+	"cm", /* SCALE_CM */
+	"in", /* SCALE_IN */
+	"pc", /* SCALE_PC */
+	"pt", /* SCALE_PT */
+	"em", /* SCALE_EM */
+	"em", /* SCALE_MM */
+	"ex", /* SCALE_EN */
+	"ex", /* SCALE_BU */
+	"em", /* SCALE_VS */
+	"ex", /* SCALE_FS */
+};
+
 static	void		  print_num(struct html *, const char *, size_t);
 static	void		  print_spec(struct html *, const char *, size_t);
 static	void		  print_res(struct html *, const char *, size_t);
@@ -729,50 +742,12 @@ void
 bufcat_su(struct html *h, const char *p, const struct roffsu *su)
 {
 	double		 v;
-	const char	*u;
 
 	v = su->scale;
+	if (SCALE_MM == su->unit && 0.0 == (v /= 100.0))
+		v = 1.0;
 
-	switch (su->unit) {
-	case (SCALE_CM):
-		u = "cm";
-		break;
-	case (SCALE_IN):
-		u = "in";
-		break;
-	case (SCALE_PC):
-		u = "pc";
-		break;
-	case (SCALE_PT):
-		u = "pt";
-		break;
-	case (SCALE_EM):
-		u = "em";
-		break;
-	case (SCALE_MM):
-		if (0 == (v /= 100))
-			v = 1;
-		u = "em";
-		break;
-	case (SCALE_EN):
-		u = "ex";
-		break;
-	case (SCALE_BU):
-		u = "ex";
-		break;
-	case (SCALE_VS):
-		u = "em";
-		break;
-	default:
-		u = "ex";
-		break;
-	}
-
-	/* 
-	 * XXX: the CSS spec isn't clear as to which types accept
-	 * integer or real numbers, so we just make them all decimals.
-	 */
-	buffmt(h, "%s: %.2f%s;", p, v, u);
+	buffmt(h, "%s: %.2f%s;", p, v, roffscales[su->unit]);
 }
 
 
