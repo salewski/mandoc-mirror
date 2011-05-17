@@ -1171,6 +1171,7 @@ mdoc_sx_pre(MDOC_ARGS)
 	struct htmlpair	 tag[2];
 
 	bufinit(h);
+	bufcat(h, "#x");
 	for (n = n->child; n; n = n->next) {
 		bufcat_id(h, n->string);
 		if (n->next)

@@ -656,6 +656,7 @@ buffmt_includes(struct html *h, const char *name)
 
 	pp = h->base_includes;
 	
+	bufinit(h);
 	while (NULL != (p = strchr(pp, '%'))) {
 		bufncat(h, pp, (size_t)(p - pp));
 		switch (*(p + 1)) {
@@ -680,7 +681,7 @@ buffmt_man(struct html *h,
 
 	pp = h->base_man;
 	
-	/* LINTED */
+	bufinit(h);
 	while (NULL != (p = strchr(pp, '%'))) {
 		bufncat(h, pp, (size_t)(p - pp));
 		switch (*(p + 1)) {
@@ -718,8 +719,6 @@ bufcat_id(struct html *h, const char *src)
 
 	/* Cf. <http://www.w3.org/TR/html4/types.html#h-6.2>. */
 
-	if (0 == h->buflen)
-		bufcat(h, "#x");
 	while ('\0' != *src)
 		bufcat_fmt(h, "%.2x", *src++);
 }
