@@ -26,6 +26,7 @@
 .Nm mchars_alloc ,
 .Nm mchars_free ,
 .Nm mchars_num2char ,
+.Nm mchars_num2uc ,
 .Nm mchars_res2cp ,
 .Nm mchars_res2str ,
 .Nm mchars_spec2cp ,
@@ -64,6 +65,8 @@
 .Fn mchars_free "struct mchars *p"
 .Ft char
 .Fn mchars_num2char "const char *cp" "size_t sz"
+.Ft int
+.Fn mchars_num2uc "const char *cp" "size_t sz"
 .Ft "const char *"
 .Fo mchars_res2str
 .Fa "struct mchars *p"
@@ -188,6 +191,9 @@ library also contains routines for translating character strings into glyphs
 .Pq see Fn mchars_alloc
 and parsing escape sequences from strings
 .Pq see Fn mandoc_escape .
+.Pp
+This library is
+.Ud
 .Sh REFERENCE
 This section documents the functions, types, and variables available
 via
@@ -247,8 +253,12 @@ The object must be freed with
 Free an object created with
 .Fn mchars_alloc .
 .It Fn mchars_num2char
-Convert a character index as found in \eN\(aq\(aq into a printable
-character.
+Convert a character index (e.g., the \eN\(aq\(aq escape) into a
+printable ASCII character.
+Returns \e0 (the nil character) if the input sequence is malformed.
+.It Fn mchars_num2uc
+Convert a hexadecimal character index (e.g., the \e[uNNNN] escape) into
+a Unicode codepoint.
 Returns \e0 (the nil character) if the input sequence is malformed.
 .It Fn mchars_res2cp
 Convert a predefined character into a valid Unicode codepoint.

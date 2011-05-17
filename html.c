@@ -315,6 +315,8 @@ html_strlen(const char *cp)
 		switch (mandoc_escape(&cp, &seq, &ssz)) {
 		case (ESCAPE_ERROR):
 			return(sz);
+		case (ESCAPE_UNICODE):
+			/* FALLTHROUGH */
 		case (ESCAPE_NUMBERED):
 			/* FALLTHROUGH */
 		case (ESCAPE_PREDEF):
@@ -373,6 +375,12 @@ print_encode(struct html *h, const char *p, int norecurse)
 			break;
 
 		switch (esc) {
+		case (ESCAPE_UNICODE):
+			/* Skip passed "u" header. */
+			c = mchars_num2uc(seq + 1, len - 1);
+			if ('\0' != c)
+				printf("&#x%x;", c);
+			break;
 		case (ESCAPE_NUMBERED):
 			c = mchars_num2char(seq, len);
 			if ('\0' != c)

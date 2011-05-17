@@ -138,7 +138,7 @@ mchars_res2cp(struct mchars *arg, const char *p, size_t sz)
 }
 
 /*
- * Numbered character to literal character.
+ * Numbered character string to ASCII codepoint.
  * This can only be a printable character (i.e., alnum, punct, space) so
  * prevent the character from ruining our state (backspace, newline, and
  * so on).
@@ -151,8 +151,22 @@ mchars_num2char(const char *p, size_t sz)
 
 	if ((i = mandoc_strntou(p, sz, 10)) < 0)
 		return('\0');
-
 	return(isprint(i) ? i : '\0');
+}
+
+/*
+ * Hex character string to Unicode codepoint.
+ * If the character is illegal, returns '\0'.
+ */
+int
+mchars_num2uc(const char *p, size_t sz)
+{
+	int               i;
+
+	if ((i = mandoc_strntou(p, sz, 16)) < 0)
+		return('\0');
+	/* FIXME: make sure we're not in a bogus range. */
+	return(i > 0x80 && i <= 0x10FFFF ? i : '\0');
 }
 
 /* 
