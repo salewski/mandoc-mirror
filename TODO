@@ -56,11 +56,6 @@
 
 - \c (interrupted text) occurs in chat(8)
 
-- \f(CW (constant width font) occurs in rsyncd.conf(5).
-  I think we should treat unknown/unavailable fonts as \fR
-  such that switching back with \fP works correctly -
-  and doesn't revert the _previous_ \fP.
-
 --- missing mdoc features ----------------------------------------------
 
 - fix bad block nesting involving multiple identical explicit blocks

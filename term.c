@@ -471,6 +471,8 @@ term_word(struct termp *p, const char *word)
 		case (ESCAPE_FONTITALIC):
 			term_fontrepl(p, TERMFONT_UNDER);
 			break;
+		case (ESCAPE_FONT):
+			/* FALLTHROUGH */
 		case (ESCAPE_FONTROMAN):
 			term_fontrepl(p, TERMFONT_NONE);
 			break;

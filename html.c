@@ -272,6 +272,8 @@ print_metaf(struct html *h, enum mandoc_esc deco)
 	case (ESCAPE_FONTBOLD):
 		font = HTMLFONT_BOLD;
 		break;
+	case (ESCAPE_FONT):
+		/* FALLTHROUGH */
 	case (ESCAPE_FONTROMAN):
 		font = HTMLFONT_NONE;
 		break;
@@ -392,6 +394,8 @@ print_encode(struct html *h, const char *p, int norecurse)
 		case (ESCAPE_SPECIAL):
 			print_spec(h, seq, len);
 			break;
+		case (ESCAPE_FONT):
+			/* FALLTHROUGH */
 		case (ESCAPE_FONTPREV):
 			/* FALLTHROUGH */
 		case (ESCAPE_FONTBOLD):
