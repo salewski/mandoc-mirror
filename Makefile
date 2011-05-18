@@ -14,7 +14,7 @@
 VERSION		 = 1.11.2
 VDATE		 = 12 May 2011
 # If your system doesn't support multi-byte functions (specifically
-# setlocale(), wcwidth(), putwchar()), then remove -DUSE_CHAR.  You'll
+# setlocale(), wcwidth(), putwchar()), then remove -DUSE_WCHAR.  You'll
 # still be able to use -Tlocale, but it becomes a synonym for -Tascii.
 CFLAGS		+= -g -DUSE_WCHAR -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings

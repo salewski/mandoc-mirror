@@ -135,6 +135,10 @@
   reported by naddy@ Sat, 16 Oct 2010 23:51:57 +0200
   *** sox(1) still doesn't work, tbl(1) errors need investigation
 
+- allow standalone `.' to be interpreted as an end-of-layout
+  delimiter instead of being thrown away as a no-op roff line
+  reported by Yuri Pankov, Wed 18 May 2011 11:34:59 CEST
+
 --- missing misc features ----------------------------------------------
 
 - clean up escape sequence handling, creating three classes:
