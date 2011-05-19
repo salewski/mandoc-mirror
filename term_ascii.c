@@ -37,8 +37,15 @@
 #include "term.h"
 #include "main.h"
 
+/* 
+ * Sadly, this doesn't seem to be defined on systems even when they
+ * support it.  For the time being, remove it and let those compiling
+ * the software decide for themselves what to use.
+ */
+#if 0
 #if ! defined(__STDC_ISO_10646__)
 # undef USE_WCHAR
+#endif
 #endif
 
 static	struct termp	 *ascii_init(enum termenc, char *);

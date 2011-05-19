@@ -13,9 +13,11 @@
 
 VERSION		 = 1.11.2
 VDATE		 = 12 May 2011
-# If your system doesn't support multi-byte functions (specifically
-# setlocale(), wcwidth(), putwchar()), then remove -DUSE_WCHAR.  You'll
-# still be able to use -Tlocale, but it becomes a synonym for -Tascii.
+# IFF your system supports multi-byte functions (setlocale(), wcwidth(),
+# putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a
+# UCS-4 value) should you define USE_WCHAR.  If you define it and your
+# system DOESN'T support this, -Tlocale will produce garbage.
+# If you don't define it, -Tlocale is a synonym for -Tacsii.
 CFLAGS		+= -g -DUSE_WCHAR -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
