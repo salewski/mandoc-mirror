@@ -439,18 +439,37 @@ term_word(struct termp *p, const char *word)
 		if (ESCAPE_ERROR == esc)
 			break;
 
-		switch (esc) {
-		case (ESCAPE_UNICODE):
-			if (TERMENC_ASCII == p->enc) {
-				encode1(p, '?');
+		if (TERMENC_ASCII != p->enc)
+			switch (esc) {
+			case (ESCAPE_UNICODE):
+				uc = mchars_num2uc(seq + 1, sz - 1);
+				if ('\0' == uc)
+					break;
+				encode1(p, uc);
+				continue;
+			case (ESCAPE_PREDEF):
+				uc = mchars_res2cp(p->symtab, seq, sz);
+				if (uc <= 0)
+					break;
+				encode1(p, uc);
+				continue;
+			case (ESCAPE_SPECIAL):
+				uc = mchars_spec2cp(p->symtab, seq, sz);
+				if (uc <= 0)
+					break;
+				encode1(p, uc);
+				continue;
+			default:
 				break;
 			}
-			uc = mchars_num2uc(seq + 1, sz - 1);
-			if ('\0' != uc)
-				encode1(p, uc);
+
+		switch (esc) {
+		case (ESCAPE_UNICODE):
+			encode1(p, '?');
 			break;
 		case (ESCAPE_NUMBERED):
-			if ('\0' != (c = mchars_num2char(seq, sz)))
+			c = mchars_num2char(seq, sz);
+			if ('\0' != c)
 				encode(p, &c, 1);
 			break;
 		case (ESCAPE_PREDEF):
@@ -597,6 +616,7 @@ term_strlen(const struct termp *p, const char *cp)
 	size_t		 sz, rsz, i;
 	int		 ssz, c;
 	const char	*seq, *rhs;
+	enum mandoc_esc	 esc;
 	static const char rej[] = { '\\', ASCII_HYPH, ASCII_NBRSP, '\0' };
 
 	/*
@@ -615,18 +635,42 @@ term_strlen(const struct termp *p, const char *cp)
 		switch (*cp) {
 		case ('\\'):
 			cp++;
-			rhs = NULL;
-			switch (mandoc_escape(&cp, &seq, &ssz)) {
-			case (ESCAPE_ERROR):
+			esc = mandoc_escape(&cp, &seq, &ssz);
+			if (ESCAPE_ERROR == esc)
 				return(sz);
-			case (ESCAPE_UNICODE):
-				if (TERMENC_ASCII != p->enc) {
-					sz += (*p->width)(p, '?');
+
+			if (TERMENC_ASCII != p->enc)
+				switch (esc) {
+				case (ESCAPE_UNICODE):
+					c = mchars_num2uc
+						(seq + 1, ssz - 1);
+					if ('\0' == c)
+						break;
+					sz += (*p->width)(p, c);
+					continue;
+				case (ESCAPE_PREDEF):
+					c = mchars_res2cp
+						(p->symtab, seq, ssz);
+					if (c <= 0)
+						break;
+					sz += (*p->width)(p, c);
+					continue;
+				case (ESCAPE_SPECIAL):
+					c = mchars_spec2cp
+						(p->symtab, seq, ssz);
+					if (c <= 0)
+						break;
+					sz += (*p->width)(p, c);
+					continue;
+				default:
 					break;
 				}
-				c = mchars_num2uc(seq + 1, ssz - 1);
-				if ('\0' != c)
-					sz += (*p->width)(p, c);
+
+			rhs = NULL;
+
+			switch (esc) {
+			case (ESCAPE_UNICODE):
+				sz += (*p->width)(p, '?');
 				break;
 			case (ESCAPE_NUMBERED):
 				c = mchars_num2char(seq, ssz);
