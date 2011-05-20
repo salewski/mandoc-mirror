@@ -23,7 +23,8 @@ struct	termp;
 
 enum	termenc {
 	TERMENC_ASCII,
-	TERMENC_LOCALE
+	TERMENC_LOCALE,
+	TERMENC_UTF8
 };
 
 enum	termtype {

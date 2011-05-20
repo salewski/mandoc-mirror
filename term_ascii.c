@@ -89,15 +89,19 @@ ascii_init(enum termenc enc, char *outopts)
 	p->letter = ascii_letter;
 	p->width = ascii_width;
 
-#if defined (USE_WCHAR)
-	if (TERMENC_LOCALE == enc)
-		if (setlocale(LC_ALL, "") && MB_CUR_MAX > 1) {
+#ifdef	USE_WCHAR
+	if (TERMENC_ASCII != enc) {
+		v = TERMENC_LOCALE == enc ?
+			setlocale(LC_ALL, "") :
+			setlocale(LC_CTYPE, "UTF-8");
+		if (NULL != v && MB_CUR_MAX > 1) {
 			p->enc = enc;
 			p->advance = locale_advance;
 			p->endline = locale_endline;
 			p->letter = locale_letter;
 			p->width = locale_width;
 		}
+	}
 #endif
 
 	toks[0] = "width";
@@ -125,6 +129,14 @@ ascii_alloc(char *outopts)
 
 	return(ascii_init(TERMENC_ASCII, outopts));
 }
+
+void *
+utf8_alloc(char *outopts)
+{
+
+	return(ascii_init(TERMENC_UTF8, outopts));
+}
+
 
 void *
 locale_alloc(char *outopts)
