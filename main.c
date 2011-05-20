@@ -44,6 +44,7 @@ typedef	void		(*out_free)(void *);
 enum	outt {
 	OUTT_ASCII = 0,	/* -Tascii */
 	OUTT_LOCALE,	/* -Tlocale */
+	OUTT_UTF8,	/* -Tutf8 */
 	OUTT_TREE,	/* -Ttree */
 	OUTT_HTML,	/* -Thtml */
 	OUTT_XHTML,	/* -Txhtml */
@@ -213,6 +214,10 @@ parse(struct curparse *curp, int fd,
 			curp->outdata = html_alloc(curp->outopts);
 			curp->outfree = html_free;
 			break;
+		case (OUTT_UTF8):
+			curp->outdata = utf8_alloc(curp->outopts);
+			curp->outfree = ascii_free;
+			break;
 		case (OUTT_LOCALE):
 			curp->outdata = locale_alloc(curp->outopts);
 			curp->outfree = ascii_free;
@@ -247,6 +252,8 @@ parse(struct curparse *curp, int fd,
 		case (OUTT_PDF):
 			/* FALLTHROUGH */
 		case (OUTT_ASCII):
+			/* FALLTHROUGH */
+		case (OUTT_UTF8):
 			/* FALLTHROUGH */
 		case (OUTT_LOCALE):
 			/* FALLTHROUGH */
@@ -307,6 +314,8 @@ toptions(struct curparse *curp, char *arg)
 		curp->outtype = OUTT_TREE;
 	else if (0 == strcmp(arg, "html"))
 		curp->outtype = OUTT_HTML;
+	else if (0 == strcmp(arg, "utf8"))
+		curp->outtype = OUTT_UTF8;
 	else if (0 == strcmp(arg, "locale"))
 		curp->outtype = OUTT_LOCALE;
 	else if (0 == strcmp(arg, "xhtml"))

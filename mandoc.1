@@ -158,10 +158,13 @@ utility accepts the following
 .Fl T
 arguments, which correspond to output modes:
 .Bl -tag -width Ds
+.It Fl T Ns Cm utf8
+Encode output in the UTF-8 multi-byte format.
+See
+.Xr UTF-8 Output .
 .It Fl T Ns Cm locale
-This option encodes output characters using the current
-.Xr locale 1
-configuration.
+Encode output using the current
+.Xr locale 1 .
 See
 .Sx Locale Output .
 .It Fl T Ns Cm ascii
@@ -195,6 +198,13 @@ See
 .Pp
 If multiple input files are specified, these will be processed by the
 corresponding filter in-order.
+.Ss UTF-8 Output
+Use
+.Fl T Ns Cm utf8
+to force a UTF-8 locale.
+See
+.Sx Locale Output
+for details and options.
 .Ss Locale Output
 Locale-depending output encoding is triggered with
 .Fl T Ns Cm locale .
