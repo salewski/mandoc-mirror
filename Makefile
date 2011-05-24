@@ -88,6 +88,7 @@ SRCS		 = Makefile \
 		   msec.in \
 		   out.c \
 		   out.h \
+		   predefs.in \
 		   read.c \
 		   roff.7 \
 		   roff.c \
@@ -174,6 +175,7 @@ att.o att.ln: att.in
 chars.o chars.ln: chars.in
 lib.o lib.ln: lib.in
 msec.o msec.ln: msec.in
+roff.o roff.ln: predefs.in
 st.o st.ln: st.in
 vol.o vol.ln: vol.in
 

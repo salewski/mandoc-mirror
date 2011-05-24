@@ -28,6 +28,7 @@
 #include "libroff.h"
 #include "libmandoc.h"
 
+/* Maximum number of nested if-else conditionals. */
 #define	RSTACK_MAX	128
 
 enum	rofft {
@@ -60,7 +61,7 @@ enum	rofft {
 	ROFF_EQ,
 	ROFF_EN,
 	ROFF_cblock,
-	ROFF_ccond, /* FIXME: remove this. */
+	ROFF_ccond,
 	ROFF_USERDEF,
 	ROFF_MAX
 };
@@ -123,6 +124,14 @@ struct	roffmac {
 #define	ROFFMAC_STRUCT	(1 << 0) /* always interpret */
 	struct roffmac	*next;
 };
+
+struct	predef {
+	const char	*name; /* predefined input name */
+	const char	*str; /* replacement symbol */
+};
+
+#define	PREDEF(__name, __str) \
+	{ (__name), (__str) },
 
 static	enum rofferr	 roff_block(ROFF_ARGS);
 static	enum rofferr	 roff_block_text(ROFF_ARGS);
@@ -195,6 +204,12 @@ static	struct roffmac	 roffs[ROFF_MAX] = {
 	{ NULL, roff_userdef, NULL, NULL, 0, NULL },
 };
 
+/* Array of injected predefined strings. */
+#define	PREDEFS_MAX	 38
+static	const struct predef predefs[PREDEFS_MAX] = {
+#include "predefs.in"
+};
+
 static	void		 roff_free1(struct roff *);
 static	enum rofft	 roff_hash_find(const char *, size_t);
 static	void		 roff_hash_init(void);
@@ -227,7 +242,6 @@ roff_hash_init(void)
 			hash[buc] = &roffs[i];
 	}
 }
-
 
 /*
  * Look up a roff token by its name.  Returns ROFF_MAX if no macro by
@@ -351,6 +365,7 @@ struct roff *
 roff_alloc(struct regset *regs, struct mparse *parse)
 {
 	struct roff	*r;
+	int		 i;
 
 	r = mandoc_calloc(1, sizeof(struct roff));
 	r->regs = regs;
@@ -358,6 +373,10 @@ roff_alloc(struct regset *regs, struct mparse *parse)
 	r->rstackpos = -1;
 	
 	roff_hash_init();
+
+	for (i = 0; i < PREDEFS_MAX; i++) 
+		roff_setstr(r, predefs[i].name, predefs[i].str, 0);
+
 	return(r);
 }
 
