@@ -448,15 +448,20 @@ than having the request or macro follow as
 The scope of a conditional is always parsed, but only executed if the
 conditional evaluates to true.
 .Pp
-Note that text following an
-.Sq \&.\e}
-escape sequence is discarded.
-Furthermore, if an explicit closing sequence
+Note that the
 .Sq \e}
-is specified in a free-form line, the entire line is accepted within the
-scope of the prior request, not only the text preceding the close, with the
+is converted into a zero-width escape sequence if not passed as a
+standalone macro
+.Sq \&.\e} .
+For example,
+.Pp
+.D1 \&.Fl a \e} b
+.Pp
+will result in
 .Sq \e}
-collapsing into a zero-width space.
+being considered an argument of the
+.Sq \&Fl
+macro.
 .Ss \&ig
 Ignore input.
 Its syntax can be either

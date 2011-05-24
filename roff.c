@@ -853,17 +853,12 @@ roff_cond_sub(ROFF_ARGS)
 	 */
 
 	if (ROFF_MAX == (t = roff_parse(r, *bufp, &pos))) {
-		/*
-		 * Jump through hoops to detect a \}, because it could
-		 * be (say) \\}, which is something completely
-		 * different.
-		 */
 		ep = &(*bufp)[pos];
 		for ( ; NULL != (ep = strchr(ep, '\\')); ep++) {
 			ep++;
 			if ('}' != *ep)
 				continue;
-			*--ep = '\0';
+			*ep = '&';
 			roff_ccond(r, ROFF_ccond, bufp, szp, 
 					ln, pos, pos + 2, offs);
 			break;
@@ -887,36 +882,27 @@ roff_cond_sub(ROFF_ARGS)
 				ln, ppos, pos, offs));
 }
 
-
 /* ARGSUSED */
 static enum rofferr
 roff_cond_text(ROFF_ARGS)
 {
-	char		*ep, *st;
+	char		*ep;
 	enum roffrule	 rr;
 
 	rr = r->last->rule;
-
-	/*
-	 * We display the value of the text if out current evaluation
-	 * scope permits us to do so.
-	 */
-
-	/* FIXME: use roff_ccond? */
-
-	st = &(*bufp)[pos];
-	if (NULL == (ep = strstr(st, "\\}"))) {
-		roffnode_cleanscope(r);
-		return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
-	}
-
-	if (ep == st || (ep > st && '\\' != *(ep - 1)))
-		roffnode_pop(r);
-
 	roffnode_cleanscope(r);
+
+	ep = &(*bufp)[pos];
+	for ( ; NULL != (ep = strchr(ep, '\\')); ep++) {
+		ep++;
+		if ('}' != *ep)
+			continue;
+		*ep = '&';
+		roff_ccond(r, ROFF_ccond, bufp, szp, 
+				ln, pos, pos + 2, offs);
+	}
 	return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
 }
-
 
 static enum roffrule
 roff_evalcond(const char *v, int *pos)
