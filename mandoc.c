@@ -164,10 +164,6 @@ mandoc_escape(const char **end, const char **start, int *sz)
 		if (ESCAPE_ERROR == gly)
 			gly = ESCAPE_IGNORE;
 		/* FALLTHROUGH */
-	case ('*'):
-		if (ESCAPE_ERROR == gly)
-			gly = ESCAPE_PREDEF;
-		/* FALLTHROUGH */
 	case ('f'):
 		if (ESCAPE_ERROR == gly)
 			gly = ESCAPE_FONT;

@@ -292,7 +292,6 @@ enum	mandoc_esc {
 	ESCAPE_ERROR = 0, /* bail! unparsable escape */
 	ESCAPE_IGNORE, /* escape to be ignored */
 	ESCAPE_SPECIAL, /* a regular special character */
-	ESCAPE_PREDEF, /* a predefined special character */
 	ESCAPE_FONT, /* a generic font mode */
 	ESCAPE_FONTBOLD, /* bold font mode */
 	ESCAPE_FONTITALIC, /* italic font mode */
@@ -333,8 +332,6 @@ char	 	  mchars_num2char(const char *, size_t);
 int		  mchars_num2uc(const char *, size_t);
 const char	 *mchars_spec2str(struct mchars *, const char *, size_t, size_t *);
 int		  mchars_spec2cp(struct mchars *, const char *, size_t);
-const char	 *mchars_res2str(struct mchars *, const char *, size_t, size_t *);
-int		  mchars_res2cp(struct mchars *, const char *, size_t);
 void		  mchars_free(struct mchars *);
 
 

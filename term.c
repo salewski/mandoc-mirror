@@ -447,12 +447,6 @@ term_word(struct termp *p, const char *word)
 					break;
 				encode1(p, uc);
 				continue;
-			case (ESCAPE_PREDEF):
-				uc = mchars_res2cp(p->symtab, seq, sz);
-				if (uc <= 0)
-					break;
-				encode1(p, uc);
-				continue;
 			case (ESCAPE_SPECIAL):
 				uc = mchars_spec2cp(p->symtab, seq, sz);
 				if (uc <= 0)
@@ -471,11 +465,6 @@ term_word(struct termp *p, const char *word)
 			c = mchars_num2char(seq, sz);
 			if ('\0' != c)
 				encode(p, &c, 1);
-			break;
-		case (ESCAPE_PREDEF):
-			cp = mchars_res2str(p->symtab, seq, sz, &ssz);
-			if (NULL != cp)
-				encode(p, cp, ssz);
 			break;
 		case (ESCAPE_SPECIAL):
 			cp = mchars_spec2str(p->symtab, seq, sz, &ssz);
@@ -648,13 +637,6 @@ term_strlen(const struct termp *p, const char *cp)
 						break;
 					sz += (*p->width)(p, c);
 					continue;
-				case (ESCAPE_PREDEF):
-					c = mchars_res2cp
-						(p->symtab, seq, ssz);
-					if (c <= 0)
-						break;
-					sz += (*p->width)(p, c);
-					continue;
 				case (ESCAPE_SPECIAL):
 					c = mchars_spec2cp
 						(p->symtab, seq, ssz);
@@ -676,10 +658,6 @@ term_strlen(const struct termp *p, const char *cp)
 				c = mchars_num2char(seq, ssz);
 				if ('\0' != c)
 					sz += (*p->width)(p, c);
-				break;
-			case (ESCAPE_PREDEF):
-				rhs = mchars_res2str
-					(p->symtab, seq, ssz, &rsz);
 				break;
 			case (ESCAPE_SPECIAL):
 				rhs = mchars_spec2str

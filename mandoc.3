@@ -27,8 +27,6 @@
 .Nm mchars_free ,
 .Nm mchars_num2char ,
 .Nm mchars_num2uc ,
-.Nm mchars_res2cp ,
-.Nm mchars_res2str ,
 .Nm mchars_spec2cp ,
 .Nm mchars_spec2str ,
 .Nm mdoc_meta ,
@@ -69,20 +67,6 @@
 .Fn mchars_num2char "const char *cp" "size_t sz"
 .Ft int
 .Fn mchars_num2uc "const char *cp" "size_t sz"
-.Ft "const char *"
-.Fo mchars_res2str
-.Fa "struct mchars *p"
-.Fa "const char *cp"
-.Fa "size_t sz"
-.Fa "size_t *rsz"
-.Fc
-.Ft int
-.Fo mchars_res2cp
-.Fa "struct mchars *p"
-.Fa "const char *cp"
-.Fa "size_t sz"
-.Ft "const char *"
-.Fc
 .Ft "const char *"
 .Fo mchars_spec2str
 .Fa "struct mchars *p"
@@ -262,14 +246,6 @@ Returns \e0 (the nil character) if the input sequence is malformed.
 Convert a hexadecimal character index (e.g., the \e[uNNNN] escape) into
 a Unicode codepoint.
 Returns \e0 (the nil character) if the input sequence is malformed.
-.It Fn mchars_res2cp
-Convert a predefined character into a valid Unicode codepoint.
-Returns \-1 on failure and 0 if no code-point exists (if this occurs,
-the caller should fall back to
-.Fn mchars_res2str ) .
-.It Fn mchars_res2str
-Convert a predefined character into an ASCII string.
-Returns NULL on failure.
 .It Fn mchars_spec2cp
 Convert a special character into a valid Unicode codepoint.
 Returns \-1 on failure and 0 if no code-point exists (if this occurs,

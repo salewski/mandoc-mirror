@@ -109,7 +109,6 @@ static	const char	*const roffscales[SCALE_MAX] = {
 
 static	void	 bufncat(struct html *, const char *, size_t);
 static	void	 print_spec(struct html *, const char *, size_t);
-static	void	 print_res(struct html *, const char *, size_t);
 static	void	 print_ctag(struct html *, enum htmltag);
 static	int	 print_encode(struct html *, const char *, int);
 static	void	 print_metaf(struct html *, enum mandoc_esc);
@@ -238,25 +237,6 @@ print_spec(struct html *h, const char *p, size_t len)
 		fwrite(rhs, 1, sz, stdout);
 }
 
-
-static void
-print_res(struct html *h, const char *p, size_t len)
-{
-	int		 cp;
-	const char	*rhs;
-	size_t		 sz;
-
-	if ((cp = mchars_res2cp(h->symtab, p, len)) > 0) {
-		printf("&#%d;", cp);
-		return;
-	} else if (-1 == cp)
-		return;
-
-	if (NULL != (rhs = mchars_res2str(h->symtab, p, len, &sz)))
-		fwrite(rhs, 1, sz, stdout);
-}
-
-
 static void
 print_metaf(struct html *h, enum mandoc_esc deco)
 {
@@ -320,8 +300,6 @@ html_strlen(const char *cp)
 		case (ESCAPE_UNICODE):
 			/* FALLTHROUGH */
 		case (ESCAPE_NUMBERED):
-			/* FALLTHROUGH */
-		case (ESCAPE_PREDEF):
 			/* FALLTHROUGH */
 		case (ESCAPE_SPECIAL):
 			sz++;
@@ -387,9 +365,6 @@ print_encode(struct html *h, const char *p, int norecurse)
 			c = mchars_num2char(seq, len);
 			if ('\0' != c)
 				putchar(c);
-			break;
-		case (ESCAPE_PREDEF):
-			print_res(h, seq, len);
 			break;
 		case (ESCAPE_SPECIAL):
 			print_spec(h, seq, len);
