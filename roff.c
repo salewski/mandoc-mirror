@@ -840,21 +840,34 @@ roff_cond_sub(ROFF_ARGS)
 {
 	enum rofft	 t;
 	enum roffrule	 rr;
+	char		*ep;
 
 	rr = r->last->rule;
-
-	/* 
-	 * Clean out scope.  If we've closed ourselves, then don't
-	 * continue. 
-	 */
-
 	roffnode_cleanscope(r);
 
+	/*
+	 * If the macro is unknown, first check if it contains a closing
+	 * delimiter `\}'.  If it does, close out our scope and return
+	 * the currently-scoped rule (ignore or continue).  Else, drop
+	 * into the currently-scoped rule.
+	 */
+
 	if (ROFF_MAX == (t = roff_parse(r, *bufp, &pos))) {
-		if ('\\' == (*bufp)[pos] && '}' == (*bufp)[pos + 1])
-			return(roff_ccond
-				(r, ROFF_ccond, bufp, szp,
-				 ln, pos, pos + 2, offs));
+		/*
+		 * Jump through hoops to detect a \}, because it could
+		 * be (say) \\}, which is something completely
+		 * different.
+		 */
+		ep = &(*bufp)[pos];
+		for ( ; NULL != (ep = strchr(ep, '\\')); ep++) {
+			ep++;
+			if ('}' != *ep)
+				continue;
+			*--ep = '\0';
+			roff_ccond(r, ROFF_ccond, bufp, szp, 
+					ln, pos, pos + 2, offs);
+			break;
+		}
 		return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
 	}
 
@@ -863,6 +876,7 @@ roff_cond_sub(ROFF_ARGS)
 	 * if they're either structurally required (such as loops and
 	 * conditionals) or a closing macro.
 	 */
+
 	if (ROFFRULE_DENY == rr)
 		if ( ! (ROFFMAC_STRUCT & roffs[t].flags))
 			if (ROFF_ccond != t)

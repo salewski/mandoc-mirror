@@ -10,12 +10,6 @@
 - .TP before .SH is still FATAL in man(7)
   reported by brad@  Sat, 15 Jan 2011 15:54:54 -0500
 
-- the roff parser doesn't tolerate additional characters between
-  a macro and the \} terminating a conditional block, e.g.
-  .if n \{
-  .br \}
-  reported by ulrich spoerlein  Tue, 19 Oct 2010 20:39:50 +0200
-
 ************************************************************************
 * formatter bugs
 ************************************************************************
