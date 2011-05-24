@@ -36,20 +36,12 @@ struct	ln {
 	const char	 *code;
 	const char	 *ascii;
 	int		  unicode;
-	int		  type;
-#define	CHARS_CHAR	 (1 << 0)
-#define	CHARS_STRING	 (1 << 1)
-#define CHARS_BOTH	 (CHARS_CHAR | CHARS_STRING)
 };
 
-#define	LINES_MAX	  353
+#define	LINES_MAX	  325
 
 #define CHAR(in, ch, code) \
-	{ NULL, (in), (ch), (code), CHARS_CHAR },
-#define STRING(in, ch, code) \
-	{ NULL, (in), (ch), (code), CHARS_STRING },
-#define BOTH(in, ch, code) \
-	{ NULL, (in), (ch), (code), CHARS_BOTH },
+	{ NULL, (in), (ch), (code) },
 
 #define	CHAR_TBL_START	  static struct ln lines[LINES_MAX] = {
 #define	CHAR_TBL_END	  };
@@ -60,9 +52,8 @@ struct	mchars {
 	struct ln	**htab;
 };
 
-static	inline int	  match(const struct ln *,
-				const char *, size_t, int);
-static	const struct ln	 *find(struct mchars *, const char *, size_t, int);
+static	inline int	  match(const struct ln *, const char *, size_t);
+static	const struct ln	 *find(struct mchars *, const char *, size_t);
 
 void
 mchars_free(struct mchars *arg)
@@ -116,7 +107,7 @@ mchars_spec2cp(struct mchars *arg, const char *p, size_t sz)
 {
 	const struct ln	*ln;
 
-	ln = find(arg, p, sz, CHARS_CHAR);
+	ln = find(arg, p, sz);
 	if (NULL == ln)
 		return(-1);
 	return(ln->unicode);
@@ -131,7 +122,7 @@ mchars_res2cp(struct mchars *arg, const char *p, size_t sz)
 {
 	const struct ln	*ln;
 
-	ln = find(arg, p, sz, CHARS_STRING);
+	ln = find(arg, p, sz);
 	if (NULL == ln)
 		return(-1);
 	return(ln->unicode);
@@ -177,7 +168,7 @@ mchars_spec2str(struct mchars *arg, const char *p, size_t sz, size_t *rsz)
 {
 	const struct ln	*ln;
 
-	ln = find(arg, p, sz, CHARS_CHAR);
+	ln = find(arg, p, sz);
 	if (NULL == ln)
 		return(NULL);
 
@@ -193,7 +184,7 @@ mchars_res2str(struct mchars *arg, const char *p, size_t sz, size_t *rsz)
 {
 	const struct ln	*ln;
 
-	ln = find(arg, p, sz, CHARS_STRING);
+	ln = find(arg, p, sz);
 	if (NULL == ln)
 		return(NULL);
 
@@ -202,7 +193,7 @@ mchars_res2str(struct mchars *arg, const char *p, size_t sz, size_t *rsz)
 }
 
 static const struct ln *
-find(struct mchars *tab, const char *p, size_t sz, int type)
+find(struct mchars *tab, const char *p, size_t sz)
 {
 	struct ln	 *pp, *prev;
 	struct ln	**htab;
@@ -228,7 +219,7 @@ find(struct mchars *tab, const char *p, size_t sz, int type)
 		return(NULL);
 
 	for (prev = NULL; pp; pp = pp->next) {
-		if ( ! match(pp, p, sz, type)) {
+		if ( ! match(pp, p, sz)) {
 			prev = pp;
 			continue;
 		}
@@ -246,11 +237,9 @@ find(struct mchars *tab, const char *p, size_t sz, int type)
 }
 
 static inline int
-match(const struct ln *ln, const char *p, size_t sz, int type)
+match(const struct ln *ln, const char *p, size_t sz)
 {
 
-	if ( ! (ln->type & type))
-		return(0);
 	if (strncmp(ln->code, p, sz))
 		return(0);
 	return('\0' == ln->code[(int)sz]);
