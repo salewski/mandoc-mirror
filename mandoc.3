@@ -248,9 +248,7 @@ a Unicode codepoint.
 Returns \e0 (the nil character) if the input sequence is malformed.
 .It Fn mchars_spec2cp
 Convert a special character into a valid Unicode codepoint.
-Returns \-1 on failure and 0 if no code-point exists (if this occurs,
-the caller should fall back to
-.Fn mchars_spec2str ) .
+Returns \-1 on failure or a non-zero Unicode codepoint on success.
 .It Fn mchars_spec2str
 Convert a special character into an ASCII string.
 Returns NULL on failure.
