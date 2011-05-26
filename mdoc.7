@@ -296,19 +296,20 @@ sections, although this varies between manual sections.
 .Pp
 The following is a well-formed skeleton
 .Nm
-file:
+file for a utility
+.Qq progname :
 .Bd -literal -offset indent
 \&.Dd $\&Mdocdate$
-\&.Dt mdoc 7
+\&.Dt PROGNAME section
 \&.Os
 \&.Sh NAME
-\&.Nm foo
+\&.Nm progname
 \&.Nd a description goes here
 \&.\e\*q .Sh LIBRARY
 \&.\e\*q For sections 2, 3, & 9 only.
 \&.\e\*q Not used in OpenBSD.
 \&.Sh SYNOPSIS
-\&.Nm foo
+\&.Nm progname
 \&.Op Fl options
 \&.Ar
 \&.Sh DESCRIPTION
