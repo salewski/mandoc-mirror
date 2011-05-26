@@ -55,6 +55,7 @@ struct	encode {
 	int		(*conv)(const struct buf *);
 };
 
+static	int	 cue_enc(const struct buf *, size_t *, enum enc *);
 static	int	 conv_latin_1(const struct buf *);
 static	int	 conv_us_ascii(const struct buf *);
 static	int	 conv_utf_8(const struct buf *);
@@ -94,11 +95,13 @@ conv_latin_1(const struct buf *b)
 	 * Latin-1 falls into the first 256 code-points of Unicode, so
 	 * there's no need for any sort of translation.  Just make the
 	 * 8-bit characters use the Unicode escape.
+	 * Note that binary values 128 < v < 160 are passed through
+	 * unmodified to mandoc.
 	 */
 
 	for (i = b->offs; i < b->sz; i++) {
 		cu = (unsigned char)*cp++;
-		cu < 128U ? putchar(cu) : printf("\\[u%.4X]", cu);
+		cu < 160U ? putchar(cu) : printf("\\[u%.4X]", cu);
 	}
 
 	return(1);
@@ -306,6 +309,93 @@ read_whole_file(const char *f, int fd,
 	return(0);
 }
 
+static int
+cue_enc(const struct buf *b, size_t *offs, enum enc *enc)
+{
+	const char	*ln, *eoln, *eoph;
+	size_t		 sz, phsz, nsz;
+	int		 i;
+
+	ln = b->buf + (int)*offs;
+	sz = b->sz - *offs;
+
+	/* Look for the end-of-line. */
+
+	if (NULL == (eoln = memchr(ln, '\n', sz)))
+		return(-1);
+
+	/* Set next-line marker. */
+
+	*offs = (size_t)((eoln + 1) - b->buf);
+
+	/* Check if we have the correct header/trailer. */
+
+	if ((sz = (size_t)(eoln - ln)) < 10 || 
+			memcmp(ln, ".\\\" -*-", 7) ||
+			memcmp(eoln - 3, "-*-", 3))
+		return(0);
+
+	/* Move after the header and adjust for the trailer. */
+
+	ln += 7;
+	sz -= 10;
+
+	while (sz > 0) {
+		while (sz > 0 && ' ' == *ln) {
+			ln++;
+			sz--;
+		}
+		if (0 == sz)
+			break;
+
+		/* Find the end-of-phrase marker (or eoln). */
+
+		if (NULL == (eoph = memchr(ln, ';', sz)))
+			eoph = eoln - 3;
+		else
+			eoph++;
+
+		/* Only account for the "coding" phrase. */
+
+		if ((phsz = (size_t)(eoph - ln)) < 7 ||
+				strncasecmp(ln, "coding:", 7)) {
+			sz -= phsz;
+			ln += phsz;
+			continue;
+		} 
+
+		sz -= 7;
+		ln += 7;
+
+		while (sz > 0 && ' ' == *ln) {
+			ln++;
+			sz--;
+		}
+		if (0 == sz)
+			break;
+
+		/* Check us against known encodings. */
+
+		for (i = 0; i < ENC__MAX; i++) {
+			nsz = strlen(encs[i].name);
+			if (phsz < nsz)
+				continue;
+			if (strncasecmp(ln, encs[i].name, nsz))
+				continue;
+
+			*enc = (enum enc)i;
+			return(1);
+		}
+
+		/* Unknown encoding. */
+
+		*enc = ENC__MAX;
+		return(1);
+	}
+
+	return(0);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -314,6 +404,7 @@ main(int argc, char *argv[])
 	const char	*fn;
 	enum enc	 enc, def;
 	const char	 bom[3] = { 0xEF, 0xBB, 0xBF };
+	size_t		 offs;
 	extern int	 optind;
 	extern char	*optarg;
 
@@ -394,6 +485,15 @@ main(int argc, char *argv[])
 			enc = ENC_UTF_8;
 		}
 
+	/* Try reading from the "-*-" cue. */
+
+	if (ENC__MAX == enc) {
+		offs = b.offs;
+		ch = cue_enc(&b, &offs, &enc);
+		if (0 == ch)
+			ch = cue_enc(&b, &offs, &enc);
+	}
+
 	/*
 	 * No encoding has been detected.
 	 * Thus, we either fall into our default encoder, if specified,
@@ -403,8 +503,10 @@ main(int argc, char *argv[])
 	if (ENC__MAX == enc) 
 		enc = ENC__MAX == def ? ENC_LATIN_1 : def;
 
-	if ( ! (*encs[(int)enc].conv)(&b)) 
+	if ( ! (*encs[(int)enc].conv)(&b)) {
+		fprintf(stderr, "%s: Bad encoding\n", fn);
 		goto out;
+	}
 
 	rc = EXIT_SUCCESS;
 out:

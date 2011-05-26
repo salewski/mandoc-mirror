@@ -32,7 +32,7 @@ INSTALL_DATA	 = $(INSTALL) -m 0444
 INSTALL_LIB	 = $(INSTALL) -m 0644
 INSTALL_MAN	 = $(INSTALL_DATA)
 
-all: mandoc
+all: mandoc preconv
 
 SRCS		 = Makefile \
 		   arch.c \
