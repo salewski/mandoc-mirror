@@ -19,8 +19,10 @@
 #include "config.h"
 #endif
 
-#include <sys/stat.h>
-#include <sys/mman.h>
+#ifdef HAVE_MMAP
+# include <sys/stat.h>
+# include <sys/mman.h>
+#endif
 
 #include <assert.h>
 #include <ctype.h>
@@ -529,19 +531,22 @@ pdesc(struct mparse *curp, const char *file, int fd)
 
 	mparse_buf_r(curp, blk, 1);
 
+#ifdef	HAVE_MMAP
 	if (with_mmap)
 		munmap(blk.buf, blk.sz);
 	else
+#endif
 		free(blk.buf);
 }
 
 static int
 read_whole_file(const char *file, int fd, struct buf *fb, int *with_mmap)
 {
-	struct stat	 st;
 	size_t		 off;
 	ssize_t		 ssz;
 
+#ifdef	HAVE_MMAP
+	struct stat	 st;
 	if (-1 == fstat(fd, &st)) {
 		perror(file);
 		return(0);
@@ -566,6 +571,7 @@ read_whole_file(const char *file, int fd, struct buf *fb, int *with_mmap)
 		if (fb->buf != MAP_FAILED)
 			return(1);
 	}
+#endif
 
 	/*
 	 * If this isn't a regular file (like, say, stdin), then we must

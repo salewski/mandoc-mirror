@@ -108,6 +108,7 @@ SRCS		 = Makefile \
 		   term.h \
 		   term_ascii.c \
 		   term_ps.c \
+		   test-mmap.c \
 		   test-strlcat.c \
 		   test-strlcpy.c \
 		   tree.c \
@@ -381,6 +382,10 @@ config.h: config.h.pre config.h.post
 	  if $(CC) $(CFLAGS) -Werror -o test-strlcat test-strlcat.c >> config.log 2>&1; then \
 		echo '#define HAVE_STRLCAT'; \
 		rm test-strlcat; \
+	  fi; \
+	  if $(CC) $(CFLAGS) -Werror -o test-mmap test-mmap.c >> config.log 2>&1; then \
+		echo '#define HAVE_MMAP'; \
+		rm test-mmap; \
 	  fi; \
 	  if $(CC) $(CFLAGS) -Werror -o test-strlcpy test-strlcpy.c >> config.log 2>&1; then \
 		echo '#define HAVE_STRLCPY'; \
