@@ -170,6 +170,18 @@
 					</TD>
 				</TR>
 				<TR>
+					<TD VALIGN="top"><A HREF="preconv.1.html">preconv(1)</A></TD>
+					<TD VALIGN="top">
+						recode multibyte UNIX manuals
+						<SMALL>
+							(<A HREF="preconv.1.txt">text</A> | 
+							<A HREF="preconv.1.xhtml">xhtml</A> |
+							<A HREF="preconv.1.pdf">pdf</A> |
+							<A HREF="preconv.1.ps">postscript</A>)
+						</SMALL>
+					</TD>
+				</TR>
+				<TR>
 					<TD VALIGN="top"><A HREF="mandoc.3.html">mandoc(3)</A></TD>
 					<TD VALIGN="top">
 						mandoc macro compiler library
@@ -319,6 +331,10 @@
 			environment supports wide-character encoding (if it does not, <B>-Tascii</B> is used instead).
 			Locale support can be turned off at compile time by removing <I>-DUSE_WCHAR</I> in the <I>Makefile</I>, in which case
 			<B>-Tlocale</B> is always a synonym for <B>-Tascii</B>.
+		</P>
+		<P>
+			Furthermore, multibyte-encoded documents, such as those in UTF-8, may be on-the-fly recoded as <A
+			HREF="mandoc.1.html">mandoc</A> input by using the newly-added <A HREF="preconv.1.html">preconv</A> utility.
 		</P>
 
 		<P CLASS="news">

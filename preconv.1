@@ -19,7 +19,7 @@
 .Os
 .Sh NAME
 .Nm preconv
-.Nd recodes multibyte UNIX manuals as mandoc input
+.Nd recode multibyte UNIX manuals
 .Sh SYNOPSIS
 .Nm preconv
 .Op Fl D Ar enc
@@ -32,6 +32,11 @@ utility recodes multibyte
 .Ux
 manual files into
 .Xr mandoc 1
+.Po
+or other troff system supporting the
+.Sq \e[uNNNN]
+escape sequence
+.Pc
 input.
 Its arguments are as follows:
 .Bl -tag -width Ds
