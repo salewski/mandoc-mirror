@@ -324,7 +324,7 @@
 		</H1>
 
 		<P CLASS="news">
-			19-05-2011: version 1.11.3
+			26-05-2011: version 1.11.3
 		</P>
 		<P>
 			Introduce locale-encoding of output with the <B>-Tlocale</B> output option and Unicode escaped-character input.
@@ -335,7 +335,7 @@
 			<B>-Tlocale</B> is always a synonym for <B>-Tascii</B>.
 		</P>
 		<P>
-			Furthermore, multibyte-encoded documents, such as those in UTF-8, may be on-the-fly recoded as <A
+			Furthermore, multibyte-encoded documents, such as those in UTF-8, may be on-the-fly recoded into <A
 			HREF="mandoc.1.html">mandoc</A> input by using the newly-added <A HREF="preconv.1.html">preconv</A> utility.
 			Note: in the future, this feature may be integrated into <A HREF="mandoc.1.html">mandoc</A>.
 		</P>
