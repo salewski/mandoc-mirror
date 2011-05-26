@@ -228,6 +228,11 @@ MAKEWHATIS_LNS	 = makewhatis.ln
 
 $(MAKEWHATIS_OBJS) $(MAKEWHATIS_LNS): mandoc.h mdoc.h man.h config.h
 
+PRECONV_OBJS	 = preconv.o
+PRECONV_LNS	 = preconv.ln
+
+$(PRECONV_OBJS) $(PRECONV_LNS): config.h
+
 INDEX_MANS	 = makewhatis.1.html \
 		   makewhatis.1.xhtml \
 		   makewhatis.1.ps \
@@ -292,6 +297,8 @@ clean:
 	rm -f llib-llibmandoc.ln $(LIBMANDOC_LNS)
 	rm -f makewhatis $(MAKEWHATIS_OBJS)
 	rm -f llib-lmakewhatis.ln $(MAKEWHATIS_LNS)
+	rm -f preconv $(PRECONV_OBJS)
+	rm -f llib-lpreconv.ln $(PRECONV_LNS)
 	rm -f mandoc $(MANDOC_OBJS)
 	rm -f llib-lmandoc.ln $(MANDOC_LNS)
 	rm -f config.h config.log compat.o compat.ln
@@ -333,15 +340,21 @@ llib-llibmandoc.ln: compat.ln $(LIBMANDOC_LNS)
 mandoc: $(MANDOC_OBJS) libmandoc.a
 	$(CC) -o $@ $(MANDOC_OBJS) libmandoc.a
 
+llib-lmandoc.ln: $(MANDOC_LNS)
+	$(LINT) $(LINTFLAGS) -Cmandoc $(MANDOC_LNS)
+
 # You'll need -ldb for Linux.
 makewhatis: $(MAKEWHATIS_OBJS) libmandoc.a
 	$(CC) -o $@ $(MAKEWHATIS_OBJS) libmandoc.a
 
-llib-lmandoc.ln: $(MANDOC_LNS)
-	$(LINT) $(LINTFLAGS) -Cmandoc $(MANDOC_LNS)
-
 llib-lmakewhatis.ln: $(MAKEWHATIS_LNS)
 	$(LINT) $(LINTFLAGS) -Cmakewhatis $(MAKEWHATIS_LNS)
+
+preconv: $(PRECONV_OBJS)
+	$(CC) -o $@ $(PRECONV_OBJS)
+
+llib-lpreconv.ln: $(PRECONV_LNS)
+	$(LINT) $(LINTFLAGS) -Cpreconv $(PRECONV_LNS)
 
 mdocml.md5: mdocml.tar.gz
 	md5 mdocml.tar.gz >$@
