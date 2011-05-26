@@ -150,7 +150,7 @@ static	const char	*roff_getstrn(const struct roff *,
 static	enum rofferr	 roff_line_ignore(ROFF_ARGS);
 static	enum rofferr	 roff_nr(ROFF_ARGS);
 static	int		 roff_res(struct roff *, 
-				char **, size_t *, int);
+				char **, size_t *, int, int);
 static	enum rofferr	 roff_rm(ROFF_ARGS);
 static	void		 roff_setstr(struct roff *,
 				const char *, const char *, int);
@@ -387,7 +387,7 @@ roff_alloc(struct regset *regs, struct mparse *parse)
  * is processed. 
  */
 static int
-roff_res(struct roff *r, char **bufp, size_t *szp, int pos)
+roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 {
 	const char	*stesc;	/* start of an escape sequence ('\\') */
 	const char	*stnam;	/* start of the name, after "[(*" */
@@ -454,8 +454,9 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int pos)
 		res = roff_getstrn(r, stnam, (size_t)i);
 
 		if (NULL == res) {
-			cp -= maxl ? 1 : 0;
-			continue;
+			/* TODO: keep track of the correct position. */
+			mandoc_msg(MANDOCERR_BADESCAPE, r->parse, ln, pos, NULL);
+			res = "";
 		}
 
 		/* Replace the escape sequence by the string. */
@@ -491,7 +492,7 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 	 * words to fill in.
 	 */
 
-	if (r->first_string && ! roff_res(r, bufp, szp, pos))
+	if (r->first_string && ! roff_res(r, bufp, szp, ln, pos))
 		return(ROFF_REPARSE);
 
 	ppos = pos;
