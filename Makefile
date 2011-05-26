@@ -298,7 +298,7 @@ INDEX_OBJS	 = $(INDEX_MANS) \
 
 www: index.html
 
-lint: llib-llibmandoc.ln llib-lmandoc.ln
+lint: llib-llibmandoc.ln llib-lmandoc.ln llib-lpreconv.ln
 
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS)

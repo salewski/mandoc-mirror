@@ -137,7 +137,7 @@ conv_utf_8(const struct buf *b)
 
 	/* Quick test for big-endian value. */
 
-	if ( ! (*((char *)(&one))))
+	if ( ! (*((const char *)(&one))))
 		be = 1;
 
 	for (i = b->offs; i < b->sz; i++) {
@@ -376,7 +376,7 @@ cue_enc(const struct buf *b, size_t *offs, enum enc *enc)
 
 		/* Check us against known encodings. */
 
-		for (i = 0; i < ENC__MAX; i++) {
+		for (i = 0; i < (int)ENC__MAX; i++) {
 			nsz = strlen(encs[i].name);
 			if (phsz < nsz)
 				continue;
@@ -403,7 +403,7 @@ main(int argc, char *argv[])
 	struct buf	 b;
 	const char	*fn;
 	enum enc	 enc, def;
-	const char	 bom[3] = { 0xEF, 0xBB, 0xBF };
+	unsigned char 	 bom[3] = { 0xEF, 0xBB, 0xBF };
 	size_t		 offs;
 	extern int	 optind;
 	extern char	*optarg;
@@ -427,12 +427,12 @@ main(int argc, char *argv[])
 		case ('D'):
 			/* FALLTHROUGH */
 		case ('e'):
-			for (i = 0; i < ENC__MAX; i++) {
+			for (i = 0; i < (int)ENC__MAX; i++) {
 				if (strcasecmp(optarg, encs[i].name))
 					continue;
 				break;
 			}
-			if (i < ENC__MAX) {
+			if (i < (int)ENC__MAX) {
 				if ('D' == ch)
 					def = (enum enc)i;
 				else
