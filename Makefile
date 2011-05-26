@@ -88,6 +88,8 @@ SRCS		 = Makefile \
 		   msec.in \
 		   out.c \
 		   out.h \
+		   preconv.1 \
+		   preconv.c \
 		   predefs.in \
 		   read.c \
 		   roff.7 \
@@ -268,6 +270,11 @@ INDEX_MANS	 = makewhatis.1.html \
 		   mdoc.7.ps \
 		   mdoc.7.pdf \
 		   mdoc.7.txt \
+		   preconv.1.html \
+		   preconv.1.xhtml \
+		   preconv.1.ps \
+		   preconv.1.pdf \
+		   preconv.1.txt \
 		   roff.7.html \
 		   roff.7.xhtml \
 		   roff.7.ps \

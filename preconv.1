@@ -1,0 +1,137 @@
+.\"	$Id$
+.\"
+.\" Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt PRECONV 1
+.Os
+.Sh NAME
+.Nm preconv
+.Nd recodes multibyte UNIX manuals as mandoc input
+.Sh SYNOPSIS
+.Nm preconv
+.Op Fl D Ar enc
+.Op Fl e Ar enc
+.Op Ar file
+.Sh DESCRIPTION
+The
+.Nm
+utility recodes multibyte
+.Ux
+manual files into
+.Xr mandoc 1
+input.
+Its arguments are as follows:
+.Bl -tag -width Ds
+.It Fl D Ar enc
+The default encoding.
+This is case-insensitive.
+See
+.Sx Algorithm
+and
+.Sx Encodings .
+.It Fl e Ar enc
+The document's encoding.
+This is case-insensitive.
+See
+.Sx Algorithm
+and
+.Sx Encodings .
+.It Ar file
+The input file.
+.El
+.Pp
+If
+.Ar file
+is not provided,
+.Nm
+accepts standard input.
+Output is written to standard output.
+Unicode characters in the ASCII range are printed as regular ASCII
+characters; those above this range are printed using the
+.Sq \e[uNNNN]
+format documented in
+.Xr mandoc_char 7 .
+.Pp
+If input bytes are improperly formed in the current encoding, they're
+passed unmodified to standard output.
+.Ss Encodings
+The
+.Nm
+utility accepts the
+.Ar utf\-8 ,
+.Ar us\-ascii ,
+and
+.Ar latin\-1
+encodings as arguments to
+.Fl D Ar enc
+or
+.Fl e Ar enc .
+.Ss Algorithm
+An encoding is chosen according to the following steps:
+.Bl -enum
+.It
+From the argument passed to
+.Fl e Ar enc .
+.It
+If a BOM exists, utf\-8 encoding is selected.
+.It
+From the argument passed to
+.Fl D Ar enc .
+.It
+If all else fails, Latin\-1 is used.
+.El
+.\" .Sh IMPLEMENTATION NOTES
+.\" Not used in OpenBSD.
+.\" .Sh RETURN VALUES
+.\" For sections 2, 3, & 9 only.
+.\" .Sh ENVIRONMENT
+.\" For sections 1, 6, 7, & 8 only.
+.\" .Sh FILES
+.Sh EXIT STATUS
+.Ex -std
+.\" .Sh EXAMPLES
+.\" .Sh DIAGNOSTICS
+.\" For sections 1, 4, 6, 7, & 8 only.
+.\" .Sh ERRORS
+.\" For sections 2, 3, & 9 only.
+.Sh SEE ALSO
+.Xr mandoc 1 ,
+.Xr mandoc_char 7
+.Sh STANDARDS
+The
+.Nm
+utility references the US-ASCII character set standard, ANSI_X3.4\-1968;
+the Latin\-1 character set standard, ISO/IEC 8859\-1:1998; the UTF\-8
+character set standard; and UCS (Unicode), ISO/IEC 10646.
+.Sh HISTORY
+The
+.Nm
+utility first appeared in the GNU troff
+.Pq Dq groff
+system in December 2005, authored by Tomohiro Kubota and Werner
+Lemberg.
+The implementation that is part of the
+.Xr mandoc 1
+utility appeared in May 2011.
+.Sh AUTHORS
+The
+.Nm
+utility was written by
+.An Kristaps Dzonsons Aq kristaps@bsd.lv .
+.\" .Sh CAVEATS
+.\" .Sh BUGS
+.\" .Sh SECURITY CONSIDERATIONS
+.\" Not used in OpenBSD.

@@ -85,7 +85,7 @@ static int
 conv_latin_1(const struct buf *b)
 {
 	size_t		 i;
-	unsigned char	 c;
+	unsigned char	 cu;
 	const char	*cp;
 
 	cp = b->buf + (int)b->offs;
@@ -97,8 +97,8 @@ conv_latin_1(const struct buf *b)
 	 */
 
 	for (i = b->offs; i < b->sz; i++) {
-		c = (unsigned char)*cp++;
-		c < 128 ? putchar(c) : printf("\\[u%.4X]", c);
+		cu = (unsigned char)*cp++;
+		cu < 128U ? putchar(cu) : printf("\\[u%.4X]", cu);
 	}
 
 	return(1);
@@ -120,6 +120,105 @@ conv_us_ascii(const struct buf *b)
 static int
 conv_utf_8(const struct buf *b)
 {
+	int		 state, be;
+	unsigned int	 accum;
+	size_t		 i;
+	unsigned char	 cu;
+	const char	*cp;
+	const long	 one = 1L;
+
+	cp = b->buf + (int)b->offs;
+	state = 0;
+	accum = 0U;
+	be = 0;
+
+	/* Quick test for big-endian value. */
+
+	if ( ! (*((char *)(&one))))
+		be = 1;
+
+	for (i = b->offs; i < b->sz; i++) {
+		cu = (unsigned char)*cp++;
+		if (state) {
+			if ( ! (cu & 128) || (cu & 64)) {
+				/* Bad sequence header. */
+				return(0);
+			}
+
+			/* Accept only legitimate bit patterns. */
+
+			if (cu > 191 || cu < 128) {
+				/* Bad in-sequence bits. */
+				return(0);
+			}
+
+			accum |= (cu & 63) << --state * 6;
+
+			/*
+			 * Accum is held in little-endian order as
+			 * stipulated by the UTF-8 sequence coding.  We
+			 * need to convert to a native big-endian if our
+			 * architecture requires it.
+			 */
+
+			if (0 == state && be) 
+				accum = (accum >> 24) | 
+					((accum << 8) & 0x00FF0000) |
+					((accum >> 8) & 0x0000FF00) |
+					(accum << 24);
+
+			if (0 == state) {
+				accum < 128U ? putchar(accum) : 
+					printf("\\[u%.4X]", accum);
+				accum = 0U;
+			}
+		} else if (cu & (1 << 7)) {
+			/*
+			 * Entering a UTF-8 state:  if we encounter a
+			 * UTF-8 bitmask, calculate the expected UTF-8
+			 * state from it.
+			 */
+			for (state = 0; state < 7; state++) 
+				if ( ! (cu & (1 << (7 - state))))
+					break;
+
+			/* Accept only legitimate bit patterns. */
+
+			switch (state) {
+			case (4):
+				if (cu <= 244 && cu >= 240) {
+					accum = (cu & 7) << 18;
+					break;
+				}
+				/* Bad 4-sequence start bits. */
+				return(0);
+			case (3):
+				if (cu <= 239 && cu >= 224) {
+					accum = (cu & 15) << 12;
+					break;
+				}
+				/* Bad 3-sequence start bits. */
+				return(0);
+			case (2):
+				if (cu <= 223 && cu >= 194) {
+					accum = (cu & 31) << 6;
+					break;
+				}
+				/* Bad 2-sequence start bits. */
+				return(0);
+			default:
+				/* Bad sequence bit mask. */
+				return(0);
+			}
+			state--;
+		} else
+			putchar(cu);
+	}
+
+	if (0 != state) {
+		/* Bad trailing bits. */
+		return(0);
+	}
 
 	return(1);
 }
@@ -211,9 +310,10 @@ int
 main(int argc, char *argv[])
 {
 	int	 	 i, ch, map, fd, rc;
-	struct buf	 buf;
+	struct buf	 b;
 	const char	*fn;
 	enum enc	 enc, def;
+	const char	 bom[3] = { 0xEF, 0xBB, 0xBF };
 	extern int	 optind;
 	extern char	*optarg;
 
@@ -229,7 +329,7 @@ main(int argc, char *argv[])
 	enc = def = ENC__MAX;
 	map = 0;
 
-	memset(&buf, 0, sizeof(struct buf));
+	memset(&b, 0, sizeof(struct buf));
 
 	while (-1 != (ch = getopt(argc, argv, "D:e:rdvh")))
 		switch (ch) {
@@ -283,12 +383,16 @@ main(int argc, char *argv[])
 		}
 	}
 
-	if ( ! read_whole_file(fn, fd, &buf, &map))
+	if ( ! read_whole_file(fn, fd, &b, &map))
 		goto out;
 
-	if (ENC__MAX == enc) {
-		/* TODO: search for BOM. */
-	}
+	/* Try to read the UTF-8 BOM. */
+
+	if (ENC__MAX == enc)
+		if (b.sz > 3 && 0 == memcmp(b.buf, bom, 3)) {
+			b.offs = 3;
+			enc = ENC_UTF_8;
+		}
 
 	/*
 	 * No encoding has been detected.
@@ -299,15 +403,15 @@ main(int argc, char *argv[])
 	if (ENC__MAX == enc) 
 		enc = ENC__MAX == def ? ENC_LATIN_1 : def;
 
-	if ( ! (*encs[(int)enc].conv)(&buf))
+	if ( ! (*encs[(int)enc].conv)(&b)) 
 		goto out;
 
 	rc = EXIT_SUCCESS;
 out:
 	if (map)
-		munmap(buf.buf, buf.sz);
+		munmap(b.buf, b.sz);
 	else 
-		free(buf.buf);
+		free(b.buf);
 
 	if (fd > STDIN_FILENO)
 		close(fd);
