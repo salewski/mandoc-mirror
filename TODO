@@ -110,6 +110,14 @@
   (e.g., NetBSD mDNSShared/dns-sd.1)
   (mdoc_html.c and mdoc_term.c `Nm' handlers can be slightly simplified)
 
+- When there is free text in the SYNOPSIS and that free text contains
+  the .Nm macro, groff somehow understands to treat the .Nm as an in-line
+  macro, while mandoc treats it as a block macro and breaks the line.
+  No idea how the logic for distinguishing in-line and block instances
+  should be, needs investigation.
+  uqs@  Thu, 2 Jun 2011 11:03:51 +0200
+  uqs@  Thu, 2 Jun 2011 11:33:35 +0200
+
 --- missing man features -----------------------------------------------
 
 - .RS/.RE can be nested, see e.g. the x11/fluxbox manuals
