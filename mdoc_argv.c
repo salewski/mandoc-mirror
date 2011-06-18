@@ -21,7 +21,6 @@
 #include <sys/types.h>
 
 #include <assert.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -52,16 +51,16 @@ struct	mdocarg {
 	const enum mdocargt *argvs;
 };
 
+static	void		 argn_free(struct mdoc_arg *, int);
 static	enum margserr	 args(struct mdoc *, int, int *, 
 				char *, enum argsflag, char **);
 static	int		 args_checkpunct(const char *, int);
-static	int		 argv_single(struct mdoc *, int, 
+static	int		 argv_multi(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
 static	int		 argv_opt_single(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
-static	int		 argv_multi(struct mdoc *, int, 
+static	int		 argv_single(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
-static	void		 argn_free(struct mdoc_arg *, int);
 
 static	const enum argvflag argvflags[MDOC_ARG_MAX] = {
 	ARGV_NONE,	/* MDOC_Split */
@@ -290,8 +289,8 @@ mdoc_argv(struct mdoc *m, int line, enum mdoct tok,
 		return(ARGV_EOLN);
 	else if (NULL == (ap = mdocargs[tok].argvs))
 		return(ARGV_WORD);
-
-	assert(' ' != buf[*pos]);
+	else if ('-' != buf[*pos])
+		return(ARGV_WORD);
 
 	/* Seek to the first unescaped space. */
 
