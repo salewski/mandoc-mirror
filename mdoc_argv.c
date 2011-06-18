@@ -55,8 +55,6 @@ struct	mdocarg {
 static	enum margserr	 args(struct mdoc *, int, int *, 
 				char *, enum argsflag, char **);
 static	int		 args_checkpunct(const char *, int);
-static	int		 argv(struct mdoc *, int, 
-				struct mdoc_argv *, int *, char *);
 static	int		 argv_single(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
 static	int		 argv_opt_single(struct mdoc *, int, 
@@ -345,8 +343,22 @@ mdoc_argv(struct mdoc *m, int line, enum mdoct tok,
 	while (buf[*pos] && ' ' == buf[*pos])
 		(*pos)++;
 
-	if ( ! argv(m, line, &tmp, pos, buf))
-		return(ARGV_ERROR);
+	switch (argvflags[tmp.arg]) {
+	case (ARGV_SINGLE):
+		if ( ! argv_single(m, line, &tmp, pos, buf))
+			return(ARGV_ERROR);
+		break;
+	case (ARGV_MULTI):
+		if ( ! argv_multi(m, line, &tmp, pos, buf))
+			return(ARGV_ERROR);
+		break;
+	case (ARGV_OPT_SINGLE):
+		if ( ! argv_opt_single(m, line, &tmp, pos, buf))
+			return(ARGV_ERROR);
+		break;
+	case (ARGV_NONE):
+		break;
+	}
 
 	if (NULL == (arg = *v))
 		arg = *v = mandoc_calloc(1, sizeof(struct mdoc_arg));
@@ -680,9 +692,6 @@ argv_opt_single(struct mdoc *m, int line,
 	return(1);
 }
 
-/*
- * Parse a single, mandatory value from the stream.
- */
 static int
 argv_single(struct mdoc *m, int line, 
 		struct mdoc_argv *v, int *pos, char *buf)
@@ -703,36 +712,6 @@ argv_single(struct mdoc *m, int line,
 	v->sz = 1;
 	v->value = mandoc_malloc(sizeof(char *));
 	v->value[0] = mandoc_strdup(p);
-
-	return(1);
-}
-
-/*
- * Determine rules for parsing arguments.  Arguments can either accept
- * no parameters, an optional single parameter, one parameter, or
- * multiple parameters.
- */
-static int
-argv(struct mdoc *mdoc, int line, 
-		struct mdoc_argv *v, int *pos, char *buf)
-{
-
-	v->sz = 0;
-	v->value = NULL;
-
-	switch (argvflags[v->arg]) {
-	case (ARGV_SINGLE):
-		return(argv_single(mdoc, line, v, pos, buf));
-	case (ARGV_MULTI):
-		return(argv_multi(mdoc, line, v, pos, buf));
-	case (ARGV_OPT_SINGLE):
-		return(argv_opt_single(mdoc, line, v, pos, buf));
-	case (ARGV_NONE):
-		break;
-	default:
-		abort();
-		/* NOTREACHED */
-	}
 
 	return(1);
 }
