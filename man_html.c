@@ -53,6 +53,8 @@ struct	htmlman {
 	int		(*post)(MAN_ARGS);
 };
 
+static	void		  print_bvspace(struct html *, 
+				const struct man_node *);
 static	void		  print_man(MAN_ARGS);
 static	void		  print_man_head(MAN_ARGS);
 static	void		  print_man_nodelist(MAN_ARGS);
@@ -114,6 +116,28 @@ static	const struct htmlman mans[MAN_MAX] = {
 	{ man_ign_pre, NULL }, /* ft */
 };
 
+/*
+ * Printing leading vertical space before a block.
+ * This is used for the paragraph macros.
+ * The rules are pretty simple, since there's very little nesting going
+ * on here.  Basically, if we're the first within another block (SS/SH),
+ * then don't emit vertical space.  If we are (RS), then do.  If not the
+ * first, print it.
+ */
+static void
+print_bvspace(struct html *h, const struct man_node *n)
+{
+
+	if (n->body && n->body->child)
+		if (MAN_TBL == n->body->child->type)
+			return;
+
+	if (MAN_ROOT == n->parent->type || MAN_RS != n->parent->tok)
+		if (NULL == n->prev)
+			return;
+
+	print_otag(h, TAG_P, 0, NULL);
+}
 
 void
 html_man(void *arg, const struct man *m)
@@ -513,8 +537,8 @@ man_PP_pre(MAN_ARGS)
 
 	if (MAN_HEAD == n->type)
 		return(0);
-	else if (MAN_BODY == n->type && n->prev)
-		print_otag(h, TAG_P, 0, NULL);
+	else if (MAN_BLOCK == n->type)
+		print_bvspace(h, n);
 
 	return(1);
 }
@@ -562,7 +586,7 @@ man_IP_pre(MAN_ARGS)
 	}
 
 	if (MAN_BLOCK == n->type) {
-		print_otag(h, TAG_P, 0, NULL);
+		print_bvspace(h, n);
 		print_otag(h, TAG_TABLE, 0, NULL);
 		bufinit(h);
 		bufcat_su(h, "width", &su);
@@ -613,7 +637,7 @@ man_HP_pre(MAN_ARGS)
 		print_otag(h, TAG_TD, 0, NULL);
 		return(0);
 	} else if (MAN_BLOCK == n->type) {
-		print_otag(h, TAG_P, 0, NULL);
+		print_bvspace(h, n);
 		print_otag(h, TAG_TABLE, 0, NULL);
 		bufcat_su(h, "width", &su);
 		PAIR_STYLE_INIT(&tag, h);
