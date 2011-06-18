@@ -10,9 +10,6 @@
 - .TP before .SH is still FATAL in man(7)
   reported by brad@  Sat, 15 Jan 2011 15:54:54 -0500
 
-- Assertion failure on src/share/man/man1/man1.atari/edahdi.1 rev 1.9
-  in the NetBSD.
-
 ************************************************************************
 * formatter bugs
 ************************************************************************
