@@ -278,33 +278,12 @@
   see for example named-checkconf(8).
 
 - In man(7), the sequence
-    regular text
-    .RS
-    .IP
-  should have a blank line between the text and the beginning of the
-  indented paragraph, see for example sudo(1).
-
-- In man(7), the sequence
     .SH HEADER
     <blank line>
     .PP
     regular text
   should not produce any blank lines between the header and the text,
   see for example rsync(1).
-  Reported by naddy@  Mon, 28 Mar 2011 20:45:42 +0200
-
-- In man(7), the sequence
-    regular text
-    .PP
-    .RS
-    indented text
-  should produce one blank line between the regular and indented texts,
-  see for example rsync(1), and
-    .RE
-    <blank line>
-    .PP
-    .RS
-  should produce two,not one blank lines.
   Reported by naddy@  Mon, 28 Mar 2011 20:45:42 +0200
 
 - In man(7), the sequence

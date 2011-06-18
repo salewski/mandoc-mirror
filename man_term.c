@@ -198,26 +198,30 @@ a2width(const struct termp *p, const char *cp)
 	return((int)term_hspan(p, &su));
 }
 
-
+/*
+ * Printing leading vertical space before a block.
+ * This is used for the paragraph macros.
+ * The rules are pretty simple, since there's very little nesting going
+ * on here.  Basically, if we're the first within another block (SS/SH),
+ * then don't emit vertical space.  If we are (RS), then do.  If not the
+ * first, print it.
+ */
 static void
 print_bvspace(struct termp *p, const struct man_node *n)
 {
+
 	term_newln(p);
 
-	if (n->body && n->body->child && MAN_TBL == n->body->child->type)
-		return;
+	if (n->body && n->body->child)
+		if (MAN_TBL == n->body->child->type)
+			return;
 
-	if (NULL == n->prev)
-		return;
-
-	if (MAN_SS == n->prev->tok)
-		return;
-	if (MAN_SH == n->prev->tok)
-		return;
+	if (MAN_ROOT == n->parent->type || MAN_RS != n->parent->tok)
+		if (NULL == n->prev)
+			return;
 
 	term_vspace(p);
 }
-
 
 /* ARGSUSED */
 static int

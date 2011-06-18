@@ -135,7 +135,6 @@ html_man(void *arg, const struct man *m)
 	printf("\n");
 }
 
-
 static void
 print_man(MAN_ARGS) 
 {
