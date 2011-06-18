@@ -307,11 +307,6 @@ blk_exp(MACRO_PROT_ARGS)
 	 * anywhere.
 	 */
 
-	if ( ! rew_scope(MAN_BODY, m, tok))
-		return(0);
-	if ( ! rew_scope(MAN_BLOCK, m, tok))
-		return(0);
-
 	if ( ! man_block_alloc(m, line, ppos, tok))
 		return(0);
 	if ( ! man_head_alloc(m, line, ppos, tok))

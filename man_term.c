@@ -791,13 +791,12 @@ post_SH(DECL_ARGS)
 	}
 }
 
-
 /* ARGSUSED */
 static int
 pre_RS(DECL_ARGS)
 {
-	const struct man_node	*nn;
-	int			 ival;
+	int		 ival;
+	size_t		 sz;
 
 	switch (n->type) {
 	case (MAN_BLOCK):
@@ -809,40 +808,44 @@ pre_RS(DECL_ARGS)
 		break;
 	}
 
-	if (NULL == (nn = n->parent->head->child)) {
-		mt->offset = mt->lmargin + term_len(p, INDENT);
-		p->offset = mt->offset;
-		return(1);
-	}
+	sz = term_len(p, INDENT);
 
-	if ((ival = a2width(p, nn->string)) < 0)
-		return(1);
+	if (NULL != (n = n->parent->head->child))
+		if ((ival = a2width(p, n->string)) >= 0) 
+			sz = (size_t)ival;
 
-	mt->offset = term_len(p, INDENT) + (size_t)ival;
+	mt->offset += sz;
 	p->offset = mt->offset;
 
 	return(1);
 }
 
-
 /* ARGSUSED */
 static void
 post_RS(DECL_ARGS)
 {
+	int		 ival;
+	size_t		 sz;
 
 	switch (n->type) {
 	case (MAN_BLOCK):
-		mt->offset = mt->lmargin = term_len(p, INDENT);
-		break;
+		return;
 	case (MAN_HEAD):
-		break;
+		return;
 	default:
 		term_newln(p);
-		p->offset = term_len(p, INDENT);
 		break;
 	}
-}
 
+	sz = term_len(p, INDENT);
+
+	if (NULL != (n = n->parent->head->child)) 
+		if ((ival = a2width(p, n->string)) >= 0) 
+			sz = (size_t)ival;
+
+	mt->offset = mt->offset < sz ?  0 : mt->offset - sz;
+	p->offset = mt->offset;
+}
 
 static void
 print_man_node(DECL_ARGS)

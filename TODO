@@ -120,11 +120,6 @@
 
 --- missing man features -----------------------------------------------
 
-- .RS/.RE can be nested, see e.g. the x11/fluxbox manuals
-  noticed by dcoppa@  Wed, Apr 13, 2011 at 04:58:14PM +0200:
-  also affects p5-Net-SFTP-Foreign-1.65
-  as reported by gsoares@  Wed, 18 May 2011 09:59:06 -0300
-
 - groff an-ext.tmac macros (.UR, .UE) occur in xine(5)
   reported by brad@  Sat, 15 Jan 2011 15:45:23 -0500
 
