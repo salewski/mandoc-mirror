@@ -792,7 +792,8 @@ hash_put(DB *db, const struct buf *buf, int mask)
 	int		 rc;
 
 	key.data = buf->cp;
-	if (0 == (key.size = buf->len))
+
+	if ((key.size = buf->len) < 2)
 		return;
 
 	if ((rc = (*db->get)(db, &key, &val, 0)) < 0) {
