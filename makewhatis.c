@@ -42,42 +42,40 @@
 #define	MANDOC_BUFSZ	  BUFSIZ
 #define	MANDOC_FLAGS	  O_CREAT|O_TRUNC|O_RDWR
 
-enum	type {
-	MANDOC_NONE = 0,
-	MANDOC_NAME,
-	MANDOC_FUNCTION,
-	MANDOC_UTILITY,
-	MANDOC_INCLUDES,
-	MANDOC_VARIABLE,
-	MANDOC_STANDARD,
-	MANDOC_AUTHOR,
-	MANDOC_CONFIG
+#define TYPE_NAME	0x01
+#define TYPE_FUNCTION	0x02
+#define TYPE_UTILITY	0x04
+#define TYPE_INCLUDES	0x08
+#define TYPE_VARIABLE	0x10
+#define TYPE_STANDARD	0x20
+#define TYPE_AUTHOR	0x40
+#define TYPE_CONFIG	0x80
+#define	TYPE__MAX	TYPE_CONFIG
+
+struct	buf {
+	char		 *cp;
+	size_t		  len;
+	size_t		  size;
 };
 
-#define	MAN_ARGS	  DB *db, \
-			  const char *dbn, \
-			  DBT *key, size_t *ksz, \
-			  DBT *val, \
+#define	MAN_ARGS	  DB *hash, \
+			  struct buf *buf, \
 			  DBT *rval, size_t *rsz, \
 			  const struct man_node *n
-#define	MDOC_ARGS	  DB *db, \
-			  const char *dbn, \
-			  DBT *key, size_t *ksz, \
-			  DBT *val, \
+#define	MDOC_ARGS	  DB *hash, \
+			  struct buf *buf, \
 			  DBT *rval, size_t *rsz, \
-			  const struct mdoc_node *n
+			  const struct mdoc_node *n, \
+			  const struct mdoc_meta *m
 
 static	void		  dbt_append(DBT *, size_t *, const char *);
 static	void		  dbt_appendb(DBT *, size_t *, 
 				const void *, size_t);
 static	void		  dbt_init(DBT *, size_t *);
 static	void		  dbt_put(DB *, const char *, DBT *, DBT *);
+static	void		  hash_put(DB *, const struct buf *, int);
 static	void		  usage(void);
-static	void		  pman(DB *, const char *, DBT *, size_t *, 
-				DBT *, DBT *, size_t *, struct man *);
 static	int		  pman_node(MAN_ARGS);
-static	void		  pmdoc(DB *, const char *, DBT *, size_t *, 
-				DBT *, DBT *, size_t *, struct mdoc *);
 static	void		  pmdoc_node(MDOC_ARGS);
 static	void		  pmdoc_An(MDOC_ARGS);
 static	void		  pmdoc_Cd(MDOC_ARGS);
@@ -233,17 +231,18 @@ main(int argc, char *argv[])
 	char		 ibuf[MAXPATHLEN], /* index fname */
 			 ibbuf[MAXPATHLEN], /* index backup fname */
 			 fbuf[MAXPATHLEN],  /* btree fname */
-			 fbbuf[MAXPATHLEN]; /* btree backup fname */
-	int		 ch;
+			 fbbuf[MAXPATHLEN], /* btree backup fname */
+			 vbuf[8]; /* stringified record number */
+	int		 ch, seq;
 	DB		*idx, /* index database */
-			*db; /* keyword database */
+			*db, /* keyword database */
+			*hash; /* temporary keyword hashtable */
 	DBT		 rkey, rval, /* recno entries */
 			 key, val; /* persistent keyword entries */
-	size_t		 sv,
-			 ksz, rsz; /* entry buffer size */
-	char		 vbuf[8]; /* stringified record number */
+	size_t		 sv, rsz; 
 	BTREEINFO	 info; /* btree configuration */
 	recno_t		 rec; /* current record number */
+	struct buf	 buf; /* keyword buffer */
 	extern int	 optind;
 	extern char	*optarg;
 
@@ -302,9 +301,17 @@ main(int argc, char *argv[])
 
 	/*
 	 * For the keyword database, open a BTREE database that allows
-	 * duplicates.  For the index database, use a standard RECNO
-	 * database type.
+	 * duplicates.  
+	 * For the index database, use a standard RECNO database type.
+	 * For the temporary keyword hashtable, use the HASH database
+	 * type.
 	 */
+
+	hash = dbopen(NULL, MANDOC_FLAGS, 0644, DB_HASH, NULL);
+	if (NULL == hash) {
+		perror("hash");
+		exit((int)MANDOCLEVEL_SYSERR);
+	}
 
 	memset(&info, 0, sizeof(BTREEINFO));
 	info.flags = R_DUP;
@@ -312,6 +319,7 @@ main(int argc, char *argv[])
 
 	if (NULL == db) {
 		perror(fbbuf);
+		(*hash->close)(hash);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
@@ -320,6 +328,7 @@ main(int argc, char *argv[])
 	if (NULL == db) {
 		perror(ibbuf);
 		(*db->close)(db);
+		(*hash->close)(hash);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
@@ -337,12 +346,15 @@ main(int argc, char *argv[])
 	memset(&rkey, 0, sizeof(DBT));
 	memset(&rval, 0, sizeof(DBT));
 
-	val.size = sizeof(vbuf);
-	val.data = vbuf;
 	rkey.size = sizeof(recno_t);
 
 	rec = 1;
-	ksz = rsz = 0;
+	rsz = 0;
+
+	memset(&buf, 0, sizeof(struct buf));
+
+	buf.size = MANDOC_BUFSZ;
+	buf.cp = mandoc_malloc(buf.size);
 
 	while (NULL != (fn = *argv++)) {
 		mparse_reset(mp);
@@ -389,19 +401,46 @@ main(int argc, char *argv[])
 
 		/* Fix the record number in the btree value. */
 
-		memset(val.data, 0, sizeof(uint32_t));
-		memcpy(val.data + 4, &rec, sizeof(uint32_t));
-
 		if (mdoc)
-			pmdoc(db, fbbuf, &key, &ksz, 
-				&val, &rval, &rsz, mdoc);
+			pmdoc_node(hash, &buf, &rval,
+					&rsz, mdoc_node(mdoc), 
+					mdoc_meta(mdoc));
 		else 
-			pman(db, fbbuf, &key, &ksz, 
-				&val, &rval, &rsz, man);
+			pman_node(hash, &buf, &rval, 
+					&rsz, man_node(man));
+
+		/*
+		 * Copy from the in-memory hashtable of pending keywords
+		 * into the database.
+		 */
+		
+		memset(vbuf, 0, sizeof(uint32_t));
+		memcpy(vbuf + 4, &rec, sizeof(uint32_t));
+
+		seq = R_FIRST;
+		while (0 == (ch = (*hash->seq)(hash, &key, &val, seq))) {
+			memcpy(vbuf, val.data, sizeof(uint32_t));
+			val.size = sizeof(vbuf);
+			val.data = vbuf;
+			dbt_put(db, fbbuf, &key, &val);
+			/*fprintf(stderr, "Recording: %s (0x%x)\n",
+					(char *)key.data,
+					*(int *)val.data);*/
+			if ((*hash->del)(hash, &key, 0) < 0) {
+				perror("hash");
+				exit((int)MANDOCLEVEL_SYSERR);
+			}
+			seq = R_NEXT;
+		}
+
+		if (ch < 0) {
+			perror("hash");
+			exit((int)MANDOCLEVEL_SYSERR);
+		}
 		
 		/*
-		 * Apply this to the index.  If we haven't had a
-		 * description set, put an empty one in now.
+		 * Apply to the index.  If we haven't had a description
+		 * set, put an empty one in now.
 		 */
 
 		if (rval.size == sv)
@@ -416,11 +455,12 @@ main(int argc, char *argv[])
 
 	(*db->close)(db);
 	(*idx->close)(idx);
+	(*hash->close)(hash);
 
 	mparse_free(mp);
 
-	free(key.data);
 	free(rval.data);
+	free(buf.cp);
 
 	/* Atomically replace the file with our temporary one. */
 
@@ -472,6 +512,21 @@ dbt_appendb(DBT *key, size_t *ksz, const void *cp, size_t sz)
 	key->size += sz;
 }
 
+static void
+buf_appendb(struct buf *buf, const void *cp, size_t sz)
+{
+
+	/* Overshoot by MANDOC_BUFSZ. */
+
+	while (buf->len + sz >= buf->size) {
+		buf->size = buf->len + sz + MANDOC_BUFSZ;
+		buf->cp = mandoc_realloc(buf->cp, buf->size);
+	}
+
+	memcpy(buf->cp + (int)buf->len, cp, sz);
+	buf->len += sz;
+}
+
 /*
  * Append a nil-terminated string to the database entry.  This can be
  * invoked multiple times.  The database entry will be nil-terminated as
@@ -493,28 +548,39 @@ dbt_append(DBT *key, size_t *ksz, const char *cp)
 	dbt_appendb(key, ksz, cp, sz + 1);
 }
 
+static void
+buf_append(struct buf *buf, const char *cp)
+{
+	size_t		 sz;
+
+	if (0 == (sz = strlen(cp)))
+		return;
+
+	if (buf->len)
+		buf->cp[(int)buf->len - 1] = ' ';
+
+	buf_appendb(buf, cp, sz + 1);
+}
+
 /* ARGSUSED */
 static void
 pmdoc_An(MDOC_ARGS)
 {
-	uint32_t	 fl;
 	
 	if (SEC_AUTHORS != n->sec)
 		return;
 
 	for (n = n->child; n; n = n->next)
 		if (MDOC_TEXT == n->type)
-			dbt_append(key, ksz, n->string);
+			buf_append(buf, n->string);
 
-	fl = (uint32_t)MANDOC_AUTHOR;
-	memcpy(val->data, &fl, 4);
+	hash_put(hash, buf, TYPE_AUTHOR);
 }
 
 /* ARGSUSED */
 static void
 pmdoc_Fd(MDOC_ARGS)
 {
-	uint32_t	 fl;
 	const char	*start, *end;
 	size_t		 sz;
 	
@@ -550,51 +616,46 @@ pmdoc_Fd(MDOC_ARGS)
 		end--;
 
 	assert(end >= start);
-	dbt_appendb(key, ksz, start, (size_t)(end - start + 1));
-	dbt_appendb(key, ksz, "", 1);
 
-	fl = (uint32_t)MANDOC_INCLUDES;
-	memcpy(val->data, &fl, 4);
+	buf_appendb(buf, start, (size_t)(end - start + 1));
+	buf_appendb(buf, "", 1);
+
+	hash_put(hash, buf, TYPE_INCLUDES);
 }
 
 /* ARGSUSED */
 static void
 pmdoc_Cd(MDOC_ARGS)
 {
-	uint32_t	 fl;
 	
 	if (SEC_SYNOPSIS != n->sec)
 		return;
 
 	for (n = n->child; n; n = n->next)
 		if (MDOC_TEXT == n->type)
-			dbt_append(key, ksz, n->string);
+			buf_append(buf, n->string);
 
-	fl = (uint32_t)MANDOC_CONFIG;
-	memcpy(val->data, &fl, 4);
+	hash_put(hash, buf, TYPE_CONFIG);
 }
 
 /* ARGSUSED */
 static void
 pmdoc_In(MDOC_ARGS)
 {
-	uint32_t	 fl;
 	
 	if (SEC_SYNOPSIS != n->sec)
 		return;
 	if (NULL == n->child || MDOC_TEXT != n->child->type)
 		return;
 
-	dbt_append(key, ksz, n->child->string);
-	fl = (uint32_t)MANDOC_INCLUDES;
-	memcpy(val->data, &fl, 4);
+	buf_append(buf, n->child->string);
+	hash_put(hash, buf, TYPE_INCLUDES);
 }
 
 /* ARGSUSED */
 static void
 pmdoc_Fn(MDOC_ARGS)
 {
-	uint32_t	 fl;
 	const char	*cp;
 	
 	if (SEC_SYNOPSIS != n->sec)
@@ -613,32 +674,28 @@ pmdoc_Fn(MDOC_ARGS)
 	while ('*' == *cp)
 		cp++;
 
-	dbt_append(key, ksz, cp);
-	fl = (uint32_t)MANDOC_FUNCTION;
-	memcpy(val->data, &fl, 4);
+	buf_append(buf, cp);
+	hash_put(hash, buf, TYPE_FUNCTION);
 }
 
 /* ARGSUSED */
 static void
 pmdoc_St(MDOC_ARGS)
 {
-	uint32_t	 fl;
 	
 	if (SEC_STANDARDS != n->sec)
 		return;
 	if (NULL == n->child || MDOC_TEXT != n->child->type)
 		return;
 
-	dbt_append(key, ksz, n->child->string);
-	fl = (uint32_t)MANDOC_STANDARD;
-	memcpy(val->data, &fl, 4);
+	buf_append(buf, n->child->string);
+	hash_put(hash, buf, TYPE_STANDARD);
 }
 
 /* ARGSUSED */
 static void
 pmdoc_Vt(MDOC_ARGS)
 {
-	uint32_t	 fl;
 	const char	*start;
 	size_t		 sz;
 	
@@ -667,27 +724,23 @@ pmdoc_Vt(MDOC_ARGS)
 	if (0 == sz)
 		return;
 
-	dbt_appendb(key, ksz, start, sz);
-	dbt_appendb(key, ksz, "", 1);
-
-	fl = (uint32_t)MANDOC_VARIABLE;
-	memcpy(val->data, &fl, 4);
+	buf_appendb(buf, start, sz);
+	buf_appendb(buf, "", 1);
+	hash_put(hash, buf, TYPE_VARIABLE);
 }
 
 /* ARGSUSED */
 static void
 pmdoc_Fo(MDOC_ARGS)
 {
-	uint32_t	 fl;
 	
 	if (SEC_SYNOPSIS != n->sec || MDOC_HEAD != n->type)
 		return;
 	if (NULL == n->child || MDOC_TEXT != n->child->type)
 		return;
 
-	dbt_append(key, ksz, n->child->string);
-	fl = (uint32_t)MANDOC_FUNCTION;
-	memcpy(val->data, &fl, 4);
+	buf_append(buf, n->child->string);
+	hash_put(hash, buf, TYPE_FUNCTION);
 }
 
 
@@ -712,28 +765,52 @@ pmdoc_Nd(MDOC_ARGS)
 static void
 pmdoc_Nm(MDOC_ARGS)
 {
-	uint32_t	 fl;
 	
 	if (SEC_NAME == n->sec) {
-		for (n = n->child; n; n = n->next) {
-			if (MDOC_TEXT != n->type)
-				continue;
-			dbt_append(key, ksz, n->string);
-		}
-		fl = (uint32_t)MANDOC_NAME;
-		memcpy(val->data, &fl, 4);
+		for (n = n->child; n; n = n->next)
+			if (MDOC_TEXT == n->type)
+				buf_append(buf, n->string);
+		hash_put(hash, buf, TYPE_NAME);
 		return;
 	} else if (SEC_SYNOPSIS != n->sec || MDOC_HEAD != n->type)
 		return;
 
-	for (n = n->child; n; n = n->next) {
-		if (MDOC_TEXT != n->type)
-			continue;
-		dbt_append(key, ksz, n->string);
-	}
+	if (NULL == n->child)
+		buf_append(buf, m->name);
 
-	fl = (uint32_t)MANDOC_UTILITY;
-	memcpy(val->data, &fl, 4);
+	for (n = n->child; n; n = n->next)
+		if (MDOC_TEXT == n->type)
+			buf_append(buf, n->string);
+
+	hash_put(hash, buf, TYPE_UTILITY);
+}
+
+static void
+hash_put(DB *db, const struct buf *buf, int mask)
+{
+	DBT		 key, val;
+	int		 rc;
+
+	key.data = buf->cp;
+	if (0 == (key.size = buf->len))
+		return;
+
+	if ((rc = (*db->get)(db, &key, &val, 0)) < 0) {
+		perror("hash");
+		exit((int)MANDOCLEVEL_SYSERR);
+	} else if (0 == rc)
+		mask |= *(int *)val.data;
+
+	val.data = &mask;
+	val.size = sizeof(int); 
+
+	/*fprintf(stderr, "Hashing: [%s] (0x%x)\n", 
+			(char *)key.data, mask);*/
+
+	if ((rc = (*db->put)(db, &key, &val, 0)) < 0) {
+		perror("hash");
+		exit((int)MANDOCLEVEL_SYSERR);
+	} 
 }
 
 static void
@@ -779,17 +856,15 @@ pmdoc_node(MDOC_ARGS)
 		if (NULL == mdocs[n->tok])
 			break;
 
-		dbt_init(key, ksz);
-
-		(*mdocs[n->tok])(db, dbn, key, ksz, val, rval, rsz, n);
-		dbt_put(db, dbn, key, val);
+		buf->len = 0;
+		(*mdocs[n->tok])(hash, buf, rval, rsz, n, m);
 		break;
 	default:
 		break;
 	}
 
-	pmdoc_node(db, dbn, key, ksz, val, rval, rsz, n->child);
-	pmdoc_node(db, dbn, key, ksz, val, rval, rsz, n->next);
+	pmdoc_node(hash, buf, rval, rsz, n->child, m);
+	pmdoc_node(hash, buf, rval, rsz, n->next, m);
 }
 
 static int
@@ -798,7 +873,6 @@ pman_node(MAN_ARGS)
 	const struct man_node *head, *body;
 	const char	*start, *sv;
 	size_t		 sz;
-	uint32_t	 fl;
 
 	if (NULL == n)
 		return(0);
@@ -821,9 +895,6 @@ pman_node(MAN_ARGS)
 				NULL != (body = body->child) &&
 				MAN_TEXT == body->type) {
 
-			fl = (uint32_t)MANDOC_NAME;
-			memcpy(val->data, &fl, 4);
-
 			assert(body->string);
 			start = sv = body->string;
 
@@ -842,11 +913,11 @@ pman_node(MAN_ARGS)
 				if ('\0' == start[(int)sz])
 					break;
 
-				dbt_init(key, ksz);
-				dbt_appendb(key, ksz, start, sz);
-				dbt_appendb(key, ksz, "", 1);
+				buf->len = 0;
+				buf_appendb(buf, start, sz);
+				buf_appendb(buf, "", 1);
 
-				dbt_put(db, dbn, key, val);
+				hash_put(hash, buf, TYPE_NAME);
 
 				if (' ' == start[(int)sz]) {
 					start += (int)sz + 1;
@@ -860,8 +931,8 @@ pman_node(MAN_ARGS)
 			}
 
 			if (sv == start) {
-				dbt_init(key, ksz);
-				dbt_append(key, ksz, start);
+				buf->len = 0;
+				buf_append(buf, start);
 				return(1);
 			}
 
@@ -884,29 +955,12 @@ pman_node(MAN_ARGS)
 		}
 	}
 
-	if (pman_node(db, dbn, key, ksz, val, rval, rsz, n->child))
+	if (pman_node(hash, buf, rval, rsz, n->child))
 		return(1);
-	if (pman_node(db, dbn, key, ksz, val, rval, rsz, n->next))
+	if (pman_node(hash, buf, rval, rsz, n->next))
 		return(1);
 
 	return(0);
-}
-
-static void
-pman(DB *db, const char *dbn, DBT *key, size_t *ksz, 
-		DBT *val, DBT *rval, size_t *rsz, struct man *m)
-{
-
-	pman_node(db, dbn, key, ksz, val, rval, rsz, man_node(m));
-}
-
-
-static void
-pmdoc(DB *db, const char *dbn, DBT *key, size_t *ksz, 
-		DBT *val, DBT *rval, size_t *rsz, struct mdoc *m)
-{
-
-	pmdoc_node(db, dbn, key, ksz, val, rval, rsz, mdoc_node(m));
 }
 
 static void
