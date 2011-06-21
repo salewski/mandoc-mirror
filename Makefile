@@ -353,7 +353,7 @@ llib-lmandoc.ln: $(MANDOC_LNS)
 
 # You'll need -ldb for Linux.
 makewhatis: $(MAKEWHATIS_OBJS) libmandoc.a
-	$(CC) -o $@ $(MAKEWHATIS_OBJS) libmandoc.a -ldb
+	$(CC) -o $@ $(MAKEWHATIS_OBJS) libmandoc.a
 
 llib-lmakewhatis.ln: $(MAKEWHATIS_LNS)
 	$(LINT) $(LINTFLAGS) -Cmakewhatis $(MAKEWHATIS_LNS)

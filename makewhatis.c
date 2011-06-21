@@ -52,7 +52,7 @@
 #define TYPE_STANDARD	0x20
 #define TYPE_AUTHOR	0x40
 #define TYPE_CONFIG	0x80
-#define	TYPE__MAX	TYPE_CONFIG
+#define TYPE_DESC	0x100
 
 /* Buffer for storing growable data. */
 
@@ -695,16 +695,25 @@ static void
 pmdoc_Nd(MDOC_ARGS)
 {
 	int		 first;
+	size_t		 sz;
 	
 	for (first = 1, n = n->child; n; n = n->next) {
 		if (MDOC_TEXT != n->type)
 			continue;
-		if (first) 
-			buf_appendb(dbuf, n->string, strlen(n->string) + 1);
-		else
+
+		if (first) {
+			sz = strlen(n->string) + 1;
+			buf_appendb(dbuf, n->string, sz);
+			buf_appendb(buf, n->string, sz);
+		} else {
 			buf_append(dbuf, n->string);
+			buf_append(buf, n->string);
+		}
+
 		first = 0;
 	}
+
+	hash_put(hash, buf, TYPE_DESC);
 }
 
 /* ARGSUSED */
@@ -897,7 +906,9 @@ pman_node(MAN_ARGS)
 			while (' ' == *start)
 				start++;
 
-			buf_appendb(dbuf, start, strlen(start) + 1);
+			sz = strlen(start) + 1;
+			buf_appendb(dbuf, start, sz);
+			buf_appendb(buf, start, sz);
 		}
 	}
 
