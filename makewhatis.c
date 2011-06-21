@@ -42,6 +42,8 @@
 #define	MANDOC_BUFSZ	  BUFSIZ
 #define	MANDOC_FLAGS	  O_CREAT|O_TRUNC|O_RDWR
 
+/* Bit-fields.  See makewhatis.1. */
+
 #define TYPE_NAME	0x01
 #define TYPE_FUNCTION	0x02
 #define TYPE_UTILITY	0x04
@@ -52,6 +54,8 @@
 #define TYPE_CONFIG	0x80
 #define	TYPE__MAX	TYPE_CONFIG
 
+/* Buffer for storing growable data. */
+
 struct	buf {
 	char		 *cp;
 	size_t		  len;
@@ -60,21 +64,19 @@ struct	buf {
 
 #define	MAN_ARGS	  DB *hash, \
 			  struct buf *buf, \
-			  DBT *rval, size_t *rsz, \
+			  struct buf *dbuf, \
 			  const struct man_node *n
 #define	MDOC_ARGS	  DB *hash, \
 			  struct buf *buf, \
-			  DBT *rval, size_t *rsz, \
+			  struct buf *dbuf, \
 			  const struct mdoc_node *n, \
 			  const struct mdoc_meta *m
 
-static	void		  dbt_append(DBT *, size_t *, const char *);
-static	void		  dbt_appendb(DBT *, size_t *, 
+static	void		  buf_append(struct buf *, const char *);
+static	void		  buf_appendb(struct buf *, 
 				const void *, size_t);
-static	void		  dbt_init(DBT *, size_t *);
 static	void		  dbt_put(DB *, const char *, DBT *, DBT *);
 static	void		  hash_put(DB *, const struct buf *, int);
-static	void		  usage(void);
 static	int		  pman_node(MAN_ARGS);
 static	void		  pmdoc_node(MDOC_ARGS);
 static	void		  pmdoc_An(MDOC_ARGS);
@@ -87,10 +89,9 @@ static	void		  pmdoc_Nd(MDOC_ARGS);
 static	void		  pmdoc_Nm(MDOC_ARGS);
 static	void		  pmdoc_St(MDOC_ARGS);
 static	void		  pmdoc_Vt(MDOC_ARGS);
+static	void		  usage(void);
 
 typedef	void		(*pmdoc_nf)(MDOC_ARGS);
-
-static	const char	 *progname;
 
 static	const pmdoc_nf	  mdocs[MDOC_MAX] = {
 	NULL, /* Ap */
@@ -217,6 +218,8 @@ static	const pmdoc_nf	  mdocs[MDOC_MAX] = {
 	NULL, /* Ta */
 };
 
+static	const char	 *progname;
+
 int
 main(int argc, char *argv[])
 {
@@ -237,12 +240,12 @@ main(int argc, char *argv[])
 	DB		*idx, /* index database */
 			*db, /* keyword database */
 			*hash; /* temporary keyword hashtable */
-	DBT		 rkey, rval, /* recno entries */
-			 key, val; /* persistent keyword entries */
+	DBT		 key, val;
 	size_t		 sv, rsz; 
 	BTREEINFO	 info; /* btree configuration */
 	recno_t		 rec; /* current record number */
-	struct buf	 buf; /* keyword buffer */
+	struct buf	 buf, /* keyword buffer */
+			 dbuf; /* description buffer */
 	extern int	 optind;
 	extern char	*optarg;
 
@@ -341,20 +344,16 @@ main(int argc, char *argv[])
 
 	mp = mparse_alloc(MPARSE_AUTO, MANDOCLEVEL_FATAL, NULL, NULL);
 
-	memset(&key, 0, sizeof(DBT));
-	memset(&val, 0, sizeof(DBT));
-	memset(&rkey, 0, sizeof(DBT));
-	memset(&rval, 0, sizeof(DBT));
-
-	rkey.size = sizeof(recno_t);
-
 	rec = 1;
 	rsz = 0;
 
 	memset(&buf, 0, sizeof(struct buf));
+	memset(&dbuf, 0, sizeof(struct buf));
 
-	buf.size = MANDOC_BUFSZ;
+	buf.size = dbuf.size = MANDOC_BUFSZ;
+
 	buf.cp = mandoc_malloc(buf.size);
+	dbuf.cp = mandoc_malloc(dbuf.size);
 
 	while (NULL != (fn = *argv++)) {
 		mparse_reset(mp);
@@ -390,24 +389,22 @@ main(int argc, char *argv[])
 		 * going to write a nil byte in its place.
 		 */
 
-		dbt_init(&rval, &rsz);
-		dbt_appendb(&rval, &rsz, fn, strlen(fn) + 1);
-		dbt_appendb(&rval, &rsz, msec, strlen(msec) + 1);
-		dbt_appendb(&rval, &rsz, mtitle, strlen(mtitle) + 1);
-		dbt_appendb(&rval, &rsz, arch ? arch : "", 
+		dbuf.len = 0;
+		buf_appendb(&dbuf, fn, strlen(fn) + 1);
+		buf_appendb(&dbuf, msec, strlen(msec) + 1);
+		buf_appendb(&dbuf, mtitle, strlen(mtitle) + 1);
+		buf_appendb(&dbuf, arch ? arch : "", 
 				arch ? strlen(arch) + 1 : 1);
 
-		sv = rval.size;
+		sv = dbuf.len;
 
 		/* Fix the record number in the btree value. */
 
 		if (mdoc)
-			pmdoc_node(hash, &buf, &rval,
-					&rsz, mdoc_node(mdoc), 
-					mdoc_meta(mdoc));
+			pmdoc_node(hash, &buf, &dbuf,
+				mdoc_node(mdoc), mdoc_meta(mdoc));
 		else 
-			pman_node(hash, &buf, &rval, 
-					&rsz, man_node(man));
+			pman_node(hash, &buf, &dbuf, man_node(man));
 
 		/*
 		 * Copy from the in-memory hashtable of pending keywords
@@ -423,9 +420,7 @@ main(int argc, char *argv[])
 			val.size = sizeof(vbuf);
 			val.data = vbuf;
 			dbt_put(db, fbbuf, &key, &val);
-			/*fprintf(stderr, "Recording: %s (0x%x)\n",
-					(char *)key.data,
-					*(int *)val.data);*/
+
 			if ((*hash->del)(hash, &key, 0) < 0) {
 				perror("hash");
 				exit((int)MANDOCLEVEL_SYSERR);
@@ -443,13 +438,16 @@ main(int argc, char *argv[])
 		 * set, put an empty one in now.
 		 */
 
-		if (rval.size == sv)
-			dbt_appendb(&rval, &rsz, "", 1);
+		if (dbuf.len == sv)
+			buf_appendb(&dbuf, "", 1);
 
-		rkey.data = &rec;
-		dbt_put(idx, ibbuf, &rkey, &rval);
+		key.data = &rec;
+		key.size = sizeof(recno_t);
 
-		printf("Indexed: %s\n", fn);
+		val.data = dbuf.cp;
+		val.size = dbuf.len;
+
+		dbt_put(idx, ibbuf, &key, &val);
 		rec++;
 	}
 
@@ -459,8 +457,8 @@ main(int argc, char *argv[])
 
 	mparse_free(mp);
 
-	free(rval.data);
 	free(buf.cp);
+	free(dbuf.cp);
 
 	/* Atomically replace the file with our temporary one. */
 
@@ -473,45 +471,8 @@ main(int argc, char *argv[])
 }
 
 /*
- * Initialise the stored database key whose data buffer is shared
- * between uses (as the key must sometimes be constructed from an array
- * of 
+ * Grow the buffer (if necessary) and copy in a binary string.
  */
-static void
-dbt_init(DBT *key, size_t *ksz)
-{
-
-	if (0 == *ksz) {
-		assert(0 == key->size);
-		assert(NULL == key->data);
-		key->data = mandoc_malloc(MANDOC_BUFSZ);
-		*ksz = MANDOC_BUFSZ;
-	}
-
-	key->size = 0;
-}
-
-/*
- * Append a binary value to a database entry.  This can be invoked
- * multiple times; the buffer is automatically resized.
- */
-static void
-dbt_appendb(DBT *key, size_t *ksz, const void *cp, size_t sz)
-{
-
-	assert(key->data);
-
-	/* Overshoot by MANDOC_BUFSZ. */
-
-	while (key->size + sz >= *ksz) {
-		*ksz = key->size + sz + MANDOC_BUFSZ;
-		key->data = mandoc_realloc(key->data, *ksz);
-	}
-
-	memcpy(key->data + (int)key->size, cp, sz);
-	key->size += sz;
-}
-
 static void
 buf_appendb(struct buf *buf, const void *cp, size_t sz)
 {
@@ -528,26 +489,11 @@ buf_appendb(struct buf *buf, const void *cp, size_t sz)
 }
 
 /*
- * Append a nil-terminated string to the database entry.  This can be
- * invoked multiple times.  The database entry will be nil-terminated as
- * well; if invoked multiple times, a space is put between strings.
+ * Append a nil-terminated string to the buffer.  
+ * This can be invoked multiple times.  
+ * The buffer string will be nil-terminated.
+ * If invoked multiple times, a space is put between strings.
  */
-static void
-dbt_append(DBT *key, size_t *ksz, const char *cp)
-{
-	size_t		 sz;
-
-	if (0 == (sz = strlen(cp)))
-		return;
-
-	assert(key->data);
-
-	if (key->size)
-		((char *)key->data)[(int)key->size - 1] = ' ';
-
-	dbt_appendb(key, ksz, cp, sz + 1);
-}
-
 static void
 buf_append(struct buf *buf, const char *cp)
 {
@@ -754,9 +700,9 @@ pmdoc_Nd(MDOC_ARGS)
 		if (MDOC_TEXT != n->type)
 			continue;
 		if (first) 
-			dbt_appendb(rval, rsz, n->string, strlen(n->string) + 1);
+			buf_appendb(dbuf, n->string, strlen(n->string) + 1);
 		else
-			dbt_append(rval, rsz, n->string);
+			buf_append(dbuf, n->string);
 		first = 0;
 	}
 }
@@ -821,9 +767,8 @@ dbt_put(DB *db, const char *dbn, DBT *key, DBT *val)
 	if (0 == key->size)
 		return;
 
-	assert(key->data);
+	assert(key->size);
 	assert(val->size);
-	assert(val->data);
 
 	if (0 == (*db->put)(db, key, val, 0))
 		return;
@@ -858,14 +803,14 @@ pmdoc_node(MDOC_ARGS)
 			break;
 
 		buf->len = 0;
-		(*mdocs[n->tok])(hash, buf, rval, rsz, n, m);
+		(*mdocs[n->tok])(hash, buf, dbuf, n, m);
 		break;
 	default:
 		break;
 	}
 
-	pmdoc_node(hash, buf, rval, rsz, n->child, m);
-	pmdoc_node(hash, buf, rval, rsz, n->next, m);
+	pmdoc_node(hash, buf, dbuf, n->child, m);
+	pmdoc_node(hash, buf, dbuf, n->next, m);
 }
 
 static int
@@ -952,13 +897,13 @@ pman_node(MAN_ARGS)
 			while (' ' == *start)
 				start++;
 
-			dbt_appendb(rval, rsz, start, strlen(start) + 1);
+			buf_appendb(dbuf, start, strlen(start) + 1);
 		}
 	}
 
-	if (pman_node(hash, buf, rval, rsz, n->child))
+	if (pman_node(hash, buf, dbuf, n->child))
 		return(1);
-	if (pman_node(hash, buf, rval, rsz, n->next))
+	if (pman_node(hash, buf, dbuf, n->next))
 		return(1);
 
 	return(0);
@@ -968,8 +913,5 @@ static void
 usage(void)
 {
 
-	fprintf(stderr, "usage: %s "
-			"[-d path] "
-			"[file...]\n", 
-			progname);
+	fprintf(stderr, "usage: %s [-d path] [file...]\n", progname);
 }
