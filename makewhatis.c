@@ -416,16 +416,17 @@ main(int argc, char *argv[])
 
 		seq = R_FIRST;
 		while (0 == (ch = (*hash->seq)(hash, &key, &val, seq))) {
+			seq = R_NEXT;
+
 			memcpy(vbuf, val.data, sizeof(uint32_t));
 			val.size = sizeof(vbuf);
 			val.data = vbuf;
+
 			dbt_put(db, fbbuf, &key, &val);
 
-			if ((*hash->del)(hash, &key, 0) < 0) {
-				perror("hash");
-				exit((int)MANDOCLEVEL_SYSERR);
-			}
-			seq = R_NEXT;
+			ch = (*hash->del)(hash, &key, R_CURSOR);
+			if (ch < 0)
+				break;
 		}
 
 		if (ch < 0) {
@@ -746,10 +747,11 @@ hash_put(DB *db, const struct buf *buf, int mask)
 	DBT		 key, val;
 	int		 rc;
 
-	key.data = buf->cp;
-
-	if ((key.size = buf->len) < 2)
+	if (buf->len < 2)
 		return;
+
+	key.data = buf->cp;
+	key.size = buf->len;
 
 	if ((rc = (*db->get)(db, &key, &val, 0)) < 0) {
 		perror("hash");
@@ -759,9 +761,6 @@ hash_put(DB *db, const struct buf *buf, int mask)
 
 	val.data = &mask;
 	val.size = sizeof(int); 
-
-	/*fprintf(stderr, "Hashing: [%s] (0x%x)\n", 
-			(char *)key.data, mask);*/
 
 	if ((rc = (*db->put)(db, &key, &val, 0)) < 0) {
 		perror("hash");
