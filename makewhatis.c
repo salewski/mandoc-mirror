@@ -306,15 +306,7 @@ main(int argc, char *argv[])
 	 * For the keyword database, open a BTREE database that allows
 	 * duplicates.  
 	 * For the index database, use a standard RECNO database type.
-	 * For the temporary keyword hashtable, use the HASH database
-	 * type.
 	 */
-
-	hash = dbopen(NULL, MANDOC_FLAGS, 0644, DB_HASH, NULL);
-	if (NULL == hash) {
-		perror("hash");
-		exit((int)MANDOCLEVEL_SYSERR);
-	}
 
 	memset(&info, 0, sizeof(BTREEINFO));
 	info.flags = R_DUP;
@@ -322,7 +314,6 @@ main(int argc, char *argv[])
 
 	if (NULL == db) {
 		perror(fbbuf);
-		(*hash->close)(hash);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
@@ -331,7 +322,6 @@ main(int argc, char *argv[])
 	if (NULL == db) {
 		perror(ibbuf);
 		(*db->close)(db);
-		(*hash->close)(hash);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
@@ -357,6 +347,16 @@ main(int argc, char *argv[])
 
 	while (NULL != (fn = *argv++)) {
 		mparse_reset(mp);
+
+		if (hash)
+			(*hash->close)(hash);
+
+		hash = dbopen(NULL, MANDOC_FLAGS, 0644, DB_HASH, NULL);
+
+		if (NULL == hash) {
+			perror("hash");
+			exit((int)MANDOCLEVEL_SYSERR);
+		}
 
 		/* Parse and get (non-empty) AST. */
 
@@ -422,11 +422,12 @@ main(int argc, char *argv[])
 			val.size = sizeof(vbuf);
 			val.data = vbuf;
 
+			printf("Added: %s (%zu): 0x%x\n",
+					(char *)key.data, key.size, 
+					*(int *)val.data);
+
 			dbt_put(db, fbbuf, &key, &val);
 
-			ch = (*hash->del)(hash, &key, R_CURSOR);
-			if (ch < 0)
-				break;
 		}
 
 		if (ch < 0) {
@@ -448,13 +449,16 @@ main(int argc, char *argv[])
 		val.data = dbuf.cp;
 		val.size = dbuf.len;
 
+		printf("Indexed: %s\n", fn);
+
 		dbt_put(idx, ibbuf, &key, &val);
 		rec++;
 	}
 
 	(*db->close)(db);
 	(*idx->close)(idx);
-	(*hash->close)(hash);
+	if (hash)
+		(*hash->close)(hash);
 
 	mparse_free(mp);
 
@@ -771,9 +775,6 @@ hash_put(DB *db, const struct buf *buf, int mask)
 static void
 dbt_put(DB *db, const char *dbn, DBT *key, DBT *val)
 {
-
-	if (0 == key->size)
-		return;
 
 	assert(key->size);
 	assert(val->size);
