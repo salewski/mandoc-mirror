@@ -241,7 +241,7 @@ main(int argc, char *argv[])
 			*db, /* keyword database */
 			*hash; /* temporary keyword hashtable */
 	DBT		 key, val;
-	size_t		 sv, rsz; 
+	size_t		 sv;
 	BTREEINFO	 info; /* btree configuration */
 	recno_t		 rec; /* current record number */
 	struct buf	 buf, /* keyword buffer */
@@ -335,7 +335,7 @@ main(int argc, char *argv[])
 	mp = mparse_alloc(MPARSE_AUTO, MANDOCLEVEL_FATAL, NULL, NULL);
 
 	rec = 1;
-	rsz = 0;
+	hash = NULL;
 
 	memset(&buf, 0, sizeof(struct buf));
 	memset(&dbuf, 0, sizeof(struct buf));
