@@ -22,6 +22,7 @@
 .Nd index UNIX manuals
 .Sh SYNOPSIS
 .Nm
+.Op Fl v
 .Op Fl d Ar dir
 .Ar
 .Sh DESCRIPTION
@@ -41,6 +42,10 @@ or
 .Xr man 7
 .Ux
 manual format.
+.It Fl v
+Verbose output.
+If specified once, prints the name of each indexed file.
+If twice, prints keywords for each file.
 .El
 .Pp
 By default,

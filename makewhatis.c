@@ -21,17 +21,18 @@
 #include <sys/param.h>
 
 #include <assert.h>
-#ifdef __linux__
-# include <db_185.h>
-#else
-# include <db.h>
-#endif
 #include <fcntl.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef __linux__
+# include <db_185.h>
+#else
+# include <db.h>
+#endif
 
 #include "man.h"
 #include "mdoc.h"
@@ -44,15 +45,15 @@
 
 /* Bit-fields.  See makewhatis.1. */
 
-#define TYPE_NAME	0x01
-#define TYPE_FUNCTION	0x02
-#define TYPE_UTILITY	0x04
-#define TYPE_INCLUDES	0x08
-#define TYPE_VARIABLE	0x10
-#define TYPE_STANDARD	0x20
-#define TYPE_AUTHOR	0x40
-#define TYPE_CONFIG	0x80
-#define TYPE_DESC	0x100
+#define TYPE_NAME	  0x01
+#define TYPE_FUNCTION	  0x02
+#define TYPE_UTILITY	  0x04
+#define TYPE_INCLUDES	  0x08
+#define TYPE_VARIABLE	  0x10
+#define TYPE_STANDARD	  0x20
+#define TYPE_AUTHOR	  0x40
+#define TYPE_CONFIG	  0x80
+#define TYPE_DESC	  0x100
 
 /* Buffer for storing growable data. */
 
@@ -236,7 +237,7 @@ main(int argc, char *argv[])
 			 fbuf[MAXPATHLEN],  /* btree fname */
 			 fbbuf[MAXPATHLEN], /* btree backup fname */
 			 vbuf[8]; /* stringified record number */
-	int		 ch, seq;
+	int		 ch, seq, verb;
 	DB		*idx, /* index database */
 			*db, /* keyword database */
 			*hash; /* temporary keyword hashtable */
@@ -256,11 +257,15 @@ main(int argc, char *argv[])
 		++progname;
 
 	dir = "";
+	verb = 0;
 
-	while (-1 != (ch = getopt(argc, argv, "d:")))
+	while (-1 != (ch = getopt(argc, argv, "d:v")))
 		switch (ch) {
 		case ('d'):
 			dir = optarg;
+			break;
+		case ('v'):
+			verb++;
 			break;
 		default:
 			usage();
@@ -298,7 +303,7 @@ main(int argc, char *argv[])
 			'\0' != fbbuf[MAXPATHLEN - 2] ||
 			'\0' != ibuf[MAXPATHLEN - 2] ||
 			'\0' != ibbuf[MAXPATHLEN - 2]) {
-		fprintf(stderr, "%s: Path too long\n", progname);
+		fprintf(stderr, "%s: Path too long\n", dir);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
@@ -326,9 +331,9 @@ main(int argc, char *argv[])
 	}
 
 	/*
-	 * Try parsing the manuals given on the command line.  If we
-	 * totally fail, then just keep on going.  Take resulting trees
-	 * and push them down into the database code.
+	 * Try parsing each manual given on the command line.  
+	 * If we fail, then emit an error and keep on going.  
+	 * Take resulting trees and push them down into the database code.
 	 * Use the auto-parser and don't report any errors.
 	 */
 
@@ -348,6 +353,8 @@ main(int argc, char *argv[])
 	while (NULL != (fn = *argv++)) {
 		mparse_reset(mp);
 
+		/* Initialise the in-memory hash of keywords. */
+
 		if (hash)
 			(*hash->close)(hash);
 
@@ -364,11 +371,11 @@ main(int argc, char *argv[])
 			fprintf(stderr, "%s: Parse failure\n", fn);
 			continue;
 		}
+
 		mparse_result(mp, &mdoc, &man);
+
 		if (NULL == mdoc && NULL == man)
 			continue;
-
-		/* Manual section: can be empty string. */
 
 		msec = NULL != mdoc ? 
 			mdoc_meta(mdoc)->msec :
@@ -377,9 +384,6 @@ main(int argc, char *argv[])
 			mdoc_meta(mdoc)->title :
 			man_meta(man)->title;
 		arch = NULL != mdoc ? mdoc_meta(mdoc)->arch : NULL;
-
-		assert(msec);
-		assert(mtitle);
 
 		/* 
 		 * The index record value consists of a nil-terminated
@@ -422,8 +426,9 @@ main(int argc, char *argv[])
 			val.size = sizeof(vbuf);
 			val.data = vbuf;
 
-			printf("Added: %s (%zu): 0x%x\n",
-					(char *)key.data, key.size, 
+			if (verb > 1)
+				printf("%s: Keyword %s (%zu): 0x%x\n", 
+					fn, (char *)key.data, key.size, 
 					*(int *)val.data);
 
 			dbt_put(db, fbbuf, &key, &val);
@@ -449,7 +454,8 @@ main(int argc, char *argv[])
 		val.data = dbuf.cp;
 		val.size = dbuf.len;
 
-		printf("Indexed: %s\n", fn);
+		if (verb > 0)
+			printf("%s: Indexed\n", fn);
 
 		dbt_put(idx, ibbuf, &key, &val);
 		rec++;
@@ -457,6 +463,7 @@ main(int argc, char *argv[])
 
 	(*db->close)(db);
 	(*idx->close)(idx);
+
 	if (hash)
 		(*hash->close)(hash);
 
@@ -924,5 +931,6 @@ static void
 usage(void)
 {
 
-	fprintf(stderr, "usage: %s [-d path] [file...]\n", progname);
+	fprintf(stderr, "usage: %s [-v] [-d path] [file...]\n", 
+			progname);
 }
