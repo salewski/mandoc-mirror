@@ -54,6 +54,7 @@
 #define TYPE_AUTHOR	  0x40
 #define TYPE_CONFIG	  0x80
 #define TYPE_DESC	  0x100
+#define TYPE_XREF	  0x200
 
 /* Buffer for storing growable data. */
 
@@ -90,6 +91,7 @@ static	void		  pmdoc_Nd(MDOC_ARGS);
 static	void		  pmdoc_Nm(MDOC_ARGS);
 static	void		  pmdoc_St(MDOC_ARGS);
 static	void		  pmdoc_Vt(MDOC_ARGS);
+static	void		  pmdoc_Xr(MDOC_ARGS);
 static	void		  usage(void);
 
 typedef	void		(*pmdoc_nf)(MDOC_ARGS);
@@ -135,7 +137,7 @@ static	const pmdoc_nf	  mdocs[MDOC_MAX] = {
 	pmdoc_St, /* St */ 
 	pmdoc_Vt, /* Va */
 	pmdoc_Vt, /* Vt */ 
-	NULL, /* Xr */ 
+	pmdoc_Xr, /* Xr */ 
 	NULL, /* %A */
 	NULL, /* %B */
 	NULL, /* %D */
@@ -648,6 +650,25 @@ pmdoc_St(MDOC_ARGS)
 
 	buf_append(buf, n->child->string);
 	hash_put(hash, buf, TYPE_STANDARD);
+}
+
+/* ARGSUSED */
+static void
+pmdoc_Xr(MDOC_ARGS)
+{
+
+	if (NULL == (n = n->child))
+		return;
+
+	buf_appendb(buf, n->string, strlen(n->string));
+
+	if (NULL != (n = n->next)) {
+		buf_appendb(buf, ".", 1);
+		buf_appendb(buf, n->string, strlen(n->string) + 1);
+	} else
+		buf_appendb(buf, ".", 2);
+
+	hash_put(hash, buf, TYPE_XREF);
 }
 
 /* ARGSUSED */
