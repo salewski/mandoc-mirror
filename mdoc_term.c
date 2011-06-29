@@ -523,9 +523,10 @@ a2height(const struct termp *p, const char *v)
 {
 	struct roffsu	 su;
 
+
 	assert(v);
 	if ( ! a2roffsu(v, &su, SCALE_VS))
-		SCALE_VS_INIT(&su, term_len(p, 1));
+		SCALE_VS_INIT(&su, atoi(v));
 
 	return(term_vspan(p, &su));
 }
