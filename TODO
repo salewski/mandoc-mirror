@@ -329,6 +329,9 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 
 - the PDF file is HUGE: this can be reduced by using relative offsets
 
+- instead of re-initialising the roff predefined-strings set before each
+  parse, create a read-only version the first time and copy it 
+
 ************************************************************************
 * structural issues
 ************************************************************************

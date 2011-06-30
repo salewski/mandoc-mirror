@@ -347,8 +347,12 @@ roff_free1(struct roff *r)
 void
 roff_reset(struct roff *r)
 {
+	int		 i;
 
 	roff_free1(r);
+
+	for (i = 0; i < PREDEFS_MAX; i++) 
+		roff_setstr(r, predefs[i].name, predefs[i].str, 0);
 }
 
 
