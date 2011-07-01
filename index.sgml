@@ -54,11 +54,9 @@
 			The most current version of <SPAN CLASS="nm">mdocml</SPAN> is <SPAN CLASS="attn">@VERSION@</SPAN>, dated <SPAN
 			class="attn">@VDATE@</SPAN>.  
 		</P>
-
 		<H2>
 			Current
 		</H2>
-
 		<TABLE WIDTH="100%" SUMMARY="Current Sources">
 			<COL WIDTH="175">
 			<COL>
@@ -78,11 +76,9 @@
 				</TR>
 			</TBODY>
 		</TABLE>
-
 		<H2>
 			Downstream
 		</H2>
-
 		<TABLE WIDTH="100%" SUMMARY="Downstream Sources">
 			<COL WIDTH="175">
 			<COL>
@@ -117,11 +113,9 @@
 				</TR>
 			</TBODY>
 		</TABLE>
-
 		<H2>
 			Historical
 		</H2>
-
 		<TABLE WIDTH="100%" SUMMARY="Archived Sources">
 			<COL WIDTH="175">
 			<COL>
@@ -134,11 +128,9 @@
 				</TR>
 			</TBODY>
 		</TABLE>
-
 		<H1>
 			<A NAME="documentation">Documentation</A>
 		</H1>
-
 		<P>
 			These manuals are generated automatically and refer to the current snapshot.
 		</P>
@@ -269,11 +261,9 @@
 				</TR>
 			</TBODY>
 		</TABLE>
-
 		<H1>
 			<A NAME="contact">Contact</A>
 		</H1>
-
 		<P>
 			Use the mailing lists for bug-reports, patches, questions, etc. (these require subscription).  Please check the
 			<A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/TODO?cvsroot=mdocml">TODO</A> for known issues
@@ -281,7 +271,6 @@
 			HREF="http://mailhide.recaptcha.net/d?k=01M6h_w7twDp58ZgH57eWC_w==&amp;c=Q2DBUt401ePlSeupJFrq_Q==" TITLE="Reveal
 			this e-mail address">kris...</A>@bsd.lv.
 		</P>
-
 		<TABLE WIDTH="100%" SUMMARY="Mailing Lists">
 			<COL WIDTH="175">
 			<COL>
@@ -318,11 +307,21 @@
 				</TR>
 			</TBODY>
 		</TABLE>
-
 		<H1>
 			<A NAME="news">News</A>
 		</H1>
-
+		<P CLASS="news">
+			xx-06-2011: version 1.11.4
+		</P>
+		<P>
+			Bug-fixes and clean-ups across all systems, especially in <A HREF="makewhatis.1.html">makewhatis</A> (note: still not
+			connected to the general build and must be compiled with <CODE>make makewhatis</CODE>).
+		</P>
+		<P>
+			The output for <A HREF="makewhatis.1.html">makewhatis</A> is used by several tools in the <A CLASS="external"
+			HREF="http://mdocml.bsd.lv/mandoc-tools">mandoc-tools</A> package.  In time these may be merged into <SPAN
+			CLASS="nm">mdocml</SPAN>, but for the time being their development is separate.
+		</P>
 		<P CLASS="news">
 			26-05-2011: version 1.11.3
 		</P>
@@ -339,7 +338,6 @@
 			HREF="mandoc.1.html">mandoc</A> input by using the newly-added <A HREF="preconv.1.html">preconv</A> utility.
 			Note: in the future, this feature may be integrated into <A HREF="mandoc.1.html">mandoc</A>.
 		</P>
-
 		<P CLASS="news">
 			12-05-2011: version 1.11.2
 		</P>
@@ -353,31 +351,10 @@
 			<A HREF="http://mdocml.bsd.lv/mandoc-tools/index.html">mandoc-tools</A>, 
 			which features semantic querying of manual content.
 		</P>
-
-		<P CLASS="news">
-			04-04-2011: version 1.11.1
-		</P>
-		<P>
-			The earlier <I>libroff</I>, <I>libmdoc</I>, and <I>libman</I> soup have been merged into
-			a single library, <A HREF="mandoc.3.html">libmandoc</A>, which manages all aspects of
-			parsing real manuals (from line-handling to <A HREF="tbl.7.html">tbl</A> parsing).
-		</P>
-		<P>
-			Beyond this structural change, initial <A HREF="eqn.7.html">eqn</A> functionality is in
-			place.  For the time being, this is limited to the recognition of equation blocks;
-			future version of <SPAN CLASS="nm">mdocml</SPAN> will expand upon this framework.
-		</P>
-		<P>
-			As usual, many general fixes and improvements have also occurred.  In particular, a great
-			deal of redundancy and superfluous code has been removed with the merging of the backend
-			libraries.
-		</P>
-
 		<P>
 			See <A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/index.sgml?cvsroot=mdocml">cvsweb</A> for
 			historical notes.
 		</P>
-
 		<P CLASS="foot">
 			<SMALL>
 				Copyright &#169; 2008&#8211;2011 
