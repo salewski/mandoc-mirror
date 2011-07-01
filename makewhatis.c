@@ -57,6 +57,7 @@
 #define TYPE_XREF	  0x200
 #define TYPE_PATH	  0x400
 #define TYPE_ENV	  0x800
+#define TYPE_ERR	  0x1000
 
 /* Buffer for storing growable data. */
 
@@ -87,6 +88,7 @@ static	int		  pman_node(MAN_ARGS);
 static	void		  pmdoc_node(MDOC_ARGS);
 static	void		  pmdoc_An(MDOC_ARGS);
 static	void		  pmdoc_Cd(MDOC_ARGS);
+static	void		  pmdoc_Er(MDOC_ARGS);
 static	void		  pmdoc_Ev(MDOC_ARGS);
 static	void		  pmdoc_Fd(MDOC_ARGS);
 static	void		  pmdoc_In(MDOC_ARGS);
@@ -123,7 +125,7 @@ static	const pmdoc_nf	  mdocs[MDOC_MAX] = {
 	pmdoc_Cd, /* Cd */ 
 	NULL, /* Cm */
 	NULL, /* Dv */ 
-	NULL, /* Er */ 
+	pmdoc_Er, /* Er */ 
 	pmdoc_Ev, /* Ev */ 
 	NULL, /* Ex */ 
 	NULL, /* Fa */ 
@@ -762,6 +764,18 @@ pmdoc_Nd(MDOC_ARGS)
 	buf_appendmdoc(buf, n->child, 0);
 
 	hash_put(hash, buf, TYPE_DESC);
+}
+
+/* ARGSUSED */
+static void
+pmdoc_Er(MDOC_ARGS)
+{
+
+	if (SEC_ERRORS != n->sec)
+		return;
+	
+	buf_appendmdoc(buf, n->child, 0);
+	hash_put(hash, buf, TYPE_ERR);
 }
 
 /* ARGSUSED */
