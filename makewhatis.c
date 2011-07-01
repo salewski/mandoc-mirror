@@ -76,7 +76,7 @@ struct	buf {
 			  const struct mdoc_meta *m
 
 static	void		  buf_appendmdoc(struct buf *, 
-				const struct mdoc_node *);
+				const struct mdoc_node *, int);
 static	void		  buf_append(struct buf *, const char *);
 static	void		  buf_appendb(struct buf *, 
 				const void *, size_t);
@@ -531,16 +531,25 @@ buf_append(struct buf *buf, const char *cp)
  * This is optimised for general mdoc nodes in this context, which do
  * not consist of subexpressions and having a recursive call for n->next
  * would be wasteful.
+ * The "f" variable should be 0 unless called from pmdoc_Nd for the
+ * description buffer, which does not start at the beginning of the
+ * buffer.
  */
 static void
-buf_appendmdoc(struct buf *buf, const struct mdoc_node *n)
+buf_appendmdoc(struct buf *buf, const struct mdoc_node *n, int f)
 {
 
 	for ( ; n; n = n->next) {
 		if (n->child)
-			buf_appendmdoc(buf, n->child);
-		if (MDOC_TEXT == n->type)
+			buf_appendmdoc(buf, n->child, f);
+
+		if (MDOC_TEXT == n->type && f) {
+			f = 0;
+			buf_appendb(buf, n->string, 
+					strlen(n->string) + 1);
+		} else if (MDOC_TEXT == n->type)
 			buf_append(buf, n->string);
+
 	}
 }
 
@@ -552,7 +561,7 @@ pmdoc_An(MDOC_ARGS)
 	if (SEC_AUTHORS != n->sec)
 		return;
 
-	buf_appendmdoc(buf, n->child);
+	buf_appendmdoc(buf, n->child, 0);
 	hash_put(hash, buf, TYPE_AUTHOR);
 }
 
@@ -610,7 +619,7 @@ pmdoc_Cd(MDOC_ARGS)
 	if (SEC_SYNOPSIS != n->sec)
 		return;
 
-	buf_appendmdoc(buf, n->child);
+	buf_appendmdoc(buf, n->child, 0);
 	hash_put(hash, buf, TYPE_CONFIG);
 }
 
@@ -743,22 +752,12 @@ pmdoc_Fo(MDOC_ARGS)
 static void
 pmdoc_Nd(MDOC_ARGS)
 {
-	size_t		 sz;
 
 	if (MDOC_BODY != n->type)
 		return;
-	else if (NULL == (n = n->child))
-		return;
 
-	/* FIXME: don't assume this. */
-	assert(MDOC_TEXT == n->type);
-
-	sz = strlen(n->string) + 1;
-	buf_appendb(dbuf, n->string, sz);
-	buf_appendb(buf, n->string, sz);
-	
-	buf_appendmdoc(dbuf, n->next);
-	buf_appendmdoc(buf, n->next);
+	buf_appendmdoc(dbuf, n->child, 1);
+	buf_appendmdoc(buf, n->child, 0);
 
 	hash_put(hash, buf, TYPE_DESC);
 }
@@ -771,7 +770,7 @@ pmdoc_Pa(MDOC_ARGS)
 	if (SEC_FILES != n->sec)
 		return;
 	
-	buf_appendmdoc(buf, n->child);
+	buf_appendmdoc(buf, n->child, 0);
 	hash_put(hash, buf, TYPE_PATH);
 }
 
@@ -781,7 +780,7 @@ pmdoc_Nm(MDOC_ARGS)
 {
 	
 	if (SEC_NAME == n->sec) {
-		buf_appendmdoc(buf, n->child);
+		buf_appendmdoc(buf, n->child, 0);
 		hash_put(hash, buf, TYPE_NAME);
 		return;
 	} else if (SEC_SYNOPSIS != n->sec || MDOC_HEAD != n->type)
@@ -790,7 +789,7 @@ pmdoc_Nm(MDOC_ARGS)
 	if (NULL == n->child)
 		buf_append(buf, m->name);
 
-	buf_appendmdoc(buf, n->child);
+	buf_appendmdoc(buf, n->child, 0);
 	hash_put(hash, buf, TYPE_UTILITY);
 }
 
