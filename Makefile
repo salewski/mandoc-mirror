@@ -323,7 +323,7 @@ install: all
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_PROGRAM) mandoc preconv $(DESTDIR)$(BINDIR)
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
-	$(INSTALL_LIB) mandoc.h $(DESTDIR)$(INCLUDEDIR)
+	$(INSTALL_LIB) man.h mdoc.h mandoc.h $(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.1 preconv.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) mandoc.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
