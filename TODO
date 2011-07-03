@@ -7,6 +7,11 @@
 * parser bugs
 ************************************************************************
 
+- ".\}" on its own line gets translated to bare ".\&"
+  which forces pset() into man(7)
+  and then triggers an unknown macro error
+  reported by naddy@  Sun, 3 Jul 2011 21:52:24 +0200
+
 - .TP before .SH is still FATAL in man(7)
   reported by brad@  Sat, 15 Jan 2011 15:54:54 -0500
 
@@ -122,6 +127,9 @@
 
 - groff an-ext.tmac macros (.UR, .UE) occur in xine(5)
   reported by brad@  Sat, 15 Jan 2011 15:45:23 -0500
+
+- .SH implies .fi, see e.g. sasl_setpass(1)
+  reported by naddy@  Sun, 3 Jul 2011 23:55:17 +0200
 
 --- missing tbl features -----------------------------------------------
 
