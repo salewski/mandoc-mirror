@@ -709,6 +709,7 @@ pre_SS(DECL_ARGS)
 
 	switch (n->type) {
 	case (MAN_BLOCK):
+		mt->fl &= ~MANT_LITERAL;
 		mt->lmargin = term_len(p, INDENT);
 		mt->offset = term_len(p, INDENT);
 		/* If following a prior empty `SS', no vspace. */
@@ -759,6 +760,7 @@ pre_SH(DECL_ARGS)
 
 	switch (n->type) {
 	case (MAN_BLOCK):
+		mt->fl &= ~MANT_LITERAL;
 		mt->lmargin = term_len(p, INDENT);
 		mt->offset = term_len(p, INDENT);
 		/* If following a prior empty `SH', no vspace. */

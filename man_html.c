@@ -439,6 +439,7 @@ man_SH_pre(MAN_ARGS)
 	struct htmlpair	 tag;
 
 	if (MAN_BLOCK == n->type) {
+		mh->fl &= ~MANH_LITERAL;
 		PAIR_CLASS_INIT(&tag, "section");
 		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
@@ -520,6 +521,7 @@ man_SS_pre(MAN_ARGS)
 	struct htmlpair	 tag;
 
 	if (MAN_BLOCK == n->type) {
+		mh->fl &= ~MANH_LITERAL;
 		PAIR_CLASS_INIT(&tag, "subsection");
 		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
