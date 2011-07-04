@@ -610,6 +610,7 @@ mdoc_sh_pre(MDOC_ARGS)
 		return(1);
 
 	bufinit(h);
+	bufcat(h, "x");
 	for (n = n->child; n; n = n->next) {
 		bufcat_id(h, n->string);
 		if (n->next)
@@ -636,6 +637,7 @@ mdoc_ss_pre(MDOC_ARGS)
 		return(1);
 
 	bufinit(h);
+	bufcat(h, "x");
 	for (n = n->child; n; n = n->next) {
 		bufcat_id(h, n->string);
 		if (n->next)

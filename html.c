@@ -595,7 +595,6 @@ bufcat(struct html *h, const char *p)
 
 	h->buflen = strlcat(h->buf, p, BUFSIZ);
 	assert(h->buflen < BUFSIZ);
-	h->buflen--;
 }
 
 void
