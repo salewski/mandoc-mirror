@@ -30,6 +30,7 @@ INSTALL		 = install
 INSTALL_PROGRAM	 = $(INSTALL) -m 0755
 INSTALL_DATA	 = $(INSTALL) -m 0444
 INSTALL_LIB	 = $(INSTALL) -m 0644
+INSTALL_SOURCE	 = $(INSTALL) -m 0644
 INSTALL_MAN	 = $(INSTALL_DATA)
 
 all: mandoc preconv
@@ -369,7 +370,7 @@ mdocml.md5: mdocml.tar.gz
 
 mdocml.tar.gz: $(SRCS)
 	mkdir -p .dist/mdocml-$(VERSION)/
-	$(INSTALL) -m 0444 $(SRCS) .dist/mdocml-$(VERSION)
+	$(INSTALL_SOURCE) $(SRCS) .dist/mdocml-$(VERSION)
 	( cd .dist/ && tar zcf ../$@ ./ )
 	rm -rf .dist/
 
