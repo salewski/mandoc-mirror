@@ -120,6 +120,9 @@ man_unscope(struct man *m, const struct man_node *to,
 
 	assert(to);
 
+	assert(MAN_ROOT != m->last->type);
+	m->next = MAN_NEXT_SIBLING;
+
 	/* LINTED */
 	while (m->last != to) {
 		/*
@@ -139,9 +142,6 @@ man_unscope(struct man *m, const struct man_node *to,
 	rew_warn(m, m->last, er);
 	if ( ! man_valid_post(m))
 		return(0);
-
-	m->next = MAN_ROOT == m->last->type ? 
-		MAN_NEXT_CHILD : MAN_NEXT_SIBLING;
 
 	return(1);
 }
@@ -428,6 +428,9 @@ in_line_eoln(MACRO_PROT_ARGS)
 		assert( ! (MAN_SCOPED & man_macros[tok].flags));
 		m->flags |= MAN_ILINE;
 	}
+
+	assert(MAN_ROOT != m->last->type);
+	m->next = MAN_NEXT_SIBLING;
 	
 	/*
 	 * Rewind our element scope.  Note that when TH is pruned, we'll
@@ -452,9 +455,6 @@ in_line_eoln(MACRO_PROT_ARGS)
 
 	if (m->last->type != MAN_ROOT && ! man_valid_post(m))
 		return(0);
-
-	m->next = MAN_ROOT == m->last->type ?
-		MAN_NEXT_CHILD : MAN_NEXT_SIBLING;
 
 	return(1);
 }
