@@ -30,6 +30,10 @@
 
 --- missing roff features ----------------------------------------------
 
+- .if n \{
+  .br\}
+  should cause an extra space to be raised.
+
 - .ad (adjust margins)
   .ad l -- adjust left margin only (flush left)
   .ad r -- adjust right margin only (flush right)
