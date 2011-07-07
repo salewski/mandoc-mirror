@@ -219,22 +219,14 @@ print_man_node(MAN_ARGS)
 		if ('\0' == *n->string) {
 			print_otag(h, TAG_P, 0, NULL);
 			return;
-		} else if (' ' == *n->string && MAN_LINE & n->flags)
+		}
+
+		if (' ' == *n->string && MAN_LINE & n->flags)
+			print_otag(h, TAG_BR, 0, NULL);
+		else if (MANH_LITERAL & mh->fl && n->prev)
 			print_otag(h, TAG_BR, 0, NULL);
 
 		print_text(h, n->string);
-
-		/*
-		 * If we're in a literal context, make sure that words
-		 * togehter on the same line stay together.  This is a
-		 * POST-printing call, so we check the NEXT word.  Since
-		 * -man doesn't have nested macros, we don't need to be
-		 * more specific than this.
-		 */
-		if (MANH_LITERAL & mh->fl &&
-				(NULL == n->next ||
-				 n->next->line > n->line))
-			print_otag(h, TAG_BR, 0, NULL);
 		return;
 	case (MAN_EQN):
 		PAIR_CLASS_INIT(&tag, "eqn");
@@ -453,9 +445,14 @@ static int
 man_alt_pre(MAN_ARGS)
 {
 	const struct man_node	*nn;
-	int		 i;
+	int		 i, savelit;
 	enum htmltag	 fp;
 	struct tag	*t;
+
+	if ((savelit = mh->fl & MANH_LITERAL)) 
+		print_otag(h, TAG_BR, 0, NULL);
+
+	mh->fl &= ~MANH_LITERAL;
 
 	for (i = 0, nn = n->child; nn; nn = nn->next, i++) {
 		t = NULL;
@@ -494,6 +491,9 @@ man_alt_pre(MAN_ARGS)
 		if (t)
 			print_tagq(h, t);
 	}
+
+	if (savelit)
+		mh->fl |= MANH_LITERAL;
 
 	return(0);
 }
@@ -553,6 +553,8 @@ man_IP_pre(MAN_ARGS)
 		print_otag(h, TAG_DL, 0, NULL);
 		return(1);
 	}
+
+	/* FIXME: width specification. */
 
 	print_otag(h, TAG_DT, 0, NULL);
 
@@ -623,11 +625,11 @@ static int
 man_literal_pre(MAN_ARGS)
 {
 
-	if (MAN_nf == n->tok) {
+	if (MAN_nf != n->tok) {
 		print_otag(h, TAG_BR, 0, NULL);
-		mh->fl |= MANH_LITERAL;
-	} else
 		mh->fl &= ~MANH_LITERAL;
+	} else
+		mh->fl |= MANH_LITERAL;
 
 	return(0);
 }
