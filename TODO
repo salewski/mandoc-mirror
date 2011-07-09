@@ -132,6 +132,8 @@
 - groff an-ext.tmac macros (.UR, .UE) occur in xine(5)
   reported by brad@  Sat, 15 Jan 2011 15:45:23 -0500
 
+- -T[x]html doesn't stipulate non-collapsing spaces in literal mode
+
 --- missing tbl features -----------------------------------------------
 
 - implement basic non-parametric .de to support e.g. sox(1)
