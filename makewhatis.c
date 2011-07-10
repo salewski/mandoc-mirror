@@ -961,8 +961,9 @@ pman_node(MAN_ARGS)
 					start++;
 			}
 
+			buf->len = 0;
+
 			if (sv == start) {
-				buf->len = 0;
 				buf_append(buf, start);
 				return(1);
 			}
@@ -985,6 +986,8 @@ pman_node(MAN_ARGS)
 			sz = strlen(start) + 1;
 			buf_appendb(dbuf, start, sz);
 			buf_appendb(buf, start, sz);
+
+			hash_put(hash, buf, TYPE_DESC);
 		}
 	}
 
