@@ -199,7 +199,7 @@ See
 .It Vt "enum mparset"
 The type of parser when reading input.
 This should usually be
-.Va MPARSE_AUTO
+.Dv MPARSE_AUTO
 for auto-detection.
 .It Vt "struct mparse"
 An opaque pointer to a running parse sequence.
@@ -222,9 +222,14 @@ Scan an escape sequence, i.e., a character string beginning with
 Pass a pointer to this string as
 .Va end ;
 it will be set to the supremum of the parsed escape sequence unless
-returning ESCAPE_ERROR, in which case the string is bogus and should be
+returning
+.Dv ESCAPE_ERROR ,
+in which case the string is bogus and should be
 thrown away.
-If not ESCAPE_ERROR or ESCAPE_IGNORE,
+If not
+.Dv ESCAPE_ERROR
+or
+.Dv ESCAPE_IGNORE ,
 .Va start
 is set to the first relevant character of the substring (font, glyph,
 whatever) of length
@@ -233,7 +238,8 @@ Both
 .Va start
 and
 .Va sz
-may be NULL.
+may be
+.Dv NULL .
 .It Fn man_meta
 Obtain the meta-data of a successful parse.
 This may only be used on a pointer returned by
@@ -267,7 +273,9 @@ Convert a special character into a valid Unicode codepoint.
 Returns \-1 on failure or a non-zero Unicode codepoint on success.
 .It Fn mchars_spec2str
 Convert a special character into an ASCII string.
-Returns NULL on failure.
+Returns
+.Dv NULL
+on failure.
 .It Fn mdoc_meta
 Obtain the meta-data of a successful parse.
 This may only be used on a pointer returned by
