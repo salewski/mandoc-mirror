@@ -84,6 +84,7 @@ static	void		  buf_appendb(struct buf *,
 				const void *, size_t);
 static	void		  dbt_put(DB *, const char *, DBT *, DBT *);
 static	void		  hash_put(DB *, const struct buf *, int);
+static	void		  hash_reset(DB **);
 static	int		  pman_node(MAN_ARGS);
 static	void		  pmdoc_node(MDOC_ARGS);
 static	void		  pmdoc_An(MDOC_ARGS);
@@ -243,15 +244,14 @@ main(int argc, char *argv[])
 			*arch, /* manual architecture */
 	      		*dir; /* result dir (default: cwd) */
 	char		 ibuf[MAXPATHLEN], /* index fname */
-			 ibbuf[MAXPATHLEN], /* index backup fname */
 			 fbuf[MAXPATHLEN],  /* btree fname */
-			 fbbuf[MAXPATHLEN], /* btree backup fname */
 			 vbuf[8]; /* stringified record number */
 	int		 ch, seq, verb;
 	DB		*idx, /* index database */
 			*db, /* keyword database */
 			*hash; /* temporary keyword hashtable */
 	DBT		 key, val;
+	enum mandocerr	 ec;
 	size_t		 sv;
 	BTREEINFO	 info; /* btree configuration */
 	recno_t		 rec; /* current record number */
@@ -268,6 +268,13 @@ main(int argc, char *argv[])
 
 	dir = "";
 	verb = 0;
+	db = idx = NULL;
+	mp = NULL;
+	hash = NULL;
+	ec = MANDOCLEVEL_SYSERR;
+
+	memset(&buf, 0, sizeof(struct buf));
+	memset(&dbuf, 0, sizeof(struct buf));
 
 	while (-1 != (ch = getopt(argc, argv, "d:v")))
 		switch (ch) {
@@ -285,36 +292,19 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	/*
-	 * Set up temporary file-names into which we're going to write
-	 * all of our data (both for the index and database).  These
-	 * will be securely renamed to the real file-names after we've
-	 * written all of our data.
-	 */
-
 	ibuf[0] = ibuf[MAXPATHLEN - 2] =
-		ibbuf[0] = ibbuf[MAXPATHLEN - 2] = 
-		fbuf[0] = fbuf[MAXPATHLEN - 2] = 
-		fbbuf[0] = fbbuf[MAXPATHLEN - 2] = '\0';
+		fbuf[0] = fbuf[MAXPATHLEN - 2] = '\0';
 
 	strlcat(fbuf, dir, MAXPATHLEN);
 	strlcat(fbuf, MANDOC_DB, MAXPATHLEN);
 
-	strlcat(fbbuf, fbuf, MAXPATHLEN);
-	strlcat(fbbuf, "~", MAXPATHLEN);
-
 	strlcat(ibuf, dir, MAXPATHLEN);
 	strlcat(ibuf, MANDOC_IDX, MAXPATHLEN);
 
-	strlcat(ibbuf, ibuf, MAXPATHLEN);
-	strlcat(ibbuf, "~", MAXPATHLEN);
-
 	if ('\0' != fbuf[MAXPATHLEN - 2] ||
-			'\0' != fbbuf[MAXPATHLEN - 2] ||
-			'\0' != ibuf[MAXPATHLEN - 2] ||
-			'\0' != ibbuf[MAXPATHLEN - 2]) {
+			'\0' != ibuf[MAXPATHLEN - 2]) {
 		fprintf(stderr, "%s: Path too long\n", dir);
-		exit((int)MANDOCLEVEL_SYSERR);
+		goto out;
 	}
 
 	/*
@@ -325,19 +315,16 @@ main(int argc, char *argv[])
 
 	memset(&info, 0, sizeof(BTREEINFO));
 	info.flags = R_DUP;
-	db = dbopen(fbbuf, MANDOC_FLAGS, 0644, DB_BTREE, &info);
+
+	db = dbopen(fbuf, MANDOC_FLAGS, 0644, DB_BTREE, &info);
+	idx = dbopen(ibuf, MANDOC_FLAGS, 0644, DB_RECNO, NULL);
 
 	if (NULL == db) {
-		perror(fbbuf);
-		exit((int)MANDOCLEVEL_SYSERR);
-	}
-
-	idx = dbopen(ibbuf, MANDOC_FLAGS, 0644, DB_RECNO, NULL);
-
-	if (NULL == db) {
-		perror(ibbuf);
-		(*db->close)(db);
-		exit((int)MANDOCLEVEL_SYSERR);
+		perror(fbuf);
+		goto out;
+	} else if (NULL == db) {
+		perror(ibuf);
+		goto out;
 	}
 
 	/*
@@ -349,33 +336,15 @@ main(int argc, char *argv[])
 
 	mp = mparse_alloc(MPARSE_AUTO, MANDOCLEVEL_FATAL, NULL, NULL);
 
-	rec = 1;
-	hash = NULL;
-
-	memset(&buf, 0, sizeof(struct buf));
-	memset(&dbuf, 0, sizeof(struct buf));
-
 	buf.size = dbuf.size = MANDOC_BUFSZ;
-
 	buf.cp = mandoc_malloc(buf.size);
 	dbuf.cp = mandoc_malloc(dbuf.size);
 
+	rec = 1;
+
 	while (NULL != (fn = *argv++)) {
 		mparse_reset(mp);
-
-		/* Initialise the in-memory hash of keywords. */
-
-		if (hash)
-			(*hash->close)(hash);
-
-		hash = dbopen(NULL, MANDOC_FLAGS, 0644, DB_HASH, NULL);
-
-		if (NULL == hash) {
-			perror("hash");
-			exit((int)MANDOCLEVEL_SYSERR);
-		}
-
-		/* Parse and get (non-empty) AST. */
+		hash_reset(&hash);
 
 		if (mparse_readfd(mp, -1, fn) >= MANDOCLEVEL_FATAL) {
 			fprintf(stderr, "%s: Parse failure\n", fn);
@@ -383,17 +352,15 @@ main(int argc, char *argv[])
 		}
 
 		mparse_result(mp, &mdoc, &man);
-
 		if (NULL == mdoc && NULL == man)
 			continue;
 
 		msec = NULL != mdoc ? 
-			mdoc_meta(mdoc)->msec :
-			man_meta(man)->msec;
+			mdoc_meta(mdoc)->msec : man_meta(man)->msec;
 		mtitle = NULL != mdoc ? 
-			mdoc_meta(mdoc)->title :
-			man_meta(man)->title;
-		arch = NULL != mdoc ? mdoc_meta(mdoc)->arch : NULL;
+			mdoc_meta(mdoc)->title : man_meta(man)->title;
+		arch = NULL != mdoc ? 
+			mdoc_meta(mdoc)->arch : "";
 
 		/* 
 		 * The index record value consists of a nil-terminated
@@ -407,8 +374,7 @@ main(int argc, char *argv[])
 		buf_appendb(&dbuf, fn, strlen(fn) + 1);
 		buf_appendb(&dbuf, msec, strlen(msec) + 1);
 		buf_appendb(&dbuf, mtitle, strlen(mtitle) + 1);
-		buf_appendb(&dbuf, arch ? arch : "", 
-				arch ? strlen(arch) + 1 : 1);
+		buf_appendb(&dbuf, arch, strlen(arch) + 1);
 
 		sv = dbuf.len;
 
@@ -437,14 +403,13 @@ main(int argc, char *argv[])
 			val.data = vbuf;
 
 			if (verb > 1)
-				printf("%s: Keyword %s (%zu): 0x%x\n", 
-					fn, (char *)key.data, key.size, 
+				printf("%s: Keyword %s: 0x%x\n", 
+					fn, (char *)key.data, 
 					*(int *)val.data);
 
-			dbt_put(db, fbbuf, &key, &val);
+			dbt_put(db, fbuf, &key, &val);
 
 		}
-
 		if (ch < 0) {
 			perror("hash");
 			exit((int)MANDOCLEVEL_SYSERR);
@@ -467,29 +432,26 @@ main(int argc, char *argv[])
 		if (verb > 0)
 			printf("%s: Indexed\n", fn);
 
-		dbt_put(idx, ibbuf, &key, &val);
+		dbt_put(idx, ibuf, &key, &val);
 		rec++;
 	}
 
-	(*db->close)(db);
-	(*idx->close)(idx);
+	ec = MANDOCLEVEL_OK;
 
+out:
+	if (db)
+		(*db->close)(db);
+	if (idx)
+		(*idx->close)(idx);
 	if (hash)
 		(*hash->close)(hash);
-
-	mparse_free(mp);
+	if (mp)
+		mparse_free(mp);
 
 	free(buf.cp);
 	free(dbuf.cp);
 
-	/* Atomically replace the file with our temporary one. */
-
-	if (-1 == rename(fbbuf, fbuf))
-		perror(fbuf);
-	if (-1 == rename(ibbuf, ibuf))
-		perror(fbuf);
-
-	return((int)MANDOCLEVEL_OK);
+	return((int)ec);
 }
 
 /*
@@ -567,6 +529,21 @@ pmdoc_An(MDOC_ARGS)
 
 	buf_appendmdoc(buf, n->child, 0);
 	hash_put(hash, buf, TYPE_AUTHOR);
+}
+
+static void
+hash_reset(DB **db)
+{
+	DB		*hash;
+
+	if (NULL != (hash = *db))
+		(*hash->close)(hash);
+
+	*db = dbopen(NULL, MANDOC_FLAGS, 0644, DB_HASH, NULL);
+	if (NULL == *db) {
+		perror("hash");
+		exit((int)MANDOCLEVEL_SYSERR);
+	}
 }
 
 /* ARGSUSED */
