@@ -146,7 +146,24 @@ A
 database of indexed file-names.
 .El
 .Sh EXIT STATUS
-.Ex -std
+The
+.Nm
+utility exits with one of the following values:
+.Pp
+.Bl -tag -width Ds -compact
+.It 0
+No errors occurred.
+.It 5
+Invalid command line arguments were specified.
+No input files have been read.
+.It 6
+An operating system error occurred, for example memory exhaustion or an
+error accessing input files.
+Such errors cause
+.Nm
+to exit at once, possibly in the middle of parsing or formatting a file.
+The output databases are corrupt and should be removed .
+.El
 .Sh SEE ALSO
 .Xr mandoc 1
 .Sh AUTHORS
