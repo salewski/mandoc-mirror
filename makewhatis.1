@@ -22,7 +22,7 @@
 .Nd index UNIX manuals
 .Sh SYNOPSIS
 .Nm
-.Op Fl v
+.Op Fl ruv
 .Op Fl d Ar dir
 .Ar
 .Sh DESCRIPTION
@@ -42,6 +42,15 @@ or
 .Xr man 7
 .Ux
 manual format.
+.It Fl r
+Remove entries.
+This will remove the index and keyword references.
+If the record is not found, it is ignored.
+.It Fl u
+Update the record.
+This will first remove the record (as in
+.Fl r )
+then re-add it.
 .It Fl v
 Verbose output.
 If specified once, prints the name of each indexed file.
@@ -50,11 +59,12 @@ If twice, prints keywords for each file.
 .Pp
 By default,
 .Nm
-constructs the
+constructs a new
 .Sx Index Database
 and
 .Sx Keyword Database
 in the current working directory.
+Existing databases are truncated.
 .Pp
 If fatal parse errors are encountered, the offending file is printed to
 stderr, omitted from the index, and the parse continues with the next
@@ -133,6 +143,14 @@ The
 .Nm
 utility is
 .Ud
+.Sh IMPLEMENTATION NOTES
+The time to construct a new database pair grows linearly with the
+number of keywords in the input.
+However, removing or updating entries with
+.Fl r
+or
+.Fl u ,
+respectively, grows as a multiple of the index length and input size.
 .Sh FILES
 .Bl -tag -width Ds
 .It Pa mandoc.db
