@@ -42,6 +42,7 @@
 #define	MANDOC_IDX	 "mandoc.index"
 #define	MANDOC_BUFSZ	  BUFSIZ
 #define	MANDOC_FLAGS	  O_CREAT|O_TRUNC|O_RDWR
+#define	MANDOC_SLOP	  1024
 
 /* Bit-fields.  See makewhatis.1. */
 
@@ -93,8 +94,6 @@ static	void		  buf_appendb(struct buf *,
 static	void		  dbt_put(DB *, const char *, DBT *, DBT *);
 static	void		  hash_put(DB *, const struct buf *, int);
 static	void		  hash_reset(DB **);
-static	void		  op_delete(const char *, int, DB *, 
-				const char *, DB *, const char *);
 static	int		  pman_node(MAN_ARGS);
 static	void		  pmdoc_node(MDOC_ARGS);
 static	void		  pmdoc_An(MDOC_ARGS);
@@ -248,7 +247,7 @@ main(int argc, char *argv[])
 	struct mparse	*mp; /* parse sequence */
 	struct mdoc	*mdoc; /* resulting mdoc */
 	struct man	*man; /* resulting man */
-	enum op		 op;
+	enum op		 op; /* current operation */
 	char		*fn; /* current file being parsed */
 	const char	*msec, /* manual section */
 	      	 	*mtitle, /* manual title */
@@ -257,18 +256,19 @@ main(int argc, char *argv[])
 	char		 ibuf[MAXPATHLEN], /* index fname */
 			 fbuf[MAXPATHLEN],  /* btree fname */
 			 vbuf[8]; /* stringified record number */
-	int		 ch, seq, verb, i;
+	int		 ch, seq, sseq, verb, i;
 	DB		*idx, /* index database */
 			*db, /* keyword database */
 			*hash; /* temporary keyword hashtable */
 	DBT		 key, val;
-	enum mandoclevel ec;
+	enum mandoclevel ec; /* exit status */
 	size_t		 sv;
 	BTREEINFO	 info; /* btree configuration */
-	recno_t		 rec, /* current record number */
-			 maxrec;
-	recno_t		*recs;
-	size_t		 recsz;
+	recno_t		 rec,
+			 maxrec; /* supremum of all records */
+	recno_t		*recs; /* buffer of empty records */
+	size_t		 recsz, /* buffer size of recs */
+			 reccur; /* valid number of recs */
 	struct buf	 buf, /* keyword buffer */
 			 dbuf; /* description buffer */
 	extern int	 optind;
@@ -286,7 +286,7 @@ main(int argc, char *argv[])
 	mp = NULL;
 	hash = NULL;
 	recs = NULL;
-	recsz = 0;
+	recsz = reccur = 0;
 	maxrec = 0;
 	op = OP_NEW;
 	ec = MANDOCLEVEL_SYSERR;
@@ -359,47 +359,82 @@ main(int argc, char *argv[])
 
 	/*
 	 * If we're going to delete or update a database, remove the
-	 * entries now.  This doesn't actually remove them; it only sets
-	 * their record value lengths to zero.
+	 * entries now (both the index and all keywords pointing to it).
+	 * This doesn't actually remove them: it only sets their record
+	 * value lengths to zero.
+	 * While doing so, add the empty records to a list we'll access
+	 * later in re-adding entries to the database.
 	 */
 
-	if (OP_DELETE == op || OP_UPDATE == op)
-		for (i = 0; i < argc; i++)
-			op_delete(argv[i], verb, idx, ibuf, db, fbuf);
+	if (OP_DELETE == op || OP_UPDATE == op) {
+		seq = R_FIRST;
+		while (0 == (ch = (*idx->seq)(idx, &key, &val, seq))) {
+			seq = R_NEXT;
+			maxrec = *(recno_t *)key.data;
+			if (0 == val.size && OP_UPDATE == op) {
+				if (reccur >= recsz) {
+					recsz += MANDOC_SLOP;
+					recs = mandoc_realloc
+						(recs, recsz * sizeof(recno_t));
+				}
+				recs[(int)reccur] = maxrec;
+				reccur++;
+				continue;
+			}
+
+			fn = (char *)val.data;
+			for (i = 0; i < argc; i++)
+				if (0 == strcmp(fn, argv[i]))
+					break;
+
+			if (i == argc)
+				continue;
+
+			sseq = R_FIRST;
+			while (0 == (ch = (*db->seq)(db, &key, &val, sseq))) {
+				sseq = R_NEXT;
+				assert(8 == val.size);
+				if (maxrec != *(recno_t *)(val.data + 4))
+					continue;
+				if (verb > 1)
+					printf("%s: Deleted keyword: %s\n", 
+						fn, (char *)key.data);
+				ch = (*db->del)(db, &key, R_CURSOR);
+				if (ch < 0)
+					break;
+			}
+			if (ch < 0) {
+				perror(fbuf);
+				exit((int)MANDOCLEVEL_SYSERR);
+			}
+
+			if (verb)
+				printf("%s: Deleted index\n", fn);
+
+			val.size = 0;
+			ch = (*idx->put)(idx, &key, &val, R_CURSOR);
+			if (ch < 0) {
+				perror(ibuf);
+				exit((int)MANDOCLEVEL_SYSERR);
+			}
+
+			if (OP_UPDATE == op) {
+				if (reccur >= recsz) {
+					recsz += MANDOC_SLOP;
+					recs = mandoc_realloc
+						(recs, recsz * sizeof(recno_t));
+				}
+				recs[(int)reccur] = maxrec;
+				reccur++;
+			}
+		}
+		maxrec++;
+	}
 
 	if (OP_DELETE == op) {
 		ec = MANDOCLEVEL_OK;
 		goto out;
 	}
-
-	/*
-	 * Compile a list of all available "empty" records to use.  This
-	 * keeps the size of the database small.
-	 */
-
-	if (OP_UPDATE == op) {
-		i = 0;
-		seq = R_FIRST;
-		while (0 == (ch = (*idx->seq)(idx, &key, &val, seq))) {
-			seq = R_NEXT;
-			maxrec = *(recno_t *)key.data;
-			if (val.size > 0)
-				continue;
-			if ((size_t)i >= recsz) {
-				recsz += 1024;
-				recs = mandoc_realloc
-					(recs, recsz * sizeof(recno_t));
-			}
-			recs[i++] = maxrec;
-		}
-		if (ch < 0) {
-			perror(ibuf);
-			exit((int)MANDOCLEVEL_SYSERR);
-		}
-		recsz = (size_t)i;
-		maxrec++;
-		assert(recsz < maxrec);
-	} 
 
 	/*
 	 * Add records to the database.
@@ -418,9 +453,9 @@ main(int argc, char *argv[])
 	for (rec = 0, i = 0; i < argc; i++) {
 		fn = argv[i];
 		if (OP_UPDATE == op) {
-			if (recsz > 0) {
-				--recsz;
-				rec = recs[(int)recsz];
+			if (reccur > 0) {
+				--reccur;
+				rec = recs[(int)reccur];
 			} else if (maxrec > 0) {
 				rec = maxrec;
 				maxrec = 0;
@@ -491,7 +526,7 @@ main(int argc, char *argv[])
 			val.data = vbuf;
 
 			if (verb > 1)
-				printf("Indexed: %s, %s, 0x%x\n", 
+				printf("%s: Added keyword: %s, 0x%x\n", 
 					fn, (char *)key.data, 
 					*(int *)val.data);
 			dbt_put(db, fbuf, &key, &val);
@@ -516,7 +551,7 @@ main(int argc, char *argv[])
 		val.size = dbuf.len;
 
 		if (verb > 0)
-			printf("Indexed: %s\n", fn);
+			printf("%s: Added index\n", fn);
 
 		dbt_put(idx, ibuf, &key, &val);
 	}
@@ -537,57 +572,6 @@ out:
 	free(recs);
 
 	return((int)ec);
-}
-
-static void
-op_delete(const char *fn, int verb, DB *idx, 
-		const char *ibuf, DB *db, const char *fbuf)
-{
-	int		 ch;
-	DBT		 key, val;
-	recno_t		 rec;
-	unsigned int	 seq, sseq;
-
-	seq = R_FIRST;
-	while (0 == (ch = (*idx->seq)(idx, &key, &val, seq))) {
-		seq = R_NEXT;
-		if (0 == val.size)
-			continue;
-		if (strcmp((char *)val.data, fn))
-			continue;
-
-		rec = *(recno_t *)key.data;
-
-		sseq = R_FIRST;
-		while (0 == (ch = (*db->seq)(db, &key, &val, sseq))) {
-			sseq = R_NEXT;
-			assert(8 == val.size);
-			if (rec != *(recno_t *)(val.data + 4))
-				continue;
-			if (verb > 1)
-				printf("Deleted: %s, %s\n", 
-					fn, (char *)key.data);
-			ch = (*db->del)(db, &key, R_CURSOR);
-			if (ch < 0)
-				break;
-		}
-		if (ch < 0) {
-			perror(fbuf);
-			exit((int)MANDOCLEVEL_SYSERR);
-		}
-
-		val.size = 0;
-		if (verb)
-			printf("Deleted: %s\n", fn);
-		ch = (*idx->put)
-			(idx, &key, &val, R_CURSOR);
-		if (ch < 0)
-			break;
-	}
-	if (ch < 0) {
-		perror(ibuf);
-		exit((int)MANDOCLEVEL_SYSERR);
-	}
 }
 
 /*
