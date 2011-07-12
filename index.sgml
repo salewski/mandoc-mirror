@@ -311,16 +311,13 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
-			xx-06-2011: version 1.11.4
+			12-07-2011: version 1.11.4
 		</P>
 		<P>
 			Bug-fixes and clean-ups across all systems, especially in <A HREF="makewhatis.1.html">makewhatis</A> (note: still not
-			connected to the general build and must be compiled with <CODE>make makewhatis</CODE>).
-		</P>
-		<P>
-			The output for <A HREF="makewhatis.1.html">makewhatis</A> is used by several tools in the <A CLASS="external"
-			HREF="http://mdocml.bsd.lv/mandoc-tools">mandoc-tools</A> package.  In time these may be merged into <SPAN
-			CLASS="nm">mdocml</SPAN>, but for the time being their development is separate.
+			connected to the general build and must be compiled with <CODE>make makewhatis</CODE>) and the <A
+			HREF="man.7.html">man</A> parser.  This release was significantly assisted by participants in <A CLASS="external"
+			HREF="http://www.openbsd.org">OpenBSD</A>'s c2k11.  Thanks!
 		</P>
 		<P CLASS="news">
 			26-05-2011: version 1.11.3
