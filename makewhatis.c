@@ -262,7 +262,7 @@ main(int argc, char *argv[])
 			*db, /* keyword database */
 			*hash; /* temporary keyword hashtable */
 	DBT		 key, val;
-	enum mandocerr	 ec;
+	enum mandoclevel ec;
 	size_t		 sv;
 	BTREEINFO	 info; /* btree configuration */
 	recno_t		 rec, /* current record number */
@@ -287,6 +287,7 @@ main(int argc, char *argv[])
 	hash = NULL;
 	recs = NULL;
 	recsz = 0;
+	maxrec = 0;
 	op = OP_NEW;
 	ec = MANDOCLEVEL_SYSERR;
 
@@ -398,8 +399,7 @@ main(int argc, char *argv[])
 		recsz = (size_t)i;
 		maxrec++;
 		assert(recsz < maxrec);
-	} else
-		maxrec = 0;
+	} 
 
 	/*
 	 * Add records to the database.
