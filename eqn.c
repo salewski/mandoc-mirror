@@ -53,11 +53,13 @@ eqn_read(struct eqn_node **epp, int ln, const char *p, int offs)
 }
 
 struct eqn_node *
-eqn_alloc(int pos, int line)
+eqn_alloc(int pos, int line, struct mparse *parse)
 {
 	struct eqn_node	*p;
 
 	p = mandoc_calloc(1, sizeof(struct eqn_node));
+	p->parse = parse;
+
 	p->eqn.line = line;
 	p->eqn.pos = pos;
 

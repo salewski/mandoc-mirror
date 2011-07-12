@@ -45,6 +45,7 @@ struct	tbl_node {
 struct	eqn_node {
 	struct eqn	  eqn;
 	struct eqn_node	 *next;
+	struct mparse	 *parse;
 };
 
 struct tbl_node	*tbl_alloc(int, int, struct mparse *);
@@ -58,7 +59,7 @@ int		 tbl_data(struct tbl_node *, int, const char *);
 int		 tbl_cdata(struct tbl_node *, int, const char *);
 const struct tbl_span	*tbl_span(struct tbl_node *);
 void		 tbl_end(struct tbl_node *);
-struct eqn_node	*eqn_alloc(int, int);
+struct eqn_node	*eqn_alloc(int, int, struct mparse *);
 void		 eqn_end(struct eqn_node *);
 void		 eqn_free(struct eqn_node *);
 enum rofferr 	 eqn_read(struct eqn_node **, int, const char *, int);

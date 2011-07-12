@@ -1179,7 +1179,7 @@ roff_EQ(ROFF_ARGS)
 	struct eqn_node	*e;
 
 	assert(NULL == r->eqn);
-	e = eqn_alloc(ppos, ln);
+	e = eqn_alloc(ppos, ln, r->parse);
 
 	if (r->last_eqn)
 		r->last_eqn->next = e;
