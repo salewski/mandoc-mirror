@@ -344,7 +344,7 @@
 			Initial public release (this utility is very much under development) of <A HREF="makewhatis.1.html">makewhatis</A>,
 			initially named mandoc-db.
 			This utility produces keyword databases of manual content
-			<STRIKE>mandoc-cgi</STRIKE>, 
+			<DEL>mandoc-cgi</DEL>, 
 			<A HREF="http://mdocml.bsd.lv/mandoc-tools/index.html">mandoc-tools</A>, 
 			which features semantic querying of manual content.
 		</P>
