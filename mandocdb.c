@@ -44,7 +44,7 @@
 #define	MANDOC_FLAGS	  O_CREAT|O_TRUNC|O_RDWR
 #define	MANDOC_SLOP	  1024
 
-/* Bit-fields.  See makewhatis.1. */
+/* Bit-fields.  See mandocdb.8. */
 
 #define TYPE_NAME	  0x01
 #define TYPE_FUNCTION	  0x02

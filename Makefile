@@ -1,11 +1,11 @@
 .PHONY: 	 clean install installwww
 .SUFFIXES:	 .sgml .html .md5 .h .h.html
-.SUFFIXES:	 .1       .3       .7
-.SUFFIXES:	 .1.txt   .3.txt   .7.txt
-.SUFFIXES:	 .1.pdf   .3.pdf   .7.pdf
-.SUFFIXES:	 .1.ps    .3.ps    .7.ps
-.SUFFIXES:	 .1.html  .3.html  .7.html 
-.SUFFIXES:	 .1.xhtml .3.xhtml .7.xhtml 
+.SUFFIXES:	 .1       .3       .7       .8
+.SUFFIXES:	 .1.txt   .3.txt   .7.txt   .8.txt
+.SUFFIXES:	 .1.pdf   .3.pdf   .7.pdf   .8.pdf
+.SUFFIXES:	 .1.ps    .3.ps    .7.ps    .8.ps
+.SUFFIXES:	 .1.html  .3.html  .7.html  .8.html
+.SUFFIXES:	 .1.xhtml .3.xhtml .7.xhtml .8.xhtml
 
 # Specify this if you want to hard-code the operating system to appear
 # in the lower-left hand corner of -mdoc manuals.
@@ -73,7 +73,7 @@ SRCS		 = Makefile \
 		   mandoc.3 \
 		   mandoc.c \
 		   mandoc.h \
-		   mandocdb.1 \
+		   mandocdb.8 \
 		   mandocdb.c \
 		   mandoc_char.7 \
 		   mdoc.h \
@@ -237,12 +237,7 @@ PRECONV_LNS	 = preconv.ln
 
 $(PRECONV_OBJS) $(PRECONV_LNS): config.h
 
-INDEX_MANS	 = mandocdb.1.html \
-		   mandocdb.1.xhtml \
-		   mandocdb.1.ps \
-		   mandocdb.1.pdf \
-		   mandocdb.1.txt \
-		   mandoc.1.html \
+INDEX_MANS	 = mandoc.1.html \
 		   mandoc.1.xhtml \
 		   mandoc.1.ps \
 		   mandoc.1.pdf \
@@ -286,7 +281,12 @@ INDEX_MANS	 = mandocdb.1.html \
 		   tbl.7.xhtml \
 		   tbl.7.ps \
 		   tbl.7.pdf \
-		   tbl.7.txt
+		   tbl.7.txt \
+		   mandocdb.8.html \
+		   mandocdb.8.xhtml \
+		   mandocdb.8.ps \
+		   mandocdb.8.pdf \
+		   mandocdb.8.txt
 
 $(INDEX_MANS): mandoc
 
@@ -322,6 +322,7 @@ install: all
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
+	mkdir -p $(DESTDIR)$(MANDIR)/man8
 	$(INSTALL_PROGRAM) mandoc preconv $(DESTDIR)$(BINDIR)
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
 	$(INSTALL_LIB) man.h mdoc.h mandoc.h $(DESTDIR)$(INCLUDEDIR)
@@ -399,19 +400,19 @@ config.h: config.h.pre config.h.post
 .h.h.html:
 	highlight -I $< >$@
 
-.1.1.txt .3.3.txt .7.7.txt:
+.1.1.txt .3.3.txt .7.7.txt .8.8.txt:
 	./mandoc -Tascii -Wall,stop $< | col -b >$@
 
-.1.1.html .3.3.html .7.7.html:
+.1.1.html .3.3.html .7.7.html .8.8.html:
 	./mandoc -Thtml -Wall,stop -Ostyle=style.css,man=%N.%S.html,includes=%I.html $< >$@
 
-.1.1.ps .3.3.ps .7.7.ps:
+.1.1.ps .3.3.ps .7.7.ps .8.8.ps:
 	./mandoc -Tps -Wall,stop $< >$@
 
-.1.1.xhtml .3.3.xhtml .7.7.xhtml:
+.1.1.xhtml .3.3.xhtml .7.7.xhtml .8.8.xhtml:
 	./mandoc -Txhtml -Wall,stop -Ostyle=style.css,man=%N.%S.xhtml,includes=%I.html $< >$@
 
-.1.1.pdf .3.3.pdf .7.7.pdf:
+.1.1.pdf .3.3.pdf .7.7.pdf .8.8.pdf:
 	./mandoc -Tpdf -Wall,stop $< >$@
 
 .sgml.html:
