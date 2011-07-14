@@ -73,8 +73,8 @@ SRCS		 = Makefile \
 		   mandoc.3 \
 		   mandoc.c \
 		   mandoc.h \
-		   makewhatis.1 \
-		   makewhatis.c \
+		   mandocdb.1 \
+		   mandocdb.c \
 		   mandoc_char.7 \
 		   mdoc.h \
 		   mdoc.7 \
@@ -227,21 +227,21 @@ $(MANDOC_OBJS) $(MANDOC_LNS): main.h mandoc.h mdoc.h man.h config.h out.h
 
 compat.o compat.ln: config.h
 
-MAKEWHATIS_OBJS	 = makewhatis.o
-MAKEWHATIS_LNS	 = makewhatis.ln
+MANDOCDB_OBJS	 = mandocdb.o
+MANDOCDB_LNS	 = mandocdb.ln
 
-$(MAKEWHATIS_OBJS) $(MAKEWHATIS_LNS): mandoc.h mdoc.h man.h config.h
+$(MANDOCDB_OBJS) $(MANDOCDB_LNS): mandoc.h mdoc.h man.h config.h
 
 PRECONV_OBJS	 = preconv.o
 PRECONV_LNS	 = preconv.ln
 
 $(PRECONV_OBJS) $(PRECONV_LNS): config.h
 
-INDEX_MANS	 = makewhatis.1.html \
-		   makewhatis.1.xhtml \
-		   makewhatis.1.ps \
-		   makewhatis.1.pdf \
-		   makewhatis.1.txt \
+INDEX_MANS	 = mandocdb.1.html \
+		   mandocdb.1.xhtml \
+		   mandocdb.1.ps \
+		   mandocdb.1.pdf \
+		   mandocdb.1.txt \
 		   mandoc.1.html \
 		   mandoc.1.xhtml \
 		   mandoc.1.ps \
@@ -304,8 +304,8 @@ lint: llib-llibmandoc.ln llib-lmandoc.ln llib-lpreconv.ln
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS)
 	rm -f llib-llibmandoc.ln $(LIBMANDOC_LNS)
-	rm -f makewhatis $(MAKEWHATIS_OBJS)
-	rm -f llib-lmakewhatis.ln $(MAKEWHATIS_LNS)
+	rm -f mandocdb $(MANDOCDB_OBJS)
+	rm -f llib-lmandocdb.ln $(MANDOCDB_LNS)
 	rm -f preconv $(PRECONV_OBJS)
 	rm -f llib-lpreconv.ln $(PRECONV_LNS)
 	rm -f mandoc $(MANDOC_OBJS)
@@ -353,11 +353,11 @@ llib-lmandoc.ln: $(MANDOC_LNS)
 	$(LINT) $(LINTFLAGS) -Cmandoc $(MANDOC_LNS)
 
 # You'll need -ldb for Linux.
-makewhatis: $(MAKEWHATIS_OBJS) libmandoc.a
-	$(CC) -o $@ $(MAKEWHATIS_OBJS) libmandoc.a
+mandocdb: $(MANDOCDB_OBJS) libmandoc.a
+	$(CC) -o $@ $(MANDOCDB_OBJS) libmandoc.a
 
-llib-lmakewhatis.ln: $(MAKEWHATIS_LNS)
-	$(LINT) $(LINTFLAGS) -Cmakewhatis $(MAKEWHATIS_LNS)
+llib-lmandocdb.ln: $(MANDOCDB_LNS)
+	$(LINT) $(LINTFLAGS) -Cmandocdb $(MANDOCDB_LNS)
 
 preconv: $(PRECONV_OBJS)
 	$(CC) -o $@ $(PRECONV_OBJS)

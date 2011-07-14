@@ -29,7 +29,7 @@
 			HREF="mandoc.1.html">mandoc</A>, which interfaces with the compiler library to format output for UNIX terminals (with
 			support for wide-character locales), XHTML, HTML, PostScript, and PDF.  
 			It also includes <A HREF="preconv.1.html">preconv</A>, for recoding multibyte manuals; and <A
-			HREF="makewhatis.1.html">makewhatis</A>, for indexing manuals.
+			HREF="mandocdb.1.html">mandocdb</A>, for indexing manuals.
 			It is a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv</A> project.  
 		</P>
 		<P>
@@ -40,15 +40,15 @@
 		</H1>
 		<P>
 			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any UNIX system, although <A
-			HREF="makewhatis.1.html">makewhatis</A> requires <A CLASS="external"
+			HREF="mandocdb.1.html">mandocdb</A> requires <A CLASS="external"
 			HREF="http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html">Berkeley Database</A> (this is
 			installed by default on all BSD operating systems).  
 			To compile <SPAN CLASS="nm">mdocml</SPAN>, run <CODE>make</CODE>, then <CODE>make install</CODE> to install into
 			<I>/usr/local</I>.
 			Be aware: if you have an existing <A HREF="http://www.gnu.org/software/groff/" CLASS="external">groff</A> installation,
 			this may overwrite its <B>preconv</B> binary.
-			The <A HREF="makewhatis.1.html">makewhatis</A> utility is not yet linked to the build.  You must run <CODE>make
-			makewhatis</CODE> to build it (it does not install).
+			The <A HREF="mandocdb.1.html">mandocdb</A> utility is not yet linked to the build.  You must run <CODE>make
+			mandocdb</CODE> to build it (it does not install).
 		</P>
 		<P>
 			The most current version of <SPAN CLASS="nm">mdocml</SPAN> is <SPAN CLASS="attn">@VERSION@</SPAN>, dated <SPAN
@@ -152,14 +152,14 @@
 					</TD>
 				</TR>
 				<TR>
-					<TD VALIGN="top"><A HREF="makewhatis.1.html">makewhatis(1)</A></TD>
+					<TD VALIGN="top"><A HREF="mandocdb.1.html">mandocdb(1)</A></TD>
 					<TD VALIGN="top">
 						index UNIX manuals
 						<SMALL>
-							(<A HREF="makewhatis.1.txt">text</A> | 
-							<A HREF="makewhatis.1.xhtml">xhtml</A> |
-							<A HREF="makewhatis.1.pdf">pdf</A> |
-							<A HREF="makewhatis.1.ps">postscript</A>)
+							(<A HREF="mandocdb.1.txt">text</A> | 
+							<A HREF="mandocdb.1.xhtml">xhtml</A> |
+							<A HREF="mandocdb.1.pdf">pdf</A> |
+							<A HREF="mandocdb.1.ps">postscript</A>)
 						</SMALL>
 					</TD>
 				</TR>
@@ -314,8 +314,8 @@
 			12-07-2011: version 1.11.4
 		</P>
 		<P>
-			Bug-fixes and clean-ups across all systems, especially in <A HREF="makewhatis.1.html">makewhatis</A> (note: still not
-			connected to the general build and must be compiled with <CODE>make makewhatis</CODE>) and the <A
+			Bug-fixes and clean-ups across all systems, especially in <INS><A HREF="mandocdb.1.html">mandocdb</A></INS> <DEL>makewhatis</DEL> (note: still not
+			connected to the general build and must be compiled with <INS><CODE>make mandocdb</CODE></INS> <DEL><CODE>make makewhatis</CODE></DEL>) and the <A
 			HREF="man.7.html">man</A> parser.  This release was significantly assisted by participants in <A CLASS="external"
 			HREF="http://www.openbsd.org">OpenBSD</A>'s c2k11.  Thanks!
 		</P>
@@ -341,7 +341,7 @@
 		<P>
 			Corrected some installation issues in version 1.11.1.
 			Further migration to <A HREF="mandoc.3.html">libmandoc</A>.
-			Initial public release (this utility is very much under development) of <A HREF="makewhatis.1.html">makewhatis</A>,
+			Initial public release (this utility is very much under development) of <INS><A HREF="mandocdb.1.html">mandocdb</A></INS><DEL>makewhatis</DEL>,
 			initially named mandoc-db.
 			This utility produces keyword databases of manual content
 			<DEL>mandoc-cgi</DEL>, 
