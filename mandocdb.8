@@ -22,9 +22,7 @@
 .Nd index UNIX manuals
 .Sh SYNOPSIS
 .Nm
-.Op Fl ruv
-.Op Fl d Ar dir
-.Ar
+.Ar dir...
 .Sh DESCRIPTION
 The
 .Nm
@@ -33,42 +31,33 @@ utility extracts keywords from
 manuals and indexes them for fast retrieval.
 The arguments are as follows:
 .Bl -tag -width Ds
-.It Fl d Ar dir
-The directory into which to write the keyword and index databases.
-.It Ar
-Read input from zero or more files in
+.It Ar dir...
+Recursively scan for
 .Xr mdoc 7
-or
+and
 .Xr man 7
 .Ux
-manual format.
-.It Fl r
-Remove entries.
-This will remove the index and keyword references.
-If the record is not found, it is ignored.
-.It Fl u
-Update the record.
-This will first remove the record (as in
-.Fl r )
-then re-add it.
-.It Fl v
-Verbose output.
-If specified once, prints the name of each indexed file.
-If twice, prints keywords for each file.
+manual files in each
+.Ar dir
+directory.
+.Sx Index Database
+and
+.Sx Keyword Database
+files are installed in each
+.Ar dir
+directory.
+Existing databases are truncated.
 .El
 .Pp
 By default,
 .Nm
-constructs a new
-.Sx Index Database
-and
-.Sx Keyword Database
-in the current working directory.
-Existing databases are truncated.
+does nothing: the
+.Ar dir...
+invocation must be used.
 .Pp
-If fatal parse errors are encountered, the offending file is printed to
-stderr, omitted from the index, and the parse continues with the next
-input file.
+If fatal parse errors are encountered while parsing, the offending file
+is printed to stderr, omitted from the index, and the parse continues
+with the next input file.
 .Ss Index Database
 The index database,
 .Pa mandoc.index ,

@@ -21,6 +21,7 @@
 #include <sys/param.h>
 
 #include <assert.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -63,6 +64,7 @@
 struct	of {
 	char		 *fname;
 	struct of	 *next;
+	struct of	 *first;
 };
 
 /* Buffer for storing growable data. */
@@ -107,6 +109,8 @@ static	void		  index_merge(const struct of *, struct mparse *,
 static	void		  index_prune(const struct of *, DB *, 
 				const char *, DB *, const char *, 
 				recno_t *, recno_t **, size_t *);
+static	int		  ofile_build(const char *, struct of **);
+static	void		  ofile_free(struct of *);
 static	int		  pman_node(MAN_ARGS);
 static	void		  pmdoc_node(MDOC_ARGS);
 static	void		  pmdoc_An(MDOC_ARGS);
@@ -259,14 +263,12 @@ main(int argc, char *argv[])
 {
 	struct mparse	*mp; /* parse sequence */
 	enum op		 op; /* current operation */
-	const char	*dir; /* result dir (default: cwd) */
 	char		 ibuf[MAXPATHLEN], /* index fname */
 			 fbuf[MAXPATHLEN];  /* btree fname */
-	int		 ch, verb, i;
+	int		 ch, i, flags;
 	DB		*idx, /* index database */
 			*db, /* keyword database */
 			*hash; /* temporary keyword hashtable */
-	enum mandoclevel ec; /* exit status */
 	BTREEINFO	 info; /* btree configuration */
 	recno_t		 maxrec; /* supremum of all records */
 	recno_t		*recs; /* buffer of empty records */
@@ -274,7 +276,7 @@ main(int argc, char *argv[])
 			 reccur; /* valid number of recs */
 	struct buf	 buf, /* keyword buffer */
 			 dbuf; /* description buffer */
-	struct of	*ofile;
+	struct of	*of;
 	extern int	 optind;
 	extern char	*optarg;
 
@@ -284,9 +286,7 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
-	ofile = NULL;
-	dir = "";
-	verb = 0;
+	of = NULL;
 	db = idx = NULL;
 	mp = NULL;
 	hash = NULL;
@@ -294,25 +294,12 @@ main(int argc, char *argv[])
 	recsz = reccur = 0;
 	maxrec = 0;
 	op = OP_NEW;
-	ec = MANDOCLEVEL_SYSERR;
 
 	memset(&buf, 0, sizeof(struct buf));
 	memset(&dbuf, 0, sizeof(struct buf));
 
-	while (-1 != (ch = getopt(argc, argv, "d:ruv")))
+	while (-1 != (ch = getopt(argc, argv, "")))
 		switch (ch) {
-		case ('d'):
-			dir = optarg;
-			break;
-		case ('r'):
-			op = OP_DELETE;
-			break;
-		case ('u'):
-			op = OP_UPDATE;
-			break;
-		case ('v'):
-			verb++;
-			break;
 		default:
 			usage();
 			return((int)MANDOCLEVEL_BADARG);
@@ -321,92 +308,63 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	ibuf[0] = ibuf[MAXPATHLEN - 2] =
-		fbuf[0] = fbuf[MAXPATHLEN - 2] = '\0';
-
-	strlcat(fbuf, dir, MAXPATHLEN);
-	strlcat(fbuf, MANDOC_DB, MAXPATHLEN);
-
-	strlcat(ibuf, dir, MAXPATHLEN);
-	strlcat(ibuf, MANDOC_IDX, MAXPATHLEN);
-
-	if ('\0' != fbuf[MAXPATHLEN - 2] ||
-			'\0' != ibuf[MAXPATHLEN - 2]) {
-		fprintf(stderr, "%s: Path too long\n", dir);
-		goto out;
-	}
-
-	/*
-	 * For the keyword database, open a BTREE database that allows
-	 * duplicates.  
-	 * For the index database, use a standard RECNO database type.
-	 * Truncate the database if we're creating a new one.
-	 */
-
 	memset(&info, 0, sizeof(BTREEINFO));
 	info.flags = R_DUP;
 
-	if (OP_NEW == op) {
-		db = dbopen(fbuf, MANDOC_FLAGS, 0644, DB_BTREE, &info);
-		idx = dbopen(ibuf, MANDOC_FLAGS, 0644, DB_RECNO, NULL);
-	} else {
-		db = dbopen(fbuf, O_CREAT|O_RDWR, 0644, DB_BTREE, &info);
-		idx = dbopen(ibuf, O_CREAT|O_RDWR, 0644, DB_RECNO, NULL);
-	}
-
-	if (NULL == db) {
-		perror(fbuf);
-		goto out;
-	} else if (NULL == db) {
-		perror(ibuf);
-		goto out;
-	}
-
-	ofile = mandoc_calloc(argc, sizeof(struct of));
-	for (i = 0; i < argc; i++) {
-		ofile[i].next = &ofile[i + 1];
-		ofile[i].fname = argv[i];
-	}
-
-	ofile[argc - 1].next = NULL;
-
-	/*
-	 * If we're going to delete or update a database, remove the
-	 * entries now (both the index and all keywords pointing to it).
-	 * This doesn't actually remove them: it only sets their record
-	 * value lengths to zero.
-	 * While doing so, add the empty records to a list we'll access
-	 * later in re-adding entries to the database.
-	 */
-
-	if (OP_DELETE == op || OP_UPDATE == op)
-		index_prune(ofile, db, fbuf, idx, ibuf, 
-				&maxrec, &recs, &recsz);
-
-	if (OP_DELETE == op) {
-		ec = MANDOCLEVEL_OK;
-		goto out;
-	}
-
-	/*
-	 * Add records to the database.
-	 * Try parsing each manual given on the command line.  
-	 * If we fail, then emit an error and keep on going.  
-	 * Take resulting trees and push them down into the database code.
-	 * Use the auto-parser and don't report any errors.
-	 */
-
 	mp = mparse_alloc(MPARSE_AUTO, MANDOCLEVEL_FATAL, NULL, NULL);
 
+	flags = OP_NEW == op ? O_CREAT|O_TRUNC|O_RDWR : O_CREAT|O_RDWR;
+
 	buf.size = dbuf.size = MANDOC_BUFSZ;
+
 	buf.cp = mandoc_malloc(buf.size);
 	dbuf.cp = mandoc_malloc(dbuf.size);
 
-	index_merge(ofile, mp, &dbuf, &buf, hash, db, 
-			fbuf, idx, ibuf, maxrec, recs, reccur);
+	for (i = 0; i < argc; i++) {
+		ibuf[0] = ibuf[MAXPATHLEN - 2] =
+			fbuf[0] = fbuf[MAXPATHLEN - 2] = '\0';
 
-	ec = MANDOCLEVEL_OK;
-out:
+		strlcat(fbuf, argv[i], MAXPATHLEN);
+		strlcat(fbuf, MANDOC_DB, MAXPATHLEN);
+
+		strlcat(ibuf, argv[i], MAXPATHLEN);
+		strlcat(ibuf, MANDOC_IDX, MAXPATHLEN);
+
+		if ('\0' != fbuf[MAXPATHLEN - 2] ||
+				'\0' != ibuf[MAXPATHLEN - 2]) {
+			fprintf(stderr, "%s: Path too long\n", argv[i]);
+			break;
+		}
+
+		db = dbopen(fbuf, flags, 0644, DB_BTREE, &info);
+		idx = dbopen(ibuf, flags, 0644, DB_RECNO, NULL);
+
+		if (NULL == db) {
+			perror(fbuf);
+			break;
+		} else if (NULL == db) {
+			perror(ibuf);
+			break;
+		}
+
+		ofile_free(of);
+		of = NULL;
+
+		if ( ! ofile_build(argv[i], &of))
+			break;
+		of = of->first;
+
+		if (OP_DELETE == op || OP_UPDATE == op)
+			index_prune(of, db, fbuf, idx, ibuf, 
+					&maxrec, &recs, &recsz);
+
+		if (OP_DELETE == op)
+			continue;
+
+		index_merge(of, mp, &dbuf, &buf, hash, db, 
+				fbuf, idx, ibuf, maxrec, recs, reccur);
+	}
+
 	if (db)
 		(*db->close)(db);
 	if (idx)
@@ -416,12 +374,12 @@ out:
 	if (mp)
 		mparse_free(mp);
 
-	free(ofile);
+	ofile_free(of);
 	free(buf.cp);
 	free(dbuf.cp);
 	free(recs);
 
-	return((int)ec);
+	return(i < argc ? MANDOCLEVEL_SYSERR : MANDOCLEVEL_OK);
 }
 
 void
@@ -1144,10 +1102,72 @@ pman_node(MAN_ARGS)
 	return(0);
 }
 
+/*
+ * Recursively build up a list of files to parse.
+ * We use this instead of ftw() and so on because I don't want global
+ * variables hanging around.
+ * This ignores the mandoc.db and mandoc.index files, but assumes that
+ * everything else is a manual.
+ * Pass in a pointer to a NULL structure for the first invocation.
+ */
+static int
+ofile_build(const char *dir, struct of **of)
+{
+	DIR		*d;
+	const char	*fn;
+	struct of	*nof;
+	struct dirent	*dp;
+
+	if (NULL == (d = opendir(dir))) {
+		perror(dir);
+		return(0);
+	}
+
+	while (NULL != (dp = readdir(d))) {
+		fn = dp->d_name;
+		if (DT_DIR == dp->d_type) {
+			if (strcmp(".", fn) && strcmp("..", fn))
+				if ( ! ofile_build(dp->d_name, of))
+					return(0);
+			continue;
+		} else if (DT_REG != dp->d_type)
+			continue;
+
+		if (0 == strcmp(MANDOC_DB, fn) ||
+				0 == strcmp(MANDOC_IDX, fn))
+			continue;
+
+		nof = mandoc_calloc(1, sizeof(struct of));
+		nof->fname = mandoc_strdup(fn);
+
+		if (NULL == *of) {
+			*of = nof;
+			(*of)->first = nof;
+		} else {
+			(*of)->next = nof;
+			*of = nof;
+		}
+	}
+
+	return(1);
+}
+
+static void
+ofile_free(struct of *of)
+{
+	struct of	*nof;
+
+	while (of) {
+		nof = of->next;
+		free(of->fname);
+		free(of);
+		of = nof;
+	}
+}
+
 static void
 usage(void)
 {
 
-	fprintf(stderr, "usage: %s [-ruv] [-d path] [file...]\n", 
-			progname);
+	fprintf(stderr, "usage: %s [dir...]\n", progname);
 }
