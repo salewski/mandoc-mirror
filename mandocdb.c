@@ -60,6 +60,11 @@
 #define TYPE_ENV	  0x800
 #define TYPE_ERR	  0x1000
 
+struct	of {
+	char		 *fname;
+	struct of	 *next;
+};
+
 /* Buffer for storing growable data. */
 
 struct	buf {
@@ -94,6 +99,14 @@ static	void		  buf_appendb(struct buf *,
 static	void		  dbt_put(DB *, const char *, DBT *, DBT *);
 static	void		  hash_put(DB *, const struct buf *, int);
 static	void		  hash_reset(DB **);
+static	void		  index_merge(const struct of *, struct mparse *,
+				struct buf *, struct buf *,
+				DB *, DB *, const char *, 
+				DB *, const char *, 
+				recno_t, const recno_t *, size_t);
+static	void		  index_prune(const struct of *, DB *, 
+				const char *, DB *, const char *, 
+				recno_t *, recno_t **, size_t *);
 static	int		  pman_node(MAN_ARGS);
 static	void		  pmdoc_node(MDOC_ARGS);
 static	void		  pmdoc_An(MDOC_ARGS);
@@ -245,32 +258,23 @@ int
 main(int argc, char *argv[])
 {
 	struct mparse	*mp; /* parse sequence */
-	struct mdoc	*mdoc; /* resulting mdoc */
-	struct man	*man; /* resulting man */
 	enum op		 op; /* current operation */
-	char		*fn; /* current file being parsed */
-	const char	*msec, /* manual section */
-	      	 	*mtitle, /* manual title */
-			*arch, /* manual architecture */
-	      		*dir; /* result dir (default: cwd) */
+	const char	*dir; /* result dir (default: cwd) */
 	char		 ibuf[MAXPATHLEN], /* index fname */
-			 fbuf[MAXPATHLEN],  /* btree fname */
-			 vbuf[8]; /* stringified record number */
-	int		 ch, seq, sseq, verb, i;
+			 fbuf[MAXPATHLEN];  /* btree fname */
+	int		 ch, verb, i;
 	DB		*idx, /* index database */
 			*db, /* keyword database */
 			*hash; /* temporary keyword hashtable */
-	DBT		 key, val;
 	enum mandoclevel ec; /* exit status */
-	size_t		 sv;
 	BTREEINFO	 info; /* btree configuration */
-	recno_t		 rec,
-			 maxrec; /* supremum of all records */
+	recno_t		 maxrec; /* supremum of all records */
 	recno_t		*recs; /* buffer of empty records */
 	size_t		 recsz, /* buffer size of recs */
 			 reccur; /* valid number of recs */
 	struct buf	 buf, /* keyword buffer */
 			 dbuf; /* description buffer */
+	struct of	*ofile;
 	extern int	 optind;
 	extern char	*optarg;
 
@@ -280,6 +284,7 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
+	ofile = NULL;
 	dir = "";
 	verb = 0;
 	db = idx = NULL;
@@ -357,6 +362,14 @@ main(int argc, char *argv[])
 		goto out;
 	}
 
+	ofile = mandoc_calloc(argc, sizeof(struct of));
+	for (i = 0; i < argc; i++) {
+		ofile[i].next = &ofile[i + 1];
+		ofile[i].fname = argv[i];
+	}
+
+	ofile[argc - 1].next = NULL;
+
 	/*
 	 * If we're going to delete or update a database, remove the
 	 * entries now (both the index and all keywords pointing to it).
@@ -366,70 +379,9 @@ main(int argc, char *argv[])
 	 * later in re-adding entries to the database.
 	 */
 
-	if (OP_DELETE == op || OP_UPDATE == op) {
-		seq = R_FIRST;
-		while (0 == (ch = (*idx->seq)(idx, &key, &val, seq))) {
-			seq = R_NEXT;
-			maxrec = *(recno_t *)key.data;
-			if (0 == val.size && OP_UPDATE == op) {
-				if (reccur >= recsz) {
-					recsz += MANDOC_SLOP;
-					recs = mandoc_realloc
-						(recs, recsz * sizeof(recno_t));
-				}
-				recs[(int)reccur] = maxrec;
-				reccur++;
-				continue;
-			}
-
-			fn = (char *)val.data;
-			for (i = 0; i < argc; i++)
-				if (0 == strcmp(fn, argv[i]))
-					break;
-
-			if (i == argc)
-				continue;
-
-			sseq = R_FIRST;
-			while (0 == (ch = (*db->seq)(db, &key, &val, sseq))) {
-				sseq = R_NEXT;
-				assert(8 == val.size);
-				if (maxrec != *(recno_t *)(val.data + 4))
-					continue;
-				if (verb > 1)
-					printf("%s: Deleted keyword: %s\n", 
-						fn, (char *)key.data);
-				ch = (*db->del)(db, &key, R_CURSOR);
-				if (ch < 0)
-					break;
-			}
-			if (ch < 0) {
-				perror(fbuf);
-				exit((int)MANDOCLEVEL_SYSERR);
-			}
-
-			if (verb)
-				printf("%s: Deleted index\n", fn);
-
-			val.size = 0;
-			ch = (*idx->put)(idx, &key, &val, R_CURSOR);
-			if (ch < 0) {
-				perror(ibuf);
-				exit((int)MANDOCLEVEL_SYSERR);
-			}
-
-			if (OP_UPDATE == op) {
-				if (reccur >= recsz) {
-					recsz += MANDOC_SLOP;
-					recs = mandoc_realloc
-						(recs, recsz * sizeof(recno_t));
-				}
-				recs[(int)reccur] = maxrec;
-				reccur++;
-			}
-		}
-		maxrec++;
-	}
+	if (OP_DELETE == op || OP_UPDATE == op)
+		index_prune(ofile, db, fbuf, idx, ibuf, 
+				&maxrec, &recs, &recsz);
 
 	if (OP_DELETE == op) {
 		ec = MANDOCLEVEL_OK;
@@ -450,17 +402,53 @@ main(int argc, char *argv[])
 	buf.cp = mandoc_malloc(buf.size);
 	dbuf.cp = mandoc_malloc(dbuf.size);
 
-	for (rec = 0, i = 0; i < argc; i++) {
-		fn = argv[i];
-		if (OP_UPDATE == op) {
-			if (reccur > 0) {
-				--reccur;
-				rec = recs[(int)reccur];
-			} else if (maxrec > 0) {
-				rec = maxrec;
-				maxrec = 0;
-			} else
-				rec++;
+	index_merge(ofile, mp, &dbuf, &buf, hash, db, 
+			fbuf, idx, ibuf, maxrec, recs, reccur);
+
+	ec = MANDOCLEVEL_OK;
+out:
+	if (db)
+		(*db->close)(db);
+	if (idx)
+		(*idx->close)(idx);
+	if (hash)
+		(*hash->close)(hash);
+	if (mp)
+		mparse_free(mp);
+
+	free(ofile);
+	free(buf.cp);
+	free(dbuf.cp);
+	free(recs);
+
+	return((int)ec);
+}
+
+void
+index_merge(const struct of *of, struct mparse *mp,
+		struct buf *dbuf, struct buf *buf,
+		DB *hash, DB *db, const char *dbf, 
+		DB *idx, const char *idxf, 
+		recno_t maxrec, const recno_t *recs, size_t reccur)
+{
+	recno_t		 rec;
+	int		 ch;
+	DBT		 key, val;
+	struct mdoc	*mdoc;
+	struct man	*man;
+	const char	*fn, *msec, *mtitle, *arch;
+	size_t		 sv;
+	unsigned	 seq;
+	char		 vbuf[8];
+
+	for (rec = 0; of; of = of->next) {
+		fn = of->fname;
+		if (reccur > 0) {
+			--reccur;
+			rec = recs[(int)reccur];
+		} else if (maxrec > 0) {
+			rec = maxrec;
+			maxrec = 0;
 		} else
 			rec++;
 
@@ -480,7 +468,8 @@ main(int argc, char *argv[])
 			mdoc_meta(mdoc)->msec : man_meta(man)->msec;
 		mtitle = NULL != mdoc ? 
 			mdoc_meta(mdoc)->title : man_meta(man)->title;
-		arch = NULL != mdoc ? mdoc_meta(mdoc)->arch : NULL;
+		arch = NULL != mdoc ? 
+			mdoc_meta(mdoc)->arch : NULL;
 
 		if (NULL == arch)
 			arch = "";
@@ -493,21 +482,21 @@ main(int argc, char *argv[])
 		 * going to write a nil byte in its place.
 		 */
 
-		dbuf.len = 0;
-		buf_appendb(&dbuf, fn, strlen(fn) + 1);
-		buf_appendb(&dbuf, msec, strlen(msec) + 1);
-		buf_appendb(&dbuf, mtitle, strlen(mtitle) + 1);
-		buf_appendb(&dbuf, arch, strlen(arch) + 1);
+		dbuf->len = 0;
+		buf_appendb(dbuf, fn, strlen(fn) + 1);
+		buf_appendb(dbuf, msec, strlen(msec) + 1);
+		buf_appendb(dbuf, mtitle, strlen(mtitle) + 1);
+		buf_appendb(dbuf, arch, strlen(arch) + 1);
 
-		sv = dbuf.len;
+		sv = dbuf->len;
 
 		/* Fix the record number in the btree value. */
 
 		if (mdoc)
-			pmdoc_node(hash, &buf, &dbuf,
+			pmdoc_node(hash, buf, dbuf,
 				mdoc_node(mdoc), mdoc_meta(mdoc));
 		else 
-			pman_node(hash, &buf, &dbuf, man_node(man));
+			pman_node(hash, buf, dbuf, man_node(man));
 
 		/*
 		 * Copy from the in-memory hashtable of pending keywords
@@ -525,11 +514,9 @@ main(int argc, char *argv[])
 			val.size = sizeof(vbuf);
 			val.data = vbuf;
 
-			if (verb > 1)
-				printf("%s: Added keyword: %s, 0x%x\n", 
-					fn, (char *)key.data, 
-					*(int *)val.data);
-			dbt_put(db, fbuf, &key, &val);
+			printf("%s: Added keyword: %s\n", 
+					fn, (char *)key.data);
+			dbt_put(db, dbf, &key, &val);
 		}
 		if (ch < 0) {
 			perror("hash");
@@ -541,37 +528,98 @@ main(int argc, char *argv[])
 		 * set, put an empty one in now.
 		 */
 
-		if (dbuf.len == sv)
-			buf_appendb(&dbuf, "", 1);
+		if (dbuf->len == sv)
+			buf_appendb(dbuf, "", 1);
 
 		key.data = &rec;
 		key.size = sizeof(recno_t);
 
-		val.data = dbuf.cp;
-		val.size = dbuf.len;
+		val.data = dbuf->cp;
+		val.size = dbuf->len;
 
-		if (verb > 0)
-			printf("%s: Added index\n", fn);
-
-		dbt_put(idx, ibuf, &key, &val);
+		printf("%s: Added index\n", fn);
+		dbt_put(idx, idxf, &key, &val);
 	}
+}
 
-	ec = MANDOCLEVEL_OK;
-out:
-	if (db)
-		(*db->close)(db);
-	if (idx)
-		(*idx->close)(idx);
-	if (hash)
-		(*hash->close)(hash);
-	if (mp)
-		mparse_free(mp);
+/*
+ * Scan through all entries in the index file `idx' and prune those
+ * entries in `ofile'.
+ * Pruning consists of removing from `db', then invalidating the entry
+ * in `idx' (zeroing its value size).
+ */
+static void
+index_prune(const struct of *ofile, DB *db, const char *dbf, 
+		DB *idx, const char *idxf, 
+		recno_t *maxrec, recno_t **recs, size_t *recsz)
+{
+	const struct of	*of;
+	const char	*fn;
+	unsigned	 seq, sseq;
+	DBT		 key, val;
+	size_t		 reccur;
+	int		 ch;
 
-	free(buf.cp);
-	free(dbuf.cp);
-	free(recs);
+	reccur = 0;
+	seq = R_FIRST;
+	while (0 == (ch = (*idx->seq)(idx, &key, &val, seq))) {
+		seq = R_NEXT;
+		*maxrec = *(recno_t *)key.data;
+		if (0 == val.size) {
+			if (reccur >= *recsz) {
+				*recsz += MANDOC_SLOP;
+				*recs = mandoc_realloc(*recs, 
+					*recsz * sizeof(recno_t));
+			}
+			(*recs)[(int)reccur] = *maxrec;
+			reccur++;
+			continue;
+		}
 
-	return((int)ec);
+		fn = (char *)val.data;
+		for (of = ofile; of; of = of->next)
+			if (0 == strcmp(fn, of->fname))
+				break;
+
+		if (NULL == of)
+			continue;
+
+		sseq = R_FIRST;
+		while (0 == (ch = (*db->seq)(db, &key, &val, sseq))) {
+			sseq = R_NEXT;
+			assert(8 == val.size);
+			if (*maxrec != *(recno_t *)(val.data + 4))
+				continue;
+			printf("%s: Deleted keyword: %s\n", 
+				fn, (char *)key.data);
+			ch = (*db->del)(db, &key, R_CURSOR);
+			if (ch < 0)
+				break;
+		}
+		if (ch < 0) {
+			perror(dbf);
+			exit((int)MANDOCLEVEL_SYSERR);
+		}
+
+		printf("%s: Deleted index\n", fn);
+
+		val.size = 0;
+		ch = (*idx->put)(idx, &key, &val, R_CURSOR);
+		if (ch < 0) {
+			perror(idxf);
+			exit((int)MANDOCLEVEL_SYSERR);
+		}
+
+		if (reccur >= *recsz) {
+			*recsz += MANDOC_SLOP;
+			*recs = mandoc_realloc
+				(*recs, *recsz * sizeof(recno_t));
+		}
+
+		(*recs)[(int)reccur] = *maxrec;
+		reccur++;
+	}
+	(*maxrec)++;
 }
 
 /*
