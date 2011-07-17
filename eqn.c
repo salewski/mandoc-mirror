@@ -54,11 +54,12 @@ eqn_read(struct eqn_node **epp, int ln,
 		return(ROFF_IGN);
 
 	if (6 == sz && 0 == strncmp("define", start, 6)) {
-		/* 
-		 * TODO: warn if key is quoted: groff doesn't seem to
-		 * like this (I don't know why).
-		 */
+		if (end && '"' == *end)
+			mandoc_msg(MANDOCERR_EQNQUOTE, 
+					ep->parse, ln, pos, NULL);
+
 		start = eqn_nexttok(ep->parse, ln, pos, &end, &sz);
+
 		for (i = 0; i < (int)ep->defsz; i++)  {
 			if (ep->defs[i].keysz != sz)
 				continue;
@@ -150,6 +151,12 @@ eqn_free(struct eqn_node *p)
 	free(p);
 }
 
+/*
+ * Return the current equation token setting "next" on the next one,
+ * setting the token size in "sz".
+ * This does the Right Thing for quoted strings, too.
+ * Returns NULL if no more tokens exist.
+ */
 static const char *
 eqn_nexttok(struct mparse *mp, int ln, int pos,
 		const char **next, size_t *sz)
@@ -177,6 +184,11 @@ eqn_nexttok(struct mparse *mp, int ln, int pos,
 		while (' ' == **next)
 			(*next)++;
 	} else {
+		/*
+		 * XXX: groff gets confused by this and doesn't always
+		 * do the "right thing" (just terminate it and warn
+		 * about it).
+		 */
 		if (q)
 			mandoc_msg(MANDOCERR_BADQUOTE, 
 					mp, ln, pos, NULL);

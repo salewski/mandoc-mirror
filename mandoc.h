@@ -104,6 +104,9 @@ enum	mandocerr {
 	MANDOCERR_BADESCAPE, /* unknown escape sequence */
 	MANDOCERR_BADQUOTE, /* unterminated quoted string */
 
+	/* related to equations */
+	MANDOCERR_EQNQUOTE, /* unexpected literal in equation */
+
 	MANDOCERR_ERROR, /* ===== start of errors ===== */
 
 	/* related to tables */

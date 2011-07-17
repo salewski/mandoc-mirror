@@ -146,6 +146,9 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"bad comment style",
 	"bad escape sequence",
 	"unterminated quoted string",
+
+	/* related to equations */
+	"unexpected literal in equation",
 	
 	"generic error",
 
