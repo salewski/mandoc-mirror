@@ -152,6 +152,9 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	
 	"generic error",
 
+	/* related to equations */
+	"bad equation macro syntax",
+
 	/* related to tables */
 	"bad table syntax",
 	"bad table option",

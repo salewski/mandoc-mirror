@@ -109,6 +109,9 @@ enum	mandocerr {
 
 	MANDOCERR_ERROR, /* ===== start of errors ===== */
 
+	/* related to equations */
+	MANDOCERR_EQNARGS, /* bad equation macro arguments */
+
 	/* related to tables */
 	MANDOCERR_TBL, /* bad table syntax */
 	MANDOCERR_TBLOPT, /* bad table option */

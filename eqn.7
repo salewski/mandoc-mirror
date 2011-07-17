@@ -40,26 +40,69 @@ Equations within
 .Xr mdoc 7
 or
 .Xr man 7
-are enclosed by the
-.Sq EQ
+documents are enclosed by the standalone
+.Sq \&.EQ
 and
-.Sq EN
-macro tags, whose precise syntax is documented in
-.Xr roff 7 .
-Equations consist of multi-line equation data.
+.Sq \&.EN
+tags.
+Equations are multi-line blocks consisting of formulas and control
+statements.
+.Sh EQUATION STRUCTURE
+Each equation is bracketed by
+.Sq \&.EQ
+and
+.Sq \&.EN
+strings.
+.Em Note :
+these are not the same as
+.Xr roff 7
+macros, and may only be invoked as
+.Sq \&.EQ .
 .Pp
-For the time being,
-.Xr mandoc 1
-reproduces the contents of
-.Nm
-equations verbatim in its output.
+The equation grammar is as follows:
+.Bd -literal -offset indent
+eqn     : box | eqn box
+box     : text
+        | DEFINE text text
+        | SET text text
+        | UNDEF text
+text    : TEXT
+.Ed
 .Pp
-The
+Data in TEXT form is a non-empty sequence of non-space characters or a
+non-empty quoted string.
+White-space (and enclosing literal quote pairs) is thrown away and
+productions may not be broken by newlines.
+.Pp
+The following control statements are available:
+.Bl -tag -width Ds
+.It Cm define
+Replace all occurances of a key with a value.
+Its syntax is as follows:
+.Pp
+.D1 define Ar key val
+.Pp
+It is an error to have an empty
+.Ar key or
+.Ar value .
+Note that a quoted
+.Ar key
+causes errors in some
 .Nm
-implementation in
-.Xr mandoc 1
-is
-.Ud
+implementations and should not be considered portable.
+.It Cm set
+Set an equation mode.  
+Both arguments are thrown away.
+.It Cm undef
+Unset a previously-defined key.
+Its syntax is as follows:
+.Pp
+.D1 define Ar key
+.Pp
+Once invoked, the definition for
+.Ar key
+is discarded.
+.El
 .Sh SEE ALSO
 .Xr mandoc 1 ,
 .Xr man 7 ,
