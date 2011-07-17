@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2009, 2011 Kristaps Dzonsons <kristaps@kth.se>
+ * Copyright (c) 2009, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2011 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
