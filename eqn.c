@@ -283,6 +283,7 @@ eqn_do_define(struct eqn_node *ep, int ln, int pos, const char **end)
 			ep->defs = mandoc_realloc
 				(ep->defs, ep->defsz * 
 				 sizeof(struct eqn_def));
+			ep->defs[i].key = ep->defs[i].val = NULL;
 		}
 
 		ep->defs[i].keysz = sz;

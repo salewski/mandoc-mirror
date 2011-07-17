@@ -355,7 +355,7 @@ llib-lmandoc.ln: $(MANDOC_LNS)
 
 # You'll need -ldb for Linux.
 mandocdb: $(MANDOCDB_OBJS) libmandoc.a
-	$(CC) -o $@ $(MANDOCDB_OBJS) libmandoc.a
+	$(CC) -o $@ $(MANDOCDB_OBJS) libmandoc.a -ldb
 
 llib-lmandocdb.ln: $(MANDOCDB_LNS)
 	$(LINT) $(LINTFLAGS) -Cmandocdb $(MANDOCDB_LNS)
