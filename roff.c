@@ -519,18 +519,18 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 		if (ROFF_CONT != e)
 			return(e);
 		if (r->eqn)
-			return(eqn_read(&r->eqn, ln, *bufp, pos));
+			return(eqn_read(&r->eqn, ln, *bufp, pos, offs));
 		if (r->tbl)
 			return(tbl_read(r->tbl, ln, *bufp, pos));
 		return(ROFF_CONT);
 	} else if ( ! ctl) {
 		if (r->eqn)
-			return(eqn_read(&r->eqn, ln, *bufp, pos));
+			return(eqn_read(&r->eqn, ln, *bufp, pos, offs));
 		if (r->tbl)
 			return(tbl_read(r->tbl, ln, *bufp, pos));
 		return(ROFF_CONT);
 	} else if (r->eqn)
-		return(eqn_read(&r->eqn, ln, *bufp, ppos));
+		return(eqn_read(&r->eqn, ln, *bufp, ppos, offs));
 
 	/*
 	 * If a scope is open, go to the child handler for that macro,
