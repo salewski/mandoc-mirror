@@ -132,48 +132,6 @@ a2roffsu(const char *src, struct roffsu *dst, enum roffscale def)
 	return(1);
 }
 
-
-/*
- * Correctly writes the time in nroff form, which differs from standard
- * form in that a space isn't printed in lieu of the extra %e field for
- * single-digit dates.
- */
-void
-time2a(time_t t, char *dst, size_t sz)
-{
-	struct tm	 tm;
-	char		 buf[5];
-	char		*p;
-	size_t		 nsz;
-
-	assert(sz > 1);
-	localtime_r(&t, &tm);
-
-	p = dst;
-	nsz = 0;
-
-	dst[0] = '\0';
-
-	if (0 == (nsz = strftime(p, sz, "%B ", &tm)))
-		return;
-
-	p += (int)nsz;
-	sz -= nsz;
-
-	if (0 == strftime(buf, sizeof(buf), "%e, ", &tm))
-		return;
-
-	nsz = strlcat(p, buf + (' ' == buf[0] ? 1 : 0), sz);
-
-	if (nsz >= sz)
-		return;
-
-	p += (int)nsz;
-	sz -= nsz;
-
-	(void)strftime(p, sz, "%Y", &tm);
-}
-
 /*
  * Calculate the abstract widths and decimal positions of columns in a
  * table.  This routine allocates the columns structures then runs over

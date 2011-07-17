@@ -64,7 +64,6 @@ __BEGIN_DECLS
 	while (/* CONSTCOND */ 0)
 
 int	  	  a2roffsu(const char *, struct roffsu *, enum roffscale);
-void	  	  time2a(time_t, char *, size_t);
 void	  	  tblcalc(struct rofftbl *tbl, const struct tbl_span *);
 
 __END_DECLS
