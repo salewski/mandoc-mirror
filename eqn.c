@@ -292,8 +292,6 @@ eqn_do_define(struct eqn_node *ep, int ln, int pos, const char **end)
 
 		memcpy(ep->defs[i].key, start, sz);
 		ep->defs[i].key[(int)sz] = '\0';
-		ep->defs[i].val = NULL;
-		ep->defs[i].valsz = 0;
 	}
 
 	start = eqn_nexttok(mp, ln, pos, end, &sz);
