@@ -28,6 +28,8 @@
 #include "libmandoc.h"
 #include "libroff.h"
 
+#define	EQN_NEST_MAX	 128 /* maximum nesting of defines */
+
 #define	EQN_ARGS	 struct eqn_node *ep, \
 			 int ln, \
 			 int pos, \
@@ -46,15 +48,18 @@ enum	eqnpartt {
 	EQN__MAX
 };
 
+static	void		 eqn_append(struct eqn_node *, 
+				struct mparse *, int, 
+				int, const char *, int);
 static	int		 eqn_do_define(EQN_ARGS);
-static	int		 eqn_do_set(EQN_ARGS);
+static	int		 eqn_do_ign2(EQN_ARGS);
 static	int		 eqn_do_undef(EQN_ARGS);
 static	const char	*eqn_nexttok(struct mparse *, int, int,
 				const char **, size_t *);
 
 static	const struct eqnpart eqnparts[EQN__MAX] = {
 	{ "define", 6, eqn_do_define }, /* EQN_DEFINE */
-	{ "set", 3, eqn_do_set }, /* EQN_SET */
+	{ "set", 3, eqn_do_ign2 }, /* EQN_SET */
 	{ "undef", 5, eqn_do_undef }, /* EQN_UNDEF */
 };
 
@@ -101,11 +106,26 @@ eqn_read(struct eqn_node **epp, int ln,
 		return(ROFF_RERUN);
 	} 
 
-	end = p + pos;
+	eqn_append(ep, mp, ln, pos, p + pos, 0);
+	return(ROFF_IGN);
+}
+
+static void
+eqn_append(struct eqn_node *ep, struct mparse *mp, 
+		int ln, int pos, const char *end, int re)
+{
+	const char	*start;
+	size_t		 sz;
+	int		 i;
+	
+	if (re >= EQN_NEST_MAX) {
+		mandoc_msg(MANDOCERR_BADQUOTE, mp, ln, pos, NULL);
+		return;
+	}
+
 	while (NULL != (start = eqn_nexttok(mp, ln, pos, &end, &sz))) {
 		if (0 == sz)
 			continue;
-
 		for (i = 0; i < (int)ep->defsz; i++) {
 			if (0 == ep->defs[i].keysz)
 				continue;
@@ -115,8 +135,12 @@ eqn_read(struct eqn_node **epp, int ln,
 				continue;
 			start = ep->defs[i].val;
 			sz = ep->defs[i].valsz;
+
+			eqn_append(ep, mp, ln, pos, start, re + 1);
 			break;
 		}
+		if (i < (int)ep->defsz)
+			continue;
 
 		ep->eqn.data = mandoc_realloc
 			(ep->eqn.data, ep->eqn.sz + sz + 1);
@@ -127,8 +151,6 @@ eqn_read(struct eqn_node **epp, int ln,
 		ep->eqn.sz += sz;
 		strlcat(ep->eqn.data, start, ep->eqn.sz + 1);
 	}
-
-	return(ROFF_IGN);
 }
 
 struct eqn_node *
@@ -217,7 +239,7 @@ eqn_nexttok(struct mparse *mp, int ln, int pos,
 }
 
 static int
-eqn_do_set(struct eqn_node *ep, int ln, int pos, const char **end)
+eqn_do_ign2(struct eqn_node *ep, int ln, int pos, const char **end)
 {
 	const char	*start;
 	struct mparse	*mp;
