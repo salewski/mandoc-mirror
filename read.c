@@ -153,6 +153,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	/* related to equations */
 	"bad equation macro syntax",
+	"too many nested equation defines",
 
 	/* related to tables */
 	"bad table syntax",

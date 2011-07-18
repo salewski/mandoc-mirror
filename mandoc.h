@@ -111,6 +111,7 @@ enum	mandocerr {
 
 	/* related to equations */
 	MANDOCERR_EQNARGS, /* bad equation macro arguments */
+	MANDOCERR_EQNNEST, /* too many nested equation defines */
 
 	/* related to tables */
 	MANDOCERR_TBL, /* bad table syntax */
