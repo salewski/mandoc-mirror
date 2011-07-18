@@ -96,7 +96,7 @@ man_free(struct man *man)
 
 
 struct man *
-man_alloc(struct regset *regs, struct mparse *parse)
+man_alloc(struct roff *roff, struct mparse *parse)
 {
 	struct man	*p;
 
@@ -104,7 +104,7 @@ man_alloc(struct regset *regs, struct mparse *parse)
 
 	man_hash_init();
 	p->parse = parse;
-	p->regs = regs;
+	p->roff = roff;
 
 	man_alloc1(p);
 	return(p);

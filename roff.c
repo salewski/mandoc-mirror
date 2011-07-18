@@ -71,6 +71,16 @@ enum	roffrule {
 	ROFFRULE_DENY
 };
 
+/*
+ * A single register entity.  If "set" is zero, the value of the
+ * register should be the default one, which is per-register.
+ * Registers are assumed to be unsigned ints for now.
+ */
+struct	reg {
+	int		  set; /* whether set or not */
+	unsigned int	  u; /* unsigned integer */
+};
+
 struct	roffstr {
 	char		*name; /* key of symbol */
 	char		*string; /* current value */
@@ -82,7 +92,7 @@ struct	roff {
 	struct roffnode	*last; /* leaf of stack */
 	enum roffrule	 rstack[RSTACK_MAX]; /* stack of !`ie' rules */
 	int		 rstackpos; /* position in rstack */
-	struct regset	*regs; /* read/writable registers */
+	struct reg	 regs[REG__MAX];
 	struct roffstr	*first_string; /* user-defined strings & macros */
 	const char	*current_string; /* value of last called user macro */
 	struct tbl_node	*first_tbl; /* first table parsed */
@@ -351,6 +361,8 @@ roff_reset(struct roff *r)
 
 	roff_free1(r);
 
+	memset(&r->regs, 0, sizeof(struct reg) * REG__MAX);
+
 	for (i = 0; i < PREDEFS_MAX; i++) 
 		roff_setstr(r, predefs[i].name, predefs[i].str, 0);
 }
@@ -366,13 +378,12 @@ roff_free(struct roff *r)
 
 
 struct roff *
-roff_alloc(struct regset *regs, struct mparse *parse)
+roff_alloc(struct mparse *parse)
 {
 	struct roff	*r;
 	int		 i;
 
 	r = mandoc_calloc(1, sizeof(struct roff));
-	r->regs = regs;
 	r->parse = parse;
 	r->rstackpos = -1;
 	
@@ -1104,6 +1115,26 @@ roff_ds(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
+int
+roff_regisset(const struct roff *r, enum regs reg)
+{
+
+	return(r->regs[(int)reg].set);
+}
+
+unsigned int
+roff_regget(const struct roff *r, enum regs reg)
+{
+
+	return(r->regs[(int)reg].u);
+}
+
+void
+roff_regunset(struct roff *r, enum regs reg)
+{
+
+	r->regs[(int)reg].set = 0;
+}
 
 /* ARGSUSED */
 static enum rofferr
@@ -1112,18 +1143,16 @@ roff_nr(ROFF_ARGS)
 	const char	*key;
 	char		*val;
 	int		 iv;
-	struct reg	*rg;
 
 	val = *bufp + pos;
 	key = roff_getname(r, &val, ln, pos);
-	rg = r->regs->regs;
 
 	if (0 == strcmp(key, "nS")) {
-		rg[(int)REG_nS].set = 1;
+		r->regs[(int)REG_nS].set = 1;
 		if ((iv = mandoc_strntou(val, strlen(val), 10)) >= 0)
-			rg[REG_nS].v.u = (unsigned)iv;
+			r->regs[(int)REG_nS].u = (unsigned)iv;
 		else
-			rg[(int)REG_nS].v.u = 0u;
+			r->regs[(int)REG_nS].u = 0u;
 	}
 
 	return(ROFF_IGN);

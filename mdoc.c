@@ -193,14 +193,14 @@ mdoc_free(struct mdoc *mdoc)
  * Allocate volatile and non-volatile parse resources.  
  */
 struct mdoc *
-mdoc_alloc(struct regset *regs, struct mparse *parse)
+mdoc_alloc(struct roff *roff, struct mparse *parse)
 {
 	struct mdoc	*p;
 
 	p = mandoc_calloc(1, sizeof(struct mdoc));
 
 	p->parse = parse;
-	p->regs = regs;
+	p->roff = roff;
 
 	mdoc_hash_init();
 	mdoc_alloc1(p);
@@ -290,8 +290,8 @@ mdoc_parseln(struct mdoc *m, int ln, char *buf, int offs)
 	 * whether this mode is on or off.
 	 * Note that this mode is also switched by the Sh macro.
 	 */
-	if (m->regs->regs[(int)REG_nS].set) {
-		if (m->regs->regs[(int)REG_nS].v.u)
+	if (roff_regisset(m->roff, REG_nS)) {
+		if (roff_regget(m->roff, REG_nS))
 			m->flags |= MDOC_SYNOPSIS;
 		else
 			m->flags &= ~MDOC_SYNOPSIS;

@@ -33,6 +33,9 @@ INSTALL_LIB	 = $(INSTALL) -m 0644
 INSTALL_SOURCE	 = $(INSTALL) -m 0644
 INSTALL_MAN	 = $(INSTALL_DATA)
 
+# Linux needs -ldb to compile mandocdb.
+#DBLIB		 = -ldb
+
 all: mandoc preconv
 
 SRCS		 = Makefile \
@@ -353,9 +356,8 @@ mandoc: $(MANDOC_OBJS) libmandoc.a
 llib-lmandoc.ln: $(MANDOC_LNS)
 	$(LINT) $(LINTFLAGS) -Cmandoc $(MANDOC_LNS)
 
-# You'll need -ldb for Linux.
 mandocdb: $(MANDOCDB_OBJS) libmandoc.a
-	$(CC) -o $@ $(MANDOCDB_OBJS) libmandoc.a -ldb
+	$(CC) -o $@ $(MANDOCDB_OBJS) libmandoc.a $(DBLIB)
 
 llib-lmandocdb.ln: $(MANDOCDB_LNS)
 	$(LINT) $(LINTFLAGS) -Cmandocdb $(MANDOCDB_LNS)
