@@ -90,8 +90,12 @@ Note that a quoted
 causes errors in some
 .Nm
 implementations and should not be considered portable.
+Definitions may refer to other definitions; these are evaluated
+recursively when text replacement occurs and not when the definition is
+created.
+Self-referencing definitions will raise an error.
 .It Cm set
-Set an equation mode.  
+Set an equation mode.
 Both arguments are thrown away.
 .It Cm undef
 Unset a previously-defined key.
