@@ -31,15 +31,14 @@
 #define	EQN_NEST_MAX	 128 /* maximum nesting of defines */
 #define	EQN_MSG(t, x)	 mandoc_msg((t), (x)->parse, (x)->eqn.ln, (x)->eqn.pos, NULL)
 
-struct	eqnpart {
+struct	eqnstr {
 	const char	*name;
 	size_t		 sz;
-	int		(*fp)(struct eqn_node *);
 };
 
-struct	eqnmark {
-	const char	*name;
-	size_t		 sz;
+struct	eqnpart {
+	struct eqnstr	 str;
+	int		(*fp)(struct eqn_node *);
 };
 
 enum	eqnpartt {
@@ -63,12 +62,12 @@ static	int		 eqn_box(struct eqn_node *,
 				struct eqn_box *, struct eqn_box **);
 
 static	const struct eqnpart eqnparts[EQN__MAX] = {
-	{ "define", 6, eqn_do_define }, /* EQN_DEFINE */
-	{ "set", 3, eqn_do_set }, /* EQN_SET */
-	{ "undef", 5, eqn_do_undef }, /* EQN_UNDEF */
+	{ { "define", 6 }, eqn_do_define }, /* EQN_DEFINE */
+	{ { "set", 3 }, eqn_do_set }, /* EQN_SET */
+	{ { "undef", 5 }, eqn_do_undef }, /* EQN_UNDEF */
 };
 
-static	const struct eqnmark eqnmarks[EQNMARK__MAX] = {
+static	const struct eqnstr eqnmarks[EQNMARK__MAX] = {
 	{ "", 0 }, /* EQNMARK_NONE */
 	{ "dot", 3 }, /* EQNMARK_DOT */
 	{ "dotdot", 6 }, /* EQNMARK_DOTDOT */
@@ -78,6 +77,12 @@ static	const struct eqnmark eqnmarks[EQNMARK__MAX] = {
 	{ "dyad", 4 }, /* EQNMARK_DYAD */
 	{ "bar", 3 }, /* EQNMARK_BAR */
 	{ "under", 5 }, /* EQNMARK_UNDER */
+};
+
+static	const struct eqnstr eqnfonts[EQNFONT__MAX] = {
+	{ "roman", 5 },
+	{ "bold", 4 },
+	{ "italic", 6 },
 };
 
 /* ARGSUSED */
@@ -173,6 +178,7 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last, struct eqn_box **sv)
 	size_t		 sz;
 	const char	*start;
 	int		 c, i, nextc;
+	enum eqn_fontt	 font;
 	struct eqn_box	*bp;
 
 	/* 
@@ -183,18 +189,28 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last, struct eqn_box **sv)
 
 	*sv = last;
 	nextc = 1;
+	font = EQNFONT_NONE;
+
 again:
 	if (NULL == (start = eqn_nexttok(ep, &sz)))
 		return(0);
 
-	for (i = 0; i < (int)EQN__MAX; i++) {
-		if (eqnparts[i].sz != sz)
+	for (i = 0; i < (int)EQNFONT__MAX; i++) {
+		if (eqnfonts[i].sz != sz)
 			continue;
-		if (strncmp(eqnparts[i].name, start, sz))
+		if (strncmp(eqnfonts[i].name, start, sz))
+			continue;
+		font = (enum eqn_fontt)i;
+		goto again;
+	}
+
+	for (i = 0; i < (int)EQN__MAX; i++) {
+		if (eqnparts[i].str.sz != sz)
+			continue;
+		if (strncmp(eqnparts[i].str.name, start, sz))
 			continue;
 		if ( ! (*eqnparts[i].fp)(ep))
 			return(-1);
-
 		goto again;
 	} 
 
@@ -213,6 +229,9 @@ again:
 		return(1);
 
 	bp = mandoc_calloc(1, sizeof(struct eqn_box));
+	bp->font = font;
+	font = EQNFONT_NONE;
+
 	if (nextc)
 		last->child = bp;
 	else

@@ -68,6 +68,7 @@ box     : text
         | SET text text
         | UNDEF text
         | box mark
+        | font box
 text    : TEXT
 mark	: DOT
         | DOTDOT
@@ -77,6 +78,9 @@ mark	: DOT
         | DYAD
         | BAR
         | UNDER
+font    : ROMAN
+        | ITALIC
+        | BOLD
 .Ed
 .Pp
 Data in TEXT form is a non-empty sequence of non-space characters or a
