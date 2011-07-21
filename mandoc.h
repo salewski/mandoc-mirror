@@ -112,6 +112,8 @@ enum	mandocerr {
 	/* related to equations */
 	MANDOCERR_EQNARGS, /* bad equation macro arguments */
 	MANDOCERR_EQNNEST, /* too many nested equation defines */
+	MANDOCERR_EQNNSCOPE, /* unexpected equation scope closure*/
+	MANDOCERR_EQNSCOPE, /* equation scope open on exit */
 
 	/* related to tables */
 	MANDOCERR_TBL, /* bad table syntax */
@@ -278,19 +280,24 @@ struct	tbl_span {
 };
 
 enum	eqn_boxt {
-	EQN_ROOT,
-	EQN_TEXT
+	EQN_ROOT, /* root of parse tree */
+	EQN_TEXT, /* text (number, variable, whatever) */
+	EQN_SUBEXPR /* nested subexpression */
 };
 
+/*
+ * A "box" is a parsed mathematical expression as defined by the eqn.7
+ * grammar.
+ */
 struct	eqn_box {
-	enum eqn_boxt	  type;
-	struct eqn_box	 *child;
-	struct eqn_box	 *next;
-	char		 *text;
+	enum eqn_boxt	  type; /* type of node */
+	struct eqn_box	 *child; /* child node */
+	struct eqn_box	 *next; /* next in tree */
+	char		 *text; /* text (or NULL) */
 };
 
 struct	eqn {
-	struct eqn_box	 *root;
+	struct eqn_box	 *root; /* root mathematical expression */
 	int		  ln; /* invocation line */
 	int		  pos; /* invocation position */
 };

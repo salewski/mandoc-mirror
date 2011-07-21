@@ -54,7 +54,8 @@ static	const char	*eqn_nexttok(struct eqn_node *, size_t *);
 static	const char	*eqn_nextrawtok(struct eqn_node *, size_t *);
 static	const char	*eqn_next(struct eqn_node *, 
 				char, size_t *, int);
-static	int		 eqn_box(struct eqn_node *, struct eqn_box *);
+static	int		 eqn_box(struct eqn_node *, 
+				struct eqn_box *, struct eqn_box **);
 
 static	const struct eqnpart eqnparts[EQN__MAX] = {
 	{ "define", 6, eqn_do_define }, /* EQN_DEFINE */
@@ -119,7 +120,8 @@ eqn_alloc(int pos, int line, struct mparse *parse)
 enum rofferr
 eqn_end(struct eqn_node *ep)
 {
-	struct eqn_box	*root;
+	struct eqn_box	*root, *last;
+	int		 c;
 
 	ep->eqn.root = root = 
 		mandoc_calloc(1, sizeof(struct eqn_box));
@@ -129,21 +131,38 @@ eqn_end(struct eqn_node *ep)
 		return(ROFF_IGN);
 
 	/*
-	 * Validate the expression.
-	 * Use the grammar found in the literature.
+	 * Run the parser.
+	 * If we return before reaching the end of our input, our scope
+	 * is still open somewhere.
+	 * If we return alright but don't have a symmetric scoping, then
+	 * something's not right either.
+	 * Otherwise, return the equation.
 	 */
 
-	return(eqn_box(ep, root) < 0 ? ROFF_IGN : ROFF_EQN);
+	if ((c = eqn_box(ep, root, &last)) > 0) {
+		EQN_MSG(MANDOCERR_EQNNSCOPE, ep);
+		c = 0;
+	} else if (0 == c && last != root)
+		EQN_MSG(MANDOCERR_EQNSCOPE, ep);
+
+	return(1 == c ? ROFF_EQN : ROFF_IGN);
 }
 
 static int
-eqn_box(struct eqn_node *ep, struct eqn_box *last)
+eqn_box(struct eqn_node *ep, struct eqn_box *last, struct eqn_box **sv)
 {
 	size_t		 sz;
 	const char	*start;
-	int		 i, nextc;
+	int		 c, i, nextc;
 	struct eqn_box	*bp;
 
+	/* 
+	 * Mark our last level of subexpression. 
+	 * Also mark whether that the next node should be a
+	 * subexpression node.
+	 */
+
+	*sv = last;
 	nextc = 1;
 again:
 	if (NULL == (start = eqn_nexttok(ep, &sz)))
@@ -160,19 +179,39 @@ again:
 		goto again;
 	} 
 
-	bp = mandoc_calloc(1, sizeof(struct eqn_box));
-	bp->type = EQN_TEXT;
+	/* Exit this [hopefully] subexpression. */
 
+	if (sz == 1 && 0 == strncmp("}", start, 1)) 
+		return(1);
+
+	bp = mandoc_calloc(1, sizeof(struct eqn_box));
 	if (nextc)
 		last->child = bp;
 	else
 		last->next = bp;
 
+	last = bp;
+
+	/* 
+	 * See if we're to open a new subexpression.
+	 * If so, mark our node as such and descend.
+	 */
+
+	if (sz == 1 && 0 == strncmp("{", start, 1)) {
+		bp->type = EQN_SUBEXPR;
+		c = eqn_box(ep, bp, sv);
+
+		nextc = 0;
+		goto again;
+	}
+
+	/* A regular text node. */
+
+	bp->type = EQN_TEXT;
 	bp->text = mandoc_malloc(sz + 1);
 	*bp->text = '\0';
 	strlcat(bp->text, start, sz + 1);
 
-	last = bp;
 	nextc = 0;
 	goto again;
 }

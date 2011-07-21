@@ -272,14 +272,19 @@ print_box(const struct eqn_box *ep, int indent)
 	case (EQN_ROOT):
 		puts("eqn-root");
 		print_box(ep->child, indent + 1);
-		return;
+		break;
+	case (EQN_SUBEXPR):
+		puts("eqn-subxpr");
+		print_box(ep->child, indent + 1);
+		break;
 	case (EQN_TEXT):
 		printf("eqn-text: [%s]\n", ep->text);
-		print_box(ep->next, indent);
-		return;
+		break;
 	default:
 		break;
 	}
+
+	print_box(ep->next, indent);
 }
 
 static void
