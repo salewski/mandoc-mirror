@@ -71,8 +71,8 @@ text    : TEXT
 .Pp
 Data in TEXT form is a non-empty sequence of non-space characters or a
 non-empty quoted string.
-White-space (and enclosing literal quote pairs) is thrown away and
-productions may not be broken by newlines.
+Unless within a quoted string, white-space (and enclosing literal quote
+pairs) is thrown away.
 .Pp
 The following control statements are available:
 .Bl -tag -width Ds
@@ -80,11 +80,20 @@ The following control statements are available:
 Replace all occurances of a key with a value.
 Its syntax is as follows:
 .Pp
-.D1 define Ar key val
+.D1 define Ar key cvalc
+.Pp
+The first character of the value string,
+.Ar c ,
+is used as the delimiter for the value
+.Ar val .
+This allows for arbitrary enclosure of terms (not just quotes), such as
+.Pp
+.D1 define Ar foo 'bar baz'
+.D1 define Ar foo cbar bazc
 .Pp
 It is an error to have an empty
 .Ar key or
-.Ar value .
+.Ar val .
 Note that a quoted
 .Ar key
 causes errors in some
@@ -93,6 +102,14 @@ implementations and should not be considered portable.
 Definitions may refer to other definitions; these are evaluated
 recursively when text replacement occurs and not when the definition is
 created.
+.Pp
+Definitions can create arbitrary strings, for example, the following is
+a legal construction.
+.Bd -literal -offset indent
+define foo 'define'
+foo bar 'baz'
+.Ed
+.Pp
 Self-referencing definitions will raise an error.
 .It Cm set
 Set an equation mode.
@@ -106,6 +123,20 @@ Its syntax is as follows:
 Once invoked, the definition for
 .Ar key
 is discarded.
+.El
+.Sh COMPATIBILITY
+This section documents the compatibility of mandoc
+.Nm
+and the troff
+.Nm
+implementation (including GNU troff).
+.Pp
+.Bl -dash -compact
+.It
+The text string
+.Sq \e\*q
+is interpreted as a literal quote in troff.
+In mandoc, this is interpreted as a comment.
 .El
 .Sh SEE ALSO
 .Xr mandoc 1 ,
@@ -122,18 +153,28 @@ is discarded.
 .%P 151\(en157
 .%D March, 1975
 .Re
-.\" .Sh HISTORY
-.\" The tbl utility, a preprocessor for troff, was originally written by M.
-.\" E. Lesk at Bell Labs in 1975.
-.\" The GNU reimplementation of tbl, part of the groff package, was released
-.\" in 1990 by James Clark.
-.\" A standalone tbl implementation was written by Kristaps Dzonsons in
-.\" 2010.
-.\" This formed the basis of the implementation that is part of the
-.\" .Xr mandoc 1
-.\" utility.
+.Rs
+.%A Brian W. Kernighan
+.%A Lorinda L. Cherry
+.%T Typesetting Mathematics, User's Guide
+.%D 1976
+.Re
+.Rs
+.%A Brian W. Kernighan
+.%A Lorinda L. Cherry
+.%T Typesetting Mathematics, User's Guide (Second Edition)
+.%D 1978
+.Re
+.Sh HISTORY
+The eqn utility, a preprocessor for troff, was originally written by 
+Brian W. Kernighan and Lorinda L. Cherry in 1975.
+The GNU reimplementation of eqn, part of the GNU troff package, was
+released in 1989 by James Clark.
+The eqn component of
+.Xr mandoc 1
+was added in 2011.
 .Sh AUTHORS
-This partial
+This
 .Nm
 reference was written by
 .An Kristaps Dzonsons Aq kristaps@bsd.lv .

@@ -29,16 +29,12 @@
 #include "libroff.h"
 
 #define	EQN_NEST_MAX	 128 /* maximum nesting of defines */
-
-#define	EQN_ARGS	 struct eqn_node *ep, \
-			 int ln, \
-			 int pos, \
-			 const char **end
+#define	EQN_MSG(t, x)	 mandoc_msg((t), (x)->parse, (x)->eqn.ln, (x)->eqn.pos, NULL)
 
 struct	eqnpart {
 	const char	*name;
 	size_t		 sz;
-	int		(*fp)(EQN_ARGS);
+	int		(*fp)(struct eqn_node *);
 };
 
 enum	eqnpartt {
@@ -48,14 +44,14 @@ enum	eqnpartt {
 	EQN__MAX
 };
 
-static	void		 eqn_append(struct eqn_node *, 
-				struct mparse *, int, 
-				int, const char *, int);
-static	int		 eqn_do_define(EQN_ARGS);
-static	int		 eqn_do_ign2(EQN_ARGS);
-static	int		 eqn_do_undef(EQN_ARGS);
-static	const char	*eqn_nexttok(struct mparse *, int, int,
-				const char **, size_t *);
+static	struct eqn_def	*eqn_def_find(struct eqn_node *, 
+				const char *, size_t);
+static	int		 eqn_do_define(struct eqn_node *);
+static	int		 eqn_do_ign2(struct eqn_node *);
+static	int		 eqn_do_undef(struct eqn_node *);
+static	const char	*eqn_nexttok(struct eqn_node *, size_t *);
+static	const char	*eqn_next(struct eqn_node *, char, size_t *);
+static	int		 eqn_box(struct eqn_node *);
 
 static	const struct eqnpart eqnparts[EQN__MAX] = {
 	{ "define", 6, eqn_do_define }, /* EQN_DEFINE */
@@ -70,87 +66,38 @@ eqn_read(struct eqn_node **epp, int ln,
 {
 	size_t		 sz;
 	struct eqn_node	*ep;
-	struct mparse	*mp;
-	const char	*start, *end;
-	int		 i, c;
-
-	if (0 == strcmp(p, ".EN")) {
-		*epp = NULL;
-		return(ROFF_EQN);
-	}
+	enum rofferr	 er;
 
 	ep = *epp;
-	mp = ep->parse;
-	end = p + pos;
 
-	if (NULL == (start = eqn_nexttok(mp, ln, pos, &end, &sz)))
-		return(ROFF_IGN);
+	/*
+	 * If we're the terminating mark, unset our equation status and
+	 * validate the full equation.
+	 */
 
-	for (i = 0; i < (int)EQN__MAX; i++) {
-		if (eqnparts[i].sz != sz)
-			continue;
-		if (strncmp(eqnparts[i].name, start, sz))
-			continue;
+	if (0 == strcmp(p, ".EN")) {
+		er = eqn_end(ep);
+		*epp = NULL;
+		return(er);
+	}
 
-		if ((c = (*eqnparts[i].fp)(ep, ln, pos, &end)) < 0)
-			return(ROFF_ERR);
-		else if (0 == c || '\0' == *end)
-			return(ROFF_IGN);
+	/*
+	 * Build up the full string, replacing all newlines with regular
+	 * whitespace.
+	 */
 
-		/* 
-		 * Re-calculate offset and rerun, if trailing text.
-		 * This allows multiple definitions (say) on each line.
-		 */
+	sz = strlen(p + pos) + 1;
+	ep->data = mandoc_realloc(ep->data, ep->sz + sz + 1);
 
-		*offs = end - (p + pos);
-		return(ROFF_RERUN);
-	} 
+	/* First invocation: nil terminate the string. */
 
-	eqn_append(ep, mp, ln, pos, p + pos, 0);
+	if (0 == ep->sz)
+		*ep->data = '\0';
+
+	ep->sz += sz;
+	strlcat(ep->data, p + pos, ep->sz + 1);
+	strlcat(ep->data, " ", ep->sz + 1);
 	return(ROFF_IGN);
-}
-
-static void
-eqn_append(struct eqn_node *ep, struct mparse *mp, 
-		int ln, int pos, const char *end, int re)
-{
-	const char	*start;
-	size_t		 sz;
-	int		 i;
-	
-	if (re >= EQN_NEST_MAX) {
-		mandoc_msg(MANDOCERR_BADQUOTE, mp, ln, pos, NULL);
-		return;
-	}
-
-	while (NULL != (start = eqn_nexttok(mp, ln, pos, &end, &sz))) {
-		if (0 == sz)
-			continue;
-		for (i = 0; i < (int)ep->defsz; i++) {
-			if (0 == ep->defs[i].keysz)
-				continue;
-			if (ep->defs[i].keysz != sz)
-				continue;
-			if (strncmp(ep->defs[i].key, start, sz))
-				continue;
-			start = ep->defs[i].val;
-			sz = ep->defs[i].valsz;
-
-			eqn_append(ep, mp, ln, pos, start, re + 1);
-			break;
-		}
-		if (i < (int)ep->defsz)
-			continue;
-
-		ep->eqn.data = mandoc_realloc
-			(ep->eqn.data, ep->eqn.sz + sz + 1);
-
-		if (0 == ep->eqn.sz)
-			*ep->eqn.data = '\0';
-
-		ep->eqn.sz += sz;
-		strlcat(ep->eqn.data, start, ep->eqn.sz + 1);
-	}
 }
 
 struct eqn_node *
@@ -160,18 +107,61 @@ eqn_alloc(int pos, int line, struct mparse *parse)
 
 	p = mandoc_calloc(1, sizeof(struct eqn_node));
 	p->parse = parse;
-	p->eqn.line = line;
+	p->eqn.ln = line;
 	p->eqn.pos = pos;
 
 	return(p);
 }
 
-/* ARGSUSED */
-void
-eqn_end(struct eqn_node *e)
+enum rofferr
+eqn_end(struct eqn_node *ep)
 {
+	int		 c;
 
-	/* Nothing to do. */
+	/*
+	 * Validate the expression.
+	 * Use the grammar found in the literature.
+	 */
+
+	if (0 == ep->sz)
+		return(ROFF_IGN);
+
+	while (1 == (c = eqn_box(ep)))
+		/* Keep parsing. */ ;
+
+	return(c < 0 ? ROFF_IGN : ROFF_EQN);
+}
+
+static int
+eqn_box(struct eqn_node *ep)
+{
+	size_t		 sz;
+	const char	*start;
+	int		 i;
+
+	if (NULL == (start = eqn_nexttok(ep, &sz)))
+		return(0);
+
+	for (i = 0; i < (int)EQN__MAX; i++) {
+		if (eqnparts[i].sz != sz)
+			continue;
+		if (strncmp(eqnparts[i].name, start, sz))
+			continue;
+		if ( ! (*eqnparts[i].fp)(ep))
+			return(-1);
+
+		return(1);
+	} 
+
+	ep->eqn.data = mandoc_realloc
+		(ep->eqn.data, ep->eqn.sz + sz + 1);
+
+	if (0 == ep->eqn.sz)
+		*ep->eqn.data = '\0';
+
+	ep->eqn.sz += sz;
+	strlcat(ep->eqn.data, start, ep->eqn.sz + 1);
+	return(1);
 }
 
 void
@@ -186,115 +176,122 @@ eqn_free(struct eqn_node *p)
 		free(p->defs[i].val);
 	}
 
+	free(p->data);
 	free(p->defs);
 	free(p);
 }
 
-/*
- * Return the current equation token setting "next" on the next one,
- * setting the token size in "sz".
- * This does the Right Thing for quoted strings, too.
- * Returns NULL if no more tokens exist.
- */
 static const char *
-eqn_nexttok(struct mparse *mp, int ln, int pos,
-		const char **next, size_t *sz)
+eqn_nexttok(struct eqn_node *ep, size_t *sz)
 {
-	const char	*start;
-	int		 q;
 
-	start = *next;
+	return(eqn_next(ep, '"', sz));
+}
+
+static const char *
+eqn_next(struct eqn_node *ep, char quote, size_t *sz)
+{
+	char		*start, *next;
+	int		 q, diff, lim;
+	size_t		 sv, ssz;
+	struct eqn_def	*def;
+
+	if (NULL == sz)
+		sz = &ssz;
+
+	start = &ep->data[(int)ep->cur];
 	q = 0;
 
 	if ('\0' == *start)
 		return(NULL);
 
-	if ('"' == *start) {
-		start++;
+	if (quote == *start) {
+		ep->cur++;
 		q = 1;
 	}
 
-	*next = q ? strchr(start, '"') : strchr(start, ' ');
+	lim = 0;
 
-	if (NULL != *next) {
-		*sz = (size_t)(*next - start);
+	sv = ep->cur;
+again:
+	if (lim >= EQN_NEST_MAX) {
+		EQN_MSG(MANDOCERR_EQNNEST, ep);
+		return(NULL);
+	}
+
+	ep->cur = sv;
+	start = &ep->data[(int)ep->cur];
+	next = q ? strchr(start, quote) : strchr(start, ' ');
+
+	if (NULL != next) {
+		*sz = (size_t)(next - start);
+		ep->cur += *sz;
 		if (q)
-			(*next)++;
-		while (' ' == **next)
-			(*next)++;
+			ep->cur++;
+		while (' ' == ep->data[(int)ep->cur])
+			ep->cur++;
 	} else {
-		/*
-		 * XXX: groff gets confused by this and doesn't always
-		 * do the "right thing" (just terminate it and warn
-		 * about it).
-		 */
 		if (q)
-			mandoc_msg(MANDOCERR_BADQUOTE, 
-					mp, ln, pos, NULL);
-		*next = strchr(start, '\0');
-		*sz = (size_t)(*next - start);
+			EQN_MSG(MANDOCERR_BADQUOTE, ep);
+		next = strchr(start, '\0');
+		*sz = (size_t)(next - start);
+		ep->cur += *sz;
+	}
+
+	if (NULL != (def = eqn_def_find(ep, start, *sz))) {
+		diff = def->valsz - *sz;
+
+		if (def->valsz > *sz) {
+			ep->sz += diff;
+			ep->data = mandoc_realloc(ep->data, ep->sz + 1);
+			ep->data[ep->sz] = '\0';
+			start = &ep->data[(int)sv];
+		}
+
+		diff = def->valsz - *sz;
+		memmove(start + *sz + diff, start + *sz, 
+				(strlen(start) - *sz) + 1);
+		memcpy(start, def->val, def->valsz);
+		goto again;
 	}
 
 	return(start);
 }
 
 static int
-eqn_do_ign2(struct eqn_node *ep, int ln, int pos, const char **end)
+eqn_do_ign2(struct eqn_node *ep)
 {
 	const char	*start;
-	struct mparse	*mp;
-	size_t		 sz;
 
-	mp = ep->parse;
+	if (NULL == (start = eqn_nexttok(ep, NULL)))
+		EQN_MSG(MANDOCERR_EQNARGS, ep);
+	else if (NULL == (start = eqn_nexttok(ep, NULL)))
+		EQN_MSG(MANDOCERR_EQNARGS, ep);
+	else
+		return(1);
 
-	start = eqn_nexttok(ep->parse, ln, pos, end, &sz);
-	if (NULL == start || 0 == sz) {
-		mandoc_msg(MANDOCERR_EQNARGS, mp, ln, pos, NULL); 
-		return(0);
-	}
-
-	start = eqn_nexttok(ep->parse, ln, pos, end, &sz);
-	if (NULL == start || 0 == sz) {
-		mandoc_msg(MANDOCERR_EQNARGS, mp, ln, pos, NULL); 
-		return(0);
-	}
-
-	return(1);
+	return(0);
 }
 
 static int
-eqn_do_define(struct eqn_node *ep, int ln, int pos, const char **end)
+eqn_do_define(struct eqn_node *ep)
 {
 	const char	*start;
-	struct mparse	*mp;
 	size_t		 sz;
+	struct eqn_def	*def;
 	int		 i;
 
-	mp = ep->parse;
-
-	start = eqn_nexttok(mp, ln, pos, end, &sz);
-	if (NULL == start || 0 == sz) {
-		mandoc_msg(MANDOCERR_EQNARGS, mp, ln, pos, NULL); 
+	if (NULL == (start = eqn_nexttok(ep, &sz))) {
+		EQN_MSG(MANDOCERR_EQNARGS, ep);
 		return(0);
 	}
 
-	/* TODO: merge this code with roff_getstr(). */
-
 	/* 
 	 * Search for a key that already exists. 
-	 * Note that the string array can have "holes" (null key).
+	 * Create a new key if none is found.
 	 */
 
-	for (i = 0; i < (int)ep->defsz; i++)  {
-		if (0 == ep->defs[i].keysz || ep->defs[i].keysz != sz)
-			continue;
-		if (0 == strncmp(ep->defs[i].key, start, sz))
-			break;
-	}
-
-	/* Create a new key. */
-
-	if (i == (int)ep->defsz) {
+	if (NULL == (def = eqn_def_find(ep, start, sz))) {
 		/* Find holes in string array. */
 		for (i = 0; i < (int)ep->defsz; i++)
 			if (0 == ep->defs[i].keysz)
@@ -314,49 +311,48 @@ eqn_do_define(struct eqn_node *ep, int ln, int pos, const char **end)
 
 		memcpy(ep->defs[i].key, start, sz);
 		ep->defs[i].key[(int)sz] = '\0';
+		def = &ep->defs[i];
 	}
 
-	start = eqn_nexttok(mp, ln, pos, end, &sz);
+	start = eqn_next(ep, ep->data[(int)ep->cur], &sz);
 
-	if (NULL == start || 0 == sz) {
-		ep->defs[i].keysz = 0;
-		mandoc_msg(MANDOCERR_EQNARGS, mp, ln, pos, NULL); 
+	if (NULL == start) {
+		EQN_MSG(MANDOCERR_EQNARGS, ep);
 		return(0);
 	}
 
-	ep->defs[i].valsz = sz;
-	ep->defs[i].val = mandoc_realloc
-		(ep->defs[i].val, sz + 1);
-	memcpy(ep->defs[i].val, start, sz);
-	ep->defs[i].val[(int)sz] = '\0';
-
-	return(sz ? 1 : 0);
+	def->valsz = sz;
+	def->val = mandoc_realloc(ep->defs[i].val, sz + 1);
+	memcpy(def->val, start, sz);
+	def->val[(int)sz] = '\0';
+	return(1);
 }
 
 static int
-eqn_do_undef(struct eqn_node *ep, int ln, int pos, const char **end)
+eqn_do_undef(struct eqn_node *ep)
 {
 	const char	*start;
-	struct mparse	*mp;
+	struct eqn_def	*def;
 	size_t		 sz;
-	int		 i;
 
-	mp = ep->parse;
-
-	start = eqn_nexttok(mp, ln, pos, end, &sz);
-	if (NULL == start || 0 == sz) {
-		mandoc_msg(MANDOCERR_EQNARGS, mp, ln, pos, NULL); 
+	if (NULL == (start = eqn_nexttok(ep, &sz))) {
+		EQN_MSG(MANDOCERR_EQNARGS, ep);
 		return(0);
-	}
-
-	for (i = 0; i < (int)ep->defsz; i++)  {
-		if (0 == ep->defs[i].keysz || ep->defs[i].keysz != sz)
-			continue;
-		if (strncmp(ep->defs[i].key, start, sz))
-			continue;
-		ep->defs[i].keysz = 0;
-		break;
-	}
+	} else if (NULL != (def = eqn_def_find(ep, start, sz)))
+		def->keysz = 0;
 
 	return(1);
+}
+
+static struct eqn_def *
+eqn_def_find(struct eqn_node *ep, const char *key, size_t sz)
+{
+	int		 i;
+
+	for (i = 0; i < (int)ep->defsz; i++) 
+		if (ep->defs[i].keysz && ep->defs[i].keysz == sz &&
+				0 == strncmp(ep->defs[i].key, key, sz))
+			return(&ep->defs[i]);
+
+	return(NULL);
 }

@@ -280,7 +280,7 @@ struct	tbl_span {
 struct	eqn {
 	size_t		  sz;
 	char		 *data;
-	int		  line; /* invocation line */
+	int		  ln; /* invocation line */
 	int		  pos; /* invocation position */
 };
 

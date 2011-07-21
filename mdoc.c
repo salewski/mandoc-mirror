@@ -233,11 +233,11 @@ mdoc_addeqn(struct mdoc *m, const struct eqn *ep)
 	/* No text before an initial macro. */
 
 	if (SEC_NONE == m->lastnamed) {
-		mdoc_pmsg(m, ep->line, ep->pos, MANDOCERR_NOTEXT);
+		mdoc_pmsg(m, ep->ln, ep->pos, MANDOCERR_NOTEXT);
 		return(1);
 	}
 
-	n = node_alloc(m, ep->line, ep->pos, MDOC_MAX, MDOC_EQN);
+	n = node_alloc(m, ep->ln, ep->pos, MDOC_MAX, MDOC_EQN);
 	n->eqn = ep;
 
 	if ( ! node_append(m, n))
