@@ -63,6 +63,7 @@ The equation grammar is as follows:
 .Bd -literal -offset indent
 eqn     : box | eqn box
 box     : text
+	| { eqn }
         | DEFINE text text
         | SET text text
         | UNDEF text
