@@ -351,7 +351,7 @@ print_mdoc_node(DECL_ARGS)
 			p->flags |= TERMP_NOSPACE;
 		break;
 	case (MDOC_EQN):
-		term_word(p, n->eqn->data);
+		/*term_word(p, n->eqn->data);*/
 		break;
 	case (MDOC_TBL):
 		term_tbl(p, n->span);

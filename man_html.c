@@ -230,8 +230,8 @@ print_man_node(MAN_ARGS)
 		return;
 	case (MAN_EQN):
 		PAIR_CLASS_INIT(&tag, "eqn");
-		print_otag(h, TAG_SPAN, 1, &tag);
-		print_text(h, n->eqn->data);
+		/*print_otag(h, TAG_SPAN, 1, &tag);
+		print_text(h, n->eqn->data);*/
 		break;
 	case (MAN_TBL):
 		/*

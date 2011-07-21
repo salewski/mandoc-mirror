@@ -28,8 +28,9 @@
 #include "man.h"
 #include "main.h"
 
-static	void	print_mdoc(const struct mdoc_node *, int);
+static	void	print_box(const struct eqn_box *, int);
 static	void	print_man(const struct man_node *, int);
+static	void	print_mdoc(const struct mdoc_node *, int);
 static	void	print_span(const struct tbl_span *, int);
 
 
@@ -63,6 +64,7 @@ print_mdoc(const struct mdoc_node *n, int indent)
 	argv = NULL;
 	argc = sz = 0;
 	params = NULL;
+	t = p = NULL;
 
 	switch (n->type) {
 	case (MDOC_ROOT):
@@ -90,17 +92,13 @@ print_mdoc(const struct mdoc_node *n, int indent)
 		t = "text";
 		break;
 	case (MDOC_TBL):
-		t = "tbl";
-		break;
+		/* FALLTHROUGH */
 	case (MDOC_EQN):
-		t = "eqn";
 		break;
 	default:
 		abort();
 		/* NOTREACHED */
 	}
-
-	p = NULL;
 
 	switch (n->type) {
 	case (MDOC_TEXT):
@@ -130,9 +128,8 @@ print_mdoc(const struct mdoc_node *n, int indent)
 		}
 		break;
 	case (MDOC_TBL):
-		break;
+		/* FALLTHROUGH */
 	case (MDOC_EQN):
-		p = n->eqn->data;
 		break;
 	case (MDOC_ROOT):
 		p = "root";
@@ -143,8 +140,11 @@ print_mdoc(const struct mdoc_node *n, int indent)
 	}
 
 	if (n->span) {
-		assert(NULL == p);
+		assert(NULL == p && NULL == t);
 		print_span(n->span, indent);
+	} else if (n->eqn) {
+		assert(NULL == p && NULL == t);
+		print_box(n->eqn->root, indent);
 	} else {
 		for (i = 0; i < indent; i++)
 			putchar('\t');
@@ -164,10 +164,8 @@ print_mdoc(const struct mdoc_node *n, int indent)
 		for (i = 0; i < (int)sz; i++)
 			printf(" [%s]", params[i]);
 
-		printf(" %d:%d", n->line, n->pos);
+		printf(" %d:%d\n", n->line, n->pos);
 	}
-
-	putchar('\n');
 
 	if (n->child)
 		print_mdoc(n->child, indent + 1);
@@ -181,6 +179,8 @@ print_man(const struct man_node *n, int indent)
 {
 	const char	 *p, *t;
 	int		  i;
+
+	t = p = NULL;
 
 	switch (n->type) {
 	case (MAN_ROOT):
@@ -205,17 +205,13 @@ print_man(const struct man_node *n, int indent)
 		t = "block-tail";
 		break;
 	case (MAN_TBL):
-		t = "tbl";
-		break;
+		/* FALLTHROUGH */
 	case (MAN_EQN):
-		t = "eqn";
 		break;
 	default:
 		abort();
 		/* NOTREACHED */
 	}
-
-	p = NULL;
 
 	switch (n->type) {
 	case (MAN_TEXT):
@@ -236,9 +232,8 @@ print_man(const struct man_node *n, int indent)
 		p = "root";
 		break;
 	case (MAN_TBL):
-		break;
+		/* FALLTHROUGH */
 	case (MAN_EQN):
-		p = n->eqn->data;
 		break;
 	default:
 		abort();
@@ -246,20 +241,45 @@ print_man(const struct man_node *n, int indent)
 	}
 
 	if (n->span) {
-		assert(NULL == p);
+		assert(NULL == p && NULL == t);
 		print_span(n->span, indent);
+	} else if (n->eqn) {
+		assert(NULL == p && NULL == t);
+		print_box(n->eqn->root, indent);
 	} else {
 		for (i = 0; i < indent; i++)
 			putchar('\t');
-		printf("%s (%s) %d:%d", p, t, n->line, n->pos);
+		printf("%s (%s) %d:%d\n", p, t, n->line, n->pos);
 	}
-
-	putchar('\n');
 
 	if (n->child)
 		print_man(n->child, indent + 1);
 	if (n->next)
 		print_man(n->next, indent);
+}
+
+static void
+print_box(const struct eqn_box *ep, int indent)
+{
+	int		 i;
+
+	if (NULL == ep)
+		return;
+	for (i = 0; i < indent; i++)
+		putchar('\t');
+
+	switch (ep->type) {
+	case (EQN_ROOT):
+		puts("eqn-root");
+		print_box(ep->child, indent + 1);
+		return;
+	case (EQN_TEXT):
+		printf("eqn-text: [%s]\n", ep->text);
+		print_box(ep->next, indent);
+		return;
+	default:
+		break;
+	}
 }
 
 static void
@@ -306,5 +326,5 @@ print_span(const struct tbl_span *sp, int indent)
 		putchar(' ');
 	}
 
-	printf("(tbl) %d:1", sp->line);
+	printf("(tbl) %d:1\n", sp->line);
 }

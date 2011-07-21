@@ -44,6 +44,7 @@ enum	eqnpartt {
 	EQN__MAX
 };
 
+static	void		 eqn_box_free(struct eqn_box *);
 static	struct eqn_def	*eqn_def_find(struct eqn_node *, 
 				const char *, size_t);
 static	int		 eqn_do_define(struct eqn_node *);
@@ -51,7 +52,7 @@ static	int		 eqn_do_ign2(struct eqn_node *);
 static	int		 eqn_do_undef(struct eqn_node *);
 static	const char	*eqn_nexttok(struct eqn_node *, size_t *);
 static	const char	*eqn_next(struct eqn_node *, char, size_t *);
-static	int		 eqn_box(struct eqn_node *);
+static	int		 eqn_box(struct eqn_node *, struct eqn_box *);
 
 static	const struct eqnpart eqnparts[EQN__MAX] = {
 	{ "define", 6, eqn_do_define }, /* EQN_DEFINE */
@@ -116,29 +117,33 @@ eqn_alloc(int pos, int line, struct mparse *parse)
 enum rofferr
 eqn_end(struct eqn_node *ep)
 {
-	int		 c;
+	struct eqn_box	*root;
+
+	ep->eqn.root = root = 
+		mandoc_calloc(1, sizeof(struct eqn_box));
+	root->type = EQN_ROOT;
+
+	if (0 == ep->sz)
+		return(ROFF_IGN);
 
 	/*
 	 * Validate the expression.
 	 * Use the grammar found in the literature.
 	 */
 
-	if (0 == ep->sz)
-		return(ROFF_IGN);
-
-	while (1 == (c = eqn_box(ep)))
-		/* Keep parsing. */ ;
-
-	return(c < 0 ? ROFF_IGN : ROFF_EQN);
+	return(eqn_box(ep, root) < 0 ? ROFF_IGN : ROFF_EQN);
 }
 
 static int
-eqn_box(struct eqn_node *ep)
+eqn_box(struct eqn_node *ep, struct eqn_box *last)
 {
 	size_t		 sz;
 	const char	*start;
-	int		 i;
+	int		 i, nextc;
+	struct eqn_box	*bp;
 
+	nextc = 1;
+again:
 	if (NULL == (start = eqn_nexttok(ep, &sz)))
 		return(0);
 
@@ -150,18 +155,24 @@ eqn_box(struct eqn_node *ep)
 		if ( ! (*eqnparts[i].fp)(ep))
 			return(-1);
 
-		return(1);
+		goto again;
 	} 
 
-	ep->eqn.data = mandoc_realloc
-		(ep->eqn.data, ep->eqn.sz + sz + 1);
+	bp = mandoc_calloc(1, sizeof(struct eqn_box));
+	bp->type = EQN_TEXT;
 
-	if (0 == ep->eqn.sz)
-		*ep->eqn.data = '\0';
+	if (nextc)
+		last->child = bp;
+	else
+		last->next = bp;
 
-	ep->eqn.sz += sz;
-	strlcat(ep->eqn.data, start, ep->eqn.sz + 1);
-	return(1);
+	bp->text = mandoc_malloc(sz + 1);
+	*bp->text = '\0';
+	strlcat(bp->text, start, sz + 1);
+
+	last = bp;
+	nextc = 0;
+	goto again;
 }
 
 void
@@ -169,7 +180,7 @@ eqn_free(struct eqn_node *p)
 {
 	int		 i;
 
-	free(p->eqn.data);
+	eqn_box_free(p->eqn.root);
 
 	for (i = 0; i < (int)p->defsz; i++) {
 		free(p->defs[i].key);
@@ -179,6 +190,19 @@ eqn_free(struct eqn_node *p)
 	free(p->data);
 	free(p->defs);
 	free(p);
+}
+
+static void
+eqn_box_free(struct eqn_box *bp)
+{
+
+	if (bp->child)
+		eqn_box_free(bp->child);
+	if (bp->next)
+		eqn_box_free(bp->next);
+
+	free(bp->text);
+	free(bp);
 }
 
 static const char *
@@ -199,6 +223,17 @@ eqn_next(struct eqn_node *ep, char quote, size_t *sz)
 	if (NULL == sz)
 		sz = &ssz;
 
+	lim = 0;
+	sv = ep->cur;
+again:
+	/* Prevent self-definitions. */
+
+	if (lim >= EQN_NEST_MAX) {
+		EQN_MSG(MANDOCERR_EQNNEST, ep);
+		return(NULL);
+	}
+
+	ep->cur = sv;
 	start = &ep->data[(int)ep->cur];
 	q = 0;
 
@@ -210,16 +245,6 @@ eqn_next(struct eqn_node *ep, char quote, size_t *sz)
 		q = 1;
 	}
 
-	lim = 0;
-
-	sv = ep->cur;
-again:
-	if (lim >= EQN_NEST_MAX) {
-		EQN_MSG(MANDOCERR_EQNNEST, ep);
-		return(NULL);
-	}
-
-	ep->cur = sv;
 	start = &ep->data[(int)ep->cur];
 	next = q ? strchr(start, quote) : strchr(start, ' ');
 
@@ -237,6 +262,11 @@ again:
 		*sz = (size_t)(next - start);
 		ep->cur += *sz;
 	}
+
+	/* Quotes aren't expanded for values. */
+
+	if (q)
+		return(start);
 
 	if (NULL != (def = eqn_def_find(ep, start, *sz))) {
 		diff = def->valsz - *sz;
@@ -322,9 +352,12 @@ eqn_do_define(struct eqn_node *ep)
 	}
 
 	def->valsz = sz;
-	def->val = mandoc_realloc(ep->defs[i].val, sz + 1);
+	def->val = mandoc_realloc(def->val, sz + 1);
 	memcpy(def->val, start, sz);
 	def->val[(int)sz] = '\0';
+
+	/*fprintf(stderr, "Defining: [%s], [%s]\n", 
+			def->key, def->val);*/
 	return(1);
 }
 

@@ -435,8 +435,8 @@ print_mdoc_node(MDOC_ARGS)
 		return;
 	case (MDOC_EQN):
 		PAIR_CLASS_INIT(&tag, "eqn");
-		print_otag(h, TAG_SPAN, 1, &tag);
-		print_text(h, n->eqn->data);
+		/*print_otag(h, TAG_SPAN, 1, &tag);
+		print_text(h, n->eqn->data);*/
 		break;
 	case (MDOC_TBL):
 		/*
