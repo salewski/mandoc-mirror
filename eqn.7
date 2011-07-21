@@ -67,9 +67,15 @@ box     : text
         | DEFINE text text
         | SET text text
         | UNDEF text
+        | box pos box
         | box mark
         | font box
 text    : TEXT
+pos     : OVER
+        | SUP
+        | SUB
+        | TO
+        | FROM
 mark	: DOT
         | DOTDOT
         | HAT

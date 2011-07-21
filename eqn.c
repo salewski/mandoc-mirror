@@ -80,9 +80,20 @@ static	const struct eqnstr eqnmarks[EQNMARK__MAX] = {
 };
 
 static	const struct eqnstr eqnfonts[EQNFONT__MAX] = {
+	{ "", 0 },
 	{ "roman", 5 },
 	{ "bold", 4 },
 	{ "italic", 6 },
+};
+
+static	const struct eqnstr eqnposs[EQNPOS__MAX] = {
+	{ "", 0 },
+	{ "over", 4 },
+	{ "sup", 3 },
+	{ "sub", 3 },
+	{ "to", 2 },
+	{ "from", 4 },
+	{ "above", 5 },
 };
 
 /* ARGSUSED */
@@ -189,8 +200,7 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last, struct eqn_box **sv)
 
 	*sv = last;
 	nextc = 1;
-	font = EQNFONT_NONE;
-
+	font = EQNFONT_NONE;  
 again:
 	if (NULL == (start = eqn_nexttok(ep, &sz)))
 		return(0);
@@ -201,6 +211,15 @@ again:
 		if (strncmp(eqnfonts[i].name, start, sz))
 			continue;
 		font = (enum eqn_fontt)i;
+		goto again;
+	}
+
+	for (i = 0; i < (int)EQNFONT__MAX; i++) {
+		if (eqnposs[i].sz != sz)
+			continue;
+		if (strncmp(eqnposs[i].name, start, sz))
+			continue;
+		last->pos = (enum eqn_post)i;
 		goto again;
 	}
 

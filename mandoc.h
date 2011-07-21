@@ -306,6 +306,17 @@ enum	eqn_fontt {
 	EQNFONT__MAX
 };
 
+enum	eqn_post {
+	EQNPOS_NONE = 0,
+	EQNPOS_OVER,
+	EQNPOS_SUP,
+	EQNPOS_SUB,
+	EQNPOS_TO,
+	EQNPOS_FROM,
+	EQNPOS_ABOVE,
+	EQNPOS__MAX
+};
+
  /*
  * A "box" is a parsed mathematical expression as defined by the eqn.7
  * grammar.
@@ -314,11 +325,16 @@ struct	eqn_box {
 	enum eqn_boxt	  type; /* type of node */
 	struct eqn_box	 *child; /* child node */
 	struct eqn_box	 *next; /* next in tree */
+	enum eqn_post	  pos; /* position of next box */
 	char		 *text; /* text (or NULL) */
 	enum eqn_markt	  mark; /* a mark about the box */
 	enum eqn_fontt	  font; /* font of box */
 };
 
+/*
+ * An equation consists of a tree of expressions starting at a given
+ * line and position. 
+ */
 struct	eqn {
 	struct eqn_box	 *root; /* root mathematical expression */
 	int		  ln; /* invocation line */
