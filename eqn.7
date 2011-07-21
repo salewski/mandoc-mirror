@@ -100,6 +100,7 @@ Note that a quoted
 causes errors in some
 .Nm
 implementations and should not be considered portable.
+It is not expanded for replacements.
 Definitions may refer to other definitions; these are evaluated
 recursively when text replacement occurs and not when the definition is
 created.
@@ -115,6 +116,15 @@ Self-referencing definitions will raise an error.
 .It Cm set
 Set an equation mode.
 Both arguments are thrown away.
+Its syntax is as follows:
+.Pp
+.D1 set Ar key val
+.Pp
+The
+.Ar key
+and
+.Ar val
+are not expanded for replacements.
 .It Cm undef
 Unset a previously-defined key.
 Its syntax is as follows:
@@ -124,6 +134,9 @@ Its syntax is as follows:
 Once invoked, the definition for
 .Ar key
 is discarded.
+The
+.Ar key
+is not expanded for replacements.
 .El
 .Sh COMPATIBILITY
 This section documents the compatibility of mandoc

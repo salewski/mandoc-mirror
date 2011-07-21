@@ -48,15 +48,17 @@ static	void		 eqn_box_free(struct eqn_box *);
 static	struct eqn_def	*eqn_def_find(struct eqn_node *, 
 				const char *, size_t);
 static	int		 eqn_do_define(struct eqn_node *);
-static	int		 eqn_do_ign2(struct eqn_node *);
+static	int		 eqn_do_set(struct eqn_node *);
 static	int		 eqn_do_undef(struct eqn_node *);
 static	const char	*eqn_nexttok(struct eqn_node *, size_t *);
-static	const char	*eqn_next(struct eqn_node *, char, size_t *);
+static	const char	*eqn_nextrawtok(struct eqn_node *, size_t *);
+static	const char	*eqn_next(struct eqn_node *, 
+				char, size_t *, int);
 static	int		 eqn_box(struct eqn_node *, struct eqn_box *);
 
 static	const struct eqnpart eqnparts[EQN__MAX] = {
 	{ "define", 6, eqn_do_define }, /* EQN_DEFINE */
-	{ "set", 3, eqn_do_ign2 }, /* EQN_SET */
+	{ "set", 3, eqn_do_set }, /* EQN_SET */
 	{ "undef", 5, eqn_do_undef }, /* EQN_UNDEF */
 };
 
@@ -206,14 +208,21 @@ eqn_box_free(struct eqn_box *bp)
 }
 
 static const char *
-eqn_nexttok(struct eqn_node *ep, size_t *sz)
+eqn_nextrawtok(struct eqn_node *ep, size_t *sz)
 {
 
-	return(eqn_next(ep, '"', sz));
+	return(eqn_next(ep, '"', sz, 0));
 }
 
 static const char *
-eqn_next(struct eqn_node *ep, char quote, size_t *sz)
+eqn_nexttok(struct eqn_node *ep, size_t *sz)
+{
+
+	return(eqn_next(ep, '"', sz, 1));
+}
+
+static const char *
+eqn_next(struct eqn_node *ep, char quote, size_t *sz, int repl)
 {
 	char		*start, *next;
 	int		 q, diff, lim;
@@ -265,7 +274,7 @@ again:
 
 	/* Quotes aren't expanded for values. */
 
-	if (q)
+	if (q || ! repl)
 		return(start);
 
 	if (NULL != (def = eqn_def_find(ep, start, *sz))) {
@@ -289,13 +298,13 @@ again:
 }
 
 static int
-eqn_do_ign2(struct eqn_node *ep)
+eqn_do_set(struct eqn_node *ep)
 {
 	const char	*start;
 
-	if (NULL == (start = eqn_nexttok(ep, NULL)))
+	if (NULL == (start = eqn_nextrawtok(ep, NULL)))
 		EQN_MSG(MANDOCERR_EQNARGS, ep);
-	else if (NULL == (start = eqn_nexttok(ep, NULL)))
+	else if (NULL == (start = eqn_nextrawtok(ep, NULL)))
 		EQN_MSG(MANDOCERR_EQNARGS, ep);
 	else
 		return(1);
@@ -311,7 +320,7 @@ eqn_do_define(struct eqn_node *ep)
 	struct eqn_def	*def;
 	int		 i;
 
-	if (NULL == (start = eqn_nexttok(ep, &sz))) {
+	if (NULL == (start = eqn_nextrawtok(ep, &sz))) {
 		EQN_MSG(MANDOCERR_EQNARGS, ep);
 		return(0);
 	}
@@ -344,7 +353,7 @@ eqn_do_define(struct eqn_node *ep)
 		def = &ep->defs[i];
 	}
 
-	start = eqn_next(ep, ep->data[(int)ep->cur], &sz);
+	start = eqn_next(ep, ep->data[(int)ep->cur], &sz, 0);
 
 	if (NULL == start) {
 		EQN_MSG(MANDOCERR_EQNARGS, ep);
@@ -355,9 +364,6 @@ eqn_do_define(struct eqn_node *ep)
 	def->val = mandoc_realloc(def->val, sz + 1);
 	memcpy(def->val, start, sz);
 	def->val[(int)sz] = '\0';
-
-	/*fprintf(stderr, "Defining: [%s], [%s]\n", 
-			def->key, def->val);*/
 	return(1);
 }
 
@@ -368,7 +374,7 @@ eqn_do_undef(struct eqn_node *ep)
 	struct eqn_def	*def;
 	size_t		 sz;
 
-	if (NULL == (start = eqn_nexttok(ep, &sz))) {
+	if (NULL == (start = eqn_nextrawtok(ep, &sz))) {
 		EQN_MSG(MANDOCERR_EQNARGS, ep);
 		return(0);
 	} else if (NULL != (def = eqn_def_find(ep, start, sz)))
