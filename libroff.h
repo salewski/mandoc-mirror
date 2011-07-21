@@ -46,6 +46,7 @@ struct	eqn_node {
 	struct eqn_def	 *defs;
 	size_t		  defsz;
 	char		 *data;
+	size_t		  rew;
 	size_t		  cur;
 	size_t		  sz;
 	struct eqn	  eqn;

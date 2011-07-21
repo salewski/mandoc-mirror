@@ -156,6 +156,9 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"too many nested equation defines",
 	"unexpected equation scope closure",
 	"equation scope open on exit",
+	"overlapping equation scopes",
+	"unexpected end of equation",
+	"equation syntax error",
 
 	/* related to tables */
 	"bad table syntax",

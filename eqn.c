@@ -32,6 +32,13 @@
 #define	EQN_NEST_MAX	 128 /* maximum nesting of defines */
 #define	EQN_MSG(t, x)	 mandoc_msg((t), (x)->parse, (x)->eqn.ln, (x)->eqn.pos, NULL)
 
+enum	eqn_rest {
+	EQN_DESCOPE,
+	EQN_ERR,
+	EQN_OK,
+	EQN_EOF
+};
+
 struct	eqnstr {
 	const char	*name;
 	size_t		 sz;
@@ -49,6 +56,7 @@ enum	eqnpartt {
 	EQN__MAX
 };
 
+static	struct eqn_box	*eqn_box_alloc(struct eqn_box *);
 static	void		 eqn_box_free(struct eqn_box *);
 static	struct eqn_def	*eqn_def_find(struct eqn_node *, 
 				const char *, size_t);
@@ -59,8 +67,9 @@ static	const char	*eqn_nexttok(struct eqn_node *, size_t *);
 static	const char	*eqn_nextrawtok(struct eqn_node *, size_t *);
 static	const char	*eqn_next(struct eqn_node *, 
 				char, size_t *, int);
-static	int		 eqn_box(struct eqn_node *, 
-				struct eqn_box *, struct eqn_box **);
+static	void		 eqn_rewind(struct eqn_node *);
+static	enum eqn_rest	 eqn_eqn(struct eqn_node *, struct eqn_box *);
+static	enum eqn_rest	 eqn_box(struct eqn_node *, struct eqn_box *);
 
 static	const struct eqnpart eqnparts[EQN__MAX] = {
 	{ { "define", 6 }, eqn_do_define }, /* EQN_DEFINE */
@@ -81,20 +90,26 @@ static	const struct eqnstr eqnmarks[EQNMARK__MAX] = {
 };
 
 static	const struct eqnstr eqnfonts[EQNFONT__MAX] = {
-	{ "", 0 },
-	{ "roman", 5 },
-	{ "bold", 4 },
-	{ "italic", 6 },
+	{ "", 0 }, /* EQNFONT_NONE */
+	{ "roman", 5 }, /* EQNFONT_ROMAN */
+	{ "bold", 4 }, /* EQNFONT_BOLD */
+	{ "italic", 6 }, /* EQNFONT_ITALIC */
 };
 
 static	const struct eqnstr eqnposs[EQNPOS__MAX] = {
-	{ "", 0 },
-	{ "over", 4 },
-	{ "sup", 3 },
-	{ "sub", 3 },
-	{ "to", 2 },
-	{ "from", 4 },
-	{ "above", 5 },
+	{ "", 0 }, /* EQNPOS_NONE */
+	{ "over", 4 }, /* EQNPOS_OVER */
+	{ "sup", 3 }, /* EQNPOS_SUP */
+	{ "sub", 3 }, /* EQNPOS_SUB */
+	{ "to", 2 }, /* EQNPOS_TO */
+	{ "from", 4 }, /* EQNPOS_FROM */
+};
+
+static	const struct eqnstr eqnpiles[EQNPILE__MAX] = {
+	{ "", 0 }, /* EQNPILE_NONE */
+	{ "cpile", 5 }, /* EQNPILE_CPILE */
+	{ "rpile", 5 }, /* EQNPILE_RPILE */
+	{ "lpile", 5 }, /* EQNPILE_LPILE */
 };
 
 /* ARGSUSED */
@@ -154,142 +169,215 @@ eqn_alloc(int pos, int line, struct mparse *parse)
 enum rofferr
 eqn_end(struct eqn_node *ep)
 {
-	struct eqn_box	*root, *last;
-	int		 c;
+	struct eqn_box	*root;
+	enum eqn_rest	 c;
 
-	ep->eqn.root = root = 
-		mandoc_calloc(1, sizeof(struct eqn_box));
+	ep->eqn.root = mandoc_calloc(1, sizeof(struct eqn_box));
+
+	root = ep->eqn.root;
 	root->type = EQN_ROOT;
 
 	if (0 == ep->sz)
 		return(ROFF_IGN);
 
-	/*
-	 * Run the parser.
-	 * If we return before reaching the end of our input, our scope
-	 * is still open somewhere.
-	 * If we return alright but don't have a symmetric scoping, then
-	 * something's not right either.
-	 * Otherwise, return the equation.
-	 */
-
-	if (0 == (c = eqn_box(ep, root, &last))) {
-		if (last != root) {
-			EQN_MSG(MANDOCERR_EQNSCOPE, ep);
-			c = 0;
-		}
-	} else if (c > 0)
+	if (EQN_DESCOPE == (c = eqn_eqn(ep, root))) {
 		EQN_MSG(MANDOCERR_EQNNSCOPE, ep);
+		c = EQN_ERR;
+	}
 
-	return(0 == c ? ROFF_EQN : ROFF_IGN);
+	return(EQN_EOF == c ? ROFF_EQN : ROFF_IGN);
 }
 
-static int
-eqn_box(struct eqn_node *ep, struct eqn_box *last, struct eqn_box **sv)
+static enum eqn_rest
+eqn_eqn(struct eqn_node *ep, struct eqn_box *last)
+{
+	struct eqn_box	*bp;
+	enum eqn_rest	 c;
+
+	bp = eqn_box_alloc(last);
+	bp->type = EQN_SUBEXPR;
+
+	while (EQN_OK == (c = eqn_box(ep, bp)))
+		/* Spin! */ ;
+
+	return(c);
+}
+
+static enum eqn_rest
+eqn_box(struct eqn_node *ep, struct eqn_box *last)
 {
 	size_t		 sz;
 	const char	*start;
-	int		 c, i, nextc, size;
-	enum eqn_fontt	 font;
+	char		*left;
+	enum eqn_rest	 c;
+	int		 i, size;
 	struct eqn_box	*bp;
 
-	/* 
-	 * Mark our last level of subexpression. 
-	 * Also mark whether that the next node should be a
-	 * subexpression node.
-	 */
-
-	*sv = last;
-	nextc = 1;
-	font = EQNFONT_NONE;  
-	size = EQN_DEFSIZE;
-again:
 	if (NULL == (start = eqn_nexttok(ep, &sz)))
-		return(0);
+		return(EQN_EOF);
 
-	for (i = 0; i < (int)EQNFONT__MAX; i++) {
-		if (eqnfonts[i].sz != sz)
-			continue;
-		if (strncmp(eqnfonts[i].name, start, sz))
-			continue;
-		font = (enum eqn_fontt)i;
-		goto again;
-	}
-
-	for (i = 0; i < (int)EQNFONT__MAX; i++) {
-		if (eqnposs[i].sz != sz)
-			continue;
-		if (strncmp(eqnposs[i].name, start, sz))
-			continue;
-		last->pos = (enum eqn_post)i;
-		goto again;
-	}
+	if (1 == sz && 0 == strncmp("}", start, 1))
+		return(EQN_DESCOPE);
+	else if (5 == sz && 0 == strncmp("right", start, 5))
+		return(EQN_DESCOPE);
+	else if (5 == sz && 0 == strncmp("above", start, 5))
+		return(EQN_DESCOPE);
 
 	for (i = 0; i < (int)EQN__MAX; i++) {
 		if (eqnparts[i].str.sz != sz)
 			continue;
 		if (strncmp(eqnparts[i].str.name, start, sz))
 			continue;
-		if ( ! (*eqnparts[i].fp)(ep))
-			return(-1);
-		goto again;
+		return((*eqnparts[i].fp)(ep) ? EQN_OK : EQN_ERR);
 	} 
+
+	if (1 == sz && 0 == strncmp("{", start, 1)) {
+		if (EQN_DESCOPE != (c = eqn_eqn(ep, last))) {
+			if (EQN_ERR != c)
+				EQN_MSG(MANDOCERR_EQNSCOPE, ep);
+			return(EQN_ERR);
+		}
+		eqn_rewind(ep);
+		start = eqn_nexttok(ep, &sz);
+		assert(start);
+		if (1 == sz && 0 == strncmp("}", start, 1))
+			return(EQN_OK);
+		EQN_MSG(MANDOCERR_EQNBADSCOPE, ep);
+		return(EQN_ERR);
+	} 
+
+	for (i = 0; i < (int)EQNPILE__MAX; i++) {
+		if (eqnpiles[i].sz != sz)
+			continue;
+		if (strncmp(eqnpiles[i].name, start, sz))
+			continue;
+		if (NULL == (start = eqn_nexttok(ep, &sz))) {
+			EQN_MSG(MANDOCERR_EQNEOF, ep);
+			return(EQN_ERR);
+		}
+		if (1 != sz || strncmp("{", start, 1)) {
+			EQN_MSG(MANDOCERR_EQNSYNT, ep);
+			return(EQN_ERR);
+		}
+		if (EQN_DESCOPE != (c = eqn_eqn(ep, last))) {
+			if (EQN_ERR != c)
+				EQN_MSG(MANDOCERR_EQNSCOPE, ep);
+			return(EQN_ERR);
+		}
+		assert(last->last);
+		last->last->pile = (enum eqn_pilet)i;
+		eqn_rewind(ep);
+		start = eqn_nexttok(ep, &sz);
+		assert(start);
+		if (1 == sz && 0 == strncmp("}", start, 1))
+			return(EQN_OK);
+		if (5 != sz || strncmp("above", start, 5)) {
+			EQN_MSG(MANDOCERR_EQNSYNT, ep);
+			return(EQN_ERR);
+		}
+		last->last->above = 1;
+		if (EQN_DESCOPE != (c = eqn_eqn(ep, last))) {
+			if (EQN_ERR != c)
+				EQN_MSG(MANDOCERR_EQNSCOPE, ep);
+			return(EQN_ERR);
+		}
+		eqn_rewind(ep);
+		start = eqn_nexttok(ep, &sz);
+		assert(start);
+		if (1 == sz && 0 == strncmp("}", start, 1))
+			return(EQN_OK);
+		EQN_MSG(MANDOCERR_EQNBADSCOPE, ep);
+		return(EQN_ERR);
+	}
+
+	if (4 == sz && 0 == strncmp("left", start, 4)) {
+		if (NULL == (start = eqn_nexttok(ep, &sz))) {
+			EQN_MSG(MANDOCERR_EQNEOF, ep);
+			return(EQN_ERR);
+		}
+		left = mandoc_strndup(start, sz);
+		if (EQN_DESCOPE != (c = eqn_eqn(ep, last)))
+			return(c);
+		assert(last->last);
+		last->last->left = left;
+		eqn_rewind(ep);
+		start = eqn_nexttok(ep, &sz);
+		assert(start);
+		if (5 != sz || strncmp("right", start, 5))
+			return(EQN_DESCOPE);
+		if (NULL == (start = eqn_nexttok(ep, &sz))) {
+			EQN_MSG(MANDOCERR_EQNEOF, ep);
+			return(EQN_ERR);
+		}
+		last->last->right = mandoc_strndup(start, sz);
+		return(EQN_OK);
+	}
+
+	for (i = 0; i < (int)EQNPOS__MAX; i++) {
+		if (eqnposs[i].sz != sz)
+			continue;
+		if (strncmp(eqnposs[i].name, start, sz))
+			continue;
+		if (NULL == last->last) {
+			EQN_MSG(MANDOCERR_EQNSYNT, ep);
+			return(EQN_ERR);
+		} 
+		last->last->pos = (enum eqn_post)i;
+		if (EQN_EOF == (c = eqn_box(ep, last))) {
+			EQN_MSG(MANDOCERR_EQNEOF, ep);
+			return(EQN_ERR);
+		}
+		return(c);
+	}
 
 	for (i = 0; i < (int)EQNMARK__MAX; i++) {
 		if (eqnmarks[i].sz != sz)
 			continue;
 		if (strncmp(eqnmarks[i].name, start, sz))
 			continue;
-		last->mark = (enum eqn_markt)i;
-		goto again;
+		if (NULL == last->last) {
+			EQN_MSG(MANDOCERR_EQNSYNT, ep);
+			return(EQN_ERR);
+		} 
+		last->last->mark = (enum eqn_markt)i;
+		if (EQN_EOF == (c = eqn_box(ep, last))) {
+			EQN_MSG(MANDOCERR_EQNEOF, ep);
+			return(EQN_ERR);
+		}
+		return(c);
 	}
 
-	if (sz == 4 && 0 == strncmp("size", start, 1)) {
-		if (NULL == (start = eqn_nexttok(ep, &sz)))
-			return(0);
+	for (i = 0; i < (int)EQNFONT__MAX; i++) {
+		if (eqnfonts[i].sz != sz)
+			continue;
+		if (strncmp(eqnfonts[i].name, start, sz))
+			continue;
+		if (EQN_EOF == (c = eqn_box(ep, last))) {
+			EQN_MSG(MANDOCERR_EQNEOF, ep);
+			return(EQN_ERR);
+		} else if (EQN_OK == c)
+			last->last->font = (enum eqn_fontt)i;
+		return(c);
+	}
+
+	if (4 == sz && 0 == strncmp("size", start, 4)) {
+		if (NULL == (start = eqn_nexttok(ep, &sz))) {
+			EQN_MSG(MANDOCERR_EQNEOF, ep);
+			return(EQN_ERR);
+		}
 		size = mandoc_strntoi(start, sz, 10);
-		goto again;
+		if (EQN_EOF == (c = eqn_box(ep, last))) {
+			EQN_MSG(MANDOCERR_EQNEOF, ep);
+			return(EQN_ERR);
+		} else if (EQN_OK != c)
+			return(c);
+		last->last->size = size;
 	}
 
-	if (sz == 1 && 0 == strncmp("}", start, 1)) 
-		return(1);
-
-	bp = mandoc_calloc(1, sizeof(struct eqn_box));
-	bp->font = font;
-	bp->size = size;
-
-	font = EQNFONT_NONE;
-	size = EQN_DEFSIZE;
-
-	if (nextc)
-		last->child = bp;
-	else
-		last->next = bp;
-
-	last = bp;
-
-	/* 
-	 * See if we're to open a new subexpression.
-	 * If so, mark our node as such and descend.
-	 */
-
-	if (sz == 1 && 0 == strncmp("{", start, 1)) {
-		bp->type = EQN_SUBEXPR;
-		c = eqn_box(ep, bp, sv);
-
-		nextc = 0;
-		goto again;
-	}
-
-	/* A regular text node. */
-
+	bp = eqn_box_alloc(last);
 	bp->type = EQN_TEXT;
-	bp->text = mandoc_malloc(sz + 1);
-	*bp->text = '\0';
-	strlcat(bp->text, start, sz + 1);
-
-	nextc = 0;
-	goto again;
+	bp->text = mandoc_strndup(start, sz);
+	return(EQN_OK);
 }
 
 void
@@ -309,16 +397,36 @@ eqn_free(struct eqn_node *p)
 	free(p);
 }
 
+static struct eqn_box *
+eqn_box_alloc(struct eqn_box *parent)
+{
+	struct eqn_box	*bp;
+
+	bp = mandoc_calloc(1, sizeof(struct eqn_box));
+	bp->parent = parent;
+	bp->size = EQN_DEFSIZE;
+
+	if (NULL == parent->first)
+		parent->first = bp;
+	else
+		parent->last->next = bp;
+
+	parent->last = bp;
+	return(bp);
+}
+
 static void
 eqn_box_free(struct eqn_box *bp)
 {
 
-	if (bp->child)
-		eqn_box_free(bp->child);
+	if (bp->first)
+		eqn_box_free(bp->first);
 	if (bp->next)
 		eqn_box_free(bp->next);
 
 	free(bp->text);
+	free(bp->left);
+	free(bp->right);
 	free(bp);
 }
 
@@ -336,19 +444,26 @@ eqn_nexttok(struct eqn_node *ep, size_t *sz)
 	return(eqn_next(ep, '"', sz, 1));
 }
 
+static void
+eqn_rewind(struct eqn_node *ep)
+{
+
+	ep->cur = ep->rew;
+}
+
 static const char *
 eqn_next(struct eqn_node *ep, char quote, size_t *sz, int repl)
 {
 	char		*start, *next;
 	int		 q, diff, lim;
-	size_t		 sv, ssz;
+	size_t		 ssz;
 	struct eqn_def	*def;
 
 	if (NULL == sz)
 		sz = &ssz;
 
 	lim = 0;
-	sv = ep->cur;
+	ep->rew = ep->cur;
 again:
 	/* Prevent self-definitions. */
 
@@ -357,7 +472,7 @@ again:
 		return(NULL);
 	}
 
-	ep->cur = sv;
+	ep->cur = ep->rew;
 	start = &ep->data[(int)ep->cur];
 	q = 0;
 
@@ -399,7 +514,7 @@ again:
 			ep->sz += diff;
 			ep->data = mandoc_realloc(ep->data, ep->sz + 1);
 			ep->data[ep->sz] = '\0';
-			start = &ep->data[(int)sv];
+			start = &ep->data[(int)ep->rew];
 		}
 
 		diff = def->valsz - *sz;

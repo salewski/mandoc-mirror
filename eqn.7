@@ -69,9 +69,14 @@ box     : text
         | UNDEF text
         | box pos box
         | box mark
+        | pile { list }
         | font box
         | SIZE text box
+        | LEFT text box [RIGHT text]
 text    : TEXT
+pile    : LPILE
+        | CPILE
+        | RPILE
 pos     : OVER
         | SUP
         | SUB
@@ -88,6 +93,7 @@ mark	: DOT
 font    : ROMAN
         | ITALIC
         | BOLD
+list    : eqn | list ABOVE eqn
 .Ed
 .Pp
 Data in TEXT form is a non-empty sequence of non-space characters or a

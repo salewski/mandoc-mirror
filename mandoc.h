@@ -114,6 +114,9 @@ enum	mandocerr {
 	MANDOCERR_EQNNEST, /* too many nested equation defines */
 	MANDOCERR_EQNNSCOPE, /* unexpected equation scope closure*/
 	MANDOCERR_EQNSCOPE, /* equation scope open on exit */
+	MANDOCERR_EQNBADSCOPE, /* overlapping equation scopes */
+	MANDOCERR_EQNEOF, /* unexpected end of equation */
+	MANDOCERR_EQNSYNT, /* equation syntax error */
 
 	/* related to tables */
 	MANDOCERR_TBL, /* bad table syntax */
@@ -313,8 +316,15 @@ enum	eqn_post {
 	EQNPOS_SUB,
 	EQNPOS_TO,
 	EQNPOS_FROM,
-	EQNPOS_ABOVE,
 	EQNPOS__MAX
+};
+
+enum	eqn_pilet {
+	EQNPILE_NONE = 0,
+	EQNPILE_CPILE,
+	EQNPILE_RPILE,
+	EQNPILE_LPILE,
+	EQNPILE__MAX
 };
 
  /*
@@ -325,12 +335,18 @@ struct	eqn_box {
 	int		  size; /* font size of expression */
 #define	EQN_DEFSIZE	  INT_MIN
 	enum eqn_boxt	  type; /* type of node */
-	struct eqn_box	 *child; /* child node */
-	struct eqn_box	 *next; /* next in tree */
-	enum eqn_post	  pos; /* position of next box */
+	struct eqn_box	 *first; /* first child node */
+	struct eqn_box	 *last; /* last child node */
+	struct eqn_box	 *next; /* node sibling */
+	struct eqn_box	 *parent; /* node sibling */
 	char		 *text; /* text (or NULL) */
+	char		 *left;
+	char		 *right;
+	enum eqn_post	  pos; /* position of next box */
 	enum eqn_markt	  mark; /* a mark about the box */
 	enum eqn_fontt	  font; /* font of box */
+	enum eqn_pilet	  pile; /* equation piling */
+	int		  above; /* next node is above */
 };
 
 /*
@@ -391,6 +407,7 @@ void		 *mandoc_calloc(size_t, size_t);
 void		 *mandoc_malloc(size_t);
 void		 *mandoc_realloc(void *, size_t);
 char		 *mandoc_strdup(const char *);
+char		 *mandoc_strndup(const char *, size_t);
 
 enum mandoc_esc	  mandoc_escape(const char **, const char **, int *);
 
