@@ -63,11 +63,20 @@ The equation grammar is as follows:
 .Bd -literal -offset indent
 eqn     : box | eqn box
 box     : text
-	| { eqn }
+        | { eqn }
         | DEFINE text text
         | SET text text
         | UNDEF text
+        | box mark
 text    : TEXT
+mark	: DOT
+        | DOTDOT
+        | HAT
+        | TILDE
+        | VEC
+        | DYAD
+        | BAR
+        | UNDER
 .Ed
 .Pp
 Data in TEXT form is a non-empty sequence of non-space characters or a

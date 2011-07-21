@@ -270,15 +270,15 @@ print_box(const struct eqn_box *ep, int indent)
 
 	switch (ep->type) {
 	case (EQN_ROOT):
-		puts("eqn-root");
+		printf("eqn-root(%d)\n", ep->mark);
 		print_box(ep->child, indent + 1);
 		break;
 	case (EQN_SUBEXPR):
-		puts("eqn-subxpr");
+		printf("eqn-subxpr(%d)\n", ep->mark);
 		print_box(ep->child, indent + 1);
 		break;
 	case (EQN_TEXT):
-		printf("eqn-text: [%s]\n", ep->text);
+		printf("eqn-text(%d): [%s]\n", ep->mark, ep->text);
 		break;
 	default:
 		break;

@@ -37,6 +37,11 @@ struct	eqnpart {
 	int		(*fp)(struct eqn_node *);
 };
 
+struct	eqnmark {
+	const char	*name;
+	size_t		 sz;
+};
+
 enum	eqnpartt {
 	EQN_DEFINE = 0,
 	EQN_SET,
@@ -61,6 +66,18 @@ static	const struct eqnpart eqnparts[EQN__MAX] = {
 	{ "define", 6, eqn_do_define }, /* EQN_DEFINE */
 	{ "set", 3, eqn_do_set }, /* EQN_SET */
 	{ "undef", 5, eqn_do_undef }, /* EQN_UNDEF */
+};
+
+static	const struct eqnmark eqnmarks[EQNMARK__MAX] = {
+	{ "", 0 }, /* EQNMARK_NONE */
+	{ "dot", 3 }, /* EQNMARK_DOT */
+	{ "dotdot", 6 }, /* EQNMARK_DOTDOT */
+	{ "hat", 3 }, /* EQNMARK_HAT */
+	{ "tilde", 5 }, /* EQNMARK_TILDE */
+	{ "vec", 3 }, /* EQNMARK_VEC */
+	{ "dyad", 4 }, /* EQNMARK_DYAD */
+	{ "bar", 3 }, /* EQNMARK_BAR */
+	{ "under", 5 }, /* EQNMARK_UNDER */
 };
 
 /* ARGSUSED */
@@ -139,13 +156,15 @@ eqn_end(struct eqn_node *ep)
 	 * Otherwise, return the equation.
 	 */
 
-	if ((c = eqn_box(ep, root, &last)) > 0) {
+	if (0 == (c = eqn_box(ep, root, &last))) {
+		if (last != root) {
+			EQN_MSG(MANDOCERR_EQNSCOPE, ep);
+			c = 0;
+		}
+	} else if (c > 0)
 		EQN_MSG(MANDOCERR_EQNNSCOPE, ep);
-		c = 0;
-	} else if (0 == c && last != root)
-		EQN_MSG(MANDOCERR_EQNSCOPE, ep);
 
-	return(1 == c ? ROFF_EQN : ROFF_IGN);
+	return(0 == c ? ROFF_EQN : ROFF_IGN);
 }
 
 static int
@@ -178,6 +197,15 @@ again:
 
 		goto again;
 	} 
+
+	for (i = 0; i < (int)EQNMARK__MAX; i++) {
+		if (eqnmarks[i].sz != sz)
+			continue;
+		if (strncmp(eqnmarks[i].name, start, sz))
+			continue;
+		last->mark = (enum eqn_markt)i;
+		goto again;
+	}
 
 	/* Exit this [hopefully] subexpression. */
 
