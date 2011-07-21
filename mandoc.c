@@ -698,7 +698,7 @@ mandoc_getcontrol(const char *cp, int *ppos)
  * If the string is invalid, or is less than 0, return -1.
  */
 int
-mandoc_strntou(const char *p, size_t sz, int base)
+mandoc_strntoi(const char *p, size_t sz, int base)
 {
 	char		 buf[32];
 	char		*ep;
@@ -716,11 +716,10 @@ mandoc_strntou(const char *p, size_t sz, int base)
 	if (buf[0] == '\0' || *ep != '\0')
 		return(-1);
 
-	if ((errno == ERANGE && 
-			(v == LONG_MAX || v == LONG_MIN)) ||
-			(v > INT_MAX || v < 0))
-		return(-1);
+	if (v > INT_MAX)
+		v = INT_MAX;
+	if (v < INT_MIN)
+		v = INT_MIN;
 
 	return((int)v);
 }
-

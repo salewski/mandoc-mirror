@@ -1149,7 +1149,7 @@ roff_nr(ROFF_ARGS)
 
 	if (0 == strcmp(key, "nS")) {
 		r->regs[(int)REG_nS].set = 1;
-		if ((iv = mandoc_strntou(val, strlen(val), 10)) >= 0)
+		if ((iv = mandoc_strntoi(val, strlen(val), 10)) >= 0)
 			r->regs[(int)REG_nS].u = (unsigned)iv;
 		else
 			r->regs[(int)REG_nS].u = 0u;

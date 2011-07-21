@@ -322,6 +322,8 @@ enum	eqn_post {
  * grammar.
  */
 struct	eqn_box {
+	int		  size; /* font size of expression */
+#define	EQN_DEFSIZE	  INT_MIN
 	enum eqn_boxt	  type; /* type of node */
 	struct eqn_box	 *child; /* child node */
 	struct eqn_box	 *next; /* next in tree */

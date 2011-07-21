@@ -111,7 +111,7 @@ mchars_num2char(const char *p, size_t sz)
 {
 	int		  i;
 
-	if ((i = mandoc_strntou(p, sz, 10)) < 0)
+	if ((i = mandoc_strntoi(p, sz, 10)) < 0)
 		return('\0');
 	return(isprint(i) ? i : '\0');
 }
@@ -121,7 +121,7 @@ mchars_num2uc(const char *p, size_t sz)
 {
 	int               i;
 
-	if ((i = mandoc_strntou(p, sz, 16)) < 0)
+	if ((i = mandoc_strntoi(p, sz, 16)) < 0)
 		return('\0');
 	/* FIXME: make sure we're not in a bogus range. */
 	return(i > 0x80 && i <= 0x10FFFF ? i : '\0');

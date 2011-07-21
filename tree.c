@@ -19,6 +19,7 @@
 #endif
 
 #include <assert.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -270,17 +271,20 @@ print_box(const struct eqn_box *ep, int indent)
 
 	switch (ep->type) {
 	case (EQN_ROOT):
-		printf("eqn-root(%d, %d, %d)\n", 
+		printf("eqn-root(%d, %d, %d, %d)\n", 
+			EQN_DEFSIZE == ep->size ? 0 : ep->size,
 			ep->pos, ep->font, ep->mark);
 		print_box(ep->child, indent + 1);
 		break;
 	case (EQN_SUBEXPR):
-		printf("eqn-subxpr(%d, %d, %d)\n", 
+		printf("eqn-subxpr(%d, %d, %d, %d)\n", 
+			EQN_DEFSIZE == ep->size ? 0 : ep->size,
 			ep->pos, ep->font, ep->mark);
 		print_box(ep->child, indent + 1);
 		break;
 	case (EQN_TEXT):
-		printf("eqn-text(%d, %d, %d): [%s]\n", 
+		printf("eqn-text(%d, %d, %d, %d): [%s]\n", 
+			EQN_DEFSIZE == ep->size ? 0 : ep->size,
 			ep->pos, ep->font, ep->mark, ep->text);
 		break;
 	default:
