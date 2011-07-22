@@ -285,7 +285,8 @@ struct	tbl_span {
 enum	eqn_boxt {
 	EQN_ROOT, /* root of parse tree */
 	EQN_TEXT, /* text (number, variable, whatever) */
-	EQN_SUBEXPR /* nested subexpression */
+	EQN_SUBEXPR, /* nested `eqn' subexpression */
+	EQN_LIST /* list of subexpressions */
 };
 
 enum	eqn_markt {

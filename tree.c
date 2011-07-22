@@ -276,6 +276,15 @@ print_box(const struct eqn_box *ep, int indent)
 			ep->pos, ep->font, ep->mark);
 		print_box(ep->first, indent + 1);
 		break;
+	case (EQN_LIST):
+		printf("eqn-list(%d, %d, %d, %d, %d, %d, \"%s\", \"%s\")\n", 
+			EQN_DEFSIZE == ep->size ? 0 : ep->size,
+			ep->pos, ep->font, ep->mark,
+			ep->pile, ep->above,
+			ep->left ? ep->left : "",
+			ep->right ? ep->right : "");
+		print_box(ep->first, indent + 1);
+		break;
 	case (EQN_SUBEXPR):
 		printf("eqn-subxpr(%d, %d, %d, %d, %d, %d, \"%s\", \"%s\")\n", 
 			EQN_DEFSIZE == ep->size ? 0 : ep->size,

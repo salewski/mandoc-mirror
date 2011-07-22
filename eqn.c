@@ -56,6 +56,7 @@ enum	eqnpartt {
 	EQN__MAX
 };
 
+static	enum eqn_rest	 eqn_box(struct eqn_node *, struct eqn_box *);
 static	struct eqn_box	*eqn_box_alloc(struct eqn_box *);
 static	void		 eqn_box_free(struct eqn_box *);
 static	struct eqn_def	*eqn_def_find(struct eqn_node *, 
@@ -63,13 +64,13 @@ static	struct eqn_def	*eqn_def_find(struct eqn_node *,
 static	int		 eqn_do_define(struct eqn_node *);
 static	int		 eqn_do_set(struct eqn_node *);
 static	int		 eqn_do_undef(struct eqn_node *);
+static	enum eqn_rest	 eqn_eqn(struct eqn_node *, struct eqn_box *);
+static	enum eqn_rest	 eqn_list(struct eqn_node *, struct eqn_box *);
 static	const char	*eqn_nexttok(struct eqn_node *, size_t *);
 static	const char	*eqn_nextrawtok(struct eqn_node *, size_t *);
 static	const char	*eqn_next(struct eqn_node *, 
 				char, size_t *, int);
 static	void		 eqn_rewind(struct eqn_node *);
-static	enum eqn_rest	 eqn_eqn(struct eqn_node *, struct eqn_box *);
-static	enum eqn_rest	 eqn_box(struct eqn_node *, struct eqn_box *);
 
 static	const struct eqnpart eqnparts[EQN__MAX] = {
 	{ { "define", 6 }, eqn_do_define }, /* EQN_DEFINE */
@@ -204,6 +205,51 @@ eqn_eqn(struct eqn_node *ep, struct eqn_box *last)
 }
 
 static enum eqn_rest
+eqn_list(struct eqn_node *ep, struct eqn_box *last)
+{
+	struct eqn_box	*bp;
+	const char	*start;
+	size_t		 sz;
+	enum eqn_rest	 c;
+
+	bp = eqn_box_alloc(last);
+	bp->type = EQN_LIST;
+
+	if (NULL == (start = eqn_nexttok(ep, &sz))) {
+		EQN_MSG(MANDOCERR_EQNEOF, ep);
+		return(EQN_ERR);
+	}
+	if (1 != sz || strncmp("{", start, 1)) {
+		EQN_MSG(MANDOCERR_EQNSYNT, ep);
+		return(EQN_ERR);
+	}
+
+	while (EQN_DESCOPE == (c = eqn_eqn(ep, bp))) {
+		eqn_rewind(ep);
+		start = eqn_nexttok(ep, &sz);
+		assert(start);
+		if (5 != sz || strncmp("above", start, 5))
+			break;
+		bp->last->above = 1;
+	}
+
+	if (EQN_DESCOPE != c) {
+		if (EQN_ERR != c)
+			EQN_MSG(MANDOCERR_EQNSCOPE, ep);
+		return(EQN_ERR);
+	}
+
+	eqn_rewind(ep);
+	start = eqn_nexttok(ep, &sz);
+	assert(start);
+	if (1 == sz && 0 == strncmp("}", start, 1))
+		return(EQN_OK);
+
+	EQN_MSG(MANDOCERR_EQNBADSCOPE, ep);
+	return(EQN_ERR);
+}
+
+static enum eqn_rest
 eqn_box(struct eqn_node *ep, struct eqn_box *last)
 {
 	size_t		 sz;
@@ -251,40 +297,9 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last)
 			continue;
 		if (strncmp(eqnpiles[i].name, start, sz))
 			continue;
-		if (NULL == (start = eqn_nexttok(ep, &sz))) {
-			EQN_MSG(MANDOCERR_EQNEOF, ep);
-			return(EQN_ERR);
-		}
-		if (1 != sz || strncmp("{", start, 1)) {
-			EQN_MSG(MANDOCERR_EQNSYNT, ep);
-			return(EQN_ERR);
-		}
-
-		while (EQN_DESCOPE == (c = eqn_eqn(ep, last))) {
-			assert(last->last);
+		if (EQN_OK == (c = eqn_list(ep, last)))
 			last->last->pile = (enum eqn_pilet)i;
-			eqn_rewind(ep);
-			start = eqn_nexttok(ep, &sz);
-			assert(start);
-			if (5 != sz || strncmp("above", start, 5))
-				break;
-			last->last->above = 1;
-		}
-
-		if (EQN_DESCOPE != c) {
-			if (EQN_ERR != c)
-				EQN_MSG(MANDOCERR_EQNSCOPE, ep);
-			return(EQN_ERR);
-		}
-
-		eqn_rewind(ep);
-		start = eqn_nexttok(ep, &sz);
-		assert(start);
-		if (1 == sz && 0 == strncmp("}", start, 1))
-			return(EQN_OK);
-
-		EQN_MSG(MANDOCERR_EQNBADSCOPE, ep);
-		return(EQN_ERR);
+		return(c);
 	}
 
 	if (4 == sz && 0 == strncmp("left", start, 4)) {
