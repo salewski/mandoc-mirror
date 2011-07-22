@@ -45,7 +45,7 @@ struct	eqnstr {
 };
 
 #define	STRNEQ(p1, sz1, p2, sz2) \
-	(sz1) == (sz2) && 0 == strncmp((p1), (p2), (sz1))
+	((sz1) == (sz2) && 0 == strncmp((p1), (p2), (sz1)))
 #define	EQNSTREQ(x, p, sz) \
 	STRNEQ((x)->name, (x)->sz, (p), (sz))
 
