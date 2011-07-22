@@ -72,7 +72,7 @@ box     : text
         | pile { list }
         | font box
         | SIZE text box
-        | LEFT text box [RIGHT text]
+        | LEFT text eqn [RIGHT text]
 text    : TEXT
 pile    : LPILE
         | CPILE
