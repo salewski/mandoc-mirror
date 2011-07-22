@@ -75,6 +75,30 @@ enum	eqn_symt {
 	EQNSYM_THETA,
 	EQNSYM_UPSILON,
 	EQNSYM_XI,
+	EQNSYM_inter,
+	EQNSYM_union,
+	EQNSYM_prod,
+	EQNSYM_int,
+	EQNSYM_sum,
+	EQNSYM_grad,
+	EQNSYM_del,
+	EQNSYM_times,
+	EQNSYM_cdot,
+	EQNSYM_nothing,
+	EQNSYM_approx,
+	EQNSYM_prime,
+	EQNSYM_half,
+	EQNSYM_partial,
+	EQNSYM_inf,
+	EQNSYM_muchgreat,
+	EQNSYM_muchless,
+	EQNSYM_larrow,
+	EQNSYM_rarrow,
+	EQNSYM_pm,
+	EQNSYM_nequal,
+	EQNSYM_equiv,
+	EQNSYM_lessequal,
+	EQNSYM_moreequal,
 	EQNSYM__MAX
 };
 
@@ -95,7 +119,7 @@ struct	eqnpart {
 
 struct	eqnsym {
 	struct eqnstr	 str;
-	char		 sym;
+	const char	*sym;
 };
 
 enum	eqnpartt {
@@ -163,41 +187,65 @@ static	const struct eqnstr eqnpiles[EQNPILE__MAX] = {
 };
 
 static	const struct eqnsym eqnsyms[EQNSYM__MAX] = {
-	{ { "alpha", 5 }, 'a' }, /* EQNSYM_alpha */
-	{ { "beta", 4 }, 'b' }, /* EQNSYM_beta */
-	{ { "chi", 3 }, 'x' }, /* EQNSYM_chi */
-	{ { "delta", 5 }, 'd' }, /* EQNSYM_delta */
-	{ { "epsilon", 7 }, 'e' }, /* EQNSYM_epsilon */
-	{ { "eta", 3 }, 'y' }, /* EQNSYM_eta */
-	{ { "gamma", 5 }, 'g' }, /* EQNSYM_gamma */
-	{ { "iota", 4 }, 'i' }, /* EQNSYM_iota */
-	{ { "kappa", 5 }, 'k' }, /* EQNSYM_kappa */
-	{ { "lambda", 6 }, 'l' }, /* EQNSYM_lambda */
-	{ { "mu", 2 }, 'm' }, /* EQNSYM_mu */
-	{ { "nu", 2 }, 'n' }, /* EQNSYM_nu */
-	{ { "omega", 5 }, 'w' }, /* EQNSYM_omega */
-	{ { "omicron", 7 }, 'o' }, /* EQNSYM_omicron */
-	{ { "phi", 3 }, 'f' }, /* EQNSYM_phi */
-	{ { "pi", 2 }, 'p' }, /* EQNSYM_pi */
-	{ { "psi", 2 }, 'q' }, /* EQNSYM_psi */
-	{ { "rho", 3 }, 'r' }, /* EQNSYM_rho */
-	{ { "sigma", 5 }, 's' }, /* EQNSYM_sigma */
-	{ { "tau", 3 }, 't' }, /* EQNSYM_tau */
-	{ { "theta", 5 }, 'h' }, /* EQNSYM_theta */
-	{ { "upsilon", 7 }, 'u' }, /* EQNSYM_upsilon */
-	{ { "xi", 2 }, 'c' }, /* EQNSYM_xi */
-	{ { "zeta", 4 }, 'z' }, /* EQNSYM_zeta */
-	{ { "DELTA", 5 }, 'D' }, /* EQNSYM_DELTA */
-	{ { "GAMMA", 5 }, 'G' }, /* EQNSYM_GAMMA */
-	{ { "LAMBDA", 6 }, 'L' }, /* EQNSYM_LAMBDA */
-	{ { "OMEGA", 5 }, 'W' }, /* EQNSYM_OMEGA */
-	{ { "PHI", 3 }, 'F' }, /* EQNSYM_PHI */
-	{ { "PI", 2 }, 'P' }, /* EQNSYM_PI */
-	{ { "PSI", 3 }, 'Q' }, /* EQNSYM_PSI */
-	{ { "SIGMA", 5 }, 'S' }, /* EQNSYM_SIGMA */
-	{ { "THETA", 5 }, 'H' }, /* EQNSYM_THETA */
-	{ { "UPSILON", 7 }, 'U' }, /* EQNSYM_UPSILON */
-	{ { "XI", 2 }, 'C' }, /* EQNSYM_XI */
+	{ { "alpha", 5 }, "*a" }, /* EQNSYM_alpha */
+	{ { "beta", 4 }, "*b" }, /* EQNSYM_beta */
+	{ { "chi", 3 }, "*x" }, /* EQNSYM_chi */
+	{ { "delta", 5 }, "*d" }, /* EQNSYM_delta */
+	{ { "epsilon", 7 }, "*e" }, /* EQNSYM_epsilon */
+	{ { "eta", 3 }, "*y" }, /* EQNSYM_eta */
+	{ { "gamma", 5 }, "*g" }, /* EQNSYM_gamma */
+	{ { "iota", 4 }, "*i" }, /* EQNSYM_iota */
+	{ { "kappa", 5 }, "*k" }, /* EQNSYM_kappa */
+	{ { "lambda", 6 }, "*l" }, /* EQNSYM_lambda */
+	{ { "mu", 2 }, "*m" }, /* EQNSYM_mu */
+	{ { "nu", 2 }, "*n" }, /* EQNSYM_nu */
+	{ { "omega", 5 }, "*w" }, /* EQNSYM_omega */
+	{ { "omicron", 7 }, "*o" }, /* EQNSYM_omicron */
+	{ { "phi", 3 }, "*f" }, /* EQNSYM_phi */
+	{ { "pi", 2 }, "*p" }, /* EQNSYM_pi */
+	{ { "psi", 2 }, "*q" }, /* EQNSYM_psi */
+	{ { "rho", 3 }, "*r" }, /* EQNSYM_rho */
+	{ { "sigma", 5 }, "*s" }, /* EQNSYM_sigma */
+	{ { "tau", 3 }, "*t" }, /* EQNSYM_tau */
+	{ { "theta", 5 }, "*h" }, /* EQNSYM_theta */
+	{ { "upsilon", 7 }, "*u" }, /* EQNSYM_upsilon */
+	{ { "xi", 2 }, "*c" }, /* EQNSYM_xi */
+	{ { "zeta", 4 }, "*z" }, /* EQNSYM_zeta */
+	{ { "DELTA", 5 }, "*D" }, /* EQNSYM_DELTA */
+	{ { "GAMMA", 5 }, "*G" }, /* EQNSYM_GAMMA */
+	{ { "LAMBDA", 6 }, "*L" }, /* EQNSYM_LAMBDA */
+	{ { "OMEGA", 5 }, "*W" }, /* EQNSYM_OMEGA */
+	{ { "PHI", 3 }, "*F" }, /* EQNSYM_PHI */
+	{ { "PI", 2 }, "*P" }, /* EQNSYM_PI */
+	{ { "PSI", 3 }, "*Q" }, /* EQNSYM_PSI */
+	{ { "SIGMA", 5 }, "*S" }, /* EQNSYM_SIGMA */
+	{ { "THETA", 5 }, "*H" }, /* EQNSYM_THETA */
+	{ { "UPSILON", 7 }, "*U" }, /* EQNSYM_UPSILON */
+	{ { "XI", 2 }, "*C" }, /* EQNSYM_XI */
+	{ { "inter", 5 }, "ca" }, /* EQNSYM_inter */
+	{ { "union", 5 }, "cu" }, /* EQNSYM_union */
+	{ { "prod", 4 }, "product" }, /* EQNSYM_prod */
+	{ { "int", 3 }, "integral" }, /* EQNSYM_int */
+	{ { "sum", 3 }, "sum" }, /* EQNSYM_sum */
+	{ { "grad", 4 }, "gr" }, /* EQNSYM_grad */
+	{ { "del", 3 }, "gr" }, /* EQNSYM_del */
+	{ { "times", 5 }, "mu" }, /* EQNSYM_times */
+	{ { "cdot", 4 }, "pc" }, /* EQNSYM_cdot */
+	{ { "nothing", 7 }, "&" }, /* EQNSYM_nothing */
+	{ { "approx", 6 }, "~~" }, /* EQNSYM_approx */
+	{ { "prime", 5 }, "aq" }, /* EQNSYM_prime */
+	{ { "half", 4 }, "12" }, /* EQNSYM_half */
+	{ { "partial", 7 }, "pd" }, /* EQNSYM_partial */
+	{ { "inf", 3 }, "if" }, /* EQNSYM_inf */
+	{ { ">>", 2 }, ">>" }, /* EQNSYM_muchgreat */
+	{ { "<<", 2 }, "<<" }, /* EQNSYM_muchless */
+	{ { "<-", 2 }, "<-" }, /* EQNSYM_larrow */
+	{ { "->", 2 }, "->" }, /* EQNSYM_rarrow */
+	{ { "+-", 2 }, "+-" }, /* EQNSYM_pm */
+	{ { "!=", 2 }, "!=" }, /* EQNSYM_nequal */
+	{ { "==", 2 }, "==" }, /* EQNSYM_equiv */
+	{ { "<=", 2 }, "<=" }, /* EQNSYM_lessequal */
+	{ { ">=", 2 }, ">=" }, /* EQNSYM_moreequal */
 };
 
 /* ARGSUSED */
@@ -342,7 +390,7 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last)
 	size_t		 sz;
 	const char	*start;
 	char		*left;
-	char		 sym[5];
+	char		 sym[64];
 	enum eqn_rest	 c;
 	int		 i, size;
 	struct eqn_box	*bp;
@@ -472,11 +520,8 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last)
 	bp->type = EQN_TEXT;
 	for (i = 0; i < (int)EQNSYM__MAX; i++)
 		if (EQNSTREQ(&eqnsyms[i].str, start, sz)) {
-			sym[0] = '\\';
-			sym[1] = '(';
-			sym[2] = '*';
-			sym[3] = eqnsyms[i].sym;
-			sym[4] = '\0';
+			sym[63] = '\0';
+			snprintf(sym, 62, "\\[%s]", eqnsyms[i].sym);
 			bp->text = mandoc_strdup(sym);
 			return(EQN_OK);
 		}
