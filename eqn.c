@@ -126,6 +126,7 @@ enum	eqnpartt {
 	EQN_DEFINE = 0,
 	EQN_SET,
 	EQN_UNDEF,
+	EQN_GFONT,
 	EQN_GSIZE,
 	EQN__MAX
 };
@@ -136,6 +137,7 @@ static	struct eqn_box	*eqn_box_alloc(struct eqn_node *,
 static	void		 eqn_box_free(struct eqn_box *);
 static	struct eqn_def	*eqn_def_find(struct eqn_node *, 
 				const char *, size_t);
+static	int		 eqn_do_gfont(struct eqn_node *);
 static	int		 eqn_do_gsize(struct eqn_node *);
 static	int		 eqn_do_define(struct eqn_node *);
 static	int		 eqn_do_set(struct eqn_node *);
@@ -152,7 +154,8 @@ static	const struct eqnpart eqnparts[EQN__MAX] = {
 	{ { "define", 6 }, eqn_do_define }, /* EQN_DEFINE */
 	{ { "set", 3 }, eqn_do_set }, /* EQN_SET */
 	{ { "undef", 5 }, eqn_do_undef }, /* EQN_UNDEF */
-	{ { "gsize", 5 }, eqn_do_gsize }, /* EQN_UNDEF */
+	{ { "gfont", 5 }, eqn_do_gfont }, /* EQN_GFONT */
+	{ { "gsize", 5 }, eqn_do_gsize }, /* EQN_GSIZE */
 };
 
 static	const struct eqnstr eqnmarks[EQNMARK__MAX] = {
@@ -761,6 +764,18 @@ eqn_do_define(struct eqn_node *ep)
 	def->val = mandoc_realloc(def->val, sz + 1);
 	memcpy(def->val, start, sz);
 	def->val[(int)sz] = '\0';
+	return(1);
+}
+
+static int
+eqn_do_gfont(struct eqn_node *ep)
+{
+	const char	*start;
+
+	if (NULL == (start = eqn_nextrawtok(ep, NULL))) {
+		EQN_MSG(MANDOCERR_EQNEOF, ep);
+		return(0);
+	} 
 	return(1);
 }
 

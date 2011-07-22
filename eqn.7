@@ -66,6 +66,7 @@ eqn     : box | eqn box
 box     : text
         | "{" eqn "}"
         | "define" text text
+        | "gfont" text
         | "gsize" text
         | "set" text text
         | "undef" text
@@ -142,18 +143,25 @@ foo bar 'baz'
 .Ed
 .Pp
 Self-referencing definitions will raise an error.
+.It Cm gfont
+Set the default font of subsequent output.
+Its syntax is as follows:
+.Pp
+.D1 gfont Ar font
+.Pp
+In mandoc, this value is discarded.
 .It Cm gsize
 Set the default size of subsequent output.
 Its syntax is as follows:
 .Pp
-.D1 define Ar size
+.D1 gsize Ar size
 .Pp
 The
 .Ar size
 value should be an integer.
 .It Cm set
 Set an equation mode.
-Both arguments are thrown away.
+In mandoc, both arguments are thrown away.
 Its syntax is as follows:
 .Pp
 .D1 set Ar key val
