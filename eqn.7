@@ -59,41 +59,29 @@ these are not the same as
 macros, and may only be invoked as
 .Sq \&.EQ .
 .Pp
-The equation grammar is as follows:
+The equation grammar is as follows, where quoted strings are
+case-sensitive literals in the input:
 .Bd -literal -offset indent
 eqn     : box | eqn box
 box     : text
-        | { eqn }
-        | DEFINE text text
-        | SET text text
-        | UNDEF text
+        | "{" eqn "}"
+        | "define" text text
+        | "set" text text
+        | "undef" text
         | box pos box
         | box mark
-        | pile { list }
+        | pile "{" list "}"
         | font box
-        | SIZE text box
-        | LEFT text eqn [RIGHT text]
+        | "size" text box
+        | "left" text eqn ["right" text]
 text    : TEXT
-pile    : LPILE
-        | CPILE
-        | RPILE
-pos     : OVER
-        | SUP
-        | SUB
-        | TO
-        | FROM
-mark	: DOT
-        | DOTDOT
-        | HAT
-        | TILDE
-        | VEC
-        | DYAD
-        | BAR
-        | UNDER
-font    : ROMAN
-        | ITALIC
-        | BOLD
-list    : eqn | list ABOVE eqn
+pile    : "lpile" | "cpile" | "rpile"
+pos     : "over" | "sup" | "sub" | "to" | "from"
+mark	: "dot" | "dotdot" | "hat" | "tilde" | "vec"
+        | "dyad" | "bar" | "under"
+font    : "roman" | "italic" | "bold"
+list    : eqn 
+        | list "above" eqn
 .Ed
 .Pp
 Data in TEXT form is a non-empty sequence of non-space characters or a
@@ -101,6 +89,11 @@ non-empty quoted string.
 Unless within a quoted string, white-space (and enclosing literal quote
 pairs) is thrown away.
 Quoted strings are not scanned for replacement definitions.
+The following text tokens are translated into an acceptable front-end
+format, if available: alpha, beta, chi, delta, epsilon, eta, gamma,
+iota, kappa, lambda, mu, nu, omega, omicron, phi, pi, psi, rho, sigma,
+tau, theta, upsilon, xi, zeta, DELTA, GAMMA, LAMBDA, OMEGA, PHI, PI,
+PSI, SIGMA, THETA, UPSILON, and XI.
 .Pp
 The following control statements are available:
 .Bl -tag -width Ds
@@ -207,7 +200,7 @@ In mandoc, this is interpreted as a comment.
 .%D 1978
 .Re
 .Sh HISTORY
-The eqn utility, a preprocessor for troff, was originally written by 
+The eqn utility, a preprocessor for troff, was originally written by
 Brian W. Kernighan and Lorinda L. Cherry in 1975.
 The GNU reimplementation of eqn, part of the GNU troff package, was
 released in 1989 by James Clark.
