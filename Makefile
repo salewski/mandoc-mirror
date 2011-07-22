@@ -50,6 +50,7 @@ SRCS		 = Makefile \
 		   config.h.pre \
 		   eqn.7 \
 		   eqn.c \
+		   eqn_term.c \
 		   example.style.css \
 		   external.png \
 		   html.c \
@@ -200,13 +201,15 @@ MANDOC_HTML_LNS	 = html.ln \
 		   mdoc_html.ln \
 		   tbl_html.ln
 
-MANDOC_TERM_OBJS = man_term.o \
+MANDOC_TERM_OBJS = eqn_term.o \
+		   man_term.o \
 		   mdoc_term.o \
 		   term.o \
 		   term_ascii.o \
 		   term_ps.o \
 		   tbl_term.o
-MANDOC_TERM_LNS	 = man_term.ln \
+MANDOC_TERM_LNS	 = eqn_term.ln \
+		   man_term.ln \
 		   mdoc_term.ln \
 		   term.ln \
 		   term_ascii.ln \

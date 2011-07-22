@@ -905,7 +905,7 @@ print_man_node(DECL_ARGS)
 			p->flags |= TERMP_SENTENCE;
 		return;
 	case (MAN_EQN):
-		/*term_word(p, n->eqn->data);*/
+		term_eqn(p, n->eqn);
 		return;
 	case (MAN_TBL):
 		/*

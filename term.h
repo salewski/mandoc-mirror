@@ -96,6 +96,7 @@ struct	termp {
 	struct termp_ps	 *ps;
 };
 
+void		  term_eqn(struct termp *, const struct eqn *);
 void		  term_tbl(struct termp *, const struct tbl_span *);
 void		  term_free(struct termp *);
 void		  term_newln(struct termp *);
