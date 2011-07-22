@@ -126,14 +126,17 @@ enum	eqnpartt {
 	EQN_DEFINE = 0,
 	EQN_SET,
 	EQN_UNDEF,
+	EQN_GSIZE,
 	EQN__MAX
 };
 
 static	enum eqn_rest	 eqn_box(struct eqn_node *, struct eqn_box *);
-static	struct eqn_box	*eqn_box_alloc(struct eqn_box *);
+static	struct eqn_box	*eqn_box_alloc(struct eqn_node *, 
+				struct eqn_box *);
 static	void		 eqn_box_free(struct eqn_box *);
 static	struct eqn_def	*eqn_def_find(struct eqn_node *, 
 				const char *, size_t);
+static	int		 eqn_do_gsize(struct eqn_node *);
 static	int		 eqn_do_define(struct eqn_node *);
 static	int		 eqn_do_set(struct eqn_node *);
 static	int		 eqn_do_undef(struct eqn_node *);
@@ -149,6 +152,7 @@ static	const struct eqnpart eqnparts[EQN__MAX] = {
 	{ { "define", 6 }, eqn_do_define }, /* EQN_DEFINE */
 	{ { "set", 3 }, eqn_do_set }, /* EQN_SET */
 	{ { "undef", 5 }, eqn_do_undef }, /* EQN_UNDEF */
+	{ { "gsize", 5 }, eqn_do_gsize }, /* EQN_UNDEF */
 };
 
 static	const struct eqnstr eqnmarks[EQNMARK__MAX] = {
@@ -298,6 +302,7 @@ eqn_alloc(int pos, int line, struct mparse *parse)
 	p->parse = parse;
 	p->eqn.ln = line;
 	p->eqn.pos = pos;
+	p->gsize = EQN_DEFSIZE;
 
 	return(p);
 }
@@ -330,7 +335,7 @@ eqn_eqn(struct eqn_node *ep, struct eqn_box *last)
 	struct eqn_box	*bp;
 	enum eqn_rest	 c;
 
-	bp = eqn_box_alloc(last);
+	bp = eqn_box_alloc(ep, last);
 	bp->type = EQN_SUBEXPR;
 
 	while (EQN_OK == (c = eqn_box(ep, bp)))
@@ -347,7 +352,7 @@ eqn_list(struct eqn_node *ep, struct eqn_box *last)
 	size_t		 sz;
 	enum eqn_rest	 c;
 
-	bp = eqn_box_alloc(last);
+	bp = eqn_box_alloc(ep, last);
 	bp->type = EQN_LIST;
 
 	if (NULL == (start = eqn_nexttok(ep, &sz))) {
@@ -516,7 +521,7 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last)
 		last->last->size = size;
 	}
 
-	bp = eqn_box_alloc(last);
+	bp = eqn_box_alloc(ep, last);
 	bp->type = EQN_TEXT;
 	for (i = 0; i < (int)EQNSYM__MAX; i++)
 		if (EQNSTREQ(&eqnsyms[i].str, start, sz)) {
@@ -548,13 +553,13 @@ eqn_free(struct eqn_node *p)
 }
 
 static struct eqn_box *
-eqn_box_alloc(struct eqn_box *parent)
+eqn_box_alloc(struct eqn_node *ep, struct eqn_box *parent)
 {
 	struct eqn_box	*bp;
 
 	bp = mandoc_calloc(1, sizeof(struct eqn_box));
 	bp->parent = parent;
-	bp->size = EQN_DEFSIZE;
+	bp->size = ep->gsize;
 
 	if (NULL == parent->first)
 		parent->first = bp;
@@ -695,9 +700,9 @@ eqn_do_set(struct eqn_node *ep)
 	const char	*start;
 
 	if (NULL == (start = eqn_nextrawtok(ep, NULL)))
-		EQN_MSG(MANDOCERR_EQNARGS, ep);
+		EQN_MSG(MANDOCERR_EQNEOF, ep);
 	else if (NULL == (start = eqn_nextrawtok(ep, NULL)))
-		EQN_MSG(MANDOCERR_EQNARGS, ep);
+		EQN_MSG(MANDOCERR_EQNEOF, ep);
 	else
 		return(1);
 
@@ -713,7 +718,7 @@ eqn_do_define(struct eqn_node *ep)
 	int		 i;
 
 	if (NULL == (start = eqn_nextrawtok(ep, &sz))) {
-		EQN_MSG(MANDOCERR_EQNARGS, ep);
+		EQN_MSG(MANDOCERR_EQNEOF, ep);
 		return(0);
 	}
 
@@ -748,7 +753,7 @@ eqn_do_define(struct eqn_node *ep)
 	start = eqn_next(ep, ep->data[(int)ep->cur], &sz, 0);
 
 	if (NULL == start) {
-		EQN_MSG(MANDOCERR_EQNARGS, ep);
+		EQN_MSG(MANDOCERR_EQNEOF, ep);
 		return(0);
 	}
 
@@ -760,6 +765,21 @@ eqn_do_define(struct eqn_node *ep)
 }
 
 static int
+eqn_do_gsize(struct eqn_node *ep)
+{
+	const char	*start;
+	size_t		 sz;
+
+	if (NULL == (start = eqn_nextrawtok(ep, &sz))) {
+		EQN_MSG(MANDOCERR_EQNEOF, ep);
+		return(0);
+	} 
+
+	ep->gsize = mandoc_strntoi(start, sz, 10);
+	return(1);
+}
+
+static int
 eqn_do_undef(struct eqn_node *ep)
 {
 	const char	*start;
@@ -767,7 +787,7 @@ eqn_do_undef(struct eqn_node *ep)
 	size_t		 sz;
 
 	if (NULL == (start = eqn_nextrawtok(ep, &sz))) {
-		EQN_MSG(MANDOCERR_EQNARGS, ep);
+		EQN_MSG(MANDOCERR_EQNEOF, ep);
 		return(0);
 	} else if (NULL != (def = eqn_def_find(ep, start, sz)))
 		def->keysz = 0;

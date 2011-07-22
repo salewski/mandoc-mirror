@@ -49,6 +49,7 @@ struct	eqn_node {
 	size_t		  rew;
 	size_t		  cur;
 	size_t		  sz;
+	int		  gsize;
 	struct eqn	  eqn;
 	struct mparse	 *parse;
 	struct eqn_node  *next;

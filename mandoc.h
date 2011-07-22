@@ -110,7 +110,6 @@ enum	mandocerr {
 	MANDOCERR_ERROR, /* ===== start of errors ===== */
 
 	/* related to equations */
-	MANDOCERR_EQNARGS, /* bad equation macro arguments */
 	MANDOCERR_EQNNEST, /* too many nested equation defines */
 	MANDOCERR_EQNNSCOPE, /* unexpected equation scope closure*/
 	MANDOCERR_EQNSCOPE, /* equation scope open on exit */
