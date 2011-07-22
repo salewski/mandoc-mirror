@@ -39,6 +39,45 @@ enum	eqn_rest {
 	EQN_EOF
 };
 
+enum	eqn_symt {
+	EQNSYM_alpha,
+	EQNSYM_beta,
+	EQNSYM_chi,
+	EQNSYM_delta,
+	EQNSYM_epsilon,
+	EQNSYM_eta,
+	EQNSYM_gamma,
+	EQNSYM_iota,
+	EQNSYM_kappa,
+	EQNSYM_lambda,
+	EQNSYM_mu,
+	EQNSYM_nu,
+	EQNSYM_omega,
+	EQNSYM_omicron,
+	EQNSYM_phi,
+	EQNSYM_pi,
+	EQNSYM_ps,
+	EQNSYM_rho,
+	EQNSYM_sigma,
+	EQNSYM_tau,
+	EQNSYM_theta,
+	EQNSYM_upsilon,
+	EQNSYM_xi,
+	EQNSYM_zeta,
+	EQNSYM_DELTA,
+	EQNSYM_GAMMA,
+	EQNSYM_LAMBDA,
+	EQNSYM_OMEGA,
+	EQNSYM_PHI,
+	EQNSYM_PI,
+	EQNSYM_PSI,
+	EQNSYM_SIGMA,
+	EQNSYM_THETA,
+	EQNSYM_UPSILON,
+	EQNSYM_XI,
+	EQNSYM__MAX
+};
+
 struct	eqnstr {
 	const char	*name;
 	size_t		 sz;
@@ -52,6 +91,11 @@ struct	eqnstr {
 struct	eqnpart {
 	struct eqnstr	 str;
 	int		(*fp)(struct eqn_node *);
+};
+
+struct	eqnsym {
+	struct eqnstr	 str;
+	char		 sym;
 };
 
 enum	eqnpartt {
@@ -116,6 +160,44 @@ static	const struct eqnstr eqnpiles[EQNPILE__MAX] = {
 	{ "cpile", 5 }, /* EQNPILE_CPILE */
 	{ "rpile", 5 }, /* EQNPILE_RPILE */
 	{ "lpile", 5 }, /* EQNPILE_LPILE */
+};
+
+static	const struct eqnsym eqnsyms[EQNSYM__MAX] = {
+	{ { "alpha", 5 }, 'a' }, /* EQNSYM_alpha */
+	{ { "beta", 4 }, 'b' }, /* EQNSYM_beta */
+	{ { "chi", 3 }, 'x' }, /* EQNSYM_chi */
+	{ { "delta", 5 }, 'd' }, /* EQNSYM_delta */
+	{ { "epsilon", 7 }, 'e' }, /* EQNSYM_epsilon */
+	{ { "eta", 3 }, 'y' }, /* EQNSYM_eta */
+	{ { "gamma", 5 }, 'g' }, /* EQNSYM_gamma */
+	{ { "iota", 4 }, 'i' }, /* EQNSYM_iota */
+	{ { "kappa", 5 }, 'k' }, /* EQNSYM_kappa */
+	{ { "lambda", 6 }, 'l' }, /* EQNSYM_lambda */
+	{ { "mu", 2 }, 'm' }, /* EQNSYM_mu */
+	{ { "nu", 2 }, 'n' }, /* EQNSYM_nu */
+	{ { "omega", 5 }, 'w' }, /* EQNSYM_omega */
+	{ { "omicron", 7 }, 'o' }, /* EQNSYM_omicron */
+	{ { "phi", 3 }, 'f' }, /* EQNSYM_phi */
+	{ { "pi", 2 }, 'p' }, /* EQNSYM_pi */
+	{ { "psi", 2 }, 'q' }, /* EQNSYM_psi */
+	{ { "rho", 3 }, 'r' }, /* EQNSYM_rho */
+	{ { "sigma", 5 }, 's' }, /* EQNSYM_sigma */
+	{ { "tau", 3 }, 't' }, /* EQNSYM_tau */
+	{ { "theta", 5 }, 'h' }, /* EQNSYM_theta */
+	{ { "upsilon", 7 }, 'u' }, /* EQNSYM_upsilon */
+	{ { "xi", 2 }, 'c' }, /* EQNSYM_xi */
+	{ { "zeta", 4 }, 'z' }, /* EQNSYM_zeta */
+	{ { "DELTA", 5 }, 'D' }, /* EQNSYM_DELTA */
+	{ { "GAMMA", 5 }, 'G' }, /* EQNSYM_GAMMA */
+	{ { "LAMBDA", 6 }, 'L' }, /* EQNSYM_LAMBDA */
+	{ { "OMEGA", 5 }, 'W' }, /* EQNSYM_OMEGA */
+	{ { "PHI", 3 }, 'F' }, /* EQNSYM_PHI */
+	{ { "PI", 2 }, 'P' }, /* EQNSYM_PI */
+	{ { "PSI", 3 }, 'Q' }, /* EQNSYM_PSI */
+	{ { "SIGMA", 5 }, 'S' }, /* EQNSYM_SIGMA */
+	{ { "THETA", 5 }, 'H' }, /* EQNSYM_THETA */
+	{ { "UPSILON", 7 }, 'U' }, /* EQNSYM_UPSILON */
+	{ { "XI", 2 }, 'C' }, /* EQNSYM_XI */
 };
 
 /* ARGSUSED */
@@ -260,6 +342,7 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last)
 	size_t		 sz;
 	const char	*start;
 	char		*left;
+	char		 sym[5];
 	enum eqn_rest	 c;
 	int		 i, size;
 	struct eqn_box	*bp;
@@ -387,6 +470,17 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last)
 
 	bp = eqn_box_alloc(last);
 	bp->type = EQN_TEXT;
+	for (i = 0; i < (int)EQNSYM__MAX; i++)
+		if (EQNSTREQ(&eqnsyms[i].str, start, sz)) {
+			sym[0] = '\\';
+			sym[1] = '(';
+			sym[2] = '*';
+			sym[3] = eqnsyms[i].sym;
+			sym[4] = '\0';
+			bp->text = mandoc_strdup(sym);
+			return(EQN_OK);
+		}
+
 	bp->text = mandoc_strndup(start, sz);
 	return(EQN_OK);
 }
