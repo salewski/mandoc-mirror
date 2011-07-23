@@ -128,6 +128,10 @@ enum	eqnpartt {
 	EQN_UNDEF,
 	EQN_GFONT,
 	EQN_GSIZE,
+	EQN_BACK,
+	EQN_FWD,
+	EQN_UP,
+	EQN_DOWN,
 	EQN__MAX
 };
 
@@ -140,7 +144,8 @@ static	struct eqn_def	*eqn_def_find(struct eqn_node *,
 static	int		 eqn_do_gfont(struct eqn_node *);
 static	int		 eqn_do_gsize(struct eqn_node *);
 static	int		 eqn_do_define(struct eqn_node *);
-static	int		 eqn_do_set(struct eqn_node *);
+static	int		 eqn_do_ign1(struct eqn_node *);
+static	int		 eqn_do_ign2(struct eqn_node *);
 static	int		 eqn_do_undef(struct eqn_node *);
 static	enum eqn_rest	 eqn_eqn(struct eqn_node *, struct eqn_box *);
 static	enum eqn_rest	 eqn_list(struct eqn_node *, struct eqn_box *);
@@ -153,10 +158,14 @@ static	void		 eqn_rewind(struct eqn_node *);
 
 static	const struct eqnpart eqnparts[EQN__MAX] = {
 	{ { "define", 6 }, eqn_do_define }, /* EQN_DEFINE */
-	{ { "set", 3 }, eqn_do_set }, /* EQN_SET */
+	{ { "set", 3 }, eqn_do_ign2 }, /* EQN_SET */
 	{ { "undef", 5 }, eqn_do_undef }, /* EQN_UNDEF */
 	{ { "gfont", 5 }, eqn_do_gfont }, /* EQN_GFONT */
 	{ { "gsize", 5 }, eqn_do_gsize }, /* EQN_GSIZE */
+	{ { "back", 4 }, eqn_do_ign1 }, /* EQN_BACK */
+	{ { "fwd", 3 }, eqn_do_ign1 }, /* EQN_FWD */
+	{ { "up", 2 }, eqn_do_ign1 }, /* EQN_UP */
+	{ { "down", 4 }, eqn_do_ign1 }, /* EQN_DOWN */
 };
 
 static	const struct eqnstr eqnmarks[EQNMARK__MAX] = {
@@ -464,6 +473,10 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last)
 		return(EQN_DESCOPE);
 	else if (STRNEQ(start, sz, "above", 5))
 		return(EQN_DESCOPE);
+	else if (STRNEQ(start, sz, "mark", 4))
+		return(EQN_OK);
+	else if (STRNEQ(start, sz, "lineup", 6))
+		return(EQN_OK);
 
 	for (i = 0; i < (int)EQN__MAX; i++) {
 		if ( ! EQNSTREQ(&eqnparts[i].str, start, sz))
@@ -754,7 +767,20 @@ again:
 }
 
 static int
-eqn_do_set(struct eqn_node *ep)
+eqn_do_ign1(struct eqn_node *ep)
+{
+	const char	*start;
+
+	if (NULL == (start = eqn_nextrawtok(ep, NULL)))
+		EQN_MSG(MANDOCERR_EQNEOF, ep);
+	else
+		return(1);
+
+	return(0);
+}
+
+static int
+eqn_do_ign2(struct eqn_node *ep)
 {
 	const char	*start;
 

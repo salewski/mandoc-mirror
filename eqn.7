@@ -203,6 +203,22 @@ In mandoc, this is interpreted as a comment.
 In troff, The circumflex and tilde white-space symbols map to
 fixed-width spaces.
 In mandoc, these characters are synonyms for the space character.
+.It
+The troff implementation of
+.Nm
+allows for equation alignment with the
+.Cm mark
+and
+.Cm lineup
+tokens.
+mandoc discards these tokens.
+The
+.Cm back Ar n ,
+.Cm fwd Ar n ,
+.Cm up Ar n ,
+and
+.Cm down Ar n
+commands are also ignored.
 .El
 .Sh SEE ALSO
 .Xr mandoc 1 ,
