@@ -184,6 +184,7 @@ static	const struct eqnstr eqnfonts[EQNFONT__MAX] = {
 	{ "", 0 }, /* EQNFONT_NONE */
 	{ "roman", 5 }, /* EQNFONT_ROMAN */
 	{ "bold", 4 }, /* EQNFONT_BOLD */
+	{ "fat", 3 }, /* EQNFONT_FAT */
 	{ "italic", 6 }, /* EQNFONT_ITALIC */
 };
 
