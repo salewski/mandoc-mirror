@@ -50,6 +50,7 @@ SRCS		 = Makefile \
 		   config.h.pre \
 		   eqn.7 \
 		   eqn.c \
+		   eqn_html.c \
 		   eqn_term.c \
 		   example.style.css \
 		   external.png \
@@ -192,11 +193,13 @@ $(LIBMDOC_OBJS) $(LIBMDOC_LNS): libmdoc.h
 $(LIBROFF_OBJS) $(LIBROFF_LNS): libroff.h
 $(LIBMANDOC_OBJS) $(LIBMANDOC_LNS): mandoc.h mdoc.h man.h libmandoc.h config.h
 
-MANDOC_HTML_OBJS = html.o \
+MANDOC_HTML_OBJS = eqn_html.o \
+		   html.o \
 		   man_html.o \
 		   mdoc_html.o \
 		   tbl_html.o
-MANDOC_HTML_LNS	 = html.ln \
+MANDOC_HTML_LNS	 = eqn_html.ln \
+		   html.ln \
 		   man_html.ln \
 		   mdoc_html.ln \
 		   tbl_html.ln

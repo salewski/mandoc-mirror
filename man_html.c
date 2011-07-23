@@ -201,7 +201,6 @@ print_man_node(MAN_ARGS)
 {
 	int		 child;
 	struct tag	*t;
-	struct htmlpair	 tag;
 
 	child = 1;
 	t = h->tags.head;
@@ -229,9 +228,7 @@ print_man_node(MAN_ARGS)
 		print_text(h, n->string);
 		return;
 	case (MAN_EQN):
-		PAIR_CLASS_INIT(&tag, "eqn");
-		/*print_otag(h, TAG_SPAN, 1, &tag);
-		print_text(h, n->eqn->data);*/
+		print_eqn(h, n->eqn);
 		break;
 	case (MAN_TBL):
 		/*

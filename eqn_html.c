@@ -25,24 +25,31 @@
 
 #include "mandoc.h"
 #include "out.h"
-#include "term.h"
+#include "html.h"
 
-static void	eqn_box(struct termp *, const struct eqn_box *);
-static void	eqn_box_post(struct termp *, const struct eqn_box *);
-static void	eqn_box_pre(struct termp *, const struct eqn_box *);
-static void	eqn_text(struct termp *, const struct eqn_box *);
+static void	eqn_box(struct html *, const struct eqn_box *);
+static void	eqn_box_post(struct html *, const struct eqn_box *);
+static void	eqn_box_pre(struct html *, const struct eqn_box *);
+static void	eqn_text(struct html *, const struct eqn_box *);
 
 void
-term_eqn(struct termp *p, const struct eqn *ep)
+print_eqn(struct html *p, const struct eqn *ep)
 {
+	struct htmlpair	 tag;
+	struct tag	*t;
 
-	p->flags |= TERMP_NONOSPACE;
+	PAIR_CLASS_INIT(&tag, "eqn");
+	t = print_otag(p, TAG_SPAN, 1, &tag);
+
+	p->flags |= HTML_NONOSPACE;
 	eqn_box(p, ep->root);
-	p->flags &= ~TERMP_NONOSPACE;
+	p->flags &= ~HTML_NONOSPACE;
+
+	print_tagq(p, t);
 }
 
 static void
-eqn_box(struct termp *p, const struct eqn_box *bp)
+eqn_box(struct html *p, const struct eqn_box *bp)
 {
 
 	eqn_box_pre(p, bp);
@@ -58,25 +65,25 @@ eqn_box(struct termp *p, const struct eqn_box *bp)
 }
 
 static void
-eqn_box_pre(struct termp *p, const struct eqn_box *bp)
+eqn_box_pre(struct html *p, const struct eqn_box *bp)
 {
 
 	if (bp->left)
-		term_word(p, bp->left);
+		print_text(p, bp->left);
 }
 
 static void
-eqn_box_post(struct termp *p, const struct eqn_box *bp)
+eqn_box_post(struct html *p, const struct eqn_box *bp)
 {
 
 	if (bp->right)
-		term_word(p, bp->right);
+		print_text(p, bp->right);
 }
 
 static void
-eqn_text(struct termp *p, const struct eqn_box *bp)
+eqn_text(struct html *p, const struct eqn_box *bp)
 {
 
 	if (bp->text)
-		term_word(p, bp->text);
+		print_text(p, bp->text);
 }

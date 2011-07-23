@@ -407,7 +407,6 @@ print_mdoc_node(MDOC_ARGS)
 {
 	int		 child;
 	struct tag	*t;
-	struct htmlpair	 tag;
 
 	child = 1;
 	t = h->tags.head;
@@ -434,9 +433,7 @@ print_mdoc_node(MDOC_ARGS)
 			h->flags |= HTML_NOSPACE;
 		return;
 	case (MDOC_EQN):
-		PAIR_CLASS_INIT(&tag, "eqn");
-		/*print_otag(h, TAG_SPAN, 1, &tag);
-		print_text(h, n->eqn->data);*/
+		print_eqn(h, n->eqn);
 		break;
 	case (MDOC_TBL):
 		/*
