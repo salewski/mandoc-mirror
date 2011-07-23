@@ -72,16 +72,18 @@ box     : text
         | \*qundef\*q text
         | box pos box
         | box mark
+        | \*qmatrix\*q \*q{\*q [col \*q{\*q list \*q}\*q ]*
         | pile \*q{\*q list \*q}\*q
         | font box
         | \*qsize\*q text box
         | \*qleft\*q text eqn [\*qright\*q text]
+col     : \*qlcol\*q | \*qrcol\*q | \*qccol\*q
 text    : [^space\e\*q]+ | \e\*q.*\e\*q
 pile    : \*qlpile\*q | \*qcpile\*q | \*qrpile\*q
 pos     : \*qover\*q | \*qsup\*q | \*qsub\*q | \*qto\*q | \*qfrom\*q
 mark	: \*qdot\*q | \*qdotdot\*q | \*qhat\*q | \*qtilde\*q | \*qvec\*q
         | \*qdyad\*q | \*qbar\*q | \*qunder\*q
-font    : \*qroman\*q | \*qitalic\*q | \*\*qbold\*q
+font    : \*qroman\*q | \*qitalic\*q | \*qbold\*q
 list    : eqn
         | list \*qabove\*q eqn
 space   : [\e^~ \et]

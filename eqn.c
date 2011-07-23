@@ -144,6 +144,7 @@ static	int		 eqn_do_set(struct eqn_node *);
 static	int		 eqn_do_undef(struct eqn_node *);
 static	enum eqn_rest	 eqn_eqn(struct eqn_node *, struct eqn_box *);
 static	enum eqn_rest	 eqn_list(struct eqn_node *, struct eqn_box *);
+static	enum eqn_rest	 eqn_matrix(struct eqn_node *, struct eqn_box *);
 static	const char	*eqn_nexttok(struct eqn_node *, size_t *);
 static	const char	*eqn_nextrawtok(struct eqn_node *, size_t *);
 static	const char	*eqn_next(struct eqn_node *, 
@@ -191,6 +192,9 @@ static	const struct eqnstr eqnpiles[EQNPILE__MAX] = {
 	{ "cpile", 5 }, /* EQNPILE_CPILE */
 	{ "rpile", 5 }, /* EQNPILE_RPILE */
 	{ "lpile", 5 }, /* EQNPILE_LPILE */
+	{ "ccol", 4 }, /* EQNPILE_CCOL */
+	{ "rcol", 4 }, /* EQNPILE_RCOL */
+	{ "lcol", 4 }, /* EQNPILE_LCOL */
 };
 
 static	const struct eqnsym eqnsyms[EQNSYM__MAX] = {
@@ -348,6 +352,55 @@ eqn_eqn(struct eqn_node *ep, struct eqn_box *last)
 }
 
 static enum eqn_rest
+eqn_matrix(struct eqn_node *ep, struct eqn_box *last)
+{
+	struct eqn_box	*bp;
+	const char	*start;
+	size_t		 sz;
+	enum eqn_rest	 c;
+
+	bp = eqn_box_alloc(ep, last);
+	bp->type = EQN_MATRIX;
+
+	if (NULL == (start = eqn_nexttok(ep, &sz))) {
+		EQN_MSG(MANDOCERR_EQNEOF, ep);
+		return(EQN_ERR);
+	}
+	if ( ! STRNEQ(start, sz, "{", 1)) {
+		EQN_MSG(MANDOCERR_EQNSYNT, ep);
+		return(EQN_ERR);
+	}
+
+	while (EQN_OK == (c = eqn_box(ep, bp)))
+		switch (bp->last->pile) {
+		case (EQNPILE_LCOL):
+			/* FALLTHROUGH */
+		case (EQNPILE_CCOL):
+			/* FALLTHROUGH */
+		case (EQNPILE_RCOL):
+			continue;
+		default:
+			EQN_MSG(MANDOCERR_EQNSYNT, ep);
+			return(EQN_ERR);
+		};
+
+	if (EQN_DESCOPE != c) {
+		if (EQN_EOF == c)
+			EQN_MSG(MANDOCERR_EQNEOF, ep);
+		return(EQN_ERR);
+	}
+
+	eqn_rewind(ep);
+	start = eqn_nexttok(ep, &sz);
+	assert(start);
+	if (STRNEQ(start, sz, "}", 1))
+		return(EQN_OK);
+
+	EQN_MSG(MANDOCERR_EQNBADSCOPE, ep);
+	return(EQN_ERR);
+}
+
+static enum eqn_rest
 eqn_list(struct eqn_node *ep, struct eqn_box *last)
 {
 	struct eqn_box	*bp;
@@ -373,7 +426,6 @@ eqn_list(struct eqn_node *ep, struct eqn_box *last)
 		assert(start);
 		if ( ! STRNEQ(start, sz, "above", 5))
 			break;
-		bp->last->above = 1;
 	}
 
 	if (EQN_DESCOPE != c) {
@@ -441,6 +493,9 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last)
 			last->last->pile = (enum eqn_pilet)i;
 		return(c);
 	}
+
+	if (STRNEQ(start, sz, "matrix", 6))
+		return(eqn_matrix(ep, last));
 
 	if (STRNEQ(start, sz, "left", 4)) {
 		if (NULL == (start = eqn_nexttok(ep, &sz))) {

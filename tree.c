@@ -263,46 +263,41 @@ static void
 print_box(const struct eqn_box *ep, int indent)
 {
 	int		 i;
+	const char	*t;
 
 	if (NULL == ep)
 		return;
 	for (i = 0; i < indent; i++)
 		putchar('\t');
 
+	t = NULL;
 	switch (ep->type) {
 	case (EQN_ROOT):
-		printf("eqn-root(%d, %d, %d, %d)\n", 
-			EQN_DEFSIZE == ep->size ? 0 : ep->size,
-			ep->pos, ep->font, ep->mark);
-		print_box(ep->first, indent + 1);
+		t = "eqn-root";
 		break;
 	case (EQN_LIST):
-		printf("eqn-list(%d, %d, %d, %d, %d, %d, \"%s\", \"%s\")\n", 
-			EQN_DEFSIZE == ep->size ? 0 : ep->size,
-			ep->pos, ep->font, ep->mark,
-			ep->pile, ep->above,
-			ep->left ? ep->left : "",
-			ep->right ? ep->right : "");
-		print_box(ep->first, indent + 1);
+		t = "eqn-list";
 		break;
 	case (EQN_SUBEXPR):
-		printf("eqn-subxpr(%d, %d, %d, %d, %d, %d, \"%s\", \"%s\")\n", 
-			EQN_DEFSIZE == ep->size ? 0 : ep->size,
-			ep->pos, ep->font, ep->mark,
-			ep->pile, ep->above,
-			ep->left ? ep->left : "",
-			ep->right ? ep->right : "");
-		print_box(ep->first, indent + 1);
+		t = "eqn-expr";
 		break;
 	case (EQN_TEXT):
-		printf("eqn-text(%d, %d, %d, %d): [%s]\n", 
-			EQN_DEFSIZE == ep->size ? 0 : ep->size,
-			ep->pos, ep->font, ep->mark, ep->text);
+		t = "eqn-text";
 		break;
-	default:
+	case (EQN_MATRIX):
+		t = "eqn-matrix";
 		break;
 	}
 
+	assert(t);
+	printf("%s(%d, %d, %d, %d, %d, \"%s\", \"%s\") %s\n", 
+		t, EQN_DEFSIZE == ep->size ? 0 : ep->size,
+		ep->pos, ep->font, ep->mark, ep->pile, 
+		ep->left ? ep->left : "",
+		ep->right ? ep->right : "",
+		ep->text ? ep->text : "");
+
+	print_box(ep->first, indent + 1);
 	print_box(ep->next, indent);
 }
 

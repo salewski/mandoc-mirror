@@ -61,8 +61,6 @@ static void
 eqn_box_pre(struct termp *p, const struct eqn_box *bp)
 {
 
-	if (EQN_LIST == bp->type)
-		term_word(p, "{");
 	if (bp->left)
 		term_word(p, bp->left);
 }
@@ -71,12 +69,8 @@ static void
 eqn_box_post(struct termp *p, const struct eqn_box *bp)
 {
 
-	if (EQN_LIST == bp->type)
-		term_word(p, "}");
 	if (bp->right)
 		term_word(p, bp->right);
-	if (bp->above)
-		term_word(p, "|");
 }
 
 static void

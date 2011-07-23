@@ -285,7 +285,8 @@ enum	eqn_boxt {
 	EQN_ROOT, /* root of parse tree */
 	EQN_TEXT, /* text (number, variable, whatever) */
 	EQN_SUBEXPR, /* nested `eqn' subexpression */
-	EQN_LIST /* list of subexpressions */
+	EQN_LIST, /* subexpressions list */
+	EQN_MATRIX /* matrix subexpression */
 };
 
 enum	eqn_markt {
@@ -324,6 +325,9 @@ enum	eqn_pilet {
 	EQNPILE_CPILE,
 	EQNPILE_RPILE,
 	EQNPILE_LPILE,
+	EQNPILE_CCOL,
+	EQNPILE_RCOL,
+	EQNPILE_LCOL,
 	EQNPILE__MAX
 };
 
@@ -346,7 +350,6 @@ struct	eqn_box {
 	enum eqn_markt	  mark; /* a mark about the box */
 	enum eqn_fontt	  font; /* font of box */
 	enum eqn_pilet	  pile; /* equation piling */
-	int		  above; /* next node is above */
 };
 
 /*
