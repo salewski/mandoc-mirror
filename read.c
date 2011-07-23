@@ -152,7 +152,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"generic error",
 
 	/* related to equations */
-	"too many nested equation defines",
 	"unexpected equation scope closure",
 	"equation scope open on exit",
 	"overlapping equation scopes",

@@ -102,6 +102,21 @@ enum	eqn_symt {
 	EQNSYM__MAX
 };
 
+enum	eqnpartt {
+	EQN_DEFINE = 0,
+	EQN_NDEFINE,
+	EQN_TDEFINE,
+	EQN_SET,
+	EQN_UNDEF,
+	EQN_GFONT,
+	EQN_GSIZE,
+	EQN_BACK,
+	EQN_FWD,
+	EQN_UP,
+	EQN_DOWN,
+	EQN__MAX
+};
+
 struct	eqnstr {
 	const char	*name;
 	size_t		 sz;
@@ -122,18 +137,6 @@ struct	eqnsym {
 	const char	*sym;
 };
 
-enum	eqnpartt {
-	EQN_DEFINE = 0,
-	EQN_SET,
-	EQN_UNDEF,
-	EQN_GFONT,
-	EQN_GSIZE,
-	EQN_BACK,
-	EQN_FWD,
-	EQN_UP,
-	EQN_DOWN,
-	EQN__MAX
-};
 
 static	enum eqn_rest	 eqn_box(struct eqn_node *, struct eqn_box *);
 static	struct eqn_box	*eqn_box_alloc(struct eqn_node *, 
@@ -146,6 +149,7 @@ static	int		 eqn_do_gsize(struct eqn_node *);
 static	int		 eqn_do_define(struct eqn_node *);
 static	int		 eqn_do_ign1(struct eqn_node *);
 static	int		 eqn_do_ign2(struct eqn_node *);
+static	int		 eqn_do_tdefine(struct eqn_node *);
 static	int		 eqn_do_undef(struct eqn_node *);
 static	enum eqn_rest	 eqn_eqn(struct eqn_node *, struct eqn_box *);
 static	enum eqn_rest	 eqn_list(struct eqn_node *, struct eqn_box *);
@@ -158,6 +162,8 @@ static	void		 eqn_rewind(struct eqn_node *);
 
 static	const struct eqnpart eqnparts[EQN__MAX] = {
 	{ { "define", 6 }, eqn_do_define }, /* EQN_DEFINE */
+	{ { "ndefine", 7 }, eqn_do_define }, /* EQN_NDEFINE */
+	{ { "tdefine", 7 }, eqn_do_tdefine }, /* EQN_TDEFINE */
 	{ { "set", 3 }, eqn_do_ign2 }, /* EQN_SET */
 	{ { "undef", 5 }, eqn_do_undef }, /* EQN_UNDEF */
 	{ { "gfont", 5 }, eqn_do_gfont }, /* EQN_GFONT */
@@ -317,11 +323,24 @@ eqn_read(struct eqn_node **epp, int ln,
 }
 
 struct eqn_node *
-eqn_alloc(int pos, int line, struct mparse *parse)
+eqn_alloc(const char *name, int pos, int line, struct mparse *parse)
 {
 	struct eqn_node	*p;
+	size_t		 sz;
+	const char	*end;
 
 	p = mandoc_calloc(1, sizeof(struct eqn_node));
+
+	if ('\0' != *name) {
+		sz = strlen(name);
+		assert(sz);
+		do {
+			sz--;
+			end = name + (int)sz;
+		} while (' ' == *end || '\t' == *end);
+		p->eqn.name = mandoc_strndup(name, sz + 1);
+	}
+
 	p->parse = parse;
 	p->eqn.ln = line;
 	p->eqn.pos = pos;
@@ -488,7 +507,8 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last)
 	for (i = 0; i < (int)EQN__MAX; i++) {
 		if ( ! EQNSTREQ(&eqnparts[i].str, start, sz))
 			continue;
-		return((*eqnparts[i].fp)(ep) ? EQN_OK : EQN_ERR);
+		return((*eqnparts[i].fp)(ep) ? 
+				EQN_OK : EQN_ERR);
 	} 
 
 	if (STRNEQ(start, sz, "{", 1)) {
@@ -625,6 +645,7 @@ eqn_free(struct eqn_node *p)
 		free(p->defs[i].val);
 	}
 
+	free(p->eqn.name);
 	free(p->data);
 	free(p->defs);
 	free(p);
@@ -701,7 +722,7 @@ again:
 	/* Prevent self-definitions. */
 
 	if (lim >= EQN_NEST_MAX) {
-		EQN_MSG(MANDOCERR_EQNNEST, ep);
+		EQN_MSG(MANDOCERR_ROFFLOOP, ep);
 		return(NULL);
 	}
 
@@ -776,9 +797,8 @@ again:
 static int
 eqn_do_ign1(struct eqn_node *ep)
 {
-	const char	*start;
 
-	if (NULL == (start = eqn_nextrawtok(ep, NULL)))
+	if (NULL == eqn_nextrawtok(ep, NULL))
 		EQN_MSG(MANDOCERR_EQNEOF, ep);
 	else
 		return(1);
@@ -789,11 +809,24 @@ eqn_do_ign1(struct eqn_node *ep)
 static int
 eqn_do_ign2(struct eqn_node *ep)
 {
-	const char	*start;
 
-	if (NULL == (start = eqn_nextrawtok(ep, NULL)))
+	if (NULL == eqn_nextrawtok(ep, NULL))
 		EQN_MSG(MANDOCERR_EQNEOF, ep);
-	else if (NULL == (start = eqn_nextrawtok(ep, NULL)))
+	else if (NULL == eqn_nextrawtok(ep, NULL))
+		EQN_MSG(MANDOCERR_EQNEOF, ep);
+	else
+		return(1);
+
+	return(0);
+}
+
+static int
+eqn_do_tdefine(struct eqn_node *ep)
+{
+
+	if (NULL == eqn_nextrawtok(ep, NULL))
+		EQN_MSG(MANDOCERR_EQNEOF, ep);
+	else if (NULL == eqn_next(ep, ep->data[(int)ep->cur], NULL, 0))
 		EQN_MSG(MANDOCERR_EQNEOF, ep);
 	else
 		return(1);
@@ -859,9 +892,8 @@ eqn_do_define(struct eqn_node *ep)
 static int
 eqn_do_gfont(struct eqn_node *ep)
 {
-	const char	*start;
 
-	if (NULL == (start = eqn_nextrawtok(ep, NULL))) {
+	if (NULL == eqn_nextrawtok(ep, NULL)) {
 		EQN_MSG(MANDOCERR_EQNEOF, ep);
 		return(0);
 	} 
@@ -878,7 +910,6 @@ eqn_do_gsize(struct eqn_node *ep)
 		EQN_MSG(MANDOCERR_EQNEOF, ep);
 		return(0);
 	} 
-
 	ep->gsize = mandoc_strntoi(start, sz, 10);
 	return(1);
 }
