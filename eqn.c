@@ -648,7 +648,7 @@ again:
 		if ('{' == *start || '}' == *start)
 			ssz = 1;
 		else
-			ssz = strcspn(start + 1, " ~\"{}\t") + 1;
+			ssz = strcspn(start + 1, " ^~\"{}\t") + 1;
 		next = start + (int)ssz;
 		if ('\0' == *next)
 			next = NULL;
@@ -662,6 +662,7 @@ again:
 			ep->cur++;
 		while (' ' == ep->data[(int)ep->cur] ||
 				'\t' == ep->data[(int)ep->cur] ||
+				'^' == ep->data[(int)ep->cur] ||
 				'~' == ep->data[(int)ep->cur])
 			ep->cur++;
 	} else {

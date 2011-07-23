@@ -311,6 +311,14 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
+			xx-07-2011: version 1.11.5
+		</P>
+		<P>
+			Significant <A HREF="eqn.7.html">eqn</A> improvements.  <SPAN CLASS="nm">mdocml</SPAN> can now parse arbitrary equations
+			(although few GNU troff extensions are accepted, nor is mixing low-level roff with eqn).  See the <A
+			HREF="eqn.7.html">eqn</A> manual for details.  For the time being, equations are rendered as simple in-line text.
+		</P>
+		<P CLASS="news">
 			12-07-2011: version 1.11.4
 		</P>
 		<P>

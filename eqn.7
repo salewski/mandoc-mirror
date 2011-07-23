@@ -64,35 +64,35 @@ case-sensitive literals in the input:
 .Bd -literal -offset indent
 eqn     : box | eqn box
 box     : text
-        | "{" eqn "}"
-        | "define" text text
-        | "gfont" text
-        | "gsize" text
-        | "set" text text
-        | "undef" text
+        | \*q{\*q eqn \*q}\*q
+        | \*qdefine\*q text text
+        | \*qgfont\*q text
+        | \*qgsize\*q text
+        | \*qset\*q text text
+        | \*qundef\*q text
         | box pos box
         | box mark
-        | pile "{" list "}"
+        | pile \*q{\*q list \*q}\*q
         | font box
-        | "size" text box
-        | "left" text eqn ["right" text]
-text    : TEXT
-pile    : "lpile" | "cpile" | "rpile"
-pos     : "over" | "sup" | "sub" | "to" | "from"
-mark	: "dot" | "dotdot" | "hat" | "tilde" | "vec"
-        | "dyad" | "bar" | "under"
-font    : "roman" | "italic" | "bold"
-list    : eqn 
-        | list "above" eqn
+        | \*qsize\*q text box
+        | \*qleft\*q text eqn [\*qright\*q text]
+text    : [^space\e\*q]+ | \e\*q.*\e\*q
+pile    : \*qlpile\*q | \*qcpile\*q | \*qrpile\*q
+pos     : \*qover\*q | \*qsup\*q | \*qsub\*q | \*qto\*q | \*qfrom\*q
+mark	: \*qdot\*q | \*qdotdot\*q | \*qhat\*q | \*qtilde\*q | \*qvec\*q
+        | \*qdyad\*q | \*qbar\*q | \*qunder\*q
+font    : \*qroman\*q | \*qitalic\*q | \*\*qbold\*q
+list    : eqn
+        | list \*qabove\*q eqn
+space   : [\e^~ \et]
 .Ed
 .Pp
-Data in TEXT form is a non-empty sequence of non-space characters or a
-non-empty quoted string.
-Unless within a quoted string, white-space (and enclosing literal quote
-pairs) is thrown away.
-Quoted strings are not scanned for replacement definitions.
+White-space consists of the space, tab, circumflex, and tilde
+characters.
+If within a quoted string, these space characters are retained.
+Quoted strings are also not scanned for replacement definitions.
 .Pp
-The following TEXT terms are translated into a rendered glyph, if
+The following text terms are translated into a rendered glyph, if
 available: alpha, beta, chi, delta, epsilon, eta, gamma, iota, kappa,
 lambda, mu, nu, omega, omicron, phi, pi, psi, rho, sigma, tau, theta,
 upsilon, xi, zeta, DELTA, GAMMA, LAMBDA, OMEGA, PHI, PI, PSI, SIGMA,
@@ -197,6 +197,10 @@ The text string
 .Sq \e\*q
 is interpreted as a literal quote in troff.
 In mandoc, this is interpreted as a comment.
+.It
+In troff, The circumflex and tilde white-space symbols map to
+fixed-width spaces.
+In mandoc, these characters are synonyms for the space character.
 .El
 .Sh SEE ALSO
 .Xr mandoc 1 ,
