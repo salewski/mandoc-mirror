@@ -81,9 +81,9 @@ box     : text
         | font box
         | \*qsize\*q text box
         | \*qleft\*q text eqn [\*qright\*q text]
-col     : \*qlcol\*q | \*qrcol\*q | \*qccol\*q
+col     : \*qlcol\*q | \*qrcol\*q | \*qccol\*q | \*qcol\*q
 text    : [^space\e\*q]+ | \e\*q.*\e\*q
-pile    : \*qlpile\*q | \*qcpile\*q | \*qrpile\*q
+pile    : \*qlpile\*q | \*qcpile\*q | \*qrpile\*q | \*qpile\*q
 pos     : \*qover\*q | \*qsup\*q | \*qsub\*q | \*qto\*q | \*qfrom\*q
 mark	: \*qdot\*q | \*qdotdot\*q | \*qhat\*q | \*qtilde\*q | \*qvec\*q
         | \*qdyad\*q | \*qbar\*q | \*qunder\*q
@@ -184,6 +184,7 @@ The
 and
 .Ar val
 are not expanded for replacements.
+This statement is a GNU extension.
 .It Cm undef
 Unset a previously-defined key.
 Its syntax is as follows:
@@ -196,6 +197,7 @@ is discarded.
 The
 .Ar key
 is not expanded for replacements.
+This statement is a GNU extension.
 .El
 .Sh COMPATIBILITY
 This section documents the compatibility of mandoc
