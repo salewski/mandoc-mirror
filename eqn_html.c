@@ -27,10 +27,16 @@
 #include "out.h"
 #include "html.h"
 
+static	const enum htmltag fontmap[EQNFONT__MAX] = {
+	TAG_SPAN, /* EQNFONT_NONE */
+	TAG_SPAN, /* EQNFONT_ROMAN */
+	TAG_B, /* EQNFONT_BOLD */
+	TAG_B, /* EQNFONT_FAT */
+	TAG_I /* EQNFONT_ITALIC */
+};
+
+
 static void	eqn_box(struct html *, const struct eqn_box *);
-static void	eqn_box_post(struct html *, const struct eqn_box *);
-static void	eqn_box_pre(struct html *, const struct eqn_box *);
-static void	eqn_text(struct html *, const struct eqn_box *);
 
 void
 print_eqn(struct html *p, const struct eqn *ep)
@@ -51,39 +57,25 @@ print_eqn(struct html *p, const struct eqn *ep)
 static void
 eqn_box(struct html *p, const struct eqn_box *bp)
 {
+	struct tag	*t;
 
-	eqn_box_pre(p, bp);
-	eqn_text(p, bp);
+	t = EQNFONT_NONE == bp->font ? NULL : 
+		print_otag(p, fontmap[(int)bp->font], 0, NULL);
+
+	if (bp->left)
+		print_text(p, bp->left);
+	
+	if (bp->text)
+		print_text(p, bp->text);
 
 	if (bp->first)
 		eqn_box(p, bp->first);
 
-	eqn_box_post(p, bp);
+	if (NULL != t)
+		print_tagq(p, t);
+	if (bp->right)
+		print_text(p, bp->right);
 
 	if (bp->next)
 		eqn_box(p, bp->next);
-}
-
-static void
-eqn_box_pre(struct html *p, const struct eqn_box *bp)
-{
-
-	if (bp->left)
-		print_text(p, bp->left);
-}
-
-static void
-eqn_box_post(struct html *p, const struct eqn_box *bp)
-{
-
-	if (bp->right)
-		print_text(p, bp->right);
-}
-
-static void
-eqn_text(struct html *p, const struct eqn_box *bp)
-{
-
-	if (bp->text)
-		print_text(p, bp->text);
 }

@@ -27,10 +27,15 @@
 #include "out.h"
 #include "term.h"
 
+static	const enum termfont fontmap[EQNFONT__MAX] = {
+	TERMFONT_NONE, /* EQNFONT_NONE */
+	TERMFONT_NONE, /* EQNFONT_ROMAN */
+	TERMFONT_BOLD, /* EQNFONT_BOLD */
+	TERMFONT_BOLD, /* EQNFONT_FAT */
+	TERMFONT_UNDER /* EQNFONT_ITALIC */
+};
+
 static void	eqn_box(struct termp *, const struct eqn_box *);
-static void	eqn_box_post(struct termp *, const struct eqn_box *);
-static void	eqn_box_pre(struct termp *, const struct eqn_box *);
-static void	eqn_text(struct termp *, const struct eqn_box *);
 
 void
 term_eqn(struct termp *p, const struct eqn *ep)
@@ -38,6 +43,7 @@ term_eqn(struct termp *p, const struct eqn *ep)
 
 	p->flags |= TERMP_NONOSPACE;
 	eqn_box(p, ep->root);
+	term_word(p, " ");
 	p->flags &= ~TERMP_NONOSPACE;
 }
 
@@ -45,38 +51,26 @@ static void
 eqn_box(struct termp *p, const struct eqn_box *bp)
 {
 
-	eqn_box_pre(p, bp);
-	eqn_text(p, bp);
+	if (EQNFONT_NONE != bp->font)
+		term_fontpush(p, fontmap[(int)bp->font]);
+	if (bp->left)
+		term_word(p, bp->left);
+	if (EQN_SUBEXPR == bp->type)
+		term_word(p, "(");
+
+	if (bp->text)
+		term_word(p, bp->text);
 
 	if (bp->first)
 		eqn_box(p, bp->first);
 
-	eqn_box_post(p, bp);
+	if (EQN_SUBEXPR == bp->type)
+		term_word(p, ")");
+	if (bp->right)
+		term_word(p, bp->right);
+	if (EQNFONT_NONE != bp->font) 
+		term_fontpop(p);
 
 	if (bp->next)
 		eqn_box(p, bp->next);
-}
-
-static void
-eqn_box_pre(struct termp *p, const struct eqn_box *bp)
-{
-
-	if (bp->left)
-		term_word(p, bp->left);
-}
-
-static void
-eqn_box_post(struct termp *p, const struct eqn_box *bp)
-{
-
-	if (bp->right)
-		term_word(p, bp->right);
-}
-
-static void
-eqn_text(struct termp *p, const struct eqn_box *bp)
-{
-
-	if (bp->text)
-		term_word(p, bp->text);
 }
