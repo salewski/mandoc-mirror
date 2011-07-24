@@ -39,16 +39,21 @@
 			<A NAME="sources">Sources</A>
 		</H1>
 		<P>
-			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any UNIX system, although <A
+			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any modern system (<A
 			HREF="mandocdb.8.html">mandocdb</A> requires <A CLASS="external"
-			HREF="http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html">Berkeley Database</A> (this is
-			installed by default on all BSD operating systems).  
+			HREF="http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html">Berkeley Database</A>, installed by
+			default on all BSD UNIX operating systems).
+		</P>
+		<P>
 			To compile <SPAN CLASS="nm">mdocml</SPAN>, run <CODE>make</CODE>, then <CODE>make install</CODE> to install into
-			<I>/usr/local</I>.
-			Be aware: if you have an existing <A HREF="http://www.gnu.org/software/groff/" CLASS="external">groff</A> installation,
-			this may overwrite its <B>preconv</B> binary.
-			The <A HREF="mandocdb.8.html">mandocdb</A> utility is not yet linked to the build.  You must run <CODE>make
-			mandocdb</CODE> to build it (it does not install).
+			<I>/usr/local</I>.  Be aware: if you have an existing <A HREF="http://www.gnu.org/software/groff/"
+			CLASS="external">groff</A> installation, this may overwrite its <B>preconv</B> binary.  The <A
+			HREF="mandocdb.8.html">mandocdb</A> utility is not yet linked to the build: you must run <CODE>make mandocdb</CODE> to
+			build it (it does not install).
+		</P>
+		<P>
+			Distributed Win32 binaries are compiled using <A CLASS="external" HREF="http://www.mingw.org/">mingw32</A>.  They are
+			distributed in a ZIP archive consisting of binaries, manuals, and other installable media.
 		</P>
 		<P>
 			The most current version of <SPAN CLASS="nm">mdocml</SPAN> is <SPAN CLASS="attn">@VERSION@</SPAN>, dated <SPAN
@@ -72,6 +77,12 @@
 					<TD>Online source</TD>
 					<TD>
 					<A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/?cvsroot=mdocml">cvsweb</A>
+					</TD>
+				</TR>
+				<TR>
+					<TD>Win32 binary archive</TD>
+					<TD>
+					<A HREF="/binaries/mdocml.zip">/binaries/mdocml-win32.zip</A> 
 					</TD>
 				</TR>
 			</TBODY>
@@ -124,6 +135,12 @@
 					<TD>Source archive</TD>
 					<TD>
 					<A HREF="/snapshots/">/snapshots/</A> 
+					</TD>
+				</TR>
+				<TR>
+					<TD>Binary archive</TD>
+					<TD>
+					<A HREF="/binaries/">/binaries/</A> 
 					</TD>
 				</TR>
 			</TBODY>
@@ -319,6 +336,10 @@
 			manual for details.  For the time being, equations are rendered as simple in-line text.  The equation parser satisfies
 			the language specified in the <A CLASS="external" HREF="http://www.kohala.com/start/troff/v7man/eqn/eqn2e.ps">Second
 			Edition User's Guide</A>.
+		</P>
+		<P>
+			This is also the first release featuring a distributed Windows binary, available at <A
+			HREF="/binaries/mdocml-win32.zip">/binaries/mdocml-win32.zip</A>.
 		</P>
 		<P CLASS="news">
 			12-07-2011: version 1.11.4

@@ -330,7 +330,7 @@ clean:
 	rm -f mandoc $(MANDOC_OBJS)
 	rm -f llib-lmandoc.ln $(MANDOC_LNS)
 	rm -f config.h config.log $(COMPAT_OBJS) $(COMPAT_LNS)
-	rm -f mdocml.tar.gz mdocml.zip
+	rm -f mdocml.tar.gz mdocml-win32.zip
 	rm -f index.html $(INDEX_OBJS)
 
 install: all
@@ -352,6 +352,7 @@ install: all
 
 installwww: www
 	mkdir -p $(PREFIX)/snapshots
+	mkdir -p $(PREFIX)/binaries
 	$(INSTALL_DATA) index.html external.png index.css $(PREFIX)
 	$(INSTALL_DATA) $(INDEX_MANS) style.css $(PREFIX)
 	$(INSTALL_DATA) mandoc.h.html man.h.html mdoc.h.html $(PREFIX)
@@ -393,7 +394,7 @@ mdocml.tar.gz: $(SRCS)
 	( cd .dist/ && tar zcf ../$@ ./ )
 	rm -rf .dist/
 
-mdocml.zip: $(SRCS)
+mdocml-win32.zip: $(SRCS)
 	mkdir -p .win32/mdocml-$(VERSION)/
 	$(INSTALL_SOURCE) $(SRCS) .win32
 	cp .win32/Makefile .win32/Makefile.old
