@@ -542,7 +542,10 @@ a2time(time_t *t, const char *fmt, const char *p)
 
 	memset(&tm, 0, sizeof(struct tm));
 
+	pp = NULL;
+#ifdef	HAVE_STRPTIME
 	pp = strptime(p, fmt, &tm);
+#endif
 	if (NULL != pp && '\0' == *pp) {
 		*t = mktime(&tm);
 		return(1);
@@ -554,12 +557,12 @@ a2time(time_t *t, const char *fmt, const char *p)
 static char *
 time2a(time_t t)
 {
-	struct tm	 tm;
+	struct tm	*tm;
 	char		*buf, *p;
 	size_t		 ssz;
 	int		 isz;
 
-	localtime_r(&t, &tm);
+	tm = localtime(&t);
 
 	/*
 	 * Reserve space:
@@ -569,15 +572,15 @@ time2a(time_t t)
 	 */
 	p = buf = mandoc_malloc(10 + 4 + 4 + 1);
 
-	if (0 == (ssz = strftime(p, 10 + 1, "%B ", &tm)))
+	if (0 == (ssz = strftime(p, 10 + 1, "%B ", tm)))
 		goto fail;
 	p += (int)ssz;
 
-	if (-1 == (isz = snprintf(p, 4 + 1, "%d, ", tm.tm_mday)))
+	if (-1 == (isz = snprintf(p, 4 + 1, "%d, ", tm->tm_mday)))
 		goto fail;
 	p += isz;
 
-	if (0 == strftime(p, 4 + 1, "%Y", &tm))
+	if (0 == strftime(p, 4 + 1, "%Y", tm))
 		goto fail;
 	return(buf);
 

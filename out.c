@@ -69,7 +69,7 @@ a2roffsu(const char *src, struct roffsu *dst, enum roffscale def)
 		return(0);
 
 	while (i < BUFSIZ) {
-		if ( ! isdigit((u_char)*src)) {
+		if ( ! isdigit((unsigned char)*src)) {
 			if ('.' != *src)
 				break;
 			else if (hasd)

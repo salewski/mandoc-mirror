@@ -2046,7 +2046,7 @@ post_dt(POST_ARGS)
 
 	if (NULL != (nn = n->child))
 		for (p = nn->string; *p; p++) {
-			if (toupper((u_char)*p) == *p)
+			if (toupper((unsigned char)*p) == *p)
 				continue;
 
 			/* 

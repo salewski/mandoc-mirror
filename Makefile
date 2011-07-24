@@ -18,7 +18,8 @@ VDATE		 = 24 July 2011
 # UCS-4 value) should you define USE_WCHAR.  If you define it and your
 # system DOESN'T support this, -Tlocale will produce garbage.
 # If you don't define it, -Tlocale is a synonym for -Tacsii.
-CFLAGS		+= -g -DUSE_WCHAR -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
+CFLAGS	 	+= -DUSE_WCHAR
+CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
 BINDIR		 = $(PREFIX)/bin
@@ -45,7 +46,9 @@ SRCS		 = Makefile \
 		   att.in \
 		   chars.c \
 		   chars.in \
-		   compat.c \
+		   compat_getsubopt.c \
+		   compat_strlcat.c \
+		   compat_strlcpy.c \
 		   config.h.post \
 		   config.h.pre \
 		   eqn.7 \
@@ -179,6 +182,13 @@ LIBMANDOC_LNS	 = $(LIBMAN_LNS) \
 		   mandoc.ln \
 		   read.ln
 
+COMPAT_OBJS	 = compat_getsubopt.o \
+		   compat_strlcat.o \
+		   compat_strlcpy.o
+COMPAT_LNS	 = compat_getsubopt.ln \
+		   compat_strlcat.ln \
+		   compat_strlcpy.ln
+
 arch.o arch.ln: arch.in
 att.o att.ln: att.in
 chars.o chars.ln: chars.in
@@ -192,6 +202,8 @@ $(LIBMAN_OBJS) $(LIBMAN_LNS): libman.h
 $(LIBMDOC_OBJS) $(LIBMDOC_LNS): libmdoc.h
 $(LIBROFF_OBJS) $(LIBROFF_LNS): libroff.h
 $(LIBMANDOC_OBJS) $(LIBMANDOC_LNS): mandoc.h mdoc.h man.h libmandoc.h config.h
+
+$(COMPAT_OBJS) $(COMPAT_LNS): config.h
 
 MANDOC_HTML_OBJS = eqn_html.o \
 		   html.o \
@@ -233,8 +245,6 @@ MANDOC_LNS	 = $(MANDOC_HTML_LNS) \
 $(MANDOC_HTML_OBJS) $(MANDOC_HTML_LNS): html.h
 $(MANDOC_TERM_OBJS) $(MANDOC_TERM_LNS): term.h
 $(MANDOC_OBJS) $(MANDOC_LNS): main.h mandoc.h mdoc.h man.h config.h out.h
-
-compat.o compat.ln: config.h
 
 MANDOCDB_OBJS	 = mandocdb.o
 MANDOCDB_LNS	 = mandocdb.ln
@@ -319,8 +329,8 @@ clean:
 	rm -f llib-lpreconv.ln $(PRECONV_LNS)
 	rm -f mandoc $(MANDOC_OBJS)
 	rm -f llib-lmandoc.ln $(MANDOC_LNS)
-	rm -f config.h config.log compat.o compat.ln
-	rm -f mdocml.tar.gz
+	rm -f config.h config.log $(COMPAT_OBJS) $(COMPAT_LNS)
+	rm -f mdocml.tar.gz mdocml.zip
 	rm -f index.html $(INDEX_OBJS)
 
 install: all
@@ -350,11 +360,11 @@ installwww: www
 	$(INSTALL_DATA) mdocml.tar.gz $(PREFIX)/snapshots/mdocml-$(VERSION).tar.gz
 	$(INSTALL_DATA) mdocml.md5 $(PREFIX)/snapshots/mdocml-$(VERSION).md5
 
-libmandoc.a: compat.o $(LIBMANDOC_OBJS)
-	$(AR) rs $@ compat.o $(LIBMANDOC_OBJS)
+libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
+	$(AR) rs $@ $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 
-llib-llibmandoc.ln: compat.ln $(LIBMANDOC_LNS)
-	$(LINT) $(LINTFLAGS) -Clibmandoc compat.ln $(LIBMANDOC_LNS)
+llib-llibmandoc.ln: $(COMPAT_LNS) $(LIBMANDOC_LNS)
+	$(LINT) $(LINTFLAGS) -Clibmandoc $(COMPAT_LNS) $(LIBMANDOC_LNS)
 
 mandoc: $(MANDOC_OBJS) libmandoc.a
 	$(CC) -o $@ $(MANDOC_OBJS) libmandoc.a
@@ -383,12 +393,30 @@ mdocml.tar.gz: $(SRCS)
 	( cd .dist/ && tar zcf ../$@ ./ )
 	rm -rf .dist/
 
+mdocml.zip: $(SRCS)
+	mkdir -p .win32/mdocml-$(VERSION)/
+	$(INSTALL_SOURCE) $(SRCS) .win32
+	cp .win32/Makefile .win32/Makefile.old
+	grep -v DUSE_WCHAR .win32/Makefile.old >.win32/Makefile
+	( cd .win32; CC=i586-mingw32msvc-cc AR=i586-mingw32msvc-ar CFLAGS='-DOSNAME=\"Windows\"' make; \
+		make install PREFIX=mdocml-$(VERSION) ; \
+		zip -r ../$@ mdocml-$(VERSION) )
+	rm -rf .win32
+
 index.html: $(INDEX_OBJS)
 
 config.h: config.h.pre config.h.post
 	rm -f config.log
 	( cat config.h.pre; \
 	  echo; \
+	  if $(CC) $(CFLAGS) -Werror -o test-strptime test-strptime.c >> config.log 2>&1; then \
+		echo '#define HAVE_STRPTIME'; \
+		rm test-strptime; \
+	  fi; \
+	  if $(CC) $(CFLAGS) -Werror -o test-getsubopt test-getsubopt.c >> config.log 2>&1; then \
+		echo '#define HAVE_GETSUBOPT'; \
+		rm test-getsubopt; \
+	  fi; \
 	  if $(CC) $(CFLAGS) -Werror -o test-strlcat test-strlcat.c >> config.log 2>&1; then \
 		echo '#define HAVE_STRLCAT'; \
 		rm test-strlcat; \

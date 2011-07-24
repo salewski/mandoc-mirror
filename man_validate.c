@@ -412,7 +412,8 @@ post_TH(CHKARGS)
 	if (n && n->string) {
 		for (p = n->string; '\0' != *p; p++) {
 			/* Only warn about this once... */
-			if (isalpha((u_char)*p) && ! isupper((u_char)*p)) {
+			if (isalpha((unsigned char)*p) && 
+					! isupper((unsigned char)*p)) {
 				man_nmsg(m, n, MANDOCERR_UPPERCASE);
 				break;
 			}
