@@ -584,15 +584,13 @@ roff_endparse(struct roff *r)
 	if (r->eqn) {
 		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse, 
 				r->eqn->eqn.ln, r->eqn->eqn.pos, NULL);
-		eqn_end(r->eqn);
-		r->eqn = NULL;
+		eqn_end(&r->eqn);
 	}
 
 	if (r->tbl) {
 		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse, 
 				r->tbl->line, r->tbl->pos, NULL);
-		tbl_end(r->tbl);
-		r->tbl = NULL;
+		tbl_end(&r->tbl);
 	}
 }
 
@@ -1182,9 +1180,8 @@ roff_TE(ROFF_ARGS)
 	if (NULL == r->tbl)
 		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
 	else
-		tbl_end(r->tbl);
+		tbl_end(&r->tbl);
 
-	r->tbl = NULL;
 	return(ROFF_IGN);
 }
 
@@ -1201,14 +1198,22 @@ roff_T_(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-/* ARGSUSED */
-static enum rofferr
-roff_EQ(ROFF_ARGS)
+int
+roff_closeeqn(struct roff *r)
 {
-	struct eqn_node	*e;
+
+	return(r->eqn && ROFF_EQN == eqn_end(&r->eqn) ? 1 : 0);
+}
+
+void
+roff_openeqn(struct roff *r, const char *name, int line, 
+		int offs, const char *buf)
+{
+	struct eqn_node *e;
+	int		 poff;
 
 	assert(NULL == r->eqn);
-	e = eqn_alloc(*bufp + pos, ppos, ln, r->parse);
+	e = eqn_alloc(name, offs, line, r->parse);
 
 	if (r->last_eqn)
 		r->last_eqn->next = e;
@@ -1216,6 +1221,19 @@ roff_EQ(ROFF_ARGS)
 		r->first_eqn = r->last_eqn = e;
 
 	r->eqn = r->last_eqn = e;
+
+	if (buf) {
+		poff = 0;
+		eqn_read(&r->eqn, line, buf, offs, &poff);
+	}
+}
+
+/* ARGSUSED */
+static enum rofferr
+roff_EQ(ROFF_ARGS)
+{
+
+	roff_openeqn(r, *bufp + pos, ln, ppos, NULL);
 	return(ROFF_IGN);
 }
 
@@ -1236,7 +1254,7 @@ roff_TS(ROFF_ARGS)
 
 	if (r->tbl) {
 		mandoc_msg(MANDOCERR_SCOPEBROKEN, r->parse, ln, ppos, NULL);
-		tbl_end(r->tbl);
+		tbl_end(&r->tbl);
 	}
 
 	t = tbl_alloc(ppos, ln, r->parse);
@@ -1471,4 +1489,11 @@ roff_eqn(const struct roff *r)
 {
 	
 	return(r->last_eqn ? &r->last_eqn->eqn : NULL);
+}
+
+char
+roff_eqndelim(const struct roff *r)
+{
+
+	return('\0');
 }

@@ -294,8 +294,7 @@ eqn_read(struct eqn_node **epp, int ln,
 	 */
 
 	if (0 == strncmp(p, ".EN", 3)) {
-		er = eqn_end(ep);
-		*epp = NULL;
+		er = eqn_end(epp);
 		p += 3;
 		while (' ' == *p || '\t' == *p)
 			p++;
@@ -333,7 +332,7 @@ eqn_alloc(const char *name, int pos, int line, struct mparse *parse)
 
 	p = mandoc_calloc(1, sizeof(struct eqn_node));
 
-	if ('\0' != *name) {
+	if (name && '\0' != *name) {
 		sz = strlen(name);
 		assert(sz);
 		do {
@@ -352,10 +351,14 @@ eqn_alloc(const char *name, int pos, int line, struct mparse *parse)
 }
 
 enum rofferr
-eqn_end(struct eqn_node *ep)
+eqn_end(struct eqn_node **epp)
 {
+	struct eqn_node	*ep;
 	struct eqn_box	*root;
 	enum eqn_rest	 c;
+
+	ep = *epp;
+	*epp = NULL;
 
 	ep->eqn.root = mandoc_calloc(1, sizeof(struct eqn_box));
 

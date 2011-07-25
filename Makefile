@@ -332,6 +332,11 @@ clean:
 	rm -f config.h config.log $(COMPAT_OBJS) $(COMPAT_LNS)
 	rm -f mdocml.tar.gz mdocml-win32.zip
 	rm -f index.html $(INDEX_OBJS)
+	rm -rf test-strlcpy.DSYM
+	rm -rf test-strlcat.DSYM 
+	rm -rf test-strptime.DSYM 
+	rm -rf test-mmap.DSYM 
+	rm -rf test-getsubopt.DSYM
 
 install: all
 	mkdir -p $(DESTDIR)$(BINDIR)

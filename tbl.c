@@ -154,8 +154,12 @@ tbl_span(struct tbl_node *tbl)
 }
 
 void
-tbl_end(struct tbl_node *tbl)
+tbl_end(struct tbl_node **tblp)
 {
+	struct tbl_node	*tbl;
+
+	tbl = *tblp;
+	*tblp = NULL;
 
 	if (NULL == tbl->first_span || NULL == tbl->first_span->first)
 		mandoc_msg(MANDOCERR_TBLNODATA, tbl->parse, 

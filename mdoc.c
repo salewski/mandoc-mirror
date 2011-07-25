@@ -97,6 +97,7 @@ static	struct mdoc_node *node_alloc(struct mdoc *, int, int,
 				enum mdoct, enum mdoc_type);
 static	int		  node_append(struct mdoc *, 
 				struct mdoc_node *);
+static	int		  mdoc_preptext(struct mdoc *, int, char *, int);
 static	int		  mdoc_ptext(struct mdoc *, int, char *, int);
 static	int		  mdoc_pmacro(struct mdoc *, int, char *, int);
 
@@ -299,7 +300,7 @@ mdoc_parseln(struct mdoc *m, int ln, char *buf, int offs)
 
 	return(mandoc_getcontrol(buf, &offs) ?
 			mdoc_pmacro(m, ln, buf, offs) :
-			mdoc_ptext(m, ln, buf, offs));
+			mdoc_preptext(m, ln, buf, offs));
 }
 
 int
@@ -650,6 +651,57 @@ mdoc_node_delete(struct mdoc *m, struct mdoc_node *p)
 	mdoc_node_free(p);
 }
 
+/*
+ * Pre-treat a text line.
+ * Text lines can consist of equations, which must be handled apart from
+ * the regular text.
+ * Thus, use this function to step through a line checking if it has any
+ * equations embedded in it.
+ * This must handle multiple equations AND equations that do not end at
+ * the end-of-line, i.e., will re-enter in the next roff parse.
+ */
+static int
+mdoc_preptext(struct mdoc *m, int line, char *buf, int offs)
+{
+	char		*start, *end;
+	char		 delim;
+
+	while ('\0' != buf[offs]) {
+		/* Mark starting position if eqn is set. */
+		start = NULL;
+		if ('\0' != (delim = roff_eqndelim(m->roff)))
+			if (NULL != (start = strchr(buf + offs, delim)))
+				*start++ = '\0';
+
+		/* Parse text as normal. */
+		if ( ! mdoc_ptext(m, line, buf, offs))
+			return(0);
+
+		/* Continue only if an equation exists. */
+		if (NULL == start)
+			break;
+
+		/* Read past the end of the equation. */
+		offs += start - (buf + offs);
+		assert(start == &buf[offs]);
+		if (NULL != (end = strchr(buf + offs, delim))) {
+			*end++ = '\0';
+			while (' ' == *end)
+				end++;
+		}
+
+		/* Parse the equation itself. */
+		roff_openeqn(m->roff, NULL, line, offs, buf);
+
+		/* Process a finished equation? */
+		if (roff_closeeqn(m->roff))
+			if ( ! mdoc_addeqn(m, roff_eqn(m->roff)))
+				return(0);
+		offs += (end - (buf + offs));
+	} 
+
+	return(1);
+}
 
 /*
  * Parse free-form text, that is, a line that does not begin with the
