@@ -395,12 +395,12 @@ roff_alloc(struct mparse *parse)
 	return(r);
 }
 
-
 /*
  * Pre-filter each and every line for reserved words (one beginning with
  * `\*', e.g., `\*(ab').  These must be handled before the actual line
  * is processed. 
- */
+ * This also checks the syntax of regular escapes.
+*/
 static int
 roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 {
@@ -433,9 +433,10 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 			esc = mandoc_escape(&cp, NULL, NULL);
 			if (ESCAPE_ERROR != esc)
 				continue;
-			mandoc_msg(MANDOCERR_BADESCAPE, 
-					r->parse, ln, pos, NULL);
 			cp = res;
+			mandoc_msg
+				(MANDOCERR_BADESCAPE, r->parse, 
+				 ln, (int)(stesc - *bufp), NULL);
 			continue;
 		}
 
@@ -467,8 +468,13 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 		/* Advance to the end of the name. */
 
 		for (i = 0; 0 == maxl || i < maxl; i++, cp++) {
-			if ('\0' == *cp)
-				return(1); /* Error. */
+			if ('\0' == *cp) {
+				mandoc_msg
+					(MANDOCERR_BADESCAPE, 
+					 r->parse, ln, 
+					 (int)(stesc - *bufp), NULL);
+				return(1); 
+			}
 			if (0 == maxl && ']' == *cp)
 				break;
 		}
@@ -481,8 +487,9 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 		res = roff_getstrn(r, stnam, (size_t)i);
 
 		if (NULL == res) {
-			/* TODO: keep track of the correct position. */
-			mandoc_msg(MANDOCERR_BADESCAPE, r->parse, ln, pos, NULL);
+			mandoc_msg
+				(MANDOCERR_BADESCAPE, r->parse, 
+				 ln, (int)(stesc - *bufp), NULL);
 			res = "";
 		}
 
@@ -505,7 +512,6 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 	return(1);
 }
 
-
 enum rofferr
 roff_parseln(struct roff *r, int ln, char **bufp, 
 		size_t *szp, int pos, int *offs)
@@ -519,7 +525,7 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 	 * words to fill in.
 	 */
 
-	if (r->first_string && ! roff_res(r, bufp, szp, ln, pos))
+	if ( ! roff_res(r, bufp, szp, ln, pos))
 		return(ROFF_REPARSE);
 
 	ppos = pos;
