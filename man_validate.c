@@ -207,45 +207,15 @@ check_root(CHKARGS)
 }
 
 static void
-check_text(CHKARGS) 
+check_text(CHKARGS)
 {
-	char		*p, *pp, *cpp;
-	int		 pos;
-	size_t		 sz;
+	char		*cp, *p;
 
-	p = n->string;
-	pos = n->pos + 1;
-
-	while ('\0' != *p) {
-		sz = strcspn(p, "\t\\");
-
-		p += (int)sz;
-		pos += (int)sz;
-
-		if ('\t' == *p) {
-			if ( ! (MAN_LITERAL & m->flags))
-				man_pmsg(m, n->line, pos, MANDOCERR_BADTAB);
-			p++;
-			pos++;
+	cp = p = n->string;
+	for (cp = p; NULL != (p = strchr(p, '\t')); p++) {
+		if (MAN_LITERAL & m->flags)
 			continue;
-		} else if ('\0' == *p)
-			break;
-
-		pos++;
-		pp = ++p;
-
-		if (ESCAPE_ERROR == mandoc_escape
-				((const char **)&pp, NULL, NULL)) {
-			man_pmsg(m, n->line, pos, MANDOCERR_BADESCAPE);
-			break;
-		}
-
-		cpp = p;
-		while (NULL != (cpp = memchr(cpp, ASCII_HYPH, pp - cpp)))
-			*cpp = '-';
-
-		pos += pp - p;
-		p = pp;
+		man_pmsg(m, n->line, (int)(p - cp), MANDOCERR_BADTAB);
 	}
 }
 
