@@ -159,7 +159,7 @@ static	const char	*roff_getstrn(const struct roff *,
 				const char *, size_t);
 static	enum rofferr	 roff_line_ignore(ROFF_ARGS);
 static	enum rofferr	 roff_nr(ROFF_ARGS);
-static	int		 roff_res(struct roff *, 
+static	void		 roff_res(struct roff *, 
 				char **, size_t *, int, int);
 static	enum rofferr	 roff_rm(ROFF_ARGS);
 static	void		 roff_setstr(struct roff *,
@@ -400,8 +400,8 @@ roff_alloc(struct mparse *parse)
  * `\*', e.g., `\*(ab').  These must be handled before the actual line
  * is processed. 
  * This also checks the syntax of regular escapes.
-*/
-static int
+ */
+static void
 roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 {
 	enum mandoc_esc	 esc;
@@ -413,8 +413,7 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 	size_t		 nsz;
 	char		*n;
 
-	/* Search for a leading backslash and save a pointer to it. */
-
+again:
 	cp = *bufp + pos;
 	while (NULL != (cp = strchr(cp, '\\'))) {
 		stesc = cp++;
@@ -426,7 +425,7 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 		 */
 
 		if ('\0' == *cp)
-			return(1);
+			return;
 
 		if ('*' != *cp) {
 			res = cp;
@@ -437,7 +436,7 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 			mandoc_msg
 				(MANDOCERR_BADESCAPE, r->parse, 
 				 ln, (int)(stesc - *bufp), NULL);
-			continue;
+			return;
 		}
 
 		cp++;
@@ -450,7 +449,7 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 
 		switch (*cp) {
 		case ('\0'):
-			return(1);
+			return;
 		case ('('):
 			cp++;
 			maxl = 2;
@@ -473,7 +472,7 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 					(MANDOCERR_BADESCAPE, 
 					 r->parse, ln, 
 					 (int)(stesc - *bufp), NULL);
-				return(1); 
+				return;
 			}
 			if (0 == maxl && ']' == *cp)
 				break;
@@ -495,6 +494,8 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 
 		/* Replace the escape sequence by the string. */
 
+		pos += (stesc - *bufp);
+
 		nsz = *szp + strlen(res) + 1;
 		n = mandoc_malloc(nsz);
 
@@ -506,10 +507,41 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 
 		*bufp = n;
 		*szp = nsz;
-		return(0);
+		goto again;
+	}
+}
+
+/*
+ * Process text streams: convert all breakable hyphens into ASCII_HYPH.
+ */
+static enum rofferr
+roff_parsetext(char *p)
+{
+	size_t		 sz;
+	const char	*start;
+	enum mandoc_esc	 esc;
+
+	start = p;
+
+	while ('\0' != *p) {
+		sz = strcspn(p, "-\\");
+		p += sz;
+
+		if ('\\' == *p) {
+			/* Skip over escapes. */
+			p++;
+			esc = mandoc_escape
+				((const char **)&p, NULL, NULL);
+			if (ESCAPE_ERROR == esc)
+				break;
+		} else if ('-' == *p) {
+			if (mandoc_hyph(start, p))
+				*p = ASCII_HYPH;
+			p++;
+		}
 	}
 
-	return(1);
+	return(ROFF_CONT);
 }
 
 enum rofferr
@@ -525,8 +557,7 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 	 * words to fill in.
 	 */
 
-	if ( ! roff_res(r, bufp, szp, ln, pos))
-		return(ROFF_REPARSE);
+	roff_res(r, bufp, szp, ln, pos);
 
 	ppos = pos;
 	ctl = mandoc_getcontrol(*bufp, &pos);
@@ -551,13 +582,13 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 			return(eqn_read(&r->eqn, ln, *bufp, pos, offs));
 		if (r->tbl)
 			return(tbl_read(r->tbl, ln, *bufp, pos));
-		return(ROFF_CONT);
+		return(roff_parsetext(*bufp + pos));
 	} else if ( ! ctl) {
 		if (r->eqn)
 			return(eqn_read(&r->eqn, ln, *bufp, pos, offs));
 		if (r->tbl)
 			return(tbl_read(r->tbl, ln, *bufp, pos));
-		return(ROFF_CONT);
+		return(roff_parsetext(*bufp + pos));
 	} else if (r->eqn)
 		return(eqn_read(&r->eqn, ln, *bufp, ppos, offs));
 
