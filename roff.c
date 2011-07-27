@@ -538,8 +538,10 @@ roff_parsetext(char *p)
 			if (ESCAPE_ERROR == esc)
 				break;
 			continue;
-		} else if ('-' != *p || p == start)
+		} else if ('-' != *p || p == start) {
+			p++;
 			continue;
+		}
 
 		l = *(p - 1);
 		r = *(p + 1);
