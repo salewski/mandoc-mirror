@@ -654,44 +654,6 @@ mandoc_eos(const char *p, size_t sz, int enclosed)
 }
 
 /*
- * Choose whether to break at a hyphenated character (identified by the
- * ASCII_HYPH value in the input string).
- */
-int
-mandoc_hyph(const char *start, const char *c)
-{
-	char		l, r;
-
-	l = *(c - 1);
-	r = *(c + 1);
-
-	/* Skip first/last character of buffer. */
-	if (c == start || '\0' == r)
-		return(0);
-
-	/* Skip a number on either side of the hyphen. */
-	if (isdigit((unsigned char)r) || isdigit((unsigned char)l))
-		return(0);
-
-	/* Skip first/last character of word. */
-	if ('\t' == r || '\t' == l)
-		return(0);
-
-	if (' ' == r || ' ' == l)
-		return(0);
-
-	/* Skip double invocations. */
-	if ('-' == r || '-' == l)
-		return(0);
-
-	/* Skip escapes. */
-	if ('\\' == l)
-		return(0);
-
-	return(1);
-}
-
-/*
  * Find out whether a line is a macro line or not.  If it is, adjust the
  * current position and return one; if it isn't, return zero and don't
  * change the current position.

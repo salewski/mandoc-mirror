@@ -143,6 +143,12 @@ struct	predef {
 #define	PREDEF(__name, __str) \
 	{ (__name), (__str) },
 
+static	enum rofft	 roffhash_find(const char *, size_t);
+static	void		 roffhash_init(void);
+static	void		 roffnode_cleanscope(struct roff *);
+static	void		 roffnode_pop(struct roff *);
+static	void		 roffnode_push(struct roff *, enum rofft,
+				const char *, int, int);
 static	enum rofferr	 roff_block(ROFF_ARGS);
 static	enum rofferr	 roff_block_text(ROFF_ARGS);
 static	enum rofferr	 roff_block_sub(ROFF_ARGS);
@@ -153,12 +159,15 @@ static	enum rofferr	 roff_cond_text(ROFF_ARGS);
 static	enum rofferr	 roff_cond_sub(ROFF_ARGS);
 static	enum rofferr	 roff_ds(ROFF_ARGS);
 static	enum roffrule	 roff_evalcond(const char *, int *);
+static	void		 roff_free1(struct roff *);
 static	void		 roff_freestr(struct roff *);
 static	char		*roff_getname(struct roff *, char **, int, int);
 static	const char	*roff_getstrn(const struct roff *, 
 				const char *, size_t);
 static	enum rofferr	 roff_line_ignore(ROFF_ARGS);
 static	enum rofferr	 roff_nr(ROFF_ARGS);
+static	enum rofft	 roff_parse(struct roff *, const char *, int *);
+static	enum rofferr	 roff_parsetext(char *);
 static	void		 roff_res(struct roff *, 
 				char **, size_t *, int, int);
 static	enum rofferr	 roff_rm(ROFF_ARGS);
@@ -172,7 +181,7 @@ static	enum rofferr	 roff_EN(ROFF_ARGS);
 static	enum rofferr	 roff_T_(ROFF_ARGS);
 static	enum rofferr	 roff_userdef(ROFF_ARGS);
 
-/* See roff_hash_find() */
+/* See roffhash_find() */
 
 #define	ASCII_HI	 126
 #define	ASCII_LO	 33
@@ -220,20 +229,11 @@ static	const struct predef predefs[PREDEFS_MAX] = {
 #include "predefs.in"
 };
 
-static	void		 roff_free1(struct roff *);
-static	enum rofft	 roff_hash_find(const char *, size_t);
-static	void		 roff_hash_init(void);
-static	void		 roffnode_cleanscope(struct roff *);
-static	void		 roffnode_push(struct roff *, enum rofft,
-				const char *, int, int);
-static	void		 roffnode_pop(struct roff *);
-static	enum rofft	 roff_parse(struct roff *, const char *, int *);
-
-/* See roff_hash_find() */
+/* See roffhash_find() */
 #define	ROFF_HASH(p)	(p[0] - ASCII_LO)
 
 static void
-roff_hash_init(void)
+roffhash_init(void)
 {
 	struct roffmac	 *n;
 	int		  buc, i;
@@ -258,7 +258,7 @@ roff_hash_init(void)
  * the nil-terminated string name could be found.
  */
 static enum rofft
-roff_hash_find(const char *p, size_t s)
+roffhash_find(const char *p, size_t s)
 {
 	int		 buc;
 	struct roffmac	*n;
@@ -387,7 +387,7 @@ roff_alloc(struct mparse *parse)
 	r->parse = parse;
 	r->rstackpos = -1;
 	
-	roff_hash_init();
+	roffhash_init();
 
 	for (i = 0; i < PREDEFS_MAX; i++) 
 		roff_setstr(r, predefs[i].name, predefs[i].str, 0);
@@ -517,6 +517,7 @@ again:
 static enum rofferr
 roff_parsetext(char *p)
 {
+	char		 l, r;
 	size_t		 sz;
 	const char	*start;
 	enum mandoc_esc	 esc;
@@ -534,11 +535,21 @@ roff_parsetext(char *p)
 				((const char **)&p, NULL, NULL);
 			if (ESCAPE_ERROR == esc)
 				break;
-		} else if ('-' == *p) {
-			if (mandoc_hyph(start, p))
-				*p = ASCII_HYPH;
-			p++;
-		}
+			continue;
+		} else if ('-' != *p || p == start)
+			continue;
+
+		l = *(p - 1);
+		r = *(p + 1);
+
+		if ('\\' != l &&
+				'\t' != r && '\t' != l &&
+				' ' != r && ' ' != l &&
+				'-' != r && '-' != l &&
+				! isdigit((unsigned char)l) &&
+			       	! isdigit((unsigned char)r))
+			*p = ASCII_HYPH;
+		p++;
 	}
 
 	return(ROFF_CONT);
@@ -668,7 +679,7 @@ roff_parse(struct roff *r, const char *buf, int *pos)
 	maclen = strcspn(mac + 1, " \\\t\0") + 1;
 
 	t = (r->current_string = roff_getstrn(r, mac, maclen))
-	    ? ROFF_USERDEF : roff_hash_find(mac, maclen);
+	    ? ROFF_USERDEF : roffhash_find(mac, maclen);
 
 	*pos += (int)maclen;
 

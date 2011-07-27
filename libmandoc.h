@@ -47,7 +47,6 @@ void		 mandoc_vmsg(enum mandocerr, struct mparse *,
 char		*mandoc_getarg(struct mparse *, char **, int, int *);
 char		*mandoc_normdate(struct mparse *, char *, int, int);
 int		 mandoc_eos(const char *, size_t, int);
-int		 mandoc_hyph(const char *, const char *);
 int		 mandoc_getcontrol(const char *, int *);
 int		 mandoc_strntoi(const char *, size_t, int);
 
