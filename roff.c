@@ -496,7 +496,7 @@ again:
 
 		/* Replace the escape sequence by the string. */
 
-		pos += (stesc - *bufp);
+		pos = stesc - *bufp;
 
 		nsz = *szp + strlen(res) + 1;
 		n = mandoc_malloc(nsz);
