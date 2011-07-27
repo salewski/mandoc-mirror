@@ -82,8 +82,8 @@ struct	reg {
 };
 
 struct	roffstr {
-	char		*name; /* key of symbol */
-	char		*string; /* current value */
+	char		*key; /* key of symbol */
+	char		*val; /* current value */
 	struct roffstr	*next; /* next in list */
 };
 
@@ -1465,20 +1465,20 @@ roff_setstr(struct roff *r, const char *name, const char *string,
 
 	/* Search for an existing string with the same name. */
 	n = r->first_string;
-	while (n && strcmp(name, n->name))
+	while (n && strcmp(name, n->key))
 		n = n->next;
 
 	if (NULL == n) {
 		/* Create a new string table entry. */
 		n = mandoc_malloc(sizeof(struct roffstr));
-		n->name = mandoc_strdup(name);
-		n->string = NULL;
+		n->key = mandoc_strdup(name);
+		n->val = NULL;
 		n->next = r->first_string;
 		r->first_string = n;
 	} else if (0 == multiline) {
 		/* In multiline mode, append; else replace. */
-		free(n->string);
-		n->string = NULL;
+		free(n->val);
+		n->val = NULL;
 	}
 
 	if (NULL == string)
@@ -1489,17 +1489,17 @@ roff_setstr(struct roff *r, const char *name, const char *string,
 	 * and one for the terminating '\0'.
 	 */
 	newch = strlen(string) + (multiline ? 2u : 1u);
-	if (NULL == n->string) {
-		n->string = mandoc_malloc(newch);
-		*n->string = '\0';
+	if (NULL == n->val) {
+		n->val = mandoc_malloc(newch);
+		*n->val = '\0';
 		oldch = 0;
 	} else {
-		oldch = strlen(n->string);
-		n->string = mandoc_realloc(n->string, oldch + newch);
+		oldch = strlen(n->val);
+		n->val = mandoc_realloc(n->val, oldch + newch);
 	}
 
 	/* Skip existing content in the destination buffer. */
-	c = n->string + (int)oldch;
+	c = n->val + (int)oldch;
 
 	/* Append new content to the destination buffer. */
 	while (*string) {
@@ -1524,9 +1524,9 @@ roff_getstrn(const struct roff *r, const char *name, size_t len)
 	const struct roffstr *n;
 
 	for (n = r->first_string; n; n = n->next)
-		if (0 == strncmp(name, n->name, len) && 
-				'\0' == n->name[(int)len])
-			return(n->string);
+		if (0 == strncmp(name, n->key, len) && 
+				'\0' == n->key[(int)len])
+			return(n->val);
 
 	return(NULL);
 }
@@ -1537,8 +1537,8 @@ roff_freestr(struct roff *r)
 	struct roffstr	 *n, *nn;
 
 	for (n = r->first_string; n; n = nn) {
-		free(n->name);
-		free(n->string);
+		free(n->key);
+		free(n->val);
 		nn = n->next;
 		free(n);
 	}
