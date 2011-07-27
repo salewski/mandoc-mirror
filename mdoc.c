@@ -568,16 +568,9 @@ int
 mdoc_word_alloc(struct mdoc *m, int line, int pos, const char *p)
 {
 	struct mdoc_node *n;
-	size_t		  sv, len;
-
-	len = strlen(p);
 
 	n = node_alloc(m, line, pos, MDOC_MAX, MDOC_TEXT);
-	n->string = mandoc_malloc(len + 1);
-	sv = strlcpy(n->string, p, len + 1);
-
-	/* Prohibit truncation. */
-	assert(sv < len + 1);
+	n->string = mandoc_strdup(p);
 
 	if ( ! node_append(m, n))
 		return(0);
