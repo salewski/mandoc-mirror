@@ -530,6 +530,9 @@ roff_parsetext(char *p)
 		sz = strcspn(p, "-\\");
 		p += sz;
 
+		if ('\0' == *p)
+			break;
+
 		if ('\\' == *p) {
 			/* Skip over escapes. */
 			p++;
@@ -538,20 +541,19 @@ roff_parsetext(char *p)
 			if (ESCAPE_ERROR == esc)
 				break;
 			continue;
-		} else if ('-' != *p || p == start) {
+		} else if (p == start) {
 			p++;
 			continue;
 		}
 
 		l = *(p - 1);
 		r = *(p + 1);
-
 		if ('\\' != l &&
 				'\t' != r && '\t' != l &&
 				' ' != r && ' ' != l &&
 				'-' != r && '-' != l &&
 				! isdigit((unsigned char)l) &&
-			       	! isdigit((unsigned char)r))
+				! isdigit((unsigned char)r))
 			*p = ASCII_HYPH;
 		p++;
 	}
