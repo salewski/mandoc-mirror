@@ -97,7 +97,9 @@ static	struct mdoc_node *node_alloc(struct mdoc *, int, int,
 				enum mdoct, enum mdoc_type);
 static	int		  node_append(struct mdoc *, 
 				struct mdoc_node *);
+#if 0
 static	int		  mdoc_preptext(struct mdoc *, int, char *, int);
+#endif
 static	int		  mdoc_ptext(struct mdoc *, int, char *, int);
 static	int		  mdoc_pmacro(struct mdoc *, int, char *, int);
 
@@ -300,7 +302,7 @@ mdoc_parseln(struct mdoc *m, int ln, char *buf, int offs)
 
 	return(mandoc_getcontrol(buf, &offs) ?
 			mdoc_pmacro(m, ln, buf, offs) :
-			mdoc_preptext(m, ln, buf, offs));
+			mdoc_ptext(m, ln, buf, offs));
 }
 
 int
@@ -651,6 +653,7 @@ mdoc_node_delete(struct mdoc *m, struct mdoc_node *p)
 	mdoc_node_free(p);
 }
 
+#if 0
 /*
  * Pre-treat a text line.
  * Text lines can consist of equations, which must be handled apart from
@@ -702,6 +705,7 @@ mdoc_preptext(struct mdoc *m, int line, char *buf, int offs)
 
 	return(1);
 }
+#endif
 
 /*
  * Parse free-form text, that is, a line that does not begin with the
