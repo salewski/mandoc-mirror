@@ -1497,12 +1497,10 @@ roff_setstr(struct roff *r, const char *name, const char *string,
 	if (NULL == n->val) {
 		n->val = mandoc_malloc(newch);
 		*n->val = '\0';
-		n->valsz = newch - 1;
 		oldch = 0;
 	} else {
 		oldch = n->valsz;
-		n->val = mandoc_realloc(n->val, n->valsz + newch);
-		n->valsz += newch - 1;
+		n->val = mandoc_realloc(n->val, oldch + newch);
 	}
 
 	/* Skip existing content in the destination buffer. */
@@ -1522,7 +1520,9 @@ roff_setstr(struct roff *r, const char *name, const char *string,
 	/* Append terminating bytes. */
 	if (multiline)
 		*c++ = '\n';
+
 	*c = '\0';
+	n->valsz = (int)(c - n->val);
 }
 
 static const char *
