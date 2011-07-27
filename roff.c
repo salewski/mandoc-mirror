@@ -1519,11 +1519,12 @@ roff_getstrn(const struct roff *r, const char *name, size_t len)
 {
 	const struct roffstr *n;
 
-	n = r->first_string;
-	while (n && (strncmp(name, n->name, len) || '\0' != n->name[(int)len]))
-		n = n->next;
+	for (n = r->first_string; n; n = n->next)
+		if (0 == strncmp(name, n->name, len) && 
+				'\0' == n->name[(int)len])
+			return(n->string);
 
-	return(n ? n->string : NULL);
+	return(NULL);
 }
 
 static void
