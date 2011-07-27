@@ -653,28 +653,39 @@ mandoc_eos(const char *p, size_t sz, int enclosed)
 	return(found && !enclosed);
 }
 
+/*
+ * Choose whether to break at a hyphenated character (identified by the
+ * ASCII_HYPH value in the input string).
+ */
 int
 mandoc_hyph(const char *start, const char *c)
 {
+	char		l, r;
 
-	/*
-	 * Choose whether to break at a hyphenated character.  We only
-	 * do this if it's free-standing within a word.
-	 */
+	l = *(c - 1);
+	r = *(c + 1);
 
 	/* Skip first/last character of buffer. */
-	if (c == start || '\0' == *(c + 1))
+	if (c == start || '\0' == r)
 		return(0);
+
+	/* Skip a number on either side of the hyphen. */
+	if (isdigit((unsigned char)r) || isdigit((unsigned char)l))
+		return(0);
+
 	/* Skip first/last character of word. */
-	if ('\t' == *(c + 1) || '\t' == *(c - 1))
+	if ('\t' == r || '\t' == l)
 		return(0);
-	if (' ' == *(c + 1) || ' ' == *(c - 1))
+
+	if (' ' == r || ' ' == l)
 		return(0);
+
 	/* Skip double invocations. */
-	if ('-' == *(c + 1) || '-' == *(c - 1))
+	if ('-' == r || '-' == l)
 		return(0);
+
 	/* Skip escapes. */
-	if ('\\' == *(c - 1))
+	if ('\\' == l)
 		return(0);
 
 	return(1);
