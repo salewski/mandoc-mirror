@@ -83,7 +83,9 @@ struct	reg {
 
 struct	roffstr {
 	char		*key; /* key of symbol */
+	size_t		 keysz;
 	char		*val; /* current value */
+	size_t		 valsz;
 	struct roffstr	*next; /* next in list */
 };
 
@@ -1472,13 +1474,16 @@ roff_setstr(struct roff *r, const char *name, const char *string,
 		/* Create a new string table entry. */
 		n = mandoc_malloc(sizeof(struct roffstr));
 		n->key = mandoc_strdup(name);
+		n->keysz = strlen(name);
 		n->val = NULL;
+		n->valsz = 0;
 		n->next = r->first_string;
 		r->first_string = n;
 	} else if (0 == multiline) {
 		/* In multiline mode, append; else replace. */
 		free(n->val);
 		n->val = NULL;
+		n->valsz = 0;
 	}
 
 	if (NULL == string)
@@ -1492,10 +1497,12 @@ roff_setstr(struct roff *r, const char *name, const char *string,
 	if (NULL == n->val) {
 		n->val = mandoc_malloc(newch);
 		*n->val = '\0';
+		n->valsz = newch - 1;
 		oldch = 0;
 	} else {
-		oldch = strlen(n->val);
-		n->val = mandoc_realloc(n->val, oldch + newch);
+		oldch = n->valsz;
+		n->val = mandoc_realloc(n->val, n->valsz + newch);
+		n->valsz += newch - 1;
 	}
 
 	/* Skip existing content in the destination buffer. */
