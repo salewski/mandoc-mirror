@@ -55,8 +55,6 @@
 - .ta (tab settings) occurs in ircbug(1) and probably gnats(1)
   reported by brad@  Sat, 15 Jan 2011 15:50:51 -0500
 
-- pod2man expects `tr' to be implemented for \*(-- to work
-
 - \c (interrupted text) occurs in chat(8)
 
 --- missing mdoc features ----------------------------------------------
