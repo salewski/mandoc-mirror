@@ -75,6 +75,7 @@ void		 roff_endparse(struct roff *);
 int		 roff_regisset(const struct roff *, enum regs);
 unsigned int	 roff_regget(const struct roff *, enum regs);
 void		 roff_regunset(struct roff *, enum regs);
+char		*roff_strdup(const struct roff *, const char *);
 #if 0
 char		 roff_eqndelim(const struct roff *);
 void		 roff_openeqn(struct roff *, const char *, 

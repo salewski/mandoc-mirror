@@ -584,10 +584,21 @@ This line-scoped request can take an arbitrary number of arguments.
 Currently, it is ignored including its arguments.
 .Ss \&tr
 Output character translation.
-This request is intended to have one argument,
-consisting of an even number of characters.
-Currently, it is ignored including its arguments,
-and the number of arguments is not checked.
+Its syntax is as follows:
+.Pp
+.D1 Pf \. Cm \&tr Ar [ab]+
+.Pp
+Pairs of
+.Ar ab
+characters are replaced
+.Ar ( a
+for
+.Ar b ) .
+Replacement (or origin) characters may also be character escapes; thus,
+.Pp
+.Dl tr \e(xx\e(yy
+.Pp
+replaces all invocations of \e(xx with \e(yy.
 .Ss \&T&
 Re-start a table layout, retaining the options of the prior table
 invocation.

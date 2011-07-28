@@ -570,7 +570,7 @@ mdoc_word_alloc(struct mdoc *m, int line, int pos, const char *p)
 	struct mdoc_node *n;
 
 	n = node_alloc(m, line, pos, MDOC_MAX, MDOC_TEXT);
-	n->string = mandoc_strdup(p);
+	n->string = roff_strdup(m->roff, p);
 
 	if ( ! node_append(m, n))
 		return(0);
