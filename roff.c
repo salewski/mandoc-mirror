@@ -1383,10 +1383,11 @@ roff_tr(ROFF_ARGS)
 				return(ROFF_IGN);
 			}
 			ssz = (size_t)(p - second);
-		} else if ('\0' == *p) {
+		} else if ('\0' == *second) {
 			mandoc_msg(MANDOCERR_ARGCOUNT, r->parse, 
 					ln, (int)(p - *bufp), NULL);
 			second = " ";
+			p--;
 		}
 
 		roff_setstrn(&r->chrtab, first, fsz, second, ssz, 0);
