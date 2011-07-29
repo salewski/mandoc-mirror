@@ -77,16 +77,22 @@ enum	roffrule {
  * Registers are assumed to be unsigned ints for now.
  */
 struct	reg {
-	int		  set; /* whether set or not */
-	unsigned int	  u; /* unsigned integer */
+	int		 set; /* whether set or not */
+	unsigned int	 u; /* unsigned integer */
 };
 
 struct	roffstr {
-	char		*key; /* key of symbol */
-	size_t		 keysz;
-	char		*val; /* current value */
-	size_t		 valsz;
-	struct roffstr	*next; /* next in list */
+	char		*p;
+	size_t		 sz;
+};
+
+/*
+ * A key-value string pair with lengths.
+ */
+struct	roffkv {
+	struct roffstr	 key;
+	struct roffstr	 val;
+	struct roffkv	*next; /* next in list */
 };
 
 struct	roff {
@@ -95,8 +101,8 @@ struct	roff {
 	enum roffrule	 rstack[RSTACK_MAX]; /* stack of !`ie' rules */
 	int		 rstackpos; /* position in rstack */
 	struct reg	 regs[REG__MAX];
-	struct roffstr	*strtab; /* user-defined strings & macros */
-	struct roffstr	*chrtab; /* user-defined characters */
+	struct roffkv	*strtab; /* user-defined strings & macros */
+	struct roffkv	*chrtab; /* user-defined characters */
 	const char	*current_string; /* value of last called user macro */
 	struct tbl_node	*first_tbl; /* first table parsed */
 	struct tbl_node	*last_tbl; /* last table parsed */
@@ -163,7 +169,7 @@ static	enum rofferr	 roff_cond_sub(ROFF_ARGS);
 static	enum rofferr	 roff_ds(ROFF_ARGS);
 static	enum roffrule	 roff_evalcond(const char *, int *);
 static	void		 roff_free1(struct roff *);
-static	void		 roff_freestr(struct roffstr **);
+static	void		 roff_freestr(struct roffkv **);
 static	char		*roff_getname(struct roff *, char **, int, int);
 static	const char	*roff_getstrn(const struct roff *, 
 				const char *, size_t);
@@ -178,7 +184,7 @@ static	void		 roff_res(struct roff *,
 static	enum rofferr	 roff_rm(ROFF_ARGS);
 static	void		 roff_setstr(struct roff *,
 				const char *, const char *, int);
-static	void		 roff_setstrn(struct roffstr **, const char *, 
+static	void		 roff_setstrn(struct roffkv **, const char *, 
 				size_t, const char *, size_t, int);
 static	enum rofferr	 roff_so(ROFF_ARGS);
 static	enum rofferr	 roff_tr(ROFF_ARGS);
@@ -1525,10 +1531,10 @@ roff_setstr(struct roff *r, const char *name, const char *string,
 }
 
 static void
-roff_setstrn(struct roffstr **r, const char *name, size_t namesz,
+roff_setstrn(struct roffkv **r, const char *name, size_t namesz,
 		const char *string, size_t stringsz, int multiline)
 {
-	struct roffstr	*n;
+	struct roffkv	*n;
 	char		*c;
 	int		 i;
 	size_t		 oldch, newch;
@@ -1536,23 +1542,23 @@ roff_setstrn(struct roffstr **r, const char *name, size_t namesz,
 	/* Search for an existing string with the same name. */
 	n = *r;
 
-	while (n && strcmp(name, n->key))
+	while (n && strcmp(name, n->key.p))
 		n = n->next;
 
 	if (NULL == n) {
 		/* Create a new string table entry. */
-		n = mandoc_malloc(sizeof(struct roffstr));
-		n->key = mandoc_strndup(name, namesz);
-		n->keysz = namesz;
-		n->val = NULL;
-		n->valsz = 0;
+		n = mandoc_malloc(sizeof(struct roffkv));
+		n->key.p = mandoc_strndup(name, namesz);
+		n->key.sz = namesz;
+		n->val.p = NULL;
+		n->val.sz = 0;
 		n->next = *r;
 		*r = n;
 	} else if (0 == multiline) {
 		/* In multiline mode, append; else replace. */
-		free(n->val);
-		n->val = NULL;
-		n->valsz = 0;
+		free(n->val.p);
+		n->val.p = NULL;
+		n->val.sz = 0;
 	}
 
 	if (NULL == string)
@@ -1564,17 +1570,17 @@ roff_setstrn(struct roffstr **r, const char *name, size_t namesz,
 	 */
 	newch = stringsz + (multiline ? 2u : 1u);
 
-	if (NULL == n->val) {
-		n->val = mandoc_malloc(newch);
-		*n->val = '\0';
+	if (NULL == n->val.p) {
+		n->val.p = mandoc_malloc(newch);
+		*n->val.p = '\0';
 		oldch = 0;
 	} else {
-		oldch = n->valsz;
-		n->val = mandoc_realloc(n->val, oldch + newch);
+		oldch = n->val.sz;
+		n->val.p = mandoc_realloc(n->val.p, oldch + newch);
 	}
 
 	/* Skip existing content in the destination buffer. */
-	c = n->val + (int)oldch;
+	c = n->val.p + (int)oldch;
 
 	/* Append new content to the destination buffer. */
 	i = 0;
@@ -1593,30 +1599,30 @@ roff_setstrn(struct roffstr **r, const char *name, size_t namesz,
 		*c++ = '\n';
 
 	*c = '\0';
-	n->valsz = (int)(c - n->val);
+	n->val.sz = (int)(c - n->val.p);
 }
 
 static const char *
 roff_getstrn(const struct roff *r, const char *name, size_t len)
 {
-	const struct roffstr *n;
+	const struct roffkv *n;
 
 	for (n = r->strtab; n; n = n->next)
-		if (0 == strncmp(name, n->key, len) && 
-				'\0' == n->key[(int)len])
-			return(n->val);
+		if (0 == strncmp(name, n->key.p, len) && 
+				'\0' == n->key.p[(int)len])
+			return(n->val.p);
 
 	return(NULL);
 }
 
 static void
-roff_freestr(struct roffstr **r)
+roff_freestr(struct roffkv **r)
 {
-	struct roffstr	 *n, *nn;
+	struct roffkv	 *n, *nn;
 
 	for (n = *r; n; n = nn) {
-		free(n->key);
-		free(n->val);
+		free(n->key.p);
+		free(n->val.p);
 		nn = n->next;
 		free(n);
 	}
@@ -1653,7 +1659,7 @@ roff_eqndelim(const struct roff *r)
 char *
 roff_strdup(const struct roff *r, const char *p)
 {
-	const struct roffstr *cp;
+	const struct roffkv *cp;
 	char		*res;
 	const char	*pp;
 	size_t		 ssz, sz;
@@ -1678,7 +1684,7 @@ roff_strdup(const struct roff *r, const char *p)
 	while ('\0' != *p) {
 		/* Search for term matches. */
 		for (cp = r->chrtab; cp; cp = cp->next)
-			if (0 == strncmp(p, cp->key, cp->keysz))
+			if (0 == strncmp(p, cp->key.p, cp->key.sz))
 				break;
 
 		if (NULL != cp) {
@@ -1687,10 +1693,11 @@ roff_strdup(const struct roff *r, const char *p)
 			 * Append the match to the array and move
 			 * forward by its keysize.
 			 */
-			res = mandoc_realloc(res, ssz + cp->valsz + 1);
-			memcpy(res + ssz, cp->val, cp->valsz);
-			ssz += cp->valsz;
-			p += (int)cp->keysz;
+			res = mandoc_realloc
+				(res, ssz + cp->val.sz + 1);
+			memcpy(res + ssz, cp->val.p, cp->val.sz);
+			ssz += cp->val.sz;
+			p += (int)cp->key.sz;
 			continue;
 		}
 
