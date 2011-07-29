@@ -81,13 +81,16 @@ struct	reg {
 	unsigned int	 u; /* unsigned integer */
 };
 
+/*
+ * An incredibly-simple string buffer.
+ */
 struct	roffstr {
-	char		*p;
-	size_t		 sz;
+	char		*p; /* nil-terminated buffer */
+	size_t		 sz; /* saved strlen(p) */
 };
 
 /*
- * A key-value string pair with lengths.
+ * A key-value roffstr pair as part of a singly-linked list.
  */
 struct	roffkv {
 	struct roffstr	 key;
@@ -102,7 +105,8 @@ struct	roff {
 	int		 rstackpos; /* position in rstack */
 	struct reg	 regs[REG__MAX];
 	struct roffkv	*strtab; /* user-defined strings & macros */
-	struct roffkv	*chrtab; /* user-defined characters */
+	struct roffkv	*xmbtab; /* multi-byte trans table (`tr') */
+	struct roffstr	*xtab; /* single-byte trans table (`tr') */
 	const char	*current_string; /* value of last called user macro */
 	struct tbl_node	*first_tbl; /* first table parsed */
 	struct tbl_node	*last_tbl; /* last table parsed */
@@ -169,7 +173,7 @@ static	enum rofferr	 roff_cond_sub(ROFF_ARGS);
 static	enum rofferr	 roff_ds(ROFF_ARGS);
 static	enum roffrule	 roff_evalcond(const char *, int *);
 static	void		 roff_free1(struct roff *);
-static	void		 roff_freestr(struct roffkv **);
+static	void		 roff_freestr(struct roffkv *);
 static	char		*roff_getname(struct roff *, char **, int, int);
 static	const char	*roff_getstrn(const struct roff *, 
 				const char *, size_t);
@@ -346,6 +350,7 @@ roff_free1(struct roff *r)
 {
 	struct tbl_node	*t;
 	struct eqn_node	*e;
+	int		 i;
 
 	while (NULL != (t = r->first_tbl)) {
 		r->first_tbl = t->next;
@@ -364,10 +369,18 @@ roff_free1(struct roff *r)
 	while (r->last)
 		roffnode_pop(r);
 
-	roff_freestr(&r->strtab);
-	roff_freestr(&r->chrtab);
-}
+	roff_freestr(r->strtab);
+	roff_freestr(r->xmbtab);
 
+	r->strtab = r->xmbtab = NULL;
+
+	if (r->xtab)
+		for (i = 0; i < 128; i++)
+			free(r->xtab[i].p);
+
+	free(r->xtab);
+	r->xtab = NULL;
+}
 
 void
 roff_reset(struct roff *r)
@@ -1396,7 +1409,19 @@ roff_tr(ROFF_ARGS)
 			p--;
 		}
 
-		roff_setstrn(&r->chrtab, first, fsz, second, ssz, 0);
+		if (fsz > 1) {
+			roff_setstrn(&r->xmbtab, first, 
+					fsz, second, ssz, 0);
+			continue;
+		}
+
+		if (NULL == r->xtab)
+			r->xtab = mandoc_calloc
+				(128, sizeof(struct roffstr));
+
+		free(r->xtab[(int)*first].p);
+		r->xtab[(int)*first].p = mandoc_strndup(second, ssz);
+		r->xtab[(int)*first].sz = ssz;
 	}
 
 	return(ROFF_IGN);
@@ -1616,18 +1641,16 @@ roff_getstrn(const struct roff *r, const char *name, size_t len)
 }
 
 static void
-roff_freestr(struct roffkv **r)
+roff_freestr(struct roffkv *r)
 {
 	struct roffkv	 *n, *nn;
 
-	for (n = *r; n; n = nn) {
+	for (n = r; n; n = nn) {
 		free(n->key.p);
 		free(n->val.p);
 		nn = n->next;
 		free(n);
 	}
-
-	*r = NULL;
 }
 
 const struct tbl_span *
@@ -1665,7 +1688,7 @@ roff_strdup(const struct roff *r, const char *p)
 	size_t		 ssz, sz;
 	enum mandoc_esc	 esc;
 
-	if (NULL == r->chrtab)
+	if (NULL == r->xmbtab && NULL == r->xtab)
 		return(mandoc_strdup(p));
 	else if ('\0' == *p)
 		return(mandoc_strdup(""));
@@ -1682,8 +1705,21 @@ roff_strdup(const struct roff *r, const char *p)
 	ssz = 0;
 
 	while ('\0' != *p) {
+		if ('\\' != *p && r->xtab && r->xtab[(int)*p].p) {
+			sz = r->xtab[(int)*p].sz;
+			res = mandoc_realloc(res, ssz + sz + 1);
+			memcpy(res + ssz, r->xtab[(int)*p].p, sz);
+			ssz += sz;
+			p++;
+			continue;
+		} else if ('\\' != *p) {
+			res = mandoc_realloc(res, ssz + 2);
+			res[ssz++] = *p++;
+			continue;
+		}
+
 		/* Search for term matches. */
-		for (cp = r->chrtab; cp; cp = cp->next)
+		for (cp = r->xmbtab; cp; cp = cp->next)
 			if (0 == strncmp(p, cp->key.p, cp->key.sz))
 				break;
 
@@ -1701,36 +1737,29 @@ roff_strdup(const struct roff *r, const char *p)
 			continue;
 		}
 
-		if ('\\' == *p) {
-			/*
-			 * Handle escapes carefully: we need to copy
-			 * over just the escape itself, or else we might
-			 * do replacements within the escape itself.
-			 * Make sure to pass along the bogus string.
-			 */
-			pp = p++;
-			esc = mandoc_escape(&p, NULL, NULL);
-			if (ESCAPE_ERROR == esc) {
-				sz = strlen(pp);
-				res = mandoc_realloc(res, ssz + sz + 1);
-				memcpy(res + ssz, pp, sz);
-				break;
-			}
-			/* 
-			 * We bail out on bad escapes. 
-			 * No need to warn: we already did so when
-			 * roff_res() was called.
-			 */
-			sz = (int)(p - pp);
+		/*
+		 * Handle escapes carefully: we need to copy
+		 * over just the escape itself, or else we might
+		 * do replacements within the escape itself.
+		 * Make sure to pass along the bogus string.
+		 */
+		pp = p++;
+		esc = mandoc_escape(&p, NULL, NULL);
+		if (ESCAPE_ERROR == esc) {
+			sz = strlen(pp);
 			res = mandoc_realloc(res, ssz + sz + 1);
 			memcpy(res + ssz, pp, sz);
-			ssz += sz;
-			continue;
+			break;
 		}
-
-		/* Just append the charater. */
-		res = mandoc_realloc(res, ssz + 2);
-		res[ssz++] = *p++;
+		/* 
+		 * We bail out on bad escapes. 
+		 * No need to warn: we already did so when
+		 * roff_res() was called.
+		 */
+		sz = (int)(p - pp);
+		res = mandoc_realloc(res, ssz + sz + 1);
+		memcpy(res + ssz, pp, sz);
+		ssz += sz;
 	}
 
 	res[(int)ssz] = '\0';
