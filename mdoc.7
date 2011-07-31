@@ -1828,7 +1828,7 @@ Insert a standard sentence regarding command exit values of 0 on success
 and >0 on failure.
 Its syntax is as follows:
 .Pp
-.D1 Pf \. Sx \&Ex Fl std Op Ar utility...
+.D1 Pf \. Sx \&Ex Fl std Op Ar utility ...
 .Pp
 If
 .Ar utility
@@ -2125,9 +2125,9 @@ The syntax is as follows:
 The
 .Ar library
 parameter may be a system library, such as
-.Ar libz
+.Cm libz
 or
-.Ar libpam ,
+.Cm libpam ,
 in which case a small library description is printed next to the linker
 invocation; or a custom library, in which case the library name is
 printed in quotes.
@@ -2469,13 +2469,13 @@ block is used within a SEE ALSO section, a vertical space is asserted
 before the rendered output, else the block continues on the current
 line.
 .Ss \&Rv
-Insert a standard sentence regarding a system call's return value of 0
+Insert a standard sentence regarding a function call's return value of 0
 on success and \-1 on error, with the
 .Va errno
 libc global variable set on error.
 Its syntax is as follows:
 .Pp
-.D1 Pf \. Sx \&Rv Fl std Op Ar function...
+.D1 Pf \. Sx \&Rv Fl std Op Ar function ...
 .Pp
 If
 .Ar function
@@ -2513,9 +2513,9 @@ Its syntax is as follows:
 .D1 Pf \. Sx \&Sm Cm on | off
 .Pp
 By default, spacing is
-.Ar on .
+.Cm on .
 When switched
-.Ar off ,
+.Cm off ,
 no white space is inserted between macro arguments and between the
 output generated from adjacent macros, but text lines
 still get normal spacing between words and sentences.
