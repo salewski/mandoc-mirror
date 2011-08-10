@@ -72,9 +72,7 @@ static	void	 check_text(struct mdoc *, int, int, char *);
 static	void	 check_argv(struct mdoc *, 
 			struct mdoc_node *, struct mdoc_argv *);
 static	void	 check_args(struct mdoc *, struct mdoc_node *);
-
-static	int	 concat(struct mdoc *, char *, 
-			const struct mdoc_node *, size_t);
+static	int	 concat(char *, const struct mdoc_node *, size_t);
 static	enum mdoc_sec	a2sec(const char *);
 static	size_t		macro2len(enum mdoct);
 
@@ -1107,6 +1105,7 @@ static int
 post_nm(POST_ARGS)
 {
 	char		 buf[BUFSIZ];
+	int		 c;
 
 	/* If no child specified, make sure we have the meta name. */
 
@@ -1118,11 +1117,14 @@ post_nm(POST_ARGS)
 
 	/* If no meta name, set it from the child. */
 
-	if ( ! concat(mdoc, buf, mdoc->last->child, BUFSIZ))
+	buf[0] = '\0';
+	if (-1 == (c = concat(buf, mdoc->last->child, BUFSIZ))) {
+		mdoc_nmsg(mdoc, mdoc->last->child, MANDOCERR_MEM);
 		return(0);
+	}
 
+	assert(c);
 	mdoc->meta.name = mandoc_strdup(buf);
-
 	return(1);
 }
 
@@ -1818,6 +1820,7 @@ post_sh_head(POST_ARGS)
 {
 	char		 buf[BUFSIZ];
 	enum mdoc_sec	 sec;
+	int		 c;
 
 	/*
 	 * Process a new section.  Sections are either "named" or
@@ -1826,10 +1829,13 @@ post_sh_head(POST_ARGS)
 	 * manual sections.
 	 */
 
-	if ( ! concat(mdoc, buf, mdoc->last->child, BUFSIZ))
+	sec = SEC_CUSTOM;
+	buf[0] = '\0';
+	if (-1 == (c = concat(buf, mdoc->last->child, BUFSIZ))) {
+		mdoc_nmsg(mdoc, mdoc->last->child, MANDOCERR_MEM);
 		return(0);
-
-	sec = a2sec(buf);
+	} else if (1 == c)
+		sec = a2sec(buf);
 
 	/* The NAME should be first. */
 
@@ -1978,6 +1984,7 @@ post_dd(POST_ARGS)
 {
 	char		  buf[DATESIZE];
 	struct mdoc_node *n;
+	int		  c;
 
 	if (mdoc->meta.date)
 		free(mdoc->meta.date);
@@ -1989,9 +1996,13 @@ post_dd(POST_ARGS)
 		return(1);
 	}
 
-	if ( ! concat(mdoc, buf, n->child, DATESIZE))
+	buf[0] = '\0';
+	if (-1 == (c = concat(buf, n->child, DATESIZE))) {
+		mdoc_nmsg(mdoc, n->child, MANDOCERR_MEM);
 		return(0);
+	}
 
+	assert(c);
 	mdoc->meta.date = mandoc_normdate
 		(mdoc->parse, buf, n->line, n->pos);
 
@@ -2146,6 +2157,7 @@ post_os(POST_ARGS)
 {
 	struct mdoc_node *n;
 	char		  buf[BUFSIZ];
+	int		  c;
 #ifndef OSNAME
 	struct utsname	  utsname;
 #endif
@@ -2162,8 +2174,13 @@ post_os(POST_ARGS)
 	if (mdoc->meta.os)
 		free(mdoc->meta.os);
 
-	if ( ! concat(mdoc, buf, n->child, BUFSIZ))
+	buf[0] = '\0';
+	if (-1 == (c = concat(buf, n->child, BUFSIZ))) {
+		mdoc_nmsg(mdoc, n->child, MANDOCERR_MEM);
 		return(0);
+	}
+
+	assert(c);
 
 	/* XXX: yes, these can all be dynamically-adjusted buffers, but
 	 * it's really not worth the extra hackery.
@@ -2230,34 +2247,24 @@ post_std(POST_ARGS)
 	return(1);
 }
 
+/*
+ * Concatenate a node, stopping at the first non-text.
+ * Concatenation is separated by a single whitespace.  
+ * Returns -1 on fatal (string overrun) error, 0 if child nodes were
+ * encountered, 1 otherwise.
+ */
 static int
-concat(struct mdoc *m, char *p, const struct mdoc_node *n, size_t sz)
+concat(char *p, const struct mdoc_node *n, size_t sz)
 {
 
-	p[0] = '\0';
-
-	/*
-	 * Concatenate sibling nodes together.  All siblings must be of
-	 * type MDOC_TEXT or an assertion is raised.  Concatenation is
-	 * separated by a single whitespace.  Returns 0 on fatal (string
-	 * overrun) error.
-	 */
-
-	for ( ; n; n = n->next) {
-		assert(MDOC_TEXT == n->type);
-
-		if (strlcat(p, n->string, sz) >= sz) {
-			mdoc_nmsg(m, n, MANDOCERR_MEM);
+	for ( ; NULL != n; n = n->next) {
+		if (MDOC_TEXT != n->type) 
 			return(0);
-		}
-
-		if (NULL == n->next)
-			continue;
-
-		if (strlcat(p, " ", sz) >= sz) {
-			mdoc_nmsg(m, n, MANDOCERR_MEM);
-			return(0);
-		}
+		if ('\0' != p[0] && strlcat(p, " ", sz) >= sz)
+			return(-1);
+		if (strlcat(p, n->string, sz) >= sz)
+			return(-1);
+		concat(p, n->child, sz);
 	}
 
 	return(1);

@@ -74,8 +74,8 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ in_line_eoln, MDOC_PROLOGUE }, /* Dd */
 	{ in_line_eoln, MDOC_PROLOGUE }, /* Dt */
 	{ in_line_eoln, MDOC_PROLOGUE }, /* Os */
-	{ blk_full, 0 }, /* Sh */
-	{ blk_full, 0 }, /* Ss */ 
+	{ blk_full, MDOC_PARSED }, /* Sh */
+	{ blk_full, MDOC_PARSED }, /* Ss */ 
 	{ in_line_eoln, 0 }, /* Pp */ 
 	{ blk_part_imp, MDOC_PARSED }, /* D1 */
 	{ blk_part_imp, MDOC_PARSED }, /* Dl */
