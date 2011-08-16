@@ -117,9 +117,11 @@ SRCS		 = Makefile \
 		   term.h \
 		   term_ascii.c \
 		   term_ps.c \
+		   test-getsubopt.c \
 		   test-mmap.c \
 		   test-strlcat.c \
 		   test-strlcpy.c \
+		   test-strptime.c \
 		   tree.c \
 		   vol.c \
 		   vol.in

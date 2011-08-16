@@ -52,10 +52,6 @@
 			build it (it does not install).
 		</P>
 		<P>
-			Distributed Win32 binaries are compiled using <A CLASS="external" HREF="http://www.mingw.org/">mingw32</A>.  They are
-			distributed in a ZIP archive consisting of binaries, manuals, and other installable media.
-		</P>
-		<P>
 			The most current version of <SPAN CLASS="nm">mdocml</SPAN> is <SPAN CLASS="attn">@VERSION@</SPAN>, dated <SPAN
 			class="attn">@VDATE@</SPAN>.  
 		</P>
@@ -63,7 +59,7 @@
 			Current
 		</H2>
 		<TABLE WIDTH="100%" SUMMARY="Current Sources">
-			<COL WIDTH="175">
+			<COL WIDTH="200">
 			<COL>
 			<TBODY>
 				<TR>
@@ -80,9 +76,15 @@
 					</TD>
 				</TR>
 				<TR>
-					<TD>Win32 binary archive</TD>
+					<TD>Win32 (i686) binary archive</TD>
 					<TD>
 					<A HREF="/binaries/mdocml-win32.zip">/binaries/mdocml-win32.zip</A> 
+					</TD>
+				</TR>
+				<TR>
+					<TD>Win64 (x86_64) binary archive</TD>
+					<TD>
+					<A HREF="/binaries/mdocml-win64.zip">/binaries/mdocml-win64.zip</A> 
 					</TD>
 				</TR>
 			</TBODY>
@@ -91,7 +93,7 @@
 			Downstream
 		</H2>
 		<TABLE WIDTH="100%" SUMMARY="Downstream Sources">
-			<COL WIDTH="175">
+			<COL WIDTH="200">
 			<COL>
 			<TBODY>
 				<TR>
@@ -128,7 +130,7 @@
 			Historical
 		</H2>
 		<TABLE WIDTH="100%" SUMMARY="Archived Sources">
-			<COL WIDTH="175">
+			<COL WIDTH="200">
 			<COL>
 			<TBODY>
 				<TR>
@@ -153,7 +155,7 @@
 		</P>
 
 		<TABLE WIDTH="100%" SUMMARY="Documentation">
-			<COL WIDTH="175">
+			<COL WIDTH="200">
 			<COL>
 			<TBODY>
 				<TR>
@@ -289,7 +291,7 @@
 			this e-mail address">kris...</A>@bsd.lv.
 		</P>
 		<TABLE WIDTH="100%" SUMMARY="Mailing Lists">
-			<COL WIDTH="175">
+			<COL WIDTH="200">
 			<COL>
 			<TBODY>
 				<TR>
@@ -328,6 +330,15 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
+			16-08-2011: version 1.11.6
+		</P>
+		<P>
+			Handling of <B>tr</B> macro in <A HREF="roff.7.html">roff</A> implemented.  This makes Perl documentation much more
+			readable.  Hyphenation is also now enabled in <A HREF="man.7.html">man</A> format documents.  Many other general
+			improvements have been implemented, and a 64-bit Windows binary is now available at <A
+			HREF="/binaries/mdocml-win64.zip">/binaries/mdocml-win64.zip</A>.
+		</P>
+		<P CLASS="news">
 			24-07-2011: version 1.11.5
 		</P>
 		<P>
@@ -349,35 +360,6 @@
 			connected to the general build and must be compiled with <INS><CODE>make mandocdb</CODE></INS> <DEL><CODE>make makewhatis</CODE></DEL>) and the <A
 			HREF="man.7.html">man</A> parser.  This release was significantly assisted by participants in <A CLASS="external"
 			HREF="http://www.openbsd.org">OpenBSD</A>'s c2k11.  Thanks!
-		</P>
-		<P CLASS="news">
-			26-05-2011: version 1.11.3
-		</P>
-		<P>
-			Introduce locale-encoding of output with the <B>-Tlocale</B> output option and Unicode escaped-character input.
-			See <A HREF="mandoc.1.html">mandoc</A> and <A HREF="mandoc_char.7.html">mandoc_char</A>, respectively, for details.
-			This allows for non-ASCII characters (e.g., <I>\[u5000]</I>) to be rendered in the locale's encoding, if said
-			environment supports wide-character encoding (if it does not, <B>-Tascii</B> is used instead).
-			Locale support can be turned off at compile time by removing <I>-DUSE_WCHAR</I> in the <I>Makefile</I>, in which case
-			<B>-Tlocale</B> is always a synonym for <B>-Tascii</B>.
-		</P>
-		<P>
-			Furthermore, multibyte-encoded documents, such as those in UTF-8, may be on-the-fly recoded into <A
-			HREF="mandoc.1.html">mandoc</A> input by using the newly-added <A HREF="preconv.1.html">preconv</A> utility.
-			Note: in the future, this feature may be integrated into <A HREF="mandoc.1.html">mandoc</A>.
-		</P>
-		<P CLASS="news">
-			12-05-2011: version 1.11.2
-		</P>
-		<P>
-			Corrected some installation issues in version 1.11.1.
-			Further migration to <A HREF="mandoc.3.html">libmandoc</A>.
-			Initial public release (this utility is very much under development) of <INS><A HREF="mandocdb.8.html">mandocdb</A></INS><DEL>makewhatis</DEL>,
-			initially named mandoc-db.
-			This utility produces keyword databases of manual content
-			<DEL>mandoc-cgi</DEL>, 
-			<A HREF="http://mdocml.bsd.lv/mandoc-tools/index.html">mandoc-tools</A>, 
-			which features semantic querying of manual content.
 		</P>
 		<P>
 			See <A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/index.sgml?cvsroot=mdocml">cvsweb</A> for
