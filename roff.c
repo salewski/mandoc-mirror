@@ -1667,13 +1667,6 @@ roff_eqn(const struct roff *r)
 	return(r->last_eqn ? &r->last_eqn->eqn : NULL);
 }
 
-char
-roff_eqndelim(const struct roff *r)
-{
-
-	return('\0');
-}
-
 /*
  * Duplicate an input string, making the appropriate character
  * conversations (as stipulated by `tr') along the way.
