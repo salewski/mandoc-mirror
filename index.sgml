@@ -7,7 +7,8 @@
 	</HEAD>
 	<BODY>
 		<P CLASS="head">
-			<B>mdocml</B> &#8211; mdoc macro compiler
+			<B>mdocml</B> &#8211; mdoc macro compiler,
+			current version <SPAN CLASS="attn">@VERSION@</SPAN> (<SPAN class="attn">@VDATE@</SPAN>)
 		</P>
 		<H1>
 			<A NAME="description">Description</A>
@@ -39,59 +40,84 @@
 			<A NAME="sources">Sources</A>
 		</H1>
 		<P>
-			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any modern system (<A
-			HREF="mandocdb.8.html">mandocdb</A> requires <A CLASS="external"
-			HREF="http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html">Berkeley Database</A>, installed by
-			default on all BSD UNIX operating systems).
+			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any modern system.
+			To build and install into <I>/usr/local/</I>, just run <CODE>make install</CODE>.
+			Be aware: if you have an existing groff installation, this may overwrite its <B>preconv</B> binary.  
+			The <A HREF="mandocdb.8.html">mandocdb</A> utility is not yet linked to the build; please <A HREF="#contact">contact
+			us</A> if you plan to use it.
 		</P>
-		<P>
-			To compile <SPAN CLASS="nm">mdocml</SPAN>, run <CODE>make</CODE>, then <CODE>make install</CODE> to install into
-			<I>/usr/local</I>.  Be aware: if you have an existing <A HREF="http://www.gnu.org/software/groff/"
-			CLASS="external">groff</A> installation, this may overwrite its <B>preconv</B> binary.  The <A
-			HREF="mandocdb.8.html">mandocdb</A> utility is not yet linked to the build: you must run <CODE>make mandocdb</CODE> to
-			build it (it does not install).
-		</P>
-		<P>
-			The most current version of <SPAN CLASS="nm">mdocml</SPAN> is <SPAN CLASS="attn">@VERSION@</SPAN>, dated <SPAN
-			class="attn">@VDATE@</SPAN>.  
-		</P>
-		<H2>
-			Current
-		</H2>
 		<TABLE WIDTH="100%" SUMMARY="Current Sources">
 			<COL WIDTH="200">
 			<COL>
 			<TBODY>
 				<TR>
-					<TD>Source archive</TD>
+					<TD>Current</TD>
 					<TD>
-					<A HREF="/snapshots/mdocml.tar.gz">/snapshots/mdocml.tar.gz</A> 
-					<SMALL>(<A HREF="/snapshots/mdocml.md5">md5</A>)</SMALL>
+					<A HREF="/snapshots/mdocml.tar.gz">/snapshots/mdocml.tar.gz</A> (<A HREF="/snapshots/mdocml.md5">md5</A>)
 					</TD>
 				</TR>
 				<TR>
-					<TD>Online source</TD>
+					<TD>Archives</TD>
+					<TD>
+					<A HREF="/snapshots/">/snapshots/</A> 
+					</TD>
+				</TR>
+				<TR>
+					<TD>Online Repository</TD>
 					<TD>
 					<A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/?cvsroot=mdocml">cvsweb</A>
 					</TD>
 				</TR>
+			</TBODY>
+		</TABLE>
+		<H1>
+			<A NAME="binaries">Binaries</A>
+		</H1>
+		<P>
+			Binary archives consist of pre-compiled binaries, manuals, and other necessary files.
+			Universal (Mac OS X) binaries are compiled for the PCC, i386, and x86_64 architectures.
+			Windows binaries are compiled with <A CLASS="external" HREF="http://www.mingw.org">MingW</A> for the 32-bit (i686) and
+			64-bit (x86_64) architectures.
+		</P>
+		<TABLE WIDTH="100%" SUMMARY="Current Binaries">
+			<COL WIDTH="200">
+			<COL>
+			<TBODY>
 				<TR>
-					<TD>Win32 (i686) binary archive</TD>
+					<TD>Windows 32-bit</TD>
 					<TD>
-					<A HREF="/binaries/mdocml-win32.zip">/binaries/mdocml-win32.zip</A> 
+					<A HREF="/binaries/mdocml-win32.zip">/binaries/mdocml-win32.zip</A>
 					</TD>
 				</TR>
 				<TR>
-					<TD>Win64 (x86_64) binary archive</TD>
+					<TD>Windows 64-bit</TD>
 					<TD>
-					<A HREF="/binaries/mdocml-win64.zip">/binaries/mdocml-win64.zip</A> 
+					<A HREF="/binaries/mdocml-win64.zip">/binaries/mdocml-win64.zip</A>
+					</TD>
+				</TR>
+				<TR>
+					<TD>Mac OS X Universal Binary</TD>
+					<TD>
+					<A HREF="/binaries/mdocml-macosx.zip">/binaries/mdocml-macosx.zip</A>
+					</TD>
+				</TR>
+				<TR>
+					<TD>Archives</TD>
+					<TD>
+					<A HREF="/binaries/">/binaries/</A> 
 					</TD>
 				</TR>
 			</TBODY>
 		</TABLE>
-		<H2>
+		<H1>
 			Downstream
-		</H2>
+		</H1>
+		<P>
+			Several systems come bundled with <SPAN CLASS="nm">mdocml</SPAN> utilities.
+			If your system does not appear below, the maintainers have not contacted me and it should not be considered
+			<Q>official</Q>.
+			Please <A HREF="#contact">contact us</A> if you plan on maintaining a downstream version!
+		</P>
 		<TABLE WIDTH="100%" SUMMARY="Downstream Sources">
 			<COL WIDTH="200">
 			<COL>
@@ -126,32 +152,12 @@
 				</TR>
 			</TBODY>
 		</TABLE>
-		<H2>
-			Historical
-		</H2>
-		<TABLE WIDTH="100%" SUMMARY="Archived Sources">
-			<COL WIDTH="200">
-			<COL>
-			<TBODY>
-				<TR>
-					<TD>Source archive</TD>
-					<TD>
-					<A HREF="/snapshots/">/snapshots/</A> 
-					</TD>
-				</TR>
-				<TR>
-					<TD>Binary archive</TD>
-					<TD>
-					<A HREF="/binaries/">/binaries/</A> 
-					</TD>
-				</TR>
-			</TBODY>
-		</TABLE>
 		<H1>
 			<A NAME="documentation">Documentation</A>
 		</H1>
 		<P>
-			These manuals are generated automatically and refer to the current snapshot.
+			These manuals are generated automatically and refer to the current release.
+			They are the authoritative documentation for the <SPAN CLASS="nm">mdocml</SPAN> system.
 		</P>
 
 		<TABLE WIDTH="100%" SUMMARY="Documentation">
@@ -335,8 +341,9 @@
 		<P>
 			Handling of <B>tr</B> macro in <A HREF="roff.7.html">roff</A> implemented.  This makes Perl documentation much more
 			readable.  Hyphenation is also now enabled in <A HREF="man.7.html">man</A> format documents.  Many other general
-			improvements have been implemented, and a 64-bit Windows binary is now available at <A
-			HREF="/binaries/mdocml-win64.zip">/binaries/mdocml-win64.zip</A>.
+			improvements have been implemented.  Furthermore, a 64-bit Windows binary is now available at <A
+			HREF="/binaries/mdocml-win64.zip">mdocml-win64.zip</A> and a Mac OS X universal binary is available at <A
+			HREF="/binaries/mdocml-macosx.zip">mdocml-macosx.zip</A>.
 		</P>
 		<P CLASS="news">
 			24-07-2011: version 1.11.5

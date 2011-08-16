@@ -332,7 +332,7 @@ clean:
 	rm -f mandoc $(MANDOC_OBJS)
 	rm -f llib-lmandoc.ln $(MANDOC_LNS)
 	rm -f config.h config.log $(COMPAT_OBJS) $(COMPAT_LNS)
-	rm -f mdocml.tar.gz mdocml-win32.zip mdocml-win64.zip
+	rm -f mdocml.tar.gz mdocml-win32.zip mdocml-win64.zip mdocml-macosx.zip
 	rm -f index.html $(INDEX_OBJS)
 	rm -rf test-strlcpy.DSYM
 	rm -rf test-strlcat.DSYM 
@@ -375,19 +375,19 @@ llib-llibmandoc.ln: $(COMPAT_LNS) $(LIBMANDOC_LNS)
 	$(LINT) $(LINTFLAGS) -Clibmandoc $(COMPAT_LNS) $(LIBMANDOC_LNS)
 
 mandoc: $(MANDOC_OBJS) libmandoc.a
-	$(CC) -o $@ $(MANDOC_OBJS) libmandoc.a
+	$(CC) $(LDFLAGS) -o $@ $(MANDOC_OBJS) libmandoc.a
 
 llib-lmandoc.ln: $(MANDOC_LNS)
 	$(LINT) $(LINTFLAGS) -Cmandoc $(MANDOC_LNS)
 
 mandocdb: $(MANDOCDB_OBJS) libmandoc.a
-	$(CC) -o $@ $(MANDOCDB_OBJS) libmandoc.a $(DBLIB)
+	$(CC) $(LDFLAGS) -o $@ $(MANDOCDB_OBJS) libmandoc.a $(DBLIB)
 
 llib-lmandocdb.ln: $(MANDOCDB_LNS)
 	$(LINT) $(LINTFLAGS) -Cmandocdb $(MANDOCDB_LNS)
 
 preconv: $(PRECONV_OBJS)
-	$(CC) -o $@ $(PRECONV_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(PRECONV_OBJS)
 
 llib-lpreconv.ln: $(PRECONV_LNS)
 	$(LINT) $(LINTFLAGS) -Cpreconv $(PRECONV_LNS)
@@ -406,7 +406,8 @@ mdocml-win32.zip: $(SRCS)
 	$(INSTALL_SOURCE) $(SRCS) .win32
 	cp .win32/Makefile .win32/Makefile.old
 	grep -v DUSE_WCHAR .win32/Makefile.old >.win32/Makefile
-	( cd .win32; CC=i686-w64-mingw32-gcc AR=i686-w64-mingw32-ar CFLAGS='-DOSNAME=\"Windows\"' make; \
+	( cd .win32; \
+		CC=i686-w64-mingw32-gcc AR=i686-w64-mingw32-ar CFLAGS='-DOSNAME=\"Windows\"' make; \
 		make install PREFIX=mdocml-$(VERSION) ; \
 		zip -r ../$@ mdocml-$(VERSION) )
 	rm -rf .win32
@@ -416,11 +417,20 @@ mdocml-win64.zip: $(SRCS)
 	$(INSTALL_SOURCE) $(SRCS) .win64
 	cp .win64/Makefile .win64/Makefile.old
 	grep -v DUSE_WCHAR .win64/Makefile.old >.win64/Makefile
-	( cd .win64; CC=x86_64-w64-mingw32-gcc AR=x86_64-w64-mingw32-ar CFLAGS='-DOSNAME=\"Windows\"' make; \
+	( cd .win64; \
+		CC=x86_64-w64-mingw32-gcc AR=x86_64-w64-mingw32-ar CFLAGS='-DOSNAME=\"Windows\"' make; \
 		make install PREFIX=mdocml-$(VERSION) ; \
 		zip -r ../$@ mdocml-$(VERSION) )
 	rm -rf .win64
 
+mdocml-macosx.zip: $(SRCS)
+	mkdir -p .macosx/mdocml-$(VERSION)/
+	$(INSTALL_SOURCE) $(SRCS) .macosx
+	( cd .macosx; \
+		CFLAGS="-arch i386 -arch x86_64 -arch ppc" LDFLAGS="-arch i386 -arch x86_64 -arch ppc" make; \
+		make install PREFIX=mdocml-$(VERSION) ; \
+		zip -r ../$@ mdocml-$(VERSION) )
+	rm -rf .macosx
 
 index.html: $(INDEX_OBJS)
 
