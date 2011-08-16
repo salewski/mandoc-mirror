@@ -1395,7 +1395,7 @@ post_bl_block_width(POST_ARGS)
 
 	assert(i < (int)n->args->argc);
 
-	snprintf(buf, NUMSIZ, "%zun", width);
+	snprintf(buf, NUMSIZ, "%un", (unsigned int)width);
 	free(n->args->argv[i].value[0]);
 	n->args->argv[i].value[0] = mandoc_strdup(buf);
 
@@ -1445,7 +1445,7 @@ post_bl_block_tag(POST_ARGS)
 
 	/* Defaults to ten ens. */
 
-	snprintf(buf, NUMSIZ, "%zun", sz);
+	snprintf(buf, NUMSIZ, "%un", (unsigned int)sz);
 
 	/*
 	 * We have to dynamically add this to the macro's argument list.
