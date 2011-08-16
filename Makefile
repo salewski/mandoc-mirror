@@ -332,7 +332,7 @@ clean:
 	rm -f mandoc $(MANDOC_OBJS)
 	rm -f llib-lmandoc.ln $(MANDOC_LNS)
 	rm -f config.h config.log $(COMPAT_OBJS) $(COMPAT_LNS)
-	rm -f mdocml.tar.gz mdocml-win32.zip
+	rm -f mdocml.tar.gz mdocml-win32.zip mdocml-win64.zip
 	rm -f index.html $(INDEX_OBJS)
 	rm -rf test-strlcpy.DSYM
 	rm -rf test-strlcat.DSYM 
@@ -406,10 +406,21 @@ mdocml-win32.zip: $(SRCS)
 	$(INSTALL_SOURCE) $(SRCS) .win32
 	cp .win32/Makefile .win32/Makefile.old
 	grep -v DUSE_WCHAR .win32/Makefile.old >.win32/Makefile
-	( cd .win32; CC=i586-mingw32msvc-cc AR=i586-mingw32msvc-ar CFLAGS='-DOSNAME=\"Windows\"' make; \
+	( cd .win32; CC=i686-w64-mingw32-gcc AR=i686-w64-mingw32-ar CFLAGS='-DOSNAME=\"Windows\"' make; \
 		make install PREFIX=mdocml-$(VERSION) ; \
 		zip -r ../$@ mdocml-$(VERSION) )
 	rm -rf .win32
+
+mdocml-win64.zip: $(SRCS)
+	mkdir -p .win64/mdocml-$(VERSION)/
+	$(INSTALL_SOURCE) $(SRCS) .win64
+	cp .win64/Makefile .win64/Makefile.old
+	grep -v DUSE_WCHAR .win64/Makefile.old >.win64/Makefile
+	( cd .win64; CC=x86_64-w64-mingw32-gcc AR=x86_64-w64-mingw32-ar CFLAGS='-DOSNAME=\"Windows\"' make; \
+		make install PREFIX=mdocml-$(VERSION) ; \
+		zip -r ../$@ mdocml-$(VERSION) )
+	rm -rf .win64
+
 
 index.html: $(INDEX_OBJS)
 
