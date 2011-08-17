@@ -7,8 +7,18 @@
 	</HEAD>
 	<BODY>
 		<P CLASS="head">
-			<B>mdocml</B> &#8211; mdoc macro compiler,
-			current version <SPAN CLASS="attn">@VERSION@</SPAN> (<SPAN class="attn">@VDATE@</SPAN>)
+			<B>mdocml</B> &#8211; mdoc macro compiler, current version @VERSION@ (@VDATE@)
+		</P>
+		<P CLASS="subhead">
+			Sources: <A HREF="/snapshots/mdocml.tar.gz">current</A>,
+			<A HREF="/cgi-bin/cvsweb/?cvsroot=mdocml">cvsweb</A>
+			(<A HREF="/snapshots/">archives</A>)
+			|
+			Binaries: <A
+			HREF="/binaries/mdocml-win32.zip">windows 32-bit</A>, <A
+			HREF="/binaries/mdocml-win64.zip">windows 64-bit</A>, <A
+			HREF="/binaries/mdocml-macosx.zip">mac os x</A>
+			(<A HREF="/binaries/">archives</A>)
 		</P>
 		<H1>
 			<A NAME="description">Description</A>
@@ -46,30 +56,6 @@
 			The <A HREF="mandocdb.8.html">mandocdb</A> utility is not yet linked to the build; please <A HREF="#contact">contact
 			us</A> if you plan to use it.
 		</P>
-		<TABLE WIDTH="100%" SUMMARY="Current Sources">
-			<COL WIDTH="200">
-			<COL>
-			<TBODY>
-				<TR>
-					<TD>Current</TD>
-					<TD>
-					<A HREF="/snapshots/mdocml.tar.gz">/snapshots/mdocml.tar.gz</A> (<A HREF="/snapshots/mdocml.md5">md5</A>)
-					</TD>
-				</TR>
-				<TR>
-					<TD>Archives</TD>
-					<TD>
-					<A HREF="/snapshots/">/snapshots/</A> 
-					</TD>
-				</TR>
-				<TR>
-					<TD>Online Repository</TD>
-					<TD>
-					<A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/?cvsroot=mdocml">cvsweb</A>
-					</TD>
-				</TR>
-			</TBODY>
-		</TABLE>
 		<H1>
 			<A NAME="binaries">Binaries</A>
 		</H1>
@@ -79,36 +65,6 @@
 			Windows binaries are compiled with <A CLASS="external" HREF="http://www.mingw.org">MingW</A> for the 32-bit (i686) and
 			64-bit (x86_64) architectures.
 		</P>
-		<TABLE WIDTH="100%" SUMMARY="Current Binaries">
-			<COL WIDTH="200">
-			<COL>
-			<TBODY>
-				<TR>
-					<TD>Windows 32-bit</TD>
-					<TD>
-					<A HREF="/binaries/mdocml-win32.zip">/binaries/mdocml-win32.zip</A>
-					</TD>
-				</TR>
-				<TR>
-					<TD>Windows 64-bit</TD>
-					<TD>
-					<A HREF="/binaries/mdocml-win64.zip">/binaries/mdocml-win64.zip</A>
-					</TD>
-				</TR>
-				<TR>
-					<TD>Mac OS X Universal Binary</TD>
-					<TD>
-					<A HREF="/binaries/mdocml-macosx.zip">/binaries/mdocml-macosx.zip</A>
-					</TD>
-				</TR>
-				<TR>
-					<TD>Archives</TD>
-					<TD>
-					<A HREF="/binaries/">/binaries/</A> 
-					</TD>
-				</TR>
-			</TBODY>
-		</TABLE>
 		<H1>
 			Downstream
 		</H1>
@@ -119,7 +75,7 @@
 			Please <A HREF="#contact">contact us</A> if you plan on maintaining a downstream version!
 		</P>
 		<TABLE WIDTH="100%" SUMMARY="Downstream Sources">
-			<COL WIDTH="200">
+			<COL WIDTH="175">
 			<COL>
 			<TBODY>
 				<TR>
@@ -161,127 +117,107 @@
 		</P>
 
 		<TABLE WIDTH="100%" SUMMARY="Documentation">
-			<COL WIDTH="200">
+			<COL WIDTH="175">
 			<COL>
 			<TBODY>
 				<TR>
 					<TD VALIGN="top"><A HREF="mandoc.1.html">mandoc(1)</A></TD>
 					<TD VALIGN="top">
 						format and display UNIX manuals
-						<SMALL>
 							(<A HREF="mandoc.1.txt">text</A> | 
 							<A HREF="mandoc.1.xhtml">xhtml</A> |
 							<A HREF="mandoc.1.pdf">pdf</A> |
-							<A HREF="mandoc.1.ps">postscript</A>)
-						</SMALL>
+							<A HREF="mandoc.1.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="mandocdb.8.html">mandocdb(8)</A></TD>
 					<TD VALIGN="top">
 						index UNIX manuals
-						<SMALL>
 							(<A HREF="mandocdb.8.txt">text</A> | 
 							<A HREF="mandocdb.8.xhtml">xhtml</A> |
 							<A HREF="mandocdb.8.pdf">pdf</A> |
-							<A HREF="mandocdb.8.ps">postscript</A>)
-						</SMALL>
+							<A HREF="mandocdb.8.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="preconv.1.html">preconv(1)</A></TD>
 					<TD VALIGN="top">
 						recode multibyte UNIX manuals
-						<SMALL>
 							(<A HREF="preconv.1.txt">text</A> | 
 							<A HREF="preconv.1.xhtml">xhtml</A> |
 							<A HREF="preconv.1.pdf">pdf</A> |
-							<A HREF="preconv.1.ps">postscript</A>)
-						</SMALL>
+							<A HREF="preconv.1.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="mandoc.3.html">mandoc(3)</A></TD>
 					<TD VALIGN="top">
 						mandoc macro compiler library
-						<SMALL>
 							(<A HREF="mandoc.3.txt">text</A> | 
 							<A HREF="mandoc.3.xhtml">xhtml</A> |
 							<A HREF="mandoc.3.pdf">pdf</A> |
-							<A HREF="mandoc.3.ps">postscript</A>)
-						</SMALL>
+							<A HREF="mandoc.3.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="man.7.html">man(7)</A></TD>
 					<TD VALIGN="top">
 						man language reference
-						<SMALL>
 							(<A HREF="man.7.txt">text</A> | 
 							<A HREF="man.7.xhtml">xhtml</A> |
 							<A HREF="man.7.pdf">pdf</A> |
-							<A HREF="man.7.ps">postscript</A>)
-						</SMALL>
+							<A HREF="man.7.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="eqn.7.html">eqn(7)</A></TD>
 					<TD VALIGN="top">
 						eqn-mandoc language reference
-						<SMALL>
 							(<A HREF="eqn.7.txt">text</A> | 
 							<A HREF="eqn.7.xhtml">xhtml</A> |
 							<A HREF="eqn.7.pdf">pdf</A> |
-							<A HREF="eqn.7.ps">postscript</A>)
-						</SMALL>
+							<A HREF="eqn.7.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="mandoc_char.7.html">mandoc_char(7)</A></TD>
 					<TD VALIGN="top">
 						mandoc special characters
-						<SMALL>
 							(<A HREF="mandoc_char.7.txt">text</A> | 
 							<A HREF="mandoc_char.7.xhtml">xhtml</A> |
 							<A HREF="mandoc_char.7.pdf">pdf</A> |
-							<A HREF="mandoc_char.7.ps">postscript</A>)
-						</SMALL>
+							<A HREF="mandoc_char.7.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="mdoc.7.html">mdoc(7)</A></TD>
 					<TD VALIGN="top">
 						mdoc language reference
-						<SMALL>
 							(<A HREF="mdoc.7.txt">text</A> | 
 							<A HREF="mdoc.7.xhtml">xhtml</A> |
 							<A HREF="mdoc.7.pdf">pdf</A> |
-							<A HREF="mdoc.7.ps">postscript</A>)
-						</SMALL>
+							<A HREF="mdoc.7.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="roff.7.html">roff(7)</A></TD>
 					<TD VALIGN="top">
 						roff-mandoc language reference
-						<SMALL>
 							(<A HREF="roff.7.txt">text</A> | 
 							<A HREF="roff.7.xhtml">xhtml</A> |
 							<A HREF="roff.7.pdf">pdf</A> |
-							<A HREF="roff.7.ps">postscript</A>)
-						</SMALL>
+							<A HREF="roff.7.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="tbl.7.html">tbl(7)</A></TD>
 					<TD VALIGN="top">
 						tbl-mandoc language reference
-						<SMALL>
 							(<A HREF="tbl.7.txt">text</A> | 
 							<A HREF="tbl.7.xhtml">xhtml</A> |
 							<A HREF="tbl.7.pdf">pdf</A> |
-							<A HREF="tbl.7.ps">postscript</A>)
-						</SMALL>
+							<A HREF="tbl.7.ps">ps</A>)
 					</TD>
 				</TR>
 			</TBODY>
@@ -297,7 +233,7 @@
 			this e-mail address">kris...</A>@bsd.lv.
 		</P>
 		<TABLE WIDTH="100%" SUMMARY="Mailing Lists">
-			<COL WIDTH="200">
+			<COL WIDTH="175">
 			<COL>
 			<TBODY>
 				<TR>
@@ -307,7 +243,7 @@
 					</TD>
 					<TD>
 						bug-reports, general questions, and announcements 
-						<SMALL>(<A HREF="/archives/discuss/summary.html">archive</A>)</SMALL>
+						(<A HREF="/archives/discuss/summary.html">archive</A>)
 					</TD>
 				</TR>
 				<TR>
@@ -317,7 +253,7 @@
 					</TD>
 					<TD>
 						patches and system discussions 
-						<SMALL>(<A HREF="/archives/tech/summary.html">archive</A>)</SMALL>
+						(<A HREF="/archives/tech/summary.html">archive</A>)
 					</TD>
 				</TR>
 				<TR>
@@ -327,7 +263,7 @@
 					</TD>
 					<TD>
 						source commit messages 
-						<SMALL>(<A HREF="/archives/source/summary.html">archive</A>)</SMALL>
+						(<A HREF="/archives/source/summary.html">archive</A>)
 					</TD>
 				</TR>
 			</TBODY>
