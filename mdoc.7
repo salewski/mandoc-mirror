@@ -30,11 +30,13 @@ language is used to format
 manuals.
 This reference document describes its syntax, structure, and
 usage.
-The reference implementation is
+The reference implementation for
+.Nm
+formatting is
 .Xr mandoc 1 ;
 the
 .Sx COMPATIBILITY
-section describes compatibility with other troff \-mdoc implementations.
+section describes compatibility with other implementations.
 .Pp
 An
 .Nm
@@ -42,7 +44,7 @@ document follows simple rules: lines beginning with the control
 character
 .Sq \&.
 are parsed for macros.
-Text lines, those not beginning with the control character, are
+Lines not beginning with the control character are
 interpreted within the scope of prior macros:
 .Bd -literal -offset indent
 \&.Sh Macro lines change control state.
@@ -52,21 +54,29 @@ Text lines are interpreted within the current state.
 .Nm
 documents may contain only graphable 7-bit ASCII characters, the space
 character, and, in certain circumstances, the tab character.
-.Pp
-If the first character of a text line is a space, that line is printed
-with a leading newline.
+The back-space character
+.Sq \e
+indicates the start of an escape sequence for
+.Sx Comments ,
+.Sx Predefined Strings ,
+and
+.Sx Special Characters .
 .Ss Comments
-Text following a
+Text following an escaped double-quote
 .Sq \e\*q ,
 whether in a macro or text line, is ignored to the end of
 line.
-A macro line with only a control character and comment escape,
-.Sq \&.\e\*q ,
+A macro line beginning with a control character and comment escape
+.Sq \&.\e\*q
 is also ignored.
-Macro lines with only a control character and optional whitespace are
+Furthermore,
+macro lines with only a control character and optional trailing
+whitespace are
 stripped from input.
 .Ss Special Characters
-Special characters may occur in both macro and text lines.
+Special characters are used to encode special glyphs and are rendered
+differently across output media.
+They may occur in both macro and text lines.
 Sequences begin with the escape character
 .Sq \e
 followed by either an open-parenthesis
@@ -76,24 +86,24 @@ for two-character sequences; an open-bracket
 for n-character sequences (terminated at a close-bracket
 .Sq \&] ) ;
 or a single one character sequence.
+.Pp
+Examples:
+.Bl -tag -width Ds -offset indent -compact
+.It \e(em
+em dash
+.It \ee
+backslash
+.El
+.Pp
 See
 .Xr mandoc_char 7
 for a complete list.
-Examples include
-.Sq \e(em
-.Pq em-dash
-and
-.Sq \ee
-.Pq back-slash .
 .Ss Text Decoration
 Terms may be text-decorated using the
 .Sq \ef
-escape followed by an indicator: B (bold), I (italic), R (Roman), or P
-(revert to previous mode):
-.Pp
-.Dl \efBbold\efR \efIitalic\efP
-.Pp
-A numerical representation 3, 2, or 1 (bold, italic, and Roman,
+escape followed by an indicator: B (bold), I (italic), R (regular), or P
+(revert to previous mode).
+A numerical representation 3, 2, or 1 (bold, italic, and regular,
 respectively) may be used instead.
 If a macro opens a font scope after calling
 .Sq \ef ,
@@ -105,19 +115,23 @@ mode will be restored upon exiting the
 .Sx \&Bf
 scope.
 .Pp
-Note this form is
+Examples:
+.Bl -tag -width Ds -offset indent -compact
+.It \efBbold\efR
+write in bold, then switch to regular
+.It \efIitalic\efP
+write in italic, then return to previous
+.El
+.Pp
+Text decoration is
 .Em not
 recommended for
 .Nm ,
 which encourages semantic annotation.
 .Ss Predefined Strings
-Historically,
-troff
-also defined a set of package-specific
-.Dq predefined strings ,
-which, like
+Predefined strings, like
 .Sx Special Characters ,
-mark special output characters and strings by way of input codes.
+mark special output glyphs.
 Predefined strings are escaped with the slash-asterisk,
 .Sq \e* :
 single-character
@@ -126,29 +140,38 @@ two-character
 .Sq \e*(XX ,
 and N-character
 .Sq \e*[N] .
-See
-.Xr mandoc_char 7
-for a complete list.
-Examples include
-.Sq \e*(Am
-.Pq ampersand
-and
-.Sq \e*(Ba
-.Pq vertical bar .
+.Pp
+Examples:
+.Bl -tag -width Ds -offset indent -compact
+.It \e*(Am
+ampersand
+.It \e*(Ba
+vertical bar
+.El
+.Pp
+These strings are set using
+.Xr roff 7 ,
+although
+.Nm
+consists of several pre-set escapes listed in
+.Xr mandoc_char 7 .
 .Ss Whitespace
 Whitespace consists of the space character.
-In text lines, whitespace is preserved within a line; unescaped
-trailing spaces are stripped from input (unless in a literal context).
-Blank text lines, which may include whitespace, are only permitted
-within literal contexts.
+In text lines, whitespace is preserved within a line.
+In macro lines, whitespace delimits arguments and is discarded.
 .Pp
-In general, trailing whitespace on input lines is discouraged
-for reasons of clarity and portability.
+Unescaped trailing spaces are stripped from text line input unless in a
+literal context.
+In general, trailing whitespace on any input line is discouraged for
+reasons of portability.
 In the rare case that a blank character is needed at the end of an
 input line, it may be forced by
 .Sq \e\ \e& .
 .Pp
-In macro lines, whitespace delimits arguments and is discarded.
+Blank text lines, which may include whitespace, are only permitted
+within literal contexts.
+If the first character of a text line is a space, that line is printed
+with a leading newline.
 .Ss Quotation
 Macro arguments may be quoted with double-quotes; in this case,
 whitespace within the quotes is retained as part of the argument.
@@ -184,16 +207,12 @@ Thus, the following produces
 .Pp
 In text lines, quotes are regarded as opaque text.
 .Ss Scaling Widths
-Many macros support scaled widths for their arguments, such as
-stipulating a two-inch list indentation with the following:
-.Bd -literal -offset indent
-\&.Bl -tag -width 2i
-.Ed
-.Pp
-The syntax for scaled widths is
+Many macros support scaled widths for their arguments.
+The syntax for a scaled width is
 .Sq Li [+-]?[0-9]*.[0-9]*[:unit:] ,
 where a decimal must be preceded or proceeded by at least one digit.
 Negative numbers, while accepted, are truncated to zero.
+.Pp
 The following scaling units are accepted:
 .Pp
 .Bl -tag -width Ds -offset indent -compact
@@ -235,10 +254,19 @@ or
 is necessarily non-portable across output media.
 See
 .Sx COMPATIBILITY .
+.Pp
+Examples:
+.Bl -tag -width Ds -offset indent -compact
+.It \&.Bl -tag -width 2i
+two-inch tagged list indentation
+.Pq see Sx \&Bl
+.It \&.br 2v
+two vertical spaces
+.Pq see Sx \&br
+.El
 .Ss Sentence Spacing
-When composing a manual, make sure that sentences end at the end of
-a line.
-By doing so, front-ends will be able to apply the proper amount of
+Sentences should terminate at the end of an input line.
+By doing this, a formatter will be able to apply the proper amount of
 spacing after the end of sentence (unescaped) period, exclamation mark,
 or question mark followed by zero or more non-sentence closing
 delimiters
@@ -251,10 +279,14 @@ delimiters
 .Pp
 The proper spacing is also intelligently preserved if a sentence ends at
 the boundary of a macro line.
-For example:
 .Pp
-.Dl \&.Xr mandoc 1 \&.
-.Dl \&.Fl T \&Ns \&Cm ascii \&.
+Examples:
+.Bd -literal -offset indent -compact
+Do not end sentences mid-line like this.  Instead,
+end a sentence like this.
+A macro would end like this:
+\&.Xr mandoc 1 \&.
+.Ed
 .Sh MANUAL STRUCTURE
 A well-formed
 .Nm
