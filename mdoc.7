@@ -73,6 +73,14 @@ Furthermore,
 macro lines with only a control character and optional trailing
 whitespace are
 stripped from input.
+.Pp
+Examples:
+.Bd -literal -offset indent -compact
+\&.\e\*q This is a comment line.
+\&.\e\*q The next line is ignored:
+\&.
+\&.Em Emphasis \e\*q This is also a comment.
+.Ed
 .Ss Special Characters
 Special characters are used to encode special glyphs and are rendered
 differently across output media.
@@ -260,9 +268,9 @@ Examples:
 .It \&.Bl -tag -width 2i
 two-inch tagged list indentation
 .Pq see Sx \&Bl
-.It \&.br 2v
+.It \&.sp 2v
 two vertical spaces
-.Pq see Sx \&br
+.Pq see Sx \&sp
 .El
 .Ss Sentence Spacing
 Sentences should terminate at the end of an input line.
