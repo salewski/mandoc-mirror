@@ -46,9 +46,9 @@
 		<P>
 			<I>Disambiguation</I>: <SPAN CLASS="nm">mdocml</SPAN> is often referred to by its installed binary, <Q>mandoc</Q>.
 		</P>
-		<H1>
+		<H2>
 			<A NAME="sources">Sources</A>
-		</H1>
+		</H2>
 		<P>
 			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any modern system.
 			To build and install into <I>/usr/local/</I>, just run <CODE>make install</CODE>.
@@ -56,18 +56,18 @@
 			The <A HREF="mandocdb.8.html">mandocdb</A> utility is not yet linked to the build; please <A HREF="#contact">contact
 			us</A> if you plan to use it.
 		</P>
-		<H1>
+		<H2>
 			<A NAME="binaries">Binaries</A>
-		</H1>
+		</H2>
 		<P>
 			Binary archives consist of pre-compiled binaries, manuals, and other necessary files.
 			Universal (Mac OS X) binaries are compiled for the PCC, i386, and x86_64 architectures.
 			Windows binaries are compiled with <A CLASS="external" HREF="http://www.mingw.org">MingW</A> for the 32-bit (i686) and
 			64-bit (x86_64) architectures.
 		</P>
-		<H1>
+		<H2>
 			Downstream
-		</H1>
+		</H2>
 		<P>
 			Several systems come bundled with <SPAN CLASS="nm">mdocml</SPAN> utilities.
 			If your system does not appear below, the maintainers have not contacted me and it should not be considered
