@@ -36,7 +36,6 @@
 /* FIXME: have PD set the default vspace width. */
 
 #define	INDENT		  5
-#define	HALFINDENT	  3
 
 #define	MAN_ARGS	  const struct man_meta *m, \
 			  const struct man_node *n, \

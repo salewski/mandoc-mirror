@@ -34,7 +34,6 @@
 #include "main.h"
 
 #define	INDENT		 5
-#define	HALFINDENT	 3
 
 #define	MDOC_ARGS	  const struct mdoc_meta *m, \
 			  const struct mdoc_node *n, \
@@ -353,10 +352,8 @@ a2offs(const char *p, struct roffsu *su)
 		SCALE_HS_INIT(su, INDENT);
 	else if (0 == strcmp(p, "indent-two"))
 		SCALE_HS_INIT(su, INDENT * 2);
-	else if ( ! a2roffsu(p, su, SCALE_MAX)) {
-		su->unit = SCALE_BU;
-		su->scale = html_strlen(p);
-	}
+	else if ( ! a2roffsu(p, su, SCALE_MAX))
+		SCALE_HS_INIT(su, html_strlen(p));
 }
 
 
