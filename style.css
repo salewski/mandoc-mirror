@@ -9,7 +9,7 @@
  * See mdoc(7) and man(7) for macro explanations.
  */
 
-html		{ max-width: 880px; }
+html		{ max-width: 880px; margin-left: 1em; }
 body		{ font-size: smaller; font-family: Helvetica,Arial,sans-serif; }
 h1		{ margin-bottom: 1ex; font-size: 110%; margin-left: -4ex; } /* Section header (Sh, SH). */
 h2		{ margin-bottom: 1ex; font-size: 105%; margin-left: -2ex; } /* Sub-section header (Ss, SS). */
@@ -38,6 +38,7 @@ i		{ } /* Italic: BI, IB, I, (implicit). */
 b		{ } /* Bold: SB, BI, IB, BR, RB, B, (implicit). */
 .symb		{ font-style: normal; font-weight: bold; } /* Symbolic: Sy, Ms, Bf -symbolic. */
 small		{ } /* Small: SB, SM. */
+.lit		{ font-style: normal; font-weight: normal; font-family: monospace; } /* Literal: Dl, Li, Bf -literal, Bl -literal, Bl -unfilled. */
 
 /* Block modes. */
 
@@ -64,7 +65,6 @@ i.ftype		{ font-weight: normal; } /* Function types (Ft, Fn). */
 b.includes	{ font-style: normal; } /* Header includes (In). */
 span.lib	{ } /* Library (Lb). */
 i.link-sec	{ font-weight: normal; } /* Section links (Sx). */
-code.lit	{ font-style: normal; font-weight: normal; } /* Literal: Dl, Li, Bf -literal, Bl -literal, Bl -unfilled. */
 b.macro		{ font-style: normal; } /* Macro-ish thing (Fd). */
 b.name		{ font-style: normal; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
