@@ -39,15 +39,15 @@ language, instead.
 .Pp
 A
 .Nm
-document follows simple rules:  lines beginning with the control
+document follows simple rules: lines beginning with the control
 character
 .Sq \&.
 are parsed for macros.
-Other lines are interpreted within the scope of
-prior macros:
+Lines not beginning with the control character are
+interpreted within the scope of prior macros:
 .Bd -literal -offset indent
 \&.SH Macro lines change control state.
-Other lines are interpreted within the current state.
+Text lines are interpreted within the current state.
 .Ed
 .Sh LANGUAGE SYNTAX
 .Nm
@@ -62,11 +62,11 @@ and
 .Sx Special Characters .
 .Ss Comments
 Text following an escaped double-quote
-.Sq \e\*q ,
+.Sq \e\(dq ,
 whether in a macro or text line, is ignored to the end of
 line.
 A macro line beginning with a control character and comment escape
-.Sq \&.\e\*q
+.Sq \&.\e\(dq
 is also ignored.
 Furthermore,
 macro lines with only a control character and optional trailing
@@ -75,10 +75,10 @@ stripped from input.
 .Pp
 Examples:
 .Bd -literal -offset indent -compact
-\&.\e\*q This is a comment line.
-\&.\e\*q The next line is ignored:
+\&.\e\(dq This is a comment line.
+\&.\e\(dq The next line is ignored:
 \&.
-\&.Em Emphasis \e\*q This is also a comment.
+\&.Em Emphasis \e\(dq This is also a comment.
 .Ed
 .Ss Special Characters
 Special characters are used to encode special glyphs and are rendered
@@ -96,10 +96,10 @@ or a single one character sequence.
 .Pp
 Examples:
 .Bl -tag -width Ds -offset indent -compact
-.It \e(em
-em dash
-.It \ee
-backslash
+.It Li \e(em
+Two-letter em dash escape.
+.It Li \ee
+One-letter backslash escape.
 .El
 .Pp
 See
@@ -109,7 +109,7 @@ for a complete list.
 Terms may be text-decorated using the
 .Sq \ef
 escape followed by an indicator: B (bold), I (italic), R (regular), or P
-(revert to previous mode):
+(revert to previous mode).
 A numerical representation 3, 2, or 1 (bold, italic, and regular,
 respectively) may be used instead.
 A text decoration is only valid, if specified in free-form text, until
@@ -125,10 +125,10 @@ attribute is forgotten when entering or exiting a macro block.
 .Pp
 Examples:
 .Bl -tag -width Ds -offset indent -compact
-.It \efBbold\efR
-write in bold, then switch to regular
-.It \efIitalic\efP
-write in italic, then return to previous
+.It Li \efBbold\efR
+Write in bold, then switch to regular font mode.
+.It Li \efIitalic\efP
+Write in italic, then return to previous font mode.
 .El
 .Ss Predefined Strings
 Predefined strings, like
@@ -145,10 +145,10 @@ and N-character
 .Pp
 Examples:
 .Bl -tag -width Ds -offset indent -compact
-.It \e*(Am
-ampersand
-.It \e*(Ba
-vertical bar
+.It Li \e*(Am
+Two-letter ampersand predefined string.
+.It Li \e*q
+One-letter double-quote predefined string.
 .El
 .Pp
 These strings are set using
@@ -170,25 +170,41 @@ In the rare case that a blank character is needed at the end of an
 input line, it may be forced by
 .Sq \e\ \e& .
 .Pp
+In general, space characters can be rendered as literal
+characters by using non-breaking space escapes or
+.Sx Quotation .
 If the first character of a text line is a space, that line is printed
 with a leading newline.
 .Ss Quotation
-Macro arguments may be quoted with double-quotes; in this case,
-whitespace within the quotes is retained as part of the argument.
+Macro arguments may be quoted with double-quotes to so that the
+enclosed text is one literal term.
+Quoted text, even if whitespace or if it would cause a macro invocation
+when unquoted, is considered literal text.
 .Pp
 A quoted argument begins with a double-quote preceded by whitespace.
 The next double-quote not pairwise adjacent to another double-quote
 terminates the literal, regardless of surrounding whitespace.
 .Pp
-In unquoted arguments, space characters can alternatively be included
-by preceding them with a backslash
-.Pq Sq \e\~ ,
-but quoting is usually better for clarity.
-.Pp
-Note that any quoted text, even if it would cause a macro invocation
-when unquoted, is considered literal text.
-.Pp
-In text lines, quotes are regarded as opaque text.
+Examples:
+.Bl -tag -width Ds -offset indent -compact
+.It Li .BR a \(dqb c\(dq d
+Group arguments
+.Qq b c
+into one un-bolded argument.
+If unspecified,
+.Qq a
+and
+.Qq c
+will be in bold,
+.Qq b
+and
+.Qq d
+in regular font mode.
+Furthermore, will be preserved between
+.Qq b
+and
+.Qq c .
+.El
 .Ss Scaling Widths
 Many macros support scaled widths for their arguments.
 The syntax for a scaled width is
@@ -294,36 +310,36 @@ file for a utility
 \&.TH PROGNAME 1 2009-10-10
 \&.SH NAME
 \efBprogname\efR \e(en a description goes here
-\&.\e\*q .SH LIBRARY
-\&.\e\*q For sections 2 & 3 only.
-\&.\e\*q Not used in OpenBSD.
+\&.\e\(dq .SH LIBRARY
+\&.\e\(dq For sections 2 & 3 only.
+\&.\e\(dq Not used in OpenBSD.
 \&.SH SYNOPSIS
 \efBprogname\efR [\efB\e-options\efR] arguments...
 \&.SH DESCRIPTION
 The \efBfoo\efR utility processes files...
-\&.\e\*q .SH IMPLEMENTATION NOTES
-\&.\e\*q Not used in OpenBSD.
-\&.\e\*q .SH RETURN VALUES
-\&.\e\*q For sections 2, 3, & 9 only.
-\&.\e\*q .SH ENVIRONMENT
-\&.\e\*q For sections 1, 6, 7, & 8 only.
-\&.\e\*q .SH FILES
-\&.\e\*q .SH EXIT STATUS
-\&.\e\*q For sections 1, 6, & 8 only.
-\&.\e\*q .SH EXAMPLES
-\&.\e\*q .SH DIAGNOSTICS
-\&.\e\*q For sections 1, 4, 6, 7, & 8 only.
-\&.\e\*q .SH ERRORS
-\&.\e\*q For sections 2, 3, & 9 only.
-\&.\e\*q .SH SEE ALSO
-\&.\e\*q .BR foo ( 1 )
-\&.\e\*q .SH STANDARDS
-\&.\e\*q .SH HISTORY
-\&.\e\*q .SH AUTHORS
-\&.\e\*q .SH CAVEATS
-\&.\e\*q .SH BUGS
-\&.\e\*q .SH SECURITY CONSIDERATIONS
-\&.\e\*q Not used in OpenBSD.
+\&.\e\(dq .SH IMPLEMENTATION NOTES
+\&.\e\(dq Not used in OpenBSD.
+\&.\e\(dq .SH RETURN VALUES
+\&.\e\(dq For sections 2, 3, & 9 only.
+\&.\e\(dq .SH ENVIRONMENT
+\&.\e\(dq For sections 1, 6, 7, & 8 only.
+\&.\e\(dq .SH FILES
+\&.\e\(dq .SH EXIT STATUS
+\&.\e\(dq For sections 1, 6, & 8 only.
+\&.\e\(dq .SH EXAMPLES
+\&.\e\(dq .SH DIAGNOSTICS
+\&.\e\(dq For sections 1, 4, 6, 7, & 8 only.
+\&.\e\(dq .SH ERRORS
+\&.\e\(dq For sections 2, 3, & 9 only.
+\&.\e\(dq .SH SEE ALSO
+\&.\e\(dq .BR foo ( 1 )
+\&.\e\(dq .SH STANDARDS
+\&.\e\(dq .SH HISTORY
+\&.\e\(dq .SH AUTHORS
+\&.\e\(dq .SH CAVEATS
+\&.\e\(dq .SH BUGS
+\&.\e\(dq .SH SECURITY CONSIDERATIONS
+\&.\e\(dq Not used in OpenBSD.
 .Ed
 .Pp
 The sections in a
