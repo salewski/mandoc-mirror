@@ -98,9 +98,9 @@ or a single one character sequence.
 Examples:
 .Bl -tag -width Ds -offset indent -compact
 .It Li \e(em
-em dash
+Two-letter em dash escape.
 .It Li \ee
-backslash
+One-letter backslash escape.
 .El
 .Pp
 See
@@ -126,9 +126,9 @@ scope.
 Examples:
 .Bl -tag -width Ds -offset indent -compact
 .It Li \efBbold\efR
-write in bold, then switch to regular
+Write in bold, then switch to regular font mode.
 .It Li \efIitalic\efP
-write in italic, then return to previous
+Write in italic, then return to previous font mode.
 .El
 .Pp
 Text decoration is
@@ -152,9 +152,9 @@ and N-character
 Examples:
 .Bl -tag -width Ds -offset indent -compact
 .It Li \e*(Am
-ampersand
-.It Li \e*(Ba
-vertical bar
+Two-letter ampersand predefined string.
+.It Li \e*q
+One-letter double-quote predefined string.
 .El
 .Pp
 These strings are set using
@@ -197,15 +197,21 @@ terminates the literal, regardless of surrounding whitespace.
 Examples:
 .Bl -tag -width Ds -offset indent -compact
 .It Li .Fn strlen \(dqconst char *s\(dq
-groups
+Group arguments
 .Qq const char *s
-into one term
-.Pq see Sx \&Fn
+into one functinon argument.
+If unspecified,
+.Qq const ,
+.Qq char ,
+and
+.Qq *s
+would be considered separate arguments.
+.Pq See Sx \&Fn .
 .It Li .Op \(dqFl a\(dq
-considers
+Consider
 .Qq \&Fl a
-as literal text
-.Pq see Sx \&Op , \&Fl
+as literal text instead of a flag macro.
+.Pq Aee Sx \&Op , \&Fl .
 .El
 .Ss Scaling Widths
 Many macros support scaled widths for their arguments.
