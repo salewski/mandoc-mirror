@@ -2219,7 +2219,11 @@ mdoc_quote_pre(MDOC_ARGS)
 		print_text(h, "(");
 		break;
 	case (MDOC_Ql):
-		/* FALLTHROUGH */
+		print_text(h, "\\(oq");
+		h->flags |= HTML_NOSPACE;
+		PAIR_CLASS_INIT(&tag, "lit");
+		print_otag(h, TAG_CODE, 1, &tag);
+		break;
 	case (MDOC_So):
 		/* FALLTHROUGH */
 	case (MDOC_Sq):

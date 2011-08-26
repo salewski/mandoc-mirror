@@ -38,7 +38,7 @@ i		{ } /* Italic: BI, IB, I, (implicit). */
 b		{ } /* Bold: SB, BI, IB, BR, RB, B, (implicit). */
 .symb		{ font-style: normal; font-weight: bold; } /* Symbolic: Sy, Ms, Bf -symbolic. */
 small		{ } /* Small: SB, SM. */
-.lit		{ font-style: normal; font-weight: normal; font-family: monospace; } /* Literal: Dl, Li, Bf -literal, Bl -literal, Bl -unfilled. */
+.lit		{ font-style: normal; font-weight: normal; font-family: monospace; } /* Literal: Dl, Li, Ql, Bf -literal, Bl -literal, Bl -unfilled. */
 
 /* Block modes. */
 
