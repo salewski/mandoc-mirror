@@ -39,9 +39,10 @@ Its arguments are as follows:
 Output a word list.
 This outputs each word of text on its own line.
 A
-.Qq word
-starts with at least two letters and consists of at least three letters
-total.
+.Qq word ,
+in this case, refers to whitespace-delimited terms beginning with at
+least two letters after opening punctuation and not consisting of any
+escape sequences.
 .It Ar
 The input files.
 .El
@@ -51,12 +52,13 @@ If
 is not provided,
 .Nm
 accepts standard input.
+If a document is not well-formed, it is skipped.
 .Pp
 By default,
 .Nm
 parses its input and outputs only text nodes, preserving line column
 position.
-If a document is not well-formed, it is skipped.
+Escape sequences are omitted from the output.
 .Pp
 The
 .Fl i ,
