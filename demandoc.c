@@ -19,6 +19,7 @@
 #endif
 
 #include <assert.h>
+#include <ctype.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,11 +30,11 @@
 #include "mdoc.h"
 #include "mandoc.h"
 
-static	void	 pline(int, int *, int *);
-static	void	 pman(const struct man_node *, int *, int *);
-static	void	 pmandoc(struct mparse *, int, const char *);
-static	void	 pmdoc(const struct mdoc_node *, int *, int *);
-static	void	 pstring(const char *, int, int *);
+static	void	 pline(int, int *, int *, int);
+static	void	 pman(const struct man_node *, int *, int *, int);
+static	void	 pmandoc(struct mparse *, int, const char *, int);
+static	void	 pmdoc(const struct mdoc_node *, int *, int *, int);
+static	void	 pstring(const char *, int, int *, int);
 static	void	 usage(void);
 
 static	const char	 *progname;
@@ -42,7 +43,7 @@ int
 main(int argc, char *argv[])
 {
 	struct mparse	*mp;
-	int		 ch, i;
+	int		 ch, i, list;
 	extern int	 optind;
 
 	progname = strrchr(argv[0], '/');
@@ -52,9 +53,21 @@ main(int argc, char *argv[])
 		++progname;
 
 	mp = NULL;
+	list = 0;
 
-	while (-1 != (ch = getopt(argc, argv, "")))
+	while (-1 != (ch = getopt(argc, argv, "ikm:pw")))
 		switch (ch) {
+		case ('i'):
+			/* FALLTHROUGH */
+		case ('k'):
+			/* FALLTHROUGH */
+		case ('m'):
+			/* FALLTHROUGH */
+		case ('p'):
+			break;
+		case ('w'):
+			list = 1;
+			break;
 		default:
 			usage();
 			return((int)MANDOCLEVEL_BADARG);
@@ -67,11 +80,11 @@ main(int argc, char *argv[])
 	assert(mp);
 
 	if (0 == argc)
-		pmandoc(mp, STDIN_FILENO, "<stdin>");
+		pmandoc(mp, STDIN_FILENO, "<stdin>", list);
 
 	for (i = 0; i < argc; i++) {
 		mparse_reset(mp);
-		pmandoc(mp, -1, argv[i]);
+		pmandoc(mp, -1, argv[i], list);
 	}
 
 	mparse_free(mp);
@@ -82,11 +95,11 @@ static void
 usage(void)
 {
 
-	fprintf(stderr, "usage: %s [files...]\n", progname);
+	fprintf(stderr, "usage: %s [-w] [files...]\n", progname);
 }
 
 static void
-pmandoc(struct mparse *mp, int fd, const char *fn)
+pmandoc(struct mparse *mp, int fd, const char *fn, int list)
 {
 	struct mdoc	*mdoc;
 	struct man	*man;
@@ -102,9 +115,9 @@ pmandoc(struct mparse *mp, int fd, const char *fn)
 	col = 0;
 
 	if (mdoc) 
-		pmdoc(mdoc_node(mdoc), &line, &col);
+		pmdoc(mdoc_node(mdoc), &line, &col, list);
 	else if (man)
-		pman(man_node(man), &line, &col);
+		pman(man_node(man), &line, &col, list);
 	else
 		return;
 
@@ -115,7 +128,7 @@ pmandoc(struct mparse *mp, int fd, const char *fn)
  * Strip the escapes out of a string, emitting the results.
  */
 static void
-pstring(const char *p, int col, int *colp)
+pstring(const char *p, int col, int *colp, int list)
 {
 	enum mandoc_esc	 esc;
 
@@ -124,57 +137,54 @@ pstring(const char *p, int col, int *colp)
 		(*colp)++;
 	}
 
-	while ('\0' != *p) {
+	while ('\0' != *p) 
 		if ('\\' == *p) {
 			p++;
 			esc = mandoc_escape(&p, NULL, NULL);
 			if (ESCAPE_ERROR == esc)
-				return;
+				break;
 		} else {
 			putchar((unsigned char )*p++);
 			(*colp)++;
 		}
-	}
 }
 
-/*
- * Emit lines until we're in sync with our input.
- */
 static void
-pline(int line, int *linep, int *col)
+pline(int line, int *linep, int *col, int list)
 {
 
 	while (*linep < line) {
 		putchar('\n');
 		(*linep)++;
 	}
+
 	*col = 0;
 }
 
 static void
-pmdoc(const struct mdoc_node *p, int *line, int *col)
+pmdoc(const struct mdoc_node *p, int *line, int *col, int list)
 {
 
 	for ( ; p; p = p->next) {
 		if (MDOC_LINE & p->flags)
-			pline(p->line, line, col);
+			pline(p->line, line, col, list);
 		if (MDOC_TEXT == p->type)
-			pstring(p->string, p->pos, col);
+			pstring(p->string, p->pos, col, list);
 		if (p->child) 
-			pmdoc(p->child, line, col);
+			pmdoc(p->child, line, col, list);
 	}
 }
 
 static void
-pman(const struct man_node *p, int *line, int *col)
+pman(const struct man_node *p, int *line, int *col, int list)
 {
 
 	for ( ; p; p = p->next) {
 		if (MAN_LINE & p->flags)
-			pline(p->line, line, col);
+			pline(p->line, line, col, list);
 		if (MAN_TEXT == p->type)
-			pstring(p->string, p->pos, col);
+			pstring(p->string, p->pos, col, list);
 		if (p->child) 
-			pman(p->child, line, col);
+			pman(p->child, line, col, list);
 	}
 }
