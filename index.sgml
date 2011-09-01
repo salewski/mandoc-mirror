@@ -39,8 +39,9 @@
 			<SPAN CLASS="nm">mdocml</SPAN> consists of the <A HREF="mandoc.3.html">libmandoc</A> validating compiler and <A
 			HREF="mandoc.1.html">mandoc</A>, which interfaces with the compiler library to format output for UNIX terminals (with
 			support for wide-character locales), XHTML, HTML, PostScript, and PDF.  
-			It also includes <A HREF="preconv.1.html">preconv</A>, for recoding multibyte manuals; and <A
-			HREF="mandocdb.8.html">mandocdb</A>, for indexing manuals.
+			It also includes <A HREF="preconv.1.html">preconv</A>, for recoding multibyte manuals; 
+			<A HREF="demandoc.1.html">demandoc</A>, for emitting only text parts of manuals;
+			and <A HREF="mandocdb.8.html">mandocdb</A>, for indexing manuals.
 			It is a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv</A> project.  
 		</P>
 		<P>
@@ -131,13 +132,13 @@
 					</TD>
 				</TR>
 				<TR>
-					<TD VALIGN="top"><A HREF="mandocdb.8.html">mandocdb(8)</A></TD>
+					<TD VALIGN="top"><A HREF="demandoc.1.html">demandoc(1)</A></TD>
 					<TD VALIGN="top">
-						index UNIX manuals
-							(<A HREF="mandocdb.8.txt">text</A> | 
-							<A HREF="mandocdb.8.xhtml">xhtml</A> |
-							<A HREF="mandocdb.8.pdf">pdf</A> |
-							<A HREF="mandocdb.8.ps">ps</A>)
+						emit only text of UNIX manuals
+							(<A HREF="demandoc.1.txt">text</A> | 
+							<A HREF="demandoc.1.xhtml">xhtml</A> |
+							<A HREF="demandoc.1.pdf">pdf</A> |
+							<A HREF="demandoc.1.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
@@ -220,6 +221,16 @@
 							<A HREF="tbl.7.ps">ps</A>)
 					</TD>
 				</TR>
+				<TR>
+					<TD VALIGN="top"><A HREF="mandocdb.8.html">mandocdb(8)</A></TD>
+					<TD VALIGN="top">
+						index UNIX manuals
+							(<A HREF="mandocdb.8.txt">text</A> | 
+							<A HREF="mandocdb.8.xhtml">xhtml</A> |
+							<A HREF="mandocdb.8.pdf">pdf</A> |
+							<A HREF="mandocdb.8.ps">ps</A>)
+					</TD>
+				</TR>
 			</TBODY>
 		</TABLE>
 		<H1>
@@ -272,6 +283,13 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
+			xx-xx-2011: version 1.11.x
+		</P>
+		<P>
+			Added <A HREF="demandoc.1.html">demandoc</A> utility for stripping away macros and escapes.  This replaces the
+			historical <CODE>deroff</CODE> utility.
+		</P>
+		<P CLASS="news">
 			16-08-2011: version 1.11.6
 		</P>
 		<P>
@@ -294,15 +312,6 @@
 		<P>
 			This is also the first release featuring a distributed Windows binary, available at <A
 			HREF="/binaries/mdocml-win32.zip">/binaries/mdocml-win32.zip</A>.
-		</P>
-		<P CLASS="news">
-			12-07-2011: version 1.11.4
-		</P>
-		<P>
-			Bug-fixes and clean-ups across all systems, especially in <INS><A HREF="mandocdb.8.html">mandocdb</A></INS> <DEL>makewhatis</DEL> (note: still not
-			connected to the general build and must be compiled with <INS><CODE>make mandocdb</CODE></INS> <DEL><CODE>make makewhatis</CODE></DEL>) and the <A
-			HREF="man.7.html">man</A> parser.  This release was significantly assisted by participants in <A CLASS="external"
-			HREF="http://www.openbsd.org">OpenBSD</A>'s c2k11.  Thanks!
 		</P>
 		<P>
 			See <A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/index.sgml?cvsroot=mdocml">cvsweb</A> for

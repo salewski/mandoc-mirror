@@ -37,7 +37,7 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 # Linux needs -ldb to compile mandocdb.
 #DBLIB		 = -ldb
 
-all: mandoc preconv
+all: mandoc preconv demandoc
 
 SRCS		 = Makefile \
 		   arch.c \
@@ -51,6 +51,8 @@ SRCS		 = Makefile \
 		   compat_strlcpy.c \
 		   config.h.post \
 		   config.h.pre \
+		   demandoc.c \
+		   demandoc.1 \
 		   eqn.7 \
 		   eqn.c \
 		   eqn_html.c \
@@ -258,7 +260,17 @@ PRECONV_LNS	 = preconv.ln
 
 $(PRECONV_OBJS) $(PRECONV_LNS): config.h
 
-INDEX_MANS	 = mandoc.1.html \
+DEMANDOC_OBJS	 = demandoc.o
+DEMANDOC_LNS	 = demandoc.ln
+
+$(DEMANDOC_OBJS) $(DEMANDOC_LNS): config.h
+
+INDEX_MANS	 = demandoc.1.html \
+		   demandoc.1.xhtml \
+		   demandoc.1.ps \
+		   demandoc.1.pdf \
+		   demandoc.1.txt \
+		   mandoc.1.html \
 		   mandoc.1.xhtml \
 		   mandoc.1.ps \
 		   mandoc.1.pdf \
@@ -320,7 +332,7 @@ INDEX_OBJS	 = $(INDEX_MANS) \
 
 www: index.html
 
-lint: llib-llibmandoc.ln llib-lmandoc.ln llib-lpreconv.ln
+lint: llib-llibmandoc.ln llib-lmandoc.ln llib-lpreconv.ln llib-ldemandoc.ln
 
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS)
@@ -329,6 +341,8 @@ clean:
 	rm -f llib-lmandocdb.ln $(MANDOCDB_LNS)
 	rm -f preconv $(PRECONV_OBJS)
 	rm -f llib-lpreconv.ln $(PRECONV_LNS)
+	rm -f demandoc $(DEMANDOC_OBJS)
+	rm -f llib-ldemandoc.ln $(DEMANDOC_LNS)
 	rm -f mandoc $(MANDOC_OBJS)
 	rm -f llib-lmandoc.ln $(MANDOC_LNS)
 	rm -f config.h config.log $(COMPAT_OBJS) $(COMPAT_LNS)
@@ -349,10 +363,10 @@ install: all
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
 	mkdir -p $(DESTDIR)$(MANDIR)/man8
-	$(INSTALL_PROGRAM) mandoc preconv $(DESTDIR)$(BINDIR)
+	$(INSTALL_PROGRAM) mandoc preconv demandoc $(DESTDIR)$(BINDIR)
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
 	$(INSTALL_LIB) man.h mdoc.h mandoc.h $(DESTDIR)$(INCLUDEDIR)
-	$(INSTALL_MAN) mandoc.1 preconv.1 $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL_MAN) mandoc.1 preconv.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) mandoc.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
@@ -391,6 +405,12 @@ preconv: $(PRECONV_OBJS)
 
 llib-lpreconv.ln: $(PRECONV_LNS)
 	$(LINT) $(LINTFLAGS) -Cpreconv $(PRECONV_LNS)
+
+demandoc: $(DEMANDOC_OBJS) libmandoc.a
+	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a
+
+llib-ldemandoc.ln: $(DEMANDOC_LNS)
+	$(LINT) $(LINTFLAGS) -Cdemandoc $(DEMANDOC_LNS)
 
 mdocml.md5: mdocml.tar.gz
 	md5 mdocml.tar.gz >$@
