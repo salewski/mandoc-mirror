@@ -237,10 +237,10 @@
 			<A NAME="contact">Contact</A>
 		</H1>
 		<P>
-			Use the mailing lists for bug-reports, patches, questions, etc. (these require subscription).  Please check the
+			Use the mailing lists for bug-reports, patches, questions, etc.  Please check the
 			<A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/TODO?cvsroot=mdocml">TODO</A> for known issues
-			before posting.  Beyond that, contact Kristaps at <A
-			HREF="http://mailhide.recaptcha.net/d?k=01M6h_w7twDp58ZgH57eWC_w==&amp;c=Q2DBUt401ePlSeupJFrq_Q==" TITLE="Reveal
+			before posting.  All lists are subscription-only: send a blank e-mail to the listed address to subscribe.  Beyond that,
+			contact Kristaps at <A HREF="http://mailhide.recaptcha.net/d?k=01M6h_w7twDp58ZgH57eWC_w==&amp;c=Q2DBUt401ePlSeupJFrq_Q==" TITLE="Reveal
 			this e-mail address">kris...</A>@bsd.lv.
 		</P>
 		<TABLE WIDTH="100%" SUMMARY="Mailing Lists">
@@ -283,11 +283,11 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
-			xx-xx-2011: version 1.11.x
+			02-09-2011: version 1.11.7
 		</P>
 		<P>
 			Added <A HREF="demandoc.1.html">demandoc</A> utility for stripping away macros and escapes.  This replaces the
-			historical <CODE>deroff</CODE> utility.
+			historical <CODE>deroff</CODE> utility.  Also improved the <A HREF="mdoc.7.html">mdoc</A> and <A HREF="man.7.html">man</A> manuals.
 		</P>
 		<P CLASS="news">
 			16-08-2011: version 1.11.6
