@@ -254,7 +254,7 @@
 					</TD>
 					<TD>
 						bug-reports, general questions, and announcements 
-						(<A HREF="/archives/discuss/summary.html">archive</A>)
+						(<A HREF="/archives/discuss/">archive</A>)
 					</TD>
 				</TR>
 				<TR>
@@ -264,7 +264,7 @@
 					</TD>
 					<TD>
 						patches and system discussions 
-						(<A HREF="/archives/tech/summary.html">archive</A>)
+						(<A HREF="/archives/tech/">archive</A>)
 					</TD>
 				</TR>
 				<TR>
@@ -274,7 +274,7 @@
 					</TD>
 					<TD>
 						source commit messages 
-						(<A HREF="/archives/source/summary.html">archive</A>)
+						(<A HREF="/archives/source/">archive</A>)
 					</TD>
 				</TR>
 			</TBODY>
