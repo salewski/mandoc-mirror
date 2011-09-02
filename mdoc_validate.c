@@ -549,7 +549,7 @@ check_text(struct mdoc *m, int ln, int pos, char *p)
 	for (cp = p; NULL != (p = strchr(p, '\t')); p++) {
 		if (MDOC_LITERAL & m->flags)
 			continue;
-		mdoc_pmsg(m, ln, (int)(p - cp), MANDOCERR_BADTAB);
+		mdoc_pmsg(m, ln, pos + (int)(p - cp), MANDOCERR_BADTAB);
 	}
 }
 
