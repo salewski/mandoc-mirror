@@ -173,6 +173,8 @@ mod:
 		goto mod;
 	case ('f'):
 		break;
+	case ('r'):
+		/* FALLTHROUGH */
 	case ('b'):
 		/* FALLTHROUGH */
 	case ('i'):
@@ -185,11 +187,19 @@ mod:
 	}
 
 	switch (tolower((unsigned char)p[(*pos)++])) {
+	case ('3'):
+		/* FALLTHROUGH */
 	case ('b'):
 		cp->flags |= TBL_CELL_BOLD;
 		goto mod;
+	case ('2'):
+		/* FALLTHROUGH */
 	case ('i'):
 		cp->flags |= TBL_CELL_ITALIC;
+		goto mod;
+	case ('1'):
+		/* FALLTHROUGH */
+	case ('r'):
 		goto mod;
 	default:
 		break;
