@@ -52,7 +52,6 @@ static	int	  check_le5(CHKARGS);
 static	int	  check_par(CHKARGS);
 static	int	  check_part(CHKARGS);
 static	int	  check_root(CHKARGS);
-static	void	  check_text(CHKARGS);
 
 static	int	  post_AT(CHKARGS);
 static	int	  post_vs(CHKARGS);
@@ -153,11 +152,10 @@ man_valid_post(struct man *m)
 	m->last->flags |= MAN_VALID;
 
 	switch (m->last->type) {
-	case (MAN_TEXT): 
-		check_text(m, m->last);
-		return(1);
 	case (MAN_ROOT):
 		return(check_root(m, m->last));
+	case (MAN_TEXT): 
+		/* FALLTHROUGH */
 	case (MAN_EQN):
 		/* FALLTHROUGH */
 	case (MAN_TBL):
@@ -206,19 +204,6 @@ check_root(CHKARGS)
 	}
 
 	return(1);
-}
-
-static void
-check_text(CHKARGS)
-{
-	char		*cp, *p;
-
-	cp = p = n->string;
-	for (cp = p; NULL != (p = strchr(p, '\t')); p++) {
-		if (MAN_LITERAL & m->flags)
-			continue;
-		man_pmsg(m, n->line, (int)(p - cp), MANDOCERR_BADTAB);
-	}
 }
 
 #define	INEQ_DEFINE(x, ineq, name) \
