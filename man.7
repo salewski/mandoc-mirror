@@ -972,6 +972,14 @@ language.
 .Pp
 .Bl -dash -compact
 .It
+Do not depend on
+.Sx \&SH
+or
+.Sx \&SS
+to close out a literal context opened with
+.Sx \&nf .
+This behaviour may not be portable.
+.It
 In quoted literals, GNU troff allowed pair-wise double-quotes to produce
 a standalone double-quote in formatted output.
 It is not known whether this behaviour is exhibited by other formatters.
