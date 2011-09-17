@@ -93,6 +93,7 @@ SRCS		 = Makefile \
 		   mdoc_hash.c \
 		   mdoc_html.c \
 		   mdoc_macro.c \
+		   mdoc_man.c \
 		   mdoc_term.c \
 		   mdoc_validate.c \
 		   msec.c \
@@ -220,6 +221,9 @@ MANDOC_HTML_LNS	 = eqn_html.ln \
 		   mdoc_html.ln \
 		   tbl_html.ln
 
+MANDOC_MAN_OBJS  = mdoc_man.o
+MANDOC_MAN_LNS   = mdoc_man.ln
+
 MANDOC_TERM_OBJS = eqn_term.o \
 		   man_term.o \
 		   mdoc_term.o \
@@ -236,11 +240,13 @@ MANDOC_TERM_LNS	 = eqn_term.ln \
 		   tbl_term.ln
 
 MANDOC_OBJS	 = $(MANDOC_HTML_OBJS) \
+		   $(MANDOC_MAN_OBJS) \
 		   $(MANDOC_TERM_OBJS) \
 		   main.o \
 		   out.o \
 		   tree.o
 MANDOC_LNS	 = $(MANDOC_HTML_LNS) \
+		   $(MANDOC_MAN_LNS) \
 		   $(MANDOC_TERM_LNS) \
 		   main.ln \
 		   out.ln \

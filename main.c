@@ -46,6 +46,7 @@ enum	outt {
 	OUTT_LOCALE,	/* -Tlocale */
 	OUTT_UTF8,	/* -Tutf8 */
 	OUTT_TREE,	/* -Ttree */
+	OUTT_MAN,	/* -Tman */
 	OUTT_HTML,	/* -Thtml */
 	OUTT_XHTML,	/* -Txhtml */
 	OUTT_LINT,	/* -Tlint */
@@ -249,6 +250,9 @@ parse(struct curparse *curp, int fd,
 			curp->outman = tree_man;
 			curp->outmdoc = tree_mdoc;
 			break;
+		case (OUTT_MAN):
+			curp->outmdoc = man_mdoc;
+			break;
 		case (OUTT_PDF):
 			/* FALLTHROUGH */
 		case (OUTT_ASCII):
@@ -312,6 +316,8 @@ toptions(struct curparse *curp, char *arg)
 		curp->wlevel  = MANDOCLEVEL_WARNING;
 	} else if (0 == strcmp(arg, "tree"))
 		curp->outtype = OUTT_TREE;
+	else if (0 == strcmp(arg, "man"))
+		curp->outtype = OUTT_MAN;
 	else if (0 == strcmp(arg, "html"))
 		curp->outtype = OUTT_HTML;
 	else if (0 == strcmp(arg, "utf8"))
