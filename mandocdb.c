@@ -1254,7 +1254,7 @@ ofile_dirbuild(const char *dir, int verb, struct of **of)
 		buf[0] = '\0';
 		strlcat(buf, dir, MAXPATHLEN);
 		strlcat(buf, "/", MAXPATHLEN);
-		strlcat(buf, fn, MAXPATHLEN);
+		sz = strlcat(buf, fn, MAXPATHLEN);
 		if (sz >= MAXPATHLEN) {
 			fprintf(stderr, "%s: Path too long\n", dir);
 			return(0);
