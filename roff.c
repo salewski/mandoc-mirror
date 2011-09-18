@@ -179,7 +179,7 @@ static	const char	*roff_getstrn(const struct roff *,
 				const char *, size_t);
 static	enum rofferr	 roff_line_ignore(ROFF_ARGS);
 static	enum rofferr	 roff_nr(ROFF_ARGS);
-static	void		 roff_openeqn(struct roff *, const char *, 
+static	void		 roff_openeqn(struct roff *, const char *,
 				int, int, const char *);
 static	enum rofft	 roff_parse(struct roff *, const char *, int *);
 static	enum rofferr	 roff_parsetext(char *);
