@@ -31,6 +31,9 @@
 /* Maximum number of nested if-else conditionals. */
 #define	RSTACK_MAX	128
 
+/* Maximum number of string expansions per line, to break infinite loops. */
+#define	EXPAND_LIMIT	1000
+
 enum	rofft {
 	ROFF_ad,
 	ROFF_am,
@@ -437,9 +440,11 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 	const char	*stnam;	/* start of the name, after "[(*" */
 	const char	*cp;	/* end of the name, e.g. before ']' */
 	const char	*res;	/* the string to be substituted */
-	int		 i, maxl;
+	int		 i, maxl, expand_count;
 	size_t		 nsz;
 	char		*n;
+
+	expand_count = 0;
 
 again:
 	cp = *bufp + pos;
@@ -535,7 +540,13 @@ again:
 
 		*bufp = n;
 		*szp = nsz;
-		goto again;
+
+		if (EXPAND_LIMIT >= ++expand_count)
+			goto again;
+
+		/* Just leave the string unexpanded. */
+		mandoc_msg(MANDOCERR_ROFFLOOP, r->parse, ln, pos, NULL);
+		return;
 	}
 }
 
