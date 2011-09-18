@@ -576,13 +576,16 @@ encode(struct termp *p, const char *word, size_t sz)
 		adjbuf(p, p->col + 1 + (len * 3));
 
 	for (i = 0; i < len; i++) {
-		if ( ! isgraph((unsigned char)word[i])) {
+		if (ASCII_HYPH != word[i] &&
+		    ! isgraph((unsigned char)word[i])) {
 			p->buf[p->col++] = word[i];
 			continue;
 		}
 
 		if (TERMFONT_UNDER == f)
 			p->buf[p->col++] = '_';
+		else if (ASCII_HYPH == word[i])
+			p->buf[p->col++] = '-';
 		else
 			p->buf[p->col++] = word[i];
 
