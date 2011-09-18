@@ -14,6 +14,8 @@
 
 - .TP before .SH is still FATAL in man(7)
   reported by brad@  Sat, 15 Jan 2011 15:54:54 -0500
+  also occurs in emulators/pcsxr/patches/patch-doc_pcsx_1
+  jeremy@  commit Wed, 7 Sep 2011 10:00:19 -0600 (MDT)
 
 ************************************************************************
 * formatter bugs
@@ -264,6 +266,9 @@
 - When .Fn arguments exceed one output line, all but the first
   should be indented, see e.g. rpc(3);
   reported by jmc@ on discuss@  Fri, 29 Oct 2010 13:48:33 +0100
+  reported again by Nicolas Joly via wiz@  Sun, 18 Sep 2011 18:24:40 +0200
+  Also, we don't want to break the line within the argument of:
+  .Fa "chtype tl"
 
 - .Ns should work when called at the end of an input line, see
   the following code in vi(1):
