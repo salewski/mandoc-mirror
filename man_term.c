@@ -245,6 +245,18 @@ pre_literal(DECL_ARGS)
 	else
 		mt->fl &= ~MANT_LITERAL;
 
+	/*
+	 * Unlike .IP and .TP, .HP does not have a HEAD.
+	 * So in case a second call to term_flushln() is needed,
+	 * indentation has to be set up explicitly.
+	 */
+	if (MAN_HP == n->parent->tok && p->rmargin < p->maxrmargin) {
+		p->offset = p->rmargin + 1;
+		p->rmargin = p->maxrmargin;
+		p->flags &= ~(TERMP_NOBREAK | TERMP_TWOSPACE);
+		p->flags |= TERMP_NOSPACE;
+	}
+
 	return(0);
 }
 
@@ -431,7 +443,7 @@ pre_sp(DECL_ARGS)
 static int
 pre_HP(DECL_ARGS)
 {
-	size_t			 len;
+	size_t			 len, one;
 	int			 ival;
 	const struct man_node	*nn;
 
@@ -456,8 +468,11 @@ pre_HP(DECL_ARGS)
 		if ((ival = a2width(p, nn->string)) >= 0)
 			len = (size_t)ival;
 
-	if (0 == len)
-		len = term_len(p, 1);
+	one = term_len(p, 1);
+	if (len > one)
+		len -= one;
+	else
+		len = one;
 
 	p->offset = mt->offset;
 	p->rmargin = mt->offset + len;
@@ -520,7 +535,6 @@ pre_IP(DECL_ARGS)
 
 	switch (n->type) {
 	case (MAN_BODY):
-		p->flags |= TERMP_NOLPAD;
 		p->flags |= TERMP_NOSPACE;
 		break;
 	case (MAN_HEAD):
@@ -591,7 +605,6 @@ post_IP(DECL_ARGS)
 		break;
 	case (MAN_BODY):
 		term_newln(p);
-		p->flags &= ~TERMP_NOLPAD;
 		break;
 	default:
 		break;
@@ -612,7 +625,6 @@ pre_TP(DECL_ARGS)
 		p->flags |= TERMP_NOBREAK;
 		break;
 	case (MAN_BODY):
-		p->flags |= TERMP_NOLPAD;
 		p->flags |= TERMP_NOSPACE;
 		break;
 	case (MAN_BLOCK):
@@ -681,7 +693,6 @@ post_TP(DECL_ARGS)
 		break;
 	case (MAN_BODY):
 		term_newln(p);
-		p->flags &= ~TERMP_NOLPAD;
 		break;
 	default:
 		break;
@@ -882,7 +893,7 @@ print_man_node(DECL_ARGS)
 		 * -man doesn't have nested macros, we don't need to be
 		 * more specific than this.
 		 */
-		if (MANT_LITERAL & mt->fl && 
+		if (MANT_LITERAL & mt->fl && ! (TERMP_NOBREAK & p->flags) &&
 				(NULL == n->next || 
 				 n->next->line > n->line)) {
 			rm = p->rmargin;
@@ -890,7 +901,6 @@ print_man_node(DECL_ARGS)
 			p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
 			p->flags |= TERMP_NOSPACE;
 			term_flushln(p);
-			p->flags &= ~TERMP_NOLPAD;
 			p->rmargin = rm;
 			p->maxrmargin = rmax;
 		}
@@ -972,7 +982,7 @@ print_man_foot(struct termp *p, const void *arg)
 		term_word(p, "");
 	term_flushln(p);
 
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+	p->flags |= TERMP_NOSPACE;
 	p->offset = p->rmargin;
 	p->rmargin = p->maxrmargin;
 	p->flags &= ~TERMP_NOBREAK;
@@ -1019,7 +1029,7 @@ print_man_head(struct termp *p, const void *arg)
 	term_word(p, title);
 	term_flushln(p);
 
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+	p->flags |= TERMP_NOSPACE;
 	p->offset = p->rmargin;
 	p->rmargin = p->offset + buflen + titlen < p->maxrmargin ?
 	    p->maxrmargin - titlen : p->maxrmargin;
@@ -1029,7 +1039,7 @@ print_man_head(struct termp *p, const void *arg)
 
 	p->flags &= ~TERMP_NOBREAK;
 	if (p->rmargin + titlen <= p->maxrmargin) {
-		p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+		p->flags |= TERMP_NOSPACE;
 		p->offset = p->rmargin;
 		p->rmargin = p->maxrmargin;
 		term_word(p, title);

@@ -435,7 +435,7 @@ print_mdoc_foot(struct termp *p, const void *arg)
 
 	p->offset = p->rmargin;
 	p->rmargin = p->maxrmargin - term_strlen(p, m->os);
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+	p->flags |= TERMP_NOSPACE;
 
 	term_word(p, m->date);
 	term_flushln(p);
@@ -443,7 +443,7 @@ print_mdoc_foot(struct termp *p, const void *arg)
 	p->offset = p->rmargin;
 	p->rmargin = p->maxrmargin;
 	p->flags &= ~TERMP_NOBREAK;
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+	p->flags |= TERMP_NOSPACE;
 
 	term_word(p, m->os);
 	term_flushln(p);
@@ -499,7 +499,7 @@ print_mdoc_head(struct termp *p, const void *arg)
 
 	p->offset = p->rmargin;
 	p->rmargin = p->maxrmargin - term_strlen(p, title);
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+	p->flags |= TERMP_NOSPACE;
 
 	term_word(p, buf);
 	term_flushln(p);
@@ -507,7 +507,7 @@ print_mdoc_head(struct termp *p, const void *arg)
 	p->offset = p->rmargin;
 	p->rmargin = p->maxrmargin;
 	p->flags &= ~TERMP_NOBREAK;
-	p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+	p->flags |= TERMP_NOSPACE;
 
 	term_word(p, title);
 	term_flushln(p);
@@ -787,16 +787,11 @@ termp_it_pre(DECL_ARGS)
 	case (LIST_hyphen):
 		if (MDOC_HEAD == n->type)
 			p->flags |= TERMP_NOBREAK;
-		else
-			p->flags |= TERMP_NOLPAD;
 		break;
 	case (LIST_hang):
 		if (MDOC_HEAD == n->type)
 			p->flags |= TERMP_NOBREAK;
 		else
-			p->flags |= TERMP_NOLPAD;
-
-		if (MDOC_HEAD != n->type)
 			break;
 
 		/*
@@ -807,17 +802,14 @@ termp_it_pre(DECL_ARGS)
 		 */
 		if (n->next->child && 
 				(MDOC_Bl == n->next->child->tok ||
-				 MDOC_Bd == n->next->child->tok)) {
+				 MDOC_Bd == n->next->child->tok))
 			p->flags &= ~TERMP_NOBREAK;
-			p->flags &= ~TERMP_NOLPAD;
-		} else
+		else
 			p->flags |= TERMP_HANG;
 		break;
 	case (LIST_tag):
 		if (MDOC_HEAD == n->type)
 			p->flags |= TERMP_NOBREAK | TERMP_TWOSPACE;
-		else
-			p->flags |= TERMP_NOLPAD;
 
 		if (MDOC_HEAD != n->type)
 			break;
@@ -832,10 +824,6 @@ termp_it_pre(DECL_ARGS)
 			p->flags &= ~TERMP_NOBREAK;
 		else
 			p->flags |= TERMP_NOBREAK;
-
-		assert(n->prev);
-		if (MDOC_BODY == n->prev->type) 
-			p->flags |= TERMP_NOLPAD;
 
 		break;
 	case (LIST_diag):
@@ -993,7 +981,6 @@ termp_it_post(DECL_ARGS)
 	p->flags &= ~TERMP_DANGLE;
 	p->flags &= ~TERMP_NOBREAK;
 	p->flags &= ~TERMP_TWOSPACE;
-	p->flags &= ~TERMP_NOLPAD;
 	p->flags &= ~TERMP_HANG;
 }
 
@@ -1009,7 +996,7 @@ termp_nm_pre(DECL_ARGS)
 	if (MDOC_BODY == n->type) {
 		if (NULL == n->child)
 			return(0);
-		p->flags |= TERMP_NOLPAD | TERMP_NOSPACE;
+		p->flags |= TERMP_NOSPACE;
 		p->offset += term_len(p, 1) +
 		    (NULL == n->prev->child ? term_strlen(p, m->name) :
 		     MDOC_TEXT == n->prev->child->type ?
@@ -1054,10 +1041,8 @@ termp_nm_post(DECL_ARGS)
 	if (MDOC_HEAD == n->type && n->next->child) {
 		term_flushln(p);
 		p->flags &= ~(TERMP_NOBREAK | TERMP_HANG);
-	} else if (MDOC_BODY == n->type && n->child) {
+	} else if (MDOC_BODY == n->type && n->child)
 		term_flushln(p);
-		p->flags &= ~TERMP_NOLPAD;
-	}
 }
 
 		
