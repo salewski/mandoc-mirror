@@ -826,7 +826,8 @@ pre_RS(DECL_ARGS)
 			sz = (size_t)ival;
 
 	mt->offset += sz;
-	p->offset = mt->offset;
+	p->rmargin = p->maxrmargin;
+	p->offset = mt->offset < p->rmargin ? mt->offset : p->rmargin;
 
 	if (++mt->lmarginsz < MAXMARGINS)
 		mt->lmargincur = mt->lmarginsz;
