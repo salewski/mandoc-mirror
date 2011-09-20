@@ -640,7 +640,7 @@ pre_TP(DECL_ARGS)
 	/* Calculate offset. */
 
 	if (NULL != (nn = n->parent->head->child))
-		if (nn->parent->line == nn->line)
+		if (nn->string && nn->parent->line == nn->line)
 			if ((ival = a2width(p, nn->string)) >= 0)
 				len = (size_t)ival;
 

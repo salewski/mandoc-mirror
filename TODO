@@ -350,6 +350,10 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 * structural issues
 ************************************************************************
 
+- We use the input line number at several places to distinguish
+  same-line from different-line input.  That plainly doesn't work
+  with user-defined macros, leading to random breakage.
+
 - Find better ways to prevent endless loops
   in roff(7) macro and string expansion.
  
