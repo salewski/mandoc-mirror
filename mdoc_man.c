@@ -31,8 +31,8 @@ struct	manact {
 	int		(*cond)(DECL_ARGS);
 	int		(*pre)(DECL_ARGS);
 	void		(*post)(DECL_ARGS);
-	char		 *prefix;
-	char		 *suffix;
+	const char	 *prefix;
+	const char	 *suffix;
 };
 
 static	void	  print_word(const char *);
