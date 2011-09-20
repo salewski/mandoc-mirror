@@ -1007,9 +1007,9 @@ print_man_head(struct termp *p, const void *arg)
 	 * point we did so here.
 	 */
 
+	p->offset = 0;
 	p->rmargin = p->maxrmargin;
 
-	p->offset = 0;
 	buf[0] = title[0] = '\0';
 
 	if (m->vol)
@@ -1019,12 +1019,12 @@ print_man_head(struct termp *p, const void *arg)
 	snprintf(title, BUFSIZ, "%s(%s)", m->title, m->msec);
 	titlen = term_strlen(p, title);
 
+	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
 	p->offset = 0;
 	p->rmargin = 2 * (titlen+1) + buflen < p->maxrmargin ?
 	    (p->maxrmargin - 
 	     term_strlen(p, buf) + term_len(p, 1)) / 2 :
 	    p->maxrmargin - buflen;
-	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
 
 	term_word(p, title);
 	term_flushln(p);
@@ -1046,9 +1046,9 @@ print_man_head(struct termp *p, const void *arg)
 		term_flushln(p);
 	}
 
-	p->rmargin = p->maxrmargin;
-	p->offset = 0;
 	p->flags &= ~TERMP_NOSPACE;
+	p->offset = 0;
+	p->rmargin = p->maxrmargin;
 
 	/* 
 	 * Groff likes to have some leading spaces before content.  Well
