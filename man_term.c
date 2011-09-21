@@ -251,7 +251,7 @@ pre_literal(DECL_ARGS)
 	 * indentation has to be set up explicitly.
 	 */
 	if (MAN_HP == n->parent->tok && p->rmargin < p->maxrmargin) {
-		p->offset = p->rmargin + 1;
+		p->offset = p->rmargin;
 		p->rmargin = p->maxrmargin;
 		p->flags &= ~(TERMP_NOBREAK | TERMP_TWOSPACE);
 		p->flags |= TERMP_NOSPACE;
@@ -469,9 +469,7 @@ pre_HP(DECL_ARGS)
 			len = (size_t)ival;
 
 	one = term_len(p, 1);
-	if (len > one)
-		len -= one;
-	else
+	if (len < one)
 		len = one;
 
 	p->offset = mt->offset;

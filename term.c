@@ -184,14 +184,12 @@ term_flushln(struct termp *p)
 		if (vend > bp && 0 == jhy && vis > 0) {
 			vend -= vis;
 			(*p->endline)(p);
+			p->viscol = 0;
 			if (TERMP_NOBREAK & p->flags) {
-				p->viscol = p->rmargin;
-				(*p->advance)(p, p->rmargin);
+				vbl = p->rmargin;
 				vend += p->rmargin - p->offset;
-			} else {
-				p->viscol = 0;
+			} else
 				vbl = p->offset;
-			}
 
 			/* Remove the p->overstep width. */
 
