@@ -283,6 +283,21 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
+			xx-xx-2011: version 1.11.x
+		</P>
+		<P>
+			For <A HREF="tbl.7.html">tbl</A>, the horizontal spacing of tables was rewritten completely.
+			It is now compatible with groff, both with and without frames and rulers.
+			Nesting of indented blocks is now supported in <A HREF="man.7.html">man</A>,
+			and several bugs were fixed regarding various kinds of indentation and alignment.
+			The page headers in <A HREF="mdoc.7.html">mdoc</A> are now nicer even for very long titles.
+			Implementation of a mdoc-to-man-coverter (-Tman) was started.
+			This is work in progress and will be developed in the tree.
+			The <A HREF="mdoc.7.html">mdoc</A> and <A HREF="man.7.html">man</A> manuals have been made more readable
+			by adding MACRO OVERVIEW sections, by moving the gory details of the LANGUAGE SYNTAX to the <A HREF="roff.7.html">roff</A> manual,
+			and by moving the very technical MACRO SYNTAX sections down to the bottom of the page.
+		</P>
+		<P CLASS="news">
 			02-09-2011: version 1.11.7
 		</P>
 		<P>
