@@ -160,6 +160,7 @@ mdoc_alloc1(struct mdoc *mdoc)
 	mdoc->last = mandoc_calloc(1, sizeof(struct mdoc_node));
 	mdoc->first = mdoc->last;
 	mdoc->last->type = MDOC_ROOT;
+	mdoc->last->tok = MDOC_MAX;
 	mdoc->next = MDOC_NEXT_CHILD;
 }
 
