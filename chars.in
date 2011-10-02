@@ -33,15 +33,15 @@ static const char ascii_nbrsp[2] = { ASCII_NBRSP, '\0' };
 CHAR_TBL_START
 
 /* Spacing. */
-CHAR("c",			"",		8203)
+CHAR("c",			"",		0)
 CHAR("0",			" ",		8194)
 CHAR(" ",			ascii_nbrsp,	160)
 CHAR("~",			ascii_nbrsp,	160)
-CHAR("%",			"",		8203)
-CHAR("&",			"",		8203)
-CHAR("^",			"",		8203)
-CHAR("|",			"",		8203)
-CHAR("}",			"",		8203)
+CHAR("%",			"",		0)
+CHAR("&",			"",		0)
+CHAR("^",			"",		0)
+CHAR("|",			"",		0)
+CHAR("}",			"",		0)
 
 /* Accents. */
 CHAR("a\"",			"\"",		779)
