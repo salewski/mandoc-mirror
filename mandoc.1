@@ -259,6 +259,12 @@ The following
 .Fl O
 arguments are accepted:
 .Bl -tag -width Ds
+.It Cm fragment
+Do not emit doctype, html, and body elements.
+The
+.Cm style
+argument shall be unused.
+This is useful when embedding manual content within existing documents.
 .It Cm includes Ns = Ns Ar fmt
 The string
 .Ar fmt ,

@@ -118,13 +118,14 @@ static void *
 ml_alloc(char *outopts, enum htmltype type)
 {
 	struct html	*h;
-	const char	*toks[4];
+	const char	*toks[5];
 	char		*v;
 
 	toks[0] = "style";
 	toks[1] = "man";
 	toks[2] = "includes";
-	toks[3] = NULL;
+	toks[3] = "fragment";
+	toks[4] = NULL;
 
 	h = mandoc_calloc(1, sizeof(struct html));
 
@@ -142,6 +143,9 @@ ml_alloc(char *outopts, enum htmltype type)
 			break;
 		case (2):
 			h->base_includes = v;
+			break;
+		case (3):
+			h->oflags |= HTML_FRAGMENT;
 			break;
 		default:
 			break;

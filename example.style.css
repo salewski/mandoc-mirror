@@ -9,8 +9,10 @@
  * See mdoc(7) and man(7) for macro explanations.
  */
 
-html		{ min-width: 580px; width: 580px; }
-body		{ font-family: monospace; }
+div.mandoc	{ min-width: 78ex; 
+		  width: 78ex; 
+	  	  font-family: monospace; } /* This is the outer node of all mandoc -T[x]html documents. */
+
 h1		{ margin-bottom: 0ex; font-size: inherit; margin-left: -4ex; } /* Section header (Sh, SH). */
 h2		{ margin-bottom: 0ex; font-size: inherit; margin-left: -2ex; } /* Sub-section header (Ss, SS). */
 table		{ width: 100%; margin-top: 0ex; margin-bottom: 0ex; } /* All tables. */
