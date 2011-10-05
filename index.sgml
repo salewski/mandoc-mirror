@@ -286,9 +286,10 @@
 			xx-xx-2011: version 1.11.8
 		</P>
 		<P>
-			This version features a new, work-in-progress output mode: -<B>Tman</B>.  This mode allows a system maintainer to
-			distribute <A HREF="man.7.html">man</A> media for older systems that may not natively support <A
-			HREF="mdoc.7.html">mdoc</A>, such as old Solaris systems.
+			This version features a new, work-in-progress <A HREF="mandoc.1.html">mandoc</A> output mode: -<B>Tman</B>.  This mode
+			allows a system maintainer to distribute <A HREF="man.7.html">man</A> media for older systems that may not natively
+			support <A HREF="mdoc.7.html">mdoc</A>, such as old Solaris systems.
+			The -<B>Ofragment</B> option was added to <A HREF="mandoc.1.html">mandoc</A>'s -<B>Thtml</B> and -<B>Txhtml</B> modes.
 		</P>
 		<P>
 			The <A HREF="mdoc.7.html">mdoc</A> and <A HREF="man.7.html">man</A> manuals have been made considerably more readable by
