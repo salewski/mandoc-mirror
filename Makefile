@@ -40,6 +40,8 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 all: mandoc preconv demandoc
 
 SRCS		 = Makefile \
+		   apropos.1 \
+		   apropos.c \
 		   arch.c \
 		   arch.in \
 		   att.c \
@@ -266,12 +268,22 @@ PRECONV_LNS	 = preconv.ln
 
 $(PRECONV_OBJS) $(PRECONV_LNS): config.h
 
+APROPOS_OBJS	 = apropos.o
+APROPOS_LNS	 = apropos.ln
+
+$(APROPOS_OBJS) $(APROPOS_LNS): config.h mandoc.h
+
 DEMANDOC_OBJS	 = demandoc.o
 DEMANDOC_LNS	 = demandoc.ln
 
 $(DEMANDOC_OBJS) $(DEMANDOC_LNS): config.h
 
-INDEX_MANS	 = demandoc.1.html \
+INDEX_MANS	 = apropos.1.html \
+		   apropos.1.xhtml \
+		   apropos.1.ps \
+		   apropos.1.pdf \
+		   apropos.1.txt \
+		   demandoc.1.html \
 		   demandoc.1.xhtml \
 		   demandoc.1.ps \
 		   demandoc.1.pdf \
@@ -347,6 +359,8 @@ clean:
 	rm -f llib-lmandocdb.ln $(MANDOCDB_LNS)
 	rm -f preconv $(PRECONV_OBJS)
 	rm -f llib-lpreconv.ln $(PRECONV_LNS)
+	rm -f apropos $(APROPOS_OBJS)
+	rm -f llib-lapropos.ln $(APROPOS_LNS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f llib-ldemandoc.ln $(DEMANDOC_LNS)
 	rm -f mandoc $(MANDOC_OBJS)
@@ -411,6 +425,12 @@ preconv: $(PRECONV_OBJS)
 
 llib-lpreconv.ln: $(PRECONV_LNS)
 	$(LINT) $(LINTFLAGS) -Cpreconv $(PRECONV_LNS)
+
+apropos: $(APROPOS_OBJS) libmandoc.a
+	$(CC) $(LDFLAGS) -o $@ $(APROPOS_OBJS) libmandoc.a
+
+llib-lapropos.ln: $(APROPOS_LNS)
+	$(LINT) $(LINTFLAGS) -Capropos $(APROPOS_LNS)
 
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a
