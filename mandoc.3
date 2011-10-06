@@ -22,6 +22,7 @@
 .Nm mandoc ,
 .Nm mandoc_escape ,
 .Nm man_meta ,
+.Nm man_mparse ,
 .Nm man_node ,
 .Nm mchars_alloc ,
 .Nm mchars_free ,
@@ -33,6 +34,8 @@
 .Nm mdoc_node ,
 .Nm mparse_alloc ,
 .Nm mparse_free ,
+.Nm mparse_getkeep ,
+.Nm mparse_keep ,
 .Nm mparse_readfd ,
 .Nm mparse_reset ,
 .Nm mparse_result ,
@@ -53,6 +56,10 @@
 .Fc
 .Ft "const struct man_meta *"
 .Fo man_meta
+.Fa "const struct man *man"
+.Fc
+.Ft "const struct mparse *"
+.Fo man_mparse
 .Fa "const struct man *man"
 .Fc
 .Ft "const struct man_node *"
@@ -98,6 +105,14 @@
 .Fc
 .Ft void
 .Fo mparse_free
+.Fa "struct mparse *parse"
+.Fc
+.Ft void
+.Fo mparse_getkeep
+.Fa "const struct mparse *parse"
+.Fc
+.Ft void
+.Fo mparse_keep
 .Fa "struct mparse *parse"
 .Fc
 .Ft "enum mandoclevel"
@@ -244,6 +259,8 @@ may be
 Obtain the meta-data of a successful parse.
 This may only be used on a pointer returned by
 .Fn mparse_result .
+.It Fn man_mparse
+Get the parser used for the current output.
 .It Fn man_node
 Obtain the root node of a successful parse.
 This may only be used on a pointer returned by
@@ -294,6 +311,15 @@ must be called to free the memory allocated by this function.
 .It Fn mparse_free
 Free all memory allocated by
 .Fn mparse_alloc .
+.It Fn mparse_getkeep
+Acquire the keep buffer.
+Must follow a call of
+.Fn mparse_keep .
+.It Fn mparse_keep
+Instruct the parser to retain a copy of its parsed input.
+This can be acquired with subsequent
+.Fn mparse_getkeep
+calls.
 .It Fn mparse_readfd
 Parse a file or file descriptor.
 If

@@ -42,6 +42,7 @@ void		  tree_mdoc(void *, const struct mdoc *);
 void		  tree_man(void *, const struct man *);
 
 void		  man_mdoc(void *, const struct mdoc *);
+void		  man_man(void *, const struct man *);
 
 void		 *locale_alloc(char *);
 void		 *utf8_alloc(char *);

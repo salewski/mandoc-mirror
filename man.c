@@ -648,3 +648,11 @@ man_node_unlink(struct man *m, struct man_node *n)
 	if (m && m->first == n)
 		m->first = NULL;
 }
+
+const struct mparse *
+man_mparse(const struct man *m)
+{
+
+	assert(m && m->parse);
+	return(m->parse);
+}

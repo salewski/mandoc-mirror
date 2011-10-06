@@ -18,6 +18,7 @@
 #include <string.h>
 
 #include "mandoc.h"
+#include "man.h"
 #include "mdoc.h"
 #include "main.h"
 
@@ -216,6 +217,13 @@ print_word(const char *s)
 			break;
 		}
 	}
+}
+
+void
+man_man(void *arg, const struct man *man)
+{
+
+	fputs(mparse_getkeep(man_mparse(man)), stdout);
 }
 
 void

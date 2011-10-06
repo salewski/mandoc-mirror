@@ -105,6 +105,7 @@ struct	man;
 
 const struct man_node *man_node(const struct man *);
 const struct man_meta *man_meta(const struct man *);
+const struct mparse   *man_mparse(const struct man *);
 
 __END_DECLS
 
