@@ -52,11 +52,12 @@
 			<A NAME="sources">Sources</A>
 		</H2>
 		<P>
-			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any modern system.
-			To build and install into <I>/usr/local/</I>, just run <CODE>make install</CODE>.
-			Be aware: if you have an existing groff installation, this may overwrite its <B>preconv</B> binary.  
-			The <A HREF="mandocdb.8.html">mandocdb</A> utility is not yet linked to the build; please <A HREF="#contact">contact
-			us</A> if you plan to use it.
+			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any modern system; however, you'll
+			need <A HREF="http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html">libdb</A> to build <A
+			HREF="apropos.1.html">apropos</A> and <A HREF="mandocdb.8.html">mandocdb</A> (this is installed by default on BSD UNIX
+			systems &mdash; see the <I>Makefile</I> if you're running Linux).  To build and install into <I>/usr/local/</I>, just
+			run <CODE>make install</CODE>.  Be careful: the <B>preconv</B> and <B>apropos</B> binary names are usually taken by
+			existing utilities.
 		</P>
 		<H2>
 			<A NAME="binaries">Binaries</A>

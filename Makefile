@@ -37,7 +37,7 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 # Linux needs -ldb to compile mandocdb.
 #DBLIB		 = -ldb
 
-all: mandoc preconv demandoc
+all: mandoc preconv demandoc apropos mandocdb
 
 SRCS		 = Makefile \
 		   apropos.1 \
@@ -427,7 +427,7 @@ llib-lpreconv.ln: $(PRECONV_LNS)
 	$(LINT) $(LINTFLAGS) -Cpreconv $(PRECONV_LNS)
 
 apropos: $(APROPOS_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(APROPOS_OBJS) libmandoc.a
+	$(CC) $(LDFLAGS) -o $@ $(APROPOS_OBJS) libmandoc.a $(DBLIB)
 
 llib-lapropos.ln: $(APROPOS_LNS)
 	$(LINT) $(LINTFLAGS) -Capropos $(APROPOS_LNS)
