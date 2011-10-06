@@ -41,7 +41,8 @@
 			support for wide-character locales), XHTML, HTML, PostScript, and PDF.  
 			It also includes <A HREF="preconv.1.html">preconv</A>, for recoding multibyte manuals; 
 			<A HREF="demandoc.1.html">demandoc</A>, for emitting only text parts of manuals;
-			and <A HREF="mandocdb.8.html">mandocdb</A>, for indexing manuals.
+			<A HREF="mandocdb.8.html">mandocdb</A>, for indexing manuals; and
+			<A HREF="apropos.1.html">apropos</A>, for semantic search of manual content.
 			It is a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv</A> project.  
 		</P>
 		<P>
@@ -122,13 +123,13 @@
 			<COL>
 			<TBODY>
 				<TR>
-					<TD VALIGN="top"><A HREF="mandoc.1.html">mandoc(1)</A></TD>
+					<TD VALIGN="top"><A HREF="apropos.1.html">apropos(1)</A></TD>
 					<TD VALIGN="top">
-						format and display UNIX manuals
-							(<A HREF="mandoc.1.txt">text</A> | 
-							<A HREF="mandoc.1.xhtml">xhtml</A> |
-							<A HREF="mandoc.1.pdf">pdf</A> |
-							<A HREF="mandoc.1.ps">ps</A>)
+						search the manual page database
+							(<A HREF="apropos.1.txt">text</A> | 
+							<A HREF="apropos.1.xhtml">xhtml</A> |
+							<A HREF="apropos.1.pdf">pdf</A> |
+							<A HREF="apropos.1.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
@@ -139,6 +140,16 @@
 							<A HREF="demandoc.1.xhtml">xhtml</A> |
 							<A HREF="demandoc.1.pdf">pdf</A> |
 							<A HREF="demandoc.1.ps">ps</A>)
+					</TD>
+				</TR>
+				<TR>
+					<TD VALIGN="top"><A HREF="mandoc.1.html">mandoc(1)</A></TD>
+					<TD VALIGN="top">
+						format and display UNIX manuals
+							(<A HREF="mandoc.1.txt">text</A> | 
+							<A HREF="mandoc.1.xhtml">xhtml</A> |
+							<A HREF="mandoc.1.pdf">pdf</A> |
+							<A HREF="mandoc.1.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
@@ -283,7 +294,7 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
-			xx-xx-2011: version 1.11.8
+			xx-xx-2011: version 1.xx.x
 		</P>
 		<P>
 			This version features a new, work-in-progress <A HREF="mandoc.1.html">mandoc</A> output mode: -<B>Tman</B>.  This mode
@@ -292,10 +303,14 @@
 			The -<B>Ofragment</B> option was added to <A HREF="mandoc.1.html">mandoc</A>'s -<B>Thtml</B> and -<B>Txhtml</B> modes.
 		</P>
 		<P>
-			The <A HREF="mdoc.7.html">mdoc</A> and <A HREF="man.7.html">man</A> manuals have been made considerably more readable by
-			adding <I>MACRO OVERVIEW</I> sections, by moving the gory details of the <I>LANGUAGE SYNTAX</I> to the <A
-			HREF="roff.7.html">roff</A> manual, and by moving the very technical <I>MACRO SYNTAX</I> sections down to the bottom of
-			the page.
+			While adding features, an <A HREF="apropos.1.html">apropos</A> utility has been merged from the mandoc-tools sandbox.
+			This interfaces with <A HREF="mandocdb.8.html">mandocdb</A> for semantic search of manual content.
+		</P>
+		<P>
+			In documentation news, the <A HREF="mdoc.7.html">mdoc</A> and <A HREF="man.7.html">man</A> manuals have been made
+			considerably more readable by adding <I>MACRO OVERVIEW</I> sections, by moving the gory details of the <I>LANGUAGE
+			SYNTAX</I> to the <A HREF="roff.7.html">roff</A> manual, and by moving the very technical <I>MACRO SYNTAX</I> sections
+			down to the bottom of the page.
 		</P>
 		<P>
 			Furthermore, for <A HREF="tbl.7.html">tbl</A>, the -<B>Tascii</B> mode horizontal spacing of tables was rewritten
