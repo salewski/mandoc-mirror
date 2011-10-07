@@ -289,12 +289,13 @@ state_search(struct state *p, const struct opts *opts, char *q)
 	recno_t		 rec;
 	uint32_t	 fl;
 	DBT		 key, val;
-	struct res	 res[MAXRESULTS];
+	struct res	*res;
 	regex_t		 reg;
 	regex_t		*regp;
 	char		 filebuf[10];
 	struct rec	 record;
 
+	res = NULL;
 	len = 0;
 	buf = NULL;
 	bufsz = 0;
@@ -341,10 +342,7 @@ state_search(struct state *p, const struct opts *opts, char *q)
 	 * Lastly, add it to the available records.
 	 */
 
-	while (len < MAXRESULTS) {
-		if ((ch = (*p->db->seq)(p->db, &key, &val, dflag)))
-			break;
-
+	while (0 == (ch = (*p->db->seq)(p->db, &key, &val, dflag))) {
 		dflag = R_NEXT;
 
 		/* 
@@ -411,6 +409,9 @@ state_search(struct state *p, const struct opts *opts, char *q)
 		if (i < len)
 			continue;
 
+		res = mandoc_realloc
+			(res, (len + 1) * sizeof(struct res));
+
 		/*
 		 * Now we have our filename, keywords, types, and all
 		 * other necessary information.  
@@ -471,6 +472,7 @@ send:
 		free(res[len].uri);
 	}
 
+	free(res);
 	free(buf);
 	mchars_free(mc);
 
