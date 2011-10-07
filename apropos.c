@@ -41,21 +41,23 @@
 
 #include "mandoc.h"
 
-#define	MAXRESULTS	 100
+#define	MAXRESULTS	 256
 
-#define TYPE_NAME	0x01
-#define TYPE_FUNCTION	0x02
-#define TYPE_UTILITY	0x04
-#define TYPE_INCLUDES	0x08
-#define TYPE_VARIABLE	0x10
-#define TYPE_STANDARD	0x20
-#define TYPE_AUTHOR	0x40
-#define TYPE_CONFIG	0x80
-#define TYPE_DESC	0x100
-#define TYPE_XREF	0x200
-#define TYPE_PATH	0x400
-#define	TYPE_ENV	0x800
-#define	TYPE_ERR	0x1000
+/* Bit-fields.  See mandocdb.8. */
+
+#define TYPE_NAME	  0x01
+#define TYPE_FUNCTION	  0x02
+#define TYPE_UTILITY	  0x04
+#define TYPE_INCLUDES	  0x08
+#define TYPE_VARIABLE	  0x10
+#define TYPE_STANDARD	  0x20
+#define TYPE_AUTHOR	  0x40
+#define TYPE_CONFIG	  0x80
+#define TYPE_DESC	  0x100
+#define TYPE_XREF	  0x200
+#define TYPE_PATH	  0x400
+#define TYPE_ENV	  0x800
+#define TYPE_ERR	  0x1000
 
 enum	match {
 	MATCH_SUBSTR = 0,
@@ -80,16 +82,16 @@ struct	opts {
 
 struct	type {
 	int		 mask;
-	const char	*name;
+	const char	*name; /* command-line type name */
 };
 
 struct	rec {
-	char		*file;
-	char		*cat;
-	char		*title;
-	char		*arch;
-	char		*desc;
-	recno_t		 rec;
+	char		*file; /* file in file-system */
+	char		*cat; /* category (3p, 3, etc.) */
+	char		*title; /* title (FOO, etc.) */
+	char		*arch; /* arch (or empty string) */
+	char		*desc; /* description (from Nd) */
+	recno_t		 rec; /* record in index */
 };
 
 struct	res {
@@ -108,8 +110,6 @@ struct	state {
 	DB		 *idx; /* index */
 	const char	 *dbf; /* database name */
 	const char	 *idxf; /* index name */
-	void		(*err)(const char *);
-	void		(*errx)(const char *, ...);
 };
 
 static	const char * const sorts[SORT__MAX] = {
@@ -139,27 +139,22 @@ static	void	 buf_alloc(char **, size_t *, size_t);
 static	void	 buf_dup(struct mchars *, char **, const char *);
 static	void	 buf_redup(struct mchars *, char **, 
 			size_t *, const char *);
-static	void	 error(const char *, ...);
 static	int	 sort_cat(const void *, const void *);
 static	int	 sort_title(const void *, const void *);
-static	void	 state_destroy(struct state *);
-static	int	 state_getrecord(struct state *, recno_t, struct rec *);
-static	int	 state_init(struct state *, 
-			const char *, const char *,
-			void (*err)(const char *),
-			void (*errx)(const char *, ...));
+static	int	 state_getrecord(struct state *, 
+			recno_t, struct rec *);
 static	void	 state_output(const struct res *, int);
 static	void	 state_search(struct state *, 
 			const struct opts *, char *);
-
 static	void	 usage(void);
 
-static	const char	 *progname;
+static	char	*progname;
 
 int
 main(int argc, char *argv[])
 {
-	int		 ch, i;
+	BTREEINFO	 info;
+	int		 ch, i, rc;
 	const char	*dbf, *idxf;
 	struct state	 state;
 	char		*q, *v;
@@ -168,10 +163,12 @@ main(int argc, char *argv[])
 	extern char	*optarg;
 
 	memset(&opts, 0, sizeof(struct opts));
+	memset(&state, 0, sizeof(struct state));
 
 	dbf = "mandoc.db";
 	idxf = "mandoc.index";
 	q = NULL;
+	rc = EXIT_FAILURE;
 
 	progname = strrchr(argv[0], '/');
 	if (progname == NULL)
@@ -209,7 +206,7 @@ main(int argc, char *argv[])
 			if (i < SORT__MAX)
 				break;
 
-			error("%s: Bad sort\n", optarg);
+			fprintf(stderr, "%s: Bad sort\n", optarg);
 			return(EXIT_FAILURE);
 		case ('t'):
 			while (NULL != (v = strsep(&optarg, ","))) {
@@ -227,7 +224,7 @@ main(int argc, char *argv[])
 			if (NULL == v)
 				break;
 			
-			error("%s: Bad type\n", v);
+			fprintf(stderr, "%s: Bad type\n", v);
 			return(EXIT_FAILURE);
 		default:
 			usage();
@@ -239,22 +236,47 @@ main(int argc, char *argv[])
 
 	if (0 == argc || '\0' == **argv) {
 		usage();
-		return(EXIT_FAILURE);
+		goto out;
 	} else
 		q = *argv;
 
 	if (0 == opts.types)
 		opts.types = TYPE_NAME | TYPE_DESC;
 
-	if ( ! state_init(&state, dbf, idxf, perror, error)) {
-		state_destroy(&state);
-		return(EXIT_FAILURE);
+	/*
+	 * Configure databases.
+	 * The keyword database is a btree that allows for duplicate
+	 * entries.
+	 * The index database is a recno.
+	 */
+
+	memset(&info, 0, sizeof(BTREEINFO));
+	info.flags = R_DUP;
+
+	state.db = dbopen(dbf, O_RDONLY, 0, DB_BTREE, &info);
+	if (NULL == state.db) {
+		perror(dbf);
+		goto out;
 	}
 
-	state_search(&state, &opts, q);
-	state_destroy(&state);
+	state.idx = dbopen(idxf, O_RDONLY, 0, DB_RECNO, NULL);
+	if (NULL == state.idx) {
+		perror(idxf);
+		goto out;
+	}
 
-	return(EXIT_SUCCESS);
+	/* Main search function. */
+
+	state_search(&state, &opts, q);
+
+	rc = EXIT_SUCCESS;
+out:
+	if (state.db)
+		(*state.db->close)(state.db);
+	if (state.idx)
+		(*state.idx->close)(state.idx);
+
+	return(rc);
 }
 
 static void
@@ -279,13 +301,18 @@ state_search(struct state *p, const struct opts *opts, char *q)
 	ch = 0;
 	regp = NULL;
 
+	/*
+	 * Configure how we scan through results to see if we match:
+	 * whether by regexp or exact matches.
+	 */
+
 	switch (opts->match) {
 	case (MATCH_REGEX):
 		rflags = REG_EXTENDED | REG_NOSUB | 
 			(opts->insens ? REG_ICASE : 0);
 
 		if (0 != regcomp(&reg, q, rflags)) {
-			error("%s: Bad pattern\n", q);
+			fprintf(stderr, "%s: Bad pattern\n", q);
 			return;
 		}
 
@@ -328,7 +355,7 @@ state_search(struct state *p, const struct opts *opts, char *q)
 		 */
 
 		if (key.size < 2 || 8 != val.size) {
-			error("%s: Corrupt database\n", p->dbf);
+			fprintf(stderr, "%s: Corrupt database\n", p->dbf);
 			exit(EXIT_FAILURE);
 		}
 
@@ -411,6 +438,18 @@ send:
 		perror(p->dbf);
 		exit(EXIT_FAILURE);
 	} 
+
+	/*
+	 * Sort our results.
+	 * We do this post-scan (instead of an in-line sort) because
+	 * it's more or less the same in terms of run-time.  Assuming we
+	 * sort in-line with a tree versus post:
+	 * 
+	 *  In-place: n * O(lg n)
+	 *  After: n + O(n lg n)
+	 *
+	 * Whatever.  This also buys us simplicity.
+	 */
 
 	switch (opts->sort) {
 	case (SORT_CAT):
@@ -544,16 +583,6 @@ buf_redup(struct mchars *mc, char **buf,
 }
 
 static void
-error(const char *fmt, ...)
-{
-	va_list		 ap;
-
-	va_start(ap, fmt);
-	vfprintf(stderr, fmt, ap);
-	va_end(ap);
-}
-
-static void
 state_output(const struct res *res, int sz)
 {
 	int		 i;
@@ -580,48 +609,6 @@ usage(void)
 }
 
 static int
-state_init(struct state *p, 
-		const char *dbf, const char *idxf,
-		void (*err)(const char *),
-		void (*errx)(const char *, ...))
-{
-	BTREEINFO	 info;
-
-	memset(p, 0, sizeof(struct state));
-	memset(&info, 0, sizeof(BTREEINFO));
-
-	info.flags = R_DUP;
-
-	p->dbf = dbf;
-	p->idxf = idxf;
-	p->err = err;
-
-	p->db = dbopen(p->dbf, O_RDONLY, 0, DB_BTREE, &info);
-	if (NULL == p->db) {
-		(*err)(p->dbf);
-		return(0);
-	}
-
-	p->idx = dbopen(p->idxf, O_RDONLY, 0, DB_RECNO, NULL);
-	if (NULL == p->idx) {
-		(*err)(p->idxf);
-		return(0);
-	}
-
-	return(1);
-}
-
-static void
-state_destroy(struct state *p)
-{
-
-	if (p->db)
-		(*p->db->close)(p->db);
-	if (p->idx)
-		(*p->idx->close)(p->idx);
-}
-
-static int
 state_getrecord(struct state *p, recno_t rec, struct rec *rp)
 {
 	DBT		key, val;
@@ -633,40 +620,33 @@ state_getrecord(struct state *p, recno_t rec, struct rec *rp)
 
 	rc = (*p->idx->get)(p->idx, &key, &val, 0);
 	if (rc < 0) {
-		(*p->err)(p->idxf);
+		perror(p->idxf);
 		return(0);
-	} else if (rc > 0) {
-		(*p->errx)("%s: Corrupt index\n", p->idxf);
-		return(0);
-	}
+	} else if (rc > 0)
+		goto err;
 
 	rp->file = (char *)val.data;
-	if ((sz = strlen(rp->file) + 1) >= val.size) {
-		(*p->errx)("%s: Corrupt index\n", p->idxf);
-		return(0);
-	}
+	if ((sz = strlen(rp->file) + 1) >= val.size)
+		goto err;
 
 	rp->cat = (char *)val.data + (int)sz;
-	if ((sz += strlen(rp->cat) + 1) >= val.size) {
-		(*p->errx)("%s: Corrupt index\n", p->idxf);
-		return(0);
-	}
+	if ((sz += strlen(rp->cat) + 1) >= val.size)
+		goto err;
 
 	rp->title = (char *)val.data + (int)sz;
-	if ((sz += strlen(rp->title) + 1) >= val.size) {
-		(*p->errx)("%s: Corrupt index\n", p->idxf);
-		return(0);
-	}
+	if ((sz += strlen(rp->title) + 1) >= val.size)
+		goto err;
 
 	rp->arch = (char *)val.data + (int)sz;
-	if ((sz += strlen(rp->arch) + 1) >= val.size) {
-		(*p->errx)("%s: Corrupt index\n", p->idxf);
-		return(0);
-	}
+	if ((sz += strlen(rp->arch) + 1) >= val.size)
+		goto err;
 
 	rp->desc = (char *)val.data + (int)sz;
 	rp->rec = rec;
 	return(1);
+err:
+	fprintf(stderr, "%s: Corrupt index\n", p->idxf);
+	return(0);
 }
 
 static int
