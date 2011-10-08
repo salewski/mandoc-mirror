@@ -491,10 +491,7 @@ buf_alloc(char **buf, size_t *bufsz, size_t sz)
 		return;
 
 	*bufsz = sz + 1024;
-	if (NULL == (*buf = realloc(*buf, *bufsz))) {
-		perror(NULL);
-		exit(EXIT_FAILURE);
-	}
+	*buf = mandoc_realloc(*buf, *bufsz);
 }
 
 /*
