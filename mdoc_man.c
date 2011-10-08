@@ -103,8 +103,11 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 	{ cond_body, pre_enc, post_enc, "[", "]" }, /* Op */
 	{ NULL, NULL, NULL, NULL, NULL }, /* _Ot */
 	{ NULL, pre_enc, post_enc, "\\fI", "\\fP" }, /* _Pa */
-	{ NULL, NULL, NULL, NULL, NULL }, /* _Rv */
-		/* FIXME: low-hanging `Rv' fruit. */
+	{ NULL, pre_enc, post_enc, "The \\fB",
+		"\\fP\nfunction returns the value 0 if successful;\n"
+		"otherwise the value -1 is returned and the global\n"
+		"variable \\fIerrno\\fP is set to indicate the error."
+		}, /* Rv */
 	{ NULL, NULL, NULL, NULL, NULL }, /* _St */
 	{ NULL, NULL, NULL, NULL, NULL }, /* _Va */
 	{ NULL, NULL, NULL, NULL, NULL }, /* _Vt */
