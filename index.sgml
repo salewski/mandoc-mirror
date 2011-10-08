@@ -295,7 +295,7 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
-			xx-xx-2011: version 1.xx.x
+			08-10-2011: version 1.12.0
 		</P>
 		<P>
 			This version features a new, work-in-progress <A HREF="mandoc.1.html">mandoc</A> output mode: -<B>Tman</B>.  This mode
@@ -305,7 +305,9 @@
 		</P>
 		<P>
 			While adding features, an <A HREF="apropos.1.html">apropos</A> utility has been merged from the mandoc-tools sandbox.
-			This interfaces with <A HREF="mandocdb.8.html">mandocdb</A> for semantic search of manual content.
+			This interfaces with <A HREF="mandocdb.8.html">mandocdb</A> for semantic search of manual content.  <A
+			HREF="apropos.1.html">apropos</A> is different from the traditional <B>apropos</B> primarily in allowing keyword search
+			(such as for functions, utilities, etc.) and regular expressions.
 		</P>
 		<P>
 			In documentation news, the <A HREF="mdoc.7.html">mdoc</A> and <A HREF="man.7.html">man</A> manuals have been made

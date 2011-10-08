@@ -11,8 +11,8 @@
 # in the lower-left hand corner of -mdoc manuals.
 # CFLAGS	+= -DOSNAME="\"OpenBSD 4.5\""
 
-VERSION		 = 1.11.7
-VDATE		 = 2 September 2011
+VERSION		 = 1.12.0
+VDATE		 = 8 October 2011
 # IFF your system supports multi-byte functions (setlocale(), wcwidth(),
 # putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a
 # UCS-4 value) should you define USE_WCHAR.  If you define it and your
