@@ -464,7 +464,8 @@ rerun:
 			 * buffer because we're going to descend into
 			 * the file recursively.
 			 */
-			curp->secondary->sz -= pos + 1;
+			if (curp->secondary) 
+				curp->secondary->sz -= pos + 1;
 			mparse_readfd_r(curp, -1, ln.buf + of, 1);
 			if (MANDOCLEVEL_FATAL <= curp->file_status)
 				break;
