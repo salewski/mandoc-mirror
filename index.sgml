@@ -42,7 +42,8 @@
 			It also includes <A HREF="preconv.1.html">preconv</A>, for recoding multibyte manuals; 
 			<A HREF="demandoc.1.html">demandoc</A>, for emitting only text parts of manuals;
 			<A HREF="mandocdb.8.html">mandocdb</A>, for indexing manuals; and
-			<A HREF="apropos.1.html">apropos</A>, for semantic search of manual content.
+			<A HREF="apropos.1.html">apropos</A>, for semantic search of manual content (both <B>mandocdb</B> and <B>apropos</B> are
+			still experimental).
 			It is a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv</A> project.  
 		</P>
 		<P>
@@ -308,6 +309,7 @@
 			This interfaces with <A HREF="mandocdb.8.html">mandocdb</A> for semantic search of manual content.  <A
 			HREF="apropos.1.html">apropos</A> is different from the traditional <B>apropos</B> primarily in allowing keyword search
 			(such as for functions, utilities, etc.) and regular expressions.
+			Note that the calling syntax for <B>apropos</B> is likely to change as it settles down.
 		</P>
 		<P>
 			In documentation news, the <A HREF="mdoc.7.html">mdoc</A> and <A HREF="man.7.html">man</A> manuals have been made
@@ -338,20 +340,6 @@
 			improvements have been implemented.  Furthermore, a 64-bit Windows binary is now available at <A
 			HREF="/binaries/mdocml-win64.zip">mdocml-win64.zip</A> and a Mac OS X universal binary is available at <A
 			HREF="/binaries/mdocml-macosx.zip">mdocml-macosx.zip</A>.
-		</P>
-		<P CLASS="news">
-			24-07-2011: version 1.11.5
-		</P>
-		<P>
-			Significant <A HREF="eqn.7.html">eqn</A> improvements.  <SPAN CLASS="nm">mdocml</SPAN> can now parse arbitrary eqn input
-			(although few GNU extensions are accepted, nor is mixing low-level roff with eqn).  See the <A HREF="eqn.7.html">eqn</A>
-			manual for details.  For the time being, equations are rendered as simple in-line text.  The equation parser satisfies
-			the language specified in the <A CLASS="external" HREF="http://www.kohala.com/start/troff/v7man/eqn/eqn2e.ps">Second
-			Edition User's Guide</A>.
-		</P>
-		<P>
-			This is also the first release featuring a distributed Windows binary, available at <A
-			HREF="/binaries/mdocml-win32.zip">/binaries/mdocml-win32.zip</A>.
 		</P>
 		<P>
 			See <A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/index.sgml?cvsroot=mdocml">cvsweb</A> for
