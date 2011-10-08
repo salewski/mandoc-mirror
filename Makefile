@@ -9,16 +9,20 @@
 
 # Specify this if you want to hard-code the operating system to appear
 # in the lower-left hand corner of -mdoc manuals.
+#
 # CFLAGS	+= -DOSNAME="\"OpenBSD 4.5\""
 
 VERSION		 = 1.12.0
 VDATE		 = 8 October 2011
+
 # IFF your system supports multi-byte functions (setlocale(), wcwidth(),
 # putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a
 # UCS-4 value) should you define USE_WCHAR.  If you define it and your
 # system DOESN'T support this, -Tlocale will produce garbage.
 # If you don't define it, -Tlocale is a synonym for -Tacsii.
+#
 CFLAGS	 	+= -DUSE_WCHAR
+
 CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
@@ -34,10 +38,15 @@ INSTALL_LIB	 = $(INSTALL) -m 0644
 INSTALL_SOURCE	 = $(INSTALL) -m 0644
 INSTALL_MAN	 = $(INSTALL_DATA)
 
-# Linux needs -ldb to compile mandocdb.
+# Non-BSD systems (Linux, etc.) need -ldb to compile mandocdb and
+# apropos.
+# However, if you don't have -ldb at all (or it's not native), then
+# comment out apropos and mandocdb. 
+#
 #DBLIB		 = -ldb
+DBBIN		 = apropos mandocdb
 
-all: mandoc preconv demandoc apropos mandocdb
+all: mandoc preconv demandoc $(DBBIN)
 
 SRCS		 = Makefile \
 		   apropos.1 \
@@ -451,7 +460,7 @@ mdocml-win32.zip: $(SRCS)
 	mkdir -p .win32/mdocml-$(VERSION)/
 	$(INSTALL_SOURCE) $(SRCS) .win32
 	cp .win32/Makefile .win32/Makefile.old
-	grep -v DUSE_WCHAR .win32/Makefile.old >.win32/Makefile
+	egrep -v -e DUSE_WCHAR -e ^DBBIN .win32/Makefile.old >.win32/Makefile
 	( cd .win32; \
 		CC=i686-w64-mingw32-gcc AR=i686-w64-mingw32-ar CFLAGS='-DOSNAME=\"Windows\"' make; \
 		make install PREFIX=mdocml-$(VERSION) ; \
@@ -462,7 +471,7 @@ mdocml-win64.zip: $(SRCS)
 	mkdir -p .win64/mdocml-$(VERSION)/
 	$(INSTALL_SOURCE) $(SRCS) .win64
 	cp .win64/Makefile .win64/Makefile.old
-	grep -v DUSE_WCHAR .win64/Makefile.old >.win64/Makefile
+	egrep -v -e DUSE_WCHAR -e ^DBBIN .win64/Makefile.old >.win64/Makefile
 	( cd .win64; \
 		CC=x86_64-w64-mingw32-gcc AR=x86_64-w64-mingw32-ar CFLAGS='-DOSNAME=\"Windows\"' make; \
 		make install PREFIX=mdocml-$(VERSION) ; \
