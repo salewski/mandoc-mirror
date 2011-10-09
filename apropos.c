@@ -290,7 +290,7 @@ out:
 static void
 state_search(struct state *p, const struct opts *opts, char *q)
 {
-	int		 leaf, root, len, ch, rflags, dflag;
+	int		 leaf, root, len, ch, dflag;
 	struct mchars	*mc;
 	char		*buf;
 	size_t		 bufsz;
@@ -308,7 +308,6 @@ state_search(struct state *p, const struct opts *opts, char *q)
 	len = 0;
 	buf = NULL;
 	bufsz = 0;
-	ch = 0;
 	regp = NULL;
 
 	/*
@@ -318,10 +317,10 @@ state_search(struct state *p, const struct opts *opts, char *q)
 
 	switch (opts->match) {
 	case (MATCH_REGEX):
-		rflags = REG_EXTENDED | REG_NOSUB | 
+		ch = REG_EXTENDED | REG_NOSUB | 
 			(opts->insens ? REG_ICASE : 0);
 
-		if (0 != regcomp(&reg, q, rflags)) {
+		if (0 != regcomp(&reg, q, ch)) {
 			fprintf(stderr, "%s: Bad pattern\n", q);
 			return;
 		}
@@ -339,10 +338,7 @@ state_search(struct state *p, const struct opts *opts, char *q)
 		break;
 	}
 
-	if (NULL == (mc = mchars_alloc())) {
-		perror(NULL);
-		exit(EXIT_FAILURE);
-	}
+	mc = mchars_alloc();
 
 	/*
 	 * Iterate over the entire keyword database.
@@ -466,26 +462,12 @@ send:
 		exit(EXIT_FAILURE);
 	} 
 
-	/*
-	 * Sort our results.
-	 * We do this post-scan (instead of an in-line sort) because
-	 * it's more or less the same in terms of run-time.  Assuming we
-	 * sort in-line with a tree versus post:
-	 * 
-	 *  In-place: n * O(lg n)
-	 *  After: n + O(n lg n)
-	 *
-	 * Whatever.  This also buys us simplicity.
-	 */
+	/* Sort our results. */
 
-	switch (opts->sort) {
-	case (SORT_CAT):
+	if (SORT_CAT == opts->sort)
 		qsort(res, len, sizeof(struct res), sort_cat);
-		break;
-	default:
+	else
 		qsort(res, len, sizeof(struct res), sort_title);
-		break;
-	}
 
 	state_output(res, len);
 
