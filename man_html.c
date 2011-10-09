@@ -309,15 +309,12 @@ man_root_pre(MAN_ARGS)
 
 	PAIR_SUMMARY_INIT(&tag[0], "Document Header");
 	PAIR_CLASS_INIT(&tag[1], "head");
-	if (NULL == h->style) {
-		PAIR_INIT(&tag[2], ATTR_WIDTH, "100%");
-		t = print_otag(h, TAG_TABLE, 3, tag);
-		PAIR_INIT(&tag[0], ATTR_WIDTH, "30%");
-		print_otag(h, TAG_COL, 1, tag);
-		print_otag(h, TAG_COL, 1, tag);
-		print_otag(h, TAG_COL, 1, tag);
-	} else
-		t = print_otag(h, TAG_TABLE, 2, tag);
+	PAIR_INIT(&tag[2], ATTR_WIDTH, "100%");
+	t = print_otag(h, TAG_TABLE, 3, tag);
+	PAIR_INIT(&tag[0], ATTR_WIDTH, "30%");
+	print_otag(h, TAG_COL, 1, tag);
+	print_otag(h, TAG_COL, 1, tag);
+	print_otag(h, TAG_COL, 1, tag);
 
 	print_otag(h, TAG_TBODY, 0, NULL);
 
@@ -325,27 +322,18 @@ man_root_pre(MAN_ARGS)
 
 	PAIR_CLASS_INIT(&tag[0], "head-ltitle");
 	print_otag(h, TAG_TD, 1, tag);
-
 	print_text(h, title);
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "head-vol");
-	if (NULL == h->style) {
-		PAIR_INIT(&tag[1], ATTR_ALIGN, "center");
-		print_otag(h, TAG_TD, 2, tag);
-	} else 
-		print_otag(h, TAG_TD, 1, tag);
-
+	PAIR_INIT(&tag[1], ATTR_ALIGN, "center");
+	print_otag(h, TAG_TD, 2, tag);
 	print_text(h, b);
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "head-rtitle");
-	if (NULL == h->style) {
-		PAIR_INIT(&tag[1], ATTR_ALIGN, "right");
-		print_otag(h, TAG_TD, 2, tag);
-	} else 
-		print_otag(h, TAG_TD, 1, tag);
-
+	PAIR_INIT(&tag[1], ATTR_ALIGN, "right");
+	print_otag(h, TAG_TD, 2, tag);
 	print_text(h, title);
 	print_tagq(h, t);
 }
@@ -360,14 +348,11 @@ man_root_post(MAN_ARGS)
 
 	PAIR_SUMMARY_INIT(&tag[0], "Document Footer");
 	PAIR_CLASS_INIT(&tag[1], "foot");
-	if (NULL == h->style) {
-		PAIR_INIT(&tag[2], ATTR_WIDTH, "100%");
-		t = print_otag(h, TAG_TABLE, 3, tag);
-		PAIR_INIT(&tag[0], ATTR_WIDTH, "50%");
-		print_otag(h, TAG_COL, 1, tag);
-		print_otag(h, TAG_COL, 1, tag);
-	} else
-		t = print_otag(h, TAG_TABLE, 2, tag);
+	PAIR_INIT(&tag[2], ATTR_WIDTH, "100%");
+	t = print_otag(h, TAG_TABLE, 3, tag);
+	PAIR_INIT(&tag[0], ATTR_WIDTH, "50%");
+	print_otag(h, TAG_COL, 1, tag);
+	print_otag(h, TAG_COL, 1, tag);
 
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
@@ -378,11 +363,8 @@ man_root_post(MAN_ARGS)
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "foot-os");
-	if (NULL == h->style) {
-		PAIR_INIT(&tag[1], ATTR_ALIGN, "right");
-		print_otag(h, TAG_TD, 2, tag);
-	} else 
-		print_otag(h, TAG_TD, 1, tag);
+	PAIR_INIT(&tag[1], ATTR_ALIGN, "right");
+	print_otag(h, TAG_TD, 2, tag);
 
 	if (m->source)
 		print_text(h, m->source);
