@@ -103,6 +103,14 @@ struct	res {
 	char		*title; /* manual section */
 	char		*uri; /* formatted uri of file */
 	recno_t		 rec; /* unique id of underlying manual */
+	/*
+	 * Maintain a binary tree for checking the uniqueness of `rec'
+	 * when adding elements to the results array.
+	 * Since the results array is dynamic, use offset in the array
+	 * instead of a pointer to the structure.
+	 */
+	int		 lhs;
+	int		 rhs;
 };
 
 struct	state {
@@ -282,7 +290,7 @@ out:
 static void
 state_search(struct state *p, const struct opts *opts, char *q)
 {
-	int		 i, len, ch, rflags, dflag;
+	int		 leaf, root, len, ch, rflags, dflag;
 	struct mchars	*mc;
 	char		*buf;
 	size_t		 bufsz;
@@ -295,6 +303,7 @@ state_search(struct state *p, const struct opts *opts, char *q)
 	char		 filebuf[10];
 	struct rec	 record;
 
+	root = leaf = -1;
 	res = NULL;
 	len = 0;
 	buf = NULL;
@@ -400,13 +409,20 @@ state_search(struct state *p, const struct opts *opts, char *q)
 		if (opts->arch && strcasecmp(opts->arch, record.arch))
 			continue;
 
-		/* FIXME: this needs to be changed.  Ugh.  Linear. */
+		/* 
+		 * Do a binary search to dedupe the results tree of the
+		 * same record: we don't print the same file.
+		 */
 
-		for (i = 0; i < len; i++)
-			if (res[i].rec == record.rec)
+		for (leaf = root; leaf >= 0; )
+			if (rec > res[leaf].rec && res[leaf].rhs >= 0)
+				leaf = res[leaf].rhs;
+			else if (rec < res[leaf].rec && res[leaf].lhs >= 0)
+				leaf = res[leaf].lhs;
+			else 
 				break;
 
-		if (i < len)
+		if (leaf >= 0 && res[leaf].rec == rec)
 			continue;
 
 		res = mandoc_realloc
@@ -424,6 +440,7 @@ state_search(struct state *p, const struct opts *opts, char *q)
 
 		res[len].rec = record.rec;
 		res[len].types = fl;
+		res[len].lhs = res[len].rhs = -1;
 
 		buf_dup(mc, &res[len].keyword, buf);
 		buf_dup(mc, &res[len].uri, filebuf);
@@ -431,6 +448,15 @@ state_search(struct state *p, const struct opts *opts, char *q)
 		buf_dup(mc, &res[len].arch, record.arch);
 		buf_dup(mc, &res[len].title, record.title);
 		buf_dup(mc, &res[len].desc, record.desc);
+
+		if (leaf >= 0) {
+			if (record.rec > res[leaf].rec)
+				res[leaf].rhs = len;
+			else
+				res[leaf].lhs = len;
+		} else
+			root = len;
+
 		len++;
 	}
 
