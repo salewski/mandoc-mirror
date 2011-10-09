@@ -152,7 +152,7 @@ static	int	 sort_title(const void *, const void *);
 static	int	 state_getrecord(struct state *, 
 			recno_t, struct rec *);
 static	void	 state_output(const struct res *, int);
-static	void	 state_search(struct state *, 
+static	int	 state_search(struct state *, 
 			const struct opts *, char *);
 static	void	 usage(void);
 
@@ -275,9 +275,8 @@ main(int argc, char *argv[])
 
 	/* Main search function. */
 
-	state_search(&state, &opts, q);
-
-	rc = EXIT_SUCCESS;
+	rc = state_search(&state, &opts, q) ?
+		EXIT_SUCCESS : EXIT_FAILURE;
 out:
 	if (state.db)
 		(*state.db->close)(state.db);
@@ -287,10 +286,10 @@ out:
 	return(rc);
 }
 
-static void
+static int
 state_search(struct state *p, const struct opts *opts, char *q)
 {
-	int		 leaf, root, len, ch, dflag;
+	int		 leaf, root, len, ch, dflag, rc;
 	struct mchars	*mc;
 	char		*buf;
 	size_t		 bufsz;
@@ -303,6 +302,7 @@ state_search(struct state *p, const struct opts *opts, char *q)
 	char		 filebuf[10];
 	struct rec	 record;
 
+	rc = 0;
 	root = leaf = -1;
 	res = NULL;
 	len = 0;
@@ -322,7 +322,7 @@ state_search(struct state *p, const struct opts *opts, char *q)
 
 		if (0 != regcomp(&reg, q, ch)) {
 			fprintf(stderr, "%s: Bad pattern\n", q);
-			return;
+			return(0);
 		}
 
 		regp = &reg;
@@ -358,8 +358,8 @@ state_search(struct state *p, const struct opts *opts, char *q)
 		 */
 
 		if (key.size < 2 || 8 != val.size) {
-			fprintf(stderr, "%s: Corrupt database\n", p->dbf);
-			exit(EXIT_FAILURE);
+			fprintf(stderr, "%s: Bad database\n", p->dbf);
+			goto out;
 		}
 
 		buf_redup(mc, &buf, &bufsz, (char *)key.data);
@@ -396,7 +396,7 @@ state_search(struct state *p, const struct opts *opts, char *q)
 		memcpy(&rec, val.data + 4, sizeof(recno_t));
 
 		if ( ! state_getrecord(p, rec, &record))
-			exit(EXIT_FAILURE);
+			goto out;
 
 		/* If we're in a different section, skip... */
 
@@ -456,12 +456,11 @@ state_search(struct state *p, const struct opts *opts, char *q)
 		len++;
 	}
 
-send:
 	if (ch < 0) {
 		perror(p->dbf);
-		exit(EXIT_FAILURE);
+		goto out;
 	} 
-
+send:
 	/* Sort our results. */
 
 	if (SORT_CAT == opts->sort)
@@ -470,7 +469,8 @@ send:
 		qsort(res, len, sizeof(struct res), sort_title);
 
 	state_output(res, len);
-
+	rc = 1;
+out:
 	for (len-- ; len >= 0; len--) {
 		free(res[len].keyword);
 		free(res[len].title);
@@ -486,6 +486,8 @@ send:
 
 	if (regp)
 		regfree(regp);
+
+	return(rc);
 }
 
 /*
