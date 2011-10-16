@@ -213,12 +213,12 @@ check_text(CHKARGS)
 {
 	char		*cp, *p;
 
-	cp = p = n->string;
-	for (cp = p; NULL != (p = strchr(p, '\t')); p++) {
-		if (MAN_LITERAL & m->flags)
-			continue;
+	if (MAN_LITERAL & m->flags)
+		return;
+
+	cp = n->string;
+	for (p = cp; NULL != (p = strchr(p, '\t')); p++)
 		man_pmsg(m, n->line, (int)(p - cp), MANDOCERR_BADTAB);
-	}
 }
 
 #define	INEQ_DEFINE(x, ineq, name) \
@@ -474,7 +474,6 @@ post_UC(CHKARGS)
 	const char	*p, *s;
 
 	n = n->child;
-	n = m->last->child;
 
 	if (NULL == n || MAN_TEXT != n->type)
 		p = bsd_versions[0];

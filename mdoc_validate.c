@@ -545,12 +545,11 @@ check_text(struct mdoc *m, int ln, int pos, char *p)
 {
 	char		*cp;
 
-	cp = p;
-	for (cp = p; NULL != (p = strchr(p, '\t')); p++) {
-		if (MDOC_LITERAL & m->flags)
-			continue;
+	if (MDOC_LITERAL & m->flags)
+		return;
+
+	for (cp = p; NULL != (p = strchr(p, '\t')); p++)
 		mdoc_pmsg(m, ln, pos + (int)(p - cp), MANDOCERR_BADTAB);
-	}
 }
 
 static int

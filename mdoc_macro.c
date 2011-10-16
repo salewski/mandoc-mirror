@@ -1443,18 +1443,15 @@ blk_part_exp(MACRO_PROT_ARGS)
 
 	/* Clean-up to leave in a consistent state. */
 
-	if (NULL == head) {
+	if (NULL == head)
 		if ( ! mdoc_head_alloc(m, line, ppos, tok))
 			return(0);
-		head = m->last;
-	}
 
 	if (NULL == body) {
 		if ( ! rew_sub(MDOC_HEAD, m, tok, line, ppos))
 			return(0);
 		if ( ! mdoc_body_alloc(m, line, ppos, tok))
 			return(0);
-		body = m->last;
 	}
 
 	/* Standard appending of delimiters. */

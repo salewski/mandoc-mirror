@@ -503,7 +503,7 @@ mdoc_root_post(MDOC_ARGS)
 	print_otag(h, TAG_COL, 1, tag);
 	print_otag(h, TAG_COL, 1, tag);
 
-	t = print_otag(h, TAG_TBODY, 0, NULL);
+	print_otag(h, TAG_TBODY, 0, NULL);
 
 	tt = print_otag(h, TAG_TR, 0, NULL);
 

@@ -584,6 +584,8 @@ print_bvspace(struct termp *p,
 {
 	const struct mdoc_node	*nn;
 
+	assert(n);
+
 	term_newln(p);
 
 	if (MDOC_Bd == bl->tok && bl->norm->Bd.comp)
