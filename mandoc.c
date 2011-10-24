@@ -161,8 +161,7 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	case ('V'):
 		/* FALLTHROUGH */
 	case ('Y'):
-		if (ESCAPE_ERROR == gly)
-			gly = ESCAPE_IGNORE;
+		gly = ESCAPE_IGNORE;
 		/* FALLTHROUGH */
 	case ('f'):
 		if (ESCAPE_ERROR == gly)
@@ -222,10 +221,7 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	case ('L'):
 		/* FALLTHROUGH */
 	case ('l'):
-		/* FALLTHROUGH */
-	case ('N'):
-		if (ESCAPE_ERROR == gly)
-			gly = ESCAPE_NUMBERED;
+		gly = ESCAPE_NUMBERED;
 		/* FALLTHROUGH */
 	case ('S'):
 		/* FALLTHROUGH */
@@ -240,6 +236,26 @@ mandoc_escape(const char **end, const char **start, int *sz)
 			return(ESCAPE_ERROR);
 		term = numeric = '\'';
 		break;
+
+	/*
+	 * Special handling for the numbered character escape.
+	 * XXX Do any other escapes need similar handling?
+	 */
+	case ('N'):
+		if ('\0' == cp[i])
+			return(ESCAPE_ERROR);
+		*end = &cp[++i];
+		if (isdigit((unsigned char)cp[i-1]))
+			return(ESCAPE_IGNORE);
+		while (isdigit((unsigned char)**end))
+			(*end)++;
+		if (start)
+			*start = &cp[i];
+		if (sz)
+			*sz = *end - &cp[i];
+		if ('\0' != **end)
+			(*end)++;
+		return(ESCAPE_NUMBERED);
 
 	/* 
 	 * Sizes get a special category of their own.
