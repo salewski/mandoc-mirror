@@ -194,7 +194,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ec */ /* FIXME: no space */
 	{ NULL, NULL }, /* Ef */
 	{ termp_under_pre, NULL }, /* Em */ 
-	{ NULL, NULL }, /* Eo */
+	{ termp_quote_pre, termp_quote_post }, /* Eo */
 	{ termp_xx_pre, NULL }, /* Fx */
 	{ termp_bold_pre, NULL }, /* Ms */
 	{ termp_igndelim_pre, NULL }, /* No */
@@ -1925,6 +1925,8 @@ termp_quote_pre(DECL_ARGS)
 	case (MDOC_Dq):
 		term_word(p, "``");
 		break;
+	case (MDOC_Eo):
+		break;
 	case (MDOC_Po):
 		/* FALLTHROUGH */
 	case (MDOC_Pq):
@@ -1988,6 +1990,8 @@ termp_quote_post(DECL_ARGS)
 		/* FALLTHROUGH */
 	case (MDOC_Dq):
 		term_word(p, "''");
+		break;
+	case (MDOC_Eo):
 		break;
 	case (MDOC_Po):
 		/* FALLTHROUGH */
