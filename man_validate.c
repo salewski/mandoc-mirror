@@ -415,10 +415,12 @@ post_TH(CHKARGS)
 
 	if (n)
 		n = n->next;
-	if (n)
+	if (n && n->string && '\0' != n->string[0]) {
 		pos = n->pos;
-	m->meta.date = mandoc_normdate
-		(m->parse, n ? n->string : NULL, line, pos);
+		m->meta.date = mandoc_normdate
+		    (m->parse, n->string, line, pos);
+	} else
+		m->meta.date = mandoc_strdup("");
 
 	/* TITLE MSEC DATE ->SOURCE<- VOL */
 
