@@ -369,8 +369,15 @@ out:
 
 	switch (gly) {
 	case (ESCAPE_FONT):
-		if (1 != rlim)
+		/*
+		 * Pretend that the constant-width font modes are the
+		 * same as the regular font modes.
+		 */
+		if (2 == rlim && 'C' == *rstart)
+			rstart++;
+		else if (1 != rlim)
 			break;
+
 		switch (*rstart) {
 		case ('3'):
 			/* FALLTHROUGH */
