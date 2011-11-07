@@ -54,6 +54,7 @@ struct	man_macro {
 #define	MAN_FSCOPED	 (1 << 2)	/* See blk_imp(). */
 #define	MAN_NSCOPED	 (1 << 3)	/* See in_line_eoln(). */
 #define	MAN_NOCLOSE	 (1 << 4)	/* See blk_exp(). */
+#define	MAN_BSCOPE	 (1 << 5)	/* Break BLINE scope. */
 };
 
 extern	const struct man_macro *const man_macros;

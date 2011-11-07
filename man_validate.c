@@ -44,7 +44,6 @@ struct	man_valid {
 	v_check	 *posts;
 };
 
-static	int	  check_bline(CHKARGS);
 static	int	  check_eq0(CHKARGS);
 static	int	  check_le1(CHKARGS);
 static	int	  check_ge2(CHKARGS);
@@ -76,20 +75,19 @@ static	v_check	  posts_sec[] = { post_sec, NULL };
 static	v_check	  posts_sp[] = { post_vs, check_le1, NULL };
 static	v_check	  posts_th[] = { check_ge2, check_le5, post_TH, NULL };
 static	v_check	  posts_uc[] = { post_UC, NULL };
-static	v_check	  pres_bline[] = { check_bline, NULL };
-static	v_check	  pres_sec[] = { check_bline, pre_sec, NULL};
+static	v_check	  pres_sec[] = { pre_sec, NULL };
 
 static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, posts_br }, /* br */
-	{ pres_bline, posts_th }, /* TH */
+	{ NULL, posts_th }, /* TH */
 	{ pres_sec, posts_sec }, /* SH */
 	{ pres_sec, posts_sec }, /* SS */
-	{ pres_bline, NULL }, /* TP */
-	{ pres_bline, posts_par }, /* LP */
-	{ pres_bline, posts_par }, /* PP */
-	{ pres_bline, posts_par }, /* P */
-	{ pres_bline, NULL }, /* IP */
-	{ pres_bline, NULL }, /* HP */
+	{ NULL, NULL }, /* TP */
+	{ NULL, posts_par }, /* LP */
+	{ NULL, posts_par }, /* PP */
+	{ NULL, posts_par }, /* P */
+	{ NULL, NULL }, /* IP */
+	{ NULL, NULL }, /* HP */
 	{ NULL, NULL }, /* SM */
 	{ NULL, NULL }, /* SB */
 	{ NULL, NULL }, /* BI */
@@ -103,8 +101,8 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, NULL }, /* RI */
 	{ NULL, posts_eq0 }, /* na */ /* FIXME: should warn only. */
 	{ NULL, posts_sp }, /* sp */ /* FIXME: should warn only. */
-	{ pres_bline, posts_nf }, /* nf */
-	{ pres_bline, posts_fi }, /* fi */
+	{ NULL, posts_nf }, /* nf */
+	{ NULL, posts_fi }, /* fi */
 	{ NULL, NULL }, /* RE */
 	{ NULL, posts_part }, /* RS */
 	{ NULL, NULL }, /* DT */
@@ -350,19 +348,6 @@ check_par(CHKARGS)
 	return(1);
 }
 
-
-static int
-check_bline(CHKARGS)
-{
-
-	assert( ! (MAN_ELINE & m->flags));
-	if (MAN_BLINE & m->flags) {
-		man_nmsg(m, n, MANDOCERR_SYNTLINESCOPE);
-		return(0);
-	}
-
-	return(1);
-}
 
 static int
 post_TH(CHKARGS)

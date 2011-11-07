@@ -192,7 +192,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"not a manual",
 	"column syntax is inconsistent",
 	"NOT IMPLEMENTED: .Bd -file",
-	"line scope broken, syntax violated",
 	"argument count wrong, violates syntax",
 	"child violates parent syntax",
 	"argument count wrong, violates syntax",

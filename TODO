@@ -12,11 +12,6 @@
   and then triggers an unknown macro error
   reported by naddy@  Sun, 3 Jul 2011 21:52:24 +0200
 
-- .TP before .SH is still FATAL in man(7)
-  reported by brad@  Sat, 15 Jan 2011 15:54:54 -0500
-  also occurs in emulators/pcsxr/patches/patch-doc_pcsx_1
-  jeremy@  commit Wed, 7 Sep 2011 10:00:19 -0600 (MDT)
-
 ************************************************************************
 * formatter bugs
 ************************************************************************
@@ -192,6 +187,7 @@
   .It Em Authentication<tab>Key Length
   ought to render "Key Length" with emphasis, too,
   see OpenBSD iked.conf(5).
+  reported again Nicolas Joly via wiz@ Wed, 12 Oct 2011 00:20:00 +0200
 
 - empty phrases in .Bl column produce too few blanks
   try e.g. .Bl -column It Ta Ta
