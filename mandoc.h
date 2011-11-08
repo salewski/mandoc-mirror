@@ -409,9 +409,9 @@ struct mchars	 *mchars_alloc(void);
 void		  mchars_free(struct mchars *);
 char	 	  mchars_num2char(const char *, size_t);
 int		  mchars_num2uc(const char *, size_t);
-int		  mchars_spec2cp(struct mchars *, 
+int		  mchars_spec2cp(const struct mchars *, 
 			const char *, size_t);
-const char	 *mchars_spec2str(struct mchars *, 
+const char	 *mchars_spec2str(const struct mchars *, 
 			const char *, size_t, size_t *);
 struct mparse	 *mparse_alloc(enum mparset, 
 			enum mandoclevel, mandocmsg, void *);
