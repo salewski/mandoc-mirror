@@ -462,30 +462,43 @@ exprcomp(int cs, char *argv[], int argc)
 {
 	struct expr	*p;
 	struct expr	 e;
-	int		 i, ch;
+	int		 i, pos, ch;
 
-	if (3 != argc)
-		return(NULL);
+	pos = 0;
 
-	if (0 == strcmp("-eq", argv[0]))
-		e.match = cs ? MATCH_STRCASE : MATCH_STR;
-	else if (0 == strcmp("-ieq", argv[0]))
-		e.match = MATCH_STRCASE;
-	else if (0 == strcmp("-re", argv[0]))
-		e.match = cs ? MATCH_REGEXCASE : MATCH_REGEX;
-	else if (0 == strcmp("-ire", argv[0]))
-		e.match = MATCH_REGEXCASE;
-	else
+	if (pos > argc)
 		return(NULL);
 
 	for (i = 0; 0 != types[i].mask; i++)
-		if (0 == strcmp(types[i].name, argv[1]))
+		if (0 == strcmp(types[i].name, argv[pos]))
 			break;
 
 	if (0 == (e.mask = types[i].mask))
 		return(NULL);
 
-	e.v = mandoc_strdup(argv[2]);
+	if (++pos > argc--)
+		return(NULL);
+
+	if ('-' != *argv[pos]) 
+		e.match = cs ? MATCH_STRCASE : MATCH_STR;
+	else if (0 == strcmp("-eq", argv[pos]))
+		e.match = cs ? MATCH_STRCASE : MATCH_STR;
+	else if (0 == strcmp("-ieq", argv[pos]))
+		e.match = MATCH_STRCASE;
+	else if (0 == strcmp("-re", argv[pos]))
+		e.match = cs ? MATCH_REGEXCASE : MATCH_REGEX;
+	else if (0 == strcmp("-ire", argv[pos]))
+		e.match = MATCH_REGEXCASE;
+	else
+		return(NULL);
+
+	if ('-' == *argv[pos])
+		pos++;
+
+	if (pos > argc--)
+		return(NULL);
+
+	e.v = mandoc_strdup(argv[pos]);
 
 	if (MATCH_REGEX == e.match || MATCH_REGEXCASE == e.match) {
 		ch = REG_EXTENDED | REG_NOSUB;
