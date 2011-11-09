@@ -44,7 +44,8 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 # comment out apropos and mandocdb. 
 #
 #DBLIB		 = -ldb
-DBBIN		 = apropos mandocdb
+DBBIN		 = apropos mandocdb man.cgi
+DBLN		 = llib-lapropos.ln llib-lmandocdb.ln llib-lman.cgi.ln
 
 all: mandoc preconv demandoc $(DBBIN)
 
@@ -277,10 +278,15 @@ PRECONV_LNS	 = preconv.ln
 
 $(PRECONV_OBJS) $(PRECONV_LNS): config.h
 
-APROPOS_OBJS	 = apropos.o
-APROPOS_LNS	 = apropos.ln
+APROPOS_OBJS	 = apropos.o db.o
+APROPOS_LNS	 = apropos.ln db.ln
 
-$(APROPOS_OBJS) $(APROPOS_LNS): config.h mandoc.h
+$(APROPOS_OBJS) $(APROPOS_LNS): config.h mandoc.h apropos.h
+
+CGI_OBJS	 = cgi.o db.o
+CGI_LNS	 	 = cgi.ln db.ln
+
+$(CGI_OBJS) $(CGI_LNS): config.h mandoc.h apropos.h
 
 DEMANDOC_OBJS	 = demandoc.o
 DEMANDOC_LNS	 = demandoc.ln
@@ -359,7 +365,7 @@ INDEX_OBJS	 = $(INDEX_MANS) \
 
 www: index.html
 
-lint: llib-llibmandoc.ln llib-lmandoc.ln llib-lpreconv.ln llib-ldemandoc.ln
+lint: llib-lmandoc.ln llib-lpreconv.ln llib-ldemandoc.ln $(DBLN)
 
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS)
@@ -370,6 +376,8 @@ clean:
 	rm -f llib-lpreconv.ln $(PRECONV_LNS)
 	rm -f apropos $(APROPOS_OBJS)
 	rm -f llib-lapropos.ln $(APROPOS_LNS)
+	rm -f man.cgi $(CGI_OBJS)
+	rm -f llib-lman.cgi.ln $(CGI_LNS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f llib-ldemandoc.ln $(DEMANDOC_LNS)
 	rm -f mandoc $(MANDOC_OBJS)
@@ -420,32 +428,38 @@ llib-llibmandoc.ln: $(COMPAT_LNS) $(LIBMANDOC_LNS)
 mandoc: $(MANDOC_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(MANDOC_OBJS) libmandoc.a
 
-llib-lmandoc.ln: $(MANDOC_LNS)
-	$(LINT) $(LINTFLAGS) -Cmandoc $(MANDOC_LNS)
+llib-lmandoc.ln: $(MANDOC_LNS) llib-llibmandoc.ln
+	$(LINT) $(LINTFLAGS) -Cmandoc $(MANDOC_LNS) llib-llibmandoc.ln
 
 mandocdb: $(MANDOCDB_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(MANDOCDB_OBJS) libmandoc.a $(DBLIB)
 
-llib-lmandocdb.ln: $(MANDOCDB_LNS)
-	$(LINT) $(LINTFLAGS) -Cmandocdb $(MANDOCDB_LNS)
+llib-lmandocdb.ln: $(MANDOCDB_LNS) llib-llibmandoc.ln
+	$(LINT) $(LINTFLAGS) -Cmandocdb $(MANDOCDB_LNS) llib-llibmandoc.ln
 
 preconv: $(PRECONV_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(PRECONV_OBJS)
 
-llib-lpreconv.ln: $(PRECONV_LNS)
-	$(LINT) $(LINTFLAGS) -Cpreconv $(PRECONV_LNS)
+llib-lpreconv.ln: $(PRECONV_LNS) llib-llibmandoc.ln
+	$(LINT) $(LINTFLAGS) -Cpreconv $(PRECONV_LNS) llib-llibmandoc.ln
 
 apropos: $(APROPOS_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(APROPOS_OBJS) libmandoc.a $(DBLIB)
 
-llib-lapropos.ln: $(APROPOS_LNS)
-	$(LINT) $(LINTFLAGS) -Capropos $(APROPOS_LNS)
+llib-lapropos.ln: $(APROPOS_LNS) llib-llibmandoc.ln
+	$(LINT) $(LINTFLAGS) -Capropos $(APROPOS_LNS) llib-llibmandoc.ln
+
+man.cgi: $(CGI_OBJS) libmandoc.a
+	$(CC) $(LDFLAGS) -o $@ $(CGI_OBJS) libmandoc.a $(DBLIB)
+
+llib-lman.cgi.ln: $(CGI_LNS) llib-llibmandoc.ln
+	$(LINT) $(LINTFLAGS) -Cman.cgi $(CGI_LNS) llib-llibmandoc.ln
 
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a
 
-llib-ldemandoc.ln: $(DEMANDOC_LNS)
-	$(LINT) $(LINTFLAGS) -Cdemandoc $(DEMANDOC_LNS)
+llib-ldemandoc.ln: $(DEMANDOC_LNS) llib-llibmandoc.ln
+	$(LINT) $(LINTFLAGS) -Cdemandoc $(DEMANDOC_LNS) llib-llibmandoc.ln
 
 mdocml.md5: mdocml.tar.gz
 	md5 mdocml.tar.gz >$@
