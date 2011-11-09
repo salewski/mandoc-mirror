@@ -72,12 +72,12 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
-	while (-1 != (ch = getopt(argc, argv, "a:c:I:t:"))) 
+	while (-1 != (ch = getopt(argc, argv, "S:s:It:"))) 
 		switch (ch) {
-		case ('a'):
+		case ('S'):
 			opts.arch = optarg;
 			break;
-		case ('c'):
+		case ('s'):
 			opts.cat = optarg;
 			break;
 		case ('I'):
@@ -159,8 +159,8 @@ usage(void)
 
 	fprintf(stderr, "usage: %s "
 			"[-I] "
-			"[-a arch] "
-			"[-c cat] "
+			"[-S arch] "
+			"[-s section] "
 			"[-t type[,...]] "
 			"key\n", progname);
 }
