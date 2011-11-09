@@ -47,13 +47,17 @@ struct	req {
 	enum page	 page;
 };
 
+#if 0
 static	void		 html_printtext(const char *);
+#endif
 static	int 		 kval_decode(char *);
 static	void		 kval_parse(struct kval **, size_t *, char *);
 static	void		 kval_free(struct kval *, size_t);
 static	void		 pg_index(const struct req *, char *);
 static	void		 pg_search(const struct req *, char *);
+#if 0
 static	void		 pg_searchres(struct rec *, size_t, void *);
+#endif
 
 static	const char * const pages[PAGE__MAX] = {
 	"index", /* PAGE_INDEX */ 
@@ -64,6 +68,7 @@ static	const char * const medias[MEDIA__MAX] = {
 	"html", /* MEDIA_HTML */
 };
 
+#if 0
 static void
 html_printtext(const char *p)
 {
@@ -88,6 +93,7 @@ html_printtext(const char *p)
 			break;
 		}
 }
+#endif
 
 static void
 kval_free(struct kval *p, size_t sz)
@@ -205,6 +211,7 @@ pg_index(const struct req *req, char *path)
 
 }
 
+#if 0
 static void
 pg_searchres(struct rec *recs, size_t sz, void *arg)
 {
@@ -223,6 +230,7 @@ pg_searchres(struct rec *recs, size_t sz, void *arg)
 		puts(")</A>");
 	}
 }
+#endif
 
 static void
 pg_search(const struct req *req, char *path)
@@ -238,8 +246,8 @@ pg_search(const struct req *req, char *path)
 		return;
 
 	memset(&opt, 0, sizeof(struct opts));
-	opt.types = TYPE_NAME | TYPE_DESC;
-	apropos_search(&opt, req->fields[i].val, NULL, pg_searchres);
+	/*opt.types = TYPE_NAME | TYPE_DESC;
+	apropos_search(&opt, req->fields[i].val, NULL, pg_searchres);*/
 }
 
 int

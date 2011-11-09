@@ -24,29 +24,6 @@
 #include "apropos.h"
 #include "mandoc.h"
 
-struct	type {
-	int		 mask;
-	const char	*name; /* command-line type name */
-};
-
-static	const struct type types[] = {
-	{ TYPE_NAME, "name" },
-	{ TYPE_FUNCTION, "func" },
-	{ TYPE_UTILITY, "utility" },
-	{ TYPE_INCLUDES, "incl" },
-	{ TYPE_VARIABLE, "var" },
-	{ TYPE_STANDARD, "stand" },
-	{ TYPE_AUTHOR, "auth" },
-	{ TYPE_CONFIG, "conf" },
-	{ TYPE_DESC, "desc" },
-	{ TYPE_XREF, "xref" },
-	{ TYPE_PATH, "path" },
-	{ TYPE_ENV, "env" },
-	{ TYPE_ERR, "err" },
-	{ INT_MAX, "all" },
-	{ 0, NULL }
-};
-
 static	int	 cmp(const void *, const void *);
 static	void	 list(struct rec *, size_t, void *);
 static	void	 usage(void);
@@ -56,15 +33,13 @@ static	char	*progname;
 int
 main(int argc, char *argv[])
 {
-	int		 ch, i;
-	char		*q, *v;
+	int		 ch, cs;
 	struct opts	 opts;
+	struct expr	*e;
 	extern int	 optind;
 	extern char	*optarg;
 
 	memset(&opts, 0, sizeof(struct opts));
-
-	q = NULL;
 
 	progname = strrchr(argv[0], '/');
 	if (progname == NULL)
@@ -72,7 +47,9 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
-	while (-1 != (ch = getopt(argc, argv, "S:s:It:"))) 
+	cs = 0;
+
+	while (-1 != (ch = getopt(argc, argv, "S:s:I"))) 
 		switch (ch) {
 		case ('S'):
 			opts.arch = optarg;
@@ -81,26 +58,8 @@ main(int argc, char *argv[])
 			opts.cat = optarg;
 			break;
 		case ('I'):
-			opts.flags |= OPTS_INSENS;
+			cs = 1;
 			break;
-		case ('t'):
-			while (NULL != (v = strsep(&optarg, ","))) {
-				if ('\0' == *v)
-					continue;
-				for (i = 0; types[i].mask; i++) {
-					if (strcmp(types[i].name, v))
-						continue;
-					break;
-				}
-				if (0 == types[i].mask)
-					break;
-				opts.types |= types[i].mask;
-			}
-			if (NULL == v)
-				break;
-			
-			fprintf(stderr, "%s: Bad type\n", v);
-			return(EXIT_FAILURE);
 		default:
 			usage();
 			return(EXIT_FAILURE);
@@ -109,14 +68,13 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (0 == argc || '\0' == **argv) {
-		usage();
+	if (0 == argc) 
 		return(EXIT_SUCCESS);
-	} else
-		q = *argv;
 
-	if (0 == opts.types)
-		opts.types = TYPE_NAME | TYPE_DESC;
+	if (NULL == (e = exprcomp(cs, argv, argc))) {
+		fprintf(stderr, "Bad expression\n");
+		return(EXIT_FAILURE);
+	}
 
 	/*
 	 * Configure databases.
@@ -125,7 +83,8 @@ main(int argc, char *argv[])
 	 * The index database is a recno.
 	 */
 
-	apropos_search(&opts, q, NULL, list);
+	apropos_search(&opts, e, NULL, list);
+	exprfree(e);
 	return(EXIT_SUCCESS);
 }
 
@@ -161,6 +120,6 @@ usage(void)
 			"[-I] "
 			"[-S arch] "
 			"[-s section] "
-			"[-t type[,...]] "
-			"key\n", progname);
+			"EXPR\n", 
+			progname);
 }

@@ -30,8 +30,46 @@
 #include "apropos.h"
 #include "mandoc.h"
 
+enum	match {
+	MATCH_REGEX,
+	MATCH_REGEXCASE,
+	MATCH_STR,
+	MATCH_STRCASE
+};
+
+struct	expr {
+	enum match	 match;
+	int	 	 mask;
+	char		*v;
+	regex_t	 	 re;
+};
+
+struct	type {
+	int		 mask;
+	const char	*name;
+};
+
+static	const struct type types[] = {
+	{ TYPE_NAME, "name" },
+	{ TYPE_FUNCTION, "func" },
+	{ TYPE_UTILITY, "utility" },
+	{ TYPE_INCLUDES, "incl" },
+	{ TYPE_VARIABLE, "var" },
+	{ TYPE_STANDARD, "stand" },
+	{ TYPE_AUTHOR, "auth" },
+	{ TYPE_CONFIG, "conf" },
+	{ TYPE_DESC, "desc" },
+	{ TYPE_XREF, "xref" },
+	{ TYPE_PATH, "path" },
+	{ TYPE_ENV, "env" },
+	{ TYPE_ERR, "err" },
+	{ INT_MAX, "all" },
+	{ 0, NULL }
+};
+
 static	DB	*btree_open(void);
 static	int	 btree_read(const DBT *, const struct mchars *, char **);
+static	int	 exprexec(const struct expr *, char *);
 static	DB	*index_open(void);
 static	int	 index_read(const DBT *, const DBT *, 
 			const struct mchars *, struct rec *);
@@ -277,16 +315,15 @@ index_read(const DBT *key, const DBT *val,
 }
 
 /*
- * Search the mandocdb database for the regular expression "q".
+ * Search the mandocdb database for the expression "expr".
  * Filter out by "opts".
  * Call "res" with the results, which may be zero.
  */
 void
-apropos_search(const struct opts *opts, const char *q, void *arg, 
-		void (*res)(struct rec *, size_t, void *))
+apropos_search(const struct opts *opts, const struct expr *expr,
+		void *arg, void (*res)(struct rec *, size_t, void *))
 {
 	int		 i, len, root, leaf;
-	regex_t		 reg;
 	DBT		 key, val;
 	DB		*btree, *idx;
 	struct mchars	*mc;
@@ -307,18 +344,7 @@ apropos_search(const struct opts *opts, const char *q, void *arg,
 
 	memset(&srec, 0, sizeof(struct rec));
 
-	if (NULL != q && '\0' == *q)
-		q = NULL;
-
-	ch = REG_EXTENDED | REG_NOSUB | 
-		(OPTS_INSENS & opts->flags ? REG_ICASE : 0);
-
 	/* XXX: error out with bad regexp? */
-
-	if (NULL == q || regcomp(&reg, q, ch)) {
-		(*res)(NULL, 0, arg);
-		return;
-	}
 
 	mc = mchars_alloc();
 
@@ -337,13 +363,10 @@ apropos_search(const struct opts *opts, const char *q, void *arg,
 		 */
 		if (key.size < 2 || 8 != val.size) 
 			break;
-
-		if ( ! (*(int32_t *)val.data & opts->types))
-			continue;
-
 		if ( ! btree_read(&key, mc, &buf))
 			break;
-		if (regexec(&reg, buf, 0, NULL, 0))
+
+		if ( ! exprexec(expr, buf))
 			continue;
 
 		memcpy(&rec, val.data + 4, sizeof(recno_t));
@@ -432,5 +455,74 @@ out:
 
 	free(buf);
 	free(recs);
-	regfree(&reg);
+}
+
+struct expr *
+exprcomp(int cs, char *argv[], int argc)
+{
+	struct expr	*p;
+	struct expr	 e;
+	int		 i, ch;
+
+	if (3 != argc)
+		return(NULL);
+
+	if (0 == strcmp("-eq", argv[0]))
+		e.match = cs ? MATCH_STRCASE : MATCH_STR;
+	else if (0 == strcmp("-ieq", argv[0]))
+		e.match = MATCH_STRCASE;
+	else if (0 == strcmp("-re", argv[0]))
+		e.match = cs ? MATCH_REGEXCASE : MATCH_REGEX;
+	else if (0 == strcmp("-ire", argv[0]))
+		e.match = MATCH_REGEXCASE;
+	else
+		return(NULL);
+
+	for (i = 0; 0 != types[i].mask; i++)
+		if (0 == strcmp(types[i].name, argv[1]))
+			break;
+
+	if (0 == (e.mask = types[i].mask))
+		return(NULL);
+
+	e.v = mandoc_strdup(argv[2]);
+
+	if (MATCH_REGEX == e.match || MATCH_REGEXCASE == e.match) {
+		ch = REG_EXTENDED | REG_NOSUB;
+		if (MATCH_REGEXCASE == e.match)
+			ch |= REG_ICASE;
+		if (regcomp(&e.re, e.v, ch))
+			return(NULL);
+	}
+
+	p = mandoc_calloc(1, sizeof(struct expr));
+	memcpy(p, &e, sizeof(struct expr));
+	return(p);
+}
+
+void
+exprfree(struct expr *p)
+{
+
+	if (NULL == p)
+		return;
+
+	if (MATCH_REGEX == p->match)
+		regfree(&p->re);
+
+	free(p->v);
+	free(p);
+}
+
+static int
+exprexec(const struct expr *p, char *cp)
+{
+
+	if (MATCH_STR == p->match)
+		return(0 == strcmp(p->v, cp));
+	else if (MATCH_STRCASE == p->match)
+		return(0 == strcasecmp(p->v, cp));
+
+	assert(MATCH_REGEX == p->match);
+	return(0 == regexec(&p->re, cp, 0, NULL, 0));
 }
