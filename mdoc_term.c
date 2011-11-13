@@ -34,9 +34,6 @@
 #include "mdoc.h"
 #include "main.h"
 
-#define	INDENT		  5
-#define	HALFINDENT	  3
-
 struct	termpair {
 	struct termpair	 *ppair;
 	int		  count;
@@ -258,6 +255,9 @@ terminal_mdoc(void *arg, const struct mdoc *mdoc)
 	struct termp		*p;
 
 	p = (struct termp *)arg;
+
+	if (0 == p->defindent)
+		p->defindent = 5;
 
 	p->overstep = 0;
 	p->maxrmargin = p->defrmargin;
@@ -562,9 +562,9 @@ a2offs(const struct termp *p, const char *v)
 	else if (0 == strcmp(v, "left"))
 		return(0);
 	else if (0 == strcmp(v, "indent"))
-		return(term_len(p, INDENT + 1));
+		return(term_len(p, p->defindent + 1));
 	else if (0 == strcmp(v, "indent-two"))
-		return(term_len(p, (INDENT + 1) * 2));
+		return(term_len(p, (p->defindent + 1) * 2));
 	else if ( ! a2roffsu(v, &su, SCALE_MAX))
 		SCALE_HS_INIT(&su, term_strlen(p, v));
 
@@ -1424,7 +1424,7 @@ termp_sh_pre(DECL_ARGS)
 		term_fontpush(p, TERMFONT_BOLD);
 		break;
 	case (MDOC_BODY):
-		p->offset = term_len(p, INDENT);
+		p->offset = term_len(p, p->defindent);
 		break;
 	default:
 		break;
@@ -1492,7 +1492,7 @@ termp_d1_pre(DECL_ARGS)
 	if (MDOC_BLOCK != n->type)
 		return(1);
 	term_newln(p);
-	p->offset += term_len(p, (INDENT + 1));
+	p->offset += term_len(p, p->defindent + 1);
 	return(1);
 }
 
@@ -1797,7 +1797,7 @@ termp_ss_pre(DECL_ARGS)
 		break;
 	case (MDOC_HEAD):
 		term_fontpush(p, TERMFONT_BOLD);
-		p->offset = term_len(p, HALFINDENT);
+		p->offset = term_len(p, (p->defindent+1)/2);
 		break;
 	default:
 		break;

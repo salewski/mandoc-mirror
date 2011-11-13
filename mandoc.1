@@ -234,6 +234,15 @@ The following
 .Fl O
 arguments are accepted:
 .Bl -tag -width Ds
+.It Cm indent Ns = Ns Ar indent
+The left margin for normal text is set to
+.Ar indent
+blank characters instead of the default of five for
+.Xr mdoc 7
+and seven for
+.Xr man 7 .
+Increasing this is not recommended; it may result in degraded formatting,
+for example overful lines or ugly line breaks.
 .It Cm width Ns = Ns Ar width
 The output width is set to
 .Ar width ,
