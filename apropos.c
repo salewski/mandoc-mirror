@@ -33,7 +33,7 @@ static	char	*progname;
 int
 main(int argc, char *argv[])
 {
-	int		 ch, cs;
+	int		 ch;
 	struct opts	 opts;
 	struct expr	*e;
 	extern int	 optind;
@@ -47,18 +47,13 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
-	cs = 0;
-
-	while (-1 != (ch = getopt(argc, argv, "S:s:I"))) 
+	while (-1 != (ch = getopt(argc, argv, "S:s:"))) 
 		switch (ch) {
 		case ('S'):
 			opts.arch = optarg;
 			break;
 		case ('s'):
 			opts.cat = optarg;
-			break;
-		case ('I'):
-			cs = 1;
 			break;
 		default:
 			usage();
@@ -71,7 +66,7 @@ main(int argc, char *argv[])
 	if (0 == argc) 
 		return(EXIT_SUCCESS);
 
-	if (NULL == (e = exprcomp(cs, argv, argc))) {
+	if (NULL == (e = exprcomp(argc, argv))) {
 		fprintf(stderr, "Bad expression\n");
 		return(EXIT_FAILURE);
 	}

@@ -49,7 +49,7 @@ void	 	 apropos_search(const struct opts *,
 			const struct expr *, void *, 
 			void (*)(struct rec *, size_t, void *));
 
-struct	expr	*exprcomp(int, char *[], int);
+struct	expr	*exprcomp(int, char *[]);
 void		 exprfree(struct expr *);
 
 __END_DECLS
