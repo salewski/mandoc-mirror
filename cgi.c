@@ -7,8 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "apropos_db.h"
 #include "mandoc.h"
+#include "mandocdb.h"
+#include "apropos_db.h"
 
 /*
  * The page a request is trying to make.
