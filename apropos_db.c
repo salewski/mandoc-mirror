@@ -27,7 +27,7 @@
 # include <db.h>
 #endif
 
-#include "apropos.h"
+#include "apropos_db.h"
 #include "mandoc.h"
 
 enum	match {

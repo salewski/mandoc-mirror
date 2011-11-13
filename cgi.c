@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "apropos.h"
+#include "apropos_db.h"
 #include "mandoc.h"
 
 /*

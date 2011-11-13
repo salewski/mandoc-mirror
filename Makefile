@@ -278,15 +278,15 @@ PRECONV_LNS	 = preconv.ln
 
 $(PRECONV_OBJS) $(PRECONV_LNS): config.h
 
-APROPOS_OBJS	 = apropos.o db.o
-APROPOS_LNS	 = apropos.ln db.ln
+APROPOS_OBJS	 = apropos.o apropos_db.o
+APROPOS_LNS	 = apropos.ln apropos_db.ln
 
-$(APROPOS_OBJS) $(APROPOS_LNS): config.h mandoc.h apropos.h
+$(APROPOS_OBJS) $(APROPOS_LNS): config.h mandoc.h apropos_db.h
 
-CGI_OBJS	 = cgi.o db.o
-CGI_LNS	 	 = cgi.ln db.ln
+CGI_OBJS	 = cgi.o apropos_db.o
+CGI_LNS	 	 = cgi.ln apropos_db.ln
 
-$(CGI_OBJS) $(CGI_LNS): config.h mandoc.h apropos.h
+$(CGI_OBJS) $(CGI_LNS): config.h mandoc.h apropos_db.h
 
 DEMANDOC_OBJS	 = demandoc.o
 DEMANDOC_LNS	 = demandoc.ln
