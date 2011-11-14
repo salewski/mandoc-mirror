@@ -14,6 +14,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <assert.h>
 #include <getopt.h>
 #include <limits.h>
@@ -34,6 +38,8 @@ int
 main(int argc, char *argv[])
 {
 	int		 ch;
+	size_t		 sz;
+	char		*buf;
 	struct opts	 opts;
 	struct expr	*e;
 	extern int	 optind;
@@ -66,10 +72,31 @@ main(int argc, char *argv[])
 	if (0 == argc) 
 		return(EXIT_SUCCESS);
 
-	if (NULL == (e = exprcomp(argc, argv))) {
+	/* 
+	 * Collapse expressions into a single string.  
+	 * First count up the contained strings, adding a space at the
+	 * end of each (plus nil-terminator).  Then merge.
+	 */
+
+	for (sz = 0, ch = 0; ch < argc; ch++)
+		sz += strlen(argv[ch]) + 1;
+
+	buf = mandoc_malloc(++sz);
+
+	for (*buf = '\0', ch = 0; ch < argc; ch++) {
+		strlcat(buf, argv[ch], sz);
+		strlcat(buf, " ", sz);
+	}
+
+	buf[sz - 2] = '\0';
+
+	if (NULL == (e = exprcomp(buf))) {
 		fprintf(stderr, "Bad expression\n");
+		free(buf);
 		return(EXIT_FAILURE);
 	}
+
+	free(buf);
 
 	/*
 	 * Configure databases.

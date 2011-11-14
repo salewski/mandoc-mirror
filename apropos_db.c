@@ -454,23 +454,23 @@ out:
 }
 
 struct expr *
-exprcomp(int argc, char *argv[])
+exprcomp(char *buf)
 {
 	struct expr	*p;
 	struct expr	 e;
 	char		*key;
 	int		 i, icase;
 
-	if (0 >= argc)
+	if ('\0' == *buf)
 		return(NULL);
 
 	/*
 	 * Choose regex or substring match.
 	 */
 
-	if (NULL == (e.v = strpbrk(*argv, "=~"))) {
+	if (NULL == (e.v = strpbrk(buf, "=~"))) {
 		e.regex = 0;
-		e.v = *argv;
+		e.v = buf;
 	} else {
 		e.regex = '~' == *e.v;
 		*e.v++ = '\0';
@@ -482,15 +482,15 @@ exprcomp(int argc, char *argv[])
 
 	icase = 0;
 	e.mask = 0;
-	if (*argv < e.v) {
-		while (NULL != (key = strsep(argv, ","))) {
+	if (buf < e.v) {
+		while (NULL != (key = strsep(&buf, ","))) {
 			if ('i' == key[0] && '\0' == key[1]) {
 				icase = REG_ICASE;
 				continue;
 			}
 			i = 0;
 			while (types[i].mask &&
-			    strcmp(types[i].name, key))
+					strcmp(types[i].name, key))
 				i++;
 			e.mask |= types[i].mask;
 		}
