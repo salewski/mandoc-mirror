@@ -556,10 +556,15 @@ man_pmacro(struct man *m, int ln, char *buf, int offs)
 	if ((m->flags & MAN_BLINE) &&
 	    (MAN_BSCOPE & man_macros[tok].flags)) {
 		n = m->last;
-		assert(MAN_TEXT != n->type);
+
+		/* Might be a text node like 8 in
+		 * .TP 8
+		 * .SH foo
+		 */
+		if (MAN_TEXT == n->type)
+			n = n->parent;
 
 		/* Remove element that didn't end BLINE, if any. */
-
 		if ( ! (MAN_BSCOPE & man_macros[n->tok].flags))
 			n = n->parent;
 
