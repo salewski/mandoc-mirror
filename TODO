@@ -57,6 +57,9 @@
 
 - \c (interrupted text) occurs in chat(8)
 
+- using undefined strings or macros defines them to be empty
+  wl@  Mon, 14 Nov 2011 14:37:01 +0000
+
 --- missing mdoc features ----------------------------------------------
 
 - fix bad block nesting involving multiple identical explicit blocks
