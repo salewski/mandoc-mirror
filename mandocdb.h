@@ -14,6 +14,8 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifndef MANDOCDB_H
+#define MANDOCDB_H
 
 #define	MANDOC_DB	"mandoc.db"
 #define	MANDOC_IDX	"mandoc.index"
@@ -30,3 +32,5 @@
 #define	TYPE_St		0x400
 #define	TYPE_Va		0x1000
 #define	TYPE_Xr		0x2000
+
+#endif /*!MANDOCDB_H */
