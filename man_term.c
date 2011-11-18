@@ -969,8 +969,9 @@ print_man_foot(struct termp *p, const void *arg)
 	term_vspace(p);
 	term_vspace(p);
 	term_vspace(p);
-	snprintf(title, BUFSIZ, "%s(%s)", meta->title, meta->msec);
-	datelen = term_strlen(p, meta->date);
+	snprintf(title, BUFSIZ, "%s(%s)", meta->title ? meta->title : "",
+	    meta->msec ? meta->msec : "");
+	datelen = term_strlen(p, meta->date ? meta->date : "");
 
 	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
 	p->offset = 0;
@@ -986,7 +987,7 @@ print_man_foot(struct termp *p, const void *arg)
 	if (p->offset + datelen >= p->rmargin)
 		p->rmargin = p->offset + datelen;
 
-	term_word(p, meta->date);
+	term_word(p, meta->date ? meta->date : "");
 	term_flushln(p);
 
 	p->flags &= ~TERMP_NOBREAK;
@@ -1023,7 +1024,8 @@ print_man_head(struct termp *p, const void *arg)
 		strlcpy(buf, m->vol, BUFSIZ);
 	buflen = term_strlen(p, buf);
 
-	snprintf(title, BUFSIZ, "%s(%s)", m->title, m->msec);
+	snprintf(title, BUFSIZ, "%s(%s)", m->title ? m->title : "",
+	    m->msec ? m->msec : "");
 	titlen = term_strlen(p, title);
 
 	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
