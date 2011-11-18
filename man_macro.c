@@ -120,7 +120,7 @@ man_unscope(struct man *m, const struct man_node *to,
 
 	assert(to);
 
-	if (MAN_ROOT != m->last->type)
+	if (MAN_ROOT == m->last->type)
 		return(1);
 	m->next = MAN_NEXT_SIBLING;
 
