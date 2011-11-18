@@ -305,7 +305,8 @@ man_root_pre(MAN_ARGS)
 	if (m->vol)
 		(void)strlcat(b, m->vol, BUFSIZ);
 
-	snprintf(title, BUFSIZ - 1, "%s(%s)", m->title, m->msec);
+	snprintf(title, BUFSIZ - 1, "%s(%s)", m->title ? m->title : "",
+	    m->msec ? m->msec : "");
 
 	PAIR_SUMMARY_INIT(&tag[0], "Document Header");
 	PAIR_CLASS_INIT(&tag[1], "head");
@@ -359,7 +360,8 @@ man_root_post(MAN_ARGS)
 	PAIR_CLASS_INIT(&tag[0], "foot-date");
 	print_otag(h, TAG_TD, 1, tag);
 
-	print_text(h, m->date);
+	if (m->date)
+		print_text(h, m->date);
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "foot-os");
