@@ -29,7 +29,7 @@
 #include "mandoc.h"
 
 static	int	 cmp(const void *, const void *);
-static	void	 list(struct rec *, size_t, void *);
+static	void	 list(struct res *, size_t, void *);
 static	void	 usage(void);
 
 static	char	*progname;
@@ -38,8 +38,7 @@ int
 main(int argc, char *argv[])
 {
 	int		 ch;
-	size_t		 sz;
-	char		*buf;
+	size_t		 terms;
 	struct opts	 opts;
 	struct expr	*e;
 	extern int	 optind;
@@ -72,31 +71,10 @@ main(int argc, char *argv[])
 	if (0 == argc) 
 		return(EXIT_SUCCESS);
 
-	/* 
-	 * Collapse expressions into a single string.  
-	 * First count up the contained strings, adding a space at the
-	 * end of each (plus nil-terminator).  Then merge.
-	 */
-
-	for (sz = 0, ch = 0; ch < argc; ch++)
-		sz += strlen(argv[ch]) + 1;
-
-	buf = mandoc_malloc(++sz);
-
-	for (*buf = '\0', ch = 0; ch < argc; ch++) {
-		strlcat(buf, argv[ch], sz);
-		strlcat(buf, " ", sz);
-	}
-
-	buf[sz - 2] = '\0';
-
-	if (NULL == (e = exprcomp(buf))) {
+	if (NULL == (e = exprcomp(argc, argv, &terms))) {
 		fprintf(stderr, "Bad expression\n");
-		free(buf);
 		return(EXIT_FAILURE);
 	}
-
-	free(buf);
 
 	/*
 	 * Configure databases.
@@ -105,18 +83,20 @@ main(int argc, char *argv[])
 	 * The index database is a recno.
 	 */
 
-	apropos_search(&opts, e, NULL, list);
+	ch = apropos_search(&opts, e, terms, NULL, list);
 	exprfree(e);
-	return(EXIT_SUCCESS);
+	if (0 == ch)
+		fprintf(stderr, "%s: Database error\n", progname);
+	return(ch ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
 /* ARGSUSED */
 static void
-list(struct rec *res, size_t sz, void *arg)
+list(struct res *res, size_t sz, void *arg)
 {
 	int		 i;
 
-	qsort(res, sz, sizeof(struct rec), cmp);
+	qsort(res, sz, sizeof(struct res), cmp);
 
 	for (i = 0; i < (int)sz; i++)
 		printf("%s(%s%s%s) - %s\n", res[i].title, 
@@ -130,18 +110,14 @@ static int
 cmp(const void *p1, const void *p2)
 {
 
-	return(strcmp(((const struct rec *)p1)->title,
-				((const struct rec *)p2)->title));
+	return(strcmp(((const struct res *)p1)->title,
+				((const struct res *)p2)->title));
 }
 
 static void
 usage(void)
 {
 
-	fprintf(stderr, "usage: %s "
-			"[-I] "
-			"[-S arch] "
-			"[-s section] "
-			"EXPR\n", 
-			progname);
+	fprintf(stderr, "usage: %s [-S arch] [-s section] "
+			"expression...\n", progname);
 }
