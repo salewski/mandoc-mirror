@@ -1693,7 +1693,11 @@ post_rs(POST_ARGS)
 		mdoc_node_delete(mdoc, nn);
 	}
 
-	/* Bail out early if a plain text node is found inside .Rs. */
+	/*
+	 * Nothing to sort if only invalid nodes were found
+	 * inside the `Rs' body.
+	 */
+
 	if (NULL == mdoc->last->child)
 		return(1);
 
