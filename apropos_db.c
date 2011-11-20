@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #ifdef __linux__
 # include <db_185.h>
@@ -62,6 +63,11 @@ struct	expr {
 struct	type {
 	uint64_t	 mask;
 	const char	*name;
+};
+
+struct	rectree {
+	struct rec	*node; /* record array for dir tree */
+	int		 len; /* length of record array */
 };
 
 static	const struct type types[] = {
@@ -125,6 +131,9 @@ static	void	 norm_string(const char *,
 			const struct mchars *, char **);
 static	size_t	 norm_utf8(unsigned int, char[7]);
 static	void	 recfree(struct rec *);
+static	int	 single_search(struct rectree *, const struct opts *,
+			const struct expr *, size_t terms,
+			struct mchars *);
 
 /*
  * Open the keyword mandoc-db database.
@@ -365,46 +374,92 @@ index_read(const DBT *key, const DBT *val,
 }
 
 /*
- * Search the mandocdb database for the expression "expr".
+ * Search mandocdb databases in argv (size argc) for the expression
+ * "expr".
  * Filter out by "opts".
  * Call "res" with the results, which may be zero.
  * Return 0 if there was a database error, else return 1.
  */
 int
-apropos_search(const struct opts *opts, const struct expr *expr,
-		size_t terms, void *arg, 
+apropos_search(int argc, char *argv[], const struct opts *opts,
+		const struct expr *expr, size_t terms, void *arg, 
 		void (*res)(struct res *, size_t, void *))
 {
-	int		 i, rsz, root, leaf, mlen, rc, ch;
+	struct rectree	 tree;
+	struct mchars	*mc;
+	struct res	*ress;
+	int		 i, mlen, rc;
+
+	memset(&tree, 0, sizeof(struct rectree));
+
+	mc = mchars_alloc();
+
+	for (rc = 1, i = 0; rc && i < argc; i++) {
+		/* FIXME: ugly warning: we shouldn't get here! */
+		if (chdir(argv[i]))
+			continue;
+		rc = single_search(&tree, opts, expr, terms, mc);
+		/* FIXME: warn and continue... ? */
+	}
+
+	/*
+	 * Count the matching files
+	 * and feed them to the output handler.
+	 */
+
+	for (mlen = i = 0; i < tree.len; i++)
+		if (tree.node[i].matched)
+			mlen++;
+
+	ress = mandoc_malloc(mlen * sizeof(struct res));
+
+	for (mlen = i = 0; i < tree.len; i++)
+		if (tree.node[i].matched)
+			memcpy(&ress[mlen++], &tree.node[i].res, 
+					sizeof(struct res));
+
+	(*res)(ress, mlen, arg);
+	free(ress);
+
+	for (i = 0; i < tree.len; i++)
+		recfree(&tree.node[i]);
+
+	free(tree.node);
+	mchars_free(mc);
+	return(rc);
+}
+
+static int
+single_search(struct rectree *tree, const struct opts *opts,
+		const struct expr *expr, size_t terms,
+		struct mchars *mc)
+{
+	int		 root, leaf, ch;
 	uint64_t	 mask;
 	DBT		 key, val;
 	DB		*btree, *idx;
-	struct mchars	*mc;
 	char		*buf;
 	recno_t		 rec;
 	struct rec	*rs;
-	struct res	*ress;
 	struct rec	 r;
 	struct db_val	*vbuf;
 
-	rc	= 0;
 	root	= -1;
 	leaf	= -1;
 	btree	= NULL;
 	idx	= NULL;
-	mc	= NULL;
 	buf	= NULL;
-	rs	= NULL;
-	rsz	= 0;
+	rs	= tree->node;
 
 	memset(&r, 0, sizeof(struct rec));
 
-	mc = mchars_alloc();
-
 	if (NULL == (btree = btree_open())) 
-		goto out;
-	if (NULL == (idx = index_open())) 
-		goto out;
+		return(0);
+
+	if (NULL == (idx = index_open())) {
+		(*btree->close)(btree);
+		return(0);
+	}
 
 	while (0 == (ch = (*btree->seq)(btree, &key, &val, R_NEXT))) {
  		if (key.size < 2 || sizeof(struct db_val) != val.size) 
@@ -474,62 +529,33 @@ apropos_search(const struct opts *opts, const struct expr *expr,
 		if (opts->arch && strcasecmp(opts->arch, r.res.arch))
 			continue;
 
-		rs = mandoc_realloc
-			(rs, (rsz + 1) * sizeof(struct rec));
+		tree->node = rs = mandoc_realloc
+			(rs, (tree->len + 1) * sizeof(struct rec));
 
-		memcpy(&rs[rsz], &r, sizeof(struct rec));
-		rs[rsz].matches = mandoc_calloc(terms, sizeof(int));
+		memcpy(&rs[tree->len], &r, sizeof(struct rec));
+		rs[tree->len].matches = 
+			mandoc_calloc(terms, sizeof(int));
 
-		exprexec(expr, buf, mask, &rs[rsz]); 
+		exprexec(expr, buf, mask, &rs[tree->len]); 
 		/* Append to our tree. */
 
 		if (leaf >= 0) {
 			if (rec > rs[leaf].res.rec)
-				rs[leaf].rhs = rsz;
+				rs[leaf].rhs = tree->len;
 			else
-				rs[leaf].lhs = rsz;
+				rs[leaf].lhs = tree->len;
 		} else
-			root = rsz;
+			root = tree->len;
 		
 		memset(&r, 0, sizeof(struct rec));
-		rsz++;
+		tree->len++;
 	}
 	
-	/*
-	 * If we haven't encountered any database errors, then construct
-	 * an array of results and push them to the caller.
-	 */
-
-	if (1 == ch) {
-		for (mlen = i = 0; i < rsz; i++)
-			if (rs[i].matched)
-				mlen++;
-		ress = mandoc_malloc(mlen * sizeof(struct res));
-		for (mlen = i = 0; i < rsz; i++)
-			if (rs[i].matched)
-				memcpy(&ress[mlen++], &rs[i].res, 
-						sizeof(struct res));
-		(*res)(ress, mlen, arg);
-		free(ress);
-		rc = 1;
-	}
-
-out:
-	for (i = 0; i < rsz; i++)
-		recfree(&rs[i]);
-
-	recfree(&r);
-
-	if (mc)
-		mchars_free(mc);
-	if (btree)
-		(*btree->close)(btree);
-	if (idx)
-		(*idx->close)(idx);
+	(*btree->close)(btree);
+	(*idx->close)(idx);
 
 	free(buf);
-	free(rs);
-	return(rc);
+	return(1 == ch);
 }
 
 static void
@@ -570,7 +596,7 @@ exprcomp(int argc, char *argv[], size_t *tt)
  * Return the root of the expression sequence if alright.
  */
 static struct expr *
-exprexpr(int argc, char *argv[], int *pos, int *lvl, size_t *tt)
+exprexpr(int argc, char **argv, int *pos, int *lvl, size_t *tt)
 {
 	struct expr	*e, *first, *next;
 	int		 log;

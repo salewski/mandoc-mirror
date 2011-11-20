@@ -35,7 +35,7 @@ __BEGIN_DECLS
 
 struct	expr;
 
-int	 	 apropos_search(const struct opts *, 
+int	 	 apropos_search(int, char **, const struct opts *, 
 			const struct expr *, size_t, void *, 
 			void (*)(struct res *, size_t, void *));
 struct	expr	*exprcomp(int, char *[], size_t *);
