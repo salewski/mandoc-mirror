@@ -22,6 +22,7 @@
 .Nd search manual page databases
 .Sh SYNOPSIS
 .Nm
+.Op Fl M Ar manpath
 .Op Fl m Ar manpath
 .Op Fl S Ar arch
 .Op Fl s Ar section
@@ -36,8 +37,14 @@ evaluating on
 for each file in each database.
 Its arguments are as follows:
 .Bl -tag -width Ds
+.It Fl M Ar manpath
+Use the colon-separated path instead of the default list of paths
+searched for
+.Xr mandocdb 8
+databases.
+Invalid paths, or paths without manual databases, are ignored.
 .It Fl m Ar manpath
-Append the colon-separated paths to the default list of paths searched
+Append the colon-separated paths to the list of paths searched
 for
 .Xr mandocdb 8
 databases.
@@ -112,9 +119,10 @@ is evaluated case-insensitively.
 .Pp
 By default,
 .Nm
-searches for a
+searches for
 .Xr mandocdb 8
-database in the current working directory and
+databases in the default paths stipulated by
+.Xr man 1 ,
 parses terms as case-sensitive regular expressions
 .Pq the Li \&~ operator
 over manual names and descriptions
@@ -150,6 +158,8 @@ If an architecture is specified in the output, use
 Comma-separated paths overriding the default list of paths searched for
 manual databases.
 Invalid paths, or paths without manual databases, are ignored.
+Takes precedence over
+.Fl M .
 .El
 .\" .Sh FILES
 .Sh EXIT STATUS

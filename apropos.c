@@ -20,6 +20,7 @@
 #endif
 
 #include <assert.h>
+#include <ctype.h>
 #include <getopt.h>
 #include <limits.h>
 #include <stdio.h>
@@ -28,6 +29,13 @@
 
 #include "apropos_db.h"
 #include "mandoc.h"
+
+/*
+ * FIXME: add support for manpath(1), which everybody but OpenBSD and
+ * NetBSD seem to use.
+ */
+#define MAN_CONF_FILE	"/etc/man.conf"
+#define MAN_CONF_KEY	"_whatdb"
 
 /*
  * List of paths to be searched for manual databases.
@@ -41,6 +49,7 @@ static	int	 cmp(const void *, const void *);
 static	void	 list(struct res *, size_t, void *);
 static	void	 manpath_add(struct manpaths *, const char *);
 static	void	 manpath_parse(struct manpaths *, char *);
+static	void	 manpath_parseconf(struct manpaths *);
 static	void	 usage(void);
 
 static	char	*progname;
@@ -53,6 +62,7 @@ main(int argc, char *argv[])
 	size_t		 terms;
 	struct opts	 opts;
 	struct expr	*e;
+	char		*defpaths, *auxpaths;
 	extern int	 optind;
 	extern char	*optarg;
 
@@ -65,13 +75,17 @@ main(int argc, char *argv[])
 	memset(&paths, 0, sizeof(struct manpaths));
 	memset(&opts, 0, sizeof(struct opts));
 
+	auxpaths = defpaths = NULL;
 	e = NULL;
 	rc = 0;
 
-	while (-1 != (ch = getopt(argc, argv, "m:S:s:"))) 
+	while (-1 != (ch = getopt(argc, argv, "M:m:S:s:"))) 
 		switch (ch) {
+		case ('M'):
+			defpaths = optarg;
+			break;
 		case ('m'):
-			manpath_parse(&paths, optarg);
+			auxpaths = optarg;
 			break;
 		case ('S'):
 			opts.arch = optarg;
@@ -92,14 +106,15 @@ main(int argc, char *argv[])
 		goto out;
 	}
 
-	/*
-	 * Let MANPATH override our default paths.
-	 */
-
 	if (NULL != getenv("MANPATH"))
-		manpath_add(&paths, getenv("MANPATH"));
+		defpaths = getenv("MANPATH");
+
+	if (NULL == defpaths)
+		manpath_parseconf(&paths);
 	else
-		manpath_add(&paths, ".");
+		manpath_parse(&paths, defpaths);
+
+	manpath_parse(&paths, auxpaths);
 
 	if (NULL == (e = exprcomp(argc, argv, &terms))) {
 		fprintf(stderr, "%s: Bad expression\n", progname);
@@ -153,6 +168,7 @@ usage(void)
 {
 
 	fprintf(stderr, "usage: %s "
+			"[-M dirs] "
 			"[-m dirs] "
 			"[-S arch] "
 			"[-s section] "
@@ -167,6 +183,9 @@ manpath_parse(struct manpaths *dirs, char *path)
 {
 	char	*dir;
 
+	if (NULL == path)
+		return;
+
 	for (dir = strtok(path, ":"); dir; dir = strtok(NULL, ":"))
 		manpath_add(dirs, dir);
 }
@@ -180,13 +199,78 @@ manpath_add(struct manpaths *dirs, const char *dir)
 {
 	char		 buf[PATH_MAX];
 	char		*cp;
+	int		 i;
 
 	if (NULL == (cp = realpath(dir, buf)))
 		return;
+
+	for (i = 0; i < dirs->sz; i++)
+		if (0 == strcmp(dirs->paths[i], dir))
+			return;
 
 	dirs->paths = mandoc_realloc
 		(dirs->paths, 
 		 ((size_t)dirs->sz + 1) * sizeof(char *));
 
 	dirs->paths[dirs->sz++] = mandoc_strdup(cp);
+}
+
+static void
+manpath_parseconf(struct manpaths *dirs) 
+{
+	FILE		*stream;
+#ifdef	USE_MANPATH
+	char		*buf;
+	size_t		 sz, bsz;
+
+	stream = popen("manpath", "r");
+	if (NULL == stream)
+		return;
+
+	buf = NULL;
+	bsz = 0;
+
+	do {
+		buf = mandoc_realloc(buf, bsz + 1024);
+		sz = fread(buf + (int)bsz, 1, 1024, stream);
+		bsz += sz;
+	} while (sz > 0);
+
+	assert(bsz && '\n' == buf[bsz - 1]);
+	buf[bsz - 1] = '\0';
+
+	manpath_parse(dirs, buf);
+	free(buf);
+	pclose(stream);
+#else
+	char		*p, *q;
+	size_t	 	 len, keysz;
+
+	keysz = strlen(MAN_CONF_KEY);
+	assert(keysz > 0);
+
+	if (NULL == (stream = fopen(MAN_CONF_FILE, "r")))
+		return;
+
+	while (NULL != (p = fgetln(stream, &len))) {
+		if (0 == len || '\n' == p[--len])
+			break;
+		p[len] = '\0';
+		while (isspace((unsigned char)*p))
+			p++;
+		if (strncmp(MAN_CONF_KEY, p, keysz))
+			continue;
+		p += keysz;
+		while (isspace(*p))
+			p++;
+		if ('\0' == *p)
+			continue;
+		if (NULL == (q = strrchr(p, '/')))
+			continue;
+		*q = '\0';
+		manpath_add(dirs, p);
+	}
+
+	fclose(stream);
+#endif
 }

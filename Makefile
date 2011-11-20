@@ -23,6 +23,9 @@ VDATE		 = 8 October 2011
 #
 CFLAGS	 	+= -DUSE_WCHAR
 
+# If your system has manpath(1), check this off.
+# CFLAGS	+= -DUSE_MANPATH
+
 CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
