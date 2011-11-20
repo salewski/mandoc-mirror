@@ -39,8 +39,8 @@ struct	manpaths {
 
 static	int	 cmp(const void *, const void *);
 static	void	 list(struct res *, size_t, void *);
-static	int	 manpath_add(struct manpaths *, const char *);
-static	int	 manpath_parse(struct manpaths *, char *);
+static	void	 manpath_add(struct manpaths *, const char *);
+static	void	 manpath_parse(struct manpaths *, char *);
 static	void	 usage(void);
 
 static	char	*progname;
@@ -71,8 +71,7 @@ main(int argc, char *argv[])
 	while (-1 != (ch = getopt(argc, argv, "m:S:s:"))) 
 		switch (ch) {
 		case ('m'):
-			if ( ! manpath_parse(&paths, optarg))
-				goto out;
+			manpath_parse(&paths, optarg);
 			break;
 		case ('S'):
 			opts.arch = optarg;
@@ -93,12 +92,17 @@ main(int argc, char *argv[])
 		goto out;
 	}
 
-	if (0 == paths.sz && ! manpath_add(&paths, "."))
-		goto out;
+	/*
+	 * Let MANPATH override our default paths.
+	 */
+
+	if (NULL != getenv("MANPATH"))
+		manpath_add(&paths, getenv("MANPATH"));
+	else
+		manpath_add(&paths, ".");
 
 	if (NULL == (e = exprcomp(argc, argv, &terms))) {
-		/* FIXME: be more specific about this. */
-		fprintf(stderr, "Bad expression\n");
+		fprintf(stderr, "%s: Bad expression\n", progname);
 		goto out;
 	}
 
@@ -106,7 +110,9 @@ main(int argc, char *argv[])
 		(paths.sz, paths.paths, 
 		 &opts, e, terms, NULL, list);
 
-	/* FIXME: report an error based on ch. */
+	if (0 == rc) 
+		fprintf(stderr, "%s: Error reading "
+				"manual database\n", progname);
 
 out:
 	for (i = 0; i < paths.sz; i++)
@@ -156,38 +162,31 @@ usage(void)
 /*
  * Parse a FULL pathname from a colon-separated list of arrays.
  */
-static int
+static void
 manpath_parse(struct manpaths *dirs, char *path) 
 {
 	char	*dir;
 
 	for (dir = strtok(path, ":"); dir; dir = strtok(NULL, ":"))
-		if ( ! manpath_add(dirs, dir))
-			return(0);
-
-	return(1);
+		manpath_add(dirs, dir);
 }
 
 /*
- * Add a directory to the array.
+ * Add a directory to the array, ignoring bad directories.
  * Grow the array one-by-one for simplicity's sake.
- * Return 0 if the directory is not a real path.
  */
-static int
+static void
 manpath_add(struct manpaths *dirs, const char *dir) 
 {
 	char		 buf[PATH_MAX];
 	char		*cp;
 
-	if (NULL == (cp = realpath(dir, buf))) {
-		fprintf(stderr, "%s: Invalid path\n", dir);
-		return(0);
-	}
+	if (NULL == (cp = realpath(dir, buf)))
+		return;
 
 	dirs->paths = mandoc_realloc
 		(dirs->paths, 
 		 ((size_t)dirs->sz + 1) * sizeof(char *));
 
 	dirs->paths[dirs->sz++] = mandoc_strdup(cp);
-	return(1);
 }

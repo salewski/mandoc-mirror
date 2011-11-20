@@ -374,14 +374,13 @@ index_read(const DBT *key, const DBT *val,
 }
 
 /*
- * Search mandocdb databases in argv (size argc) for the expression
- * "expr".
+ * Search mandocdb databases in paths for expression "expr".
  * Filter out by "opts".
  * Call "res" with the results, which may be zero.
  * Return 0 if there was a database error, else return 1.
  */
 int
-apropos_search(int argc, char *argv[], const struct opts *opts,
+apropos_search(int pathsz, char **paths, const struct opts *opts,
 		const struct expr *expr, size_t terms, void *arg, 
 		void (*res)(struct res *, size_t, void *))
 {
@@ -392,19 +391,24 @@ apropos_search(int argc, char *argv[], const struct opts *opts,
 
 	memset(&tree, 0, sizeof(struct rectree));
 
+	rc = 0;
 	mc = mchars_alloc();
 
-	for (rc = 1, i = 0; rc && i < argc; i++) {
-		/* FIXME: ugly warning: we shouldn't get here! */
-		if (chdir(argv[i]))
+	/*
+	 * Main loop.  Change into the directory containing manpage
+	 * databases.  Run our expession over each database in the set.
+	 */
+
+	for (i = 0; i < pathsz; i++) {
+		if (chdir(paths[i]))
 			continue;
-		rc = single_search(&tree, opts, expr, terms, mc);
-		/* FIXME: warn and continue... ? */
+		if ( ! single_search(&tree, opts, expr, terms, mc))
+			goto out;
 	}
 
 	/*
-	 * Count the matching files
-	 * and feed them to the output handler.
+	 * Count matching files, transfer to a "clean" array, then feed
+	 * them to the output handler.
 	 */
 
 	for (mlen = i = 0; i < tree.len; i++)
@@ -421,6 +425,8 @@ apropos_search(int argc, char *argv[], const struct opts *opts,
 	(*res)(ress, mlen, arg);
 	free(ress);
 
+	rc = 1;
+out:
 	for (i = 0; i < tree.len; i++)
 		recfree(&tree.node[i]);
 
@@ -454,11 +460,11 @@ single_search(struct rectree *tree, const struct opts *opts,
 	memset(&r, 0, sizeof(struct rec));
 
 	if (NULL == (btree = btree_open())) 
-		return(0);
+		return(1);
 
 	if (NULL == (idx = index_open())) {
 		(*btree->close)(btree);
-		return(0);
+		return(1);
 	}
 
 	while (0 == (ch = (*btree->seq)(btree, &key, &val, R_NEXT))) {
