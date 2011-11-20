@@ -596,7 +596,7 @@ exprcomp(int argc, char *argv[], size_t *tt)
  * Return the root of the expression sequence if alright.
  */
 static struct expr *
-exprexpr(int argc, char **argv, int *pos, int *lvl, size_t *tt)
+exprexpr(int argc, char *argv[], int *pos, int *lvl, size_t *tt)
 {
 	struct expr	*e, *first, *next;
 	int		 log;
