@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <regex.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -49,7 +50,7 @@ struct	rec {
 struct	expr {
 	int		 regex; /* is regex? */
 	int		 index; /* index in match array */
-	int	 	 mask; /* type-mask */
+	uint64_t 	 mask; /* type-mask */
 	int		 cs; /* is case-sensitive? */
 	int		 and; /* is rhs of logical AND? */
 	char		*v; /* search value */
@@ -59,25 +60,50 @@ struct	expr {
 };
 
 struct	type {
-	int		 mask;
+	uint64_t	 mask;
 	const char	*name;
 };
 
 static	const struct type types[] = {
-	{ TYPE_An, "An" },
-	{ TYPE_Cd, "Cd" },
-	{ TYPE_Er, "Er" },
-	{ TYPE_Ev, "Ev" },
-	{ TYPE_Fn, "Fn" },
-	{ TYPE_Fn, "Fo" },
-	{ TYPE_In, "In" },
-	{ TYPE_Nd, "Nd" },
-	{ TYPE_Nm, "Nm" },
-	{ TYPE_Pa, "Pa" },
-	{ TYPE_St, "St" },
-	{ TYPE_Va, "Va" },
-	{ TYPE_Va, "Vt" },
-	{ TYPE_Xr, "Xr" },
+  	{ TYPE_An, "An" },
+ 	{ TYPE_Ar, "Ar" },
+ 	{ TYPE_At, "At" },
+ 	{ TYPE_Bsx, "Bsx" },
+ 	{ TYPE_Bx, "Bx" },
+  	{ TYPE_Cd, "Cd" },
+ 	{ TYPE_Cm, "Cm" },
+ 	{ TYPE_Dv, "Dv" },
+ 	{ TYPE_Dx, "Dx" },
+ 	{ TYPE_Em, "Em" },
+  	{ TYPE_Er, "Er" },
+  	{ TYPE_Ev, "Ev" },
+ 	{ TYPE_Fa, "Fa" },
+ 	{ TYPE_Fl, "Fl" },
+  	{ TYPE_Fn, "Fn" },
+  	{ TYPE_Fn, "Fo" },
+ 	{ TYPE_Ft, "Ft" },
+ 	{ TYPE_Fx, "Fx" },
+ 	{ TYPE_Ic, "Ic" },
+  	{ TYPE_In, "In" },
+ 	{ TYPE_Lb, "Lb" },
+ 	{ TYPE_Li, "Li" },
+ 	{ TYPE_Lk, "Lk" },
+ 	{ TYPE_Ms, "Ms" },
+ 	{ TYPE_Mt, "Mt" },
+  	{ TYPE_Nd, "Nd" },
+  	{ TYPE_Nm, "Nm" },
+ 	{ TYPE_Nx, "Nx" },
+ 	{ TYPE_Ox, "Ox" },
+  	{ TYPE_Pa, "Pa" },
+ 	{ TYPE_Rs, "Rs" },
+ 	{ TYPE_Sh, "Sh" },
+ 	{ TYPE_Ss, "Ss" },
+  	{ TYPE_St, "St" },
+ 	{ TYPE_Sy, "Sy" },
+ 	{ TYPE_Tn, "Tn" },
+  	{ TYPE_Va, "Va" },
+  	{ TYPE_Va, "Vt" },
+  	{ TYPE_Xr, "Xr" },
 	{ INT_MAX, "any" },
 	{ 0, NULL }
 };
@@ -87,9 +113,9 @@ static	int	 btree_read(const DBT *,
 			const struct mchars *, char **);
 static	int	 expreval(const struct expr *, int *);
 static	void	 exprexec(const struct expr *, 
-			const char *, int, struct rec *);
+			const char *, uint64_t, struct rec *);
 static	int	 exprmark(const struct expr *, 
-			const char *, int, int *);
+			const char *, uint64_t, int *);
 static	struct expr *exprexpr(int, char *[], int *, int *, size_t *);
 static	struct expr *exprterm(char *, int);
 static	DB	*index_open(void);
@@ -130,6 +156,7 @@ btree_read(const DBT *v, const struct mchars *mc, char **buf)
 	/* Sanity: are we nil-terminated? */
 
 	assert(v->size > 0);
+
 	if ('\0' != ((char *)v->data)[(int)v->size - 1])
 		return(0);
 
@@ -348,7 +375,8 @@ apropos_search(const struct opts *opts, const struct expr *expr,
 		size_t terms, void *arg, 
 		void (*res)(struct res *, size_t, void *))
 {
-	int		 i, rsz, root, leaf, mask, mlen, rc, ch;
+	int		 i, rsz, root, leaf, mlen, rc, ch;
+	uint64_t	 mask;
 	DBT		 key, val;
 	DB		*btree, *idx;
 	struct mchars	*mc;
@@ -357,6 +385,7 @@ apropos_search(const struct opts *opts, const struct expr *expr,
 	struct rec	*rs;
 	struct res	*ress;
 	struct rec	 r;
+	struct db_val	*vbuf;
 
 	rc	= 0;
 	root	= -1;
@@ -378,17 +407,14 @@ apropos_search(const struct opts *opts, const struct expr *expr,
 		goto out;
 
 	while (0 == (ch = (*btree->seq)(btree, &key, &val, R_NEXT))) {
-		/* 
-		 * Low-water mark for key and value.
-		 * The key must have something in it, and the value must
-		 * have the correct tags/recno mix.
-		 */
-		if (key.size < 2 || 8 != val.size) 
-			break;
+ 		if (key.size < 2 || sizeof(struct db_val) != val.size) 
+  			break;
 		if ( ! btree_read(&key, mc, &buf))
 			break;
 
-		mask = *(int *)val.data;
+		vbuf = val.data;
+		rec = vbuf->rec;
+		mask = vbuf->mask;
 
 		/*
 		 * See if this keyword record matches any of the
@@ -396,8 +422,6 @@ apropos_search(const struct opts *opts, const struct expr *expr,
 		 */
 		if ( ! exprmark(expr, buf, mask, NULL))
 			continue;
-
-		memcpy(&rec, val.data + 4, sizeof(recno_t));
 
 		/*
 		 * O(log n) scan for prior records.  Since a record
@@ -701,7 +725,8 @@ exprfree(struct expr *p)
 }
 
 static int
-exprmark(const struct expr *p, const char *cp, int mask, int *ms)
+exprmark(const struct expr *p, const char *cp, 
+		uint64_t mask, int *ms)
 {
 
 	for ( ; p; p = p->next) {
@@ -772,7 +797,8 @@ expreval(const struct expr *p, int *ms)
  * If this evaluates to true, mark the expression as satisfied.
  */
 static void
-exprexec(const struct expr *p, const char *cp, int mask, struct rec *r)
+exprexec(const struct expr *p, const char *cp, 
+		uint64_t mask, struct rec *r)
 {
 
 	assert(0 == r->matched);
