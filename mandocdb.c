@@ -39,6 +39,7 @@
 #include "mdoc.h"
 #include "mandoc.h"
 #include "mandocdb.h"
+#include "manpath.h"
 
 #define	MANDOC_BUFSZ	  BUFSIZ
 #define	MANDOC_SLOP	  1024
@@ -247,6 +248,7 @@ int
 main(int argc, char *argv[])
 {
 	struct mparse	*mp; /* parse sequence */
+	struct manpaths	 dirs;
 	enum op		 op; /* current operation */
 	const char	*dir;
 	char		 ibuf[MAXPATHLEN], /* index fname */
@@ -273,6 +275,8 @@ main(int argc, char *argv[])
 		progname = argv[0];
 	else
 		++progname;
+
+	memset(&dirs, 0, sizeof(struct manpaths));
 
 	verb = 0;
 	of = NULL;
@@ -370,19 +374,34 @@ main(int argc, char *argv[])
 		goto out;
 	}
 
-	for (i = 0; i < argc; i++) {
+	/*
+	 * Configure the directories we're going to scan.
+	 * If we have command-line arguments, use them.
+	 * If not, we use man(1)'s method (see mandocdb.8).
+	 */
+
+	if (argc > 0) {
+		dirs.paths = mandoc_malloc(argc * sizeof(char *));
+		dirs.sz = argc;
+		for (i = 0; i < argc; i++)
+			dirs.paths[i] = mandoc_strdup(argv[i]);
+	} else
+		manpath_parseconf(&dirs);
+
+	for (i = 0; i < dirs.sz; i++) {
 		ibuf[0] = fbuf[0] = '\0';
 
-		strlcat(fbuf, argv[i], MAXPATHLEN);
+		strlcat(fbuf, dirs.paths[i], MAXPATHLEN);
 		strlcat(fbuf, "/", MAXPATHLEN);
 		sz1 = strlcat(fbuf, MANDOC_DB, MAXPATHLEN);
 
-		strlcat(ibuf, argv[i], MAXPATHLEN);
+		strlcat(ibuf, dirs.paths[i], MAXPATHLEN);
 		strlcat(ibuf, "/", MAXPATHLEN);
 		sz2 = strlcat(ibuf, MANDOC_IDX, MAXPATHLEN);
 
 		if (sz1 >= MAXPATHLEN || sz2 >= MAXPATHLEN) {
-			fprintf(stderr, "%s: Path too long\n", argv[i]);
+			fprintf(stderr, "%s: Path too long\n", 
+					dirs.paths[i]);
 			exit((int)MANDOCLEVEL_BADARG);
 		}
 
@@ -405,7 +424,7 @@ main(int argc, char *argv[])
 		ofile_free(of);
 		of = NULL;
 
-		if ( ! ofile_dirbuild(argv[i], verb, &of)) 
+		if ( ! ofile_dirbuild(dirs.paths[i], verb, &of)) 
 			exit((int)MANDOCLEVEL_SYSERR);
 
 		if (NULL == of)
@@ -427,6 +446,7 @@ out:
 	if (mp)
 		mparse_free(mp);
 
+	manpath_free(&dirs);
 	ofile_free(of);
 	free(buf.cp);
 	free(dbuf.cp);

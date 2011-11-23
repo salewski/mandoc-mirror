@@ -71,6 +71,12 @@ By default,
 creates databases in each
 .Ar dir
 using files rooted in that directory.
+If
+.Ar dir
+is not provided,
+.Nm
+uses the default paths stipulated by
+.Xr man 1 .
 .Pp
 If fatal parse errors are encountered while parsing, the offending file
 is printed to stderr, omitted from the index, and the parse continues
@@ -190,6 +196,7 @@ to exit at once, possibly in the middle of parsing or formatting a file.
 The output databases are corrupt and should be removed .
 .El
 .Sh SEE ALSO
+.Xr man 1 ,
 .Xr mandoc 1 ,
 .Xr btree 3 ,
 .Xr recno 3
