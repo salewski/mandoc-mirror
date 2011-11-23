@@ -125,7 +125,7 @@ static	int	 exprmark(const struct expr *,
 static	struct expr *exprexpr(int, char *[], int *, int *, size_t *);
 static	struct expr *exprterm(char *, int);
 static	DB	*index_open(void);
-static	int	 index_read(const DBT *, const DBT *, 
+static	int	 index_read(const DBT *, const DBT *, int,
 			const struct mchars *, struct rec *);
 static	void	 norm_string(const char *,
 			const struct mchars *, char **);
@@ -133,7 +133,7 @@ static	size_t	 norm_utf8(unsigned int, char[7]);
 static	void	 recfree(struct rec *);
 static	int	 single_search(struct rectree *, const struct opts *,
 			const struct expr *, size_t terms,
-			struct mchars *);
+			struct mchars *, int);
 
 /*
  * Open the keyword mandoc-db database.
@@ -345,7 +345,7 @@ index_open(void)
  * Returns 1 if an entry was unpacked, 0 if the database is insane.
  */
 static int
-index_read(const DBT *key, const DBT *val, 
+index_read(const DBT *key, const DBT *val, int index,
 		const struct mchars *mc, struct rec *rec)
 {
 	size_t		 left;
@@ -364,6 +364,7 @@ index_read(const DBT *key, const DBT *val,
 	cp = (char *)val->data;
 
 	rec->res.rec = *(recno_t *)key->data;
+	rec->res.volume = index;
 
 	INDEX_BREAD(rec->res.file);
 	INDEX_BREAD(rec->res.cat);
@@ -402,7 +403,7 @@ apropos_search(int pathsz, char **paths, const struct opts *opts,
 	for (i = 0; i < pathsz; i++) {
 		if (chdir(paths[i]))
 			continue;
-		if ( ! single_search(&tree, opts, expr, terms, mc))
+		if ( ! single_search(&tree, opts, expr, terms, mc, i))
 			goto out;
 	}
 
@@ -438,7 +439,7 @@ out:
 static int
 single_search(struct rectree *tree, const struct opts *opts,
 		const struct expr *expr, size_t terms,
-		struct mchars *mc)
+		struct mchars *mc, int vol)
 {
 	int		 root, leaf, ch;
 	uint64_t	 mask;
@@ -525,7 +526,7 @@ single_search(struct rectree *tree, const struct opts *opts,
 			break;
 
 		r.lhs = r.rhs = -1;
-		if ( ! index_read(&key, &val, mc, &r))
+		if ( ! index_read(&key, &val, vol, mc, &r))
 			break;
 
 		/* XXX: this should be elsewhere, I guess? */
