@@ -110,6 +110,12 @@
 						CLASS="external">src/usr.bin/mandoc</A> 
 					</TD>
 				</TR>
+				<TR>
+					<TD>pkgsrc</TD>
+					<TD>
+					<A HREF="http://pkgsrc.se/textproc/mdocml" CLASS="external">textproc/mdocml</A> 
+					</TD>
+				</TR>
 			</TBODY>
 		</TABLE>
 		<H1>
