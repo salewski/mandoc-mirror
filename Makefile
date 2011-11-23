@@ -23,7 +23,10 @@ VDATE		 = 8 October 2011
 #
 CFLAGS	 	+= -DUSE_WCHAR
 
-# If your system has manpath(1), check this off.
+# If your system has manpath(1), uncomment this.  This is most any
+# system that's not OpenBSD or NetBSD.  If uncommented, apropos(1),
+# mandocdb(8), and man.cgi will popen(3) manpath(1) to get the MANPATH
+# variable.
 # CFLAGS	+= -DUSE_MANPATH
 
 CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
@@ -102,6 +105,8 @@ SRCS		 = Makefile \
 		   mandocdb.c \
 		   mandocdb.h \
 		   mandoc_char.7 \
+		   manpath.c \
+		   manpath.h \
 		   mdoc.h \
 		   mdoc.7 \
 		   mdoc.c \
@@ -272,25 +277,25 @@ $(MANDOC_HTML_OBJS) $(MANDOC_HTML_LNS): html.h
 $(MANDOC_TERM_OBJS) $(MANDOC_TERM_LNS): term.h
 $(MANDOC_OBJS) $(MANDOC_LNS): main.h mandoc.h mdoc.h man.h config.h out.h
 
-MANDOCDB_OBJS	 = mandocdb.o
-MANDOCDB_LNS	 = mandocdb.ln
+MANDOCDB_OBJS	 = mandocdb.o manpath.o
+MANDOCDB_LNS	 = mandocdb.ln manpath.ln
 
-$(MANDOCDB_OBJS) $(MANDOCDB_LNS): mandocdb.h mandoc.h mdoc.h man.h config.h
+$(MANDOCDB_OBJS) $(MANDOCDB_LNS): mandocdb.h mandoc.h mdoc.h man.h config.h manpath.h
 
 PRECONV_OBJS	 = preconv.o
 PRECONV_LNS	 = preconv.ln
 
 $(PRECONV_OBJS) $(PRECONV_LNS): config.h
 
-APROPOS_OBJS	 = apropos.o apropos_db.o
-APROPOS_LNS	 = apropos.ln apropos_db.ln
+APROPOS_OBJS	 = apropos.o apropos_db.o manpath.o
+APROPOS_LNS	 = apropos.ln apropos_db.ln manpath.ln
 
-$(APROPOS_OBJS) $(APROPOS_LNS): config.h mandoc.h mandocdb.h apropos_db.h
+$(APROPOS_OBJS) $(APROPOS_LNS): config.h mandoc.h apropos_db.h manpath.h mandocdb.h
 
-CGI_OBJS	 = cgi.o apropos_db.o
-CGI_LNS	 	 = cgi.ln apropos_db.ln
+CGI_OBJS	 = cgi.o apropos_db.o manpath.o
+CGI_LNS	 	 = cgi.ln apropos_db.ln manpath.ln
 
-$(CGI_OBJS) $(CGI_LNS): config.h mandoc.h mandocdb.h apropos_db.h
+$(CGI_OBJS) $(CGI_LNS): config.h mandoc.h apropos_db.h manpath.h mandocdb.h
 
 DEMANDOC_OBJS	 = demandoc.o
 DEMANDOC_LNS	 = demandoc.ln
@@ -454,7 +459,7 @@ llib-lapropos.ln: $(APROPOS_LNS) llib-llibmandoc.ln
 	$(LINT) $(LINTFLAGS) -Capropos $(APROPOS_LNS) llib-llibmandoc.ln
 
 man.cgi: $(CGI_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(CGI_OBJS) libmandoc.a $(DBLIB)
+	$(CC) $(LDFLAGS) -static -o $@ $(CGI_OBJS) libmandoc.a $(DBLIB)
 
 llib-lman.cgi.ln: $(CGI_LNS) llib-llibmandoc.ln
 	$(LINT) $(LINTFLAGS) -Cman.cgi $(CGI_LNS) llib-llibmandoc.ln
