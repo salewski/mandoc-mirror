@@ -1,0 +1,78 @@
+.Dd $Mdocdate$
+.Dt MAN.CGI 7
+.Os
+.Sh NAME
+.Nm man.cgi
+.Nd cgi for manpage query and display
+.Sh SYNOPSIS
+.Nm
+.Sh DESCRIPTION
+The
+.Nm
+script queries and displays manual pages.
+It interfaces with
+.Xr mandocdb 8
+databases for query and with
+.Xr mandoc 1
+for display.
+This script operates in two modes: secure and insecure.
+.Bl -tag -width Ds
+.It insecure
+Act as a web-based
+.Xr apropos 1
+and
+.Xr mandoc 1 .
+This assumes full access to the file-system.
+It is not recommended for public-facing servers.
+.It secure
+Act on manual pages cached by
+.Xr manup 8 .
+A cached file tree is queried for pre-formatted manuals.
+.El
+.Pp
+To run in insecure mode, drop
+.Nm
+into your web-server's CGI directory.
+The environment variable
+.Ev INSECURE
+must be set.
+.Pp
+To run in secure mode, you must maintain a cache directory of
+preformatted manuals using
+.Xr manup 8 .
+If your web-server is running in a jail, the cache directory must be
+within the jail.
+Set the environment variable
+.Ev CACHE_DIR
+to this directory, which defaults to
+.Pa /cache/man.cgi .
+If you're running in a jailed web-server, make sure the
+.Pa /tmp
+directory exists and is writable.
+.Sh ENVIRONMENT
+.Bl -tag -width Ds
+.It Er INSECURE
+Run in insecure mode.
+Not recommended.
+.It Er CACHE_DIR
+The absolute path of the
+.Xr manup 8
+cache directory.
+.El
+.Sh FILES
+The configuration file
+.Pa etc/man.conf
+must exist within the cache directory.
+This is built by
+.Xr manup 8 .
+.Sh SEE ALSO
+.Xr apropos 1 ,
+.Xr mandoc 1 ,
+.Xr manup 8 ,
+.Xr mandocdb 8
+.Sh AUTHORS
+The
+.Nm
+utility was written by
+.An Kristaps Dzonsons ,
+.Mt kristaps@bsd.lv .

@@ -92,6 +92,7 @@ SRCS		 = Makefile \
 		   man.h \
 		   man.7 \
 		   man.c \
+		   man.cgi.7 \
 		   man_hash.c \
 		   man_html.c \
 		   man_macro.c \
