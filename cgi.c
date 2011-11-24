@@ -63,6 +63,8 @@ struct	req {
 };
 
 static	int		 atou(const char *, unsigned *);
+static	void		 format_insecure(const char *);
+static	void		 format_secure(const char *);
 static	void		 html_print(const char *);
 static	int 		 kval_decode(char *);
 static	void		 kval_parse(struct kval **, size_t *, char *);
@@ -73,6 +75,7 @@ static	void		 pg_search(const struct manpaths *,
 				const struct req *, char *);
 static	void		 pg_show(const struct manpaths *,
 				const struct req *, char *);
+static	void		 resp_bad(void);
 static	void		 resp_baddb(void);
 static	void		 resp_badexpr(const struct req *);
 static	void		 resp_badmanual(void);
@@ -83,7 +86,9 @@ static	void		 resp_index(const struct req *);
 static	void		 resp_search(struct res *, size_t, void *);
 static	void		 resp_searchform(const struct req *);
 
+static	int		  insecure = 1;
 static	const char	 *progname;
+static	const char	 *cache;
 static	const char	 *host;
 
 static	const char * const pages[PAGE__MAX] = {
@@ -361,6 +366,14 @@ resp_badexpr(const struct req *req)
 }
 
 static void
+resp_bad(void)
+{
+	resp_begin_html(500, "Internal Server Error");
+	puts("<P>Generic badness happened.</P>");
+	resp_end_html();
+}
+
+static void
 resp_baddb(void)
 {
 
@@ -421,11 +434,63 @@ pg_index(const struct manpaths *ps, const struct req *req, char *path)
 }
 
 static void
-pg_show(const struct manpaths *ps, const struct req *req, char *path)
+format_insecure(const char *file)
 {
 	pid_t		 pid;
+	char		 cmd[MAXPATHLEN];
+
+	strlcpy(cmd, "man=", MAXPATHLEN);
+	strlcat(cmd, progname, MAXPATHLEN);
+	strlcat(cmd, "/search?expr=%N&sec=%S", MAXPATHLEN);
+
+	/* Get ready to call the child mandoc(1) process. */
+
+	if (-1 == (pid = fork()))
+		exit(EXIT_FAILURE);
+
+	if (pid > 0) {
+		waitpid(pid, NULL, 0);
+		return;
+	}
+
+	dup2(STDOUT_FILENO, STDERR_FILENO);
+
+	puts("Content-Type: text/html; charset=utf-8\n");
+
+	fflush(stdout);
+
+	execlp("mandoc", "mandoc", "-T", 
+		"html", "-O", cmd, file, (char *)NULL);
+}
+
+static void
+format_secure(const char *file)
+{
+	char		 buf[BUFSIZ];
+	int		 fd;
+	ssize_t		 ssz;
+
+	if (-1 == (fd = open(file, O_RDONLY, 0))) {
+		resp_baddb();
+		return;
+	}
+
+	resp_begin_http(200, NULL);
+
+	do {
+		ssz = read(fd, buf, BUFSIZ);
+		if (ssz > 0)
+			write(STDOUT_FILENO, buf, ssz);
+	} while (ssz > 0);
+
+	close(fd);
+}
+
+static void
+pg_show(const struct manpaths *ps, const struct req *req, char *path)
+{
 	char		*sub;
-	char		 file[MAXPATHLEN], cmd[MAXPATHLEN];
+	char		 file[MAXPATHLEN];
 	int		 rc;
 	unsigned int	 vol, rec;
 	DB		*db;
@@ -470,34 +535,17 @@ pg_show(const struct manpaths *ps, const struct req *req, char *path)
 
 	/* Extra filename: the first nil-terminated entry. */
 
+	(*db->close)(db);
+
 	strlcpy(file, ps->paths[vol], MAXPATHLEN);
 	strlcat(file, "/", MAXPATHLEN);
 	strlcat(file, (char *)val.data, MAXPATHLEN);
 
-	(*db->close)(db);
-
-	strlcpy(cmd, "man=", MAXPATHLEN);
-	strlcat(cmd, progname, MAXPATHLEN);
-	strlcat(cmd, "/search?expr=%N&sec=%S", MAXPATHLEN);
-
-	/* Get ready to call the child mandoc(1) process. */
-
-	if (-1 == (pid = fork()))
-		exit(EXIT_FAILURE);
-
-	if (pid > 0) {
-		waitpid(pid, NULL, 0);
-		return;
-	}
-
-	dup2(STDOUT_FILENO, STDERR_FILENO);
-
-	puts("Content-Type: text/html; charset=utf-8\n");
-
-	fflush(stdout);
-
-	execlp("mandoc", "mandoc", "-T", 
-		"html", "-O", cmd, file, (char *)NULL);
+	if ( ! insecure) {
+		strlcat(file, ".html", MAXPATHLEN);
+		format_secure(file);
+	} else
+		format_insecure(file);
 }
 
 static void
@@ -586,6 +634,18 @@ main(void)
 	if (NULL == progname)
 		progname = "";
 
+	cache = getenv("CACHE_DIR");
+	if (NULL == cache)
+		cache = "/cache/man.cgi";
+
+	if (NULL == getenv("INSECURE")) {
+		insecure = 0;
+		if (-1 == chdir(cache)) {
+			resp_bad();
+			return(EXIT_FAILURE);
+		}
+	}
+
 	host = getenv("HTTP_HOST");
 	if (NULL == host)
 		host = "localhost";
@@ -629,7 +689,10 @@ main(void)
 	/* Initialise MANPATH. */
 
 	memset(&paths, 0, sizeof(struct manpaths));
-	manpath_parse(&paths, NULL, NULL);
+	if ( ! insecure)
+		manpath_manconf("etc/man.conf", &paths);
+	else
+		manpath_parse(&paths, NULL, NULL);
 
 	/* Route pages. */
 
