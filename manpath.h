@@ -29,6 +29,7 @@ struct	manpaths {
 
 __BEGIN_DECLS
 
+void	 manpath_manconf(struct manpaths *);
 void	 manpath_parse(struct manpaths *, char *, char *);
 void	 manpath_parseconf(struct manpaths *);
 void	 manpath_parseline(struct manpaths *, char *);

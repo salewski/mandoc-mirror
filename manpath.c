@@ -92,8 +92,8 @@ manpath_add(struct manpaths *dirs, const char *dir)
 void
 manpath_parseconf(struct manpaths *dirs)
 {
-	FILE		*stream;
 #ifdef	USE_MANPATH
+	FILE		*stream;
 	char		*buf;
 	size_t		 sz, bsz;
 
@@ -123,6 +123,25 @@ manpath_parseconf(struct manpaths *dirs)
 	free(buf);
 	pclose(stream);
 #else
+	manpath_manconf(dirs);
+#endif
+}
+
+void
+manpath_free(struct manpaths *p)
+{
+	int		 i;
+
+	for (i = 0; i < p->sz; i++)
+		free(p->paths[i]);
+
+	free(p->paths);
+}
+
+void
+manpath_manconf(struct manpaths *dirs)
+{
+	FILE		*stream;
 	char		*p, *q;
 	size_t	 	 len, keysz;
 
@@ -152,16 +171,4 @@ manpath_parseconf(struct manpaths *dirs)
 	}
 
 	fclose(stream);
-#endif
-}
-
-void
-manpath_free(struct manpaths *p)
-{
-	int		 i;
-
-	for (i = 0; i < p->sz; i++)
-		free(p->paths[i]);
-
-	free(p->paths);
 }
