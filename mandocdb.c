@@ -386,7 +386,7 @@ main(int argc, char *argv[])
 		for (i = 0; i < argc; i++)
 			dirs.paths[i] = mandoc_strdup(argv[i]);
 	} else
-		manpath_parseconf(&dirs);
+		manpath_parse(&dirs, NULL, NULL);
 
 	for (i = 0; i < dirs.sz; i++) {
 		ibuf[0] = fbuf[0] = '\0';
