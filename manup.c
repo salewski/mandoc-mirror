@@ -391,8 +391,10 @@ treecpy(char *dst, char *src)
 	xstrlcat(src, "/mandoc.db", MAXPATHLEN);
 	xstrlcat(dst, "/mandoc.db", MAXPATHLEN);
 
-	if ((rc = isnewer(dst, src)) <= 0)
+	if (-1 == (rc = isnewer(dst, src)))
 		return(0);
+	else if (rc == 0)
+		return(1);
 
 	dst[(int)dsz] = src[(int)ssz] = '\0';
 
@@ -425,6 +427,9 @@ manup(const struct manpaths *dirs, const char *dir)
 
 	xstrlcat(dst, "/man.conf", MAXPATHLEN);
 
+	if (verbose)
+		printf("%s\n", dst);
+
 	if (NULL == (f = fopen(dst, "w"))) {
 		perror(dst);
 		return(0);
@@ -451,7 +456,17 @@ manup(const struct manpaths *dirs, const char *dir)
 		else if (0 == c)
 			continue;
 
-		fprintf(f, "_whatdb %s/whatis.db\n", path);
+		/*
+		 * We want to use a relative path here because manpath.h
+		 * will realpath() when invoked with man.cgi, and we'll
+		 * make sure to chdir() into the cache directory before.
+		 *
+		 * This allows the cache directory to be in an arbitrary
+		 * place, working in both chroot() and non-chroot()
+		 * "safe" modes.
+		 */
+		assert('/' == path[0]);
+		fprintf(f, "_whatdb %s/whatis.db\n", path + 1);
 	}
 
 	fclose(f);
