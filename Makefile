@@ -50,8 +50,8 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 # comment out apropos and mandocdb. 
 #
 #DBLIB		 = -ldb
-DBBIN		 = apropos mandocdb man.cgi
-DBLN		 = llib-lapropos.ln llib-lmandocdb.ln llib-lman.cgi.ln
+DBBIN		 = apropos mandocdb man.cgi manup
+DBLN		 = llib-lapropos.ln llib-lmandocdb.ln llib-lman.cgi.ln llib-lmanup.ln
 
 all: mandoc preconv demandoc $(DBBIN)
 
@@ -107,6 +107,8 @@ SRCS		 = Makefile \
 		   mandoc_char.7 \
 		   manpath.c \
 		   manpath.h \
+		   manup.c \
+		   manup.8 \
 		   mdoc.h \
 		   mdoc.7 \
 		   mdoc.c \
@@ -297,6 +299,11 @@ CGI_LNS	 	 = cgi.ln apropos_db.ln manpath.ln
 
 $(CGI_OBJS) $(CGI_LNS): config.h mandoc.h apropos_db.h manpath.h mandocdb.h
 
+MANUP_OBJS	 = manup.o manpath.o
+MANUP_LNS 	 = manup.ln manpath.ln
+
+$(MANUP_OBJS) $(MANUP_LNS): config.h mandoc.h manpath.h 
+
 DEMANDOC_OBJS	 = demandoc.o
 DEMANDOC_LNS	 = demandoc.ln
 
@@ -387,6 +394,8 @@ clean:
 	rm -f llib-lapropos.ln $(APROPOS_LNS)
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f llib-lman.cgi.ln $(CGI_LNS)
+	rm -f manup $(MANUP_OBJS)
+	rm -f llib-lmanup.ln $(MANUP_LNS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f llib-ldemandoc.ln $(DEMANDOC_LNS)
 	rm -f mandoc $(MANDOC_OBJS)
@@ -457,6 +466,12 @@ apropos: $(APROPOS_OBJS) libmandoc.a
 
 llib-lapropos.ln: $(APROPOS_LNS) llib-llibmandoc.ln
 	$(LINT) $(LINTFLAGS) -Capropos $(APROPOS_LNS) llib-llibmandoc.ln
+
+manup: $(MANUP_OBJS) libmandoc.a
+	$(CC) $(LDFLAGS) -o $@ $(MANUP_OBJS) libmandoc.a $(DBLIB)
+
+llib-lmanup.ln: $(MANUP_LNS) llib-llibmandoc.ln
+	$(LINT) $(LINTFLAGS) -Cmanup $(MANUP_LNS) llib-llibmandoc.ln
 
 man.cgi: $(CGI_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -static -o $@ $(CGI_OBJS) libmandoc.a $(DBLIB)

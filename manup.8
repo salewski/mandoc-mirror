@@ -1,0 +1,82 @@
+.\"	$Id$
+.\"
+.\" Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd $Mdocdate$
+.Dt MANUP 8
+.Os
+.Sh NAME
+.Nm manup
+.Nd update a man.cgi manpage cache
+.Sh SYNOPSIS
+.Nm manup
+.Op Fl fv
+.Op Fl M Ar manpath
+.Op Fl m Ar manpath
+.Op Fl o Ar path
+.Sh DESCRIPTION
+The
+.Nm
+utility updates cached manpages for a jailed man.cgi.
+Its arguments are as follows:
+.Bl -tag -width Ds
+.It Fl f
+Force an update to all files.
+.It Fl v
+Print each file being updated.
+.It Fl M Ar manpath
+Use the colon-separated path instead of the default list of paths
+searched for
+.Xr mandocdb 8
+databases.
+Invalid paths, or paths without manual databases, are ignored.
+.It Fl m Ar manpath
+Append the colon-separated paths to the list of paths searched
+for
+.Xr mandocdb 8
+databases.
+Invalid paths, or paths without manual databases, are ignored.
+.It Fl o Ar path
+Update into the directory tree under
+.Ar path .
+.El
+.Pp
+By default,
+.Nm
+searches for
+.Xr mandocdb 8
+databases in the default paths stipulated by
+.Xr man 1
+and updates the cache in
+.Pa /var/www/cache/man.cgi .
+.Pp
+An update occurs when a
+.Xr mandocdb 8
+database is older than the cached copy.
+Cached manual pages are only updated if older than the master copy.
+If
+.Fl f
+is specified, all files are updated.
+.Sh EXIT STATUS
+.Ex -std
+.Sh SEE ALSO
+.Xr mandoc 1 ,
+.Xr mandocdb 8
+.Sh AUTHORS
+The
+.Nm
+utility was written by
+.An Kristaps Dzonsons ,
+.Mt kristaps@bsd.lv .
