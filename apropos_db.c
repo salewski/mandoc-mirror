@@ -115,12 +115,12 @@ static	const struct type types[] = {
 };
 
 static	DB	*btree_open(void);
-static	int	 btree_read(const DBT *, 
+static	int	 btree_read(const DBT *,
 			const struct mchars *, char **);
 static	int	 expreval(const struct expr *, int *);
-static	void	 exprexec(const struct expr *, 
+static	void	 exprexec(const struct expr *,
 			const char *, uint64_t, struct rec *);
-static	int	 exprmark(const struct expr *, 
+static	int	 exprmark(const struct expr *,
 			const char *, uint64_t, int *);
 static	struct expr *exprexpr(int, char *[], int *, int *, size_t *);
 static	struct expr *exprterm(char *, int);
@@ -148,7 +148,7 @@ btree_open(void)
 	info.flags = R_DUP;
 
 	db = dbopen(MANDOC_DB, O_RDONLY, 0, DB_BTREE, &info);
-	if (NULL != db) 
+	if (NULL != db)
 		return(db);
 
 	return(NULL);
@@ -176,7 +176,7 @@ btree_read(const DBT *v, const struct mchars *mc, char **buf)
 /*
  * Take a Unicode codepoint and produce its UTF-8 encoding.
  * This isn't the best way to do this, but it works.
- * The magic numbers are from the UTF-8 packaging.  
+ * The magic numbers are from the UTF-8 packaging.
  * They're not as scary as they seem: read the UTF-8 spec for details.
  */
 static size_t
@@ -241,7 +241,7 @@ norm_string(const char *val, const struct mchars *mc, char **buf)
 	const char	 *seq, *cpp;
 	int		  len, u, pos;
 	enum mandoc_esc	  esc;
-	static const char res[] = { '\\', '\t', 
+	static const char res[] = { '\\', '\t',
 				ASCII_NBRSP, ASCII_HYPH, '\0' };
 
 	/* Pre-allocate by the length of the input */
@@ -287,7 +287,7 @@ norm_string(const char *val, const struct mchars *mc, char **buf)
 		if (ESCAPE_ERROR == esc)
 			break;
 
-		/* 
+		/*
 		 * XXX - this just does UTF-8, but we need to know
 		 * beforehand whether we should do text substitution.
 		 */
@@ -382,7 +382,7 @@ index_read(const DBT *key, const DBT *val, int index,
  */
 int
 apropos_search(int pathsz, char **paths, const struct opts *opts,
-		const struct expr *expr, size_t terms, void *arg, 
+		const struct expr *expr, size_t terms, void *arg,
 		void (*res)(struct res *, size_t, void *))
 {
 	struct rectree	 tree;
@@ -420,7 +420,7 @@ apropos_search(int pathsz, char **paths, const struct opts *opts,
 
 	for (mlen = i = 0; i < tree.len; i++)
 		if (tree.node[i].matched)
-			memcpy(&ress[mlen++], &tree.node[i].res, 
+			memcpy(&ress[mlen++], &tree.node[i].res,
 					sizeof(struct res));
 
 	(*res)(ress, mlen, arg);
@@ -460,7 +460,7 @@ single_search(struct rectree *tree, const struct opts *opts,
 
 	memset(&r, 0, sizeof(struct rec));
 
-	if (NULL == (btree = btree_open())) 
+	if (NULL == (btree = btree_open()))
 		return(1);
 
 	if (NULL == (idx = index_open())) {
@@ -469,8 +469,8 @@ single_search(struct rectree *tree, const struct opts *opts,
 	}
 
 	while (0 == (ch = (*btree->seq)(btree, &key, &val, R_NEXT))) {
- 		if (key.size < 2 || sizeof(struct db_val) != val.size) 
-  			break;
+		if (key.size < 2 || sizeof(struct db_val) != val.size)
+			break;
 		if ( ! btree_read(&key, mc, &buf))
 			break;
 
@@ -492,13 +492,13 @@ single_search(struct rectree *tree, const struct opts *opts,
 		 */
 
 		for (leaf = root; leaf >= 0; )
-			if (rec > rs[leaf].res.rec && 
+			if (rec > rs[leaf].res.rec &&
 					rs[leaf].rhs >= 0)
 				leaf = rs[leaf].rhs;
-			else if (rec < rs[leaf].res.rec && 
+			else if (rec < rs[leaf].res.rec &&
 					rs[leaf].lhs >= 0)
 				leaf = rs[leaf].lhs;
-			else 
+			else
 				break;
 
 		/*
@@ -540,10 +540,11 @@ single_search(struct rectree *tree, const struct opts *opts,
 			(rs, (tree->len + 1) * sizeof(struct rec));
 
 		memcpy(&rs[tree->len], &r, sizeof(struct rec));
-		rs[tree->len].matches = 
+		rs[tree->len].matches =
 			mandoc_calloc(terms, sizeof(int));
 
-		exprexec(expr, buf, mask, &rs[tree->len]); 
+		exprexec(expr, buf, mask, &rs[tree->len]);
+
 		/* Append to our tree. */
 
 		if (leaf >= 0) {
@@ -553,11 +554,11 @@ single_search(struct rectree *tree, const struct opts *opts,
 				rs[leaf].lhs = tree->len;
 		} else
 			root = tree->len;
-		
+
 		memset(&r, 0, sizeof(struct rec));
 		tree->len++;
 	}
-	
+
 	(*btree->close)(btree);
 	(*idx->close)(idx);
 
@@ -632,7 +633,7 @@ exprexpr(int argc, char *argv[], int *pos, int *lvl, size_t *tt)
 		log = 0;
 
 		if (NULL != e && 0 == strcmp("-a", argv[*pos]))
-			log = 1;			
+			log = 1;
 		else if (NULL != e && 0 == strcmp("-o", argv[*pos]))
 			log = 2;
 
@@ -744,7 +745,7 @@ void
 exprfree(struct expr *p)
 {
 	struct expr	*pp;
-	
+
 	while (NULL != p) {
 		if (p->subexpr)
 			exprfree(p->subexpr);
@@ -758,7 +759,7 @@ exprfree(struct expr *p)
 }
 
 static int
-exprmark(const struct expr *p, const char *cp, 
+exprmark(const struct expr *p, const char *cp,
 		uint64_t mask, int *ms)
 {
 
@@ -813,7 +814,7 @@ expreval(const struct expr *p, int *ms)
 		for ( ; p->next && p->next->and; p = p->next) {
 			/* Evaluate a subexpression, if applicable. */
 			if (p->next->subexpr && ! ms[p->next->index])
-				ms[p->next->index] = 
+				ms[p->next->index] =
 					expreval(p->next->subexpr, ms);
 			match = match && ms[p->next->index];
 		}
@@ -830,11 +831,11 @@ expreval(const struct expr *p, int *ms)
  * If this evaluates to true, mark the expression as satisfied.
  */
 static void
-exprexec(const struct expr *p, const char *cp, 
+exprexec(const struct expr *e, const char *cp,
 		uint64_t mask, struct rec *r)
 {
 
 	assert(0 == r->matched);
-	exprmark(p, cp, mask, r->matches);
-	r->matched = expreval(p, r->matches);
+	exprmark(e, cp, mask, r->matches);
+	r->matched = expreval(e, r->matches);
 }

@@ -20,7 +20,6 @@
 #endif
 
 #include <assert.h>
-#include <ctype.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,7 +60,7 @@ main(int argc, char *argv[])
 	e = NULL;
 	rc = 0;
 
-	while (-1 != (ch = getopt(argc, argv, "M:m:S:s:"))) 
+	while (-1 != (ch = getopt(argc, argv, "M:m:S:s:")))
 		switch (ch) {
 		case ('M'):
 			defpaths = optarg;
@@ -96,10 +95,10 @@ main(int argc, char *argv[])
 	}
 
 	rc = apropos_search
-		(paths.sz, paths.paths, 
+		(paths.sz, paths.paths,
 		 &opts, e, terms, NULL, list);
 
-	if (0 == rc) 
+	if (0 == rc)
 		fprintf(stderr, "%s: Error reading "
 				"manual database\n", progname);
 
@@ -119,8 +118,8 @@ list(struct res *res, size_t sz, void *arg)
 	qsort(res, sz, sizeof(struct res), cmp);
 
 	for (i = 0; i < (int)sz; i++)
-		printf("%s(%s%s%s) - %s\n", res[i].title, 
-				res[i].cat, 
+		printf("%s(%s%s%s) - %s\n", res[i].title,
+				res[i].cat,
 				*res[i].arch ? "/" : "",
 				*res[i].arch ? res[i].arch : "",
 				res[i].desc);
@@ -139,9 +138,10 @@ usage(void)
 {
 
 	fprintf(stderr, "usage: %s "
-			"[-M dirs] "
-			"[-m dirs] "
+			"[-M path] "
+			"[-m path] "
 			"[-S arch] "
 			"[-s section] "
-			"expression...\n", progname);
+			"expression...\n",
+			progname);
 }

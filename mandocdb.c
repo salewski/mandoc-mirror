@@ -378,7 +378,7 @@ main(int argc, char *argv[])
 				&maxrec, &recs, &recsz);
 
 		if (OP_UPDATE == op)
-			index_merge(of, mp, &dbuf, &buf, hash, 
+			index_merge(of, mp, &dbuf, &buf, hash,
 					db, fbuf, idx, ibuf, use_all,
 					verb, maxrec, recs, reccur);
 
@@ -411,10 +411,15 @@ main(int argc, char *argv[])
 		sz2 = strlcat(ibuf, MANDOC_IDX, MAXPATHLEN);
 
 		if (sz1 >= MAXPATHLEN || sz2 >= MAXPATHLEN) {
-			fprintf(stderr, "%s: Path too long\n", 
+			fprintf(stderr, "%s: Path too long\n",
 					dirs.paths[i]);
 			exit((int)MANDOCLEVEL_BADARG);
 		}
+
+		if (db)
+			(*db->close)(db);
+		if (idx)
+			(*idx->close)(idx);
 
 		db = dbopen(fbuf, flags, 0644, DB_BTREE, &info);
 		idx = dbopen(ibuf, flags, 0644, DB_RECNO, NULL);
@@ -444,7 +449,7 @@ main(int argc, char *argv[])
 
 		of = of->first;
 
-		index_merge(of, mp, &dbuf, &buf, hash, db, fbuf, 
+		index_merge(of, mp, &dbuf, &buf, hash, db, fbuf,
 				idx, ibuf, use_all, verb,
 				maxrec, recs, reccur);
 	}
@@ -471,7 +476,7 @@ out:
 void
 index_merge(const struct of *of, struct mparse *mp,
 		struct buf *dbuf, struct buf *buf,
-		DB *hash, DB *db, const char *dbf, 
+		DB *hash, DB *db, const char *dbf,
 		DB *idx, const char *idxf, int use_all, int verb,
 		recno_t maxrec, const recno_t *recs, size_t reccur)
 {

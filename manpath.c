@@ -19,6 +19,7 @@
 #include "config.h"
 #endif
 
+#include <sys/types.h>
 #include <assert.h>
 #include <ctype.h>
 #include <limits.h>
@@ -35,25 +36,25 @@
 static	void	 manpath_add(struct manpaths *, const char *);
 
 void
-manpath_parse(struct manpaths *dirs, char *defp, char *auxp) 
+manpath_parse(struct manpaths *dirs, char *defp, char *auxp)
 {
 
-	if (NULL != getenv("MANPATH"))
+	manpath_parseline(dirs, auxp);
+
+	if (NULL == defp)
 		defp = getenv("MANPATH");
 
 	if (NULL == defp)
 		manpath_parseconf(dirs);
 	else
 		manpath_parseline(dirs, defp);
-
-	manpath_parseline(dirs, auxp);
 }
 
 /*
  * Parse a FULL pathname from a colon-separated list of arrays.
  */
 void
-manpath_parseline(struct manpaths *dirs, char *path) 
+manpath_parseline(struct manpaths *dirs, char *path)
 {
 	char	*dir;
 
@@ -69,7 +70,7 @@ manpath_parseline(struct manpaths *dirs, char *path)
  * Grow the array one-by-one for simplicity's sake.
  */
 static void
-manpath_add(struct manpaths *dirs, const char *dir) 
+manpath_add(struct manpaths *dirs, const char *dir)
 {
 	char		 buf[PATH_MAX];
 	char		*cp;
@@ -83,7 +84,7 @@ manpath_add(struct manpaths *dirs, const char *dir)
 			return;
 
 	dirs->paths = mandoc_realloc
-		(dirs->paths, 
+		(dirs->paths,
 		 ((size_t)dirs->sz + 1) * sizeof(char *));
 
 	dirs->paths[dirs->sz++] = mandoc_strdup(cp);
@@ -143,7 +144,7 @@ manpath_manconf(const char *file, struct manpaths *dirs)
 {
 	FILE		*stream;
 	char		*p, *q;
-	size_t	 	 len, keysz;
+	size_t		 len, keysz;
 
 	keysz = strlen(MAN_CONF_KEY);
 	assert(keysz > 0);

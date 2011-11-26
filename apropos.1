@@ -44,7 +44,7 @@ searched for
 databases.
 Invalid paths, or paths without manual databases, are ignored.
 .It Fl m Ar manpath
-Append the colon-separated paths to the list of paths searched
+Prepend the colon-separated paths to the list of paths searched
 for
 .Xr mandocdb 8
 databases.
@@ -154,10 +154,10 @@ If an architecture is specified in the output, use
 .Sh ENVIRONMENT
 .Bl -tag -width Ds
 .It Ev MANPATH
-Comma-separated paths overriding the default list of paths searched for
+Colon-separated paths overriding the default list of paths searched for
 manual databases.
 Invalid paths, or paths without manual databases, are ignored.
-Takes precedence over
+Overridden by
 .Fl M .
 .El
 .\" .Sh FILES
