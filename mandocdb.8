@@ -22,7 +22,7 @@
 .Nd index UNIX manuals
 .Sh SYNOPSIS
 .Nm
-.Op Fl v
+.Op Fl av
 .Op Ar dir...
 .Nm
 .Op Fl v
@@ -42,8 +42,19 @@ manuals and indexes them in a
 and
 .Sx Index Database
 for fast retrieval.
+.Pp
 The arguments are as follows:
 .Bl -tag -width Ds
+.It Fl a
+Use all directories and files found below
+.Ar dir ... .
+By default, only files matching
+.Sm off
+.Sy man Ar section Li /
+.Op Ar arch Li /
+.Ar title . section
+.Sm on
+will be used.
 .It Fl d Ar dir
 Merge (remove and re-add)
 .Ar
