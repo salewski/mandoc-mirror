@@ -52,8 +52,10 @@
 	} while (/* CONSTCOND */0)
 
 static	int		 indexhtml(char *);
+#if 0
 static	int		 jobstart(const char *, const char *, pid_t *);
 static	int		 jobwait(pid_t);
+#endif
 static	int		 manup(const struct manpaths *, const char *);
 static	int		 mkpath(char *, mode_t, mode_t);
 static	int		 treecpy(char *, char *);
@@ -194,6 +196,7 @@ out:
 	return(rc);
 }
 
+#if 0
 /*
  * Clean up existing child.
  * Return 1 if cleaned up fine (or none was started) and 0 otherwise.
@@ -252,6 +255,7 @@ jobstart(const char *dst, const char *src, pid_t *pid)
 	exit(EXIT_FAILURE);
 	/* NOTREACHED */
 }
+#endif
 
 /*
  * Pass over the recno database and re-create HTML pages if they're
@@ -292,7 +296,7 @@ indexhtml(char *dst)
 
 		xstrlcat(dst, "/", MAXPATHLEN);
 		xstrlcat(dst, f, MAXPATHLEN);
-		xstrlcat(dst, ".html", MAXPATHLEN);
+		/*xstrlcat(dst, ".html", MAXPATHLEN);*/
 
 		if (-1 == (rc = isnewer(dst, f))) {
 			fprintf(stderr, "%s: Manpage missing\n", f);
@@ -310,8 +314,12 @@ indexhtml(char *dst)
 		}
 
 		*d = '/';
-		if ( ! jobstart(dst, f, &pid))
+
+		if ( ! filecpy(dst, f))
 			break;
+
+		/*if ( ! jobstart(dst, f, &pid))
+			break;*/
 		if (verbose)
 			printf("%s\n", dst);
 	}
@@ -320,8 +328,8 @@ indexhtml(char *dst)
 
 	if (c < 0)
 		perror(fname);
-	if ( ! jobwait(pid))
-		c = -1;
+	/*if ( ! jobwait(pid))
+		c = -1;*/
 
 	return(1 == c ? 1 : -1);
 }

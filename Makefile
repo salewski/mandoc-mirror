@@ -27,7 +27,10 @@ CFLAGS	 	+= -DUSE_WCHAR
 # system that's not OpenBSD or NetBSD.  If uncommented, apropos(1),
 # mandocdb(8), and man.cgi will popen(3) manpath(1) to get the MANPATH
 # variable.
-# CFLAGS	+= -DUSE_MANPATH
+CFLAGS		+= -DUSE_MANPATH
+
+# If your system doesn't support static binaries, comment this.
+#STATIC		 = -static
 
 CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
@@ -50,8 +53,8 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 # comment out apropos and mandocdb. 
 #
 #DBLIB		 = -ldb
-DBBIN		 = apropos mandocdb man.cgi manup
-DBLN		 = llib-lapropos.ln llib-lmandocdb.ln llib-lman.cgi.ln llib-lmanup.ln
+DBBIN		 = apropos mandocdb man.cgi catman whatis
+DBLN		 = llib-lapropos.ln llib-lmandocdb.ln llib-lman.cgi.ln llib-lcatman.ln
 
 all: mandoc preconv demandoc $(DBBIN)
 
@@ -108,8 +111,8 @@ SRCS		 = Makefile \
 		   mandoc_char.7 \
 		   manpath.c \
 		   manpath.h \
-		   manup.c \
-		   manup.8 \
+		   catman.c \
+		   catman.8 \
 		   mdoc.h \
 		   mdoc.7 \
 		   mdoc.c \
@@ -295,15 +298,30 @@ APROPOS_LNS	 = apropos.ln apropos_db.ln manpath.ln
 
 $(APROPOS_OBJS) $(APROPOS_LNS): config.h mandoc.h apropos_db.h manpath.h mandocdb.h
 
-CGI_OBJS	 = cgi.o apropos_db.o manpath.o
-CGI_LNS	 	 = cgi.ln apropos_db.ln manpath.ln
+CGI_OBJS	 = $(MANDOC_HTML_OBJS) \
+		   $(MANDOC_MAN_OBJS) \
+		   $(MANDOC_TERM_OBJS) \
+		   cgi.o \
+		   apropos_db.o \
+		   manpath.o \
+		   out.o \
+		   tree.o
 
-$(CGI_OBJS) $(CGI_LNS): config.h mandoc.h apropos_db.h manpath.h mandocdb.h
+CGI_LNS	 	 = $(MANDOC_HTML_LNS) \
+		   $(MANDOC_MAN_LNS) \
+		   $(MANDOC_TERM_LNS) \
+		   cgi.ln \
+		   apropos_db.ln \
+		   manpath.ln \
+		   out.ln \
+		   tree.ln
 
-MANUP_OBJS	 = manup.o manpath.o
-MANUP_LNS 	 = manup.ln manpath.ln
+$(CGI_OBJS) $(CGI_LNS): main.h mdoc.h man.h out.h config.h mandoc.h apropos_db.h manpath.h mandocdb.h
 
-$(MANUP_OBJS) $(MANUP_LNS): config.h mandoc.h manpath.h 
+CATMAN_OBJS	 = catman.o manpath.o
+CATMAN_LNS 	 = catman.ln manpath.ln
+
+$(CATMAN_OBJS) $(CATMAN_LNS): config.h mandoc.h manpath.h 
 
 DEMANDOC_OBJS	 = demandoc.o
 DEMANDOC_LNS	 = demandoc.ln
@@ -395,8 +413,8 @@ clean:
 	rm -f llib-lapropos.ln $(APROPOS_LNS)
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f llib-lman.cgi.ln $(CGI_LNS)
-	rm -f manup $(MANUP_OBJS)
-	rm -f llib-lmanup.ln $(MANUP_LNS)
+	rm -f catman $(CATMAN_OBJS)
+	rm -f llib-lcatman.ln $(CATMAN_LNS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f llib-ldemandoc.ln $(DEMANDOC_LNS)
 	rm -f mandoc $(MANDOC_OBJS)
@@ -462,20 +480,23 @@ preconv: $(PRECONV_OBJS)
 llib-lpreconv.ln: $(PRECONV_LNS) llib-llibmandoc.ln
 	$(LINT) $(LINTFLAGS) -Cpreconv $(PRECONV_LNS) llib-llibmandoc.ln
 
+whatis: apropos
+	cp -f apropos whatis
+
 apropos: $(APROPOS_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(APROPOS_OBJS) libmandoc.a $(DBLIB)
 
 llib-lapropos.ln: $(APROPOS_LNS) llib-llibmandoc.ln
 	$(LINT) $(LINTFLAGS) -Capropos $(APROPOS_LNS) llib-llibmandoc.ln
 
-manup: $(MANUP_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(MANUP_OBJS) libmandoc.a $(DBLIB)
+catman: $(CATMAN_OBJS) libmandoc.a
+	$(CC) $(LDFLAGS) -o $@ $(CATMAN_OBJS) libmandoc.a $(DBLIB)
 
-llib-lmanup.ln: $(MANUP_LNS) llib-llibmandoc.ln
-	$(LINT) $(LINTFLAGS) -Cmanup $(MANUP_LNS) llib-llibmandoc.ln
+llib-lcatman.ln: $(CATMAN_LNS) llib-llibmandoc.ln
+	$(LINT) $(LINTFLAGS) -Ccatman $(CATMAN_LNS) llib-llibmandoc.ln
 
 man.cgi: $(CGI_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -static -o $@ $(CGI_OBJS) libmandoc.a $(DBLIB)
+	$(CC) $(LDFLAGS) $(STATIC) -o $@ $(CGI_OBJS) libmandoc.a $(DBLIB)
 
 llib-lman.cgi.ln: $(CGI_LNS) llib-llibmandoc.ln
 	$(LINT) $(LINTFLAGS) -Cman.cgi $(CGI_LNS) llib-llibmandoc.ln

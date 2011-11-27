@@ -36,6 +36,9 @@
 
 #include "apropos_db.h"
 #include "mandoc.h"
+#include "mdoc.h"
+#include "man.h"
+#include "main.h"
 #include "manpath.h"
 
 #ifdef __linux__
@@ -63,8 +66,7 @@ struct	req {
 };
 
 static	int		 atou(const char *, unsigned *);
-static	void		 format_insecure(const char *);
-static	void		 format_secure(const char *);
+static	void		 format(const char *);
 static	void		 html_print(const char *);
 static	int 		 kval_decode(char *);
 static	void		 kval_parse(struct kval **, size_t *, char *);
@@ -86,7 +88,6 @@ static	void		 resp_index(const struct req *);
 static	void		 resp_search(struct res *, size_t, void *);
 static	void		 resp_searchform(const struct req *);
 
-static	int		  insecure = 1;
 static	const char	 *progname;
 static	const char	 *cache;
 static	const char	 *host;
@@ -434,56 +435,43 @@ pg_index(const struct manpaths *ps, const struct req *req, char *path)
 }
 
 static void
-format_insecure(const char *file)
+format(const char *file)
 {
-	pid_t		 pid;
-	char		 cmd[MAXPATHLEN];
-
-	strlcpy(cmd, "man=", MAXPATHLEN);
-	strlcat(cmd, progname, MAXPATHLEN);
-	strlcat(cmd, "/search?expr=%N&sec=%S", MAXPATHLEN);
-
-	/* Get ready to call the child mandoc(1) process. */
-
-	if (-1 == (pid = fork()))
-		exit(EXIT_FAILURE);
-
-	if (pid > 0) {
-		waitpid(pid, NULL, 0);
-		return;
-	}
-
-	dup2(STDOUT_FILENO, STDERR_FILENO);
-
-	puts("Content-Type: text/html; charset=utf-8\n");
-
-	fflush(stdout);
-
-	execlp("mandoc", "mandoc", "-T", 
-		"html", "-O", cmd, file, (char *)NULL);
-}
-
-static void
-format_secure(const char *file)
-{
-	char		 buf[BUFSIZ];
+	struct mparse	*mp;
 	int		 fd;
-	ssize_t		 ssz;
+	struct mdoc	*mdoc;
+	struct man	*man;
+	void		*vp;
+	enum mandoclevel rc;
 
 	if (-1 == (fd = open(file, O_RDONLY, 0))) {
 		resp_baddb();
 		return;
 	}
 
-	resp_begin_http(200, NULL);
-
-	do {
-		ssz = read(fd, buf, BUFSIZ);
-		if (ssz > 0)
-			write(STDOUT_FILENO, buf, ssz);
-	} while (ssz > 0);
-
+	mp = mparse_alloc(MPARSE_AUTO, MANDOCLEVEL_FATAL, NULL, NULL);
+	rc = mparse_readfd(mp, fd, file);
 	close(fd);
+
+	if (rc >= MANDOCLEVEL_FATAL) {
+		resp_baddb();
+		return;
+	}
+
+	mparse_result(mp, &mdoc, &man);
+	vp = html_alloc(NULL);
+
+	if (NULL != mdoc) {
+		resp_begin_http(200, NULL);
+		html_mdoc(vp, mdoc);
+	} else if (NULL != man) {
+		resp_begin_http(200, NULL);
+		html_man(vp, man);
+	} else
+		resp_baddb();
+
+	html_free(vp);
+	mparse_free(mp);
 }
 
 static void
@@ -535,17 +523,13 @@ pg_show(const struct manpaths *ps, const struct req *req, char *path)
 
 	/* Extra filename: the first nil-terminated entry. */
 
-	(*db->close)(db);
-
 	strlcpy(file, ps->paths[vol], MAXPATHLEN);
 	strlcat(file, "/", MAXPATHLEN);
 	strlcat(file, (char *)val.data, MAXPATHLEN);
 
-	if ( ! insecure) {
-		strlcat(file, ".html", MAXPATHLEN);
-		format_secure(file);
-	} else
-		format_insecure(file);
+	(*db->close)(db);
+
+	format(file);
 }
 
 static void
@@ -638,12 +622,9 @@ main(void)
 	if (NULL == cache)
 		cache = "/cache/man.cgi";
 
-	if (NULL == getenv("INSECURE")) {
-		insecure = 0;
-		if (-1 == chdir(cache)) {
-			resp_bad();
-			return(EXIT_FAILURE);
-		}
+	if (-1 == chdir(cache)) {
+		resp_bad();
+		return(EXIT_FAILURE);
 	}
 
 	host = getenv("HTTP_HOST");
@@ -689,10 +670,7 @@ main(void)
 	/* Initialise MANPATH. */
 
 	memset(&paths, 0, sizeof(struct manpaths));
-	if ( ! insecure)
-		manpath_manconf("etc/man.conf", &paths);
-	else
-		manpath_parse(&paths, NULL, NULL);
+	manpath_manconf("etc/man.conf", &paths);
 
 	/* Route pages. */
 
