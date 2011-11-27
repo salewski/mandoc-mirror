@@ -579,6 +579,50 @@ recfree(struct rec *rec)
 	free(rec->matches);
 }
 
+/*
+ * Compile a list of straight-up terms.
+ * The arguments are re-written into ~[[:<:]]term[[:>:]], or "term"
+ * surrounded by word boundaries, then pumped through exprterm().
+ * Terms are case-insensitive.
+ * This emulates whatis(1) behaviour.
+ */
+struct expr *
+termcomp(int argc, char *argv[], size_t *tt)
+{
+	char		*buf;
+	int		 pos;
+	struct expr	*e, *next;
+	size_t		 sz;
+
+	buf = NULL;
+	e = NULL;
+	*tt = 0;
+
+	for (pos = 0; pos < argc; pos++) {
+		sz = strlen(argv[pos]) + 16;
+		buf = mandoc_realloc(buf, sz);
+		strlcpy(buf, "~[[:<:]]", sz);
+		strlcat(buf, argv[pos], sz);
+		strlcat(buf, "[[:>:]]", sz);
+		if (NULL == (next = exprterm(buf, 0))) {
+			free(buf);
+			exprfree(e);
+			return(NULL);
+		}
+		if (NULL != e)
+			e->next = next;
+		e = next;
+		(*tt)++;
+	}
+
+	free(buf);
+	return(e);
+}
+
+/*
+ * Compile a sequence of logical expressions.
+ * See apropos.1 for a grammar of this sequence.
+ */
 struct expr *
 exprcomp(int argc, char *argv[], size_t *tt)
 {
@@ -729,7 +773,7 @@ exprterm(char *buf, int cs)
 		e.mask = TYPE_Nm | TYPE_Nd;
 
 	if (e.regex) {
-		i = REG_EXTENDED | REG_NOSUB | cs ? 0 : REG_ICASE;
+		i = REG_EXTENDED | REG_NOSUB | (cs ? 0 : REG_ICASE);
 		if (regcomp(&e.re, e.v, i))
 			return(NULL);
 	}

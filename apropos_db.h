@@ -45,6 +45,7 @@ int	 	 apropos_search(int, char **, const struct opts *,
 			void (*)(struct res *, size_t, void *));
 struct	expr	*exprcomp(int, char *[], size_t *);
 void		 exprfree(struct expr *);
+struct	expr	*termcomp(int, char *[], size_t *);
 
 __END_DECLS
 

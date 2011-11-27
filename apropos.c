@@ -38,7 +38,7 @@ static	char	*progname;
 int
 main(int argc, char *argv[])
 {
-	int		 ch, rc;
+	int		 ch, rc, whatis;
 	struct manpaths	 paths;
 	size_t		 terms;
 	struct opts	 opts;
@@ -53,12 +53,13 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
+	whatis = 0 == strcmp(progname, "whatis");
+
 	memset(&paths, 0, sizeof(struct manpaths));
 	memset(&opts, 0, sizeof(struct opts));
 
 	auxpaths = defpaths = NULL;
 	e = NULL;
-	rc = 0;
 
 	while (-1 != (ch = getopt(argc, argv, "M:m:S:s:")))
 		switch (ch) {
@@ -76,20 +77,23 @@ main(int argc, char *argv[])
 			break;
 		default:
 			usage();
-			goto out;
+			return(EXIT_FAILURE);
 		}
 
 	argc -= optind;
 	argv += optind;
 
-	if (0 == argc) {
-		rc = 1;
-		goto out;
-	}
+	if (0 == argc) 
+		return(EXIT_SUCCESS);
+
+	rc = 0;
 
 	manpath_parse(&paths, defpaths, auxpaths);
 
-	if (NULL == (e = exprcomp(argc, argv, &terms))) {
+	e = whatis ? termcomp(argc, argv, &terms) :
+		     exprcomp(argc, argv, &terms);
+		
+	if (NULL == e) {
 		fprintf(stderr, "%s: Bad expression\n", progname);
 		goto out;
 	}
