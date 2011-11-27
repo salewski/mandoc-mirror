@@ -592,6 +592,7 @@ index_merge(const struct of *of, struct mparse *mp,
 		 */
 
 		dbuf->len = 0;
+		buf_append(dbuf, mdoc ? "mdoc" : (man ? "man" : "cat"));
 		buf_appendb(dbuf, fn, strlen(fn) + 1);
 		buf_appendb(dbuf, msec, strlen(msec) + 1);
 		buf_appendb(dbuf, mtitle, strlen(mtitle) + 1);

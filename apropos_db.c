@@ -366,6 +366,7 @@ index_read(const DBT *key, const DBT *val, int index,
 	rec->res.rec = *(recno_t *)key->data;
 	rec->res.volume = index;
 
+	INDEX_BREAD(rec->res.type);
 	INDEX_BREAD(rec->res.file);
 	INDEX_BREAD(rec->res.cat);
 	INDEX_BREAD(rec->res.title);

@@ -18,6 +18,7 @@
 #define APROPOS_H
 
 struct	res {
+	char		*type; /* file type: mdoc, man or cat */
 	char		*file; /* file in file-system */
 	char		*cat; /* category (3p, 3, etc.) */
 	char		*title; /* title (FOO, etc.) */
