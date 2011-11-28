@@ -53,7 +53,7 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
-	whatis = 0 == strcmp(progname, "whatis");
+	whatis = 0 == strncmp(progname, "whatis", 6);
 
 	memset(&paths, 0, sizeof(struct manpaths));
 	memset(&opts, 0, sizeof(struct opts));
