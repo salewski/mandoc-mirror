@@ -27,9 +27,9 @@ CFLAGS	 	+= -DUSE_WCHAR
 # system that's not OpenBSD or NetBSD.  If uncommented, apropos(1),
 # mandocdb(8), and man.cgi will popen(3) manpath(1) to get the MANPATH
 # variable.
-CFLAGS		+= -DUSE_MANPATH
+#CFLAGS		+= -DUSE_MANPATH
 
-# If your system doesn't support static binaries, comment this.
+# If your system supports static binaries only, uncomment this.
 #STATIC		 = -static
 
 CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
