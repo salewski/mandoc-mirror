@@ -3,11 +3,11 @@
 	<HEAD>
 		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
 		<LINK REL="stylesheet" HREF="index.css" TYPE="text/css" MEDIA="all">
-		<TITLE>mdocml | mdoc macro compiler</TITLE>
+		<TITLE>mdocml | UNIX manpage compiler</TITLE>
 	</HEAD>
 	<BODY>
 		<P CLASS="head">
-			<B>mdocml</B> &#8211; mdoc macro compiler, current version @VERSION@ (@VDATE@)
+			<B>mdocml</B> &#8211; UNIX manpage compiler, current version @VERSION@ (@VDATE@)
 		</P>
 		<P CLASS="subhead">
 			Sources: <A HREF="/snapshots/mdocml.tar.gz">current</A>,
@@ -42,8 +42,7 @@
 			It also includes <A HREF="preconv.1.html">preconv</A>, for recoding multibyte manuals; 
 			<A HREF="demandoc.1.html">demandoc</A>, for emitting only text parts of manuals;
 			<A HREF="mandocdb.8.html">mandocdb</A>, for indexing manuals; and
-			<A HREF="apropos.1.html">apropos</A>, for semantic search of manual content (both <B>mandocdb</B> and <B>apropos</B> are
-			still experimental).
+			<A HREF="apropos.1.html">apropos</A> and <A HREF="whatis.1.html">whatis</A>, for semantic search of manual content.
 			It is a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv</A> project.  
 		</P>
 		<P>
@@ -55,10 +54,10 @@
 		<P>
 			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any modern system; however, you'll
 			need <A HREF="http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html">libdb</A> to build <A
-			HREF="apropos.1.html">apropos</A> and <A HREF="mandocdb.8.html">mandocdb</A> (this is installed by default on BSD UNIX
-			systems &mdash; see the <I>Makefile</I> if you're running Linux).  To build and install into <I>/usr/local/</I>, just
-			run <CODE>make install</CODE>.  Be careful: the <B>preconv</B> and <B>apropos</B> binary names are usually taken by
-			existing utilities.
+			HREF="apropos.1.html">apropos</A>, <A HREF="whatis.1.html">whatis</A>, and <A HREF="mandocdb.8.html">mandocdb</A> (this
+			is installed by default on BSD UNIX systems &mdash; see the <I>Makefile</I> if you're running Linux).  To build and
+			install into <I>/usr/local/</I>, just run <CODE>make install</CODE>.  Be careful: the <B>preconv</B>, <B>apropos</B>,
+			and <B>whatis</B> binary names are usually taken by existing utilities.
 		</P>
 		<H2>
 			<A NAME="binaries">Binaries</A>
@@ -171,6 +170,16 @@
 					</TD>
 				</TR>
 				<TR>
+					<TD VALIGN="top"><A HREF="whatis.1.html">whatis(1)</A></TD>
+					<TD VALIGN="top">
+						search the manual page database
+							(<A HREF="whatis.1.txt">text</A> | 
+							<A HREF="whatis.1.xhtml">xhtml</A> |
+							<A HREF="whatis.1.pdf">pdf</A> |
+							<A HREF="whatis.1.ps">ps</A>)
+					</TD>
+				</TR>
+				<TR>
 					<TD VALIGN="top"><A HREF="mandoc.3.html">mandoc(3)</A></TD>
 					<TD VALIGN="top">
 						mandoc macro compiler library
@@ -260,7 +269,7 @@
 			<A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/TODO?cvsroot=mdocml">TODO</A> for known issues
 			before posting.  All lists are subscription-only: send a blank e-mail to the listed address to subscribe.  Beyond that,
 			contact Kristaps at <A HREF="http://mailhide.recaptcha.net/d?k=01M6h_w7twDp58ZgH57eWC_w==&amp;c=Q2DBUt401ePlSeupJFrq_Q==" TITLE="Reveal
-			this e-mail address">kris...</A>@bsd.lv.
+			this e-mail address">kris...</A>@bsd.lv.  Archives are available at <A HREF="http://gmane.org/" CLASS="external">Gmane</A>.
 		</P>
 		<TABLE WIDTH="100%" SUMMARY="Mailing Lists">
 			<COL WIDTH="175">
@@ -273,7 +282,6 @@
 					</TD>
 					<TD>
 						bug-reports, general questions, and announcements 
-						(<A HREF="/archives/discuss/">archive</A>)
 					</TD>
 				</TR>
 				<TR>
@@ -283,7 +291,6 @@
 					</TD>
 					<TD>
 						patches and system discussions 
-						(<A HREF="/archives/tech/">archive</A>)
 					</TD>
 				</TR>
 				<TR>
@@ -293,7 +300,6 @@
 					</TD>
 					<TD>
 						source commit messages 
-						(<A HREF="/archives/source/">archive</A>)
 					</TD>
 				</TR>
 			</TBODY>
@@ -301,6 +307,14 @@
 		<H1>
 			<A NAME="news">News</A>
 		</H1>
+		<P CLASS="news">
+			xx-xx-2011: version 1.12.1
+		</P>
+		<P>
+			Significant work on <A HREF="apropos.1.html">apropos</A> and <A HREF="mandocdb.8.html">mandocdb</A>.  These tools are
+			now much more robust and in line with other manpage systems.  A <A HREF="whatis.1.html">whatis</A> implementation is now
+			handled as an <A HREF="apropos.1.html">apropos</A> mode.
+		</P>
 		<P CLASS="news">
 			08-10-2011: version 1.12.0
 		</P>
@@ -329,23 +343,6 @@
 			with and without frames and rulers.  Nesting of indented blocks is now supported in <A HREF="man.7.html">man</A>, and
 			several bugs were fixed regarding indentation and alignment.  The page headers in <A HREF="mdoc.7.html">mdoc</A> are now
 			nicer for very long titles.
-		</P>
-		<P CLASS="news">
-			02-09-2011: version 1.11.7
-		</P>
-		<P>
-			Added <A HREF="demandoc.1.html">demandoc</A> utility for stripping away macros and escapes.  This replaces the
-			historical <CODE>deroff</CODE> utility.  Also improved the <A HREF="mdoc.7.html">mdoc</A> and <A HREF="man.7.html">man</A> manuals.
-		</P>
-		<P CLASS="news">
-			16-08-2011: version 1.11.6
-		</P>
-		<P>
-			Handling of <B>tr</B> macro in <A HREF="roff.7.html">roff</A> implemented.  This makes Perl documentation much more
-			readable.  Hyphenation is also now enabled in <A HREF="man.7.html">man</A> format documents.  Many other general
-			improvements have been implemented.  Furthermore, a 64-bit Windows binary is now available at <A
-			HREF="/binaries/mdocml-win64.zip">mdocml-win64.zip</A> and a Mac OS X universal binary is available at <A
-			HREF="/binaries/mdocml-macosx.zip">mdocml-macosx.zip</A>.
 		</P>
 		<P>
 			See <A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/index.sgml?cvsroot=mdocml">cvsweb</A> for
