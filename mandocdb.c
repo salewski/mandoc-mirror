@@ -33,8 +33,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <arpa/inet.h>
-
 #ifdef __linux__
 # include <db_185.h>
 #else
@@ -628,11 +626,11 @@ index_merge(const struct of *of, struct mparse *mp,
 		 * into the database.
 		 */
 
-		vbuf.rec = htonl(rec);
+		vbuf.rec = htobe32(rec);
 		seq = R_FIRST;
 		while (0 == (ch = (*hash->seq)(hash, &key, &val, seq))) {
 			seq = R_NEXT;
-			vbuf.mask = *(uint64_t *)val.data;
+			vbuf.mask = htobe64(*(uint64_t *)val.data);
 			val.size = sizeof(struct db_val);
 			val.data = &vbuf;
 			dbt_put(db, dbf, &key, &val);
@@ -732,7 +730,7 @@ index_prune(const struct of *ofile, DB *db, const char *dbf,
 				break;
 
 			vbuf = val.data;
-			if (*maxrec != ntohl(vbuf->rec))
+			if (*maxrec != betoh32(vbuf->rec))
 				continue;
 
 			if ((ch = (*db->del)(db, &key, R_CURSOR)) < 0)

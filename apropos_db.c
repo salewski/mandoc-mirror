@@ -24,8 +24,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <arpa/inet.h>
-
 #ifdef __linux__
 # include <db_185.h>
 #else
@@ -177,8 +175,8 @@ btree_read(const DBT *k, const DBT *v,
 
 	vp = v->data;
 	norm_string((const char *)k->data, mc, buf);
-	dbv->rec = ntohl(vp->rec);
-	dbv->mask = vp->mask;
+	dbv->rec = betoh32(vp->rec);
+	dbv->mask = betoh64(vp->mask);
 	return(1);
 }
 
