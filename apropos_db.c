@@ -24,6 +24,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <arpa/inet.h>
+
 #ifdef __linux__
 # include <db_185.h>
 #else
@@ -114,8 +116,9 @@ static	const struct type types[] = {
 };
 
 static	DB	*btree_open(void);
-static	int	 btree_read(const DBT *,
-			const struct mchars *, char **);
+static	int	 btree_read(const DBT *, const DBT *,
+			const struct mchars *, 
+			struct db_val *, char **);
 static	int	 expreval(const struct expr *, int *);
 static	void	 exprexec(const struct expr *,
 			const char *, uint64_t, struct rec *);
@@ -158,17 +161,24 @@ btree_open(void)
  * Return 0 if the database is insane, else 1.
  */
 static int
-btree_read(const DBT *v, const struct mchars *mc, char **buf)
+btree_read(const DBT *k, const DBT *v, 
+		const struct mchars *mc, 
+		struct db_val *dbv, char **buf)
 {
+	const struct db_val *vp;
 
-	/* Sanity: are we nil-terminated? */
-
-	assert(v->size > 0);
-
-	if ('\0' != ((char *)v->data)[(int)v->size - 1])
+	/* Are our sizes sane? */
+	if (k->size < 2 || sizeof(struct db_val) != v->size)
 		return(0);
 
-	norm_string((char *)v->data, mc, buf);
+	/* Is our string nil-terminated? */
+	if ('\0' != ((const char *)k->data)[(int)k->size - 1])
+		return(0);
+
+	vp = v->data;
+	norm_string((const char *)k->data, mc, buf);
+	dbv->rec = ntohl(vp->rec);
+	dbv->mask = vp->mask;
 	return(1);
 }
 
@@ -442,14 +452,12 @@ single_search(struct rectree *tree, const struct opts *opts,
 		struct mchars *mc, int vol)
 {
 	int		 root, leaf, ch;
-	uint64_t	 mask;
 	DBT		 key, val;
 	DB		*btree, *idx;
 	char		*buf;
-	recno_t		 rec;
 	struct rec	*rs;
 	struct rec	 r;
-	struct db_val	*vbuf;
+	struct db_val	 vb;
 
 	root	= -1;
 	leaf	= -1;
@@ -469,20 +477,14 @@ single_search(struct rectree *tree, const struct opts *opts,
 	}
 
 	while (0 == (ch = (*btree->seq)(btree, &key, &val, R_NEXT))) {
-		if (key.size < 2 || sizeof(struct db_val) != val.size)
+		if ( ! btree_read(&key, &val, mc, &vb, &buf))
 			break;
-		if ( ! btree_read(&key, mc, &buf))
-			break;
-
-		vbuf = val.data;
-		rec = vbuf->rec;
-		mask = vbuf->mask;
 
 		/*
 		 * See if this keyword record matches any of the
 		 * expressions we have stored.
 		 */
-		if ( ! exprmark(expr, buf, mask, NULL))
+		if ( ! exprmark(expr, buf, vb.mask, NULL))
 			continue;
 
 		/*
@@ -492,10 +494,10 @@ single_search(struct rectree *tree, const struct opts *opts,
 		 */
 
 		for (leaf = root; leaf >= 0; )
-			if (rec > rs[leaf].res.rec &&
+			if (vb.rec > rs[leaf].res.rec &&
 					rs[leaf].rhs >= 0)
 				leaf = rs[leaf].rhs;
-			else if (rec < rs[leaf].res.rec &&
+			else if (vb.rec < rs[leaf].res.rec &&
 					rs[leaf].lhs >= 0)
 				leaf = rs[leaf].lhs;
 			else
@@ -507,9 +509,9 @@ single_search(struct rectree *tree, const struct opts *opts,
 		 * try to evaluate it now and continue anyway.
 		 */
 
-		if (leaf >= 0 && rs[leaf].res.rec == rec) {
+		if (leaf >= 0 && rs[leaf].res.rec == vb.rec) {
 			if (0 == rs[leaf].matched)
-				exprexec(expr, buf, mask, &rs[leaf]);
+				exprexec(expr, buf, vb.mask, &rs[leaf]);
 			continue;
 		}
 
@@ -519,7 +521,7 @@ single_search(struct rectree *tree, const struct opts *opts,
 		 * database, then begin partial evaluation.
 		 */
 
-		key.data = &rec;
+		key.data = &vb.rec;
 		key.size = sizeof(recno_t);
 
 		if (0 != (*idx->get)(idx, &key, &val, 0))
@@ -543,12 +545,12 @@ single_search(struct rectree *tree, const struct opts *opts,
 		rs[tree->len].matches =
 			mandoc_calloc(terms, sizeof(int));
 
-		exprexec(expr, buf, mask, &rs[tree->len]);
+		exprexec(expr, buf, vb.mask, &rs[tree->len]);
 
 		/* Append to our tree. */
 
 		if (leaf >= 0) {
-			if (rec > rs[leaf].res.rec)
+			if (vb.rec > rs[leaf].res.rec)
 				rs[leaf].rhs = tree->len;
 			else
 				rs[leaf].lhs = tree->len;
@@ -570,6 +572,7 @@ static void
 recfree(struct rec *rec)
 {
 
+	free(rec->res.type);
 	free(rec->res.file);
 	free(rec->res.cat);
 	free(rec->res.title);
