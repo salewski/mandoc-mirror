@@ -33,8 +33,12 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef __linux__
+#if defined(__linux__)
+# include <endian.h>
 # include <db_185.h>
+#elif defined(__APPLE__)
+# include <libkern/OSByteOrder.h>
+# include <db.h>
 #else
 # include <db.h>
 #endif

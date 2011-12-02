@@ -15,6 +15,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <assert.h>
 #include <fcntl.h>
 #include <regex.h>
@@ -24,8 +28,12 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef __linux__
+#if defined(__linux__)
+# include <endian.h>
 # include <db_185.h>
+#elif defined(__APPLE__)
+# include <libkern/OSByteOrder.h>
+# include <db.h>
 #else
 # include <db.h>
 #endif

@@ -137,11 +137,11 @@ The keyword database,
 is a
 .Xr btree 3
 database of NUL-terminated keywords (record length is non-zero string
-length plus one) mapping to a 8-byte binary field consisting of the
-keyword type and source
+length plus one) mapping to a 12-byte binary field consisting of the
+64-bit keyword type and 32-bit source
 .Sx Index Database
-record number.
-The type, a 64-bit bit-mask in host order, consists of the following
+record number, both in network-byte order.
+The typet bit-mask consists of the following
 values mapping into
 .Xr mdoc 7
 macro identifiers:
