@@ -173,7 +173,6 @@ LIBMDOC_OBJS	 = arch.o \
 		   mdoc_hash.o \
 		   mdoc_macro.o \
 		   mdoc_validate.o \
-		   msec.o \
 		   st.o \
 		   vol.o
 LIBMDOC_LNS	 = arch.ln \
@@ -184,7 +183,6 @@ LIBMDOC_LNS	 = arch.ln \
 		   mdoc_hash.ln \
 		   mdoc_macro.ln \
 		   mdoc_validate.ln \
-		   msec.ln \
 		   st.ln \
 		   vol.ln
 
@@ -206,12 +204,14 @@ LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 		   $(LIBROFF_OBJS) \
 		   chars.o \
 		   mandoc.o \
+		   msec.o \
 		   read.o
 LIBMANDOC_LNS	 = $(LIBMAN_LNS) \
 		   $(LIBMDOC_LNS) \
 		   $(LIBROFF_LNS) \
 		   chars.ln \
 		   mandoc.ln \
+		   msec.ln \
 		   read.ln
 
 COMPAT_OBJS	 = compat_getsubopt.o \

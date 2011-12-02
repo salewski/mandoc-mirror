@@ -2084,7 +2084,7 @@ post_dt(POST_ARGS)
 	 *       arch = NULL
 	 */
 
-	cp = mdoc_a2msec(nn->string);
+	cp = mandoc_a2msec(nn->string);
 	if (cp) {
 		mdoc->meta.vol = mandoc_strdup(cp);
 		mdoc->meta.msec = mandoc_strdup(nn->string);

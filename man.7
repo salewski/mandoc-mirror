@@ -840,6 +840,19 @@ The
 .Sx \&sp
 macro does not accept negative values in mandoc.
 In GNU troff, this would result in strange behaviour.
+.It
+In page header lines, GNU troff versions up to and including 1.21
+only print
+.Ar volume
+names explicitly specified in the
+.Sx \&TH
+macro; mandoc and newer groff print the default volume name
+corresponding to the
+.Ar section
+number when no
+.Ar volume
+is given, like in
+.Xr mdoc 7 .
 .El
 .Sh SEE ALSO
 .Xr man 1 ,

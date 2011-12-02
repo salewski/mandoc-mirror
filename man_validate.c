@@ -413,9 +413,13 @@ post_TH(CHKARGS)
 		m->meta.source = mandoc_strdup(n->string);
 
 	/* TITLE MSEC DATE SOURCE ->VOL<- */
+	/* If missing, use the default VOL name for MSEC. */
 
 	if (n && (n = n->next))
 		m->meta.vol = mandoc_strdup(n->string);
+	else if ('\0' != m->meta.msec[0] &&
+	    (NULL != (p = mandoc_a2msec(m->meta.msec))))
+		m->meta.vol = mandoc_strdup(p);
 
 	/*
 	 * Remove the `TH' node after we've processed it for our

@@ -49,6 +49,7 @@ char		*mandoc_normdate(struct mparse *, char *, int, int);
 int		 mandoc_eos(const char *, size_t, int);
 int		 mandoc_getcontrol(const char *, int *);
 int		 mandoc_strntoi(const char *, size_t, int);
+const char	*mandoc_a2msec(const char*);
 
 void	 	 mdoc_free(struct mdoc *);
 struct	mdoc	*mdoc_alloc(struct roff *, struct mparse *);
