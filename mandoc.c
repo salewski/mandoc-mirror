@@ -623,9 +623,10 @@ mandoc_normdate(struct mparse *parse, char *in, int ln, int pos)
 		mandoc_msg(MANDOCERR_NODATE, parse, ln, pos, NULL);
 		time(&t);
 	}
+	else if (a2time(&t, "%Y-%m-%d", in))
+		t = 0;
 	else if (!a2time(&t, "$" "Mdocdate: %b %d %Y $", in) &&
-	    !a2time(&t, "%b %d, %Y", in) &&
-	    !a2time(&t, "%Y-%m-%d", in)) {
+	    !a2time(&t, "%b %d, %Y", in)) {
 		mandoc_msg(MANDOCERR_BADDATE, parse, ln, pos, NULL);
 		t = 0;
 	}
