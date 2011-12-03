@@ -333,6 +333,7 @@ main(int argc, char *argv[])
 	argv += optind;
 
 	memset(&info, 0, sizeof(BTREEINFO));
+	info.lorder = 4321;
 	info.flags = R_DUP;
 
 	mp = mparse_alloc(MPARSE_AUTO, MANDOCLEVEL_FATAL, NULL, NULL);
