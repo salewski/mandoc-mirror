@@ -52,6 +52,7 @@ struct	termp_tbl {
 struct	termp {
 	enum termtype	  type;
 	struct rofftbl	  tbl;		/* table configuration */
+	int		  mdocstyle;	/* imitate mdoc(7) output */
 	size_t		  defindent;	/* Default indent for text. */
 	size_t		  defrmargin;	/* Right margin of the device. */
 	size_t		  rmargin;	/* Current right margin. */

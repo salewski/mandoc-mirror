@@ -68,7 +68,7 @@ static	size_t		  locale_width(const struct termp *, int);
 static struct termp *
 ascii_init(enum termenc enc, char *outopts)
 {
-	const char	*toks[3];
+	const char	*toks[4];
 	char		*v;
 	struct termp	*p;
 
@@ -106,7 +106,8 @@ ascii_init(enum termenc enc, char *outopts)
 
 	toks[0] = "indent";
 	toks[1] = "width";
-	toks[2] = NULL;
+	toks[2] = "mdoc";
+	toks[3] = NULL;
 
 	while (outopts && *outopts)
 		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
@@ -115,6 +116,14 @@ ascii_init(enum termenc enc, char *outopts)
 			break;
 		case (1):
 			p->defrmargin = (size_t)atoi(v);
+			break;
+		case (2):
+			/*
+			 * Temporary, undocumented mode
+			 * to imitate mdoc(7) output style.
+			 */
+			p->mdocstyle = 1;
+			p->defindent = 5;
 			break;
 		default:
 			break;

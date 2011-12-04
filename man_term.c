@@ -970,10 +970,25 @@ print_man_foot(struct termp *p, const void *arg)
 	term_fontrepl(p, TERMFONT_NONE);
 
 	term_vspace(p);
-	term_vspace(p);
-	term_vspace(p);
-	snprintf(title, BUFSIZ, "%s(%s)", meta->title, meta->msec);
+
+	/*
+	 * Temporary, undocumented option to imitate mdoc(7) output.
+	 * In the bottom right corner, use the source instead of
+	 * the title.
+	 */
+
+	if ( ! p->mdocstyle) {
+		term_vspace(p);
+		term_vspace(p);
+		snprintf(title, BUFSIZ, "%s(%s)", meta->title, meta->msec);
+	} else if (meta->source) {
+		strlcpy(title, meta->source, BUFSIZ);
+	} else {
+		title[0] = '\0';
+	}
 	datelen = term_strlen(p, meta->date);
+
+	/* Bottom left corner: manual source. */
 
 	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
 	p->offset = 0;
@@ -983,6 +998,8 @@ print_man_foot(struct termp *p, const void *arg)
 		term_word(p, meta->source);
 	term_flushln(p);
 
+	/* At the bottom in the middle: manual date. */
+
 	p->flags |= TERMP_NOSPACE;
 	p->offset = p->rmargin;
 	p->rmargin = p->maxrmargin - term_strlen(p, title);
@@ -991,6 +1008,8 @@ print_man_foot(struct termp *p, const void *arg)
 
 	term_word(p, meta->date);
 	term_flushln(p);
+
+	/* Bottom right corner: manual title and section. */
 
 	p->flags &= ~TERMP_NOBREAK;
 	p->flags |= TERMP_NOSPACE;
@@ -1013,20 +1032,13 @@ print_man_head(struct termp *p, const void *arg)
 	assert(m->title);
 	assert(m->msec);
 
-	/*
-	 * Note that old groff would spit out some spaces before the
-	 * header.  We discontinue this strange behaviour, but at one
-	 * point we did so here.
-	 */
-
-	p->offset = 0;
-	p->rmargin = p->maxrmargin;
-
-	buf[0] = title[0] = '\0';
-
 	if (m->vol)
 		strlcpy(buf, m->vol, BUFSIZ);
+	else
+		buf[0] = '\0';
 	buflen = term_strlen(p, buf);
+
+	/* Top left corner: manual title and section. */
 
 	snprintf(title, BUFSIZ, "%s(%s)", m->title, m->msec);
 	titlen = term_strlen(p, title);
@@ -1041,6 +1053,8 @@ print_man_head(struct termp *p, const void *arg)
 	term_word(p, title);
 	term_flushln(p);
 
+	/* At the top in the middle: manual volume. */
+
 	p->flags |= TERMP_NOSPACE;
 	p->offset = p->rmargin;
 	p->rmargin = p->offset + buflen + titlen < p->maxrmargin ?
@@ -1048,6 +1062,8 @@ print_man_head(struct termp *p, const void *arg)
 
 	term_word(p, buf);
 	term_flushln(p);
+
+	/* Top right corner: title and section, again. */
 
 	p->flags &= ~TERMP_NOBREAK;
 	if (p->rmargin + titlen <= p->maxrmargin) {
@@ -1063,11 +1079,14 @@ print_man_head(struct termp *p, const void *arg)
 	p->rmargin = p->maxrmargin;
 
 	/* 
-	 * Groff likes to have some leading spaces before content.  Well
-	 * that's fine by me.
+	 * Groff prints three blank lines before the content.
+	 * Do the same, except in the temporary, undocumented
+	 * mode imitating mdoc(7) output.
 	 */
 
 	term_vspace(p);
-	term_vspace(p);
-	term_vspace(p);
+	if ( ! p->mdocstyle) {
+		term_vspace(p);
+		term_vspace(p);
+	}
 }
