@@ -265,12 +265,12 @@ jobstart(const char *dst, const char *src, pid_t *pid)
 static int
 indexhtml(char *dst)
 {
-	DB		*db;
+	DB		*idx;
 	DBT		 key, val;
 	size_t		 sz;
 	int		 c, rc;
 	unsigned int	 fl;
-	const char	*f;
+	const char	*f, *cp;
 	char		*d;
 	char		 fname[MAXPATHLEN];
 	pid_t		 pid;
@@ -281,25 +281,32 @@ indexhtml(char *dst)
 	xstrlcpy(fname, dst, MAXPATHLEN);
 	xstrlcat(fname, "/mandoc.index", MAXPATHLEN);
 
-	db = dbopen(fname, O_RDONLY, 0, DB_RECNO, NULL);
-	if (NULL == db) {
+	idx = dbopen(fname, O_RDONLY, 0, DB_RECNO, NULL);
+	if (NULL == idx) {
 		perror(fname);
 		return(-1);
 	}
 
 	fl = R_FIRST;
-	while (0 == (c = (*db->seq)(db, &key, &val, fl))) {
+	while (0 == (c = (*idx->seq)(idx, &key, &val, fl))) {
 		fl = R_NEXT;
-		f = (const char *)val.data;
+		cp = (const char *)val.data;
+		if (0 == val.size)
+			continue;
+		if (NULL == (f = memchr(cp, '\0', val.size)))
+			break;
+		if (++f - cp >= (int)val.size)
+			break;
+		if (NULL == memchr(f, '\0', val.size - (f - cp)))
+			break;
 
 		dst[(int)sz] = '\0';
 
 		xstrlcat(dst, "/", MAXPATHLEN);
 		xstrlcat(dst, f, MAXPATHLEN);
-		/*xstrlcat(dst, ".html", MAXPATHLEN);*/
 
 		if (-1 == (rc = isnewer(dst, f))) {
-			fprintf(stderr, "%s: Manpage missing\n", f);
+			fprintf(stderr, "%s: File missing\n", f);
 			break;
 		} else if (0 == rc)
 			continue;
@@ -317,19 +324,24 @@ indexhtml(char *dst)
 
 		if ( ! filecpy(dst, f))
 			break;
-
-		/*if ( ! jobstart(dst, f, &pid))
-			break;*/
+#if 0
+		if ( ! jobstart(dst, f, &pid))
+			break;
+#endif
 		if (verbose)
 			printf("%s\n", dst);
 	}
 
-	(*db->close)(db);
+	(*idx->close)(idx);
 
 	if (c < 0)
 		perror(fname);
-	/*if ( ! jobwait(pid))
-		c = -1;*/
+	else if (0 == c) 
+		fprintf(stderr, "%s: Corrupt index\n", fname);
+#if 0
+	if ( ! jobwait(pid))
+		c = -1;
+#endif
 
 	return(1 == c ? 1 : -1);
 }
@@ -433,7 +445,7 @@ manup(const struct manpaths *dirs, const char *dir)
 		return(0);
 	}
 
-	xstrlcat(dst, "/man.conf", MAXPATHLEN);
+	xstrlcat(dst, "/catman.conf", MAXPATHLEN);
 
 	if (verbose)
 		printf("%s\n", dst);

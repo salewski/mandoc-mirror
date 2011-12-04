@@ -66,6 +66,7 @@ struct	req {
 };
 
 static	int		 atou(const char *, unsigned *);
+static	void		 catman(const char *);
 static	void		 format(const char *);
 static	void		 html_print(const char *);
 static	int 		 kval_decode(char *);
@@ -81,6 +82,7 @@ static	void		 resp_bad(void);
 static	void		 resp_baddb(void);
 static	void		 resp_badexpr(const struct req *);
 static	void		 resp_badmanual(void);
+static	void		 resp_badpage(void);
 static	void		 resp_begin_html(int, const char *);
 static	void		 resp_begin_http(int, const char *);
 static	void		 resp_end_html(void);
@@ -320,7 +322,7 @@ resp_searchform(const struct req *req)
 	puts("<!-- Begin search form. //-->");
 	printf("<FORM ACTION=\"");
 	html_print(progname);
-	printf("/search\" METHOD=\"get\">\n");
+	printf("/search.html\" METHOD=\"get\">\n");
 	puts(" <FIELDSET>"					"\n"
 	     "  <INPUT TYPE=\"submit\" VALUE=\"Search:\">");
 	printf("  Terms: <INPUT TYPE=\"text\" "
@@ -344,6 +346,15 @@ resp_index(const struct req *req)
 
 	resp_begin_html(200, NULL);
 	resp_searchform(req);
+	resp_end_html();
+}
+
+static void
+resp_badpage(void)
+{
+
+	resp_begin_html(404, "Not Found");
+	puts("<P>Page not found.</P>");
 	resp_end_html();
 }
 
@@ -435,6 +446,29 @@ pg_index(const struct manpaths *ps, const struct req *req, char *path)
 }
 
 static void
+catman(const char *file)
+{
+	int		 fd;
+	char		 buf[BUFSIZ];
+	ssize_t		 ssz;
+
+	if (-1 == (fd = open(file, O_RDONLY, 0))) {
+		resp_baddb();
+		return;
+	}
+
+	resp_begin_http(200, NULL);
+
+	while ((ssz = read(fd, buf, BUFSIZ)) > 0)
+		write(STDOUT_FILENO, buf, (size_t)ssz);
+
+	if (ssz < 0)
+		perror(file);
+
+	close(fd);
+}
+
+static void
 format(const char *file)
 {
 	struct mparse	*mp;
@@ -479,9 +513,10 @@ pg_show(const struct manpaths *ps, const struct req *req, char *path)
 {
 	char		*sub;
 	char		 file[MAXPATHLEN];
+	const char	*fn, *cp;
 	int		 rc;
 	unsigned int	 vol, rec;
-	DB		*db;
+	DB		*idx;
 	DBT		 key, val;
 
 	if (NULL == path) {
@@ -506,8 +541,8 @@ pg_show(const struct manpaths *ps, const struct req *req, char *path)
 
 	/* Open the index recno(3) database. */
 
-	db = dbopen(file, O_RDONLY, 0, DB_RECNO, NULL);
-	if (NULL == db) {
+	idx = dbopen(file, O_RDONLY, 0, DB_RECNO, NULL);
+	if (NULL == idx) {
 		resp_baddb();
 		return;
 	}
@@ -515,21 +550,30 @@ pg_show(const struct manpaths *ps, const struct req *req, char *path)
 	key.data = &rec;
 	key.size = 4;
 
-	if (0 != (rc = (*db->get)(db, &key, &val, 0))) {
+	if (0 != (rc = (*idx->get)(idx, &key, &val, 0))) {
 		rc < 0 ? resp_baddb() : resp_badmanual();
-		(*db->close)(db);
-		return;
+		goto out;
 	} 
 
-	/* Extra filename: the first nil-terminated entry. */
+	cp = (char *)val.data;
 
-	strlcpy(file, ps->paths[vol], MAXPATHLEN);
-	strlcat(file, "/", MAXPATHLEN);
-	strlcat(file, (char *)val.data, MAXPATHLEN);
-
-	(*db->close)(db);
-
-	format(file);
+	if (NULL == (fn = memchr(cp, '\0', val.size)))
+		resp_baddb();
+	else if (++fn - cp >= (int)val.size)
+		resp_baddb();
+	else if (NULL == memchr(fn, '\0', val.size - (fn - cp)))
+		resp_baddb();
+	else {
+		strlcpy(file, ps->paths[vol], MAXPATHLEN);
+		strlcat(file, "/", MAXPATHLEN);
+		strlcat(file, fn, MAXPATHLEN);
+		if (0 == strcmp(cp, "cat"))
+			catman(file);
+		else
+			format(file);
+	}
+out:
+	(*idx->close)(idx);
 }
 
 static void
@@ -670,7 +714,7 @@ main(void)
 	/* Initialise MANPATH. */
 
 	memset(&paths, 0, sizeof(struct manpaths));
-	manpath_manconf("etc/man.conf", &paths);
+	manpath_manconf("etc/catman.conf", &paths);
 
 	/* Route pages. */
 
@@ -685,6 +729,7 @@ main(void)
 		pg_show(&paths, &req, subpath);
 		break;
 	default:
+		resp_badpage();
 		break;
 	}
 
