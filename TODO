@@ -30,6 +30,11 @@
 
 --- missing roff features ----------------------------------------------
 
+- The pod2man preamble wants \h'...' with quoted numerical arguments,
+  see for example AUTHORS in MooseX::Getopt.3p, p5-MooseX-Getopt.
+  reported by Andreas Voegele <mail at andreasvoegele dot com>
+  Tue, 22 Nov 2011 15:34:47 +0100 on ports@
+
 - .if n \{
   .br\}
   should cause an extra space to be raised.
