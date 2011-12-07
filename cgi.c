@@ -341,6 +341,7 @@ resp_searchform(const struct req *req)
 	html_print(progname);
 	printf("/search.html\" METHOD=\"get\">\n");
 	printf("<FIELDSET>\n"
+	       "<LEGEND>Search Parameters</LEGEND>\n"
 	       "<INPUT TYPE=\"submit\" NAME=\"op\" "
 	        "VALUE=\"Whatis\"> or \n"
 	       "<INPUT TYPE=\"submit\" NAME=\"op\" "
@@ -467,6 +468,8 @@ resp_search(struct res *r, size_t sz, void *arg)
 		html_print(r[i].desc);
 		puts("</TD></TR>");
 	}
+
+	puts("</TABLE>");
 
 	resp_end_html();
 }
