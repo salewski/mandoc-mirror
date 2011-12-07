@@ -35,6 +35,9 @@ STATIC		 = -static
 CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
+WWWPREFIX	 = /var/www
+HTDOCDIR	 = $(WWWPREFIX)/htdocs
+CGIBINDIR	 = $(WWWPREFIX)/cgi-bin
 BINDIR		 = $(PREFIX)/bin
 INCLUDEDIR	 = $(PREFIX)/include/mandoc
 LIBDIR		 = $(PREFIX)/lib/mandoc
@@ -444,6 +447,12 @@ install: all
 	$(INSTALL_MAN) mandoc.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
+
+installcgi: all
+	mkdir -p $(DESTDIR)$(CGIBINDIR)
+	mkdir -p $(DESTDIR)$(HTDOCDIR)
+	$(INSTALL_PROGRAM) man.cgi $(DESTDIR)$(CGIBINDIR)
+	$(INSTALL_DATA) example.style.css $(DESTDIR)$(HTDOCDIR)/man.css
 
 installwww: www
 	mkdir -p $(PREFIX)/snapshots
