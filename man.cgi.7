@@ -39,11 +39,22 @@ The absolute path of the
 cache directory.
 .El
 .Sh FILES
-The configuration file
-.Pa etc/catman.conf
-must exist within the cache directory.
-This is built by
-.Xr catman 8 .
+.Bl -tag -width Ds
+.It Pa etc/catman.conf
+Built by
+.Xr catman 8
+and must exist under the configuration directory root.
+.It Pa man.css
+Must be visible in the server document root, used for styling source
+manual page output.
+.It Pa catman.css
+Must be visible in the server document root, used for styling
+pre-formatted manual page output.
+.It Pa man.cgi.css
+Must be visible in the server document root, used for general styling of
+.Nm
+search and error pages.
+.El
 .Sh SEE ALSO
 .Xr mandoc 3 ,
 .Xr catman 8 ,

@@ -297,6 +297,8 @@ resp_begin_html(int code, const char *msg)
 	     " <HEAD>"						"\n"
 	     "   <META HTTP-EQUIV=\"Content-Type\" "		"\n"
 	     "         CONTENT=\"text/html; charset=utf-8\">"	"\n"
+	     "  <LINK REL=\"stylesheet\" HREF=\"/man.cgi.css\""	"\n"
+	     "        TYPE=\"text/css\" media=\"all\">"		"\n"
 	     "  <TITLE>System Manpage Reference</TITLE>"	"\n"
 	     " </HEAD>"						"\n"
 	     " <BODY>"						"\n"
@@ -330,21 +332,27 @@ resp_searchform(const struct req *req)
 	printf("<FORM ACTION=\"");
 	html_print(progname);
 	printf("/search.html\" METHOD=\"get\">\n");
-	puts(" <FIELDSET>\n"
-	     "  <INPUT TYPE=\"submit\" VALUE=\"Search:\">");
-	printf("  Terms: <INPUT TYPE=\"text\" "
-			"SIZE=\"60\" NAME=\"expr\" VALUE=\"");
+	puts("<FIELDSET>\n"
+	     "<INPUT TYPE=\"submit\" NAME=\"op\" "
+	      "VALUE=\"Whatis\"> or \n"
+	     "<INPUT TYPE=\"submit\" NAME=\"op\" "
+	      "VALUE=\"apropos\"> for manuals satisfying \n"
+	     "<INPUT TYPE=\"text\" SIZE=\"40\" "
+	      "NAME=\"expr\" VALUE=\"");
 	html_print(expr);
-	puts("\">");
-	printf("  Section: <INPUT TYPE=\"text\" "
-			"SIZE=\"4\" NAME=\"sec\" VALUE=\"");
+	puts("\">, section "
+	     "<INPUT TYPE=\"text\" "
+	      "SIZE=\"4\" NAME=\"sec\" VALUE=\"");
 	html_print(sec);
-	puts("\">");
-	printf("  Arch: <INPUT TYPE=\"text\" "
-			"SIZE=\"8\" NAME=\"arch\" VALUE=\"");
+	puts("\">, arch "
+	     "<INPUT TYPE=\"text\" "
+	      "SIZE=\"8\" NAME=\"arch\" VALUE=\"");
 	html_print(arch);
-	puts("\">");
-	puts(" </FIELDSET>\n</FORM>\n<!-- End search form. //-->");
+	puts("\">.\n"
+	     "<INPUT TYPE=\"reset\" VALUE=\"Reset\">\n"
+	     "</FIELDSET>\n"
+	     "</FORM>\n"
+	     "<!-- End search form. //-->");
 }
 
 static void
@@ -361,12 +369,12 @@ resp_error400(void)
 {
 
 	resp_begin_html(400, "Query Malformed");
-	puts("<H1>Malformed Query</H1>\n"
-	     "<P>\n"
-	     "  The query your entered was malformed.\n"
-	     "  Try again from the\n"
-	     "  <A HREF=\"/index.html\">main page</A>\n"
-	     "</P>");
+	printf("<H1>Malformed Query</H1>\n"
+	       "<P>\n"
+	       "  The query your entered was malformed.\n"
+	       "  Try again from the\n"
+	       "  <A HREF=\"%s/index.html\">main page</A>\n"
+	       "</P>", progname);
 	resp_end_html();
 }
 
@@ -380,11 +388,11 @@ resp_error404(const char *page)
 	     "  The page you're looking for, ");
 	printf("  <B>");
 	html_print(page);
-	puts("</B>,\n"
-	     "  could not be found.\n"
-	     "  Try searching from the\n"
-	     "  <A HREF=\"/index.html\">main page</A>\n"
-	     "</P>");
+	printf("</B>,\n"
+	       "  could not be found.\n"
+	       "  Try searching from the\n"
+	       "  <A HREF=\"%s/index.html\">main page</A>\n"
+	       "</P>", progname);
 	resp_end_html();
 }
 
@@ -423,21 +431,7 @@ resp_search(struct res *r, size_t sz, void *arg)
 		return;
 	}
 
-	resp_begin_http(200, NULL);
-	puts("<!DOCTYPE HTML PUBLIC "				"\n"
-	     " \"-//W3C//DTD HTML 4.01//EN\""			"\n"
-	     " \"http://www.w3.org/TR/html4/strict.dtd\">"	"\n"
-	     "<HTML>"						"\n"
-	     " <HEAD>"						"\n"
-	     "  <META HTTP-EQUIV=\"Content-Type\" "		"\n"
-	     "        CONTENT=\"text/html; charset=utf-8\">"	"\n"
-	     "  <LINK REL=\"stylesheet\" HREF=\"/catman.css\""	"\n"
-	     "        TYPE=\"text/css\" media=\"all\">"		"\n"
-	     "  <TITLE>System Manpage Reference</TITLE>"	"\n"
-	     " </HEAD>"						"\n"
-	     " <BODY>"						"\n"
-	     "<!-- Begin page content. //-->");
-
+	resp_begin_html(200, NULL);
 	resp_searchform((const struct req *)arg);
 
 	if (0 == sz)
@@ -484,7 +478,20 @@ catman(const char *file)
 		return;
 	}
 
-	resp_begin_html(200, NULL);
+	resp_begin_http(200, NULL);
+	puts("<!DOCTYPE HTML PUBLIC "				"\n"
+	     " \"-//W3C//DTD HTML 4.01//EN\""			"\n"
+	     " \"http://www.w3.org/TR/html4/strict.dtd\">"	"\n"
+	     "<HTML>"						"\n"
+	     " <HEAD>"						"\n"
+	     "  <META HTTP-EQUIV=\"Content-Type\" "		"\n"
+	     "        CONTENT=\"text/html; charset=utf-8\">"	"\n"
+	     "  <LINK REL=\"stylesheet\" HREF=\"/catman.css\""	"\n"
+	     "        TYPE=\"text/css\" media=\"all\">"		"\n"
+	     "  <TITLE>System Manpage Reference</TITLE>"	"\n"
+	     " </HEAD>"						"\n"
+	     " <BODY>"						"\n"
+	     "<!-- Begin page content. //-->");
 
 	puts("<PRE>");
 	while (NULL != (p = fgetln(f, &len))) {
@@ -721,7 +728,7 @@ static void
 pg_search(const struct manpaths *ps, const struct req *req, char *path)
 {
 	size_t		  tt;
-	int		  i, sz, rc;
+	int		  i, sz, rc, whatis;
 	const char	 *ep, *start;
 	char		**cp;
 	struct opts	  opt;
@@ -731,6 +738,7 @@ pg_search(const struct manpaths *ps, const struct req *req, char *path)
 	cp = NULL;
 	ep = NULL;
 	sz = 0;
+	whatis = 0;
 
 	memset(&opt, 0, sizeof(struct opts));
 
@@ -741,6 +749,9 @@ pg_search(const struct manpaths *ps, const struct req *req, char *path)
 			opt.cat = req->fields[i].val;
 		else if (0 == strcmp(req->fields[i].key, "arch"))
 			opt.arch = req->fields[i].val;
+		else if (0 == strcmp(req->fields[i].key, "op"))
+			whatis = 0 == strcasecmp
+				(req->fields[i].val, "whatis");
 
 	/*
 	 * Poor man's tokenisation.
@@ -770,7 +781,10 @@ pg_search(const struct manpaths *ps, const struct req *req, char *path)
 	 * The resp_search() function is called with the results.
 	 */
 
-	if (NULL != (expr = exprcomp(sz, cp, &tt)))
+	expr = whatis ? termcomp(sz, cp, &tt) :
+		        exprcomp(sz, cp, &tt);
+
+	if (NULL != expr)
 		rc = apropos_search
 			(ps->sz, ps->paths, &opt,
 			 expr, tt, (void *)req, resp_search);
