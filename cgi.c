@@ -323,10 +323,17 @@ resp_searchform(const struct req *req)
 	for (i = 0; i < (int)req->fieldsz; i++)
 		if (0 == strcmp(req->fields[i].key, "expr"))
 			expr = req->fields[i].val;
+		else if (0 == strcmp(req->fields[i].key, "query"))
+			expr = req->fields[i].val;
 		else if (0 == strcmp(req->fields[i].key, "sec"))
+			sec = req->fields[i].val;
+		else if (0 == strcmp(req->fields[i].key, "sektion"))
 			sec = req->fields[i].val;
 		else if (0 == strcmp(req->fields[i].key, "arch"))
 			arch = req->fields[i].val;
+
+	if (NULL != sec && 0 == strcmp(sec, "0"))
+		sec = NULL;
 
 	puts("<!-- Begin search form. //-->");
 	printf("<FORM ACTION=\"");
@@ -745,13 +752,23 @@ pg_search(const struct manpaths *ps, const struct req *req, char *path)
 	for (sz = i = 0; i < (int)req->fieldsz; i++)
 		if (0 == strcmp(req->fields[i].key, "expr"))
 			ep = req->fields[i].val;
+		else if (0 == strcmp(req->fields[i].key, "query"))
+			ep = req->fields[i].val;
 		else if (0 == strcmp(req->fields[i].key, "sec"))
+			opt.cat = req->fields[i].val;
+		else if (0 == strcmp(req->fields[i].key, "sektion"))
 			opt.cat = req->fields[i].val;
 		else if (0 == strcmp(req->fields[i].key, "arch"))
 			opt.arch = req->fields[i].val;
+		else if (0 == strcmp(req->fields[i].key, "apropos"))
+			whatis = 0 == strcmp
+				(req->fields[i].val, "0");
 		else if (0 == strcmp(req->fields[i].key, "op"))
 			whatis = 0 == strcasecmp
 				(req->fields[i].val, "whatis");
+
+	if (NULL != opt.cat && 0 == strcmp(opt.cat, "0"))
+		opt.cat = NULL;
 
 	/*
 	 * Poor man's tokenisation.
