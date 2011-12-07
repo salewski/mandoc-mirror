@@ -30,7 +30,7 @@ CFLAGS	 	+= -DUSE_WCHAR
 #CFLAGS		+= -DUSE_MANPATH
 
 # If your system supports static binaries only, uncomment this.
-#STATIC		 = -static
+STATIC		 = -static
 
 CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
