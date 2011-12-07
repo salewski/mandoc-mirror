@@ -69,6 +69,7 @@ static	int		 atou(const char *, unsigned *);
 static	void		 catman(const char *);
 static	void		 format(const char *);
 static	void		 html_print(const char *);
+static	void		 html_putchar(char);
 static	int 		 kval_decode(char *);
 static	void		 kval_parse(struct kval **, size_t *, char *);
 static	void		 kval_free(struct kval *, size_t);
@@ -80,9 +81,8 @@ static	void		 pg_show(const struct manpaths *,
 				const struct req *, char *);
 static	void		 resp_bad(void);
 static	void		 resp_baddb(void);
-static	void		 resp_badexpr(const struct req *);
-static	void		 resp_badmanual(void);
-static	void		 resp_badpage(void);
+static	void		 resp_error400(void);
+static	void		 resp_error404(const char *);
 static	void		 resp_begin_html(int, const char *);
 static	void		 resp_begin_http(int, const char *);
 static	void		 resp_end_html(void);
@@ -123,6 +123,29 @@ atou(const char *buf, unsigned *v)
 	return(1);
 }
 
+static void
+html_putchar(char c)
+{
+
+	switch (c) {
+	case ('"'):
+		printf("&quote;");
+		break;
+	case ('&'):
+		printf("&amp;");
+		break;
+	case ('>'):
+		printf("&gt;");
+		break;
+	case ('<'):
+		printf("&lt;");
+		break;
+	default:
+		putchar((unsigned char)c);
+		break;
+	}
+}
+
 /*
  * Print a word, escaping HTML along the way.
  * This will pass non-ASCII straight to output: be warned!
@@ -130,29 +153,11 @@ atou(const char *buf, unsigned *v)
 static void
 html_print(const char *p)
 {
-	char		 c;
 	
 	if (NULL == p)
 		return;
-
 	while ('\0' != *p)
-		switch ((c = *p++)) {
-		case ('"'):
-			printf("&quote;");
-			break;
-		case ('&'):
-			printf("&amp;");
-			break;
-		case ('>'):
-			printf("&gt;");
-			break;
-		case ('<'):
-			printf("&lt;");
-			break;
-		default:
-			putchar((unsigned char)c);
-			break;
-		}
+		html_putchar(*p++);
 }
 
 static void
@@ -290,6 +295,8 @@ resp_begin_html(int code, const char *msg)
 	     " \"http://www.w3.org/TR/html4/strict.dtd\">"	"\n"
 	     "<HTML>"						"\n"
 	     " <HEAD>"						"\n"
+	     "   <META HTTP-EQUIV=\"Content-Type\" "		"\n"
+	     "         CONTENT=\"text/html; charset=utf-8\">"	"\n"
 	     "  <TITLE>System Manpage Reference</TITLE>"	"\n"
 	     " </HEAD>"						"\n"
 	     " <BODY>"						"\n"
@@ -323,7 +330,7 @@ resp_searchform(const struct req *req)
 	printf("<FORM ACTION=\"");
 	html_print(progname);
 	printf("/search.html\" METHOD=\"get\">\n");
-	puts(" <FIELDSET>"					"\n"
+	puts(" <FIELDSET>\n"
 	     "  <INPUT TYPE=\"submit\" VALUE=\"Search:\">");
 	printf("  Terms: <INPUT TYPE=\"text\" "
 			"SIZE=\"60\" NAME=\"expr\" VALUE=\"");
@@ -350,30 +357,34 @@ resp_index(const struct req *req)
 }
 
 static void
-resp_badpage(void)
+resp_error400(void)
 {
 
-	resp_begin_html(404, "Not Found");
-	puts("<P>Page not found.</P>");
+	resp_begin_html(400, "Query Malformed");
+	puts("<H1>Malformed Query</H1>\n"
+	     "<P>\n"
+	     "  The query your entered was malformed.\n"
+	     "  Try again from the\n"
+	     "  <A HREF=\"/index.html\">main page</A>\n"
+	     "</P>");
 	resp_end_html();
 }
 
 static void
-resp_badmanual(void)
+resp_error404(const char *page)
 {
 
 	resp_begin_html(404, "Not Found");
-	puts("<P>Requested manual not found.</P>");
-	resp_end_html();
-}
-
-static void
-resp_badexpr(const struct req *req)
-{
-
-	resp_begin_html(200, NULL);
-	resp_searchform(req);
-	puts("<P>Your search didn't work.</P>");
+	puts("<H1>Page Not Found</H1>\n"
+	     "<P>\n"
+	     "  The page you're looking for, ");
+	printf("  <B>");
+	html_print(page);
+	puts("</B>,\n"
+	     "  could not be found.\n"
+	     "  Try searching from the\n"
+	     "  <A HREF=\"/index.html\">main page</A>\n"
+	     "</P>");
 	resp_end_html();
 }
 
@@ -448,24 +459,134 @@ pg_index(const struct manpaths *ps, const struct req *req, char *path)
 static void
 catman(const char *file)
 {
-	int		 fd;
-	char		 buf[BUFSIZ];
-	ssize_t		 ssz;
+	FILE		*f;
+	size_t		 len;
+	int		 i;
+	char		*p;
+	int		 italic, bold;
 
-	if (-1 == (fd = open(file, O_RDONLY, 0))) {
+	if (NULL == (f = fopen(file, "r"))) {
 		resp_baddb();
 		return;
 	}
 
-	resp_begin_http(200, NULL);
+	resp_begin_html(200, NULL);
 
-	while ((ssz = read(fd, buf, BUFSIZ)) > 0)
-		write(STDOUT_FILENO, buf, (size_t)ssz);
+	puts("<PRE>");
+	while (NULL != (p = fgetln(f, &len))) {
+		bold = italic = 0;
+		for (i = 0; i < (int)len - 1; i++) {
+			/* 
+			 * This means that the catpage is out of state.
+			 * Ignore it and keep going (although the
+			 * catpage is bogus).
+			 */
 
-	if (ssz < 0)
-		perror(file);
+			if ('\b' == p[i] || '\n' == p[i])
+				continue;
 
-	close(fd);
+			/*
+			 * Print a regular character.
+			 * Close out any bold/italic scopes.
+			 * If we're in back-space mode, make sure we'll
+			 * have something to enter when we backspace.
+			 */
+
+			if ('\b' != p[i + 1]) {
+				if (italic)
+					printf("</I>");
+				if (bold)
+					printf("</B>");
+				italic = bold = 0;
+				html_putchar(p[i]);
+				continue;
+			} else if (i + 2 >= (int)len)
+				continue;
+
+			/* Italic mode. */
+
+			if ('_' == p[i]) {
+				if (bold)
+					printf("</B>");
+				if ( ! italic)
+					printf("<I>");
+				bold = 0;
+				italic = 1;
+				i += 2;
+				html_putchar(p[i]);
+				continue;
+			}
+
+			/* 
+			 * Handle funny behaviour troff-isms.
+			 * These grok'd from the original man2html.c.
+			 */
+
+			if (('+' == p[i] && 'o' == p[i + 2]) ||
+					('o' == p[i] && '+' == p[i + 2]) ||
+					('|' == p[i] && '=' == p[i + 2]) ||
+					('=' == p[i] && '|' == p[i + 2]) ||
+					('*' == p[i] && '=' == p[i + 2]) ||
+					('=' == p[i] && '*' == p[i + 2]) ||
+					('*' == p[i] && '|' == p[i + 2]) ||
+					('|' == p[i] && '*' == p[i + 2]))  {
+				if (italic)
+					printf("</I>");
+				if (bold)
+					printf("</B>");
+				italic = bold = 0;
+				putchar('*');
+				i += 2;
+				continue;
+			} else if (('|' == p[i] && '-' == p[i + 2]) ||
+					('-' == p[i] && '|' == p[i + 1]) ||
+					('+' == p[i] && '-' == p[i + 1]) ||
+					('-' == p[i] && '+' == p[i + 1]) ||
+					('+' == p[i] && '|' == p[i + 1]) ||
+					('|' == p[i] && '+' == p[i + 1]))  {
+				if (italic)
+					printf("</I>");
+				if (bold)
+					printf("</B>");
+				italic = bold = 0;
+				putchar('+');
+				i += 2;
+				continue;
+			}
+
+			/* Bold mode. */
+			
+			if (italic)
+				printf("</I>");
+			if ( ! bold)
+				printf("<B>");
+			bold = 1;
+			italic = 0;
+			i += 2;
+			html_putchar(p[i]);
+		}
+
+		/* 
+		 * Clean up the last character.
+		 * We can get to a newline; don't print that. 
+		 */
+
+		if (italic)
+			printf("</I>");
+		if (bold)
+			printf("</B>");
+
+		if (i == (int)len - 1 && '\n' != p[i])
+			html_putchar(p[i]);
+
+		putchar('\n');
+	}
+
+	puts("</PRE>\n"
+	     "</BODY>\n"
+	     "</HTML>");
+
+	fclose(f);
 }
 
 static void
@@ -477,6 +598,7 @@ format(const char *file)
 	struct man	*man;
 	void		*vp;
 	enum mandoclevel rc;
+	char		 opts[MAXPATHLEN + 128];
 
 	if (-1 == (fd = open(file, O_RDONLY, 0))) {
 		resp_baddb();
@@ -492,8 +614,13 @@ format(const char *file)
 		return;
 	}
 
+	snprintf(opts, sizeof(opts), "style=/style.css,"
+			"man=%s/search.html?sec=%%S&expr=%%N,"
+			"includes=/cgi-bin/man.cgi/usr/include/%%I",
+			progname);
+
 	mparse_result(mp, &mdoc, &man);
-	vp = html_alloc(NULL);
+	vp = html_alloc(opts);
 
 	if (NULL != mdoc) {
 		resp_begin_http(200, NULL);
@@ -520,19 +647,19 @@ pg_show(const struct manpaths *ps, const struct req *req, char *path)
 	DBT		 key, val;
 
 	if (NULL == path) {
-		resp_badmanual();
+		resp_error400();
 		return;
 	} else if (NULL == (sub = strrchr(path, '/'))) {
-		resp_badmanual();
+		resp_error400();
 		return;
 	} else
 		*sub++ = '\0';
 
 	if ( ! (atou(path, &vol) && atou(sub, &rec))) {
-		resp_badmanual();
+		resp_error400();
 		return;
 	} else if (vol >= (unsigned int)ps->sz) {
-		resp_badmanual();
+		resp_error400();
 		return;
 	}
 
@@ -551,7 +678,7 @@ pg_show(const struct manpaths *ps, const struct req *req, char *path)
 	key.size = 4;
 
 	if (0 != (rc = (*idx->get)(idx, &key, &val, 0))) {
-		rc < 0 ? resp_baddb() : resp_badmanual();
+		rc < 0 ? resp_baddb() : resp_error400();
 		goto out;
 	} 
 
@@ -639,7 +766,7 @@ pg_search(const struct manpaths *ps, const struct req *req, char *path)
 	if (0 == rc)
 		resp_baddb();
 	else if (-1 == rc)
-		resp_badexpr(req);
+		resp_search(NULL, 0, (void *)req);
 
 	for (i = 0; i < sz; i++)
 		free(cp[i]);
@@ -729,7 +856,7 @@ main(void)
 		pg_show(&paths, &req, subpath);
 		break;
 	default:
-		resp_badpage();
+		resp_error404(path);
 		break;
 	}
 
