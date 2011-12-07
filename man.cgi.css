@@ -1,0 +1,6 @@
+body		{ font-family: Helvetica,Arial, sans-serif;
+		  font-size: small; }
+fieldset	{ text-align: center; }
+input[name=expr] { width: 25%; }
+td.title	{ padding-right: 1em; 
+		  text-align: right; }

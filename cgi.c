@@ -295,8 +295,8 @@ resp_begin_html(int code, const char *msg)
 	     " \"http://www.w3.org/TR/html4/strict.dtd\">"	"\n"
 	     "<HTML>"						"\n"
 	     " <HEAD>"						"\n"
-	     "   <META HTTP-EQUIV=\"Content-Type\" "		"\n"
-	     "         CONTENT=\"text/html; charset=utf-8\">"	"\n"
+	     "  <META HTTP-EQUIV=\"Content-Type\" "		"\n"
+	     "        CONTENT=\"text/html; charset=utf-8\">"	"\n"
 	     "  <LINK REL=\"stylesheet\" HREF=\"/man.cgi.css\""	"\n"
 	     "        TYPE=\"text/css\" media=\"all\">"		"\n"
 	     "  <TITLE>System Manpage Reference</TITLE>"	"\n"
@@ -339,21 +339,20 @@ resp_searchform(const struct req *req)
 	printf("<FORM ACTION=\"");
 	html_print(progname);
 	printf("/search.html\" METHOD=\"get\">\n");
-	puts("<FIELDSET>\n"
-	     "<INPUT TYPE=\"submit\" NAME=\"op\" "
-	      "VALUE=\"Whatis\"> or \n"
-	     "<INPUT TYPE=\"submit\" NAME=\"op\" "
-	      "VALUE=\"apropos\"> for manuals satisfying \n"
-	     "<INPUT TYPE=\"text\" SIZE=\"40\" "
-	      "NAME=\"expr\" VALUE=\"");
+	printf("<FIELDSET>\n"
+	       "<INPUT TYPE=\"submit\" NAME=\"op\" "
+	        "VALUE=\"Whatis\"> or \n"
+	       "<INPUT TYPE=\"submit\" NAME=\"op\" "
+	        "VALUE=\"apropos\"> for manuals satisfying \n"
+	       "<INPUT TYPE=\"text\" NAME=\"expr\" VALUE=\"");
 	html_print(expr);
-	puts("\">, section "
-	     "<INPUT TYPE=\"text\" "
-	      "SIZE=\"4\" NAME=\"sec\" VALUE=\"");
+	printf("\">, section "
+	       "<INPUT TYPE=\"text\" "
+	        "SIZE=\"4\" NAME=\"sec\" VALUE=\"");
 	html_print(sec);
-	puts("\">, arch "
-	     "<INPUT TYPE=\"text\" "
-	      "SIZE=\"8\" NAME=\"arch\" VALUE=\"");
+	printf("\">, arch "
+	       "<INPUT TYPE=\"text\" "
+	        "SIZE=\"8\" NAME=\"arch\" VALUE=\"");
 	html_print(arch);
 	puts("\">.\n"
 	     "<INPUT TYPE=\"reset\" VALUE=\"Reset\">\n"
@@ -424,6 +423,7 @@ static void
 resp_search(struct res *r, size_t sz, void *arg)
 {
 	int		 i;
+	char		*cp;
 
 	if (1 == sz) {
 		/*
@@ -441,23 +441,30 @@ resp_search(struct res *r, size_t sz, void *arg)
 	resp_begin_html(200, NULL);
 	resp_searchform((const struct req *)arg);
 
-	if (0 == sz)
+	if (0 == sz) {
 		puts("<P>No results found.</P>");
+		resp_end_html();
+		return;
+	}
+
+	puts("<P></P>\n"
+	     "<TABLE>");
 
 	for (i = 0; i < (int)sz; i++) {
-		printf("<P><A HREF=\"");
+		printf("<TR><TD CLASS=\"title\"><A HREF=\"");
 		html_print(progname);
 		printf("/show/%u/%u.html\">", r[i].volume, r[i].rec);
-		html_print(r[i].title);
+		for (cp = r[i].title; '\0' != *cp; cp++)
+			html_putchar(toupper((unsigned char)*cp));
 		putchar('(');
 		html_print(r[i].cat);
 		if (r[i].arch && '\0' != *r[i].arch) {
 			putchar('/');
 			html_print(r[i].arch);
 		}
-		printf(")</A> ");
+		printf(")</A></TD><TD CLASS=\"desc\">");
 		html_print(r[i].desc);
-		puts("</P>");
+		puts("</TD></TR>");
 	}
 
 	resp_end_html();
