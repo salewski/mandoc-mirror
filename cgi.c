@@ -67,6 +67,7 @@ struct	req {
 
 static	int		 atou(const char *, unsigned *);
 static	void		 catman(const char *);
+static	int	 	 cmp(const void *, const void *);
 static	void		 format(const char *);
 static	void		 html_print(const char *);
 static	void		 html_putchar(char);
@@ -423,7 +424,6 @@ static void
 resp_search(struct res *r, size_t sz, void *arg)
 {
 	int		 i;
-	char		*cp;
 
 	if (1 == sz) {
 		/*
@@ -437,6 +437,8 @@ resp_search(struct res *r, size_t sz, void *arg)
 		puts("Content-Type: text/html; charset=utf-8\n");
 		return;
 	}
+
+	qsort(r, sz, sizeof(struct res), cmp);
 
 	resp_begin_html(200, NULL);
 	resp_searchform((const struct req *)arg);
@@ -454,8 +456,7 @@ resp_search(struct res *r, size_t sz, void *arg)
 		printf("<TR><TD CLASS=\"title\"><A HREF=\"");
 		html_print(progname);
 		printf("/show/%u/%u.html\">", r[i].volume, r[i].rec);
-		for (cp = r[i].title; '\0' != *cp; cp++)
-			html_putchar(toupper((unsigned char)*cp));
+		html_print(r[i].title);
 		putchar('(');
 		html_print(r[i].cat);
 		if (r[i].arch && '\0' != *r[i].arch) {
@@ -752,7 +753,7 @@ pg_search(const struct manpaths *ps, const struct req *req, char *path)
 	cp = NULL;
 	ep = NULL;
 	sz = 0;
-	whatis = 0;
+	whatis = 1;
 
 	memset(&opt, 0, sizeof(struct opts));
 
@@ -917,3 +918,12 @@ main(void)
 
 	return(EXIT_SUCCESS);
 }
+
+static int
+cmp(const void *p1, const void *p2)
+{
+
+	return(strcasecmp(((const struct res *)p1)->title,
+				((const struct res *)p2)->title));
+}
+

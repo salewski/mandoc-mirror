@@ -133,7 +133,7 @@ static int
 cmp(const void *p1, const void *p2)
 {
 
-	return(strcmp(((const struct res *)p1)->title,
+	return(strcasecmp(((const struct res *)p1)->title,
 				((const struct res *)p2)->title));
 }
 
