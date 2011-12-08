@@ -731,7 +731,7 @@ pg_show(const struct manpaths *ps, const struct req *req, char *path)
 		resp_baddb();
 	else {
 		strlcpy(file, cache, MAXPATHLEN);
-		strlcpy(file, "/", MAXPATHLEN);
+		strlcat(file, "/", MAXPATHLEN);
 		strlcat(file, fn, MAXPATHLEN);
 		if (0 == strcmp(cp, "cat"))
 			catman(file);
