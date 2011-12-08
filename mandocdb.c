@@ -1288,52 +1288,59 @@ pformatted(DB *hash, struct buf *buf, struct buf *dbuf,
 	buf_append(buf, of->title);
 	hash_put(hash, buf, TYPE_Nm);
 
-	while (NULL != (line = fgetln(stream, &len)) && '\n' != *line)
-		/* Skip to first blank line. */ ;
+	/* Skip to first blank line. */ 
 
-	while (NULL != (line = fgetln(stream, &len)) &&
-			('\n' == *line || ' ' == *line))
-		/* Skip to first section header. */ ;
+	while (NULL != (line = fgetln(stream, &len)))
+		if (len && '\n' == *line)
+			break;
 
-	/*
-	 * If no page content can be found,
-	 * reuse the page title as the page description.
+	/* 
+	 * Skip to first section header.
+	 * This happens when text is flush-left.
 	 */
 
-	if (NULL == (line = fgetln(stream, &len))) {
+	while (NULL != (line = fgetln(stream, &len)))
+		if (len && '\n' != *line && ' ' != *line)
+			break;
+
+	/*
+	 * If no page content can be found or the input line is
+	 * malformed (zer-length or has no trailing newline), reuse the
+	 * page title as the page description.
+	 */
+
+	line = fgetln(stream, &len);
+	if (NULL == line || len == 0 || '\n' != line[(int)len - 1]) {
 		buf_appendb(dbuf, buf->cp, buf->size);
 		hash_put(hash, buf, TYPE_Nd);
 		fclose(stream);
 		return;
 	}
-	fclose(stream);
 
-	/*
-	 * If there is a dash, skip to the text following it.
+	line[(int)--len] = '\0';
+
+	/* 
+	 * Skip to the last dash.
+	 * Use the remaining line as the description (no more than 70
+	 * bytes).
 	 */
 
-	for (p = line, plen = len; plen; p++, plen--)
-		if ('-' == *p)
-			break;
-	for ( ; plen; p++, plen--)
-		if ('-' != *p && ' ' != *p && 8 != *p)
-			break;
-	if (0 == plen) {
+	if (NULL != (p = strrchr(line, '-'))) {
+		for (++p; ' ' == *p || '\b' == *p; p++)
+			/* Skip to next word. */ ;
+	} else
 		p = line;
-		plen = len;
+
+	if ((plen = strlen(p)) > 70) {
+		plen = 70;
+		p[plen] = '\0';
 	}
 
-	/*
-	 * Copy the rest of the line, but no more than 70 bytes.
-	 */
-
-	if (70 < plen)
-		plen = 70;
-	p[plen-1] = '\0';
-	buf_appendb(dbuf, p, plen);
+	buf_appendb(dbuf, p, plen + 1);
 	buf->len = 0;
-	buf_appendb(buf, p, plen);
+	buf_appendb(buf, p, plen + 1);
 	hash_put(hash, buf, TYPE_Nd);
+	fclose(stream);
 }
 
 static void
