@@ -51,15 +51,11 @@
 		exit(EXIT_FAILURE); \
 	} while (/* CONSTCOND */0)
 
-static	int		 indexhtml(char *);
-#if 0
-static	int		 jobstart(const char *, const char *, pid_t *);
-static	int		 jobwait(pid_t);
-#endif
-static	int		 manup(const struct manpaths *, const char *);
+static	int		 indexhtml(char *, char *);
+static	int		 manup(const struct manpaths *, char *);
 static	int		 mkpath(char *, mode_t, mode_t);
-static	int		 treecpy(char *, char *);
-static	int		 update(char *, char *);
+static	int		 treecpy(char *, char *, char *);
+static	int		 update(char *, char *, char *);
 static	void		 usage(void);
 
 static	const char	*progname;
@@ -71,8 +67,8 @@ main(int argc, char *argv[])
 {
 	int		 ch;
 	char		*aux, *base;
-	const char	*dir;
 	struct manpaths	 dirs;
+	char		 buf[MAXPATHLEN];
 	extern char	*optarg;
 	extern int	 optind;
 
@@ -83,7 +79,7 @@ main(int argc, char *argv[])
 		++progname;
 
 	aux = base = NULL;
-	dir = "/var/www/cache/man.cgi";
+	xstrlcpy(buf, "/var/www/cache/man.cgi", MAXPATHLEN);
 
 	while (-1 != (ch = getopt(argc, argv, "fm:M:o:v")))
 		switch (ch) {
@@ -97,7 +93,7 @@ main(int argc, char *argv[])
 			base = optarg;
 			break;
 		case ('o'):
-			dir = optarg;
+			xstrlcpy(buf, optarg, MAXPATHLEN);
 			break;
 		case ('v'):
 			verbose++;
@@ -117,7 +113,7 @@ main(int argc, char *argv[])
 
 	memset(&dirs, 0, sizeof(struct manpaths));
 	manpath_parse(&dirs, base, aux);
-	ch = manup(&dirs, dir);
+	ch = manup(&dirs, buf);
 	manpath_free(&dirs);
 	return(ch ? EXIT_SUCCESS : EXIT_FAILURE);
 }
@@ -196,74 +192,13 @@ out:
 	return(rc);
 }
 
-#if 0
-/*
- * Clean up existing child.
- * Return 1 if cleaned up fine (or none was started) and 0 otherwise.
- */
-static int
-jobwait(pid_t pid)
-{
-	int		 st;
-
-	if (-1 == pid)
-		return(1);
-
-	if (-1 == waitpid(pid, &st, 0)) {
-		perror(NULL);
-		exit(EXIT_FAILURE);
-	}
-
-	return(WIFEXITED(st) && 0 == WEXITSTATUS(st));
-}
-
-/*
- * Start a job (child process), first making sure that the prior one has
- * finished.
- * Return 1 if the prior child exited and the new one started, else 0.
- */
-static int
-jobstart(const char *dst, const char *src, pid_t *pid)
-{
-	int		 fd;
-
-	if ( ! jobwait(*pid))
-		return(0);
-
-	if (-1 == (*pid = fork())) {
-		perror(NULL);
-		exit(EXIT_FAILURE);
-	} else if (*pid > 0)
-		return(1);
-
-	if (-1 == (fd = open(dst, O_WRONLY|O_TRUNC|O_CREAT, 0644))) {
-		perror(dst);
-		exit(EXIT_FAILURE);
-	}
-
-	if (-1 == dup2(fd, STDOUT_FILENO)) {
-		perror(NULL);
-		exit(EXIT_FAILURE);
-	}
-
-	execlp("mandoc", "mandoc", "-T", "html", 
-			"-O", "fragment",
-			"-O", "man=man.cgi?expr=%N&sec=%S", 
-			src, (char *)NULL);
-
-	perror("mandoc");
-	exit(EXIT_FAILURE);
-	/* NOTREACHED */
-}
-#endif
-
 /*
  * Pass over the recno database and re-create HTML pages if they're
  * found to be out of date.
  * Returns -1 on fatal error, 1 on success.
  */
 static int
-indexhtml(char *dst)
+indexhtml(char *base, char *dst)
 {
 	DB		*idx;
 	DBT		 key, val;
@@ -275,7 +210,7 @@ indexhtml(char *dst)
 	char		 fname[MAXPATHLEN];
 	pid_t		 pid;
 
-	sz = strlen(dst);
+	sz = strlen(base);
 	pid = -1;
 
 	xstrlcpy(fname, dst, MAXPATHLEN);
@@ -300,36 +235,32 @@ indexhtml(char *dst)
 		if (NULL == memchr(f, '\0', val.size - (f - cp)))
 			break;
 
-		dst[(int)sz] = '\0';
+		base[(int)sz] = '\0';
 
-		xstrlcat(dst, "/", MAXPATHLEN);
-		xstrlcat(dst, f, MAXPATHLEN);
+		xstrlcat(base, "/", MAXPATHLEN);
+		xstrlcat(base, f, MAXPATHLEN);
 
-		if (-1 == (rc = isnewer(dst, f))) {
+		if (-1 == (rc = isnewer(base, f))) {
 			fprintf(stderr, "%s: File missing\n", f);
 			break;
 		} else if (0 == rc)
 			continue;
 
-		d = strrchr(dst, '/');
+		d = strrchr(base, '/');
 		assert(NULL != d);
 		*d = '\0';
 
-		if (-1 == mkpath(dst, 0755, 0755)) {
-			perror(dst);
+		if (-1 == mkpath(base, 0755, 0755)) {
+			perror(base);
 			break;
 		}
 
 		*d = '/';
 
-		if ( ! filecpy(dst, f))
+		if ( ! filecpy(base, f))
 			break;
-#if 0
-		if ( ! jobstart(dst, f, &pid))
-			break;
-#endif
 		if (verbose)
-			printf("%s\n", dst);
+			printf("%s\n", base);
 	}
 
 	(*idx->close)(idx);
@@ -338,10 +269,6 @@ indexhtml(char *dst)
 		perror(fname);
 	else if (0 == c) 
 		fprintf(stderr, "%s: Corrupt index\n", fname);
-#if 0
-	if ( ! jobwait(pid))
-		c = -1;
-#endif
 
 	return(1 == c ? 1 : -1);
 }
@@ -352,7 +279,7 @@ indexhtml(char *dst)
  * Return -1 on fatal error and 1 if the update went well.
  */
 static int
-update(char *dst, char *src)
+update(char *base, char *dst, char *src)
 {
 	size_t		 dsz, ssz;
 
@@ -379,7 +306,7 @@ update(char *dst, char *src)
 
 	dst[(int)dsz] = '\0';
 
-	return(indexhtml(dst));
+	return(indexhtml(base, dst));
 }
 
 /*
@@ -389,7 +316,7 @@ update(char *dst, char *src)
  * shouldn't be listed), and 1 if the update went well.
  */
 static int
-treecpy(char *dst, char *src)
+treecpy(char *base, char *dst, char *src)
 {
 	size_t		 dsz, ssz;
 	int		 rc;
@@ -406,7 +333,7 @@ treecpy(char *dst, char *src)
 	dst[(int)dsz] = src[(int)ssz] = '\0';
 
 	if (1 == rc)
-		return(update(dst, src));
+		return(update(base, dst, src));
 
 	xstrlcat(src, "/mandoc.db", MAXPATHLEN);
 	xstrlcat(dst, "/mandoc.db", MAXPATHLEN);
@@ -418,7 +345,7 @@ treecpy(char *dst, char *src)
 
 	dst[(int)dsz] = src[(int)ssz] = '\0';
 
-	return(update(dst, src));
+	return(update(base, dst, src));
 }
 
 /*
@@ -428,7 +355,7 @@ treecpy(char *dst, char *src)
  * Returns 1 on success, 0 on failure.
  */
 static int
-manup(const struct manpaths *dirs, const char *dir)
+manup(const struct manpaths *dirs, char *base)
 {
 	char		 dst[MAXPATHLEN],
 			 src[MAXPATHLEN];
@@ -437,41 +364,34 @@ manup(const struct manpaths *dirs, const char *dir)
 	size_t		 sz;
 	FILE		*f;
 
-	xstrlcpy(dst, dir, MAXPATHLEN);
-	xstrlcat(dst, "/etc", MAXPATHLEN);
+	/* Create the path and file for the catman.conf file. */
 
+	sz = strlen(base);
+	xstrlcpy(dst, base, MAXPATHLEN);
+	xstrlcat(dst, "/etc", MAXPATHLEN);
 	if (-1 == mkpath(dst, 0755, 0755)) {
 		perror(dst);
 		return(0);
 	}
 
 	xstrlcat(dst, "/catman.conf", MAXPATHLEN);
-
-	if (verbose)
-		printf("%s\n", dst);
-
 	if (NULL == (f = fopen(dst, "w"))) {
 		perror(dst);
 		return(0);
-	}
-
-	xstrlcpy(dst, dir, MAXPATHLEN);
-	sz = strlen(dst);
+	} else if (verbose)
+		printf("%s\n", dst);
 
 	for (i = 0; i < dirs->sz; i++) {
 		path = dirs->paths[i];
-
-		dst[(int)sz] = '\0';
+		dst[(int)sz] = base[(int)sz] = '\0';
 		xstrlcat(dst, path, MAXPATHLEN);
-
 		if (-1 == mkpath(dst, 0755, 0755)) {
 			perror(dst);
 			break;
 		}
 
 		xstrlcpy(src, path, MAXPATHLEN);
-
-		if (-1 == (c = treecpy(dst, src)))
+		if (-1 == (c = treecpy(base, dst, src)))
 			break;
 		else if (0 == c)
 			continue;
