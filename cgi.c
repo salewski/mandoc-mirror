@@ -730,8 +730,8 @@ pg_show(const struct manpaths *ps, const struct req *req, char *path)
 	else if (NULL == memchr(fn, '\0', val.size - (fn - cp)))
 		resp_baddb();
 	else {
-		strlcpy(file, ps->paths[vol], MAXPATHLEN);
-		strlcat(file, "/", MAXPATHLEN);
+		strlcpy(file, cache, MAXPATHLEN);
+		strlcpy(file, "/", MAXPATHLEN);
 		strlcat(file, fn, MAXPATHLEN);
 		if (0 == strcmp(cp, "cat"))
 			catman(file);
