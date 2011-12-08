@@ -424,7 +424,12 @@ resp_baddb(void)
 static void
 resp_search(struct res *r, size_t sz, void *arg)
 {
-	int		 i;
+	int		 i, whatis;
+	const char	*ep, *sec, *arch;
+	const struct req *req;
+
+	whatis = 1;
+	ep = sec = arch = NULL;
 
 	if (1 == sz) {
 		/*
@@ -439,13 +444,46 @@ resp_search(struct res *r, size_t sz, void *arg)
 		return;
 	}
 
+	req = (const struct req *)arg;
+
+	for (i = 0; i < (int)req->fieldsz; i++)
+		if (0 == strcmp(req->fields[i].key, "expr"))
+			ep = req->fields[i].val;
+		else if (0 == strcmp(req->fields[i].key, "query"))
+			ep = req->fields[i].val;
+		else if (0 == strcmp(req->fields[i].key, "sec"))
+			sec = req->fields[i].val;
+		else if (0 == strcmp(req->fields[i].key, "sektion"))
+			sec = req->fields[i].val;
+		else if (0 == strcmp(req->fields[i].key, "arch"))
+			arch = req->fields[i].val;
+		else if (0 == strcmp(req->fields[i].key, "apropos"))
+			whatis = 0 == strcmp
+				(req->fields[i].val, "0");
+		else if (0 == strcmp(req->fields[i].key, "op"))
+			whatis = 0 == strcasecmp
+				(req->fields[i].val, "whatis");
+
 	qsort(r, sz, sizeof(struct res), cmp);
 
 	resp_begin_html(200, NULL);
-	resp_searchform((const struct req *)arg);
+	resp_searchform(req);
 
 	if (0 == sz) {
-		puts("<P>No results found.</P>");
+		puts("<P>\n"
+		     "No results found.");
+		if (whatis) {
+			printf("(Try <A HREF=\"");
+			html_print(progname);
+			printf("/search.html?op=apropos&amp;expr=");
+			html_print(ep ? ep : "");
+			printf("&amp;sec=");
+			html_print(sec ? sec : "");
+			printf("&amp;arch=");
+			html_print(arch ? arch : "");
+			puts("\">apropos</A>?)");
+		}
+		puts("</P>");
 		resp_end_html();
 		return;
 	}
