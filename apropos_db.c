@@ -541,8 +541,10 @@ single_search(struct rectree *tree, const struct opts *opts,
 
 		if (opts->cat && strcasecmp(opts->cat, r.res.cat))
 			continue;
-		if (opts->arch && strcasecmp(opts->arch, r.res.arch))
-			continue;
+
+		if (opts->arch && *r.res.arch)
+			if (strcasecmp(opts->arch, r.res.arch))
+				continue;
 
 		tree->node = rs = mandoc_realloc
 			(rs, (tree->len + 1) * sizeof(struct rec));
