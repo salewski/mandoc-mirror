@@ -1325,8 +1325,8 @@ pformatted(DB *hash, struct buf *buf, struct buf *dbuf,
 	 * bytes).
 	 */
 
-	if (NULL != (p = strrchr(line, '-'))) {
-		for (++p; ' ' == *p || '\b' == *p; p++)
+	if (NULL != (p = strstr(line, "- "))) {
+		for (p += 2; ' ' == *p || '\b' == *p; p++)
 			/* Skip to next word. */ ;
 	} else
 		p = line;
