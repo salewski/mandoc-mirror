@@ -54,6 +54,18 @@ enum	page {
 	PAGE__MAX
 };
 
+/*
+ * A query as passed to the search function.
+ * See kval_query() on how this is parsed.
+ */
+struct	query {
+	const char	*arch; /* architecture */
+	const char	*sec; /* manual section */
+	const char	*expr; /* unparsed expression string */
+	int		 whatis; /* whether whatis mode */
+	int		 legacy; /* whether legacy mode */
+};
+
 struct	kval {
 	char		*key;
 	char		*val;
@@ -72,8 +84,10 @@ static	void		 format(const char *);
 static	void		 html_print(const char *);
 static	void		 html_putchar(char);
 static	int 		 kval_decode(char *);
-static	void		 kval_parse(struct kval **, size_t *, char *);
 static	void		 kval_free(struct kval *, size_t);
+static	void		 kval_parse(struct kval **, size_t *, char *);
+static	void		 kval_query(struct query *, 
+				const struct kval *, size_t);
 static	void		 pg_index(const struct manpaths *,
 				const struct req *, char *);
 static	void		 pg_search(const struct manpaths *,
@@ -102,6 +116,55 @@ static	const char * const pages[PAGE__MAX] = {
 };
 
 /*
+ * Initialise and parse a query structure from input.
+ * This accomodates for mdocml's man.cgi and also for legacy man.cgi
+ * input keys ("sektion" and "apropos").
+ * Note that legacy mode has some quirks: if apropos legacy mode is
+ * detected, we unset the section and architecture string.
+ */
+static void
+kval_query(struct query *q, const struct kval *fields, size_t sz)
+{
+	int		 i, legacy;
+
+	memset(q, 0, sizeof(struct query));
+	legacy = -1;
+
+	for (i = 0; i < (int)sz; i++)
+		if (0 == strcmp(fields[i].key, "expr"))
+			q->expr = fields[i].val;
+		else if (0 == strcmp(fields[i].key, "query"))
+			q->expr = fields[i].val;
+		else if (0 == strcmp(fields[i].key, "sec"))
+			q->sec = fields[i].val;
+		else if (0 == strcmp(fields[i].key, "sektion"))
+			q->sec = fields[i].val;
+		else if (0 == strcmp(fields[i].key, "arch"))
+			q->arch = fields[i].val;
+		else if (0 == strcmp(fields[i].key, "apropos"))
+			legacy = 0 == strcmp
+				(fields[i].val, "0");
+		else if (0 == strcmp(fields[i].key, "op"))
+			q->whatis = 0 == strcasecmp
+				(fields[i].val, "whatis");
+
+	/* Test for old man.cgi compatibility mode. */
+
+	if (legacy == 0) {
+		q->whatis = 0;
+		q->legacy = 1;
+	} else if (legacy > 0) {
+		q->legacy = 1;
+		q->whatis = 1;
+	}
+
+	/* Section "0" means no section when in legacy mode. */
+
+	if (q->legacy && NULL != q->sec && 0 == strcmp(q->sec, "0"))
+		q->sec = NULL;
+}
+
+/*
  * This is just OpenBSD's strtol(3) suggestion.
  * I use it instead of strtonum(3) for portability's sake.
  */
@@ -124,6 +187,10 @@ atou(const char *buf, unsigned *v)
 	return(1);
 }
 
+/*
+ * Print a character, escaping HTML along the way.
+ * This will pass non-ASCII straight to output: be warned!
+ */
 static void
 html_putchar(char c)
 {
@@ -148,8 +215,8 @@ html_putchar(char c)
 }
 
 /*
- * Print a word, escaping HTML along the way.
- * This will pass non-ASCII straight to output: be warned!
+ * Call through to html_putchar().
+ * Accepts NULL strings.
  */
 static void
 html_print(const char *p)
@@ -277,9 +344,9 @@ resp_begin_http(int code, const char *msg)
 	if (200 != code)
 		printf("Status: %d %s\n", code, msg);
 
-	puts("Content-Type: text/html; charset=utf-8"		"\n"
-	     "Cache-Control: no-cache"				"\n"
-	     "Pragma: no-cache"					"\n"
+	puts("Content-Type: text/html; charset=utf-8\n"
+	     "Cache-Control: no-cache\n"
+	     "Pragma: no-cache\n"
 	     "");
 
 	fflush(stdout);
@@ -291,18 +358,18 @@ resp_begin_html(int code, const char *msg)
 
 	resp_begin_http(code, msg);
 
-	puts("<!DOCTYPE HTML PUBLIC "				"\n"
-	     " \"-//W3C//DTD HTML 4.01//EN\""			"\n"
-	     " \"http://www.w3.org/TR/html4/strict.dtd\">"	"\n"
-	     "<HTML>"						"\n"
-	     " <HEAD>"						"\n"
-	     "  <META HTTP-EQUIV=\"Content-Type\" "		"\n"
-	     "        CONTENT=\"text/html; charset=utf-8\">"	"\n"
-	     "  <LINK REL=\"stylesheet\" HREF=\"/man.cgi.css\""	"\n"
-	     "        TYPE=\"text/css\" media=\"all\">"		"\n"
-	     "  <TITLE>System Manpage Reference</TITLE>"	"\n"
-	     " </HEAD>"						"\n"
-	     " <BODY>"						"\n"
+	puts("<!DOCTYPE HTML PUBLIC "
+	     " \"-//W3C//DTD HTML 4.01//EN\""
+	     " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
+	     "<HTML>\n"
+	     "<HEAD>\n"
+	     "<META HTTP-EQUIV=\"Content-Type\""
+	     " CONTENT=\"text/html; charset=utf-8\">\n"
+	     "<LINK REL=\"stylesheet\" HREF=\"/man.cgi.css\""
+	     " TYPE=\"text/css\" media=\"all\">\n"
+	     "<TITLE>System Manpage Reference</TITLE>\n"
+	     "</HEAD>\n"
+	     "<BODY>\n"
 	     "<!-- Begin page content. //-->");
 }
 
@@ -310,31 +377,16 @@ static void
 resp_end_html(void)
 {
 
-	puts(" </BODY>\n</HTML>");
+	puts("</BODY>\n"
+	     "</HTML>");
 }
 
 static void
 resp_searchform(const struct req *req)
 {
-	int	 	 i;
-	const char	*expr, *sec, *arch;
+	struct query	 q;
 
-	expr = sec = arch = "";
-
-	for (i = 0; i < (int)req->fieldsz; i++)
-		if (0 == strcmp(req->fields[i].key, "expr"))
-			expr = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "query"))
-			expr = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "sec"))
-			sec = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "sektion"))
-			sec = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "arch"))
-			arch = req->fields[i].val;
-
-	if (NULL != sec && 0 == strcmp(sec, "0"))
-		sec = NULL;
+	kval_query(&q, req->fields, req->fieldsz);
 
 	puts("<!-- Begin search form. //-->");
 	printf("<FORM ACTION=\"");
@@ -342,25 +394,25 @@ resp_searchform(const struct req *req)
 	printf("/search.html\" METHOD=\"get\">\n");
 	printf("<FIELDSET>\n"
 	       "<LEGEND>Search Parameters</LEGEND>\n"
-	       "<INPUT TYPE=\"submit\" NAME=\"op\" "
-	        "VALUE=\"Whatis\"> or \n"
-	       "<INPUT TYPE=\"submit\" NAME=\"op\" "
-	        "VALUE=\"apropos\"> for manuals satisfying \n"
+	       "<INPUT TYPE=\"submit\" NAME=\"op\""
+	       " VALUE=\"Whatis\"> or \n"
+	       "<INPUT TYPE=\"submit\" NAME=\"op\""
+	       " VALUE=\"apropos\"> for manuals satisfying \n"
 	       "<INPUT TYPE=\"text\" NAME=\"expr\" VALUE=\"");
-	html_print(expr);
+	html_print(q.expr ? q.expr : "");
 	printf("\">, section "
-	       "<INPUT TYPE=\"text\" "
-	        "SIZE=\"4\" NAME=\"sec\" VALUE=\"");
-	html_print(sec);
+	       "<INPUT TYPE=\"text\""
+	       " SIZE=\"4\" NAME=\"sec\" VALUE=\"");
+	html_print(q.sec ? q.sec : "");
 	printf("\">, arch "
-	       "<INPUT TYPE=\"text\" "
-	        "SIZE=\"8\" NAME=\"arch\" VALUE=\"");
-	html_print(arch);
+	       "<INPUT TYPE=\"text\""
+	       " SIZE=\"8\" NAME=\"arch\" VALUE=\"");
+	html_print(q.arch ? q.arch : "");
 	puts("\">.\n"
 	     "<INPUT TYPE=\"reset\" VALUE=\"Reset\">\n"
 	     "</FIELDSET>\n"
-	     "</FORM>\n"
-	     "<!-- End search form. //-->");
+	     "</FORM>");
+	puts("<!-- End search form. //-->");
 }
 
 static void
@@ -379,9 +431,9 @@ resp_error400(void)
 	resp_begin_html(400, "Query Malformed");
 	printf("<H1>Malformed Query</H1>\n"
 	       "<P>\n"
-	       "  The query your entered was malformed.\n"
-	       "  Try again from the\n"
-	       "  <A HREF=\"%s/index.html\">main page</A>\n"
+	       "The query your entered was malformed.\n"
+	       "Try again from the\n"
+	       "<A HREF=\"%s/index.html\">main page</A>\n"
 	       "</P>", progname);
 	resp_end_html();
 }
@@ -393,13 +445,13 @@ resp_error404(const char *page)
 	resp_begin_html(404, "Not Found");
 	puts("<H1>Page Not Found</H1>\n"
 	     "<P>\n"
-	     "  The page you're looking for, ");
-	printf("  <B>");
+	     "The page you're looking for, ");
+	printf("<B>");
 	html_print(page);
 	printf("</B>,\n"
-	       "  could not be found.\n"
-	       "  Try searching from the\n"
-	       "  <A HREF=\"%s/index.html\">main page</A>\n"
+	       "could not be found.\n"
+	       "Try searching from the\n"
+	       "<A HREF=\"%s/index.html\">main page</A>\n"
 	       "</P>", progname);
 	resp_end_html();
 }
@@ -424,12 +476,9 @@ resp_baddb(void)
 static void
 resp_search(struct res *r, size_t sz, void *arg)
 {
-	int		 i, whatis;
-	const char	*ep, *sec, *arch;
+	int		  i;
+	struct query	  q;
 	const struct req *req;
-
-	whatis = 1;
-	ep = sec = arch = NULL;
 
 	if (1 == sz) {
 		/*
@@ -444,43 +493,26 @@ resp_search(struct res *r, size_t sz, void *arg)
 		return;
 	}
 
-	req = (const struct req *)arg;
-
-	for (i = 0; i < (int)req->fieldsz; i++)
-		if (0 == strcmp(req->fields[i].key, "expr"))
-			ep = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "query"))
-			ep = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "sec"))
-			sec = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "sektion"))
-			sec = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "arch"))
-			arch = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "apropos"))
-			whatis = 0 == strcmp
-				(req->fields[i].val, "0");
-		else if (0 == strcmp(req->fields[i].key, "op"))
-			whatis = 0 == strcasecmp
-				(req->fields[i].val, "whatis");
-
 	qsort(r, sz, sizeof(struct res), cmp);
 
 	resp_begin_html(200, NULL);
+
+	req = (const struct req *)arg;
 	resp_searchform(req);
+	kval_query(&q, req->fields, req->fieldsz);
 
 	if (0 == sz) {
 		puts("<P>\n"
 		     "No results found.");
-		if (whatis) {
+		if (q.whatis) {
 			printf("(Try <A HREF=\"");
 			html_print(progname);
 			printf("/search.html?op=apropos&amp;expr=");
-			html_print(ep ? ep : "");
+			html_print(q.expr ? q.expr : "");
 			printf("&amp;sec=");
-			html_print(sec ? sec : "");
+			html_print(q.sec ? q.sec : "");
 			printf("&amp;arch=");
-			html_print(arch ? arch : "");
+			html_print(q.arch ? q.arch : "");
 			puts("\">apropos</A>?)");
 		}
 		puts("</P>");
@@ -492,7 +524,9 @@ resp_search(struct res *r, size_t sz, void *arg)
 	     "<TABLE>");
 
 	for (i = 0; i < (int)sz; i++) {
-		printf("<TR><TD CLASS=\"title\"><A HREF=\"");
+		printf("<TR>\n"
+		       "<TD CLASS=\"title\">\n"
+		       "<A HREF=\"");
 		html_print(progname);
 		printf("/show/%u/%u.html\">", r[i].volume, r[i].rec);
 		html_print(r[i].title);
@@ -502,13 +536,15 @@ resp_search(struct res *r, size_t sz, void *arg)
 			putchar('/');
 			html_print(r[i].arch);
 		}
-		printf(")</A></TD><TD CLASS=\"desc\">");
+		printf(")</A>\n"
+		       "</TD>\n"
+		       "<TD CLASS=\"desc\">");
 		html_print(r[i].desc);
-		puts("</TD></TR>");
+		puts("</TD>\n"
+		     "</TR>");
 	}
 
 	puts("</TABLE>");
-
 	resp_end_html();
 }
 
@@ -535,21 +571,21 @@ catman(const char *file)
 	}
 
 	resp_begin_http(200, NULL);
-	puts("<!DOCTYPE HTML PUBLIC "				"\n"
-	     " \"-//W3C//DTD HTML 4.01//EN\""			"\n"
-	     " \"http://www.w3.org/TR/html4/strict.dtd\">"	"\n"
-	     "<HTML>"						"\n"
-	     " <HEAD>"						"\n"
-	     "  <META HTTP-EQUIV=\"Content-Type\" "		"\n"
-	     "        CONTENT=\"text/html; charset=utf-8\">"	"\n"
-	     "  <LINK REL=\"stylesheet\" HREF=\"/catman.css\""	"\n"
-	     "        TYPE=\"text/css\" media=\"all\">"		"\n"
-	     "  <TITLE>System Manpage Reference</TITLE>"	"\n"
-	     " </HEAD>"						"\n"
-	     " <BODY>"						"\n"
-	     "<!-- Begin page content. //-->");
+	puts("<!DOCTYPE HTML PUBLIC "
+	     " \"-//W3C//DTD HTML 4.01//EN\""
+	     " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
+	     "<HTML>\n"
+	     "<HEAD>\n"
+	     "<META HTTP-EQUIV=\"Content-Type\""
+	     " CONTENT=\"text/html; charset=utf-8\">\n"
+	     "<LINK REL=\"stylesheet\" HREF=\"/catman.css\""
+	     " TYPE=\"text/css\" media=\"all\">\n"
+	     "<TITLE>System Manpage Reference</TITLE>\n"
+	     "</HEAD>\n"
+	     "<BODY>\n"
+	     "<!-- Begin page content. //-->\n"
+	     "<PRE>");
 
-	puts("<PRE>");
 	while (NULL != (p = fgetln(f, &len))) {
 		bold = italic = 0;
 		for (i = 0; i < (int)len - 1; i++) {
@@ -784,40 +820,22 @@ static void
 pg_search(const struct manpaths *ps, const struct req *req, char *path)
 {
 	size_t		  tt;
-	int		  i, sz, rc, whatis;
+	int		  i, sz, rc;
 	const char	 *ep, *start;
 	char		**cp;
 	struct opts	  opt;
 	struct expr	 *expr;
+	struct query	  q;
 
-	expr = NULL;
-	cp = NULL;
-	ep = NULL;
-	sz = 0;
-	whatis = 1;
-
+	kval_query(&q, req->fields, req->fieldsz);
 	memset(&opt, 0, sizeof(struct opts));
 
-	for (sz = i = 0; i < (int)req->fieldsz; i++)
-		if (0 == strcmp(req->fields[i].key, "expr"))
-			ep = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "query"))
-			ep = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "sec"))
-			opt.cat = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "sektion"))
-			opt.cat = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "arch"))
-			opt.arch = req->fields[i].val;
-		else if (0 == strcmp(req->fields[i].key, "apropos"))
-			whatis = 0 == strcmp
-				(req->fields[i].val, "0");
-		else if (0 == strcmp(req->fields[i].key, "op"))
-			whatis = 0 == strcasecmp
-				(req->fields[i].val, "whatis");
-
-	if (NULL != opt.cat && 0 == strcmp(opt.cat, "0"))
-		opt.cat = NULL;
+	ep 	 = q.expr;
+	opt.arch = q.arch;
+	opt.cat  = q.sec;
+	rc 	 = -1;
+	sz 	 = 0;
+	cp	 = NULL;
 
 	/*
 	 * Poor man's tokenisation.
@@ -840,15 +858,13 @@ pg_search(const struct manpaths *ps, const struct req *req, char *path)
 			ep++;
 	}
 
-	rc = -1;
-
 	/*
 	 * Pump down into apropos backend.
 	 * The resp_search() function is called with the results.
 	 */
 
-	expr = whatis ? termcomp(sz, cp, &tt) :
-		        exprcomp(sz, cp, &tt);
+	expr = q.whatis ? termcomp(sz, cp, &tt) :
+		          exprcomp(sz, cp, &tt);
 
 	if (NULL != expr)
 		rc = apropos_search
