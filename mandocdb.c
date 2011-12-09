@@ -1336,6 +1336,18 @@ pformatted(DB *hash, struct buf *buf, struct buf *dbuf,
 		p[plen] = '\0';
 	}
 
+	/* Strip backspace-encoding from line. */
+
+	while (NULL != (line = memchr(p, '\b', plen))) {
+		len = line - p;
+		if (0 == len) {
+			memmove(line, line + 1, plen--);
+			continue;
+		} 
+		memmove(line - 1, line + 1, plen - len);
+		plen -= 2;
+	}
+
 	buf_appendb(dbuf, p, plen + 1);
 	buf->len = 0;
 	buf_appendb(buf, p, plen + 1);
