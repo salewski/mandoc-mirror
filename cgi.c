@@ -67,6 +67,7 @@ struct	query {
 	const char	*arch; /* architecture */
 	const char	*sec; /* manual section */
 	const char	*expr; /* unparsed expression string */
+	int		 manroot; /* manroot index (or -1)*/
 	int		 whatis; /* whether whatis mode */
 	int		 legacy; /* whether legacy mode */
 };
@@ -85,7 +86,7 @@ static	void		 format(const char *);
 static	void		 html_print(const char *);
 static	void		 html_putchar(char);
 static	int 		 http_decode(char *);
-static	void		 http_parse(struct query *, char *);
+static	void		 http_parse(struct req *, char *);
 static	int		 pathstop(DIR *);
 static	void		 pathgen(DIR *, char *, struct req *);
 static	void		 pg_index(const struct req *, char *);
@@ -182,16 +183,17 @@ html_print(const char *p)
  * uses only GET for simplicity.
  */
 static void
-http_parse(struct query *q, char *p)
+http_parse(struct req *req, char *p)
 {
-	char            *key, *val;
+	char            *key, *val, *manroot;
 	size_t		 sz;
-	int		 legacy;
+	int		 i, legacy;
 
-	memset(q, 0, sizeof(struct query));
+	memset(&req->q, 0, sizeof(struct query));
 
-	q->whatis = 1;
+	req->q.whatis = 1;
 	legacy = -1;
+	manroot = NULL;
 
 	while (p && '\0' != *p) {
 		while (' ' == *p)
@@ -232,29 +234,31 @@ http_parse(struct query *q, char *p)
 			break;
 
 		if (0 == strcmp(key, "expr"))
-			q->expr = val;
+			req->q.expr = val;
 		else if (0 == strcmp(key, "query"))
-			q->expr = val;
+			req->q.expr = val;
 		else if (0 == strcmp(key, "sec"))
-			q->sec = val;
+			req->q.sec = val;
 		else if (0 == strcmp(key, "sektion"))
-			q->sec = val;
+			req->q.sec = val;
 		else if (0 == strcmp(key, "arch"))
-			q->arch = val;
+			req->q.arch = val;
+		else if (0 == strcmp(key, "manpath"))
+			manroot = val;
 		else if (0 == strcmp(key, "apropos"))
 			legacy = 0 == strcmp(val, "0");
 		else if (0 == strcmp(key, "op"))
-			q->whatis = 0 == strcasecmp(val, "whatis");
+			req->q.whatis = 0 == strcasecmp(val, "whatis");
 	}
 
 	/* Test for old man.cgi compatibility mode. */
 
 	if (legacy == 0) {
-		q->whatis = 0;
-		q->legacy = 1;
+		req->q.whatis = 0;
+		req->q.legacy = 1;
 	} else if (legacy > 0) {
-		q->legacy = 1;
-		q->whatis = 1;
+		req->q.legacy = 1;
+		req->q.whatis = 1;
 	}
 
 	/* 
@@ -262,12 +266,21 @@ http_parse(struct query *q, char *p)
 	 * For some man.cgi scripts, "default" arch is none.
 	 */
 
-	if (q->legacy && NULL != q->sec)
-		if (0 == strcmp(q->sec, "0"))
-			q->sec = NULL;
-	if (q->legacy && NULL != q->arch)
-		if (0 == strcmp(q->arch, "default"))
-			q->arch = NULL;
+	if (req->q.legacy && NULL != req->q.sec)
+		if (0 == strcmp(req->q.sec, "0"))
+			req->q.sec = NULL;
+	if (req->q.legacy && NULL != req->q.arch)
+		if (0 == strcmp(req->q.arch, "default"))
+			req->q.arch = NULL;
+
+	/* Default to first manroot. */
+
+	if (NULL != manroot) {
+		for (i = 0; i < (int)req->psz; i++)
+			if (0 == strcmp(req->p[i].name, manroot))
+				break;
+		req->q.manroot = i < (int)req->psz ? i : -1;
+	}
 }
 
 /*
@@ -486,12 +499,15 @@ resp_search(struct res *r, size_t sz, void *arg)
 	puts("<P></P>\n"
 	     "<TABLE>");
 
+	assert(req->q.manroot >= 0);
 	for (i = 0; i < (int)sz; i++) {
 		printf("<TR>\n"
 		       "<TD CLASS=\"title\">\n"
 		       "<A HREF=\"");
 		html_print(progname);
-		printf("/show/0/%u/%u.html\">", r[i].volume, r[i].rec);
+		printf("/show/%d/%u/%u.html\">", 
+				req->q.manroot,
+				r[i].volume, r[i].rec);
 		html_print(r[i].title);
 		putchar('(');
 		html_print(r[i].cat);
@@ -751,7 +767,7 @@ pg_show(const struct req *req, char *path)
 	}
 
 	/*
-	 * Begin by chdir()ing into the root of the manpath.
+	 * Begin by chdir()ing into the manroot.
 	 * This way we can pick up the database files, which are
 	 * relative to the manpath root.
 	 */
@@ -821,7 +837,7 @@ pg_search(const struct req *req, char *path)
 	struct opts	  opt;
 	struct expr	 *expr;
 
-	if (0 == req->psz) {
+	if (req->q.manroot < 0) {
 		resp_search(NULL, 0, (void *)req);
 		return;
 	}
@@ -841,8 +857,9 @@ pg_search(const struct req *req, char *path)
 	 * relative to the manpath root.
 	 */
 
-	if (-1 == (chdir(req->p[0].path))) {
-		perror(req->p[0].path);
+	assert(req->q.manroot < (int)req->psz);
+	if (-1 == (chdir(req->p[req->q.manroot].path))) {
+		perror(req->p[req->q.manroot].path);
 		resp_search(NULL, 0, (void *)req);
 		return;
 	}
@@ -946,7 +963,7 @@ main(void)
 	/* Next parse out the query string. */
 
 	if (NULL != (p = getenv("QUERY_STRING")))
-		http_parse(&req.q, p);
+		http_parse(&req, p);
 
 	/*
 	 * Now juggle paths to extract information.
