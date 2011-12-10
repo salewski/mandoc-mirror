@@ -62,12 +62,18 @@ DBLN		 = llib-lapropos.ln llib-lmandocdb.ln llib-lman.cgi.ln llib-lcatman.ln
 all: mandoc preconv demandoc $(DBBIN)
 
 SRCS		 = Makefile \
+		   TODO \
 		   apropos.1 \
 		   apropos.c \
+		   apropos_db.c \
+		   apropos_db.h \
 		   arch.c \
 		   arch.in \
 		   att.c \
 		   att.in \
+		   catman.8 \
+		   catman.c \
+		   cgi.c \
 		   chars.c \
 		   chars.in \
 		   compat_getsubopt.c \
@@ -75,8 +81,8 @@ SRCS		 = Makefile \
 		   compat_strlcpy.c \
 		   config.h.post \
 		   config.h.pre \
-		   demandoc.c \
 		   demandoc.1 \
+		   demandoc.c \
 		   eqn.7 \
 		   eqn.c \
 		   eqn_html.c \
@@ -95,10 +101,11 @@ SRCS		 = Makefile \
 		   libroff.h \
 		   main.c \
 		   main.h \
-		   man.h \
 		   man.7 \
 		   man.c \
 		   man.cgi.7 \
+		   man.cgi.css \
+		   man.h \
 		   man_hash.c \
 		   man_html.c \
 		   man_macro.c \
@@ -108,17 +115,15 @@ SRCS		 = Makefile \
 		   mandoc.3 \
 		   mandoc.c \
 		   mandoc.h \
+		   mandoc_char.7 \
 		   mandocdb.8 \
 		   mandocdb.c \
 		   mandocdb.h \
-		   mandoc_char.7 \
 		   manpath.c \
 		   manpath.h \
-		   catman.c \
-		   catman.8 \
-		   mdoc.h \
 		   mdoc.7 \
 		   mdoc.c \
+		   mdoc.h \
 		   mdoc_argv.c \
 		   mdoc_hash.c \
 		   mdoc_html.c \
@@ -134,6 +139,7 @@ SRCS		 = Makefile \
 		   preconv.c \
 		   predefs.in \
 		   read.c \
+		   regress \
 		   roff.7 \
 		   roff.c \
 		   st.c \
@@ -157,7 +163,8 @@ SRCS		 = Makefile \
 		   test-strptime.c \
 		   tree.c \
 		   vol.c \
-		   vol.in
+		   vol.in \
+		   whatis.1
 
 LIBMAN_OBJS	 = man.o \
 		   man_hash.o \
@@ -346,6 +353,11 @@ INDEX_MANS	 = apropos.1.html \
 		   mandoc.1.ps \
 		   mandoc.1.pdf \
 		   mandoc.1.txt \
+		   whatis.1.html \
+		   whatis.1.xhtml \
+		   whatis.1.ps \
+		   whatis.1.pdf \
+		   whatis.1.txt \
 		   mandoc.3.html \
 		   mandoc.3.xhtml \
 		   mandoc.3.ps \
@@ -412,7 +424,7 @@ clean:
 	rm -f llib-lmandocdb.ln $(MANDOCDB_LNS)
 	rm -f preconv $(PRECONV_OBJS)
 	rm -f llib-lpreconv.ln $(PRECONV_LNS)
-	rm -f apropos $(APROPOS_OBJS)
+	rm -f apropos whatis $(APROPOS_OBJS)
 	rm -f llib-lapropos.ln $(APROPOS_LNS)
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f llib-lman.cgi.ln $(CGI_LNS)
