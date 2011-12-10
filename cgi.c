@@ -853,7 +853,7 @@ pg_search(const struct req *req, char *path)
 	struct opts	  opt;
 	struct expr	 *expr;
 
-	if (req->q.manroot < 0) {
+	if (req->q.manroot < 0 || 0 == req->psz) {
 		resp_search(NULL, 0, (void *)req);
 		return;
 	}
