@@ -491,7 +491,7 @@ resp_search(struct res *r, size_t sz, void *arg)
 		       "<TD CLASS=\"title\">\n"
 		       "<A HREF=\"");
 		html_print(progname);
-		printf("/show/%u/%u.html\">", r[i].volume, r[i].rec);
+		printf("/show/0/%u/%u.html\">", r[i].volume, r[i].rec);
 		html_print(r[i].title);
 		putchar('(');
 		html_print(r[i].cat);
@@ -719,20 +719,36 @@ pg_show(const struct req *req, char *path)
 	char		 file[MAXPATHLEN];
 	const char	*fn, *cp;
 	int		 rc;
-	unsigned int	 vol, rec;
+	unsigned int	 vol, rec, mr;
 	DB		*idx;
 	DBT		 key, val;
 
 	idx = NULL;
 
-	if (0 == req->psz || NULL == path) {
+	/* Parse out mroot, volume, and record from the path. */
+
+	if (NULL == path || NULL == (sub = strchr(path, '/'))) {
 		resp_error400();
 		return;
-	} else if (NULL == (sub = strrchr(path, '/'))) {
+	} 
+	*sub++ = '\0';
+	if ( ! atou(path, &mr)) {
 		resp_error400();
 		return;
-	} else
-		*sub++ = '\0';
+	}
+	path = sub;
+	if (NULL == (sub = strchr(path, '/'))) {
+		resp_error400();
+		return;
+	}
+	*sub++ = '\0';
+	if ( ! atou(path, &vol) || ! atou(sub, &rec)) {
+		resp_error400();
+		return;
+	} else if (mr >= (unsigned int)req->psz) {
+		resp_error400();
+		return;
+	}
 
 	/*
 	 * Begin by chdir()ing into the root of the manpath.
@@ -740,19 +756,16 @@ pg_show(const struct req *req, char *path)
 	 * relative to the manpath root.
 	 */
 
-	if (-1 == chdir(req->p[0].path)) {
-		perror(req->p[0].path);
-		resp_error400();
+	if (-1 == chdir(req->p[(int)mr].path)) {
+		perror(req->p[(int)mr].path);
+		resp_baddb();
 		return;
 	}
 
 	memset(&ps, 0, sizeof(struct manpaths));
 	manpath_manconf("etc/catman.conf", &ps);
 
-	if ( ! (atou(path, &vol) && atou(sub, &rec))) {
-		resp_error400();
-		goto out;
-	} else if (vol >= (unsigned int)ps.sz) {
+	if (vol >= (unsigned int)ps.sz) {
 		resp_error400();
 		goto out;
 	}
