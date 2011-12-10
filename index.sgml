@@ -42,7 +42,8 @@
 			It also includes <A HREF="preconv.1.html">preconv</A>, for recoding multibyte manuals; 
 			<A HREF="demandoc.1.html">demandoc</A>, for emitting only text parts of manuals;
 			<A HREF="mandocdb.8.html">mandocdb</A>, for indexing manuals; and
-			<A HREF="apropos.1.html">apropos</A> and <A HREF="whatis.1.html">whatis</A>, for semantic search of manual content.
+			<A HREF="apropos.1.html">apropos</A>, <A HREF="whatis.1.html">whatis</A>, and
+			<A HREF="man.cgi.7.html">man.cgi</A> (via <A HREF="catman.8.html">catman</A>) for semantic search of manual content.
 			It is a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv</A> project.  
 		</P>
 		<P>
@@ -54,10 +55,11 @@
 		<P>
 			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any modern system; however, you'll
 			need <A HREF="http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html">libdb</A> to build <A
-			HREF="apropos.1.html">apropos</A>, <A HREF="whatis.1.html">whatis</A>, and <A HREF="mandocdb.8.html">mandocdb</A> (this
-			is installed by default on BSD UNIX systems &mdash; see the <I>Makefile</I> if you're running Linux).  To build and
-			install into <I>/usr/local/</I>, just run <CODE>make install</CODE>.  Be careful: the <B>preconv</B>, <B>apropos</B>,
-			and <B>whatis</B> binary names are usually taken by existing utilities.
+			HREF="apropos.1.html">apropos</A>, <A HREF="whatis.1.html">whatis</A>, <A HREF="man.cgi.7.html">man.cgi</A>, <A
+			HREF="catman.8.html">catman</A>, and <A HREF="mandocdb.8.html">mandocdb</A> (this is installed by default on BSD UNIX
+			systems &mdash; see the <I>Makefile</I> if you're running Linux).  To build and install into <I>/usr/local/</I>, just
+			run <CODE>make install</CODE>.  Be careful: the <B>preconv</B>, <B>apropos</B>, and <B>whatis</B> binary names are
+			usually taken by existing utilities.
 		</P>
 		<H2>
 			<A NAME="binaries">Binaries</A>
@@ -200,6 +202,16 @@
 					</TD>
 				</TR>
 				<TR>
+					<TD VALIGN="top"><A HREF="man.cgi.7.html">man.cgi(7)</A></TD>
+					<TD VALIGN="top">
+						cgi for manpage query and display
+							(<A HREF="man.cgi.7.txt">text</A> | 
+							<A HREF="man.cgi.7.xhtml">xhtml</A> |
+							<A HREF="man.cgi.7.pdf">pdf</A> |
+							<A HREF="man.cgi.7.ps">ps</A>)
+					</TD>
+				</TR>
+				<TR>
 					<TD VALIGN="top"><A HREF="eqn.7.html">eqn(7)</A></TD>
 					<TD VALIGN="top">
 						eqn-mandoc language reference
@@ -247,6 +259,16 @@
 							<A HREF="tbl.7.xhtml">xhtml</A> |
 							<A HREF="tbl.7.pdf">pdf</A> |
 							<A HREF="tbl.7.ps">ps</A>)
+					</TD>
+				</TR>
+				<TR>
+					<TD VALIGN="top"><A HREF="catman.8.html">catman(8)</A></TD>
+					<TD VALIGN="top">
+						update a man.cgi manpage cache
+							(<A HREF="catman.8.txt">text</A> | 
+							<A HREF="catman.8.xhtml">xhtml</A> |
+							<A HREF="catman.8.pdf">pdf</A> |
+							<A HREF="catman.8.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
@@ -313,7 +335,13 @@
 		<P>
 			Significant work on <A HREF="apropos.1.html">apropos</A> and <A HREF="mandocdb.8.html">mandocdb</A>.  These tools are
 			now much more robust and in line with other manpage systems.  A <A HREF="whatis.1.html">whatis</A> implementation is now
-			handled as an <A HREF="apropos.1.html">apropos</A> mode.
+			handled as an <A HREF="apropos.1.html">apropos</A> mode.  These tools are also able to minimally handle pre-formatted
+			pages, that is, those already formatted by another utility such as GNU troff.
+		</P>
+		<P>
+			The <A HREF="man.cgi.7.html">man.cgi</A> script is also now available for wider testing.  It interfaces with <A
+			HREF="mandocdb.8.html">mandocdb</A> manuals cached by <A HREF="catman.8.html">catman</A>.  HTML output is generated
+			on-the-fly by <A HREF="mandoc.3.html">libmandoc</A> or internal methods to convert pre-formatted pages.
 		</P>
 		<P CLASS="news">
 			08-10-2011: version 1.12.0
