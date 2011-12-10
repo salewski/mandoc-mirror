@@ -364,6 +364,7 @@ resp_end_html(void)
 static void
 resp_searchform(const struct req *req)
 {
+	int		 i;
 
 	puts("<!-- Begin search form. //-->");
 	printf("<FORM ACTION=\"");
@@ -385,7 +386,22 @@ resp_searchform(const struct req *req)
 	       "<INPUT TYPE=\"text\""
 	       " SIZE=\"8\" NAME=\"arch\" VALUE=\"");
 	html_print(req->q.arch ? req->q.arch : "");
-	puts("\">.\n"
+	printf("\">");
+	if (req->psz > 1) {
+		puts(", <SELECT NAME=\"manpath\">");
+		for (i = 0; i < (int)req->psz; i++) {
+			printf("<OPTION %s VALUE=\"",
+				(i == req->q.manroot) ||
+				(0 == i && -1 == req->q.manroot) ?
+				"SELECTED=\"selected\"" : "");
+			html_print(req->p[i].name);
+			printf("\">");
+			html_print(req->p[i].name);
+			puts("</OPTION>");
+		}
+		puts("</SELECT>");
+	}
+	puts(".\n"
 	     "<INPUT TYPE=\"reset\" VALUE=\"Reset\">\n"
 	     "</FIELDSET>\n"
 	     "</FORM>");
@@ -1100,14 +1116,17 @@ pathgen(DIR *dir, char *path, struct req *req)
 
 	if (rc > 0) {
 		/* This also strips the trailing slash. */
-		path[(int)sz - 1] = '\0';
+		path[(int)--sz] = '\0';
 		req->p = mandoc_realloc
 			(req->p, 
 			 (req->psz + 1) * sizeof(struct paths));
+		/*
+		 * Strip out the leading "./" unless we're just a ".",
+		 * in which case use an empty string as our name.
+		 */
 		req->p[(int)req->psz].path = mandoc_strdup(path);
-		/* And this strips out the leading "./". */
 		req->p[(int)req->psz].name = 
-			cp = mandoc_strdup(path + 2);
+			cp = mandoc_strdup(path + (1 == sz ? 1 : 2));
 		req->psz++;
 		/* 
 		 * The name is just the path with all the slashes taken
