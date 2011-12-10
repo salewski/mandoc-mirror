@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <regex.h>
@@ -54,9 +55,13 @@ enum	page {
 	PAGE__MAX
 };
 
+struct	paths {
+	char		*name;
+	char		*path;
+};
+
 /*
  * A query as passed to the search function.
- * See kval_query() on how this is parsed.
  */
 struct	query {
 	const char	*arch; /* architecture */
@@ -66,14 +71,10 @@ struct	query {
 	int		 legacy; /* whether legacy mode */
 };
 
-struct	kval {
-	char		*key;
-	char		*val;
-};
-
 struct	req {
-	struct kval	*fields;
-	size_t		 fieldsz;
+	struct query	 q;
+	struct paths	*p;
+	size_t		 psz;
 	enum page	 page;
 };
 
@@ -83,17 +84,13 @@ static	int	 	 cmp(const void *, const void *);
 static	void		 format(const char *);
 static	void		 html_print(const char *);
 static	void		 html_putchar(char);
-static	int 		 kval_decode(char *);
-static	void		 kval_free(struct kval *, size_t);
-static	void		 kval_parse(struct kval **, size_t *, char *);
-static	void		 kval_query(struct query *, 
-				const struct kval *, size_t);
-static	void		 pg_index(const struct manpaths *,
-				const struct req *, char *);
-static	void		 pg_search(const struct manpaths *,
-				const struct req *, char *);
-static	void		 pg_show(const struct manpaths *,
-				const struct req *, char *);
+static	int 		 http_decode(char *);
+static	void		 http_parse(struct query *, char *);
+static	int		 pathstop(DIR *);
+static	void		 pathgen(DIR *, char *, struct req *);
+static	void		 pg_index(const struct req *, char *);
+static	void		 pg_search(const struct req *, char *);
+static	void		 pg_show(const struct req *, char *);
 static	void		 resp_bad(void);
 static	void		 resp_baddb(void);
 static	void		 resp_error400(void);
@@ -114,63 +111,6 @@ static	const char * const pages[PAGE__MAX] = {
 	"search", /* PAGE_SEARCH */
 	"show", /* PAGE_SHOW */
 };
-
-/*
- * Initialise and parse a query structure from input.
- * This accomodates for mdocml's man.cgi and also for legacy man.cgi
- * input keys ("sektion" and "apropos").
- * Note that legacy mode has some quirks: if apropos legacy mode is
- * detected, we unset the section and architecture string.
- */
-static void
-kval_query(struct query *q, const struct kval *fields, size_t sz)
-{
-	int		 i, legacy;
-
-	memset(q, 0, sizeof(struct query));
-	q->whatis = 1;
-	legacy = -1;
-
-	for (i = 0; i < (int)sz; i++)
-		if (0 == strcmp(fields[i].key, "expr"))
-			q->expr = fields[i].val;
-		else if (0 == strcmp(fields[i].key, "query"))
-			q->expr = fields[i].val;
-		else if (0 == strcmp(fields[i].key, "sec"))
-			q->sec = fields[i].val;
-		else if (0 == strcmp(fields[i].key, "sektion"))
-			q->sec = fields[i].val;
-		else if (0 == strcmp(fields[i].key, "arch"))
-			q->arch = fields[i].val;
-		else if (0 == strcmp(fields[i].key, "apropos"))
-			legacy = 0 == strcmp
-				(fields[i].val, "0");
-		else if (0 == strcmp(fields[i].key, "op"))
-			q->whatis = 0 == strcasecmp
-				(fields[i].val, "whatis");
-
-	/* Test for old man.cgi compatibility mode. */
-
-	if (legacy == 0) {
-		q->whatis = 0;
-		q->legacy = 1;
-	} else if (legacy > 0) {
-		q->legacy = 1;
-		q->whatis = 1;
-	}
-
-	/* 
-	 * Section "0" means no section when in legacy mode.
-	 * For some man.cgi scripts, "default" arch is none.
-	 */
-
-	if (q->legacy && NULL != q->sec)
-		if (0 == strcmp(q->sec, "0"))
-			q->sec = NULL;
-	if (q->legacy && NULL != q->arch)
-		if (0 == strcmp(q->arch, "default"))
-			q->arch = NULL;
-}
 
 /*
  * This is just OpenBSD's strtol(3) suggestion.
@@ -236,30 +176,22 @@ html_print(const char *p)
 		html_putchar(*p++);
 }
 
-static void
-kval_free(struct kval *p, size_t sz)
-{
-	int		 i;
-
-	for (i = 0; i < (int)sz; i++) {
-		free(p[i].key);
-		free(p[i].val);
-	}
-	free(p);
-}
-
 /*
  * Parse out key-value pairs from an HTTP request variable.
  * This can be either a cookie or a POST/GET string, although man.cgi
  * uses only GET for simplicity.
  */
 static void
-kval_parse(struct kval **kv, size_t *kvsz, char *p)
+http_parse(struct query *q, char *p)
 {
 	char            *key, *val;
-	size_t           sz, cur;
+	size_t		 sz;
+	int		 legacy;
 
-	cur = 0;
+	memset(q, 0, sizeof(struct query));
+
+	q->whatis = 1;
+	legacy = -1;
 
 	while (p && '\0' != *p) {
 		while (' ' == *p)
@@ -294,21 +226,48 @@ kval_parse(struct kval **kv, size_t *kvsz, char *p)
 
 		/* Just abort handling. */
 
-		if ( ! kval_decode(key))
-			return;
-		if ( ! kval_decode(val))
-			return;
+		if ( ! http_decode(key))
+			break;
+		if ( ! http_decode(val))
+			break;
 
-		if (*kvsz + 1 >= cur) {
-			cur++;
-			*kv = mandoc_realloc
-				(*kv, cur * sizeof(struct kval));
-		}
-
-		(*kv)[(int)*kvsz].key = mandoc_strdup(key);
-		(*kv)[(int)*kvsz].val = mandoc_strdup(val);
-		(*kvsz)++;
+		if (0 == strcmp(key, "expr"))
+			q->expr = val;
+		else if (0 == strcmp(key, "query"))
+			q->expr = val;
+		else if (0 == strcmp(key, "sec"))
+			q->sec = val;
+		else if (0 == strcmp(key, "sektion"))
+			q->sec = val;
+		else if (0 == strcmp(key, "arch"))
+			q->arch = val;
+		else if (0 == strcmp(key, "apropos"))
+			legacy = 0 == strcmp(val, "0");
+		else if (0 == strcmp(key, "op"))
+			q->whatis = 0 == strcasecmp(val, "whatis");
 	}
+
+	/* Test for old man.cgi compatibility mode. */
+
+	if (legacy == 0) {
+		q->whatis = 0;
+		q->legacy = 1;
+	} else if (legacy > 0) {
+		q->legacy = 1;
+		q->whatis = 1;
+	}
+
+	/* 
+	 * Section "0" means no section when in legacy mode.
+	 * For some man.cgi scripts, "default" arch is none.
+	 */
+
+	if (q->legacy && NULL != q->sec)
+		if (0 == strcmp(q->sec, "0"))
+			q->sec = NULL;
+	if (q->legacy && NULL != q->arch)
+		if (0 == strcmp(q->arch, "default"))
+			q->arch = NULL;
 }
 
 /*
@@ -317,7 +276,7 @@ kval_parse(struct kval **kv, size_t *kvsz, char *p)
  * over the allocated string.
  */
 static int
-kval_decode(char *p)
+http_decode(char *p)
 {
 	char             hex[3];
 	int              c;
@@ -392,9 +351,6 @@ resp_end_html(void)
 static void
 resp_searchform(const struct req *req)
 {
-	struct query	 q;
-
-	kval_query(&q, req->fields, req->fieldsz);
 
 	puts("<!-- Begin search form. //-->");
 	printf("<FORM ACTION=\"");
@@ -407,15 +363,15 @@ resp_searchform(const struct req *req)
 	       "<INPUT TYPE=\"submit\" NAME=\"op\""
 	       " VALUE=\"apropos\"> for manuals satisfying \n"
 	       "<INPUT TYPE=\"text\" NAME=\"expr\" VALUE=\"");
-	html_print(q.expr ? q.expr : "");
+	html_print(req->q.expr ? req->q.expr : "");
 	printf("\">, section "
 	       "<INPUT TYPE=\"text\""
 	       " SIZE=\"4\" NAME=\"sec\" VALUE=\"");
-	html_print(q.sec ? q.sec : "");
+	html_print(req->q.sec ? req->q.sec : "");
 	printf("\">, arch "
 	       "<INPUT TYPE=\"text\""
 	       " SIZE=\"8\" NAME=\"arch\" VALUE=\"");
-	html_print(q.arch ? q.arch : "");
+	html_print(req->q.arch ? req->q.arch : "");
 	puts("\">.\n"
 	     "<INPUT TYPE=\"reset\" VALUE=\"Reset\">\n"
 	     "</FIELDSET>\n"
@@ -485,7 +441,6 @@ static void
 resp_search(struct res *r, size_t sz, void *arg)
 {
 	int		  i;
-	struct query	  q;
 	const struct req *req;
 
 	if (1 == sz) {
@@ -507,21 +462,20 @@ resp_search(struct res *r, size_t sz, void *arg)
 
 	req = (const struct req *)arg;
 	resp_searchform(req);
-	kval_query(&q, req->fields, req->fieldsz);
 
 	if (0 == sz) {
 		printf("<P>\n"
-		       "No %s results found.",
-		       q.whatis ? "whatis" : "apropos");
-		if (q.whatis) {
+		       "No %s results found.\n",
+		       req->q.whatis ? "whatis" : "apropos");
+		if (req->q.whatis) {
 			printf("(Try <A HREF=\"");
 			html_print(progname);
 			printf("/search.html?op=apropos&amp;expr=");
-			html_print(q.expr ? q.expr : "");
+			html_print(req->q.expr ? req->q.expr : "");
 			printf("&amp;sec=");
-			html_print(q.sec ? q.sec : "");
+			html_print(req->q.sec ? req->q.sec : "");
 			printf("&amp;arch=");
-			html_print(q.arch ? q.arch : "");
+			html_print(req->q.arch ? req->q.arch : "");
 			puts("\">apropos</A>?)");
 		}
 		puts("</P>");
@@ -559,7 +513,7 @@ resp_search(struct res *r, size_t sz, void *arg)
 
 /* ARGSUSED */
 static void
-pg_index(const struct manpaths *ps, const struct req *req, char *path)
+pg_index(const struct req *req, char *path)
 {
 
 	resp_index(req);
@@ -758,8 +712,9 @@ format(const char *file)
 }
 
 static void
-pg_show(const struct manpaths *ps, const struct req *req, char *path)
+pg_show(const struct req *req, char *path)
 {
+	struct manpaths	 ps;
 	char		*sub;
 	char		 file[MAXPATHLEN];
 	const char	*fn, *cp;
@@ -768,7 +723,9 @@ pg_show(const struct manpaths *ps, const struct req *req, char *path)
 	DB		*idx;
 	DBT		 key, val;
 
-	if (NULL == path) {
+	idx = NULL;
+
+	if (0 == req->psz || NULL == path) {
 		resp_error400();
 		return;
 	} else if (NULL == (sub = strrchr(path, '/'))) {
@@ -777,23 +734,39 @@ pg_show(const struct manpaths *ps, const struct req *req, char *path)
 	} else
 		*sub++ = '\0';
 
-	if ( ! (atou(path, &vol) && atou(sub, &rec))) {
-		resp_error400();
-		return;
-	} else if (vol >= (unsigned int)ps->sz) {
+	/*
+	 * Begin by chdir()ing into the root of the manpath.
+	 * This way we can pick up the database files, which are
+	 * relative to the manpath root.
+	 */
+
+	if (-1 == chdir(req->p[0].path)) {
+		perror(req->p[0].path);
 		resp_error400();
 		return;
 	}
 
-	strlcpy(file, ps->paths[vol], MAXPATHLEN);
+	memset(&ps, 0, sizeof(struct manpaths));
+	manpath_manconf("etc/catman.conf", &ps);
+
+	if ( ! (atou(path, &vol) && atou(sub, &rec))) {
+		resp_error400();
+		goto out;
+	} else if (vol >= (unsigned int)ps.sz) {
+		resp_error400();
+		goto out;
+	}
+
+	strlcpy(file, ps.paths[vol], MAXPATHLEN);
 	strlcat(file, "/mandoc.index", MAXPATHLEN);
 
 	/* Open the index recno(3) database. */
 
 	idx = dbopen(file, O_RDONLY, 0, DB_RECNO, NULL);
 	if (NULL == idx) {
+		perror(file);
 		resp_baddb();
-		return;
+		goto out;
 	}
 
 	key.data = &rec;
@@ -813,42 +786,59 @@ pg_show(const struct manpaths *ps, const struct req *req, char *path)
 	else if (NULL == memchr(fn, '\0', val.size - (fn - cp)))
 		resp_baddb();
 	else {
-		strlcpy(file, cache, MAXPATHLEN);
-		strlcat(file, "/", MAXPATHLEN);
-		strlcat(file, fn, MAXPATHLEN);
 		if (0 == strcmp(cp, "cat"))
-			catman(file);
+			catman(fn + 1);
 		else
-			format(file);
+			format(fn + 1);
 	}
 out:
-	(*idx->close)(idx);
+	if (idx)
+		(*idx->close)(idx);
+	manpath_free(&ps);
 }
 
 static void
-pg_search(const struct manpaths *ps, const struct req *req, char *path)
+pg_search(const struct req *req, char *path)
 {
 	size_t		  tt;
+	struct manpaths	  ps;
 	int		  i, sz, rc;
 	const char	 *ep, *start;
 	char		**cp;
 	struct opts	  opt;
 	struct expr	 *expr;
-	struct query	  q;
 
-	kval_query(&q, req->fields, req->fieldsz);
+	if (0 == req->psz) {
+		resp_search(NULL, 0, (void *)req);
+		return;
+	}
+
 	memset(&opt, 0, sizeof(struct opts));
 
-	ep 	 = q.expr;
-	opt.arch = q.arch;
-	opt.cat  = q.sec;
+	ep 	 = req->q.expr;
+	opt.arch = req->q.arch;
+	opt.cat  = req->q.sec;
 	rc 	 = -1;
 	sz 	 = 0;
 	cp	 = NULL;
 
 	/*
-	 * Poor man's tokenisation.
-	 * Just break apart by spaces.
+	 * Begin by chdir()ing into the root of the manpath.
+	 * This way we can pick up the database files, which are
+	 * relative to the manpath root.
+	 */
+
+	if (-1 == (chdir(req->p[0].path))) {
+		perror(req->p[0].path);
+		resp_search(NULL, 0, (void *)req);
+		return;
+	}
+
+	memset(&ps, 0, sizeof(struct manpaths));
+	manpath_manconf("etc/catman.conf", &ps);
+
+	/*
+	 * Poor man's tokenisation: just break apart by spaces.
 	 * Yes, this is half-ass.  But it works for now.
 	 */
 
@@ -872,12 +862,12 @@ pg_search(const struct manpaths *ps, const struct req *req, char *path)
 	 * The resp_search() function is called with the results.
 	 */
 
-	expr = q.whatis ? termcomp(sz, cp, &tt) :
-		          exprcomp(sz, cp, &tt);
+	expr = req->q.whatis ? 
+		termcomp(sz, cp, &tt) : exprcomp(sz, cp, &tt);
 
 	if (NULL != expr)
 		rc = apropos_search
-			(ps->sz, ps->paths, &opt,
+			(ps.sz, ps.paths, &opt,
 			 expr, tt, (void *)req, resp_search);
 
 	/* ...unless errors occured. */
@@ -892,17 +882,19 @@ pg_search(const struct manpaths *ps, const struct req *req, char *path)
 
 	free(cp);
 	exprfree(expr);
+	manpath_free(&ps);
 }
 
 int
 main(void)
 {
 	int		 i;
+	char		 buf[MAXPATHLEN];
+	DIR		*cwd;
 	struct req	 req;
 	char		*p, *path, *subpath;
-	struct manpaths	 paths;
 
-	/* HTTP init: read and parse the query string. */
+	/* Scan our run-time environment. */
 
 	progname = getenv("SCRIPT_NAME");
 	if (NULL == progname)
@@ -912,21 +904,43 @@ main(void)
 	if (NULL == cache)
 		cache = "/cache/man.cgi";
 
-	if (-1 == chdir(cache)) {
-		resp_bad();
-		return(EXIT_FAILURE);
-	}
-
 	host = getenv("HTTP_HOST");
 	if (NULL == host)
 		host = "localhost";
 
+	/*
+	 * First we change directory into the cache directory so that
+	 * subsequent scanning for manpath directories is rooted
+	 * relative to the same position.
+	 */
+
+	if (-1 == chdir(cache)) {
+		perror(cache);
+		resp_bad();
+		return(EXIT_FAILURE);
+	} else if (NULL == (cwd = opendir(cache))) {
+		perror(cache);
+		resp_bad();
+		return(EXIT_FAILURE);
+	} 
+
 	memset(&req, 0, sizeof(struct req));
 
-	if (NULL != (p = getenv("QUERY_STRING")))
-		kval_parse(&req.fields, &req.fieldsz, p);
+	strlcpy(buf, ".", MAXPATHLEN);
+	pathgen(cwd, buf, &req);
+	closedir(cwd);
 
-	/* Resolve leading subpath component. */
+	/* Next parse out the query string. */
+
+	if (NULL != (p = getenv("QUERY_STRING")))
+		http_parse(&req.q, p);
+
+	/*
+	 * Now juggle paths to extract information.
+	 * We want to extract our filetype (the file suffix), the
+	 * initial path component, then the trailing component(s).
+	 * Start with leading subpath component. 
+	 */
 
 	subpath = path = NULL;
 	req.page = PAGE__MAX;
@@ -957,31 +971,29 @@ main(void)
 				break;
 			}
 
-	/* Initialise MANPATH. */
-
-	memset(&paths, 0, sizeof(struct manpaths));
-	manpath_manconf("etc/catman.conf", &paths);
-
 	/* Route pages. */
 
 	switch (req.page) {
 	case (PAGE_INDEX):
-		pg_index(&paths, &req, subpath);
+		pg_index(&req, subpath);
 		break;
 	case (PAGE_SEARCH):
-		pg_search(&paths, &req, subpath);
+		pg_search(&req, subpath);
 		break;
 	case (PAGE_SHOW):
-		pg_show(&paths, &req, subpath);
+		pg_show(&req, subpath);
 		break;
 	default:
 		resp_error404(path);
 		break;
 	}
 
-	manpath_free(&paths);
-	kval_free(req.fields, req.fieldsz);
+	for (i = 0; i < (int)req.psz; i++) {
+		free(req.p[i].path);
+		free(req.p[i].name);
+	}
 
+	free(req.p);
 	return(EXIT_SUCCESS);
 }
 
@@ -993,3 +1005,112 @@ cmp(const void *p1, const void *p2)
 				((const struct res *)p2)->title));
 }
 
+/*
+ * Check to see if an "etc" path consists of a catman.conf file.  If it
+ * does, that means that the path contains a tree created by catman(8)
+ * and should be used for indexing.
+ */
+static int
+pathstop(DIR *dir)
+{
+	struct dirent	*d;
+
+	while (NULL != (d = readdir(dir)))
+		if (DT_REG == d->d_type)
+			if (0 == strcmp(d->d_name, "catman.conf"))
+				return(1);
+
+	return(0);
+}
+
+/*
+ * Scan for indexable paths.
+ * This adds all paths with "etc/catman.conf" to the buffer.
+ */
+static void
+pathgen(DIR *dir, char *path, struct req *req)
+{
+	struct dirent	*d;
+	char		*cp;
+	DIR		*cd;
+	int		 rc;
+	size_t		 sz, ssz;
+
+	sz = strlcat(path, "/", MAXPATHLEN);
+	if (sz >= MAXPATHLEN) {
+		fprintf(stderr, "%s: Path too long", path);
+		return;
+	} 
+
+	/* 
+	 * First, scan for the "etc" directory.
+	 * If it's found, then see if it should cause us to stop.  This
+	 * happens when a catman.conf is found in the directory.
+	 */
+
+	rc = 0;
+	while (0 == rc && NULL != (d = readdir(dir))) {
+		if (DT_DIR != d->d_type || strcmp(d->d_name, "etc"))
+			continue;
+
+		path[(int)sz] = '\0';
+		ssz = strlcat(path, d->d_name, MAXPATHLEN);
+
+		if (ssz >= MAXPATHLEN) {
+			fprintf(stderr, "%s: Path too long", path);
+			return;
+		} else if (NULL == (cd = opendir(path))) {
+			perror(path);
+			return;
+		} 
+		
+		rc = pathstop(cd);
+		closedir(cd);
+	}
+
+	if (rc > 0) {
+		/* This also strips the trailing slash. */
+		path[(int)sz - 1] = '\0';
+		req->p = mandoc_realloc
+			(req->p, 
+			 (req->psz + 1) * sizeof(struct paths));
+		req->p[(int)req->psz].path = mandoc_strdup(path);
+		/* And this strips out the leading "./". */
+		req->p[(int)req->psz].name = 
+			cp = mandoc_strdup(path + 2);
+		req->psz++;
+		/* 
+		 * The name is just the path with all the slashes taken
+		 * out of it.  Simple but effective. 
+		 */
+		for ( ; '\0' != *cp; cp++) 
+			if ('/' == *cp)
+				*cp = ' ';
+		return;
+	} 
+
+	/*
+	 * If no etc/catman.conf was found, recursively enter child
+	 * directory and continue scanning.
+	 */
+
+	rewinddir(dir);
+	while (NULL != (d = readdir(dir))) {
+		if (DT_DIR != d->d_type || '.' == d->d_name[0])
+			continue;
+
+		path[(int)sz] = '\0';
+		ssz = strlcat(path, d->d_name, MAXPATHLEN);
+
+		if (ssz >= MAXPATHLEN) {
+			fprintf(stderr, "%s: Path too long", path);
+			return;
+		} else if (NULL == (cd = opendir(path))) {
+			perror(path);
+			return;
+		}
+
+		pathgen(cd, path, req);
+		closedir(cd);
+	}
+}
