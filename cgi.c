@@ -434,7 +434,7 @@ resp_error400(void)
 	       "<P>\n"
 	       "The query your entered was malformed.\n"
 	       "Try again from the\n"
-	       "<A HREF=\"%s/index.html\">main page</A>\n"
+	       "<A HREF=\"%s/index.html\">main page</A>.\n"
 	       "</P>", progname);
 	resp_end_html();
 }
@@ -452,7 +452,7 @@ resp_error404(const char *page)
 	printf("</B>,\n"
 	       "could not be found.\n"
 	       "Try searching from the\n"
-	       "<A HREF=\"%s/index.html\">main page</A>\n"
+	       "<A HREF=\"%s/index.html\">main page</A>.\n"
 	       "</P>", progname);
 	resp_end_html();
 }
