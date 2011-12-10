@@ -579,14 +579,14 @@ index_merge(const struct of *of, struct mparse *mp,
 		if (0 == use_all) {
 			assert(of->sec);
 			assert(msec);
-			if (strcmp(msec, of->sec))
+			if (strcasecmp(msec, of->sec))
 				continue;
 
 			if (NULL == arch) {
 				if (NULL != of->arch)
 					continue;
 			} else if (NULL == of->arch ||
-					strcmp(arch, of->arch))
+					strcasecmp(arch, of->arch))
 				continue;
 		}
 
@@ -1559,6 +1559,10 @@ ofile_dirbuild(const char *dir, const char* psec, const char *parch,
 			buf[0] = '\0';
 			strlcat(buf, dir, MAXPATHLEN);
 			p = strrchr(buf, '/');
+			if (NULL != parch && NULL != p)
+				for (p--; p > buf; p--)
+					if ('/' == *p)
+						break;
 			if (NULL == p)
 				p = buf;
 			else
