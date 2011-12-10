@@ -550,6 +550,7 @@ single_search(struct rectree *tree, const struct opts *opts,
 			(rs, (tree->len + 1) * sizeof(struct rec));
 
 		memcpy(&rs[tree->len], &r, sizeof(struct rec));
+		memset(&r, 0, sizeof(struct rec));
 		rs[tree->len].matches =
 			mandoc_calloc(terms, sizeof(int));
 
@@ -565,7 +566,6 @@ single_search(struct rectree *tree, const struct opts *opts,
 		} else
 			root = tree->len;
 
-		memset(&r, 0, sizeof(struct rec));
 		tree->len++;
 	}
 
@@ -573,6 +573,7 @@ single_search(struct rectree *tree, const struct opts *opts,
 	(*idx->close)(idx);
 
 	free(buf);
+	recfree(&r);
 	return(1 == ch);
 }
 
