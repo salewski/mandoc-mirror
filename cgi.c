@@ -103,9 +103,10 @@ static	void		 resp_index(const struct req *);
 static	void		 resp_search(struct res *, size_t, void *);
 static	void		 resp_searchform(const struct req *);
 
-static	const char	 *progname;
-static	const char	 *cache;
-static	const char	 *host;
+static	const char	 *progname; /* cgi script name */
+static	const char	 *cache; /* cache directory */
+static	const char	 *css; /* css directory */
+static	const char	 *host; /* hostname */
 
 static	const char * const pages[PAGE__MAX] = {
 	"index", /* PAGE_INDEX */ 
@@ -338,19 +339,19 @@ resp_begin_html(int code, const char *msg)
 
 	resp_begin_http(code, msg);
 
-	puts("<!DOCTYPE HTML PUBLIC "
-	     " \"-//W3C//DTD HTML 4.01//EN\""
-	     " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
-	     "<HTML>\n"
-	     "<HEAD>\n"
-	     "<META HTTP-EQUIV=\"Content-Type\""
-	     " CONTENT=\"text/html; charset=utf-8\">\n"
-	     "<LINK REL=\"stylesheet\" HREF=\"/man.cgi.css\""
-	     " TYPE=\"text/css\" media=\"all\">\n"
-	     "<TITLE>System Manpage Reference</TITLE>\n"
-	     "</HEAD>\n"
-	     "<BODY>\n"
-	     "<!-- Begin page content. //-->");
+	printf("<!DOCTYPE HTML PUBLIC "
+	       " \"-//W3C//DTD HTML 4.01//EN\""
+	       " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
+	       "<HTML>\n"
+	       "<HEAD>\n"
+	       "<META HTTP-EQUIV=\"Content-Type\""
+	       " CONTENT=\"text/html; charset=utf-8\">\n"
+	       "<LINK REL=\"stylesheet\" HREF=\"%s/man.cgi.css\""
+	       " TYPE=\"text/css\" media=\"all\">\n"
+	       "<TITLE>System Manpage Reference</TITLE>\n"
+	       "</HEAD>\n"
+	       "<BODY>\n"
+	       "<!-- Begin page content. //-->\n", css);
 }
 
 static void
@@ -367,16 +368,15 @@ resp_searchform(const struct req *req)
 	int		 i;
 
 	puts("<!-- Begin search form. //-->");
-	printf("<FORM ACTION=\"");
-	html_print(progname);
-	printf("/search.html\" METHOD=\"get\">\n");
-	printf("<FIELDSET>\n"
+	printf("<FORM ACTION=\"%s/search.html\" METHOD=\"get\">\n"
+	       "<FIELDSET>\n"
 	       "<LEGEND>Search Parameters</LEGEND>\n"
 	       "<INPUT TYPE=\"submit\" NAME=\"op\""
 	       " VALUE=\"Whatis\"> or \n"
 	       "<INPUT TYPE=\"submit\" NAME=\"op\""
 	       " VALUE=\"apropos\"> for manuals satisfying \n"
-	       "<INPUT TYPE=\"text\" NAME=\"expr\" VALUE=\"");
+	       "<INPUT TYPE=\"text\" NAME=\"expr\" VALUE=\"",
+	       progname);
 	html_print(req->q.expr ? req->q.expr : "");
 	printf("\">, section "
 	       "<INPUT TYPE=\"text\""
@@ -472,14 +472,17 @@ resp_search(struct res *r, size_t sz, void *arg)
 	int		  i;
 	const struct req *req;
 
+	req = (const struct req *)arg;
+	assert(req->q.manroot >= 0);
+
 	if (1 == sz) {
 		/*
 		 * If we have just one result, then jump there now
 		 * without any delay.
 		 */
 		puts("Status: 303 See Other");
-		printf("Location: http://%s%s/show/%u/%u.html\n",
-				host, progname,
+		printf("Location: http://%s%s/show/%d/%u/%u.html\n",
+				host, progname, req->q.manroot,
 				r[0].volume, r[0].rec);
 		puts("Content-Type: text/html; charset=utf-8\n");
 		return;
@@ -488,8 +491,6 @@ resp_search(struct res *r, size_t sz, void *arg)
 	qsort(r, sz, sizeof(struct res), cmp);
 
 	resp_begin_html(200, NULL);
-
-	req = (const struct req *)arg;
 	resp_searchform(req);
 
 	if (0 == sz) {
@@ -497,9 +498,8 @@ resp_search(struct res *r, size_t sz, void *arg)
 		       "No %s results found.\n",
 		       req->q.whatis ? "whatis" : "apropos");
 		if (req->q.whatis) {
-			printf("(Try <A HREF=\"");
-			html_print(progname);
-			printf("/search.html?op=apropos&amp;expr=");
+			printf("(Try <A HREF=\"%s/search.html?"
+			       "op=apropos&amp;expr=", progname);
 			html_print(req->q.expr ? req->q.expr : "");
 			printf("&amp;sec=");
 			html_print(req->q.sec ? req->q.sec : "");
@@ -515,14 +515,11 @@ resp_search(struct res *r, size_t sz, void *arg)
 	puts("<P></P>\n"
 	     "<TABLE>");
 
-	assert(req->q.manroot >= 0);
 	for (i = 0; i < (int)sz; i++) {
 		printf("<TR>\n"
 		       "<TD CLASS=\"title\">\n"
-		       "<A HREF=\"");
-		html_print(progname);
-		printf("/show/%d/%u/%u.html\">", 
-				req->q.manroot,
+		       "<A HREF=\"%s/show/%d/%u/%u.html\">", 
+				progname, req->q.manroot,
 				r[i].volume, r[i].rec);
 		html_print(r[i].title);
 		putchar('(');
@@ -566,20 +563,20 @@ catman(const char *file)
 	}
 
 	resp_begin_http(200, NULL);
-	puts("<!DOCTYPE HTML PUBLIC "
-	     " \"-//W3C//DTD HTML 4.01//EN\""
-	     " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
-	     "<HTML>\n"
-	     "<HEAD>\n"
-	     "<META HTTP-EQUIV=\"Content-Type\""
-	     " CONTENT=\"text/html; charset=utf-8\">\n"
-	     "<LINK REL=\"stylesheet\" HREF=\"/catman.css\""
-	     " TYPE=\"text/css\" media=\"all\">\n"
-	     "<TITLE>System Manpage Reference</TITLE>\n"
-	     "</HEAD>\n"
-	     "<BODY>\n"
-	     "<!-- Begin page content. //-->\n"
-	     "<PRE>");
+	printf("<!DOCTYPE HTML PUBLIC "
+	       " \"-//W3C//DTD HTML 4.01//EN\""
+	       " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
+	       "<HTML>\n"
+	       "<HEAD>\n"
+	       "<META HTTP-EQUIV=\"Content-Type\""
+	       " CONTENT=\"text/html; charset=utf-8\">\n"
+	       "<LINK REL=\"stylesheet\" HREF=\"%s/catman.css\""
+	       " TYPE=\"text/css\" media=\"all\">\n"
+	       "<TITLE>System Manpage Reference</TITLE>\n"
+	       "</HEAD>\n"
+	       "<BODY>\n"
+	       "<!-- Begin page content. //-->\n"
+	       "<PRE>\n", css);
 
 	while (NULL != (p = fgetln(f, &len))) {
 		bold = italic = 0;
@@ -722,10 +719,10 @@ format(const char *file)
 		return;
 	}
 
-	snprintf(opts, sizeof(opts), "style=/man.css,"
+	snprintf(opts, sizeof(opts), "style=%s/man.css,"
 			"man=%s/search.html?sec=%%S&expr=%%N,"
 			/*"includes=/cgi-bin/man.cgi/usr/include/%%I"*/,
-			progname);
+			css, progname);
 
 	mparse_result(mp, &mdoc, &man);
 	vp = html_alloc(opts);
@@ -942,16 +939,16 @@ main(void)
 
 	/* Scan our run-time environment. */
 
-	progname = getenv("SCRIPT_NAME");
-	if (NULL == progname)
-		progname = "";
-
-	cache = getenv("CACHE_DIR");
-	if (NULL == cache)
+	if (NULL == (cache = getenv("CACHE_DIR")))
 		cache = "/cache/man.cgi";
 
-	host = getenv("HTTP_HOST");
-	if (NULL == host)
+	if (NULL == (progname = getenv("SCRIPT_NAME")))
+		progname = "";
+
+	if (NULL == (css = getenv("CSS_DIR")))
+		css = "/";
+
+	if (NULL == (host = getenv("HTTP_HOST")))
 		host = "localhost";
 
 	/*
