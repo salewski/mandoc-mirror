@@ -792,7 +792,7 @@ pg_show(const struct req *req, char *path)
 	}
 
 	memset(&ps, 0, sizeof(struct manpaths));
-	manpath_manconf("etc/catman.conf", &ps);
+	manpath_manconf(&ps, "etc/catman.conf");
 
 	if (vol >= (unsigned int)ps.sz) {
 		resp_error400();
@@ -878,7 +878,7 @@ pg_search(const struct req *req, char *path)
 	}
 
 	memset(&ps, 0, sizeof(struct manpaths));
-	manpath_manconf("etc/catman.conf", &ps);
+	manpath_manconf(&ps, "etc/catman.conf");
 
 	/*
 	 * Poor man's tokenisation: just break apart by spaces.

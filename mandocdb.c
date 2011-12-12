@@ -273,6 +273,7 @@ main(int argc, char *argv[])
 	struct manpaths	 dirs;
 	enum op		 op; /* current operation */
 	const char	*dir;
+	char		*conf_file;
 	char		*cp;
 	char		 pbuf[PATH_MAX],
 			 ibuf[MAXPATHLEN], /* index fname */
@@ -312,11 +313,15 @@ main(int argc, char *argv[])
 	maxrec = 0;
 	op = OP_NEW;
 	dir = NULL;
+	conf_file = NULL;
 
-	while (-1 != (ch = getopt(argc, argv, "ad:u:v")))
+	while (-1 != (ch = getopt(argc, argv, "aC:d:u:v")))
 		switch (ch) {
 		case ('a'):
 			use_all = 1;
+			break;
+		case ('C'):
+			conf_file = optarg;
 			break;
 		case ('d'):
 			dir = optarg;
@@ -426,7 +431,7 @@ main(int argc, char *argv[])
 			dirs.paths[i] = mandoc_strdup(cp);
 		}
 	} else
-		manpath_parse(&dirs, NULL, NULL);
+		manpath_parse(&dirs, conf_file, NULL, NULL);
 
 	for (i = 0; i < dirs.sz; i++) {
 		ibuf[0] = fbuf[0] = '\0';
@@ -1660,7 +1665,8 @@ usage(void)
 {
 
 	fprintf(stderr, "usage: %s [-v] "
-			"[-d dir [files...] |"
-			" -u dir [files...] |"
-			" dir...]\n", progname);
+			"[-C file] |"
+			" dir ... |"
+			" -d dir [file ...] |"
+			" -u dir [file ...]\n", progname);
 }

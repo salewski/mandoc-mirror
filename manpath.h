@@ -29,9 +29,9 @@ struct	manpaths {
 
 __BEGIN_DECLS
 
-void	 manpath_manconf(const char *, struct manpaths *);
-void	 manpath_parse(struct manpaths *, char *, char *);
-void	 manpath_parseconf(struct manpaths *);
+void	 manpath_manconf(struct manpaths *, const char *);
+void	 manpath_parse(struct manpaths *, const char *, char *, char *);
+void	 manpath_parseconf(struct manpaths *, const char *);
 void	 manpath_parseline(struct manpaths *, char *);
 void	 manpath_free(struct manpaths *);
 

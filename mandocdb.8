@@ -23,7 +23,10 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl av
-.Op Ar dir ...
+.Op Fl C Ar file
+.Nm
+.Op Fl av
+.Ar dir ...
 .Nm
 .Op Fl v
 .Fl d Ar dir
@@ -69,10 +72,16 @@ uses the default paths stipulated by
 .Xr man 1 .
 .Pp
 The arguments are as follows:
-.Bl -tag -width Ds
+.Bl -tag -width "-C file"
 .It Fl a
 Use all directories and files found below
 .Ar dir ... .
+.It Fl C Ar file
+Specify an alternative configuration
+.Ar file
+in
+.Xr man.conf 5
+format.
 .It Fl d Ar dir
 Merge (remove and re-add)
 .Ar
@@ -141,7 +150,7 @@ length plus one) mapping to a 12-byte binary field consisting of the
 64-bit keyword type and 32-bit source
 .Sx Index Database
 record number, both in network-byte order.
-The typet bit-mask consists of the following
+The type bit-mask consists of the following
 values mapping into
 .Xr mdoc 7
 macro identifiers:
@@ -208,6 +217,10 @@ keyword database mapping keywords to a type and file reference in
 A
 .Xr recno 3
 database of indexed file-names.
+.It Pa /etc/man.conf
+The default
+.Xr man 1
+configuration file.
 .El
 .Sh EXIT STATUS
 The
@@ -249,9 +262,12 @@ This usually indicates database corruption or invalid command-line
 arguments.
 .El
 .Sh SEE ALSO
+.Xr apropos 1 ,
 .Xr man 1 ,
+.Xr whatis 1 ,
 .Xr btree 3 ,
-.Xr recno 3
+.Xr recno 3 ,
+.Xr man.conf 5
 .Sh AUTHORS
 The
 .Nm

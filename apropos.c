@@ -44,6 +44,7 @@ main(int argc, char *argv[])
 	struct opts	 opts;
 	struct expr	*e;
 	char		*defpaths, *auxpaths;
+	char		*conf_file;
 	extern int	 optind;
 	extern char	*optarg;
 
@@ -59,10 +60,14 @@ main(int argc, char *argv[])
 	memset(&opts, 0, sizeof(struct opts));
 
 	auxpaths = defpaths = NULL;
+	conf_file = NULL;
 	e = NULL;
 
-	while (-1 != (ch = getopt(argc, argv, "M:m:S:s:")))
+	while (-1 != (ch = getopt(argc, argv, "C:M:m:S:s:")))
 		switch (ch) {
+		case ('C'):
+			conf_file = optarg;
+			break;
 		case ('M'):
 			defpaths = optarg;
 			break;
@@ -88,7 +93,7 @@ main(int argc, char *argv[])
 
 	rc = 0;
 
-	manpath_parse(&paths, defpaths, auxpaths);
+	manpath_parse(&paths, conf_file, defpaths, auxpaths);
 
 	e = whatis ? termcomp(argc, argv, &terms) :
 		     exprcomp(argc, argv, &terms);
@@ -142,10 +147,11 @@ usage(void)
 {
 
 	fprintf(stderr, "usage: %s "
+			"[-C file] "
 			"[-M manpath] "
 			"[-m manpath] "
 			"[-S arch] "
 			"[-s section] "
-			"expression...\n",
+			"expression ...\n",
 			progname);
 }
