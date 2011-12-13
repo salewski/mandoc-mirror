@@ -35,5 +35,8 @@ extern	size_t	  strlcpy(char *, const char *, size_t);
 extern	int	  getsubopt(char **, char * const *, char **);
 extern	char	 *suboptarg;
 #endif
+#ifndef HAVE_FGETLN
+extern	char	 *fgetln(FILE *, size_t *);
+#endif
 
 #endif /* MANDOC_CONFIG_H */

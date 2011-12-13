@@ -29,7 +29,9 @@ CFLAGS	 	+= -DUSE_WCHAR
 # variable.
 #CFLAGS		+= -DUSE_MANPATH
 
-# If your system supports static binaries only, uncomment this.
+# If your system supports static binaries only, uncomment this.  This
+# appears only to be BSD UNIX systems (Mac OS X has no support and Linux
+# requires -pthreads for static libdb).
 STATIC		 = -static
 
 CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
@@ -76,6 +78,7 @@ SRCS		 = Makefile \
 		   cgi.c \
 		   chars.c \
 		   chars.in \
+		   compat_fgetln.c \
 		   compat_getsubopt.c \
 		   compat_strlcat.c \
 		   compat_strlcpy.c \
@@ -156,6 +159,7 @@ SRCS		 = Makefile \
 		   term.h \
 		   term_ascii.c \
 		   term_ps.c \
+		   test-fgetln.c \
 		   test-getsubopt.c \
 		   test-mmap.c \
 		   test-strlcat.c \
@@ -224,10 +228,12 @@ LIBMANDOC_LNS	 = $(LIBMAN_LNS) \
 		   msec.ln \
 		   read.ln
 
-COMPAT_OBJS	 = compat_getsubopt.o \
+COMPAT_OBJS	 = compat_fgetln.o \
+		   compat_getsubopt.o \
 		   compat_strlcat.o \
 		   compat_strlcpy.o
-COMPAT_LNS	 = compat_getsubopt.ln \
+COMPAT_LNS	 = compat_fgetln.ln \
+		   compat_getsubopt.ln \
 		   compat_strlcat.ln \
 		   compat_strlcpy.ln
 
@@ -343,6 +349,11 @@ INDEX_MANS	 = apropos.1.html \
 		   apropos.1.ps \
 		   apropos.1.pdf \
 		   apropos.1.txt \
+		   catman.8.html \
+		   catman.8.xhtml \
+		   catman.8.ps \
+		   catman.8.pdf \
+		   catman.8.txt \
 		   demandoc.1.html \
 		   demandoc.1.xhtml \
 		   demandoc.1.ps \
@@ -373,6 +384,11 @@ INDEX_MANS	 = apropos.1.html \
 		   man.7.ps \
 		   man.7.pdf \
 		   man.7.txt \
+		   man.cgi.7.html \
+		   man.cgi.7.xhtml \
+		   man.cgi.7.ps \
+		   man.cgi.7.pdf \
+		   man.cgi.7.txt \
 		   mandoc_char.7.html \
 		   mandoc_char.7.xhtml \
 		   mandoc_char.7.ps \
@@ -437,6 +453,7 @@ clean:
 	rm -f config.h config.log $(COMPAT_OBJS) $(COMPAT_LNS)
 	rm -f mdocml.tar.gz mdocml-win32.zip mdocml-win64.zip mdocml-macosx.zip
 	rm -f index.html $(INDEX_OBJS)
+	rm -rf test-fgetln.DSYM
 	rm -rf test-strlcpy.DSYM
 	rm -rf test-strlcat.DSYM 
 	rm -rf test-strptime.DSYM 
@@ -575,6 +592,10 @@ config.h: config.h.pre config.h.post
 	rm -f config.log
 	( cat config.h.pre; \
 	  echo; \
+	  if $(CC) $(CFLAGS) -Werror -o test-fgetln test-fgetln.c >> config.log 2>&1; then \
+		echo '#define HAVE_FGETLN'; \
+		rm test-fgetln; \
+	  fi; \
 	  if $(CC) $(CFLAGS) -Werror -o test-strptime test-strptime.c >> config.log 2>&1; then \
 		echo '#define HAVE_STRPTIME'; \
 		rm test-strptime; \
