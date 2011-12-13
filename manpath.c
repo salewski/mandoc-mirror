@@ -63,7 +63,6 @@ manpath_parse(struct manpaths *dirs, const char *file,
 
 	/* Open manpath(1).  Ignore errors. */
 
-	warnx(cmd);
 	stream = popen(cmd, "r");
 	if (NULL == stream)
 		return;
