@@ -19,7 +19,8 @@
 #include "config.h"
 #endif
 
-#include <sys/types.h>
+#include <sys/param.h>
+
 #include <assert.h>
 #include <ctype.h>
 #include <limits.h>
@@ -34,27 +35,75 @@
 #define MAN_CONF_KEY	"_whatdb"
 
 static	void	 manpath_add(struct manpaths *, const char *);
+static	void	 manpath_parseline(struct manpaths *, char *);
 
 void
 manpath_parse(struct manpaths *dirs, const char *file,
 		char *defp, char *auxp)
 {
+#ifdef	USE_MANPATH
+	char		 cmd[(MAXPATHLEN * 3) + 20];
+	FILE		*stream;
+	char		*buf;
+	size_t		 sz, bsz;
 
+	strlcpy(cmd, "manpath", sizeof(cmd));
+	if (file) {
+		strlcat(cmd, " -C ", sizeof(cmd));
+		strlcat(cmd, file, sizeof(cmd));
+	}
+	if (auxp) {
+		strlcat(cmd, " -m ", sizeof(cmd));
+		strlcat(cmd, auxp, sizeof(cmd));
+	}
+	if (defp) {
+		strlcat(cmd, " -M ", sizeof(cmd));
+		strlcat(cmd, defp, sizeof(cmd));
+	}
+
+	/* Open manpath(1).  Ignore errors. */
+
+	warnx(cmd);
+	stream = popen(cmd, "r");
+	if (NULL == stream)
+		return;
+
+	buf = NULL;
+	bsz = 0;
+
+	/* Read in as much output as we can. */
+
+	do {
+		buf = mandoc_realloc(buf, bsz + 1024);
+		sz = fread(buf + (int)bsz, 1, 1024, stream);
+		bsz += sz;
+	} while (sz > 0);
+
+	if ( ! ferror(stream) && feof(stream) &&
+			bsz && '\n' == buf[bsz - 1]) {
+		buf[bsz - 1] = '\0';
+		manpath_parseline(dirs, buf);
+	}
+
+	free(buf);
+	pclose(stream);
+#else
 	manpath_parseline(dirs, auxp);
 
 	if (NULL == defp)
 		defp = getenv("MANPATH");
 
 	if (NULL == defp)
-		manpath_parseconf(dirs, file);
+		manpath_manconf(dirs, file ? file : MAN_CONF_FILE);
 	else
 		manpath_parseline(dirs, defp);
+#endif
 }
 
 /*
  * Parse a FULL pathname from a colon-separated list of arrays.
  */
-void
+static void
 manpath_parseline(struct manpaths *dirs, char *path)
 {
 	char	*dir;
@@ -89,44 +138,6 @@ manpath_add(struct manpaths *dirs, const char *dir)
 		 ((size_t)dirs->sz + 1) * sizeof(char *));
 
 	dirs->paths[dirs->sz++] = mandoc_strdup(cp);
-}
-
-void
-manpath_parseconf(struct manpaths *dirs, const char *file)
-{
-#ifdef	USE_MANPATH
-	FILE		*stream;
-	char		*buf;
-	size_t		 sz, bsz;
-
-	/* Open manpath(1).  Ignore errors. */
-
-	stream = popen("manpath", "r");
-	if (NULL == stream)
-		return;
-
-	buf = NULL;
-	bsz = 0;
-
-	/* Read in as much output as we can. */
-
-	do {
-		buf = mandoc_realloc(buf, bsz + 1024);
-		sz = fread(buf + (int)bsz, 1, 1024, stream);
-		bsz += sz;
-	} while (sz > 0);
-
-	if ( ! ferror(stream) && feof(stream) &&
-			bsz && '\n' == buf[bsz - 1]) {
-		buf[bsz - 1] = '\0';
-		manpath_parseline(dirs, buf);
-	}
-
-	free(buf);
-	pclose(stream);
-#else
-	manpath_manconf(dirs, file ? file : MAN_CONF_FILE);
-#endif
 }
 
 void

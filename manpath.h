@@ -31,8 +31,6 @@ __BEGIN_DECLS
 
 void	 manpath_manconf(struct manpaths *, const char *);
 void	 manpath_parse(struct manpaths *, const char *, char *, char *);
-void	 manpath_parseconf(struct manpaths *, const char *);
-void	 manpath_parseline(struct manpaths *, char *);
 void	 manpath_free(struct manpaths *);
 
 __END_DECLS
