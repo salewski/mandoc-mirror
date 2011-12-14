@@ -946,7 +946,7 @@ main(void)
 		progname = "";
 
 	if (NULL == (css = getenv("CSS_DIR")))
-		css = "/";
+		css = "";
 
 	if (NULL == (host = getenv("HTTP_HOST")))
 		host = "localhost";
