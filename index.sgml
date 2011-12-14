@@ -343,6 +343,12 @@
 			HREF="mandocdb.8.html">mandocdb</A> manuals cached by <A HREF="catman.8.html">catman</A>.  HTML output is generated
 			on-the-fly by <A HREF="mandoc.3.html">libmandoc</A> or internal methods to convert pre-formatted pages.
 		</P>
+		<P>
+			Lastly, the mailing list archive for the discuss and tech lists are being hosted by <A CLASS="external"
+			HREF="http://www.gmane.org">Gmane</A> at <A HREF="http://dir.gmane.org/gmane.comp.tools.mdocml.user"
+			CLASS="external">gmane.comp.tools.mdocml.user</A> and <A HREF="http://dir.gmane.org/gmane.comp.tools.mdocml.devel"
+			CLASS="external">gmane.comp.tools.mdocml.devel</A>, respectively.
+		</P>
 		<P CLASS="news">
 			08-10-2011: version 1.12.0
 		</P>
