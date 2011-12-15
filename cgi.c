@@ -80,9 +80,9 @@ struct	req {
 };
 
 static	int		 atou(const char *, unsigned *);
-static	void		 catman(const char *);
+static	void		 catman(const struct req *, const char *);
 static	int	 	 cmp(const void *, const void *);
-static	void		 format(const char *);
+static	void		 format(const struct req *, const char *);
 static	void		 html_print(const char *);
 static	void		 html_putchar(char);
 static	int 		 http_decode(char *);
@@ -346,12 +346,14 @@ resp_begin_html(int code, const char *msg)
 	       "<HEAD>\n"
 	       "<META HTTP-EQUIV=\"Content-Type\""
 	       " CONTENT=\"text/html; charset=utf-8\">\n"
-	       "<LINK REL=\"stylesheet\" HREF=\"%s/man.cgi.css\""
+	       "<LINK REL=\"stylesheet\" HREF=\"%s/man-cgi.css\""
+	       " TYPE=\"text/css\" media=\"all\">\n"
+	       "<LINK REL=\"stylesheet\" HREF=\"%s/man.css\""
 	       " TYPE=\"text/css\" media=\"all\">\n"
 	       "<TITLE>System Manpage Reference</TITLE>\n"
 	       "</HEAD>\n"
 	       "<BODY>\n"
-	       "<!-- Begin page content. //-->\n", css);
+	       "<!-- Begin page content. //-->\n", css, css);
 }
 
 static void
@@ -368,7 +370,8 @@ resp_searchform(const struct req *req)
 	int		 i;
 
 	puts("<!-- Begin search form. //-->");
-	printf("<FORM ACTION=\"%s/search.html\" METHOD=\"get\">\n"
+	printf("<DIV ID=\"mancgi\">\n"
+	       "<FORM ACTION=\"%s/search.html\" METHOD=\"get\">\n"
 	       "<FIELDSET>\n"
 	       "<LEGEND>Search Parameters</LEGEND>\n"
 	       "<INPUT TYPE=\"submit\" NAME=\"op\""
@@ -404,7 +407,8 @@ resp_searchform(const struct req *req)
 	puts(".\n"
 	     "<INPUT TYPE=\"reset\" VALUE=\"Reset\">\n"
 	     "</FIELDSET>\n"
-	     "</FORM>");
+	     "</FORM>\n"
+	     "</DIV>");
 	puts("<!-- End search form. //-->");
 }
 
@@ -549,7 +553,7 @@ pg_index(const struct req *req, char *path)
 }
 
 static void
-catman(const char *file)
+catman(const struct req *req, const char *file)
 {
 	FILE		*f;
 	size_t		 len;
@@ -562,21 +566,10 @@ catman(const char *file)
 		return;
 	}
 
-	resp_begin_http(200, NULL);
-	printf("<!DOCTYPE HTML PUBLIC "
-	       " \"-//W3C//DTD HTML 4.01//EN\""
-	       " \"http://www.w3.org/TR/html4/strict.dtd\">\n"
-	       "<HTML>\n"
-	       "<HEAD>\n"
-	       "<META HTTP-EQUIV=\"Content-Type\""
-	       " CONTENT=\"text/html; charset=utf-8\">\n"
-	       "<LINK REL=\"stylesheet\" HREF=\"%s/catman.css\""
-	       " TYPE=\"text/css\" media=\"all\">\n"
-	       "<TITLE>System Manpage Reference</TITLE>\n"
-	       "</HEAD>\n"
-	       "<BODY>\n"
-	       "<!-- Begin page content. //-->\n"
-	       "<PRE>\n", css);
+	resp_begin_html(200, NULL);
+	resp_searchform(req);
+	puts("<DIV CLASS=\"catman\">\n"
+	     "<PRE>");
 
 	while (NULL != (p = fgetln(f, &len))) {
 		bold = italic = 0;
@@ -688,6 +681,7 @@ catman(const char *file)
 	}
 
 	puts("</PRE>\n"
+	     "</DIV>\n"
 	     "</BODY>\n"
 	     "</HTML>");
 
@@ -695,7 +689,7 @@ catman(const char *file)
 }
 
 static void
-format(const char *file)
+format(const struct req *req, const char *file)
 {
 	struct mparse	*mp;
 	int		 fd;
@@ -719,22 +713,30 @@ format(const char *file)
 		return;
 	}
 
-	snprintf(opts, sizeof(opts), "style=%s/man.css,"
+	snprintf(opts, sizeof(opts), "fragment,"
 			"man=%s/search.html?sec=%%S&expr=%%N,"
 			/*"includes=/cgi-bin/man.cgi/usr/include/%%I"*/,
-			css, progname);
+			progname);
 
 	mparse_result(mp, &mdoc, &man);
+	if (NULL == man && NULL == mdoc) {
+		resp_baddb();
+		mparse_free(mp);
+		return;
+	}
+
+	resp_begin_html(200, NULL);
+	resp_searchform(req);
+
 	vp = html_alloc(opts);
 
-	if (NULL != mdoc) {
-		resp_begin_http(200, NULL);
+	if (NULL != mdoc)
 		html_mdoc(vp, mdoc);
-	} else if (NULL != man) {
-		resp_begin_http(200, NULL);
+	else
 		html_man(vp, man);
-	} else
-		resp_baddb();
+
+	puts("</BODY>\n"
+	     "</HTML>");
 
 	html_free(vp);
 	mparse_free(mp);
@@ -829,9 +831,9 @@ pg_show(const struct req *req, char *path)
 		resp_baddb();
 	else {
 		if (0 == strcmp(cp, "cat"))
-			catman(fn + 1);
+			catman(req, fn + 1);
 		else
-			format(fn + 1);
+			format(req, fn + 1);
 	}
 out:
 	if (idx)

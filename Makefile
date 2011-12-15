@@ -107,7 +107,7 @@ SRCS		 = Makefile \
 		   man.7 \
 		   man.c \
 		   man.cgi.7 \
-		   man.cgi.css \
+		   man-cgi.css \
 		   man.h \
 		   man_hash.c \
 		   man_html.c \
@@ -482,7 +482,7 @@ installcgi: all
 	mkdir -p $(DESTDIR)$(HTDOCDIR)
 	$(INSTALL_PROGRAM) man.cgi $(DESTDIR)$(CGIBINDIR)
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(HTDOCDIR)/man.css
-	$(INSTALL_DATA) man.cgi.css $(DESTDIR)$(HTDOCDIR)
+	$(INSTALL_DATA) man-cgi.css $(DESTDIR)$(HTDOCDIR)
 
 installwww: www
 	mkdir -p $(PREFIX)/snapshots
