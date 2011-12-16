@@ -117,7 +117,7 @@ static	const struct type types[] = {
 	{ TYPE_Va, "Va" },
 	{ TYPE_Va, "Vt" },
 	{ TYPE_Xr, "Xr" },
-	{ INT_MAX, "any" },
+	{ UINT64_MAX, "any" },
 	{ 0, NULL }
 };
 
