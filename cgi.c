@@ -510,7 +510,9 @@ resp_search(struct res *r, size_t sz, void *arg)
 	const struct req *req;
 
 	req = (const struct req *)arg;
-	assert(req->q.manroot >= 0);
+
+	if (sz > 0)
+		assert(req->q.manroot >= 0);
 	
 	if (1 == sz) {
 		/*
