@@ -21,7 +21,6 @@
 
 #include <sys/param.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 
 #include <assert.h>
 #include <dirent.h>
@@ -110,7 +109,7 @@ static	void		  index_prune(const struct of *, DB *,
 				recno_t *, recno_t **, size_t *,
 				size_t *);
 static	void		  ofile_argbuild(int, char *[], struct of **);
-static	int		  ofile_dirbuild(const char *, const char *,
+static	void		  ofile_dirbuild(const char *, const char *,
 				const char *, int, struct of **);
 static	void		  ofile_free(struct of *);
 static	void		  pformatted(DB *, struct buf *, struct buf *,
@@ -384,12 +383,8 @@ main(int argc, char *argv[])
 			exit((int)MANDOCLEVEL_SYSERR);
 		}
 
-		if (verb > 2) {
-			printf("%s: Opened\n", fbuf);
-			printf("%s: Opened\n", ibuf);
-		}
-
 		ofile_argbuild(argc, argv, &of);
+
 		if (NULL == of)
 			goto out;
 
@@ -399,13 +394,16 @@ main(int argc, char *argv[])
 				&maxrec, &recs, &recsz, &reccur);
 
 		/*
-		 * Go to the root of the respective manual tree
-		 * such that .so links work.  In case of failure,
-		 * just prod on, even though .so links won't work.
+		 * Go to the root of the respective manual tree.
+		 * This must work or no manuals may be found (they're
+		 * indexed relative to the root).
 		 */
 
 		if (OP_UPDATE == op) {
-			chdir(dir);
+			if (-1 == chdir(dir)) {
+				perror(dir);
+				exit((int)MANDOCLEVEL_SYSERR);
+			}
 			index_merge(of, mp, &dbuf, &buf, hash,
 					db, fbuf, idx, ibuf,
 					maxrec, recs, reccur);
@@ -466,17 +464,15 @@ main(int argc, char *argv[])
 			exit((int)MANDOCLEVEL_SYSERR);
 		}
 
-		if (verb > 2) {
-			printf("%s: Truncated\n", fbuf);
-			printf("%s: Truncated\n", ibuf);
-		}
-
 		ofile_free(of);
 		of = NULL;
 
-		if ( ! ofile_dirbuild(dirs.paths[i], NULL, NULL,
-					0, &of)) 
+		if (-1 == chdir(dirs.paths[i])) {
+			perror(dirs.paths[i]);
 			exit((int)MANDOCLEVEL_SYSERR);
+		} 
+
+	       	ofile_dirbuild(".", NULL, NULL, 0, &of);
 
 		if (NULL == of)
 			continue;
@@ -484,12 +480,16 @@ main(int argc, char *argv[])
 		of = of->first;
 
 		/*
-		 * Go to the root of the respective manual tree
-		 * such that .so links work.  In case of failure,
-		 * just prod on, even though .so links won't work.
+		 * Go to the root of the respective manual tree.  
+		 * This must work or no manuals may be found (they're
+		 * indexed relative to the root).
 		 */
 
-		chdir(dirs.paths[i]);
+		if (-1 == chdir(dirs.paths[i])) {
+			perror(dirs.paths[i]);
+			exit((int)MANDOCLEVEL_SYSERR);
+		}
+
 		index_merge(of, mp, &dbuf, &buf, hash, db, fbuf,
 				idx, ibuf, maxrec, recs, reccur);
 	}
@@ -1434,8 +1434,6 @@ ofile_argbuild(int argc, char *argv[], struct of **of)
 		 * Add the structure to the list.
 		 */
 
-		if (verb > 2) 
-			printf("%s: Scheduling\n", argv[i]);
 		if (NULL == *of) {
 			*of = nof;
 			(*of)->first = nof;
@@ -1455,12 +1453,11 @@ ofile_argbuild(int argc, char *argv[], struct of **of)
  * everything else is a manual.
  * Pass in a pointer to a NULL structure for the first invocation.
  */
-static int
+static void
 ofile_dirbuild(const char *dir, const char* psec, const char *parch,
 		int p_src_form, struct of **of)
 {
 	char		 buf[MAXPATHLEN];
-	struct stat	 sb;
 	size_t		 sz;
 	DIR		*d;
 	const char	*fn, *sec, *arch;
@@ -1471,7 +1468,7 @@ ofile_dirbuild(const char *dir, const char* psec, const char *parch,
 
 	if (NULL == (d = opendir(dir))) {
 		perror(dir);
-		return(0);
+		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
 	while (NULL != (dp = readdir(d))) {
@@ -1516,20 +1513,16 @@ ofile_dirbuild(const char *dir, const char* psec, const char *parch,
 
 			if (MAXPATHLEN <= sz) {
 				fprintf(stderr, "%s: Path too long\n", dir);
-				return(0);
+				exit((int)MANDOCLEVEL_SYSERR);
 			}
  
-			if (verb > 2)
-				printf("%s: Scanning\n", buf);
-
-			if ( ! ofile_dirbuild(buf, sec, arch,
-					src_form, of))
-				return(0);
+			ofile_dirbuild(buf, sec, arch, src_form, of);
 		}
+
 		if (DT_REG != dp->d_type ||
-		    (NULL == psec && !use_all) ||
-		    !strcmp(MANDOC_DB, fn) ||
-		    !strcmp(MANDOC_IDX, fn))
+				(NULL == psec && !use_all) ||
+				! strcmp(MANDOC_DB, fn) ||
+				! strcmp(MANDOC_IDX, fn))
 			continue;
 
 		/*
@@ -1593,13 +1586,15 @@ ofile_dirbuild(const char *dir, const char* psec, const char *parch,
 					    "%s: Path too long\n", buf);
 					continue;
 				}
-				if (0 == stat(buf, &sb))
+				if (0 == access(buf, R_OK))
 					continue;
 			}
 		}
 
+		assert('.' == dir[0]);
+		assert('/' == dir[1]);
 		buf[0] = '\0';
-		strlcat(buf, dir, MAXPATHLEN);
+		strlcat(buf, dir + 2, MAXPATHLEN);
 		strlcat(buf, "/", MAXPATHLEN);
 		sz = strlcat(buf, fn, MAXPATHLEN);
 		if (sz >= MAXPATHLEN) {
@@ -1628,8 +1623,6 @@ ofile_dirbuild(const char *dir, const char* psec, const char *parch,
 		 * Add the structure to the list.
 		 */
 
-		if (verb > 2)
-			printf("%s: Scheduling\n", buf);
 		if (NULL == *of) {
 			*of = nof;
 			(*of)->first = nof;
@@ -1641,7 +1634,6 @@ ofile_dirbuild(const char *dir, const char* psec, const char *parch,
 	}
 
 	closedir(d);
-	return(1);
 }
 
 static void

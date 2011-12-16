@@ -51,11 +51,11 @@
 		exit(EXIT_FAILURE); \
 	} while (/* CONSTCOND */0)
 
-static	int		 indexhtml(char *, char *);
+static	int		 indexhtml(char *, size_t, char *, size_t);
 static	int		 manup(const struct manpaths *, char *);
 static	int		 mkpath(char *, mode_t, mode_t);
-static	int		 treecpy(char *, char *, char *);
-static	int		 update(char *, char *, char *);
+static	int		 treecpy(char *, char *);
+static	int		 update(char *, char *);
 static	void		 usage(void);
 
 static	const char	*progname;
@@ -198,11 +198,10 @@ out:
  * Returns -1 on fatal error, 1 on success.
  */
 static int
-indexhtml(char *base, char *dst)
+indexhtml(char *src, size_t ssz, char *dst, size_t dsz)
 {
 	DB		*idx;
 	DBT		 key, val;
-	size_t		 sz;
 	int		 c, rc;
 	unsigned int	 fl;
 	const char	*f, *cp;
@@ -210,7 +209,6 @@ indexhtml(char *base, char *dst)
 	char		 fname[MAXPATHLEN];
 	pid_t		 pid;
 
-	sz = strlen(base);
 	pid = -1;
 
 	xstrlcpy(fname, dst, MAXPATHLEN);
@@ -235,32 +233,35 @@ indexhtml(char *base, char *dst)
 		if (NULL == memchr(f, '\0', val.size - (f - cp)))
 			break;
 
-		base[(int)sz] = '\0';
+		src[(int)ssz] = dst[(int)dsz] = '\0';
 
-		xstrlcat(base, "/", MAXPATHLEN);
-		xstrlcat(base, f, MAXPATHLEN);
+		xstrlcat(dst, "/", MAXPATHLEN);
+		xstrlcat(dst, f, MAXPATHLEN);
 
-		if (-1 == (rc = isnewer(base, f))) {
+		xstrlcat(src, "/", MAXPATHLEN);
+		xstrlcat(src, f, MAXPATHLEN);
+
+		if (-1 == (rc = isnewer(dst, src))) {
 			fprintf(stderr, "%s: File missing\n", f);
 			break;
 		} else if (0 == rc)
 			continue;
 
-		d = strrchr(base, '/');
+		d = strrchr(dst, '/');
 		assert(NULL != d);
 		*d = '\0';
 
-		if (-1 == mkpath(base, 0755, 0755)) {
-			perror(base);
+		if (-1 == mkpath(dst, 0755, 0755)) {
+			perror(dst);
 			break;
 		}
 
 		*d = '/';
 
-		if ( ! filecpy(base, f))
+		if ( ! filecpy(dst, src))
 			break;
 		if (verbose)
-			printf("%s\n", base);
+			printf("%s\n", dst);
 	}
 
 	(*idx->close)(idx);
@@ -279,7 +280,7 @@ indexhtml(char *base, char *dst)
  * Return -1 on fatal error and 1 if the update went well.
  */
 static int
-update(char *base, char *dst, char *src)
+update(char *dst, char *src)
 {
 	size_t		 dsz, ssz;
 
@@ -304,9 +305,9 @@ update(char *base, char *dst, char *src)
 	if (verbose)
 		printf("%s\n", dst);
 
-	dst[(int)dsz] = '\0';
+	dst[(int)dsz] = src[(int)ssz] = '\0';
 
-	return(indexhtml(base, dst));
+	return(indexhtml(src, ssz, dst, dsz));
 }
 
 /*
@@ -316,7 +317,7 @@ update(char *base, char *dst, char *src)
  * shouldn't be listed), and 1 if the update went well.
  */
 static int
-treecpy(char *base, char *dst, char *src)
+treecpy(char *dst, char *src)
 {
 	size_t		 dsz, ssz;
 	int		 rc;
@@ -333,7 +334,7 @@ treecpy(char *base, char *dst, char *src)
 	dst[(int)dsz] = src[(int)ssz] = '\0';
 
 	if (1 == rc)
-		return(update(base, dst, src));
+		return(update(dst, src));
 
 	xstrlcat(src, "/mandoc.db", MAXPATHLEN);
 	xstrlcat(dst, "/mandoc.db", MAXPATHLEN);
@@ -345,7 +346,7 @@ treecpy(char *base, char *dst, char *src)
 
 	dst[(int)dsz] = src[(int)ssz] = '\0';
 
-	return(update(base, dst, src));
+	return(update(dst, src));
 }
 
 /*
@@ -383,7 +384,7 @@ manup(const struct manpaths *dirs, char *base)
 
 	for (i = 0; i < dirs->sz; i++) {
 		path = dirs->paths[i];
-		dst[(int)sz] = base[(int)sz] = '\0';
+		dst[(int)sz] = '\0';
 		xstrlcat(dst, path, MAXPATHLEN);
 		if (-1 == mkpath(dst, 0755, 0755)) {
 			perror(dst);
@@ -391,7 +392,7 @@ manup(const struct manpaths *dirs, char *base)
 		}
 
 		xstrlcpy(src, path, MAXPATHLEN);
-		if (-1 == (c = treecpy(base, dst, src)))
+		if (-1 == (c = treecpy(dst, src)))
 			break;
 		else if (0 == c)
 			continue;

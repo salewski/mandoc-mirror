@@ -749,6 +749,7 @@ static void
 pg_show(const struct req *req, char *path)
 {
 	struct manpaths	 ps;
+	size_t		 sz;
 	char		*sub;
 	char		 file[MAXPATHLEN];
 	const char	*fn, *cp;
@@ -804,7 +805,8 @@ pg_show(const struct req *req, char *path)
 		goto out;
 	}
 
-	strlcpy(file, ps.paths[vol], MAXPATHLEN);
+	sz = strlcpy(file, ps.paths[vol], MAXPATHLEN);
+	assert(sz < MAXPATHLEN);
 	strlcat(file, "/mandoc.index", MAXPATHLEN);
 
 	/* Open the index recno(3) database. */
@@ -833,10 +835,13 @@ pg_show(const struct req *req, char *path)
 	else if (NULL == memchr(fn, '\0', val.size - (fn - cp)))
 		resp_baddb();
 	else {
+ 		file[(int)sz] = '\0';
+ 		strlcat(file, "/", MAXPATHLEN);
+ 		strlcat(file, fn, MAXPATHLEN);
 		if (0 == strcmp(cp, "cat"))
-			catman(req, fn + 1);
+			catman(req, file);
 		else
-			format(req, fn + 1);
+			format(req, file);
 	}
 out:
 	if (idx)
