@@ -365,6 +365,7 @@ index_read(const DBT *key, const DBT *val, int index,
 {
 	size_t		 left;
 	char		*np, *cp;
+	char		 type;
 
 #define	INDEX_BREAD(_dst) \
 	do { \
@@ -375,13 +376,23 @@ index_read(const DBT *key, const DBT *val, int index,
 		cp = np + 1; \
 	} while (/* CONSTCOND */ 0)
 
-	left = val->size;
-	cp = (char *)val->data;
+	if (0 == (left = val->size))
+		return(0);
 
+	cp = val->data;
 	rec->res.rec = *(recno_t *)key->data;
 	rec->res.volume = index;
 
-	INDEX_BREAD(rec->res.type);
+	if ('d' == (type = *cp++))
+		rec->res.type = RESTYPE_MDOC;
+	else if ('a' == type)
+		rec->res.type = RESTYPE_MAN;
+	else if ('c' == type)
+		rec->res.type = RESTYPE_CAT;
+	else
+		return(0);
+
+	left--;
 	INDEX_BREAD(rec->res.file);
 	INDEX_BREAD(rec->res.cat);
 	INDEX_BREAD(rec->res.title);
@@ -581,7 +592,6 @@ static void
 recfree(struct rec *rec)
 {
 
-	free(rec->res.type);
 	free(rec->res.file);
 	free(rec->res.cat);
 	free(rec->res.title);

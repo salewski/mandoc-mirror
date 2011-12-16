@@ -17,8 +17,14 @@
 #ifndef APROPOS_H
 #define APROPOS_H
 
+enum	restype {
+	RESTYPE_MAN, /* man(7) file */
+	RESTYPE_MDOC, /* mdoc(7) file */
+	RESTYPE_CAT /* pre-formatted file */
+};
+
 struct	res {
-	char		*type; /* file type: mdoc, man or cat */
+	enum restype	 type; /* input file type */
 	char		*file; /* file in file-system */
 	char		*cat; /* category (3p, 3, etc.) */
 	char		*title; /* title (FOO, etc.) */

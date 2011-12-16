@@ -528,6 +528,7 @@ index_merge(const struct of *of, struct mparse *mp,
 	size_t		 sv;
 	unsigned	 seq;
 	struct db_val	 vbuf;
+	char		 type;
 
 	for (rec = 0; of; of = of->next) {
 		fn = of->fname;
@@ -608,7 +609,8 @@ index_merge(const struct of *of, struct mparse *mp,
 		 */
 
 		dbuf->len = 0;
-		buf_append(dbuf, mdoc ? "mdoc" : (man ? "man" : "cat"));
+		type = mdoc ? 'd' : (man ? 'a' : 'c');
+		buf_appendb(dbuf, &type, 1);
 		buf_appendb(dbuf, fn, strlen(fn) + 1);
 		buf_appendb(dbuf, msec, strlen(msec) + 1);
 		buf_appendb(dbuf, mtitle, strlen(mtitle) + 1);
@@ -696,7 +698,7 @@ index_prune(const struct of *ofile, DB *db, const char *dbf,
 		recno_t **recs, size_t *recsz, size_t *reccur)
 {
 	const struct of	*of;
-	const char	*fn, *cp;
+	const char	*fn;
 	struct db_val	*vbuf;
 	unsigned	 seq, sseq;
 	DBT		 key, val;
@@ -707,7 +709,6 @@ index_prune(const struct of *ofile, DB *db, const char *dbf,
 	while (0 == (ch = (*idx->seq)(idx, &key, &val, seq))) {
 		seq = R_NEXT;
 		*maxrec = *(recno_t *)key.data;
-		cp = val.data;
 
 		/* Deleted records are zero-sized.  Skip them. */
 
@@ -721,11 +722,8 @@ index_prune(const struct of *ofile, DB *db, const char *dbf,
 		 * Failing any of these, we go into our error handler.
 		 */
 
-		if (NULL == (fn = memchr(cp, '\0', val.size)))
-			break;
-		if (++fn - cp >= (int)val.size)
-			break;
-		if (NULL == memchr(fn, '\0', val.size - (fn - cp)))
+		fn = (char *)val.data + 1;
+		if (NULL == memchr(fn, '\0', val.size - 1))
 			break;
 
 		/* 

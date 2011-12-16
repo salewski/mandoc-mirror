@@ -110,14 +110,13 @@ database with record values consisting of
 .Pp
 .Bl -enum -compact
 .It
-the string
-.Cm mdoc ,
-.Cm man ,
+the character
+.Cm d ,
+.Cm a ,
 or
-.Cm cat
+.Cm c
 to indicate the file type
 .Po
-file in
 .Xr mdoc 7 ,
 .Xr man 7 ,
 and post-formatted, respectively
@@ -137,9 +136,7 @@ and the description.
 .Pp
 Each of the above is NUL-terminated.
 .Pp
-Both the manual section and description may be zero-length if the record
-is unassigned.
-Entries are sequentially-numbered, but the filenames are unordered.
+If the record value is zero-length, it is unassigned.
 .Ss Keyword Database
 The keyword database,
 .Pa mandoc.db ,

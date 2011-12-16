@@ -752,8 +752,8 @@ pg_show(const struct req *req, char *path)
 	size_t		 sz;
 	char		*sub;
 	char		 file[MAXPATHLEN];
-	const char	*fn, *cp;
-	int		 rc;
+	const char	*cp;
+	int		 rc, catm;
 	unsigned int	 vol, rec, mr;
 	DB		*idx;
 	DBT		 key, val;
@@ -824,21 +824,21 @@ pg_show(const struct req *req, char *path)
 	if (0 != (rc = (*idx->get)(idx, &key, &val, 0))) {
 		rc < 0 ? resp_baddb() : resp_error400();
 		goto out;
-	} 
+	} else if (0 == val.size) {
+		resp_baddb();
+		goto out;
+	}
 
 	cp = (char *)val.data;
+	catm = 'c' == *cp++;
 
-	if (NULL == (fn = memchr(cp, '\0', val.size)))
-		resp_baddb();
-	else if (++fn - cp >= (int)val.size)
-		resp_baddb();
-	else if (NULL == memchr(fn, '\0', val.size - (fn - cp)))
+	if (NULL == memchr(cp, '\0', val.size - 1)) 
 		resp_baddb();
 	else {
  		file[(int)sz] = '\0';
  		strlcat(file, "/", MAXPATHLEN);
- 		strlcat(file, fn, MAXPATHLEN);
-		if (0 == strcmp(cp, "cat"))
+ 		strlcat(file, cp, MAXPATHLEN);
+		if (catm) 
 			catman(req, file);
 		else
 			format(req, file);

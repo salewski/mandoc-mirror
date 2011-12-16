@@ -204,7 +204,7 @@ indexhtml(char *src, size_t ssz, char *dst, size_t dsz)
 	DBT		 key, val;
 	int		 c, rc;
 	unsigned int	 fl;
-	const char	*f, *cp;
+	const char	*f;
 	char		*d;
 	char		 fname[MAXPATHLEN];
 	pid_t		 pid;
@@ -223,14 +223,15 @@ indexhtml(char *src, size_t ssz, char *dst, size_t dsz)
 	fl = R_FIRST;
 	while (0 == (c = (*idx->seq)(idx, &key, &val, fl))) {
 		fl = R_NEXT;
-		cp = (const char *)val.data;
+		/*
+		 * If the record is zero-length, then it's unassigned.
+		 * Skip past these.
+		 */
 		if (0 == val.size)
 			continue;
-		if (NULL == (f = memchr(cp, '\0', val.size)))
-			break;
-		if (++f - cp >= (int)val.size)
-			break;
-		if (NULL == memchr(f, '\0', val.size - (f - cp)))
+
+		f = (const char *)val.data + 1;
+		if (NULL == memchr(f, '\0', val.size - 1))
 			break;
 
 		src[(int)ssz] = dst[(int)dsz] = '\0';
