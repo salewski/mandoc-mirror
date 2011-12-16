@@ -197,7 +197,7 @@ btree_read(const DBT *k, const DBT *v,
 static size_t
 norm_utf8(unsigned int cp, char out[7])
 {
-	size_t		 rc;
+	int		 rc;
 
 	rc = 0;
 
@@ -238,7 +238,7 @@ norm_utf8(unsigned int cp, char out[7])
 		return(0);
 
 	out[rc] = '\0';
-	return(rc);
+	return((size_t)rc);
 }
 
 /*

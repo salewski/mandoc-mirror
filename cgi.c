@@ -134,7 +134,7 @@ atou(const char *buf, unsigned *v)
 		return(0);
 	if ((errno == ERANGE && (lval == LONG_MAX || 
 					lval == LONG_MIN)) ||
-			(lval > UINT_MAX || lval < 0))
+			(lval > INT_MAX || lval < 0))
 		return(0);
 
 	*v = (unsigned int)lval;
