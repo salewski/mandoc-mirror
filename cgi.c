@@ -84,9 +84,13 @@ static	void		 catman(const struct req *, const char *);
 static	int	 	 cmp(const void *, const void *);
 static	void		 format(const struct req *, const char *);
 static	void		 html_print(const char *);
+static	void		 html_printquery(const struct req *);
 static	void		 html_putchar(char);
 static	int 		 http_decode(char *);
 static	void		 http_parse(struct req *, char *);
+static	void		 http_print(const char *);
+static	void 		 http_putchar(char);
+static	void		 http_printquery(const struct req *);
 static	int		 pathstop(DIR *);
 static	void		 pathgen(DIR *, char *, struct req *);
 static	void		 pg_index(const struct req *, char *);
@@ -163,6 +167,40 @@ html_putchar(char c)
 		break;
 	}
 }
+static void
+http_printquery(const struct req *req)
+{
+
+	printf("&expr=");
+	http_print(req->q.expr ? req->q.expr : "");
+	printf("&sec=");
+	http_print(req->q.sec ? req->q.sec : "");
+	printf("&arch=");
+	http_print(req->q.arch ? req->q.arch : "");
+}
+
+
+static void
+html_printquery(const struct req *req)
+{
+
+	printf("&amp;expr=");
+	html_print(req->q.expr ? req->q.expr : "");
+	printf("&amp;sec=");
+	html_print(req->q.sec ? req->q.sec : "");
+	printf("&amp;arch=");
+	html_print(req->q.arch ? req->q.arch : "");
+}
+
+static void
+http_print(const char *p)
+{
+
+	if (NULL == p)
+		return;
+	while ('\0' != *p)
+		http_putchar(*p++);
+}
 
 /*
  * Call through to html_putchar().
@@ -187,7 +225,6 @@ static void
 http_parse(struct req *req, char *p)
 {
 	char            *key, *val, *manroot;
-	size_t		 sz;
 	int		 i, legacy;
 
 	memset(&req->q, 0, sizeof(struct query));
@@ -196,42 +233,24 @@ http_parse(struct req *req, char *p)
 	legacy = -1;
 	manroot = NULL;
 
-	while (p && '\0' != *p) {
-		while (' ' == *p)
-			p++;
-
+	while ('\0' != *p) {
 		key = p;
 		val = NULL;
 
-		if (NULL != (p = strchr(p, '='))) {
+		p += (int)strcspn(p, ";&");
+		if ('\0' != *p)
 			*p++ = '\0';
-			val = p;
+		if (NULL != (val = strchr(key, '=')))
+			*val++ = '\0';
 
-			sz = strcspn(p, ";&");
-			/* LINTED */
-			p += sz;
-
-			if ('\0' != *p)
-				*p++ = '\0';
-		} else {
-			p = key;
-			sz = strcspn(p, ";&");
-			/* LINTED */
-			p += sz;
-
-			if ('\0' != *p)
-				p++;
-			continue;
-		}
-
-		if ('\0' == *key || '\0' == *val)
+		if ('\0' == *key || NULL == val || '\0' == *val)
 			continue;
 
 		/* Just abort handling. */
 
 		if ( ! http_decode(key))
 			break;
-		if ( ! http_decode(val))
+		if (NULL != val && ! http_decode(val))
 			break;
 
 		if (0 == strcmp(key, "expr"))
@@ -282,6 +301,20 @@ http_parse(struct req *req, char *p)
 				break;
 		req->q.manroot = i < (int)req->psz ? i : -1;
 	}
+}
+
+static void
+http_putchar(char c)
+{
+
+	if (isalnum((unsigned char)c)) {
+		putchar((unsigned char)c);
+		return;
+	} else if (' ' == c) {
+		putchar('+');
+		return;
+	}
+	printf("%%%.2x", c);
 }
 
 /*
@@ -478,17 +511,19 @@ resp_search(struct res *r, size_t sz, void *arg)
 
 	req = (const struct req *)arg;
 	assert(req->q.manroot >= 0);
-
+	
 	if (1 == sz) {
 		/*
 		 * If we have just one result, then jump there now
 		 * without any delay.
 		 */
 		puts("Status: 303 See Other");
-		printf("Location: http://%s%s/show/%d/%u/%u.html\n",
+		printf("Location: http://%s%s/show/%d/%u/%u.html?",
 				host, progname, req->q.manroot,
 				r[0].volume, r[0].rec);
-		puts("Content-Type: text/html; charset=utf-8\n");
+		http_printquery(req);
+		puts("\n"
+		     "Content-Type: text/html; charset=utf-8\n");
 		return;
 	}
 
@@ -504,13 +539,10 @@ resp_search(struct res *r, size_t sz, void *arg)
 		       "No %s results found.\n",
 		       req->q.whatis ? "whatis" : "apropos");
 		if (req->q.whatis) {
-			printf("(Try <A HREF=\"%s/search.html?"
-			       "op=apropos&amp;expr=", progname);
-			html_print(req->q.expr ? req->q.expr : "");
-			printf("&amp;sec=");
-			html_print(req->q.sec ? req->q.sec : "");
-			printf("&amp;arch=");
-			html_print(req->q.arch ? req->q.arch : "");
+			printf("(Try "
+			       "<A HREF=\"%s/search.html?op=apropos",
+			       progname);
+			html_printquery(req);
 			puts("\">apropos</A>?)");
 		}
 		puts("</P>");
@@ -524,9 +556,11 @@ resp_search(struct res *r, size_t sz, void *arg)
 	for (i = 0; i < (int)sz; i++) {
 		printf("<TR>\n"
 		       "<TD CLASS=\"title\">\n"
-		       "<A HREF=\"%s/show/%d/%u/%u.html\">", 
+		       "<A HREF=\"%s/show/%d/%u/%u.html?", 
 				progname, req->q.manroot,
 				r[i].volume, r[i].rec);
+		html_printquery(req);
+		printf("\">");
 		html_print(r[i].title);
 		putchar('(');
 		html_print(r[i].cat);
