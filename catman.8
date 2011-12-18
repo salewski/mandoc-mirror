@@ -23,6 +23,7 @@
 .Sh SYNOPSIS
 .Nm catman
 .Op Fl fv
+.Op Fl C Ar file
 .Op Fl M Ar manpath
 .Op Fl m Ar manpath
 .Op Fl o Ar path
@@ -37,6 +38,12 @@ Its arguments are as follows:
 Force an update to all files.
 .It Fl v
 Print each file being updated.
+.It Fl C Ar file
+Specify an alternative configuration
+.Ar file
+in
+.Xr man.conf 5
+format.
 .It Fl M Ar manpath
 Use the colon-separated path instead of the default list of paths
 searched for
@@ -44,7 +51,7 @@ searched for
 databases.
 Invalid paths, or paths without manual databases, are ignored.
 .It Fl m Ar manpath
-Append the colon-separated paths to the list of paths searched
+Prepend the colon-separated paths to the list of paths searched
 for
 .Xr mandocdb 8
 databases.
@@ -70,6 +77,15 @@ Cached manual pages are only updated if older than the master copy.
 If
 .Fl f
 is specified, all files are updated.
+.Sh ENVIRONMENT
+.Bl -tag -width Ds
+.It Ev MANPATH
+Colon-separated paths overriding the default list of paths searched for
+manual databases.
+Invalid paths, or paths without manual databases, are ignored.
+Overridden by
+.Fl M .
+.El
 .Sh EXIT STATUS
 .Ex -std
 .Sh SEE ALSO
