@@ -171,7 +171,7 @@ btree_read(const DBT *k, const DBT *v,
 		const struct mchars *mc, 
 		struct db_val *dbv, char **buf)
 {
-	const struct db_val *vp;
+	struct db_val	 raw_dbv;
 
 	/* Are our sizes sane? */
 	if (k->size < 2 || sizeof(struct db_val) != v->size)
@@ -181,10 +181,10 @@ btree_read(const DBT *k, const DBT *v,
 	if ('\0' != ((const char *)k->data)[(int)k->size - 1])
 		return(0);
 
-	vp = v->data;
 	norm_string((const char *)k->data, mc, buf);
-	dbv->rec = betoh32(vp->rec);
-	dbv->mask = betoh64(vp->mask);
+	memcpy(&raw_dbv, v->data, v->size);
+	dbv->rec = betoh32(raw_dbv.rec);
+	dbv->mask = betoh64(raw_dbv.mask);
 	return(1);
 }
 
@@ -380,7 +380,8 @@ index_read(const DBT *key, const DBT *val, int index,
 		return(0);
 
 	cp = val->data;
-	rec->res.rec = *(recno_t *)key->data;
+	assert(sizeof(recno_t) == key->size);
+	memcpy(&rec->res.rec, key->data, key->size);
 	rec->res.volume = index;
 
 	if ('d' == (type = *cp++))
