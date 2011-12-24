@@ -111,11 +111,22 @@ as follows:
 .Sh ENVIRONMENT
 .Bl -tag -width Ds
 .It Ev MANPATH
-Colon-separated paths overriding the default list of paths searched for
+Colon-separated paths modifying the default list of paths searched for
 manual databases.
 Invalid paths, or paths without manual databases, are ignored.
 Overridden by
 .Fl M .
+If
+.Ev MANPATH
+begins with a
+.Sq \&: ,
+it is appended to the default list;
+else if it ends with
+.Sq \&: ,
+it is prepended to the default list; else if it contains
+.Sq \&:: ,
+the default list is inserted between the colons.
+If none of these conditions are met, it overrides the default list.
 .El
 .Sh FILES
 .Bl -tag -width "/etc/man.conf" -compact
