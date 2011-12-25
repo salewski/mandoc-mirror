@@ -1538,7 +1538,7 @@ ofile_argbuild(int argc, char *argv[], struct of **of)
  * Recursively build up a list of files to parse.
  * We use this instead of ftw() and so on because I don't want global
  * variables hanging around.
- * This ignores the mandoc.db and mandoc.index files, but assumes that
+ * This ignores the whatis.db and whatis.index files, but assumes that
  * everything else is a manual.
  * Pass in a pointer to a NULL structure for the first invocation.
  */

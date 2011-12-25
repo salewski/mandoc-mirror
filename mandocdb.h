@@ -17,8 +17,8 @@
 #ifndef MANDOCDB_H
 #define MANDOCDB_H
 
-#define	MANDOC_DB	"mandoc.db"
-#define	MANDOC_IDX	"mandoc.index"
+#define	MANDOC_DB	"whatis.db"
+#define	MANDOC_IDX	"whatis.index"
 
 #define	TYPE_An		0x0000000000000001ULL
 #define	TYPE_Ar		0x0000000000000002ULL
