@@ -17,11 +17,6 @@
 #ifndef MANDOCDB_H
 #define MANDOCDB_H
 
-struct db_val {
-	uint64_t	mask;
-	uint32_t	rec;
-};
-
 #define	MANDOC_DB	"mandoc.db"
 #define	MANDOC_IDX	"mandoc.index"
 
