@@ -41,6 +41,7 @@
 #include "man.h"
 #include "main.h"
 #include "manpath.h"
+#include "mandocdb.h"
 
 #ifdef __linux__
 # include <db_185.h>
@@ -843,7 +844,8 @@ pg_show(const struct req *req, char *path)
 
 	sz = strlcpy(file, ps.paths[vol], MAXPATHLEN);
 	assert(sz < MAXPATHLEN);
-	strlcat(file, "/mandoc.index", MAXPATHLEN);
+	strlcat(file, "/", MAXPATHLEN);
+	strlcat(file, MANDOC_IDX, MAXPATHLEN);
 
 	/* Open the index recno(3) database. */
 

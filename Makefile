@@ -337,7 +337,7 @@ $(CGI_OBJS) $(CGI_LNS): main.h mdoc.h man.h out.h config.h mandoc.h apropos_db.h
 CATMAN_OBJS	 = catman.o manpath.o
 CATMAN_LNS 	 = catman.ln manpath.ln
 
-$(CATMAN_OBJS) $(CATMAN_LNS): config.h mandoc.h manpath.h 
+$(CATMAN_OBJS) $(CATMAN_LNS): config.h mandoc.h manpath.h mandocdb.h
 
 DEMANDOC_OBJS	 = demandoc.o
 DEMANDOC_LNS	 = demandoc.ln

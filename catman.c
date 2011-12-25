@@ -38,6 +38,7 @@
 #endif
 
 #include "manpath.h"
+#include "mandocdb.h"
 
 #define	xstrlcpy(_dst, _src, _sz) \
 	do if (strlcpy((_dst), (_src), (_sz)) >= (_sz)) { \
@@ -216,7 +217,8 @@ indexhtml(char *src, size_t ssz, char *dst, size_t dsz)
 	pid = -1;
 
 	xstrlcpy(fname, dst, MAXPATHLEN);
-	xstrlcat(fname, "/mandoc.index", MAXPATHLEN);
+	xstrlcat(fname, "/", MAXPATHLEN);
+	xstrlcat(fname, MANDOC_IDX, MAXPATHLEN);
 
 	idx = dbopen(fname, O_RDONLY, 0, DB_RECNO, NULL);
 	if (NULL == idx) {
@@ -292,8 +294,11 @@ update(char *dst, char *src)
 	dsz = strlen(dst);
 	ssz = strlen(src);
 
-	xstrlcat(src, "/mandoc.db", MAXPATHLEN);
-	xstrlcat(dst, "/mandoc.db", MAXPATHLEN);
+	xstrlcat(src, "/", MAXPATHLEN);
+	xstrlcat(dst, "/", MAXPATHLEN);
+
+	xstrlcat(src, MANDOC_DB, MAXPATHLEN);
+	xstrlcat(dst, MANDOC_DB, MAXPATHLEN);
 
 	if ( ! filecpy(dst, src))
 		return(-1);
@@ -302,8 +307,11 @@ update(char *dst, char *src)
 
 	dst[(int)dsz] = src[(int)ssz] = '\0';
 
-	xstrlcat(src, "/mandoc.index", MAXPATHLEN);
-	xstrlcat(dst, "/mandoc.index", MAXPATHLEN);
+	xstrlcat(src, "/", MAXPATHLEN);
+	xstrlcat(dst, "/", MAXPATHLEN);
+
+	xstrlcat(src, MANDOC_IDX, MAXPATHLEN);
+	xstrlcat(dst, MANDOC_IDX, MAXPATHLEN);
 
 	if ( ! filecpy(dst, src))
 		return(-1);
@@ -330,8 +338,11 @@ treecpy(char *dst, char *src)
 	dsz = strlen(dst);
 	ssz = strlen(src);
 
-	xstrlcat(src, "/mandoc.index", MAXPATHLEN);
-	xstrlcat(dst, "/mandoc.index", MAXPATHLEN);
+	xstrlcat(src, "/", MAXPATHLEN);
+	xstrlcat(dst, "/", MAXPATHLEN);
+
+	xstrlcat(src, MANDOC_IDX, MAXPATHLEN);
+	xstrlcat(dst, MANDOC_IDX, MAXPATHLEN);
 
 	if (-1 == (rc = isnewer(dst, src)))
 		return(0);
@@ -341,8 +352,11 @@ treecpy(char *dst, char *src)
 	if (1 == rc)
 		return(update(dst, src));
 
-	xstrlcat(src, "/mandoc.db", MAXPATHLEN);
-	xstrlcat(dst, "/mandoc.db", MAXPATHLEN);
+	xstrlcat(src, "/", MAXPATHLEN);
+	xstrlcat(dst, "/", MAXPATHLEN);
+
+	xstrlcat(src, MANDOC_DB, MAXPATHLEN);
+	xstrlcat(dst, MANDOC_DB, MAXPATHLEN);
 
 	if (-1 == (rc = isnewer(dst, src)))
 		return(0);
