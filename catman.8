@@ -32,6 +32,16 @@ The
 .Nm
 utility updates cached manpages for a jailed
 .Xr man.cgi 7 .
+.Pp
+By default,
+.Nm
+searches for
+.Xr mandocdb 8
+databases in the default paths stipulated by
+.Xr man 1
+and updates the cache in
+.Pa /var/www/cache/man.cgi .
+.Pp
 Its arguments are as follows:
 .Bl -tag -width Ds
 .It Fl f
@@ -61,22 +71,12 @@ Update into the directory tree under
 .Ar path .
 .El
 .Pp
-By default,
-.Nm
-searches for
+Cache updates occur when a
 .Xr mandocdb 8
-databases in the default paths stipulated by
-.Xr man 1
-and updates the cache in
-.Pa /var/www/cache/man.cgi .
-.Pp
-An update occurs when a
-.Xr mandocdb 8
-database is older than the cached copy.
-Cached manual pages are only updated if older than the master copy.
-If
+database is older than the cached copy unless
 .Fl f
-is specified, all files are updated.
+is specified, in which case files are always considered out of date.
+Cached manual pages are only updated if older than the master copy.
 .Sh ENVIRONMENT
 .Bl -tag -width Ds
 .It Ev MANPATH

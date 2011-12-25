@@ -33,6 +33,13 @@ and
 .Xr man 7
 .Ux
 manual files.
+.Pp
+By default,
+.Nm
+parses standard input and outputs only text nodes, preserving line
+and column position.
+Escape sequences are omitted from the output.
+.Pp
 Its arguments are as follows:
 .Bl -tag -width Ds
 .It Fl w
@@ -49,18 +56,7 @@ stripped.
 The input files.
 .El
 .Pp
-If
-.Ar file
-is not provided,
-.Nm
-accepts standard input.
 If a document is not well-formed, it is skipped.
-.Pp
-By default,
-.Nm
-parses its input and outputs only text nodes, preserving line column
-position.
-Escape sequences are omitted from the output.
 .Pp
 The
 .Fl i ,

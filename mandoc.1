@@ -34,6 +34,19 @@ The
 utility formats
 .Ux
 manual pages for display.
+.Pp
+By default,
+.Nm
+reads
+.Xr mdoc 7
+or
+.Xr man 7
+text from stdin, implying
+.Fl m Ns Cm andoc ,
+and produces
+.Fl T Ns Cm ascii
+output.
+.Pp
 The arguments are as follows:
 .Bl -tag -width Ds
 .It Fl m Ns Ar format
@@ -96,18 +109,6 @@ If multiple files are specified,
 .Nm
 will halt with the first failed parse.
 .El
-.Pp
-By default,
-.Nm
-reads
-.Xr mdoc 7
-or
-.Xr man 7
-text from stdin, implying
-.Fl m Ns Cm andoc ,
-and produces
-.Fl T Ns Cm ascii
-output.
 .Ss Input Formats
 The
 .Nm

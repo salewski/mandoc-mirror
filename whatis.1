@@ -41,6 +41,13 @@ You can then use the
 .Xr man 1
 command to get more information.
 .Pp
+By default,
+.Nm
+searches for
+.Xr mandocdb 8
+databases in the default paths stipulated by
+.Xr man 1 .
+.Pp
 The options are as follows:
 .Bl -tag -width Ds
 .It Fl C Ar file
@@ -72,12 +79,6 @@ See
 for a listing of manual sections.
 .El
 .Pp
-By default,
-.Nm
-searches for
-.Xr mandocdb 8
-databases in the default paths stipulated by
-.Xr man 1 .
 Results are sorted by manual title, with output formatted as
 .Pp
 .D1 title(sec) \- description
