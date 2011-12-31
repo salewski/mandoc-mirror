@@ -9,6 +9,5 @@ body > div.results		{ font-size: smaller; }
 				  border-radius: 1em;
 			  	  font-size: small; }
 #mancgi input[name=expr] 	{ width: 25%; }
-#mancgi td.title		{ padding-right: 1em; 
-			  	  text-align: right; }
-
+.results td.title		{ vertical-align: top;
+				  padding-right: 1em; }
