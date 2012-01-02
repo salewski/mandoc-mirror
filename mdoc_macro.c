@@ -228,7 +228,6 @@ mdoc_macroend(struct mdoc *m)
 static enum mdoct
 lookup(enum mdoct from, const char *p)
 {
-	/* FIXME: make -diag lists be un-PARSED. */
 
 	if ( ! (MDOC_PARSED & mdoc_macros[from].flags))
 		return(MDOC_MAX);
@@ -984,7 +983,7 @@ in_line(MACRO_PROT_ARGS)
 static int
 blk_full(MACRO_PROT_ARGS)
 {
-	int		  la, nl;
+	int		  la, nl, nparsed;
 	struct mdoc_arg	 *arg;
 	struct mdoc_node *head; /* save of head macro */
 	struct mdoc_node *body; /* save of body macro */
@@ -994,6 +993,16 @@ blk_full(MACRO_PROT_ARGS)
 	enum margserr	  ac, lac;
 	enum margverr	  av;
 	char		 *p;
+
+	/*
+	 * Exception: `-diag' lists are not parsed, but lists in general
+	 * are parsed.
+	 */
+	nparsed = 0;
+	if (MDOC_It == tok && NULL != m->last &&
+			MDOC_Bl == m->last->tok &&
+			LIST_diag == m->last->norm->Bl.type)
+		nparsed = 1;
 
 	nl = MDOC_NEWLINE & m->flags;
 
@@ -1146,7 +1155,8 @@ blk_full(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		ntok = ARGS_QWORD == ac ? MDOC_MAX : lookup(tok, p);
+		ntok = nparsed || ARGS_QWORD == ac ? 
+			MDOC_MAX : lookup(tok, p);
 
 		if (MDOC_MAX == ntok) {
 			if ( ! dword(m, line, la, p, DELIM_MAX))

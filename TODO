@@ -12,9 +12,6 @@
   and then triggers an unknown macro error
   reported by naddy@  Sun, 3 Jul 2011 21:52:24 +0200
 
-- .It is parsed in general, except in .Bl -diag
-  deraadt@  Mon, 07 Nov 2011 11:10:52 -0700
-
 ************************************************************************
 * formatter bugs
 ************************************************************************
