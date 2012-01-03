@@ -79,7 +79,7 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
-	aux = base = NULL;
+	aux = base = conf_file = NULL;
 	xstrlcpy(buf, "/var/www/cache/man.cgi", MAXPATHLEN);
 
 	while (-1 != (ch = getopt(argc, argv, "C:fm:M:o:v")))
