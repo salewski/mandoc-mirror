@@ -68,21 +68,22 @@ static	void		  print_man_foot(struct termp *, const void *);
 static	void		  print_bvspace(struct termp *, 
 				const struct man_node *);
 
-static	int		  pre_alternate(DECL_ARGS);
 static	int		  pre_B(DECL_ARGS);
 static	int		  pre_HP(DECL_ARGS);
 static	int		  pre_I(DECL_ARGS);
 static	int		  pre_IP(DECL_ARGS);
+static	int		  pre_OP(DECL_ARGS);
 static	int		  pre_PP(DECL_ARGS);
 static	int		  pre_RS(DECL_ARGS);
 static	int		  pre_SH(DECL_ARGS);
 static	int		  pre_SS(DECL_ARGS);
 static	int		  pre_TP(DECL_ARGS);
+static	int		  pre_alternate(DECL_ARGS);
+static	int		  pre_ft(DECL_ARGS);
 static	int		  pre_ign(DECL_ARGS);
 static	int		  pre_in(DECL_ARGS);
 static	int		  pre_literal(DECL_ARGS);
 static	int		  pre_sp(DECL_ARGS);
-static	int		  pre_ft(DECL_ARGS);
 
 static	void		  post_IP(DECL_ARGS);
 static	void		  post_HP(DECL_ARGS);
@@ -125,6 +126,7 @@ static	const struct termact termacts[MAN_MAX] = {
 	{ pre_ign, NULL, 0 }, /* AT */
 	{ pre_in, NULL, MAN_NOTEXT }, /* in */
 	{ pre_ft, NULL, MAN_NOTEXT }, /* ft */
+	{ pre_OP, NULL, 0 }, /* OP */
 };
 
 
@@ -320,6 +322,29 @@ pre_B(DECL_ARGS)
 
 	term_fontrepl(p, TERMFONT_BOLD);
 	return(1);
+}
+
+/* ARGSUSED */
+static int
+pre_OP(DECL_ARGS)
+{
+
+	term_word(p, "[");
+	p->flags |= TERMP_NOSPACE;
+
+	if (NULL != (n = n->child)) {
+		term_fontrepl(p, TERMFONT_BOLD);
+		term_word(p, n->string);
+	}
+	if (NULL != n && NULL != n->next) {
+		term_fontrepl(p, TERMFONT_UNDER);
+		term_word(p, n->next->string);
+	}
+
+	term_fontrepl(p, TERMFONT_NONE);
+	p->flags |= TERMP_NOSPACE;
+	term_word(p, "]");
+	return(0);
 }
 
 /* ARGSUSED */

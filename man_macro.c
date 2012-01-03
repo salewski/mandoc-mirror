@@ -84,6 +84,7 @@ const	struct man_macro __man_macros[MAN_MAX] = {
 	{ in_line_eoln, 0 }, /* AT */
 	{ in_line_eoln, 0 }, /* in */
 	{ in_line_eoln, 0 }, /* ft */
+	{ in_line_eoln, 0 }, /* OP */
 };
 
 const	struct man_macro * const man_macros = __man_macros;

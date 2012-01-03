@@ -45,6 +45,7 @@ struct	man_valid {
 };
 
 static	int	  check_eq0(CHKARGS);
+static	int	  check_eq2(CHKARGS);
 static	int	  check_le1(CHKARGS);
 static	int	  check_ge2(CHKARGS);
 static	int	  check_le5(CHKARGS);
@@ -66,6 +67,7 @@ static	int	  pre_sec(CHKARGS);
 static	v_check	  posts_at[] = { post_AT, NULL };
 static	v_check	  posts_br[] = { post_vs, check_eq0, NULL };
 static	v_check	  posts_eq0[] = { check_eq0, NULL };
+static	v_check	  posts_eq2[] = { check_eq2, NULL };
 static	v_check	  posts_fi[] = { check_eq0, post_fi, NULL };
 static	v_check	  posts_ft[] = { post_ft, NULL };
 static	v_check	  posts_nf[] = { check_eq0, post_nf, NULL };
@@ -99,8 +101,8 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, NULL }, /* I */
 	{ NULL, NULL }, /* IR */
 	{ NULL, NULL }, /* RI */
-	{ NULL, posts_eq0 }, /* na */ /* FIXME: should warn only. */
-	{ NULL, posts_sp }, /* sp */ /* FIXME: should warn only. */
+	{ NULL, posts_eq0 }, /* na */
+	{ NULL, posts_sp }, /* sp */
 	{ NULL, posts_nf }, /* nf */
 	{ NULL, posts_fi }, /* fi */
 	{ NULL, NULL }, /* RE */
@@ -111,6 +113,7 @@ static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, posts_at }, /* AT */
 	{ NULL, NULL }, /* in */
 	{ NULL, posts_ft }, /* ft */
+	{ NULL, posts_eq2 }, /* OP */
 };
 
 
@@ -232,6 +235,7 @@ check_##name(CHKARGS) \
 }
 
 INEQ_DEFINE(0, ==, eq0)
+INEQ_DEFINE(2, ==, eq2)
 INEQ_DEFINE(1, <=, le1)
 INEQ_DEFINE(2, >=, ge2)
 INEQ_DEFINE(5, <=, le5)

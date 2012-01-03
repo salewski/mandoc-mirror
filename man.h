@@ -51,6 +51,7 @@ enum	mant {
 	MAN_AT,
 	MAN_in,
 	MAN_ft,
+	MAN_OP,
 	MAN_MAX
 };
 

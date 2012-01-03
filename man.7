@@ -272,6 +272,10 @@ in the alphabetical reference below.
 .It Sx RB Ta alternate between roman and boldface fonts
 .It Sx RI Ta alternate between roman and italic fonts
 .El
+.Ss Semantic markup
+.Bl -column "PP, LP, P" description
+.It Sx OP Ta optional arguments
+.El
 .Sh MACRO REFERENCE
 This section is a canonical reference to all macros, arranged
 alphabetically.
@@ -437,6 +441,19 @@ See also
 .Sx \&PP ,
 and
 .Sx \&TP .
+.Ss \&OP
+Optional command-line argument.
+This has the following syntax:
+.Bd -filled -offset indent
+.Pf \. Sx \&OP
+.Cm key Op Cm value
+.Ed
+.Pp
+The
+.Cm key
+is usually a command-line flag and
+.Cm value
+its argument.
 .Ss \&P
 Synonym for
 .Sx \&LP .
@@ -691,6 +708,7 @@ The syntax is as follows:
 .It Sx \&I   Ta    n         Ta    next-line Ta    \&
 .It Sx \&IB  Ta    n         Ta    current   Ta    \&
 .It Sx \&IR  Ta    n         Ta    current   Ta    \&
+.It Sx \&OP  Ta    0, 1      Ta    current   Ta    compat
 .It Sx \&R   Ta    n         Ta    next-line Ta    \&
 .It Sx \&RB  Ta    n         Ta    current   Ta    \&
 .It Sx \&RI  Ta    n         Ta    current   Ta    \&
@@ -854,6 +872,12 @@ number when no
 is given, like in
 .Xr mdoc 7 .
 .El
+.Pp
+The
+.Sx OP
+macro is part of the extended
+.Nm
+macro set, and may not be portable to non-GNU troff implementations.
 .Sh SEE ALSO
 .Xr man 1 ,
 .Xr mandoc 1 ,
@@ -869,6 +893,9 @@ language first appeared as a macro package for the roff typesetting
 system in
 .At v7 .
 It was later rewritten by James Clark as a macro package for groff.
+Eric S. Raymond wrote the extended
+.Nm
+macros for groff in 2007.
 The stand-alone implementation that is part of the
 .Xr mandoc 1
 utility written by Kristaps Dzonsons appeared in
