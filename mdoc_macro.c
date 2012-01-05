@@ -994,16 +994,6 @@ blk_full(MACRO_PROT_ARGS)
 	enum margverr	  av;
 	char		 *p;
 
-	/*
-	 * Exception: `-diag' lists are not parsed, but lists in general
-	 * are parsed.
-	 */
-	nparsed = 0;
-	if (MDOC_It == tok && NULL != m->last &&
-			MDOC_Bl == m->last->tok &&
-			LIST_diag == m->last->norm->Bl.type)
-		nparsed = 1;
-
 	nl = MDOC_NEWLINE & m->flags;
 
 	/* Close out prior implicit scope. */
@@ -1046,6 +1036,14 @@ blk_full(MACRO_PROT_ARGS)
 		return(0);
 
 	head = body = NULL;
+
+	/*
+	 * Exception: Heads of `It' macros in `-diag' lists are not
+	 * parsed, even though `It' macros in general are parsed.
+	 */
+	nparsed = MDOC_It == tok &&
+		MDOC_Bl == m->last->parent->tok &&
+		LIST_diag == m->last->parent->norm->Bl.type;
 
 	/*
 	 * The `Nd' macro has all arguments in its body: it's a hybrid
