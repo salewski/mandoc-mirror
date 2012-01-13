@@ -234,7 +234,9 @@ messages emitted by the parser.
 .It Fn mandoc_escape
 Scan an escape sequence, i.e., a character string beginning with
 .Sq \e .
-Pass a pointer to this string as
+Pass a pointer to the character after the
+.Sq \e
+as
 .Va end ;
 it will be set to the supremum of the parsed escape sequence unless
 returning
