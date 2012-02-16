@@ -418,6 +418,8 @@ struct mparse	 *mparse_alloc(enum mparset,
 void		  mparse_free(struct mparse *);
 void		  mparse_keep(struct mparse *);
 enum mandoclevel  mparse_readfd(struct mparse *, int, const char *);
+enum mandoclevel  mparse_readmem(struct mparse *, const void *, size_t,
+			const char *);
 void		  mparse_reset(struct mparse *);
 void		  mparse_result(struct mparse *, 
 			struct mdoc **, struct man **);
