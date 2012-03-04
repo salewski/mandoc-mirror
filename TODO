@@ -240,6 +240,7 @@
 - .Pp between two .It in .Bl -column should produce one,
   not two blank lines, see e.g. login.conf(5).
   reported by jmc@  Sun, 17 Apr 2011 14:04:58 +0059
+  reported again by sthen@  Wed, 18 Jan 2012 02:09:39 +0000 (UTC)
 
 - If the *first* line after .It is .Pp, break the line right after
   the tag, do not pad with space characters before breaking.
@@ -262,6 +263,8 @@
     .Bl -tag -width ".Dv message"
   in magic(5), located in src/usr.bin/file, is the same
   as -width 7n, not -width 11n.
+  The same applies to .Bl -column column widths;
+  reported again by Nicolas Joly Thu, 1 Mar 2012 13:41:26 +0100 via wiz@ 5 Mar
 
 - The \& zero-width character counts as output.
   That is, when it is alone on a line between two .Pp,
