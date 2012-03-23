@@ -453,12 +453,16 @@ clean:
 	rm -f config.h config.log $(COMPAT_OBJS) $(COMPAT_LNS)
 	rm -f mdocml.tar.gz mdocml-win32.zip mdocml-win64.zip mdocml-macosx.zip
 	rm -f index.html $(INDEX_OBJS)
-	rm -rf test-fgetln.DSYM
-	rm -rf test-strlcpy.DSYM
-	rm -rf test-strlcat.DSYM 
-	rm -rf test-strptime.DSYM 
-	rm -rf test-mmap.DSYM 
-	rm -rf test-getsubopt.DSYM
+	rm -rf test-fgetln.dSYM
+	rm -rf test-strlcpy.dSYM
+	rm -rf test-strlcat.dSYM 
+	rm -rf test-strptime.dSYM 
+	rm -rf test-mmap.dSYM 
+	rm -rf test-getsubopt.dSYM
+	rm -rf apropos.dSYM
+	rm -rf catman.dSYM
+	rm -rf mandocdb.dSYM
+	rm -rf whatis.dSYM
 
 install: all
 	mkdir -p $(DESTDIR)$(BINDIR)
