@@ -153,6 +153,7 @@ btree_open(void)
 	DB		*db;
 
 	memset(&info, 0, sizeof(BTREEINFO));
+	info.lorder = 4321;
 	info.flags = R_DUP;
 
 	db = dbopen(MANDOC_DB, O_RDONLY, 0, DB_BTREE, &info);
