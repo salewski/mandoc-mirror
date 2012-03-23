@@ -547,7 +547,7 @@ out:
 
 usage:
 	fprintf(stderr,
-		"usage: %s [-avvv] [-C file] | dir ... | -t file ...\n"
+		"usage: %s [-av] [-C file] | dir ... | -t file ...\n"
 		"                        -d dir [file ...] | "
 		"-u dir [file ...]\n",
 		progname);
@@ -822,9 +822,9 @@ index_merge(const struct of *of, struct mparse *mp,
 		while (0 == (*files->seq)(files, &key, &val, seq)) {
 			seq = R_NEXT;
 			if (val.size)
-				fprintf(stderr, "%s: probably "
-				    "unreachable, title is %s\n",
-				    (char *)val.data, (char *)key.data);
+				WARNING((char *)val.data, basedir, 
+					"Probably unreachable, title "
+					"is %s", (char *)key.data);
 		}
 		(*files->close)(files);
 	}
@@ -1323,8 +1323,8 @@ static int
 pman_node(MAN_ARGS)
 {
 	const struct man_node *head, *body;
-	const char	*start, *sv;
-	size_t		 sz;
+	char		*start, *sv, *title;
+	size_t		 sz, titlesz;
 
 	if (NULL == n)
 		return(0);
@@ -1347,8 +1347,54 @@ pman_node(MAN_ARGS)
 				NULL != (body = body->child) &&
 				MAN_TEXT == body->type) {
 
-			assert(body->string);
-			start = sv = body->string;
+			title = NULL;
+			titlesz = 0;
+			/*
+			 * Suck the entire NAME section into memory.
+			 * Yes, we might run away.
+			 * But too many manuals have big, spread-out
+			 * NAME sections over many lines.
+			 */
+			for ( ; NULL != body; body = body->next) {
+				if (MAN_TEXT != body->type)
+					break;
+				if (0 == (sz = strlen(body->string)))
+					continue;
+				title = mandoc_realloc
+					(title, titlesz + sz + 1);
+				memcpy(title + titlesz, body->string, sz);
+				titlesz += sz + 1;
+				title[(int)titlesz - 1] = ' ';
+			}
+			if (NULL == title)
+				return(0);
+
+			title = mandoc_realloc(title, titlesz + 1);
+			title[(int)titlesz] = '\0';
+
+			/* Skip leading space.  */
+
+			sv = title;
+			while (isspace((unsigned char)*sv))
+				sv++;
+
+			if (0 == (sz = strlen(sv))) {
+				free(title);
+				return(0);
+			}
+
+			/* Erase trailing space. */
+
+			start = &sv[sz - 1];
+			while (start > sv && isspace((unsigned char)*start))
+				*start-- = '\0';
+
+			if (start == sv) {
+				free(title);
+				return(0);
+			}
+
+			start = sv;
 
 			/* 
 			 * Go through a special heuristic dance here.
@@ -1386,10 +1432,11 @@ pman_node(MAN_ARGS)
 
 			if (sv == start) {
 				buf_append(buf, start);
+				free(title);
 				return(1);
 			}
 
-			while (' ' == *start)
+			while (isspace((unsigned char)*start))
 				start++;
 
 			if (0 == strncmp(start, "-", 1))
@@ -1411,6 +1458,7 @@ pman_node(MAN_ARGS)
 			buf_appendb(buf, start, sz);
 
 			hash_put(hash, buf, TYPE_Nd);
+			free(title);
 		}
 	}
 
