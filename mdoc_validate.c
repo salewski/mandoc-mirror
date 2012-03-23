@@ -661,8 +661,13 @@ pre_bl(PRE_ARGS)
 			comp = 1;
 			break;
 		case (MDOC_Width):
-			dup = (NULL != n->norm->Bl.width);
-			width = n->args->argv[i].value[0];
+			/* NB: this can be empty! */
+			if (n->args->argv[i].sz) {
+				width = n->args->argv[i].value[0];
+				dup = (NULL != n->norm->Bl.width);
+				break;
+			}
+			mdoc_nmsg(mdoc, n, MANDOCERR_IGNARGV);
 			break;
 		case (MDOC_Offset):
 			/* NB: this can be empty! */

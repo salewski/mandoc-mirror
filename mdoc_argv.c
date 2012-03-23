@@ -81,7 +81,7 @@ static	const enum argvflag argvflags[MDOC_ARG_MAX] = {
 	ARGV_NONE,	/* MDOC_Ohang */
 	ARGV_NONE,	/* MDOC_Inset */
 	ARGV_MULTI,	/* MDOC_Column */
-	ARGV_SINGLE,	/* MDOC_Width */
+	ARGV_OPT_SINGLE, /* MDOC_Width */
 	ARGV_NONE,	/* MDOC_Compact */
 	ARGV_NONE,	/* MDOC_Std */
 	ARGV_NONE,	/* MDOC_Filled */
