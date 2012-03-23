@@ -468,7 +468,6 @@ install: all
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
-	mkdir -p $(DESTDIR)$(MANDIR)/man8
 	$(INSTALL_PROGRAM) mandoc preconv demandoc $(DESTDIR)$(BINDIR)
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
 	$(INSTALL_LIB) man.h mdoc.h mandoc.h $(DESTDIR)$(INCLUDEDIR)
