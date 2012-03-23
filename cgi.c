@@ -69,7 +69,6 @@ struct	query {
 	const char	*sec; /* manual section */
 	const char	*expr; /* unparsed expression string */
 	int		 manroot; /* manroot index (or -1)*/
-	int		 whatis; /* whether whatis mode */
 	int		 legacy; /* whether legacy mode */
 };
 
@@ -230,7 +229,6 @@ http_parse(struct req *req, char *p)
 
 	memset(&req->q, 0, sizeof(struct query));
 
-	req->q.whatis = 1;
 	legacy = -1;
 	manroot = NULL;
 
@@ -268,19 +266,11 @@ http_parse(struct req *req, char *p)
 			manroot = val;
 		else if (0 == strcmp(key, "apropos"))
 			legacy = 0 == strcmp(val, "0");
-		else if (0 == strcmp(key, "op"))
-			req->q.whatis = 0 == strcasecmp(val, "whatis");
 	}
 
 	/* Test for old man.cgi compatibility mode. */
 
-	if (legacy == 0) {
-		req->q.whatis = 0;
-		req->q.legacy = 1;
-	} else if (legacy > 0) {
-		req->q.legacy = 1;
-		req->q.whatis = 1;
-	}
+	req->q.legacy = legacy > 0;
 
 	/* 
 	 * Section "0" means no section when in legacy mode.
@@ -408,10 +398,8 @@ resp_searchform(const struct req *req)
 	       "<FORM ACTION=\"%s/search.html\" METHOD=\"get\">\n"
 	       "<FIELDSET>\n"
 	       "<LEGEND>Search Parameters</LEGEND>\n"
-	       "<INPUT TYPE=\"submit\" NAME=\"op\""
-	       " VALUE=\"Whatis\"> or \n"
-	       "<INPUT TYPE=\"submit\" NAME=\"op\""
-	       " VALUE=\"apropos\"> for manuals satisfying \n"
+	       "<INPUT TYPE=\"submit\" "
+	       " VALUE=\"Search\"> for manuals satisfying \n"
 	       "<INPUT TYPE=\"text\" NAME=\"expr\" VALUE=\"",
 	       progname);
 	html_print(req->q.expr ? req->q.expr : "");
@@ -538,18 +526,10 @@ resp_search(struct res *r, size_t sz, void *arg)
 	puts("<DIV CLASS=\"results\">");
 
 	if (0 == sz) {
-		printf("<P>\n"
-		       "No %s results found.\n",
-		       req->q.whatis ? "whatis" : "apropos");
-		if (req->q.whatis) {
-			printf("(Try "
-			       "<A HREF=\"%s/search.html?op=apropos",
-			       progname);
-			html_printquery(req);
-			puts("\">apropos</A>?)");
-		}
-		puts("</P>");
-		puts("</DIV>");
+		puts("<P>\n"
+		     "No results found.\n"
+		     "</P>\n"
+		     "</DIV>");
 		resp_end_html();
 		return;
 	}
@@ -953,7 +933,7 @@ pg_search(const struct req *req, char *path)
 	 * The resp_search() function is called with the results.
 	 */
 
-	expr = req->q.whatis ? 
+	expr = req->q.legacy ? 
 		termcomp(sz, cp, &tt) : exprcomp(sz, cp, &tt);
 
 	if (NULL != expr)
