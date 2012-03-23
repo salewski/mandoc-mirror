@@ -122,12 +122,13 @@ out:
 static void
 list(struct res *res, size_t sz, void *arg)
 {
-	int		 i;
+	size_t		 i;
 
 	qsort(res, sz, sizeof(struct res), cmp);
 
-	for (i = 0; i < (int)sz; i++)
-		printf("%s(%s%s%s) - %.70s\n", res[i].title,
+	for (i = 0; i < sz; i++)
+		printf("%s(%s%s%s) - %.70s\n", 
+				res[i].title,
 				res[i].cat,
 				*res[i].arch ? "/" : "",
 				*res[i].arch ? res[i].arch : "",
