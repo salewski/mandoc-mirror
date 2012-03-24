@@ -80,35 +80,37 @@
 				<TR>
 					<TD>DragonFly BSD</TD>
 					<TD>
-					<A HREF="http://gitweb.dragonflybsd.org/dragonfly.git/tree/HEAD:/usr.bin/mandoc"
-						CLASS="external">usr.bin/mandoc</A>
+					<A HREF="http://gitweb.dragonflybsd.org/dragonfly.git/tree/HEAD:/usr.bin/mandoc" CLASS="external">usr.bin/mandoc</A>
 					</TD>
 				</TR>
 				<TR>
 					<TD>FreeBSD</TD>
 					<TD>
-					<A HREF="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/" 
-						CLASS="external">ports/textproc/mdocml</A>
+					<A HREF="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/" CLASS="external">ports/textproc/mdocml</A>
 					</TD>
 				</TR>
 				<TR>
 					<TD>NetBSD</TD>
 					<TD>
-					<A HREF="http://cvsweb.netbsd.org/bsdweb.cgi/src/external/bsd/mdocml/"
-						CLASS="external">src/external/bsd/mdocml</A>
+					<A HREF="http://cvsweb.netbsd.org/bsdweb.cgi/src/external/bsd/mdocml/" CLASS="external">src/external/bsd/mdocml</A>
 					</TD>
 				</TR>
 				<TR>
 					<TD>OpenBSD</TD>
 					<TD>
-					<A HREF="http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/mandoc/"
-						CLASS="external">src/usr.bin/mandoc</A> 
+					<A HREF="http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/mandoc/" CLASS="external">src/usr.bin/mandoc</A> 
 					</TD>
 				</TR>
 				<TR>
 					<TD>pkgsrc</TD>
 					<TD>
 					<A HREF="http://pkgsrc.se/textproc/mdocml" CLASS="external">textproc/mdocml</A> 
+					</TD>
+				</TR>
+				<TR>
+					<TD>Minix3</TD>
+					<TD>
+					<A HREF="http://git.minix3.org/?p=minix.git;a=tree;f=external/bsd/mdocml" CLASS="external">external/bsd/mdocml</A>
 					</TD>
 				</TR>
 			</TBODY>
