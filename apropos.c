@@ -18,6 +18,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <sys/param.h>
 
 #include <assert.h>
 #include <getopt.h>
@@ -39,8 +40,9 @@ int
 main(int argc, char *argv[])
 {
 	int		 ch, rc, whatis;
+	struct res	*res;
 	struct manpaths	 paths;
-	size_t		 terms;
+	size_t		 terms, ressz;
 	struct opts	 opts;
 	struct expr	*e;
 	char		*defpaths, *auxpaths;
@@ -59,6 +61,8 @@ main(int argc, char *argv[])
 	memset(&paths, 0, sizeof(struct manpaths));
 	memset(&opts, 0, sizeof(struct opts));
 
+	ressz = 0;
+	res = NULL;
 	auxpaths = defpaths = NULL;
 	conf_file = NULL;
 	e = NULL;
@@ -104,17 +108,17 @@ main(int argc, char *argv[])
 	}
 
 	rc = apropos_search
-		(paths.sz, paths.paths,
-		 &opts, e, terms, NULL, list);
+		(paths.sz, paths.paths, &opts, 
+		 e, terms, NULL, &ressz, &res, list);
 
-	if (0 == rc)
-		fprintf(stderr, "%s: Error reading "
-				"manual database\n", progname);
-
+	if (0 == rc) {
+		fprintf(stderr, "%s: Bad database\n", progname);
+		goto out;
+	}
 out:
 	manpath_free(&paths);
+	resfree(res, ressz);
 	exprfree(e);
-
 	return(rc ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
@@ -126,13 +130,16 @@ list(struct res *res, size_t sz, void *arg)
 
 	qsort(res, sz, sizeof(struct res), cmp);
 
-	for (i = 0; i < sz; i++)
+	for (i = 0; i < sz; i++) {
+		if ( ! res[i].matched)
+			continue;
 		printf("%s(%s%s%s) - %.70s\n", 
 				res[i].title,
 				res[i].cat,
 				*res[i].arch ? "/" : "",
 				*res[i].arch ? res[i].arch : "",
 				res[i].desc);
+	}
 }
 
 static int

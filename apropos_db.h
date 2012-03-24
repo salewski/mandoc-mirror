@@ -36,6 +36,18 @@ struct	res {
 	 * searched for manual page databases.
 	 */
 	unsigned int	 volume;
+	/*
+	 * The following fields are used internally.
+	 *
+	 * Maintain a binary tree for checking the uniqueness of `rec'
+	 * when adding elements to the results array.
+	 * Since the results array is dynamic, use offset in the array
+	 * instead of a pointer to the structure.
+	 */
+	int		 lhs;
+	int		 rhs;
+	int		 matched; /* expression is true */
+	int		*matches; /* partial truth evaluations */
 };
 
 struct	opts {
@@ -47,11 +59,13 @@ __BEGIN_DECLS
 
 struct	expr;
 
-int	 	 apropos_search(int, char **, const struct opts *,
-			const struct expr *, size_t, void *,
+int		 apropos_search(int, char **, const struct opts *,
+			const struct expr *, size_t, 
+			void *, size_t *, struct res **,
 			void (*)(struct res *, size_t, void *));
 struct	expr	*exprcomp(int, char *[], size_t *);
 void		 exprfree(struct expr *);
+void	 	 resfree(struct res *, size_t);
 struct	expr	*termcomp(int, char *[], size_t *);
 
 __END_DECLS

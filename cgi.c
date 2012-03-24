@@ -495,15 +495,22 @@ resp_baddb(void)
 static void
 resp_search(struct res *r, size_t sz, void *arg)
 {
-	int		  i;
+	size_t		 i, matched;
 	const struct req *req;
 
 	req = (const struct req *)arg;
 
 	if (sz > 0)
 		assert(req->q.manroot >= 0);
+
+	for (matched = i = 0; i < sz; i++)
+		if (r[i].matched)
+			matched++;
 	
-	if (1 == sz) {
+	if (1 == matched) {
+		for (i = 0; i < sz; i++)
+			if (r[i].matched)
+				break;
 		/*
 		 * If we have just one result, then jump there now
 		 * without any delay.
@@ -511,21 +518,19 @@ resp_search(struct res *r, size_t sz, void *arg)
 		puts("Status: 303 See Other");
 		printf("Location: http://%s%s/show/%d/%u/%u.html?",
 				host, progname, req->q.manroot,
-				r[0].volume, r[0].rec);
+				r[i].volume, r[i].rec);
 		http_printquery(req);
 		puts("\n"
 		     "Content-Type: text/html; charset=utf-8\n");
 		return;
 	}
 
-	qsort(r, sz, sizeof(struct res), cmp);
-
 	resp_begin_html(200, NULL);
 	resp_searchform(req);
 
 	puts("<DIV CLASS=\"results\">");
 
-	if (0 == sz) {
+	if (0 == matched) {
 		puts("<P>\n"
 		     "No results found.\n"
 		     "</P>\n"
@@ -534,9 +539,13 @@ resp_search(struct res *r, size_t sz, void *arg)
 		return;
 	}
 
+	qsort(r, sz, sizeof(struct res), cmp);
+
 	puts("<TABLE>");
 
-	for (i = 0; i < (int)sz; i++) {
+	for (i = 0; i < sz; i++) {
+		if ( ! r[i].matched)
+			continue;
 		printf("<TR>\n"
 		       "<TD CLASS=\"title\">\n"
 		       "<A HREF=\"%s/show/%d/%u/%u.html?", 
@@ -870,10 +879,11 @@ out:
 static void
 pg_search(const struct req *req, char *path)
 {
-	size_t		  tt;
+	size_t		  tt, ressz;
 	struct manpaths	  ps;
 	int		  i, sz, rc;
 	const char	 *ep, *start;
+	struct res	*res;
 	char		**cp;
 	struct opts	  opt;
 	struct expr	 *expr;
@@ -891,6 +901,8 @@ pg_search(const struct req *req, char *path)
 	rc 	 = -1;
 	sz 	 = 0;
 	cp	 = NULL;
+	ressz	 = 0;
+	res	 = NULL;
 
 	/*
 	 * Begin by chdir()ing into the root of the manpath.
@@ -938,20 +950,21 @@ pg_search(const struct req *req, char *path)
 
 	if (NULL != expr)
 		rc = apropos_search
-			(ps.sz, ps.paths, &opt,
-			 expr, tt, (void *)req, resp_search);
+			(ps.sz, ps.paths, &opt, expr, tt, 
+			 (void *)req, &ressz, &res, resp_search);
 
 	/* ...unless errors occured. */
 
 	if (0 == rc)
 		resp_baddb();
 	else if (-1 == rc)
-		resp_search(NULL, 0, (void *)req);
+		resp_search(NULL, 0, NULL);
 
 	for (i = 0; i < sz; i++)
 		free(cp[i]);
 
 	free(cp);
+	resfree(res, ressz);
 	exprfree(expr);
 	manpath_free(&ps);
 }
