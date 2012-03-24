@@ -143,6 +143,7 @@ main(int argc, char *argv[])
 	}
 
 	if (--terms < ressz && res[terms].matched) {
+		chdir(paths.paths[res[terms].volume]);
 		strlcpy(path, res[terms].file, PATH_MAX);
 		usecat = RESTYPE_CAT == res[terms].type;
 	}
