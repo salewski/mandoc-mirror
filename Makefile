@@ -12,8 +12,8 @@
 #
 # CFLAGS	+= -DOSNAME="\"OpenBSD 4.5\""
 
-VERSION		 = 1.12.0
-VDATE		 = 8 October 2011
+VERSION		 = 1.12.1
+VDATE		 = 23 March 2012
 
 # IFF your system supports multi-byte functions (setlocale(), wcwidth(),
 # putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a
@@ -142,7 +142,6 @@ SRCS		 = Makefile \
 		   preconv.c \
 		   predefs.in \
 		   read.c \
-		   regress \
 		   roff.7 \
 		   roff.c \
 		   st.c \

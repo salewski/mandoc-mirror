@@ -13,12 +13,6 @@
 			Sources: <A HREF="/snapshots/mdocml.tar.gz">current</A>,
 			<A HREF="/cgi-bin/cvsweb/?cvsroot=mdocml">cvsweb</A>
 			(<A HREF="/snapshots/">archives</A>)
-			|
-			Binaries: <A
-			HREF="/binaries/mdocml-win32.zip">windows 32-bit</A>, <A
-			HREF="/binaries/mdocml-win64.zip">windows 64-bit</A>, <A
-			HREF="/binaries/mdocml-macosx.zip">mac os x</A>
-			(<A HREF="/binaries/">archives</A>)
 		</P>
 		<H1>
 			<A NAME="description">Description</A>
@@ -330,13 +324,14 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
-			xx-xx-2011: version 1.12.1
+			23-03-2011: version 1.12.1
 		</P>
 		<P>
 			Significant work on <A HREF="apropos.1.html">apropos</A> and <A HREF="mandocdb.8.html">mandocdb</A>.  These tools are
-			now much more robust and in line with other manpage systems.  A <A HREF="whatis.1.html">whatis</A> implementation is now
-			handled as an <A HREF="apropos.1.html">apropos</A> mode.  These tools are also able to minimally handle pre-formatted
-			pages, that is, those already formatted by another utility such as GNU troff.
+			now much more robust.  
+			A <A HREF="whatis.1.html">whatis</A> implementation is now handled as an <A HREF="apropos.1.html">apropos</A> mode.
+			These tools are also able to minimally handle pre-formatted pages, that is, those already formatted by another utility
+			such as GNU troff.
 		</P>
 		<P>
 			The <A HREF="man.cgi.7.html">man.cgi</A> script is also now available for wider testing.  It interfaces with <A
@@ -344,39 +339,13 @@
 			on-the-fly by <A HREF="mandoc.3.html">libmandoc</A> or internal methods to convert pre-formatted pages.
 		</P>
 		<P>
-			Lastly, the mailing list archive for the discuss and tech lists are being hosted by <A CLASS="external"
+			The mailing list archive for the discuss and tech lists are being hosted by <A CLASS="external"
 			HREF="http://www.gmane.org">Gmane</A> at <A HREF="http://dir.gmane.org/gmane.comp.tools.mdocml.user"
 			CLASS="external">gmane.comp.tools.mdocml.user</A> and <A HREF="http://dir.gmane.org/gmane.comp.tools.mdocml.devel"
 			CLASS="external">gmane.comp.tools.mdocml.devel</A>, respectively.
 		</P>
-		<P CLASS="news">
-			08-10-2011: version 1.12.0
-		</P>
 		<P>
-			This version features a new, work-in-progress <A HREF="mandoc.1.html">mandoc</A> output mode: -<B>Tman</B>.  This mode
-			allows a system maintainer to distribute <A HREF="man.7.html">man</A> media for older systems that may not natively
-			support <A HREF="mdoc.7.html">mdoc</A>, such as old Solaris systems.
-			The -<B>Ofragment</B> option was added to <A HREF="mandoc.1.html">mandoc</A>'s -<B>Thtml</B> and -<B>Txhtml</B> modes.
-		</P>
-		<P>
-			While adding features, an <A HREF="apropos.1.html">apropos</A> utility has been merged from the mandoc-tools sandbox.
-			This interfaces with <A HREF="mandocdb.8.html">mandocdb</A> for semantic search of manual content.  <A
-			HREF="apropos.1.html">apropos</A> is different from the traditional <B>apropos</B> primarily in allowing keyword search
-			(such as for functions, utilities, etc.) and regular expressions.
-			Note that the calling syntax for <B>apropos</B> is likely to change as it settles down.
-		</P>
-		<P>
-			In documentation news, the <A HREF="mdoc.7.html">mdoc</A> and <A HREF="man.7.html">man</A> manuals have been made
-			considerably more readable by adding <I>MACRO OVERVIEW</I> sections, by moving the gory details of the <I>LANGUAGE
-			SYNTAX</I> to the <A HREF="roff.7.html">roff</A> manual, and by moving the very technical <I>MACRO SYNTAX</I> sections
-			down to the bottom of the page.
-		</P>
-		<P>
-			Furthermore, for <A HREF="tbl.7.html">tbl</A>, the -<B>Tascii</B> mode horizontal spacing of tables was rewritten
-			completely.  It is now compatible with <A HREF="http://www.gnu.org/software/groff/" CLASS="external">groff</A>, both
-			with and without frames and rulers.  Nesting of indented blocks is now supported in <A HREF="man.7.html">man</A>, and
-			several bugs were fixed regarding indentation and alignment.  The page headers in <A HREF="mdoc.7.html">mdoc</A> are now
-			nicer for very long titles.
+			Lastly, I'm no longer providing binaries, as nobody has asked for them.
 		</P>
 		<P>
 			See <A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/index.sgml?cvsroot=mdocml">cvsweb</A> for
