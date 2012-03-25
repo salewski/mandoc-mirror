@@ -56,15 +56,6 @@
 			usually taken by existing utilities.
 		</P>
 		<H2>
-			<A NAME="binaries">Binaries</A>
-		</H2>
-		<P>
-			Binary archives consist of pre-compiled binaries, manuals, and other necessary files.
-			Universal (Mac OS X) binaries are compiled for the PCC, i386, and x86_64 architectures.
-			Windows binaries are compiled with <A CLASS="external" HREF="http://www.mingw.org">MingW</A> for the 32-bit (i686) and
-			64-bit (x86_64) architectures.
-		</P>
-		<H2>
 			Downstream
 		</H2>
 		<P>

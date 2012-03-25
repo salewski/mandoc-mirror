@@ -19,6 +19,8 @@
 #include "config.h"
 #endif
 
+#include <sys/param.h>
+
 #include <assert.h>
 #include <fcntl.h>
 #include <regex.h>
@@ -426,6 +428,7 @@ apropos_search(int pathsz, char **paths, const struct opts *opts,
 	 */
 
 	for (i = 0; i < pathsz; i++) {
+		assert('/' == paths[i][0]);
 		if (chdir(paths[i]))
 			continue;
 		if (single_search(&tree, opts, expr, terms, mc, i))
