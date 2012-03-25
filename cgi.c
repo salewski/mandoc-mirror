@@ -743,7 +743,7 @@ format(const struct req *req, const char *file)
 	}
 
 	snprintf(opts, sizeof(opts), "fragment,"
-			"man=%s/search.html?sec=%%S&expr=%%N,"
+			"man=%s/search.html?sec=%%S&expr=Nm~^%%N$,"
 			/*"includes=/cgi-bin/man.cgi/usr/include/%%I"*/,
 			progname);
 
