@@ -42,8 +42,7 @@ enum	argsflag {
 enum	argvflag {
 	ARGV_NONE, /* no args to flag (e.g., -split) */
 	ARGV_SINGLE, /* one arg to flag (e.g., -file xxx)  */
-	ARGV_MULTI, /* multiple args (e.g., -column xxx yyy) */
-	ARGV_OPT_SINGLE /* optional arg (e.g., -offset [xxx]) */
+	ARGV_MULTI /* multiple args (e.g., -column xxx yyy) */
 };
 
 struct	mdocarg {
@@ -57,8 +56,6 @@ static	enum margserr	 args(struct mdoc *, int, int *,
 static	int		 args_checkpunct(const char *, int);
 static	int		 argv_multi(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
-static	int		 argv_opt_single(struct mdoc *, int, 
-				struct mdoc_argv *, int *, char *);
 static	int		 argv_single(struct mdoc *, int, 
 				struct mdoc_argv *, int *, char *);
 
@@ -69,7 +66,7 @@ static	const enum argvflag argvflags[MDOC_ARG_MAX] = {
 	ARGV_NONE,	/* MDOC_Unfilled */
 	ARGV_NONE,	/* MDOC_Literal */
 	ARGV_SINGLE,	/* MDOC_File */
-	ARGV_OPT_SINGLE, /* MDOC_Offset */
+	ARGV_SINGLE,	/* MDOC_Offset */
 	ARGV_NONE,	/* MDOC_Bullet */
 	ARGV_NONE,	/* MDOC_Dash */
 	ARGV_NONE,	/* MDOC_Hyphen */
@@ -81,7 +78,7 @@ static	const enum argvflag argvflags[MDOC_ARG_MAX] = {
 	ARGV_NONE,	/* MDOC_Ohang */
 	ARGV_NONE,	/* MDOC_Inset */
 	ARGV_MULTI,	/* MDOC_Column */
-	ARGV_OPT_SINGLE, /* MDOC_Width */
+	ARGV_SINGLE,	/* MDOC_Width */
 	ARGV_NONE,	/* MDOC_Compact */
 	ARGV_NONE,	/* MDOC_Std */
 	ARGV_NONE,	/* MDOC_Filled */
@@ -349,10 +346,6 @@ mdoc_argv(struct mdoc *m, int line, enum mdoct tok,
 		break;
 	case (ARGV_MULTI):
 		if ( ! argv_multi(m, line, &tmp, pos, buf))
-			return(ARGV_ERROR);
-		break;
-	case (ARGV_OPT_SINGLE):
-		if ( ! argv_opt_single(m, line, &tmp, pos, buf))
 			return(ARGV_ERROR);
 		break;
 	case (ARGV_NONE):
@@ -669,44 +662,17 @@ argv_multi(struct mdoc *m, int line,
 }
 
 static int
-argv_opt_single(struct mdoc *m, int line, 
+argv_single(struct mdoc *m, int line, 
 		struct mdoc_argv *v, int *pos, char *buf)
 {
 	enum margserr	 ac;
 	char		*p;
-
-	if ('-' == buf[*pos])
-		return(1);
 
 	ac = args(m, line, pos, buf, ARGSFL_NONE, &p);
 	if (ARGS_ERROR == ac)
 		return(0);
 	if (ARGS_EOLN == ac)
 		return(1);
-
-	v->sz = 1;
-	v->value = mandoc_malloc(sizeof(char *));
-	v->value[0] = mandoc_strdup(p);
-
-	return(1);
-}
-
-static int
-argv_single(struct mdoc *m, int line, 
-		struct mdoc_argv *v, int *pos, char *buf)
-{
-	int		 ppos;
-	enum margserr	 ac;
-	char		*p;
-
-	ppos = *pos;
-
-	ac = args(m, line, pos, buf, ARGSFL_NONE, &p);
-	if (ARGS_EOLN == ac) {
-		mdoc_pmsg(m, line, ppos, MANDOCERR_SYNTARGVCOUNT);
-		return(0);
-	} else if (ARGS_ERROR == ac)
-		return(0);
 
 	v->sz = 1;
 	v->value = mandoc_malloc(sizeof(char *));
