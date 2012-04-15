@@ -137,12 +137,12 @@ static	void		  index_merge(const struct of *, struct mparse *,
 				const char *);
 static	void		  index_prune(const struct of *, struct mdb *,
 				struct recs *, const char *);
-static	void		  ofile_argbuild(int, char *[], 
+static	void		  ofile_argbuild(int, char *[],
 				struct of **, const char *);
 static	void		  ofile_dirbuild(const char *, const char *,
 				const char *, int, struct of **, char *);
 static	void		  ofile_free(struct of *);
-static	void		  pformatted(DB *, struct buf *, struct buf *, 
+static	void		  pformatted(DB *, struct buf *, struct buf *,
 				const struct of *, const char *);
 static	int		  pman_node(MAN_ARGS);
 static	void		  pmdoc_node(MDOC_ARGS);
@@ -410,7 +410,7 @@ main(int argc, char *argv[])
 		ofile_argbuild(argc, argv, &of, ".");
 		if (NULL == of)
 			goto out;
-		index_merge(of, mp, &dbuf, &buf, 
+		index_merge(of, mp, &dbuf, &buf,
 				hash, &mdb, &recs, ".");
 		goto out;
 	}
@@ -651,7 +651,7 @@ index_merge(const struct of *of, struct mparse *mp,
 		assert(march);
 		if (strcasecmp(march, of->arch))
 			WARNING(fn, basedir, "Architecture \"%s\" "
-				"manual in \"%s\" directory", 
+				"manual in \"%s\" directory",
 				march, of->arch);
 
 		/*
@@ -822,7 +822,7 @@ index_merge(const struct of *of, struct mparse *mp,
 		while (0 == (*files->seq)(files, &key, &val, seq)) {
 			seq = R_NEXT;
 			if (val.size)
-				WARNING((char *)val.data, basedir, 
+				WARNING((char *)val.data, basedir,
 					"Probably unreachable, title "
 					"is %s", (char *)key.data);
 		}
@@ -837,7 +837,7 @@ index_merge(const struct of *of, struct mparse *mp,
  * in `idx' (zeroing its value size).
  */
 static void
-index_prune(const struct of *ofile, struct mdb *mdb, 
+index_prune(const struct of *ofile, struct mdb *mdb,
 		struct recs *recs, const char *basedir)
 {
 	const struct of	*of;
@@ -913,7 +913,7 @@ index_prune(const struct of *ofile, struct mdb *mdb,
 		}
 
 		if (verb)
-			printf("%s: Deleting from index: %s\n", 
+			printf("%s: Deleting from index: %s\n",
 					basedir, fn);
 
 		val.size = 0;
@@ -1760,7 +1760,7 @@ ofile_dirbuild(const char *dir, const char* psec, const char *parch,
 				continue;
 			}
 
-			ofile_dirbuild(buf, sec, arch, 
+			ofile_dirbuild(buf, sec, arch,
 					src_form, of, basedir);
 
 			p = strrchr(basedir, '/');
