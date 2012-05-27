@@ -52,7 +52,7 @@ int		 mandoc_strntoi(const char *, size_t, int);
 const char	*mandoc_a2msec(const char*);
 
 void	 	 mdoc_free(struct mdoc *);
-struct	mdoc	*mdoc_alloc(struct roff *, struct mparse *);
+struct	mdoc	*mdoc_alloc(struct roff *, struct mparse *, char *);
 void		 mdoc_reset(struct mdoc *);
 int	 	 mdoc_parseln(struct mdoc *, int, char *, int);
 int		 mdoc_endparse(struct mdoc *);

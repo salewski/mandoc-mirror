@@ -197,13 +197,14 @@ mdoc_free(struct mdoc *mdoc)
  * Allocate volatile and non-volatile parse resources.  
  */
 struct mdoc *
-mdoc_alloc(struct roff *roff, struct mparse *parse)
+mdoc_alloc(struct roff *roff, struct mparse *parse, char *defos)
 {
 	struct mdoc	*p;
 
 	p = mandoc_calloc(1, sizeof(struct mdoc));
 
 	p->parse = parse;
+	p->defos = defos;
 	p->roff = roff;
 
 	mdoc_hash_init();

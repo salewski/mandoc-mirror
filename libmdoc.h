@@ -24,6 +24,7 @@ enum	mdoc_next {
 
 struct	mdoc {
 	struct mparse	 *parse; /* parse pointer */
+	char		 *defos; /* default argument for .Os */
 	int		  flags; /* parse flags */
 #define	MDOC_HALT	 (1 << 0) /* error in parse: halt */
 #define	MDOC_LITERAL	 (1 << 1) /* in a literal scope */

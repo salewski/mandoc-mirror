@@ -1,6 +1,7 @@
 .\"	$Id$
 .\"
 .\" Copyright (c) 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+.\" Copyright (c) 2012 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -23,6 +24,9 @@
 .Sh SYNOPSIS
 .Nm mandoc
 .Op Fl V
+.Sm off
+.Op Fl I Cm os Li = Ar name
+.Sm on
 .Op Fl m Ns Ar format
 .Op Fl O Ns Ar option
 .Op Fl T Ns Ar output
@@ -49,6 +53,15 @@ output.
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds
+.Sm off
+.It Fl I Cm os Li = Ar name
+.Sm on
+Override the default operating system
+.Ar name
+for the
+.Xr mdoc 7
+.Sq \&Os
+macro.
 .It Fl m Ns Ar format
 Input format.
 See

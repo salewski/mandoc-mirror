@@ -66,6 +66,7 @@ struct	mparse {
 	void		 *arg; /* argument to mmsg */
 	const char	 *file; 
 	struct buf	 *secondary;
+	char		 *defos; /* default operating system */
 };
 
 static	void	  resize_buf(struct buf *, size_t);
@@ -247,7 +248,8 @@ pset(const char *buf, int pos, struct mparse *curp)
 	switch (curp->inttype) {
 	case (MPARSE_MDOC):
 		if (NULL == curp->pmdoc) 
-			curp->pmdoc = mdoc_alloc(curp->roff, curp);
+			curp->pmdoc = mdoc_alloc(curp->roff, curp,
+					curp->defos);
 		assert(curp->pmdoc);
 		curp->mdoc = curp->pmdoc;
 		return;
@@ -263,7 +265,8 @@ pset(const char *buf, int pos, struct mparse *curp)
 
 	if (pos >= 3 && 0 == memcmp(buf, ".Dd", 3))  {
 		if (NULL == curp->pmdoc) 
-			curp->pmdoc = mdoc_alloc(curp->roff, curp);
+			curp->pmdoc = mdoc_alloc(curp->roff, curp,
+					curp->defos);
 		assert(curp->pmdoc);
 		curp->mdoc = curp->pmdoc;
 		return;
@@ -720,7 +723,8 @@ mparse_readfd(struct mparse *curp, int fd, const char *file)
 }
 
 struct mparse *
-mparse_alloc(enum mparset inttype, enum mandoclevel wlevel, mandocmsg mmsg, void *arg)
+mparse_alloc(enum mparset inttype, enum mandoclevel wlevel,
+		mandocmsg mmsg, void *arg, char *defos)
 {
 	struct mparse	*curp;
 
@@ -732,6 +736,7 @@ mparse_alloc(enum mparset inttype, enum mandoclevel wlevel, mandocmsg mmsg, void
 	curp->mmsg = mmsg;
 	curp->arg = arg;
 	curp->inttype = inttype;
+	curp->defos = defos;
 
 	curp->roff = roff_alloc(curp);
 	return(curp);

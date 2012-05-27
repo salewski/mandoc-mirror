@@ -733,7 +733,7 @@ format(const struct req *req, const char *file)
 		return;
 	}
 
-	mp = mparse_alloc(MPARSE_AUTO, MANDOCLEVEL_FATAL, NULL, NULL);
+	mp = mparse_alloc(MPARSE_AUTO, MANDOCLEVEL_FATAL, NULL, NULL, NULL);
 	rc = mparse_readfd(mp, fd, file);
 	close(fd);
 
