@@ -4,15 +4,6 @@
 ************************************************************************
 
 ************************************************************************
-* formatter bugs
-************************************************************************
-
-- tbl(7): Horizontal and vertical lines are formatted badly:
-  With the box option, there is too much white space at the end of cells.
-  Horizontal lines from "=" lines are a bit too long.
-  yuri dot pankov at gmail dot com  Thu, 14 Apr 2011 05:45:26 +0400
-
-************************************************************************
 * missing features
 ************************************************************************
 
