@@ -171,10 +171,14 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 
 	if (TBL_SPAN_LAST & sp->flags) {
 		if (TBL_OPT_DBOX & sp->tbl->opts ||
-		    TBL_OPT_BOX  & sp->tbl->opts)
+		    TBL_OPT_BOX  & sp->tbl->opts) {
 			tbl_hframe(tp, sp, 0);
-		if (TBL_OPT_DBOX & sp->tbl->opts)
+			tp->skipvsp = 1;
+		}
+		if (TBL_OPT_DBOX & sp->tbl->opts) {
 			tbl_hframe(tp, sp, 1);
+			tp->skipvsp = 2;
+		}
 		assert(tp->tbl.cols);
 		free(tp->tbl.cols);
 		tp->tbl.cols = NULL;
