@@ -178,25 +178,6 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp)
 			tblcalc_data(tbl, col, sp->tbl, dp);
 		}
 	}
-
-	/* 
-	 * Calculate width of the spanners.  These get one space for a
-	 * vertical line, two for a double-vertical line. 
-	 */
-
-	for ( ; hp; hp = hp->next) {
-		col = &tbl->cols[hp->ident];
-		switch (hp->pos) {
-		case (TBL_HEAD_VERT):
-			col->width = (*tbl->len)(1, tbl->arg);
-			break;
-		case (TBL_HEAD_DVERT):
-			col->width = (*tbl->len)(2, tbl->arg);
-			break;
-		default:
-			break;
-		}
-	}
 }
 
 static void

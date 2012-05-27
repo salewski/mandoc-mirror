@@ -49,13 +49,11 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 		cp = dp->layout->first;
 
 	/* 
-	 * Skip over spanners and vertical lines to data formats, since
+	 * Skip over spanners, since
 	 * we want to match data with data layout cells in the header.
 	 */
 
-	while (cp && (TBL_CELL_VERT == cp->pos || 
-				TBL_CELL_DVERT == cp->pos ||
-				TBL_CELL_SPAN == cp->pos))
+	while (cp && TBL_CELL_SPAN == cp->pos)
 		cp = cp->next;
 
 	/*
