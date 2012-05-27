@@ -4,15 +4,6 @@
 ************************************************************************
 
 ************************************************************************
-* parser bugs
-************************************************************************
-
-- ".\}" on its own line gets translated to bare ".\&"
-  which forces pset() into man(7)
-  and then triggers an unknown macro error
-  reported by naddy@  Sun, 3 Jul 2011 21:52:24 +0200
-
-************************************************************************
 * formatter bugs
 ************************************************************************
 
@@ -53,6 +44,8 @@
   reported by brad@  Sat, 15 Jan 2011 15:45:23 -0500
 
 - xloadimage(1) wants .ti (temporary indent), rep by naddy@
+  reported again by bentley@ in nmh(1)  Mon, 23 Apr 2012 13:38:28 -0600
+  also uses .ce (center N lines) and .fc (field control)
 
 - .ta (tab settings) occurs in ircbug(1) and probably gnats(1)
   reported by brad@  Sat, 15 Jan 2011 15:50:51 -0500
