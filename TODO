@@ -9,8 +9,8 @@
 
 --- missing roff features ----------------------------------------------
 
-- The pod2man preamble wants \h'...' with quoted numerical arguments,
-  see for example AUTHORS in MooseX::Getopt.3p, p5-MooseX-Getopt.
+- roff.c should treat \n(.H>23 and \n(.V>19 in the pod2man(1)
+  preamble as true, see for example AUTHORS in MooseX::Getopt.3p
   reported by Andreas Voegele <mail at andreasvoegele dot com>
   Tue, 22 Nov 2011 15:34:47 +0100 on ports@
 
@@ -41,7 +41,8 @@
 - .ta (tab settings) occurs in ircbug(1) and probably gnats(1)
   reported by brad@  Sat, 15 Jan 2011 15:50:51 -0500
 
-- \c (interrupted text) occurs in chat(8)
+- \c (interrupted text) should prevent the line break
+  even inside .Bd literal; that occurs in chat(8)
 
 - using undefined strings or macros defines them to be empty
   wl@  Mon, 14 Nov 2011 14:37:01 +0000
