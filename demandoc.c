@@ -76,7 +76,7 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	mp = mparse_alloc(MPARSE_AUTO, MANDOCLEVEL_FATAL, NULL, NULL);
+	mp = mparse_alloc(MPARSE_AUTO, MANDOCLEVEL_FATAL, NULL, NULL, NULL);
 	assert(mp);
 
 	if (0 == argc)
