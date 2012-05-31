@@ -78,6 +78,7 @@ struct	termp {
 #define	TERMP_ANPREC	 (1 << 13)	/* See termp_an_pre(). */
 #define	TERMP_KEEP	 (1 << 14)	/* Keep words together. */
 #define	TERMP_PREKEEP	 (1 << 15)	/* ...starting with the next one. */
+#define	TERMP_SKIPCHAR	 (1 << 16)	/* Skip the next character. */
 	int		 *buf;		/* Output buffer. */
 	enum termenc	  enc;		/* Type of encoding. */
 	struct mchars	 *symtab;	/* Encoded-symbol table. */

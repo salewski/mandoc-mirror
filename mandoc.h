@@ -379,7 +379,8 @@ enum	mandoc_esc {
 	ESCAPE_FONTPREV, /* previous font mode */
 	ESCAPE_NUMBERED, /* a numbered glyph */
 	ESCAPE_UNICODE, /* a unicode codepoint */
-	ESCAPE_NOSPACE /* suppress space if the last on a line */
+	ESCAPE_NOSPACE, /* suppress space if the last on a line */
+	ESCAPE_SKIPCHAR /* skip the next character */
 };
 
 typedef	void	(*mandocmsg)(enum mandocerr, enum mandoclevel,
