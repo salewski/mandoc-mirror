@@ -18,7 +18,6 @@
 #define MANDOCDB_H
 
 #define	MANDOC_DB	"mandocdb.db"
-#define	MANDOC_IDX	"mandocdb.index"
 
 #define	TYPE_An		0x0000000000000001ULL
 #define	TYPE_Ar		0x0000000000000002ULL
