@@ -60,6 +60,25 @@
 		fprintf(stderr, ": %s\n", (_f)); \
 	} while (/* CONSTCOND */ 0)
 
+#define	SQL_EXEC(_v) \
+	if (SQLITE_OK != sqlite3_exec(db, (_v), NULL, NULL, NULL)) \
+		fprintf(stderr, "%s\n", sqlite3_errmsg(db))
+#define	SQL_BIND_TEXT(_s, _i, _v) \
+	if (SQLITE_OK != sqlite3_bind_text \
+		((_s), (_i)++, (_v), -1, SQLITE_STATIC)) \
+		fprintf(stderr, "%s\n", sqlite3_errmsg(db))
+#define	SQL_BIND_INT(_s, _i, _v) \
+	if (SQLITE_OK != sqlite3_bind_int \
+		((_s), (_i)++, (_v))) \
+		fprintf(stderr, "%s\n", sqlite3_errmsg(db))
+#define	SQL_BIND_INT64(_s, _i, _v) \
+	if (SQLITE_OK != sqlite3_bind_int64 \
+		((_s), (_i)++, (_v))) \
+		fprintf(stderr, "%s\n", sqlite3_errmsg(db))
+#define SQL_STEP(_s) \
+	if (SQLITE_DONE != sqlite3_step((_s))) \
+		fprintf(stderr, "%s\n", sqlite3_errmsg(db))
+
 enum	op {
 	OP_DEFAULT = 0, /* new dbs from dir list or default config */
 	OP_CONFFILE, /* new databases from custom config file */
@@ -479,6 +498,14 @@ main(int argc, char *argv[])
 				goto out;
 			if (0 == dbopen(dirs.paths[j], 0))
 				goto out;
+
+			/*
+			 * Since we're opening up a new database, we can
+			 * turn off synchronous mode for much better
+			 * performance.
+			 */
+			SQL_EXEC("PRAGMA synchronous = OFF");
+
 			if (0 == ofmerge(mc, mp, dirs.paths[j]))
 				goto out;
 			dbclose(dirs.paths[j], 0);
@@ -1768,6 +1795,7 @@ dbindex(struct mchars *mc, int form,
 	struct str	*key;
 	const char	*desc;
 	int64_t		 recno;
+	size_t		 i;
 
 	DEBUG(of->file, base, "Adding to index");
 
@@ -1783,23 +1811,15 @@ dbindex(struct mchars *mc, int form,
 		desc = key->utf8;
 	}
 
-	sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
+	SQL_EXEC("BEGIN TRANSACTION");
 
-	sqlite3_bind_text
-		(stmts[STMT_INSERT_DOC], 1, 
-		 of->file, -1, SQLITE_STATIC);
-	sqlite3_bind_text
-		(stmts[STMT_INSERT_DOC], 2, 
-		 of->sec, -1, SQLITE_STATIC);
-	sqlite3_bind_text
-		(stmts[STMT_INSERT_DOC], 3, 
-		 of->arch, -1, SQLITE_STATIC);
-	sqlite3_bind_text
-		(stmts[STMT_INSERT_DOC], 4, 
-		 desc, -1, SQLITE_STATIC);
-	sqlite3_bind_int
-		(stmts[STMT_INSERT_DOC], 5, form);
-	sqlite3_step(stmts[STMT_INSERT_DOC]);
+	i = 1;
+	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, of->file);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, of->sec);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, of->arch);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, desc);
+	SQL_BIND_INT(stmts[STMT_INSERT_DOC], i, form);
+	SQL_STEP(stmts[STMT_INSERT_DOC]);
 	recno = sqlite3_last_insert_rowid(db);
 	sqlite3_reset(stmts[STMT_INSERT_DOC]);
 
@@ -1807,34 +1827,30 @@ dbindex(struct mchars *mc, int form,
 		assert(key->of == of);
 		if (NULL == key->utf8)
 			utf8key(mc, key);
-		sqlite3_bind_int64
-			(stmts[STMT_INSERT_KEY], 1, key->mask);
-		sqlite3_bind_text
-			(stmts[STMT_INSERT_KEY], 2, 
-			 key->utf8, -1, SQLITE_STATIC);
-		sqlite3_bind_int64
-			(stmts[STMT_INSERT_KEY], 3, recno);
-		sqlite3_step(stmts[STMT_INSERT_KEY]);
+		i = 1;
+		SQL_BIND_INT64(stmts[STMT_INSERT_KEY], i, key->mask);
+		SQL_BIND_TEXT(stmts[STMT_INSERT_KEY], i, key->utf8);
+		SQL_BIND_INT64(stmts[STMT_INSERT_KEY], i, recno);
+		SQL_STEP(stmts[STMT_INSERT_KEY]);
 		sqlite3_reset(stmts[STMT_INSERT_KEY]);
 	}
 
-	sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, NULL);
-
+	SQL_EXEC("END TRANSACTION");
 }
 
 static void
 dbprune(const char *base)
 {
 	struct of	*of;
+	size_t		 i;
 
 	if (nodb)
 		return;
 
 	for (of = ofs; NULL != of; of = of->next) {
-		sqlite3_bind_text
-			(stmts[STMT_DELETE], 1, 
-			 of->file, -1, SQLITE_STATIC);
-		sqlite3_step(stmts[STMT_DELETE]);
+		i = 1;
+		SQL_BIND_TEXT(stmts[STMT_DELETE], i, of->file);
+		SQL_STEP(stmts[STMT_DELETE]);
 		sqlite3_reset(stmts[STMT_DELETE]);
 		DEBUG(of->file, base, "Deleted from index");
 	}
@@ -1901,7 +1917,7 @@ dbopen(const char *base, int real)
 	if ( ! real)
 		remove(file);
 
-	ofl = SQLITE_OPEN_PRIVATECACHE | SQLITE_OPEN_READWRITE |
+	ofl = SQLITE_OPEN_READWRITE | 
 		(0 == real ? SQLITE_OPEN_EXCLUSIVE : 0);
 
 	rc = sqlite3_open_v2(file, &db, ofl, NULL);

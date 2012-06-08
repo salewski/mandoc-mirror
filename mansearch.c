@@ -38,11 +38,11 @@
 #include "mandocdb.h"
 #include "mansearch.h"
 
-#define	BIND_TEXT(_db, _s, _i, _v) \
+#define	SQL_BIND_TEXT(_db, _s, _i, _v) \
 	if (SQLITE_OK != sqlite3_bind_text \
 		((_s), (_i)++, (_v), -1, SQLITE_STATIC)) \
 		fprintf(stderr, "%s\n", sqlite3_errmsg((_db)))
-#define	BIND_INT64(_db, _s, _i, _v) \
+#define	SQL_BIND_INT64(_db, _s, _i, _v) \
 	if (SQLITE_OK != sqlite3_bind_int64 \
 		((_s), (_i)++, (_v))) \
 		fprintf(stderr, "%s\n", sqlite3_errmsg((_db)))
@@ -208,13 +208,13 @@ mansearch(const struct manpaths *paths,
 			fprintf(stderr, "%s\n", sqlite3_errmsg(db));
 
 		if (NULL != arch)
-			BIND_TEXT(db, s, j, arch);
+			SQL_BIND_TEXT(db, s, j, arch);
 		if (NULL != sec)
-			BIND_TEXT(db, s, j, arch);
+			SQL_BIND_TEXT(db, s, j, arch);
 
 		for (ep = e; NULL != ep; ep = ep->next) {
-			BIND_TEXT(db, s, j, ep->v);
-			BIND_INT64(db, s, j, ep->bits);
+			SQL_BIND_TEXT(db, s, j, ep->v);
+			SQL_BIND_INT64(db, s, j, ep->bits);
 		}
 
 		memset(&htab, 0, sizeof(struct ohash));
