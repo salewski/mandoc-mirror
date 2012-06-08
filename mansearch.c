@@ -38,6 +38,15 @@
 #include "mandocdb.h"
 #include "mansearch.h"
 
+#define	BIND_TEXT(_db, _s, _i, _v) \
+	if (SQLITE_OK != sqlite3_bind_text \
+		((_s), (_i)++, (_v), -1, SQLITE_STATIC)) \
+		fprintf(stderr, "%s\n", sqlite3_errmsg((_db)))
+#define	BIND_INT64(_db, _s, _i, _v) \
+	if (SQLITE_OK != sqlite3_bind_int64 \
+		((_s), (_i)++, (_v))) \
+		fprintf(stderr, "%s\n", sqlite3_errmsg((_db)))
+
 struct	expr {
 	int		 glob; /* is glob? */
 	uint64_t 	 bits; /* type-mask */
@@ -116,7 +125,7 @@ mansearch(const struct manpaths *paths,
 		int argc, char *argv[], 
 		struct manpage **res, size_t *sz)
 {
-	int		 fd, rc;
+	int		 fd, rc, c;
 	int64_t		 id;
 	char		 buf[MAXPATHLEN];
 	char		*sql;
@@ -136,12 +145,12 @@ mansearch(const struct manpaths *paths,
 	info.hfree = hash_free;
 	info.key_offset = offsetof(struct match, id);
 
-	*sz = 0;
+	*sz = cur = maxres = 0;
 	sql = NULL;
 	*res = NULL;
 	fd = -1;
 	e = NULL;
-	cur = maxres = 0;
+	rc = 0;
 
 	if (0 == argc)
 		goto out;
@@ -175,7 +184,6 @@ mansearch(const struct manpaths *paths,
 
 	for (i = 0; i < paths->sz; i++) {
 		if (-1 == fchdir(fd)) {
-			/* FIXME: will return success */
 			perror(buf);
 			free(*res);
 			break;
@@ -184,30 +192,29 @@ mansearch(const struct manpaths *paths,
 			continue;
 		} 
 
-		rc =  sqlite3_open_v2
-			(MANDOC_DB, &db, SQLITE_OPEN_READONLY, NULL);
+		c =  sqlite3_open_v2
+			(MANDOC_DB, &db, 
+			 SQLITE_OPEN_READONLY, NULL);
 
-		if (SQLITE_OK != rc) {
+		if (SQLITE_OK != c) {
 			perror(MANDOC_DB);
 			sqlite3_close(db);
 			continue;
 		}
 
 		j = 1;
-		sqlite3_prepare_v2(db, sql, -1, &s, NULL);
+		c = sqlite3_prepare_v2(db, sql, -1, &s, NULL);
+		if (SQLITE_OK != c)
+			fprintf(stderr, "%s\n", sqlite3_errmsg(db));
 
 		if (NULL != arch)
-			sqlite3_bind_text
-				(s, j++, arch, -1, SQLITE_STATIC);
+			BIND_TEXT(db, s, j, arch);
 		if (NULL != sec)
-			sqlite3_bind_text
-				(s, j++, sec, -1, SQLITE_STATIC);
+			BIND_TEXT(db, s, j, arch);
 
 		for (ep = e; NULL != ep; ep = ep->next) {
-			sqlite3_bind_text
-				(s, j++, ep->v, -1, SQLITE_STATIC);
-			sqlite3_bind_int64
-				(s, j++, ep->bits);
+			BIND_TEXT(db, s, j, ep->v);
+			BIND_INT64(db, s, j, ep->bits);
 		}
 
 		memset(&htab, 0, sizeof(struct ohash));
@@ -221,7 +228,7 @@ mansearch(const struct manpaths *paths,
 		 * This gives good performance and preserves the
 		 * distribution of buckets in the table.
 		 */
-		while (SQLITE_ROW == sqlite3_step(s)) {
+		while (SQLITE_ROW == (c = sqlite3_step(s))) {
 			id = sqlite3_column_int64(s, 0);
 			idx = ohash_lookup_memory
 				(&htab, (char *)&id, 
@@ -239,6 +246,9 @@ mansearch(const struct manpaths *paths,
 			mp->form = sqlite3_column_int(s, 5);
 			ohash_insert(&htab, idx, mp);
 		}
+
+		if (SQLITE_DONE != c)
+			fprintf(stderr, "%s\n", sqlite3_errmsg(db));
 
 		sqlite3_finalize(s);
 		sqlite3_close(db);
@@ -263,13 +273,14 @@ mansearch(const struct manpaths *paths,
 		}
 		ohash_delete(&htab);
 	}
+	rc = 1;
 out:
 	exprfree(e);
 	if (-1 != fd)
 		close(fd);
 	free(sql);
 	*sz = cur;
-	return(1);
+	return(rc);
 }
 
 /*
@@ -285,8 +296,8 @@ sql_statement(const struct expr *e, const char *arch, const char *sec)
 	const char	*eq = "(key = ? AND bits & ?)";
 	const char	*andarch = "arch = ? AND ";
 	const char	*andsec = "sec = ? AND ";
-	const size_t	 globsz = 27;
-	const size_t	 eqsz = 22;
+	size_t	 	 globsz;
+	size_t	 	 eqsz;
 	size_t		 sz;
 
 	sql = mandoc_strdup
@@ -295,12 +306,15 @@ sql_statement(const struct expr *e, const char *arch, const char *sec)
 		 "INNER JOIN docs ON docs.id=keys.docid "
 		 "WHERE ");
 	sz = strlen(sql);
+	globsz = strlen(glob);
+	eqsz = strlen(eq);
 
 	if (NULL != arch) {
 		sz += strlen(andarch) + 1;
 		sql = mandoc_realloc(sql, sz);
 		strlcat(sql, andarch, sz);
 	}
+
 	if (NULL != sec) {
 		sz += strlen(andsec) + 1;
 		sql = mandoc_realloc(sql, sz);
