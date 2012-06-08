@@ -380,7 +380,8 @@ manup(const struct manpaths *dirs, char *base)
 	char		 dst[MAXPATHLEN],
 			 src[MAXPATHLEN];
 	const char	*path;
-	int		 i, c;
+	size_t		 i;
+	int		 c;
 	size_t		 sz;
 	FILE		*f;
 
