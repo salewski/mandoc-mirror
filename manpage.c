@@ -29,18 +29,24 @@
 #include "manpath.h"
 #include "mansearch.h"
 
+static	void	 show(const char *, const char *);
+
 int
 main(int argc, char *argv[])
 {
-	int		 ch;
-	size_t		 i, sz;
+	int		 ch, term;
+	size_t		 i, sz, len;
 	struct manpage	*res;
-	char		*conf_file, *defpaths, *auxpaths,
+	char		*conf_file, *defpaths, *auxpaths, *cp,
 			*arch, *sec;
+	char		 buf[MAXPATHLEN];
+	const char	*cmd;
 	struct manpaths	 paths;
 	char		*progname;
 	extern char	*optarg;
 	extern int	 optind;
+
+	term = isatty(STDIN_FILENO) && isatty(STDOUT_FILENO);
 
 	progname = strrchr(argv[0], '/');
 	if (progname == NULL)
@@ -85,13 +91,48 @@ main(int argc, char *argv[])
 	if (0 == ch)
 		goto usage;
 
+	if (0 == sz) {
+		free(res);
+		return(EXIT_FAILURE);
+	} else if (1 == sz && term) {
+		i = 1;
+		goto show;
+	} else if (NULL == res)
+		return(EXIT_FAILURE);
+
 	for (i = 0; i < sz; i++) {
-		printf("%s - %s\n", res[i].file, res[i].desc);
+		printf("%6zu  %s: %s\n", 
+			i + 1, res[i].file, res[i].desc);
 		free(res[i].desc);
 	}
 
+	if (0 == term) {
+		free(res);
+		return(EXIT_SUCCESS);
+	}
+
+	i = 1;
+	printf("Enter a choice [1]: ");
+	fflush(stdout);
+
+	if (NULL != (cp = fgetln(stdin, &len)))
+		if ('\n' == cp[--len] && len > 0) {
+			cp[len] = '\0';
+			if ((i = atoi(cp)) < 1 || i > sz)
+				i = 0;
+		}
+
+	if (0 == i) {
+		free(res);
+		return(EXIT_SUCCESS);
+	}
+show:
+	cmd = res[i - 1].form ? "mandoc" : "cat";
+	strlcpy(buf, res[i - 1].file, MAXPATHLEN);
 	free(res);
-	return(sz ? EXIT_SUCCESS : EXIT_FAILURE);
+
+	show(cmd, buf);
+	/* NOTREACHED */
 usage:
 	fprintf(stderr, "usage: %s [-C conf] "
 			 	  "[-M paths] "
@@ -101,4 +142,37 @@ usage:
 			          "expr ...\n", 
 				  progname);
 	return(EXIT_FAILURE);
+}
+
+static void
+show(const char *cmd, const char *file)
+{
+	int		 fds[2];
+	pid_t		 pid;
+
+	if (-1 == pipe(fds)) {
+		perror(NULL);
+		exit(EXIT_FAILURE);
+	}
+
+	if (-1 == (pid = fork())) {
+		perror(NULL);
+		exit(EXIT_FAILURE);
+	} else if (pid > 0) {
+		dup2(fds[0], STDIN_FILENO);
+		close(fds[1]);
+		cmd = NULL != getenv("MANPAGER") ? 
+			getenv("MANPAGER") :
+			(NULL != getenv("PAGER") ? 
+			 getenv("PAGER") : "more");
+		execlp(cmd, cmd, (char *)NULL);
+		perror(cmd);
+		exit(EXIT_FAILURE);
+	}
+
+	dup2(fds[1], STDOUT_FILENO);
+	close(fds[0]);
+	execlp(cmd, cmd, file, (char *)NULL);
+	perror(cmd);
+	exit(EXIT_FAILURE);
 }
