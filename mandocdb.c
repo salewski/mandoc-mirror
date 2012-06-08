@@ -79,7 +79,7 @@ struct	str {
 	const struct of *of; /* if set, the owning parse */
 	struct str	*next; /* next in owning parse sequence */
 	uint64_t	 mask; /* bitmask in sequence */
-	char		 key[1]; /* the string itself */
+	char		 key[]; /* the string itself */
 };
 
 struct	id {
@@ -1538,7 +1538,7 @@ straddbuf(const char *cp, size_t sz)
 	if (NULL != (s = hashget(cp, sz)))
 		return(s->key);
 
-	s = mandoc_calloc(sizeof(struct str) + sz, 1);
+	s = mandoc_calloc(sizeof(struct str) + sz + 1, 1);
 	memcpy(s->key, cp, sz);
 
 	end = cp + sz;
@@ -1585,7 +1585,7 @@ wordaddbuf(const struct of *of,
 		s->mask |= v;
 		return;
 	} else if (NULL == s) {
-		s = mandoc_calloc(sizeof(struct str) + sz, 1);
+		s = mandoc_calloc(sizeof(struct str) + sz + 1, 1);
 		memcpy(s->key, cp, sz);
 		end = cp + sz;
 		index = ohash_qlookupi(&strings, cp, &end);
