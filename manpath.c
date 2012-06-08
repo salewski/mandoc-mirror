@@ -74,7 +74,7 @@ manpath_parse(struct manpaths *dirs, const char *file,
 
 	do {
 		buf = mandoc_realloc(buf, bsz + 1024);
-		sz = fread(buf + (int)bsz, 1, 1024, stream);
+		sz = fread(buf + bsz, 1, 1024, stream);
 		bsz += sz;
 	} while (sz > 0);
 
@@ -117,7 +117,7 @@ manpath_parse(struct manpaths *dirs, const char *file,
 	}
 
 	/* Append man.conf(5) to MANPATH. */
-	if (':' == defp[(int)strlen(defp) - 1]) {
+	if (':' == defp[strlen(defp) - 1]) {
 		manpath_parseline(dirs, defp);
 		manpath_manconf(dirs, file);
 		return;
@@ -162,7 +162,7 @@ manpath_add(struct manpaths *dirs, const char *dir)
 {
 	char		 buf[PATH_MAX];
 	char		*cp;
-	int		 i;
+	size_t		 i;
 
 	if (NULL == (cp = realpath(dir, buf)))
 		return;
@@ -173,7 +173,7 @@ manpath_add(struct manpaths *dirs, const char *dir)
 
 	dirs->paths = mandoc_realloc
 		(dirs->paths,
-		 ((size_t)dirs->sz + 1) * sizeof(char *));
+		 (dirs->sz + 1) * sizeof(char *));
 
 	dirs->paths[dirs->sz++] = mandoc_strdup(cp);
 }
@@ -181,7 +181,7 @@ manpath_add(struct manpaths *dirs, const char *dir)
 void
 manpath_free(struct manpaths *p)
 {
-	int		 i;
+	size_t		 i;
 
 	for (i = 0; i < p->sz; i++)
 		free(p->paths[i]);

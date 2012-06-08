@@ -23,7 +23,7 @@
  * databases.
  */
 struct	manpaths {
-	int	  sz;
+	size_t	  sz;
 	char	**paths;
 };
 
