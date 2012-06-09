@@ -509,7 +509,9 @@ main(int argc, char *argv[])
 			 * turn off synchronous mode for much better
 			 * performance.
 			 */
+#ifndef __APPLE__
 			SQL_EXEC("PRAGMA synchronous = OFF");
+#endif
 
 			if (0 == ofmerge(mc, mp, dirs.paths[j]))
 				goto out;
