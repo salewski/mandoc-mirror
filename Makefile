@@ -1,11 +1,7 @@
 .PHONY: 	 clean install installwww
 .SUFFIXES:	 .sgml .html .md5 .h .h.html
 .SUFFIXES:	 .1       .3       .7       .8
-.SUFFIXES:	 .1.txt   .3.txt   .7.txt   .8.txt
-.SUFFIXES:	 .1.pdf   .3.pdf   .7.pdf   .8.pdf
-.SUFFIXES:	 .1.ps    .3.ps    .7.ps    .8.ps
 .SUFFIXES:	 .1.html  .3.html  .7.html  .8.html
-.SUFFIXES:	 .1.xhtml .3.xhtml .7.xhtml .8.xhtml
 
 # Specify this if you want to hard-code the operating system to appear
 # in the lower-left hand corner of -mdoc manuals.
@@ -248,60 +244,16 @@ DEMANDOC_OBJS	 = demandoc.o
 $(DEMANDOC_OBJS): config.h
 
 INDEX_MANS	 = demandoc.1.html \
-		   demandoc.1.xhtml \
-		   demandoc.1.ps \
-		   demandoc.1.pdf \
-		   demandoc.1.txt \
 		   mandoc.1.html \
-		   mandoc.1.xhtml \
-		   mandoc.1.ps \
-		   mandoc.1.pdf \
-		   mandoc.1.txt \
 		   mandoc.3.html \
-		   mandoc.3.xhtml \
-		   mandoc.3.ps \
-		   mandoc.3.pdf \
-		   mandoc.3.txt \
 		   eqn.7.html \
-		   eqn.7.xhtml \
-		   eqn.7.ps \
-		   eqn.7.pdf \
-		   eqn.7.txt \
 		   man.7.html \
-		   man.7.xhtml \
-		   man.7.ps \
-		   man.7.pdf \
-		   man.7.txt \
 		   mandoc_char.7.html \
-		   mandoc_char.7.xhtml \
-		   mandoc_char.7.ps \
-		   mandoc_char.7.pdf \
-		   mandoc_char.7.txt \
 		   mdoc.7.html \
-		   mdoc.7.xhtml \
-		   mdoc.7.ps \
-		   mdoc.7.pdf \
-		   mdoc.7.txt \
 		   preconv.1.html \
-		   preconv.1.xhtml \
-		   preconv.1.ps \
-		   preconv.1.pdf \
-		   preconv.1.txt \
 		   roff.7.html \
-		   roff.7.xhtml \
-		   roff.7.ps \
-		   roff.7.pdf \
-		   roff.7.txt \
 		   tbl.7.html \
-		   tbl.7.xhtml \
-		   tbl.7.ps \
-		   tbl.7.pdf \
-		   tbl.7.txt \
-		   mandocdb.8.html \
-		   mandocdb.8.xhtml \
-		   mandocdb.8.ps \
-		   mandocdb.8.pdf \
-		   mandocdb.8.txt
+		   mandocdb.8.html
 
 $(INDEX_MANS): mandoc
 
@@ -432,20 +384,8 @@ config.h: config.h.pre config.h.post
 .h.h.html:
 	highlight -I $< >$@
 
-.1.1.txt .3.3.txt .7.7.txt .8.8.txt:
-	./mandoc -Tascii -Wall,stop $< | col -b >$@
-
 .1.1.html .3.3.html .7.7.html .8.8.html:
 	./mandoc -Thtml -Wall,stop -Ostyle=style.css,man=%N.%S.html,includes=%I.html $< >$@
-
-.1.1.ps .3.3.ps .7.7.ps .8.8.ps:
-	./mandoc -Tps -Wall,stop $< >$@
-
-.1.1.xhtml .3.3.xhtml .7.7.xhtml .8.8.xhtml:
-	./mandoc -Txhtml -Wall,stop -Ostyle=style.css,man=%N.%S.xhtml,includes=%I.html $< >$@
-
-.1.1.pdf .3.3.pdf .7.7.pdf .8.8.pdf:
-	./mandoc -Tpdf -Wall,stop $< >$@
 
 .sgml.html:
 	validate --warn $<

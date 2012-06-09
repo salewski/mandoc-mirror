@@ -33,11 +33,11 @@
 			<SPAN CLASS="nm">mdocml</SPAN> consists of the <A HREF="mandoc.3.html">libmandoc</A> validating compiler and <A
 			HREF="mandoc.1.html">mandoc</A>, which interfaces with the compiler library to format output for UNIX terminals (with
 			support for wide-character locales), XHTML, HTML, PostScript, and PDF.  
-			It also includes <A HREF="preconv.1.html">preconv</A>, for recoding multibyte manuals; 
-			<A HREF="demandoc.1.html">demandoc</A>, for emitting only text parts of manuals;
-			<A HREF="mandocdb.8.html">mandocdb</A>, for indexing manuals; and
-			<A HREF="apropos.1.html">apropos</A>, <A HREF="whatis.1.html">whatis</A>, and
-			<A HREF="man.cgi.7.html">man.cgi</A> for semantic search of manual content.
+			It also includes <A HREF="preconv.1.html">preconv</A> for recoding multibyte manuals,
+			<A HREF="demandoc.1.html">demandoc</A> for emitting only text parts of manuals,
+			<A HREF="mandocdb.8.html">mandocdb</A> for indexing manuals,
+			<A HREF="apropos.1.html">apropos</A> (includes whatis mode) for indexed manual search, and
+			<A HREF="man.cgi.7.html">man.cgi</A> for indexed manual search online.
 			It is a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv</A> project.  
 		</P>
 		<P>
@@ -48,8 +48,8 @@
 		</H2>
 		<P>
 			<SPAN CLASS="nm">mdocml</SPAN> is in ISO C99 and should build and run on any modern system; however, you'll need <A
-			HREF="http://www.sqlite.org">sqlite3</A> to build <A HREF="apropos.1.html">apropos</A>, <A
-			HREF="whatis.1.html">whatis</A>, <A HREF="man.cgi.7.html">man.cgi</A>, and <A HREF="mandocdb.8.html">mandocdb</A>.  
+			HREF="http://www.sqlite.org">sqlite3</A> to build <A HREF="apropos.1.html">apropos</A> (links to whatis), 
+			<A HREF="man.cgi.7.html">man.cgi</A>, and <A HREF="mandocdb.8.html">mandocdb</A>.  
 			To build and install into <I>/usr/local/</I>, just run <CODE>make install</CODE>.  
 			Be careful: the <B>preconv</B>, <B>apropos</B>, and <B>whatis</B> binary names are usually taken by existing utilities.
 		</P>
@@ -120,130 +120,78 @@
 					<TD VALIGN="top"><A HREF="apropos.1.html">apropos(1)</A></TD>
 					<TD VALIGN="top">
 						search the manual page database
-							(<A HREF="apropos.1.txt">text</A> | 
-							<A HREF="apropos.1.xhtml">xhtml</A> |
-							<A HREF="apropos.1.pdf">pdf</A> |
-							<A HREF="apropos.1.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="demandoc.1.html">demandoc(1)</A></TD>
 					<TD VALIGN="top">
 						emit only text of UNIX manuals
-							(<A HREF="demandoc.1.txt">text</A> | 
-							<A HREF="demandoc.1.xhtml">xhtml</A> |
-							<A HREF="demandoc.1.pdf">pdf</A> |
-							<A HREF="demandoc.1.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="mandoc.1.html">mandoc(1)</A></TD>
 					<TD VALIGN="top">
 						format and display UNIX manuals
-							(<A HREF="mandoc.1.txt">text</A> | 
-							<A HREF="mandoc.1.xhtml">xhtml</A> |
-							<A HREF="mandoc.1.pdf">pdf</A> |
-							<A HREF="mandoc.1.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="preconv.1.html">preconv(1)</A></TD>
 					<TD VALIGN="top">
 						recode multibyte UNIX manuals
-							(<A HREF="preconv.1.txt">text</A> | 
-							<A HREF="preconv.1.xhtml">xhtml</A> |
-							<A HREF="preconv.1.pdf">pdf</A> |
-							<A HREF="preconv.1.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="mandoc.3.html">mandoc(3)</A></TD>
 					<TD VALIGN="top">
 						mandoc macro compiler library
-							(<A HREF="mandoc.3.txt">text</A> | 
-							<A HREF="mandoc.3.xhtml">xhtml</A> |
-							<A HREF="mandoc.3.pdf">pdf</A> |
-							<A HREF="mandoc.3.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="man.7.html">man(7)</A></TD>
 					<TD VALIGN="top">
 						man language reference
-							(<A HREF="man.7.txt">text</A> | 
-							<A HREF="man.7.xhtml">xhtml</A> |
-							<A HREF="man.7.pdf">pdf</A> |
-							<A HREF="man.7.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="man.cgi.7.html">man.cgi(7)</A></TD>
 					<TD VALIGN="top">
 						cgi for manpage query and display
-							(<A HREF="man.cgi.7.txt">text</A> | 
-							<A HREF="man.cgi.7.xhtml">xhtml</A> |
-							<A HREF="man.cgi.7.pdf">pdf</A> |
-							<A HREF="man.cgi.7.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="eqn.7.html">eqn(7)</A></TD>
 					<TD VALIGN="top">
 						eqn-mandoc language reference
-							(<A HREF="eqn.7.txt">text</A> | 
-							<A HREF="eqn.7.xhtml">xhtml</A> |
-							<A HREF="eqn.7.pdf">pdf</A> |
-							<A HREF="eqn.7.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="mandoc_char.7.html">mandoc_char(7)</A></TD>
 					<TD VALIGN="top">
 						mandoc special characters
-							(<A HREF="mandoc_char.7.txt">text</A> | 
-							<A HREF="mandoc_char.7.xhtml">xhtml</A> |
-							<A HREF="mandoc_char.7.pdf">pdf</A> |
-							<A HREF="mandoc_char.7.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="mdoc.7.html">mdoc(7)</A></TD>
 					<TD VALIGN="top">
 						mdoc language reference
-							(<A HREF="mdoc.7.txt">text</A> | 
-							<A HREF="mdoc.7.xhtml">xhtml</A> |
-							<A HREF="mdoc.7.pdf">pdf</A> |
-							<A HREF="mdoc.7.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="roff.7.html">roff(7)</A></TD>
 					<TD VALIGN="top">
 						roff-mandoc language reference
-							(<A HREF="roff.7.txt">text</A> | 
-							<A HREF="roff.7.xhtml">xhtml</A> |
-							<A HREF="roff.7.pdf">pdf</A> |
-							<A HREF="roff.7.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="tbl.7.html">tbl(7)</A></TD>
 					<TD VALIGN="top">
 						tbl-mandoc language reference
-							(<A HREF="tbl.7.txt">text</A> | 
-							<A HREF="tbl.7.xhtml">xhtml</A> |
-							<A HREF="tbl.7.pdf">pdf</A> |
-							<A HREF="tbl.7.ps">ps</A>)
 					</TD>
 				</TR>
 				<TR>
 					<TD VALIGN="top"><A HREF="mandocdb.8.html">mandocdb(8)</A></TD>
 					<TD VALIGN="top">
 						index UNIX manuals
-							(<A HREF="mandocdb.8.txt">text</A> | 
-							<A HREF="mandocdb.8.xhtml">xhtml</A> |
-							<A HREF="mandocdb.8.pdf">pdf</A> |
-							<A HREF="mandocdb.8.ps">ps</A>)
 					</TD>
 				</TR>
 			</TBODY>
@@ -301,10 +249,9 @@
 			<I>Ingo, can you summarise your changes here?</I>
 		</P>
 		<P>
-			The <A HREF="mandocdb.8.html">mandocdb</A> tools (<A HREF="mandocdb.8.html">mandocdb</A>, 
-			<A HREF="apropos.1.html">apropos</A> (absorbing whatis), and
-			<A HREF="man.cgi.7.html">man.cgi</A> have been re-written to use
-			<A CLASS="external" HREF="http://www.sqlite.org">sqlite3</A> as a database.
+			The <A HREF="mandocdb.8.html">mandocdb</A> tools (<A HREF="mandocdb.8.html">mandocdb</A>, <A
+			HREF="apropos.1.html">apropos</A> (absorbing whatis), and <A HREF="man.cgi.7.html">man.cgi</A>) have been re-written to
+			use <A CLASS="external" HREF="http://www.sqlite.org">sqlite3</A> as a database.
 		</P>
 		<P>
 			See <A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/index.sgml?cvsroot=mdocml">cvsweb</A> for
