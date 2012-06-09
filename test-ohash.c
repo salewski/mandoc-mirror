@@ -12,7 +12,7 @@ main(void)
 	struct ohash h;
 	struct ohash_info i;
 	i.halloc = i.alloc = xalloc;
-	i.free = free;
+	i.hfree = xfree;
 	ohash_init(&h, 2, &i);
 	ohash_delete(&h);
 	return 0;
