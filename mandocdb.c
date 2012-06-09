@@ -34,7 +34,11 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef HAVE_OHASH
 #include <ohash.h>
+#else
+#include "compat_ohash.h"
+#endif
 #include <sqlite3.h>
 
 #include "mdoc.h"
@@ -327,6 +331,7 @@ main(int argc, char *argv[])
 {
 	char		  cwd[MAXPATHLEN];
 	int		  ch, rc, fd, i;
+	unsigned int	  index;
 	size_t		  j, sz;
 	const char	 *dir;
 	struct str	 *s;
@@ -521,8 +526,8 @@ out:
 	manpath_free(&dirs);
 	mchars_free(mc);
 	mparse_free(mp);
-	for (s = ohash_first(&strings, &ch);
-			NULL != s; s = ohash_next(&strings, &ch)) {
+	for (s = ohash_first(&strings, &index);
+			NULL != s; s = ohash_next(&strings, &index)) {
 		if (s->utf8 != s->key)
 			free(s->utf8);
 		free(s);

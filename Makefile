@@ -147,6 +147,7 @@ SRCS		 = Makefile \
 		   test-fgetln.c \
 		   test-getsubopt.c \
 		   test-mmap.c \
+		   test-ohash.c \
 		   test-strlcat.c \
 		   test-strlcpy.c \
 		   test-strptime.c \
@@ -187,6 +188,7 @@ LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 
 COMPAT_OBJS	 = compat_fgetln.o \
 		   compat_getsubopt.o \
+		   compat_ohash.o \
 		   compat_strlcat.o \
 		   compat_strlcpy.o
 
@@ -203,7 +205,7 @@ $(LIBMAN_OBJS): libman.h
 $(LIBMDOC_OBJS): libmdoc.h
 $(LIBROFF_OBJS): libroff.h
 $(LIBMANDOC_OBJS): mandoc.h mdoc.h man.h libmandoc.h config.h
-$(COMPAT_OBJS): config.h
+$(COMPAT_OBJS): config.h compat_ohash.h
 
 MANDOC_HTML_OBJS = eqn_html.o \
 		   html.o \
@@ -396,6 +398,10 @@ config.h: config.h.pre config.h.post
 	rm -f config.log
 	( cat config.h.pre; \
 	  echo; \
+	  if $(CC) $(CFLAGS) -Werror -o test-ohash test-ohash.c >> config.log 2>&1; then \
+		echo '#define HAVE_OHASH'; \
+		rm test-ohash; \
+	  fi; \
 	  if $(CC) $(CFLAGS) -Werror -o test-fgetln test-fgetln.c >> config.log 2>&1; then \
 		echo '#define HAVE_FGETLN'; \
 		rm test-fgetln; \

@@ -30,7 +30,11 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef HAVE_OHASH
 #include <ohash.h>
+#else
+#include "compat_ohash.h"
+#endif
 #include <sqlite3.h>
 
 #include "mandoc.h"
