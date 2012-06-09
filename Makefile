@@ -26,7 +26,7 @@ CFLAGS	 	+= -DUSE_WCHAR
 # If your system has manpath(1), uncomment this.  This is most any
 # system that's not OpenBSD or NetBSD.  If uncommented, manpage(1) and
 # mandocdb(8) will use manpath(1) to get the MANPATH variable.
-#CFLAGS		+= -DUSE_MANPATH
+CFLAGS		+= -DUSE_MANPATH
 
 # If your system supports static binaries only, uncomment this.  This
 # appears only to be BSD UNIX systems (Mac OS X has no support and Linux
