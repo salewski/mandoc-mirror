@@ -39,7 +39,6 @@
 
 #include "mandoc.h"
 #include "manpath.h"
-#include "mandocdb.h"
 #include "mansearch.h"
 
 #define	SQL_BIND_TEXT(_db, _s, _i, _v) \
@@ -117,15 +116,16 @@ static	const struct type types[] = {
 static	void		*hash_alloc(size_t, void *);
 static	void		 hash_free(void *, size_t, void *);
 static	void		*hash_halloc(size_t, void *);
-static	struct expr	*exprcomp(int, char *[]);
+static	struct expr	*exprcomp(const struct mansearch *, 
+				int, char *[]);
 static	void		 exprfree(struct expr *);
-static	struct expr	*exprterm(char *);
+static	struct expr	*exprterm(const struct mansearch *, char *);
 static	char		*sql_statement(const struct expr *,
 				const char *, const char *);
 
 int
-mansearch(const struct manpaths *paths, 
-		const char *arch, const char *sec,
+mansearch(const struct mansearch *search,
+		const struct manpaths *paths, 
 		int argc, char *argv[], 
 		struct manpage **res, size_t *sz)
 {
@@ -158,7 +158,7 @@ mansearch(const struct manpaths *paths,
 
 	if (0 == argc)
 		goto out;
-	if (NULL == (e = exprcomp(argc, argv)))
+	if (NULL == (e = exprcomp(search, argc, argv)))
 		goto out;
 
 	/*
@@ -176,7 +176,7 @@ mansearch(const struct manpaths *paths,
 		goto out;
 	}
 
-	sql = sql_statement(e, arch, sec);
+	sql = sql_statement(e, search->arch, search->sec);
 
 	/*
 	 * Loop over the directories (containing databases) for us to
@@ -211,10 +211,10 @@ mansearch(const struct manpaths *paths,
 		if (SQLITE_OK != c)
 			fprintf(stderr, "%s\n", sqlite3_errmsg(db));
 
-		if (NULL != arch)
-			SQL_BIND_TEXT(db, s, j, arch);
-		if (NULL != sec)
-			SQL_BIND_TEXT(db, s, j, arch);
+		if (NULL != search->arch)
+			SQL_BIND_TEXT(db, s, j, search->arch);
+		if (NULL != search->sec)
+			SQL_BIND_TEXT(db, s, j, search->sec);
 
 		for (ep = e; NULL != ep; ep = ep->next) {
 			SQL_BIND_TEXT(db, s, j, ep->v);
@@ -346,7 +346,7 @@ sql_statement(const struct expr *e, const char *arch, const char *sec)
  * "(", "foo=bar", etc.).
  */
 static struct expr *
-exprcomp(int argc, char *argv[])
+exprcomp(const struct mansearch *search, int argc, char *argv[])
 {
 	int		 i;
 	struct expr	*first, *next, *cur;
@@ -354,7 +354,7 @@ exprcomp(int argc, char *argv[])
 	first = cur = NULL;
 
 	for (i = 0; i < argc; i++) {
-		next = exprterm(argv[i]);
+		next = exprterm(search, argv[i]);
 		if (NULL == next) {
 			exprfree(first);
 			return(NULL);
@@ -370,7 +370,7 @@ exprcomp(int argc, char *argv[])
 }
 
 static struct expr *
-exprterm(char *buf)
+exprterm(const struct mansearch *search, char *buf)
 {
 	struct expr	*e;
 	char		*key, *v;
@@ -381,6 +381,14 @@ exprterm(char *buf)
 
 	e = mandoc_calloc(1, sizeof(struct expr));
 
+	/*"whatis" mode uses an opaque string and default fields. */
+
+	if (MANSEARCH_WHATIS & search->flags) {
+		e->v = buf;
+		e->bits = search->deftype;
+		return(e);
+	}
+
 	/*
 	 * If no =~ is specified, search with equality over names and
 	 * descriptions.
@@ -389,10 +397,10 @@ exprterm(char *buf)
 
 	if (NULL == (v = strpbrk(buf, "=~"))) {
 		e->v = buf;
-		e->bits = TYPE_Nm | TYPE_Nd;
+		e->bits = search->deftype;
 		return(e);
 	} else if (v == buf)
-		e->bits = TYPE_Nm | TYPE_Nd;
+		e->bits = search->deftype;
 
 	e->glob = '~' == *v;
 	*v++ = '\0';

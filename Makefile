@@ -26,7 +26,7 @@ CFLAGS	 	+= -DUSE_WCHAR
 # If your system has manpath(1), uncomment this.  This is most any
 # system that's not OpenBSD or NetBSD.  If uncommented, manpage(1) and
 # mandocdb(8) will use manpath(1) to get the MANPATH variable.
-CFLAGS		+= -DUSE_MANPATH
+#CFLAGS		+= -DUSE_MANPATH
 
 # If your system supports static binaries only, uncomment this.  This
 # appears only to be BSD UNIX systems (Mac OS X has no support and Linux
@@ -107,7 +107,6 @@ SRCS		 = Makefile \
 		   mandoc_char.7 \
 		   mandocdb.8 \
 		   mandocdb.c \
-		   mandocdb.h \
 		   manpath.c \
 		   manpath.h \
 		   mdoc.7 \
@@ -234,16 +233,16 @@ MANDOC_OBJS	 = $(MANDOC_HTML_OBJS) \
 $(MANDOC_OBJS): main.h mandoc.h mdoc.h man.h config.h out.h
 
 MANDOCDB_OBJS	 = mandocdb.o manpath.o
-$(MANDOCDB_OBJS): mandocdb.h mandoc.h mdoc.h man.h config.h manpath.h
+$(MANDOCDB_OBJS): mansearch.h mandoc.h mdoc.h man.h config.h manpath.h
 
 PRECONV_OBJS	 = preconv.o
 $(PRECONV_OBJS): config.h
 
 APROPOS_OBJS	 = apropos.o mansearch.o manpath.o
-$(APROPOS_OBJS): config.h manpath.h mandocdb.h mansearch.h
+$(APROPOS_OBJS): config.h manpath.h mansearch.h
 
 MANPAGE_OBJS	 = manpage.o mansearch.o manpath.o
-$(MANPAGE_OBJS): config.h manpath.h mandocdb.h mansearch.h
+$(MANPAGE_OBJS): config.h manpath.h mansearch.h
 
 DEMANDOC_OBJS	 = demandoc.o
 $(DEMANDOC_OBJS): config.h

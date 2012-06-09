@@ -32,11 +32,11 @@
 int
 main(int argc, char *argv[])
 {
-	int		 ch;
+	int		 ch, whatis;
+	struct mansearch search;
 	size_t		 i, sz;
 	struct manpage	*res;
-	char		*conf_file, *defpaths, *auxpaths,
-			*arch, *sec;
+	char		*conf_file, *defpaths, *auxpaths;
 	struct manpaths	 paths;
 	char		*progname;
 	extern char	*optarg;
@@ -48,8 +48,10 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
-	auxpaths = defpaths = conf_file = arch = sec = NULL;
+	auxpaths = defpaths = conf_file = NULL;
 	memset(&paths, 0, sizeof(struct manpaths));
+	memset(&search, 0, sizeof(struct mansearch));
+	whatis = (0 == strcmp(progname, "whatis"));
 
 	while (-1 != (ch = getopt(argc, argv, "C:M:m:S:s:")))
 		switch (ch) {
@@ -63,10 +65,10 @@ main(int argc, char *argv[])
 			auxpaths = optarg;
 			break;
 		case ('S'):
-			arch = optarg;
+			search.arch = optarg;
 			break;
 		case ('s'):
-			sec = optarg;
+			search.sec = optarg;
 			break;
 		default:
 			goto usage;
@@ -78,8 +80,11 @@ main(int argc, char *argv[])
 	if (0 == argc)
 		goto usage;
 
+	search.deftype = whatis ? TYPE_Nm : TYPE_Nm | TYPE_Nd;
+	search.flags = whatis ? MANSEARCH_WHATIS : 0;
+
 	manpath_parse(&paths, conf_file, defpaths, auxpaths);
-	ch = mansearch(&paths, arch, sec, argc, argv, &res, &sz);
+	ch = mansearch(&search, &paths, argc, argv, &res, &sz);
 	manpath_free(&paths);
 
 	if (0 == ch)

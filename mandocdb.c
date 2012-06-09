@@ -44,8 +44,8 @@
 #include "mdoc.h"
 #include "man.h"
 #include "mandoc.h"
-#include "mandocdb.h"
 #include "manpath.h"
+#include "mansearch.h"
 
 /* Post a warning to stderr. */
 #define WARNING(_f, _b, _fmt, _args...) \

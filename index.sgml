@@ -157,16 +157,6 @@
 					</TD>
 				</TR>
 				<TR>
-					<TD VALIGN="top"><A HREF="whatis.1.html">whatis(1)</A></TD>
-					<TD VALIGN="top">
-						search the manual page database
-							(<A HREF="whatis.1.txt">text</A> | 
-							<A HREF="whatis.1.xhtml">xhtml</A> |
-							<A HREF="whatis.1.pdf">pdf</A> |
-							<A HREF="whatis.1.ps">ps</A>)
-					</TD>
-				</TR>
-				<TR>
 					<TD VALIGN="top"><A HREF="mandoc.3.html">mandoc(3)</A></TD>
 					<TD VALIGN="top">
 						mandoc macro compiler library
@@ -305,28 +295,16 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
-			23-03-2011: version 1.12.1
+			xx-xx-2012: version 1.12.4
 		</P>
 		<P>
-			Significant work on <A HREF="apropos.1.html">apropos</A> and <A HREF="mandocdb.8.html">mandocdb</A>.  These tools are
-			now much more robust.  
-			A <A HREF="whatis.1.html">whatis</A> implementation is now handled as an <A HREF="apropos.1.html">apropos</A> mode.
-			These tools are also able to minimally handle pre-formatted pages, that is, those already formatted by another utility
-			such as GNU troff.
+			<I>Ingo, can you summarise your changes here?</I>
 		</P>
 		<P>
-			The <A HREF="man.cgi.7.html">man.cgi</A> script is also now available for wider testing.  It interfaces with <A
-			HREF="mandocdb.8.html">mandocdb</A> manuals cached by <DEL><A HREF="catman.8.html">catman</A></DEL>.  HTML output is generated
-			on-the-fly by <A HREF="mandoc.3.html">libmandoc</A> or internal methods to convert pre-formatted pages.
-		</P>
-		<P>
-			The mailing list archive for the discuss and tech lists are being hosted by <A CLASS="external"
-			HREF="http://www.gmane.org">Gmane</A> at <A HREF="http://dir.gmane.org/gmane.comp.tools.mdocml.user"
-			CLASS="external">gmane.comp.tools.mdocml.user</A> and <A HREF="http://dir.gmane.org/gmane.comp.tools.mdocml.devel"
-			CLASS="external">gmane.comp.tools.mdocml.devel</A>, respectively.
-		</P>
-		<P>
-			Lastly, I'm no longer providing binaries, as nobody has asked for them.
+			The <A HREF="mandocdb.8.html">mandocdb</A> tools (<A HREF="mandocdb.8.html">mandocdb</A>, 
+			<A HREF="apropos.1.html">apropos</A> (absorbing whatis), and
+			<A HREF="man.cgi.7.html">man.cgi</A> have been re-written to use
+			<A CLASS="external" HREF="http://www.sqlite.org">sqlite3</A> as a database.
 		</P>
 		<P>
 			See <A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/index.sgml?cvsroot=mdocml">cvsweb</A> for
