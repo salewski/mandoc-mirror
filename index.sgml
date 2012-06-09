@@ -47,13 +47,11 @@
 			<A NAME="sources">Sources</A>
 		</H2>
 		<P>
-			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any modern system; however, you'll
-			need <A HREF="http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html">libdb</A> to build <A
-			HREF="apropos.1.html">apropos</A>, <A HREF="whatis.1.html">whatis</A>, <A HREF="man.cgi.7.html">man.cgi</A>, 
-			and <A HREF="mandocdb.8.html">mandocdb</A> (this is installed by default on BSD UNIX
-			systems &mdash; see the <I>Makefile</I> if you're running Linux).  To build and install into <I>/usr/local/</I>, just
-			run <CODE>make install</CODE>.  Be careful: the <B>preconv</B>, <B>apropos</B>, and <B>whatis</B> binary names are
-			usually taken by existing utilities.
+			<SPAN CLASS="nm">mdocml</SPAN> is in ISO C99 and should build and run on any modern system; however, you'll need <A
+			HREF="http://www.sqlite.org">sqlite3</A> to build <A HREF="apropos.1.html">apropos</A>, <A
+			HREF="whatis.1.html">whatis</A>, <A HREF="man.cgi.7.html">man.cgi</A>, and <A HREF="mandocdb.8.html">mandocdb</A>.  
+			To build and install into <I>/usr/local/</I>, just run <CODE>make install</CODE>.  
+			Be careful: the <B>preconv</B>, <B>apropos</B>, and <B>whatis</B> binary names are usually taken by existing utilities.
 		</P>
 		<H2>
 			Downstream
