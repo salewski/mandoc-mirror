@@ -39,6 +39,7 @@ enum	rofft {
 	ROFF_am,
 	ROFF_ami,
 	ROFF_am1,
+	ROFF_cc,
 	ROFF_de,
 	ROFF_dei,
 	ROFF_de1,
@@ -105,6 +106,7 @@ struct	roff {
 	struct mparse	*parse; /* parse point */
 	struct roffnode	*last; /* leaf of stack */
 	enum roffrule	 rstack[RSTACK_MAX]; /* stack of !`ie' rules */
+	char		 control; /* control character */
 	int		 rstackpos; /* position in rstack */
 	struct reg	 regs[REG__MAX];
 	struct roffkv	*strtab; /* user-defined strings & macros */
@@ -169,6 +171,7 @@ static	enum rofferr	 roff_block(ROFF_ARGS);
 static	enum rofferr	 roff_block_text(ROFF_ARGS);
 static	enum rofferr	 roff_block_sub(ROFF_ARGS);
 static	enum rofferr	 roff_cblock(ROFF_ARGS);
+static	enum rofferr	 roff_cc(ROFF_ARGS);
 static	enum rofferr	 roff_ccond(ROFF_ARGS);
 static	enum rofferr	 roff_cond(ROFF_ARGS);
 static	enum rofferr	 roff_cond_text(ROFF_ARGS);
@@ -215,6 +218,7 @@ static	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "am", roff_block, roff_block_text, roff_block_sub, 0, NULL },
 	{ "ami", roff_block, roff_block_text, roff_block_sub, 0, NULL },
 	{ "am1", roff_block, roff_block_text, roff_block_sub, 0, NULL },
+	{ "cc", roff_cc, NULL, NULL, 0, NULL },
 	{ "de", roff_block, roff_block_text, roff_block_sub, 0, NULL },
 	{ "dei", roff_block, roff_block_text, roff_block_sub, 0, NULL },
 	{ "de1", roff_block, roff_block_text, roff_block_sub, 0, NULL },
@@ -392,6 +396,7 @@ roff_reset(struct roff *r)
 
 	roff_free1(r);
 
+	r->control = 0;
 	memset(&r->regs, 0, sizeof(struct reg) * REG__MAX);
 
 	for (i = 0; i < PREDEFS_MAX; i++) 
@@ -611,7 +616,7 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 	assert(ROFF_CONT == e);
 
 	ppos = pos;
-	ctl = mandoc_getcontrol(*bufp, &pos);
+	ctl = roff_getcontrol(r, *bufp, &pos);
 
 	/*
 	 * First, if a scope is open and we're not a macro, pass the
@@ -1363,6 +1368,23 @@ roff_TS(ROFF_ARGS)
 
 /* ARGSUSED */
 static enum rofferr
+roff_cc(ROFF_ARGS)
+{
+	const char	*p;
+
+	p = *bufp + pos;
+
+	if ('\0' == *p || '.' == (r->control = *p++))
+		r->control = 0;
+
+	if ('\0' != *p)
+		mandoc_msg(MANDOCERR_ARGCOUNT, r->parse, ln, ppos, NULL);
+
+	return(ROFF_IGN);
+}
+
+/* ARGSUSED */
+static enum rofferr
 roff_tr(ROFF_ARGS)
 {
 	const char	*p, *first, *second;
@@ -1756,4 +1778,39 @@ roff_strdup(const struct roff *r, const char *p)
 
 	res[(int)ssz] = '\0';
 	return(res);
+}
+
+/*
+ * Find out whether a line is a macro line or not.  
+ * If it is, adjust the current position and return one; if it isn't,
+ * return zero and don't change the current position.
+ * If the control character has been set with `.cc', then let that grain
+ * precedence.
+ * This is slighly contrary to groff, where using the non-breaking
+ * control character when `cc' has been invoked will cause the
+ * non-breaking macro contents to be printed verbatim.
+ */
+int
+roff_getcontrol(const struct roff *r, const char *cp, int *ppos)
+{
+	int		pos;
+
+	pos = *ppos;
+
+	if (0 != r->control && cp[pos] == r->control)
+		pos++;
+	else if (0 != r->control)
+		return(0);
+	else if ('\\' == cp[pos] && '.' == cp[pos + 1])
+		pos += 2;
+	else if ('.' == cp[pos] || '\'' == cp[pos])
+		pos++;
+	else
+		return(0);
+
+	while (' ' == cp[pos] || '\t' == cp[pos])
+		pos++;
+
+	*ppos = pos;
+	return(1);
 }

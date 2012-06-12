@@ -604,32 +604,6 @@ mandoc_eos(const char *p, size_t sz, int enclosed)
 }
 
 /*
- * Find out whether a line is a macro line or not.  If it is, adjust the
- * current position and return one; if it isn't, return zero and don't
- * change the current position.
- */
-int
-mandoc_getcontrol(const char *cp, int *ppos)
-{
-	int		pos;
-
-	pos = *ppos;
-
-	if ('\\' == cp[pos] && '.' == cp[pos + 1])
-		pos += 2;
-	else if ('.' == cp[pos] || '\'' == cp[pos])
-		pos++;
-	else
-		return(0);
-
-	while (' ' == cp[pos] || '\t' == cp[pos])
-		pos++;
-
-	*ppos = pos;
-	return(1);
-}
-
-/*
  * Convert a string to a long that may not be <0.
  * If the string is invalid, or is less than 0, return -1.
  */

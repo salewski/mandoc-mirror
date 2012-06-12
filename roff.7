@@ -417,6 +417,18 @@ The syntax of this request is the same as that of
 It is currently ignored by
 .Xr mandoc 1 ,
 as are its children.
+.Ss \&cc
+Changes the control character.
+Its syntax is as follows:
+.Bd -literal -offset indent
+.Pf . Cm \&cc Op Ar c
+.Ed
+.Pp
+If
+.Ar c
+is not specified, the control character is reset to
+.Sq \&. .
+Trailing characters are ignored.
 .Ss \&de
 Define a
 .Nm

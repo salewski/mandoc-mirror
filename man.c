@@ -131,7 +131,7 @@ man_parseln(struct man *m, int ln, char *buf, int offs)
 
 	assert( ! (MAN_HALT & m->flags));
 
-	return (mandoc_getcontrol(buf, &offs) ?
+	return (roff_getcontrol(m->roff, buf, &offs) ?
 			man_pmacro(m, ln, buf, offs) : 
 			man_ptext(m, ln, buf, offs));
 }
