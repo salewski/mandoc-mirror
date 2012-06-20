@@ -361,8 +361,9 @@ subsequent output lines are indented, with the following syntax:
 .Pp
 The
 .Cm width
-argument must conform to
-.Sx Scaling Widths .
+argument is a
+.Xr roff 7
+scaling width.
 If specified, it's saved for later paragraph left-margins; if unspecified, the
 saved or default width is used.
 .Pp
@@ -404,8 +405,9 @@ Begin an indented paragraph with the following syntax:
 .Pp
 The
 .Cm width
-argument defines the width of the left margin and is defined by
-.Sx Scaling Widths .
+argument is a
+.Xr roff 7
+scaling width defining the left margin.
 It's saved for later paragraph left-margins; if unspecified, the saved or
 default width is used.
 .Pp
@@ -538,8 +540,9 @@ This has the following syntax:
 .Pp
 The
 .Cm width
-argument must conform to
-.Sx Scaling Widths .
+argument is a
+.Xr roff 7
+scaling width.
 If not specified, the saved or default width is used.
 .Pp
 See also
@@ -604,8 +607,9 @@ The syntax is as follows:
 .Pp
 The
 .Cm width
-argument must conform to
-.Sx Scaling Widths .
+argument is a
+.Xr roff 7
+scaling width.
 If specified, it's saved for later paragraph left-margins; if
 unspecified, the saved or default width is used.
 .Pp
@@ -662,10 +666,10 @@ Insert vertical spaces into output with the following syntax:
 .Op Cm height
 .Ed
 .Pp
-Insert
+The
 .Cm height
-spaces, which must conform to
-.Sx Scaling Widths .
+argument is a scaling width as described in
+.Xr roff 7 .
 If 0, this is equivalent to the
 .Sx \&br
 macro.
