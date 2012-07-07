@@ -53,6 +53,7 @@ static	void	  post_bd(DECL_ARGS);
 static	void	  post_bk(DECL_ARGS);
 static	void	  post_dl(DECL_ARGS);
 static	void	  post_enc(DECL_ARGS);
+static	void	  post_in(DECL_ARGS);
 static	void	  post_lb(DECL_ARGS);
 static	void	  post_nm(DECL_ARGS);
 static	void	  post_percent(DECL_ARGS);
@@ -66,6 +67,7 @@ static	int	  pre_br(DECL_ARGS);
 static	int	  pre_bx(DECL_ARGS);
 static	int	  pre_dl(DECL_ARGS);
 static	int	  pre_enc(DECL_ARGS);
+static	int	  pre_in(DECL_ARGS);
 static	int	  pre_it(DECL_ARGS);
 static	int	  pre_nm(DECL_ARGS);
 static	int	  pre_ns(DECL_ARGS);
@@ -111,7 +113,7 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 	{ NULL, NULL, NULL, NULL, NULL }, /* _Fn */
 	{ NULL, NULL, NULL, NULL, NULL }, /* _Ft */
 	{ NULL, pre_enc, post_enc, "\\fB", "\\fP" }, /* Ic */
-	{ NULL, NULL, NULL, NULL, NULL }, /* _In */
+	{ NULL, pre_in, post_in, NULL, NULL }, /* In */
 	{ NULL, pre_enc, post_enc, "\\fR", "\\fP" }, /* Li */
 	{ cond_head, pre_enc, NULL, "\\- ", NULL }, /* Nd */
 	{ NULL, pre_nm, post_nm, NULL, NULL }, /* Nm */
@@ -583,6 +585,35 @@ post_dl(DECL_ARGS)
 	mm->need_nl = 1;
 	print_word(mm, ".RE");
 	mm->need_nl = 1;
+}
+
+static int
+pre_in(DECL_ARGS)
+{
+
+	if (MDOC_SYNPRETTY & n->flags) {
+		mm->need_nl = 1;
+		print_word(mm, ".br");
+		mm->need_nl = 1;
+		print_word(mm, "\\fB#include <");
+	} else
+		print_word(mm, "<\\fI");
+	mm->need_space = 0;
+	return(1);
+}
+
+static void
+post_in(DECL_ARGS)
+{
+
+	mm->need_space = 0;
+	if (MDOC_SYNPRETTY & n->flags) {
+		print_word(mm, ">\\fP");
+		mm->need_nl = 1;
+		print_word(mm, ".br");
+		mm->need_nl = 1;
+	} else
+		print_word(mm, "\\fP>");
 }
 
 static int
