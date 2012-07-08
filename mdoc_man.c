@@ -63,6 +63,7 @@ static	void	  post_percent(DECL_ARGS);
 static	void	  post_pf(DECL_ARGS);
 static	void	  post_sect(DECL_ARGS);
 static	void	  post_sp(DECL_ARGS);
+static	void	  post_vt(DECL_ARGS);
 static	int	  pre_ap(DECL_ARGS);
 static	int	  pre_bd(DECL_ARGS);
 static	int	  pre_bk(DECL_ARGS);
@@ -81,6 +82,7 @@ static	int	  pre_pp(DECL_ARGS);
 static	int	  pre_sm(DECL_ARGS);
 static	int	  pre_sp(DECL_ARGS);
 static	int	  pre_sect(DECL_ARGS);
+static	int	  pre_vt(DECL_ARGS);
 static	int	  pre_ux(DECL_ARGS);
 static	int	  pre_xr(DECL_ARGS);
 static	void	  print_word(struct mman *, const char *);
@@ -133,7 +135,7 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 		}, /* Rv */
 	{ NULL, NULL, NULL, NULL, NULL }, /* St */
 	{ NULL, NULL, NULL, NULL, NULL }, /* _Va */
-	{ NULL, NULL, NULL, NULL, NULL }, /* _Vt */
+	{ NULL, pre_vt, post_vt, NULL, NULL }, /* Vt */
 	{ NULL, pre_xr, NULL, NULL, NULL }, /* Xr */
 	{ NULL, NULL, post_percent, NULL, NULL }, /* _%A */
 	{ NULL, NULL, NULL, NULL, NULL }, /* _%B */
@@ -845,6 +847,44 @@ post_sp(DECL_ARGS)
 {
 
 	mm->need_nl = 1;
+}
+
+static int
+pre_vt(DECL_ARGS)
+{
+
+	if (MDOC_SYNPRETTY & n->flags) {
+		switch (n->type) {
+		case (MDOC_BLOCK):
+			return(1);
+		case (MDOC_BODY):
+			break;
+		default:
+			return(0);
+		}
+		mm->need_nl = 1;
+		print_word(mm, ".br");
+		mm->need_nl = 1;
+	}
+	print_word(mm, "\\fI");
+	mm->need_space = 0;
+	return(1);
+}
+
+static void
+post_vt(DECL_ARGS)
+{
+
+	if (MDOC_BODY != n->type)
+		return;
+
+	mm->need_space = 0;
+	print_word(mm, "\\fP");
+	if (MDOC_SYNPRETTY & n->flags) {
+		mm->need_nl = 1;
+		print_word(mm, ".br");
+		mm->need_nl = 1;
+	}
 }
 
 static int
