@@ -70,6 +70,7 @@ static	int	  pre_fo(DECL_ARGS);
 static	int	  pre_ft(DECL_ARGS);
 static	int	  pre_in(DECL_ARGS);
 static	int	  pre_it(DECL_ARGS);
+static	int	  pre_lk(DECL_ARGS);
 static	int	  pre_nm(DECL_ARGS);
 static	int	  pre_ns(DECL_ARGS);
 static	int	  pre_pp(DECL_ARGS);
@@ -199,7 +200,7 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 	{ NULL, pre_ux, NULL, "currently under development.", NULL }, /* Ud */
 	{ NULL, NULL, post_lb, NULL, NULL }, /* Lb */
 	{ NULL, pre_pp, NULL, NULL, NULL }, /* Lp */
-	{ NULL, NULL, NULL, NULL, NULL }, /* _Lk */
+	{ NULL, pre_lk, NULL, NULL, NULL }, /* Lk */
 	{ NULL, NULL, NULL, NULL, NULL }, /* _Mt */
 	{ cond_body, pre_enc, post_enc, "{", "}" }, /* Brq */
 	{ cond_body, pre_enc, post_enc, "{", "}" }, /* Bro */
@@ -828,6 +829,34 @@ post_lb(DECL_ARGS)
 
 	if (SEC_LIBRARY == n->sec)
 		outflags |= MMAN_br;
+}
+
+static int
+pre_lk(DECL_ARGS)
+{
+	const struct mdoc_node *link, *descr;
+
+	if (NULL == (link = n->child))
+		return(0);
+
+	if (NULL != (descr = link->next)) {
+		print_word("\\fI");
+		outflags &= ~MMAN_spc;
+		while (NULL != descr) {
+			print_word(descr->string);
+			descr = descr->next;
+		}
+		print_word(":");
+		outflags &= ~MMAN_spc;
+		print_word("\\fP");
+	}
+
+	print_word("\\fB");
+	outflags &= ~MMAN_spc;
+	print_word(link->string);
+	outflags &= ~MMAN_spc;
+	print_word("\\fP");
+	return(0);
 }
 
 static int
