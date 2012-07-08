@@ -1425,6 +1425,8 @@ termp_sh_pre(DECL_ARGS)
 		break;
 	case (MDOC_BODY):
 		p->offset = term_len(p, p->defindent);
+		if (SEC_AUTHORS == n->sec)
+			p->flags &= ~(TERMP_SPLIT|TERMP_NOSPLIT);
 		break;
 	default:
 		break;
