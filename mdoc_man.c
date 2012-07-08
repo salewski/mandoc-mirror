@@ -53,7 +53,9 @@ static	void	  post_bd(DECL_ARGS);
 static	void	  post_bk(DECL_ARGS);
 static	void	  post_dl(DECL_ARGS);
 static	void	  post_enc(DECL_ARGS);
+static	void	  post_fa(DECL_ARGS);
 static	void	  post_fn(DECL_ARGS);
+static	void	  post_fo(DECL_ARGS);
 static	void	  post_in(DECL_ARGS);
 static	void	  post_lb(DECL_ARGS);
 static	void	  post_nm(DECL_ARGS);
@@ -68,7 +70,9 @@ static	int	  pre_br(DECL_ARGS);
 static	int	  pre_bx(DECL_ARGS);
 static	int	  pre_dl(DECL_ARGS);
 static	int	  pre_enc(DECL_ARGS);
+static	int	  pre_fa(DECL_ARGS);
 static	int	  pre_fn(DECL_ARGS);
+static	int	  pre_fo(DECL_ARGS);
 static	int	  pre_in(DECL_ARGS);
 static	int	  pre_it(DECL_ARGS);
 static	int	  pre_nm(DECL_ARGS);
@@ -109,7 +113,7 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 	{ NULL, pre_enc, post_enc, "The \\fB",
 	    "\\fP\nutility exits 0 on success, and >0 if an error occurs."
 	    }, /* Ex */
-	{ NULL, NULL, NULL, NULL, NULL }, /* _Fa */
+	{ NULL, pre_fa, post_fa, NULL, NULL }, /* Fa */
 	{ NULL, NULL, NULL, NULL, NULL }, /* _Fd */
 	{ NULL, pre_enc, post_enc, "\\fB-", "\\fP" }, /* Fl */
 	{ NULL, pre_fn, post_fn, NULL, NULL }, /* Fn */
@@ -186,8 +190,8 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 	{ NULL, pre_ux, NULL, "UNIX", NULL }, /* Ux */
 	{ NULL, NULL, NULL, NULL, NULL }, /* _Xc */
 	{ NULL, NULL, NULL, NULL, NULL }, /* _Xo */
-	{ NULL, NULL, NULL, NULL, NULL }, /* _Fo */
-	{ NULL, NULL, NULL, NULL, NULL }, /* _Fc */
+	{ NULL, pre_fo, post_fo, NULL, NULL }, /* Fo */
+	{ NULL, NULL, NULL, NULL, NULL }, /* Fc */
 	{ cond_body, pre_enc, post_enc, "[", "]" }, /* Oo */
 	{ NULL, NULL, NULL, NULL, NULL }, /* Oc */
 	{ NULL, pre_bk, post_bk, NULL, NULL }, /* Bk */
@@ -332,7 +336,8 @@ print_node(DECL_ARGS)
 	 * This makes the page structure be more consistent.
 	 */
 	prev = n->prev ? n->prev : n->parent;
-	if (prev && prev->line < n->line && MDOC_Ns != prev->tok)
+	if (prev && prev->line < n->line &&
+	    MDOC_Fo != prev->tok && MDOC_Ns != prev->tok)
 		mm->need_nl = 1;
 
 	act = NULL;
@@ -590,6 +595,33 @@ post_dl(DECL_ARGS)
 }
 
 static int
+pre_fa(DECL_ARGS)
+{
+
+	if (MDOC_Fa == n->tok)
+		n = n->child;
+
+	while (NULL != n) {
+		print_word(mm, "\\fI");
+		mm->need_space = 0;
+		print_node(m, n, mm);
+		mm->need_space = 0;
+		print_word(mm, "\\fP");
+		if (NULL != (n = n->next))
+			print_word(mm, ",");
+	}
+	return(0);
+}
+
+static void
+post_fa(DECL_ARGS)
+{
+
+	if (NULL != n->next && MDOC_Fa == n->next->tok)
+		print_word(mm, ",");
+}
+
+static int
 pre_fn(DECL_ARGS)
 {
 
@@ -608,28 +640,61 @@ pre_fn(DECL_ARGS)
 	mm->need_space = 0;
 	print_word(mm, "\\fP(");
 	mm->need_space = 0;
-	for (n = n->next; n; n = n->next) {
-		print_word(mm, "\\fI");
-		mm->need_space = 0;
-		print_node(m, n, mm);
-		mm->need_space = 0;
-		print_word(mm, "\\fP");
-		if (NULL != n->next)
-			print_word(mm, ",");
-	}
-	return(0);
+	return(pre_fa(m, n->next, mm));
 }
 
 static void
 post_fn(DECL_ARGS)
 {
 
-	mm->need_space = 0;
-	print_word(mm, ");");
+	print_word(mm, ")");
 	if (MDOC_SYNPRETTY & n->flags) {
+		print_word(mm, ";");
 		mm->need_nl = 1;
 		print_word(mm, ".br");
 		mm->need_nl = 1;
+	}
+}
+
+static int
+pre_fo(DECL_ARGS)
+{
+
+	switch (n->type) {
+	case (MDOC_HEAD):
+		if (MDOC_SYNPRETTY & n->flags) {
+			mm->need_nl = 1;
+			print_word(mm, ".br");
+			mm->need_nl = 1;
+		}
+		print_word(mm, "\\fB");
+		mm->need_space = 0;
+		break;
+	case (MDOC_BODY):
+		mm->need_space = 0;
+		print_word(mm, "(");
+		mm->need_space = 0;
+		break;
+	default:
+		break;
+	}
+	return(1);
+}
+		
+static void
+post_fo(DECL_ARGS)
+{
+
+	switch (n->type) {
+	case (MDOC_HEAD):
+		mm->need_space = 0;
+		print_word(mm, "\\fP");
+		break;
+	case (MDOC_BODY):
+		post_fn(m, n, mm);
+		break;
+	default:
+		break;
 	}
 }
 
