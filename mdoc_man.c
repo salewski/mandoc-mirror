@@ -134,7 +134,7 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 		"variable \\fIerrno\\fP is set to indicate the error."
 		}, /* Rv */
 	{ NULL, NULL, NULL, NULL, NULL }, /* St */
-	{ NULL, NULL, NULL, NULL, NULL }, /* _Va */
+	{ NULL, pre_enc, post_enc, "\\fI", "\\fP" }, /* Va */
 	{ NULL, pre_vt, post_vt, NULL, NULL }, /* Vt */
 	{ NULL, pre_xr, NULL, NULL, NULL }, /* Xr */
 	{ NULL, NULL, post_percent, NULL, NULL }, /* _%A */
@@ -875,7 +875,7 @@ static void
 post_vt(DECL_ARGS)
 {
 
-	if (MDOC_BODY != n->type)
+	if (MDOC_SYNPRETTY & n->flags && MDOC_BODY != n->type)
 		return;
 
 	mm->need_space = 0;
