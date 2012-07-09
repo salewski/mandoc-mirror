@@ -69,7 +69,7 @@ static	void	  termp_an_post(DECL_ARGS);
 static	void	  termp_bd_post(DECL_ARGS);
 static	void	  termp_bk_post(DECL_ARGS);
 static	void	  termp_bl_post(DECL_ARGS);
-static	void	  termp_d1_post(DECL_ARGS);
+static	void	  termp_fd_post(DECL_ARGS);
 static	void	  termp_fo_post(DECL_ARGS);
 static	void	  termp_in_post(DECL_ARGS);
 static	void	  termp_it_post(DECL_ARGS);
@@ -129,8 +129,8 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_sh_pre, termp_sh_post }, /* Sh */
 	{ termp_ss_pre, termp_ss_post }, /* Ss */ 
 	{ termp_sp_pre, NULL }, /* Pp */ 
-	{ termp_d1_pre, termp_d1_post }, /* D1 */
-	{ termp_d1_pre, termp_d1_post }, /* Dl */
+	{ termp_d1_pre, termp_bl_post }, /* D1 */
+	{ termp_d1_pre, termp_bl_post }, /* Dl */
 	{ termp_bd_pre, termp_bd_post }, /* Bd */
 	{ NULL, NULL }, /* Ed */
 	{ termp_bl_pre, termp_bl_post }, /* Bl */
@@ -146,7 +146,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ev */ 
 	{ termp_ex_pre, NULL }, /* Ex */
 	{ termp_fa_pre, NULL }, /* Fa */ 
-	{ termp_fd_pre, NULL }, /* Fd */ 
+	{ termp_fd_pre, termp_fd_post }, /* Fd */ 
 	{ termp_fl_pre, NULL }, /* Fl */
 	{ termp_fn_pre, NULL }, /* Fn */ 
 	{ termp_ft_pre, NULL }, /* Ft */ 
@@ -1407,6 +1407,15 @@ termp_fd_pre(DECL_ARGS)
 
 
 /* ARGSUSED */
+static void
+termp_fd_post(DECL_ARGS)
+{
+
+	term_newln(p);
+}
+
+
+/* ARGSUSED */
 static int
 termp_sh_pre(DECL_ARGS)
 {
@@ -1496,17 +1505,6 @@ termp_d1_pre(DECL_ARGS)
 	term_newln(p);
 	p->offset += term_len(p, p->defindent + 1);
 	return(1);
-}
-
-
-/* ARGSUSED */
-static void
-termp_d1_post(DECL_ARGS)
-{
-
-	if (MDOC_BLOCK != n->type) 
-		return;
-	term_newln(p);
 }
 
 
