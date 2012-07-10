@@ -100,7 +100,7 @@ static	int	  pre_ux(DECL_ARGS);
 static	int	  pre_xr(DECL_ARGS);
 static	void	  print_word(const char *);
 static	void	  print_offs(const char *);
-static	void	  print_width(const char *);
+static	void	  print_width(const char *, const struct mdoc_node *);
 static	void	  print_count(int *);
 static	void	  print_node(DECL_ARGS);
 
@@ -360,22 +360,34 @@ print_offs(const char *v)
 }
 
 void
-print_width(const char *v)
+print_width(const char *v, const struct mdoc_node *child)
 {
 	char		  buf[24];
 	struct roffsu	  su;
-	size_t		  sz;
+	size_t		  sz, chsz;
+
+	/* XXX Rough estimation, might have multiple parts. */
+	chsz = (NULL != child && MDOC_TEXT == child->type) ?
+			strlen(child->string) : 0;
 
 	if (a2roffsu(v, &su, SCALE_MAX)) {
 		if (SCALE_EN == su.unit)
 			sz = su.scale;
 		else {
+			if (chsz)
+				print_word(".HP");
+			else
+				print_word(".TP");
 			print_word(v);
 			return;
 		}
 	} else
 		sz = strlen(v);
 
+	if (chsz > sz)
+		print_word(".HP");
+	else
+		print_word(".TP");
 	snprintf(buf, sizeof(buf), "%ldn", sz + 2);
 	print_word(buf);
 }
@@ -1027,8 +1039,7 @@ pre_it(DECL_ARGS)
 		case (LIST_dash):
 			/* FALLTHROUGH */
 		case (LIST_hyphen):
-			print_word(".TP");
-			print_width(bln->norm->Bl.width);
+			print_width(bln->norm->Bl.width, NULL);
 			outflags |= MMAN_nl;
 			font_push('B');
 			if (LIST_bullet == bln->norm->Bl.type)
@@ -1038,15 +1049,18 @@ pre_it(DECL_ARGS)
 			font_pop();
 			break;
 		case (LIST_enum):
-			print_word(".TP");
-			print_width(bln->norm->Bl.width);
+			print_width(bln->norm->Bl.width, NULL);
 			outflags |= MMAN_nl;
 			print_count(&bln->norm->Bl.count);
 			outflags |= MMAN_nl;
 			break;
+		case (LIST_hang):
+			print_width(bln->norm->Bl.width, n->child);
+			outflags |= MMAN_nl;
+			break;
 		default:
 			if (bln->norm->Bl.width)
-				print_width(bln->norm->Bl.width);
+				print_width(bln->norm->Bl.width, n->child);
 			break;
 		}
 		outflags |= MMAN_nl;
