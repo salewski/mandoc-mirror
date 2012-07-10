@@ -265,16 +265,11 @@ term_flushln(struct termp *p)
 		p->overstep = (int)(vis - maxvis + (*p->width)(p, ' '));
 
 		/*
-		 * Behave exactly the same way as groff:
 		 * If we have overstepped the margin, temporarily move
 		 * it to the right and flag the rest of the line to be
 		 * shorter.
-		 * If we landed right at the margin, be happy.
-		 * If we are one step before the margin, temporarily
-		 * move it one step LEFT and flag the rest of the line
-		 * to be longer.
 		 */
-		if (p->overstep < -1)
+		if (p->overstep < 0)
 			p->overstep = 0;
 		return;
 
