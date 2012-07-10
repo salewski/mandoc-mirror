@@ -311,6 +311,7 @@ struct	mdoc_bl {
 	int		  comp; /* -compact */
 	size_t		  ncols; /* -column arg count */
 	const char	**cols; /* -column val ptr */
+	int		  count; /* -enum counter */
 };
 
 struct	mdoc_bf {

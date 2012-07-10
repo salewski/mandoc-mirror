@@ -727,12 +727,10 @@ termp_it_pre(DECL_ARGS)
 	case (LIST_dash):
 		/* FALLTHROUGH */
 	case (LIST_hyphen):
-		if (width < term_len(p, 4))
-			width = term_len(p, 4);
-		break;
+		/* FALLTHROUGH */
 	case (LIST_enum):
-		if (width < term_len(p, 5))
-			width = term_len(p, 5);
+		if (width < term_len(p, 2))
+			width = term_len(p, 2);
 		break;
 	case (LIST_hang):
 		if (0 == width)
@@ -787,11 +785,17 @@ termp_it_pre(DECL_ARGS)
 	 */
 
 	switch (type) {
+	case (LIST_enum):
+		/*
+		 * Weird special case.
+		 * Very narrow enum lists actually hang.
+		 */
+		if (width == term_len(p, 2))
+			p->flags |= TERMP_HANG;
+		/* FALLTHROUGH */
 	case (LIST_bullet):
 		/* FALLTHROUGH */
 	case (LIST_dash):
-		/* FALLTHROUGH */
-	case (LIST_enum):
 		/* FALLTHROUGH */
 	case (LIST_hyphen):
 		if (MDOC_HEAD == n->type)
