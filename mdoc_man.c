@@ -764,6 +764,7 @@ static void
 post_bl(DECL_ARGS)
 {
 
+	outflags |= MMAN_br;
 	if (LIST_enum == n->norm->Bl.type)
 		n->norm->Bl.count = 0;
 }
@@ -1052,16 +1053,15 @@ pre_it(DECL_ARGS)
 			print_width(bln->norm->Bl.width, NULL);
 			outflags |= MMAN_nl;
 			print_count(&bln->norm->Bl.count);
-			outflags |= MMAN_nl;
 			break;
 		case (LIST_hang):
 			print_width(bln->norm->Bl.width, n->child);
-			outflags |= MMAN_nl;
+			break;
+		case (LIST_tag):
+			print_width(bln->norm->Bl.width, NULL);
 			break;
 		default:
-			if (bln->norm->Bl.width)
-				print_width(bln->norm->Bl.width, n->child);
-			break;
+			return(1);
 		}
 		outflags |= MMAN_nl;
 	default:
