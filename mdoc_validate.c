@@ -314,12 +314,12 @@ static	const enum mdoct rsord[RSORD_MAX] = {
 	MDOC__R,
 	MDOC__N,
 	MDOC__V,
+	MDOC__U,
 	MDOC__P,
 	MDOC__Q,
 	MDOC__D,
 	MDOC__O,
-	MDOC__C,
-	MDOC__U
+	MDOC__C
 };
 
 static	const char * const secnames[SEC__MAX] = {
