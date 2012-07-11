@@ -754,9 +754,24 @@ post_bk(DECL_ARGS)
 static int
 pre_bl(DECL_ARGS)
 {
+	size_t		 icol;
 
-	if (LIST_enum == n->norm->Bl.type)
+	switch (n->norm->Bl.type) {
+	case (LIST_enum):
 		n->norm->Bl.count = 0;
+		return(1);
+	case (LIST_column):
+		break;
+	default:
+		return(1);
+	}
+
+	outflags |= MMAN_nl;
+	print_word(".TS");
+	outflags |= MMAN_nl;
+	for (icol = 0; icol < n->norm->Bl.ncols; icol++)
+		print_word("l");
+	print_word(".");
 	return(1);
 }
 
@@ -764,9 +779,18 @@ static void
 post_bl(DECL_ARGS)
 {
 
-	outflags |= MMAN_br;
-	if (LIST_enum == n->norm->Bl.type)
+	switch (n->norm->Bl.type) {
+	case (LIST_enum):
 		n->norm->Bl.count = 0;
+		break;
+	case (LIST_column):
+		outflags |= MMAN_nl;
+		print_word(".TE");
+		break;
+	default:
+		break;
+	}
+	outflags |= MMAN_br;
 }
 
 static int
@@ -1075,8 +1099,10 @@ post_it(DECL_ARGS)
 {
 	const struct mdoc_node *bln;
 
-	if (MDOC_HEAD == n->type) {
-		bln = n->parent->parent;
+	bln = n->parent->parent;
+
+	switch (n->type) {
+	case (MDOC_HEAD):
 		switch (bln->norm->Bl.type) {
 		case (LIST_diag):
 			outflags &= ~MMAN_spc;
@@ -1088,6 +1114,16 @@ post_it(DECL_ARGS)
 		default:
 			break;
 		}
+		break;
+	case (MDOC_BODY):
+		if (LIST_column == bln->norm->Bl.type &&
+		    NULL != n->next) {
+			putchar('\t');
+			outflags &= ~MMAN_spc;
+		}
+		break;
+	default:
+		break;
 	}
 }
 
