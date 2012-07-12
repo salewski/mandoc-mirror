@@ -1123,24 +1123,29 @@ post_nm(POST_ARGS)
 	char		 buf[BUFSIZ];
 	int		 c;
 
-	/* If no child specified, make sure we have the meta name. */
-
-	if (NULL == mdoc->last->child && NULL == mdoc->meta.name) {
-		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NONAME);
-		return(1);
-	} else if (mdoc->meta.name)
+	if (NULL != mdoc->meta.name)
 		return(1);
 
-	/* If no meta name, set it from the child. */
+	/* Try to use our children for setting the meta name. */
 
-	buf[0] = '\0';
-	if (-1 == (c = concat(buf, mdoc->last->child, BUFSIZ))) {
+	if (NULL != mdoc->last->child) {
+		buf[0] = '\0';
+		c = concat(buf, mdoc->last->child, BUFSIZ);
+	} else
+		c = 0;
+
+	switch (c) {
+	case (-1):
 		mdoc_nmsg(mdoc, mdoc->last->child, MANDOCERR_MEM);
 		return(0);
+	case (0):
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NONAME);
+		mdoc->meta.name = mandoc_strdup("UNKNOWN");
+		break;
+	default:
+		mdoc->meta.name = mandoc_strdup(buf);
+		break;
 	}
-
-	assert(c);
-	mdoc->meta.name = mandoc_strdup(buf);
 	return(1);
 }
 
