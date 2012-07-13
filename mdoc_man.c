@@ -1249,13 +1249,22 @@ pre_li(DECL_ARGS)
 static int
 pre_nm(DECL_ARGS)
 {
+	char	*name;
 
 	if (MDOC_BLOCK == n->type)
 		pre_syn(n);
 	if (MDOC_ELEM != n->type && MDOC_HEAD != n->type)
 		return(1);
-	if (NULL == n->child && NULL == m->name)
+	name = n->child ? n->child->string : m->name;
+	if (NULL == name)
 		return(0);
+	if (MDOC_HEAD == n->type) {
+		if (NULL == n->parent->prev)
+			outflags |= MMAN_sp;
+		print_block(".HP", 0);
+		printf(" %ldn", strlen(name) + 1);
+		outflags |= MMAN_nl;
+	}
 	font_push('B');
 	if (NULL == n->child)
 		print_word(m->name);
