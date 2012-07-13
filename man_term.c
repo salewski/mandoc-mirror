@@ -440,7 +440,9 @@ pre_in(DECL_ARGS)
 static int
 pre_sp(DECL_ARGS)
 {
+	char		*s;
 	size_t		 i, len;
+	int		 neg;
 
 	if ((NULL == n->prev && n->parent)) {
 		if (MAN_SS == n->parent->tok)
@@ -449,19 +451,32 @@ pre_sp(DECL_ARGS)
 			return(0);
 	}
 
+	neg = 0;
 	switch (n->tok) {
 	case (MAN_br):
 		len = 0;
 		break;
 	default:
-		len = n->child ? a2height(p, n->child->string) : 1;
+		if (NULL == n->child) {
+			len = 1;
+			break;
+		}
+		s = n->child->string;
+		if ('-' == *s) {
+			neg = 1;
+			s++;
+		}
+		len = a2height(p, s);
 		break;
 	}
 
 	if (0 == len)
 		term_newln(p);
-	for (i = 0; i < len; i++)
-		term_vspace(p);
+	else if (neg)
+		p->skipvsp += len;
+	else
+		for (i = 0; i < len; i++)
+			term_vspace(p);
 
 	return(0);
 }
