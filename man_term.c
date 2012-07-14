@@ -445,10 +445,21 @@ pre_sp(DECL_ARGS)
 	int		 neg;
 
 	if ((NULL == n->prev && n->parent)) {
-		if (MAN_SS == n->parent->tok)
+		switch (n->parent->tok) {
+		case (MAN_SH):
+			/* FALLTHROUGH */
+		case (MAN_SS):
+			/* FALLTHROUGH */
+		case (MAN_PP):
+			/* FALLTHROUGH */
+		case (MAN_LP):
+			/* FALLTHROUGH */
+		case (MAN_P):
+			/* FALLTHROUGH */
 			return(0);
-		if (MAN_SH == n->parent->tok)
-			return(0);
+		default:
+			break;
+		}
 	}
 
 	neg = 0;
