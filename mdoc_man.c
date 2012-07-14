@@ -1116,7 +1116,8 @@ pre_it(DECL_ARGS)
 		outflags |= MMAN_PP | MMAN_nl;
 		bln = n->parent->parent;
 		if (0 == bln->norm->Bl.comp ||
-		    NULL == bln->parent->prev)
+		    (NULL == n->parent->prev &&
+		     NULL == bln->parent->prev))
 			outflags |= MMAN_sp;
 		outflags &= ~MMAN_br;
 		switch (bln->norm->Bl.type) {
