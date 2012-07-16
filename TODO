@@ -169,9 +169,6 @@
   so far, we only have it in roff(7) and man(7)
   reminded by millert@  Thu, 09 Dec 2010 17:29:52 -0500
 
-- perl(1) SYNOPSIS looks bad; reported by deraadt@
-  1) man(7) seems to need SYNOPSIS .Nm blocks, too
-
 - In .Bl -column,
   .It Em Authentication<tab>Key Length
   ought to render "Key Length" with emphasis, too,

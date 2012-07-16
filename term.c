@@ -106,6 +106,7 @@ void
 term_flushln(struct termp *p)
 {
 	int		 i;     /* current input position in p->buf */
+	int		 ntab;	/* number of tabs to prepend */
 	size_t		 vis;   /* current visual position on output */
 	size_t		 vbl;   /* number of blanks to prepend to output */
 	size_t		 vend;	/* end of word visual position on output */
@@ -144,10 +145,12 @@ term_flushln(struct termp *p)
 		 * Handle literal tab characters: collapse all
 		 * subsequent tabs into a single huge set of spaces.
 		 */
+		ntab = 0;
 		while (i < p->col && '\t' == p->buf[i]) {
 			vend = (vis / p->tabwidth + 1) * p->tabwidth;
 			vbl += vend - vis;
 			vis = vend;
+			ntab++;
 			i++;
 		}
 
@@ -191,6 +194,11 @@ term_flushln(struct termp *p)
 				vend += p->rmargin - p->offset;
 			} else
 				vbl = p->offset;
+
+			/* use pending tabs on the new line */
+
+			if (0 < ntab)
+				vbl += ntab * p->tabwidth;
 
 			/* Remove the p->overstep width. */
 
