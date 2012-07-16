@@ -801,7 +801,8 @@ mdoc_ptext(struct mdoc *m, int line, char *buf, int offs)
 			return(0);
 
 		m->next = MDOC_NEXT_SIBLING;
-		return(1);
+
+		return(mdoc_valid_post(m));
 	}
 
 	if ( ! mdoc_word_alloc(m, line, offs, buf+offs))

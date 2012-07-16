@@ -1342,7 +1342,10 @@ static int
 pre_sp(DECL_ARGS)
 {
 
-	print_line(".sp", MMAN_nl);
+	if (MMAN_PP & outflags && MDOC_It != n->parent->tok)
+		print_line(".PP", 0);
+	else
+		print_line(".sp", 0);
 	return(1);
 }
 
