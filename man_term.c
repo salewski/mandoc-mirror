@@ -771,7 +771,7 @@ pre_SS(DECL_ARGS)
 		break;
 	case (MAN_HEAD):
 		term_fontrepl(p, TERMFONT_BOLD);
-		p->offset = term_len(p, p->defindent/2);
+		p->offset = term_len(p, 3);
 		break;
 	case (MAN_BODY):
 		p->offset = mt->offset;
