@@ -243,15 +243,6 @@
   Also, we don't want to break the line within the argument of:
   .Fa "chtype tl"
 
-- .Ns should work when called at the end of an input line, see
-  the following code in vi(1):
-    .It Xo
-    .Op Ar line
-    .Cm a Ns Op Cm ppend Ns
-    .Op Cm !\&
-    .Xc
-    The input text is appended after the specified line.
-
 - Header lines of excessive length:
   Port OpenBSD man_term.c rev. 1.25 to mdoc_term.c
   and document it in mdoc(7) and man(7) COMPATIBILITY

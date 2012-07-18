@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008-2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010, 2012 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1358,6 +1358,13 @@ blk_part_imp(MACRO_PROT_ARGS)
 
 	if (n && ! rew_sub(MDOC_BLOCK, m, tok, line, ppos))
 		return(0);
+
+	/* Move trailing .Ns out of scope. */
+
+	for (n = body->child; n && n->next; n = n->next)
+		/* Do nothing. */ ;
+	if (n && MDOC_Ns == n->tok)
+		mdoc_node_relink(m, n);
 
 	return(1);
 }
