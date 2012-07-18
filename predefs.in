@@ -26,7 +26,7 @@
  */
 
 PREDEF("Am", "&")
-PREDEF("Ba", "|")
+PREDEF("Ba", "\\fR|\\fP")
 PREDEF("Ge", "\\(>=")
 PREDEF("Gt", ">")
 PREDEF("If", "infinity")

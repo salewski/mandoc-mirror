@@ -203,11 +203,6 @@
   is just "o\bo".
   see for example OpenBSD ksh(1)
 
-- The characters "|" and "\*(Ba" should never be bold,
-  not even in the middle of a word, e.g. ".Cm b\*(Bac" in
-  "mknod [-m mode] name b|c major minor"
-  in OpenBSD ksh(1)
-
 - A bogus .Pp between two .It must not produce a double blank line,
   see between -R and -r in OpenBSD rm(1), before "update" in mount(8),
   or in DIAGNOSTICS in init(8), or before "is always true" in ksh(1).
@@ -268,13 +263,6 @@
   Port OpenBSD man_term.c rev. 1.25 to mdoc_term.c
   and document it in mdoc(7) and man(7) COMPATIBILITY
   found while talking to Chris Bennett
-
-- In man(7), the sequence
-    .HP
-    one line of regular text
-    .SH
-  should not produce two blank lines before the .SH,
-  see for example named-checkconf(8).
 
 - In man(7), the sequence
     .SH HEADER
