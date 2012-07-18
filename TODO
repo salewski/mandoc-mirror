@@ -249,15 +249,6 @@
   found while talking to Chris Bennett
 
 - In man(7), the sequence
-    .SH HEADER
-    <blank line>
-    .PP
-    regular text
-  should not produce any blank lines between the header and the text,
-  see for example rsync(1).
-  Reported by naddy@  Mon, 28 Mar 2011 20:45:42 +0200
-
-- In man(7), the sequence
     regular text
     .IP
     .IP "tag"
