@@ -118,6 +118,7 @@ int		  mdoc_endbody_alloc(struct mdoc *m, int line, int pos,
 			enum mdoct tok, struct mdoc_node *body,
 			enum mdoc_endbody end);
 void		  mdoc_node_delete(struct mdoc *, struct mdoc_node *);
+int		  mdoc_node_relink(struct mdoc *, struct mdoc_node *);
 void		  mdoc_hash_init(void);
 enum mdoct	  mdoc_hash_find(const char *);
 const char	 *mdoc_a2att(const char *);

@@ -203,13 +203,6 @@
   is just "o\bo".
   see for example OpenBSD ksh(1)
 
-- A bogus .Pp between two .It must not produce a double blank line,
-  see between -R and -r in OpenBSD rm(1), before "update" in mount(8),
-  or in DIAGNOSTICS in init(8), or before "is always true" in ksh(1).
-  The same happens with .Pp just before .El, see bgpd.conf(5).
-  Also have `It' complain if `Pp' is invoked at certain times (not
-  -compact?).
-
 - .Pp between two .It in .Bl -column should produce one,
   not two blank lines, see e.g. login.conf(5).
   reported by jmc@  Sun, 17 Apr 2011 14:04:58 +0059
