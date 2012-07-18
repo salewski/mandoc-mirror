@@ -248,26 +248,6 @@
   and document it in mdoc(7) and man(7) COMPATIBILITY
   found while talking to Chris Bennett
 
-- In man(7), the sequence
-    regular text
-    .IP
-    .IP "tag"
-    indented text
-  should produce one, not four blank lines between the regular text
-  and the tag, see for example rsync(1).
-  Likewise,
-    regular text
-    .IP
-    indented text
-  should produce one, not two blank lines in between, and
-    regular text
-    .IP
-    .RS
-    .IP tag
-    indented text
-  should produce one, not three blank lines.
-  Reported by naddy@  Mon, 28 Mar 2011 20:45:42 +0200
-
 - trailing whitespace must be ignored even when followed by a font escape,
   see for example 
     makes
