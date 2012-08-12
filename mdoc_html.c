@@ -981,8 +981,6 @@ mdoc_bl_pre(MDOC_ARGS)
 	struct roffsu	 su;
 	char		 buf[BUFSIZ];
 
-	bufinit(h);
-
 	if (MDOC_BODY == n->type) {
 		if (LIST_column == n->norm->Bl.type)
 			print_otag(h, TAG_TBODY, 0, NULL);
@@ -1001,6 +999,7 @@ mdoc_bl_pre(MDOC_ARGS)
 		 */
 
 		for (i = 0; i < (int)n->norm->Bl.ncols; i++) {
+			bufinit(h);
 			a2width(n->norm->Bl.cols[i], &su);
 			if (i < (int)n->norm->Bl.ncols - 1)
 				bufcat_su(h, "width", &su);
@@ -1014,6 +1013,7 @@ mdoc_bl_pre(MDOC_ARGS)
 	}
 
 	SCALE_VS_INIT(&su, 0);
+	bufinit(h);
 	bufcat_su(h, "margin-top", &su);
 	bufcat_su(h, "margin-bottom", &su);
 	PAIR_STYLE_INIT(&tag[0], h);
@@ -2273,7 +2273,7 @@ mdoc_quote_post(MDOC_ARGS)
 	case (MDOC_So):
 		/* FALLTHROUGH */
 	case (MDOC_Sq):
-		print_text(h, "\\(aq");
+		print_text(h, "\\(cq");
 		break;
 	default:
 		abort();
