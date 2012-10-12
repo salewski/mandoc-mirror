@@ -191,6 +191,14 @@
 - in enclosures, mandoc sometimes fancies a bogus end of sentence
   reminded by jmc@  Thu, 23 Sep 2010 18:13:39 +0059
 
+- Trailing isolated dots lack EOS for some macros.
+  This cannot use mandoc_eos() because groff only does EOS
+  for isolated dots at least in some of these cases.
+  Affected macros included those using in_line_eoln().
+  Make sure to fix open(2)
+  without breaking fstat(1), ksh(1), tzset(3) and UKC(8).
+  reported by Nicolas Joly  Fri, 12 Oct 2012 17:00:36 +0200
+
 ************************************************************************
 * formatting issues: gratuitous differences
 ************************************************************************
