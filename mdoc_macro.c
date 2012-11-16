@@ -738,7 +738,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 		if (later &&
 		    MDOC_EXPLICIT & mdoc_macros[later->tok].flags)
 			continue;
-		if (MDOC_CALLABLE & mdoc_macros[n->tok].flags)
+		if (MDOC_It != n->tok)
 			later = n;
 	}
 
