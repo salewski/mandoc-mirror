@@ -1,6 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2012 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -143,7 +144,7 @@ static	const enum mdocargt args_Bl[] = {
 };
 
 static	const struct mdocarg mdocargs[MDOC_MAX] = {
-	{ ARGSFL_NONE, NULL }, /* Ap */
+	{ ARGSFL_DELIM, NULL }, /* Ap */
 	{ ARGSFL_NONE, NULL }, /* Dd */
 	{ ARGSFL_NONE, NULL }, /* Dt */
 	{ ARGSFL_NONE, NULL }, /* Os */
@@ -172,7 +173,7 @@ static	const struct mdocarg mdocargs[MDOC_MAX] = {
 	{ ARGSFL_DELIM, NULL }, /* Fn */ 
 	{ ARGSFL_DELIM, NULL }, /* Ft */ 
 	{ ARGSFL_DELIM, NULL }, /* Ic */ 
-	{ ARGSFL_NONE, NULL }, /* In */ 
+	{ ARGSFL_DELIM, NULL }, /* In */ 
 	{ ARGSFL_DELIM, NULL }, /* Li */
 	{ ARGSFL_NONE, NULL }, /* Nd */ 
 	{ ARGSFL_DELIM, NULL }, /* Nm */ 
