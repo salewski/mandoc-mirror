@@ -376,7 +376,7 @@ void
 term_fontpopq(struct termp *p, const void *key)
 {
 
-	while (p->fonti >= 0 && key != &p->fontq[p->fonti])
+	while (p->fonti >= 0 && key < (void *)(p->fontq + p->fonti))
 		p->fonti--;
 	assert(p->fonti >= 0);
 }
