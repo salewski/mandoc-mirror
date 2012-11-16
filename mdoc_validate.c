@@ -2205,9 +2205,9 @@ post_dt(POST_ARGS)
 		free(mdoc->meta.vol);
 		mdoc->meta.vol = mandoc_strdup(cp);
 	} else {
-		/* FIXME: warn about bad arch. */
 		cp = mdoc_a2arch(nn->string);
 		if (NULL == cp) {
+			mdoc_nmsg(mdoc, nn, MANDOCERR_BADVOLARCH);
 			free(mdoc->meta.vol);
 			mdoc->meta.vol = mandoc_strdup(nn->string);
 		} else 

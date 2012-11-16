@@ -50,6 +50,7 @@ enum	mandocerr {
 	MANDOCERR_NOTITLE, /* no title in document */
 	MANDOCERR_UPPERCASE, /* document title should be all caps */
 	MANDOCERR_BADMSEC, /* unknown manual section */
+	MANDOCERR_BADVOLARCH, /* unknown manual volume or arch */
 	MANDOCERR_NODATE, /* date missing, using today's date */
 	MANDOCERR_BADDATE, /* cannot parse date, using it verbatim */
 	MANDOCERR_PROLOGOOO, /* prologue macros out of order */

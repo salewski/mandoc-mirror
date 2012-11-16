@@ -95,6 +95,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"no title in document",
 	"document title should be all caps",
 	"unknown manual section",
+	"unknown manual volume or arch",
 	"date missing, using today's date",
 	"cannot parse date, using it verbatim",
 	"prologue macros out of order",
