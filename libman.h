@@ -39,7 +39,7 @@ struct	man {
 	struct roff	*roff;
 };
 
-#define	MACRO_PROT_ARGS	  struct man *m, \
+#define	MACRO_PROT_ARGS	  struct man *man, \
 			  enum mant tok, \
 			  int line, \
 			  int ppos, \
@@ -61,10 +61,10 @@ extern	const struct man_macro *const man_macros;
 
 __BEGIN_DECLS
 
-#define		  man_pmsg(m, l, p, t) \
-		  mandoc_msg((t), (m)->parse, (l), (p), NULL)
-#define		  man_nmsg(m, n, t) \
-		  mandoc_msg((t), (m)->parse, (n)->line, (n)->pos, NULL)
+#define		  man_pmsg(man, l, p, t) \
+		  mandoc_msg((t), (man)->parse, (l), (p), NULL)
+#define		  man_nmsg(man, n, t) \
+		  mandoc_msg((t), (man)->parse, (n)->line, (n)->pos, NULL)
 int		  man_word_alloc(struct man *, int, int, const char *);
 int		  man_block_alloc(struct man *, int, int, enum mant);
 int		  man_head_alloc(struct man *, int, int, enum mant);

@@ -48,7 +48,7 @@ struct	mtermp {
 #define	DECL_ARGS 	  struct termp *p, \
 			  struct mtermp *mt, \
 			  const struct man_node *n, \
-			  const struct man_meta *m
+			  const struct man_meta *meta
 
 struct	termact {
 	int		(*pre)(DECL_ARGS);
@@ -138,7 +138,7 @@ terminal_man(void *arg, const struct man *man)
 {
 	struct termp		*p;
 	const struct man_node	*n;
-	const struct man_meta	*m;
+	const struct man_meta	*meta;
 	struct mtermp		 mt;
 
 	p = (struct termp *)arg;
@@ -154,9 +154,9 @@ terminal_man(void *arg, const struct man *man)
 		p->symtab = mchars_alloc();
 
 	n = man_node(man);
-	m = man_meta(man);
+	meta = man_meta(man);
 
-	term_begin(p, print_man_head, print_man_foot, m);
+	term_begin(p, print_man_head, print_man_foot, meta);
 	p->flags |= TERMP_NOSPACE;
 
 	memset(&mt, 0, sizeof(struct mtermp));
@@ -166,7 +166,7 @@ terminal_man(void *arg, const struct man *man)
 	mt.pardist = 1;
 
 	if (n->child)
-		print_man_nodelist(p, &mt, n->child, m);
+		print_man_nodelist(p, &mt, n->child, meta);
 
 	term_end(p);
 }
@@ -327,7 +327,7 @@ pre_alternate(DECL_ARGS)
 		term_fontrepl(p, font[i]);
 		if (savelit && NULL == nn->next)
 			mt->fl |= MANT_LITERAL;
-		print_man_node(p, mt, nn, m);
+		print_man_node(p, mt, nn, meta);
 		if (nn->next)
 			p->flags |= TERMP_NOSPACE;
 	}
@@ -644,7 +644,7 @@ pre_IP(DECL_ARGS)
 		mt->fl &= ~MANT_LITERAL;
 
 		if (n->child)
-			print_man_node(p, mt, n->child, m);
+			print_man_node(p, mt, n->child, meta);
 
 		if (savelit)
 			mt->fl |= MANT_LITERAL;
@@ -729,7 +729,7 @@ pre_TP(DECL_ARGS)
 		/* Don't print same-line elements. */
 		for (nn = n->child; nn; nn = nn->next)
 			if (nn->line > n->line)
-				print_man_node(p, mt, nn, m);
+				print_man_node(p, mt, nn, meta);
 
 		if (savelit)
 			mt->fl |= MANT_LITERAL;
@@ -982,13 +982,13 @@ print_man_node(DECL_ARGS)
 
 	c = 1;
 	if (termacts[n->tok].pre)
-		c = (*termacts[n->tok].pre)(p, mt, n, m);
+		c = (*termacts[n->tok].pre)(p, mt, n, meta);
 
 	if (c && n->child)
-		print_man_nodelist(p, mt, n->child, m);
+		print_man_nodelist(p, mt, n->child, meta);
 
 	if (termacts[n->tok].post)
-		(*termacts[n->tok].post)(p, mt, n, m);
+		(*termacts[n->tok].post)(p, mt, n, meta);
 	if ( ! (MAN_NOTEXT & termacts[n->tok].flags))
 		term_fontrepl(p, TERMFONT_NONE);
 
@@ -1026,10 +1026,10 @@ static void
 print_man_nodelist(DECL_ARGS)
 {
 
-	print_man_node(p, mt, n, m);
+	print_man_node(p, mt, n, meta);
 	if ( ! n->next)
 		return;
-	print_man_nodelist(p, mt, n->next, m);
+	print_man_nodelist(p, mt, n->next, meta);
 }
 
 
@@ -1104,21 +1104,21 @@ print_man_head(struct termp *p, const void *arg)
 {
 	char		buf[BUFSIZ], title[BUFSIZ];
 	size_t		buflen, titlen;
-	const struct man_meta *m;
+	const struct man_meta *meta;
 
-	m = (const struct man_meta *)arg;
-	assert(m->title);
-	assert(m->msec);
+	meta = (const struct man_meta *)arg;
+	assert(meta->title);
+	assert(meta->msec);
 
-	if (m->vol)
-		strlcpy(buf, m->vol, BUFSIZ);
+	if (meta->vol)
+		strlcpy(buf, meta->vol, BUFSIZ);
 	else
 		buf[0] = '\0';
 	buflen = term_strlen(p, buf);
 
 	/* Top left corner: manual title and section. */
 
-	snprintf(title, BUFSIZ, "%s(%s)", m->title, m->msec);
+	snprintf(title, BUFSIZ, "%s(%s)", meta->title, meta->msec);
 	titlen = term_strlen(p, title);
 
 	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
