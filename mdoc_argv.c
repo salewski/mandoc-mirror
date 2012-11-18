@@ -161,7 +161,7 @@ static	const struct mdocarg mdocargs[MDOC_MAX] = {
 	{ ARGSFL_DELIM, NULL }, /* Ad */ 
 	{ ARGSFL_DELIM, args_An }, /* An */
 	{ ARGSFL_DELIM, NULL }, /* Ar */
-	{ ARGSFL_NONE, NULL }, /* Cd */
+	{ ARGSFL_DELIM, NULL }, /* Cd */
 	{ ARGSFL_DELIM, NULL }, /* Cm */
 	{ ARGSFL_DELIM, NULL }, /* Dv */ 
 	{ ARGSFL_DELIM, NULL }, /* Er */ 
@@ -241,7 +241,7 @@ static	const struct mdocarg mdocargs[MDOC_MAX] = {
 	{ ARGSFL_DELIM, NULL }, /* Xc */
 	{ ARGSFL_NONE, NULL }, /* Xo */
 	{ ARGSFL_NONE, NULL }, /* Fo */ 
-	{ ARGSFL_NONE, NULL }, /* Fc */ 
+	{ ARGSFL_DELIM, NULL }, /* Fc */ 
 	{ ARGSFL_NONE, NULL }, /* Oo */
 	{ ARGSFL_DELIM, NULL }, /* Oc */
 	{ ARGSFL_NONE, args_Bk }, /* Bk */
@@ -250,7 +250,7 @@ static	const struct mdocarg mdocargs[MDOC_MAX] = {
 	{ ARGSFL_NONE, NULL }, /* Hf */
 	{ ARGSFL_NONE, NULL }, /* Fr */
 	{ ARGSFL_NONE, NULL }, /* Ud */
-	{ ARGSFL_NONE, NULL }, /* Lb */
+	{ ARGSFL_DELIM, NULL }, /* Lb */
 	{ ARGSFL_NONE, NULL }, /* Lp */
 	{ ARGSFL_DELIM, NULL }, /* Lk */
 	{ ARGSFL_DELIM, NULL }, /* Mt */

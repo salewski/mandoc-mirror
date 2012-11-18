@@ -200,6 +200,11 @@
   of in_line() - put trailing punctuation out of scope.
   Found in mount_nfs(8) and exports(5), search for "Appendix".
 
+- Trailing punctuation after .%T triggers EOS spacing, at least
+  outside .Rs (eek!).  Simply setting ARGSFL_DELIM for .%T is not
+  the right solution, it sends mandoc into an endless loop.
+  reported by Nicolas Joly  Sat, 17 Nov 2012 11:49:54 +0100
+
 - in enclosures, mandoc sometimes fancies a bogus end of sentence
   reminded by jmc@  Thu, 23 Sep 2010 18:13:39 +0059
 
@@ -227,6 +232,10 @@
 - If the first line after .It is .D1, do not assert a blank line
   in between, see for example tmux(1).
   reported by nicm@  13 Jan 2011 00:18:57 +0000
+
+- Trailing punctuation after .It should trigger EOS spacing.
+  reported by Nicolas Joly  Sat, 17 Nov 2012 11:49:54 +0100
+  Probably, this should be fixed somewhere in termp_it_pre(), not sure.
 
 - .Nx 1.0a
   should be "NetBSD 1.0A", not "NetBSD 1.0a",
