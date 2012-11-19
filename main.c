@@ -186,12 +186,12 @@ usage(void)
 
 	fprintf(stderr, "usage: %s "
 			"[-V] "
-			"[-foption] "
+			"[-Ios=name] "
 			"[-mformat] "
 			"[-Ooption] "
 			"[-Toutput] "
-			"[-Wlevel] "
-			"[file...]\n", 
+			"[-Wlevel]\n"
+			"\t      [file ...]\n", 
 			progname);
 
 	exit((int)MANDOCLEVEL_BADARG);
