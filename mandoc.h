@@ -1,6 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2012 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -135,6 +136,7 @@ enum	mandocerr {
 	MANDOCERR_MACRO, /* skipping unknown macro */
 	MANDOCERR_REQUEST, /* NOT IMPLEMENTED: skipping request */
 	MANDOCERR_ARGCOUNT, /* argument count wrong */
+	MANDOCERR_STRAYTA, /* skipping column outside column list */
 	MANDOCERR_NOSCOPE, /* skipping end of block that is not open */
 	MANDOCERR_SCOPEBROKEN, /* missing end of block */
 	MANDOCERR_SCOPEEXIT, /* scope open on exit */

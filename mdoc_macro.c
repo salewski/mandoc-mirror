@@ -1759,16 +1759,22 @@ phrase(struct mdoc *mdoc, int line, int ppos, char *buf)
 static int
 phrase_ta(MACRO_PROT_ARGS)
 {
+	struct mdoc_node *n;
 	int		  la;
 	enum mdoct	  ntok;
 	enum margserr	  ac;
 	char		 *p;
 
-	/*
-	 * FIXME: this is overly restrictive: if the `Ta' is unexpected,
-	 * it should simply error out with ARGSLOST.
-	 */
+	/* Make sure we are in a column list or ignore this macro. */
+	n = mdoc->last;
+	while (NULL != n && MDOC_Bl != n->tok)
+		n = n->parent;
+	if (NULL == n || LIST_column != n->norm->Bl.type) {
+		mdoc_pmsg(mdoc, line, ppos, MANDOCERR_STRAYTA);
+		return(1);
+	}
 
+	/* Advance to the next column. */
 	if ( ! rew_sub(MDOC_BODY, mdoc, MDOC_It, line, ppos))
 		return(0);
 	if ( ! mdoc_body_alloc(mdoc, line, ppos, MDOC_It))

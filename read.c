@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010, 2011 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010, 2011, 2012 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -180,6 +180,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"skipping unknown macro",
 	"NOT IMPLEMENTED, please use groff: skipping request",
 	"argument count wrong",
+	"skipping column outside column list",
 	"skipping end of block that is not open",
 	"missing end of block",
 	"scope open on exit",
