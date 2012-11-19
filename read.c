@@ -740,7 +740,7 @@ mparse_alloc(enum mparset inttype, enum mandoclevel wlevel,
 	curp->inttype = inttype;
 	curp->defos = defos;
 
-	curp->roff = roff_alloc(curp);
+	curp->roff = roff_alloc(inttype, curp);
 	return(curp);
 }
 
