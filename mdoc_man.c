@@ -334,11 +334,9 @@ print_word(const char *s)
 		 */
 		if (MMAN_spc_force & outflags || '\0' == s[0] ||
 		    NULL == strchr(".,:;)]?!", s[0]) || '\0' != s[1]) {
-			if (MMAN_Bk & outflags) {
+			if (MMAN_Bk & outflags)
 				putchar('\\');
-				putchar('~');
-			} else 
-				putchar(' ');
+			putchar(' ');
 			if (TPremain)
 				TPremain--;
 		}
@@ -358,7 +356,7 @@ print_word(const char *s)
 	for ( ; *s; s++) {
 		switch (*s) {
 		case (ASCII_NBRSP):
-			printf("\\~");
+			printf("\\ ");
 			break;
 		case (ASCII_HYPH):
 			putchar('-');
@@ -535,9 +533,12 @@ man_mdoc(void *arg, const struct mdoc *mdoc)
 	meta = mdoc_meta(mdoc);
 	n = mdoc_node(mdoc);
 
-	printf(".TH \"%s\" \"%s\" \"%s\" \"%s\" \"%s\"",
+	printf(".TH \"%s\" \"%s\" \"%s\" \"%s\" \"%s\"\n",
 			meta->title, meta->msec, meta->date,
 			meta->os, meta->vol);
+
+	/* Disable hyphenation and if nroff, disable justification. */
+	printf(".nh\n.if n .ad l");
 
 	outflags = MMAN_nl | MMAN_Sm;
 	if (0 == fontqueue.size) {
@@ -1053,7 +1054,7 @@ pre_fl(DECL_ARGS)
 {
 
 	font_push('B');
-	print_word("-");
+	print_word("\\-");
 	outflags &= ~MMAN_spc;
 	return(1);
 }
@@ -1531,7 +1532,7 @@ pre_ux(DECL_ARGS)
 	if (NULL == n->child)
 		return(0);
 	outflags &= ~MMAN_spc;
-	print_word("\\~");
+	print_word("\\ ");
 	outflags &= ~MMAN_spc;
 	return(1);
 }
