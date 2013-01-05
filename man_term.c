@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008-2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010, 2011, 2012 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010, 2011, 2012, 2013 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -564,7 +564,7 @@ post_HP(DECL_ARGS)
 
 	switch (n->type) {
 	case (MAN_BODY):
-		term_flushln(p);
+		term_newln(p);
 		p->flags &= ~TERMP_NOBREAK;
 		p->flags &= ~TERMP_TWOSPACE;
 		p->offset = mt->offset;
@@ -1001,7 +1001,7 @@ out:
 	 * more specific than this.
 	 */
 	if (MANT_LITERAL & mt->fl && ! (TERMP_NOBREAK & p->flags) &&
-	    NULL != n->next && n->next->line > n->line) {
+	    (NULL == n->next || n->next->line > n->line)) {
 		rm = p->rmargin;
 		rmax = p->maxrmargin;
 		p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
