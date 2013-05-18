@@ -1756,7 +1756,8 @@ termp_xx_pre(DECL_ARGS)
 		pp = "UNIX";
 		break;
 	default:
-		break;
+		abort();
+		/* NOTREACHED */
 	}
 
 	term_word(p, pp);
