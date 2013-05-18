@@ -77,7 +77,7 @@ mchars_alloc(void)
 	 */
 
 	tab = mandoc_malloc(sizeof(struct mchars));
-	htab = mandoc_calloc(PRINT_HI - PRINT_LO + 1, sizeof(struct ln **));
+	htab = mandoc_calloc(PRINT_HI - PRINT_LO + 1, sizeof(struct ln *));
 
 	for (i = 0; i < LINES_MAX; i++) {
 		hash = (int)lines[i].code[0] - PRINT_LO;
