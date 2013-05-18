@@ -58,13 +58,11 @@ print_mdoc(const struct mdoc_node *n, int indent)
 {
 	const char	 *p, *t;
 	int		  i, j;
-	size_t		  argc, sz;
-	char		**params;
+	size_t		  argc;
 	struct mdoc_argv *argv;
 
 	argv = NULL;
-	argc = sz = 0;
-	params = NULL;
+	argc = 0;
 	t = p = NULL;
 
 	switch (n->type) {
@@ -162,9 +160,6 @@ print_mdoc(const struct mdoc_node *n, int indent)
 				printf(" ]");
 		}
 		
-		for (i = 0; i < (int)sz; i++)
-			printf(" [%s]", params[i]);
-
 		printf(" %d:%d\n", n->line, n->pos);
 	}
 
