@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2011, 2012 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011, 2012, 2013 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -910,6 +910,16 @@ pre_bl(DECL_ARGS)
 {
 	size_t		 icol;
 
+	/*
+	 * print_offs() will increase the -offset to account for
+	 * a possible enclosing .It, but any enclosed .It blocks
+	 * just nest and do not add up their indentation.
+	 */
+	if (n->norm->Bl.offs) {
+		print_offs(n->norm->Bl.offs);
+		Bl_stack[Bl_stack_len++] = 0;
+	}
+
 	switch (n->norm->Bl.type) {
 	case (LIST_enum):
 		n->norm->Bl.count = 0;
@@ -942,8 +952,16 @@ post_bl(DECL_ARGS)
 	default:
 		break;
 	}
-	outflags |= MMAN_PP | MMAN_nl;
-	outflags &= ~(MMAN_sp | MMAN_br);
+
+	if (n->norm->Bl.offs) {
+		print_line(".RE", MMAN_nl);
+		assert(Bl_stack_len);
+		Bl_stack_len--;
+		assert(0 == Bl_stack[Bl_stack_len]);
+	} else {
+		outflags |= MMAN_PP | MMAN_nl;
+		outflags &= ~(MMAN_sp | MMAN_br);
+	}
 
 	/* Maybe we are inside an enclosing list? */
 	if (NULL != n->parent->next)
