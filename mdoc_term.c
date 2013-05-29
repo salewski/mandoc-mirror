@@ -313,14 +313,10 @@ print_mdoc_node(DECL_ARGS)
 	 */
 
 	if (TERMP_KEEP & p->flags || MDOC_SYNPRETTY & n->flags) {
-		if (n->prev && n->prev->line != n->line) {
+		if (n->prev ? (n->prev->line != n->line) :
+		    (n->parent && n->parent->line != n->line)) {
 			p->flags &= ~TERMP_KEEP;
 			p->flags |= TERMP_PREKEEP;
-		} else if (NULL == n->prev) {
-			if (n->parent && n->parent->line != n->line) {
-				p->flags &= ~TERMP_KEEP;
-				p->flags |= TERMP_PREKEEP;
-			}
 		}
 	}
 
