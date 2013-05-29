@@ -901,7 +901,7 @@ static void
 post_bk(DECL_ARGS)
 {
 
-	if (MDOC_BODY == n->type)
+	if (MDOC_BODY == n->type && ! (MDOC_SYNPRETTY & n->flags))
 		outflags &= ~MMAN_Bk;
 }
 

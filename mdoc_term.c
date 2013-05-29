@@ -2215,7 +2215,7 @@ static void
 termp_bk_post(DECL_ARGS)
 {
 
-	if (MDOC_BODY == n->type)
+	if (MDOC_BODY == n->type && ! (MDOC_SYNPRETTY & n->flags))
 		p->flags &= ~(TERMP_KEEP | TERMP_PREKEEP);
 }
 
