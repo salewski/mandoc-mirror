@@ -19,7 +19,9 @@
 #include "config.h"
 #endif
 
+#ifdef	USE_MANPATH
 #include <sys/param.h>
+#endif
 
 #include <assert.h>
 #include <ctype.h>
@@ -90,8 +92,8 @@ manpath_parse(struct manpaths *dirs, const char *file,
 	char		*insert;
 
 	/* Always prepend -m. */
- 	manpath_parseline(dirs, auxp);
- 
+	manpath_parseline(dirs, auxp);
+
 	/* If -M is given, it overrides everything else. */
 	if (NULL != defp) {
 		manpath_parseline(dirs, defp);
