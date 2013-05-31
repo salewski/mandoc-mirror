@@ -393,13 +393,13 @@ roffnode_push(struct roff *r, enum rofft tok, const char *name,
 static void
 roff_free1(struct roff *r)
 {
-	struct tbl_node	*t;
+	struct tbl_node	*tbl;
 	struct eqn_node	*e;
 	int		 i;
 
-	while (NULL != (t = r->first_tbl)) {
-		r->first_tbl = t->next;
-		tbl_free(t);
+	while (NULL != (tbl = r->first_tbl)) {
+		r->first_tbl = tbl->next;
+		tbl_free(tbl);
 	}
 
 	r->first_tbl = r->last_tbl = r->tbl = NULL;
@@ -1413,21 +1413,21 @@ roff_EN(ROFF_ARGS)
 static enum rofferr
 roff_TS(ROFF_ARGS)
 {
-	struct tbl_node	*t;
+	struct tbl_node	*tbl;
 
 	if (r->tbl) {
 		mandoc_msg(MANDOCERR_SCOPEBROKEN, r->parse, ln, ppos, NULL);
 		tbl_end(&r->tbl);
 	}
 
-	t = tbl_alloc(ppos, ln, r->parse);
+	tbl = tbl_alloc(ppos, ln, r->parse);
 
 	if (r->last_tbl)
-		r->last_tbl->next = t;
+		r->last_tbl->next = tbl;
 	else
-		r->first_tbl = r->last_tbl = t;
+		r->first_tbl = r->last_tbl = tbl;
 
-	r->tbl = r->last_tbl = t;
+	r->tbl = r->last_tbl = tbl;
 	return(ROFF_IGN);
 }
 
