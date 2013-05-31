@@ -164,7 +164,7 @@ enum	mandocerr {
 	MANDOCERR_MAX
 };
 
-struct	tbl {
+struct	tbl_opts {
 	char		  tab; /* cell-separator */
 	char		  decimal; /* decimal point */
 	int		  linesize;
@@ -263,7 +263,7 @@ enum	tbl_spant {
  * A row of data in a table.
  */
 struct	tbl_span {
-	struct tbl	 *tbl;
+	struct tbl_opts	 *opts;
 	struct tbl_head	 *head;
 	struct tbl_row	 *layout; /* layout row */
 	struct tbl_dat	 *first;

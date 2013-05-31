@@ -185,7 +185,7 @@ newspan(struct tbl_node *tbl, int line, struct tbl_row *rp)
 
 	dp = mandoc_calloc(1, sizeof(struct tbl_span));
 	dp->line = line;
-	dp->tbl = &tbl->opts;
+	dp->opts = &tbl->opts;
 	dp->layout = rp;
 	dp->head = tbl->first_head;
 

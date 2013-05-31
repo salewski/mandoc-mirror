@@ -31,7 +31,7 @@ struct	tbl_node {
 	int		  pos; /* invocation column */
 	int		  line; /* invocation line */
 	enum tbl_part	  part;
-	struct tbl	  opts;
+	struct tbl_opts	  opts;
 	struct tbl_row	 *first_row;
 	struct tbl_row	 *last_row;
 	struct tbl_span	 *first_span;
