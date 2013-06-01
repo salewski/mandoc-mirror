@@ -71,7 +71,6 @@ struct	mparse {
 
 static	void	  resize_buf(struct buf *, size_t);
 static	void	  mparse_buf_r(struct mparse *, struct buf, int);
-static	void	  mparse_readfd_r(struct mparse *, int, const char *, int);
 static	void	  pset(const char *, int, struct mparse *);
 static	int	  read_whole_file(const char *, int, struct buf *, int *);
 static	void	  mparse_end(struct mparse *);
@@ -490,7 +489,7 @@ rerun:
 			 */
 			if (curp->secondary) 
 				curp->secondary->sz -= pos + 1;
-			mparse_readfd_r(curp, -1, ln.buf + of, 1);
+			mparse_readfd(curp, -1, ln.buf + of);
 			if (MANDOCLEVEL_FATAL <= curp->file_status)
 				break;
 			pos = 0;
@@ -664,19 +663,25 @@ mparse_end(struct mparse *curp)
 }
 
 static void
-mparse_parse_buffer(struct mparse *curp, struct buf blk, const char *file,
-		int re)
+mparse_parse_buffer(struct mparse *curp, struct buf blk, const char *file)
 {
 	const char	*svfile;
+	static int	 recursion_depth;
+
+	if (64 < recursion_depth) {
+		mandoc_msg(MANDOCERR_ROFFLOOP, curp, curp->line, 0, NULL);
+		return;
+	}
 
 	/* Line number is per-file. */
 	svfile = curp->file;
 	curp->file = file;
 	curp->line = 1;
+	recursion_depth++;
 
 	mparse_buf_r(curp, blk, 1);
 
-	if (0 == re && MANDOCLEVEL_FATAL > curp->file_status)
+	if (0 == --recursion_depth && MANDOCLEVEL_FATAL > curp->file_status)
 		mparse_end(curp);
 
 	curp->file = svfile;
@@ -691,12 +696,12 @@ mparse_readmem(struct mparse *curp, const void *buf, size_t len,
 	blk.buf = UNCONST(buf);
 	blk.sz = len;
 
-	mparse_parse_buffer(curp, blk, file, 0);
+	mparse_parse_buffer(curp, blk, file);
 	return(curp->file_status);
 }
 
-static void
-mparse_readfd_r(struct mparse *curp, int fd, const char *file, int re)
+enum mandoclevel
+mparse_readfd(struct mparse *curp, int fd, const char *file)
 {
 	struct buf	 blk;
 	int		 with_mmap;
@@ -705,7 +710,7 @@ mparse_readfd_r(struct mparse *curp, int fd, const char *file, int re)
 		if (-1 == (fd = open(file, O_RDONLY, 0))) {
 			perror(file);
 			curp->file_status = MANDOCLEVEL_SYSERR;
-			return;
+			goto out;
 		}
 	/*
 	 * Run for each opened file; may be called more than once for
@@ -716,10 +721,10 @@ mparse_readfd_r(struct mparse *curp, int fd, const char *file, int re)
 
 	if ( ! read_whole_file(file, fd, &blk, &with_mmap)) {
 		curp->file_status = MANDOCLEVEL_SYSERR;
-		return;
+		goto out;
 	}
 
-	mparse_parse_buffer(curp, blk, file, re);
+	mparse_parse_buffer(curp, blk, file);
 
 #ifdef	HAVE_MMAP
 	if (with_mmap)
@@ -730,13 +735,7 @@ mparse_readfd_r(struct mparse *curp, int fd, const char *file, int re)
 
 	if (STDIN_FILENO != fd && -1 == close(fd))
 		perror(file);
-}
-
-enum mandoclevel
-mparse_readfd(struct mparse *curp, int fd, const char *file)
-{
-
-	mparse_readfd_r(curp, fd, file, 0);
+out:
 	return(curp->file_status);
 }
 
