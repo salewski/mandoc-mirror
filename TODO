@@ -204,6 +204,10 @@ None known right now.
 - in enclosures, mandoc sometimes fancies a bogus end of sentence
   reminded by jmc@  Thu, 23 Sep 2010 18:13:39 +0059
 
+- formatting /usr/local/man/man1/latex2man.1 with groff and mandoc
+  reveals lots of bugs both in groff and mandoc...
+  reported by bentley@  Wed, 22 May 2013 23:49:30 -0600
+
 ************************************************************************
 * formatting issues: gratuitous differences
 ************************************************************************
