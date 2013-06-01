@@ -102,7 +102,7 @@ data(struct tbl_node *tbl, struct tbl_span *dp,
 
 	if (*pos - sv == 2 && 'T' == p[sv] && '{' == p[sv + 1]) {
 		tbl->part = TBL_PART_CDATA;
-		return(0);
+		return(1);
 	}
 
 	assert(*pos - sv >= 0);
