@@ -73,7 +73,6 @@ ascii_init(enum termenc enc, char *outopts)
 	struct termp	*p;
 
 	p = mandoc_calloc(1, sizeof(struct termp));
-	p->enc = enc;
 
 	p->tabwidth = 5;
 	p->defrmargin = 78;
@@ -93,7 +92,7 @@ ascii_init(enum termenc enc, char *outopts)
 	if (TERMENC_ASCII != enc) {
 		v = TERMENC_LOCALE == enc ?
 			setlocale(LC_ALL, "") :
-			setlocale(LC_CTYPE, "UTF-8");
+			setlocale(LC_CTYPE, "en_US.UTF-8");
 		if (NULL != v && MB_CUR_MAX > 1) {
 			p->enc = enc;
 			p->advance = locale_advance;
