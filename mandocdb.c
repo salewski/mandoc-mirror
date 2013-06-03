@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011, 2012 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011, 2012, 2013 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -46,23 +46,6 @@
 #include "mandoc.h"
 #include "manpath.h"
 #include "mansearch.h"
-
-/* Post a warning to stderr. */
-#define WARNING(_f, _b, _fmt, _args...) \
-	do if (warnings) { \
-		fprintf(stderr, "%s: ", (_b)); \
-		fprintf(stderr, (_fmt), ##_args); \
-		if ('\0' != *(_f)) \
-			fprintf(stderr, ": %s", (_f)); \
-		fprintf(stderr, "\n"); \
-	} while (/* CONSTCOND */ 0)
-/* Post a "verbose" message to stderr. */
-#define	DEBUG(_f, _b, _fmt, _args...) \
-	do if (verb) { \
-		fprintf(stderr, "%s: ", (_b)); \
-		fprintf(stderr, (_fmt), ##_args); \
-		fprintf(stderr, ": %s\n", (_f)); \
-	} while (/* CONSTCOND */ 0)
 
 #define	SQL_EXEC(_v) \
 	if (SQLITE_OK != sqlite3_exec(db, (_v), NULL, NULL, NULL)) \
@@ -179,6 +162,7 @@ static	void	 putkeys(const struct of *,
 			const char *, int, uint64_t);
 static	void	 putmdockey(const struct of *,
 			const struct mdoc_node *, uint64_t);
+static	void	 say(const char *, const char *, const char *, ...);
 static	char 	*stradd(const char *);
 static	char 	*straddbuf(const char *, size_t);
 static	int	 treescan(const char *);
@@ -600,30 +584,37 @@ treescan(const char *base)
 		 */
 		if (FTS_F == ff->fts_info) {
 			if ( ! use_all && ff->fts_level < 2) {
-				WARNING(path, base, "Extraneous file");
+				if (warnings)
+					say(base, path, "Extraneous file");
 				continue;
 			} else if (inocheck(ff->fts_statp)) {
-				WARNING(path, base, "Duplicate file");
+				if (warnings)
+					say(base, path, "Duplicate file");
 				continue;
 			} 
 
 			cp = ff->fts_name;
 
 			if (0 == strcmp(cp, "mandocdb.db")) {
-				WARNING(path, base, "Skip database");
+				if (warnings)
+					say(base, path, "Skip database");
 				continue;
 			} else if (NULL != (cp = strrchr(cp, '.'))) {
 				if (0 == strcmp(cp + 1, "html")) {
-					WARNING(path, base, "Skip html");
+					if (warnings)
+						say(base, path, "Skip html");
 					continue;
 				} else if (0 == strcmp(cp + 1, "gz")) {
-					WARNING(path, base, "Skip gz");
+					if (warnings)
+						say(base, path, "Skip gz");
 					continue;
 				} else if (0 == strcmp(cp + 1, "ps")) {
-					WARNING(path, base, "Skip ps");
+					if (warnings)
+						say(base, path, "Skip ps");
 					continue;
 				} else if (0 == strcmp(cp + 1, "pdf")) {
-					WARNING(path, base, "Skip pdf");
+					if (warnings)
+						say(base, path, "Skip pdf");
 					continue;
 				}
 			}
@@ -667,7 +658,8 @@ treescan(const char *base)
 			if (NULL != dsec || use_all) 
 				break;
 
-			WARNING(path, base, "Unknown directory part");
+			if (warnings)
+				say(base, path, "Unknown directory part");
 			fts_set(f, ff, FTS_SKIP);
 			break;
 		case (2):
@@ -682,7 +674,8 @@ treescan(const char *base)
 		default:
 			if (FTS_DP == ff->fts_info || use_all)
 				break;
-			WARNING(path, base, "Extraneous directory part");
+			if (warnings)
+				say(base, path, "Extraneous directory part");
 			fts_set(f, ff, FTS_SKIP);
 			break;
 		}
@@ -721,13 +714,16 @@ filescan(const char *file, const char *base)
 		file += 2;
 
 	if (-1 == stat(file, &st)) {
-		WARNING(file, base, "%s", strerror(errno));
+		if (warnings)
+			say(base, file, "%s", strerror(errno));
 		return;
 	} else if ( ! (S_IFREG & st.st_mode)) {
-		WARNING(file, base, "Not a regular file");
+		if (warnings)
+			say(base, file, "Not a regular file");
 		return;
 	} else if (inocheck(&st)) {
-		WARNING(file, base, "Duplicate file");
+		if (warnings)
+			say(base, file, "Duplicate file");
 		return;
 	}
 
@@ -941,8 +937,9 @@ ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
 		if ( ! use_all && FORM_CAT == of->dform) {
 			sz = strlcpy(buf, of->file, MAXPATHLEN);
 			if (sz >= MAXPATHLEN) {
-				WARNING(of->file, base, 
-					"Filename too long");
+				if (warnings)
+					say(base, of->file,
+					    "Filename too long");
 				continue;
 			}
 			bufp = strstr(buf, "cat");
@@ -952,8 +949,9 @@ ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
 				*++bufp = '\0';
 			strlcat(buf, of->dsec, MAXPATHLEN);
 			if (filecheck(buf)) {
-				WARNING(of->file, base, "Man "
-					"source exists: %s", buf);
+				if (warnings)
+					say(base, of->file, "Man "
+					    "source exists: %s", buf);
 				continue;
 			}
 		}
@@ -1006,8 +1004,9 @@ ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
 		 * section, like encrypt(1) = makekey(8).  Do not skip
 		 * manuals for such reasons.
 		 */
-		if ( ! use_all && form && strcasecmp(msec, of->dsec))
-			WARNING(of->file, base, "Section \"%s\" "
+		if (warnings && !use_all && form &&
+				strcasecmp(msec, of->dsec))
+			say(base, of->file, "Section \"%s\" "
 				"manual in %s directory", 
 				msec, of->dsec);
 
@@ -1025,8 +1024,8 @@ ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
 		 * Thus, warn about architecture mismatches,
 		 * but don't skip manuals for this reason.
 		 */
-		if ( ! use_all && strcasecmp(march, of->arch))
-			WARNING(of->file, base, "Architecture \"%s\" "
+		if (warnings && !use_all && strcasecmp(march, of->arch))
+			say(base, of->file, "Architecture \"%s\" "
 				"manual in \"%s\" directory",
 				march, of->arch);
 
@@ -1055,7 +1054,8 @@ parse_catpage(struct of *of, const char *base)
 	size_t		 len, plen, titlesz;
 
 	if (NULL == (stream = fopen(of->file, "r"))) {
-		WARNING(of->file, base, "%s", strerror(errno));
+		if (warnings)
+			say(base, of->file, "%s", strerror(errno));
 		return;
 	}
 
@@ -1107,7 +1107,8 @@ parse_catpage(struct of *of, const char *base)
 	 */
 
 	if (NULL == title || '\0' == *title) {
-		WARNING(of->file, base, "Cannot find NAME section");
+		if (warnings)
+			say(base, of->file, "Cannot find NAME section");
 		fclose(stream);
 		free(title);
 		return;
@@ -1126,7 +1127,8 @@ parse_catpage(struct of *of, const char *base)
 		for (p += 2; ' ' == *p || '\b' == *p; p++)
 			/* Skip to next word. */ ;
 	} else {
-		WARNING(of->file, base, "No dash in title line");
+		if (warnings)
+			say(base, of->file, "No dash in title line");
 		p = title;
 	}
 
@@ -1804,7 +1806,8 @@ dbindex(struct mchars *mc, int form,
 	int64_t		 recno;
 	size_t		 i;
 
-	DEBUG(of->file, base, "Adding to index");
+	if (verb)
+		say(base, of->file, "Adding to index");
 
 	if (nodb)
 		return;
@@ -1859,7 +1862,8 @@ dbprune(const char *base)
 		SQL_BIND_TEXT(stmts[STMT_DELETE], i, of->file);
 		SQL_STEP(stmts[STMT_DELETE]);
 		sqlite3_reset(stmts[STMT_DELETE]);
-		DEBUG(of->file, base, "Deleted from index");
+		if (verb)
+			say(base, of->file, "Deleted from index");
 	}
 }
 
@@ -2011,4 +2015,21 @@ path_reset(const char *cwd, int fd, const char *base)
 		return(0);
 	}
 	return(1);
+}
+
+static void
+say(const char *dir, const char *file, const char *format, ...)
+{
+	va_list		 ap;
+
+	fprintf(stderr, "%s", dir);
+	if ('\0' != *file)
+		fprintf(stderr, "//%s", file);
+	fputs(": ", stderr);
+
+	va_start(ap, format);
+	vfprintf(stderr, format, ap);
+	va_end(ap);
+
+	fputc('\n', stderr);
 }
