@@ -567,6 +567,8 @@ treescan(void)
 		 * Disallow duplicate (hard-linked) files.
 		 */
 		if (FTS_F == ff->fts_info) {
+			if (0 == strcmp(path, MANDOC_DB))
+				continue;
 			if ( ! use_all && ff->fts_level < 2) {
 				if (warnings)
 					say(path, "Extraneous file");
@@ -575,45 +577,50 @@ treescan(void)
 				if (warnings)
 					say(path, "Duplicate file");
 				continue;
-			} 
-
-			cp = ff->fts_name;
-
-			if (0 == strcmp(cp, "mandocdb.db")) {
-				if (warnings)
-					say(path, "Skip database");
-				continue;
-			} else if (NULL != (cp = strrchr(cp, '.'))) {
-				if (0 == strcmp(cp + 1, "html")) {
+			} else if (NULL == (sec =
+					strrchr(ff->fts_name, '.'))) {
+				if ( ! use_all) {
 					if (warnings)
-						say(path, "Skip html");
-					continue;
-				} else if (0 == strcmp(cp + 1, "gz")) {
-					if (warnings)
-						say(path, "Skip gz");
-					continue;
-				} else if (0 == strcmp(cp + 1, "ps")) {
-					if (warnings)
-						say(path, "Skip ps");
-					continue;
-				} else if (0 == strcmp(cp + 1, "pdf")) {
-					if (warnings)
-						say(path, "Skip pdf");
+						say(path,
+						    "No filename suffix");
 					continue;
 				}
-			}
-
-			if (NULL != (sec = strrchr(ff->fts_name, '.'))) {
-				*sec = '\0';
-				sec = stradd(sec + 1);
+			} else if (0 == strcmp(++sec, "html")) {
+				if (warnings)
+					say(path, "Skip html");
+				continue;
+			} else if (0 == strcmp(sec, "gz")) {
+				if (warnings)
+					say(path, "Skip gz");
+				continue;
+			} else if (0 == strcmp(sec, "ps")) {
+				if (warnings)
+					say(path, "Skip ps");
+				continue;
+			} else if (0 == strcmp(sec, "pdf")) {
+				if (warnings)
+					say(path, "Skip pdf");
+				continue;
+			} else if ( ! use_all &&
+			    ((FORM_SRC == dform && strcmp(sec, dsec)) ||
+			     (FORM_CAT == dform && strcmp(sec, "0")))) {
+				if (warnings)
+					say(path, "Wrong filename suffix");
+				continue;
+			} else {
+				sec[-1] = '\0';
+				sec = stradd(sec);
 			}
 			name = stradd(ff->fts_name);
 			ofadd(dform, path, 
 				name, dsec, sec, arch, ff->fts_statp);
 			continue;
 		} else if (FTS_D != ff->fts_info && 
-				FTS_DP != ff->fts_info)
+				FTS_DP != ff->fts_info) {
+			if (warnings)
+				say(path, "Not a regular file");
 			continue;
+		}
 
 		switch (ff->fts_level) {
 		case (0):
