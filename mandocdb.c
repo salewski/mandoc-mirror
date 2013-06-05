@@ -140,8 +140,7 @@ static	void	 ofadd(int, const char *, const char *, const char *,
 static	void	 offree(void);
 static	void	 ofmerge(struct mchars *, struct mparse *);
 static	void	 parse_catpage(struct of *);
-static	int	 parse_man(struct of *, 
-			const struct man_node *);
+static	void	 parse_man(struct of *, const struct man_node *);
 static	void	 parse_mdoc(struct of *, const struct mdoc_node *);
 static	int	 parse_mdoc_body(struct of *, const struct mdoc_node *);
 static	int	 parse_mdoc_head(struct of *, const struct mdoc_node *);
@@ -1181,7 +1180,7 @@ putmdockey(const struct of *of, const struct mdoc_node *n, uint64_t m)
 	}
 }
 
-static int
+static void
 parse_man(struct of *of, const struct man_node *n)
 {
 	const struct man_node *head, *body;
@@ -1190,7 +1189,7 @@ parse_man(struct of *of, const struct man_node *n)
 	size_t		 sz, titlesz;
 
 	if (NULL == n)
-		return(0);
+		return;
 
 	/*
 	 * We're only searching for one thing: the first text child in
@@ -1232,7 +1231,7 @@ parse_man(struct of *of, const struct man_node *n)
 				title[titlesz - 1] = ' ';
 			}
 			if (NULL == title)
-				return(1);
+				return;
 
 			title = mandoc_realloc(title, titlesz + 1);
 			title[titlesz] = '\0';
@@ -1245,7 +1244,7 @@ parse_man(struct of *of, const struct man_node *n)
 
 			if (0 == (sz = strlen(sv))) {
 				free(title);
-				return(1);
+				return;
 			}
 
 			/* Erase trailing space. */
@@ -1256,7 +1255,7 @@ parse_man(struct of *of, const struct man_node *n)
 
 			if (start == sv) {
 				free(title);
-				return(1);
+				return;
 			}
 
 			start = sv;
@@ -1293,7 +1292,7 @@ parse_man(struct of *of, const struct man_node *n)
 			if (sv == start) {
 				putkey(of, start, TYPE_Nm);
 				free(title);
-				return(1);
+				return;
 			}
 
 			while (isspace((unsigned char)*start))
@@ -1317,15 +1316,12 @@ parse_man(struct of *of, const struct man_node *n)
 			of->desc = stradd(start);
 			putkey(of, start, TYPE_Nd);
 			free(title);
-			return(1);
+			return;
 		}
 	}
 
 	for (n = n->child; n; n = n->next)
-		if (parse_man(of, n))
-			return(1);
-
-	return(0);
+		parse_man(of, n);
 }
 
 static void
