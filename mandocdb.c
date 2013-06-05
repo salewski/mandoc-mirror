@@ -19,7 +19,6 @@
 #include "config.h"
 #endif
 
-#include <sys/param.h>
 #include <sys/stat.h>
 
 #include <assert.h>
@@ -28,6 +27,7 @@
 #include <fcntl.h>
 #include <fts.h>
 #include <getopt.h>
+#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -98,7 +98,7 @@ struct	of {
 	struct of	*next; /* next in ofs */
 	enum form	 dform; /* path-cued form */
 	enum form	 sform; /* suffix-cued form */
-	char		 file[MAXPATHLEN]; /* filename rel. to manpath */
+	char		 file[PATH_MAX]; /* filename rel. to manpath */
 	const char	*desc; /* parsed description */
 	const char	*sec; /* suffix-cued section (or empty) */
 	const char	*dsec; /* path-cued section (or empty) */
@@ -313,7 +313,7 @@ static	const struct mdoc_handler mdocs[MDOC_MAX] = {
 int
 main(int argc, char *argv[])
 {
-	char		  cwd[MAXPATHLEN];
+	char		  cwd[PATH_MAX];
 	int		  ch, rc, fd, i;
 	unsigned int	  index;
 	size_t		  j, sz;
@@ -350,7 +350,7 @@ main(int argc, char *argv[])
 	 * handle relative paths, and by doing this, we can return to
 	 * the starting point.
 	 */
-	if (NULL == getcwd(cwd, MAXPATHLEN)) {
+	if (NULL == getcwd(cwd, PATH_MAX)) {
 		perror(NULL);
 		return(EXIT_FAILURE);
 	} else if (-1 == (fd = open(cwd, O_RDONLY, 0))) {
@@ -876,7 +876,7 @@ ofadd(const char *base, int dform, const char *file,
 	}
 
 	of = mandoc_calloc(1, sizeof(struct of));
-	strlcpy(of->file, file, MAXPATHLEN);
+	strlcpy(of->file, file, PATH_MAX);
 	of->name = name;
 	of->sec = sec;
 	of->dsec = dsec;
@@ -920,7 +920,7 @@ ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
 	size_t		 sz;
 	struct mdoc	*mdoc;
 	struct man	*man;
-	char		 buf[MAXPATHLEN];
+	char		 buf[PATH_MAX];
 	char		*bufp;
 	const char	*msec, *march, *mtitle, *cp;
 	struct of	*of;
@@ -935,8 +935,8 @@ ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
 		 * own.
 		 */
 		if ( ! use_all && FORM_CAT == of->dform) {
-			sz = strlcpy(buf, of->file, MAXPATHLEN);
-			if (sz >= MAXPATHLEN) {
+			sz = strlcpy(buf, of->file, PATH_MAX);
+			if (sz >= PATH_MAX) {
 				if (warnings)
 					say(base, of->file,
 					    "Filename too long");
@@ -947,7 +947,7 @@ ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
 			memcpy(bufp, "man", 3);
 			if (NULL != (bufp = strrchr(buf, '.')))
 				*++bufp = '\0';
-			strlcat(buf, of->dsec, MAXPATHLEN);
+			strlcat(buf, of->dsec, PATH_MAX);
 			if (filecheck(buf)) {
 				if (warnings)
 					say(base, of->file, "Man "
@@ -1875,7 +1875,7 @@ static void
 dbclose(const char *base, int real)
 {
 	size_t		 i;
-	char		 file[MAXPATHLEN];
+	char		 file[PATH_MAX];
 
 	if (nodb)
 		return;
@@ -1891,8 +1891,8 @@ dbclose(const char *base, int real)
 	if (real)
 		return;
 
-	strlcpy(file, MANDOC_DB, MAXPATHLEN);
-	strlcat(file, "~", MAXPATHLEN);
+	strlcpy(file, MANDOC_DB, PATH_MAX);
+	strlcat(file, "~", PATH_MAX);
 	if (-1 == rename(file, MANDOC_DB))
 		perror(MANDOC_DB);
 }
@@ -1908,7 +1908,7 @@ dbclose(const char *base, int real)
 static int
 dbopen(const char *base, int real)
 {
-	char		 file[MAXPATHLEN];
+	char		 file[PATH_MAX];
 	const char	*sql;
 	int		 rc, ofl;
 	size_t		 sz;
@@ -1916,11 +1916,11 @@ dbopen(const char *base, int real)
 	if (nodb) 
 		return(1);
 
-	sz = strlcpy(file, MANDOC_DB, MAXPATHLEN);
+	sz = strlcpy(file, MANDOC_DB, PATH_MAX);
 	if ( ! real)
-		sz = strlcat(file, "~", MAXPATHLEN);
+		sz = strlcat(file, "~", PATH_MAX);
 
-	if (sz >= MAXPATHLEN) {
+	if (sz >= PATH_MAX) {
 		fprintf(stderr, "%s: Path too long\n", file);
 		return(0);
 	}

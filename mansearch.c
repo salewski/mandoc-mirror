@@ -18,11 +18,10 @@
 #include "config.h"
 #endif
 
-#include <sys/param.h>
-
 #include <assert.h>
 #include <fcntl.h>
 #include <getopt.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -131,7 +130,7 @@ mansearch(const struct mansearch *search,
 {
 	int		 fd, rc, c;
 	int64_t		 id;
-	char		 buf[MAXPATHLEN];
+	char		 buf[PATH_MAX];
 	char		*sql;
 	struct expr	*e, *ep;
 	sqlite3		*db;
@@ -168,7 +167,7 @@ mansearch(const struct mansearch *search,
 	 * on our current directory from which to start the chdir().
 	 */
 
-	if (NULL == getcwd(buf, MAXPATHLEN)) {
+	if (NULL == getcwd(buf, PATH_MAX)) {
 		perror(NULL);
 		goto out;
 	} else if (-1 == (fd = open(buf, O_RDONLY, 0))) {
@@ -266,9 +265,9 @@ mansearch(const struct mansearch *search,
 					(*res, maxres * sizeof(struct manpage));
 			}
 			strlcpy((*res)[cur].file, 
-				paths->paths[i], MAXPATHLEN);
-			strlcat((*res)[cur].file, "/", MAXPATHLEN);
-			strlcat((*res)[cur].file, mp->file, MAXPATHLEN);
+				paths->paths[i], PATH_MAX);
+			strlcat((*res)[cur].file, "/", PATH_MAX);
+			strlcat((*res)[cur].file, mp->file, PATH_MAX);
 			(*res)[cur].desc = mp->desc;
 			(*res)[cur].form = mp->form;
 			free(mp->file);

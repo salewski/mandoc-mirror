@@ -61,7 +61,7 @@
 __BEGIN_DECLS
 
 struct	manpage {
-	char		 file[MAXPATHLEN]; /* prefixed by manpath */
+	char		 file[PATH_MAX]; /* prefixed by manpath */
 	char		*desc; /* description of manpage */
 	int		 form; /* 0 == catpage */
 };

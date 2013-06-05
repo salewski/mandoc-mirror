@@ -17,10 +17,10 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <sys/param.h>
 
 #include <assert.h>
 #include <getopt.h>
+#include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,7 +40,7 @@ main(int argc, char *argv[])
 	struct mansearch search;
 	struct manpage	*res;
 	char		*conf_file, *defpaths, *auxpaths, *cp;
-	char		 buf[MAXPATHLEN];
+	char		 buf[PATH_MAX];
 	const char	*cmd;
 	struct manpaths	 paths;
 	char		*progname;
@@ -132,7 +132,7 @@ main(int argc, char *argv[])
 	}
 show:
 	cmd = res[i - 1].form ? "mandoc" : "cat";
-	strlcpy(buf, res[i - 1].file, MAXPATHLEN);
+	strlcpy(buf, res[i - 1].file, PATH_MAX);
 	free(res);
 
 	show(cmd, buf);

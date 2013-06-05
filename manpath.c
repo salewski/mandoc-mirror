@@ -19,10 +19,6 @@
 #include "config.h"
 #endif
 
-#ifdef	USE_MANPATH
-#include <sys/param.h>
-#endif
-
 #include <assert.h>
 #include <ctype.h>
 #include <limits.h>
@@ -44,7 +40,7 @@ manpath_parse(struct manpaths *dirs, const char *file,
 		char *defp, char *auxp)
 {
 #ifdef	USE_MANPATH
-	char		 cmd[(MAXPATHLEN * 3) + 20];
+	char		 cmd[(PATH_MAX * 3) + 20];
 	FILE		*stream;
 	char		*buf;
 	size_t		 sz, bsz;
