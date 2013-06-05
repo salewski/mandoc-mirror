@@ -23,12 +23,12 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <fts.h>
 #include <getopt.h>
 #include <limits.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -122,26 +122,24 @@ struct	mdoc_handler {
 #define	MDOCF_CHILD	 0x01  /* automatically index child nodes */
 };
 
-static	void	 dbclose(const char *, int);
-static	void	 dbindex(struct mchars *, int,
-			const struct of *, const char *);
-static	int	 dbopen(const char *, int);
-static	void	 dbprune(const char *);
+static	void	 dbclose(int);
+static	void	 dbindex(struct mchars *, int, const struct of *);
+static	int	 dbopen(int);
+static	void	 dbprune(void);
 static	void	 fileadd(struct of *);
 static	int	 filecheck(const char *);
-static	void	 filescan(const char *, const char *);
+static	void	 filescan(const char *);
 static	struct str *hashget(const char *, size_t);
 static	void	*hash_alloc(size_t, void *);
 static	void	 hash_free(void *, size_t, void *);
 static	void	*hash_halloc(size_t, void *);
 static	void	 inoadd(const struct stat *, struct of *);
 static	int	 inocheck(const struct stat *);
-static	void	 ofadd(const char *, int, const char *, 
-			const char *, const char *, const char *, 
-			const char *, const struct stat *);
+static	void	 ofadd(int, const char *, const char *, const char *,
+			const char *, const char *, const struct stat *);
 static	void	 offree(void);
-static	int	 ofmerge(struct mchars *, struct mparse *, const char *);
-static	void	 parse_catpage(struct of *, const char *);
+static	void	 ofmerge(struct mchars *, struct mparse *);
+static	void	 parse_catpage(struct of *);
 static	int	 parse_man(struct of *, 
 			const struct man_node *);
 static	void	 parse_mdoc(struct of *, const struct mdoc_node *);
@@ -155,17 +153,17 @@ static	int	 parse_mdoc_Nm(struct of *, const struct mdoc_node *);
 static	int	 parse_mdoc_Sh(struct of *, const struct mdoc_node *);
 static	int	 parse_mdoc_St(struct of *, const struct mdoc_node *);
 static	int	 parse_mdoc_Xr(struct of *, const struct mdoc_node *);
-static	int	 path_reset(const char *, int, const char *);
+static	int	 set_basedir(const char *);
 static	void	 putkey(const struct of *, 
 			const char *, uint64_t);
 static	void	 putkeys(const struct of *, 
 			const char *, int, uint64_t);
 static	void	 putmdockey(const struct of *,
 			const struct mdoc_node *, uint64_t);
-static	void	 say(const char *, const char *, const char *, ...);
+static	void	 say(const char *, const char *, ...);
 static	char 	*stradd(const char *);
 static	char 	*straddbuf(const char *, size_t);
-static	int	 treescan(const char *);
+static	int	 treescan(void);
 static	size_t	 utf8(unsigned int, char [7]);
 static	void	 utf8key(struct mchars *, struct str *);
 static	void 	 wordaddbuf(const struct of *, 
@@ -176,7 +174,9 @@ static	int	 	 use_all; /* use all found files */
 static	int		 nodb; /* no database changes */
 static	int	  	 verb; /* print what we're doing */
 static	int	  	 warnings; /* warn about crap */
+static	int		 exitcode; /* to be returned by main */
 static	enum op	  	 op; /* operational mode */
+static	char		 basedir[PATH_MAX]; /* current base directory */
 static	struct ohash	 inos; /* table of inodes/devices */
 static	struct ohash	 filenames; /* table of filenames */
 static	struct ohash	 strings; /* table of all strings */
@@ -313,11 +313,10 @@ static	const struct mdoc_handler mdocs[MDOC_MAX] = {
 int
 main(int argc, char *argv[])
 {
-	char		  cwd[PATH_MAX];
-	int		  ch, rc, fd, i;
+	int		  ch, i;
 	unsigned int	  index;
 	size_t		  j, sz;
-	const char	 *dir;
+	const char	 *path_arg;
 	struct str	 *s;
 	struct mchars	 *mc;
 	struct manpaths	  dirs;
@@ -345,20 +344,6 @@ main(int argc, char *argv[])
 		++progname;
 
 	/*
-	 * Remember where we started by keeping a fd open to the origin
-	 * path component: throughout this utility, we chdir() a lot to
-	 * handle relative paths, and by doing this, we can return to
-	 * the starting point.
-	 */
-	if (NULL == getcwd(cwd, PATH_MAX)) {
-		perror(NULL);
-		return(EXIT_FAILURE);
-	} else if (-1 == (fd = open(cwd, O_RDONLY, 0))) {
-		perror(cwd);
-		return(EXIT_FAILURE);
-	}
-
-	/*
 	 * We accept a few different invocations.  
 	 * The CHECKOP macro makes sure that invocation styles don't
 	 * clobber each other.
@@ -369,7 +354,7 @@ main(int argc, char *argv[])
 		goto usage; \
 	} while (/*CONSTCOND*/0)
 
-	dir = NULL;
+	path_arg = NULL;
 	op = OP_DEFAULT;
 
 	while (-1 != (ch = getopt(argc, argv, "aC:d:ntu:vW")))
@@ -379,12 +364,12 @@ main(int argc, char *argv[])
 			break;
 		case ('C'):
 			CHECKOP(op, ch);
-			dir = optarg;
+			path_arg = optarg;
 			op = OP_CONFFILE;
 			break;
 		case ('d'):
 			CHECKOP(op, ch);
-			dir = optarg;
+			path_arg = optarg;
 			op = OP_UPDATE;
 			break;
 		case ('n'):
@@ -398,7 +383,7 @@ main(int argc, char *argv[])
 			break;
 		case ('u'):
 			CHECKOP(op, ch);
-			dir = optarg;
+			path_arg = optarg;
 			op = OP_DELETE;
 			break;
 		case ('v'):
@@ -419,7 +404,7 @@ main(int argc, char *argv[])
 		goto usage;
 	}
 
-	rc = 1;
+	exitcode = (int)MANDOCLEVEL_OK;
 	mp = mparse_alloc(MPARSE_AUTO, 
 		MANDOCLEVEL_FATAL, NULL, NULL, NULL);
 	mc = mchars_alloc();
@@ -433,24 +418,23 @@ main(int argc, char *argv[])
 		 * Force processing all files.
 		 */
 		use_all = 1;
-		if (NULL == dir)
-			dir = cwd;
+
 		/*
 		 * All of these deal with a specific directory.
 		 * Jump into that directory then collect files specified
 		 * on the command-line.
 		 */
-		if (0 == path_reset(cwd, fd, dir))
+		if (0 == set_basedir(path_arg))
 			goto out;
 		for (i = 0; i < argc; i++)
-			filescan(argv[i], dir);
-		if (0 == dbopen(dir, 1))
+			filescan(argv[i]);
+		if (0 == dbopen(1))
 			goto out;
 		if (OP_TEST != op)
-			dbprune(dir);
+			dbprune();
 		if (OP_DELETE != op)
-			rc = ofmerge(mc, mp, dir);
-		dbclose(dir, 1);
+			ofmerge(mc, mp);
+		dbclose(1);
 	} else {
 		/*
 		 * If we have arguments, use them as our manpaths.
@@ -464,7 +448,7 @@ main(int argc, char *argv[])
 			for (i = 0; i < argc; i++)
 				dirs.paths[i] = mandoc_strdup(argv[i]);
 		} else
-			manpath_parse(&dirs, dir, NULL, NULL);
+			manpath_parse(&dirs, path_arg, NULL, NULL);
 
 		/*
 		 * First scan the tree rooted at a base directory.
@@ -479,13 +463,13 @@ main(int argc, char *argv[])
 				dirs.paths[j][--sz] = '\0';
 			if (0 == sz)
 				continue;
-			if (0 == path_reset(cwd, fd, dirs.paths[j]))
+			if (0 == set_basedir(dirs.paths[j]))
 				goto out;
-			if (0 == treescan(dirs.paths[j]))
+			if (0 == treescan())
 				goto out;
-			if (0 == path_reset(cwd, fd, dirs.paths[j]))
+			if (0 == set_basedir(dirs.paths[j]))
 				goto out;
-			if (0 == dbopen(dirs.paths[j], 0))
+			if (0 == dbopen(0))
 				goto out;
 
 			/*
@@ -497,9 +481,8 @@ main(int argc, char *argv[])
 			SQL_EXEC("PRAGMA synchronous = OFF");
 #endif
 
-			if (0 == ofmerge(mc, mp, dirs.paths[j]))
-				goto out;
-			dbclose(dirs.paths[j], 0);
+			ofmerge(mc, mp);
+			dbclose(0);
 			offree();
 			ohash_delete(&inos);
 			ohash_init(&inos, 6, &ino_info);
@@ -508,7 +491,7 @@ main(int argc, char *argv[])
 		}
 	}
 out:
-	close(fd);
+	set_basedir(NULL);
 	manpath_free(&dirs);
 	mchars_free(mc);
 	mparse_free(mp);
@@ -522,7 +505,7 @@ out:
 	ohash_delete(&inos);
 	ohash_delete(&filenames);
 	offree();
-	return(rc ? EXIT_SUCCESS : EXIT_FAILURE);
+	return(exitcode);
 usage:
 	fprintf(stderr, "usage: %s [-anvW] [-C file]\n"
 			"       %s [-anvW] dir ...\n"
@@ -532,11 +515,11 @@ usage:
 		       progname, progname, progname, 
 		       progname, progname);
 
-	return(EXIT_FAILURE);
+	return((int)MANDOCLEVEL_BADARG);
 }
 
 /*
- * Scan a directory tree rooted at "base" for manpages.
+ * Scan a directory tree rooted at "basedir" for manpages.
  * We use fts(), scanning directory parts along the way for clues to our
  * section and architecture.
  *
@@ -550,7 +533,7 @@ usage:
  * TODO: accomodate for multi-language directories.
  */
 static int
-treescan(const char *base)
+treescan(void)
 {
 	FTS		*f;
 	FTSENT		*ff;
@@ -568,7 +551,8 @@ treescan(const char *base)
 	 */
 	f = fts_open((char * const *)argv, FTS_LOGICAL, NULL);
 	if (NULL == f) {
-		perror(base);
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say("", NULL);
 		return(0);
 	}
 
@@ -585,11 +569,11 @@ treescan(const char *base)
 		if (FTS_F == ff->fts_info) {
 			if ( ! use_all && ff->fts_level < 2) {
 				if (warnings)
-					say(base, path, "Extraneous file");
+					say(path, "Extraneous file");
 				continue;
 			} else if (inocheck(ff->fts_statp)) {
 				if (warnings)
-					say(base, path, "Duplicate file");
+					say(path, "Duplicate file");
 				continue;
 			} 
 
@@ -597,24 +581,24 @@ treescan(const char *base)
 
 			if (0 == strcmp(cp, "mandocdb.db")) {
 				if (warnings)
-					say(base, path, "Skip database");
+					say(path, "Skip database");
 				continue;
 			} else if (NULL != (cp = strrchr(cp, '.'))) {
 				if (0 == strcmp(cp + 1, "html")) {
 					if (warnings)
-						say(base, path, "Skip html");
+						say(path, "Skip html");
 					continue;
 				} else if (0 == strcmp(cp + 1, "gz")) {
 					if (warnings)
-						say(base, path, "Skip gz");
+						say(path, "Skip gz");
 					continue;
 				} else if (0 == strcmp(cp + 1, "ps")) {
 					if (warnings)
-						say(base, path, "Skip ps");
+						say(path, "Skip ps");
 					continue;
 				} else if (0 == strcmp(cp + 1, "pdf")) {
 					if (warnings)
-						say(base, path, "Skip pdf");
+						say(path, "Skip pdf");
 					continue;
 				}
 			}
@@ -624,7 +608,7 @@ treescan(const char *base)
 				sec = stradd(sec + 1);
 			}
 			name = stradd(ff->fts_name);
-			ofadd(base, dform, path, 
+			ofadd(dform, path, 
 				name, dsec, sec, arch, ff->fts_statp);
 			continue;
 		} else if (FTS_D != ff->fts_info && 
@@ -659,7 +643,7 @@ treescan(const char *base)
 				break;
 
 			if (warnings)
-				say(base, path, "Unknown directory part");
+				say(path, "Unknown directory part");
 			fts_set(f, ff, FTS_SKIP);
 			break;
 		case (2):
@@ -675,7 +659,7 @@ treescan(const char *base)
 			if (FTS_DP == ff->fts_info || use_all)
 				break;
 			if (warnings)
-				say(base, path, "Extraneous directory part");
+				say(path, "Extraneous directory part");
 			fts_set(f, ff, FTS_SKIP);
 			break;
 		}
@@ -701,10 +685,11 @@ treescan(const char *base)
  * See treescan() for the fts(3) version of this.
  */
 static void
-filescan(const char *file, const char *base)
+filescan(const char *file)
 {
+	char		 buf[PATH_MAX];
 	const char	*sec, *arch, *name, *dsec;
-	char		*p, *start, *buf;
+	char		*p, *start;
 	int		 dform;
 	struct stat	 st;
 
@@ -713,22 +698,28 @@ filescan(const char *file, const char *base)
 	if (0 == strncmp(file, "./", 2))
 		file += 2;
 
-	if (-1 == stat(file, &st)) {
-		if (warnings)
-			say(base, file, "%s", strerror(errno));
+	if (NULL == realpath(file, buf)) {
+		exitcode = (int)MANDOCLEVEL_BADARG;
+		say(file, NULL);
+		return;
+	} else if (strstr(buf, basedir) != buf) {
+		exitcode = (int)MANDOCLEVEL_BADARG;
+		say("", "%s: outside base directory", buf);
+		return;
+	} else if (-1 == stat(buf, &st)) {
+		exitcode = (int)MANDOCLEVEL_BADARG;
+		say(file, NULL);
 		return;
 	} else if ( ! (S_IFREG & st.st_mode)) {
-		if (warnings)
-			say(base, file, "Not a regular file");
+		exitcode = (int)MANDOCLEVEL_BADARG;
+		say(file, "Not a regular file");
 		return;
 	} else if (inocheck(&st)) {
 		if (warnings)
-			say(base, file, "Duplicate file");
+			say(file, "Duplicate file");
 		return;
 	}
-
-	buf = mandoc_strdup(file);
-	start = buf;
+	start = buf + strlen(basedir);
 	sec = arch = name = dsec = NULL;
 	dform = FORM_NONE;
 
@@ -779,8 +770,7 @@ filescan(const char *file, const char *base)
 		*p = '\0';
 	} 
 
-	ofadd(base, dform, file, name, dsec, sec, arch, &st);
-	free(buf);
+	ofadd(dform, file, name, dsec, sec, arch, &st);
 }
 
 /*
@@ -849,9 +839,8 @@ inoadd(const struct stat *st, struct of *of)
 }
 
 static void
-ofadd(const char *base, int dform, const char *file, 
-		const char *name, const char *dsec, const char *sec, 
-		const char *arch, const struct stat *st)
+ofadd(int dform, const char *file, const char *name, const char *dsec,
+	const char *sec, const char *arch, const struct stat *st)
 {
 	struct of	*of;
 	int		 sform;
@@ -908,13 +897,13 @@ offree(void)
 
 /*
  * Run through the files in the global vector "ofs" and add them to the
- * database specified in "base".
+ * database specified in "basedir".
  *
  * This handles the parsing scheme itself, using the cues of directory
  * and filename to determine whether the file is parsable or not.
  */
-static int
-ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
+static void
+ofmerge(struct mchars *mc, struct mparse *mp)
 {
 	int		 form;
 	size_t		 sz;
@@ -938,8 +927,7 @@ ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
 			sz = strlcpy(buf, of->file, PATH_MAX);
 			if (sz >= PATH_MAX) {
 				if (warnings)
-					say(base, of->file,
-					    "Filename too long");
+					say(of->file, "Filename too long");
 				continue;
 			}
 			bufp = strstr(buf, "cat");
@@ -950,7 +938,7 @@ ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
 			strlcat(buf, of->dsec, PATH_MAX);
 			if (filecheck(buf)) {
 				if (warnings)
-					say(base, of->file, "Man "
+					say(of->file, "Man "
 					    "source exists: %s", buf);
 				continue;
 			}
@@ -1006,7 +994,7 @@ ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
 		 */
 		if (warnings && !use_all && form &&
 				strcasecmp(msec, of->dsec))
-			say(base, of->file, "Section \"%s\" "
+			say(of->file, "Section \"%s\" "
 				"manual in %s directory", 
 				msec, of->dsec);
 
@@ -1025,7 +1013,7 @@ ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
 		 * but don't skip manuals for this reason.
 		 */
 		if (warnings && !use_all && strcasecmp(march, of->arch))
-			say(base, of->file, "Architecture \"%s\" "
+			say(of->file, "Architecture \"%s\" "
 				"manual in \"%s\" directory",
 				march, of->arch);
 
@@ -1038,16 +1026,14 @@ ofmerge(struct mchars *mc, struct mparse *mp, const char *base)
 		} else if (NULL != man)
 			parse_man(of, man_node(man));
 		else
-			parse_catpage(of, base);
+			parse_catpage(of);
 
-		dbindex(mc, form, of, base);
+		dbindex(mc, form, of);
 	}
-
-	return(1);
 }
 
 static void
-parse_catpage(struct of *of, const char *base)
+parse_catpage(struct of *of)
 {
 	FILE		*stream;
 	char		*line, *p, *title;
@@ -1055,7 +1041,7 @@ parse_catpage(struct of *of, const char *base)
 
 	if (NULL == (stream = fopen(of->file, "r"))) {
 		if (warnings)
-			say(base, of->file, "%s", strerror(errno));
+			say(of->file, NULL);
 		return;
 	}
 
@@ -1108,7 +1094,7 @@ parse_catpage(struct of *of, const char *base)
 
 	if (NULL == title || '\0' == *title) {
 		if (warnings)
-			say(base, of->file, "Cannot find NAME section");
+			say(of->file, "Cannot find NAME section");
 		fclose(stream);
 		free(title);
 		return;
@@ -1128,7 +1114,7 @@ parse_catpage(struct of *of, const char *base)
 			/* Skip to next word. */ ;
 	} else {
 		if (warnings)
-			say(base, of->file, "No dash in title line");
+			say(of->file, "No dash in title line");
 		p = title;
 	}
 
@@ -1798,8 +1784,7 @@ utf8key(struct mchars *mc, struct str *key)
  * Also, UTF-8-encode the description at the last possible moment.
  */
 static void
-dbindex(struct mchars *mc, int form, 
-		const struct of *of, const char *base)
+dbindex(struct mchars *mc, int form, const struct of *of)
 {
 	struct str	*key;
 	const char	*desc;
@@ -1807,7 +1792,7 @@ dbindex(struct mchars *mc, int form,
 	size_t		 i;
 
 	if (verb)
-		say(base, of->file, "Adding to index");
+		say(of->file, "Adding to index");
 
 	if (nodb)
 		return;
@@ -1849,7 +1834,7 @@ dbindex(struct mchars *mc, int form,
 }
 
 static void
-dbprune(const char *base)
+dbprune(void)
 {
 	struct of	*of;
 	size_t		 i;
@@ -1863,7 +1848,7 @@ dbprune(const char *base)
 		SQL_STEP(stmts[STMT_DELETE]);
 		sqlite3_reset(stmts[STMT_DELETE]);
 		if (verb)
-			say(base, of->file, "Deleted from index");
+			say(of->file, "Deleted from index");
 	}
 }
 
@@ -1872,7 +1857,7 @@ dbprune(const char *base)
  * If "real" is not set, rename the temporary file into the real one.
  */
 static void
-dbclose(const char *base, int real)
+dbclose(int real)
 {
 	size_t		 i;
 	char		 file[PATH_MAX];
@@ -1893,8 +1878,10 @@ dbclose(const char *base, int real)
 
 	strlcpy(file, MANDOC_DB, PATH_MAX);
 	strlcat(file, "~", PATH_MAX);
-	if (-1 == rename(file, MANDOC_DB))
-		perror(MANDOC_DB);
+	if (-1 == rename(file, MANDOC_DB)) {
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say(MANDOC_DB, NULL);
+	}
 }
 
 /*
@@ -1906,7 +1893,7 @@ dbclose(const char *base, int real)
  * Must be matched by dbclose().
  */
 static int
-dbopen(const char *base, int real)
+dbopen(int real)
 {
 	char		 file[PATH_MAX];
 	const char	*sql;
@@ -1935,7 +1922,8 @@ dbopen(const char *base, int real)
 	if (SQLITE_OK == rc) 
 		goto prepare_statements;
 	if (SQLITE_CANTOPEN != rc) {
-		perror(file);
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say(file, NULL);
 		return(0);
 	}
 
@@ -1943,7 +1931,8 @@ dbopen(const char *base, int real)
 	db = NULL;
 
 	if (SQLITE_OK != (rc = sqlite3_open(file, &db))) {
-		perror(file);
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say(file, NULL);
 		return(0);
 	}
 
@@ -1967,7 +1956,8 @@ dbopen(const char *base, int real)
 	      "CREATE INDEX \"key_index\" ON keys (key);\n";
 
 	if (SQLITE_OK != sqlite3_exec(db, sql, NULL, NULL, NULL)) {
-		perror(sqlite3_errmsg(db));
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say(file, "%s", sqlite3_errmsg(db));
 		return(0);
 	}
 
@@ -2006,28 +1996,76 @@ hash_free(void *p, size_t sz, void *arg)
 }
 
 static int
-path_reset(const char *cwd, int fd, const char *base)
+set_basedir(const char *targetdir)
 {
+	static char	 startdir[PATH_MAX];
+	static int	 fd;
 
-	if (-1 == fchdir(fd)) {
-		perror(cwd);
+	/*
+	 * Remember where we started by keeping a fd open to the origin
+	 * path component: throughout this utility, we chdir() a lot to
+	 * handle relative paths, and by doing this, we can return to
+	 * the starting point.
+	 */
+	if ('\0' == *startdir) {
+		if (NULL == getcwd(startdir, PATH_MAX)) {
+			exitcode = (int)MANDOCLEVEL_SYSERR;
+			if (NULL != targetdir)
+				say(".", NULL);
+			return(0);
+		}
+		if (-1 == (fd = open(startdir, O_RDONLY, 0))) {
+			exitcode = (int)MANDOCLEVEL_SYSERR;
+			say(startdir, NULL);
+			return(0);
+		}
+		if (NULL == targetdir)
+			targetdir = startdir;
+	} else {
+		if (-1 == fd)
+			return(0);
+		if (-1 == fchdir(fd)) {
+			close(fd);
+			basedir[0] = '\0';
+			exitcode = (int)MANDOCLEVEL_SYSERR;
+			say(startdir, NULL);
+			return(0);
+		}
+		if (NULL == targetdir) {
+			close(fd);
+			return(1);
+		}
+	}
+	if (NULL == realpath(targetdir, basedir)) {
+		basedir[0] = '\0';
+		exitcode = (int)MANDOCLEVEL_BADARG;
+		say(targetdir, NULL);
 		return(0);
-	} else if (-1 == chdir(base)) {
-		perror(base);
+	} else if (-1 == chdir(basedir)) {
+		exitcode = (int)MANDOCLEVEL_BADARG;
+		say("", NULL);
 		return(0);
 	}
 	return(1);
 }
 
 static void
-say(const char *dir, const char *file, const char *format, ...)
+say(const char *file, const char *format, ...)
 {
 	va_list		 ap;
 
-	fprintf(stderr, "%s", dir);
+	if ('\0' != *basedir)
+		fprintf(stderr, "%s", basedir);
+	if ('\0' != *basedir && '\0' != *file)
+		fputs("//", stderr);
 	if ('\0' != *file)
-		fprintf(stderr, "//%s", file);
+		fprintf(stderr, "%s", file);
 	fputs(": ", stderr);
+
+	if (NULL == format) {
+		perror(NULL);
+		return;
+	}
 
 	va_start(ap, format);
 	vfprintf(stderr, format, ap);
