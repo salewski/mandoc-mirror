@@ -23,6 +23,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <fts.h>
 #include <getopt.h>
@@ -1864,7 +1865,6 @@ static void
 dbclose(int real)
 {
 	size_t		 i;
-	char		 file[PATH_MAX];
 
 	if (nodb)
 		return;
@@ -1880,9 +1880,7 @@ dbclose(int real)
 	if (real)
 		return;
 
-	strlcpy(file, MANDOC_DB, PATH_MAX);
-	strlcat(file, "~", PATH_MAX);
-	if (-1 == rename(file, MANDOC_DB)) {
+	if (-1 == rename(MANDOC_DB "~", MANDOC_DB)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
 		say(MANDOC_DB, NULL);
 	}
@@ -1899,28 +1897,23 @@ dbclose(int real)
 static int
 dbopen(int real)
 {
-	char		 file[PATH_MAX];
-	const char	*sql;
+	const char	*file, *sql;
 	int		 rc, ofl;
-	size_t		 sz;
 
 	if (nodb) 
 		return(1);
 
-	sz = strlcpy(file, MANDOC_DB, PATH_MAX);
-	if ( ! real)
-		sz = strlcat(file, "~", PATH_MAX);
-
-	if (sz >= PATH_MAX) {
-		fprintf(stderr, "%s: Path too long\n", file);
-		return(0);
-	}
-
-	if ( ! real)
-		remove(file);
-
-	ofl = SQLITE_OPEN_READWRITE | 
-		(0 == real ? SQLITE_OPEN_EXCLUSIVE : 0);
+	ofl = SQLITE_OPEN_READWRITE;
+	if (0 == real) {
+		file = MANDOC_DB "~";
+		if (-1 == remove(file) && ENOENT != errno) {
+			exitcode = (int)MANDOCLEVEL_SYSERR;
+			say(file, NULL);
+			return(0);
+		}
+		ofl |= SQLITE_OPEN_EXCLUSIVE;
+	} else
+		file = MANDOC_DB;
 
 	rc = sqlite3_open_v2(file, &db, ofl, NULL);
 	if (SQLITE_OK == rc) 
