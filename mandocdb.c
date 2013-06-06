@@ -1101,6 +1101,7 @@ parse_catpage(struct of *of)
 	if (NULL == title || '\0' == *title) {
 		if (warnings)
 			say(of->file, "Cannot find NAME section");
+		putkey(of, of->name, TYPE_Nd);
 		fclose(stream);
 		free(title);
 		return;
