@@ -130,7 +130,6 @@ static	void	 dbprune(void);
 static	void	 fileadd(struct of *);
 static	int	 filecheck(const char *);
 static	void	 filescan(const char *);
-static	struct str *hashget(const char *, size_t);
 static	void	*hash_alloc(size_t, void *);
 static	void	 hash_free(void *, size_t, void *);
 static	void	*hash_halloc(size_t, void *);
@@ -312,7 +311,7 @@ int
 main(int argc, char *argv[])
 {
 	int		  ch, i;
-	unsigned int	  index;
+	unsigned int	  slot;
 	size_t		  j, sz;
 	const char	 *path_arg;
 	struct str	 *s;
@@ -493,8 +492,8 @@ out:
 	manpath_free(&dirs);
 	mchars_free(mc);
 	mparse_free(mp);
-	for (s = ohash_first(&strings, &index);
-			NULL != s; s = ohash_next(&strings, &index)) {
+	for (s = ohash_first(&strings, &slot); NULL != s;
+	     s = ohash_next(&strings, &slot)) {
 		if (s->utf8 != s->key)
 			free(s->utf8);
 		free(s);
@@ -784,10 +783,9 @@ filescan(const char *file)
 static int
 filecheck(const char *name)
 {
-	unsigned int	 index;
 
-	index = ohash_qlookup(&filenames, name);
-	return(NULL != ohash_find(&filenames, index));
+	return(NULL != ohash_find(&filenames,
+			ohash_qlookup(&filenames, name)));
 }
 
 /*
@@ -797,11 +795,11 @@ filecheck(const char *name)
 static void
 fileadd(struct of *of)
 {
-	unsigned int	 index;
+	unsigned int	 slot;
 
-	index = ohash_qlookup(&filenames, of->file);
-	assert(NULL == ohash_find(&filenames, index));
-	ohash_insert(&filenames, index, of);
+	slot = ohash_qlookup(&filenames, of->file);
+	assert(NULL == ohash_find(&filenames, slot));
+	ohash_insert(&filenames, slot, of);
 }
 
 /*
@@ -812,15 +810,13 @@ inocheck(const struct stat *st)
 {
 	struct id	 id;
 	uint32_t	 hash;
-	unsigned int	 index;
 
 	memset(&id, 0, sizeof(id));
 	id.ino = hash = st->st_ino;
 	id.dev = st->st_dev;
-	index = ohash_lookup_memory
-		(&inos, (char *)&id, sizeof(id), hash);
 
-	return(NULL != ohash_find(&inos, index));
+	return(NULL != ohash_find(&inos, ohash_lookup_memory(
+			&inos, (char *)&id, sizeof(id), hash)));
 }
 
 /*
@@ -832,15 +828,15 @@ static void
 inoadd(const struct stat *st, struct of *of)
 {
 	uint32_t	 hash;
-	unsigned int	 index;
+	unsigned int	 slot;
 
 	of->id.ino = hash = st->st_ino;
 	of->id.dev = st->st_dev;
-	index = ohash_lookup_memory
+	slot = ohash_lookup_memory
 		(&inos, (char *)&of->id, sizeof(of->id), hash);
 
-	assert(NULL == ohash_find(&inos, index));
-	ohash_insert(&inos, index, of);
+	assert(NULL == ohash_find(&inos, slot));
+	ohash_insert(&inos, slot, of);
 }
 
 static void
@@ -1547,31 +1543,18 @@ static char *
 stradds(const char *cp, size_t sz)
 {
 	struct str	*s;
-	unsigned int	 index;
+	unsigned int	 slot;
 	const char	*end;
 
-	if (NULL != (s = hashget(cp, sz)))
+	end = cp + sz;
+	slot = ohash_qlookupi(&strings, cp, &end);
+	if (NULL != (s = ohash_find(&strings, slot)))
 		return(s->key);
 
 	s = mandoc_calloc(sizeof(struct str) + sz + 1, 1);
 	memcpy(s->key, cp, sz);
-
-	end = cp + sz;
-	index = ohash_qlookupi(&strings, cp, &end);
-	assert(NULL == ohash_find(&strings, index));
-	ohash_insert(&strings, index, s);
+	ohash_insert(&strings, slot, s);
 	return(s->key);
-}
-
-static struct str *
-hashget(const char *cp, size_t sz)
-{
-	unsigned int	 index;
-	const char	*end;
-
-	end = cp + sz;
-	index = ohash_qlookupi(&strings, cp, &end);
-	return(ohash_find(&strings, index));
 }
 
 /*
@@ -1587,13 +1570,15 @@ static void
 putkeys(const struct of *of, const char *cp, size_t sz, uint64_t v)
 {
 	struct str	*s;
-	unsigned int	 index;
+	unsigned int	 slot;
 	const char	*end;
 
 	if (0 == sz)
 		return;
 
-	s = hashget(cp, sz);
+	end = cp + sz;
+	slot = ohash_qlookupi(&strings, cp, &end);
+	s = ohash_find(&strings, slot);
 
 	if (NULL != s && of == s->of) {
 		s->mask |= v;
@@ -1601,10 +1586,7 @@ putkeys(const struct of *of, const char *cp, size_t sz, uint64_t v)
 	} else if (NULL == s) {
 		s = mandoc_calloc(sizeof(struct str) + sz + 1, 1);
 		memcpy(s->key, cp, sz);
-		end = cp + sz;
-		index = ohash_qlookupi(&strings, cp, &end);
-		assert(NULL == ohash_find(&strings, index));
-		ohash_insert(&strings, index, s);
+		ohash_insert(&strings, slot, s);
 	}
 
 	s->next = words;
@@ -1791,7 +1773,8 @@ dbindex(struct mchars *mc, int form, const struct of *of)
 
 	desc = "";
 	if (NULL != of->desc) {
-		key = hashget(of->desc, strlen(of->desc));
+		key = ohash_find(&strings,
+			ohash_qlookup(&strings, of->desc));
 		assert(NULL != key);
 		if (NULL == key->utf8)
 			utf8key(mc, key);
