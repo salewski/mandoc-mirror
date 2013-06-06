@@ -17,7 +17,7 @@
 #ifndef MANSEARCH_H
 #define MANSEARCH_H
 
-#define	MANDOC_DB	 "mandocdb.db"
+#define	MANDOC_DB	 "mandoc.db"
 
 #define	TYPE_An		 0x0000000000000001ULL
 #define	TYPE_Ar		 0x0000000000000002ULL
