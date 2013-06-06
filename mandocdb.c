@@ -157,17 +157,15 @@ static	int	 set_basedir(const char *);
 static	void	 putkey(const struct of *, 
 			const char *, uint64_t);
 static	void	 putkeys(const struct of *, 
-			const char *, int, uint64_t);
+			const char *, size_t, uint64_t);
 static	void	 putmdockey(const struct of *,
 			const struct mdoc_node *, uint64_t);
 static	void	 say(const char *, const char *, ...);
 static	char 	*stradd(const char *);
-static	char 	*straddbuf(const char *, size_t);
+static	char 	*stradds(const char *, size_t);
 static	int	 treescan(void);
 static	size_t	 utf8(unsigned int, char [7]);
 static	void	 utf8key(struct mchars *, struct str *);
-static	void 	 wordaddbuf(const struct of *, 
-			const char *, size_t, uint64_t);
 
 static	char		*progname;
 static	int	 	 use_all; /* use all found files */
@@ -1154,17 +1152,7 @@ putkey(const struct of *of, const char *value, uint64_t type)
 {
 
 	assert(NULL != value);
-	wordaddbuf(of, value, strlen(value), type);
-}
-
-/*
- * Like putkey() but for unterminated strings.
- */
-static void
-putkeys(const struct of *of, const char *value, int sz, uint64_t type)
-{
-
-	wordaddbuf(of, value, sz, type);
+	putkeys(of, value, strlen(value), type);
 }
 
 /*
@@ -1537,13 +1525,13 @@ parse_mdoc_body(struct of *of, const struct mdoc_node *n)
 }
 
 /*
- * See straddbuf().
+ * See stradds().
  */
 static char *
 stradd(const char *cp)
 {
 
-	return(straddbuf(cp, strlen(cp)));
+	return(stradds(cp, strlen(cp)));
 }
 
 /*
@@ -1553,10 +1541,10 @@ stradd(const char *cp)
  * In using it, we avoid having thousands of (e.g.) "cat1" string
  * allocations for the "of" table.
  * We also have a layer atop the string table for keeping track of words
- * in a parse sequence (see wordaddbuf()).
+ * in a parse sequence (see putkeys()).
  */
 static char *
-straddbuf(const char *cp, size_t sz)
+stradds(const char *cp, size_t sz)
 {
 	struct str	*s;
 	unsigned int	 index;
@@ -1596,8 +1584,7 @@ hashget(const char *cp, size_t sz)
  * of its entries without conflict.
  */
 static void
-wordaddbuf(const struct of *of, 
-		const char *cp, size_t sz, uint64_t v)
+putkeys(const struct of *of, const char *cp, size_t sz, uint64_t v)
 {
 	struct str	*s;
 	unsigned int	 index;
