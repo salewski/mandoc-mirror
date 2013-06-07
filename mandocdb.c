@@ -118,8 +118,6 @@ typedef	int (*mdoc_fp)(struct of *, const struct mdoc_node *);
 struct	mdoc_handler {
 	mdoc_fp		 fp; /* optional handler */
 	uint64_t	 mask;  /* set unless handler returns 0 */
-	int		 flags;  /* for use by pmdoc_node */
-#define	MDOCF_CHILD	 0x01  /* automatically index child nodes */
 };
 
 static	void	 dbclose(int);
@@ -180,128 +178,128 @@ static	sqlite3		*db = NULL; /* current database */
 static	sqlite3_stmt	*stmts[STMT__MAX]; /* current statements */
 
 static	const struct mdoc_handler mdocs[MDOC_MAX] = {
-	{ NULL, 0, 0 },  /* Ap */
-	{ NULL, 0, 0 },  /* Dd */
-	{ NULL, 0, 0 },  /* Dt */
-	{ NULL, 0, 0 },  /* Os */
-	{ parse_mdoc_Sh, TYPE_Sh, MDOCF_CHILD }, /* Sh */
-	{ parse_mdoc_head, TYPE_Ss, MDOCF_CHILD }, /* Ss */
-	{ NULL, 0, 0 },  /* Pp */
-	{ NULL, 0, 0 },  /* D1 */
-	{ NULL, 0, 0 },  /* Dl */
-	{ NULL, 0, 0 },  /* Bd */
-	{ NULL, 0, 0 },  /* Ed */
-	{ NULL, 0, 0 },  /* Bl */
-	{ NULL, 0, 0 },  /* El */
-	{ NULL, 0, 0 },  /* It */
-	{ NULL, 0, 0 },  /* Ad */
-	{ NULL, TYPE_An, MDOCF_CHILD },  /* An */
-	{ NULL, TYPE_Ar, MDOCF_CHILD },  /* Ar */
-	{ NULL, TYPE_Cd, MDOCF_CHILD },  /* Cd */
-	{ NULL, TYPE_Cm, MDOCF_CHILD },  /* Cm */
-	{ NULL, TYPE_Dv, MDOCF_CHILD },  /* Dv */
-	{ NULL, TYPE_Er, MDOCF_CHILD },  /* Er */
-	{ NULL, TYPE_Ev, MDOCF_CHILD },  /* Ev */
-	{ NULL, 0, 0 },  /* Ex */
-	{ NULL, TYPE_Fa, MDOCF_CHILD },  /* Fa */
-	{ parse_mdoc_Fd, TYPE_In, 0 },  /* Fd */
-	{ NULL, TYPE_Fl, MDOCF_CHILD },  /* Fl */
-	{ parse_mdoc_Fn, 0, 0 },  /* Fn */
-	{ NULL, TYPE_Ft, MDOCF_CHILD },  /* Ft */
-	{ NULL, TYPE_Ic, MDOCF_CHILD },  /* Ic */
-	{ parse_mdoc_In, TYPE_In, MDOCF_CHILD },  /* In */
-	{ NULL, TYPE_Li, MDOCF_CHILD },  /* Li */
-	{ parse_mdoc_Nd, TYPE_Nd, MDOCF_CHILD },  /* Nd */
-	{ parse_mdoc_Nm, TYPE_Nm, MDOCF_CHILD },  /* Nm */
-	{ NULL, 0, 0 },  /* Op */
-	{ NULL, 0, 0 },  /* Ot */
-	{ NULL, TYPE_Pa, MDOCF_CHILD },  /* Pa */
-	{ NULL, 0, 0 },  /* Rv */
-	{ parse_mdoc_St, TYPE_St, 0 },  /* St */
-	{ NULL, TYPE_Va, MDOCF_CHILD },  /* Va */
-	{ parse_mdoc_body, TYPE_Va, MDOCF_CHILD },  /* Vt */
-	{ parse_mdoc_Xr, TYPE_Xr, 0 },  /* Xr */
-	{ NULL, 0, 0 },  /* %A */
-	{ NULL, 0, 0 },  /* %B */
-	{ NULL, 0, 0 },  /* %D */
-	{ NULL, 0, 0 },  /* %I */
-	{ NULL, 0, 0 },  /* %J */
-	{ NULL, 0, 0 },  /* %N */
-	{ NULL, 0, 0 },  /* %O */
-	{ NULL, 0, 0 },  /* %P */
-	{ NULL, 0, 0 },  /* %R */
-	{ NULL, 0, 0 },  /* %T */
-	{ NULL, 0, 0 },  /* %V */
-	{ NULL, 0, 0 },  /* Ac */
-	{ NULL, 0, 0 },  /* Ao */
-	{ NULL, 0, 0 },  /* Aq */
-	{ NULL, TYPE_At, MDOCF_CHILD },  /* At */
-	{ NULL, 0, 0 },  /* Bc */
-	{ NULL, 0, 0 },  /* Bf */
-	{ NULL, 0, 0 },  /* Bo */
-	{ NULL, 0, 0 },  /* Bq */
-	{ NULL, TYPE_Bsx, MDOCF_CHILD },  /* Bsx */
-	{ NULL, TYPE_Bx, MDOCF_CHILD },  /* Bx */
-	{ NULL, 0, 0 },  /* Db */
-	{ NULL, 0, 0 },  /* Dc */
-	{ NULL, 0, 0 },  /* Do */
-	{ NULL, 0, 0 },  /* Dq */
-	{ NULL, 0, 0 },  /* Ec */
-	{ NULL, 0, 0 },  /* Ef */
-	{ NULL, TYPE_Em, MDOCF_CHILD },  /* Em */
-	{ NULL, 0, 0 },  /* Eo */
-	{ NULL, TYPE_Fx, MDOCF_CHILD },  /* Fx */
-	{ NULL, TYPE_Ms, MDOCF_CHILD },  /* Ms */
-	{ NULL, 0, 0 },  /* No */
-	{ NULL, 0, 0 },  /* Ns */
-	{ NULL, TYPE_Nx, MDOCF_CHILD },  /* Nx */
-	{ NULL, TYPE_Ox, MDOCF_CHILD },  /* Ox */
-	{ NULL, 0, 0 },  /* Pc */
-	{ NULL, 0, 0 },  /* Pf */
-	{ NULL, 0, 0 },  /* Po */
-	{ NULL, 0, 0 },  /* Pq */
-	{ NULL, 0, 0 },  /* Qc */
-	{ NULL, 0, 0 },  /* Ql */
-	{ NULL, 0, 0 },  /* Qo */
-	{ NULL, 0, 0 },  /* Qq */
-	{ NULL, 0, 0 },  /* Re */
-	{ NULL, 0, 0 },  /* Rs */
-	{ NULL, 0, 0 },  /* Sc */
-	{ NULL, 0, 0 },  /* So */
-	{ NULL, 0, 0 },  /* Sq */
-	{ NULL, 0, 0 },  /* Sm */
-	{ NULL, 0, 0 },  /* Sx */
-	{ NULL, TYPE_Sy, MDOCF_CHILD },  /* Sy */
-	{ NULL, TYPE_Tn, MDOCF_CHILD },  /* Tn */
-	{ NULL, 0, 0 },  /* Ux */
-	{ NULL, 0, 0 },  /* Xc */
-	{ NULL, 0, 0 },  /* Xo */
-	{ parse_mdoc_head, TYPE_Fn, 0 },  /* Fo */
-	{ NULL, 0, 0 },  /* Fc */
-	{ NULL, 0, 0 },  /* Oo */
-	{ NULL, 0, 0 },  /* Oc */
-	{ NULL, 0, 0 },  /* Bk */
-	{ NULL, 0, 0 },  /* Ek */
-	{ NULL, 0, 0 },  /* Bt */
-	{ NULL, 0, 0 },  /* Hf */
-	{ NULL, 0, 0 },  /* Fr */
-	{ NULL, 0, 0 },  /* Ud */
-	{ NULL, TYPE_Lb, MDOCF_CHILD },  /* Lb */
-	{ NULL, 0, 0 },  /* Lp */
-	{ NULL, TYPE_Lk, MDOCF_CHILD },  /* Lk */
-	{ NULL, TYPE_Mt, MDOCF_CHILD },  /* Mt */
-	{ NULL, 0, 0 },  /* Brq */
-	{ NULL, 0, 0 },  /* Bro */
-	{ NULL, 0, 0 },  /* Brc */
-	{ NULL, 0, 0 },  /* %C */
-	{ NULL, 0, 0 },  /* Es */
-	{ NULL, 0, 0 },  /* En */
-	{ NULL, TYPE_Dx, MDOCF_CHILD },  /* Dx */
-	{ NULL, 0, 0 },  /* %Q */
-	{ NULL, 0, 0 },  /* br */
-	{ NULL, 0, 0 },  /* sp */
-	{ NULL, 0, 0 },  /* %U */
-	{ NULL, 0, 0 },  /* Ta */
+	{ NULL, 0 },  /* Ap */
+	{ NULL, 0 },  /* Dd */
+	{ NULL, 0 },  /* Dt */
+	{ NULL, 0 },  /* Os */
+	{ parse_mdoc_Sh, TYPE_Sh }, /* Sh */
+	{ parse_mdoc_head, TYPE_Ss }, /* Ss */
+	{ NULL, 0 },  /* Pp */
+	{ NULL, 0 },  /* D1 */
+	{ NULL, 0 },  /* Dl */
+	{ NULL, 0 },  /* Bd */
+	{ NULL, 0 },  /* Ed */
+	{ NULL, 0 },  /* Bl */
+	{ NULL, 0 },  /* El */
+	{ NULL, 0 },  /* It */
+	{ NULL, 0 },  /* Ad */
+	{ NULL, TYPE_An },  /* An */
+	{ NULL, TYPE_Ar },  /* Ar */
+	{ NULL, TYPE_Cd },  /* Cd */
+	{ NULL, TYPE_Cm },  /* Cm */
+	{ NULL, TYPE_Dv },  /* Dv */
+	{ NULL, TYPE_Er },  /* Er */
+	{ NULL, TYPE_Ev },  /* Ev */
+	{ NULL, 0 },  /* Ex */
+	{ NULL, TYPE_Fa },  /* Fa */
+	{ parse_mdoc_Fd, 0 },  /* Fd */
+	{ NULL, TYPE_Fl },  /* Fl */
+	{ parse_mdoc_Fn, 0 },  /* Fn */
+	{ NULL, TYPE_Ft },  /* Ft */
+	{ NULL, TYPE_Ic },  /* Ic */
+	{ parse_mdoc_In, TYPE_In },  /* In */
+	{ NULL, TYPE_Li },  /* Li */
+	{ parse_mdoc_Nd, TYPE_Nd },  /* Nd */
+	{ parse_mdoc_Nm, TYPE_Nm },  /* Nm */
+	{ NULL, 0 },  /* Op */
+	{ NULL, 0 },  /* Ot */
+	{ NULL, TYPE_Pa },  /* Pa */
+	{ NULL, 0 },  /* Rv */
+	{ parse_mdoc_St, 0 },  /* St */
+	{ NULL, TYPE_Va },  /* Va */
+	{ parse_mdoc_body, TYPE_Va },  /* Vt */
+	{ parse_mdoc_Xr, 0 },  /* Xr */
+	{ NULL, 0 },  /* %A */
+	{ NULL, 0 },  /* %B */
+	{ NULL, 0 },  /* %D */
+	{ NULL, 0 },  /* %I */
+	{ NULL, 0 },  /* %J */
+	{ NULL, 0 },  /* %N */
+	{ NULL, 0 },  /* %O */
+	{ NULL, 0 },  /* %P */
+	{ NULL, 0 },  /* %R */
+	{ NULL, 0 },  /* %T */
+	{ NULL, 0 },  /* %V */
+	{ NULL, 0 },  /* Ac */
+	{ NULL, 0 },  /* Ao */
+	{ NULL, 0 },  /* Aq */
+	{ NULL, TYPE_At },  /* At */
+	{ NULL, 0 },  /* Bc */
+	{ NULL, 0 },  /* Bf */
+	{ NULL, 0 },  /* Bo */
+	{ NULL, 0 },  /* Bq */
+	{ NULL, TYPE_Bsx },  /* Bsx */
+	{ NULL, TYPE_Bx },  /* Bx */
+	{ NULL, 0 },  /* Db */
+	{ NULL, 0 },  /* Dc */
+	{ NULL, 0 },  /* Do */
+	{ NULL, 0 },  /* Dq */
+	{ NULL, 0 },  /* Ec */
+	{ NULL, 0 },  /* Ef */
+	{ NULL, TYPE_Em },  /* Em */
+	{ NULL, 0 },  /* Eo */
+	{ NULL, TYPE_Fx },  /* Fx */
+	{ NULL, TYPE_Ms },  /* Ms */
+	{ NULL, 0 },  /* No */
+	{ NULL, 0 },  /* Ns */
+	{ NULL, TYPE_Nx },  /* Nx */
+	{ NULL, TYPE_Ox },  /* Ox */
+	{ NULL, 0 },  /* Pc */
+	{ NULL, 0 },  /* Pf */
+	{ NULL, 0 },  /* Po */
+	{ NULL, 0 },  /* Pq */
+	{ NULL, 0 },  /* Qc */
+	{ NULL, 0 },  /* Ql */
+	{ NULL, 0 },  /* Qo */
+	{ NULL, 0 },  /* Qq */
+	{ NULL, 0 },  /* Re */
+	{ NULL, 0 },  /* Rs */
+	{ NULL, 0 },  /* Sc */
+	{ NULL, 0 },  /* So */
+	{ NULL, 0 },  /* Sq */
+	{ NULL, 0 },  /* Sm */
+	{ NULL, 0 },  /* Sx */
+	{ NULL, TYPE_Sy },  /* Sy */
+	{ NULL, TYPE_Tn },  /* Tn */
+	{ NULL, 0 },  /* Ux */
+	{ NULL, 0 },  /* Xc */
+	{ NULL, 0 },  /* Xo */
+	{ parse_mdoc_head, 0 },  /* Fo */
+	{ NULL, 0 },  /* Fc */
+	{ NULL, 0 },  /* Oo */
+	{ NULL, 0 },  /* Oc */
+	{ NULL, 0 },  /* Bk */
+	{ NULL, 0 },  /* Ek */
+	{ NULL, 0 },  /* Bt */
+	{ NULL, 0 },  /* Hf */
+	{ NULL, 0 },  /* Fr */
+	{ NULL, 0 },  /* Ud */
+	{ NULL, TYPE_Lb },  /* Lb */
+	{ NULL, 0 },  /* Lp */
+	{ NULL, TYPE_Lk },  /* Lk */
+	{ NULL, TYPE_Mt },  /* Mt */
+	{ NULL, 0 },  /* Brq */
+	{ NULL, 0 },  /* Bro */
+	{ NULL, 0 },  /* Brc */
+	{ NULL, 0 },  /* %C */
+	{ NULL, 0 },  /* Es */
+	{ NULL, 0 },  /* En */
+	{ NULL, TYPE_Dx },  /* Dx */
+	{ NULL, 0 },  /* %Q */
+	{ NULL, 0 },  /* br */
+	{ NULL, 0 },  /* sp */
+	{ NULL, 0 },  /* %U */
+	{ NULL, 0 },  /* Ta */
 };
 
 int
@@ -1332,8 +1330,7 @@ parse_mdoc(struct of *of, const struct mdoc_node *n)
 			if (NULL != mdocs[n->tok].fp)
 			       if (0 == (*mdocs[n->tok].fp)(of, n))
 				       break;
-
-			if (MDOCF_CHILD & mdocs[n->tok].flags)
+			if (mdocs[n->tok].mask)
 				putmdockey(of, n->child, mdocs[n->tok].mask);
 			break;
 		default:
