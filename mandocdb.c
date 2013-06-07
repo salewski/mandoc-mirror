@@ -84,7 +84,6 @@ enum	form {
 struct	str {
 	char		*utf8; /* key in UTF-8 form */
 	const struct of *of; /* if set, the owning parse */
-	struct str	*next; /* next in owning parse sequence */
 	uint64_t	 mask; /* bitmask in sequence */
 	char		 key[]; /* the string itself */
 };
@@ -100,11 +99,11 @@ struct	of {
 	enum form	 dform; /* path-cued form */
 	enum form	 sform; /* suffix-cued form */
 	char		 file[PATH_MAX]; /* filename rel. to manpath */
-	const char	*desc; /* parsed description */
-	const char	*sec; /* suffix-cued section (or empty) */
-	const char	*dsec; /* path-cued section (or empty) */
-	const char	*arch; /* path-cued arch. (or empty) */
-	const char	*name; /* name (from filename) (not empty) */
+	char		*desc; /* parsed description */
+	char		*name; /* name (from filename) (not empty) */
+	char		*sec; /* suffix-cued section (or empty) */
+	char		*dsec; /* path-cued section (or empty) */
+	char		*arch; /* path-cued arch. (or empty) */
 };
 
 enum	stmt {
@@ -138,7 +137,8 @@ static	int	 inocheck(const struct stat *);
 static	void	 ofadd(int, const char *, const char *, const char *,
 			const char *, const char *, const struct stat *);
 static	void	 offree(void);
-static	void	 ofmerge(struct mchars *, struct mparse *);
+static	void	 ofmerge(struct mchars *, struct mparse *,
+			struct ohash_info*);
 static	void	 parse_catpage(struct of *);
 static	void	 parse_man(struct of *, const struct man_node *);
 static	void	 parse_mdoc(struct of *, const struct mdoc_node *);
@@ -160,8 +160,6 @@ static	void	 putkeys(const struct of *,
 static	void	 putmdockey(const struct of *,
 			const struct mdoc_node *, uint64_t);
 static	void	 say(const char *, const char *, ...);
-static	char 	*stradd(const char *);
-static	char 	*stradds(const char *, size_t);
 static	int	 treescan(void);
 static	size_t	 utf8(unsigned int, char [7]);
 static	void	 utf8key(struct mchars *, struct str *);
@@ -178,7 +176,6 @@ static	struct ohash	 inos; /* table of inodes/devices */
 static	struct ohash	 filenames; /* table of filenames */
 static	struct ohash	 strings; /* table of all strings */
 static	struct of	*ofs = NULL; /* vector of files to parse */
-static	struct str	*words = NULL; /* word list in current parse */
 static	sqlite3		*db = NULL; /* current database */
 static	sqlite3_stmt	*stmts[STMT__MAX]; /* current statements */
 
@@ -311,10 +308,8 @@ int
 main(int argc, char *argv[])
 {
 	int		  ch, i;
-	unsigned int	  slot;
 	size_t		  j, sz;
 	const char	 *path_arg;
-	struct str	 *s;
 	struct mchars	 *mc;
 	struct manpaths	  dirs;
 	struct mparse	 *mp;
@@ -406,7 +401,6 @@ main(int argc, char *argv[])
 		MANDOCLEVEL_FATAL, NULL, NULL, NULL);
 	mc = mchars_alloc();
 
-	ohash_init(&strings, 6, &str_info);
 	ohash_init(&inos, 6, &ino_info);
 	ohash_init(&filenames, 6, &filename_info);
 
@@ -430,7 +424,7 @@ main(int argc, char *argv[])
 		if (OP_TEST != op)
 			dbprune();
 		if (OP_DELETE != op)
-			ofmerge(mc, mp);
+			ofmerge(mc, mp, &str_info);
 		dbclose(1);
 	} else {
 		/*
@@ -460,6 +454,12 @@ main(int argc, char *argv[])
 				dirs.paths[j][--sz] = '\0';
 			if (0 == sz)
 				continue;
+
+			if (j) {
+				ohash_init(&inos, 6, &ino_info);
+				ohash_init(&filenames, 6, &filename_info);
+			}
+
 			if (0 == set_basedir(dirs.paths[j]))
 				goto out;
 			if (0 == treescan())
@@ -478,13 +478,14 @@ main(int argc, char *argv[])
 			SQL_EXEC("PRAGMA synchronous = OFF");
 #endif
 
-			ofmerge(mc, mp);
+			ofmerge(mc, mp, &str_info);
 			dbclose(0);
-			offree();
-			ohash_delete(&inos);
-			ohash_init(&inos, 6, &ino_info);
-			ohash_delete(&filenames);
-			ohash_init(&filenames, 6, &filename_info);
+
+			if (j + 1 < dirs.sz) {
+				ohash_delete(&inos);
+				ohash_delete(&filenames);
+				offree();
+			}
 		}
 	}
 out:
@@ -492,13 +493,6 @@ out:
 	manpath_free(&dirs);
 	mchars_free(mc);
 	mparse_free(mp);
-	for (s = ohash_first(&strings, &slot); NULL != s;
-	     s = ohash_next(&strings, &slot)) {
-		if (s->utf8 != s->key)
-			free(s->utf8);
-		free(s);
-	}
-	ohash_delete(&strings);
 	ohash_delete(&inos);
 	ohash_delete(&filenames);
 	offree();
@@ -536,7 +530,7 @@ treescan(void)
 	FTSENT		*ff;
 	int		 dform;
 	char		*sec;
-	const char	*dsec, *arch, *cp, *name, *path;
+	const char	*dsec, *arch, *cp, *path;
 	const char	*argv[2];
 
 	argv[0] = ".";
@@ -604,13 +598,10 @@ treescan(void)
 				if (warnings)
 					say(path, "Wrong filename suffix");
 				continue;
-			} else {
+			} else
 				sec[-1] = '\0';
-				sec = stradd(sec);
-			}
-			name = stradd(ff->fts_name);
-			ofadd(dform, path, 
-				name, dsec, sec, arch, ff->fts_statp);
+			ofadd(dform, path, ff->fts_name, dsec, sec,
+					arch, ff->fts_statp);
 			continue;
 		} else if (FTS_D != ff->fts_info && 
 				FTS_DP != ff->fts_info) {
@@ -637,10 +628,10 @@ treescan(void)
 
 			if (0 == strncmp(cp, "man", 3)) {
 				dform = FORM_SRC;
-				dsec = stradd(cp + 3);
+				dsec = cp + 3;
 			} else if (0 == strncmp(cp, "cat", 3)) {
 				dform = FORM_CAT;
-				dsec = stradd(cp + 3);
+				dsec = cp + 3;
 			}
 
 			if (NULL != dsec || use_all) 
@@ -657,7 +648,7 @@ treescan(void)
 			 */
 			arch = NULL;
 			if (FTS_DP != ff->fts_info && NULL != dsec)
-				arch = stradd(ff->fts_name);
+				arch = ff->fts_name;
 			break;
 		default:
 			if (FTS_DP == ff->fts_info || use_all)
@@ -867,10 +858,10 @@ ofadd(int dform, const char *file, const char *name, const char *dsec,
 
 	of = mandoc_calloc(1, sizeof(struct of));
 	strlcpy(of->file, file, PATH_MAX);
-	of->name = name;
-	of->sec = sec;
-	of->dsec = dsec;
-	of->arch = arch;
+	of->name = mandoc_strdup(name);
+	of->sec = mandoc_strdup(sec);
+	of->dsec = mandoc_strdup(dsec);
+	of->arch = mandoc_strdup(arch);
 	of->sform = sform;
 	of->dform = dform;
 	of->next = ofs;
@@ -892,6 +883,10 @@ offree(void)
 
 	while (NULL != (of = ofs)) {
 		ofs = of->next;
+		free(of->name);
+		free(of->sec);
+		free(of->dsec);
+		free(of->arch);
 		free(of);
 	}
 }
@@ -904,7 +899,8 @@ offree(void)
  * and filename to determine whether the file is parsable or not.
  */
 static void
-ofmerge(struct mchars *mc, struct mparse *mp)
+ofmerge(struct mchars *mc, struct mparse *mp,
+		struct ohash_info *infop)
 {
 	int		 form;
 	size_t		 sz;
@@ -945,7 +941,7 @@ ofmerge(struct mchars *mc, struct mparse *mp)
 			}
 		}
 
-		words = NULL;
+		ohash_init(&strings, 6, infop);
 		mparse_reset(mp);
 		mdoc = NULL;
 		man = NULL;
@@ -1023,13 +1019,17 @@ ofmerge(struct mchars *mc, struct mparse *mp)
 		if (NULL != mdoc) {
 			if (NULL != (cp = mdoc_meta(mdoc)->name))
 				putkey(of, cp, TYPE_Nm);
+			assert(NULL == of->desc);
 			parse_mdoc(of, mdoc_node(mdoc));
+			putkey(of, NULL != of->desc ?
+				of->desc : of->name, TYPE_Nd);
 		} else if (NULL != man)
 			parse_man(of, man_node(man));
 		else
 			parse_catpage(of);
 
 		dbindex(mc, form, of);
+		ohash_delete(&strings);
 	}
 }
 
@@ -1096,6 +1096,8 @@ parse_catpage(struct of *of)
 	if (NULL == title || '\0' == *title) {
 		if (warnings)
 			say(of->file, "Cannot find NAME section");
+		assert(NULL == of->desc);
+		of->desc = mandoc_strdup(of->name);
 		putkey(of, of->name, TYPE_Nd);
 		fclose(stream);
 		free(title);
@@ -1134,8 +1136,9 @@ parse_catpage(struct of *of)
 		plen -= 2;
 	}
 
-	of->desc = stradd(p);
-	putkey(of, p, TYPE_Nd);
+	assert(NULL == of->desc);
+	of->desc = mandoc_strdup(p);
+	putkey(of, of->desc, TYPE_Nd);
 	fclose(stream);
 	free(title);
 }
@@ -1299,8 +1302,8 @@ parse_man(struct of *of, const struct man_node *n)
 				start++;
 
 			assert(NULL == of->desc);
-			of->desc = stradd(start);
-			putkey(of, start, TYPE_Nd);
+			of->desc = mandoc_strdup(start);
+			putkey(of, of->desc, TYPE_Nd);
 			free(title);
 			return;
 		}
@@ -1455,7 +1458,6 @@ static int
 parse_mdoc_Nd(struct of *of, const struct mdoc_node *n)
 {
 	size_t		 sz;
-	char		*sv, *desc;
 
 	if (MDOC_BODY != n->type)
 		return(0);
@@ -1465,25 +1467,20 @@ parse_mdoc_Nd(struct of *of, const struct mdoc_node *n)
 	 * into the document table.
 	 */
 
-	desc = NULL;
 	for (n = n->child; NULL != n; n = n->next) {
 		if (MDOC_TEXT == n->type) {
-			sz = strlen(n->string) + 1;
-			if (NULL != (sv = desc))
-				sz += strlen(desc) + 1;
-			desc = mandoc_realloc(desc, sz);
-			if (NULL != sv)
-				strlcat(desc, " ", sz);
-			else
-				*desc = '\0';
-			strlcat(desc, n->string, sz);
+			if (NULL != of->desc) {
+				sz = strlen(of->desc) +
+				     strlen(n->string) + 2;
+				of->desc = mandoc_realloc(of->desc, sz);
+				strlcat(of->desc, " ", sz);
+				strlcat(of->desc, n->string, sz);
+			} else
+				of->desc = mandoc_strdup(n->string);
 		}
 		if (NULL != n->child)
 			parse_mdoc_Nd(of, n);
 	}
-
-	of->desc = NULL != desc ? stradd(desc) : NULL;
-	free(desc);
 	return(1);
 }
 
@@ -1521,50 +1518,9 @@ parse_mdoc_body(struct of *of, const struct mdoc_node *n)
 }
 
 /*
- * See stradds().
- */
-static char *
-stradd(const char *cp)
-{
-
-	return(stradds(cp, strlen(cp)));
-}
-
-/*
- * This looks up or adds a string to the string table.
- * The string table is a table of all strings encountered during parse
- * or file scan.
- * In using it, we avoid having thousands of (e.g.) "cat1" string
- * allocations for the "of" table.
- * We also have a layer atop the string table for keeping track of words
- * in a parse sequence (see putkeys()).
- */
-static char *
-stradds(const char *cp, size_t sz)
-{
-	struct str	*s;
-	unsigned int	 slot;
-	const char	*end;
-
-	end = cp + sz;
-	slot = ohash_qlookupi(&strings, cp, &end);
-	if (NULL != (s = ohash_find(&strings, slot)))
-		return(s->key);
-
-	s = mandoc_calloc(sizeof(struct str) + sz + 1, 1);
-	memcpy(s->key, cp, sz);
-	ohash_insert(&strings, slot, s);
-	return(s->key);
-}
-
-/*
- * Add a word to the current parse sequence.
- * Within the hashtable of strings, we maintain a list of strings that
- * are currently indexed.
- * Each of these ("words") has a bitmask modified within the parse.
- * When we finish a parse, we'll dump the list, then remove the head
- * entry -- since the next parse will have a new "of", it can keep track
- * of its entries without conflict.
+ * Add a string to the hash table for the current manual.
+ * Each string has a bitmask telling which macros it belongs to.
+ * When we finish the manual, we'll dump the table.
  */
 static void
 putkeys(const struct of *of, const char *cp, size_t sz, uint64_t v)
@@ -1588,11 +1544,8 @@ putkeys(const struct of *of, const char *cp, size_t sz, uint64_t v)
 		memcpy(s->key, cp, sz);
 		ohash_insert(&strings, slot, s);
 	}
-
-	s->next = words;
 	s->of = of;
 	s->mask = v;
-	words = s;
 }
 
 /*
@@ -1764,6 +1717,7 @@ dbindex(struct mchars *mc, int form, const struct of *of)
 	const char	*desc;
 	int64_t		 recno;
 	size_t		 i;
+	unsigned int	 slot;
 
 	if (verb)
 		say(of->file, "Adding to index");
@@ -1793,7 +1747,8 @@ dbindex(struct mchars *mc, int form, const struct of *of)
 	recno = sqlite3_last_insert_rowid(db);
 	sqlite3_reset(stmts[STMT_INSERT_DOC]);
 
-	for (key = words; NULL != key; key = key->next) {
+	for (key = ohash_first(&strings, &slot); NULL != key;
+	     key = ohash_next(&strings, &slot)) {
 		assert(key->of == of);
 		if (NULL == key->utf8)
 			utf8key(mc, key);
@@ -1803,6 +1758,9 @@ dbindex(struct mchars *mc, int form, const struct of *of)
 		SQL_BIND_INT64(stmts[STMT_INSERT_KEY], i, recno);
 		SQL_STEP(stmts[STMT_INSERT_KEY]);
 		sqlite3_reset(stmts[STMT_INSERT_KEY]);
+		if (key->utf8 != key->key)
+			free(key->utf8);
+		free(key);
 	}
 
 	SQL_EXEC("END TRANSACTION");
