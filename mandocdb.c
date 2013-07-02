@@ -106,6 +106,11 @@ struct	of {
 	char		*arch; /* path-cued arch. (or empty) */
 };
 
+struct	title {
+	char		*title; /* name(sec/arch) given inside the file */
+	char		*file; /* file name in case of mismatch */
+};
+
 enum	stmt {
 	STMT_DELETE = 0, /* delete manpage */
 	STMT_INSERT_DOC, /* insert manpage */
@@ -136,7 +141,7 @@ static	void	 ofadd(int, const char *, const char *, const char *,
 			const char *, const char *, const struct stat *);
 static	void	 offree(void);
 static	void	 ofmerge(struct mchars *, struct mparse *,
-			struct ohash_info*);
+			struct ohash_info*, int);
 static	void	 parse_catpage(struct of *);
 static	void	 parse_man(struct of *, const struct man_node *);
 static	void	 parse_mdoc(struct of *, const struct mdoc_node *);
@@ -422,7 +427,7 @@ main(int argc, char *argv[])
 		if (OP_TEST != op)
 			dbprune();
 		if (OP_DELETE != op)
-			ofmerge(mc, mp, &str_info);
+			ofmerge(mc, mp, &str_info, 0);
 		dbclose(1);
 	} else {
 		/*
@@ -440,9 +445,8 @@ main(int argc, char *argv[])
 			manpath_parse(&dirs, path_arg, NULL, NULL);
 
 		/*
-		 * First scan the tree rooted at a base directory.
-		 * Then whak its database (if one exists), parse, and
-		 * build up the database.
+		 * First scan the tree rooted at a base directory, then
+		 * build a new database and finally move it into place.
 		 * Ignore zero-length directories and strip trailing
 		 * slashes.
 		 */
@@ -476,7 +480,7 @@ main(int argc, char *argv[])
 			SQL_EXEC("PRAGMA synchronous = OFF");
 #endif
 
-			ofmerge(mc, mp, &str_info);
+			ofmerge(mc, mp, &str_info, warnings && !use_all);
 			dbclose(0);
 
 			if (j + 1 < dirs.sz) {
@@ -898,17 +902,30 @@ offree(void)
  */
 static void
 ofmerge(struct mchars *mc, struct mparse *mp,
-		struct ohash_info *infop)
+		struct ohash_info *infop, int check_reachable)
 {
-	int		 form;
-	size_t		 sz;
-	struct mdoc	*mdoc;
-	struct man	*man;
-	char		 buf[PATH_MAX];
-	char		*bufp;
-	const char	*msec, *march, *mtitle, *cp;
-	struct of	*of;
-	enum mandoclevel lvl;
+	struct ohash		 title_table;
+	struct ohash_info	 title_info;
+	char			 buf[PATH_MAX];
+	struct of		*of;
+	struct mdoc		*mdoc;
+	struct man		*man;
+	struct title		*title_entry;
+	char			*bufp, *title_str;
+	const char		*msec, *march, *mtitle, *cp;
+	size_t			 sz;
+	int			 form;
+	int			 match;
+	unsigned int		 slot;
+	enum mandoclevel	 lvl;
+
+	if (check_reachable) {
+		title_info.alloc = hash_alloc;
+		title_info.halloc = hash_halloc;
+		title_info.hfree = hash_free;
+		title_info.key_offset = offsetof(struct title, title);
+		ohash_init(&title_table, 6, &title_info);
+	}
 
 	for (of = ofs; NULL != of; of = of->next) {
 		/*
@@ -947,6 +964,7 @@ ofmerge(struct mchars *mc, struct mparse *mp,
 		msec = of->dsec;
 		march = of->arch;
 		mtitle = of->name;
+		match = 1;
 
 		/*
 		 * Try interpreting the file as mdoc(7) or man(7)
@@ -988,10 +1006,12 @@ ofmerge(struct mchars *mc, struct mparse *mp,
 		 * manuals for such reasons.
 		 */
 		if (warnings && !use_all && form &&
-				strcasecmp(msec, of->dsec))
+				strcasecmp(msec, of->dsec)) {
+			match = 0;
 			say(of->file, "Section \"%s\" "
 				"manual in %s directory", 
 				msec, of->dsec);
+		}
 
 		/*
 		 * Manual page directories exist for each kernel
@@ -1007,10 +1027,14 @@ ofmerge(struct mchars *mc, struct mparse *mp,
 		 * Thus, warn about architecture mismatches,
 		 * but don't skip manuals for this reason.
 		 */
-		if (warnings && !use_all && strcasecmp(march, of->arch))
+		if (warnings && !use_all && strcasecmp(march, of->arch)) {
+			match = 0;
 			say(of->file, "Architecture \"%s\" "
 				"manual in \"%s\" directory",
 				march, of->arch);
+		}
+		if (warnings && !use_all && strcasecmp(mtitle, of->name))
+			match = 0;
 
 		putkey(of, of->name, TYPE_Nm);
 
@@ -1026,8 +1050,52 @@ ofmerge(struct mchars *mc, struct mparse *mp,
 		else
 			parse_catpage(of);
 
+		/*
+		 * Build a title string for the file.  If it matches
+		 * the location of the file, remember the title as
+		 * found; else, remember it as missing.
+		 */
+
+		if (check_reachable) {
+			if (-1 == asprintf(&title_str, "%s(%s%s%s)", mtitle,
+			    msec, '\0' == *march ? "" : "/", march)) {
+				perror(NULL);
+				exit((int)MANDOCLEVEL_SYSERR);
+			}
+			slot = ohash_qlookup(&title_table, title_str);
+			title_entry = ohash_find(&title_table, slot);
+			if (NULL == title_entry) {
+				title_entry = mandoc_malloc(
+						sizeof(struct title));
+				title_entry->title = title_str;
+				title_entry->file = mandoc_strdup(
+				    match ? "" : of->file);
+				ohash_insert(&title_table, slot,
+						title_entry);
+			} else {
+				if (match)
+					*title_entry->file = '\0';
+				free(title_str);
+			}
+		}
+
 		dbindex(mc, form, of);
 		ohash_delete(&strings);
+	}
+
+	if (check_reachable) {
+		title_entry = ohash_first(&title_table, &slot);
+		while (NULL != title_entry) {
+			if ('\0' != *title_entry->file)
+				say(title_entry->file,
+			    	    "Probably unreachable, title is %s",
+				    title_entry->title);
+			free(title_entry->title);
+			free(title_entry->file);
+			free(title_entry);
+			title_entry = ohash_next(&title_table, &slot);
+		}
+		ohash_delete(&title_table);
 	}
 }
 
