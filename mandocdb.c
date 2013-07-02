@@ -140,8 +140,7 @@ static	int	 inocheck(const struct stat *);
 static	void	 ofadd(int, const char *, const char *, const char *,
 			const char *, const char *, const struct stat *);
 static	void	 offree(void);
-static	void	 ofmerge(struct mchars *, struct mparse *,
-			struct ohash_info*, int);
+static	void	 ofmerge(struct mchars *, struct mparse *, int);
 static	void	 parse_catpage(struct of *);
 static	void	 parse_man(struct of *, const struct man_node *);
 static	void	 parse_mdoc(struct of *, const struct mdoc_node *);
@@ -316,21 +315,17 @@ main(int argc, char *argv[])
 	struct mchars	 *mc;
 	struct manpaths	  dirs;
 	struct mparse	 *mp;
-	struct ohash_info ino_info, filename_info, str_info;
+	struct ohash_info ino_info, filename_info;
 
 	memset(stmts, 0, STMT__MAX * sizeof(sqlite3_stmt *));
 	memset(&dirs, 0, sizeof(struct manpaths));
 
-	ino_info.halloc = filename_info.halloc = 
-		str_info.halloc = hash_halloc;
-	ino_info.hfree = filename_info.hfree = 
-		str_info.hfree = hash_free;
-	ino_info.alloc = filename_info.alloc = 
-		str_info.alloc = hash_alloc;
+	ino_info.alloc  = filename_info.alloc  = hash_alloc;
+	ino_info.halloc = filename_info.halloc = hash_halloc;
+	ino_info.hfree  = filename_info.hfree  = hash_free;
 
 	ino_info.key_offset = offsetof(struct of, id);
 	filename_info.key_offset = offsetof(struct of, file);
-	str_info.key_offset = offsetof(struct str, key);
 
 	progname = strrchr(argv[0], '/');
 	if (progname == NULL)
@@ -427,7 +422,7 @@ main(int argc, char *argv[])
 		if (OP_TEST != op)
 			dbprune();
 		if (OP_DELETE != op)
-			ofmerge(mc, mp, &str_info, 0);
+			ofmerge(mc, mp, 0);
 		dbclose(1);
 	} else {
 		/*
@@ -471,7 +466,7 @@ main(int argc, char *argv[])
 			if (0 == dbopen(0))
 				goto out;
 
-			ofmerge(mc, mp, &str_info, warnings && !use_all);
+			ofmerge(mc, mp, warnings && !use_all);
 			dbclose(0);
 
 			if (j + 1 < dirs.sz) {
@@ -892,11 +887,10 @@ offree(void)
  * and filename to determine whether the file is parsable or not.
  */
 static void
-ofmerge(struct mchars *mc, struct mparse *mp,
-		struct ohash_info *infop, int check_reachable)
+ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 {
 	struct ohash		 title_table;
-	struct ohash_info	 title_info;
+	struct ohash_info	 title_info, str_info;
 	char			 buf[PATH_MAX];
 	struct of		*of;
 	struct mdoc		*mdoc;
@@ -909,6 +903,11 @@ ofmerge(struct mchars *mc, struct mparse *mp,
 	int			 match;
 	unsigned int		 slot;
 	enum mandoclevel	 lvl;
+
+	str_info.alloc = hash_alloc;
+	str_info.halloc = hash_halloc;
+	str_info.hfree = hash_free;
+	str_info.key_offset = offsetof(struct str, key);
 
 	if (check_reachable) {
 		title_info.alloc = hash_alloc;
@@ -947,7 +946,7 @@ ofmerge(struct mchars *mc, struct mparse *mp,
 			}
 		}
 
-		ohash_init(&strings, 6, infop);
+		ohash_init(&strings, 6, &str_info);
 		mparse_reset(mp);
 		mdoc = NULL;
 		man = NULL;
