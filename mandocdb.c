@@ -471,15 +471,6 @@ main(int argc, char *argv[])
 			if (0 == dbopen(0))
 				goto out;
 
-			/*
-			 * Since we're opening up a new database, we can
-			 * turn off synchronous mode for much better
-			 * performance.
-			 */
-#ifndef __APPLE__
-			SQL_EXEC("PRAGMA synchronous = OFF");
-#endif
-
 			ofmerge(mc, mp, &str_info, warnings && !use_all);
 			dbclose(0);
 
@@ -1972,6 +1963,17 @@ prepare_statements:
 	sql = "INSERT INTO keys "
 		"(bits,key,docid) VALUES (?,?,?)";
 	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_KEY], NULL);
+
+#ifndef __APPLE__
+	/*
+	 * When opening a new database, we can turn off
+	 * synchronous mode for much better performance.
+	 */
+
+	if (real)
+		SQL_EXEC("PRAGMA synchronous = OFF");
+#endif
+
 	return(1);
 }
 
