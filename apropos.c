@@ -37,8 +37,9 @@ main(int argc, char *argv[])
 	struct mansearch search;
 	size_t		 i, sz;
 	struct manpage	*res;
-	char		*conf_file, *defpaths, *auxpaths;
 	struct manpaths	 paths;
+	char		*defpaths, *auxpaths;
+	char		*conf_file;
 	char		*progname;
 	extern char	*optarg;
 	extern int	 optind;
@@ -49,10 +50,13 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
-	auxpaths = defpaths = conf_file = NULL;
+	whatis = (0 == strncmp(progname, "whatis", 6));
+
 	memset(&paths, 0, sizeof(struct manpaths));
 	memset(&search, 0, sizeof(struct mansearch));
-	whatis = (0 == strcmp(progname, "whatis"));
+
+	auxpaths = defpaths = NULL;
+	conf_file = NULL;
 
 	while (-1 != (ch = getopt(argc, argv, "C:M:m:S:s:")))
 		switch (ch) {
@@ -99,12 +103,8 @@ main(int argc, char *argv[])
 	free(res);
 	return(sz ? EXIT_SUCCESS : EXIT_FAILURE);
 usage:
-	fprintf(stderr, "usage: %s [-C conf] "
-			 	  "[-M paths] "
-				  "[-m paths] "
-				  "[-S arch] "
-				  "[-s section] "
-			          "expr ...\n", 
-				  progname);
+	fprintf(stderr, "usage: %s [-C file] [-M path] [-m path] "
+			"[-S arch] [-s section]%s ...\n", progname,
+			whatis ? " name" : "\n               expression");
 	return(EXIT_FAILURE);
 }

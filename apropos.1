@@ -24,8 +24,8 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl C Ar file
-.Op Fl M Ar manpath
-.Op Fl m Ar manpath
+.Op Fl M Ar path
+.Op Fl m Ar path
 .Op Fl S Ar arch
 .Op Fl s Ar section
 .Ar expression ...
@@ -60,13 +60,13 @@ Specify an alternative configuration
 in
 .Xr man.conf 5
 format.
-.It Fl M Ar manpath
+.It Fl M Ar path
 Use the colon-separated path instead of the default list of paths
 searched for
 .Xr mandocdb 8
 databases.
 Invalid paths, or paths without manual databases, are ignored.
-.It Fl m Ar manpath
+.It Fl m Ar path
 Prepend the colon-separated paths to the list of paths searched
 for
 .Xr mandocdb 8
