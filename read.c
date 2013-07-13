@@ -185,6 +185,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"macro requires line argument(s)",
 	"macro requires body argument(s)",
 	"macro requires argument(s)",
+	"request requires a numeric argument",
 	"missing list type",
 	"line argument(s) will be lost",
 	"body argument(s) will be lost",
