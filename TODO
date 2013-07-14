@@ -29,6 +29,9 @@ None known right now.
   .ad   -- re-enable adjustment without changing the mode
   Adjustment mode is ignored while in no-fill mode (.nf).
 
+- .as (append to string)
+  found by jca@ in ratpoison(1)  Sun, 30 Jun 2013 12:01:09 +0200
+  
 - .ce (center N lines)
   found by naddy@ in xloadimage(1)
   found by Juan Francisco Cantero Hurtado <iam at juanfra dot info>
@@ -46,6 +49,9 @@ None known right now.
 - .ti (temporary indent)
   found by naddy@ in xloadimage(1)
   found by bentley@ in nmh(1)  Mon, 23 Apr 2012 13:38:28 -0600
+
+- .while and .shift 
+  found by jca@ in ratpoison(1)  Sun, 30 Jun 2013 12:01:09 +0200
 
 - \c (interrupted text) should prevent the line break
   even inside .Bd literal; that occurs in chat(8)
