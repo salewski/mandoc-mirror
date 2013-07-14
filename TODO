@@ -142,6 +142,15 @@ None known right now.
 
 --- missing misc features ----------------------------------------------
 
+- The whatis(1) utility looks for whole words in Nm.
+  If the file name of a page does not agree with the contents of any
+  of its Nm macros (e.g. pool(9)), add the file name as an Nm entry
+  to the mandoc.db as well, such that whatis(1) finds it.
+  If there is a page with a file name that does not appear as a substring
+  neither in Nm nor in Nd, the same fix would allow finding that page
+  with apropos(1) using the file name as a key, as well.
+  Issue reported by tedu@  Fri, 05 Jul 2013 21:15:23 -0400
+
 - clean up escape sequence handling, creating three classes:
   (1) fully implemented, or parsed and ignored without loss of content
   (2) unimplemented, potentially causing loss of content
