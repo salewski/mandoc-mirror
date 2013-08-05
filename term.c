@@ -162,7 +162,7 @@ term_flushln(struct termp *p)
 		 */
 
 		for (j = i, jhy = 0; j < p->col; j++) {
-			if ((j && ' ' == p->buf[j]) || '\t' == p->buf[j])
+			if (' ' == p->buf[j] || '\t' == p->buf[j])
 				break;
 
 			/* Back over the the last printed character. */
