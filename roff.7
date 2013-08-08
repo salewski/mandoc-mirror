@@ -146,12 +146,19 @@ respectively) may be used instead.
 The indicator or numerical representative may be preceded by C
 (constant-width), which is ignored.
 .Pp
+The two-character indicator
+.Sq BI
+requests a font that is both bold and italic.
+It may not be portable to old roff implementations.
+.Pp
 Examples:
 .Bl -tag -width Ds -offset indent -compact
 .It Li \efBbold\efR
-Write in bold, then switch to regular font mode.
+Write in \fBbold\fP, then switch to regular font mode.
 .It Li \efIitalic\efP
-Write in italic, then return to previous font mode.
+Write in \fIitalic\fP, then return to previous font mode.
+.It Li \ef(BIbold italic\efP
+Write in \f(BIbold italic\fP, then return to previous font mode.
 .El
 .Pp
 Text decoration is

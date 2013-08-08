@@ -380,6 +380,7 @@ enum	mandoc_esc {
 	ESCAPE_FONT, /* a generic font mode */
 	ESCAPE_FONTBOLD, /* bold font mode */
 	ESCAPE_FONTITALIC, /* italic font mode */
+	ESCAPE_FONTBI, /* bold italic font mode */
 	ESCAPE_FONTROMAN, /* roman font mode */
 	ESCAPE_FONTPREV, /* previous font mode */
 	ESCAPE_NUMBERED, /* a numbered glyph */
