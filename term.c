@@ -34,7 +34,7 @@
 #include "main.h"
 
 static	size_t		 cond_width(const struct termp *, int, int *);
-static	void		 adjbuf(struct termp *p, int);
+static	void		 adjbuf(struct termp *p, size_t);
 static	void		 bufferc(struct termp *, char);
 static	void		 encode(struct termp *, const char *, size_t);
 static	void		 encode1(struct termp *, int);
@@ -105,15 +105,15 @@ term_end(struct termp *p)
 void
 term_flushln(struct termp *p)
 {
-	int		 i;     /* current input position in p->buf */
+	size_t		 i;     /* current input position in p->buf */
 	int		 ntab;	/* number of tabs to prepend */
 	size_t		 vis;   /* current visual position on output */
 	size_t		 vbl;   /* number of blanks to prepend to output */
 	size_t		 vend;	/* end of word visual position on output */
 	size_t		 bp;    /* visual right border position */
 	size_t		 dv;    /* temporary for visual pos calculations */
-	int		 j;     /* temporary loop index for p->buf */
-	int		 jhy;	/* last hyph before overflow w/r/t j */
+	size_t		 j;     /* temporary loop index for p->buf */
+	size_t		 jhy;	/* last hyph before overflow w/r/t j */
 	size_t		 maxvis; /* output position of visible boundary */
 	size_t		 mmax; /* used in calculating bp */
 
@@ -216,7 +216,7 @@ term_flushln(struct termp *p)
 				j = i;
 				while (' ' == p->buf[i])
 					i++;
-				dv = (size_t)(i - j) * (*p->width)(p, ' ');
+				dv = (i - j) * (*p->width)(p, ' ');
 				vbl += dv;
 				vend += dv;
 				break;
@@ -507,7 +507,7 @@ term_word(struct termp *p, const char *word)
 }
 
 static void
-adjbuf(struct termp *p, int sz)
+adjbuf(struct termp *p, size_t sz)
 {
 
 	if (0 == p->maxcols)
@@ -515,8 +515,7 @@ adjbuf(struct termp *p, int sz)
 	while (sz >= p->maxcols)
 		p->maxcols <<= 2;
 
-	p->buf = mandoc_realloc
-		(p->buf, sizeof(int) * (size_t)p->maxcols);
+	p->buf = mandoc_realloc(p->buf, sizeof(int) * p->maxcols);
 }
 
 static void
@@ -566,15 +565,12 @@ encode1(struct termp *p, int c)
 static void
 encode(struct termp *p, const char *word, size_t sz)
 {
-	int		  i, len;
+	size_t		  i;
 
 	if (TERMP_SKIPCHAR & p->flags) {
 		p->flags &= ~TERMP_SKIPCHAR;
 		return;
 	}
-
-	/* LINTED */
-	len = sz;
 
 	/*
 	 * Encode and buffer a string of characters.  If the current
@@ -583,19 +579,19 @@ encode(struct termp *p, const char *word, size_t sz)
 	 */
 
 	if (TERMFONT_NONE == term_fonttop(p)) {
-		if (p->col + len >= p->maxcols) 
-			adjbuf(p, p->col + len);
-		for (i = 0; i < len; i++)
+		if (p->col + sz >= p->maxcols) 
+			adjbuf(p, p->col + sz);
+		for (i = 0; i < sz; i++)
 			p->buf[p->col++] = word[i];
 		return;
 	}
 
 	/* Pre-buffer, assuming worst-case. */
 
-	if (p->col + 1 + (len * 5) >= p->maxcols)
-		adjbuf(p, p->col + 1 + (len * 5));
+	if (p->col + 1 + (sz * 5) >= p->maxcols)
+		adjbuf(p, p->col + 1 + (sz * 5));
 
-	for (i = 0; i < len; i++) {
+	for (i = 0; i < sz; i++) {
 		if (ASCII_HYPH == word[i] ||
 		    isgraph((unsigned char)word[i]))
 			encode1(p, word[i]);
