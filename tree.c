@@ -159,8 +159,11 @@ print_mdoc(const struct mdoc_node *n, int indent)
 			if (argv[i].sz > 0)
 				printf(" ]");
 		}
-		
-		printf(" %d:%d\n", n->line, n->pos);
+
+		putchar(' ');
+		if (MDOC_LINE & n->flags)
+			putchar('*');
+		printf("%d:%d\n", n->line, n->pos);
 	}
 
 	if (n->child)
