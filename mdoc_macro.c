@@ -792,6 +792,9 @@ blk_exp_close(MACRO_PROT_ARGS)
 				return(0);
 			flushed = 1;
 		}
+
+		mdoc->flags &= ~MDOC_NEWLINE;
+
 		if ( ! mdoc_macro(mdoc, ntok, line, lastarg, pos, buf))
 			return(0);
 		break;
