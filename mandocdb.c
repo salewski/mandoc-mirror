@@ -495,19 +495,38 @@ main(int argc, char *argv[])
 			exit((int)MANDOCLEVEL_SYSERR);
 		}
 
-		strlcpy(mdb.dbn, MANDOC_DB, PATH_MAX);
-		strlcpy(mdb.idxn, MANDOC_IDX, PATH_MAX);
+		/* Create a new database in two temporary files. */
 
-		flags = O_CREAT | O_TRUNC | O_RDWR;
-		mdb.db = dbopen(mdb.dbn, flags, 0644, DB_BTREE, &info);
-		mdb.idx = dbopen(mdb.idxn, flags, 0644, DB_RECNO, NULL);
-
-		if (NULL == mdb.db) {
-			perror(mdb.dbn);
-			exit((int)MANDOCLEVEL_SYSERR);
-		} else if (NULL == mdb.idx) {
-			perror(mdb.idxn);
-			exit((int)MANDOCLEVEL_SYSERR);
+		flags = O_CREAT | O_EXCL | O_RDWR;
+		while (NULL == mdb.db) {
+			strlcpy(mdb.dbn, MANDOC_DB, PATH_MAX);
+			strlcat(mdb.dbn, ".XXXXXXXXXX", PATH_MAX);
+			if (NULL == mktemp(mdb.dbn)) {
+				perror(mdb.dbn);
+				exit((int)MANDOCLEVEL_SYSERR);
+			}
+			mdb.db = dbopen(mdb.dbn, flags, 0644,
+					DB_BTREE, &info);
+			if (NULL == mdb.db && EEXIST != errno) {
+				perror(mdb.dbn);
+				exit((int)MANDOCLEVEL_SYSERR);
+			}
+		}
+		while (NULL == mdb.idx) {
+			strlcpy(mdb.idxn, MANDOC_IDX, PATH_MAX);
+			strlcat(mdb.idxn, ".XXXXXXXXXX", PATH_MAX);
+			if (NULL == mktemp(mdb.idxn)) {
+				perror(mdb.idxn);
+				unlink(mdb.dbn);
+				exit((int)MANDOCLEVEL_SYSERR);
+			}
+			mdb.idx = dbopen(mdb.idxn, flags, 0644,
+					DB_RECNO, NULL);
+			if (NULL == mdb.idx && EEXIST != errno) {
+				perror(mdb.idxn);
+				unlink(mdb.dbn);
+				exit((int)MANDOCLEVEL_SYSERR);
+			}
 		}
 
 		/*
@@ -527,6 +546,26 @@ main(int argc, char *argv[])
 		(*mdb.idx->close)(mdb.idx);
 		mdb.db = NULL;
 		mdb.idx = NULL;
+
+		/*
+		 * Replace the old database with the new one.
+		 * This is not perfectly atomic,
+		 * but i cannot think of a better way.
+		 */
+
+		if (-1 == rename(mdb.dbn, MANDOC_DB)) {
+			perror(MANDOC_DB);
+			unlink(mdb.dbn);
+			unlink(mdb.idxn);
+			exit((int)MANDOCLEVEL_SYSERR);
+		}
+		if (-1 == rename(mdb.idxn, MANDOC_IDX)) {
+			perror(MANDOC_IDX);
+			unlink(MANDOC_DB);
+			unlink(MANDOC_IDX);
+			unlink(mdb.idxn);
+			exit((int)MANDOCLEVEL_SYSERR);
+		}
 	}
 
 out:
