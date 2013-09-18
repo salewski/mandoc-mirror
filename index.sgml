@@ -263,6 +263,50 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
+			18-09-2013: version 1.12.2
+		</P>
+		<P>
+			The main new feature in mandoc 1.12.2 is that the <A HREF="mdoc.7.html">mdoc(7)</A> to <A HREF="man.7.html">man(7)</A>
+			converter, to be called as <CODE>mandoc -Tman</CODE>, is now fully functional.
+		</P>
+		<P>
+			The <A HREF="mandoc.1.html">mandoc(1)</A> utility now supports the <CODE>-Ios</CODE> (default operating system)
+			input option, and the <CODE>-Tutf8</CODE> output mode now actually works.
+		</P>
+		<P>
+			In <A HREF="mandocdb.8.html">mandocdb(8)</A>, do not truncate existing databases when starting to build new ones,
+			only replace them when the build actually succeeds.
+		</P>
+		<P>
+			The <A HREF="man.7.html">man(7)</A> parser now supports the <EM>PD</EM> macro (paragraph distance),
+			and (for GNU man-ext compatibility only) <EM>EX</EM> (example block) and <EM>EE</EM> (example end).
+			Plus several bugfixes regarding indentation, line breaks, and vertical spacing,
+			and regarding <EM>RS</EM> following <EM>TP</EM>.
+		</P>
+		<P>
+			The <A HREF="roff.7.html">roff(7)</A> parser now supports the <EM>\f(BI</EM> (bold+italic) font escape,
+			the <EM>\z</EM> (zero cursor advance) escape and the <EM>cc</EM> (change control character)
+			and <EM>it</EM> (input line trap) requests.
+			Plus bugfixes regarding the <EM>\t</EM> (tab) escape, regarding nested escape sequences,
+			and regarding conditional requests.
+		</P>
+		<P>
+			In <A HREF="mdoc.7.html">mdoc(7)</A>, several bugfixes related to UTF-8 output of quoting enclosures,
+			delimiter handling, list indentation and horizontal and vertical spacing,
+			formatting fixes to <EM>Lk</EM>, <EM>%U</EM>, and <EM>%C</EM>,
+			plus some bugfixes related to the handling of syntax errors like badly nested font blocks,
+			stray <EM>Ta</EM> macros outside column lists, unterminated <EM>It Xo</EM> blocks,
+			and non-text children of <EM>Nm</EM> blocks.
+		</P>
+		<P>
+			In <A HREF="tbl.7.html">tbl(7)</A>, correct the width of horizontal spans, the vertical spacing around tables
+			in <A HREF="man.7.html">man(7)</A> files, and fix a crash caused by some particular unclosed <EM>T{</EM> macros.
+		</P>
+		<P>
+			For mandoc developers, we now provide a <A HREF="tbl.3.html">tbl(3)</A> library manual and <CODE>gmdiff</CODE>,
+			a simplistic groff-versus-mandoc output comparison tool.
+		</P>
+		<P CLASS="news">
 			23-03-2011: version 1.12.1
 		</P>
 		<P>
