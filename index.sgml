@@ -155,6 +155,12 @@
 					</TD>
 				</TR>
 				<TR>
+					<TD VALIGN="top"><A HREF="tbl.3.html">tbl(3)</A></TD>
+					<TD VALIGN="top">
+						roff table parser library for mandoc
+					</TD>
+				</TR>
+				<TR>
 					<TD VALIGN="top"><A HREF="man.7.html">man(7)</A></TD>
 					<TD VALIGN="top">
 						man language reference
