@@ -55,6 +55,11 @@ None known right now.
 
 - \c (interrupted text) should prevent the line break
   even inside .Bd literal; that occurs in chat(8)
+  also found in cclive(1) - DocBook output
+
+- \h horizontal move
+  found in cclive(1) DocBook output
+  Anthony J. Bentley on discuss@  Sat, 21 Sep 2013 22:29:34 -0600
 
 - using undefined strings or macros defines them to be empty
   wl@  Mon, 14 Nov 2011 14:37:01 +0000
