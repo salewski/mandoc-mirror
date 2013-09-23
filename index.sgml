@@ -25,7 +25,7 @@
 			pages whilst providing token support for <I>man</I>.
 		</P>
 		<P>
-			Why?  groff amounts to over 5 MB of source code, most of which is C++ and all of which is GPL.  It runs slowly, produces
+			Why?  groff amounts to over 5 MB of source code, most of which is C++ and GPL version 3.  It runs slowly, produces
 			uncertain output, and varies in operation from system to system.  mdocml strives to fix this (respectively small, C, <A
 			CLASS="external" HREF="http://www.isc.org/software/license">ISC</A>-licensed, fast and regular).
 		</P>
@@ -71,37 +71,39 @@
 				<TR>
 					<TD>DragonFly BSD</TD>
 					<TD>
-					<A HREF="http://gitweb.dragonflybsd.org/dragonfly.git/tree/HEAD:/usr.bin/mandoc" CLASS="external">usr.bin/mandoc</A>
+					<A HREF="http://gitweb.dragonflybsd.org/dragonfly.git/tree/HEAD:/contrib/mdocml" CLASS="external">contrib/mdocml</A> (1.12.1 sources)
+					<A HREF="http://gitweb.dragonflybsd.org/dragonfly.git/tree/HEAD:/lib/libmandoc" CLASS="external">lib/libmandoc</A>
+					<A HREF="http://gitweb.dragonflybsd.org/dragonfly.git/tree/HEAD:/usr.bin/mandoc" CLASS="external">usr.bin/mandoc</A> (build system)
 					</TD>
 				</TR>
 				<TR>
 					<TD>FreeBSD</TD>
 					<TD>
-					<A HREF="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/" CLASS="external">ports/textproc/mdocml</A>
+					<A HREF="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/" CLASS="external">ports/textproc/mdocml</A> (1.12.1 port)
 					</TD>
 				</TR>
 				<TR>
 					<TD>NetBSD</TD>
 					<TD>
-					<A HREF="http://cvsweb.netbsd.org/bsdweb.cgi/src/external/bsd/mdocml/" CLASS="external">src/external/bsd/mdocml</A>
+					<A HREF="http://cvsweb.netbsd.org/bsdweb.cgi/src/external/bsd/mdocml/" CLASS="external">src/external/bsd/mdocml</A> (1.12.1 sources plus patches and build system)
 					</TD>
 				</TR>
 				<TR>
 					<TD>OpenBSD</TD>
 					<TD>
-					<A HREF="http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/mandoc/" CLASS="external">src/usr.bin/mandoc</A> 
+					<A HREF="http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/mandoc/" CLASS="external">src/usr.bin/mandoc</A> (1.12.2 sources and build system)
 					</TD>
 				</TR>
 				<TR>
 					<TD>pkgsrc</TD>
 					<TD>
-					<A HREF="http://pkgsrc.se/textproc/mdocml" CLASS="external">textproc/mdocml</A> 
+					<A HREF="http://pkgsrc.se/textproc/mdocml" CLASS="external">textproc/mdocml</A> (1.12.0 port)
 					</TD>
 				</TR>
 				<TR>
 					<TD>Minix3</TD>
 					<TD>
-					<A HREF="http://git.minix3.org/?p=minix.git;a=tree;f=external/bsd/mdocml" CLASS="external">external/bsd/mdocml</A>
+					<A HREF="http://git.minix3.org/?p=minix.git;a=tree;f=external/bsd/mdocml" CLASS="external">external/bsd/mdocml</A> (1.10.9 sources and build system)
 					</TD>
 				</TR>
 			</TBODY>
@@ -161,6 +163,12 @@
 					</TD>
 				</TR>
 				<TR>
+					<TD VALIGN="top"><A HREF="eqn.7.html">eqn(7)</A></TD>
+					<TD VALIGN="top">
+						eqn-mandoc language reference
+					</TD>
+				</TR>
+				<TR>
 					<TD VALIGN="top"><A HREF="man.7.html">man(7)</A></TD>
 					<TD VALIGN="top">
 						man language reference
@@ -170,12 +178,6 @@
 					<TD VALIGN="top"><A HREF="man.cgi.7.html">man.cgi(7)</A></TD>
 					<TD VALIGN="top">
 						cgi for manpage query and display
-					</TD>
-				</TR>
-				<TR>
-					<TD VALIGN="top"><A HREF="eqn.7.html">eqn(7)</A></TD>
-					<TD VALIGN="top">
-						eqn-mandoc language reference
 					</TD>
 				</TR>
 				<TR>
@@ -263,19 +265,19 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
-			18-09-2013: version 1.12.2
+			23-09-2013: version 1.12.2
 		</P>
 		<P>
-			The main new feature in mandoc 1.12.2 is that the <A HREF="mdoc.7.html">mdoc(7)</A> to <A HREF="man.7.html">man(7)</A>
-			converter, to be called as <CODE>mandoc -Tman</CODE>, is now fully functional.
+			The <A HREF="mdoc.7.html">mdoc(7)</A> to <A HREF="man.7.html">man(7)</A> converter,
+			to be called as <CODE>mandoc -Tman</CODE>, is now fully functional.
 		</P>
 		<P>
 			The <A HREF="mandoc.1.html">mandoc(1)</A> utility now supports the <CODE>-Ios</CODE> (default operating system)
 			input option, and the <CODE>-Tutf8</CODE> output mode now actually works.
 		</P>
 		<P>
-			In <A HREF="mandocdb.8.html">mandocdb(8)</A>, do not truncate existing databases when starting to build new ones,
-			only replace them when the build actually succeeds.
+			The <A HREF="mandocdb.8.html">mandocdb(8)</A> utility no longer truncates existing databases when starting to build new ones,
+			but only replaces them when the build actually succeeds.
 		</P>
 		<P>
 			The <A HREF="man.7.html">man(7)</A> parser now supports the <EM>PD</EM> macro (paragraph distance),
@@ -287,24 +289,23 @@
 			The <A HREF="roff.7.html">roff(7)</A> parser now supports the <EM>\f(BI</EM> (bold+italic) font escape,
 			the <EM>\z</EM> (zero cursor advance) escape and the <EM>cc</EM> (change control character)
 			and <EM>it</EM> (input line trap) requests.
-			Plus bugfixes regarding the <EM>\t</EM> (tab) escape, regarding nested escape sequences,
-			and regarding conditional requests.
+			Plus bugfixes regarding the <EM>\t</EM> (tab) escape, nested escape sequences, and conditional requests.
 		</P>
 		<P>
-			In <A HREF="mdoc.7.html">mdoc(7)</A>, several bugfixes related to UTF-8 output of quoting enclosures,
+			In <A HREF="mdoc.7.html">mdoc(7)</A>, several bugs were fixed related to UTF-8 output of quoting enclosures,
 			delimiter handling, list indentation and horizontal and vertical spacing,
-			formatting fixes to <EM>Lk</EM>, <EM>%U</EM>, and <EM>%C</EM>,
+			formatting of the <EM>Lk</EM>, <EM>%U</EM>, and <EM>%C</EM> macros,
 			plus some bugfixes related to the handling of syntax errors like badly nested font blocks,
 			stray <EM>Ta</EM> macros outside column lists, unterminated <EM>It Xo</EM> blocks,
 			and non-text children of <EM>Nm</EM> blocks.
 		</P>
 		<P>
-			In <A HREF="tbl.7.html">tbl(7)</A>, correct the width of horizontal spans, the vertical spacing around tables
-			in <A HREF="man.7.html">man(7)</A> files, and fix a crash caused by some particular unclosed <EM>T{</EM> macros.
+			In <A HREF="tbl.7.html">tbl(7)</A>, the width of horizontal spans and the vertical spacing around tables was corrected,
+			and in <A HREF="man.7.html">man(7)</A> files, a crash was fixed that was triggered by some particular unclosed <EM>T{</EM> macros.
 		</P>
 		<P>
 			For mandoc developers, we now provide a <A HREF="tbl.3.html">tbl(3)</A> library manual and <CODE>gmdiff</CODE>,
-			a simplistic groff-versus-mandoc output comparison tool.
+			a very small, very simplistic groff-versus-mandoc output comparison tool.
 		</P>
 		<P CLASS="news">
 			23-03-2011: version 1.12.1
@@ -338,6 +339,7 @@
 			<SMALL>
 				Copyright &#169; 2008&#8211;2011 
 				<A CLASS="external" HREF="http://kristaps.bsd.lv">Kristaps Dzonsons</A>, 
+				&#169; 2013 Ingo Schwarze,
 				$Date$
 			</SMALL>
 		</P>
