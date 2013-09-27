@@ -274,6 +274,9 @@
   as -width 7n, not -width 11n.
   The same applies to .Bl -column column widths;
   reported again by Nicolas Joly Thu, 1 Mar 2012 13:41:26 +0100 via wiz@ 5 Mar
+  reported again by Franco Fichtner Fri, 27 Sep 2013 21:02:28 +0200
+  An easy partial fix would be to just skip the first word if it starts
+  with a dot, including any following white space, when measuring.
 
 - The \& zero-width character counts as output.
   That is, when it is alone on a line between two .Pp,
