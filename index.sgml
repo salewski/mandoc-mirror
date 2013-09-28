@@ -77,9 +77,16 @@
 					</TD>
 				</TR>
 				<TR>
-					<TD>FreeBSD</TD>
+					<TD>FreeBSD 10.0, -CURRENT</TD>
 					<TD>
-					<A HREF="http://www.freebsd.org/cgi/cvsweb.cgi/ports/textproc/mdocml/" CLASS="external">ports/textproc/mdocml</A> (1.12.1 port)
+					<A HREF="http://svnweb.freebsd.org/base/head/contrib/mdocml/" CLASS="external">contrib/mdocml</A> (1.12.1 sources)
+					<A HREF="http://svnweb.freebsd.org/base/head/usr.bin/mandoc/" CLASS="external">usr.bin/mandoc</A> (build system)
+					</TD>
+				</TR>
+				<TR>
+					<TD>FreeBSD 9.x, 8.x</TD>
+					<TD>
+					<A HREF="http://svnweb.freebsd.org/ports/textproc/mdocml/" CLASS="external">ports/textproc/mdocml</A> (1.12.1 port)
 					</TD>
 				</TR>
 				<TR>
