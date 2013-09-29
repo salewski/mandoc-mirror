@@ -8,8 +8,8 @@
 #
 # CFLAGS	+= -DOSNAME="\"OpenBSD 5.4\""
 
-VERSION		 = 1.12.2
-VDATE		 = 18 September 2013
+VERSION		 = 1.12.2beta1
+VDATE		 = 30 September 2013
 
 # IFF your system supports multi-byte functions (setlocale(), wcwidth(),
 # putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a
@@ -25,10 +25,11 @@ CFLAGS	 	+= -DUSE_WCHAR
 # variable.
 #CFLAGS		+= -DUSE_MANPATH
 
-# If your system supports static binaries only, uncomment this.  This
-# appears only to be BSD UNIX systems (Mac OS X has no support and Linux
-# requires -pthreads for static libdb).
+# If your system does not support static binaries, comment this,
+# for example on Mac OS X.
 STATIC		 = -static
+# Linux requires -pthread to statically link with libdb.
+#STATIC		+= -pthread
 
 CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
@@ -156,6 +157,7 @@ SRCS		 = Makefile \
 		   term.h \
 		   term_ascii.c \
 		   term_ps.c \
+		   test-betoh64.c \
 		   test-fgetln.c \
 		   test-getsubopt.c \
 		   test-mmap.c \
@@ -410,6 +412,10 @@ config.h: config.h.pre config.h.post
 	  if $(CC) $(CFLAGS) -Werror -o test-strlcpy test-strlcpy.c >> config.log 2>&1; then \
 		echo '#define HAVE_STRLCPY'; \
 		rm test-strlcpy; \
+	  fi; \
+	  if $(CC) $(CFLAGS) -Werror -o test-betoh64 test-betoh64.c >> config.log 2>&1; then \
+		echo '#define HAVE_BETOH64'; \
+		rm test-betoh64; \
 	  fi; \
 	  echo; \
 	  cat config.h.post \

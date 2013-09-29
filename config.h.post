@@ -15,6 +15,9 @@
 #  endif
 #endif
 
+#ifndef HAVE_BETOH64
+#define betoh64(x) be64toh(x)
+#endif
 #ifndef HAVE_STRLCAT
 extern	size_t	  strlcat(char *, const char *, size_t);
 #endif
