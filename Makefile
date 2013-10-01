@@ -8,8 +8,8 @@
 #
 # CFLAGS	+= -DOSNAME="\"OpenBSD 5.4\""
 
-VERSION		 = 1.12.2beta1
-VDATE		 = 30 September 2013
+VERSION		 = 1.12.2beta2
+VDATE		 = 01 October 2013
 
 # IFF your system supports multi-byte functions (setlocale(), wcwidth(),
 # putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a
@@ -61,6 +61,7 @@ DBLN		 = llib-lapropos.ln llib-lmandocdb.ln llib-lman.cgi.ln llib-lcatman.ln
 all: mandoc preconv demandoc $(DBBIN)
 
 SRCS		 = Makefile \
+		   NEWS \
 		   TODO \
 		   apropos.1 \
 		   apropos.c \
