@@ -34,7 +34,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__sun)
 # include <endian.h>
 # include <db_185.h>
 #elif defined(__APPLE__)
@@ -42,6 +42,10 @@
 # include <db.h>
 #else
 # include <db.h>
+#endif
+
+#if defined(__sun)
+#include <sys/stat.h>
 #endif
 
 #include "man.h"
@@ -1756,6 +1760,9 @@ ofile_dirbuild(const char *dir, const char* psec, const char *parch,
 		int p_src_form, struct of **of)
 {
 	char		 buf[PATH_MAX];
+#if defined(__sun)
+	struct stat	 sb;
+#endif
 	size_t		 sz;
 	DIR		*d;
 	const char	*fn, *sec, *arch;
@@ -1778,7 +1785,12 @@ ofile_dirbuild(const char *dir, const char* psec, const char *parch,
 
 		src_form = p_src_form;
 
+#if defined(__sun)
+		stat(dp->d_name, &sb);
+		if (S_IFDIR & sb.st_mode) {
+#else
 		if (DT_DIR == dp->d_type) {
+#endif
 			sec = psec;
 			arch = parch;
 
@@ -1835,7 +1847,11 @@ ofile_dirbuild(const char *dir, const char* psec, const char *parch,
 			continue;
 		}
 
+#if defined(__sun)
+		if (0 == S_IFREG & sb.st_mode) {
+#else
 		if (DT_REG != dp->d_type) {
+#endif
 			if (warnings)
 				fprintf(stderr,
 				    "%s/%s: not a regular file\n",
