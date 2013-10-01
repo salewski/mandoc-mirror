@@ -122,11 +122,11 @@ is printed to stderr, omitted from the index, and the parse continues
 with the next input file.
 .Sh FILES
 .Bl -tag -width Ds
-.It Pa mandocdb.db
+.It Pa mandoc.db
 A database of manpages relative to the directory of the file.
 This file is portable across architectures and systems, so long as the
 manpage hierarchy it indexes does not change.
-.It Pa mandocdb.db~
+.It Pa mandoc.db~
 A temporary database used during scanning and parsing.
 .El
 .Sh EXIT STATUS
@@ -136,10 +136,42 @@ A temporary database used during scanning and parsing.
 .Xr man 1 ,
 .Xr whatis 1 ,
 .Xr man.conf 5
-.Sh AUTHORS
+.Sh HISTORY
+A
+.Nm makewhatis
+utility first appeared in
+.Bx 2 .
+It was rewritten in
+.Xr perl 1
+for
+.Ox 2.7
+and in C for
+.Ox 5.1 .
+.Pp
 The
+.Ar dir
+argument first appeared in
+.Nx 1.0 ;
+the options
+.Fl dtu
+in
+.Ox 2.7 ;
+and the options
+.Fl aCvW
+in
+.Ox 5.1 .
+.Sh AUTHORS
+.An -nosplit
+.An Bill Joy
+wrote the original
+.Bx
+.Nm makewhatis
+in February 1979,
+.An Marc Espie
+started the Perl version in 2000,
+and the current version of
 .Nm
-utility was written by
-.An Kristaps Dzonsons Aq Mt kristaps@bsd.lv ,
+was written by
+.An Kristaps Dzonsons Aq Mt kristaps@bsd.lv
 and
 .An Ingo Schwarze Aq Mt schwarze@openbsd.org .
