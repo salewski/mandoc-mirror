@@ -6,10 +6,10 @@
 # Specify this if you want to hard-code the operating system to appear
 # in the lower-left hand corner of -mdoc manuals.
 #
-# CFLAGS	+= -DOSNAME="\"OpenBSD 4.5\""
+# CFLAGS	+= -DOSNAME="\"OpenBSD 5.4\""
 
-VERSION		 = 1.12.1
-VDATE		 = 23 March 2012
+VERSION		 = 1.12.2
+VDATE		 = 01 October 2013
 
 # IFF your system supports multi-byte functions (setlocale(), wcwidth(),
 # putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a
@@ -24,10 +24,11 @@ CFLAGS	 	+= -DUSE_WCHAR
 # mandocdb(8) will use manpath(1) to get the MANPATH variable.
 #CFLAGS		+= -DUSE_MANPATH
 
-# If your system supports static binaries only, uncomment this.  This
-# appears only to be BSD UNIX systems (Mac OS X has no support and Linux
-# requires -pthreads for static libdb).
+# If your system does not support static binaries, comment this,
+# for example on Mac OS X.
 STATIC		 = -static
+# Linux requires -pthread to statically link with libdb.
+#STATIC		+= -pthread
 
 CFLAGS		+= -I/usr/local/include -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
@@ -53,7 +54,10 @@ DBBIN		 = mandocdb manpage apropos
 all: mandoc preconv demandoc $(DBBIN)
 
 SRCS		 = Makefile \
+		   NEWS \
 		   TODO \
+		   apropos.1 \
+		   apropos.c \
 		   arch.c \
 		   arch.in \
 		   att.c \
@@ -75,6 +79,7 @@ SRCS		 = Makefile \
 		   eqn_term.c \
 		   example.style.css \
 		   external.png \
+		   gmdiff \
 		   html.c \
 		   html.h \
 		   index.css \
@@ -128,6 +133,7 @@ SRCS		 = Makefile \
 		   st.c \
 		   st.in \
 		   style.css \
+		   tbl.3 \
 		   tbl.7 \
 		   tbl.c \
 		   tbl_data.c \
@@ -243,14 +249,16 @@ $(MANPAGE_OBJS): config.h manpath.h mansearch.h
 DEMANDOC_OBJS	 = demandoc.o
 $(DEMANDOC_OBJS): config.h
 
-INDEX_MANS	 = demandoc.1.html \
+INDEX_MANS	 = apropos.1.html \
+		   demandoc.1.html \
 		   mandoc.1.html \
+		   preconv.1.html \
 		   mandoc.3.html \
+		   tbl.3.html \
 		   eqn.7.html \
 		   man.7.html \
 		   mandoc_char.7.html \
 		   mdoc.7.html \
-		   preconv.1.html \
 		   roff.7.html \
 		   tbl.7.html \
 		   mandocdb.8.html
@@ -291,7 +299,7 @@ install: all
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
 	$(INSTALL_LIB) man.h mdoc.h mandoc.h $(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.1 preconv.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
-	$(INSTALL_MAN) mandoc.3 $(DESTDIR)$(MANDIR)/man3
+	$(INSTALL_MAN) mandoc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
 
