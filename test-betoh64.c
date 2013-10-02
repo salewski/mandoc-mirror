@@ -4,6 +4,8 @@
 # include <endian.h>
 #elif defined(__APPLE__)
 # include <libkern/OSByteOrder.h>
+#else
+# include <sys/endian.h>
 #endif
 
 int

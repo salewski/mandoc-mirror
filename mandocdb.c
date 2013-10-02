@@ -41,6 +41,7 @@
 # include <libkern/OSByteOrder.h>
 # include <db.h>
 #else
+# include <sys/endian.h>
 # include <db.h>
 #endif
 
