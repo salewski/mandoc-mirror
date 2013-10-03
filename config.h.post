@@ -16,8 +16,14 @@
 #endif
 
 #ifndef HAVE_BETOH64
-#define betoh64(x) be64toh(x)
+#  if defined(__APPLE__)
+#    define betoh64(x) OSSwapBigToHostInt64(x)
+#    define htobe64(x) OSSwapHostToBigInt64(x)
+#  else
+#    define betoh64(x) be64toh(x)
+#  endif
 #endif
+
 #ifndef HAVE_STRLCAT
 extern	size_t	  strlcat(char *, const char *, size_t);
 #endif
