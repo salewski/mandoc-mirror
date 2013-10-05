@@ -9,7 +9,7 @@
 # CFLAGS	+= -DOSNAME="\"OpenBSD 5.4\""
 
 VERSION		 = 1.12.2
-VDATE		 = 01 October 2013
+VDATE		 = 05 October 2013
 
 # IFF your system supports multi-byte functions (setlocale(), wcwidth(),
 # putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a

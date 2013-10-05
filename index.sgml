@@ -84,7 +84,7 @@
 				<TR>
 					<TD>FreeBSD 9.x, 8.x</TD>
 					<TD>
-					<A HREF="http://svnweb.freebsd.org/ports/textproc/mdocml/" CLASS="external">ports/textproc/mdocml</A> (1.12.1 port)
+					<A HREF="http://svnweb.freebsd.org/ports/head/textproc/mdocml/" CLASS="external">ports/textproc/mdocml</A> (1.12.1 port)
 					</TD>
 				</TR>
 				<TR>
@@ -102,13 +102,19 @@
 				<TR>
 					<TD>pkgsrc</TD>
 					<TD>
-					<A HREF="http://pkgsrc.se/textproc/mdocml" CLASS="external">textproc/mdocml</A> (1.12.0 port)
+					<A HREF="http://pkgsrc.se/textproc/mdocml" CLASS="external">textproc/mdocml</A> (1.12.2 port)
 					</TD>
 				</TR>
 				<TR>
 					<TD>Minix3</TD>
 					<TD>
 					<A HREF="http://git.minix3.org/?p=minix.git;a=tree;f=external/bsd/mdocml" CLASS="external">external/bsd/mdocml</A> (1.10.9 sources and build system)
+					</TD>
+				</TR>
+				<TR>
+					<TD>Alpine Linux</TD>
+					<TD>
+					<A HREF="http://git.alpinelinux.org/cgit/aports/tree/main/mdocml" CLASS="external">aports/main/mdocml</A> (1.12.1 port)
 					</TD>
 				</TR>
 			</TBODY>
@@ -266,7 +272,7 @@
 			use <A CLASS="external" HREF="http://www.sqlite.org">sqlite3</A> as a database.
 		</P>
 		<P CLASS="news">
-			01-10-2013: version 1.12.2
+			05-10-2013: version 1.12.2
 		</P>
 		<P>
 			The <A HREF="mdoc.7.html">mdoc(7)</A> to <A HREF="man.7.html">man(7)</A> converter,
@@ -308,8 +314,11 @@
 			For mandoc developers, we now provide a <A HREF="tbl.3.html">tbl(3)</A> library manual and <CODE>gmdiff</CODE>,
 			a very small, very simplistic groff-versus-mandoc output comparison tool.
 		</P>
+		<P>
+			See <A HREF="NEWS">NEWS</A> for historical notes.
+		</P>
 		<P CLASS="news">
-			23-03-2011: version 1.12.1
+			23-03-2012: version 1.12.1
 		</P>
 		<P>
 			Significant work on <A HREF="apropos.1.html">apropos</A> and <A HREF="mandocdb.8.html">mandocdb</A>.  These tools are
