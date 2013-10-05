@@ -113,6 +113,12 @@
 					<A HREF="http://git.minix3.org/?p=minix.git;a=tree;f=external/bsd/mdocml" CLASS="external">external/bsd/mdocml</A> (1.10.9 sources and build system)
 					</TD>
 				</TR>
+				<TR>
+					<TD>Alpine Linux</TD>
+					<TD>
+					<A HREF="http://git.alpinelinux.org/cgit/aports/tree/main/mdocml" CLASS="external">aports/main/mdocml</A> (1.12.1 port)
+					</TD>
+				</TR>
 			</TBODY>
 		</TABLE>
 		<H1>
@@ -272,7 +278,7 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
-			23-09-2013: version 1.12.2
+			02-10-2013: version 1.12.2
 		</P>
 		<P>
 			The <A HREF="mdoc.7.html">mdoc(7)</A> to <A HREF="man.7.html">man(7)</A> converter,
