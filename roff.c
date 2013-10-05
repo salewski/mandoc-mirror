@@ -79,16 +79,6 @@ enum	roffrule {
 };
 
 /*
- * A single register entity.  If "set" is zero, the value of the
- * register should be the default one, which is per-register.
- * Registers are assumed to be unsigned ints for now.
- */
-struct	reg {
-	int		 set; /* whether set or not */
-	unsigned int	 u; /* unsigned integer */
-};
-
-/*
  * An incredibly-simple string buffer.
  */
 struct	roffstr {
@@ -105,6 +95,16 @@ struct	roffkv {
 	struct roffkv	*next; /* next in list */
 };
 
+/*
+ * A single number register as part of a singly-linked list.
+ * Registers are assumed to be unsigned ints for now.
+ */
+struct	roffreg {
+	struct roffstr	 key;
+	unsigned int	 u;
+	struct roffreg	*next;
+};
+
 struct	roff {
 	enum mparset	 parsetype; /* requested parse type */
 	struct mparse	*parse; /* parse point */
@@ -112,7 +112,7 @@ struct	roff {
 	enum roffrule	 rstack[RSTACK_MAX]; /* stack of !`ie' rules */
 	char		 control; /* control character */
 	int		 rstackpos; /* position in rstack */
-	struct reg	 regs[REG__MAX];
+	struct roffreg	*regtab; /* number registers */
 	struct roffkv	*strtab; /* user-defined strings & macros */
 	struct roffkv	*xmbtab; /* multi-byte trans table (`tr') */
 	struct roffstr	*xtab; /* single-byte trans table (`tr') */
@@ -183,6 +183,7 @@ static	enum rofferr	 roff_cond_sub(ROFF_ARGS);
 static	enum rofferr	 roff_ds(ROFF_ARGS);
 static	enum roffrule	 roff_evalcond(const char *, int *);
 static	void		 roff_free1(struct roff *);
+static	void		 roff_freereg(struct roffreg *);
 static	void		 roff_freestr(struct roffkv *);
 static	char		*roff_getname(struct roff *, char **, int, int);
 static	const char	*roff_getstrn(const struct roff *, 
@@ -424,6 +425,10 @@ roff_free1(struct roff *r)
 
 	r->strtab = r->xmbtab = NULL;
 
+	roff_freereg(r->regtab);
+
+	r->regtab = NULL;
+
 	if (r->xtab)
 		for (i = 0; i < 128; i++)
 			free(r->xtab[i].p);
@@ -440,7 +445,6 @@ roff_reset(struct roff *r)
 	roff_free1(r);
 
 	r->control = 0;
-	memset(&r->regs, 0, sizeof(struct reg) * REG__MAX);
 
 	for (i = 0; i < PREDEFS_MAX; i++) 
 		roff_setstr(r, predefs[i].name, predefs[i].str, 0);
@@ -1258,25 +1262,52 @@ roff_ds(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-int
-roff_regisset(const struct roff *r, enum regs reg)
+void
+roff_setreg(struct roff *r, const char *name, unsigned int val)
 {
+	struct roffreg	*reg;
 
-	return(r->regs[(int)reg].set);
+	/* Search for an existing register with the same name. */
+	reg = r->regtab;
+
+	while (reg && strcmp(name, reg->key.p))
+		reg = reg->next;
+
+	if (NULL == reg) {
+		/* Create a new register. */
+		reg = mandoc_malloc(sizeof(struct roffreg));
+		reg->key.p = mandoc_strdup(name);
+		reg->key.sz = strlen(name);
+		reg->next = r->regtab;
+		r->regtab = reg;
+	}
+
+	reg->u = val;
 }
 
 unsigned int
-roff_regget(const struct roff *r, enum regs reg)
+roff_getreg(const struct roff *r, const char *name)
 {
+	struct roffreg	*reg;
 
-	return(r->regs[(int)reg].u);
+	for (reg = r->regtab; reg; reg = reg->next)
+		if (0 == strcmp(name, reg->key.p))
+			return(reg->u);
+
+	return(0);
 }
 
-void
-roff_regunset(struct roff *r, enum regs reg)
+static void
+roff_freereg(struct roffreg *reg)
 {
+	struct roffreg	*old_reg;
 
-	r->regs[(int)reg].set = 0;
+	while (NULL != reg) {
+		free(reg->key.p);
+		old_reg = reg;
+		reg = reg->next;
+		free(old_reg);
+	}
 }
 
 /* ARGSUSED */
@@ -1290,13 +1321,11 @@ roff_nr(ROFF_ARGS)
 	val = *bufp + pos;
 	key = roff_getname(r, &val, ln, pos);
 
-	if (0 == strcmp(key, "nS")) {
-		r->regs[(int)REG_nS].set = 1;
-		if ((iv = mandoc_strntoi(val, strlen(val), 10)) >= 0)
-			r->regs[(int)REG_nS].u = (unsigned)iv;
-		else
-			r->regs[(int)REG_nS].u = 0u;
-	}
+	iv = mandoc_strntoi(val, strlen(val), 10);
+	if (0 > iv)
+		iv = 0;
+
+	roff_setreg(r, key, (unsigned)iv);
 
 	return(ROFF_IGN);
 }

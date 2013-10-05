@@ -295,12 +295,10 @@ mdoc_parseln(struct mdoc *mdoc, int ln, char *buf, int offs)
 	 * whether this mode is on or off.
 	 * Note that this mode is also switched by the Sh macro.
 	 */
-	if (roff_regisset(mdoc->roff, REG_nS)) {
-		if (roff_regget(mdoc->roff, REG_nS))
-			mdoc->flags |= MDOC_SYNOPSIS;
-		else
-			mdoc->flags &= ~MDOC_SYNOPSIS;
-	}
+	if (roff_getreg(mdoc->roff, "nS"))
+		mdoc->flags |= MDOC_SYNOPSIS;
+	else
+		mdoc->flags &= ~MDOC_SYNOPSIS;
 
 	return(roff_getcontrol(mdoc->roff, buf, &offs) ?
 			mdoc_pmacro(mdoc, ln, buf, offs) :
