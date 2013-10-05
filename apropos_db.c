@@ -414,11 +414,10 @@ apropos_search(int pathsz, char **paths, const struct opts *opts,
 {
 	struct rectree	 tree;
 	struct mchars	*mc;
-	int		 i, rc;
+	int		 i;
 
 	memset(&tree, 0, sizeof(struct rectree));
 
-	rc = 0;
 	mc = mchars_alloc();
 	*sz = 0;
 	*resp = NULL;
