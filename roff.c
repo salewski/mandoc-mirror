@@ -627,7 +627,7 @@ roff_parsetext(char **bufp, size_t *szp, int pos, int *offs)
 			/* Skip over escapes. */
 			p++;
 			esc = mandoc_escape
-				((const char **)&p, NULL, NULL);
+				((const char const **)&p, NULL, NULL);
 			if (ESCAPE_ERROR == esc)
 				break;
 			continue;
