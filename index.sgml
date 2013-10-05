@@ -86,7 +86,7 @@
 				<TR>
 					<TD>FreeBSD 9.x, 8.x</TD>
 					<TD>
-					<A HREF="http://svnweb.freebsd.org/ports/textproc/mdocml/" CLASS="external">ports/textproc/mdocml</A> (1.12.1 port)
+					<A HREF="http://svnweb.freebsd.org/ports/head/textproc/mdocml/" CLASS="external">ports/textproc/mdocml</A> (1.12.1 port)
 					</TD>
 				</TR>
 				<TR>
@@ -104,7 +104,7 @@
 				<TR>
 					<TD>pkgsrc</TD>
 					<TD>
-					<A HREF="http://pkgsrc.se/textproc/mdocml" CLASS="external">textproc/mdocml</A> (1.12.0 port)
+					<A HREF="http://pkgsrc.se/textproc/mdocml" CLASS="external">textproc/mdocml</A> (1.12.2 port)
 					</TD>
 				</TR>
 				<TR>
@@ -324,7 +324,7 @@
 			See <A HREF="NEWS">NEWS</A> for historical notes.
 		</P>
 		<P CLASS="news">
-			23-03-2011: version 1.12.1
+			23-03-2012: version 1.12.1
 		</P>
 		<P>
 			Significant work on <A HREF="apropos.1.html">apropos</A> and <A HREF="mandocdb.8.html">mandocdb</A>.  These tools are
