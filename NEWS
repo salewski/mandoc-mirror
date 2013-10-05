@@ -2,7 +2,7 @@ $Id$
 
 This file lists the most important changes in the mdocml.bsd.lv distribution.
 
-Changes in version 1.12.2, released on Oktober 1, 2013
+Changes in version 1.12.2, released on Oktober 5, 2013
 
  * The mdoc(7) to man(7) converter, to be called as mandoc -Tman,
    is now fully functional.
@@ -31,6 +31,7 @@ Changes in version 1.12.2, released on Oktober 1, 2013
  * For mandoc developers, we now provide a tbl(3) library manual and
    gmdiff, a very small, very simplistic groff-versus-mandoc output
    comparison tool.
+ * Provide this NEWS file.
 
 Changes in version 1.12.1, released on March 23, 2012
 
