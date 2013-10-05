@@ -74,8 +74,8 @@ enum	rofft {
 };
 
 enum	roffrule {
-	ROFFRULE_ALLOW,
-	ROFFRULE_DENY
+	ROFFRULE_DENY,
+	ROFFRULE_ALLOW
 };
 
 /*
