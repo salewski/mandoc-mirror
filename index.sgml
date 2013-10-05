@@ -320,6 +320,9 @@
 			For mandoc developers, we now provide a <A HREF="tbl.3.html">tbl(3)</A> library manual and <CODE>gmdiff</CODE>,
 			a very small, very simplistic groff-versus-mandoc output comparison tool.
 		</P>
+		<P>
+			See <A HREF="NEWS">NEWS</A> for historical notes.
+		</P>
 		<P CLASS="news">
 			23-03-2011: version 1.12.1
 		</P>
