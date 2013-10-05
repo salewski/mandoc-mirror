@@ -357,31 +357,31 @@ config.h: config.h.pre config.h.post
 	rm -f config.log
 	( cat config.h.pre; \
 	  echo; \
-	  if $(CC) $(CFLAGS) -Werror -o test-ohash test-ohash.c >> config.log 2>&1; then \
+	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-ohash test-ohash.c >> config.log 2>&1; then \
 		echo '#define HAVE_OHASH'; \
 		rm test-ohash; \
 	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -o test-fgetln test-fgetln.c >> config.log 2>&1; then \
+	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-fgetln test-fgetln.c >> config.log 2>&1; then \
 		echo '#define HAVE_FGETLN'; \
 		rm test-fgetln; \
 	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -o test-strptime test-strptime.c >> config.log 2>&1; then \
+	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-strptime test-strptime.c >> config.log 2>&1; then \
 		echo '#define HAVE_STRPTIME'; \
 		rm test-strptime; \
 	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -o test-getsubopt test-getsubopt.c >> config.log 2>&1; then \
+	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-getsubopt test-getsubopt.c >> config.log 2>&1; then \
 		echo '#define HAVE_GETSUBOPT'; \
 		rm test-getsubopt; \
 	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -o test-strlcat test-strlcat.c >> config.log 2>&1; then \
+	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-strlcat test-strlcat.c >> config.log 2>&1; then \
 		echo '#define HAVE_STRLCAT'; \
 		rm test-strlcat; \
 	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -o test-mmap test-mmap.c >> config.log 2>&1; then \
+	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-mmap test-mmap.c >> config.log 2>&1; then \
 		echo '#define HAVE_MMAP'; \
 		rm test-mmap; \
 	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -o test-strlcpy test-strlcpy.c >> config.log 2>&1; then \
+	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-strlcpy test-strlcpy.c >> config.log 2>&1; then \
 		echo '#define HAVE_STRLCPY'; \
 		rm test-strlcpy; \
 	  fi; \
