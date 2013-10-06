@@ -31,7 +31,7 @@ STATIC		 = -static
 # Linux requires -pthread to statically link with libdb.
 #STATIC		+= -pthread
 
-CFLAGS		+= -g -DHAVE_CONFIG_H -DVERSION="\"$(VERSION)\""
+CFLAGS		+= -g -DHAVE_CONFIG_H
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
 WWWPREFIX	 = /var/www
@@ -390,6 +390,7 @@ config.h: config.h.pre config.h.post
 	rm -f config.log
 	( cat config.h.pre; \
 	  echo; \
+	  echo '#define VERSION "$(VERSION)"'; \
 	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-fgetln test-fgetln.c >> config.log 2>&1; then \
 		echo '#define HAVE_FGETLN'; \
 		rm test-fgetln; \
