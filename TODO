@@ -7,13 +7,7 @@
 * crashes
 ************************************************************************
 
-- .Bl -tag followed by a text node preceding the first .It should not
-  throw a FATAL error, but only a normal ERROR.  Putting this into the
-  HEAD of an implicit .It might be cleanest, inserting an implicit .Pp
-  or just dumping the orphan stuff directly into the BODY of the .Bl
-  might be easier to implement, and all options can no doubt be made
-  to yield correct (i.e. groff bug-compatible) rendering.
-  Anthony J. Bentley on discuss@  Sun, 22 Sep 2013 16:33:21 -0600
+None known.
 
 ************************************************************************
 * missing features
