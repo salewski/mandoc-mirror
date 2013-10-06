@@ -71,7 +71,7 @@
 				<TR>
 					<TD>DragonFly BSD</TD>
 					<TD>
-					<A HREF="http://gitweb.dragonflybsd.org/dragonfly.git/tree/HEAD:/contrib/mdocml" CLASS="external">contrib/mdocml</A> (1.12.1 sources)
+					<A HREF="http://gitweb.dragonflybsd.org/dragonfly.git/tree/HEAD:/contrib/mdocml" CLASS="external">contrib/mdocml</A> (1.12.2 sources)
 					<A HREF="http://gitweb.dragonflybsd.org/dragonfly.git/tree/HEAD:/lib/libmandoc" CLASS="external">lib/libmandoc</A>
 					<A HREF="http://gitweb.dragonflybsd.org/dragonfly.git/tree/HEAD:/usr.bin/mandoc" CLASS="external">usr.bin/mandoc</A> (build system)
 					</TD>
@@ -278,7 +278,7 @@
 			<A NAME="news">News</A>
 		</H1>
 		<P CLASS="news">
-			02-10-2013: version 1.12.2
+			05-10-2013: version 1.12.2
 		</P>
 		<P>
 			The <A HREF="mdoc.7.html">mdoc(7)</A> to <A HREF="man.7.html">man(7)</A> converter,
