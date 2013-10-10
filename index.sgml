@@ -116,7 +116,7 @@
 				<TR>
 					<TD>Alpine Linux</TD>
 					<TD>
-					<A HREF="http://git.alpinelinux.org/cgit/aports/tree/main/mdocml" CLASS="external">aports/main/mdocml</A> (1.12.1 port)
+					<A HREF="http://git.alpinelinux.org/cgit/aports/tree/main/mdocml" CLASS="external">aports/main/mdocml</A> (1.12.2 port)
 					</TD>
 				</TR>
 			</TBODY>
@@ -231,6 +231,25 @@
 				</TR>
 			</TBODY>
 		</TABLE>
+		<H2>
+			<A NAME="links">Supplementary Information</A>
+		</H2>
+		<UL>
+			<LI>
+				<A HREF="http://manpages.bsd.lv/">Practical UNIX Manuals</A>: mdoc tutorial by Kristaps Dzonsons
+			</LI>
+			<LI>
+				<A HREF="http://www.openbsd.org/faq/ports/specialtopics.html#Mandoc" CLASS="external">OpenBSD porting guide</A>
+				chapter regarding manual pages
+			</LI>
+			<LI>
+				<A HREF="press.html">Publications and media coverage</A>
+				concerning mdocml and mandoc
+			</LI>
+			<LI>
+				<A HREF="http://manpages.bsd.lv/history.html">History of UNIX Manpages</A>: a comprehensive overview by Kristaps Dzonsons
+			</LI>
+		</UL>
 		<H1>
 			<A NAME="contact">Contact</A>
 		</H1>
@@ -346,10 +365,6 @@
 		</P>
 		<P>
 			Lastly, I'm no longer providing binaries, as nobody has asked for them.
-		</P>
-		<P>
-			See <A HREF="http://mdocml.bsd.lv/cgi-bin/cvsweb/index.sgml?cvsroot=mdocml">cvsweb</A> for
-			historical notes.
 		</P>
 		<P CLASS="foot">
 			<SMALL>
