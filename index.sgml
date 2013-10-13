@@ -339,9 +339,6 @@
 			For mandoc developers, we now provide a <A HREF="tbl.3.html">tbl(3)</A> library manual and <CODE>gmdiff</CODE>,
 			a very small, very simplistic groff-versus-mandoc output comparison tool.
 		</P>
-		<P>
-			See <A HREF="NEWS">NEWS</A> for historical notes.
-		</P>
 		<P CLASS="news">
 			23-03-2012: version 1.12.1
 		</P>
@@ -366,6 +363,36 @@
 		<P>
 			Lastly, I'm no longer providing binaries, as nobody has asked for them.
 		</P>
+		<H2>
+			<A>History</A>
+		</H2>
+		<UL>
+			<LI>
+				<A HREF="NEWS">Release notes</A> going back to release 1.9.15, February 18, 2010.
+				Briefly explaining the most important changes in each release in relatively easy terms.
+				Very many changes are not mentioned here.
+			</LI>
+			<LI>
+				<A HREF="history.html">Development history</A> going back to the beginning of the project, November 22, 2008.
+				One-line entries for important commits, releases, merges, hackathons and talks.
+				Makes it easy to find out who did what, and when, and when it became available where.
+				However, this is still incomplete, mentioning only a small fraction of all commits,
+				and to keep the size down, the individual entries are extremely terse and technical.
+				Feel free to look up more details and longer explanations about individual entries
+				in the ChangeLog or in CVS.
+			</LI>
+			<LI>
+				<A HREF="ChangeLog">CVS ChangeLog</A> going back to the beginning of the project.
+				Very technical information of varying quality, strictly chronological.
+				All commits are mentioned, but some messages neglect to mention some changes.
+				Partly terse, partly detailed and verbose.  In any case, the ChangeLog is very long -
+				more than 25,000 lines, more than 700 kB.
+			</LI>
+			<LI>
+				<A HREF="/cgi-bin/cvsweb/?cvsroot=mdocml">CVS</A> web interface, going back to the beginning of the project.
+				Source code, diffs and commit messages for each source file.  The real thing.
+			</LI>
+		</UL>
 		<P CLASS="foot">
 			<SMALL>
 				Copyright &#169; 2008&#8211;2011 
