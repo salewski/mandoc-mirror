@@ -78,6 +78,7 @@ static	int		  pre_RS(DECL_ARGS);
 static	int		  pre_SH(DECL_ARGS);
 static	int		  pre_SS(DECL_ARGS);
 static	int		  pre_TP(DECL_ARGS);
+static	int		  pre_UR(DECL_ARGS);
 static	int		  pre_alternate(DECL_ARGS);
 static	int		  pre_ft(DECL_ARGS);
 static	int		  pre_ign(DECL_ARGS);
@@ -91,6 +92,7 @@ static	void		  post_RS(DECL_ARGS);
 static	void		  post_SH(DECL_ARGS);
 static	void		  post_SS(DECL_ARGS);
 static	void		  post_TP(DECL_ARGS);
+static	void		  post_UR(DECL_ARGS);
 
 static	const struct termact termacts[MAN_MAX] = {
 	{ pre_sp, NULL, MAN_NOTEXT }, /* br */
@@ -129,6 +131,8 @@ static	const struct termact termacts[MAN_MAX] = {
 	{ pre_OP, NULL, 0 }, /* OP */
 	{ pre_literal, NULL, 0 }, /* EX */
 	{ pre_literal, NULL, 0 }, /* EE */
+	{ pre_UR, post_UR, 0 }, /* UR */
+	{ NULL, NULL, 0 }, /* UE */
 };
 
 
@@ -937,6 +941,32 @@ post_RS(DECL_ARGS)
 
 	if (--mt->lmarginsz < MAXMARGINS)
 		mt->lmargincur = mt->lmarginsz;
+}
+
+/* ARGSUSED */
+static int
+pre_UR(DECL_ARGS)
+{
+
+	return (MAN_HEAD != n->type);
+}
+
+/* ARGSUSED */
+static void
+post_UR(DECL_ARGS)
+{
+
+	if (MAN_BLOCK != n->type)
+		return;
+
+	term_word(p, "<");
+	p->flags |= TERMP_NOSPACE;
+
+	if (NULL != n->child->child)
+		print_man_node(p, mt, n->child->child, meta);
+
+	p->flags |= TERMP_NOSPACE;
+	term_word(p, ">");
 }
 
 static void
