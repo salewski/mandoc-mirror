@@ -1792,7 +1792,7 @@ dbindex(struct mchars *mc, int form, const struct of *of)
 		return;
 
 	desc = "";
-	if (NULL != of->desc) {
+	if (NULL != of->desc && '\0' != *of->desc) {
 		key = ohash_find(&strings,
 			ohash_qlookup(&strings, of->desc));
 		assert(NULL != key);
