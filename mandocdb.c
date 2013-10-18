@@ -685,7 +685,7 @@ filescan(const char *file)
 		exitcode = (int)MANDOCLEVEL_BADARG;
 		say(file, NULL);
 		return;
-	} else if (strstr(buf, basedir) != buf) {
+	} else if (OP_TEST != op && strstr(buf, basedir) != buf) {
 		exitcode = (int)MANDOCLEVEL_BADARG;
 		say("", "%s: outside base directory", buf);
 		return;
