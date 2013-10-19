@@ -1,6 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2012 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2013 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -119,6 +120,8 @@ static	struct expr	*exprcomp(const struct mansearch *,
 				int, char *[]);
 static	void		 exprfree(struct expr *);
 static	struct expr	*exprterm(const struct mansearch *, char *);
+static	void		 sql_match(sqlite3_context *context,
+				int argc, sqlite3_value **argv);
 static	char		*sql_statement(const struct expr *,
 				const char *, const char *);
 
@@ -205,6 +208,15 @@ mansearch(const struct mansearch *search,
 			continue;
 		}
 
+		/* Define the SQL function for substring matching. */
+
+		c = sqlite3_create_function(db, "match", 2,
+		    SQLITE_ANY, NULL, sql_match, NULL, NULL);
+		if (SQLITE_OK != c) {
+			fprintf(stderr, "%s\n", sqlite3_errmsg(db));
+			break;
+		}
+
 		j = 1;
 		c = sqlite3_prepare_v2(db, sql, -1, &s, NULL);
 		if (SQLITE_OK != c)
@@ -287,6 +299,22 @@ out:
 }
 
 /*
+ * Implement substring match as an application-defined SQL function.
+ * Using the SQL LIKE or GLOB operators instead would be a bad idea
+ * because that would require escaping metacharacters in the string
+ * being searched for.
+ */
+static void
+sql_match(sqlite3_context *context, int argc, sqlite3_value **argv)
+{
+
+	assert(2 == argc);
+	sqlite3_result_int(context, NULL != strcasestr(
+	    (const char *)sqlite3_value_text(argv[1]),
+	    (const char *)sqlite3_value_text(argv[0])));
+}
+
+/*
  * Prepare the search SQL statement.
  * We search for any of the words specified in our match expression.
  * We filter the per-doc AND expressions when collecting results.
@@ -295,12 +323,12 @@ static char *
 sql_statement(const struct expr *e, const char *arch, const char *sec)
 {
 	char		*sql;
+	const char	*substr = "(key MATCH ? AND bits & ?)";
 	const char	*glob = "(key GLOB ? AND bits & ?)";
-	const char	*eq = "(key = ? AND bits & ?)";
 	const char	*andarch = "arch = ? AND ";
 	const char	*andsec = "sec = ? AND ";
+	size_t	 	 substrsz;
 	size_t	 	 globsz;
-	size_t	 	 eqsz;
 	size_t		 sz;
 
 	sql = mandoc_strdup
@@ -309,8 +337,8 @@ sql_statement(const struct expr *e, const char *arch, const char *sec)
 		 "INNER JOIN docs ON docs.id=keys.docid "
 		 "WHERE ");
 	sz = strlen(sql);
+	substrsz = strlen(substr);
 	globsz = strlen(glob);
-	eqsz = strlen(eq);
 
 	if (NULL != arch) {
 		sz += strlen(andarch) + 1;
@@ -329,10 +357,10 @@ sql_statement(const struct expr *e, const char *arch, const char *sec)
 	strlcat(sql, "(", sz);
 
 	for ( ; NULL != e; e = e->next) {
-		sz += (e->glob ? globsz : eqsz) + 
+		sz += (e->glob ? globsz : substrsz) + 
 			(NULL == e->next ? 3 : 5);
 		sql = mandoc_realloc(sql, sz);
-		strlcat(sql, e->glob ? glob : eq, sz);
+		strlcat(sql, e->glob ? glob : substr, sz);
 		strlcat(sql, NULL == e->next ? ");" : " OR ", sz);
 	}
 
