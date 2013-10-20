@@ -23,6 +23,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <limits.h>
+#include <regex.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -42,19 +43,26 @@
 #include "mansearch.h"
 
 #define	SQL_BIND_TEXT(_db, _s, _i, _v) \
-	if (SQLITE_OK != sqlite3_bind_text \
+	do { if (SQLITE_OK != sqlite3_bind_text \
 		((_s), (_i)++, (_v), -1, SQLITE_STATIC)) \
-		fprintf(stderr, "%s\n", sqlite3_errmsg((_db)))
+		fprintf(stderr, "%s\n", sqlite3_errmsg((_db))); \
+	} while (0)
 #define	SQL_BIND_INT64(_db, _s, _i, _v) \
-	if (SQLITE_OK != sqlite3_bind_int64 \
+	do { if (SQLITE_OK != sqlite3_bind_int64 \
 		((_s), (_i)++, (_v))) \
-		fprintf(stderr, "%s\n", sqlite3_errmsg((_db)))
+		fprintf(stderr, "%s\n", sqlite3_errmsg((_db))); \
+	} while (0)
+#define	SQL_BIND_BLOB(_db, _s, _i, _v) \
+	do { if (SQLITE_OK != sqlite3_bind_blob \
+		((_s), (_i)++, (&_v), sizeof(_v), SQLITE_STATIC)) \
+		fprintf(stderr, "%s\n", sqlite3_errmsg((_db))); \
+	} while (0)
 
 struct	expr {
-	int		 glob; /* is glob? */
-	uint64_t 	 bits; /* type-mask */
-	const char	*v; /* search value */
-	struct expr	*next; /* next in sequence */
+	uint64_t 	 bits;    /* type-mask */
+	const char	*substr;  /* to search for, if applicable */
+	regex_t		 regexp;  /* compiled regexp, if applicable */
+	struct expr	*next;    /* next in sequence */
 };
 
 struct	match {
@@ -119,8 +127,10 @@ static	void		*hash_halloc(size_t, void *);
 static	struct expr	*exprcomp(const struct mansearch *, 
 				int, char *[]);
 static	void		 exprfree(struct expr *);
-static	struct expr	*exprterm(const struct mansearch *, char *);
+static	struct expr	*exprterm(const struct mansearch *, char *, int);
 static	void		 sql_match(sqlite3_context *context,
+				int argc, sqlite3_value **argv);
+static	void		 sql_regexp(sqlite3_context *context,
 				int argc, sqlite3_value **argv);
 static	char		*sql_statement(const struct expr *,
 				const char *, const char *);
@@ -208,14 +218,17 @@ mansearch(const struct mansearch *search,
 			continue;
 		}
 
-		/* Define the SQL function for substring matching. */
+		/*
+		 * Define the SQL functions for substring
+		 * and regular expression matching.
+		 */
 
 		c = sqlite3_create_function(db, "match", 2,
 		    SQLITE_ANY, NULL, sql_match, NULL, NULL);
-		if (SQLITE_OK != c) {
-			fprintf(stderr, "%s\n", sqlite3_errmsg(db));
-			break;
-		}
+		assert(SQLITE_OK == c);
+		c = sqlite3_create_function(db, "regexp", 2,
+		    SQLITE_ANY, NULL, sql_regexp, NULL, NULL);
+		assert(SQLITE_OK == c);
 
 		j = 1;
 		c = sqlite3_prepare_v2(db, sql, -1, &s, NULL);
@@ -228,7 +241,10 @@ mansearch(const struct mansearch *search,
 			SQL_BIND_TEXT(db, s, j, search->sec);
 
 		for (ep = e; NULL != ep; ep = ep->next) {
-			SQL_BIND_TEXT(db, s, j, ep->v);
+			if (NULL == ep->substr) {
+				SQL_BIND_BLOB(db, s, j, ep->regexp);
+			} else
+				SQL_BIND_TEXT(db, s, j, ep->substr);
 			SQL_BIND_INT64(db, s, j, ep->bits);
 		}
 
@@ -315,6 +331,21 @@ sql_match(sqlite3_context *context, int argc, sqlite3_value **argv)
 }
 
 /*
+ * Implement regular expression match
+ * as an application-defined SQL function.
+ */
+static void
+sql_regexp(sqlite3_context *context, int argc, sqlite3_value **argv)
+{
+
+	assert(2 == argc);
+	sqlite3_result_int(context, !regexec(
+	    (regex_t *)sqlite3_value_blob(argv[0]),
+	    (const char *)sqlite3_value_text(argv[1]),
+	    0, NULL, 0));
+}
+
+/*
  * Prepare the search SQL statement.
  * We search for any of the words specified in our match expression.
  * We filter the per-doc AND expressions when collecting results.
@@ -324,11 +355,11 @@ sql_statement(const struct expr *e, const char *arch, const char *sec)
 {
 	char		*sql;
 	const char	*substr = "(key MATCH ? AND bits & ?)";
-	const char	*glob = "(key GLOB ? AND bits & ?)";
+	const char	*regexp = "(key REGEXP ? AND bits & ?)";
 	const char	*andarch = "arch = ? AND ";
 	const char	*andsec = "sec = ? AND ";
 	size_t	 	 substrsz;
-	size_t	 	 globsz;
+	size_t	 	 regexpsz;
 	size_t		 sz;
 
 	sql = mandoc_strdup
@@ -338,7 +369,7 @@ sql_statement(const struct expr *e, const char *arch, const char *sec)
 		 "WHERE ");
 	sz = strlen(sql);
 	substrsz = strlen(substr);
-	globsz = strlen(glob);
+	regexpsz = strlen(regexp);
 
 	if (NULL != arch) {
 		sz += strlen(andarch) + 1;
@@ -357,10 +388,10 @@ sql_statement(const struct expr *e, const char *arch, const char *sec)
 	strlcat(sql, "(", sz);
 
 	for ( ; NULL != e; e = e->next) {
-		sz += (e->glob ? globsz : substrsz) + 
+		sz += (NULL == e->substr ? regexpsz : substrsz) + 
 			(NULL == e->next ? 3 : 5);
 		sql = mandoc_realloc(sql, sz);
-		strlcat(sql, e->glob ? glob : substr, sz);
+		strlcat(sql, NULL == e->substr ? regexp : substr, sz);
 		strlcat(sql, NULL == e->next ? ");" : " OR ", sz);
 	}
 
@@ -375,13 +406,19 @@ sql_statement(const struct expr *e, const char *arch, const char *sec)
 static struct expr *
 exprcomp(const struct mansearch *search, int argc, char *argv[])
 {
-	int		 i;
+	int		 i, cs;
 	struct expr	*first, *next, *cur;
 
 	first = cur = NULL;
 
 	for (i = 0; i < argc; i++) {
-		next = exprterm(search, argv[i]);
+		if (0 == strcmp("-i", argv[i])) {
+			if (++i >= argc)
+				return(NULL);
+			cs = 0;
+		} else
+			cs = 1;
+		next = exprterm(search, argv[i], cs);
 		if (NULL == next) {
 			exprfree(first);
 			return(NULL);
@@ -397,7 +434,7 @@ exprcomp(const struct mansearch *search, int argc, char *argv[])
 }
 
 static struct expr *
-exprterm(const struct mansearch *search, char *buf)
+exprterm(const struct mansearch *search, char *buf, int cs)
 {
 	struct expr	*e;
 	char		*key, *v;
@@ -411,7 +448,7 @@ exprterm(const struct mansearch *search, char *buf)
 	/*"whatis" mode uses an opaque string and default fields. */
 
 	if (MANSEARCH_WHATIS & search->flags) {
-		e->v = buf;
+		e->substr = buf;
 		e->bits = search->deftype;
 		return(e);
 	}
@@ -423,15 +460,21 @@ exprterm(const struct mansearch *search, char *buf)
 	 */
 
 	if (NULL == (v = strpbrk(buf, "=~"))) {
-		e->v = buf;
+		e->substr = buf;
 		e->bits = search->deftype;
 		return(e);
 	} else if (v == buf)
 		e->bits = search->deftype;
 
-	e->glob = '~' == *v;
-	*v++ = '\0';
-	e->v = v;
+	if ('~' == *v++) {
+		if (regcomp(&e->regexp, v,
+		    REG_EXTENDED | REG_NOSUB | (cs ? 0 : REG_ICASE))) {
+			free(e);
+			return(NULL);
+		}
+	} else
+		e->substr = v;
+	v[-1] = '\0';
 
 	/*
 	 * Parse out all possible fields.
