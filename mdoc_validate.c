@@ -1674,10 +1674,16 @@ ebool(struct mdoc *mdoc)
 
 	assert(MDOC_TEXT == mdoc->last->child->type);
 
-	if (0 == strcmp(mdoc->last->child->string, "on"))
+	if (0 == strcmp(mdoc->last->child->string, "on")) {
+		if (MDOC_Sm == mdoc->last->tok)
+			mdoc->flags &= ~MDOC_SMOFF;
 		return(1);
-	if (0 == strcmp(mdoc->last->child->string, "off"))
+	}
+	if (0 == strcmp(mdoc->last->child->string, "off")) {
+		if (MDOC_Sm == mdoc->last->tok)
+			mdoc->flags |= MDOC_SMOFF;
 		return(1);
+	}
 
 	mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADBOOL);
 	return(1);
