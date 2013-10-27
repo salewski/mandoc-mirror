@@ -961,7 +961,7 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		 * source code, unless it is already known to be
 		 * formatted.  Fall back to formatted mode.
 		 */
-		if (FORM_SRC == of->dform || FORM_SRC == of->sform) {
+		if (FORM_CAT != of->dform || FORM_CAT != of->sform) {
 			lvl = mparse_readfd(mp, -1, of->file);
 			if (lvl < MANDOCLEVEL_FATAL)
 				mparse_result(mp, &mdoc, &man);
