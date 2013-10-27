@@ -950,10 +950,6 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		mparse_reset(mp);
 		mdoc = NULL;
 		man = NULL;
-		form = 0;
-		msec = of->dsec;
-		march = of->arch;
-		mtitle = of->name;
 		match = 1;
 
 		/*
@@ -965,7 +961,7 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 			lvl = mparse_readfd(mp, -1, of->file);
 			if (lvl < MANDOCLEVEL_FATAL)
 				mparse_result(mp, &mdoc, &man);
-		} 
+		}
 
 		if (NULL != mdoc) {
 			form = 1;
@@ -975,15 +971,20 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		} else if (NULL != man) {
 			form = 1;
 			msec = man_meta(man)->msec;
-			march = "";
+			march = of->arch;
 			mtitle = man_meta(man)->title;
-		} 
+		} else {
+			form = 0;
+			msec = of->dsec;
+			march = of->arch;
+			mtitle = of->name;
+		}
 
-		if (NULL == msec) 
+		if (NULL == msec)
 			msec = "";
-		if (NULL == march) 
+		if (NULL == march)
 			march = "";
-		if (NULL == mtitle) 
+		if (NULL == mtitle)
 			mtitle = "";
 
 		/*
