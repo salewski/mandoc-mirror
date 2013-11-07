@@ -7,6 +7,7 @@
 	</HEAD>
 	<BODY>
 		<P CLASS="head">
+			<A HREF="http://www.openbsd.org/"><IMG SRC="puffy.gif" ALT="Puffy" WIDTH="100" HEIGHT="91" STYLE="float: right"></A>
 			<B>mdocml</B> &#8211; UNIX manpage compiler, current version @VERSION@ (@VDATE@)
 		</P>
 		<P CLASS="subhead">
@@ -20,14 +21,8 @@
 		<P>
 			<SPAN CLASS="nm">mdocml</SPAN> is a suite of tools compiling <I><A HREF="mdoc.7.html">mdoc</A></I>, the roff macro
 			package of choice for BSD manual pages, and <I><A HREF="man.7.html">man</A></I>, the predominant historical package for
-			UNIX manuals.  The mission of <SPAN CLASS="nm">mdocml</SPAN> is to deprecate <A
-			HREF="http://www.gnu.org/software/groff/" CLASS="external">groff</A>, the GNU troff implementation, for displaying <I>mdoc</I>
-			pages whilst providing token support for <I>man</I>.
-		</P>
-		<P>
-			Why?  groff amounts to over 5 MB of source code, most of which is C++ and GPL version 3.  It runs slowly, produces
-			uncertain output, and varies in operation from system to system.  mdocml strives to fix this (respectively small, C, <A
-			CLASS="external" HREF="http://www.isc.org/software/license">ISC</A>-licensed, fast and regular).
+			UNIX manuals.
+			It is small, ISO C, <A CLASS="external" HREF="http://www.isc.org/software/license">ISC</A>-licensed, and quite fast.
 		</P>
 		<P>
 			<SPAN CLASS="nm">mdocml</SPAN> consists of the <A HREF="mandoc.3.html">libmandoc</A> validating compiler and <A
@@ -38,7 +33,20 @@
 			<A HREF="mandocdb.8.html">mandocdb</A>, for indexing manuals; and
 			<A HREF="apropos.1.html">apropos</A>, <A HREF="whatis.1.html">whatis</A>, and
 			<A HREF="man.cgi.7.html">man.cgi</A> (via <A HREF="catman.8.html">catman</A>) for semantic search of manual content.
-			It is a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv</A> project.  
+		</P>
+		<P>
+			<SPAN CLASS="nm">mdocml</SPAN> has predominantly been developed on OpenBSD
+			and is both an <A CLASS="external" HREF="http://www.openbsd.org/">OpenBSD</A>
+			and a <A CLASS="external" HREF="http://bsd.lv/">BSD.lv</A> project.  
+			We strive to support all interested free operating systems, in particular
+			<A CLASS="external" HREF="http://www.netbsd.org/">NetBSD</A>,
+			<A CLASS="external" HREF="http://www.dragonflybsd.org/">DragonFly</A>,
+			<A CLASS="external" HREF="http://www.freebsd.org/">FreeBSD</A>,
+			<A CLASS="external" HREF="http://www.minix3.org/">Minix 3</A>,
+			and <A CLASS="external" HREF="http://www.gnu.org/">GNU</A>/Linux,
+			as well as all systems running the <A CLASS="external" HREF="http://www.pkgsrc.org/">pkgsrc</A> portable package build system.
+			All of these projects have helped to make <SPAN CLASS="nm">mdocml</SPAN> better, by providing feedback and advice,
+			bug reports, and patches.
 		</P>
 		<P>
 			<I>Disambiguation</I>: <SPAN CLASS="nm">mdocml</SPAN> is often referred to by its installed binary, <Q>mandoc</Q>.
