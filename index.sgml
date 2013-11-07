@@ -25,8 +25,9 @@
 			It is small, ISO C, <A CLASS="external" HREF="http://www.isc.org/software/license">ISC</A>-licensed, and quite fast.
 		</P>
 		<P>
-			<SPAN CLASS="nm">mdocml</SPAN> consists of the <A HREF="mandoc.3.html">libmandoc</A> validating compiler and <A
-			HREF="mandoc.1.html">mandoc</A>, which interfaces with the compiler library to format output for UNIX terminals (with
+			The tool set features <A HREF="mandoc.1.html">mandoc</A>,
+			based on the <A HREF="mandoc.3.html">libmandoc</A> validating compiler,
+			to format output for UNIX terminals (with
 			support for wide-character locales), XHTML, HTML, PostScript, and PDF.  
 			It also includes <A HREF="preconv.1.html">preconv</A>, for recoding multibyte manuals; 
 			<A HREF="demandoc.1.html">demandoc</A>, for emitting only text parts of manuals;
@@ -55,13 +56,12 @@
 			<A NAME="sources">Sources</A>
 		</H2>
 		<P>
-			<SPAN CLASS="nm">mdocml</SPAN> is in plain-old ANSI C and should build and run on any modern system; however, you'll
-			need <A HREF="http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html">libdb</A> to build <A
-			HREF="apropos.1.html">apropos</A>, <A HREF="whatis.1.html">whatis</A>, <A HREF="man.cgi.7.html">man.cgi</A>, <A
-			HREF="catman.8.html">catman</A>, and <A HREF="mandocdb.8.html">mandocdb</A> (this is installed by default on BSD UNIX
-			systems &mdash; see the <I>Makefile</I> if you're running Linux).  To build and install into <I>/usr/local/</I>, just
-			run <CODE>make install</CODE>.  Be careful: the <B>preconv</B>, <B>apropos</B>, and <B>whatis</B> binary names are
-			usually taken by existing utilities.
+			<SPAN CLASS="nm">mdocml</SPAN> should build and run on any modern system with
+			<A HREF="http://www.oracle.com/technetwork/database/berkeleydb/overview/index.html">libdb</A>
+			(this is installed by default on BSD UNIX systems &mdash; see the <I>Makefile</I> if you're running Linux).
+			To build and install into <I>/usr/local/</I>, just run <CODE>make install</CODE>.
+			Be careful: the <B>preconv</B>, <B>apropos</B>, and <B>whatis</B> installed binary names
+			may be taken by existing utilities.
 		</P>
 		<H2>
 			Downstream
@@ -69,8 +69,7 @@
 		<P>
 			Several systems come bundled with <SPAN CLASS="nm">mdocml</SPAN> utilities.
 			If your system does not appear below, the maintainers have not contacted me and it should not be considered
-			<Q>official</Q>.
-			Please <A HREF="#contact">contact us</A> if you plan on maintaining a downstream version!
+			<Q>official</Q>, so please <A HREF="#contact">contact us</A> if you plan on maintaining a downstream version!
 		</P>
 		<TABLE WIDTH="100%" SUMMARY="Downstream Sources">
 			<COL WIDTH="175">
