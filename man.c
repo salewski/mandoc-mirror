@@ -429,16 +429,22 @@ man_ptext(struct man *man, int line, char *buf, int offs)
 		return(man_descope(man, line, offs));
 	}
 
-	/* Pump blank lines directly into the backend. */
-
 	for (i = offs; ' ' == buf[i]; i++)
 		/* Skip leading whitespace. */ ;
 
+	/*
+	 * Blank lines are ignored right after headings
+	 * but add a single vertical space elsewhere.
+	 */
+
 	if ('\0' == buf[i]) {
 		/* Allocate a blank entry. */
-		if ( ! man_elem_alloc(man, line, offs, MAN_sp))
-			return(0);
-		man->next = MAN_NEXT_SIBLING;
+		if (MAN_SH != man->last->tok &&
+		    MAN_SS != man->last->tok) {
+			if ( ! man_elem_alloc(man, line, offs, MAN_sp))
+				return(0);
+			man->next = MAN_NEXT_SIBLING;
+		}
 		return(1);
 	}
 
