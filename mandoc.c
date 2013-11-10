@@ -93,8 +93,11 @@ mandoc_escape(const char const **end, const char const **start, int *sz)
 	case ('C'):
 		if ('\'' != **start)
 			return(ESCAPE_ERROR);
-		gly = ESCAPE_SPECIAL;
 		*start = ++*end;
+		if ('u' == (*start)[0] && '\'' != (*start)[1])
+			gly = ESCAPE_UNICODE;
+		else
+			gly = ESCAPE_SPECIAL;
 		term = '\'';
 		break;
 
