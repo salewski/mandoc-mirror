@@ -679,6 +679,7 @@ post_IP(DECL_ARGS)
 		break;
 	case (MAN_BODY):
 		term_newln(p);
+		p->offset = mt->offset;
 		break;
 	default:
 		break;
@@ -766,6 +767,7 @@ post_TP(DECL_ARGS)
 		break;
 	case (MAN_BODY):
 		term_newln(p);
+		p->offset = mt->offset;
 		break;
 	default:
 		break;
