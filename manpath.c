@@ -209,7 +209,7 @@ manpath_manconf(struct manpaths *dirs, const char *file)
 		if (strncmp(MAN_CONF_KEY, p, keysz))
 			continue;
 		p += keysz;
-		while (isspace(*p))
+		while (isspace((unsigned char)*p))
 			p++;
 		if ('\0' == *p)
 			continue;
