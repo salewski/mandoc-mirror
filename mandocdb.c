@@ -736,7 +736,7 @@ index_merge(const struct of *of, struct mparse *mp,
 			}
 			buf_appendb(buf, ")", 2);
 			for (p = buf->cp; '\0' != *p; p++)
-				*p = tolower(*p);
+				*p = tolower((unsigned char)*p);
 			key.data = buf->cp;
 			key.size = buf->len;
 			val.data = NULL;
