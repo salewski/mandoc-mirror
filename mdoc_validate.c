@@ -1991,10 +1991,10 @@ post_sh_head(POST_ARGS)
 	/* The SYNOPSIS gets special attention in other areas. */
 
 	if (SEC_SYNOPSIS == sec) {
-		roff_setreg(mdoc->roff, "nS", 1);
+		roff_setreg(mdoc->roff, "nS", 1, '=');
 		mdoc->flags |= MDOC_SYNOPSIS;
 	} else {
-		roff_setreg(mdoc->roff, "nS", 0);
+		roff_setreg(mdoc->roff, "nS", 0, '=');
 		mdoc->flags &= ~MDOC_SYNOPSIS;
 	}
 

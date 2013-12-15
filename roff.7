@@ -814,19 +814,22 @@ the name of the request, macro or string to be undefined.
 Currently, it is ignored including its arguments,
 and the number of arguments is not checked.
 .Ss \&nr
-Define a register.
+Define or change a register.
 A register is an arbitrary string value that defines some sort of state,
 which influences parsing and/or formatting.
 Its syntax is as follows:
 .Pp
-.D1 Pf \. Cm \&nr Ar name Ar value
+.D1 Pf \. Cm \&nr Ar name Oo +|- Oc Ns Ar value
 .Pp
 The
 .Ar value
 may, at the moment, only be an integer.
-So far, only the following register
+If it is prefixed by a sign, the register will be 
+incremented or decremented instead of assigned to.
+.Pp
+The following register
 .Ar name
-is recognised:
+is handled specially:
 .Bl -tag -width Ds
 .It Cm nS
 If set to a positive integer value, certain
