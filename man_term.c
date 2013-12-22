@@ -265,7 +265,8 @@ pre_literal(DECL_ARGS)
 	if (MAN_HP == n->parent->tok && p->rmargin < p->maxrmargin) {
 		p->offset = p->rmargin;
 		p->rmargin = p->maxrmargin;
-		p->flags &= ~(TERMP_NOBREAK | TERMP_TWOSPACE);
+		p->trailspace = 0;
+		p->flags &= ~TERMP_NOBREAK;
 		p->flags |= TERMP_NOSPACE;
 	}
 
@@ -535,7 +536,7 @@ pre_HP(DECL_ARGS)
 
 	if ( ! (MANT_LITERAL & mt->fl)) {
 		p->flags |= TERMP_NOBREAK;
-		p->flags |= TERMP_TWOSPACE;
+		p->trailspace = 2;
 	}
 
 	len = mt->lmargin[mt->lmargincur];
@@ -570,7 +571,7 @@ post_HP(DECL_ARGS)
 	case (MAN_BODY):
 		term_newln(p);
 		p->flags &= ~TERMP_NOBREAK;
-		p->flags &= ~TERMP_TWOSPACE;
+		p->trailspace = 0;
 		p->offset = mt->offset;
 		p->rmargin = p->maxrmargin;
 		break;
@@ -613,6 +614,7 @@ pre_IP(DECL_ARGS)
 		break;
 	case (MAN_HEAD):
 		p->flags |= TERMP_NOBREAK;
+		p->trailspace = 1;
 		break;
 	case (MAN_BLOCK):
 		print_bvspace(p, n, mt->pardist);
@@ -675,6 +677,7 @@ post_IP(DECL_ARGS)
 	case (MAN_HEAD):
 		term_flushln(p);
 		p->flags &= ~TERMP_NOBREAK;
+		p->trailspace = 0;
 		p->rmargin = p->maxrmargin;
 		break;
 	case (MAN_BODY):
@@ -698,6 +701,7 @@ pre_TP(DECL_ARGS)
 	switch (n->type) {
 	case (MAN_HEAD):
 		p->flags |= TERMP_NOBREAK;
+		p->trailspace = 1;
 		break;
 	case (MAN_BODY):
 		p->flags |= TERMP_NOSPACE;
@@ -745,8 +749,8 @@ pre_TP(DECL_ARGS)
 	case (MAN_BODY):
 		p->offset = mt->offset + len;
 		p->rmargin = p->maxrmargin;
+		p->trailspace = 0;
 		p->flags &= ~TERMP_NOBREAK;
-		p->flags &= ~TERMP_TWOSPACE;
 		break;
 	default:
 		break;
@@ -1101,6 +1105,7 @@ print_man_foot(struct termp *p, const void *arg)
 	/* Bottom left corner: manual source. */
 
 	p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
+	p->trailspace = 1;
 	p->offset = 0;
 	p->rmargin = (p->maxrmargin - datelen + term_len(p, 1)) / 2;
 
@@ -1123,6 +1128,7 @@ print_man_foot(struct termp *p, const void *arg)
 
 	p->flags &= ~TERMP_NOBREAK;
 	p->flags |= TERMP_NOSPACE;
+	p->trailspace = 0;
 	p->offset = p->rmargin;
 	p->rmargin = p->maxrmargin;
 
@@ -1154,6 +1160,7 @@ print_man_head(struct termp *p, const void *arg)
 	titlen = term_strlen(p, title);
 
 	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
+	p->trailspace = 1;
 	p->offset = 0;
 	p->rmargin = 2 * (titlen+1) + buflen < p->maxrmargin ?
 	    (p->maxrmargin - 
@@ -1176,6 +1183,7 @@ print_man_head(struct termp *p, const void *arg)
 	/* Top right corner: title and section, again. */
 
 	p->flags &= ~TERMP_NOBREAK;
+	p->trailspace = 0;
 	if (p->rmargin + titlen <= p->maxrmargin) {
 		p->flags |= TERMP_NOSPACE;
 		p->offset = p->rmargin;
