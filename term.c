@@ -120,7 +120,12 @@ term_flushln(struct termp *p)
 	 * First, establish the maximum columns of "visible" content.
 	 * This is usually the difference between the right-margin and
 	 * an indentation, but can be, for tagged lists or columns, a
-	 * small set of values. 
+	 * small set of values.
+	 *
+	 * The following unsigned-signed subtractions look strange,
+	 * but they are actually correct.  If the int p->overstep
+	 * is negative, it gets sign extended.  Subtracting that
+	 * very large size_t effectively adds a small number to dv.
 	 */
 	assert  (p->rmargin >= p->offset);
 	dv     = p->rmargin - p->offset;
@@ -199,7 +204,11 @@ term_flushln(struct termp *p)
 			if (0 < ntab)
 				vbl += ntab * p->tabwidth;
 
-			/* Remove the p->overstep width. */
+			/*
+			 * Remove the p->overstep width.
+			 * Again, if p->overstep is negative,
+			 * sign extension does the right thing.
+			 */
 
 			bp += (size_t)p->overstep;
 			p->overstep = 0;
@@ -275,8 +284,10 @@ term_flushln(struct termp *p)
 		 * If we have overstepped the margin, temporarily move
 		 * it to the right and flag the rest of the line to be
 		 * shorter.
+		 * If there is a request to keep the columns together,
+		 * allow negative overstep when the column is not full.
 		 */
-		if (p->overstep < 0)
+		if (p->trailspace && p->overstep < 0)
 			p->overstep = 0;
 		return;
 

@@ -1538,6 +1538,7 @@ termp_ft_pre(DECL_ARGS)
 static int
 termp_fn_pre(DECL_ARGS)
 {
+	size_t		 width, rmargin = 0;
 	int		 pretty;
 
 	pretty = MDOC_SYNPRETTY & n->flags;
@@ -1547,10 +1548,24 @@ termp_fn_pre(DECL_ARGS)
 	if (NULL == (n = n->child))
 		return(0);
 
+	if (pretty) {
+		width = term_len(p, 4);
+		rmargin = p->rmargin;
+		p->rmargin = p->offset + width;
+		p->flags |= TERMP_NOBREAK | TERMP_HANG;
+	}
+
 	assert(MDOC_TEXT == n->type);
 	term_fontpush(p, TERMFONT_BOLD);
 	term_word(p, n->string);
 	term_fontpop(p);
+
+	if (pretty) {
+		term_flushln(p);
+		p->flags &= ~(TERMP_NOBREAK | TERMP_HANG);
+		p->offset = p->rmargin;
+		p->rmargin = rmargin;
+	}
 
 	p->flags |= TERMP_NOSPACE;
 	term_word(p, "(");
@@ -1574,6 +1589,7 @@ termp_fn_pre(DECL_ARGS)
 	if (pretty) {
 		p->flags |= TERMP_NOSPACE;
 		term_word(p, ";");
+		term_flushln(p);
 	}
 
 	return(0);
