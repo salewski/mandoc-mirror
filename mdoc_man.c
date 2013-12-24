@@ -1091,6 +1091,9 @@ pre_fn(DECL_ARGS)
 	if (NULL == n)
 		return(0);
 
+	if (MDOC_SYNPRETTY & n->flags)
+		print_block(".HP 4n", MMAN_nl);
+
 	font_push('B');
 	print_node(meta, n);
 	font_pop();
@@ -1111,7 +1114,7 @@ post_fn(DECL_ARGS)
 	print_word(")");
 	if (MDOC_SYNPRETTY & n->flags) {
 		print_word(";");
-		outflags |= MMAN_br;
+		outflags |= MMAN_PP;
 	}
 }
 
