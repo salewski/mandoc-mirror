@@ -459,7 +459,7 @@ print_mdoc_node(MDOC_ARGS)
 		break;
 	}
 
-	if (HTML_KEEP & h->flags || MDOC_SYNPRETTY & n->flags) {
+	if (HTML_KEEP & h->flags) {
 		if (n->prev ? (n->prev->lastline != n->line) :
 		    (n->parent && n->parent->line != n->line)) {
 			h->flags &= ~HTML_KEEP;

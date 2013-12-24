@@ -713,8 +713,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 		maxargs = 1;
 		break;
 	case (MDOC_Ek):
-		if ( ! (MDOC_SYNOPSIS & mdoc->flags))
-			mdoc->flags &= ~MDOC_KEEP;
+		mdoc->flags &= ~MDOC_KEEP;
 	default:
 		maxargs = 0;
 		break;

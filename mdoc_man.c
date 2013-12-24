@@ -705,24 +705,12 @@ static int
 pre_sect(DECL_ARGS)
 {
 
-	switch (n->type) {
-	case (MDOC_HEAD):
+	if (MDOC_HEAD == n->type) {
 		outflags |= MMAN_sp;
 		print_block(manacts[n->tok].prefix, 0);
 		print_word("");
 		putchar('\"');
 		outflags &= ~MMAN_spc;
-		break;
-	case (MDOC_BODY):
-		if (MDOC_Sh == n->tok) {
-			if (MDOC_SYNPRETTY & n->flags)
-				outflags |= MMAN_Bk;
-			else
-				outflags &= ~MMAN_Bk;
-		}
-		break;
-	default:
-		break;
 	}
 	return(1);
 }
@@ -900,7 +888,7 @@ static void
 post_bk(DECL_ARGS)
 {
 
-	if (MDOC_BODY == n->type && ! (MDOC_SYNPRETTY & n->flags))
+	if (MDOC_BODY == n->type)
 		outflags &= ~MMAN_Bk;
 }
 
@@ -1408,8 +1396,10 @@ pre_nm(DECL_ARGS)
 {
 	char	*name;
 
-	if (MDOC_BLOCK == n->type)
+	if (MDOC_BLOCK == n->type) {
+		outflags |= MMAN_Bk;
 		pre_syn(n);
+	}
 	if (MDOC_ELEM != n->type && MDOC_HEAD != n->type)
 		return(1);
 	name = n->child ? n->child->string : meta->name;
@@ -1432,9 +1422,18 @@ static void
 post_nm(DECL_ARGS)
 {
 
-	if (MDOC_ELEM != n->type && MDOC_HEAD != n->type)
-		return;
-	font_pop();
+	switch (n->type) {
+	case (MDOC_BLOCK):
+		outflags &= ~MMAN_Bk;
+		break;
+	case (MDOC_HEAD):
+		/* FALLTHROUGH */
+	case (MDOC_ELEM):
+		font_pop();
+		break;
+	default:
+		break;
+	}
 }
 
 static int
