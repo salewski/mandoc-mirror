@@ -351,6 +351,7 @@ struct	mdoc_node {
 	int		  nchild; /* number children */
 	int		  line; /* parse line */
 	int		  pos; /* parse column */
+	int		  lastline; /* the node ends on this line */
 	enum mdoct	  tok; /* tok or MDOC__MAX if none */
 	int		  flags;
 #define	MDOC_VALID	 (1 << 0) /* has been validated */
