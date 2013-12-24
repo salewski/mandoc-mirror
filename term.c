@@ -429,7 +429,7 @@ term_word(struct termp *p, const char *word)
 	else
 		p->flags |= TERMP_NOSPACE;
 
-	p->flags &= ~(TERMP_SENTENCE | TERMP_IGNDELIM);
+	p->flags &= ~TERMP_SENTENCE;
 
 	while ('\0' != *word) {
 		if ('\\' != *word) {

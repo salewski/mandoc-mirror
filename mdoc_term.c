@@ -100,7 +100,6 @@ static	int	  termp_fl_pre(DECL_ARGS);
 static	int	  termp_fn_pre(DECL_ARGS);
 static	int	  termp_fo_pre(DECL_ARGS);
 static	int	  termp_ft_pre(DECL_ARGS);
-static	int	  termp_igndelim_pre(DECL_ARGS);
 static	int	  termp_in_pre(DECL_ARGS);
 static	int	  termp_it_pre(DECL_ARGS);
 static	int	  termp_li_pre(DECL_ARGS);
@@ -194,12 +193,12 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_quote_pre, termp_quote_post }, /* Eo */
 	{ termp_xx_pre, NULL }, /* Fx */
 	{ termp_bold_pre, NULL }, /* Ms */
-	{ termp_igndelim_pre, NULL }, /* No */
+	{ NULL, NULL }, /* No */
 	{ termp_ns_pre, NULL }, /* Ns */
 	{ termp_xx_pre, NULL }, /* Nx */
 	{ termp_xx_pre, NULL }, /* Ox */
 	{ NULL, NULL }, /* Pc */
-	{ termp_igndelim_pre, termp_pf_post }, /* Pf */
+	{ NULL, termp_pf_post }, /* Pf */
 	{ termp_quote_pre, termp_quote_post }, /* Po */
 	{ termp_quote_pre, termp_quote_post }, /* Pq */
 	{ NULL, NULL }, /* Qc */
@@ -1784,16 +1783,6 @@ termp_xx_pre(DECL_ARGS)
 		p->flags = flags;
 	}
 	return(0);
-}
-
-
-/* ARGSUSED */
-static int
-termp_igndelim_pre(DECL_ARGS)
-{
-
-	p->flags |= TERMP_IGNDELIM;
-	return(1);
 }
 
 
