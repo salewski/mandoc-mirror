@@ -419,10 +419,10 @@ mandoc_strdup(const char *ptr)
  * Parse a quoted or unquoted roff-style request or macro argument.
  * Return a pointer to the parsed argument, which is either the original
  * pointer or advanced by one byte in case the argument is quoted.
- * Null-terminate the argument in place.
+ * NUL-terminate the argument in place.
  * Collapse pairs of quotes inside quoted arguments.
  * Advance the argument pointer to the next argument,
- * or to the null byte terminating the argument line.
+ * or to the NUL byte terminating the argument line.
  */
 char *
 mandoc_getarg(struct mparse *parse, char **cpp, int ln, int *pos)
@@ -493,7 +493,7 @@ mandoc_getarg(struct mparse *parse, char **cpp, int ln, int *pos)
 	if (1 == quoted)
 		mandoc_msg(MANDOCERR_BADQUOTE, parse, ln, *pos, NULL);
 
-	/* Null-terminate this argument and move to the next one. */
+	/* NUL-terminate this argument and move to the next one. */
 	if (pairs)
 		cp[-pairs] = '\0';
 	if ('\0' != *cp) {

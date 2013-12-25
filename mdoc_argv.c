@@ -536,12 +536,12 @@ args(struct mdoc *mdoc, int line, int *pos,
 			/* Skip ahead. */ ;
 
 		return(rc);
-	} 
+	}
 
-	/* 
+	/*
 	 * Process a quoted literal.  A quote begins with a double-quote
 	 * and ends with a double-quote NOT preceded by a double-quote.
-	 * Null-terminate the literal in place.
+	 * NUL-terminate the literal in place.
 	 * Collapse pairs of quotes inside quoted literals.
 	 * Whitespace is NOT involved in literal termination.
 	 */

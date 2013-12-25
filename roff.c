@@ -1733,7 +1733,7 @@ roff_userdef(ROFF_ARGS)
 
 	/*
 	 * Collect pointers to macro argument strings
-	 * and null-terminate them.
+	 * and NUL-terminate them.
 	 */
 	cp = *bufp + pos;
 	for (i = 0; i < 9; i++)
