@@ -102,6 +102,14 @@ mandoc_escape(const char const **end, const char const **start, int *sz)
 		break;
 
 	/*
+	 * Escapes taking no arguments at all.
+	 */
+	case ('d'):
+		/* FALLTHROUGH */
+	case ('u'):
+		return(ESCAPE_IGNORE);
+
+	/*
 	 * The \z escape is supposed to output the following
 	 * character without advancing the cursor position.  
 	 * Since we are mostly dealing with terminal mode,
