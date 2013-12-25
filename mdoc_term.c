@@ -1601,8 +1601,7 @@ termp_fa_pre(DECL_ARGS)
 
 	for (nn = n->child; nn; nn = nn->next) {
 		term_fontpush(p, TERMFONT_UNDER);
-		if (MDOC_SYNPRETTY & n->flags)
-			p->flags |= TERMP_NBRWORD;
+		p->flags |= TERMP_NBRWORD;
 		term_word(p, nn->string);
 		term_fontpop(p);
 
