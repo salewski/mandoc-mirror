@@ -1564,6 +1564,8 @@ termp_fn_pre(DECL_ARGS)
 	for (n = n->next; n; n = n->next) {
 		assert(MDOC_TEXT == n->type);
 		term_fontpush(p, TERMFONT_UNDER);
+		if (pretty)
+			p->flags |= TERMP_NBRWORD;
 		term_word(p, n->string);
 		term_fontpop(p);
 

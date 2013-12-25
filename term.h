@@ -71,6 +71,7 @@ struct	termp {
 #define	TERMP_SENTENCE	 (1 << 1)	/* Space before a sentence. */
 #define	TERMP_NOSPACE	 (1 << 2)	/* No space before words. */
 #define	TERMP_NONOSPACE	 (1 << 3)	/* No space (no autounset). */
+#define	TERMP_NBRWORD	 (1 << 4)	/* Make next word nonbreaking. */
 #define	TERMP_KEEP	 (1 << 5)	/* Keep words together. */
 #define	TERMP_PREKEEP	 (1 << 6)	/* ...starting with the next one. */
 #define	TERMP_SKIPCHAR	 (1 << 7)	/* Skip the next character. */
