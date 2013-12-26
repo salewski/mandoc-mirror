@@ -1366,8 +1366,11 @@ parse_man(struct of *of, const struct man_node *n)
 		}
 	}
 
-	for (n = n->child; n; n = n->next)
+	for (n = n->child; n; n = n->next) {
+		if (NULL != of->desc)
+			break;
 		parse_man(of, n);
+	}
 }
 
 static void
