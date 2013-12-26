@@ -165,11 +165,15 @@ mandoc_escape(const char const **end, const char const **start, int *sz)
 		/* FALLTHROUGH */
 	case ('b'):
 		/* FALLTHROUGH */
+	case ('B'):
+		/* FALLTHROUGH */
 	case ('D'):
 		/* FALLTHROUGH */
 	case ('o'):
 		/* FALLTHROUGH */
 	case ('R'):
+		/* FALLTHROUGH */
+	case ('w'):
 		/* FALLTHROUGH */
 	case ('X'):
 		/* FALLTHROUGH */
@@ -185,8 +189,6 @@ mandoc_escape(const char const **end, const char const **start, int *sz)
 	 * These escapes are of the form \X'N', where 'X' is the trigger
 	 * and 'N' resolves to a numerical expression.
 	 */
-	case ('B'):
-		/* FALLTHROUGH */
 	case ('h'):
 		/* FALLTHROUGH */
 	case ('H'):
@@ -194,19 +196,15 @@ mandoc_escape(const char const **end, const char const **start, int *sz)
 	case ('L'):
 		/* FALLTHROUGH */
 	case ('l'):
-		gly = ESCAPE_NUMBERED;
 		/* FALLTHROUGH */
 	case ('S'):
 		/* FALLTHROUGH */
 	case ('v'):
 		/* FALLTHROUGH */
-	case ('w'):
-		/* FALLTHROUGH */
 	case ('x'):
 		if ('\'' != **start)
 			return(ESCAPE_ERROR);
-		if (ESCAPE_ERROR == gly)
-			gly = ESCAPE_IGNORE;
+		gly = ESCAPE_IGNORE;
 		*start = ++*end;
 		term = '\'';
 		break;
