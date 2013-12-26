@@ -83,7 +83,7 @@ enum	form {
 
 struct	str {
 	char		*utf8; /* key in UTF-8 form */
-	const struct of *of; /* if set, the owning parse */
+	const struct mpage *mpage; /* if set, the owning parse */
 	uint64_t	 mask; /* bitmask in sequence */
 	char		 key[]; /* the string itself */
 };
@@ -93,9 +93,9 @@ struct	id {
 	dev_t		 dev;
 };
 
-struct	of {
+struct	mpage {
 	struct id	 id; /* used for hashing routine */
-	struct of	*next; /* next in ofs */
+	struct mpage	*next; /* next in mpages_list */
 	enum form	 dform; /* path-cued form */
 	enum form	 sform; /* suffix-cued form */
 	char		 file[PATH_MAX]; /* filename rel. to manpath */
@@ -118,7 +118,7 @@ enum	stmt {
 	STMT__MAX
 };
 
-typedef	int (*mdoc_fp)(struct of *, const struct mdoc_node *);
+typedef	int (*mdoc_fp)(struct mpage *, const struct mdoc_node *);
 
 struct	mdoc_handler {
 	mdoc_fp		 fp; /* optional handler */
@@ -126,40 +126,40 @@ struct	mdoc_handler {
 };
 
 static	void	 dbclose(int);
-static	void	 dbindex(struct mchars *, int, const struct of *);
+static	void	 dbindex(struct mchars *, int, const struct mpage *);
 static	int	 dbopen(int);
 static	void	 dbprune(void);
-static	void	 fileadd(struct of *);
+static	void	 fileadd(struct mpage *);
 static	int	 filecheck(const char *);
 static	void	 filescan(const char *);
 static	void	*hash_alloc(size_t, void *);
 static	void	 hash_free(void *, size_t, void *);
 static	void	*hash_halloc(size_t, void *);
-static	void	 inoadd(const struct stat *, struct of *);
+static	void	 inoadd(const struct stat *, struct mpage *);
 static	int	 inocheck(const struct stat *);
 static	void	 ofadd(int, const char *, const char *, const char *,
 			const char *, const char *, const struct stat *);
-static	void	 offree(void);
-static	void	 ofmerge(struct mchars *, struct mparse *, int);
-static	void	 parse_catpage(struct of *);
-static	void	 parse_man(struct of *, const struct man_node *);
-static	void	 parse_mdoc(struct of *, const struct mdoc_node *);
-static	int	 parse_mdoc_body(struct of *, const struct mdoc_node *);
-static	int	 parse_mdoc_head(struct of *, const struct mdoc_node *);
-static	int	 parse_mdoc_Fd(struct of *, const struct mdoc_node *);
-static	int	 parse_mdoc_Fn(struct of *, const struct mdoc_node *);
-static	int	 parse_mdoc_In(struct of *, const struct mdoc_node *);
-static	int	 parse_mdoc_Nd(struct of *, const struct mdoc_node *);
-static	int	 parse_mdoc_Nm(struct of *, const struct mdoc_node *);
-static	int	 parse_mdoc_Sh(struct of *, const struct mdoc_node *);
-static	int	 parse_mdoc_St(struct of *, const struct mdoc_node *);
-static	int	 parse_mdoc_Xr(struct of *, const struct mdoc_node *);
+static	void	 mpages_free(void);
+static	void	 mpages_merge(struct mchars *, struct mparse *, int);
+static	void	 parse_cat(struct mpage *);
+static	void	 parse_man(struct mpage *, const struct man_node *);
+static	void	 parse_mdoc(struct mpage *, const struct mdoc_node *);
+static	int	 parse_mdoc_body(struct mpage *, const struct mdoc_node *);
+static	int	 parse_mdoc_head(struct mpage *, const struct mdoc_node *);
+static	int	 parse_mdoc_Fd(struct mpage *, const struct mdoc_node *);
+static	int	 parse_mdoc_Fn(struct mpage *, const struct mdoc_node *);
+static	int	 parse_mdoc_In(struct mpage *, const struct mdoc_node *);
+static	int	 parse_mdoc_Nd(struct mpage *, const struct mdoc_node *);
+static	int	 parse_mdoc_Nm(struct mpage *, const struct mdoc_node *);
+static	int	 parse_mdoc_Sh(struct mpage *, const struct mdoc_node *);
+static	int	 parse_mdoc_St(struct mpage *, const struct mdoc_node *);
+static	int	 parse_mdoc_Xr(struct mpage *, const struct mdoc_node *);
 static	int	 set_basedir(const char *);
-static	void	 putkey(const struct of *, 
+static	void	 putkey(const struct mpage *,
 			const char *, uint64_t);
-static	void	 putkeys(const struct of *, 
+static	void	 putkeys(const struct mpage *,
 			const char *, size_t, uint64_t);
-static	void	 putmdockey(const struct of *,
+static	void	 putmdockey(const struct mpage *,
 			const struct mdoc_node *, uint64_t);
 static	void	 say(const char *, const char *, ...);
 static	int	 treescan(void);
@@ -174,10 +174,10 @@ static	int	  	 warnings; /* warn about crap */
 static	int		 exitcode; /* to be returned by main */
 static	enum op	  	 op; /* operational mode */
 static	char		 basedir[PATH_MAX]; /* current base directory */
-static	struct ohash	 inos; /* table of inodes/devices */
+static	struct ohash	 mpages; /* table of distinct manual pages */
 static	struct ohash	 filenames; /* table of filenames */
 static	struct ohash	 strings; /* table of all strings */
-static	struct of	*ofs = NULL; /* vector of files to parse */
+static	struct mpage	*mpages_list = NULL; /* vector of files to parse */
 static	sqlite3		*db = NULL; /* current database */
 static	sqlite3_stmt	*stmts[STMT__MAX]; /* current statements */
 
@@ -315,17 +315,17 @@ main(int argc, char *argv[])
 	struct mchars	 *mc;
 	struct manpaths	  dirs;
 	struct mparse	 *mp;
-	struct ohash_info ino_info, filename_info;
+	struct ohash_info mpages_info, filename_info;
 
 	memset(stmts, 0, STMT__MAX * sizeof(sqlite3_stmt *));
 	memset(&dirs, 0, sizeof(struct manpaths));
 
-	ino_info.alloc  = filename_info.alloc  = hash_alloc;
-	ino_info.halloc = filename_info.halloc = hash_halloc;
-	ino_info.hfree  = filename_info.hfree  = hash_free;
+	mpages_info.alloc  = filename_info.alloc  = hash_alloc;
+	mpages_info.halloc = filename_info.halloc = hash_halloc;
+	mpages_info.hfree  = filename_info.hfree  = hash_free;
 
-	ino_info.key_offset = offsetof(struct of, id);
-	filename_info.key_offset = offsetof(struct of, file);
+	mpages_info.key_offset = offsetof(struct mpage, id);
+	filename_info.key_offset = offsetof(struct mpage, file);
 
 	progname = strrchr(argv[0], '/');
 	if (progname == NULL)
@@ -399,7 +399,7 @@ main(int argc, char *argv[])
 		MANDOCLEVEL_FATAL, NULL, NULL, NULL);
 	mc = mchars_alloc();
 
-	ohash_init(&inos, 6, &ino_info);
+	ohash_init(&mpages, 6, &mpages_info);
 	ohash_init(&filenames, 6, &filename_info);
 
 	if (OP_UPDATE == op || OP_DELETE == op || OP_TEST == op) {
@@ -422,7 +422,7 @@ main(int argc, char *argv[])
 		if (OP_TEST != op)
 			dbprune();
 		if (OP_DELETE != op)
-			ofmerge(mc, mp, 0);
+			mpages_merge(mc, mp, 0);
 		dbclose(1);
 	} else {
 		/*
@@ -453,7 +453,7 @@ main(int argc, char *argv[])
 				continue;
 
 			if (j) {
-				ohash_init(&inos, 6, &ino_info);
+				ohash_init(&mpages, 6, &mpages_info);
 				ohash_init(&filenames, 6, &filename_info);
 			}
 
@@ -466,13 +466,13 @@ main(int argc, char *argv[])
 			if (0 == dbopen(0))
 				goto out;
 
-			ofmerge(mc, mp, warnings && !use_all);
+			mpages_merge(mc, mp, warnings && !use_all);
 			dbclose(0);
 
 			if (j + 1 < dirs.sz) {
-				ohash_delete(&inos);
+				ohash_delete(&mpages);
 				ohash_delete(&filenames);
-				offree();
+				mpages_free();
 			}
 		}
 	}
@@ -481,9 +481,9 @@ out:
 	manpath_free(&dirs);
 	mchars_free(mc);
 	mparse_free(mp);
-	ohash_delete(&inos);
+	ohash_delete(&mpages);
 	ohash_delete(&filenames);
-	offree();
+	mpages_free();
 	return(exitcode);
 usage:
 	fprintf(stderr, "usage: %s [-anvW] [-C file]\n"
@@ -541,7 +541,7 @@ treescan(void)
 	while (NULL != (ff = fts_read(f))) {
 		path = ff->fts_path + 2;
 		/*
-		 * If we're a regular file, add an "of" by using the
+		 * If we're a regular file, add an mpage by using the
 		 * stored directory data and handling the filename.
 		 * Disallow duplicate (hard-linked) files.
 		 */
@@ -664,7 +664,7 @@ treescan(void)
  *   or
  *   [./]cat<section>[/<arch>]/<name>.0
  *
- * Stuff this information directly into the "of" vector.
+ * Stuff this information directly into the mpage vector.
  * See treescan() for the fts(3) version of this.
  */
 static void
@@ -772,13 +772,13 @@ filecheck(const char *name)
  * already exists.
  */
 static void
-fileadd(struct of *of)
+fileadd(struct mpage *mpage)
 {
 	unsigned int	 slot;
 
-	slot = ohash_qlookup(&filenames, of->file);
+	slot = ohash_qlookup(&filenames, mpage->file);
 	assert(NULL == ohash_find(&filenames, slot));
-	ohash_insert(&filenames, slot, of);
+	ohash_insert(&filenames, slot, mpage);
 }
 
 /*
@@ -794,8 +794,8 @@ inocheck(const struct stat *st)
 	id.ino = hash = st->st_ino;
 	id.dev = st->st_dev;
 
-	return(NULL != ohash_find(&inos, ohash_lookup_memory(
-			&inos, (char *)&id, sizeof(id), hash)));
+	return(NULL != ohash_find(&mpages, ohash_lookup_memory(
+			&mpages, (char *)&id, sizeof(id), hash)));
 }
 
 /*
@@ -804,25 +804,25 @@ inocheck(const struct stat *st)
  * Then when we do the lookup, use both the inode and device identifier.
  */
 static void
-inoadd(const struct stat *st, struct of *of)
+inoadd(const struct stat *st, struct mpage *mpage)
 {
 	uint32_t	 hash;
 	unsigned int	 slot;
 
-	of->id.ino = hash = st->st_ino;
-	of->id.dev = st->st_dev;
+	mpage->id.ino = hash = st->st_ino;
+	mpage->id.dev = st->st_dev;
 	slot = ohash_lookup_memory
-		(&inos, (char *)&of->id, sizeof(of->id), hash);
+		(&mpages, (char *)&mpage->id, sizeof(mpage->id), hash);
 
-	assert(NULL == ohash_find(&inos, slot));
-	ohash_insert(&inos, slot, of);
+	assert(NULL == ohash_find(&mpages, slot));
+	ohash_insert(&mpages, slot, mpage);
 }
 
 static void
 ofadd(int dform, const char *file, const char *name, const char *dsec,
 	const char *sec, const char *arch, const struct stat *st)
 {
-	struct of	*of;
+	struct mpage	*mpage;
 	int		 sform;
 
 	assert(NULL != file);
@@ -844,55 +844,55 @@ ofadd(int dform, const char *file, const char *name, const char *dsec,
 	else
 		sform = FORM_NONE;
 
-	of = mandoc_calloc(1, sizeof(struct of));
-	strlcpy(of->file, file, PATH_MAX);
-	of->name = mandoc_strdup(name);
-	of->sec = mandoc_strdup(sec);
-	of->dsec = mandoc_strdup(dsec);
-	of->arch = mandoc_strdup(arch);
-	of->sform = sform;
-	of->dform = dform;
-	of->next = ofs;
-	ofs = of;
+	mpage = mandoc_calloc(1, sizeof(struct mpage));
+	strlcpy(mpage->file, file, PATH_MAX);
+	mpage->name = mandoc_strdup(name);
+	mpage->sec = mandoc_strdup(sec);
+	mpage->dsec = mandoc_strdup(dsec);
+	mpage->arch = mandoc_strdup(arch);
+	mpage->sform = sform;
+	mpage->dform = dform;
+	mpage->next = mpages_list;
+	mpages_list = mpage;
 
 	/*
 	 * Add to unique identifier hash.
 	 * Then if it's a source manual and we're going to use source in
 	 * favour of catpages, add it to that hash.
 	 */
-	inoadd(st, of);
-	fileadd(of);
+	inoadd(st, mpage);
+	fileadd(mpage);
 }
 
 static void
-offree(void)
+mpages_free(void)
 {
-	struct of	*of;
+	struct mpage	*mpage;
 
-	while (NULL != (of = ofs)) {
-		ofs = of->next;
-		free(of->name);
-		free(of->sec);
-		free(of->dsec);
-		free(of->arch);
-		free(of);
+	while (NULL != (mpage = mpages_list)) {
+		mpages_list = mpage->next;
+		free(mpage->name);
+		free(mpage->sec);
+		free(mpage->dsec);
+		free(mpage->arch);
+		free(mpage);
 	}
 }
 
 /*
- * Run through the files in the global vector "ofs" and add them to the
+ * Run through the files in the global vector "mpages_list" and add them to the
  * database specified in "basedir".
  *
  * This handles the parsing scheme itself, using the cues of directory
  * and filename to determine whether the file is parsable or not.
  */
 static void
-ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
+mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 {
 	struct ohash		 title_table;
 	struct ohash_info	 title_info, str_info;
 	char			 buf[PATH_MAX];
-	struct of		*of;
+	struct mpage		*mpage;
 	struct mdoc		*mdoc;
 	struct man		*man;
 	struct title		*title_entry;
@@ -917,7 +917,7 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		ohash_init(&title_table, 6, &title_info);
 	}
 
-	for (of = ofs; NULL != of; of = of->next) {
+	for (mpage = mpages_list; NULL != mpage; mpage = mpage->next) {
 		/*
 		 * If we're a catpage (as defined by our path), then see
 		 * if a manpage exists by the same name (ignoring the
@@ -925,11 +925,12 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		 * If it does, then we want to use it instead of our
 		 * own.
 		 */
-		if ( ! use_all && FORM_CAT == of->dform) {
-			sz = strlcpy(buf, of->file, PATH_MAX);
+		if ( ! use_all && FORM_CAT == mpage->dform) {
+			sz = strlcpy(buf, mpage->file, PATH_MAX);
 			if (sz >= PATH_MAX) {
 				if (warnings)
-					say(of->file, "Filename too long");
+					say(mpage->file,
+					    "Filename too long");
 				continue;
 			}
 			bufp = strstr(buf, "cat");
@@ -937,10 +938,10 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 			memcpy(bufp, "man", 3);
 			if (NULL != (bufp = strrchr(buf, '.')))
 				*++bufp = '\0';
-			strlcat(buf, of->dsec, PATH_MAX);
+			strlcat(buf, mpage->dsec, PATH_MAX);
 			if (filecheck(buf)) {
 				if (warnings)
-					say(of->file, "Man "
+					say(mpage->file, "Man "
 					    "source exists: %s", buf);
 				continue;
 			}
@@ -957,8 +958,8 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		 * source code, unless it is already known to be
 		 * formatted.  Fall back to formatted mode.
 		 */
-		if (FORM_CAT != of->dform || FORM_CAT != of->sform) {
-			lvl = mparse_readfd(mp, -1, of->file);
+		if (FORM_CAT != mpage->dform || FORM_CAT != mpage->sform) {
+			lvl = mparse_readfd(mp, -1, mpage->file);
 			if (lvl < MANDOCLEVEL_FATAL)
 				mparse_result(mp, &mdoc, &man);
 		}
@@ -971,13 +972,13 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		} else if (NULL != man) {
 			form = 1;
 			msec = man_meta(man)->msec;
-			march = of->arch;
+			march = mpage->arch;
 			mtitle = man_meta(man)->title;
 		} else {
 			form = 0;
-			msec = of->dsec;
-			march = of->arch;
-			mtitle = of->name;
+			msec = mpage->dsec;
+			march = mpage->arch;
+			mtitle = mpage->name;
 		}
 
 		if (NULL == msec)
@@ -997,11 +998,11 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		 * manuals for such reasons.
 		 */
 		if (warnings && !use_all && form &&
-				strcasecmp(msec, of->dsec)) {
+				strcasecmp(msec, mpage->dsec)) {
 			match = 0;
-			say(of->file, "Section \"%s\" "
-				"manual in %s directory", 
-				msec, of->dsec);
+			say(mpage->file, "Section \"%s\" "
+				"manual in %s directory",
+				msec, mpage->dsec);
 		}
 
 		/*
@@ -1018,28 +1019,28 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		 * Thus, warn about architecture mismatches,
 		 * but don't skip manuals for this reason.
 		 */
-		if (warnings && !use_all && strcasecmp(march, of->arch)) {
+		if (warnings && !use_all && strcasecmp(march, mpage->arch)) {
 			match = 0;
-			say(of->file, "Architecture \"%s\" "
+			say(mpage->file, "Architecture \"%s\" "
 				"manual in \"%s\" directory",
-				march, of->arch);
+				march, mpage->arch);
 		}
-		if (warnings && !use_all && strcasecmp(mtitle, of->name))
+		if (warnings && !use_all && strcasecmp(mtitle, mpage->name))
 			match = 0;
 
-		putkey(of, of->name, TYPE_Nm);
+		putkey(mpage, mpage->name, TYPE_Nm);
 
 		if (NULL != mdoc) {
 			if (NULL != (cp = mdoc_meta(mdoc)->name))
-				putkey(of, cp, TYPE_Nm);
-			assert(NULL == of->desc);
-			parse_mdoc(of, mdoc_node(mdoc));
-			putkey(of, NULL != of->desc ?
-				of->desc : of->name, TYPE_Nd);
+				putkey(mpage, cp, TYPE_Nm);
+			assert(NULL == mpage->desc);
+			parse_mdoc(mpage, mdoc_node(mdoc));
+			putkey(mpage, NULL != mpage->desc ?
+				mpage->desc : mpage->name, TYPE_Nd);
 		} else if (NULL != man)
-			parse_man(of, man_node(man));
+			parse_man(mpage, man_node(man));
 		else
-			parse_catpage(of);
+			parse_cat(mpage);
 
 		/*
 		 * Build a title string for the file.  If it matches
@@ -1060,7 +1061,7 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 						sizeof(struct title));
 				title_entry->title = title_str;
 				title_entry->file = mandoc_strdup(
-				    match ? "" : of->file);
+				    match ? "" : mpage->file);
 				ohash_insert(&title_table, slot,
 						title_entry);
 			} else {
@@ -1070,7 +1071,7 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 			}
 		}
 
-		dbindex(mc, form, of);
+		dbindex(mc, form, mpage);
 		ohash_delete(&strings);
 	}
 
@@ -1091,15 +1092,15 @@ ofmerge(struct mchars *mc, struct mparse *mp, int check_reachable)
 }
 
 static void
-parse_catpage(struct of *of)
+parse_cat(struct mpage *mpage)
 {
 	FILE		*stream;
 	char		*line, *p, *title;
 	size_t		 len, plen, titlesz;
 
-	if (NULL == (stream = fopen(of->file, "r"))) {
+	if (NULL == (stream = fopen(mpage->file, "r"))) {
 		if (warnings)
-			say(of->file, NULL);
+			say(mpage->file, NULL);
 		return;
 	}
 
@@ -1152,10 +1153,10 @@ parse_catpage(struct of *of)
 
 	if (NULL == title || '\0' == *title) {
 		if (warnings)
-			say(of->file, "Cannot find NAME section");
-		assert(NULL == of->desc);
-		of->desc = mandoc_strdup(of->name);
-		putkey(of, of->name, TYPE_Nd);
+			say(mpage->file, "Cannot find NAME section");
+		assert(NULL == mpage->desc);
+		mpage->desc = mandoc_strdup(mpage->name);
+		putkey(mpage, mpage->name, TYPE_Nd);
 		fclose(stream);
 		free(title);
 		return;
@@ -1175,7 +1176,7 @@ parse_catpage(struct of *of)
 			/* Skip to next word. */ ;
 	} else {
 		if (warnings)
-			say(of->file, "No dash in title line");
+			say(mpage->file, "No dash in title line");
 		p = title;
 	}
 
@@ -1193,9 +1194,9 @@ parse_catpage(struct of *of)
 		plen -= 2;
 	}
 
-	assert(NULL == of->desc);
-	of->desc = mandoc_strdup(p);
-	putkey(of, of->desc, TYPE_Nd);
+	assert(NULL == mpage->desc);
+	mpage->desc = mandoc_strdup(p);
+	putkey(mpage, mpage->desc, TYPE_Nd);
 	fclose(stream);
 	free(title);
 }
@@ -1204,30 +1205,31 @@ parse_catpage(struct of *of)
  * Put a type/word pair into the word database for this particular file.
  */
 static void
-putkey(const struct of *of, const char *value, uint64_t type)
+putkey(const struct mpage *mpage, const char *value, uint64_t type)
 {
 
 	assert(NULL != value);
-	putkeys(of, value, strlen(value), type);
+	putkeys(mpage, value, strlen(value), type);
 }
 
 /*
  * Grok all nodes at or below a certain mdoc node into putkey().
  */
 static void
-putmdockey(const struct of *of, const struct mdoc_node *n, uint64_t m)
+putmdockey(const struct mpage *mpage,
+	const struct mdoc_node *n, uint64_t m)
 {
 
 	for ( ; NULL != n; n = n->next) {
 		if (NULL != n->child)
-			putmdockey(of, n->child, m);
+			putmdockey(mpage, n->child, m);
 		if (MDOC_TEXT == n->type)
-			putkey(of, n->string, m);
+			putkey(mpage, n->string, m);
 	}
 }
 
 static void
-parse_man(struct of *of, const struct man_node *n)
+parse_man(struct mpage *mpage, const struct man_node *n)
 {
 	const struct man_node *head, *body;
 	char		*start, *sv, *title;
@@ -1322,7 +1324,7 @@ parse_man(struct of *of, const struct man_node *n)
 				byte = start[sz];
 				start[sz] = '\0';
 
-				putkey(of, start, TYPE_Nm);
+				putkey(mpage, start, TYPE_Nm);
 
 				if (' ' == byte) {
 					start += sz + 1;
@@ -1336,7 +1338,7 @@ parse_man(struct of *of, const struct man_node *n)
 			}
 
 			if (sv == start) {
-				putkey(of, start, TYPE_Nm);
+				putkey(mpage, start, TYPE_Nm);
 				free(title);
 				return;
 			}
@@ -1358,23 +1360,23 @@ parse_man(struct of *of, const struct man_node *n)
 			while (' ' == *start)
 				start++;
 
-			assert(NULL == of->desc);
-			of->desc = mandoc_strdup(start);
-			putkey(of, of->desc, TYPE_Nd);
+			assert(NULL == mpage->desc);
+			mpage->desc = mandoc_strdup(start);
+			putkey(mpage, mpage->desc, TYPE_Nd);
 			free(title);
 			return;
 		}
 	}
 
 	for (n = n->child; n; n = n->next) {
-		if (NULL != of->desc)
+		if (NULL != mpage->desc)
 			break;
-		parse_man(of, n);
+		parse_man(mpage, n);
 	}
 }
 
 static void
-parse_mdoc(struct of *of, const struct mdoc_node *n)
+parse_mdoc(struct mpage *mpage, const struct mdoc_node *n)
 {
 
 	assert(NULL != n);
@@ -1390,22 +1392,23 @@ parse_mdoc(struct of *of, const struct mdoc_node *n)
 			/* FALLTHROUGH */
 		case (MDOC_TAIL):
 			if (NULL != mdocs[n->tok].fp)
-			       if (0 == (*mdocs[n->tok].fp)(of, n))
+			       if (0 == (*mdocs[n->tok].fp)(mpage, n))
 				       break;
 			if (mdocs[n->tok].mask)
-				putmdockey(of, n->child, mdocs[n->tok].mask);
+				putmdockey(mpage, n->child,
+				    mdocs[n->tok].mask);
 			break;
 		default:
 			assert(MDOC_ROOT != n->type);
 			continue;
 		}
 		if (NULL != n->child)
-			parse_mdoc(of, n);
+			parse_mdoc(mpage, n);
 	}
 }
 
 static int
-parse_mdoc_Fd(struct of *of, const struct mdoc_node *n)
+parse_mdoc_Fd(struct mpage *mpage, const struct mdoc_node *n)
 {
 	const char	*start, *end;
 	size_t		 sz;
@@ -1443,23 +1446,23 @@ parse_mdoc_Fd(struct of *of, const struct mdoc_node *n)
 		end--;
 
 	if (end > start)
-		putkeys(of, start, end - start + 1, TYPE_In);
+		putkeys(mpage, start, end - start + 1, TYPE_In);
 	return(1);
 }
 
 static int
-parse_mdoc_In(struct of *of, const struct mdoc_node *n)
+parse_mdoc_In(struct mpage *mpage, const struct mdoc_node *n)
 {
 
 	if (NULL != n->child && MDOC_TEXT == n->child->type)
 		return(0);
 
-	putkey(of, n->child->string, TYPE_In);
+	putkey(mpage, n->child->string, TYPE_In);
 	return(1);
 }
 
 static int
-parse_mdoc_Fn(struct of *of, const struct mdoc_node *n)
+parse_mdoc_Fn(struct mpage *mpage, const struct mdoc_node *n)
 {
 	const char	*cp;
 
@@ -1479,31 +1482,31 @@ parse_mdoc_Fn(struct of *of, const struct mdoc_node *n)
 	while ('*' == *cp)
 		cp++;
 
-	putkey(of, cp, TYPE_Fn);
+	putkey(mpage, cp, TYPE_Fn);
 
 	if (n->string < cp)
-		putkeys(of, n->string, cp - n->string, TYPE_Ft);
+		putkeys(mpage, n->string, cp - n->string, TYPE_Ft);
 
 	for (n = n->next; NULL != n; n = n->next)
 		if (MDOC_TEXT == n->type)
-			putkey(of, n->string, TYPE_Fa);
+			putkey(mpage, n->string, TYPE_Fa);
 
 	return(0);
 }
 
 static int
-parse_mdoc_St(struct of *of, const struct mdoc_node *n)
+parse_mdoc_St(struct mpage *mpage, const struct mdoc_node *n)
 {
 
 	if (NULL == n->child || MDOC_TEXT != n->child->type)
 		return(0);
 
-	putkey(of, n->child->string, TYPE_St);
+	putkey(mpage, n->child->string, TYPE_St);
 	return(1);
 }
 
 static int
-parse_mdoc_Xr(struct of *of, const struct mdoc_node *n)
+parse_mdoc_Xr(struct mpage *mpage, const struct mdoc_node *n)
 {
 	char	*cp;
 
@@ -1511,7 +1514,7 @@ parse_mdoc_Xr(struct of *of, const struct mdoc_node *n)
 		return(0);
 
 	if (NULL == n->next) {
-		putkey(of, n->string, TYPE_Xr);
+		putkey(mpage, n->string, TYPE_Xr);
 		return(0);
 	}
 
@@ -1519,13 +1522,13 @@ parse_mdoc_Xr(struct of *of, const struct mdoc_node *n)
 		perror(NULL);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
-	putkey(of, cp, TYPE_Xr);
+	putkey(mpage, cp, TYPE_Xr);
 	free(cp);
 	return(0);
 }
 
 static int
-parse_mdoc_Nd(struct of *of, const struct mdoc_node *n)
+parse_mdoc_Nd(struct mpage *mpage, const struct mdoc_node *n)
 {
 	size_t		 sz;
 
@@ -1539,23 +1542,24 @@ parse_mdoc_Nd(struct of *of, const struct mdoc_node *n)
 
 	for (n = n->child; NULL != n; n = n->next) {
 		if (MDOC_TEXT == n->type) {
-			if (NULL != of->desc) {
-				sz = strlen(of->desc) +
+			if (NULL != mpage->desc) {
+				sz = strlen(mpage->desc) +
 				     strlen(n->string) + 2;
-				of->desc = mandoc_realloc(of->desc, sz);
-				strlcat(of->desc, " ", sz);
-				strlcat(of->desc, n->string, sz);
+				mpage->desc = mandoc_realloc(
+				    mpage->desc, sz);
+				strlcat(mpage->desc, " ", sz);
+				strlcat(mpage->desc, n->string, sz);
 			} else
-				of->desc = mandoc_strdup(n->string);
+				mpage->desc = mandoc_strdup(n->string);
 		}
 		if (NULL != n->child)
-			parse_mdoc_Nd(of, n);
+			parse_mdoc_Nd(mpage, n);
 	}
 	return(1);
 }
 
 static int
-parse_mdoc_Nm(struct of *of, const struct mdoc_node *n)
+parse_mdoc_Nm(struct mpage *mpage, const struct mdoc_node *n)
 {
 
 	if (SEC_NAME == n->sec)
@@ -1567,21 +1571,21 @@ parse_mdoc_Nm(struct of *of, const struct mdoc_node *n)
 }
 
 static int
-parse_mdoc_Sh(struct of *of, const struct mdoc_node *n)
+parse_mdoc_Sh(struct mpage *mpage, const struct mdoc_node *n)
 {
 
 	return(SEC_CUSTOM == n->sec && MDOC_HEAD == n->type);
 }
 
 static int
-parse_mdoc_head(struct of *of, const struct mdoc_node *n)
+parse_mdoc_head(struct mpage *mpage, const struct mdoc_node *n)
 {
 
 	return(MDOC_HEAD == n->type);
 }
 
 static int
-parse_mdoc_body(struct of *of, const struct mdoc_node *n)
+parse_mdoc_body(struct mpage *mpage, const struct mdoc_node *n)
 {
 
 	return(MDOC_BODY == n->type);
@@ -1593,7 +1597,8 @@ parse_mdoc_body(struct of *of, const struct mdoc_node *n)
  * When we finish the manual, we'll dump the table.
  */
 static void
-putkeys(const struct of *of, const char *cp, size_t sz, uint64_t v)
+putkeys(const struct mpage *mpage,
+	const char *cp, size_t sz, uint64_t v)
 {
 	struct str	*s;
 	unsigned int	 slot;
@@ -1606,7 +1611,7 @@ putkeys(const struct of *of, const char *cp, size_t sz, uint64_t v)
 	slot = ohash_qlookupi(&strings, cp, &end);
 	s = ohash_find(&strings, slot);
 
-	if (NULL != s && of == s->of) {
+	if (NULL != s && mpage == s->mpage) {
 		s->mask |= v;
 		return;
 	} else if (NULL == s) {
@@ -1614,7 +1619,7 @@ putkeys(const struct of *of, const char *cp, size_t sz, uint64_t v)
 		memcpy(s->key, cp, sz);
 		ohash_insert(&strings, slot, s);
 	}
-	s->of = of;
+	s->mpage = mpage;
 	s->mask = v;
 }
 
@@ -1781,7 +1786,7 @@ utf8key(struct mchars *mc, struct str *key)
  * Also, UTF-8-encode the description at the last possible moment.
  */
 static void
-dbindex(struct mchars *mc, int form, const struct of *of)
+dbindex(struct mchars *mc, int form, const struct mpage *mpage)
 {
 	struct str	*key;
 	const char	*desc;
@@ -1790,15 +1795,15 @@ dbindex(struct mchars *mc, int form, const struct of *of)
 	unsigned int	 slot;
 
 	if (verb)
-		say(of->file, "Adding to index");
+		say(mpage->file, "Adding to index");
 
 	if (nodb)
 		return;
 
 	desc = "";
-	if (NULL != of->desc && '\0' != *of->desc) {
+	if (NULL != mpage->desc && '\0' != *mpage->desc) {
 		key = ohash_find(&strings,
-			ohash_qlookup(&strings, of->desc));
+			ohash_qlookup(&strings, mpage->desc));
 		assert(NULL != key);
 		if (NULL == key->utf8)
 			utf8key(mc, key);
@@ -1808,9 +1813,9 @@ dbindex(struct mchars *mc, int form, const struct of *of)
 	SQL_EXEC("BEGIN TRANSACTION");
 
 	i = 1;
-	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, of->file);
-	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, of->sec);
-	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, of->arch);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, mpage->file);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, mpage->sec);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, mpage->arch);
 	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, desc);
 	SQL_BIND_INT(stmts[STMT_INSERT_DOC], i, form);
 	SQL_STEP(stmts[STMT_INSERT_DOC]);
@@ -1819,7 +1824,7 @@ dbindex(struct mchars *mc, int form, const struct of *of)
 
 	for (key = ohash_first(&strings, &slot); NULL != key;
 	     key = ohash_next(&strings, &slot)) {
-		assert(key->of == of);
+		assert(key->mpage == mpage);
 		if (NULL == key->utf8)
 			utf8key(mc, key);
 		i = 1;
@@ -1839,19 +1844,19 @@ dbindex(struct mchars *mc, int form, const struct of *of)
 static void
 dbprune(void)
 {
-	struct of	*of;
+	struct mpage	*mpage;
 	size_t		 i;
 
 	if (nodb)
 		return;
 
-	for (of = ofs; NULL != of; of = of->next) {
+	for (mpage = mpages_list; NULL != mpage; mpage = mpage->next) {
 		i = 1;
-		SQL_BIND_TEXT(stmts[STMT_DELETE], i, of->file);
+		SQL_BIND_TEXT(stmts[STMT_DELETE], i, mpage->file);
 		SQL_STEP(stmts[STMT_DELETE]);
 		sqlite3_reset(stmts[STMT_DELETE]);
 		if (verb)
-			say(of->file, "Deleted from index");
+			say(mpage->file, "Deleted from index");
 	}
 }
 
