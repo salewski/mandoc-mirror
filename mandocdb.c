@@ -95,7 +95,6 @@ struct	inodev {
 
 struct	mpage {
 	struct inodev	 inodev;  /* used for hashing routine */
-	struct mpage	*next; /* next in mpages_list */
 	enum form	 dform; /* path-cued form */
 	enum form	 sform; /* suffix-cued form */
 	char		 file[PATH_MAX]; /* filename rel. to manpath */
@@ -154,7 +153,6 @@ static	int	 parse_mdoc_Nm(struct mpage *, const struct mdoc_node *);
 static	int	 parse_mdoc_Sh(struct mpage *, const struct mdoc_node *);
 static	int	 parse_mdoc_St(struct mpage *, const struct mdoc_node *);
 static	int	 parse_mdoc_Xr(struct mpage *, const struct mdoc_node *);
-static	int	 set_basedir(const char *);
 static	void	 putkey(const struct mpage *,
 			const char *, uint64_t);
 static	void	 putkeys(const struct mpage *,
@@ -162,6 +160,7 @@ static	void	 putkeys(const struct mpage *,
 static	void	 putmdockey(const struct mpage *,
 			const struct mdoc_node *, uint64_t);
 static	void	 say(const char *, const char *, ...);
+static	int	 set_basedir(const char *);
 static	int	 treescan(void);
 static	size_t	 utf8(unsigned int, char [7]);
 static	void	 utf8key(struct mchars *, struct str *);
@@ -177,7 +176,6 @@ static	char		 basedir[PATH_MAX]; /* current base directory */
 static	struct ohash	 mpages; /* table of distinct manual pages */
 static	struct ohash	 filenames; /* table of filenames */
 static	struct ohash	 strings; /* table of all strings */
-static	struct mpage	*mpages_list = NULL; /* vector of files to parse */
 static	sqlite3		*db = NULL; /* current database */
 static	sqlite3_stmt	*stmts[STMT__MAX]; /* current statements */
 
@@ -470,9 +468,9 @@ main(int argc, char *argv[])
 			dbclose(0);
 
 			if (j + 1 < dirs.sz) {
+				mpages_free();
 				ohash_delete(&mpages);
 				ohash_delete(&filenames);
-				mpages_free();
 			}
 		}
 	}
@@ -481,9 +479,9 @@ out:
 	manpath_free(&dirs);
 	mchars_free(mc);
 	mparse_free(mp);
+	mpages_free();
 	ohash_delete(&mpages);
 	ohash_delete(&filenames);
-	mpages_free();
 	return(exitcode);
 usage:
 	fprintf(stderr, "usage: %s [-anvW] [-C file]\n"
@@ -806,13 +804,12 @@ inocheck(const struct stat *st)
 static void
 inoadd(const struct stat *st, struct mpage *mpage)
 {
-	uint32_t	 hash;
 	unsigned int	 slot;
 
-	mpage->inodev.st_ino = hash = st->st_ino;
+	mpage->inodev.st_ino = st->st_ino;
 	mpage->inodev.st_dev = st->st_dev;
-	slot = ohash_lookup_memory(&mpages,
-	    (char *)&mpage->inodev, sizeof(mpage->inodev), hash);
+	slot = ohash_lookup_memory(&mpages, (char *)&mpage->inodev,
+	    sizeof(struct inodev), st->st_ino);
 
 	assert(NULL == ohash_find(&mpages, slot));
 	ohash_insert(&mpages, slot, mpage);
@@ -852,8 +849,6 @@ ofadd(int dform, const char *file, const char *name, const char *dsec,
 	mpage->arch = mandoc_strdup(arch);
 	mpage->sform = sform;
 	mpage->dform = dform;
-	mpage->next = mpages_list;
-	mpages_list = mpage;
 
 	/*
 	 * Add to unique identifier hash.
@@ -868,20 +863,22 @@ static void
 mpages_free(void)
 {
 	struct mpage	*mpage;
+	unsigned int	 slot;
 
-	while (NULL != (mpage = mpages_list)) {
-		mpages_list = mpage->next;
+	mpage = ohash_first(&mpages, &slot);
+	while (NULL != mpage) {
 		free(mpage->name);
 		free(mpage->sec);
 		free(mpage->dsec);
 		free(mpage->arch);
 		free(mpage);
+		mpage = ohash_next(&mpages, &slot);
 	}
 }
 
 /*
- * Run through the files in the global vector "mpages_list" and add them to the
- * database specified in "basedir".
+ * Run through the files in the global vector "mpages"
+ * and add them to the database specified in "basedir".
  *
  * This handles the parsing scheme itself, using the cues of directory
  * and filename to determine whether the file is parsable or not.
@@ -901,7 +898,7 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 	size_t			 sz;
 	int			 form;
 	int			 match;
-	unsigned int		 slot;
+	unsigned int		 pslot, tslot;
 	enum mandoclevel	 lvl;
 
 	str_info.alloc = hash_alloc;
@@ -917,7 +914,8 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		ohash_init(&title_table, 6, &title_info);
 	}
 
-	for (mpage = mpages_list; NULL != mpage; mpage = mpage->next) {
+	mpage = ohash_first(&mpages, &pslot);
+	while (NULL != mpage) {
 		/*
 		 * If we're a catpage (as defined by our path), then see
 		 * if a manpage exists by the same name (ignoring the
@@ -931,6 +929,7 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 				if (warnings)
 					say(mpage->file,
 					    "Filename too long");
+				mpage = ohash_next(&mpages, &pslot);
 				continue;
 			}
 			bufp = strstr(buf, "cat");
@@ -943,6 +942,7 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 				if (warnings)
 					say(mpage->file, "Man "
 					    "source exists: %s", buf);
+				mpage = ohash_next(&mpages, &pslot);
 				continue;
 			}
 		}
@@ -1054,15 +1054,15 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 				perror(NULL);
 				exit((int)MANDOCLEVEL_SYSERR);
 			}
-			slot = ohash_qlookup(&title_table, title_str);
-			title_entry = ohash_find(&title_table, slot);
+			tslot = ohash_qlookup(&title_table, title_str);
+			title_entry = ohash_find(&title_table, tslot);
 			if (NULL == title_entry) {
 				title_entry = mandoc_malloc(
 						sizeof(struct title));
 				title_entry->title = title_str;
 				title_entry->file = mandoc_strdup(
 				    match ? "" : mpage->file);
-				ohash_insert(&title_table, slot,
+				ohash_insert(&title_table, tslot,
 						title_entry);
 			} else {
 				if (match)
@@ -1073,10 +1073,11 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 
 		dbindex(mc, form, mpage);
 		ohash_delete(&strings);
+		mpage = ohash_next(&mpages, &pslot);
 	}
 
 	if (check_reachable) {
-		title_entry = ohash_first(&title_table, &slot);
+		title_entry = ohash_first(&title_table, &tslot);
 		while (NULL != title_entry) {
 			if ('\0' != *title_entry->file)
 				say(title_entry->file,
@@ -1085,7 +1086,7 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 			free(title_entry->title);
 			free(title_entry->file);
 			free(title_entry);
-			title_entry = ohash_next(&title_table, &slot);
+			title_entry = ohash_next(&title_table, &tslot);
 		}
 		ohash_delete(&title_table);
 	}
@@ -1846,17 +1847,20 @@ dbprune(void)
 {
 	struct mpage	*mpage;
 	size_t		 i;
+	unsigned int	 slot;
 
 	if (nodb)
 		return;
 
-	for (mpage = mpages_list; NULL != mpage; mpage = mpage->next) {
+	mpage = ohash_first(&mpages, &slot);
+	while (NULL != mpage) {
 		i = 1;
 		SQL_BIND_TEXT(stmts[STMT_DELETE], i, mpage->file);
 		SQL_STEP(stmts[STMT_DELETE]);
 		sqlite3_reset(stmts[STMT_DELETE]);
 		if (verb)
 			say(mpage->file, "Deleted from index");
+		mpage = ohash_next(&mpages, &slot);
 	}
 }
 
