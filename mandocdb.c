@@ -144,6 +144,7 @@ static	void	 hash_free(void *, size_t, void *);
 static	void	*hash_halloc(size_t, void *);
 static	void	 mlink_add(struct mlink *, const struct stat *);
 static	void	 mlink_free(struct mlink *);
+static	void	 mlinks_undupe(struct mpage *);
 static	void	 mpages_free(void);
 static	void	 mpages_merge(struct mchars *, struct mparse *, int);
 static	void	 parse_cat(struct mpage *);
@@ -548,7 +549,6 @@ treescan(void)
 		/*
 		 * If we're a regular file, add an mlink by using the
 		 * stored directory data and handling the filename.
-		 * Disallow duplicate (hard-linked) files.
 		 */
 		if (FTS_F == ff->fts_info) {
 			if (0 == strcmp(path, MANDOC_DB))
@@ -663,7 +663,7 @@ treescan(void)
 }
 
 /*
- * Add a file to the file vector.
+ * Add a file to the mlinks table.
  * Do not verify that it's a "valid" looking manpage (we'll do that
  * later).
  *
@@ -674,7 +674,6 @@ treescan(void)
  *   or
  *   [./]cat<section>[/<arch>]/<name>.0
  *
- * Stuff this information directly into the mlink vector.
  * See treescan() for the fts(3) version of this.
  */
 static void
@@ -842,6 +841,51 @@ mpages_free(void)
 }
 
 /*
+ * For each mlink to the mpage, check whether the path looks like
+ * it is formatted, and if it does, check whether a source manual
+ * exists by the same name, ignoring the suffix.
+ * If both conditions hold, drop the mlink.
+ */
+static void
+mlinks_undupe(struct mpage *mpage)
+{
+	char		  buf[PATH_MAX];
+	struct mlink	**prev;
+	struct mlink	 *mlink;
+	char		 *bufp;
+
+	mpage->form = FORM_CAT;
+	for(prev = &mpage->mlinks; *prev; prev = &(*prev)->next) {
+		mlink = *prev;
+		if (FORM_CAT != mlink->dform) {
+			mpage->form = FORM_NONE;
+			continue;
+		}
+		if (strlcpy(buf, mlink->file, PATH_MAX) >= PATH_MAX) {
+			if (warnings)
+				say(mlink->file, "Filename too long");
+			continue;
+		}
+		bufp = strstr(buf, "cat");
+		assert(NULL != bufp);
+		memcpy(bufp, "man", 3);
+		if (NULL != (bufp = strrchr(buf, '.')))
+			*++bufp = '\0';
+		strlcat(buf, mlink->dsec, PATH_MAX);
+		if (NULL == ohash_find(&mlinks,
+				ohash_qlookup(&mlinks, buf)))
+			continue;
+		if (warnings)
+			say(mlink->file, "Man source exists: %s", buf);
+		if (use_all)
+			continue;
+		*prev = mlink->next;
+		mlink_free(mlink);
+		mlink = *prev;
+	}
+}
+
+/*
  * Run through the files in the global vector "mpages"
  * and add them to the database specified in "basedir".
  *
@@ -853,14 +897,12 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 {
 	struct ohash		 title_table;
 	struct ohash_info	 title_info, str_info;
-	char			 buf[PATH_MAX];
 	struct mpage		*mpage;
 	struct mdoc		*mdoc;
 	struct man		*man;
 	struct title		*title_entry;
-	char			*bufp, *title_str;
+	char			*title_str;
 	const char		*cp;
-	size_t			 sz;
 	int			 match;
 	unsigned int		 pslot, tslot;
 	enum mandoclevel	 lvl;
@@ -880,36 +922,10 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 
 	mpage = ohash_first(&mpages, &pslot);
 	while (NULL != mpage) {
-		/*
-		 * If we're a catpage (as defined by our path), then see
-		 * if a manpage exists by the same name (ignoring the
-		 * suffix).
-		 * If it does, then we want to use it instead of our
-		 * own.
-		 */
-		if ( ! use_all && FORM_CAT == mpage->mlinks->dform) {
-			sz = strlcpy(buf, mpage->mlinks->file, PATH_MAX);
-			if (sz >= PATH_MAX) {
-				if (warnings)
-					say(mpage->mlinks->file,
-					    "Filename too long");
-				mpage = ohash_next(&mpages, &pslot);
-				continue;
-			}
-			bufp = strstr(buf, "cat");
-			assert(NULL != bufp);
-			memcpy(bufp, "man", 3);
-			if (NULL != (bufp = strrchr(buf, '.')))
-				*++bufp = '\0';
-			strlcat(buf, mpage->mlinks->dsec, PATH_MAX);
-			if (NULL != ohash_find(&mlinks,
-					ohash_qlookup(&mlinks, buf))) {
-				if (warnings)
-					say(mpage->mlinks->file, "Man "
-					    "source exists: %s", buf);
-				mpage = ohash_next(&mpages, &pslot);
-				continue;
-			}
+		mlinks_undupe(mpage);
+		if (NULL == mpage->mlinks) {
+			mpage = ohash_next(&mpages, &pslot);
+			continue;
 		}
 
 		ohash_init(&strings, 6, &str_info);
