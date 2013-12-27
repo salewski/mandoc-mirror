@@ -76,9 +76,9 @@ enum	op {
 };
 
 enum	form {
-	FORM_SRC, /* format is -man or -mdoc */
-	FORM_CAT, /* format is cat */
-	FORM_NONE /* format is unknown */
+	FORM_NONE,  /* format is unknown */
+	FORM_SRC,   /* format is -man or -mdoc */
+	FORM_CAT    /* format is cat */
 };
 
 struct	str {
@@ -106,7 +106,7 @@ struct	mpage {
 struct	mlink {
 	char		 file[PATH_MAX]; /* filename rel. to manpath */
 	enum form	 dform;   /* format from directory */
-	enum form	 sform;   /* format from file name suffix */
+	enum form	 fform;   /* format from file name suffix */
 	char		*dsec;    /* section from directory */
 	char		*arch;    /* architecture from directory */
 	char		*name;    /* name from file name (not empty) */
@@ -142,8 +142,7 @@ static	void	*hash_alloc(size_t, void *);
 static	void	 hash_free(void *, size_t, void *);
 static	void	*hash_halloc(size_t, void *);
 static	int	 inocheck(const struct stat *);
-static	void	 mlink_add(int, const char *, const char *, const char *,
-			const char *, const char *, const struct stat *);
+static	void	 mlink_add(struct mlink *, const struct stat *);
 static	void	 mlink_free(struct mlink *);
 static	void	 mpages_free(void);
 static	void	 mpages_merge(struct mchars *, struct mparse *, int);
@@ -521,8 +520,9 @@ treescan(void)
 {
 	FTS		*f;
 	FTSENT		*ff;
+	struct mlink	*mlink;
 	int		 dform;
-	char		*sec;
+	char		*fsec;
 	const char	*dsec, *arch, *cp, *path;
 	const char	*argv[2];
 
@@ -561,7 +561,7 @@ treescan(void)
 				if (warnings)
 					say(path, "Duplicate file");
 				continue;
-			} else if (NULL == (sec =
+			} else if (NULL == (fsec =
 					strrchr(ff->fts_name, '.'))) {
 				if ( ! use_all) {
 					if (warnings)
@@ -569,34 +569,43 @@ treescan(void)
 						    "No filename suffix");
 					continue;
 				}
-			} else if (0 == strcmp(++sec, "html")) {
+			} else if (0 == strcmp(++fsec, "html")) {
 				if (warnings)
 					say(path, "Skip html");
 				continue;
-			} else if (0 == strcmp(sec, "gz")) {
+			} else if (0 == strcmp(fsec, "gz")) {
 				if (warnings)
 					say(path, "Skip gz");
 				continue;
-			} else if (0 == strcmp(sec, "ps")) {
+			} else if (0 == strcmp(fsec, "ps")) {
 				if (warnings)
 					say(path, "Skip ps");
 				continue;
-			} else if (0 == strcmp(sec, "pdf")) {
+			} else if (0 == strcmp(fsec, "pdf")) {
 				if (warnings)
 					say(path, "Skip pdf");
 				continue;
 			} else if ( ! use_all &&
-			    ((FORM_SRC == dform && strcmp(sec, dsec)) ||
-			     (FORM_CAT == dform && strcmp(sec, "0")))) {
+			    ((FORM_SRC == dform && strcmp(fsec, dsec)) ||
+			     (FORM_CAT == dform && strcmp(fsec, "0")))) {
 				if (warnings)
 					say(path, "Wrong filename suffix");
 				continue;
 			} else
-				sec[-1] = '\0';
-			mlink_add(dform, path, ff->fts_name, dsec, sec,
-					arch, ff->fts_statp);
+				fsec[-1] = '\0';
+			mlink = mandoc_calloc(1, sizeof(struct mlink));
+			strlcpy(mlink->file, path, sizeof(mlink->file));
+			mlink->dform = dform;
+			if (NULL != dsec)
+				mlink->dsec = mandoc_strdup(dsec);
+			if (NULL != arch)
+				mlink->arch = mandoc_strdup(arch);
+			mlink->name = mandoc_strdup(ff->fts_name);
+			if (NULL != fsec)
+				mlink->fsec = mandoc_strdup(fsec);
+			mlink_add(mlink, ff->fts_statp);
 			continue;
-		} else if (FTS_D != ff->fts_info && 
+		} else if (FTS_D != ff->fts_info &&
 				FTS_DP != ff->fts_info) {
 			if (warnings)
 				say(path, "Not a regular file");
@@ -676,10 +685,9 @@ static void
 filescan(const char *file)
 {
 	char		 buf[PATH_MAX];
-	const char	*sec, *arch, *name, *dsec;
-	char		*p, *start;
-	int		 dform;
 	struct stat	 st;
+	struct mlink	*mlink;
+	char		*p, *start;
 
 	assert(use_all);
 
@@ -708,8 +716,8 @@ filescan(const char *file)
 		return;
 	}
 	start = buf + strlen(basedir);
-	sec = arch = name = dsec = NULL;
-	dform = FORM_NONE;
+	mlink = mandoc_calloc(1, sizeof(struct mlink));
+	strlcpy(mlink->file, start, sizeof(mlink->file));
 
 	/*
 	 * First try to guess our directory structure.
@@ -720,19 +728,19 @@ filescan(const char *file)
 	if (NULL != (p = strchr(start, '/'))) {
 		*p++ = '\0';
 		if (0 == strncmp(start, "man", 3)) {
-			dform = FORM_SRC;
-			dsec = start + 3;
+			mlink->dform = FORM_SRC;
+			mlink->dsec = mandoc_strdup(start + 3);
 		} else if (0 == strncmp(start, "cat", 3)) {
-			dform = FORM_CAT;
-			dsec = start + 3;
+			mlink->dform = FORM_CAT;
+			mlink->dsec = mandoc_strdup(start + 3);
 		}
 
 		start = p;
-		if (NULL != dsec && NULL != (p = strchr(start, '/'))) {
+		if (NULL != mlink->dsec && NULL != (p = strchr(start, '/'))) {
 			*p++ = '\0';
-			arch = start;
+			mlink->arch = mandoc_strdup(start);
 			start = p;
-		} 
+		}
 	}
 
 	/*
@@ -745,20 +753,21 @@ filescan(const char *file)
 
 	if ('.' == *p) {
 		*p++ = '\0';
-		sec = p;
+		mlink->fsec = mandoc_strdup(p);
 	}
 
 	/*
 	 * Now try to parse the name.
 	 * Use the filename portion of the path.
 	 */
-	name = start;
+	mlink->name = start;
 	if (NULL != (p = strrchr(start, '/'))) {
-		name = p + 1;
+		mlink->name = p + 1;
 		*p = '\0';
-	} 
+	}
+	mlink->name = mandoc_strdup(mlink->name);
 
-	mlink_add(dform, file, name, dsec, sec, arch, &st);
+	mlink_add(mlink, &st);
 }
 
 static int
@@ -776,42 +785,31 @@ inocheck(const struct stat *st)
 }
 
 static void
-mlink_add(int dform, const char *file, const char *name, const char *dsec,
-	const char *sec, const char *arch, const struct stat *st)
+mlink_add(struct mlink *mlink, const struct stat *st)
 {
 	struct inodev	 inodev;
 	struct mpage	*mpage;
-	struct mlink	*mlink;
-	int		 sform;
 	unsigned int	 slot;
 
-	assert(NULL != file);
+	assert(NULL != mlink->file);
 
-	if (NULL == name)
-		name = "";
-	if (NULL == sec)
-		sec = "";
-	if (NULL == dsec)
-		dsec = "";
-	if (NULL == arch)
-		arch = "";
+	if (NULL == mlink->dsec)
+		mlink->dsec = mandoc_strdup("");
+	if (NULL == mlink->arch)
+		mlink->arch = mandoc_strdup("");
+	if (NULL == mlink->name)
+		mlink->name = mandoc_strdup("");
+	if (NULL == mlink->fsec)
+		mlink->fsec = mandoc_strdup("");
 
-	if ('0' == *sec) {
-		sec = dsec;
-		sform = FORM_CAT;
-	} else if ('1' <= *sec && '9' >= *sec)
-		sform = FORM_SRC;
+	if ('0' == *mlink->fsec) {
+		free(mlink->fsec);
+		mlink->fsec = mandoc_strdup(mlink->dsec);
+		mlink->fform = FORM_CAT;
+	} else if ('1' <= *mlink->fsec && '9' >= *mlink->fsec)
+		mlink->fform = FORM_SRC;
 	else
-		sform = FORM_NONE;
-
-	mlink = mandoc_calloc(1, sizeof(struct mlink));
-	strlcpy(mlink->file, file, PATH_MAX);
-	mlink->dform = dform;
-	mlink->sform = sform;
-	mlink->dsec = mandoc_strdup(dsec);
-	mlink->arch = mandoc_strdup(arch);
-	mlink->name = mandoc_strdup(name);
-	mlink->fsec = mandoc_strdup(sec);
+		mlink->fform = FORM_NONE;
 
 	slot = ohash_qlookup(&mlinks, mlink->file);
 	assert(NULL == ohash_find(&mlinks, slot));
@@ -948,7 +946,7 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		 * formatted.  Fall back to formatted mode.
 		 */
 		if (FORM_CAT != mpage->mlinks->dform ||
-		    FORM_CAT != mpage->mlinks->sform) {
+		    FORM_CAT != mpage->mlinks->fform) {
 			lvl = mparse_readfd(mp, -1, mpage->mlinks->file);
 			if (lvl < MANDOCLEVEL_FATAL)
 				mparse_result(mp, &mdoc, &man);
@@ -959,9 +957,8 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 			mpage->sec =
 			    mandoc_strdup(mdoc_meta(mdoc)->msec);
 			mpage->arch = mdoc_meta(mdoc)->arch;
-			if (NULL == mpage->arch)
-				mpage->arch = "";
-			mpage->arch = mandoc_strdup(mpage->arch);
+			mpage->arch = mandoc_strdup(
+			    NULL == mpage->arch ? "" : mpage->arch);
 			mpage->title =
 			    mandoc_strdup(mdoc_meta(mdoc)->title);
 		} else if (NULL != man) {
