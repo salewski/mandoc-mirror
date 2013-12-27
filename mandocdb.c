@@ -95,14 +95,22 @@ struct	inodev {
 
 struct	mpage {
 	struct inodev	 inodev;  /* used for hashing routine */
-	enum form	 dform; /* path-cued form */
-	enum form	 sform; /* suffix-cued form */
+	enum form	 form;    /* format from file content */
+	char		*sec;     /* section from file content */
+	char		*arch;    /* architecture from file content */
+	char		*title;   /* title from file content */
+	char		*desc;    /* description from file content */
+	struct mlink	*mlinks;  /* singly linked list */
+};
+
+struct	mlink {
 	char		 file[PATH_MAX]; /* filename rel. to manpath */
-	char		*desc; /* parsed description */
-	char		*name; /* name (from filename) (not empty) */
-	char		*sec; /* suffix-cued section (or empty) */
-	char		*dsec; /* path-cued section (or empty) */
-	char		*arch; /* path-cued arch. (or empty) */
+	enum form	 dform;   /* format from directory */
+	enum form	 sform;   /* format from file name suffix */
+	char		*dsec;    /* section from directory */
+	char		*arch;    /* architecture from directory */
+	char		*name;    /* name from file name (not empty) */
+	char		*fsec;    /* section from file name suffix */
 };
 
 struct	title {
@@ -126,10 +134,10 @@ struct	mdoc_handler {
 };
 
 static	void	 dbclose(int);
-static	void	 dbindex(struct mchars *, int, const struct mpage *);
+static	void	 dbindex(const struct mpage *, struct mchars *);
 static	int	 dbopen(int);
 static	void	 dbprune(void);
-static	void	 fileadd(struct mpage *);
+static	void	 fileadd(struct mlink *);
 static	int	 filecheck(const char *);
 static	void	 filescan(const char *);
 static	void	*hash_alloc(size_t, void *);
@@ -139,6 +147,7 @@ static	void	 inoadd(const struct stat *, struct mpage *);
 static	int	 inocheck(const struct stat *);
 static	void	 ofadd(int, const char *, const char *, const char *,
 			const char *, const char *, const struct stat *);
+static	void	 mlink_free(struct mlink *);
 static	void	 mpages_free(void);
 static	void	 mpages_merge(struct mchars *, struct mparse *, int);
 static	void	 parse_cat(struct mpage *);
@@ -324,7 +333,7 @@ main(int argc, char *argv[])
 	mpages_info.hfree  = filename_info.hfree  = hash_free;
 
 	mpages_info.key_offset = offsetof(struct mpage, inodev);
-	filename_info.key_offset = offsetof(struct mpage, file);
+	filename_info.key_offset = offsetof(struct mlink, file);
 
 	progname = strrchr(argv[0], '/');
 	if (progname == NULL)
@@ -771,13 +780,13 @@ filecheck(const char *name)
  * already exists.
  */
 static void
-fileadd(struct mpage *mpage)
+fileadd(struct mlink *mlink)
 {
 	unsigned int	 slot;
 
-	slot = ohash_qlookup(&filenames, mpage->file);
+	slot = ohash_qlookup(&filenames, mlink->file);
 	assert(NULL == ohash_find(&filenames, slot));
-	ohash_insert(&filenames, slot, mpage);
+	ohash_insert(&filenames, slot, mlink);
 }
 
 /*
@@ -821,6 +830,7 @@ ofadd(int dform, const char *file, const char *name, const char *dsec,
 	const char *sec, const char *arch, const struct stat *st)
 {
 	struct mpage	*mpage;
+	struct mlink	*mlink;
 	int		 sform;
 
 	assert(NULL != file);
@@ -842,14 +852,17 @@ ofadd(int dform, const char *file, const char *name, const char *dsec,
 	else
 		sform = FORM_NONE;
 
+	mlink = mandoc_calloc(1, sizeof(struct mlink));
+	strlcpy(mlink->file, file, PATH_MAX);
+	mlink->dform = dform;
+	mlink->sform = sform;
+	mlink->dsec = mandoc_strdup(dsec);
+	mlink->arch = mandoc_strdup(arch);
+	mlink->name = mandoc_strdup(name);
+	mlink->fsec = mandoc_strdup(sec);
+
 	mpage = mandoc_calloc(1, sizeof(struct mpage));
-	strlcpy(mpage->file, file, PATH_MAX);
-	mpage->name = mandoc_strdup(name);
-	mpage->sec = mandoc_strdup(sec);
-	mpage->dsec = mandoc_strdup(dsec);
-	mpage->arch = mandoc_strdup(arch);
-	mpage->sform = sform;
-	mpage->dform = dform;
+	mpage->mlinks = mlink;
 
 	/*
 	 * Add to unique identifier hash.
@@ -857,21 +870,37 @@ ofadd(int dform, const char *file, const char *name, const char *dsec,
 	 * favour of catpages, add it to that hash.
 	 */
 	inoadd(st, mpage);
-	fileadd(mpage);
+	fileadd(mpage->mlinks);
+}
+
+static void
+mlink_free(struct mlink *mlink)
+{
+
+	free(mlink->dsec);
+	free(mlink->arch);
+	free(mlink->name);
+	free(mlink->fsec);
+	free(mlink);
 }
 
 static void
 mpages_free(void)
 {
 	struct mpage	*mpage;
+	struct mlink	*mlink;
 	unsigned int	 slot;
 
 	mpage = ohash_first(&mpages, &slot);
 	while (NULL != mpage) {
-		free(mpage->name);
+		while (NULL != (mlink = mpage->mlinks)) {
+			mpage->mlinks = NULL;
+			mlink_free(mlink);
+		}
 		free(mpage->sec);
-		free(mpage->dsec);
 		free(mpage->arch);
+		free(mpage->title);
+		free(mpage->desc);
 		free(mpage);
 		mpage = ohash_next(&mpages, &slot);
 	}
@@ -895,9 +924,8 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 	struct man		*man;
 	struct title		*title_entry;
 	char			*bufp, *title_str;
-	const char		*msec, *march, *mtitle, *cp;
+	const char		*cp;
 	size_t			 sz;
-	int			 form;
 	int			 match;
 	unsigned int		 pslot, tslot;
 	enum mandoclevel	 lvl;
@@ -924,11 +952,11 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		 * If it does, then we want to use it instead of our
 		 * own.
 		 */
-		if ( ! use_all && FORM_CAT == mpage->dform) {
-			sz = strlcpy(buf, mpage->file, PATH_MAX);
+		if ( ! use_all && FORM_CAT == mpage->mlinks->dform) {
+			sz = strlcpy(buf, mpage->mlinks->file, PATH_MAX);
 			if (sz >= PATH_MAX) {
 				if (warnings)
-					say(mpage->file,
+					say(mpage->mlinks->file,
 					    "Filename too long");
 				mpage = ohash_next(&mpages, &pslot);
 				continue;
@@ -938,10 +966,10 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 			memcpy(bufp, "man", 3);
 			if (NULL != (bufp = strrchr(buf, '.')))
 				*++bufp = '\0';
-			strlcat(buf, mpage->dsec, PATH_MAX);
+			strlcat(buf, mpage->mlinks->dsec, PATH_MAX);
 			if (filecheck(buf)) {
 				if (warnings)
-					say(mpage->file, "Man "
+					say(mpage->mlinks->file, "Man "
 					    "source exists: %s", buf);
 				mpage = ohash_next(&mpages, &pslot);
 				continue;
@@ -959,35 +987,40 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		 * source code, unless it is already known to be
 		 * formatted.  Fall back to formatted mode.
 		 */
-		if (FORM_CAT != mpage->dform || FORM_CAT != mpage->sform) {
-			lvl = mparse_readfd(mp, -1, mpage->file);
+		if (FORM_CAT != mpage->mlinks->dform ||
+		    FORM_CAT != mpage->mlinks->sform) {
+			lvl = mparse_readfd(mp, -1, mpage->mlinks->file);
 			if (lvl < MANDOCLEVEL_FATAL)
 				mparse_result(mp, &mdoc, &man);
 		}
 
 		if (NULL != mdoc) {
-			form = 1;
-			msec = mdoc_meta(mdoc)->msec;
-			march = mdoc_meta(mdoc)->arch;
-			mtitle = mdoc_meta(mdoc)->title;
+			mpage->form = FORM_SRC;
+			mpage->sec =
+			    mandoc_strdup(mdoc_meta(mdoc)->msec);
+			mpage->arch = mdoc_meta(mdoc)->arch;
+			if (NULL == mpage->arch)
+				mpage->arch = "";
+			mpage->arch = mandoc_strdup(mpage->arch);
+			mpage->title =
+			    mandoc_strdup(mdoc_meta(mdoc)->title);
 		} else if (NULL != man) {
-			form = 1;
-			msec = man_meta(man)->msec;
-			march = mpage->arch;
-			mtitle = man_meta(man)->title;
+			mpage->form = FORM_SRC;
+			mpage->sec =
+			    mandoc_strdup(man_meta(man)->msec);
+			mpage->arch =
+			    mandoc_strdup(mpage->mlinks->arch);
+			mpage->title =
+			    mandoc_strdup(man_meta(man)->title);
 		} else {
-			form = 0;
-			msec = mpage->dsec;
-			march = mpage->arch;
-			mtitle = mpage->name;
+			mpage->form = FORM_CAT;
+			mpage->sec =
+			    mandoc_strdup(mpage->mlinks->dsec);
+			mpage->arch =
+			    mandoc_strdup(mpage->mlinks->arch);
+			mpage->title =
+			    mandoc_strdup(mpage->mlinks->name);
 		}
-
-		if (NULL == msec)
-			msec = "";
-		if (NULL == march)
-			march = "";
-		if (NULL == mtitle)
-			mtitle = "";
 
 		/*
 		 * Check whether the manual section given in a file
@@ -998,12 +1031,12 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		 * section, like encrypt(1) = makekey(8).  Do not skip
 		 * manuals for such reasons.
 		 */
-		if (warnings && !use_all && form &&
-				strcasecmp(msec, mpage->dsec)) {
+		if (warnings && !use_all && FORM_SRC == mpage->form &&
+		    strcasecmp(mpage->sec, mpage->mlinks->dsec)) {
 			match = 0;
-			say(mpage->file, "Section \"%s\" "
+			say(mpage->mlinks->file, "Section \"%s\" "
 				"manual in %s directory",
-				msec, mpage->dsec);
+				mpage->sec, mpage->mlinks->dsec);
 		}
 
 		/*
@@ -1020,16 +1053,18 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		 * Thus, warn about architecture mismatches,
 		 * but don't skip manuals for this reason.
 		 */
-		if (warnings && !use_all && strcasecmp(march, mpage->arch)) {
+		if (warnings && !use_all &&
+		    strcasecmp(mpage->arch, mpage->mlinks->arch)) {
 			match = 0;
-			say(mpage->file, "Architecture \"%s\" "
+			say(mpage->mlinks->file, "Architecture \"%s\" "
 				"manual in \"%s\" directory",
-				march, mpage->arch);
+				mpage->arch, mpage->mlinks->arch);
 		}
-		if (warnings && !use_all && strcasecmp(mtitle, mpage->name))
+		if (warnings && !use_all &&
+		    strcasecmp(mpage->title, mpage->mlinks->name))
 			match = 0;
 
-		putkey(mpage, mpage->name, TYPE_Nm);
+		putkey(mpage, mpage->mlinks->name, TYPE_Nm);
 
 		if (NULL != mdoc) {
 			if (NULL != (cp = mdoc_meta(mdoc)->name))
@@ -1037,7 +1072,7 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 			assert(NULL == mpage->desc);
 			parse_mdoc(mpage, mdoc_node(mdoc));
 			putkey(mpage, NULL != mpage->desc ?
-				mpage->desc : mpage->name, TYPE_Nd);
+			    mpage->desc : mpage->mlinks->name, TYPE_Nd);
 		} else if (NULL != man)
 			parse_man(mpage, man_node(man));
 		else
@@ -1050,8 +1085,10 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		 */
 
 		if (check_reachable) {
-			if (-1 == asprintf(&title_str, "%s(%s%s%s)", mtitle,
-			    msec, '\0' == *march ? "" : "/", march)) {
+			if (-1 == asprintf(&title_str, "%s(%s%s%s)",
+			    mpage->title, mpage->sec,
+			    '\0' == *mpage->arch ? "" : "/",
+			    mpage->arch)) {
 				perror(NULL);
 				exit((int)MANDOCLEVEL_SYSERR);
 			}
@@ -1062,7 +1099,7 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 						sizeof(struct title));
 				title_entry->title = title_str;
 				title_entry->file = mandoc_strdup(
-				    match ? "" : mpage->file);
+				    match ? "" : mpage->mlinks->file);
 				ohash_insert(&title_table, tslot,
 						title_entry);
 			} else {
@@ -1072,7 +1109,7 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 			}
 		}
 
-		dbindex(mc, form, mpage);
+		dbindex(mpage, mc);
 		ohash_delete(&strings);
 		mpage = ohash_next(&mpages, &pslot);
 	}
@@ -1100,9 +1137,9 @@ parse_cat(struct mpage *mpage)
 	char		*line, *p, *title;
 	size_t		 len, plen, titlesz;
 
-	if (NULL == (stream = fopen(mpage->file, "r"))) {
+	if (NULL == (stream = fopen(mpage->mlinks->file, "r"))) {
 		if (warnings)
-			say(mpage->file, NULL);
+			say(mpage->mlinks->file, NULL);
 		return;
 	}
 
@@ -1155,10 +1192,11 @@ parse_cat(struct mpage *mpage)
 
 	if (NULL == title || '\0' == *title) {
 		if (warnings)
-			say(mpage->file, "Cannot find NAME section");
+			say(mpage->mlinks->file,
+			    "Cannot find NAME section");
 		assert(NULL == mpage->desc);
-		mpage->desc = mandoc_strdup(mpage->name);
-		putkey(mpage, mpage->name, TYPE_Nd);
+		mpage->desc = mandoc_strdup(mpage->mlinks->name);
+		putkey(mpage, mpage->mlinks->name, TYPE_Nd);
 		fclose(stream);
 		free(title);
 		return;
@@ -1178,7 +1216,8 @@ parse_cat(struct mpage *mpage)
 			/* Skip to next word. */ ;
 	} else {
 		if (warnings)
-			say(mpage->file, "No dash in title line");
+			say(mpage->mlinks->file,
+			    "No dash in title line");
 		p = title;
 	}
 
@@ -1788,7 +1827,7 @@ utf8key(struct mchars *mc, struct str *key)
  * Also, UTF-8-encode the description at the last possible moment.
  */
 static void
-dbindex(struct mchars *mc, int form, const struct mpage *mpage)
+dbindex(const struct mpage *mpage, struct mchars *mc)
 {
 	struct str	*key;
 	const char	*desc;
@@ -1797,7 +1836,7 @@ dbindex(struct mchars *mc, int form, const struct mpage *mpage)
 	unsigned int	 slot;
 
 	if (verb)
-		say(mpage->file, "Adding to index");
+		say(mpage->mlinks->file, "Adding to index");
 
 	if (nodb)
 		return;
@@ -1820,19 +1859,19 @@ dbindex(struct mchars *mc, int form, const struct mpage *mpage)
 	 * and only kept for backward compatibility
 	 * until apropos(1) and friends have caught up.
 	 */
-	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, mpage->file);
-	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, mpage->sec);
-	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, mpage->arch);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, mpage->mlinks->file);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, mpage->mlinks->dsec);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, mpage->mlinks->arch);
 	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, desc);
-	SQL_BIND_INT(stmts[STMT_INSERT_PAGE], i, form);
+	SQL_BIND_INT(stmts[STMT_INSERT_PAGE], i, FORM_SRC == mpage->form);
 	SQL_STEP(stmts[STMT_INSERT_PAGE]);
 	recno = sqlite3_last_insert_rowid(db);
 	sqlite3_reset(stmts[STMT_INSERT_PAGE]);
 
 	i = 1;
-	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mpage->sec);
-	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mpage->arch);
-	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mpage->file);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mpage->mlinks->dsec);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mpage->mlinks->arch);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mpage->mlinks->file);
 	SQL_BIND_INT64(stmts[STMT_INSERT_LINK], i, recno);
 	SQL_STEP(stmts[STMT_INSERT_LINK]);
 	sqlite3_reset(stmts[STMT_INSERT_LINK]);
@@ -1860,6 +1899,7 @@ static void
 dbprune(void)
 {
 	struct mpage	*mpage;
+	struct mlink	*mlink;
 	size_t		 i;
 	unsigned int	 slot;
 
@@ -1868,12 +1908,13 @@ dbprune(void)
 
 	mpage = ohash_first(&mpages, &slot);
 	while (NULL != mpage) {
+		mlink = mpage->mlinks;
 		i = 1;
-		SQL_BIND_TEXT(stmts[STMT_DELETE_PAGE], i, mpage->file);
+		SQL_BIND_TEXT(stmts[STMT_DELETE_PAGE], i, mlink->file);
 		SQL_STEP(stmts[STMT_DELETE_PAGE]);
 		sqlite3_reset(stmts[STMT_DELETE_PAGE]);
 		if (verb)
-			say(mpage->file, "Deleted from index");
+			say(mlink->file, "Deleted from index");
 		mpage = ohash_next(&mpages, &slot);
 	}
 }
