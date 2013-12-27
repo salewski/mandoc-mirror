@@ -144,7 +144,9 @@ mansearch(const struct mansearch *search,
 	int		 fd, rc, c;
 	int64_t		 id;
 	char		 buf[PATH_MAX];
-	char		*sql;
+	char		*sql, *newnames;
+	const char	*oldnames, *sep1, *name, *sec, *sep2, *arch;
+	struct manpage	*mpage;
 	struct expr	*e, *ep;
 	sqlite3		*db;
 	sqlite3_stmt	*s;
@@ -282,7 +284,12 @@ mansearch(const struct mansearch *search,
 			fprintf(stderr, "%s\n", sqlite3_errmsg(db));
 
 		sqlite3_finalize(s);
-		sqlite3_close(db);
+
+		c = sqlite3_prepare_v2(db, 
+		    "SELECT * FROM mlinks WHERE pageid=?",
+		    -1, &s, NULL);
+		if (SQLITE_OK != c)
+			fprintf(stderr, "%s\n", sqlite3_errmsg(db));
 
 		for (mp = ohash_first(&htab, &idx);
 				NULL != mp;
@@ -292,16 +299,50 @@ mansearch(const struct mansearch *search,
 				*res = mandoc_realloc
 					(*res, maxres * sizeof(struct manpage));
 			}
-			strlcpy((*res)[cur].file, 
-				paths->paths[i], PATH_MAX);
-			strlcat((*res)[cur].file, "/", PATH_MAX);
-			strlcat((*res)[cur].file, mp->file, PATH_MAX);
-			(*res)[cur].desc = mp->desc;
-			(*res)[cur].form = mp->form;
+			mpage = *res + cur;
+			if (-1 == asprintf(&mpage->file, "%s/%s",
+			    paths->paths[i], mp->file)) {
+				perror(0);
+				exit((int)MANDOCLEVEL_SYSERR);
+			}
+			mpage->names = NULL;
+			mpage->desc = mp->desc;
+			mpage->form = mp->form;
+
+			j = 1;
+			SQL_BIND_INT64(db, s, j, mp->id);
+			while (SQLITE_ROW == (c = sqlite3_step(s))) {
+				if (NULL == mpage->names) {
+					oldnames = "";
+					sep1 = "";
+				} else {
+					oldnames = mpage->names;
+					sep1 = ", ";
+				}
+				sec = sqlite3_column_text(s, 1);
+				arch = sqlite3_column_text(s, 2);
+				name = sqlite3_column_text(s, 3);
+				sep2 = '\0' == *arch ? "" : "/";
+				if (-1 == asprintf(&newnames,
+				    "%s%s%s(%s%s%s)", oldnames, sep1,
+				    name, sec, sep2, arch)) {
+					perror(0);
+					exit((int)MANDOCLEVEL_SYSERR);
+				}
+				free(mpage->names);
+				mpage->names = newnames;
+			}
+			if (SQLITE_DONE != c)
+				fprintf(stderr, "%s\n", sqlite3_errmsg(db));
+			sqlite3_reset(s);
+
 			free(mp->file);
 			free(mp);
 			cur++;
 		}
+
+		sqlite3_finalize(s);
+		sqlite3_close(db);
 		ohash_delete(&htab);
 	}
 	rc = 1;

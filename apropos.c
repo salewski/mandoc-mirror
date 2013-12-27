@@ -96,7 +96,9 @@ main(int argc, char *argv[])
 		goto usage;
 
 	for (i = 0; i < sz; i++) {
-		printf("%s - %s\n", res[i].file, res[i].desc);
+		printf("%s - %s\n", res[i].names, res[i].desc);
+		free(res[i].file);
+		free(res[i].names);
 		free(res[i].desc);
 	}
 

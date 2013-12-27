@@ -106,11 +106,14 @@ main(int argc, char *argv[])
 
 	for (i = 0; i < sz; i++) {
 		printf("%6zu  %s: %s\n", 
-			i + 1, res[i].file, res[i].desc);
+			i + 1, res[i].names, res[i].desc);
+		free(res[i].names);
 		free(res[i].desc);
 	}
 
 	if (0 == term) {
+		for (i = 0; i < sz; i++)
+			free(res[i].file);
 		free(res);
 		return(EXIT_SUCCESS);
 	}
@@ -127,12 +130,16 @@ main(int argc, char *argv[])
 		}
 
 	if (0 == i) {
+		for (i = 0; i < sz; i++)
+			free(res[i].file);
 		free(res);
 		return(EXIT_SUCCESS);
 	}
 show:
 	cmd = res[i - 1].form ? "mandoc" : "cat";
 	strlcpy(buf, res[i - 1].file, PATH_MAX);
+	for (i = 0; i < sz; i++)
+		free(res[i].file);
 	free(res);
 
 	show(cmd, buf);
