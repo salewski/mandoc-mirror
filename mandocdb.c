@@ -111,9 +111,10 @@ struct	title {
 };
 
 enum	stmt {
-	STMT_DELETE = 0, /* delete manpage */
-	STMT_INSERT_DOC, /* insert manpage */
-	STMT_INSERT_KEY, /* insert parsed key */
+	STMT_DELETE_PAGE = 0,	/* delete mpage */
+	STMT_INSERT_PAGE,	/* insert mpage */
+	STMT_INSERT_LINK,	/* insert mlink */
+	STMT_INSERT_KEY,	/* insert parsed key */
 	STMT__MAX
 };
 
@@ -1814,14 +1815,27 @@ dbindex(struct mchars *mc, int form, const struct mpage *mpage)
 	SQL_EXEC("BEGIN TRANSACTION");
 
 	i = 1;
-	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, mpage->file);
-	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, mpage->sec);
-	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, mpage->arch);
-	SQL_BIND_TEXT(stmts[STMT_INSERT_DOC], i, desc);
-	SQL_BIND_INT(stmts[STMT_INSERT_DOC], i, form);
-	SQL_STEP(stmts[STMT_INSERT_DOC]);
+	/*
+	 * XXX The following three lines are obsolete
+	 * and only kept for backward compatibility
+	 * until apropos(1) and friends have caught up.
+	 */
+	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, mpage->file);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, mpage->sec);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, mpage->arch);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, desc);
+	SQL_BIND_INT(stmts[STMT_INSERT_PAGE], i, form);
+	SQL_STEP(stmts[STMT_INSERT_PAGE]);
 	recno = sqlite3_last_insert_rowid(db);
-	sqlite3_reset(stmts[STMT_INSERT_DOC]);
+	sqlite3_reset(stmts[STMT_INSERT_PAGE]);
+
+	i = 1;
+	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mpage->sec);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mpage->arch);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mpage->file);
+	SQL_BIND_INT64(stmts[STMT_INSERT_LINK], i, recno);
+	SQL_STEP(stmts[STMT_INSERT_LINK]);
+	sqlite3_reset(stmts[STMT_INSERT_LINK]);
 
 	for (key = ohash_first(&strings, &slot); NULL != key;
 	     key = ohash_next(&strings, &slot)) {
@@ -1855,9 +1869,9 @@ dbprune(void)
 	mpage = ohash_first(&mpages, &slot);
 	while (NULL != mpage) {
 		i = 1;
-		SQL_BIND_TEXT(stmts[STMT_DELETE], i, mpage->file);
-		SQL_STEP(stmts[STMT_DELETE]);
-		sqlite3_reset(stmts[STMT_DELETE]);
+		SQL_BIND_TEXT(stmts[STMT_DELETE_PAGE], i, mpage->file);
+		SQL_STEP(stmts[STMT_DELETE_PAGE]);
+		sqlite3_reset(stmts[STMT_DELETE_PAGE]);
 		if (verb)
 			say(mpage->file, "Deleted from index");
 		mpage = ohash_next(&mpages, &slot);
@@ -1940,7 +1954,12 @@ dbopen(int real)
 		return(0);
 	}
 
-	sql = "CREATE TABLE \"docs\" (\n"
+	/*
+	 * XXX The first three columns in table mpages are obsolete
+	 * and only kept for backward compatibility
+	 * until apropos(1) and friends have caught up.
+	 */
+	sql = "CREATE TABLE \"mpages\" (\n"
 	      " \"file\" TEXT NOT NULL,\n"
 	      " \"sec\" TEXT NOT NULL,\n"
 	      " \"arch\" TEXT NOT NULL,\n"
@@ -1949,11 +1968,20 @@ dbopen(int real)
 	      " \"id\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL\n"
 	      ");\n"
 	      "\n"
+	      "CREATE TABLE \"mlinks\" (\n"
+	      " \"sec\" TEXT NOT NULL,\n"
+	      " \"arch\" TEXT NOT NULL,\n"
+	      " \"name\" TEXT NOT NULL,\n"
+	      " \"pageid\" INTEGER NOT NULL REFERENCES mpages(id) "
+		"ON DELETE CASCADE,\n"
+	      " \"id\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL\n"
+	      ");\n"
+	      "\n"
 	      "CREATE TABLE \"keys\" (\n"
 	      " \"bits\" INTEGER NOT NULL,\n"
 	      " \"key\" TEXT NOT NULL,\n"
-	      " \"docid\" INTEGER NOT NULL REFERENCES docs(id) "
-	      	"ON DELETE CASCADE,\n"
+	      " \"pageid\" INTEGER NOT NULL REFERENCES mpages(id) "
+		"ON DELETE CASCADE,\n"
 	      " \"id\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL\n"
 	      ");\n"
 	      "\n"
@@ -1967,13 +1995,16 @@ dbopen(int real)
 
 prepare_statements:
 	SQL_EXEC("PRAGMA foreign_keys = ON");
-	sql = "DELETE FROM docs where file=?";
-	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_DELETE], NULL);
-	sql = "INSERT INTO docs "
+	sql = "DELETE FROM mpages where file=?";
+	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_DELETE_PAGE], NULL);
+	sql = "INSERT INTO mpages "
 		"(file,sec,arch,desc,form) VALUES (?,?,?,?,?)";
-	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_DOC], NULL);
+	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_PAGE], NULL);
+	sql = "INSERT INTO mlinks "
+		"(sec,arch,name,pageid) VALUES (?,?,?,?)";
+	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_LINK], NULL);
 	sql = "INSERT INTO keys "
-		"(bits,key,docid) VALUES (?,?,?)";
+		"(bits,key,pageid) VALUES (?,?,?)";
 	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_KEY], NULL);
 
 #ifndef __APPLE__

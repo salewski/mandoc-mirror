@@ -363,9 +363,9 @@ sql_statement(const struct expr *e, const char *arch, const char *sec)
 	size_t		 sz;
 
 	sql = mandoc_strdup
-		("SELECT docid,bits,key,file,desc,form,sec,arch "
+		("SELECT pageid,bits,key,file,desc,form,sec,arch "
 		 "FROM keys "
-		 "INNER JOIN docs ON docs.id=keys.docid "
+		 "INNER JOIN mpages ON mpages.id=keys.pageid "
 		 "WHERE ");
 	sz = strlen(sql);
 	substrsz = strlen(substr);
