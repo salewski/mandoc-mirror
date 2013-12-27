@@ -137,15 +137,12 @@ static	void	 dbclose(int);
 static	void	 dbindex(const struct mpage *, struct mchars *);
 static	int	 dbopen(int);
 static	void	 dbprune(void);
-static	void	 fileadd(struct mlink *);
-static	int	 filecheck(const char *);
 static	void	 filescan(const char *);
 static	void	*hash_alloc(size_t, void *);
 static	void	 hash_free(void *, size_t, void *);
 static	void	*hash_halloc(size_t, void *);
-static	void	 inoadd(const struct stat *, struct mpage *);
 static	int	 inocheck(const struct stat *);
-static	void	 ofadd(int, const char *, const char *, const char *,
+static	void	 mlink_add(int, const char *, const char *, const char *,
 			const char *, const char *, const struct stat *);
 static	void	 mlink_free(struct mlink *);
 static	void	 mpages_free(void);
@@ -184,7 +181,7 @@ static	int		 exitcode; /* to be returned by main */
 static	enum op	  	 op; /* operational mode */
 static	char		 basedir[PATH_MAX]; /* current base directory */
 static	struct ohash	 mpages; /* table of distinct manual pages */
-static	struct ohash	 filenames; /* table of filenames */
+static	struct ohash	 mlinks; /* table of directory entries */
 static	struct ohash	 strings; /* table of all strings */
 static	sqlite3		*db = NULL; /* current database */
 static	sqlite3_stmt	*stmts[STMT__MAX]; /* current statements */
@@ -323,17 +320,17 @@ main(int argc, char *argv[])
 	struct mchars	 *mc;
 	struct manpaths	  dirs;
 	struct mparse	 *mp;
-	struct ohash_info mpages_info, filename_info;
+	struct ohash_info mpages_info, mlinks_info;
 
 	memset(stmts, 0, STMT__MAX * sizeof(sqlite3_stmt *));
 	memset(&dirs, 0, sizeof(struct manpaths));
 
-	mpages_info.alloc  = filename_info.alloc  = hash_alloc;
-	mpages_info.halloc = filename_info.halloc = hash_halloc;
-	mpages_info.hfree  = filename_info.hfree  = hash_free;
+	mpages_info.alloc  = mlinks_info.alloc  = hash_alloc;
+	mpages_info.halloc = mlinks_info.halloc = hash_halloc;
+	mpages_info.hfree  = mlinks_info.hfree  = hash_free;
 
 	mpages_info.key_offset = offsetof(struct mpage, inodev);
-	filename_info.key_offset = offsetof(struct mlink, file);
+	mlinks_info.key_offset = offsetof(struct mlink, file);
 
 	progname = strrchr(argv[0], '/');
 	if (progname == NULL)
@@ -408,7 +405,7 @@ main(int argc, char *argv[])
 	mc = mchars_alloc();
 
 	ohash_init(&mpages, 6, &mpages_info);
-	ohash_init(&filenames, 6, &filename_info);
+	ohash_init(&mlinks, 6, &mlinks_info);
 
 	if (OP_UPDATE == op || OP_DELETE == op || OP_TEST == op) {
 		/* 
@@ -462,7 +459,7 @@ main(int argc, char *argv[])
 
 			if (j) {
 				ohash_init(&mpages, 6, &mpages_info);
-				ohash_init(&filenames, 6, &filename_info);
+				ohash_init(&mlinks, 6, &mlinks_info);
 			}
 
 			if (0 == set_basedir(dirs.paths[j]))
@@ -480,7 +477,7 @@ main(int argc, char *argv[])
 			if (j + 1 < dirs.sz) {
 				mpages_free();
 				ohash_delete(&mpages);
-				ohash_delete(&filenames);
+				ohash_delete(&mlinks);
 			}
 		}
 	}
@@ -491,7 +488,7 @@ out:
 	mparse_free(mp);
 	mpages_free();
 	ohash_delete(&mpages);
-	ohash_delete(&filenames);
+	ohash_delete(&mlinks);
 	return(exitcode);
 usage:
 	fprintf(stderr, "usage: %s [-anvW] [-C file]\n"
@@ -549,7 +546,7 @@ treescan(void)
 	while (NULL != (ff = fts_read(f))) {
 		path = ff->fts_path + 2;
 		/*
-		 * If we're a regular file, add an mpage by using the
+		 * If we're a regular file, add an mlink by using the
 		 * stored directory data and handling the filename.
 		 * Disallow duplicate (hard-linked) files.
 		 */
@@ -596,7 +593,7 @@ treescan(void)
 				continue;
 			} else
 				sec[-1] = '\0';
-			ofadd(dform, path, ff->fts_name, dsec, sec,
+			mlink_add(dform, path, ff->fts_name, dsec, sec,
 					arch, ff->fts_statp);
 			continue;
 		} else if (FTS_D != ff->fts_info && 
@@ -672,7 +669,7 @@ treescan(void)
  *   or
  *   [./]cat<section>[/<arch>]/<name>.0
  *
- * Stuff this information directly into the mpage vector.
+ * Stuff this information directly into the mlink vector.
  * See treescan() for the fts(3) version of this.
  */
 static void
@@ -761,37 +758,9 @@ filescan(const char *file)
 		*p = '\0';
 	} 
 
-	ofadd(dform, file, name, dsec, sec, arch, &st);
+	mlink_add(dform, file, name, dsec, sec, arch, &st);
 }
 
-/*
- * See fileadd(). 
- */
-static int
-filecheck(const char *name)
-{
-
-	return(NULL != ohash_find(&filenames,
-			ohash_qlookup(&filenames, name)));
-}
-
-/*
- * Use the standard hashing mechanism (K&R) to see if the given filename
- * already exists.
- */
-static void
-fileadd(struct mlink *mlink)
-{
-	unsigned int	 slot;
-
-	slot = ohash_qlookup(&filenames, mlink->file);
-	assert(NULL == ohash_find(&filenames, slot));
-	ohash_insert(&filenames, slot, mlink);
-}
-
-/*
- * See inoadd().
- */
 static int
 inocheck(const struct stat *st)
 {
@@ -806,32 +775,15 @@ inocheck(const struct stat *st)
 			&mpages, (char *)&inodev, sizeof(inodev), hash)));
 }
 
-/*
- * The hashing function used here is quite simple: simply take the inode
- * and use uint32_t of its bits.
- * Then when we do the lookup, use both the inode and device identifier.
- */
 static void
-inoadd(const struct stat *st, struct mpage *mpage)
-{
-	unsigned int	 slot;
-
-	mpage->inodev.st_ino = st->st_ino;
-	mpage->inodev.st_dev = st->st_dev;
-	slot = ohash_lookup_memory(&mpages, (char *)&mpage->inodev,
-	    sizeof(struct inodev), st->st_ino);
-
-	assert(NULL == ohash_find(&mpages, slot));
-	ohash_insert(&mpages, slot, mpage);
-}
-
-static void
-ofadd(int dform, const char *file, const char *name, const char *dsec,
+mlink_add(int dform, const char *file, const char *name, const char *dsec,
 	const char *sec, const char *arch, const struct stat *st)
 {
+	struct inodev	 inodev;
 	struct mpage	*mpage;
 	struct mlink	*mlink;
 	int		 sform;
+	unsigned int	 slot;
 
 	assert(NULL != file);
 
@@ -861,16 +813,23 @@ ofadd(int dform, const char *file, const char *name, const char *dsec,
 	mlink->name = mandoc_strdup(name);
 	mlink->fsec = mandoc_strdup(sec);
 
-	mpage = mandoc_calloc(1, sizeof(struct mpage));
-	mpage->mlinks = mlink;
+	slot = ohash_qlookup(&mlinks, mlink->file);
+	assert(NULL == ohash_find(&mlinks, slot));
+	ohash_insert(&mlinks, slot, mlink);
 
-	/*
-	 * Add to unique identifier hash.
-	 * Then if it's a source manual and we're going to use source in
-	 * favour of catpages, add it to that hash.
-	 */
-	inoadd(st, mpage);
-	fileadd(mpage->mlinks);
+	inodev.st_ino = st->st_ino;
+	inodev.st_dev = st->st_dev;
+	slot = ohash_lookup_memory(&mpages, (char *)&inodev,
+	    sizeof(struct inodev), inodev.st_ino);
+	mpage = ohash_find(&mpages, slot);
+	if (NULL == mpage) {
+		mpage = mandoc_calloc(1, sizeof(struct mpage));
+		mpage->inodev.st_ino = inodev.st_ino;
+		mpage->inodev.st_dev = inodev.st_dev;
+		ohash_insert(&mpages, slot, mpage);
+	} else
+		abort();
+	mpage->mlinks = mlink;
 }
 
 static void
@@ -967,7 +926,8 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 			if (NULL != (bufp = strrchr(buf, '.')))
 				*++bufp = '\0';
 			strlcat(buf, mpage->mlinks->dsec, PATH_MAX);
-			if (filecheck(buf)) {
+			if (NULL != ohash_find(&mlinks,
+					ohash_qlookup(&mlinks, buf))) {
 				if (warnings)
 					say(mpage->mlinks->file, "Man "
 					    "source exists: %s", buf);
