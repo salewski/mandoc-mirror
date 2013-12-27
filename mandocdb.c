@@ -1764,6 +1764,7 @@ utf8key(struct mchars *mc, struct str *key)
 static void
 dbindex(const struct mpage *mpage, struct mchars *mc)
 {
+	struct mlink	*mlink;
 	struct str	*key;
 	const char	*desc;
 	int64_t		 recno;
@@ -1803,13 +1804,15 @@ dbindex(const struct mpage *mpage, struct mchars *mc)
 	recno = sqlite3_last_insert_rowid(db);
 	sqlite3_reset(stmts[STMT_INSERT_PAGE]);
 
-	i = 1;
-	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mpage->mlinks->dsec);
-	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mpage->mlinks->arch);
-	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mpage->mlinks->file);
-	SQL_BIND_INT64(stmts[STMT_INSERT_LINK], i, recno);
-	SQL_STEP(stmts[STMT_INSERT_LINK]);
-	sqlite3_reset(stmts[STMT_INSERT_LINK]);
+	for (mlink = mpage->mlinks; mlink; mlink = mlink->next) {
+		i = 1;
+		SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->dsec);
+		SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->arch);
+		SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->file);
+		SQL_BIND_INT64(stmts[STMT_INSERT_LINK], i, recno);
+		SQL_STEP(stmts[STMT_INSERT_LINK]);
+		sqlite3_reset(stmts[STMT_INSERT_LINK]);
+	}
 
 	for (key = ohash_first(&strings, &slot); NULL != key;
 	     key = ohash_next(&strings, &slot)) {
