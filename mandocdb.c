@@ -142,7 +142,6 @@ static	void	 filescan(const char *);
 static	void	*hash_alloc(size_t, void *);
 static	void	 hash_free(void *, size_t, void *);
 static	void	*hash_halloc(size_t, void *);
-static	int	 inocheck(const struct stat *);
 static	void	 mlink_add(struct mlink *, const struct stat *);
 static	void	 mlink_free(struct mlink *);
 static	void	 mpages_free(void);
@@ -558,10 +557,6 @@ treescan(void)
 				if (warnings)
 					say(path, "Extraneous file");
 				continue;
-			} else if (inocheck(ff->fts_statp)) {
-				if (warnings)
-					say(path, "Duplicate file");
-				continue;
 			} else if (NULL == (fsec =
 					strrchr(ff->fts_name, '.'))) {
 				if ( ! use_all) {
@@ -711,10 +706,6 @@ filescan(const char *file)
 		exitcode = (int)MANDOCLEVEL_BADARG;
 		say(file, "Not a regular file");
 		return;
-	} else if (inocheck(&st)) {
-		if (warnings)
-			say(file, "Duplicate file");
-		return;
 	}
 	start = buf + strlen(basedir);
 	mlink = mandoc_calloc(1, sizeof(struct mlink));
@@ -769,20 +760,6 @@ filescan(const char *file)
 	mlink->name = mandoc_strdup(mlink->name);
 
 	mlink_add(mlink, &st);
-}
-
-static int
-inocheck(const struct stat *st)
-{
-	struct inodev	 inodev;
-	uint32_t	 hash;
-
-	memset(&inodev, 0, sizeof(inodev));
-	inodev.st_ino = hash = st->st_ino;
-	inodev.st_dev = st->st_dev;
-
-	return(NULL != ohash_find(&mpages, ohash_lookup_memory(
-			&mpages, (char *)&inodev, sizeof(inodev), hash)));
 }
 
 static void
