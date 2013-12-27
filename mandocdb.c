@@ -855,16 +855,16 @@ mlinks_undupe(struct mpage *mpage)
 	char		 *bufp;
 
 	mpage->form = FORM_CAT;
-	for(prev = &mpage->mlinks; *prev; prev = &(*prev)->next) {
-		mlink = *prev;
+	prev = &mpage->mlinks;
+	while (NULL != (mlink = *prev)) {
 		if (FORM_CAT != mlink->dform) {
 			mpage->form = FORM_NONE;
-			continue;
+			goto nextlink;
 		}
 		if (strlcpy(buf, mlink->file, PATH_MAX) >= PATH_MAX) {
 			if (warnings)
 				say(mlink->file, "Filename too long");
-			continue;
+			goto nextlink;
 		}
 		bufp = strstr(buf, "cat");
 		assert(NULL != bufp);
@@ -874,14 +874,16 @@ mlinks_undupe(struct mpage *mpage)
 		strlcat(buf, mlink->dsec, PATH_MAX);
 		if (NULL == ohash_find(&mlinks,
 				ohash_qlookup(&mlinks, buf)))
-			continue;
+			goto nextlink;
 		if (warnings)
 			say(mlink->file, "Man source exists: %s", buf);
 		if (use_all)
-			continue;
+			goto nextlink;
 		*prev = mlink->next;
 		mlink_free(mlink);
-		mlink = *prev;
+		continue;
+nextlink:
+		prev = &(*prev)->next;
 	}
 }
 
