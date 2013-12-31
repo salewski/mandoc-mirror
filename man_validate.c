@@ -395,7 +395,6 @@ static int
 post_TH(CHKARGS)
 {
 	const char	*p;
-	int		 line, pos;
 
 	free(man->meta.title);
 	free(man->meta.vol);
@@ -403,8 +402,6 @@ post_TH(CHKARGS)
 	free(man->meta.msec);
 	free(man->meta.date);
 
-	line = n->line;
-	pos = n->pos;
 	man->meta.title = man->meta.vol = man->meta.date =
 		man->meta.msec = man->meta.source = NULL;
 
@@ -438,9 +435,8 @@ post_TH(CHKARGS)
 	if (n)
 		n = n->next;
 	if (n && n->string && '\0' != n->string[0]) {
-		pos = n->pos;
 		man->meta.date = mandoc_normdate
-		    (man->parse, n->string, line, pos);
+		    (man->parse, n->string, n->line, n->pos);
 	} else
 		man->meta.date = mandoc_strdup("");
 

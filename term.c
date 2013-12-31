@@ -659,7 +659,6 @@ term_strlen(const struct termp *p, const char *cp)
 		for (i = 0; i < rsz; i++)
 			sz += cond_width(p, *cp++, &skip);
 
-		c = 0;
 		switch (*cp) {
 		case ('\\'):
 			cp++;
