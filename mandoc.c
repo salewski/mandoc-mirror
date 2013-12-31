@@ -594,10 +594,10 @@ mandoc_normdate(struct mparse *parse, char *in, int ln, int pos)
 }
 
 int
-mandoc_eos(const char *p, size_t sz, int enclosed)
+mandoc_eos(const char *p, size_t sz)
 {
-	const char *q;
-	int found;
+	const char	*q;
+	int		 enclosed, found;
 
 	if (0 == sz)
 		return(0);
@@ -608,7 +608,7 @@ mandoc_eos(const char *p, size_t sz, int enclosed)
 	 * propagate outward.
 	 */
 
-	found = 0;
+	enclosed = found = 0;
 	for (q = p + (int)sz - 1; q >= p; q--) {
 		switch (*q) {
 		case ('\"'):

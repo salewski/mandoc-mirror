@@ -438,7 +438,7 @@ in_line_eoln(MACRO_PROT_ARGS)
 	 */
 
 	if (n != man->last &&
-	    mandoc_eos(man->last->string, strlen(man->last->string), 0))
+	    mandoc_eos(man->last->string, strlen(man->last->string)))
 		man->last->flags |= MAN_EOS;
 
 	/*

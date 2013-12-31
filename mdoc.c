@@ -846,7 +846,7 @@ mdoc_ptext(struct mdoc *mdoc, int line, char *buf, int offs)
 
 	assert(buf < end);
 
-	if (mandoc_eos(buf+offs, (size_t)(end-buf-offs), 0))
+	if (mandoc_eos(buf+offs, (size_t)(end-buf-offs)))
 		mdoc->last->flags |= MDOC_EOS;
 
 	return(1);

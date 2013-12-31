@@ -683,7 +683,7 @@ append_delims(struct mdoc *mdoc, int line, int *pos, char *buf)
 		 * knowing which symbols break this behaviour, for
 		 * example, `.  ;' shouldn't propagate the double-space.
 		 */
-		if (mandoc_eos(p, strlen(p), 0))
+		if (mandoc_eos(p, strlen(p)))
 			mdoc->last->flags |= MDOC_EOS;
 	}
 
