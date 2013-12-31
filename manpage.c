@@ -1,6 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2012 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2013 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -89,7 +90,7 @@ main(int argc, char *argv[])
 	search.deftype = TYPE_Nm | TYPE_Nd;
 
 	manpath_parse(&paths, conf_file, defpaths, auxpaths);
-	ch = mansearch(&search, &paths, argc, argv, &res, &sz);
+	ch = mansearch(&search, &paths, argc, argv, NULL, &res, &sz);
 	manpath_free(&paths);
 
 	if (0 == ch)
@@ -109,6 +110,7 @@ main(int argc, char *argv[])
 			i + 1, res[i].names, res[i].desc);
 		free(res[i].names);
 		free(res[i].desc);
+		free(res[i].output);
 	}
 
 	if (0 == term) {
