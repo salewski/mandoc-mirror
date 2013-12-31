@@ -22,7 +22,7 @@
 			<SPAN CLASS="nm">mdocml</SPAN> is a suite of tools compiling <I><A HREF="mdoc.7.html">mdoc</A></I>, the roff macro
 			package of choice for BSD manual pages, and <I><A HREF="man.7.html">man</A></I>, the predominant historical package for
 			UNIX manuals.
-			It is small, ISO C, <A CLASS="external" HREF="http://www.isc.org/software/license">ISC</A>-licensed, and quite fast.
+			It is small, ISO C, <A CLASS="external" HREF="https://www.isc.org/downloads/software-support-policy/isc-license/">ISC</A>-licensed, and quite fast.
 		</P>
 		<P>
 			The tool set features <A HREF="mandoc.1.html">mandoc</A>,
@@ -111,7 +111,7 @@
 				<TR>
 					<TD>pkgsrc</TD>
 					<TD>
-					<A HREF="http://pkgsrc.se/textproc/mdocml" CLASS="external">textproc/mdocml</A> (1.12.2 port)
+					<A HREF="http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/textproc/mdocml/" CLASS="external">textproc/mdocml</A> (1.12.3 port)
 					</TD>
 				</TR>
 				<TR>
