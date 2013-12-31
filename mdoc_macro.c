@@ -1349,25 +1349,6 @@ blk_part_imp(MACRO_PROT_ARGS)
 		body = mdoc->last;
 	}
 
-	for (n = body->child; n && n->next; n = n->next)
-		/* Do nothing. */ ;
-	
-	/* 
-	 * End of sentence spacing: if the last node is a text node and
-	 * has a trailing period, then mark it as being end-of-sentence.
-	 */
-
-	if (n && MDOC_TEXT == n->type && n->string)
-		if (mandoc_eos(n->string, strlen(n->string), 1))
-			n->flags |= MDOC_EOS;
-
-	/* Up-propagate the end-of-space flag. */
-
-	if (n && (MDOC_EOS & n->flags)) {
-		body->flags |= MDOC_EOS;
-		body->parent->flags |= MDOC_EOS;
-	}
-
 	/*
 	 * If there is an open sub-block requiring explicit close-out,
 	 * postpone closing out the current block
