@@ -15,11 +15,17 @@
 #  endif
 #endif
 
+#ifndef HAVE_STRCASESTR
+extern	char	 *strcasestr(const char *, const char *);
+#endif
 #ifndef HAVE_STRLCAT
 extern	size_t	  strlcat(char *, const char *, size_t);
 #endif
 #ifndef HAVE_STRLCPY
 extern	size_t	  strlcpy(char *, const char *, size_t);
+#endif
+#ifndef HAVE_STRSEP
+extern	char	 *strsep(char **, const char *);
 #endif
 #ifndef HAVE_GETSUBOPT
 extern	int	  getsubopt(char **, char * const *, char **);
