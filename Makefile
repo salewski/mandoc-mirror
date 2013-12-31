@@ -78,8 +78,10 @@ SRCS		 = Makefile \
 		   chars.in \
 		   compat_fgetln.c \
 		   compat_getsubopt.c \
+		   compat_strcasestr.c \
 		   compat_strlcat.c \
 		   compat_strlcpy.c \
+		   compat_strsep.c \
 		   config.h.post \
 		   config.h.pre \
 		   demandoc.1 \
@@ -203,8 +205,10 @@ LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 
 COMPAT_OBJS	 = compat_fgetln.o \
 		   compat_getsubopt.o \
+		   compat_strcasestr.o \
 		   compat_strlcat.o \
-		   compat_strlcpy.o
+		   compat_strlcpy.o \
+		   compat_strsep.o
 
 arch.o: arch.in
 att.o: att.in
@@ -418,6 +422,14 @@ config.h: config.h.pre config.h.post
 	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-betoh64 test-betoh64.c >> config.log 2>&1; then \
 		echo '#define HAVE_BETOH64'; \
 		rm test-betoh64; \
+	  fi; \
+	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-strcasestr test-strcasestr.c >> config.log 2>&1; then \
+		echo '#define HAVE_STRCASESTR'; \
+		rm test-strcasestr; \
+	  fi; \
+	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-strsep test-strsep.c >> config.log 2>&1; then \
+		echo '#define HAVE_STRSEP'; \
+		rm test-strsep; \
 	  fi; \
 	  echo; \
 	  cat config.h.post \
