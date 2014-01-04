@@ -65,7 +65,7 @@ void *ohash_next(struct ohash *, unsigned int *);
 unsigned int ohash_entries(struct ohash *);
 
 void *ohash_create_entry(struct ohash_info *, const char *, const char **);
-u_int32_t ohash_interval(const char *, const char **);
+uint32_t ohash_interval(const char *, const char **);
 
 unsigned int ohash_qlookupi(struct ohash *, const char *, const char **);
 unsigned int ohash_qlookup(struct ohash *, const char *);
