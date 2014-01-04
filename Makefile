@@ -83,6 +83,7 @@ SRCS		 = Makefile \
 		   compat_strsep.c \
 		   config.h.post \
 		   config.h.pre \
+		   configure \
 		   demandoc.1 \
 		   demandoc.c \
 		   eqn.7 \
@@ -357,7 +358,8 @@ mdocml.md5: mdocml.tar.gz
 mdocml.tar.gz: $(SRCS)
 	mkdir -p .dist/mdocml-$(VERSION)/
 	$(INSTALL_SOURCE) $(SRCS) .dist/mdocml-$(VERSION)
-	( cd .dist/ && tar zcf ../$@ ./ )
+	chmod 755 .dist/mdocml-$(VERSION)/configure
+	( cd .dist/ && tar zcf ../$@ mdocml-$(VERSION) )
 	rm -rf .dist/
 
 index.html: $(INDEX_OBJS)
