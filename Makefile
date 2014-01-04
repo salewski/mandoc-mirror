@@ -53,6 +53,14 @@ DBBIN		 = mandocdb manpage apropos
 
 all: mandoc preconv demandoc $(DBBIN)
 
+TESTSRCS	 = test-fgetln.c \
+		   test-getsubopt.c \
+		   test-mmap.c \
+		   test-ohash.c \
+		   test-strlcat.c \
+		   test-strlcpy.c \
+		   test-strptime.c
+
 SRCS		 = Makefile \
 		   NEWS \
 		   TODO \
@@ -147,16 +155,10 @@ SRCS		 = Makefile \
 		   term.h \
 		   term_ascii.c \
 		   term_ps.c \
-		   test-fgetln.c \
-		   test-getsubopt.c \
-		   test-mmap.c \
-		   test-ohash.c \
-		   test-strlcat.c \
-		   test-strlcpy.c \
-		   test-strptime.c \
 		   tree.c \
 		   vol.c \
-		   vol.in
+		   vol.in \
+		   $(TESTSRCS)
 
 LIBMAN_OBJS	 = man.o \
 		   man_hash.o \
@@ -357,50 +359,9 @@ mdocml.tar.gz: $(SRCS)
 
 index.html: $(INDEX_OBJS)
 
-config.h: config.h.pre config.h.post
+config.h: configure config.h.pre config.h.post $(TESTSRCS)
 	rm -f config.log
-	( cat config.h.pre; \
-	  echo; \
-	  echo '#define VERSION "$(VERSION)"'; \
-	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-ohash test-ohash.c >> config.log 2>&1; then \
-		echo '#define HAVE_OHASH'; \
-		rm test-ohash; \
-	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-fgetln test-fgetln.c >> config.log 2>&1; then \
-		echo '#define HAVE_FGETLN'; \
-		rm test-fgetln; \
-	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-strptime test-strptime.c >> config.log 2>&1; then \
-		echo '#define HAVE_STRPTIME'; \
-		rm test-strptime; \
-	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-getsubopt test-getsubopt.c >> config.log 2>&1; then \
-		echo '#define HAVE_GETSUBOPT'; \
-		rm test-getsubopt; \
-	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-strlcat test-strlcat.c >> config.log 2>&1; then \
-		echo '#define HAVE_STRLCAT'; \
-		rm test-strlcat; \
-	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-mmap test-mmap.c >> config.log 2>&1; then \
-		echo '#define HAVE_MMAP'; \
-		rm test-mmap; \
-	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-strlcpy test-strlcpy.c >> config.log 2>&1; then \
-		echo '#define HAVE_STRLCPY'; \
-		rm test-strlcpy; \
-	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-strcasestr test-strcasestr.c >> config.log 2>&1; then \
-		echo '#define HAVE_STRCASESTR'; \
-		rm test-strcasestr; \
-	  fi; \
-	  if $(CC) $(CFLAGS) -Werror -Wno-unused -o test-strsep test-strsep.c >> config.log 2>&1; then \
-		echo '#define HAVE_STRSEP'; \
-		rm test-strsep; \
-	  fi; \
-	  echo; \
-	  cat config.h.post \
-	) > $@
+	CC="$(CC)" CFLAGS="$(CFLAGS)" VERSION="$(VERSION)" ./configure
 
 .h.h.html:
 	highlight -I $< >$@
