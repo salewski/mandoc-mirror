@@ -66,6 +66,7 @@ TESTSRCS	 = test-betoh64.c \
 		   test-mmap.c \
 		   test-strlcat.c \
 		   test-strlcpy.c \
+		   test-strnlen.c \
 		   test-strptime.c
 
 SRCS		 = Makefile \
@@ -89,6 +90,7 @@ SRCS		 = Makefile \
 		   compat_strcasestr.c \
 		   compat_strlcat.c \
 		   compat_strlcpy.c \
+		   compat_strnlen.c \
 		   compat_strsep.c \
 		   config.h.post \
 		   config.h.pre \
@@ -210,6 +212,7 @@ COMPAT_OBJS	 = compat_fgetln.o \
 		   compat_strcasestr.o \
 		   compat_strlcat.o \
 		   compat_strlcpy.o \
+		   compat_strnlen.o \
 		   compat_strsep.o
 
 arch.o: arch.in

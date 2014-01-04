@@ -37,6 +37,7 @@ runtest mmap MMAP
 runtest strcasestr STRCASESTR
 runtest strlcat STRLCAT
 runtest strlcpy STRLCPY
+runtest strnlen STRNLEN
 runtest strptime STRPTIME
 runtest strsep STRSEP
 echo
