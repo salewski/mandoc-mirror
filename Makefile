@@ -8,8 +8,8 @@
 #
 # CFLAGS	+= -DOSNAME="\"OpenBSD 5.4\""
 
-VERSION		 = 1.12.3
-VDATE		 = 31 December 2013
+VERSION		 = 1.13.0
+VDATE		 = 4 January 2014
 
 # IFF your system supports multi-byte functions (setlocale(), wcwidth(),
 # putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a
@@ -76,6 +76,8 @@ SRCS		 = Makefile \
 		   chars.in \
 		   compat_fgetln.c \
 		   compat_getsubopt.c \
+		   compat_ohash.c \
+		   compat_ohash.h \
 		   compat_strcasestr.c \
 		   compat_strlcat.c \
 		   compat_strlcpy.c \
@@ -121,8 +123,11 @@ SRCS		 = Makefile \
 		   mandoc_char.7 \
 		   mandocdb.8 \
 		   mandocdb.c \
+		   manpage.c \
 		   manpath.c \
 		   manpath.h \
+		   mansearch.c \
+		   mansearch.h \
 		   mdoc.7 \
 		   mdoc.c \
 		   mdoc.h \
