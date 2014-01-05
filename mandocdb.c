@@ -114,11 +114,6 @@ struct	mlink {
 	struct mlink	*next;    /* singly linked list */
 };
 
-struct	title {
-	char		*title; /* name(sec/arch) given inside the file */
-	char		*file; /* file name in case of mismatch */
-};
-
 enum	stmt {
 	STMT_DELETE_PAGE = 0,	/* delete mpage */
 	STMT_INSERT_PAGE,	/* insert mpage */
@@ -147,7 +142,7 @@ static	int	 mlink_check(struct mpage *, struct mlink *);
 static	void	 mlink_free(struct mlink *);
 static	void	 mlinks_undupe(struct mpage *);
 static	void	 mpages_free(void);
-static	void	 mpages_merge(struct mchars *, struct mparse *, int);
+static	void	 mpages_merge(struct mchars *, struct mparse *);
 static	void	 parse_cat(struct mpage *);
 static	void	 parse_man(struct mpage *, const struct man_node *);
 static	void	 parse_mdoc(struct mpage *, const struct mdoc_node *);
@@ -435,7 +430,7 @@ main(int argc, char *argv[])
 		if (OP_TEST != op)
 			dbprune();
 		if (OP_DELETE != op)
-			mpages_merge(mc, mp, 0);
+			mpages_merge(mc, mp);
 		dbclose(1);
 	} else {
 		/*
@@ -479,7 +474,7 @@ main(int argc, char *argv[])
 			if (0 == dbopen(0))
 				goto out;
 
-			mpages_merge(mc, mp, warnings && !use_all);
+			mpages_merge(mc, mp);
 			dbclose(0);
 
 			if (j + 1 < dirs.sz) {
@@ -945,33 +940,22 @@ mlink_check(struct mpage *mpage, struct mlink *mlink)
  * and filename to determine whether the file is parsable or not.
  */
 static void
-mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
+mpages_merge(struct mchars *mc, struct mparse *mp)
 {
-	struct ohash		 title_table;
-	struct ohash_info	 title_info, str_info;
+	struct ohash_info	 str_info;
 	struct mpage		*mpage;
 	struct mlink		*mlink;
 	struct mdoc		*mdoc;
 	struct man		*man;
-	struct title		*title_entry;
-	char			*title_str;
 	const char		*cp;
 	int			 match;
-	unsigned int		 pslot, tslot;
+	unsigned int		 pslot;
 	enum mandoclevel	 lvl;
 
 	str_info.alloc = hash_alloc;
 	str_info.halloc = hash_halloc;
 	str_info.hfree = hash_free;
 	str_info.key_offset = offsetof(struct str, key);
-
-	if (check_reachable) {
-		title_info.alloc = hash_alloc;
-		title_info.halloc = hash_halloc;
-		title_info.hfree = hash_free;
-		title_info.key_offset = offsetof(struct title, title);
-		ohash_init(&title_table, 6, &title_info);
-	}
 
 	mpage = ohash_first(&mpages, &pslot);
 	while (NULL != mpage) {
@@ -1059,55 +1043,9 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 		else
 			parse_cat(mpage);
 
-		/*
-		 * Build a title string for the file.  If it matches
-		 * the location of the file, remember the title as
-		 * found; else, remember it as missing.
-		 */
-
-		if (check_reachable) {
-			if (-1 == asprintf(&title_str, "%s(%s%s%s)",
-			    mpage->title, mpage->sec,
-			    '\0' == *mpage->arch ? "" : "/",
-			    mpage->arch)) {
-				perror(NULL);
-				exit((int)MANDOCLEVEL_SYSERR);
-			}
-			tslot = ohash_qlookup(&title_table, title_str);
-			title_entry = ohash_find(&title_table, tslot);
-			if (NULL == title_entry) {
-				title_entry = mandoc_malloc(
-						sizeof(struct title));
-				title_entry->title = title_str;
-				title_entry->file = mandoc_strdup(
-				    match ? "" : mpage->mlinks->file);
-				ohash_insert(&title_table, tslot,
-						title_entry);
-			} else {
-				if (match)
-					*title_entry->file = '\0';
-				free(title_str);
-			}
-		}
-
 		dbindex(mpage, mc);
 		ohash_delete(&strings);
 		mpage = ohash_next(&mpages, &pslot);
-	}
-
-	if (check_reachable) {
-		title_entry = ohash_first(&title_table, &tslot);
-		while (NULL != title_entry) {
-			if ('\0' != *title_entry->file)
-				say(title_entry->file,
-			    	    "Probably unreachable, title is %s",
-				    title_entry->title);
-			free(title_entry->title);
-			free(title_entry->file);
-			free(title_entry);
-			title_entry = ohash_next(&title_table, &tslot);
-		}
-		ohash_delete(&title_table);
 	}
 }
 
