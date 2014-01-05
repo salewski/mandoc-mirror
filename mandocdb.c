@@ -1024,9 +1024,17 @@ mpages_merge(struct mchars *mc, struct mparse *mp, int check_reachable)
 			mpage->title =
 			    mandoc_strdup(mpage->mlinks->name);
 		}
+		putkey(mpage, mpage->sec, TYPE_sec);
+		putkey(mpage, mpage->arch, TYPE_arch);
 
-		for (mlink = mpage->mlinks; mlink; mlink = mlink->next)
+		for (mlink = mpage->mlinks; mlink; mlink = mlink->next) {
+			if ('\0' != *mlink->dsec)
+				putkey(mpage, mlink->dsec, TYPE_sec);
+			if ('\0' != *mlink->fsec)
+				putkey(mpage, mlink->fsec, TYPE_sec);
+			putkey(mpage, mlink->arch, TYPE_arch);
 			putkey(mpage, mlink->name, TYPE_Nm);
+		}
 
 		if (warnings && !use_all) {
 			match = 0;

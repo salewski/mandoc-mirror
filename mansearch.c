@@ -120,6 +120,8 @@ static	const struct type types[] = {
 	{ TYPE_Va,  "Va" },
 	{ TYPE_Va,  "Vt" },
 	{ TYPE_Xr,  "Xr" },
+	{ TYPE_sec, "sec" },
+	{ TYPE_arch,"arch" },
 	{ ~0ULL,    "any" },
 	{ 0ULL, NULL }
 };
