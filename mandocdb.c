@@ -1818,12 +1818,6 @@ dbindex(const struct mpage *mpage, struct mchars *mc)
 	SQL_EXEC("BEGIN TRANSACTION");
 
 	i = 1;
-	/*
-	 * XXX The following line is obsolete
-	 * and only kept for backward compatibility
-	 * until apropos(1) and friends have caught up.
-	 */
-	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, mpage->mlinks->file);
 	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, desc);
 	SQL_BIND_INT(stmts[STMT_INSERT_PAGE], i, FORM_SRC == mpage->form);
 	SQL_STEP(stmts[STMT_INSERT_PAGE]);
@@ -1960,13 +1954,7 @@ dbopen(int real)
 		return(0);
 	}
 
-	/*
-	 * XXX The first column in table mpages is obsolete
-	 * and only kept for backward compatibility
-	 * until apropos(1) and friends have caught up.
-	 */
 	sql = "CREATE TABLE \"mpages\" (\n"
-	      " \"file\" TEXT NOT NULL,\n"
 	      " \"desc\" TEXT NOT NULL,\n"
 	      " \"form\" INTEGER NOT NULL,\n"
 	      " \"id\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL\n"
@@ -2003,7 +1991,7 @@ prepare_statements:
 	sql = "DELETE FROM mpages where file=?";
 	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_DELETE_PAGE], NULL);
 	sql = "INSERT INTO mpages "
-		"(file,desc,form) VALUES (?,?,?)";
+		"(desc,form) VALUES (?,?)";
 	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_PAGE], NULL);
 	sql = "INSERT INTO mlinks "
 		"(file,sec,arch,name,pageid) VALUES (?,?,?,?,?)";
