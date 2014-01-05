@@ -38,6 +38,9 @@ struct	man;
 
 void		 mandoc_msg(enum mandocerr, struct mparse *, 
 			int, int, const char *);
+#if __GNUC__ - 0 >= 4
+__attribute__((__format__ (__printf__, 5, 6)))
+#endif
 void		 mandoc_vmsg(enum mandocerr, struct mparse *, 
 			int, int, const char *, ...);
 char		*mandoc_getarg(struct mparse *, char **, int, int *);

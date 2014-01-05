@@ -722,7 +722,7 @@ buffmt_man(struct html *h,
 			bufcat(h, sec ? sec : "1");
 			break;
 		case('N'):
-			bufcat_fmt(h, name);
+			bufcat_fmt(h, "%s", name);
 			break;
 		default:
 			bufncat(h, p, 2);

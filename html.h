@@ -147,6 +147,9 @@ void		  print_tblclose(struct html *);
 void		  print_tbl(struct html *, const struct tbl_span *);
 void		  print_eqn(struct html *, const struct eqn *);
 
+#if __GNUC__ - 0 >= 4
+__attribute__((__format__ (__printf__, 2, 3)))
+#endif
 void		  bufcat_fmt(struct html *, const char *, ...);
 void		  bufcat(struct html *, const char *);
 void		  bufcat_id(struct html *, const char *);
