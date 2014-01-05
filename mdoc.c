@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010, 2012, 2013 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010, 2012, 2013, 2014 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -197,7 +197,8 @@ mdoc_free(struct mdoc *mdoc)
  * Allocate volatile and non-volatile parse resources.  
  */
 struct mdoc *
-mdoc_alloc(struct roff *roff, struct mparse *parse, char *defos)
+mdoc_alloc(struct roff *roff, struct mparse *parse,
+	char *defos, int quick)
 {
 	struct mdoc	*p;
 
@@ -205,6 +206,7 @@ mdoc_alloc(struct roff *roff, struct mparse *parse, char *defos)
 
 	p->parse = parse;
 	p->defos = defos;
+	p->quick = quick;
 	p->roff = roff;
 
 	mdoc_hash_init();
@@ -960,6 +962,12 @@ mdoc_pmacro(struct mdoc *mdoc, int ln, char *buf, int offs)
 
 	if ( ! mdoc_macro(mdoc, tok, ln, sv, &offs, buf)) 
 		goto err;
+
+	/* In quick mode (for mandocdb), abort after the NAME section. */
+
+	if (mdoc->quick && MDOC_Sh == tok &&
+	    SEC_NAME != mdoc->last->sec)
+		return(2);
 
 	return(1);
 

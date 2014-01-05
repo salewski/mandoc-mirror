@@ -140,7 +140,7 @@ main(int argc, char *argv[])
 			/* NOTREACHED */
 		}
 
-	curp.mp = mparse_alloc(type, curp.wlevel, mmsg, &curp, defos);
+	curp.mp = mparse_alloc(type, curp.wlevel, mmsg, defos, 0);
 
 	/*
 	 * Conditionally start up the lookaside buffer before parsing.

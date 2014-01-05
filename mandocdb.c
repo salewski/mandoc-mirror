@@ -167,8 +167,9 @@ static	int	 treescan(void);
 static	size_t	 utf8(unsigned int, char [7]);
 
 static	char		*progname;
-static	int	 	 use_all; /* use all found files */
 static	int		 nodb; /* no database changes */
+static	int		 quick; /* abort the parse early */
+static	int	 	 use_all; /* use all found files */
 static	int	  	 verb; /* print what we're doing */
 static	int	  	 warnings; /* warn about crap */
 static	int		 write_utf8; /* write UTF-8 output; else ASCII */
@@ -347,7 +348,7 @@ main(int argc, char *argv[])
 	path_arg = NULL;
 	op = OP_DEFAULT;
 
-	while (-1 != (ch = getopt(argc, argv, "aC:d:nT:tu:vW")))
+	while (-1 != (ch = getopt(argc, argv, "aC:d:nQT:tu:vW")))
 		switch (ch) {
 		case ('a'):
 			use_all = 1;
@@ -364,6 +365,9 @@ main(int argc, char *argv[])
 			break;
 		case ('n'):
 			nodb = 1;
+			break;
+		case ('Q'):
+			quick = 1;
 			break;
 		case ('T'):
 			if (strcmp(optarg, "utf8")) {
@@ -404,7 +408,7 @@ main(int argc, char *argv[])
 
 	exitcode = (int)MANDOCLEVEL_OK;
 	mp = mparse_alloc(MPARSE_AUTO, 
-		MANDOCLEVEL_FATAL, NULL, NULL, NULL);
+		MANDOCLEVEL_FATAL, NULL, NULL, quick);
 	mc = mchars_alloc();
 
 	ohash_init(&mpages, 6, &mpages_info);
@@ -494,11 +498,11 @@ out:
 	ohash_delete(&mlinks);
 	return(exitcode);
 usage:
-	fprintf(stderr, "usage: %s [-anvW] [-C file] [-Tutf8]\n"
-			"       %s [-anvW] [-Tutf8] dir ...\n"
-			"       %s [-nvW] [-Tutf8] -d dir [file ...]\n"
+	fprintf(stderr, "usage: %s [-anQvW] [-C file] [-Tutf8]\n"
+			"       %s [-anQvW] [-Tutf8] dir ...\n"
+			"       %s [-nQvW] [-Tutf8] -d dir [file ...]\n"
 			"       %s [-nvW] -u dir [file ...]\n"
-			"       %s -t file ...\n",
+			"       %s [-Q] -t file ...\n",
 		       progname, progname, progname, 
 		       progname, progname);
 

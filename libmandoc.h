@@ -50,7 +50,7 @@ int		 mandoc_strntoi(const char *, size_t, int);
 const char	*mandoc_a2msec(const char*);
 
 void	 	 mdoc_free(struct mdoc *);
-struct	mdoc	*mdoc_alloc(struct roff *, struct mparse *, char *);
+struct	mdoc	*mdoc_alloc(struct roff *, struct mparse *, char *, int);
 void		 mdoc_reset(struct mdoc *);
 int	 	 mdoc_parseln(struct mdoc *, int, char *, int);
 int		 mdoc_endparse(struct mdoc *);
@@ -58,7 +58,7 @@ int		 mdoc_addspan(struct mdoc *, const struct tbl_span *);
 int		 mdoc_addeqn(struct mdoc *, const struct eqn *);
 
 void	 	 man_free(struct man *);
-struct	man	*man_alloc(struct roff *, struct mparse *);
+struct	man	*man_alloc(struct roff *, struct mparse *, int);
 void		 man_reset(struct man *);
 int	 	 man_parseln(struct man *, int, char *, int);
 int		 man_endparse(struct man *);

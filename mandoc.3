@@ -50,8 +50,8 @@
 .In mandoc.h
 .Ft "enum mandoc_esc"
 .Fo mandoc_escape
-.Fa "const char const **end"
-.Fa "const char const **start"
+.Fa "const char **end"
+.Fa "const char **start"
 .Fa "int *sz"
 .Fc
 .Ft "const struct man_meta *"
@@ -97,16 +97,17 @@
 .Fc
 .Ft void
 .Fo mparse_alloc
-.Fa "enum mparset type"
+.Fa "enum mparset inttype"
 .Fa "enum mandoclevel wlevel"
-.Fa "mandocmsg msg"
-.Fa "void *msgarg"
+.Fa "mandocmsg mmsg"
+.Fa "char *defos"
+.Fa "int quick"
 .Fc
 .Ft void
 .Fo mparse_free
 .Fa "struct mparse *parse"
 .Fc
-.Ft void
+.Ft const char *
 .Fo mparse_getkeep
 .Fa "const struct mparse *parse"
 .Fc
@@ -203,7 +204,7 @@ An escape sequence classification.
 A fatal error, error, or warning message during parsing.
 .It Vt "enum mandoclevel"
 A classification of an
-.Vt "enum mandoclevel"
+.Vt "enum mandocerr"
 as regards system operation.
 .It Vt "struct mchars"
 An opaque pointer to an object allowing for translation between
@@ -352,6 +353,42 @@ implemented in
 .Pa mdoc.c .
 .It Fn mparse_alloc
 Allocate a parser.
+The arguments have the following effect:
+.Bl -tag -offset 5n -width inttype
+.It Ar inttype
+When set to
+.Dv MPARSE_MDOC
+or
+.Dv MPARSE_MAN ,
+only that parser will be used.
+With
+.Dv MPARSE_AUTO ,
+the document type will be automatically detected.
+.It Ar wlevel
+Can be set to
+.Dv MANDOCLEVEL_FATAL ,
+.Dv MANDOCLEVEL_ERROR ,
+or
+.Dv MANDOCLEVEL_WARNING .
+Messages below the selected level will be suppressed.
+.It Ar mmsg
+A callback function to handle errors and warnings.
+See
+.Pa main.c
+for an example.
+.It Ar defos
+A default string for the
+.Xr mdoc 7
+.Sq \&Os
+macro, overriding the
+.Dv OSNAME
+preprocessor definition and the results of
+.Xr uname 3 .
+.It Ar quick
+When set, parsing is aborted after the NAME section.
+This is for example useful to quickly build minimal databases.
+.El
+.Pp
 The same parser may be used for multiple files so long as
 .Fn mparse_reset
 is called between parses.

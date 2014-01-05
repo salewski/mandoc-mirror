@@ -24,6 +24,7 @@ enum	man_next {
 
 struct	man {
 	struct mparse	*parse; /* parse pointer */
+	int		 quick; /* abort parse early */
 	int		 flags; /* parse flags */
 #define	MAN_HALT	(1 << 0) /* badness happened: die */
 #define	MAN_ELINE	(1 << 1) /* Next-line element scope. */
