@@ -1756,7 +1756,6 @@ dbindex(const struct mpage *mpage, struct mchars *mc)
 
 	for (mlink = mpage->mlinks; mlink; mlink = mlink->next) {
 		i = 1;
-		SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->file);
 		SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->dsec);
 		SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->arch);
 		SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->name);
@@ -1890,7 +1889,6 @@ dbopen(int real)
 	      ");\n"
 	      "\n"
 	      "CREATE TABLE \"mlinks\" (\n"
-	      " \"file\" TEXT NOT NULL,\n"
 	      " \"sec\" TEXT NOT NULL,\n"
 	      " \"arch\" TEXT NOT NULL,\n"
 	      " \"name\" TEXT NOT NULL,\n"
@@ -1923,7 +1921,7 @@ prepare_statements:
 		"(form) VALUES (?)";
 	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_PAGE], NULL);
 	sql = "INSERT INTO mlinks "
-		"(file,sec,arch,name,pageid) VALUES (?,?,?,?,?)";
+		"(sec,arch,name,pageid) VALUES (?,?,?,?)";
 	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_LINK], NULL);
 	sql = "INSERT INTO keys "
 		"(bits,key,pageid) VALUES (?,?,?)";
