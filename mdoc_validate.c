@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008-2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010, 2011, 2012, 2013 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2014 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2010 Joerg Sonnenberger <joerg@netbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -2184,8 +2184,8 @@ post_dd(POST_ARGS)
 
 	n = mdoc->last;
 	if (NULL == n->child || '\0' == n->child->string[0]) {
-		mdoc->meta.date = mandoc_normdate
-			(mdoc->parse, NULL, n->line, n->pos);
+		mdoc->meta.date = mdoc->quick ? mandoc_strdup("") :
+		    mandoc_normdate(mdoc->parse, NULL, n->line, n->pos);
 		return(1);
 	}
 
@@ -2196,8 +2196,8 @@ post_dd(POST_ARGS)
 	}
 
 	assert(c);
-	mdoc->meta.date = mandoc_normdate
-		(mdoc->parse, buf, n->line, n->pos);
+	mdoc->meta.date = mdoc->quick ? mandoc_strdup(buf) :
+	    mandoc_normdate(mdoc->parse, buf, n->line, n->pos);
 
 	return(1);
 }
