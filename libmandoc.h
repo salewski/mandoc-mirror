@@ -66,7 +66,7 @@ int		 man_addspan(struct man *, const struct tbl_span *);
 int		 man_addeqn(struct man *, const struct eqn *);
 
 void	 	 roff_free(struct roff *);
-struct roff	*roff_alloc(enum mparset, struct mparse *);
+struct roff	*roff_alloc(enum mparset, struct mparse *, int);
 void		 roff_reset(struct roff *);
 enum rofferr	 roff_parseln(struct roff *, int, 
 			char **, size_t *, int, int *);

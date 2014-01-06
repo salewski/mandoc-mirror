@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2010, 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010, 2011, 2012, 2013 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2014 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -109,6 +109,7 @@ struct	roffreg {
 struct	roff {
 	enum mparset	 parsetype; /* requested parse type */
 	struct mparse	*parse; /* parse point */
+	int		 quick; /* skip standard macro deletion */
 	struct roffnode	*last; /* leaf of stack */
 	enum roffrule	 rstack[RSTACK_MAX]; /* stack of !`ie' rules */
 	char		 control; /* control character */
@@ -468,7 +469,7 @@ roff_free(struct roff *r)
 
 
 struct roff *
-roff_alloc(enum mparset type, struct mparse *parse)
+roff_alloc(enum mparset type, struct mparse *parse, int quick)
 {
 	struct roff	*r;
 	int		 i;
@@ -476,6 +477,7 @@ roff_alloc(enum mparset type, struct mparse *parse)
 	r = mandoc_calloc(1, sizeof(struct roff));
 	r->parsetype = type;
 	r->parse = parse;
+	r->quick = quick;
 	r->rstackpos = -1;
 	
 	roffhash_init();
@@ -1497,7 +1499,7 @@ roff_Dd(ROFF_ARGS)
 {
 	const char *const	*cp;
 
-	if (MPARSE_MDOC != r->parsetype)
+	if (0 == r->quick && MPARSE_MDOC != r->parsetype)
 		for (cp = __mdoc_reserved; *cp; cp++)
 			roff_setstr(r, *cp, NULL, 0);
 
@@ -1510,7 +1512,7 @@ roff_TH(ROFF_ARGS)
 {
 	const char *const	*cp;
 
-	if (MPARSE_MDOC != r->parsetype)
+	if (0 == r->quick && MPARSE_MDOC != r->parsetype)
 		for (cp = __man_reserved; *cp; cp++)
 			roff_setstr(r, *cp, NULL, 0);
 
