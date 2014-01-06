@@ -66,7 +66,6 @@ __BEGIN_DECLS
 struct	manpage {
 	char		*file; /* to be prefixed by manpath */
 	char		*names; /* a list of names with sections */
-	char		*desc; /* description of manpage */
 	char		*output; /* user-defined additional output */
 	int		 form; /* 0 == catpage */
 };

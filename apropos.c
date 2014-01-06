@@ -42,7 +42,7 @@ main(int argc, char *argv[])
 	char		*defpaths, *auxpaths;
 	char		*conf_file;
 	char		*progname;
-	char		*outkey;
+	const char	*outkey;
 	extern char	*optarg;
 	extern int	 optind;
 
@@ -59,7 +59,7 @@ main(int argc, char *argv[])
 
 	auxpaths = defpaths = NULL;
 	conf_file = NULL;
-	outkey = NULL;
+	outkey = "Nd";
 
 	while (-1 != (ch = getopt(argc, argv, "C:M:m:O:S:s:")))
 		switch (ch) {
@@ -103,11 +103,9 @@ main(int argc, char *argv[])
 
 	for (i = 0; i < sz; i++) {
 		printf("%s - %s\n", res[i].names,
-		    NULL == outkey ? res[i].desc :
 		    NULL == res[i].output ? "" : res[i].output);
 		free(res[i].file);
 		free(res[i].names);
-		free(res[i].desc);
 		free(res[i].output);
 	}
 

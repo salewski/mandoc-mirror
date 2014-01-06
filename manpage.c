@@ -90,7 +90,7 @@ main(int argc, char *argv[])
 	search.deftype = TYPE_Nm | TYPE_Nd;
 
 	manpath_parse(&paths, conf_file, defpaths, auxpaths);
-	ch = mansearch(&search, &paths, argc, argv, NULL, &res, &sz);
+	ch = mansearch(&search, &paths, argc, argv, "Nd", &res, &sz);
 	manpath_free(&paths);
 
 	if (0 == ch)
@@ -107,9 +107,8 @@ main(int argc, char *argv[])
 
 	for (i = 0; i < sz; i++) {
 		printf("%6zu  %s: %s\n", 
-			i + 1, res[i].names, res[i].desc);
+			i + 1, res[i].names, res[i].output);
 		free(res[i].names);
-		free(res[i].desc);
 		free(res[i].output);
 	}
 
