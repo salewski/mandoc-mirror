@@ -1894,7 +1894,7 @@ post_hyph(POST_ARGS)
 		if (MDOC_TEXT != nch->type)
 			continue;
 		cp = nch->string;
-		if (3 > strnlen(cp, 3))
+		if ('\0' == *cp)
 			continue;
 		while ('\0' != *(++cp))
 			if ('-' == *cp &&
