@@ -1924,9 +1924,7 @@ dbopen(int real)
 	      " \"pageid\" INTEGER NOT NULL REFERENCES mpages(id) "
 		"ON DELETE CASCADE,\n"
 	      " \"id\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL\n"
-	      ");\n"
-	      "\n"
-	      "CREATE INDEX \"key_index\" ON keys (key);\n";
+	      ");\n";
 
 	if (SQLITE_OK != sqlite3_exec(db, sql, NULL, NULL, NULL)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
