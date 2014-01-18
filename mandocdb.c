@@ -1302,6 +1302,15 @@ parse_man(struct mpage *mpage, const struct man_node *n)
 				byte = start[sz];
 				start[sz] = '\0';
 
+				/*
+				 * Assume a stray trailing comma in the
+				 * name list if a name begins with a dash.
+				 */
+
+				if ('-' == start[0] ||
+				    ('\\' == start[0] && '-' == start[1]))
+					break;
+
 				putkey(mpage, start, TYPE_Nm);
 
 				if (' ' == byte) {
