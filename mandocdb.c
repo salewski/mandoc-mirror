@@ -157,8 +157,7 @@ static	int	 parse_mdoc_Nd(struct mpage *, const struct mdoc_node *);
 static	int	 parse_mdoc_Nm(struct mpage *, const struct mdoc_node *);
 static	int	 parse_mdoc_Sh(struct mpage *, const struct mdoc_node *);
 static	int	 parse_mdoc_Xr(struct mpage *, const struct mdoc_node *);
-static	void	 putkey(const struct mpage *,
-			const char *, uint64_t);
+static	void	 putkey(const struct mpage *, char *, uint64_t);
 static	void	 putkeys(const struct mpage *,
 			const char *, size_t, uint64_t);
 static	void	 putmdockey(const struct mpage *,
@@ -962,7 +961,7 @@ mpages_merge(struct mchars *mc, struct mparse *mp)
 	struct mlink		*mlink;
 	struct mdoc		*mdoc;
 	struct man		*man;
-	const char		*cp;
+	char			*cp;
 	int			 match;
 	unsigned int		 pslot;
 	enum mandoclevel	 lvl;
@@ -1186,10 +1185,15 @@ parse_cat(struct mpage *mpage)
  * Put a type/word pair into the word database for this particular file.
  */
 static void
-putkey(const struct mpage *mpage, const char *value, uint64_t type)
+putkey(const struct mpage *mpage, char *value, uint64_t type)
 {
+	char	 *cp;
 
 	assert(NULL != value);
+	if (TYPE_arch == type)
+		for (cp = value; *cp; cp++)
+			if (isupper((unsigned char)*cp))
+				*cp = _tolower((unsigned char)*cp);
 	putkeys(mpage, value, strlen(value), type);
 }
 
@@ -1443,7 +1447,7 @@ parse_mdoc_Fd(struct mpage *mpage, const struct mdoc_node *n)
 static int
 parse_mdoc_Fn(struct mpage *mpage, const struct mdoc_node *n)
 {
-	const char	*cp;
+	char	*cp;
 
 	if (NULL == (n = n->child) || MDOC_TEXT != n->type)
 		return(0);
