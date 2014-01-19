@@ -256,10 +256,10 @@ $(MANDOCDB_OBJS): mansearch.h mandoc.h mdoc.h man.h config.h manpath.h
 PRECONV_OBJS	 = preconv.o
 $(PRECONV_OBJS): config.h
 
-APROPOS_OBJS	 = apropos.o mansearch.o manpath.o
+APROPOS_OBJS	 = apropos.o mansearch.o mansearch_const.o manpath.o
 $(APROPOS_OBJS): config.h manpath.h mansearch.h
 
-MANPAGE_OBJS	 = manpage.o mansearch.o manpath.o
+MANPAGE_OBJS	 = manpage.o mansearch.o mansearch_const.o manpath.o
 $(MANPAGE_OBJS): config.h manpath.h mansearch.h
 
 DEMANDOC_OBJS	 = demandoc.o
