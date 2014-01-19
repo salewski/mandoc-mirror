@@ -608,6 +608,8 @@ exprterm(const struct mansearch *search, char *buf, int cs)
 		e->bits = search->deftype;
 
 	if ('~' == *v++) {
+		if (NULL != strstr(buf, "arch"))
+			cs = 0;
 		if (0 != (irc = regcomp(&e->regexp, v,
 		    REG_EXTENDED | REG_NOSUB | (cs ? 0 : REG_ICASE)))) {
 			regerror(irc, &e->regexp, errbuf, sizeof(errbuf));
