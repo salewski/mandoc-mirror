@@ -956,6 +956,7 @@ mlink_check(struct mpage *mpage, struct mlink *mlink)
 static void
 mpages_merge(struct mchars *mc, struct mparse *mp)
 {
+	char			 any[] = "any";
 	struct ohash_info	 str_info;
 	struct mpage		*mpage;
 	struct mlink		*mlink;
@@ -1027,7 +1028,7 @@ mpages_merge(struct mchars *mc, struct mparse *mp)
 		}
 		putkey(mpage, mpage->sec, TYPE_sec);
 		putkey(mpage, '\0' == *mpage->arch ?
-		    "any" : mpage->arch, TYPE_arch);
+		    any : mpage->arch, TYPE_arch);
 
 		for (mlink = mpage->mlinks; mlink; mlink = mlink->next) {
 			if ('\0' != *mlink->dsec)
@@ -1035,7 +1036,7 @@ mpages_merge(struct mchars *mc, struct mparse *mp)
 			if ('\0' != *mlink->fsec)
 				putkey(mpage, mlink->fsec, TYPE_sec);
 			putkey(mpage, '\0' == *mlink->arch ?
-			    "any" : mlink->arch, TYPE_arch);
+			    any : mlink->arch, TYPE_arch);
 			putkey(mpage, mlink->name, TYPE_Nm);
 		}
 
