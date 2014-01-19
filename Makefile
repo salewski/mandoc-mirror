@@ -128,6 +128,7 @@ SRCS		 = Makefile \
 		   manpath.h \
 		   mansearch.c \
 		   mansearch.h \
+		   mansearch_const.c \
 		   mdoc.7 \
 		   mdoc.c \
 		   mdoc.h \
@@ -249,7 +250,7 @@ MANDOC_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   tree.o
 $(MANDOC_OBJS): main.h mandoc.h mdoc.h man.h config.h out.h
 
-MANDOCDB_OBJS	 = mandocdb.o manpath.o
+MANDOCDB_OBJS	 = mandocdb.o mansearch_const.o manpath.o
 $(MANDOCDB_OBJS): mansearch.h mandoc.h mdoc.h man.h config.h manpath.h
 
 PRECONV_OBJS	 = preconv.o
