@@ -87,7 +87,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ad */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED | MDOC_JOIN }, /* An */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ar */
-	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Cd */
+	{ in_line, MDOC_CALLABLE | MDOC_PARSED | MDOC_JOIN }, /* Cd */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Cm */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Dv */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Er */
