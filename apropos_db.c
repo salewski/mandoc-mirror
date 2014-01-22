@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011, 2014 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -259,8 +259,8 @@ norm_string(const char *val, const struct mchars *mc, char **buf)
 	const char	 *seq, *cpp;
 	int		  len, u, pos;
 	enum mandoc_esc	  esc;
-	static const char res[] = { '\\', '\t',
-				ASCII_NBRSP, ASCII_HYPH, '\0' };
+	static const char res[] = { '\\', '\t', ASCII_NBRSP,
+			ASCII_HYPH, ASCII_BREAK, '\0' };
 
 	/* Pre-allocate by the length of the input */
 
@@ -280,15 +280,23 @@ norm_string(const char *val, const struct mchars *mc, char **buf)
 			val += (int)sz;
 		}
 
-		if (ASCII_HYPH == *val) {
+		switch (*val) {
+		case (ASCII_HYPH):
 			(*buf)[pos++] = '-';
 			val++;
 			continue;
-		} else if ('\t' == *val || ASCII_NBRSP == *val) {
+		case ('\t'):
+			/* FALLTHROUGH */
+		case (ASCII_NBRSP):
 			(*buf)[pos++] = ' ';
 			val++;
+			/* FALLTHROUGH */
+		case (ASCII_BREAK):
 			continue;
-		} else if ('\\' != *val)
+		default:
+			break;
+		}
+		if ('\\' != *val)
 			break;
 
 		/* Read past the slash. */
