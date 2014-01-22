@@ -20,6 +20,7 @@
 
 #define ASCII_NBRSP	 31  /* non-breaking space */
 #define	ASCII_HYPH	 30  /* breakable hyphen */
+#define	ASCII_BREAK	 29  /* breakable zero-width space */
 
 /*
  * Status level.  This refers to both internal status (i.e., whilst
