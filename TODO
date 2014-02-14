@@ -24,9 +24,6 @@ None known.
   .ad   -- re-enable adjustment without changing the mode
   Adjustment mode is ignored while in no-fill mode (.nf).
 
-- .as (append to string)
-  found by jca@ in ratpoison(1)  Sun, 30 Jun 2013 12:01:09 +0200
-  
 - .ce (center N lines)
   found by naddy@ in xloadimage(1)
   found by Juan Francisco Cantero Hurtado <iam at juanfra dot info>

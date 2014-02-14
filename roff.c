@@ -40,6 +40,7 @@ enum	rofft {
 	ROFF_am,
 	ROFF_ami,
 	ROFF_am1,
+	ROFF_as,
 	ROFF_cc,
 	ROFF_de,
 	ROFF_dei,
@@ -233,6 +234,7 @@ static	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "am", roff_block, roff_block_text, roff_block_sub, 0, NULL },
 	{ "ami", roff_block, roff_block_text, roff_block_sub, 0, NULL },
 	{ "am1", roff_block, roff_block_text, roff_block_sub, 0, NULL },
+	{ "as", roff_ds, NULL, NULL, 0, NULL },
 	{ "cc", roff_cc, NULL, NULL, 0, NULL },
 	{ "de", roff_block, roff_block_text, roff_block_sub, 0, NULL },
 	{ "dei", roff_block, roff_block_text, roff_block_sub, 0, NULL },
@@ -939,7 +941,7 @@ roff_block(ROFF_ARGS)
 	/*
 	 * At the beginning of a `de' macro, clear the existing string
 	 * with the same name, if there is one.  New content will be
-	 * added from roff_block_text() in multiline mode.
+	 * appended from roff_block_text() in multiline mode.
 	 */
 
 	if (ROFF_de == tok)
@@ -1029,7 +1031,7 @@ roff_block_sub(ROFF_ARGS)
 	 */
 	if (ROFF_cblock != t) {
 		if (ROFF_de == tok)
-			roff_setstr(r, r->last->name, *bufp + ppos, 1);
+			roff_setstr(r, r->last->name, *bufp + ppos, 2);
 		return(ROFF_IGN);
 	}
 
@@ -1045,7 +1047,7 @@ roff_block_text(ROFF_ARGS)
 {
 
 	if (ROFF_de == tok)
-		roff_setstr(r, r->last->name, *bufp + pos, 1);
+		roff_setstr(r, r->last->name, *bufp + pos, 2);
 
 	return(ROFF_IGN);
 }
@@ -1348,7 +1350,7 @@ roff_ds(ROFF_ARGS)
 		string++;
 
 	/* The rest is the value. */
-	roff_setstr(r, name, string, 0);
+	roff_setstr(r, name, string, ROFF_as == tok);
 	return(ROFF_IGN);
 }
 
@@ -1848,22 +1850,23 @@ roff_getname(struct roff *r, char **cpp, int ln, int pos)
 
 /*
  * Store *string into the user-defined string called *name.
- * In multiline mode, append to an existing entry and append '\n';
- * else replace the existing entry, if there is one.
  * To clear an existing entry, call with (*r, *name, NULL, 0).
+ * append == 0: replace mode
+ * append == 1: single-line append mode
+ * append == 2: multiline append mode, append '\n' after each call
  */
 static void
 roff_setstr(struct roff *r, const char *name, const char *string,
-	int multiline)
+	int append)
 {
 
 	roff_setstrn(&r->strtab, name, strlen(name), string,
-			string ? strlen(string) : 0, multiline);
+			string ? strlen(string) : 0, append);
 }
 
 static void
 roff_setstrn(struct roffkv **r, const char *name, size_t namesz,
-		const char *string, size_t stringsz, int multiline)
+		const char *string, size_t stringsz, int append)
 {
 	struct roffkv	*n;
 	char		*c;
@@ -1885,8 +1888,7 @@ roff_setstrn(struct roffkv **r, const char *name, size_t namesz,
 		n->val.sz = 0;
 		n->next = *r;
 		*r = n;
-	} else if (0 == multiline) {
-		/* In multiline mode, append; else replace. */
+	} else if (0 == append) {
 		free(n->val.p);
 		n->val.p = NULL;
 		n->val.sz = 0;
@@ -1899,7 +1901,7 @@ roff_setstrn(struct roffkv **r, const char *name, size_t namesz,
 	 * One additional byte for the '\n' in multiline mode,
 	 * and one for the terminating '\0'.
 	 */
-	newch = stringsz + (multiline ? 2u : 1u);
+	newch = stringsz + (1 < append ? 2u : 1u);
 
 	if (NULL == n->val.p) {
 		n->val.p = mandoc_malloc(newch);
@@ -1926,7 +1928,7 @@ roff_setstrn(struct roffkv **r, const char *name, size_t namesz,
 	}
 
 	/* Append terminating bytes. */
-	if (multiline)
+	if (1 < append)
 		*c++ = '\n';
 
 	*c = '\0';
