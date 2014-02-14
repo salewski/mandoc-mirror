@@ -15,11 +15,6 @@ None known.
 
 --- missing roff features ----------------------------------------------
 
-- roff.c should treat \n(.H>23 and \n(.V>19 in the pod2man(1)
-  preamble as true, see for example AUTHORS in MooseX::Getopt.3p
-  reported by Andreas Voegele <mail at andreasvoegele dot com>
-  Tue, 22 Nov 2011 15:34:47 +0100 on ports@
-
 - .ad (adjust margins)
   .ad l -- adjust left margin only (flush left)
   .ad r -- adjust right margin only (flush right)
