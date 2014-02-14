@@ -24,11 +24,6 @@ None known.
   .ad   -- re-enable adjustment without changing the mode
   Adjustment mode is ignored while in no-fill mode (.nf).
 
-- .ce (center N lines)
-  found by naddy@ in xloadimage(1)
-  found by Juan Francisco Cantero Hurtado <iam at juanfra dot info>
-           in lang/racket(1)  Thu, 20 Jun 2013 03:19:11 +0200
-
 - .fc (field control)
   found by naddy@ in xloadimage(1)
   
