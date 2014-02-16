@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010, 2012, 2013 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010, 2012, 2013, 2014 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2013 Franco Fichtner <franco@lastsummer.de>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -873,8 +873,11 @@ termp_it_pre(DECL_ARGS)
 		assert(width);
 		if (MDOC_HEAD == n->type)
 			p->rmargin = p->offset + width;
-		else 
+		else {
 			p->offset += width;
+			if (p->rmargin < p->offset)
+				p->rmargin = p->offset;
+		}
 		break;
 	case (LIST_column):
 		assert(width);
