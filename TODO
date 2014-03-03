@@ -130,11 +130,6 @@ None known.
 
 --- missing man features -----------------------------------------------
 
-- groff an-ext.tmac macros (.UR, .UE) occur in xine(5)
-  reported by brad@  Sat, 15 Jan 2011 15:45:23 -0500
-  also occur in freeciv-client(6) freeciv-server(6) freeciv-modpack(6)
-  reported by bentley@  Tue, 30 Oct 2012 01:05:57 -0600
-
 - -T[x]html doesn't stipulate non-collapsing spaces in literal mode
 
 --- missing tbl features -----------------------------------------------
@@ -284,6 +279,17 @@ None known.
     \fBdig \fR
     operate in batch mode
   in dig(1).
+
+************************************************************************
+* warning issues
+************************************************************************
+
+- check that MANDOCERR_BADTAB is thrown in the right cases,
+  i.e. when finding a literal tab character in fill mode,
+  and possibly change the wording of the warning message
+  to refer to fill mode, not literal mode
+  See the mail from Werner LEMBERG on the groff list,
+  Fri, 14 Feb 2014 18:54:42 +0100 (CET)
 
 ************************************************************************
 * performance issues
