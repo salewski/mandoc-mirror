@@ -1,15 +1,16 @@
-.PHONY: 	 clean install installwww
-.SUFFIXES:	 .sgml .html .md5 .h .h.html
+.PHONY: 	 clean install installcgi installwww
+.SUFFIXES:	 .md5 .h .h.html
 .SUFFIXES:	 .1       .3       .7       .8
 .SUFFIXES:	 .1.html  .3.html  .7.html  .8.html
+
+VERSION		 = 1.12.3
+
+# === USER SETTINGS ====================================================
 
 # Specify this if you want to hard-code the operating system to appear
 # in the lower-left hand corner of -mdoc manuals.
 #
 # CFLAGS	+= -DOSNAME="\"OpenBSD 5.4\""
-
-VERSION		 = 1.12.3
-VDATE		 = 31 December 2013
 
 # IFF your system supports multi-byte functions (setlocale(), wcwidth(),
 # putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a
@@ -102,12 +103,9 @@ SRCS		 = Makefile \
 		   eqn_html.c \
 		   eqn_term.c \
 		   example.style.css \
-		   external.png \
 		   gmdiff \
 		   html.c \
 		   html.h \
-		   index.css \
-		   index.sgml \
 		   lib.c \
 		   lib.in \
 		   libman.h \
@@ -282,7 +280,7 @@ $(CATMAN_OBJS): config.h mandoc.h manpath.h mandocdb.h
 DEMANDOC_OBJS	 = demandoc.o
 $(DEMANDOC_OBJS): config.h
 
-INDEX_MANS	 = apropos.1.html \
+WWW_MANS	 = apropos.1.html \
 		   catman.8.html \
 		   demandoc.1.html \
 		   mandoc.1.html \
@@ -297,18 +295,15 @@ INDEX_MANS	 = apropos.1.html \
 		   preconv.1.html \
 		   roff.7.html \
 		   tbl.7.html \
-		   mandocdb.8.html
-
-$(INDEX_MANS): mandoc
-
-INDEX_OBJS	 = $(INDEX_MANS) \
+		   mandocdb.8.html \
 		   man.h.html \
 		   mandoc.h.html \
-		   mdoc.h.html \
-		   mdocml.tar.gz \
-		   mdocml.md5
+		   mdoc.h.html
 
-www: index.html
+$(WWW_MANS): mandoc
+
+WWW_OBJS	 = mdocml.tar.gz \
+		   mdocml.md5
 
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS)
@@ -320,8 +315,7 @@ clean:
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f mandoc $(MANDOC_OBJS)
 	rm -f config.h config.log $(COMPAT_OBJS)
-	rm -f mdocml.tar.gz
-	rm -f index.html $(INDEX_OBJS)
+	rm -f $(WWW_MANS) $(WWW_OBJS)
 	rm -rf *.dSYM
 
 install: all
@@ -347,16 +341,14 @@ installcgi: all
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(HTDOCDIR)/man.css
 	$(INSTALL_DATA) man-cgi.css $(DESTDIR)$(HTDOCDIR)
 
-installwww: www
-	mkdir -p $(PREFIX)/snapshots
-	mkdir -p $(PREFIX)/binaries
-	$(INSTALL_DATA) index.html external.png index.css $(PREFIX)
-	$(INSTALL_DATA) $(INDEX_MANS) style.css $(PREFIX)
-	$(INSTALL_DATA) mandoc.h.html man.h.html mdoc.h.html $(PREFIX)
-	$(INSTALL_DATA) mdocml.tar.gz $(PREFIX)/snapshots
-	$(INSTALL_DATA) mdocml.md5 $(PREFIX)/snapshots
-	$(INSTALL_DATA) mdocml.tar.gz $(PREFIX)/snapshots/mdocml-$(VERSION).tar.gz
-	$(INSTALL_DATA) mdocml.md5 $(PREFIX)/snapshots/mdocml-$(VERSION).md5
+installwww: $(WWW_MANS) $(WWW_OBJS)
+	mkdir -p $(DESTDIR)$(HTDOCDIR)/snapshots
+	$(INSTALL_DATA) $(WWW_MANS) style.css $(DESTDIR)$(HTDOCDIR)
+	$(INSTALL_DATA) $(WWW_OBJS) $(DESTDIR)$(HTDOCDIR)/snapshots
+	$(INSTALL_DATA) mdocml.tar.gz \
+		$(DESTDIR)$(HTDOCDIR)/snapshots/mdocml-$(VERSION).tar.gz
+	$(INSTALL_DATA) mdocml.md5 \
+		$(DESTDIR)$(HTDOCDIR)/snapshots/mdocml-$(VERSION).md5
 
 libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 	$(AR) rs $@ $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
@@ -395,8 +387,6 @@ mdocml.tar.gz: $(SRCS)
 	( cd .dist/ && tar zcf ../$@ mdocml-$(VERSION) )
 	rm -rf .dist/
 
-index.html: $(INDEX_OBJS)
-
 config.h: configure config.h.pre config.h.post $(TESTSRCS)
 	rm -f config.log
 	CC="$(CC)" CFLAGS="$(CFLAGS)" VERSION="$(VERSION)" ./configure
@@ -406,7 +396,3 @@ config.h: configure config.h.pre config.h.post $(TESTSRCS)
 
 .1.1.html .3.3.html .7.7.html .8.8.html:
 	./mandoc -Thtml -Wall,stop -Ostyle=style.css,man=%N.%S.html,includes=%I.html $< >$@
-
-.sgml.html:
-	validate --warn $<
-	sed -e "s!@VERSION@!$(VERSION)!" -e "s!@VDATE@!$(VDATE)!" $< >$@
