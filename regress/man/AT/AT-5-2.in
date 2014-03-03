@@ -1,7 +1,0 @@
-.TH AT-5-2 1 "2010-05-17" "MANDOC"
-.SH TEST FOR VSPACE
-.AT 5 2
-.SH DESCRIPTION
-.SS foo
-.SS Test case for AT
-foo
