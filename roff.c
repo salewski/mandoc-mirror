@@ -1070,25 +1070,21 @@ roff_cond_sub(ROFF_ARGS)
 					ln, ppos, pos, offs));
 	}
 
+	/*
+	 * If `\}' occurs on a macro line without a preceding macro,
+	 * drop the line completely.
+	 */
+
+	ep = *bufp + pos;
+	if ('\\' == ep[0] && '}' == ep[1])
+		rr = ROFFRULE_DENY;
+
 	/* Always check for the closing delimiter `\}'. */
 
-	ep = &(*bufp)[pos];
 	while (NULL != (ep = strchr(ep, '\\'))) {
 		if ('}' != *(++ep))
 			continue;
-
-		/*
-		 * If we're at the end of line, then just chop
-		 * off the \} and resize the buffer.
-		 * If we aren't, then convert it to spaces.
-		 */
-
-		if ('\0' == *(ep + 1)) {
-			*--ep = '\0';
-			*szp -= 2;
-		} else
-			*(ep - 1) = *ep = ' ';
-
+		*ep = '&';
 		roff_ccond(r, ln, pos);
 	}
 	return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
