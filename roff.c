@@ -1082,10 +1082,11 @@ roff_cond_sub(ROFF_ARGS)
 	/* Always check for the closing delimiter `\}'. */
 
 	while (NULL != (ep = strchr(ep, '\\'))) {
-		if ('}' != *(++ep))
-			continue;
-		*ep = '&';
-		roff_ccond(r, ln, pos);
+		if ('}' == *(++ep)) {
+			*ep = '&';
+			roff_ccond(r, ln, ep - *bufp - 1);
+		}
+		++ep;
 	}
 	return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
 }
@@ -1100,13 +1101,13 @@ roff_cond_text(ROFF_ARGS)
 	rr = r->last->rule;
 	roffnode_cleanscope(r);
 
-	ep = &(*bufp)[pos];
-	for ( ; NULL != (ep = strchr(ep, '\\')); ep++) {
-		ep++;
-		if ('}' != *ep)
-			continue;
-		*ep = '&';
-		roff_ccond(r, ln, pos);
+	ep = *bufp + pos;
+	while (NULL != (ep = strchr(ep, '\\'))) {
+		if ('}' == *(++ep)) {
+			*ep = '&';
+			roff_ccond(r, ln, ep - *bufp - 1);
+		}
+		++ep;
 	}
 	return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
 }
