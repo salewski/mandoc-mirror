@@ -72,7 +72,6 @@ enum	rofft {
 	ROFF_EQ,
 	ROFF_EN,
 	ROFF_cblock,
-	ROFF_ccond,
 	ROFF_USERDEF,
 	ROFF_MAX
 };
@@ -180,7 +179,7 @@ static	enum rofferr	 roff_block_text(ROFF_ARGS);
 static	enum rofferr	 roff_block_sub(ROFF_ARGS);
 static	enum rofferr	 roff_cblock(ROFF_ARGS);
 static	enum rofferr	 roff_cc(ROFF_ARGS);
-static	enum rofferr	 roff_ccond(ROFF_ARGS);
+static	void		 roff_ccond(struct roff *, int, int);
 static	enum rofferr	 roff_cond(ROFF_ARGS);
 static	enum rofferr	 roff_cond_text(ROFF_ARGS);
 static	enum rofferr	 roff_cond_sub(ROFF_ARGS);
@@ -267,7 +266,6 @@ static	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "EQ", roff_EQ, NULL, NULL, 0, NULL },
 	{ "EN", roff_EN, NULL, NULL, 0, NULL },
 	{ ".", roff_cblock, NULL, NULL, 0, NULL },
-	{ "\\}", roff_ccond, NULL, NULL, 0, NULL },
 	{ NULL, roff_userdef, NULL, NULL, 0, NULL },
 };
 
@@ -790,14 +788,10 @@ roff_parse(struct roff *r, const char *buf, int *pos)
 			'\t' == buf[*pos] || ' ' == buf[*pos])
 		return(ROFF_MAX);
 
-	/*
-	 * We stop the macro parse at an escape, tab, space, or nil.
-	 * However, `\}' is also a valid macro, so make sure we don't
-	 * clobber it by seeing the `\' as the end of token.
-	 */
+	/* We stop the macro parse at an escape, tab, space, or nil. */
 
 	mac = buf + *pos;
-	maclen = strcspn(mac + 1, " \\\t\0") + 1;
+	maclen = strcspn(mac, " \\\t\0");
 
 	t = (r->current_string = roff_getstrn(r, mac, maclen))
 	    ? ROFF_USERDEF : roffhash_find(mac, maclen);
@@ -866,14 +860,13 @@ roffnode_cleanscope(struct roff *r)
 }
 
 
-/* ARGSUSED */
-static enum rofferr
-roff_ccond(ROFF_ARGS)
+static void
+roff_ccond(struct roff *r, int ln, int ppos)
 {
 
 	if (NULL == r->last) {
 		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
-		return(ROFF_IGN);
+		return;
 	}
 
 	switch (r->last->tok) {
@@ -885,20 +878,17 @@ roff_ccond(ROFF_ARGS)
 		break;
 	default:
 		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
-		return(ROFF_IGN);
+		return;
 	}
 
 	if (r->last->endspan > -1) {
 		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
-		return(ROFF_IGN);
+		return;
 	}
-
-	if ((*bufp)[pos])
-		mandoc_msg(MANDOCERR_ARGSLOST, r->parse, ln, pos, NULL);
 
 	roffnode_pop(r);
 	roffnode_cleanscope(r);
-	return(ROFF_IGN);
+	return;
 }
 
 
@@ -1073,7 +1063,7 @@ roff_cond_sub(ROFF_ARGS)
 	 */
 
 	if ((ROFF_MAX != t) &&
-	    (ROFF_ccond == t || ROFFRULE_ALLOW == rr ||
+	    (ROFFRULE_ALLOW == rr ||
 	     ROFFMAC_STRUCT & roffs[t].flags)) {
 		assert(roffs[t].proc);
 		return((*roffs[t].proc)(r, t, bufp, szp,
@@ -1099,9 +1089,7 @@ roff_cond_sub(ROFF_ARGS)
 		} else
 			*(ep - 1) = *ep = ' ';
 
-		roff_ccond(r, ROFF_ccond, bufp, szp, 
-				ln, pos, pos + 2, offs);
-		break;
+		roff_ccond(r, ln, pos);
 	}
 	return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
 }
@@ -1122,8 +1110,7 @@ roff_cond_text(ROFF_ARGS)
 		if ('}' != *ep)
 			continue;
 		*ep = '&';
-		roff_ccond(r, ROFF_ccond, bufp, szp, 
-				ln, pos, pos + 2, offs);
+		roff_ccond(r, ln, pos);
 	}
 	return(ROFFRULE_DENY == rr ? ROFF_IGN : ROFF_CONT);
 }
