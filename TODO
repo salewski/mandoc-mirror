@@ -38,6 +38,7 @@ None known.
 
 - .ta (tab settings) occurs in ircbug(1) and probably gnats(1)
   reported by brad@  Sat, 15 Jan 2011 15:50:51 -0500
+  also Tcl_NewStringObj(3) via wiz@  Wed, 5 Mar 2014 22:27:43 +0100
 
 - .ti (temporary indent)
   found by naddy@ in xloadimage(1)
@@ -57,8 +58,17 @@ None known.
 - \n+ and \n- numerical register increment and decrement
   found by bentley@ in sbcl(1)  Mon, 9 Dec 2013 18:36:57 -0700
 
+- \w'' width measurements
+  would not be very useful without an expression parser, see below
+  needed for Tcl_NewStringObj(3) via wiz@  Wed, 5 Mar 2014 22:27:43 +0100
+
 - using undefined strings or macros defines them to be empty
   wl@  Mon, 14 Nov 2011 14:37:01 +0000
+
+- general expression parser, including arithmetics
+  to be used at least for .if/.ie and .nr and maybe at other places
+  could use J.T.Conklin's PD code in bin/expr/expr.c for inspiration
+  needed for Tcl_NewStringObj(3) via wiz@  Wed, 5 Mar 2014 22:27:43 +0100
 
 --- missing mdoc features ----------------------------------------------
 
