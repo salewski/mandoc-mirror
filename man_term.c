@@ -1045,7 +1045,7 @@ out:
 	 * more specific than this.
 	 */
 	if (MANT_LITERAL & mt->fl && ! (TERMP_NOBREAK & p->flags) &&
-	    (NULL == n->next || n->next->line > n->line)) {
+	    (NULL == n->next || MAN_LINE & n->next->flags)) {
 		rm = p->rmargin;
 		rmax = p->maxrmargin;
 		p->rmargin = p->maxrmargin = TERM_MAXMARGIN;
