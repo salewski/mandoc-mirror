@@ -720,7 +720,7 @@ pre_TP(DECL_ARGS)
 	/* Calculate offset. */
 
 	if (NULL != (nn = n->parent->head->child))
-		if (nn->string && nn->parent->line == nn->line)
+		if (nn->string && 0 == (MAN_LINE & nn->flags))
 			if ((ival = a2width(p, nn->string)) >= 0)
 				len = (size_t)ival;
 
@@ -737,9 +737,14 @@ pre_TP(DECL_ARGS)
 		mt->fl &= ~MANT_LITERAL;
 
 		/* Don't print same-line elements. */
-		for (nn = n->child; nn; nn = nn->next)
-			if (nn->line > n->line)
-				print_man_node(p, mt, nn, meta);
+		nn = n->child;
+		while (NULL != nn && 0 == (MAN_LINE & nn->flags))
+			nn = nn->next;
+
+		while (NULL != nn) {
+			print_man_node(p, mt, nn, meta);
+			nn = nn->next;
+		}
 
 		if (savelit)
 			mt->fl |= MANT_LITERAL;

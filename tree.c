@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2013 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2013, 2014 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -252,7 +252,10 @@ print_man(const struct man_node *n, int indent)
 	} else {
 		for (i = 0; i < indent; i++)
 			putchar('\t');
-		printf("%s (%s) %d:%d\n", p, t, n->line, n->pos);
+		printf("%s (%s) ", p, t);
+		if (MAN_LINE & n->flags)
+			putchar('*');
+		printf("%d:%d\n", n->line, n->pos);
 	}
 
 	if (n->child)
