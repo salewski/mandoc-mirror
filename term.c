@@ -183,6 +183,13 @@ term_flushln(struct termp *p)
 			     ASCII_BREAK == p->buf[j]))
 				jhy = j;
 
+			/*
+			 * Hyphenation now decided, put back a real
+			 * hyphen such that we get the correct width.
+			 */
+			if (ASCII_HYPH == p->buf[j])
+				p->buf[j] = '-';
+
 			vend += (*p->width)(p, p->buf[j]);
 		}
 
@@ -246,12 +253,6 @@ term_flushln(struct termp *p)
 				(*p->advance)(p, vbl);
 				p->viscol += vbl;
 				vbl = 0;
-			}
-
-			if (ASCII_HYPH == p->buf[i]) {
-				(*p->letter)(p, '-');
-				p->viscol += (*p->width)(p, '-');
-				continue;
 			}
 
 			(*p->letter)(p, p->buf[i]);
