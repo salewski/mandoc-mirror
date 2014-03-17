@@ -1,6 +1,7 @@
 .\"	$Id$
 .\"
-.\" Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+.\" Copyright (c) 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
+.\" Copyright (c) 2011, 2012 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -70,14 +71,16 @@ and
 .Op Ar arch Li /
 .Ar title . Sy 0
 .Sm on
-in that directory;
-existing databases are truncated.
+in that directory.
+Existing databases are replaced.
 If
 .Ar dir
 is not provided,
 .Nm
 uses the default paths stipulated by
-.Xr man 1 .
+.Xr manpath 1 ,
+or
+.Xr man.conf 5 .
 .Pp
 The arguments are as follows:
 .Bl -tag -width "-C file"
@@ -321,4 +324,6 @@ started the Perl version in 2000,
 and the current version of
 .Nm
 was written by
-.An Kristaps Dzonsons Aq Mt kristaps@bsd.lv .
+.An Kristaps Dzonsons Aq Mt kristaps@bsd.lv
+and
+.An Ingo Schwarze Aq Mt schwarze@openbsd.org .
