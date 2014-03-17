@@ -1,6 +1,7 @@
 .\"	$Id$
 .\"
 .\" Copyright (c) 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
+.\" Copyright (c) 2011, 2012 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -46,7 +47,9 @@ manuals and indexes them in a database for fast retrieval by
 .Xr apropos 1 ,
 .Xr whatis 1 ,
 and
-.Xr man 1 .
+.Xr man 1 Ns 's
+.Fl k
+option.
 .Pp
 By default,
 .Nm
@@ -126,11 +129,30 @@ with the next input file.
 A database of manpages relative to the directory of the file.
 This file is portable across architectures and systems, so long as the
 manpage hierarchy it indexes does not change.
-.It Pa mandoc.db~
-A temporary database used during scanning and parsing.
+.It Pa /etc/man.conf
+The default
+.Xr man 1
+configuration file.
 .El
 .Sh EXIT STATUS
-.Ex -std
+The
+.Nm
+utility exits with one of the following values:
+.Pp
+.Bl -tag -width Ds -compact
+.It 0
+No errors occurred.
+.It 5
+Invalid command line arguments were specified.
+No input files have been read.
+.It 6
+An operating system error occurred, for example memory exhaustion or an
+error accessing input files.
+Such errors cause
+.Nm
+to exit at once, possibly in the middle of parsing or formatting a file.
+The output databases are corrupt and should be removed.
+.El
 .Sh SEE ALSO
 .Xr apropos 1 ,
 .Xr man 1 ,
