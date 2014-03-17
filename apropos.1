@@ -1,6 +1,6 @@
 .\"	$Id$
 .\"
-.\" Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+.\" Copyright (c) 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -71,12 +71,18 @@ for
 databases.
 Invalid paths, or paths without manual databases, are ignored.
 .It Fl S Ar arch
-Search only for a particular architecture.
-.It Fl s Ar cat
-Search only for a manual section.
+Restrict the search to pages for the specified
+.Xr machine 1
+architecture.
+.Ar arch
+is case insensitive.
+By default, pages for all architectures are shown.
+.It Fl s Ar section
+Restrict the search to the specified section of the manual.
+By default, pages from all sections are shown.
 See
 .Xr man 1
-for a listing of manual sections.
+for a listing of sections.
 .El
 .Pp
 An
@@ -239,24 +245,24 @@ Text production:
 .It Li \&Dx Ta Dx No version reference
 .El
 .Sh ENVIRONMENT
-.Bl -tag -width Ds
+.Bl -tag -width MANPATH
 .It Ev MANPATH
-Colon-separated paths modifying the default list of paths searched for
-manual databases.
+The standard search path used by
+.Xr man 1
+may be changed by specifying a path in the
+.Ev MANPATH
+environment variable.
 Invalid paths, or paths without manual databases, are ignored.
 Overridden by
 .Fl M .
 If
 .Ev MANPATH
-begins with a
-.Sq \&: ,
-it is appended to the default list;
-else if it ends with
-.Sq \&: ,
-it is prepended to the default list; else if it contains
-.Sq \&:: ,
-the default list is inserted between the colons.
-If none of these conditions are met, it overrides the default list.
+begins with a colon, it is appended to the default list;
+if it ends with a colon, it is prepended to the default list;
+or if it contains two adjacent colons,
+the standard search path is inserted between the colons.
+If none of these conditions are met, it overrides the
+standard search path.
 .El
 .Sh FILES
 .Bl -tag -width "/etc/man.conf" -compact
@@ -277,35 +283,73 @@ configuration file
 .Ex -std
 .Sh EXAMPLES
 Search for
-.Qq mdoc
-as a substring and regular expression
-within each manual name and description:
+.Qq .cf
+as a substring of manual names and descriptions:
 .Pp
-.Dl $ apropos mdoc
-.Dl $ apropos ~^mdoc$
+.Dl $ apropos .cf
 .Pp
 Include matches for
-.Qq roff
+.Qq .cnf
 and
-.Qq man
-for the regular expression case:
+.Qq .conf
+as well:
 .Pp
-.Dl $ apropos ~^mdoc$ roff man
-.Dl $ apropos ~^mdoc$ \-o roff \-o man
+.Dl $ apropos .cf .cnf .conf
 .Pp
-Search for
+Search in names and descriptions using a regular expression:
+.Pp
+.Dl $ apropos '~set.?[ug]id'
+.Pp
+Search for manuals in the library category mentioning both the
 .Qq optind
-and
+and the
 .Qq optarg
-as variable names in the library category:
+variables:
 .Pp
-.Dl $ apropos \-s 3 Va~^optind \-a Va~^optarg$
+.Dl $ apropos \-s 3 Va=optind \-a Va=optarg
+.Pp
+Do exactly the same as calling
+.Xr whatis 1
+with the argument
+.Qq ssh :
+.Pp
+.Dl $ apropos \-\- \-i 'Nm~[[:<:]]ssh[[:>:]]'
 .Sh SEE ALSO
 .Xr man 1 ,
 .Xr re_format 7 ,
 .Xr mandocdb 8
-.Sh AUTHORS
-The
+.Sh HISTORY
+An
 .Nm
-utility was written by
+utility first appeared in
+.Bx 2 .
+It was rewritten from scratch for
+.Ox 5.1 .
+.Pp
+The
+.Fl M
+option and the
+.Ev MANPATH
+variable first appeared in
+.Bx 4.3 ;
+.Fl m
+in
+.Bx 4.3 Reno ;
+.Fl C
+in
+.Bx 4.4 Lite1 ;
+and
+.Fl S
+and
+.Fl s
+in
+.Ox 4.5 .
+.Sh AUTHORS
+.An -nosplit
+.An Bill Joy
+wrote the original
+.Bx
+.Nm
+in February 1979.
+The current version was written by
 .An Kristaps Dzonsons Aq Mt kristaps@bsd.lv .
