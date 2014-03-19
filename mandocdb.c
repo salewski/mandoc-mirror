@@ -288,7 +288,7 @@ static	const struct mdoc_handler mdocs[MDOC_MAX] = {
 };
 
 static	const char	 *progname;
-static	int		  quick;  /* abort the parse early */
+static	int		  mparse_options;  /* abort the parse early */
 static	int		  use_all;  /* Use all directories and files. */
 static	int		  verb;  /* Output verbosity level. */
 static	int		  warnings;  /* Potential problems in manuals. */
@@ -329,6 +329,7 @@ main(int argc, char *argv[])
 	hash = NULL;
 	op = OP_DEFAULT;
 	dir = NULL;
+	mparse_options = MPARSE_SO;
 
 	while (-1 != (ch = getopt(argc, argv, "aC:d:Qtu:vW")))
 		switch (ch) {
@@ -354,7 +355,7 @@ main(int argc, char *argv[])
 			op = OP_UPDATE;
 			break;
 		case ('Q'):
-			quick = 1;
+			mparse_options |= MPARSE_QUICK;
 			break;
 		case ('t'):
 			dup2(STDOUT_FILENO, STDERR_FILENO);
@@ -398,8 +399,7 @@ main(int argc, char *argv[])
 	info.lorder = 4321;
 	info.flags = R_DUP;
 
-	mp = mparse_alloc(MPARSE_AUTO,
-		MANDOCLEVEL_FATAL, NULL, NULL, quick);
+	mp = mparse_alloc(mparse_options, MANDOCLEVEL_FATAL, NULL, NULL);
 
 	memset(&buf, 0, sizeof(struct buf));
 	memset(&dbuf, 0, sizeof(struct buf));
