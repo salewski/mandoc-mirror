@@ -99,6 +99,7 @@ struct	inodev {
 
 struct	mpage {
 	struct inodev	 inodev;  /* used for hashing routine */
+	int64_t		 recno;   /* id in mpages SQL table */
 	enum form	 form;    /* format from file content */
 	char		*sec;     /* section from file content */
 	char		*arch;    /* architecture from file content */
@@ -116,6 +117,7 @@ struct	mlink {
 	char		*name;    /* name from file name (not empty) */
 	char		*fsec;    /* section from file name suffix */
 	struct mlink	*next;    /* singly linked list */
+	struct mpage	*mpage;   /* parent */
 };
 
 enum	stmt {
@@ -134,7 +136,8 @@ struct	mdoc_handler {
 };
 
 static	void	 dbclose(int);
-static	void	 dbadd(const struct mpage *, struct mchars *);
+static	void	 dbadd(struct mpage *, struct mchars *);
+static	void	 dbadd_mlink(const struct mlink *mlink);
 static	int	 dbopen(int);
 static	void	 dbprune(void);
 static	void	 filescan(const char *);
@@ -351,7 +354,6 @@ main(int argc, char *argv[])
 
 	path_arg = NULL;
 	op = OP_DEFAULT;
-	mparse_options = MPARSE_SO;
 
 	while (-1 != (ch = getopt(argc, argv, "aC:d:nQT:tu:vW")))
 		switch (ch) {
@@ -818,6 +820,7 @@ mlink_add(struct mlink *mlink, const struct stat *st)
 	} else
 		mlink->next = mpage->mlinks;
 	mpage->mlinks = mlink;
+	mlink->mpage = mpage;
 }
 
 static void
@@ -960,10 +963,11 @@ mpages_merge(struct mchars *mc, struct mparse *mp)
 {
 	char			 any[] = "any";
 	struct ohash_info	 str_info;
-	struct mpage		*mpage;
-	struct mlink		*mlink;
+	struct mpage		*mpage, *mpage_dest;
+	struct mlink		*mlink, *mlink_dest;
 	struct mdoc		*mdoc;
 	struct man		*man;
+	char			*sodest;
 	char			*cp;
 	int			 match;
 	unsigned int		 pslot;
@@ -999,10 +1003,48 @@ mpages_merge(struct mchars *mc, struct mparse *mp)
 		    FORM_CAT != mpage->mlinks->fform) {
 			lvl = mparse_readfd(mp, -1, mpage->mlinks->file);
 			if (lvl < MANDOCLEVEL_FATAL)
-				mparse_result(mp, &mdoc, &man, NULL);
+				mparse_result(mp, &mdoc, &man, &sodest);
 		}
 
-		if (NULL != mdoc) {
+		if (NULL != sodest) {
+			mlink_dest = ohash_find(&mlinks,
+			    ohash_qlookup(&mlinks, sodest));
+			if (NULL != mlink_dest) {
+
+				/* The .so target exists. */
+
+				mpage_dest = mlink_dest->mpage;
+				mlink = mpage->mlinks;
+				while (1) {
+					mlink->mpage = mpage_dest;
+
+					/*
+					 * If the target was already
+					 * processed, add the links
+					 * to the database now.
+					 * Otherwise, this will
+					 * happen when we come
+					 * to the target.
+					 */
+
+					if (mpage_dest->recno)
+						dbadd_mlink(mlink);
+
+					if (NULL == mlink->next)
+						break;
+					mlink = mlink->next;
+				}
+
+				/* Move all links to the target. */
+
+				mlink->next = mlink_dest->next;
+				mlink_dest->next = mpage->mlinks;
+				mpage->mlinks = NULL;
+			}
+			ohash_delete(&strings);
+			mpage = ohash_next(&mpages, &pslot);
+			continue;
+		} else if (NULL != mdoc) {
 			mpage->form = FORM_SRC;
 			mpage->sec =
 			    mandoc_strdup(mdoc_meta(mdoc)->msec);
@@ -1779,6 +1821,20 @@ render_key(struct mchars *mc, struct str *key)
 	key->rendered = buf;
 }
 
+static void
+dbadd_mlink(const struct mlink *mlink)
+{
+	size_t		 i;
+
+	i = 1;
+	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->dsec);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->arch);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->name);
+	SQL_BIND_INT64(stmts[STMT_INSERT_LINK], i, mlink->mpage->recno);
+	SQL_STEP(stmts[STMT_INSERT_LINK]);
+	sqlite3_reset(stmts[STMT_INSERT_LINK]);
+}
+
 /*
  * Flush the current page's terms (and their bits) into the database.
  * Wrap the entire set of additions in a transaction to make sqlite be a
@@ -1786,11 +1842,10 @@ render_key(struct mchars *mc, struct str *key)
  * Also, handle escape sequences at the last possible moment.
  */
 static void
-dbadd(const struct mpage *mpage, struct mchars *mc)
+dbadd(struct mpage *mpage, struct mchars *mc)
 {
 	struct mlink	*mlink;
 	struct str	*key;
-	int64_t		 recno;
 	size_t		 i;
 	unsigned int	 slot;
 
@@ -1803,18 +1858,11 @@ dbadd(const struct mpage *mpage, struct mchars *mc)
 	i = 1;
 	SQL_BIND_INT(stmts[STMT_INSERT_PAGE], i, FORM_SRC == mpage->form);
 	SQL_STEP(stmts[STMT_INSERT_PAGE]);
-	recno = sqlite3_last_insert_rowid(db);
+	mpage->recno = sqlite3_last_insert_rowid(db);
 	sqlite3_reset(stmts[STMT_INSERT_PAGE]);
 
-	for (mlink = mpage->mlinks; mlink; mlink = mlink->next) {
-		i = 1;
-		SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->dsec);
-		SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->arch);
-		SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->name);
-		SQL_BIND_INT64(stmts[STMT_INSERT_LINK], i, recno);
-		SQL_STEP(stmts[STMT_INSERT_LINK]);
-		sqlite3_reset(stmts[STMT_INSERT_LINK]);
-	}
+	for (mlink = mpage->mlinks; mlink; mlink = mlink->next)
+		dbadd_mlink(mlink);
 
 	for (key = ohash_first(&strings, &slot); NULL != key;
 	     key = ohash_next(&strings, &slot)) {
@@ -1824,7 +1872,7 @@ dbadd(const struct mpage *mpage, struct mchars *mc)
 		i = 1;
 		SQL_BIND_INT64(stmts[STMT_INSERT_KEY], i, key->mask);
 		SQL_BIND_TEXT(stmts[STMT_INSERT_KEY], i, key->rendered);
-		SQL_BIND_INT64(stmts[STMT_INSERT_KEY], i, recno);
+		SQL_BIND_INT64(stmts[STMT_INSERT_KEY], i, mpage->recno);
 		SQL_STEP(stmts[STMT_INSERT_KEY]);
 		sqlite3_reset(stmts[STMT_INSERT_KEY]);
 		if (key->rendered != key->key)
