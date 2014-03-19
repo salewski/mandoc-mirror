@@ -103,9 +103,8 @@ struct	roffreg {
 };
 
 struct	roff {
-	enum mparset	 parsetype; /* requested parse type */
 	struct mparse	*parse; /* parse point */
-	int		 quick; /* skip standard macro deletion */
+	int		 options; /* parse options */
 	struct roffnode	*last; /* leaf of stack */
 	int		 rstack[RSTACK_MAX]; /* stack of !`ie' rules */
 	char		 control; /* control character */
@@ -463,14 +462,13 @@ roff_free(struct roff *r)
 
 
 struct roff *
-roff_alloc(enum mparset type, struct mparse *parse, int quick)
+roff_alloc(struct mparse *parse, int options)
 {
 	struct roff	*r;
 
 	r = mandoc_calloc(1, sizeof(struct roff));
-	r->parsetype = type;
 	r->parse = parse;
-	r->quick = quick;
+	r->options = options;
 	r->rstackpos = -1;
 	
 	roffhash_init();
@@ -1552,7 +1550,7 @@ roff_Dd(ROFF_ARGS)
 {
 	const char *const	*cp;
 
-	if (0 == r->quick && MPARSE_MDOC != r->parsetype)
+	if (0 == ((MPARSE_MDOC | MPARSE_QUICK) & r->options))
 		for (cp = __mdoc_reserved; *cp; cp++)
 			roff_setstr(r, *cp, NULL, 0);
 
@@ -1565,7 +1563,7 @@ roff_TH(ROFF_ARGS)
 {
 	const char *const	*cp;
 
-	if (0 == r->quick && MPARSE_MDOC != r->parsetype)
+	if (0 == (MPARSE_QUICK & r->options))
 		for (cp = __man_reserved; *cp; cp++)
 			roff_setstr(r, *cp, NULL, 0);
 

@@ -172,7 +172,7 @@ static	size_t	 utf8(unsigned int, char [7]);
 static	char		 tempfilename[32];
 static	char		*progname;
 static	int		 nodb; /* no database changes */
-static	int		 quick; /* abort the parse early */
+static	int		 mparse_options; /* abort the parse early */
 static	int	 	 use_all; /* use all found files */
 static	int	  	 verb; /* print what we're doing */
 static	int	  	 warnings; /* warn about crap */
@@ -351,6 +351,7 @@ main(int argc, char *argv[])
 
 	path_arg = NULL;
 	op = OP_DEFAULT;
+	mparse_options = MPARSE_SO;
 
 	while (-1 != (ch = getopt(argc, argv, "aC:d:nQT:tu:vW")))
 		switch (ch) {
@@ -371,7 +372,7 @@ main(int argc, char *argv[])
 			nodb = 1;
 			break;
 		case ('Q'):
-			quick = 1;
+			mparse_options |= MPARSE_QUICK;
 			break;
 		case ('T'):
 			if (strcmp(optarg, "utf8")) {
@@ -411,8 +412,7 @@ main(int argc, char *argv[])
 	}
 
 	exitcode = (int)MANDOCLEVEL_OK;
-	mp = mparse_alloc(MPARSE_AUTO, 
-		MANDOCLEVEL_FATAL, NULL, NULL, quick);
+	mp = mparse_alloc(mparse_options, MANDOCLEVEL_FATAL, NULL, NULL);
 	mc = mchars_alloc();
 
 	ohash_init(&mpages, 6, &mpages_info);
@@ -1985,7 +1985,7 @@ dbopen(int real)
 	rc = sqlite3_open_v2(MANDOC_DB "~", &db, ofl, NULL);
 	if (SQLITE_OK == rc) 
 		goto create_tables;
-	if (quick) {
+	if (MPARSE_QUICK & mparse_options) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
 		say(MANDOC_DB "~", "%s", sqlite3_errmsg(db));
 		return(0);
