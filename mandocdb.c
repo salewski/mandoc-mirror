@@ -651,7 +651,7 @@ index_merge(const struct of *of, struct mparse *mp,
 		if ((MANDOC_SRC & of->src_form ||
 		    ! (MANDOC_FORM & of->src_form)) &&
 		    MANDOCLEVEL_FATAL > mparse_readfd(mp, -1, fn))
-			mparse_result(mp, &mdoc, &man);
+			mparse_result(mp, &mdoc, &man, NULL);
 
 		if (NULL != mdoc) {
 			msec = mdoc_meta(mdoc)->msec;
