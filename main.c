@@ -294,7 +294,7 @@ parse(struct curparse *curp, int fd,
 		}
 	}
 
-	mparse_result(curp->mp, &mdoc, &man);
+	mparse_result(curp->mp, &mdoc, &man, NULL);
 
 	/* Execute the out device, if it exists. */
 

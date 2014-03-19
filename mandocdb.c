@@ -999,7 +999,7 @@ mpages_merge(struct mchars *mc, struct mparse *mp)
 		    FORM_CAT != mpage->mlinks->fform) {
 			lvl = mparse_readfd(mp, -1, mpage->mlinks->file);
 			if (lvl < MANDOCLEVEL_FATAL)
-				mparse_result(mp, &mdoc, &man);
+				mparse_result(mp, &mdoc, &man, NULL);
 		}
 
 		if (NULL != mdoc) {

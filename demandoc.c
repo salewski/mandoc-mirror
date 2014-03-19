@@ -110,7 +110,7 @@ pmandoc(struct mparse *mp, int fd, const char *fn, int list)
 		return;
 	}
 
-	mparse_result(mp, &mdoc, &man);
+	mparse_result(mp, &mdoc, &man, NULL);
 	line = 1;
 	col = 0;
 

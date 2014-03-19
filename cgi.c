@@ -753,7 +753,7 @@ format(const struct req *req, const char *file)
 			/*"includes=/cgi-bin/man.cgi/usr/include/%%I"*/,
 			progname);
 
-	mparse_result(mp, &mdoc, &man);
+	mparse_result(mp, &mdoc, &man, NULL);
 	if (NULL == man && NULL == mdoc) {
 		resp_baddb();
 		mparse_free(mp);
