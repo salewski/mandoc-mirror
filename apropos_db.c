@@ -49,6 +49,7 @@
 #include "mandocdb.h"
 #include "apropos_db.h"
 #include "mandoc.h"
+#include "mandoc_aux.h"
 
 #define	RESFREE(_x) \
 	do { \

@@ -54,6 +54,7 @@
 #include "man.h"
 #include "mdoc.h"
 #include "mandoc.h"
+#include "mandoc_aux.h"
 #include "mandocdb.h"
 #include "manpath.h"
 
