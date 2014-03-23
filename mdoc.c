@@ -22,6 +22,7 @@
 #include <sys/types.h>
 
 #include <assert.h>
+#include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1019,4 +1020,43 @@ mdoc_isdelim(const char *p)
 		return(DELIM_MIDDLE);
 
 	return(DELIM_NONE);
+}
+
+void
+mdoc_deroff(char **dest, const struct mdoc_node *n)
+{
+	char	*cp;
+	size_t	 sz;
+
+	if (MDOC_TEXT != n->type) {
+		for (n = n->child; n; n = n->next)
+			mdoc_deroff(dest, n);
+		return;
+	}
+
+	/* Skip leading whitespace. */
+
+	for (cp = n->string; '\0' != *cp; cp++)
+		if (0 == isspace((unsigned char)*cp))
+			break;
+
+	/* Skip trailing whitespace. */
+
+	for (sz = strlen(cp); sz; sz--)
+		if (0 == isspace((unsigned char)cp[sz-1]))
+			break;
+
+	/* Skip empty strings. */
+
+	if (0 == sz)
+		return;
+
+	if (NULL == *dest) {
+		*dest = mandoc_strndup(cp, sz);
+		return;
+	}
+
+	mandoc_asprintf(&cp, "%s %*s", *dest, (int)sz, cp);
+	free(*dest);
+	*dest = cp;
 }

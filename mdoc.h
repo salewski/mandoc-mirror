@@ -389,6 +389,7 @@ struct	mdoc;
 
 const struct mdoc_node *mdoc_node(const struct mdoc *);
 const struct mdoc_meta *mdoc_meta(const struct mdoc *);
+void mdoc_deroff(char **, const struct mdoc_node *);
 
 __END_DECLS
 
