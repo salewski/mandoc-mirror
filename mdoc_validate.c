@@ -2395,11 +2395,9 @@ post_os(POST_ARGS)
 		if (-1 == uname(&utsname)) {
 			mdoc_nmsg(mdoc, n, MANDOCERR_UNAME);
                         defbuf = mandoc_strdup("UNKNOWN");
-                } else if (-1 == asprintf(&defbuf, "%s %s",
-		    utsname.sysname, utsname.release)) {
-			perror(NULL);
-			exit((int)MANDOCLEVEL_SYSERR);
-		}
+                } else
+			mandoc_asprintf(&defbuf, "%s %s",
+			    utsname.sysname, utsname.release);
 	}
 	mdoc->meta.os = mandoc_strdup(defbuf);
 #endif /*!OSNAME*/

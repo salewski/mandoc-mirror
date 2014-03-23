@@ -594,10 +594,7 @@ mdoc_word_append(struct mdoc *mdoc, const char *p)
 
 	n = mdoc->last;
 	addstr = roff_strdup(mdoc->roff, p);
-	if (-1 == asprintf(&newstr, "%s %s", n->string, addstr)) {
-		perror(NULL);
-		exit((int)MANDOCLEVEL_SYSERR);
-	}
+	mandoc_asprintf(&newstr, "%s %s", n->string, addstr);
 	free(addstr);
 	free(n->string);
 	n->string = newstr;

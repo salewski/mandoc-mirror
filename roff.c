@@ -656,11 +656,7 @@ roff_parsetext(char **bufp, size_t *szp, int pos, int *offs)
 
 	/* Spring the input line trap. */
 	if (1 == roffit_lines) {
-		isz = asprintf(&p, "%s\n.%s", *bufp, roffit_macro);
-		if (-1 == isz) {
-			perror(NULL);
-			exit((int)MANDOCLEVEL_SYSERR);
-		}
+		isz = mandoc_asprintf(&p, "%s\n.%s", *bufp, roffit_macro);
 		free(*bufp);
 		*bufp = p;
 		*szp = isz + 1;
