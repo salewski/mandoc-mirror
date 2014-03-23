@@ -1383,8 +1383,8 @@ static int
 pman_node(MAN_ARGS)
 {
 	const struct man_node *head, *body;
-	char		*start, *sv, *title;
-	size_t		 sz, titlesz;
+	char		*start, *title;
+	size_t		 sz;
 
 	if (NULL == n)
 		return(0);
@@ -1404,57 +1404,19 @@ pman_node(MAN_ARGS)
 				NULL != (head = (head->child)) &&
 				MAN_TEXT == head->type &&
 				0 == strcmp(head->string, "NAME") &&
-				NULL != (body = body->child) &&
-				MAN_TEXT == body->type) {
+				NULL != body->child) {
 
-			title = NULL;
-			titlesz = 0;
 			/*
 			 * Suck the entire NAME section into memory.
 			 * Yes, we might run away.
 			 * But too many manuals have big, spread-out
 			 * NAME sections over many lines.
 			 */
-			for ( ; NULL != body; body = body->next) {
-				if (MAN_TEXT != body->type)
-					break;
-				if (0 == (sz = strlen(body->string)))
-					continue;
-				title = mandoc_realloc
-					(title, titlesz + sz + 1);
-				memcpy(title + titlesz, body->string, sz);
-				titlesz += sz + 1;
-				title[(int)titlesz - 1] = ' ';
-			}
+
+			title = NULL;
+			man_deroff(&title, body);
 			if (NULL == title)
 				return(0);
-
-			title = mandoc_realloc(title, titlesz + 1);
-			title[(int)titlesz] = '\0';
-
-			/* Skip leading space.  */
-
-			sv = title;
-			while (isspace((unsigned char)*sv))
-				sv++;
-
-			if (0 == (sz = strlen(sv))) {
-				free(title);
-				return(0);
-			}
-
-			/* Erase trailing space. */
-
-			start = &sv[sz - 1];
-			while (start > sv && isspace((unsigned char)*start))
-				*start-- = '\0';
-
-			if (start == sv) {
-				free(title);
-				return(0);
-			}
-
-			start = sv;
 
 			/* 
 			 * Go through a special heuristic dance here.
@@ -1466,6 +1428,7 @@ pman_node(MAN_ARGS)
 			 * the name parts here.
 			 */
 
+			start = title;
 			for ( ;; ) {
 				sz = strcspn(start, " ,");
 				if ('\0' == start[(int)sz])
@@ -1490,7 +1453,7 @@ pman_node(MAN_ARGS)
 
 			buf->len = 0;
 
-			if (sv == start) {
+			if (start == title) {
 				buf_append(buf, start);
 				free(title);
 				return(1);
