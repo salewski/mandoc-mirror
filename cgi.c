@@ -43,6 +43,7 @@
 
 #include "apropos_db.h"
 #include "mandoc.h"
+#include "mandoc_aux.h"
 #include "mdoc.h"
 #include "man.h"
 #include "main.h"
