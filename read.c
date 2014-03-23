@@ -37,6 +37,7 @@
 #include <unistd.h>
 
 #include "mandoc.h"
+#include "mandoc_aux.h"
 #include "libmandoc.h"
 #include "mdoc.h"
 #include "man.h"

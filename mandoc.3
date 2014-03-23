@@ -20,7 +20,12 @@
 .Os
 .Sh NAME
 .Nm mandoc ,
+.Nm mandoc_calloc ,
 .Nm mandoc_escape ,
+.Nm mandoc_malloc ,
+.Nm mandoc_realloc ,
+.Nm mandoc_strdup ,
+.Nm mandoc_strndup ,
 .Nm man_meta ,
 .Nm man_mparse ,
 .Nm man_node ,
@@ -45,28 +50,30 @@
 .Sh LIBRARY
 .Lb libmandoc
 .Sh SYNOPSIS
-.In man.h
-.In mdoc.h
 .In mandoc.h
+.Fd "#define ASCII_NBRSP"
+.Fd "#define ASCII_HYPH"
+.Fd "#define ASCII_BREAK"
+.Ft "void *"
+.Fo mandoc_calloc
+.Fa "size_t nmemb"
+.Fa "size_t size"
+.Fc
 .Ft "enum mandoc_esc"
 .Fo mandoc_escape
 .Fa "const char **end"
 .Fa "const char **start"
 .Fa "int *sz"
 .Fc
-.Ft "const struct man_meta *"
-.Fo man_meta
-.Fa "const struct man *man"
-.Fc
-.Ft "const struct mparse *"
-.Fo man_mparse
-.Fa "const struct man *man"
-.Fc
-.Ft "const struct man_node *"
-.Fo man_node
-.Fa "const struct man *man"
-.Fc
+.Ft "void *"
+.Fn mandoc_malloc "size_t size"
 .Ft "struct mchars *"
+.Fo mandoc_realloc
+.Fa "void *ptr"
+.Fa "size_t size"
+.Fc
+.Ft "char *"
+.Fn mandoc_strdup
 .Fn mchars_alloc "void"
 .Ft void
 .Fn mchars_free "struct mchars *p"
@@ -87,14 +94,6 @@
 .Fa "const char *cp"
 .Fa "size_t sz"
 .Fc
-.Ft "const struct mdoc_meta *"
-.Fo mdoc_meta
-.Fa "const struct mdoc *mdoc"
-.Fc
-.Ft "const struct mdoc_node *"
-.Fo mdoc_node
-.Fa "const struct mdoc *mdoc"
-.Fc
 .Ft void
 .Fo mparse_alloc
 .Fa "enum mparset inttype"
@@ -102,6 +101,15 @@
 .Fa "mandocmsg mmsg"
 .Fa "char *defos"
 .Fa "int quick"
+.Fc
+.Ft void
+.Fo (*mandocmsg)
+.Fa "enum mandocerr errtype"
+.Fa "enum mandoclevel level"
+.Fa "const char *file"
+.Fa "int line"
+.Fa "int col"
+.Fa "const char *msg"
 .Fc
 .Ft void
 .Fo mparse_free
@@ -139,11 +147,33 @@
 .Fo mparse_strlevel
 .Fa "enum mandoclevel"
 .Fc
-.Vt extern const char * const * man_macronames;
+.In mandoc.h
+.In mdoc.h
+.Ft "const struct mdoc_meta *"
+.Fo mdoc_meta
+.Fa "const struct mdoc *mdoc"
+.Fc
+.Ft "const struct mdoc_node *"
+.Fo mdoc_node
+.Fa "const struct mdoc *mdoc"
+.Fc
 .Vt extern const char * const * mdoc_argnames;
 .Vt extern const char * const * mdoc_macronames;
-.Fd "#define ASCII_NBRSP"
-.Fd "#define ASCII_HYPH"
+.In mandoc.h
+.In man.h
+.Ft "const struct man_meta *"
+.Fo man_meta
+.Fa "const struct man *man"
+.Fc
+.Ft "const struct mparse *"
+.Fo man_mparse
+.Fa "const struct man *man"
+.Fc
+.Ft "const struct man_node *"
+.Fo man_node
+.Fa "const struct man *man"
+.Fc
+.Vt extern const char * const * man_macronames;
 .Sh DESCRIPTION
 The
 .Nm mandoc

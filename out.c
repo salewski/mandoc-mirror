@@ -28,6 +28,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "mandoc_aux.h"
 #include "mandoc.h"
 #include "out.h"
 

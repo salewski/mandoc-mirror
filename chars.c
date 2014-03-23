@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "mandoc.h"
+#include "mandoc_aux.h"
 #include "libmandoc.h"
 
 #define	PRINT_HI	 126

@@ -32,6 +32,7 @@
 
 #include "man.h"
 #include "mandoc.h"
+#include "mandoc_aux.h"
 #include "libman.h"
 #include "libmandoc.h"
 

@@ -26,6 +26,7 @@
 #include <time.h>
 
 #include "mandoc.h"
+#include "mandoc_aux.h"
 #include "libmandoc.h"
 #include "libroff.h"
 

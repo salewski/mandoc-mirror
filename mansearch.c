@@ -39,6 +39,7 @@
 #include <sqlite3.h>
 
 #include "mandoc.h"
+#include "mandoc_aux.h"
 #include "manpath.h"
 #include "mansearch.h"
 

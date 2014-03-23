@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #include "mandoc.h"
+#include "mandoc_aux.h"
 #include "out.h"
 #include "main.h"
 #include "term.h"

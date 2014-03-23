@@ -31,6 +31,7 @@
 #include <time.h>
 
 #include "mandoc.h"
+#include "mandoc_aux.h"
 #include "libmandoc.h"
 
 #define DATESIZE 32
@@ -351,74 +352,6 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	}
 
 	return(gly);
-}
-
-void *
-mandoc_calloc(size_t num, size_t size)
-{
-	void		*ptr;
-
-	ptr = calloc(num, size);
-	if (NULL == ptr) {
-		perror(NULL);
-		exit((int)MANDOCLEVEL_SYSERR);
-	}
-
-	return(ptr);
-}
-
-
-void *
-mandoc_malloc(size_t size)
-{
-	void		*ptr;
-
-	ptr = malloc(size);
-	if (NULL == ptr) {
-		perror(NULL);
-		exit((int)MANDOCLEVEL_SYSERR);
-	}
-
-	return(ptr);
-}
-
-
-void *
-mandoc_realloc(void *ptr, size_t size)
-{
-
-	ptr = realloc(ptr, size);
-	if (NULL == ptr) {
-		perror(NULL);
-		exit((int)MANDOCLEVEL_SYSERR);
-	}
-
-	return(ptr);
-}
-
-char *
-mandoc_strndup(const char *ptr, size_t sz)
-{
-	char		*p;
-
-	p = mandoc_malloc(sz + 1);
-	memcpy(p, ptr, sz);
-	p[(int)sz] = '\0';
-	return(p);
-}
-
-char *
-mandoc_strdup(const char *ptr)
-{
-	char		*p;
-
-	p = strdup(ptr);
-	if (NULL == p) {
-		perror(NULL);
-		exit((int)MANDOCLEVEL_SYSERR);
-	}
-
-	return(p);
 }
 
 /*

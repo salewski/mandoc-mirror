@@ -20,7 +20,6 @@
 
 #include <sys/types.h>
 
-#include <assert.h>
 #ifdef USE_WCHAR
 # include <locale.h>
 #endif
@@ -33,6 +32,7 @@
 #endif
 
 #include "mandoc.h"
+#include "mandoc_aux.h"
 #include "out.h"
 #include "term.h"
 #include "main.h"

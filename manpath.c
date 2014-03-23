@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mandoc.h"
+#include "mandoc_aux.h"
 #include "manpath.h"
 
 #define MAN_CONF_FILE	"/etc/man.conf"

@@ -36,6 +36,7 @@
 
 #include "mdoc.h"
 #include "mandoc.h"
+#include "mandoc_aux.h"
 #include "libmdoc.h"
 #include "libmandoc.h"
 

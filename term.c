@@ -23,12 +23,12 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "mandoc.h"
+#include "mandoc_aux.h"
 #include "out.h"
 #include "term.h"
 #include "main.h"

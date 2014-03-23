@@ -124,6 +124,8 @@ SRCS		 = Makefile \
 		   mandoc.3 \
 		   mandoc.c \
 		   mandoc.h \
+		   mandoc_aux.c \
+		   mandoc_aux.h \
 		   mandoc_char.7 \
 		   mandocdb.8 \
 		   mandocdb.c \
@@ -201,6 +203,7 @@ LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 		   $(LIBROFF_OBJS) \
 		   chars.o \
 		   mandoc.o \
+		   mandoc_aux.o \
 		   msec.o \
 		   read.o
 
@@ -225,7 +228,7 @@ vol.o: vol.in
 $(LIBMAN_OBJS): libman.h
 $(LIBMDOC_OBJS): libmdoc.h
 $(LIBROFF_OBJS): libroff.h
-$(LIBMANDOC_OBJS): mandoc.h mdoc.h man.h libmandoc.h config.h
+$(LIBMANDOC_OBJS): mandoc.h mandoc_aux.h mdoc.h man.h libmandoc.h config.h
 $(COMPAT_OBJS): config.h compat_ohash.h
 
 MANDOC_HTML_OBJS = eqn_html.o \
@@ -252,10 +255,11 @@ MANDOC_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   main.o \
 		   out.o \
 		   tree.o
-$(MANDOC_OBJS): main.h mandoc.h mdoc.h man.h config.h out.h
+$(MANDOC_OBJS): main.h mandoc.h mandoc_aux.h mdoc.h man.h config.h out.h
 
 MANDOCDB_OBJS	 = mandocdb.o mansearch_const.o manpath.o
-$(MANDOCDB_OBJS): mansearch.h mandoc.h mdoc.h man.h config.h manpath.h
+$(MANDOCDB_OBJS): mansearch.h mandoc.h mandoc_aux.h \
+		  mdoc.h man.h config.h manpath.h
 
 PRECONV_OBJS	 = preconv.o
 $(PRECONV_OBJS): config.h
