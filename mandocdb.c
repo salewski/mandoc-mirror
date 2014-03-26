@@ -551,7 +551,7 @@ treescan(void)
 	f = fts_open((char * const *)argv, FTS_LOGICAL, NULL);
 	if (NULL == f) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("", NULL);
+		say("", "&fts_open");
 		return(0);
 	}
 
@@ -705,7 +705,7 @@ filescan(const char *file)
 
 	if (NULL == realpath(file, buf)) {
 		exitcode = (int)MANDOCLEVEL_BADARG;
-		say(file, NULL);
+		say(file, "&realpath");
 		return;
 	}
 
@@ -721,7 +721,7 @@ filescan(const char *file)
 
 	if (-1 == stat(buf, &st)) {
 		exitcode = (int)MANDOCLEVEL_BADARG;
-		say(file, NULL);
+		say(file, "&stat");
 		return;
 	} else if ( ! (S_IFREG & st.st_mode)) {
 		exitcode = (int)MANDOCLEVEL_BADARG;
@@ -1124,7 +1124,7 @@ parse_cat(struct mpage *mpage)
 
 	if (NULL == (stream = fopen(mpage->mlinks->file, "r"))) {
 		if (warnings)
-			say(mpage->mlinks->file, NULL);
+			say(mpage->mlinks->file, "&fopen");
 		return;
 	}
 
@@ -1881,7 +1881,7 @@ dbclose(int real)
 	if ('\0' == *tempfilename) {
 		if (-1 == rename(MANDOC_DB "~", MANDOC_DB)) {
 			exitcode = (int)MANDOCLEVEL_SYSERR;
-			say(MANDOC_DB, "%s", strerror(errno));
+			say(MANDOC_DB, "&rename");
 		}
 		return;
 	}
@@ -1889,22 +1889,22 @@ dbclose(int real)
 	switch (child = fork()) {
 	case (-1):
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("fork cmp", "%s", strerror(errno));
+		say("", "&fork cmp");
 		return;
 	case (0):
 		execlp("cmp", "cmp", "-s",
 		    tempfilename, MANDOC_DB, NULL);
-		say("exec cmp", "%s", strerror(errno));
+		say("", "&exec cmp");
 		exit(0);
 	default:
 		break;
 	}
 	if (-1 == waitpid(child, &status, 0)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("wait cmp", "%s", strerror(errno));
+		say("", "&wait cmp");
 	} else if (WIFSIGNALED(status)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("cmp", "Died from a signal");
+		say("", "cmp died from signal %d", WTERMSIG(status));
 	} else if (WEXITSTATUS(status)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
 		say(MANDOC_DB,
@@ -1915,22 +1915,22 @@ dbclose(int real)
 	switch (child = fork()) {
 	case (-1):
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("fork rm", "%s", strerror(errno));
+		say("", "&fork rm");
 		return;
 	case (0):
 		execlp("rm", "rm", "-rf", tempfilename, NULL);
-		say("exec rm", "%s", strerror(errno));
+		say("", "&exec rm");
 		exit((int)MANDOCLEVEL_SYSERR);
 	default:
 		break;
 	}
 	if (-1 == waitpid(child, &status, 0)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("wait rm", "%s", strerror(errno));
+		say("", "&wait rm");
 	} else if (WIFSIGNALED(status) || WEXITSTATUS(status)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say(tempfilename,
-		    "Cannot remove temporary directory");
+		say("", "%s: Cannot remove temporary directory",
+		    tempfilename);
 	}
 }
 
@@ -1979,24 +1979,25 @@ dbopen(int real)
 	if (strlcpy(tempfilename, "/tmp/mandocdb.XXXXXX",
 	    sizeof(tempfilename)) >= sizeof(tempfilename)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("/tmp/mandocdb.XXXXXX", "Filename too long");
+		say("", "/tmp/mandocdb.XXXXXX: Filename too long");
 		return(0);
 	}
 	if (NULL == mkdtemp(tempfilename)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say(tempfilename, "%s", strerror(errno));
+		say("", "&%s", tempfilename);
 		return(0);
 	}
 	if (strlcat(tempfilename, "/" MANDOC_DB,
 	    sizeof(tempfilename)) >= sizeof(tempfilename)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say(tempfilename, "Filename too long");
+		say("", "%s/" MANDOC_DB ": Filename too long",
+		    tempfilename);
 		return(0);
 	}
 	rc = sqlite3_open_v2(tempfilename, &db, ofl, NULL);
 	if (SQLITE_OK != rc) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say(tempfilename, "%s", sqlite3_errmsg(db));
+		say("", "%s: %s", tempfilename, sqlite3_errmsg(db));
 		return(0);
 	}
 
@@ -2093,12 +2094,12 @@ set_basedir(const char *targetdir)
 		if (NULL == getcwd(startdir, PATH_MAX)) {
 			exitcode = (int)MANDOCLEVEL_SYSERR;
 			if (NULL != targetdir)
-				say(".", NULL);
+				say("", "&getcwd");
 			return(0);
 		}
 		if (-1 == (fd = open(startdir, O_RDONLY, 0))) {
 			exitcode = (int)MANDOCLEVEL_SYSERR;
-			say(startdir, NULL);
+			say("", "&open %s", startdir);
 			return(0);
 		}
 		if (NULL == targetdir)
@@ -2110,7 +2111,7 @@ set_basedir(const char *targetdir)
 			close(fd);
 			basedir[0] = '\0';
 			exitcode = (int)MANDOCLEVEL_SYSERR;
-			say(startdir, NULL);
+			say("", "&chdir %s", startdir);
 			return(0);
 		}
 		if (NULL == targetdir) {
@@ -2121,11 +2122,11 @@ set_basedir(const char *targetdir)
 	if (NULL == realpath(targetdir, basedir)) {
 		basedir[0] = '\0';
 		exitcode = (int)MANDOCLEVEL_BADARG;
-		say(targetdir, NULL);
+		say("", "&%s: realpath", targetdir);
 		return(0);
 	} else if (-1 == chdir(basedir)) {
 		exitcode = (int)MANDOCLEVEL_BADARG;
-		say("", NULL);
+		say("", "&chdir");
 		return(0);
 	}
 	return(1);
@@ -2135,6 +2136,7 @@ static void
 say(const char *file, const char *format, ...)
 {
 	va_list		 ap;
+	int		 use_errno;
 
 	if ('\0' != *basedir)
 		fprintf(stderr, "%s", basedir);
@@ -2142,16 +2144,32 @@ say(const char *file, const char *format, ...)
 		fputs("//", stderr);
 	if ('\0' != *file)
 		fprintf(stderr, "%s", file);
-	fputs(": ", stderr);
 
-	if (NULL == format) {
-		perror(NULL);
-		return;
+	use_errno = 1;
+	if (NULL != format) {
+		switch (*format) {
+		case ('&'):
+			format++;
+			break;
+		case ('\0'):
+			format = NULL;
+			break;
+		default:
+			use_errno = 0;
+			break;
+		}
 	}
-
-	va_start(ap, format);
-	vfprintf(stderr, format, ap);
-	va_end(ap);
-
-	fputc('\n', stderr);
+	if (NULL != format) {
+		if ('\0' != *basedir || '\0' != *file)
+			fputs(": ", stderr);
+		va_start(ap, format);
+		vfprintf(stderr, format, ap);
+		va_end(ap);
+	}
+	if (use_errno) {
+		if ('\0' != *basedir || '\0' != *file || NULL != format)
+			fputs(": ", stderr);
+		perror(NULL);
+	} else
+		fputc('\n', stderr);
 }
