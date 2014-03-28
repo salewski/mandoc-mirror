@@ -310,6 +310,7 @@ buildnames(struct manpage *mpage, sqlite3 *db, sqlite3_stmt *s,
 	size_t		 i;
 	int		 c;
 
+	mpage->file = NULL;
 	mpage->names = NULL;
 	prevsec = prevarch = NULL;
 	i = 1;
