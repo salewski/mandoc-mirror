@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2012 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2012, 2014 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -100,6 +100,8 @@ mod:
 	case (','):
 		/* FALLTHROUGH */
 	case ('.'):
+		/* FALLTHROUGH */
+	case ('|'):
 		return(1);
 	default:
 		break;
@@ -217,6 +219,13 @@ cell(struct tbl_node *tbl, struct tbl_row *rp,
 		vert++;
 	while (' ' == p[*pos])
 		(*pos)++;
+
+	/* Handle trailing vertical lines */
+
+	if ('.' == p[*pos] || '\0' == p[*pos]) {
+		rp->vert = vert;
+		return(1);
+	}
 
 	/* Parse the column position (`c', `l', `r', ...). */
 

@@ -240,6 +240,7 @@ struct	tbl_row {
 	struct tbl_row	 *next;
 	struct tbl_cell	 *first;
 	struct tbl_cell	 *last;
+	int		  vert; /* trailing vertical line */
 };
 
 enum	tbl_datt {
