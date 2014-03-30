@@ -304,6 +304,7 @@ static	const struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, posts_sp },			/* sp */
 	{ NULL, posts_text1 },			/* %U */
 	{ NULL, NULL },				/* Ta */
+	{ NULL, NULL },				/* ll */
 };
 
 #define	RSORD_MAX 14 /* Number of `Rs' blocks. */

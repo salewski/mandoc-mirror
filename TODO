@@ -27,9 +27,6 @@ None known.
 - .fc (field control)
   found by naddy@ in xloadimage(1)
   
-- .ll (line length)
-  found by naddy@ in textproc/enchant(1)  Sat, 12 Oct 2013 03:27:10 +0200
-
 - .nr third argument (auto-increment step size, requires \n+)
   found by bentley@ in sbcl(1)  Mon, 9 Dec 2013 18:36:57 -0700
 

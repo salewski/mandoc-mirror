@@ -874,6 +874,21 @@ Otherwise, it only terminates the
 and arguments following it or the
 .Sq \&..
 request are discarded.
+.Ss \&ll
+Change the output line length.
+Its syntax is as follows:
+.Pp
+.D1 Pf . Cm \&ll Op Ar width
+.Pp
+If the
+.Ar width
+argument is omitted, the line length is reset to its previous value.
+The default setting for terminal output is 78n.
+Using this request in new manuals is discouraged for several reasons,
+among others because it overrides the
+.Xr mandoc 1
+.Fl O Cm width
+command line option.
 .Ss \&ne
 Declare the need for the specified minimum vertical space
 before the next trap or the bottom of the page.

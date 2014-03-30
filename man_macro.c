@@ -91,6 +91,7 @@ const	struct man_macro __man_macros[MAN_MAX] = {
 	{ in_line_eoln, MAN_BSCOPE }, /* EE */
 	{ blk_exp, MAN_BSCOPE | MAN_EXPLICIT }, /* UR */
 	{ blk_close, 0 }, /* UE */
+	{ in_line_eoln, 0 }, /* ll */
 };
 
 const	struct man_macro * const man_macros = __man_macros;

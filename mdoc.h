@@ -140,6 +140,7 @@ enum	mdoct {
 	MDOC_sp,
 	MDOC__U,
 	MDOC_Ta,
+	MDOC_ll,
 	MDOC_MAX
 };
 

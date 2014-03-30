@@ -119,6 +119,7 @@ static	const struct htmlman mans[MAN_MAX] = {
 	{ man_literal_pre, NULL }, /* EE */
 	{ man_UR_pre, NULL }, /* UR */
 	{ NULL, NULL }, /* UE */
+	{ man_ign_pre, NULL }, /* ll */
 };
 
 /*

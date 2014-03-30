@@ -90,6 +90,7 @@ static	int	  pre_in(DECL_ARGS);
 static	int	  pre_it(DECL_ARGS);
 static	int	  pre_lk(DECL_ARGS);
 static	int	  pre_li(DECL_ARGS);
+static	int	  pre_ll(DECL_ARGS);
 static	int	  pre_nm(DECL_ARGS);
 static	int	  pre_no(DECL_ARGS);
 static	int	  pre_ns(DECL_ARGS);
@@ -241,6 +242,7 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 	{ NULL, pre_sp, post_sp, NULL, NULL }, /* sp */
 	{ NULL, NULL, post_percent, NULL, NULL }, /* %U */
 	{ NULL, NULL, NULL, NULL, NULL }, /* Ta */
+	{ NULL, pre_ll, post_sp, NULL, NULL }, /* ll */
 	{ NULL, NULL, NULL, NULL, NULL }, /* ROOT */
 };
 
@@ -1403,6 +1405,14 @@ pre_lk(DECL_ARGS)
 	print_word(link->string);
 	font_pop();
 	return(0);
+}
+
+static int
+pre_ll(DECL_ARGS)
+{
+
+	print_line(".ll", 0);
+	return(1);
 }
 
 static int
