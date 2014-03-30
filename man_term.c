@@ -242,7 +242,7 @@ static int
 pre_ll(DECL_ARGS)
 {
 
-	(*p->setwidth)(p, n->nchild ? a2width(p, n->child->string) : 0);
+	term_setwidth(p, n->nchild ? n->child->string : NULL);
 	return(0);
 }
 

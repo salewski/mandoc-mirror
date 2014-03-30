@@ -622,7 +622,7 @@ static int
 termp_ll_pre(DECL_ARGS)
 {
 
-	(*p->setwidth)(p, n->nchild ? a2width(p, n->child->string) : 0);
+	term_setwidth(p, n->nchild ? n->child->string : NULL);
 	return(0);
 }
 

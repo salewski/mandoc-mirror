@@ -58,7 +58,7 @@ static	void		  ascii_begin(struct termp *);
 static	void		  ascii_end(struct termp *);
 static	void		  ascii_endline(struct termp *);
 static	void		  ascii_letter(struct termp *, int);
-static	void		  ascii_setwidth(struct termp *, size_t);
+static	void		  ascii_setwidth(struct termp *, int, size_t);
 
 #ifdef	USE_WCHAR
 static	void		  locale_advance(struct termp *, size_t);
@@ -161,14 +161,18 @@ locale_alloc(char *outopts)
 }
 
 static void
-ascii_setwidth(struct termp *p, size_t width)
+ascii_setwidth(struct termp *p, int iop, size_t width)
 {
-	size_t	 lastwidth;
 
-	lastwidth = p->defrmargin;
-	p->rmargin = p->maxrmargin = p->defrmargin =
-	    width ? width : p->lastrmargin;
-	p->lastrmargin = lastwidth;
+	p->rmargin = p->defrmargin;
+	if (0 < iop)
+		p->defrmargin += width;
+	else if (0 > iop)
+		p->defrmargin -= width;
+	else
+		p->defrmargin = width ? width : p->lastrmargin;
+	p->lastrmargin = p->rmargin;
+	p->rmargin = p->maxrmargin = p->defrmargin;
 }
 
 /* ARGSUSED */

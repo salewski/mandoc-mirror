@@ -95,7 +95,7 @@ struct	termp {
 	void		(*end)(struct termp *);
 	void		(*endline)(struct termp *);
 	void		(*advance)(struct termp *, size_t);
-	void		(*setwidth)(struct termp *, size_t);
+	void		(*setwidth)(struct termp *, int, size_t);
 	size_t		(*width)(const struct termp *, int);
 	double		(*hspan)(const struct termp *,
 				const struct roffsu *);
@@ -114,7 +114,7 @@ void		  term_begin(struct termp *, term_margin,
 			term_margin, const void *);
 void		  term_end(struct termp *);
 
-void		  term_setwidth(struct termp *, size_t);
+void		  term_setwidth(struct termp *, const char *);
 size_t		  term_hspan(const struct termp *, 
 			const struct roffsu *);
 size_t		  term_vspan(const struct termp *,

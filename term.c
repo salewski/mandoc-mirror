@@ -623,6 +623,36 @@ encode(struct termp *p, const char *word, size_t sz)
 	}
 }
 
+void
+term_setwidth(struct termp *p, const char *wstr)
+{
+	struct roffsu	 su;
+	size_t		 width;
+	int		 iop;
+
+	if (NULL != wstr) {
+		switch (*wstr) {
+		case ('+'):
+			iop = 1;
+			wstr++;
+			break;
+		case ('-'):
+			iop = -1;
+			wstr++;
+			break;
+		default:
+			iop = 0;
+			break;
+		}
+		if ( ! a2roffsu(wstr, &su, SCALE_MAX)) {
+			wstr = NULL;
+			iop = 0;
+		}
+	}
+	width = (NULL != wstr) ? term_hspan(p, &su) : 0;
+	(*p->setwidth)(p, iop, width);
+}
+
 size_t
 term_len(const struct termp *p, size_t sz)
 {
