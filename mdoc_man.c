@@ -601,7 +601,7 @@ print_node(DECL_ARGS)
 		 */
 		act = manacts + n->tok;
 		cond = NULL == act->cond || (*act->cond)(meta, n);
-		if (cond && act->pre)
+		if (cond && act->pre && ENDBODY_NOT == n->end)
 			do_sub = (*act->pre)(meta, n);
 	}
 
@@ -617,8 +617,17 @@ print_node(DECL_ARGS)
 	/*
 	 * Lastly, conditionally run the post-node handler.
 	 */
+	if (MDOC_ENDED & n->flags)
+		return;
+
 	if (cond && act->post)
 		(*act->post)(meta, n);
+
+	if (ENDBODY_NOT != n->end)
+		n->pending->flags |= MDOC_ENDED;
+
+	if (ENDBODY_NOSPACE == n->end)
+		outflags &= ~(MMAN_spc | MMAN_nl);
 }
 
 static int
@@ -656,7 +665,7 @@ post_enc(DECL_ARGS)
 	suffix = manacts[n->tok].suffix;
 	if (NULL == suffix)
 		return;
-	outflags &= ~MMAN_spc;
+	outflags &= ~(MMAN_spc | MMAN_nl);
 	print_word(suffix);
 }
 
