@@ -332,6 +332,7 @@ static	const char * const secnames[SEC__MAX] = {
 	"LIBRARY",
 	"SYNOPSIS",
 	"DESCRIPTION",
+	"CONTEXT",
 	"IMPLEMENTATION NOTES",
 	"RETURN VALUES",
 	"ENVIRONMENT",
@@ -2040,6 +2041,8 @@ post_sh_head(POST_ARGS)
 			break;
 		if (*mdoc->meta.msec == '3')
 			break;
+		/* FALLTHROUGH */
+	case (SEC_CONTEXT):
 		if (*mdoc->meta.msec == '9')
 			break;
 		mandoc_msg(MANDOCERR_SECMSEC, mdoc->parse,
