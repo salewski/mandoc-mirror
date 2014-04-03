@@ -462,6 +462,11 @@ main(int argc, char *argv[])
 		} else
 			manpath_parse(&dirs, path_arg, NULL, NULL);
 
+		if (0 == dirs.sz) {
+			exitcode = (int)MANDOCLEVEL_BADARG;
+			say("", "Empty manpath");
+		}
+
 		/*
 		 * First scan the tree rooted at a base directory, then
 		 * build a new database and finally move it into place.
