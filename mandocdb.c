@@ -224,7 +224,7 @@ static	const struct mdoc_handler mdocs[MDOC_MAX] = {
 	{ NULL, TYPE_In },  /* In */
 	{ NULL, TYPE_Li },  /* Li */
 	{ parse_mdoc_Nd, TYPE_Nd },  /* Nd */
-	{ parse_mdoc_Nm, TYPE_Nm },  /* Nm */
+	{ parse_mdoc_Nm, 0 },  /* Nm */
 	{ NULL, 0 },  /* Op */
 	{ NULL, 0 },  /* Ot */
 	{ NULL, TYPE_Pa },  /* Pa */
@@ -1397,7 +1397,7 @@ parse_man(struct mpage *mpage, const struct man_node *n)
 				    ('\\' == start[0] && '-' == start[1]))
 					break;
 
-				putkey(mpage, start, TYPE_Nm);
+				putkey(mpage, start, TYPE_NAME | TYPE_Nm);
 
 				if (' ' == byte) {
 					start += sz + 1;
@@ -1411,7 +1411,7 @@ parse_man(struct mpage *mpage, const struct man_node *n)
 			}
 
 			if (start == title) {
-				putkey(mpage, start, TYPE_Nm);
+				putkey(mpage, start, TYPE_NAME | TYPE_Nm);
 				free(title);
 				return;
 			}
@@ -1588,8 +1588,11 @@ static int
 parse_mdoc_Nm(struct mpage *mpage, const struct mdoc_node *n)
 {
 
-	return(SEC_NAME == n->sec ||
-	    (SEC_SYNOPSIS == n->sec && MDOC_HEAD == n->type));
+	if (SEC_NAME == n->sec)
+		putmdockey(mpage, n->child, TYPE_NAME | TYPE_Nm);
+	else if (SEC_SYNOPSIS == n->sec && MDOC_HEAD == n->type)
+		putmdockey(mpage, n->child, TYPE_Nm);
+	return(0);
 }
 
 static int
