@@ -62,6 +62,7 @@ enum	rofft {
 	ROFF_ns,
 	ROFF_ps,
 	ROFF_rm,
+	ROFF_rr,
 	ROFF_so,
 	ROFF_ta,
 	ROFF_tr,
@@ -202,6 +203,7 @@ static	enum rofferr	 roff_parsetext(char **, size_t *, int, int *);
 static	enum rofferr	 roff_res(struct roff *, 
 				char **, size_t *, int, int);
 static	enum rofferr	 roff_rm(ROFF_ARGS);
+static	enum rofferr	 roff_rr(ROFF_ARGS);
 static	void		 roff_setstr(struct roff *,
 				const char *, const char *, int);
 static	void		 roff_setstrn(struct roffkv **, const char *, 
@@ -251,6 +253,7 @@ static	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "ns", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ "ps", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ "rm", roff_rm, NULL, NULL, 0, NULL },
+	{ "rr", roff_rr, NULL, NULL, 0, NULL },
 	{ "so", roff_so, NULL, NULL, 0, NULL },
 	{ "ta", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ "tr", roff_tr, NULL, NULL, 0, NULL },
@@ -1499,6 +1502,31 @@ roff_nr(ROFF_ARGS)
 
 	roff_setreg(r, key, iv, sign);
 
+	return(ROFF_IGN);
+}
+
+static enum rofferr
+roff_rr(ROFF_ARGS)
+{
+	struct roffreg	*reg, **prev;
+	const char	*name;
+	char		*cp;
+
+	cp = *bufp + pos;
+	name = roff_getname(r, &cp, ln, pos);
+
+	prev = &r->regtab;
+	while (1) {
+		reg = *prev;
+		if (NULL == reg || !strcmp(name, reg->key.p))
+			break;
+		prev = &reg->next;
+	}
+	if (NULL != reg) {
+		*prev = reg->next;
+		free(reg->key.p);
+		free(reg);
+	}
 	return(ROFF_IGN);
 }
 
