@@ -630,6 +630,8 @@ term_setwidth(struct termp *p, const char *wstr)
 	size_t		 width;
 	int		 iop;
 
+	iop = 0;
+	width = 0;
 	if (NULL != wstr) {
 		switch (*wstr) {
 		case ('+'):
@@ -641,15 +643,13 @@ term_setwidth(struct termp *p, const char *wstr)
 			wstr++;
 			break;
 		default:
-			iop = 0;
 			break;
 		}
-		if ( ! a2roffsu(wstr, &su, SCALE_MAX)) {
-			wstr = NULL;
+		if (a2roffsu(wstr, &su, SCALE_MAX))
+			width = term_hspan(p, &su);
+		else
 			iop = 0;
-		}
 	}
-	width = (NULL != wstr) ? term_hspan(p, &su) : 0;
 	(*p->setwidth)(p, iop, width);
 }
 
