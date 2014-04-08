@@ -278,7 +278,7 @@ pre_literal(DECL_ARGS)
 		p->offset = p->rmargin;
 		p->rmargin = p->maxrmargin;
 		p->trailspace = 0;
-		p->flags &= ~TERMP_NOBREAK;
+		p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND);
 		p->flags |= TERMP_NOSPACE;
 	}
 
@@ -547,7 +547,7 @@ pre_HP(DECL_ARGS)
 	}
 
 	if ( ! (MANT_LITERAL & mt->fl)) {
-		p->flags |= TERMP_NOBREAK;
+		p->flags |= TERMP_NOBREAK | TERMP_BRIND;
 		p->trailspace = 2;
 	}
 
@@ -582,7 +582,7 @@ post_HP(DECL_ARGS)
 	switch (n->type) {
 	case (MAN_BODY):
 		term_newln(p);
-		p->flags &= ~TERMP_NOBREAK;
+		p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND);
 		p->trailspace = 0;
 		p->offset = mt->offset;
 		p->rmargin = p->maxrmargin;

@@ -819,14 +819,14 @@ termp_it_pre(DECL_ARGS)
 				 MDOC_Bd == n->next->child->tok))
 			break;
 
-		p->flags |= TERMP_NOBREAK | TERMP_HANG;
+		p->flags |= TERMP_NOBREAK | TERMP_BRIND | TERMP_HANG;
 		p->trailspace = 1;
 		break;
 	case (LIST_tag):
 		if (MDOC_HEAD != n->type)
 			break;
 
-		p->flags |= TERMP_NOBREAK;
+		p->flags |= TERMP_NOBREAK | TERMP_BRIND;
 		p->trailspace = 2;
 
 		if (NULL == n->next || NULL == n->next->child)
@@ -848,7 +848,7 @@ termp_it_pre(DECL_ARGS)
 	case (LIST_diag):
 		if (MDOC_HEAD != n->type)
 			break;
-		p->flags |= TERMP_NOBREAK;
+		p->flags |= TERMP_NOBREAK | TERMP_BRIND;
 		p->trailspace = 1;
 		break;
 	default:
@@ -1002,9 +1002,8 @@ termp_it_post(DECL_ARGS)
 	 * has munged them in the meanwhile.
 	 */
 
-	p->flags &= ~TERMP_DANGLE;
-	p->flags &= ~TERMP_NOBREAK;
-	p->flags &= ~TERMP_HANG;
+	p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND |
+			TERMP_DANGLE | TERMP_HANG);
 	p->trailspace = 0;
 }
 
@@ -1041,7 +1040,7 @@ termp_nm_pre(DECL_ARGS)
 		synopsis_pre(p, n->parent);
 
 	if (MDOC_HEAD == n->type && n->next->child) {
-		p->flags |= TERMP_NOSPACE | TERMP_NOBREAK;
+		p->flags |= TERMP_NOSPACE | TERMP_NOBREAK | TERMP_BRIND;
 		p->trailspace = 1;
 		p->rmargin = p->offset + term_len(p, 1);
 		if (NULL == n->child) {
@@ -1072,7 +1071,7 @@ termp_nm_post(DECL_ARGS)
 		p->flags &= ~(TERMP_KEEP | TERMP_PREKEEP);
 	} else if (MDOC_HEAD == n->type && n->next->child) {
 		term_flushln(p);
-		p->flags &= ~(TERMP_NOBREAK | TERMP_HANG);
+		p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND | TERMP_HANG);
 		p->trailspace = 0;
 	} else if (MDOC_BODY == n->type && n->child)
 		term_flushln(p);
@@ -1561,7 +1560,7 @@ termp_fn_pre(DECL_ARGS)
 	if (pretty) {
 		rmargin = p->rmargin;
 		p->rmargin = p->offset + term_len(p, 4);
-		p->flags |= TERMP_NOBREAK | TERMP_HANG;
+		p->flags |= TERMP_NOBREAK | TERMP_BRIND | TERMP_HANG;
 	}
 
 	assert(MDOC_TEXT == n->type);
@@ -1571,7 +1570,7 @@ termp_fn_pre(DECL_ARGS)
 
 	if (pretty) {
 		term_flushln(p);
-		p->flags &= ~(TERMP_NOBREAK | TERMP_HANG);
+		p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND | TERMP_HANG);
 		p->offset = p->rmargin;
 		p->rmargin = rmargin;
 	}
@@ -2063,14 +2062,16 @@ termp_fo_pre(DECL_ARGS)
 		if (pretty) {
 			rmargin = p->rmargin;
 			p->rmargin = p->offset + term_len(p, 4);
-			p->flags |= TERMP_NOBREAK | TERMP_HANG;
+			p->flags |= TERMP_NOBREAK | TERMP_BRIND |
+					TERMP_HANG;
 		}
 		p->flags |= TERMP_NOSPACE;
 		term_word(p, "(");
 		p->flags |= TERMP_NOSPACE;
 		if (pretty) {
 			term_flushln(p);
-			p->flags &= ~(TERMP_NOBREAK | TERMP_HANG);
+			p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND |
+					TERMP_HANG);
 			p->offset = p->rmargin;
 			p->rmargin = rmargin;
 		}
