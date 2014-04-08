@@ -485,9 +485,9 @@ roff_alloc(struct mparse *parse, int options)
 }
 
 /*
- * In the current line, expand user-defined strings ("\*")
- * and references to number registers ("\n").
- * Also check the syntax of other escape sequences.
+ * In the current line, expand escape sequences that tend to get
+ * used in numerical expressions and conditional requests.
+ * Also check the syntax of the remaining escape sequences.
  */
 static enum rofferr
 roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
@@ -503,6 +503,9 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 	size_t		 naml;	/* actual length of the escape name */
 	size_t		 ressz;	/* size of the replacement string */
 	int		 expand_count;	/* to avoid infinite loops */
+	int		 npos;	/* position in numeric expression */
+	int		 irc;	/* return code from roff_evalnum() */
+	char		 term;	/* character terminating the escape */
 
 	expand_count = 0;
 	start = *bufp + pos;
@@ -525,16 +528,19 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 			continue;
 		}
 
-		/*
-		 * Everything except user-defined strings and number
-		 * registers is only checked, not expanded.
-		 */
+		/* Decide whether to expand or to check only. */
 
+		term = '\0';
 		cp = stesc + 1;
 		switch (*cp) {
 		case ('*'):
 			res = NULL;
 			break;
+		case ('B'):
+			/* FALLTHROUGH */
+		case ('w'):
+			term = cp[1];
+			/* FALLTHROUGH */
 		case ('n'):
 			res = ubuf;
 			break;
@@ -557,20 +563,27 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 		 * Save a pointer to the name.
 		 */
 
-		switch (*++cp) {
-		case ('\0'):
-			continue;
-		case ('('):
-			cp++;
-			maxl = 2;
-			break;
-		case ('['):
-			cp++;
+		if ('\0' == term) {
+			switch (*++cp) {
+			case ('\0'):
+				maxl = 0;
+				break;
+			case ('('):
+				cp++;
+				maxl = 2;
+				break;
+			case ('['):
+				cp++;
+				term = ']';
+				maxl = 0;
+				break;
+			default:
+				maxl = 1;
+				break;
+			}
+		} else {
+			cp += 2;
 			maxl = 0;
-			break;
-		default:
-			maxl = 1;
-			break;
 		}
 		stnam = cp;
 
@@ -582,10 +595,12 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 					(MANDOCERR_BADESCAPE, 
 					 r->parse, ln, 
 					 (int)(stesc - *bufp), NULL);
-				continue;
-			}
-			if (0 == maxl && ']' == *cp)
 				break;
+			}
+			if (0 == maxl && *cp == term) {
+				cp++;
+				break;
+			}
 		}
 
 		/*
@@ -593,11 +608,26 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 		 * undefined, resume searching for escapes.
 		 */
 
-		if (NULL == res)
+		switch (stesc[1]) {
+		case ('*'):
 			res = roff_getstrn(r, stnam, naml);
-		else
+			break;
+		case ('B'):
+			npos = 0;
+			irc = roff_evalnum(stnam, &npos, NULL, 0);
+			ubuf[0] = irc && stnam + npos + 1 == cp
+			    ? '1' : '0';
+			ubuf[1] = '\0';
+			break;
+		case ('n'):
 			snprintf(ubuf, sizeof(ubuf), "%d",
 			    roff_getregn(r, stnam, naml));
+			break;
+		case ('w'):
+			snprintf(ubuf, sizeof(ubuf), "%d",
+			    24 * (int)naml);
+			break;
+		}
 
 		if (NULL == res) {
 			mandoc_msg
@@ -614,7 +644,7 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 
 		strlcpy(nbuf, *bufp, (size_t)(stesc - *bufp + 1));
 		strlcat(nbuf, res, *szp);
-		strlcat(nbuf, cp + (maxl ? 0 : 1), *szp);
+		strlcat(nbuf, cp, *szp);
 
 		/* Prepare for the next replacement. */
 
@@ -1126,7 +1156,10 @@ roff_cond_text(ROFF_ARGS)
 static int
 roff_getnum(const char *v, int *pos, int *res)
 {
-	int p, n;
+	int	 myres, n, p;
+
+	if (NULL == res)
+		res = &myres;
 
 	p = *pos;
 	n = v[p] == '-';
@@ -1430,9 +1463,16 @@ roff_evalpar(const char *v, int *pos, int *res)
 	if ( ! roff_evalnum(v, pos, res, 1))
 		return(0);
 
-	/* If the trailing parenthesis is missing, ignore the error. */
+	/*
+	 * Omission of the closing parenthesis
+	 * is an error in validation mode,
+	 * but ignored in evaluation mode.
+	 */
+
 	if (')' == v[*pos])
 		(*pos)++;
+	else if (NULL == res)
+		return(0);
 
 	return(1);
 }
@@ -1477,6 +1517,9 @@ roff_evalnum(const char *v, int *pos, int *res, int skipwhite)
 		if (skipwhite)
 			while (isspace((unsigned char)v[*pos]))
 				(*pos)++;
+
+		if (NULL == res)
+			continue;
 
 		switch (operator) {
 		case ('+'):
