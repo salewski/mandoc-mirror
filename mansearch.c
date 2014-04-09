@@ -74,6 +74,7 @@ struct	expr {
 
 struct	match {
 	uint64_t	 id; /* identifier in database */
+	char		*desc; /* manual page description */
 	int		 form; /* 0 == catpage */
 };
 
@@ -220,7 +221,8 @@ mansearch(const struct mansearch *search,
 				SQL_BIND_BLOB(db, s, j, ep->regexp);
 			} else
 				SQL_BIND_TEXT(db, s, j, ep->substr);
-			SQL_BIND_INT64(db, s, j, ep->bits);
+			if (0 == (TYPE_Nd & ep->bits))
+				SQL_BIND_INT64(db, s, j, ep->bits);
 		}
 
 		memset(&htab, 0, sizeof(struct ohash));
@@ -235,9 +237,9 @@ mansearch(const struct mansearch *search,
 		 * distribution of buckets in the table.
 		 */
 		while (SQLITE_ROW == (c = sqlite3_step(s))) {
-			id = sqlite3_column_int64(s, 1);
+			id = sqlite3_column_int64(s, 2);
 			idx = ohash_lookup_memory
-				(&htab, (char *)&id, 
+				(&htab, (char *)&id,
 				 sizeof(uint64_t), (uint32_t)id);
 
 			if (NULL != ohash_find(&htab, idx))
@@ -245,7 +247,10 @@ mansearch(const struct mansearch *search,
 
 			mp = mandoc_calloc(1, sizeof(struct match));
 			mp->id = id;
-			mp->form = sqlite3_column_int(s, 0);
+			mp->form = sqlite3_column_int(s, 1);
+			if (TYPE_Nd == outbit)
+				mp->desc = mandoc_strdup(
+				    sqlite3_column_text(s, 0));
 			ohash_insert(&htab, idx, mp);
 		}
 
@@ -279,7 +284,8 @@ mansearch(const struct mansearch *search,
 			mpage->form = mp->form;
 			buildnames(mpage, db, s, mp->id,
 			    paths->paths[i], mp->form);
-			mpage->output = outbit ?
+			mpage->output = TYPE_Nd & outbit ?
+			    mp->desc : outbit ?
 			    buildoutput(db, s2, mp->id, outbit) : NULL;
 
 			free(mp);
@@ -493,11 +499,16 @@ sql_statement(const struct expr *e)
 			sql_append(&sql, &sz, " OR ", 1);
 		if (e->open)
 			sql_append(&sql, &sz, "(", e->open);
-		sql_append(&sql, &sz, NULL == e->substr ?
-		    "id IN (SELECT pageid FROM keys "
-		    "WHERE key REGEXP ? AND bits & ?)" :
-		    "id IN (SELECT pageid FROM keys "
-		    "WHERE key MATCH ? AND bits & ?)", 1);
+		sql_append(&sql, &sz,
+		    TYPE_Nd & e->bits
+		    ? (NULL == e->substr
+			? "desc REGEXP ?"
+			: "desc MATCH ?")
+		    : (NULL == e->substr
+			? "id IN (SELECT pageid FROM keys "
+			  "WHERE key REGEXP ? AND bits & ?)"
+			: "id IN (SELECT pageid FROM keys "
+			  "WHERE key MATCH ? AND bits & ?)"), 1);
 		if (e->close)
 			sql_append(&sql, &sz, ")", e->close);
 		needop = 1;
@@ -554,13 +565,29 @@ exprcomp(const struct mansearch *search, int argc, char *argv[])
 		next = exprterm(search, argv[i], !igncase);
 		if (NULL == next)
 			goto fail;
-		next->open = toopen;
-		next->and = (1 == logic);
-		if (NULL != first) {
+		if (NULL == first)
+			first = next;
+		else
 			cur->next = next;
-			cur = next;
+
+		/*
+		 * Searching for descriptions must be split out
+		 * because they are stored in the mpages table,
+		 * not in the keys table.
+		 */
+
+		if (TYPE_Nd & next->bits && ~TYPE_Nd & next->bits) {
+			cur = mandoc_calloc(1, sizeof(struct expr));
+			memcpy(cur, next, sizeof(struct expr));
+			next->open = 1;
+			next->bits = TYPE_Nd;
+			next->next = cur;
+			cur->bits &= ~TYPE_Nd;
+			cur->close = 1;
 		} else
-			cur = first = next;
+			cur = next;
+		next->and = (1 == logic);
+		next->open += toopen;
 		toopen = logic = igncase = 0;
 	}
 	if (toopen || logic || igncase || toclose)
