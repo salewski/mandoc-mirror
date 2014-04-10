@@ -126,6 +126,7 @@ enum	stmt {
 	STMT_DELETE_PAGE = 0,	/* delete mpage */
 	STMT_INSERT_PAGE,	/* insert mpage */
 	STMT_INSERT_LINK,	/* insert mlink */
+	STMT_INSERT_NAME,	/* insert name */
 	STMT_INSERT_KEY,	/* insert parsed key */
 	STMT__MAX
 };
@@ -188,9 +189,11 @@ static	enum op	  	 op; /* operational mode */
 static	char		 basedir[PATH_MAX]; /* current base directory */
 static	struct ohash	 mpages; /* table of distinct manual pages */
 static	struct ohash	 mlinks; /* table of directory entries */
+static	struct ohash	 names; /* table of all names */
 static	struct ohash	 strings; /* table of all strings */
 static	sqlite3		*db = NULL; /* current database */
 static	sqlite3_stmt	*stmts[STMT__MAX]; /* current statements */
+static	uint64_t	 name_mask;
 
 static	const struct mdoc_handler mdocs[MDOC_MAX] = {
 	{ NULL, 0 },  /* Ap */
@@ -963,7 +966,7 @@ mlink_check(struct mpage *mpage, struct mlink *mlink)
 
 	/*
 	 * XXX
-	 * parse_cat() doesn't set TYPE_Nm and TYPE_NAME yet.
+	 * parse_cat() doesn't set NAME_TITLE yet.
 	 */
 
 	if (FORM_CAT == mpage->form)
@@ -974,10 +977,10 @@ mlink_check(struct mpage *mpage, struct mlink *mlink)
 	 * appears as a name in the NAME section.
 	 */
 
-	slot = ohash_qlookup(&strings, mlink->name);
-	str = ohash_find(&strings, slot);
+	slot = ohash_qlookup(&names, mlink->name);
+	str = ohash_find(&names, slot);
 	assert(NULL != str);
-	if ( ! (TYPE_NAME & str->mask))
+	if ( ! (NAME_TITLE & str->mask))
 		say(mlink->file, "Name missing in NAME section");
 }
 
@@ -1021,6 +1024,8 @@ mpages_merge(struct mchars *mc, struct mparse *mp)
 			continue;
 		}
 
+		name_mask = NAME_MASK;
+		ohash_init(&names, 4, &str_info);
 		ohash_init(&strings, 6, &str_info);
 		mparse_reset(mp);
 		mdoc = NULL;
@@ -1146,12 +1151,12 @@ mpages_merge(struct mchars *mc, struct mparse *mp)
 				putkey(mpage, mlink->fsec, TYPE_sec);
 			putkey(mpage, '\0' == *mlink->arch ?
 			    any : mlink->arch, TYPE_arch);
-			putkey(mpage, mlink->name, TYPE_Nm);
+			putkey(mpage, mlink->name, NAME_FILE);
 		}
 
 		if (NULL != mdoc) {
 			if (NULL != (cp = mdoc_meta(mdoc)->name))
-				putkey(mpage, cp, TYPE_Nm);
+				putkey(mpage, cp, NAME_HEAD);
 			assert(NULL == mpage->desc);
 			parse_mdoc(mpage, mdoc_node(mdoc));
 			if (NULL == mpage->desc)
@@ -1187,6 +1192,7 @@ nextpage:
 			}
 		}
 		ohash_delete(&strings);
+		ohash_delete(&names);
 		mpage = ohash_next(&mpages, &pslot);
 	}
 
@@ -1204,11 +1210,11 @@ names_check(void)
 
 	sqlite3_prepare_v2(db,
 	  "SELECT name, sec, arch, key FROM ("
-	    "SELECT key, pageid FROM keys "
+	    "SELECT name AS key, pageid FROM names "
 	    "WHERE bits & ? AND NOT EXISTS ("
 	      "SELECT pageid FROM mlinks "
-	      "WHERE mlinks.pageid == keys.pageid "
-	      "AND mlinks.name == keys.key"
+	      "WHERE mlinks.pageid == names.pageid "
+	      "AND mlinks.name == names.name"
 	    ")"
 	  ") JOIN ("
 	    "SELECT * FROM mlinks GROUP BY pageid"
@@ -1216,7 +1222,7 @@ names_check(void)
 	  -1, &stmt, NULL);
 
 	i = 1;
-	SQL_BIND_INT64(stmt, i, TYPE_NAME);
+	SQL_BIND_INT64(stmt, i, NAME_TITLE);
 
 	while (SQLITE_ROW == (irc = sqlite3_step(stmt))) {
 		name = sqlite3_column_text(stmt, 0);
@@ -1441,7 +1447,7 @@ parse_man(struct mpage *mpage, const struct man_node *n)
 				    ('\\' == start[0] && '-' == start[1]))
 					break;
 
-				putkey(mpage, start, TYPE_NAME | TYPE_Nm);
+				putkey(mpage, start, NAME_TITLE);
 
 				if (' ' == byte) {
 					start += sz + 1;
@@ -1455,7 +1461,7 @@ parse_man(struct mpage *mpage, const struct man_node *n)
 			}
 
 			if (start == title) {
-				putkey(mpage, start, TYPE_NAME | TYPE_Nm);
+				putkey(mpage, start, NAME_TITLE);
 				free(title);
 				return;
 			}
@@ -1632,9 +1638,9 @@ parse_mdoc_Nm(struct mpage *mpage, const struct mdoc_node *n)
 {
 
 	if (SEC_NAME == n->sec)
-		putmdockey(mpage, n->child, TYPE_NAME | TYPE_Nm);
+		putmdockey(mpage, n->child, NAME_TITLE);
 	else if (SEC_SYNOPSIS == n->sec && MDOC_HEAD == n->type)
-		putmdockey(mpage, n->child, TYPE_Nm);
+		putmdockey(mpage, n->child, NAME_SYN);
 	return(0);
 }
 
@@ -1668,28 +1674,35 @@ static void
 putkeys(const struct mpage *mpage,
 	const char *cp, size_t sz, uint64_t v)
 {
+	struct ohash	*htab;
 	struct str	*s;
 	const char	*end;
-	uint64_t	 mask;
 	unsigned int	 slot;
 	int		 i;
 
 	if (0 == sz)
 		return;
 
-	if (debug > 1) {
-		for (i = 0, mask = 1;
-		     i < mansearch_keymax;
-		     i++, mask <<= 1)
-			if (mask & v)
-				break;
-		say(mpage->mlinks->file, "Adding key %s=%*s",
-		    mansearch_keynames[i], sz, cp);
+	if (TYPE_Nm & v) {
+		htab = &names;
+		v &= name_mask;
+		name_mask &= ~NAME_FIRST;
+		if (debug > 1)
+			say(mpage->mlinks->file,
+			    "Adding name %*s", sz, cp);
+	} else {
+		htab = &strings;
+		if (debug > 1)
+		    for (i = 0; i < mansearch_keymax; i++)
+			if (1 << i & v)
+			    say(mpage->mlinks->file,
+				"Adding key %s=%*s",
+				mansearch_keynames[i], sz, cp);
 	}
 
 	end = cp + sz;
-	slot = ohash_qlookupi(&strings, cp, &end);
-	s = ohash_find(&strings, slot);
+	slot = ohash_qlookupi(htab, cp, &end);
+	s = ohash_find(htab, slot);
 
 	if (NULL != s && mpage == s->mpage) {
 		s->mask |= v;
@@ -1697,7 +1710,7 @@ putkeys(const struct mpage *mpage,
 	} else if (NULL == s) {
 		s = mandoc_calloc(sizeof(struct str) + sz + 1, 1);
 		memcpy(s->key, cp, sz);
-		ohash_insert(&strings, slot, s);
+		ohash_insert(htab, slot, s);
 	}
 	s->mpage = mpage;
 	s->mask = v;
@@ -1945,6 +1958,21 @@ dbadd(struct mpage *mpage, struct mchars *mc)
 		mlink = mlink->next;
 	}
 
+	for (key = ohash_first(&names, &slot); NULL != key;
+	     key = ohash_next(&names, &slot)) {
+		assert(key->mpage == mpage);
+		if (NULL == key->rendered)
+			render_key(mc, key);
+		i = 1;
+		SQL_BIND_INT64(stmts[STMT_INSERT_NAME], i, key->mask);
+		SQL_BIND_TEXT(stmts[STMT_INSERT_NAME], i, key->rendered);
+		SQL_BIND_INT64(stmts[STMT_INSERT_NAME], i, mpage->recno);
+		SQL_STEP(stmts[STMT_INSERT_NAME]);
+		sqlite3_reset(stmts[STMT_INSERT_NAME]);
+		if (key->rendered != key->key)
+			free(key->rendered);
+		free(key);
+	}
 	for (key = ohash_first(&strings, &slot); NULL != key;
 	     key = ohash_next(&strings, &slot)) {
 		assert(key->mpage == mpage);
@@ -2160,6 +2188,13 @@ create_tables:
 		"ON DELETE CASCADE\n"
 	      ");\n"
 	      "\n"
+	      "CREATE TABLE \"names\" (\n"
+	      " \"bits\" INTEGER NOT NULL,\n"
+	      " \"name\" TEXT NOT NULL,\n"
+	      " \"pageid\" INTEGER NOT NULL REFERENCES mpages(id) "
+		"ON DELETE CASCADE\n"
+	      ");\n"
+	      "\n"
 	      "CREATE TABLE \"keys\" (\n"
 	      " \"bits\" INTEGER NOT NULL,\n"
 	      " \"key\" TEXT NOT NULL,\n"
@@ -2185,6 +2220,9 @@ prepare_statements:
 	sql = "INSERT INTO mlinks "
 		"(sec,arch,name,pageid) VALUES (?,?,?,?)";
 	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_LINK], NULL);
+	sql = "INSERT INTO names "
+		"(bits,name,pageid) VALUES (?,?,?)";
+	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_NAME], NULL);
 	sql = "INSERT INTO keys "
 		"(bits,key,pageid) VALUES (?,?,?)";
 	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_KEY], NULL);
