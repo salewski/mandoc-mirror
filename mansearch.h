@@ -85,6 +85,7 @@ struct	mansearch {
 #define	MANSEARCH_WHATIS 0x01 /* whatis mode: equality, no key */
 };
 
+int	mansearch_setup(int);
 int	mansearch(const struct mansearch *cfg, /* options */
 		const struct manpaths *paths, /* manpaths */
 		int argc, /* size of argv */
