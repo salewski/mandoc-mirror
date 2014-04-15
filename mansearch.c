@@ -218,6 +218,7 @@ mansearch(const struct mansearch *search,
 	}
 
 	sql = sql_statement(e);
+	printf("%s\n", sql);
 
 	/*
 	 * Loop over the directories (containing databases) for us to
