@@ -1,7 +1,7 @@
 .PHONY: 	 clean install installcgi installwww
 .SUFFIXES:	 .md5 .h .h.html
-.SUFFIXES:	 .1       .3       .7       .8
-.SUFFIXES:	 .1.html  .3.html  .7.html  .8.html
+.SUFFIXES:	 .1       .3       .5       .7       .8
+.SUFFIXES:	 .1.html  .3.html  .5.html  .7.html  .8.html
 
 VERSION		 = 1.13.0
 
@@ -123,6 +123,7 @@ SRCS		 = Makefile \
 		   mandoc.1 \
 		   mandoc.3 \
 		   mandoc.c \
+		   mandoc.db.5 \
 		   mandoc.h \
 		   mandoc_aux.c \
 		   mandoc_aux.h \
@@ -132,6 +133,7 @@ SRCS		 = Makefile \
 		   manpage.c \
 		   manpath.c \
 		   manpath.h \
+		   mansearch.3 \
 		   mansearch.c \
 		   mansearch.h \
 		   mansearch_const.c \
@@ -278,7 +280,9 @@ WWW_MANS	 = apropos.1.html \
 		   mandoc.1.html \
 		   preconv.1.html \
 		   mandoc.3.html \
+		   mansearch.3.html \
 		   tbl.3.html \
+		   mandoc.db.5.html \
 		   eqn.7.html \
 		   man.7.html \
 		   mandoc_char.7.html \
@@ -288,6 +292,8 @@ WWW_MANS	 = apropos.1.html \
 		   mandocdb.8.html \
 		   man.h.html \
 		   mandoc.h.html \
+		   manpath.h.html \
+		   mansearch.h.html \
 		   mdoc.h.html
 
 $(WWW_MANS): mandoc
@@ -314,12 +320,14 @@ install: all
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
+	mkdir -p $(DESTDIR)$(MANDIR)/man5
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_PROGRAM) $(ALLBIN) $(DESTDIR)$(BINDIR)
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
 	$(INSTALL_LIB) man.h mdoc.h mandoc.h $(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.1 preconv.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
-	$(INSTALL_MAN) mandoc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
+	$(INSTALL_MAN) mandoc.3 mansearch.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
+	$(INSTALL_MAN) mandoc.db.5 $(DESTDIR)$(MANDIR)/man5
 	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
 
@@ -377,5 +385,5 @@ config.h: configure config.h.pre config.h.post $(TESTSRCS)
 .h.h.html:
 	highlight -I $< >$@
 
-.1.1.html .3.3.html .7.7.html .8.8.html:
+.1.1.html .3.3.html .5.5.html .7.7.html .8.8.html:
 	./mandoc -Thtml -Wall,stop -Ostyle=style.css,man=%N.%S.html,includes=%I.html $< >$@
