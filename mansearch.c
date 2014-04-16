@@ -253,10 +253,12 @@ mansearch(const struct mansearch *search,
 		 */
 
 		c = sqlite3_create_function(db, "match", 2,
-		    SQLITE_ANY, NULL, sql_match, NULL, NULL);
+		    SQLITE_UTF8 | SQLITE_DETERMINISTIC,
+		    NULL, sql_match, NULL, NULL);
 		assert(SQLITE_OK == c);
 		c = sqlite3_create_function(db, "regexp", 2,
-		    SQLITE_ANY, NULL, sql_regexp, NULL, NULL);
+		    SQLITE_UTF8 | SQLITE_DETERMINISTIC,
+		    NULL, sql_regexp, NULL, NULL);
 		assert(SQLITE_OK == c);
 
 		j = 1;
