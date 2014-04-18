@@ -22,7 +22,7 @@ CFLAGS	 	+= -DUSE_WCHAR
 
 # If your system has manpath(1), uncomment this.  This is most any
 # system that's not OpenBSD or NetBSD.  If uncommented, manpage(1) and
-# mandocdb(8) will use manpath(1) to get the MANPATH variable.
+# makewhatis(8) will use manpath(1) to get the MANPATH variable.
 #CFLAGS		+= -DUSE_MANPATH
 
 # If your system does not support static binaries, comment this,
@@ -52,7 +52,7 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 # If you want to build without database support, for example to avoid
 # the dependency on SQLite3, comment the following two lines.
 DBLIB		 = -L/usr/local/lib -lsqlite3
-DBBIN		 = mandocdb manpage apropos
+DBBIN		 = makewhatis manpage apropos
 
 # === END OF USER SETTINGS =============================================
 
@@ -111,6 +111,7 @@ SRCS		 = Makefile \
 		   libroff.h \
 		   main.c \
 		   main.h \
+		   makewhatis.8 \
 		   man.7 \
 		   man.c \
 		   man-cgi.css \
@@ -128,7 +129,6 @@ SRCS		 = Makefile \
 		   mandoc_aux.c \
 		   mandoc_aux.h \
 		   mandoc_char.7 \
-		   mandocdb.8 \
 		   mandocdb.c \
 		   manpage.c \
 		   manpath.c \
@@ -259,8 +259,8 @@ MANDOC_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   tree.o
 $(MANDOC_OBJS): main.h mandoc.h mandoc_aux.h mdoc.h man.h config.h out.h
 
-MANDOCDB_OBJS	 = mandocdb.o mansearch_const.o manpath.o
-$(MANDOCDB_OBJS): mansearch.h mandoc.h mandoc_aux.h \
+MAKEWHATIS_OBJS	 = mandocdb.o mansearch_const.o manpath.o
+$(MAKEWHATIS_OBJS): mansearch.h mandoc.h mandoc_aux.h \
 		  mdoc.h man.h config.h manpath.h
 
 PRECONV_OBJS	 = preconv.o
@@ -289,7 +289,7 @@ WWW_MANS	 = apropos.1.html \
 		   mdoc.7.html \
 		   roff.7.html \
 		   tbl.7.html \
-		   mandocdb.8.html \
+		   makewhatis.8.html \
 		   man.h.html \
 		   mandoc.h.html \
 		   manpath.h.html \
@@ -304,7 +304,7 @@ WWW_OBJS	 = mdocml.tar.gz \
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS)
 	rm -f apropos $(APROPOS_OBJS)
-	rm -f mandocdb $(MANDOCDB_OBJS)
+	rm -f makewhatis $(MAKEWHATIS_OBJS)
 	rm -f preconv $(PRECONV_OBJS)
 	rm -f manpage $(MANPAGE_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
@@ -353,8 +353,8 @@ libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 mandoc: $(MANDOC_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(MANDOC_OBJS) libmandoc.a
 
-mandocdb: $(MANDOCDB_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(MANDOCDB_OBJS) libmandoc.a $(DBLIB)
+makewhatis: $(MAKEWHATIS_OBJS) libmandoc.a
+	$(CC) $(LDFLAGS) -o $@ $(MAKEWHATIS_OBJS) libmandoc.a $(DBLIB)
 
 preconv: $(PRECONV_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(PRECONV_OBJS)
