@@ -442,15 +442,25 @@ main(int argc, char *argv[])
 		 */
 		if (0 == set_basedir(path_arg))
 			goto out;
-		for (i = 0; i < argc; i++)
-			filescan(argv[i]);
-		if (0 == dbopen(1))
-			goto out;
-		if (OP_TEST != op)
-			dbprune();
+		if (dbopen(1)) {
+			for (i = 0; i < argc; i++)
+				filescan(argv[i]);
+			if (OP_TEST != op)
+				dbprune();
+		} else {
+			/*
+			 * Database missing or corrupt.
+			 * Recreate from scratch.
+			 */
+			op = OP_DEFAULT;
+			if (0 == treescan())
+				goto out;
+			if (0 == dbopen(0))
+				goto out;
+		}
 		if (OP_DELETE != op)
 			mpages_merge(mc, mp);
-		dbclose(1);
+		dbclose(OP_DEFAULT == op ? 0 : 1);
 	} else {
 		/*
 		 * If we have arguments, use them as our manpaths.
