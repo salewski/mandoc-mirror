@@ -111,12 +111,12 @@ void		  term_newln(struct termp *);
 void		  term_vspace(struct termp *);
 void		  term_word(struct termp *, const char *);
 void		  term_flushln(struct termp *);
-void		  term_begin(struct termp *, term_margin, 
+void		  term_begin(struct termp *, term_margin,
 			term_margin, const void *);
 void		  term_end(struct termp *);
 
 void		  term_setwidth(struct termp *, const char *);
-size_t		  term_hspan(const struct termp *, 
+size_t		  term_hspan(const struct termp *,
 			const struct roffsu *);
 size_t		  term_vspan(const struct termp *,
 			const struct roffsu *);

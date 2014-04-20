@@ -63,8 +63,8 @@ __BEGIN_DECLS
 	     (p)->scale = (v); } \
 	while (/* CONSTCOND */ 0)
 
-int	  	  a2roffsu(const char *, struct roffsu *, enum roffscale);
-void	  	  tblcalc(struct rofftbl *tbl, const struct tbl_span *);
+int		  a2roffsu(const char *, struct roffsu *, enum roffscale);
+void		  tblcalc(struct rofftbl *tbl, const struct tbl_span *);
 
 __END_DECLS
 

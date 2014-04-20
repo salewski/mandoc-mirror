@@ -46,7 +46,7 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	const char	*local_start;
 	int		 local_sz;
 	char		 term;
-	enum mandoc_esc	 gly; 
+	enum mandoc_esc	 gly;
 
 	/*
 	 * When the caller doesn't provide return storage,
@@ -75,11 +75,11 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	 * these, but each eventually returns a substring of the glyph
 	 * name.
 	 */
-	case ('('):
+	case '(':
 		gly = ESCAPE_SPECIAL;
 		*sz = 2;
 		break;
-	case ('['):
+	case '[':
 		gly = ESCAPE_SPECIAL;
 		/*
 		 * Unicode escapes are defined in groff as \[uXXXX] to
@@ -91,7 +91,7 @@ mandoc_escape(const char **end, const char **start, int *sz)
 			gly = ESCAPE_UNICODE;
 		term = ']';
 		break;
-	case ('C'):
+	case 'C':
 		if ('\'' != **start)
 			return(ESCAPE_ERROR);
 		*start = ++*end;
@@ -105,50 +105,50 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	/*
 	 * Escapes taking no arguments at all.
 	 */
-	case ('d'):
+	case 'd':
 		/* FALLTHROUGH */
-	case ('u'):
+	case 'u':
 		return(ESCAPE_IGNORE);
 
 	/*
 	 * The \z escape is supposed to output the following
-	 * character without advancing the cursor position.  
+	 * character without advancing the cursor position.
 	 * Since we are mostly dealing with terminal mode,
 	 * let us just skip the next character.
 	 */
-	case ('z'):
+	case 'z':
 		return(ESCAPE_SKIPCHAR);
 
 	/*
 	 * Handle all triggers matching \X(xy, \Xx, and \X[xxxx], where
 	 * 'X' is the trigger.  These have opaque sub-strings.
 	 */
-	case ('F'):
+	case 'F':
 		/* FALLTHROUGH */
-	case ('g'):
+	case 'g':
 		/* FALLTHROUGH */
-	case ('k'):
+	case 'k':
 		/* FALLTHROUGH */
-	case ('M'):
+	case 'M':
 		/* FALLTHROUGH */
-	case ('m'):
+	case 'm':
 		/* FALLTHROUGH */
-	case ('n'):
+	case 'n':
 		/* FALLTHROUGH */
-	case ('V'):
+	case 'V':
 		/* FALLTHROUGH */
-	case ('Y'):
+	case 'Y':
 		gly = ESCAPE_IGNORE;
 		/* FALLTHROUGH */
-	case ('f'):
+	case 'f':
 		if (ESCAPE_ERROR == gly)
 			gly = ESCAPE_FONT;
 		switch (**start) {
-		case ('('):
+		case '(':
 			*start = ++*end;
 			*sz = 2;
 			break;
-		case ('['):
+		case '[':
 			*start = ++*end;
 			term = ']';
 			break;
@@ -163,19 +163,19 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	 * and 'Y' is any string.  These have opaque sub-strings.
 	 * The \B and \w escapes are handled in roff.c, roff_res().
 	 */
-	case ('A'):
+	case 'A':
 		/* FALLTHROUGH */
-	case ('b'):
+	case 'b':
 		/* FALLTHROUGH */
-	case ('D'):
+	case 'D':
 		/* FALLTHROUGH */
-	case ('o'):
+	case 'o':
 		/* FALLTHROUGH */
-	case ('R'):
+	case 'R':
 		/* FALLTHROUGH */
-	case ('X'):
+	case 'X':
 		/* FALLTHROUGH */
-	case ('Z'):
+	case 'Z':
 		if ('\0' == **start)
 			return(ESCAPE_ERROR);
 		gly = ESCAPE_IGNORE;
@@ -187,19 +187,19 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	 * These escapes are of the form \X'N', where 'X' is the trigger
 	 * and 'N' resolves to a numerical expression.
 	 */
-	case ('h'):
+	case 'h':
 		/* FALLTHROUGH */
-	case ('H'):
+	case 'H':
 		/* FALLTHROUGH */
-	case ('L'):
+	case 'L':
 		/* FALLTHROUGH */
-	case ('l'):
+	case 'l':
 		/* FALLTHROUGH */
-	case ('S'):
+	case 'S':
 		/* FALLTHROUGH */
-	case ('v'):
+	case 'v':
 		/* FALLTHROUGH */
-	case ('x'):
+	case 'x':
 		if (strchr("\0 %&()*+-./0123456789:<=>", **start))
 			return(ESCAPE_ERROR);
 		gly = ESCAPE_IGNORE;
@@ -211,7 +211,7 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	 * Special handling for the numbered character escape.
 	 * XXX Do any other escapes need similar handling?
 	 */
-	case ('N'):
+	case 'N':
 		if ('\0' == **start)
 			return(ESCAPE_ERROR);
 		(*end)++;
@@ -227,10 +227,10 @@ mandoc_escape(const char **end, const char **start, int *sz)
 			(*end)++;
 		return(ESCAPE_NUMBERED);
 
-	/* 
+	/*
 	 * Sizes get a special category of their own.
 	 */
-	case ('s'):
+	case 's':
 		gly = ESCAPE_IGNORE;
 
 		/* See +/- counts as a sign. */
@@ -238,15 +238,15 @@ mandoc_escape(const char **end, const char **start, int *sz)
 			(*end)++;
 
 		switch (**end) {
-		case ('('):
+		case '(':
 			*start = ++*end;
 			*sz = 2;
 			break;
-		case ('['):
+		case '[':
 			*start = ++*end;
 			term = ']';
 			break;
-		case ('\''):
+		case '\'':
 			*start = ++*end;
 			term = '\'';
 			break;
@@ -278,9 +278,9 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	if ('\0' != term) {
 		while (**end != term) {
 			switch (**end) {
-			case ('\0'):
+			case '\0':
 				return(ESCAPE_ERROR);
-			case ('\\'):
+			case '\\':
 				(*end)++;
 				if (ESCAPE_ERROR ==
 				    mandoc_escape(end, NULL, NULL))
@@ -302,7 +302,7 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	/* Run post-processors. */
 
 	switch (gly) {
-	case (ESCAPE_FONT):
+	case ESCAPE_FONT:
 		if (2 == *sz) {
 			if ('C' == **start) {
 				/*
@@ -320,27 +320,27 @@ mandoc_escape(const char **end, const char **start, int *sz)
 			break;
 
 		switch (**start) {
-		case ('3'):
+		case '3':
 			/* FALLTHROUGH */
-		case ('B'):
+		case 'B':
 			gly = ESCAPE_FONTBOLD;
 			break;
-		case ('2'):
+		case '2':
 			/* FALLTHROUGH */
-		case ('I'):
+		case 'I':
 			gly = ESCAPE_FONTITALIC;
 			break;
-		case ('P'):
+		case 'P':
 			gly = ESCAPE_FONTPREV;
 			break;
-		case ('1'):
+		case '1':
 			/* FALLTHROUGH */
-		case ('R'):
+		case 'R':
 			gly = ESCAPE_FONTROMAN;
 			break;
 		}
 		break;
-	case (ESCAPE_SPECIAL):
+	case ESCAPE_SPECIAL:
 		if (1 == *sz && 'c' == **start)
 			gly = ESCAPE_NOSPACE;
 		break;
@@ -372,7 +372,7 @@ mandoc_getarg(struct mparse *parse, char **cpp, int ln, int *pos)
 	if ('"' == *start) {
 		quoted = 1;
 		start++;
-	} 
+	}
 
 	pairs = 0;
 	white = 0;
@@ -391,14 +391,14 @@ mandoc_getarg(struct mparse *parse, char **cpp, int ln, int *pos)
 			 * backslashes and backslash-t to literal tabs.
 			 */
 			switch (cp[1]) {
-			case ('t'):
+			case 't':
 				cp[0] = '\t';
 				/* FALLTHROUGH */
-			case ('\\'):
+			case '\\':
 				pairs++;
 				cp++;
 				break;
-			case (' '):
+			case ' ':
 				/* Skip escaped blanks. */
 				if (0 == quoted)
 					cp++;
@@ -541,21 +541,21 @@ mandoc_eos(const char *p, size_t sz)
 	enclosed = found = 0;
 	for (q = p + (int)sz - 1; q >= p; q--) {
 		switch (*q) {
-		case ('\"'):
+		case '\"':
 			/* FALLTHROUGH */
-		case ('\''):
+		case '\'':
 			/* FALLTHROUGH */
-		case (']'):
+		case ']':
 			/* FALLTHROUGH */
-		case (')'):
+		case ')':
 			if (0 == found)
 				enclosed = 1;
 			break;
-		case ('.'):
+		case '.':
 			/* FALLTHROUGH */
-		case ('!'):
+		case '!':
 			/* FALLTHROUGH */
-		case ('?'):
+		case '?':
 			found = 1;
 			break;
 		default:

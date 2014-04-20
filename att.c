@@ -26,11 +26,12 @@
 #define LINE(x, y) \
 	if (0 == strcmp(p, x)) return(y);
 
+
 const char *
 mdoc_a2att(const char *p)
 {
 
-#include "att.in" 
+#include "att.in"
 
 	return(NULL);
 }

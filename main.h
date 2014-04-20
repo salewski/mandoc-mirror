@@ -25,7 +25,7 @@ struct	man;
 #define	UNCONST(a)	((void *)(uintptr_t)(const void *)(a))
 
 
-/* 
+/*
  * Definitions for main.c-visible output device functions, e.g., -Thtml
  * and -Tascii.  Note that ascii_alloc() is named as such in
  * anticipation of latin1_alloc() and so on, all of which map into the

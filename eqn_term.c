@@ -37,6 +37,7 @@ static	const enum termfont fontmap[EQNFONT__MAX] = {
 
 static void	eqn_box(struct termp *, const struct eqn_box *);
 
+
 void
 term_eqn(struct termp *p, const struct eqn *ep)
 {
@@ -68,7 +69,7 @@ eqn_box(struct termp *p, const struct eqn_box *bp)
 		term_word(p, ")");
 	if (bp->right)
 		term_word(p, bp->right);
-	if (EQNFONT_NONE != bp->font) 
+	if (EQNFONT_NONE != bp->font)
 		term_fontpop(p);
 
 	if (bp->next)

@@ -137,7 +137,7 @@ struct	roffnode {
 
 #define	ROFF_ARGS	 struct roff *r, /* parse ctx */ \
 			 enum rofft tok, /* tok of macro */ \
-		 	 char **bufp, /* input buffer */ \
+			 char **bufp, /* input buffer */ \
 			 size_t *szp, /* size of input buffer */ \
 			 int ln, /* parse line */ \
 			 int ppos, /* original pos in buffer */ \
@@ -193,7 +193,7 @@ static	int		 roff_getop(const char *, int *, char *);
 static	int		 roff_getregn(const struct roff *,
 				const char *, size_t);
 static	int		 roff_getregro(const char *name);
-static	const char	*roff_getstrn(const struct roff *, 
+static	const char	*roff_getstrn(const struct roff *,
 				const char *, size_t);
 static	enum rofferr	 roff_it(ROFF_ARGS);
 static	enum rofferr	 roff_line_ignore(ROFF_ARGS);
@@ -202,13 +202,13 @@ static	void		 roff_openeqn(struct roff *, const char *,
 				int, int, const char *);
 static	enum rofft	 roff_parse(struct roff *, const char *, int *);
 static	enum rofferr	 roff_parsetext(char **, size_t *, int, int *);
-static	enum rofferr	 roff_res(struct roff *, 
+static	enum rofferr	 roff_res(struct roff *,
 				char **, size_t *, int, int);
 static	enum rofferr	 roff_rm(ROFF_ARGS);
 static	enum rofferr	 roff_rr(ROFF_ARGS);
 static	void		 roff_setstr(struct roff *,
 				const char *, const char *, int);
-static	void		 roff_setstrn(struct roffkv **, const char *, 
+static	void		 roff_setstrn(struct roffkv **, const char *,
 				size_t, const char *, size_t, int);
 static	enum rofferr	 roff_so(ROFF_ARGS);
 static	enum rofferr	 roff_tr(ROFF_ARGS);
@@ -315,6 +315,7 @@ static	const struct predef predefs[PREDEFS_MAX] = {
 static	int	 roffit_lines;  /* number of lines to delay */
 static	char	*roffit_macro;  /* nil-terminated macro line */
 
+
 static void
 roffhash_init(void)
 {
@@ -367,7 +368,6 @@ roffhash_find(const char *p, size_t s)
 	return(ROFF_MAX);
 }
 
-
 /*
  * Pop the current node off of the stack of roff instructions currently
  * pending.
@@ -378,14 +378,13 @@ roffnode_pop(struct roff *r)
 	struct roffnode	*p;
 
 	assert(r->last);
-	p = r->last; 
+	p = r->last;
 
 	r->last = r->last->parent;
 	free(p->name);
 	free(p->end);
 	free(p);
 }
-
 
 /*
  * Push a roff node onto the instruction stack.  This must later be
@@ -408,7 +407,6 @@ roffnode_push(struct roff *r, enum rofft tok, const char *name,
 
 	r->last = p;
 }
-
 
 static void
 roff_free1(struct roff *r)
@@ -459,7 +457,6 @@ roff_reset(struct roff *r)
 	r->control = 0;
 }
 
-
 void
 roff_free(struct roff *r)
 {
@@ -467,7 +464,6 @@ roff_free(struct roff *r)
 	roff_free1(r);
 	free(r);
 }
-
 
 struct roff *
 roff_alloc(struct mparse *parse, int options)
@@ -478,7 +474,7 @@ roff_alloc(struct mparse *parse, int options)
 	r->parse = parse;
 	r->options = options;
 	r->rstackpos = -1;
-	
+
 	roffhash_init();
 
 	return(r);
@@ -533,15 +529,15 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 		term = '\0';
 		cp = stesc + 1;
 		switch (*cp) {
-		case ('*'):
+		case '*':
 			res = NULL;
 			break;
-		case ('B'):
+		case 'B':
 			/* FALLTHROUGH */
-		case ('w'):
+		case 'w':
 			term = cp[1];
 			/* FALLTHROUGH */
-		case ('n'):
+		case 'n':
 			res = ubuf;
 			break;
 		default:
@@ -565,14 +561,14 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 
 		if ('\0' == term) {
 			switch (*++cp) {
-			case ('\0'):
+			case '\0':
 				maxl = 0;
 				break;
-			case ('('):
+			case '(':
 				cp++;
 				maxl = 2;
 				break;
-			case ('['):
+			case '[':
 				cp++;
 				term = ']';
 				maxl = 0;
@@ -591,10 +587,8 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 
 		for (naml = 0; 0 == maxl || naml < maxl; naml++, cp++) {
 			if ('\0' == *cp) {
-				mandoc_msg
-					(MANDOCERR_BADESCAPE, 
-					 r->parse, ln, 
-					 (int)(stesc - *bufp), NULL);
+				mandoc_msg(MANDOCERR_BADESCAPE, r->parse,
+				    ln, (int)(stesc - *bufp), NULL);
 				break;
 			}
 			if (0 == maxl && *cp == term) {
@@ -609,30 +603,29 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 		 */
 
 		switch (stesc[1]) {
-		case ('*'):
+		case '*':
 			res = roff_getstrn(r, stnam, naml);
 			break;
-		case ('B'):
+		case 'B':
 			npos = 0;
 			irc = roff_evalnum(stnam, &npos, NULL, 0);
 			ubuf[0] = irc && stnam + npos + 1 == cp
 			    ? '1' : '0';
 			ubuf[1] = '\0';
 			break;
-		case ('n'):
+		case 'n':
 			snprintf(ubuf, sizeof(ubuf), "%d",
 			    roff_getregn(r, stnam, naml));
 			break;
-		case ('w'):
+		case 'w':
 			snprintf(ubuf, sizeof(ubuf), "%d",
 			    24 * (int)naml);
 			break;
 		}
 
 		if (NULL == res) {
-			mandoc_msg
-				(MANDOCERR_BADESCAPE, r->parse, 
-				 ln, (int)(stesc - *bufp), NULL);
+			mandoc_msg(MANDOCERR_BADESCAPE, r->parse,
+			    ln, (int)(stesc - *bufp), NULL);
 			res = "";
 		}
 		ressz = strlen(res);
@@ -713,7 +706,7 @@ roff_parsetext(char **bufp, size_t *szp, int pos, int *offs)
 }
 
 enum rofferr
-roff_parseln(struct roff *r, int ln, char **bufp, 
+roff_parseln(struct roff *r, int ln, char **bufp,
 		size_t *szp, int pos, int *offs)
 {
 	enum rofft	 t;
@@ -744,8 +737,7 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 	if (r->last && ! ctl) {
 		t = r->last->tok;
 		assert(roffs[t].text);
-		e = (*roffs[t].text)
-			(r, t, bufp, szp, ln, pos, pos, offs);
+		e = (*roffs[t].text)(r, t, bufp, szp, ln, pos, pos, offs);
 		assert(ROFF_IGN == e || ROFF_CONT == e);
 		if (ROFF_CONT != e)
 			return(e);
@@ -767,9 +759,8 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 	if (r->last) {
 		t = r->last->tok;
 		assert(roffs[t].sub);
-		return((*roffs[t].sub)
-				(r, t, bufp, szp, 
-				 ln, ppos, pos, offs));
+		return((*roffs[t].sub)(r, t, bufp, szp,
+		    ln, ppos, pos, offs));
 	}
 
 	/*
@@ -782,11 +773,8 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 		return(ROFF_CONT);
 
 	assert(roffs[t].proc);
-	return((*roffs[t].proc)
-			(r, t, bufp, szp, 
-			 ln, ppos, pos, offs));
+	return((*roffs[t].proc)(r, t, bufp, szp, ln, ppos, pos, offs));
 }
-
 
 void
 roff_endparse(struct roff *r)
@@ -794,17 +782,17 @@ roff_endparse(struct roff *r)
 
 	if (r->last)
 		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse,
-				r->last->line, r->last->col, NULL);
+		    r->last->line, r->last->col, NULL);
 
 	if (r->eqn) {
-		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse, 
-				r->eqn->eqn.ln, r->eqn->eqn.pos, NULL);
+		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse,
+		    r->eqn->eqn.ln, r->eqn->eqn.pos, NULL);
 		eqn_end(&r->eqn);
 	}
 
 	if (r->tbl) {
-		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse, 
-				r->tbl->line, r->tbl->pos, NULL);
+		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse,
+		    r->tbl->line, r->tbl->pos, NULL);
 		tbl_end(&r->tbl);
 	}
 }
@@ -820,8 +808,8 @@ roff_parse(struct roff *r, const char *buf, int *pos)
 	size_t		 maclen;
 	enum rofft	 t;
 
-	if ('\0' == buf[*pos] || '"' == buf[*pos] || 
-			'\t' == buf[*pos] || ' ' == buf[*pos])
+	if ('\0' == buf[*pos] || '"' == buf[*pos] ||
+	    '\t' == buf[*pos] || ' ' == buf[*pos])
 		return(ROFF_MAX);
 
 	/* We stop the macro parse at an escape, tab, space, or nil. */
@@ -840,7 +828,6 @@ roff_parse(struct roff *r, const char *buf, int *pos)
 	return(t);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_cblock(ROFF_ARGS)
 {
@@ -856,18 +843,18 @@ roff_cblock(ROFF_ARGS)
 	}
 
 	switch (r->last->tok) {
-	case (ROFF_am):
+	case ROFF_am:
 		/* FALLTHROUGH */
-	case (ROFF_ami):
+	case ROFF_ami:
 		/* FALLTHROUGH */
-	case (ROFF_am1):
+	case ROFF_am1:
 		/* FALLTHROUGH */
-	case (ROFF_de):
+	case ROFF_de:
 		/* ROFF_de1 is remapped to ROFF_de in roff_block(). */
 		/* FALLTHROUGH */
-	case (ROFF_dei):
+	case ROFF_dei:
 		/* FALLTHROUGH */
-	case (ROFF_ig):
+	case ROFF_ig:
 		break;
 	default:
 		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
@@ -883,7 +870,6 @@ roff_cblock(ROFF_ARGS)
 
 }
 
-
 static void
 roffnode_cleanscope(struct roff *r)
 {
@@ -895,7 +881,6 @@ roffnode_cleanscope(struct roff *r)
 	}
 }
 
-
 static void
 roff_ccond(struct roff *r, int ln, int ppos)
 {
@@ -906,11 +891,11 @@ roff_ccond(struct roff *r, int ln, int ppos)
 	}
 
 	switch (r->last->tok) {
-	case (ROFF_el):
+	case ROFF_el:
 		/* FALLTHROUGH */
-	case (ROFF_ie):
+	case ROFF_ie:
 		/* FALLTHROUGH */
-	case (ROFF_if):
+	case ROFF_if:
 		break;
 	default:
 		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
@@ -927,8 +912,6 @@ roff_ccond(struct roff *r, int ln, int ppos)
 	return;
 }
 
-
-/* ARGSUSED */
 static enum rofferr
 roff_block(ROFF_ARGS)
 {
@@ -1007,8 +990,6 @@ roff_block(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-
-/* ARGSUSED */
 static enum rofferr
 roff_block_sub(ROFF_ARGS)
 {
@@ -1029,10 +1010,10 @@ roff_block_sub(ROFF_ARGS)
 			if ((*bufp)[i] != r->last->end[j])
 				break;
 
-		if ('\0' == r->last->end[j] && 
-				('\0' == (*bufp)[i] ||
-				 ' ' == (*bufp)[i] ||
-				 '\t' == (*bufp)[i])) {
+		if ('\0' == r->last->end[j] &&
+		    ('\0' == (*bufp)[i] ||
+		     ' '  == (*bufp)[i] ||
+		     '\t' == (*bufp)[i])) {
 			roffnode_pop(r);
 			roffnode_cleanscope(r);
 
@@ -1064,12 +1045,9 @@ roff_block_sub(ROFF_ARGS)
 	}
 
 	assert(roffs[t].proc);
-	return((*roffs[t].proc)(r, t, bufp, szp, 
-				ln, ppos, pos, offs));
+	return((*roffs[t].proc)(r, t, bufp, szp, ln, ppos, pos, offs));
 }
 
-
-/* ARGSUSED */
 static enum rofferr
 roff_block_text(ROFF_ARGS)
 {
@@ -1080,8 +1058,6 @@ roff_block_text(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-
-/* ARGSUSED */
 static enum rofferr
 roff_cond_sub(ROFF_ARGS)
 {
@@ -1102,7 +1078,7 @@ roff_cond_sub(ROFF_ARGS)
 	    (rr || ROFFMAC_STRUCT & roffs[t].flags)) {
 		assert(roffs[t].proc);
 		return((*roffs[t].proc)(r, t, bufp, szp,
-					ln, ppos, pos, offs));
+		    ln, ppos, pos, offs));
 	}
 
 	/*
@@ -1126,7 +1102,6 @@ roff_cond_sub(ROFF_ARGS)
 	return(rr ? ROFF_CONT : ROFF_IGN);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_cond_text(ROFF_ARGS)
 {
@@ -1237,20 +1212,20 @@ roff_evalcond(const char *v, int *pos)
 		wanttrue = 1;
 
 	switch (v[*pos]) {
-	case ('n'):
+	case 'n':
 		/* FALLTHROUGH */
-	case ('o'):
+	case 'o':
 		(*pos)++;
 		return(wanttrue);
-	case ('c'):
+	case 'c':
 		/* FALLTHROUGH */
-	case ('d'):
+	case 'd':
 		/* FALLTHROUGH */
-	case ('e'):
+	case 'e':
 		/* FALLTHROUGH */
-	case ('r'):
+	case 'r':
 		/* FALLTHROUGH */
-	case ('t'):
+	case 't':
 		(*pos)++;
 		return(!wanttrue);
 	default:
@@ -1263,7 +1238,6 @@ roff_evalcond(const char *v, int *pos)
 		return(roff_evalstrcond(v, pos) == wanttrue);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_line_ignore(ROFF_ARGS)
 {
@@ -1271,24 +1245,23 @@ roff_line_ignore(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_cond(ROFF_ARGS)
 {
 
 	roffnode_push(r, tok, NULL, ln, ppos);
 
-	/* 
+	/*
 	 * An `.el' has no conditional body: it will consume the value
 	 * of the current rstack entry set in prior `ie' calls or
-	 * defaults to DENY.  
+	 * defaults to DENY.
 	 *
 	 * If we're not an `el', however, then evaluate the conditional.
 	 */
 
 	r->last->rule = ROFF_el == tok ?
-		(r->rstackpos < 0 ? 0 : r->rstack[r->rstackpos--]) :
-		roff_evalcond(*bufp, &pos);
+	    (r->rstackpos < 0 ? 0 : r->rstack[r->rstackpos--]) :
+	    roff_evalcond(*bufp, &pos);
 
 	/*
 	 * An if-else will put the NEGATION of the current evaluated
@@ -1297,8 +1270,8 @@ roff_cond(ROFF_ARGS)
 
 	if (ROFF_ie == tok) {
 		if (r->rstackpos == RSTACK_MAX - 1) {
-			mandoc_msg(MANDOCERR_MEM, 
-				r->parse, ln, ppos, NULL);
+			mandoc_msg(MANDOCERR_MEM,
+			    r->parse, ln, ppos, NULL);
 			return(ROFF_ERR);
 		}
 		r->rstack[++r->rstackpos] = !r->last->rule;
@@ -1329,7 +1302,7 @@ roff_cond(ROFF_ARGS)
 		r->last->endspan = -1;
 		pos += 2;
 		goto out;
-	} 
+	}
 
 	/*
 	 * Anything else following the conditional causes
@@ -1347,8 +1320,6 @@ out:
 	return(ROFF_RERUN);
 }
 
-
-/* ARGSUSED */
 static enum rofferr
 roff_ds(ROFF_ARGS)
 {
@@ -1390,31 +1361,31 @@ roff_getop(const char *v, int *pos, char *res)
 	*res = v[*pos];
 
 	switch (*res) {
-	case ('+'):
+	case '+':
 		/* FALLTHROUGH */
-	case ('-'):
+	case '-':
 		/* FALLTHROUGH */
-	case ('*'):
+	case '*':
 		/* FALLTHROUGH */
-	case ('/'):
+	case '/':
 		/* FALLTHROUGH */
-	case ('%'):
+	case '%':
 		/* FALLTHROUGH */
-	case ('&'):
+	case '&':
 		/* FALLTHROUGH */
-	case (':'):
+	case ':':
 		break;
 	case '<':
 		switch (v[*pos + 1]) {
-		case ('='):
+		case '=':
 			*res = 'l';
 			(*pos)++;
 			break;
-		case ('>'):
+		case '>':
 			*res = '!';
 			(*pos)++;
 			break;
-		case ('?'):
+		case '?':
 			*res = 'i';
 			(*pos)++;
 			break;
@@ -1424,11 +1395,11 @@ roff_getop(const char *v, int *pos, char *res)
 		break;
 	case '>':
 		switch (v[*pos + 1]) {
-		case ('='):
+		case '=':
 			*res = 'g';
 			(*pos)++;
 			break;
-		case ('?'):
+		case '?':
 			*res = 'a';
 			(*pos)++;
 			break;
@@ -1522,50 +1493,50 @@ roff_evalnum(const char *v, int *pos, int *res, int skipwhite)
 			continue;
 
 		switch (operator) {
-		case ('+'):
+		case '+':
 			*res += operand2;
 			break;
-		case ('-'):
+		case '-':
 			*res -= operand2;
 			break;
-		case ('*'):
+		case '*':
 			*res *= operand2;
 			break;
-		case ('/'):
+		case '/':
 			*res /= operand2;
 			break;
-		case ('%'):
+		case '%':
 			*res %= operand2;
 			break;
-		case ('<'):
+		case '<':
 			*res = *res < operand2;
 			break;
-		case ('>'):
+		case '>':
 			*res = *res > operand2;
 			break;
-		case ('l'):
+		case 'l':
 			*res = *res <= operand2;
 			break;
-		case ('g'):
+		case 'g':
 			*res = *res >= operand2;
 			break;
-		case ('='):
+		case '=':
 			*res = *res == operand2;
 			break;
-		case ('!'):
+		case '!':
 			*res = *res != operand2;
 			break;
-		case ('&'):
+		case '&':
 			*res = *res && operand2;
 			break;
-		case (':'):
+		case ':':
 			*res = *res || operand2;
 			break;
-		case ('i'):
+		case 'i':
 			if (operand2 < *res)
 				*res = operand2;
 			break;
-		case ('a'):
+		case 'a':
 			if (operand2 > *res)
 				*res = operand2;
 			break;
@@ -1616,17 +1587,17 @@ roff_getregro(const char *name)
 {
 
 	switch (*name) {
-	case ('A'):  /* ASCII approximation mode is always off. */
+	case 'A':  /* ASCII approximation mode is always off. */
 		return(0);
-	case ('g'):  /* Groff compatibility mode is always on. */
+	case 'g':  /* Groff compatibility mode is always on. */
 		return(1);
-	case ('H'):  /* Fixed horizontal resolution. */
+	case 'H':  /* Fixed horizontal resolution. */
 		return (24);
-	case ('j'):  /* Always adjust left margin only. */
+	case 'j':  /* Always adjust left margin only. */
 		return(0);
-	case ('T'):  /* Some output device is always defined. */
+	case 'T':  /* Some output device is always defined. */
 		return(1);
-	case ('V'):  /* Fixed vertical resolution. */
+	case 'V':  /* Fixed vertical resolution. */
 		return (40);
 	default:
 		return (-1);
@@ -1731,7 +1702,6 @@ roff_rr(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_rm(ROFF_ARGS)
 {
@@ -1747,7 +1717,6 @@ roff_rm(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_it(ROFF_ARGS)
 {
@@ -1761,7 +1730,7 @@ roff_it(ROFF_ARGS)
 	cp[len] = '\0';
 	if ((iv = mandoc_strntoi(cp, len, 10)) <= 0) {
 		mandoc_msg(MANDOCERR_NUMERIC, r->parse,
-				ln, ppos, *bufp + 1);
+		    ln, ppos, *bufp + 1);
 		return(ROFF_IGN);
 	}
 	cp += len + 1;
@@ -1772,7 +1741,6 @@ roff_it(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_Dd(ROFF_ARGS)
 {
@@ -1785,7 +1753,6 @@ roff_Dd(ROFF_ARGS)
 	return(ROFF_CONT);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_TH(ROFF_ARGS)
 {
@@ -1798,7 +1765,6 @@ roff_TH(ROFF_ARGS)
 	return(ROFF_CONT);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_TE(ROFF_ARGS)
 {
@@ -1811,7 +1777,6 @@ roff_TE(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_T_(ROFF_ARGS)
 {
@@ -1834,7 +1799,7 @@ roff_closeeqn(struct roff *r)
 #endif
 
 static void
-roff_openeqn(struct roff *r, const char *name, int line, 
+roff_openeqn(struct roff *r, const char *name, int line,
 		int offs, const char *buf)
 {
 	struct eqn_node *e;
@@ -1856,7 +1821,6 @@ roff_openeqn(struct roff *r, const char *name, int line,
 	}
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_EQ(ROFF_ARGS)
 {
@@ -1865,7 +1829,6 @@ roff_EQ(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_EN(ROFF_ARGS)
 {
@@ -1874,7 +1837,6 @@ roff_EN(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_TS(ROFF_ARGS)
 {
@@ -1896,7 +1858,6 @@ roff_TS(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_cc(ROFF_ARGS)
 {
@@ -1913,7 +1874,6 @@ roff_cc(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_tr(ROFF_ARGS)
 {
@@ -1935,9 +1895,9 @@ roff_tr(ROFF_ARGS)
 		if ('\\' == *first) {
 			esc = mandoc_escape(&p, NULL, NULL);
 			if (ESCAPE_ERROR == esc) {
-				mandoc_msg
-					(MANDOCERR_BADESCAPE, r->parse, 
-					 ln, (int)(p - *bufp), NULL);
+				mandoc_msg(MANDOCERR_BADESCAPE,
+				    r->parse, ln,
+				    (int)(p - *bufp), NULL);
 				return(ROFF_IGN);
 			}
 			fsz = (size_t)(p - first);
@@ -1947,28 +1907,28 @@ roff_tr(ROFF_ARGS)
 		if ('\\' == *second) {
 			esc = mandoc_escape(&p, NULL, NULL);
 			if (ESCAPE_ERROR == esc) {
-				mandoc_msg
-					(MANDOCERR_BADESCAPE, r->parse, 
-					 ln, (int)(p - *bufp), NULL);
+				mandoc_msg(MANDOCERR_BADESCAPE,
+				    r->parse, ln,
+				    (int)(p - *bufp), NULL);
 				return(ROFF_IGN);
 			}
 			ssz = (size_t)(p - second);
 		} else if ('\0' == *second) {
-			mandoc_msg(MANDOCERR_ARGCOUNT, r->parse, 
-					ln, (int)(p - *bufp), NULL);
+			mandoc_msg(MANDOCERR_ARGCOUNT, r->parse,
+			    ln, (int)(p - *bufp), NULL);
 			second = " ";
 			p--;
 		}
 
 		if (fsz > 1) {
-			roff_setstrn(&r->xmbtab, first, 
-					fsz, second, ssz, 0);
+			roff_setstrn(&r->xmbtab, first, fsz,
+			    second, ssz, 0);
 			continue;
 		}
 
 		if (NULL == r->xtab)
-			r->xtab = mandoc_calloc
-				(128, sizeof(struct roffstr));
+			r->xtab = mandoc_calloc(128,
+			    sizeof(struct roffstr));
 
 		free(r->xtab[(int)*first].p);
 		r->xtab[(int)*first].p = mandoc_strndup(second, ssz);
@@ -1978,7 +1938,6 @@ roff_tr(ROFF_ARGS)
 	return(ROFF_IGN);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_so(ROFF_ARGS)
 {
@@ -2003,7 +1962,6 @@ roff_so(ROFF_ARGS)
 	return(ROFF_SO);
 }
 
-/* ARGSUSED */
 static enum rofferr
 roff_userdef(ROFF_ARGS)
 {
@@ -2104,7 +2062,7 @@ roff_setstr(struct roff *r, const char *name, const char *string,
 {
 
 	roff_setstrn(&r->strtab, name, strlen(name), string,
-			string ? strlen(string) : 0, append);
+	    string ? strlen(string) : 0, append);
 }
 
 static void
@@ -2185,8 +2143,8 @@ roff_getstrn(const struct roff *r, const char *name, size_t len)
 	int i;
 
 	for (n = r->strtab; n; n = n->next)
-		if (0 == strncmp(name, n->key.p, len) && 
-				'\0' == n->key.p[(int)len])
+		if (0 == strncmp(name, n->key.p, len) &&
+		    '\0' == n->key.p[(int)len])
 			return(n->val.p);
 
 	for (i = 0; i < PREDEFS_MAX; i++)
@@ -2213,14 +2171,14 @@ roff_freestr(struct roffkv *r)
 const struct tbl_span *
 roff_span(const struct roff *r)
 {
-	
+
 	return(r->tbl ? tbl_span(r->tbl) : NULL);
 }
 
 const struct eqn *
 roff_eqn(const struct roff *r)
 {
-	
+
 	return(r->last_eqn ? &r->last_eqn->eqn : NULL);
 }
 
@@ -2279,8 +2237,8 @@ roff_strdup(const struct roff *r, const char *p)
 			 * Append the match to the array and move
 			 * forward by its keysize.
 			 */
-			res = mandoc_realloc
-				(res, ssz + cp->val.sz + 1);
+			res = mandoc_realloc(res,
+			    ssz + cp->val.sz + 1);
 			memcpy(res + ssz, cp->val.p, cp->val.sz);
 			ssz += cp->val.sz;
 			p += (int)cp->key.sz;
@@ -2301,8 +2259,8 @@ roff_strdup(const struct roff *r, const char *p)
 			memcpy(res + ssz, pp, sz);
 			break;
 		}
-		/* 
-		 * We bail out on bad escapes. 
+		/*
+		 * We bail out on bad escapes.
 		 * No need to warn: we already did so when
 		 * roff_res() was called.
 		 */
@@ -2317,7 +2275,7 @@ roff_strdup(const struct roff *r, const char *p)
 }
 
 /*
- * Find out whether a line is a macro line or not.  
+ * Find out whether a line is a macro line or not.
  * If it is, adjust the current position and return one; if it isn't,
  * return zero and don't change the current position.
  * If the control character has been set with `.cc', then let that grain

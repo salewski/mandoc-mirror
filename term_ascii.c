@@ -67,6 +67,7 @@ static	void		  locale_letter(struct termp *, int);
 static	size_t		  locale_width(const struct termp *, int);
 #endif
 
+
 static struct termp *
 ascii_init(enum termenc enc, char *outopts)
 {
@@ -94,8 +95,8 @@ ascii_init(enum termenc enc, char *outopts)
 #ifdef	USE_WCHAR
 	if (TERMENC_ASCII != enc) {
 		v = TERMENC_LOCALE == enc ?
-			setlocale(LC_ALL, "") :
-			setlocale(LC_CTYPE, "en_US.UTF-8");
+		    setlocale(LC_ALL, "") :
+		    setlocale(LC_CTYPE, "en_US.UTF-8");
 		if (NULL != v && MB_CUR_MAX > 1) {
 			p->enc = enc;
 			p->advance = locale_advance;
@@ -113,13 +114,13 @@ ascii_init(enum termenc enc, char *outopts)
 
 	while (outopts && *outopts)
 		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
-		case (0):
+		case 0:
 			p->defindent = (size_t)atoi(v);
 			break;
-		case (1):
+		case 1:
 			p->defrmargin = (size_t)atoi(v);
 			break;
-		case (2):
+		case 2:
 			/*
 			 * Temporary, undocumented mode
 			 * to imitate mdoc(7) output style.
@@ -152,7 +153,6 @@ utf8_alloc(char *outopts)
 	return(ascii_init(TERMENC_UTF8, outopts));
 }
 
-
 void *
 locale_alloc(char *outopts)
 {
@@ -175,7 +175,6 @@ ascii_setwidth(struct termp *p, int iop, size_t width)
 	p->rmargin = p->maxrmargin = p->defrmargin;
 }
 
-/* ARGSUSED */
 static size_t
 ascii_width(const struct termp *p, int c)
 {
@@ -190,11 +189,10 @@ ascii_free(void *arg)
 	term_free((struct termp *)arg);
 }
 
-/* ARGSUSED */
 static void
 ascii_letter(struct termp *p, int c)
 {
-	
+
 	putchar(c);
 }
 
@@ -212,7 +210,6 @@ ascii_end(struct termp *p)
 	(*p->footf)(p, p->argf);
 }
 
-/* ARGSUSED */
 static void
 ascii_endline(struct termp *p)
 {
@@ -220,17 +217,15 @@ ascii_endline(struct termp *p)
 	putchar('\n');
 }
 
-/* ARGSUSED */
 static void
 ascii_advance(struct termp *p, size_t len)
 {
-	size_t	 	i;
+	size_t		i;
 
 	for (i = 0; i < len; i++)
 		putchar(' ');
 }
 
-/* ARGSUSED */
 static double
 ascii_hspan(const struct termp *p, const struct roffsu *su)
 {
@@ -242,22 +237,22 @@ ascii_hspan(const struct termp *p, const struct roffsu *su)
 	 */
 
 	switch (su->unit) {
-	case (SCALE_CM):
+	case SCALE_CM:
 		r = 4 * su->scale;
 		break;
-	case (SCALE_IN):
+	case SCALE_IN:
 		r = 10 * su->scale;
 		break;
-	case (SCALE_PC):
+	case SCALE_PC:
 		r = (10 * su->scale) / 6;
 		break;
-	case (SCALE_PT):
+	case SCALE_PT:
 		r = (10 * su->scale) / 72;
 		break;
-	case (SCALE_MM):
+	case SCALE_MM:
 		r = su->scale / 1000;
 		break;
-	case (SCALE_VS):
+	case SCALE_VS:
 		r = su->scale * 2 - 1;
 		break;
 	default:
@@ -269,7 +264,6 @@ ascii_hspan(const struct termp *p, const struct roffsu *su)
 }
 
 #ifdef USE_WCHAR
-/* ARGSUSED */
 static size_t
 locale_width(const struct termp *p, int c)
 {
@@ -278,17 +272,15 @@ locale_width(const struct termp *p, int c)
 	return((rc = wcwidth(c)) < 0 ? 0 : rc);
 }
 
-/* ARGSUSED */
 static void
 locale_advance(struct termp *p, size_t len)
 {
-	size_t	 	i;
+	size_t		i;
 
 	for (i = 0; i < len; i++)
 		putwchar(L' ');
 }
 
-/* ARGSUSED */
 static void
 locale_endline(struct termp *p)
 {
@@ -296,11 +288,10 @@ locale_endline(struct termp *p)
 	putwchar(L'\n');
 }
 
-/* ARGSUSED */
 static void
 locale_letter(struct termp *p, int c)
 {
-	
+
 	putwchar(c);
 }
 #endif

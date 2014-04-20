@@ -17,7 +17,7 @@
  */
 
 /*
- * The ASCII translation tables.  
+ * The ASCII translation tables.
  *
  * The left-hand side corresponds to the input sequence (\x, \(xx, \*(xx
  * and so on) whose length is listed second element.  The right-hand

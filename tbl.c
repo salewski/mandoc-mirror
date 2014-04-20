@@ -30,6 +30,7 @@
 #include "libmandoc.h"
 #include "libroff.h"
 
+
 enum rofferr
 tbl_read(struct tbl_node *tbl, int ln, const char *p, int offs)
 {
@@ -53,11 +54,11 @@ tbl_read(struct tbl_node *tbl, int ln, const char *p, int offs)
 	/* Now process each logical section of the table.  */
 
 	switch (tbl->part) {
-	case (TBL_PART_OPTS):
+	case TBL_PART_OPTS:
 		return(tbl_option(tbl, ln, p) ? ROFF_IGN : ROFF_ERR);
-	case (TBL_PART_LAYOUT):
+	case TBL_PART_LAYOUT:
 		return(tbl_layout(tbl, ln, p) ? ROFF_IGN : ROFF_ERR);
-	case (TBL_PART_CDATA):
+	case TBL_PART_CDATA:
 		return(tbl_cdata(tbl, ln, p) ? ROFF_TBL : ROFF_IGN);
 	default:
 		break;
@@ -129,8 +130,8 @@ void
 tbl_restart(int line, int pos, struct tbl_node *tbl)
 {
 	if (TBL_PART_CDATA == tbl->part)
-		mandoc_msg(MANDOCERR_TBLBLOCK, tbl->parse, 
-				tbl->line, tbl->pos, NULL);
+		mandoc_msg(MANDOCERR_TBLBLOCK, tbl->parse,
+		    tbl->line, tbl->pos, NULL);
 
 	tbl->part = TBL_PART_LAYOUT;
 	tbl->line = line;
@@ -138,7 +139,7 @@ tbl_restart(int line, int pos, struct tbl_node *tbl)
 
 	if (NULL == tbl->first_span || NULL == tbl->first_span->first)
 		mandoc_msg(MANDOCERR_TBLNODATA, tbl->parse,
-				tbl->line, tbl->pos, NULL);
+		    tbl->line, tbl->pos, NULL);
 }
 
 const struct tbl_span *
@@ -163,14 +164,13 @@ tbl_end(struct tbl_node **tblp)
 	*tblp = NULL;
 
 	if (NULL == tbl->first_span || NULL == tbl->first_span->first)
-		mandoc_msg(MANDOCERR_TBLNODATA, tbl->parse, 
-				tbl->line, tbl->pos, NULL);
+		mandoc_msg(MANDOCERR_TBLNODATA, tbl->parse,
+		    tbl->line, tbl->pos, NULL);
 
 	if (tbl->last_span)
 		tbl->last_span->flags |= TBL_SPAN_LAST;
 
 	if (TBL_PART_CDATA == tbl->part)
-		mandoc_msg(MANDOCERR_TBLBLOCK, tbl->parse, 
-				tbl->line, tbl->pos, NULL);
+		mandoc_msg(MANDOCERR_TBLBLOCK, tbl->parse,
+		    tbl->line, tbl->pos, NULL);
 }
-
