@@ -488,7 +488,7 @@ roff_alloc(struct mparse *parse, int options)
 static enum rofferr
 roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 {
-	char		 ubuf[12]; /* buffer to print the number */
+	char		 ubuf[24]; /* buffer to print the number */
 	const char	*start;	/* start of the string to process */
 	const char	*stesc;	/* start of an escape sequence ('\\') */
 	const char	*stnam;	/* start of the name, after "[(*" */
@@ -614,11 +614,11 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 			ubuf[1] = '\0';
 			break;
 		case 'n':
-			snprintf(ubuf, sizeof(ubuf), "%d",
+			(void)snprintf(ubuf, sizeof(ubuf), "%d",
 			    roff_getregn(r, stnam, naml));
 			break;
 		case 'w':
-			snprintf(ubuf, sizeof(ubuf), "%d",
+			(void)snprintf(ubuf, sizeof(ubuf), "%d",
 			    24 * (int)naml);
 			break;
 		}
