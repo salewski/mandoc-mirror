@@ -852,7 +852,7 @@ mandoc_vmsg(enum mandocerr t, struct mparse *m,
 	va_list		 ap;
 
 	va_start(ap, fmt);
-	vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
+	(void)vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
 	mandoc_msg(t, m, ln, pos, buf);
