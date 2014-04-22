@@ -70,7 +70,8 @@ TESTSRCS	 = test-betoh64.c \
 		   test-strnlen.c \
 		   test-strptime.c
 
-SRCS		 = Makefile \
+SRCS		 = LICENSE \
+		   Makefile \
 		   NEWS \
 		   TODO \
 		   apropos.1 \
