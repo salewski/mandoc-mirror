@@ -80,6 +80,18 @@ mandoc_realloc(void *ptr, size_t size)
 	return(ptr);
 }
 
+void *
+mandoc_reallocarray(void *ptr, size_t num, size_t size)
+{
+
+	ptr = reallocarray(ptr, num, size);
+	if (NULL == ptr) {
+		perror(NULL);
+		exit((int)MANDOCLEVEL_SYSERR);
+	}
+	return(ptr);
+}
+
 char *
 mandoc_strdup(const char *ptr)
 {

@@ -1,7 +1,16 @@
-/*	$Id$ */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_REALLOCARRAY
+
+int dummy;
+
+#else
+
+/*	$OpenBSD: malloc.c,v 1.158 2014/04/23 15:07:27 tedu Exp $	*/
 /*
- * Copyright (c) 2009, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2014 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2008 Otto Moerbeek <otto@drijf.net>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,19 +24,22 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef MANDOC_AUX_H
-#define MANDOC_AUX_H
+#include <sys/types.h>
+#include <errno.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-__BEGIN_DECLS
+#define MUL_NO_OVERFLOW (1UL << (sizeof(size_t) * 4))
 
-int		  mandoc_asprintf(char **, const char *, ...);
-void		 *mandoc_calloc(size_t, size_t);
-void		 *mandoc_malloc(size_t);
-void		 *mandoc_realloc(void *, size_t);
-void		 *mandoc_reallocarray(void *, size_t, size_t);
-char		 *mandoc_strdup(const char *);
-char		 *mandoc_strndup(const char *, size_t);
+void *
+reallocarray(void *optr, size_t nmemb, size_t size)
+{
+	if ((nmemb >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
+	    nmemb > 0 && SIZE_MAX / nmemb < size) {
+		errno = ENOMEM;
+		return NULL;
+	}
+	return realloc(optr, size * nmemb);
+}
 
-__END_DECLS
-
-#endif /*!MANDOC_AUX_H*/
+#endif /*!HAVE_REALLOCARRAY*/

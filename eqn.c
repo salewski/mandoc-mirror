@@ -864,8 +864,8 @@ eqn_do_define(struct eqn_node *ep)
 
 		if (i == (int)ep->defsz) {
 			ep->defsz++;
-			ep->defs = mandoc_realloc(ep->defs,
-			    ep->defsz * sizeof(struct eqn_def));
+			ep->defs = mandoc_reallocarray(ep->defs,
+			    ep->defsz, sizeof(struct eqn_def));
 			ep->defs[i].key = ep->defs[i].val = NULL;
 		}
 

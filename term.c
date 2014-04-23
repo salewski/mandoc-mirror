@@ -522,7 +522,7 @@ adjbuf(struct termp *p, size_t sz)
 	while (sz >= p->maxcols)
 		p->maxcols <<= 2;
 
-	p->buf = mandoc_realloc(p->buf, sizeof(int) * p->maxcols);
+	p->buf = mandoc_reallocarray(p->buf, p->maxcols, sizeof(int));
 }
 
 static void

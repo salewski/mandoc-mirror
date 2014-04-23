@@ -169,8 +169,8 @@ manpath_add(struct manpaths *dirs, const char *dir)
 		if (0 == strcmp(dirs->paths[i], dir))
 			return;
 
-	dirs->paths = mandoc_realloc(dirs->paths,
-	    (dirs->sz + 1) * sizeof(char *));
+	dirs->paths = mandoc_reallocarray(dirs->paths,
+	    dirs->sz + 1, sizeof(char *));
 
 	dirs->paths[dirs->sz++] = mandoc_strdup(cp);
 }

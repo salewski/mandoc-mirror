@@ -1460,8 +1460,8 @@ post_bl_block_tag(POST_ARGS)
 	assert(n->args);
 	i = (int)(n->args->argc)++;
 
-	n->args->argv = mandoc_realloc(n->args->argv,
-	    n->args->argc * sizeof(struct mdoc_argv));
+	n->args->argv = mandoc_reallocarray(n->args->argv,
+	    n->args->argc, sizeof(struct mdoc_argv));
 
 	n->args->argv[i].arg = MDOC_Width;
 	n->args->argv[i].line = n->line;
@@ -1521,8 +1521,8 @@ post_bl_head(POST_ARGS)
 	 */
 
 	np->args->argv[j].sz = (size_t)mdoc->last->nchild;
-	np->args->argv[j].value = mandoc_malloc(
-	    (size_t)mdoc->last->nchild * sizeof(char *));
+	np->args->argv[j].value = mandoc_reallocarray(NULL,
+	    (size_t)mdoc->last->nchild, sizeof(char *));
 
 	mdoc->last->norm->Bl.ncols = np->args->argv[j].sz;
 	mdoc->last->norm->Bl.cols = (void *)np->args->argv[j].value;
