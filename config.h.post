@@ -20,6 +20,9 @@ extern	char	 *fgetln(FILE *, size_t *);
 extern	int	  getsubopt(char **, char * const *, char **);
 extern	char	 *suboptarg;
 #endif
+#ifndef HAVE_REALLOCARRAY
+extern	void	 *reallocarray(void *, size_t, size_t);
+#endif
 #ifndef HAVE_STRCASESTR
 extern	char	 *strcasestr(const char *, const char *);
 #endif
