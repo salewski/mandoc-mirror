@@ -936,7 +936,7 @@ pg_search(const struct req *req, char *path)
 		ep++;
 
 	while (ep && '\0' != *ep) {
-		cp = mandoc_realloc(cp, (sz + 1) * sizeof(char *));
+		cp = mandoc_reallocarray(cp, sz + 1, sizeof(char *));
 		start = ep;
 		while ('\0' != *ep && ! isspace((unsigned char)*ep))
 			ep++;
@@ -1180,9 +1180,8 @@ pathgen(DIR *dir, char *path, struct req *req)
 	if (rc > 0) {
 		/* This also strips the trailing slash. */
 		path[(int)--sz] = '\0';
-		req->p = mandoc_realloc
-			(req->p, 
-			 (req->psz + 1) * sizeof(struct paths));
+		req->p = mandoc_reallocarray(req->p, 
+		    req->psz + 1, sizeof(struct paths));
 		/*
 		 * Strip out the leading "./" unless we're just a ".",
 		 * in which case use an empty string as our name.
