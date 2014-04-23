@@ -65,6 +65,7 @@ TESTSRCS	 = test-betoh64.c \
 		   test-fgetln.c \
 		   test-getsubopt.c \
 		   test-mmap.c \
+		   test-reallocarray.c \
 		   test-strlcat.c \
 		   test-strlcpy.c \
 		   test-strnlen.c \
@@ -89,6 +90,7 @@ SRCS		 = LICENSE \
 		   chars.in \
 		   compat_fgetln.c \
 		   compat_getsubopt.c \
+		   compat_reallocarray.c \
 		   compat_strcasestr.c \
 		   compat_strlcat.c \
 		   compat_strlcpy.c \
@@ -212,6 +214,7 @@ LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 
 COMPAT_OBJS	 = compat_fgetln.o \
 		   compat_getsubopt.o \
+		   compat_reallocarray.o \
 		   compat_strcasestr.o \
 		   compat_strlcat.o \
 		   compat_strlcpy.o \

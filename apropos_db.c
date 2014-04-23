@@ -555,8 +555,8 @@ single_search(struct rectree *tree, const struct opts *opts,
 			if (strcasecmp(opts->arch, r.arch))
 				continue;
 
-		tree->node = rs = mandoc_realloc
-			(rs, (tree->len + 1) * sizeof(struct res));
+		tree->node = rs = mandoc_reallocarray(rs,
+		    tree->len + 1, sizeof(struct res));
 
 		memcpy(&rs[tree->len], &r, sizeof(struct res));
 		memset(&r, 0, sizeof(struct res));

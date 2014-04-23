@@ -984,8 +984,8 @@ index_prune(const struct of *ofile, struct mdb *mdb, struct recs *recs)
 cont:
 		if (recs->cur >= recs->size) {
 			recs->size += MANDOC_SLOP;
-			recs->stack = mandoc_realloc(recs->stack,
-					recs->size * sizeof(recno_t));
+			recs->stack = mandoc_reallocarray(recs->stack,
+			    recs->size, sizeof(recno_t));
 		}
 
 		recs->stack[(int)recs->cur] = recs->last;
