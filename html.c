@@ -657,6 +657,12 @@ void
 bufcat(struct html *h, const char *p)
 {
 
+	/*
+	 * XXX This is broken and not easy to fix.
+	 * When using the -Oincludes option, buffmt_includes()
+	 * may pass in strings overrunning BUFSIZ, causing a crash.
+	 */
+
 	h->buflen = strlcat(h->buf, p, BUFSIZ);
 	assert(h->buflen < BUFSIZ);
 }

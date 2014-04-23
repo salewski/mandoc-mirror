@@ -442,10 +442,9 @@ print_mdoc_foot(struct termp *p, const void *arg)
 static void
 print_mdoc_head(struct termp *p, const void *arg)
 {
-	char			 buf[BUFSIZ];
 	const struct mdoc_meta	*meta;
-	char			*title;
-	size_t			 buflen, titlen;
+	char			*volume, *title;
+	size_t			 vollen, titlen;
 
 	meta = (const struct mdoc_meta *)arg;
 
@@ -466,14 +465,12 @@ print_mdoc_head(struct termp *p, const void *arg)
 	p->rmargin = p->maxrmargin;
 
 	assert(meta->vol);
-	strlcpy(buf, meta->vol, BUFSIZ);
-	buflen = term_strlen(p, buf);
-
-	if (meta->arch) {
-		strlcat(buf, " (", BUFSIZ);
-		strlcat(buf, meta->arch, BUFSIZ);
-		strlcat(buf, ")", BUFSIZ);
-	}
+	if (NULL == meta->arch)
+		volume = mandoc_strdup(meta->vol);
+	else
+		mandoc_asprintf(&volume, "%s (%s)",
+		    meta->vol, meta->arch);
+	vollen = term_strlen(p, volume);
 
 	mandoc_asprintf(&title, "%s(%s)", meta->title, meta->msec);
 	titlen = term_strlen(p, title);
@@ -481,20 +478,19 @@ print_mdoc_head(struct termp *p, const void *arg)
 	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;
 	p->trailspace = 1;
 	p->offset = 0;
-	p->rmargin = 2 * (titlen+1) + buflen < p->maxrmargin ?
-	    (p->maxrmargin -
-	     term_strlen(p, buf) + term_len(p, 1)) / 2 :
-	    p->maxrmargin - buflen;
+	p->rmargin = 2 * (titlen+1) + vollen < p->maxrmargin ?
+	    (p->maxrmargin - vollen + term_len(p, 1)) / 2 :
+	    p->maxrmargin - vollen;
 
 	term_word(p, title);
 	term_flushln(p);
 
 	p->flags |= TERMP_NOSPACE;
 	p->offset = p->rmargin;
-	p->rmargin = p->offset + buflen + titlen < p->maxrmargin ?
+	p->rmargin = p->offset + vollen + titlen < p->maxrmargin ?
 	    p->maxrmargin - titlen : p->maxrmargin;
 
-	term_word(p, buf);
+	term_word(p, volume);
 	term_flushln(p);
 
 	p->flags &= ~TERMP_NOBREAK;
@@ -511,6 +507,7 @@ print_mdoc_head(struct termp *p, const void *arg)
 	p->offset = 0;
 	p->rmargin = p->maxrmargin;
 	free(title);
+	free(volume);
 }
 
 static size_t

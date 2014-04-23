@@ -167,8 +167,8 @@ tbl_cdata(struct tbl_node *tbl, int ln, const char *p)
 	if (dat->string) {
 		sz = strlen(p) + strlen(dat->string) + 2;
 		dat->string = mandoc_realloc(dat->string, sz);
-		strlcat(dat->string, " ", sz);
-		strlcat(dat->string, p, sz);
+		(void)strlcat(dat->string, " ", sz);
+		(void)strlcat(dat->string, p, sz);
 	} else
 		dat->string = mandoc_strdup(p);
 

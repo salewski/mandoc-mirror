@@ -1183,9 +1183,9 @@ post_defaults(POST_ARGS)
 static int
 post_at(POST_ARGS)
 {
-	const char	 *p, *q;
-	char		 *buf;
-	size_t		  sz;
+	struct mdoc_node	*n;
+	const char		*std_att;
+	char			*att;
 
 	/*
 	 * If we have a child, look it up in the standard keys.  If a
@@ -1193,27 +1193,18 @@ post_at(POST_ARGS)
 	 * prefix "AT&T UNIX " to the existing data.
 	 */
 
-	if (NULL == mdoc->last->child)
+	if (NULL == (n = mdoc->last->child))
 		return(1);
 
-	assert(MDOC_TEXT == mdoc->last->child->type);
-	p = mdoc_a2att(mdoc->last->child->string);
-
-	if (p) {
-		free(mdoc->last->child->string);
-		mdoc->last->child->string = mandoc_strdup(p);
-	} else {
+	assert(MDOC_TEXT == n->type);
+	if (NULL == (std_att = mdoc_a2att(n->string))) {
 		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_BADATT);
-		p = "AT&T UNIX ";
-		q = mdoc->last->child->string;
-		sz = strlen(p) + strlen(q) + 1;
-		buf = mandoc_malloc(sz);
-		strlcpy(buf, p, sz);
-		strlcat(buf, q, sz);
-		free(mdoc->last->child->string);
-		mdoc->last->child->string = buf;
-	}
+		mandoc_asprintf(&att, "AT&T UNIX %s", n->string);
+	} else
+		att = mandoc_strdup(std_att);
 
+	free(n->string);
+	n->string = att;
 	return(1);
 }
 
