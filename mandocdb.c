@@ -1287,7 +1287,8 @@ names_check(void)
 	      "AND mlinks.name == names.name"
 	    ")"
 	  ") JOIN ("
-	    "SELECT * FROM mlinks GROUP BY pageid"
+	    "SELECT sec, arch, name, pageid FROM mlinks "
+	    "GROUP BY pageid"
 	  ") USING (pageid);",
 	  -1, &stmt, NULL);
 
