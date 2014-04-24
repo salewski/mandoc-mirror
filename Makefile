@@ -1,16 +1,28 @@
-.PHONY: 	 clean install installcgi installwww
-.SUFFIXES:	 .md5 .h .h.html
-.SUFFIXES:	 .1       .3       .7       .8
-.SUFFIXES:	 .1.html  .3.html  .7.html  .8.html
+# $Id$
+#
+# Copyright (c) 2010, 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
+# Copyright (c) 2011, 2013, 2014 Ingo Schwarze <schwarze@openbsd.org>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-VERSION		 = 1.12.3
+VERSION		 = 1.12.4
 
 # === USER SETTINGS ====================================================
 
 # Specify this if you want to hard-code the operating system to appear
 # in the lower-left hand corner of -mdoc manuals.
 #
-# CFLAGS	+= -DOSNAME="\"OpenBSD 5.4\""
+# CFLAGS	+= -DOSNAME="\"OpenBSD 5.5\""
 
 # IFF your system supports multi-byte functions (setlocale(), wcwidth(),
 # putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a
@@ -57,9 +69,12 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 #
 #DBLIB		 = -ldb
 DBBIN		 = apropos mandocdb man.cgi catman whatis
-DBLN		 = llib-lapropos.ln llib-lmandocdb.ln llib-lman.cgi.ln llib-lcatman.ln
 
-all: mandoc preconv demandoc $(DBBIN)
+# === END OF USER SETTINGS =============================================
+
+ALLBIN		 = mandoc preconv demandoc $(DBBIN)
+
+all: $(ALLBIN)
 
 TESTSRCS	 = test-betoh64.c \
 		   test-fgetln.c \
@@ -221,6 +236,8 @@ COMPAT_OBJS	 = compat_fgetln.o \
 		   compat_strnlen.o \
 		   compat_strsep.o
 
+# === DEPENDENCY HANDLING ==============================================
+
 arch.o: arch.in
 att.o: att.in
 chars.o: chars.in
@@ -270,7 +287,8 @@ PRECONV_OBJS	 = preconv.o
 $(PRECONV_OBJS): config.h
 
 APROPOS_OBJS	 = apropos.o apropos_db.o manpath.o
-$(APROPOS_OBJS): config.h mandoc.h apropos_db.h manpath.h mandocdb.h
+$(APROPOS_OBJS): config.h mandoc.h mandoc_aux.h manpath.h \
+		 apropos_db.h mandocdb.h
 
 CGI_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   $(MANDOC_MAN_OBJS) \
@@ -284,15 +302,16 @@ $(CGI_OBJS): main.h mdoc.h man.h out.h config.h mandoc.h mandoc_aux.h \
 	     apropos_db.h manpath.h mandocdb.h
 
 CATMAN_OBJS	 = catman.o manpath.o
-$(CATMAN_OBJS): config.h mandoc.h manpath.h mandocdb.h
+$(CATMAN_OBJS): config.h mandoc_aux.h manpath.h mandocdb.h
 
 DEMANDOC_OBJS	 = demandoc.o
-$(DEMANDOC_OBJS): config.h
+$(DEMANDOC_OBJS): config.h mandoc.h man.h mdoc.h
 
 WWW_MANS	 = apropos.1.html \
 		   catman.8.html \
 		   demandoc.1.html \
 		   mandoc.1.html \
+		   preconv.1.html \
 		   whatis.1.html \
 		   mandoc.3.html \
 		   tbl.3.html \
@@ -301,24 +320,27 @@ WWW_MANS	 = apropos.1.html \
 		   man.cgi.7.html \
 		   mandoc_char.7.html \
 		   mdoc.7.html \
-		   preconv.1.html \
 		   roff.7.html \
 		   tbl.7.html \
 		   mandocdb.8.html \
 		   man.h.html \
 		   mandoc.h.html \
+		   mandoc_aux.h.html \
+		   manpath.h.html \
 		   mdoc.h.html
 
-$(WWW_MANS): mandoc
-
 WWW_OBJS	 = mdocml.tar.gz \
-		   mdocml.md5
+		   mdocml.sha256
+
+www: $(WWW_OBJS) $(WWW_MANS)
+
+# === TARGETS CONTAINING SHELL COMMANDS ================================
 
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS)
+	rm -f apropos whatis $(APROPOS_OBJS)
 	rm -f mandocdb $(MANDOCDB_OBJS)
 	rm -f preconv $(PRECONV_OBJS)
-	rm -f apropos whatis $(APROPOS_OBJS)
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f catman $(CATMAN_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
@@ -340,7 +362,8 @@ install: all
 	$(INSTALL_LIB) man.h mdoc.h mandoc.h $(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.1 preconv.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) mandoc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
-	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
+	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 \
+		$(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
 
 installcgi: all
@@ -350,14 +373,14 @@ installcgi: all
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(HTDOCDIR)/man.css
 	$(INSTALL_DATA) man-cgi.css $(DESTDIR)$(HTDOCDIR)
 
-installwww: $(WWW_MANS) $(WWW_OBJS)
+installwww: www
 	mkdir -p $(DESTDIR)$(HTDOCDIR)/snapshots
 	$(INSTALL_DATA) $(WWW_MANS) style.css $(DESTDIR)$(HTDOCDIR)
 	$(INSTALL_DATA) $(WWW_OBJS) $(DESTDIR)$(HTDOCDIR)/snapshots
 	$(INSTALL_DATA) mdocml.tar.gz \
 		$(DESTDIR)$(HTDOCDIR)/snapshots/mdocml-$(VERSION).tar.gz
-	$(INSTALL_DATA) mdocml.md5 \
-		$(DESTDIR)$(HTDOCDIR)/snapshots/mdocml-$(VERSION).md5
+	$(INSTALL_DATA) mdocml.sha256 \
+		$(DESTDIR)$(HTDOCDIR)/snapshots/mdocml-$(VERSION).sha256
 
 libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 	$(AR) rs $@ $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
@@ -386,8 +409,8 @@ man.cgi: $(CGI_OBJS) libmandoc.a
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a
 
-mdocml.md5: mdocml.tar.gz
-	md5 mdocml.tar.gz >$@
+mdocml.sha256: mdocml.tar.gz
+	sha256 mdocml.tar.gz > $@
 
 mdocml.tar.gz: $(SRCS)
 	mkdir -p .dist/mdocml-$(VERSION)/
@@ -400,8 +423,13 @@ config.h: configure config.h.pre config.h.post $(TESTSRCS)
 	rm -f config.log
 	CC="$(CC)" CFLAGS="$(CFLAGS)" VERSION="$(VERSION)" ./configure
 
-.h.h.html:
-	highlight -I $< >$@
+.PHONY: 	 clean install installcgi installwww
+.SUFFIXES:	 .1       .3       .5       .7       .8       .h
+.SUFFIXES:	 .1.html  .3.html  .5.html  .7.html  .8.html  .h.html
 
-.1.1.html .3.3.html .7.7.html .8.8.html:
-	./mandoc -Thtml -Wall,stop -Ostyle=style.css,man=%N.%S.html,includes=%I.html $< >$@
+.h.h.html:
+	highlight -I $< > $@
+
+.1.1.html .3.3.html .5.5.html .7.7.html .8.8.html: mandoc
+	./mandoc -Thtml -Wall,stop \
+		-Ostyle=style.css,man=%N.%S.html,includes=%I.html $< > $@
