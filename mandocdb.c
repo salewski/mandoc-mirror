@@ -1996,6 +1996,8 @@ dbadd(struct mpage *mpage, struct mchars *mc)
 	mlink = mpage->mlinks;
 
 	if (nodb) {
+		if (0 == debug)
+			return;
 		while (NULL != mlink) {
 			fputs(mlink->name, stdout);
 			if (NULL == mlink->next ||
