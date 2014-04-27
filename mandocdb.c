@@ -2209,7 +2209,7 @@ dbopen(int real)
 		rc = sqlite3_open_v2(MANDOC_DB, &db, ofl, NULL);
 		if (SQLITE_OK != rc) {
 			exitcode = (int)MANDOCLEVEL_SYSERR;
-			say(MANDOC_DB, "%s", sqlite3_errmsg(db));
+			say(MANDOC_DB, "%s", sqlite3_errstr(rc));
 			return(0);
 		}
 		goto prepare_statements;
@@ -2223,7 +2223,7 @@ dbopen(int real)
 		goto create_tables;
 	if (MPARSE_QUICK & mparse_options) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say(MANDOC_DB "~", "%s", sqlite3_errmsg(db));
+		say(MANDOC_DB "~", "%s", sqlite3_errstr(rc));
 		return(0);
 	}
 
@@ -2239,7 +2239,7 @@ dbopen(int real)
 	rc = sqlite3_open_v2(tempfilename, &db, ofl, NULL);
 	if (SQLITE_OK != rc) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("", "%s: %s", tempfilename, sqlite3_errmsg(db));
+		say("", "%s: %s", tempfilename, sqlite3_errstr(rc));
 		return(0);
 	}
 
@@ -2277,11 +2277,20 @@ create_tables:
 	if (SQLITE_OK != sqlite3_exec(db, sql, NULL, NULL, NULL)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
 		say(MANDOC_DB, "%s", sqlite3_errmsg(db));
+		sqlite3_close(db);
 		return(0);
 	}
 
 prepare_statements:
-	SQL_EXEC("PRAGMA foreign_keys = ON");
+	if (SQLITE_OK != sqlite3_exec(db,
+	    "PRAGMA foreign_keys = ON", NULL, NULL, NULL)) {
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say(MANDOC_DB, "PRAGMA foreign_keys: %s",
+		    sqlite3_errmsg(db));
+		sqlite3_close(db);
+		return(0);
+	}
+
 	sql = "DELETE FROM mpages WHERE pageid IN "
 		"(SELECT pageid FROM mlinks WHERE "
 		"sec=? AND arch=? AND name=?)";
@@ -2305,8 +2314,14 @@ prepare_statements:
 	 * synchronous mode for much better performance.
 	 */
 
-	if (real)
-		SQL_EXEC("PRAGMA synchronous = OFF");
+	if (real && SQLITE_OK != sqlite3_exec(db,
+	    "PRAGMA synchronous = OFF", NULL, NULL, NULL)) {
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say(MANDOC_DB, "PRAGMA synchronous: %s",
+		sqlite3_errmsg(db));
+		sqlite3_close(db);
+		return(0);
+	}
 #endif
 
 	return(1);
