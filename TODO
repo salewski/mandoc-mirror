@@ -143,6 +143,9 @@
 
 --- missing tbl features -----------------------------------------------
 
+- look at the POSIX manuals in the books/man-pages-posix port,
+  they use some unsupported tbl(7) features.
+
 - implement basic non-parametric .de to support e.g. sox(1)
   reported by naddy@ Sat, 16 Oct 2010 23:51:57 +0200
   *** sox(1) still doesn't work, tbl(1) errors need investigation
@@ -164,6 +167,13 @@
   neither in Nm nor in Nd, the same fix would allow finding that page
   with apropos(1) using the file name as a key, as well.
   Issue reported by tedu@  Fri, 05 Jul 2013 21:15:23 -0400
+
+- makewhatis(8) for preformatted pages:
+  parse the section number from the header line
+  and compare to the section number from the directory name
+
+- Does makewhatis(8) detect missing NAME sections, missing names,
+  and missing descriptions in all the file formats?
 
 - clean up escape sequence handling, creating three classes:
   (1) fully implemented, or parsed and ignored without loss of content
@@ -224,6 +234,14 @@
 - formatting /usr/local/man/man1/latex2man.1 with groff and mandoc
   reveals lots of bugs both in groff and mandoc...
   reported by bentley@  Wed, 22 May 2013 23:49:30 -0600
+
+--- PDF issues ---------------------------------------------------------
+
+- PDF output doesn't use a monospaced font for .Bd -literal
+  Example: "mandoc -Tpdf afterboot.8 > output.pdf && pdfviewer output.pdf".
+  Search the text "Routing tables".
+  Also check what PostScript mode does when fixing this.
+  reported by juanfra@ Wed, 04 Jun 2014 21:44:58 +0200
 
 ************************************************************************
 * formatting issues: gratuitous differences
