@@ -2230,7 +2230,8 @@ dbopen(int real)
 		rc = sqlite3_open_v2(MANDOC_DB, &db, ofl, NULL);
 		if (SQLITE_OK != rc) {
 			exitcode = (int)MANDOCLEVEL_SYSERR;
-			say(MANDOC_DB, "%s", sqlite3_errstr(rc));
+			if (SQLITE_CANTOPEN != rc)
+				say(MANDOC_DB, "%s", sqlite3_errstr(rc));
 			return(0);
 		}
 		goto prepare_statements;
