@@ -1,8 +1,4 @@
-#ifndef OHASH_H
-#define OHASH_H
-/* $OpenBSD: ohash.h,v 1.9 2006/01/16 15:52:25 espie Exp $ */
-/* ex:ts=8 sw=4: 
- */
+/* $OpenBSD: ohash.h,v 1.2 2014/06/02 18:52:03 deraadt Exp $ */
 
 /* Copyright (c) 1999, 2004 Marc Espie <espie@openbsd.org>
  *
@@ -19,11 +15,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef OHASH_H
+#define OHASH_H
+
 /* Open hashing support. 
  * Open hashing was chosen because it is much lighter than other hash
  * techniques, and more efficient in most cases.
  */
 
+/* user-visible data structure */
 struct ohash_info {
 	ptrdiff_t key_offset;
 	void *data;	/* user data */
@@ -34,6 +34,7 @@ struct ohash_info {
 
 struct _ohash_record;
 
+/* private structure. It's there just so you can do a sizeof */
 struct ohash {
 	struct _ohash_record 	*t;
 	struct ohash_info 	info;
