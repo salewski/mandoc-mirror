@@ -93,7 +93,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"generic warning",
 
 	/* related to the prologue */
-	"no title in document",
+	"no TH macro in document",
 	"document title should be all caps",
 	"unknown manual section",
 	"unknown manual volume or arch",

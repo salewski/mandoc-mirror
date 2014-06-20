@@ -202,7 +202,7 @@ check_root(CHKARGS)
 		man_nmsg(man, n, MANDOCERR_NODOCBODY);
 		return(0);
 	} else if (NULL == man->meta.title) {
-		man_nmsg(man, n, MANDOCERR_NOTITLE);
+		man_nmsg(man, n, MANDOCERR_TH_MISSING);
 
 		/*
 		 * If a title hasn't been set, do so now (by
@@ -390,6 +390,7 @@ post_IP(CHKARGS)
 static int
 post_TH(CHKARGS)
 {
+	struct man_node	*nb;
 	const char	*p;
 
 	free(man->meta.title);
@@ -401,6 +402,8 @@ post_TH(CHKARGS)
 	man->meta.title = man->meta.vol = man->meta.date =
 	    man->meta.msec = man->meta.source = NULL;
 
+	nb = n;
+
 	/* ->TITLE<- MSEC DATE SOURCE VOL */
 
 	n = n->child;
@@ -409,7 +412,7 @@ post_TH(CHKARGS)
 			/* Only warn about this once... */
 			if (isalpha((unsigned char)*p) &&
 			    ! isupper((unsigned char)*p)) {
-				man_nmsg(man, n, MANDOCERR_UPPERCASE);
+				man_nmsg(man, n, MANDOCERR_TITLE_CASE);
 				break;
 			}
 		}
@@ -435,8 +438,10 @@ post_TH(CHKARGS)
 		    mandoc_strdup(n->string) :
 		    mandoc_normdate(man->parse, n->string,
 			n->line, n->pos);
-	} else
+	} else {
 		man->meta.date = mandoc_strdup("");
+		man_nmsg(man, n ? n : nb, MANDOCERR_DATE_MISSING);
+	}
 
 	/* TITLE MSEC DATE ->SOURCE<- VOL */
 

@@ -305,7 +305,8 @@ mdoc_macro(MACRO_PROT_ARGS)
 
 	if (MDOC_PROLOGUE & mdoc_macros[tok].flags &&
 	    MDOC_PBODY & mdoc->flags) {
-		mdoc_pmsg(mdoc, line, ppos, MANDOCERR_BADBODY);
+		mandoc_vmsg(MANDOCERR_PROLOG_ONLY, mdoc->parse,
+		    line, ppos, "%s", mdoc_macronames[tok]);
 		return(1);
 	}
 
@@ -313,7 +314,8 @@ mdoc_macro(MACRO_PROT_ARGS)
 
 	if ( ! (MDOC_PROLOGUE & mdoc_macros[tok].flags) &&
 	     ! (MDOC_PBODY & mdoc->flags)) {
-		mdoc_pmsg(mdoc, line, ppos, MANDOCERR_BADPROLOG);
+		mandoc_vmsg(MANDOCERR_PROLOG_BAD, mdoc->parse,
+		    line, ppos, "%s", mdoc_macronames[tok]);
 		if (NULL == mdoc->meta.msec)
 			mdoc->meta.msec = mandoc_strdup("1");
 		if (NULL == mdoc->meta.title)
