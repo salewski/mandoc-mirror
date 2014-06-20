@@ -29,6 +29,7 @@ int dummy;
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "compat_ohash.h"
 
 struct _ohash_record {
@@ -69,8 +70,7 @@ ohash_create_entry(struct ohash_info *i, const char *start, const char **end)
 void
 ohash_delete(struct ohash *h)
 {
-	(h->info.hfree)(h->t, sizeof(struct _ohash_record) * h->size,
-		h->info.data);
+	(h->info.free)(h->t, h->info.data);
 #ifndef NDEBUG
 	h->t = NULL;
 #endif
@@ -80,13 +80,17 @@ static void
 ohash_resize(struct ohash *h)
 {
 	struct _ohash_record *n;
-	unsigned int 	ns, j;
+	size_t ns;
+	unsigned int	j;
 	unsigned int	i, incr;
 
-	if (4 * h->deleted < h->total)
-		ns = h->size << 1;
-	else if (3 * h->deleted > 2 * h->total)
-		ns = h->size >> 1;
+	if (4 * h->deleted < h->total) {
+		if (h->size >= (UINT_MAX >> 1U))
+			ns = UINT_MAX;
+		else
+			ns = h->size << 1U;
+	} else if (3 * h->deleted > 2 * h->total)
+		ns = h->size >> 1U;
 	else
 		ns = h->size;
 	if (ns < MINSIZE)
@@ -95,7 +99,8 @@ ohash_resize(struct ohash *h)
 	STAT_HASH_EXPAND++;
 	STAT_HASH_SIZE += ns - h->size;
 #endif
-	n = (h->info.halloc)(sizeof(struct _ohash_record) * ns, h->info.data);
+
+	n = (h->info.calloc)(ns, sizeof(struct _ohash_record), h->info.data);
 	if (!n)
 		return;
 
@@ -112,8 +117,7 @@ ohash_resize(struct ohash *h)
 			n[i].p = h->t[j].p;
 		}
 	}
-	(h->info.hfree)(h->t, sizeof(struct _ohash_record) * h->size, 
-		h->info.data);
+	(h->info.free)(h->t, h->info.data);
 	h->t = n;
 	h->size = ns;
 	h->total -= h->deleted;
@@ -199,12 +203,12 @@ ohash_init(struct ohash *h, unsigned int size, struct ohash_info *info)
 #endif
 	/* Copy info so that caller may free it.  */
 	h->info.key_offset = info->key_offset;
-	h->info.halloc = info->halloc;
-	h->info.hfree = info->hfree;
+	h->info.calloc = info->calloc;
+	h->info.free = info->free;
 	h->info.alloc = info->alloc;
 	h->info.data = info->data;
-	h->t = (h->info.halloc)(sizeof(struct _ohash_record) * h->size,
-	    h->info.data);
+	h->t = (h->info.calloc)(h->size, sizeof(struct _ohash_record),
+		    h->info.data);
 	h->total = h->deleted = 0;
 }
 

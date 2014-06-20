@@ -85,8 +85,8 @@ static	void		 buildnames(struct manpage *, sqlite3 *,
 static	char		*buildoutput(sqlite3 *, sqlite3_stmt *,
 				 uint64_t, uint64_t);
 static	void		*hash_alloc(size_t, void *);
-static	void		 hash_free(void *, size_t, void *);
-static	void		*hash_halloc(size_t, void *);
+static	void		 hash_free(void *, void *);
+static	void		*hash_calloc(size_t, size_t, void *);
 static	struct expr	*exprcomp(const struct mansearch *,
 				int, char *[]);
 static	void		 exprfree(struct expr *);
@@ -171,11 +171,9 @@ mansearch(const struct mansearch *search,
 	unsigned int	 idx;
 	size_t		 i, j, cur, maxres;
 
-	memset(&info, 0, sizeof(struct ohash_info));
-
-	info.halloc = hash_halloc;
+	info.calloc = hash_calloc;
 	info.alloc = hash_alloc;
-	info.hfree = hash_free;
+	info.free = hash_free;
 	info.key_offset = offsetof(struct match, pageid);
 
 	*sz = cur = maxres = 0;
@@ -790,10 +788,10 @@ exprfree(struct expr *p)
 }
 
 static void *
-hash_halloc(size_t sz, void *arg)
+hash_calloc(size_t nmemb, size_t sz, void *arg)
 {
 
-	return(mandoc_calloc(1, sz));
+	return(mandoc_calloc(nmemb, sz));
 }
 
 static void *
@@ -804,7 +802,7 @@ hash_alloc(size_t sz, void *arg)
 }
 
 static void
-hash_free(void *p, size_t sz, void *arg)
+hash_free(void *p, void *arg)
 {
 
 	free(p);

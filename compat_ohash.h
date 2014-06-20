@@ -27,8 +27,8 @@
 struct ohash_info {
 	ptrdiff_t key_offset;
 	void *data;	/* user data */
-	void *(*halloc)(size_t, void *);
-	void (*hfree)(void *, size_t, void *);
+	void *(*calloc)(size_t, size_t, void *);
+	void (*free)(void *, void *);
 	void *(*alloc)(size_t, void *);
 };
 
