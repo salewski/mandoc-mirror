@@ -66,6 +66,10 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 DBLIB		 = -L/usr/local/lib -lsqlite3
 DBBIN		 = makewhatis manpage apropos
 
+# OpenBSD has the ohash functions in libutil.
+# Comment the following line if your system doesn't.
+DBLIB		+= -lutil
+
 # === END OF USER SETTINGS =============================================
 
 ALLBIN		 = mandoc preconv demandoc $(DBBIN)
