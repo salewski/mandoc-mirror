@@ -198,10 +198,12 @@ check_root(CHKARGS)
 	man->flags &= ~MAN_BLINE;
 	man->flags &= ~MAN_ELINE;
 
-	if (NULL == man->first->child) {
-		man_nmsg(man, n, MANDOCERR_NODOCBODY);
-		return(0);
-	} else if (NULL == man->meta.title) {
+	if (NULL == man->first->child)
+		man_nmsg(man, n, MANDOCERR_DOC_EMPTY);
+	else
+		man->meta.hasbody = 1;
+
+	if (NULL == man->meta.title) {
 		man_nmsg(man, n, MANDOCERR_TH_MISSING);
 
 		/*

@@ -1645,15 +1645,15 @@ ebool(struct mdoc *mdoc)
 static int
 post_root(POST_ARGS)
 {
-	int		  erc;
+	int		  ret;
 	struct mdoc_node *n;
 
-	erc = 0;
+	ret = 1;
 
 	/* Check that we have a finished prologue. */
 
 	if ( ! (MDOC_PBODY & mdoc->flags)) {
-		erc++;
+		ret = 0;
 		mdoc_nmsg(mdoc, mdoc->first, MANDOCERR_NODOCPROLOG);
 	}
 
@@ -1662,17 +1662,13 @@ post_root(POST_ARGS)
 
 	/* Check that we begin with a proper `Sh'. */
 
-	if (NULL == n->child) {
-		erc++;
-		mdoc_nmsg(mdoc, n, MANDOCERR_NODOCBODY);
-	} else if (MDOC_BLOCK != n->child->type ||
-	    MDOC_Sh != n->child->tok) {
-		erc++;
-		/* Can this be lifted?  See rxdebug.1 for example. */
-		mdoc_nmsg(mdoc, n, MANDOCERR_NODOCBODY);
-	}
+	if (NULL == n->child)
+		mdoc_nmsg(mdoc, n, MANDOCERR_DOC_EMPTY);
+	else if (MDOC_BLOCK != n->child->type ||
+	    MDOC_Sh != n->child->tok)
+		mdoc_nmsg(mdoc, n->child, MANDOCERR_SEC_BEFORE);
 
-	return(erc ? 0 : 1);
+	return(ret);
 }
 
 static int

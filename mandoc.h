@@ -62,6 +62,8 @@ enum	mandocerr {
 
 	/* related to document structure */
 	MANDOCERR_SO, /* .so is fragile, better use ln(1) */
+	MANDOCERR_DOC_EMPTY, /* no document body */
+	MANDOCERR_SEC_BEFORE, /* content before the first section header */
 	MANDOCERR_NAMESECFIRST, /* NAME section must come first */
 	MANDOCERR_BADNAMESEC, /* bad NAME section contents */
 	MANDOCERR_SECOOO, /* sections out of conventional order */
@@ -161,7 +163,6 @@ enum	mandocerr {
 	MANDOCERR_SYNTCHILD, /* child violates parent syntax */
 	MANDOCERR_SYNTARGCOUNT, /* argument count wrong, violates syntax */
 	MANDOCERR_SOPATH, /* NOT IMPLEMENTED: .so with absolute path or ".." */
-	MANDOCERR_NODOCBODY, /* no document body */
 	MANDOCERR_NODOCPROLOG, /* no document prologue */
 	MANDOCERR_MEM, /* static buffer exhausted */
 

@@ -79,6 +79,7 @@ struct	man_meta {
 	char		*vol; /* `TH' volume */
 	char		*title; /* `TH' title (e.g., FOO) */
 	char		*source; /* `TH' source (e.g., GNU) */
+	int		 hasbody; /* document is not empty */
 };
 
 struct	man_node {
