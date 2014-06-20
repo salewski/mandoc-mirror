@@ -408,7 +408,8 @@ mmsg(enum mandocerr t, enum mandoclevel lvl,
 		const char *file, int line, int col, const char *msg)
 {
 
-	fprintf(stderr, "%s:%d:%d: %s: %s", file, line, col + 1,
+	fprintf(stderr, "%s: %s:%d:%d: %s: %s", progname,
+	    file, line, col + 1,
 	    mparse_strlevel(lvl), mparse_strerror(t));
 
 	if (msg)
