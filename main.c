@@ -108,13 +108,14 @@ main(int argc, char *argv[])
 		case 'I':
 			if (strncmp(optarg, "os=", 3)) {
 				fprintf(stderr,
-				    "-I%s: Bad argument\n", optarg);
+				    "%s: -I%s: Bad argument\n",
+				    progname, optarg);
 				return((int)MANDOCLEVEL_BADARG);
 			}
 			if (defos) {
 				fprintf(stderr,
-				    "-I%s: Duplicate argument\n",
-				    optarg);
+				    "%s: -I%s: Duplicate argument\n",
+				    progname, optarg);
 				return((int)MANDOCLEVEL_BADARG);
 			}
 			defos = mandoc_strdup(optarg + 3);
@@ -324,7 +325,8 @@ moptions(int *options, char *arg)
 	else if (0 == strcmp(arg, "an"))
 		*options |= MPARSE_MAN;
 	else {
-		fprintf(stderr, "%s: Bad argument\n", arg);
+		fprintf(stderr, "%s: -m%s: Bad argument\n",
+		    progname, arg);
 		return(0);
 	}
 
@@ -357,7 +359,8 @@ toptions(struct curparse *curp, char *arg)
 	else if (0 == strcmp(arg, "pdf"))
 		curp->outtype = OUTT_PDF;
 	else {
-		fprintf(stderr, "%s: Bad argument\n", arg);
+		fprintf(stderr, "%s: -T%s: Bad argument\n",
+		    progname, arg);
 		return(0);
 	}
 
@@ -395,7 +398,8 @@ woptions(struct curparse *curp, char *arg)
 			curp->wlevel = MANDOCLEVEL_FATAL;
 			break;
 		default:
-			fprintf(stderr, "-W%s: Bad argument\n", o);
+			fprintf(stderr, "%s: -W%s: Bad argument\n",
+			    progname, o);
 			return(0);
 		}
 	}
