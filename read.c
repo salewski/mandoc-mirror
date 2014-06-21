@@ -210,7 +210,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"static buffer exhausted",
 
 	/* system errors */
-	"cannot open file",
+	NULL,
 	"cannot stat file",
 	"cannot read file",
 };
