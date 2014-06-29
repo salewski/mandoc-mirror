@@ -2068,7 +2068,8 @@ roff_setstrn(struct roffkv **r, const char *name, size_t namesz,
 	/* Search for an existing string with the same name. */
 	n = *r;
 
-	while (n && strcmp(name, n->key.p))
+	while (n && (namesz != n->key.sz ||
+			strncmp(n->key.p, name, namesz)))
 		n = n->next;
 
 	if (NULL == n) {
