@@ -2018,10 +2018,12 @@ roff_getname(struct roff *r, char **cpp, int ln, int pos)
 		}
 		if ('\\' != *cp)
 			continue;
+		namesz = cp - name;
+		if ('{' == cp[1] || '}' == cp[1])
+			break;
 		cp++;
 		if ('\\' == *cp)
 			continue;
-		namesz = cp - name - 1;
 		mandoc_msg(MANDOCERR_NAMESC, r->parse, ln, pos, NULL);
 		mandoc_escape((const char **)&cp, NULL, NULL);
 		break;
