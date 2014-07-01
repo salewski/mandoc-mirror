@@ -516,7 +516,7 @@ mandoc_normdate(struct mparse *parse, char *in, int ln, int pos)
 		t = 0;
 	else if (!a2time(&t, "$" "Mdocdate: %b %d %Y $", in) &&
 	    !a2time(&t, "%b %d, %Y", in)) {
-		mandoc_msg(MANDOCERR_DATE_BAD, parse, ln, pos, NULL);
+		mandoc_msg(MANDOCERR_DATE_BAD, parse, ln, pos, in);
 		t = 0;
 	}
 	out = t ? time2a(t) : NULL;

@@ -414,7 +414,10 @@ post_TH(CHKARGS)
 			/* Only warn about this once... */
 			if (isalpha((unsigned char)*p) &&
 			    ! isupper((unsigned char)*p)) {
-				man_nmsg(man, n, MANDOCERR_TITLE_CASE);
+				mandoc_msg(MANDOCERR_TITLE_CASE,
+				    man->parse, n->line,
+				    n->pos + (p - n->string),
+				    n->string);
 				break;
 			}
 		}

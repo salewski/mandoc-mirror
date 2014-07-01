@@ -35,7 +35,7 @@
 #include "libmdoc.h"
 #include "libmandoc.h"
 
-const	char *const __mdoc_macronames[MDOC_MAX] = {
+const	char *const __mdoc_macronames[MDOC_MAX + 1] = {
 	"Ap",		"Dd",		"Dt",		"Os",
 	"Sh",		"Ss",		"Pp",		"D1",
 	"Dl",		"Bd",		"Ed",		"Bl",
@@ -66,7 +66,7 @@ const	char *const __mdoc_macronames[MDOC_MAX] = {
 	"Lk",		"Mt",		"Brq",		"Bro",
 	"Brc",		"%C",		"Es",		"En",
 	"Dx",		"%Q",		"br",		"sp",
-	"%U",		"Ta",		"ll",
+	"%U",		"Ta",		"ll",		"text",
 	};
 
 const	char *const __mdoc_argnames[MDOC_ARG_MAX] = {
