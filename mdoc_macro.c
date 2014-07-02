@@ -1573,7 +1573,7 @@ in_line_argn(MACRO_PROT_ARGS)
 				return(0);
 			continue;
 		} else if (0 == j)
-		       if ( ! mdoc_elem_alloc(mdoc, line, la, tok, arg))
+		       if ( ! mdoc_elem_alloc(mdoc, line, ppos, tok, arg))
 			       return(0);
 
 		if (j == maxargs && ! flushed) {
@@ -1609,7 +1609,7 @@ in_line_argn(MACRO_PROT_ARGS)
 		j++;
 	}
 
-	if (0 == j && ! mdoc_elem_alloc(mdoc, line, la, tok, arg))
+	if (0 == j && ! mdoc_elem_alloc(mdoc, line, ppos, tok, arg))
 	       return(0);
 
 	/* Close out in a consistent state. */
