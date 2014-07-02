@@ -516,6 +516,8 @@ mdoc_block_alloc(struct mdoc *mdoc, int line, int pos,
 		/* FALLTHROUGH */
 	case MDOC_Bl:
 		/* FALLTHROUGH */
+	case MDOC_En:
+		/* FALLTHROUGH */
 	case MDOC_Rs:
 		p->norm = mandoc_calloc(1, sizeof(union mdoc_data));
 		break;

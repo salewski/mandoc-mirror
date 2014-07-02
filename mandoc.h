@@ -71,7 +71,7 @@ enum	mandocerr {
 	MANDOCERR_SEC_MSEC, /* unexpected section: title for ... only */
 
 	/* related to macros and nesting */
-	MANDOCERR_MACROOBS, /* skipping obsolete macro */
+	MANDOCERR_MACRO_OBS, /* obsolete macro: macro */
 	MANDOCERR_IGNPAR, /* skipping paragraph macro */
 	MANDOCERR_MOVEPAR, /* moving paragraph macro out of list */
 	MANDOCERR_IGNNS, /* skipping no-space macro */

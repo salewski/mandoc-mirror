@@ -115,7 +115,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"unexpected section",
 
 	/* related to macros and nesting */
-	"skipping obsolete macro",
+	"obsolete macro",
 	"skipping paragraph macro",
 	"moving paragraph macro out of list",
 	"skipping no-space macro",

@@ -51,6 +51,7 @@ static	void	  post_bf(DECL_ARGS);
 static	void	  post_bk(DECL_ARGS);
 static	void	  post_bl(DECL_ARGS);
 static	void	  post_dl(DECL_ARGS);
+static	void	  post_en(DECL_ARGS);
 static	void	  post_enc(DECL_ARGS);
 static	void	  post_eo(DECL_ARGS);
 static	void	  post_fa(DECL_ARGS);
@@ -78,8 +79,10 @@ static	int	  pre_bl(DECL_ARGS);
 static	int	  pre_br(DECL_ARGS);
 static	int	  pre_bx(DECL_ARGS);
 static	int	  pre_dl(DECL_ARGS);
+static	int	  pre_en(DECL_ARGS);
 static	int	  pre_enc(DECL_ARGS);
 static	int	  pre_em(DECL_ARGS);
+static	int	  pre_es(DECL_ARGS);
 static	int	  pre_fa(DECL_ARGS);
 static	int	  pre_fd(DECL_ARGS);
 static	int	  pre_fl(DECL_ARGS);
@@ -150,7 +153,7 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 	{ cond_head, pre_enc, NULL, "\\- ", NULL }, /* Nd */
 	{ NULL, pre_nm, post_nm, NULL, NULL }, /* Nm */
 	{ cond_body, pre_enc, post_enc, "[", "]" }, /* Op */
-	{ NULL, NULL, NULL, NULL, NULL }, /* Ot */
+	{ NULL, pre_ft, post_font, NULL, NULL }, /* Ot */
 	{ NULL, pre_em, post_font, NULL, NULL }, /* Pa */
 	{ NULL, pre_enc, post_enc, "The \\fB",
 		"\\fP\nfunction returns the value 0 if successful;\n"
@@ -224,7 +227,7 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 	{ NULL, NULL, NULL, NULL, NULL }, /* Ek */
 	{ NULL, pre_ux, NULL, "is currently in beta test.", NULL }, /* Bt */
 	{ NULL, NULL, NULL, NULL, NULL }, /* Hf */
-	{ NULL, NULL, NULL, NULL, NULL }, /* Fr */
+	{ NULL, pre_em, post_font, NULL, NULL }, /* Fr */
 	{ NULL, pre_ux, NULL, "currently under development.", NULL }, /* Ud */
 	{ NULL, NULL, post_lb, NULL, NULL }, /* Lb */
 	{ NULL, pre_pp, NULL, NULL, NULL }, /* Lp */
@@ -234,8 +237,8 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 	{ cond_body, pre_enc, post_enc, "{", "}" }, /* Bro */
 	{ NULL, NULL, NULL, NULL, NULL }, /* Brc */
 	{ NULL, NULL, post_percent, NULL, NULL }, /* %C */
-	{ NULL, NULL, NULL, NULL, NULL }, /* Es */
-	{ NULL, NULL, NULL, NULL, NULL }, /* En */
+	{ NULL, pre_es, NULL, NULL, NULL }, /* Es */
+	{ cond_body, pre_en, post_en, NULL, NULL }, /* En */
 	{ NULL, pre_ux, NULL, "DragonFly", NULL }, /* Dx */
 	{ NULL, NULL, post_percent, NULL, NULL }, /* %Q */
 	{ NULL, pre_br, NULL, NULL, NULL }, /* br */
@@ -1035,12 +1038,46 @@ pre_em(DECL_ARGS)
 	return(1);
 }
 
+static int
+pre_en(DECL_ARGS)
+{
+
+	if (NULL == n->norm->Es ||
+	    NULL == n->norm->Es->child)
+		return(1);
+
+	print_word(n->norm->Es->child->string);
+	outflags &= ~MMAN_spc;
+	return(1);
+}
+
+static void
+post_en(DECL_ARGS)
+{
+
+	if (NULL == n->norm->Es ||
+	    NULL == n->norm->Es->child ||
+	    NULL == n->norm->Es->child->next)
+		return;
+
+	outflags &= ~MMAN_spc;
+	print_word(n->norm->Es->child->next->string);
+	return;
+}
+
 static void
 post_eo(DECL_ARGS)
 {
 
 	if (MDOC_HEAD == n->type || MDOC_BODY == n->type)
 		outflags &= ~MMAN_spc;
+}
+
+static int
+pre_es(DECL_ARGS)
+{
+
+	return(0);
 }
 
 static int

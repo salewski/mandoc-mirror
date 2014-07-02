@@ -95,6 +95,7 @@ static	int	  termp_bt_pre(DECL_ARGS);
 static	int	  termp_bx_pre(DECL_ARGS);
 static	int	  termp_cd_pre(DECL_ARGS);
 static	int	  termp_d1_pre(DECL_ARGS);
+static	int	  termp_es_pre(DECL_ARGS);
 static	int	  termp_ex_pre(DECL_ARGS);
 static	int	  termp_fa_pre(DECL_ARGS);
 static	int	  termp_fd_pre(DECL_ARGS);
@@ -158,7 +159,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_nd_pre, NULL }, /* Nd */
 	{ termp_nm_pre, termp_nm_post }, /* Nm */
 	{ termp_quote_pre, termp_quote_post }, /* Op */
-	{ NULL, NULL }, /* Ot */
+	{ termp_ft_pre, NULL }, /* Ot */
 	{ termp_under_pre, NULL }, /* Pa */
 	{ termp_rv_pre, NULL }, /* Rv */
 	{ NULL, NULL }, /* St */
@@ -228,7 +229,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ek */
 	{ termp_bt_pre, NULL }, /* Bt */
 	{ NULL, NULL }, /* Hf */
-	{ NULL, NULL }, /* Fr */
+	{ termp_under_pre, NULL }, /* Fr */
 	{ termp_ud_pre, NULL }, /* Ud */
 	{ NULL, termp_lb_post }, /* Lb */
 	{ termp_sp_pre, NULL }, /* Lp */
@@ -238,8 +239,8 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_quote_pre, termp_quote_post }, /* Bro */
 	{ NULL, NULL }, /* Brc */
 	{ NULL, termp____post }, /* %C */
-	{ NULL, NULL }, /* Es */ /* TODO */
-	{ NULL, NULL }, /* En */ /* TODO */
+	{ termp_es_pre, NULL }, /* Es */
+	{ termp_quote_pre, termp_quote_post }, /* En */
 	{ termp_xx_pre, NULL }, /* Dx */
 	{ NULL, termp____post }, /* %Q */
 	{ termp_sp_pre, NULL }, /* br */
@@ -1829,6 +1830,13 @@ termp_sp_pre(DECL_ARGS)
 }
 
 static int
+termp_es_pre(DECL_ARGS)
+{
+
+	return(0);
+}
+
+static int
 termp_quote_pre(DECL_ARGS)
 {
 
@@ -1859,6 +1867,12 @@ termp_quote_pre(DECL_ARGS)
 		/* FALLTHROUGH */
 	case MDOC_Dq:
 		term_word(p, "\\(lq");
+		break;
+	case MDOC_En:
+		if (NULL == n->norm->Es ||
+		    NULL == n->norm->Es->child)
+			return(1);
+		term_word(p, n->norm->Es->child->string);
 		break;
 	case MDOC_Eo:
 		break;
@@ -1897,7 +1911,8 @@ termp_quote_post(DECL_ARGS)
 	if (MDOC_BODY != n->type && MDOC_ELEM != n->type)
 		return;
 
-	p->flags |= TERMP_NOSPACE;
+	if (MDOC_En != n->tok)
+		p->flags |= TERMP_NOSPACE;
 
 	switch (n->tok) {
 	case MDOC_Ao:
@@ -1923,6 +1938,14 @@ termp_quote_post(DECL_ARGS)
 		/* FALLTHROUGH */
 	case MDOC_Dq:
 		term_word(p, "\\(rq");
+		break;
+	case MDOC_En:
+		if (NULL != n->norm->Es &&
+		    NULL != n->norm->Es->child &&
+		    NULL != n->norm->Es->child->next) {
+			p->flags |= TERMP_NOSPACE;
+			term_word(p, n->norm->Es->child->next->string);
+		}
 		break;
 	case MDOC_Eo:
 		break;

@@ -41,6 +41,7 @@ struct	mdoc {
 	enum mdoc_next	  next; /* where to put the next node */
 	struct mdoc_node *last; /* the last node parsed */
 	struct mdoc_node *first; /* the first node parsed */
+	struct mdoc_node *last_es; /* the most recent Es node */
 	struct mdoc_meta  meta; /* document meta-data */
 	enum mdoc_sec	  lastnamed;
 	enum mdoc_sec	  lastsec;
