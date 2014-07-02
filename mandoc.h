@@ -72,8 +72,8 @@ enum	mandocerr {
 
 	/* related to macros and nesting */
 	MANDOCERR_MACRO_OBS, /* obsolete macro: macro */
-	MANDOCERR_IGNPAR, /* skipping paragraph macro */
-	MANDOCERR_MOVEPAR, /* moving paragraph macro out of list */
+	MANDOCERR_PAR_SKIP, /* skipping paragraph macro: macro ... */
+	MANDOCERR_PAR_MOVE, /* moving paragraph macro out of list: macro */
 	MANDOCERR_IGNNS, /* skipping no-space macro */
 	MANDOCERR_SCOPENEST, /* blocks badly nested */
 	MANDOCERR_CHILD, /* child violates parent syntax */
