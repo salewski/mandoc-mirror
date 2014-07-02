@@ -122,7 +122,8 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"blocks badly nested",
 	"child violates parent syntax",
 	"nested displays are not portable",
-	"already in literal mode",
+	"fill mode already enabled, skipping .fi",
+	"fill mode already disabled, skipping .nf",
 	"line scope broken",
 
 	/* related to missing macro arguments */
@@ -132,7 +133,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"list type must come first",
 	"tag lists require a width argument",
 	"missing font type",
-	"skipping end of block that is not open",
 
 	/* related to bad macro arguments */
 	"skipping argument",

@@ -591,7 +591,9 @@ pre_display(PRE_ARGS)
 				break;
 
 	if (node)
-		mdoc_nmsg(mdoc, n, MANDOCERR_NESTEDDISP);
+		mandoc_vmsg(MANDOCERR_BD_NEST,
+		    mdoc->parse, n->line, n->pos,
+		    "%s in Bd", mdoc_macronames[n->tok]);
 
 	return(1);
 }
@@ -1903,7 +1905,7 @@ post_ns(POST_ARGS)
 {
 
 	if (MDOC_LINE & mdoc->last->flags)
-		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_IGNNS);
+		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_NS_SKIP);
 	return(1);
 }
 

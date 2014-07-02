@@ -479,7 +479,7 @@ post_nf(CHKARGS)
 {
 
 	if (MAN_LITERAL & man->flags)
-		man_nmsg(man, n, MANDOCERR_SCOPEREP);
+		man_nmsg(man, n, MANDOCERR_NF_SKIP);
 
 	man->flags |= MAN_LITERAL;
 	return(1);
@@ -490,7 +490,7 @@ post_fi(CHKARGS)
 {
 
 	if ( ! (MAN_LITERAL & man->flags))
-		man_nmsg(man, n, MANDOCERR_WNOSCOPE);
+		man_nmsg(man, n, MANDOCERR_FI_SKIP);
 
 	man->flags &= ~MAN_LITERAL;
 	return(1);
