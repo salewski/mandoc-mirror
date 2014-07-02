@@ -84,7 +84,7 @@ enum	mandocerr {
 	MANDOCERR_LINESCOPE, /* line scope broken: macro breaks macro */
 
 	/* related to missing macro arguments */
-	MANDOCERR_MACROEMPTY, /* skipping empty macro */
+	MANDOCERR_MACRO_EMPTY, /* skipping empty macro: macro */
 	MANDOCERR_ARGCWARN, /* argument count wrong */
 	MANDOCERR_DISPTYPE, /* missing display type */
 	MANDOCERR_LISTFIRST, /* list type must come first */

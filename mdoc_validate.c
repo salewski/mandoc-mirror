@@ -1729,7 +1729,9 @@ post_st(POST_ARGS)
 	const char		 *p;
 
 	if (NULL == (ch = mdoc->last->child)) {
-		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_MACROEMPTY);
+		mandoc_msg(MANDOCERR_MACRO_EMPTY, mdoc->parse,
+		    mdoc->last->line, mdoc->last->pos,
+		    mdoc_macronames[mdoc->last->tok]);
 		mdoc_node_delete(mdoc, mdoc->last);
 		return(1);
 	}
