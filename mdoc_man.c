@@ -1565,11 +1565,16 @@ static int
 pre_sm(DECL_ARGS)
 {
 
-	assert(n->child && MDOC_TEXT == n->child->type);
-	if (0 == strcmp("on", n->child->string))
-		outflags |= MMAN_Sm | MMAN_spc;
+	if (NULL == n->child)
+		outflags ^= MMAN_Sm;
+	else if (0 == strcmp("on", n->child->string))
+		outflags |= MMAN_Sm;
 	else
 		outflags &= ~MMAN_Sm;
+
+	if (MMAN_Sm & outflags)
+		outflags |= MMAN_spc;
+
 	return(0);
 }
 

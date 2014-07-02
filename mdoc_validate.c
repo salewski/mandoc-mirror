@@ -1668,11 +1668,12 @@ ebool(struct mdoc *mdoc)
 {
 
 	if (NULL == mdoc->last->child) {
-		mdoc_nmsg(mdoc, mdoc->last, MANDOCERR_MACROEMPTY);
-		mdoc_node_delete(mdoc, mdoc->last);
+		if (MDOC_Sm == mdoc->last->tok)
+			mdoc->flags ^= MDOC_SMOFF;
 		return(1);
 	}
-	check_count(mdoc, MDOC_ELEM, CHECK_WARN, CHECK_EQ, 1);
+
+	check_count(mdoc, MDOC_ELEM, CHECK_WARN, CHECK_LT, 2);
 
 	assert(MDOC_TEXT == mdoc->last->child->type);
 

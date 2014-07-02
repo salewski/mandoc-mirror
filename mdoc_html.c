@@ -1524,22 +1524,15 @@ static int
 mdoc_sm_pre(MDOC_ARGS)
 {
 
-	assert(n->child && MDOC_TEXT == n->child->type);
-	if (0 == strcmp("on", n->child->string)) {
-		/*
-		 * FIXME: no p->col to check.  Thus, if we have
-		 *  .Bd -literal
-		 *  .Sm off
-		 *  1 2
-		 *  .Sm on
-		 *  3
-		 *  .Ed
-		 * the "3" is preceded by a space.
-		 */
-		h->flags &= ~HTML_NOSPACE;
+	if (NULL == n->child)
+		h->flags ^= HTML_NONOSPACE;
+	else if (0 == strcmp("on", n->child->string))
 		h->flags &= ~HTML_NONOSPACE;
-	} else
+	else
 		h->flags |= HTML_NONOSPACE;
+
+	if ( ! (HTML_NONOSPACE & h->flags))
+		h->flags &= ~HTML_NOSPACE;
 
 	return(0);
 }
