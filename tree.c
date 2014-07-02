@@ -160,7 +160,7 @@ print_mdoc(const struct mdoc_node *n, int indent)
 		putchar(' ');
 		if (MDOC_LINE & n->flags)
 			putchar('*');
-		printf("%d:%d", n->line, n->pos);
+		printf("%d:%d", n->line, n->pos + 1);
 		if (n->lastline != n->line)
 			printf("-%d", n->lastline);
 		putchar('\n');
@@ -250,7 +250,7 @@ print_man(const struct man_node *n, int indent)
 		printf("%s (%s) ", p, t);
 		if (MAN_LINE & n->flags)
 			putchar('*');
-		printf("%d:%d\n", n->line, n->pos);
+		printf("%d:%d\n", n->line, n->pos + 1);
 	}
 
 	if (n->child)
@@ -292,7 +292,7 @@ print_box(const struct eqn_box *ep, int indent)
 	assert(t);
 	printf("%s(%d, %d, %d, %d, %d, \"%s\", \"%s\") %s\n",
 	    t, EQN_DEFSIZE == ep->size ? 0 : ep->size,
-	    ep->pos, ep->font, ep->mark, ep->pile,
+	    ep->pos + 1, ep->font, ep->mark, ep->pile,
 	    ep->left ? ep->left : "",
 	    ep->right ? ep->right : "",
 	    ep->text ? ep->text : "");
