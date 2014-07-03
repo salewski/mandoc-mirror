@@ -135,6 +135,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"missing display type",
 	"list type must come first",
 	"tag lists require a width argument",
+	"missing head in list item",
 	"missing font type",
 
 	/* related to bad macro arguments */
@@ -189,7 +190,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"missing end of block",
 	"scope open on exit",
 	"uname(3) system call failed",
-	"macro requires line argument(s)",
 	"macro requires body argument(s)",
 	"macro requires argument(s)",
 	"request requires a numeric argument",

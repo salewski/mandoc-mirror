@@ -91,6 +91,7 @@ enum	mandocerr {
 	MANDOCERR_DISPTYPE, /* missing display type */
 	MANDOCERR_LISTFIRST, /* list type must come first */
 	MANDOCERR_NOWIDTHARG, /* tag lists require a width argument */
+	MANDOCERR_IT_NOHEAD, /* missing head in list item: type */
 	MANDOCERR_FONTTYPE, /* missing font type */
 
 	/* related to bad macro arguments */
@@ -146,7 +147,6 @@ enum	mandocerr {
 	MANDOCERR_SCOPEEXIT, /* scope open on exit */
 	MANDOCERR_UNAME, /* uname(3) system call failed */
 	/* FIXME: merge following with MANDOCERR_ARGCOUNT */
-	MANDOCERR_NOARGS, /* macro requires line argument(s) */
 	MANDOCERR_NOBODY, /* macro requires body argument(s) */
 	MANDOCERR_NOARGV, /* macro requires argument(s) */
 	MANDOCERR_NUMERIC, /* request requires a numeric argument */

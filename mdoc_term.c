@@ -747,7 +747,7 @@ termp_it_pre(DECL_ARGS)
 			term_word(p, "\\ \\ ");
 		break;
 	case LIST_inset:
-		if (MDOC_BODY == n->type)
+		if (MDOC_BODY == n->type && n->parent->head->nchild)
 			term_word(p, "\\ ");
 		break;
 	default:
