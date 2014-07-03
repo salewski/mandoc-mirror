@@ -917,7 +917,8 @@ roff_block(ROFF_ARGS)
 
 	if (ROFF_ig != tok) {
 		if ('\0' == *cp) {
-			mandoc_msg(MANDOCERR_NOARGS, r->parse, ln, ppos, NULL);
+			mandoc_msg(MANDOCERR_REQ_EMPTY, r->parse,
+			    ln, ppos, roffs[tok].name);
 			return(ROFF_IGN);
 		}
 
@@ -1285,7 +1286,8 @@ roff_cond(ROFF_ARGS)
 	 */
 
 	if ('\0' == (*bufp)[pos])
-		mandoc_msg(MANDOCERR_NOARGS, r->parse, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_COND_EMPTY, r->parse,
+		    ln, ppos, roffs[tok].name);
 
 	r->last->endspan = 1;
 

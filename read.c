@@ -128,6 +128,8 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"line scope broken",
 
 	/* related to missing macro arguments */
+	"skipping empty request",
+	"conditional request controls empty scope",
 	"skipping empty macro",
 	"argument count wrong",
 	"missing display type",

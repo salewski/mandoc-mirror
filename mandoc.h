@@ -83,7 +83,9 @@ enum	mandocerr {
 	MANDOCERR_NF_SKIP, /* fill mode already disabled, skipping .nf */
 	MANDOCERR_LINESCOPE, /* line scope broken: macro breaks macro */
 
-	/* related to missing macro arguments */
+	/* related to missing arguments */
+	MANDOCERR_REQ_EMPTY, /* skipping empty request: request */
+	MANDOCERR_COND_EMPTY, /* conditional request controls empty scope */
 	MANDOCERR_MACRO_EMPTY, /* skipping empty macro: macro */
 	MANDOCERR_ARGCWARN, /* argument count wrong */
 	MANDOCERR_DISPTYPE, /* missing display type */
