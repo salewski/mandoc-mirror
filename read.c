@@ -137,7 +137,8 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"missing -width in -tag list, using 8n",
 	"empty head in list item",
 	"empty list item",
-	"missing font type",
+	"missing font type, using \\fR",
+	"unknown font type, using \\fR",
 	"missing -std argument, adding it",
 
 	/* related to bad macro arguments */
@@ -194,7 +195,8 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"uname(3) system call failed",
 	"request requires a numeric argument",
 	"missing list type, using -item",
-	"line argument(s) will be lost",
+	"skipping all arguments",
+	"skipping excess arguments",
 
 	"generic fatal error",
 
@@ -202,7 +204,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"not a manual",
 	"column syntax is inconsistent",
 	"NOT IMPLEMENTED: .Bd -file",
-	"argument count wrong, violates syntax",
 	"child violates parent syntax",
 	"argument count wrong, violates syntax",
 	"NOT IMPLEMENTED: .so with absolute path or \"..\"",

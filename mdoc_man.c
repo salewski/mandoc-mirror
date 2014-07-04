@@ -1308,17 +1308,20 @@ pre_it(DECL_ARGS)
 			else
 				print_word("-");
 			font_pop();
-			break;
+			outflags |= MMAN_nl;
+			return(0);
 		case LIST_enum:
 			print_width(bln->norm->Bl.width, NULL, 0);
 			TPremain = 0;
 			outflags |= MMAN_nl;
 			print_count(&bln->norm->Bl.count);
-			break;
+			outflags |= MMAN_nl;
+			return(0);
 		case LIST_hang:
 			print_width(bln->norm->Bl.width, n->child, 6);
 			TPremain = 0;
-			break;
+			outflags |= MMAN_nl;
+			return(1);
 		case LIST_tag:
 			print_width(bln->norm->Bl.width, n->child, 0);
 			putchar('\n');
@@ -1327,7 +1330,6 @@ pre_it(DECL_ARGS)
 		default:
 			return(1);
 		}
-		outflags |= MMAN_nl;
 	default:
 		break;
 	}

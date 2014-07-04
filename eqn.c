@@ -300,7 +300,8 @@ eqn_read(struct eqn_node **epp, int ln,
 			p++;
 		if ('\0' == *p)
 			return(er);
-		mandoc_msg(MANDOCERR_ARGSLOST, ep->parse, ln, pos, NULL);
+		mandoc_vmsg(MANDOCERR_ARG_SKIP, ep->parse,
+		    ln, pos, "EN %s", p);
 		return(er);
 	}
 

@@ -363,7 +363,11 @@ check_par(CHKARGS)
 		break;
 	case MAN_HEAD:
 		if (n->nchild)
-			man_nmsg(man, n, MANDOCERR_ARGSLOST);
+			mandoc_vmsg(MANDOCERR_ARG_SKIP,
+			    man->parse, n->line, n->pos,
+			    "%s %s%s", man_macronames[n->tok],
+			    n->child->string,
+			    n->nchild > 1 ? " ..." : "");
 		break;
 	default:
 		break;
