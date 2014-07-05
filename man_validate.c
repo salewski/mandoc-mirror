@@ -303,8 +303,8 @@ post_ft(CHKARGS)
 	}
 
 	if (0 == ok) {
-		mandoc_vmsg(MANDOCERR_BADFONT, man->parse, n->line,
-		    n->pos, "%s", cp);
+		mandoc_vmsg(MANDOCERR_FT_BAD, man->parse,
+		    n->line, n->pos, "ft %s", cp);
 		*cp = '\0';
 	}
 
