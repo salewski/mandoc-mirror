@@ -131,6 +131,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"skipping empty request",
 	"conditional request controls empty scope",
 	"skipping empty macro",
+	"empty argument, using 0n",
 	"argument count wrong",
 	"missing display type, using -ragged",
 	"list type is not the first argument",
