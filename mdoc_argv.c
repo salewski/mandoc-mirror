@@ -461,7 +461,8 @@ args(struct mdoc *mdoc, int line, int *pos,
 		 * is unterminated.
 		 */
 		if (MDOC_PHRASELIT & mdoc->flags)
-			mdoc_pmsg(mdoc, line, *pos, MANDOCERR_BADQUOTE);
+			mandoc_msg(MANDOCERR_ARG_QUOTE,
+			    mdoc->parse, line, *pos, NULL);
 
 		mdoc->flags &= ~MDOC_PHRASELIT;
 		return(ARGS_EOLN);
@@ -520,7 +521,8 @@ args(struct mdoc *mdoc, int line, int *pos,
 
 		/* Whitespace check for eoln case... */
 		if ('\0' == *p && ' ' == *(p - 1))
-			mdoc_pmsg(mdoc, line, *pos, MANDOCERR_EOLNSPACE);
+			mandoc_msg(MANDOCERR_SPACE_EOL, mdoc->parse,
+			    line, *pos, NULL);
 
 		*pos += (int)(p - *v);
 
@@ -575,7 +577,8 @@ args(struct mdoc *mdoc, int line, int *pos,
 		if ('\0' == buf[*pos]) {
 			if (MDOC_PPHRASE & mdoc->flags)
 				return(ARGS_QWORD);
-			mdoc_pmsg(mdoc, line, *pos, MANDOCERR_BADQUOTE);
+			mandoc_msg(MANDOCERR_ARG_QUOTE,
+			    mdoc->parse, line, *pos, NULL);
 			return(ARGS_QWORD);
 		}
 
@@ -589,7 +592,8 @@ args(struct mdoc *mdoc, int line, int *pos,
 			(*pos)++;
 
 		if ('\0' == buf[*pos])
-			mdoc_pmsg(mdoc, line, *pos, MANDOCERR_EOLNSPACE);
+			mandoc_msg(MANDOCERR_SPACE_EOL, mdoc->parse,
+			    line, *pos, NULL);
 
 		return(ARGS_QWORD);
 	}

@@ -768,7 +768,7 @@ again:
 			ep->cur++;
 	} else {
 		if (q)
-			EQN_MSG(MANDOCERR_BADQUOTE, ep);
+			EQN_MSG(MANDOCERR_ARG_QUOTE, ep);
 		next = strchr(start, '\0');
 		*sz = (size_t)(next - start);
 		ep->cur += *sz;

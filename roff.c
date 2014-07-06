@@ -542,8 +542,9 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 			break;
 		default:
 			if (ESCAPE_ERROR == mandoc_escape(&cp, NULL, NULL))
-				mandoc_msg(MANDOCERR_BADESCAPE, r->parse,
-				    ln, (int)(stesc - *bufp), NULL);
+				mandoc_vmsg(MANDOCERR_ESC_BAD,
+				    r->parse, ln, (int)(stesc - *bufp),
+				    "%.*s", (int)(cp - stesc), stesc);
 			continue;
 		}
 
@@ -588,8 +589,8 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 		arg_complete = 1;
 		for (naml = 0; 0 == maxl || naml < maxl; naml++, cp++) {
 			if ('\0' == *cp) {
-				mandoc_msg(MANDOCERR_BADESCAPE, r->parse,
-				    ln, (int)(stesc - *bufp), NULL);
+				mandoc_msg(MANDOCERR_ESC_BAD, r->parse,
+				    ln, (int)(stesc - *bufp), stesc);
 				arg_complete = 0;
 				break;
 			}
@@ -631,8 +632,9 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 		}
 
 		if (NULL == res) {
-			mandoc_msg(MANDOCERR_BADESCAPE, r->parse,
-			    ln, (int)(stesc - *bufp), NULL);
+			mandoc_vmsg(MANDOCERR_STR_UNDEF,
+			    r->parse, ln, (int)(stesc - *bufp),
+			    "%.*s", (int)naml, stnam);
 			res = "";
 		}
 
@@ -1894,9 +1896,8 @@ roff_tr(ROFF_ARGS)
 		if ('\\' == *first) {
 			esc = mandoc_escape(&p, NULL, NULL);
 			if (ESCAPE_ERROR == esc) {
-				mandoc_msg(MANDOCERR_BADESCAPE,
-				    r->parse, ln,
-				    (int)(p - *bufp), NULL);
+				mandoc_msg(MANDOCERR_ESC_BAD, r->parse,
+				    ln, (int)(p - *bufp), first);
 				return(ROFF_IGN);
 			}
 			fsz = (size_t)(p - first);
@@ -1906,9 +1907,8 @@ roff_tr(ROFF_ARGS)
 		if ('\\' == *second) {
 			esc = mandoc_escape(&p, NULL, NULL);
 			if (ESCAPE_ERROR == esc) {
-				mandoc_msg(MANDOCERR_BADESCAPE,
-				    r->parse, ln,
-				    (int)(p - *bufp), NULL);
+				mandoc_msg(MANDOCERR_ESC_BAD, r->parse,
+				    ln, (int)(p - *bufp), second);
 				return(ROFF_IGN);
 			}
 			ssz = (size_t)(p - second);

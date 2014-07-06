@@ -230,7 +230,8 @@ check_text(CHKARGS)
 
 	cp = n->string;
 	for (p = cp; NULL != (p = strchr(p, '\t')); p++)
-		man_pmsg(man, n->line, (int)(p - cp), MANDOCERR_BADTAB);
+		mandoc_msg(MANDOCERR_FI_TAB, man->parse,
+		    n->line, n->pos + (p - cp), NULL);
 }
 
 #define	INEQ_DEFINE(x, ineq, name) \

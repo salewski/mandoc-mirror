@@ -551,7 +551,8 @@ check_text(struct mdoc *mdoc, int ln, int pos, char *p)
 		return;
 
 	for (cp = p; NULL != (p = strchr(p, '\t')); p++)
-		mdoc_pmsg(mdoc, ln, pos + (int)(p - cp), MANDOCERR_BADTAB);
+		mandoc_msg(MANDOCERR_FI_TAB, mdoc->parse,
+		    ln, pos + (int)(p - cp), NULL);
 }
 
 static int

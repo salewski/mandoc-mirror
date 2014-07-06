@@ -144,6 +144,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	/* related to bad macro arguments */
 	"skipping argument",
+	"unterminated quoted argument",
 	"duplicate argument",
 	"skipping duplicate display type",
 	"skipping duplicate list type",
@@ -152,12 +153,12 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"unknown font, skipping request",
 
 	/* related to plain text */
-	"blank line in non-literal context",
-	"tab in non-literal context",
-	"end of line whitespace",
+	"blank line in fill mode, using .sp",
+	"tab in filled text",
+	"whitespace at end of input line",
 	"bad comment style",
-	"bad escape sequence",
-	"unterminated quoted string",
+	"invalid escape sequence",
+	"undefined string, using \"\"",
 
 	"generic error",
 
