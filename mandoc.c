@@ -200,8 +200,10 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	case 'v':
 		/* FALLTHROUGH */
 	case 'x':
-		if (strchr("\0 %&()*+-./0123456789:<=>", **start))
+		if (strchr(" %&()*+-./0123456789:<=>", **start)) {
+			++*end;
 			return(ESCAPE_ERROR);
+		}
 		gly = ESCAPE_IGNORE;
 		term = **start;
 		*start = ++*end;
