@@ -444,7 +444,7 @@ term_word(struct termp *p, const char *word)
 		word++;
 		esc = mandoc_escape(&word, &seq, &sz);
 		if (ESCAPE_ERROR == esc)
-			break;
+			continue;
 
 		if (TERMENC_ASCII != p->enc)
 			switch (esc) {
@@ -683,7 +683,7 @@ term_strlen(const struct termp *p, const char *cp)
 			cp++;
 			esc = mandoc_escape(&cp, &seq, &ssz);
 			if (ESCAPE_ERROR == esc)
-				return(sz);
+				continue;
 
 			if (TERMENC_ASCII != p->enc)
 				switch (esc) {
