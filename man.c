@@ -542,7 +542,7 @@ man_pmacro(struct man *man, int ln, char *buf, int offs)
 		if (MAN_NSCOPED & man_macros[n->tok].flags)
 			n = n->parent;
 
-		mandoc_vmsg(MANDOCERR_LINESCOPE, man->parse, n->line,
+		mandoc_vmsg(MANDOCERR_BLK_LINE, man->parse, n->line,
 		    n->pos, "%s breaks %s", man_macronames[tok],
 		    man_macronames[n->tok]);
 
@@ -573,7 +573,7 @@ man_pmacro(struct man *man, int ln, char *buf, int offs)
 		assert(MAN_BLOCK == n->type);
 		assert(MAN_SCOPED & man_macros[n->tok].flags);
 
-		mandoc_vmsg(MANDOCERR_LINESCOPE, man->parse, n->line,
+		mandoc_vmsg(MANDOCERR_BLK_LINE, man->parse, n->line,
 		    n->pos, "%s breaks %s", man_macronames[tok],
 		    man_macronames[n->tok]);
 

@@ -786,18 +786,19 @@ roff_endparse(struct roff *r)
 {
 
 	if (r->last)
-		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse,
-		    r->last->line, r->last->col, NULL);
+		mandoc_msg(MANDOCERR_BLK_NOEND, r->parse,
+		    r->last->line, r->last->col,
+		    roffs[r->last->tok].name);
 
 	if (r->eqn) {
-		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse,
-		    r->eqn->eqn.ln, r->eqn->eqn.pos, NULL);
+		mandoc_msg(MANDOCERR_BLK_NOEND, r->parse,
+		    r->eqn->eqn.ln, r->eqn->eqn.pos, "EQ");
 		eqn_end(&r->eqn);
 	}
 
 	if (r->tbl) {
-		mandoc_msg(MANDOCERR_SCOPEEXIT, r->parse,
-		    r->tbl->line, r->tbl->pos, NULL);
+		mandoc_msg(MANDOCERR_BLK_NOEND, r->parse,
+		    r->tbl->line, r->tbl->pos, "TS");
 		tbl_end(&r->tbl);
 	}
 }
@@ -841,7 +842,8 @@ roff_cblock(ROFF_ARGS)
 	 */
 
 	if (NULL == r->last) {
-		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_BLK_NOTOPEN, r->parse,
+		    ln, ppos, "..");
 		return(ROFF_IGN);
 	}
 
@@ -859,7 +861,8 @@ roff_cblock(ROFF_ARGS)
 	case ROFF_ig:
 		break;
 	default:
-		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_BLK_NOTOPEN, r->parse,
+		    ln, ppos, "..");
 		return(ROFF_IGN);
 	}
 
@@ -889,7 +892,8 @@ roff_ccond(struct roff *r, int ln, int ppos)
 {
 
 	if (NULL == r->last) {
-		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_BLK_NOTOPEN, r->parse,
+		    ln, ppos, "\\}");
 		return;
 	}
 
@@ -901,12 +905,14 @@ roff_ccond(struct roff *r, int ln, int ppos)
 	case ROFF_if:
 		break;
 	default:
-		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_BLK_NOTOPEN, r->parse,
+		    ln, ppos, "\\}");
 		return;
 	}
 
 	if (r->last->endspan > -1) {
-		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_BLK_NOTOPEN, r->parse,
+		    ln, ppos, "\\}");
 		return;
 	}
 
@@ -1793,7 +1799,8 @@ roff_TE(ROFF_ARGS)
 {
 
 	if (NULL == r->tbl)
-		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_BLK_NOTOPEN, r->parse,
+		    ln, ppos, "TE");
 	else
 		tbl_end(&r->tbl);
 
@@ -1805,7 +1812,8 @@ roff_T_(ROFF_ARGS)
 {
 
 	if (NULL == r->tbl)
-		mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_BLK_NOTOPEN, r->parse,
+		    ln, ppos, "T&");
 	else
 		tbl_restart(ppos, ln, r->tbl);
 
@@ -1856,7 +1864,7 @@ static enum rofferr
 roff_EN(ROFF_ARGS)
 {
 
-	mandoc_msg(MANDOCERR_NOSCOPE, r->parse, ln, ppos, NULL);
+	mandoc_msg(MANDOCERR_BLK_NOTOPEN, r->parse, ln, ppos, "EN");
 	return(ROFF_IGN);
 }
 
@@ -1866,7 +1874,8 @@ roff_TS(ROFF_ARGS)
 	struct tbl_node	*tbl;
 
 	if (r->tbl) {
-		mandoc_msg(MANDOCERR_SCOPEBROKEN, r->parse, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_BLK_BROKEN, r->parse,
+		    ln, ppos, "TS breaks TS");
 		tbl_end(&r->tbl);
 	}
 

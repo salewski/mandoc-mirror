@@ -190,10 +190,9 @@ static int
 check_root(CHKARGS)
 {
 
-	if (MAN_BLINE & man->flags)
-		man_nmsg(man, n, MANDOCERR_SCOPEEXIT);
-	else if (MAN_ELINE & man->flags)
-		man_nmsg(man, n, MANDOCERR_SCOPEEXIT);
+	if ((MAN_BLINE | MAN_ELINE) & man->flags)
+		mandoc_msg(MANDOCERR_BLK_LINE, man->parse,
+		    0, 0, "at end of file");
 
 	man->flags &= ~MAN_BLINE;
 	man->flags &= ~MAN_ELINE;

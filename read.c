@@ -180,17 +180,20 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"data block still open",
 	"ignoring extra data cells",
 
+	/* related to document structure and macros */
 	"input stack limit exceeded, infinite loop?",
 	"skipping bad character",
-	"escaped character not allowed in a name",
-	"manual name not yet set",
 	"skipping unknown macro",
-	"argument count wrong",
-	"unknown standard specifier",
 	"skipping column outside column list",
 	"skipping end of block that is not open",
-	"missing end of block",
-	"scope open on exit",
+	"inserting missing end of block",
+	"appending missing end of block",
+
+	/* related to request and macro arguments */
+	"escaped character not allowed in a name",
+	"manual name not yet set",
+	"argument count wrong",
+	"unknown standard specifier",
 	"uname(3) system call failed",
 	"request requires a numeric argument",
 	"missing list type, using -item",
