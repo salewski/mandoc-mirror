@@ -275,8 +275,11 @@ terminal_mdoc(void *arg, const struct mdoc *mdoc)
 
 	term_begin(p, print_mdoc_head, print_mdoc_foot, meta);
 
-	if (n->child)
+	if (n->child) {
+		if (MDOC_Sh != n->child->tok)
+			term_vspace(p);
 		print_mdoc_nodelist(p, NULL, meta, n->child);
+	}
 
 	term_end(p);
 }

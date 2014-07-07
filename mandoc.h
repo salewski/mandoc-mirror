@@ -139,7 +139,6 @@ enum	mandocerr {
 	MANDOCERR_BADCHAR, /* skipping bad character */
 	MANDOCERR_NAMESC, /* escaped character not allowed in a name */
 	MANDOCERR_NONAME, /* manual name not yet set */
-	MANDOCERR_NOTEXT, /* skipping text before first section header */
 	MANDOCERR_MACRO, /* skipping unknown macro */
 	MANDOCERR_ARGCOUNT, /* argument count wrong */
 	MANDOCERR_RS_SKIP, /* skipping invalid content in .Rs block: macro */

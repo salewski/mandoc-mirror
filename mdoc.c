@@ -227,13 +227,6 @@ mdoc_addeqn(struct mdoc *mdoc, const struct eqn *ep)
 
 	assert( ! (MDOC_HALT & mdoc->flags));
 
-	/* No text before an initial macro. */
-
-	if (SEC_NONE == mdoc->lastnamed) {
-		mdoc_pmsg(mdoc, ep->ln, ep->pos, MANDOCERR_NOTEXT);
-		return(1);
-	}
-
 	n = node_alloc(mdoc, ep->ln, ep->pos, MDOC_MAX, MDOC_EQN);
 	n->eqn = ep;
 
@@ -250,13 +243,6 @@ mdoc_addspan(struct mdoc *mdoc, const struct tbl_span *sp)
 	struct mdoc_node *n;
 
 	assert( ! (MDOC_HALT & mdoc->flags));
-
-	/* No text before an initial macro. */
-
-	if (SEC_NONE == mdoc->lastnamed) {
-		mdoc_pmsg(mdoc, sp->line, 0, MANDOCERR_NOTEXT);
-		return(1);
-	}
 
 	n = node_alloc(mdoc, sp->line, 0, MDOC_MAX, MDOC_TBL);
 	n->span = sp;
@@ -721,13 +707,6 @@ mdoc_ptext(struct mdoc *mdoc, int line, char *buf, int offs)
 {
 	char		 *c, *ws, *end;
 	struct mdoc_node *n;
-
-	/* No text before an initial macro. */
-
-	if (SEC_NONE == mdoc->lastnamed) {
-		mdoc_pmsg(mdoc, line, offs, MANDOCERR_NOTEXT);
-		return(1);
-	}
 
 	assert(mdoc->last);
 	n = mdoc->last;

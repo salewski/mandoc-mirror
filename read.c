@@ -183,7 +183,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"skipping bad character",
 	"escaped character not allowed in a name",
 	"manual name not yet set",
-	"skipping text before first section header",
 	"skipping unknown macro",
 	"argument count wrong",
 	"skipping invalid content in .Rs block",
