@@ -392,7 +392,7 @@ man_descope(struct man *man, int line, int offs)
 
 	if (MAN_ELINE & man->flags) {
 		man->flags &= ~MAN_ELINE;
-		if ( ! man_unscope(man, man->last->parent, MANDOCERR_MAX))
+		if ( ! man_unscope(man, man->last->parent))
 			return(0);
 	}
 
@@ -400,7 +400,7 @@ man_descope(struct man *man, int line, int offs)
 		return(1);
 	man->flags &= ~MAN_BLINE;
 
-	if ( ! man_unscope(man, man->last->parent, MANDOCERR_MAX))
+	if ( ! man_unscope(man, man->last->parent))
 		return(0);
 	return(man_body_alloc(man, line, offs, man->last->tok));
 }
@@ -639,7 +639,7 @@ man_pmacro(struct man *man, int ln, char *buf, int offs)
 	assert(MAN_BLINE & man->flags);
 	man->flags &= ~MAN_BLINE;
 
-	if ( ! man_unscope(man, man->last->parent, MANDOCERR_MAX))
+	if ( ! man_unscope(man, man->last->parent))
 		return(0);
 	return(man_body_alloc(man, ln, ppos, man->last->tok));
 
