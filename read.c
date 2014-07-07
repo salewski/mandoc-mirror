@@ -185,7 +185,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"manual name not yet set",
 	"skipping text before first section header",
 	"skipping unknown macro",
-	"NOT IMPLEMENTED, please use groff: skipping request",
 	"argument count wrong",
 	"skipping invalid content in .Rs block",
 	"unknown standard specifier",

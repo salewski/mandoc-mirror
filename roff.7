@@ -409,24 +409,21 @@ and the number of arguments is not checked.
 Append to a macro definition.
 The syntax of this request is the same as that of
 .Sx \&de .
-It is currently ignored by
-.Xr mandoc 1 ,
-as are its children.
 .Ss \&ami
 Append to a macro definition, specifying the macro name indirectly.
 The syntax of this request is the same as that of
 .Sx \&dei .
-It is currently ignored by
-.Xr mandoc 1 ,
-as are its children.
 .Ss \&am1
 Append to a macro definition, switching roff compatibility mode off
 during macro execution.
 The syntax of this request is the same as that of
 .Sx \&de1 .
-It is currently ignored by
-.Xr mandoc 1 ,
-as are its children.
+Since
+.Xr mandoc 1
+does not implement
+.Nm
+compatibility mode at all, it handles this request as an alias for
+.Sx \&am .
 .Ss \&as
 Append to a user-defined string.
 The syntax of this request is the same as that of
@@ -554,9 +551,13 @@ Define a
 macro, specifying the macro name indirectly.
 The syntax of this request is the same as that of
 .Sx \&de .
-It is currently ignored by
-.Xr mandoc 1 ,
-as are its children.
+The request
+.Pp
+.D1 Pf . Cm \&dei Ar name Op Ar end
+.Pp
+has the same effect as:
+.Pp
+.D1 Pf . Cm \&de No \e* Ns Bo Ar name Bc Op \e* Ns Bq Ar end
 .Ss \&de1
 Define a
 .Nm

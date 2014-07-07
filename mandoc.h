@@ -141,7 +141,6 @@ enum	mandocerr {
 	MANDOCERR_NONAME, /* manual name not yet set */
 	MANDOCERR_NOTEXT, /* skipping text before first section header */
 	MANDOCERR_MACRO, /* skipping unknown macro */
-	MANDOCERR_REQUEST, /* NOT IMPLEMENTED: skipping request */
 	MANDOCERR_ARGCOUNT, /* argument count wrong */
 	MANDOCERR_RS_SKIP, /* skipping invalid content in .Rs block: macro */
 	MANDOCERR_ST_BAD, /* unknown standard specifier: standard */
