@@ -189,7 +189,7 @@ mdoc_free(struct mdoc *mdoc)
  */
 struct mdoc *
 mdoc_alloc(struct roff *roff, struct mparse *parse,
-	char *defos, int quick)
+	const char *defos, int quick)
 {
 	struct mdoc	*p;
 
