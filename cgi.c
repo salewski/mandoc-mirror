@@ -1,6 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2014 Ingo Schwarze <schwarze@usta.de>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,18 +19,11 @@
 #include "config.h"
 #endif
 
-#include <sys/wait.h>
-
-#include <assert.h>
 #include <ctype.h>
-#include <errno.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <limits.h>
-#include <regex.h>
 #include <stdio.h>
-#include <stdarg.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -41,20 +35,11 @@
 #include <sys/stat.h>
 #endif
 
-#include "apropos_db.h"
 #include "mandoc.h"
 #include "mandoc_aux.h"
-#include "mdoc.h"
-#include "man.h"
 #include "main.h"
 #include "manpath.h"
-#include "mandocdb.h"
-
-#if defined(__linux__) || defined(__sun)
-# include <db_185.h>
-#else
-# include <db.h>
-#endif
+#include "mansearch.h"
 
 enum	page {
 	PAGE_INDEX,
@@ -63,30 +48,24 @@ enum	page {
 	PAGE__MAX
 };
 
-struct	paths {
-	char		*name;
-	char		*path;
-};
-
 /*
  * A query as passed to the search function.
  */
 struct	query {
+	const char	*manroot; /* manual root directory */
 	const char	*arch; /* architecture */
 	const char	*sec; /* manual section */
 	const char	*expr; /* unparsed expression string */
-	int		 manroot; /* manroot index (or -1)*/
 	int		 legacy; /* whether legacy mode */
 };
 
 struct	req {
 	struct query	 q;
-	struct paths	*p;
+	char		**p; /* array of available manroots */
 	size_t		 psz;
 	enum page	 page;
 };
 
-static	int		 atou(const char *, unsigned *);
 static	void		 catman(const struct req *, const char *);
 static	int	 	 cmp(const void *, const void *);
 static	void		 format(const struct req *, const char *);
@@ -98,8 +77,7 @@ static	void		 http_parse(struct req *, char *);
 static	void		 http_print(const char *);
 static	void 		 http_putchar(char);
 static	void		 http_printquery(const struct req *);
-static	int		 pathstop(DIR *);
-static	void		 pathgen(DIR *, char *, struct req *);
+static	void		 pathgen(DIR *, struct req *);
 static	void		 pg_index(const struct req *, char *);
 static	void		 pg_search(const struct req *, char *);
 static	void		 pg_show(const struct req *, char *);
@@ -111,7 +89,8 @@ static	void		 resp_begin_html(int, const char *);
 static	void		 resp_begin_http(int, const char *);
 static	void		 resp_end_html(void);
 static	void		 resp_index(const struct req *);
-static	void		 resp_search(struct res *, size_t, void *);
+static	void		 resp_search(const struct req *,
+				struct manpage *, size_t);
 static	void		 resp_searchform(const struct req *);
 
 static	const char	 *progname; /* cgi script name */
@@ -124,29 +103,6 @@ static	const char * const pages[PAGE__MAX] = {
 	"search", /* PAGE_SEARCH */
 	"show", /* PAGE_SHOW */
 };
-
-/*
- * This is just OpenBSD's strtol(3) suggestion.
- * I use it instead of strtonum(3) for portability's sake.
- */
-static int
-atou(const char *buf, unsigned *v)
-{
-	char		*ep;
-	long		 lval;
-
-	errno = 0;
-	lval = strtol(buf, &ep, 10);
-	if (buf[0] == '\0' || *ep != '\0')
-		return(0);
-	if ((errno == ERANGE && (lval == LONG_MAX || 
-					lval == LONG_MIN)) ||
-			(lval > INT_MAX || lval < 0))
-		return(0);
-
-	*v = (unsigned int)lval;
-	return(1);
-}
 
 /*
  * Print a character, escaping HTML along the way.
@@ -231,14 +187,13 @@ html_print(const char *p)
 static void
 http_parse(struct req *req, char *p)
 {
-	char            *key, *val, *manroot;
-	int		 i, legacy;
+	char            *key, *val;
+	int		 legacy;
 
 	memset(&req->q, 0, sizeof(struct query));
+	req->q.manroot = req->p[0];
 
 	legacy = -1;
-	manroot = NULL;
-
 	while ('\0' != *p) {
 		key = p;
 		val = NULL;
@@ -270,7 +225,7 @@ http_parse(struct req *req, char *p)
 		else if (0 == strcmp(key, "arch"))
 			req->q.arch = val;
 		else if (0 == strcmp(key, "manpath"))
-			manroot = val;
+			req->q.manroot = val;
 		else if (0 == strcmp(key, "apropos"))
 			legacy = 0 == strcmp(val, "0");
 	}
@@ -290,15 +245,6 @@ http_parse(struct req *req, char *p)
 	if (req->q.legacy && NULL != req->q.arch)
 		if (0 == strcmp(req->q.arch, "default"))
 			req->q.arch = NULL;
-
-	/* Default to first manroot. */
-
-	if (NULL != manroot) {
-		for (i = 0; i < (int)req->psz; i++)
-			if (0 == strcmp(req->p[i].name, manroot))
-				break;
-		req->q.manroot = i < (int)req->psz ? i : -1;
-	}
 }
 
 static void
@@ -402,7 +348,7 @@ resp_searchform(const struct req *req)
 
 	puts("<!-- Begin search form. //-->");
 	printf("<DIV ID=\"mancgi\">\n"
-	       "<FORM ACTION=\"%s/search.html\" METHOD=\"get\">\n"
+	       "<FORM ACTION=\"%s/search\" METHOD=\"get\">\n"
 	       "<FIELDSET>\n"
 	       "<LEGEND>Search Parameters</LEGEND>\n"
 	       "<INPUT TYPE=\"submit\" "
@@ -422,13 +368,14 @@ resp_searchform(const struct req *req)
 	if (req->psz > 1) {
 		puts(", <SELECT NAME=\"manpath\">");
 		for (i = 0; i < (int)req->psz; i++) {
-			printf("<OPTION %s VALUE=\"",
-				(i == req->q.manroot) ||
-				(0 == i && -1 == req->q.manroot) ?
-				"SELECTED=\"selected\"" : "");
-			html_print(req->p[i].name);
+			printf("<OPTION ");
+			if (NULL == req->q.manroot ? 0 == i :
+			    0 == strcmp(req->q.manroot, req->p[i]))
+				printf("SELECTED=\"selected\" ");
+			printf("VALUE=\"");
+			html_print(req->p[i]);
 			printf("\">");
-			html_print(req->p[i].name);
+			html_print(req->p[i]);
 			puts("</OPTION>");
 		}
 		puts("</SELECT>");
@@ -500,32 +447,18 @@ resp_baddb(void)
 }
 
 static void
-resp_search(struct res *r, size_t sz, void *arg)
+resp_search(const struct req *req, struct manpage *r, size_t sz)
 {
-	size_t		 i, matched;
-	const struct req *req;
+	size_t		 i;
 
-	req = (const struct req *)arg;
-
-	if (sz > 0)
-		assert(req->q.manroot >= 0);
-
-	for (matched = i = 0; i < sz; i++)
-		if (r[i].matched)
-			matched++;
-	
-	if (1 == matched) {
-		for (i = 0; i < sz; i++)
-			if (r[i].matched)
-				break;
+	if (1 == sz) {
 		/*
 		 * If we have just one result, then jump there now
 		 * without any delay.
 		 */
 		puts("Status: 303 See Other");
-		printf("Location: http://%s%s/show/%d/%u/%u.html?",
-				host, progname, req->q.manroot,
-				r[i].volume, r[i].rec);
+		printf("Location: http://%s%s/show/%s/%s?",
+		    host, progname, req->q.manroot, r[0].file);
 		http_printquery(req);
 		puts("\n"
 		     "Content-Type: text/html; charset=utf-8\n");
@@ -537,7 +470,7 @@ resp_search(struct res *r, size_t sz, void *arg)
 
 	puts("<DIV CLASS=\"results\">");
 
-	if (0 == matched) {
+	if (0 == sz) {
 		puts("<P>\n"
 		     "No results found.\n"
 		     "</P>\n"
@@ -546,31 +479,22 @@ resp_search(struct res *r, size_t sz, void *arg)
 		return;
 	}
 
-	qsort(r, sz, sizeof(struct res), cmp);
+	qsort(r, sz, sizeof(struct manpage), cmp);
 
 	puts("<TABLE>");
 
 	for (i = 0; i < sz; i++) {
-		if ( ! r[i].matched)
-			continue;
 		printf("<TR>\n"
 		       "<TD CLASS=\"title\">\n"
-		       "<A HREF=\"%s/show/%d/%u/%u.html?", 
-				progname, req->q.manroot,
-				r[i].volume, r[i].rec);
+		       "<A HREF=\"%s/show/%s/%s?", 
+		    progname, req->q.manroot, r[i].file);
 		html_printquery(req);
 		printf("\">");
-		html_print(r[i].title);
-		putchar('(');
-		html_print(r[i].cat);
-		if (r[i].arch && '\0' != *r[i].arch) {
-			putchar('/');
-			html_print(r[i].arch);
-		}
-		printf(")</A>\n"
+		html_print(r[i].names);
+		printf("</A>\n"
 		       "</TD>\n"
 		       "<TD CLASS=\"desc\">");
-		html_print(r[i].desc);
+		html_print(r[i].output);
 		puts("</TD>\n"
 		     "</TR>");
 	}
@@ -749,10 +673,9 @@ format(const struct req *req, const char *file)
 		return;
 	}
 
-	snprintf(opts, sizeof(opts), "fragment,"
-			"man=%s/search.html?sec=%%S&expr=Nm~^%%N$,"
-			/*"includes=/cgi-bin/man.cgi/usr/include/%%I"*/,
-			progname);
+	snprintf(opts, sizeof(opts),
+	    "fragment,man=%s/search?sec=%%S&expr=Nm~^%%N$",
+	    progname);
 
 	mparse_result(mp, &mdoc, &man, NULL);
 	if (NULL == man && NULL == mdoc) {
@@ -781,42 +704,13 @@ format(const struct req *req, const char *file)
 static void
 pg_show(const struct req *req, char *path)
 {
-	struct manpaths	 ps;
-	size_t		 sz;
 	char		*sub;
-	char		 file[PATH_MAX];
-	const char	*cp;
-	int		 rc, catm;
-	unsigned int	 vol, rec, mr;
-	DB		*idx;
-	DBT		 key, val;
-
-	idx = NULL;
-
-	/* Parse out mroot, volume, and record from the path. */
 
 	if (NULL == path || NULL == (sub = strchr(path, '/'))) {
 		resp_error400();
 		return;
 	} 
 	*sub++ = '\0';
-	if ( ! atou(path, &mr)) {
-		resp_error400();
-		return;
-	}
-	path = sub;
-	if (NULL == (sub = strchr(path, '/'))) {
-		resp_error400();
-		return;
-	}
-	*sub++ = '\0';
-	if ( ! atou(path, &vol) || ! atou(sub, &rec)) {
-		resp_error400();
-		return;
-	} else if (mr >= (unsigned int)req->psz) {
-		resp_error400();
-		return;
-	}
 
 	/*
 	 * Begin by chdir()ing into the manroot.
@@ -824,92 +718,28 @@ pg_show(const struct req *req, char *path)
 	 * relative to the manpath root.
 	 */
 
-	if (-1 == chdir(req->p[(int)mr].path)) {
-		perror(req->p[(int)mr].path);
+	if (-1 == chdir(path)) {
+		perror(path);
 		resp_baddb();
 		return;
 	}
 
-	memset(&ps, 0, sizeof(struct manpaths));
-	manpath_manconf(&ps, "etc/catman.conf");
-
-	if (vol >= (unsigned int)ps.sz) {
-		resp_error400();
-		goto out;
-	}
-
-	sz = strlcpy(file, ps.paths[vol], PATH_MAX);
-	assert(sz < PATH_MAX);
-	strlcat(file, "/", PATH_MAX);
-	strlcat(file, MANDOC_IDX, PATH_MAX);
-
-	/* Open the index recno(3) database. */
-
-	idx = dbopen(file, O_RDONLY, 0, DB_RECNO, NULL);
-	if (NULL == idx) {
-		perror(file);
-		resp_baddb();
-		goto out;
-	}
-
-	key.data = &rec;
-	key.size = 4;
-
-	if (0 != (rc = (*idx->get)(idx, &key, &val, 0))) {
-		rc < 0 ? resp_baddb() : resp_error400();
-		goto out;
-	} else if (0 == val.size) {
-		resp_baddb();
-		goto out;
-	}
-
-	cp = (char *)val.data;
-	catm = 'c' == *cp++;
-
-	if (NULL == memchr(cp, '\0', val.size - 1)) 
-		resp_baddb();
-	else {
- 		file[(int)sz] = '\0';
- 		strlcat(file, "/", PATH_MAX);
- 		strlcat(file, cp, PATH_MAX);
-		if (catm) 
-			catman(req, file);
-		else
-			format(req, file);
-	}
-out:
-	if (idx)
-		(*idx->close)(idx);
-	manpath_free(&ps);
+	if ('c' == *sub)
+		catman(req, sub);
+	else
+		format(req, sub);
 }
 
 static void
 pg_search(const struct req *req, char *path)
 {
-	size_t		  tt, ressz;
-	struct manpaths	  ps;
-	int		  i, sz, rc;
-	const char	 *ep, *start;
-	struct res	*res;
-	char		**cp;
-	struct opts	  opt;
-	struct expr	 *expr;
-
-	if (req->q.manroot < 0 || 0 == req->psz) {
-		resp_search(NULL, 0, (void *)req);
-		return;
-	}
-
-	memset(&opt, 0, sizeof(struct opts));
-
-	ep 	 = req->q.expr;
-	opt.arch = req->q.arch;
-	opt.cat  = req->q.sec;
-	rc 	 = -1;
-	sz 	 = 0;
-	cp	 = NULL;
-	ressz	 = 0;
-	res	 = NULL;
+	struct mansearch	  search;
+	struct manpaths		  paths;
+	struct manpage		 *res;
+	char			**cp;
+	const char		 *ep, *start;
+	size_t			  ressz;
+	int			  i, sz;
 
 	/*
 	 * Begin by chdir()ing into the root of the manpath.
@@ -917,24 +747,32 @@ pg_search(const struct req *req, char *path)
 	 * relative to the manpath root.
 	 */
 
-	assert(req->q.manroot < (int)req->psz);
-	if (-1 == (chdir(req->p[req->q.manroot].path))) {
-		perror(req->p[req->q.manroot].path);
-		resp_search(NULL, 0, (void *)req);
+	if (-1 == (chdir(req->q.manroot))) {
+		perror(req->q.manroot);
+		resp_search(req, NULL, 0);
 		return;
 	}
 
-	memset(&ps, 0, sizeof(struct manpaths));
-	manpath_manconf(&ps, "etc/catman.conf");
+	search.arch = req->q.arch;
+	search.sec = req->q.sec;
+	search.deftype = TYPE_Nm | TYPE_Nd;
+	search.flags = 0;
+
+	paths.sz = 1;
+	paths.paths = mandoc_malloc(sizeof(char *));
+	paths.paths[0] = mandoc_strdup(".");
 
 	/*
 	 * Poor man's tokenisation: just break apart by spaces.
 	 * Yes, this is half-ass.  But it works for now.
 	 */
 
+	ep = req->q.expr;
 	while (ep && isspace((unsigned char)*ep))
 		ep++;
 
+	sz = 0;
+	cp = NULL;
 	while (ep && '\0' != *ep) {
 		cp = mandoc_reallocarray(cp, sz + 1, sizeof(char *));
 		start = ep;
@@ -947,40 +785,30 @@ pg_search(const struct req *req, char *path)
 			ep++;
 	}
 
-	/*
-	 * Pump down into apropos backend.
-	 * The resp_search() function is called with the results.
-	 */
-
-	expr = req->q.legacy ? 
-		termcomp(sz, cp, &tt) : exprcomp(sz, cp, &tt);
-
-	if (NULL != expr)
-		rc = apropos_search
-			(ps.sz, ps.paths, &opt, expr, tt, 
-			 (void *)req, &ressz, &res, resp_search);
-
-	/* ...unless errors occured. */
-
-	if (0 == rc)
+	if (mansearch(&search, &paths, sz, cp, "Nd", &res, &ressz))
+		resp_search(req, res, ressz);
+	else
 		resp_baddb();
-	else if (-1 == rc)
-		resp_search(NULL, 0, NULL);
 
 	for (i = 0; i < sz; i++)
 		free(cp[i]);
-
 	free(cp);
-	resfree(res, ressz);
-	exprfree(expr);
-	manpath_free(&ps);
+
+	for (i = 0; i < (int)ressz; i++) {
+		free(res[i].file);
+		free(res[i].names);
+		free(res[i].output);
+	}
+	free(res);
+
+	free(paths.paths[0]);
+	free(paths.paths);
 }
 
 int
 main(void)
 {
 	int		 i;
-	char		 buf[PATH_MAX];
 	DIR		*cwd;
 	struct req	 req;
 	char		*p, *path, *subpath;
@@ -1017,8 +845,7 @@ main(void)
 
 	memset(&req, 0, sizeof(struct req));
 
-	strlcpy(buf, ".", PATH_MAX);
-	pathgen(cwd, buf, &req);
+	pathgen(cwd, &req);
 	closedir(cwd);
 
 	/* Next parse out the query string. */
@@ -1041,12 +868,6 @@ main(void)
 
 	if (NULL != path && '/' == *path && '\0' == *++path)
 		req.page = PAGE_INDEX;
-
-	/* Strip file suffix. */
-
-	if (NULL != path && NULL != (p = strrchr(path, '.')))
-		if (NULL != p && NULL == strchr(p, '/'))
-			*p++ = '\0';
 
 	/* Resolve subpath component. */
 
@@ -1079,11 +900,8 @@ main(void)
 		break;
 	}
 
-	for (i = 0; i < (int)req.psz; i++) {
-		free(req.p[i].path);
-		free(req.p[i].name);
-	}
-
+	for (i = 0; i < (int)req.psz; i++)
+		free(req.p[i]);
 	free(req.p);
 	return(EXIT_SUCCESS);
 }
@@ -1092,120 +910,21 @@ static int
 cmp(const void *p1, const void *p2)
 {
 
-	return(strcasecmp(((const struct res *)p1)->title,
-				((const struct res *)p2)->title));
-}
-
-/*
- * Check to see if an "etc" path consists of a catman.conf file.  If it
- * does, that means that the path contains a tree created by catman(8)
- * and should be used for indexing.
- */
-static int
-pathstop(DIR *dir)
-{
-	struct dirent	*d;
-#if defined(__sun)
-	struct stat	 sb;
-#endif
-
-	while (NULL != (d = readdir(dir))) {
-#if defined(__sun)
-		stat(d->d_name, &sb);
-		if (S_IFREG & sb.st_mode)
-#else
-		if (DT_REG == d->d_type)
-#endif
-			if (0 == strcmp(d->d_name, "catman.conf"))
-				return(1);
-  }
-
-	return(0);
+	return(strcasecmp(((const struct manpage *)p1)->names,
+	    ((const struct manpage *)p2)->names));
 }
 
 /*
  * Scan for indexable paths.
- * This adds all paths with "etc/catman.conf" to the buffer.
  */
 static void
-pathgen(DIR *dir, char *path, struct req *req)
+pathgen(DIR *dir, struct req *req)
 {
 	struct dirent	*d;
-	char		*cp;
-	DIR		*cd;
-	int		 rc;
-	size_t		 sz, ssz;
 #if defined(__sun)
 	struct stat	 sb;
 #endif
 
-	sz = strlcat(path, "/", PATH_MAX);
-	if (sz >= PATH_MAX) {
-		fprintf(stderr, "%s: Path too long", path);
-		return;
-	} 
-
-	/* 
-	 * First, scan for the "etc" directory.
-	 * If it's found, then see if it should cause us to stop.  This
-	 * happens when a catman.conf is found in the directory.
-	 */
-
-	rc = 0;
-	while (0 == rc && NULL != (d = readdir(dir))) {
-#if defined(__sun)
-		stat(d->d_name, &sb);
-		if (!(S_IFDIR & sb.st_mode)
-#else
-		if (DT_DIR != d->d_type
-#endif
-        || strcmp(d->d_name, "etc"))
-			continue;
-
-		path[(int)sz] = '\0';
-		ssz = strlcat(path, d->d_name, PATH_MAX);
-
-		if (ssz >= PATH_MAX) {
-			fprintf(stderr, "%s: Path too long", path);
-			return;
-		} else if (NULL == (cd = opendir(path))) {
-			perror(path);
-			return;
-		} 
-		
-		rc = pathstop(cd);
-		closedir(cd);
-	}
-
-	if (rc > 0) {
-		/* This also strips the trailing slash. */
-		path[(int)--sz] = '\0';
-		req->p = mandoc_reallocarray(req->p, 
-		    req->psz + 1, sizeof(struct paths));
-		/*
-		 * Strip out the leading "./" unless we're just a ".",
-		 * in which case use an empty string as our name.
-		 */
-		req->p[(int)req->psz].path = mandoc_strdup(path);
-		req->p[(int)req->psz].name = 
-			cp = mandoc_strdup(path + (1 == sz ? 1 : 2));
-		req->psz++;
-		/* 
-		 * The name is just the path with all the slashes taken
-		 * out of it.  Simple but effective. 
-		 */
-		for ( ; '\0' != *cp; cp++) 
-			if ('/' == *cp)
-				*cp = ' ';
-		return;
-	} 
-
-	/*
-	 * If no etc/catman.conf was found, recursively enter child
-	 * directory and continue scanning.
-	 */
-
-	rewinddir(dir);
 	while (NULL != (d = readdir(dir))) {
 #if defined(__sun)
 		stat(d->d_name, &sb);
@@ -1213,21 +932,10 @@ pathgen(DIR *dir, char *path, struct req *req)
 #else
 		if (DT_DIR != d->d_type
 #endif
-        || '.' == d->d_name[0])
-			continue;
-
-		path[(int)sz] = '\0';
-		ssz = strlcat(path, d->d_name, PATH_MAX);
-
-		if (ssz >= PATH_MAX) {
-			fprintf(stderr, "%s: Path too long", path);
-			return;
-		} else if (NULL == (cd = opendir(path))) {
-			perror(path);
-			return;
+		    || '.' != d->d_name[0]) {
+			req->p = mandoc_realloc(req->p,
+			    (req->psz + 1) * sizeof(char *));
+			req->p[req->psz++] = mandoc_strdup(d->d_name);
 		}
-
-		pathgen(cd, path, req);
-		closedir(cd);
 	}
 }

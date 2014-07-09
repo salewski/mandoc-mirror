@@ -65,6 +65,7 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 # the dependency on SQLite3, comment the following two lines.
 DBLIB		 = -L/usr/local/lib -lsqlite3
 DBBIN		 = makewhatis manpage apropos
+DBBIN		+= man.cgi
 
 # OpenBSD has the ohash functions in libutil.
 # Comment the following line if your system doesn't.
@@ -133,6 +134,7 @@ SRCS		 = LICENSE \
 		   makewhatis.8 \
 		   man.7 \
 		   man.c \
+		   man.cgi.7 \
 		   man-cgi.css \
 		   man.h \
 		   man_hash.c \
@@ -291,6 +293,14 @@ $(PRECONV_OBJS): config.h
 APROPOS_OBJS	 = apropos.o mansearch.o mansearch_const.o manpath.o
 $(APROPOS_OBJS): config.h mandoc.h mandoc_aux.h manpath.h mansearch.h
 
+CGI_OBJS	 = $(MANDOC_HTML_OBJS) \
+		   cgi.o \
+		   mansearch.o \
+		   mansearch_const.o \
+		   out.o
+$(CGI_OBJS): main.h out.h config.h mandoc.h mandoc_aux.h \
+	     manpath.h mansearch.h
+
 MANPAGE_OBJS	 = manpage.o mansearch.o mansearch_const.o manpath.o
 $(MANPAGE_OBJS): config.h mandoc.h mandoc_aux.h manpath.h mansearch.h
 
@@ -307,6 +317,7 @@ WWW_MANS	 = apropos.1.html \
 		   mandoc.db.5.html \
 		   eqn.7.html \
 		   man.7.html \
+		   man.cgi.7.html \
 		   mandoc_char.7.html \
 		   mdoc.7.html \
 		   roff.7.html \
@@ -331,6 +342,7 @@ clean:
 	rm -f apropos $(APROPOS_OBJS)
 	rm -f makewhatis $(MAKEWHATIS_OBJS)
 	rm -f preconv $(PRECONV_OBJS)
+	rm -f man.cgi $(CGI_OBJS)
 	rm -f manpage $(MANPAGE_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f mandoc $(MANDOC_OBJS)
@@ -360,7 +372,7 @@ install: all
 installcgi: all
 	mkdir -p $(DESTDIR)$(CGIBINDIR)
 	mkdir -p $(DESTDIR)$(HTDOCDIR)
-	#$(INSTALL_PROGRAM) man.cgi $(DESTDIR)$(CGIBINDIR)
+	$(INSTALL_PROGRAM) man.cgi $(DESTDIR)$(CGIBINDIR)
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(HTDOCDIR)/man.css
 	$(INSTALL_DATA) man-cgi.css $(DESTDIR)$(HTDOCDIR)
 
@@ -390,6 +402,9 @@ manpage: $(MANPAGE_OBJS) libmandoc.a
 
 apropos: $(APROPOS_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(APROPOS_OBJS) libmandoc.a $(DBLIB)
+
+man.cgi: $(CGI_OBJS) libmandoc.a
+	$(CC) $(LDFLAGS) $(STATIC) -o $@ $(CGI_OBJS) libmandoc.a $(DBLIB)
 
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a
