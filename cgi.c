@@ -940,6 +940,8 @@ pathgen(struct req *req)
 		return;
 
 	while (NULL != (dp = fgetln(fp, &dpsz))) {
+		if ('\n' == dp[dpsz - 1])
+			dpsz--;
 		req->p = mandoc_realloc(req->p,
 		    (req->psz + 1) * sizeof(char *));
 		req->p[req->psz++] = mandoc_strndup(dp, dpsz);
