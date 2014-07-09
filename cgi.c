@@ -381,7 +381,7 @@ resp_searchform(const struct req *req)
 	html_print(req->q.arch ? req->q.arch : "");
 	printf("\">");
 	if (req->psz > 1) {
-		puts(", <SELECT NAME=\"manpath\">");
+		puts(", in <SELECT NAME=\"manpath\">");
 		for (i = 0; i < (int)req->psz; i++) {
 			printf("<OPTION ");
 			if (NULL == req->q.manpath ? 0 == i :
@@ -395,7 +395,7 @@ resp_searchform(const struct req *req)
 		}
 		puts("</SELECT>");
 	}
-	puts(".\n"
+	puts("&mdash;\n"
 	     "<INPUT TYPE=\"reset\" VALUE=\"Reset\">\n"
 	     "</FIELDSET>\n"
 	     "</FORM>\n"
@@ -408,7 +408,15 @@ resp_index(const struct req *req)
 {
 
 	resp_begin_html(200, NULL);
+	puts("<H1>\n"
+	     "Online manuals with "
+	     "<A HREF=\"http://mdocml.bsd.lv/\">mandoc</A>\n"
+	     "</H1>");
 	resp_searchform(req);
+	puts("<P>\n"
+	     "The <A HREF=\"search?expr=Nm~^apropos$&amp;sec=1\">"
+	     "apropos</A> manual explains the query syntax.\n"
+	     "</P>");
 	resp_end_html();
 }
 
