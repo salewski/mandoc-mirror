@@ -20,7 +20,6 @@
 #endif
 
 #include <ctype.h>
-#include <dirent.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
@@ -77,7 +76,7 @@ static	void		 http_parse(struct req *, char *);
 static	void		 http_print(const char *);
 static	void 		 http_putchar(char);
 static	void		 http_printquery(const struct req *);
-static	void		 pathgen(DIR *, struct req *);
+static	void		 pathgen(struct req *);
 static	void		 pg_index(const struct req *, char *);
 static	void		 pg_search(const struct req *, char *);
 static	void		 pg_show(const struct req *, char *);
@@ -829,7 +828,6 @@ int
 main(void)
 {
 	int		 i;
-	DIR		*cwd;
 	struct req	 req;
 	char		*p, *path, *subpath;
 
@@ -857,16 +855,10 @@ main(void)
 		perror(cache);
 		resp_bad();
 		return(EXIT_FAILURE);
-	} else if (NULL == (cwd = opendir(cache))) {
-		perror(cache);
-		resp_bad();
-		return(EXIT_FAILURE);
 	} 
 
 	memset(&req, 0, sizeof(struct req));
-
-	pathgen(cwd, &req);
-	closedir(cwd);
+	pathgen(&req);
 
 	/* Next parse out the query string. */
 
@@ -938,24 +930,18 @@ cmp(const void *p1, const void *p2)
  * Scan for indexable paths.
  */
 static void
-pathgen(DIR *dir, struct req *req)
+pathgen(struct req *req)
 {
-	struct dirent	*d;
-#if defined(__sun)
-	struct stat	 sb;
-#endif
+	FILE	*fp;
+	char	*dp;
+	size_t	 dpsz;
 
-	while (NULL != (d = readdir(dir))) {
-#if defined(__sun)
-		stat(d->d_name, &sb);
-		if (!(S_IFDIR & sb.st_mode)
-#else
-		if (DT_DIR != d->d_type
-#endif
-		    || '.' != d->d_name[0]) {
-			req->p = mandoc_realloc(req->p,
-			    (req->psz + 1) * sizeof(char *));
-			req->p[req->psz++] = mandoc_strdup(d->d_name);
-		}
+	if (NULL == (fp = fopen("manpath.conf", "r")))
+		return;
+
+	while (NULL != (dp = fgetln(fp, &dpsz))) {
+		req->p = mandoc_realloc(req->p,
+		    (req->psz + 1) * sizeof(char *));
+		req->p[req->psz++] = mandoc_strndup(dp, dpsz);
 	}
 }
