@@ -20,6 +20,7 @@
 #endif
 
 #include <ctype.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
@@ -44,7 +45,7 @@ enum	page {
  * A query as passed to the search function.
  */
 struct	query {
-	const char	*manroot; /* manual root directory */
+	const char	*manpath; /* desired manual directory */
 	const char	*arch; /* architecture */
 	const char	*sec; /* manual section */
 	const char	*expr; /* unparsed expression string */
@@ -52,10 +53,10 @@ struct	query {
 };
 
 struct	req {
-	struct query	 q;
-	char		**p; /* array of available manroots */
-	size_t		 psz; /* number of available manroots */
-	enum page	 page;
+	struct query	  q;
+	char		**p; /* array of available manpaths */
+	size_t		  psz; /* number of available manpaths */
+	enum page	  page;
 };
 
 static	void		 catman(const struct req *, const char *);
@@ -85,10 +86,10 @@ static	void		 resp_search(const struct req *,
 				struct manpage *, size_t);
 static	void		 resp_searchform(const struct req *);
 
-static	const char	 *progname; /* cgi script name */
-static	const char	 *cache; /* cache directory */
-static	const char	 *css; /* css directory */
-static	const char	 *host; /* hostname */
+static	const char	 *scriptname; /* CGI script name */
+static	const char	 *mandir; /* contains all manpath directories */
+static	const char	 *cssdir; /* css directory */
+static	const char	 *httphost; /* hostname used in the URIs */
 
 static	const char * const pages[PAGE__MAX] = {
 	"index", /* PAGE_INDEX */ 
@@ -127,9 +128,9 @@ static void
 http_printquery(const struct req *req)
 {
 
-	if (NULL != req->q.manroot) {
+	if (NULL != req->q.manpath) {
 		printf("&manpath=");
-		http_print(req->q.manroot);
+		http_print(req->q.manpath);
 	}
 	if (NULL != req->q.sec) {
 		printf("&sec=");
@@ -149,9 +150,9 @@ static void
 html_printquery(const struct req *req)
 {
 
-	if (NULL != req->q.manroot) {
+	if (NULL != req->q.manpath) {
 		printf("&amp;manpath=");
-		html_print(req->q.manroot);
+		html_print(req->q.manpath);
 	}
 	if (NULL != req->q.sec) {
 		printf("&amp;sec=");
@@ -203,7 +204,7 @@ http_parse(struct req *req, char *p)
 	int		 legacy;
 
 	memset(&req->q, 0, sizeof(struct query));
-	req->q.manroot = req->p[0];
+	req->q.manpath = req->p[0];
 
 	legacy = -1;
 	while ('\0' != *p) {
@@ -237,7 +238,7 @@ http_parse(struct req *req, char *p)
 		else if (0 == strcmp(key, "arch"))
 			req->q.arch = val;
 		else if (0 == strcmp(key, "manpath"))
-			req->q.manroot = val;
+			req->q.manpath = val;
 		else if (0 == strcmp(key, "apropos"))
 			legacy = 0 == strcmp(val, "0");
 	}
@@ -342,7 +343,8 @@ resp_begin_html(int code, const char *msg)
 	       "<TITLE>System Manpage Reference</TITLE>\n"
 	       "</HEAD>\n"
 	       "<BODY>\n"
-	       "<!-- Begin page content. //-->\n", css, css);
+	       "<!-- Begin page content. //-->\n",
+	       cssdir, cssdir);
 }
 
 static void
@@ -366,7 +368,7 @@ resp_searchform(const struct req *req)
 	       "<INPUT TYPE=\"submit\" "
 	       " VALUE=\"Search\"> for manuals satisfying \n"
 	       "<INPUT TYPE=\"text\" NAME=\"expr\" VALUE=\"",
-	       progname);
+	       scriptname);
 	html_print(req->q.expr ? req->q.expr : "");
 	printf("\">, section "
 	       "<INPUT TYPE=\"text\""
@@ -381,8 +383,8 @@ resp_searchform(const struct req *req)
 		puts(", <SELECT NAME=\"manpath\">");
 		for (i = 0; i < (int)req->psz; i++) {
 			printf("<OPTION ");
-			if (NULL == req->q.manroot ? 0 == i :
-			    0 == strcmp(req->q.manroot, req->p[i]))
+			if (NULL == req->q.manpath ? 0 == i :
+			    0 == strcmp(req->q.manpath, req->p[i]))
 				printf("SELECTED=\"selected\" ");
 			printf("VALUE=\"");
 			html_print(req->p[i]);
@@ -419,7 +421,7 @@ resp_error400(void)
 	       "The query your entered was malformed.\n"
 	       "Try again from the\n"
 	       "<A HREF=\"%s/index.html\">main page</A>.\n"
-	       "</P>", progname);
+	       "</P>", scriptname);
 	resp_end_html();
 }
 
@@ -436,8 +438,8 @@ resp_error404(const char *page)
 	printf("</B>,\n"
 	       "could not be found.\n"
 	       "Try searching from the\n"
-	       "<A HREF=\"%s/index.html\">main page</A>.\n"
-	       "</P>", progname);
+	       "<A HREF=\"%s\">main page</A>.\n"
+	       "</P>", scriptname);
 	resp_end_html();
 }
 
@@ -445,7 +447,7 @@ static void
 resp_bad(void)
 {
 	resp_begin_html(500, "Internal Server Error");
-	puts("<P>Generic badness happened.</P>");
+	puts("<P>Internal Server Error</P>");
 	resp_end_html();
 }
 
@@ -470,7 +472,7 @@ resp_search(const struct req *req, struct manpage *r, size_t sz)
 		 */
 		puts("Status: 303 See Other");
 		printf("Location: http://%s%s/show/%s/%s?",
-		    host, progname, req->q.manroot, r[0].file);
+		    httphost, scriptname, req->q.manpath, r[0].file);
 		http_printquery(req);
 		puts("\n"
 		     "Content-Type: text/html; charset=utf-8\n");
@@ -499,7 +501,7 @@ resp_search(const struct req *req, struct manpage *r, size_t sz)
 		printf("<TR>\n"
 		       "<TD CLASS=\"title\">\n"
 		       "<A HREF=\"%s/show/%s/%s?", 
-		    progname, req->q.manroot, r[i].file);
+		    scriptname, req->q.manpath, r[i].file);
 		html_printquery(req);
 		printf("\">");
 		html_print(r[i].names);
@@ -677,7 +679,7 @@ format(const struct req *req, const char *file)
 	}
 
 	mp = mparse_alloc(MPARSE_SO, MANDOCLEVEL_FATAL, NULL,
-	    req->q.manroot);
+	    req->q.manpath);
 	rc = mparse_readfd(mp, fd, file);
 	close(fd);
 
@@ -688,7 +690,7 @@ format(const struct req *req, const char *file)
 
 	snprintf(opts, sizeof(opts),
 	    "fragment,man=%s/search?sec=%%S&expr=Nm~^%%N$",
-	    progname);
+	    scriptname);
 
 	mparse_result(mp, &mdoc, &man, NULL);
 	if (NULL == man && NULL == mdoc) {
@@ -726,7 +728,7 @@ pg_show(const struct req *req, char *path)
 	*sub++ = '\0';
 
 	/*
-	 * Begin by chdir()ing into the manroot.
+	 * Begin by chdir()ing into the manpath.
 	 * This way we can pick up the database files, which are
 	 * relative to the manpath root.
 	 */
@@ -760,8 +762,8 @@ pg_search(const struct req *req, char *path)
 	 * relative to the manpath root.
 	 */
 
-	if (-1 == (chdir(req->q.manroot))) {
-		perror(req->q.manroot);
+	if (-1 == (chdir(req->q.manpath))) {
+		perror(req->q.manpath);
 		resp_search(req, NULL, 0);
 		return;
 	}
@@ -823,30 +825,31 @@ main(void)
 {
 	int		 i;
 	struct req	 req;
-	char		*p, *path, *subpath;
+	char		*querystring, *path, *subpath;
 
 	/* Scan our run-time environment. */
 
-	if (NULL == (cache = getenv("CACHE_DIR")))
-		cache = "/cache/man.cgi";
+	if (NULL == (mandir = getenv("MAN_DIR")))
+		mandir = "/man";
 
-	if (NULL == (progname = getenv("SCRIPT_NAME")))
-		progname = "";
+	if (NULL == (scriptname = getenv("SCRIPT_NAME")))
+		scriptname = "";
 
-	if (NULL == (css = getenv("CSS_DIR")))
-		css = "";
+	if (NULL == (cssdir = getenv("CSS_DIR")))
+		cssdir = "";
 
-	if (NULL == (host = getenv("HTTP_HOST")))
-		host = "localhost";
+	if (NULL == (httphost = getenv("HTTP_HOST")))
+		httphost = "localhost";
 
 	/*
-	 * First we change directory into the cache directory so that
+	 * First we change directory into the mandir so that
 	 * subsequent scanning for manpath directories is rooted
 	 * relative to the same position.
 	 */
 
-	if (-1 == chdir(cache)) {
-		perror(cache);
+	if (-1 == chdir(mandir)) {
+		fprintf(stderr, "MAN_DIR: %s: %s\n",
+		    mandir, strerror(errno));
 		resp_bad();
 		return(EXIT_FAILURE);
 	} 
@@ -856,8 +859,8 @@ main(void)
 
 	/* Next parse out the query string. */
 
-	if (NULL != (p = getenv("QUERY_STRING")))
-		http_parse(&req, p);
+	if (NULL != (querystring = getenv("QUERY_STRING")))
+		http_parse(&req, querystring);
 
 	/*
 	 * Now juggle paths to extract information.
