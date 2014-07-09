@@ -134,12 +134,22 @@ static void
 http_printquery(const struct req *req)
 {
 
-	printf("&expr=");
-	http_print(req->q.expr ? req->q.expr : "");
-	printf("&sec=");
-	http_print(req->q.sec ? req->q.sec : "");
-	printf("&arch=");
-	http_print(req->q.arch ? req->q.arch : "");
+	if (NULL != req->q.manroot) {
+		printf("&manpath=");
+		http_print(req->q.manroot);
+	}
+	if (NULL != req->q.sec) {
+		printf("&sec=");
+		http_print(req->q.sec);
+	}
+	if (NULL != req->q.arch) {
+		printf("&arch=");
+		http_print(req->q.arch);
+	}
+	if (NULL != req->q.expr) {
+		printf("&expr=");
+		http_print(req->q.expr ? req->q.expr : "");
+	}
 }
 
 
@@ -147,12 +157,22 @@ static void
 html_printquery(const struct req *req)
 {
 
-	printf("&amp;expr=");
-	html_print(req->q.expr ? req->q.expr : "");
-	printf("&amp;sec=");
-	html_print(req->q.sec ? req->q.sec : "");
-	printf("&amp;arch=");
-	html_print(req->q.arch ? req->q.arch : "");
+	if (NULL != req->q.manroot) {
+		printf("&amp;manpath=");
+		html_print(req->q.manroot);
+	}
+	if (NULL != req->q.sec) {
+		printf("&amp;sec=");
+		html_print(req->q.sec);
+	}
+	if (NULL != req->q.arch) {
+		printf("&amp;arch=");
+		html_print(req->q.arch);
+	}
+	if (NULL != req->q.expr) {
+		printf("&amp;expr=");
+		html_print(req->q.expr ? req->q.expr : "");
+	}
 }
 
 static void
