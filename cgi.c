@@ -74,14 +74,15 @@ static	void		 pathgen(struct req *);
 static	void		 pg_index(const struct req *, char *);
 static	void		 pg_search(const struct req *, char *);
 static	void		 pg_show(const struct req *, char *);
-static	void		 resp_bad(void);
-static	void		 resp_baddb(void);
-static	void		 resp_error400(void);
-static	void		 resp_error404(const char *);
 static	void		 resp_begin_html(int, const char *);
 static	void		 resp_begin_http(int, const char *);
 static	void		 resp_end_html(void);
+static	void		 resp_error_badrequest(const char *);
+static	void		 resp_error_internal(void);
+static	void		 resp_error_notfound(const char *);
 static	void		 resp_index(const struct req *);
+static	void		 resp_noresult(const struct req *,
+				const char *);
 static	void		 resp_search(const struct req *,
 				struct manpage *, size_t);
 static	void		 resp_searchform(const struct req *);
@@ -412,21 +413,32 @@ resp_index(const struct req *req)
 }
 
 static void
-resp_error400(void)
+resp_noresult(const struct req *req, const char *msg)
+{
+	resp_begin_html(200, NULL);
+	resp_searchform(req);
+	puts("<P>");
+	puts(msg);
+	puts("</P>");
+	resp_end_html();
+}
+
+static void
+resp_error_badrequest(const char *msg)
 {
 
-	resp_begin_html(400, "Query Malformed");
-	printf("<H1>Malformed Query</H1>\n"
-	       "<P>\n"
-	       "The query your entered was malformed.\n"
-	       "Try again from the\n"
-	       "<A HREF=\"%s/index.html\">main page</A>.\n"
+	resp_begin_html(400, "Bad Request");
+	puts("<H1>Bad Request</H1>\n"
+	     "<P>\n");
+	puts(msg);
+	printf("Try again from the\n"
+	       "<A HREF=\"%s\">main page</A>.\n"
 	       "</P>", scriptname);
 	resp_end_html();
 }
 
 static void
-resp_error404(const char *page)
+resp_error_notfound(const char *page)
 {
 
 	resp_begin_html(404, "Not Found");
@@ -444,19 +456,10 @@ resp_error404(const char *page)
 }
 
 static void
-resp_bad(void)
+resp_error_internal(void)
 {
 	resp_begin_html(500, "Internal Server Error");
 	puts("<P>Internal Server Error</P>");
-	resp_end_html();
-}
-
-static void
-resp_baddb(void)
-{
-
-	resp_begin_html(500, "Internal Server Error");
-	puts("<P>Your database is broken.</P>");
 	resp_end_html();
 }
 
@@ -479,22 +482,11 @@ resp_search(const struct req *req, struct manpage *r, size_t sz)
 		return;
 	}
 
-	resp_begin_html(200, NULL);
-	resp_searchform(req);
-
-	puts("<DIV CLASS=\"results\">");
-
-	if (0 == sz) {
-		puts("<P>\n"
-		     "No results found.\n"
-		     "</P>\n"
-		     "</DIV>");
-		resp_end_html();
-		return;
-	}
-
 	qsort(r, sz, sizeof(struct manpage), cmp);
 
+	resp_begin_html(200, NULL);
+	resp_searchform(req);
+	puts("<DIV CLASS=\"results\">");
 	puts("<TABLE>");
 
 	for (i = 0; i < sz; i++) {
@@ -536,7 +528,8 @@ catman(const struct req *req, const char *file)
 	int		 italic, bold;
 
 	if (NULL == (f = fopen(file, "r"))) {
-		resp_baddb();
+		resp_error_badrequest(
+		    "You specified an invalid manual file.");
 		return;
 	}
 
@@ -674,7 +667,8 @@ format(const struct req *req, const char *file)
 	char		 opts[PATH_MAX + 128];
 
 	if (-1 == (fd = open(file, O_RDONLY, 0))) {
-		resp_baddb();
+		resp_error_badrequest(
+		    "You specified an invalid manual file.");
 		return;
 	}
 
@@ -684,7 +678,9 @@ format(const struct req *req, const char *file)
 	close(fd);
 
 	if (rc >= MANDOCLEVEL_FATAL) {
-		resp_baddb();
+		fprintf(stderr, "fatal mandoc error: %s/%s\n",
+		    req->q.manpath, file);
+		resp_error_internal();
 		return;
 	}
 
@@ -694,7 +690,9 @@ format(const struct req *req, const char *file)
 
 	mparse_result(mp, &mdoc, &man, NULL);
 	if (NULL == man && NULL == mdoc) {
-		resp_baddb();
+		fprintf(stderr, "fatal mandoc error: %s/%s\n",
+		    req->q.manpath, file);
+		resp_error_internal();
 		mparse_free(mp);
 		return;
 	}
@@ -722,7 +720,8 @@ pg_show(const struct req *req, char *path)
 	char		*sub;
 
 	if (NULL == path || NULL == (sub = strchr(path, '/'))) {
-		resp_error400();
+		resp_error_badrequest(
+		    "You did not specify a page to show.");
 		return;
 	} 
 	*sub++ = '\0';
@@ -734,8 +733,8 @@ pg_show(const struct req *req, char *path)
 	 */
 
 	if (-1 == chdir(path)) {
-		perror(path);
-		resp_baddb();
+		resp_error_badrequest(
+		    "You specified an invalid manpath.");
 		return;
 	}
 
@@ -763,8 +762,8 @@ pg_search(const struct req *req, char *path)
 	 */
 
 	if (-1 == (chdir(req->q.manpath))) {
-		perror(req->q.manpath);
-		resp_search(req, NULL, 0);
+		resp_error_badrequest(
+		    "You specified an invalid manpath.");
 		return;
 	}
 
@@ -800,10 +799,12 @@ pg_search(const struct req *req, char *path)
 			ep++;
 	}
 
-	if (mansearch(&search, &paths, sz, cp, "Nd", &res, &ressz))
-		resp_search(req, res, ressz);
+	if (0 == mansearch(&search, &paths, sz, cp, "Nd", &res, &ressz))
+		resp_noresult(req, "You entered an invalid query.");
+	else if (0 == ressz)
+		resp_noresult(req, "No results found.");
 	else
-		resp_baddb();
+		resp_search(req, res, ressz);
 
 	for (i = 0; i < sz; i++)
 		free(cp[i]);
@@ -850,7 +851,7 @@ main(void)
 	if (-1 == chdir(mandir)) {
 		fprintf(stderr, "MAN_DIR: %s: %s\n",
 		    mandir, strerror(errno));
-		resp_bad();
+		resp_error_internal();
 		return(EXIT_FAILURE);
 	} 
 
@@ -905,7 +906,7 @@ main(void)
 		pg_show(&req, subpath);
 		break;
 	default:
-		resp_error404(path);
+		resp_error_notfound(path);
 		break;
 	}
 
