@@ -49,8 +49,6 @@ static	enum rew	 rew_dohalt(enum mant, enum man_type,
 				const struct man_node *);
 static	enum rew	 rew_block(enum mant, enum man_type,
 				const struct man_node *);
-static	void		 rew_warn(struct man *,
-				struct man_node *, enum mandocerr);
 
 const	struct man_macro __man_macros[MAN_MAX] = {
 	{ in_line_eoln, MAN_NSCOPED }, /* br */
