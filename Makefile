@@ -134,7 +134,7 @@ SRCS		 = LICENSE \
 		   makewhatis.8 \
 		   man.7 \
 		   man.c \
-		   man.cgi.7 \
+		   man.cgi.8 \
 		   man-cgi.css \
 		   man.h \
 		   man_hash.c \
@@ -317,12 +317,12 @@ WWW_MANS	 = apropos.1.html \
 		   mandoc.db.5.html \
 		   eqn.7.html \
 		   man.7.html \
-		   man.cgi.7.html \
 		   mandoc_char.7.html \
 		   mdoc.7.html \
 		   roff.7.html \
 		   tbl.7.html \
 		   makewhatis.8.html \
+		   man.cgi.8.html \
 		   man.h.html \
 		   mandoc.h.html \
 		   mandoc_aux.h.html \
