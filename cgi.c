@@ -367,7 +367,7 @@ resp_searchform(const struct req *req)
 	       "<FIELDSET>\n"
 	       "<LEGEND>Search Parameters</LEGEND>\n"
 	       "<INPUT TYPE=\"submit\" "
-	       " VALUE=\"Search\"> for manuals satisfying \n"
+	       " VALUE=\"Search\"> for manuals matching \n"
 	       "<INPUT TYPE=\"text\" NAME=\"expr\" VALUE=\"",
 	       scriptname);
 	html_print(req->q.expr ? req->q.expr : "");
@@ -414,7 +414,10 @@ resp_index(const struct req *req)
 	     "</H1>");
 	resp_searchform(req);
 	puts("<P>\n"
-	     "The <A HREF=\"search?expr=Nm~^apropos$&amp;sec=1\">"
+	     "This web interface is documented in the "
+	     "<A HREF=\"search?expr=Nm~^man\\.cgi$&amp;sec=8\">"
+	     "man.cgi</A> manual, and the "
+	     "<A HREF=\"search?expr=Nm~^apropos$&amp;sec=1\">"
 	     "apropos</A> manual explains the query syntax.\n"
 	     "</P>");
 	resp_end_html();
