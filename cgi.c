@@ -415,13 +415,14 @@ resp_index(const struct req *req)
 	     "<A HREF=\"http://mdocml.bsd.lv/\">mandoc</A>\n"
 	     "</H1>");
 	resp_searchform(req);
-	puts("<P>\n"
-	     "This web interface is documented in the "
-	     "<A HREF=\"search?expr=Nm~^man\\.cgi$&amp;sec=8\">"
-	     "man.cgi</A> manual, and the "
-	     "<A HREF=\"search?expr=Nm~^apropos$&amp;sec=1\">"
-	     "apropos</A> manual explains the query syntax.\n"
-	     "</P>");
+	printf("<P>\n"
+	       "This web interface is documented in the "
+	       "<A HREF=\"%s/search?expr=Nm~^man\\.cgi$&amp;sec=8\">"
+	       "man.cgi</A> manual, and the "
+	       "<A HREF=\"%s/search?expr=Nm~^apropos$&amp;sec=1\">"
+	       "apropos</A> manual explains the query syntax.\n"
+	       "</P>\n",
+	       scriptname, scriptname);
 	resp_end_html();
 }
 
