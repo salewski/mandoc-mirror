@@ -82,7 +82,8 @@ struct	mansearch {
 	const char	*sec; /* mansection/NULL */
 	uint64_t	 deftype; /* type if no key  */
 	int		 flags;
-#define	MANSEARCH_WHATIS 0x01 /* whatis mode: equality, no key */
+#define	MANSEARCH_WHATIS 0x01 /* whatis(1) mode: whole words, no keys */
+#define	MANSEARCH_MAN    0x02 /* man(1) mode: string equality, no keys */
 };
 
 int	mansearch_setup(int);
