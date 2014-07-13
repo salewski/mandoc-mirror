@@ -768,6 +768,8 @@ format(const struct req *req, const char *file)
 static void
 resp_show(const struct req *req, const char *file)
 {
+	if ('.' == file[0] || '/' == file[1])
+		file += 2;
 
 	if ('c' == *file)
 		catman(req, file);
