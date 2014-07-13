@@ -463,10 +463,10 @@ resp_index(const struct req *req)
 	resp_searchform(req);
 	printf("<P>\n"
 	       "This web interface is documented in the "
-	       "<A HREF=\"%s?query=man.cgi&amp;sec=8\">"
-	       "man.cgi</A> manual, and the "
-	       "<A HREF=\"%s?query=apropos&amp;sec=1\">"
-	       "apropos</A> manual explains the query syntax.\n"
+	       "<A HREF=\"%s/mandoc/man8/man.cgi.8\">man.cgi</A> "
+	       "manual, and the "
+	       "<A HREF=\"%s/mandoc/man1/apropos.1\">apropos</A> "
+	       "manual explains the query syntax.\n"
 	       "</P>\n",
 	       scriptname, scriptname);
 	resp_end_html();
