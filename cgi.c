@@ -77,10 +77,12 @@ static	void		 resp_noresult(const struct req *,
 static	void		 resp_search(const struct req *,
 				struct manpage *, size_t);
 static	void		 resp_searchform(const struct req *);
+static	void		 resp_show(const struct req *, const char *);
 
 static	const char	 *scriptname; /* CGI script name */
 static	const char	 *httphost; /* hostname used in the URIs */
 
+static	const int sec_prios[] = {1, 4, 5, 8, 6, 3, 7, 2, 9};
 static	const char *const sec_numbers[] = {
     "0", "1", "2", "3", "3p", "4", "5", "6", "7", "8", "9"
 };
@@ -508,7 +510,9 @@ resp_error_internal(void)
 static void
 resp_search(const struct req *req, struct manpage *r, size_t sz)
 {
-	size_t		 i;
+	size_t		 i, iuse, isec;
+	int		 prio, priouse;
+	char		 sec;
 
 	if (1 == sz) {
 		/*
@@ -550,6 +554,30 @@ resp_search(const struct req *req, struct manpage *r, size_t sz)
 
 	puts("</TABLE>\n"
 	     "</DIV>");
+
+	/*
+	 * In man(1) mode, show one of the pages
+	 * even if more than one is found.
+	 */
+
+	if (req->q.equal) {
+		puts("<HR>");
+		iuse = 0;
+		priouse = 10;
+		for (i = 0; i < sz; i++) {
+			isec = strcspn(r[i].file, "123456789");
+			sec = r[i].file[isec];
+			if ('\0' == sec)
+				continue;
+			prio = sec_prios[sec - '1'];
+			if (prio >= priouse)
+				continue;
+			priouse = prio;
+			iuse = i;
+		}
+		resp_show(req, r[iuse].file);
+	}
+
 	resp_end_html();
 }
 
@@ -563,13 +591,10 @@ catman(const struct req *req, const char *file)
 	int		 italic, bold;
 
 	if (NULL == (f = fopen(file, "r"))) {
-		resp_error_badrequest(
-		    "You specified an invalid manual file.");
+		puts("<P>You specified an invalid manual file.</P>");
 		return;
 	}
 
-	resp_begin_html(200, NULL);
-	resp_searchform(req);
 	puts("<DIV CLASS=\"catman\">\n"
 	     "<PRE>");
 
@@ -683,9 +708,7 @@ catman(const struct req *req, const char *file)
 	}
 
 	puts("</PRE>\n"
-	     "</DIV>\n"
-	     "</BODY>\n"
-	     "</HTML>");
+	     "</DIV>");
 
 	fclose(f);
 }
@@ -702,8 +725,7 @@ format(const struct req *req, const char *file)
 	char		 opts[PATH_MAX + 128];
 
 	if (-1 == (fd = open(file, O_RDONLY, 0))) {
-		resp_error_badrequest(
-		    "You specified an invalid manual file.");
+		puts("<P>You specified an invalid manual file.</P>");
 		return;
 	}
 
@@ -732,9 +754,6 @@ format(const struct req *req, const char *file)
 		return;
 	}
 
-	resp_begin_html(200, NULL);
-	resp_searchform(req);
-
 	vp = html_alloc(opts);
 
 	if (NULL != mdoc)
@@ -742,11 +761,18 @@ format(const struct req *req, const char *file)
 	else
 		html_man(vp, man);
 
-	puts("</BODY>\n"
-	     "</HTML>");
-
 	html_free(vp);
 	mparse_free(mp);
+}
+
+static void
+resp_show(const struct req *req, const char *file)
+{
+
+	if ('c' == *file)
+		catman(req, file);
+	else
+		format(req, file);
 }
 
 static void
@@ -773,10 +799,10 @@ pg_show(const struct req *req, const char *path)
 		return;
 	}
 
-	if ('c' == *sub)
-		catman(req, sub);
-	else
-		format(req, sub);
+	resp_begin_html(200, NULL);
+	resp_searchform(req);
+	resp_show(req, sub);
+	resp_end_html();
 }
 
 static void
