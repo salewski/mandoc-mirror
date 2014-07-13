@@ -64,18 +64,17 @@ static	void		 http_print(const char *);
 static	void 		 http_putchar(char);
 static	void		 http_printquery(const struct req *);
 static	void		 pathgen(struct req *);
+static	void		 pg_error_badrequest(const char *);
+static	void		 pg_error_internal(void);
+static	void		 pg_index(const struct req *);
+static	void		 pg_noresult(const struct req *, const char *);
 static	void		 pg_search(const struct req *);
+static	void		 pg_searchres(const struct req *,
+				struct manpage *, size_t);
 static	void		 pg_show(const struct req *, const char *);
 static	void		 resp_begin_html(int, const char *);
 static	void		 resp_begin_http(int, const char *);
 static	void		 resp_end_html(void);
-static	void		 resp_error_badrequest(const char *);
-static	void		 resp_error_internal(void);
-static	void		 resp_index(const struct req *);
-static	void		 resp_noresult(const struct req *,
-				const char *);
-static	void		 resp_search(const struct req *,
-				struct manpage *, size_t);
 static	void		 resp_searchform(const struct req *);
 static	void		 resp_show(const struct req *, const char *);
 
@@ -458,7 +457,7 @@ resp_searchform(const struct req *req)
 }
 
 static void
-resp_index(const struct req *req)
+pg_index(const struct req *req)
 {
 
 	resp_begin_html(200, NULL);
@@ -475,7 +474,7 @@ resp_index(const struct req *req)
 }
 
 static void
-resp_noresult(const struct req *req, const char *msg)
+pg_noresult(const struct req *req, const char *msg)
 {
 	resp_begin_html(200, NULL);
 	resp_searchform(req);
@@ -486,7 +485,7 @@ resp_noresult(const struct req *req, const char *msg)
 }
 
 static void
-resp_error_badrequest(const char *msg)
+pg_error_badrequest(const char *msg)
 {
 
 	resp_begin_html(400, "Bad Request");
@@ -500,7 +499,7 @@ resp_error_badrequest(const char *msg)
 }
 
 static void
-resp_error_internal(void)
+pg_error_internal(void)
 {
 	resp_begin_html(500, "Internal Server Error");
 	puts("<P>Internal Server Error</P>");
@@ -508,7 +507,7 @@ resp_error_internal(void)
 }
 
 static void
-resp_search(const struct req *req, struct manpage *r, size_t sz)
+pg_searchres(const struct req *req, struct manpage *r, size_t sz)
 {
 	size_t		 i, iuse, isec;
 	int		 prio, priouse;
@@ -737,7 +736,7 @@ format(const struct req *req, const char *file)
 	if (rc >= MANDOCLEVEL_FATAL) {
 		fprintf(stderr, "fatal mandoc error: %s/%s\n",
 		    req->q.manpath, file);
-		resp_error_internal();
+		pg_error_internal();
 		return;
 	}
 
@@ -749,7 +748,7 @@ format(const struct req *req, const char *file)
 	if (NULL == man && NULL == mdoc) {
 		fprintf(stderr, "fatal mandoc error: %s/%s\n",
 		    req->q.manpath, file);
-		resp_error_internal();
+		pg_error_internal();
 		mparse_free(mp);
 		return;
 	}
@@ -783,7 +782,7 @@ pg_show(const struct req *req, const char *path)
 	char		*sub;
 
 	if (NULL == path || NULL == (sub = strchr(path, '/'))) {
-		resp_error_badrequest(
+		pg_error_badrequest(
 		    "You did not specify a page to show.");
 		return;
 	} 
@@ -796,7 +795,7 @@ pg_show(const struct req *req, const char *path)
 	 */
 
 	if (-1 == chdir(path)) {
-		resp_error_badrequest(
+		pg_error_badrequest(
 		    "You specified an invalid manpath.");
 		return;
 	}
@@ -825,7 +824,7 @@ pg_search(const struct req *req)
 	 */
 
 	if (-1 == (chdir(req->q.manpath))) {
-		resp_error_badrequest(
+		pg_error_badrequest(
 		    "You specified an invalid manpath.");
 		return;
 	}
@@ -863,11 +862,11 @@ pg_search(const struct req *req)
 	}
 
 	if (0 == mansearch(&search, &paths, sz, cp, "Nd", &res, &ressz))
-		resp_noresult(req, "You entered an invalid query.");
+		pg_noresult(req, "You entered an invalid query.");
 	else if (0 == ressz)
-		resp_noresult(req, "No results found.");
+		pg_noresult(req, "No results found.");
 	else
-		resp_search(req, res, ressz);
+		pg_searchres(req, res, ressz);
 
 	for (i = 0; i < sz; i++)
 		free(cp[i]);
@@ -909,7 +908,7 @@ main(void)
 	if (-1 == chdir(MAN_DIR)) {
 		fprintf(stderr, "MAN_DIR: %s: %s\n",
 		    MAN_DIR, strerror(errno));
-		resp_error_internal();
+		pg_error_internal();
 		return(EXIT_FAILURE);
 	} 
 
@@ -934,7 +933,7 @@ main(void)
 	else if (NULL != req.q.expr)
 		pg_search(&req);
 	else
-		resp_index(&req);
+		pg_index(&req);
 
 	for (i = 0; i < (int)req.psz; i++)
 		free(req.p[i]);
