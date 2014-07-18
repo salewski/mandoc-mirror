@@ -266,11 +266,6 @@ is supported as an alias for
 The web server may pass the following CGI variables to
 .Nm :
 .Bl -tag -width Ds
-.It Ev HTTP_HOST
-The FQDN of the (possibly virtual) host the HTTP server is running on.
-This is used for
-.Ic Location:
-headers in HTTP 303 responses.
 .It Ev PATH_INFO
 The final part of the URI path passed from the client to the server,
 starting after the

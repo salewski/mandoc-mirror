@@ -79,7 +79,6 @@ static	void		 resp_searchform(const struct req *);
 static	void		 resp_show(const struct req *, const char *);
 
 static	const char	 *scriptname; /* CGI script name */
-static	const char	 *httphost; /* hostname used in the URIs */
 
 static	const int sec_prios[] = {1, 4, 5, 8, 6, 3, 7, 2, 9};
 static	const char *const sec_numbers[] = {
@@ -530,8 +529,8 @@ pg_searchres(const struct req *req, struct manpage *r, size_t sz)
 		 * without any delay.
 		 */
 		printf("Status: 303 See Other\r\n");
-		printf("Location: http://%s%s/%s/%s?",
-		    httphost, scriptname, req->q.manpath, r[0].file);
+		printf("Location: %s/%s/%s?",
+		    scriptname, req->q.manpath, r[0].file);
 		http_printquery(req);
 		printf("\r\n"
 		     "Content-Type: text/html; charset=utf-8\r\n"
@@ -906,9 +905,6 @@ main(void)
 
 	if (NULL == (scriptname = getenv("SCRIPT_NAME")))
 		scriptname = "";
-
-	if (NULL == (httphost = getenv("HTTP_HOST")))
-		httphost = "localhost";
 
 	/*
 	 * First we change directory into the MAN_DIR so that
