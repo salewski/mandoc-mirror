@@ -970,8 +970,12 @@ pathgen(struct req *req)
 	char	*dp;
 	size_t	 dpsz;
 
-	if (NULL == (fp = fopen("manpath.conf", "r")))
-		return;
+	if (NULL == (fp = fopen("manpath.conf", "r"))) {
+		fprintf(stderr, "%s/manpath.conf: %s\n",
+			MAN_DIR, strerror(errno));
+		pg_error_internal();
+		exit(EXIT_FAILURE);
+	}
 
 	while (NULL != (dp = fgetln(fp, &dpsz))) {
 		if ('\n' == dp[dpsz - 1])
@@ -979,5 +983,11 @@ pathgen(struct req *req)
 		req->p = mandoc_realloc(req->p,
 		    (req->psz + 1) * sizeof(char *));
 		req->p[req->psz++] = mandoc_strndup(dp, dpsz);
+	}
+
+	if ( req->p == NULL ) {
+		fprintf(stderr, "%s/manpath.conf is empty\n", MAN_DIR);
+		pg_error_internal();
+		exit(EXIT_FAILURE);
 	}
 }
