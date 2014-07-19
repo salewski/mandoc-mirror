@@ -467,6 +467,21 @@ resp_searchform(const struct req *req)
 }
 
 static int
+validate_manpath(const struct req *req, const char* manpath)
+{
+	size_t	 i;
+
+	if ( ! strcmp(manpath, "mandoc"))
+		return(1);
+
+	for (i = 0; i < req->psz; i++)
+		if ( ! strcmp(manpath, req->p[i]))
+			return(1);
+
+	return(0);
+}
+
+static int
 validate_filename(const char *file)
 {
 
@@ -819,6 +834,12 @@ pg_show(const struct req *req, const char *path)
 	} 
 	*sub++ = '\0';
 
+	if ( ! validate_manpath(req, path)) {
+		pg_error_badrequest(
+		    "You specified an invalid manpath.");
+		return;
+	}
+
 	/*
 	 * Begin by chdir()ing into the manpath.
 	 * This way we can pick up the database files, which are
@@ -826,8 +847,9 @@ pg_show(const struct req *req, const char *path)
 	 */
 
 	if (-1 == chdir(path)) {
-		pg_error_badrequest(
-		    "You specified an invalid manpath.");
+		fprintf(stderr, "chdir %s: %s\n",
+		    path, strerror(errno));
+		pg_error_internal();
 		return;
 	}
 
@@ -861,8 +883,9 @@ pg_search(const struct req *req)
 	 */
 
 	if (-1 == (chdir(req->q.manpath))) {
-		pg_error_badrequest(
-		    "You specified an invalid manpath.");
+		fprintf(stderr, "chdir %s: %s\n",
+		    req->q.manpath, strerror(errno));
+		pg_error_internal();
 		return;
 	}
 
@@ -953,6 +976,12 @@ main(void)
 
 	if (NULL != (querystring = getenv("QUERY_STRING")))
 		http_parse(&req, querystring);
+
+	if ( ! validate_manpath(&req, req.q.manpath)) {
+		pg_error_badrequest(
+		    "You specified an invalid manpath.");
+		return(EXIT_FAILURE);
+	}
 
 	/* Dispatch to the three different pages. */
 
