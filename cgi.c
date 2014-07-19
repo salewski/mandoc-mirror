@@ -466,6 +466,17 @@ resp_searchform(const struct req *req)
 	puts("<!-- End search form. //-->");
 }
 
+static int
+validate_filename(const char *file)
+{
+
+	if ('.' == file[0] && '/' == file[1])
+		file += 2;
+
+	return ( ! (strstr(file, "../") || strstr(file, "/..") ||
+	    (strncmp(file, "man", 3) && strncmp(file, "cat", 3))));
+}
+
 static void
 pg_index(const struct req *req)
 {
@@ -522,6 +533,15 @@ pg_searchres(const struct req *req, struct manpage *r, size_t sz)
 	size_t		 i, iuse, isec;
 	int		 prio, priouse;
 	char		 sec;
+
+	for (i = 0; i < sz; i++) {
+		if (validate_filename(r[i].file))
+			continue;
+		fprintf(stderr, "invalid filename %s in %s database\n",
+		    r[i].file, req->q.manpath);
+		pg_error_internal();
+		return;
+	}
 
 	if (1 == sz) {
 		/*
@@ -777,7 +797,8 @@ format(const struct req *req, const char *file)
 static void
 resp_show(const struct req *req, const char *file)
 {
-	if ('.' == file[0] || '/' == file[1])
+
+	if ('.' == file[0] && '/' == file[1])
 		file += 2;
 
 	if ('c' == *file)
@@ -807,6 +828,12 @@ pg_show(const struct req *req, const char *path)
 	if (-1 == chdir(path)) {
 		pg_error_badrequest(
 		    "You specified an invalid manpath.");
+		return;
+	}
+
+	if ( ! validate_filename(sub)) {
+		pg_error_badrequest(
+		    "You specified an invalid manual file.");
 		return;
 	}
 
