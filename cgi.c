@@ -71,7 +71,7 @@ static	void		 pg_noresult(const struct req *, const char *);
 static	void		 pg_search(const struct req *);
 static	void		 pg_searchres(const struct req *,
 				struct manpage *, size_t);
-static	void		 pg_show(const struct req *, const char *);
+static	void		 pg_show(struct req *, const char *);
 static	void		 resp_begin_html(int, const char *);
 static	void		 resp_begin_http(int, const char *);
 static	void		 resp_end_html(void);
@@ -785,9 +785,10 @@ format(const struct req *req, const char *file)
 		return;
 	}
 
-	snprintf(opts, sizeof(opts),
-	    "fragment,man=%s?query=%%N&amp;sec=%%S",
-	    scriptname);
+	snprintf(opts, sizeof(opts), "fragment,man=%s?"
+	    "manpath=%s&amp;query=%%N&amp;sec=%%S&amp;arch=%s",
+	    scriptname, req->q.manpath,
+	    req->q.arch ? req->q.arch : "");
 
 	mparse_result(mp, &mdoc, &man, NULL);
 	if (NULL == man && NULL == mdoc) {
@@ -823,7 +824,7 @@ resp_show(const struct req *req, const char *file)
 }
 
 static void
-pg_show(const struct req *req, const char *path)
+pg_show(struct req *req, const char *path)
 {
 	char		*sub;
 
@@ -858,6 +859,9 @@ pg_show(const struct req *req, const char *path)
 		    "You specified an invalid manual file.");
 		return;
 	}
+
+	if (strcmp(path, "mandoc"))
+		req->q.manpath = path;
 
 	resp_begin_html(200, NULL);
 	resp_searchform(req);
