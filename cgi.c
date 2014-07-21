@@ -564,8 +564,8 @@ pg_searchres(const struct req *req, struct manpage *r, size_t sz)
 		 * without any delay.
 		 */
 		printf("Status: 303 See Other\r\n");
-		printf("Location: %s/%s/%s?",
-		    scriptname, req->q.manpath, r[0].file);
+		printf("Location: http://%s%s/%s/%s?",
+		    HTTP_HOST, scriptname, req->q.manpath, r[0].file);
 		http_printquery(req);
 		printf("\r\n"
 		     "Content-Type: text/html; charset=utf-8\r\n"

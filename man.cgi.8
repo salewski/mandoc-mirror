@@ -189,6 +189,11 @@ element.
 An ASCII string to be used for the HTML
 .Aq TITLE
 element.
+.It Ev HTTP_HOST
+The FQDN of the (possibly virtual) host the HTTP server is running on.
+This is used for
+.Ic Location:
+headers in HTTP 303 responses.
 .It Ev MAN_DIR
 A path to the
 .Nm
