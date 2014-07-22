@@ -330,7 +330,7 @@ print_encode(struct html *h, const char *p, int norecurse)
 	int		 c, len, nospace;
 	const char	*seq;
 	enum mandoc_esc	 esc;
-	static const char rejs[8] = { '\\', '<', '>', '&',
+	static const char rejs[9] = { '\\', '<', '>', '&', '"',
 		ASCII_NBRSP, ASCII_HYPH, ASCII_BREAK, '\0' };
 
 	nospace = 0;
@@ -359,6 +359,9 @@ print_encode(struct html *h, const char *p, int norecurse)
 			continue;
 		case '&':
 			printf("&amp;");
+			continue;
+		case '"':
+			printf("&quot;");
 			continue;
 		case ASCII_NBRSP:
 			putchar('-');
