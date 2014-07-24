@@ -168,6 +168,13 @@
   with apropos(1) using the file name as a key, as well.
   Issue reported by tedu@  Fri, 05 Jul 2013 21:15:23 -0400
 
+- When makewhatis(8) encounters a FATAL parse error,
+  it silently treats the file as formatted, which makes no sense
+  at all for paths like man1/foo.1 - and which also contradicts
+  what the manual says at the end of the description.
+  The end result will be ENOENT for file names returned
+  by mansearch() in manpage.file.
+
 - makewhatis(8) for preformatted pages:
   parse the section number from the header line
   and compare to the section number from the directory name
@@ -246,6 +253,10 @@
   Search the text "Routing tables".
   Also check what PostScript mode does when fixing this.
   reported by juanfra@ Wed, 04 Jun 2014 21:44:58 +0200
+
+--- HTML issues --------------------------------------------------------
+
+- check https://github.com/trentm/mdocml
 
 ************************************************************************
 * formatting issues: gratuitous differences
