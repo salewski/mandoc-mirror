@@ -874,8 +874,9 @@ format(const struct req *req, const char *file)
 	}
 
 	snprintf(opts, sizeof(opts), "fragment,man=%s?"
-	    "manpath=%s&amp;query=%%N&amp;sec=%%S&amp;arch=%s",
+	    "manpath=%s&query=%%N&sec=%%S%s%s",
 	    scriptname, req->q.manpath,
+	    req->q.arch ? "&arch=" : "",
 	    req->q.arch ? req->q.arch : "");
 
 	mparse_result(mp, &mdoc, &man, NULL);
