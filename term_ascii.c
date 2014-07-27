@@ -269,7 +269,12 @@ locale_width(const struct termp *p, int c)
 {
 	int		rc;
 
-	return((rc = wcwidth(c)) < 0 ? 0 : rc);
+	if (c == ASCII_NBRSP)
+		c = ' ';
+	rc = wcwidth(c);
+	if (rc < 0)
+		rc = 0;
+	return(rc);
 }
 
 static void
