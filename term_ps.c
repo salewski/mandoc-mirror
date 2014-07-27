@@ -914,11 +914,8 @@ ps_pletter(struct termp *p, int c)
 
 	f = (int)p->ps->lastf;
 
-	if (c <= 32 || (c - 32 >= MAXCHAR)) {
-		ps_putchar(p, ' ');
-		p->ps->pscol += (size_t)fonts[f].gly[0].wx;
-		return;
-	}
+	if (c <= 32 || c - 32 >= MAXCHAR)
+		c = 32;
 
 	ps_putchar(p, (char)c);
 	c -= 32;
@@ -1104,9 +1101,10 @@ ps_width(const struct termp *p, int c)
 {
 
 	if (c <= 32 || c - 32 >= MAXCHAR)
-		return((size_t)fonts[(int)TERMFONT_NONE].gly[0].wx);
+		c = 0;
+	else
+		c -= 32;
 
-	c -= 32;
 	return((size_t)fonts[(int)TERMFONT_NONE].gly[c].wx);
 }
 
