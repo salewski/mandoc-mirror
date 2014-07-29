@@ -802,7 +802,7 @@ pre_bd(PRE_ARGS)
 
 		switch (argv->arg) {
 		case MDOC_Centred:
-			dt = DISP_centred;
+			dt = DISP_centered;
 			break;
 		case MDOC_Ragged:
 			dt = DISP_ragged;

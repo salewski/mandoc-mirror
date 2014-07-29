@@ -280,7 +280,7 @@ enum	mdoc_list {
 
 enum	mdoc_disp {
 	DISP__NONE = 0,
-	DISP_centred, /* -centered */
+	DISP_centered, /* -centered */
 	DISP_ragged, /* -ragged */
 	DISP_unfilled, /* -unfilled */
 	DISP_filled, /* -filled */
