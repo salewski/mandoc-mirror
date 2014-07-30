@@ -62,7 +62,6 @@ static	int	  post_vs(CHKARGS);
 static	int	  post_fi(CHKARGS);
 static	int	  post_ft(CHKARGS);
 static	int	  post_nf(CHKARGS);
-static	int	  post_sec(CHKARGS);
 static	int	  post_TH(CHKARGS);
 static	int	  post_UC(CHKARGS);
 static	int	  pre_sec(CHKARGS);
@@ -78,7 +77,6 @@ static	v_check	  posts_le1[] = { check_le1, NULL };
 static	v_check	  posts_nf[] = { check_eq0, post_nf, NULL };
 static	v_check	  posts_par[] = { check_par, NULL };
 static	v_check	  posts_part[] = { check_part, NULL };
-static	v_check	  posts_sec[] = { post_sec, NULL };
 static	v_check	  posts_sp[] = { post_vs, check_le1, NULL };
 static	v_check	  posts_th[] = { check_ge2, check_le5, post_TH, NULL };
 static	v_check	  posts_uc[] = { post_UC, NULL };
@@ -88,8 +86,8 @@ static	v_check	  pres_sec[] = { pre_sec, NULL };
 static	const struct man_valid man_valids[MAN_MAX] = {
 	{ NULL, posts_br }, /* br */
 	{ NULL, posts_th }, /* TH */
-	{ pres_sec, posts_sec }, /* SH */
-	{ pres_sec, posts_sec }, /* SS */
+	{ pres_sec, NULL }, /* SH */
+	{ pres_sec, NULL }, /* SS */
 	{ NULL, NULL }, /* TP */
 	{ NULL, posts_par }, /* LP */
 	{ NULL, posts_par }, /* PP */
@@ -190,12 +188,7 @@ static int
 check_root(CHKARGS)
 {
 
-	if ((MAN_BLINE | MAN_ELINE) & man->flags)
-		mandoc_msg(MANDOCERR_BLK_LINE, man->parse,
-		    0, 0, "at end of file");
-
-	man->flags &= ~MAN_BLINE;
-	man->flags &= ~MAN_ELINE;
+	assert((man->flags & (MAN_BLINE | MAN_ELINE)) == 0);
 
 	if (NULL == man->first->child)
 		man_nmsg(man, n, MANDOCERR_DOC_EMPTY);
@@ -322,17 +315,6 @@ pre_sec(CHKARGS)
 	if (MAN_BLOCK == n->type)
 		man->flags &= ~MAN_LITERAL;
 	return(1);
-}
-
-static int
-post_sec(CHKARGS)
-{
-
-	if ( ! (MAN_HEAD == n->type && 0 == n->nchild))
-		return(1);
-
-	man_nmsg(man, n, MANDOCERR_SYNTARGCOUNT);
-	return(0);
 }
 
 static int

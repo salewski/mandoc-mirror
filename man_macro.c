@@ -104,13 +104,35 @@ man_unscope(struct man *man, const struct man_node *to)
 	to = to->parent;
 	n = man->last;
 	while (n != to) {
-		if (NULL == to &&
-		    MAN_BLOCK == n->type &&
-		    0 == (MAN_VALID & n->flags) &&
-		    MAN_EXPLICIT & man_macros[n->tok].flags)
-			mandoc_msg(MANDOCERR_BLK_NOEND,
-			    man->parse, n->line, n->pos,
-			    man_macronames[n->tok]);
+
+		/* Reached the end of the document? */
+
+		if (to == NULL && ! (n->flags & MAN_VALID)) {
+			if (man->flags & (MAN_BLINE | MAN_ELINE) &&
+			    man_macros[n->tok].flags & MAN_SCOPED) {
+				mandoc_vmsg(MANDOCERR_BLK_LINE,
+				    man->parse, n->line, n->pos,
+				    "EOF breaks %s",
+				    man_macronames[n->tok]);
+				if (man->flags & MAN_ELINE)
+					man->flags &= ~MAN_ELINE;
+				else {
+					assert(n->type == MAN_HEAD);
+					n = n->parent;
+					man->flags &= ~MAN_BLINE;
+				}
+				man->last = n;
+				n = n->parent;
+				man_node_delete(man, man->last);
+				continue;
+			}
+			if (n->type == MAN_BLOCK &&
+			    man_macros[n->tok].flags & MAN_EXPLICIT)
+				mandoc_msg(MANDOCERR_BLK_NOEND,
+				    man->parse, n->line, n->pos,
+				    man_macronames[n->tok]);
+		}
+
 		/*
 		 * We might delete the man->last node
 		 * in the post-validation phase.
