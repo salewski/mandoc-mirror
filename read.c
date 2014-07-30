@@ -207,7 +207,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"input too large",
 	"column syntax is inconsistent",
 	"NOT IMPLEMENTED: .Bd -file",
-	"argument count wrong, violates syntax",
 	"NOT IMPLEMENTED: .so with absolute path or \"..\"",
 	".so request failed",
 	"static buffer exhausted",

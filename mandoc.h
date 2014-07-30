@@ -163,7 +163,6 @@ enum	mandocerr {
 	MANDOCERR_TOOLARGE, /* input too large */
 	MANDOCERR_COLUMNS, /* column syntax is inconsistent */
 	MANDOCERR_BADDISP, /* NOT IMPLEMENTED: .Bd -file */
-	MANDOCERR_SYNTARGCOUNT, /* argument count wrong, violates syntax */
 	MANDOCERR_SO_PATH, /* NOT IMPLEMENTED: .so with absolute path or ".." */
 	MANDOCERR_SO_FAIL, /* .so request failed */
 	MANDOCERR_MEM, /* static buffer exhausted */
