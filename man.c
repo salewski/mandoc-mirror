@@ -68,7 +68,6 @@ const struct man_node *
 man_node(const struct man *man)
 {
 
-	assert( ! (MAN_HALT & man->flags));
 	return(man->first);
 }
 
@@ -76,7 +75,6 @@ const struct man_meta *
 man_meta(const struct man *man)
 {
 
-	assert( ! (MAN_HALT & man->flags));
 	return(&man->meta);
 }
 
@@ -116,11 +114,7 @@ int
 man_endparse(struct man *man)
 {
 
-	assert( ! (MAN_HALT & man->flags));
-	if (man_macroend(man))
-		return(1);
-	man->flags |= MAN_HALT;
-	return(0);
+	return(man_macroend(man));
 }
 
 int
@@ -128,8 +122,6 @@ man_parseln(struct man *man, int ln, char *buf, int offs)
 {
 
 	man->flags |= MAN_NEWLINE;
-
-	assert( ! (MAN_HALT & man->flags));
 
 	return (roff_getcontrol(man->roff, buf, &offs) ?
 	    man_pmacro(man, ln, buf, offs) :
@@ -352,8 +344,6 @@ man_addeqn(struct man *man, const struct eqn *ep)
 {
 	struct man_node	*n;
 
-	assert( ! (MAN_HALT & man->flags));
-
 	n = man_node_alloc(man, ep->ln, ep->pos, MAN_EQN, MAN_MAX);
 	n->eqn = ep;
 
@@ -368,8 +358,6 @@ int
 man_addspan(struct man *man, const struct tbl_span *sp)
 {
 	struct man_node	*n;
-
-	assert( ! (MAN_HALT & man->flags));
 
 	n = man_node_alloc(man, sp->line, 0, MAN_TBL, MAN_MAX);
 	n->span = sp;
@@ -590,7 +578,7 @@ man_pmacro(struct man *man, int ln, char *buf, int offs)
 
 	assert(man_macros[tok].fp);
 	if ( ! (*man_macros[tok].fp)(man, tok, ln, ppos, &offs, buf))
-		goto err;
+		return(0);
 
 	/* In quick mode (for mandocdb), abort after the NAME section. */
 
@@ -602,34 +590,14 @@ man_pmacro(struct man *man, int ln, char *buf, int offs)
 	}
 
 	/*
-	 * We weren't in a block-line scope when entering the
-	 * above-parsed macro, so return.
+	 * If we are in a next-line scope for a block head,
+	 * close it out now and switch to the body,
+	 * unless the next-line scope is allowed to continue.
 	 */
 
-	if ( ! bline) {
-		man->flags &= ~MAN_ILINE;
+	if ( ! bline || man->flags & MAN_ELINE ||
+	    man_macros[tok].flags & MAN_NSCOPED)
 		return(1);
-	}
-
-	/*
-	 * If we're in a block scope, then allow this macro to slip by
-	 * without closing scope around it.
-	 */
-
-	if (MAN_ILINE & man->flags) {
-		man->flags &= ~MAN_ILINE;
-		return(1);
-	}
-
-	/*
-	 * If we've opened a new next-line element scope, then return
-	 * now, as the next line will close out the block scope.
-	 */
-
-	if (MAN_ELINE & man->flags)
-		return(1);
-
-	/* Close out the block scope opened in the prior line.  */
 
 	assert(MAN_BLINE & man->flags);
 	man->flags &= ~MAN_BLINE;
@@ -637,11 +605,6 @@ man_pmacro(struct man *man, int ln, char *buf, int offs)
 	if ( ! man_unscope(man, man->last->parent))
 		return(0);
 	return(man_body_alloc(man, ln, ppos, man->last->tok));
-
-err:	/* Error out. */
-
-	man->flags |= MAN_HALT;
-	return(0);
 }
 
 /*

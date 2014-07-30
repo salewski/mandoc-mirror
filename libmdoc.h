@@ -28,7 +28,6 @@ struct	mdoc {
 	const char	 *defos; /* default argument for .Os */
 	int		  quick; /* abort parse early */
 	int		  flags; /* parse flags */
-#define	MDOC_HALT	 (1 << 0) /* error in parse: halt */
 #define	MDOC_LITERAL	 (1 << 1) /* in a literal scope */
 #define	MDOC_PBODY	 (1 << 2) /* in the document body */
 #define	MDOC_NEWLINE	 (1 << 3) /* first macro/text in a line */

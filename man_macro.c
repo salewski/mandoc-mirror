@@ -415,13 +415,6 @@ in_line_eoln(MACRO_PROT_ARGS)
 		return(1);
 	}
 
-	/* Set ignorable context, if applicable. */
-
-	if (MAN_NSCOPED & man_macros[tok].flags) {
-		assert( ! (MAN_SCOPED & man_macros[tok].flags));
-		man->flags |= MAN_ILINE;
-	}
-
 	assert(MAN_ROOT != man->last->type);
 	man->next = MAN_NEXT_SIBLING;
 
