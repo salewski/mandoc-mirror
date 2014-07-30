@@ -478,10 +478,11 @@ man_ptext(struct man *man, int line, char *buf, int offs)
 static int
 man_pmacro(struct man *man, int ln, char *buf, int offs)
 {
-	int		 i, ppos;
-	enum mant	 tok;
 	char		 mac[5];
 	struct man_node	*n;
+	enum mant	 tok;
+	int		 i, ppos;
+	int		 bline;
 
 	if ('"' == buf[offs]) {
 		mandoc_msg(MANDOCERR_COMMENT_BAD, man->parse,
@@ -581,14 +582,9 @@ man_pmacro(struct man *man, int ln, char *buf, int offs)
 		man->flags &= ~MAN_BLINE;
 	}
 
-	/*
-	 * Save the fact that we're in the next-line for a block.  In
-	 * this way, embedded roff instructions can "remember" state
-	 * when they exit.
-	 */
+	/* Remember whether we are in next-line scope for a block head. */
 
-	if (MAN_BLINE & man->flags)
-		man->flags |= MAN_BPLINE;
+	bline = man->flags & MAN_BLINE;
 
 	/* Call to handler... */
 
@@ -610,11 +606,10 @@ man_pmacro(struct man *man, int ln, char *buf, int offs)
 	 * above-parsed macro, so return.
 	 */
 
-	if ( ! (MAN_BPLINE & man->flags)) {
+	if ( ! bline) {
 		man->flags &= ~MAN_ILINE;
 		return(1);
 	}
-	man->flags &= ~MAN_BPLINE;
 
 	/*
 	 * If we're in a block scope, then allow this macro to slip by
