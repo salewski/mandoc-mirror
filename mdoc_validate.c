@@ -2376,7 +2376,8 @@ post_os(POST_ARGS)
 #else /*!OSNAME */
 	if (NULL == defbuf) {
 		if (-1 == uname(&utsname)) {
-			mdoc_nmsg(mdoc, n, MANDOCERR_UNAME);
+			mandoc_msg(MANDOCERR_OS_UNAME, mdoc->parse,
+			    n->line, n->pos, "Os");
 			defbuf = mandoc_strdup("UNKNOWN");
 		} else
 			mandoc_asprintf(&defbuf, "%s %s",

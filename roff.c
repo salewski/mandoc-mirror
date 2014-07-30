@@ -1758,7 +1758,7 @@ roff_it(ROFF_ARGS)
 	len = strcspn(cp, " \t");
 	cp[len] = '\0';
 	if ((iv = mandoc_strntoi(cp, len, 10)) <= 0) {
-		mandoc_msg(MANDOCERR_NUMERIC, r->parse,
+		mandoc_msg(MANDOCERR_IT_NONUM, r->parse,
 		    ln, ppos, *bufp + 1);
 		return(ROFF_IGN);
 	}

@@ -193,11 +193,11 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	/* related to request and macro arguments */
 	"escaped character not allowed in a name",
 	"argument count wrong",
-	"missing manual name, using \"\"",
-	"unknown standard specifier",
-	"uname(3) system call failed",
-	"request requires a numeric argument",
 	"missing list type, using -item",
+	"missing manual name, using \"\"",
+	"uname(3) system call failed, using UNKNOWN",
+	"unknown standard specifier",
+	"skipping request without numeric argument",
 	"skipping all arguments",
 	"skipping excess arguments",
 
