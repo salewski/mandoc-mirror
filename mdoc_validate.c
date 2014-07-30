@@ -1683,16 +1683,24 @@ ebool(struct mdoc *mdoc)
 static int
 post_root(POST_ARGS)
 {
-	int		  ret;
 	struct mdoc_node *n;
 
-	ret = 1;
-
-	/* Check that we have a finished prologue. */
+	/* Add missing prologue data. */
 
 	if ( ! (MDOC_PBODY & mdoc->flags)) {
-		ret = 0;
-		mdoc_nmsg(mdoc, mdoc->first, MANDOCERR_NODOCPROLOG);
+		mandoc_msg(MANDOCERR_PROLOG_BAD, mdoc->parse, 0, 0, "EOF");
+		if (mdoc->meta.date == NULL)
+			mdoc->meta.date = mdoc->quick ?
+			    mandoc_strdup("") :
+			    mandoc_normdate(mdoc->parse, NULL, 0, 0);
+		if (mdoc->meta.title == NULL)
+			mdoc->meta.title = mandoc_strdup("UNKNOWN");
+		if (mdoc->meta.vol == NULL)
+			mdoc->meta.vol = mandoc_strdup("LOCAL");
+		if (mdoc->meta.arch == NULL)
+			mdoc->meta.msec = mandoc_strdup("1");
+		if (mdoc->meta.os == NULL)
+			mdoc->meta.os = mandoc_strdup("UNKNOWN");
 	}
 
 	n = mdoc->first;
@@ -1707,7 +1715,7 @@ post_root(POST_ARGS)
 		    n->child->line, n->child->pos,
 		    mdoc_macronames[n->child->tok]);
 
-	return(ret);
+	return(1);
 }
 
 static int
