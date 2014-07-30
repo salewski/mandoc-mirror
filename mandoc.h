@@ -141,6 +141,7 @@ enum	mandocerr {
 	MANDOCERR_ROFFLOOP, /* input stack limit exceeded, infinite loop? */
 	MANDOCERR_BADCHAR, /* skipping bad character */
 	MANDOCERR_MACRO, /* skipping unknown macro */
+	MANDOCERR_IT_STRAY, /* skipping item outside list */
 	MANDOCERR_TA_STRAY, /* skipping column outside column list */
 	MANDOCERR_BLK_NOTOPEN, /* skipping end of block that is not open */
 	MANDOCERR_BLK_BROKEN, /* inserting missing end of block: macro ... */
@@ -162,7 +163,6 @@ enum	mandocerr {
 	MANDOCERR_TOOLARGE, /* input too large */
 	MANDOCERR_COLUMNS, /* column syntax is inconsistent */
 	MANDOCERR_BADDISP, /* NOT IMPLEMENTED: .Bd -file */
-	MANDOCERR_SYNTCHILD, /* child violates parent syntax */
 	MANDOCERR_SYNTARGCOUNT, /* argument count wrong, violates syntax */
 	MANDOCERR_SO_PATH, /* NOT IMPLEMENTED: .so with absolute path or ".." */
 	MANDOCERR_SO_FAIL, /* .so request failed */
