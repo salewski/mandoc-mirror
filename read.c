@@ -136,6 +136,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"missing display type, using -ragged",
 	"list type is not the first argument",
 	"missing -width in -tag list, using 8n",
+	"missing name for .Ex, using \"\"",
 	"empty head in list item",
 	"empty list item",
 	"missing font type, using \\fR",
@@ -191,8 +192,8 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	/* related to request and macro arguments */
 	"escaped character not allowed in a name",
-	"manual name not yet set",
 	"argument count wrong",
+	"missing manual name, using \"\"",
 	"unknown standard specifier",
 	"uname(3) system call failed",
 	"request requires a numeric argument",
