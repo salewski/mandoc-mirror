@@ -144,11 +144,12 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"missing -std argument, adding it",
 
 	/* related to bad macro arguments */
-	"skipping argument",
 	"unterminated quoted argument",
 	"duplicate argument",
+	"skipping duplicate argument",
 	"skipping duplicate display type",
 	"skipping duplicate list type",
+	"skipping -width argument",
 	"unknown AT&T UNIX version",
 	"invalid content in Rs block",
 	"invalid Boolean argument",
