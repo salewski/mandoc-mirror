@@ -191,12 +191,14 @@ check_root(CHKARGS)
 	assert((man->flags & (MAN_BLINE | MAN_ELINE)) == 0);
 
 	if (NULL == man->first->child)
-		man_nmsg(man, n, MANDOCERR_DOC_EMPTY);
+		mandoc_msg(MANDOCERR_DOC_EMPTY, man->parse,
+		    n->line, n->pos, NULL);
 	else
 		man->meta.hasbody = 1;
 
 	if (NULL == man->meta.title) {
-		man_nmsg(man, n, MANDOCERR_TH_MISSING);
+		mandoc_msg(MANDOCERR_TH_MISSING, man->parse,
+		    n->line, n->pos, NULL);
 
 		/*
 		 * If a title hasn't been set, do so now (by

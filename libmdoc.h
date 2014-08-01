@@ -104,10 +104,6 @@ extern	const struct mdoc_macro *const mdoc_macros;
 
 __BEGIN_DECLS
 
-#define		  mdoc_pmsg(mdoc, l, p, t) \
-		  mandoc_msg((t), (mdoc)->parse, (l), (p), NULL)
-#define		  mdoc_nmsg(mdoc, n, t) \
-		  mandoc_msg((t), (mdoc)->parse, (n)->line, (n)->pos, NULL)
 int		  mdoc_macro(MACRO_PROT_ARGS);
 int		  mdoc_word_alloc(struct mdoc *,
 			int, int, const char *);
