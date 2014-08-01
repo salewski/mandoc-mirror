@@ -165,7 +165,6 @@ enum	mandocerr {
 	MANDOCERR_BADDISP, /* NOT IMPLEMENTED: .Bd -file */
 	MANDOCERR_SO_PATH, /* NOT IMPLEMENTED: .so with absolute path or ".." */
 	MANDOCERR_SO_FAIL, /* .so request failed */
-	MANDOCERR_MEM, /* static buffer exhausted */
 
 	/* ===== system errors ===== */
 

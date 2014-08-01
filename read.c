@@ -209,7 +209,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"NOT IMPLEMENTED: .Bd -file",
 	"NOT IMPLEMENTED: .so with absolute path or \"..\"",
 	".so request failed",
-	"static buffer exhausted",
 
 	/* system errors */
 	NULL,
