@@ -388,7 +388,7 @@ man_br_pre(MAN_ARGS)
 			if ( ! a2roffsu(n->string, &su, SCALE_VS))
 				SCALE_VS_INIT(&su, atoi(n->string));
 	} else
-		su.scale = 0;
+		su.scale = 0.0;
 
 	bufinit(h);
 	bufcat_su(h, "height", &su);

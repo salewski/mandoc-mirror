@@ -238,22 +238,22 @@ ascii_hspan(const struct termp *p, const struct roffsu *su)
 
 	switch (su->unit) {
 	case SCALE_CM:
-		r = 4 * su->scale;
+		r = su->scale * 4.0;
 		break;
 	case SCALE_IN:
-		r = 10 * su->scale;
+		r = su->scale * 10.0;
 		break;
 	case SCALE_PC:
-		r = (10 * su->scale) / 6;
+		r = (su->scale * 10.0) / 6.0;
 		break;
 	case SCALE_PT:
-		r = (10 * su->scale) / 72;
+		r = (su->scale * 10.0) / 72.0;
 		break;
 	case SCALE_MM:
-		r = su->scale / 1000;
+		r = su->scale / 1000.0;
 		break;
 	case SCALE_VS:
-		r = su->scale * 2 - 1;
+		r = su->scale * 2.0 - 1.0;
 		break;
 	default:
 		r = su->scale;

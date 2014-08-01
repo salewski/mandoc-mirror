@@ -699,7 +699,7 @@ mdoc_nm_pre(MDOC_ARGS)
 	if (0 == len && meta->name)
 		len = html_strlen(meta->name);
 
-	SCALE_HS_INIT(&su, (double)len);
+	SCALE_HS_INIT(&su, len);
 	bufinit(h);
 	bufcat_su(h, "width", &su);
 	PAIR_STYLE_INIT(&tag, h);
@@ -1565,7 +1565,7 @@ mdoc_sp_pre(MDOC_ARGS)
 			if ( ! a2roffsu(n->string, &su, SCALE_VS))
 				SCALE_VS_INIT(&su, atoi(n->string));
 	} else
-		su.scale = 0;
+		su.scale = 0.0;
 
 	bufinit(h);
 	bufcat_su(h, "height", &su);
