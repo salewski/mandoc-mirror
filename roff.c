@@ -1975,7 +1975,7 @@ roff_so(ROFF_ARGS)
 	char *name;
 
 	name = *bufp + pos;
-	mandoc_vmsg(MANDOCERR_SO, r->parse, ln, ppos, ".so %s", name);
+	mandoc_vmsg(MANDOCERR_SO, r->parse, ln, ppos, "so %s", name);
 
 	/*
 	 * Handle `so'.  Be EXTREMELY careful, as we shouldn't be
@@ -2067,7 +2067,8 @@ roff_getname(struct roff *r, char **cpp, int ln, int pos)
 		cp++;
 		if ('\\' == *cp)
 			continue;
-		mandoc_msg(MANDOCERR_NAMESC, r->parse, ln, pos, NULL);
+		mandoc_vmsg(MANDOCERR_NAMESC, r->parse, ln, pos,
+		    "%.*s", (int)(cp - name + 1), name);
 		mandoc_escape((const char **)&cp, NULL, NULL);
 		break;
 	}

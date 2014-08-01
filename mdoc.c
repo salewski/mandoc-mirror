@@ -838,8 +838,8 @@ mdoc_pmacro(struct mdoc *mdoc, int ln, char *buf, int offs)
 	tok = (i > 1 && i < 4) ? mdoc_hash_find(mac) : MDOC_MAX;
 
 	if (MDOC_MAX == tok) {
-		mandoc_vmsg(MANDOCERR_MACRO, mdoc->parse,
-		    ln, sv, "%s", buf + sv - 1);
+		mandoc_msg(MANDOCERR_MACRO, mdoc->parse,
+		    ln, sv, buf + sv - 1);
 		return(1);
 	}
 

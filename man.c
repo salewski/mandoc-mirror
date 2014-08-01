@@ -496,8 +496,8 @@ man_pmacro(struct man *man, int ln, char *buf, int offs)
 	tok = (i > 0 && i < 4) ? man_hash_find(mac) : MAN_MAX;
 
 	if (MAN_MAX == tok) {
-		mandoc_vmsg(MANDOCERR_MACRO, man->parse, ln, ppos,
-		    "%s", buf + ppos - 1);
+		mandoc_msg(MANDOCERR_MACRO, man->parse,
+		    ln, ppos, buf + ppos - 1);
 		return(1);
 	}
 

@@ -1785,7 +1785,7 @@ phrase_ta(MACRO_PROT_ARGS)
 		n = n->parent;
 	if (NULL == n || LIST_column != n->norm->Bl.type) {
 		mandoc_msg(MANDOCERR_TA_STRAY, mdoc->parse,
-		    line, ppos, NULL);
+		    line, ppos, "Ta");
 		return(1);
 	}
 
