@@ -70,7 +70,6 @@ void		  man_hash_init(void);
 enum mant	  man_hash_find(const char *);
 int		  man_macroend(struct man *);
 int		  man_valid_post(struct man *);
-int		  man_valid_pre(struct man *, struct man_node *);
 int		  man_unscope(struct man *, const struct man_node *);
 
 __END_DECLS
