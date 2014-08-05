@@ -19,6 +19,8 @@ VERSION		 = 1.13.0
 
 # === USER SETTINGS ====================================================
 
+# --- user settings relevant for all builds ----------------------------
+
 # Specify this if you want to hard-code the operating system to appear
 # in the lower-left hand corner of -mdoc manuals.
 #
@@ -32,28 +34,15 @@ VERSION		 = 1.13.0
 #
 CFLAGS	 	+= -DUSE_WCHAR
 
-# If your system has manpath(1), uncomment this.  This is most any
-# system that's not OpenBSD or NetBSD.  If uncommented, manpage(1) and
-# makewhatis(8) will use manpath(1) to get the MANPATH variable.
-#CFLAGS		+= -DUSE_MANPATH
-
-# If your system does not support static binaries, comment this,
-# for example on Mac OS X.
-STATIC		 = -static
-# Linux requires -pthread to statically link with libdb.
-#STATIC		+= -pthread
-
 CFLAGS		+= -I/usr/local/include -g -DHAVE_CONFIG_H
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
-WWWPREFIX	 = /var/www
-HTDOCDIR	 = $(WWWPREFIX)/htdocs
-CGIBINDIR	 = $(WWWPREFIX)/cgi-bin
 BINDIR		 = $(PREFIX)/bin
 INCLUDEDIR	 = $(PREFIX)/include/mandoc
 LIBDIR		 = $(PREFIX)/lib/mandoc
 MANDIR		 = $(PREFIX)/man
 EXAMPLEDIR	 = $(PREFIX)/share/examples/mandoc
+
 INSTALL		 = install
 INSTALL_PROGRAM	 = $(INSTALL) -m 0755
 INSTALL_DATA	 = $(INSTALL) -m 0444
@@ -61,22 +50,48 @@ INSTALL_LIB	 = $(INSTALL) -m 0644
 INSTALL_SOURCE	 = $(INSTALL) -m 0644
 INSTALL_MAN	 = $(INSTALL_DATA)
 
+# --- user settings related to database support ------------------------
+
 # If you want to build without database support, for example to avoid
-# the dependency on SQLite3, comment the following two lines.
-DBLIB		 = -L/usr/local/lib -lsqlite3
+# the dependency on SQLite3, comment the following line.
+#
 DBBIN		 = makewhatis manpage apropos
 
-# To build man.cgi, copy cgi.h.example to cgi.h, edit it, and
-# either enable the following line or run "make man.cgi" by hand.
-#DBBIN		+= man.cgi
+# If your system has manpath(1), uncomment this.  This is most any
+# system that's not OpenBSD or NetBSD.  If uncommented, apropos(1)
+# and makewhatis(8) will use manpath(1) to get the MANPATH variable.
+#
+#CFLAGS		+= -DUSE_MANPATH
 
 # OpenBSD has the ohash functions in libutil.
 # Comment the following line if your system doesn't.
+#
 DBLIB		+= -lutil
+
+# --- user settings related to man.cgi ---------------------------------
+
+# To build man.cgi, copy cgi.h.example to cgi.h, edit it,
+# and enable the following line.
+#
+#DBBIN		+= man.cgi
+
+# If your system does not support static binaries, comment this,
+# for example on Mac OS X.
+#
+STATIC		 = -static
+
+# Linux requires -pthread for statical linking.
+#
+#STATIC		+= -pthread
+
+WWWPREFIX	 = /var/www
+HTDOCDIR	 = $(WWWPREFIX)/htdocs
+CGIBINDIR	 = $(WWWPREFIX)/cgi-bin
 
 # === END OF USER SETTINGS =============================================
 
 ALLBIN		 = mandoc preconv demandoc $(DBBIN)
+DBLIB		+= -L/usr/local/lib -lsqlite3
 
 all: $(ALLBIN)
 
