@@ -121,6 +121,7 @@ TESTSRCS	 = test-fgetln.c \
 		   test-mmap.c \
 		   test-ohash.c \
 		   test-reallocarray.c \
+		   test-sqlite3_errstr.c \
 		   test-strcasestr.c \
 		   test-strlcat.c \
 		   test-strlcpy.c \
@@ -136,6 +137,7 @@ SRCS		 = apropos.c \
 		   compat_getsubopt.c \
 		   compat_ohash.c \
 		   compat_reallocarray.c \
+		   compat_sqlite3_errstr.c \
 		   compat_strcasestr.c \
 		   compat_strlcat.c \
 		   compat_strlcpy.c \
@@ -281,6 +283,7 @@ COMPAT_OBJS	 = compat_fgetln.o \
 		   compat_getsubopt.o \
 		   compat_ohash.o \
 		   compat_reallocarray.o \
+		   compat_sqlite3_errstr.o \
 		   compat_strcasestr.o \
 		   compat_strlcat.o \
 		   compat_strlcpy.o \

@@ -23,6 +23,9 @@ extern	char	 *suboptarg;
 #ifndef HAVE_REALLOCARRAY
 extern	void	 *reallocarray(void *, size_t, size_t);
 #endif
+#ifndef HAVE_SQLITE3_ERRSTR
+extern	const char *sqlite3_errstr(int);
+#endif
 #ifndef HAVE_STRCASESTR
 extern	char	 *strcasestr(const char *, const char *);
 #endif

@@ -35,6 +35,8 @@ runtest getsubopt GETSUBOPT
 runtest mmap MMAP
 runtest ohash OHASH -lutil
 runtest reallocarray REALLOCARRAY
+runtest sqlite3_errstr SQLITE3_ERRSTR \
+	"-I/usr/local/include -L/usr/local/lib -lsqlite3"
 runtest strcasestr STRCASESTR
 runtest strlcat STRLCAT
 runtest strlcpy STRLCPY
