@@ -7,6 +7,7 @@ compat_fgetln.o: compat_fgetln.c config.h
 compat_getsubopt.o: compat_getsubopt.c config.h 
 compat_ohash.o: compat_ohash.c config.h 
 compat_reallocarray.o: compat_reallocarray.c config.h 
+compat_sqlite3_errstr.o: compat_sqlite3_errstr.c config.h 
 compat_strcasestr.o: compat_strcasestr.c config.h 
 compat_strlcat.o: compat_strlcat.c config.h 
 compat_strlcpy.o: compat_strlcpy.c config.h 
@@ -61,6 +62,7 @@ test-getsubopt.o: test-getsubopt.c
 test-mmap.o: test-mmap.c 
 test-ohash.o: test-ohash.c 
 test-reallocarray.o: test-reallocarray.c 
+test-sqlite3_errstr.o: test-sqlite3_errstr.c 
 test-strcasestr.o: test-strcasestr.c 
 test-strlcat.o: test-strlcat.c 
 test-strlcpy.o: test-strlcpy.c 
