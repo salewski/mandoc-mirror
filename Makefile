@@ -34,22 +34,15 @@ CFLAGS	 	+= -DUSE_WCHAR
 
 # If your system has manpath(1), uncomment this.  This is most any
 # system that's not OpenBSD or NetBSD.  If uncommented, apropos(1),
-# mandocdb(8), and man.cgi will popen(3) manpath(1) to get the MANPATH
+# and mandocdb(8) will popen(3) manpath(1) to get the MANPATH
 # variable.
 #CFLAGS		+= -DUSE_MANPATH
-
-# If your system does not support static binaries, comment this,
-# for example on Mac OS X.
-STATIC		 = -static
-# Linux requires -pthread to statically link with libdb.
-#STATIC		+= -pthread
 
 CFLAGS		+= -g -DHAVE_CONFIG_H
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
 WWWPREFIX	 = /var/www
 HTDOCDIR	 = $(WWWPREFIX)/htdocs
-CGIBINDIR	 = $(WWWPREFIX)/cgi-bin
 BINDIR		 = $(PREFIX)/bin
 INCLUDEDIR	 = $(PREFIX)/include/mandoc
 LIBDIR		 = $(PREFIX)/lib/mandoc
@@ -68,7 +61,7 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 # comment out apropos and mandocdb. 
 #
 #DBLIB		 = -ldb
-DBBIN		 = apropos mandocdb man.cgi catman whatis
+DBBIN		 = apropos mandocdb whatis
 
 # === END OF USER SETTINGS =============================================
 
@@ -97,9 +90,6 @@ SRCS		 = LICENSE \
 		   arch.in \
 		   att.c \
 		   att.in \
-		   catman.8 \
-		   catman.c \
-		   cgi.c \
 		   chars.c \
 		   chars.in \
 		   compat_fgetln.c \
@@ -132,8 +122,6 @@ SRCS		 = LICENSE \
 		   main.h \
 		   man.7 \
 		   man.c \
-		   man.cgi.7 \
-		   man-cgi.css \
 		   man.h \
 		   man_hash.c \
 		   man_html.c \
@@ -287,25 +275,10 @@ APROPOS_OBJS	 = apropos.o apropos_db.o manpath.o
 $(APROPOS_OBJS): config.h mandoc.h mandoc_aux.h manpath.h \
 		 apropos_db.h mandocdb.h
 
-CGI_OBJS	 = $(MANDOC_HTML_OBJS) \
-		   $(MANDOC_MAN_OBJS) \
-		   $(MANDOC_TERM_OBJS) \
-		   cgi.o \
-		   apropos_db.o \
-		   manpath.o \
-		   out.o \
-		   tree.o
-$(CGI_OBJS): main.h mdoc.h man.h out.h config.h mandoc.h mandoc_aux.h \
-	     apropos_db.h manpath.h mandocdb.h
-
-CATMAN_OBJS	 = catman.o manpath.o
-$(CATMAN_OBJS): config.h mandoc_aux.h manpath.h mandocdb.h
-
 DEMANDOC_OBJS	 = demandoc.o
 $(DEMANDOC_OBJS): config.h mandoc.h man.h mdoc.h
 
 WWW_MANS	 = apropos.1.html \
-		   catman.8.html \
 		   demandoc.1.html \
 		   mandoc.1.html \
 		   preconv.1.html \
@@ -314,7 +287,6 @@ WWW_MANS	 = apropos.1.html \
 		   tbl.3.html \
 		   eqn.7.html \
 		   man.7.html \
-		   man.cgi.7.html \
 		   mandoc_char.7.html \
 		   mdoc.7.html \
 		   roff.7.html \
@@ -338,8 +310,6 @@ clean:
 	rm -f apropos whatis $(APROPOS_OBJS)
 	rm -f mandocdb $(MANDOCDB_OBJS)
 	rm -f preconv $(PRECONV_OBJS)
-	rm -f man.cgi $(CGI_OBJS)
-	rm -f catman $(CATMAN_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f mandoc $(MANDOC_OBJS)
 	rm -f config.h config.log $(COMPAT_OBJS)
@@ -362,13 +332,6 @@ install: all
 	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 \
 		$(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
-
-installcgi: all
-	mkdir -p $(DESTDIR)$(CGIBINDIR)
-	mkdir -p $(DESTDIR)$(HTDOCDIR)
-	$(INSTALL_PROGRAM) man.cgi $(DESTDIR)$(CGIBINDIR)
-	$(INSTALL_DATA) example.style.css $(DESTDIR)$(HTDOCDIR)/man.css
-	$(INSTALL_DATA) man-cgi.css $(DESTDIR)$(HTDOCDIR)
 
 installwww: www
 	mkdir -p $(DESTDIR)$(HTDOCDIR)/snapshots
@@ -397,12 +360,6 @@ whatis: apropos
 apropos: $(APROPOS_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(APROPOS_OBJS) libmandoc.a $(DBLIB)
 
-catman: $(CATMAN_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(CATMAN_OBJS) libmandoc.a $(DBLIB)
-
-man.cgi: $(CGI_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) $(STATIC) -o $@ $(CGI_OBJS) libmandoc.a $(DBLIB)
-
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a
 
@@ -420,7 +377,7 @@ config.h: configure config.h.pre config.h.post $(TESTSRCS)
 	rm -f config.log
 	CC="$(CC)" CFLAGS="$(CFLAGS)" VERSION="$(VERSION)" ./configure
 
-.PHONY: 	 clean install installcgi installwww
+.PHONY: 	 clean install installwww
 .SUFFIXES:	 .1       .3       .5       .7       .8       .h
 .SUFFIXES:	 .1.html  .3.html  .5.html  .7.html  .8.html  .h.html
 
