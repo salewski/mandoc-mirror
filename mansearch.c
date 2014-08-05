@@ -38,6 +38,9 @@
 #include "compat_ohash.h"
 #endif
 #include <sqlite3.h>
+#ifndef SQLITE_DETERMINISTIC
+#define SQLITE_DETERMINISTIC 0
+#endif
 
 #include "mandoc.h"
 #include "mandoc_aux.h"
