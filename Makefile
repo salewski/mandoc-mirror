@@ -19,6 +19,8 @@ VERSION		 = 1.12.4
 
 # === USER SETTINGS ====================================================
 
+# --- user settings relevant for all builds ----------------------------
+
 # Specify this if you want to hard-code the operating system to appear
 # in the lower-left hand corner of -mdoc manuals.
 #
@@ -32,22 +34,15 @@ VERSION		 = 1.12.4
 #
 CFLAGS	 	+= -DUSE_WCHAR
 
-# If your system has manpath(1), uncomment this.  This is most any
-# system that's not OpenBSD or NetBSD.  If uncommented, apropos(1),
-# and mandocdb(8) will popen(3) manpath(1) to get the MANPATH
-# variable.
-#CFLAGS		+= -DUSE_MANPATH
-
 CFLAGS		+= -g -DHAVE_CONFIG_H
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
-WWWPREFIX	 = /var/www
-HTDOCDIR	 = $(WWWPREFIX)/htdocs
 BINDIR		 = $(PREFIX)/bin
 INCLUDEDIR	 = $(PREFIX)/include/mandoc
 LIBDIR		 = $(PREFIX)/lib/mandoc
 MANDIR		 = $(PREFIX)/man
 EXAMPLEDIR	 = $(PREFIX)/share/examples/mandoc
+
 INSTALL		 = install
 INSTALL_PROGRAM	 = $(INSTALL) -m 0755
 INSTALL_DATA	 = $(INSTALL) -m 0444
@@ -55,13 +50,26 @@ INSTALL_LIB	 = $(INSTALL) -m 0644
 INSTALL_SOURCE	 = $(INSTALL) -m 0644
 INSTALL_MAN	 = $(INSTALL_DATA)
 
+# --- user settings related to database support ------------------------
+
+# If you want to build without database support, for example to avoid
+# the dependency on Berkeley DB, comment the following line.
+#
+DBBIN		 = apropos mandocdb whatis
+
 # Non-BSD systems (Linux, etc.) need -ldb to compile mandocdb and
 # apropos.
-# However, if you don't have -ldb at all (or it's not native), then
-# comment out apropos and mandocdb. 
 #
 #DBLIB		 = -ldb
-DBBIN		 = apropos mandocdb whatis
+
+# If your system has manpath(1), uncomment this.  This is most any
+# system that's not OpenBSD or NetBSD.  If uncommented, apropos(1)
+# and mandocdb(8) will use manpath(1) to get the MANPATH variable.
+#
+#CFLAGS		+= -DUSE_MANPATH
+
+WWWPREFIX	 = /var/www
+HTDOCDIR	 = $(WWWPREFIX)/htdocs
 
 # === END OF USER SETTINGS =============================================
 
