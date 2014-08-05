@@ -44,9 +44,9 @@ MANDIR		 = $(PREFIX)/man
 EXAMPLEDIR	 = $(PREFIX)/share/examples/mandoc
 
 INSTALL		 = install
-INSTALL_PROGRAM	 = $(INSTALL) -m 0755
+INSTALL_PROGRAM	 = $(INSTALL) -m 0555
 INSTALL_DATA	 = $(INSTALL) -m 0444
-INSTALL_LIB	 = $(INSTALL) -m 0644
+INSTALL_LIB	 = $(INSTALL) -m 0444
 INSTALL_SOURCE	 = $(INSTALL) -m 0644
 INSTALL_MAN	 = $(INSTALL_DATA)
 
@@ -82,9 +82,11 @@ TESTSRCS	 = test-betoh64.c \
 		   test-getsubopt.c \
 		   test-mmap.c \
 		   test-reallocarray.c \
+		   test-strcasestr.c \
 		   test-strlcat.c \
 		   test-strlcpy.c \
-		   test-strptime.c
+		   test-strptime.c \
+		   test-strsep.c
 
 SRCS		 = LICENSE \
 		   Makefile \
@@ -143,6 +145,7 @@ SRCS		 = LICENSE \
 		   mandoc_aux.c \
 		   mandoc_aux.h \
 		   mandoc_char.7 \
+		   mandoc_html.3 \
 		   mandocdb.8 \
 		   mandocdb.c \
 		   mandocdb.h \
@@ -292,6 +295,7 @@ WWW_MANS	 = apropos.1.html \
 		   preconv.1.html \
 		   whatis.1.html \
 		   mandoc.3.html \
+		   mandoc_html.3.html \
 		   tbl.3.html \
 		   eqn.7.html \
 		   man.7.html \
