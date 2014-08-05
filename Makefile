@@ -94,20 +94,11 @@ TESTSRCS	 = test-betoh64.c \
 		   test-strptime.c \
 		   test-strsep.c
 
-SRCS		 = LICENSE \
-		   Makefile \
-		   NEWS \
-		   TODO \
-		   apropos.1 \
-		   apropos.c \
+SRCS		 = apropos.c \
 		   apropos_db.c \
-		   apropos_db.h \
 		   arch.c \
-		   arch.in \
 		   att.c \
-		   att.in \
 		   chars.c \
-		   chars.in \
 		   compat_fgetln.c \
 		   compat_getsubopt.c \
 		   compat_reallocarray.c \
@@ -115,51 +106,24 @@ SRCS		 = LICENSE \
 		   compat_strlcat.c \
 		   compat_strlcpy.c \
 		   compat_strsep.c \
-		   config.h.post \
-		   config.h.pre \
-		   configure \
-		   demandoc.1 \
 		   demandoc.c \
-		   eqn.7 \
 		   eqn.c \
 		   eqn_html.c \
 		   eqn_term.c \
-		   example.style.css \
-		   gmdiff \
 		   html.c \
-		   html.h \
 		   lib.c \
-		   lib.in \
-		   libman.h \
-		   libmandoc.h \
-		   libmdoc.h \
-		   libroff.h \
 		   main.c \
-		   main.h \
-		   man.7 \
 		   man.c \
-		   man.h \
 		   man_hash.c \
 		   man_html.c \
 		   man_macro.c \
 		   man_term.c \
 		   man_validate.c \
-		   mandoc.1 \
-		   mandoc.3 \
 		   mandoc.c \
-		   mandoc.h \
 		   mandoc_aux.c \
-		   mandoc_aux.h \
-		   mandoc_char.7 \
-		   mandoc_html.3 \
-		   mandocdb.8 \
 		   mandocdb.c \
-		   mandocdb.h \
 		   manpath.c \
-		   manpath.h \
-		   mdoc.7 \
 		   mdoc.c \
-		   mdoc.h \
 		   mdoc_argv.c \
 		   mdoc_hash.c \
 		   mdoc_html.c \
@@ -168,20 +132,11 @@ SRCS		 = LICENSE \
 		   mdoc_term.c \
 		   mdoc_validate.c \
 		   msec.c \
-		   msec.in \
 		   out.c \
-		   out.h \
-		   preconv.1 \
 		   preconv.c \
-		   predefs.in \
 		   read.c \
-		   roff.7 \
 		   roff.c \
 		   st.c \
-		   st.in \
-		   style.css \
-		   tbl.3 \
-		   tbl.7 \
 		   tbl.c \
 		   tbl_data.c \
 		   tbl_html.c \
@@ -189,14 +144,62 @@ SRCS		 = LICENSE \
 		   tbl_opts.c \
 		   tbl_term.c \
 		   term.c \
-		   term.h \
 		   term_ascii.c \
 		   term_ps.c \
 		   tree.c \
 		   vol.c \
+		   $(TESTSRCS)
+
+DISTFILES	 = LICENSE \
+		   Makefile \
+		   Makefile.depend \
+		   NEWS \
+		   TODO \
+		   apropos.1 \
+		   apropos_db.h \
+		   arch.in \
+		   att.in \
+		   chars.in \
+		   config.h.post \
+		   config.h.pre \
+		   configure \
+		   demandoc.1 \
+		   eqn.7 \
+		   example.style.css \
+		   gmdiff \
+		   html.h \
+		   lib.in \
+		   libman.h \
+		   libmandoc.h \
+		   libmdoc.h \
+		   libroff.h \
+		   main.h \
+		   man.7 \
+		   man.h \
+		   mandoc.1 \
+		   mandoc.3 \
+		   mandoc.h \
+		   mandoc_aux.h \
+		   mandoc_char.7 \
+		   mandoc_html.3 \
+		   mandocdb.8 \
+		   mandocdb.h \
+		   manpath.h \
+		   mdoc.7 \
+		   mdoc.h \
+		   msec.in \
+		   out.h \
+		   preconv.1 \
+		   predefs.in \
+		   roff.7 \
+		   st.in \
+		   style.css \
+		   tbl.3 \
+		   tbl.7 \
+		   term.h \
 		   vol.in \
 		   whatis.1 \
-		   $(TESTSRCS)
+		   $(SRCS)
 
 LIBMAN_OBJS	 = man.o \
 		   man_hash.o \
@@ -238,37 +241,11 @@ COMPAT_OBJS	 = compat_fgetln.o \
 		   compat_strlcpy.o \
 		   compat_strsep.o
 
-# === DEPENDENCY HANDLING ==============================================
-
-all: base-build $(BUILD_TARGETS)
-
-base-build: $(BASEBIN)
-
-db-build: $(DBBIN)
-
-install: base-install $(INSTALL_TARGETS)
-
-arch.o: arch.in
-att.o: att.in
-chars.o: chars.in
-lib.o: lib.in
-msec.o: msec.in
-roff.o: predefs.in
-st.o: st.in
-vol.o: vol.in
-
-$(LIBMAN_OBJS): libman.h
-$(LIBMDOC_OBJS): libmdoc.h
-$(LIBROFF_OBJS): libroff.h
-$(LIBMANDOC_OBJS): mandoc.h mandoc_aux.h mdoc.h man.h libmandoc.h config.h
-$(COMPAT_OBJS): config.h
-
 MANDOC_HTML_OBJS = eqn_html.o \
 		   html.o \
 		   man_html.o \
 		   mdoc_html.o \
 		   tbl_html.o
-$(MANDOC_HTML_OBJS): html.h
 
 MANDOC_MAN_OBJS  = mdoc_man.o
 
@@ -279,7 +256,6 @@ MANDOC_TERM_OBJS = eqn_term.o \
 		   term_ascii.o \
 		   term_ps.o \
 		   tbl_term.o
-$(MANDOC_TERM_OBJS): term.h
 
 MANDOC_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   $(MANDOC_MAN_OBJS) \
@@ -287,21 +263,14 @@ MANDOC_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   main.o \
 		   out.o \
 		   tree.o
-$(MANDOC_OBJS): main.h mandoc.h mandoc_aux.h mdoc.h man.h config.h out.h
 
 MANDOCDB_OBJS	 = mandocdb.o manpath.o
-$(MANDOCDB_OBJS): mandocdb.h mandoc.h mandoc_aux.h \
-		  mdoc.h man.h config.h manpath.h
 
 PRECONV_OBJS	 = preconv.o
-$(PRECONV_OBJS): config.h
 
 APROPOS_OBJS	 = apropos.o apropos_db.o manpath.o
-$(APROPOS_OBJS): config.h mandoc.h mandoc_aux.h manpath.h \
-		 apropos_db.h mandocdb.h
 
 DEMANDOC_OBJS	 = demandoc.o
-$(DEMANDOC_OBJS): config.h mandoc.h man.h mdoc.h
 
 WWW_MANS	 = apropos.1.html \
 		   demandoc.1.html \
@@ -327,7 +296,19 @@ WWW_MANS	 = apropos.1.html \
 WWW_OBJS	 = mdocml.tar.gz \
 		   mdocml.sha256
 
+# === DEPENDENCY HANDLING ==============================================
+
+all: base-build $(BUILD_TARGETS)
+
+base-build: $(BASEBIN)
+
+db-build: $(DBBIN)
+
+install: base-install $(INSTALL_TARGETS)
+
 www: $(WWW_OBJS) $(WWW_MANS)
+
+.include "Makefile.depend"
 
 # === TARGETS CONTAINING SHELL COMMANDS ================================
 
@@ -378,6 +359,12 @@ www-install: www
 	$(INSTALL_DATA) mdocml.sha256 \
 		$(DESTDIR)$(HTDOCDIR)/snapshots/mdocml-$(VERSION).sha256
 
+Makefile.depend: $(SRCS) config.h Makefile
+	mkdep -f Makefile.depend $(CFLAGS) $(SRCS)
+	perl -e 'undef $$/; $$_ = <>; s|/usr/include/\S+||g; \
+		s|\\\n||g; s|  +| |g; print;' Makefile.depend > Makefile.tmp
+	mv Makefile.tmp Makefile.depend
+
 libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 	$(AR) rs $@ $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 
@@ -399,9 +386,9 @@ demandoc: $(DEMANDOC_OBJS) libmandoc.a
 mdocml.sha256: mdocml.tar.gz
 	sha256 mdocml.tar.gz > $@
 
-mdocml.tar.gz: $(SRCS)
+mdocml.tar.gz: $(DISTFILES)
 	mkdir -p .dist/mdocml-$(VERSION)/
-	$(INSTALL_SOURCE) $(SRCS) .dist/mdocml-$(VERSION)
+	$(INSTALL_SOURCE) $(DISTFILES) .dist/mdocml-$(VERSION)
 	chmod 755 .dist/mdocml-$(VERSION)/configure
 	( cd .dist/ && tar zcf ../$@ mdocml-$(VERSION) )
 	rm -rf .dist/
