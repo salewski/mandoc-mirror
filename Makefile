@@ -54,8 +54,13 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 
 # If you want to build without database support, for example to avoid
 # the dependency on Berkeley DB, comment the following line.
+# However, you won't get apropos(1) and makewhatis(8) in that case.
 #
-DBBIN		 = apropos mandocdb whatis
+BUILD_TARGETS	+= db-build
+
+# The remaining settings in this section
+# are only relevant if db-build is enabled.
+# Otherwise, they have no effect either way.
 
 # Non-BSD systems (Linux, etc.) need -ldb to compile mandocdb and
 # apropos.
@@ -73,9 +78,10 @@ HTDOCDIR	 = $(WWWPREFIX)/htdocs
 
 # === END OF USER SETTINGS =============================================
 
-ALLBIN		 = mandoc preconv demandoc $(DBBIN)
+INSTALL_TARGETS	 = $(BUILD_TARGETS:-build=-install)
 
-all: $(ALLBIN)
+BASEBIN		 = mandoc preconv demandoc
+DBBIN		 = apropos mandocdb
 
 TESTSRCS	 = test-betoh64.c \
 		   test-fgetln.c \
@@ -234,6 +240,14 @@ COMPAT_OBJS	 = compat_fgetln.o \
 
 # === DEPENDENCY HANDLING ==============================================
 
+all: base-build $(BUILD_TARGETS)
+
+base-build: $(BASEBIN)
+
+db-build: $(DBBIN)
+
+install: base-install $(INSTALL_TARGETS)
+
 arch.o: arch.in
 att.o: att.in
 chars.o: chars.in
@@ -319,7 +333,7 @@ www: $(WWW_OBJS) $(WWW_MANS)
 
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS)
-	rm -f apropos whatis $(APROPOS_OBJS)
+	rm -f apropos $(APROPOS_OBJS)
 	rm -f mandocdb $(MANDOCDB_OBJS)
 	rm -f preconv $(PRECONV_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
@@ -328,7 +342,7 @@ clean:
 	rm -f $(WWW_MANS) $(WWW_OBJS)
 	rm -rf *.dSYM
 
-install: all
+base-install: base-build
 	mkdir -p $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(EXAMPLEDIR)
 	mkdir -p $(DESTDIR)$(LIBDIR)
@@ -336,16 +350,26 @@ install: all
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
-	$(INSTALL_PROGRAM) mandoc preconv demandoc $(DESTDIR)$(BINDIR)
+	$(INSTALL_PROGRAM) $(BASEBIN) $(DESTDIR)$(BINDIR)
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
-	$(INSTALL_LIB) man.h mdoc.h mandoc.h $(DESTDIR)$(INCLUDEDIR)
+	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h \
+		$(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.1 preconv.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) mandoc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 \
 		$(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
 
-installwww: www
+db-install: db-build
+	mkdir -p $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(MANDIR)/man1
+	mkdir -p $(DESTDIR)$(MANDIR)/man8
+	$(INSTALL_PROGRAM) $(DBBIN) $(DESTDIR)$(BINDIR)
+	ln -f $(DESTDIR)$(BINDIR)/apropos $(DESTDIR)$(BINDIR)/whatis
+	$(INSTALL_MAN) apropos.1 whatis.1 $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL_MAN) mandocdb.8 $(DESTDIR)$(MANDIR)/man8
+
+www-install: www
 	mkdir -p $(DESTDIR)$(HTDOCDIR)/snapshots
 	$(INSTALL_DATA) $(WWW_MANS) style.css $(DESTDIR)$(HTDOCDIR)
 	$(INSTALL_DATA) $(WWW_OBJS) $(DESTDIR)$(HTDOCDIR)/snapshots
@@ -365,9 +389,6 @@ mandocdb: $(MANDOCDB_OBJS) libmandoc.a
 
 preconv: $(PRECONV_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(PRECONV_OBJS)
-
-whatis: apropos
-	cp -f apropos whatis
 
 apropos: $(APROPOS_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(APROPOS_OBJS) libmandoc.a $(DBLIB)
@@ -389,7 +410,7 @@ config.h: configure config.h.pre config.h.post $(TESTSRCS)
 	rm -f config.log
 	CC="$(CC)" CFLAGS="$(CFLAGS)" VERSION="$(VERSION)" ./configure
 
-.PHONY: 	 clean install installwww
+.PHONY: 	 base-install clean db-install install www-install
 .SUFFIXES:	 .1       .3       .5       .7       .8       .h
 .SUFFIXES:	 .1.html  .3.html  .5.html  .7.html  .8.html  .h.html
 
