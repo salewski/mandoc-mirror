@@ -1306,10 +1306,10 @@ names_check(void)
 		say("", "%s", sqlite3_errmsg(db));
 
 	while (SQLITE_ROW == (irc = sqlite3_step(stmt))) {
-		name = sqlite3_column_text(stmt, 0);
-		sec  = sqlite3_column_text(stmt, 1);
-		arch = sqlite3_column_text(stmt, 2);
-		key  = sqlite3_column_text(stmt, 3);
+		name = (const char *)sqlite3_column_text(stmt, 0);
+		sec  = (const char *)sqlite3_column_text(stmt, 1);
+		arch = (const char *)sqlite3_column_text(stmt, 2);
+		key  = (const char *)sqlite3_column_text(stmt, 3);
 		say("", "%s(%s%s%s) lacks mlink \"%s\"", name, sec,
 		    '\0' == *arch ? "" : "/",
 		    '\0' == *arch ? "" : arch, key);
