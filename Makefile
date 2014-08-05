@@ -314,7 +314,7 @@ install: base-install $(INSTALL_TARGETS)
 
 www: $(WWW_OBJS) $(WWW_MANS)
 
-.include "Makefile.depend"
+include Makefile.depend
 
 # === TARGETS CONTAINING SHELL COMMANDS ================================
 
@@ -366,7 +366,7 @@ www-install: www
 	$(INSTALL_DATA) mdocml.sha256 \
 		$(DESTDIR)$(HTDOCDIR)/snapshots/mdocml-$(VERSION).sha256
 
-Makefile.depend: $(SRCS) config.h Makefile
+depend: config.h
 	mkdep -f Makefile.depend $(CFLAGS) $(SRCS)
 	perl -e 'undef $$/; $$_ = <>; s|/usr/include/\S+||g; \
 		s|\\\n||g; s|  +| |g; print;' Makefile.depend > Makefile.tmp
@@ -404,7 +404,8 @@ config.h: configure config.h.pre config.h.post $(TESTSRCS)
 	rm -f config.log
 	CC="$(CC)" CFLAGS="$(CFLAGS)" VERSION="$(VERSION)" ./configure
 
-.PHONY: 	 base-install clean db-install install www-install
+.PHONY: 	 base-install db-install install www-install
+.PHONY: 	 clean depend
 .SUFFIXES:	 .1       .3       .5       .7       .8       .h
 .SUFFIXES:	 .1.html  .3.html  .5.html  .7.html  .8.html  .h.html
 
