@@ -54,8 +54,13 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 
 # If you want to build without database support, for example to avoid
 # the dependency on SQLite3, comment the following line.
+# However, you won't get apropos(1) and makewhatis(8) in that case.
 #
-DBBIN		 = makewhatis manpage apropos
+BUILD_TARGETS	+= db-build
+
+# The remaining settings in this section
+# are only relevant if db-build is enabled.
+# Otherwise, they have no effect either way.
 
 # If your system has manpath(1), uncomment this.  This is most any
 # system that's not OpenBSD or NetBSD.  If uncommented, apropos(1)
@@ -74,12 +79,19 @@ DBBIN		 = makewhatis manpage apropos
 #
 DBLIB		+= -lutil
 
+SBINDIR		 = $(PREFIX)/sbin
+
 # --- user settings related to man.cgi ---------------------------------
 
 # To build man.cgi, copy cgi.h.example to cgi.h, edit it,
 # and enable the following line.
+# Obviously, this requires that db-build is enabled, too.
 #
-#DBBIN		+= man.cgi
+#BUILD_TARGETS	+= cgi-build
+
+# The remaining settings in this section
+# are only relevant if cgi-build is enabled.
+# Otherwise, they have no effect either way.
 
 # If your system does not support static binaries, comment this,
 # for example on Mac OS X.
@@ -96,10 +108,13 @@ CGIBINDIR	 = $(WWWPREFIX)/cgi-bin
 
 # === END OF USER SETTINGS =============================================
 
-ALLBIN		 = mandoc preconv demandoc $(DBBIN)
-DBLIB		+= -lsqlite3
+INSTALL_TARGETS	 = $(BUILD_TARGETS:-build=-install)
 
-all: $(ALLBIN)
+BASEBIN		 = mandoc preconv demandoc
+DBBIN		 = apropos makewhatis
+CGIBIN		 = man.cgi
+
+DBLIB		+= -lsqlite3
 
 TESTSRCS	 = test-fgetln.c \
 		   test-getsubopt.c \
@@ -267,6 +282,16 @@ COMPAT_OBJS	 = compat_fgetln.o \
 
 # === DEPENDENCY HANDLING ==============================================
 
+all: base-build $(BUILD_TARGETS)
+
+base-build: $(BASEBIN)
+
+db-build: $(DBBIN)
+
+cgi-build: $(CGIBIN)
+
+install: base-install $(INSTALL_TARGETS)
+
 arch.o: arch.in
 att.o: att.in
 chars.o: chars.in
@@ -377,26 +402,42 @@ clean:
 	rm -f $(WWW_MANS) $(WWW_OBJS)
 	rm -rf *.dSYM
 
-install: all
+base-install: base-build
 	mkdir -p $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(EXAMPLEDIR)
 	mkdir -p $(DESTDIR)$(LIBDIR)
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
-	mkdir -p $(DESTDIR)$(MANDIR)/man5
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
-	$(INSTALL_PROGRAM) $(ALLBIN) $(DESTDIR)$(BINDIR)
+	$(INSTALL_PROGRAM) $(BASEBIN) $(DESTDIR)$(BINDIR)
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
-	$(INSTALL_LIB) man.h mdoc.h mandoc.h $(DESTDIR)$(INCLUDEDIR)
+	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h \
+		$(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.1 preconv.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
-	$(INSTALL_MAN) mandoc.3 mansearch.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
-	$(INSTALL_MAN) mandoc.db.5 $(DESTDIR)$(MANDIR)/man5
+	$(INSTALL_MAN) mandoc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 \
 		$(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
 
-installcgi: all
+db-install: db-build
+	mkdir -p $(DESTDIR)$(BINDIR)
+	mkdir -p $(DESTDIR)$(SBINDIR)
+	mkdir -p $(DESTDIR)$(MANDIR)/man1
+	mkdir -p $(DESTDIR)$(MANDIR)/man3
+	mkdir -p $(DESTDIR)$(MANDIR)/man5
+	mkdir -p $(DESTDIR)$(MANDIR)/man8
+	$(INSTALL_PROGRAM) apropos $(DESTDIR)$(BINDIR)
+	ln -f $(DESTDIR)$(BINDIR)/apropos $(DESTDIR)$(BINDIR)/whatis
+	$(INSTALL_PROGRAM) makewhatis $(DESTDIR)$(SBINDIR)
+	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(MANDIR)/man1
+	ln -f $(DESTDIR)$(MANDIR)/man1/apropos.1 \
+		$(DESTDIR)$(MANDIR)/man1/whatis.1
+	$(INSTALL_MAN) mansearch.3 $(DESTDIR)$(MANDIR)/man3
+	$(INSTALL_MAN) mandoc.db.5 $(DESTDIR)$(MANDIR)/man5
+	$(INSTALL_MAN) makewhatis.8 $(DESTDIR)$(MANDIR)/man8
+
+cgi-install: cgi-build
 	mkdir -p $(DESTDIR)$(CGIBINDIR)
 	mkdir -p $(DESTDIR)$(HTDOCDIR)
 	mkdir -p $(DESTDIR)$(WWWPREFIX)/man/mandoc/man1
@@ -407,7 +448,7 @@ installcgi: all
 	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(WWWPREFIX)/man/mandoc/man1/
 	$(INSTALL_MAN) man.cgi.8 $(DESTDIR)$(WWWPREFIX)/man/mandoc/man8/
 
-installwww: www
+www-install: www
 	mkdir -p $(DESTDIR)$(HTDOCDIR)/snapshots
 	$(INSTALL_DATA) $(WWW_MANS) style.css $(DESTDIR)$(HTDOCDIR)
 	$(INSTALL_DATA) $(WWW_OBJS) $(DESTDIR)$(HTDOCDIR)/snapshots
@@ -454,7 +495,7 @@ config.h: configure config.h.pre config.h.post $(TESTSRCS)
 	rm -f config.log
 	CC="$(CC)" CFLAGS="$(CFLAGS)" VERSION="$(VERSION)" ./configure
 
-.PHONY: 	 clean install installcgi installwww
+.PHONY: 	 base-install clean cgi-install db-install install www-install
 .SUFFIXES:	 .1       .3       .5       .7       .8       .h
 .SUFFIXES:	 .1.html  .3.html  .5.html  .7.html  .8.html  .h.html
 
