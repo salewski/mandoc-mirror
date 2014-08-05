@@ -181,10 +181,13 @@ DISTFILES	 = LICENSE \
 		   mandoc.h \
 		   mandoc_aux.h \
 		   mandoc_char.7 \
+		   mandoc_escape.3 \
 		   mandoc_html.3 \
+		   mandoc_malloc.3 \
 		   mandocdb.8 \
 		   mandocdb.h \
 		   manpath.h \
+		   mchars_alloc.3 \
 		   mdoc.7 \
 		   mdoc.h \
 		   msec.in \
@@ -278,7 +281,10 @@ WWW_MANS	 = apropos.1.html \
 		   preconv.1.html \
 		   whatis.1.html \
 		   mandoc.3.html \
+		   mandoc_escape.3.html \
 		   mandoc_html.3.html \
+		   mandoc_malloc.3.html \
+		   mchars_alloc.3.html \
 		   tbl.3.html \
 		   eqn.7.html \
 		   man.7.html \
@@ -336,7 +342,8 @@ base-install: base-build
 	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h \
 		$(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.1 preconv.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
-	$(INSTALL_MAN) mandoc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
+	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
+		mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 \
 		$(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
