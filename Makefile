@@ -34,7 +34,7 @@ VERSION		 = 1.13.0
 #
 CFLAGS	 	+= -DUSE_WCHAR
 
-CFLAGS		+= -I/usr/local/include -g -DHAVE_CONFIG_H
+CFLAGS		+= -g -DHAVE_CONFIG_H
 CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
 BINDIR		 = $(PREFIX)/bin
@@ -44,9 +44,9 @@ MANDIR		 = $(PREFIX)/man
 EXAMPLEDIR	 = $(PREFIX)/share/examples/mandoc
 
 INSTALL		 = install
-INSTALL_PROGRAM	 = $(INSTALL) -m 0755
+INSTALL_PROGRAM	 = $(INSTALL) -m 0555
 INSTALL_DATA	 = $(INSTALL) -m 0444
-INSTALL_LIB	 = $(INSTALL) -m 0644
+INSTALL_LIB	 = $(INSTALL) -m 0444
 INSTALL_SOURCE	 = $(INSTALL) -m 0644
 INSTALL_MAN	 = $(INSTALL_DATA)
 
@@ -62,6 +62,12 @@ DBBIN		 = makewhatis manpage apropos
 # and makewhatis(8) will use manpath(1) to get the MANPATH variable.
 #
 #CFLAGS		+= -DUSE_MANPATH
+
+# On some systems, SQLite3 may be installed below /usr/local.
+# In that case, uncomment the following two lines.
+#
+#CFLAGS		+= -I/usr/local/include
+#DBLIB		+= -L/usr/local/lib
 
 # OpenBSD has the ohash functions in libutil.
 # Comment the following line if your system doesn't.
@@ -91,7 +97,7 @@ CGIBINDIR	 = $(WWWPREFIX)/cgi-bin
 # === END OF USER SETTINGS =============================================
 
 ALLBIN		 = mandoc preconv demandoc $(DBBIN)
-DBLIB		+= -L/usr/local/lib -lsqlite3
+DBLIB		+= -lsqlite3
 
 all: $(ALLBIN)
 
@@ -100,9 +106,11 @@ TESTSRCS	 = test-fgetln.c \
 		   test-mmap.c \
 		   test-ohash.c \
 		   test-reallocarray.c \
+		   test-strcasestr.c \
 		   test-strlcat.c \
 		   test-strlcpy.c \
-		   test-strptime.c
+		   test-strptime.c \
+		   test-strsep.c
 
 SRCS		 = LICENSE \
 		   Makefile \
@@ -115,6 +123,7 @@ SRCS		 = LICENSE \
 		   att.c \
 		   att.in \
 		   cgi.c \
+		   cgi.h.example \
 		   chars.c \
 		   chars.in \
 		   compat_fgetln.c \
@@ -166,6 +175,7 @@ SRCS		 = LICENSE \
 		   mandoc_aux.c \
 		   mandoc_aux.h \
 		   mandoc_char.7 \
+		   mandoc_html.3 \
 		   mandocdb.c \
 		   manpage.c \
 		   manpath.c \
@@ -328,6 +338,7 @@ WWW_MANS	 = apropos.1.html \
 		   mandoc.1.html \
 		   preconv.1.html \
 		   mandoc.3.html \
+		   mandoc_html.3.html \
 		   mansearch.3.html \
 		   tbl.3.html \
 		   mandoc.db.5.html \
