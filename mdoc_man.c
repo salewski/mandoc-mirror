@@ -548,8 +548,9 @@ man_mdoc(void *arg, const struct mdoc *mdoc)
 	n = mdoc_node(mdoc);
 
 	printf(".TH \"%s\" \"%s\" \"%s\" \"%s\" \"%s\"\n",
-	    meta->title, meta->msec, meta->date,
-	    meta->os, meta->vol);
+	    meta->title,
+	    (meta->msec == NULL ? "" : meta->msec),
+	    meta->date, meta->os, meta->vol);
 
 	/* Disable hyphenation and if nroff, disable justification. */
 	printf(".nh\n.if n .ad l");

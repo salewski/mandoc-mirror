@@ -1198,8 +1198,9 @@ mpages_merge(struct mchars *mc, struct mparse *mp)
 			goto nextpage;
 		} else if (NULL != mdoc) {
 			mpage->form = FORM_SRC;
-			mpage->sec =
-			    mandoc_strdup(mdoc_meta(mdoc)->msec);
+			mpage->sec = mdoc_meta(mdoc)->msec;
+			mpage->sec = mandoc_strdup(
+			    NULL == mpage->sec ? "" : mpage->sec);
 			mpage->arch = mdoc_meta(mdoc)->arch;
 			mpage->arch = mandoc_strdup(
 			    NULL == mpage->arch ? "" : mpage->arch);

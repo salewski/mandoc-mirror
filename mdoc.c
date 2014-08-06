@@ -123,20 +123,13 @@ mdoc_free1(struct mdoc *mdoc)
 
 	if (mdoc->first)
 		mdoc_node_delete(mdoc, mdoc->first);
-	if (mdoc->meta.title)
-		free(mdoc->meta.title);
-	if (mdoc->meta.os)
-		free(mdoc->meta.os);
-	if (mdoc->meta.name)
-		free(mdoc->meta.name);
-	if (mdoc->meta.arch)
-		free(mdoc->meta.arch);
-	if (mdoc->meta.vol)
-		free(mdoc->meta.vol);
-	if (mdoc->meta.msec)
-		free(mdoc->meta.msec);
-	if (mdoc->meta.date)
-		free(mdoc->meta.date);
+	free(mdoc->meta.msec);
+	free(mdoc->meta.vol);
+	free(mdoc->meta.arch);
+	free(mdoc->meta.date);
+	free(mdoc->meta.title);
+	free(mdoc->meta.os);
+	free(mdoc->meta.name);
 }
 
 /*
@@ -271,32 +264,22 @@ mdoc_macro(MACRO_PROT_ARGS)
 {
 	assert(tok < MDOC_MAX);
 
-	/* If we're in the body, deny prologue calls. */
-
-	if (MDOC_PROLOGUE & mdoc_macros[tok].flags &&
-	    MDOC_PBODY & mdoc->flags) {
-		mandoc_vmsg(MANDOCERR_PROLOG_ONLY, mdoc->parse,
-		    line, ppos, "%s", mdoc_macronames[tok]);
-		return(1);
-	}
-
-	/* If we're in the prologue, deny "body" macros.  */
-
-	if ( ! (MDOC_PROLOGUE & mdoc_macros[tok].flags) &&
-	     ! (MDOC_PBODY & mdoc->flags)) {
-		mandoc_vmsg(MANDOCERR_PROLOG_BAD, mdoc->parse,
-		    line, ppos, "%s", mdoc_macronames[tok]);
-		if (NULL == mdoc->meta.msec)
-			mdoc->meta.msec = mandoc_strdup("1");
-		if (NULL == mdoc->meta.title)
-			mdoc->meta.title = mandoc_strdup("UNKNOWN");
+	if (mdoc->flags & MDOC_PBODY) {
+		if (tok == MDOC_Dt) {
+			mandoc_vmsg(MANDOCERR_DT_LATE,
+			    mdoc->parse, line, ppos,
+			    "Dt %s", buf + *pos);
+			return(1);
+		}
+	} else if ( ! (mdoc_macros[tok].flags & MDOC_PROLOGUE)) {
+		if (mdoc->meta.title == NULL) {
+			mandoc_vmsg(MANDOCERR_DT_NOTITLE,
+			    mdoc->parse, line, ppos, "%s %s",
+			    mdoc_macronames[tok], buf + *pos);
+			mdoc->meta.title = mandoc_strdup("UNTITLED");
+		}
 		if (NULL == mdoc->meta.vol)
 			mdoc->meta.vol = mandoc_strdup("LOCAL");
-		if (NULL == mdoc->meta.os)
-			mdoc->meta.os = mandoc_strdup("LOCAL");
-		if (NULL == mdoc->meta.date)
-			mdoc->meta.date = mandoc_normdate
-				(mdoc->parse, NULL, line, ppos);
 		mdoc->flags |= MDOC_PBODY;
 	}
 

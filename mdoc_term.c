@@ -476,7 +476,11 @@ print_mdoc_head(struct termp *p, const void *arg)
 		    meta->vol, meta->arch);
 	vollen = term_strlen(p, volume);
 
-	mandoc_asprintf(&title, "%s(%s)", meta->title, meta->msec);
+	if (NULL == meta->msec)
+		title = mandoc_strdup(meta->title);
+	else
+		mandoc_asprintf(&title, "%s(%s)",
+		    meta->title, meta->msec);
 	titlen = term_strlen(p, title);
 
 	p->flags |= TERMP_NOBREAK | TERMP_NOSPACE;

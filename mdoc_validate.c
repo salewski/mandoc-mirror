@@ -114,7 +114,6 @@ static	int	 post_nm(POST_ARGS);
 static	int	 post_ns(POST_ARGS);
 static	int	 post_os(POST_ARGS);
 static	int	 post_par(POST_ARGS);
-static	int	 post_prol(POST_ARGS);
 static	int	 post_root(POST_ARGS);
 static	int	 post_rs(POST_ARGS);
 static	int	 post_sh(POST_ARGS);
@@ -843,14 +842,12 @@ static int
 pre_dt(PRE_ARGS)
 {
 
-	if (NULL == mdoc->meta.date || mdoc->meta.os)
-		mandoc_msg(MANDOCERR_PROLOG_ORDER, mdoc->parse,
-		    n->line, n->pos, "Dt");
-
-	if (mdoc->meta.title)
+	if (mdoc->meta.title != NULL)
 		mandoc_msg(MANDOCERR_PROLOG_REP, mdoc->parse,
 		    n->line, n->pos, "Dt");
-
+	else if (mdoc->meta.os != NULL)
+		mandoc_msg(MANDOCERR_PROLOG_ORDER, mdoc->parse,
+		    n->line, n->pos, "Dt after Os");
 	return(1);
 }
 
@@ -858,14 +855,12 @@ static int
 pre_os(PRE_ARGS)
 {
 
-	if (NULL == mdoc->meta.title || NULL == mdoc->meta.date)
-		mandoc_msg(MANDOCERR_PROLOG_ORDER, mdoc->parse,
-		    n->line, n->pos, "Os");
-
-	if (mdoc->meta.os)
+	if (mdoc->meta.os != NULL)
 		mandoc_msg(MANDOCERR_PROLOG_REP, mdoc->parse,
 		    n->line, n->pos, "Os");
-
+	else if (mdoc->flags & MDOC_PBODY)
+		mandoc_msg(MANDOCERR_PROLOG_LATE, mdoc->parse,
+		    n->line, n->pos, "Os");
 	return(1);
 }
 
@@ -873,14 +868,18 @@ static int
 pre_dd(PRE_ARGS)
 {
 
-	if (mdoc->meta.title || mdoc->meta.os)
-		mandoc_msg(MANDOCERR_PROLOG_ORDER, mdoc->parse,
-		    n->line, n->pos, "Dd");
-
-	if (mdoc->meta.date)
+	if (mdoc->meta.date != NULL)
 		mandoc_msg(MANDOCERR_PROLOG_REP, mdoc->parse,
 		    n->line, n->pos, "Dd");
-
+	else if (mdoc->flags & MDOC_PBODY)
+		mandoc_msg(MANDOCERR_PROLOG_LATE, mdoc->parse,
+		    n->line, n->pos, "Dd");
+	else if (mdoc->meta.title != NULL)
+		mandoc_msg(MANDOCERR_PROLOG_ORDER, mdoc->parse,
+		    n->line, n->pos, "Dd after Dt");
+	else if (mdoc->meta.os != NULL)
+		mandoc_msg(MANDOCERR_PROLOG_ORDER, mdoc->parse,
+		    n->line, n->pos, "Dd after Os");
 	return(1);
 }
 
@@ -1627,20 +1626,24 @@ post_root(POST_ARGS)
 
 	/* Add missing prologue data. */
 
-	if ( ! (MDOC_PBODY & mdoc->flags)) {
-		mandoc_msg(MANDOCERR_PROLOG_BAD, mdoc->parse, 0, 0, "EOF");
-		if (mdoc->meta.date == NULL)
-			mdoc->meta.date = mdoc->quick ?
-			    mandoc_strdup("") :
-			    mandoc_normdate(mdoc->parse, NULL, 0, 0);
-		if (mdoc->meta.title == NULL)
-			mdoc->meta.title = mandoc_strdup("UNKNOWN");
-		if (mdoc->meta.vol == NULL)
-			mdoc->meta.vol = mandoc_strdup("LOCAL");
-		if (mdoc->meta.arch == NULL)
-			mdoc->meta.msec = mandoc_strdup("1");
-		if (mdoc->meta.os == NULL)
-			mdoc->meta.os = mandoc_strdup("UNKNOWN");
+	if (mdoc->meta.date == NULL)
+		mdoc->meta.date = mdoc->quick ?
+		    mandoc_strdup("") :
+		    mandoc_normdate(mdoc->parse, NULL, 0, 0);
+
+	if (mdoc->meta.title == NULL) {
+		mandoc_msg(MANDOCERR_DT_NOTITLE,
+		    mdoc->parse, 0, 0, "EOF");
+		mdoc->meta.title = mandoc_strdup("UNTITLED");
+	}
+
+	if (mdoc->meta.vol == NULL)
+		mdoc->meta.vol = mandoc_strdup("LOCAL");
+
+	if (mdoc->meta.os == NULL) {
+		mandoc_msg(MANDOCERR_OS_MISSING,
+		    mdoc->parse, 0, 0, NULL);
+		mdoc->meta.os = mandoc_strdup("");
 	}
 
 	n = mdoc->first;
@@ -1977,7 +1980,10 @@ post_sh_head(POST_ARGS)
 
 	/* Check particular section/manual conventions. */
 
-	assert(mdoc->meta.msec);
+	if (mdoc->meta.msec == NULL) {
+		free(secname);
+		return(1);
+	}
 
 	goodsec = NULL;
 	switch (sec) {
@@ -2156,7 +2162,7 @@ post_dd(POST_ARGS)
 	if (NULL == n->child || '\0' == n->child->string[0]) {
 		mdoc->meta.date = mdoc->quick ? mandoc_strdup("") :
 		    mandoc_normdate(mdoc->parse, NULL, n->line, n->pos);
-		return(post_prol(mdoc));
+		goto out;
 	}
 
 	datestr = NULL;
@@ -2168,7 +2174,9 @@ post_dd(POST_ARGS)
 		    datestr, n->line, n->pos);
 		free(datestr);
 	}
-	return(post_prol(mdoc));
+out:
+	mdoc_node_delete(mdoc, n);
+	return(1);
 }
 
 static int
@@ -2180,14 +2188,15 @@ post_dt(POST_ARGS)
 
 	n = mdoc->last;
 
-	if (mdoc->meta.title)
-		free(mdoc->meta.title);
-	if (mdoc->meta.vol)
-		free(mdoc->meta.vol);
-	if (mdoc->meta.arch)
-		free(mdoc->meta.arch);
+	free(mdoc->meta.title);
+	free(mdoc->meta.msec);
+	free(mdoc->meta.vol);
+	free(mdoc->meta.arch);
 
-	mdoc->meta.title = mdoc->meta.vol = mdoc->meta.arch = NULL;
+	mdoc->meta.title = NULL;
+	mdoc->meta.msec = NULL;
+	mdoc->meta.vol = NULL;
+	mdoc->meta.arch = NULL;
 
 	/* First check that all characters are uppercase. */
 
@@ -2202,32 +2211,27 @@ post_dt(POST_ARGS)
 			break;
 		}
 
-	/* Handles: `.Dt'
-	 * title = unknown, volume = local, msec = 0, arch = NULL
-	 */
+	/* No argument: msec and arch remain NULL. */
 
 	if (NULL == (nn = n->child)) {
-		/* XXX: make these macro values. */
-		/* FIXME: warn about missing values. */
-		mdoc->meta.title = mandoc_strdup("UNKNOWN");
+		mandoc_msg(MANDOCERR_DT_NOTITLE,
+		    mdoc->parse, n->line, n->pos, "Dt");
+		mdoc->meta.title = mandoc_strdup("UNTITLED");
 		mdoc->meta.vol = mandoc_strdup("LOCAL");
-		mdoc->meta.msec = mandoc_strdup("1");
-		return(post_prol(mdoc));
+		goto out;
 	}
 
-	/* Handles: `.Dt TITLE'
-	 * title = TITLE, volume = local, msec = 0, arch = NULL
-	 */
+	/* One argument: msec and arch remain NULL. */
 
 	mdoc->meta.title = mandoc_strdup(
-	    '\0' == nn->string[0] ? "UNKNOWN" : nn->string);
+	    '\0' == nn->string[0] ? "UNTITLED" : nn->string);
 
 	if (NULL == (nn = nn->next)) {
-		/* FIXME: warn about missing msec. */
-		/* XXX: make this a macro value. */
+		mandoc_vmsg(MANDOCERR_MSEC_MISSING,
+		    mdoc->parse, n->line, n->pos,
+		    "Dt %s", mdoc->meta.title);
 		mdoc->meta.vol = mandoc_strdup("LOCAL");
-		mdoc->meta.msec = mandoc_strdup("1");
-		return(post_prol(mdoc));
+		goto out;
 	}
 
 	/* Handles: `.Dt TITLE SEC'
@@ -2249,7 +2253,7 @@ post_dt(POST_ARGS)
 	}
 
 	if (NULL == (nn = nn->next))
-		return(post_prol(mdoc));
+		goto out;
 
 	/* Handles: `.Dt TITLE SEC VOL'
 	 * title = TITLE,
@@ -2275,23 +2279,8 @@ post_dt(POST_ARGS)
 
 	/* Ignore any subsequent parameters... */
 	/* FIXME: warn about subsequent parameters. */
-
-	return(post_prol(mdoc));
-}
-
-static int
-post_prol(POST_ARGS)
-{
-	/*
-	 * Remove prologue macros from the document after they're
-	 * processed.  The final document uses mdoc_meta for these
-	 * values and discards the originals.
-	 */
-
-	mdoc_node_delete(mdoc, mdoc->last);
-	if (mdoc->meta.title && mdoc->meta.date && mdoc->meta.os)
-		mdoc->flags |= MDOC_PBODY;
-
+out:
+	mdoc_node_delete(mdoc, n);
 	return(1);
 }
 
@@ -2337,11 +2326,11 @@ post_os(POST_ARGS)
 	mdoc->meta.os = NULL;
 	mdoc_deroff(&mdoc->meta.os, n);
 	if (mdoc->meta.os)
-		return(post_prol(mdoc));
+		goto out;
 
 	if (mdoc->defos) {
 		mdoc->meta.os = mandoc_strdup(mdoc->defos);
-		return(post_prol(mdoc));
+		goto out;
 	}
 
 #ifdef OSNAME
@@ -2358,7 +2347,10 @@ post_os(POST_ARGS)
 	}
 	mdoc->meta.os = mandoc_strdup(defbuf);
 #endif /*!OSNAME*/
-	return(post_prol(mdoc));
+
+out:
+	mdoc_node_delete(mdoc, n);
+	return(1);
 }
 
 /*

@@ -93,16 +93,19 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"generic warning",
 
 	/* related to the prologue */
-	"missing .TH macro, using \"unknown 1\"",
+	"missing manual title, using UNTITLED",
+	"missing manual title, using \"\"",
 	"lower case character in document title",
+	"missing manual section, using \"\"",
 	"unknown manual section",
 	"unknown manual volume or arch",
 	"missing date, using today's date",
 	"cannot parse date, using it verbatim",
-	"prologue macros out of order",
+	"missing Os macro, using \"\"",
 	"duplicate prologue macro",
-	"incomplete prologue, terminated by",
-	"skipping prologue macro in body",
+	"late prologue macro",
+	"skipping late title macro",
+	"prologue macros out of order",
 
 	/* related to document structure */
 	".so is fragile, better use ln(1)",
