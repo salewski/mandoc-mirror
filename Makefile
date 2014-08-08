@@ -15,7 +15,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-VERSION		 = 1.13.0
+VERSION		 = 1.13.1
 
 # === USER SETTINGS ====================================================
 
@@ -189,7 +189,8 @@ SRCS		 = apropos.c \
 		   vol.c \
 		   $(TESTSRCS)
 
-DISTFILES	 = LICENSE \
+DISTFILES	 = INSTALL \
+		   LICENSE \
 		   Makefile \
 		   Makefile.depend \
 		   NEWS \
