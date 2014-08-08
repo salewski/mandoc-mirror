@@ -488,7 +488,8 @@ mdocml.tar.gz: $(DISTFILES)
 
 config.h: configure config.h.pre config.h.post $(TESTSRCS)
 	rm -f config.log
-	CC="$(CC)" CFLAGS="$(CFLAGS)" VERSION="$(VERSION)" ./configure
+	CC="$(CC)" CFLAGS="$(CFLAGS)" DBLIB="$(DBLIB)" \
+		VERSION="$(VERSION)" ./configure
 
 .PHONY: 	 base-install cgi-install db-install install www-install
 .PHONY: 	 clean depend
