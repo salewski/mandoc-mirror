@@ -399,6 +399,10 @@
 * performance issues
 ************************************************************************
 
+- Why are we using MAP_SHARED, not MAP_PRIVATE for mmap(2)?
+  How does SQLITE_CONFIG_PAGECACHE actually work?  Document it!
+  from kristaps@  Sat, 09 Aug 2014 13:51:36 +0200
+
 Several areas can be cleaned up to make mandoc even faster.  These are 
 
 - improve hashing mechanism for macros (quite important: performance)
