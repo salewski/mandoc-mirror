@@ -15,21 +15,19 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include <sys/types.h>
 
 #ifdef USE_WCHAR
-# include <locale.h>
+#include <locale.h>
 #endif
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #ifdef USE_WCHAR
-# include <wchar.h>
+#include <wchar.h>
 #endif
 
 #include "mandoc.h"

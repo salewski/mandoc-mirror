@@ -16,15 +16,12 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
+#include <sys/types.h>
 #ifndef OSNAME
 #include <sys/utsname.h>
 #endif
-
-#include <sys/types.h>
 
 #include <assert.h>
 #include <ctype.h>
