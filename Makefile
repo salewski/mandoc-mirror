@@ -52,9 +52,10 @@ INSTALL_MAN	 = $(INSTALL_DATA)
 
 # --- user settings related to database support ------------------------
 
-# If you want to build without database support, for example to avoid
-# the dependency on SQLite3, comment the following line.
-# However, you won't get apropos(1) and makewhatis(8) in that case.
+# Building apropos(1) and makewhatis(8) requires both SQLite3 and fts(3).
+# To avoid those dependencies, comment the following line.
+# Be careful: the fts(3) implementation in glibc is broken on 32bit
+# machines, see: https://sourceware.org/bugzilla/show_bug.cgi?id=15838
 #
 BUILD_TARGETS	+= db-build
 
