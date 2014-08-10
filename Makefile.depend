@@ -31,7 +31,7 @@ mandocdb.o: mandocdb.c config.h mdoc.h man.h mandoc.h mandoc_aux.h manpath.h man
 manpage.o: manpage.c config.h manpath.h mansearch.h
 manpath.o: manpath.c config.h mandoc_aux.h manpath.h
 mansearch.o: mansearch.c config.h mandoc.h mandoc_aux.h manpath.h mansearch.h
-mansearch_const.o: mansearch_const.c manpath.h mansearch.h
+mansearch_const.o: mansearch_const.c config.h manpath.h mansearch.h
 mdoc.o: mdoc.c config.h mdoc.h mandoc.h mandoc_aux.h libmdoc.h libmandoc.h
 mdoc_argv.o: mdoc_argv.c config.h mdoc.h mandoc.h mandoc_aux.h libmdoc.h libmandoc.h
 mdoc_hash.o: mdoc_hash.c config.h mdoc.h libmdoc.h
