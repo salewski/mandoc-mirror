@@ -34,8 +34,8 @@ VERSION		 = 1.12.4
 #
 CFLAGS	 	+= -DUSE_WCHAR
 
-CFLAGS		+= -g -DHAVE_CONFIG_H
-CFLAGS     	+= -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings
+CFLAGS		+= -g -W -Wall -Wstrict-prototypes
+CFLAGS     	+= -Wno-unused-parameter -Wwrite-strings
 PREFIX		 = /usr/local
 BINDIR		 = $(PREFIX)/bin
 INCLUDEDIR	 = $(PREFIX)/include/mandoc
