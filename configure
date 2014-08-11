@@ -32,6 +32,7 @@ runtest() {
 cat config.h.pre
 echo
 echo "#define VERSION \"${VERSION}\""
+runtest dirent-namlen DIRENT_NAMLEN
 runtest fgetln FGETLN
 runtest fts FTS
 runtest getsubopt GETSUBOPT

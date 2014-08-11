@@ -404,7 +404,7 @@ fts_build(FTS *sp)
 	FTSENT *cur, *tail;
 	DIR *dirp;
 	void *oldaddr;
-	size_t len, maxlen;
+	size_t dlen, len, maxlen;
 	int nitems, cderrno, descend, level, nlinks, nostat, doadjust;
 	int saved_errno;
 	char *cp;
@@ -489,11 +489,17 @@ fts_build(FTS *sp)
 		if (ISDOT(dp->d_name))
 			continue;
 
-		if (!(p = fts_alloc(sp, dp->d_name, (size_t)dp->d_namlen)))
+#ifdef HAVE_DIRENT_NAMLEN
+		dlen = dp->d_namlen;
+#else
+		dlen = strlen(dp->d_name);
+#endif
+
+		if (!(p = fts_alloc(sp, dp->d_name, dlen)))
 			goto mem1;
-		if (dp->d_namlen >= maxlen) {	/* include space for NUL */
+		if (dlen >= maxlen) {	/* include space for NUL */
 			oldaddr = sp->fts_path;
-			if (fts_palloc(sp, dp->d_namlen +len + 1)) {
+			if (fts_palloc(sp, dlen + len + 1)) {
 				/*
 				 * No more memory for path or structures.  Save
 				 * errno, free up the current structure and the
@@ -520,7 +526,7 @@ mem1:				saved_errno = errno;
 
 		p->fts_level = level;
 		p->fts_parent = sp->fts_cur;
-		p->fts_pathlen = len + dp->d_namlen;
+		p->fts_pathlen = len + dlen;
 		if (p->fts_pathlen < len) {
 			/*
 			 * If we wrap, free up the current structure and
@@ -680,23 +686,18 @@ fts_alloc(FTS *sp, const char *name, size_t namelen)
 	FTSENT *p;
 	size_t len;
 
-	/*
-	 * The file name is a variable length array and no stat structure is
-	 * necessary if the user has set the nostat bit.  Allocate the FTSENT
-	 * structure, the file name and the stat structure in one chunk, but
-	 * be careful that the stat structure is reasonably aligned.  Since the
-	 * fts_name field is declared to be of size 1, the fts_name pointer is
-	 * namelen + 2 before the first possible address of the stat structure.
-	 */
 	len = sizeof(FTSENT) + namelen;
-	len += sizeof(struct stat) + ALIGNBYTES;
 	if ((p = calloc(1, len)) == NULL)
 		return (NULL);
 
 	p->fts_path = sp->fts_path;
 	p->fts_namelen = namelen;
 	p->fts_instr = FTS_NOINSTR;
-	p->fts_statp = (struct stat *)ALIGN(p->fts_name + namelen + 2);
+	p->fts_statp = malloc(sizeof(struct stat));
+	if (p->fts_statp == NULL) {
+		free(p);
+		return (NULL);
+	}
 	memcpy(p->fts_name, name, namelen);
 
 	return (p);

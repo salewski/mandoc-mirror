@@ -115,7 +115,9 @@ CGIBIN		 = man.cgi
 
 DBLIB		+= -lsqlite3
 
-TESTSRCS	 = test-fgetln.c \
+TESTSRCS	 = test-dirent-namlen.c \
+		   test-fgetln.c \
+		   test-fts.c \
 		   test-getsubopt.c \
 		   test-mmap.c \
 		   test-ohash.c \
