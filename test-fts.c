@@ -33,7 +33,7 @@ main(void)
 		return(1);
 	}
 
-	if (fts_close(NULL) != 0) {
+	if (fts_close(ftsp) != 0) {
 		perror("fts_close");
 		return(1);
 	}
