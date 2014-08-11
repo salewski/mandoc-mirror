@@ -33,6 +33,7 @@ cat config.h.pre
 echo
 echo "#define VERSION \"${VERSION}\""
 runtest fgetln FGETLN
+runtest fts FTS
 runtest getsubopt GETSUBOPT
 runtest mmap MMAP
 runtest ohash OHASH "${DBLIB}"

@@ -57,10 +57,8 @@ problems, apropos(1) is fully usable with SQLite 3.7.5.  Versions
 older than 3.7.5 may or may not work, they have not been tested.
 
 1.2. The fts(3) directory traversion functions.
-A compatibility version will be bundled for 1.13.2 but is not available
-yet.  If you want apropos(1) and makewhatis(8) but do not have fts(3),
-please stay with mandoc 1.12.3 for now and upgrade first to 1.12.4,
-then to 1.13.2 when these versionns are released.  Be careful: the
+If your system does not have them, the bundled compatibility version
+will be used, so you need not worry in that case.  But be careful: the
 glibc version of fts(3) is known to be broken on 32bit platforms,
 see <https://sourceware.org/bugzilla/show_bug.cgi?id=15838>.
 

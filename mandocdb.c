@@ -25,7 +25,11 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#ifdef HAVE_FTS
 #include <fts.h>
+#else
+#include "compat_fts.h"
+#endif
 #include <getopt.h>
 #include <limits.h>
 #include <stddef.h>
