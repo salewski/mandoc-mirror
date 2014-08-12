@@ -30,7 +30,7 @@ VERSION		 = 1.12.4
 # putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a
 # UCS-4 value) should you define USE_WCHAR.  If you define it and your
 # system DOESN'T support this, -Tlocale will produce garbage.
-# If you don't define it, -Tlocale is a synonym for -Tacsii.
+# If you don't define it, -Tlocale is a synonym for -Tascii.
 #
 CFLAGS	 	+= -DUSE_WCHAR
 
