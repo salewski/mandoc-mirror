@@ -59,7 +59,7 @@ __BEGIN_DECLS
 	while (/* CONSTCOND */ 0)
 
 #define	SCALE_HS_INIT(p, v) \
-	do { (p)->unit = SCALE_BU; \
+	do { (p)->unit = SCALE_EN; \
 	     (p)->scale = (v); } \
 	while (/* CONSTCOND */ 0)
 
