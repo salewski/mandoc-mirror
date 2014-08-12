@@ -110,7 +110,7 @@ a2roffsu(const char *src, struct roffsu *dst, enum roffscale def)
 	case '\0':
 		if (SCALE_MAX == def)
 			return(0);
-		unit = SCALE_BU;
+		unit = SCALE_EN;
 		break;
 	case 'u':
 		unit = SCALE_BU;
