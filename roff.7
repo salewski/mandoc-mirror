@@ -239,8 +239,9 @@ pica (~1/6 inch)
 .It p
 point (~1/72 inch)
 .It f
-synonym for
+scale
 .Sq u
+by 65536
 .It v
 default vertical span
 .It m
@@ -254,7 +255,7 @@ width of rendered
 .Pq en
 character
 .It u
-default horizontal span
+default horizontal span for the terminal
 .It M
 mini-em (~1/100 em)
 .El
@@ -262,7 +263,6 @@ mini-em (~1/100 em)
 Using anything other than
 .Sq m ,
 .Sq n ,
-.Sq u ,
 or
 .Sq v
 is necessarily non-portable across output media.
@@ -1347,6 +1347,12 @@ The term
 refers to groff version 1.15.
 .Pp
 .Bl -dash -compact
+.It
+The
+.Sq u
+scaling unit is the default terminal unit.
+In traditional troff systems, this unit would change depending on the
+output media.
 .It
 In mandoc, the
 .Sx \&EQ ,
