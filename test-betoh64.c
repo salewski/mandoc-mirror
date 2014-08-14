@@ -1,6 +1,6 @@
 #include <sys/types.h>
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__CYGWIN__)
 # include <endian.h>
 #elif defined(__APPLE__)
 # include <libkern/OSByteOrder.h>

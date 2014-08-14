@@ -31,7 +31,7 @@
 
 #if defined(__APPLE__)
 # include <libkern/OSByteOrder.h>
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__CYGWIN__)
 # include <endian.h>
 #elif defined(__sun)
 # include <sys/byteorder.h>
@@ -39,7 +39,7 @@
 # include <sys/endian.h>
 #endif
 
-#if defined(__linux__) || defined(__sun)
+#if defined(__linux__) || defined(__CYGWIN__) || defined(__sun)
 # include <db_185.h>
 #else
 # include <db.h>
