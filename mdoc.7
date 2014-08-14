@@ -1467,16 +1467,29 @@ See also
 and
 .Sx \&It .
 .Ss \&Em
-Denotes text that should be
-.Em emphasised .
-Note that this is a presentation term and should not be used for
-stylistically decorating technical terms.
-Depending on the output device, this is usually represented
-using an italic font or underlined characters.
+Request an italic font.
+If the output device does not provide that, underline.
+.Pp
+This is most often used for stress emphasis (not to be confused with
+importance, see
+.Sx \&Sy ) .
+In the rare cases where none of the semantic markup macros fit,
+it can also be used for technical terms and placeholders, except
+that for syntax elements,
+.Sx \&Sy
+and
+.Sx \&Ar
+are preferred, respectively.
 .Pp
 Examples:
-.Dl \&.Em Warnings!
-.Dl \&.Em Remarks :
+.Bd -literal -compact -offset indent
+Selected lines are those
+\&.Em not
+matching any of the specified patterns.
+Some of the functions use a
+\&.Em hold space
+to save the pattern space for subsequent retrieval.
+.Ed
 .Pp
 See also
 .Sx \&Bf ,
@@ -2637,10 +2650,24 @@ See also
 and
 .Sx \&Ss .
 .Ss \&Sy
-Format enclosed arguments in symbolic
-.Pq Dq boldface .
-Note that this is a presentation term and should not be used for
-stylistically decorating technical terms.
+Request a boldface font.
+.Pp
+This is most often used to indicate importance or seriousness (not to be
+confused with stress emphasis, see
+.Sx \&Em ) .
+When none of the semantic macros fit, it is also adequate for syntax
+elements that have to be given or that appear verbatim.
+.Pp
+Examples:
+.Bd -literal -compact -offset indent
+\&.Sy Warning :
+If
+\&.Sy s
+appears in the owner permissions, set-user-ID mode is set.
+This utility replaces the former
+\&.Sy dumpdir
+program.
+.Ed
 .Pp
 See also
 .Sx \&Bf ,
