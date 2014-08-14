@@ -73,9 +73,6 @@ BUILD_TARGETS	+= db-build
 #
 #CFLAGS		+= -DUSE_MANPATH
 
-WWWPREFIX	 = /var/www
-HTDOCDIR	 = $(WWWPREFIX)/htdocs
-
 # === END OF USER SETTINGS =============================================
 
 INSTALL_TARGETS	 = $(BUILD_TARGETS:-build=-install)
@@ -150,7 +147,8 @@ SRCS		 = apropos.c \
 		   vol.c \
 		   $(TESTSRCS)
 
-DISTFILES	 = LICENSE \
+DISTFILES	 = INSTALL \
+		   LICENSE \
 		   Makefile \
 		   Makefile.depend \
 		   NEWS \
@@ -275,30 +273,6 @@ APROPOS_OBJS	 = apropos.o apropos_db.o manpath.o
 
 DEMANDOC_OBJS	 = demandoc.o
 
-WWW_MANS	 = apropos.1.html \
-		   demandoc.1.html \
-		   mandoc.1.html \
-		   preconv.1.html \
-		   whatis.1.html \
-		   mandoc.3.html \
-		   mandoc_escape.3.html \
-		   mandoc_html.3.html \
-		   mandoc_malloc.3.html \
-		   mchars_alloc.3.html \
-		   tbl.3.html \
-		   eqn.7.html \
-		   man.7.html \
-		   mandoc_char.7.html \
-		   mdoc.7.html \
-		   roff.7.html \
-		   tbl.7.html \
-		   mandocdb.8.html \
-		   man.h.html \
-		   mandoc.h.html \
-		   mandoc_aux.h.html \
-		   manpath.h.html \
-		   mdoc.h.html
-
 WWW_OBJS	 = mdocml.tar.gz \
 		   mdocml.sha256
 
@@ -312,7 +286,7 @@ db-build: $(DBBIN)
 
 install: base-install $(INSTALL_TARGETS)
 
-www: $(WWW_OBJS) $(WWW_MANS)
+www: $(WWW_OBJS)
 
 include Makefile.depend
 
@@ -326,7 +300,7 @@ clean:
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f mandoc $(MANDOC_OBJS)
 	rm -f config.h config.log $(COMPAT_OBJS)
-	rm -f $(WWW_MANS) $(WWW_OBJS)
+	rm -f $(WWW_OBJS)
 	rm -rf *.dSYM
 
 base-install: base-build
@@ -356,15 +330,6 @@ db-install: db-build
 	ln -f $(DESTDIR)$(BINDIR)/apropos $(DESTDIR)$(BINDIR)/whatis
 	$(INSTALL_MAN) apropos.1 whatis.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) mandocdb.8 $(DESTDIR)$(MANDIR)/man8
-
-www-install: www
-	mkdir -p $(DESTDIR)$(HTDOCDIR)/snapshots
-	$(INSTALL_DATA) $(WWW_MANS) style.css $(DESTDIR)$(HTDOCDIR)
-	$(INSTALL_DATA) $(WWW_OBJS) $(DESTDIR)$(HTDOCDIR)/snapshots
-	$(INSTALL_DATA) mdocml.tar.gz \
-		$(DESTDIR)$(HTDOCDIR)/snapshots/mdocml-$(VERSION).tar.gz
-	$(INSTALL_DATA) mdocml.sha256 \
-		$(DESTDIR)$(HTDOCDIR)/snapshots/mdocml-$(VERSION).sha256
 
 depend: config.h
 	mkdep -f Makefile.depend $(CFLAGS) $(SRCS)
@@ -404,14 +369,5 @@ config.h: configure config.h.pre config.h.post $(TESTSRCS)
 	rm -f config.log
 	CC="$(CC)" CFLAGS="$(CFLAGS)" VERSION="$(VERSION)" ./configure
 
-.PHONY: 	 base-install db-install install www-install
+.PHONY: 	 base-install db-install install
 .PHONY: 	 clean depend
-.SUFFIXES:	 .1       .3       .5       .7       .8       .h
-.SUFFIXES:	 .1.html  .3.html  .5.html  .7.html  .8.html  .h.html
-
-.h.h.html:
-	highlight -I $< > $@
-
-.1.1.html .3.3.html .5.5.html .7.7.html .8.8.html: mandoc
-	./mandoc -Thtml -Wall,stop \
-		-Ostyle=style.css,man=%N.%S.html,includes=%I.html $< > $@
