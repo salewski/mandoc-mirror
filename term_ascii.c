@@ -260,12 +260,13 @@ ascii_hspan(const struct termp *p, const struct roffsu *su)
 		r = su->scale * 2.0 - 1.0;
 		break;
 	case SCALE_EN:
+		/* FALLTHROUGH */
 	case SCALE_EM:
 		r = su->scale;
 		break;
 	case SCALE_MAX:
 		abort();
-		break;
+		/* NOTREACHED */
 	}
 
 	return(r);
