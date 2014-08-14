@@ -34,7 +34,7 @@ td.head-rtitle	{ width: 10%; text-align: right; } /* Document header: right-titl
 /* General font modes. */
 
 i		{ } /* Italic: BI, IB, I, (implicit). */
-em		{ font-style: italic; font-weight: normal; } /* Emphasis: Em, Bl -emphasis. */
+.emph		{ font-style: italic; font-weight: normal; } /* Emphasis: Em, Bl -emphasis. */
 b		{ } /* Bold: SB, BI, IB, BR, RB, B, (implicit). */
 .symb		{ font-style: normal; font-weight: bold; } /* Symbolic: Sy, Ms, Bf -symbolic. */
 small		{ } /* Small: SB, SM. */

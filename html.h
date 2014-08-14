@@ -50,7 +50,6 @@ enum	htmltag {
 	TAG_I,
 	TAG_CODE,
 	TAG_SMALL,
-	TAG_EM,
 	TAG_MAX
 };
 

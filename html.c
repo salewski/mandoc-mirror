@@ -74,7 +74,6 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"i",		0 }, /* TAG_I */
 	{"code",	0 }, /* TAG_CODE */
 	{"small",	0 }, /* TAG_SMALL */
-	{"em",		0 }, /* TAG_EM */
 };
 
 static	const char	*const htmlattrs[ATTR_MAX] = {

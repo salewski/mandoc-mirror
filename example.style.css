@@ -30,7 +30,7 @@ div.mandoc .list		{ } /* All Bl. */
 div.mandoc i			{ } /* Italic: BI, IB, I, (implicit). */
 div.mandoc b			{ } /* Bold: SB, BI, IB, BR, RB, B, (implicit). */
 div.mandoc small		{ } /* Small: SB, SM. */
-div.mandoc em			{ font-style: italic; font-weight: normal; } /* Emphasis: Em, Bl -emphasis. */
+div.mandoc .emph		{ font-style: italic; font-weight: normal; } /* Emphasis: Em, Bl -emphasis. */
 div.mandoc .symb		{ font-style: normal; font-weight: bold; } /* Symbolic: Sy, Ms, Bf -symbolic. */
 div.mandoc .lit			{ font-style: normal; font-weight: normal; font-family: monospace; } /* Literal: Dl, Li, Ql, Bf -literal, Bl -literal, Bl -unfilled. */
 div.mandoc i.addr		{ font-weight: normal; } /* Address (Ad). */
