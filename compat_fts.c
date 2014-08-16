@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef HAVE_FTS
+#if HAVE_FTS
 
 int dummy;
 

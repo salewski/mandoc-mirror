@@ -455,7 +455,7 @@ a2time(time_t *t, const char *fmt, const char *p)
 	memset(&tm, 0, sizeof(struct tm));
 
 	pp = NULL;
-#ifdef	HAVE_STRPTIME
+#if HAVE_STRPTIME
 	pp = strptime(p, fmt, &tm);
 #endif
 	if (NULL != pp && '\0' == *pp) {

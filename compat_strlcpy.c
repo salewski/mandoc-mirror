@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef HAVE_STRLCPY
+#if HAVE_STRLCPY
 
 int dummy;
 

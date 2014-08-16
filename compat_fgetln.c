@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef HAVE_FGETLN
+#if HAVE_FGETLN
 
 int dummy;
 

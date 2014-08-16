@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef HAVE_STRSEP
+#if HAVE_STRSEP
 
 int dummy;
 

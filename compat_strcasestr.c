@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef HAVE_STRCASESTR
+#if HAVE_STRCASESTR
 
 int dummy;
 

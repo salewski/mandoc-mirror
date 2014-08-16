@@ -1,14 +1,6 @@
-#include "config.h"
-
-#if HAVE_REALLOCARRAY
-
-int dummy;
-
-#else
-
-/*	$OpenBSD: malloc.c,v 1.158 2014/04/23 15:07:27 tedu Exp $	*/
+/*	$Id$	*/
 /*
- * Copyright (c) 2008 Otto Moerbeek <otto@drijf.net>
+ * Copyright (c) 2014 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,22 +14,34 @@ int dummy;
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include <sys/types.h>
-#include <errno.h>
-#include <stdint.h>
-#include <stdlib.h>
 
-#define MUL_NO_OVERFLOW (1UL << (sizeof(size_t) * 4))
+#include <stdio.h>
+#include <unistd.h>
+#include <sqlite3.h>
 
-void *
-reallocarray(void *optr, size_t nmemb, size_t size)
+int
+main(void)
 {
-	if ((nmemb >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
-	    nmemb > 0 && SIZE_MAX / nmemb < size) {
-		errno = ENOMEM;
-		return NULL;
-	}
-	return realloc(optr, size * nmemb);
-}
+	sqlite3	*db;
 
-#endif /*!HAVE_REALLOCARRAY*/
+	if (sqlite3_open_v2("test.db", &db,
+	    SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+	    NULL) != SQLITE_OK) {
+		perror("test.db");
+		fprintf(stderr, "sqlite3_open_v2: %s", sqlite3_errmsg(db));
+		return(1);
+	}
+	unlink("test.db");
+
+	if (sqlite3_exec(db, "PRAGMA foreign_keys = ON",
+	    NULL, NULL, NULL) != SQLITE_OK) {
+		fprintf(stderr, "sqlite3_exec: %s", sqlite3_errmsg(db));
+		return(1);
+	}
+
+	if (sqlite3_close(db) != SQLITE_OK) {
+		fprintf(stderr, "sqlite3_close: %s", sqlite3_errmsg(db));
+		return(1);
+	}
+	return(0);
+}

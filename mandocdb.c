@@ -25,7 +25,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
-#ifdef HAVE_FTS
+#if HAVE_FTS
 #include <fts.h>
 #else
 #include "compat_fts.h"
@@ -39,7 +39,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef HAVE_OHASH
+#if HAVE_OHASH
 #include <ohash.h>
 #else
 #include "compat_ohash.h"

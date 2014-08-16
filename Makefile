@@ -15,105 +15,9 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-VERSION		 = 1.13.1
-
-# === USER SETTINGS ====================================================
-
-# --- user settings relevant for all builds ----------------------------
-
-# Specify this if you want to hard-code the operating system to appear
-# in the lower-left hand corner of -mdoc manuals.
-#
-# CFLAGS	+= -DOSNAME="\"OpenBSD 5.5\""
-
-# IFF your system supports multi-byte functions (setlocale(), wcwidth(),
-# putwchar()) AND has __STDC_ISO_10646__ (that is, wchar_t is simply a
-# UCS-4 value) should you define USE_WCHAR.  If you define it and your
-# system DOESN'T support this, -Tlocale will produce garbage.
-# If you don't define it, -Tlocale is a synonym for -Tascii.
-#
-CFLAGS	 	+= -DUSE_WCHAR
-
-CFLAGS		+= -g -W -Wall -Wstrict-prototypes
-CFLAGS     	+= -Wno-unused-parameter -Wwrite-strings
-PREFIX		 = /usr/local
-BINDIR		 = $(PREFIX)/bin
-INCLUDEDIR	 = $(PREFIX)/include/mandoc
-LIBDIR		 = $(PREFIX)/lib/mandoc
-MANDIR		 = $(PREFIX)/man
-EXAMPLEDIR	 = $(PREFIX)/share/examples/mandoc
-
-INSTALL		 = install
-INSTALL_PROGRAM	 = $(INSTALL) -m 0555
-INSTALL_DATA	 = $(INSTALL) -m 0444
-INSTALL_LIB	 = $(INSTALL) -m 0444
-INSTALL_SOURCE	 = $(INSTALL) -m 0644
-INSTALL_MAN	 = $(INSTALL_DATA)
-
-# --- user settings related to database support ------------------------
-
-# Building apropos(1) and makewhatis(8) requires SQLite3.
-# To avoid that dependency, comment the following line.
-#
-BUILD_TARGETS	+= db-build
-
-# The remaining settings in this section
-# are only relevant if db-build is enabled.
-# Otherwise, they have no effect either way.
-
-# If your system has manpath(1), uncomment this.  This is most any
-# system that's not OpenBSD or NetBSD.  If uncommented, apropos(1)
-# and makewhatis(8) will use manpath(1) to get the MANPATH variable.
-#
-#CFLAGS		+= -DUSE_MANPATH
-
-# On some systems, SQLite3 may be installed below /usr/local.
-# In that case, uncomment the following two lines.
-#
-#CFLAGS		+= -I/usr/local/include
-#DBLIB		+= -L/usr/local/lib
-
-# OpenBSD has the ohash functions in libutil.
-# Comment the following line if your system doesn't.
-#
-DBLIB		+= -lutil
-
-SBINDIR		 = $(PREFIX)/sbin
-
-# --- user settings related to man.cgi ---------------------------------
-
-# To build man.cgi, copy cgi.h.example to cgi.h, edit it,
-# and enable the following line.
-# Obviously, this requires that db-build is enabled, too.
-#
-#BUILD_TARGETS	+= cgi-build
-
-# The remaining settings in this section
-# are only relevant if cgi-build is enabled.
-# Otherwise, they have no effect either way.
-
-# If your system does not support static binaries, comment this,
-# for example on Mac OS X.
-#
-STATIC		 = -static
-
-# Linux requires -pthread for statical linking.
-#
-#STATIC		+= -pthread
-
-WWWPREFIX	 = /var/www
-HTDOCDIR	 = $(WWWPREFIX)/htdocs
-CGIBINDIR	 = $(WWWPREFIX)/cgi-bin
-
-# === END OF USER SETTINGS =============================================
-
-INSTALL_TARGETS	 = $(BUILD_TARGETS:-build=-install)
-
 BASEBIN		 = mandoc preconv demandoc
 DBBIN		 = apropos makewhatis
 CGIBIN		 = man.cgi
-
-DBLIB		+= -lsqlite3
 
 TESTSRCS	 = test-dirent-namlen.c \
 		   test-fgetln.c \
@@ -122,12 +26,14 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-mmap.c \
 		   test-ohash.c \
 		   test-reallocarray.c \
+		   test-sqlite3.c \
 		   test-sqlite3_errstr.c \
 		   test-strcasestr.c \
 		   test-strlcat.c \
 		   test-strlcpy.c \
 		   test-strptime.c \
-		   test-strsep.c
+		   test-strsep.c \
+		   test-wchar.c
 
 SRCS		 = apropos.c \
 		   arch.c \
@@ -204,9 +110,8 @@ DISTFILES	 = INSTALL \
 		   chars.in \
 		   compat_fts.h \
 		   compat_ohash.h \
-		   config.h.post \
-		   config.h.pre \
 		   configure \
+		   configure.local.example \
 		   demandoc.1 \
 		   eqn.7 \
 		   example.style.css \
@@ -363,9 +268,13 @@ WWW_MANS	 = apropos.1.html \
 WWW_OBJS	 = mdocml.tar.gz \
 		   mdocml.sha256
 
+include Makefile.local
+
+INSTALL_TARGETS	 = $(BUILD_TARGETS:-build=-install)
+
 # === DEPENDENCY HANDLING ==============================================
 
-all: base-build $(BUILD_TARGETS)
+all: base-build $(BUILD_TARGETS) Makefile.local
 
 base-build: $(BASEBIN)
 
@@ -381,8 +290,11 @@ include Makefile.depend
 
 # === TARGETS CONTAINING SHELL COMMANDS ================================
 
+distclean: clean
+	rm -f Makefile.local config.h config.h.old config.log config.log.old
+
 clean:
-	rm -f libmandoc.a $(LIBMANDOC_OBJS)
+	rm -f libmandoc.a $(LIBMANDOC_OBJS) $(COMPAT_OBJS)
 	rm -f apropos $(APROPOS_OBJS)
 	rm -f makewhatis $(MAKEWHATIS_OBJS)
 	rm -f preconv $(PRECONV_OBJS)
@@ -390,7 +302,6 @@ clean:
 	rm -f manpage $(MANPAGE_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f mandoc $(MANDOC_OBJS)
-	rm -f config.h config.log $(COMPAT_OBJS)
 	rm -f $(WWW_MANS) $(WWW_OBJS)
 	rm -rf *.dSYM
 
@@ -450,6 +361,10 @@ www-install: www
 	$(INSTALL_DATA) mdocml.sha256 \
 		$(DESTDIR)$(HTDOCDIR)/snapshots/mdocml-$(VERSION).sha256
 
+Makefile.local config.h: configure ${TESTSRCS}
+	@echo "$@ is out of date; please run ./configure"
+	@exit 1
+
 depend: config.h
 	mkdep -f Makefile.depend $(CFLAGS) $(SRCS)
 	perl -e 'undef $$/; $$_ = <>; s|/usr/include/\S+||g; \
@@ -485,18 +400,13 @@ mdocml.sha256: mdocml.tar.gz
 
 mdocml.tar.gz: $(DISTFILES)
 	mkdir -p .dist/mdocml-$(VERSION)/
-	$(INSTALL_SOURCE) $(DISTFILES) .dist/mdocml-$(VERSION)
+	$(INSTALL) -m 0644 $(DISTFILES) .dist/mdocml-$(VERSION)
 	chmod 755 .dist/mdocml-$(VERSION)/configure
 	( cd .dist/ && tar zcf ../$@ mdocml-$(VERSION) )
 	rm -rf .dist/
 
-config.h: configure config.h.pre config.h.post $(TESTSRCS)
-	rm -f config.log
-	CC="$(CC)" CFLAGS="$(CFLAGS)" DBLIB="$(DBLIB)" \
-		VERSION="$(VERSION)" ./configure
-
 .PHONY: 	 base-install cgi-install db-install install www-install
-.PHONY: 	 clean depend
+.PHONY: 	 clean distclean depend
 .SUFFIXES:	 .1       .3       .5       .7       .8       .h
 .SUFFIXES:	 .1.html  .3.html  .5.html  .7.html  .8.html  .h.html
 

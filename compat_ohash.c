@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef HAVE_OHASH
+#if HAVE_OHASH
 
 int dummy;
 

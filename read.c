@@ -19,7 +19,7 @@
 #include "config.h"
 
 #include <sys/types.h>
-#ifdef HAVE_MMAP
+#if HAVE_MMAP
 #include <sys/stat.h>
 #include <sys/mman.h>
 #endif
@@ -590,7 +590,7 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 	size_t		 off;
 	ssize_t		 ssz;
 
-#ifdef	HAVE_MMAP
+#if HAVE_MMAP
 	struct stat	 st;
 	if (-1 == fstat(fd, &st)) {
 		curp->file_status = MANDOCLEVEL_SYSERR;
@@ -763,7 +763,7 @@ mparse_readfd(struct mparse *curp, int fd, const char *file)
 
 	mparse_parse_buffer(curp, blk, file);
 
-#ifdef	HAVE_MMAP
+#if HAVE_MMAP
 	if (with_mmap)
 		munmap(blk.buf, blk.sz);
 	else

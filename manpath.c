@@ -39,7 +39,7 @@ void
 manpath_parse(struct manpaths *dirs, const char *file,
 		char *defp, char *auxp)
 {
-#ifdef	USE_MANPATH
+#if HAVE_MANPATH
 	char		 cmd[(PATH_MAX * 3) + 20];
 	FILE		*stream;
 	char		*buf;

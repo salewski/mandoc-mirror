@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef HAVE_SQLITE3_ERRSTR
+#if HAVE_SQLITE3_ERRSTR
 
 int dummy;
 

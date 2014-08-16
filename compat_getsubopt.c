@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef HAVE_GETSUBOPT
+#if HAVE_GETSUBOPT
 
 int dummy;
 

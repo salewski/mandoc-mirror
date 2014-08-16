@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef HAVE_STRLCAT
+#if HAVE_STRLCAT
 
 int dummy;
 

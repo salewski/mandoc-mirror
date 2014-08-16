@@ -19,14 +19,14 @@
 
 #include <sys/types.h>
 
-#ifdef USE_WCHAR
+#if HAVE_WCHAR
 #include <locale.h>
 #endif
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#ifdef USE_WCHAR
+#if HAVE_WCHAR
 #include <wchar.h>
 #endif
 
@@ -35,17 +35,6 @@
 #include "out.h"
 #include "term.h"
 #include "main.h"
-
-/* 
- * Sadly, this doesn't seem to be defined on systems even when they
- * support it.  For the time being, remove it and let those compiling
- * the software decide for themselves what to use.
- */
-#if 0
-#if ! defined(__STDC_ISO_10646__)
-# undef USE_WCHAR
-#endif
-#endif
 
 static	struct termp	 *ascii_init(enum termenc, char *);
 static	double		  ascii_hspan(const struct termp *,
@@ -58,7 +47,7 @@ static	void		  ascii_endline(struct termp *);
 static	void		  ascii_letter(struct termp *, int);
 static	void		  ascii_setwidth(struct termp *, int, size_t);
 
-#ifdef	USE_WCHAR
+#if HAVE_WCHAR
 static	void		  locale_advance(struct termp *, size_t);
 static	void		  locale_endline(struct termp *);
 static	void		  locale_letter(struct termp *, int);
@@ -90,7 +79,7 @@ ascii_init(enum termenc enc, char *outopts)
 	p->setwidth = ascii_setwidth;
 	p->width = ascii_width;
 
-#ifdef	USE_WCHAR
+#if HAVE_WCHAR
 	if (TERMENC_ASCII != enc) {
 		v = TERMENC_LOCALE == enc ?
 		    setlocale(LC_ALL, "") :
@@ -272,7 +261,7 @@ ascii_hspan(const struct termp *p, const struct roffsu *su)
 	return(r);
 }
 
-#ifdef USE_WCHAR
+#if HAVE_WCHAR
 static size_t
 locale_width(const struct termp *p, int c)
 {
