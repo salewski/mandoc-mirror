@@ -280,6 +280,7 @@ cat << __HEREDOC__
 #define HAVE_STRPTIME ${HAVE_STRPTIME}
 #define HAVE_STRSEP ${HAVE_STRSEP}
 #define HAVE_WCHAR ${HAVE_WCHAR}
+#define HAVE_SQLITE3 ${HAVE_SQLITE3}
 #define HAVE_SQLITE3_ERRSTR ${HAVE_SQLITE3_ERRSTR}
 #define HAVE_OHASH ${HAVE_OHASH}
 #define HAVE_MANPATH ${HAVE_MANPATH}
@@ -384,6 +385,9 @@ INSTALL_LIB	= ${INSTALL_LIB}
 INSTALL_MAN	= ${INSTALL_MAN}
 INSTALL_DATA	= ${INSTALL_DATA}
 __HEREDOC__
+
+[ ${BUILD_DB} -gt 0 ] && \
+	echo "MAN_OBJS	= \$(MANDOC_OBJS) \$(APROPOS_OBJS)"
 
 echo "Makefile.local: written" 1>&2
 echo "Makefile.local: written" 1>&3

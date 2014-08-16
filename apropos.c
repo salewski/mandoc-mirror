@@ -33,7 +33,7 @@
 
 
 int
-main(int argc, char *argv[])
+apropos(int argc, char *argv[])
 {
 	int		 ch, whatis;
 	struct mansearch search;

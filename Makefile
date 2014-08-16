@@ -16,7 +16,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 BASEBIN		 = mandoc preconv demandoc
-DBBIN		 = apropos makewhatis
+DBBIN		 = makewhatis
 CGIBIN		 = man.cgi
 
 TESTSRCS	 = test-dirent-namlen.c \
@@ -222,6 +222,8 @@ MANDOC_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   out.o \
 		   tree.o
 
+MAN_OBJS	 = $(MANDOC_OBJS)
+
 MAKEWHATIS_OBJS	 = mandocdb.o mansearch_const.o manpath.o
 
 PRECONV_OBJS	 = preconv.o
@@ -295,13 +297,12 @@ distclean: clean
 
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS) $(COMPAT_OBJS)
-	rm -f apropos $(APROPOS_OBJS)
+	rm -f mandoc $(MANDOC_OBJS) $(APROPOS_OBJS)
 	rm -f makewhatis $(MAKEWHATIS_OBJS)
 	rm -f preconv $(PRECONV_OBJS)
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f manpage $(MANPAGE_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
-	rm -f mandoc $(MANDOC_OBJS)
 	rm -f $(WWW_MANS) $(WWW_OBJS)
 	rm -rf *.dSYM
 
@@ -331,8 +332,8 @@ db-install: db-build
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	mkdir -p $(DESTDIR)$(MANDIR)/man5
 	mkdir -p $(DESTDIR)$(MANDIR)/man8
-	$(INSTALL_PROGRAM) apropos $(DESTDIR)$(BINDIR)
-	ln -f $(DESTDIR)$(BINDIR)/apropos $(DESTDIR)$(BINDIR)/whatis
+	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/apropos
+	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/whatis
 	$(INSTALL_PROGRAM) makewhatis $(DESTDIR)$(SBINDIR)
 	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(MANDIR)/man1
 	ln -f $(DESTDIR)$(MANDIR)/man1/apropos.1 \
@@ -374,8 +375,8 @@ depend: config.h
 libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 	$(AR) rs $@ $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 
-mandoc: $(MANDOC_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(MANDOC_OBJS) libmandoc.a
+mandoc: $(MAN_OBJS) libmandoc.a
+	$(CC) $(LDFLAGS) -o $@ $(MAN_OBJS) libmandoc.a $(DBLIB)
 
 makewhatis: $(MAKEWHATIS_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(MAKEWHATIS_OBJS) libmandoc.a $(DBLIB)
@@ -385,9 +386,6 @@ preconv: $(PRECONV_OBJS)
 
 manpage: $(MANPAGE_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(MANPAGE_OBJS) libmandoc.a $(DBLIB)
-
-apropos: $(APROPOS_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(APROPOS_OBJS) libmandoc.a $(DBLIB)
 
 man.cgi: $(CGI_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) $(STATIC) -o $@ $(CGI_OBJS) libmandoc.a $(DBLIB)
