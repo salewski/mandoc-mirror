@@ -1041,7 +1041,8 @@ blk_full(MACRO_PROT_ARGS)
 
 	if (tok == MDOC_It) {
 		for (n = mdoc->last; n; n = n->parent)
-			if (n->tok == MDOC_Bl)
+			if (n->tok == MDOC_Bl &&
+			    ! (n->flags & MDOC_VALID))
 				break;
 		if (n == NULL) {
 			mandoc_vmsg(MANDOCERR_IT_STRAY, mdoc->parse,
