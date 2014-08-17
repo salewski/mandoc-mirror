@@ -6,6 +6,7 @@ int dummy;
 
 #else
 
+/*	$Id$	*/
 /*	$OpenBSD: fts.c,v 1.46 2014/05/25 17:47:04 tedu Exp $	*/
 
 /*-
@@ -489,7 +490,7 @@ fts_build(FTS *sp)
 		if (ISDOT(dp->d_name))
 			continue;
 
-#ifdef HAVE_DIRENT_NAMLEN
+#if HAVE_DIRENT_NAMLEN
 		dlen = dp->d_namlen;
 #else
 		dlen = strlen(dp->d_name);
