@@ -305,10 +305,8 @@ __HEREDOC__
 [ ${HAVE_FGETLN} -eq 0 ] && \
 	echo "extern	char	 *fgetln(FILE *, size_t *);"
 
-if [ ${HAVE_GETSUBOPT} -eq 0 ]; then
+[ ${HAVE_GETSUBOPT} -eq 0 ] && \
 	echo "extern	int	  getsubopt(char **, char * const *, char **);"
-	echo "extern	char	 *suboptarg;"
-fi
 
 [ ${HAVE_REALLOCARRAY} -eq 0 ] && \
 	echo "extern	void	 *reallocarray(void *, size_t, size_t);"
