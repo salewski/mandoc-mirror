@@ -32,6 +32,8 @@
 #include "main.h"
 #include "mdoc.h"
 #include "man.h"
+#include "manpath.h"
+#include "mansearch.h"
 
 #if !defined(__GNUC__) || (__GNUC__ < 2)
 # if !defined(lint)
@@ -68,17 +70,13 @@ struct	curparse {
 	char		  outopts[BUFSIZ]; /* buf of output opts */
 };
 
-#if HAVE_SQLITE3
-int			  apropos(int, char**);
-#endif
-
 static	int		  moptions(int *, char *);
 static	void		  mmsg(enum mandocerr, enum mandoclevel,
 				const char *, int, int, const char *);
 static	void		  parse(struct curparse *, int,
 				const char *, enum mandoclevel *);
 static	int		  toptions(struct curparse *, char *);
-static	void		  usage(void) __attribute__((noreturn));
+static	void		  usage(enum argmode) __attribute__((noreturn));
 static	void		  version(void) __attribute__((noreturn));
 static	int		  woptions(struct curparse *, char *);
 
@@ -88,11 +86,19 @@ static	const char	 *progname;
 int
 main(int argc, char *argv[])
 {
-	int		 c;
 	struct curparse	 curp;
-	int		 options;
-	enum mandoclevel rc;
+	struct mansearch search;
+	struct manpaths	 paths;
+	char		*conf_file, *defpaths, *auxpaths;
 	char		*defos;
+#if HAVE_SQLITE3
+	struct manpage	*res;
+	size_t		 i, sz;
+#endif
+	enum mandoclevel rc;
+	int		 show_usage;
+	int		 options;
+	int		 c;
 
 	progname = strrchr(argv[0], '/');
 	if (progname == NULL)
@@ -100,21 +106,40 @@ main(int argc, char *argv[])
 	else
 		++progname;
 
-#if HAVE_SQLITE3
-	if (0 == strncmp(progname, "apropos", 7) ||
-	    0 == strncmp(progname, "whatis", 6))
-		return(apropos(argc, argv));
-#endif
+	/* Search options. */
+
+	memset(&paths, 0, sizeof(struct manpaths));
+	conf_file = defpaths = auxpaths = NULL;
+
+	memset(&search, 0, sizeof(struct mansearch));
+	search.outkey = "Nd";
+
+	if (strcmp(progname, "man") == 0)
+		search.argmode = ARG_NAME;
+	else if (strncmp(progname, "apropos", 7) == 0)
+		search.argmode = ARG_EXPR;
+	else if (strncmp(progname, "whatis", 6) == 0)
+		search.argmode = ARG_WORD;
+	else
+		search.argmode = ARG_FILE;
+
+	/* Parser and formatter options. */
 
 	memset(&curp, 0, sizeof(struct curparse));
-
-	options = MPARSE_SO;
 	curp.outtype = OUTT_ASCII;
 	curp.wlevel  = MANDOCLEVEL_FATAL;
+	options = MPARSE_SO;
 	defos = NULL;
 
-	while (-1 != (c = getopt(argc, argv, "I:m:O:T:VW:")))
+	show_usage = 0;
+	while (-1 != (c = getopt(argc, argv, "C:fI:kM:m:O:S:s:T:VW:"))) {
 		switch (c) {
+		case 'C':
+			conf_file = optarg;
+			break;
+		case 'f':
+			search.argmode = ARG_WORD;
+			break;
 		case 'I':
 			if (strncmp(optarg, "os=", 3)) {
 				fprintf(stderr,
@@ -130,13 +155,25 @@ main(int argc, char *argv[])
 			}
 			defos = mandoc_strdup(optarg + 3);
 			break;
+		case 'k':
+			search.argmode = ARG_EXPR;
+			break;
+		case 'M':
+			defpaths = optarg;
+			break;
 		case 'm':
-			if ( ! moptions(&options, optarg))
-				return((int)MANDOCLEVEL_BADARG);
+			auxpaths = optarg;
 			break;
 		case 'O':
+			search.outkey = optarg;
 			(void)strlcat(curp.outopts, optarg, BUFSIZ);
 			(void)strlcat(curp.outopts, ",", BUFSIZ);
+			break;
+		case 'S':
+			search.arch = optarg;
+			break;
+		case 's':
+			search.sec = optarg;
 			break;
 		case 'T':
 			if ( ! toptions(&curp, optarg))
@@ -150,9 +187,45 @@ main(int argc, char *argv[])
 			version();
 			/* NOTREACHED */
 		default:
-			usage();
-			/* NOTREACHED */
+			show_usage = 1;
+			break;
 		}
+	}
+
+	if (show_usage)
+		usage(search.argmode);
+
+	argc -= optind;
+	argv += optind;
+
+	/* man(1), whatis(1), apropos(1) */
+
+	if (search.argmode != ARG_FILE) {
+#if HAVE_SQLITE3
+		if (argc == 0)
+			usage(search.argmode);
+		manpath_parse(&paths, conf_file, defpaths, auxpaths);
+		mansearch_setup(1);
+		if( ! mansearch(&search, &paths, argc, argv, &res, &sz))
+			usage(search.argmode);
+		manpath_free(&paths);
+		for (i = 0; i < sz; i++)
+			printf("%s - %s\n", res[i].names,
+			    res[i].output == NULL ? "" : res[i].output);
+		mansearch_free(res, sz);
+		mansearch_setup(0);
+		return((int)MANDOCLEVEL_OK);
+#else
+		fputs("mandoc: database support not compiled in\n",
+		    stderr);
+		return((int)MANDOCLEVEL_BADARG);
+#endif
+	}
+
+	/* mandoc(1) */
+
+	if ( ! moptions(&options, auxpaths))
+		return((int)MANDOCLEVEL_BADARG);
 
 	curp.mp = mparse_alloc(options, curp.wlevel, mmsg, defos);
 
@@ -161,9 +234,6 @@ main(int argc, char *argv[])
 	 */
 	if (OUTT_MAN == curp.outtype)
 		mparse_keep(curp.mp);
-
-	argc -= optind;
-	argv += optind;
 
 	rc = MANDOCLEVEL_OK;
 
@@ -190,24 +260,35 @@ static void
 version(void)
 {
 
-	printf("%s %s\n", progname, VERSION);
+	printf("mandoc %s\n", VERSION);
 	exit((int)MANDOCLEVEL_OK);
 }
 
 static void
-usage(void)
+usage(enum argmode argmode)
 {
 
-	fprintf(stderr, "usage: %s "
-			"[-V] "
-			"[-Ios=name] "
-			"[-mformat] "
-			"[-Ooption] "
-			"[-Toutput] "
-			"[-Wlevel]\n"
-			"\t      [file ...]\n",
-			progname);
-
+	switch (argmode) {
+	case ARG_FILE:
+		fputs("usage: mandoc [-V] [-Ios=name] [-mformat]"
+		    " [-Ooption] [-Toutput] [-Wlevel]\n"
+		    "\t      [file ...]\n", stderr);
+		break;
+	case ARG_NAME:
+		fputs("usage: man [-acfhkVw] [-C file] "
+		    "[-M path] [-m path] [-S arch] [-s section]\n"
+		    "\t   [section] name ...\n", stderr);
+		break;
+	case ARG_WORD:
+		fputs("usage: whatis [-V] [-C file] [-M path] [-m path] "
+		    "[-S arch] [-s section] name ...\n", stderr);
+		break;
+	case ARG_EXPR:
+		fputs("usage: apropos [-V] [-C file] [-M path] [-m path] "
+		    "[-O outkey] [-S arch]\n"
+		    "\t       [-s section] expression ...\n", stderr);
+		break;
+	}
 	exit((int)MANDOCLEVEL_BADARG);
 }
 
@@ -328,7 +409,9 @@ static int
 moptions(int *options, char *arg)
 {
 
-	if (0 == strcmp(arg, "doc"))
+	if (arg == NULL)
+		/* nothing to do */;
+	else if (0 == strcmp(arg, "doc"))
 		*options |= MPARSE_MDOC;
 	else if (0 == strcmp(arg, "andoc"))
 		/* nothing to do */;

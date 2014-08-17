@@ -35,8 +35,7 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-strsep.c \
 		   test-wchar.c
 
-SRCS		 = apropos.c \
-		   arch.c \
+SRCS		 = arch.c \
 		   att.c \
 		   cgi.c \
 		   chars.c \
@@ -228,7 +227,7 @@ MAKEWHATIS_OBJS	 = mandocdb.o mansearch_const.o manpath.o
 
 PRECONV_OBJS	 = preconv.o
 
-APROPOS_OBJS	 = apropos.o mansearch.o mansearch_const.o manpath.o
+APROPOS_OBJS	 = mansearch.o mansearch_const.o manpath.o
 
 CGI_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   cgi.o \
@@ -369,7 +368,8 @@ Makefile.local config.h: configure ${TESTSRCS}
 depend: config.h
 	mkdep -f Makefile.depend $(CFLAGS) $(SRCS)
 	perl -e 'undef $$/; $$_ = <>; s|/usr/include/\S+||g; \
-		s|\\\n||g; s|  +| |g; print;' Makefile.depend > Makefile.tmp
+		s|\\\n||g; s|  +| |g; s| $$||mg; print;' \
+		Makefile.depend > Makefile.tmp
 	mv Makefile.tmp Makefile.depend
 
 libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)

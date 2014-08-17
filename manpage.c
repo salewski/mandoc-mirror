@@ -87,10 +87,11 @@ main(int argc, char *argv[])
 	if (0 == argc)
 		goto usage;
 
-	search.deftype = TYPE_Nm | TYPE_Nd;
+	search.outkey = "Nd";
+	search.argmode = ARG_EXPR;
 
 	manpath_parse(&paths, conf_file, defpaths, auxpaths);
-	ch = mansearch(&search, &paths, argc, argv, "Nd", &res, &sz);
+	ch = mansearch(&search, &paths, argc, argv, &res, &sz);
 	manpath_free(&paths);
 
 	if (0 == ch)

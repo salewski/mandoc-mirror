@@ -159,7 +159,6 @@ int
 mansearch(const struct mansearch *search,
 		const struct manpaths *paths,
 		int argc, char *argv[],
-		const char *outkey,
 		struct manpage **res, size_t *sz)
 {
 	int		 fd, rc, c, indexbit;
@@ -195,11 +194,11 @@ mansearch(const struct mansearch *search,
 		goto out;
 
 	outbit = 0;
-	if (NULL != outkey) {
+	if (NULL != search->outkey) {
 		for (indexbit = 0, iterbit = 1;
 		     indexbit < mansearch_keymax;
 		     indexbit++, iterbit <<= 1) {
-			if (0 == strcasecmp(outkey,
+			if (0 == strcasecmp(search->outkey,
 			    mansearch_keynames[indexbit])) {
 				outbit = iterbit;
 				break;
@@ -365,6 +364,19 @@ out:
 	free(sql);
 	*sz = cur;
 	return(rc);
+}
+
+void
+mansearch_free(struct manpage *res, size_t sz)
+{
+	size_t	 i;
+
+	for (i = 0; i < sz; i++) {
+		free(res[i].file);
+		free(res[i].names);
+		free(res[i].output);
+	}
+	free(res);
 }
 
 static int
@@ -739,35 +751,29 @@ exprterm(const struct mansearch *search, char *buf, int cs)
 
 	e = mandoc_calloc(1, sizeof(struct expr));
 
-	if (MANSEARCH_MAN & search->flags) {
-		e->bits = search->deftype;
+	if (search->argmode == ARG_NAME) {
+		e->bits = TYPE_Nm;
 		e->substr = buf;
 		e->equal = 1;
 		return(e);
 	}
 
 	/*
-	 * Look for an '=' or '~' operator,
-	 * unless forced to some fixed macro keys.
+	 * Separate macro keys from search string.
+	 * If needed, request regular expression handling
+	 * by setting e->substr to NULL.
 	 */
 
-	if (MANSEARCH_WHATIS & search->flags)
-		val = NULL;
-	else
-		val = strpbrk(buf, "=~");
-
-	if (NULL == val) {
-		e->bits = search->deftype;
+	if (search->argmode == ARG_WORD) {
+		e->bits = TYPE_Nm;
+		e->substr = NULL;
+		mandoc_asprintf(&val, "[[:<:]]%s[[:>:]]", buf);
+	} else if ((val = strpbrk(buf, "=~")) == NULL) {
+		e->bits = TYPE_Nm | TYPE_Nd;
 		e->substr = buf;
-
-	/*
-	 * Found an operator.
-	 * Regexp search is requested by !e->substr.
-	 */
-
 	} else {
 		if (val == buf)
-			e->bits = search->deftype;
+			e->bits = TYPE_Nm | TYPE_Nd;
 		if ('=' == *val)
 			e->substr = val + 1;
 		*val++ = '\0';
@@ -777,15 +783,10 @@ exprterm(const struct mansearch *search, char *buf, int cs)
 
 	/* Compile regular expressions. */
 
-	if (MANSEARCH_WHATIS & search->flags) {
-		e->substr = NULL;
-		mandoc_asprintf(&val, "[[:<:]]%s[[:>:]]", buf);
-	}
-
 	if (NULL == e->substr) {
 		irc = regcomp(&e->regexp, val,
 		    REG_EXTENDED | REG_NOSUB | (cs ? 0 : REG_ICASE));
-		if (MANSEARCH_WHATIS & search->flags)
+		if (search->argmode == ARG_WORD)
 			free(val);
 		if (irc) {
 			regerror(irc, &e->regexp, errbuf, sizeof(errbuf));
