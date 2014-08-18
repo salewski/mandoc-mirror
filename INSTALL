@@ -42,7 +42,8 @@ system, please consult your operating system documentation.
 To install mandoc manually, the following steps are needed:
 
 1. If you want to build the CGI program, man.cgi(8), too, run the
-command "echo BUILD_CGI=1 > configure.local".
+command "echo BUILD_CGI=1 > configure.local".  Then run "cp
+cgi.h.examples cgi.h" and edit cgi.h as desired.
 
 2. Run "./configure".
 This script attempts autoconfiguration of mandoc for your system.

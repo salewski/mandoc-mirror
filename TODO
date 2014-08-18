@@ -442,3 +442,16 @@ Several areas can be cleaned up to make mandoc even faster.  These are
   abstract from the database structure, too.
   suggested by espie@  Sat, 19 Apr 2014 14:52:57 +0200
 
+************************************************************************
+* CGI issues
+************************************************************************
+
+ - Enable HTTP compression by detecting gzip encoding and filtering
+   output through libz.
+ - Sandbox (see OpenSSH).
+ - Enable caching support via HTTP 304 and If-Modified-Since.
+ - Allow for cgi.h to be overridden by CGI environment variables.
+   Otherwise, binary distributions will inherit the compile-time
+   behaviour, which is not optimal.
+ - Have Mac OSX systems automatically disable -static compilation of the
+   CGI: -static isn't supported.
