@@ -100,7 +100,6 @@ man_unscope(struct man *man, const struct man_node *to)
 {
 	struct man_node	*n;
 
-	man->next = MAN_NEXT_SIBLING;
 	to = to->parent;
 	n = man->last;
 	while (n != to) {
@@ -139,11 +138,23 @@ man_unscope(struct man *man, const struct man_node *to)
 		 * Save a pointer to the parent such that
 		 * we know where to continue the iteration.
 		 */
+
 		man->last = n;
 		n = n->parent;
 		if ( ! man_valid_post(man))
 			return(0);
 	}
+
+	/*
+	 * If we ended up at the parent of the node we were
+	 * supposed to rewind to, that means the target node
+	 * got deleted, so add the next node we parse as a child
+	 * of the parent instead of as a sibling of the target.
+	 */
+
+	man->next = (man->last == to) ?
+	    MAN_NEXT_CHILD : MAN_NEXT_SIBLING;
+
 	return(1);
 }
 
