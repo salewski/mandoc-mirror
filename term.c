@@ -220,7 +220,7 @@ term_flushln(struct termp *p)
 				break;
 			if (' ' == p->buf[i]) {
 				j = i;
-				while (' ' == p->buf[i])
+				while (i < p->col && ' ' == p->buf[i])
 					i++;
 				dv = (i - j) * (*p->width)(p, ' ');
 				vbl += dv;
