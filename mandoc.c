@@ -199,7 +199,8 @@ mandoc_escape(const char **end, const char **start, int *sz)
 		/* FALLTHROUGH */
 	case 'x':
 		if (strchr(" %&()*+-./0123456789:<=>", **start)) {
-			++*end;
+			if ('\0' != **start)
+				++*end;
 			return(ESCAPE_ERROR);
 		}
 		gly = ESCAPE_IGNORE;
