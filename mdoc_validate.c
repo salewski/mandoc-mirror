@@ -529,7 +529,7 @@ pre_bl(PRE_ARGS)
 	 * ones.  If we find no list type, we default to LIST_item.
 	 */
 
-	wa = n->args->argv;
+	wa = (n->args == NULL) ? NULL : n->args->argv;
 	mdoclt = MDOC_ARG_MAX;
 	for (i = 0; n->args && i < (int)n->args->argc; i++) {
 		argv = n->args->argv + i;
