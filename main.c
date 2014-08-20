@@ -41,6 +41,15 @@
 # endif
 #endif /* !defined(__GNUC__) || (__GNUC__ < 2) */
 
+enum	outmode {
+	OUTMODE_DEF = 0,
+	OUTMODE_FLN,
+	OUTMODE_LST,
+	OUTMODE_ALL,
+	OUTMODE_INT,
+	OUTMODE_ONE
+};
+
 typedef	void		(*out_mdoc)(void *, const struct mdoc *);
 typedef	void		(*out_man)(void *, const struct man *);
 typedef	void		(*out_free)(void *);
@@ -96,6 +105,7 @@ main(int argc, char *argv[])
 	size_t		 i, sz;
 #endif
 	enum mandoclevel rc;
+	enum outmode	 outmode;
 	int		 show_usage;
 	int		 options;
 	int		 c;
@@ -132,8 +142,12 @@ main(int argc, char *argv[])
 	defos = NULL;
 
 	show_usage = 0;
-	while (-1 != (c = getopt(argc, argv, "C:fI:kM:m:O:S:s:T:VW:"))) {
+	outmode = OUTMODE_DEF;
+	while (-1 != (c = getopt(argc, argv, "aC:fI:ikM:m:O:S:s:T:VW:w"))) {
 		switch (c) {
+		case 'a':
+			outmode = OUTMODE_ALL;
+			break;
 		case 'C':
 			conf_file = optarg;
 			break;
@@ -154,6 +168,9 @@ main(int argc, char *argv[])
 				return((int)MANDOCLEVEL_BADARG);
 			}
 			defos = mandoc_strdup(optarg + 3);
+			break;
+		case 'i':
+			outmode = OUTMODE_INT;
 			break;
 		case 'k':
 			search.argmode = ARG_EXPR;
@@ -183,6 +200,9 @@ main(int argc, char *argv[])
 			if ( ! woptions(&curp, optarg))
 				return((int)MANDOCLEVEL_BADARG);
 			break;
+		case 'w':
+			outmode = OUTMODE_FLN;
+			break;
 		case 'V':
 			version();
 			/* NOTREACHED */
@@ -194,6 +214,20 @@ main(int argc, char *argv[])
 
 	if (show_usage)
 		usage(search.argmode);
+
+	if (outmode == OUTMODE_DEF) {
+		switch (search.argmode) {
+		case ARG_FILE:
+			outmode = OUTMODE_ALL;
+			break;
+		case ARG_NAME:
+			outmode = OUTMODE_ONE;
+			break;
+		default:
+			outmode = OUTMODE_LST;
+			break;
+		}
+	}
 
 	argc -= optind;
 	argv += optind;
@@ -209,9 +243,14 @@ main(int argc, char *argv[])
 		if( ! mansearch(&search, &paths, argc, argv, &res, &sz))
 			usage(search.argmode);
 		manpath_free(&paths);
-		for (i = 0; i < sz; i++)
-			printf("%s - %s\n", res[i].names,
-			    res[i].output == NULL ? "" : res[i].output);
+		for (i = 0; i < sz; i++) {
+			if (outmode == OUTMODE_FLN)
+				puts(res[i].file);
+			else
+				printf("%s - %s\n", res[i].names,
+				    res[i].output == NULL ? "" :
+				    res[i].output);
+		}
 		mansearch_free(res, sz);
 		mansearch_setup(0);
 		return((int)MANDOCLEVEL_OK);
