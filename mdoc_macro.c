@@ -843,7 +843,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 static int
 in_line(MACRO_PROT_ARGS)
 {
-	int		 la, scope, cnt, nc, nl;
+	int		 la, scope, cnt, mayopen, nc, nl;
 	enum margverr	 av;
 	enum mdoct	 ntok;
 	enum margserr	 ac;
@@ -894,6 +894,7 @@ in_line(MACRO_PROT_ARGS)
 		return(0);
 	}
 
+	mayopen = 1;
 	for (cnt = scope = 0;; ) {
 		la = *pos;
 		ac = mdoc_args(mdoc, line, pos, buf, tok, &p);
@@ -950,19 +951,19 @@ in_line(MACRO_PROT_ARGS)
 			 * If we encounter closing punctuation, no word
 			 * has been omitted, no scope is open, and we're
 			 * allowed to have an empty element, then start
-			 * a new scope.  `Ar', `Fl', and `Li', only do
-			 * this once per invocation.  There may be more
-			 * of these (all of them?).
+			 * a new scope.
 			 */
-			if (0 == cnt && (nc || MDOC_Li == tok) &&
-			    DELIM_CLOSE == d && ! scope) {
+			if ((d == DELIM_CLOSE ||
+			     (d == DELIM_MIDDLE && tok == MDOC_Fl)) &&
+			    (nc || tok == MDOC_Li) &&
+			    !scope && !cnt && mayopen) {
 				if ( ! mdoc_elem_alloc(mdoc,
 				    line, ppos, tok, arg))
 					return(0);
-				if (MDOC_Ar == tok || MDOC_Li == tok ||
-				    MDOC_Fl == tok)
-					cnt++;
 				scope = 1;
+				cnt++;
+				if (MDOC_Li == tok || MDOC_Nm == tok)
+					mayopen = 0;
 			}
 			/*
 			 * Close out our scope, if one is open, before
@@ -971,14 +972,12 @@ in_line(MACRO_PROT_ARGS)
 			if (scope && ! rew_elem(mdoc, tok))
 				return(0);
 			scope = 0;
-		} else if ( ! scope) {
+		} else if (mayopen && !scope) {
 			if ( ! mdoc_elem_alloc(mdoc, line, ppos, tok, arg))
 				return(0);
 			scope = 1;
-		}
-
-		if (DELIM_NONE == d)
 			cnt++;
+		}
 
 		if ( ! dword(mdoc, line, la, p, d,
 		    MDOC_JOIN & mdoc_macros[tok].flags))

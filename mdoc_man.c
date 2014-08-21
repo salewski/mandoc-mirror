@@ -1166,7 +1166,8 @@ pre_fl(DECL_ARGS)
 
 	font_push('B');
 	print_word("\\-");
-	outflags &= ~MMAN_spc;
+	if (n->nchild)
+		outflags &= ~MMAN_spc;
 	return(1);
 }
 
@@ -1175,8 +1176,10 @@ post_fl(DECL_ARGS)
 {
 
 	font_pop();
-	if (0 == n->nchild && NULL != n->next &&
-			n->next->line == n->line)
+	if ( ! (n->nchild ||
+	    n->next == NULL ||
+	    n->next->type == MDOC_TEXT ||
+	    n->next->flags & MDOC_LINE))
 		outflags &= ~MMAN_spc;
 }
 
