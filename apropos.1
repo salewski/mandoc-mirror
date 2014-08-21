@@ -24,6 +24,7 @@
 .Nd search manual page databases
 .Sh SYNOPSIS
 .Nm
+.Op Fl afkw
 .Op Fl C Ar file
 .Op Fl M Ar path
 .Op Fl m Ar path
@@ -56,17 +57,50 @@ over manual names and descriptions
 .Pq the Li \&Nm No and Li \&Nd No macro keys .
 Multiple terms imply pairwise
 .Fl o .
-.Nm whatis
-maps terms only to case-sensitive manual names.
 .Pp
-Its arguments are as follows:
+.Nm whatis
+is a synonym for
+.Nm
+.Fl f .
+.Pp
+The options are as follows:
 .Bl -tag -width Ds
+.It Fl a
+Instead of showing only the title lines, show the complete manual pages,
+just like
+.Xr man 1
+.Fl a
+would.
+In this mode, the options
+.Fl IOTW
+described in the
+.Xr mandoc 1
+manual are also available.
 .It Fl C Ar file
 Specify an alternative configuration
 .Ar file
 in
 .Xr man.conf 5
 format.
+.It Fl f
+Search for all words in
+.Ar expression
+in manual page names only.
+The search is case insensitive and matches whole words only.
+In this mode, macro keys, comparison operators, and logical operators
+are not available.
+This overrides any earlier
+.Fl k
+option.
+.It Fl k
+Support the full
+.Ar expression
+syntax.
+This overrides any earlier
+.Fl f
+option.
+It is the default for
+.Nm .
 .It Fl M Ar path
 Use the colon-separated path instead of the default list of paths
 searched for
@@ -96,6 +130,12 @@ By default, pages from all sections are shown.
 See
 .Xr man 1
 for a listing of sections.
+.It Fl w
+Instead of showing title lines, show the pathnames of the matching
+manual pages, just like
+.Xr man 1
+.Fl w
+would.
 .El
 .Pp
 An
@@ -164,11 +204,6 @@ is a regular expression, it
 is evaluated case-insensitively.
 Has no effect on substring terms.
 .El
-.Pp
-.Nm whatis
-considers an
-.Ar expression
-to consist of an opaque keyword.
 .Pp
 Results are sorted by manual sections and names, with output formatted as
 .Pp
