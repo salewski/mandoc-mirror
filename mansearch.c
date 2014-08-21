@@ -768,6 +768,7 @@ exprterm(const struct mansearch *search, char *buf, int cs)
 		e->bits = TYPE_Nm;
 		e->substr = NULL;
 		mandoc_asprintf(&val, "[[:<:]]%s[[:>:]]", buf);
+		cs = 0;
 	} else if ((val = strpbrk(buf, "=~")) == NULL) {
 		e->bits = TYPE_Nm | TYPE_Nd;
 		e->substr = buf;
