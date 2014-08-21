@@ -18,6 +18,7 @@
 #include "config.h"
 
 #include <sys/types.h>
+#include <sys/time.h>
 
 #include <ctype.h>
 #include <errno.h>
@@ -1029,9 +1030,22 @@ int
 main(void)
 {
 	struct req	 req;
+	struct itimerval itimer;
 	const char	*path;
 	const char	*querystring;
 	int		 i;
+
+	/* Poor man's ReDoS mitigation. */
+
+	itimer.it_value.tv_sec = 1;
+	itimer.it_value.tv_usec = 0;
+	itimer.it_interval.tv_sec = 1;
+	itimer.it_interval.tv_usec = 0;
+	if (setitimer(ITIMER_VIRTUAL, &itimer, NULL) == -1) {
+		fprintf(stderr, "setitimer: %s\n", strerror(errno));
+		pg_error_internal();
+		return(EXIT_FAILURE);
+	}
 
 	/* Scan our run-time environment. */
 
