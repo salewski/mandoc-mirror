@@ -89,6 +89,7 @@ static	void		  usage(enum argmode) __attribute__((noreturn));
 static	void		  version(void) __attribute__((noreturn));
 static	int		  woptions(struct curparse *, char *);
 
+static	const int sec_prios[] = {1, 4, 5, 8, 6, 3, 7, 2, 9};
 static	const char	 *progname;
 
 
@@ -102,7 +103,10 @@ main(int argc, char *argv[])
 	char		*defos;
 #if HAVE_SQLITE3
 	struct manpage	*res;
-	size_t		 i, sz;
+	char		**auxargv;
+	size_t		 isec, i, sz;
+	int		 prio, best_prio;
+	char		 sec;
 #endif
 	enum mandoclevel rc;
 	enum outmode	 outmode;
@@ -231,6 +235,11 @@ main(int argc, char *argv[])
 
 	argc -= optind;
 	argv += optind;
+#if HAVE_SQLITE3
+	auxargv = NULL;
+#endif
+
+	rc = MANDOCLEVEL_OK;
 
 	/* man(1), whatis(1), apropos(1) */
 
@@ -238,22 +247,66 @@ main(int argc, char *argv[])
 #if HAVE_SQLITE3
 		if (argc == 0)
 			usage(search.argmode);
+
+		/* Access the mandoc database. */
+
 		manpath_parse(&paths, conf_file, defpaths, auxpaths);
 		mansearch_setup(1);
 		if( ! mansearch(&search, &paths, argc, argv, &res, &sz))
 			usage(search.argmode);
 		manpath_free(&paths);
+
+		/*
+		 * For standard man(1) and -a output mode,
+		 * prepare for copying filename pointers
+		 * into the program parameter array.
+		 */
+
+		if (outmode == OUTMODE_ONE) {
+			argc = 1;
+			argv[0] = res[0].file;
+			argv[1] = NULL;
+			best_prio = 10;
+		} else if (outmode == OUTMODE_ALL) {
+			argc = (int)sz;
+			argv = auxargv = mandoc_reallocarray(
+			    NULL, sz + 1, sizeof(char *));
+			argv[argc] = NULL;
+		}
+
+		/* Iterate all matching manuals. */
+
 		for (i = 0; i < sz; i++) {
 			if (outmode == OUTMODE_FLN)
 				puts(res[i].file);
-			else
+			else if (outmode == OUTMODE_LST)
 				printf("%s - %s\n", res[i].names,
 				    res[i].output == NULL ? "" :
 				    res[i].output);
+			else if (outmode == OUTMODE_ALL)
+				argv[i] = res[i].file;
+			else {
+				/* Search for the best section. */
+				isec = strcspn(res[i].file, "123456789");
+				sec = res[i].file[isec];
+				if ('\0' == sec)
+					continue;
+				prio = sec_prios[sec - '1'];
+				if (prio >= best_prio)
+					continue;
+				best_prio = prio;
+				argv[0] = res[i].file;
+			}
 		}
-		mansearch_free(res, sz);
-		mansearch_setup(0);
-		return((int)MANDOCLEVEL_OK);
+
+		/*
+		 * For man(1), -a and -i output mode, fall through
+		 * to the main mandoc(1) code iterating files
+		 * and running the parsers on each of them.
+		 */
+
+		if (outmode == OUTMODE_FLN || outmode == OUTMODE_LST)
+			goto out;
 #else
 		fputs("mandoc: database support not compiled in\n",
 		    stderr);
@@ -274,8 +327,6 @@ main(int argc, char *argv[])
 	if (OUTT_MAN == curp.outtype)
 		mparse_keep(curp.mp);
 
-	rc = MANDOCLEVEL_OK;
-
 	if (NULL == *argv)
 		parse(&curp, STDIN_FILENO, "<stdin>", &rc);
 
@@ -290,6 +341,16 @@ main(int argc, char *argv[])
 		(*curp.outfree)(curp.outdata);
 	if (curp.mp)
 		mparse_free(curp.mp);
+
+#if HAVE_SQLITE3
+out:
+	if (search.argmode != ARG_FILE) {
+		mansearch_free(res, sz);
+		mansearch_setup(0);
+		free(auxargv);
+	}
+#endif
+
 	free(defos);
 
 	return((int)rc);
