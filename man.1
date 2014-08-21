@@ -1,7 +1,10 @@
+.\"	$Id$
 .\"	$OpenBSD: man.1,v 1.55 2014/04/03 06:15:18 jmc Exp $
 .\"
 .\" Copyright (c) 1989, 1990, 1993
 .\"	The Regents of the University of California.  All rights reserved.
+.\" Copyright (c) 2003, 2007, 2008, 2014 Jason McIntyre <jmc@openbsd.org>
+.\" Copyright (c) 2010, 2011 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions
@@ -37,7 +40,7 @@
 .Nd display manual pages
 .Sh SYNOPSIS
 .Nm man
-.Op Fl achw
+.Op Fl acfhkw
 .Op Fl C Ar file
 .Op Fl M Ar path
 .Op Fl m Ar path
@@ -45,16 +48,11 @@
 .Op Fl s Ar section
 .Op Ar section
 .Ar name ...
-.Nm man
-.Fl f Ar command ...
-.Nm man
-.Fl k Ar keyword ...
 .Sh DESCRIPTION
 The
 .Nm
 utility
 displays the
-.Bx
 manual pages entitled
 .Ar name .
 Pages may be selected according to
@@ -86,56 +84,26 @@ Copy the manual page to the standard output instead of using
 .Xr more 1
 to paginate it.
 This is done by default if the standard output is not a terminal device.
-.It Fl f Ar command
+.It Fl f
 A synonym for
 .Xr whatis 1 .
-It looks up a given command and
-gives the header line from the manual page.
-.Ar command
-is case insensitive.
+It searches for
+.Ar name
+in manual page names and displays the header lines from all matching pages.
+The search is case insensitive and matches whole words only.
 .It Fl h
 Display only the
 .Dq SYNOPSIS
 lines of the requested manual pages.
-.It Fl k Ar keyword
+.It Fl k
 A synonym for
 .Xr apropos 1 .
-It shows which manual pages contain instances of any of the given
-keywords in their title line.
-.Ar keyword
-is case insensitive.
-.Pp
-For instance,
-to list all man pages which contain
-.Dq mount
-in the
-.Dq NAME
-line of the man page:
-.Pp
-.Dl $ man -k mount
-.Pp
-Which would produce a list much like this:
-.Bd -literal
-amd (8) \(en automatically mount file systems
-amq (8) \(en automounter query tool
-domountroothooks (9) \(en run all mountroot hooks
-exports (5) \(en define remote mount points for NFS mount requests
-getfsstat (2) \(en get list of all mounted file systems
-getmntinfo (3) \(en get information about mounted file systems
-mount (8) \(en mount file systems
-mount, unmount (2) \(en mount or dismount a filesystem
-mount_cd9660 (8) \(en mount an ISO-9660 filesystem
-mount_ext2fs (8) \(en mount an ext2fs file system
-mount_ffs (8) \(en mount a Berkeley Fast File System
-mount_msdos (8) \(en mount an MS-DOS file system
-mount_nfs (8) \(en mount NFS file systems
-mount_ntfs (8) \(en mount an NTFS file system
-mount_procfs (8) \(en mount the process file system
-mount_udf (8) \(en mount a UDF filesystem
-mount_vnd, vnconfig (8) \(en configure vnode disks
-mountd (8) \(en service remote NFS mount requests
-\&...
-.Ed
+Instead of
+.Ar name ,
+an expression can be provided using the syntax described in the
+.Xr apropos 1
+manual.
+By default, it displays the header lines of all matching pages.
 .It Fl M Ar path
 Override the list of standard directories which
 .Nm
@@ -253,8 +221,7 @@ and
 combination.
 .El
 .Pp
-Guidelines for
-.Ox
+Guidelines for writing
 man pages can be found in
 .Xr mdoc 7 .
 .Pp
