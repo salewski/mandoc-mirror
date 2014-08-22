@@ -23,7 +23,7 @@
 .Nd format and display UNIX manuals
 .Sh SYNOPSIS
 .Nm mandoc
-.Op Fl V
+.Op Fl acV
 .Sm off
 .Op Fl I Cm os Li = Ar name
 .Sm on
@@ -53,6 +53,21 @@ output.
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds
+.It Fl a
+If the standard output is a terminal device and
+.Fl c
+is not specified, use
+.Xr more 1
+to paginate the output, just like
+.Xr man 1
+would.
+.It Fl c
+Copy the formatted manual pages to the standard output without using
+.Xr more 1
+to paginate them.
+This is the default.
+It can be specified to override
+.Fl a .
 .Sm off
 .It Fl I Cm os Li = Ar name
 .Sm on

@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2008-2012 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2010, 2011, 2012, 2014 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2010 Joerg Sonnenberger <joerg@netbsd.org>
  *
@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -84,6 +85,7 @@ static	void		  mmsg(enum mandocerr, enum mandoclevel,
 				const char *, int, int, const char *);
 static	void		  parse(struct curparse *, int,
 				const char *, enum mandoclevel *);
+static	void		  spawn_pager(void);
 static	int		  toptions(struct curparse *, char *);
 static	void		  usage(enum argmode) __attribute__((noreturn));
 static	void		  version(void) __attribute__((noreturn));
@@ -111,6 +113,7 @@ main(int argc, char *argv[])
 	enum mandoclevel rc;
 	enum outmode	 outmode;
 	int		 show_usage;
+	int		 use_pager;
 	int		 options;
 	int		 c;
 
@@ -145,15 +148,20 @@ main(int argc, char *argv[])
 	options = MPARSE_SO;
 	defos = NULL;
 
+	use_pager = 1;
 	show_usage = 0;
 	outmode = OUTMODE_DEF;
-	while (-1 != (c = getopt(argc, argv, "aC:fI:ikM:m:O:S:s:T:VW:w"))) {
+
+	while (-1 != (c = getopt(argc, argv, "aC:cfI:ikM:m:O:S:s:T:VW:w"))) {
 		switch (c) {
 		case 'a':
 			outmode = OUTMODE_ALL;
 			break;
 		case 'C':
 			conf_file = optarg;
+			break;
+		case 'c':
+			use_pager = 0;
 			break;
 		case 'f':
 			search.argmode = ARG_WORD;
@@ -223,6 +231,7 @@ main(int argc, char *argv[])
 		switch (search.argmode) {
 		case ARG_FILE:
 			outmode = OUTMODE_ALL;
+			use_pager = 0;
 			break;
 		case ARG_NAME:
 			outmode = OUTMODE_ONE;
@@ -318,6 +327,9 @@ main(int argc, char *argv[])
 
 	if ( ! moptions(&options, auxpaths))
 		return((int)MANDOCLEVEL_BADARG);
+
+	if (use_pager && isatty(STDOUT_FILENO))
+		spawn_pager();
 
 	curp.mp = mparse_alloc(options, curp.wlevel, mmsg, defos);
 
@@ -620,4 +632,42 @@ mmsg(enum mandocerr t, enum mandoclevel lvl,
 		fprintf(stderr, ": %s", msg);
 
 	fputc('\n', stderr);
+}
+
+static void
+spawn_pager(void)
+{
+	int	 fildes[2];
+
+	if (pipe(fildes) == -1) {
+		fprintf(stderr, "%s: pipe: %s\n",
+		    progname, strerror(errno));
+		return;
+	}
+
+	switch (fork()) {
+	case -1:
+		fprintf(stderr, "%s: fork: %s\n",
+		    progname, strerror(errno));
+		exit((int)MANDOCLEVEL_SYSERR);
+	case 0:
+		close(fildes[0]);
+		if (dup2(fildes[1], STDOUT_FILENO) == -1) {
+			fprintf(stderr, "%s: dup output: %s\n",
+			    progname, strerror(errno));
+			exit((int)MANDOCLEVEL_SYSERR);
+		}
+		return;
+	default:
+		close(fildes[1]);
+		if (dup2(fildes[0], STDIN_FILENO) == -1) {
+			fprintf(stderr, "%s: dup input: %s\n",
+			    progname, strerror(errno));
+		} else {
+			execlp("more", "more", "-s", NULL);
+			fprintf(stderr, "%s: exec: %s\n",
+			    progname, strerror(errno));
+		}
+		exit((int)MANDOCLEVEL_SYSERR);
+	}
 }

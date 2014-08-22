@@ -24,7 +24,7 @@
 .Nd search manual page databases
 .Sh SYNOPSIS
 .Nm
-.Op Fl afkw
+.Op Fl acfkw
 .Op Fl C Ar file
 .Op Fl M Ar path
 .Op Fl m Ar path
@@ -71,7 +71,14 @@ just like
 .Xr man 1
 .Fl a
 would.
-In this mode, the options
+If the standard output is a terminal device and
+.Fl c
+is not specified, use
+.Xr more 1
+to paginate them.
+In
+.Fl a
+mode, the options
 .Fl IOTW
 described in the
 .Xr mandoc 1
@@ -82,6 +89,12 @@ Specify an alternative configuration
 in
 .Xr man.conf 5
 format.
+.It Fl c
+In
+.Fl a
+mode, copy the formatted manual pages to the standard output without using
+.Xr more 1
+to paginate them.
 .It Fl f
 Search for all words in
 .Ar expression
