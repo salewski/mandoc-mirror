@@ -318,7 +318,12 @@ Text production:
 .It Li \&Dx Ta Dx No version reference
 .El
 .Sh ENVIRONMENT
-.Bl -tag -width MANPATH
+.Bl -tag -width MANPAGER
+.It Ev MANPAGER
+Any non-empty value of the environment variable
+.Ev MANPAGER
+will be used instead of the standard pagination program,
+.Xr more 1 .
 .It Ev MANPATH
 The standard search path used by
 .Xr man 1
@@ -336,6 +341,13 @@ or if it contains two adjacent colons,
 the standard search path is inserted between the colons.
 If none of these conditions are met, it overrides the
 standard search path.
+.It Ev PAGER
+Specifies the pagination program to use when
+.Ev MANPAGER
+is not defined.
+If neither PAGER nor MANPAGER is defined,
+.Pa /usr/bin/more Fl s
+will be used.
 .El
 .Sh FILES
 .Bl -tag -width "/etc/man.conf" -compact

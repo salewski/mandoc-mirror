@@ -440,6 +440,21 @@ See
 .Sx HTML Output
 for details; beyond generating XHTML tags instead of HTML tags, these
 output modes are identical.
+.Sh ENVIRONMENT
+.Bl -tag -width MANPAGER
+.It Ev MANPAGER
+Any non-empty value of the environment variable
+.Ev MANPAGER
+will be used instead of the standard pagination program,
+.Xr more 1 .
+.It Ev PAGER
+Specifies the pagination program to use when
+.Ev MANPAGER
+is not defined.
+If neither PAGER nor MANPAGER is defined,
+.Pa /usr/bin/more Fl s
+will be used.
+.El
 .Sh EXIT STATUS
 The
 .Nm

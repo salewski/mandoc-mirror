@@ -637,7 +637,12 @@ mmsg(enum mandocerr t, enum mandoclevel lvl,
 static void
 spawn_pager(void)
 {
-	int	 fildes[2];
+#define MAX_PAGER_ARGS 16
+	char		*argv[MAX_PAGER_ARGS];
+	const char	*pager;
+	char		*cp;
+	int		 fildes[2];
+	int		 argc;
 
 	if (pipe(fildes) == -1) {
 		fprintf(stderr, "%s: pipe: %s\n",
@@ -659,15 +664,48 @@ spawn_pager(void)
 		}
 		return;
 	default:
-		close(fildes[1]);
-		if (dup2(fildes[0], STDIN_FILENO) == -1) {
-			fprintf(stderr, "%s: dup input: %s\n",
-			    progname, strerror(errno));
-		} else {
-			execlp("more", "more", "-s", NULL);
-			fprintf(stderr, "%s: exec: %s\n",
-			    progname, strerror(errno));
-		}
+		break;
+	}
+
+	/* The original process becomes the pager. */
+
+	close(fildes[1]);
+	if (dup2(fildes[0], STDIN_FILENO) == -1) {
+		fprintf(stderr, "%s: dup input: %s\n",
+		    progname, strerror(errno));
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
+
+	pager = getenv("MANPAGER");
+	if (pager == NULL || *pager == '\0')
+		pager = getenv("PAGER");
+	if (pager == NULL || *pager == '\0')
+		pager = "/usr/bin/more -s";
+	cp = mandoc_strdup(pager);
+
+	/*
+	 * Parse the pager command into words.
+	 * Intentionally do not do anything fancy here.
+	 */
+
+	argc = 0;
+	while (argc + 1 < MAX_PAGER_ARGS) {
+		argv[argc++] = cp;
+		cp = strchr(cp, ' ');
+		if (cp == NULL)
+			break;
+		*cp++ = '\0';
+		while (*cp == ' ')
+			cp++;
+		if (*cp == '\0')
+			break;
+	}
+	argv[argc] = NULL;
+
+	/* Hand over to the pager. */
+
+	execvp(argv[0], argv);
+	fprintf(stderr, "%s: exec: %s\n",
+	    progname, strerror(errno));
+	exit((int)MANDOCLEVEL_SYSERR);
 }
