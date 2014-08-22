@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include <assert.h>
+#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -227,6 +228,8 @@ main(int argc, char *argv[])
 	if (show_usage)
 		usage(search.argmode);
 
+	/* Postprocess options. */
+
 	if (outmode == OUTMODE_DEF) {
 		switch (search.argmode) {
 		case ARG_FILE:
@@ -242,11 +245,24 @@ main(int argc, char *argv[])
 		}
 	}
 
+	/* Parse arguments. */
+
 	argc -= optind;
 	argv += optind;
 #if HAVE_SQLITE3
 	auxargv = NULL;
 #endif
+
+	/* Quirk for a man(1) section argument without -s. */
+
+	if (search.argmode == ARG_NAME &&
+	    argv[0] != NULL &&
+	    isdigit((unsigned char)argv[0][0]) &&
+	    (argv[0][1] == '\0' || !strcmp(argv[0], "3p"))) {
+		search.sec = argv[0];
+		argv++;
+		argc--;
+	}
 
 	rc = MANDOCLEVEL_OK;
 
