@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -86,6 +87,7 @@ static	void		  mmsg(enum mandocerr, enum mandoclevel,
 				const char *, int, int, const char *);
 static	void		  parse(struct curparse *, int,
 				const char *, enum mandoclevel *);
+static	enum mandoclevel  passthrough(const char *);
 static	void		  spawn_pager(void);
 static	int		  toptions(struct curparse *, char *);
 static	void		  usage(enum argmode) __attribute__((noreturn));
@@ -105,8 +107,7 @@ main(int argc, char *argv[])
 	char		*conf_file, *defpaths, *auxpaths;
 	char		*defos;
 #if HAVE_SQLITE3
-	struct manpage	*res;
-	char		**auxargv;
+	struct manpage	*res, *resp;
 	size_t		 isec, i, sz;
 	int		 prio, best_prio;
 	char		 sec;
@@ -250,7 +251,7 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 #if HAVE_SQLITE3
-	auxargv = NULL;
+	resp = NULL;
 #endif
 
 	/* Quirk for a man(1) section argument without -s. */
@@ -280,6 +281,7 @@ main(int argc, char *argv[])
 		if( ! mansearch(&search, &paths, argc, argv, &res, &sz))
 			usage(search.argmode);
 		manpath_free(&paths);
+		resp = res;
 
 		/*
 		 * For standard man(1) and -a output mode,
@@ -289,15 +291,9 @@ main(int argc, char *argv[])
 
 		if (outmode == OUTMODE_ONE) {
 			argc = 1;
-			argv[0] = res[0].file;
-			argv[1] = NULL;
 			best_prio = 10;
-		} else if (outmode == OUTMODE_ALL) {
+		} else if (outmode == OUTMODE_ALL)
 			argc = (int)sz;
-			argv = auxargv = mandoc_reallocarray(
-			    NULL, sz + 1, sizeof(char *));
-			argv[argc] = NULL;
-		}
 
 		/* Iterate all matching manuals. */
 
@@ -308,9 +304,7 @@ main(int argc, char *argv[])
 				printf("%s - %s\n", res[i].names,
 				    res[i].output == NULL ? "" :
 				    res[i].output);
-			else if (outmode == OUTMODE_ALL)
-				argv[i] = res[i].file;
-			else {
+			else if (outmode == OUTMODE_ONE) {
 				/* Search for the best section. */
 				isec = strcspn(res[i].file, "123456789");
 				sec = res[i].file[isec];
@@ -320,7 +314,7 @@ main(int argc, char *argv[])
 				if (prio >= best_prio)
 					continue;
 				best_prio = prio;
-				argv[0] = res[i].file;
+				resp = res + i;
 			}
 		}
 
@@ -355,14 +349,23 @@ main(int argc, char *argv[])
 	if (OUTT_MAN == curp.outtype)
 		mparse_keep(curp.mp);
 
-	if (NULL == *argv)
+	if (argc == 0)
 		parse(&curp, STDIN_FILENO, "<stdin>", &rc);
 
-	while (*argv) {
-		parse(&curp, -1, *argv, &rc);
+	while (argc) {
+#if HAVE_SQLITE3
+		if (resp != NULL) {
+			if (resp->form)
+				parse(&curp, -1, resp->file, &rc);
+			else
+				rc = passthrough(resp->file);
+			resp++;
+		} else
+#endif
+			parse(&curp, -1, *argv++, &rc);
 		if (MANDOCLEVEL_OK != rc && curp.wstop)
 			break;
-		++argv;
+		argc--;
 	}
 
 	if (curp.outfree)
@@ -375,7 +378,6 @@ out:
 	if (search.argmode != ARG_FILE) {
 		mansearch_free(res, sz);
 		mansearch_setup(0);
-		free(auxargv);
 	}
 #endif
 
@@ -531,6 +533,40 @@ parse(struct curparse *curp, int fd, const char *file,
 
 	if (*level < rc)
 		*level = rc;
+}
+
+static enum mandoclevel
+passthrough(const char *file)
+{
+	char		 buf[BUFSIZ];
+	const char	*syscall;
+	ssize_t		 nr, nw, off;
+	int		 fd;
+
+	fd = open(file, O_RDONLY);
+	if (fd == -1) {
+		syscall = "open";
+		goto fail;
+	}
+
+	while ((nr = read(fd, buf, BUFSIZ)) != -1 && nr != 0)
+		for (off = 0; off < nr; off += nw)
+			if ((nw = write(STDOUT_FILENO, buf + off,
+			    (size_t)(nr - off))) == -1 || nw == 0) {
+				syscall = "write";
+				goto fail;
+			}
+
+        if (nr == 0) {
+		close(fd);
+		return(MANDOCLEVEL_OK);
+        }
+
+	syscall = "read";
+fail:
+	fprintf(stderr, "%s: %s: SYSERR: %s: %s",
+	    progname, file, syscall, strerror(errno));
+	return(MANDOCLEVEL_SYSERR);
 }
 
 static int
