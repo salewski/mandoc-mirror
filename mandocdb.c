@@ -1332,6 +1332,8 @@ parse_cat(struct mpage *mpage, int fd)
 	    fopen(mpage->mlinks->file, "r") :
 	    fdopen(fd, "r");
 	if (NULL == stream) {
+		if (-1 != fd)
+			close(fd);
 		if (warnings)
 			say(mpage->mlinks->file, "&fopen");
 		return;
