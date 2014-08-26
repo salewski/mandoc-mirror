@@ -92,14 +92,14 @@ static	const char *const sec_names[] = {
     "All Sections",
     "1 - General Commands",
     "2 - System Calls",
-    "3 - Subroutines",
-    "3p - Perl Subroutines",
-    "4 - Special Files",
+    "3 - Library Functions",
+    "3p - Perl Library",
+    "4 - Device Drivers",
     "5 - File Formats",
     "6 - Games",
-    "7 - Macros and Conventions",
-    "8 - Maintenance Commands",
-    "9 - Kernel Interface"
+    "7 - Miscellaneous Information",
+    "8 - System Manager\'s Manual",
+    "9 - Kernel Developer\'s Manual"
 };
 static	const int sec_MAX = sizeof(sec_names) / sizeof(char *);
 
