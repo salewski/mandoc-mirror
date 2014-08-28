@@ -15,6 +15,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#if defined(__linux__) || defined(__MINT__)
+#define _GNU_SOURCE /* wcwidth() */
+#endif
+
 #include <locale.h>
 #include <stdio.h>
 #include <wchar.h>
@@ -50,7 +54,7 @@ main(void)
 
 	dup2(STDERR_FILENO, STDOUT_FILENO);
 	wc = L'*';
-	if (putwchar(wc) != wc) {
+	if (putwchar(wc) != (wint_t)wc) {
 		fputs("bad putwchar return value\n", stderr);
 		return(1);
 	}
