@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "mandoc.h"
@@ -852,7 +851,6 @@ ps_end(struct termp *p)
 static void
 ps_begin(struct termp *p)
 {
-	time_t		 t;
 	int		 i;
 
 	/*
@@ -893,11 +891,8 @@ ps_begin(struct termp *p)
 	 * stuff gets printed to the screen, so make sure we're sane.
 	 */
 
-	t = time(NULL);
-
 	if (TERMTYPE_PS == p->type) {
 		ps_printf(p, "%%!PS-Adobe-3.0\n");
-		ps_printf(p, "%%%%CreationDate: %s", ctime(&t));
 		ps_printf(p, "%%%%DocumentData: Clean7Bit\n");
 		ps_printf(p, "%%%%Orientation: Portrait\n");
 		ps_printf(p, "%%%%Pages: (atend)\n");
