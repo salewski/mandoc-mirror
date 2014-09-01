@@ -1984,6 +1984,13 @@ dbadd_mlink(const struct mlink *mlink)
 	SQL_BIND_INT64(stmts[STMT_INSERT_LINK], i, mlink->mpage->pageid);
 	SQL_STEP(stmts[STMT_INSERT_LINK]);
 	sqlite3_reset(stmts[STMT_INSERT_LINK]);
+
+	i = 1;
+	SQL_BIND_INT64(stmts[STMT_INSERT_NAME], i, NAME_FILE);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_NAME], i, mlink->name);
+	SQL_BIND_INT64(stmts[STMT_INSERT_NAME], i, mlink->mpage->pageid);
+	SQL_STEP(stmts[STMT_INSERT_NAME]);
+	sqlite3_reset(stmts[STMT_INSERT_NAME]);
 }
 
 /*
