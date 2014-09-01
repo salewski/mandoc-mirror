@@ -335,6 +335,7 @@ mansearch(const struct mansearch *search,
 				    maxres, sizeof(struct manpage));
 			}
 			mpage = *res + cur;
+			mpage->ipath = i;
 			mpage->sec = 10;
 			mpage->form = mp->form;
 			buildnames(mpage, db, s, mp->pageid,
