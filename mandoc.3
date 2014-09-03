@@ -31,11 +31,13 @@
 .Nm mparse_free ,
 .Nm mparse_getkeep ,
 .Nm mparse_keep ,
+.Nm mparse_open ,
 .Nm mparse_readfd ,
 .Nm mparse_reset ,
 .Nm mparse_result ,
 .Nm mparse_strerror ,
 .Nm mparse_strlevel
+.Nm mparse_wait ,
 .Nd mandoc macro compiler library
 .Sh LIBRARY
 .Lb libmandoc
@@ -74,6 +76,13 @@
 .Fa "struct mparse *parse"
 .Fc
 .Ft "enum mandoclevel"
+.Fo mparse_open
+.Fa "struct mparse *parse"
+.Fa "int *fd"
+.Fa "const char *fname"
+.Fa "pid_t *child_pid"
+.Fc
+.Ft "enum mandoclevel"
 .Fo mparse_readfd
 .Fa "struct mparse *parse"
 .Fa "int fd"
@@ -97,6 +106,11 @@
 .Ft "const char *"
 .Fo mparse_strlevel
 .Fa "enum mandoclevel"
+.Fc
+.Ft "enum mandoclevel"
+.Fo mparse_wait
+.Fa "struct mparse *parse"
+.Fa "pid_t child_pid"
 .Fc
 .In sys/types.h
 .In mandoc.h
@@ -361,6 +375,33 @@ Declared in
 .In mandoc.h ,
 implemented in
 .Pa read.c .
+.It Fn mparse_open
+If the
+.Fa fname
+ends in
+.Pa .gz ,
+open with
+.Xr gunzip 1 ;
+otherwise, with
+.Xr open 2 .
+Return a file descriptor open for reading in
+.Fa fd ,
+or -1 on failure.
+It can be passed to
+.Fn mparse_readfd
+or used directly.
+If applicable, return the
+.Xr gunzip 1
+child process ID in
+.Fa child_pid ,
+or otherwise 0.
+If non-zero, it should be passed to
+.Fn mparse_wait
+after completing the parse sequence.
+Declared in
+.In mandoc.h ,
+implemented in
+.Pa read.c .
 .It Fn mparse_readfd
 Parse a file or file descriptor.
 If
@@ -409,6 +450,27 @@ implemented in
 .Pa read.c .
 .It Fn mparse_strlevel
 Return a statically-allocated string representation of a level code.
+Declared in
+.In mandoc.h ,
+implemented in
+.Pa read.c .
+.It Fn mparse_wait
+Bury a
+.Xr gunzip 1
+child process
+.Fa child_pid
+that was spawned with
+.Fn mparse_open .
+To be called after the parse sequence is complete.
+Returns
+.Dv MANDOCLEVEL_OK
+on success and
+.Dv MANDOCLEVEL_SYSERR
+on failure, that is, when
+.Xr wait 2
+fails, or when
+.Xr gunzip 1
+died from a signal or exited with non-zero status.
 Declared in
 .In mandoc.h ,
 implemented in
