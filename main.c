@@ -370,7 +370,7 @@ main(int argc, char *argv[])
 	while (argc) {
 #if HAVE_SQLITE3
 		if (resp != NULL) {
-			if (resp->form) {
+			if (resp->form & FORM_SRC) {
 				/* For .so only; ignore failure. */
 				chdir(paths.paths[resp->ipath]);
 				parse(&curp, -1, resp->file, &rc);
