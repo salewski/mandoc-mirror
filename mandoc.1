@@ -23,7 +23,7 @@
 .Nd format and display UNIX manuals
 .Sh SYNOPSIS
 .Nm mandoc
-.Op Fl acfklV
+.Op Fl acfhklV
 .Sm off
 .Op Fl I Cm os Li = Ar name
 .Sm on
@@ -85,6 +85,10 @@ for the
 .Xr mdoc 7
 .Sq \&Os
 macro.
+.It Fl h
+Display only the SYNOPSIS lines.
+Implies
+.Fl a .
 .It Fl k
 A synonym for
 .Xr apropos 1 .

@@ -58,7 +58,7 @@ static	size_t		  locale_width(const struct termp *, int);
 static struct termp *
 ascii_init(enum termenc enc, char *outopts)
 {
-	const char	*toks[4];
+	const char	*toks[5];
 	char		*v;
 	struct termp	*p;
 
@@ -97,7 +97,8 @@ ascii_init(enum termenc enc, char *outopts)
 	toks[0] = "indent";
 	toks[1] = "width";
 	toks[2] = "mdoc";
-	toks[3] = NULL;
+	toks[3] = "synopsis";
+	toks[4] = NULL;
 
 	while (outopts && *outopts)
 		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
@@ -114,6 +115,9 @@ ascii_init(enum termenc enc, char *outopts)
 			 */
 			p->mdocstyle = 1;
 			p->defindent = 5;
+			break;
+		case 3:
+			p->synopsisonly = 1;
 			break;
 		default:
 			break;

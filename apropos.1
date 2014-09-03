@@ -24,7 +24,7 @@
 .Nd search manual page databases
 .Sh SYNOPSIS
 .Nm
-.Op Fl acfklVw
+.Op Fl acfhklVw
 .Op Fl C Ar file
 .Op Fl M Ar path
 .Op Fl m Ar path
@@ -107,6 +107,11 @@ This overrides any earlier
 and
 .Fl l
 options.
+.It Fl h
+Instead of showing the title lines, show the SYNOPSIS sections, just like
+.Xr man 1
+.Fl h
+would.
 .It Fl k
 Support the full
 .Ar expression
