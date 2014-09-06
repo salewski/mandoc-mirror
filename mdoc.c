@@ -793,15 +793,6 @@ mdoc_pmacro(struct mdoc *mdoc, int ln, char *buf, int offs)
 	char		  mac[5];
 	struct mdoc_node *n;
 
-	/* Empty post-control lines are ignored. */
-
-	if ('"' == buf[offs]) {
-		mandoc_msg(MANDOCERR_COMMENT_BAD, mdoc->parse,
-		    ln, offs, NULL);
-		return(1);
-	} else if ('\0' == buf[offs])
-		return(1);
-
 	sv = offs;
 
 	/*

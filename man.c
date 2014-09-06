@@ -471,13 +471,6 @@ man_pmacro(struct man *man, int ln, char *buf, int offs)
 	int		 i, ppos;
 	int		 bline;
 
-	if ('"' == buf[offs]) {
-		mandoc_msg(MANDOCERR_COMMENT_BAD, man->parse,
-		    ln, offs, NULL);
-		return(1);
-	} else if ('\0' == buf[offs])
-		return(1);
-
 	ppos = offs;
 
 	/*
