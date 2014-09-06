@@ -122,6 +122,7 @@ struct	roff {
 	int		 options; /* parse options */
 	int		 rstacksz; /* current size limit of rstack */
 	int		 rstackpos; /* position in rstack */
+	int		 format; /* current file in mdoc or man format */
 	char		 control; /* control character */
 };
 
@@ -456,6 +457,7 @@ roff_reset(struct roff *r)
 {
 
 	roff_free1(r);
+	r->format = r->options & (MPARSE_MDOC | MPARSE_MAN);
 	r->control = 0;
 }
 
@@ -475,6 +477,7 @@ roff_alloc(struct mparse *parse, int options)
 	r = mandoc_calloc(1, sizeof(struct roff));
 	r->parse = parse;
 	r->options = options;
+	r->format = options & (MPARSE_MDOC | MPARSE_MAN);
 	r->rstackpos = -1;
 
 	roffhash_init();
@@ -1776,9 +1779,12 @@ roff_Dd(ROFF_ARGS)
 {
 	const char *const	*cp;
 
-	if (0 == ((MPARSE_MDOC | MPARSE_QUICK) & r->options))
+	if ((r->options & (MPARSE_MDOC | MPARSE_QUICK)) == 0)
 		for (cp = __mdoc_reserved; *cp; cp++)
 			roff_setstr(r, *cp, NULL, 0);
+
+	if (r->format == 0)
+		r->format = MPARSE_MDOC;
 
 	return(ROFF_CONT);
 }
@@ -1788,9 +1794,12 @@ roff_TH(ROFF_ARGS)
 {
 	const char *const	*cp;
 
-	if (0 == (MPARSE_QUICK & r->options))
+	if ((r->options & MPARSE_QUICK) == 0)
 		for (cp = __man_reserved; *cp; cp++)
 			roff_setstr(r, *cp, NULL, 0);
+
+	if (r->format == 0)
+		r->format = MPARSE_MAN;
 
 	return(ROFF_CONT);
 }
@@ -2305,6 +2314,13 @@ roff_strdup(const struct roff *r, const char *p)
 
 	res[(int)ssz] = '\0';
 	return(res);
+}
+
+int
+roff_getformat(const struct roff *r)
+{
+
+	return(r->format);
 }
 
 /*
