@@ -1735,7 +1735,7 @@ putkeys(const struct mpage *mpage,
 		htab = &strings;
 		if (debug > 1)
 		    for (i = 0; i < mansearch_keymax; i++)
-			if (1 << i & v)
+			if ((uint64_t)1 << i & v)
 			    say(mpage->mlinks->file,
 				"Adding key %s=%*s",
 				mansearch_keynames[i], sz, cp);
