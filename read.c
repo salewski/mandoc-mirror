@@ -117,6 +117,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"sections out of conventional order",
 	"duplicate section title",
 	"unexpected section",
+	"AUTHORS section without An macro",
 
 	/* related to macros and nesting */
 	"obsolete macro",
