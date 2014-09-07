@@ -1196,8 +1196,8 @@ mpages_merge(struct mchars *mc, struct mparse *mp)
 		if (mpage->mlinks->gzip)
 			mpage->form |= FORM_GZ;
 		putkey(mpage, mpage->sec, TYPE_sec);
-		putkey(mpage, '\0' == *mpage->arch ?
-		    any : mpage->arch, TYPE_arch);
+		if (*mpage->arch != '\0')
+			putkey(mpage, mpage->arch, TYPE_arch);
 
 		for (mlink = mpage->mlinks; mlink; mlink = mlink->next) {
 			if ('\0' != *mlink->dsec)
