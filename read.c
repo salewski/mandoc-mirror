@@ -158,6 +158,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"skipping duplicate list type",
 	"skipping -width argument",
 	"unknown AT&T UNIX version",
+	"comma in function argument",
 	"invalid content in Rs block",
 	"invalid Boolean argument",
 	"unknown font, skipping request",

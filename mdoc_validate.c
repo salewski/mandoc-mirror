@@ -100,6 +100,7 @@ static	int	 post_en(POST_ARGS);
 static	int	 post_es(POST_ARGS);
 static	int	 post_eoln(POST_ARGS);
 static	int	 post_ex(POST_ARGS);
+static	int	 post_fa(POST_ARGS);
 static	int	 post_fo(POST_ARGS);
 static	int	 post_hyph(POST_ARGS);
 static	int	 post_hyphtext(POST_ARGS);
@@ -157,10 +158,10 @@ static	const struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Er */
 	{ NULL, NULL },				/* Ev */
 	{ pre_std, post_ex },			/* Ex */
-	{ NULL, NULL },				/* Fa */
+	{ NULL, post_fa },			/* Fa */
 	{ NULL, ewarn_ge1 },			/* Fd */
 	{ NULL, NULL },				/* Fl */
-	{ NULL, NULL },				/* Fn */
+	{ NULL, post_fa },			/* Fn */
 	{ NULL, NULL },				/* Ft */
 	{ NULL, NULL },				/* Ic */
 	{ NULL, ewarn_eq1 },			/* In */
@@ -1004,6 +1005,28 @@ post_fo(POST_ARGS)
 
 	hwarn_eq1(mdoc);
 	bwarn_ge1(mdoc);
+	return(1);
+}
+
+static int
+post_fa(POST_ARGS)
+{
+	const struct mdoc_node *n;
+	const char *cp;
+
+	for (n = mdoc->last->child; n != NULL; n = n->next) {
+		for (cp = n->string; *cp != '\0'; cp++) {
+			/* Ignore callbacks and alterations. */
+			if (*cp == '(' || *cp == '{')
+				break;
+			if (*cp != ',')
+				continue;
+			mandoc_msg(MANDOCERR_FA_COMMA, mdoc->parse,
+			    n->line, n->pos + (cp - n->string),
+			    n->string);
+			break;
+		}
+	}
 	return(1);
 }
 
