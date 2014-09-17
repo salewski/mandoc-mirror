@@ -119,6 +119,8 @@ struct	html {
 #define	HTML_NONOSPACE	 (1 << 4) /* never add spaces */
 #define	HTML_LITERAL	 (1 << 5) /* literal (e.g., <PRE>) context */
 #define	HTML_SKIPCHAR	 (1 << 6) /* skip the next character */
+#define	HTML_NOSPLIT	 (1 << 7) /* do not break line before .An */
+#define	HTML_SPLIT	 (1 << 8) /* break line before .An */
 	struct tagq	  tags; /* stack of open tags */
 	struct rofftbl	  tbl; /* current table */
 	struct tag	 *tblt; /* current open table scope */
