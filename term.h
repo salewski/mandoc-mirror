@@ -81,9 +81,8 @@ struct	termp {
 #define	TERMP_BRIND	 (1 << 9)	/* See term_flushln(). */
 #define	TERMP_DANGLE	 (1 << 10)	/* See term_flushln(). */
 #define	TERMP_HANG	 (1 << 11)	/* See term_flushln(). */
-#define	TERMP_NOSPLIT	 (1 << 12)	/* See termp_an_pre/post(). */
-#define	TERMP_SPLIT	 (1 << 13)	/* See termp_an_pre/post(). */
-#define	TERMP_ANPREC	 (1 << 14)	/* See termp_an_pre(). */
+#define	TERMP_NOSPLIT	 (1 << 12)	/* Do not break line before .An. */
+#define	TERMP_SPLIT	 (1 << 13)	/* Break line before .An. */
 	int		 *buf;		/* Output buffer. */
 	enum termenc	  enc;		/* Type of encoding. */
 	struct mchars	 *symtab;	/* Encoded-symbol table. */
