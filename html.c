@@ -78,8 +78,6 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 };
 
 static	const char	*const htmlattrs[ATTR_MAX] = {
-	"http-equiv", /* ATTR_HTTPEQUIV */
-	"content", /* ATTR_CONTENT */
 	"name", /* ATTR_NAME */
 	"rel", /* ATTR_REL */
 	"href", /* ATTR_HREF */

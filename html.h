@@ -55,8 +55,6 @@ enum	htmltag {
 };
 
 enum	htmlattr {
-	ATTR_HTTPEQUIV,
-	ATTR_CONTENT,
 	ATTR_NAME,
 	ATTR_REL,
 	ATTR_HREF,
