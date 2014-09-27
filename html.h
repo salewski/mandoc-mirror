@@ -100,11 +100,6 @@ struct	htmlpair {
 #define	PAIR_HREF_INIT(p, v)	PAIR_INIT(p, ATTR_HREF, v)
 #define	PAIR_STYLE_INIT(p, h)	PAIR_INIT(p, ATTR_STYLE, (h)->buf)
 
-enum	htmltype {
-	HTML_HTML_4_01_STRICT,
-	HTML_XHTML_1_0_STRICT
-};
-
 struct	html {
 	int		  flags;
 #define	HTML_NOSPACE	 (1 << 0) /* suppress next space */
@@ -128,7 +123,6 @@ struct	html {
 	struct tag	 *metaf; /* current open font scope */
 	enum htmlfont	  metal; /* last used font */
 	enum htmlfont	  metac; /* current font mode */
-	enum htmltype	  type; /* output media type */
 	int		  oflags; /* output options */
 #define	HTML_FRAGMENT	 (1 << 0) /* don't emit HTML/HEAD/BODY */
 };

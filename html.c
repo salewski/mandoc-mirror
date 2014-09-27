@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2008, 2009, 2010, 2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2011, 2012, 2013, 2014 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -108,11 +108,11 @@ static	int	 print_escape(char);
 static	int	 print_encode(struct html *, const char *, int);
 static	void	 print_metaf(struct html *, enum mandoc_esc);
 static	void	 print_attr(struct html *, const char *, const char *);
-static	void	 *ml_alloc(char *, enum htmltype);
+static	void	 *ml_alloc(char *);
 
 
 static void *
-ml_alloc(char *outopts, enum htmltype type)
+ml_alloc(char *outopts)
 {
 	struct html	*h;
 	const char	*toks[5];
@@ -126,7 +126,6 @@ ml_alloc(char *outopts, enum htmltype type)
 
 	h = mandoc_calloc(1, sizeof(struct html));
 
-	h->type = type;
 	h->tags.head = NULL;
 	h->symtab = mchars_alloc();
 
@@ -155,14 +154,14 @@ void *
 html_alloc(char *outopts)
 {
 
-	return(ml_alloc(outopts, HTML_HTML_4_01_STRICT));
+	return(ml_alloc(outopts));
 }
 
 void *
 xhtml_alloc(char *outopts)
 {
 
-	return(ml_alloc(outopts, HTML_XHTML_1_0_STRICT));
+	return(ml_alloc(outopts));
 }
 
 void
@@ -494,16 +493,10 @@ print_otag(struct html *h, enum htmltag tag,
 	for (i = 0; i < sz; i++)
 		print_attr(h, htmlattrs[p[i].key], p[i].val);
 
-	/* Accommodate for XML "well-formed" singleton escaping. */
+	/* Accommodate for "well-formed" singleton escaping. */
 
 	if (HTML_AUTOCLOSE & htmltags[tag].flags)
-		switch (h->type) {
-		case HTML_XHTML_1_0_STRICT:
-			putchar('/');
-			break;
-		default:
-			break;
-		}
+		putchar('/');
 
 	putchar('>');
 
