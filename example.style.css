@@ -108,3 +108,4 @@ div.mandoc ol.list-enum		{ padding-left: 2em; }
 div.mandoc li.list-enum		{ }
 div.mandoc span.eqn		{ } /* Equation modes.  See eqn(7). */
 div.mandoc table.tbl		{ } /* Table modes.  See tbl(7). */
+div.mandoc div.spacer		{ margin: 1em 0; }
