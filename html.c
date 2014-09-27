@@ -87,7 +87,6 @@ static	const char	*const htmlattrs[ATTR_MAX] = {
 	"style", /* ATTR_STYLE */
 	"width", /* ATTR_WIDTH */
 	"id", /* ATTR_ID */
-	"summary", /* ATTR_SUMMARY */
 	"align", /* ATTR_ALIGN */
 	"colspan", /* ATTR_COLSPAN */
 	"charset", /* ATTR_CHARSET */
