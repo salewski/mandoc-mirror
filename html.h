@@ -68,6 +68,7 @@ enum	htmlattr {
 	ATTR_SUMMARY,
 	ATTR_ALIGN,
 	ATTR_COLSPAN,
+	ATTR_CHARSET,
 	ATTR_MAX
 };
 

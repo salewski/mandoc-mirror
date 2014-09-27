@@ -91,6 +91,7 @@ static	const char	*const htmlattrs[ATTR_MAX] = {
 	"summary", /* ATTR_SUMMARY */
 	"align", /* ATTR_ALIGN */
 	"colspan", /* ATTR_COLSPAN */
+	"charset", /* ATTR_CHARSET */
 };
 
 static	const char	*const roffscales[SCALE_MAX] = {
@@ -193,17 +194,9 @@ print_gen_head(struct html *h)
 {
 	struct htmlpair	 tag[4];
 
-	tag[0].key = ATTR_HTTPEQUIV;
-	tag[0].val = "Content-Type";
-	tag[1].key = ATTR_CONTENT;
-	tag[1].val = "text/html; charset=utf-8";
-	print_otag(h, TAG_META, 2, tag);
-
-	tag[0].key = ATTR_NAME;
-	tag[0].val = "resource-type";
-	tag[1].key = ATTR_CONTENT;
-	tag[1].val = "document";
-	print_otag(h, TAG_META, 2, tag);
+	tag[0].key = ATTR_CHARSET;
+	tag[0].val = "utf-8";
+	print_otag(h, TAG_META, 1, tag);
 
 	if (h->style) {
 		tag[0].key = ATTR_REL;
@@ -493,14 +486,6 @@ print_otag(struct html *h, enum htmltag tag,
 	for (i = 0; i < sz; i++)
 		print_attr(h, htmlattrs[p[i].key], p[i].val);
 
-	/* Add non-overridable attributes. */
-
-	if (TAG_HTML == tag && HTML_XHTML_1_0_STRICT == h->type) {
-		print_attr(h, "xmlns", "http://www.w3.org/1999/xhtml");
-		print_attr(h, "xml:lang", "en");
-		print_attr(h, "lang", "en");
-	}
-
 	/* Accommodate for XML "well-formed" singleton escaping. */
 
 	if (HTML_AUTOCLOSE & htmltags[tag].flags)
@@ -536,26 +521,8 @@ print_ctag(struct html *h, enum htmltag tag)
 void
 print_gen_decls(struct html *h)
 {
-	const char	*doctype;
-	const char	*dtd;
-	const char	*name;
 
-	switch (h->type) {
-	case HTML_HTML_4_01_STRICT:
-		name = "HTML";
-		doctype = "-//W3C//DTD HTML 4.01//EN";
-		dtd = "http://www.w3.org/TR/html4/strict.dtd";
-		break;
-	default:
-		puts("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-		name = "html";
-		doctype = "-//W3C//DTD XHTML 1.0 Strict//EN";
-		dtd = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd";
-		break;
-	}
-
-	printf("<!DOCTYPE %s PUBLIC \"%s\" \"%s\">\n",
-	    name, doctype, dtd);
+	puts("<!DOCTYPE html>");
 }
 
 void
