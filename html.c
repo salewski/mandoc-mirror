@@ -85,7 +85,6 @@ static	const char	*const htmlattrs[ATTR_MAX] = {
 	"media", /* ATTR_MEDIA */
 	"class", /* ATTR_CLASS */
 	"style", /* ATTR_STYLE */
-	"width", /* ATTR_WIDTH */
 	"id", /* ATTR_ID */
 	"colspan", /* ATTR_COLSPAN */
 	"charset", /* ATTR_CHARSET */
@@ -202,7 +201,9 @@ print_gen_head(struct html *h)
 	t = print_otag(h, TAG_STYLE, 0, NULL);
 	print_text(h, "table.head, table.foot { width: 100%; }\n"
 	      "td.head-rtitle, td.foot-os { text-align: right; }\n"
-	      "td.head-vol { text-align: center; }\n");
+	      "td.head-vol { text-align: center; }\n"
+	      "table.foot td { width: 50%; }\n"
+	      "table.head td { width: 33%; }\n");
 	print_tagq(h, t);
 
 	if (h->style) {

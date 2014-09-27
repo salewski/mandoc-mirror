@@ -309,10 +309,6 @@ man_root_pre(MAN_ARGS)
 
 	PAIR_CLASS_INIT(&tag, "head");
 	t = print_otag(h, TAG_TABLE, 1, &tag);
-	PAIR_INIT(&tag, ATTR_WIDTH, "30%");
-	print_otag(h, TAG_COL, 1, &tag);
-	print_otag(h, TAG_COL, 1, &tag);
-	print_otag(h, TAG_COL, 1, &tag);
 
 	print_otag(h, TAG_TBODY, 0, NULL);
 
@@ -344,9 +340,6 @@ man_root_post(MAN_ARGS)
 
 	PAIR_CLASS_INIT(&tag, "foot");
 	t = print_otag(h, TAG_TABLE, 1, &tag);
-	PAIR_INIT(&tag, ATTR_WIDTH, "50%");
-	print_otag(h, TAG_COL, 1, &tag);
-	print_otag(h, TAG_COL, 1, &tag);
 
 	tt = print_otag(h, TAG_TR, 0, NULL);
 

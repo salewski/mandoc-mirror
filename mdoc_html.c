@@ -489,9 +489,6 @@ mdoc_root_post(MDOC_ARGS)
 
 	PAIR_CLASS_INIT(&tag, "foot");
 	t = print_otag(h, TAG_TABLE, 1, &tag);
-	PAIR_INIT(&tag, ATTR_WIDTH, "50%");
-	print_otag(h, TAG_COL, 1, &tag);
-	print_otag(h, TAG_COL, 1, &tag);
 
 	print_otag(h, TAG_TBODY, 0, NULL);
 
@@ -529,10 +526,6 @@ mdoc_root_pre(MDOC_ARGS)
 
 	PAIR_CLASS_INIT(&tag, "head");
 	t = print_otag(h, TAG_TABLE, 1, &tag);
-	PAIR_INIT(&tag, ATTR_WIDTH, "30%");
-	print_otag(h, TAG_COL, 1, &tag);
-	print_otag(h, TAG_COL, 1, &tag);
-	print_otag(h, TAG_COL, 1, &tag);
 
 	print_otag(h, TAG_TBODY, 0, NULL);
 
