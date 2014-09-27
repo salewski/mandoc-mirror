@@ -289,6 +289,8 @@ install: base-install $(INSTALL_TARGETS)
 
 www: $(WWW_OBJS) $(WWW_MANS)
 
+$(WWW_MANS): mandoc
+
 include Makefile.depend
 
 # === TARGETS CONTAINING SHELL COMMANDS ================================
