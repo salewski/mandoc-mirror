@@ -299,7 +299,7 @@ a2width(const struct man_node *n, struct roffsu *su)
 static void
 man_root_pre(MAN_ARGS)
 {
-	struct htmlpair	 tag[2];
+	struct htmlpair	 tag;
 	struct tag	*t, *tt;
 	char		*title;
 
@@ -307,31 +307,30 @@ man_root_pre(MAN_ARGS)
 	assert(man->msec);
 	mandoc_asprintf(&title, "%s(%s)", man->title, man->msec);
 
-	PAIR_CLASS_INIT(&tag[0], "head");
-	t = print_otag(h, TAG_TABLE, 1, tag);
-	PAIR_INIT(&tag[0], ATTR_WIDTH, "30%");
-	print_otag(h, TAG_COL, 1, tag);
-	print_otag(h, TAG_COL, 1, tag);
-	print_otag(h, TAG_COL, 1, tag);
+	PAIR_CLASS_INIT(&tag, "head");
+	t = print_otag(h, TAG_TABLE, 1, &tag);
+	PAIR_INIT(&tag, ATTR_WIDTH, "30%");
+	print_otag(h, TAG_COL, 1, &tag);
+	print_otag(h, TAG_COL, 1, &tag);
+	print_otag(h, TAG_COL, 1, &tag);
 
 	print_otag(h, TAG_TBODY, 0, NULL);
 
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
-	PAIR_CLASS_INIT(&tag[0], "head-ltitle");
-	print_otag(h, TAG_TD, 1, tag);
+	PAIR_CLASS_INIT(&tag, "head-ltitle");
+	print_otag(h, TAG_TD, 1, &tag);
 	print_text(h, title);
 	print_stagq(h, tt);
 
-	PAIR_CLASS_INIT(&tag[0], "head-vol");
-	PAIR_INIT(&tag[1], ATTR_ALIGN, "center");
-	print_otag(h, TAG_TD, 2, tag);
+	PAIR_CLASS_INIT(&tag, "head-vol");
+	print_otag(h, TAG_TD, 1, &tag);
 	if (NULL != man->vol)
 		print_text(h, man->vol);
 	print_stagq(h, tt);
 
-	PAIR_CLASS_INIT(&tag[0], "head-rtitle");
-	print_otag(h, TAG_TD, 1, tag);
+	PAIR_CLASS_INIT(&tag, "head-rtitle");
+	print_otag(h, TAG_TD, 1, &tag);
 	print_text(h, title);
 	print_tagq(h, t);
 	free(title);
@@ -340,26 +339,26 @@ man_root_pre(MAN_ARGS)
 static void
 man_root_post(MAN_ARGS)
 {
-	struct htmlpair	 tag[2];
+	struct htmlpair	 tag;
 	struct tag	*t, *tt;
 
-	PAIR_CLASS_INIT(&tag[0], "foot");
-	t = print_otag(h, TAG_TABLE, 1, tag);
-	PAIR_INIT(&tag[0], ATTR_WIDTH, "50%");
-	print_otag(h, TAG_COL, 1, tag);
-	print_otag(h, TAG_COL, 1, tag);
+	PAIR_CLASS_INIT(&tag, "foot");
+	t = print_otag(h, TAG_TABLE, 1, &tag);
+	PAIR_INIT(&tag, ATTR_WIDTH, "50%");
+	print_otag(h, TAG_COL, 1, &tag);
+	print_otag(h, TAG_COL, 1, &tag);
 
 	tt = print_otag(h, TAG_TR, 0, NULL);
 
-	PAIR_CLASS_INIT(&tag[0], "foot-date");
-	print_otag(h, TAG_TD, 1, tag);
+	PAIR_CLASS_INIT(&tag, "foot-date");
+	print_otag(h, TAG_TD, 1, &tag);
 
 	assert(man->date);
 	print_text(h, man->date);
 	print_stagq(h, tt);
 
-	PAIR_CLASS_INIT(&tag[0], "foot-os");
-	print_otag(h, TAG_TD, 1, tag);
+	PAIR_CLASS_INIT(&tag, "foot-os");
+	print_otag(h, TAG_TD, 1, &tag);
 
 	if (man->source)
 		print_text(h, man->source);
