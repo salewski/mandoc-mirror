@@ -74,6 +74,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"i",		0 }, /* TAG_I */
 	{"code",	0 }, /* TAG_CODE */
 	{"small",	0 }, /* TAG_SMALL */
+	{"style",	HTML_CLRLINE}, /* TAG_STYLE */
 };
 
 static	const char	*const htmlattrs[ATTR_MAX] = {
@@ -193,10 +194,15 @@ void
 print_gen_head(struct html *h)
 {
 	struct htmlpair	 tag[4];
+	struct tag	*t;
 
 	tag[0].key = ATTR_CHARSET;
 	tag[0].val = "utf-8";
 	print_otag(h, TAG_META, 1, tag);
+
+	t = print_otag(h, TAG_STYLE, 0, NULL);
+	print_text(h, "table.head, table.foot { width: 100%; }\n");
+	print_tagq(h, t);
 
 	if (h->style) {
 		tag[0].key = ATTR_REL;

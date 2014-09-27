@@ -484,13 +484,12 @@ print_mdoc_node(MDOC_ARGS)
 static void
 mdoc_root_post(MDOC_ARGS)
 {
-	struct htmlpair	 tag[3];
+	struct htmlpair	 tag[2];
 	struct tag	*t, *tt;
 
 	PAIR_SUMMARY_INIT(&tag[0], "Document Footer");
 	PAIR_CLASS_INIT(&tag[1], "foot");
-	PAIR_INIT(&tag[2], ATTR_WIDTH, "100%");
-	t = print_otag(h, TAG_TABLE, 3, tag);
+	t = print_otag(h, TAG_TABLE, 2, tag);
 	PAIR_INIT(&tag[0], ATTR_WIDTH, "50%");
 	print_otag(h, TAG_COL, 1, tag);
 	print_otag(h, TAG_COL, 1, tag);
@@ -514,7 +513,7 @@ mdoc_root_post(MDOC_ARGS)
 static int
 mdoc_root_pre(MDOC_ARGS)
 {
-	struct htmlpair	 tag[3];
+	struct htmlpair	 tag[2];
 	struct tag	*t, *tt;
 	char		*volume, *title;
 
@@ -532,8 +531,7 @@ mdoc_root_pre(MDOC_ARGS)
 
 	PAIR_SUMMARY_INIT(&tag[0], "Document Header");
 	PAIR_CLASS_INIT(&tag[1], "head");
-	PAIR_INIT(&tag[2], ATTR_WIDTH, "100%");
-	t = print_otag(h, TAG_TABLE, 3, tag);
+	t = print_otag(h, TAG_TABLE, 2, tag);
 	PAIR_INIT(&tag[0], ATTR_WIDTH, "30%");
 	print_otag(h, TAG_COL, 1, tag);
 	print_otag(h, TAG_COL, 1, tag);
