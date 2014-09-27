@@ -503,8 +503,7 @@ mdoc_root_post(MDOC_ARGS)
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "foot-os");
-	PAIR_INIT(&tag[1], ATTR_ALIGN, "right");
-	print_otag(h, TAG_TD, 2, tag);
+	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, meta->os);
 	print_tagq(h, t);
 }
@@ -551,8 +550,7 @@ mdoc_root_pre(MDOC_ARGS)
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "head-rtitle");
-	PAIR_INIT(&tag[1], ATTR_ALIGN, "right");
-	print_otag(h, TAG_TD, 2, tag);
+	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, title);
 	print_tagq(h, t);
 

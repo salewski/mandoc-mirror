@@ -331,8 +331,7 @@ man_root_pre(MAN_ARGS)
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "head-rtitle");
-	PAIR_INIT(&tag[1], ATTR_ALIGN, "right");
-	print_otag(h, TAG_TD, 2, tag);
+	print_otag(h, TAG_TD, 1, tag);
 	print_text(h, title);
 	print_tagq(h, t);
 	free(title);
@@ -360,8 +359,7 @@ man_root_post(MAN_ARGS)
 	print_stagq(h, tt);
 
 	PAIR_CLASS_INIT(&tag[0], "foot-os");
-	PAIR_INIT(&tag[1], ATTR_ALIGN, "right");
-	print_otag(h, TAG_TD, 2, tag);
+	print_otag(h, TAG_TD, 1, tag);
 
 	if (man->source)
 		print_text(h, man->source);

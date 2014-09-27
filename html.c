@@ -197,8 +197,12 @@ print_gen_head(struct html *h)
 	tag[0].val = "utf-8";
 	print_otag(h, TAG_META, 1, tag);
 
+	/*
+	 * Print a default style-sheet.
+	 */
 	t = print_otag(h, TAG_STYLE, 0, NULL);
-	print_text(h, "table.head, table.foot { width: 100%; }\n");
+	print_text(h, "table.head, table.foot { width: 100%; }\n"
+	      "td.head-rtitle, td.foot-os { text-align: right; }\n");
 	print_tagq(h, t);
 
 	if (h->style) {
