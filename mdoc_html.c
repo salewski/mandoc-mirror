@@ -314,11 +314,11 @@ synopsis_pre(struct html *h, const struct mdoc_node *n)
 	case MDOC_In:
 		/* FALLTHROUGH */
 	case MDOC_Vt:
-		print_otag(h, TAG_P, 0, NULL);
+		print_paragraph(h);
 		break;
 	case MDOC_Ft:
 		if (MDOC_Fn != n->tok && MDOC_Fo != n->tok) {
-			print_otag(h, TAG_P, 0, NULL);
+			print_paragraph(h);
 			break;
 		}
 		/* FALLTHROUGH */
@@ -1156,7 +1156,7 @@ mdoc_bd_pre(MDOC_ARGS)
 				break;
 		}
 		if ( ! comp)
-			print_otag(h, TAG_P, 0, NULL);
+			print_paragraph(h);
 		return(1);
 	}
 
@@ -1562,7 +1562,7 @@ static int
 mdoc_pp_pre(MDOC_ARGS)
 {
 
-	print_otag(h, TAG_P, 0, NULL);
+	print_paragraph(h);
 	return(0);
 }
 
@@ -1890,7 +1890,7 @@ mdoc_rs_pre(MDOC_ARGS)
 		return(1);
 
 	if (n->prev && SEC_SEE_ALSO == n->sec)
-		print_otag(h, TAG_P, 0, NULL);
+		print_paragraph(h);
 
 	PAIR_CLASS_INIT(&tag, "ref");
 	print_otag(h, TAG_SPAN, 1, &tag);

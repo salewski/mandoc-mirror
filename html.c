@@ -68,7 +68,6 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"dt",		HTML_CLRLINE}, /* TAG_DT */
 	{"dd",		HTML_CLRLINE}, /* TAG_DD */
 	{"blockquote",	HTML_CLRLINE}, /* TAG_BLOCKQUOTE */
-	{"p",		HTML_CLRLINE | HTML_NOSTACK | HTML_AUTOCLOSE}, /* TAG_P */
 	{"pre",		HTML_CLRLINE }, /* TAG_PRE */
 	{"b",		0 }, /* TAG_B */
 	{"i",		0 }, /* TAG_I */
@@ -203,7 +202,8 @@ print_gen_head(struct html *h)
 	      "td.head-rtitle, td.foot-os { text-align: right; }\n"
 	      "td.head-vol { text-align: center; }\n"
 	      "table.foot td { width: 50%; }\n"
-	      "table.head td { width: 33%; }\n");
+	      "table.head td { width: 33%; }\n"
+	      "div.spacer { margin: 1em 0; }\n");
 	print_tagq(h, t);
 
 	if (h->style) {
@@ -621,6 +621,18 @@ print_stagq(struct html *h, const struct tag *suntil)
 		free(tag);
 	}
 }
+
+void
+print_paragraph(struct html *h)
+{
+	struct tag	*t;
+	struct htmlpair	 tag;
+
+	PAIR_CLASS_INIT(&tag, "spacer");
+	t = print_otag(h, TAG_DIV, 1, &tag);
+	print_tagq(h, t);
+}
+
 
 void
 bufinit(struct html *h)

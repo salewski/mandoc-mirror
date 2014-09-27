@@ -142,7 +142,7 @@ print_bvspace(struct html *h, const struct man_node *n)
 		if (NULL == n->prev)
 			return;
 
-	print_otag(h, TAG_P, 0, NULL);
+	print_paragraph(h);
 }
 
 void
@@ -219,7 +219,7 @@ print_man_node(MAN_ARGS)
 		 * before printing the line's data.
 		 */
 		if ('\0' == *n->string) {
-			print_otag(h, TAG_P, 0, NULL);
+			print_paragraph(h);
 			return;
 		}
 
@@ -538,7 +538,7 @@ man_IP_pre(MAN_ARGS)
 static int
 man_HP_pre(MAN_ARGS)
 {
-	struct htmlpair	 tag;
+	struct htmlpair	 tag[2];
 	struct roffsu	 su;
 	const struct man_node *np;
 
@@ -558,8 +558,9 @@ man_HP_pre(MAN_ARGS)
 	bufcat_su(h, "margin-left", &su);
 	su.scale = -su.scale;
 	bufcat_su(h, "text-indent", &su);
-	PAIR_STYLE_INIT(&tag, h);
-	print_otag(h, TAG_P, 1, &tag);
+	PAIR_STYLE_INIT(&tag[0], h);
+	PAIR_CLASS_INIT(&tag[1], "spacer");
+	print_otag(h, TAG_DIV, 2, tag);
 	return(1);
 }
 
