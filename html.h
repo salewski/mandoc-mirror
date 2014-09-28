@@ -63,6 +63,9 @@ enum	htmltag {
 	TAG_MTABLE,
 	TAG_MTR,
 	TAG_MTD,
+	TAG_MUNDEROVER,
+	TAG_MUNDER,
+	TAG_MOVER,
 	TAG_MAX
 };
 

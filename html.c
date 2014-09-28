@@ -87,6 +87,9 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"mtable",	0}, /* TAG_MTABLE */
 	{"mtr",		0}, /* TAG_MTR */
 	{"mtd",		0}, /* TAG_MTD */
+	{"munderover",	0}, /* TAG_MUNDEROVER */
+	{"munder",	0}, /* TAG_MUNDER*/
+	{"mover",	0}, /* TAG_MOVER*/
 };
 
 static	const char	*const htmlattrs[ATTR_MAX] = {

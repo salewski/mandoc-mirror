@@ -113,12 +113,14 @@ eqn_box(struct html *p, const struct eqn_box *bp, int next)
 	 */
 	switch (bp->pos) {
 	case (EQNPOS_TO):
-		/* FALLTHROUGH */
+		post = print_otag(p, TAG_MOVER, 0, NULL);
+		break;
 	case (EQNPOS_SUP):
 		post = print_otag(p, TAG_MSUP, 0, NULL);
 		break;
 	case (EQNPOS_FROM):
-		/* FALLTHROUGH */
+		post = print_otag(p, TAG_MUNDER, 0, NULL);
+		break;
 	case (EQNPOS_SUB):
 		post = print_otag(p, TAG_MSUB, 0, NULL);
 		break;
@@ -126,9 +128,10 @@ eqn_box(struct html *p, const struct eqn_box *bp, int next)
 		post = print_otag(p, TAG_MFRAC, 0, NULL);
 		break;
 	case (EQNPOS_FROMTO):
-		/* FALLTHROUGH */
+		post = print_otag(p, TAG_MUNDEROVER, 0, NULL);
+		skiptwo = 1;
+		break;
 	case (EQNPOS_SUBSUP):
-		/* This requires two elements. */
 		post = print_otag(p, TAG_MSUBSUP, 0, NULL);
 		skiptwo = 1;
 		break;
