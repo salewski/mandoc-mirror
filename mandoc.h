@@ -336,6 +336,7 @@ enum	eqn_post {
 	EQNPOS_NONE = 0,
 	EQNPOS_OVER,
 	EQNPOS_SUP,
+	EQNPOS_SUBSUP,
 	EQNPOS_SUB,
 	EQNPOS_TO,
 	EQNPOS_FROM,
@@ -366,6 +367,7 @@ struct	eqn_box {
 	struct eqn_box	 *first; /* first child node */
 	struct eqn_box	 *last; /* last child node */
 	struct eqn_box	 *next; /* node sibling */
+	struct eqn_box	 *prev; /* node sibling */
 	struct eqn_box	 *parent; /* node sibling */
 	char		 *text; /* text (or NULL) */
 	char		 *left;
