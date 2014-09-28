@@ -88,6 +88,11 @@ eqn_box(struct html *p, const struct eqn_box *bp, int next)
 		pilet = print_otag(p, TAG_MTR, 0, NULL);
 		print_otag(p, TAG_MTD, 0, NULL);
 	}
+	if (NULL != bp->parent && bp->parent->type == EQN_MATRIX) {
+		pilet = print_otag(p, TAG_MTABLE, 0, NULL);
+		print_otag(p, TAG_MTR, 0, NULL);
+		print_otag(p, TAG_MTD, 0, NULL);
+	}
 
 	/*
 	 * If we're establishing a pile, start the table mode now.
@@ -107,6 +112,8 @@ eqn_box(struct html *p, const struct eqn_box *bp, int next)
 	 * single or double following expression.
 	 */
 	switch (bp->pos) {
+	case (EQNPOS_TO):
+		/* FALLTHROUGH */
 	case (EQNPOS_SUP):
 		post = print_otag(p, TAG_MSUP, 0, NULL);
 		break;
@@ -118,6 +125,8 @@ eqn_box(struct html *p, const struct eqn_box *bp, int next)
 	case (EQNPOS_OVER):
 		post = print_otag(p, TAG_MFRAC, 0, NULL);
 		break;
+	case (EQNPOS_FROMTO):
+		/* FALLTHROUGH */
 	case (EQNPOS_SUBSUP):
 		/* This requires two elements. */
 		post = print_otag(p, TAG_MSUBSUP, 0, NULL);
