@@ -340,6 +340,7 @@ enum	eqn_post {
 	EQNPOS_SUB,
 	EQNPOS_TO,
 	EQNPOS_FROM,
+	EQNPOS_FROMTO,
 	EQNPOS__MAX
 };
 

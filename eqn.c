@@ -195,13 +195,14 @@ static	const struct eqnstr eqnfonts[EQNFONT__MAX] = {
 };
 
 static	const struct eqnstr eqnposs[EQNPOS__MAX] = {
-	{ "", 0 }, /* EQNPOS_NONE */
+	{ NULL, 0 }, /* EQNPOS_NONE */
 	{ "over", 4 }, /* EQNPOS_OVER */
 	{ "sup", 3 }, /* EQNPOS_SUP */
 	{ NULL, 0 }, /* EQNPOS_SUPSUB */
 	{ "sub", 3 }, /* EQNPOS_SUB */
 	{ "to", 2 }, /* EQNPOS_TO */
 	{ "from", 4 }, /* EQNPOS_FROM */
+	{ NULL, 0 }, /* EQNPOS_FROMTO */
 };
 
 static	const struct eqnstr eqnpiles[EQNPILE__MAX] = {
@@ -591,6 +592,10 @@ eqn_box(struct eqn_node *ep, struct eqn_box *last)
 			NULL != last->last->prev &&
 			EQNPOS_SUB == last->last->prev->pos)
 			last->last->prev->pos = EQNPOS_SUBSUP;
+		else if (EQNPOS_TO == i &&
+			NULL != last->last->prev &&
+			EQNPOS_FROM == last->last->prev->pos)
+			last->last->prev->pos = EQNPOS_FROMTO;
 		else
 			last->last->pos = (enum eqn_post)i;
 
