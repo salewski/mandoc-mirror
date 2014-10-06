@@ -285,6 +285,12 @@
   http://stackoverflow.com/questions/1713048/
   see also matthew@  Fri, 18 Jul 2014 19:25:12 -0700
 
+- The tables used to render the three-part page headers actually force
+  the width of the <body> to the max-width given for <html>.
+  Not yet sure how to fix that...
+  Observed by an Anonymous Coward on undeadly.org:
+  http://undeadly.org/cgi?action=article&sid=20140925064244&pid=1
+
 - consider whether <var> can be used for Ar Dv Er Ev Fa Va.
   from bentley@  Wed, 13 Aug 2014 09:17:55 -0600
 
