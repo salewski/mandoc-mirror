@@ -1033,9 +1033,9 @@ main(void)
 
 	/* Poor man's ReDoS mitigation. */
 
-	itimer.it_value.tv_sec = 1;
+	itimer.it_value.tv_sec = 2;
 	itimer.it_value.tv_usec = 0;
-	itimer.it_interval.tv_sec = 1;
+	itimer.it_interval.tv_sec = 2;
 	itimer.it_interval.tv_usec = 0;
 	if (setitimer(ITIMER_VIRTUAL, &itimer, NULL) == -1) {
 		fprintf(stderr, "setitimer: %s\n", strerror(errno));
