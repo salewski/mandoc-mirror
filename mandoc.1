@@ -1134,11 +1134,16 @@ or
 The invalid argument is moved out of the macro, which leaves the macro
 empty, causing it to toggle the spacing mode.
 .It Sy "unknown font, skipping request"
-.Pq man
+.Pq man , tbl
 A
 .Xr roff 7
 .Ic \&ft
-request has an invalid argument.
+request or a
+.Xr tbl 7
+.Ic \&f
+layout modifier has an unknown
+.Ar font
+argument.
 .El
 .Ss "Warnings related to plain text"
 .Bl -ohang

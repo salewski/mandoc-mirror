@@ -201,6 +201,11 @@ mod:
 	default:
 		break;
 	}
+	if (isalnum((unsigned char)p[*pos - 1])) {
+		mandoc_vmsg(MANDOCERR_FT_BAD, tbl->parse,
+		    ln, *pos - 1, "TS f%c", p[*pos - 1]);
+		goto mod;
+	}
 
 	mandoc_msg(MANDOCERR_TBLLAYOUT, tbl->parse,
 	    ln, *pos - 1, NULL);
