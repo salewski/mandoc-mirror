@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -54,7 +54,7 @@ eqn_box(struct html *p, const struct eqn_box *bp)
 		/* Estimate the number of rows, first. */
 		if (NULL == (child = parent->first))
 			goto out;
-		for (rows = 0; NULL != child; rows++) 
+		for (rows = 0; NULL != child; rows++)
 			child = child->next;
 		/* Print row-by-row. */
 		post = print_otag(p, TAG_MTABLE, 0, NULL);
@@ -70,12 +70,12 @@ eqn_box(struct html *p, const struct eqn_box *bp)
 				}
 				cell = print_otag
 					(p, TAG_MTD, 0, NULL);
-				/* 
+				/*
 				 * If we have no data for this
 				 * particular cell, then print a
 				 * placeholder and continue--don't puke.
 				 */
-				if (NULL != child) 
+				if (NULL != child)
 					eqn_box(p, child->first);
 				print_tagq(p, cell);
 				parent = parent->next;
@@ -137,14 +137,14 @@ eqn_box(struct html *p, const struct eqn_box *bp)
 		assert(NULL == post);
 		post = print_otag(p, TAG_MI, 0, NULL);
 		print_text(p, bp->text);
-	} else if (NULL == post) { 
+	} else if (NULL == post) {
 		if (NULL != bp->left || NULL != bp->right) {
 			PAIR_INIT(&tag[0], ATTR_OPEN,
-				NULL == bp->left ? "" : bp->left);
+			    NULL == bp->left ? "" : bp->left);
 			PAIR_INIT(&tag[1], ATTR_CLOSE,
-				NULL == bp->right ? "" : bp->right);
+			    NULL == bp->right ? "" : bp->right);
 			post = print_otag(p, TAG_MFENCED, 2, tag);
-		} 
+		}
 		if (NULL == post)
 			post = print_otag(p, TAG_MROW, 0, NULL);
 		else
@@ -158,7 +158,7 @@ out:
 		t = print_otag(p, TAG_MO, 0, NULL);
 		print_text(p, bp->bottom);
 		print_tagq(p, t);
-	} 
+	}
 	if (NULL != bp->top) {
 		t = print_otag(p, TAG_MO, 0, NULL);
 		print_text(p, bp->top);

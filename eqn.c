@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -554,7 +554,7 @@ eqn_box_alloc(struct eqn_node *ep, struct eqn_box *parent)
  * The new EQN_SUBEXPR will have a two-child limit.
  */
 static struct eqn_box *
-eqn_box_makebinary(struct eqn_node *ep, 
+eqn_box_makebinary(struct eqn_node *ep,
 	enum eqn_post pos, struct eqn_box *parent)
 {
 	struct eqn_box	*b, *newb;
@@ -666,7 +666,7 @@ eqn_parse(struct eqn_node *ep, struct eqn_box *parent)
 
 	assert(NULL != parent);
 again:
-	
+
 	switch ((tok = eqn_tok_parse(ep, &p))) {
 	case (EQN_TOK_UNDEF):
 		if ((rc = eqn_undef(ep)) <= 0)
@@ -680,7 +680,7 @@ again:
 	case (EQN_TOK_TDEFINE):
 		if (NULL == eqn_nextrawtok(ep, NULL))
 			EQN_MSG(MANDOCERR_EQNEOF, ep);
-		else if (NULL == eqn_next(ep, 
+		else if (NULL == eqn_next(ep,
 				ep->data[(int)ep->cur], NULL, 0))
 			EQN_MSG(MANDOCERR_EQNEOF, ep);
 		break;
@@ -707,8 +707,7 @@ again:
 			EQN_MSG(MANDOCERR_EQNSYNT, ep);
 			return(-1);
 		}
-		parent = eqn_box_makebinary
-			(ep, EQNPOS_NONE, parent);
+		parent = eqn_box_makebinary(ep, EQNPOS_NONE, parent);
 		parent->type = EQN_LISTONE;
 		parent->expectargs = 1;
 		switch (tok) {
@@ -762,7 +761,7 @@ again:
 	case (EQN_TOK_BACK):
 	case (EQN_TOK_DOWN):
 	case (EQN_TOK_UP):
-		tok = eqn_tok_parse(ep, NULL); 
+		tok = eqn_tok_parse(ep, NULL);
 		if (EQN_TOK__MAX != tok) {
 			EQN_MSG(MANDOCERR_EQNSYNT, ep);
 			return(-1);
@@ -871,7 +870,7 @@ again:
 				EQN_MSG(MANDOCERR_EQNSYNT, ep);
 				return(-1);
 			}
-		/* 
+		/*
 		 * Accept a left-right-associative set of arguments just
 		 * like sub and sup and friends but without rebalancing
 		 * under a pivot.
@@ -905,7 +904,7 @@ again:
 		 * FIXME: this is a shitty sentinel: we should really
 		 * have a native EQN_BRACE type or whatnot.
 		 */
-		while (parent->type != EQN_LIST) 
+		while (parent->type != EQN_LIST)
 			if (NULL == (parent = parent->parent)) {
 				EQN_MSG(MANDOCERR_EQNSYNT, ep);
 				return(-1);
@@ -926,20 +925,20 @@ again:
 			} else if (STRNEQ(start, sz, "floor", 5)) {
 				strlcpy(sym, "\\[rf]", sizeof(sym));
 				parent->right = mandoc_strdup(sym);
-			} else 
+			} else
 				parent->right = mandoc_strndup(start, sz);
 		}
 		if (NULL == (parent = parent->parent)) {
 			EQN_MSG(MANDOCERR_EQNSYNT, ep);
 			return(-1);
 		}
-		if (EQN_TOK_BRACE_CLOSE == tok && parent && 
-			(parent->type == EQN_PILE ||
-			 parent->type == EQN_MATRIX))
+		if (EQN_TOK_BRACE_CLOSE == tok && parent &&
+		    (parent->type == EQN_PILE ||
+		     parent->type == EQN_MATRIX))
 			parent = parent->parent;
 		/* Close out any "singleton" lists. */
-		while (parent->type == EQN_LISTONE && 
-			parent->args == parent->expectargs)
+		while (parent->type == EQN_LISTONE &&
+		    parent->args == parent->expectargs)
 			if (NULL == (parent = parent->parent)) {
 				EQN_MSG(MANDOCERR_EQNSYNT, ep);
 				return(-1);
@@ -971,7 +970,7 @@ again:
 			} else if (STRNEQ(start, sz, "floor", 5)) {
 				strlcpy(sym, "\\[lf]", sizeof(sym));
 				parent->left = mandoc_strdup(sym);
-			} else 
+			} else
 				parent->left = mandoc_strndup(start, sz);
 		}
 		break;
@@ -997,7 +996,7 @@ again:
 		parent->type = EQN_LIST;
 		break;
 	case (EQN_TOK_ABOVE):
-		while (parent->type != EQN_PILE) 
+		while (parent->type != EQN_PILE)
 			if (NULL == (parent = parent->parent)) {
 				EQN_MSG(MANDOCERR_EQNSYNT, ep);
 				return(-1);
@@ -1022,7 +1021,7 @@ again:
 		break;
 	case (EQN_TOK_EOF):
 		/*
-		 * End of file! 
+		 * End of file!
 		 * TODO: make sure we're not in an open subexpression.
 		 */
 		return(0);
@@ -1043,7 +1042,7 @@ again:
 		cur->type = EQN_TEXT;
 		for (i = 0; i < EQNSYM__MAX; i++)
 			if (0 == strcmp(eqnsyms[i].str, p)) {
-				(void)snprintf(sym, sizeof(sym), 
+				(void)snprintf(sym, sizeof(sym),
 					"\\[%s]", eqnsyms[i].sym);
 				cur->text = mandoc_strdup(sym);
 				free(p);
@@ -1055,7 +1054,7 @@ again:
 		/*
 		 * Post-process list status.
 		 */
-		while (parent->type == EQN_LISTONE && 
+		while (parent->type == EQN_LISTONE &&
 			parent->args == parent->expectargs)
 			if (NULL == (parent = parent->parent)) {
 				EQN_MSG(MANDOCERR_EQNSYNT, ep);
@@ -1067,7 +1066,7 @@ again:
 }
 
 enum rofferr
-eqn_end(struct eqn_node **epp) 
+eqn_end(struct eqn_node **epp)
 {
 	struct eqn_node	*ep;
 
