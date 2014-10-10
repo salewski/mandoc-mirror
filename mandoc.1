@@ -233,7 +233,7 @@ This is the default.
 See
 .Sx ASCII Output .
 .It Fl T Ns Cm html
-Produce CSS1/HTML5 output.
+Produce HTML5, CSS1, and MathML output.
 See
 .Sx HTML Output .
 .It Fl T Ns Cm lint
@@ -320,6 +320,10 @@ which will normalise to \(>=60.
 Output produced by
 .Fl T Ns Cm html
 conforms to HTML5 using optional self-closing tags.
+Default styles use only CSS1.
+Equations rendered from
+.Xr eqn 7
+blocks use MathML.
 .Pp
 The
 .Pa example.style.css

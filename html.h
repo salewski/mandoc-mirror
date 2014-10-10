@@ -82,6 +82,7 @@ enum	htmlattr {
 	ATTR_CHARSET,
 	ATTR_OPEN,
 	ATTR_CLOSE,
+	ATTR_MATHVARIANT,
 	ATTR_MAX
 };
 

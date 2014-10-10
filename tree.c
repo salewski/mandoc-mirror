@@ -275,6 +275,7 @@ print_box(const struct eqn_box *ep, int indent)
 	case EQN_ROOT:
 		t = "eqn-root";
 		break;
+	case EQN_LISTONE:
 	case EQN_LIST:
 		t = "eqn-list";
 		break;
@@ -284,15 +285,19 @@ print_box(const struct eqn_box *ep, int indent)
 	case EQN_TEXT:
 		t = "eqn-text";
 		break;
+	case EQN_PILE:
+		t = "eqn-pile";
+		break;
 	case EQN_MATRIX:
 		t = "eqn-matrix";
 		break;
 	}
 
 	assert(t);
-	printf("%s(size=%d, pos=%d, font=%d, mark=%d, pile=%d, l=\"%s\", r=\"%s\") %s\n",
+	printf("%s(size=%d, args=%zu(%zu), pos=%d, font=%d, pile=%d, l=\"%s\", r=\"%s\") %s\n",
 	    t, EQN_DEFSIZE == ep->size ? 0 : ep->size,
-	    ep->pos, ep->font, ep->mark, ep->pile,
+	    ep->args, ep->expectargs,
+	    ep->pos, ep->font, ep->pile,
 	    ep->left ? ep->left : "",
 	    ep->right ? ep->right : "",
 	    ep->text ? ep->text : "");

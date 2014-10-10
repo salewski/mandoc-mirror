@@ -105,6 +105,7 @@ static	const char	*const htmlattrs[ATTR_MAX] = {
 	"charset", /* ATTR_CHARSET */
 	"open", /* ATTR_OPEN */
 	"close", /* ATTR_CLOSE */
+	"mathvariant", /* ATTR_MATHVARIANT */
 };
 
 static	const char	*const roffscales[SCALE_MAX] = {

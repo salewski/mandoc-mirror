@@ -461,3 +461,9 @@ Several areas can be cleaned up to make mandoc even faster.  These are
    behaviour, which is not optimal.
  - Have Mac OSX systems automatically disable -static compilation of the
    CGI: -static isn't supported.
+
+************************************************************************
+* eqn missing features
+************************************************************************
+
+ - set, delim, fonts
