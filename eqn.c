@@ -687,6 +687,7 @@ again:
 				ep->data[(int)ep->cur], NULL, 0))
 			EQN_MSG(MANDOCERR_EQNEOF, ep);
 		break;
+	case (EQN_TOK_DELIM):
 	case (EQN_TOK_GFONT):
 		if (NULL == eqn_nextrawtok(ep, NULL)) {
 			EQN_MSG(MANDOCERR_EQNSYNT, ep);
