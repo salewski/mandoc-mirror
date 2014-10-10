@@ -163,6 +163,18 @@
   delimiter instead of being thrown away as a no-op roff line
   reported by Yuri Pankov, Wed 18 May 2011 11:34:59 CEST
 
+--- missing eqn features -----------------------------------------------
+
+- set, delim, fonts
+
+- The "size" keyword is parsed, but ignored by the formatter.
+
+- The spacing characters `~', `^', and tab are currently ignored,
+  see User's Guide (Second Edition) page 2 section 4.
+
+- Mark and lineup are parsed and ignored,
+  see User's Guide (Second Edition) page 5 section 15.
+
 --- missing misc features ----------------------------------------------
 
 - italic correction (\/) in PostScript mode
@@ -295,6 +307,11 @@
   from bentley@  Wed, 13 Aug 2014 09:17:55 -0600
 
 - check https://github.com/trentm/mdocml
+
+--- eqn issues ---------------------------------------------------------
+
+- If .EQ follows preceding text, a space should be output between the
+  text and the equation.
 
 ************************************************************************
 * formatting issues: gratuitous differences
@@ -462,8 +479,3 @@ Several areas can be cleaned up to make mandoc even faster.  These are
  - Have Mac OSX systems automatically disable -static compilation of the
    CGI: -static isn't supported.
 
-************************************************************************
-* eqn missing features
-************************************************************************
-
- - set, delim, fonts
