@@ -265,6 +265,11 @@ print_box(const struct eqn_box *ep, int indent)
 	int		 i;
 	const char	*t;
 
+	static const char *posnames[] = {
+	    NULL, "sup", "subsup", "sub",
+	    "to", "from", "fromto",
+	    "over", "sqrt", NULL };
+
 	if (NULL == ep)
 		return;
 	for (i = 0; i < indent; i++)
@@ -293,14 +298,28 @@ print_box(const struct eqn_box *ep, int indent)
 		break;
 	}
 
-	assert(t);
-	printf("%s(size=%d, args=%zu(%zu), pos=%d, font=%d, pile=%d, l=\"%s\", r=\"%s\") %s\n",
-	    t, EQN_DEFSIZE == ep->size ? 0 : ep->size,
-	    ep->args, ep->expectargs,
-	    ep->pos, ep->font, ep->pile,
-	    ep->left ? ep->left : "",
-	    ep->right ? ep->right : "",
-	    ep->text ? ep->text : "");
+	fputs(t, stdout);
+	if (ep->pos)
+		printf(" pos=%s", posnames[ep->pos]);
+	if (ep->left)
+		printf(" left=\"%s\"", ep->left);
+	if (ep->right)
+		printf(" right=\"%s\"", ep->right);
+	if (ep->top)
+		printf(" top=\"%s\"", ep->top);
+	if (ep->bottom)
+		printf(" bottom=\"%s\"", ep->bottom);
+	if (ep->text)
+		printf(" text=\"%s\"", ep->text);
+	if (ep->font)
+		printf(" font=%d", ep->font);
+	if (ep->size != EQN_DEFSIZE)
+		printf(" size=%d", ep->size);
+	if (ep->expectargs != UINT_MAX && ep->expectargs != ep->args)
+		printf(" badargs=%zu(%zu)", ep->args, ep->expectargs);
+	else if (ep->args)
+		printf(" args=%zu", ep->args);
+	putchar('\n');
 
 	print_box(ep->first, indent + 1);
 	print_box(ep->next, indent);
