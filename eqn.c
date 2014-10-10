@@ -537,10 +537,7 @@ eqn_box_alloc(struct eqn_node *ep, struct eqn_box *parent)
 	bp->expectargs = UINT_MAX;
 	bp->size = ep->gsize;
 
-	assert(NULL != parent);
-
 	if (NULL != parent->first) {
-		assert(NULL != parent->last);
 		parent->last->next = bp;
 		bp->prev = parent->last;
 	} else
