@@ -114,6 +114,7 @@ enum	mandocerr {
 	MANDOCERR_BL_SKIPW, /* skipping -width argument: Bl -type */
 	MANDOCERR_AT_BAD, /* unknown AT&T UNIX version: At version */
 	MANDOCERR_FA_COMMA, /* comma in function argument: arg */
+	MANDOCERR_FN_PAREN, /* parenthesis in function name: arg */
 	MANDOCERR_RS_BAD, /* invalid content in Rs block: macro */
 	MANDOCERR_SM_BAD, /* invalid Boolean argument: macro arg */
 	MANDOCERR_FT_BAD, /* unknown font, skipping request: ft font */
