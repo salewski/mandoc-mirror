@@ -1030,7 +1030,7 @@ post_fo(POST_ARGS)
 
 	hwarn_eq1(mdoc);
 	bwarn_ge1(mdoc);
-	if (mdoc->last->type == MDOC_HEAD)
+	if (mdoc->last->type == MDOC_HEAD && mdoc->last->nchild)
 		post_fname(mdoc);
 	return(1);
 }
