@@ -149,6 +149,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"missing font type, using \\fR",
 	"unknown font type, using \\fR",
 	"missing -std argument, adding it",
+	"missing eqn box, using \"\"",
 
 	/* related to bad macro arguments */
 	"unterminated quoted argument",
@@ -179,7 +180,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"equation scope open on exit",
 	"overlapping equation scopes",
 	"unexpected end of equation",
-	"equation syntax error",
 
 	/* related to tables */
 	"bad table syntax",

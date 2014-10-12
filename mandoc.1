@@ -911,8 +911,11 @@ The previous, interrupted macro is deleted from the parse tree.
 .Ss "Warnings related to missing arguments"
 .Bl -ohang
 .It Sy "skipping empty request"
-.Pq roff
-The macro name is missing from a macro definition request.
+.Pq roff , eqn
+The macro name is missing from a macro definition request,
+or an
+.Xr eqn 7
+control statement or operation keyword lacks its required argument.
 .It Sy "conditional request controls empty scope"
 .Pq roff
 A conditional request is only useful if any of the following
@@ -1046,6 +1049,11 @@ The
 utility assumes
 .Fl std
 even when it is not specified, but other implementations may not.
+.It Sy "missing eqn box, using \(dq\(dq"
+.Pq eqn
+A diacritic mark or a binary operator is found,
+but there is nothing to the left of it.
+An empty box is inserted.
 .El
 .Ss "Warnings related to bad macro arguments"
 .Bl -ohang
@@ -1218,7 +1226,6 @@ keeps the code more readable.
 .It "equation scope open on exit"
 .It "overlapping equation scopes"
 .It "unexpected end of equation"
-.It "equation syntax error"
 .El
 .Ss "Errors related to tables"
 .Bl -inset -compact
@@ -1272,12 +1279,15 @@ macro.
 It may be mistyped or unsupported.
 The request or macro is discarded including its arguments.
 .It Sy "skipping item outside list"
-.Pq mdoc
+.Pq mdoc , eqn
 An
 .Ic \&It
 macro occurs outside any
 .Ic \&Bl
-list.
+list, or an
+.Xr eqn 7
+.Ic above
+delimiter occurs outside any pile.
 It is discarded including its arguments.
 .It Sy "skipping column outside column list"
 .Pq mdoc
@@ -1298,7 +1308,9 @@ block closing macro, a
 .Ic \&RE
 or
 .Ic \&UE
-macro, or the end of an equation, table, or
+macro, an
+.Xr eqn 7
+right delimiter or closing brace, or the end of an equation, table, or
 .Xr roff 7
 conditional request is encountered but no matching block is open.
 The offending request or macro is discarded.
@@ -1395,11 +1407,16 @@ An
 .Ic \&St
 macro has an unknown argument and is discarded.
 .It Sy "skipping request without numeric argument"
-.Pq roff
+.Pq roff , eqn
 An
 .Ic \&it
-request has a non-numeric or negative argument or no argument at all.
-The invalid request is ignored.
+request or an
+.Xr eqn 7
+.Ic \&size
+or
+.Ic \&gsize
+statement has a non-numeric or negative argument or no argument at all.
+The invalid request or statement is ignored.
 .It Sy "skipping all arguments"
 .Pq mdoc , man , eqn , roff
 An
