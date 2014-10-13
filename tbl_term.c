@@ -43,6 +43,7 @@ static	void	tbl_number(struct termp *, const struct tbl_opts *,
 			const struct roffcol *);
 static	void	tbl_hrule(struct termp *, const struct tbl_span *);
 static	void	tbl_vrule(struct termp *, const struct tbl_head *);
+static	void	tbl_word(struct termp *, const struct tbl_dat *);
 
 
 static size_t
@@ -378,7 +379,7 @@ tbl_literal(struct termp *tp, const struct tbl_dat *dp,
 	}
 
 	tbl_char(tp, ASCII_NBRSP, padl);
-	term_word(tp, dp->string);
+	tbl_word(tp, dp);
 	tbl_char(tp, ASCII_NBRSP, padr);
 }
 
@@ -419,8 +420,23 @@ tbl_number(struct termp *tp, const struct tbl_opts *opts,
 	padl = col->decimal - d;
 
 	tbl_char(tp, ASCII_NBRSP, padl);
-	term_word(tp, dp->string);
+	tbl_word(tp, dp);
 	if (col->width > sz + padl)
 		tbl_char(tp, ASCII_NBRSP, col->width - sz - padl);
 }
 
+static void
+tbl_word(struct termp *tp, const struct tbl_dat *dp)
+{
+	const void	*prev_font;
+
+	prev_font = term_fontq(tp);
+	if (dp->layout->flags & TBL_CELL_BOLD)
+		term_fontpush(tp, TERMFONT_BOLD);
+	else if (dp->layout->flags & TBL_CELL_ITALIC)
+		term_fontpush(tp, TERMFONT_UNDER);
+
+	term_word(tp, dp->string);
+
+	term_fontpopq(tp, prev_font);
+}
