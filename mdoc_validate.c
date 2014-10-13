@@ -1989,7 +1989,8 @@ post_sh_see_also(POST_ARGS)
 				    mdoc->parse, n->line, n->pos,
 				    "%s(%s) after %s(%s)", name,
 				    sec, lastname, lastsec);
-			else if (cmp == 0 && strcmp(lastname, name) > 0)
+			else if (cmp == 0 &&
+			    strcasecmp(lastname, name) > 0)
 				mandoc_vmsg(MANDOCERR_XR_ORDER,
 				    mdoc->parse, n->line, n->pos,
 				    "%s after %s", name, lastname);
