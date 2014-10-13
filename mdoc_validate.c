@@ -1004,12 +1004,14 @@ post_eoln(POST_ARGS)
 static int
 post_fname(POST_ARGS)
 {
-	const struct mdoc_node *n;
-	size_t pos;
+	const struct mdoc_node	*n;
+	const char		*cp;
+	size_t			 pos;
 
 	n = mdoc->last->child;
 	pos = strcspn(n->string, "()");
-	if (n->string[pos] != '\0')
+	cp = n->string + pos;
+	if ( ! (cp[0] == '\0' || (cp[0] == '(' && cp[1] == '*')))
 		mandoc_msg(MANDOCERR_FN_PAREN, mdoc->parse,
 		    n->line, n->pos + pos, n->string);
 	return(1);
