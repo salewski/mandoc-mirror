@@ -541,8 +541,10 @@ a2width(const struct termp *p, const char *v)
 	struct roffsu	 su;
 
 	assert(v);
-	if ( ! a2roffsu(v, &su, SCALE_MAX))
+	if ( ! a2roffsu(v, &su, SCALE_MAX)) {
 		SCALE_HS_INIT(&su, term_strlen(p, v));
+		su.scale /= term_strlen(p, "0");
+	}
 
 	return(term_hspan(p, &su));
 }
@@ -560,8 +562,10 @@ a2offs(const struct termp *p, const char *v)
 		return(term_len(p, p->defindent + 1));
 	else if (0 == strcmp(v, "indent-two"))
 		return(term_len(p, (p->defindent + 1) * 2));
-	else if ( ! a2roffsu(v, &su, SCALE_MAX))
+	else if ( ! a2roffsu(v, &su, SCALE_MAX)) {
 		SCALE_HS_INIT(&su, term_strlen(p, v));
+		su.scale /= term_strlen(p, "0");
+	}
 
 	return(term_hspan(p, &su));
 }
