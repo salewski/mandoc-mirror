@@ -57,7 +57,7 @@ html_tblopen(struct html *h, const struct tbl_span *sp)
 	if (TBL_SPAN_FIRST & sp->flags) {
 		h->tbl.len = html_tbl_len;
 		h->tbl.slen = html_tbl_strlen;
-		tblcalc(&h->tbl, sp);
+		tblcalc(&h->tbl, sp, 0);
 	}
 
 	assert(NULL == h->tblt);

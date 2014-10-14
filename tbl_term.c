@@ -91,7 +91,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 		tp->tbl.slen = term_tbl_strlen;
 		tp->tbl.arg = tp;
 
-		tblcalc(&tp->tbl, sp);
+		tblcalc(&tp->tbl, sp, rmargin - tp->offset);
 	}
 
 	/* Horizontal frame at the start of boxed tables. */

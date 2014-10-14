@@ -248,6 +248,11 @@ The following case-insensitive modifier keys are available:
 .Bl -tag -width 2n
 .It Cm b
 Use a bold font for the contents of this column.
+.It Cm e
+Make this column wider to match the maximum width
+of any other column also having the
+.Cm e
+modifier.
 .It Cm f
 The next character selects the font to use for this column.
 See the
@@ -255,16 +260,21 @@ See the
 manual for supported one-character font names.
 .It Cm i
 Use an italic font for the contents of this column.
+.It Cm x
+After determining the width of all other columns, distribute the
+rest of the line length among all columns having the
+.Cm x
+modifier.
+.It Cm z
+Do not use this cell for determining the width of this column.
 .El
 .Pp
 The modifiers
 .Cm d ,
-.Cm e ,
-.Cm r ,
 .Cm t ,
 .Cm u ,
 and
-.Cm z
+.Cm w
 are ignored by
 .Xr mandoc 1 .
 .Pp

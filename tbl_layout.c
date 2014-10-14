@@ -168,6 +168,9 @@ mod:
 		goto mod;
 	case 'w':  /* XXX for now, ignore minimal column width */
 		goto mod;
+	case 'x':
+		cp->flags |= TBL_CELL_WMAX;
+		goto mod;
 	case 'f':
 		break;
 	case 'r':
