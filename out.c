@@ -158,7 +158,7 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp,
 	tbl->cols = mandoc_calloc((size_t)sp->opts->cols,
 	    sizeof(struct roffcol));
 
-	for (maxcol = 0; sp; sp = sp->next) {
+	for (maxcol = -1; sp; sp = sp->next) {
 		if (TBL_SPAN_DATA != sp->pos)
 			continue;
 		spans = 1;

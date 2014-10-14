@@ -107,7 +107,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	/* Vertical frame at the start of each row. */
 
 	if ((TBL_OPT_BOX | TBL_OPT_DBOX) & sp->opts->opts ||
-	    sp->head->vert)
+	    (sp->head != NULL && sp->head->vert))
 		term_word(tp, TBL_SPAN_HORIZ == sp->pos ||
 		    TBL_SPAN_DHORIZ == sp->pos ? "+" : "|");
 
