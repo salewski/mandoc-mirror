@@ -156,8 +156,9 @@
 - look at the POSIX manuals in the books/man-pages-posix port,
   they use some unsupported tbl(7) features.
 
-- investigate tbl(1) errors in sox(1)
-  see also naddy@  Sat, 16 Oct 2010 23:51:57 +0200
+- use Unicode U+2500 to U+256C for table borders
+  in tbl(7) -Tutf-8 output
+  suggested by bentley@  Tue, 14 Oct 2014 04:10:55 -0600
 
 - allow standalone `.' to be interpreted as an end-of-layout
   delimiter instead of being thrown away as a no-op roff line
