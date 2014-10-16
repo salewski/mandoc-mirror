@@ -1883,8 +1883,8 @@ roff_eqndelim(struct roff *r, char **bufp, size_t *szp, int pos)
 
 	/* Replace the delimiter with an equation macro. */
 
-	*szp = mandoc_asprintf(&cp1, "%s\n.E%c\n\\&%s", *bufp,
-	    r->eqn == NULL ? 'Q' : 'N', cp2) + 1;
+	*szp = mandoc_asprintf(&cp1, "%s\n.E%s%s", *bufp,
+	    r->eqn == NULL ? "Q\n" : "N\n\\&", cp2) + 1;
 	free(*bufp);
 	*bufp = cp1;
 
