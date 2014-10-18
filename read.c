@@ -768,7 +768,7 @@ mparse_readfd(struct mparse *curp, int fd, const char *file)
 			(*curp->mmsg)(MANDOCERR_SYSOPEN,
 			    curp->file_status,
 			    file, 0, 0, strerror(errno));
-		goto out;
+		return(curp->file_status);
 	}
 
 	/*
@@ -778,21 +778,19 @@ mparse_readfd(struct mparse *curp, int fd, const char *file)
 	 * the parse phase for the file.
 	 */
 
-	if ( ! read_whole_file(curp, file, fd, &blk, &with_mmap))
-		goto out;
-
-	mparse_parse_buffer(curp, blk, file);
-
+	if (read_whole_file(curp, file, fd, &blk, &with_mmap)) {
+		mparse_parse_buffer(curp, blk, file);
 #if HAVE_MMAP
-	if (with_mmap)
-		munmap(blk.buf, blk.sz);
-	else
+		if (with_mmap)
+			munmap(blk.buf, blk.sz);
+		else
 #endif
-		free(blk.buf);
+			free(blk.buf);
+	}
 
 	if (STDIN_FILENO != fd && -1 == close(fd))
 		perror(file);
-out:
+
 	return(curp->file_status);
 }
 

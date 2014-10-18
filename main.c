@@ -581,14 +581,15 @@ passthrough(const char *file, int fd)
 		for (off = 0; off < nr; off += nw)
 			if ((nw = write(STDOUT_FILENO, buf + off,
 			    (size_t)(nr - off))) == -1 || nw == 0) {
+				close(fd);
 				syscall = "write";
 				goto fail;
 			}
 
-        if (nr == 0) {
-		close(fd);
+	close(fd);
+
+	if (nr == 0)
 		return(MANDOCLEVEL_OK);
-        }
 
 	syscall = "read";
 fail:
