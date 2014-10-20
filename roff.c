@@ -1857,7 +1857,8 @@ roff_T_(ROFF_ARGS)
 static enum rofferr
 roff_eqndelim(struct roff *r, char **bufp, size_t *szp, int pos)
 {
-	char	*cp1, *cp2;
+	char		*cp1, *cp2;
+	const char	*bef_pr, *bef_nl, *mac, *aft_nl, *aft_pr;
 
 	/*
 	 * Outside equations, look for an opening delimiter.
@@ -1872,11 +1873,41 @@ roff_eqndelim(struct roff *r, char **bufp, size_t *szp, int pos)
 	if (cp2 == NULL)
 		return(ROFF_CONT);
 
-	/* Replace the delimiter with an equation macro. */
-
 	*cp2++ = '\0';
-	*szp = mandoc_asprintf(&cp1, "%s%s%s", *bufp,
-	    r->eqn == NULL ? "\\&\n.EQ\n" : "\n.EN\n\\&", cp2) + 1;
+	bef_pr = bef_nl = aft_nl = aft_pr = "";
+
+	/* Handle preceding text, protecting whitespace. */
+
+	if (**bufp != '\0') {
+		if (r->eqn == NULL)
+			bef_pr = "\\&";
+		bef_nl = "\n";
+	}
+
+	/*
+	 * Prepare replacing the delimiter with an equation macro
+	 * and drop leading white space from the equation.
+	 */
+
+	if (r->eqn == NULL) {
+		while (*cp2 == ' ')
+			cp2++;
+		mac = ".EQ";
+	} else
+		mac = ".EN";
+
+	/* Handle following text, protecting whitespace. */
+
+	if (*cp2 != '\0') {
+		aft_nl = "\n";
+		if (r->eqn != NULL)
+			aft_pr = "\\&";
+	}
+
+	/* Do the actual replacement. */
+
+	*szp = mandoc_asprintf(&cp1, "%s%s%s%s%s%s%s", *bufp,
+	    bef_pr, bef_nl, mac, aft_nl, aft_pr, cp2) + 1;
 	free(*bufp);
 	*bufp = cp1;
 
