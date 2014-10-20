@@ -119,7 +119,8 @@ int
 man_parseln(struct man *man, int ln, char *buf, int offs)
 {
 
-	man->flags |= MAN_NEWLINE;
+	if (man->last->type != MAN_EQN || ln > man->last->line)
+		man->flags |= MAN_NEWLINE;
 
 	return (roff_getcontrol(man->roff, buf, &offs) ?
 	    man_pmacro(man, ln, buf, offs) :

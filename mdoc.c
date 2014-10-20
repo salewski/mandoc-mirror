@@ -238,7 +238,8 @@ int
 mdoc_parseln(struct mdoc *mdoc, int ln, char *buf, int offs)
 {
 
-	mdoc->flags |= MDOC_NEWLINE;
+	if (mdoc->last->type != MDOC_EQN || ln > mdoc->last->line)
+		mdoc->flags |= MDOC_NEWLINE;
 
 	/*
 	 * Let the roff nS register switch SYNOPSIS mode early,

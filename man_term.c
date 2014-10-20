@@ -990,7 +990,7 @@ print_man_node(DECL_ARGS)
 		if ( ! (n->flags & MAN_LINE))
 			p->flags |= TERMP_NOSPACE;
 		term_eqn(p, n->eqn);
-		if ( ! (n->flags & MAN_LINE))
+		if (n->next != NULL && ! (n->next->flags & MAN_LINE))
 			p->flags |= TERMP_NOSPACE;
 		return;
 	case MAN_TBL:
