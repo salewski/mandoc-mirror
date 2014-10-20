@@ -987,6 +987,8 @@ print_man_node(DECL_ARGS)
 		goto out;
 
 	case MAN_EQN:
+		if ( ! (n->flags & MAN_LINE))
+			p->flags |= TERMP_NOSPACE;
 		term_eqn(p, n->eqn);
 		return;
 	case MAN_TBL:

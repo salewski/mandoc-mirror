@@ -344,6 +344,8 @@ print_mdoc_node(DECL_ARGS)
 			p->flags |= TERMP_NOSPACE;
 		break;
 	case MDOC_EQN:
+		if ( ! (n->flags & MDOC_LINE))
+			p->flags |= TERMP_NOSPACE;
 		term_eqn(p, n->eqn);
 		break;
 	case MDOC_TBL:

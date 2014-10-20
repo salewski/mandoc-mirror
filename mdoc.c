@@ -205,6 +205,8 @@ mdoc_addeqn(struct mdoc *mdoc, const struct eqn *ep)
 
 	n = node_alloc(mdoc, ep->ln, ep->pos, MDOC_MAX, MDOC_EQN);
 	n->eqn = ep;
+	if (ep->ln > mdoc->last->line)
+		n->flags |= MDOC_LINE;
 
 	if ( ! node_append(mdoc, n))
 		return(0);

@@ -1872,19 +1872,11 @@ roff_eqndelim(struct roff *r, char **bufp, size_t *szp, int pos)
 	if (cp2 == NULL)
 		return(ROFF_CONT);
 
-	/* Found a delimiter; get rid of surrounding blanks. */
-
-	cp1 = cp2++;
-	while (cp2[0] == ' ')
-		cp2++;
-	while (cp1[-1] == ' ')
-		cp1--;
-	*cp1 = '\0';
-
 	/* Replace the delimiter with an equation macro. */
 
-	*szp = mandoc_asprintf(&cp1, "%s\n.E%s%s", *bufp,
-	    r->eqn == NULL ? "Q\n" : "N\n\\&", cp2) + 1;
+	*cp2++ = '\0';
+	*szp = mandoc_asprintf(&cp1, "%s%s%s", *bufp,
+	    r->eqn == NULL ? "\\&\n.EQ\n" : "\n.EN\n\\&", cp2) + 1;
 	free(*bufp);
 	*bufp = cp1;
 

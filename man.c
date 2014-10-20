@@ -345,6 +345,8 @@ man_addeqn(struct man *man, const struct eqn *ep)
 
 	n = man_node_alloc(man, ep->ln, ep->pos, MAN_EQN, MAN_MAX);
 	n->eqn = ep;
+	if (ep->ln > man->last->line)
+		n->flags |= MAN_LINE;
 
 	if ( ! man_node_append(man, n))
 		return(0);
