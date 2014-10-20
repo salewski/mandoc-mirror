@@ -211,6 +211,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"skipping request without numeric argument",
 	"skipping all arguments",
 	"skipping excess arguments",
+	"divide by zero",
 
 	"generic fatal error",
 

@@ -186,9 +186,12 @@ static	enum rofferr	 roff_cond_sub(ROFF_ARGS);
 static	enum rofferr	 roff_ds(ROFF_ARGS);
 static	enum rofferr	 roff_eqndelim(struct roff *,
 				char **, size_t *, int);
-static	int		 roff_evalcond(const char *, int *);
-static	int		 roff_evalnum(const char *, int *, int *, int);
-static	int		 roff_evalpar(const char *, int *, int *);
+static	int		 roff_evalcond(struct roff *r, int,
+				const char *, int *);
+static	int		 roff_evalnum(struct roff *, int,
+				const char *, int *, int *, int);
+static	int		 roff_evalpar(struct roff *, int,
+				const char *, int *, int *);
 static	int		 roff_evalstrcond(const char *, int *);
 static	void		 roff_free1(struct roff *);
 static	void		 roff_freereg(struct roffreg *);
@@ -622,7 +625,7 @@ roff_res(struct roff *r, char **bufp, size_t *szp, int ln, int pos)
 		case 'B':
 			npos = 0;
 			ubuf[0] = arg_complete &&
-			    roff_evalnum(stnam, &npos, NULL, 0) &&
+			    roff_evalnum(r, ln, stnam, &npos, NULL, 0) &&
 			    stnam + npos + 1 == cp ? '1' : '0';
 			ubuf[1] = '\0';
 			break;
@@ -1240,7 +1243,7 @@ out:
  * or string condition.
  */
 static int
-roff_evalcond(const char *v, int *pos)
+roff_evalcond(struct roff *r, int ln, const char *v, int *pos)
 {
 	int	 wanttrue, number;
 
@@ -1271,7 +1274,7 @@ roff_evalcond(const char *v, int *pos)
 		break;
 	}
 
-	if (roff_evalnum(v, pos, &number, 0))
+	if (roff_evalnum(r, ln, v, pos, &number, 0))
 		return((number > 0) == wanttrue);
 	else
 		return(roff_evalstrcond(v, pos) == wanttrue);
@@ -1300,7 +1303,7 @@ roff_cond(ROFF_ARGS)
 
 	r->last->rule = ROFF_el == tok ?
 	    (r->rstackpos < 0 ? 0 : r->rstack[r->rstackpos--]) :
-	    roff_evalcond(*bufp, &pos);
+	    roff_evalcond(r, ln, *bufp, &pos);
 
 	/*
 	 * An if-else will put the NEGATION of the current evaluated
@@ -1466,14 +1469,15 @@ roff_getop(const char *v, int *pos, char *res)
  * or a single signed integer number.
  */
 static int
-roff_evalpar(const char *v, int *pos, int *res)
+roff_evalpar(struct roff *r, int ln, 
+	const char *v, int *pos, int *res)
 {
 
 	if ('(' != v[*pos])
 		return(roff_getnum(v, pos, res));
 
 	(*pos)++;
-	if ( ! roff_evalnum(v, pos, res, 1))
+	if ( ! roff_evalnum(r, ln, v, pos, res, 1))
 		return(0);
 
 	/*
@@ -1495,7 +1499,8 @@ roff_evalpar(const char *v, int *pos, int *res)
  * Proceed left to right, there is no concept of precedence.
  */
 static int
-roff_evalnum(const char *v, int *pos, int *res, int skipwhite)
+roff_evalnum(struct roff *r, int ln, const char *v, 
+	int *pos, int *res, int skipwhite)
 {
 	int		 mypos, operand2;
 	char		 operator;
@@ -1509,7 +1514,7 @@ roff_evalnum(const char *v, int *pos, int *res, int skipwhite)
 		while (isspace((unsigned char)v[*pos]))
 			(*pos)++;
 
-	if ( ! roff_evalpar(v, pos, res))
+	if ( ! roff_evalpar(r, ln, v, pos, res))
 		return(0);
 
 	while (1) {
@@ -1524,7 +1529,7 @@ roff_evalnum(const char *v, int *pos, int *res, int skipwhite)
 			while (isspace((unsigned char)v[*pos]))
 				(*pos)++;
 
-		if ( ! roff_evalpar(v, pos, &operand2))
+		if ( ! roff_evalpar(r, ln, v, pos, &operand2))
 			return(0);
 
 		if (skipwhite)
@@ -1545,6 +1550,12 @@ roff_evalnum(const char *v, int *pos, int *res, int skipwhite)
 			*res *= operand2;
 			break;
 		case '/':
+			if (0 == operand2) {
+				mandoc_msg(MANDOCERR_DIVZERO, 
+					r->parse, ln, *pos, v);
+				*res = 0;
+				break;
+			}
 			*res /= operand2;
 			break;
 		case '%':
@@ -1719,7 +1730,7 @@ roff_nr(ROFF_ARGS)
 	if ('+' == sign || '-' == sign)
 		val++;
 
-	if (roff_evalnum(val, NULL, &iv, 0))
+	if (roff_evalnum(r, ln, val, NULL, &iv, 0))
 		roff_setreg(r, key, iv, sign);
 
 	return(ROFF_IGN);

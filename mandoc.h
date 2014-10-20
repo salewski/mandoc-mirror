@@ -166,6 +166,7 @@ enum	mandocerr {
 	MANDOCERR_IT_NONUM, /* skipping request without numeric argument */
 	MANDOCERR_ARG_SKIP, /* skipping all arguments: macro args */
 	MANDOCERR_ARG_EXCESS, /* skipping excess arguments: macro ... args */
+	MANDOCERR_DIVZERO, /* divide by zero */
 
 	MANDOCERR_FATAL, /* ===== start of fatal errors ===== */
 
