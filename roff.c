@@ -730,7 +730,8 @@ roff_parseln(struct roff *r, int ln, char **bufp,
 
 	/* Handle in-line equation delimiters. */
 
-	if (r->last_eqn != NULL && r->last_eqn->delim &&
+	if (r->tbl == NULL &&
+	    r->last_eqn != NULL && r->last_eqn->delim &&
 	    (r->eqn == NULL || r->eqn_inline)) {
 		e = roff_eqndelim(r, bufp, szp, pos);
 		if (e == ROFF_REPARSE)
