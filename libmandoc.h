@@ -30,6 +30,12 @@ enum	rofferr {
 	ROFF_ERR /* badness: puke and stop */
 };
 
+struct	buf {
+	char	*buf;
+	size_t	 sz;
+	size_t	 offs;
+};
+
 __BEGIN_DECLS
 
 struct	roff;
@@ -65,6 +71,9 @@ int		 man_parseln(struct man *, int, char *, int);
 int		 man_endparse(struct man *);
 int		 man_addspan(struct man *, const struct tbl_span *);
 int		 man_addeqn(struct man *, const struct eqn *);
+
+int		 preconv_cue(const struct buf *);
+int		 preconv_encode(struct buf *, struct buf *, int *);
 
 void		 roff_free(struct roff *);
 struct roff	*roff_alloc(struct mparse *, int);

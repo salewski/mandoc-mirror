@@ -15,7 +15,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-BASEBIN		 = mandoc preconv demandoc
+BASEBIN		 = mandoc demandoc
 DBBIN		 = makewhatis
 CGIBIN		 = man.cgi
 
@@ -145,7 +145,6 @@ DISTFILES	 = INSTALL \
 		   mdoc.h \
 		   msec.in \
 		   out.h \
-		   preconv.1 \
 		   predefs.in \
 		   roff.7 \
 		   st.in \
@@ -186,6 +185,7 @@ LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 		   mandoc.o \
 		   mandoc_aux.o \
 		   msec.o \
+		   preconv.o \
 		   read.o
 
 COMPAT_OBJS	 = compat_fgetln.o \
@@ -226,8 +226,6 @@ MAN_OBJS	 = $(MANDOC_OBJS)
 
 MAKEWHATIS_OBJS	 = mandocdb.o mansearch_const.o manpath.o
 
-PRECONV_OBJS	 = preconv.o
-
 APROPOS_OBJS	 = mansearch.o mansearch_const.o manpath.o
 
 CGI_OBJS	 = $(MANDOC_HTML_OBJS) \
@@ -244,7 +242,6 @@ WWW_MANS	 = apropos.1.html \
 		   demandoc.1.html \
 		   man.1.html \
 		   mandoc.1.html \
-		   preconv.1.html \
 		   mandoc.3.html \
 		   mandoc_escape.3.html \
 		   mandoc_html.3.html \
@@ -302,7 +299,6 @@ clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS) $(COMPAT_OBJS)
 	rm -f mandoc $(MANDOC_OBJS) $(APROPOS_OBJS)
 	rm -f makewhatis $(MAKEWHATIS_OBJS)
-	rm -f preconv $(PRECONV_OBJS)
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f manpage $(MANPAGE_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
@@ -321,7 +317,7 @@ base-install: base-build
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
 	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h \
 		$(DESTDIR)$(INCLUDEDIR)
-	$(INSTALL_MAN) man.1 mandoc.1 preconv.1 demandoc.1 \
+	$(INSTALL_MAN) man.1 mandoc.1 demandoc.1 \
 		$(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
 		mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
@@ -385,9 +381,6 @@ mandoc: $(MAN_OBJS) libmandoc.a
 
 makewhatis: $(MAKEWHATIS_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(MAKEWHATIS_OBJS) libmandoc.a $(DBLIB)
-
-preconv: $(PRECONV_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(PRECONV_OBJS)
 
 manpage: $(MANPAGE_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(MANPAGE_OBJS) libmandoc.a $(DBLIB)

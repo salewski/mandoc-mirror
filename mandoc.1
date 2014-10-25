@@ -27,6 +27,7 @@
 .Sm off
 .Op Fl I Cm os Li = Ar name
 .Sm on
+.Op Fl K Na Ar encoding
 .Op Fl m Ns Ar format
 .Op Fl O Ns Ar option
 .Op Fl T Ns Ar output
@@ -89,6 +90,31 @@ macro.
 Display only the SYNOPSIS lines.
 Implies
 .Fl a .
+.It Fl K Ns Ar encoding
+Specify the input encoding.
+The supported
+.Ar encoding
+arguments are
+.Cm us-ascii ,
+.Cm iso-8859-1 ,
+and
+.Cm utf-8 .
+If not specified, autodetection uses the first match:
+.Bl -tag -width iso-8859-1
+.It Cm utf-8
+if the first three bytes of the input file
+are the UTF-8 byte order mark (BOM, 0xefbbbf)
+.It Ar encoding
+if the first or second line of the input file matches the
+.Sy emacs
+mode line format
+.Pp
+.D1 .\e" -*- Oo ...; Oc coding: Ar encoding ; No -*-
+.It Cm utf-8
+if the first non-ASCII byte in the file introduces a valid UTF-8 sequence
+.It Cm iso-8859-1
+otherwise
+.El
 .It Fl k
 A synonym for
 .Xr apropos 1 .

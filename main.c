@@ -82,6 +82,7 @@ struct	curparse {
 	char		  outopts[BUFSIZ]; /* buf of output opts */
 };
 
+static	int		  koptions(int *, char *);
 static	int		  moptions(int *, char *);
 static	void		  mmsg(enum mandocerr, enum mandoclevel,
 				const char *, int, int, const char *);
@@ -149,14 +150,15 @@ main(int argc, char *argv[])
 	memset(&curp, 0, sizeof(struct curparse));
 	curp.outtype = OUTT_ASCII;
 	curp.wlevel  = MANDOCLEVEL_FATAL;
-	options = MPARSE_SO;
+	options = MPARSE_SO | MPARSE_UTF8 | MPARSE_LATIN1;
 	defos = NULL;
 
 	use_pager = 1;
 	show_usage = 0;
 	outmode = OUTMODE_DEF;
 
-	while (-1 != (c = getopt(argc, argv, "aC:cfhI:iklM:m:O:S:s:T:VW:w"))) {
+	while (-1 != (c = getopt(argc, argv,
+			"aC:cfhI:iK:klM:m:O:S:s:T:VW:w"))) {
 		switch (c) {
 		case 'a':
 			outmode = OUTMODE_ALL;
@@ -191,6 +193,10 @@ main(int argc, char *argv[])
 			break;
 		case 'i':
 			outmode = OUTMODE_INT;
+			break;
+		case 'K':
+			if ( ! koptions(&options, optarg))
+				return((int)MANDOCLEVEL_BADARG);
 			break;
 		case 'k':
 			search.argmode = ARG_EXPR;
@@ -596,6 +602,26 @@ fail:
 	fprintf(stderr, "%s: %s: SYSERR: %s: %s",
 	    progname, file, syscall, strerror(errno));
 	return(MANDOCLEVEL_SYSERR);
+}
+
+static int
+koptions(int *options, char *arg)
+{
+
+	if ( ! strcmp(arg, "utf-8")) {
+		*options |=  MPARSE_UTF8;
+		*options &= ~MPARSE_LATIN1;
+	} else if ( ! strcmp(arg, "iso-8859-1")) {
+		*options |=  MPARSE_LATIN1;
+		*options &= ~MPARSE_UTF8;
+	} else if ( ! strcmp(arg, "us-ascii")) {
+		*options &= ~(MPARSE_UTF8 | MPARSE_LATIN1);
+	} else {
+		fprintf(stderr, "%s: -K%s: Bad argument\n",
+		    progname, arg);
+		return(0);
+	}
+	return(1);
 }
 
 static int

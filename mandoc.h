@@ -393,6 +393,8 @@ struct	eqn {
 #define	MPARSE_MAN	2  /* assume -man */
 #define	MPARSE_SO	4  /* honour .so requests */
 #define	MPARSE_QUICK	8  /* abort the parse early */
+#define	MPARSE_UTF8	16 /* accept UTF-8 input */
+#define	MPARSE_LATIN1	32 /* accept ISO-LATIN-1 input */
 
 enum	mandoc_esc {
 	ESCAPE_ERROR = 0, /* bail! unparsable escape */
