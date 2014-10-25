@@ -207,8 +207,6 @@ static	const char	*roff_getstrn(const struct roff *,
 static	enum rofferr	 roff_it(ROFF_ARGS);
 static	enum rofferr	 roff_line_ignore(ROFF_ARGS);
 static	enum rofferr	 roff_nr(ROFF_ARGS);
-static	void		 roff_openeqn(struct roff *, const char *,
-				int, int, const char *);
 static	enum rofft	 roff_parse(struct roff *, char *, int *,
 				int, int);
 static	enum rofferr	 roff_parsetext(char **, size_t *, int, int *);
@@ -1469,7 +1467,7 @@ roff_getop(const char *v, int *pos, char *res)
  * or a single signed integer number.
  */
 static int
-roff_evalpar(struct roff *r, int ln, 
+roff_evalpar(struct roff *r, int ln,
 	const char *v, int *pos, int *res)
 {
 
@@ -1499,7 +1497,7 @@ roff_evalpar(struct roff *r, int ln,
  * Proceed left to right, there is no concept of precedence.
  */
 static int
-roff_evalnum(struct roff *r, int ln, const char *v, 
+roff_evalnum(struct roff *r, int ln, const char *v,
 	int *pos, int *res, int skipwhite)
 {
 	int		 mypos, operand2;
@@ -1551,7 +1549,7 @@ roff_evalnum(struct roff *r, int ln, const char *v,
 			break;
 		case '/':
 			if (0 == operand2) {
-				mandoc_msg(MANDOCERR_DIVZERO, 
+				mandoc_msg(MANDOCERR_DIVZERO,
 					r->parse, ln, *pos, v);
 				*res = 0;
 				break;
@@ -1928,15 +1926,13 @@ roff_eqndelim(struct roff *r, char **bufp, size_t *szp, int pos)
 	return(ROFF_REPARSE);
 }
 
-static void
-roff_openeqn(struct roff *r, const char *name, int line,
-		int offs, const char *buf)
+static enum rofferr
+roff_EQ(ROFF_ARGS)
 {
 	struct eqn_node *e;
-	int		 poff;
 
 	assert(NULL == r->eqn);
-	e = eqn_alloc(name, offs, line, r->parse);
+	e = eqn_alloc(ppos, ln, r->parse);
 
 	if (r->last_eqn) {
 		r->last_eqn->next = e;
@@ -1948,17 +1944,10 @@ roff_openeqn(struct roff *r, const char *name, int line,
 
 	r->eqn = r->last_eqn = e;
 
-	if (buf) {
-		poff = 0;
-		eqn_read(&r->eqn, line, buf, offs, &poff);
-	}
-}
+	if ((*bufp)[pos])
+		mandoc_vmsg(MANDOCERR_ARG_SKIP, r->parse, ln, pos,
+		    ".EQ %s", *bufp + pos);
 
-static enum rofferr
-roff_EQ(ROFF_ARGS)
-{
-
-	roff_openeqn(r, *bufp + pos, ln, ppos, NULL);
 	return(ROFF_IGN);
 }
 
