@@ -684,7 +684,9 @@ eqn_parse(struct eqn_node *ep, struct eqn_box *parent)
 	char		 sym[64];
 	const char	*start;
 
-	assert(NULL != parent);
+	assert(parent != NULL);
+	if (ep->data == NULL)
+		return(-1);
 
 next_tok:
 	tok = eqn_tok_parse(ep, &p);
