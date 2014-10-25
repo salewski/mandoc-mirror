@@ -306,6 +306,11 @@ are mere guesses, and some may be wrong.
 - check compatibility with the man(7) formatter
   https://raw.githubusercontent.com/rofl0r/hardcore-utils/master/man.c
 
+- check compatibility with
+  http://ikiwiki.info/plugins/contrib/mandoc/
+  https://github.com/schmonz/ikiwiki/compare/mandoc
+  Amitai Schlair  Mon, 19 May 2014 14:05:53 -0400
+
 ************************************************************************
 * formatting issues: ugly output
 ************************************************************************
@@ -360,7 +365,10 @@ are mere guesses, and some may be wrong.
   Search the text "Routing tables".
   Also check what PostScript mode does when fixing this.
   reported by juanfra@ Wed, 04 Jun 2014 21:44:58 +0200
-  loc *  exist **  algo ?  size *  imp **
+  instructions from juanfra@  Wed, 11 Jun 2014 02:21:01 +0200
+    add a new <</Type /Font>> block to the PDF files with /BaseFont /Courier
+    and change the /Name from /F0 to the new font (/F5 (?)).
+  loc *  exist **  algo **  size *  imp **
 
 --- HTML issues --------------------------------------------------------
 
@@ -550,6 +558,9 @@ Several areas can be cleaned up to make mandoc even faster.  These are
   Decide which formats should be recognized where.
   Update both mdoc(7) and man(7) documentation.
   Triggered by  Tim van der Molen  Tue, 22 Feb 2011 20:30:45 +0100
+
+- struct mparse refactoring
+  Steffen Nurpmeso  Thu, 04 Sep 2014 12:50:00 +0200
 
 - Consider creating some views that will make the database more
   readable from the sqlite3 shell.  Consider using them to
