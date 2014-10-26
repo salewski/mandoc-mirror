@@ -236,9 +236,11 @@ ascii_uc2str(int uc)
 	"j",	"DZ",	"D",	"dz",	"G",	"g",	"HV",	"W",
 	"N",	"n",	"A",	"a",	"AE",	"ae",	"O",	"o"};
 
-	if (uc < 0 || (size_t)uc >= sizeof(tab)/sizeof(tab[0]))
+	if (uc < 0)
 		return("<?>");
-	return(tab[uc]);
+	if ((size_t)uc < sizeof(tab)/sizeof(tab[0]))
+		return(tab[uc]);
+	return(mchars_uc2str(uc));
 }
 
 static size_t

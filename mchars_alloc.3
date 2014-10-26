@@ -59,6 +59,8 @@
 .Fa "size_t sz"
 .Fa "size_t *rsz"
 .Fc
+.Ft "const char *"
+.Fn mchars_uc2str "int codepoint"
 .Sh DESCRIPTION
 These functions translate Unicode character numbers and
 .Xr roff 7
@@ -199,6 +201,14 @@ output module use this function to render
 and
 .Ic \eC\(aq Ns Ar name Ns Ic \(aq
 escape sequences.
+.Pp
+The function
+.Fn mchars_uc2str
+performs a reverse lookup of the Unicode
+.Fa codepoint
+and returns an ASCII string representation, or the string
+.Qq <?>
+if none is available.
 .Sh FILES
 These funtions are implemented in the file
 .Pa chars.c .
@@ -218,6 +228,7 @@ following mandoc versions:
 .It Fn mchars_num2uc Ta 1.11.3 Ta \(em Ta \(em
 .It Fn mchars_spec2cp Ta 1.11.2 Ta Fn chars_spec2cp Ta 1.10.5
 .It Fn mchars_spec2str Ta 1.11.2 Ta Fn a2ascii Ta 1.5.3
+.It Fn mchars_uc2str Ta 1.13.2 Ta \(em Ta \(em
 .El
 .Sh AUTHORS
 .An Kristaps Dzonsons Aq Mt kristaps@bsd.lv

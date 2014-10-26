@@ -149,6 +149,17 @@ mchars_spec2str(const struct mchars *arg,
 	return(ln->ascii);
 }
 
+const char *
+mchars_uc2str(int uc)
+{
+	int	 i;
+
+	for (i = 0; i < LINES_MAX; i++)
+		if (uc == lines[i].unicode)
+			return(lines[i].ascii);
+	return("<?>");
+}
+
 static const struct ln *
 find(const struct mchars *tab, const char *p, size_t sz)
 {
