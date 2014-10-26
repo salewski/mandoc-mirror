@@ -104,6 +104,8 @@ struct	termp {
 	struct termp_ps	 *ps;
 };
 
+const char	 *ascii_uc2str(int);
+
 void		  term_eqn(struct termp *, const struct eqn *);
 void		  term_tbl(struct termp *, const struct tbl_span *);
 void		  term_free(struct termp *);
