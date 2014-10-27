@@ -59,12 +59,13 @@ struct	termp_ps {
 #define	PS_INLINE	 (1 << 0)	/* we're in a word */
 #define	PS_MARGINS	 (1 << 1)	/* we're in the margins */
 #define	PS_NEWPAGE	 (1 << 2)	/* new page, no words yet */
+#define	PS_BACKSP	 (1 << 3)	/* last character was backspace */
 	size_t		  pscol;	/* visible column (AFM units) */
 	size_t		  psrow;	/* visible row (AFM units) */
 	char		 *psmarg;	/* margin buf */
 	size_t		  psmargsz;	/* margin buf size */
 	size_t		  psmargcur;	/* cur index in margin buf */
-	char		  last;		/* character buffer */
+	char		  last;		/* last non-backspace seen */
 	enum termfont	  lastf;	/* last set font */
 	enum termfont	  nextf;	/* building next font here */
 	size_t		  scale;	/* font scaling factor */
@@ -1047,7 +1048,7 @@ ps_fclose(struct termp *p)
 	 */
 
 	if (p->ps->last != '\0') {
-		assert(p->ps->last != 8);
+		assert( ! (p->ps->flags & PS_BACKSP));
 		if (p->ps->nextf != p->ps->lastf) {
 			ps_pclose(p);
 			ps_setfont(p, p->ps->nextf);
@@ -1066,25 +1067,30 @@ ps_fclose(struct termp *p)
 static void
 ps_letter(struct termp *p, int arg)
 {
+	size_t		savecol;
 	char		c;
 
 	c = arg >= 128 || arg <= 0 ? '?' : arg;
 
 	/*
-	 * When receiving an initial character, merely buffer it,
-	 * because a backspace might follow to specify formatting.
-	 * When receiving a backspace, use the buffered character
-	 * to build the font instruction and clear the buffer.
-	 * Only when there are two non-backspace characters in a row,
-	 * activate the font built so far and print the first of them;
-	 * the second, again, merely gets buffered.
-	 * The final character will get printed from ps_fclose().
+	 * When receiving a backspace, merely flag it.
+	 * We don't know yet whether it is
+	 * a font instruction or an overstrike.
 	 */
 
-	if (c == 8) {
+	if (c == '\b') {
 		assert(p->ps->last != '\0');
-		assert(p->ps->last != 8);
-		if ('_' == p->ps->last) {
+		assert( ! (p->ps->flags & PS_BACKSP));
+		p->ps->flags |= PS_BACKSP;
+		return;
+	}
+
+	/*
+	 * Decode font instructions.
+	 */
+
+	if (p->ps->flags & PS_BACKSP) {
+		if (p->ps->last == '_') {
 			switch (p->ps->nextf) {
 			case TERMFONT_BI:
 				break;
@@ -1094,7 +1100,11 @@ ps_letter(struct termp *p, int arg)
 			default:
 				p->ps->nextf = TERMFONT_UNDER;
 			}
-		} else {
+			p->ps->last = c;
+			p->ps->flags &= ~PS_BACKSP;
+			return;
+		}
+		if (p->ps->last == c) {
 			switch (p->ps->nextf) {
 			case TERMFONT_BI:
 				break;
@@ -1104,8 +1114,26 @@ ps_letter(struct termp *p, int arg)
 			default:
 				p->ps->nextf = TERMFONT_BOLD;
 			}
+			p->ps->flags &= ~PS_BACKSP;
+			return;
 		}
-	} else if (p->ps->last != '\0' && p->ps->last != 8) {
+
+		/*
+		 * This is not a font instruction, but rather
+		 * the next character.  Prepare for overstrike.
+		 */
+
+		savecol = p->ps->pscol;
+	} else
+		savecol = SIZE_MAX;
+
+	/*
+	 * We found the next character, so the font instructions
+	 * for the previous one are complete.
+	 * Use them and print it.
+	 */
+
+	if (p->ps->last != '\0') {
 		if (p->ps->nextf != p->ps->lastf) {
 			ps_pclose(p);
 			ps_setfont(p, p->ps->nextf);
@@ -1113,7 +1141,25 @@ ps_letter(struct termp *p, int arg)
 		p->ps->nextf = TERMFONT_NONE;
 		ps_pletter(p, p->ps->last);
 	}
+
+	/*
+	 * Do not print the current character yet because font
+	 * instructions might follow; only remember it.
+	 * For the first character, nothing else is done.
+	 * The final character will get printed from ps_fclose().
+	 */
+
 	p->ps->last = c;
+
+	/*
+	 * For an overstrike, back up to the previous position.
+	 */
+
+	if (savecol != SIZE_MAX) {
+		ps_pclose(p);
+		p->ps->pscol = savecol;
+		p->ps->flags &= ~PS_BACKSP;
+	}
 }
 
 static void
