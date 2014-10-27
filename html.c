@@ -457,11 +457,12 @@ print_encode(struct html *h, const char *p, int norecurse)
 			break;
 		case ESCAPE_SPECIAL:
 			c = mchars_spec2cp(h->symtab, seq, len);
-			if (c > 0)
+			if (c <= 0)
+				break;
+			if (c < 0x20 || c > 0x7e)
 				printf("&#%d;", c);
-			else if (-1 == c && 1 == len &&
-			    !print_escape(*seq))
-				putchar((int)*seq);
+			else if ( ! print_escape(c))
+				putchar(c);
 			break;
 		case ESCAPE_NOSPACE:
 			if ('\0' == *p)

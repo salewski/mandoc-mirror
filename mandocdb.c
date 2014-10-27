@@ -1903,7 +1903,7 @@ render_key(struct mchars *mc, struct str *key)
 		 */
 
 		if (write_utf8) {
-			if (0 == (u = mchars_spec2cp(mc, seq, len)))
+			if ((u = mchars_spec2cp(mc, seq, len)) <= 0)
 				continue;
 			cpp = utfbuf;
 			if (0 == (sz = utf8(u, utfbuf)))

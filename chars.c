@@ -104,7 +104,7 @@ mchars_spec2cp(const struct mchars *arg, const char *p, size_t sz)
 	const struct ln	*ln;
 
 	ln = find(arg, p, sz);
-	return(ln != NULL ? ln->unicode : sz == 1 ? *p : -1);
+	return(ln != NULL ? ln->unicode : sz == 1 ? *p : 0xFFFD);
 }
 
 char
