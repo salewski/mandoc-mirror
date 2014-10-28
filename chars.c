@@ -123,14 +123,9 @@ mchars_num2uc(const char *p, size_t sz)
 {
 	int	 i;
 
-	if ((i = mandoc_strntoi(p, sz, 16)) < 0)
-		return(0xFFFD);
-
-	/*
-	 * XXX Code is missing here to exclude bogus ranges.
-	 */
-
-	return(i <= 0x10FFFF ? i : 0xFFFD);
+	i = mandoc_strntoi(p, sz, 16);
+	assert(i >= 0 && i <= 0x10FFFF);
+	return(i);
 }
 
 const char *
