@@ -19,6 +19,7 @@
 
 #include <sys/types.h>
 
+#include <assert.h>
 #if HAVE_WCHAR
 #include <locale.h>
 #endif
@@ -337,8 +338,7 @@ ascii_uc2str(int uc)
 	"j",	"DZ",	"Dz",	"dz",	"'\bG",	"'\bg",	"HV",	"W",
 	"`\bN",	"`\bn",	"A",	"a",	"'\bAE","'\bae","O",	"o"};
 
-	if (uc < 0)
-		return("<?>");
+	assert(uc >= 0);
 	if ((size_t)uc < sizeof(tab)/sizeof(tab[0]))
 		return(tab[uc]);
 	return(mchars_uc2str(uc));
