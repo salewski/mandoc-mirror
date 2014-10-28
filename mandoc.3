@@ -52,6 +52,7 @@
 .Fa "int options"
 .Fa "enum mandoclevel wlevel"
 .Fa "mandocmsg mmsg"
+.Fa "const struct mchars *mchars"
 .Fa "char *defos"
 .Fc
 .Ft void
@@ -173,6 +174,8 @@ The following describes a general parse sequence:
 .Bl -enum
 .It
 initiate a parsing sequence with
+.Xr mchars_alloc 3
+and
 .Fn mparse_alloc ;
 .It
 parse files or file descriptors with
@@ -187,7 +190,9 @@ or
 .Fn man_node ;
 .It
 free all allocated memory with
-.Fn mparse_free ,
+.Fn mparse_free
+and
+.Xr mchars_free 3 ,
 or invoke
 .Fn mparse_reset
 and parse new files.
@@ -208,6 +213,12 @@ A fatal error, error, or warning message during parsing.
 A classification of an
 .Vt "enum mandocerr"
 as regards system operation.
+.It Vt "struct mchars"
+An opaque pointer to a a character table.
+Created with
+.Xr mchars_alloc 3
+and freed with
+.Xr mchars_free 3 .
 .It Vt "struct mparse"
 An opaque pointer to a running parse sequence.
 Created with
@@ -332,6 +343,9 @@ A callback function to handle errors and warnings.
 See
 .Pa main.c
 for an example.
+.It Ar mchars
+An opaque pointer to a a character table obtained from
+.Xr mchars_alloc 3 .
 .It Ar defos
 A default string for the
 .Xr mdoc 7

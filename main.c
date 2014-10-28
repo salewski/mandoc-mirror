@@ -64,7 +64,6 @@ enum	outt {
 	OUTT_TREE,	/* -Ttree */
 	OUTT_MAN,	/* -Tman */
 	OUTT_HTML,	/* -Thtml */
-	OUTT_XHTML,	/* -Txhtml */
 	OUTT_LINT,	/* -Tlint */
 	OUTT_PS,	/* -Tps */
 	OUTT_PDF	/* -Tpdf */
@@ -72,6 +71,7 @@ enum	outt {
 
 struct	curparse {
 	struct mparse	 *mp;
+	struct mchars	 *mchars;	/* character table */
 	enum mandoclevel  wlevel;	/* ignore messages below this */
 	int		  wstop;	/* stop after a file with a warning */
 	enum outt	  outtype;	/* which output to use */
@@ -364,7 +364,9 @@ main(int argc, char *argv[])
 	if (use_pager && isatty(STDOUT_FILENO))
 		spawn_pager();
 
-	curp.mp = mparse_alloc(options, curp.wlevel, mmsg, defos);
+	curp.mchars = mchars_alloc();
+	curp.mp = mparse_alloc(options, curp.wlevel, mmsg,
+	    curp.mchars, defos);
 
 	/*
 	 * Conditionally start up the lookaside buffer before parsing.
@@ -409,8 +411,8 @@ main(int argc, char *argv[])
 
 	if (curp.outfree)
 		(*curp.outfree)(curp.outdata);
-	if (curp.mp)
-		mparse_free(curp.mp);
+	mparse_free(curp.mp);
+	mchars_free(curp.mchars);
 
 #if HAVE_SQLITE3
 out:
@@ -495,32 +497,34 @@ parse(struct curparse *curp, int fd, const char *file,
 
 	if ( ! (curp->outman && curp->outmdoc)) {
 		switch (curp->outtype) {
-		case OUTT_XHTML:
-			curp->outdata = xhtml_alloc(curp->outopts);
-			curp->outfree = html_free;
-			break;
 		case OUTT_HTML:
-			curp->outdata = html_alloc(curp->outopts);
+			curp->outdata = html_alloc(curp->mchars,
+			    curp->outopts);
 			curp->outfree = html_free;
 			break;
 		case OUTT_UTF8:
-			curp->outdata = utf8_alloc(curp->outopts);
+			curp->outdata = utf8_alloc(curp->mchars,
+			    curp->outopts);
 			curp->outfree = ascii_free;
 			break;
 		case OUTT_LOCALE:
-			curp->outdata = locale_alloc(curp->outopts);
+			curp->outdata = locale_alloc(curp->mchars,
+			    curp->outopts);
 			curp->outfree = ascii_free;
 			break;
 		case OUTT_ASCII:
-			curp->outdata = ascii_alloc(curp->outopts);
+			curp->outdata = ascii_alloc(curp->mchars,
+			    curp->outopts);
 			curp->outfree = ascii_free;
 			break;
 		case OUTT_PDF:
-			curp->outdata = pdf_alloc(curp->outopts);
+			curp->outdata = pdf_alloc(curp->mchars,
+			    curp->outopts);
 			curp->outfree = pspdf_free;
 			break;
 		case OUTT_PS:
-			curp->outdata = ps_alloc(curp->outopts);
+			curp->outdata = ps_alloc(curp->mchars,
+			    curp->outopts);
 			curp->outfree = pspdf_free;
 			break;
 		default:
@@ -529,8 +533,6 @@ parse(struct curparse *curp, int fd, const char *file,
 
 		switch (curp->outtype) {
 		case OUTT_HTML:
-			/* FALLTHROUGH */
-		case OUTT_XHTML:
 			curp->outman = html_man;
 			curp->outmdoc = html_mdoc;
 			break;
@@ -665,7 +667,7 @@ toptions(struct curparse *curp, char *arg)
 	else if (0 == strcmp(arg, "locale"))
 		curp->outtype = OUTT_LOCALE;
 	else if (0 == strcmp(arg, "xhtml"))
-		curp->outtype = OUTT_XHTML;
+		curp->outtype = OUTT_HTML;
 	else if (0 == strcmp(arg, "ps"))
 		curp->outtype = OUTT_PS;
 	else if (0 == strcmp(arg, "pdf"))

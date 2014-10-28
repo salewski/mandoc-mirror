@@ -425,9 +425,9 @@ main(int argc, char *argv[])
 	}
 
 	exitcode = (int)MANDOCLEVEL_OK;
-	mp = mparse_alloc(mparse_options, MANDOCLEVEL_FATAL, NULL, NULL);
 	mc = mchars_alloc();
-
+	mp = mparse_alloc(mparse_options, MANDOCLEVEL_FATAL, NULL,
+	    mc, NULL);
 	ohash_init(&mpages, 6, &mpages_info);
 	ohash_init(&mlinks, 6, &mlinks_info);
 
@@ -525,8 +525,8 @@ main(int argc, char *argv[])
 	}
 out:
 	manpath_free(&dirs);
-	mchars_free(mc);
 	mparse_free(mp);
+	mchars_free(mc);
 	mpages_free();
 	ohash_delete(&mpages);
 	ohash_delete(&mlinks);

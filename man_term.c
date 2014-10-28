@@ -151,9 +151,6 @@ terminal_man(void *arg, const struct man *man)
 	p->rmargin = p->maxrmargin = p->defrmargin;
 	p->tabwidth = term_len(p, 5);
 
-	if (NULL == p->symtab)
-		p->symtab = mchars_alloc();
-
 	n = man_node(man)->child;
 	meta = man_meta(man);
 

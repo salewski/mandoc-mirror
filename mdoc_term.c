@@ -261,9 +261,6 @@ terminal_mdoc(void *arg, const struct mdoc *mdoc)
 	p->rmargin = p->maxrmargin = p->defrmargin;
 	p->tabwidth = term_len(p, 5);
 
-	if (NULL == p->symtab)
-		p->symtab = mchars_alloc();
-
 	n = mdoc_node(mdoc)->child;
 	meta = mdoc_meta(mdoc);
 

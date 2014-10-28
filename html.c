@@ -127,11 +127,10 @@ static	int	 print_escape(char);
 static	int	 print_encode(struct html *, const char *, int);
 static	void	 print_metaf(struct html *, enum mandoc_esc);
 static	void	 print_attr(struct html *, const char *, const char *);
-static	void	 *ml_alloc(char *);
 
 
-static void *
-ml_alloc(char *outopts)
+void *
+html_alloc(const struct mchars *mchars, char *outopts)
 {
 	struct html	*h;
 	const char	*toks[5];
@@ -146,7 +145,7 @@ ml_alloc(char *outopts)
 	h = mandoc_calloc(1, sizeof(struct html));
 
 	h->tags.head = NULL;
-	h->symtab = mchars_alloc();
+	h->symtab = mchars;
 
 	while (outopts && *outopts)
 		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
@@ -169,20 +168,6 @@ ml_alloc(char *outopts)
 	return(h);
 }
 
-void *
-html_alloc(char *outopts)
-{
-
-	return(ml_alloc(outopts));
-}
-
-void *
-xhtml_alloc(char *outopts)
-{
-
-	return(ml_alloc(outopts));
-}
-
 void
 html_free(void *p)
 {
@@ -195,9 +180,6 @@ html_free(void *p)
 		h->tags.head = tag->next;
 		free(tag);
 	}
-
-	if (h->symtab)
-		mchars_free(h->symtab);
 
 	free(h);
 }

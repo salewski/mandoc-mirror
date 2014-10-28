@@ -43,6 +43,7 @@ int
 main(int argc, char *argv[])
 {
 	struct mparse	*mp;
+	struct mchars	*mchars;
 	int		 ch, i, list;
 	extern int	 optind;
 
@@ -76,7 +77,8 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	mp = mparse_alloc(MPARSE_SO, MANDOCLEVEL_FATAL, NULL, NULL);
+	mchars = mchars_alloc();
+	mp = mparse_alloc(MPARSE_SO, MANDOCLEVEL_FATAL, NULL, mchars, NULL);
 	assert(mp);
 
 	if (0 == argc)
@@ -88,6 +90,7 @@ main(int argc, char *argv[])
 	}
 
 	mparse_free(mp);
+	mchars_free(mchars);
 	return((int)MANDOCLEVEL_OK);
 }
 

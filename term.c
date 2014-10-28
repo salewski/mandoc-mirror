@@ -42,11 +42,7 @@ void
 term_free(struct termp *p)
 {
 
-	if (p->buf)
-		free(p->buf);
-	if (p->symtab)
-		mchars_free(p->symtab);
-
+	free(p->buf);
 	free(p);
 }
 

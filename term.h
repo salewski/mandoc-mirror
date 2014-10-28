@@ -85,7 +85,7 @@ struct	termp {
 #define	TERMP_SPLIT	 (1 << 13)	/* Break line before .An. */
 	int		 *buf;		/* Output buffer. */
 	enum termenc	  enc;		/* Type of encoding. */
-	struct mchars	 *symtab;	/* Encoded-symbol table. */
+	const struct mchars *symtab;	/* Character table. */
 	enum termfont	  fontl;	/* Last font set. */
 	enum termfont	  fontq[10];	/* Symmetric fonts. */
 	int		  fonti;	/* Index of font stack. */

@@ -433,7 +433,7 @@ int		  mchars_spec2cp(const struct mchars *,
 const char	 *mchars_spec2str(const struct mchars *,
 			const char *, size_t, size_t *);
 struct mparse	 *mparse_alloc(int, enum mandoclevel, mandocmsg,
-			const char *);
+			const struct mchars *, const char *);
 void		  mparse_free(struct mparse *);
 void		  mparse_keep(struct mparse *);
 enum mandoclevel  mparse_open(struct mparse *, int *, const char *,

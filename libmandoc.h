@@ -76,7 +76,7 @@ int		 preconv_cue(const struct buf *);
 int		 preconv_encode(struct buf *, struct buf *, int *);
 
 void		 roff_free(struct roff *);
-struct roff	*roff_alloc(struct mparse *, int);
+struct roff	*roff_alloc(struct mparse *, const struct mchars *, int);
 void		 roff_reset(struct roff *);
 enum rofferr	 roff_parseln(struct roff *, int,
 			char **, size_t *, int, int *);
