@@ -425,7 +425,7 @@ __BEGIN_DECLS
 enum mandoc_esc	  mandoc_escape(const char **, const char **, int *);
 struct mchars	 *mchars_alloc(void);
 void		  mchars_free(struct mchars *);
-char		  mchars_num2char(const char *, size_t);
+int		  mchars_num2char(const char *, size_t);
 const char	 *mchars_uc2str(int);
 int		  mchars_num2uc(const char *, size_t);
 int		  mchars_spec2cp(const struct mchars *,

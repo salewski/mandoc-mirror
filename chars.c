@@ -107,15 +107,13 @@ mchars_spec2cp(const struct mchars *arg, const char *p, size_t sz)
 	return(ln != NULL ? ln->unicode : sz == 1 ? (unsigned char)*p : -1);
 }
 
-char
+int
 mchars_num2char(const char *p, size_t sz)
 {
 	int	  i;
 
-	if ((i = mandoc_strntoi(p, sz, 10)) < 0)
-		return('\0');
-
-	return(i > 0 && i < 256 && isprint(i) ? i : '\0');
+	i = mandoc_strntoi(p, sz, 10);
+	return(i >= 0 && i < 256 ? i : -1);
 }
 
 int

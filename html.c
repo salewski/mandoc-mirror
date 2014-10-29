@@ -422,9 +422,13 @@ print_encode(struct html *h, const char *p, int norecurse)
 			break;
 		case ESCAPE_NUMBERED:
 			c = mchars_num2char(seq, len);
+			if (c < 0)
+				continue;
 			break;
 		case ESCAPE_SPECIAL:
 			c = mchars_spec2cp(h->symtab, seq, len);
+			if (c <= 0)
+				continue;
 			break;
 		case ESCAPE_NOSPACE:
 			if ('\0' == *p)
@@ -433,9 +437,8 @@ print_encode(struct html *h, const char *p, int norecurse)
 		default:
 			continue;
 		}
-		if (c <= 0)
-			continue;
-		if (c < 0x20 || (c > 0x7E && c < 0xA0))
+		if ((c < 0x20 && c != 0x09) ||
+		    (c > 0x7E && c < 0xA0))
 			c = 0xFFFD;
 		if (c > 0x7E)
 			printf("&#%d;", c);
