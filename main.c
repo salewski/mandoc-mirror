@@ -443,8 +443,8 @@ usage(enum argmode argmode)
 	switch (argmode) {
 	case ARG_FILE:
 		fputs("usage: mandoc [-acfhklV] [-Ios=name] "
-		    "[-mformat] [-Ooption] [-Toutput] [-Wlevel]\n"
-		    "\t      [file ...]\n", stderr);
+		    "[-Kencoding] [-mformat] [-Ooption]\n"
+		    "\t      [-Toutput] [-Wlevel] [file ...]\n", stderr);
 		break;
 	case ARG_NAME:
 		fputs("usage: man [-acfhklVw] [-C file] "
