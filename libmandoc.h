@@ -33,7 +33,6 @@ enum	rofferr {
 struct	buf {
 	char	*buf;
 	size_t	 sz;
-	size_t	 offs;
 };
 
 __BEGIN_DECLS
@@ -72,8 +71,9 @@ int		 man_endparse(struct man *);
 int		 man_addspan(struct man *, const struct tbl_span *);
 int		 man_addeqn(struct man *, const struct eqn *);
 
-int		 preconv_cue(const struct buf *);
-int		 preconv_encode(struct buf *, struct buf *, int *);
+int		 preconv_cue(const struct buf *, size_t);
+int		 preconv_encode(struct buf *, size_t *,
+			struct buf *, size_t *, int *);
 
 void		 roff_free(struct roff *);
 struct roff	*roff_alloc(struct mparse *, const struct mchars *, int);
