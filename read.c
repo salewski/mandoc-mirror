@@ -493,8 +493,7 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 				[curp->secondary->sz] = '\0';
 		}
 rerun:
-		rr = roff_parseln(curp->roff, curp->line,
-		    &ln.buf, &ln.sz, of, &of);
+		rr = roff_parseln(curp->roff, curp->line, &ln, &of);
 
 		switch (rr) {
 		case ROFF_REPARSE:
