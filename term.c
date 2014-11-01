@@ -684,7 +684,7 @@ term_strlen(const struct termp *p, const char *cp)
 
 			switch (esc) {
 			case ESCAPE_UNICODE:
-				uc = mchars_num2uc(seq + 1, sz - 1);
+				uc = mchars_num2uc(seq + 1, ssz - 1);
 				break;
 			case ESCAPE_NUMBERED:
 				uc = mchars_num2char(seq, ssz);
