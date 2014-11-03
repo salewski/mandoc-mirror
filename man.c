@@ -315,6 +315,21 @@ man_word_alloc(struct man *man, int line, int pos, const char *word)
 	return(1);
 }
 
+void
+man_word_append(struct man *man, const char *word)
+{
+	struct man_node	*n;
+	char		*addstr, *newstr;
+
+	n = man->last;
+	addstr = roff_strdup(man->roff, word);
+	mandoc_asprintf(&newstr, "%s %s", n->string, addstr);
+	free(addstr);
+	free(n->string);
+	n->string = newstr;
+	man->next = MAN_NEXT_SIBLING;
+}
+
 /*
  * Free all of the resources held by a node.  This does NOT unlink a
  * node from its context; for that, see man_node_unlink().
