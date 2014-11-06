@@ -1340,7 +1340,7 @@ pre_it(DECL_ARGS)
 			outflags |= MMAN_nl;
 			font_push('B');
 			if (LIST_bullet == bln->norm->Bl.type)
-				print_word("o");
+				print_word("\\(bu");
 			else
 				print_word("-");
 			font_pop();
