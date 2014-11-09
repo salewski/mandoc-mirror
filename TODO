@@ -378,6 +378,9 @@ are mere guesses, and some may be wrong.
   see also matthew@  Fri, 18 Jul 2014 19:25:12 -0700
   loc *  exist *  algo **  size *  imp ***
 
+- jsg on icb, Nov 3, 2014:
+  try to guess Xr in man(7) for hyperlinking
+
 - The tables used to render the three-part page headers actually force
   the width of the <body> to the max-width given for <html>.
   Not yet sure how to fix that...
@@ -393,6 +396,12 @@ are mere guesses, and some may be wrong.
 ************************************************************************
 * formatting issues: gratuitous differences
 ************************************************************************
+
+- .Fn reopens a new scope after punctuation in mandoc,
+  but closes its scope for good in groff.
+  Do we want to change mandoc or groff?
+  Steffen Nurpmeso  Sat, 08 Nov 2014 13:34:59 +0100
+  loc *  exist **  algo **  size *  imp **
 
 - .Rv (and probably .Ex) print different text if an `Nm' has been named
   or not (run a manual without `Nm blah' to see this).  I'm not sure
