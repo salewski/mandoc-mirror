@@ -572,16 +572,18 @@ print_bvspace(struct termp *p,
 
 	/* Do not vspace directly after Ss/Sh. */
 
-	for (nn = n; nn; nn = nn->parent) {
-		if (MDOC_BLOCK != nn->type)
-			continue;
-		if (MDOC_Ss == nn->tok)
+	nn = n;
+	while (nn->prev == NULL) {
+		do {
+			nn = nn->parent;
+			if (nn->type == MDOC_ROOT)
+				return;
+		} while (nn->type != MDOC_BLOCK);
+		if (nn->tok == MDOC_Sh || nn->tok == MDOC_Ss)
 			return;
-		if (MDOC_Sh == nn->tok)
-			return;
-		if (NULL == nn->prev)
-			continue;
-		break;
+		if (nn->tok == MDOC_It &&
+		    nn->parent->parent->norm->Bl.type != LIST_item)
+			break;
 	}
 
 	/* A `-column' does not assert vspace within the list. */
