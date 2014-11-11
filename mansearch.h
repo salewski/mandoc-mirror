@@ -94,6 +94,7 @@ struct	mansearch {
 	const char	*sec; /* mansection/NULL */
 	const char	*outkey; /* show content of this macro */
 	enum argmode	 argmode; /* interpretation of arguments */
+	int		 firstmatch; /* first matching database only */
 };
 
 __BEGIN_DECLS

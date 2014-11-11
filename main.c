@@ -294,6 +294,10 @@ main(int argc, char *argv[])
 		if (argc == 0)
 			usage(search.argmode);
 
+		if (search.argmode == ARG_NAME &&
+		    outmode == OUTMODE_ONE)
+			search.firstmatch = 1;
+
 		/* Access the mandoc database. */
 
 		manpath_parse(&paths, conf_file, defpaths, auxpaths);

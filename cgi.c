@@ -977,6 +977,7 @@ pg_search(const struct req *req)
 	search.sec = req->q.sec;
 	search.outkey = "Nd";
 	search.argmode = req->q.equal ? ARG_NAME : ARG_EXPR;
+	search.firstmatch = 1;
 
 	paths.sz = 1;
 	paths.paths = mandoc_malloc(sizeof(char *));

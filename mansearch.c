@@ -352,6 +352,14 @@ mansearch(const struct mansearch *search,
 		sqlite3_finalize(s2);
 		sqlite3_close(db);
 		ohash_delete(&htab);
+
+		/*
+		 * In man(1) mode, prefer matches in earlier trees
+		 * over matches in later trees.
+		 */
+
+		if (cur && search->firstmatch)
+			break;
 	}
 	qsort(*res, cur, sizeof(struct manpage), manpage_compare);
 	rc = 1;
