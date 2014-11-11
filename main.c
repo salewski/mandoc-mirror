@@ -177,6 +177,7 @@ main(int argc, char *argv[])
 		case 'h':
 			(void)strlcat(curp.outopts, "synopsis,", BUFSIZ);
 			synopsis_only = 1;
+			use_pager = 0;
 			outmode = OUTMODE_ALL;
 			break;
 		case 'I':
