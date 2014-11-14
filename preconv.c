@@ -29,8 +29,7 @@ preconv_encode(struct buf *ib, size_t *ii, struct buf *ob, size_t *oi,
     int *filenc)
 {
 	size_t		 i;
-	const long	 one = 1L;
-	int		 state, be;
+	int		 state;
 	unsigned int	 accum;
 	unsigned char	 cu;
 
@@ -39,12 +38,6 @@ preconv_encode(struct buf *ib, size_t *ii, struct buf *ob, size_t *oi,
 
 	state = 0;
 	accum = 0U;
-	be = 0;
-
-	/* Quick test for big-endian value. */
-
-	if ( ! (*((const char *)(&one))))
-		be = 1;
 
 	for (i = *ii; i < ib->sz; i++) {
 		cu = ib->buf[i];
@@ -66,19 +59,6 @@ preconv_encode(struct buf *ib, size_t *ii, struct buf *ob, size_t *oi,
 			if (state)
 				continue;
 
-			/*
-			 * Accum is held in little-endian order as
-			 * stipulated by the UTF-8 sequence coding.  We
-			 * need to convert to a native big-endian if our
-			 * architecture requires it.
-			 */
-
-			if (be)
-				accum = (accum >> 24) | 
-					((accum << 8) & 0x00FF0000) |
-					((accum >> 8) & 0x0000FF00) |
-					(accum << 24);
-
 			if (accum < 0x80)
 				ob->buf[(*oi)++] = accum;
 			else
@@ -93,7 +73,7 @@ preconv_encode(struct buf *ib, size_t *ii, struct buf *ob, size_t *oi,
 			 * UTF-8 bitmask, calculate the expected UTF-8
 			 * state from it.
 			 */
-			for (state = 0; state < 7; state++) 
+			for (state = 0; state < 7; state++)
 				if ( ! (cu & (1 << (7 - state))))
 					break;
 
@@ -158,7 +138,7 @@ preconv_cue(const struct buf *b, size_t offset)
 
 	/* Check if we have the correct header/trailer. */
 
-	if ((sz = (size_t)(eoln - ln)) < 10 || 
+	if ((sz = (size_t)(eoln - ln)) < 10 ||
 	    memcmp(ln, ".\\\" -*-", 7) || memcmp(eoln - 3, "-*-", 3))
 		return(MPARSE_UTF8 | MPARSE_LATIN1);
 
@@ -189,7 +169,7 @@ preconv_cue(const struct buf *b, size_t offset)
 			sz -= phsz;
 			ln += phsz;
 			continue;
-		} 
+		}
 
 		sz -= 7;
 		ln += 7;
