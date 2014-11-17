@@ -209,7 +209,7 @@ static	const struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Eo */
 	{ NULL, NULL },				/* Fx */
 	{ NULL, NULL },				/* Ms */
-	{ NULL, ewarn_eq0 },			/* No */
+	{ NULL, NULL },				/* No */
 	{ NULL, post_ns },			/* Ns */
 	{ NULL, NULL },				/* Nx */
 	{ NULL, NULL },				/* Ox */
@@ -353,6 +353,20 @@ mdoc_valid_post(struct mdoc *mdoc)
 	case MDOC_ROOT:
 		return(post_root(mdoc));
 	default:
+
+		/*
+		 * Closing delimiters are not special at the
+		 * beginning of a block, opening delimiters
+		 * are not special at the end.
+		 */
+
+		if (n->child != NULL)
+			n->child->flags &= ~MDOC_DELIMC;
+		if (n->last != NULL)
+			n->last->flags &= ~MDOC_DELIMO;
+
+		/* Call the macro's postprocessor. */
+
 		p = mdoc_valids[n->tok].post;
 		return(*p ? (*p)(mdoc) : 1);
 	}
@@ -1160,10 +1174,6 @@ post_defaults(POST_ARGS)
 		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, "file"))
 			return(0);
 		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, "..."))
-			return(0);
-		break;
-	case MDOC_Li:
-		if ( ! mdoc_word_alloc(mdoc, nn->line, nn->pos, ""))
 			return(0);
 		break;
 	case MDOC_Pa:

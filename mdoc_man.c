@@ -594,7 +594,11 @@ print_node(DECL_ARGS)
 			printf("\\&");
 			outflags &= ~MMAN_spc;
 		}
+		if (outflags & MMAN_Sm && ! (n->flags & MDOC_DELIMC))
+			outflags |= MMAN_spc_force;
 		print_word(n->string);
+		if (outflags & MMAN_Sm && ! (n->flags & MDOC_DELIMO))
+			outflags |= MMAN_spc;
 	} else {
 		/*
 		 * Conditionally run the pre-node action handler for a
