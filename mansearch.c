@@ -79,6 +79,7 @@ struct	expr {
 
 struct	match {
 	uint64_t	 pageid; /* identifier in database */
+	uint64_t	 bits; /* name type mask */
 	char		*desc; /* manual page description */
 	int		 form; /* bit field: formatted, zipped? */
 };
@@ -301,6 +302,7 @@ mansearch(const struct mansearch *search,
 			mp = mandoc_calloc(1, sizeof(struct match));
 			mp->pageid = pageid;
 			mp->form = sqlite3_column_int(s, 1);
+			mp->bits = sqlite3_column_int64(s, 3);
 			if (TYPE_Nd == outbit)
 				mp->desc = mandoc_strdup((const char *)
 				    sqlite3_column_text(s, 0));
@@ -336,6 +338,7 @@ mansearch(const struct mansearch *search,
 			}
 			mpage = *res + cur;
 			mpage->ipath = i;
+			mpage->bits = mp->bits;
 			mpage->sec = 10;
 			mpage->form = mp->form;
 			buildnames(mpage, db, s, mp->pageid,
@@ -396,8 +399,9 @@ manpage_compare(const void *vp1, const void *vp2)
 
 	mp1 = vp1;
 	mp2 = vp2;
-	diff = mp1->sec - mp2->sec;
-	return(diff ? diff : strcasecmp(mp1->names, mp2->names));
+	return(	(diff = mp2->bits - mp1->bits) ? diff :
+		(diff = mp1->sec - mp2->sec) ? diff :
+		strcasecmp(mp1->names, mp2->names));
 }
 
 static void
@@ -592,8 +596,10 @@ sql_statement(const struct expr *e)
 	size_t		 sz;
 	int		 needop;
 
-	sql = mandoc_strdup(
-	    "SELECT desc, form, pageid FROM mpages WHERE ");
+	sql = mandoc_strdup(e->equal ?
+	    "SELECT desc, form, pageid, bits "
+		"FROM mpages NATURAL JOIN names WHERE " :
+	    "SELECT desc, form, pageid, 0 FROM mpages WHERE ");
 	sz = strlen(sql);
 
 	for (needop = 0; NULL != e; e = e->next) {
@@ -613,8 +619,7 @@ sql_statement(const struct expr *e)
 			? "pageid IN (SELECT pageid FROM names "
 			  "WHERE name REGEXP ?)"
 			: e->equal
-			? "pageid IN (SELECT pageid FROM names "
-			  "WHERE name = ?)"
+			? "name = ? "
 			: "pageid IN (SELECT pageid FROM names "
 			  "WHERE name MATCH ?)")
 		    : (NULL == e->substr
