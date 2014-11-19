@@ -1272,6 +1272,8 @@ roff_evalcond(struct roff *r, int ln, const char *v, int *pos)
 	case 'r':
 		/* FALLTHROUGH */
 	case 't':
+		/* FALLTHROUGH */
+	case 'v':
 		(*pos)++;
 		return(!wanttrue);
 	default:
