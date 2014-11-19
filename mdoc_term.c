@@ -1854,7 +1854,8 @@ termp_quote_pre(DECL_ARGS)
 	case MDOC_Ao:
 		/* FALLTHROUGH */
 	case MDOC_Aq:
-		term_word(p, "<");
+		term_word(p, n->parent->prev != NULL &&
+		    n->parent->prev->tok == MDOC_An ?  "<" : "\\(la");
 		break;
 	case MDOC_Bro:
 		/* FALLTHROUGH */
@@ -1925,7 +1926,8 @@ termp_quote_post(DECL_ARGS)
 	case MDOC_Ao:
 		/* FALLTHROUGH */
 	case MDOC_Aq:
-		term_word(p, ">");
+		term_word(p, n->parent->prev != NULL &&
+		    n->parent->prev->tok == MDOC_An ?  ">" : "\\(ra");
 		break;
 	case MDOC_Bro:
 		/* FALLTHROUGH */
