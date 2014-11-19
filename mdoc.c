@@ -734,37 +734,47 @@ mdoc_ptext(struct mdoc *mdoc, int line, char *buf, int offs)
 static int
 mdoc_pmacro(struct mdoc *mdoc, int ln, char *buf, int offs)
 {
+	struct mdoc_node *n;
+	const char	 *cp;
 	enum mdoct	  tok;
 	int		  i, sv;
 	char		  mac[5];
-	struct mdoc_node *n;
 
 	sv = offs;
 
 	/*
 	 * Copy the first word into a nil-terminated buffer.
-	 * Stop copying when a tab, space, or eoln is encountered.
+	 * Stop when a space, tab, escape, or eoln is encountered.
 	 */
 
 	i = 0;
-	while (i < 4 && '\0' != buf[offs] && ' ' != buf[offs] &&
-	    '\t' != buf[offs])
+	while (i < 4 && strchr(" \t\\", buf[offs]) == NULL)
 		mac[i++] = buf[offs++];
 
 	mac[i] = '\0';
 
 	tok = (i > 1 && i < 4) ? mdoc_hash_find(mac) : MDOC_MAX;
 
-	if (MDOC_MAX == tok) {
+	if (tok == MDOC_MAX) {
 		mandoc_msg(MANDOCERR_MACRO, mdoc->parse,
 		    ln, sv, buf + sv - 1);
 		return(1);
 	}
 
-	/* Disregard the first trailing tab, if applicable. */
+	/* Skip a leading escape sequence or tab. */
 
-	if ('\t' == buf[offs])
+	switch (buf[offs]) {
+	case '\\':
+		cp = buf + offs + 1;
+		mandoc_escape(&cp, NULL, NULL);
+		offs = cp - buf;
+		break;
+	case '\t':
 		offs++;
+		break;
+	default:
+		break;
+	}
 
 	/* Jump to the next non-whitespace word. */
 
