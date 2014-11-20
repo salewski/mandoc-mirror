@@ -493,6 +493,14 @@ are mere guesses, and some may be wrong.
   Fri, 14 Feb 2014 18:54:42 +0100 (CET)
   loc *  exist **  algo **  size *  imp **
 
+- warn about attempts to call non-callable macros
+  Steffen Nurpmeso  Tue, 11 Nov 2014 22:55:16 +0100
+  Note that formatting is inconsistent in groff.
+  .Fn Po prints "Po()", .Ar Sh prints "file ..." and no "Sh".
+  Relatively hard because the relevant code is scattered
+  all over mdoc_macro.c and all subtly different.
+  loc **  exist **  algo **  size **  imp **
+
 - warn about "new sentence, new line"
   loc **  exist **  algo ***  size *  imp **
 
