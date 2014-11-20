@@ -635,12 +635,14 @@ ps_setwidth(struct termp *p, int iop, size_t width)
 	size_t	 lastwidth;
 
 	lastwidth = p->ps->width;
-	if (0 < iop)
+	if (iop > 0)
 		p->ps->width += width;
-	else if (0 > iop)
+	else if (iop == 0)
+		p->ps->width = width ? width : p->ps->lastwidth;
+	else if (p->ps->width > width)
 		p->ps->width -= width;
 	else
-		p->ps->width = width ? width : p->ps->lastwidth;
+		p->ps->width = 0;
 	p->ps->lastwidth = lastwidth;
 }
 

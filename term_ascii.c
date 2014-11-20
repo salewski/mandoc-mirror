@@ -159,12 +159,14 @@ ascii_setwidth(struct termp *p, int iop, size_t width)
 {
 
 	p->rmargin = p->defrmargin;
-	if (0 < iop)
+	if (iop > 0)
 		p->defrmargin += width;
-	else if (0 > iop)
+	else if (iop == 0)
+		p->defrmargin = width ? width : p->lastrmargin;
+	else if (p->defrmargin > width)
 		p->defrmargin -= width;
 	else
-		p->defrmargin = width ? width : p->lastrmargin;
+		p->defrmargin = 0;
 	p->lastrmargin = p->rmargin;
 	p->rmargin = p->maxrmargin = p->defrmargin;
 }
