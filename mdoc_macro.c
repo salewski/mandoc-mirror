@@ -437,9 +437,11 @@ rew_dohalt(enum mdoct tok, enum mdoc_type type,
 	 * Default block rewinding rules.
 	 * In particular, always skip block end markers,
 	 * and let all blocks rewind Nm children.
+	 * Do not warn again when closing a block,
+	 * since closing the body already warned.
 	 */
 	if (ENDBODY_NOT != p->end || MDOC_Nm == p->tok ||
-	    (MDOC_BLOCK == p->type &&
+	    MDOC_BLOCK == type || (MDOC_BLOCK == p->type &&
 	    ! (MDOC_EXPLICIT & mdoc_macros[tok].flags)))
 		return(REWIND_MORE);
 
