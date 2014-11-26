@@ -163,8 +163,7 @@ http_printquery(const struct req *req, const char *sep)
 		printf("%sarch=", sep);
 		http_print(req->q.arch);
 	}
-	if (NULL != req->q.manpath &&
-	    strcmp(req->q.manpath, req->p[0])) {
+	if (strcmp(req->q.manpath, req->p[0])) {
 		printf("%smanpath=", sep);
 		http_print(req->q.manpath);
 	}
@@ -298,11 +297,6 @@ next:
 		if (*qs != '\0')
 			qs++;
 	}
-
-	/* Fall back to the default manpath. */
-
-	if (req->q.manpath == NULL)
-		req->q.manpath = mandoc_strdup(req->p[0]);
 }
 
 static void
@@ -469,8 +463,7 @@ resp_searchform(const struct req *req)
 		puts("<SELECT NAME=\"manpath\">");
 		for (i = 0; i < (int)req->psz; i++) {
 			printf("<OPTION ");
-			if (NULL == req->q.manpath ? 0 == i :
-			    0 == strcmp(req->q.manpath, req->p[i]))
+			if (strcmp(req->q.manpath, req->p[i]) == 0)
 				printf("SELECTED=\"selected\" ");
 			printf("VALUE=\"");
 			html_print(req->p[i]);
@@ -1081,8 +1074,9 @@ main(void)
 	if (NULL != (querystring = getenv("QUERY_STRING")))
 		http_parse(&req, querystring);
 
-	if ( ! (NULL == req.q.manpath ||
-	    validate_manpath(&req, req.q.manpath))) {
+	if (req.q.manpath == NULL)
+		req.q.manpath = mandoc_strdup(req.p[0]);
+	else if ( ! validate_manpath(&req, req.q.manpath)) {
 		pg_error_badrequest(
 		    "You specified an invalid manpath.");
 		return(EXIT_FAILURE);
