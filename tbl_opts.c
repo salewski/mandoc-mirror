@@ -182,7 +182,7 @@ again:	/*
 	 *
 	 * options	::= option_list [:space:]* [;][\n]
 	 * option_list	::= option option_tail
-	 * option_tail	::= [:space:]+ option_list |
+	 * option_tail	::= [,:space:]+ option_list |
 	 *		::= epsilon
 	 * option	::= [:alpha:]+ args
 	 * args		::= [:space:]* [(] [:alpha:]+ [)]
@@ -213,7 +213,7 @@ again:	/*
 
 	buf[i] = '\0';
 
-	while (isspace((unsigned char)p[*pos]))
+	while (isspace((unsigned char)p[*pos]) || p[*pos] == ',')
 		(*pos)++;
 
 	/*
