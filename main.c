@@ -115,7 +115,6 @@ main(int argc, char *argv[])
 #endif
 	enum mandoclevel rc;
 	enum outmode	 outmode;
-	pid_t		 child_pid;
 	int		 fd;
 	int		 show_usage;
 	int		 use_pager;
@@ -388,8 +387,7 @@ main(int argc, char *argv[])
 	while (argc) {
 #if HAVE_SQLITE3
 		if (resp != NULL) {
-			rc = mparse_open(curp.mp, &fd, resp->file,
-			    &child_pid);
+			rc = mparse_open(curp.mp, &fd, resp->file);
 			if (fd == -1)
 				/* nothing */;
 			else if (resp->form & FORM_SRC) {
@@ -403,14 +401,12 @@ main(int argc, char *argv[])
 		} else
 #endif
 		{
-			rc = mparse_open(curp.mp, &fd, *argv++,
-			    &child_pid);
+			rc = mparse_open(curp.mp, &fd, *argv++);
 			if (fd != -1)
 				parse(&curp, fd, argv[-1], &rc);
 		}
 
-		if (child_pid &&
-		    mparse_wait(curp.mp, child_pid) != MANDOCLEVEL_OK)
+		if (mparse_wait(curp.mp) != MANDOCLEVEL_OK)
 			rc = MANDOCLEVEL_SYSERR;
 
 		if (MANDOCLEVEL_OK != rc && curp.wstop)

@@ -436,8 +436,7 @@ struct mparse	 *mparse_alloc(int, enum mandoclevel, mandocmsg,
 			const struct mchars *, const char *);
 void		  mparse_free(struct mparse *);
 void		  mparse_keep(struct mparse *);
-enum mandoclevel  mparse_open(struct mparse *, int *, const char *,
-			pid_t *);
+enum mandoclevel  mparse_open(struct mparse *, int *, const char *);
 enum mandoclevel  mparse_readfd(struct mparse *, int, const char *);
 enum mandoclevel  mparse_readmem(struct mparse *, const void *, size_t,
 			const char *);
@@ -447,7 +446,7 @@ void		  mparse_result(struct mparse *,
 const char	 *mparse_getkeep(const struct mparse *);
 const char	 *mparse_strerror(enum mandocerr);
 const char	 *mparse_strlevel(enum mandoclevel);
-enum mandoclevel  mparse_wait(struct mparse *, pid_t);
+enum mandoclevel  mparse_wait(struct mparse *);
 
 __END_DECLS
 

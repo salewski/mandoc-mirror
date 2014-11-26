@@ -81,7 +81,6 @@
 .Fa "struct mparse *parse"
 .Fa "int *fd"
 .Fa "const char *fname"
-.Fa "pid_t *child_pid"
 .Fc
 .Ft "enum mandoclevel"
 .Fo mparse_readfd
@@ -111,7 +110,6 @@
 .Ft "enum mandoclevel"
 .Fo mparse_wait
 .Fa "struct mparse *parse"
-.Fa "pid_t child_pid"
 .Fc
 .In sys/types.h
 .In mandoc.h
@@ -404,14 +402,6 @@ or -1 on failure.
 It can be passed to
 .Fn mparse_readfd
 or used directly.
-If applicable, return the
-.Xr gunzip 1
-child process ID in
-.Fa child_pid ,
-or otherwise 0.
-If non-zero, it should be passed to
-.Fn mparse_wait
-after completing the parse sequence.
 Declared in
 .In mandoc.h ,
 implemented in
