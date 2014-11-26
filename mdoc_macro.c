@@ -171,7 +171,7 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX] = {
 	{ blk_part_exp, MDOC_CALLABLE | MDOC_PARSED |
 			MDOC_EXPLICIT | MDOC_JOIN }, /* So */
 	{ blk_part_imp, MDOC_CALLABLE | MDOC_PARSED | MDOC_JOIN }, /* Sq */
-	{ in_line_eoln, 0 }, /* Sm */
+	{ in_line_argn, 0 }, /* Sm */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED | MDOC_JOIN }, /* Sx */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED | MDOC_JOIN }, /* Sy */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Tn */
