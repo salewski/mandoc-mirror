@@ -1636,8 +1636,6 @@ ebool(struct mdoc *mdoc)
 		return(1);
 	}
 
-	check_count(mdoc, MDOC_ELEM, CHECK_WARN, CHECK_LT, 2);
-
 	assert(MDOC_TEXT == nch->type);
 
 	if (0 == strcmp(nch->string, "on")) {
