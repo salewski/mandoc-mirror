@@ -202,6 +202,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	/* related to request and macro arguments */
 	"escaped character not allowed in a name",
 	"argument count wrong",
+	"NOT IMPLEMENTED: Bd -file",
 	"missing list type, using -item",
 	"missing manual name, using \"\"",
 	"uname(3) system call failed, using UNKNOWN",
@@ -214,7 +215,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"generic fatal error",
 
 	"input too large",
-	"NOT IMPLEMENTED: Bd -file",
 	"NOT IMPLEMENTED: .so with absolute path or \"..\"",
 	".so request failed",
 

@@ -159,6 +159,7 @@ enum	mandocerr {
 	/* related to request and macro arguments */
 	MANDOCERR_NAMESC, /* escaped character not allowed in a name: name */
 	MANDOCERR_ARGCOUNT, /* argument count wrong */
+	MANDOCERR_BD_FILE, /* NOT IMPLEMENTED: Bd -file */
 	MANDOCERR_BL_NOTYPE, /* missing list type, using -item: Bl */
 	MANDOCERR_NM_NONAME, /* missing manual name, using "": Nm */
 	MANDOCERR_OS_UNAME, /* uname(3) system call failed, using UNKNOWN */
@@ -171,7 +172,6 @@ enum	mandocerr {
 	MANDOCERR_FATAL, /* ===== start of fatal errors ===== */
 
 	MANDOCERR_TOOLARGE, /* input too large */
-	MANDOCERR_BD_FILE, /* NOT IMPLEMENTED: Bd -file */
 	MANDOCERR_SO_PATH, /* NOT IMPLEMENTED: .so with absolute path or ".." */
 	MANDOCERR_SO_FAIL, /* .so request failed */
 

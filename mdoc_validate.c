@@ -761,7 +761,7 @@ pre_bd(PRE_ARGS)
 		case MDOC_File:
 			mandoc_msg(MANDOCERR_BD_FILE, mdoc->parse,
 			    n->line, n->pos, NULL);
-			return(0);
+			break;
 		case MDOC_Offset:
 			if (0 == argv->sz) {
 				mandoc_msg(MANDOCERR_ARG_EMPTY,

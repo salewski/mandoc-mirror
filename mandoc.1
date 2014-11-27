@@ -1396,6 +1396,17 @@ The indicated request or macro has too few or too many arguments.
 The syntax tree will contain the wrong number of arguments as given.
 Formatting behaviour depends on the specific request or macro in question.
 Note that the same message may also occur as a WARNING, see above.
+.It Sy "NOT IMPLEMENTED: Bd -file"
+.Pq mdoc
+For security reasons, the
+.Ic \&Bd
+macro does not support the
+.Fl file
+argument.
+By requesting the inclusion of a sensitive file, a malicious document
+might otherwise trick a privileged user into inadvertently displaying
+the file on the screen, revealing the file content to bystanders.
+The argument is ignored including the file name following it.
 .It Sy "missing list type, using -item"
 .Pq mdoc
 A
@@ -1484,17 +1495,6 @@ cannot handle input files larger than its arbitrary size limit
 of 2^31 bytes (2 Gigabytes).
 Since useful manuals are always small, this is not a problem in practice.
 Parsing is aborted as soon as the condition is detected.
-.It Sy "NOT IMPLEMENTED: Bd -file"
-.Pq mdoc
-For security reasons, the
-.Ic \&Bd
-macro does not support the
-.Fl file
-argument.
-By requesting the inclusion of a sensitive file, a malicious document
-might otherwise trick a privileged user into inadvertently displaying
-the file on the screen, revealing the file content to bystanders.
-The parser exits immediately.
 .It Sy "NOT IMPLEMENTED: .so with absolute path or \(dq..\(dq"
 .Pq roff
 For security reasons,
