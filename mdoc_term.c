@@ -91,7 +91,6 @@ static	int	  termp_bt_pre(DECL_ARGS);
 static	int	  termp_bx_pre(DECL_ARGS);
 static	int	  termp_cd_pre(DECL_ARGS);
 static	int	  termp_d1_pre(DECL_ARGS);
-static	int	  termp_es_pre(DECL_ARGS);
 static	int	  termp_ex_pre(DECL_ARGS);
 static	int	  termp_fa_pre(DECL_ARGS);
 static	int	  termp_fd_pre(DECL_ARGS);
@@ -111,6 +110,7 @@ static	int	  termp_quote_pre(DECL_ARGS);
 static	int	  termp_rs_pre(DECL_ARGS);
 static	int	  termp_rv_pre(DECL_ARGS);
 static	int	  termp_sh_pre(DECL_ARGS);
+static	int	  termp_skip_pre(DECL_ARGS);
 static	int	  termp_sm_pre(DECL_ARGS);
 static	int	  termp_sp_pre(DECL_ARGS);
 static	int	  termp_ss_pre(DECL_ARGS);
@@ -183,7 +183,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_quote_pre, termp_quote_post }, /* Bq */
 	{ termp_xx_pre, NULL }, /* Bsx */
 	{ termp_bx_pre, NULL }, /* Bx */
-	{ NULL, NULL }, /* Db */
+	{ termp_skip_pre, NULL }, /* Db */
 	{ NULL, NULL }, /* Dc */
 	{ termp_quote_pre, termp_quote_post }, /* Do */
 	{ termp_quote_pre, termp_quote_post }, /* Dq */
@@ -235,7 +235,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_quote_pre, termp_quote_post }, /* Bro */
 	{ NULL, NULL }, /* Brc */
 	{ NULL, termp____post }, /* %C */
-	{ termp_es_pre, NULL }, /* Es */
+	{ termp_skip_pre, NULL }, /* Es */
 	{ termp_quote_pre, termp_quote_post }, /* En */
 	{ termp_xx_pre, NULL }, /* Dx */
 	{ NULL, termp____post }, /* %Q */
@@ -1838,7 +1838,7 @@ termp_sp_pre(DECL_ARGS)
 }
 
 static int
-termp_es_pre(DECL_ARGS)
+termp_skip_pre(DECL_ARGS)
 {
 
 	return(0);

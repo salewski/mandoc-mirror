@@ -72,7 +72,6 @@ static	enum mdoc_sec	a2sec(const char *);
 static	size_t		macro2len(enum mdoct);
 static	void	 rewrite_macro2len(char **);
 
-static	int	 ebool(POST_ARGS);
 static	int	 berr_ge1(POST_ARGS);
 static	int	 bwarn_ge1(POST_ARGS);
 static	int	 ewarn_eq0(POST_ARGS);
@@ -122,6 +121,7 @@ static	int	 post_sh_head(POST_ARGS);
 static	int	 post_sh_name(POST_ARGS);
 static	int	 post_sh_see_also(POST_ARGS);
 static	int	 post_sh_authors(POST_ARGS);
+static	int	 post_sm(POST_ARGS);
 static	int	 post_st(POST_ARGS);
 static	int	 post_vt(POST_ARGS);
 static	int	 pre_an(PRE_ARGS);
@@ -199,7 +199,7 @@ static	const struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Bq */
 	{ NULL, NULL },				/* Bsx */
 	{ NULL, post_bx },			/* Bx */
-	{ NULL, ebool },			/* Db */
+	{ pre_obsolete, NULL },			/* Db */
 	{ NULL, NULL },				/* Dc */
 	{ NULL, NULL },				/* Do */
 	{ NULL, NULL },				/* Dq */
@@ -226,7 +226,7 @@ static	const struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Sc */
 	{ NULL, NULL },				/* So */
 	{ NULL, NULL },				/* Sq */
-	{ NULL, ebool },			/* Sm */
+	{ NULL, post_sm },			/* Sm */
 	{ NULL, post_hyph },			/* Sx */
 	{ NULL, NULL },				/* Sy */
 	{ NULL, NULL },				/* Tn */
@@ -1622,36 +1622,31 @@ post_bk(POST_ARGS)
 }
 
 static int
-ebool(struct mdoc *mdoc)
+post_sm(struct mdoc *mdoc)
 {
 	struct mdoc_node	*nch;
-	enum mdoct		 tok;
 
-	tok = mdoc->last->tok;
 	nch = mdoc->last->child;
 
-	if (NULL == nch) {
-		if (MDOC_Sm == tok)
-			mdoc->flags ^= MDOC_SMOFF;
+	if (nch == NULL) {
+		mdoc->flags ^= MDOC_SMOFF;
 		return(1);
 	}
 
-	assert(MDOC_TEXT == nch->type);
+	assert(nch->type == MDOC_TEXT);
 
-	if (0 == strcmp(nch->string, "on")) {
-		if (MDOC_Sm == tok)
-			mdoc->flags &= ~MDOC_SMOFF;
+	if ( ! strcmp(nch->string, "on")) {
+		mdoc->flags &= ~MDOC_SMOFF;
 		return(1);
 	}
-	if (0 == strcmp(nch->string, "off")) {
-		if (MDOC_Sm == tok)
-			mdoc->flags |= MDOC_SMOFF;
+	if ( ! strcmp(nch->string, "off")) {
+		mdoc->flags |= MDOC_SMOFF;
 		return(1);
 	}
 
 	mandoc_vmsg(MANDOCERR_SM_BAD,
 	    mdoc->parse, nch->line, nch->pos,
-	    "%s %s", mdoc_macronames[tok], nch->string);
+	    "%s %s", mdoc_macronames[mdoc->last->tok], nch->string);
 	return(mdoc_node_relink(mdoc, nch));
 }
 

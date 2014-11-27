@@ -183,7 +183,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_quote_pre, mdoc_quote_post}, /* Bq */
 	{mdoc_xx_pre, NULL}, /* Bsx */
 	{mdoc_bx_pre, NULL}, /* Bx */
-	{NULL, NULL}, /* Db */
+	{mdoc_skip_pre, NULL}, /* Db */
 	{NULL, NULL}, /* Dc */
 	{mdoc_quote_pre, mdoc_quote_post}, /* Do */
 	{mdoc_quote_pre, mdoc_quote_post}, /* Dq */
