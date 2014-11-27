@@ -70,7 +70,6 @@
 
 #define	FORM_CAT	 0  /* manual page is preformatted */
 #define	FORM_SRC	 1  /* format is mdoc(7) or man(7) */
-#define	FORM_GZ		 2  /* compressed with gzip(1) */
 #define	FORM_NONE	 4  /* format is unknown */
 
 enum	argmode {
