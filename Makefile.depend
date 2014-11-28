@@ -1,5 +1,4 @@
-arch.o: arch.c config.h mdoc.h libmdoc.h arch.in
-att.o: att.c config.h mdoc.h libmdoc.h att.in
+att.o: att.c config.h mdoc.h libmdoc.h
 cgi.o: cgi.c config.h mandoc.h mandoc_aux.h main.h manpath.h mansearch.h cgi.h
 chars.o: chars.c config.h mandoc.h mandoc_aux.h libmandoc.h chars.in
 compat_fgetln.o: compat_fgetln.c config.h
@@ -42,9 +41,9 @@ mdoc_term.o: mdoc_term.c config.h mandoc.h mandoc_aux.h out.h term.h mdoc.h main
 mdoc_validate.o: mdoc_validate.c config.h mdoc.h mandoc.h mandoc_aux.h libmdoc.h libmandoc.h
 msec.o: msec.c config.h mandoc.h libmandoc.h msec.in
 out.o: out.c config.h mandoc_aux.h mandoc.h out.h
-preconv.o: preconv.c config.h
+preconv.o: preconv.c config.h mandoc.h libmandoc.h
 read.o: read.c config.h mandoc.h mandoc_aux.h libmandoc.h mdoc.h man.h main.h
-roff.o: roff.c config.h mandoc.h mandoc_aux.h libroff.h libmandoc.h predefs.in
+roff.o: roff.c config.h mandoc.h mandoc_aux.h libmandoc.h libroff.h predefs.in
 st.o: st.c config.h mdoc.h libmdoc.h st.in
 tbl.o: tbl.c config.h mandoc.h mandoc_aux.h libmandoc.h libroff.h
 tbl_data.o: tbl_data.c config.h mandoc.h mandoc_aux.h libmandoc.h libroff.h
@@ -56,7 +55,6 @@ term.o: term.c config.h mandoc.h mandoc_aux.h out.h term.h main.h
 term_ascii.o: term_ascii.c config.h mandoc.h mandoc_aux.h out.h term.h main.h
 term_ps.o: term_ps.c config.h mandoc.h mandoc_aux.h out.h main.h term.h
 tree.o: tree.c config.h mandoc.h mdoc.h man.h main.h
-vol.o: vol.c config.h mdoc.h libmdoc.h vol.in
 test-dirent-namlen.o: test-dirent-namlen.c
 test-fgetln.o: test-fgetln.c
 test-fts.o: test-fts.c

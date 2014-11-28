@@ -101,7 +101,6 @@ DISTFILES	 = INSTALL \
 		   NEWS \
 		   TODO \
 		   apropos.1 \
-		   att.in \
 		   cgi.h.example \
 		   chars.in \
 		   compat_fts.h \
