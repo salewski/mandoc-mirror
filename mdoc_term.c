@@ -1227,14 +1227,8 @@ static int
 termp_nd_pre(DECL_ARGS)
 {
 
-	if (MDOC_BODY != n->type)
-		return(1);
-
-#if defined(__OpenBSD__) || defined(__linux__)
-	term_word(p, "\\(en");
-#else
-	term_word(p, "\\(em");
-#endif
+	if (n->type == MDOC_BODY)
+		term_word(p, "\\(en");
 	return(1);
 }
 
