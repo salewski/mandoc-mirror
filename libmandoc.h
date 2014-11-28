@@ -60,16 +60,16 @@ struct	mdoc	*mdoc_alloc(struct roff *, struct mparse *,
 void		 mdoc_reset(struct mdoc *);
 int		 mdoc_parseln(struct mdoc *, int, char *, int);
 int		 mdoc_endparse(struct mdoc *);
-int		 mdoc_addspan(struct mdoc *, const struct tbl_span *);
-int		 mdoc_addeqn(struct mdoc *, const struct eqn *);
+void		 mdoc_addspan(struct mdoc *, const struct tbl_span *);
+void		 mdoc_addeqn(struct mdoc *, const struct eqn *);
 
 void		 man_free(struct man *);
 struct	man	*man_alloc(struct roff *, struct mparse *, int);
 void		 man_reset(struct man *);
 int		 man_parseln(struct man *, int, char *, int);
 int		 man_endparse(struct man *);
-int		 man_addspan(struct man *, const struct tbl_span *);
-int		 man_addeqn(struct man *, const struct eqn *);
+void		 man_addspan(struct man *, const struct tbl_span *);
+void		 man_addeqn(struct man *, const struct eqn *);
 
 int		 preconv_cue(const struct buf *, size_t);
 int		 preconv_encode(struct buf *, size_t *,

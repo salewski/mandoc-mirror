@@ -317,7 +317,7 @@ man_node_delete(struct man *man, struct man_node *p)
 	man_node_free(p);
 }
 
-int
+void
 man_addeqn(struct man *man, const struct eqn *ep)
 {
 	struct man_node	*n;
@@ -329,10 +329,9 @@ man_addeqn(struct man *man, const struct eqn *ep)
 	man_node_append(man, n);
 	man->next = MAN_NEXT_SIBLING;
 	man_descope(man, ep->ln, ep->pos);
-	return(1);
 }
 
-int
+void
 man_addspan(struct man *man, const struct tbl_span *sp)
 {
 	struct man_node	*n;
@@ -342,7 +341,6 @@ man_addspan(struct man *man, const struct tbl_span *sp)
 	man_node_append(man, n);
 	man->next = MAN_NEXT_SIBLING;
 	man_descope(man, sp->line, 0);
-	return(1);
 }
 
 static void

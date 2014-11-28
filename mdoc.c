@@ -198,7 +198,7 @@ mdoc_endparse(struct mdoc *mdoc)
 	return(1);
 }
 
-int
+void
 mdoc_addeqn(struct mdoc *mdoc, const struct eqn *ep)
 {
 	struct mdoc_node *n;
@@ -209,10 +209,9 @@ mdoc_addeqn(struct mdoc *mdoc, const struct eqn *ep)
 		n->flags |= MDOC_LINE;
 	node_append(mdoc, n);
 	mdoc->next = MDOC_NEXT_SIBLING;
-	return(1);
 }
 
-int
+void
 mdoc_addspan(struct mdoc *mdoc, const struct tbl_span *sp)
 {
 	struct mdoc_node *n;
@@ -221,7 +220,6 @@ mdoc_addspan(struct mdoc *mdoc, const struct tbl_span *sp)
 	n->span = sp;
 	node_append(mdoc, n);
 	mdoc->next = MDOC_NEXT_SIBLING;
-	return(1);
 }
 
 /*

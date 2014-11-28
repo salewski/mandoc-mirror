@@ -317,7 +317,7 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 	struct buf	 ln;
 	size_t		 pos; /* byte number in the ln buffer */
 	enum rofferr	 rr;
-	int		 of, rc;
+	int		 of;
 	int		 lnn; /* line number in the real file */
 	unsigned char	 c;
 
@@ -570,34 +570,21 @@ rerun:
 		 * Do the same for ROFF_EQN.
 		 */
 
-		rc = -1;
-
-		if (ROFF_TBL == rr)
-			while (NULL != (span = roff_span(curp->roff))) {
-				rc = curp->man ?
-				    man_addspan(curp->man, span) :
-				    mdoc_addspan(curp->mdoc, span);
-				if (0 == rc)
-					break;
-			}
-		else if (ROFF_EQN == rr)
-			rc = curp->mdoc ?
-			    mdoc_addeqn(curp->mdoc,
-				roff_eqn(curp->roff)) :
-			    man_addeqn(curp->man,
-				roff_eqn(curp->roff));
-		else if (curp->man || curp->mdoc)
-			rc = curp->man ?
-			    man_parseln(curp->man,
-				curp->line, ln.buf, of) :
-			    mdoc_parseln(curp->mdoc,
-				curp->line, ln.buf, of);
-
-		if (0 == rc) {
-			assert(MANDOCLEVEL_FATAL <= curp->file_status);
-			break;
-		} else if (2 == rc)
-			break;
+		if (rr == ROFF_TBL) {
+			while ((span = roff_span(curp->roff)) != NULL)
+				if (curp->man == NULL)
+					mdoc_addspan(curp->mdoc, span);
+				else
+					man_addspan(curp->man, span);
+		} else if (rr == ROFF_EQN) {
+			if (curp->man == NULL)
+				mdoc_addeqn(curp->mdoc, roff_eqn(curp->roff));
+			else
+				man_addeqn(curp->man, roff_eqn(curp->roff));
+		} else if ((curp->man == NULL ?
+		    mdoc_parseln(curp->mdoc, curp->line, ln.buf, of) :
+		    man_parseln(curp->man, curp->line, ln.buf, of)) == 2)
+				break;
 
 		/* Temporary buffers typically are not full. */
 
