@@ -942,10 +942,7 @@ post_lb(POST_ARGS)
 	char			*libname;
 
 	check_count(mdoc, MDOC_ELEM, CHECK_WARN, CHECK_EQ, 1);
-
 	n = mdoc->last->child;
-
-	assert(n);
 	assert(MDOC_TEXT == n->type);
 
 	if (NULL == (stdlibname = mdoc_a2lib(n->string)))
