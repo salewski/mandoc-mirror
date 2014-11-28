@@ -2280,19 +2280,9 @@ post_dt(POST_ARGS)
 		mdoc->meta.msec = mandoc_strdup(nn->string);
 	}
 
-	if (NULL == (nn = nn->next))
-		goto out;
+	/* Handle an optional architecture */
 
-	/*
-	 * If the third argument is a volume name, format is,
-	 * otherwise assume it's an architecture.
-	 */
-
-	cp = mdoc_a2vol(nn->string);
-	if (cp) {
-		free(mdoc->meta.vol);
-		mdoc->meta.vol = mandoc_strdup(cp);
-	} else {
+	if ((nn = nn->next) != NULL) {
 		for (p = nn->string; *p; p++)
 			*p = tolower((unsigned char)*p);
 		mdoc->meta.arch = mandoc_strdup(nn->string);

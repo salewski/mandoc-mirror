@@ -92,7 +92,6 @@ SRCS		 = att.c \
 		   term_ascii.c \
 		   term_ps.c \
 		   tree.c \
-		   vol.c \
 		   $(TESTSRCS)
 
 DISTFILES	 = INSTALL \
@@ -150,7 +149,6 @@ DISTFILES	 = INSTALL \
 		   tbl.3 \
 		   tbl.7 \
 		   term.h \
-		   vol.in \
 		   $(SRCS)
 
 LIBMAN_OBJS	 = man.o \
@@ -165,8 +163,7 @@ LIBMDOC_OBJS	 = att.o \
 		   mdoc_hash.o \
 		   mdoc_macro.o \
 		   mdoc_validate.o \
-		   st.o \
-		   vol.o
+		   st.o
 
 LIBROFF_OBJS	 = eqn.o \
 		   roff.o \
