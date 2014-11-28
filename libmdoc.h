@@ -127,8 +127,8 @@ const char	 *mdoc_a2lib(const char *);
 const char	 *mdoc_a2st(const char *);
 const char	 *mdoc_a2arch(const char *);
 const char	 *mdoc_a2vol(const char *);
-int		  mdoc_valid_pre(struct mdoc *, struct mdoc_node *);
-int		  mdoc_valid_post(struct mdoc *);
+void		  mdoc_valid_pre(struct mdoc *, struct mdoc_node *);
+void		  mdoc_valid_post(struct mdoc *);
 enum margverr	  mdoc_argv(struct mdoc *, int, enum mdoct,
 			struct mdoc_arg **, int *, char *);
 void		  mdoc_argv_free(struct mdoc_arg *);

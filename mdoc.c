@@ -89,8 +89,7 @@ static	void		  mdoc_free1(struct mdoc *);
 static	void		  mdoc_alloc1(struct mdoc *);
 static	struct mdoc_node *node_alloc(struct mdoc *, int, int,
 				enum mdoct, enum mdoc_type);
-static	int		  node_append(struct mdoc *,
-				struct mdoc_node *);
+static	void		  node_append(struct mdoc *, struct mdoc_node *);
 static	int		  mdoc_ptext(struct mdoc *, int, char *, int);
 static	int		  mdoc_pmacro(struct mdoc *, int, char *, int);
 
@@ -207,10 +206,7 @@ mdoc_addeqn(struct mdoc *mdoc, const struct eqn *ep)
 	n->eqn = ep;
 	if (ep->ln > mdoc->last->line)
 		n->flags |= MDOC_LINE;
-
-	if ( ! node_append(mdoc, n))
-		return(0);
-
+	node_append(mdoc, n);
 	mdoc->next = MDOC_NEXT_SIBLING;
 	return(1);
 }
@@ -222,10 +218,7 @@ mdoc_addspan(struct mdoc *mdoc, const struct tbl_span *sp)
 
 	n = node_alloc(mdoc, sp->line, 0, MDOC_MAX, MDOC_TBL);
 	n->span = sp;
-
-	if ( ! node_append(mdoc, n))
-		return(0);
-
+	node_append(mdoc, n);
 	mdoc->next = MDOC_NEXT_SIBLING;
 	return(1);
 }
@@ -285,7 +278,7 @@ mdoc_macro(MACRO_PROT_ARGS)
 }
 
 
-static int
+static void
 node_append(struct mdoc *mdoc, struct mdoc_node *p)
 {
 
@@ -329,8 +322,7 @@ node_append(struct mdoc *mdoc, struct mdoc_node *p)
 		break;
 	}
 
-	if ( ! mdoc_valid_pre(mdoc, p))
-		return(0);
+	mdoc_valid_pre(mdoc, p);
 
 	switch (p->type) {
 	case MDOC_HEAD:
@@ -357,14 +349,11 @@ node_append(struct mdoc *mdoc, struct mdoc_node *p)
 	case MDOC_TBL:
 		/* FALLTHROUGH */
 	case MDOC_TEXT:
-		if ( ! mdoc_valid_post(mdoc))
-			return(0);
+		mdoc_valid_post(mdoc);
 		break;
 	default:
 		break;
 	}
-
-	return(1);
 }
 
 static struct mdoc_node *
@@ -400,8 +389,7 @@ mdoc_tail_alloc(struct mdoc *mdoc, int line, int pos, enum mdoct tok)
 	struct mdoc_node *p;
 
 	p = node_alloc(mdoc, line, pos, tok, MDOC_TAIL);
-	if ( ! node_append(mdoc, p))
-		return(0);
+	node_append(mdoc, p);
 	mdoc->next = MDOC_NEXT_CHILD;
 	return(1);
 }
@@ -415,8 +403,7 @@ mdoc_head_alloc(struct mdoc *mdoc, int line, int pos, enum mdoct tok)
 	assert(mdoc->last);
 
 	p = node_alloc(mdoc, line, pos, tok, MDOC_HEAD);
-	if ( ! node_append(mdoc, p))
-		return(0);
+	node_append(mdoc, p);
 	mdoc->next = MDOC_NEXT_CHILD;
 	return(1);
 }
@@ -427,8 +414,7 @@ mdoc_body_alloc(struct mdoc *mdoc, int line, int pos, enum mdoct tok)
 	struct mdoc_node *p;
 
 	p = node_alloc(mdoc, line, pos, tok, MDOC_BODY);
-	if ( ! node_append(mdoc, p))
-		return(0);
+	node_append(mdoc, p);
 	mdoc->next = MDOC_NEXT_CHILD;
 	return(1);
 }
@@ -443,8 +429,7 @@ mdoc_endbody_alloc(struct mdoc *mdoc, int line, int pos, enum mdoct tok,
 	p->pending = body;
 	p->norm = body->norm;
 	p->end = end;
-	if ( ! node_append(mdoc, p))
-		return(0);
+	node_append(mdoc, p);
 	mdoc->next = MDOC_NEXT_SIBLING;
 	return(1);
 }
@@ -475,9 +460,7 @@ mdoc_block_alloc(struct mdoc *mdoc, int line, int pos,
 	default:
 		break;
 	}
-
-	if ( ! node_append(mdoc, p))
-		return(0);
+	node_append(mdoc, p);
 	mdoc->next = MDOC_NEXT_CHILD;
 	return(1);
 }
@@ -500,9 +483,7 @@ mdoc_elem_alloc(struct mdoc *mdoc, int line, int pos,
 	default:
 		break;
 	}
-
-	if ( ! node_append(mdoc, p))
-		return(0);
+	node_append(mdoc, p);
 	mdoc->next = MDOC_NEXT_CHILD;
 	return(1);
 }
@@ -514,10 +495,7 @@ mdoc_word_alloc(struct mdoc *mdoc, int line, int pos, const char *p)
 
 	n = node_alloc(mdoc, line, pos, MDOC_MAX, MDOC_TEXT);
 	n->string = roff_strdup(mdoc->roff, p);
-
-	if ( ! node_append(mdoc, n))
-		return(0);
-
+	node_append(mdoc, n);
 	mdoc->next = MDOC_NEXT_SIBLING;
 	return(1);
 }
@@ -606,7 +584,8 @@ mdoc_node_relink(struct mdoc *mdoc, struct mdoc_node *p)
 {
 
 	mdoc_node_unlink(mdoc, p);
-	return(node_append(mdoc, p));
+	node_append(mdoc, p);
+	return(1);
 }
 
 /*
@@ -704,7 +683,8 @@ mdoc_ptext(struct mdoc *mdoc, int line, char *buf, int offs)
 
 		mdoc->next = MDOC_NEXT_SIBLING;
 
-		return(mdoc_valid_post(mdoc));
+		mdoc_valid_post(mdoc);
+		return(1);
 	}
 
 	if ( ! mdoc_word_alloc(mdoc, line, offs, buf+offs))
