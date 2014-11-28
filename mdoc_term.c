@@ -995,6 +995,7 @@ termp_it_post(DECL_ARGS)
 static int
 termp_nm_pre(DECL_ARGS)
 {
+	const char	*cp;
 
 	if (MDOC_BLOCK == n->type) {
 		p->flags |= TERMP_PREKEEP;
@@ -1005,12 +1006,15 @@ termp_nm_pre(DECL_ARGS)
 		if (NULL == n->child)
 			return(0);
 		p->flags |= TERMP_NOSPACE;
-		p->offset += term_len(p, 1) +
-		    (NULL == n->prev->child ?
-		     term_strlen(p, meta->name) :
-		     MDOC_TEXT == n->prev->child->type ?
-		     term_strlen(p, n->prev->child->string) :
-		     term_len(p, 5));
+		cp = NULL;
+		if (n->prev->child != NULL)
+		    cp = n->prev->child->string;
+		if (cp == NULL)
+			cp = meta->name;
+		if (cp == NULL)
+			p->offset += term_len(p, 6);
+		else
+			p->offset += term_len(p, 1) + term_strlen(p, cp);
 		return(1);
 	}
 
