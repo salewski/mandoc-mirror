@@ -35,8 +35,7 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-strsep.c \
 		   test-wchar.c
 
-SRCS		 = arch.c \
-		   att.c \
+SRCS		 = att.c \
 		   cgi.c \
 		   chars.c \
 		   compat_fgetln.c \
@@ -103,7 +102,6 @@ DISTFILES	 = INSTALL \
 		   NEWS \
 		   TODO \
 		   apropos.1 \
-		   arch.in \
 		   att.in \
 		   cgi.h.example \
 		   chars.in \
@@ -160,8 +158,7 @@ LIBMAN_OBJS	 = man.o \
 		   man_macro.o \
 		   man_validate.o
 
-LIBMDOC_OBJS	 = arch.o \
-		   att.o \
+LIBMDOC_OBJS	 = att.o \
 		   lib.o \
 		   mdoc.o \
 		   mdoc_argv.o \

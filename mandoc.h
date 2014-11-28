@@ -54,7 +54,6 @@ enum	mandocerr {
 	MANDOCERR_TITLE_CASE, /* lower case character in document title */
 	MANDOCERR_MSEC_MISSING, /* missing manual section, using "": macro */
 	MANDOCERR_MSEC_BAD, /* unknown manual section: Dt ... section */
-	MANDOCERR_ARCH_BAD, /* unknown manual volume or arch: Dt ... volume */
 	MANDOCERR_DATE_MISSING, /* missing date, using today's date */
 	MANDOCERR_DATE_BAD, /* cannot parse date, using it verbatim: date */
 	MANDOCERR_OS_MISSING, /* missing Os macro, using "" */

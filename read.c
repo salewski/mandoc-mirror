@@ -97,7 +97,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"lower case character in document title",
 	"missing manual section, using \"\"",
 	"unknown manual section",
-	"unknown manual volume or arch",
 	"missing date, using today's date",
 	"cannot parse date, using it verbatim",
 	"missing Os macro, using \"\"",
