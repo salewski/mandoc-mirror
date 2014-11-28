@@ -194,7 +194,8 @@ int
 mdoc_endparse(struct mdoc *mdoc)
 {
 
-	return(mdoc_macroend(mdoc));
+	mdoc_macroend(mdoc);
+	return(1);
 }
 
 int
@@ -250,7 +251,7 @@ mdoc_parseln(struct mdoc *mdoc, int ln, char *buf, int offs)
 	    mdoc_ptext(mdoc, ln, buf, offs));
 }
 
-int
+void
 mdoc_macro(MACRO_PROT_ARGS)
 {
 	assert(tok < MDOC_MAX);
@@ -260,7 +261,7 @@ mdoc_macro(MACRO_PROT_ARGS)
 			mandoc_vmsg(MANDOCERR_DT_LATE,
 			    mdoc->parse, line, ppos,
 			    "Dt %s", buf + *pos);
-			return(1);
+			return;
 		}
 	} else if ( ! (mdoc_macros[tok].flags & MDOC_PROLOGUE)) {
 		if (mdoc->meta.title == NULL) {
@@ -273,8 +274,7 @@ mdoc_macro(MACRO_PROT_ARGS)
 			mdoc->meta.vol = mandoc_strdup("LOCAL");
 		mdoc->flags |= MDOC_PBODY;
 	}
-
-	return((*mdoc_macros[tok].fp)(mdoc, tok, line, ppos, pos, buf));
+	(*mdoc_macros[tok].fp)(mdoc, tok, line, ppos, pos, buf);
 }
 
 
@@ -606,7 +606,8 @@ mdoc_ptext(struct mdoc *mdoc, int line, char *buf, int offs)
 	    LIST_column == n->norm->Bl.type) {
 		/* `Bl' is open without any children. */
 		mdoc->flags |= MDOC_FREECOL;
-		return(mdoc_macro(mdoc, MDOC_It, line, offs, &offs, buf));
+		mdoc_macro(mdoc, MDOC_It, line, offs, &offs, buf);
+		return(1);
 	}
 
 	if (MDOC_It == n->tok && MDOC_BLOCK == n->type &&
@@ -615,7 +616,8 @@ mdoc_ptext(struct mdoc *mdoc, int line, char *buf, int offs)
 	    LIST_column == n->parent->norm->Bl.type) {
 		/* `Bl' has block-level `It' children. */
 		mdoc->flags |= MDOC_FREECOL;
-		return(mdoc_macro(mdoc, MDOC_It, line, offs, &offs, buf));
+		mdoc_macro(mdoc, MDOC_It, line, offs, &offs, buf);
+		return(1);
 	}
 
 	/*
@@ -693,7 +695,6 @@ mdoc_ptext(struct mdoc *mdoc, int line, char *buf, int offs)
 
 	if (mandoc_eos(buf+offs, (size_t)(end-buf-offs)))
 		mdoc->last->flags |= MDOC_EOS;
-
 	return(1);
 }
 
@@ -765,8 +766,10 @@ mdoc_pmacro(struct mdoc *mdoc, int ln, char *buf, int offs)
 	 * into macro processing.
 	 */
 
-	if (NULL == mdoc->last || MDOC_It == tok || MDOC_El == tok)
-		return(mdoc_macro(mdoc, tok, ln, sv, &offs, buf));
+	if (NULL == mdoc->last || MDOC_It == tok || MDOC_El == tok) {
+		mdoc_macro(mdoc, tok, ln, sv, &offs, buf);
+		return(1);
+	}
 
 	n = mdoc->last;
 	assert(mdoc->last);
@@ -779,7 +782,8 @@ mdoc_pmacro(struct mdoc *mdoc, int ln, char *buf, int offs)
 	if (MDOC_Bl == n->tok && MDOC_BODY == n->type &&
 	    LIST_column == n->norm->Bl.type) {
 		mdoc->flags |= MDOC_FREECOL;
-		return(mdoc_macro(mdoc, MDOC_It, ln, sv, &sv, buf));
+		mdoc_macro(mdoc, MDOC_It, ln, sv, &sv, buf);
+		return(1);
 	}
 
 	/*
@@ -793,13 +797,13 @@ mdoc_pmacro(struct mdoc *mdoc, int ln, char *buf, int offs)
 	    MDOC_Bl == n->parent->tok &&
 	    LIST_column == n->parent->norm->Bl.type) {
 		mdoc->flags |= MDOC_FREECOL;
-		return(mdoc_macro(mdoc, MDOC_It, ln, sv, &sv, buf));
+		mdoc_macro(mdoc, MDOC_It, ln, sv, &sv, buf);
+		return(1);
 	}
 
 	/* Normal processing of a macro. */
 
-	if ( ! mdoc_macro(mdoc, tok, ln, sv, &offs, buf))
-		return(0);
+	mdoc_macro(mdoc, tok, ln, sv, &offs, buf);
 
 	/* In quick mode (for mandocdb), abort after the NAME section. */
 

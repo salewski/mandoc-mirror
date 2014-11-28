@@ -56,7 +56,7 @@ struct	mdoc {
 			char *buf
 
 struct	mdoc_macro {
-	int		(*fp)(MACRO_PROT_ARGS);
+	void		(*fp)(MACRO_PROT_ARGS);
 	int		  flags;
 #define	MDOC_CALLABLE	 (1 << 0)
 #define	MDOC_PARSED	 (1 << 1)
@@ -105,7 +105,7 @@ extern	const struct mdoc_macro *const mdoc_macros;
 
 __BEGIN_DECLS
 
-int		  mdoc_macro(MACRO_PROT_ARGS);
+void		  mdoc_macro(MACRO_PROT_ARGS);
 void		  mdoc_word_alloc(struct mdoc *, int, int, const char *);
 void		  mdoc_word_append(struct mdoc *, const char *);
 void		  mdoc_elem_alloc(struct mdoc *, int, int,
@@ -135,7 +135,7 @@ enum margserr	  mdoc_args(struct mdoc *, int,
 			int *, char *, enum mdoct, char **);
 enum margserr	  mdoc_zargs(struct mdoc *, int,
 			int *, char *, char **);
-int		  mdoc_macroend(struct mdoc *);
+void		  mdoc_macroend(struct mdoc *);
 enum mdelim	  mdoc_isdelim(const char *);
 
 __END_DECLS
