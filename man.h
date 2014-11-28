@@ -68,7 +68,6 @@ enum	man_type {
 	MAN_BLOCK,
 	MAN_HEAD,
 	MAN_BODY,
-	MAN_TAIL,
 	MAN_TBL,
 	MAN_EQN
 };

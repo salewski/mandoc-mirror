@@ -46,7 +46,7 @@ struct	man {
 			  char *buf
 
 struct	man_macro {
-	int		(*fp)(MACRO_PROT_ARGS);
+	void		(*fp)(MACRO_PROT_ARGS);
 	int		  flags;
 #define	MAN_SCOPED	 (1 << 0)
 #define	MAN_EXPLICIT	 (1 << 1)	/* See blk_imp(). */
@@ -61,19 +61,18 @@ extern	const struct man_macro *const man_macros;
 
 __BEGIN_DECLS
 
-int		  man_word_alloc(struct man *, int, int, const char *);
+void		  man_word_alloc(struct man *, int, int, const char *);
 void		  man_word_append(struct man *, const char *);
-int		  man_block_alloc(struct man *, int, int, enum mant);
-int		  man_head_alloc(struct man *, int, int, enum mant);
-int		  man_tail_alloc(struct man *, int, int, enum mant);
-int		  man_body_alloc(struct man *, int, int, enum mant);
-int		  man_elem_alloc(struct man *, int, int, enum mant);
+void		  man_block_alloc(struct man *, int, int, enum mant);
+void		  man_head_alloc(struct man *, int, int, enum mant);
+void		  man_body_alloc(struct man *, int, int, enum mant);
+void		  man_elem_alloc(struct man *, int, int, enum mant);
 void		  man_node_delete(struct man *, struct man_node *);
 void		  man_hash_init(void);
 enum mant	  man_hash_find(const char *);
-int		  man_macroend(struct man *);
-int		  man_valid_post(struct man *);
-int		  man_unscope(struct man *, const struct man_node *);
+void		  man_macroend(struct man *);
+void		  man_valid_post(struct man *);
+void		  man_unscope(struct man *, const struct man_node *);
 
 __END_DECLS
 
