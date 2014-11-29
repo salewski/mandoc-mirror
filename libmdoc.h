@@ -125,8 +125,6 @@ void		  mdoc_argv(struct mdoc *, int, enum mdoct,
 void		  mdoc_argv_free(struct mdoc_arg *);
 enum margserr	  mdoc_args(struct mdoc *, int,
 			int *, char *, enum mdoct, char **);
-enum margserr	  mdoc_zargs(struct mdoc *, int,
-			int *, char *, char **);
 void		  mdoc_macroend(struct mdoc *);
 enum mdelim	  mdoc_isdelim(const char *);
 

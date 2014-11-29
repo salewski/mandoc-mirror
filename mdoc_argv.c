@@ -412,22 +412,17 @@ argn_free(struct mdoc_arg *p, int iarg)
 }
 
 enum margserr
-mdoc_zargs(struct mdoc *mdoc, int line, int *pos, char *buf, char **v)
-{
-
-	return(args(mdoc, line, pos, buf, ARGSFL_NONE, v));
-}
-
-enum margserr
 mdoc_args(struct mdoc *mdoc, int line, int *pos,
 		char *buf, enum mdoct tok, char **v)
 {
-	enum argsflag	  fl;
 	struct mdoc_node *n;
+	char		 *v_local;
+	enum argsflag	  fl;
 
-	fl = mdocargs[tok].flags;
-
-	if (MDOC_It != tok)
+	if (v == NULL)
+		v = &v_local;
+	fl = tok == MDOC_MAX ? ARGSFL_NONE : mdocargs[tok].flags;
+	if (tok != MDOC_It)
 		return(args(mdoc, line, pos, buf, fl, v));
 
 	/*
