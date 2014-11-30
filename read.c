@@ -120,6 +120,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	/* related to macros and nesting */
 	"obsolete macro",
+	"macro neither callable nor escaped",
 	"skipping paragraph macro",
 	"moving paragraph macro out of list",
 	"skipping no-space macro",

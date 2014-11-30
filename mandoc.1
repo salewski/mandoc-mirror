@@ -803,6 +803,13 @@ Probably, there are author names lacking markup.
 See the
 .Xr mdoc 7
 manual for replacements.
+.It Sy "macro neither callable nor escaped"
+.Pq mdoc
+The name of a macro that is not callable appears on a macro line.
+It is printed verbatim.
+If the intention is to call it, move it to its own line;
+otherwise, escape it by prepending
+.Sq \e& .
 .It Sy "skipping paragraph macro"
 In
 .Xr mdoc 7
