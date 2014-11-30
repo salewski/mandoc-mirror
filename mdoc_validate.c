@@ -210,7 +210,7 @@ static	const struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Nx */
 	{ NULL, NULL },				/* Ox */
 	{ NULL, NULL },				/* Pc */
-	{ NULL, ewarn_eq1 },			/* Pf */
+	{ NULL, NULL },				/* Pf */
 	{ NULL, NULL },				/* Po */
 	{ NULL, NULL },				/* Pq */
 	{ NULL, NULL },				/* Qc */

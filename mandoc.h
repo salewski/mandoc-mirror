@@ -103,6 +103,7 @@ enum	mandocerr {
 	MANDOCERR_IT_NOBODY, /* empty list item: Bl -type It */
 	MANDOCERR_BF_NOFONT, /* missing font type, using \fR: Bf */
 	MANDOCERR_BF_BADFONT, /* unknown font type, using \fR: Bf font */
+	MANDOCERR_PF_SKIP, /* nothing follows prefix: Pf arg */
 	MANDOCERR_ARG_STD, /* missing -std argument, adding it: macro */
 	MANDOCERR_EQN_NOBOX, /* missing eqn box, using "": op */
 

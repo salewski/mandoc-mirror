@@ -1602,7 +1602,8 @@ static void
 post_pf(DECL_ARGS)
 {
 
-	outflags &= ~MMAN_spc;
+	if ( ! (n->next == NULL || n->next->flags & MDOC_LINE))
+		outflags &= ~MMAN_spc;
 }
 
 static int

@@ -1734,7 +1734,8 @@ static void
 termp_pf_post(DECL_ARGS)
 {
 
-	p->flags |= TERMP_NOSPACE;
+	if ( ! (n->next == NULL || n->next->flags & MDOC_LINE))
+		p->flags |= TERMP_NOSPACE;
 }
 
 static int

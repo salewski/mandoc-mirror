@@ -1869,7 +1869,8 @@ static void
 mdoc_pf_post(MDOC_ARGS)
 {
 
-	h->flags |= HTML_NOSPACE;
+	if ( ! (n->next == NULL || n->next->flags & MDOC_LINE))
+		h->flags |= HTML_NOSPACE;
 }
 
 static int
