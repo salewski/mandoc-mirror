@@ -179,7 +179,7 @@ low-level roff(7) markup embedded in some man(7) pages.  On the BSD
 systems using mandoc(1), third-party software is generally vetted
 on whether it may be formatted with mandoc(1).  If not, groff(1)
 is pulled in as a dependency and used to install a pre-formatted
-"catpage" intead of directly as manual page source.
+"catpage" instead of directly as manual page source.
 
 For more background on switching operating systems to use mandoc(1)
 instead of groff(1) to format manuals, see the two BSDCan presentations
