@@ -131,6 +131,7 @@ DISTFILES	 = INSTALL \
 		   mandoc_aux.h \
 		   mandoc_char.7 \
 		   mandoc_escape.3 \
+		   mandoc_headers.3 \
 		   mandoc_html.3 \
 		   mandoc_malloc.3 \
 		   manpath.h \
@@ -237,6 +238,7 @@ WWW_MANS	 = apropos.1.html \
 		   mandoc.1.html \
 		   mandoc.3.html \
 		   mandoc_escape.3.html \
+		   mandoc_headers.3.html \
 		   mandoc_html.3.html \
 		   mandoc_malloc.3.html \
 		   mansearch.3.html \
