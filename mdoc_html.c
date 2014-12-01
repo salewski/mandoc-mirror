@@ -26,11 +26,10 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "mandoc.h"
 #include "mandoc_aux.h"
+#include "mdoc.h"
 #include "out.h"
 #include "html.h"
-#include "mdoc.h"
 #include "main.h"
 
 #define	INDENT		 5

@@ -27,11 +27,10 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "mandoc.h"
 #include "mandoc_aux.h"
 #include "out.h"
-#include "main.h"
 #include "term.h"
+#include "main.h"
 
 /* These work the buffer used by the header and footer. */
 #define	PS_BUFSLOP	  128

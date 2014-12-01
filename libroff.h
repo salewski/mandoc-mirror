@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-__BEGIN_DECLS
-
 enum	tbl_part {
 	TBL_PART_OPTS, /* in options (first line) */
 	TBL_PART_LAYOUT, /* describing layout */
@@ -63,6 +61,8 @@ struct	eqn_def {
 	char		 *val;
 	size_t		  valsz;
 };
+
+__BEGIN_DECLS
 
 struct tbl_node	*tbl_alloc(int, int, struct mparse *);
 void		 tbl_restart(int, int, struct tbl_node *);

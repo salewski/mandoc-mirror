@@ -24,7 +24,6 @@
 #include <string.h>
 
 #include "man.h"
-#include "mandoc.h"
 #include "libman.h"
 
 #define	HASH_DEPTH	 6

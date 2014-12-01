@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-__BEGIN_DECLS
-
-struct	termp;
-
 enum	termenc {
 	TERMENC_ASCII,
 	TERMENC_LOCALE,
@@ -41,6 +37,8 @@ enum	termfont {
 };
 
 #define	TERM_MAXMARGIN	  100000 /* FIXME */
+
+struct	termp;
 
 typedef void	(*term_margin)(struct termp *, const void *);
 
@@ -101,6 +99,11 @@ struct	termp {
 	const void	 *argf;		/* arg for headf/footf */
 	struct termp_ps	 *ps;
 };
+
+__BEGIN_DECLS
+
+struct	tbl_span;
+struct	eqn;
 
 const char	 *ascii_uc2str(int);
 

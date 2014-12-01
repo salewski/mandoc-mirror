@@ -35,6 +35,11 @@ struct	buf {
 
 __BEGIN_DECLS
 
+struct	mparse;
+struct	mchars;
+enum	mandocerr;
+struct	tbl_span;
+struct	eqn;
 struct	roff;
 struct	mdoc;
 struct	man;

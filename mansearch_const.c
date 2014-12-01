@@ -20,7 +20,6 @@
 
 #include <stdint.h>
 
-#include "manpath.h"
 #include "mansearch.h"
 
 const int mansearch_keymax = 40;

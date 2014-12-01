@@ -15,8 +15,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-__BEGIN_DECLS
-
 enum	htmltag {
 	TAG_HTML,
 	TAG_HEAD,
@@ -143,6 +141,11 @@ struct	html {
 	int		  oflags; /* output options */
 #define	HTML_FRAGMENT	 (1 << 0) /* don't emit HTML/HEAD/BODY */
 };
+
+__BEGIN_DECLS
+
+struct	tbl_span;
+struct	eqn;
 
 void		  print_gen_decls(struct html *);
 void		  print_gen_head(struct html *);

@@ -15,13 +15,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-__BEGIN_DECLS
-
-struct	mdoc;
-struct	man;
-
 #define	UNCONST(a)	((void *)(uintptr_t)(const void *)(a))
 
+__BEGIN_DECLS
+
+struct	mchars;
+struct	mdoc;
+struct	man;
 
 /*
  * Definitions for main.c-visible output device functions, e.g., -Thtml

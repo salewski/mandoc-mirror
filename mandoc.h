@@ -414,12 +414,12 @@ enum	mandoc_esc {
 typedef	void	(*mandocmsg)(enum mandocerr, enum mandoclevel,
 			const char *, int, int, const char *);
 
+__BEGIN_DECLS
+
 struct	mparse;
 struct	mchars;
 struct	mdoc;
 struct	man;
-
-__BEGIN_DECLS
 
 enum mandoc_esc	  mandoc_escape(const char **, const char **, int *);
 struct mchars	 *mchars_alloc(void);

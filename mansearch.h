@@ -97,6 +97,8 @@ struct	mansearch {
 
 __BEGIN_DECLS
 
+struct	manpaths;
+
 int	mansearch_setup(int);
 int	mansearch(const struct mansearch *cfg, /* options */
 		const struct manpaths *paths, /* manpaths */
