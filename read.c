@@ -41,7 +41,6 @@
 #include "libmandoc.h"
 #include "mdoc.h"
 #include "man.h"
-#include "main.h"
 
 #define	REPARSE_LIMIT	1000
 
@@ -756,12 +755,12 @@ mparse_parse_buffer(struct mparse *curp, struct buf blk, const char *file)
 }
 
 enum mandoclevel
-mparse_readmem(struct mparse *curp, const void *buf, size_t len,
+mparse_readmem(struct mparse *curp, void *buf, size_t len,
 		const char *file)
 {
 	struct buf blk;
 
-	blk.buf = UNCONST(buf);
+	blk.buf = buf;
 	blk.sz = len;
 
 	mparse_parse_buffer(curp, blk, file);
