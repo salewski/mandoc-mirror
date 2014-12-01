@@ -15,8 +15,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef LIBMDOC_H
-#define LIBMDOC_H
 
 enum	mdoc_next {
 	MDOC_NEXT_SIBLING = 0,
@@ -129,5 +127,3 @@ void		  mdoc_macroend(struct mdoc *);
 enum mdelim	  mdoc_isdelim(const char *);
 
 __END_DECLS
-
-#endif /*!LIBMDOC_H*/

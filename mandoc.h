@@ -15,8 +15,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef MANDOC_H
-#define MANDOC_H
 
 #define ASCII_NBRSP	 31  /* non-breaking space */
 #define	ASCII_HYPH	 30  /* breakable hyphen */
@@ -450,5 +448,3 @@ const char	 *mparse_strlevel(enum mandoclevel);
 enum mandoclevel  mparse_wait(struct mparse *);
 
 __END_DECLS
-
-#endif /*!MANDOC_H*/

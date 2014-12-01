@@ -15,8 +15,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef MANSEARCH_H
-#define MANSEARCH_H
 
 #define	MANDOC_DB	 "mandoc.db"
 
@@ -109,5 +107,3 @@ int	mansearch(const struct mansearch *cfg, /* options */
 void	mansearch_free(struct manpage *, size_t);
 
 __END_DECLS
-
-#endif /* MANSEARCH_H */

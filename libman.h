@@ -15,8 +15,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef LIBMAN_H
-#define LIBMAN_H
 
 enum	man_next {
 	MAN_NEXT_SIBLING = 0,
@@ -75,5 +73,3 @@ void		  man_valid_post(struct man *);
 void		  man_unscope(struct man *, const struct man_node *);
 
 __END_DECLS
-
-#endif /*!LIBMAN_H*/

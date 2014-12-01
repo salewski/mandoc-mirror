@@ -15,8 +15,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef MAN_H
-#define MAN_H
 
 enum	mant {
 	MAN_br = 0,
@@ -116,5 +114,3 @@ const struct mparse   *man_mparse(const struct man *);
 void man_deroff(char **, const struct man_node *);
 
 __END_DECLS
-
-#endif /*!MAN_H*/

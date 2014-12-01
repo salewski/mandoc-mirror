@@ -15,8 +15,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef LIBROFF_H
-#define LIBROFF_H
 
 __BEGIN_DECLS
 
@@ -84,5 +82,3 @@ enum rofferr	 eqn_read(struct eqn_node **, int,
 			const char *, int, int *);
 
 __END_DECLS
-
-#endif /*LIBROFF_H*/

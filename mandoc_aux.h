@@ -15,8 +15,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef MANDOC_AUX_H
-#define MANDOC_AUX_H
 
 __BEGIN_DECLS
 
@@ -29,5 +27,3 @@ char		 *mandoc_strdup(const char *);
 char		 *mandoc_strndup(const char *, size_t);
 
 __END_DECLS
-
-#endif /*!MANDOC_AUX_H*/

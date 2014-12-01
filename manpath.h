@@ -15,8 +15,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef MANPATH_H
-#define MANPATH_H
 
 /*
  * Unsorted list of unique, absolute paths to be searched for manual
@@ -34,5 +32,3 @@ void	 manpath_parse(struct manpaths *, const char *, char *, char *);
 void	 manpath_free(struct manpaths *);
 
 __END_DECLS
-
-#endif /*!MANPATH_H*/

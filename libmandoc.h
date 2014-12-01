@@ -15,8 +15,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef LIBMANDOC_H
-#define LIBMANDOC_H
 
 enum	rofferr {
 	ROFF_CONT, /* continue processing line */
@@ -91,5 +89,3 @@ const struct tbl_span	*roff_span(const struct roff *);
 const struct eqn	*roff_eqn(const struct roff *);
 
 __END_DECLS
-
-#endif /*!LIBMANDOC_H*/

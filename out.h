@@ -14,8 +14,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef OUT_H
-#define OUT_H
 
 enum	roffscale {
 	SCALE_CM, /* centimeters (c) */
@@ -69,5 +67,3 @@ void		  tblcalc(struct rofftbl *tbl,
 			const struct tbl_span *, size_t);
 
 __END_DECLS
-
-#endif /*!OUT_H*/

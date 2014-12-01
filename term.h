@@ -15,8 +15,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef TERM_H
-#define TERM_H
 
 __BEGIN_DECLS
 
@@ -134,5 +132,3 @@ void		  term_fontrepl(struct termp *, enum termfont);
 void		  term_fontlast(struct termp *);
 
 __END_DECLS
-
-#endif /*!TERM_H*/
