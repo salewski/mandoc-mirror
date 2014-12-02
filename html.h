@@ -126,6 +126,7 @@ struct	html {
 #define	HTML_SKIPCHAR	 (1 << 6) /* skip the next character */
 #define	HTML_NOSPLIT	 (1 << 7) /* do not break line before .An */
 #define	HTML_SPLIT	 (1 << 8) /* break line before .An */
+#define	HTML_NONEWLINE	 (1 << 9) /* No line break in nofill mode. */
 	struct tagq	  tags; /* stack of open tags */
 	struct rofftbl	  tbl; /* current table */
 	struct tag	 *tblt; /* current open table scope */

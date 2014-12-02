@@ -562,8 +562,9 @@ print_text(struct html *h, const char *word)
 	if ( ! print_encode(h, word, 0)) {
 		if ( ! (h->flags & HTML_NONOSPACE))
 			h->flags &= ~HTML_NOSPACE;
+		h->flags &= ~HTML_NONEWLINE;
 	} else
-		h->flags |= HTML_NOSPACE;
+		h->flags |= HTML_NOSPACE | HTML_NONEWLINE;
 
 	if (h->metaf) {
 		print_tagq(h, h->metaf);

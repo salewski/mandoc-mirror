@@ -417,7 +417,7 @@ term_word(struct termp *p, const char *word)
 	else
 		p->flags |= TERMP_NOSPACE;
 
-	p->flags &= ~TERMP_SENTENCE;
+	p->flags &= ~(TERMP_SENTENCE | TERMP_NONEWLINE);
 
 	while ('\0' != *word) {
 		if ('\\' != *word) {
@@ -487,7 +487,7 @@ term_word(struct termp *p, const char *word)
 			if (TERMP_SKIPCHAR & p->flags)
 				p->flags &= ~TERMP_SKIPCHAR;
 			else if ('\0' == *word)
-				p->flags |= TERMP_NOSPACE;
+				p->flags |= (TERMP_NOSPACE | TERMP_NONEWLINE);
 			continue;
 		case ESCAPE_SKIPCHAR:
 			p->flags |= TERMP_SKIPCHAR;

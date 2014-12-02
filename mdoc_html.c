@@ -1201,7 +1201,8 @@ mdoc_bd_pre(MDOC_ARGS)
 		default:
 			break;
 		}
-		if (nn->next && nn->next->line == nn->line)
+		if (h->flags & HTML_NONEWLINE ||
+		    (nn->next && ! (nn->next->flags & MDOC_LINE)))
 			continue;
 		else if (nn->next)
 			print_text(h, "\n");

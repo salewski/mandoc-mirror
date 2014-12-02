@@ -1632,7 +1632,8 @@ termp_bd_pre(DECL_ARGS)
 		default:
 			break;
 		}
-		if (nn->next && nn->next->line == nn->line)
+		if (p->flags & TERMP_NONEWLINE ||
+		    (nn->next && ! (nn->next->flags & MDOC_LINE)))
 			continue;
 		term_flushln(p);
 		p->flags |= TERMP_NOSPACE;

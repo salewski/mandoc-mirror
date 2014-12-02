@@ -83,11 +83,6 @@ are mere guesses, and some may be wrong.
   found by jca@ in ratpoison(1)  Sun, 30 Jun 2013 12:01:09 +0200
   loc *  exist **  algo **  size **  imp **
 
-- \c (interrupted text) should prevent the line break
-  even inside .Bd literal; that occurs in chat(8)
-  also found in cclive(1) - DocBook output
-  loc **  exist ***  algo **  size *  imp *
-
 - \h horizontal move
   found in cclive(1) DocBook output
   Anthony J. Bentley on discuss@  Sat, 21 Sep 2013 22:29:34 -0600

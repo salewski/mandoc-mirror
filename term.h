@@ -79,6 +79,7 @@ struct	termp {
 #define	TERMP_HANG	 (1 << 11)	/* See term_flushln(). */
 #define	TERMP_NOSPLIT	 (1 << 12)	/* Do not break line before .An. */
 #define	TERMP_SPLIT	 (1 << 13)	/* Break line before .An. */
+#define	TERMP_NONEWLINE	 (1 << 14)	/* No line break in nofill mode. */
 	int		 *buf;		/* Output buffer. */
 	enum termenc	  enc;		/* Type of encoding. */
 	const struct mchars *symtab;	/* Character table. */
