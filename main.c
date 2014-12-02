@@ -148,7 +148,7 @@ main(int argc, char *argv[])
 	/* Parser and formatter options. */
 
 	memset(&curp, 0, sizeof(struct curparse));
-	curp.outtype = OUTT_ASCII;
+	curp.outtype = OUTT_LOCALE;
 	curp.wlevel  = MANDOCLEVEL_FATAL;
 	options = MPARSE_SO | MPARSE_UTF8 | MPARSE_LATIN1;
 	defos = NULL;
