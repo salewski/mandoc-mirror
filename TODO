@@ -597,3 +597,9 @@ Several areas can be cleaned up to make mandoc even faster.  These are
  - Have Mac OSX systems automatically disable -static compilation of the
    CGI: -static isn't supported.
 
+************************************************************************
+* to improve in the groff_mdoc(7) macros
+************************************************************************
+
+- use uname(1) to set doc-default-operating-system at install time
+  tobimensch  Mon, 1 Dec 2014 00:25:07 +0100
