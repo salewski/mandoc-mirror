@@ -72,7 +72,8 @@ are mere guesses, and some may be wrong.
 - .ta (tab settings) occurs in ircbug(1) and probably gnats(1)
   reported by brad@  Sat, 15 Jan 2011 15:50:51 -0500
   also Tcl_NewStringObj(3) via wiz@  Wed, 5 Mar 2014 22:27:43 +0100
-  loc **  exist ***  algo **  size **  imp **
+  also posix2time(3) Carsten Kunze  Mon, 1 Dec 2014 13:03:10 +0100
+  loc **  exist ***  algo **  size **  imp ***
 
 - .ti (temporary indent)
   found by naddy@ in xloadimage(1)
