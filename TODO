@@ -121,13 +121,6 @@ are mere guesses, and some may be wrong.
   from jmc@  Wed, 14 Jul 2010 18:10:32 +0100
   loc *  exist ***  algo ***  size **  imp **
 
-- \\ is now implemented correctly
-  * when defining strings and macros using .ds and .de
-  * when parsing roff(7) and man(7) macro arguments
-  It does not yet work in mdoc(7) macro arguments
-  because libmdoc does not yet use mandoc_getarg().
-  Also check what happens in plain text, it must be identical to \e.
-
 - .Bd -centered implies -filled, not -unfilled, which is not
   easy to implement; it requires code similar to .ce, which
   we don't have either.
@@ -167,12 +160,6 @@ are mere guesses, and some may be wrong.
 - inside `.Bl -column' phrases, TERMP_IGNDELIM handling by `Pf'
   is not safe, e.g. `.Bl -column .It Pf a b .' gives "ab."
   but should give "ab ."
-
-- set a meaningful default if no `Bl' list type is assigned
-  loc *  exist *  algo *  size *  imp **  (already done?)
-
-- have a blank `It' head for `Bl -tag' not puke
-  loc *  exist *  algo *  size *  imp **  (already done?)
 
 - check whether it is correct that `D1' uses INDENT+1;
   does it need its own constant?
@@ -398,16 +385,6 @@ are mere guesses, and some may be wrong.
   Do we want to change mandoc or groff?
   Steffen Nurpmeso  Sat, 08 Nov 2014 13:34:59 +0100
   loc *  exist **  algo **  size *  imp **
-
-- .Rv (and probably .Ex) print different text if an `Nm' has been named
-  or not (run a manual without `Nm blah' to see this).  I'm not sure
-  that this exists in the wild, but it's still an error.
-  loc *  exist *  algo *  size *  imp * (already done?)
-
-- In .Bl -bullet, the groff bullet is "+\b+\bo\bo", the mandoc bullet
-  is just "o\bo".  The problem is to not break ps/pdf when fixing.
-  see for example OpenBSD ksh(1)
-  loc **  exist **  algo **  size *  imp **
 
 - In .Bl -enum -width 0n, groff continues one the same line after
   the number, mandoc breaks the line.
