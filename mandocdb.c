@@ -165,6 +165,8 @@ static	int	 parse_mdoc_Fd(struct mpage *, const struct mdoc_meta *,
 			const struct mdoc_node *);
 static	int	 parse_mdoc_Fn(struct mpage *, const struct mdoc_meta *,
 			const struct mdoc_node *);
+static	int	 parse_mdoc_Fo(struct mpage *, const struct mdoc_meta *,
+			const struct mdoc_node *);
 static	int	 parse_mdoc_Nd(struct mpage *, const struct mdoc_meta *,
 			const struct mdoc_node *);
 static	int	 parse_mdoc_Nm(struct mpage *, const struct mdoc_meta *,
@@ -300,7 +302,7 @@ static	const struct mdoc_handler mdocs[MDOC_MAX] = {
 	{ NULL, 0 },  /* Ux */
 	{ NULL, 0 },  /* Xc */
 	{ NULL, 0 },  /* Xo */
-	{ parse_mdoc_head, 0 },  /* Fo */
+	{ parse_mdoc_Fo, 0 },  /* Fo */
 	{ NULL, 0 },  /* Fc */
 	{ NULL, 0 },  /* Oo */
 	{ NULL, 0 },  /* Oc */
@@ -1651,6 +1653,8 @@ parse_mdoc_Fn(struct mpage *mpage, const struct mdoc_meta *meta,
 		cp++;
 
 	putkey(mpage, cp, TYPE_Fn);
+	if (n->sec == SEC_SYNOPSIS)
+		putkey(mpage, cp, NAME_SYN);
 
 	if (n->string < cp)
 		putkeys(mpage, n->string, cp - n->string, TYPE_Ft);
@@ -1659,6 +1663,17 @@ parse_mdoc_Fn(struct mpage *mpage, const struct mdoc_meta *meta,
 		if (MDOC_TEXT == n->type)
 			putkey(mpage, n->string, TYPE_Fa);
 
+	return(0);
+}
+
+static int
+parse_mdoc_Fo(struct mpage *mpage, const struct mdoc_meta *meta,
+	const struct mdoc_node *n)
+{
+
+	putmdockey(mpage, n->child, TYPE_Fn);
+	if (n->sec == SEC_SYNOPSIS)
+		putmdockey(mpage, n->child, NAME_SYN);
 	return(0);
 }
 
