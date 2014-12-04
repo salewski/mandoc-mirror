@@ -282,7 +282,7 @@ a2width(const struct man_node *n, struct roffsu *su)
 
 	if (MAN_TEXT != n->type)
 		return(0);
-	if (a2roffsu(n->string, su, SCALE_BU))
+	if (a2roffsu(n->string, su, SCALE_EN))
 		return(1);
 
 	return(0);

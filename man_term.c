@@ -201,7 +201,7 @@ a2width(const struct termp *p, const char *cp)
 {
 	struct roffsu	 su;
 
-	if ( ! a2roffsu(cp, &su, SCALE_BU))
+	if ( ! a2roffsu(cp, &su, SCALE_EN))
 		return(-1);
 
 	return((int)term_hspan(p, &su));
