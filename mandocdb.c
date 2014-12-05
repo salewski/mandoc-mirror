@@ -165,6 +165,7 @@ static	int	 parse_mdoc_head(struct mpage *, const struct mdoc_meta *,
 			const struct mdoc_node *);
 static	int	 parse_mdoc_Fd(struct mpage *, const struct mdoc_meta *,
 			const struct mdoc_node *);
+static	void	 parse_mdoc_fname(struct mpage *, const struct mdoc_node *);
 static	int	 parse_mdoc_Fn(struct mpage *, const struct mdoc_meta *,
 			const struct mdoc_node *);
 static	int	 parse_mdoc_Fo(struct mpage *, const struct mdoc_meta *,
@@ -1640,37 +1641,39 @@ parse_mdoc_Fd(struct mpage *mpage, const struct mdoc_meta *meta,
 	return(0);
 }
 
+static void
+parse_mdoc_fname(struct mpage *mpage, const struct mdoc_node *n)
+{
+	char	*cp;
+	size_t	 sz;
+
+	if (n->type != MDOC_TEXT)
+		return;
+
+	/* Skip function pointer punctuation. */
+
+	cp = n->string;
+	while (*cp == '(' || *cp == '*')
+		cp++;
+	sz = strcspn(cp, "()");
+
+	putkeys(mpage, cp, sz, TYPE_Fn);
+	if (n->sec == SEC_SYNOPSIS)
+		putkeys(mpage, cp, sz, NAME_SYN);
+}
+
 static int
 parse_mdoc_Fn(struct mpage *mpage, const struct mdoc_meta *meta,
 	const struct mdoc_node *n)
 {
-	char	*cp;
 
-	if (NULL == (n = n->child) || MDOC_TEXT != n->type)
+	if (n->child == NULL)
 		return(0);
 
-	/*
-	 * Parse: .Fn "struct type *name" "char *arg".
-	 * First strip away pointer symbol.
-	 * Then store the function name, then type.
-	 * Finally, store the arguments.
-	 */
+	parse_mdoc_fname(mpage, n->child);
 
-	if (NULL == (cp = strrchr(n->string, ' ')))
-		cp = n->string;
-
-	while ('*' == *cp)
-		cp++;
-
-	putkey(mpage, cp, TYPE_Fn);
-	if (n->sec == SEC_SYNOPSIS)
-		putkey(mpage, cp, NAME_SYN);
-
-	if (n->string < cp)
-		putkeys(mpage, n->string, cp - n->string, TYPE_Ft);
-
-	for (n = n->next; NULL != n; n = n->next)
-		if (MDOC_TEXT == n->type)
+	for (n = n->child->next; n != NULL; n = n->next)
+		if (n->type == MDOC_TEXT)
 			putkey(mpage, n->string, TYPE_Fa);
 
 	return(0);
@@ -1684,9 +1687,9 @@ parse_mdoc_Fo(struct mpage *mpage, const struct mdoc_meta *meta,
 	if (n->type != MDOC_HEAD)
 		return(1);
 
-	putmdockey(mpage, n->child, TYPE_Fn);
-	if (n->sec == SEC_SYNOPSIS)
-		putmdockey(mpage, n->child, NAME_SYN);
+	if (n->child != NULL)
+		parse_mdoc_fname(mpage, n->child);
+
 	return(0);
 }
 
