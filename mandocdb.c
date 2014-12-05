@@ -1681,6 +1681,9 @@ parse_mdoc_Fo(struct mpage *mpage, const struct mdoc_meta *meta,
 	const struct mdoc_node *n)
 {
 
+	if (n->type != MDOC_HEAD)
+		return(1);
+
 	putmdockey(mpage, n->child, TYPE_Fn);
 	if (n->sec == SEC_SYNOPSIS)
 		putmdockey(mpage, n->child, NAME_SYN);
