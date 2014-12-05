@@ -96,6 +96,8 @@ static	void		  version(void) __attribute__((noreturn));
 static	int		  woptions(struct curparse *, char *);
 
 static	const int sec_prios[] = {1, 4, 5, 8, 6, 3, 7, 2, 9};
+static	char		  help_arg[] = "help";
+static	char		 *help_argv[] = {help_arg, NULL};
 static	const char	 *progname;
 
 
@@ -142,6 +144,8 @@ main(int argc, char *argv[])
 		search.argmode = ARG_EXPR;
 	else if (strncmp(progname, "whatis", 6) == 0)
 		search.argmode = ARG_WORD;
+	else if (strncmp(progname, "help", 4) == 0)
+		search.argmode = ARG_NAME;
 	else
 		search.argmode = ARG_FILE;
 
@@ -273,15 +277,24 @@ main(int argc, char *argv[])
 	resp = NULL;
 #endif
 
-	/* Quirk for a man(1) section argument without -s. */
+	/*
+	 * Quirks for help(1)
+	 * and for a man(1) section argument without -s.
+	 */
 
-	if (search.argmode == ARG_NAME &&
-	    argv[0] != NULL &&
-	    isdigit((unsigned char)argv[0][0]) &&
-	    (argv[0][1] == '\0' || !strcmp(argv[0], "3p"))) {
-		search.sec = argv[0];
-		argv++;
-		argc--;
+	if (search.argmode == ARG_NAME) {
+		if (*progname == 'h') {
+			if (argc == 0) {
+				argv = help_argv;
+				argc = 1;
+			}
+		} else if (argv[0] != NULL &&
+		    isdigit((unsigned char)argv[0][0]) &&
+		    (argv[0][1] == '\0' || !strcmp(argv[0], "3p"))) {
+			search.sec = argv[0];
+			argv++;
+			argc--;
+		}
 	}
 
 	rc = MANDOCLEVEL_OK;
