@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <limits.h>
@@ -246,7 +247,8 @@ mansearch(const struct mansearch *search,
 		    SQLITE_OPEN_READONLY, NULL);
 
 		if (SQLITE_OK != c) {
-			perror(MANDOC_DB);
+			fprintf(stderr, "%s/%s: %s\n",
+			    paths->paths[i], MANDOC_DB, strerror(errno));
 			sqlite3_close(db);
 			continue;
 		}
