@@ -15,10 +15,6 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-BASEBIN		 = mandoc demandoc
-DBBIN		 = makewhatis
-CGIBIN		 = man.cgi
-
 TESTSRCS	 = test-dirent-namlen.c \
 		   test-fgetln.c \
 		   test-fts.c \
@@ -271,11 +267,11 @@ INSTALL_TARGETS	 = $(BUILD_TARGETS:-build=-install)
 
 all: base-build $(BUILD_TARGETS) Makefile.local
 
-base-build: $(BASEBIN)
+base-build: mandoc demandoc
 
-db-build: $(DBBIN)
+db-build: makewhatis
 
-cgi-build: $(CGIBIN)
+cgi-build: man.cgi
 
 install: base-install $(INSTALL_TARGETS)
 
@@ -308,12 +304,11 @@ base-install: base-build
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
-	$(INSTALL_PROGRAM) $(BASEBIN) $(DESTDIR)$(BINDIR)
+	$(INSTALL_PROGRAM) mandoc demandoc $(DESTDIR)$(BINDIR)
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
 	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h \
 		$(DESTDIR)$(INCLUDEDIR)
-	$(INSTALL_MAN) man.1 mandoc.1 demandoc.1 \
-		$(DESTDIR)$(MANDIR)/man1
+	$(INSTALL_MAN) mandoc.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
 		mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 \
@@ -328,9 +323,10 @@ db-install: db-build
 	mkdir -p $(DESTDIR)$(MANDIR)/man5
 	mkdir -p $(DESTDIR)$(MANDIR)/man8
 	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/apropos
+	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/man
 	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/whatis
 	$(INSTALL_PROGRAM) makewhatis $(DESTDIR)$(SBINDIR)
-	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL_MAN) apropos.1 man.1 $(DESTDIR)$(MANDIR)/man1
 	ln -f $(DESTDIR)$(MANDIR)/man1/apropos.1 \
 		$(DESTDIR)$(MANDIR)/man1/whatis.1
 	$(INSTALL_MAN) mansearch.3 $(DESTDIR)$(MANDIR)/man3
