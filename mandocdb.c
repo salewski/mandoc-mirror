@@ -336,7 +336,7 @@ static	const struct mdoc_handler mdocs[MDOC_MAX] = {
 
 
 int
-main(int argc, char *argv[])
+mandocdb(int argc, char *argv[])
 {
 	int		  ch, i;
 	size_t		  j, sz;

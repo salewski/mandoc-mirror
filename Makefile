@@ -207,18 +207,19 @@ MANDOC_TERM_OBJS = eqn_term.o \
 		   term_ps.o \
 		   tbl_term.o
 
-MANDOC_OBJS	 = $(MANDOC_HTML_OBJS) \
+BASE_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   $(MANDOC_MAN_OBJS) \
 		   $(MANDOC_TERM_OBJS) \
 		   main.o \
 		   out.o \
 		   tree.o
 
-MAN_OBJS	 = $(MANDOC_OBJS)
+MAIN_OBJS	 = $(BASE_OBJS)
 
-MAKEWHATIS_OBJS	 = mandocdb.o mansearch_const.o manpath.o
-
-APROPOS_OBJS	 = mansearch.o mansearch_const.o manpath.o
+DB_OBJS		 = mandocdb.o \
+		   mansearch.o \
+		   mansearch_const.o \
+		   manpath.o
 
 CGI_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   cgi.o \
@@ -265,15 +266,11 @@ WWW_OBJS	 = mdocml.tar.gz \
 
 include Makefile.local
 
-INSTALL_TARGETS	 = $(BUILD_TARGETS:-build=-install)
-
 # === DEPENDENCY HANDLING ==============================================
 
 all: base-build $(BUILD_TARGETS) Makefile.local
 
 base-build: mandoc demandoc
-
-db-build: makewhatis
 
 cgi-build: man.cgi
 
@@ -295,8 +292,7 @@ distclean: clean
 
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS) $(COMPAT_OBJS)
-	rm -f mandoc $(MANDOC_OBJS) $(APROPOS_OBJS)
-	rm -f makewhatis $(MAKEWHATIS_OBJS)
+	rm -f mandoc $(BASE_OBJS) $(DB_OBJS)
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f manpage $(MANPAGE_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
@@ -322,7 +318,7 @@ base-install: base-build
 		$(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
 
-db-install: db-build
+db-install: base-build
 	mkdir -p $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(SBINDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
@@ -332,7 +328,7 @@ db-install: db-build
 	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/apropos
 	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/man
 	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/whatis
-	$(INSTALL_PROGRAM) makewhatis $(DESTDIR)$(SBINDIR)
+	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(SBINDIR)/makewhatis
 	$(INSTALL_MAN) apropos.1 man.1 $(DESTDIR)$(MANDIR)/man1
 	ln -f $(DESTDIR)$(MANDIR)/man1/apropos.1 \
 		$(DESTDIR)$(MANDIR)/man1/whatis.1
@@ -358,11 +354,8 @@ Makefile.local config.h: configure ${TESTSRCS}
 libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 	$(AR) rs $@ $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 
-mandoc: $(MAN_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(MAN_OBJS) libmandoc.a $(DBLIB)
-
-makewhatis: $(MAKEWHATIS_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(MAKEWHATIS_OBJS) libmandoc.a $(DBLIB)
+mandoc: $(MAIN_OBJS) libmandoc.a
+	$(CC) $(LDFLAGS) -o $@ $(MAIN_OBJS) libmandoc.a $(DBLIB)
 
 manpage: $(MANPAGE_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(MANPAGE_OBJS) libmandoc.a $(DBLIB)

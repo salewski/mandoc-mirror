@@ -358,12 +358,15 @@ if [ ${BUILD_DB} -eq 0 -a ${BUILD_CGI} -gt 0 ]; then
 fi
 
 BUILD_TARGETS="base-build"
-[ ${BUILD_DB}  -gt 0 ] && BUILD_TARGETS="${BUILD_TARGETS} db-build"
 [ ${BUILD_CGI} -gt 0 ] && BUILD_TARGETS="${BUILD_TARGETS} cgi-build"
+INSTALL_TARGETS="base-install"
+[ ${BUILD_DB}  -gt 0 ] && INSTALL_TARGETS="${INSTALL_TARGETS} db-install"
+[ ${BUILD_CGI} -gt 0 ] && INSTALL_TARGETS="${INSTALL_TARGETS} cgi-install"
 
 cat << __HEREDOC__
 VERSION		= ${VERSION}
 BUILD_TARGETS	= ${BUILD_TARGETS}
+INSTALL_TARGETS	= ${INSTALL_TARGETS}
 CFLAGS		= ${CFLAGS}
 DBLIB		= ${DBLIB}
 STATIC		= ${STATIC}
@@ -385,7 +388,7 @@ INSTALL_DATA	= ${INSTALL_DATA}
 __HEREDOC__
 
 [ ${BUILD_DB} -gt 0 ] && \
-	echo "MAN_OBJS	= \$(MANDOC_OBJS) \$(APROPOS_OBJS)"
+	echo "MAIN_OBJS	= \$(BASE_OBJS) \$(DB_OBJS)"
 
 echo "Makefile.local: written" 1>&2
 echo "Makefile.local: written" 1>&3

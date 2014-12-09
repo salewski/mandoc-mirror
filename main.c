@@ -83,6 +83,9 @@ struct	curparse {
 };
 
 static	int		  koptions(int *, char *);
+#if HAVE_SQLITE3
+int			  mandocdb(int, char**);
+#endif
 static	int		  moptions(int *, char *);
 static	void		  mmsg(enum mandocerr, enum mandoclevel,
 				const char *, int, int, const char *);
@@ -129,6 +132,12 @@ main(int argc, char *argv[])
 		progname = argv[0];
 	else
 		++progname;
+
+#if HAVE_SQLITE3
+	if (0 == strncmp(progname, "mandocdb", 8) ||
+	    0 == strncmp(progname, "makewhatis", 10))
+		return(mandocdb(argc, argv));
+#endif
 
 	/* Search options. */
 
