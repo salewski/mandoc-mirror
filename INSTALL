@@ -155,11 +155,11 @@ Deployment requires the following steps:
 1. Build and install mandoc as described above in steps 2 to 5
 below "Installation".
 
-2. If you system uses manpath(1), make sure it is configured
+2. If your system uses manpath(1), make sure it is configured
 correctly, in particular, it returns all directory trees where
 manual pages are installed.  If your system uses man.conf(5), make
-sure it contains a "_whatdb" for each directory tree, and the order
-of these lines meets your wishes.
+sure it contains a "_whatdb" line for each directory tree, and the
+order of these lines meets your wishes.
 
 3. Run the command "sudo makewhatis" to build mandoc.db(5) databases
 in all the directory trees configured in step 2.
@@ -167,6 +167,9 @@ in all the directory trees configured in step 2.
 At this point, your new man(1), apropos(1), and whatis(1) should work.
 Otherwise, please look at <http://mdocml.bsd.lv/contact.html>, both
 for help and to have these instructions improved.
+
+Whenever installing new manual pages, re-run makewhatis(8) to update
+the databases, or man(1) will not find the new pages.
 
 
 Deployment using your system's native man(1) viewer
