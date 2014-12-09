@@ -314,8 +314,12 @@ base-install: base-build
 	$(INSTALL_MAN) mandoc.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
 		mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
-	$(INSTALL_MAN) man.7 mdoc.7 roff.7 eqn.7 tbl.7 mandoc_char.7 \
-		$(DESTDIR)$(MANDIR)/man7
+	$(INSTALL_MAN) man.7 $(DESTDIR)$(MANDIR)/man7/${MANM_MAN}.7
+	$(INSTALL_MAN) mdoc.7 $(DESTDIR)$(MANDIR)/man7/${MANM_MDOC}.7
+	$(INSTALL_MAN) roff.7 $(DESTDIR)$(MANDIR)/man7/${MANM_ROFF}.7
+	$(INSTALL_MAN) eqn.7 $(DESTDIR)$(MANDIR)/man7/${MANM_EQN}.7
+	$(INSTALL_MAN) tbl.7 $(DESTDIR)$(MANDIR)/man7/${MANM_TBL}.7
+	$(INSTALL_MAN) mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
 
 db-install: base-build
@@ -325,16 +329,19 @@ db-install: base-build
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	mkdir -p $(DESTDIR)$(MANDIR)/man5
 	mkdir -p $(DESTDIR)$(MANDIR)/man8
-	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/apropos
-	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/man
-	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/whatis
-	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(SBINDIR)/makewhatis
-	$(INSTALL_MAN) apropos.1 man.1 $(DESTDIR)$(MANDIR)/man1
-	ln -f $(DESTDIR)$(MANDIR)/man1/apropos.1 \
-		$(DESTDIR)$(MANDIR)/man1/whatis.1
+	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_APROPOS)
+	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_MAN)
+	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_WHATIS)
+	ln -f $(DESTDIR)$(BINDIR)/mandoc \
+		$(DESTDIR)$(SBINDIR)/$(BINM_MAKEWHATIS)
+	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1
+	$(INSTALL_MAN) man.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_MAN).1
+	ln -f $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1 \
+		$(DESTDIR)$(MANDIR)/man1/$(BINM_WHATIS).1
 	$(INSTALL_MAN) mansearch.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) mandoc.db.5 $(DESTDIR)$(MANDIR)/man5
-	$(INSTALL_MAN) makewhatis.8 $(DESTDIR)$(MANDIR)/man8
+	$(INSTALL_MAN) makewhatis.8 \
+		$(DESTDIR)$(MANDIR)/man8/$(BINM_MAKEWHATIS).8
 
 cgi-install: cgi-build
 	mkdir -p $(DESTDIR)$(CGIBINDIR)
