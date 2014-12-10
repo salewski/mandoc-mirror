@@ -85,8 +85,9 @@ are mere guesses, and some may be wrong.
   loc *  exist **  algo **  size **  imp **
 
 - \h horizontal move
-  found in cclive(1) DocBook output
-  Anthony J. Bentley on discuss@  Sat, 21 Sep 2013 22:29:34 -0600
+  found in cclive(1) and nasm(1) asciidoc/DocBook output
+  bentley@ on discuss@  Sat, 21 Sep 2013 22:29:34 -0600
+  naddy@  Thu, 4 Dec 2014 16:26:41 +0100
   loc **  exist **  algo **  size *  imp ** (parser reorg helps a lot)
 
 - \n+ and \n- numerical register increment and decrement
