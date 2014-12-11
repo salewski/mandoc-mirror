@@ -7,7 +7,7 @@ int dummy;
 #else
 
 /*	$Id$	*/
-/*	$OpenBSD: fts.c,v 1.46 2014/05/25 17:47:04 tedu Exp $	*/
+/*	$OpenBSD: fts.c,v 1.49 2014/11/23 00:14:22 guenther Exp $	*/
 
 /*-
  * Copyright (c) 1990, 1993, 1994
@@ -146,7 +146,8 @@ fts_open(char * const *argv, int options, void *dummy)
 	 * and ".." are all fairly nasty problems.  Note, if we can't get the
 	 * descriptor we run anyway, just more slowly.
 	 */
-	if (!ISSET(FTS_NOCHDIR) && (sp->fts_rfd = open(".", O_RDONLY, 0)) < 0)
+	if (!ISSET(FTS_NOCHDIR) &&
+	    (sp->fts_rfd = open(".", O_RDONLY | O_CLOEXEC)) < 0)
 		SET(FTS_NOCHDIR);
 
 	if (nitems == 0)
@@ -803,7 +804,7 @@ fts_safe_changedir(FTS *sp, FTSENT *p, int fd, const char *path)
 	newfd = fd;
 	if (ISSET(FTS_NOCHDIR))
 		return (0);
-	if (fd < 0 && (newfd = open(path, O_RDONLY, 0)) < 0)
+	if (fd < 0 && (newfd = open(path, O_RDONLY|O_DIRECTORY|O_CLOEXEC)) < 0)
 		return (-1);
 	if (fstat(newfd, &sb)) {
 		ret = -1;
