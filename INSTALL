@@ -210,7 +210,8 @@ is pulled in as a dependency and used to install a pre-formatted
 "catpage" instead of directly as manual page source.
 
 For more background on switching operating systems to use mandoc(1)
-instead of groff(1) to format manuals, see the two BSDCan presentations
-by Ingo Schwarze:
+instead of groff(1) to format manuals, see the BSDCan and EuroBSDCon
+presentations by Ingo Schwarze:
 <http://www.openbsd.org/papers/bsdcan11-mandoc-openbsd.html>
 <http://www.openbsd.org/papers/bsdcan14-mandoc.pdf>
+<http://www.openbsd.org/papers/eurobsdcon2014-mandoc-paper.pdf>
