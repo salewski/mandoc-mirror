@@ -6,7 +6,8 @@ int dummy;
 
 #else
 
-/*	($)NetBSD: strcasestr.c,v 1.2 2005/02/09 21:35:47 kleink Exp $ */
+/*	$Id$	*/
+/*	$NetBSD: strcasestr.c,v 1.3 2005/11/29 03:12:00 christos Exp $	*/
 
 /*-
  * Copyright (c) 1990, 1993
