@@ -91,7 +91,9 @@ static	void		  mmsg(enum mandocerr, enum mandoclevel,
 				const char *, int, int, const char *);
 static	void		  parse(struct curparse *, int,
 				const char *, enum mandoclevel *);
+#if HAVE_SQLITE3
 static	enum mandoclevel  passthrough(const char *, int, int);
+#endif
 static	void		  spawn_pager(void);
 static	int		  toptions(struct curparse *, char *);
 static	void		  usage(enum argmode) __attribute__((noreturn));
@@ -110,12 +112,13 @@ main(int argc, char *argv[])
 	struct curparse	 curp;
 	struct mansearch search;
 	struct manpaths	 paths;
-	char		*conf_file, *defpaths, *auxpaths;
+	char		*auxpaths;
 	char		*defos;
 #if HAVE_SQLITE3
 	struct manpage	*res, *resp;
+	char		*conf_file, *defpaths;
 	size_t		 isec, i, sz;
-	int		 prio, best_prio;
+	int		 prio, best_prio, synopsis_only;
 	char		 sec;
 #endif
 	enum mandoclevel rc;
@@ -123,7 +126,6 @@ main(int argc, char *argv[])
 	int		 fd;
 	int		 show_usage;
 	int		 use_pager;
-	int		 synopsis_only;
 	int		 options;
 	int		 c;
 
@@ -141,7 +143,10 @@ main(int argc, char *argv[])
 	/* Search options. */
 
 	memset(&paths, 0, sizeof(struct manpaths));
-	conf_file = defpaths = auxpaths = NULL;
+#if HAVE_SQLITE3
+	conf_file = defpaths = NULL;
+#endif
+	auxpaths = NULL;
 
 	memset(&search, 0, sizeof(struct mansearch));
 	search.outkey = "Nd";
@@ -167,7 +172,9 @@ main(int argc, char *argv[])
 
 	use_pager = 1;
 	show_usage = 0;
+#if HAVE_SQLITE3
 	synopsis_only = 0;
+#endif
 	outmode = OUTMODE_DEF;
 
 	while (-1 != (c = getopt(argc, argv,
@@ -177,7 +184,9 @@ main(int argc, char *argv[])
 			outmode = OUTMODE_ALL;
 			break;
 		case 'C':
+#if HAVE_SQLITE3
 			conf_file = optarg;
+#endif
 			break;
 		case 'c':
 			use_pager = 0;
@@ -187,7 +196,9 @@ main(int argc, char *argv[])
 			break;
 		case 'h':
 			(void)strlcat(curp.outopts, "synopsis,", BUFSIZ);
+#if HAVE_SQLITE3
 			synopsis_only = 1;
+#endif
 			use_pager = 0;
 			outmode = OUTMODE_ALL;
 			break;
@@ -221,7 +232,9 @@ main(int argc, char *argv[])
 			outmode = OUTMODE_ALL;
 			break;
 		case 'M':
+#if HAVE_SQLITE3
 			defpaths = optarg;
+#endif
 			break;
 		case 'm':
 			auxpaths = optarg;
@@ -604,6 +617,7 @@ parse(struct curparse *curp, int fd, const char *file,
 		*level = rc;
 }
 
+#if HAVE_SQLITE3
 static enum mandoclevel
 passthrough(const char *file, int fd, int synopsis_only)
 {
@@ -667,6 +681,7 @@ fail:
 	    progname, file, syscall, strerror(errno));
 	return(MANDOCLEVEL_SYSERR);
 }
+#endif
 
 static int
 koptions(int *options, char *arg)
