@@ -62,6 +62,10 @@ static unsigned short	 fts_stat(FTS *, FTSENT *);
 static int	 fts_safe_changedir(FTS *, FTSENT *, int, const char *);
 
 #define	ISDOT(a)	(a[0] == '.' && (!a[1] || (a[1] == '.' && !a[2])))
+#define	MAX(a,b)	(((a)>(b))?(a):(b))
+#ifndef	O_DIRECTORY
+#define	O_DIRECTORY	0
+#endif
 
 #define	CLR(opt)	(sp->fts_options &= ~(opt))
 #define	ISSET(opt)	(sp->fts_options & (opt))
@@ -407,7 +411,7 @@ fts_build(FTS *sp)
 	DIR *dirp;
 	void *oldaddr;
 	size_t dlen, len, maxlen;
-	int nitems, cderrno, descend, level, nlinks, nostat, doadjust;
+	int nitems, cderrno, descend, level, doadjust;
 	int saved_errno;
 	char *cp;
 
@@ -423,14 +427,6 @@ fts_build(FTS *sp)
 		cur->fts_errno = errno;
 		return (NULL);
 	}
-
-	/*
-	 * Nlinks is the number of possible entries of type directory in the
-	 * directory if we're cheating on stat calls, 0 if we're not doing
-	 * any stat calls at all, -1 if we're doing stats on everything.
-	 */
-	nlinks = -1;
-	nostat = 0;
 
 	/*
 	 * If we're going to need to stat anything or we want to descend
@@ -449,8 +445,7 @@ fts_build(FTS *sp)
 	 */
 	cderrno = 0;
 	if (fts_safe_changedir(sp, cur, dirfd(dirp), NULL)) {
-		if (nlinks)
-			cur->fts_errno = errno;
+		cur->fts_errno = errno;
 		cur->fts_flags |= FTS_DONTCHDIR;
 		descend = 0;
 		cderrno = errno;
@@ -545,21 +540,9 @@ mem1:				saved_errno = errno;
 		}
 
 		if (cderrno) {
-			if (nlinks) {
-				p->fts_info = FTS_NS;
-				p->fts_errno = cderrno;
-			} else
-				p->fts_info = FTS_NSOK;
+			p->fts_info = FTS_NS;
+			p->fts_errno = cderrno;
 			p->fts_accpath = cur->fts_accpath;
-		} else if (nlinks == 0
-#ifdef DT_DIR
-		    || (nostat &&
-		    dp->d_type != DT_DIR && dp->d_type != DT_UNKNOWN)
-#endif
-		    ) {
-			p->fts_accpath =
-			    ISSET(FTS_NOCHDIR) ? p->fts_path : p->fts_name;
-			p->fts_info = FTS_NSOK;
 		} else {
 			/* Build a file name for fts_stat to stat. */
 			if (ISSET(FTS_NOCHDIR)) {
@@ -569,11 +552,6 @@ mem1:				saved_errno = errno;
 				p->fts_accpath = p->fts_name;
 			/* Stat it. */
 			p->fts_info = fts_stat(sp, p);
-
-			/* Decrement link count if applicable. */
-			if (nlinks > 0 && (p->fts_info == FTS_D ||
-			    p->fts_info == FTS_DC || p->fts_info == FTS_DOT))
-				--nlinks;
 		}
 
 		/* We walk in directory order so "ls -f" doesn't get upset. */
