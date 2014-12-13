@@ -31,7 +31,7 @@ echo "config.log: writing..."
 # Initialize all variables here,
 # such that nothing can leak in from the environment.
 
-VERSION="1.13.1"
+VERSION="1.13.2"
 echo "VERSION=\"${VERSION}\"" 1>&2
 echo "VERSION=\"${VERSION}\"" 1>&3
 

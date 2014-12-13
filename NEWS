@@ -2,7 +2,7 @@ $Id$
 
 This file lists the most important changes in the mdocml.bsd.lv distribution.
 
-Changes in version 1.13.2, released on December XXX, 2014
+Changes in version 1.13.2, released on December 13, 2014
 
     --- MAJOR NEW FEATURES ---
  * Include an implementation of man(1), the manual page viewer.
