@@ -672,11 +672,9 @@ macro_or_word(MACRO_PROT_ARGS, int parsed)
 
 	p = buf + ppos;
 	ntok = MDOC_MAX;
-	if (mdoc->flags & MDOC_PHRASELIT)
-		/* nothing */;
-	else if (*p == '"')
+	if (*p == '"')
 		p++;
-	else if (parsed)
+	else if (parsed && ! (mdoc->flags & MDOC_PHRASELIT))
 		ntok = lookup(mdoc, tok, line, ppos, p);
 
 	if (ntok == MDOC_MAX) {

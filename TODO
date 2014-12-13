@@ -299,8 +299,17 @@ are mere guesses, and some may be wrong.
 * formatting issues: ugly output
 ************************************************************************
 
-- a column list with blank `Ta' cells triggers a spurrious
+- revisit empty in-line macros
+  look at the difference between "Em x Em ." and "Sq x Em ."
+  Carsten Kunze  Fri, 12 Dec 2014 00:15:41 +0100
+  loc *** exist *** algo *** size * imp **
+
+- a column list with blank `Ta' cells triggers a spurious
   start-with-whitespace printing of a newline
+
+- In .Bl -column, .It a<tab>"b<tab>c"
+  shows the quotes in groff, but not in mandoc
+  loc * exist *** algo ** size * imp **
 
 - In .Bl -column,
   .It Em Authentication<tab>Key Length
