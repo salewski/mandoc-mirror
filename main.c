@@ -309,9 +309,10 @@ main(int argc, char *argv[])
 				argv = help_argv;
 				argc = 1;
 			}
-		} else if (argv[0] != NULL &&
-		    isdigit((unsigned char)argv[0][0]) &&
-		    (argv[0][1] == '\0' || !strcmp(argv[0], "3p"))) {
+		} else if (argv[0] != NULL && (
+		    (isdigit((unsigned char)argv[0][0]) &&
+		     (argv[0][1] == '\0' || !strcmp(argv[0], "3p"))) ||
+		    (argv[0][0] == 'n' && argv[0][1] == '\0'))) {
 			search.sec = argv[0];
 			argv++;
 			argc--;
