@@ -1258,6 +1258,8 @@ roff_evalcond(struct roff *r, int ln, const char *v, int *pos)
 		wanttrue = 1;
 
 	switch (v[*pos]) {
+	case '\0':
+		return(0);
 	case 'n':
 		/* FALLTHROUGH */
 	case 'o':
