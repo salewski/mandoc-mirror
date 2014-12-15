@@ -480,6 +480,8 @@ time2a(time_t t)
 	int		 isz;
 
 	tm = localtime(&t);
+	if (tm == NULL)
+		return(NULL);
 
 	/*
 	 * Reserve space:
