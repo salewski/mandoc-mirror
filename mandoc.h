@@ -144,6 +144,7 @@ enum	mandocerr {
 	MANDOCERR_TBLIGNDATA, /* ignore data in cell */
 	MANDOCERR_TBLBLOCK, /* data block still open */
 	MANDOCERR_TBLEXTRADAT, /* ignoring extra data cells */
+	MANDOCERR_TBLMACRO, /* ignoring macro in table: macro */
 
 	/* related to document structure and macros */
 	MANDOCERR_ROFFLOOP, /* input stack limit exceeded, infinite loop? */

@@ -188,6 +188,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"ignore data in cell",
 	"data block still open",
 	"ignoring extra data cells",
+	"ignoring macro in table",
 
 	/* related to document structure and macros */
 	"input stack limit exceeded, infinite loop?",
