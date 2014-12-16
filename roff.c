@@ -1249,7 +1249,7 @@ out:
 static int
 roff_evalcond(struct roff *r, int ln, const char *v, int *pos)
 {
-	int	 wanttrue, number;
+	int	 number, savepos, wanttrue;
 
 	if ('!' == v[*pos]) {
 		wanttrue = 0;
@@ -1282,10 +1282,13 @@ roff_evalcond(struct roff *r, int ln, const char *v, int *pos)
 		break;
 	}
 
+	savepos = *pos;
 	if (roff_evalnum(r, ln, v, pos, &number, 0))
 		return((number > 0) == wanttrue);
-	else
+	else if (*pos == savepos)
 		return(roff_evalstrcond(v, pos) == wanttrue);
+	else
+		return (0);
 }
 
 static enum rofferr
