@@ -1236,7 +1236,7 @@ roff_evalstrcond(const char *v, int *pos)
 out:
 	if (NULL == s3)
 		s3 = strchr(s2, '\0');
-	else
+	else if (*s3 != '\0')
 		s3++;
 	*pos = s3 - v;
 	return(match);
