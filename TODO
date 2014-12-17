@@ -255,6 +255,10 @@ are mere guesses, and some may be wrong.
 
 --- compatibility checks -----------------------------------------------
 
+- write a configure check for [[:<:]] support and provide some
+  fallback for whatis(1) when it doesn't work;
+  Svyatoslav Mishyn  Wed, 17 Dec 2014 11:07:10 +0200
+
 - is .Bk implemented correctly in modern groff?
   sobrado@  Tue, 19 Apr 2011 22:12:55 +0200
 
