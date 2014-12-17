@@ -114,6 +114,7 @@ main(int argc, char *argv[])
 	struct manpaths	 paths;
 	char		*auxpaths;
 	char		*defos;
+	unsigned char	*uc;
 #if HAVE_SQLITE3
 	struct manpage	*res, *resp;
 	char		*conf_file, *defpaths;
@@ -309,11 +310,11 @@ main(int argc, char *argv[])
 				argv = help_argv;
 				argc = 1;
 			}
-		} else if (argv[0] != NULL && (
-		    (isdigit((unsigned char)argv[0][0]) &&
-		     (argv[0][1] == '\0' || !strcmp(argv[0], "3p"))) ||
-		    (argv[0][0] == 'n' && argv[0][1] == '\0'))) {
-			search.sec = argv[0];
+		} else if (((uc = argv[0]) != NULL) &&
+		    ((isdigit(uc[0]) && (uc[1] == '\0' ||
+		      (isalpha(uc[1]) && uc[2] == '\0'))) ||
+		     (uc[0] == 'n' && uc[1] == '\0'))) {
+			search.sec = uc;
 			argv++;
 			argc--;
 		}
