@@ -488,8 +488,10 @@ usage(enum argmode argmode)
 		    "\t      [-Toutput] [-Wlevel] [file ...]\n", stderr);
 		break;
 	case ARG_NAME:
-		fputs("usage: man [-acfhklVw] [-C file] "
-		    "[-M path] [-m path] [-S arch] [-s section]\n"
+		fputs("usage: man [-acfhklVw] [-C file] [-I os=name] "
+		    "[-K encoding] [-M path] [-m path]\n"
+		    "\t   [-O option=value] [-S subsection] [-s section] "
+		    "[-T output] [-W level]\n"
 		    "\t   [section] name ...\n", stderr);
 		break;
 	case ARG_WORD:
