@@ -1576,7 +1576,7 @@ roff_evalnum(struct roff *r, int ln, const char *v,
 			*res *= operand2;
 			break;
 		case '/':
-			if (0 == operand2) {
+			if (operand2 == 0) {
 				mandoc_msg(MANDOCERR_DIVZERO,
 					r->parse, ln, *pos, v);
 				*res = 0;
@@ -1585,6 +1585,12 @@ roff_evalnum(struct roff *r, int ln, const char *v,
 			*res /= operand2;
 			break;
 		case '%':
+			if (operand2 == 0) {
+				mandoc_msg(MANDOCERR_DIVZERO,
+					r->parse, ln, *pos, v);
+				*res = 0;
+				break;
+			}
 			*res %= operand2;
 			break;
 		case '<':
