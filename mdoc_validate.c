@@ -1197,7 +1197,7 @@ post_it(POST_ARGS)
 	struct mdoc_node *nbl, *nit, *nch;
 
 	nit = mdoc->last;
-	if (MDOC_BLOCK != nit->type)
+	if (nit->type != MDOC_BLOCK)
 		return;
 
 	nbl = nit->parent->parent;
@@ -1213,7 +1213,7 @@ post_it(POST_ARGS)
 	case LIST_inset:
 		/* FALLTHROUGH */
 	case LIST_diag:
-		if (NULL == nit->head->child)
+		if (nit->head->child == NULL)
 			mandoc_vmsg(MANDOCERR_IT_NOHEAD,
 			    mdoc->parse, nit->line, nit->pos,
 			    "Bl -%s It",
@@ -1226,14 +1226,14 @@ post_it(POST_ARGS)
 	case LIST_enum:
 		/* FALLTHROUGH */
 	case LIST_hyphen:
-		if (NULL == nit->body->child)
+		if (nit->body == NULL || nit->body->child == NULL)
 			mandoc_vmsg(MANDOCERR_IT_NOBODY,
 			    mdoc->parse, nit->line, nit->pos,
 			    "Bl -%s It",
 			    mdoc_argnames[nbl->args->argv[0].arg]);
 		/* FALLTHROUGH */
 	case LIST_item:
-		if (NULL != nit->head->child)
+		if (nit->head->child != NULL)
 			mandoc_vmsg(MANDOCERR_ARG_SKIP,
 			    mdoc->parse, nit->line, nit->pos,
 			    "It %s", nit->head->child->string);
@@ -1241,10 +1241,10 @@ post_it(POST_ARGS)
 	case LIST_column:
 		cols = (int)nbl->norm->Bl.ncols;
 
-		assert(NULL == nit->head->child);
+		assert(nit->head->child == NULL);
 
 		for (i = 0, nch = nit->child; nch; nch = nch->next)
-			if (MDOC_BODY == nch->type)
+			if (nch->type == MDOC_BODY)
 				i++;
 
 		if (i < cols || i > cols + 1)
