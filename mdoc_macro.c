@@ -1559,7 +1559,8 @@ phrase_ta(MACRO_PROT_ARGS)
 	/* Make sure we are in a column list or ignore this macro. */
 
 	n = mdoc->last;
-	while (n != NULL && n->tok != MDOC_Bl)
+	while (n != NULL &&
+	    (n->tok != MDOC_Bl || n->flags & (MDOC_VALID | MDOC_BREAK)))
 		n = n->parent;
 	if (n == NULL || n->norm->Bl.type != LIST_column) {
 		mandoc_msg(MANDOCERR_TA_STRAY, mdoc->parse,
