@@ -1484,7 +1484,10 @@ post_bl(POST_ARGS)
 
 	nchild = nbody->child;
 	while (NULL != nchild) {
-		if (MDOC_It == nchild->tok || MDOC_Sm == nchild->tok) {
+		if (nchild->tok == MDOC_It ||
+		    (nchild->tok == MDOC_Sm &&
+		     nchild->next != NULL &&
+		     nchild->next->tok == MDOC_It)) {
 			nchild = nchild->next;
 			continue;
 		}
