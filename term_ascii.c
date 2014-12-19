@@ -69,6 +69,9 @@ ascii_init(enum termenc enc, const struct mchars *mchars, char *outopts)
 	p->symtab = mchars;
 	p->tabwidth = 5;
 	p->defrmargin = p->lastrmargin = 78;
+	p->fontq = mandoc_reallocarray(NULL,
+	     (p->fontsz = 8), sizeof(enum termfont));
+	p->fontq[0] = p->fontl = TERMFONT_NONE;
 
 	p->begin = ascii_begin;
 	p->end = ascii_end;

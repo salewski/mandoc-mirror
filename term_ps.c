@@ -540,6 +540,9 @@ pspdf_alloc(const struct mchars *mchars, char *outopts)
 	p = mandoc_calloc(1, sizeof(struct termp));
 	p->symtab = mchars;
 	p->enc = TERMENC_ASCII;
+	p->fontq = mandoc_reallocarray(NULL,
+	    (p->fontsz = 8), sizeof(enum termfont));
+	p->fontq[0] = p->fontl = TERMFONT_NONE;
 	p->ps = mandoc_calloc(1, sizeof(struct termp_ps));
 
 	p->advance = ps_advance;
