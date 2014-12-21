@@ -20,6 +20,7 @@
 
 #include <string.h>
 
+#include "mandoc.h"
 #include "libmandoc.h"
 
 #define LINE(x, y) \

@@ -37,7 +37,6 @@ __BEGIN_DECLS
 
 struct	mparse;
 struct	mchars;
-enum	mandocerr;
 struct	tbl_span;
 struct	eqn;
 struct	roff;
