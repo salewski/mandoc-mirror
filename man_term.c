@@ -633,11 +633,10 @@ pre_IP(DECL_ARGS)
 
 		p->offset = mt->offset;
 		p->rmargin = mt->offset + len;
-		if (ival < 0)
-			break;
 
 		/* Set the saved left-margin. */
-		mt->lmargin[mt->lmargincur] = (size_t)ival;
+		if (ival >= 0)
+			mt->lmargin[mt->lmargincur] = (size_t)ival;
 
 		savelit = MANT_LITERAL & mt->fl;
 		mt->fl &= ~MANT_LITERAL;
