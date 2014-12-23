@@ -94,9 +94,6 @@ a2roffsu(const char *src, struct roffsu *dst, enum roffscale def)
 		break;
 	}
 
-	/* FIXME: do this in the caller. */
-	if (dst->scale < 0.0)
-		dst->scale = 0.0;
 	return(*endptr == '\0' ? 2 : 1);
 }
 

@@ -101,7 +101,6 @@ term_flushln(struct termp *p)
 	size_t		 j;     /* temporary loop index for p->buf */
 	size_t		 jhy;	/* last hyph before overflow w/r/t j */
 	size_t		 maxvis; /* output position of visible boundary */
-	size_t		 rmargin; /* the rightmost of the two margins */
 
 	/*
 	 * First, establish the maximum columns of "visible" content.
@@ -114,8 +113,7 @@ term_flushln(struct termp *p)
 	 * is negative, it gets sign extended.  Subtracting that
 	 * very large size_t effectively adds a small number to dv.
 	 */
-	rmargin = p->rmargin > p->offset ? p->rmargin : p->offset;
-	dv = p->rmargin - p->offset;
+	dv = p->rmargin > p->offset ? p->rmargin - p->offset : 0;
 	maxvis = (int)dv > p->overstep ? dv - (size_t)p->overstep : 0;
 
 	if (p->flags & TERMP_NOBREAK) {
@@ -193,8 +191,9 @@ term_flushln(struct termp *p)
 			(*p->endline)(p);
 			p->viscol = 0;
 			if (TERMP_BRIND & p->flags) {
-				vbl = rmargin;
-				vend += rmargin - p->offset;
+				vbl = p->rmargin;
+				vend += p->rmargin;
+				vend -= p->offset;
 			} else
 				vbl = p->offset;
 
@@ -770,7 +769,7 @@ term_strlen(const struct termp *p, const char *cp)
 	return(sz);
 }
 
-size_t
+int
 term_vspan(const struct termp *p, const struct roffsu *su)
 {
 	double		 r;
@@ -809,19 +808,14 @@ term_vspan(const struct termp *p, const struct roffsu *su)
 		abort();
 		/* NOTREACHED */
 	}
-
-	if (r < 0.0)
-		r = 0.0;
-	return((size_t)(r + 0.4995));
+	return(r > 0.0 ? r + 0.4995 : r - 0.4995);
 }
 
-size_t
+int
 term_hspan(const struct termp *p, const struct roffsu *su)
 {
 	double		 v;
 
 	v = (*p->hspan)(p, su);
-	if (v < 0.0)
-		v = 0.0;
-	return((size_t)(v + 0.0005));
+	return(v > 0.0 ? v + 0.0005 : v - 0.0005);
 }
