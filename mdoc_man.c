@@ -434,7 +434,7 @@ print_offs(const char *v, int keywords)
 		sz = 6;
 	else if (keywords && !strcmp(v, "indent-two"))
 		sz = 12;
-	else if (a2roffsu(v, &su, SCALE_MAX)) {
+	else if (a2roffsu(v, &su, SCALE_EN) < 2) {
 		if (SCALE_EN == su.unit)
 			sz = su.scale;
 		else {
@@ -481,7 +481,7 @@ print_width(const char *v, const struct mdoc_node *child, size_t defsz)
 	/* Convert v into a number (of characters). */
 	if (NULL == v)
 		sz = defsz;
-	else if (a2roffsu(v, &su, SCALE_MAX)) {
+	else if (a2roffsu(v, &su, SCALE_MAX) < 2) {
 		if (SCALE_EN == su.unit)
 			sz = su.scale;
 		else {

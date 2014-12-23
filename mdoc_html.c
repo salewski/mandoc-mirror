@@ -279,7 +279,7 @@ static void
 a2width(const char *p, struct roffsu *su)
 {
 
-	if ( ! a2roffsu(p, su, SCALE_MAX)) {
+	if (a2roffsu(p, su, SCALE_MAX) < 2) {
 		su->unit = SCALE_EN;
 		su->scale = html_strlen(p);
 	}
@@ -1568,7 +1568,7 @@ mdoc_sp_pre(MDOC_ARGS)
 	if (MDOC_sp == n->tok) {
 		if (NULL != (n = n->child))
 			if ( ! a2roffsu(n->string, &su, SCALE_VS))
-				SCALE_VS_INIT(&su, atoi(n->string));
+				su.scale = 1.0;
 	} else
 		su.scale = 0.0;
 

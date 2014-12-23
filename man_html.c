@@ -362,7 +362,7 @@ man_br_pre(MAN_ARGS)
 	if (MAN_sp == n->tok) {
 		if (NULL != (n = n->child))
 			if ( ! a2roffsu(n->string, &su, SCALE_VS))
-				SCALE_VS_INIT(&su, atoi(n->string));
+				su.scale = 1.0;
 	} else
 		su.scale = 0.0;
 
