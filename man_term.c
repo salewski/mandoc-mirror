@@ -288,14 +288,16 @@ pre_literal(DECL_ARGS)
 static int
 pre_PD(DECL_ARGS)
 {
+	struct roffsu	 su;
 
 	n = n->child;
-	if (0 == n) {
+	if (n == NULL) {
 		mt->pardist = 1;
 		return(0);
 	}
 	assert(MAN_TEXT == n->type);
-	mt->pardist = atoi(n->string);
+	if (a2roffsu(n->string, &su, SCALE_VS))
+		mt->pardist = term_vspan(p, &su);
 	return(0);
 }
 
