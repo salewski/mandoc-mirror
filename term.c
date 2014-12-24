@@ -773,6 +773,7 @@ int
 term_vspan(const struct termp *p, const struct roffsu *su)
 {
 	double		 r;
+	int		 ri;
 
 	switch (su->unit) {
 	case SCALE_BU:
@@ -808,7 +809,8 @@ term_vspan(const struct termp *p, const struct roffsu *su)
 		abort();
 		/* NOTREACHED */
 	}
-	return(r > 0.0 ? r + 0.4995 : r - 0.4995);
+	ri = r > 0.0 ? r + 0.4995 : r - 0.4995;
+	return(ri < 66 ? ri : 1);
 }
 
 int

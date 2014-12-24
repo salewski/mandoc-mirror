@@ -21,6 +21,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -432,6 +433,8 @@ pre_in(DECL_ARGS)
 		p->offset += v;
 	else
 		p->offset = v;
+	if (p->offset > SHRT_MAX)
+		p->offset = term_len(p, p->defindent);
 
 	return(0);
 }
@@ -508,16 +511,16 @@ pre_HP(DECL_ARGS)
 	if ((nn = n->parent->head->child) != NULL &&
 	    a2roffsu(nn->string, &su, SCALE_EN)) {
 		len = term_hspan(p, &su);
+		if (len < 0 && (size_t)(-len) > mt->offset)
+			len = -mt->offset;
+		else if (len > SHRT_MAX)
+			len = term_len(p, p->defindent);
 		mt->lmargin[mt->lmargincur] = len;
 	} else
 		len = mt->lmargin[mt->lmargincur];
 
 	p->offset = mt->offset;
-	if (len > 0 || (size_t)(-len) < mt->offset)
-		p->rmargin = mt->offset + len;
-	else
-		p->rmargin = 0;
-
+	p->rmargin = mt->offset + len;
 	return(1);
 }
 
@@ -582,9 +585,11 @@ pre_IP(DECL_ARGS)
 	    (nn = nn->next) != NULL &&
 	    a2roffsu(nn->string, &su, SCALE_EN)) {
 		len = term_hspan(p, &su);
-		mt->lmargin[mt->lmargincur] = len;
 		if (len < 0 && (size_t)(-len) > mt->offset)
 			len = -mt->offset;
+		else if (len > SHRT_MAX)
+			len = term_len(p, p->defindent);
+		mt->lmargin[mt->lmargincur] = len;
 	} else
 		len = mt->lmargin[mt->lmargincur];
 
@@ -662,9 +667,11 @@ pre_TP(DECL_ARGS)
 	    nn->string != NULL && ! (MAN_LINE & nn->flags) &&
 	    a2roffsu(nn->string, &su, SCALE_EN)) {
 		len = term_hspan(p, &su);
-		mt->lmargin[mt->lmargincur] = len;
 		if (len < 0 && (size_t)(-len) > mt->offset)
 			len = -mt->offset;
+		else if (len > SHRT_MAX)
+			len = term_len(p, p->defindent);
+		mt->lmargin[mt->lmargincur] = len;
 	} else
 		len = mt->lmargin[mt->lmargincur];
 
@@ -845,10 +852,11 @@ pre_RS(DECL_ARGS)
 		break;
 	}
 
+	len = SHRT_MAX + 1;
 	if ((n = n->parent->head->child) != NULL &&
 	    a2roffsu(n->string, &su, SCALE_EN))
 		len = term_hspan(p, &su);
-	else
+	if (len > SHRT_MAX)
 		len = term_len(p, p->defindent);
 
 	if (len > 0 || (size_t)(-len) < mt->offset)
@@ -881,10 +889,11 @@ post_RS(DECL_ARGS)
 		break;
 	}
 
+	len = SHRT_MAX + 1;
 	if ((n = n->parent->head->child) != NULL &&
 	    a2roffsu(n->string, &su, SCALE_EN))
 		len = term_hspan(p, &su);
-	else
+	if (len > SHRT_MAX)
 		len = term_len(p, p->defindent);
 
 	if (len < 0 || (size_t)len < mt->offset)
