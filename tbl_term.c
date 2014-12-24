@@ -417,9 +417,13 @@ tbl_number(struct termp *tp, const struct tbl_opts *opts,
 	} else
 		d = sz + psz;
 
-	padl = col->decimal - d;
-
-	tbl_char(tp, ASCII_NBRSP, padl);
+	if (col->decimal > d && col->width > sz) {
+		padl = col->decimal - d;
+		if (padl + sz > col->width)
+			padl = col->width - sz;
+		tbl_char(tp, ASCII_NBRSP, padl);
+	} else
+		padl = 0;
 	tbl_word(tp, dp);
 	if (col->width > sz + padl)
 		tbl_char(tp, ASCII_NBRSP, col->width - sz - padl);
