@@ -273,7 +273,7 @@ term_flushln(struct termp *p)
 	}
 
 	if (TERMP_HANG & p->flags) {
-		p->overstep = (int)(vis - maxvis +
+		p->overstep += (int)(p->offset + vis - p->rmargin +
 		    p->trailspace * (*p->width)(p, ' '));
 
 		/*
