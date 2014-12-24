@@ -99,6 +99,7 @@ struct	man_node {
 	struct man_node	*body; /* BLOCK node BODY ptr */
 	const struct tbl_span *span; /* TBL */
 	const struct eqn *eqn; /* EQN */
+	int		 aux; /* decoded node data, type-dependent */
 };
 
 /* Names of macros.  Index is enum mant. */
