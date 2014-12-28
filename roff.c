@@ -651,6 +651,10 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 			    r->parse, ln, (int)(stesc - buf->buf),
 			    "%.*s", (int)naml, stnam);
 			res = "";
+		} else if (buf->sz + strlen(res) > SHRT_MAX) {
+			mandoc_msg(MANDOCERR_ROFFLOOP, r->parse,
+			    ln, (int)(stesc - buf->buf), NULL);
+			return(ROFF_IGN);
 		}
 
 		/* Replace the escape sequence by the string. */
@@ -658,12 +662,6 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 		*stesc = '\0';
 		buf->sz = mandoc_asprintf(&nbuf, "%s%s%s",
 		    buf->buf, res, cp) + 1;
-
-		if (buf->sz > SHRT_MAX) {
-			mandoc_msg(MANDOCERR_ROFFLOOP, r->parse,
-			    ln, (int)(stesc - buf->buf), NULL);
-			return(ROFF_IGN);
-		}
 
 		/* Prepare for the next replacement. */
 
