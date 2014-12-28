@@ -607,7 +607,8 @@ The scope of a sub-section is closed by a subsequent sub-section,
 section, or end of file.
 The paragraph left-margin width is reset to the default.
 .Ss \&TH
-Sets the title of the manual page with the following syntax:
+Sets the title of the manual page for use in the page header
+and footer with the following syntax:
 .Bd -filled -offset indent
 .Pf \. Sx \&TH
 .Ar title section date
@@ -629,6 +630,11 @@ is empty or not specified, the current date is used.
 The optional
 .Ar source
 string specifies the organisation providing the utility.
+When unspecified,
+.Xr mandoc 1
+uses its
+.Fl Ios
+argument.
 The
 .Ar volume
 string replaces the default rendered volume, which is dictated by the
