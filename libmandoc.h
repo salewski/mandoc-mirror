@@ -66,7 +66,8 @@ void		 mdoc_addspan(struct mdoc *, const struct tbl_span *);
 void		 mdoc_addeqn(struct mdoc *, const struct eqn *);
 
 void		 man_free(struct man *);
-struct	man	*man_alloc(struct roff *, struct mparse *, int);
+struct	man	*man_alloc(struct roff *, struct mparse *,
+			const char *, int);
 void		 man_reset(struct man *);
 int		 man_parseln(struct man *, int, char *, int);
 int		 man_endparse(struct man *);

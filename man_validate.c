@@ -379,6 +379,8 @@ post_TH(CHKARGS)
 
 	if (n && (n = n->next))
 		man->meta.source = mandoc_strdup(n->string);
+	else if (man->defos != NULL)
+		man->meta.source = mandoc_strdup(man->defos);
 
 	/* TITLE MSEC DATE SOURCE ->VOL<- */
 	/* If missing, use the default VOL name for MSEC. */

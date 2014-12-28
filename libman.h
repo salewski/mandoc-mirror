@@ -23,6 +23,7 @@ enum	man_next {
 
 struct	man {
 	struct mparse	*parse; /* parse pointer */
+	const char	*defos; /* default OS argument for .TH */
 	int		 quick; /* abort parse early */
 	int		 flags; /* parse flags */
 #define	MAN_ELINE	(1 << 1) /* Next-line element scope. */

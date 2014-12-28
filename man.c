@@ -92,7 +92,8 @@ man_free(struct man *man)
 }
 
 struct man *
-man_alloc(struct roff *roff, struct mparse *parse, int quick)
+man_alloc(struct roff *roff, struct mparse *parse,
+	const char *defos, int quick)
 {
 	struct man	*p;
 
@@ -100,6 +101,7 @@ man_alloc(struct roff *roff, struct mparse *parse, int quick)
 
 	man_hash_init();
 	p->parse = parse;
+	p->defos = defos;
 	p->quick = quick;
 	p->roff = roff;
 
