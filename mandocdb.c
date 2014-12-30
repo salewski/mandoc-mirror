@@ -852,6 +852,7 @@ filescan(const char *file)
 	if (strlcpy(mlink->file, start, sizeof(mlink->file)) >=
 	    sizeof(mlink->file)) {
 		say(start, "Filename too long");
+		free(mlink);
 		return;
 	}
 
