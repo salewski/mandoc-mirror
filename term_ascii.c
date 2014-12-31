@@ -174,6 +174,20 @@ ascii_setwidth(struct termp *p, int iop, size_t width)
 	p->rmargin = p->maxrmargin = p->defrmargin;
 }
 
+void
+ascii_sepline(void *arg)
+{
+	struct termp	*p;
+	size_t		 i;
+
+	p = (struct termp *)arg;
+	putchar('\n');
+	for (i = 0; i < p->defrmargin; i++)
+		putchar('-');
+	putchar('\n');
+	putchar('\n');
+}
+
 static size_t
 ascii_width(const struct termp *p, int c)
 {

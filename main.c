@@ -447,7 +447,9 @@ main(int argc, char *argv[])
 
 		if (MANDOCLEVEL_OK != rc && curp.wstop)
 			break;
-		argc--;
+
+		if (--argc && curp.outtype <= OUTT_UTF8)
+			ascii_sepline(curp.outdata);
 	}
 
 	if (curp.outfree)
@@ -634,6 +636,8 @@ passthrough(const char *file, int fd, int synopsis_only)
 	size_t		 len, off;
 	ssize_t		 nw;
 	int		 print;
+
+	fflush(stdout);
 
 	if ((stream = fdopen(fd, "r")) == NULL) {
 		close(fd);
