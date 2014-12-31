@@ -2201,9 +2201,12 @@ See also
 Close quoted context opened by
 .Sx \&Qo .
 .Ss \&Ql
-Format a single-quoted literal.
+Request a literal font and enclose in single quotes.
+For arguments of three or more characters, formatters other than
+.Xr mandoc 1
+usually omit the quotes on non-terminal output devices.
 See also
-.Sx \&Qq
+.Sx \&Li
 and
 .Sx \&Sq .
 .Ss \&Qo
