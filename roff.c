@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2010, 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010-2014 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010, 2011, 2012, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2010-2015 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1163,7 +1163,8 @@ roff_cond_sub(ROFF_ARGS)
 			*ep = '&';
 			roff_ccond(r, ln, ep - buf->buf - 1);
 		}
-		++ep;
+		if (*ep != '\0')
+			++ep;
 	}
 	return(rr ? ROFF_CONT : ROFF_IGN);
 }
@@ -1183,7 +1184,8 @@ roff_cond_text(ROFF_ARGS)
 			*ep = '&';
 			roff_ccond(r, ln, ep - buf->buf - 1);
 		}
-		++ep;
+		if (*ep != '\0')
+			++ep;
 	}
 	return(rr ? ROFF_CONT : ROFF_IGN);
 }
