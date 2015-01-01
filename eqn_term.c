@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2014 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2014, 2015 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -79,14 +79,17 @@ eqn_box(struct termp *p, const struct eqn_box *bp)
 		     bp->pos == EQNPOS_TO) ? "^" : "_");
 		p->flags |= TERMP_NOSPACE;
 		child = child->next;
-		eqn_box(p, child);
-		if (bp->pos == EQNPOS_FROMTO ||
-		    bp->pos == EQNPOS_SUBSUP) {
-			p->flags |= TERMP_NOSPACE;
-			term_word(p, "^");
-			p->flags |= TERMP_NOSPACE;
-			child = child->next;
+		if (child != NULL) {
 			eqn_box(p, child);
+			if (bp->pos == EQNPOS_FROMTO ||
+			    bp->pos == EQNPOS_SUBSUP) {
+				p->flags |= TERMP_NOSPACE;
+				term_word(p, "^");
+				p->flags |= TERMP_NOSPACE;
+				child = child->next;
+				if (child != NULL)
+					eqn_box(p, child);
+			}
 		}
 	} else {
 		child = bp->first;
