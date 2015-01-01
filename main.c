@@ -310,7 +310,8 @@ main(int argc, char *argv[])
 				argv = help_argv;
 				argc = 1;
 			}
-		} else if (((uc = argv[0]) != NULL) &&
+		} else if (argc > 1 &&
+		    ((uc = argv[0]) != NULL) &&
 		    ((isdigit(uc[0]) && (uc[1] == '\0' ||
 		      (isalpha(uc[1]) && uc[2] == '\0'))) ||
 		     (uc[0] == 'n' && uc[1] == '\0'))) {
