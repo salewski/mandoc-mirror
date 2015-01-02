@@ -350,7 +350,8 @@ mandocdb(int argc, char *argv[])
 
 	mpages_info.alloc  = mlinks_info.alloc  = hash_alloc;
 	mpages_info.calloc = mlinks_info.calloc = hash_calloc;
-	mpages_info.free  = mlinks_info.free  = hash_free;
+	mpages_info.free   = mlinks_info.free   = hash_free;
+	mpages_info.data   = mlinks_info.data   = NULL;
 
 	mpages_info.key_offset = offsetof(struct mpage, inodev);
 	mlinks_info.key_offset = offsetof(struct mlink, file);
@@ -1106,6 +1107,7 @@ mpages_merge(struct mparse *mp)
 	str_info.alloc = hash_alloc;
 	str_info.calloc = hash_calloc;
 	str_info.free = hash_free;
+	str_info.data = NULL;
 	str_info.key_offset = offsetof(struct str, key);
 
 	if ( ! nodb)
