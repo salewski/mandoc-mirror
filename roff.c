@@ -2169,6 +2169,7 @@ roff_userdef(ROFF_ARGS)
 	buf->buf = n1;
 	if (buf->sz == 0)
 		buf->sz = strlen(buf->buf) + 1;
+	*offs = 0;
 
 	return(buf->sz > 1 && buf->buf[buf->sz - 2] == '\n' ?
 	   ROFF_REPARSE : ROFF_APPEND);
