@@ -55,9 +55,11 @@ tbl_read(struct tbl_node *tbl, int ln, const char *p, int offs)
 
 	switch (tbl->part) {
 	case TBL_PART_OPTS:
-		return(tbl_option(tbl, ln, p) ? ROFF_IGN : ROFF_ERR);
+		tbl_option(tbl, ln, p);
+		return(ROFF_IGN);
 	case TBL_PART_LAYOUT:
-		return(tbl_layout(tbl, ln, p) ? ROFF_IGN : ROFF_ERR);
+		tbl_layout(tbl, ln, p);
+		return(ROFF_IGN);
 	case TBL_PART_CDATA:
 		return(tbl_cdata(tbl, ln, p) ? ROFF_TBL : ROFF_IGN);
 	default:

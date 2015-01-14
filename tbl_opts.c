@@ -252,7 +252,7 @@ again:	/*
 	/* NOTREACHED */
 }
 
-int
+void
 tbl_option(struct tbl_node *tbl, int ln, const char *p)
 {
 	int		 pos;
@@ -265,7 +265,4 @@ tbl_option(struct tbl_node *tbl, int ln, const char *p)
 
 	pos = 0;
 	opt(tbl, ln, p, &pos);
-
-	/* Always succeed. */
-	return(1);
 }
