@@ -210,6 +210,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"uname(3) system call failed, using UNKNOWN",
 	"unknown standard specifier",
 	"skipping request without numeric argument",
+	"NOT IMPLEMENTED: .so with absolute path or \"..\"",
 	"skipping all arguments",
 	"skipping excess arguments",
 	"divide by zero",
@@ -217,7 +218,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"generic fatal error",
 
 	"input too large",
-	"NOT IMPLEMENTED: .so with absolute path or \"..\"",
 	".so request failed",
 };
 
@@ -504,9 +504,6 @@ rerun:
 		case ROFF_IGN:
 			pos = 0;
 			continue;
-		case ROFF_ERR:
-			assert(MANDOCLEVEL_FATAL <= curp->file_status);
-			break;
 		case ROFF_SO:
 			if ( ! (curp->options & MPARSE_SO) &&
 			    (i >= blk.sz || blk.buf[i] == '\0')) {

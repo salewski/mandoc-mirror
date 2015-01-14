@@ -24,8 +24,7 @@ enum	rofferr {
 	ROFF_SO, /* include another file */
 	ROFF_IGN, /* ignore current line */
 	ROFF_TBL, /* a table row was successfully parsed */
-	ROFF_EQN, /* an equation was successfully parsed */
-	ROFF_ERR /* badness: puke and stop */
+	ROFF_EQN /* an equation was successfully parsed */
 };
 
 struct	buf {

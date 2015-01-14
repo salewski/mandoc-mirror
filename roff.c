@@ -2103,7 +2103,7 @@ roff_tr(ROFF_ARGS)
 static enum rofferr
 roff_so(ROFF_ARGS)
 {
-	char *name;
+	char *name, *cp;
 
 	name = buf->buf + pos;
 	mandoc_vmsg(MANDOCERR_SO, r->parse, ln, ppos, "so %s", name);
@@ -2118,7 +2118,12 @@ roff_so(ROFF_ARGS)
 	if (*name == '/' || strstr(name, "../") || strstr(name, "/..")) {
 		mandoc_vmsg(MANDOCERR_SO_PATH, r->parse, ln, ppos,
 		    ".so %s", name);
-		return(ROFF_ERR);
+		buf->sz = mandoc_asprintf(&cp,
+		    ".sp\nSee the file %s.\n.sp", name) + 1;
+		free(buf->buf);
+		buf->buf = cp;
+		*offs = 0;
+		return(ROFF_REPARSE);
 	}
 
 	*offs = pos;
