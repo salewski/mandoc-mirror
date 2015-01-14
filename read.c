@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010-2014 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2015 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2010, 2012 Joerg Sonnenberger <joerg@netbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -220,16 +220,9 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	".so request failed",
 
 	/* system errors */
-	"cannot dup file descriptor",
-	"cannot exec",
 	"gunzip failed with code",
-	"cannot fork",
 	NULL,
-	"cannot open pipe",
-	"cannot read file",
 	"gunzip died from signal",
-	"cannot stat file",
-	"wait failed",
 };
 
 static	const char * const	mandoclevels[MANDOCLEVEL_MAX] = {
@@ -611,11 +604,8 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 #if HAVE_MMAP
 	struct stat	 st;
 	if (-1 == fstat(fd, &st)) {
-		curp->file_status = MANDOCLEVEL_SYSERR;
-		if (curp->mmsg)
-			(*curp->mmsg)(MANDOCERR_SYSSTAT, curp->file_status,
-			    file, 0, 0, strerror(errno));
-		return(0);
+		perror(file);
+		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
 	/*
@@ -668,12 +658,8 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 			return(1);
 		}
 		if (ssz == -1) {
-			curp->file_status = MANDOCLEVEL_SYSERR;
-			if (curp->mmsg)
-				(*curp->mmsg)(MANDOCERR_SYSREAD,
-				    curp->file_status, file, 0, 0,
-				    strerror(errno));
-			break;
+			perror(file);
+			exit((int)MANDOCLEVEL_SYSERR);
 		}
 		off += (size_t)ssz;
 	}
@@ -852,26 +838,23 @@ mparse_open(struct mparse *curp, int *fd, const char *file)
 	/* Run gunzip(1). */
 
 	if (pipe(pfd) == -1) {
-		err = MANDOCERR_SYSPIPE;
-		goto out;
+		perror("pipe");
+		exit((int)MANDOCLEVEL_SYSERR);
 	}
 
 	switch (curp->child = fork()) {
 	case -1:
-		err = MANDOCERR_SYSFORK;
-		close(pfd[0]);
-		close(pfd[1]);
-		pfd[1] = -1;
-		break;
+		perror("fork");
+		exit((int)MANDOCLEVEL_SYSERR);
 	case 0:
 		close(pfd[0]);
 		if (dup2(pfd[1], STDOUT_FILENO) == -1) {
-			err = MANDOCERR_SYSDUP;
-			break;
+			perror("dup");
+			exit((int)MANDOCLEVEL_SYSERR);
 		}
 		execlp("gunzip", "gunzip", "-c", file, NULL);
-		err = MANDOCERR_SYSEXEC;
-		break;
+		perror("exec");
+		exit((int)MANDOCLEVEL_SYSERR);
 	default:
 		close(pfd[1]);
 		*fd = pfd[0];
@@ -900,10 +883,8 @@ mparse_wait(struct mparse *curp)
 		return(MANDOCLEVEL_OK);
 
 	if (waitpid(curp->child, &status, 0) == -1) {
-		mandoc_msg(MANDOCERR_SYSWAIT, curp, 0, 0,
-		    strerror(errno));
-		curp->file_status = MANDOCLEVEL_SYSERR;
-		return(curp->file_status);
+		perror("wait");
+		exit((int)MANDOCLEVEL_SYSERR);
 	}
 	if (WIFSIGNALED(status)) {
 		mandoc_vmsg(MANDOCERR_SYSSIG, curp, 0, 0,
