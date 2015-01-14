@@ -191,6 +191,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"ignoring macro in table",
 
 	/* related to document structure and macros */
+	NULL,
 	"input stack limit exceeded, infinite loop?",
 	"skipping bad character",
 	"skipping unknown macro",
@@ -218,11 +219,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"input too large",
 	"NOT IMPLEMENTED: .so with absolute path or \"..\"",
 	".so request failed",
-
-	/* system errors */
-	"gunzip failed with code",
-	NULL,
-	"gunzip died from signal",
 };
 
 static	const char * const	mandoclevels[MANDOCLEVEL_MAX] = {
@@ -773,7 +769,7 @@ mparse_readfd(struct mparse *curp, int fd, const char *file)
 	save_child = curp->child;
 	if (fd != -1)
 		curp->child = 0;
-	else if (mparse_open(curp, &fd, file) >= MANDOCLEVEL_SYSERR)
+	else if (mparse_open(curp, &fd, file) != MANDOCLEVEL_OK)
 		goto out;
 
 	if (read_whole_file(curp, file, fd, &blk, &with_mmap)) {
@@ -805,9 +801,7 @@ mparse_open(struct mparse *curp, int *fd, const char *file)
 	int		  pfd[2];
 	int		  save_errno;
 	char		 *cp;
-	enum mandocerr	  err;
 
-	pfd[1] = -1;
 	curp->file = file;
 
 	/* Unless zipped, try to just open the file. */
@@ -831,8 +825,11 @@ mparse_open(struct mparse *curp, int *fd, const char *file)
 	if (access(file, R_OK) == -1) {
 		if (cp != NULL)
 			errno = save_errno;
-		err = MANDOCERR_SYSOPEN;
-		goto out;
+		free(cp);
+		*fd = -1;
+		curp->child = 0;
+		mandoc_msg(MANDOCERR_FILE, curp, 0, 0, strerror(errno));
+		return(MANDOCLEVEL_ERROR);
 	}
 
 	/* Run gunzip(1). */
@@ -860,18 +857,6 @@ mparse_open(struct mparse *curp, int *fd, const char *file)
 		*fd = pfd[0];
 		return(MANDOCLEVEL_OK);
 	}
-
-out:
-	free(cp);
-	*fd = -1;
-	curp->child = 0;
-	curp->file_status = MANDOCLEVEL_SYSERR;
-	if (curp->mmsg)
-		(*curp->mmsg)(err, curp->file_status, curp->file,
-		    0, 0, strerror(errno));
-	if (pfd[1] != -1)
-		exit(1);
-	return(curp->file_status);
 }
 
 enum mandoclevel
@@ -887,16 +872,14 @@ mparse_wait(struct mparse *curp)
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
 	if (WIFSIGNALED(status)) {
-		mandoc_vmsg(MANDOCERR_SYSSIG, curp, 0, 0,
-		    "%d", WTERMSIG(status));
-		curp->file_status = MANDOCLEVEL_SYSERR;
-		return(curp->file_status);
+		mandoc_vmsg(MANDOCERR_FILE, curp, 0, 0,
+		    "gunzip died from signal %d", WTERMSIG(status));
+		return(MANDOCLEVEL_ERROR);
 	}
 	if (WEXITSTATUS(status)) {
-		mandoc_vmsg(MANDOCERR_SYSEXIT, curp, 0, 0,
-		    "%d", WEXITSTATUS(status));
-		curp->file_status = MANDOCLEVEL_SYSERR;
-		return(curp->file_status);
+		mandoc_vmsg(MANDOCERR_FILE, curp, 0, 0,
+		    "gunzip failed with code %d", WEXITSTATUS(status));
+		return(MANDOCLEVEL_ERROR);
 	}
 	return(MANDOCLEVEL_OK);
 }
@@ -1009,7 +992,7 @@ mandoc_msg(enum mandocerr er, struct mparse *m,
 	while (er < mandoclimits[level])
 		level--;
 
-	if (level < m->wlevel)
+	if (level < m->wlevel && er != MANDOCERR_FILE)
 		return;
 
 	if (m->mmsg)
