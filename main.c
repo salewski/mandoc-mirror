@@ -131,7 +131,7 @@ main(int argc, char *argv[])
 	int		 prio, best_prio, synopsis_only;
 	char		 sec;
 #endif
-	enum mandoclevel rc;
+	enum mandoclevel rc, rctmp;
 	enum outmode	 outmode;
 	int		 fd;
 	int		 show_usage;
@@ -431,11 +431,13 @@ main(int argc, char *argv[])
 	}
 
 	while (argc) {
-		rc = mparse_open(curp.mp, &fd,
+		rctmp = mparse_open(curp.mp, &fd,
 #if HAVE_SQLITE3
 		    resp != NULL ? resp->file :
 #endif
 		    *argv);
+		if (rc < rctmp)
+			rc = rctmp;
 
 		if (fd != -1) {
 			if (use_pager && isatty(STDOUT_FILENO))
@@ -451,13 +453,17 @@ main(int argc, char *argv[])
 				/* For .so only; ignore failure. */
 				chdir(paths.paths[resp->ipath]);
 				parse(&curp, fd, resp->file, &rc);
-			} else
-				rc = passthrough(resp->file, fd,
+			} else {
+				rctmp = passthrough(resp->file, fd,
 				    synopsis_only);
+				if (rc < rctmp)
+					rc = rctmp;
+			}
 #endif
 
-			if (mparse_wait(curp.mp) != MANDOCLEVEL_OK)
-				rc = MANDOCLEVEL_SYSERR;
+			rctmp = mparse_wait(curp.mp);
+			if (rc < rctmp)
+				rc = rctmp;
 
 			if (argc > 1 && curp.outtype <= OUTT_UTF8)
 				ascii_sepline(curp.outdata);
