@@ -80,7 +80,7 @@ static	const enum mandocerr	mandoclimits[MANDOCLEVEL_MAX] = {
 	MANDOCERR_WARNING,
 	MANDOCERR_WARNING,
 	MANDOCERR_ERROR,
-	MANDOCERR_FATAL,
+	MANDOCERR_MAX,
 	MANDOCERR_MAX,
 	MANDOCERR_MAX
 };
@@ -192,6 +192,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	/* related to document structure and macros */
 	NULL,
+	"input too large",
 	"input stack limit exceeded, infinite loop?",
 	"skipping bad character",
 	"skipping unknown macro",
@@ -215,10 +216,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"skipping all arguments",
 	"skipping excess arguments",
 	"divide by zero",
-
-	"generic fatal error",
-
-	"input too large",
 };
 
 static	const char * const	mandoclevels[MANDOCLEVEL_MAX] = {
@@ -545,14 +542,6 @@ rerun:
 		}
 
 		/*
-		 * If we encounter errors in the recursive parse, make
-		 * sure we don't continue parsing.
-		 */
-
-		if (MANDOCLEVEL_FATAL <= curp->file_status)
-			break;
-
-		/*
 		 * If input parsers have not been allocated, do so now.
 		 * We keep these instanced between parsers, but set them
 		 * locally per parse routine since we can use different
@@ -623,10 +612,7 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 
 	if (S_ISREG(st.st_mode)) {
 		if (st.st_size >= (1U << 31)) {
-			curp->file_status = MANDOCLEVEL_FATAL;
-			if (curp->mmsg)
-				(*curp->mmsg)(MANDOCERR_TOOLARGE,
-				    curp->file_status, file, 0, 0, NULL);
+			mandoc_msg(MANDOCERR_TOOLARGE, curp, 0, 0, NULL);
 			return(0);
 		}
 		*with_mmap = 1;
@@ -649,11 +635,8 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 	for (;;) {
 		if (off == fb->sz) {
 			if (fb->sz == (1U << 31)) {
-				curp->file_status = MANDOCLEVEL_FATAL;
-				if (curp->mmsg)
-					(*curp->mmsg)(MANDOCERR_TOOLARGE,
-					    curp->file_status,
-					    file, 0, 0, NULL);
+				mandoc_msg(MANDOCERR_TOOLARGE, curp,
+				    0, 0, NULL);
 				break;
 			}
 			resize_buf(fb, 65536);
@@ -679,9 +662,6 @@ static void
 mparse_end(struct mparse *curp)
 {
 
-	if (MANDOCLEVEL_FATAL <= curp->file_status)
-		return;
-
 	if (curp->mdoc == NULL &&
 	    curp->man == NULL &&
 	    curp->sodest == NULL) {
@@ -695,17 +675,10 @@ mparse_end(struct mparse *curp)
 			curp->man = curp->pman;
 		}
 	}
-
-	if (curp->mdoc && ! mdoc_endparse(curp->mdoc)) {
-		assert(MANDOCLEVEL_FATAL <= curp->file_status);
-		return;
-	}
-
-	if (curp->man && ! man_endparse(curp->man)) {
-		assert(MANDOCLEVEL_FATAL <= curp->file_status);
-		return;
-	}
-
+	if (curp->mdoc)
+		mdoc_endparse(curp->mdoc);
+	if (curp->man)
+		man_endparse(curp->man);
 	roff_endparse(curp->roff);
 }
 
@@ -742,7 +715,7 @@ mparse_parse_buffer(struct mparse *curp, struct buf blk, const char *file)
 
 	mparse_buf_r(curp, blk, offset, 1);
 
-	if (0 == --recursion_depth && MANDOCLEVEL_FATAL > curp->file_status)
+	if (--recursion_depth == 0)
 		mparse_end(curp);
 
 	curp->primary = svprimary;
@@ -889,8 +862,6 @@ mparse_alloc(int options, enum mandoclevel wlevel, mandocmsg mmsg,
 {
 	struct mparse	*curp;
 
-	assert(wlevel <= MANDOCLEVEL_FATAL);
-
 	curp = mandoc_calloc(1, sizeof(struct mparse));
 
 	curp->options = options;
@@ -987,7 +958,7 @@ mandoc_msg(enum mandocerr er, struct mparse *m,
 {
 	enum mandoclevel level;
 
-	level = MANDOCLEVEL_FATAL;
+	level = MANDOCLEVEL_ERROR;
 	while (er < mandoclimits[level])
 		level--;
 

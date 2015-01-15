@@ -44,7 +44,7 @@ main(int argc, char *argv[])
 {
 	struct mparse	*mp;
 	struct mchars	*mchars;
-	int		 ch, i, list;
+	int		 ch, fd, i, list;
 	extern int	 optind;
 
 	progname = strrchr(argv[0], '/');
@@ -78,7 +78,7 @@ main(int argc, char *argv[])
 	argv += optind;
 
 	mchars = mchars_alloc();
-	mp = mparse_alloc(MPARSE_SO, MANDOCLEVEL_FATAL, NULL, mchars, NULL);
+	mp = mparse_alloc(MPARSE_SO, MANDOCLEVEL_BADARG, NULL, mchars, NULL);
 	assert(mp);
 
 	if (0 == argc)
@@ -86,7 +86,11 @@ main(int argc, char *argv[])
 
 	for (i = 0; i < argc; i++) {
 		mparse_reset(mp);
-		pmandoc(mp, -1, argv[i], list);
+		if (mparse_open(mp, &fd, argv[i]) != MANDOCLEVEL_OK) {
+			perror(argv[i]);
+			continue;
+		}
+		pmandoc(mp, fd, argv[i], list);
 	}
 
 	mparse_free(mp);
@@ -108,11 +112,7 @@ pmandoc(struct mparse *mp, int fd, const char *fn, int list)
 	struct man	*man;
 	int		 line, col;
 
-	if (mparse_readfd(mp, fd, fn) >= MANDOCLEVEL_FATAL) {
-		fprintf(stderr, "%s: Parse failure\n", fn);
-		return;
-	}
-
+	mparse_readfd(mp, fd, fn);
 	mparse_result(mp, &mdoc, &man, NULL);
 	line = 1;
 	col = 0;

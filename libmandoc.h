@@ -60,7 +60,7 @@ struct	mdoc	*mdoc_alloc(struct roff *, struct mparse *,
 			const char *, int);
 void		 mdoc_reset(struct mdoc *);
 int		 mdoc_parseln(struct mdoc *, int, char *, int);
-int		 mdoc_endparse(struct mdoc *);
+void		 mdoc_endparse(struct mdoc *);
 void		 mdoc_addspan(struct mdoc *, const struct tbl_span *);
 void		 mdoc_addeqn(struct mdoc *, const struct eqn *);
 
@@ -69,7 +69,7 @@ struct	man	*man_alloc(struct roff *, struct mparse *,
 			const char *, int);
 void		 man_reset(struct man *);
 int		 man_parseln(struct man *, int, char *, int);
-int		 man_endparse(struct man *);
+void		 man_endparse(struct man *);
 void		 man_addspan(struct man *, const struct tbl_span *);
 void		 man_addeqn(struct man *, const struct eqn *);
 

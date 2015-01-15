@@ -442,7 +442,7 @@ mandocdb(int argc, char *argv[])
 
 	exitcode = (int)MANDOCLEVEL_OK;
 	mchars = mchars_alloc();
-	mp = mparse_alloc(mparse_options, MANDOCLEVEL_FATAL, NULL,
+	mp = mparse_alloc(mparse_options, MANDOCLEVEL_BADARG, NULL,
 	    mchars, NULL);
 	ohash_init(&mpages, 6, &mpages_info);
 	ohash_init(&mlinks, 6, &mlinks_info);
@@ -1102,7 +1102,6 @@ mpages_merge(struct mparse *mp)
 	char			*cp;
 	int			 fd;
 	unsigned int		 pslot;
-	enum mandoclevel	 lvl;
 
 	str_info.alloc = hash_alloc;
 	str_info.calloc = hash_calloc;
@@ -1136,14 +1135,12 @@ mpages_merge(struct mparse *mp)
 		}
 
 		/*
-		 * Try interpreting the file as mdoc(7) or man(7)
-		 * source code, unless it is already known to be
-		 * formatted.  Fall back to formatted mode.
+		 * Interpret the file as mdoc(7) or man(7) source
+		 * code, unless it is known to be formatted.
 		 */
 		if (mlink->dform != FORM_CAT || mlink->fform != FORM_CAT) {
-			lvl = mparse_readfd(mp, fd, mlink->file);
-			if (lvl < MANDOCLEVEL_FATAL)
-				mparse_result(mp, &mdoc, &man, &sodest);
+			mparse_readfd(mp, fd, mlink->file);
+			mparse_result(mp, &mdoc, &man, &sodest);
 		}
 
 		if (sodest != NULL) {

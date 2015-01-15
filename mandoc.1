@@ -159,15 +159,15 @@ to be reported on the standard error output and to affect the exit status.
 The
 .Ar level
 can be
-.Cm warning ,
-.Cm error ,
+.Cm warning
 or
-.Cm fatal .
-The default is
-.Fl W Ns Cm fatal ;
-.Fl W Ns Cm all
+.Cm error ;
+.Cm all
 is an alias for
-.Fl W Ns Cm warning .
+.Cm warning .
+By default,
+.Nm
+is silent.
 See
 .Sx EXIT STATUS
 and
@@ -532,13 +532,11 @@ At least one warning occurred, but no error, and
 .Fl W Ns Cm warning
 was specified.
 .It 3
-At least one parsing error occurred, but no fatal error, and
+At least one parsing error occurred, and
 .Fl W Ns Cm error
 or
 .Fl W Ns Cm warning
 was specified.
-.It 4
-A fatal parsing error occurred.
 .It 5
 Invalid command line arguments were specified.
 No input files have been read.
@@ -603,9 +601,6 @@ fields.
 .Pp
 Message levels have the following meanings:
 .Bl -tag -width "warning"
-.It Cm fatal
-The parser is unable to parse a given input file at all.
-No formatted output is produced from that input file.
 .It Cm error
 An input file contains syntax that cannot be safely interpreted,
 either because it is invalid or because
@@ -1277,6 +1272,14 @@ keeps the code more readable.
 .El
 .Ss "Errors related to roff, mdoc, and man code"
 .Bl -ohang
+.It Sy "input too large"
+.Pq mdoc , man
+Currently,
+.Nm
+cannot handle input files larger than its arbitrary size limit
+of 2^31 bytes (2 Gigabytes).
+Since useful manuals are always small, this is not a problem in practice.
+Parsing is aborted as soon as the condition is detected.
 .It Sy "input stack limit exceeded, infinite loop?"
 .Pq roff
 Explicit recursion limits are implemented for the following features,
@@ -1465,6 +1468,29 @@ or
 .Ic \&gsize
 statement has a non-numeric or negative argument or no argument at all.
 The invalid request or statement is ignored.
+.It Sy "NOT IMPLEMENTED: .so with absolute path or \(dq..\(dq"
+.Pq roff
+For security reasons,
+.Nm
+allows
+.Ic \&so
+file inclusion requests only with relative paths
+and only without ascending to any parent directory.
+By requesting the inclusion of a sensitive file, a malicious document
+might otherwise trick a privileged user into inadvertently displaying
+the file on the screen, revealing the file content to bystanders.
+.Nm
+only shows the path as it appears behind
+.Ic \&so .
+.It Sy ".so request failed"
+.Pq roff
+Servicing a
+.Ic \&so
+request requires reading an external file, but the file could not be
+opened.
+.Nm
+only shows the path as it appears behind
+.Ic \&so .
 .It Sy "skipping all arguments"
 .Pq mdoc , man , eqn , roff
 An
@@ -1503,44 +1529,6 @@ macro is invoked with more than one argument, or a request of the
 .Ic \&de
 family is invoked with more than two arguments.
 The excess arguments are ignored.
-.El
-.Ss FATAL errors
-.Bl -ohang
-.It Sy "input too large"
-.Pq mdoc , man
-Currently,
-.Nm
-cannot handle input files larger than its arbitrary size limit
-of 2^31 bytes (2 Gigabytes).
-Since useful manuals are always small, this is not a problem in practice.
-Parsing is aborted as soon as the condition is detected.
-.It Sy "NOT IMPLEMENTED: .so with absolute path or \(dq..\(dq"
-.Pq roff
-For security reasons,
-.Nm
-allows
-.Ic \&so
-file inclusion requests only with relative paths
-and only without ascending to any parent directory.
-By requesting the inclusion of a sensitive file, a malicious document
-might otherwise trick a privileged user into inadvertently displaying
-the file on the screen, revealing the file content to bystanders.
-The parser exits immediately.
-.It Sy ".so request failed"
-.Pq roff
-Servicing a
-.Ic \&so
-request requires reading an external file.
-While trying to do so, an
-.Xr open 2 ,
-.Xr stat 2 ,
-or
-.Xr read 2
-system call failed.
-The parser exits immediately.
-Before showing this message,
-.Nm
-always shows another message explaining why the system call failed.
 .El
 .Sh COMPATIBILITY
 This section summarises

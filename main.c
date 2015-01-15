@@ -176,7 +176,7 @@ main(int argc, char *argv[])
 
 	memset(&curp, 0, sizeof(struct curparse));
 	curp.outtype = OUTT_LOCALE;
-	curp.wlevel  = MANDOCLEVEL_FATAL;
+	curp.wlevel  = MANDOCLEVEL_BADARG;
 	options = MPARSE_SO | MPARSE_UTF8 | MPARSE_LATIN1;
 	defos = NULL;
 
@@ -647,11 +647,6 @@ parse(struct curparse *curp, int fd, const char *file,
 
 	rc = mparse_readfd(curp->mp, fd, file);
 
-	/* Stop immediately if the parse has failed. */
-
-	if (MANDOCLEVEL_FATAL <= rc)
-		goto cleanup;
-
 	/*
 	 * With -Wstop and warnings or errors of at least the requested
 	 * level, do not produce output.
@@ -913,7 +908,7 @@ woptions(struct curparse *curp, char *arg)
 			curp->wlevel = MANDOCLEVEL_ERROR;
 			break;
 		case 4:
-			curp->wlevel = MANDOCLEVEL_FATAL;
+			curp->wlevel = MANDOCLEVEL_BADARG;
 			break;
 		default:
 			fprintf(stderr, "%s: -W %s: Bad argument\n",

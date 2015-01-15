@@ -148,6 +148,7 @@ enum	mandocerr {
 
 	/* related to document structure and macros */
 	MANDOCERR_FILE, /* cannot open file */
+	MANDOCERR_TOOLARGE, /* input too large */
 	MANDOCERR_ROFFLOOP, /* input stack limit exceeded, infinite loop? */
 	MANDOCERR_BADCHAR, /* skipping bad character: number */
 	MANDOCERR_MACRO, /* skipping unknown macro: macro */
@@ -171,10 +172,6 @@ enum	mandocerr {
 	MANDOCERR_ARG_SKIP, /* skipping all arguments: macro args */
 	MANDOCERR_ARG_EXCESS, /* skipping excess arguments: macro ... args */
 	MANDOCERR_DIVZERO, /* divide by zero */
-
-	MANDOCERR_FATAL, /* ===== start of fatal errors ===== */
-
-	MANDOCERR_TOOLARGE, /* input too large */
 
 	MANDOCERR_MAX
 };

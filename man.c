@@ -109,12 +109,11 @@ man_alloc(struct roff *roff, struct mparse *parse,
 	return(p);
 }
 
-int
+void
 man_endparse(struct man *man)
 {
 
 	man_macroend(man);
-	return(1);
 }
 
 int

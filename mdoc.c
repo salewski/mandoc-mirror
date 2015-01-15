@@ -190,12 +190,11 @@ mdoc_alloc(struct roff *roff, struct mparse *parse,
 	return(p);
 }
 
-int
+void
 mdoc_endparse(struct mdoc *mdoc)
 {
 
 	mdoc_macroend(mdoc);
-	return(1);
 }
 
 void

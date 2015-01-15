@@ -3,7 +3,7 @@
 .\" Copyright (c) 1989, 1990, 1993
 .\"	The Regents of the University of California.  All rights reserved.
 .\" Copyright (c) 2003, 2007, 2008, 2014 Jason McIntyre <jmc@openbsd.org>
-.\" Copyright (c) 2010, 2011 Ingo Schwarze <schwarze@openbsd.org>
+.\" Copyright (c) 2010, 2011, 2014, 2015 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions
@@ -300,15 +300,15 @@ to be reported on the standard error output and to affect the exit status.
 The
 .Ar level
 can be
-.Cm warning ,
-.Cm error ,
+.Cm warning
 or
-.Cm fatal .
-The default is
-.Cm fatal ;
+.Cm error ;
 .Cm all
 is an alias for
 .Cm warning .
+By default,
+.Nm
+is silent.
 See the
 .Xr mandoc 1
 manual for details.
