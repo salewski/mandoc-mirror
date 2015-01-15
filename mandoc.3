@@ -176,7 +176,9 @@ initiate a parsing sequence with
 and
 .Fn mparse_alloc ;
 .It
-parse files or file descriptors with
+parse files with
+.Fn mparse_open
+and
 .Fn mparse_readfd ;
 .It
 retrieve a parsed syntax tree, if the parse was successful, with
@@ -413,17 +415,12 @@ Declared in
 implemented in
 .Pa read.c .
 .It Fn mparse_readfd
-Parse a file or file descriptor.
-If
-.Va fd
-is -1, open
-.Va fname
-with
+Parse a file descriptor opened with
+.Xr open 2
+or
 .Fn mparse_open .
-Otherwise,
-.Va fname
-is assumed to be the name associated with
-.Va fd .
+Pass the associated filename in
+.Va fname .
 Calls
 .Fn mparse_wait
 before returning.
