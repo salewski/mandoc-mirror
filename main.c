@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include <sys/types.h>
+#include <sys/param.h>	/* MACHINE */
 
 #include <assert.h>
 #include <ctype.h>
@@ -328,6 +329,10 @@ main(int argc, char *argv[])
 			argv++;
 			argc--;
 		}
+		if (search.arch == NULL)
+			search.arch = getenv("MACHINE");
+		if (search.arch == NULL)
+			search.arch = MACHINE;
 	}
 
 	rc = MANDOCLEVEL_OK;
