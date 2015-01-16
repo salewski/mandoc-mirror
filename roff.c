@@ -75,6 +75,7 @@ enum	rofft {
 	ROFF_T_,
 	ROFF_EQ,
 	ROFF_EN,
+	ROFF_IX,
 	ROFF_cblock,
 	ROFF_USERDEF,
 	ROFF_MAX
@@ -274,6 +275,7 @@ static	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "T&", roff_T_, NULL, NULL, 0, NULL },
 	{ "EQ", roff_EQ, NULL, NULL, 0, NULL },
 	{ "EN", roff_EN, NULL, NULL, 0, NULL },
+	{ "IX", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ ".", roff_cblock, NULL, NULL, 0, NULL },
 	{ NULL, roff_userdef, NULL, NULL, 0, NULL },
 };
