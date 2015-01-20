@@ -889,14 +889,15 @@ static int
 woptions(struct curparse *curp, char *arg)
 {
 	char		*v, *o;
-	const char	*toks[6];
+	const char	*toks[7];
 
 	toks[0] = "stop";
 	toks[1] = "all";
 	toks[2] = "warning";
 	toks[3] = "error";
-	toks[4] = "fatal";
-	toks[5] = NULL;
+	toks[4] = "unsupp";
+	toks[5] = "fatal";
+	toks[6] = NULL;
 
 	while (*arg) {
 		o = arg;
@@ -913,6 +914,9 @@ woptions(struct curparse *curp, char *arg)
 			curp->wlevel = MANDOCLEVEL_ERROR;
 			break;
 		case 4:
+			curp->wlevel = MANDOCLEVEL_UNSUPP;
+			break;
+		case 5:
 			curp->wlevel = MANDOCLEVEL_BADARG;
 			break;
 		default:
