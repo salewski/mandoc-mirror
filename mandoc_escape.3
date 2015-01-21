@@ -20,8 +20,6 @@
 .Sh NAME
 .Nm mandoc_escape
 .Nd parse roff escape sequences
-.Sh LIBRARY
-.Lb libmandoc
 .Sh SYNOPSIS
 .In sys/types.h
 .In mandoc.h
@@ -119,8 +117,8 @@ in turn contain other escape sequences,
 for error detection internally by the
 .Xr roff 7
 parser part of the
-.Lb libmandoc ,
-see the file
+.Xr mandoc 3
+library, see the file
 .Pa roff.c ,
 .It
 above all externally by the
@@ -256,6 +254,10 @@ Such ASCII character escape sequences can be rendered using the function
 described in the
 .Xr mchars_alloc 3
 manual.
+.It Dv ESCAPE_OVERSTRIKE
+The escape sequence
+.Ic \eo
+followed by an argument delimited by an arbitrary character.
 .It Dv ESCAPE_IGNORE
 .Bl -bullet -width 2n
 .It
@@ -288,7 +290,6 @@ The escape sequences
 .Ic \eA ,
 .Ic \eb ,
 .Ic \eD ,
-.Ic \eo ,
 .Ic \eR ,
 .Ic \eX ,
 and

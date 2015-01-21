@@ -1948,10 +1948,11 @@ For short names, there are variants
 and
 .No \en( Ns Ar cc .
 .Ss \eo\(aq Ns Ar string Ns \(aq
-Overstrike
-.Ar string ;
-ignored by
-.Xr mandoc 1 .
+Overstrike, that is, write all the characters contained in the
+.Ar string
+to the same output position.
+In terminal and HTML output modes,
+only the last one of the characters is visible.
 .Ss \eR\(aq Ns Ar name Oo +|- Oc Ns Ar number Ns \(aq
 Set number register; ignored by
 .Xr mandoc 1 .

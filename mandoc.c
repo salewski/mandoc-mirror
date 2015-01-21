@@ -156,16 +156,18 @@ mandoc_escape(const char **end, const char **start, int *sz)
 		/* FALLTHROUGH */
 	case 'D':
 		/* FALLTHROUGH */
-	case 'o':
-		/* FALLTHROUGH */
 	case 'R':
 		/* FALLTHROUGH */
 	case 'X':
 		/* FALLTHROUGH */
 	case 'Z':
-		if ('\0' == **start)
-			return(ESCAPE_ERROR);
 		gly = ESCAPE_IGNORE;
+		/* FALLTHROUGH */
+	case 'o':
+		if (**start == '\0')
+			return(ESCAPE_ERROR);
+		if (gly == ESCAPE_ERROR)
+			gly = ESCAPE_OVERSTRIKE;
 		term = **start;
 		*start = ++*end;
 		break;
