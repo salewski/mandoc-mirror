@@ -71,7 +71,7 @@ void		 tbl_reset(struct tbl_node *);
 enum rofferr	 tbl_read(struct tbl_node *, int, const char *, int);
 void		 tbl_option(struct tbl_node *, int, const char *);
 void		 tbl_layout(struct tbl_node *, int, const char *);
-int		 tbl_data(struct tbl_node *, int, const char *);
+void		 tbl_data(struct tbl_node *, int, const char *);
 int		 tbl_cdata(struct tbl_node *, int, const char *);
 const struct tbl_span	*tbl_span(struct tbl_node *);
 void		 tbl_end(struct tbl_node **);

@@ -66,11 +66,8 @@ tbl_read(struct tbl_node *tbl, int ln, const char *p, int offs)
 		break;
 	}
 
-	/*
-	 * This only returns zero if the line is empty, so we ignore it
-	 * and continue on.
-	 */
-	return(tbl_data(tbl, ln, p) ? ROFF_TBL : ROFF_IGN);
+	tbl_data(tbl, ln, p);
+	return(ROFF_TBL);
 }
 
 struct tbl_node *
