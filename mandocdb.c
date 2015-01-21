@@ -613,7 +613,11 @@ treescan(void)
 					say(path, "&realpath");
 				continue;
 			}
-			if (strstr(buf, basedir) != buf) {
+			if (strstr(buf, basedir) != buf
+#ifdef HOMEBREWDIR
+			    && strstr(buf, HOMEBREWDIR) != buf
+#endif
+			) {
 				if (warnings) say("",
 				    "%s: outside base directory", buf);
 				continue;
@@ -818,6 +822,10 @@ filescan(const char *file)
 		start = buf;
 	else if (strstr(buf, basedir) == buf)
 		start = buf + strlen(basedir);
+#ifdef HOMEBREWDIR
+	else if (strstr(buf, HOMEBREWDIR) == buf)
+		start = buf;
+#endif
 	else {
 		exitcode = (int)MANDOCLEVEL_BADARG;
 		say("", "%s: outside base directory", buf);

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2014 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2014, 2015 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -70,6 +70,7 @@ INCLUDEDIR=
 LIBDIR=
 MANDIR=
 EXAMPLEDIR=
+HOMEBREWDIR=
 
 WWWPREFIX="/var/www"
 HTDOCDIR=
@@ -276,6 +277,7 @@ __HEREDOC__
 echo
 echo "#define VERSION \"${VERSION}\""
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
+[ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""
 
 cat << __HEREDOC__
 #define HAVE_DIRENT_NAMLEN ${HAVE_DIRENT_NAMLEN}

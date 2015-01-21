@@ -1,6 +1,6 @@
 # $Id$
 #
-# Copyright (c) 2014 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2014, 2015 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -152,6 +152,14 @@ BINM_APROPOS=mapropos		# default is "apropos"
 BINM_MAN=mman			# default is "man"
 BINM_WHATIS=mwhatis		# default is "whatis"
 BINM_MAKEWHATIS=mandocdb	# default is "makewhatis"
+
+# When using the "homebrew" package manager on Mac OS X, the actual
+# manuals are located in a so-called "cellar" and only symlinked
+# into the manual trees.  To allow mandoc to follow such symlinks,
+# you have to specify the physical location of the cellar as returned
+# by realpath(3), for example:
+
+HOMEBREWDIR=/Cellar
 
 # --- user settings related man.cgi ------------------------------------
 
