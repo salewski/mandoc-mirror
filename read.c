@@ -215,6 +215,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	"unsupported feature",
 	"input too large",
+	"unsupported control character",
 	"unsupported roff request",
 	"unsupported table syntax",
 	"unsupported table option",
@@ -369,9 +370,8 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 			if (c & 0x80) {
 				if ( ! (curp->filenc && preconv_encode(
 				    &blk, &i, &ln, &pos, &curp->filenc))) {
-					mandoc_vmsg(MANDOCERR_BADCHAR,
-					    curp, curp->line, pos,
-					    "0x%x", c);
+					mandoc_vmsg(MANDOCERR_CHAR_BAD, curp,
+					    curp->line, pos, "0x%x", c);
 					ln.buf[pos++] = '?';
 					i++;
 				}
@@ -383,8 +383,10 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 			 */
 
 			if (c == 0x7f || (c < 0x20 && c != 0x09)) {
-				mandoc_vmsg(MANDOCERR_BADCHAR, curp,
-				    curp->line, pos, "0x%x", c);
+				mandoc_vmsg(c == 0x00 || c == 0x04 ||
+				    c > 0x0a ? MANDOCERR_CHAR_BAD :
+				    MANDOCERR_CHAR_UNSUPP,
+				    curp, curp->line, pos, "0x%x", c);
 				i++;
 				ln.buf[pos++] = '?';
 				continue;
@@ -440,7 +442,7 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 
 			if ( ! (isascii(c) &&
 			    (isgraph(c) || isblank(c)))) {
-				mandoc_vmsg(MANDOCERR_BADCHAR, curp,
+				mandoc_vmsg(MANDOCERR_CHAR_BAD, curp,
 				    curp->line, pos, "0x%x", c);
 				i += 2;
 				ln.buf[pos++] = '?';

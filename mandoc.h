@@ -145,7 +145,7 @@ enum	mandocerr {
 	/* related to document structure and macros */
 	MANDOCERR_FILE, /* cannot open file */
 	MANDOCERR_ROFFLOOP, /* input stack limit exceeded, infinite loop? */
-	MANDOCERR_BADCHAR, /* skipping bad character: number */
+	MANDOCERR_CHAR_BAD, /* skipping bad character: number */
 	MANDOCERR_MACRO, /* skipping unknown macro: macro */
 	MANDOCERR_REQ_INSEC, /* skipping insecure request: request */
 	MANDOCERR_IT_STRAY, /* skipping item outside list: It ... */
@@ -172,6 +172,7 @@ enum	mandocerr {
 	MANDOCERR_UNSUPP, /* ===== start of unsupported features ===== */
 
 	MANDOCERR_TOOLARGE, /* input too large */
+	MANDOCERR_CHAR_UNSUPP, /* unsupported control character: number */
 	MANDOCERR_REQ_UNSUPP, /* unsupported roff request: request */
 	MANDOCERR_TBL, /* unsupported table syntax */
 	MANDOCERR_TBLOPT, /* unsupported table option */
