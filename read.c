@@ -307,6 +307,7 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 {
 	const struct tbl_span	*span;
 	struct buf	 ln;
+	const char	*save_file;
 	char		*cp;
 	size_t		 pos; /* byte number in the ln buffer */
 	enum rofferr	 rr;
@@ -522,11 +523,14 @@ rerun:
 			 */
 			if (curp->secondary)
 				curp->secondary->sz -= pos + 1;
+			save_file = curp->file;
 			save_child = curp->child;
 			if (mparse_open(curp, &fd, ln.buf + of) ==
-			    MANDOCLEVEL_OK)
+			    MANDOCLEVEL_OK) {
 				mparse_readfd(curp, fd, ln.buf + of);
-			else {
+				curp->file = save_file;
+			} else {
+				curp->file = save_file;
 				mandoc_vmsg(MANDOCERR_SO_FAIL,
 				    curp, curp->line, pos,
 				    ".so %s", ln.buf + of);
