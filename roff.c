@@ -1004,8 +1004,9 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 
 		/* Advance to the end of the name. */
 
+		naml = 0;
 		arg_complete = 1;
-		for (naml = 0; maxl == 0 || naml < maxl; naml++, cp++) {
+		while (maxl == 0 || naml < maxl) {
 			if (*cp == '\0') {
 				mandoc_msg(MANDOCERR_ESC_BAD, r->parse,
 				    ln, (int)(stesc - buf->buf), stesc);
@@ -1014,6 +1015,23 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 			}
 			if (maxl == 0 && *cp == term) {
 				cp++;
+				break;
+			}
+			if (*cp++ != '\\' || stesc[1] != 'w') {
+				naml++;
+				continue;
+			}
+			switch (mandoc_escape(&cp, NULL, NULL)) {
+			case ESCAPE_SPECIAL:
+				/* FALLTHROUGH */
+			case ESCAPE_UNICODE:
+				/* FALLTHROUGH */
+			case ESCAPE_NUMBERED:
+				/* FALLTHROUGH */
+			case ESCAPE_OVERSTRIKE:
+				naml++;
+				break;
+			default:
 				break;
 			}
 		}
