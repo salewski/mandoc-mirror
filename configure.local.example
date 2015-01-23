@@ -159,7 +159,8 @@ BINM_MAKEWHATIS=mandocdb	# default is "makewhatis"
 # you have to specify the physical location of the cellar as returned
 # by realpath(3), for example:
 
-HOMEBREWDIR=/Cellar
+PREFIX="/usr/local"
+HOMEBREWDIR="${PREFIX}/Cellar"
 
 # --- user settings related man.cgi ------------------------------------
 
