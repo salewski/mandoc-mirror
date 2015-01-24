@@ -76,7 +76,7 @@ are mere guesses, and some may be wrong.
   loc **  exist ***  algo **  size **  imp ***
 
 - .ti (temporary indent)
-  found by naddy@ in xloadimage(1)
+  found by naddy@ in xloadimage(1) [devel/libvstr] vstr(3)
   found by bentley@ in nmh(1)  Mon, 23 Apr 2012 13:38:28 -0600
   loc **  exist **  algo **  size *  imp ** (parser reorg helps a lot)
 
@@ -350,6 +350,10 @@ are mere guesses, and some may be wrong.
 - in enclosures, mandoc sometimes fancies a bogus end of sentence
   reminded by jmc@  Thu, 23 Sep 2010 18:13:39 +0059
   loc *  exist **  algo ***  size *  imp ***
+
+- a line starting with "\fB something" counts as starting with whitespace
+  and triggers a line break; found in audio/normalize-mp3(1)
+  loc **  exist *  algo **  size *  imp **
 
 - formatting /usr/local/man/man1/latex2man.1 with groff and mandoc
   reveals lots of bugs both in groff and mandoc...
