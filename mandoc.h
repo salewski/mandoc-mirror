@@ -151,6 +151,7 @@ enum	mandocerr {
 	MANDOCERR_IT_STRAY, /* skipping item outside list: It ... */
 	MANDOCERR_TA_STRAY, /* skipping column outside column list: Ta */
 	MANDOCERR_BLK_NOTOPEN, /* skipping end of block that is not open */
+	MANDOCERR_RE_NOTOPEN, /* fewer RS blocks open, skipping: RE arg */
 	MANDOCERR_BLK_BROKEN, /* inserting missing end of block: macro ... */
 	MANDOCERR_BLK_NOEND, /* appending missing end of block: macro */
 

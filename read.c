@@ -195,6 +195,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"skipping item outside list",
 	"skipping column outside column list",
 	"skipping end of block that is not open",
+	"fewer RS blocks open, skipping",
 	"inserting missing end of block",
 	"appending missing end of block",
 

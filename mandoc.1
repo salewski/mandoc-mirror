@@ -1369,6 +1369,16 @@ right delimiter or closing brace, or the end of an equation, table, or
 .Xr roff 7
 conditional request is encountered but no matching block is open.
 The offending request or macro is discarded.
+.It Sy "fewer RS blocks open, skipping"
+.Pq man
+The
+.Ic \&RE
+macro is invoked with an argument, but less than the specified number of
+.Ic \&RS
+blocks is open.
+The
+.Ic \&RE
+macro is discarded.
 .It Sy "inserting missing end of block"
 .Pq mdoc , tbl
 Various
@@ -1537,10 +1547,13 @@ macro, or a
 block closing request is invoked with at least one argument.
 All arguments are ignored.
 .It Sy "skipping excess arguments"
-.Pq mdoc , roff
+.Pq mdoc , man , roff
 The
 .Ic \&Bf
-macro is invoked with more than one argument, or a request of the
+macro is invoked with more than one argument, the
+.Ic \&RE
+macro is invoked with more than one argument
+or with a non-integer argument, or a request of the
 .Ic \&de
 family is invoked with more than two arguments.
 The excess arguments are ignored.
