@@ -319,8 +319,19 @@ blk_close(MACRO_PROT_ARGS)
 		mandoc_msg(MANDOCERR_BLK_NOTOPEN, man->parse,
 		    line, ppos, man_macronames[tok]);
 		rew_scope(MAN_BLOCK, man, MAN_PP);
-	} else
+	} else {
+		line = man->last->line;
+		ppos = man->last->pos;
+		ntok = man->last->tok;
 		man_unscope(man, nn);
+
+		/* Move a trailing paragraph behind the block. */
+
+		if (ntok == MAN_LP || ntok == MAN_PP || ntok == MAN_P) {
+			*pos = strlen(buf);
+			blk_imp(man, ntok, line, ppos, pos, buf);
+		}
+	}
 }
 
 void
