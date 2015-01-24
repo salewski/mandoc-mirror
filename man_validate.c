@@ -79,7 +79,6 @@ static	v_check man_valids[MAN_MAX] = {
 	NULL,       /* I */
 	NULL,       /* IR */
 	NULL,       /* RI */
-	check_eq0,  /* na */
 	post_vs,    /* sp */
 	post_nf,    /* nf */
 	post_fi,    /* fi */

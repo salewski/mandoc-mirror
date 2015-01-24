@@ -179,7 +179,7 @@ enum	rofft {
 	ROFF_minss,
 	ROFF_mk,
 	ROFF_mso,
-	/* MAN_na; ignored in mdoc(7) */
+	ROFF_na,
 	ROFF_ne,
 	/* MAN_nf; ignored in mdoc(7) */
 	ROFF_nh,
@@ -580,6 +580,7 @@ static	struct roffmac	 roffs[ROFF_MAX] = {
 	{ "minss", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ "mk", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ "mso", roff_insec, NULL, NULL, 0, NULL },
+	{ "na", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ "ne", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ "nh", roff_line_ignore, NULL, NULL, 0, NULL },
 	{ "nhychar", roff_line_ignore, NULL, NULL, 0, NULL },

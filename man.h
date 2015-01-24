@@ -38,7 +38,6 @@ enum	mant {
 	MAN_I,
 	MAN_IR,
 	MAN_RI,
-	MAN_na,
 	MAN_sp,
 	MAN_nf,
 	MAN_fi,
