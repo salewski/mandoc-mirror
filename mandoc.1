@@ -1281,12 +1281,35 @@ keeps the code more readable.
 .It "unexpected end of equation"
 .El
 .Ss "Errors related to tables"
+.Bl -ohang
+.It Sy "non-alphabetic character in tbl options"
+.Pq tbl
+The table options line contains a character other than a letter,
+blank, or comma where the beginning of an option name is expected.
+The character is ignored.
+.It Sy "skipping unknown tbl option"
+.Pq tbl
+The table options line contains a string of letters that does not
+match any known option name.
+The word is ignored.
+.It Sy "missing tbl option argument"
+.Pq tbl
+A table option that requires an argument is not followed by an
+opening parenthesis, or the opening parenthesis is immediately
+followed by a closing parenthesis.
+The option is ignored.
+.It Sy "wrong tbl option argument size"
+.Pq tbl
+A table option argument contains an invalid number of characters.
+Both the option and the argument are ignored.
+.El
+.Pp
 .Bl -inset -compact
-.It "no table layout cells specified"
-.It "no table data cells specified"
-.It "ignore data in cell"
-.It "data block still open"
-.It "ignoring extra data cells"
+.It Sy "no table layout cells specified"
+.It Sy "no table data cells specified"
+.It Sy "ignore data in cell"
+.It Sy "data block still open"
+.It Sy "ignoring extra data cells"
 .El
 .Ss "Errors related to roff, mdoc, and man code"
 .Bl -ohang
@@ -1568,6 +1591,14 @@ cannot handle input files larger than its arbitrary size limit
 of 2^31 bytes (2 Gigabytes).
 Since useful manuals are always small, this is not a problem in practice.
 Parsing is aborted as soon as the condition is detected.
+.It Sy "unsupported control character"
+.Pq roff
+An ASCII control character supported by other
+.Xr roff 7
+implementations but not by
+.Nm
+was found in an input file.
+It is replaced by a question mark.
 .It Sy "unsupported roff request"
 .Pq roff
 An input file contains a
@@ -1576,9 +1607,7 @@ request supported by GNU troff or Heirloom troff but not by
 .Nm ,
 and it is likely that this will cause information loss
 or considerable misformatting.
-.It Sy "bad table syntax"
-.It Sy "bad table option"
-.It Sy "bad table layout"
+.It Sy "unsupported table layout"
 .It Sy "ignoring macro in table"
 .El
 .Sh COMPATIBILITY

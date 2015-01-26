@@ -136,6 +136,10 @@ enum	mandocerr {
 	MANDOCERR_EQNEOF, /* unexpected end of equation */
 
 	/* related to tables */
+	MANDOCERR_TBLOPT_ALPHA, /* non-alphabetic character in tbl options */
+	MANDOCERR_TBLOPT_BAD, /* skipping unknown tbl option: option */
+	MANDOCERR_TBLOPT_NOARG, /* missing tbl option argument */
+	MANDOCERR_TBLOPT_ARGSZ, /* wrong tbl option argument size */
 	MANDOCERR_TBLNOLAYOUT, /* no table layout cells specified */
 	MANDOCERR_TBLNODATA, /* no table data cells specified */
 	MANDOCERR_TBLIGNDATA, /* ignore data in cell */
@@ -175,8 +179,6 @@ enum	mandocerr {
 	MANDOCERR_TOOLARGE, /* input too large */
 	MANDOCERR_CHAR_UNSUPP, /* unsupported control character: number */
 	MANDOCERR_REQ_UNSUPP, /* unsupported roff request: request */
-	MANDOCERR_TBL, /* unsupported table syntax */
-	MANDOCERR_TBLOPT, /* unsupported table option */
 	MANDOCERR_TBLLAYOUT, /* unsupported table layout */
 	MANDOCERR_TBLMACRO, /* ignoring macro in table: macro */
 
@@ -186,7 +188,6 @@ enum	mandocerr {
 struct	tbl_opts {
 	char		  tab; /* cell-separator */
 	char		  decimal; /* decimal point */
-	int		  linesize;
 	int		  opts;
 #define	TBL_OPT_CENTRE	 (1 << 0)
 #define	TBL_OPT_EXPAND	 (1 << 1)
