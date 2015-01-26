@@ -224,6 +224,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"unsupported roff request",
 	"unsupported table layout",
 	"ignoring macro in table",
+	"eqn in tbl",
 };
 
 static	const char * const	mandoclevels[MANDOCLEVEL_MAX] = {

@@ -181,6 +181,7 @@ enum	mandocerr {
 	MANDOCERR_REQ_UNSUPP, /* unsupported roff request: request */
 	MANDOCERR_TBLLAYOUT, /* unsupported table layout */
 	MANDOCERR_TBLMACRO, /* ignoring macro in table: macro */
+	MANDOCERR_TBLEQN, /* eqn in tbl */
 
 	MANDOCERR_MAX
 };
@@ -196,6 +197,7 @@ struct	tbl_opts {
 #define	TBL_OPT_ALLBOX	 (1 << 4)
 #define	TBL_OPT_NOKEEP	 (1 << 5)
 #define	TBL_OPT_NOSPACE	 (1 << 6)
+#define	TBL_OPT_NOWARN	 (1 << 7)
 	int		  cols; /* number of columns */
 };
 
