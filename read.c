@@ -171,6 +171,11 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"invalid escape sequence",
 	"undefined string, using \"\"",
 
+	/* related to tables */
+	"tbl line starts with span",
+	"tbl column starts with span",
+	"skipping vertical bar in tbl layout",
+
 	"generic error",
 
 	/* related to equations */
@@ -184,7 +189,9 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"skipping unknown tbl option",
 	"missing tbl option argument",
 	"wrong tbl option argument size",
-	"no table layout cells specified",
+	"empty tbl layout",
+	"invalid character in tbl layout",
+	"unmatched parenthesis in tbl layout",
 	"no table data cells specified",
 	"ignore data in cell",
 	"data block still open",
@@ -222,7 +229,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"input too large",
 	"unsupported control character",
 	"unsupported roff request",
-	"unsupported table layout",
+	"unsupported tbl layout modifier",
 	"ignoring macro in table",
 	"eqn in tbl",
 };
