@@ -173,11 +173,15 @@ void
 tbl_end(struct tbl_node **tblp)
 {
 	struct tbl_node	*tbl;
+	struct tbl_span *sp;
 
 	tbl = *tblp;
 	*tblp = NULL;
 
-	if (NULL == tbl->first_span || NULL == tbl->first_span->first)
+	sp = tbl->first_span;
+	while (sp != NULL && sp->first == NULL)
+		sp = sp->next;
+	if (sp == NULL)
 		mandoc_msg(MANDOCERR_TBLNODATA, tbl->parse,
 		    tbl->line, tbl->pos, NULL);
 
