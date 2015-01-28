@@ -63,8 +63,9 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	const struct tbl_head	*hp;
 	const struct tbl_cell	*cp;
 	const struct tbl_dat	*dp;
+	static size_t		 offset;
+	size_t			 rmargin, maxrmargin, tsz;
 	int			 horiz, spans, vert;
-	size_t			 rmargin, maxrmargin;
 
 	rmargin = tp->rmargin;
 	maxrmargin = tp->maxrmargin;
@@ -89,6 +90,21 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 		tp->tbl.arg = tp;
 
 		tblcalc(&tp->tbl, sp, rmargin - tp->offset);
+
+		/* Center the table as a whole. */
+
+		offset = tp->offset;
+		if (sp->opts->opts & TBL_OPT_CENTRE) {
+			tsz = sp->opts->opts & (TBL_OPT_BOX | TBL_OPT_DBOX)
+			    ? 2 : !!sp->opts->lvert + !!sp->opts->rvert;
+			for (hp = sp->head; hp != NULL; hp = hp->next)
+				tsz += tp->tbl.cols[hp->ident].width + 3;
+			tsz -= 3;
+			if (offset + tsz > rmargin)
+				tsz -= 1;
+			tp->offset = (offset + rmargin > tsz) ?
+			    (offset + rmargin - tsz) / 2 : 0;
+		}
 
 		/* Horizontal frame at the start of boxed tables. */
 
@@ -189,12 +205,12 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 		assert(tp->tbl.cols);
 		free(tp->tbl.cols);
 		tp->tbl.cols = NULL;
+		tp->offset = offset;
 	}
 
 	tp->flags &= ~TERMP_NONOSPACE;
 	tp->rmargin = rmargin;
 	tp->maxrmargin = maxrmargin;
-
 }
 
 /*
