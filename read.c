@@ -178,12 +178,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	"generic error",
 
-	/* related to equations */
-	"unexpected equation scope closure",
-	"equation scope open on exit",
-	"overlapping equation scopes",
-	"unexpected end of equation",
-
 	/* related to tables */
 	"non-alphabetic character in tbl options",
 	"skipping unknown tbl option",

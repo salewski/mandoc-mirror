@@ -134,12 +134,6 @@ enum	mandocerr {
 
 	MANDOCERR_ERROR, /* ===== start of errors ===== */
 
-	/* related to equations */
-	MANDOCERR_EQNNSCOPE, /* unexpected equation scope closure*/
-	MANDOCERR_EQNSCOPE, /* equation scope open on exit */
-	MANDOCERR_EQNBADSCOPE, /* overlapping equation scopes */
-	MANDOCERR_EQNEOF, /* unexpected end of equation */
-
 	/* related to tables */
 	MANDOCERR_TBLOPT_ALPHA, /* non-alphabetic character in tbl options */
 	MANDOCERR_TBLOPT_BAD, /* skipping unknown tbl option: option */
