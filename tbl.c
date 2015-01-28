@@ -143,17 +143,13 @@ tbl_free(struct tbl_node *tbl)
 void
 tbl_restart(int line, int pos, struct tbl_node *tbl)
 {
-	if (TBL_PART_CDATA == tbl->part)
-		mandoc_msg(MANDOCERR_TBLBLOCK, tbl->parse,
-		    tbl->line, tbl->pos, NULL);
+	if (tbl->part == TBL_PART_CDATA)
+		mandoc_msg(MANDOCERR_TBLDATA_BLK, tbl->parse,
+		    line, pos, "T&");
 
 	tbl->part = TBL_PART_LAYOUT;
 	tbl->line = line;
 	tbl->pos = pos;
-
-	if (NULL == tbl->first_span || NULL == tbl->first_span->first)
-		mandoc_msg(MANDOCERR_TBLNODATA, tbl->parse,
-		    tbl->line, tbl->pos, NULL);
 }
 
 const struct tbl_span *
@@ -169,7 +165,7 @@ tbl_span(struct tbl_node *tbl)
 	return(span);
 }
 
-void
+int
 tbl_end(struct tbl_node **tblp)
 {
 	struct tbl_node	*tbl;
@@ -178,17 +174,21 @@ tbl_end(struct tbl_node **tblp)
 	tbl = *tblp;
 	*tblp = NULL;
 
+	if (tbl->part == TBL_PART_CDATA)
+		mandoc_msg(MANDOCERR_TBLDATA_BLK, tbl->parse,
+		    tbl->line, tbl->pos, "TE");
+
 	sp = tbl->first_span;
 	while (sp != NULL && sp->first == NULL)
 		sp = sp->next;
-	if (sp == NULL)
-		mandoc_msg(MANDOCERR_TBLNODATA, tbl->parse,
+	if (sp == NULL) {
+		mandoc_msg(MANDOCERR_TBLDATA_NONE, tbl->parse,
 		    tbl->line, tbl->pos, NULL);
+		return(0);
+	}
 
-	if (tbl->last_span)
+	if (tbl->last_span != NULL)
 		tbl->last_span->flags |= TBL_SPAN_LAST;
 
-	if (TBL_PART_CDATA == tbl->part)
-		mandoc_msg(MANDOCERR_TBLBLOCK, tbl->parse,
-		    tbl->line, tbl->pos, NULL);
+	return(1);
 }

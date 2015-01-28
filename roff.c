@@ -2376,9 +2376,12 @@ roff_TE(ROFF_ARGS)
 	if (NULL == r->tbl)
 		mandoc_msg(MANDOCERR_BLK_NOTOPEN, r->parse,
 		    ln, ppos, "TE");
-	else
-		tbl_end(&r->tbl);
-
+	else if ( ! tbl_end(&r->tbl)) {
+		free(buf->buf);
+		buf->buf = mandoc_strdup(".sp");
+		buf->sz = 4;
+		return(ROFF_REPARSE);
+	}
 	return(ROFF_IGN);
 }
 

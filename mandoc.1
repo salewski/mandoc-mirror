@@ -1336,13 +1336,30 @@ The invalid character is discarded.
 A table layout specification contains an opening parenthesis,
 but no matching closing parenthesis.
 The rest of the input line, starting from the parenthesis, has no effect.
-.El
-.Pp
-.Bl -inset -compact
-.It Sy "no table data cells specified"
-.It Sy "ignore data in cell"
-.It Sy "data block still open"
-.It Sy "ignoring extra data cells"
+.It Sy "tbl without any data cells"
+.Pq tbl
+A table does not contain any data cells.
+It will probably produce no output.
+.It Sy "ignoring data in spanned tbl cell"
+.Pq tbl
+A table cell is marked as a horizontal span
+.Pq Sq Cm s
+or vertical span
+.Pq Sq Cm ^
+in the table layout, but it contains data.
+The data is ignored.
+.It Sy "ignoring extra tbl data cells"
+.Pq tbl
+A data line contains more cells than the corresponding layout line.
+The data in the extra cells is ignored.
+.It Sy "data block open at end of tbl"
+.Pq tbl
+A data block is opened with
+.Cm T{ ,
+but never closed with a matching
+.Cm T} .
+The remaining data lines of the table are all put into one cell,
+and any remaining cells stay empty.
 .El
 .Ss "Errors related to roff, mdoc, and man code"
 .Bl -ohang
@@ -1640,17 +1657,25 @@ request supported by GNU troff or Heirloom troff but not by
 .Nm ,
 and it is likely that this will cause information loss
 or considerable misformatting.
-.It Sy "unsupported table layout modfier"
+.It Sy "eqn delim option in tbl"
+.Pq eqn , tbl
+The options line of a table defines equation delimiters.
+Any equation source code contained in the table will be printed unformatted.
+.It Sy "unsupported table layout modifier"
 .Pq tbl
 A table layout specification contains an
 .Sq Cm m
 modifier.
 The modifier is discarded.
 .It Sy "ignoring macro in table"
-.It Sy "eqn in tbl"
-.Pq eqn , tbl
-The options line of a table defines equation delimiters.
-Any equation source code contained in the table will be printed unformatted.
+.Pq tbl , mdoc , man
+A table contains an invocation of an
+.Xr mdoc 7
+or
+.Xr man 7
+macro or of an undefined macro.
+The macro is ignored, and its arguments are handled
+as if they were a text line.
 .El
 .Sh COMPATIBILITY
 This section summarises

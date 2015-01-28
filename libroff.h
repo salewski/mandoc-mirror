@@ -74,7 +74,7 @@ void		 tbl_layout(struct tbl_node *, int, const char *, int);
 void		 tbl_data(struct tbl_node *, int, const char *, int);
 int		 tbl_cdata(struct tbl_node *, int, const char *, int);
 const struct tbl_span	*tbl_span(struct tbl_node *);
-void		 tbl_end(struct tbl_node **);
+int		 tbl_end(struct tbl_node **);
 struct eqn_node	*eqn_alloc(int, int, struct mparse *);
 enum rofferr	 eqn_end(struct eqn_node **);
 void		 eqn_free(struct eqn_node *);

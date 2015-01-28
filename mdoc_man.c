@@ -1006,10 +1006,12 @@ pre_bl(DECL_ARGS)
 		return(1);
 	}
 
-	print_line(".TS", MMAN_nl);
-	for (icol = 0; icol < n->norm->Bl.ncols; icol++)
-		print_word("l");
-	print_word(".");
+	if (n->nchild) {
+		print_line(".TS", MMAN_nl);
+		for (icol = 0; icol < n->norm->Bl.ncols; icol++)
+			print_word("l");
+		print_word(".");
+	}
 	outflags |= MMAN_nl;
 	return(1);
 }
@@ -1020,7 +1022,8 @@ post_bl(DECL_ARGS)
 
 	switch (n->norm->Bl.type) {
 	case LIST_column:
-		print_line(".TE", 0);
+		if (n->nchild)
+			print_line(".TE", 0);
 		break;
 	case LIST_enum:
 		n->norm->Bl.count = 0;

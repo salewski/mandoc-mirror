@@ -80,7 +80,8 @@ arg(struct tbl_node *tbl, int ln, const char *p, int *pos, int key)
 
 	switch (key) {
 	case KEY_DELIM:
-		mandoc_msg(MANDOCERR_TBLEQN, tbl->parse, ln, *pos, NULL);
+		mandoc_vmsg(MANDOCERR_TBLOPT_EQN, tbl->parse,
+		    ln, *pos, "%.*s", len, p + *pos);
 		want = 2;
 		break;
 	case KEY_TAB:
