@@ -138,13 +138,10 @@ getdata(struct tbl_node *tbl, struct tbl_span *dp,
 }
 
 int
-tbl_cdata(struct tbl_node *tbl, int ln, const char *p)
+tbl_cdata(struct tbl_node *tbl, int ln, const char *p, int pos)
 {
 	struct tbl_dat	*dat;
 	size_t		 sz;
-	int		 pos;
-
-	pos = 0;
 
 	dat = tbl->last_span->last;
 
@@ -204,11 +201,10 @@ newspan(struct tbl_node *tbl, int line, struct tbl_row *rp)
 }
 
 void
-tbl_data(struct tbl_node *tbl, int ln, const char *p)
+tbl_data(struct tbl_node *tbl, int ln, const char *p, int pos)
 {
 	struct tbl_span	*dp;
 	struct tbl_row	*rp;
-	int		 pos;
 
 	/*
 	 * Choose a layout row: take the one following the last parsed
@@ -259,7 +255,6 @@ tbl_data(struct tbl_node *tbl, int ln, const char *p)
 
 	dp->pos = TBL_SPAN_DATA;
 
-	pos = 0;
 	while ('\0' != p[pos])
 		getdata(tbl, dp, ln, p, &pos);
 }

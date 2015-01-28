@@ -234,14 +234,11 @@ again:
 }
 
 void
-tbl_layout(struct tbl_node *tbl, int ln, const char *p)
+tbl_layout(struct tbl_node *tbl, int ln, const char *p, int pos)
 {
 	struct tbl_row	*rp;
-	int		 pos;
 
-	pos = 0;
 	rp = NULL;
-
 	for (;;) {
 		/* Skip whitespace before and after each cell. */
 

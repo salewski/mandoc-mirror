@@ -32,7 +32,7 @@
 
 
 enum rofferr
-tbl_read(struct tbl_node *tbl, int ln, const char *p, int offs)
+tbl_read(struct tbl_node *tbl, int ln, const char *p, int pos)
 {
 	const char	*cp;
 	int		 active;
@@ -46,7 +46,7 @@ tbl_read(struct tbl_node *tbl, int ln, const char *p, int offs)
 	if (tbl->part == TBL_PART_OPTS) {
 		tbl->part = TBL_PART_LAYOUT;
 		active = 1;
-		for (cp = p; *cp != '\0'; cp++) {
+		for (cp = p + pos; *cp != '\0'; cp++) {
 			switch (*cp) {
 			case '(':
 				active = 0;
@@ -64,8 +64,8 @@ tbl_read(struct tbl_node *tbl, int ln, const char *p, int offs)
 			break;
 		}
 		if (*cp == ';') {
-			tbl_option(tbl, ln, p);
-			if (*(p = cp + 1) == '\0')
+			tbl_option(tbl, ln, p, &pos);
+			if (p[pos] == '\0')
 				return(ROFF_IGN);
 		}
 	}
@@ -74,15 +74,15 @@ tbl_read(struct tbl_node *tbl, int ln, const char *p, int offs)
 
 	switch (tbl->part) {
 	case TBL_PART_LAYOUT:
-		tbl_layout(tbl, ln, p);
+		tbl_layout(tbl, ln, p, pos);
 		return(ROFF_IGN);
 	case TBL_PART_CDATA:
-		return(tbl_cdata(tbl, ln, p) ? ROFF_TBL : ROFF_IGN);
+		return(tbl_cdata(tbl, ln, p, pos) ? ROFF_TBL : ROFF_IGN);
 	default:
 		break;
 	}
 
-	tbl_data(tbl, ln, p);
+	tbl_data(tbl, ln, p, pos);
 	return(ROFF_TBL);
 }
 

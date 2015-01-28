@@ -1237,7 +1237,13 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 	if (r->tbl != NULL && (t == ROFF_MAX || t == ROFF_TS)) {
 		mandoc_msg(MANDOCERR_TBLMACRO, r->parse,
 		    ln, pos, buf->buf + spos);
-		return(ROFF_IGN);
+		if (t == ROFF_TS)
+			return(ROFF_IGN);
+		while (buf->buf[pos] != '\0' && buf->buf[pos] != ' ')
+			pos++;
+		while (buf->buf[pos] != '\0' && buf->buf[pos] == ' ')
+			pos++;
+		return(tbl_read(r->tbl, ln, buf->buf, pos));
 	}
 
 	/*

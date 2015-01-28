@@ -120,17 +120,19 @@ arg(struct tbl_node *tbl, int ln, const char *p, int *pos, int key)
  * and some options are followed by arguments.
  */
 void
-tbl_option(struct tbl_node *tbl, int ln, const char *p)
+tbl_option(struct tbl_node *tbl, int ln, const char *p, int *offs)
 {
 	int		 i, pos, len;
 
-	pos = 0;
+	pos = *offs;
 	for (;;) {
 		while (p[pos] == ' ' || p[pos] == '\t' || p[pos] == ',')
 			pos++;
 
-		if (p[pos] == ';')
+		if (p[pos] == ';') {
+			*offs = pos + 1;
 			return;
+		}
 
 		/* Parse one option name. */
 
