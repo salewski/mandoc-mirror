@@ -328,18 +328,17 @@ It may then be followed by a tab
 .Pq or as designated by Cm tab
 or an end-of-line to terminate the row.
 .Sh COMPATIBILITY
-This section documents compatibility between mandoc and other
-.Nm
-implementations, at this time limited to GNU tbl.
-.Pp
-.Bl -dash -compact
-.It
-In GNU tbl, comments and macros are disallowed prior to the data block
-of a table.
 The
 .Xr mandoc 1
-implementation allows them.
-.El
+implementation of
+.Nm
+doesn't support
+.Xr mdoc 7
+and
+.Xr man 7
+macros and
+.Xr eqn 7
+equations inside tables.
 .Sh SEE ALSO
 .Xr mandoc 1 ,
 .Xr man 7 ,
