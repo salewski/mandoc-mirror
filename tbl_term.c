@@ -81,7 +81,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	 * calculate the table widths and decimal positions.
 	 */
 
-	if (sp->flags & TBL_SPAN_FIRST) {
+	if (tp->tbl.cols == NULL) {
 		term_flushln(tp);
 
 		tp->tbl.len = term_tbl_len;
@@ -189,7 +189,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	 * existing table configuration and set it to NULL.
 	 */
 
-	if (sp->flags & TBL_SPAN_LAST) {
+	if (sp->next == NULL) {
 		if (sp->opts->opts & (TBL_OPT_DBOX | TBL_OPT_BOX)) {
 			tbl_hrule(tp, sp, 1);
 			tp->skipvsp = 1;

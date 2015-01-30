@@ -285,9 +285,6 @@ struct	tbl_span {
 	struct tbl_span	 *prev;
 	struct tbl_span	 *next;
 	int		  line; /* parse line */
-	int		  flags;
-#define	TBL_SPAN_FIRST	 (1 << 0)
-#define	TBL_SPAN_LAST	 (1 << 1)
 	enum tbl_spant	  pos;
 };
 

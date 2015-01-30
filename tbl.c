@@ -179,9 +179,5 @@ tbl_end(struct tbl_node **tblp)
 		    tbl->line, tbl->pos, NULL);
 		return(0);
 	}
-
-	if (tbl->last_span != NULL)
-		tbl->last_span->flags |= TBL_SPAN_LAST;
-
 	return(1);
 }

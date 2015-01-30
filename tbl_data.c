@@ -173,7 +173,6 @@ newspan(struct tbl_node *tbl, int line, struct tbl_row *rp)
 	if (dp->prev == NULL) {
 		tbl->first_span = dp;
 		tbl->current_span = NULL;
-		dp->flags |= TBL_SPAN_FIRST;
 	} else
 		dp->prev->next = dp;
 	tbl->last_span = dp;
