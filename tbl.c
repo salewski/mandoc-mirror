@@ -91,7 +91,7 @@ tbl_alloc(int pos, int line, struct mparse *parse)
 {
 	struct tbl_node	*tbl;
 
-	tbl = mandoc_calloc(1, sizeof(struct tbl_node));
+	tbl = mandoc_calloc(1, sizeof(*tbl));
 	tbl->line = line;
 	tbl->pos = pos;
 	tbl->parse = parse;
@@ -110,9 +110,9 @@ tbl_free(struct tbl_node *tbl)
 	struct tbl_dat	*dp;
 	struct tbl_head	*hp;
 
-	while (NULL != (rp = tbl->first_row)) {
+	while ((rp = tbl->first_row) != NULL) {
 		tbl->first_row = rp->next;
-		while (rp->first) {
+		while (rp->first != NULL) {
 			cp = rp->first;
 			rp->first = cp->next;
 			free(cp);
@@ -120,19 +120,18 @@ tbl_free(struct tbl_node *tbl)
 		free(rp);
 	}
 
-	while (NULL != (sp = tbl->first_span)) {
+	while ((sp = tbl->first_span) != NULL) {
 		tbl->first_span = sp->next;
-		while (sp->first) {
+		while (sp->first != NULL) {
 			dp = sp->first;
 			sp->first = dp->next;
-			if (dp->string)
-				free(dp->string);
+			free(dp->string);
 			free(dp);
 		}
 		free(sp);
 	}
 
-	while (NULL != (hp = tbl->first_head)) {
+	while ((hp = tbl->first_head) != NULL) {
 		tbl->first_head = hp->next;
 		free(hp);
 	}

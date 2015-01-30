@@ -262,11 +262,10 @@ tbl_data(struct termp *tp, const struct tbl_opts *opts,
 	const struct roffcol *col)
 {
 
-	if (NULL == dp) {
+	if (dp == NULL) {
 		tbl_char(tp, ASCII_NBRSP, col->width);
 		return;
 	}
-	assert(dp->layout);
 
 	switch (dp->pos) {
 	case TBL_DATA_NONE:
@@ -396,8 +395,7 @@ tbl_number(struct termp *tp, const struct tbl_opts *opts,
 
 	psz = term_strlen(tp, buf);
 
-	if (NULL != (cp = strrchr(dp->string, opts->decimal))) {
-		buf[1] = '\0';
+	if ((cp = strrchr(dp->string, opts->decimal)) != NULL) {
 		for (ssz = 0, i = 0; cp != &dp->string[i]; i++) {
 			buf[0] = dp->string[i];
 			ssz += term_strlen(tp, buf);

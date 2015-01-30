@@ -326,9 +326,9 @@ cell_alloc(struct tbl_node *tbl, struct tbl_row *rp, enum tbl_cellt pos)
 	struct tbl_cell	*p, *pp;
 	struct tbl_head	*h, *hp;
 
-	p = mandoc_calloc(1, sizeof(struct tbl_cell));
+	p = mandoc_calloc(1, sizeof(*p));
 
-	if (NULL != (pp = rp->last)) {
+	if ((pp = rp->last) != NULL) {
 		pp->next = p;
 		h = pp->head->next;
 	} else {
@@ -341,15 +341,15 @@ cell_alloc(struct tbl_node *tbl, struct tbl_row *rp, enum tbl_cellt pos)
 
 	/* Re-use header. */
 
-	if (h) {
+	if (h != NULL) {
 		p->head = h;
 		return(p);
 	}
 
-	hp = mandoc_calloc(1, sizeof(struct tbl_head));
+	hp = mandoc_calloc(1, sizeof(*hp));
 	hp->ident = tbl->opts.cols++;
 
-	if (tbl->last_head) {
+	if (tbl->last_head != NULL) {
 		hp->prev = tbl->last_head;
 		tbl->last_head->next = hp;
 	} else
