@@ -371,9 +371,10 @@ static void
 print_mdoc_nodelist(MDOC_ARGS)
 {
 
-	print_mdoc_node(meta, n, h);
-	if (n->next)
-		print_mdoc_nodelist(meta, n->next, h);
+	while (n != NULL) {
+		print_mdoc_node(meta, n, h);
+		n = n->next;
+	}
 }
 
 static void
