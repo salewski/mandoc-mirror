@@ -108,7 +108,6 @@ tbl_free(struct tbl_node *tbl)
 	struct tbl_cell	*cp;
 	struct tbl_span	*sp;
 	struct tbl_dat	*dp;
-	struct tbl_head	*hp;
 
 	while ((rp = tbl->first_row) != NULL) {
 		tbl->first_row = rp->next;
@@ -129,11 +128,6 @@ tbl_free(struct tbl_node *tbl)
 			free(dp);
 		}
 		free(sp);
-	}
-
-	while ((hp = tbl->first_head) != NULL) {
-		tbl->first_head = hp->next;
-		free(hp);
 	}
 
 	free(tbl);

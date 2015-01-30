@@ -34,8 +34,6 @@ struct	tbl_node {
 	struct tbl_span	 *first_span;
 	struct tbl_span	 *current_span;
 	struct tbl_span	 *last_span;
-	struct tbl_head	 *first_head;
-	struct tbl_head	 *last_head;
 	struct tbl_node	 *next;
 };
 

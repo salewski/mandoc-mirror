@@ -140,7 +140,7 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp,
 			spans = dp->spans;
 			if (1 < spans)
 				continue;
-			icol = dp->layout->head->ident;
+			icol = dp->layout->col;
 			if (maxcol < icol)
 				maxcol = icol;
 			col = tbl->cols + icol;
