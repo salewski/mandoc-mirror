@@ -1202,7 +1202,7 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 	if (r->eqn != NULL)
 		return(eqn_read(&r->eqn, ln, buf->buf, ppos, offs));
 	if (r->tbl != NULL && ( ! ctl || buf->buf[pos] == '\0'))
-		return(tbl_read(r->tbl, ln, buf->buf, pos));
+		return(tbl_read(r->tbl, ln, buf->buf, ppos));
 	if ( ! ctl)
 		return(roff_parsetext(buf, pos, offs));
 
