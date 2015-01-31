@@ -126,10 +126,9 @@ int		  term_vspan(const struct termp *, const struct roffsu *);
 size_t		  term_strlen(const struct termp *, const char *);
 size_t		  term_len(const struct termp *, size_t);
 
-const enum termfont *term_fontq(struct termp *);
 void		  term_fontpush(struct termp *, enum termfont);
 void		  term_fontpop(struct termp *);
-void		  term_fontpopq(struct termp *, const enum termfont *);
+void		  term_fontpopq(struct termp *, int);
 void		  term_fontrepl(struct termp *, enum termfont);
 void		  term_fontlast(struct termp *);
 

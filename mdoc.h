@@ -366,7 +366,7 @@ struct	mdoc_node {
 	enum mdoc_type	  type; /* AST node type */
 	enum mdoc_sec	  sec; /* current named section */
 	union mdoc_data	 *norm; /* normalised args */
-	const void	 *prev_font; /* before entering this node */
+	int		  prev_font; /* before entering this node */
 	/* FIXME: these can be union'd to shave a few bytes. */
 	struct mdoc_arg	 *args; /* BLOCK/ELEM */
 	struct mdoc_node *pending; /* BLOCK */

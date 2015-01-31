@@ -307,7 +307,7 @@ print_mdoc_node(DECL_ARGS)
 	chld = 1;
 	offset = p->offset;
 	rmargin = p->rmargin;
-	n->prev_font = term_fontq(p);
+	n->prev_font = p->fonti;
 
 	memset(&npair, 0, sizeof(struct termpair));
 	npair.ppair = pair;

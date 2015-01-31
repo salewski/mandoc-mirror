@@ -414,9 +414,9 @@ tbl_number(struct termp *tp, const struct tbl_opts *opts,
 static void
 tbl_word(struct termp *tp, const struct tbl_dat *dp)
 {
-	const void	*prev_font;
+	int		 prev_font;
 
-	prev_font = term_fontq(tp);
+	prev_font = tp->fonti;
 	if (dp->layout->flags & TBL_CELL_BOLD)
 		term_fontpush(tp, TERMFONT_BOLD);
 	else if (dp->layout->flags & TBL_CELL_ITALIC)
