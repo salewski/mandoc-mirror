@@ -67,6 +67,7 @@ static	void	  termp__t_post(DECL_ARGS);
 static	void	  termp_bd_post(DECL_ARGS);
 static	void	  termp_bk_post(DECL_ARGS);
 static	void	  termp_bl_post(DECL_ARGS);
+static	void	  termp_eo_post(DECL_ARGS);
 static	void	  termp_fd_post(DECL_ARGS);
 static	void	  termp_fo_post(DECL_ARGS);
 static	void	  termp_in_post(DECL_ARGS);
@@ -91,6 +92,7 @@ static	int	  termp_bt_pre(DECL_ARGS);
 static	int	  termp_bx_pre(DECL_ARGS);
 static	int	  termp_cd_pre(DECL_ARGS);
 static	int	  termp_d1_pre(DECL_ARGS);
+static	int	  termp_eo_pre(DECL_ARGS);
 static	int	  termp_ex_pre(DECL_ARGS);
 static	int	  termp_fa_pre(DECL_ARGS);
 static	int	  termp_fd_pre(DECL_ARGS);
@@ -190,7 +192,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ NULL, NULL }, /* Ec */ /* FIXME: no space */
 	{ NULL, NULL }, /* Ef */
 	{ termp_under_pre, NULL }, /* Em */
-	{ termp_quote_pre, termp_quote_post }, /* Eo */
+	{ termp_eo_pre, termp_eo_post }, /* Eo */
 	{ termp_xx_pre, NULL }, /* Fx */
 	{ termp_bold_pre, NULL }, /* Ms */
 	{ termp_li_pre, NULL }, /* No */
@@ -1884,8 +1886,6 @@ termp_quote_pre(DECL_ARGS)
 			return(1);
 		term_word(p, n->norm->Es->child->string);
 		break;
-	case MDOC_Eo:
-		break;
 	case MDOC_Po:
 		/* FALLTHROUGH */
 	case MDOC_Pq:
@@ -1921,9 +1921,7 @@ termp_quote_post(DECL_ARGS)
 	if (n->type != MDOC_BODY && n->type != MDOC_ELEM)
 		return;
 
-	if ( ! (n->tok == MDOC_En ||
-	    (n->tok == MDOC_Eo && n->end == ENDBODY_SPACE)))
-		p->flags |= TERMP_NOSPACE;
+	p->flags |= TERMP_NOSPACE;
 
 	switch (n->tok) {
 	case MDOC_Ao:
@@ -1952,14 +1950,12 @@ termp_quote_post(DECL_ARGS)
 		term_word(p, "\\(rq");
 		break;
 	case MDOC_En:
-		if (NULL != n->norm->Es &&
-		    NULL != n->norm->Es->child &&
-		    NULL != n->norm->Es->child->next) {
-			p->flags |= TERMP_NOSPACE;
+		if (n->norm->Es == NULL ||
+		    n->norm->Es->child == NULL ||
+		    n->norm->Es->child->next == NULL)
+			p->flags &= ~TERMP_NOSPACE;
+		else
 			term_word(p, n->norm->Es->child->next->string);
-		}
-		break;
-	case MDOC_Eo:
 		break;
 	case MDOC_Po:
 		/* FALLTHROUGH */
@@ -1984,6 +1980,51 @@ termp_quote_post(DECL_ARGS)
 		abort();
 		/* NOTREACHED */
 	}
+}
+
+static int
+termp_eo_pre(DECL_ARGS)
+{
+
+	if (n->type != MDOC_BODY)
+		return(1);
+
+	if (n->end == ENDBODY_NOT &&
+	    n->parent->head->child == NULL &&
+	    n->child != NULL &&
+	    n->child->end != ENDBODY_NOT)
+		term_word(p, "\\&");
+	else if (n->end != ENDBODY_NOT ? n->child != NULL :
+	     n->parent->head->child != NULL &&
+	     (n->parent->body->child != NULL ||
+	      n->parent->tail->child != NULL))
+		p->flags |= TERMP_NOSPACE;
+
+	return(1);
+}
+
+static void
+termp_eo_post(DECL_ARGS)
+{
+	int	 body, tail;
+
+	if (n->type != MDOC_BODY)
+		return;
+
+	if (n->end != ENDBODY_NOT) {
+		p->flags &= ~TERMP_NOSPACE;
+		return;
+	}
+
+	body = n->child != NULL || n->parent->head->child != NULL;
+	tail = n->parent->tail != NULL && n->parent->tail->child != NULL;
+
+	if (body && tail)
+		p->flags |= TERMP_NOSPACE;
+	else if ( ! (body || tail))
+		term_word(p, "\\&");
+	else if ( ! tail)
+		p->flags &= ~TERMP_NOSPACE;
 }
 
 static int

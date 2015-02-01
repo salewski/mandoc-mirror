@@ -1134,16 +1134,38 @@ static int
 pre_eo(DECL_ARGS)
 {
 
-	outflags &= ~(MMAN_spc | MMAN_nl);
+	if (n->end == ENDBODY_NOT &&
+	    n->parent->head->child == NULL &&
+	    n->child != NULL &&
+	    n->child->end != ENDBODY_NOT)
+		print_word("\\&");
+	else if (n->end != ENDBODY_NOT ? n->child != NULL :
+	    n->parent->head->child != NULL &&
+	    (n->parent->body->child != NULL ||
+	     n->parent->tail->child != NULL))
+		outflags &= ~(MMAN_spc | MMAN_nl);
 	return(1);
 }
 
 static void
 post_eo(DECL_ARGS)
 {
+	int	 body, tail;
 
-	if (n->end != ENDBODY_SPACE)
+	if (n->end != ENDBODY_NOT) {
+		outflags |= MMAN_spc;
+		return;
+	}
+
+	body = n->child != NULL || n->parent->head->child != NULL;
+	tail = n->parent->tail != NULL && n->parent->tail->child != NULL;
+
+	if (body && tail)
 		outflags &= ~MMAN_spc;
+	else if ( ! (body || tail))
+		print_word("\\&");
+	else if ( ! tail)
+		outflags |= MMAN_spc;
 }
 
 static int
