@@ -106,7 +106,7 @@ struct mdoc_node *mdoc_block_alloc(struct mdoc *, int, int,
 struct mdoc_node *mdoc_head_alloc(struct mdoc *, int, int, enum mdoct);
 void		  mdoc_tail_alloc(struct mdoc *, int, int, enum mdoct);
 struct mdoc_node *mdoc_body_alloc(struct mdoc *, int, int, enum mdoct);
-void		  mdoc_endbody_alloc(struct mdoc *, int, int, enum mdoct,
+struct mdoc_node *mdoc_endbody_alloc(struct mdoc *, int, int, enum mdoct,
 			struct mdoc_node *, enum mdoc_endbody);
 void		  mdoc_node_delete(struct mdoc *, struct mdoc_node *);
 void		  mdoc_node_relink(struct mdoc *, struct mdoc_node *);

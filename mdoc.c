@@ -414,7 +414,7 @@ mdoc_body_alloc(struct mdoc *mdoc, int line, int pos, enum mdoct tok)
 	return(p);
 }
 
-void
+struct mdoc_node *
 mdoc_endbody_alloc(struct mdoc *mdoc, int line, int pos, enum mdoct tok,
 		struct mdoc_node *body, enum mdoc_endbody end)
 {
@@ -426,6 +426,7 @@ mdoc_endbody_alloc(struct mdoc *mdoc, int line, int pos, enum mdoct tok,
 	p->end = end;
 	node_append(mdoc, p);
 	mdoc->next = MDOC_NEXT_SIBLING;
+	return(p);
 }
 
 struct mdoc_node *
