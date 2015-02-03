@@ -83,7 +83,6 @@ struct	curparse {
 	char		  outopts[BUFSIZ]; /* buf of output opts */
 };
 
-#if HAVE_SQLITE3
 static	int		  fs_lookup(const struct manpaths *,
 				size_t ipath, const char *,
 				const char *, const char *,
@@ -91,7 +90,6 @@ static	int		  fs_lookup(const struct manpaths *,
 static	void		  fs_search(const struct mansearch *,
 				const struct manpaths *, int, char**,
 				struct manpage **, size_t *);
-#endif
 static	int		  koptions(int *, char *);
 #if HAVE_SQLITE3
 int			  mandocdb(int, char**);
@@ -101,9 +99,7 @@ static	void		  mmsg(enum mandocerr, enum mandoclevel,
 				const char *, int, int, const char *);
 static	void		  parse(struct curparse *, int,
 				const char *, enum mandoclevel *);
-#if HAVE_SQLITE3
 static	enum mandoclevel  passthrough(const char *, int, int);
-#endif
 static	void		  spawn_pager(void);
 static	int		  toptions(struct curparse *, char *);
 static	void		  usage(enum argmode) __attribute__((noreturn));
@@ -125,13 +121,11 @@ main(int argc, char *argv[])
 	char		*auxpaths;
 	char		*defos;
 	unsigned char	*uc;
-#if HAVE_SQLITE3
 	struct manpage	*res, *resp;
 	char		*conf_file, *defpaths;
 	size_t		 isec, i, sz;
 	int		 prio, best_prio, synopsis_only;
 	char		 sec;
-#endif
 	enum mandoclevel rc, rctmp;
 	enum outmode	 outmode;
 	int		 fd;
@@ -154,9 +148,7 @@ main(int argc, char *argv[])
 	/* Search options. */
 
 	memset(&paths, 0, sizeof(struct manpaths));
-#if HAVE_SQLITE3
 	conf_file = defpaths = NULL;
-#endif
 	auxpaths = NULL;
 
 	memset(&search, 0, sizeof(struct mansearch));
@@ -183,9 +175,7 @@ main(int argc, char *argv[])
 
 	use_pager = 1;
 	show_usage = 0;
-#if HAVE_SQLITE3
 	synopsis_only = 0;
-#endif
 	outmode = OUTMODE_DEF;
 
 	while (-1 != (c = getopt(argc, argv,
@@ -195,9 +185,7 @@ main(int argc, char *argv[])
 			outmode = OUTMODE_ALL;
 			break;
 		case 'C':
-#if HAVE_SQLITE3
 			conf_file = optarg;
-#endif
 			break;
 		case 'c':
 			use_pager = 0;
@@ -207,9 +195,7 @@ main(int argc, char *argv[])
 			break;
 		case 'h':
 			(void)strlcat(curp.outopts, "synopsis,", BUFSIZ);
-#if HAVE_SQLITE3
 			synopsis_only = 1;
-#endif
 			use_pager = 0;
 			outmode = OUTMODE_ALL;
 			break;
@@ -243,9 +229,7 @@ main(int argc, char *argv[])
 			outmode = OUTMODE_ALL;
 			break;
 		case 'M':
-#if HAVE_SQLITE3
 			defpaths = optarg;
-#endif
 			break;
 		case 'm':
 			auxpaths = optarg;
@@ -305,9 +289,7 @@ main(int argc, char *argv[])
 
 	argc -= optind;
 	argv += optind;
-#if HAVE_SQLITE3
 	resp = NULL;
-#endif
 
 	/*
 	 * Quirks for help(1)
@@ -340,7 +322,6 @@ main(int argc, char *argv[])
 	/* man(1), whatis(1), apropos(1) */
 
 	if (search.argmode != ARG_FILE) {
-#if HAVE_SQLITE3
 		if (argc == 0)
 			usage(search.argmode);
 
@@ -351,9 +332,18 @@ main(int argc, char *argv[])
 		/* Access the mandoc database. */
 
 		manpath_parse(&paths, conf_file, defpaths, auxpaths);
+#if HAVE_SQLITE3
 		mansearch_setup(1);
 		if( ! mansearch(&search, &paths, argc, argv, &res, &sz))
 			usage(search.argmode);
+#else
+		if (search.argmode != ARG_NAME) {
+			fputs("mandoc: database support not compiled in\n",
+			    stderr);
+			return((int)MANDOCLEVEL_BADARG);
+		}
+		sz = 0;
+#endif
 
 		if (sz == 0 && search.argmode == ARG_NAME)
 			fs_search(&search, &paths, argc, argv, &res, &sz);
@@ -407,11 +397,6 @@ main(int argc, char *argv[])
 
 		if (outmode == OUTMODE_FLN || outmode == OUTMODE_LST)
 			goto out;
-#else
-		fputs("mandoc: database support not compiled in\n",
-		    stderr);
-		return((int)MANDOCLEVEL_BADARG);
-#endif
 	}
 
 	/* mandoc(1) */
@@ -437,10 +422,7 @@ main(int argc, char *argv[])
 
 	while (argc) {
 		rctmp = mparse_open(curp.mp, &fd,
-#if HAVE_SQLITE3
-		    resp != NULL ? resp->file :
-#endif
-		    *argv);
+		    resp != NULL ? resp->file : *argv);
 		if (rc < rctmp)
 			rc = rctmp;
 
@@ -449,11 +431,8 @@ main(int argc, char *argv[])
 				spawn_pager();
 			use_pager = 0;
 
-#if HAVE_SQLITE3
 			if (resp == NULL)
-#endif
 				parse(&curp, fd, *argv, &rc);
-#if HAVE_SQLITE3
 			else if (resp->form & FORM_SRC) {
 				/* For .so only; ignore failure. */
 				chdir(paths.paths[resp->ipath]);
@@ -464,7 +443,6 @@ main(int argc, char *argv[])
 				if (rc < rctmp)
 					rc = rctmp;
 			}
-#endif
 
 			rctmp = mparse_wait(curp.mp);
 			if (rc < rctmp)
@@ -477,11 +455,9 @@ main(int argc, char *argv[])
 		if (MANDOCLEVEL_OK != rc && curp.wstop)
 			break;
 
-#if HAVE_SQLITE3
 		if (resp != NULL)
 			resp++;
 		else
-#endif
 			argv++;
 		if (--argc)
 			mparse_reset(curp.mp);
@@ -492,14 +468,14 @@ main(int argc, char *argv[])
 	mparse_free(curp.mp);
 	mchars_free(curp.mchars);
 
-#if HAVE_SQLITE3
 out:
 	if (search.argmode != ARG_FILE) {
 		manpath_free(&paths);
+#if HAVE_SQLITE3
 		mansearch_free(res, sz);
 		mansearch_setup(0);
-	}
 #endif
+	}
 
 	free(defos);
 
@@ -545,7 +521,6 @@ usage(enum argmode argmode)
 	exit((int)MANDOCLEVEL_BADARG);
 }
 
-#if HAVE_SQLITE3
 static int
 fs_lookup(const struct manpaths *paths, size_t ipath,
 	const char *sec, const char *arch, const char *name,
@@ -583,9 +558,11 @@ fs_lookup(const struct manpaths *paths, size_t ipath,
 	return(0);
 
 found:
+#if HAVE_SQLITE3
 	fprintf(stderr, "%s: outdated mandoc.db lacks %s(%s) entry,\n"
 	    "     consider running  # makewhatis %s\n",
 	    progname, name, sec, paths->paths[ipath]);
+#endif
 	
 	*res = mandoc_reallocarray(*res, ++*ressz, sizeof(struct manpage));
 	page = *res + (*ressz - 1);
@@ -635,7 +612,6 @@ fs_search(const struct mansearch *cfg, const struct manpaths *paths,
 		argc--;
 	}
 }
-#endif
 
 static void
 parse(struct curparse *curp, int fd, const char *file,
@@ -742,7 +718,6 @@ cleanup:
 		*level = rc;
 }
 
-#if HAVE_SQLITE3
 static enum mandoclevel
 passthrough(const char *file, int fd, int synopsis_only)
 {
@@ -808,7 +783,6 @@ fail:
 	    progname, file, syscall, strerror(errno));
 	return(MANDOCLEVEL_SYSERR);
 }
-#endif
 
 static int
 koptions(int *options, char *arg)

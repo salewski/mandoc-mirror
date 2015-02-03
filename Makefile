@@ -211,6 +211,7 @@ BASE_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   $(MANDOC_MAN_OBJS) \
 		   $(MANDOC_TERM_OBJS) \
 		   main.o \
+		   manpath.o \
 		   out.o \
 		   tree.o
 
@@ -218,8 +219,7 @@ MAIN_OBJS	 = $(BASE_OBJS)
 
 DB_OBJS		 = mandocdb.o \
 		   mansearch.o \
-		   mansearch_const.o \
-		   manpath.o
+		   mansearch_const.o
 
 CGI_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   cgi.o \
@@ -308,10 +308,12 @@ base-install: base-build
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_PROGRAM) mandoc demandoc $(DESTDIR)$(BINDIR)
+	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_MAN)
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
 	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h \
 		$(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL_MAN) man.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_MAN).1
 	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
 		mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) man.7 $(DESTDIR)$(MANDIR)/man7/${MANM_MAN}.7
@@ -330,12 +332,10 @@ db-install: base-build
 	mkdir -p $(DESTDIR)$(MANDIR)/man5
 	mkdir -p $(DESTDIR)$(MANDIR)/man8
 	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_APROPOS)
-	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_MAN)
 	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_WHATIS)
 	ln -f $(DESTDIR)$(BINDIR)/mandoc \
 		$(DESTDIR)$(SBINDIR)/$(BINM_MAKEWHATIS)
 	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1
-	$(INSTALL_MAN) man.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_MAN).1
 	ln -f $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1 \
 		$(DESTDIR)$(MANDIR)/man1/$(BINM_WHATIS).1
 	$(INSTALL_MAN) mansearch.3 $(DESTDIR)$(MANDIR)/man3
