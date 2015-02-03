@@ -967,6 +967,7 @@ blk_full(MACRO_PROT_ARGS)
 				    "It breaks %s",
 				    mdoc_macronames[blk->tok]);
 				rew_pending(mdoc, blk);
+				blk = NULL;
 			}
 
 			/* Close out prior implicit scopes. */
