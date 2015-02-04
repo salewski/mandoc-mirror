@@ -48,11 +48,6 @@ enum	check_ineq {
 	CHECK_EQ
 };
 
-enum	check_lvl {
-	CHECK_WARN,
-	CHECK_ERROR,
-};
-
 typedef	void	(*v_pre)(PRE_ARGS);
 typedef	void	(*v_post)(POST_ARGS);
 
@@ -62,7 +57,7 @@ struct	valids {
 };
 
 static	void	 check_count(struct mdoc *, enum mdoc_type,
-			enum check_lvl, enum check_ineq, int);
+			enum check_ineq, int);
 static	void	 check_text(struct mdoc *, int, int, char *);
 static	void	 check_argv(struct mdoc *,
 			struct mdoc_node *, struct mdoc_argv *);
@@ -374,10 +369,9 @@ mdoc_valid_post(struct mdoc *mdoc)
 
 static void
 check_count(struct mdoc *mdoc, enum mdoc_type type,
-		enum check_lvl lvl, enum check_ineq ineq, int val)
+	enum check_ineq ineq, int val)
 {
 	const char	*p;
-	enum mandocerr	 t;
 
 	if (mdoc->last->type != type)
 		return;
@@ -403,8 +397,7 @@ check_count(struct mdoc *mdoc, enum mdoc_type type,
 		/* NOTREACHED */
 	}
 
-	t = lvl == CHECK_WARN ? MANDOCERR_ARGCWARN : MANDOCERR_ARGCOUNT;
-	mandoc_vmsg(t, mdoc->parse, mdoc->last->line,
+	mandoc_vmsg(MANDOCERR_ARGCWARN, mdoc->parse, mdoc->last->line,
 	    mdoc->last->pos, "want %s%d children (have %d)",
 	    p, val, mdoc->last->nchild);
 }
@@ -412,25 +405,25 @@ check_count(struct mdoc *mdoc, enum mdoc_type type,
 static void
 bwarn_ge1(POST_ARGS)
 {
-	check_count(mdoc, MDOC_BODY, CHECK_WARN, CHECK_GT, 0);
+	check_count(mdoc, MDOC_BODY, CHECK_GT, 0);
 }
 
 static void
 ewarn_eq1(POST_ARGS)
 {
-	check_count(mdoc, MDOC_ELEM, CHECK_WARN, CHECK_EQ, 1);
+	check_count(mdoc, MDOC_ELEM, CHECK_EQ, 1);
 }
 
 static void
 ewarn_ge1(POST_ARGS)
 {
-	check_count(mdoc, MDOC_ELEM, CHECK_WARN, CHECK_GT, 0);
+	check_count(mdoc, MDOC_ELEM, CHECK_GT, 0);
 }
 
 static void
 hwarn_eq0(POST_ARGS)
 {
-	check_count(mdoc, MDOC_HEAD, CHECK_WARN, CHECK_EQ, 0);
+	check_count(mdoc, MDOC_HEAD, CHECK_EQ, 0);
 }
 
 static void
@@ -941,7 +934,7 @@ post_lb(POST_ARGS)
 	const char		*stdlibname;
 	char			*libname;
 
-	check_count(mdoc, MDOC_ELEM, CHECK_WARN, CHECK_EQ, 1);
+	check_count(mdoc, MDOC_ELEM, CHECK_EQ, 1);
 	n = mdoc->last->child;
 	assert(MDOC_TEXT == n->type);
 
@@ -995,7 +988,7 @@ static void
 post_fo(POST_ARGS)
 {
 
-	check_count(mdoc, MDOC_HEAD, CHECK_WARN, CHECK_EQ, 1);
+	check_count(mdoc, MDOC_HEAD, CHECK_EQ, 1);
 	bwarn_ge1(mdoc);
 	if (mdoc->last->type == MDOC_HEAD && mdoc->last->nchild)
 		post_fname(mdoc);
@@ -1069,8 +1062,17 @@ post_nm(POST_ARGS)
 static void
 post_nd(POST_ARGS)
 {
+	struct mdoc_node	*n;
 
-	check_count(mdoc, MDOC_BODY, CHECK_ERROR, CHECK_GT, 0);
+	n = mdoc->last;
+
+	if (n->type != MDOC_BODY)
+		return;
+
+	if (n->child == NULL)
+		mandoc_msg(MANDOCERR_ND_EMPTY, mdoc->parse,
+		    n->line, n->pos, "Nd");
+
 	post_hyph(mdoc);
 }
 
@@ -1177,9 +1179,9 @@ post_an(POST_ARGS)
 	np = mdoc->last;
 	if (AUTH__NONE == np->norm->An.auth) {
 		if (0 == np->child)
-			check_count(mdoc, MDOC_ELEM, CHECK_WARN, CHECK_GT, 0);
+			check_count(mdoc, MDOC_ELEM, CHECK_GT, 0);
 	} else if (np->child)
-		check_count(mdoc, MDOC_ELEM, CHECK_WARN, CHECK_EQ, 0);
+		check_count(mdoc, MDOC_ELEM, CHECK_EQ, 0);
 }
 
 static void
@@ -1661,12 +1663,12 @@ post_rs(POST_ARGS)
 
 	switch (mdoc->last->type) {
 	case MDOC_HEAD:
-		check_count(mdoc, MDOC_HEAD, CHECK_WARN, CHECK_EQ, 0);
+		check_count(mdoc, MDOC_HEAD, CHECK_EQ, 0);
 		return;
 	case MDOC_BODY:
 		if (mdoc->last->child)
 			break;
-		check_count(mdoc, MDOC_BODY, CHECK_WARN, CHECK_GT, 0);
+		check_count(mdoc, MDOC_BODY, CHECK_GT, 0);
 		return;
 	default:
 		return;
@@ -2072,7 +2074,7 @@ post_ignpar(POST_ARGS)
 {
 	struct mdoc_node *np;
 
-	check_count(mdoc, MDOC_HEAD, CHECK_WARN, CHECK_GT, 0);
+	check_count(mdoc, MDOC_HEAD, CHECK_GT, 0);
 	post_hyph(mdoc);
 
 	if (MDOC_BODY != mdoc->last->type)
@@ -2135,9 +2137,9 @@ post_par(POST_ARGS)
 	struct mdoc_node *np;
 
 	if (mdoc->last->tok == MDOC_sp)
-		check_count(mdoc, MDOC_ELEM, CHECK_WARN, CHECK_LT, 2);
+		check_count(mdoc, MDOC_ELEM, CHECK_LT, 2);
 	else
-		check_count(mdoc, MDOC_ELEM, CHECK_WARN, CHECK_EQ, 0);
+		check_count(mdoc, MDOC_ELEM, CHECK_EQ, 0);
 
 	if (MDOC_ELEM != mdoc->last->type &&
 	    MDOC_BLOCK != mdoc->last->type)

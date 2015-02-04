@@ -110,6 +110,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"content before first section header",
 	"first section is not \"NAME\"",
 	"bad NAME section contents",
+	"missing description line, using \"\"",
 	"sections out of conventional order",
 	"duplicate section title",
 	"unexpected section",
