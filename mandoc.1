@@ -1602,6 +1602,8 @@ An
 .Ic \&Ef ,
 .Ic \&Ek ,
 .Ic \&El ,
+.Ic \&Lp ,
+.Ic \&Pp ,
 .Ic \&Re ,
 .Ic \&Rs ,
 or
@@ -1621,14 +1623,24 @@ or
 .Ic \&EN
 macro, or a
 .Xr roff 7
+.Ic \&br
+request or
 .Sq \&..
 block closing request is invoked with at least one argument.
 All arguments are ignored.
 .It Sy "skipping excess arguments"
 .Pq mdoc , man , roff
 The
+.Ic \&An
+macro is invoked with another argument after
+.Fl split
+or
+.Fl nosplit ,
+the
 .Ic \&Bf
-macro is invoked with more than one argument, the
+macro or the
+.Ic \&sp
+request is invoked with more than one argument, the
 .Ic \&RE
 macro is invoked with more than one argument
 or with a non-integer argument, or a request of the
