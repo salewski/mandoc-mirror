@@ -1042,6 +1042,12 @@ blk_full(MACRO_PROT_ARGS)
 			body = mdoc_body_alloc(mdoc, line, ppos, tok);
 			break;
 		}
+		if (tok == MDOC_Bd || tok == MDOC_Bk) {
+			mandoc_vmsg(MANDOCERR_ARG_EXCESS,
+			    mdoc->parse, line, la, "%s ... %s",
+			    mdoc_macronames[tok], buf + la);
+			break;
+		}
 		if (tok == MDOC_Rs) {
 			mandoc_vmsg(MANDOCERR_ARG_SKIP, mdoc->parse,
 			    line, la, "Rs %s", buf + la);
@@ -1105,7 +1111,7 @@ blk_full(MACRO_PROT_ARGS)
 		return;
 	if (head == NULL)
 		head = mdoc_head_alloc(mdoc, line, ppos, tok);
-	if (nl && tok != MDOC_Rs)
+	if (nl && tok != MDOC_Bd && tok != MDOC_Bl && tok != MDOC_Rs)
 		append_delims(mdoc, line, pos, buf);
 	if (body != NULL)
 		goto out;

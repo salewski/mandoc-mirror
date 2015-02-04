@@ -994,7 +994,8 @@ except that it may control a following
 clause.
 .It Sy "skipping empty macro"
 .Pq mdoc
-The indicated macro has no arguments and hence no effect.
+The indicated macro has no arguments or no body content
+and hence no effect.
 .It Sy "empty argument, using 0n"
 .Pq mdoc
 The required width is missing after
@@ -1636,14 +1637,16 @@ macro is invoked with another argument after
 .Fl split
 or
 .Fl nosplit ,
-the
-.Ic \&Bf
-macro or the
-.Ic \&sp
-request is invoked with more than one argument, the
+.Ic \&Bd ,
+.Ic \&Bk ,
+or
+.Ic \&Bl
+are invoked with invalid arguments, the
 .Ic \&RE
 macro is invoked with more than one argument
-or with a non-integer argument, or a request of the
+or with a non-integer argument, the
+.Ic \&sp
+request is invoked with more than one argument, or a request of the
 .Ic \&de
 family is invoked with more than two arguments.
 The excess arguments are ignored.
