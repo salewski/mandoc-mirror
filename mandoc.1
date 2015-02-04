@@ -1091,6 +1091,14 @@ macro has no argument, or only one argument and no macro follows
 on the same input line.
 This defeats its purpose; in particular, spacing is not suppressed
 before the text or macros following on the next input line.
+.It Sy "empty reference block"
+.Pq mdoc
+An
+.Ic \&Rs
+macro is immediately followed by an
+.Ic \&Re
+macro on the next input line.
+Such an empty block does not produce any output.
 .It Sy "missing -std argument, adding it"
 .Pq mdoc
 An
@@ -1595,6 +1603,7 @@ An
 .Ic \&Ek ,
 .Ic \&El ,
 .Ic \&Re ,
+.Ic \&Rs ,
 or
 .Ic \&Ud
 macro, an

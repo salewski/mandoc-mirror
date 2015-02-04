@@ -147,6 +147,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"missing font type, using \\fR",
 	"unknown font type, using \\fR",
 	"nothing follows prefix",
+	"empty reference block",
 	"missing -std argument, adding it",
 	"missing eqn box, using \"\"",
 
