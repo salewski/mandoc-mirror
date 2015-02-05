@@ -1253,9 +1253,6 @@ mdoc_an_pre(MDOC_ARGS)
 		return(0);
 	}
 
-	if (n->child == NULL)
-		return(0);
-
 	if (h->flags & HTML_SPLIT)
 		print_otag(h, TAG_BR, 0, NULL);
 

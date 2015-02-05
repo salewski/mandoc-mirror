@@ -772,7 +772,7 @@ in_line(MACRO_PROT_ARGS)
 		 */
 
 		if (ac == ARGS_PUNCT) {
-			if (cnt == 0 && nc == 0)
+			if (cnt == 0 && (nc == 0 || tok == MDOC_An))
 				mdoc->flags |= MDOC_NODELIMC;
 			break;
 		}

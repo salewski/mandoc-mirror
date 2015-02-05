@@ -1091,9 +1091,6 @@ termp_an_pre(DECL_ARGS)
 		return(0);
 	}
 
-	if (n->child == NULL)
-		return(0);
-
 	if (p->flags & TERMP_SPLIT)
 		term_newln(p);
 
