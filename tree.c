@@ -162,10 +162,7 @@ print_mdoc(const struct mdoc_node *n, int indent)
 		putchar(' ');
 		if (MDOC_LINE & n->flags)
 			putchar('*');
-		printf("%d:%d", n->line, n->pos + 1);
-		if (n->lastline != n->line)
-			printf("-%d", n->lastline);
-		putchar('\n');
+		printf("%d:%d\n", n->line, n->pos + 1);
 	}
 
 	if (n->eqn)

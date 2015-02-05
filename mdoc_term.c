@@ -319,12 +319,9 @@ print_mdoc_node(DECL_ARGS)
 	 * invoked in a prior line, revert it to PREKEEP.
 	 */
 
-	if (TERMP_KEEP & p->flags) {
-		if (n->prev ? (n->prev->lastline != n->line) :
-		    (n->parent && n->parent->line != n->line)) {
-			p->flags &= ~TERMP_KEEP;
-			p->flags |= TERMP_PREKEEP;
-		}
+	if (p->flags & TERMP_KEEP && n->flags & MDOC_LINE) {
+		p->flags &= ~TERMP_KEEP;
+		p->flags |= TERMP_PREKEEP;
 	}
 
 	/*

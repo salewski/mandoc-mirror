@@ -262,9 +262,6 @@ rew_last(struct mdoc *mdoc, const struct mdoc_node *to)
 	assert(to);
 	mdoc->next = MDOC_NEXT_SIBLING;
 	while (mdoc->last != to) {
-		if ( ! (mdoc->last->flags & MDOC_VALID))
-			mdoc->last->lastline = to->lastline -
-			    (mdoc->flags & MDOC_NEWLINE ? 1 : 0);
 		/*
 		 * Save the parent here, because we may delete the
 		 * mdoc->last node in the post-validation phase and reset
@@ -578,10 +575,8 @@ blk_exp_close(MACRO_PROT_ARGS)
 		/* Remember the start of our own body. */
 
 		if (n->type == MDOC_BODY && atok == n->tok) {
-			if (n->end == ENDBODY_NOT) {
+			if (n->end == ENDBODY_NOT)
 				body = n;
-				n->lastline = line;
-			}
 			continue;
 		}
 
@@ -594,7 +589,6 @@ blk_exp_close(MACRO_PROT_ARGS)
 		}
 
 		if (atok == n->tok) {
-			n->lastline = line;
 			assert(body);
 
 			/*

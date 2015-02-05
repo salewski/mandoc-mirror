@@ -436,12 +436,9 @@ print_mdoc_node(MDOC_ARGS)
 		break;
 	}
 
-	if (HTML_KEEP & h->flags) {
-		if (n->prev ? (n->prev->lastline != n->line) :
-		    (n->parent && n->parent->line != n->line)) {
-			h->flags &= ~HTML_KEEP;
-			h->flags |= HTML_PREKEEP;
-		}
+	if (h->flags & HTML_KEEP && n->flags & MDOC_LINE) {
+		h->flags &= ~HTML_KEEP;
+		h->flags |= HTML_PREKEEP;
 	}
 
 	if (child && n->child)
