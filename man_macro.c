@@ -427,6 +427,13 @@ in_line_eoln(MACRO_PROT_ARGS)
 			    man_macronames[tok], buf + *pos);
 			break;
 		}
+		if (buf[*pos] != '\0' && man->last != n &&
+		    (tok == MAN_PD || tok == MAN_ft || tok == MAN_sp)) {
+			mandoc_vmsg(MANDOCERR_ARG_EXCESS,
+			    man->parse, line, *pos, "%s ... %s",
+			    man_macronames[tok], buf + *pos);
+			break;
+		}
 		la = *pos;
 		if ( ! man_args(man, line, pos, buf, &p))
 			break;
