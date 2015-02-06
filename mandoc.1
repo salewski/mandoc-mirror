@@ -1125,6 +1125,18 @@ The
 utility assumes
 .Fl std
 even when it is not specified, but other implementations may not.
+.It Sy "missing option string, using \(dq\(dq"
+.Pq man
+The
+.Ic \&OP
+macro is invoked without any argument.
+An empty pair of square brackets is shown.
+.It Sy "missing resource identifier, using \(dq\(dq"
+.Pq man
+The
+.Ic \&UR
+macro is invoked without any argument.
+An empty pair of angle brackets is shown.
 .It Sy "missing eqn box, using \(dq\(dq"
 .Pq eqn
 A diacritic mark or a binary operator is found,
@@ -1645,30 +1657,41 @@ block closing request is invoked with at least one argument.
 All arguments are ignored.
 .It Sy "skipping excess arguments"
 .Pq mdoc , man , roff
-The
+A macro or request is invoked with too many arguments:
+.Bl -dash -offset 2n -width 2n -compact
+.It
+.Ic \&Fo ,
+.Ic \&PD ,
+.Ic \&RS ,
+.Ic \&UR ,
+.Ic \&ft ,
+or
+.Ic \&sp
+with more than one argument
+.It
 .Ic \&An
-macro is invoked with another argument after
+with another argument after
 .Fl split
 or
-.Fl nosplit ,
-.Ic \&Fo
-is invoked with more than one argument,
+.Fl nosplit
+.It
+.Ic \&RE
+with more than one argument or with a non-integer argument
+.It
+.Ic \&OP
+or a request of the
+.Ic \&de
+family with more than two arguments
+.It
+.Ic \&TH
+with more than five arguments
+.It
 .Ic \&Bd ,
 .Ic \&Bk ,
 or
 .Ic \&Bl
-are invoked with invalid arguments, the
-.Ic \&RE
-macro is invoked with more than one argument
-or with a non-integer argument, the
-.Ic \&PD
-macro or the
-.Ic \&ft
-or
-.Ic \&sp
-request is invoked with more than one argument, or a request of the
-.Ic \&de
-family is invoked with more than two arguments.
+with invalid arguments
+.El
 The excess arguments are ignored.
 .El
 .Ss Unsupported features

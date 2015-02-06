@@ -150,6 +150,8 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"nothing follows prefix",
 	"empty reference block",
 	"missing -std argument, adding it",
+	"missing option string, using \"\"",
+	"missing resource identifier, using \"\"",
 	"missing eqn box, using \"\"",
 
 	/* related to bad macro arguments */
