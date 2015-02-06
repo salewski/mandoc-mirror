@@ -2538,7 +2538,8 @@ roff_cc(ROFF_ARGS)
 		r->control = 0;
 
 	if (*p != '\0')
-		mandoc_msg(MANDOCERR_ARGCOUNT, r->parse, ln, ppos, NULL);
+		mandoc_vmsg(MANDOCERR_ARG_EXCESS, r->parse,
+		    ln, p - buf->buf, "cc ... %s", p);
 
 	return(ROFF_IGN);
 }
@@ -2553,7 +2554,7 @@ roff_tr(ROFF_ARGS)
 	p = buf->buf + pos;
 
 	if (*p == '\0') {
-		mandoc_msg(MANDOCERR_ARGCOUNT, r->parse, ln, ppos, NULL);
+		mandoc_msg(MANDOCERR_REQ_EMPTY, r->parse, ln, ppos, "tr");
 		return(ROFF_IGN);
 	}
 
@@ -2581,8 +2582,8 @@ roff_tr(ROFF_ARGS)
 			}
 			ssz = (size_t)(p - second);
 		} else if (*second == '\0') {
-			mandoc_msg(MANDOCERR_ARGCOUNT, r->parse,
-			    ln, (int)(p - buf->buf), NULL);
+			mandoc_vmsg(MANDOCERR_TR_ODD, r->parse,
+			    ln, first - buf->buf, "tr %s", first);
 			second = " ";
 			p--;
 		}

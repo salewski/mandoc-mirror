@@ -1221,9 +1221,9 @@ post_it(POST_ARGS)
 				i++;
 
 		if (i < cols || i > cols + 1)
-			mandoc_vmsg(MANDOCERR_ARGCOUNT,
+			mandoc_vmsg(MANDOCERR_BL_COL,
 			    mdoc->parse, nit->line, nit->pos,
-			    "columns == %d (have %d)", cols, i);
+			    "%d columns, %d cells", cols, i);
 		break;
 	default:
 		abort();

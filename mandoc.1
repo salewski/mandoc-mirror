@@ -1201,6 +1201,15 @@ list has a
 .Fl width
 argument.
 That has no effect.
+.It Sy "wrong number of cells"
+In a line of a
+.Ic \&Bl Fl column
+list, the number of tabs or
+.Ic \&Ta
+macros is less than the number expected from the list header line
+or exceeds the expected number by more than one.
+Missing cells remain empty, and all cells exceeding the number of
+columns are joined into one single cell.
 .It Sy "unknown AT&T UNIX version"
 .Pq mdoc
 An
@@ -1252,6 +1261,12 @@ request or a
 layout modifier has an unknown
 .Ar font
 argument.
+.It Sy "odd number of characters in request"
+.Pq roff
+A
+.Ic \&tr
+request contains an odd number of characters.
+The last character is mapped to the blank character.
 .El
 .Ss "Warnings related to plain text"
 .Bl -ohang
@@ -1538,12 +1553,6 @@ When parsing for a request or a user-defined macro name to be called,
 only the escape sequence is discarded.
 The characters preceding it are used as the request or macro name,
 the characters following it are used as the arguments to the request or macro.
-.It Sy "argument count wrong"
-.Pq mdoc , man , roff
-The indicated request or macro has too few or too many arguments.
-The syntax tree will contain the wrong number of arguments as given.
-Formatting behaviour depends on the specific request or macro in question.
-Note that the same message may also occur as a WARNING, see above.
 .It Sy "NOT IMPLEMENTED: Bd -file"
 .Pq mdoc
 For security reasons, the
