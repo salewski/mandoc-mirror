@@ -156,7 +156,7 @@ static	const struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, post_fn },			/* Fn */
 	{ NULL, NULL },				/* Ft */
 	{ NULL, NULL },				/* Ic */
-	{ NULL, ewarn_eq1 },			/* In */
+	{ NULL, NULL },				/* In */
 	{ NULL, post_defaults },		/* Li */
 	{ NULL, post_nd },			/* Nd */
 	{ NULL, post_nm },			/* Nm */
@@ -167,7 +167,7 @@ static	const struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, post_st },			/* St */
 	{ NULL, NULL },				/* Va */
 	{ NULL, post_vt },			/* Vt */
-	{ NULL, ewarn_ge1 },			/* Xr */
+	{ NULL, NULL },				/* Xr */
 	{ NULL, ewarn_ge1 },			/* %A */
 	{ NULL, post_hyphtext },		/* %B */ /* FIXME: can be used outside Rs/Re. */
 	{ NULL, ewarn_ge1 },			/* %D */
@@ -1640,13 +1640,6 @@ post_st(POST_ARGS)
 	n = mdoc->last;
 	nch = n->child;
 
-	if (NULL == nch) {
-		mandoc_msg(MANDOCERR_MACRO_EMPTY, mdoc->parse,
-		    n->line, n->pos, mdoc_macronames[n->tok]);
-		mdoc_node_delete(mdoc, n);
-		return;
-	}
-
 	assert(MDOC_TEXT == nch->type);
 
 	if (NULL == (p = mdoc_a2st(nch->string))) {
@@ -2076,7 +2069,6 @@ post_ignpar(POST_ARGS)
 {
 	struct mdoc_node *np;
 
-	check_count(mdoc, MDOC_HEAD, CHECK_GT, 0);
 	post_hyph(mdoc);
 
 	if (MDOC_BODY != mdoc->last->type)

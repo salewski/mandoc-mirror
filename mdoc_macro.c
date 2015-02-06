@@ -904,6 +904,12 @@ blk_full(MACRO_PROT_ARGS)
 
 	nl = MDOC_NEWLINE & mdoc->flags;
 
+	if (buf[*pos] == '\0' && (tok == MDOC_Sh || tok == MDOC_Ss)) {
+		mandoc_msg(MANDOCERR_MACRO_EMPTY, mdoc->parse,
+		    line, ppos, mdoc_macronames[tok]);
+		return;
+	}
+
 	if ( ! (mdoc_macros[tok].flags & MDOC_EXPLICIT)) {
 
 		/* Here, tok is one of Sh Ss Nm Nd It. */
@@ -1367,6 +1373,11 @@ in_line_argn(MACRO_PROT_ARGS)
 	}
 
 	if (j == 0) {
+		if (tok == MDOC_In || tok == MDOC_St || tok == MDOC_Xr) {
+			mandoc_msg(MANDOCERR_MACRO_EMPTY, mdoc->parse,
+			    line, ppos, mdoc_macronames[tok]);
+			return;
+		}
 		mdoc_elem_alloc(mdoc, line, ppos, tok, arg);
 		if (ac == ARGS_PUNCT && tok == MDOC_Pf)
 			append_delims(mdoc, line, pos, buf);
