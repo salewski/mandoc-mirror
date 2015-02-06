@@ -92,8 +92,8 @@ enum	mandocerr {
 	MANDOCERR_REQ_EMPTY, /* skipping empty request: request */
 	MANDOCERR_COND_EMPTY, /* conditional request controls empty scope */
 	MANDOCERR_MACRO_EMPTY, /* skipping empty macro: macro */
+	MANDOCERR_BLK_EMPTY, /* empty block: macro */
 	MANDOCERR_ARG_EMPTY, /* empty argument, using 0n: macro arg */
-	MANDOCERR_ARGCWARN, /* argument count wrong */
 	MANDOCERR_BD_NOTYPE, /* missing display type, using -ragged: Bd */
 	MANDOCERR_BL_LATETYPE, /* list type is not the first argument: Bl arg */
 	MANDOCERR_BL_NOWIDTH, /* missing -width in -tag list, using 8n */

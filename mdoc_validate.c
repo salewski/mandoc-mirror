@@ -56,8 +56,6 @@ struct	valids {
 	v_post	 post;
 };
 
-static	void	 check_count(struct mdoc *, enum mdoc_type,
-			enum check_ineq, int);
 static	void	 check_text(struct mdoc *, int, int, char *);
 static	void	 check_argv(struct mdoc *,
 			struct mdoc_node *, struct mdoc_argv *);
@@ -66,9 +64,6 @@ static	int	 child_an(const struct mdoc_node *);
 static	enum mdoc_sec	a2sec(const char *);
 static	size_t		macro2len(enum mdoct);
 static	void	 rewrite_macro2len(char **);
-
-static	void	 ewarn_eq1(POST_ARGS);
-static	void	 ewarn_ge1(POST_ARGS);
 
 static	void	 post_an(POST_ARGS);
 static	void	 post_at(POST_ARGS);
@@ -92,7 +87,6 @@ static	void	 post_fn(POST_ARGS);
 static	void	 post_fname(POST_ARGS);
 static	void	 post_fo(POST_ARGS);
 static	void	 post_hyph(POST_ARGS);
-static	void	 post_hyphtext(POST_ARGS);
 static	void	 post_ignpar(POST_ARGS);
 static	void	 post_it(POST_ARGS);
 static	void	 post_lb(POST_ARGS);
@@ -167,17 +161,17 @@ static	const struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Va */
 	{ NULL, post_vt },			/* Vt */
 	{ NULL, NULL },				/* Xr */
-	{ NULL, ewarn_ge1 },			/* %A */
-	{ NULL, post_hyphtext },		/* %B */ /* FIXME: can be used outside Rs/Re. */
-	{ NULL, ewarn_ge1 },			/* %D */
-	{ NULL, ewarn_ge1 },			/* %I */
-	{ NULL, ewarn_ge1 },			/* %J */
-	{ NULL, post_hyphtext },		/* %N */
-	{ NULL, post_hyphtext },		/* %O */
-	{ NULL, ewarn_ge1 },			/* %P */
-	{ NULL, post_hyphtext },		/* %R */
-	{ NULL, post_hyphtext },		/* %T */ /* FIXME: can be used outside Rs/Re. */
-	{ NULL, ewarn_ge1 },			/* %V */
+	{ NULL, NULL },				/* %A */
+	{ NULL, post_hyph },			/* %B */ /* FIXME: can be used outside Rs/Re. */
+	{ NULL, NULL },				/* %D */
+	{ NULL, NULL },				/* %I */
+	{ NULL, NULL },				/* %J */
+	{ NULL, post_hyph },			/* %N */
+	{ NULL, post_hyph },			/* %O */
+	{ NULL, NULL },				/* %P */
+	{ NULL, post_hyph },			/* %R */
+	{ NULL, post_hyph },			/* %T */ /* FIXME: can be used outside Rs/Re. */
+	{ NULL, NULL },				/* %V */
 	{ NULL, NULL },				/* Ac */
 	{ NULL, NULL },				/* Ao */
 	{ NULL, NULL },				/* Aq */
@@ -239,14 +233,14 @@ static	const struct valids mdoc_valids[MDOC_MAX] = {
 	{ NULL, NULL },				/* Brq */
 	{ NULL, NULL },				/* Bro */
 	{ NULL, NULL },				/* Brc */
-	{ NULL, ewarn_ge1 },			/* %C */
+	{ NULL, NULL },				/* %C */
 	{ pre_obsolete, post_es },		/* Es */
 	{ pre_obsolete, post_en },		/* En */
 	{ NULL, NULL },				/* Dx */
-	{ NULL, ewarn_ge1 },			/* %Q */
+	{ NULL, NULL },				/* %Q */
 	{ NULL, post_par },			/* br */
 	{ NULL, post_par },			/* sp */
-	{ NULL, ewarn_eq1 },			/* %U */
+	{ NULL, NULL },				/* %U */
 	{ NULL, NULL },				/* Ta */
 	{ NULL, NULL },				/* ll */
 };
@@ -363,53 +357,6 @@ mdoc_valid_post(struct mdoc *mdoc)
 			(*p)(mdoc);
 		break;
 	}
-}
-
-static void
-check_count(struct mdoc *mdoc, enum mdoc_type type,
-	enum check_ineq ineq, int val)
-{
-	const char	*p;
-
-	if (mdoc->last->type != type)
-		return;
-
-	switch (ineq) {
-	case CHECK_LT:
-		p = "less than ";
-		if (mdoc->last->nchild < val)
-			return;
-		break;
-	case CHECK_GT:
-		p = "more than ";
-		if (mdoc->last->nchild > val)
-			return;
-		break;
-	case CHECK_EQ:
-		p = "";
-		if (val == mdoc->last->nchild)
-			return;
-		break;
-	default:
-		abort();
-		/* NOTREACHED */
-	}
-
-	mandoc_vmsg(MANDOCERR_ARGCWARN, mdoc->parse, mdoc->last->line,
-	    mdoc->last->pos, "want %s%d children (have %d)",
-	    p, val, mdoc->last->nchild);
-}
-
-static void
-ewarn_eq1(POST_ARGS)
-{
-	check_count(mdoc, MDOC_ELEM, CHECK_EQ, 1);
-}
-
-static void
-ewarn_ge1(POST_ARGS)
-{
-	check_count(mdoc, MDOC_ELEM, CHECK_GT, 0);
 }
 
 static void
@@ -920,7 +867,6 @@ post_lb(POST_ARGS)
 	const char		*stdlibname;
 	char			*libname;
 
-	check_count(mdoc, MDOC_ELEM, CHECK_EQ, 1);
 	n = mdoc->last->child;
 	assert(MDOC_TEXT == n->type);
 
@@ -1089,7 +1035,7 @@ post_d1(POST_ARGS)
 		return;
 
 	if (n->child == NULL)
-		mandoc_msg(MANDOCERR_MACRO_EMPTY, mdoc->parse,
+		mandoc_msg(MANDOCERR_BLK_EMPTY, mdoc->parse,
 		    n->line, n->pos, "D1");
 
 	post_hyph(mdoc);
@@ -1106,7 +1052,7 @@ post_literal(POST_ARGS)
 		return;
 
 	if (n->child == NULL)
-		mandoc_msg(MANDOCERR_MACRO_EMPTY, mdoc->parse,
+		mandoc_msg(MANDOCERR_BLK_EMPTY, mdoc->parse,
 		    n->line, n->pos, mdoc_macronames[n->tok]);
 
 	if (n->tok == MDOC_Bd &&
@@ -1513,7 +1459,7 @@ post_bl(POST_ARGS)
 
 	nchild = nbody->child;
 	if (nchild == NULL) {
-		mandoc_msg(MANDOCERR_MACRO_EMPTY, mdoc->parse,
+		mandoc_msg(MANDOCERR_BLK_EMPTY, mdoc->parse,
 		    nbody->line, nbody->pos, "Bl");
 		return;
 	}
@@ -1581,7 +1527,7 @@ post_bk(POST_ARGS)
 	n = mdoc->last;
 
 	if (n->type == MDOC_BLOCK && n->body->child == NULL) {
-		mandoc_msg(MANDOCERR_MACRO_EMPTY,
+		mandoc_msg(MANDOCERR_BLK_EMPTY,
 		    mdoc->parse, n->line, n->pos, "Bk");
 		mdoc_node_delete(mdoc, n);
 	}
@@ -1790,14 +1736,6 @@ post_hyph(POST_ARGS)
 			    isalpha((unsigned char)cp[1]))
 				*cp = ASCII_HYPH;
 	}
-}
-
-static void
-post_hyphtext(POST_ARGS)
-{
-
-	ewarn_ge1(mdoc);
-	post_hyph(mdoc);
 }
 
 static void

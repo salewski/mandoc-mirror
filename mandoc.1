@@ -994,8 +994,19 @@ except that it may control a following
 clause.
 .It Sy "skipping empty macro"
 .Pq mdoc
-The indicated macro has no arguments or no body content
-and hence no effect.
+The indicated macro has no arguments and hence no effect.
+.It Sy "empty block"
+.Pq mdoc , man
+A
+.Ic \&Bd ,
+.Ic \&Bk ,
+.Ic \&Bl ,
+.Ic \&D1 ,
+.Ic \&Dl ,
+.Ic \&RS ,
+or
+.Ic \&UR
+block contains nothing in its body and will produce no output.
 .It Sy "empty argument, using 0n"
 .Pq mdoc
 The required width is missing after
@@ -1005,12 +1016,6 @@ or
 .Fl offset
 or
 .Fl width.
-.It Sy "argument count wrong"
-.Pq mdoc , man
-The indicated macro has too few or too many arguments.
-The syntax tree will contain the wrong number of arguments as given.
-Formatting behaviour depends on the specific macro in question.
-Note that the same message may also occur as an ERROR, see below.
 .It Sy "missing display type, using -ragged"
 .Pq mdoc
 The

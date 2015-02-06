@@ -1403,9 +1403,10 @@ in_line_eoln(MACRO_PROT_ARGS)
 			rew_last(mdoc, mdoc->last->parent);
 	}
 
-	if (buf[*pos] == '\0' && tok == MDOC_Fd) {
+	if (buf[*pos] == '\0' &&
+	    (tok == MDOC_Fd || mdoc_macronames[tok][0] == '%')) {
 		mandoc_msg(MANDOCERR_MACRO_EMPTY, mdoc->parse,
-		    line, ppos, "Fd");
+		    line, ppos, mdoc_macronames[tok]);
 		return;
 	}
 

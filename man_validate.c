@@ -252,9 +252,9 @@ static void
 check_part(CHKARGS)
 {
 
-	if (MAN_BODY == n->type && 0 == n->nchild)
-		mandoc_msg(MANDOCERR_ARGCWARN, man->parse, n->line,
-		    n->pos, "want children (have none)");
+	if (n->type == MAN_BODY && n->child == NULL)
+		mandoc_msg(MANDOCERR_BLK_EMPTY, man->parse,
+		    n->line, n->pos, man_macronames[n->tok]);
 }
 
 static void
