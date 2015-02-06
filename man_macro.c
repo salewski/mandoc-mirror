@@ -420,6 +420,13 @@ in_line_eoln(MACRO_PROT_ARGS)
 	n = man->last;
 
 	for (;;) {
+		if (buf[*pos] != '\0' && (tok == MAN_br ||
+		    tok == MAN_fi || tok == MAN_nf)) {
+			mandoc_vmsg(MANDOCERR_ARG_SKIP,
+			    man->parse, line, *pos, "%s %s",
+			    man_macronames[tok], buf + *pos);
+			break;
+		}
 		la = *pos;
 		if ( ! man_args(man, line, pos, buf, &p))
 			break;

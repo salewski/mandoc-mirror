@@ -38,7 +38,6 @@
 
 typedef	void	(*v_check)(CHKARGS);
 
-static	void	  check_eq0(CHKARGS);
 static	void	  check_eq2(CHKARGS);
 static	void	  check_le1(CHKARGS);
 static	void	  check_le5(CHKARGS);
@@ -182,7 +181,6 @@ check_##name(CHKARGS) \
 	    #ineq, (x), n->nchild); \
 }
 
-INEQ_DEFINE(0, ==, eq0)
 INEQ_DEFINE(2, ==, eq2)
 INEQ_DEFINE(1, <=, le1)
 INEQ_DEFINE(5, <=, le5)
@@ -401,9 +399,7 @@ static void
 post_nf(CHKARGS)
 {
 
-	check_eq0(man, n);
-
-	if (MAN_LITERAL & man->flags)
+	if (man->flags & MAN_LITERAL)
 		mandoc_msg(MANDOCERR_NF_SKIP, man->parse,
 		    n->line, n->pos, "nf");
 
@@ -413,8 +409,6 @@ post_nf(CHKARGS)
 static void
 post_fi(CHKARGS)
 {
-
-	check_eq0(man, n);
 
 	if ( ! (MAN_LITERAL & man->flags))
 		mandoc_msg(MANDOCERR_FI_SKIP, man->parse,
@@ -501,9 +495,7 @@ static void
 post_vs(CHKARGS)
 {
 
-	if (n->tok == MAN_br)
-		check_eq0(man, n);
-	else
+	if (n->tok == MAN_sp)
 		check_le1(man, n);
 
 	if (NULL != n->prev)
