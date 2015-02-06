@@ -1042,6 +1042,12 @@ The
 macro is called without an argument before
 .Ic \&Nm
 has first been called with an argument.
+.It Sy "missing function name, using \(dq\(dq"
+.Pq mdoc
+The
+.Ic \&Fo
+macro is called without an argument.
+No function name is printed.
 .It Sy "empty head in list item"
 .Pq mdoc
 In a
@@ -1637,6 +1643,8 @@ macro is invoked with another argument after
 .Fl split
 or
 .Fl nosplit ,
+.Ic \&Fo
+is invoked with more than one argument,
 .Ic \&Bd ,
 .Ic \&Bk ,
 or

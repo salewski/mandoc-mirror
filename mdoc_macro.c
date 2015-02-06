@@ -1403,6 +1403,12 @@ in_line_eoln(MACRO_PROT_ARGS)
 			rew_last(mdoc, mdoc->last->parent);
 	}
 
+	if (buf[*pos] == '\0' && tok == MDOC_Fd) {
+		mandoc_msg(MANDOCERR_MACRO_EMPTY, mdoc->parse,
+		    line, ppos, "Fd");
+		return;
+	}
+
 	mdoc_argv(mdoc, line, tok, &arg, pos, buf);
 	mdoc_elem_alloc(mdoc, line, ppos, tok, arg);
 	if (parse_rest(mdoc, tok, line, pos, buf))

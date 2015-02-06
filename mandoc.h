@@ -98,6 +98,7 @@ enum	mandocerr {
 	MANDOCERR_BL_LATETYPE, /* list type is not the first argument: Bl arg */
 	MANDOCERR_BL_NOWIDTH, /* missing -width in -tag list, using 8n */
 	MANDOCERR_EX_NONAME, /* missing utility name, using "": Ex */
+	MANDOCERR_FO_NOHEAD, /* missing function name, using "": Fo */
 	MANDOCERR_IT_NOHEAD, /* empty head in list item: Bl -type It */
 	MANDOCERR_IT_NOBODY, /* empty list item: Bl -type It */
 	MANDOCERR_BF_NOFONT, /* missing font type, using \fR: Bf */

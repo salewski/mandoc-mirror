@@ -142,6 +142,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"list type is not the first argument",
 	"missing -width in -tag list, using 8n",
 	"missing utility name, using \"\"",
+	"missing function name, using \"\"",
 	"empty head in list item",
 	"empty list item",
 	"missing font type, using \\fR",
