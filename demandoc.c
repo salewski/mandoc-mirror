@@ -47,8 +47,9 @@ main(int argc, char *argv[])
 	int		 ch, fd, i, list;
 	extern int	 optind;
 
-	progname = strrchr(argv[0], '/');
-	if (progname == NULL)
+	if (argc < 1)
+		progname = "demandoc";
+	else if ((progname = strrchr(argv[0], '/')) == NULL)
 		progname = argv[0];
 	else
 		++progname;
@@ -81,7 +82,7 @@ main(int argc, char *argv[])
 	mp = mparse_alloc(MPARSE_SO, MANDOCLEVEL_BADARG, NULL, mchars, NULL);
 	assert(mp);
 
-	if (0 == argc)
+	if (argc < 1)
 		pmandoc(mp, STDIN_FILENO, "<stdin>", list);
 
 	for (i = 0; i < argc; i++) {
