@@ -729,9 +729,9 @@ macro occurs after some non-prologue macro, but still takes effect.
 .Pq mdoc
 The
 .Ic \&Dt
-macro can only occur before the first non-prologue macro
-because traditional formatters write the page header
-before parsing the document body.
+macro appears after the first non-prologue macro.
+Traditional formatters cannot handle this because
+they write the page header before parsing the document body.
 Even though this technical restriction does not apply to
 .Nm ,
 traditional semantics is preserved.
@@ -836,7 +836,7 @@ manual for replacements.
 .Pq mdoc
 The name of a macro that is not callable appears on a macro line.
 It is printed verbatim.
-If the intention is to call it, move it to its own line;
+If the intention is to call it, move it to its own input line;
 otherwise, escape it by prepending
 .Sq \e& .
 .It Sy "skipping paragraph macro"
@@ -1080,21 +1080,18 @@ list, an
 .Ic \&It
 block is empty.
 An empty list item is shown.
-.It Sy "missing font type"
+.It Sy "missing font type, using \efR"
 .Pq mdoc
 A
 .Ic \&Bf
 macro has no argument.
-It switches to the default font,
-.Cm \efR .
-.It Sy "unknown font type"
+It switches to the default font.
+.It Sy "unknown font type, using \efR"
 .Pq mdoc
 The
 .Ic \&Bf
 argument is invalid.
-The default font
-.Cm \efR
-is used instead.
+The default font is used instead.
 .It Sy "nothing follows prefix"
 .Pq mdoc
 A
@@ -1503,7 +1500,7 @@ macros as well as tables require explicit closing by dedicated macros.
 A block that doesn't support bad nesting
 ends before all of its children are properly closed.
 The open child nodes are closed implicitly.
-.It Sy "scope open on exit"
+.It Sy "appending missing end of block"
 .Pq mdoc , man , eqn , tbl , roff
 At the end of the document, an explicit
 .Xr mdoc 7
