@@ -66,6 +66,9 @@ static int	 fts_safe_changedir(FTS *, FTSENT *, int, const char *);
 #ifndef	O_DIRECTORY
 #define	O_DIRECTORY	0
 #endif
+#ifndef	O_CLOEXEC
+#define	O_CLOEXEC	0
+#endif
 
 #define	CLR(opt)	(sp->fts_options &= ~(opt))
 #define	ISSET(opt)	(sp->fts_options & (opt))
