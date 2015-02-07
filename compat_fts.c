@@ -7,7 +7,7 @@ int dummy;
 #else
 
 /*	$Id$	*/
-/*	$OpenBSD: fts.c,v 1.49 2014/11/23 00:14:22 guenther Exp $	*/
+/*	$OpenBSD: fts.c,v 1.50 2015/01/16 16:48:51 deraadt Exp $	*/
 
 /*-
  * Copyright (c) 1990, 1993, 1994
@@ -38,7 +38,6 @@ int dummy;
  * SUCH DAMAGE.
  */
 
-#include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -51,6 +50,8 @@ int dummy;
 #include <unistd.h>
 #include "compat_fts.h"
 
+#define MAXIMUM(a, b)	(((a) > (b)) ? (a) : (b))
+
 static FTSENT	*fts_alloc(FTS *, const char *, size_t);
 static FTSENT	*fts_build(FTS *);
 static void	 fts_lfree(FTSENT *);
@@ -62,7 +63,6 @@ static unsigned short	 fts_stat(FTS *, FTSENT *);
 static int	 fts_safe_changedir(FTS *, FTSENT *, int, const char *);
 
 #define	ISDOT(a)	(a[0] == '.' && (!a[1] || (a[1] == '.' && !a[2])))
-#define	MAX(a,b)	(((a)>(b))?(a):(b))
 #ifndef	O_DIRECTORY
 #define	O_DIRECTORY	0
 #endif
@@ -97,7 +97,7 @@ fts_open(char * const *argv, int options, void *dummy)
 	 * Start out with 1K of path space, and enough, in any case,
 	 * to hold the user's paths.
 	 */
-	if (fts_palloc(sp, MAX(fts_maxarglen(argv), PATH_MAX)))
+	if (fts_palloc(sp, MAXIMUM(fts_maxarglen(argv), PATH_MAX)))
 		goto mem1;
 
 	/* Allocate/initialize root's parent. */
