@@ -941,6 +941,7 @@ blk_full(MACRO_PROT_ARGS)
 					    mdoc_macronames[tok],
 					    mdoc_macronames[n->tok]);
 					rew_pending(mdoc, n);
+					n = mdoc->last;
 					continue;
 				case MDOC_It:
 					/* Delay in case it's astray. */
