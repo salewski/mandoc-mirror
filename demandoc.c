@@ -118,7 +118,7 @@ pmandoc(struct mparse *mp, int fd, const char *fn, int list)
 	line = 1;
 	col = 0;
 
-	if (mdoc) 
+	if (mdoc)
 		pmdoc(mdoc_node(mdoc), &line, &col, list);
 	else if (man)
 		pman(man_node(man), &line, &col, list);
@@ -168,7 +168,7 @@ again:
 		end = p - 1;
 
 		while (end > start)
-			if ('.' == *end || ',' == *end || 
+			if ('.' == *end || ',' == *end ||
 					'\'' == *end || '"' == *end ||
 					')' == *end || '!' == *end ||
 					'?' == *end || ':' == *end ||
@@ -200,7 +200,7 @@ again:
 	/*
 	 * Print the input word, skipping any special characters.
 	 */
-	while ('\0' != *p) 
+	while ('\0' != *p)
 		if ('\\' == *p) {
 			p++;
 			esc = mandoc_escape(&p, NULL, NULL);
@@ -221,7 +221,7 @@ pline(int line, int *linep, int *col, int list)
 
 	/*
 	 * Print out as many lines as needed to reach parity with the
-	 * original input. 
+	 * original input.
 	 */
 
 	while (*linep < line) {
@@ -241,7 +241,7 @@ pmdoc(const struct mdoc_node *p, int *line, int *col, int list)
 			pline(p->line, line, col, list);
 		if (MDOC_TEXT == p->type)
 			pstring(p->string, p->pos, col, list);
-		if (p->child) 
+		if (p->child)
 			pmdoc(p->child, line, col, list);
 	}
 }
@@ -255,7 +255,7 @@ pman(const struct man_node *p, int *line, int *col, int list)
 			pline(p->line, line, col, list);
 		if (MAN_TEXT == p->type)
 			pstring(p->string, p->pos, col, list);
-		if (p->child) 
+		if (p->child)
 			pman(p->child, line, col, list);
 	}
 }

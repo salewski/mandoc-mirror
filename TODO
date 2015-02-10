@@ -60,7 +60,7 @@ are mere guesses, and some may be wrong.
 - .fc (field control)
   found by naddy@ in xloadimage(1)
   loc **  exist ***  algo *  size *  imp *
-  
+
 - .nr third argument (auto-increment step size, requires \n+)
   found by bentley@ in sbcl(1)  Mon, 9 Dec 2013 18:36:57 -0700
   loc *  exist *  algo *  size *  imp **
@@ -80,7 +80,7 @@ are mere guesses, and some may be wrong.
   found by bentley@ in nmh(1)  Mon, 23 Apr 2012 13:38:28 -0600
   loc **  exist **  algo **  size *  imp ** (parser reorg helps a lot)
 
-- .while and .shift 
+- .while and .shift
   found by jca@ in ratpoison(1)  Sun, 30 Jun 2013 12:01:09 +0200
   loc *  exist **  algo **  size **  imp **
 
@@ -465,7 +465,7 @@ are mere guesses, and some may be wrong.
   loc *  exist *  algo *  size *  imp *
 
 - trailing whitespace must be ignored even when followed by a font escape,
-  see for example 
+  see for example
     makes
     \fBdig \fR
     operate in batch mode
@@ -539,7 +539,7 @@ are mere guesses, and some may be wrong.
   How does SQLITE_CONFIG_PAGECACHE actually work?  Document it!
   from kristaps@  Sat, 09 Aug 2014 13:51:36 +0200
 
-Several areas can be cleaned up to make mandoc even faster.  These are 
+Several areas can be cleaned up to make mandoc even faster.  These are
 
 - improve hashing mechanism for macros (quite important: performance)
 
@@ -548,7 +548,7 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 - the PDF file is HUGE: this can be reduced by using relative offsets
 
 - instead of re-initialising the roff predefined-strings set before each
-  parse, create a read-only version the first time and copy it 
+  parse, create a read-only version the first time and copy it
   loc *  exist **  algo **  size *  imp **
 
 ************************************************************************
@@ -564,7 +564,7 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 
 - Find better ways to prevent endless loops
   in roff(7) macro and string expansion.
- 
+
 - Finish cleanup of date handling.
   Decide which formats should be recognized where.
   Update both mdoc(7) and man(7) documentation.

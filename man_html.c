@@ -216,7 +216,7 @@ print_man_node(MAN_ARGS)
 			print_paragraph(h);
 			return;
 		}
-		if (n->flags & MAN_LINE && (*n->string == ' ' || 
+		if (n->flags & MAN_LINE && (*n->string == ' ' ||
 		    (n->prev != NULL && mh->fl & MANH_LITERAL &&
 		     ! (h->flags & HTML_NONEWLINE))))
 			print_otag(h, TAG_BR, 0, NULL);

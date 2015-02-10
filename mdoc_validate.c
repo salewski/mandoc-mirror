@@ -1815,7 +1815,7 @@ static void
 post_sh_see_also(POST_ARGS)
 {
 	const struct mdoc_node	*n;
-	const char 		*name, *sec;
+	const char		*name, *sec;
 	const char		*lastname, *lastsec, *lastpunct;
 	int			 cmp;
 

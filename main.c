@@ -566,7 +566,7 @@ found:
 	    "     consider running  # makewhatis %s\n",
 	    progname, name, sec, paths->paths[ipath]);
 #endif
-	
+
 	*res = mandoc_reallocarray(*res, ++*ressz, sizeof(struct manpage));
 	page = *res + (*ressz - 1);
 	page->file = file;
