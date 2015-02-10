@@ -97,12 +97,8 @@ mod:
 
 	switch (tolower((unsigned char)p[(*pos)++])) {
 	case 'b':
-		/* FALLTHROUGH */
-	case 'i':
-		/* FALLTHROUGH */
-	case 'r':
-		(*pos)--;
-		break;
+		cp->flags |= TBL_CELL_BOLD;
+		goto mod;
 	case 'd':
 		cp->flags |= TBL_CELL_BALIGN;
 		goto mod;
@@ -111,6 +107,9 @@ mod:
 		goto mod;
 	case 'f':
 		break;
+	case 'i':
+		cp->flags |= TBL_CELL_ITALIC;
+		goto mod;
 	case 'm':
 		mandoc_msg(MANDOCERR_TBLLAYOUT_MOD, tbl->parse,
 		    ln, *pos, "m");
@@ -150,20 +149,37 @@ mod:
 		goto mod;
 	}
 
-	switch (tolower((unsigned char)p[(*pos)++])) {
+	/* Ignore parenthised font names for now. */
+
+	if (p[*pos] == '(')
+		goto mod;
+
+	/* Support only one-character font-names for now. */
+
+	if (p[*pos] == '\0' || (p[*pos + 1] != ' ' && p[*pos + 1] != '.')) {
+		mandoc_vmsg(MANDOCERR_FT_BAD, tbl->parse,
+		    ln, *pos, "TS %s", p + *pos - 1);
+		if (p[*pos] != '\0')
+			(*pos)++;
+		if (p[*pos] != '\0')
+			(*pos)++;
+		goto mod;
+	}
+
+	switch (p[(*pos)++]) {
 	case '3':
 		/* FALLTHROUGH */
-	case 'b':
+	case 'B':
 		cp->flags |= TBL_CELL_BOLD;
 		goto mod;
 	case '2':
 		/* FALLTHROUGH */
-	case 'i':
+	case 'I':
 		cp->flags |= TBL_CELL_ITALIC;
 		goto mod;
 	case '1':
 		/* FALLTHROUGH */
-	case 'r':
+	case 'R':
 		goto mod;
 	default:
 		mandoc_vmsg(MANDOCERR_FT_BAD, tbl->parse,
