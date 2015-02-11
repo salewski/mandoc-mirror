@@ -630,6 +630,13 @@ blk_exp_close(MACRO_PROT_ARGS)
 			break;
 		}
 
+		/* Explicit blocks close out description lines. */
+
+		if (n->tok == MDOC_Nd) {
+			rew_last(mdoc, n);
+			continue;
+		}
+
 		/*
 		 * When finding an open sub block, remember the last
 		 * open explicit block, or, in case there are only
