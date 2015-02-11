@@ -1140,9 +1140,8 @@ pre_eo(DECL_ARGS)
 	    n->child->end != ENDBODY_NOT)
 		print_word("\\&");
 	else if (n->end != ENDBODY_NOT ? n->child != NULL :
-	    n->parent->head->child != NULL &&
-	    (n->parent->body->child != NULL ||
-	     n->parent->tail->child != NULL))
+	    n->parent->head->child != NULL && (n->child != NULL ||
+	    (n->parent->tail != NULL && n->parent->tail->child != NULL)))
 		outflags &= ~(MMAN_spc | MMAN_nl);
 	return(1);
 }

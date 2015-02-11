@@ -1989,9 +1989,8 @@ termp_eo_pre(DECL_ARGS)
 	    n->child->end != ENDBODY_NOT)
 		term_word(p, "\\&");
 	else if (n->end != ENDBODY_NOT ? n->child != NULL :
-	     n->parent->head->child != NULL &&
-	     (n->parent->body->child != NULL ||
-	      n->parent->tail->child != NULL))
+	     n->parent->head->child != NULL && (n->child != NULL ||
+	     (n->parent->tail != NULL && n->parent->tail->child != NULL)))
 		p->flags |= TERMP_NOSPACE;
 
 	return(1);

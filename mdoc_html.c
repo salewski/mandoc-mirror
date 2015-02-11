@@ -2220,9 +2220,8 @@ mdoc_eo_pre(MDOC_ARGS)
 	    n->child->end != ENDBODY_NOT)
 		print_text(h, "\\&");
 	else if (n->end != ENDBODY_NOT ? n->child != NULL :
-	    n->parent->head->child != NULL &&
-	    (n->parent->body->child != NULL ||
-	     n->parent->tail->child != NULL))
+	    n->parent->head->child != NULL && (n->child != NULL ||
+	    (n->parent->tail != NULL && n->parent->tail->child != NULL)))
 		h->flags |= HTML_NOSPACE;
 	return(1);
 }
