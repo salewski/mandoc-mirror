@@ -601,8 +601,8 @@ mdoc_ptext(struct mdoc *mdoc, int line, char *buf, int offs)
 	 * process within its context in the normal way).
 	 */
 
-	if (MDOC_Bl == n->tok && MDOC_BODY == n->type &&
-	    LIST_column == n->norm->Bl.type) {
+	if (n->tok == MDOC_Bl && n->type == MDOC_BODY &&
+	    n->end == ENDBODY_NOT && n->norm->Bl.type == LIST_column) {
 		/* `Bl' is open without any children. */
 		mdoc->flags |= MDOC_FREECOL;
 		mdoc_macro(mdoc, MDOC_It, line, offs, &offs, buf);
@@ -778,8 +778,8 @@ mdoc_pmacro(struct mdoc *mdoc, int ln, char *buf, int offs)
 	 * context around the parsed macro.
 	 */
 
-	if (MDOC_Bl == n->tok && MDOC_BODY == n->type &&
-	    LIST_column == n->norm->Bl.type) {
+	if (n->tok == MDOC_Bl && n->type == MDOC_BODY &&
+	    n->end == ENDBODY_NOT && n->norm->Bl.type == LIST_column) {
 		mdoc->flags |= MDOC_FREECOL;
 		mdoc_macro(mdoc, MDOC_It, ln, sv, &sv, buf);
 		return(1);
