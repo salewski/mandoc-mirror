@@ -105,10 +105,6 @@ are mere guesses, and some may be wrong.
 
 --- missing mdoc features ----------------------------------------------
 
-- fix bad block nesting involving multiple identical explicit blocks
-  see the OpenBSD mdoc_macro.c 1.47 commit message
-  loc *  exist ***  algo ***  size *  imp **
-
 - .Bl -column .Xo support is missing
   ultimate goal:
   restore .Xr and .Dv to
