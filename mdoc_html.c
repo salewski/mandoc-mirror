@@ -35,7 +35,7 @@
 #define	INDENT		 5
 
 #define	MDOC_ARGS	  const struct mdoc_meta *meta, \
-			  const struct mdoc_node *n, \
+			  struct mdoc_node *n, \
 			  struct html *h
 
 #ifndef MIN
@@ -267,7 +267,7 @@ void
 html_mdoc(void *arg, const struct mdoc *mdoc)
 {
 
-	print_mdoc(mdoc_meta(mdoc), mdoc_node(mdoc),
+	print_mdoc(mdoc_meta(mdoc), mdoc_node(mdoc)->child,
 	    (struct html *)arg);
 	putchar('\n');
 }
@@ -387,6 +387,7 @@ print_mdoc_node(MDOC_ARGS)
 
 	child = 1;
 	t = h->tags.head;
+	n->flags &= ~MDOC_ENDED;
 
 	switch (n->type) {
 	case MDOC_ROOT:
@@ -457,7 +458,7 @@ print_mdoc_node(MDOC_ARGS)
 			break;
 		(*mdocs[n->tok].post)(meta, n, h);
 		if (n->end != ENDBODY_NOT)
-			n->pending->flags |= MDOC_ENDED;
+			n->body->flags |= MDOC_ENDED;
 		if (n->end == ENDBODY_NOSPACE)
 			h->flags |= HTML_NOSPACE;
 		break;
@@ -1122,7 +1123,7 @@ mdoc_bd_pre(MDOC_ARGS)
 {
 	struct htmlpair		 tag[2];
 	int			 comp, sv;
-	const struct mdoc_node	*nn;
+	struct mdoc_node	*nn;
 	struct roffsu		 su;
 
 	if (MDOC_HEAD == n->type)

@@ -29,8 +29,7 @@
 #include "mdoc.h"
 #include "main.h"
 
-#define	DECL_ARGS const struct mdoc_meta *meta, \
-		  const struct mdoc_node *n
+#define	DECL_ARGS const struct mdoc_meta *meta, struct mdoc_node *n
 
 struct	manact {
 	int		(*cond)(DECL_ARGS); /* DON'T run actions */
@@ -548,10 +547,10 @@ void
 man_mdoc(void *arg, const struct mdoc *mdoc)
 {
 	const struct mdoc_meta *meta;
-	const struct mdoc_node *n;
+	struct mdoc_node *n;
 
 	meta = mdoc_meta(mdoc);
-	n = mdoc_node(mdoc);
+	n = mdoc_node(mdoc)->child;
 
 	printf(".TH \"%s\" \"%s\" \"%s\" \"%s\" \"%s\"\n",
 	    meta->title,
@@ -567,15 +566,18 @@ man_mdoc(void *arg, const struct mdoc *mdoc)
 		fontqueue.head = fontqueue.tail = mandoc_malloc(8);
 		*fontqueue.tail = 'R';
 	}
-	print_node(meta, n);
+	while (n != NULL) {
+		print_node(meta, n);
+		n = n->next;
+	}
 	putchar('\n');
 }
 
 static void
 print_node(DECL_ARGS)
 {
-	const struct mdoc_node	*sub;
 	const struct manact	*act;
+	struct mdoc_node	*sub;
 	int			 cond, do_sub;
 
 	/*
@@ -588,6 +590,7 @@ print_node(DECL_ARGS)
 	act = NULL;
 	cond = 0;
 	do_sub = 1;
+	n->flags &= ~MDOC_ENDED;
 
 	if (MDOC_TEXT == n->type) {
 		/*
@@ -635,7 +638,7 @@ print_node(DECL_ARGS)
 		(*act->post)(meta, n);
 
 	if (ENDBODY_NOT != n->end)
-		n->pending->flags |= MDOC_ENDED;
+		n->body->flags |= MDOC_ENDED;
 
 	if (ENDBODY_NOSPACE == n->end)
 		outflags &= ~(MMAN_spc | MMAN_nl);

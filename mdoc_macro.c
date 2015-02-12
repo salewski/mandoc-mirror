@@ -47,8 +47,6 @@ static	void		append_delims(struct mdoc *, int, int *, char *);
 static	enum mdoct	lookup(struct mdoc *, enum mdoct,
 				int, int, const char *);
 static	int		macro_or_word(MACRO_PROT_ARGS, int);
-static	void		make_pending(struct mdoc *, struct mdoc_node *,
-				struct mdoc_node *, int, int);
 static	int		parse_rest(struct mdoc *, enum mdoct,
 				int, int *, char *);
 static	enum mdoct	rew_alt(enum mdoct);
@@ -285,15 +283,34 @@ static void
 rew_pending(struct mdoc *mdoc, const struct mdoc_node *n)
 {
 
-	rew_last(mdoc, n);
-
-	if (n->type != MDOC_BLOCK)
-		return;
-
-	while ((n = n->pending) != NULL) {
+	for (;;) {
 		rew_last(mdoc, n);
-		if (n->type == MDOC_HEAD)
+
+		switch (n->type) {
+		case MDOC_HEAD:
 			mdoc_body_alloc(mdoc, n->line, n->pos, n->tok);
+			return;
+		case MDOC_BLOCK:
+			break;
+		default:
+			return;
+		}
+
+		if ( ! (n->flags & MDOC_BROKEN))
+			return;
+
+		for (;;) {
+			if ((n = n->parent) == NULL)
+				return;
+
+			if (n->type == MDOC_BLOCK ||
+			    n->type == MDOC_HEAD) {
+				if (n->flags & MDOC_ENDED)
+					break;
+				else
+					return;
+			}
+		}
 	}
 }
 
@@ -354,78 +371,6 @@ rew_elem(struct mdoc *mdoc, enum mdoct tok)
 	assert(MDOC_ELEM == n->type);
 	assert(tok == n->tok);
 	rew_last(mdoc, n);
-}
-
-/*
- * We are trying to close the block *breaker,
- * but the child block *broken is still open.
- * Thus, postpone closing the *breaker
- * until the rew_pending() call closing *broken.
- */
-static void
-make_pending(struct mdoc *mdoc, struct mdoc_node *breaker,
-	struct mdoc_node *broken, int line, int ppos)
-{
-	struct mdoc_node *n;
-
-	mandoc_vmsg(MANDOCERR_BLK_NEST, mdoc->parse, line, ppos,
-	    "%s breaks %s", mdoc_macronames[breaker->tok],
-	    mdoc_macronames[broken->tok]);
-
-	/*
-	 * If the *broken block (Z) is already broken by a block (B)
-	 * contained in the breaker (A), make the breaker pending
-	 * on that inner breaker (B).  Graphically,
-	 *
-	 * breaker=[A! broken=n=[B!->A (old broken=)[Z->B B] A] Z]
-	 *
-	 * In these graphics, "->" indicates the "pending" pointer and
-	 * "!" indicates the MDOC_BREAK flag.  Each of the cases gets
-	 * one additional pointer (B->A) and one additional flag (A!).
-	 */
-
-	for (n = broken->parent; ; n = n->parent)
-		if (n == broken->pending)
-			broken = n;
-		else if (n == breaker)
-			break;
-
-	/*
-	 * Found the breaker.
-	 *
-	 * If another, outer breaker (X) is already pending on
-	 * the *broken block (B), we must not clobber the link
-	 * to the outer breaker, but make it pending on the new,
-	 * now inner breaker (A).  Graphically,
-	 *
-	 * [X! n=breaker=[A!->X broken=[B(->X)->A X] A] B].
-	 */
-
-	if (broken->pending != NULL) {
-		n = breaker;
-
-		/*
-		 * If the inner breaker (A) is already broken, too,
-		 * it cannot take on the outer breaker (X) but must
-		 * hand it on to its own breakers (Y).  Graphically,
-		 *
-		 * [X! n=[Y!->X breaker=[A!->Y Y] broken=[B(->X)->A X] A] B]
-		 */
-
-		while (n->pending)
-			n = n->pending;
-		n->pending = broken->pending;
-	}
-
-	/*
-	 * Now we have reduced the situation to the simplest case:
-	 * breaker=[A! broken=[B->A A] B].
-	 */
-
-	broken->pending = breaker;
-	breaker->flags |= MDOC_BREAK;
-	if (breaker->body != NULL)
-		breaker->body->flags |= MDOC_BREAK;
 }
 
 /*
@@ -569,8 +514,11 @@ blk_exp_close(MACRO_PROT_ARGS)
 	atok = rew_alt(tok);
 	body = endbody = itblk = later = NULL;
 	for (n = mdoc->last; n; n = n->parent) {
-		if (n->flags & (MDOC_VALID | MDOC_BREAK))
+		if (n->flags & MDOC_ENDED) {
+			if ( ! (n->flags & MDOC_VALID))
+				n->flags |= MDOC_BROKEN;
 			continue;
+		}
 
 		/* Remember the start of our own body. */
 
@@ -605,19 +553,20 @@ blk_exp_close(MACRO_PROT_ARGS)
 			 * When there is a pending sub block, postpone
 			 * closing out the current block until the
 			 * rew_pending() closing out the sub-block.
-			 */
-
-			make_pending(mdoc, n, later, line, ppos);
-			if (tok == MDOC_El)
-				itblk->flags |= MDOC_BREAK;
-
-			/*
 			 * Mark the place where the formatting - but not
 			 * the scope - of the current block ends.
 			 */
 
+			mandoc_vmsg(MANDOCERR_BLK_NEST, mdoc->parse,
+			    line, ppos, "%s breaks %s",
+			    mdoc_macronames[atok],
+			    mdoc_macronames[later->tok]);
+
 			endbody = mdoc_endbody_alloc(mdoc, line, ppos,
 			    atok, body, ENDBODY_SPACE);
+
+			if (tok == MDOC_El)
+				itblk->flags |= MDOC_ENDED | MDOC_BROKEN;
 
 			/*
 			 * If a block closing macro taking arguments
@@ -637,14 +586,10 @@ blk_exp_close(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		/*
-		 * When finding an open sub block, remember the last
-		 * open explicit block, or, in case there are only
-		 * implicit ones, the first open implicit block.
-		 */
+		/* Breaking an open sub block. */
 
-		if (later == NULL ||
-		    ! (mdoc_macros[later->tok].flags & MDOC_EXPLICIT))
+		n->flags |= MDOC_BROKEN;
+		if (later == NULL)
 			later = n;
 	}
 
@@ -923,9 +868,14 @@ blk_full(MACRO_PROT_ARGS)
 
 		blk = NULL;
 		for (n = mdoc->last; n != NULL; n = n->parent) {
-			if (n->flags & (MDOC_VALID | MDOC_BREAK) ||
-			    n->type != MDOC_BLOCK)
+			if (n->flags & MDOC_ENDED) {
+				if ( ! (n->flags & MDOC_VALID))
+					n->flags |= MDOC_BROKEN;
 				continue;
+			}
+			if (n->type != MDOC_BLOCK)
+				continue;
+
 			if (tok == MDOC_It && n->tok == MDOC_Bl) {
 				if (blk != NULL) {
 					mandoc_vmsg(MANDOCERR_BLK_BROKEN,
@@ -1131,13 +1081,19 @@ blk_full(MACRO_PROT_ARGS)
 	 * sub-block.
 	 */
 	for (n = mdoc->last; n && n != head; n = n->parent) {
+		if (n->flags & MDOC_ENDED) {
+			if ( ! (n->flags & MDOC_VALID))
+				n->flags |= MDOC_BROKEN;
+			continue;
+		}
 		if (n->type == MDOC_BLOCK &&
-		    mdoc_macros[n->tok].flags & MDOC_EXPLICIT &&
-		    ! (n->flags & MDOC_VALID)) {
-			n->pending = head;
-			return;
+		    mdoc_macros[n->tok].flags & MDOC_EXPLICIT) {
+			n->flags = MDOC_BROKEN;
+			head->flags = MDOC_ENDED;
 		}
 	}
+	if (head->flags & MDOC_ENDED)
+		return;
 
 	/* Close out scopes to remain in a consistent state. */
 
@@ -1210,16 +1166,28 @@ blk_part_imp(MACRO_PROT_ARGS)
 
 	for (n = mdoc->last; n && n != body && n != blk->parent;
 	     n = n->parent) {
+		if (n->flags & MDOC_ENDED) {
+			if ( ! (n->flags & MDOC_VALID))
+				n->flags |= MDOC_BROKEN;
+			continue;
+		}
 		if (n->type == MDOC_BLOCK &&
-		    mdoc_macros[n->tok].flags & MDOC_EXPLICIT &&
-		    ! (n->flags & MDOC_VALID)) {
-			make_pending(mdoc, blk, n, line, ppos);
-			mdoc_endbody_alloc(mdoc, line, ppos,
-			    tok, body, ENDBODY_NOSPACE);
-			return;
+		    mdoc_macros[n->tok].flags & MDOC_EXPLICIT) {
+			n->flags |= MDOC_BROKEN;
+			if ( ! (body->flags & MDOC_ENDED)) {
+				mandoc_vmsg(MANDOCERR_BLK_NEST,
+				    mdoc->parse, line, ppos,
+				    "%s breaks %s", mdoc_macronames[tok],
+				    mdoc_macronames[n->tok]);
+				mdoc_endbody_alloc(mdoc, line, ppos,
+				    tok, body, ENDBODY_NOSPACE);
+			}
 		}
 	}
 	assert(n == body);
+	if (body->flags & MDOC_ENDED)
+		return;
+
 	rew_last(mdoc, body);
 	if (nl)
 		append_delims(mdoc, line, pos, buf);
@@ -1482,7 +1450,7 @@ phrase_ta(MACRO_PROT_ARGS)
 
 	body = NULL;
 	for (n = mdoc->last; n != NULL; n = n->parent) {
-		if (n->flags & (MDOC_VALID | MDOC_BREAK))
+		if (n->flags & MDOC_ENDED)
 			continue;
 		if (n->tok == MDOC_It && n->type == MDOC_BODY)
 			body = n;
