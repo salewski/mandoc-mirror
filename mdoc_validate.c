@@ -298,7 +298,8 @@ mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *n)
 
 	switch (n->type) {
 	case MDOC_TEXT:
-		check_text(mdoc, n->line, n->pos, n->string);
+		if (n->sec != SEC_SYNOPSIS || n->parent->tok != MDOC_Fd)
+			check_text(mdoc, n->line, n->pos, n->string);
 		/* FALLTHROUGH */
 	case MDOC_TBL:
 		/* FALLTHROUGH */
