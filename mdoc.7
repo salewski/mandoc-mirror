@@ -1758,17 +1758,18 @@ is preferred for displaying code; the
 .Sx \&Ic
 macro is used when referring to specific instructions.
 .Ss \&In
-An
-.Dq include
-file.
+The name of an include file.
+This macro is most often used in section 2, 3, and 9 manual pages.
+.Pp
 When invoked as the first macro on an input line in the
 .Em SYNOPSIS
 section, the argument is displayed in angle brackets
 and preceded by
-.Dq #include ,
+.Qq #include ,
 and a blank line is inserted in front if there is a preceding
 function declaration.
-This is most often used in section 2, 3, and 9 manual pages.
+In other sections, it only encloses its argument in angle brackets
+and causes no line break.
 .Pp
 Examples:
 .Dl \&.In sys/types.h
