@@ -15,6 +15,8 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+VERSION = 1.13.2
+
 # === LIST OF FILES ====================================================
 
 TESTSRCS	 = test-dirent-namlen.c \

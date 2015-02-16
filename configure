@@ -31,10 +31,6 @@ echo "config.log: writing..."
 # Initialize all variables here,
 # such that nothing can leak in from the environment.
 
-VERSION="1.13.2"
-echo "VERSION=\"${VERSION}\"" 1>&2
-echo "VERSION=\"${VERSION}\"" 1>&3
-
 OSNAME=
 
 CC=`printf "all:\\n\\t@echo \\\$(CC)\\n" | make -f -`
@@ -277,7 +273,6 @@ __HEREDOC__
 [ ${HAVE_FGETLN} -eq 0 ] && echo "#include <stdio.h>"
 
 echo
-echo "#define VERSION \"${VERSION}\""
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
 [ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""
 
@@ -387,7 +382,6 @@ INSTALL_TARGETS="base-install"
 [ ${BUILD_CGI} -gt 0 ] && INSTALL_TARGETS="${INSTALL_TARGETS} cgi-install"
 
 cat << __HEREDOC__
-VERSION		= ${VERSION}
 BUILD_TARGETS	= ${BUILD_TARGETS}
 INSTALL_TARGETS	= ${INSTALL_TARGETS}
 CFLAGS		= ${CFLAGS}
