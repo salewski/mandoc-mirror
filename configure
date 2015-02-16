@@ -56,6 +56,7 @@ HAVE_STRLCAT=
 HAVE_STRLCPY=
 HAVE_STRPTIME=
 HAVE_STRSEP=
+HAVE_STRTONUM=
 HAVE_WCHAR=
 
 HAVE_SQLITE3=
@@ -177,6 +178,7 @@ runtest strlcat		STRLCAT		|| true
 runtest strlcpy		STRLCPY		|| true
 runtest strptime	STRPTIME	|| true
 runtest strsep		STRSEP		|| true
+runtest strtonum	STRTONUM	|| true
 runtest wchar		WCHAR		|| true
 
 # --- sqlite3 ---
@@ -291,6 +293,7 @@ cat << __HEREDOC__
 #define HAVE_STRLCPY ${HAVE_STRLCPY}
 #define HAVE_STRPTIME ${HAVE_STRPTIME}
 #define HAVE_STRSEP ${HAVE_STRSEP}
+#define HAVE_STRTONUM ${HAVE_STRTONUM}
 #define HAVE_WCHAR ${HAVE_WCHAR}
 #define HAVE_SQLITE3 ${HAVE_SQLITE3}
 #define HAVE_SQLITE3_ERRSTR ${HAVE_SQLITE3_ERRSTR}
@@ -342,6 +345,9 @@ __HEREDOC__
 
 [ ${HAVE_STRSEP} -eq 0 ] && \
 	echo "extern	char	 *strsep(char **, const char *);"
+
+[ ${HAVE_STRTONUM} -eq 0 ] && \
+	echo "extern	long long strtonum(const char *, long long, long long, const char **);"
 
 echo
 echo "#endif /* MANDOC_CONFIG_H */"

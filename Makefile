@@ -31,6 +31,7 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-strlcpy.c \
 		   test-strptime.c \
 		   test-strsep.c \
+		   test-strtonum.c \
 		   test-wchar.c
 
 SRCS		 = att.c \
@@ -46,6 +47,7 @@ SRCS		 = att.c \
 		   compat_strlcat.c \
 		   compat_strlcpy.c \
 		   compat_strsep.c \
+		   compat_strtonum.c \
 		   demandoc.c \
 		   eqn.c \
 		   eqn_html.c \
@@ -189,7 +191,8 @@ COMPAT_OBJS	 = compat_fgetln.o \
 		   compat_strcasestr.o \
 		   compat_strlcat.o \
 		   compat_strlcpy.o \
-		   compat_strsep.o
+		   compat_strsep.o \
+		   compat_strtonum.o
 
 MANDOC_HTML_OBJS = eqn_html.o \
 		   html.o \
