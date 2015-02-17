@@ -1196,13 +1196,18 @@ This is a Heirloom extension and currently unsupported.
 Set an input line trap.
 Its syntax is as follows:
 .Pp
-.D1 Pf . Cm it Ar number macro
+.D1 Pf . Cm it Ar expression macro
 .Pp
 The named
 .Ar macro
-will be invoked after processing the specified
-.Ar number
-of input text lines.
+will be invoked after processing the number of input text lines
+specified by the numerical
+.Ar expression .
+While evaluating the
+.Ar expression ,
+the unit suffixes described below
+.Sx Scaling Widths
+are ignored.
 .Ss \&itc
 Set an input line trap, not counting lines ending with \ec.
 Currently unsupported.
