@@ -1873,7 +1873,7 @@ termp_quote_pre(DECL_ARGS)
 	case MDOC_Do:
 		/* FALLTHROUGH */
 	case MDOC_Dq:
-		term_word(p, "\\(lq");
+		term_word(p, "\\(Lq");
 		break;
 	case MDOC_En:
 		if (NULL == n->norm->Es ||
@@ -1942,7 +1942,7 @@ termp_quote_post(DECL_ARGS)
 	case MDOC_Do:
 		/* FALLTHROUGH */
 	case MDOC_Dq:
-		term_word(p, "\\(rq");
+		term_word(p, "\\(Rq");
 		break;
 	case MDOC_En:
 		if (n->norm->Es == NULL ||

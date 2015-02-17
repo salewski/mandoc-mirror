@@ -839,7 +839,7 @@ post_lb(POST_ARGS)
 
 	if (NULL == (stdlibname = mdoc_a2lib(n->string)))
 		mandoc_asprintf(&libname,
-		    "library \\(lq%s\\(rq", n->string);
+		    "library \\(Lq%s\\(Rq", n->string);
 	else
 		libname = mandoc_strdup(stdlibname);
 
