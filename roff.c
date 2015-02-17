@@ -2337,10 +2337,19 @@ roff_it(ROFF_ARGS)
 		return(ROFF_IGN);
 	}
 
-	/* Arm the input line trap. */
+	while (isspace((unsigned char)buf->buf[pos]))
+		pos++;
+
+	/*
+	 * Arm the input line trap.
+	 * Special-casing "an-trap" is an ugly workaround to cope
+	 * with DocBook stupidly fiddling with man(7) internals.
+	 */
 
 	roffit_lines = iv;
-	roffit_macro = mandoc_strdup(buf->buf + pos);
+	roffit_macro = mandoc_strdup(iv != 1 ||
+	    strcmp(buf->buf + pos, "an-trap") ?
+	    buf->buf + pos : "br");
 	return(ROFF_IGN);
 }
 
