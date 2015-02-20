@@ -399,7 +399,8 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 				    MANDOCERR_CHAR_UNSUPP,
 				    curp, curp->line, pos, "0x%x", c);
 				i++;
-				ln.buf[pos++] = '?';
+				if (c != '\r')
+					ln.buf[pos++] = '?';
 				continue;
 			}
 
