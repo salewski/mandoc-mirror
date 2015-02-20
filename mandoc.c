@@ -242,6 +242,14 @@ mandoc_escape(const char **end, const char **start, int *sz)
 			*start = ++*end;
 			term = '\'';
 			break;
+		case '3':
+			/* FALLTHROUGH */
+		case '2':
+			/* FALLTHROUGH */
+		case '1':
+			*sz = (*end)[-1] == 's' &&
+			    isdigit((unsigned char)(*end)[1]) ? 2 : 1;
+			break;
 		default:
 			*sz = 1;
 			break;
