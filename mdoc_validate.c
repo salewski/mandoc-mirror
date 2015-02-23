@@ -1763,6 +1763,10 @@ post_sh_name(POST_ARGS)
 				mandoc_msg(MANDOCERR_NAMESEC_ND,
 				    mdoc->parse, n->line, n->pos, NULL);
 			break;
+		case MDOC_MAX:
+			if (hasnm)
+				break;
+			/* FALLTHROUGH */
 		default:
 			mandoc_msg(MANDOCERR_NAMESEC_BAD, mdoc->parse,
 			    n->line, n->pos, mdoc_macronames[n->tok]);
