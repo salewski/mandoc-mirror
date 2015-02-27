@@ -672,7 +672,8 @@ treescan(void)
 					say(path, "Skip pdf");
 				continue;
 			} else if ( ! use_all &&
-			    ((FORM_SRC == dform && strcmp(fsec, dsec)) ||
+			    ((FORM_SRC == dform &&
+			      strncmp(fsec, dsec, strlen(dsec))) ||
 			     (FORM_CAT == dform && strcmp(fsec, "0")))) {
 				if (warnings)
 					say(path, "Wrong filename suffix");
