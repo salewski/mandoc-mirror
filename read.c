@@ -868,6 +868,7 @@ mparse_wait(struct mparse *curp)
 		perror("wait");
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
+	curp->child = 0;
 	if (WIFSIGNALED(status)) {
 		mandoc_vmsg(MANDOCERR_FILE, curp, 0, 0,
 		    "gunzip died from signal %d", WTERMSIG(status));
