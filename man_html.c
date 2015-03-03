@@ -223,6 +223,8 @@ print_man_node(MAN_ARGS)
 		print_text(h, n->string);
 		return;
 	case MAN_EQN:
+		if (n->flags & MAN_LINE)
+			putchar('\n');
 		print_eqn(h, n->eqn);
 		break;
 	case MAN_TBL:

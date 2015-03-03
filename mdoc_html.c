@@ -411,6 +411,8 @@ print_mdoc_node(MDOC_ARGS)
 			h->flags |= HTML_NOSPACE;
 		return;
 	case MDOC_EQN:
+		if (n->flags & MDOC_LINE)
+			putchar('\n');
 		print_eqn(h, n->eqn);
 		break;
 	case MDOC_TBL:
