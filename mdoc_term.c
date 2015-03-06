@@ -1808,7 +1808,7 @@ static int
 termp_sp_pre(DECL_ARGS)
 {
 	struct roffsu	 su;
-	size_t		 i, len;
+	int		 i, len;
 
 	switch (n->tok) {
 	case MDOC_sp:
@@ -1829,8 +1829,11 @@ termp_sp_pre(DECL_ARGS)
 
 	if (0 == len)
 		term_newln(p);
-	for (i = 0; i < len; i++)
-		term_vspace(p);
+	else if (len < 0)
+		p->skipvsp -= len;
+	else
+		for (i = 0; i < len; i++)
+			term_vspace(p);
 
 	return(0);
 }
