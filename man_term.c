@@ -945,12 +945,8 @@ print_man_node(DECL_ARGS)
 			p->flags |= TERMP_NOSPACE;
 		return;
 	case MAN_TBL:
-		/*
-		 * Tables are preceded by a newline.  Then process a
-		 * table line, which will cause line termination,
-		 */
-		if (n->span->prev == NULL)
-			term_newln(p);
+		if (p->tbl.cols == NULL)
+			term_vspace(p);
 		term_tbl(p, n->span);
 		return;
 	default:

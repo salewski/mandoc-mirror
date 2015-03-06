@@ -348,6 +348,8 @@ print_mdoc_node(DECL_ARGS)
 			p->flags |= TERMP_NOSPACE;
 		break;
 	case MDOC_TBL:
+		if (p->tbl.cols == NULL)
+			term_newln(p);
 		term_tbl(p, n->span);
 		break;
 	default:
