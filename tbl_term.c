@@ -66,6 +66,9 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	size_t			 rmargin, maxrmargin, tsz;
 	int			 ic, horiz, spans, vert;
 
+	if (tp->tbl.cols == NULL)
+		term_flushln(tp);
+
 	rmargin = tp->rmargin;
 	maxrmargin = tp->maxrmargin;
 
@@ -82,8 +85,6 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	 */
 
 	if (tp->tbl.cols == NULL) {
-		term_flushln(tp);
-
 		tp->tbl.len = term_tbl_len;
 		tp->tbl.slen = term_tbl_strlen;
 		tp->tbl.arg = tp;
