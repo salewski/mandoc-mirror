@@ -413,6 +413,7 @@ term_word(struct termp *p, const char *word)
 		p->flags |= TERMP_NOSPACE;
 
 	p->flags &= ~(TERMP_SENTENCE | TERMP_NONEWLINE);
+	p->skipvsp = 0;
 
 	while ('\0' != *word) {
 		if ('\\' != *word) {
