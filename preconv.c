@@ -33,7 +33,7 @@ preconv_encode(struct buf *ib, size_t *ii, struct buf *ob, size_t *oi,
 	int		 nby;
 	unsigned int	 accum;
 
-	cu = ib->buf + *ii;
+	cu = (unsigned char *)ib->buf + *ii;
 	assert(*cu & 0x80);
 
 	if ( ! (*filenc & MPARSE_UTF8))
