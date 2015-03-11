@@ -636,7 +636,7 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 	 */
 
 	if (S_ISREG(st.st_mode)) {
-		if ((size_t)st.st_size >= (1U << 31)) {
+		if (st.st_size > 0x7fffffff) {
 			mandoc_msg(MANDOCERR_TOOLARGE, curp, 0, 0, NULL);
 			return(0);
 		}
