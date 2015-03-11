@@ -195,8 +195,8 @@ mansearch(const struct mansearch *search,
 	if (NULL == (e = exprcomp(search, argc, argv)))
 		goto out;
 
-	outbit = 0;
 	if (NULL != search->outkey) {
+		outbit = TYPE_Nd;
 		for (indexbit = 0, iterbit = 1;
 		     indexbit < mansearch_keymax;
 		     indexbit++, iterbit <<= 1) {
@@ -206,7 +206,8 @@ mansearch(const struct mansearch *search,
 				break;
 			}
 		}
-	}
+	} else
+		outbit = 0;
 
 	/*
 	 * Save a descriptor to the current working directory.

@@ -557,6 +557,11 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 * structural issues
 ************************************************************************
 
+- Improve -O suboption parsing.  Do it in the main program such that
+  errors can be reported.  Pay attention to distinguishing the
+  mandoc(1) and apropos(1) styles of both options.
+  loc **  exist *  algo **  size **  imp ***
+
 - Use libz directly instead of forking gunzip(1).
   Suggested by bapt at FreeBSD among others.
 
