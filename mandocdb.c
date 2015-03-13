@@ -942,6 +942,7 @@ mlink_add(struct mlink *mlink, const struct stat *st)
 	assert(NULL == ohash_find(&mlinks, slot));
 	ohash_insert(&mlinks, slot, mlink);
 
+	memset(&inodev, 0, sizeof(inodev));  /* Clear padding. */
 	inodev.st_ino = st->st_ino;
 	inodev.st_dev = st->st_dev;
 	slot = ohash_lookup_memory(&mpages, (char *)&inodev,
