@@ -105,6 +105,19 @@ are mere guesses, and some may be wrong.
   needed for Tcl_NewStringObj(3) via wiz@  Wed, 5 Mar 2014 22:27:43 +0100
   loc **  exist ***  algo ***  size *  imp ***
 
+- \\ in high-level macro arguments
+  Currently, \\ is expanded in two situations:
+  1) macro and string definition (roff.c setstrn())
+  2) macro argument parsing (mandoc.c mandoc_getarg())
+  For user defined macros, the second happens in time because of ROFF_REPARSE.
+  But for standard high-level macros, it only happens after entering the
+  high level parsers, which is too late because the code doesn't get
+  back to roff.c roff_res() from that point.  Because this requires
+  distinguishing requests, user-defined macros and standard macros
+  on the roff_res() level, it is hard to solve without the parser reorg.
+  Found by naddy@ in devel/cutils cobfusc(1)  Mon, 16 Feb 2015 19:10:52 +0100
+  loc ***  exist ***  algo ***  size **  imp *
+
 - using undefined strings or macros defines them to be empty
   wl@  Mon, 14 Nov 2011 14:37:01 +0000
   loc *  exist *  algo *  size *  imp *
