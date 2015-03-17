@@ -29,6 +29,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -846,6 +847,7 @@ mparse_open(struct mparse *curp, int *fd, const char *file)
 			perror("dup");
 			exit((int)MANDOCLEVEL_SYSERR);
 		}
+		signal(SIGPIPE, SIG_DFL);
 		execlp("gunzip", "gunzip", "-c", file, NULL);
 		perror("exec");
 		exit((int)MANDOCLEVEL_SYSERR);

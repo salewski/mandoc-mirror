@@ -27,6 +27,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <glob.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -92,6 +93,7 @@ static	int		  fs_lookup(const struct manpaths *,
 static	void		  fs_search(const struct mansearch *,
 				const struct manpaths *, int, char**,
 				struct manpage **, size_t *);
+static	void		  handle_sigpipe(int);
 static	int		  koptions(int *, char *);
 #if HAVE_SQLITE3
 int			  mandocdb(int, char**);
@@ -111,6 +113,7 @@ static	const int sec_prios[] = {1, 4, 5, 8, 6, 3, 7, 2, 9};
 static	char		  help_arg[] = "help";
 static	char		 *help_argv[] = {help_arg, NULL};
 static	const char	 *progname;
+static	enum mandoclevel  rc;
 
 
 int
@@ -127,7 +130,7 @@ main(int argc, char *argv[])
 	size_t		 isec, i, sz;
 	int		 prio, best_prio, synopsis_only;
 	char		 sec;
-	enum mandoclevel rc, rctmp;
+	enum mandoclevel rctmp;
 	enum outmode	 outmode;
 	int		 fd;
 	int		 show_usage;
@@ -940,6 +943,13 @@ mmsg(enum mandocerr t, enum mandoclevel lvl,
 	fputc('\n', stderr);
 }
 
+static void
+handle_sigpipe(int signum)
+{
+
+	exit(rc);
+}
+
 static pid_t
 spawn_pager(void)
 {
@@ -972,6 +982,7 @@ spawn_pager(void)
 			exit((int)MANDOCLEVEL_SYSERR);
 		}
 		close(fildes[1]);
+		signal(SIGPIPE, handle_sigpipe);
 		return(pager_pid);
 	}
 
