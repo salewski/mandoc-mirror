@@ -101,9 +101,8 @@ int			  mandocdb(int, char**);
 static	int		  moptions(int *, char *);
 static	void		  mmsg(enum mandocerr, enum mandoclevel,
 				const char *, int, int, const char *);
-static	void		  parse(struct curparse *, int,
-				const char *, enum mandoclevel *);
-static	enum mandoclevel  passthrough(const char *, int, int);
+static	void		  parse(struct curparse *, int, const char *);
+static	void		  passthrough(const char *, int, int);
 static	pid_t		  spawn_pager(void);
 static	int		  toptions(struct curparse *, char *);
 static	void		  usage(enum argmode) __attribute__((noreturn));
@@ -423,7 +422,7 @@ main(int argc, char *argv[])
 	if (argc < 1) {
 		if (pager_pid == 1 && isatty(STDOUT_FILENO))
 			pager_pid = spawn_pager();
-		parse(&curp, STDIN_FILENO, "<stdin>", &rc);
+		parse(&curp, STDIN_FILENO, "<stdin>");
 	}
 
 	while (argc > 0) {
@@ -437,17 +436,13 @@ main(int argc, char *argv[])
 				pager_pid = spawn_pager();
 
 			if (resp == NULL)
-				parse(&curp, fd, *argv, &rc);
+				parse(&curp, fd, *argv);
 			else if (resp->form & FORM_SRC) {
 				/* For .so only; ignore failure. */
 				chdir(paths.paths[resp->ipath]);
-				parse(&curp, fd, resp->file, &rc);
-			} else {
-				rctmp = passthrough(resp->file, fd,
-				    synopsis_only);
-				if (rc < rctmp)
-					rc = rctmp;
-			}
+				parse(&curp, fd, resp->file);
+			} else
+				passthrough(resp->file, fd, synopsis_only);
 
 			rctmp = mparse_wait(curp.mp);
 			if (rc < rctmp)
@@ -632,10 +627,9 @@ fs_search(const struct mansearch *cfg, const struct manpaths *paths,
 }
 
 static void
-parse(struct curparse *curp, int fd, const char *file,
-	enum mandoclevel *level)
+parse(struct curparse *curp, int fd, const char *file)
 {
-	enum mandoclevel  rc;
+	enum mandoclevel  rctmp;
 	struct mdoc	 *mdoc;
 	struct man	 *man;
 
@@ -644,15 +638,17 @@ parse(struct curparse *curp, int fd, const char *file,
 	assert(file);
 	assert(fd >= -1);
 
-	rc = mparse_readfd(curp->mp, fd, file);
+	rctmp = mparse_readfd(curp->mp, fd, file);
+	if (rc < rctmp)
+		rc = rctmp;
 
 	/*
 	 * With -Wstop and warnings or errors of at least the requested
 	 * level, do not produce output.
 	 */
 
-	if (MANDOCLEVEL_OK != rc && curp->wstop)
-		goto cleanup;
+	if (rctmp != MANDOCLEVEL_OK && curp->wstop)
+		return;
 
 	/* If unset, allocate output dev now (if applicable). */
 
@@ -730,13 +726,9 @@ parse(struct curparse *curp, int fd, const char *file,
 		(*curp->outman)(curp->outdata, man);
 	if (mdoc && curp->outmdoc)
 		(*curp->outmdoc)(curp->outdata, mdoc);
-
-cleanup:
-	if (*level < rc)
-		*level = rc;
 }
 
-static enum mandoclevel
+static void
 passthrough(const char *file, int fd, int synopsis_only)
 {
 	const char	 synb[] = "S\bSY\bYN\bNO\bOP\bPS\bSI\bIS\bS";
@@ -794,12 +786,13 @@ passthrough(const char *file, int fd, int synopsis_only)
 
 done:
 	fclose(stream);
-	return(MANDOCLEVEL_OK);
+	return;
 
 fail:
 	fprintf(stderr, "%s: %s: SYSERR: %s: %s",
 	    progname, file, syscall, strerror(errno));
-	return(MANDOCLEVEL_SYSERR);
+	if (rc < MANDOCLEVEL_SYSERR)
+		rc = MANDOCLEVEL_SYSERR;
 }
 
 static int
@@ -947,7 +940,7 @@ static void
 handle_sigpipe(int signum)
 {
 
-	exit(rc);
+	exit((int)rc);
 }
 
 static pid_t
