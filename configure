@@ -45,6 +45,8 @@ HAVE_DIRENT_NAMLEN=
 HAVE_FGETLN=
 HAVE_FTS=
 HAVE_GETSUBOPT=
+HAVE_ISBLANK=
+HAVE_MKDTEMP=
 HAVE_MMAP=
 HAVE_REALLOCARRAY=
 HAVE_STRCASESTR=
@@ -53,6 +55,7 @@ HAVE_STRLCPY=
 HAVE_STRPTIME=
 HAVE_STRSEP=
 HAVE_STRTONUM=
+HAVE_VASPRINTF=
 HAVE_WCHAR=
 
 HAVE_SQLITE3=
@@ -167,6 +170,8 @@ runtest dirent-namlen	DIRENT_NAMLEN	|| true
 runtest fgetln		FGETLN		|| true
 runtest fts		FTS		|| true
 runtest getsubopt	GETSUBOPT	|| true
+runtest isblank		ISBLANK		|| true
+runtest mkdtemp		MKDTEMP		|| true
 runtest mmap		MMAP		|| true
 runtest reallocarray	REALLOCARRAY	|| true
 runtest strcasestr	STRCASESTR	|| true
@@ -175,6 +180,7 @@ runtest strlcpy		STRLCPY		|| true
 runtest strptime	STRPTIME	|| true
 runtest strsep		STRSEP		|| true
 runtest strtonum	STRTONUM	|| true
+runtest vasprintf	VASPRINTF	|| true
 runtest wchar		WCHAR		|| true
 
 # --- sqlite3 ---
@@ -268,6 +274,7 @@ __HEREDOC__
 [ ${HAVE_FGETLN} -eq 0 -o ${HAVE_REALLOCARRAY} -eq 0 -o \
   ${HAVE_STRLCAT} -eq 0 -o ${HAVE_STRLCPY} -eq 0 ] \
 	&& echo "#include <sys/types.h>"
+[ ${HAVE_VASPRINTF} -eq 0 ] && echo "#include <stdarg.h>"
 [ ${HAVE_FGETLN} -eq 0 ] && echo "#include <stdio.h>"
 
 echo
@@ -279,6 +286,8 @@ cat << __HEREDOC__
 #define HAVE_FGETLN ${HAVE_FGETLN}
 #define HAVE_FTS ${HAVE_FTS}
 #define HAVE_GETSUBOPT ${HAVE_GETSUBOPT}
+#define HAVE_ISBLANK ${HAVE_ISBLANK}
+#define HAVE_MKDTEMP ${HAVE_MKDTEMP}
 #define HAVE_MMAP ${HAVE_MMAP}
 #define HAVE_REALLOCARRAY ${HAVE_REALLOCARRAY}
 #define HAVE_STRCASESTR ${HAVE_STRCASESTR}
@@ -287,6 +296,7 @@ cat << __HEREDOC__
 #define HAVE_STRPTIME ${HAVE_STRPTIME}
 #define HAVE_STRSEP ${HAVE_STRSEP}
 #define HAVE_STRTONUM ${HAVE_STRTONUM}
+#define HAVE_VASPRINTF ${HAVE_VASPRINTF}
 #define HAVE_WCHAR ${HAVE_WCHAR}
 #define HAVE_SQLITE3 ${HAVE_SQLITE3}
 #define HAVE_SQLITE3_ERRSTR ${HAVE_SQLITE3_ERRSTR}
@@ -321,6 +331,12 @@ __HEREDOC__
 [ ${HAVE_GETSUBOPT} -eq 0 ] && \
 	echo "extern	int	  getsubopt(char **, char * const *, char **);"
 
+[ ${HAVE_ISBLANK} -eq 0 ] && \
+	echo "extern	int	  isblank(int);"
+
+[ ${HAVE_MKDTEMP} -eq 0 ] && \
+	echo "extern	char	 *mkdtemp(char *);"
+
 [ ${HAVE_REALLOCARRAY} -eq 0 ] && \
 	echo "extern	void	 *reallocarray(void *, size_t, size_t);"
 
@@ -341,6 +357,9 @@ __HEREDOC__
 
 [ ${HAVE_STRTONUM} -eq 0 ] && \
 	echo "extern	long long strtonum(const char *, long long, long long, const char **);"
+
+[ ${HAVE_VASPRINTF} -eq 0 ] && \
+	echo "extern	int	  vasprintf(char **, const char *, va_list);"
 
 echo
 echo "#endif /* MANDOC_CONFIG_H */"

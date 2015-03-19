@@ -4,6 +4,8 @@ chars.o: chars.c config.h mandoc.h mandoc_aux.h libmandoc.h chars.in
 compat_fgetln.o: compat_fgetln.c config.h
 compat_fts.o: compat_fts.c config.h compat_fts.h
 compat_getsubopt.o: compat_getsubopt.c config.h
+compat_isblank.o: compat_isblank.c config.h
+compat_mkdtemp.o: compat_mkdtemp.c config.h
 compat_ohash.o: compat_ohash.c config.h compat_ohash.h
 compat_reallocarray.o: compat_reallocarray.c config.h
 compat_sqlite3_errstr.o: compat_sqlite3_errstr.c config.h
@@ -12,6 +14,7 @@ compat_strlcat.o: compat_strlcat.c config.h
 compat_strlcpy.o: compat_strlcpy.c config.h
 compat_strsep.o: compat_strsep.c config.h
 compat_strtonum.o: compat_strtonum.c config.h
+compat_vasprintf.o: compat_vasprintf.c config.h
 demandoc.o: demandoc.c config.h man.h mdoc.h mandoc.h
 eqn.o: eqn.c config.h mandoc.h mandoc_aux.h libmandoc.h libroff.h
 eqn_html.o: eqn_html.c config.h mandoc.h out.h html.h
@@ -60,6 +63,8 @@ test-dirent-namlen.o: test-dirent-namlen.c
 test-fgetln.o: test-fgetln.c
 test-fts.o: test-fts.c
 test-getsubopt.o: test-getsubopt.c
+test-isblank.o: test-isblank.c
+test-mkdtemp.o: test-mkdtemp.c
 test-mmap.o: test-mmap.c
 test-ohash.o: test-ohash.c
 test-reallocarray.o: test-reallocarray.c
@@ -71,4 +76,5 @@ test-strlcpy.o: test-strlcpy.c
 test-strptime.o: test-strptime.c
 test-strsep.o: test-strsep.c
 test-strtonum.o: test-strtonum.c
+test-vasprintf.o: test-vasprintf.c
 test-wchar.o: test-wchar.c
