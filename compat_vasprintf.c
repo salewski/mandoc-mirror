@@ -37,10 +37,14 @@ int
 vasprintf(char **ret, const char *format, va_list ap)
 {
 	char	 buf[2];
+	va_list	 ap2;
 	int	 sz;
 
-	if ((sz = vsnprintf(buf, sizeof(buf), format, ap)) != -1 &&
-	    (*ret = malloc(sz + 1)) != NULL) {
+	va_copy(ap2, ap);
+	sz = vsnprintf(buf, sizeof(buf), format, ap2);
+	va_end(ap2);
+
+	if (sz != -1 && (*ret = malloc(sz + 1)) != NULL) {
 		if (vsnprintf(*ret, sz + 1, format, ap) == sz)
 			return(sz);
 		free(*ret);
