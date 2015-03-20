@@ -15,6 +15,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#if defined(__linux__) || defined(__MINT__)
+#define _GNU_SOURCE /* vasprintf() */
+#endif
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
