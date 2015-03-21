@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2011, 2014 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011, 2014, 2015 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -32,6 +32,7 @@
 
 #define MAN_CONF_FILE	"/etc/man.conf"
 #define MAN_CONF_KEY	"_whatdb"
+#define MANPATH_DEFAULT	"/usr/share/man:/usr/X11R6/man:/usr/local/man"
 
 static	void	 manpath_add(struct manpaths *, const char *, int);
 static	void	 manpath_parseline(struct manpaths *, char *, int);
@@ -86,6 +87,7 @@ manpath_parse(struct manpaths *dirs, const char *file,
 	free(buf);
 	pclose(stream);
 #else
+	char		 manpath_default[] = MANPATH_DEFAULT;
 	char		*insert;
 
 	/* Always prepend -m. */
@@ -105,6 +107,8 @@ manpath_parse(struct manpaths *dirs, const char *file,
 	/* No MANPATH; use man.conf(5) only. */
 	if (NULL == defp || '\0' == defp[0]) {
 		manpath_manconf(dirs, file);
+		if (dirs->sz == 0)
+			manpath_parseline(dirs, manpath_default, 0);
 		return;
 	}
 
