@@ -32,7 +32,6 @@
 
 #define MAN_CONF_FILE	"/etc/man.conf"
 #define MAN_CONF_KEY	"_whatdb"
-#define MANPATH_DEFAULT	"/usr/share/man:/usr/X11R6/man:/usr/local/man"
 
 static	void	 manpath_add(struct manpaths *, const char *, int);
 static	void	 manpath_parseline(struct manpaths *, char *, int);

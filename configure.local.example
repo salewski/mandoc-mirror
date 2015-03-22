@@ -48,6 +48,13 @@ HAVE_WCHAR=1
 
 HAVE_WCHAR=0
 
+# When man(1) or apropos(1) is called without -m and -M options,
+# MANPATH is not set in the environment, man.conf(5) is not available
+# and manpath(1) not used, manuals are searched for in the following
+# directory trees by default.
+
+MANPATH_DEFAULT="/usr/share/man:/usr/X11R6/man:/usr/local/man"
+
 # In manual pages written in the mdoc(7) language, the operating system
 # version is displayed in the page footer line.  If an operating system
 # is specified as an argument to the .Os macro, that is always used.

@@ -31,6 +31,7 @@ echo "config.log: writing..."
 # Initialize all variables here,
 # such that nothing can leak in from the environment.
 
+MANPATH_DEFAULT="/usr/share/man:/usr/X11R6/man:/usr/local/man"
 OSNAME=
 
 CC=`printf "all:\\n\\t@echo \\\$(CC)\\n" | make -f -`
@@ -278,6 +279,7 @@ __HEREDOC__
 [ ${HAVE_FGETLN} -eq 0 ] && echo "#include <stdio.h>"
 
 echo
+echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
 [ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""
 
