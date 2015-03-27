@@ -499,9 +499,9 @@ usage(enum argmode argmode)
 
 	switch (argmode) {
 	case ARG_FILE:
-		fputs("usage: mandoc [-acfhkl] [-Ios=name] "
-		    "[-Kencoding] [-mformat] [-Ooption]\n"
-		    "\t      [-Toutput] [-Wlevel] [file ...]\n", stderr);
+		fputs("usage: mandoc [-acfhkl] [-I os=name] "
+		    "[-K encoding] [-mformat] [-O option]\n"
+		    "\t      [-T output] [-W level] [file ...]\n", stderr);
 		break;
 	case ARG_NAME:
 		fputs("usage: man [-acfhklw] [-C file] [-I os=name] "
