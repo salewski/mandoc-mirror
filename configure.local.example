@@ -96,6 +96,11 @@ HAVE_MANPATH=1
 # man(1), makewhatis(8), and apropos(1) will not work properly.
 HAVE_MANPATH=0
 
+# Some distributions may want to avoid naming conflicts
+# with the configuration files of other man(1) implementations.
+# This changes the name of the installed section 5 manual page as well.
+MANM_MANCONF="mandoc.conf"	# default is "man.conf"
+
 # Some distributions may want to avoid naming conflicts among manuals.
 # If you want to change the names of installed section 7 manual pages,
 # the following alternative names are suggested.

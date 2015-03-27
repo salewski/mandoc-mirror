@@ -82,6 +82,7 @@ BINM_MAN="man"
 BINM_WHATIS="whatis"
 BINM_MAKEWHATIS="makewhatis"
 MANM_MAN="man"
+MANM_MANCONF="man.conf"
 MANM_MDOC="mdoc"
 MANM_ROFF="roff"
 MANM_EQN="eqn"
@@ -279,6 +280,7 @@ __HEREDOC__
 [ ${HAVE_FGETLN} -eq 0 ] && echo "#include <stdio.h>"
 
 echo
+echo "#define MAN_CONF_FILE \"/etc/${MANM_MANCONF}\""
 echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
 [ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""
@@ -422,6 +424,7 @@ BINM_MAN	= ${BINM_MAN}
 BINM_WHATIS	= ${BINM_WHATIS}
 BINM_MAKEWHATIS	= ${BINM_MAKEWHATIS}
 MANM_MAN	= ${MANM_MAN}
+MANM_MANCONF	= ${MANM_MANCONF}
 MANM_MDOC	= ${MANM_MDOC}
 MANM_ROFF	= ${MANM_ROFF}
 MANM_EQN	= ${MANM_EQN}
