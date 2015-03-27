@@ -7,9 +7,9 @@
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR
  * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
@@ -32,6 +32,7 @@
 #include "mandoc_aux.h"
 #include "out.h"
 #include "html.h"
+#include "manconf.h"
 #include "main.h"
 
 struct	htmldata {
@@ -129,40 +130,20 @@ static	void	 print_attr(struct html *, const char *, const char *);
 
 
 void *
-html_alloc(const struct mchars *mchars, char *outopts)
+html_alloc(const struct mchars *mchars, const struct manoutput *outopts)
 {
 	struct html	*h;
-	const char	*toks[5];
-	char		*v;
-
-	toks[0] = "style";
-	toks[1] = "man";
-	toks[2] = "includes";
-	toks[3] = "fragment";
-	toks[4] = NULL;
 
 	h = mandoc_calloc(1, sizeof(struct html));
 
 	h->tags.head = NULL;
 	h->symtab = mchars;
 
-	while (outopts && *outopts)
-		switch (getsubopt(&outopts, UNCONST(toks), &v)) {
-		case 0:
-			h->style = v;
-			break;
-		case 1:
-			h->base_man = v;
-			break;
-		case 2:
-			h->base_includes = v;
-			break;
-		case 3:
-			h->oflags |= HTML_FRAGMENT;
-			break;
-		default:
-			break;
-		}
+	h->style = outopts->style;
+	h->base_man = outopts->man;
+	h->base_includes = outopts->includes;
+	if (outopts->fragment)
+		h->oflags |= HTML_FRAGMENT;
 
 	return(h);
 }
