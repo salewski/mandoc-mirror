@@ -366,8 +366,6 @@ from
 as an opaque type for function prototypes.
 .Pp
 When this header is included, the same file should not include
-.Pa manpath.h
-or
 .Pa mansearch.h .
 .It Qq Pa term.h
 Requires
@@ -406,8 +404,7 @@ from
 as opaque types for function prototypes.
 .Pp
 When this header is included, the same file should not include
-.Pa html.h ,
-.Pa manpath.h
+.Pa html.h
 or
 .Pa mansearch.h .
 .It Qq Pa html.h
@@ -441,8 +438,7 @@ from
 .Pa chars.c .
 .Pp
 When this header is included, the same file should not include
-.Pa term.h ,
-.Pa manpath.h
+.Pa term.h
 or
 .Pa mansearch.h .
 .It Qq Pa main.h
@@ -461,25 +457,21 @@ and
 from
 .Pa libman.h
 as opaque types for function prototypes.
-.It Qq Pa manpath.h
+.It Qq Pa manconf.h
 Requires
 .In sys/types.h
 for
 .Vt size_t .
 .Pp
 Provides
-.Vt struct manpaths
+.Vt struct manconf ,
+.Vt struct manpaths ,
+.Vt struct manoutput ,
 and the functions
-.Fn manpath_manconf ,
-.Fn manpath_parse ,
+.Fn manconf_parse ,
+.Fn manconf_output ,
 and
-.Fn manpath_free .
-.Pp
-When this header is included, the same file should not include
-.Pa out.h ,
-.Pa term.h ,
-or
-.Pa html.h .
+.Fn manconf_free .
 .It Qq Pa mansearch.h
 Requires
 .In sys/types.h
@@ -503,7 +495,7 @@ and
 Uses
 .Vt struct manpaths
 from
-.Pa manpath.h
+.Pa manconf.h
 as an opaque type for function prototypes.
 .Pp
 When this header is included, the same file should not include

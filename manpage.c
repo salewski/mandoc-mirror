@@ -28,7 +28,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "manpath.h"
+#include "manconf.h"
 #include "mansearch.h"
 
 static	void	 show(const char *, const char *);
@@ -43,7 +43,7 @@ main(int argc, char *argv[])
 	char		*conf_file, *defpaths, *auxpaths, *cp;
 	char		 buf[PATH_MAX];
 	const char	*cmd;
-	struct manpaths	 paths;
+	struct manconf	 conf;
 	char		*progname;
 	extern char	*optarg;
 	extern int	 optind;
@@ -57,7 +57,7 @@ main(int argc, char *argv[])
 		++progname;
 
 	auxpaths = defpaths = conf_file = NULL;
-	memset(&paths, 0, sizeof(struct manpaths));
+	memset(&conf, 0, sizeof(conf));
 	memset(&search, 0, sizeof(struct mansearch));
 
 	while (-1 != (ch = getopt(argc, argv, "C:M:m:S:s:")))
@@ -90,9 +90,9 @@ main(int argc, char *argv[])
 	search.outkey = "Nd";
 	search.argmode = ARG_EXPR;
 
-	manpath_parse(&paths, conf_file, defpaths, auxpaths);
-	ch = mansearch(&search, &paths, argc, argv, &res, &sz);
-	manpath_free(&paths);
+	manconf_parse(&conf, conf_file, defpaths, auxpaths);
+	ch = mansearch(&search, &conf.manpath, argc, argv, &res, &sz);
+	manconf_free(&conf);
 
 	if (0 == ch)
 		goto usage;
