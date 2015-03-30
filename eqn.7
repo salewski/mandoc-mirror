@@ -146,7 +146,7 @@ is used as the delimiter for the value
 .Ar val .
 This allows for arbitrary enclosure of terms (not just quotes), such as
 .Pp
-.D1 Cm define Ar foo 'bar baz'
+.D1 Cm define Ar foo \(aqbar baz\(aq
 .D1 Cm define Ar foo cbar bazc
 .Pp
 It is an error to have an empty
@@ -166,8 +166,8 @@ created.
 Definitions can create arbitrary strings, for example, the following is
 a legal construction.
 .Bd -literal -offset indent
-define foo 'define'
-foo bar 'baz'
+define foo \(aqdefine\(aq
+foo bar \(aqbaz\(aq
 .Ed
 .Pp
 Self-referencing definitions will raise an error.
