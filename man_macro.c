@@ -44,12 +44,11 @@ static	void		 in_line_eoln(MACRO_PROT_ARGS);
 static	int		 man_args(struct man *, int,
 				int *, char *, char **);
 
-static	void		 rew_scope(enum roff_type,
-				struct man *, enum mant);
-static	enum rew	 rew_dohalt(enum mant, enum roff_type,
-				const struct man_node *);
-static	enum rew	 rew_block(enum mant, enum roff_type,
-				const struct man_node *);
+static	void		 rew_scope(enum roff_type, struct man *, int);
+static	enum rew	 rew_dohalt(int, enum roff_type,
+				const struct roff_node *);
+static	enum rew	 rew_block(int, enum roff_type,
+				const struct roff_node *);
 
 const	struct man_macro __man_macros[MAN_MAX] = {
 	{ in_line_eoln, MAN_NSCOPED }, /* br */
@@ -96,9 +95,9 @@ const	struct man_macro * const man_macros = __man_macros;
 
 
 void
-man_unscope(struct man *man, const struct man_node *to)
+man_unscope(struct man *man, const struct roff_node *to)
 {
-	struct man_node	*n;
+	struct roff_node *n;
 
 	to = to->parent;
 	n = man->last;
@@ -156,7 +155,7 @@ man_unscope(struct man *man, const struct man_node *to)
 }
 
 static enum rew
-rew_block(enum mant ntok, enum roff_type type, const struct man_node *n)
+rew_block(int ntok, enum roff_type type, const struct roff_node *n)
 {
 
 	if (type == ROFFT_BLOCK && n->parent->tok == ntok &&
@@ -171,7 +170,7 @@ rew_block(enum mant ntok, enum roff_type type, const struct man_node *n)
  * sections and subsections).
  */
 static enum rew
-rew_dohalt(enum mant tok, enum roff_type type, const struct man_node *n)
+rew_dohalt(int tok, enum roff_type type, const struct roff_node *n)
 {
 	enum rew	 c;
 
@@ -244,9 +243,9 @@ rew_dohalt(enum mant tok, enum roff_type type, const struct man_node *n)
  * scopes.  When a scope is closed, it must be validated and actioned.
  */
 static void
-rew_scope(enum roff_type type, struct man *man, enum mant tok)
+rew_scope(enum roff_type type, struct man *man, int tok)
 {
-	struct man_node	*n;
+	struct roff_node *n;
 	enum rew	 c;
 
 	for (n = man->last; n; n = n->parent) {
@@ -277,8 +276,8 @@ rew_scope(enum roff_type type, struct man *man, enum mant tok)
 void
 blk_close(MACRO_PROT_ARGS)
 {
-	enum mant		 ntok;
-	const struct man_node	*nn;
+	int			 ntok;
+	const struct roff_node	*nn;
 	char			*p;
 	int			 nrew, target;
 
@@ -338,7 +337,7 @@ blk_close(MACRO_PROT_ARGS)
 void
 blk_exp(MACRO_PROT_ARGS)
 {
-	struct man_node	*head;
+	struct roff_node *head;
 	char		*p;
 	int		 la;
 
@@ -371,7 +370,7 @@ blk_imp(MACRO_PROT_ARGS)
 {
 	int		 la;
 	char		*p;
-	struct man_node	*n;
+	struct roff_node *n;
 
 	rew_scope(ROFFT_BODY, man, tok);
 	rew_scope(ROFFT_BLOCK, man, tok);
@@ -411,7 +410,7 @@ in_line_eoln(MACRO_PROT_ARGS)
 {
 	int		 la;
 	char		*p;
-	struct man_node	*n;
+	struct roff_node *n;
 
 	man_elem_alloc(man, line, ppos, tok);
 	n = man->last;

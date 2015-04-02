@@ -32,9 +32,9 @@
 #include "mandoc.h"
 
 static	void	 pline(int, int *, int *, int);
-static	void	 pman(const struct man_node *, int *, int *, int);
+static	void	 pman(const struct roff_node *, int *, int *, int);
 static	void	 pmandoc(struct mparse *, int, const char *, int);
-static	void	 pmdoc(const struct mdoc_node *, int *, int *, int);
+static	void	 pmdoc(const struct roff_node *, int *, int *, int);
 static	void	 pstring(const char *, int, int *, int);
 static	void	 usage(void);
 
@@ -234,7 +234,7 @@ pline(int line, int *linep, int *col, int list)
 }
 
 static void
-pmdoc(const struct mdoc_node *p, int *line, int *col, int list)
+pmdoc(const struct roff_node *p, int *line, int *col, int list)
 {
 
 	for ( ; p; p = p->next) {
@@ -248,7 +248,7 @@ pmdoc(const struct mdoc_node *p, int *line, int *col, int list)
 }
 
 static void
-pman(const struct man_node *p, int *line, int *col, int list)
+pman(const struct roff_node *p, int *line, int *col, int list)
 {
 
 	for ( ; p; p = p->next) {

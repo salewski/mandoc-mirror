@@ -118,7 +118,19 @@ from
 as opaque types for function prototypes.
 .It Qq Pa roff.h
 Provides
-.Vt enum roff_type .
+.Vt enum mdoc_endbody ,
+.Vt enum roff_sec ,
+.Vt enum roff_type ,
+and
+.Vt struct roff_node .
+.Pp
+Uses pointers to the types
+.Vt struct mdoc_arg
+and
+.Vt union mdoc_data
+from
+.Qq Pa mdoc.h
+as opaque struct members.
 .El
 .Pp
 The following two require
@@ -137,10 +149,7 @@ for
 .Vt enum roff_type .
 .Pp
 Provides
-.Vt enum mdoct ,
 .Vt enum mdocargt ,
-.Vt enum mdoc_sec ,
-.Vt enum mdoc_endbody ,
 .Vt enum mdoc_disp ,
 .Vt enum mdoc_list ,
 .Vt enum mdoc_auth ,
@@ -153,7 +162,6 @@ Provides
 .Vt struct mdoc_an ,
 .Vt struct mdoc_bf ,
 .Vt struct mdoc_rs ,
-.Vt struct mdoc_node ,
 and the functions
 .Fn mdoc_*
 described in
@@ -181,9 +189,7 @@ for
 .Vt enum roff_type .
 .Pp
 Provides
-.Vt enum mant ,
-.Vt struct man_meta ,
-.Vt struct man_node ,
+.Vt struct man_meta
 and the functions
 .Fn man_*
 described in
@@ -259,8 +265,7 @@ as opaque types for function prototypes.
 Requires
 .Qq Pa mdoc.h
 for
-.Vt enum mdoct ,
-.Vt enum mdoc_* ,
+.Vt enum mdoc_*
 and
 .Vt struct mdoc_* .
 .Pp
@@ -290,11 +295,9 @@ or
 .Pa libroff.h .
 .It Qq Pa libman.h
 Requires
-.Qq Pa man.h
+.Qq Pa roff.h
 for
-.Vt enum mant
-and
-.Vt struct man_node.
+.Vt struct roff_node.
 .Pp
 Provides
 .Vt enum man_next ,

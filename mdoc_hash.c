@@ -62,7 +62,7 @@ mdoc_hash_init(void)
 	}
 }
 
-enum mdoct
+int
 mdoc_hash_find(const char *p)
 {
 	int		  major, i, j;
@@ -86,7 +86,7 @@ mdoc_hash_find(const char *p)
 		if (UCHAR_MAX == (i = table[major + j]))
 			break;
 		if (0 == strcmp(p, mdoc_macronames[i]))
-			return((enum mdoct)i);
+			return(i);
 	}
 
 	return(MDOC_MAX);

@@ -276,7 +276,7 @@ static	const struct mdocarg mdocargs[MDOC_MAX] = {
  * Some flags take no argument, some one, some multiple.
  */
 void
-mdoc_argv(struct mdoc *mdoc, int line, enum mdoct tok,
+mdoc_argv(struct mdoc *mdoc, int line, int tok,
 	struct mdoc_arg **reta, int *pos, char *buf)
 {
 	struct mdoc_argv	  tmpv;
@@ -414,9 +414,9 @@ argn_free(struct mdoc_arg *p, int iarg)
 
 enum margserr
 mdoc_args(struct mdoc *mdoc, int line, int *pos,
-		char *buf, enum mdoct tok, char **v)
+	char *buf, int tok, char **v)
 {
-	struct mdoc_node *n;
+	struct roff_node *n;
 	char		 *v_local;
 	enum argsflag	  fl;
 

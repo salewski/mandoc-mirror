@@ -35,7 +35,7 @@
 #include "libmandoc.h"
 #include "libman.h"
 
-#define	CHKARGS	  struct man *man, struct man_node *n
+#define	CHKARGS	  struct man *man, struct roff_node *n
 
 typedef	void	(*v_check)(CHKARGS);
 
@@ -100,7 +100,7 @@ static	v_check man_valids[MAN_MAX] = {
 void
 man_valid_post(struct man *man)
 {
-	struct man_node	*n;
+	struct roff_node *n;
 	v_check		*cp;
 
 	n = man->last;
@@ -300,7 +300,7 @@ post_IP(CHKARGS)
 static void
 post_TH(CHKARGS)
 {
-	struct man_node	*nb;
+	struct roff_node *nb;
 	const char	*p;
 
 	free(man->meta.title);
@@ -460,8 +460,8 @@ post_AT(CHKARGS)
 	    "System V Release 2",
 	};
 
+	struct roff_node *nn;
 	const char	*p, *s;
-	struct man_node	*nn;
 
 	n = n->child;
 

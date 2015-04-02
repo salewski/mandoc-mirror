@@ -38,7 +38,7 @@
 #define	INDENT		  5
 
 #define	MAN_ARGS	  const struct man_meta *man, \
-			  const struct man_node *n, \
+			  const struct roff_node *n, \
 			  struct mhtml *mh, \
 			  struct html *h
 
@@ -53,12 +53,12 @@ struct	htmlman {
 };
 
 static	void		  print_bvspace(struct html *,
-				const struct man_node *);
+				const struct roff_node *);
 static	void		  print_man(MAN_ARGS);
 static	void		  print_man_head(MAN_ARGS);
 static	void		  print_man_nodelist(MAN_ARGS);
 static	void		  print_man_node(MAN_ARGS);
-static	int		  a2width(const struct man_node *,
+static	int		  a2width(const struct roff_node *,
 				struct roffsu *);
 static	int		  man_B_pre(MAN_ARGS);
 static	int		  man_HP_pre(MAN_ARGS);
@@ -130,7 +130,7 @@ static	const struct htmlman mans[MAN_MAX] = {
  * first, print it.
  */
 static void
-print_bvspace(struct html *h, const struct man_node *n)
+print_bvspace(struct html *h, const struct roff_node *n)
 {
 
 	if (n->body && n->body->child)
@@ -280,7 +280,7 @@ print_man_node(MAN_ARGS)
 }
 
 static int
-a2width(const struct man_node *n, struct roffsu *su)
+a2width(const struct roff_node *n, struct roffsu *su)
 {
 
 	if (n->type != ROFFT_TEXT)
@@ -400,7 +400,7 @@ man_SH_pre(MAN_ARGS)
 static int
 man_alt_pre(MAN_ARGS)
 {
-	const struct man_node	*nn;
+	const struct roff_node	*nn;
 	int		 i, savelit;
 	enum htmltag	 fp;
 	struct tag	*t;
@@ -496,7 +496,7 @@ man_PP_pre(MAN_ARGS)
 static int
 man_IP_pre(MAN_ARGS)
 {
-	const struct man_node	*nn;
+	const struct roff_node	*nn;
 
 	if (n->type == ROFFT_BODY) {
 		print_otag(h, TAG_DD, 0, NULL);
@@ -535,7 +535,7 @@ man_HP_pre(MAN_ARGS)
 {
 	struct htmlpair	 tag[2];
 	struct roffsu	 su;
-	const struct man_node *np;
+	const struct roff_node *np;
 
 	if (n->type == ROFFT_HEAD)
 		return(0);
