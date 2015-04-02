@@ -43,7 +43,7 @@ struct	termpair {
 
 #define	DECL_ARGS struct termp *p, \
 		  struct termpair *pair, \
-		  const struct mdoc_meta *meta, \
+		  const struct roff_meta *meta, \
 		  struct roff_node *n
 
 struct	termact {
@@ -58,8 +58,8 @@ static	void	  print_bvspace(struct termp *,
 			const struct roff_node *);
 static	void	  print_mdoc_node(DECL_ARGS);
 static	void	  print_mdoc_nodelist(DECL_ARGS);
-static	void	  print_mdoc_head(struct termp *, const void *);
-static	void	  print_mdoc_foot(struct termp *, const void *);
+static	void	  print_mdoc_head(struct termp *, const struct roff_meta *);
+static	void	  print_mdoc_foot(struct termp *, const struct roff_meta *);
 static	void	  synopsis_pre(struct termp *,
 			const struct roff_node *);
 
@@ -253,7 +253,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 void
 terminal_mdoc(void *arg, const struct mdoc *mdoc)
 {
-	const struct mdoc_meta	*meta;
+	const struct roff_meta	*meta;
 	struct roff_node	*n;
 	struct termp		*p;
 
@@ -407,12 +407,9 @@ print_mdoc_node(DECL_ARGS)
 }
 
 static void
-print_mdoc_foot(struct termp *p, const void *arg)
+print_mdoc_foot(struct termp *p, const struct roff_meta *meta)
 {
-	const struct mdoc_meta *meta;
 	size_t sz;
-
-	meta = (const struct mdoc_meta *)arg;
 
 	term_fontrepl(p, TERMFONT_NONE);
 
@@ -459,13 +456,10 @@ print_mdoc_foot(struct termp *p, const void *arg)
 }
 
 static void
-print_mdoc_head(struct termp *p, const void *arg)
+print_mdoc_head(struct termp *p, const struct roff_meta *meta)
 {
-	const struct mdoc_meta	*meta;
 	char			*volume, *title;
 	size_t			 vollen, titlen;
-
-	meta = (const struct mdoc_meta *)arg;
 
 	/*
 	 * The header is strange.  It has three components, which are

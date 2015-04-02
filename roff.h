@@ -104,3 +104,14 @@ struct	roff_node {
 	enum roff_sec	  sec;     /* Current named section. */
 	enum mdoc_endbody end;     /* BODY */
 };
+
+struct	roff_meta {
+	char		 *msec;    /* Manual section, usually a digit. */
+	char		 *vol;     /* Manual volume title. */
+	char		 *os;      /* Operating system. */
+	char		 *arch;    /* Machine architecture. */
+	char		 *title;   /* Manual title, usually CAPS. */
+	char		 *name;    /* Leading manual name. */
+	char		 *date;    /* Normalized date. */
+	int		  hasbody; /* Document is not empty. */
+};

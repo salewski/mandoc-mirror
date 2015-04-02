@@ -30,7 +30,7 @@
 #include "out.h"
 #include "main.h"
 
-#define	DECL_ARGS const struct mdoc_meta *meta, struct roff_node *n
+#define	DECL_ARGS const struct roff_meta *meta, struct roff_node *n
 
 struct	manact {
 	int		(*cond)(DECL_ARGS); /* DON'T run actions */
@@ -547,7 +547,7 @@ man_man(void *arg, const struct man *man)
 void
 man_mdoc(void *arg, const struct mdoc *mdoc)
 {
-	const struct mdoc_meta *meta;
+	const struct roff_meta *meta;
 	struct roff_node *n;
 
 	meta = mdoc_meta(mdoc);

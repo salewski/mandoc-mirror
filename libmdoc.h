@@ -40,7 +40,7 @@ struct	mdoc {
 	struct roff_node *last; /* the last node parsed */
 	struct roff_node *first; /* the first node parsed */
 	struct roff_node *last_es; /* the most recent Es node */
-	struct mdoc_meta  meta; /* document meta-data */
+	struct roff_meta  meta; /* document meta-data */
 	enum roff_sec	  lastnamed;
 	enum roff_sec	  lastsec;
 	struct roff	 *roff;

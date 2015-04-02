@@ -305,16 +305,16 @@ post_TH(CHKARGS)
 
 	free(man->meta.title);
 	free(man->meta.vol);
-	free(man->meta.source);
+	free(man->meta.os);
 	free(man->meta.msec);
 	free(man->meta.date);
 
 	man->meta.title = man->meta.vol = man->meta.date =
-	    man->meta.msec = man->meta.source = NULL;
+	    man->meta.msec = man->meta.os = NULL;
 
 	nb = n;
 
-	/* ->TITLE<- MSEC DATE SOURCE VOL */
+	/* ->TITLE<- MSEC DATE OS VOL */
 
 	n = n->child;
 	if (n && n->string) {
@@ -336,7 +336,7 @@ post_TH(CHKARGS)
 		    nb->line, nb->pos, "TH");
 	}
 
-	/* TITLE ->MSEC<- DATE SOURCE VOL */
+	/* TITLE ->MSEC<- DATE OS VOL */
 
 	if (n)
 		n = n->next;
@@ -348,7 +348,7 @@ post_TH(CHKARGS)
 		    nb->line, nb->pos, "TH %s", man->meta.title);
 	}
 
-	/* TITLE MSEC ->DATE<- SOURCE VOL */
+	/* TITLE MSEC ->DATE<- OS VOL */
 
 	if (n)
 		n = n->next;
@@ -364,14 +364,14 @@ post_TH(CHKARGS)
 		    n ? n->pos : nb->pos, "TH");
 	}
 
-	/* TITLE MSEC DATE ->SOURCE<- VOL */
+	/* TITLE MSEC DATE ->OS<- VOL */
 
 	if (n && (n = n->next))
-		man->meta.source = mandoc_strdup(n->string);
+		man->meta.os = mandoc_strdup(n->string);
 	else if (man->defos != NULL)
-		man->meta.source = mandoc_strdup(man->defos);
+		man->meta.os = mandoc_strdup(man->defos);
 
-	/* TITLE MSEC DATE SOURCE ->VOL<- */
+	/* TITLE MSEC DATE OS ->VOL<- */
 	/* If missing, use the default VOL name for MSEC. */
 
 	if (n && (n = n->next))
@@ -446,8 +446,8 @@ post_UC(CHKARGS)
 			p = bsd_versions[0];
 	}
 
-	free(man->meta.source);
-	man->meta.source = mandoc_strdup(p);
+	free(man->meta.os);
+	man->meta.os = mandoc_strdup(p);
 }
 
 static void
@@ -485,8 +485,8 @@ post_AT(CHKARGS)
 			p = unix_versions[0];
 	}
 
-	free(man->meta.source);
-	man->meta.source = mandoc_strdup(p);
+	free(man->meta.os);
+	man->meta.os = mandoc_strdup(p);
 }
 
 static void

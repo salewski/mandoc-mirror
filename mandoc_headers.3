@@ -121,6 +121,7 @@ Provides
 .Vt enum mdoc_endbody ,
 .Vt enum roff_sec ,
 .Vt enum roff_type ,
+.Vt struct roff_meta ,
 and
 .Vt struct roff_node .
 .Pp
@@ -154,7 +155,6 @@ Provides
 .Vt enum mdoc_list ,
 .Vt enum mdoc_auth ,
 .Vt enum mdoc_font ,
-.Vt struct mdoc_meta ,
 .Vt struct mdoc_argv ,
 .Vt struct mdoc_arg ,
 .Vt struct mdoc_bd ,
@@ -188,9 +188,7 @@ Requires
 for
 .Vt enum roff_type .
 .Pp
-Provides
-.Vt struct man_meta
-and the functions
+Provides the functions
 .Fn man_*
 described in
 .Xr mandoc 3 .
@@ -226,11 +224,16 @@ are included, the same file should not include any formatter headers.
 Requires
 .In sys/types.h
 for
-.Vt size_t
-and
+.Vt size_t ,
 .Qq Pa mandoc.h
 for
-.Vt enum mandocerr .
+.Vt enum mandocerr ,
+and
+.Qq Pa roff.h
+for
+.Vt struct roff_meta
+and
+.Vt struct roff_node .
 .Pp
 Provides
 .Vt enum rofferr ,
@@ -297,7 +300,9 @@ or
 Requires
 .Qq Pa roff.h
 for
-.Vt struct roff_node.
+.Vt struct roff_meta
+and
+.Vt struct roff_node .
 .Pp
 Provides
 .Vt enum man_next ,
@@ -420,6 +425,10 @@ and
 .Vt struct eqn
 from
 .Pa mandoc.h
+and
+.Vt struct roff_meta
+from
+.Qq Pa roff.h
 as opaque types for function prototypes.
 .Pp
 When this header is included, the same file should not include

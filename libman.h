@@ -33,7 +33,7 @@ struct	man {
 	enum man_next	 next; /* where to put the next node */
 	struct roff_node *last; /* the last parsed node */
 	struct roff_node *first; /* the first parsed node */
-	struct man_meta	 meta; /* document meta-data */
+	struct roff_meta meta; /* document meta-data */
 	struct roff	*roff;
 };
 

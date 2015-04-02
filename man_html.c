@@ -37,7 +37,7 @@
 
 #define	INDENT		  5
 
-#define	MAN_ARGS	  const struct man_meta *man, \
+#define	MAN_ARGS	  const struct roff_meta *man, \
 			  const struct roff_node *n, \
 			  struct mhtml *mh, \
 			  struct html *h
@@ -348,8 +348,8 @@ man_root_post(MAN_ARGS)
 	PAIR_CLASS_INIT(&tag, "foot-os");
 	print_otag(h, TAG_TD, 1, &tag);
 
-	if (man->source)
-		print_text(h, man->source);
+	if (man->os)
+		print_text(h, man->os);
 	print_tagq(h, t);
 }
 
