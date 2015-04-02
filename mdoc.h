@@ -7,9 +7,9 @@
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR
  * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
@@ -172,18 +172,6 @@ enum	mdocargt {
 	MDOC_Nested, /* -nested */
 	MDOC_Centred, /* -centered */
 	MDOC_ARG_MAX
-};
-
-enum	mdoc_type {
-	MDOC_TEXT,
-	MDOC_ELEM,
-	MDOC_HEAD,
-	MDOC_TAIL,
-	MDOC_BODY,
-	MDOC_BLOCK,
-	MDOC_TBL,
-	MDOC_EQN,
-	MDOC_ROOT
 };
 
 /*
@@ -363,7 +351,7 @@ struct	mdoc_node {
 #define	MDOC_BROKEN	 (1 << 5) /* must validate parent when ending */
 #define	MDOC_DELIMO	 (1 << 6)
 #define	MDOC_DELIMC	 (1 << 7)
-	enum mdoc_type	  type; /* AST node type */
+	enum roff_type	  type; /* AST node type */
 	enum mdoc_sec	  sec; /* current named section */
 	union mdoc_data	 *norm; /* normalised args */
 	int		  prev_font; /* before entering this node */

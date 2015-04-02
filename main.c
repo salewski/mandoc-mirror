@@ -34,11 +34,12 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "mandoc.h"
 #include "mandoc_aux.h"
-#include "main.h"
+#include "mandoc.h"
+#include "roff.h"
 #include "mdoc.h"
 #include "man.h"
+#include "main.h"
 #include "manconf.h"
 #include "mansearch.h"
 

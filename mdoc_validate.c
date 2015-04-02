@@ -8,9 +8,9 @@
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR
  * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
@@ -31,11 +31,12 @@
 #include <string.h>
 #include <time.h>
 
-#include "mdoc.h"
-#include "mandoc.h"
 #include "mandoc_aux.h"
-#include "libmdoc.h"
+#include "mandoc.h"
+#include "roff.h"
+#include "mdoc.h"
 #include "libmandoc.h"
+#include "libmdoc.h"
 
 /* FIXME: .Bl -diag can't have non-text children in HEAD. */
 
@@ -297,15 +298,15 @@ mdoc_valid_pre(struct mdoc *mdoc, struct mdoc_node *n)
 	v_pre	 p;
 
 	switch (n->type) {
-	case MDOC_TEXT:
+	case ROFFT_TEXT:
 		if (n->sec != SEC_SYNOPSIS || n->parent->tok != MDOC_Fd)
 			check_text(mdoc, n->line, n->pos, n->string);
 		/* FALLTHROUGH */
-	case MDOC_TBL:
+	case ROFFT_TBL:
 		/* FALLTHROUGH */
-	case MDOC_EQN:
+	case ROFFT_EQN:
 		/* FALLTHROUGH */
-	case MDOC_ROOT:
+	case ROFFT_ROOT:
 		return;
 	default:
 		break;
@@ -329,13 +330,13 @@ mdoc_valid_post(struct mdoc *mdoc)
 	n->flags |= MDOC_VALID | MDOC_ENDED;
 
 	switch (n->type) {
-	case MDOC_TEXT:
+	case ROFFT_TEXT:
 		/* FALLTHROUGH */
-	case MDOC_EQN:
+	case ROFFT_EQN:
 		/* FALLTHROUGH */
-	case MDOC_TBL:
+	case ROFFT_TBL:
 		break;
-	case MDOC_ROOT:
+	case ROFFT_ROOT:
 		post_root(mdoc);
 		break;
 	default:
@@ -400,11 +401,11 @@ pre_display(PRE_ARGS)
 {
 	struct mdoc_node *node;
 
-	if (MDOC_BLOCK != n->type)
+	if (n->type != ROFFT_BLOCK)
 		return;
 
 	for (node = mdoc->last->parent; node; node = node->parent)
-		if (MDOC_BLOCK == node->type)
+		if (node->type == ROFFT_BLOCK)
 			if (MDOC_Bd == node->tok)
 				break;
 
@@ -422,7 +423,7 @@ pre_bl(PRE_ARGS)
 	enum mdocargt	  mdoclt;
 	enum mdoc_list	  lt;
 
-	if (n->type != MDOC_BLOCK)
+	if (n->type != ROFFT_BLOCK)
 		return;
 
 	/*
@@ -605,7 +606,7 @@ pre_bd(PRE_ARGS)
 
 	pre_literal(mdoc, n);
 
-	if (n->type != MDOC_BLOCK)
+	if (n->type != ROFFT_BLOCK)
 		return;
 
 	for (i = 0; n->args && i < (int)n->args->argc; i++) {
@@ -718,7 +719,7 @@ static void
 pre_obsolete(PRE_ARGS)
 {
 
-	if (MDOC_ELEM == n->type || MDOC_BLOCK == n->type)
+	if (n->type == ROFFT_ELEM || n->type == ROFFT_BLOCK)
 		mandoc_msg(MANDOCERR_MACRO_OBS, mdoc->parse,
 		    n->line, n->pos, mdoc_macronames[n->tok]);
 }
@@ -777,10 +778,10 @@ post_bf(POST_ARGS)
 	 */
 
 	np = mdoc->last;
-	if (MDOC_HEAD != np->type)
+	if (np->type != ROFFT_HEAD)
 		return;
 
-	assert(MDOC_BLOCK == np->parent->type);
+	assert(np->parent->type == ROFFT_BLOCK);
 	assert(MDOC_Bf == np->parent->tok);
 
 	/* Check the number of arguments. */
@@ -835,7 +836,7 @@ post_lb(POST_ARGS)
 	char			*libname;
 
 	n = mdoc->last->child;
-	assert(MDOC_TEXT == n->type);
+	assert(n->type == ROFFT_TEXT);
 
 	if (NULL == (stdlibname = mdoc_a2lib(n->string)))
 		mandoc_asprintf(&libname,
@@ -890,7 +891,7 @@ post_fo(POST_ARGS)
 
 	n = mdoc->last;
 
-	if (n->type != MDOC_HEAD)
+	if (n->type != ROFFT_HEAD)
 		return;
 
 	if (n->child == NULL) {
@@ -943,11 +944,11 @@ post_vt(POST_ARGS)
 	 * specifically the BODY, should only have TEXT children.
 	 */
 
-	if (MDOC_BODY != mdoc->last->type)
+	if (mdoc->last->type != ROFFT_BODY)
 		return;
 
 	for (n = mdoc->last->child; n; n = n->next)
-		if (MDOC_TEXT != n->type)
+		if (n->type != ROFFT_TEXT)
 			mandoc_msg(MANDOCERR_VT_CHILD, mdoc->parse,
 			    n->line, n->pos, mdoc_macronames[n->tok]);
 }
@@ -981,7 +982,7 @@ post_nd(POST_ARGS)
 
 	n = mdoc->last;
 
-	if (n->type != MDOC_BODY)
+	if (n->type != ROFFT_BODY)
 		return;
 
 	if (n->child == NULL)
@@ -998,7 +999,7 @@ post_d1(POST_ARGS)
 
 	n = mdoc->last;
 
-	if (n->type != MDOC_BODY)
+	if (n->type != ROFFT_BODY)
 		return;
 
 	if (n->child == NULL)
@@ -1015,7 +1016,7 @@ post_literal(POST_ARGS)
 
 	n = mdoc->last;
 
-	if (n->type != MDOC_BODY)
+	if (n->type != ROFFT_BODY)
 		return;
 
 	if (n->child == NULL)
@@ -1086,7 +1087,7 @@ post_at(POST_ARGS)
 	 */
 
 	n = n->child;
-	assert(MDOC_TEXT == n->type);
+	assert(n->type == ROFFT_TEXT);
 	if (NULL == (std_att = mdoc_a2att(n->string))) {
 		mandoc_vmsg(MANDOCERR_AT_BAD, mdoc->parse,
 		    n->line, n->pos, "At %s", n->string);
@@ -1118,7 +1119,7 @@ static void
 post_en(POST_ARGS)
 {
 
-	if (MDOC_BLOCK == mdoc->last->type)
+	if (mdoc->last->type == ROFFT_BLOCK)
 		mdoc->last->norm->Es = mdoc->last_es;
 }
 
@@ -1137,7 +1138,7 @@ post_it(POST_ARGS)
 	struct mdoc_node *nbl, *nit, *nch;
 
 	nit = mdoc->last;
-	if (nit->type != MDOC_BLOCK)
+	if (nit->type != ROFFT_BLOCK)
 		return;
 
 	nbl = nit->parent->parent;
@@ -1184,7 +1185,7 @@ post_it(POST_ARGS)
 		assert(nit->head->child == NULL);
 
 		for (i = 0, nch = nit->child; nch; nch = nch->next)
-			if (nch->type == MDOC_BODY)
+			if (nch->type == ROFFT_BODY)
 				i++;
 
 		if (i < cols || i > cols + 1)
@@ -1298,13 +1299,13 @@ post_bl_block_tag(POST_ARGS)
 		if (MDOC_It != nn->tok)
 			continue;
 
-		assert(MDOC_BLOCK == nn->type);
+		assert(nn->type == ROFFT_BLOCK);
 		nn = nn->head->child;
 
 		if (nn == NULL)
 			break;
 
-		if (MDOC_TEXT == nn->type) {
+		if (nn->type == ROFFT_TEXT) {
 			sz = strlen(nn->string) + 1;
 			break;
 		}
@@ -1412,13 +1413,13 @@ post_bl(POST_ARGS)
 
 	nbody = mdoc->last;
 	switch (nbody->type) {
-	case MDOC_BLOCK:
+	case ROFFT_BLOCK:
 		post_bl_block(mdoc);
 		return;
-	case MDOC_HEAD:
+	case ROFFT_HEAD:
 		post_bl_head(mdoc);
 		return;
-	case MDOC_BODY:
+	case ROFFT_BODY:
 		break;
 	default:
 		return;
@@ -1493,7 +1494,7 @@ post_bk(POST_ARGS)
 
 	n = mdoc->last;
 
-	if (n->type == MDOC_BLOCK && n->body->child == NULL) {
+	if (n->type == ROFFT_BLOCK && n->body->child == NULL) {
 		mandoc_msg(MANDOCERR_BLK_EMPTY,
 		    mdoc->parse, n->line, n->pos, "Bk");
 		mdoc_node_delete(mdoc, n);
@@ -1512,7 +1513,7 @@ post_sm(struct mdoc *mdoc)
 		return;
 	}
 
-	assert(nch->type == MDOC_TEXT);
+	assert(nch->type == ROFFT_TEXT);
 
 	if ( ! strcmp(nch->string, "on")) {
 		mdoc->flags &= ~MDOC_SMOFF;
@@ -1579,7 +1580,7 @@ post_st(POST_ARGS)
 	n = mdoc->last;
 	nch = n->child;
 
-	assert(MDOC_TEXT == nch->type);
+	assert(nch->type == ROFFT_TEXT);
 
 	if (NULL == (p = mdoc_a2st(nch->string))) {
 		mandoc_vmsg(MANDOCERR_ST_BAD, mdoc->parse,
@@ -1599,7 +1600,7 @@ post_rs(POST_ARGS)
 
 	np = mdoc->last;
 
-	if (np->type != MDOC_BODY)
+	if (np->type != ROFFT_BODY)
 		return;
 
 	if (np->child == NULL) {
@@ -1692,7 +1693,7 @@ post_hyph(POST_ARGS)
 	char			*cp;
 
 	for (nch = mdoc->last->child; nch != NULL; nch = nch->next) {
-		if (nch->type != MDOC_TEXT)
+		if (nch->type != ROFFT_TEXT)
 			continue;
 		cp = nch->string;
 		if (*cp == '\0')
@@ -1721,10 +1722,10 @@ post_sh(POST_ARGS)
 	post_ignpar(mdoc);
 
 	switch (mdoc->last->type) {
-	case MDOC_HEAD:
+	case ROFFT_HEAD:
 		post_sh_head(mdoc);
 		break;
-	case MDOC_BODY:
+	case ROFFT_BODY:
 		switch (mdoc->lastsec)  {
 		case SEC_NAME:
 			post_sh_name(mdoc);
@@ -1830,7 +1831,7 @@ post_sh_see_also(POST_ARGS)
 			lastpunct = "none";
 			continue;
 		}
-		if (n->type != MDOC_TEXT)
+		if (n->type != ROFFT_TEXT)
 			break;
 		for (name = n->string; *name != '\0'; name++)
 			if (isalpha((const unsigned char)*name))
@@ -1989,10 +1990,10 @@ post_ignpar(POST_ARGS)
 	struct mdoc_node *np;
 
 	switch (mdoc->last->type) {
-	case MDOC_HEAD:
+	case ROFFT_HEAD:
 		post_hyph(mdoc);
 		return;
-	case MDOC_BODY:
+	case ROFFT_BODY:
 		break;
 	default:
 		return;
@@ -2023,7 +2024,7 @@ pre_par(PRE_ARGS)
 
 	if (NULL == mdoc->last)
 		return;
-	if (MDOC_ELEM != n->type && MDOC_BLOCK != n->type)
+	if (n->type != ROFFT_ELEM && n->type != ROFFT_BLOCK)
 		return;
 
 	/*
@@ -2088,7 +2089,7 @@ pre_literal(PRE_ARGS)
 
 	pre_display(mdoc, n);
 
-	if (MDOC_BODY != n->type)
+	if (n->type != ROFFT_BODY)
 		return;
 
 	/*

@@ -23,6 +23,7 @@
 #include <limits.h>
 #include <string.h>
 
+#include "roff.h"
 #include "man.h"
 #include "libman.h"
 

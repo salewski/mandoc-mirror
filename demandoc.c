@@ -26,6 +26,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "roff.h"
 #include "man.h"
 #include "mdoc.h"
 #include "mandoc.h"
@@ -239,7 +240,7 @@ pmdoc(const struct mdoc_node *p, int *line, int *col, int list)
 	for ( ; p; p = p->next) {
 		if (MDOC_LINE & p->flags)
 			pline(p->line, line, col, list);
-		if (MDOC_TEXT == p->type)
+		if (ROFFT_TEXT == p->type)
 			pstring(p->string, p->pos, col, list);
 		if (p->child)
 			pmdoc(p->child, line, col, list);
@@ -253,7 +254,7 @@ pman(const struct man_node *p, int *line, int *col, int list)
 	for ( ; p; p = p->next) {
 		if (MAN_LINE & p->flags)
 			pline(p->line, line, col, list);
-		if (MAN_TEXT == p->type)
+		if (ROFFT_TEXT == p->type)
 			pstring(p->string, p->pos, col, list);
 		if (p->child)
 			pman(p->child, line, col, list);

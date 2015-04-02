@@ -54,7 +54,6 @@ require inclusion of the header where that type is defined.
 Each of the following headers can be included without including
 any other mandoc header.
 These headers should be included before any other mandoc headers.
-Afterwards, any other mandoc headers can be included as needed.
 .Bl -tag -width Ds
 .It Qq Pa mandoc_aux.h
 Requires
@@ -117,16 +116,29 @@ and
 from
 .Pa libman.h
 as opaque types for function prototypes.
+.It Qq Pa roff.h
+Provides
+.Vt enum roff_type .
+.El
+.Pp
+The following two require
+.Qq Pa roff.h
+but no other mandoc headers.
+Afterwards, any other mandoc headers can be included as needed.
+.Bl -tag -width Ds
 .It Qq Pa mdoc.h
 Requires
 .In sys/types.h
 for
-.Vt size_t .
+.Vt size_t
+and
+.Qq Pa roff.h
+for
+.Vt enum roff_type .
 .Pp
 Provides
 .Vt enum mdoct ,
 .Vt enum mdocargt ,
-.Vt enum mdoc_type ,
 .Vt enum mdoc_sec ,
 .Vt enum mdoc_endbody ,
 .Vt enum mdoc_disp ,
@@ -163,9 +175,13 @@ When this header is included, the same file should not include
 or
 .Pa libroff.h .
 .It Qq Pa man.h
+Requires
+.Qq Pa roff.h
+for
+.Vt enum roff_type .
+.Pp
 Provides
 .Vt enum mant ,
-.Vt enum man_type ,
 .Vt struct man_meta ,
 .Vt struct man_node ,
 and the functions

@@ -153,6 +153,7 @@ DISTFILES	 = INSTALL \
 		   out.h \
 		   predefs.in \
 		   roff.7 \
+		   roff.h \
 		   st.in \
 		   style.css \
 		   tbl.3 \
@@ -273,7 +274,8 @@ WWW_MANS	 = apropos.1.html \
 		   mandoc.h.html \
 		   mandoc_aux.h.html \
 		   mansearch.h.html \
-		   mdoc.h.html
+		   mdoc.h.html \
+		   roff.h.html
 
 WWW_OBJS	 = mdocml.tar.gz \
 		   mdocml.sha256
@@ -327,7 +329,7 @@ base-install: base-build
 	$(INSTALL_PROGRAM) mandoc demandoc $(DESTDIR)$(BINDIR)
 	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_MAN)
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
-	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h \
+	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h roff.h \
 		$(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) man.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_MAN).1

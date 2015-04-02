@@ -7,9 +7,9 @@
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR
  * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include "mandoc_aux.h"
+#include "roff.h"
 #include "mdoc.h"
 #include "out.h"
 #include "html.h"
@@ -390,10 +391,10 @@ print_mdoc_node(MDOC_ARGS)
 	n->flags &= ~MDOC_ENDED;
 
 	switch (n->type) {
-	case MDOC_ROOT:
+	case ROFFT_ROOT:
 		child = mdoc_root_pre(meta, n, h);
 		break;
-	case MDOC_TEXT:
+	case ROFFT_TEXT:
 		/* No tables in this mode... */
 		assert(NULL == h->tblt);
 
@@ -410,12 +411,12 @@ print_mdoc_node(MDOC_ARGS)
 		if (MDOC_DELIMO & n->flags)
 			h->flags |= HTML_NOSPACE;
 		return;
-	case MDOC_EQN:
+	case ROFFT_EQN:
 		if (n->flags & MDOC_LINE)
 			putchar('\n');
 		print_eqn(h, n->eqn);
 		break;
-	case MDOC_TBL:
+	case ROFFT_TBL:
 		/*
 		 * This will take care of initialising all of the table
 		 * state data for the first table, then tearing it down
@@ -450,10 +451,10 @@ print_mdoc_node(MDOC_ARGS)
 	print_stagq(h, t);
 
 	switch (n->type) {
-	case MDOC_ROOT:
+	case ROFFT_ROOT:
 		mdoc_root_post(meta, n, h);
 		break;
-	case MDOC_EQN:
+	case ROFFT_EQN:
 		break;
 	default:
 		if ( ! mdocs[n->tok].post || n->flags & MDOC_ENDED)
@@ -543,11 +544,11 @@ mdoc_sh_pre(MDOC_ARGS)
 	struct htmlpair	 tag;
 
 	switch (n->type) {
-	case MDOC_BLOCK:
+	case ROFFT_BLOCK:
 		PAIR_CLASS_INIT(&tag, "section");
 		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
-	case MDOC_BODY:
+	case ROFFT_BODY:
 		if (n->sec == SEC_AUTHORS)
 			h->flags &= ~(HTML_SPLIT|HTML_NOSPLIT);
 		return(1);
@@ -558,7 +559,7 @@ mdoc_sh_pre(MDOC_ARGS)
 	bufinit(h);
 	bufcat(h, "x");
 
-	for (n = n->child; n && MDOC_TEXT == n->type; ) {
+	for (n = n->child; n != NULL && n->type == ROFFT_TEXT; ) {
 		bufcat_id(h, n->string);
 		if (NULL != (n = n->next))
 			bufcat_id(h, " ");
@@ -578,17 +579,17 @@ mdoc_ss_pre(MDOC_ARGS)
 {
 	struct htmlpair	 tag;
 
-	if (MDOC_BLOCK == n->type) {
+	if (n->type == ROFFT_BLOCK) {
 		PAIR_CLASS_INIT(&tag, "subsection");
 		print_otag(h, TAG_DIV, 1, &tag);
 		return(1);
-	} else if (MDOC_BODY == n->type)
+	} else if (n->type == ROFFT_BODY)
 		return(1);
 
 	bufinit(h);
 	bufcat(h, "x");
 
-	for (n = n->child; n && MDOC_TEXT == n->type; ) {
+	for (n = n->child; n != NULL && n->type == ROFFT_TEXT; ) {
 		bufcat_id(h, n->string);
 		if (NULL != (n = n->next))
 			bufcat_id(h, " ");
@@ -620,7 +621,7 @@ mdoc_fl_pre(MDOC_ARGS)
 
 	if ( ! (n->nchild == 0 &&
 	    (n->next == NULL ||
-	     n->next->type == MDOC_TEXT ||
+	     n->next->type == ROFFT_TEXT ||
 	     n->next->flags & MDOC_LINE)))
 		h->flags |= HTML_NOSPACE;
 
@@ -632,7 +633,7 @@ mdoc_nd_pre(MDOC_ARGS)
 {
 	struct htmlpair	 tag;
 
-	if (MDOC_BODY != n->type)
+	if (n->type != ROFFT_BODY)
 		return(1);
 
 	/* XXX: this tag in theory can contain block elements. */
@@ -651,19 +652,19 @@ mdoc_nm_pre(MDOC_ARGS)
 	int		 len;
 
 	switch (n->type) {
-	case MDOC_ELEM:
+	case ROFFT_ELEM:
 		synopsis_pre(h, n);
 		PAIR_CLASS_INIT(&tag, "name");
 		print_otag(h, TAG_B, 1, &tag);
 		if (NULL == n->child && meta->name)
 			print_text(h, meta->name);
 		return(1);
-	case MDOC_HEAD:
+	case ROFFT_HEAD:
 		print_otag(h, TAG_TD, 0, NULL);
 		if (NULL == n->child && meta->name)
 			print_text(h, meta->name);
 		return(1);
-	case MDOC_BODY:
+	case ROFFT_BODY:
 		print_otag(h, TAG_TD, 0, NULL);
 		return(1);
 	default:
@@ -675,7 +676,7 @@ mdoc_nm_pre(MDOC_ARGS)
 	print_otag(h, TAG_TABLE, 1, &tag);
 
 	for (len = 0, n = n->child; n; n = n->next)
-		if (MDOC_TEXT == n->type)
+		if (n->type == ROFFT_TEXT)
 			len += html_strlen(n->string);
 
 	if (0 == len && meta->name)
@@ -836,7 +837,7 @@ mdoc_it_pre(MDOC_ARGS)
 
 	bufinit(h);
 
-	if (MDOC_HEAD == n->type) {
+	if (n->type == ROFFT_HEAD) {
 		switch (type) {
 		case LIST_bullet:
 			/* FALLTHROUGH */
@@ -871,7 +872,7 @@ mdoc_it_pre(MDOC_ARGS)
 		default:
 			break;
 		}
-	} else if (MDOC_BODY == n->type) {
+	} else if (n->type == ROFFT_BODY) {
 		switch (type) {
 		case LIST_bullet:
 			/* FALLTHROUGH */
@@ -935,13 +936,13 @@ mdoc_bl_pre(MDOC_ARGS)
 	struct roffsu	 su;
 	char		 buf[BUFSIZ];
 
-	if (MDOC_BODY == n->type) {
+	if (n->type == ROFFT_BODY) {
 		if (LIST_column == n->norm->Bl.type)
 			print_otag(h, TAG_TBODY, 0, NULL);
 		return(1);
 	}
 
-	if (MDOC_HEAD == n->type) {
+	if (n->type == ROFFT_HEAD) {
 		if (LIST_column != n->norm->Bl.type)
 			return(0);
 
@@ -1035,7 +1036,7 @@ mdoc_ex_pre(MDOC_ARGS)
 
 	nchild = n->nchild;
 	for (n = n->child; n; n = n->next) {
-		assert(MDOC_TEXT == n->type);
+		assert(n->type == ROFFT_TEXT);
 
 		t = print_otag(h, TAG_B, 1, &tag);
 		print_text(h, n->string);
@@ -1075,7 +1076,7 @@ mdoc_d1_pre(MDOC_ARGS)
 	struct htmlpair	 tag[2];
 	struct roffsu	 su;
 
-	if (MDOC_BLOCK != n->type)
+	if (n->type != ROFFT_BLOCK)
 		return(1);
 
 	SCALE_VS_INIT(&su, 0);
@@ -1128,13 +1129,13 @@ mdoc_bd_pre(MDOC_ARGS)
 	struct mdoc_node	*nn;
 	struct roffsu		 su;
 
-	if (MDOC_HEAD == n->type)
+	if (n->type == ROFFT_HEAD)
 		return(0);
 
-	if (MDOC_BLOCK == n->type) {
+	if (n->type == ROFFT_BLOCK) {
 		comp = n->norm->Bd.comp;
 		for (nn = n; nn && ! comp; nn = nn->parent) {
-			if (MDOC_BLOCK != nn->type)
+			if (nn->type != ROFFT_BLOCK)
 				continue;
 			if (MDOC_Ss == nn->tok || MDOC_Sh == nn->tok)
 				comp = 1;
@@ -1353,7 +1354,7 @@ mdoc_fd_pre(MDOC_ARGS)
 	if (NULL == (n = n->child))
 		return(0);
 
-	assert(MDOC_TEXT == n->type);
+	assert(n->type == ROFFT_TEXT);
 
 	if (strcmp(n->string, "#include")) {
 		PAIR_CLASS_INIT(&tag[0], "macro");
@@ -1366,7 +1367,7 @@ mdoc_fd_pre(MDOC_ARGS)
 	print_text(h, n->string);
 
 	if (NULL != (n = n->next)) {
-		assert(MDOC_TEXT == n->type);
+		assert(n->type == ROFFT_TEXT);
 
 		/*
 		 * XXX This is broken and not easy to fix.
@@ -1400,7 +1401,7 @@ mdoc_fd_pre(MDOC_ARGS)
 	}
 
 	for ( ; n; n = n->next) {
-		assert(MDOC_TEXT == n->type);
+		assert(n->type == ROFFT_TEXT);
 		print_text(h, n->string);
 	}
 
@@ -1412,12 +1413,12 @@ mdoc_vt_pre(MDOC_ARGS)
 {
 	struct htmlpair	 tag;
 
-	if (MDOC_BLOCK == n->type) {
+	if (n->type == ROFFT_BLOCK) {
 		synopsis_pre(h, n);
 		return(1);
-	} else if (MDOC_ELEM == n->type) {
+	} else if (n->type == ROFFT_ELEM) {
 		synopsis_pre(h, n);
-	} else if (MDOC_HEAD == n->type)
+	} else if (n->type == ROFFT_HEAD)
 		return(0);
 
 	PAIR_CLASS_INIT(&tag, "type");
@@ -1596,7 +1597,7 @@ mdoc_lk_pre(MDOC_ARGS)
 	if (NULL == (n = n->child))
 		return(0);
 
-	assert(MDOC_TEXT == n->type);
+	assert(n->type == ROFFT_TEXT);
 
 	PAIR_CLASS_INIT(&tag[0], "link-ext");
 	PAIR_HREF_INIT(&tag[1], n->string);
@@ -1621,7 +1622,7 @@ mdoc_mt_pre(MDOC_ARGS)
 	PAIR_CLASS_INIT(&tag[0], "link-mail");
 
 	for (n = n->child; n; n = n->next) {
-		assert(MDOC_TEXT == n->type);
+		assert(n->type == ROFFT_TEXT);
 
 		bufinit(h);
 		bufcat(h, "mailto:");
@@ -1642,12 +1643,12 @@ mdoc_fo_pre(MDOC_ARGS)
 	struct htmlpair	 tag;
 	struct tag	*t;
 
-	if (MDOC_BODY == n->type) {
+	if (n->type == ROFFT_BODY) {
 		h->flags |= HTML_NOSPACE;
 		print_text(h, "(");
 		h->flags |= HTML_NOSPACE;
 		return(1);
-	} else if (MDOC_BLOCK == n->type) {
+	} else if (n->type == ROFFT_BLOCK) {
 		synopsis_pre(h, n);
 		return(1);
 	}
@@ -1668,7 +1669,7 @@ static void
 mdoc_fo_post(MDOC_ARGS)
 {
 
-	if (MDOC_BODY != n->type)
+	if (n->type != ROFFT_BODY)
 		return;
 	h->flags |= HTML_NOSPACE;
 	print_text(h, ")");
@@ -1702,7 +1703,7 @@ mdoc_in_pre(MDOC_ARGS)
 	h->flags |= HTML_NOSPACE;
 
 	if (NULL != (n = n->child)) {
-		assert(MDOC_TEXT == n->type);
+		assert(n->type == ROFFT_TEXT);
 
 		PAIR_CLASS_INIT(&tag[0], "link-includes");
 
@@ -1724,7 +1725,7 @@ mdoc_in_pre(MDOC_ARGS)
 	print_text(h, ">");
 
 	for ( ; n; n = n->next) {
-		assert(MDOC_TEXT == n->type);
+		assert(n->type == ROFFT_TEXT);
 		print_text(h, n->string);
 	}
 
@@ -1823,9 +1824,9 @@ mdoc_bf_pre(MDOC_ARGS)
 	struct htmlpair	 tag[2];
 	struct roffsu	 su;
 
-	if (MDOC_HEAD == n->type)
+	if (n->type == ROFFT_HEAD)
 		return(0);
-	else if (MDOC_BODY != n->type)
+	else if (n->type != ROFFT_BODY)
 		return(1);
 
 	if (FONT_Em == n->norm->Bf.font)
@@ -1882,7 +1883,7 @@ mdoc_rs_pre(MDOC_ARGS)
 {
 	struct htmlpair	 tag;
 
-	if (MDOC_BLOCK != n->type)
+	if (n->type != ROFFT_BLOCK)
 		return(1);
 
 	if (n->prev && SEC_SEE_ALSO == n->sec)
@@ -2048,11 +2049,11 @@ mdoc_bk_pre(MDOC_ARGS)
 {
 
 	switch (n->type) {
-	case MDOC_BLOCK:
+	case ROFFT_BLOCK:
 		break;
-	case MDOC_HEAD:
+	case ROFFT_HEAD:
 		return(0);
-	case MDOC_BODY:
+	case ROFFT_BODY:
 		if (n->parent->args || 0 == n->prev->nchild)
 			h->flags |= HTML_PREKEEP;
 		break;
@@ -2068,7 +2069,7 @@ static void
 mdoc_bk_post(MDOC_ARGS)
 {
 
-	if (MDOC_BODY == n->type)
+	if (n->type == ROFFT_BODY)
 		h->flags &= ~(HTML_KEEP | HTML_PREKEEP);
 }
 
@@ -2077,7 +2078,7 @@ mdoc_quote_pre(MDOC_ARGS)
 {
 	struct htmlpair	tag;
 
-	if (MDOC_BODY != n->type)
+	if (n->type != ROFFT_BODY)
 		return(1);
 
 	switch (n->tok) {
@@ -2149,7 +2150,7 @@ static void
 mdoc_quote_post(MDOC_ARGS)
 {
 
-	if (n->type != MDOC_BODY && n->type != MDOC_ELEM)
+	if (n->type != ROFFT_BODY && n->type != ROFFT_ELEM)
 		return;
 
 	h->flags |= HTML_NOSPACE;
@@ -2214,7 +2215,7 @@ static int
 mdoc_eo_pre(MDOC_ARGS)
 {
 
-	if (n->type != MDOC_BODY)
+	if (n->type != ROFFT_BODY)
 		return(1);
 
 	if (n->end == ENDBODY_NOT &&
@@ -2234,7 +2235,7 @@ mdoc_eo_post(MDOC_ARGS)
 {
 	int	 body, tail;
 
-	if (n->type != MDOC_BODY)
+	if (n->type != ROFFT_BODY)
 		return;
 
 	if (n->end != ENDBODY_NOT) {
