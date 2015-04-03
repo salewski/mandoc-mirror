@@ -997,7 +997,7 @@ spawn_pager(void)
 	if (pager == NULL || *pager == '\0')
 		pager = getenv("PAGER");
 	if (pager == NULL || *pager == '\0')
-		pager = "/usr/bin/more -s";
+		pager = "more -s";
 	cp = mandoc_strdup(pager);
 
 	/*
