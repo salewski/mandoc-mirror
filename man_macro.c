@@ -401,7 +401,7 @@ blk_imp(MACRO_PROT_ARGS)
 
 	/* Close out the head and open the body. */
 
-	rew_scope(ROFFT_HEAD, man, tok);
+	man_unscope(man, n);
 	man_body_alloc(man, line, ppos, tok);
 }
 
