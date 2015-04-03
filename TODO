@@ -488,6 +488,14 @@ are mere guesses, and some may be wrong.
   loc **  exist **  algo **  size *  imp **
 
 ************************************************************************
+* portability
+************************************************************************
+
+- word boundaries in regular expressions for whatis(1)
+  set up config tests to use [[:<:]], \<, or nothing
+  reminded by Peter Bray Fri, 03 Apr 2015 23:02:16 +1100
+
+************************************************************************
 * warning issues
 ************************************************************************
 
