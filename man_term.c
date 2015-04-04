@@ -533,6 +533,17 @@ post_HP(DECL_ARGS)
 	switch (n->type) {
 	case ROFFT_BODY:
 		term_newln(p);
+
+		/*
+		 * Compatibility with a groff bug.
+		 * The .HP macro uses the undocumented .tag request
+		 * which causes a line break and cancels no-space
+		 * mode even if there isn't any output.
+		 */
+
+		if (n->child == NULL)
+			term_vspace(p);
+
 		p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND);
 		p->trailspace = 0;
 		p->offset = mt->offset;
