@@ -768,9 +768,15 @@ pre_SS(DECL_ARGS)
 	case ROFFT_HEAD:
 		term_fontrepl(p, TERMFONT_BOLD);
 		p->offset = term_len(p, 3);
+		p->rmargin = mt->offset;
+		p->trailspace = mt->offset;
+		p->flags |= TERMP_NOBREAK | TERMP_BRIND;
 		break;
 	case ROFFT_BODY:
 		p->offset = mt->offset;
+		p->rmargin = p->maxrmargin;
+		p->trailspace = 0;
+		p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND);
 		break;
 	default:
 		break;
@@ -823,9 +829,15 @@ pre_SH(DECL_ARGS)
 	case ROFFT_HEAD:
 		term_fontrepl(p, TERMFONT_BOLD);
 		p->offset = 0;
+		p->rmargin = mt->offset;
+		p->trailspace = mt->offset;
+		p->flags |= TERMP_NOBREAK | TERMP_BRIND;
 		break;
 	case ROFFT_BODY:
 		p->offset = mt->offset;
+		p->rmargin = p->maxrmargin;
+		p->trailspace = 0;
+		p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND);
 		break;
 	default:
 		break;
