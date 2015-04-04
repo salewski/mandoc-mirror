@@ -1128,6 +1128,8 @@ roff_parsetext(struct buf *buf, int pos, int *offs)
 			esc = mandoc_escape((const char **)&p, NULL, NULL);
 			if (esc == ESCAPE_ERROR)
 				break;
+			while (*p == '-')
+				p++;
 			continue;
 		} else if (p == start) {
 			p++;
