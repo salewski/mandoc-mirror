@@ -95,9 +95,9 @@ struct	termp {
 	void		(*end)(struct termp *);
 	void		(*endline)(struct termp *);
 	void		(*advance)(struct termp *, size_t);
-	void		(*setwidth)(struct termp *, int, size_t);
+	void		(*setwidth)(struct termp *, int, int);
 	size_t		(*width)(const struct termp *, int);
-	double		(*hspan)(const struct termp *,
+	int		(*hspan)(const struct termp *,
 				const struct roffsu *);
 	const void	 *argf;		/* arg for headf/footf */
 	struct termp_ps	 *ps;

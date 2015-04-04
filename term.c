@@ -619,8 +619,7 @@ void
 term_setwidth(struct termp *p, const char *wstr)
 {
 	struct roffsu	 su;
-	size_t		 width;
-	int		 iop;
+	int		 iop, width;
 
 	iop = 0;
 	width = 0;
@@ -831,11 +830,12 @@ term_vspan(const struct termp *p, const struct roffsu *su)
 	return(ri < 66 ? ri : 1);
 }
 
+/*
+ * Convert a scaling width to basic units, rounding down.
+ */
 int
 term_hspan(const struct termp *p, const struct roffsu *su)
 {
-	double		 v;
 
-	v = (*p->hspan)(p, su);
-	return(v > 0.0 ? v + 0.0005 : v - 0.0005);
+	return((*p->hspan)(p, su));
 }

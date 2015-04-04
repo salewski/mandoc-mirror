@@ -87,7 +87,7 @@ struct	termp_ps {
 	size_t		  pdfobjsz;	/* size of pdfobjs */
 };
 
-static	double		  ps_hspan(const struct termp *,
+static	int		  ps_hspan(const struct termp *,
 				const struct roffsu *);
 static	size_t		  ps_width(const struct termp *, int);
 static	void		  ps_advance(struct termp *, size_t);
@@ -106,7 +106,7 @@ __attribute__((__format__ (__printf__, 2, 3)))
 static	void		  ps_printf(struct termp *, const char *, ...);
 static	void		  ps_putchar(struct termp *, char);
 static	void		  ps_setfont(struct termp *, enum termfont);
-static	void		  ps_setwidth(struct termp *, int, size_t);
+static	void		  ps_setwidth(struct termp *, int, int);
 static	struct termp	 *pspdf_alloc(const struct mchars *,
 				const struct manoutput *);
 static	void		  pdf_obj(struct termp *, size_t);
@@ -620,7 +620,7 @@ pspdf_alloc(const struct mchars *mchars, const struct manoutput *outopts)
 }
 
 static void
-ps_setwidth(struct termp *p, int iop, size_t width)
+ps_setwidth(struct termp *p, int iop, int width)
 {
 	size_t	 lastwidth;
 
@@ -628,8 +628,8 @@ ps_setwidth(struct termp *p, int iop, size_t width)
 	if (iop > 0)
 		p->ps->width += width;
 	else if (iop == 0)
-		p->ps->width = width ? width : p->ps->lastwidth;
-	else if (p->ps->width > width)
+		p->ps->width = width ? (size_t)width : p->ps->lastwidth;
+	else if (p->ps->width > (size_t)width)
 		p->ps->width -= width;
 	else
 		p->ps->width = 0;
@@ -1273,7 +1273,7 @@ ps_width(const struct termp *p, int c)
 	return((size_t)fonts[(int)TERMFONT_NONE].gly[c].wx);
 }
 
-static double
+static int
 ps_hspan(const struct termp *p, const struct roffsu *su)
 {
 	double		 r;
@@ -1325,7 +1325,7 @@ ps_hspan(const struct termp *p, const struct roffsu *su)
 		break;
 	}
 
-	return(r);
+	return(r * 24.0);
 }
 
 static void

@@ -533,7 +533,7 @@ a2width(const struct termp *p, const char *v)
 		SCALE_HS_INIT(&su, term_strlen(p, v));
 		su.scale /= term_strlen(p, "0");
 	}
-	return(term_hspan(p, &su));
+	return(term_hspan(p, &su) / 24);
 }
 
 /*
