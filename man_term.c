@@ -879,7 +879,9 @@ pre_RS(DECL_ARGS)
 
 	n = n->parent->head;
 	n->aux = SHRT_MAX + 1;
-	if (n->child != NULL && a2roffsu(n->child->string, &su, SCALE_EN))
+	if (n->child == NULL)
+		n->aux = mt->lmargin[mt->lmargincur];
+	else if (a2roffsu(n->child->string, &su, SCALE_EN))
 		n->aux = term_hspan(p, &su) / 24;
 	if (n->aux < 0 && (size_t)(-n->aux) > mt->offset)
 		n->aux = -mt->offset;
