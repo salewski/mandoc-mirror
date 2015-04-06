@@ -895,7 +895,7 @@ pre_RS(DECL_ARGS)
 	if (++mt->lmarginsz < MAXMARGINS)
 		mt->lmargincur = mt->lmarginsz;
 
-	mt->lmargin[mt->lmargincur] = mt->lmargin[mt->lmargincur - 1];
+	mt->lmargin[mt->lmargincur] = term_len(p, p->defindent);
 	return(1);
 }
 
