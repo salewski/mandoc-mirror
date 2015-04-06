@@ -321,7 +321,10 @@ pre_alternate(DECL_ARGS)
 		term_fontrepl(p, font[i]);
 		if (savelit && NULL == nn->next)
 			mt->fl |= MANT_LITERAL;
-		print_man_node(p, mt, nn, meta);
+		assert(nn->type == ROFFT_TEXT);
+		term_word(p, nn->string);
+		if (nn->flags & MAN_EOS)
+                	p->flags |= TERMP_SENTENCE;
 		if (nn->next)
 			p->flags |= TERMP_NOSPACE;
 	}

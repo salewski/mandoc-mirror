@@ -66,6 +66,7 @@ are mere guesses, and some may be wrong.
   loc *  exist *  algo *  size *  imp **
 
 - .ns (no-space mode) occurs in xine-config(1)
+  when implementing this, also let .TH set it
   reported by brad@  Sat, 15 Jan 2011 15:45:23 -0500
   loc ***  exist ***  algo ***  size **  imp *
 
@@ -478,6 +479,10 @@ are mere guesses, and some may be wrong.
   and document it in mdoc(7) and man(7) COMPATIBILITY
   found while talking to Chris Bennett
   loc *  exist *  algo *  size *  imp *
+
+- Sequences of multiple man(7) paragraphs (.PP, .IP) interspersed
+  with .ps and .nf/.fi produce execessive blank lines, see libJudy
+  The parser reorg may help with this.
 
 - trailing whitespace must be ignored even when followed by a font escape,
   see for example
