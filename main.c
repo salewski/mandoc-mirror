@@ -576,11 +576,9 @@ fs_lookup(const struct manpaths *paths, size_t ipath,
 
 found:
 #if HAVE_SQLITE3
-	fprintf(stderr, "%s: outdated mandoc.db lacks %s(%s) entry,\n"
-	    "     consider running  # makewhatis %s\n",
-	    progname, name, sec, paths->paths[ipath]);
+	fprintf(stderr, "%s: outdated mandoc.db lacks %s(%s) entry, run "
+	    "makewhatis %s\n", progname, name, sec, paths->paths[ipath]);
 #endif
-
 	*res = mandoc_reallocarray(*res, ++*ressz, sizeof(struct manpage));
 	page = *res + (*ressz - 1);
 	page->file = file;
