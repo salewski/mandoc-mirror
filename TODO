@@ -408,6 +408,10 @@ are mere guesses, and some may be wrong.
 - consider whether <var> can be used for Ar Dv Er Ev Fa Va.
   from bentley@  Wed, 13 Aug 2014 09:17:55 -0600
 
+- generate <img> tags in HTML
+  idea from florian@  Tue, 7 Apr 2015 00:26:28 +0000
+  may be possible to implement with .Lk img://something.png alt_text
+
 - check https://github.com/trentm/mdocml
 
 ************************************************************************
