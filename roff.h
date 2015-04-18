@@ -19,6 +19,12 @@
 struct	mdoc_arg;
 union	mdoc_data;
 
+enum	roff_macroset {
+	MACROSET_NONE = 0,
+	MACROSET_MDOC,
+	MACROSET_MAN
+};
+
 enum	roff_sec {
 	SEC_NONE = 0,
 	SEC_NAME,
@@ -145,6 +151,7 @@ struct	roff_man {
 #define	MAN_BLINE	 (1 << 12) /* Next-line block scope. */
 #define	MAN_LITERAL	  MDOC_LITERAL
 #define	MAN_NEWLINE	  MDOC_NEWLINE
+	enum roff_macroset macroset; /* Kind of high-level macros used. */
 	enum roff_sec	  lastsec; /* Last section seen. */
 	enum roff_sec	  lastnamed; /* Last standard section seen. */
 	enum roff_next	  next;    /* Where to put the next node. */

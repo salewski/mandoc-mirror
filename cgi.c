@@ -30,8 +30,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "mandoc.h"
 #include "mandoc_aux.h"
+#include "mandoc.h"
+#include "roff.h"
 #include "main.h"
 #include "manconf.h"
 #include "mansearch.h"
@@ -819,7 +820,6 @@ format(const struct req *req, const char *file)
 	struct manoutput conf;
 	struct mparse	*mp;
 	struct mchars	*mchars;
-	struct roff_man	*mdoc;
 	struct roff_man	*man;
 	void		*vp;
 	int		 fd;
@@ -846,8 +846,8 @@ format(const struct req *req, const char *file)
 	    usepath	? "&manpath="    : "",
 	    usepath	? req->q.manpath : "");
 
-	mparse_result(mp, &mdoc, &man, NULL);
-	if (NULL == man && NULL == mdoc) {
+	mparse_result(mp, &man, NULL);
+	if (man == NULL) {
 		fprintf(stderr, "fatal mandoc error: %s/%s\n",
 		    req->q.manpath, file);
 		pg_error_internal();
@@ -858,8 +858,8 @@ format(const struct req *req, const char *file)
 
 	vp = html_alloc(mchars, &conf);
 
-	if (NULL != mdoc)
-		html_mdoc(vp, mdoc);
+	if (man->macroset == MACROSET_MDOC)
+		html_mdoc(vp, man);
 	else
 		html_man(vp, man);
 

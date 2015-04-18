@@ -433,7 +433,7 @@ enum mandoclevel  mparse_readfd(struct mparse *, int, const char *);
 enum mandoclevel  mparse_readmem(struct mparse *, void *, size_t,
 			const char *);
 void		  mparse_reset(struct mparse *);
-void		  mparse_result(struct mparse *, struct roff_man **,
+void		  mparse_result(struct mparse *,
 			struct roff_man **, char **);
 const char	 *mparse_getkeep(const struct mparse *);
 const char	 *mparse_strerror(enum mandocerr);

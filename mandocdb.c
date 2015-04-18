@@ -1107,7 +1107,6 @@ mpages_merge(struct mparse *mp)
 	struct ohash_info	 str_info;
 	struct mpage		*mpage, *mpage_dest;
 	struct mlink		*mlink, *mlink_dest;
-	struct roff_man		*mdoc;
 	struct roff_man		*man;
 	char			*sodest;
 	char			*cp;
@@ -1135,7 +1134,6 @@ mpages_merge(struct mparse *mp)
 		ohash_init(&names, 4, &str_info);
 		ohash_init(&strings, 6, &str_info);
 		mparse_reset(mp);
-		mdoc = NULL;
 		man = NULL;
 		sodest = NULL;
 
@@ -1151,7 +1149,7 @@ mpages_merge(struct mparse *mp)
 		 */
 		if (mlink->dform != FORM_CAT || mlink->fform != FORM_CAT) {
 			mparse_readfd(mp, fd, mlink->file);
-			mparse_result(mp, &mdoc, &man, &sodest);
+			mparse_result(mp, &man, &sodest);
 		}
 
 		if (sodest != NULL) {
@@ -1195,17 +1193,17 @@ mpages_merge(struct mparse *mp)
 				mpage->mlinks = NULL;
 			}
 			goto nextpage;
-		} else if (mdoc != NULL) {
+		} else if (man != NULL && man->macroset == MACROSET_MDOC) {
 			mpage->form = FORM_SRC;
-			mpage->sec = mdoc_meta(mdoc)->msec;
+			mpage->sec = mdoc_meta(man)->msec;
 			mpage->sec = mandoc_strdup(
 			    mpage->sec == NULL ? "" : mpage->sec);
-			mpage->arch = mdoc_meta(mdoc)->arch;
+			mpage->arch = mdoc_meta(man)->arch;
 			mpage->arch = mandoc_strdup(
 			    mpage->arch == NULL ? "" : mpage->arch);
 			mpage->title =
-			    mandoc_strdup(mdoc_meta(mdoc)->title);
-		} else if (man != NULL) {
+			    mandoc_strdup(mdoc_meta(man)->title);
+		} else if (man != NULL && man->macroset == MACROSET_MAN) {
 			mpage->form = FORM_SRC;
 			mpage->sec = mandoc_strdup(man_meta(man)->msec);
 			mpage->arch = mandoc_strdup(mlink->arch);
@@ -1231,8 +1229,8 @@ mpages_merge(struct mparse *mp)
 		}
 
 		assert(mpage->desc == NULL);
-		if (mdoc != NULL)
-			parse_mdoc(mpage, mdoc_meta(mdoc), mdoc_node(mdoc));
+		if (man != NULL && man->macroset == MACROSET_MDOC)
+			parse_mdoc(mpage, mdoc_meta(man), mdoc_node(man));
 		else if (man != NULL)
 			parse_man(mpage, man_meta(man), man_node(man));
 		else

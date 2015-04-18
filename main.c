@@ -632,7 +632,6 @@ static void
 parse(struct curparse *curp, int fd, const char *file)
 {
 	enum mandoclevel  rctmp;
-	struct roff_man	 *mdoc;
 	struct roff_man	 *man;
 
 	/* Begin by parsing the file itself. */
@@ -720,14 +719,16 @@ parse(struct curparse *curp, int fd, const char *file)
 		}
 	}
 
-	mparse_result(curp->mp, &mdoc, &man, NULL);
+	mparse_result(curp->mp, &man, NULL);
 
 	/* Execute the out device, if it exists. */
 
-	if (man && curp->outman)
+	if (man == NULL)
+		return;
+	if (curp->outmdoc != NULL && man->macroset == MACROSET_MDOC)
+		(*curp->outmdoc)(curp->outdata, man);
+	if (curp->outman != NULL && man->macroset == MACROSET_MAN)
 		(*curp->outman)(curp->outdata, man);
-	if (mdoc && curp->outmdoc)
-		(*curp->outmdoc)(curp->outdata, mdoc);
 }
 
 static void

@@ -135,6 +135,7 @@ mdoc_alloc1(struct roff_man *mdoc)
 {
 
 	memset(&mdoc->meta, 0, sizeof(mdoc->meta));
+	mdoc->macroset = MACROSET_MDOC;
 	mdoc->flags = 0;
 	mdoc->lastnamed = mdoc->lastsec = SEC_NONE;
 	mdoc->last = mandoc_calloc(1, sizeof(*mdoc->last));
