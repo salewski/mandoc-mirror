@@ -93,20 +93,6 @@ static	int		  mdoc_ptext(struct roff_man *, int, char *, int);
 static	int		  mdoc_pmacro(struct roff_man *, int, char *, int);
 
 
-const struct roff_node *
-mdoc_node(const struct roff_man *mdoc)
-{
-
-	return(mdoc->first);
-}
-
-const struct roff_meta *
-mdoc_meta(const struct roff_man *mdoc)
-{
-
-	return(&mdoc->meta);
-}
-
 void
 mdoc_endparse(struct roff_man *mdoc)
 {

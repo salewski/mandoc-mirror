@@ -62,20 +62,6 @@ static	int		 man_ptext(struct roff_man *, int, char *, int);
 static	int		 man_pmacro(struct roff_man *, int, char *, int);
 
 
-const struct roff_node *
-man_node(const struct roff_man *man)
-{
-
-	return(man->first);
-}
-
-const struct roff_meta *
-man_meta(const struct roff_man *man)
-{
-
-	return(&man->meta);
-}
-
 void
 man_endparse(struct roff_man *man)
 {

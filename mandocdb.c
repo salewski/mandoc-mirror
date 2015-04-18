@@ -1195,19 +1195,18 @@ mpages_merge(struct mparse *mp)
 			goto nextpage;
 		} else if (man != NULL && man->macroset == MACROSET_MDOC) {
 			mpage->form = FORM_SRC;
-			mpage->sec = mdoc_meta(man)->msec;
+			mpage->sec = man->meta.msec;
 			mpage->sec = mandoc_strdup(
 			    mpage->sec == NULL ? "" : mpage->sec);
-			mpage->arch = mdoc_meta(man)->arch;
+			mpage->arch = man->meta.arch;
 			mpage->arch = mandoc_strdup(
 			    mpage->arch == NULL ? "" : mpage->arch);
-			mpage->title =
-			    mandoc_strdup(mdoc_meta(man)->title);
+			mpage->title = mandoc_strdup(man->meta.title);
 		} else if (man != NULL && man->macroset == MACROSET_MAN) {
 			mpage->form = FORM_SRC;
-			mpage->sec = mandoc_strdup(man_meta(man)->msec);
+			mpage->sec = mandoc_strdup(man->meta.msec);
 			mpage->arch = mandoc_strdup(mlink->arch);
-			mpage->title = mandoc_strdup(man_meta(man)->title);
+			mpage->title = mandoc_strdup(man->meta.title);
 		} else {
 			mpage->form = FORM_CAT;
 			mpage->sec = mandoc_strdup(mlink->dsec);
@@ -1230,9 +1229,9 @@ mpages_merge(struct mparse *mp)
 
 		assert(mpage->desc == NULL);
 		if (man != NULL && man->macroset == MACROSET_MDOC)
-			parse_mdoc(mpage, mdoc_meta(man), mdoc_node(man));
+			parse_mdoc(mpage, &man->meta, man->first);
 		else if (man != NULL)
-			parse_man(mpage, man_meta(man), man_node(man));
+			parse_man(mpage, &man->meta, man->first);
 		else
 			parse_cat(mpage, fd);
 		if (mpage->desc == NULL)

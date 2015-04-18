@@ -41,14 +41,14 @@ void
 tree_mdoc(void *arg, const struct roff_man *mdoc)
 {
 
-	print_mdoc(mdoc_node(mdoc)->child, 0);
+	print_mdoc(mdoc->first->child, 0);
 }
 
 void
 tree_man(void *arg, const struct roff_man *man)
 {
 
-	print_man(man_node(man)->child, 0);
+	print_man(man->first->child, 0);
 }
 
 static void

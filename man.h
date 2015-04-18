@@ -63,8 +63,6 @@ __BEGIN_DECLS
 
 struct	roff_man;
 
-const struct roff_node *man_node(const struct roff_man *);
-const struct roff_meta *man_meta(const struct roff_man *);
 const struct mparse   *man_mparse(const struct roff_man *);
 void man_deroff(char **, const struct roff_node *);
 

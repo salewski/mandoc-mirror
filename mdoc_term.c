@@ -253,25 +253,22 @@ static	const struct termact termacts[MDOC_MAX] = {
 void
 terminal_mdoc(void *arg, const struct roff_man *mdoc)
 {
-	const struct roff_meta	*meta;
 	struct roff_node	*n;
 	struct termp		*p;
 
 	p = (struct termp *)arg;
-
 	p->overstep = 0;
 	p->rmargin = p->maxrmargin = p->defrmargin;
 	p->tabwidth = term_len(p, 5);
 
-	n = mdoc_node(mdoc)->child;
-	meta = mdoc_meta(mdoc);
-
+	n = mdoc->first->child;
 	if (p->synopsisonly) {
 		while (n != NULL) {
 			if (n->tok == MDOC_Sh && n->sec == SEC_SYNOPSIS) {
 				if (n->child->next->child != NULL)
 					print_mdoc_nodelist(p, NULL,
-					    meta, n->child->next->child);
+					    &mdoc->meta,
+					    n->child->next->child);
 				term_newln(p);
 				break;
 			}
@@ -280,11 +277,12 @@ terminal_mdoc(void *arg, const struct roff_man *mdoc)
 	} else {
 		if (p->defindent == 0)
 			p->defindent = 5;
-		term_begin(p, print_mdoc_head, print_mdoc_foot, meta);
+		term_begin(p, print_mdoc_head, print_mdoc_foot,
+		    &mdoc->meta);
 		if (n != NULL) {
 			if (n->tok != MDOC_Sh)
 				term_vspace(p);
-			print_mdoc_nodelist(p, NULL, meta, n);
+			print_mdoc_nodelist(p, NULL, &mdoc->meta, n);
 		}
 		term_end(p);
 	}

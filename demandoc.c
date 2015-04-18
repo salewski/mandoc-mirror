@@ -121,9 +121,9 @@ pmandoc(struct mparse *mp, int fd, const char *fn, int list)
 	if (man == NULL)
 		return;
 	if (man->macroset == MACROSET_MDOC)
-		pmdoc(mdoc_node(man), &line, &col, list);
+		pmdoc(man->first->child, &line, &col, list);
 	else
-		pman(man_node(man), &line, &col, list);
+		pman(man->first->child, &line, &col, list);
 
 	if ( ! list)
 		putchar('\n');

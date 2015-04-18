@@ -141,25 +141,20 @@ void
 terminal_man(void *arg, const struct roff_man *man)
 {
 	struct termp		*p;
-	const struct roff_meta	*meta;
 	struct roff_node	*n;
 	struct mtermp		 mt;
 
 	p = (struct termp *)arg;
-
 	p->overstep = 0;
 	p->rmargin = p->maxrmargin = p->defrmargin;
 	p->tabwidth = term_len(p, 5);
 
-	n = man_node(man)->child;
-	meta = man_meta(man);
-
 	memset(&mt, 0, sizeof(struct mtermp));
-
 	mt.lmargin[mt.lmargincur] = term_len(p, p->defindent);
 	mt.offset = term_len(p, p->defindent);
 	mt.pardist = 1;
 
+	n = man->first->child;
 	if (p->synopsisonly) {
 		while (n != NULL) {
 			if (n->tok == MAN_SH &&
@@ -167,7 +162,8 @@ terminal_man(void *arg, const struct roff_man *man)
 			    !strcmp(n->child->child->string, "SYNOPSIS")) {
 				if (n->child->next->child != NULL)
 					print_man_nodelist(p, &mt,
-					    n->child->next->child, meta);
+					    n->child->next->child,
+					    &man->meta);
 				term_newln(p);
 				break;
 			}
@@ -176,10 +172,10 @@ terminal_man(void *arg, const struct roff_man *man)
 	} else {
 		if (p->defindent == 0)
 			p->defindent = 7;
-		term_begin(p, print_man_head, print_man_foot, meta);
+		term_begin(p, print_man_head, print_man_foot, &man->meta);
 		p->flags |= TERMP_NOSPACE;
 		if (n != NULL)
-			print_man_nodelist(p, &mt, n, meta);
+			print_man_nodelist(p, &mt, n, &man->meta);
 		term_end(p);
 	}
 }
