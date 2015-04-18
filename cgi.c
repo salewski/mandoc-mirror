@@ -819,8 +819,8 @@ format(const struct req *req, const char *file)
 	struct manoutput conf;
 	struct mparse	*mp;
 	struct mchars	*mchars;
-	struct mdoc	*mdoc;
-	struct man	*man;
+	struct roff_man	*mdoc;
+	struct roff_man	*man;
 	void		*vp;
 	int		 fd;
 	int		 usepath;

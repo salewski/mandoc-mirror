@@ -265,7 +265,7 @@ static	const char * const lists[LIST_MAX] = {
 
 
 void
-html_mdoc(void *arg, const struct mdoc *mdoc)
+html_mdoc(void *arg, const struct roff_man *mdoc)
 {
 
 	print_mdoc(mdoc_meta(mdoc), mdoc_node(mdoc)->child,

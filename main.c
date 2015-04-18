@@ -58,8 +58,8 @@ enum	outmode {
 	OUTMODE_ONE
 };
 
-typedef	void		(*out_mdoc)(void *, const struct mdoc *);
-typedef	void		(*out_man)(void *, const struct man *);
+typedef	void		(*out_mdoc)(void *, const struct roff_man *);
+typedef	void		(*out_man)(void *, const struct roff_man *);
 typedef	void		(*out_free)(void *);
 
 enum	outt {
@@ -632,8 +632,8 @@ static void
 parse(struct curparse *curp, int fd, const char *file)
 {
 	enum mandoclevel  rctmp;
-	struct mdoc	 *mdoc;
-	struct man	 *man;
+	struct roff_man	 *mdoc;
+	struct roff_man	 *man;
 
 	/* Begin by parsing the file itself. */
 

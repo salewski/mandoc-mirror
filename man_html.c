@@ -145,7 +145,7 @@ print_bvspace(struct html *h, const struct roff_node *n)
 }
 
 void
-html_man(void *arg, const struct man *man)
+html_man(void *arg, const struct roff_man *man)
 {
 	struct mhtml	 mh;
 

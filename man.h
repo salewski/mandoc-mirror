@@ -61,11 +61,11 @@ extern	const char *const *man_macronames;
 
 __BEGIN_DECLS
 
-struct	man;
+struct	roff_man;
 
-const struct roff_node *man_node(const struct man *);
-const struct roff_meta *man_meta(const struct man *);
-const struct mparse   *man_mparse(const struct man *);
+const struct roff_node *man_node(const struct roff_man *);
+const struct roff_meta *man_meta(const struct roff_man *);
+const struct mparse   *man_mparse(const struct roff_man *);
 void man_deroff(char **, const struct roff_node *);
 
 __END_DECLS

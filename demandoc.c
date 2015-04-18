@@ -110,8 +110,8 @@ usage(void)
 static void
 pmandoc(struct mparse *mp, int fd, const char *fn, int list)
 {
-	struct mdoc	*mdoc;
-	struct man	*man;
+	struct roff_man	*mdoc;
+	struct roff_man	*man;
 	int		 line, col;
 
 	mparse_readfd(mp, fd, fn);

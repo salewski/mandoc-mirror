@@ -1107,8 +1107,8 @@ mpages_merge(struct mparse *mp)
 	struct ohash_info	 str_info;
 	struct mpage		*mpage, *mpage_dest;
 	struct mlink		*mlink, *mlink_dest;
-	struct mdoc		*mdoc;
-	struct man		*man;
+	struct roff_man		*mdoc;
+	struct roff_man		*man;
 	char			*sodest;
 	char			*cp;
 	int			 fd;

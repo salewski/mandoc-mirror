@@ -282,10 +282,10 @@ extern	const char *const *mdoc_argnames;
 
 __BEGIN_DECLS
 
-struct	mdoc;
+struct	roff_man;
 
-const struct roff_node *mdoc_node(const struct mdoc *);
-const struct roff_meta *mdoc_meta(const struct mdoc *);
+const struct roff_node *mdoc_node(const struct roff_man *);
+const struct roff_meta *mdoc_meta(const struct roff_man *);
 void mdoc_deroff(char **, const struct roff_node *);
 
 __END_DECLS

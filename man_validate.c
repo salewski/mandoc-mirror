@@ -35,7 +35,7 @@
 #include "libmandoc.h"
 #include "libman.h"
 
-#define	CHKARGS	  struct man *man, struct roff_node *n
+#define	CHKARGS	  struct roff_man *man, struct roff_node *n
 
 typedef	void	(*v_check)(CHKARGS);
 
@@ -98,7 +98,7 @@ static	v_check man_valids[MAN_MAX] = {
 
 
 void
-man_valid_post(struct man *man)
+man_valid_post(struct roff_man *man)
 {
 	struct roff_node *n;
 	v_check		*cp;

@@ -138,7 +138,7 @@ static	const struct termact termacts[MAN_MAX] = {
 
 
 void
-terminal_man(void *arg, const struct man *man)
+terminal_man(void *arg, const struct roff_man *man)
 {
 	struct termp		*p;
 	const struct roff_meta	*meta;

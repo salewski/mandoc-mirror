@@ -49,35 +49,37 @@ const	char *const __man_macronames[MAN_MAX] = {
 
 const	char * const *man_macronames = __man_macronames;
 
-static	void		 man_alloc1(struct man *);
-static	void		 man_breakscope(struct man *, int);
-static	void		 man_descope(struct man *, int, int);
-static	void		 man_free1(struct man *);
-static	struct roff_node *man_node_alloc(struct man *, int, int,
+static	void		 man_alloc1(struct roff_man *);
+static	void		 man_breakscope(struct roff_man *, int);
+static	void		 man_descope(struct roff_man *, int, int);
+static	void		 man_free1(struct roff_man *);
+static	struct roff_node *man_node_alloc(struct roff_man *, int, int,
 				enum roff_type, int);
-static	void		 man_node_append(struct man *, struct roff_node *);
+static	void		 man_node_append(struct roff_man *,
+				struct roff_node *);
 static	void		 man_node_free(struct roff_node *);
-static	void		 man_node_unlink(struct man *, struct roff_node *);
-static	int		 man_ptext(struct man *, int, char *, int);
-static	int		 man_pmacro(struct man *, int, char *, int);
+static	void		 man_node_unlink(struct roff_man *,
+				struct roff_node *);
+static	int		 man_ptext(struct roff_man *, int, char *, int);
+static	int		 man_pmacro(struct roff_man *, int, char *, int);
 
 
 const struct roff_node *
-man_node(const struct man *man)
+man_node(const struct roff_man *man)
 {
 
 	return(man->first);
 }
 
 const struct roff_meta *
-man_meta(const struct man *man)
+man_meta(const struct roff_man *man)
 {
 
 	return(&man->meta);
 }
 
 void
-man_reset(struct man *man)
+man_reset(struct roff_man *man)
 {
 
 	man_free1(man);
@@ -85,20 +87,20 @@ man_reset(struct man *man)
 }
 
 void
-man_free(struct man *man)
+man_free(struct roff_man *man)
 {
 
 	man_free1(man);
 	free(man);
 }
 
-struct man *
+struct roff_man *
 man_alloc(struct roff *roff, struct mparse *parse,
 	const char *defos, int quick)
 {
-	struct man	*p;
+	struct roff_man	*p;
 
-	p = mandoc_calloc(1, sizeof(struct man));
+	p = mandoc_calloc(1, sizeof(*p));
 
 	man_hash_init();
 	p->parse = parse;
@@ -111,14 +113,14 @@ man_alloc(struct roff *roff, struct mparse *parse,
 }
 
 void
-man_endparse(struct man *man)
+man_endparse(struct roff_man *man)
 {
 
 	man_macroend(man);
 }
 
 int
-man_parseln(struct man *man, int ln, char *buf, int offs)
+man_parseln(struct roff_man *man, int ln, char *buf, int offs)
 {
 
 	if (man->last->type != ROFFT_EQN || ln > man->last->line)
@@ -130,7 +132,7 @@ man_parseln(struct man *man, int ln, char *buf, int offs)
 }
 
 static void
-man_free1(struct man *man)
+man_free1(struct roff_man *man)
 {
 
 	if (man->first)
@@ -143,7 +145,7 @@ man_free1(struct man *man)
 }
 
 static void
-man_alloc1(struct man *man)
+man_alloc1(struct roff_man *man)
 {
 
 	memset(&man->meta, 0, sizeof(man->meta));
@@ -152,12 +154,12 @@ man_alloc1(struct man *man)
 	man->first = man->last;
 	man->last->type = ROFFT_ROOT;
 	man->last->tok = MAN_MAX;
-	man->next = MAN_NEXT_CHILD;
+	man->next = ROFF_NEXT_CHILD;
 }
 
 
 static void
-man_node_append(struct man *man, struct roff_node *p)
+man_node_append(struct roff_man *man, struct roff_node *p)
 {
 
 	assert(man->last);
@@ -165,12 +167,12 @@ man_node_append(struct man *man, struct roff_node *p)
 	assert(p->type != ROFFT_ROOT);
 
 	switch (man->next) {
-	case MAN_NEXT_SIBLING:
+	case ROFF_NEXT_SIBLING:
 		man->last->next = p;
 		p->prev = man->last;
 		p->parent = man->last->parent;
 		break;
-	case MAN_NEXT_CHILD:
+	case ROFF_NEXT_CHILD:
 		man->last->child = p;
 		p->parent = man->last;
 		break;
@@ -213,7 +215,7 @@ man_node_append(struct man *man, struct roff_node *p)
 }
 
 static struct roff_node *
-man_node_alloc(struct man *man, int line, int pos,
+man_node_alloc(struct roff_man *man, int line, int pos,
 		enum roff_type type, int tok)
 {
 	struct roff_node *p;
@@ -231,58 +233,58 @@ man_node_alloc(struct man *man, int line, int pos,
 }
 
 void
-man_elem_alloc(struct man *man, int line, int pos, int tok)
+man_elem_alloc(struct roff_man *man, int line, int pos, int tok)
 {
 	struct roff_node *p;
 
 	p = man_node_alloc(man, line, pos, ROFFT_ELEM, tok);
 	man_node_append(man, p);
-	man->next = MAN_NEXT_CHILD;
+	man->next = ROFF_NEXT_CHILD;
 }
 
 void
-man_head_alloc(struct man *man, int line, int pos, int tok)
+man_head_alloc(struct roff_man *man, int line, int pos, int tok)
 {
 	struct roff_node *p;
 
 	p = man_node_alloc(man, line, pos, ROFFT_HEAD, tok);
 	man_node_append(man, p);
-	man->next = MAN_NEXT_CHILD;
+	man->next = ROFF_NEXT_CHILD;
 }
 
 void
-man_body_alloc(struct man *man, int line, int pos, int tok)
+man_body_alloc(struct roff_man *man, int line, int pos, int tok)
 {
 	struct roff_node *p;
 
 	p = man_node_alloc(man, line, pos, ROFFT_BODY, tok);
 	man_node_append(man, p);
-	man->next = MAN_NEXT_CHILD;
+	man->next = ROFF_NEXT_CHILD;
 }
 
 void
-man_block_alloc(struct man *man, int line, int pos, int tok)
+man_block_alloc(struct roff_man *man, int line, int pos, int tok)
 {
 	struct roff_node *p;
 
 	p = man_node_alloc(man, line, pos, ROFFT_BLOCK, tok);
 	man_node_append(man, p);
-	man->next = MAN_NEXT_CHILD;
+	man->next = ROFF_NEXT_CHILD;
 }
 
 void
-man_word_alloc(struct man *man, int line, int pos, const char *word)
+man_word_alloc(struct roff_man *man, int line, int pos, const char *word)
 {
 	struct roff_node *n;
 
 	n = man_node_alloc(man, line, pos, ROFFT_TEXT, MAN_MAX);
 	n->string = roff_strdup(man->roff, word);
 	man_node_append(man, n);
-	man->next = MAN_NEXT_SIBLING;
+	man->next = ROFF_NEXT_SIBLING;
 }
 
 void
-man_word_append(struct man *man, const char *word)
+man_word_append(struct roff_man *man, const char *word)
 {
 	struct roff_node *n;
 	char		*addstr, *newstr;
@@ -293,7 +295,7 @@ man_word_append(struct man *man, const char *word)
 	free(addstr);
 	free(n->string);
 	n->string = newstr;
-	man->next = MAN_NEXT_SIBLING;
+	man->next = ROFF_NEXT_SIBLING;
 }
 
 /*
@@ -309,7 +311,7 @@ man_node_free(struct roff_node *p)
 }
 
 void
-man_node_delete(struct man *man, struct roff_node *p)
+man_node_delete(struct roff_man *man, struct roff_node *p)
 {
 
 	while (p->child)
@@ -320,7 +322,7 @@ man_node_delete(struct man *man, struct roff_node *p)
 }
 
 void
-man_addeqn(struct man *man, const struct eqn *ep)
+man_addeqn(struct roff_man *man, const struct eqn *ep)
 {
 	struct roff_node *n;
 
@@ -329,12 +331,12 @@ man_addeqn(struct man *man, const struct eqn *ep)
 	if (ep->ln > man->last->line)
 		n->flags |= MAN_LINE;
 	man_node_append(man, n);
-	man->next = MAN_NEXT_SIBLING;
+	man->next = ROFF_NEXT_SIBLING;
 	man_descope(man, ep->ln, ep->pos);
 }
 
 void
-man_addspan(struct man *man, const struct tbl_span *sp)
+man_addspan(struct roff_man *man, const struct tbl_span *sp)
 {
 	struct roff_node *n;
 
@@ -342,12 +344,12 @@ man_addspan(struct man *man, const struct tbl_span *sp)
 	n = man_node_alloc(man, sp->line, 0, ROFFT_TBL, MAN_MAX);
 	n->span = sp;
 	man_node_append(man, n);
-	man->next = MAN_NEXT_SIBLING;
+	man->next = ROFF_NEXT_SIBLING;
 	man_descope(man, sp->line, 0);
 }
 
 static void
-man_descope(struct man *man, int line, int offs)
+man_descope(struct roff_man *man, int line, int offs)
 {
 	/*
 	 * Co-ordinate what happens with having a next-line scope open:
@@ -367,7 +369,7 @@ man_descope(struct man *man, int line, int offs)
 }
 
 static int
-man_ptext(struct man *man, int line, char *buf, int offs)
+man_ptext(struct roff_man *man, int line, char *buf, int offs)
 {
 	int		 i;
 
@@ -392,7 +394,7 @@ man_ptext(struct man *man, int line, char *buf, int offs)
 		if (man->last->tok != MAN_SH &&
 		    man->last->tok != MAN_SS) {
 			man_elem_alloc(man, line, offs, MAN_sp);
-			man->next = MAN_NEXT_SIBLING;
+			man->next = ROFF_NEXT_SIBLING;
 		}
 		return(1);
 	}
@@ -435,7 +437,7 @@ man_ptext(struct man *man, int line, char *buf, int offs)
 }
 
 static int
-man_pmacro(struct man *man, int ln, char *buf, int offs)
+man_pmacro(struct roff_man *man, int ln, char *buf, int offs)
 {
 	struct roff_node *n;
 	const char	*cp;
@@ -535,7 +537,7 @@ man_pmacro(struct man *man, int ln, char *buf, int offs)
 }
 
 void
-man_breakscope(struct man *man, int tok)
+man_breakscope(struct roff_man *man, int tok)
 {
 	struct roff_node *n;
 
@@ -595,7 +597,7 @@ man_breakscope(struct man *man, int tok)
  * point will also be adjusted accordingly.
  */
 static void
-man_node_unlink(struct man *man, struct roff_node *n)
+man_node_unlink(struct roff_man *man, struct roff_node *n)
 {
 
 	/* Adjust siblings. */
@@ -620,10 +622,10 @@ man_node_unlink(struct man *man, struct roff_node *n)
 		/*assert(NULL == n->next);*/
 		if (n->prev) {
 			man->last = n->prev;
-			man->next = MAN_NEXT_SIBLING;
+			man->next = ROFF_NEXT_SIBLING;
 		} else {
 			man->last = n->parent;
-			man->next = MAN_NEXT_CHILD;
+			man->next = ROFF_NEXT_CHILD;
 		}
 	}
 
@@ -632,7 +634,7 @@ man_node_unlink(struct man *man, struct roff_node *n)
 }
 
 const struct mparse *
-man_mparse(const struct man *man)
+man_mparse(const struct roff_man *man)
 {
 
 	assert(man && man->parse);

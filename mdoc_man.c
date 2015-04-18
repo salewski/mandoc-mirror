@@ -532,7 +532,7 @@ print_count(int *count)
 }
 
 void
-man_man(void *arg, const struct man *man)
+man_man(void *arg, const struct roff_man *man)
 {
 
 	/*
@@ -545,7 +545,7 @@ man_man(void *arg, const struct man *man)
 }
 
 void
-man_mdoc(void *arg, const struct mdoc *mdoc)
+man_mdoc(void *arg, const struct roff_man *mdoc)
 {
 	const struct roff_meta *meta;
 	struct roff_node *n;

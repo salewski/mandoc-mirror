@@ -251,7 +251,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 
 
 void
-terminal_mdoc(void *arg, const struct mdoc *mdoc)
+terminal_mdoc(void *arg, const struct roff_man *mdoc)
 {
 	const struct roff_meta	*meta;
 	struct roff_node	*n;

@@ -35,9 +35,9 @@ static	void		 blk_close(MACRO_PROT_ARGS);
 static	void		 blk_exp(MACRO_PROT_ARGS);
 static	void		 blk_imp(MACRO_PROT_ARGS);
 static	void		 in_line_eoln(MACRO_PROT_ARGS);
-static	int		 man_args(struct man *, int,
+static	int		 man_args(struct roff_man *, int,
 				int *, char *, char **);
-static	void		 rew_scope(struct man *, int);
+static	void		 rew_scope(struct roff_man *, int);
 
 const	struct man_macro __man_macros[MAN_MAX] = {
 	{ in_line_eoln, MAN_NSCOPED }, /* br */
@@ -84,7 +84,7 @@ const	struct man_macro * const man_macros = __man_macros;
 
 
 void
-man_unscope(struct man *man, const struct roff_node *to)
+man_unscope(struct roff_man *man, const struct roff_node *to)
 {
 	struct roff_node *n;
 
@@ -140,7 +140,7 @@ man_unscope(struct man *man, const struct roff_node *to)
 	 */
 
 	man->next = (man->last == to) ?
-	    MAN_NEXT_CHILD : MAN_NEXT_SIBLING;
+	    ROFF_NEXT_CHILD : ROFF_NEXT_SIBLING;
 }
 
 /*
@@ -149,7 +149,7 @@ man_unscope(struct man *man, const struct roff_node *to)
  * scopes.  When a scope is closed, it must be validated and actioned.
  */
 static void
-rew_scope(struct man *man, int tok)
+rew_scope(struct roff_man *man, int tok)
 {
 	struct roff_node *n;
 
@@ -377,7 +377,7 @@ in_line_eoln(MACRO_PROT_ARGS)
 	}
 
 	assert(man->last->type != ROFFT_ROOT);
-	man->next = MAN_NEXT_SIBLING;
+	man->next = ROFF_NEXT_SIBLING;
 
 	/*
 	 * Rewind our element scope.  Note that when TH is pruned, we'll
@@ -405,14 +405,14 @@ in_line_eoln(MACRO_PROT_ARGS)
 
 
 void
-man_macroend(struct man *man)
+man_macroend(struct roff_man *man)
 {
 
 	man_unscope(man, man->first);
 }
 
 static int
-man_args(struct man *man, int line, int *pos, char *buf, char **v)
+man_args(struct roff_man *man, int line, int *pos, char *buf, char **v)
 {
 	char	 *start;
 
