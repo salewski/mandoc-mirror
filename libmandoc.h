@@ -40,6 +40,7 @@ struct	tbl_span;
 struct	eqn;
 struct	roff;
 struct	roff_man;
+struct	roff_node;
 
 void		 mandoc_msg(enum mandocerr, struct mparse *,
 			int, int, const char *);
@@ -54,21 +55,15 @@ int		 mandoc_eos(const char *, size_t);
 int		 mandoc_strntoi(const char *, size_t, int);
 const char	*mandoc_a2msec(const char*);
 
-void		 mdoc_free(struct roff_man *);
-struct roff_man	*mdoc_alloc(struct roff *, struct mparse *,
-			const char *, int);
-void		 mdoc_reset(struct roff_man *);
 void		 mdoc_hash_init(void);
+void		 mdoc_node_delete(struct roff_man *, struct roff_node *);
 int		 mdoc_parseln(struct roff_man *, int, char *, int);
 void		 mdoc_endparse(struct roff_man *);
 void		 mdoc_addspan(struct roff_man *, const struct tbl_span *);
 void		 mdoc_addeqn(struct roff_man *, const struct eqn *);
 
-void		 man_free(struct roff_man *);
-struct roff_man	*man_alloc(struct roff *, struct mparse *,
-			const char *, int);
-void		 man_reset(struct roff_man *);
 void		 man_hash_init(void);
+void		 man_node_delete(struct roff_man *, struct roff_node *);
 int		 man_parseln(struct roff_man *, int, char *, int);
 void		 man_endparse(struct roff_man *);
 void		 man_addspan(struct roff_man *, const struct tbl_span *);
@@ -81,6 +76,10 @@ int		 preconv_encode(struct buf *, size_t *,
 void		 roff_free(struct roff *);
 struct roff	*roff_alloc(struct mparse *, const struct mchars *, int);
 void		 roff_reset(struct roff *);
+void		 roff_man_free(struct roff_man *);
+struct roff_man	*roff_man_alloc(struct roff *, struct mparse *,
+			const char *, int);
+void		 roff_man_reset(struct roff_man *);
 enum rofferr	 roff_parseln(struct roff *, int, struct buf *, int *);
 void		 roff_endparse(struct roff *);
 void		 roff_setreg(struct roff *, const char *, int, char sign);

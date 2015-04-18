@@ -78,7 +78,6 @@ void		  mdoc_tail_alloc(struct roff_man *, int, int, int);
 struct roff_node *mdoc_body_alloc(struct roff_man *, int, int, int);
 struct roff_node *mdoc_endbody_alloc(struct roff_man *, int, int, int,
 			struct roff_node *, enum mdoc_endbody);
-void		  mdoc_node_delete(struct roff_man *, struct roff_node *);
 void		  mdoc_node_relink(struct roff_man *, struct roff_node *);
 int		  mdoc_hash_find(const char *);
 const char	 *mdoc_a2att(const char *);
