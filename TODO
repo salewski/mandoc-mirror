@@ -307,6 +307,9 @@ are mere guesses, and some may be wrong.
   http://swtch.com/plan9port/man/man7/man.html
   "Anthony J. Bentley" <anthonyjbentley@gmail.com> 28 Dec 2010 21:58:40 -0700
 
+- check compatibility with COHERENT troff:
+  http://www.nesssoftware.com/home/mwc/source.php
+
 - check compatibility with the man(7) formatter
   https://raw.githubusercontent.com/rofl0r/hardcore-utils/master/man.c
 
@@ -486,7 +489,7 @@ are mere guesses, and some may be wrong.
 
 - Sequences of multiple man(7) paragraphs (.PP, .IP) interspersed
   with .ps and .nf/.fi produce execessive blank lines, see libJudy
-  The parser reorg may help with this.
+  and graphics/dcmtk.  The parser reorg may help with this.
 
 - trailing whitespace must be ignored even when followed by a font escape,
   see for example
