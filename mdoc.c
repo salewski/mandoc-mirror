@@ -187,7 +187,6 @@ mdoc_alloc(struct roff *roff, struct mparse *parse,
 	p->quick = quick;
 	p->roff = roff;
 
-	mdoc_hash_init();
 	mdoc_alloc1(p);
 	return(p);
 }

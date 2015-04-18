@@ -43,7 +43,6 @@ void		  man_head_alloc(struct roff_man *, int, int, int);
 void		  man_body_alloc(struct roff_man *, int, int, int);
 void		  man_elem_alloc(struct roff_man *, int, int, int);
 void		  man_node_delete(struct roff_man *, struct roff_node *);
-void		  man_hash_init(void);
 int		  man_hash_find(const char *);
 void		  man_macroend(struct roff_man *);
 void		  man_valid_post(struct roff_man *);

@@ -101,8 +101,6 @@ man_alloc(struct roff *roff, struct mparse *parse,
 	struct roff_man	*p;
 
 	p = mandoc_calloc(1, sizeof(*p));
-
-	man_hash_init();
 	p->parse = parse;
 	p->defos = defos;
 	p->quick = quick;

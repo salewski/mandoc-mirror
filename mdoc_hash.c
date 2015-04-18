@@ -32,15 +32,14 @@
 static	unsigned char	 table[27 * 12];
 
 
-/*
- * XXX - this hash has global scope, so if intended for use as a library
- * with multiple callers, it will need re-invocation protection.
- */
 void
 mdoc_hash_init(void)
 {
 	int		 i, j, major;
 	const char	*p;
+
+	if (*table != '\0')
+		return;
 
 	memset(table, UCHAR_MAX, sizeof(table));
 

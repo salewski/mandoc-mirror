@@ -296,6 +296,7 @@ choose_parser(struct mparse *curp)
 			    MPARSE_QUICK & curp->options ? 1 : 0);
 		else
 			curp->man->macroset = MACROSET_MDOC;
+		mdoc_hash_init();
 		return;
 	}
 
@@ -307,6 +308,7 @@ choose_parser(struct mparse *curp)
 		    MPARSE_QUICK & curp->options ? 1 : 0);
 	else
 		curp->man->macroset = MACROSET_MAN;
+	man_hash_init();
 }
 
 /*
@@ -890,14 +892,18 @@ mparse_alloc(int options, enum mandoclevel wlevel, mandocmsg mmsg,
 
 	curp->mchars = mchars;
 	curp->roff = roff_alloc(curp, curp->mchars, options);
-	if (curp->options & MPARSE_MDOC)
+	if (curp->options & MPARSE_MDOC) {
 		curp->man = mdoc_alloc(
 		    curp->roff, curp, curp->defos,
 		    curp->options & MPARSE_QUICK ? 1 : 0);
-	if (curp->options & MPARSE_MAN)
+		mdoc_hash_init();
+	}
+	if (curp->options & MPARSE_MAN) {
 		curp->man = man_alloc(
 		    curp->roff, curp, curp->defos,
 		    curp->options & MPARSE_QUICK ? 1 : 0);
+		man_hash_init();
+	}
 
 	return(curp);
 }

@@ -58,6 +58,7 @@ void		 mdoc_free(struct roff_man *);
 struct roff_man	*mdoc_alloc(struct roff *, struct mparse *,
 			const char *, int);
 void		 mdoc_reset(struct roff_man *);
+void		 mdoc_hash_init(void);
 int		 mdoc_parseln(struct roff_man *, int, char *, int);
 void		 mdoc_endparse(struct roff_man *);
 void		 mdoc_addspan(struct roff_man *, const struct tbl_span *);
@@ -67,6 +68,7 @@ void		 man_free(struct roff_man *);
 struct roff_man	*man_alloc(struct roff *, struct mparse *,
 			const char *, int);
 void		 man_reset(struct roff_man *);
+void		 man_hash_init(void);
 int		 man_parseln(struct roff_man *, int, char *, int);
 void		 man_endparse(struct roff_man *);
 void		 man_addspan(struct roff_man *, const struct tbl_span *);
