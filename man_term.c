@@ -756,7 +756,7 @@ pre_SS(DECL_ARGS)
 
 		do {
 			n = n->prev;
-		} while (n != NULL && n->tok != MAN_MAX &&
+		} while (n != NULL && n->tok != TOKEN_NONE &&
 		    termacts[n->tok].flags & MAN_NOTEXT);
 		if (n == NULL || (n->tok == MAN_SS && n->body->child == NULL))
 			break;

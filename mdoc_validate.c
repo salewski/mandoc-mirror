@@ -1269,7 +1269,7 @@ rewrite_macro2len(char **arg)
 		return;
 	else if ( ! strcmp(*arg, "Ds"))
 		width = 6;
-	else if ((tok = mdoc_hash_find(*arg)) == MDOC_MAX)
+	else if ((tok = mdoc_hash_find(*arg)) == TOKEN_NONE)
 		return;
 	else
 		width = macro2len(tok);
@@ -1765,7 +1765,7 @@ post_sh_name(POST_ARGS)
 				mandoc_msg(MANDOCERR_NAMESEC_ND,
 				    mdoc->parse, n->line, n->pos, NULL);
 			break;
-		case MDOC_MAX:
+		case TOKEN_NONE:
 			if (hasnm)
 				break;
 			/* FALLTHROUGH */

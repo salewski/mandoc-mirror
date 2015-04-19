@@ -422,7 +422,7 @@ mdoc_args(struct roff_man *mdoc, int line, int *pos,
 
 	if (v == NULL)
 		v = &v_local;
-	fl = tok == MDOC_MAX ? ARGSFL_NONE : mdocargs[tok].flags;
+	fl = tok == TOKEN_NONE ? ARGSFL_NONE : mdocargs[tok].flags;
 	if (tok != MDOC_It)
 		return(args(mdoc, line, pos, buf, fl, v));
 

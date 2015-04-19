@@ -97,6 +97,7 @@ struct	roff_node {
 	int		  line;    /* Input file line number. */
 	int		  pos;     /* Input file column number. */
 	int		  tok;     /* Request or macro ID. */
+#define	TOKEN_NONE	 (-1)	   /* No request or macro. */
 	int		  flags;
 #define	MDOC_VALID	 (1 << 0)  /* Has been validated. */
 #define	MDOC_ENDED	 (1 << 1)  /* Gone past body end mark. */

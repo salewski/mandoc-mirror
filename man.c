@@ -100,7 +100,7 @@ man_word_alloc(struct roff_man *man, int line, int pos, const char *word)
 {
 	struct roff_node *n;
 
-	n = roff_node_alloc(man, line, pos, ROFFT_TEXT, MAN_MAX);
+	n = roff_node_alloc(man, line, pos, ROFFT_TEXT, TOKEN_NONE);
 	n->string = roff_strdup(man->roff, word);
 	roff_node_append(man, n);
 	man_valid_post(man);
@@ -127,7 +127,7 @@ man_addeqn(struct roff_man *man, const struct eqn *ep)
 {
 	struct roff_node *n;
 
-	n = roff_node_alloc(man, ep->ln, ep->pos, ROFFT_EQN, MAN_MAX);
+	n = roff_node_alloc(man, ep->ln, ep->pos, ROFFT_EQN, TOKEN_NONE);
 	n->eqn = ep;
 	if (ep->ln > man->last->line)
 		n->flags |= MAN_LINE;
@@ -141,8 +141,8 @@ man_addspan(struct roff_man *man, const struct tbl_span *sp)
 {
 	struct roff_node *n;
 
-	man_breakscope(man, MAN_MAX);
-	n = roff_node_alloc(man, sp->line, 0, ROFFT_TBL, MAN_MAX);
+	man_breakscope(man, TOKEN_NONE);
+	n = roff_node_alloc(man, sp->line, 0, ROFFT_TBL, TOKEN_NONE);
 	n->span = sp;
 	roff_node_append(man, n);
 	man_valid_post(man);
@@ -261,9 +261,9 @@ man_pmacro(struct roff_man *man, int ln, char *buf, int offs)
 
 	mac[i] = '\0';
 
-	tok = (i > 0 && i < 4) ? man_hash_find(mac) : MAN_MAX;
+	tok = (i > 0 && i < 4) ? man_hash_find(mac) : TOKEN_NONE;
 
-	if (tok == MAN_MAX) {
+	if (tok == TOKEN_NONE) {
 		mandoc_msg(MANDOCERR_MACRO, man->parse,
 		    ln, ppos, buf + ppos - 1);
 		return(1);
@@ -349,7 +349,7 @@ man_breakscope(struct roff_man *man, int tok)
 	 * Delete the element that is being broken.
 	 */
 
-	if (man->flags & MAN_ELINE && (tok == MAN_MAX ||
+	if (man->flags & MAN_ELINE && (tok == TOKEN_NONE ||
 	    ! (man_macros[tok].flags & MAN_NSCOPED))) {
 		n = man->last;
 		assert(n->type != ROFFT_TEXT);
@@ -358,7 +358,7 @@ man_breakscope(struct roff_man *man, int tok)
 
 		mandoc_vmsg(MANDOCERR_BLK_LINE, man->parse,
 		    n->line, n->pos, "%s breaks %s",
-		    tok == MAN_MAX ? "TS" : man_macronames[tok],
+		    tok == TOKEN_NONE ? "TS" : man_macronames[tok],
 		    man_macronames[n->tok]);
 
 		roff_node_delete(man, n);
@@ -371,7 +371,7 @@ man_breakscope(struct roff_man *man, int tok)
 	 * Delete the block that is being broken.
 	 */
 
-	if (man->flags & MAN_BLINE && (tok == MAN_MAX ||
+	if (man->flags & MAN_BLINE && (tok == TOKEN_NONE ||
 	    man_macros[tok].flags & MAN_BSCOPE)) {
 		n = man->last;
 		if (n->type == ROFFT_TEXT)
@@ -386,7 +386,7 @@ man_breakscope(struct roff_man *man, int tok)
 
 		mandoc_vmsg(MANDOCERR_BLK_LINE, man->parse,
 		    n->line, n->pos, "%s breaks %s",
-		    tok == MAN_MAX ? "TS" : man_macronames[tok],
+		    tok == TOKEN_NONE ? "TS" : man_macronames[tok],
 		    man_macronames[n->tok]);
 
 		roff_node_delete(man, n);

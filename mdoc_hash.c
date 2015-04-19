@@ -67,19 +67,19 @@ mdoc_hash_find(const char *p)
 	int		  major, i, j;
 
 	if (0 == p[0])
-		return(MDOC_MAX);
+		return(TOKEN_NONE);
 	if ( ! isalpha((unsigned char)p[0]) && '%' != p[0])
-		return(MDOC_MAX);
+		return(TOKEN_NONE);
 
 	if (isalpha((unsigned char)p[1]))
 		major = 12 * (tolower((unsigned char)p[1]) - 97);
 	else if ('1' == p[1])
 		major = 12 * 26;
 	else
-		return(MDOC_MAX);
+		return(TOKEN_NONE);
 
 	if (p[2] && p[3])
-		return(MDOC_MAX);
+		return(TOKEN_NONE);
 
 	for (j = 0; j < 12; j++) {
 		if (UCHAR_MAX == (i = table[major + j]))
@@ -88,5 +88,5 @@ mdoc_hash_find(const char *p)
 			return(i);
 	}
 
-	return(MDOC_MAX);
+	return(TOKEN_NONE);
 }

@@ -505,7 +505,7 @@ post_vs(CHKARGS)
 		    "%s after %s", man_macronames[n->tok],
 		    man_macronames[n->parent->tok]);
 		/* FALLTHROUGH */
-	case MAN_MAX:
+	case TOKEN_NONE:
 		/*
 		 * Don't warn about this because it occurs in pod2man
 		 * and would cause considerable (unfixable) warnage.

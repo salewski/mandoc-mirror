@@ -293,17 +293,17 @@ choose_parser(struct mparse *curp)
 		curp->man = roff_man_alloc(curp->roff, curp, curp->defos,
 		    curp->options & MPARSE_QUICK ? 1 : 0);
 		curp->man->macroset = MACROSET_MAN;
-		curp->man->first->tok = MDOC_MAX;
+		curp->man->first->tok = TOKEN_NONE;
 	}
 
 	if (format == MPARSE_MDOC) {
 		mdoc_hash_init();
 		curp->man->macroset = MACROSET_MDOC;
-		curp->man->first->tok = MDOC_MAX;
+		curp->man->first->tok = TOKEN_NONE;
 	} else {
 		man_hash_init();
 		curp->man->macroset = MACROSET_MAN;
-		curp->man->first->tok = MAN_MAX;
+		curp->man->first->tok = TOKEN_NONE;
 	}
 }
 
@@ -893,12 +893,11 @@ mparse_alloc(int options, enum mandoclevel wlevel, mandocmsg mmsg,
 	if (curp->options & MPARSE_MDOC) {
 		mdoc_hash_init();
 		curp->man->macroset = MACROSET_MDOC;
-		curp->man->first->tok = MDOC_MAX;
 	} else if (curp->options & MPARSE_MAN) {
 		man_hash_init();
 		curp->man->macroset = MACROSET_MAN;
-		curp->man->first->tok = MAN_MAX;
 	}
+	curp->man->first->tok = TOKEN_NONE;
 	return(curp);
 }
 
