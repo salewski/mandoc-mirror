@@ -482,6 +482,17 @@ pre_sp(DECL_ARGS)
 		for (i = 0; i < len; i++)
 			term_vspace(p);
 
+	/*
+	 * Handle an explicit break request in the same way
+	 * as an overflowing line.
+	 */
+
+	if (p->flags & TERMP_BRIND) {
+		p->offset = p->rmargin;
+		p->rmargin = p->maxrmargin;
+		p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND);
+	}
+
 	return(0);
 }
 
