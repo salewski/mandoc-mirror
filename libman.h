@@ -39,8 +39,6 @@ __BEGIN_DECLS
 void		  man_word_alloc(struct roff_man *, int, int, const char *);
 void		  man_word_append(struct roff_man *, const char *);
 void		  man_block_alloc(struct roff_man *, int, int, int);
-void		  man_head_alloc(struct roff_man *, int, int, int);
-void		  man_body_alloc(struct roff_man *, int, int, int);
 void		  man_elem_alloc(struct roff_man *, int, int, int);
 int		  man_hash_find(const char *);
 void		  man_macroend(struct roff_man *);

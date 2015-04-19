@@ -36,6 +36,7 @@
 #include "roff.h"
 #include "mdoc.h"
 #include "libmandoc.h"
+#include "roff_int.h"
 #include "libmdoc.h"
 
 /* FIXME: .Bl -diag can't have non-text children in HEAD. */
@@ -904,7 +905,7 @@ post_fo(POST_ARGS)
 		    n->child->next->line, n->child->next->pos,
 		    "Fo ... %s", n->child->next->string);
 		while (n->child != n->last)
-			mdoc_node_delete(mdoc, n->last);
+			roff_node_delete(mdoc, n->last);
 	}
 
 	post_fname(mdoc);
@@ -1246,7 +1247,7 @@ post_bl_block(POST_ARGS)
 				    mdoc->parse, nc->line, nc->pos,
 				    "%s before It",
 				    mdoc_macronames[nc->tok]);
-				mdoc_node_delete(mdoc, nc);
+				roff_node_delete(mdoc, nc);
 			} else
 				break;
 			nc = ni->body->last;
@@ -1357,7 +1358,7 @@ post_bl_head(POST_ARGS)
 		mandoc_vmsg(MANDOCERR_ARG_EXCESS, mdoc->parse,
 		    nch->line, nch->pos, "Bl ... %s", nch->string);
 		while (nch != NULL) {
-			mdoc_node_delete(mdoc, nch);
+			roff_node_delete(mdoc, nch);
 			nch = nh->child;
 		}
 		return;
@@ -1398,7 +1399,7 @@ post_bl_head(POST_ARGS)
 		argv->value[i++] = nch->string;
 		nch->string = NULL;
 		nnext = nch->next;
-		mdoc_node_delete(NULL, nch);
+		roff_node_delete(NULL, nch);
 	}
 	nh->nchild = 0;
 	nh->child = NULL;
@@ -1497,7 +1498,7 @@ post_bk(POST_ARGS)
 	if (n->type == ROFFT_BLOCK && n->body->child == NULL) {
 		mandoc_msg(MANDOCERR_BLK_EMPTY,
 		    mdoc->parse, n->line, n->pos, "Bk");
-		mdoc_node_delete(mdoc, n);
+		roff_node_delete(mdoc, n);
 	}
 }
 
@@ -1585,7 +1586,7 @@ post_st(POST_ARGS)
 	if (NULL == (p = mdoc_a2st(nch->string))) {
 		mandoc_vmsg(MANDOCERR_ST_BAD, mdoc->parse,
 		    nch->line, nch->pos, "St %s", nch->string);
-		mdoc_node_delete(mdoc, n);
+		roff_node_delete(mdoc, n);
 	} else {
 		free(nch->string);
 		nch->string = mandoc_strdup(p);
@@ -1632,7 +1633,7 @@ post_rs(POST_ARGS)
 
 		/*
 		 * Remove this child from the chain.  This somewhat
-		 * repeats mdoc_node_unlink(), but since we're
+		 * repeats roff_node_unlink(), but since we're
 		 * just re-ordering, there's no need for the
 		 * full unlink process.
 		 */
@@ -2005,7 +2006,7 @@ post_ignpar(POST_ARGS)
 			    mdoc->parse, np->line, np->pos,
 			    "%s after %s", mdoc_macronames[np->tok],
 			    mdoc_macronames[mdoc->last->tok]);
-			mdoc_node_delete(mdoc, np);
+			roff_node_delete(mdoc, np);
 		}
 
 	if (NULL != (np = mdoc->last->last))
@@ -2014,7 +2015,7 @@ post_ignpar(POST_ARGS)
 			    np->line, np->pos, "%s at the end of %s",
 			    mdoc_macronames[np->tok],
 			    mdoc_macronames[mdoc->last->tok]);
-			mdoc_node_delete(mdoc, np);
+			roff_node_delete(mdoc, np);
 		}
 }
 
@@ -2047,7 +2048,7 @@ pre_par(PRE_ARGS)
 	    mdoc->last->line, mdoc->last->pos,
 	    "%s before %s", mdoc_macronames[mdoc->last->tok],
 	    mdoc_macronames[n->tok]);
-	mdoc_node_delete(mdoc, mdoc->last);
+	roff_node_delete(mdoc, mdoc->last);
 }
 
 static void
@@ -2080,7 +2081,7 @@ post_par(POST_ARGS)
 	    mdoc->last->line, mdoc->last->pos,
 	    "%s after %s", mdoc_macronames[mdoc->last->tok],
 	    mdoc_macronames[np->tok]);
-	mdoc_node_delete(mdoc, mdoc->last);
+	roff_node_delete(mdoc, mdoc->last);
 }
 
 static void
@@ -2139,7 +2140,7 @@ post_dd(POST_ARGS)
 		free(datestr);
 	}
 out:
-	mdoc_node_delete(mdoc, n);
+	roff_node_delete(mdoc, n);
 }
 
 static void
@@ -2224,7 +2225,7 @@ post_dt(POST_ARGS)
 		    nn->line, nn->pos, "Dt ... %s", nn->string);
 
 out:
-	mdoc_node_delete(mdoc, n);
+	roff_node_delete(mdoc, n);
 }
 
 static void
@@ -2290,7 +2291,7 @@ post_os(POST_ARGS)
 #endif /*!OSNAME*/
 
 out:
-	mdoc_node_delete(mdoc, n);
+	roff_node_delete(mdoc, n);
 }
 
 /*

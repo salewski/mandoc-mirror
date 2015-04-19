@@ -29,6 +29,7 @@
 #include "roff.h"
 #include "man.h"
 #include "libmandoc.h"
+#include "roff_int.h"
 #include "libman.h"
 
 static	void		 blk_close(MACRO_PROT_ARGS);
@@ -110,7 +111,7 @@ man_unscope(struct roff_man *man, const struct roff_node *to)
 				}
 				man->last = n;
 				n = n->parent;
-				man_node_delete(man, man->last);
+				roff_node_delete(man, man->last);
 				continue;
 			}
 			if (n->type == ROFFT_BLOCK &&
@@ -259,8 +260,7 @@ blk_exp(MACRO_PROT_ARGS)
 
 	rew_scope(man, tok);
 	man_block_alloc(man, line, ppos, tok);
-	man_head_alloc(man, line, ppos, tok);
-	head = man->last;
+	head = roff_head_alloc(man, line, ppos, tok);
 
 	la = *pos;
 	if (man_args(man, line, pos, buf, &p))
@@ -272,7 +272,7 @@ blk_exp(MACRO_PROT_ARGS)
 		    man_macronames[tok], buf + *pos);
 
 	man_unscope(man, head);
-	man_body_alloc(man, line, ppos, tok);
+	roff_body_alloc(man, line, ppos, tok);
 }
 
 /*
@@ -290,8 +290,10 @@ blk_imp(MACRO_PROT_ARGS)
 
 	rew_scope(man, tok);
 	man_block_alloc(man, line, ppos, tok);
-	man_head_alloc(man, line, ppos, tok);
 	n = man->last;
+	if (n->tok == MAN_SH || n->tok == MAN_SS)
+		man->flags &= ~MAN_LITERAL;
+	n = roff_head_alloc(man, line, ppos, tok);
 
 	/* Add line arguments. */
 
@@ -317,7 +319,7 @@ blk_imp(MACRO_PROT_ARGS)
 	/* Close out the head and open the body. */
 
 	man_unscope(man, n);
-	man_body_alloc(man, line, ppos, tok);
+	roff_body_alloc(man, line, ppos, tok);
 }
 
 void

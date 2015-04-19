@@ -56,14 +56,12 @@ int		 mandoc_strntoi(const char *, size_t, int);
 const char	*mandoc_a2msec(const char*);
 
 void		 mdoc_hash_init(void);
-void		 mdoc_node_delete(struct roff_man *, struct roff_node *);
 int		 mdoc_parseln(struct roff_man *, int, char *, int);
 void		 mdoc_endparse(struct roff_man *);
 void		 mdoc_addspan(struct roff_man *, const struct tbl_span *);
 void		 mdoc_addeqn(struct roff_man *, const struct eqn *);
 
 void		 man_hash_init(void);
-void		 man_node_delete(struct roff_man *, struct roff_node *);
 int		 man_parseln(struct roff_man *, int, char *, int);
 void		 man_endparse(struct roff_man *);
 void		 man_addspan(struct roff_man *, const struct tbl_span *);

@@ -33,6 +33,7 @@
 #include "roff.h"
 #include "man.h"
 #include "libmandoc.h"
+#include "roff_int.h"
 #include "libman.h"
 
 #define	CHKARGS	  struct roff_man *man, struct roff_node *n
@@ -256,7 +257,7 @@ check_par(CHKARGS)
 	switch (n->type) {
 	case ROFFT_BLOCK:
 		if (0 == n->body->nchild)
-			man_node_delete(man, n);
+			roff_node_delete(man, n);
 		break;
 	case ROFFT_BODY:
 		if (0 == n->nchild)
@@ -284,7 +285,7 @@ post_IP(CHKARGS)
 	switch (n->type) {
 	case ROFFT_BLOCK:
 		if (0 == n->head->nchild && 0 == n->body->nchild)
-			man_node_delete(man, n);
+			roff_node_delete(man, n);
 		break;
 	case ROFFT_BODY:
 		if (0 == n->parent->head->nchild && 0 == n->nchild)
@@ -388,7 +389,7 @@ post_TH(CHKARGS)
 	 * Remove the `TH' node after we've processed it for our
 	 * meta-data.
 	 */
-	man_node_delete(man, man->last);
+	roff_node_delete(man, man->last);
 }
 
 static void
@@ -509,7 +510,7 @@ post_vs(CHKARGS)
 		 * Don't warn about this because it occurs in pod2man
 		 * and would cause considerable (unfixable) warnage.
 		 */
-		man_node_delete(man, n);
+		roff_node_delete(man, n);
 		break;
 	default:
 		break;

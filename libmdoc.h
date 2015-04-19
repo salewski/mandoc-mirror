@@ -73,9 +73,7 @@ void		  mdoc_elem_alloc(struct roff_man *, int, int,
 			int, struct mdoc_arg *);
 struct roff_node *mdoc_block_alloc(struct roff_man *, int, int,
 			int, struct mdoc_arg *);
-struct roff_node *mdoc_head_alloc(struct roff_man *, int, int, int);
 void		  mdoc_tail_alloc(struct roff_man *, int, int, int);
-struct roff_node *mdoc_body_alloc(struct roff_man *, int, int, int);
 struct roff_node *mdoc_endbody_alloc(struct roff_man *, int, int, int,
 			struct roff_node *, enum mdoc_endbody);
 void		  mdoc_node_relink(struct roff_man *, struct roff_node *);
