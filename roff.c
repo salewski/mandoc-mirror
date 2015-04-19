@@ -1096,6 +1096,27 @@ roff_word_append(struct roff_man *man, const char *word)
 	man->next = ROFF_NEXT_SIBLING;
 }
 
+void
+roff_elem_alloc(struct roff_man *man, int line, int pos, int tok)
+{
+	struct roff_node	*n;
+
+	n = roff_node_alloc(man, line, pos, ROFFT_ELEM, tok);
+	roff_node_append(man, n);
+	man->next = ROFF_NEXT_CHILD;
+}
+
+struct roff_node *
+roff_block_alloc(struct roff_man *man, int line, int pos, int tok)
+{
+	struct roff_node	*n;
+
+	n = roff_node_alloc(man, line, pos, ROFFT_BLOCK, tok);
+	roff_node_append(man, n);
+	man->next = ROFF_NEXT_CHILD;
+	return(n);
+}
+
 struct roff_node *
 roff_head_alloc(struct roff_man *man, int line, int pos, int tok)
 {

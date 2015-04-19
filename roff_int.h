@@ -23,6 +23,8 @@ struct roff_node *roff_node_alloc(struct roff_man *, int, int,
 void		  roff_node_append(struct roff_man *, struct roff_node *);
 void		  roff_word_alloc(struct roff_man *, int, int, const char *);
 void		  roff_word_append(struct roff_man *, const char *);
+void		  roff_elem_alloc(struct roff_man *, int, int, int);
+struct roff_node *roff_block_alloc(struct roff_man *, int, int, int);
 struct roff_node *roff_head_alloc(struct roff_man *, int, int, int);
 struct roff_node *roff_body_alloc(struct roff_man *, int, int, int);
 void		  roff_addeqn(struct roff_man *, const struct eqn *);
