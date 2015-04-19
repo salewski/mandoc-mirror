@@ -67,8 +67,6 @@ extern	const struct mdoc_macro *const mdoc_macros;
 __BEGIN_DECLS
 
 void		  mdoc_macro(MACRO_PROT_ARGS);
-void		  mdoc_word_alloc(struct roff_man *, int, int, const char *);
-void		  mdoc_word_append(struct roff_man *, const char *);
 void		  mdoc_elem_alloc(struct roff_man *, int, int,
 			int, struct mdoc_arg *);
 struct roff_node *mdoc_block_alloc(struct roff_man *, int, int,
@@ -82,11 +80,8 @@ const char	 *mdoc_a2att(const char *);
 const char	 *mdoc_a2lib(const char *);
 const char	 *mdoc_a2st(const char *);
 const char	 *mdoc_a2arch(const char *);
-void		  mdoc_valid_pre(struct roff_man *, struct roff_node *);
-void		  mdoc_valid_post(struct roff_man *);
 void		  mdoc_argv(struct roff_man *, int, int,
 			struct mdoc_arg **, int *, char *);
-void		  mdoc_argv_free(struct mdoc_arg *);
 enum margserr	  mdoc_args(struct roff_man *, int,
 			int *, char *, int, char **);
 void		  mdoc_macroend(struct roff_man *);

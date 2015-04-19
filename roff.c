@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2009-2012, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2008-2012, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2010-2015 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -32,7 +32,6 @@
 #include "libmandoc.h"
 #include "roff_int.h"
 #include "libroff.h"
-#include "libmdoc.h"
 
 /* Maximum number of nested if-else conditionals. */
 #define	RSTACK_MAX	128
@@ -1067,6 +1066,36 @@ roff_node_append(struct roff_man *man, struct roff_node *n)
 	man->last = n;
 }
 
+void
+roff_word_alloc(struct roff_man *man, int line, int pos, const char *word)
+{
+	struct roff_node	*n;
+
+	n = roff_node_alloc(man, line, pos, ROFFT_TEXT, TOKEN_NONE);
+	n->string = roff_strdup(man->roff, word);
+	roff_node_append(man, n);
+	if (man->macroset == MACROSET_MDOC)
+		mdoc_valid_post(man);
+	else
+		man_valid_post(man);
+	man->next = ROFF_NEXT_SIBLING;
+}
+
+void
+roff_word_append(struct roff_man *man, const char *word)
+{
+	struct roff_node	*n;
+	char			*addstr, *newstr;
+
+	n = man->last;
+	addstr = roff_strdup(man->roff, word);
+	mandoc_asprintf(&newstr, "%s %s", n->string, addstr);
+	free(addstr);
+	free(n->string);
+	n->string = newstr;
+	man->next = ROFF_NEXT_SIBLING;
+}
+
 struct roff_node *
 roff_head_alloc(struct roff_man *man, int line, int pos, int tok)
 {
@@ -1087,6 +1116,36 @@ roff_body_alloc(struct roff_man *man, int line, int pos, int tok)
 	roff_node_append(man, n);
 	man->next = ROFF_NEXT_CHILD;
 	return(n);
+}
+
+void
+roff_addeqn(struct roff_man *man, const struct eqn *eqn)
+{
+	struct roff_node	*n;
+
+	n = roff_node_alloc(man, eqn->ln, eqn->pos, ROFFT_EQN, TOKEN_NONE);
+	n->eqn = eqn;
+	if (eqn->ln > man->last->line)
+		n->flags |= MDOC_LINE;
+	roff_node_append(man, n);
+	man->next = ROFF_NEXT_SIBLING;
+}
+
+void
+roff_addtbl(struct roff_man *man, const struct tbl_span *tbl)
+{
+	struct roff_node	*n;
+
+	if (man->macroset == MACROSET_MAN)
+		man_breakscope(man, TOKEN_NONE);
+	n = roff_node_alloc(man, tbl->line, 0, ROFFT_TBL, TOKEN_NONE);
+	n->span = tbl;
+	roff_node_append(man, n);
+	if (man->macroset == MACROSET_MDOC)
+		mdoc_valid_post(man);
+	else
+		man_valid_post(man);
+	man->next = ROFF_NEXT_SIBLING;
 }
 
 void

@@ -58,14 +58,10 @@ const char	*mandoc_a2msec(const char*);
 void		 mdoc_hash_init(void);
 int		 mdoc_parseln(struct roff_man *, int, char *, int);
 void		 mdoc_endparse(struct roff_man *);
-void		 mdoc_addspan(struct roff_man *, const struct tbl_span *);
-void		 mdoc_addeqn(struct roff_man *, const struct eqn *);
 
 void		 man_hash_init(void);
 int		 man_parseln(struct roff_man *, int, char *, int);
 void		 man_endparse(struct roff_man *);
-void		 man_addspan(struct roff_man *, const struct tbl_span *);
-void		 man_addeqn(struct roff_man *, const struct eqn *);
 
 int		 preconv_cue(const struct buf *, size_t);
 int		 preconv_encode(struct buf *, size_t *,

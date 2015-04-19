@@ -264,7 +264,7 @@ blk_exp(MACRO_PROT_ARGS)
 
 	la = *pos;
 	if (man_args(man, line, pos, buf, &p))
-		man_word_alloc(man, line, la, p);
+		roff_word_alloc(man, line, la, p);
 
 	if (buf[*pos] != '\0')
 		mandoc_vmsg(MANDOCERR_ARG_EXCESS,
@@ -301,7 +301,7 @@ blk_imp(MACRO_PROT_ARGS)
 		la = *pos;
 		if ( ! man_args(man, line, pos, buf, &p))
 			break;
-		man_word_alloc(man, line, la, p);
+		roff_word_alloc(man, line, la, p);
 	}
 
 	/*
@@ -352,9 +352,9 @@ in_line_eoln(MACRO_PROT_ARGS)
 			break;
 		if (man_macros[tok].flags & MAN_JOIN &&
 		    man->last->type == ROFFT_TEXT)
-			man_word_append(man, p);
+			roff_word_append(man, p);
 		else
-			man_word_alloc(man, line, la, p);
+			roff_word_alloc(man, line, la, p);
 	}
 
 	/*

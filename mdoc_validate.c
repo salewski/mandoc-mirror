@@ -1051,13 +1051,13 @@ post_defaults(POST_ARGS)
 
 	switch (nn->tok) {
 	case MDOC_Ar:
-		mdoc_word_alloc(mdoc, nn->line, nn->pos, "file");
-		mdoc_word_alloc(mdoc, nn->line, nn->pos, "...");
+		roff_word_alloc(mdoc, nn->line, nn->pos, "file");
+		roff_word_alloc(mdoc, nn->line, nn->pos, "...");
 		break;
 	case MDOC_Pa:
 		/* FALLTHROUGH */
 	case MDOC_Mt:
-		mdoc_word_alloc(mdoc, nn->line, nn->pos, "~");
+		roff_word_alloc(mdoc, nn->line, nn->pos, "~");
 		break;
 	default:
 		abort();
@@ -1076,7 +1076,7 @@ post_at(POST_ARGS)
 	n = mdoc->last;
 	if (n->child == NULL) {
 		mdoc->next = ROFF_NEXT_CHILD;
-		mdoc_word_alloc(mdoc, n->line, n->pos, "AT&T UNIX");
+		roff_word_alloc(mdoc, n->line, n->pos, "AT&T UNIX");
 		mdoc->last = n;
 		return;
 	}
@@ -2315,7 +2315,7 @@ post_ex(POST_ARGS)
 	}
 
 	mdoc->next = ROFF_NEXT_CHILD;
-	mdoc_word_alloc(mdoc, n->line, n->pos, mdoc->meta.name);
+	roff_word_alloc(mdoc, n->line, n->pos, mdoc->meta.name);
 	mdoc->last = n;
 }
 
