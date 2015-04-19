@@ -357,6 +357,8 @@ main(int argc, char *argv[])
 			    argc, argv, &res, &sz);
 
 		if (sz == 0) {
+			fprintf(stderr, "%s: nothing appropriate\n",
+			    progname);
 			rc = MANDOCLEVEL_BADARG;
 			goto out;
 		}
