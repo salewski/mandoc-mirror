@@ -132,7 +132,8 @@ tbl_cdata(struct tbl_node *tbl, int ln, const char *p, int pos)
 		if (p[pos] == tbl->opts.tab) {
 			tbl->part = TBL_PART_DATA;
 			pos++;
-			getdata(tbl, tbl->last_span, ln, p, &pos);
+			while (p[pos] != '\0')
+				getdata(tbl, tbl->last_span, ln, p, &pos);
 			return(1);
 		} else if (p[pos] == '\0') {
 			tbl->part = TBL_PART_DATA;
