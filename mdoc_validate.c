@@ -1562,7 +1562,8 @@ post_root(POST_ARGS)
 	/* Check that we begin with a proper `Sh'. */
 
 	n = mdoc->first->child;
-	while (n != NULL && mdoc_macros[n->tok].flags & MDOC_PROLOGUE)
+	while (n != NULL && n->tok != TOKEN_NONE &&
+	    mdoc_macros[n->tok].flags & MDOC_PROLOGUE)
 		n = n->next;
 
 	if (n == NULL)
