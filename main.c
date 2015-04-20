@@ -352,13 +352,17 @@ main(int argc, char *argv[])
 		sz = 0;
 #endif
 
-		if (sz == 0 && search.argmode == ARG_NAME)
-			fs_search(&search, &conf.manpath,
-			    argc, argv, &res, &sz);
+		if (sz == 0) {
+			if (search.argmode == ARG_NAME)
+				fs_search(&search, &conf.manpath,
+				    argc, argv, &res, &sz);
+			else
+				fprintf(stderr,
+				    "%s: nothing appropriate\n",
+				    progname);
+		}
 
 		if (sz == 0) {
-			fprintf(stderr, "%s: nothing appropriate\n",
-			    progname);
 			rc = MANDOCLEVEL_BADARG;
 			goto out;
 		}
