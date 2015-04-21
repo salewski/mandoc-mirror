@@ -291,18 +291,21 @@ rew_pending(struct roff_man *mdoc, const struct roff_node *n)
 	for (;;) {
 		rew_last(mdoc, n);
 
-		switch (n->type) {
-		case ROFFT_HEAD:
-			roff_body_alloc(mdoc, n->line, n->pos, n->tok);
-			return;
-		case ROFFT_BLOCK:
-			break;
-		default:
-			return;
-		}
-
-		if ( ! (n->flags & MDOC_BROKEN))
-			return;
+		if (mdoc->last == n) {
+			switch (n->type) {
+			case ROFFT_HEAD:
+				roff_body_alloc(mdoc, n->line, n->pos,
+				    n->tok);
+				return;
+			case ROFFT_BLOCK:
+				break;
+			default:
+				return;
+			}
+			if ( ! (n->flags & MDOC_BROKEN))
+				return;
+		} else
+			n = mdoc->last;
 
 		for (;;) {
 			if ((n = n->parent) == NULL)
