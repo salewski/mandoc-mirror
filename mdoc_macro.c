@@ -210,7 +210,7 @@ const	struct mdoc_macro * const mdoc_macros = __mdoc_macros;
  * are errors.
  */
 void
-mdoc_macroend(struct roff_man *mdoc)
+mdoc_endparse(struct roff_man *mdoc)
 {
 	struct roff_node *n;
 

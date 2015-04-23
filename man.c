@@ -55,13 +55,6 @@ static	int		 man_ptext(struct roff_man *, int, char *, int);
 static	int		 man_pmacro(struct roff_man *, int, char *, int);
 
 
-void
-man_endparse(struct roff_man *man)
-{
-
-	man_macroend(man);
-}
-
 int
 man_parseln(struct roff_man *man, int ln, char *buf, int offs)
 {

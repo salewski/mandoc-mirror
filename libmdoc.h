@@ -84,7 +84,6 @@ void		  mdoc_argv(struct roff_man *, int, int,
 			struct mdoc_arg **, int *, char *);
 enum margserr	  mdoc_args(struct roff_man *, int,
 			int *, char *, int, char **);
-void		  mdoc_macroend(struct roff_man *);
 enum mdelim	  mdoc_isdelim(const char *);
 
 __END_DECLS

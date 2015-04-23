@@ -89,13 +89,6 @@ static	int		  mdoc_ptext(struct roff_man *, int, char *, int);
 static	int		  mdoc_pmacro(struct roff_man *, int, char *, int);
 
 
-void
-mdoc_endparse(struct roff_man *mdoc)
-{
-
-	mdoc_macroend(mdoc);
-}
-
 /*
  * Main parse routine.  Parses a single line -- really just hands off to
  * the macro (mdoc_pmacro()) or text parser (mdoc_ptext()).

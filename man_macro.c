@@ -404,9 +404,8 @@ in_line_eoln(MACRO_PROT_ARGS)
 		man_valid_post(man);
 }
 
-
 void
-man_macroend(struct roff_man *man)
+man_endparse(struct roff_man *man)
 {
 
 	man_unscope(man, man->first);
