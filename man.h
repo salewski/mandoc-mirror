@@ -64,6 +64,5 @@ __BEGIN_DECLS
 struct	roff_man;
 
 const struct mparse   *man_mparse(const struct roff_man *);
-void man_deroff(char **, const struct roff_node *);
 
 __END_DECLS

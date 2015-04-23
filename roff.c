@@ -1230,6 +1230,52 @@ roff_node_delete(struct roff_man *man, struct roff_node *n)
 	roff_node_free(n);
 }
 
+void
+deroff(char **dest, const struct roff_node *n)
+{
+	char	*cp;
+	size_t	 sz;
+
+	if (n->type != ROFFT_TEXT) {
+		for (n = n->child; n != NULL; n = n->next)
+			deroff(dest, n);
+		return;
+	}
+
+	/* Skip leading whitespace and escape sequences. */
+
+	cp = n->string;
+	while (*cp != '\0') {
+		if ('\\' == *cp) {
+			cp++;
+			mandoc_escape((const char **)&cp, NULL, NULL);
+		} else if (isspace((unsigned char)*cp))
+			cp++;
+		else
+			break;
+	}
+
+	/* Skip trailing whitespace. */
+
+	for (sz = strlen(cp); sz; sz--)
+		if ( ! isspace((unsigned char)cp[sz-1]))
+			break;
+
+	/* Skip empty strings. */
+
+	if (sz == 0)
+		return;
+
+	if (*dest == NULL) {
+		*dest = mandoc_strndup(cp, sz);
+		return;
+	}
+
+	mandoc_asprintf(&cp, "%s %*s", *dest, (int)sz, cp);
+	free(*dest);
+	*dest = cp;
+}
+
 /* --- main functions of the roff parser ---------------------------------- */
 
 /*

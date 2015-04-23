@@ -1476,7 +1476,7 @@ parse_man(struct mpage *mpage, const struct roff_meta *meta,
 			 */
 
 			title = NULL;
-			man_deroff(&title, body);
+			deroff(&title, body);
 			if (NULL == title)
 				return;
 
@@ -1720,7 +1720,7 @@ parse_mdoc_Nd(struct mpage *mpage, const struct roff_meta *meta,
 {
 
 	if (n->type == ROFFT_BODY)
-		mdoc_deroff(&mpage->desc, n);
+		deroff(&mpage->desc, n);
 	return(0);
 }
 

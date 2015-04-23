@@ -157,3 +157,9 @@ struct	roff_man {
 	enum roff_sec	  lastnamed; /* Last standard section seen. */
 	enum roff_next	  next;    /* Where to put the next node. */
 };
+
+__BEGIN_DECLS
+
+void		 deroff(char **, const struct roff_node *);
+
+__END_DECLS

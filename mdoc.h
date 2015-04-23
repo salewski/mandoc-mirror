@@ -279,11 +279,3 @@ extern	const char *const *mdoc_macronames;
 
 /* Names of macro args.  Index is enum mdocargt. */
 extern	const char *const *mdoc_argnames;
-
-__BEGIN_DECLS
-
-struct	roff_man;
-
-void mdoc_deroff(char **, const struct roff_node *);
-
-__END_DECLS
