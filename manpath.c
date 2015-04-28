@@ -78,7 +78,7 @@ manconf_parse(struct manconf *conf, const char *file,
 	if ( ! ferror(stream) && feof(stream) &&
 			bsz && '\n' == buf[bsz - 1]) {
 		buf[bsz - 1] = '\0';
-		manpath_parseline(dirs, buf, 1);
+		manpath_parseline(&conf->manpath, buf, 1);
 	}
 
 	free(buf);
