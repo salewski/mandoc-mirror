@@ -308,6 +308,7 @@ tbl_layout(struct tbl_node *tbl, int ln, const char *p, int pos)
 				    rp->next->first == NULL) {
 					free(rp->next);
 					rp->next = NULL;
+					tbl->last_row = rp;
 				}
 			}
 			return;
