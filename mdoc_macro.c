@@ -644,6 +644,8 @@ blk_exp_close(MACRO_PROT_ARGS)
 	if (body == NULL) {
 		mandoc_msg(MANDOCERR_BLK_NOTOPEN, mdoc->parse,
 		    line, ppos, mdoc_macronames[tok]);
+		if (later != NULL)
+			later->flags &= ~MDOC_BROKEN;
 		if (maxargs && endbody == NULL) {
 			/*
 			 * Stray .Ec without previous .Eo:
