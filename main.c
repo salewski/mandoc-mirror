@@ -1027,7 +1027,7 @@ spawn_pager(void)
 	/* Hand over to the pager. */
 
 	execvp(argv[0], argv);
-	fprintf(stderr, "%s: exec: %s\n",
-	    progname, strerror(errno));
+	fprintf(stderr, "%s: exec %s: %s\n",
+	    progname, argv[0], strerror(errno));
 	exit((int)MANDOCLEVEL_SYSERR);
 }
