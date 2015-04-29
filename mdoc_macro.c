@@ -673,6 +673,8 @@ blk_exp_close(MACRO_PROT_ARGS)
 
 	if (endbody != NULL)
 		n = endbody;
+
+	ntok = TOKEN_NONE;
 	for (j = 0; ; j++) {
 		lastarg = *pos;
 
@@ -700,7 +702,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 	}
 
 	if (n != NULL) {
-		if (n != mdoc->last && n->flags & MDOC_BROKEN) {
+		if (ntok != TOKEN_NONE && n->flags & MDOC_BROKEN) {
 			target = n;
 			do
 				target = target->parent;
