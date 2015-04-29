@@ -265,6 +265,7 @@ term_flushln(struct termp *p)
 
 	p->col = 0;
 	p->overstep = 0;
+	p->flags &= ~(TERMP_BACKAFTER | TERMP_BACKBEFORE);
 
 	if ( ! (TERMP_NOBREAK & p->flags)) {
 		p->viscol = 0;
@@ -417,11 +418,6 @@ term_word(struct termp *p, const char *word)
 
 	while ('\0' != *word) {
 		if ('\\' != *word) {
-			if (TERMP_SKIPCHAR & p->flags) {
-				p->flags &= ~TERMP_SKIPCHAR;
-				word++;
-				continue;
-			}
 			if (TERMP_NBRWORD & p->flags) {
 				if (' ' == *word) {
 					encode(p, nbrsp, 1);
@@ -480,13 +476,13 @@ term_word(struct termp *p, const char *word)
 			term_fontlast(p);
 			continue;
 		case ESCAPE_NOSPACE:
-			if (TERMP_SKIPCHAR & p->flags)
-				p->flags &= ~TERMP_SKIPCHAR;
-			else if ('\0' == *word)
+			if (p->flags & TERMP_BACKAFTER)
+				p->flags &= ~TERMP_BACKAFTER;
+			else if (*word == '\0')
 				p->flags |= (TERMP_NOSPACE | TERMP_NONEWLINE);
 			continue;
 		case ESCAPE_SKIPCHAR:
-			p->flags |= TERMP_SKIPCHAR;
+			p->flags |= TERMP_BACKAFTER;
 			continue;
 		case ESCAPE_OVERSTRIKE:
 			cp = seq + sz;
@@ -496,9 +492,14 @@ term_word(struct termp *p, const char *word)
 					continue;
 				}
 				encode1(p, *seq++);
-				if (seq < cp)
-					encode(p, "\b", 1);
+				if (seq < cp) {
+					if (p->flags & TERMP_BACKBEFORE)
+						p->flags |= TERMP_BACKAFTER;
+					else
+						p->flags |= TERMP_BACKBEFORE;
+				}
 			}
+			continue;
 		default:
 			continue;
 		}
@@ -553,16 +554,16 @@ encode1(struct termp *p, int c)
 {
 	enum termfont	  f;
 
-	if (TERMP_SKIPCHAR & p->flags) {
-		p->flags &= ~TERMP_SKIPCHAR;
-		return;
+	if (p->col + 7 >= p->maxcols)
+		adjbuf(p, p->col + 7);
+
+	f = (c == ASCII_HYPH || isgraph(c)) ?
+	    p->fontq[p->fonti] : TERMFONT_NONE;
+
+	if (p->flags & TERMP_BACKBEFORE) {
+		p->buf[p->col++] = 8;
+		p->flags &= ~TERMP_BACKBEFORE;
 	}
-
-	if (p->col + 6 >= p->maxcols)
-		adjbuf(p, p->col + 6);
-
-	f = p->fontq[p->fonti];
-
 	if (TERMFONT_UNDER == f || TERMFONT_BI == f) {
 		p->buf[p->col++] = '_';
 		p->buf[p->col++] = 8;
@@ -575,6 +576,10 @@ encode1(struct termp *p, int c)
 		p->buf[p->col++] = 8;
 	}
 	p->buf[p->col++] = c;
+	if (p->flags & TERMP_BACKAFTER) {
+		p->flags |= TERMP_BACKBEFORE;
+		p->flags &= ~TERMP_BACKAFTER;
+	}
 }
 
 static void
@@ -582,29 +587,8 @@ encode(struct termp *p, const char *word, size_t sz)
 {
 	size_t		  i;
 
-	if (TERMP_SKIPCHAR & p->flags) {
-		p->flags &= ~TERMP_SKIPCHAR;
-		return;
-	}
-
-	/*
-	 * Encode and buffer a string of characters.  If the current
-	 * font mode is unset, buffer directly, else encode then buffer
-	 * character by character.
-	 */
-
-	if (p->fontq[p->fonti] == TERMFONT_NONE) {
-		if (p->col + sz >= p->maxcols)
-			adjbuf(p, p->col + sz);
-		for (i = 0; i < sz; i++)
-			p->buf[p->col++] = word[i];
-		return;
-	}
-
-	/* Pre-buffer, assuming worst-case. */
-
-	if (p->col + 1 + (sz * 5) >= p->maxcols)
-		adjbuf(p, p->col + 1 + (sz * 5));
+	if (p->col + 2 + (sz * 5) >= p->maxcols)
+		adjbuf(p, p->col + 2 + (sz * 5));
 
 	for (i = 0; i < sz; i++) {
 		if (ASCII_HYPH == word[i] ||
