@@ -1399,7 +1399,7 @@ in_line_eoln(MACRO_PROT_ARGS)
 		if (mdoc->next == ROFF_NEXT_SIBLING)
 			n = n->parent;
 		if (n->tok == MDOC_Nm)
-			rew_last(mdoc, mdoc->last->parent);
+			rew_last(mdoc, n->parent);
 	}
 
 	if (buf[*pos] == '\0' &&
