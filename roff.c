@@ -1022,6 +1022,7 @@ roff_node_append(struct roff_man *man, struct roff_node *n)
 		/* NOTREACHED */
 	}
 	n->parent->nchild++;
+	n->parent->last = n;
 
 	/*
 	 * Copy over the normalised-data pointer of our parent.  Not

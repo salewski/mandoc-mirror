@@ -258,7 +258,7 @@ lookup(struct roff_man *mdoc, int from, int line, int ppos, const char *p)
 static void
 rew_last(struct roff_man *mdoc, const struct roff_node *to)
 {
-	struct roff_node *n, *np;
+	struct roff_node	*np;
 
 	if (to->flags & MDOC_VALID)
 		return;
@@ -273,10 +273,8 @@ rew_last(struct roff_man *mdoc, const struct roff_node *to)
 		 */
 		np = mdoc->last->parent;
 		mdoc_valid_post(mdoc);
-		n = mdoc->last;
 		mdoc->last = np;
 		assert(mdoc->last);
-		mdoc->last->last = n;
 	}
 	mdoc_valid_post(mdoc);
 }
