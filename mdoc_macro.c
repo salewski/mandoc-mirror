@@ -263,7 +263,6 @@ rew_last(struct roff_man *mdoc, const struct roff_node *to)
 	if (to->flags & MDOC_VALID)
 		return;
 
-	mdoc->next = ROFF_NEXT_SIBLING;
 	while (mdoc->last != to) {
 		/*
 		 * Save the parent here, because we may delete the
@@ -276,6 +275,7 @@ rew_last(struct roff_man *mdoc, const struct roff_node *to)
 		mdoc->last = np;
 		assert(mdoc->last);
 	}
+	mdoc->next = ROFF_NEXT_SIBLING;
 	mdoc_valid_post(mdoc);
 }
 
