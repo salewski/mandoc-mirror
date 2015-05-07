@@ -84,7 +84,6 @@ manconf_parse(struct manconf *conf, const char *file,
 	free(buf);
 	pclose(stream);
 #else
-	char		 manpath_default[] = MANPATH_DEFAULT;
 	char		*insert;
 
 	/* Always prepend -m. */
@@ -104,8 +103,6 @@ manconf_parse(struct manconf *conf, const char *file,
 	/* No MANPATH; use man.conf(5) only. */
 	if (NULL == defp || '\0' == defp[0]) {
 		manconf_file(conf, file);
-		if (conf->manpath.sz == 0)
-			manpath_parseline(&conf->manpath, manpath_default, 0);
 		return;
 	}
 
@@ -210,13 +207,14 @@ static void
 manconf_file(struct manconf *conf, const char *file)
 {
 	const char *const toks[] = { "manpath", "output", "_whatdb" };
+	char manpath_default[] = MANPATH_DEFAULT;
 
 	FILE		*stream;
 	char		*cp, *ep;
 	size_t		 len, tok;
 
 	if ((stream = fopen(file, "r")) == NULL)
-		return;
+		goto out;
 
 	while ((cp = fgetln(stream, &len)) != NULL) {
 		ep = cp + len;
@@ -250,6 +248,7 @@ manconf_file(struct manconf *conf, const char *file)
 			/* FALLTHROUGH */
 		case 0:  /* manpath */
 			manpath_add(&conf->manpath, cp, 0);
+			*manpath_default = '\0';
 			break;
 		case 1:  /* output */
 			manconf_output(&conf->output, cp);
@@ -258,8 +257,11 @@ manconf_file(struct manconf *conf, const char *file)
 			break;
 		}
 	}
-
 	fclose(stream);
+
+out:
+	if (*manpath_default != '\0')
+		manpath_parseline(&conf->manpath, manpath_default, 0);
 }
 
 void
