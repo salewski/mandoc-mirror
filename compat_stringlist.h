@@ -1,7 +1,8 @@
+/*	$Id$	*/
 /*	$NetBSD: stringlist.h,v 1.2 1997/01/17 06:11:36 lukem Exp $	*/
 
 /*
- * Copyright (c) 1994 Christos Zoulas
+ * Copyright (c) 1994 Christos Zoulas <christos@netbsd.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,13 +30,8 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $FreeBSD$
  */
 
-#ifndef _STRINGLIST_H
-#define _STRINGLIST_H 
-#include <sys/cdefs.h>
 #include <sys/types.h>
 
 /*
@@ -53,5 +49,3 @@ int	 sl_add(StringList *, char *);
 void	 sl_free(StringList *, int);
 char	*sl_find(StringList *, const char *);
 __END_DECLS
-
-#endif /* _STRINGLIST_H */

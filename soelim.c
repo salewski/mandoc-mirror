@@ -1,4 +1,5 @@
-/*-
+/*	$Id$	*/
+/*
  * Copyright (c) 2014 Baptiste Daroussin <bapt@FreeBSD.org>
  * All rights reserved.
  *
@@ -24,20 +25,20 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
-
 #include <sys/param.h>
+#include <sys/types.h>
 
-#define _WITH_GETLINE
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <stringlist.h>
-#include <err.h>
 #include <ctype.h>
+#include <err.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#if HAVE_STRINGLIST
+#include <stringlist.h>
+#else
+#include "compat_stringlist.h"
+#endif
+#include <unistd.h>
 
 #define C_OPTION 0x1
 

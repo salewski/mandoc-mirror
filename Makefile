@@ -31,6 +31,7 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-sqlite3.c \
 		   test-sqlite3_errstr.c \
 		   test-strcasestr.c \
+		   test-stringlist.c \
 		   test-strlcat.c \
 		   test-strlcpy.c \
 		   test-strptime.c \
@@ -51,6 +52,7 @@ SRCS		 = att.c \
 		   compat_reallocarray.c \
 		   compat_sqlite3_errstr.c \
 		   compat_strcasestr.c \
+		   compat_stringlist.c \
 		   compat_strlcat.c \
 		   compat_strlcpy.c \
 		   compat_strsep.c \
@@ -89,6 +91,7 @@ SRCS		 = att.c \
 		   preconv.c \
 		   read.c \
 		   roff.c \
+		   soelim.c \
 		   st.c \
 		   tbl.c \
 		   tbl_data.c \
@@ -113,6 +116,7 @@ DISTFILES	 = INSTALL \
 		   chars.in \
 		   compat_fts.h \
 		   compat_ohash.h \
+		   compat_stringlist.h \
 		   configure \
 		   configure.local.example \
 		   demandoc.1 \
@@ -154,6 +158,7 @@ DISTFILES	 = INSTALL \
 		   predefs.in \
 		   roff.7 \
 		   roff.h \
+		   soelim.1 \
 		   st.in \
 		   style.css \
 		   tbl.3 \
@@ -247,10 +252,13 @@ MANPAGE_OBJS	 = manpage.o mansearch.o mansearch_const.o manpath.o
 
 DEMANDOC_OBJS	 = demandoc.o
 
+SOELIM_OBJS	 = soelim.o compat_stringlist.o
+
 WWW_MANS	 = apropos.1.html \
 		   demandoc.1.html \
 		   man.1.html \
 		   mandoc.1.html \
+		   soelim.1.html \
 		   mandoc.3.html \
 		   mandoc_escape.3.html \
 		   mandoc_headers.3.html \
@@ -288,7 +296,7 @@ include Makefile.local
 
 all: base-build $(BUILD_TARGETS) Makefile.local
 
-base-build: mandoc demandoc
+base-build: mandoc demandoc soelim
 
 cgi-build: man.cgi
 
@@ -314,6 +322,7 @@ clean:
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f manpage $(MANPAGE_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
+	rm -f soelim $(SOELIM_OBJS)
 	rm -f $(WWW_MANS) $(WWW_OBJS)
 	rm -rf *.dSYM
 
@@ -326,12 +335,12 @@ base-install: base-build
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	mkdir -p $(DESTDIR)$(MANDIR)/man5
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
-	$(INSTALL_PROGRAM) mandoc demandoc $(DESTDIR)$(BINDIR)
+	$(INSTALL_PROGRAM) mandoc demandoc soelim $(DESTDIR)$(BINDIR)
 	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_MAN)
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
 	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h roff.h \
 		$(DESTDIR)$(INCLUDEDIR)
-	$(INSTALL_MAN) mandoc.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL_MAN) mandoc.1 demandoc.1 soelim.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) man.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_MAN).1
 	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
 		mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
@@ -392,6 +401,9 @@ man.cgi: $(CGI_OBJS) libmandoc.a
 
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a
+
+soelim: $(SOELIM_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(SOELIM_OBJS)
 
 # --- maintainer targets ---
 

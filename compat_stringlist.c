@@ -1,5 +1,6 @@
+/*	$Id$	*/
 /*
- * Copyright (c) 1994 Christos Zoulas
+ * Copyright (c) 1994 Christos Zoulas <christos@netbsd.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,19 +27,10 @@
  * SUCH DAMAGE.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static char *rcsid = "$NetBSD: stringlist.c,v 1.2 1997/01/17 07:26:20 lukem Exp $";
-#endif /* LIBC_SCCS and not lint */
-#include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
-
-#include "namespace.h"
-#include <stdio.h>
-#include <string.h>
 #include <err.h>
 #include <stdlib.h>
-#include <stringlist.h>
-#include "un-namespace.h"
+#include <string.h>
+#include "compat_stringlist.h"
 
 #define _SL_CHUNKSIZE	20
 
@@ -52,13 +44,13 @@ sl_init(void)
 
 	sl = malloc(sizeof(StringList));
 	if (sl == NULL)
-		_err(1, "stringlist: %m");
+		err(1, "stringlist");
 
 	sl->sl_cur = 0;
 	sl->sl_max = _SL_CHUNKSIZE;
 	sl->sl_str = malloc(sl->sl_max * sizeof(char *));
 	if (sl->sl_str == NULL)
-		_err(1, "stringlist: %m");
+		err(1, "stringlist");
 	return sl;
 }
 
