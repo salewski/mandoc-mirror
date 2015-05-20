@@ -48,7 +48,7 @@ sl_init(void)
 
 	sl->sl_cur = 0;
 	sl->sl_max = _SL_CHUNKSIZE;
-	sl->sl_str = malloc(sl->sl_max * sizeof(char *));
+	sl->sl_str = reallocarray(NULL, sl->sl_max, sizeof(char *));
 	if (sl->sl_str == NULL)
 		err(1, "stringlist");
 	return sl;
@@ -63,7 +63,8 @@ sl_add(StringList *sl, char *name)
 {
 	if (sl->sl_cur == sl->sl_max - 1) {
 		sl->sl_max += _SL_CHUNKSIZE;
-		sl->sl_str = reallocf(sl->sl_str, sl->sl_max * sizeof(char *));
+		sl->sl_str = reallocarray(sl->sl_str,
+		    sl->sl_max, sizeof(char *));
 		if (sl->sl_str == NULL)
 			return (-1);
 	}
