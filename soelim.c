@@ -25,11 +25,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/param.h>
 #include <sys/types.h>
 
 #include <ctype.h>
 #include <err.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -57,7 +57,7 @@ static FILE *
 soelim_fopen(const char *name)
 {
 	FILE *f;
-	char path[MAXPATHLEN];
+	char path[PATH_MAX];
 	size_t i;
 
 	if (strcmp(name, "-") == 0)
