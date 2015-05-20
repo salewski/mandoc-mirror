@@ -37,9 +37,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
 The following files included from outside sources are protected by
-other people's Copyright and are distributed under various 2-clause,
-3-clause, and 4-clause BSD licenses; see these individual files for
-details.
+other people's Copyright and are distributed under various 2-clause
+and 3-clause BSD licenses; see these individual files for details.
 
 soelim.c, soelim.1:
 Copyright (c) 2014 Baptiste Daroussin <bapt@FreeBSD.org>
