@@ -1,3 +1,11 @@
+#include "config.h"
+
+#if HAVE_STRINGLIST
+
+int dummy;
+
+#else
+
 /*	$Id$	*/
 /*
  * Copyright (c) 1994 Christos Zoulas <christos@netbsd.org>
@@ -105,3 +113,5 @@ sl_find(StringList *sl, const char *name)
 
 	return NULL;
 }
+
+#endif
