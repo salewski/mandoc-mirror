@@ -402,8 +402,8 @@ man.cgi: $(CGI_OBJS) libmandoc.a
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a
 
-soelim: $(SOELIM_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(SOELIM_OBJS)
+soelim: $(SOELIM_OBJS) compat_reallocarray.o
+	$(CC) $(LDFLAGS) -o $@ $(SOELIM_OBJS) compat_reallocarray.o
 
 # --- maintainer targets ---
 
