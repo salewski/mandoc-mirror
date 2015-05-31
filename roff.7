@@ -1057,14 +1057,17 @@ If the first character of COND is
 .Pq string defined ,
 .Sq e
 .Pq even page ,
-.Sq r
-.Pq register accessed ,
 .Sq t
 .Pq troff mode ,
 or
 .Sq v
 .Pq vroff mode ,
 COND evaluates to false.
+.It
+If the first character of COND is
+.Sq r ,
+it evalutes to true if the rest of COND is the name of an existing
+number register; otherwise, it evaluates to false.
 .It
 If COND starts with a parenthesis or with an optionally signed
 integer number, it is evaluated according to the rules of
