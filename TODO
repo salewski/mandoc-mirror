@@ -208,6 +208,12 @@ are mere guesses, and some may be wrong.
 
 --- missing tbl features -----------------------------------------------
 
+- support mdoc(7) and man(7) macros inside tbl(7) code;
+  probably requires the parser reorg and letting tbl(7)
+  use roff_node such that macro sets can mix;
+  informed by bapt@ that FreeBSD needs this.
+  loc ***  exist **  algo ***  size **  imp ***
+
 - look at the POSIX manuals in the books/man-pages-posix port,
   they use some unsupported tbl(7) features.
   loc *  exist **  algo **  size **  imp ***
@@ -268,6 +274,10 @@ are mere guesses, and some may be wrong.
 
 - kettenis wants base roff, ms, and me  Fri, 1 Jan 2010 22:13:15 +0100 (CET)
   loc **  exist **  algo **  size ***  imp *
+
+- Some FreeBSD people need either a markdown output formatter
+  for mandoc -mdoc or a markdown to mdoc converter because they
+  have to maintain manuals needed both in markdown and mdoc format.
 
 --- compatibility checks -----------------------------------------------
 
