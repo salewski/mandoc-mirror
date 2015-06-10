@@ -62,7 +62,9 @@ static struct termp *
 ascii_init(enum termenc enc, const struct mchars *mchars,
 	const struct manoutput *outopts)
 {
+#if HAVE_WCHAR
 	char		*v;
+#endif
 	struct termp	*p;
 
 	p = mandoc_calloc(1, sizeof(struct termp));
