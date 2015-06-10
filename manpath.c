@@ -29,7 +29,9 @@
 #include "mandoc_aux.h"
 #include "manconf.h"
 
+#if !HAVE_MANPATH
 static	void	 manconf_file(struct manconf *, const char *);
+#endif
 static	void	 manpath_add(struct manpaths *, const char *, int);
 static	void	 manpath_parseline(struct manpaths *, char *, int);
 
@@ -203,6 +205,7 @@ manconf_free(struct manconf *conf)
 	free(conf->output.style);
 }
 
+#if !HAVE_MANPATH
 static void
 manconf_file(struct manconf *conf, const char *file)
 {
@@ -263,6 +266,7 @@ out:
 	if (*manpath_default != '\0')
 		manpath_parseline(&conf->manpath, manpath_default, 0);
 }
+#endif
 
 void
 manconf_output(struct manoutput *conf, const char *cp)
