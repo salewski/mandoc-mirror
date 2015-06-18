@@ -230,6 +230,11 @@ are mere guesses, and some may be wrong.
 
 --- missing eqn features -----------------------------------------------
 
+- In a matrix, break the output line after each matrix line.
+  Found in the discussion at CDBUG 2015.
+  Suggested by Avi Weinstock.
+  loc *  exist *  algo *  size *  imp **
+
 - The "size" keyword is parsed, but ignored by the formatter.
   loc *  exist *  algo *  size *  imp *
 
