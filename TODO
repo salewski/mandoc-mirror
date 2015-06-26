@@ -223,11 +223,6 @@ are mere guesses, and some may be wrong.
   suggested by bentley@  Tue, 14 Oct 2014 04:10:55 -0600
   loc *  exist **  algo *  size *  imp **
 
-- allow standalone `.' to be interpreted as an end-of-layout
-  delimiter instead of being thrown away as a no-op roff line
-  reported by Yuri Pankov, Wed 18 May 2011 11:34:59 CEST
-  loc **  exist **  algo **  size *  imp **
-
 --- missing eqn features -----------------------------------------------
 
 - In a matrix, break the output line after each matrix line.
@@ -252,13 +247,9 @@ are mere guesses, and some may be wrong.
   Werner LEMBERG on groff at gnu dot org  Sun, 10 Nov 2013 12:47:46
   loc **  exist **  algo *  size *  imp *
 
-- When makewhatis(8) encounters a FATAL parse error,
-  it silently treats the file as formatted, which makes no sense
-  at all for paths like man1/foo.1 - and which also contradicts
-  what the manual says at the end of the description.
-  The end result will be ENOENT for file names returned
-  by mansearch() in manpage.file.
-  loc *  exist *  algo *  size *  imp **
+- change the default PAGER to more -Es and use the pager
+  even for apropos title line output; req by bapt@
+  loc *  exist *  algo *  size *  imp ***
 
 - makewhatis(8) for preformatted pages:
   parse the section number from the header line
@@ -280,15 +271,13 @@ are mere guesses, and some may be wrong.
 - kettenis wants base roff, ms, and me  Fri, 1 Jan 2010 22:13:15 +0100 (CET)
   loc **  exist **  algo **  size ***  imp *
 
-- Some FreeBSD people need either a markdown output formatter
+- Vsevolod Stakhov (FreeBSD) needs either a markdown output formatter
   for mandoc -mdoc or a markdown to mdoc converter because they
   have to maintain manuals needed both in markdown and mdoc format.
+  Look at the libsoldout (markdown -> whatever)
+  loc *  exist *  algo *  size **  imp **
 
 --- compatibility checks -----------------------------------------------
-
-- write a configure check for [[:<:]] support and provide some
-  fallback for whatis(1) when it doesn't work;
-  Svyatoslav Mishyn  Wed, 17 Dec 2014 11:07:10 +0200
 
 - is .Bk implemented correctly in modern groff?
   sobrado@  Tue, 19 Apr 2011 22:12:55 +0200
@@ -520,11 +509,15 @@ are mere guesses, and some may be wrong.
 
 - word boundaries in regular expressions for whatis(1)
   set up config tests to use [[:<:]], \<, or nothing
+  Svyatoslav Mishyn  Wed, 17 Dec 2014 11:07:10 +0200
   reminded by Peter Bray Fri, 03 Apr 2015 23:02:16 +1100
 
 ************************************************************************
 * warning issues
 ************************************************************************
+
+- Report errors in -O suboption parsing.
+  loc *  exist *  algo *  size *  imp **
 
 - check that MANDOCERR_BADTAB is thrown in the right cases,
   i.e. when finding a literal tab character in fill mode,
@@ -604,11 +597,6 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 ************************************************************************
 * structural issues
 ************************************************************************
-
-- Improve -O suboption parsing.  Do it in the main program such that
-  errors can be reported.  Pay attention to distinguishing the
-  mandoc(1) and apropos(1) styles of both options.
-  loc **  exist *  algo **  size **  imp ***
 
 - Use libz directly instead of forking gunzip(1).
   Suggested by bapt at FreeBSD among others.
