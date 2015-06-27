@@ -2265,6 +2265,8 @@ roff_cond(ROFF_ARGS)
 	if (buf->buf[pos] == '\\' && buf->buf[pos + 1] == '{') {
 		r->last->endspan = -1;
 		pos += 2;
+		while (buf->buf[pos] == ' ')
+			pos++;
 		goto out;
 	}
 
