@@ -102,8 +102,7 @@ SRCS		 = att.c \
 		   term.c \
 		   term_ascii.c \
 		   term_ps.c \
-		   tree.c \
-		   $(TESTSRCS)
+		   tree.c
 
 DISTFILES	 = INSTALL \
 		   LICENSE \
@@ -164,7 +163,8 @@ DISTFILES	 = INSTALL \
 		   tbl.3 \
 		   tbl.7 \
 		   term.h \
-		   $(SRCS)
+		   $(SRCS) \
+		   $(TESTSRCS)
 
 LIBMAN_OBJS	 = man.o \
 		   man_hash.o \
