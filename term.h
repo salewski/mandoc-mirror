@@ -53,6 +53,7 @@ struct	termp {
 	struct rofftbl	  tbl;		/* table configuration */
 	int		  synopsisonly; /* print the synopsis only */
 	int		  mdocstyle;	/* imitate mdoc(7) output */
+	size_t		  line;		/* Current output line number. */
 	size_t		  defindent;	/* Default indent for text. */
 	size_t		  defrmargin;	/* Right margin of the device. */
 	size_t		  lastrmargin;	/* Right margin before the last ll. */

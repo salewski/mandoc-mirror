@@ -39,6 +39,7 @@
 #include "roff.h"
 #include "mdoc.h"
 #include "man.h"
+#include "tag.h"
 #include "main.h"
 #include "manconf.h"
 #include "mansearch.h"
@@ -497,7 +498,9 @@ out:
 
 	if (pager_pid != 0 && pager_pid != 1) {
 		fclose(stdout);
+		tag_write();
 		waitpid(pager_pid, NULL, 0);
+		tag_unlink();
 	}
 
 	return((int)rc);
@@ -959,9 +962,49 @@ spawn_pager(void)
 	char		*argv[MAX_PAGER_ARGS];
 	const char	*pager;
 	char		*cp;
+	size_t		 cmdlen;
 	int		 fildes[2];
 	int		 argc;
 	pid_t		 pager_pid;
+
+	pager = getenv("MANPAGER");
+	if (pager == NULL || *pager == '\0')
+		pager = getenv("PAGER");
+	if (pager == NULL || *pager == '\0')
+		pager = "more -s";
+	cp = mandoc_strdup(pager);
+
+	/*
+	 * Parse the pager command into words.
+	 * Intentionally do not do anything fancy here.
+	 */
+
+	argc = 0;
+	while (argc + 4 < MAX_PAGER_ARGS) {
+		argv[argc++] = cp;
+		cp = strchr(cp, ' ');
+		if (cp == NULL)
+			break;
+		*cp++ = '\0';
+		while (*cp == ' ')
+			cp++;
+		if (*cp == '\0')
+			break;
+	}
+
+	/* Read all text right away and use the tag file. */
+
+	if ((cmdlen = strlen(argv[0])) >= 4) {
+		cp = argv[0] + cmdlen - 4;
+		if (strcmp(cp, "less") == 0 ||
+		    strcmp(cp, "more") == 0) {
+			tag_init();
+			argv[argc++] = mandoc_strdup("+G1G");
+			argv[argc++] = mandoc_strdup("-T");
+			argv[argc++] = tag_filename();
+		}
+	}
+	argv[argc] = NULL;
 
 	if (pipe(fildes) == -1) {
 		fprintf(stderr, "%s: pipe: %s\n",
@@ -997,32 +1040,6 @@ spawn_pager(void)
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
 	close(fildes[0]);
-
-	pager = getenv("MANPAGER");
-	if (pager == NULL || *pager == '\0')
-		pager = getenv("PAGER");
-	if (pager == NULL || *pager == '\0')
-		pager = "more -s";
-	cp = mandoc_strdup(pager);
-
-	/*
-	 * Parse the pager command into words.
-	 * Intentionally do not do anything fancy here.
-	 */
-
-	argc = 0;
-	while (argc + 1 < MAX_PAGER_ARGS) {
-		argv[argc++] = cp;
-		cp = strchr(cp, ' ');
-		if (cp == NULL)
-			break;
-		*cp++ = '\0';
-		while (*cp == ' ')
-			cp++;
-		if (*cp == '\0')
-			break;
-	}
-	argv[argc] = NULL;
 
 	/* Hand over to the pager. */
 

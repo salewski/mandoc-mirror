@@ -70,6 +70,7 @@ ascii_init(enum termenc enc, const struct mchars *mchars,
 	p = mandoc_calloc(1, sizeof(struct termp));
 
 	p->symtab = mchars;
+	p->line = 1;
 	p->tabwidth = 5;
 	p->defrmargin = p->lastrmargin = 78;
 	p->fontq = mandoc_reallocarray(NULL,
@@ -163,6 +164,7 @@ ascii_sepline(void *arg)
 	size_t		 i;
 
 	p = (struct termp *)arg;
+	p->line += 3;
 	putchar('\n');
 	for (i = 0; i < p->defrmargin; i++)
 		putchar('-');
@@ -209,6 +211,7 @@ static void
 ascii_endline(struct termp *p)
 {
 
+	p->line++;
 	putchar('\n');
 }
 
@@ -365,6 +368,7 @@ static void
 locale_endline(struct termp *p)
 {
 
+	p->line++;
 	putwchar(L'\n');
 }
 

@@ -93,6 +93,7 @@ SRCS		 = att.c \
 		   roff.c \
 		   soelim.c \
 		   st.c \
+		   tag.c \
 		   tbl.c \
 		   tbl_data.c \
 		   tbl_html.c \
@@ -160,6 +161,7 @@ DISTFILES	 = INSTALL \
 		   soelim.1 \
 		   st.in \
 		   style.css \
+		   tag.h \
 		   tbl.3 \
 		   tbl.7 \
 		   term.h \
@@ -234,6 +236,7 @@ BASE_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   main.o \
 		   manpath.o \
 		   out.o \
+		   tag.o \
 		   tree.o
 
 MAIN_OBJS	 = $(BASE_OBJS)
