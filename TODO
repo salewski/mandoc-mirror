@@ -511,6 +511,13 @@ are mere guesses, and some may be wrong.
   set up config tests to use [[:<:]], \<, or nothing
   Svyatoslav Mishyn  Wed, 17 Dec 2014 11:07:10 +0200
   reminded by Peter Bray Fri, 03 Apr 2015 23:02:16 +1100
+  loc *  exist *  algo *  size *  imp *
+
+- systems having UTF-8 but not en_US.UTF-8
+  call locale(1) from ./configure, select a UTF-8-locale,
+  and use that for test-wchar.c and term_ascii.c
+  to Markus Waldeck  Sat, 18 Jul 2015 01:55:37 +0200
+  loc *  exist *  algo *  size *  imp *
 
 ************************************************************************
 * warning issues
