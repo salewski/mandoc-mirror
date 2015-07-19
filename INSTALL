@@ -84,9 +84,10 @@ manual page source.
 
 Understanding mandoc dependencies
 ---------------------------------
-The mandoc(1), man(1), and demandoc(1) utilities have no external
-dependencies, but makewhatis(8) and apropos(1) depend on the
-following software:
+The mandoc(1), man(1), and demandoc(1) utilities only depend
+on the zlib library for decompressing gzipped manual pages,
+but makewhatis(8) and apropos(1) depend on the following
+additional software:
 
 1. The SQLite database system, see <http://sqlite.org/>.
 The recommended version of SQLite is 3.8.4.3 or newer.  The mandoc

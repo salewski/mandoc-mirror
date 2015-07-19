@@ -438,6 +438,5 @@ void		  mparse_result(struct mparse *,
 const char	 *mparse_getkeep(const struct mparse *);
 const char	 *mparse_strerror(enum mandocerr);
 const char	 *mparse_strlevel(enum mandoclevel);
-enum mandoclevel  mparse_wait(struct mparse *);
 
 __END_DECLS

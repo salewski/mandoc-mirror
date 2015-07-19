@@ -1246,10 +1246,6 @@ mpages_merge(struct mparse *mp)
 		mlink = mpage->mlinks;
 
 nextpage:
-		if (mparse_wait(mp) != MANDOCLEVEL_OK) {
-			exitcode = (int)MANDOCLEVEL_SYSERR;
-			say(mlink->file, "&wait gunzip");
-		}
 		ohash_delete(&strings);
 		ohash_delete(&names);
 		mpage = ohash_next(&mpages, &pslot);

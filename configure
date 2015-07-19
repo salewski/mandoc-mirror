@@ -239,9 +239,9 @@ fi
 
 # --- DBLIB ---
 if [ ${BUILD_DB} -eq 0 ]; then
-	DBLIB=
+	DBLIB="-lz"
 elif [ -z "${DBLIB}" ]; then
-	DBLIB="${DETECTLIB}"
+	DBLIB="${DETECTLIB} -lz"
 	echo "DBLIB=\"${DBLIB}\"" 1>&2
 	echo "DBLIB=\"${DBLIB}\"" 1>&3
 	echo 1>&3

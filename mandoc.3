@@ -37,7 +37,6 @@
 .Nm mparse_result ,
 .Nm mparse_strerror ,
 .Nm mparse_strlevel
-.Nm mparse_wait ,
 .Nd mandoc macro compiler library
 .Sh SYNOPSIS
 .In sys/types.h
@@ -105,10 +104,6 @@
 .Ft "const char *"
 .Fo mparse_strlevel
 .Fa "enum mandoclevel"
-.Fc
-.Ft "enum mandoclevel"
-.Fo mparse_wait
-.Fa "struct mparse *parse"
 .Fc
 .In sys/types.h
 .In mandoc.h
@@ -392,20 +387,14 @@ Declared in
 implemented in
 .Pa read.c .
 .It Fn mparse_open
-If the
+Open the file for reading.
+If that fails and
 .Fa fname
-ends in
-.Pa .gz ,
-open with
-.Xr gunzip 1 ;
-otherwise, with
-.Xr open 2 .
-If
-.Xr open 2
-fails, append
-.Pa .gz
-and try with
-.Xr gunzip 1 .
+does not already end in
+.Ql .gz ,
+try again after appending
+.Ql .gz .
+Save the information whether the file is zipped or not.
 Return a file descriptor open for reading in
 .Fa fd ,
 or -1 on failure.
@@ -423,9 +412,6 @@ or
 .Fn mparse_open .
 Pass the associated filename in
 .Va fname .
-Calls
-.Fn mparse_wait
-before returning.
 This function may be called multiple times with different parameters; however,
 .Fn mparse_reset
 should be invoked between parses.
@@ -456,28 +442,6 @@ implemented in
 .Pa read.c .
 .It Fn mparse_strlevel
 Return a statically-allocated string representation of a level code.
-Declared in
-.In mandoc.h ,
-implemented in
-.Pa read.c .
-.It Fn mparse_wait
-Bury a
-.Xr gunzip 1
-child process that was spawned with
-.Fn mparse_open .
-To be called after the parse sequence is complete.
-Not needed after
-.Fn mparse_readfd ,
-but does no harm in that case, either.
-Returns
-.Dv MANDOCLEVEL_OK
-on success and
-.Dv MANDOCLEVEL_SYSERR
-on failure, that is, when
-.Xr wait 2
-fails, or when
-.Xr gunzip 1
-died from a signal or exited with non-zero status.
 Declared in
 .In mandoc.h ,
 implemented in

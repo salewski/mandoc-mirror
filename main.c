@@ -458,10 +458,6 @@ main(int argc, char *argv[])
 				passthrough(resp->file, fd,
 				    conf.output.synopsisonly);
 
-			rctmp = mparse_wait(curp.mp);
-			if (rc < rctmp)
-				rc = rctmp;
-
 			if (argc > 1 && curp.outtype <= OUTT_UTF8)
 				ascii_sepline(curp.outdata);
 		}
