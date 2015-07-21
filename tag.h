@@ -17,8 +17,7 @@
 
 __BEGIN_DECLS
 
-void	 tag_init(void);
-char	*tag_filename(void);
+char	*tag_init(void);
 size_t	 tag_get(const char *, size_t);
 void	 tag_put(const char *, size_t, size_t);
 void	 tag_write(void);

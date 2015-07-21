@@ -993,15 +993,18 @@ spawn_pager(void)
 
 	/* Read all text right away and use the tag file. */
 
-	if ((cmdlen = strlen(argv[0])) >= 4) {
+	for (;;) {
+		if ((cmdlen = strlen(argv[0])) < 4)
+			break;
 		cp = argv[0] + cmdlen - 4;
-		if (strcmp(cp, "less") == 0 ||
-		    strcmp(cp, "more") == 0) {
-			tag_init();
-			argv[argc++] = mandoc_strdup("+G1G");
-			argv[argc++] = mandoc_strdup("-T");
-			argv[argc++] = tag_filename();
-		}
+		if (strcmp(cp, "less") && strcmp(cp, "more"))
+			break;
+		if ((cp = tag_init()) == NULL)
+			break;
+		argv[argc++] = mandoc_strdup("+G1G");
+		argv[argc++] = mandoc_strdup("-T");
+		argv[argc++] = cp;
+		break;
 	}
 	argv[argc] = NULL;
 
