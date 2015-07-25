@@ -2268,7 +2268,7 @@ termp_tag_pre(DECL_ARGS)
 	     (n->parent->tok == MDOC_Xo &&
 	      n->parent->parent->prev == NULL &&
 	      n->parent->parent->parent->tok == MDOC_It)) &&
-	    ! tag_get(n->child->string, 0))
-		tag_put(n->child->string, 0, p->line);
+	    ! tag_get(n->child->string, 0, 1))
+		tag_put(n->child->string, 0, 1, p->line);
 	return(1);
 }
