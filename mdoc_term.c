@@ -1481,10 +1481,8 @@ termp_fn_pre(DECL_ARGS)
 	term_word(p, n->string);
 	term_fontpop(p);
 
-	if (n->sec == SEC_DESCRIPTION) {
-		if ( ! tag_get(n->string, 0, ++fn_prio))
-			tag_put(n->string, 0, fn_prio, p->line);
-	}
+	if (n->sec == SEC_DESCRIPTION)
+		tag_put(n->string, ++fn_prio, p->line);
 
 	if (pretty) {
 		term_flushln(p);
@@ -2280,9 +2278,8 @@ termp_er_pre(DECL_ARGS)
 	if (n->sec == SEC_ERRORS &&
 	    (n->parent->tok == MDOC_It ||
 	     (n->parent->tok == MDOC_Bq &&
-	      n->parent->parent->parent->tok == MDOC_It)) &&
-	    ! tag_get(n->child->string, 0, 1))
-		tag_put(n->child->string, 0, 1, p->line);
+	      n->parent->parent->parent->tok == MDOC_It)))
+		tag_put(n->child->string, 1, p->line);
 	return(1);
 }
 
@@ -2296,8 +2293,7 @@ termp_tag_pre(DECL_ARGS)
 	    (n->parent->tok == MDOC_It ||
 	     (n->parent->tok == MDOC_Xo &&
 	      n->parent->parent->prev == NULL &&
-	      n->parent->parent->parent->tok == MDOC_It)) &&
-	    ! tag_get(n->child->string, 0, 1))
-		tag_put(n->child->string, 0, 1, p->line);
+	      n->parent->parent->parent->tok == MDOC_It)))
+		tag_put(n->child->string, 1, p->line);
 	return(1);
 }

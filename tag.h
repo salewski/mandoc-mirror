@@ -18,8 +18,7 @@
 __BEGIN_DECLS
 
 char	*tag_init(void);
-size_t	 tag_get(const char *, size_t, int);
-void	 tag_put(const char *, size_t, int, size_t);
+void	 tag_put(const char *, int, size_t);
 void	 tag_write(void);
 void	 tag_unlink(void);
 
