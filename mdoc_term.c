@@ -251,6 +251,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_ll_pre, NULL }, /* ll */
 };
 
+static	int	 fn_prio;
 
 void
 terminal_mdoc(void *arg, const struct roff_man *mdoc)
@@ -1364,7 +1365,7 @@ termp_sh_pre(DECL_ARGS)
 		 * when the previous section was empty.
 		 */
 		if (n->prev == NULL ||
-		    MDOC_Sh != n->prev->tok ||
+		    n->prev->tok != MDOC_Sh ||
 		    (n->prev->body != NULL &&
 		     n->prev->body->child != NULL))
 			term_vspace(p);
@@ -1374,8 +1375,16 @@ termp_sh_pre(DECL_ARGS)
 		break;
 	case ROFFT_BODY:
 		p->offset = term_len(p, p->defindent);
-		if (SEC_AUTHORS == n->sec)
+		switch (n->sec) {
+		case SEC_DESCRIPTION:
+			fn_prio = 0;
+			break;
+		case SEC_AUTHORS:
 			p->flags &= ~(TERMP_SPLIT|TERMP_NOSPLIT);
+			break;
+		default:
+			break;
+		}
 		break;
 	default:
 		break;
@@ -1470,6 +1479,11 @@ termp_fn_pre(DECL_ARGS)
 	term_fontpush(p, TERMFONT_BOLD);
 	term_word(p, n->string);
 	term_fontpop(p);
+
+	if (n->sec == SEC_DESCRIPTION) {
+		if ( ! tag_get(n->string, 0, ++fn_prio))
+			tag_put(n->string, 0, fn_prio, p->line);
+	}
 
 	if (pretty) {
 		term_flushln(p);
@@ -1823,6 +1837,7 @@ termp_sp_pre(DECL_ARGS)
 		break;
 	default:
 		len = 1;
+		fn_prio = 0;
 		break;
 	}
 
