@@ -208,6 +208,20 @@ are mere guesses, and some may be wrong.
 
 --- missing tbl features -----------------------------------------------
 
+- horizontal lines in the layout still consume data cells
+  and can be mixed with actual data on the same table line
+  synaptics(4) found by tedu@  Mon, 17 Aug 2015 21:17:42 -0400
+  loc **  exist **  algo **  size **  imp ***
+
+- the "w" layout option is ignored
+  synaptics(4) found by tedu@  Mon, 17 Aug 2015 21:17:42 -0400
+  loc *  exist *  algo *  size *  imp **
+
+- the "s" layout column specifier is used for placement of data
+  into columns, but ignored during column width calculations
+  synaptics(4) found by tedu@  Mon, 17 Aug 2015 21:17:42 -0400
+  loc *  exist **  algo ***  size *  imp **
+
 - support mdoc(7) and man(7) macros inside tbl(7) code;
   probably requires the parser reorg and letting tbl(7)
   use roff_node such that macro sets can mix;
