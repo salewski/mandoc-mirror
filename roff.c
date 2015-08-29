@@ -335,6 +335,7 @@ struct	roff {
 	int		 rstacksz; /* current size limit of rstack */
 	int		 rstackpos; /* position in rstack */
 	int		 format; /* current file in mdoc or man format */
+	int		 argc; /* number of args of the last macro */
 	char		 control; /* control character */
 };
 
@@ -411,7 +412,8 @@ static	int		 roff_getnum(const char *, int *, int *, int);
 static	int		 roff_getop(const char *, int *, char *);
 static	int		 roff_getregn(const struct roff *,
 				const char *, size_t);
-static	int		 roff_getregro(const char *name);
+static	int		 roff_getregro(const struct roff *,
+				const char *name);
 static	const char	*roff_getstrn(const struct roff *,
 				const char *, size_t);
 static	int		 roff_hasregn(const struct roff *,
@@ -2575,10 +2577,12 @@ roff_setreg(struct roff *r, const char *name, int val, char sign)
  * were to turn up, another special value would have to be chosen.
  */
 static int
-roff_getregro(const char *name)
+roff_getregro(const struct roff *r, const char *name)
 {
 
 	switch (*name) {
+	case '$':  /* Number of arguments of the last macro evaluated. */
+		return(r->argc);
 	case 'A':  /* ASCII approximation mode is always off. */
 		return(0);
 	case 'g':  /* Groff compatibility mode is always on. */
@@ -2603,7 +2607,7 @@ roff_getreg(const struct roff *r, const char *name)
 	int		 val;
 
 	if ('.' == name[0] && '\0' != name[1] && '\0' == name[2]) {
-		val = roff_getregro(name + 1);
+		val = roff_getregro(r, name + 1);
 		if (-1 != val)
 			return (val);
 	}
@@ -2622,7 +2626,7 @@ roff_getregn(const struct roff *r, const char *name, size_t len)
 	int		 val;
 
 	if ('.' == name[0] && 2 == len) {
-		val = roff_getregro(name + 1);
+		val = roff_getregro(r, name + 1);
 		if (-1 != val)
 			return (val);
 	}
@@ -2642,7 +2646,7 @@ roff_hasregn(const struct roff *r, const char *name, size_t len)
 	int		 val;
 
 	if ('.' == name[0] && 2 == len) {
-		val = roff_getregro(name + 1);
+		val = roff_getregro(r, name + 1);
 		if (-1 != val)
 			return(1);
 	}
@@ -3084,10 +3088,16 @@ roff_userdef(ROFF_ARGS)
 	 * and NUL-terminate them.
 	 */
 
+	r->argc = 0;
 	cp = buf->buf + pos;
-	for (i = 0; i < 9; i++)
-		arg[i] = *cp == '\0' ? "" :
-		    mandoc_getarg(r->parse, &cp, ln, &pos);
+	for (i = 0; i < 9; i++) {
+		if (*cp == '\0')
+			arg[i] = "";
+		else {
+			arg[i] = mandoc_getarg(r->parse, &cp, ln, &pos);
+			r->argc = i + 1;
+		}
+	}
 
 	/*
 	 * Expand macro arguments.
