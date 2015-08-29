@@ -95,6 +95,10 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	case 'd':
 		/* FALLTHROUGH */
 	case 'u':
+		/* FALLTHROUGH */
+	case ',':
+		/* FALLTHROUGH */
+	case '/':
 		return(ESCAPE_IGNORE);
 
 	/*
