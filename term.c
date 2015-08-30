@@ -499,6 +499,9 @@ term_word(struct termp *p, const char *word)
 						p->flags |= TERMP_BACKBEFORE;
 				}
 			}
+			/* Trim trailing backspace/blank pair. */
+			if (p->col > 2 && p->buf[p->col - 1] == ' ')
+				p->col -= 2;
 			continue;
 		default:
 			continue;
@@ -561,7 +564,10 @@ encode1(struct termp *p, int c)
 	    p->fontq[p->fonti] : TERMFONT_NONE;
 
 	if (p->flags & TERMP_BACKBEFORE) {
-		p->buf[p->col++] = 8;
+		if (p->buf[p->col - 1] == ' ')
+			p->col--;
+		else
+			p->buf[p->col++] = 8;
 		p->flags &= ~TERMP_BACKBEFORE;
 	}
 	if (TERMFONT_UNDER == f || TERMFONT_BI == f) {
