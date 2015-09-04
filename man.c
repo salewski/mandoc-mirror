@@ -283,6 +283,20 @@ man_breakscope(struct roff_man *man, int tok)
 	}
 
 	/*
+	 * Weird special case:
+	 * Switching fill mode closes section headers.
+	 */
+
+	if (man->flags & MAN_BLINE &&
+	    (tok == MAN_nf || tok == MAN_fi) &&
+	    (man->last->tok == MAN_SH || man->last->tok == MAN_SS)) {
+		n = man->last;
+		man_unscope(man, n);
+		roff_body_alloc(man, n->line, n->pos, n->tok);
+		man->flags &= ~MAN_BLINE;
+	}
+
+	/*
 	 * A block header next line scope is open,
 	 * and the new macro is not allowed inside block headers.
 	 * Delete the block that is being broken.
