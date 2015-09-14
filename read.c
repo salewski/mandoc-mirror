@@ -129,7 +129,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"blocks badly nested",
 	"nested displays are not portable",
 	"moving content out of list",
-	".Vt block has child macro",
 	"fill mode already enabled, skipping",
 	"fill mode already disabled, skipping",
 	"line scope broken",
