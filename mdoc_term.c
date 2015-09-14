@@ -146,7 +146,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_under_pre, NULL }, /* Ar */
 	{ termp_cd_pre, NULL }, /* Cd */
 	{ termp_bold_pre, NULL }, /* Cm */
-	{ NULL, NULL }, /* Dv */
+	{ termp_li_pre, NULL }, /* Dv */
 	{ termp_er_pre, NULL }, /* Er */
 	{ termp_tag_pre, NULL }, /* Ev */
 	{ termp_ex_pre, NULL }, /* Ex */
