@@ -2208,7 +2208,7 @@ dbclose(int real)
 		return;
 	case 0:
 		execlp("cmp", "cmp", "-s",
-		    tempfilename, MANDOC_DB, NULL);
+		    tempfilename, MANDOC_DB, (char *)NULL);
 		say("", "&exec cmp");
 		exit(0);
 	default:
@@ -2233,7 +2233,7 @@ dbclose(int real)
 		say("", "&fork rm");
 		return;
 	case 0:
-		execlp("rm", "rm", "-rf", tempfilename, NULL);
+		execlp("rm", "rm", "-rf", tempfilename, (char *)NULL);
 		say("", "&exec rm");
 		exit((int)MANDOCLEVEL_SYSERR);
 	default:
