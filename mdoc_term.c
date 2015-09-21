@@ -802,7 +802,7 @@ termp_it_pre(DECL_ARGS)
 		if (n->type != ROFFT_HEAD)
 			break;
 
-		p->flags |= TERMP_NOBREAK | TERMP_BRIND;
+		p->flags |= TERMP_NOBREAK | TERMP_BRTRSP | TERMP_BRIND;
 		p->trailspace = 2;
 
 		if (NULL == n->next || NULL == n->next->child)
@@ -974,7 +974,7 @@ termp_it_post(DECL_ARGS)
 	 * has munged them in the meanwhile.
 	 */
 
-	p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND |
+	p->flags &= ~(TERMP_NOBREAK | TERMP_BRTRSP | TERMP_BRIND |
 			TERMP_DANGLE | TERMP_HANG);
 	p->trailspace = 0;
 }
