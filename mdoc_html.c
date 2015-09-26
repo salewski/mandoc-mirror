@@ -641,17 +641,13 @@ mdoc_nm_pre(MDOC_ARGS)
 	int		 len;
 
 	switch (n->type) {
+	case ROFFT_HEAD:
+		print_otag(h, TAG_TD, 0, NULL);
+		/* FALLTHROUGH */
 	case ROFFT_ELEM:
 		PAIR_CLASS_INIT(&tag, "name");
 		print_otag(h, TAG_B, 1, &tag);
-		if (NULL == n->child && meta->name)
-			print_text(h, meta->name);
-		return(1);
-	case ROFFT_HEAD:
-		print_otag(h, TAG_TD, 0, NULL);
-		PAIR_CLASS_INIT(&tag, "name");
-		print_otag(h, TAG_B, 1, &tag);
-		if (NULL == n->child && meta->name)
+		if (n->child == NULL && meta->name != NULL)
 			print_text(h, meta->name);
 		return(1);
 	case ROFFT_BODY:
@@ -669,7 +665,7 @@ mdoc_nm_pre(MDOC_ARGS)
 		if (n->type == ROFFT_TEXT)
 			len += html_strlen(n->string);
 
-	if (0 == len && meta->name)
+	if (len == 0 && meta->name != NULL)
 		len = html_strlen(meta->name);
 
 	SCALE_HS_INIT(&su, len);
