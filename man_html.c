@@ -427,7 +427,6 @@ man_alt_pre(MAN_ARGS)
 			break;
 		default:
 			abort();
-			/* NOTREACHED */
 		}
 
 		if (i)

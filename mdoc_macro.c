@@ -363,7 +363,6 @@ rew_alt(int tok)
 	default:
 		return(tok);
 	}
-	/* NOTREACHED */
 }
 
 static void

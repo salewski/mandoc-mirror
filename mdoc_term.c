@@ -1721,7 +1721,6 @@ termp_xx_pre(DECL_ARGS)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	term_word(p, pp);
@@ -1918,7 +1917,6 @@ termp_quote_pre(DECL_ARGS)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	p->flags |= TERMP_NOSPACE;
@@ -1989,7 +1987,6 @@ termp_quote_post(DECL_ARGS)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 }
 
@@ -2218,7 +2215,6 @@ termp_bk_pre(DECL_ARGS)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	return(1);

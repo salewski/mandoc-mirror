@@ -657,7 +657,6 @@ pre_bd(PRE_ARGS)
 			break;
 		default:
 			abort();
-			/* NOTREACHED */
 		}
 		if (DISP__NONE == dt)
 			continue;
@@ -1038,7 +1037,6 @@ post_defaults(POST_ARGS)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 	mdoc->last = nn;
 }
@@ -2088,7 +2086,6 @@ pre_literal(PRE_ARGS)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 }
 

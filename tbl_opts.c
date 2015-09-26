@@ -99,7 +99,6 @@ arg(struct tbl_node *tbl, int ln, const char *p, int *pos, int key)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	if (len == 0)

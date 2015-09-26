@@ -1000,7 +1000,6 @@ mdoc_bl_pre(MDOC_ARGS)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	return(1);
@@ -1997,7 +1996,6 @@ mdoc__x_pre(MDOC_ARGS)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	if (MDOC__U != n->tok) {
@@ -2044,7 +2042,6 @@ mdoc_bk_pre(MDOC_ARGS)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	return(1);
@@ -2124,7 +2121,6 @@ mdoc_quote_pre(MDOC_ARGS)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	h->flags |= HTML_NOSPACE;
@@ -2192,7 +2188,6 @@ mdoc_quote_post(MDOC_ARGS)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 }
 

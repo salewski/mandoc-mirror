@@ -262,7 +262,6 @@ tblcalc_data(struct rofftbl *tbl, struct roffcol *col,
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 }
 

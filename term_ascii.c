@@ -260,7 +260,6 @@ ascii_hspan(const struct termp *p, const struct roffsu *su)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 	return(r > 0.0 ? r + 0.01 : r - 0.01);
 }

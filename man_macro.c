@@ -225,7 +225,6 @@ blk_close(MACRO_PROT_ARGS)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	for (nn = man->last->parent; nn; nn = nn->parent)

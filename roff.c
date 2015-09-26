@@ -1022,7 +1022,6 @@ roff_node_append(struct roff_man *man, struct roff_node *n)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 	n->parent->nchild++;
 	n->parent->last = n;
@@ -2060,12 +2059,12 @@ roff_getnum(const char *v, int *pos, int *res, int flags)
 		scaled = *res * 240 / 2.54;
 		break;
 	case 'v':
-		/* FALLTROUGH */
+		/* FALLTHROUGH */
 	case 'P':
 		scaled = *res * 40;
 		break;
 	case 'm':
-		/* FALLTROUGH */
+		/* FALLTHROUGH */
 	case 'n':
 		scaled = *res * 24;
 		break;

@@ -303,7 +303,6 @@ tbl_data(struct termp *tp, const struct tbl_opts *opts,
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 }
 

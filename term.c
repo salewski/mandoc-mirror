@@ -820,7 +820,6 @@ term_vspan(const struct termp *p, const struct roffsu *su)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 	ri = r > 0.0 ? r + 0.4995 : r - 0.4995;
 	return(ri < 66 ? ri : 1);

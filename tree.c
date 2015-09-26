@@ -98,7 +98,6 @@ print_mdoc(const struct roff_node *n, int indent)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	switch (n->type) {
@@ -138,7 +137,6 @@ print_mdoc(const struct roff_node *n, int indent)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	if (n->span) {
@@ -212,7 +210,6 @@ print_man(const struct roff_node *n, int indent)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	switch (n->type) {
@@ -238,7 +235,6 @@ print_man(const struct roff_node *n, int indent)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	if (n->span) {

@@ -224,7 +224,6 @@ print_metaf(struct html *h, enum mandoc_esc deco)
 		break;
 	default:
 		abort();
-		/* NOTREACHED */
 	}
 
 	if (h->metaf) {
