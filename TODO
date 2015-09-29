@@ -416,6 +416,12 @@ are mere guesses, and some may be wrong.
   see also matthew@  Fri, 18 Jul 2014 19:25:12 -0700
   loc *  exist *  algo **  size *  imp ***
 
+- .Bf at the beginning of a paragraph inserts a bogus 1ex horizontal
+  space, see for example random(3).  Introduced in
+  http://mdocml.bsd.lv/cgi-bin/cvsweb/mdoc_html.c.diff?r1=1.91&r2=1.92
+  reported by deraadt@ Mon, 28 Sep 2015 20:14:13 -0600 (MDT)
+  loc **  exist **  algo **  size *  imp *
+
 - jsg on icb, Nov 3, 2014:
   try to guess Xr in man(7) for hyperlinking
 
