@@ -46,11 +46,11 @@ vasprintf(char **ret, const char *format, va_list ap)
 
 	if (sz != -1 && (*ret = malloc(sz + 1)) != NULL) {
 		if (vsnprintf(*ret, sz + 1, format, ap) == sz)
-			return(sz);
+			return sz;
 		free(*ret);
 	}
 	*ret = NULL;
-	return(-1);
+	return -1;
 }
 
 #endif

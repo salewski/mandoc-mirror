@@ -134,10 +134,10 @@ tbl_cdata(struct tbl_node *tbl, int ln, const char *p, int pos)
 			pos++;
 			while (p[pos] != '\0')
 				getdata(tbl, tbl->last_span, ln, p, &pos);
-			return(1);
+			return 1;
 		} else if (p[pos] == '\0') {
 			tbl->part = TBL_PART_DATA;
-			return(1);
+			return 1;
 		}
 
 		/* Fallthrough: T} is part of a word. */
@@ -157,7 +157,7 @@ tbl_cdata(struct tbl_node *tbl, int ln, const char *p, int pos)
 		mandoc_msg(MANDOCERR_TBLDATA_SPAN, tbl->parse,
 		    ln, pos, dat->string);
 
-	return(0);
+	return 0;
 }
 
 static struct tbl_span *
@@ -178,7 +178,7 @@ newspan(struct tbl_node *tbl, int line, struct tbl_row *rp)
 		dp->prev->next = dp;
 	tbl->last_span = dp;
 
-	return(dp);
+	return dp;
 }
 
 void

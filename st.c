@@ -33,5 +33,5 @@ mdoc_a2st(const char *p)
 
 #include "st.in"
 
-	return(NULL);
+	return NULL;
 }

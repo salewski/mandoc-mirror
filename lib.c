@@ -33,5 +33,5 @@ mdoc_a2lib(const char *p)
 
 #include "lib.in"
 
-	return(NULL);
+	return NULL;
 }

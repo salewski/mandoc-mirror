@@ -7,6 +7,6 @@ main(void)
 	char	dirname[] = "/tmp/temp.XXXXXX";
 
 	if (mkdtemp(dirname) != dirname)
-		return(1);
-	return(rmdir(dirname) == -1);
+		return 1;
+	return rmdir(dirname) == -1;
 }

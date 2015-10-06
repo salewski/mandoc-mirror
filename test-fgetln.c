@@ -7,5 +7,5 @@ main(void)
 {
 	size_t sz;
 	fclose(stdin);
-	return(NULL != fgetln(stdin, &sz));
+	return fgetln(stdin, &sz) != NULL;
 }

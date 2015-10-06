@@ -627,13 +627,13 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 	if (curp->gzip == 0 && S_ISREG(st.st_mode)) {
 		if (st.st_size > 0x7fffffff) {
 			mandoc_msg(MANDOCERR_TOOLARGE, curp, 0, 0, NULL);
-			return(0);
+			return 0;
 		}
 		*with_mmap = 1;
 		fb->sz = (size_t)st.st_size;
 		fb->buf = mmap(NULL, fb->sz, PROT_READ, MAP_SHARED, fd, 0);
 		if (fb->buf != MAP_FAILED)
-			return(1);
+			return 1;
 	}
 #endif
 
@@ -668,7 +668,7 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 		    read(fd, fb->buf + (int)off, fb->sz - off);
 		if (ssz == 0) {
 			fb->sz = off;
-			return(1);
+			return 1;
 		}
 		if (ssz == -1) {
 			perror(file);
@@ -679,7 +679,7 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 
 	free(fb->buf);
 	fb->buf = NULL;
-	return(0);
+	return 0;
 }
 
 static void
@@ -748,7 +748,7 @@ mparse_readmem(struct mparse *curp, void *buf, size_t len,
 	blk.sz = len;
 
 	mparse_parse_buffer(curp, blk, file);
-	return(curp->file_status);
+	return curp->file_status;
 }
 
 /*
@@ -779,7 +779,7 @@ mparse_readfd(struct mparse *curp, int fd, const char *file)
 	if (fd != STDIN_FILENO && close(fd) == -1)
 		perror(file);
 
-	return(curp->file_status);
+	return curp->file_status;
 }
 
 enum mandoclevel
@@ -794,7 +794,7 @@ mparse_open(struct mparse *curp, int *fd, const char *file)
 	/* First try to use the filename as it is. */
 
 	if ((*fd = open(file, O_RDONLY)) != -1)
-		return(MANDOCLEVEL_OK);
+		return MANDOCLEVEL_OK;
 
 	/*
 	 * If that doesn't work and the filename doesn't
@@ -807,14 +807,14 @@ mparse_open(struct mparse *curp, int *fd, const char *file)
 		free(cp);
 		if (*fd != -1) {
 			curp->gzip = 1;
-			return(MANDOCLEVEL_OK);
+			return MANDOCLEVEL_OK;
 		}
 	}
 
 	/* Neither worked, give up. */
 
 	mandoc_msg(MANDOCERR_FILE, curp, 0, 0, strerror(errno));
-	return(MANDOCLEVEL_ERROR);
+	return MANDOCLEVEL_ERROR;
 }
 
 struct mparse *
@@ -842,7 +842,7 @@ mparse_alloc(int options, enum mandoclevel wlevel, mandocmsg mmsg,
 		curp->man->macroset = MACROSET_MAN;
 	}
 	curp->man->first->tok = TOKEN_NONE;
-	return(curp);
+	return curp;
 }
 
 void
@@ -928,13 +928,13 @@ const char *
 mparse_strerror(enum mandocerr er)
 {
 
-	return(mandocerrs[er]);
+	return mandocerrs[er];
 }
 
 const char *
 mparse_strlevel(enum mandoclevel lvl)
 {
-	return(mandoclevels[lvl]);
+	return mandoclevels[lvl];
 }
 
 void
@@ -950,5 +950,5 @@ mparse_getkeep(const struct mparse *p)
 {
 
 	assert(p->secondary);
-	return(p->secondary->sz ? p->secondary->buf : NULL);
+	return p->secondary->sz ? p->secondary->buf : NULL;
 }

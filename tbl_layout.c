@@ -355,5 +355,5 @@ cell_alloc(struct tbl_node *tbl, struct tbl_row *rp, enum tbl_cellt pos)
 	if (tbl->opts.cols <= p->col)
 		tbl->opts.cols = p->col + 1;
 
-	return(p);
+	return p;
 }

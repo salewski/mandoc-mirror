@@ -29,19 +29,19 @@ main(void)
 	    NULL) != SQLITE_OK) {
 		perror("test.db");
 		fprintf(stderr, "sqlite3_open_v2: %s", sqlite3_errmsg(db));
-		return(1);
+		return 1;
 	}
 	unlink("test.db");
 
 	if (sqlite3_exec(db, "PRAGMA foreign_keys = ON",
 	    NULL, NULL, NULL) != SQLITE_OK) {
 		fprintf(stderr, "sqlite3_exec: %s", sqlite3_errmsg(db));
-		return(1);
+		return 1;
 	}
 
 	if (sqlite3_close(db) != SQLITE_OK) {
 		fprintf(stderr, "sqlite3_close: %s", sqlite3_errmsg(db));
-		return(1);
+		return 1;
 	}
-	return(0);
+	return 0;
 }

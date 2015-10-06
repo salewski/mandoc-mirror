@@ -97,7 +97,7 @@ tag_init(void)
 	tag_info.key_offset = offsetof(struct tag_entry, s);
 	tag_info.data = NULL;
 	ohash_init(&tag_data, 4, &tag_info);
-	return(&tag_files);
+	return &tag_files;
 
 fail:
 	tag_unlink();
@@ -111,7 +111,7 @@ fail:
 	*tag_files.tfn = '\0';
 	tag_files.ofd = -1;
 	tag_files.tfd = -1;
-	return(NULL);
+	return NULL;
 }
 
 /*
@@ -195,14 +195,14 @@ static void *
 tag_alloc(size_t sz, void *arg)
 {
 
-	return(mandoc_malloc(sz));
+	return mandoc_malloc(sz);
 }
 
 static void *
 tag_calloc(size_t nmemb, size_t sz, void *arg)
 {
 
-	return(mandoc_calloc(nmemb, sz));
+	return mandoc_calloc(nmemb, sz);
 }
 
 static void

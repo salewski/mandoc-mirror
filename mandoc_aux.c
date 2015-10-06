@@ -41,7 +41,7 @@ mandoc_asprintf(char **dest, const char *fmt, ...)
 		perror(NULL);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
-	return(ret);
+	return ret;
 }
 
 void *
@@ -54,7 +54,7 @@ mandoc_calloc(size_t num, size_t size)
 		perror(NULL);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
-	return(ptr);
+	return ptr;
 }
 
 void *
@@ -67,7 +67,7 @@ mandoc_malloc(size_t size)
 		perror(NULL);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
-	return(ptr);
+	return ptr;
 }
 
 void *
@@ -79,7 +79,7 @@ mandoc_realloc(void *ptr, size_t size)
 		perror(NULL);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
-	return(ptr);
+	return ptr;
 }
 
 void *
@@ -91,7 +91,7 @@ mandoc_reallocarray(void *ptr, size_t num, size_t size)
 		perror(NULL);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
-	return(ptr);
+	return ptr;
 }
 
 char *
@@ -104,7 +104,7 @@ mandoc_strdup(const char *ptr)
 		perror(NULL);
 		exit((int)MANDOCLEVEL_SYSERR);
 	}
-	return(p);
+	return p;
 }
 
 char *
@@ -115,5 +115,5 @@ mandoc_strndup(const char *ptr, size_t sz)
 	p = mandoc_malloc(sz + 1);
 	memcpy(p, ptr, sz);
 	p[(int)sz] = '\0';
-	return(p);
+	return p;
 }

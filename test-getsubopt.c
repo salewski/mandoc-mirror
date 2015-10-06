@@ -29,6 +29,6 @@ main(void)
 	char token0[] = "k";
 	char *const tokens[] = { token0, NULL };
 	char *value = NULL;
-	return( ! (0 == getsubopt(&options, tokens, &value)
-	    && value == buf+2 && options == buf+3));
+	return ! (getsubopt(&options, tokens, &value) == 0
+	    && value == buf+2 && options == buf+3);
 }

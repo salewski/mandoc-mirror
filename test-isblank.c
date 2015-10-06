@@ -3,5 +3,5 @@
 int
 main(void)
 {
-	return(!isblank(' ') || !isblank('\t') || isblank('_'));
+	return !isblank(' ') || !isblank('\t') || isblank('_');
 }

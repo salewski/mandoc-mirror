@@ -73,7 +73,7 @@ main(int argc, char *argv[])
 			break;
 		default:
 			usage();
-			return((int)MANDOCLEVEL_BADARG);
+			return (int)MANDOCLEVEL_BADARG;
 		}
 
 	argc -= optind;
@@ -97,7 +97,7 @@ main(int argc, char *argv[])
 
 	mparse_free(mp);
 	mchars_free(mchars);
-	return((int)MANDOCLEVEL_OK);
+	return (int)MANDOCLEVEL_OK;
 }
 
 static void

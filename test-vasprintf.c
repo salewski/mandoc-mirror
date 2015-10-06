@@ -33,7 +33,7 @@ testfunc(char **ret, const char *format, ...)
 	irc = vasprintf(ret, format, ap);
 	va_end(ap);
 
-	return(irc);
+	return irc;
 }
 
 int
@@ -42,8 +42,8 @@ main(void)
 	char	*ret;
 
 	if (testfunc(&ret, "%s.", "Text") != 5)
-		return(1);
+		return 1;
 	if (strcmp(ret, "Text."))
-		return(2);
-	return(0);
+		return 2;
+	return 0;
 }

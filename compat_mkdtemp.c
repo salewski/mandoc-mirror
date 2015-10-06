@@ -45,17 +45,17 @@ mkdtemp(char *path)
 	for (tries = INT_MAX; tries; tries--) {
 		if (mktemp(path) == NULL) {
 			errno = EEXIST;
-			return(NULL);
+			return NULL;
 		}
 		if (mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR) == 0)
-			return(path);
+			return path;
 		if (errno != EEXIST)
-			return(NULL);
+			return NULL;
 		for (cp = start; *cp != '\0'; cp++)
 			*cp = 'X';
 	}
 	errno = EEXIST;
-	return(NULL);
+	return NULL;
 }
 
 #endif

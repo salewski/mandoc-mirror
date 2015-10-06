@@ -32,5 +32,5 @@ mandoc_a2msec(const char *p)
 
 #include "msec.in"
 
-	return(NULL);
+	return NULL;
 }

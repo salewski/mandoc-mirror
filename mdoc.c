@@ -111,9 +111,9 @@ mdoc_parseln(struct roff_man *mdoc, int ln, char *buf, int offs)
 	else
 		mdoc->flags &= ~MDOC_SYNOPSIS;
 
-	return(roff_getcontrol(mdoc->roff, buf, &offs) ?
+	return roff_getcontrol(mdoc->roff, buf, &offs) ?
 	    mdoc_pmacro(mdoc, ln, buf, offs) :
-	    mdoc_ptext(mdoc, ln, buf, offs));
+	    mdoc_ptext(mdoc, ln, buf, offs);
 }
 
 void
@@ -166,7 +166,7 @@ mdoc_endbody_alloc(struct roff_man *mdoc, int line, int pos, int tok,
 	p->end = end;
 	roff_node_append(mdoc, p);
 	mdoc->next = ROFF_NEXT_SIBLING;
-	return(p);
+	return p;
 }
 
 struct roff_node *
@@ -197,7 +197,7 @@ mdoc_block_alloc(struct roff_man *mdoc, int line, int pos,
 	}
 	roff_node_append(mdoc, p);
 	mdoc->next = ROFF_NEXT_CHILD;
-	return(p);
+	return p;
 }
 
 void
@@ -255,7 +255,7 @@ mdoc_ptext(struct roff_man *mdoc, int line, char *buf, int offs)
 		/* `Bl' is open without any children. */
 		mdoc->flags |= MDOC_FREECOL;
 		mdoc_macro(mdoc, MDOC_It, line, offs, &offs, buf);
-		return(1);
+		return 1;
 	}
 
 	if (n->tok == MDOC_It && n->type == ROFFT_BLOCK &&
@@ -265,7 +265,7 @@ mdoc_ptext(struct roff_man *mdoc, int line, char *buf, int offs)
 		/* `Bl' has block-level `It' children. */
 		mdoc->flags |= MDOC_FREECOL;
 		mdoc_macro(mdoc, MDOC_It, line, offs, &offs, buf);
-		return(1);
+		return 1;
 	}
 
 	/*
@@ -325,13 +325,13 @@ mdoc_ptext(struct roff_man *mdoc, int line, char *buf, int offs)
 		roff_elem_alloc(mdoc, line, offs, MDOC_sp);
 		mdoc->next = ROFF_NEXT_SIBLING;
 		mdoc_valid_post(mdoc);
-		return(1);
+		return 1;
 	}
 
 	roff_word_alloc(mdoc, line, offs, buf+offs);
 
 	if (mdoc->flags & MDOC_LITERAL)
-		return(1);
+		return 1;
 
 	/*
 	 * End-of-sentence check.  If the last character is an unescaped
@@ -343,7 +343,7 @@ mdoc_ptext(struct roff_man *mdoc, int line, char *buf, int offs)
 
 	if (mandoc_eos(buf+offs, (size_t)(end-buf-offs)))
 		mdoc->last->flags |= MDOC_EOS;
-	return(1);
+	return 1;
 }
 
 /*
@@ -377,7 +377,7 @@ mdoc_pmacro(struct roff_man *mdoc, int ln, char *buf, int offs)
 	if (tok == TOKEN_NONE) {
 		mandoc_msg(MANDOCERR_MACRO, mdoc->parse,
 		    ln, sv, buf + sv - 1);
-		return(1);
+		return 1;
 	}
 
 	/* Skip a leading escape sequence or tab. */
@@ -416,7 +416,7 @@ mdoc_pmacro(struct roff_man *mdoc, int ln, char *buf, int offs)
 
 	if (NULL == mdoc->last || MDOC_It == tok || MDOC_El == tok) {
 		mdoc_macro(mdoc, tok, ln, sv, &offs, buf);
-		return(1);
+		return 1;
 	}
 
 	n = mdoc->last;
@@ -431,7 +431,7 @@ mdoc_pmacro(struct roff_man *mdoc, int ln, char *buf, int offs)
 	    n->end == ENDBODY_NOT && n->norm->Bl.type == LIST_column) {
 		mdoc->flags |= MDOC_FREECOL;
 		mdoc_macro(mdoc, MDOC_It, ln, sv, &sv, buf);
-		return(1);
+		return 1;
 	}
 
 	/*
@@ -446,7 +446,7 @@ mdoc_pmacro(struct roff_man *mdoc, int ln, char *buf, int offs)
 	    LIST_column == n->parent->norm->Bl.type) {
 		mdoc->flags |= MDOC_FREECOL;
 		mdoc_macro(mdoc, MDOC_It, ln, sv, &sv, buf);
-		return(1);
+		return 1;
 	}
 
 	/* Normal processing of a macro. */
@@ -457,9 +457,9 @@ mdoc_pmacro(struct roff_man *mdoc, int ln, char *buf, int offs)
 
 	if (mdoc->quick && MDOC_Sh == tok &&
 	    SEC_NAME != mdoc->last->sec)
-		return(2);
+		return 2;
 
-	return(1);
+	return 1;
 }
 
 enum mdelim
@@ -467,16 +467,16 @@ mdoc_isdelim(const char *p)
 {
 
 	if ('\0' == p[0])
-		return(DELIM_NONE);
+		return DELIM_NONE;
 
 	if ('\0' == p[1])
 		switch (p[0]) {
 		case '(':
 			/* FALLTHROUGH */
 		case '[':
-			return(DELIM_OPEN);
+			return DELIM_OPEN;
 		case '|':
-			return(DELIM_MIDDLE);
+			return DELIM_MIDDLE;
 		case '.':
 			/* FALLTHROUGH */
 		case ',':
@@ -492,18 +492,18 @@ mdoc_isdelim(const char *p)
 		case ')':
 			/* FALLTHROUGH */
 		case ']':
-			return(DELIM_CLOSE);
+			return DELIM_CLOSE;
 		default:
-			return(DELIM_NONE);
+			return DELIM_NONE;
 		}
 
 	if ('\\' != p[0])
-		return(DELIM_NONE);
+		return DELIM_NONE;
 
 	if (0 == strcmp(p + 1, "."))
-		return(DELIM_CLOSE);
+		return DELIM_CLOSE;
 	if (0 == strcmp(p + 1, "fR|\\fP"))
-		return(DELIM_MIDDLE);
+		return DELIM_MIDDLE;
 
-	return(DELIM_NONE);
+	return DELIM_NONE;
 }

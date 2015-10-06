@@ -99,12 +99,12 @@ main(int argc, char *argv[])
 
 	if (0 == sz) {
 		free(res);
-		return(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	} else if (1 == sz && term) {
 		i = 1;
 		goto show;
 	} else if (NULL == res)
-		return(EXIT_FAILURE);
+		return EXIT_FAILURE;
 
 	for (i = 0; i < sz; i++) {
 		printf("%6zu  %s: %s\n",
@@ -117,7 +117,7 @@ main(int argc, char *argv[])
 		for (i = 0; i < sz; i++)
 			free(res[i].file);
 		free(res);
-		return(EXIT_SUCCESS);
+		return EXIT_SUCCESS;
 	}
 
 	i = 1;
@@ -135,7 +135,7 @@ main(int argc, char *argv[])
 		for (i = 0; i < sz; i++)
 			free(res[i].file);
 		free(res);
-		return(EXIT_SUCCESS);
+		return EXIT_SUCCESS;
 	}
 show:
 	cmd = res[i - 1].form ? "mandoc" : "cat";
@@ -154,7 +154,7 @@ usage:
 				  "[-s section] "
 			          "expr ...\n",
 				  progname);
-	return(EXIT_FAILURE);
+	return EXIT_FAILURE;
 }
 
 static void
