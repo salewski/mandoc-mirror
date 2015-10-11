@@ -125,7 +125,7 @@ tag_put(const char *s, int prio, size_t line)
 	size_t			 len;
 	unsigned int		 slot;
 
-	if (tag_files.tfd <= 0)
+	if (tag_files.tfd <= 0 || strchr(s, ' ') != NULL)
 		return;
 	slot = ohash_qlookup(&tag_data, s);
 	entry = ohash_find(&tag_data, slot);
