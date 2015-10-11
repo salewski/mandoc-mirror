@@ -20,6 +20,7 @@
 #include <sys/types.h>
 
 #include <assert.h>
+#include <err.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -582,7 +583,7 @@ pspdf_alloc(const struct mchars *mchars, const struct manoutput *outopts)
 			pagex = 216;
 			pagey = 356;
 		} else if (2 != sscanf(pp, "%ux%u", &pagex, &pagey))
-			fprintf(stderr, "%s: Unknown paper\n", pp);
+			warnx("%s: Unknown paper", pp);
 	}
 
 	/*

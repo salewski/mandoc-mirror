@@ -20,6 +20,7 @@ VERSION = 1.13.3
 # === LIST OF FILES ====================================================
 
 TESTSRCS	 = test-dirent-namlen.c \
+		   test-err.c \
 		   test-fgetln.c \
 		   test-fts.c \
 		   test-getsubopt.c \
@@ -27,6 +28,7 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-mkdtemp.c \
 		   test-mmap.c \
 		   test-ohash.c \
+		   test-progname.c \
 		   test-reallocarray.c \
 		   test-sqlite3.c \
 		   test-sqlite3_errstr.c \
@@ -43,6 +45,7 @@ TESTSRCS	 = test-dirent-namlen.c \
 SRCS		 = att.c \
 		   cgi.c \
 		   chars.c \
+		   compat_err.c \
 		   compat_fgetln.c \
 		   compat_fts.c \
 		   compat_getsubopt.c \
@@ -199,7 +202,8 @@ LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 		   preconv.o \
 		   read.o
 
-COMPAT_OBJS	 = compat_fgetln.o \
+COMPAT_OBJS	 = compat_err.o \
+		   compat_fgetln.o \
 		   compat_fts.o \
 		   compat_getsubopt.o \
 		   compat_isblank.o \

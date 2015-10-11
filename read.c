@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <err.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -612,10 +613,9 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 
 #if HAVE_MMAP
 	struct stat	 st;
-	if (-1 == fstat(fd, &st)) {
-		perror(file);
-		exit((int)MANDOCLEVEL_SYSERR);
-	}
+
+	if (fstat(fd, &st) == -1)
+		err((int)MANDOCLEVEL_SYSERR, "%s", file);
 
 	/*
 	 * If we're a regular file, try just reading in the whole entry
@@ -638,10 +638,8 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 #endif
 
 	if (curp->gzip) {
-		if ((gz = gzdopen(fd, "rb")) == NULL) {
-			perror(file);
-			exit((int)MANDOCLEVEL_SYSERR);
-		}
+		if ((gz = gzdopen(fd, "rb")) == NULL)
+			err((int)MANDOCLEVEL_SYSERR, "%s", file);
 	} else
 		gz = NULL;
 
@@ -670,10 +668,8 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 			fb->sz = off;
 			return 1;
 		}
-		if (ssz == -1) {
-			perror(file);
-			exit((int)MANDOCLEVEL_SYSERR);
-		}
+		if (ssz == -1)
+			err((int)MANDOCLEVEL_SYSERR, "%s", file);
 		off += (size_t)ssz;
 	}
 

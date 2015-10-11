@@ -43,7 +43,7 @@ and 3-clause BSD licenses; see these individual files for details.
 soelim.c, soelim.1:
 Copyright (c) 2014 Baptiste Daroussin <bapt@FreeBSD.org>
 
-compat_fts.c, compat_fts.h,
+compat_err.c, compat_fts.c, compat_fts.h,
 compat_getsubopt.c, compat_strcasestr.c, compat_strsep.c,
 man.1:
 Copyright (c) 1989,1990,1993,1994 The Regents of the University of California

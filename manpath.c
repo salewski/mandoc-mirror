@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 
 #include <ctype.h>
+#include <err.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -165,10 +166,8 @@ manpath_add(struct manpaths *dirs, const char *dir, int complain)
 	size_t		 i;
 
 	if (NULL == (cp = realpath(dir, buf))) {
-		if (complain) {
-			fputs("manpath: ", stderr);
-			perror(dir);
-		}
+		if (complain)
+			warn("manpath: %s", dir);
 		return;
 	}
 
@@ -177,10 +176,8 @@ manpath_add(struct manpaths *dirs, const char *dir, int complain)
 			return;
 
 	if (stat(cp, &sb) == -1) {
-		if (complain) {
-			fputs("manpath: ", stderr);
-			perror(dir);
-		}
+		if (complain)
+			warn("manpath: %s", dir);
 		return;
 	}
 

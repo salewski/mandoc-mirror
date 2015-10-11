@@ -43,12 +43,14 @@ BUILD_DB=1
 BUILD_CGI=0
 
 HAVE_DIRENT_NAMLEN=
+HAVE_ERR=
 HAVE_FGETLN=
 HAVE_FTS=
 HAVE_GETSUBOPT=
 HAVE_ISBLANK=
 HAVE_MKDTEMP=
 HAVE_MMAP=
+HAVE_PROGNAME=
 HAVE_REALLOCARRAY=
 HAVE_STRCASESTR=
 HAVE_STRINGLIST=
@@ -171,12 +173,14 @@ runtest() {
 
 # --- library functions ---
 runtest dirent-namlen	DIRENT_NAMLEN	|| true
+runtest err		ERR		|| true
 runtest fgetln		FGETLN		|| true
 runtest fts		FTS		|| true
 runtest getsubopt	GETSUBOPT	|| true
 runtest isblank		ISBLANK		|| true
 runtest mkdtemp		MKDTEMP		|| true
 runtest mmap		MMAP		|| true
+runtest progname	PROGNAME	|| true
 runtest reallocarray	REALLOCARRAY	|| true
 runtest strcasestr	STRCASESTR	|| true
 runtest stringlist	STRINGLIST	|| true
@@ -286,16 +290,19 @@ echo
 echo "#define MAN_CONF_FILE \"/etc/${MANM_MANCONF}\""
 echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
+[ ${HAVE_PROGNAME} -eq 0 ] && echo "#define __progname mandoc_progname"
 [ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""
 
 cat << __HEREDOC__
 #define HAVE_DIRENT_NAMLEN ${HAVE_DIRENT_NAMLEN}
+#define HAVE_ERR ${HAVE_ERR}
 #define HAVE_FGETLN ${HAVE_FGETLN}
 #define HAVE_FTS ${HAVE_FTS}
 #define HAVE_GETSUBOPT ${HAVE_GETSUBOPT}
 #define HAVE_ISBLANK ${HAVE_ISBLANK}
 #define HAVE_MKDTEMP ${HAVE_MKDTEMP}
 #define HAVE_MMAP ${HAVE_MMAP}
+#define HAVE_PROGNAME ${HAVE_PROGNAME}
 #define HAVE_REALLOCARRAY ${HAVE_REALLOCARRAY}
 #define HAVE_STRCASESTR ${HAVE_STRCASESTR}
 #define HAVE_STRINGLIST ${HAVE_STRINGLIST}
@@ -333,6 +340,12 @@ cat << __HEREDOC__
 #endif
 
 __HEREDOC__
+
+if [ ${HAVE_ERR} -eq 0 ]; then
+	echo "extern	void	  err(int, const char *, ...);"
+	echo "extern	void	  warn(const char *, ...);"
+	echo "extern	void	  warnx(const char *, ...);"
+fi
 
 [ ${HAVE_FGETLN} -eq 0 ] && \
 	echo "extern	char	 *fgetln(FILE *, size_t *);"
