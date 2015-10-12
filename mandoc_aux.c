@@ -95,7 +95,7 @@ mandoc_strdup(const char *ptr)
 	char	*p;
 
 	p = strdup(ptr);
-	if (ptr == NULL)
+	if (p == NULL)
 		err((int)MANDOCLEVEL_SYSERR, NULL);
 	return p;
 }
