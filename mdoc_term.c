@@ -887,7 +887,7 @@ termp_it_pre(DECL_ARGS)
 		case LIST_dash:
 		case LIST_hyphen:
 			term_fontpush(p, TERMFONT_BOLD);
-			term_word(p, "\\(hy");
+			term_word(p, "-");
 			term_fontpop(p);
 			break;
 		case LIST_enum:
