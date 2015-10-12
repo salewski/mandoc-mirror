@@ -117,7 +117,6 @@ man_valid_post(struct roff_man *man)
 		check_root(man, n);
 		break;
 	case ROFFT_EQN:
-		/* FALLTHROUGH */
 	case ROFFT_TBL:
 		break;
 	default:
@@ -207,17 +206,11 @@ post_ft(CHKARGS)
 	cp = n->child->string;
 	switch (*cp) {
 	case '1':
-		/* FALLTHROUGH */
 	case '2':
-		/* FALLTHROUGH */
 	case '3':
-		/* FALLTHROUGH */
 	case '4':
-		/* FALLTHROUGH */
 	case 'I':
-		/* FALLTHROUGH */
 	case 'P':
-		/* FALLTHROUGH */
 	case 'R':
 		if ('\0' == cp[1])
 			ok = 1;
@@ -499,7 +492,6 @@ post_vs(CHKARGS)
 
 	switch (n->parent->tok) {
 	case MAN_SH:
-		/* FALLTHROUGH */
 	case MAN_SS:
 		mandoc_vmsg(MANDOCERR_PAR_SKIP, man->parse, n->line, n->pos,
 		    "%s after %s", man_macronames[n->tok],

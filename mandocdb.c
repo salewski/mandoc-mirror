@@ -693,7 +693,6 @@ treescan(void)
 			continue;
 
 		case FTS_D:
-			/* FALLTHROUGH */
 		case FTS_DP:
 			break;
 
@@ -1563,13 +1562,9 @@ parse_mdoc(struct mpage *mpage, const struct roff_meta *meta,
 	for (n = n->child; NULL != n; n = n->next) {
 		switch (n->type) {
 		case ROFFT_ELEM:
-			/* FALLTHROUGH */
 		case ROFFT_BLOCK:
-			/* FALLTHROUGH */
 		case ROFFT_HEAD:
-			/* FALLTHROUGH */
 		case ROFFT_BODY:
-			/* FALLTHROUGH */
 		case ROFFT_TAIL:
 			if (NULL != mdocs[n->tok].fp)
 			       if (0 == (*mdocs[n->tok].fp)(mpage, meta, n))
@@ -1922,7 +1917,6 @@ render_string(char **public, size_t *psz)
 		case '\\':
 			break;
 		case '\t':
-			/* FALLTHROUGH */
 		case ASCII_NBRSP:
 			dst[dsz++] = ' ';
 			scp++;

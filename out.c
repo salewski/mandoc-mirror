@@ -240,18 +240,14 @@ tblcalc_data(struct rofftbl *tbl, struct roffcol *col,
 
 	switch (dp->layout->pos) {
 	case TBL_CELL_HORIZ:
-		/* FALLTHROUGH */
 	case TBL_CELL_DHORIZ:
 		sz = (*tbl->len)(1, tbl->arg);
 		if (col->width < sz)
 			col->width = sz;
 		break;
 	case TBL_CELL_LONG:
-		/* FALLTHROUGH */
 	case TBL_CELL_CENTRE:
-		/* FALLTHROUGH */
 	case TBL_CELL_LEFT:
-		/* FALLTHROUGH */
 	case TBL_CELL_RIGHT:
 		tblcalc_literal(tbl, col, dp);
 		break;

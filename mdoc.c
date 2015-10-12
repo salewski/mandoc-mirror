@@ -182,13 +182,9 @@ mdoc_block_alloc(struct roff_man *mdoc, int line, int pos,
 
 	switch (tok) {
 	case MDOC_Bd:
-		/* FALLTHROUGH */
 	case MDOC_Bf:
-		/* FALLTHROUGH */
 	case MDOC_Bl:
-		/* FALLTHROUGH */
 	case MDOC_En:
-		/* FALLTHROUGH */
 	case MDOC_Rs:
 		p->norm = mandoc_calloc(1, sizeof(union mdoc_data));
 		break;
@@ -472,25 +468,17 @@ mdoc_isdelim(const char *p)
 	if ('\0' == p[1])
 		switch (p[0]) {
 		case '(':
-			/* FALLTHROUGH */
 		case '[':
 			return DELIM_OPEN;
 		case '|':
 			return DELIM_MIDDLE;
 		case '.':
-			/* FALLTHROUGH */
 		case ',':
-			/* FALLTHROUGH */
 		case ';':
-			/* FALLTHROUGH */
 		case ':':
-			/* FALLTHROUGH */
 		case '?':
-			/* FALLTHROUGH */
 		case '!':
-			/* FALLTHROUGH */
 		case ')':
-			/* FALLTHROUGH */
 		case ']':
 			return DELIM_CLOSE;
 		default:

@@ -115,7 +115,6 @@ mod:
 		    ln, *pos, "m");
 		goto mod;
 	case 'p':
-		/* FALLTHROUGH */
 	case 'v':
 		if (p[*pos] == '-' || p[*pos] == '+')
 			(*pos)++;
@@ -168,17 +167,14 @@ mod:
 
 	switch (p[(*pos)++]) {
 	case '3':
-		/* FALLTHROUGH */
 	case 'B':
 		cp->flags |= TBL_CELL_BOLD;
 		goto mod;
 	case '2':
-		/* FALLTHROUGH */
 	case 'I':
 		cp->flags |= TBL_CELL_ITALIC;
 		goto mod;
 	case '1':
-		/* FALLTHROUGH */
 	case 'R':
 		goto mod;
 	default:

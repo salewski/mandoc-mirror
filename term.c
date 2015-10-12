@@ -474,7 +474,6 @@ term_word(struct termp *p, const char *word)
 			term_fontrepl(p, TERMFONT_BI);
 			continue;
 		case ESCAPE_FONT:
-			/* FALLTHROUGH */
 		case ESCAPE_FONTROMAN:
 			term_fontrepl(p, TERMFONT_NONE);
 			continue;
@@ -771,8 +770,6 @@ term_strlen(const struct termp *p, const char *cp)
 		case ASCII_HYPH:
 			sz += cond_width(p, '-', &skip);
 			cp++;
-			/* FALLTHROUGH */
-		case ASCII_BREAK:
 			break;
 		default:
 			break;
@@ -811,7 +808,6 @@ term_vspan(const struct termp *p, const struct roffsu *su)
 		r = su->scale / 12.0;
 		break;
 	case SCALE_EN:
-		/* FALLTHROUGH */
 	case SCALE_EM:
 		r = su->scale * 0.6;
 		break;

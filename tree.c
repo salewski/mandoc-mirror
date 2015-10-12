@@ -224,11 +224,8 @@ print_man(const struct roff_node *n, int indent)
 		p = n->string;
 		break;
 	case ROFFT_ELEM:
-		/* FALLTHROUGH */
 	case ROFFT_BLOCK:
-		/* FALLTHROUGH */
 	case ROFFT_HEAD:
-		/* FALLTHROUGH */
 	case ROFFT_BODY:
 		p = man_macronames[n->tok];
 		break;
@@ -357,12 +354,10 @@ print_span(const struct tbl_span *sp, int indent)
 	for (dp = sp->first; dp; dp = dp->next) {
 		switch (dp->pos) {
 		case TBL_DATA_HORIZ:
-			/* FALLTHROUGH */
 		case TBL_DATA_NHORIZ:
 			putchar('-');
 			continue;
 		case TBL_DATA_DHORIZ:
-			/* FALLTHROUGH */
 		case TBL_DATA_NDHORIZ:
 			putchar('=');
 			continue;

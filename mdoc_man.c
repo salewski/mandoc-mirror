@@ -818,13 +818,9 @@ pre_syn(const struct roff_node *n)
 
 	switch (n->prev->tok) {
 	case MDOC_Fd:
-		/* FALLTHROUGH */
 	case MDOC_Fn:
-		/* FALLTHROUGH */
 	case MDOC_Fo:
-		/* FALLTHROUGH */
 	case MDOC_In:
-		/* FALLTHROUGH */
 	case MDOC_Vt:
 		outflags |= MMAN_sp;
 		break;
@@ -1375,9 +1371,7 @@ pre_it(DECL_ARGS)
 		case LIST_item:
 			return 0;
 		case LIST_inset:
-			/* FALLTHROUGH */
 		case LIST_diag:
-			/* FALLTHROUGH */
 		case LIST_ohang:
 			if (bln->norm->Bl.type == LIST_diag)
 				print_line(".B \"", 0);
@@ -1386,9 +1380,7 @@ pre_it(DECL_ARGS)
 			outflags &= ~MMAN_spc;
 			return 1;
 		case LIST_bullet:
-			/* FALLTHROUGH */
 		case LIST_dash:
-			/* FALLTHROUGH */
 		case LIST_hyphen:
 			print_width(&bln->norm->Bl, NULL);
 			TPremain = 0;
@@ -1478,15 +1470,10 @@ post_it(DECL_ARGS)
 	case ROFFT_BODY:
 		switch (bln->norm->Bl.type) {
 		case LIST_bullet:
-			/* FALLTHROUGH */
 		case LIST_dash:
-			/* FALLTHROUGH */
 		case LIST_hyphen:
-			/* FALLTHROUGH */
 		case LIST_enum:
-			/* FALLTHROUGH */
 		case LIST_hang:
-			/* FALLTHROUGH */
 		case LIST_tag:
 			assert(Bl_stack_len);
 			Bl_stack[--Bl_stack_len] = 0;
@@ -1600,7 +1587,6 @@ post_nm(DECL_ARGS)
 		outflags &= ~MMAN_Bk;
 		break;
 	case ROFFT_HEAD:
-		/* FALLTHROUGH */
 	case ROFFT_ELEM:
 		if (n->child != NULL || meta->name != NULL)
 			font_pop();

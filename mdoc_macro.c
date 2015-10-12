@@ -734,15 +734,10 @@ in_line(MACRO_PROT_ARGS)
 
 	switch (tok) {
 	case MDOC_An:
-		/* FALLTHROUGH */
 	case MDOC_Ar:
-		/* FALLTHROUGH */
 	case MDOC_Fl:
-		/* FALLTHROUGH */
 	case MDOC_Mt:
-		/* FALLTHROUGH */
 	case MDOC_Nm:
-		/* FALLTHROUGH */
 	case MDOC_Pa:
 		nc = 1;
 		break;
@@ -946,7 +941,6 @@ blk_full(MACRO_PROT_ARGS)
 			if (mdoc_macros[n->tok].flags & MDOC_EXPLICIT) {
 				switch (tok) {
 				case MDOC_Sh:
-					/* FALLTHROUGH */
 				case MDOC_Ss:
 					mandoc_vmsg(MANDOCERR_BLK_BROKEN,
 					    mdoc->parse, line, ppos,
@@ -1289,16 +1283,12 @@ in_line_argn(MACRO_PROT_ARGS)
 
 	switch (tok) {
 	case MDOC_Ap:
-		/* FALLTHROUGH */
 	case MDOC_Ns:
-		/* FALLTHROUGH */
 	case MDOC_Ux:
 		maxargs = 0;
 		break;
 	case MDOC_Bx:
-		/* FALLTHROUGH */
 	case MDOC_Es:
-		/* FALLTHROUGH */
 	case MDOC_Xr:
 		maxargs = 2;
 		break;

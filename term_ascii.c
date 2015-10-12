@@ -246,7 +246,6 @@ ascii_hspan(const struct termp *p, const struct roffsu *su)
 		r = su->scale * 0.24;
 		break;
 	case SCALE_VS:
-		/* FALLTHROUGH */
 	case SCALE_PC:
 		r = su->scale * 40.0;
 		break;
@@ -254,7 +253,6 @@ ascii_hspan(const struct termp *p, const struct roffsu *su)
 		r = su->scale * 10.0 / 3.0;
 		break;
 	case SCALE_EN:
-		/* FALLTHROUGH */
 	case SCALE_EM:
 		r = su->scale * 24.0;
 		break;

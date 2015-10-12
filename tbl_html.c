@@ -108,7 +108,6 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 
 	switch (sp->pos) {
 	case TBL_SPAN_HORIZ:
-		/* FALLTHROUGH */
 	case TBL_SPAN_DHORIZ:
 		PAIR_INIT(&tag, ATTR_COLSPAN, "0");
 		print_otag(h, TAG_TD, 1, &tag);

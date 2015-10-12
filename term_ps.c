@@ -986,9 +986,7 @@ ps_pletter(struct termp *p, int c)
 
 	switch (c) {
 	case '(':
-		/* FALLTHROUGH */
 	case ')':
-		/* FALLTHROUGH */
 	case '\\':
 		ps_putchar(p, '\\');
 		break;

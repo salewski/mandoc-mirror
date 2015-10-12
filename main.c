@@ -709,13 +709,9 @@ parse(struct curparse *curp, int fd, const char *file)
 			curp->outman = man_man;
 			break;
 		case OUTT_PDF:
-			/* FALLTHROUGH */
 		case OUTT_ASCII:
-			/* FALLTHROUGH */
 		case OUTT_UTF8:
-			/* FALLTHROUGH */
 		case OUTT_LOCALE:
-			/* FALLTHROUGH */
 		case OUTT_PS:
 			curp->outman = terminal_man;
 			curp->outmdoc = terminal_mdoc;
@@ -896,7 +892,6 @@ woptions(struct curparse *curp, char *arg)
 			curp->wstop = 1;
 			break;
 		case 1:
-			/* FALLTHROUGH */
 		case 2:
 			curp->wlevel = MANDOCLEVEL_WARNING;
 			break;
