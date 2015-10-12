@@ -1837,7 +1837,6 @@ post_sh_head(POST_ARGS)
 	 */
 
 	secname = NULL;
-	sec = SEC_CUSTOM;
 	deroff(&secname, mdoc->last);
 	sec = NULL == secname ? SEC_CUSTOM : a2sec(secname);
 
