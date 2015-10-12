@@ -318,7 +318,7 @@ print_escape(char c)
 		printf("&quot;");
 		break;
 	case ASCII_NBRSP:
-		putchar('-');
+		printf("&nbsp;");
 		break;
 	case ASCII_HYPH:
 		putchar('-');
