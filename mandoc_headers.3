@@ -98,14 +98,10 @@ and the functions
 described in
 .Xr mandoc 3 .
 .Pp
-Uses the opaque types
+Uses the opaque type
 .Vt struct mparse
 from
 .Pa read.c
-and
-.Vt struct mchars
-from
-.Pa chars.c
 for function prototypes.
 Uses the types
 .Vt struct mdoc
@@ -411,11 +407,7 @@ Provides
 .Vt struct termp ,
 and many terminal formatting functions.
 .Pp
-Uses the opaque types
-.Vt struct mchars
-from
-.Pa chars.c
-and
+Uses the opaque type
 .Vt struct termp_ps
 from
 .Pa term_ps.c .
@@ -460,11 +452,6 @@ Provides
 .Vt struct html ,
 and many HTML formatting functions.
 .Pp
-Uses the opaque type
-.Vt struct mchars
-from
-.Pa chars.c .
-.Pp
 When this header is included, the same file should not include
 .Pa term.h
 or
@@ -472,10 +459,6 @@ or
 .It Qq Pa main.h
 Provides the top level steering functions for all formatters.
 .Pp
-Uses the opaque type
-.Vt struct mchars
-from
-.Pa chars.c .
 Uses the types
 .Vt struct mdoc
 from

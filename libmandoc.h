@@ -35,7 +35,6 @@ struct	buf {
 __BEGIN_DECLS
 
 struct	mparse;
-struct	mchars;
 struct	tbl_span;
 struct	eqn;
 struct	roff;
@@ -68,7 +67,7 @@ int		 preconv_encode(struct buf *, size_t *,
 			struct buf *, size_t *, int *);
 
 void		 roff_free(struct roff *);
-struct roff	*roff_alloc(struct mparse *, const struct mchars *, int);
+struct roff	*roff_alloc(struct mparse *, int);
 void		 roff_reset(struct roff *);
 void		 roff_man_free(struct roff_man *);
 struct roff_man	*roff_man_alloc(struct roff *, struct mparse *,

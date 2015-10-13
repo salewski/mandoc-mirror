@@ -195,7 +195,6 @@ static	int		 write_utf8; /* write UTF-8 output; else ASCII */
 static	int		 exitcode; /* to be returned by main */
 static	enum op		 op; /* operational mode */
 static	char		 basedir[PATH_MAX]; /* current base directory */
-static	struct mchars	*mchars; /* table of named characters */
 static	struct ohash	 mpages; /* table of distinct manual pages */
 static	struct ohash	 mlinks; /* table of directory entries */
 static	struct ohash	 names; /* table of all names */
@@ -419,9 +418,8 @@ mandocdb(int argc, char *argv[])
 	}
 
 	exitcode = (int)MANDOCLEVEL_OK;
-	mchars = mchars_alloc();
-	mp = mparse_alloc(mparse_options, MANDOCLEVEL_BADARG, NULL,
-	    mchars, NULL);
+	mchars_alloc();
+	mp = mparse_alloc(mparse_options, MANDOCLEVEL_BADARG, NULL, NULL);
 	mandoc_ohash_init(&mpages, 6, offsetof(struct mpage, inodev));
 	mandoc_ohash_init(&mlinks, 6, offsetof(struct mlink, file));
 
@@ -522,7 +520,7 @@ mandocdb(int argc, char *argv[])
 out:
 	manconf_free(&conf);
 	mparse_free(mp);
-	mchars_free(mchars);
+	mchars_free();
 	mpages_free();
 	ohash_delete(&mpages);
 	ohash_delete(&mlinks);
@@ -1928,7 +1926,7 @@ render_string(char **public, size_t *psz)
 		 */
 
 		if (write_utf8) {
-			unicode = mchars_spec2cp(mchars, seq, seqlen);
+			unicode = mchars_spec2cp(seq, seqlen);
 			if (unicode <= 0)
 				continue;
 			addsz = utf8(unicode, utfbuf);
@@ -1936,7 +1934,7 @@ render_string(char **public, size_t *psz)
 				continue;
 			addcp = utfbuf;
 		} else {
-			addcp = mchars_spec2str(mchars, seq, seqlen, &addsz);
+			addcp = mchars_spec2str(seq, seqlen, &addsz);
 			if (addcp == NULL)
 				continue;
 			if (*addcp == ASCII_NBRSP) {

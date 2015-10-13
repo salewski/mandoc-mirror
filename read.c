@@ -50,7 +50,6 @@
 struct	mparse {
 	struct roff_man	 *man; /* man parser */
 	struct roff	 *roff; /* roff parser (!NULL) */
-	const struct mchars *mchars; /* character table */
 	char		 *sodest; /* filename pointed to by .so */
 	const char	 *file; /* filename of current input file */
 	struct buf	 *primary; /* buffer currently being parsed */
@@ -815,7 +814,7 @@ mparse_open(struct mparse *curp, int *fd, const char *file)
 
 struct mparse *
 mparse_alloc(int options, enum mandoclevel wlevel, mandocmsg mmsg,
-    const struct mchars *mchars, const char *defos)
+    const char *defos)
 {
 	struct mparse	*curp;
 
@@ -826,8 +825,7 @@ mparse_alloc(int options, enum mandoclevel wlevel, mandocmsg mmsg,
 	curp->mmsg = mmsg;
 	curp->defos = defos;
 
-	curp->mchars = mchars;
-	curp->roff = roff_alloc(curp, curp->mchars, options);
+	curp->roff = roff_alloc(curp, options);
 	curp->man = roff_man_alloc( curp->roff, curp, curp->defos,
 		curp->options & MPARSE_QUICK ? 1 : 0);
 	if (curp->options & MPARSE_MDOC) {

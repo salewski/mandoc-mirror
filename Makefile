@@ -117,7 +117,6 @@ DISTFILES	 = INSTALL \
 		   TODO \
 		   apropos.1 \
 		   cgi.h.example \
-		   chars.in \
 		   compat_fts.h \
 		   compat_ohash.h \
 		   compat_stringlist.h \

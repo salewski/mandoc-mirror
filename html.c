@@ -130,15 +130,13 @@ static	void	 print_attr(struct html *, const char *, const char *);
 
 
 void *
-html_alloc(const struct mchars *mchars, const struct manoutput *outopts)
+html_alloc(const struct manoutput *outopts)
 {
 	struct html	*h;
 
 	h = mandoc_calloc(1, sizeof(struct html));
 
 	h->tags.head = NULL;
-	h->symtab = mchars;
-
 	h->style = outopts->style;
 	h->base_man = outopts->man;
 	h->base_includes = outopts->includes;
@@ -398,7 +396,7 @@ print_encode(struct html *h, const char *p, int norecurse)
 				continue;
 			break;
 		case ESCAPE_SPECIAL:
-			c = mchars_spec2cp(h->symtab, seq, len);
+			c = mchars_spec2cp(seq, len);
 			if (c <= 0)
 				continue;
 			break;

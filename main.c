@@ -77,7 +77,6 @@ enum	outt {
 
 struct	curparse {
 	struct mparse	 *mp;
-	struct mchars	 *mchars;	/* character table */
 	enum mandoclevel  wlevel;	/* ignore messages below this */
 	int		  wstop;	/* stop after a file with a warning */
 	enum outt	  outtype;	/* which output to use */
@@ -422,9 +421,8 @@ main(int argc, char *argv[])
 	if (search.argmode == ARG_FILE && ! moptions(&options, auxpaths))
 		return (int)MANDOCLEVEL_BADARG;
 
-	curp.mchars = mchars_alloc();
-	curp.mp = mparse_alloc(options, curp.wlevel, mmsg,
-	    curp.mchars, defos);
+	mchars_alloc();
+	curp.mp = mparse_alloc(options, curp.wlevel, mmsg, defos);
 
 	/*
 	 * Conditionally start up the lookaside buffer before parsing.
@@ -478,7 +476,7 @@ main(int argc, char *argv[])
 	if (curp.outfree)
 		(*curp.outfree)(curp.outdata);
 	mparse_free(curp.mp);
-	mchars_free(curp.mchars);
+	mchars_free();
 
 out:
 	if (search.argmode != ARG_FILE) {
@@ -662,33 +660,27 @@ parse(struct curparse *curp, int fd, const char *file)
 	if ( ! (curp->outman && curp->outmdoc)) {
 		switch (curp->outtype) {
 		case OUTT_HTML:
-			curp->outdata = html_alloc(curp->mchars,
-			    curp->outopts);
+			curp->outdata = html_alloc(curp->outopts);
 			curp->outfree = html_free;
 			break;
 		case OUTT_UTF8:
-			curp->outdata = utf8_alloc(curp->mchars,
-			    curp->outopts);
+			curp->outdata = utf8_alloc(curp->outopts);
 			curp->outfree = ascii_free;
 			break;
 		case OUTT_LOCALE:
-			curp->outdata = locale_alloc(curp->mchars,
-			    curp->outopts);
+			curp->outdata = locale_alloc(curp->outopts);
 			curp->outfree = ascii_free;
 			break;
 		case OUTT_ASCII:
-			curp->outdata = ascii_alloc(curp->mchars,
-			    curp->outopts);
+			curp->outdata = ascii_alloc(curp->outopts);
 			curp->outfree = ascii_free;
 			break;
 		case OUTT_PDF:
-			curp->outdata = pdf_alloc(curp->mchars,
-			    curp->outopts);
+			curp->outdata = pdf_alloc(curp->outopts);
 			curp->outfree = pspdf_free;
 			break;
 		case OUTT_PS:
-			curp->outdata = ps_alloc(curp->mchars,
-			    curp->outopts);
+			curp->outdata = ps_alloc(curp->outopts);
 			curp->outfree = pspdf_free;
 			break;
 		default:

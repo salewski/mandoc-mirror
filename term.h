@@ -86,7 +86,6 @@ struct	termp {
 #define	TERMP_NONEWLINE	 (1 << 15)	/* No line break in nofill mode. */
 	int		 *buf;		/* Output buffer. */
 	enum termenc	  enc;		/* Type of encoding. */
-	const struct mchars *symtab;	/* Character table. */
 	enum termfont	  fontl;	/* Last font set. */
 	enum termfont	 *fontq;	/* Symmetric fonts. */
 	int		  fontsz;	/* Allocated size of font stack */

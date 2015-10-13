@@ -454,12 +454,11 @@ term_word(struct termp *p, const char *word)
 			break;
 		case ESCAPE_SPECIAL:
 			if (p->enc == TERMENC_ASCII) {
-				cp = mchars_spec2str(p->symtab,
-				    seq, sz, &ssz);
+				cp = mchars_spec2str(seq, sz, &ssz);
 				if (cp != NULL)
 					encode(p, cp, ssz);
 			} else {
-				uc = mchars_spec2cp(p->symtab, seq, sz);
+				uc = mchars_spec2cp(seq, sz);
 				if (uc > 0)
 					encode1(p, uc);
 			}
@@ -700,13 +699,11 @@ term_strlen(const struct termp *p, const char *cp)
 				break;
 			case ESCAPE_SPECIAL:
 				if (p->enc == TERMENC_ASCII) {
-					rhs = mchars_spec2str(p->symtab,
-					    seq, ssz, &rsz);
+					rhs = mchars_spec2str(seq, ssz, &rsz);
 					if (rhs != NULL)
 						break;
 				} else {
-					uc = mchars_spec2cp(p->symtab,
-					    seq, ssz);
+					uc = mchars_spec2cp(seq, ssz);
 					if (uc > 0)
 						sz += cond_width(p, uc, &skip);
 				}

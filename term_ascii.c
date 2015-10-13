@@ -38,8 +38,7 @@
 #include "manconf.h"
 #include "main.h"
 
-static	struct termp	 *ascii_init(enum termenc, const struct mchars *,
-				const struct manoutput *);
+static	struct termp	 *ascii_init(enum termenc, const struct manoutput *);
 static	int		  ascii_hspan(const struct termp *,
 				const struct roffsu *);
 static	size_t		  ascii_width(const struct termp *, int);
@@ -59,8 +58,7 @@ static	size_t		  locale_width(const struct termp *, int);
 
 
 static struct termp *
-ascii_init(enum termenc enc, const struct mchars *mchars,
-	const struct manoutput *outopts)
+ascii_init(enum termenc enc, const struct manoutput *outopts)
 {
 #if HAVE_WCHAR
 	char		*v;
@@ -69,7 +67,6 @@ ascii_init(enum termenc enc, const struct mchars *mchars,
 
 	p = mandoc_calloc(1, sizeof(struct termp));
 
-	p->symtab = mchars;
 	p->line = 1;
 	p->tabwidth = 5;
 	p->defrmargin = p->lastrmargin = 78;
@@ -119,24 +116,24 @@ ascii_init(enum termenc enc, const struct mchars *mchars,
 }
 
 void *
-ascii_alloc(const struct mchars *mchars, const struct manoutput *outopts)
+ascii_alloc(const struct manoutput *outopts)
 {
 
-	return ascii_init(TERMENC_ASCII, mchars, outopts);
+	return ascii_init(TERMENC_ASCII, outopts);
 }
 
 void *
-utf8_alloc(const struct mchars *mchars, const struct manoutput *outopts)
+utf8_alloc(const struct manoutput *outopts)
 {
 
-	return ascii_init(TERMENC_UTF8, mchars, outopts);
+	return ascii_init(TERMENC_UTF8, outopts);
 }
 
 void *
-locale_alloc(const struct mchars *mchars, const struct manoutput *outopts)
+locale_alloc(const struct manoutput *outopts)
 {
 
-	return ascii_init(TERMENC_LOCALE, mchars, outopts);
+	return ascii_init(TERMENC_LOCALE, outopts);
 }
 
 static void
