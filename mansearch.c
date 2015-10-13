@@ -35,11 +35,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#if HAVE_OHASH
-#include <ohash.h>
-#else
-#include "compat_ohash.h"
-#endif
 #include <sqlite3.h>
 #ifndef SQLITE_DETERMINISTIC
 #define SQLITE_DETERMINISTIC 0
@@ -47,6 +42,7 @@
 
 #include "mandoc.h"
 #include "mandoc_aux.h"
+#include "mandoc_ohash.h"
 #include "manconf.h"
 #include "mansearch.h"
 
@@ -93,9 +89,6 @@ static	void		 buildnames(const struct mansearch *,
 				const char *, int form);
 static	char		*buildoutput(sqlite3 *, sqlite3_stmt *,
 				 uint64_t, uint64_t);
-static	void		*hash_alloc(size_t, void *);
-static	void		 hash_free(void *, void *);
-static	void		*hash_calloc(size_t, size_t, void *);
 static	struct expr	*exprcomp(const struct mansearch *,
 				int, char *[]);
 static	void		 exprfree(struct expr *);
@@ -173,7 +166,6 @@ mansearch(const struct mansearch *search,
 	sqlite3		*db;
 	sqlite3_stmt	*s, *s2;
 	struct match	*mp;
-	struct ohash_info info;
 	struct ohash	 htab;
 	unsigned int	 idx;
 	size_t		 i, j, cur, maxres;
@@ -183,11 +175,6 @@ mansearch(const struct mansearch *search,
 		*sz = 0;
 		return 0;
 	}
-
-	info.calloc = hash_calloc;
-	info.alloc = hash_alloc;
-	info.free = hash_free;
-	info.key_offset = offsetof(struct match, pageid);
 
 	cur = maxres = 0;
 	*res = NULL;
@@ -284,8 +271,7 @@ mansearch(const struct mansearch *search,
 				SQL_BIND_INT64(db, s, j, ep->bits);
 		}
 
-		memset(&htab, 0, sizeof(struct ohash));
-		ohash_init(&htab, 4, &info);
+		mandoc_ohash_init(&htab, 4, offsetof(struct match, pageid));
 
 		/*
 		 * Hash each entry on its [unique] document identifier.
@@ -852,25 +838,4 @@ exprfree(struct expr *p)
 		free(p);
 		p = pp;
 	}
-}
-
-static void *
-hash_calloc(size_t nmemb, size_t sz, void *arg)
-{
-
-	return mandoc_calloc(nmemb, sz);
-}
-
-static void *
-hash_alloc(size_t sz, void *arg)
-{
-
-	return mandoc_malloc(sz);
-}
-
-static void
-hash_free(void *p, void *arg)
-{
-
-	free(p);
 }

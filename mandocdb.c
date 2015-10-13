@@ -40,14 +40,10 @@
 #include <string.h>
 #include <unistd.h>
 
-#if HAVE_OHASH
-#include <ohash.h>
-#else
-#include "compat_ohash.h"
-#endif
 #include <sqlite3.h>
 
 #include "mandoc_aux.h"
+#include "mandoc_ohash.h"
 #include "mandoc.h"
 #include "roff.h"
 #include "mdoc.h"
@@ -146,9 +142,6 @@ static	void	 dbadd_mlink_name(const struct mlink *mlink);
 static	int	 dbopen(int);
 static	void	 dbprune(void);
 static	void	 filescan(const char *);
-static	void	*hash_alloc(size_t, void *);
-static	void	 hash_free(void *, void *);
-static	void	*hash_calloc(size_t, size_t, void *);
 static	void	 mlink_add(struct mlink *, const struct stat *);
 static	void	 mlink_check(struct mpage *, struct mlink *);
 static	void	 mlink_free(struct mlink *);
@@ -342,7 +335,6 @@ int
 mandocdb(int argc, char *argv[])
 {
 	struct manconf	  conf;
-	struct ohash_info mpages_info, mlinks_info;
 	struct mparse	 *mp;
 	const char	 *path_arg;
 	size_t		  j, sz;
@@ -350,14 +342,6 @@ mandocdb(int argc, char *argv[])
 
 	memset(&conf, 0, sizeof(conf));
 	memset(stmts, 0, STMT__MAX * sizeof(sqlite3_stmt *));
-
-	mpages_info.alloc  = mlinks_info.alloc  = hash_alloc;
-	mpages_info.calloc = mlinks_info.calloc = hash_calloc;
-	mpages_info.free   = mlinks_info.free   = hash_free;
-	mpages_info.data   = mlinks_info.data   = NULL;
-
-	mpages_info.key_offset = offsetof(struct mpage, inodev);
-	mlinks_info.key_offset = offsetof(struct mlink, file);
 
 	/*
 	 * We accept a few different invocations.
@@ -438,8 +422,8 @@ mandocdb(int argc, char *argv[])
 	mchars = mchars_alloc();
 	mp = mparse_alloc(mparse_options, MANDOCLEVEL_BADARG, NULL,
 	    mchars, NULL);
-	ohash_init(&mpages, 6, &mpages_info);
-	ohash_init(&mlinks, 6, &mlinks_info);
+	mandoc_ohash_init(&mpages, 6, offsetof(struct mpage, inodev));
+	mandoc_ohash_init(&mlinks, 6, offsetof(struct mlink, file));
 
 	if (OP_UPDATE == op || OP_DELETE == op || OP_TEST == op) {
 
@@ -509,8 +493,10 @@ mandocdb(int argc, char *argv[])
 				continue;
 
 			if (j) {
-				ohash_init(&mpages, 6, &mpages_info);
-				ohash_init(&mlinks, 6, &mlinks_info);
+				mandoc_ohash_init(&mpages, 6,
+				    offsetof(struct mpage, inodev));
+				mandoc_ohash_init(&mlinks, 6,
+				    offsetof(struct mlink, file));
 			}
 
 			if ( ! set_basedir(conf.manpath.paths[j], argc > 0))
@@ -1099,7 +1085,6 @@ static void
 mpages_merge(struct mparse *mp)
 {
 	char			 any[] = "any";
-	struct ohash_info	 str_info;
 	struct mpage		*mpage, *mpage_dest;
 	struct mlink		*mlink, *mlink_dest;
 	struct roff_man		*man;
@@ -1107,12 +1092,6 @@ mpages_merge(struct mparse *mp)
 	char			*cp;
 	int			 fd;
 	unsigned int		 pslot;
-
-	str_info.alloc = hash_alloc;
-	str_info.calloc = hash_calloc;
-	str_info.free = hash_free;
-	str_info.data = NULL;
-	str_info.key_offset = offsetof(struct str, key);
 
 	if ( ! nodb)
 		SQL_EXEC("BEGIN TRANSACTION");
@@ -1126,8 +1105,8 @@ mpages_merge(struct mparse *mp)
 		}
 
 		name_mask = NAME_MASK;
-		ohash_init(&names, 4, &str_info);
-		ohash_init(&strings, 6, &str_info);
+		mandoc_ohash_init(&names, 4, offsetof(struct str, key));
+		mandoc_ohash_init(&strings, 6, offsetof(struct str, key));
 		mparse_reset(mp);
 		man = NULL;
 		sodest = NULL;
@@ -2382,27 +2361,6 @@ prepare_statements:
 #endif
 
 	return 1;
-}
-
-static void *
-hash_calloc(size_t n, size_t sz, void *arg)
-{
-
-	return mandoc_calloc(n, sz);
-}
-
-static void *
-hash_alloc(size_t sz, void *arg)
-{
-
-	return mandoc_malloc(sz);
-}
-
-static void
-hash_free(void *p, void *arg)
-{
-
-	free(p);
 }
 
 static int

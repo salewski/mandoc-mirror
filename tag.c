@@ -26,13 +26,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#if HAVE_OHASH
-#include <ohash.h>
-#else
-#include "compat_ohash.h"
-#endif
-
 #include "mandoc_aux.h"
+#include "mandoc_ohash.h"
 #include "tag.h"
 
 struct tag_entry {
@@ -42,9 +37,6 @@ struct tag_entry {
 };
 
 static	void	 tag_signal(int);
-static	void	*tag_alloc(size_t, void *);
-static	void	 tag_free(void *, void *);
-static	void	*tag_calloc(size_t, size_t, void *);
 
 static struct ohash	 tag_data;
 static struct tag_files	 tag_files;
@@ -58,7 +50,6 @@ static struct tag_files	 tag_files;
 struct tag_files *
 tag_init(void)
 {
-	struct ohash_info	 tag_info;
 	int			 ofd;
 
 	ofd = -1;
@@ -91,12 +82,7 @@ tag_init(void)
 	 * where various marked-up terms are documented.
 	 */
 
-	tag_info.alloc = tag_alloc;
-	tag_info.calloc = tag_calloc;
-	tag_info.free = tag_free;
-	tag_info.key_offset = offsetof(struct tag_entry, s);
-	tag_info.data = NULL;
-	ohash_init(&tag_data, 4, &tag_info);
+	mandoc_ohash_init(&tag_data, 4, offsetof(struct tag_entry, s));
 	return &tag_files;
 
 fail:
@@ -186,28 +172,4 @@ tag_signal(int signum)
 	kill(getpid(), signum);
 	/* NOTREACHED */
 	_exit(1);
-}
-
-/*
- * Memory management callback functions for ohash.
- */
-static void *
-tag_alloc(size_t sz, void *arg)
-{
-
-	return mandoc_malloc(sz);
-}
-
-static void *
-tag_calloc(size_t nmemb, size_t sz, void *arg)
-{
-
-	return mandoc_calloc(nmemb, sz);
-}
-
-static void
-tag_free(void *p, void *arg)
-{
-
-	free(p);
 }
