@@ -333,6 +333,9 @@ mandoc_escape(const char **end, const char **start, int *sz)
 			break;
 		if (*sz == 6 && (*start)[1] == '0')
 			break;
+		if (*sz == 5 && (*start)[1] == 'D' &&
+		    strchr("89ABCDEF", (*start)[2]) != NULL)
+			break;
 		if ((int)strspn(*start + 1, "0123456789ABCDEFabcdef")
 		    + 1 == *sz)
 			gly = ESCAPE_UNICODE;
