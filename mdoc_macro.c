@@ -1108,6 +1108,11 @@ blk_full(MACRO_PROT_ARGS)
 				mdoc->flags |= MDOC_PPHRASE;
 			parse_rest(mdoc, TOKEN_NONE, line, &la, buf);
 			mdoc->flags &= ~MDOC_PPHRASE;
+
+			/* There may have been `Ta' macros. */
+
+			while (body->next != NULL)
+				body = body->next;
 			continue;
 		}
 
