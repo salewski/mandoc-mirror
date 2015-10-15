@@ -33,9 +33,6 @@
 #include "roff_int.h"
 #include "libroff.h"
 
-/* Maximum number of nested if-else conditionals. */
-#define	RSTACK_MAX	128
-
 /* Maximum number of string expansions per line, to break infinite loops. */
 #define	EXPAND_LIMIT	1000
 

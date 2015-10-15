@@ -32,8 +32,6 @@
 #include "mandoc_aux.h"
 #include "libmandoc.h"
 
-#define DATESIZE 32
-
 static	int	 a2time(time_t *, const char *, const char *);
 static	char	*time2a(time_t);
 
