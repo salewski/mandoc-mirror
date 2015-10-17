@@ -449,11 +449,10 @@ args(struct roff_man *mdoc, int line, int *pos,
 {
 	char		*p;
 	int		 pairs;
-	enum margserr	 rc;
 
 	if (buf[*pos] == '\0') {
 		if (mdoc->flags & MDOC_PHRASELIT &&
-		    ! (mdoc->flags & MDOC_PPHRASE)) {
+		    ! (mdoc->flags & MDOC_PHRASE)) {
 			mandoc_msg(MANDOCERR_ARG_QUOTE,
 			    mdoc->parse, line, *pos, NULL);
 			mdoc->flags &= ~MDOC_PHRASELIT;
@@ -473,18 +472,41 @@ args(struct roff_man *mdoc, int line, int *pos,
 
 	if (fl == ARGSFL_TABSEP) {
 		if ((p = strchr(*v, '\t')) != NULL) {
-			/* Skip any blank characters after the tab. */
+
+			/*
+			 * Words right before and right after
+			 * tab characters are not parsed,
+			 * unless there is a blank in between.
+			 */
+
+			if (p[-1] != ' ')
+				mdoc->flags |= MDOC_PHRASEQL;
+			if (p[1] != ' ')
+				mdoc->flags |= MDOC_PHRASEQN;
+
+			/*
+			 * One or more blanks after a tab cause
+			 * one leading blank in the next column.
+			 * So skip all but one of them.
+			 */
+
 			*pos += (int)(p - *v) + 1;
-			while (buf[*pos] == ' ')
+			while (buf[*pos] == ' ' && buf[*pos + 1] == ' ')
 				(*pos)++;
-			rc = ARGS_PPHRASE;
+
+			/*
+			 * A tab at the end of an input line
+			 * switches to the next column.
+			 */
+
+			if (buf[*pos] == '\0' || buf[*pos + 1] == '\0')
+				mdoc->flags |= MDOC_PHRASEQN;
 		} else {
 			p = strchr(*v, '\0');
 			if (p[-1] == ' ')
 				mandoc_msg(MANDOCERR_SPACE_EOL,
 				    mdoc->parse, line, *pos, NULL);
 			*pos += (int)(p - *v);
-			rc = ARGS_PEND;
 		}
 
 		/* Skip any trailing blank characters. */
@@ -493,7 +515,7 @@ args(struct roff_man *mdoc, int line, int *pos,
 			p--;
 		*p = '\0';
 
-		return rc;
+		return ARGS_PHRASE;
 	}
 
 	/*
@@ -504,11 +526,11 @@ args(struct roff_man *mdoc, int line, int *pos,
 	 * Whitespace is NOT involved in literal termination.
 	 */
 
-	if (MDOC_PHRASELIT & mdoc->flags || '\"' == buf[*pos]) {
-		if ( ! (MDOC_PHRASELIT & mdoc->flags))
+	if (mdoc->flags & MDOC_PHRASELIT || buf[*pos] == '\"') {
+		if ( ! (mdoc->flags & MDOC_PHRASELIT))
 			*v = &buf[++(*pos)];
 
-		if (MDOC_PPHRASE & mdoc->flags)
+		if (mdoc->flags & MDOC_PHRASE)
 			mdoc->flags |= MDOC_PHRASELIT;
 
 		pairs = 0;
@@ -528,11 +550,10 @@ args(struct roff_man *mdoc, int line, int *pos,
 		if (pairs)
 			buf[*pos - pairs] = '\0';
 
-		if ('\0' == buf[*pos]) {
-			if (MDOC_PPHRASE & mdoc->flags)
-				return ARGS_QWORD;
-			mandoc_msg(MANDOCERR_ARG_QUOTE,
-			    mdoc->parse, line, *pos, NULL);
+		if (buf[*pos] == '\0') {
+			if ( ! (mdoc->flags & MDOC_PHRASE))
+				mandoc_msg(MANDOCERR_ARG_QUOTE,
+				    mdoc->parse, line, *pos, NULL);
 			return ARGS_QWORD;
 		}
 
@@ -555,6 +576,15 @@ args(struct roff_man *mdoc, int line, int *pos,
 	p = &buf[*pos];
 	*v = mandoc_getarg(mdoc->parse, &p, line, pos);
 
+	/*
+	 * After parsing the last word in this phrase,
+	 * tell lookup() whether or not to interpret it.
+	 */
+
+	if (*p == '\0' && mdoc->flags & MDOC_PHRASEQL) {
+		mdoc->flags &= ~MDOC_PHRASEQL;
+		mdoc->flags |= MDOC_PHRASEQF;
+	}
 	return ARGS_WORD;
 }
 

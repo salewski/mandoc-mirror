@@ -40,9 +40,7 @@ enum	margserr {
 	ARGS_WORD, /* normal word */
 	ARGS_PUNCT, /* series of punctuation */
 	ARGS_QWORD, /* quoted word */
-	ARGS_PHRASE, /* Ta'd phrase (-column) */
-	ARGS_PPHRASE, /* tabbed phrase (-column) */
-	ARGS_PEND /* last phrase (-column) */
+	ARGS_PHRASE /* Bl -column phrase */
 };
 
 /*
