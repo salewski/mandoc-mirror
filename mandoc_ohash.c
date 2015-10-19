@@ -16,6 +16,7 @@
  */
 #include <sys/types.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "mandoc_aux.h"
