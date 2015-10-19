@@ -759,7 +759,6 @@ static void
 post_bf(POST_ARGS)
 {
 	struct roff_node *np, *nch;
-	enum mdocargt	  arg;
 
 	/*
 	 * Unlike other data pointers, these are "housed" by the HEAD
@@ -771,45 +770,49 @@ post_bf(POST_ARGS)
 		return;
 
 	assert(np->parent->type == ROFFT_BLOCK);
-	assert(MDOC_Bf == np->parent->tok);
+	assert(np->parent->tok == MDOC_Bf);
 
 	/* Check the number of arguments. */
 
 	nch = np->child;
-	if (NULL == np->parent->args) {
-		if (NULL == nch) {
+	if (np->parent->args == NULL) {
+		if (nch == NULL) {
 			mandoc_msg(MANDOCERR_BF_NOFONT, mdoc->parse,
 			    np->line, np->pos, "Bf");
 			return;
 		}
 		nch = nch->next;
 	}
-	if (NULL != nch)
+	if (nch != NULL)
 		mandoc_vmsg(MANDOCERR_ARG_EXCESS, mdoc->parse,
 		    nch->line, nch->pos, "Bf ... %s", nch->string);
 
 	/* Extract argument into data. */
 
-	if (np->parent->args) {
-		arg = np->parent->args->argv[0].arg;
-		if (MDOC_Emphasis == arg)
+	if (np->parent->args != NULL) {
+		switch (np->parent->args->argv[0].arg) {
+		case MDOC_Emphasis:
 			np->norm->Bf.font = FONT_Em;
-		else if (MDOC_Literal == arg)
+			break;
+		case MDOC_Literal:
 			np->norm->Bf.font = FONT_Li;
-		else if (MDOC_Symbolic == arg)
+			break;
+		case MDOC_Symbolic:
 			np->norm->Bf.font = FONT_Sy;
-		else
+			break;
+		default:
 			abort();
+		}
 		return;
 	}
 
 	/* Extract parameter into data. */
 
-	if (0 == strcmp(np->child->string, "Em"))
+	if ( ! strcmp(np->child->string, "Em"))
 		np->norm->Bf.font = FONT_Em;
-	else if (0 == strcmp(np->child->string, "Li"))
+	else if ( ! strcmp(np->child->string, "Li"))
 		np->norm->Bf.font = FONT_Li;
-	else if (0 == strcmp(np->child->string, "Sy"))
+	else if ( ! strcmp(np->child->string, "Sy"))
 		np->norm->Bf.font = FONT_Sy;
 	else
 		mandoc_vmsg(MANDOCERR_BF_BADFONT, mdoc->parse,
@@ -843,7 +846,7 @@ post_eoln(POST_ARGS)
 	const struct roff_node *n;
 
 	n = mdoc->last;
-	if (n->child)
+	if (n->child != NULL)
 		mandoc_vmsg(MANDOCERR_ARG_SKIP,
 		    mdoc->parse, n->line, n->pos,
 		    "%s %s", mdoc_macronames[n->tok],
@@ -932,12 +935,12 @@ post_nm(POST_ARGS)
 	     n->last->tok == MDOC_Lp))
 		mdoc_node_relink(mdoc, n->last);
 
-	if (NULL != mdoc->meta.name)
+	if (mdoc->meta.name != NULL)
 		return;
 
 	deroff(&mdoc->meta.name, n);
 
-	if (NULL == mdoc->meta.name)
+	if (mdoc->meta.name == NULL)
 		mandoc_msg(MANDOCERR_NM_NONAME, mdoc->parse,
 		    n->line, n->pos, "Nm");
 }
@@ -1009,7 +1012,7 @@ post_defaults(POST_ARGS)
 	 * gets an empty string.
 	 */
 
-	if (mdoc->last->child)
+	if (mdoc->last->child != NULL)
 		return;
 
 	nn = mdoc->last;
@@ -1053,7 +1056,7 @@ post_at(POST_ARGS)
 
 	n = n->child;
 	assert(n->type == ROFFT_TEXT);
-	if (NULL == (std_att = mdoc_a2att(n->string))) {
+	if ((std_att = mdoc_a2att(n->string)) == NULL) {
 		mandoc_vmsg(MANDOCERR_AT_BAD, mdoc->parse,
 		    n->line, n->pos, "At %s", n->string);
 		mandoc_asprintf(&att, "AT&T UNIX %s", n->string);
@@ -1142,7 +1145,8 @@ post_it(POST_ARGS)
 
 		assert(nit->head->child == NULL);
 
-		for (i = 0, nch = nit->child; nch; nch = nch->next)
+		i = 0;
+		for (nch = nit->child; nch != NULL; nch = nch->next)
 			if (nch->type == ROFFT_BODY)
 				i++;
 
@@ -1171,17 +1175,17 @@ post_bl_block(POST_ARGS)
 
 	n = mdoc->last;
 
-	if (LIST_tag == n->norm->Bl.type &&
-	    NULL == n->norm->Bl.width) {
+	if (n->norm->Bl.type == LIST_tag &&
+	    n->norm->Bl.width == NULL) {
 		post_bl_block_tag(mdoc);
-		assert(n->norm->Bl.width);
+		assert(n->norm->Bl.width != NULL);
 	}
 
-	for (ni = n->body->child; ni; ni = ni->next) {
-		if (NULL == ni->body)
+	for (ni = n->body->child; ni != NULL; ni = ni->next) {
+		if (ni->body == NULL)
 			continue;
 		nc = ni->body->last;
-		while (NULL != nc) {
+		while (nc != NULL) {
 			switch (nc->tok) {
 			case MDOC_Pp:
 			case MDOC_Lp:
@@ -1191,13 +1195,13 @@ post_bl_block(POST_ARGS)
 				nc = NULL;
 				continue;
 			}
-			if (NULL == ni->next) {
+			if (ni->next == NULL) {
 				mandoc_msg(MANDOCERR_PAR_MOVE,
 				    mdoc->parse, nc->line, nc->pos,
 				    mdoc_macronames[nc->tok]);
 				mdoc_node_relink(mdoc, nc);
-			} else if (0 == n->norm->Bl.comp &&
-			    LIST_column != n->norm->Bl.type) {
+			} else if (n->norm->Bl.comp == 0 &&
+			    n->norm->Bl.type != LIST_column) {
 				mandoc_vmsg(MANDOCERR_PAR_SKIP,
 				    mdoc->parse, nc->line, nc->pos,
 				    "%s before It",
@@ -1251,8 +1255,8 @@ post_bl_block_tag(POST_ARGS)
 	sz = 10;
 	n = mdoc->last;
 
-	for (nn = n->body->child; nn; nn = nn->next) {
-		if (MDOC_It != nn->tok)
+	for (nn = n->body->child; nn != NULL; nn = nn->next) {
+		if (nn->tok != MDOC_It)
 			continue;
 
 		assert(nn->type == ROFFT_BLOCK);
@@ -1281,7 +1285,7 @@ post_bl_block_tag(POST_ARGS)
 	 * We're guaranteed that a MDOC_Width doesn't already exist.
 	 */
 
-	assert(n->args);
+	assert(n->args != NULL);
 	i = (int)(n->args->argc)++;
 
 	n->args->argv = mandoc_reallocarray(n->args->argv,
@@ -1414,11 +1418,11 @@ post_bl(POST_ARGS)
 		 * Unlink this child.
 		 */
 
-		assert(NULL == nchild->prev);
-		if (0 == --nbody->nchild) {
+		assert(nchild->prev == NULL);
+		if (--nbody->nchild == 0) {
 			nbody->child = NULL;
 			nbody->last  = NULL;
-			assert(NULL == nnext);
+			assert(nnext == NULL);
 		} else {
 			nbody->child = nnext;
 			nnext->prev = NULL;
@@ -1434,7 +1438,7 @@ post_bl(POST_ARGS)
 
 		nblock->prev = nchild;
 		nparent->nchild++;
-		if (NULL == nprev)
+		if (nprev == NULL)
 			nparent->child = nchild;
 		else
 			nprev->next = nchild;
@@ -1458,7 +1462,7 @@ post_bk(POST_ARGS)
 }
 
 static void
-post_sm(struct roff_man *mdoc)
+post_sm(POST_ARGS)
 {
 	struct roff_node	*nch;
 
@@ -1539,7 +1543,7 @@ post_st(POST_ARGS)
 
 	assert(nch->type == ROFFT_TEXT);
 
-	if (NULL == (p = mdoc_a2st(nch->string))) {
+	if ((p = mdoc_a2st(nch->string)) == NULL) {
 		mandoc_vmsg(MANDOCERR_ST_BAD, mdoc->parse,
 		    nch->line, nch->pos, "St %s", nch->string);
 		roff_node_delete(mdoc, n);
@@ -1667,7 +1671,7 @@ static void
 post_ns(POST_ARGS)
 {
 
-	if (MDOC_LINE & mdoc->last->flags)
+	if (mdoc->last->flags & MDOC_LINE)
 		mandoc_msg(MANDOCERR_NS_SKIP, mdoc->parse,
 		    mdoc->last->line, mdoc->last->pos, NULL);
 }
@@ -1872,7 +1876,7 @@ post_sh_head(POST_ARGS)
 
 	mdoc->last->parent->sec = sec;
 	mdoc->last->sec = sec;
-	for (n = mdoc->last->child; n; n = n->next)
+	for (n = mdoc->last->child; n != NULL; n = n->next)
 		n->sec = sec;
 
 	/* We don't care about custom sections after this. */
@@ -1954,8 +1958,8 @@ post_ignpar(POST_ARGS)
 		return;
 	}
 
-	if (NULL != (np = mdoc->last->child))
-		if (MDOC_Pp == np->tok || MDOC_Lp == np->tok) {
+	if ((np = mdoc->last->child) != NULL)
+		if (np->tok == MDOC_Pp || np->tok == MDOC_Lp) {
 			mandoc_vmsg(MANDOCERR_PAR_SKIP,
 			    mdoc->parse, np->line, np->pos,
 			    "%s after %s", mdoc_macronames[np->tok],
@@ -1963,8 +1967,8 @@ post_ignpar(POST_ARGS)
 			roff_node_delete(mdoc, np);
 		}
 
-	if (NULL != (np = mdoc->last->last))
-		if (MDOC_Pp == np->tok || MDOC_Lp == np->tok) {
+	if ((np = mdoc->last->last) != NULL)
+		if (np->tok == MDOC_Pp || np->tok == MDOC_Lp) {
 			mandoc_vmsg(MANDOCERR_PAR_SKIP, mdoc->parse,
 			    np->line, np->pos, "%s at the end of %s",
 			    mdoc_macronames[np->tok],
@@ -2022,13 +2026,13 @@ post_par(POST_ARGS)
 		    mdoc->parse, np->line, np->pos, "%s %s",
 		    mdoc_macronames[np->tok], np->child->string);
 
-	if (NULL == (np = mdoc->last->prev)) {
+	if ((np = mdoc->last->prev) == NULL) {
 		np = mdoc->last->parent;
-		if (MDOC_Sh != np->tok && MDOC_Ss != np->tok)
+		if (np->tok != MDOC_Sh && np->tok != MDOC_Ss)
 			return;
-	} else if (MDOC_Pp != np->tok && MDOC_Lp != np->tok &&
-	    (MDOC_br != mdoc->last->tok ||
-	     (MDOC_sp != np->tok && MDOC_br != np->tok)))
+	} else if (np->tok != MDOC_Pp && np->tok != MDOC_Lp &&
+	    (mdoc->last->tok != MDOC_br ||
+	     (np->tok != MDOC_sp && np->tok != MDOC_br)))
 		return;
 
 	mandoc_vmsg(MANDOCERR_PAR_SKIP, mdoc->parse,
@@ -2077,7 +2081,7 @@ post_dd(POST_ARGS)
 		free(mdoc->meta.date);
 
 	n = mdoc->last;
-	if (NULL == n->child || '\0' == n->child->string[0]) {
+	if (n->child == NULL || n->child->string[0] == '\0') {
 		mdoc->meta.date = mdoc->quick ? mandoc_strdup("") :
 		    mandoc_normdate(mdoc->parse, NULL, n->line, n->pos);
 		goto out;
@@ -2192,8 +2196,7 @@ post_bx(POST_ARGS)
 	 * uppercase blindly.
 	 */
 
-	n = mdoc->last->child;
-	if (n && NULL != (n = n->next))
+	if ((n = mdoc->last->child) != NULL && (n = n->next) != NULL)
 		*n->string = (char)toupper((unsigned char)*n->string);
 }
 
@@ -2231,8 +2234,8 @@ post_os(POST_ARGS)
 #ifdef OSNAME
 	mdoc->meta.os = mandoc_strdup(OSNAME);
 #else /*!OSNAME */
-	if (NULL == defbuf) {
-		if (-1 == uname(&utsname)) {
+	if (defbuf == NULL) {
+		if (uname(&utsname) == -1) {
 			mandoc_msg(MANDOCERR_OS_UNAME, mdoc->parse,
 			    n->line, n->pos, "Os");
 			defbuf = mandoc_strdup("UNKNOWN");
@@ -2258,7 +2261,7 @@ post_ex(POST_ARGS)
 
 	n = mdoc->last;
 
-	if (n->child)
+	if (n->child != NULL)
 		return;
 
 	if (mdoc->meta.name == NULL) {
