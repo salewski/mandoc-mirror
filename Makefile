@@ -88,6 +88,7 @@ SRCS		 = att.c \
 		   mdoc_html.c \
 		   mdoc_macro.c \
 		   mdoc_man.c \
+		   mdoc_state.c \
 		   mdoc_term.c \
 		   mdoc_validate.c \
 		   msec.c \
@@ -183,6 +184,7 @@ LIBMDOC_OBJS	 = att.o \
 		   mdoc_argv.o \
 		   mdoc_hash.o \
 		   mdoc_macro.o \
+		   mdoc_state.o \
 		   mdoc_validate.o \
 		   st.o
 

@@ -119,9 +119,10 @@ pmandoc(struct mparse *mp, int fd, const char *fn, int list)
 
 	if (man == NULL)
 		return;
-	if (man->macroset == MACROSET_MDOC)
+	if (man->macroset == MACROSET_MDOC) {
+		mdoc_validate(man);
 		pmdoc(man->first->child, &line, &col, list);
-	else
+	} else
 		pman(man->first->child, &line, &col, list);
 
 	if ( ! list)

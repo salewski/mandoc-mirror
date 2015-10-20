@@ -1166,6 +1166,7 @@ mpages_merge(struct mparse *mp)
 			}
 			goto nextpage;
 		} else if (man != NULL && man->macroset == MACROSET_MDOC) {
+			mdoc_validate(man);
 			mpage->form = FORM_SRC;
 			mpage->sec = man->meta.msec;
 			mpage->sec = mandoc_strdup(

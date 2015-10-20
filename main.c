@@ -696,6 +696,7 @@ parse(struct curparse *curp, int fd, const char *file)
 	if (man == NULL)
 		return;
 	if (man->macroset == MACROSET_MDOC) {
+		mdoc_validate(man);
 		switch (curp->outtype) {
 		case OUTT_HTML:
 			html_mdoc(curp->outdata, man);

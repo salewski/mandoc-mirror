@@ -33,6 +33,7 @@
 #include "mandoc_aux.h"
 #include "mandoc.h"
 #include "roff.h"
+#include "mdoc.h"
 #include "main.h"
 #include "manconf.h"
 #include "mansearch.h"
@@ -856,9 +857,10 @@ format(const struct req *req, const char *file)
 
 	vp = html_alloc(&conf);
 
-	if (man->macroset == MACROSET_MDOC)
+	if (man->macroset == MACROSET_MDOC) {
+		mdoc_validate(man);
 		html_mdoc(vp, man);
-	else
+	} else
 		html_man(vp, man);
 
 	html_free(vp);
