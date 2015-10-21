@@ -41,8 +41,6 @@ void		  roff_node_delete(struct roff_man *, struct roff_node *);
 
 void		  man_breakscope(struct roff_man *, int);
 void		  man_valid_post(struct roff_man *);
-
-void		  mdoc_valid_pre(struct roff_man *, struct roff_node *);
 void		  mdoc_argv_free(struct mdoc_arg *);
 
 __END_DECLS

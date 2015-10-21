@@ -1025,47 +1025,31 @@ roff_node_append(struct roff_man *man, struct roff_node *n)
 		abort();
 	}
 	n->parent->nchild++;
+	man->last = n;
+
+	switch (n->type) {
+	case ROFFT_HEAD:
+		n->parent->head = n;
+		break;
+	case ROFFT_BODY:
+		if (n->end != ENDBODY_NOT)
+			return;
+		n->parent->body = n;
+		break;
+	case ROFFT_TAIL:
+		n->parent->tail = n;
+		break;
+	default:
+		return;
+	}
 
 	/*
 	 * Copy over the normalised-data pointer of our parent.  Not
 	 * everybody has one, but copying a null pointer is fine.
 	 */
 
-	switch (n->type) {
-	case ROFFT_BODY:
-		if (n->end != ENDBODY_NOT)
-			break;
-		/* FALLTHROUGH */
-	case ROFFT_TAIL:
-	case ROFFT_HEAD:
-		n->norm = n->parent->norm;
-		break;
-	default:
-		break;
-	}
-
-	if (man->macroset == MACROSET_MDOC)
-		mdoc_valid_pre(man, n);
-
-	switch (n->type) {
-	case ROFFT_HEAD:
-		assert(n->parent->type == ROFFT_BLOCK);
-		n->parent->head = n;
-		break;
-	case ROFFT_BODY:
-		if (n->end)
-			break;
-		assert(n->parent->type == ROFFT_BLOCK);
-		n->parent->body = n;
-		break;
-	case ROFFT_TAIL:
-		assert(n->parent->type == ROFFT_BLOCK);
-		n->parent->tail = n;
-		break;
-	default:
-		break;
-	}
-	man->last = n;
+	n->norm = n->parent->norm;
+	assert(n->parent->type == ROFFT_BLOCK);
 }
 
 void
