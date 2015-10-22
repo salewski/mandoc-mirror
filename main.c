@@ -466,21 +466,23 @@ main(int argc, char *argv[])
 			mparse_reset(curp.mp);
 	}
 
-	switch (curp.outtype) {
-	case OUTT_HTML:
-		html_free(curp.outdata);
-		break;
-	case OUTT_UTF8:
-	case OUTT_LOCALE:
-	case OUTT_ASCII:
-		ascii_free(curp.outdata);
-		break;
-	case OUTT_PDF:
-	case OUTT_PS:
-		pspdf_free(curp.outdata);
-		break;
-	default:
-		break;
+	if (curp.outdata != NULL) {
+		switch (curp.outtype) {
+		case OUTT_HTML:
+			html_free(curp.outdata);
+			break;
+		case OUTT_UTF8:
+		case OUTT_LOCALE:
+		case OUTT_ASCII:
+			ascii_free(curp.outdata);
+			break;
+		case OUTT_PDF:
+		case OUTT_PS:
+			pspdf_free(curp.outdata);
+			break;
+		default:
+			break;
+		}
 	}
 	mparse_free(curp.mp);
 	mchars_free();
