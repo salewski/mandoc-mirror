@@ -1,5 +1,5 @@
 att.o: att.c config.h roff.h mdoc.h libmdoc.h
-cgi.o: cgi.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h main.h manconf.h mansearch.h cgi.h
+cgi.o: cgi.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h man.h main.h manconf.h mansearch.h cgi.h
 chars.o: chars.c config.h mandoc.h mandoc_aux.h mandoc_ohash.h compat_ohash.h libmandoc.h
 compat_err.o: compat_err.c config.h
 compat_fgetln.o: compat_fgetln.c config.h

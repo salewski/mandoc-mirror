@@ -1176,6 +1176,7 @@ mpages_merge(struct mparse *mp)
 			    mpage->arch == NULL ? "" : mpage->arch);
 			mpage->title = mandoc_strdup(man->meta.title);
 		} else if (man != NULL && man->macroset == MACROSET_MAN) {
+			man_validate(man);
 			mpage->form = FORM_SRC;
 			mpage->sec = mandoc_strdup(man->meta.msec);
 			mpage->arch = mandoc_strdup(mlink->arch);
