@@ -721,6 +721,7 @@ parse(struct curparse *curp, int fd, const char *file)
 		}
 	}
 	if (man->macroset == MACROSET_MAN) {
+		man_validate(man);
 		switch (curp->outtype) {
 		case OUTT_HTML:
 			html_man(curp->outdata, man);

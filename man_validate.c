@@ -48,9 +48,7 @@ static	void	  check_text(CHKARGS);
 static	void	  post_AT(CHKARGS);
 static	void	  post_IP(CHKARGS);
 static	void	  post_vs(CHKARGS);
-static	void	  post_fi(CHKARGS);
 static	void	  post_ft(CHKARGS);
-static	void	  post_nf(CHKARGS);
 static	void	  post_OP(CHKARGS);
 static	void	  post_TH(CHKARGS);
 static	void	  post_UC(CHKARGS);
@@ -79,8 +77,8 @@ static	v_check man_valids[MAN_MAX] = {
 	NULL,       /* IR */
 	NULL,       /* RI */
 	post_vs,    /* sp */
-	post_nf,    /* nf */
-	post_fi,    /* fi */
+	NULL,       /* nf */
+	NULL,       /* fi */
 	NULL,       /* RE */
 	check_part, /* RS */
 	NULL,       /* DT */
@@ -90,8 +88,8 @@ static	v_check man_valids[MAN_MAX] = {
 	NULL,       /* in */
 	post_ft,    /* ft */
 	post_OP,    /* OP */
-	post_nf,    /* EX */
-	post_fi,    /* EE */
+	NULL,       /* EX */
+	NULL,       /* EE */
 	post_UR,    /* UR */
 	NULL,       /* UE */
 	NULL,       /* ll */
@@ -99,16 +97,23 @@ static	v_check man_valids[MAN_MAX] = {
 
 
 void
-man_valid_post(struct roff_man *man)
+man_node_validate(struct roff_man *man)
 {
 	struct roff_node *n;
 	v_check		*cp;
 
 	n = man->last;
-	if (n->flags & MAN_VALID)
-		return;
-	n->flags |= MAN_VALID;
+	man->last = man->last->child;
+	while (man->last != NULL) {
+		man_node_validate(man);
+		if (man->last == n)
+			man->last = man->last->child;
+		else
+			man->last = man->last->next;
+	}
 
+	man->last = n;
+	man->next = ROFF_NEXT_SIBLING;
 	switch (n->type) {
 	case ROFFT_TEXT:
 		check_text(man, n);
@@ -123,6 +128,8 @@ man_valid_post(struct roff_man *man)
 		cp = man_valids + n->tok;
 		if (*cp)
 			(*cp)(man, n);
+		if (man->last == n)
+			man_state(man, n);
 		break;
 	}
 }
@@ -383,28 +390,6 @@ post_TH(CHKARGS)
 	 * meta-data.
 	 */
 	roff_node_delete(man, man->last);
-}
-
-static void
-post_nf(CHKARGS)
-{
-
-	if (man->flags & MAN_LITERAL)
-		mandoc_msg(MANDOCERR_NF_SKIP, man->parse,
-		    n->line, n->pos, "nf");
-
-	man->flags |= MAN_LITERAL;
-}
-
-static void
-post_fi(CHKARGS)
-{
-
-	if ( ! (MAN_LITERAL & man->flags))
-		mandoc_msg(MANDOCERR_FI_SKIP, man->parse,
-		    n->line, n->pos, "fi");
-
-	man->flags &= ~MAN_LITERAL;
 }
 
 static void

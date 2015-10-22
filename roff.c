@@ -1063,7 +1063,7 @@ roff_word_alloc(struct roff_man *man, int line, int pos, const char *word)
 	if (man->macroset == MACROSET_MDOC)
 		n->flags |= MDOC_VALID | MDOC_ENDED;
 	else
-		man_valid_post(man);
+		n->flags |= MAN_VALID;
 	man->next = ROFF_NEXT_SIBLING;
 }
 
@@ -1151,7 +1151,7 @@ roff_addtbl(struct roff_man *man, const struct tbl_span *tbl)
 	if (man->macroset == MACROSET_MDOC)
 		n->flags |= MDOC_VALID | MDOC_ENDED;
 	else
-		man_valid_post(man);
+		n->flags |= MAN_VALID;
 	man->next = ROFF_NEXT_SIBLING;
 }
 

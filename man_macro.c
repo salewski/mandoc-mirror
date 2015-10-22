@@ -130,7 +130,7 @@ man_unscope(struct roff_man *man, const struct roff_node *to)
 
 		man->last = n;
 		n = n->parent;
-		man_valid_post(man);
+		man->last->flags |= MAN_VALID;
 	}
 
 	/*
@@ -379,28 +379,13 @@ in_line_eoln(MACRO_PROT_ARGS)
 	assert(man->last->type != ROFFT_ROOT);
 	man->next = ROFF_NEXT_SIBLING;
 
-	/*
-	 * Rewind our element scope.  Note that when TH is pruned, we'll
-	 * be back at the root, so make sure that we don't clobber as
-	 * its sibling.
-	 */
+	/* Rewind our element scope. */
 
 	for ( ; man->last; man->last = man->last->parent) {
+		man_state(man, man->last);
 		if (man->last == n)
 			break;
-		if (man->last->type == ROFFT_ROOT)
-			break;
-		man_valid_post(man);
 	}
-
-	assert(man->last);
-
-	/*
-	 * Same here regarding whether we're back at the root.
-	 */
-
-	if (man->last->type != ROFFT_ROOT)
-		man_valid_post(man);
 }
 
 void
@@ -408,6 +393,7 @@ man_endparse(struct roff_man *man)
 {
 
 	man_unscope(man, man->first);
+	man->flags &= ~MAN_LITERAL;
 }
 
 static int

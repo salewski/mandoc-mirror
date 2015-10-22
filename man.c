@@ -332,3 +332,38 @@ man_mparse(const struct roff_man *man)
 	assert(man && man->parse);
 	return man->parse;
 }
+
+void
+man_state(struct roff_man *man, struct roff_node *n)
+{
+
+	switch(n->tok) {
+	case MAN_nf:
+	case MAN_EX:
+		if (man->flags & MAN_LITERAL && ! (n->flags & MAN_VALID))
+			mandoc_msg(MANDOCERR_NF_SKIP, man->parse,
+			    n->line, n->pos, "nf");
+		man->flags |= MAN_LITERAL;
+		break;
+	case MAN_fi:
+	case MAN_EE:
+		if ( ! (man->flags & MAN_LITERAL) &&
+		     ! (n->flags & MAN_VALID))
+			mandoc_msg(MANDOCERR_FI_SKIP, man->parse,
+			    n->line, n->pos, "fi");
+		man->flags &= ~MAN_LITERAL;
+		break;
+	default:
+		break;
+	}
+	man->last->flags |= MAN_VALID;
+}
+
+void
+man_validate(struct roff_man *man)
+{
+
+	man->last = man->first;
+	man_node_validate(man);
+	man->flags &= ~MAN_LITERAL;
+}
