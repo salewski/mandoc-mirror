@@ -564,7 +564,7 @@ encode1(struct termp *p, int c)
 	if (p->col + 7 >= p->maxcols)
 		adjbuf(p, p->col + 7);
 
-	f = (c == ASCII_HYPH || isgraph(c)) ?
+	f = (c == ASCII_HYPH || c > 127 || isgraph(c)) ?
 	    p->fontq[p->fonti] : TERMFONT_NONE;
 
 	if (p->flags & TERMP_BACKBEFORE) {
