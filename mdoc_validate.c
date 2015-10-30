@@ -895,6 +895,16 @@ post_display(POST_ARGS)
 		break;
 	case ROFFT_BLOCK:
 		if (n->tok == MDOC_Bd) {
+			if (n->args == NULL) {
+				mandoc_msg(MANDOCERR_BD_NOARG,
+				    mdoc->parse, n->line, n->pos, "Bd");
+				mdoc->next = ROFF_NEXT_SIBLING;
+				while (n->body->child != NULL)
+					mdoc_node_relink(mdoc,
+					    n->body->child);
+				roff_node_delete(mdoc, n);
+				break;
+			}
 			post_bd(mdoc);
 			post_prevpar(mdoc);
 		}

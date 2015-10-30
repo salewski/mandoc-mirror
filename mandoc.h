@@ -172,6 +172,7 @@ enum	mandocerr {
 	/* related to request and macro arguments */
 	MANDOCERR_NAMESC, /* escaped character not allowed in a name: name */
 	MANDOCERR_BD_FILE, /* NOT IMPLEMENTED: Bd -file */
+	MANDOCERR_BD_NOARG, /* skipping display without arguments: Bd */
 	MANDOCERR_BL_NOTYPE, /* missing list type, using -item: Bl */
 	MANDOCERR_NM_NONAME, /* missing manual name, using "": Nm */
 	MANDOCERR_OS_UNAME, /* uname(3) system call failed, using UNKNOWN */

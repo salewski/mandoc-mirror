@@ -1600,6 +1600,13 @@ By requesting the inclusion of a sensitive file, a malicious document
 might otherwise trick a privileged user into inadvertently displaying
 the file on the screen, revealing the file content to bystanders.
 The argument is ignored including the file name following it.
+.It Sy "skipping display without arguments"
+.Pq mdoc
+A
+.Ic \&Bd
+block macro does not have any arguments.
+The block is discarded, and the block content is displayed in
+whatever mode was active before the block.
 .It Sy "missing list type, using -item"
 .Pq mdoc
 A

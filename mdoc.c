@@ -205,6 +205,7 @@ mdoc_node_relink(struct roff_man *mdoc, struct roff_node *p)
 {
 
 	roff_node_unlink(mdoc, p);
+	p->prev = p->next = NULL;
 	roff_node_append(mdoc, p);
 }
 
