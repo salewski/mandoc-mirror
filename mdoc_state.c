@@ -195,6 +195,9 @@ state_bd(STATE_ARGS)
 	    (n->type != ROFFT_BODY || n->end != ENDBODY_NOT))
 		return;
 
+	if (n->parent->args == NULL)
+		return;
+
 	arg = n->parent->args->argv[0].arg;
 	if (arg != MDOC_Literal && arg != MDOC_Unfilled)
 		return;
