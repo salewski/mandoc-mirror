@@ -411,7 +411,7 @@ man.cgi: $(CGI_OBJS) libmandoc.a
 	$(CC) $(LDFLAGS) $(STATIC) -o $@ $(CGI_OBJS) libmandoc.a $(DBLIB)
 
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a -lz
+	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a $(DBLIB)
 
 soelim: $(SOELIM_OBJS) compat_reallocarray.o
 	$(CC) $(LDFLAGS) -o $@ $(SOELIM_OBJS) compat_reallocarray.o
