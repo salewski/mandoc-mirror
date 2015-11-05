@@ -161,6 +161,9 @@ database inside each manpath.
 Configure your web server to execute CGI programs located in
 .Pa /cgi-bin .
 When using
+.Ox
+.Xr httpd 8
+or
 .Xr nginx 8 ,
 the
 .Xr slowcgi 8
@@ -349,15 +352,10 @@ Can be overridden by
 The path to the server document root relative to the server root.
 This is part of the web server configuration and not specific to
 .Nm .
-.It Pa /htdocs/man-cgi.css
-A style sheet for general
-.Nm
-styling, referenced from each generated HTML page.
-.It Pa /htdocs/man.css
+.It Pa /htdocs/mandoc.css
 A style sheet for
 .Xr mandoc 1
-HTML styling, referenced from each generated HTML page after
-.Pa man-cgi.css .
+HTML styling, referenced from each generated HTML page.
 .It Pa /man
 Default
 .Nm

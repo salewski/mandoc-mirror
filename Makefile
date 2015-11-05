@@ -125,7 +125,6 @@ DISTFILES	 = INSTALL \
 		   configure.local.example \
 		   demandoc.1 \
 		   eqn.7 \
-		   example.style.css \
 		   gmdiff \
 		   html.h \
 		   lib.in \
@@ -135,7 +134,6 @@ DISTFILES	 = INSTALL \
 		   libroff.h \
 		   main.h \
 		   makewhatis.8 \
-		   man-cgi.css \
 		   man.1 \
 		   man.7 \
 		   man.cgi.8 \
@@ -144,6 +142,7 @@ DISTFILES	 = INSTALL \
 		   manconf.h \
 		   mandoc.1 \
 		   mandoc.3 \
+		   mandoc.css \
 		   mandoc.db.5 \
 		   mandoc.h \
 		   mandoc_aux.h \
@@ -165,7 +164,6 @@ DISTFILES	 = INSTALL \
 		   roff.h \
 		   soelim.1 \
 		   st.in \
-		   style.css \
 		   tag.h \
 		   tbl.3 \
 		   tbl.7 \
@@ -362,7 +360,6 @@ base-install: base-build
 	$(INSTALL_MAN) eqn.7 $(DESTDIR)$(MANDIR)/man7/${MANM_EQN}.7
 	$(INSTALL_MAN) tbl.7 $(DESTDIR)$(MANDIR)/man7/${MANM_TBL}.7
 	$(INSTALL_MAN) mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
-	$(INSTALL_DATA) example.style.css $(DESTDIR)$(EXAMPLEDIR)
 
 db-install: base-build
 	mkdir -p $(DESTDIR)$(BINDIR)
@@ -389,8 +386,7 @@ cgi-install: cgi-build
 	mkdir -p $(DESTDIR)$(WWWPREFIX)/man/mandoc/man1
 	mkdir -p $(DESTDIR)$(WWWPREFIX)/man/mandoc/man8
 	$(INSTALL_PROGRAM) man.cgi $(DESTDIR)$(CGIBINDIR)
-	$(INSTALL_DATA) example.style.css $(DESTDIR)$(HTDOCDIR)/man.css
-	$(INSTALL_DATA) man-cgi.css $(DESTDIR)$(HTDOCDIR)
+	$(INSTALL_DATA) mandoc.css $(DESTDIR)$(HTDOCDIR)
 	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(WWWPREFIX)/man/mandoc/man1/
 	$(INSTALL_MAN) man.cgi.8 $(DESTDIR)$(WWWPREFIX)/man/mandoc/man8/
 
@@ -420,7 +416,7 @@ soelim: $(SOELIM_OBJS) compat_reallocarray.o
 
 www-install: www
 	mkdir -p $(HTDOCDIR)/snapshots
-	$(INSTALL_DATA) $(WWW_MANS) style.css $(HTDOCDIR)
+	$(INSTALL_DATA) $(WWW_MANS) mandoc.css $(HTDOCDIR)
 	$(INSTALL_DATA) $(WWW_OBJS) $(HTDOCDIR)/snapshots
 	$(INSTALL_DATA) mdocml.tar.gz \
 		$(HTDOCDIR)/snapshots/mdocml-$(VERSION).tar.gz
@@ -454,4 +450,4 @@ mdocml.tar.gz: $(DISTFILES)
 
 .1.1.html .3.3.html .5.5.html .7.7.html .8.8.html: mandoc
 	./mandoc -Thtml -Wall,stop \
-		-Ostyle=style.css,man=%N.%S.html,includes=%I.html $< > $@
+		-Ostyle=mandoc.css,man=%N.%S.html,includes=%I.html $< > $@
