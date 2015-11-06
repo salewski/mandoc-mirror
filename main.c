@@ -149,6 +149,11 @@ main(int argc, char *argv[])
 		return mandocdb(argc, argv);
 #endif
 
+#if HAVE_PLEDGE
+	if (pledge("stdio rpath tmppath proc exec flock", NULL) == -1)
+		err((int)MANDOCLEVEL_SYSERR, "pledge");
+#endif
+
 	/* Search options. */
 
 	memset(&conf, 0, sizeof(conf));
@@ -288,6 +293,11 @@ main(int argc, char *argv[])
 	    !isatty(STDOUT_FILENO))
 		use_pager = 0;
 
+#if HAVE_PLEDGE
+	if (!use_pager && pledge("stdio rpath flock", NULL) == -1)
+		err((int)MANDOCLEVEL_SYSERR, "pledge");
+#endif
+
 	/* Parse arguments. */
 
 	if (argc > 0) {
@@ -413,6 +423,12 @@ main(int argc, char *argv[])
 	}
 
 	/* mandoc(1) */
+
+#if HAVE_PLEDGE
+	if (pledge(use_pager ? "stdio rpath tmppath proc exec" :
+	    "stdio rpath", NULL) == -1)
+		err((int)MANDOCLEVEL_SYSERR, "pledge");
+#endif
 
 	if (search.argmode == ARG_FILE && ! moptions(&options, auxpaths))
 		return (int)MANDOCLEVEL_BADARG;
@@ -1004,6 +1020,10 @@ spawn_pager(struct tag_files *tag_files)
 	case 0:
 		break;
 	default:
+#if HAVE_PLEDGE
+		if (pledge("stdio rpath tmppath", NULL) == -1)
+			err((int)MANDOCLEVEL_SYSERR, "pledge");
+#endif
 		return pager_pid;
 	}
 

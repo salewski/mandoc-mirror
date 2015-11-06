@@ -28,6 +28,7 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-mkdtemp.c \
 		   test-mmap.c \
 		   test-ohash.c \
+		   test-pledge.c \
 		   test-progname.c \
 		   test-reallocarray.c \
 		   test-sqlite3.c \

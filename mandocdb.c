@@ -337,6 +337,13 @@ mandocdb(int argc, char *argv[])
 	size_t		  j, sz;
 	int		  ch, i;
 
+#if HAVE_PLEDGE
+	if (pledge("stdio rpath wpath cpath fattr flock proc exec", NULL) == -1) {
+		perror("pledge");
+		return (int)MANDOCLEVEL_SYSERR;
+	}
+#endif
+
 	memset(&conf, 0, sizeof(conf));
 	memset(stmts, 0, STMT__MAX * sizeof(sqlite3_stmt *));
 
@@ -410,6 +417,13 @@ mandocdb(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
+#if HAVE_PLEDGE
+	if (nodb && pledge("stdio rpath", NULL) == -1) {
+		perror("pledge");
+		return (int)MANDOCLEVEL_SYSERR;
+	}
+#endif
+
 	if (OP_CONFFILE == op && argc > 0) {
 		warnx("-C: Too many arguments");
 		goto usage;
@@ -435,6 +449,14 @@ mandocdb(int argc, char *argv[])
 			 * The existing database is usable.  Process
 			 * all files specified on the command-line.
 			 */
+#if HAVE_PLEDGE
+			if (!nodb && pledge("stdio rpath wpath cpath fattr flock",
+			    NULL) == -1) {
+				perror("pledge");
+				exitcode = (int)MANDOCLEVEL_SYSERR;
+				goto out;
+			}
+#endif
 			use_all = 1;
 			for (i = 0; i < argc; i++)
 				filescan(argv[i]);

@@ -50,6 +50,7 @@ HAVE_GETSUBOPT=
 HAVE_ISBLANK=
 HAVE_MKDTEMP=
 HAVE_MMAP=
+HAVE_PLEDGE=
 HAVE_PROGNAME=
 HAVE_REALLOCARRAY=
 HAVE_STRCASESTR=
@@ -180,6 +181,7 @@ runtest getsubopt	GETSUBOPT	|| true
 runtest isblank		ISBLANK		|| true
 runtest mkdtemp		MKDTEMP		|| true
 runtest mmap		MMAP		|| true
+runtest pledge		PLEDGE		|| true
 runtest progname	PROGNAME	|| true
 runtest reallocarray	REALLOCARRAY	|| true
 runtest strcasestr	STRCASESTR	|| true
@@ -301,6 +303,7 @@ cat << __HEREDOC__
 #define HAVE_ISBLANK ${HAVE_ISBLANK}
 #define HAVE_MKDTEMP ${HAVE_MKDTEMP}
 #define HAVE_MMAP ${HAVE_MMAP}
+#define HAVE_PLEDGE ${HAVE_PLEDGE}
 #define HAVE_PROGNAME ${HAVE_PROGNAME}
 #define HAVE_REALLOCARRAY ${HAVE_REALLOCARRAY}
 #define HAVE_STRCASESTR ${HAVE_STRCASESTR}
