@@ -53,6 +53,8 @@ HAVE_MMAP=
 HAVE_PLEDGE=
 HAVE_PROGNAME=
 HAVE_REALLOCARRAY=
+HAVE_REWB_BSD=
+HAVE_REWB_SYSV=
 HAVE_STRCASESTR=
 HAVE_STRINGLIST=
 HAVE_STRLCAT=
@@ -184,6 +186,8 @@ runtest mmap		MMAP		|| true
 runtest pledge		PLEDGE		|| true
 runtest progname	PROGNAME	|| true
 runtest reallocarray	REALLOCARRAY	|| true
+runtest rewb-bsd	REWB_BSD	|| true
+runtest rewb-sysv	REWB_SYSV	|| true
 runtest strcasestr	STRCASESTR	|| true
 runtest stringlist	STRINGLIST	|| true
 runtest strlcat		STRLCAT		|| true
@@ -306,6 +310,8 @@ cat << __HEREDOC__
 #define HAVE_PLEDGE ${HAVE_PLEDGE}
 #define HAVE_PROGNAME ${HAVE_PROGNAME}
 #define HAVE_REALLOCARRAY ${HAVE_REALLOCARRAY}
+#define HAVE_REWB_BSD ${HAVE_REWB_BSD}
+#define HAVE_REWB_SYSV ${HAVE_REWB_SYSV}
 #define HAVE_STRCASESTR ${HAVE_STRCASESTR}
 #define HAVE_STRINGLIST ${HAVE_STRINGLIST}
 #define HAVE_STRLCAT ${HAVE_STRLCAT}
