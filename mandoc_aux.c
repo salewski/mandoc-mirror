@@ -28,9 +28,6 @@
 #include "mandoc.h"
 #include "mandoc_aux.h"
 
-#if !HAVE_PROGNAME
-const char *mandoc_progname;
-#endif
 
 int
 mandoc_asprintf(char **dest, const char *fmt, ...)

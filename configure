@@ -290,7 +290,6 @@ echo
 echo "#define MAN_CONF_FILE \"/etc/${MANM_MANCONF}\""
 echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
-[ ${HAVE_PROGNAME} -eq 0 ] && echo "#define __progname mandoc_progname"
 [ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""
 
 cat << __HEREDOC__
@@ -358,6 +357,11 @@ fi
 
 [ ${HAVE_MKDTEMP} -eq 0 ] && \
 	echo "extern	char	 *mkdtemp(char *);"
+
+if [ ${HAVE_PROGNAME} -eq 0 ]; then
+	echo "extern 	const char *getprogname(void);"
+	echo "extern	void	  setprogname(const char *);"
+fi
 
 [ ${HAVE_REALLOCARRAY} -eq 0 ] && \
 	echo "extern	void	 *reallocarray(void *, size_t, size_t);"

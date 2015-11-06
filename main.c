@@ -101,8 +101,6 @@ static	int		  toptions(struct curparse *, char *);
 static	void		  usage(enum argmode) __attribute__((noreturn));
 static	int		  woptions(struct curparse *, char *);
 
-extern	char		 *__progname;
-
 static	const int sec_prios[] = {1, 4, 5, 8, 6, 3, 7, 2, 9};
 static	char		  help_arg[] = "help";
 static	char		 *help_argv[] = {help_arg, NULL};
@@ -116,6 +114,7 @@ main(int argc, char *argv[])
 	struct curparse	 curp;
 	struct mansearch search;
 	struct tag_files *tag_files;
+	const char	*progname;
 	char		*auxpaths;
 	char		*defos;
 	unsigned char	*uc;
@@ -132,17 +131,21 @@ main(int argc, char *argv[])
 	int		 use_pager;
 	int		 c;
 
-#if !HAVE_PROGNAME
+#if HAVE_PROGNAME
+	progname = getprogname();
+#else
 	if (argc < 1)
-		__progname = mandoc_strdup("mandoc");
-	else if ((__progname = strrchr(argv[0], '/')) == NULL)
-		__progname = argv[0];
+		progname = mandoc_strdup("mandoc");
+	else if ((progname = strrchr(argv[0], '/')) == NULL)
+		progname = argv[0];
 	else
-		++__progname;
+		++progname;
+	setprogname(progname);
 #endif
 
 #if HAVE_SQLITE3
-	if (strcmp(__progname, BINM_MAKEWHATIS) == 0)
+	if (strncmp(progname, "mandocdb", 8) == 0 ||
+	    strcmp(progname, BINM_MAKEWHATIS) == 0)
 		return mandocdb(argc, argv);
 #endif
 
@@ -155,13 +158,13 @@ main(int argc, char *argv[])
 	memset(&search, 0, sizeof(struct mansearch));
 	search.outkey = "Nd";
 
-	if (strcmp(__progname, BINM_MAN) == 0)
+	if (strcmp(progname, BINM_MAN) == 0)
 		search.argmode = ARG_NAME;
-	else if (strcmp(__progname, BINM_APROPOS) == 0)
+	else if (strcmp(progname, BINM_APROPOS) == 0)
 		search.argmode = ARG_EXPR;
-	else if (strcmp(__progname, BINM_WHATIS) == 0)
+	else if (strcmp(progname, BINM_WHATIS) == 0)
 		search.argmode = ARG_WORD;
-	else if (strncmp(__progname, "help", 4) == 0)
+	else if (strncmp(progname, "help", 4) == 0)
 		search.argmode = ARG_NAME;
 	else
 		search.argmode = ARG_FILE;
@@ -299,7 +302,7 @@ main(int argc, char *argv[])
 	 */
 
 	if (search.argmode == ARG_NAME) {
-		if (*__progname == 'h') {
+		if (*progname == 'h') {
 			if (argc == 0) {
 				argv = help_argv;
 				argc = 1;
@@ -591,7 +594,7 @@ fs_lookup(const struct manpaths *paths, size_t ipath,
 
 found:
 #if HAVE_SQLITE3
-	warnx("outdated mandoc.db lacks %s(%s) entry, run makewhatis %s\n",
+	warnx("outdated mandoc.db lacks %s(%s) entry, run makewhatis %s",
 	    name, sec, paths->paths[ipath]);
 #endif
 	*res = mandoc_reallocarray(*res, ++*ressz, sizeof(struct manpage));
@@ -931,7 +934,7 @@ mmsg(enum mandocerr t, enum mandoclevel lvl,
 {
 	const char	*mparse_msg;
 
-	fprintf(stderr, "%s: %s:", __progname, file);
+	fprintf(stderr, "%s: %s:", getprogname(), file);
 
 	if (line)
 		fprintf(stderr, "%d:%d:", line, col + 1);

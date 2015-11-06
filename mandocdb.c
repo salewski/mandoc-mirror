@@ -183,8 +183,6 @@ static	int	 set_basedir(const char *, int);
 static	int	 treescan(void);
 static	size_t	 utf8(unsigned int, char [7]);
 
-extern	char		*__progname;
-
 static	char		 tempfilename[32];
 static	int		 nodb; /* no database changes */
 static	int		 mparse_options; /* abort the parse early */
@@ -335,7 +333,7 @@ mandocdb(int argc, char *argv[])
 {
 	struct manconf	  conf;
 	struct mparse	 *mp;
-	const char	 *path_arg;
+	const char	 *path_arg, *progname;
 	size_t		  j, sz;
 	int		  ch, i;
 
@@ -526,13 +524,13 @@ out:
 	ohash_delete(&mlinks);
 	return exitcode;
 usage:
+	progname = getprogname();
 	fprintf(stderr, "usage: %s [-aDnpQ] [-C file] [-Tutf8]\n"
 			"       %s [-aDnpQ] [-Tutf8] dir ...\n"
 			"       %s [-DnpQ] [-Tutf8] -d dir [file ...]\n"
 			"       %s [-Dnp] -u dir [file ...]\n"
 			"       %s [-Q] -t file ...\n",
-		       __progname, __progname, __progname,
-		       __progname, __progname);
+		        progname, progname, progname, progname, progname);
 
 	return (int)MANDOCLEVEL_BADARG;
 }

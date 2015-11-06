@@ -43,15 +43,13 @@ int dummy;
 #include <stdlib.h>
 #include <string.h>
 
-extern char *__progname;
-
 static void vwarni(const char *, va_list);
 static void vwarnxi(const char *, va_list);
 
 static void
 vwarnxi(const char *fmt, va_list ap)
 {
-	fprintf(stderr, "%s: ", __progname);
+	fprintf(stderr, "%s: ", getprogname());
 	if (fmt != NULL)
 		vfprintf(stderr, fmt, ap);
 }

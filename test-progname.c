@@ -1,9 +1,10 @@
-#include <string.h>
-
-extern char *__progname;
+#include <stdlib.h>
 
 int
 main(void)
 {
-	return !!strcmp(__progname, "test-progname");
+	const char * progname;
+
+	progname = getprogname();
+	return progname == NULL;
 }
