@@ -105,7 +105,6 @@ struct	termp {
 	struct termp_ps	 *ps;
 };
 
-__BEGIN_DECLS
 
 struct	tbl_span;
 struct	eqn;
@@ -134,5 +133,3 @@ void		  term_fontpop(struct termp *);
 void		  term_fontpopq(struct termp *, int);
 void		  term_fontrepl(struct termp *, enum termfont);
 void		  term_fontlast(struct termp *);
-
-__END_DECLS

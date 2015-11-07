@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-__BEGIN_DECLS
-
 struct roff_node *roff_node_alloc(struct roff_man *, int, int,
 			enum roff_type, int);
 void		  roff_node_append(struct roff_man *, struct roff_node *);
@@ -41,5 +39,3 @@ void		  roff_node_delete(struct roff_man *, struct roff_node *);
 
 void		  man_breakscope(struct roff_man *, int);
 void		  mdoc_argv_free(struct mdoc_arg *);
-
-__END_DECLS

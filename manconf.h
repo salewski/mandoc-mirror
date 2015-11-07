@@ -42,10 +42,7 @@ struct	manconf {
 	struct manpaths		  manpath;
 };
 
-__BEGIN_DECLS
 
 void	 manconf_parse(struct manconf *, const char *, char *, char *);
 void	 manconf_output(struct manoutput *, const char *);
 void	 manconf_free(struct manconf *);
-
-__END_DECLS

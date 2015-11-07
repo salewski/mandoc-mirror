@@ -408,7 +408,6 @@ enum	mandoc_esc {
 typedef	void	(*mandocmsg)(enum mandocerr, enum mandoclevel,
 			const char *, int, int, const char *);
 
-__BEGIN_DECLS
 
 struct	mparse;
 struct	roff_man;
@@ -434,5 +433,3 @@ void		  mparse_result(struct mparse *,
 const char	 *mparse_getkeep(const struct mparse *);
 const char	 *mparse_strerror(enum mandocerr);
 const char	 *mparse_strlevel(enum mandoclevel);
-
-__END_DECLS

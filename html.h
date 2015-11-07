@@ -142,7 +142,6 @@ struct	html {
 #define	HTML_FRAGMENT	 (1 << 0) /* don't emit HTML/HEAD/BODY */
 };
 
-__BEGIN_DECLS
 
 struct	tbl_span;
 struct	eqn;
@@ -175,5 +174,3 @@ void		  buffmt_man(struct html *,
 void		  buffmt_includes(struct html *, const char *);
 
 int		  html_strlen(const char *);
-
-__END_DECLS

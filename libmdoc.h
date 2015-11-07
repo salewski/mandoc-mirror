@@ -62,7 +62,6 @@ enum	mdelim {
 
 extern	const struct mdoc_macro *const mdoc_macros;
 
-__BEGIN_DECLS
 
 void		  mdoc_macro(MACRO_PROT_ARGS);
 void		  mdoc_elem_alloc(struct roff_man *, int, int,
@@ -87,5 +86,3 @@ void		  mdoc_argv(struct roff_man *, int, int,
 enum margserr	  mdoc_args(struct roff_man *, int,
 			int *, char *, int, char **);
 enum mdelim	  mdoc_isdelim(const char *);
-
-__END_DECLS

@@ -276,6 +276,10 @@ fi
 exec > config.h
 
 cat << __HEREDOC__
+#ifdef __cplusplus
+#error "Do not use C++.  See the INSTALL file."
+#endif
+
 #ifndef MANDOC_CONFIG_H
 #define MANDOC_CONFIG_H
 
@@ -330,21 +334,6 @@ cat << __HEREDOC__
 #define BINM_MAN "${BINM_MAN}"
 #define BINM_SOELIM "${BINM_SOELIM}"
 #define BINM_WHATIS "${BINM_WHATIS}"
-
-#if !defined(__BEGIN_DECLS)
-#  ifdef __cplusplus
-#  define	__BEGIN_DECLS		extern "C" {
-#  else
-#  define	__BEGIN_DECLS
-#  endif
-#endif
-#if !defined(__END_DECLS)
-#  ifdef __cplusplus
-#  define	__END_DECLS		}
-#  else
-#  define	__END_DECLS
-#  endif
-#endif
 
 __HEREDOC__
 

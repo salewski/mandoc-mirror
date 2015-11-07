@@ -59,11 +59,8 @@
 /* Names of macros. */
 extern	const char *const *man_macronames;
 
-__BEGIN_DECLS
 
 struct	roff_man;
 
 const struct mparse	*man_mparse(const struct roff_man *);
 void			 man_validate(struct roff_man *);
-
-__END_DECLS

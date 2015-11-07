@@ -18,8 +18,6 @@
 
 #define	UNCONST(a)	((void *)(uintptr_t)(const void *)(a))
 
-__BEGIN_DECLS
-
 struct	roff_man;
 struct	manoutput;
 
@@ -53,5 +51,3 @@ void		  pspdf_free(void *);
 
 void		  terminal_mdoc(void *, const struct roff_man *);
 void		  terminal_man(void *, const struct roff_man *);
-
-__END_DECLS

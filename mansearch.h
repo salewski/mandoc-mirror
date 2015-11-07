@@ -95,7 +95,6 @@ struct	mansearch {
 	int		 firstmatch; /* first matching database only */
 };
 
-__BEGIN_DECLS
 
 struct	manpaths;
 
@@ -107,5 +106,3 @@ int	mansearch(const struct mansearch *cfg, /* options */
 		struct manpage **res, /* results */
 		size_t *ressz); /* results returned */
 void	mansearch_free(struct manpage *, size_t);
-
-__END_DECLS

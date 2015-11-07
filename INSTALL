@@ -110,6 +110,11 @@ If you run into that problem, set "HAVE_FTS=0" in configure.local.
 If your system does not have it, the bundled compatibility version
 will be used, so you probably need not worry about it.
 
+One of the chief design goals of the mandoc toolbox is to make
+sure that nothing related to documentation requires C++.
+Consequently, linking mandoc against any kind of C++ program
+would defeat the purpose and is not supported.
+
 
 Checking autoconfiguration quality
 ----------------------------------

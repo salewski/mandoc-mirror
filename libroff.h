@@ -60,7 +60,6 @@ struct	eqn_def {
 	size_t		  valsz;
 };
 
-__BEGIN_DECLS
 
 struct tbl_node	*tbl_alloc(int, int, struct mparse *);
 void		 tbl_restart(int, int, struct tbl_node *);
@@ -78,5 +77,3 @@ enum rofferr	 eqn_end(struct eqn_node **);
 void		 eqn_free(struct eqn_node *);
 enum rofferr	 eqn_read(struct eqn_node **, int,
 			const char *, int, int *);
-
-__END_DECLS

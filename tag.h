@@ -22,11 +22,8 @@ struct	tag_files {
 	int	 tfd;
 };
 
-__BEGIN_DECLS
 
 struct tag_files *tag_init(void);
 void	 tag_put(const char *, int, size_t);
 void	 tag_write(void);
 void	 tag_unlink(void);
-
-__END_DECLS

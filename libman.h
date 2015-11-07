@@ -34,11 +34,8 @@ struct	man_macro {
 
 extern	const struct man_macro *const man_macros;
 
-__BEGIN_DECLS
 
 int		  man_hash_find(const char *);
 void		  man_node_validate(struct roff_man *);
 void		  man_state(struct roff_man *, struct roff_node *);
 void		  man_unscope(struct roff_man *, const struct roff_node *);
-
-__END_DECLS

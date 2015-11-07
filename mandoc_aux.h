@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-__BEGIN_DECLS
-
 int		  mandoc_asprintf(char **, const char *, ...);
 void		 *mandoc_calloc(size_t, size_t);
 void		 *mandoc_malloc(size_t);
@@ -25,5 +23,3 @@ void		 *mandoc_realloc(void *, size_t);
 void		 *mandoc_reallocarray(void *, size_t, size_t);
 char		 *mandoc_strdup(const char *);
 char		 *mandoc_strndup(const char *, size_t);
-
-__END_DECLS

@@ -20,8 +20,4 @@
 #include "compat_ohash.h"
 #endif
 
-__BEGIN_DECLS
-
 void		  mandoc_ohash_init(struct ohash *, unsigned int, ptrdiff_t);
-
-__END_DECLS

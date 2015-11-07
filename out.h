@@ -60,12 +60,9 @@ struct	rofftbl {
 	     (p)->scale = (v); } \
 	while (/* CONSTCOND */ 0)
 
-__BEGIN_DECLS
 
 struct	tbl_span;
 
 int		  a2roffsu(const char *, struct roffsu *, enum roffscale);
 void		  tblcalc(struct rofftbl *tbl,
 			const struct tbl_span *, size_t);
-
-__END_DECLS
