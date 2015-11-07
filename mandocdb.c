@@ -23,7 +23,9 @@
 
 #include <assert.h>
 #include <ctype.h>
+#if HAVE_ERR
 #include <err.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #if HAVE_FTS

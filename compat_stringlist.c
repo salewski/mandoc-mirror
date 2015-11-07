@@ -33,7 +33,9 @@ int dummy;
  * SUCH DAMAGE.
  */
 
+#if HAVE_ERR
 #include <err.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include "compat_stringlist.h"

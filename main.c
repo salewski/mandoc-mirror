@@ -24,7 +24,9 @@
 
 #include <assert.h>
 #include <ctype.h>
+#if HAVE_ERR
 #include <err.h>
+#endif
 #include <fcntl.h>
 #include <glob.h>
 #include <signal.h>

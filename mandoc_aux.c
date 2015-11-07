@@ -19,7 +19,9 @@
 
 #include <sys/types.h>
 
+#if HAVE_ERR
 #include <err.h>
+#endif
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>

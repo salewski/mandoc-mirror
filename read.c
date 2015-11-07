@@ -26,7 +26,9 @@
 
 #include <assert.h>
 #include <ctype.h>
+#if HAVE_ERR
 #include <err.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>

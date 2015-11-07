@@ -29,7 +29,9 @@
 #include <sys/types.h>
 
 #include <ctype.h>
+#if HAVE_ERR
 #include <err.h>
+#endif
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>

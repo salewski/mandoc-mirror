@@ -20,7 +20,9 @@
 #include <sys/types.h>
 
 #include <assert.h>
+#if HAVE_ERR
 #include <err.h>
+#endif
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>

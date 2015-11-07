@@ -36,7 +36,6 @@ int dummy;
  * SUCH DAMAGE.
  */
 
-#include <err.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
