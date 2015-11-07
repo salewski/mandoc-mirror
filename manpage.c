@@ -37,10 +37,11 @@ int
 main(int argc, char *argv[])
 {
 	int		 ch, term;
-	size_t		 i, sz, len;
+	size_t		 i, sz, linesz;
+	ssize_t		 len;
 	struct mansearch search;
 	struct manpage	*res;
-	char		*conf_file, *defpaths, *auxpaths, *cp;
+	char		*conf_file, *defpaths, *auxpaths, *line;
 	char		 buf[PATH_MAX];
 	const char	*cmd;
 	struct manconf	 conf;
@@ -124,12 +125,16 @@ main(int argc, char *argv[])
 	printf("Enter a choice [1]: ");
 	fflush(stdout);
 
-	if (NULL != (cp = fgetln(stdin, &len)))
-		if ('\n' == cp[--len] && len > 0) {
-			cp[len] = '\0';
-			if ((i = atoi(cp)) < 1 || i > sz)
+	line = NULL;
+	linesz = 0;
+	if ((len = getline(&line, &linesz, stdin)) != -1) {
+		if ('\n' == line[--len] && len > 0) {
+			line[len] = '\0';
+			if ((i = atoi(line)) < 1 || i > sz)
 				i = 0;
 		}
+	}
+	free(line);
 
 	if (0 == i) {
 		for (i = 0; i < sz; i++)

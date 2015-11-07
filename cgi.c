@@ -704,12 +704,13 @@ static void
 catman(const struct req *req, const char *file)
 {
 	FILE		*f;
-	size_t		 len;
-	int		 i;
 	char		*p;
+	size_t		 sz;
+	ssize_t		 len;
+	int		 i;
 	int		 italic, bold;
 
-	if (NULL == (f = fopen(file, "r"))) {
+	if ((f = fopen(file, "r")) == NULL) {
 		puts("<P>You specified an invalid manual file.</P>");
 		return;
 	}
@@ -717,9 +718,12 @@ catman(const struct req *req, const char *file)
 	puts("<DIV CLASS=\"catman\">\n"
 	     "<PRE>");
 
-	while (NULL != (p = fgetln(f, &len))) {
+	p = NULL;
+	sz = 0;
+
+	while ((len = getline(&p, &sz, f)) != -1) {
 		bold = italic = 0;
-		for (i = 0; i < (int)len - 1; i++) {
+		for (i = 0; i < len - 1; i++) {
 			/*
 			 * This means that the catpage is out of state.
 			 * Ignore it and keep going (although the
@@ -744,7 +748,7 @@ catman(const struct req *req, const char *file)
 				italic = bold = 0;
 				html_putchar(p[i]);
 				continue;
-			} else if (i + 2 >= (int)len)
+			} else if (i + 2 >= len)
 				continue;
 
 			/* Italic mode. */
@@ -820,11 +824,12 @@ catman(const struct req *req, const char *file)
 		if (bold)
 			printf("</B>");
 
-		if (i == (int)len - 1 && '\n' != p[i])
+		if (i == len - 1 && p[i] != '\n')
 			html_putchar(p[i]);
 
 		putchar('\n');
 	}
+	free(p);
 
 	puts("</PRE>\n"
 	     "</DIV>");
@@ -1134,6 +1139,7 @@ pathgen(struct req *req)
 	FILE	*fp;
 	char	*dp;
 	size_t	 dpsz;
+	ssize_t	 len;
 
 	if (NULL == (fp = fopen("manpath.conf", "r"))) {
 		fprintf(stderr, "%s/manpath.conf: %s\n",
@@ -1142,12 +1148,14 @@ pathgen(struct req *req)
 		exit(EXIT_FAILURE);
 	}
 
-	while (NULL != (dp = fgetln(fp, &dpsz))) {
-		if ('\n' == dp[dpsz - 1])
-			dpsz--;
+	dp = NULL;
+	dpsz = 0;
+
+	while ((len = getline(&dp, &dpsz, fp)) != -1) {
+		if (dp[len - 1] == '\n')
+			dp[--len] = '\0';
 		req->p = mandoc_realloc(req->p,
 		    (req->psz + 1) * sizeof(char *));
-		dp = mandoc_strndup(dp, dpsz);
 		if ( ! validate_urifrag(dp)) {
 			fprintf(stderr, "%s/manpath.conf contains "
 			    "unsafe path \"%s\"\n", MAN_DIR, dp);
@@ -1161,7 +1169,10 @@ pathgen(struct req *req)
 			exit(EXIT_FAILURE);
 		}
 		req->p[req->psz++] = dp;
+		dp = NULL;
+		dpsz = 0;
 	}
+	free(dp);
 
 	if ( req->p == NULL ) {
 		fprintf(stderr, "%s/manpath.conf is empty\n", MAN_DIR);

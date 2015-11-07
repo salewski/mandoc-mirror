@@ -1291,7 +1291,9 @@ parse_cat(struct mpage *mpage, int fd)
 {
 	FILE		*stream;
 	char		*line, *p, *title;
-	size_t		 len, plen, titlesz;
+	size_t		 linesz, plen, titlesz;
+	ssize_t		 len;
+	int		 offs;
 
 	stream = (-1 == fd) ?
 	    fopen(mpage->mlinks->file, "r") :
@@ -1304,10 +1306,13 @@ parse_cat(struct mpage *mpage, int fd)
 		return;
 	}
 
+	line = NULL;
+	linesz = 0;
+
 	/* Skip to first blank line. */
 
-	while (NULL != (line = fgetln(stream, &len)))
-		if ('\n' == *line)
+	while (getline(&line, &linesz, stream) != -1)
+		if (*line == '\n')
 			break;
 
 	/*
@@ -1315,8 +1320,8 @@ parse_cat(struct mpage *mpage, int fd)
 	 * is the first section header.  Skip to it.
 	 */
 
-	while (NULL != (line = fgetln(stream, &len)))
-		if ('\n' != *line && ' ' != *line)
+	while (getline(&line, &linesz, stream) != -1)
+		if (*line != '\n' && *line != ' ')
 			break;
 
 	/*
@@ -1329,20 +1334,20 @@ parse_cat(struct mpage *mpage, int fd)
 	titlesz = 0;
 	title = NULL;
 
-	while (NULL != (line = fgetln(stream, &len))) {
-		if (' ' != *line || '\n' != line[len - 1])
+	while ((len = getline(&line, &linesz, stream)) != -1) {
+		if (*line != ' ')
 			break;
-		while (len > 0 && isspace((unsigned char)*line)) {
-			line++;
-			len--;
-		}
-		if (1 == len)
+		offs = 0;
+		while (isspace((unsigned char)line[offs]))
+			offs++;
+		if (line[offs] == '\0')
 			continue;
-		title = mandoc_realloc(title, titlesz + len);
-		memcpy(title + titlesz, line, len);
-		titlesz += len;
+		title = mandoc_realloc(title, titlesz + len - offs);
+		memcpy(title + titlesz, line + offs, len - offs);
+		titlesz += len - offs;
 		title[titlesz - 1] = ' ';
 	}
+	free(line);
 
 	/*
 	 * If no page content can be found, or the input line
@@ -1360,8 +1365,7 @@ parse_cat(struct mpage *mpage, int fd)
 		return;
 	}
 
-	title = mandoc_realloc(title, titlesz + 1);
-	title[titlesz] = '\0';
+	title[titlesz - 1] = '\0';
 
 	/*
 	 * Skip to the first dash.

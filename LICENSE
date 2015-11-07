@@ -48,8 +48,5 @@ compat_getsubopt.c, compat_strcasestr.c, compat_strsep.c,
 man.1:
 Copyright (c) 1989,1990,1993,1994 The Regents of the University of California
 
-compat_fgetln.c:
-Copyright (c) 1998 The NetBSD Foundation, Inc.
-
 compat_stringlist.c, compat_stringlist.h:
 Copyright (c) 1994 Christos Zoulas <christos@netbsd.org>

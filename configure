@@ -44,7 +44,6 @@ BUILD_CGI=0
 
 HAVE_DIRENT_NAMLEN=
 HAVE_ERR=
-HAVE_FGETLN=
 HAVE_FTS=
 HAVE_GETSUBOPT=
 HAVE_ISBLANK=
@@ -176,7 +175,6 @@ runtest() {
 # --- library functions ---
 runtest dirent-namlen	DIRENT_NAMLEN	|| true
 runtest err		ERR		|| true
-runtest fgetln		FGETLN		|| true
 runtest fts		FTS		|| true
 runtest getsubopt	GETSUBOPT	|| true
 runtest isblank		ISBLANK		|| true
@@ -289,11 +287,10 @@ cat << __HEREDOC__
 
 __HEREDOC__
 
-[ ${HAVE_FGETLN} -eq 0 -o ${HAVE_REALLOCARRAY} -eq 0 -o \
+[ ${HAVE_REALLOCARRAY} -eq 0 -o \
   ${HAVE_STRLCAT} -eq 0 -o ${HAVE_STRLCPY} -eq 0 ] \
 	&& echo "#include <sys/types.h>"
 [ ${HAVE_VASPRINTF} -eq 0 ] && echo "#include <stdarg.h>"
-[ ${HAVE_FGETLN} -eq 0 ] && echo "#include <stdio.h>"
 
 echo
 echo "#define MAN_CONF_FILE \"/etc/${MANM_MANCONF}\""
@@ -304,7 +301,6 @@ echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 cat << __HEREDOC__
 #define HAVE_DIRENT_NAMLEN ${HAVE_DIRENT_NAMLEN}
 #define HAVE_ERR ${HAVE_ERR}
-#define HAVE_FGETLN ${HAVE_FGETLN}
 #define HAVE_FTS ${HAVE_FTS}
 #define HAVE_GETSUBOPT ${HAVE_GETSUBOPT}
 #define HAVE_ISBLANK ${HAVE_ISBLANK}
@@ -342,9 +338,6 @@ if [ ${HAVE_ERR} -eq 0 ]; then
 	echo "extern	void	  warn(const char *, ...);"
 	echo "extern	void	  warnx(const char *, ...);"
 fi
-
-[ ${HAVE_FGETLN} -eq 0 ] && \
-	echo "extern	char	 *fgetln(FILE *, size_t *);"
 
 [ ${HAVE_GETSUBOPT} -eq 0 ] && \
 	echo "extern	int	  getsubopt(char **, char * const *, char **);"
