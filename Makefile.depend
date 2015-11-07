@@ -3,6 +3,7 @@ cgi.o: cgi.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h man.h main.h manconf.h
 chars.o: chars.c config.h mandoc.h mandoc_aux.h mandoc_ohash.h compat_ohash.h libmandoc.h
 compat_err.o: compat_err.c config.h
 compat_fts.o: compat_fts.c config.h compat_fts.h
+compat_getline.o: compat_getline.c config.h
 compat_getsubopt.o: compat_getsubopt.c config.h
 compat_isblank.o: compat_isblank.c config.h
 compat_mkdtemp.o: compat_mkdtemp.c config.h
