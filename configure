@@ -16,8 +16,8 @@
 
 set -e
 
-[ -e config.log ] && mv config.log config.log.old
-[ -e config.h   ] && mv config.h config.h.old
+[ -w config.log ] && mv config.log config.log.old
+[ -w config.h   ] && mv config.h config.h.old
 
 # Output file descriptor usage:
 # 1 (stdout): config.h, Makefile.local
@@ -102,7 +102,7 @@ INSTALL_DATA=
 
 # --- manual settings from configure.local -----------------------------
 
-if [ -e ./configure.local ]; then
+if [ -r ./configure.local ]; then
 	echo "configure.local: reading..." 1>&2
 	echo "configure.local: reading..." 1>&3
 	cat ./configure.local 1>&3
