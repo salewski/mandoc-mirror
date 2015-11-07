@@ -264,7 +264,11 @@ MANPAGE_OBJS	 = manpage.o mansearch.o mansearch_const.o manpath.o
 
 DEMANDOC_OBJS	 = demandoc.o
 
-SOELIM_OBJS	 = soelim.o compat_stringlist.o
+SOELIM_OBJS	 = soelim.o \
+		   compat_err.o \
+		   compat_getline.o \
+		   compat_progname.o \
+		   compat_stringlist.o
 
 WWW_MANS	 = apropos.1.html \
 		   demandoc.1.html \
