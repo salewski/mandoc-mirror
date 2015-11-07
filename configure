@@ -76,7 +76,6 @@ SBINDIR=
 INCLUDEDIR=
 LIBDIR=
 MANDIR=
-EXAMPLEDIR=
 HOMEBREWDIR=
 
 WWWPREFIX="/var/www"
@@ -411,7 +410,6 @@ exec > Makefile.local
 [ -z "${INCLUDEDIR}" ] && INCLUDEDIR="${PREFIX}/include/mandoc"
 [ -z "${LIBDIR}"     ] && LIBDIR="${PREFIX}/lib/mandoc"
 [ -z "${MANDIR}"     ] && MANDIR="${PREFIX}/man"
-[ -z "${EXAMPLEDIR}" ] && EXAMPLEDIR="${PREFIX}/share/examples/mandoc"
 
 [ -z "${HTDOCDIR}"   ] && HTDOCDIR="${WWWPREFIX}/htdocs"
 [ -z "${CGIBINDIR}"  ] && CGIBINDIR="${WWWPREFIX}/cgi-bin"
@@ -446,7 +444,6 @@ SBINDIR		= ${SBINDIR}
 INCLUDEDIR	= ${INCLUDEDIR}
 LIBDIR		= ${LIBDIR}
 MANDIR		= ${MANDIR}
-EXAMPLEDIR	= ${EXAMPLEDIR}
 WWWPREFIX	= ${WWWPREFIX}
 HTDOCDIR	= ${HTDOCDIR}
 CGIBINDIR	= ${CGIBINDIR}

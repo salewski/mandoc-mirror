@@ -79,7 +79,6 @@ SBINDIR="${PREFIX}/sbin"
 INCLUDEDIR="${PREFIX}/include/mandoc"
 LIBDIR="${PREFIX}/lib/mandoc"
 MANDIR="${PREFIX}/man"
-EXAMPLEDIR="${PREFIX}/share/examples/mandoc"
 
 # The man(1) utility needs to know where the manuals reside.
 # We know of two ways to tell it: via manpath(1) or man.conf(5).
