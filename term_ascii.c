@@ -88,8 +88,16 @@ ascii_init(enum termenc enc, const struct manoutput *outopts)
 
 #if HAVE_WCHAR
 	if (TERMENC_ASCII != enc) {
+
+		/*
+		 * Do not change any of this to LC_ALL.  It might break
+		 * the formatting by subtly changing the behaviour of
+		 * various functions, for example strftime(3).  As a
+		 * worst case, it might even cause buffer overflows.
+		 */
+
 		v = TERMENC_LOCALE == enc ?
-		    setlocale(LC_ALL, "") :
+		    setlocale(LC_CTYPE, "") :
 		    setlocale(LC_CTYPE, "en_US.UTF-8");
 		if (NULL != v && MB_CUR_MAX > 1) {
 			p->enc = enc;
