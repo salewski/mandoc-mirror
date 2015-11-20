@@ -50,10 +50,12 @@ static struct tag_files	 tag_files;
 struct tag_files *
 tag_init(void)
 {
+	struct sigaction	 sa;
 	int			 ofd;
 
 	ofd = -1;
 	tag_files.tfd = -1;
+	tag_files.tcpgid = -1;
 
 	/* Save the original standard output for use by the pager. */
 
@@ -66,9 +68,12 @@ tag_init(void)
 	    sizeof(tag_files.ofn));
 	(void)strlcpy(tag_files.tfn, "/tmp/man.XXXXXXXXXX",
 	    sizeof(tag_files.tfn));
-	signal(SIGHUP, tag_signal);
-	signal(SIGINT, tag_signal);
-	signal(SIGTERM, tag_signal);
+	memset(&sa, 0, sizeof(sa));
+	sigfillset(&sa.sa_mask);
+	sa.sa_handler = tag_signal;
+	sigaction(SIGHUP, &sa, NULL);
+	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGTERM, &sa, NULL);
 	if ((ofd = mkstemp(tag_files.ofn)) == -1)
 		goto fail;
 	if ((tag_files.tfd = mkstemp(tag_files.tfn)) == -1)
@@ -156,7 +161,15 @@ tag_write(void)
 void
 tag_unlink(void)
 {
+	pid_t	 tc_pgid;
 
+	if (tag_files.tcpgid != -1) {
+		tc_pgid = tcgetpgrp(STDIN_FILENO);
+		if (tc_pgid == tag_files.pager_pid ||
+		    tc_pgid == getpgid(0) ||
+		    getpgid(tc_pgid) == -1)
+			(void)tcsetpgrp(STDIN_FILENO, tag_files.tcpgid);
+	}
 	if (*tag_files.ofn != '\0')
 		unlink(tag_files.ofn);
 	if (*tag_files.tfn != '\0')
@@ -166,9 +179,13 @@ tag_unlink(void)
 static void
 tag_signal(int signum)
 {
+	struct sigaction	 sa;
 
 	tag_unlink();
-	signal(signum, SIG_DFL);
+	memset(&sa, 0, sizeof(sa));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_handler = SIG_DFL;
+	sigaction(signum, &sa, NULL);
 	kill(getpid(), signum);
 	/* NOTREACHED */
 	_exit(1);

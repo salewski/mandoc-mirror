@@ -20,6 +20,8 @@ struct	tag_files {
 	char	 tfn[20];
 	int	 ofd;
 	int	 tfd;
+	pid_t	 tcpgid;
+	pid_t	 pager_pid;
 };
 
 

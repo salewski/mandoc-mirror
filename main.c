@@ -132,9 +132,9 @@ main(int argc, char *argv[])
 	int		 show_usage;
 	int		 options;
 	int		 use_pager;
-	int		 status;
+	int		 status, signum;
 	int		 c;
-	pid_t		 pager_pid;
+	pid_t		 pager_pid, tc_pgid, man_pgid, pid;
 
 #if HAVE_PROGNAME
 	progname = getprogname();
@@ -530,11 +530,43 @@ out:
 	if (tag_files != NULL) {
 		fclose(stdout);
 		tag_write();
-		pager_pid = spawn_pager(tag_files);
+		man_pgid = getpgid(0);
+		tag_files->tcpgid = man_pgid == getpid() ?
+		    getpgid(getppid()) : man_pgid;
+		pager_pid = 0;
+		signum = SIGSTOP;
 		for (;;) {
-			if (waitpid(pager_pid, &status, WUNTRACED) == -1) {
-				if (errno == EINTR)
-					continue;
+
+			/* Stop here until moved to the foreground. */
+
+			tc_pgid = tcgetpgrp(STDIN_FILENO);
+			if (tc_pgid != man_pgid) {
+				if (tc_pgid == pager_pid) {
+					(void)tcsetpgrp(STDIN_FILENO,
+					    man_pgid);
+					if (signum == SIGTTIN)
+						continue;
+				} else
+					tag_files->tcpgid = tc_pgid;
+				kill(0, signum);
+				continue;
+			}
+
+			/* Once in the foreground, activate the pager. */
+
+			if (pager_pid) {
+				(void)tcsetpgrp(STDIN_FILENO, pager_pid);
+				kill(pager_pid, SIGCONT);
+			} else
+				pager_pid = spawn_pager(tag_files);
+
+			/* Wait for the pager to stop or exit. */
+
+			while ((pid = waitpid(pager_pid, &status,
+			    WUNTRACED)) == -1 && errno == EINTR)
+				continue;
+
+			if (pid == -1) {
 				warn("wait");
 				rc = MANDOCLEVEL_SYSERR;
 				break;
@@ -542,16 +574,7 @@ out:
 			if (!WIFSTOPPED(status))
 				break;
 
-			(void)tcsetpgrp(STDIN_FILENO, getpgid(0));
-			kill(0, WSTOPSIG(status));
-	
-			/*
-			 * I'm now stopped.
-			 * When getting SIGCONT, continue here:
-			 */
-
-			(void)tcsetpgrp(STDIN_FILENO, pager_pid);
-			kill(pager_pid, SIGCONT);
+			signum = WSTOPSIG(status);
 		}
 		tag_unlink();
 	}
@@ -1046,12 +1069,12 @@ spawn_pager(struct tag_files *tag_files)
 		break;
 	default:
 		(void)setpgid(pager_pid, 0);
-		if (tcsetpgrp(STDIN_FILENO, pager_pid) == -1)
-			err((int)MANDOCLEVEL_SYSERR, "tcsetpgrp");
+		(void)tcsetpgrp(STDIN_FILENO, pager_pid);
 #if HAVE_PLEDGE
 		if (pledge("stdio rpath tmppath tty proc", NULL) == -1)
 			err((int)MANDOCLEVEL_SYSERR, "pledge");
 #endif
+		tag_files->pager_pid = pager_pid;
 		return pager_pid;
 	}
 
