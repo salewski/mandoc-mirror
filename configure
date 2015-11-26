@@ -339,6 +339,7 @@ __HEREDOC__
 
 if [ ${HAVE_ERR} -eq 0 ]; then
 	echo "extern	void	  err(int, const char *, ...);"
+	echo "extern	void	  errx(int, const char *, ...);"
 	echo "extern	void	  warn(const char *, ...);"
 	echo "extern	void	  warnx(const char *, ...);"
 fi

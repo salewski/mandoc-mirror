@@ -77,6 +77,18 @@ err(int eval, const char *fmt, ...)
 }
 
 void
+errx(int eval, const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	vwarnxi(fmt, ap);
+	va_end(ap);
+	fputc('\n', stderr);
+	exit(eval);
+}
+
+void
 warn(const char *fmt, ...)
 {
 	va_list ap;
