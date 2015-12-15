@@ -299,8 +299,9 @@ main(int argc, char *argv[])
 		use_pager = 0;
 
 #if HAVE_PLEDGE
-	if (!use_pager && pledge("stdio rpath flock", NULL) == -1)
-		err((int)MANDOCLEVEL_SYSERR, "pledge");
+	if (!use_pager)
+		if (pledge("stdio rpath flock", NULL) == -1)
+			err((int)MANDOCLEVEL_SYSERR, "pledge");
 #endif
 
 	/* Parse arguments. */
@@ -430,9 +431,13 @@ main(int argc, char *argv[])
 	/* mandoc(1) */
 
 #if HAVE_PLEDGE
-	if (pledge(use_pager ? "stdio rpath tmppath tty proc exec" :
-	    "stdio rpath", NULL) == -1)
-		err((int)MANDOCLEVEL_SYSERR, "pledge");
+	if (use_pager) {
+		if (pledge("stdio rpath tmppath tty proc exec", NULL) == -1)
+			err((int)MANDOCLEVEL_SYSERR, "pledge");
+	} else {
+		if (pledge("stdio rpath", NULL) == -1)
+			err((int)MANDOCLEVEL_SYSERR, "pledge");
+	}
 #endif
 
 	if (search.argmode == ARG_FILE && ! moptions(&options, auxpaths))
