@@ -644,10 +644,8 @@ pspdf_free(void *arg)
 
 	p = (struct termp *)arg;
 
-	if (p->ps->psmarg)
-		free(p->ps->psmarg);
-	if (p->ps->pdfobjs)
-		free(p->ps->pdfobjs);
+	free(p->ps->psmarg);
+	free(p->ps->pdfobjs);
 
 	free(p->ps);
 	term_free(p);
