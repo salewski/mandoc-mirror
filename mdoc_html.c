@@ -542,7 +542,6 @@ mdoc_sh_pre(MDOC_ARGS)
 	}
 
 	bufinit(h);
-	bufcat(h, "x");
 
 	for (n = n->child; n != NULL && n->type == ROFFT_TEXT; ) {
 		bufcat_id(h, n->string);
@@ -572,7 +571,6 @@ mdoc_ss_pre(MDOC_ARGS)
 		return 1;
 
 	bufinit(h);
-	bufcat(h, "x");
 
 	for (n = n->child; n != NULL && n->type == ROFFT_TEXT; ) {
 		bufcat_id(h, n->string);
@@ -1063,7 +1061,7 @@ mdoc_sx_pre(MDOC_ARGS)
 	struct htmlpair	 tag[2];
 
 	bufinit(h);
-	bufcat(h, "#x");
+	bufcat(h, "#");
 
 	for (n = n->child; n; ) {
 		bufcat_id(h, n->string);

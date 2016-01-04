@@ -720,8 +720,8 @@ void
 bufcat_id(struct html *h, const char *src)
 {
 
-	/* Cf. <http://www.w3.org/TR/html4/types.html#h-6.2>. */
+	/* Cf. <http://www.w3.org/TR/html5/dom.html#the-id-attribute>. */
 
-	while ('\0' != *src)
-		bufcat_fmt(h, "%.2x", *src++);
+	for (; '\0' != *src; src++)
+		bufncat(h, *src == ' ' ? "_" : src, 1);
 }
