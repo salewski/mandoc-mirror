@@ -448,6 +448,7 @@ again:
 		memmove(start + *sz + diff, start + *sz,
 		    (strlen(start) - *sz) + 1);
 		memcpy(start, def->val, def->valsz);
+		lim++;
 		goto again;
 	}
 
