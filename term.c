@@ -365,7 +365,7 @@ term_fontpush(struct termp *p, enum termfont f)
 	if (++p->fonti == p->fontsz) {
 		p->fontsz += 8;
 		p->fontq = mandoc_reallocarray(p->fontq,
-		    p->fontsz, sizeof(enum termfont *));
+		    p->fontsz, sizeof(*p->fontq));
 	}
 	p->fontq[p->fonti] = f;
 }
