@@ -987,7 +987,7 @@ this_tok:
 				parent->right = mandoc_strndup(start, sz);
 		}
 		parent = parent->parent;
-		if (EQN_TOK_BRACE_CLOSE == tok && parent &&
+		if (tok == EQN_TOK_BRACE_CLOSE &&
 		    (parent->type == EQN_PILE ||
 		     parent->type == EQN_MATRIX))
 			parent = parent->parent;
