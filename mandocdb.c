@@ -1446,7 +1446,7 @@ parse_man(struct mpage *mpage, const struct roff_meta *meta,
 	char		 byte;
 	size_t		 sz;
 
-	if (NULL == n)
+	if (n == NULL)
 		return;
 
 	/*
@@ -1458,13 +1458,12 @@ parse_man(struct mpage *mpage, const struct roff_meta *meta,
 
 	if (n->type == ROFFT_BODY && n->tok == MAN_SH) {
 		body = n;
-		assert(body->parent);
-		if (NULL != (head = body->parent->head) &&
-		    1 == head->nchild &&
-		    NULL != (head = (head->child)) &&
+		if ((head = body->parent->head) != NULL &&
+		    (head = head->child) != NULL &&
+		    head->next == NULL &&
 		    head->type == ROFFT_TEXT &&
-		    0 == strcmp(head->string, "NAME") &&
-		    NULL != body->child) {
+		    strcmp(head->string, "NAME") == 0 &&
+		    body->child != NULL) {
 
 			/*
 			 * Suck the entire NAME section into memory.
@@ -1697,7 +1696,9 @@ parse_mdoc_Va(struct mpage *mpage, const struct roff_meta *meta,
 	if (n->type != ROFFT_ELEM && n->type != ROFFT_BODY)
 		return 0;
 
-	if (n->nchild == 1 && n->child->type == ROFFT_TEXT)
+	if (n->child != NULL &&
+	    n->child->next == NULL &&
+	    n->child->type == ROFFT_TEXT)
 		return 1;
 
 	cp = NULL;

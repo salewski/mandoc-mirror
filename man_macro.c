@@ -157,7 +157,7 @@ rew_scope(struct roff_man *man, int tok)
 	/* Preserve empty paragraphs before RS. */
 
 	n = man->last;
-	if (tok == MAN_RS && n->nchild == 0 &&
+	if (tok == MAN_RS && n->child == NULL &&
 	    (n->tok == MAN_P || n->tok == MAN_PP || n->tok == MAN_LP))
 		return;
 

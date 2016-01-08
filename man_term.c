@@ -219,7 +219,7 @@ static int
 pre_ll(DECL_ARGS)
 {
 
-	term_setwidth(p, n->nchild ? n->child->string : NULL);
+	term_setwidth(p, n->child != NULL ? n->child->string : NULL);
 	return 0;
 }
 

@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008-2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010-2015 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2016 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2010 Joerg Sonnenberger <joerg@netbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -1278,7 +1278,8 @@ post_bl_head(POST_ARGS)
 
 	argv = nbl->args->argv + j;
 	i = argv->sz;
-	argv->sz += nh->nchild;
+	for (nch = nh->child; nch != NULL; nch = nch->next)
+		argv->sz++;
 	argv->value = mandoc_reallocarray(argv->value,
 	    argv->sz, sizeof(char *));
 
@@ -1291,7 +1292,6 @@ post_bl_head(POST_ARGS)
 		nnext = nch->next;
 		roff_node_delete(NULL, nch);
 	}
-	nh->nchild = 0;
 	nh->child = NULL;
 }
 
@@ -1352,14 +1352,11 @@ post_bl(POST_ARGS)
 		 */
 
 		assert(nchild->prev == NULL);
-		if (--nbody->nchild == 0) {
-			nbody->child = NULL;
+		nbody->child = nnext;
+		if (nnext == NULL)
 			nbody->last  = NULL;
-			assert(nnext == NULL);
-		} else {
-			nbody->child = nnext;
+		else
 			nnext->prev = NULL;
-		}
 
 		/*
 		 * Relink this child.
@@ -1370,7 +1367,6 @@ post_bl(POST_ARGS)
 		nchild->next   = nblock;
 
 		nblock->prev = nchild;
-		nparent->nchild++;
 		if (nprev == NULL)
 			nparent->child = nchild;
 		else
@@ -1688,7 +1684,9 @@ post_sh_see_also(POST_ARGS)
 	n = mdoc->last->child;
 	lastname = lastsec = lastpunct = NULL;
 	while (n != NULL) {
-		if (n->tok != MDOC_Xr || n->nchild < 2)
+		if (n->tok != MDOC_Xr ||
+		    n->child == NULL ||
+		    n->child->next == NULL)
 			break;
 
 		/* Process one .Xr node. */
@@ -1744,7 +1742,7 @@ child_an(const struct roff_node *n)
 {
 
 	for (n = n->child; n != NULL; n = n->next)
-		if ((n->tok == MDOC_An && n->nchild) || child_an(n))
+		if ((n->tok == MDOC_An && n->child != NULL) || child_an(n))
 			return 1;
 	return 0;
 }
@@ -1931,7 +1929,7 @@ post_par(POST_ARGS)
 		post_prevpar(mdoc);
 
 	if (np->tok == MDOC_sp) {
-		if (np->nchild > 1)
+		if (np->child != NULL && np->child->next != NULL)
 			mandoc_vmsg(MANDOCERR_ARG_EXCESS, mdoc->parse,
 			    np->child->next->line, np->child->next->pos,
 			    "sp ... %s", np->child->next->string);

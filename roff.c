@@ -1024,7 +1024,6 @@ roff_node_append(struct roff_man *man, struct roff_node *n)
 	default:
 		abort();
 	}
-	n->parent->nchild++;
 	man->last = n;
 
 	switch (n->type) {
@@ -1169,7 +1168,6 @@ roff_node_unlink(struct roff_man *man, struct roff_node *n)
 	/* Adjust parent. */
 
 	if (n->parent != NULL) {
-		n->parent->nchild--;
 		if (n->parent->child == n)
 			n->parent->child = n->next;
 		if (n->parent->last == n)
@@ -1211,7 +1209,6 @@ roff_node_delete(struct roff_man *man, struct roff_node *n)
 
 	while (n->child != NULL)
 		roff_node_delete(man, n->child);
-	assert(n->nchild == 0);
 	roff_node_unlink(man, n);
 	roff_node_free(n);
 }

@@ -93,7 +93,6 @@ struct	roff_node {
 	char		 *string;  /* TEXT */
 	const struct tbl_span *span; /* TBL */
 	const struct eqn *eqn;	   /* EQN */
-	int		  nchild;  /* Number of child nodes. */
 	int		  line;    /* Input file line number. */
 	int		  pos;     /* Input file column number. */
 	int		  tok;     /* Request or macro ID. */
