@@ -73,10 +73,9 @@
 .Fo mparse_keep
 .Fa "struct mparse *parse"
 .Fc
-.Ft "enum mandoclevel"
+.Ft int
 .Fo mparse_open
 .Fa "struct mparse *parse"
-.Fa "int *fd"
 .Fa "const char *fname"
 .Fc
 .Ft "enum mandoclevel"
@@ -388,9 +387,7 @@ does not already end in
 try again after appending
 .Ql .gz .
 Save the information whether the file is zipped or not.
-Return a file descriptor open for reading in
-.Fa fd ,
-or -1 on failure.
+Return a file descriptor open for reading or -1 on failure.
 It can be passed to
 .Fn mparse_readfd
 or used directly.

@@ -87,7 +87,7 @@ main(int argc, char *argv[])
 
 	for (i = 0; i < argc; i++) {
 		mparse_reset(mp);
-		if (mparse_open(mp, &fd, argv[i]) != MANDOCLEVEL_OK) {
+		if ((fd = mparse_open(mp, argv[i])) == -1) {
 			perror(argv[i]);
 			continue;
 		}

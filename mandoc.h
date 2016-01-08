@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2010, 2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010-2015 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2016 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -423,7 +423,7 @@ const char	 *mchars_spec2str(const char *, size_t, size_t *);
 struct mparse	 *mparse_alloc(int, enum mandoclevel, mandocmsg, const char *);
 void		  mparse_free(struct mparse *);
 void		  mparse_keep(struct mparse *);
-enum mandoclevel  mparse_open(struct mparse *, int *, const char *);
+int		  mparse_open(struct mparse *, const char *);
 enum mandoclevel  mparse_readfd(struct mparse *, int, const char *);
 enum mandoclevel  mparse_readmem(struct mparse *, void *, size_t,
 			const char *);

@@ -1134,8 +1134,7 @@ mpages_merge(struct mparse *mp)
 		man = NULL;
 		sodest = NULL;
 
-		mparse_open(mp, &fd, mlink->file);
-		if (fd == -1) {
+		if ((fd = mparse_open(mp, mlink->file)) == -1) {
 			say(mlink->file, "&open");
 			goto nextpage;
 		}

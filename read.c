@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010-2015 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2016 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2010, 2012 Joerg Sonnenberger <joerg@netbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -539,8 +539,7 @@ rerun:
 			if (curp->secondary)
 				curp->secondary->sz -= pos + 1;
 			save_file = curp->file;
-			if (mparse_open(curp, &fd, ln.buf + of) ==
-			    MANDOCLEVEL_OK) {
+			if ((fd = mparse_open(curp, ln.buf + of)) != -1) {
 				mparse_readfd(curp, fd, ln.buf + of);
 				close(fd);
 				curp->file = save_file;
@@ -777,10 +776,11 @@ mparse_readfd(struct mparse *curp, int fd, const char *file)
 	return curp->file_status;
 }
 
-enum mandoclevel
-mparse_open(struct mparse *curp, int *fd, const char *file)
+int
+mparse_open(struct mparse *curp, const char *file)
 {
 	char		 *cp;
+	int		  fd;
 
 	curp->file = file;
 	cp = strrchr(file, '.');
@@ -788,8 +788,8 @@ mparse_open(struct mparse *curp, int *fd, const char *file)
 
 	/* First try to use the filename as it is. */
 
-	if ((*fd = open(file, O_RDONLY)) != -1)
-		return MANDOCLEVEL_OK;
+	if ((fd = open(file, O_RDONLY)) != -1)
+		return fd;
 
 	/*
 	 * If that doesn't work and the filename doesn't
@@ -798,18 +798,18 @@ mparse_open(struct mparse *curp, int *fd, const char *file)
 
 	if ( ! curp->gzip) {
 		mandoc_asprintf(&cp, "%s.gz", file);
-		*fd = open(file, O_RDONLY);
+		fd = open(file, O_RDONLY);
 		free(cp);
-		if (*fd != -1) {
+		if (fd != -1) {
 			curp->gzip = 1;
-			return MANDOCLEVEL_OK;
+			return fd;
 		}
 	}
 
 	/* Neither worked, give up. */
 
 	mandoc_msg(MANDOCERR_FILE, curp, 0, 0, strerror(errno));
-	return MANDOCLEVEL_ERROR;
+	return -1;
 }
 
 struct mparse *
