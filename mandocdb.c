@@ -341,7 +341,7 @@ mandocdb(int argc, char *argv[])
 
 #if HAVE_PLEDGE
 	if (pledge("stdio rpath wpath cpath fattr flock proc exec", NULL) == -1) {
-		perror("pledge");
+		warn("pledge");
 		return (int)MANDOCLEVEL_SYSERR;
 	}
 #endif
@@ -422,7 +422,7 @@ mandocdb(int argc, char *argv[])
 #if HAVE_PLEDGE
 	if (nodb) {
 		if (pledge("stdio rpath", NULL) == -1) {
-			perror("pledge");
+			warn("pledge");
 			return (int)MANDOCLEVEL_SYSERR;
 		}
 	}
@@ -456,7 +456,7 @@ mandocdb(int argc, char *argv[])
 #if HAVE_PLEDGE
 			if (!nodb) {
 				if (pledge("stdio rpath wpath cpath fattr flock", NULL) == -1) {
-					perror("pledge");
+					warn("pledge");
 					exitcode = (int)MANDOCLEVEL_SYSERR;
 					goto out;
 				}
