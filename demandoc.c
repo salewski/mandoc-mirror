@@ -113,6 +113,7 @@ pmandoc(struct mparse *mp, int fd, const char *fn, int list)
 	int		 line, col;
 
 	mparse_readfd(mp, fd, fn);
+	close(fd);
 	mparse_result(mp, &man, NULL);
 	line = 1;
 	col = 0;

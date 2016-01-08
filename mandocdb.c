@@ -1146,6 +1146,7 @@ mpages_merge(struct mparse *mp)
 		 */
 		if (mlink->dform != FORM_CAT || mlink->fform != FORM_CAT) {
 			mparse_readfd(mp, fd, mlink->file);
+			close(fd);
 			mparse_result(mp, &man, &sodest);
 		}
 

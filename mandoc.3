@@ -177,6 +177,9 @@ or
 parse it with
 .Fn mparse_readfd ;
 .It
+close it with
+.Xr close 2 ;
+.It
 retrieve the syntax tree with
 .Fn mparse_result ;
 .It
@@ -403,6 +406,8 @@ or
 Pass the associated filename in
 .Va fname .
 This function may be called multiple times with different parameters; however,
+.Xr close 2
+and
 .Fn mparse_reset
 should be invoked between parses.
 Declared in

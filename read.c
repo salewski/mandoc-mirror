@@ -542,6 +542,7 @@ rerun:
 			if (mparse_open(curp, &fd, ln.buf + of) ==
 			    MANDOCLEVEL_OK) {
 				mparse_readfd(curp, fd, ln.buf + of);
+				close(fd);
 				curp->file = save_file;
 			} else {
 				curp->file = save_file;
@@ -773,10 +774,6 @@ mparse_readfd(struct mparse *curp, int fd, const char *file)
 #endif
 			free(blk.buf);
 	}
-
-	if (fd != STDIN_FILENO && close(fd) == -1)
-		perror(file);
-
 	return curp->file_status;
 }
 
