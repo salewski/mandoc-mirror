@@ -64,6 +64,7 @@ static	void		 html_putchar(char);
 static	int		 http_decode(char *);
 static	void		 http_parse(struct req *, const char *);
 static	void		 pathgen(struct req *);
+static	void		 path_parse(struct req *req, const char *path);
 static	void		 pg_error_badrequest(const char *);
 static	void		 pg_error_internal(void);
 static	void		 pg_index(const struct req *);
@@ -1033,10 +1034,20 @@ main(void)
 	memset(&req, 0, sizeof(struct req));
 	pathgen(&req);
 
-	/* Next parse out the query string. */
+	/* Parse the path info and the query string. */
 
-	if (NULL != (querystring = getenv("QUERY_STRING")))
+	if ((path = getenv("PATH_INFO")) == NULL)
+		path = "";
+	else if (*path == '/')
+		path++;
+
+	if (*path != '\0' && access(path, F_OK) == -1) {
+		path_parse(&req, path);
+		path = "";
+	} else if ((querystring = getenv("QUERY_STRING")) != NULL)
 		http_parse(&req, querystring);
+
+	/* Validate parsed data and add defaults. */
 
 	if (req.q.manpath == NULL)
 		req.q.manpath = mandoc_strdup(req.p[0]);
@@ -1054,12 +1065,6 @@ main(void)
 
 	/* Dispatch to the three different pages. */
 
-	path = getenv("PATH_INFO");
-	if (NULL == path)
-		path = "";
-	else if ('/' == *path)
-		path++;
-
 	if ('\0' != *path)
 		pg_show(&req, path);
 	else if (NULL != req.q.query)
@@ -1075,6 +1080,61 @@ main(void)
 		free(req.p[i]);
 	free(req.p);
 	return EXIT_SUCCESS;
+}
+
+/*
+ * If PATH_INFO is not a file name, translate it to a query.
+ */
+static void
+path_parse(struct req *req, const char *path)
+{
+	int	 dir_done;
+
+	req->q.equal = 1;
+	req->q.manpath = mandoc_strdup(path);
+
+	/* Mandatory manual page name. */
+	if ((req->q.query = strrchr(req->q.manpath, '/')) == NULL) {
+		req->q.query = req->q.manpath;
+		req->q.manpath = NULL;
+	} else
+		*req->q.query++ = '\0';
+
+	/* Optional trailing section. */
+	if ((req->q.sec = strrchr(req->q.query, '.')) != NULL) {
+		if(isdigit((unsigned char)req->q.sec[1])) {
+			*req->q.sec++ = '\0';
+			req->q.sec = mandoc_strdup(req->q.sec);
+		} else
+			req->q.sec = NULL;
+	}
+
+	/* Handle the case of name[.section] only. */
+	if (req->q.manpath == NULL) {
+		req->q.arch = NULL;
+		return;
+	}
+	req->q.query = mandoc_strdup(req->q.query);
+
+	/* Optional architecture. */
+	dir_done = 0;
+	for (;;) {
+		if ((req->q.arch = strrchr(req->q.manpath, '/')) == NULL)
+			break;
+		*req->q.arch++ = '\0';
+		if (dir_done || strncmp(req->q.arch, "man", 3)) {
+			req->q.arch = mandoc_strdup(req->q.arch);
+			break;
+		}
+
+		/* Optional directory name. */
+		req->q.arch += 3;
+		if (*req->q.arch != '\0') {
+			free(req->q.sec);
+			req->q.sec = mandoc_strdup(req->q.arch);
+		}
+		dir_done = 1;
+	}
 }
 
 /*
