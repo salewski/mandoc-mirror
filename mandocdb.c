@@ -574,7 +574,7 @@ usage:
  *   or
  *   [./]cat<section>[/<arch>]/<name>.0
  *
- * TODO: accomodate for multi-language directories.
+ * TODO: accommodate for multi-language directories.
  */
 static int
 treescan(void)
