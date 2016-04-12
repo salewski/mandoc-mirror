@@ -160,7 +160,7 @@ term_flushln(struct termp *p)
 			if (' ' == p->buf[j] || '\t' == p->buf[j])
 				break;
 
-			/* Back over the the last printed character. */
+			/* Back over the last printed character. */
 			if (8 == p->buf[j]) {
 				assert(j);
 				vend -= (*p->width)(p, p->buf[j - 1]);
