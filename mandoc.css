@@ -24,7 +24,8 @@ body > div.results		{ font-size: smaller; }
 #mancgi input[name=expr] 	{ width: 25%; }
 .results td.title		{ vertical-align: top;
 				  padding-right: 1em; }
-h1		{ margin-bottom: 1ex; font-size: 110%; margin-left: -4ex; } /* Section header (Sh, SH). */
+h1		{ margin-bottom: 1ex; font-size: 110% } 
+div.section > h1 { margin-left: -4ex; } /* Section header (Sh, SH). */
 h2		{ margin-bottom: 1ex; font-size: 105%; margin-left: -2ex; } /* Sub-section header (Ss, SS). */
 table		{ width: 100%; margin-top: 0ex; margin-bottom: 0ex; } /* All tables. */
 td		{ vertical-align: top; } /* All table cells. */
