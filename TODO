@@ -416,6 +416,11 @@ are mere guesses, and some may be wrong.
   see also matthew@  Fri, 18 Jul 2014 19:25:12 -0700
   loc *  exist *  algo **  size *  imp ***
 
+- In -man -Thtml, .nf does not preserve indentation.
+  It should either convert blanks to &nbsp;
+  or use <pre> rather than <div> (like .Bd -literal does).
+  Reported by afresh1@  12 Apr 2016 14:35:45 -0700
+
 - .Bf at the beginning of a paragraph inserts a bogus 1ex horizontal
   space, see for example random(3).  Introduced in
   http://mdocml.bsd.lv/cgi-bin/cvsweb/mdoc_html.c.diff?r1=1.91&r2=1.92
