@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "mandoc_aux.h"
@@ -1020,6 +1021,7 @@ mmsg(enum mandocerr t, enum mandoclevel lvl,
 static pid_t
 spawn_pager(struct tag_files *tag_files)
 {
+	const struct timespec timeout = { 0, 100000000 };  /* 0.1s */
 #define MAX_PAGER_ARGS 16
 	char		*argv[MAX_PAGER_ARGS];
 	const char	*pager;
@@ -1069,8 +1071,6 @@ spawn_pager(struct tag_files *tag_files)
 	case -1:
 		err((int)MANDOCLEVEL_SYSERR, "fork");
 	case 0:
-		/* Set pgrp in both parent and child to avoid racing exec. */
-		(void)setpgid(0, 0);
 		break;
 	default:
 		(void)setpgid(pager_pid, 0);
@@ -1089,6 +1089,12 @@ spawn_pager(struct tag_files *tag_files)
 		err((int)MANDOCLEVEL_SYSERR, "pager stdout");
 	close(tag_files->ofd);
 	close(tag_files->tfd);
+
+	/* Do not start the pager before controlling the terminal. */
+
+	while (tcgetpgrp(STDIN_FILENO) != getpid())
+		nanosleep(&timeout, NULL);
+
 	execvp(argv[0], argv);
 	err((int)MANDOCLEVEL_SYSERR, "exec %s", argv[0]);
 }
