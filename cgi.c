@@ -816,12 +816,8 @@ format(const struct req *req, const char *file)
 	memset(&conf, 0, sizeof(conf));
 	conf.fragment = 1;
 	usepath = strcmp(req->q.manpath, req->p[0]);
-	mandoc_asprintf(&conf.man, "/%s?query=%%N&sec=%%S%s%s%s%s",
-	    scriptname,
-	    req->q.arch	? "&arch="       : "",
-	    req->q.arch	? req->q.arch    : "",
-	    usepath	? "&manpath="    : "",
-	    usepath	? req->q.manpath : "");
+	mandoc_asprintf(&conf.man, "/%s%s%%N.%%S",
+	    usepath ? req->q.manpath : "", usepath ? "/" : "");
 
 	mparse_result(mp, &man, NULL);
 	if (man == NULL) {
