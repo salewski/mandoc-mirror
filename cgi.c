@@ -55,6 +55,7 @@ struct	req {
 	struct query	  q;
 	char		**p; /* array of available manpaths */
 	size_t		  psz; /* number of available manpaths */
+	int		  isquery; /* QUERY_STRING used, not PATH_INFO */
 };
 
 static	void		 catman(const struct req *, const char *);
@@ -188,6 +189,7 @@ http_parse(struct req *req, const char *qs)
 	char		*key, *val;
 	size_t		 keysz, valsz;
 
+	req->isquery	= 1;
 	req->q.manpath	= NULL;
 	req->q.arch	= NULL;
 	req->q.sec	= NULL;
@@ -568,7 +570,7 @@ pg_searchres(const struct req *req, struct manpage *r, size_t sz)
 		return;
 	}
 
-	if (1 == sz) {
+	if (req->isquery && sz == 1) {
 		/*
 		 * If we have just one result, then jump there now
 		 * without any delay.
@@ -1085,6 +1087,7 @@ path_parse(struct req *req, const char *path)
 {
 	int	 dir_done;
 
+	req->isquery = 0;
 	req->q.equal = 1;
 	req->q.manpath = mandoc_strdup(path);
 
