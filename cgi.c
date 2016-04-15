@@ -21,6 +21,7 @@
 #include <sys/time.h>
 
 #include <ctype.h>
+#include <err.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -564,7 +565,7 @@ pg_searchres(const struct req *req, struct manpage *r, size_t sz)
 	for (i = 0; i < sz; i++) {
 		if (validate_filename(r[i].file))
 			continue;
-		fprintf(stderr, "invalid filename %s in %s database\n",
+		warnx("invalid filename %s in %s database",
 		    r[i].file, req->q.manpath);
 		pg_error_internal();
 		return;
@@ -824,8 +825,7 @@ format(const struct req *req, const char *file)
 
 	mparse_result(mp, &man, NULL);
 	if (man == NULL) {
-		fprintf(stderr, "fatal mandoc error: %s/%s\n",
-		    req->q.manpath, file);
+		warnx("fatal mandoc error: %s/%s", req->q.manpath, file);
 		pg_error_internal();
 		mparse_free(mp);
 		mchars_free();
@@ -889,8 +889,7 @@ pg_show(struct req *req, const char *fullpath)
 	 */
 
 	if (chdir(manpath) == -1) {
-		fprintf(stderr, "chdir %s: %s\n",
-		    manpath, strerror(errno));
+		warn("chdir %s", manpath);
 		pg_error_internal();
 		free(manpath);
 		return;
@@ -931,9 +930,8 @@ pg_search(const struct req *req)
 	 * relative to the manpath root.
 	 */
 
-	if (-1 == (chdir(req->q.manpath))) {
-		fprintf(stderr, "chdir %s: %s\n",
-		    req->q.manpath, strerror(errno));
+	if (chdir(req->q.manpath) == -1) {
+		warn("chdir %s", req->q.manpath);
 		pg_error_internal();
 		return;
 	}
@@ -1008,7 +1006,7 @@ main(void)
 	itimer.it_interval.tv_sec = 2;
 	itimer.it_interval.tv_usec = 0;
 	if (setitimer(ITIMER_VIRTUAL, &itimer, NULL) == -1) {
-		fprintf(stderr, "setitimer: %s\n", strerror(errno));
+		warn("setitimer");
 		pg_error_internal();
 		return EXIT_FAILURE;
 	}
@@ -1019,9 +1017,8 @@ main(void)
 	 * relative to the same position.
 	 */
 
-	if (-1 == chdir(MAN_DIR)) {
-		fprintf(stderr, "MAN_DIR: %s: %s\n",
-		    MAN_DIR, strerror(errno));
+	if (chdir(MAN_DIR) == -1) {
+		warn("MAN_DIR: %s", MAN_DIR);
 		pg_error_internal();
 		return EXIT_FAILURE;
 	}
@@ -1142,9 +1139,8 @@ pathgen(struct req *req)
 	size_t	 dpsz;
 	ssize_t	 len;
 
-	if (NULL == (fp = fopen("manpath.conf", "r"))) {
-		fprintf(stderr, "%s/manpath.conf: %s\n",
-			MAN_DIR, strerror(errno));
+	if ((fp = fopen("manpath.conf", "r")) == NULL) {
+		warn("%s/manpath.conf", MAN_DIR);
 		pg_error_internal();
 		exit(EXIT_FAILURE);
 	}
@@ -1158,14 +1154,14 @@ pathgen(struct req *req)
 		req->p = mandoc_realloc(req->p,
 		    (req->psz + 1) * sizeof(char *));
 		if ( ! validate_urifrag(dp)) {
-			fprintf(stderr, "%s/manpath.conf contains "
-			    "unsafe path \"%s\"\n", MAN_DIR, dp);
+			warnx("%s/manpath.conf contains "
+			    "unsafe path \"%s\"", MAN_DIR, dp);
 			pg_error_internal();
 			exit(EXIT_FAILURE);
 		}
-		if (NULL != strchr(dp, '/')) {
-			fprintf(stderr, "%s/manpath.conf contains "
-			    "path with slash \"%s\"\n", MAN_DIR, dp);
+		if (strchr(dp, '/') != NULL) {
+			warnx("%s/manpath.conf contains "
+			    "path with slash \"%s\"", MAN_DIR, dp);
 			pg_error_internal();
 			exit(EXIT_FAILURE);
 		}
@@ -1175,8 +1171,8 @@ pathgen(struct req *req)
 	}
 	free(dp);
 
-	if ( req->p == NULL ) {
-		fprintf(stderr, "%s/manpath.conf is empty\n", MAN_DIR);
+	if (req->p == NULL) {
+		warnx("%s/manpath.conf is empty", MAN_DIR);
 		pg_error_internal();
 		exit(EXIT_FAILURE);
 	}
