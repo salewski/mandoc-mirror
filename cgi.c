@@ -108,16 +108,16 @@ static	const int sec_MAX = sizeof(sec_names) / sizeof(char *);
 
 static	const char *const arch_names[] = {
     "amd64",       "alpha",       "armish",      "armv7",
-    "aviion",      "hppa",        "hppa64",      "i386",
-    "ia64",        "landisk",     "loongson",    "luna88k",
-    "macppc",      "mips64",      "octeon",      "sgi",
-    "socppc",      "solbourne",   "sparc",       "sparc64",
-    "vax",         "zaurus",
+    "hppa",        "hppa64",      "i386",        "landisk",
+    "loongson",    "luna88k",     "macppc",      "mips64",
+    "octeon",      "sgi",         "socppc",      "sparc",
+    "sparc64",     "zaurus",
     "amiga",       "arc",         "arm32",       "atari",
-    "beagle",      "cats",        "hp300",       "mac68k",
-    "mvme68k",     "mvme88k",     "mvmeppc",     "palm",
-    "pc532",       "pegasos",     "pmax",        "powerpc",
-    "sun3",        "wgrisc",      "x68k"
+    "aviion",      "beagle",      "cats",        "hp300",       
+    "ia64",        "mac68k",      "mvme68k",     "mvme88k",
+    "mvmeppc",     "palm",        "pc532",       "pegasos",
+    "pmax",        "powerpc",     "solbourne",   "sun3",
+    "vax",         "wgrisc",      "x68k"
 };
 static	const int arch_MAX = sizeof(arch_names) / sizeof(char *);
 
