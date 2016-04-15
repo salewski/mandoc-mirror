@@ -1037,9 +1037,10 @@ main(void)
 	else if (*path == '/')
 		path++;
 
-	if (*path != '\0' && access(path, F_OK) == -1) {
+	if (*path != '\0') {
 		path_parse(&req, path);
-		path = "";
+		if (access(path, F_OK) == -1)
+			path = "";
 	} else if ((querystring = getenv("QUERY_STRING")) != NULL)
 		http_parse(&req, querystring);
 
