@@ -138,6 +138,7 @@ DISTFILES	 = INSTALL \
 		   makewhatis.8 \
 		   man.1 \
 		   man.7 \
+		   man.cgi.3 \
 		   man.cgi.8 \
 		   man.conf.5 \
 		   man.h \
@@ -293,6 +294,7 @@ WWW_MANS	 = apropos.1.html \
 		   roff.7.html \
 		   tbl.7.html \
 		   makewhatis.8.html \
+		   man.cgi.3.html \
 		   man.cgi.8.html \
 		   man.h.html \
 		   manconf.h.html \
