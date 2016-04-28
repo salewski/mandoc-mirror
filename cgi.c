@@ -384,7 +384,7 @@ resp_searchform(const struct req *req)
 		"<input type=\"text\" name=\"query\" value=\"");
 	if (NULL != req->q.query)
 		html_print(req->q.query);
-	puts("\" size=\"40\">");
+	puts("\" size=\"40\" autofocus>");
 
 	/* Write submission and reset buttons. */
 
