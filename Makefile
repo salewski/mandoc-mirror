@@ -406,22 +406,22 @@ Makefile.local config.h: configure ${TESTSRCS}
 	@exit 1
 
 libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
-	$(AR) rs $@ $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
+	ar rs $@ $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 
 mandoc: $(MAIN_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(MAIN_OBJS) libmandoc.a $(LDADD)
+	$(CC) -o $@ $(MAIN_OBJS) libmandoc.a $(LDADD)
 
 manpage: $(MANPAGE_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(MANPAGE_OBJS) libmandoc.a $(LDADD)
+	$(CC) -o $@ $(MANPAGE_OBJS) libmandoc.a $(LDADD)
 
 man.cgi: $(CGI_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) $(STATIC) -o $@ $(CGI_OBJS) libmandoc.a $(LDADD)
+	$(CC) $(STATIC) -o $@ $(CGI_OBJS) libmandoc.a $(LDADD)
 
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a $(LDADD)
+	$(CC) -o $@ $(DEMANDOC_OBJS) libmandoc.a $(LDADD)
 
 soelim: $(SOELIM_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(SOELIM_OBJS)
+	$(CC) -o $@ $(SOELIM_OBJS)
 
 # --- maintainer targets ---
 
