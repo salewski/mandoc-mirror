@@ -664,8 +664,8 @@ fs_lookup(const struct manpaths *paths, size_t ipath,
 
 found:
 #if HAVE_SQLITE3
-	warnx("outdated mandoc.db lacks %s(%s) entry, run makewhatis %s",
-	    name, sec, paths->paths[ipath]);
+	warnx("outdated mandoc.db lacks %s(%s) entry, run %s %s",
+	    name, sec, BINM_MAKEWHATIS, paths->paths[ipath]);
 #endif
 	*res = mandoc_reallocarray(*res, ++*ressz, sizeof(struct manpage));
 	page = *res + (*ressz - 1);
