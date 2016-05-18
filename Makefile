@@ -1,7 +1,7 @@
 # $Id$
 #
 # Copyright (c) 2010, 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
-# Copyright (c) 2011, 2013, 2014, 2015 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2011, 2013-2016 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -409,16 +409,16 @@ libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 	$(AR) rs $@ $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 
 mandoc: $(MAIN_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(MAIN_OBJS) libmandoc.a $(DBLIB)
+	$(CC) $(LDFLAGS) -o $@ $(MAIN_OBJS) libmandoc.a $(LDADD)
 
 manpage: $(MANPAGE_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(MANPAGE_OBJS) libmandoc.a $(DBLIB)
+	$(CC) $(LDFLAGS) -o $@ $(MANPAGE_OBJS) libmandoc.a $(LDADD)
 
 man.cgi: $(CGI_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) $(STATIC) -o $@ $(CGI_OBJS) libmandoc.a $(DBLIB)
+	$(CC) $(LDFLAGS) $(STATIC) -o $@ $(CGI_OBJS) libmandoc.a $(LDADD)
 
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
-	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a $(DBLIB)
+	$(CC) $(LDFLAGS) -o $@ $(DEMANDOC_OBJS) libmandoc.a $(LDADD)
 
 soelim: $(SOELIM_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(SOELIM_OBJS)
