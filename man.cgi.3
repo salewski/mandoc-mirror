@@ -55,14 +55,13 @@ the data directory containing all the manual trees;
 calls
 .Fn parse_manpath_conf ;
 .It
-calls
-.Fn parse_path_info ;
-.It
-calls
-.Fn parse_query_string
 if
 .Ev PATH_INFO
-is empty;
+is empty, calls
+.Fn parse_query_string ;
+otherwise,
+calls
+.Fn parse_path_info ;
 .It
 validates the manpath and the architecture;
 .It
@@ -227,9 +226,14 @@ to print the HTTP headers, then prints the HTML header up to the
 opening tag of the <body> element, then copies the file
 .Pa header.html
 to the output, if it exists and is readable.
-.It Ft void Fn resp_searchform "const struct req *req"
+.It Ft void Fn resp_searchform "const struct req *req" "enum focus focus"
 This generator prints a search form, filling it with data
 from the provided request object.
+If the
+.Fa focus
+argument is
+.Dv FOCUS_QUERY ,
+it sets the document's autofocus to the query input box.
 .It Ft void Fn resp_show "const struct req *req" "const char *file"
 This wrapper dispatches to either
 .Fn resp_catman
@@ -278,5 +282,6 @@ and does not ascend to parent directories.
 .Sh SEE ALSO
 .Xr mandoc 3 ,
 .Xr mansearch 3 ,
+.Xr mchars_alloc 3 ,
 .Xr mandoc.db 5 ,
 .Xr man.cgi 8

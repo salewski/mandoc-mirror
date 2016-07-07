@@ -38,7 +38,6 @@ struct	tbl_span;
 struct	eqn;
 struct	roff;
 struct	roff_man;
-struct	roff_node;
 
 void		 mandoc_msg(enum mandocerr, struct mparse *,
 			int, int, const char *);
