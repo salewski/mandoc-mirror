@@ -52,7 +52,7 @@ and go back to step 2.
 
 4. Run "make -n install" and check whether everything will be
 installed to the intended places.  Otherwise, put some *DIR or *NM*
-variables into "configure.local" and go back to step 2.
+variables into "configure.local" and go back to step 2.
 
 5. Run "sudo make install".  If you intend to build a binary
 package using some kind of fake root mechanism, you may need a
@@ -63,7 +63,7 @@ in the "Makefile" to understand how DESTDIR is used.
 manpath(1), make sure it is configured correctly, in particular,
 it returns all directory trees where manual pages are installed.
 Otherwise, if your system uses man.conf(5), make sure it contains
-a "_whatdb" line for each directory tree, and the order of these
+a "manpath" line for each directory tree, and the order of these
 lines meets your wishes.
 
 7. If you compiled with database support, run the command "sudo
