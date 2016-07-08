@@ -43,7 +43,6 @@ void		 *locale_alloc(const struct manoutput *);
 void		 *utf8_alloc(const struct manoutput *);
 void		 *ascii_alloc(const struct manoutput *);
 void		  ascii_free(void *);
-void		  ascii_sepline(void *);
 
 void		 *pdf_alloc(const struct manoutput *);
 void		 *ps_alloc(const struct manoutput *);
@@ -51,3 +50,4 @@ void		  pspdf_free(void *);
 
 void		  terminal_mdoc(void *, const struct roff_man *);
 void		  terminal_man(void *, const struct roff_man *);
+void		  terminal_sepline(void *);

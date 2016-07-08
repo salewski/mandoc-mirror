@@ -163,18 +163,17 @@ ascii_setwidth(struct termp *p, int iop, int width)
 }
 
 void
-ascii_sepline(void *arg)
+terminal_sepline(void *arg)
 {
 	struct termp	*p;
 	size_t		 i;
 
 	p = (struct termp *)arg;
-	p->line += 3;
-	putchar('\n');
+	(*p->endline)(p);
 	for (i = 0; i < p->defrmargin; i++)
-		putchar('-');
-	putchar('\n');
-	putchar('\n');
+		(*p->letter)(p, '-');
+	(*p->endline)(p);
+	(*p->endline)(p);
 }
 
 static size_t

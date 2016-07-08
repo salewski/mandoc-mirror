@@ -479,7 +479,7 @@ main(int argc, char *argv[])
 				    conf.output.synopsisonly);
 
 			if (argc > 1 && curp.outtype <= OUTT_UTF8)
-				ascii_sepline(curp.outdata);
+				terminal_sepline(curp.outdata);
 		} else if (rc < MANDOCLEVEL_ERROR)
 			rc = MANDOCLEVEL_ERROR;
 
