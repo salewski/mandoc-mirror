@@ -31,6 +31,8 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-pledge.c \
 		   test-progname.c \
 		   test-reallocarray.c \
+		   test-rewb-bsd.c \
+		   test-rewb-sysv.c \
 		   test-sqlite3.c \
 		   test-sqlite3_errstr.c \
 		   test-strcasestr.c \
@@ -165,6 +167,7 @@ DISTFILES	 = INSTALL \
 		   predefs.in \
 		   roff.7 \
 		   roff.h \
+		   roff_int.h \
 		   soelim.1 \
 		   st.in \
 		   tag.h \
@@ -440,6 +443,8 @@ depend: config.h
 		s|\\\n||g; s|  +| |g; s| $$||mg; print;' \
 		Makefile.depend > Makefile.tmp
 	mv Makefile.tmp Makefile.depend
+
+dist: mdocml.sha256
 
 mdocml.sha256: mdocml.tar.gz
 	sha256 mdocml.tar.gz > $@
