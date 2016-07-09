@@ -26,7 +26,6 @@
 #endif
 #include <errno.h>
 #include <fcntl.h>
-#include <getopt.h>
 #include <glob.h>
 #include <limits.h>
 #include <regex.h>

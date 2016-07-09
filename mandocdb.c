@@ -33,7 +33,6 @@
 #else
 #include "compat_fts.h"
 #endif
-#include <getopt.h>
 #include <limits.h>
 #include <stddef.h>
 #include <stdio.h>

@@ -20,7 +20,6 @@
 #include <sys/types.h>
 
 #include <assert.h>
-#include <getopt.h>
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
