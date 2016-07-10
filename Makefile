@@ -397,12 +397,8 @@ db-install: base-build
 cgi-install: cgi-build
 	mkdir -p $(DESTDIR)$(CGIBINDIR)
 	mkdir -p $(DESTDIR)$(HTDOCDIR)
-	mkdir -p $(DESTDIR)$(WWWPREFIX)/man/mandoc/man1
-	mkdir -p $(DESTDIR)$(WWWPREFIX)/man/mandoc/man8
 	$(INSTALL_PROGRAM) man.cgi $(DESTDIR)$(CGIBINDIR)
 	$(INSTALL_DATA) mandoc.css $(DESTDIR)$(HTDOCDIR)
-	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(WWWPREFIX)/man/mandoc/man1/
-	$(INSTALL_MAN) man.cgi.8 $(DESTDIR)$(WWWPREFIX)/man/mandoc/man8/
 
 Makefile.local config.h: configure ${TESTSRCS}
 	@echo "$@ is out of date; please run ./configure"
