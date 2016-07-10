@@ -798,7 +798,7 @@ mparse_open(struct mparse *curp, const char *file)
 
 	if ( ! curp->gzip) {
 		mandoc_asprintf(&cp, "%s.gz", file);
-		fd = open(file, O_RDONLY);
+		fd = open(cp, O_RDONLY);
 		free(cp);
 		if (fd != -1) {
 			curp->gzip = 1;
