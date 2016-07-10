@@ -1055,11 +1055,11 @@ spawn_pager(struct tag_files *tag_files)
 			break;
 	}
 
-	/* For more(1) and less(1), use the tag file. */
+	/* For less(1), use the tag file. */
 
 	if ((cmdlen = strlen(argv[0])) >= 4) {
 		cp = argv[0] + cmdlen - 4;
-		if (strcmp(cp, "less") == 0 || strcmp(cp, "more") == 0) {
+		if (strcmp(cp, "less") == 0) {
 			argv[argc++] = mandoc_strdup("-T");
 			argv[argc++] = tag_files->tfn;
 		}
