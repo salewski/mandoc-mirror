@@ -408,19 +408,19 @@ libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 	ar rs $@ $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 
 mandoc: $(MAIN_OBJS) libmandoc.a
-	$(CC) -o $@ $(MAIN_OBJS) libmandoc.a $(LDADD)
+	$(CC) -o $@ $(LDFLAGS) $(MAIN_OBJS) libmandoc.a $(LDADD)
 
 manpage: $(MANPAGE_OBJS) libmandoc.a
-	$(CC) -o $@ $(MANPAGE_OBJS) libmandoc.a $(LDADD)
+	$(CC) -o $@ $(LDFLAGS) $(MANPAGE_OBJS) libmandoc.a $(LDADD)
 
 man.cgi: $(CGI_OBJS) libmandoc.a
-	$(CC) $(STATIC) -o $@ $(CGI_OBJS) libmandoc.a $(LDADD)
+	$(CC) $(STATIC) -o $@ $(LDFLAGS) $(CGI_OBJS) libmandoc.a $(LDADD)
 
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
-	$(CC) -o $@ $(DEMANDOC_OBJS) libmandoc.a $(LDADD)
+	$(CC) -o $@ $(LDFLAGS) $(DEMANDOC_OBJS) libmandoc.a $(LDADD)
 
 soelim: $(SOELIM_OBJS)
-	$(CC) -o $@ $(SOELIM_OBJS)
+	$(CC) -o $@ $(LDFLAGS) $(SOELIM_OBJS)
 
 # --- maintainer targets ---
 
