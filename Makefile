@@ -33,6 +33,7 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-reallocarray.c \
 		   test-rewb-bsd.c \
 		   test-rewb-sysv.c \
+		   test-sandbox_init.c \
 		   test-sqlite3.c \
 		   test-sqlite3_errstr.c \
 		   test-strcasestr.c \

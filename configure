@@ -58,6 +58,7 @@ HAVE_PROGNAME=
 HAVE_REALLOCARRAY=
 HAVE_REWB_BSD=
 HAVE_REWB_SYSV=
+HAVE_SANDBOX_INIT=
 HAVE_STRCASESTR=
 HAVE_STRINGLIST=
 HAVE_STRLCAT=
@@ -186,6 +187,7 @@ runtest isblank		ISBLANK		|| true
 runtest mkdtemp		MKDTEMP		|| true
 runtest mmap		MMAP		|| true
 runtest pledge		PLEDGE		|| true
+runtest sandbox_init	SANDBOX_INIT	|| true
 runtest progname	PROGNAME	|| true
 runtest reallocarray	REALLOCARRAY	|| true
 runtest rewb-bsd	REWB_BSD	|| true
@@ -317,6 +319,7 @@ cat << __HEREDOC__
 #define HAVE_REALLOCARRAY ${HAVE_REALLOCARRAY}
 #define HAVE_REWB_BSD ${HAVE_REWB_BSD}
 #define HAVE_REWB_SYSV ${HAVE_REWB_SYSV}
+#define HAVE_SANDBOX_INIT ${HAVE_SANDBOX_INIT}
 #define HAVE_STRCASESTR ${HAVE_STRCASESTR}
 #define HAVE_STRINGLIST ${HAVE_STRINGLIST}
 #define HAVE_STRLCAT ${HAVE_STRLCAT}

@@ -30,6 +30,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <glob.h>
+#if HAVE_SANDBOX_INIT
+#include <sandbox.h>
+#endif
 #include <signal.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -157,6 +160,11 @@ main(int argc, char *argv[])
 #if HAVE_PLEDGE
 	if (pledge("stdio rpath tmppath tty proc exec flock", NULL) == -1)
 		err((int)MANDOCLEVEL_SYSERR, "pledge");
+#endif
+
+#if HAVE_SANDBOX_INIT
+	if (sandbox_init(kSBXProfileNoInternet, SANDBOX_NAMED, NULL) == -1)
+		errx((int)MANDOCLEVEL_SYSERR, "sandbox_init");
 #endif
 
 	/* Search options. */
