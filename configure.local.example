@@ -236,9 +236,17 @@ CGIBINDIR="${WWWPREFIX}/cgi-bin"
 
 CC=cc
 
+# IBM AIX may need:
+
+CC=xlc
+
 # The default compiler flags are:
 
 CFLAGS="-g -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings"
+
+# IBM AIX xlc does not support -W; in that case, please use:
+
+CFLAGS="-g"
 
 # In rare cases, it may be required to skip individual automatic tests.
 # Each of the following variables can be set to 0 (test will not be run
