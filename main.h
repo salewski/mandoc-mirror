@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define	UNCONST(a)	((void *)(uintptr_t)(const void *)(a))
-
 struct	roff_man;
 struct	manoutput;
 

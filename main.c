@@ -980,7 +980,7 @@ woptions(struct curparse *curp, char *arg)
 
 	while (*arg) {
 		o = arg;
-		switch (getsubopt(&arg, UNCONST(toks), &v)) {
+		switch (getsubopt(&arg, (char * const *)toks, &v)) {
 		case 0:
 			curp->wstop = 1;
 			break;
