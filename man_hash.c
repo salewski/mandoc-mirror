@@ -24,8 +24,10 @@
 #include <limits.h>
 #include <string.h>
 
+#include "mandoc.h"
 #include "roff.h"
 #include "man.h"
+#include "libmandoc.h"
 #include "libman.h"
 
 #define	HASH_DEPTH	 6

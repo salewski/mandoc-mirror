@@ -26,7 +26,7 @@ html.o: html.c config.h mandoc.h mandoc_aux.h out.h html.h manconf.h main.h
 lib.o: lib.c config.h roff.h mdoc.h libmdoc.h lib.in
 main.o: main.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h man.h tag.h main.h manconf.h mansearch.h
 man.o: man.c config.h mandoc_aux.h mandoc.h roff.h man.h libmandoc.h roff_int.h libman.h
-man_hash.o: man_hash.c config.h roff.h man.h libman.h
+man_hash.o: man_hash.c config.h mandoc.h roff.h man.h libmandoc.h libman.h
 man_html.o: man_html.c config.h mandoc_aux.h roff.h man.h out.h html.h main.h
 man_macro.o: man_macro.c config.h mandoc.h roff.h man.h libmandoc.h roff_int.h libman.h
 man_term.o: man_term.c config.h mandoc_aux.h mandoc.h roff.h man.h out.h term.h main.h
@@ -40,8 +40,8 @@ manpath.o: manpath.c config.h mandoc_aux.h manconf.h
 mansearch.o: mansearch.c config.h mandoc.h mandoc_aux.h mandoc_ohash.h compat_ohash.h manconf.h mansearch.h
 mansearch_const.o: mansearch_const.c config.h mansearch.h
 mdoc.o: mdoc.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h libmandoc.h roff_int.h libmdoc.h
-mdoc_argv.o: mdoc_argv.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h libmandoc.h libmdoc.h
-mdoc_hash.o: mdoc_hash.c config.h roff.h mdoc.h libmdoc.h
+mdoc_argv.o: mdoc_argv.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h libmandoc.h roff_int.h libmdoc.h
+mdoc_hash.o: mdoc_hash.c config.h mandoc.h roff.h mdoc.h libmandoc.h libmdoc.h
 mdoc_html.o: mdoc_html.c config.h mandoc_aux.h roff.h mdoc.h out.h html.h main.h
 mdoc_macro.o: mdoc_macro.c config.h mandoc.h roff.h mdoc.h libmandoc.h roff_int.h libmdoc.h
 mdoc_man.o: mdoc_man.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h man.h out.h main.h

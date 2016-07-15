@@ -87,6 +87,9 @@ struct	curparse {
 	struct manoutput *outopts;	/* output options */
 };
 
+
+int			  mandocdb(int, char *[]);
+
 static	int		  fs_lookup(const struct manpaths *,
 				size_t ipath, const char *,
 				const char *, const char *,

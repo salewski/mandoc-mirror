@@ -26,8 +26,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "mandoc.h"
 #include "roff.h"
 #include "mdoc.h"
+#include "libmandoc.h"
 #include "libmdoc.h"
 
 static	unsigned char	 table[27 * 12];

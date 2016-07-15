@@ -35,7 +35,8 @@ MANPATH_DEFAULT="/usr/share/man:/usr/X11R6/man:/usr/local/man"
 OSNAME=
 
 CC=`printf "all:\\n\\t@echo \\\$(CC)\\n" | env -i make -f -`
-CFLAGS="-g -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wwrite-strings"
+CFLAGS="-g -W -Wall -Wmissing-prototypes -Wstrict-prototypes -Wwrite-strings"
+CFLAGS="${CFLAGS} -Wno-unused-parameter"
 LDADD=
 LDFLAGS=
 LD_OHASH=

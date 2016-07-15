@@ -139,6 +139,9 @@ struct	mdoc_handler {
 	uint64_t	 mask;  /* set unless handler returns 0 */
 };
 
+
+int		 mandocdb(int, char *[]);
+
 static	void	 dbclose(int);
 static	void	 dbadd(struct mpage *);
 static	void	 dbadd_mlink(const struct mlink *mlink);
