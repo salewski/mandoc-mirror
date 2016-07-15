@@ -88,7 +88,9 @@ struct	curparse {
 };
 
 
+#if HAVE_SQLITE3
 int			  mandocdb(int, char *[]);
+#endif
 
 static	int		  fs_lookup(const struct manpaths *,
 				size_t ipath, const char *,
@@ -98,9 +100,6 @@ static	void		  fs_search(const struct mansearch *,
 				const struct manpaths *, int, char**,
 				struct manpage **, size_t *);
 static	int		  koptions(int *, char *);
-#if HAVE_SQLITE3
-int			  mandocdb(int, char**);
-#endif
 static	int		  moptions(int *, char *);
 static	void		  mmsg(enum mandocerr, enum mandoclevel,
 				const char *, int, int, const char *);
