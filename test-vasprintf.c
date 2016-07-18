@@ -23,7 +23,10 @@
 #include <stdio.h>
 #include <string.h>
 
-int
+static int	 testfunc(char **, const char *, ...);
+
+
+static int
 testfunc(char **ret, const char *format, ...)
 {
 	va_list	 ap;
