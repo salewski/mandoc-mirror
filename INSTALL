@@ -35,7 +35,11 @@ To install mandoc manually, the following steps are needed:
 command "echo BUILD_CGI=1 > configure.local".  Then run "cp
 cgi.h.examples cgi.h" and edit cgi.h as desired.
 
-2. Run "./configure".
+2. Define MANPATH_DEFAULT in configure.local
+if /usr/share/man:/usr/X11R6/man:/usr/local/man is not appropriate
+for your operating system.
+
+3. Run "./configure".
 This script attempts autoconfiguration of mandoc for your system.
 Read both its standard output and the file "Makefile.local" it
 generates.  If anything looks wrong or different from what you
@@ -45,26 +49,19 @@ result seems right to you.
 On Solaris 10 and earlier, you may have to run "ksh ./configure"
 because the native /bin/sh lacks some POSIX features.
 
-3. Run "make".
+4. Run "make".
 Any POSIX-compatible make, in particular both BSD make and GNU make,
 should work.  If the build fails, look at "configure.local.example"
 and go back to step 2.
 
-4. Run "make -n install" and check whether everything will be
+5. Run "make -n install" and check whether everything will be
 installed to the intended places.  Otherwise, put some *DIR or *NM*
-variables into "configure.local" and go back to step 2.
+variables into "configure.local" and go back to step 3.
 
-5. Run "sudo make install".  If you intend to build a binary
+6. Run "sudo make install".  If you intend to build a binary
 package using some kind of fake root mechanism, you may need a
 command like "make DESTDIR=... install".  Read the *-install targets
 in the "Makefile" to understand how DESTDIR is used.
-
-6. If you want to use the integrated man(1) and your system uses
-manpath(1), make sure it is configured correctly, in particular,
-it returns all directory trees where manual pages are installed.
-Otherwise, if your system uses man.conf(5), make sure it contains
-a "manpath" line for each directory tree, and the order of these
-lines meets your wishes.
 
 7. Run the command "sudo
 makewhatis" to build mandoc.db(5) databases in all the directory

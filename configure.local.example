@@ -49,9 +49,9 @@ HAVE_WCHAR=1
 HAVE_WCHAR=0
 
 # When man(1) or apropos(1) is called without -m and -M options,
-# MANPATH is not set in the environment, man.conf(5) is not available
-# and manpath(1) not used, manuals are searched for in the following
-# directory trees by default.
+# MANPATH is not set in the environment, and man.conf(5) is not
+# available, manuals are searched for in the following directory
+# trees by default.
 
 MANPATH_DEFAULT="/usr/share/man:/usr/X11R6/man:/usr/local/man"
 
@@ -79,19 +79,6 @@ SBINDIR="${PREFIX}/sbin"
 INCLUDEDIR="${PREFIX}/include/mandoc"
 LIBDIR="${PREFIX}/lib/mandoc"
 MANDIR="${PREFIX}/man"
-
-# The man(1) utility needs to know where the manuals reside.
-# We know of two ways to tell it: via manpath(1) or man.conf(5).
-# The latter is used by OpenBSD and NetBSD, the former by most
-# other systems.
-
-# Force usage of manpath(1).
-# If it is not installed or not operational,
-# man(1), makewhatis(8), and apropos(1) will not work properly.
-HAVE_MANPATH=1
-
-# Force usage of man.conf(5).
-HAVE_MANPATH=0
 
 # Some distributions may want to avoid naming conflicts
 # with the configuration files of other man(1) implementations.

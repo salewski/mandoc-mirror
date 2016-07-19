@@ -464,8 +464,7 @@ mandocdb(int argc, char *argv[])
 	} else {
 		/*
 		 * If we have arguments, use them as our manpaths.
-		 * If we don't, grok from manpath(1) or however else
-		 * manconf_parse() wants to do it.
+		 * If we don't, use man.conf(5).
 		 */
 		if (argc > 0) {
 			conf.manpath.paths = mandoc_reallocarray(NULL,
