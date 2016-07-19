@@ -91,8 +91,6 @@ MANDIR="${PREFIX}/man"
 HAVE_MANPATH=1
 
 # Force usage of man.conf(5).
-# If it does not exist or contains no valid configuration,
-# man(1), makewhatis(8), and apropos(1) will not work properly.
 HAVE_MANPATH=0
 
 # Some distributions may want to avoid naming conflicts
@@ -198,7 +196,7 @@ BINM_MAKEWHATIS=mandocdb	# default is "makewhatis"
 PREFIX="/usr/local"
 HOMEBREWDIR="${PREFIX}/Cellar"
 
-# --- user settings related man.cgi ------------------------------------
+# --- user settings related to man.cgi ---------------------------------
 
 # By default, building man.cgi(8) is disabled.  To enable it, copy
 # cgi.h.example to cgi.h, edit it, and use the following line.
