@@ -51,12 +51,6 @@
 #include "manconf.h"
 #include "mansearch.h"
 
-#if !defined(__GNUC__) || (__GNUC__ < 2)
-# if !defined(lint)
-#  define __attribute__(x)
-# endif
-#endif /* !defined(__GNUC__) || (__GNUC__ < 2) */
-
 enum	outmode {
 	OUTMODE_DEF = 0,
 	OUTMODE_FLN,

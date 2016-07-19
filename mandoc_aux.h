@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-int		  mandoc_asprintf(char **, const char *, ...);
+int		  mandoc_asprintf(char **, const char *, ...)
+			__attribute__((__format__ (printf, 2, 3)));
 void		 *mandoc_calloc(size_t, size_t);
 void		 *mandoc_malloc(size_t);
 void		 *mandoc_realloc(void *, size_t);

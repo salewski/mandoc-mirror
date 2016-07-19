@@ -285,8 +285,9 @@ cat << __HEREDOC__
 #error "Do not use C++.  See the INSTALL file."
 #endif
 
-#ifndef MANDOC_CONFIG_H
-#define MANDOC_CONFIG_H
+#if !defined(__GNUC__) || (__GNUC__ < 4)
+#define __attribute__(x)
+#endif
 
 #if defined(__linux__) || defined(__MINT__)
 #define _GNU_SOURCE	/* See test-*.c what needs this. */
@@ -390,9 +391,6 @@ fi
 
 [ ${HAVE_VASPRINTF} -eq 0 ] && \
 	echo "extern	int	  vasprintf(char **, const char *, va_list);"
-
-echo
-echo "#endif /* MANDOC_CONFIG_H */"
 
 echo "config.h: written" 1>&2
 echo "config.h: written" 1>&3
