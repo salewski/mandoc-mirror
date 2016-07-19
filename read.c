@@ -19,10 +19,8 @@
 #include "config.h"
 
 #include <sys/types.h>
-#if HAVE_MMAP
 #include <sys/mman.h>
 #include <sys/stat.h>
-#endif
 
 #include <assert.h>
 #include <ctype.h>
@@ -598,7 +596,6 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 	size_t		 off;
 	ssize_t		 ssz;
 
-#if HAVE_MMAP
 	struct stat	 st;
 
 	if (fstat(fd, &st) == -1)
@@ -622,7 +619,6 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 		if (fb->buf != MAP_FAILED)
 			return 1;
 	}
-#endif
 
 	if (curp->gzip) {
 		if ((gz = gzdopen(fd, "rb")) == NULL)
@@ -747,11 +743,9 @@ mparse_readfd(struct mparse *curp, int fd, const char *file)
 		    (MPARSE_UTF8 | MPARSE_LATIN1);
 		mparse_parse_buffer(curp, blk, file);
 		curp->filenc = save_filenc;
-#if HAVE_MMAP
 		if (with_mmap)
 			munmap(blk.buf, blk.sz);
 		else
-#endif
 			free(blk.buf);
 	}
 	return curp->file_status;

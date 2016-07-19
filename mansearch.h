@@ -16,7 +16,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define	MANDOC_DB	 "mandoc.db"
+#define	MANDOC_DB	 "mandoc.new.db"
+#define	MANDOCDB_MAGIC	 0x3a7d0cdb
+#define	MANDOCDB_VERSION 0  /* XXX Start counting in production. */
+
+#define	MACRO_MAX	 36
+#define	KEY_Nd		 39
+#define	KEY_MAX		 40
 
 #define	TYPE_arch	 0x0000000000000001ULL
 #define	TYPE_sec	 0x0000000000000002ULL
@@ -66,9 +72,11 @@
 #define	NAME_FILE	 0x0000004000000010ULL
 #define	NAME_MASK	 0x000000000000001fULL
 
-#define	FORM_CAT	 0  /* manual page is preformatted */
-#define	FORM_SRC	 1  /* format is mdoc(7) or man(7) */
-#define	FORM_NONE	 4  /* format is unknown */
+enum	form {
+	FORM_SRC = 1,	/* Format is mdoc(7) or man(7). */
+	FORM_CAT,	/* Manual page is preformatted. */
+	FORM_NONE	/* Format is unknown. */
+};
 
 enum	argmode {
 	ARG_FILE = 0,
@@ -84,7 +92,7 @@ struct	manpage {
 	size_t		 ipath; /* number of the manpath */
 	uint64_t	 bits; /* name type mask */
 	int		 sec; /* section number, 10 means invalid */
-	int		 form; /* 0 == catpage */
+	enum form	 form;
 };
 
 struct	mansearch {
@@ -98,7 +106,6 @@ struct	mansearch {
 
 struct	manpaths;
 
-int	mansearch_setup(int);
 int	mansearch(const struct mansearch *cfg, /* options */
 		const struct manpaths *paths, /* manpaths */
 		int argc, /* size of argv */

@@ -1,6 +1,6 @@
-/*	$Id$	*/
+/*	$Id$ */
 /*
- * Copyright (c) 2014 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2016 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -13,35 +13,17 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ * Private interface for low-level routines for the map-based version 
+ * of the mandoc database, for read-only access.
+ * To be used by dbm*.c only.
  */
 
-#include <stdio.h>
-#include <unistd.h>
-#include <sqlite3.h>
+struct dbm_match;
 
-int
-main(void)
-{
-	sqlite3	*db;
-
-	if (sqlite3_open_v2("test.db", &db,
-	    SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
-	    NULL) != SQLITE_OK) {
-		perror("test.db");
-		fprintf(stderr, "sqlite3_open_v2: %s", sqlite3_errmsg(db));
-		return 1;
-	}
-	unlink("test.db");
-
-	if (sqlite3_exec(db, "PRAGMA foreign_keys = ON",
-	    NULL, NULL, NULL) != SQLITE_OK) {
-		fprintf(stderr, "sqlite3_exec: %s", sqlite3_errmsg(db));
-		return 1;
-	}
-
-	if (sqlite3_close(db) != SQLITE_OK) {
-		fprintf(stderr, "sqlite3_close: %s", sqlite3_errmsg(db));
-		return 1;
-	}
-	return 0;
-}
+int		 dbm_map(const char *);
+void		 dbm_unmap(void);
+void		*dbm_get(int32_t);
+int32_t		*dbm_getint(int32_t);
+int32_t		 dbm_addr(const void *);
+int		 dbm_match(const struct dbm_match *, const char *);
