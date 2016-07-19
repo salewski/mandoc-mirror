@@ -291,13 +291,6 @@ choose_parser(struct mparse *curp)
 		}
 	}
 
-	if (curp->man == NULL) {
-		curp->man = roff_man_alloc(curp->roff, curp, curp->defos,
-		    curp->options & MPARSE_QUICK ? 1 : 0);
-		curp->man->macroset = MACROSET_MAN;
-		curp->man->first->tok = TOKEN_NONE;
-	}
-
 	if (format == MPARSE_MDOC) {
 		mdoc_hash_init();
 		curp->man->macroset = MACROSET_MDOC;
@@ -562,15 +555,7 @@ rerun:
 			break;
 		}
 
-		/*
-		 * If input parsers have not been allocated, do so now.
-		 * We keep these instanced between parsers, but set them
-		 * locally per parse routine since we can use different
-		 * parsers with each one.
-		 */
-
-		if (curp->man == NULL ||
-		    curp->man->macroset == MACROSET_NONE)
+		if (curp->man->macroset == MACROSET_NONE)
 			choose_parser(curp);
 
 		/*
@@ -683,10 +668,6 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 static void
 mparse_end(struct mparse *curp)
 {
-
-	if (curp->man == NULL && curp->sodest == NULL)
-		curp->man = roff_man_alloc(curp->roff, curp, curp->defos,
-		    curp->options & MPARSE_QUICK ? 1 : 0);
 	if (curp->man->macroset == MACROSET_NONE)
 		curp->man->macroset = MACROSET_MAN;
 	if (curp->man->macroset == MACROSET_MDOC)
@@ -842,11 +823,8 @@ mparse_alloc(int options, enum mandoclevel wlevel, mandocmsg mmsg,
 void
 mparse_reset(struct mparse *curp)
 {
-
 	roff_reset(curp->roff);
-
-	if (curp->man != NULL)
-		roff_man_reset(curp->man);
+	roff_man_reset(curp->man);
 	if (curp->secondary)
 		curp->secondary->sz = 0;
 
