@@ -43,20 +43,21 @@ LDADD=
 LDFLAGS=
 LD_NANOSLEEP=
 LD_OHASH=
+LD_SQLITE3=
 STATIC="-static"
 
+BUILD_DB=1
 BUILD_CGI=0
 
 HAVE_DIRENT_NAMLEN=
-HAVE_EFTYPE=
 HAVE_ERR=
 HAVE_FTS=
 HAVE_GETLINE=
 HAVE_GETSUBOPT=
 HAVE_ISBLANK=
 HAVE_MKDTEMP=
+HAVE_MMAP=
 HAVE_NANOSLEEP=
-HAVE_OHASH=
 HAVE_PLEDGE=
 HAVE_PROGNAME=
 HAVE_REALLOCARRAY=
@@ -72,6 +73,11 @@ HAVE_STRSEP=
 HAVE_STRTONUM=
 HAVE_VASPRINTF=
 HAVE_WCHAR=
+
+HAVE_SQLITE3=
+HAVE_SQLITE3_ERRSTR=
+HAVE_OHASH=
+HAVE_MANPATH=
 
 PREFIX="/usr/local"
 BINDIR=
@@ -178,13 +184,13 @@ runtest() {
 
 # --- library functions ---
 runtest dirent-namlen	DIRENT_NAMLEN	|| true
-runtest EFTYPE		EFTYPE		|| true
 runtest err		ERR		|| true
 runtest fts		FTS		|| true
 runtest getline		GETLINE		|| true
 runtest getsubopt	GETSUBOPT	|| true
 runtest isblank		ISBLANK		|| true
 runtest mkdtemp		MKDTEMP		|| true
+runtest mmap		MMAP		|| true
 runtest pledge		PLEDGE		|| true
 runtest sandbox_init	SANDBOX_INIT	|| true
 runtest progname	PROGNAME	|| true
@@ -200,6 +206,44 @@ runtest strsep		STRSEP		|| true
 runtest strtonum	STRTONUM	|| true
 runtest vasprintf	VASPRINTF	|| true
 runtest wchar		WCHAR		|| true
+
+# --- sqlite3 ---
+if [ ${BUILD_DB} -eq 0 ]; then
+	echo "BUILD_DB=0 (manual)" 1>&2
+	echo "BUILD_DB=0 (manual)" 1>&3
+	echo 1>&3
+	HAVE_SQLITE3=0
+elif ismanual sqlite3 "${HAVE_SQLITE3}"; then
+	if [ -z "${LD_SQLITE3}" ]; then
+		LD_SQLITE3="-lsqlite3"
+	fi
+elif [ -n "${LD_SQLITE3}" ]; then
+	runtest sqlite3 SQLITE3 "${LD_SQLITE3}" || true
+elif singletest sqlite3 SQLITE3 "-lsqlite3"; then
+	LD_SQLITE3="-lsqlite3"
+elif runtest sqlite3 SQLITE3 \
+		"-I/usr/local/include -L/usr/local/lib -lsqlite3"; then
+	LD_SQLITE3="-L/usr/local/lib -lsqlite3"
+	CFLAGS="${CFLAGS} -I/usr/local/include"
+fi
+if [ ${HAVE_SQLITE3} -eq 0 ]; then
+	LD_SQLITE3=
+	if [ ${BUILD_DB} -gt 0 ]; then
+		echo "BUILD_DB=0 (no sqlite3)" 1>&2
+		echo "BUILD_DB=0 (no sqlite3)" 1>&3
+		echo 1>&3
+		BUILD_DB=0
+	fi
+fi
+
+# --- sqlite3_errstr ---
+if [ ${BUILD_DB} -eq 0 ]; then
+	HAVE_SQLITE3_ERRSTR=1
+elif ismanual sqlite3_errstr "${HAVE_SQLITE3_ERRSTR}"; then
+	:
+else
+	runtest sqlite3_errstr SQLITE3_ERRSTR "${LD_SQLITE3}" || true
+fi
 
 # --- nanosleep ---
 if [ -n "${LD_NANOSLEEP}" ]; then
@@ -230,10 +274,25 @@ if [ "${HAVE_OHASH}" -eq 0 ]; then
 fi
 
 # --- LDADD ---
-LDADD="${LDADD} ${LD_NANOSLEEP} ${LD_OHASH} -lz"
+LDADD="${LDADD} ${LD_SQLITE3} ${LD_NANOSLEEP} ${LD_OHASH} -lz"
 echo "LDADD=\"${LDADD}\"" 1>&2
 echo "LDADD=\"${LDADD}\"" 1>&3
 echo 1>&3
+
+# --- manpath ---
+if ismanual manpath "${HAVE_MANPATH}"; then
+	:
+elif manpath 1>&3 2>&3; then
+	echo "manpath: yes" 1>&2
+	echo "manpath: yes" 1>&3
+	echo 1>&3
+	HAVE_MANPATH=1
+else
+	echo "manpath: no" 1>&2
+	echo "manpath: no" 1>&3
+	echo 1>&3
+	HAVE_MANPATH=0
+fi
 
 # --- write config.h ---
 
@@ -265,7 +324,6 @@ echo "#define MAN_CONF_FILE \"/etc/${MANM_MANCONF}\""
 echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
 [ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""
-[ ${HAVE_EFTYPE} -eq 0 ] && echo "#define EFTYPE EINVAL"
 
 cat << __HEREDOC__
 #define HAVE_DIRENT_NAMLEN ${HAVE_DIRENT_NAMLEN}
@@ -275,6 +333,7 @@ cat << __HEREDOC__
 #define HAVE_GETSUBOPT ${HAVE_GETSUBOPT}
 #define HAVE_ISBLANK ${HAVE_ISBLANK}
 #define HAVE_MKDTEMP ${HAVE_MKDTEMP}
+#define HAVE_MMAP ${HAVE_MMAP}
 #define HAVE_PLEDGE ${HAVE_PLEDGE}
 #define HAVE_PROGNAME ${HAVE_PROGNAME}
 #define HAVE_REALLOCARRAY ${HAVE_REALLOCARRAY}
@@ -290,7 +349,10 @@ cat << __HEREDOC__
 #define HAVE_STRTONUM ${HAVE_STRTONUM}
 #define HAVE_VASPRINTF ${HAVE_VASPRINTF}
 #define HAVE_WCHAR ${HAVE_WCHAR}
+#define HAVE_SQLITE3 ${HAVE_SQLITE3}
+#define HAVE_SQLITE3_ERRSTR ${HAVE_SQLITE3_ERRSTR}
 #define HAVE_OHASH ${HAVE_OHASH}
+#define HAVE_MANPATH ${HAVE_MANPATH}
 
 #define BINM_APROPOS "${BINM_APROPOS}"
 #define BINM_MAKEWHATIS "${BINM_MAKEWHATIS}"
@@ -326,6 +388,9 @@ fi
 
 [ ${HAVE_REALLOCARRAY} -eq 0 ] && \
 	echo "extern	void	 *reallocarray(void *, size_t, size_t);"
+
+[ ${BUILD_DB} -gt 0 -a ${HAVE_SQLITE3_ERRSTR} -eq 0 ] &&
+	echo "extern	const char *sqlite3_errstr(int);"
 
 [ ${HAVE_STRCASESTR} -eq 0 ] && \
 	echo "extern	char	 *strcasestr(const char *, const char *);"
@@ -366,10 +431,17 @@ exec > Makefile.local
 [ -z "${INSTALL_MAN}"     ] && INSTALL_MAN="${INSTALL} -m 0444"
 [ -z "${INSTALL_DATA}"    ] && INSTALL_DATA="${INSTALL} -m 0444"
 
-BUILD_TARGETS=
-[ ${BUILD_CGI} -gt 0 ] && BUILD_TARGETS="cgi-build"
-INSTALL_TARGETS=
-[ ${BUILD_CGI} -gt 0 ] && INSTALL_TARGETS="cgi-install"
+if [ ${BUILD_DB} -eq 0 -a ${BUILD_CGI} -gt 0 ]; then
+	echo "BUILD_CGI=0 (no BUILD_DB)" 1>&2
+	echo "BUILD_CGI=0 (no BUILD_DB)" 1>&3
+	BUILD_CGI=0
+fi
+
+BUILD_TARGETS="base-build"
+[ ${BUILD_CGI} -gt 0 ] && BUILD_TARGETS="${BUILD_TARGETS} cgi-build"
+INSTALL_TARGETS="base-install"
+[ ${BUILD_DB}  -gt 0 ] && INSTALL_TARGETS="${INSTALL_TARGETS} db-install"
+[ ${BUILD_CGI} -gt 0 ] && INSTALL_TARGETS="${INSTALL_TARGETS} cgi-install"
 
 cat << __HEREDOC__
 BUILD_TARGETS	= ${BUILD_TARGETS}
@@ -405,6 +477,9 @@ INSTALL_LIB	= ${INSTALL_LIB}
 INSTALL_MAN	= ${INSTALL_MAN}
 INSTALL_DATA	= ${INSTALL_DATA}
 __HEREDOC__
+
+[ ${BUILD_DB} -gt 0 ] && \
+	echo "MAIN_OBJS	= \$(BASE_OBJS) \$(DB_OBJS)"
 
 echo "Makefile.local: written" 1>&2
 echo "Makefile.local: written" 1>&3

@@ -49,9 +49,9 @@ HAVE_WCHAR=1
 HAVE_WCHAR=0
 
 # When man(1) or apropos(1) is called without -m and -M options,
-# MANPATH is not set in the environment, and man.conf(5) is not
-# available, manuals are searched for in the following directory
-# trees by default.
+# MANPATH is not set in the environment, man.conf(5) is not available
+# and manpath(1) not used, manuals are searched for in the following
+# directory trees by default.
 
 MANPATH_DEFAULT="/usr/share/man:/usr/X11R6/man:/usr/local/man"
 
@@ -65,7 +65,7 @@ MANPATH_DEFAULT="/usr/share/man:/usr/X11R6/man:/usr/local/man"
 # If you do not want uname(3) to be called but instead want a fixed
 # string to be used, use the following line:
 
-OSNAME="OpenBSD 6.0"
+OSNAME="OpenBSD 5.9"
 
 # The following installation directories are used.
 # It is possible to set only one or a few of these variables,
@@ -79,6 +79,19 @@ SBINDIR="${PREFIX}/sbin"
 INCLUDEDIR="${PREFIX}/include/mandoc"
 LIBDIR="${PREFIX}/lib/mandoc"
 MANDIR="${PREFIX}/man"
+
+# The man(1) utility needs to know where the manuals reside.
+# We know of two ways to tell it: via manpath(1) or man.conf(5).
+# The latter is used by OpenBSD and NetBSD, the former by most
+# other systems.
+
+# Force usage of manpath(1).
+# If it is not installed or not operational,
+# man(1), makewhatis(8), and apropos(1) will not work properly.
+HAVE_MANPATH=1
+
+# Force usage of man.conf(5).
+HAVE_MANPATH=0
 
 # Some distributions may want to avoid naming conflicts
 # with the configuration files of other man(1) implementations.
@@ -98,20 +111,14 @@ MANM_ROFF="mandoc_roff"		# default is "roff"
 MANM_EQN="mandoc_eqn"		# default is "eqn"
 MANM_TBL="mandoc_tbl"		# default is "tbl"
 
-# Some distributions may want to avoid naming conflicts with
-# other man(1), apropos(1), makewhatis(8), or soelim(1) utilities.
+# Some distributions may want to avoid naming conflicts
+# with other man(1) and soelim(1) utilities.
 # If you want to change the names of binary programs,
 # the following alternative names are suggested.
 # Using different names is possible as well.
-# This changes the names of the installed section 1 and section 8
-# manual pages as well.
-# It is possible to set only one or two of these variables,
-# there is no need to copy the whole block.
+# This changes the names of the installed section 1 manual pages as well.
 
 BINM_MAN=mman			# default is "man"
-BINM_APROPOS=mapropos		# default is "apropos"
-BINM_WHATIS=mwhatis		# default is "whatis"
-BINM_MAKEWHATIS=mandocdb	# default is "makewhatis"
 BINM_SOELIM=msoelim		# default is "soelim"
 
 # Before falling back to the bundled version of the ohash(3) hashing
@@ -121,13 +128,6 @@ BINM_SOELIM=msoelim		# default is "soelim"
 # variable to specify the required linker flags.
 
 LD_OHASH="-lutil"
-
-# When library autodetection decides to use -L/usr/local/lib,
-# -I/usr/local/include is automatically added to CFLAGS.
-# If you manually set LD_OHASH to something including -L/usr/local/lib,
-# chances are you will also need the following line:
-
-CFLAGS="${CFLAGS} -I/usr/local/include"
 
 # Some platforms may need an additional linker flag for nanosleep(2).
 # If none is needed or it is -lrt, it is autodetected.
@@ -156,6 +156,43 @@ INSTALL_LIB="${INSTALL} -m 0444"
 INSTALL_MAN="${INSTALL} -m 0444"
 INSTALL_DATA="${INSTALL} -m 0444"
 
+# --- user settings related to database support ------------------------
+
+# By default, building makewhatis(8) and apropos(1) is enabled.
+# To disable it, for example to avoid the dependency on SQLite3,
+# use the following line.  It that case, the remaining settings
+# in this section are irrelevant.
+
+BUILD_DB=0
+
+# Autoconfiguration tries the following linker flags to find the
+# SQLite3 library installed on your system.  If none of these work,
+# set the following variable to specify the required linker flags.
+
+LD_SQLITE3="-lsqlite3"
+LD_SQLITE3="-L/usr/local/lib -lsqlite3"
+
+# When library autodetection decides to use -L/usr/local/lib,
+# -I/usr/local/include is automatically added to CFLAGS.
+# If you manually set LD_SQLITE3 to something including -L/usr/local/lib,
+# chances are you will also need the following line:
+
+CFLAGS="${CFLAGS} -I/usr/local/include"
+
+# Some distributions may want to avoid naming conflicts
+# with another implementation of apropos(1) and makewhatis(8).
+# If you want to change the names of the binary programs,
+# the following alternative names are suggested.
+# Using other names is possible as well.
+# This changes the names of the installed section 1 and section 8
+# manual pages as well.
+# It is possible to set only one or two of these variables,
+# there is no need to copy the whole block.
+
+BINM_APROPOS=mapropos		# default is "apropos"
+BINM_WHATIS=mwhatis		# default is "whatis"
+BINM_MAKEWHATIS=mandocdb	# default is "makewhatis"
+
 # When using the "homebrew" package manager on Mac OS X, the actual
 # manuals are located in a so-called "cellar" and only symlinked
 # into the manual trees.  To allow mandoc to follow such symlinks,
@@ -169,6 +206,7 @@ HOMEBREWDIR="${PREFIX}/Cellar"
 
 # By default, building man.cgi(8) is disabled.  To enable it, copy
 # cgi.h.example to cgi.h, edit it, and use the following line.
+# Obviously, this requires that BUILD_DB is enabled, too.
 
 BUILD_CGI=1
 
@@ -226,7 +264,7 @@ HAVE_GETLINE=0
 HAVE_GETSUBOPT=0
 HAVE_ISBLANK=0
 HAVE_MKDTEMP=0
-HAVE_OHASH=0
+HAVE_MMAP=0
 HAVE_PLEDGE=0
 HAVE_PROGNAME=0
 HAVE_REALLOCARRAY=0
@@ -241,3 +279,7 @@ HAVE_STRSEP=0
 HAVE_STRTONUM=0
 HAVE_VASPRINTF=0
 HAVE_WCHAR=0
+
+HAVE_SQLITE3=0
+HAVE_SQLITE3_ERRSTR=0
+HAVE_OHASH=0
