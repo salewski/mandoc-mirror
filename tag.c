@@ -1,4 +1,4 @@
-/*      $Id$    */
+/*	$Id$ */
 /*
  * Copyright (c) 2015 Ingo Schwarze <schwarze@openbsd.org>
  *
@@ -36,7 +36,7 @@ struct tag_entry {
 	char	 s[];
 };
 
-static	void	 tag_signal(int);
+static	void	 tag_signal(int) __attribute__((noreturn));
 
 static struct ohash	 tag_data;
 static struct tag_files	 tag_files;
