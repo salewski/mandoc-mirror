@@ -26,6 +26,7 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-getsubopt.c \
 		   test-isblank.c \
 		   test-mkdtemp.c \
+		   test-nanosleep.c \
 		   test-ohash.c \
 		   test-pledge.c \
 		   test-progname.c \

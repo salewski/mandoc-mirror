@@ -129,11 +129,17 @@ LD_OHASH="-lutil"
 
 CFLAGS="${CFLAGS} -I/usr/local/include"
 
-# Some platforms may need additional linker flags to link against libmandoc
-# that are not autodetected.
-# For example, Solaris 9 and 10 need -lrt for nanosleep(2).
+# Some platforms may need an additional linker flag for nanosleep(2).
+# If none is needed or it is -lrt, it is autodetected.
+# Otherwise, set the following variable.
 
-LDADD="-lrt"
+LD_NANOSLEEP="-lrt"
+
+# Some platforms might need additional linker flags to link against
+# libmandoc that are not autodetected, though no such cases are
+# currently known.
+
+LDADD="-lm"
 
 # Some systems may want to set additional linker flags for all the
 # binaries, not only for those using libmandoc, for example for
