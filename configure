@@ -45,6 +45,7 @@ STATIC="-static"
 BUILD_CGI=0
 
 HAVE_DIRENT_NAMLEN=
+HAVE_EFTYPE=
 HAVE_ERR=
 HAVE_FTS=
 HAVE_GETLINE=
@@ -173,6 +174,7 @@ runtest() {
 
 # --- library functions ---
 runtest dirent-namlen	DIRENT_NAMLEN	|| true
+runtest EFTYPE		EFTYPE		|| true
 runtest err		ERR		|| true
 runtest fts		FTS		|| true
 runtest getline		GETLINE		|| true
@@ -245,6 +247,7 @@ echo "#define MAN_CONF_FILE \"/etc/${MANM_MANCONF}\""
 echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
 [ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""
+[ ${HAVE_EFTYPE} -eq 0 ] && echo "#define EFTYPE EINVAL"
 
 cat << __HEREDOC__
 #define HAVE_DIRENT_NAMLEN ${HAVE_DIRENT_NAMLEN}

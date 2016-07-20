@@ -17,9 +17,13 @@
  * Map-based version of the mandoc database, for read-only access.
  * The interface is defined in "dbm.h".
  */
+#include "config.h"
+
 #include <assert.h>
 #include <endian.h>
+#if HAVE_ERR
 #include <err.h>
+#endif
 #include <errno.h>
 #include <regex.h>
 #include <stdint.h>

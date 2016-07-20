@@ -18,12 +18,16 @@
  * of the mandoc database, for read-only access.
  * The interface is defined in "dbm_map.h".
  */
+#include "config.h"
+
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #include <endian.h>
+#if HAVE_ERR
 #include <err.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <regex.h>

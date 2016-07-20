@@ -17,9 +17,13 @@
  * Low-level functions for serializing allocation-based data to disk.
  * The interface is defined in "dba_write.h".
  */
+#include "config.h"
+
 #include <assert.h>
 #include <endian.h>
+#if HAVE_ERR
 #include <err.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
