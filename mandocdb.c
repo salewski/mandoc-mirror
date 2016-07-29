@@ -122,6 +122,7 @@ static	void	 mlink_add(struct mlink *, const struct stat *);
 static	void	 mlink_check(struct mpage *, struct mlink *);
 static	void	 mlink_free(struct mlink *);
 static	void	 mlinks_undupe(struct mpage *);
+int		 mpages_compare(const void *, const void *);
 static	void	 mpages_free(void);
 static	void	 mpages_merge(struct dba *, struct mparse *);
 static	void	 parse_cat(struct mpage *, int);
@@ -1084,22 +1085,30 @@ mlink_check(struct mpage *mpage, struct mlink *mlink)
 static void
 mpages_merge(struct dba *dba, struct mparse *mp)
 {
-	struct mpage		*mpage, *mpage_dest;
+	struct mpage		**mplist, *mpage, *mpage_dest;
 	struct mlink		*mlink, *mlink_dest;
 	struct roff_man		*man;
 	char			*sodest;
 	char			*cp;
 	int			 fd;
-	unsigned int		 pslot;
+	unsigned int		 ip, npages, pslot;
 
+	npages = ohash_entries(&mpages);
+	mplist = mandoc_reallocarray(NULL, npages, sizeof(*mplist));
+	ip = 0;
 	mpage = ohash_first(&mpages, &pslot);
 	while (mpage != NULL) {
 		mlinks_undupe(mpage);
-		if ((mlink = mpage->mlinks) == NULL) {
-			mpage = ohash_next(&mpages, &pslot);
-			continue;
-		}
+		if (mpage->mlinks != NULL)
+			mplist[ip++] = mpage;
+		mpage = ohash_next(&mpages, &pslot);
+	}
+	npages = ip;
+	qsort(mplist, npages, sizeof(*mplist), mpages_compare);
 
+	for (ip = 0; ip < npages; ip++) {
+		mpage = mplist[ip];
+		mlink = mpage->mlinks;
 		name_mask = NAME_MASK;
 		mandoc_ohash_init(&names, 4, offsetof(struct str, key));
 		mandoc_ohash_init(&strings, 6, offsetof(struct str, key));
@@ -1207,8 +1216,18 @@ mpages_merge(struct dba *dba, struct mparse *mp)
 nextpage:
 		ohash_delete(&strings);
 		ohash_delete(&names);
-		mpage = ohash_next(&mpages, &pslot);
 	}
+	free(mplist);
+}
+
+int
+mpages_compare(const void *vp1, const void *vp2)
+{
+	const struct mpage	*mp1, *mp2;
+
+	mp1 = *(const struct mpage **)vp1;
+	mp2 = *(const struct mpage **)vp2;
+	return strcmp(mp1->mlinks->file, mp2->mlinks->file);
 }
 
 static void
