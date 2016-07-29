@@ -1084,7 +1084,6 @@ mlink_check(struct mpage *mpage, struct mlink *mlink)
 static void
 mpages_merge(struct dba *dba, struct mparse *mp)
 {
-	char			 any[] = "any";
 	struct mpage		*mpage, *mpage_dest;
 	struct mlink		*mlink, *mlink_dest;
 	struct roff_man		*man;
@@ -1185,19 +1184,6 @@ mpages_merge(struct dba *dba, struct mparse *mp)
 			mpage->sec = mandoc_strdup(mlink->dsec);
 			mpage->arch = mandoc_strdup(mlink->arch);
 			mpage->title = mandoc_strdup(mlink->name);
-		}
-		putkey(mpage, mpage->sec, TYPE_sec);
-		if (*mpage->arch != '\0')
-			putkey(mpage, mpage->arch, TYPE_arch);
-
-		for ( ; mlink != NULL; mlink = mlink->next) {
-			if ('\0' != *mlink->dsec)
-				putkey(mpage, mlink->dsec, TYPE_sec);
-			if ('\0' != *mlink->fsec)
-				putkey(mpage, mlink->fsec, TYPE_sec);
-			putkey(mpage, '\0' == *mlink->arch ?
-			    any : mlink->arch, TYPE_arch);
-			putkey(mpage, mlink->name, NAME_FILE);
 		}
 
 		assert(mpage->desc == NULL);
@@ -1347,13 +1333,6 @@ parse_cat(struct mpage *mpage, int fd)
 static void
 putkey(const struct mpage *mpage, char *value, uint64_t type)
 {
-	char	 *cp;
-
-	assert(NULL != value);
-	if (TYPE_arch == type)
-		for (cp = value; *cp; cp++)
-			if (isupper((unsigned char)*cp))
-				*cp = _tolower((unsigned char)*cp);
 	putkeys(mpage, value, strlen(value), type);
 }
 
@@ -1954,6 +1933,7 @@ dbadd_mlink(const struct mlink *mlink)
 {
 	dba_page_alias(mlink->mpage->dba, mlink->name, NAME_FILE);
 	dba_page_add(mlink->mpage->dba, DBP_SECT, mlink->dsec);
+	dba_page_add(mlink->mpage->dba, DBP_SECT, mlink->fsec);
 	dba_page_add(mlink->mpage->dba, DBP_ARCH, mlink->arch);
 	dba_page_add(mlink->mpage->dba, DBP_FILE, mlink->file);
 }
@@ -2013,13 +1993,16 @@ dbadd(struct dba *dba, struct mpage *mpage)
 	cp = mpage->desc;
 	i = strlen(cp);
 	mustfree = render_string(&cp, &i);
-	mpage->dba = dba_page_new(dba->pages, mlink->name,
-	    mlink->dsec, mlink->arch, cp, mlink->file, mpage->form);
+	mpage->dba = dba_page_new(dba->pages, mlink->name, mpage->sec,
+	    *mpage->arch == '\0' ? mlink->arch : mpage->arch,
+	    cp, mlink->file, mpage->form);
 	if (mustfree)
 		free(cp);
 
-	while ((mlink = mlink->next) != NULL)
+	while (mlink != NULL) {
 		dbadd_mlink(mlink);
+		mlink = mlink->next;
+	}
 
 	for (key = ohash_first(&names, &slot); NULL != key;
 	     key = ohash_next(&names, &slot)) {

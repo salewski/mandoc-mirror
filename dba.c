@@ -175,9 +175,12 @@ dba_page_add(struct dba_array *page, int32_t ie, const char *str)
 	}
 	if (*str == '\0')
 		return;
-	dba_array_FOREACH(entries, entry)
+	dba_array_FOREACH(entries, entry) {
+		if (ie == DBP_FILE && *entry < ' ')
+			entry++;
 		if (strcmp(entry, str) == 0)
 			return;
+	}
 	dba_array_add(entries, (void *)str);
 }
 
