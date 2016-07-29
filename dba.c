@@ -33,6 +33,7 @@
 static void	*prepend(const char *, char);
 static void	 dba_pages_write(struct dba_array *);
 static int	 compare_names(const void *, const void *);
+static int	 compare_strings(const void *, const void *);
 static void	 dba_macros_write(struct dba_array *);
 static void	 dba_macro_write(struct dba_array *);
 
@@ -243,24 +244,26 @@ prepend(const char *instr, char inbyte)
 static void
 dba_pages_write(struct dba_array *pages)
 {
-	struct dba_array	*page, *names;
-	void			*entry;
+	struct dba_array	*page, *entry;
 	int32_t			 pos_pages, pos_end;
 
 	pos_pages = dba_array_writelen(pages, 5);
 	dba_array_FOREACH(pages, page) {
 		dba_array_setpos(page, DBP_NAME, dba_tell());
-		names = dba_array_get(page, DBP_NAME);
-		dba_array_sort(names, compare_names);
-		dba_array_writelst(names);
+		entry = dba_array_get(page, DBP_NAME);
+		dba_array_sort(entry, compare_names);
+		dba_array_writelst(entry);
 	}
 	dba_array_FOREACH(pages, page) {
 		dba_array_setpos(page, DBP_SECT, dba_tell());
-		dba_array_writelst(dba_array_get(page, DBP_SECT));
+		entry = dba_array_get(page, DBP_SECT);
+		dba_array_sort(entry, compare_strings);
+		dba_array_writelst(entry);
 	}
 	dba_array_FOREACH(pages, page) {
 		if ((entry = dba_array_get(page, DBP_ARCH)) != NULL) {
 			dba_array_setpos(page, DBP_ARCH, dba_tell());
+			dba_array_sort(entry, compare_strings);
 			dba_array_writelst(entry);
 		} else
 			dba_array_setpos(page, DBP_ARCH, 0);
@@ -292,6 +295,15 @@ compare_names(const void *vp1, const void *vp2)
 	    strcasecmp(cp1 + 1, cp2 + 1);
 }
 
+static int
+compare_strings(const void *vp1, const void *vp2)
+{
+	const char	*cp1, *cp2;
+
+	cp1 = *(char **)vp1;
+	cp2 = *(char **)vp2;
+	return strcmp(cp1, cp2);
+}
 
 /*** functions for handling macros ************************************/
 
