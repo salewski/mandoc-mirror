@@ -98,7 +98,7 @@ ascii_init(enum termenc enc, const struct manoutput *outopts)
 
 		v = TERMENC_LOCALE == enc ?
 		    setlocale(LC_CTYPE, "") :
-		    setlocale(LC_CTYPE, "en_US.UTF-8");
+		    setlocale(LC_CTYPE, UTF8_LOCALE);
 		if (NULL != v && MB_CUR_MAX > 1) {
 			p->enc = enc;
 			p->advance = locale_advance;

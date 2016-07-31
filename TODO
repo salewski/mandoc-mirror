@@ -529,16 +529,6 @@ are mere guesses, and some may be wrong.
   loc **  exist **  algo **  size *  imp **
 
 ************************************************************************
-* portability
-************************************************************************
-
-- systems having UTF-8 but not en_US.UTF-8
-  call locale(1) from ./configure, select a UTF-8-locale,
-  and use that for test-wchar.c and term_ascii.c
-  to Markus Waldeck  Sat, 18 Jul 2015 01:55:37 +0200
-  loc *  exist *  algo *  size *  imp *
-
-************************************************************************
 * warning issues
 ************************************************************************
 

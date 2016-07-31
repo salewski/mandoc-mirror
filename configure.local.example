@@ -48,6 +48,13 @@ HAVE_WCHAR=1
 
 HAVE_WCHAR=0
 
+# For -Tutf8 mode, mandoc needs to set an arbitrary locale having
+# a UTF-8 character set.  If autodetection of a suitable locale
+# fails or selects an undesirable locale, you can manually choose
+# the locale for -Tutf8 mode:
+
+UTF8_LOCALE=en_US.UTF-8
+
 # When man(1) or apropos(1) is called without -m and -M options,
 # MANPATH is not set in the environment, and man.conf(5) is not
 # available, manuals are searched for in the following directory

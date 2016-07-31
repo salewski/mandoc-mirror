@@ -35,9 +35,9 @@ main(void)
 		return 1;
 	}
 
-	if (setlocale(LC_CTYPE, "en_US.UTF-8") == NULL) {
-		fputs("setlocale(LC_CTYPE, \"en_US.UTF-8\") failed\n",
-		    stderr);
+	if (setlocale(LC_CTYPE, UTF8_LOCALE) == NULL) {
+		fprintf(stderr, "setlocale(LC_CTYPE, \"%s\") failed\n",
+		    UTF8_LOCALE);
 		return 1;
 	}
 
