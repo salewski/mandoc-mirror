@@ -35,6 +35,7 @@ echo "config.log: writing..."
 
 MANPATH_DEFAULT="/usr/share/man:/usr/X11R6/man:/usr/local/man"
 OSNAME=
+UTF8_LOCALE=
 
 CC=`printf "all:\\n\\t@echo \\\$(CC)\\n" | env -i make -f -`
 CFLAGS="-g -W -Wall -Wmissing-prototypes -Wstrict-prototypes -Wwrite-strings"
@@ -182,6 +183,23 @@ runtest() {
 	return 1
 }
 
+# Select a UTF-8 locale.
+get_locale() {
+	[ -n "${HAVE_WCHAR}" ] && [ "${HAVE_WCHAR}" -eq 0 ] && return 0
+	ismanual UTF8_LOCALE "$UTF8_LOCALE" && return 0
+	echo "UTF8_LOCALE: testing..." 1>&3
+	UTF8_LOCALE=`locale -a | grep -i '^en_US\.UTF-*8$' | head -n 1`
+	if [ -z "${UTF8_LOCALE}" ]; then
+		UTF8_LOCALE=`locale -a | grep -i '\.UTF-*8' | head -n 1`
+		[ -n "${UTF8_LOCALE}" ] || return 1
+	fi
+	echo "UTF8_LOCALE=${UTF8_LOCALE}" 1>&2
+	echo "UTF8_LOCALE=${UTF8_LOCALE}" 1>&3
+	echo 1>&3
+	return 0;
+}
+
+
 # --- library functions ---
 runtest dirent-namlen	DIRENT_NAMLEN	|| true
 runtest err		ERR		|| true
@@ -205,7 +223,15 @@ runtest strptime	STRPTIME	|| true
 runtest strsep		STRSEP		|| true
 runtest strtonum	STRTONUM	|| true
 runtest vasprintf	VASPRINTF	|| true
-runtest wchar		WCHAR		|| true
+
+# --- wide character and locale support ---
+if get_locale; then
+	runtest wchar WCHAR -DUTF8_LOCALE=\"${UTF8_LOCALE}\" || true
+else
+	HAVE_WCHAR=0
+	echo "wchar: no (no UTF8_LOCALE)" 1>&2
+	echo "wchar: no (no UTF8_LOCALE)" 1>&3
+fi
 
 # --- sqlite3 ---
 if [ ${BUILD_DB} -eq 0 ]; then
@@ -323,6 +349,7 @@ echo
 echo "#define MAN_CONF_FILE \"/etc/${MANM_MANCONF}\""
 echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
+[ -n "${UTF8_LOCALE}" ] && echo "#define UTF8_LOCALE \"${UTF8_LOCALE}\""
 [ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""
 
 cat << __HEREDOC__
