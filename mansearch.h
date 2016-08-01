@@ -16,9 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define	MANDOC_DB	 "mandoc.new.db"
+#define	MANDOC_DB	 "mandoc.db"
 #define	MANDOCDB_MAGIC	 0x3a7d0cdb
-#define	MANDOCDB_VERSION 0  /* XXX Start counting in production. */
+#define	MANDOCDB_VERSION 1
 
 #define	MACRO_MAX	 36
 #define	KEY_Nd		 39
