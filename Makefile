@@ -29,6 +29,7 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-mmap.c \
 		   test-nanosleep.c \
 		   test-ohash.c \
+		   test-PATH_MAX.c \
 		   test-pledge.c \
 		   test-progname.c \
 		   test-reallocarray.c \

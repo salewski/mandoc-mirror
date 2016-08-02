@@ -209,6 +209,7 @@ runtest getsubopt	GETSUBOPT	|| true
 runtest isblank		ISBLANK		|| true
 runtest mkdtemp		MKDTEMP		|| true
 runtest mmap		MMAP		|| true
+runtest PATH_MAX	PATH_MAX	|| true
 runtest pledge		PLEDGE		|| true
 runtest sandbox_init	SANDBOX_INIT	|| true
 runtest progname	PROGNAME	|| true
@@ -351,6 +352,7 @@ echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
 [ -n "${UTF8_LOCALE}" ] && echo "#define UTF8_LOCALE \"${UTF8_LOCALE}\""
 [ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""
+[ ${HAVE_PATH_MAX} -eq 0 ] && echo "#define PATH_MAX 4096"
 
 cat << __HEREDOC__
 #define HAVE_DIRENT_NAMLEN ${HAVE_DIRENT_NAMLEN}
