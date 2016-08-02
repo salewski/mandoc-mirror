@@ -20,6 +20,7 @@ VERSION = 1.14.0
 # === LIST OF FILES ====================================================
 
 TESTSRCS	 = test-dirent-namlen.c \
+		   test-EFTYPE.c \
 		   test-err.c \
 		   test-fts.c \
 		   test-getline.c \
@@ -28,6 +29,7 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-mkdtemp.c \
 		   test-nanosleep.c \
 		   test-ohash.c \
+		   test-PATH_MAX.c \
 		   test-pledge.c \
 		   test-progname.c \
 		   test-reallocarray.c \

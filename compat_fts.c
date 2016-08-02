@@ -68,6 +68,9 @@ static unsigned short	 fts_stat(FTS *, FTSENT *);
 #ifndef	O_CLOEXEC
 #define	O_CLOEXEC	0
 #endif
+#ifndef	PATH_MAX
+#define	PATH_MAX	4096
+#endif
 
 #define	CLR(opt)	(sp->fts_options &= ~(opt))
 #define	ISSET(opt)	(sp->fts_options & (opt))
