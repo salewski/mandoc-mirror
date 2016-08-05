@@ -24,7 +24,13 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#if HAVE_ENDIAN
 #include <endian.h>
+#elif HAVE_SYS_ENDIAN
+#include <sys/endian.h>
+#elif HAVE_NTOHL
+#include <arpa/inet.h>
+#endif
 #if HAVE_ERR
 #include <err.h>
 #endif

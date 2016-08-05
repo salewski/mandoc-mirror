@@ -19,7 +19,8 @@ VERSION = 1.14.0
 
 # === LIST OF FILES ====================================================
 
-TESTSRCS	 = test-dirent-namlen.c \
+TESTSRCS	 = test-be32toh.c \
+		   test-dirent-namlen.c \
 		   test-EFTYPE.c \
 		   test-err.c \
 		   test-fts.c \
@@ -28,6 +29,7 @@ TESTSRCS	 = test-dirent-namlen.c \
 		   test-isblank.c \
 		   test-mkdtemp.c \
 		   test-nanosleep.c \
+		   test-ntohl.c \
 		   test-ohash.c \
 		   test-PATH_MAX.c \
 		   test-pledge.c \

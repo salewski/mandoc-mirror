@@ -17,8 +17,16 @@
  * Allocation-based version of the mandoc database, for read-write access.
  * The interface is defined in "dba.h".
  */
+#include "config.h"
+
 #include <sys/types.h>
+#if HAVE_ENDIAN
 #include <endian.h>
+#elif HAVE_SYS_ENDIAN
+#include <sys/endian.h>
+#elif HAVE_NTOHL
+#include <arpa/inet.h>
+#endif
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
