@@ -21,7 +21,9 @@
 #include <sys/types.h>
 
 #include <assert.h>
+#if HAVE_ERR
 #include <err.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <glob.h>
