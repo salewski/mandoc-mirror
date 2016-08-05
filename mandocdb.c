@@ -1693,7 +1693,7 @@ parse_mdoc_Nm(struct mpage *mpage, const struct roff_meta *meta,
 	if ( ! (mpage->name_head_done ||
 	    n->child == NULL || n->child->string == NULL ||
 	    strcasecmp(n->child->string, meta->title))) {
-		putkey(mpage, n->child->string, ROFFT_HEAD);
+		putkey(mpage, n->child->string, NAME_HEAD);
 		mpage->name_head_done = 1;
 	}
 	return 0;
