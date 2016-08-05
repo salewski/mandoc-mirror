@@ -18,6 +18,7 @@
  * The interface is defined in "dba.h".
  */
 #include <sys/types.h>
+#include <endian.h>
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
