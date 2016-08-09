@@ -1773,10 +1773,11 @@ post_sh_head(POST_ARGS)
 
 	/* The NAME should be first. */
 
-	if (SEC_NAME != sec && SEC_NONE == mdoc->lastnamed)
+	if (sec != SEC_NAME && mdoc->lastnamed == SEC_NONE)
 		mandoc_vmsg(MANDOCERR_NAMESEC_FIRST, mdoc->parse,
-		    mdoc->last->line, mdoc->last->pos,
-		    "Sh %s", secnames[sec]);
+		    mdoc->last->line, mdoc->last->pos, "Sh %s",
+		    sec == SEC_CUSTOM ? mdoc->last->child->string :
+		    secnames[sec]);
 
 	/* The SYNOPSIS gets special attention in other areas. */
 

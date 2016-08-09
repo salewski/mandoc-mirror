@@ -985,7 +985,8 @@ mmsg(enum mandocerr t, enum mandoclevel lvl,
 {
 	const char	*mparse_msg;
 
-	fprintf(stderr, "%s: %s:", getprogname(), file);
+	fprintf(stderr, "%s: %s:", getprogname(),
+	    file == NULL ? "<stdin>" : file);
 
 	if (line)
 		fprintf(stderr, "%d:%d:", line, col + 1);
