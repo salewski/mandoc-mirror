@@ -82,7 +82,9 @@ struct	curparse {
 };
 
 
+#if HAVE_SQLITE3
 int			  mandocdb(int, char *[]);
+#endif
 
 static	int		  fs_lookup(const struct manpaths *,
 				size_t ipath, const char *,
@@ -145,9 +147,11 @@ main(int argc, char *argv[])
 	setprogname(progname);
 #endif
 
+#if HAVE_SQLITE3
 	if (strncmp(progname, "mandocdb", 8) == 0 ||
 	    strcmp(progname, BINM_MAKEWHATIS) == 0)
 		return mandocdb(argc, argv);
+#endif
 
 #if HAVE_PLEDGE
 	if (pledge("stdio rpath tmppath tty proc exec flock", NULL) == -1)
@@ -345,6 +349,9 @@ main(int argc, char *argv[])
 	/* man(1), whatis(1), apropos(1) */
 
 	if (search.argmode != ARG_FILE) {
+		if (argc == 0)
+			usage(search.argmode);
+
 		if (search.argmode == ARG_NAME &&
 		    outmode == OUTMODE_ONE)
 			search.firstmatch = 1;
@@ -352,9 +359,19 @@ main(int argc, char *argv[])
 		/* Access the mandoc database. */
 
 		manconf_parse(&conf, conf_file, defpaths, auxpaths);
+#if HAVE_SQLITE3
+		mansearch_setup(1);
 		if ( ! mansearch(&search, &conf.manpath,
 		    argc, argv, &res, &sz))
 			usage(search.argmode);
+#else
+		if (search.argmode != ARG_NAME) {
+			fputs("mandoc: database support not compiled in\n",
+			    stderr);
+			return (int)MANDOCLEVEL_BADARG;
+		}
+		sz = 0;
+#endif
 
 		if (sz == 0) {
 			if (search.argmode == ARG_NAME)
@@ -457,7 +474,7 @@ main(int argc, char *argv[])
 
 			if (resp == NULL)
 				parse(&curp, fd, *argv);
-			else if (resp->form == FORM_SRC) {
+			else if (resp->form & FORM_SRC) {
 				/* For .so only; ignore failure. */
 				chdir(conf.manpath.paths[resp->ipath]);
 				parse(&curp, fd, resp->file);
@@ -505,7 +522,10 @@ main(int argc, char *argv[])
 out:
 	if (search.argmode != ARG_FILE) {
 		manconf_free(&conf);
+#if HAVE_SQLITE3
 		mansearch_free(res, sz);
+		mansearch_setup(0);
+#endif
 	}
 
 	free(defos);
@@ -609,8 +629,7 @@ fs_lookup(const struct manpaths *paths, size_t ipath,
 	glob_t		 globinfo;
 	struct manpage	*page;
 	char		*file;
-	int		 globres;
-	enum form	 form;
+	int		 form, globres;
 
 	form = FORM_SRC;
 	mandoc_asprintf(&file, "%s/man%s/%s.%s",
@@ -648,8 +667,10 @@ fs_lookup(const struct manpaths *paths, size_t ipath,
 		return 0;
 
 found:
+#if HAVE_SQLITE3
 	warnx("outdated mandoc.db lacks %s(%s) entry, run %s %s",
 	    name, sec, BINM_MAKEWHATIS, paths->paths[ipath]);
+#endif
 	*res = mandoc_reallocarray(*res, ++*ressz, sizeof(struct manpage));
 	page = *res + (*ressz - 1);
 	page->file = file;
@@ -985,7 +1006,8 @@ mmsg(enum mandocerr t, enum mandoclevel lvl,
 {
 	const char	*mparse_msg;
 
-	fprintf(stderr, "%s: %s:", getprogname(), file);
+	fprintf(stderr, "%s: %s:", getprogname(),
+	    file == NULL ? "<stdin>" : file);
 
 	if (line)
 		fprintf(stderr, "%d:%d:", line, col + 1);
