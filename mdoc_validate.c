@@ -1064,10 +1064,11 @@ post_it(POST_ARGS)
 			    mdoc_argnames[nbl->args->argv[0].arg]);
 		/* FALLTHROUGH */
 	case LIST_item:
-		if (nit->head->child != NULL)
+		if ((nch = nit->head->child) != NULL)
 			mandoc_vmsg(MANDOCERR_ARG_SKIP,
 			    mdoc->parse, nit->line, nit->pos,
-			    "It %s", nit->head->child->string);
+			    "It %s", nch->string == NULL ?
+			    mdoc_macronames[nch->tok] : nch->string);
 		break;
 	case LIST_column:
 		cols = (int)nbl->norm->Bl.ncols;
