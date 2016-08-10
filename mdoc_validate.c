@@ -502,6 +502,7 @@ post_bl_norm(POST_ARGS)
 		mandoc_msg(MANDOCERR_BL_NOTYPE, mdoc->parse,
 		    n->line, n->pos, "Bl");
 		n->norm->Bl.type = LIST_item;
+		mdoclt = MDOC_Item;
 	}
 
 	/*
