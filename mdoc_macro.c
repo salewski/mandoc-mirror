@@ -292,7 +292,7 @@ rew_pending(struct roff_man *mdoc, const struct roff_node *n)
 			case ROFFT_HEAD:
 				roff_body_alloc(mdoc, n->line, n->pos,
 				    n->tok);
-				return;
+				break;
 			case ROFFT_BLOCK:
 				break;
 			default:
