@@ -886,9 +886,10 @@ post_display(POST_ARGS)
 	n = mdoc->last;
 	switch (n->type) {
 	case ROFFT_BODY:
-		if (n->end != ENDBODY_NOT)
-			break;
-		if (n->child == NULL)
+		if (n->end != ENDBODY_NOT) {
+			if (n->tok == MDOC_Bd && n->parent->args == NULL)
+				roff_node_delete(mdoc, n);
+		} else if (n->child == NULL)
 			mandoc_msg(MANDOCERR_BLK_EMPTY, mdoc->parse,
 			    n->line, n->pos, mdoc_macronames[n->tok]);
 		else if (n->tok == MDOC_D1)
