@@ -2013,11 +2013,12 @@ dbadd(struct dba *dba, struct mpage *mpage)
 	cp = mpage->desc;
 	i = strlen(cp);
 	mustfree = render_string(&cp, &i);
-	mpage->dba = dba_page_new(dba->pages, mlink->name, mpage->sec,
+	mpage->dba = dba_page_new(dba->pages,
 	    *mpage->arch == '\0' ? mlink->arch : mpage->arch,
 	    cp, mlink->file, mpage->form);
 	if (mustfree)
 		free(cp);
+	dba_page_add(mpage->dba, DBP_SECT, mpage->sec);
 
 	while (mlink != NULL) {
 		dbadd_mlink(mlink);
