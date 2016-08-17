@@ -143,7 +143,8 @@ dba_page_new(struct dba_array *pages, const char *name, const char *sect,
 
 	page = dba_array_new(DBP_MAX, 0);
 	entry = dba_array_new(1, DBA_STR | DBA_GROW);
-	dba_array_add(entry, prepend(name, NAME_FILE & NAME_MASK));
+	if (name != NULL)
+		dba_array_add(entry, prepend(name, NAME_FILE & NAME_MASK));
 	dba_array_add(page, entry);
 	entry = dba_array_new(1, DBA_STR | DBA_GROW);
 	dba_array_add(entry, (void *)sect);
