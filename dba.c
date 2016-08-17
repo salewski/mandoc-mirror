@@ -177,7 +177,7 @@ dba_page_add(struct dba_array *page, int32_t ie, const char *str)
 	if (ie == DBP_ARCH) {
 		if (entries == NULL)
 			return;
-		if (str == NULL) {
+		if (str == NULL || *str == '\0') {
 			dba_array_free(entries);
 			dba_array_set(page, DBP_ARCH, NULL);
 			return;
