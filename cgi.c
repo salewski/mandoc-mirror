@@ -338,6 +338,7 @@ resp_copy(const char *filename)
 		fflush(stdout);
 		while ((sz = read(fd, buf, sizeof(buf))) > 0)
 			write(STDOUT_FILENO, buf, sz);
+		close(fd);
 	}
 }
 
