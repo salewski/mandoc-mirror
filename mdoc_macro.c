@@ -1459,7 +1459,7 @@ phrase_ta(MACRO_PROT_ARGS)
 			continue;
 		if (n->tok == MDOC_It && n->type == ROFFT_BODY)
 			body = n;
-		if (n->tok == MDOC_Bl)
+		if (n->tok == MDOC_Bl && n->end == ENDBODY_NOT)
 			break;
 	}
 
