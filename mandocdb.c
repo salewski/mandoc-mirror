@@ -448,10 +448,10 @@ mandocdb(int argc, char *argv[])
 			if (nodb == 0)
 				dbprune(dba);
 		} else {
-			/*
-			 * Database missing or corrupt.
-			 * Recreate from scratch.
-			 */
+			/* Database missing or corrupt. */
+			say(MANDOC_DB,
+			    "%s: Automatically recreating from scratch",
+			    strerror(errno));
 			exitcode = (int)MANDOCLEVEL_OK;
 			op = OP_DEFAULT;
 			if (0 == treescan())
