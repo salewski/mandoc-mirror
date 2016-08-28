@@ -480,7 +480,7 @@ args(struct roff_man *mdoc, int line, int *pos,
 			 * unless there is a blank in between.
 			 */
 
-			if (p[-1] != ' ')
+			if (p > buf && p[-1] != ' ')
 				mdoc->flags |= MDOC_PHRASEQL;
 			if (p[1] != ' ')
 				mdoc->flags |= MDOC_PHRASEQN;
