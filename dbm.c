@@ -150,10 +150,18 @@ dbm_page_get(int32_t ip)
 	assert(ip >= 0);
 	assert(ip < npages);
 	res.name = dbm_get(pages[ip].name);
+	if (res.name == NULL)
+		res.name = "(NULL)";
 	res.sect = dbm_get(pages[ip].sect);
+	if (res.sect == NULL)
+		res.sect = "(NULL)";
 	res.arch = pages[ip].arch ? dbm_get(pages[ip].arch) : NULL;
 	res.desc = dbm_get(pages[ip].desc);
+	if (res.desc == NULL)
+		res.desc = "(NULL)";
 	res.file = dbm_get(pages[ip].file);
+	if (res.file == NULL)
+		res.file = " (NULL)";
 	res.addr = dbm_addr(pages + ip);
 	return &res;
 }
@@ -250,7 +258,13 @@ page_bytitle(enum iter arg_iter, const struct dbm_match *arg_match)
 		default:
 			abort();
 		}
-		ip = 0;
+		if (cp == NULL) {
+			iteration = ITER_NONE;
+			match = NULL;
+			cp = NULL;
+			ip = npages;
+		} else
+			ip = 0;
 		return res;
 	}
 
