@@ -143,7 +143,11 @@ void *
 dbm_get(int32_t offset)
 {
 	offset = be32toh(offset);
-	if (offset < 0 || offset >= max_offset) {
+	if (offset < 0) {
+		warnx("dbm_get: Database corrupt: offset %d", offset);
+		return NULL;
+	}
+	if (offset >= max_offset) {
 		warnx("dbm_get: Database corrupt: offset %d > %d",
 		    offset, max_offset);
 		return NULL;
