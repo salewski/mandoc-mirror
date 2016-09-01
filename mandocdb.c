@@ -1049,7 +1049,7 @@ mlink_check(struct mpage *mpage, struct mlink *mlink)
 	 * architectures.
 	 * A few manuals are even shared across completely
 	 * different architectures, for example fdformat(1)
-	 * on amd64, i386, sparc, and sparc64.
+	 * on amd64, i386, and sparc64.
 	 */
 
 	if (strcasecmp(mpage->arch, mlink->arch))
