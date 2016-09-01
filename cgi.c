@@ -116,15 +116,15 @@ static	const char *const arch_names[] = {
     "amd64",       "alpha",       "armv7",
     "hppa",        "i386",        "landisk",
     "loongson",    "luna88k",     "macppc",      "mips64",
-    "octeon",      "sgi",         "socppc",      "sparc",
+    "octeon",      "sgi",         "socppc",
     "sparc64",     "zaurus",
     "amiga",       "arc",         "armish",      "arm32",
     "atari",       "aviion",      "beagle",      "cats",
     "hppa64",      "hp300",
     "ia64",        "mac68k",      "mvme68k",     "mvme88k",
     "mvmeppc",     "palm",        "pc532",       "pegasos",
-    "pmax",        "powerpc",     "solbourne",   "sun3",
-    "vax",         "wgrisc",      "x68k"
+    "pmax",        "powerpc",     "solbourne",   "sparc",
+    "sun3",        "vax",         "wgrisc",      "x68k"
 };
 static	const int arch_MAX = sizeof(arch_names) / sizeof(char *);
 
