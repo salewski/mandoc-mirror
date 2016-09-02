@@ -449,9 +449,9 @@ mandocdb(int argc, char *argv[])
 				dbprune(dba);
 		} else {
 			/* Database missing or corrupt. */
-			say(MANDOC_DB,
-			    "%s: Automatically recreating from scratch",
-			    strerror(errno));
+			if (op != OP_UPDATE || errno != ENOENT)
+				say(MANDOC_DB, "%s: Automatically recreating"
+				    " from scratch", strerror(errno));
 			exitcode = (int)MANDOCLEVEL_OK;
 			op = OP_DEFAULT;
 			if (0 == treescan())
