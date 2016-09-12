@@ -138,7 +138,7 @@ html_putchar(char c)
 
 	switch (c) {
 	case ('"'):
-		printf("&quote;");
+		printf("&quot;");
 		break;
 	case ('&'):
 		printf("&amp;");
