@@ -213,6 +213,13 @@ are mere guesses, and some may be wrong.
   synaptics(4) found by tedu@  Mon, 17 Aug 2015 21:17:42 -0400
   loc **  exist **  algo **  size **  imp ***
 
+- break long text into lines inside cells
+  net/lftp(1) from jirib via bentley@ Sep 13, 2016
+
+- layout l1 for a column of max text width 3 reduces the following
+  inter-column spacing for groff, but not for mandoc
+  net/lftp(1) from jirib via bentley@ Sep 13, 2016
+
 - the "w" layout option is ignored
   synaptics(4) found by tedu@  Mon, 17 Aug 2015 21:17:42 -0400
   loc *  exist *  algo *  size *  imp **
