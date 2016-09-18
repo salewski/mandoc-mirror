@@ -97,6 +97,7 @@ static	int		  koptions(int *, char *);
 static	int		  moptions(int *, char *);
 static	void		  mmsg(enum mandocerr, enum mandoclevel,
 				const char *, int, int, const char *);
+static	void		  outdata_alloc(struct curparse *);
 static	void		  parse(struct curparse *, int, const char *);
 static	void		  passthrough(const char *, int, int);
 static	pid_t		  spawn_pager(struct tag_files *);
@@ -482,8 +483,11 @@ main(int argc, char *argv[])
 				passthrough(resp->file, fd,
 				    conf.output.synopsisonly);
 
-			if (argc > 1 && curp.outtype <= OUTT_UTF8)
+			if (argc > 1 && curp.outtype <= OUTT_UTF8) {
+				if (curp.outdata == NULL)
+					outdata_alloc(&curp);
 				terminal_sepline(curp.outdata);
+			}
 		} else if (rc < MANDOCLEVEL_ERROR)
 			rc = MANDOCLEVEL_ERROR;
 
@@ -743,32 +747,8 @@ parse(struct curparse *curp, int fd, const char *file)
 	if (rctmp != MANDOCLEVEL_OK && curp->wstop)
 		return;
 
-	/* If unset, allocate output dev now (if applicable). */
-
-	if (curp->outdata == NULL) {
-		switch (curp->outtype) {
-		case OUTT_HTML:
-			curp->outdata = html_alloc(curp->outopts);
-			break;
-		case OUTT_UTF8:
-			curp->outdata = utf8_alloc(curp->outopts);
-			break;
-		case OUTT_LOCALE:
-			curp->outdata = locale_alloc(curp->outopts);
-			break;
-		case OUTT_ASCII:
-			curp->outdata = ascii_alloc(curp->outopts);
-			break;
-		case OUTT_PDF:
-			curp->outdata = pdf_alloc(curp->outopts);
-			break;
-		case OUTT_PS:
-			curp->outdata = ps_alloc(curp->outopts);
-			break;
-		default:
-			break;
-		}
-	}
+	if (curp->outdata == NULL)
+		outdata_alloc(curp);
 
 	mparse_result(curp->mp, &man, NULL);
 
@@ -825,6 +805,33 @@ parse(struct curparse *curp, int fd, const char *file)
 }
 
 static void
+outdata_alloc(struct curparse *curp)
+{
+	switch (curp->outtype) {
+	case OUTT_HTML:
+		curp->outdata = html_alloc(curp->outopts);
+		break;
+	case OUTT_UTF8:
+		curp->outdata = utf8_alloc(curp->outopts);
+		break;
+	case OUTT_LOCALE:
+		curp->outdata = locale_alloc(curp->outopts);
+		break;
+	case OUTT_ASCII:
+		curp->outdata = ascii_alloc(curp->outopts);
+		break;
+	case OUTT_PDF:
+		curp->outdata = pdf_alloc(curp->outopts);
+		break;
+	case OUTT_PS:
+		curp->outdata = ps_alloc(curp->outopts);
+		break;
+	default:
+		break;
+	}
+}
+
+static void
 passthrough(const char *file, int fd, int synopsis_only)
 {
 	const char	 synb[] = "S\bSY\bYN\bNO\bOP\bPS\bSI\bIS\bS";
@@ -834,10 +841,16 @@ passthrough(const char *file, int fd, int synopsis_only)
 	const char	*syscall;
 	char		*line, *cp;
 	size_t		 linesz;
+	ssize_t		 len, written;
 	int		 print;
 
 	line = NULL;
 	linesz = 0;
+
+	if (fflush(stdout) == EOF) {
+		syscall = "fflush";
+		goto fail;
+	}
 
 	if ((stream = fdopen(fd, "r")) == NULL) {
 		close(fd);
@@ -846,14 +859,16 @@ passthrough(const char *file, int fd, int synopsis_only)
 	}
 
 	print = 0;
-	while (getline(&line, &linesz, stream) != -1) {
+	while ((len = getline(&line, &linesz, stream)) != -1) {
 		cp = line;
 		if (synopsis_only) {
 			if (print) {
 				if ( ! isspace((unsigned char)*cp))
 					goto done;
-				while (isspace((unsigned char)*cp))
+				while (isspace((unsigned char)*cp)) {
 					cp++;
+					len--;
+				}
 			} else {
 				if (strcmp(cp, synb) == 0 ||
 				    strcmp(cp, synr) == 0)
@@ -861,9 +876,11 @@ passthrough(const char *file, int fd, int synopsis_only)
 				continue;
 			}
 		}
-		if (fputs(cp, stdout)) {
+		for (; len > 0; len -= written) {
+			if ((written = write(STDOUT_FILENO, cp, len)) != -1)
+				continue;
 			fclose(stream);
-			syscall = "fputs";
+			syscall = "write";
 			goto fail;
 		}
 	}
