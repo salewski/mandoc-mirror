@@ -820,10 +820,16 @@ passthrough(const char *file, int fd, int synopsis_only)
 	const char	*syscall;
 	char		*line, *cp;
 	size_t		 linesz;
+	ssize_t		 len, written;
 	int		 print;
 
 	line = NULL;
 	linesz = 0;
+
+	if (fflush(stdout) == EOF) {
+		syscall = "fflush";
+		goto fail;
+	}
 
 	if ((stream = fdopen(fd, "r")) == NULL) {
 		close(fd);
@@ -832,14 +838,16 @@ passthrough(const char *file, int fd, int synopsis_only)
 	}
 
 	print = 0;
-	while (getline(&line, &linesz, stream) != -1) {
+	while ((len = getline(&line, &linesz, stream)) != -1) {
 		cp = line;
 		if (synopsis_only) {
 			if (print) {
 				if ( ! isspace((unsigned char)*cp))
 					goto done;
-				while (isspace((unsigned char)*cp))
+				while (isspace((unsigned char)*cp)) {
 					cp++;
+					len--;
+				}
 			} else {
 				if (strcmp(cp, synb) == 0 ||
 				    strcmp(cp, synr) == 0)
@@ -847,9 +855,11 @@ passthrough(const char *file, int fd, int synopsis_only)
 				continue;
 			}
 		}
-		if (fputs(cp, stdout)) {
+		for (; len > 0; len -= written) {
+			if ((written = write(STDOUT_FILENO, cp, len)) != -1)
+				continue;
 			fclose(stream);
-			syscall = "fputs";
+			syscall = "write";
 			goto fail;
 		}
 	}
