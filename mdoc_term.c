@@ -631,10 +631,10 @@ termp_it_pre(DECL_ARGS)
 		width = term_len(p, 2);
 		break;
 	case LIST_hang:
+	case LIST_tag:
 		width = term_len(p, 8);
 		break;
 	case LIST_column:
-	case LIST_tag:
 		width = term_len(p, 10);
 		break;
 	default:
