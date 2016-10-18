@@ -120,7 +120,11 @@ static	void	 dbadd_mlink(const struct mlink *mlink);
 static	void	 dbprune(struct dba *);
 static	void	 dbwrite(struct dba *);
 static	void	 filescan(const char *);
+#if HAVE_FTS_COMPARE_CONST
+static	int	 fts_compare(const FTSENT *const *, const FTSENT *const *);
+#else
 static	int	 fts_compare(const FTSENT **, const FTSENT **);
+#endif
 static	void	 mlink_add(struct mlink *, const struct stat *);
 static	void	 mlink_check(struct mpage *, struct mlink *);
 static	void	 mlink_free(struct mlink *);
@@ -547,7 +551,11 @@ usage:
  * at the beginning, process directory entries in reverse alpha order.
  */
 static int
+#if HAVE_FTS_COMPARE_CONST
+fts_compare(const FTSENT *const *a, const FTSENT *const *b)
+#else
 fts_compare(const FTSENT **a, const FTSENT **b)
+#endif
 {
 	return -strcmp((*a)->fts_name, (*b)->fts_name);
 }
