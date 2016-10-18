@@ -7,7 +7,7 @@ int dummy;
 #else
 
 /*	$Id$	*/
-/*	$OpenBSD: fts.c,v 1.50 2015/01/16 16:48:51 deraadt Exp $	*/
+/*	$OpenBSD: fts.c,v 1.56 2016/09/21 04:38:56 guenther Exp $	*/
 
 /*-
  * Copyright (c) 1990, 1993, 1994
@@ -83,10 +83,15 @@ fts_open(char * const *argv, int options, void *dummy)
 	FTSENT *p, *root;
 	int nitems;
 	FTSENT *parent, *tmp;
-	size_t len;
 
 	/* Options check. */
 	if (options & ~FTS_OPTIONMASK) {
+		errno = EINVAL;
+		return (NULL);
+	}
+
+	/* At least one path must be specified. */
+	if (*argv == NULL) {
 		errno = EINVAL;
 		return (NULL);
 	}
@@ -110,13 +115,7 @@ fts_open(char * const *argv, int options, void *dummy)
 
 	/* Allocate/initialize root(s). */
 	for (root = NULL, nitems = 0; *argv; ++argv, ++nitems) {
-		/* Don't allow zero-length paths. */
-		if ((len = strlen(*argv)) == 0) {
-			errno = ENOENT;
-			goto mem3;
-		}
-
-		if ((p = fts_alloc(sp, *argv, len)) == NULL)
+		if ((p = fts_alloc(sp, *argv, strlen(*argv))) == NULL)
 			goto mem3;
 		p->fts_level = FTS_ROOTLEVEL;
 		p->fts_parent = parent;
@@ -320,7 +319,6 @@ name:		t = sp->fts_path + NAPPEND(p->fts_parent);
  * semantics to fts using fts_set.  An error return is allowed for similar
  * reasons.
  */
-/* ARGSUSED */
 int
 fts_set(FTS *sp, FTSENT *p, int instr)
 {
@@ -419,8 +417,7 @@ fts_build(FTS *sp)
 				 * structures already allocated.
 				 */
 mem1:				saved_errno = errno;
-				if (p)
-					free(p);
+				free(p);
 				fts_lfree(head);
 				(void)closedir(dirp);
 				cur->fts_info = FTS_ERR;
@@ -600,8 +597,7 @@ fts_palloc(FTS *sp, size_t more)
 	 */
 	more += 256;
 	if (sp->fts_pathlen + more < sp->fts_pathlen) {
-		if (sp->fts_path)
-			free(sp->fts_path);
+		free(sp->fts_path);
 		sp->fts_path = NULL;
 		errno = ENAMETOOLONG;
 		return (1);
@@ -609,8 +605,7 @@ fts_palloc(FTS *sp, size_t more)
 	sp->fts_pathlen += more;
 	p = realloc(sp->fts_path, sp->fts_pathlen);
 	if (p == NULL) {
-		if (sp->fts_path)
-			free(sp->fts_path);
+		free(sp->fts_path);
 		sp->fts_path = NULL;
 		return (1);
 	}
