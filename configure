@@ -185,7 +185,7 @@ runtest() {
 # Select a UTF-8 locale.
 get_locale() {
 	[ -n "${HAVE_WCHAR}" ] && [ "${HAVE_WCHAR}" -eq 0 ] && return 0
-	ismanual UTF8_LOCALE UTF_LOCALE "$UTF8_LOCALE" && return 0
+	ismanual UTF8_LOCALE UTF8_LOCALE "$UTF8_LOCALE" && return 0
 	echo "UTF8_LOCALE: testing..." 1>&3
 	UTF8_LOCALE=`locale -a | grep -i '^en_US\.UTF-*8$' | head -n 1`
 	if [ -z "${UTF8_LOCALE}" ]; then
