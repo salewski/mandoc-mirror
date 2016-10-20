@@ -51,6 +51,7 @@ BUILD_DB=1
 BUILD_CGI=0
 
 HAVE_DIRENT_NAMLEN=
+HAVE_EFTYPE=
 HAVE_ERR=
 HAVE_FTS=
 HAVE_GETLINE=
@@ -202,6 +203,7 @@ get_locale() {
 
 # --- library functions ---
 runtest dirent-namlen	DIRENT_NAMLEN	|| true
+runtest EFTYPE		EFTYPE		|| true
 runtest err		ERR		|| true
 runtest fts		FTS		|| true
 runtest getline		GETLINE		|| true
@@ -352,6 +354,7 @@ echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
 [ -n "${UTF8_LOCALE}" ] && echo "#define UTF8_LOCALE \"${UTF8_LOCALE}\""
 [ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""
+[ ${HAVE_EFTYPE} -eq 0 ] && echo "#define EFTYPE EINVAL"
 [ ${HAVE_PATH_MAX} -eq 0 ] && echo "#define PATH_MAX 4096"
 
 cat << __HEREDOC__
