@@ -100,7 +100,7 @@ dbm_map(const char *fname)
 	}
 	max_offset = be32toh(*dbm_getint(3)) + sizeof(int32_t);
 	if (st.st_size != max_offset) {
-		warnx("dbm_map(%s): Inconsistent file size %llu (expected %d)",
+		warnx("dbm_map(%s): Inconsistent file size %lld (expected %d)",
 		    fname, st.st_size, max_offset);
 		errno = EFTYPE;
 		goto fail;
