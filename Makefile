@@ -20,6 +20,7 @@ VERSION = 1.13.4
 # === LIST OF FILES ====================================================
 
 TESTSRCS	 = test-dirent-namlen.c \
+		   test-EFTYPE.c \
 		   test-err.c \
 		   test-fts.c \
 		   test-getline.c \
