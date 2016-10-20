@@ -262,6 +262,7 @@ elif runtest sqlite3 SQLITE3 \
 		"-I/usr/local/include -L/usr/local/lib -lsqlite3"; then
 	LD_SQLITE3="-L/usr/local/lib -lsqlite3"
 	CFLAGS="${CFLAGS} -I/usr/local/include"
+	COMP="${COMP} -I/usr/local/include"
 fi
 if [ ${HAVE_SQLITE3} -eq 0 ]; then
 	LD_SQLITE3=
