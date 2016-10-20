@@ -37,13 +37,14 @@
 #if HAVE_SANDBOX_INIT
 #include <sandbox.h>
 #endif
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#include <sqlite3.h>
 
 #include "mandoc_aux.h"
 #include "mandoc_ohash.h"
@@ -53,10 +54,28 @@
 #include "man.h"
 #include "manconf.h"
 #include "mansearch.h"
-#include "dba_array.h"
-#include "dba.h"
 
+extern int mansearch_keymax;
 extern const char *const mansearch_keynames[];
+
+#define	SQL_EXEC(_v) \
+	if (SQLITE_OK != sqlite3_exec(db, (_v), NULL, NULL, NULL)) \
+		say("", "%s: %s", (_v), sqlite3_errmsg(db))
+#define	SQL_BIND_TEXT(_s, _i, _v) \
+	if (SQLITE_OK != sqlite3_bind_text \
+		((_s), (_i)++, (_v), -1, SQLITE_STATIC)) \
+		say(mlink->file, "%s", sqlite3_errmsg(db))
+#define	SQL_BIND_INT(_s, _i, _v) \
+	if (SQLITE_OK != sqlite3_bind_int \
+		((_s), (_i)++, (_v))) \
+		say(mlink->file, "%s", sqlite3_errmsg(db))
+#define	SQL_BIND_INT64(_s, _i, _v) \
+	if (SQLITE_OK != sqlite3_bind_int64 \
+		((_s), (_i)++, (_v))) \
+		say(mlink->file, "%s", sqlite3_errmsg(db))
+#define SQL_STEP(_s) \
+	if (SQLITE_DONE != sqlite3_step((_s))) \
+		say(mlink->file, "%s", sqlite3_errmsg(db))
 
 enum	op {
 	OP_DEFAULT = 0, /* new dbs from dir list or default config */
@@ -79,14 +98,14 @@ struct	inodev {
 
 struct	mpage {
 	struct inodev	 inodev;  /* used for hashing routine */
-	struct dba_array *dba;
+	int64_t		 pageid;  /* pageid in mpages SQL table */
 	char		*sec;     /* section from file content */
 	char		*arch;    /* architecture from file content */
 	char		*title;   /* title from file content */
 	char		*desc;    /* description from file content */
 	struct mlink	*mlinks;  /* singly linked list */
+	int		 form;    /* format from file content */
 	int		 name_head_done;
-	enum form	 form;    /* format from file content */
 };
 
 struct	mlink {
@@ -97,9 +116,19 @@ struct	mlink {
 	char		*fsec;    /* section from file name suffix */
 	struct mlink	*next;    /* singly linked list */
 	struct mpage	*mpage;   /* parent */
+	int		 dform;   /* format from directory */
+	int		 fform;   /* format from file name suffix */
 	int		 gzip;	  /* filename has a .gz suffix */
-	enum form	 dform;   /* format from directory */
-	enum form	 fform;   /* format from file name suffix */
+};
+
+enum	stmt {
+	STMT_DELETE_PAGE = 0,	/* delete mpage */
+	STMT_INSERT_PAGE,	/* insert mpage */
+	STMT_INSERT_LINK,	/* insert mlink */
+	STMT_INSERT_NAME,	/* insert name */
+	STMT_SELECT_NAME,	/* retrieve existing name flags */
+	STMT_INSERT_KEY,	/* insert parsed key */
+	STMT__MAX
 };
 
 typedef	int (*mdoc_fp)(struct mpage *, const struct roff_meta *,
@@ -113,17 +142,20 @@ struct	mdoc_handler {
 
 int		 mandocdb(int, char *[]);
 
-static	void	 dbadd(struct dba *, struct mpage *);
+static	void	 dbclose(int);
+static	void	 dbadd(struct mpage *);
 static	void	 dbadd_mlink(const struct mlink *mlink);
-static	void	 dbprune(struct dba *);
-static	void	 dbwrite(struct dba *);
+static	void	 dbadd_mlink_name(const struct mlink *mlink);
+static	int	 dbopen(int);
+static	void	 dbprune(void);
 static	void	 filescan(const char *);
 static	void	 mlink_add(struct mlink *, const struct stat *);
 static	void	 mlink_check(struct mpage *, struct mlink *);
 static	void	 mlink_free(struct mlink *);
 static	void	 mlinks_undupe(struct mpage *);
 static	void	 mpages_free(void);
-static	void	 mpages_merge(struct dba *, struct mparse *);
+static	void	 mpages_merge(struct mparse *);
+static	void	 names_check(void);
 static	void	 parse_cat(struct mpage *, int);
 static	void	 parse_man(struct mpage *, const struct roff_meta *,
 			const struct roff_node *);
@@ -159,6 +191,7 @@ static	int	 set_basedir(const char *, int);
 static	int	 treescan(void);
 static	size_t	 utf8(unsigned int, char [7]);
 
+static	char		 tempfilename[32];
 static	int		 nodb; /* no database changes */
 static	int		 mparse_options; /* abort the parse early */
 static	int		 use_all; /* use all found files */
@@ -172,6 +205,8 @@ static	struct ohash	 mpages; /* table of distinct manual pages */
 static	struct ohash	 mlinks; /* table of directory entries */
 static	struct ohash	 names; /* table of all names */
 static	struct ohash	 strings; /* table of all strings */
+static	sqlite3		*db = NULL; /* current database */
+static	sqlite3_stmt	*stmts[STMT__MAX]; /* current statements */
 static	uint64_t	 name_mask;
 
 static	const struct mdoc_handler mdocs[MDOC_MAX] = {
@@ -306,7 +341,6 @@ mandocdb(int argc, char *argv[])
 {
 	struct manconf	  conf;
 	struct mparse	 *mp;
-	struct dba	 *dba;
 	const char	 *path_arg, *progname;
 	size_t		  j, sz;
 	int		  ch, i;
@@ -326,6 +360,7 @@ mandocdb(int argc, char *argv[])
 #endif
 
 	memset(&conf, 0, sizeof(conf));
+	memset(stmts, 0, STMT__MAX * sizeof(sqlite3_stmt *));
 
 	/*
 	 * We accept a few different invocations.
@@ -426,7 +461,7 @@ mandocdb(int argc, char *argv[])
 		if (OP_TEST != op && 0 == set_basedir(path_arg, 1))
 			goto out;
 
-		if ((dba = dba_read(MANDOC_DB)) != NULL) {
+		if (dbopen(1)) {
 			/*
 			 * The existing database is usable.  Process
 			 * all files specified on the command-line.
@@ -444,7 +479,7 @@ mandocdb(int argc, char *argv[])
 			for (i = 0; i < argc; i++)
 				filescan(argv[i]);
 			if (OP_TEST != op)
-				dbprune(dba);
+				dbprune();
 		} else {
 			/*
 			 * Database missing or corrupt.
@@ -454,17 +489,17 @@ mandocdb(int argc, char *argv[])
 			op = OP_DEFAULT;
 			if (0 == treescan())
 				goto out;
-			dba = dba_new(128);
+			if (0 == dbopen(0))
+				goto out;
 		}
 		if (OP_DELETE != op)
-			mpages_merge(dba, mp);
-		if (nodb == 0)
-			dbwrite(dba);
-		dba_free(dba);
+			mpages_merge(mp);
+		dbclose(OP_DEFAULT == op ? 0 : 1);
 	} else {
 		/*
 		 * If we have arguments, use them as our manpaths.
-		 * If we don't, use man.conf(5).
+		 * If we don't, grok from manpath(1) or however else
+		 * manconf_parse() wants to do it.
 		 */
 		if (argc > 0) {
 			conf.manpath.paths = mandoc_reallocarray(NULL,
@@ -504,11 +539,14 @@ mandocdb(int argc, char *argv[])
 				continue;
 			if (0 == treescan())
 				continue;
-			dba = dba_new(128);
-			mpages_merge(dba, mp);
-			if (nodb == 0)
-				dbwrite(dba);
-			dba_free(dba);
+			if (0 == dbopen(0))
+				continue;
+
+			mpages_merge(mp);
+			if (warnings && !nodb &&
+			    ! (MPARSE_QUICK & mparse_options))
+				names_check();
+			dbclose(0);
 
 			if (j + 1 < conf.manpath.sz) {
 				mpages_free();
@@ -558,8 +596,7 @@ treescan(void)
 	FTS		*f;
 	FTSENT		*ff;
 	struct mlink	*mlink;
-	int		 gzip;
-	enum form	 dform;
+	int		 dform, gzip;
 	char		*dsec, *arch, *fsec, *cp;
 	const char	*path;
 	const char	*argv[2];
@@ -933,7 +970,6 @@ mlink_add(struct mlink *mlink, const struct stat *st)
 		mpage = mandoc_calloc(1, sizeof(struct mpage));
 		mpage->inodev.st_ino = inodev.st_ino;
 		mpage->inodev.st_dev = inodev.st_dev;
-		mpage->form = FORM_NONE;
 		ohash_insert(&mpages, slot, mpage);
 	} else
 		mlink->next = mpage->mlinks;
@@ -1082,7 +1118,7 @@ mlink_check(struct mpage *mpage, struct mlink *mlink)
  * and filename to determine whether the file is parsable or not.
  */
 static void
-mpages_merge(struct dba *dba, struct mparse *mp)
+mpages_merge(struct mparse *mp)
 {
 	char			 any[] = "any";
 	struct mpage		*mpage, *mpage_dest;
@@ -1092,6 +1128,9 @@ mpages_merge(struct dba *dba, struct mparse *mp)
 	char			*cp;
 	int			 fd;
 	unsigned int		 pslot;
+
+	if ( ! nodb)
+		SQL_EXEC("BEGIN TRANSACTION");
 
 	mpage = ohash_first(&mpages, &pslot);
 	while (mpage != NULL) {
@@ -1149,8 +1188,8 @@ mpages_merge(struct dba *dba, struct mparse *mp)
 					 * to the target.
 					 */
 
-					if (mpage_dest->dba != NULL)
-						dbadd_mlink(mlink);
+					if (mpage_dest->pageid)
+						dbadd_mlink_name(mlink);
 
 					if (mlink->next == NULL)
 						break;
@@ -1215,7 +1254,7 @@ mpages_merge(struct dba *dba, struct mparse *mp)
 			     mlink = mlink->next)
 				mlink_check(mpage, mlink);
 
-		dbadd(dba, mpage);
+		dbadd(mpage);
 		mlink = mpage->mlinks;
 
 nextpage:
@@ -1223,6 +1262,44 @@ nextpage:
 		ohash_delete(&names);
 		mpage = ohash_next(&mpages, &pslot);
 	}
+
+	if (0 == nodb)
+		SQL_EXEC("END TRANSACTION");
+}
+
+static void
+names_check(void)
+{
+	sqlite3_stmt	*stmt;
+	const char	*name, *sec, *arch, *key;
+
+	sqlite3_prepare_v2(db,
+	  "SELECT name, sec, arch, key FROM ("
+	    "SELECT name AS key, pageid FROM names "
+	    "WHERE bits & ? AND NOT EXISTS ("
+	      "SELECT pageid FROM mlinks "
+	      "WHERE mlinks.pageid == names.pageid "
+	      "AND mlinks.name == names.name"
+	    ")"
+	  ") JOIN ("
+	    "SELECT sec, arch, name, pageid FROM mlinks "
+	    "GROUP BY pageid"
+	  ") USING (pageid);",
+	  -1, &stmt, NULL);
+
+	if (sqlite3_bind_int64(stmt, 1, NAME_TITLE) != SQLITE_OK)
+		say("", "%s", sqlite3_errmsg(db));
+
+	while (sqlite3_step(stmt) == SQLITE_ROW) {
+		name = (const char *)sqlite3_column_text(stmt, 0);
+		sec  = (const char *)sqlite3_column_text(stmt, 1);
+		arch = (const char *)sqlite3_column_text(stmt, 2);
+		key  = (const char *)sqlite3_column_text(stmt, 3);
+		say("", "%s(%s%s%s) lacks mlink \"%s\"", name, sec,
+		    '\0' == *arch ? "" : "/",
+		    '\0' == *arch ? "" : arch, key);
+	}
+	sqlite3_finalize(stmt);
 }
 
 static void
@@ -1694,7 +1771,7 @@ parse_mdoc_Nm(struct mpage *mpage, const struct roff_meta *meta,
 	if ( ! (mpage->name_head_done ||
 	    n->child == NULL || n->child->string == NULL ||
 	    strcasecmp(n->child->string, meta->title))) {
-		putkey(mpage, n->child->string, ROFFT_HEAD);
+		putkey(mpage, n->child->string, NAME_HEAD);
 		mpage->name_head_done = 1;
 	}
 	return 0;
@@ -1746,7 +1823,7 @@ putkeys(const struct mpage *mpage, char *cp, size_t sz, uint64_t v)
 	} else {
 		htab = &strings;
 		if (debug > 1)
-		    for (i = 0; i < KEY_MAX; i++)
+		    for (i = 0; i < mansearch_keymax; i++)
 			if ((uint64_t)1 << i & v)
 			    say(mpage->mlinks->file,
 				"Adding key %s=%*s",
@@ -1952,23 +2029,53 @@ render_string(char **public, size_t *psz)
 static void
 dbadd_mlink(const struct mlink *mlink)
 {
-	dba_page_alias(mlink->mpage->dba, mlink->name, NAME_FILE);
-	dba_page_add(mlink->mpage->dba, DBP_SECT, mlink->dsec);
-	dba_page_add(mlink->mpage->dba, DBP_ARCH, mlink->arch);
-	dba_page_add(mlink->mpage->dba, DBP_FILE, mlink->file);
+	size_t		 i;
+
+	i = 1;
+	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->dsec);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->arch);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_LINK], i, mlink->name);
+	SQL_BIND_INT64(stmts[STMT_INSERT_LINK], i, mlink->mpage->pageid);
+	SQL_STEP(stmts[STMT_INSERT_LINK]);
+	sqlite3_reset(stmts[STMT_INSERT_LINK]);
+}
+
+static void
+dbadd_mlink_name(const struct mlink *mlink)
+{
+	uint64_t	 bits;
+	size_t		 i;
+
+	dbadd_mlink(mlink);
+
+	i = 1;
+	SQL_BIND_INT64(stmts[STMT_SELECT_NAME], i, mlink->mpage->pageid);
+	bits = NAME_FILE & NAME_MASK;
+	if (sqlite3_step(stmts[STMT_SELECT_NAME]) == SQLITE_ROW) {
+		bits |= sqlite3_column_int64(stmts[STMT_SELECT_NAME], 0);
+		sqlite3_reset(stmts[STMT_SELECT_NAME]);
+	}
+
+	i = 1;
+	SQL_BIND_INT64(stmts[STMT_INSERT_NAME], i, bits);
+	SQL_BIND_TEXT(stmts[STMT_INSERT_NAME], i, mlink->name);
+	SQL_BIND_INT64(stmts[STMT_INSERT_NAME], i, mlink->mpage->pageid);
+	SQL_STEP(stmts[STMT_INSERT_NAME]);
+	sqlite3_reset(stmts[STMT_INSERT_NAME]);
 }
 
 /*
  * Flush the current page's terms (and their bits) into the database.
+ * Wrap the entire set of additions in a transaction to make sqlite be a
+ * little faster.
  * Also, handle escape sequences at the last possible moment.
  */
 static void
-dbadd(struct dba *dba, struct mpage *mpage)
+dbadd(struct mpage *mpage)
 {
 	struct mlink	*mlink;
 	struct str	*key;
 	char		*cp;
-	uint64_t	 mask;
 	size_t		 i;
 	unsigned int	 slot;
 	int		 mustfree;
@@ -2013,87 +2120,111 @@ dbadd(struct dba *dba, struct mpage *mpage)
 	cp = mpage->desc;
 	i = strlen(cp);
 	mustfree = render_string(&cp, &i);
-	mpage->dba = dba_page_new(dba->pages, mlink->name,
-	    mlink->dsec, mlink->arch, cp, mlink->file, mpage->form);
+	i = 1;
+	SQL_BIND_TEXT(stmts[STMT_INSERT_PAGE], i, cp);
+	SQL_BIND_INT(stmts[STMT_INSERT_PAGE], i, mpage->form);
+	SQL_STEP(stmts[STMT_INSERT_PAGE]);
+	mpage->pageid = sqlite3_last_insert_rowid(db);
+	sqlite3_reset(stmts[STMT_INSERT_PAGE]);
 	if (mustfree)
 		free(cp);
 
-	while ((mlink = mlink->next) != NULL)
+	while (NULL != mlink) {
 		dbadd_mlink(mlink);
+		mlink = mlink->next;
+	}
+	mlink = mpage->mlinks;
 
 	for (key = ohash_first(&names, &slot); NULL != key;
 	     key = ohash_next(&names, &slot)) {
 		assert(key->mpage == mpage);
-		dba_page_alias(mpage->dba, key->key, key->mask);
+		i = 1;
+		SQL_BIND_INT64(stmts[STMT_INSERT_NAME], i, key->mask);
+		SQL_BIND_TEXT(stmts[STMT_INSERT_NAME], i, key->key);
+		SQL_BIND_INT64(stmts[STMT_INSERT_NAME], i, mpage->pageid);
+		SQL_STEP(stmts[STMT_INSERT_NAME]);
+		sqlite3_reset(stmts[STMT_INSERT_NAME]);
 		free(key);
 	}
 	for (key = ohash_first(&strings, &slot); NULL != key;
 	     key = ohash_next(&strings, &slot)) {
 		assert(key->mpage == mpage);
-		i = 0;
-		for (mask = TYPE_Xr; mask <= TYPE_Lb; mask *= 2) {
-			if (key->mask & mask)
-				dba_macro_add(dba->macros, i,
-				    key->key, mpage->dba);
-			i++;
-		}
+		i = 1;
+		SQL_BIND_INT64(stmts[STMT_INSERT_KEY], i, key->mask);
+		SQL_BIND_TEXT(stmts[STMT_INSERT_KEY], i, key->key);
+		SQL_BIND_INT64(stmts[STMT_INSERT_KEY], i, mpage->pageid);
+		SQL_STEP(stmts[STMT_INSERT_KEY]);
+		sqlite3_reset(stmts[STMT_INSERT_KEY]);
 		free(key);
 	}
 }
 
 static void
-dbprune(struct dba *dba)
+dbprune(void)
 {
-	struct dba_array	*page, *files;
-	char			*file;
+	struct mpage	*mpage;
+	struct mlink	*mlink;
+	size_t		 i;
+	unsigned int	 slot;
 
-	dba_array_FOREACH(dba->pages, page) {
-		files = dba_array_get(page, DBP_FILE);
-		dba_array_FOREACH(files, file) {
-			if (*file < ' ')
-				file++;
-			if (ohash_find(&mlinks, ohash_qlookup(&mlinks,
-			    file)) != NULL) {
-				if (debug)
-					say(file, "Deleting from database");
-				dba_array_del(dba->pages);
-				break;
-			}
+	if (0 == nodb)
+		SQL_EXEC("BEGIN TRANSACTION");
+
+	for (mpage = ohash_first(&mpages, &slot); NULL != mpage;
+	     mpage = ohash_next(&mpages, &slot)) {
+		mlink = mpage->mlinks;
+		if (debug)
+			say(mlink->file, "Deleting from database");
+		if (nodb)
+			continue;
+		for ( ; NULL != mlink; mlink = mlink->next) {
+			i = 1;
+			SQL_BIND_TEXT(stmts[STMT_DELETE_PAGE],
+			    i, mlink->dsec);
+			SQL_BIND_TEXT(stmts[STMT_DELETE_PAGE],
+			    i, mlink->arch);
+			SQL_BIND_TEXT(stmts[STMT_DELETE_PAGE],
+			    i, mlink->name);
+			SQL_STEP(stmts[STMT_DELETE_PAGE]);
+			sqlite3_reset(stmts[STMT_DELETE_PAGE]);
 		}
 	}
+
+	if (0 == nodb)
+		SQL_EXEC("END TRANSACTION");
 }
 
 /*
- * Write the database from memory to disk.
+ * Close an existing database and its prepared statements.
+ * If "real" is not set, rename the temporary file into the real one.
  */
 static void
-dbwrite(struct dba *dba)
+dbclose(int real)
 {
-	char		 tfn[32];
+	size_t		 i;
 	int		 status;
 	pid_t		 child;
 
-	if (dba_write(MANDOC_DB "~", dba) != -1) {
-		if (rename(MANDOC_DB "~", MANDOC_DB) == -1) {
+	if (nodb)
+		return;
+
+	for (i = 0; i < STMT__MAX; i++) {
+		sqlite3_finalize(stmts[i]);
+		stmts[i] = NULL;
+	}
+
+	sqlite3_close(db);
+	db = NULL;
+
+	if (real)
+		return;
+
+	if ('\0' == *tempfilename) {
+		if (-1 == rename(MANDOC_DB "~", MANDOC_DB)) {
 			exitcode = (int)MANDOCLEVEL_SYSERR;
 			say(MANDOC_DB, "&rename");
-			unlink(MANDOC_DB "~");
 		}
 		return;
-	}
-
-	(void)strlcpy(tfn, "/tmp/mandocdb.XXXXXXXX", sizeof(tfn));
-	if (mkdtemp(tfn) == NULL) {
-		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("", "&%s", tfn);
-		return;
-	}
-
-	(void)strlcat(tfn, "/" MANDOC_DB, sizeof(tfn));
-	if (dba_write(tfn, dba) == -1) {
-		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say(tfn, "&dba_write");
-		goto out;
 	}
 
 	switch (child = fork()) {
@@ -2102,13 +2233,14 @@ dbwrite(struct dba *dba)
 		say("", "&fork cmp");
 		return;
 	case 0:
-		execlp("cmp", "cmp", "-s", tfn, MANDOC_DB, (char *)NULL);
+		execlp("cmp", "cmp", "-s",
+		    tempfilename, MANDOC_DB, (char *)NULL);
 		say("", "&exec cmp");
 		exit(0);
 	default:
 		break;
 	}
-	if (waitpid(child, &status, 0) == -1) {
+	if (-1 == waitpid(child, &status, 0)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
 		say("", "&wait cmp");
 	} else if (WIFSIGNALED(status)) {
@@ -2120,27 +2252,173 @@ dbwrite(struct dba *dba)
 		    "Data changed, but cannot replace database");
 	}
 
-out:
-	*strrchr(tfn, '/') = '\0';
+	*strrchr(tempfilename, '/') = '\0';
 	switch (child = fork()) {
 	case -1:
 		exitcode = (int)MANDOCLEVEL_SYSERR;
 		say("", "&fork rm");
 		return;
 	case 0:
-		execlp("rm", "rm", "-rf", tfn, (char *)NULL);
+		execlp("rm", "rm", "-rf", tempfilename, (char *)NULL);
 		say("", "&exec rm");
 		exit((int)MANDOCLEVEL_SYSERR);
 	default:
 		break;
 	}
-	if (waitpid(child, &status, 0) == -1) {
+	if (-1 == waitpid(child, &status, 0)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
 		say("", "&wait rm");
 	} else if (WIFSIGNALED(status) || WEXITSTATUS(status)) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("", "%s: Cannot remove temporary directory", tfn);
+		say("", "%s: Cannot remove temporary directory",
+		    tempfilename);
 	}
+}
+
+/*
+ * This is straightforward stuff.
+ * Open a database connection to a "temporary" database, then open a set
+ * of prepared statements we'll use over and over again.
+ * If "real" is set, we use the existing database; if not, we truncate a
+ * temporary one.
+ * Must be matched by dbclose().
+ */
+static int
+dbopen(int real)
+{
+	const char	*sql;
+	int		 rc, ofl;
+
+	if (nodb)
+		return 1;
+
+	*tempfilename = '\0';
+	ofl = SQLITE_OPEN_READWRITE;
+
+	if (real) {
+		rc = sqlite3_open_v2(MANDOC_DB, &db, ofl, NULL);
+		if (SQLITE_OK != rc) {
+			exitcode = (int)MANDOCLEVEL_SYSERR;
+			if (SQLITE_CANTOPEN != rc)
+				say(MANDOC_DB, "%s", sqlite3_errstr(rc));
+			return 0;
+		}
+		goto prepare_statements;
+	}
+
+	ofl |= SQLITE_OPEN_CREATE | SQLITE_OPEN_EXCLUSIVE;
+
+	remove(MANDOC_DB "~");
+	rc = sqlite3_open_v2(MANDOC_DB "~", &db, ofl, NULL);
+	if (SQLITE_OK == rc)
+		goto create_tables;
+	if (MPARSE_QUICK & mparse_options) {
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say(MANDOC_DB "~", "%s", sqlite3_errstr(rc));
+		return 0;
+	}
+
+	(void)strlcpy(tempfilename, "/tmp/mandocdb.XXXXXX",
+	    sizeof(tempfilename));
+	if (NULL == mkdtemp(tempfilename)) {
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say("", "&%s", tempfilename);
+		return 0;
+	}
+	(void)strlcat(tempfilename, "/" MANDOC_DB,
+	    sizeof(tempfilename));
+	rc = sqlite3_open_v2(tempfilename, &db, ofl, NULL);
+	if (SQLITE_OK != rc) {
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say("", "%s: %s", tempfilename, sqlite3_errstr(rc));
+		return 0;
+	}
+
+create_tables:
+	sql = "CREATE TABLE \"mpages\" (\n"
+	      " \"desc\" TEXT NOT NULL,\n"
+	      " \"form\" INTEGER NOT NULL,\n"
+	      " \"pageid\" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL\n"
+	      ");\n"
+	      "\n"
+	      "CREATE TABLE \"mlinks\" (\n"
+	      " \"sec\" TEXT NOT NULL,\n"
+	      " \"arch\" TEXT NOT NULL,\n"
+	      " \"name\" TEXT NOT NULL,\n"
+	      " \"pageid\" INTEGER NOT NULL REFERENCES mpages(pageid) "
+		"ON DELETE CASCADE\n"
+	      ");\n"
+	      "CREATE INDEX mlinks_pageid_idx ON mlinks (pageid);\n"
+	      "\n"
+	      "CREATE TABLE \"names\" (\n"
+	      " \"bits\" INTEGER NOT NULL,\n"
+	      " \"name\" TEXT NOT NULL,\n"
+	      " \"pageid\" INTEGER NOT NULL REFERENCES mpages(pageid) "
+		"ON DELETE CASCADE,\n"
+	      " UNIQUE (\"name\", \"pageid\") ON CONFLICT REPLACE\n"
+	      ");\n"
+	      "\n"
+	      "CREATE TABLE \"keys\" (\n"
+	      " \"bits\" INTEGER NOT NULL,\n"
+	      " \"key\" TEXT NOT NULL,\n"
+	      " \"pageid\" INTEGER NOT NULL REFERENCES mpages(pageid) "
+		"ON DELETE CASCADE\n"
+	      ");\n"
+	      "CREATE INDEX keys_pageid_idx ON keys (pageid);\n";
+
+	if (SQLITE_OK != sqlite3_exec(db, sql, NULL, NULL, NULL)) {
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say(MANDOC_DB, "%s", sqlite3_errmsg(db));
+		sqlite3_close(db);
+		return 0;
+	}
+
+prepare_statements:
+	if (SQLITE_OK != sqlite3_exec(db,
+	    "PRAGMA foreign_keys = ON", NULL, NULL, NULL)) {
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say(MANDOC_DB, "PRAGMA foreign_keys: %s",
+		    sqlite3_errmsg(db));
+		sqlite3_close(db);
+		return 0;
+	}
+
+	sql = "DELETE FROM mpages WHERE pageid IN "
+		"(SELECT pageid FROM mlinks WHERE "
+		"sec=? AND arch=? AND name=?)";
+	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_DELETE_PAGE], NULL);
+	sql = "INSERT INTO mpages "
+		"(desc,form) VALUES (?,?)";
+	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_PAGE], NULL);
+	sql = "INSERT INTO mlinks "
+		"(sec,arch,name,pageid) VALUES (?,?,?,?)";
+	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_LINK], NULL);
+	sql = "SELECT bits FROM names where pageid = ?";
+	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_SELECT_NAME], NULL);
+	sql = "INSERT INTO names "
+		"(bits,name,pageid) VALUES (?,?,?)";
+	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_NAME], NULL);
+	sql = "INSERT INTO keys "
+		"(bits,key,pageid) VALUES (?,?,?)";
+	sqlite3_prepare_v2(db, sql, -1, &stmts[STMT_INSERT_KEY], NULL);
+
+#ifndef __APPLE__
+	/*
+	 * When opening a new database, we can turn off
+	 * synchronous mode for much better performance.
+	 */
+
+	if (real && SQLITE_OK != sqlite3_exec(db,
+	    "PRAGMA synchronous = OFF", NULL, NULL, NULL)) {
+		exitcode = (int)MANDOCLEVEL_SYSERR;
+		say(MANDOC_DB, "PRAGMA synchronous: %s",
+		    sqlite3_errmsg(db));
+		sqlite3_close(db);
+		return 0;
+	}
+#endif
+
+	return 1;
 }
 
 static int
