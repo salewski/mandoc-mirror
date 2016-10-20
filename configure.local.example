@@ -265,6 +265,7 @@ CFLAGS="-g"
 # be regarded as successful).
 
 HAVE_DIRENT_NAMLEN=0
+HAVE_EFTYPE=0
 HAVE_ERR=0
 HAVE_FTS=0
 HAVE_GETLINE=0
