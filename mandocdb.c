@@ -2,6 +2,7 @@
 /*
  * Copyright (c) 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2011-2016 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2016 Ed Maste <emaste@freebsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -103,6 +104,7 @@ struct	mpage {
 	char		*arch;    /* architecture from file content */
 	char		*title;   /* title from file content */
 	char		*desc;    /* description from file content */
+	struct mpage	*next;    /* singly linked list */
 	struct mlink	*mlinks;  /* singly linked list */
 	int		 form;    /* format from file content */
 	int		 name_head_done;
@@ -149,6 +151,11 @@ static	void	 dbadd_mlink_name(const struct mlink *mlink);
 static	int	 dbopen(int);
 static	void	 dbprune(void);
 static	void	 filescan(const char *);
+#if HAVE_FTS_COMPARE_CONST
+static	int	 fts_compare(const FTSENT *const *, const FTSENT *const *);
+#else
+static	int	 fts_compare(const FTSENT **, const FTSENT **);
+#endif
 static	void	 mlink_add(struct mlink *, const struct stat *);
 static	void	 mlink_check(struct mpage *, struct mlink *);
 static	void	 mlink_free(struct mlink *);
@@ -201,6 +208,7 @@ static	int		 write_utf8; /* write UTF-8 output; else ASCII */
 static	int		 exitcode; /* to be returned by main */
 static	enum op		 op; /* operational mode */
 static	char		 basedir[PATH_MAX]; /* current base directory */
+static	struct mpage	*mpage_head; /* list of distinct manual pages */
 static	struct ohash	 mpages; /* table of distinct manual pages */
 static	struct ohash	 mlinks; /* table of directory entries */
 static	struct ohash	 names; /* table of all names */
@@ -576,6 +584,20 @@ usage:
 }
 
 /*
+ * To get a singly linked list in alpha order while inserting entries
+ * at the beginning, process directory entries in reverse alpha order.
+ */
+static int
+#if HAVE_FTS_COMPARE_CONST
+fts_compare(const FTSENT *const *a, const FTSENT *const *b)
+#else
+fts_compare(const FTSENT **a, const FTSENT **b)
+#endif
+{
+	return -strcmp((*a)->fts_name, (*b)->fts_name);
+}
+
+/*
  * Scan a directory tree rooted at "basedir" for manpages.
  * We use fts(), scanning directory parts along the way for clues to our
  * section and architecture.
@@ -604,8 +626,8 @@ treescan(void)
 	argv[0] = ".";
 	argv[1] = (char *)NULL;
 
-	f = fts_open((char * const *)argv,
-	    FTS_PHYSICAL | FTS_NOCHDIR, NULL);
+	f = fts_open((char * const *)argv, FTS_PHYSICAL | FTS_NOCHDIR,
+	    fts_compare);
 	if (f == NULL) {
 		exitcode = (int)MANDOCLEVEL_SYSERR;
 		say("", "&fts_open");
@@ -970,6 +992,8 @@ mlink_add(struct mlink *mlink, const struct stat *st)
 		mpage = mandoc_calloc(1, sizeof(struct mpage));
 		mpage->inodev.st_ino = inodev.st_ino;
 		mpage->inodev.st_dev = inodev.st_dev;
+		mpage->next = mpage_head;
+		mpage_head = mpage;
 		ohash_insert(&mpages, slot, mpage);
 	} else
 		mlink->next = mpage->mlinks;
@@ -993,20 +1017,18 @@ mpages_free(void)
 {
 	struct mpage	*mpage;
 	struct mlink	*mlink;
-	unsigned int	 slot;
 
-	mpage = ohash_first(&mpages, &slot);
-	while (NULL != mpage) {
-		while (NULL != (mlink = mpage->mlinks)) {
+	while ((mpage = mpage_head) != NULL) {
+		while ((mlink = mpage->mlinks) != NULL) {
 			mpage->mlinks = mlink->next;
 			mlink_free(mlink);
 		}
+		mpage_head = mpage->next;
 		free(mpage->sec);
 		free(mpage->arch);
 		free(mpage->title);
 		free(mpage->desc);
 		free(mpage);
-		mpage = ohash_next(&mpages, &slot);
 	}
 }
 
@@ -1127,18 +1149,14 @@ mpages_merge(struct mparse *mp)
 	char			*sodest;
 	char			*cp;
 	int			 fd;
-	unsigned int		 pslot;
 
 	if ( ! nodb)
 		SQL_EXEC("BEGIN TRANSACTION");
 
-	mpage = ohash_first(&mpages, &pslot);
-	while (mpage != NULL) {
+	for (mpage = mpage_head; mpage != NULL; mpage = mpage->next) {
 		mlinks_undupe(mpage);
-		if ((mlink = mpage->mlinks) == NULL) {
-			mpage = ohash_next(&mpages, &pslot);
+		if ((mlink = mpage->mlinks) == NULL)
 			continue;
-		}
 
 		name_mask = NAME_MASK;
 		mandoc_ohash_init(&names, 4, offsetof(struct str, key));
@@ -1260,7 +1278,6 @@ mpages_merge(struct mparse *mp)
 nextpage:
 		ohash_delete(&strings);
 		ohash_delete(&names);
-		mpage = ohash_next(&mpages, &pslot);
 	}
 
 	if (0 == nodb)
