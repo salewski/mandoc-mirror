@@ -1836,7 +1836,8 @@ putkeys(const struct mpage *mpage, char *cp, size_t sz, uint64_t v)
 			name_mask &= ~NAME_FIRST;
 		if (debug > 1)
 			say(mpage->mlinks->file,
-			    "Adding name %*s, bits=0x%llx", (int)sz, cp, v);
+			    "Adding name %*s, bits=0x%llx", (int)sz, cp,
+			    (unsigned long long)v);
 	} else {
 		htab = &strings;
 		if (debug > 1)
