@@ -95,6 +95,7 @@ static	int	  termp_bx_pre(DECL_ARGS);
 static	int	  termp_cd_pre(DECL_ARGS);
 static	int	  termp_d1_pre(DECL_ARGS);
 static	int	  termp_eo_pre(DECL_ARGS);
+static	int	  termp_em_pre(DECL_ARGS);
 static	int	  termp_er_pre(DECL_ARGS);
 static	int	  termp_ex_pre(DECL_ARGS);
 static	int	  termp_fa_pre(DECL_ARGS);
@@ -119,6 +120,7 @@ static	int	  termp_skip_pre(DECL_ARGS);
 static	int	  termp_sm_pre(DECL_ARGS);
 static	int	  termp_sp_pre(DECL_ARGS);
 static	int	  termp_ss_pre(DECL_ARGS);
+static	int	  termp_sy_pre(DECL_ARGS);
 static	int	  termp_tag_pre(DECL_ARGS);
 static	int	  termp_under_pre(DECL_ARGS);
 static	int	  termp_ud_pre(DECL_ARGS);
@@ -195,7 +197,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_quote_pre, termp_quote_post }, /* Dq */
 	{ NULL, NULL }, /* Ec */ /* FIXME: no space */
 	{ NULL, NULL }, /* Ef */
-	{ termp_under_pre, NULL }, /* Em */
+	{ termp_em_pre, NULL }, /* Em */
 	{ termp_eo_pre, termp_eo_post }, /* Eo */
 	{ termp_xx_pre, NULL }, /* Fx */
 	{ termp_bold_pre, NULL }, /* Ms */
@@ -218,7 +220,7 @@ static	const struct termact termacts[MDOC_MAX] = {
 	{ termp_quote_pre, termp_quote_post }, /* Sq */
 	{ termp_sm_pre, NULL }, /* Sm */
 	{ termp_under_pre, NULL }, /* Sx */
-	{ termp_bold_pre, NULL }, /* Sy */
+	{ termp_sy_pre, NULL }, /* Sy */
 	{ NULL, NULL }, /* Tn */
 	{ termp_xx_pre, NULL }, /* Ux */
 	{ NULL, NULL }, /* Xc */
@@ -2214,6 +2216,26 @@ termp_under_pre(DECL_ARGS)
 {
 
 	term_fontpush(p, TERMFONT_UNDER);
+	return 1;
+}
+
+static int
+termp_em_pre(DECL_ARGS)
+{
+	if (n->child != NULL &&
+	    n->child->type == ROFFT_TEXT)
+		tag_put(n->child->string, 0, p->line);
+	term_fontpush(p, TERMFONT_UNDER);
+	return 1;
+}
+
+static int
+termp_sy_pre(DECL_ARGS)
+{
+	if (n->child != NULL &&
+	    n->child->type == ROFFT_TEXT)
+		tag_put(n->child->string, 0, p->line);
+	term_fontpush(p, TERMFONT_BOLD);
 	return 1;
 }
 
