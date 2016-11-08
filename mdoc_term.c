@@ -2122,6 +2122,7 @@ static int
 termp_li_pre(DECL_ARGS)
 {
 
+	termp_tag_pre(p, pair, meta, n);
 	term_fontpush(p, TERMFONT_NONE);
 	return 1;
 }
