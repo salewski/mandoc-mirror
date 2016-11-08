@@ -1462,7 +1462,7 @@ termp_fn_pre(DECL_ARGS)
 	term_word(p, n->string);
 	term_fontpop(p);
 
-	if (n->sec == SEC_DESCRIPTION)
+	if (n->sec == SEC_DESCRIPTION || n->sec == SEC_CUSTOM)
 		tag_put(n->string, ++fn_prio, p->line);
 
 	if (pretty) {
