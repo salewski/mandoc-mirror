@@ -326,7 +326,19 @@ is used, the interactive
 .Ic :t
 command can be used to go to the definitions of various terms, for
 example command line options, command modifiers, internal commands,
-and environment variables.
+environment variables, function names, preprocessor macros,
+.Xr errno 2
+values, and some other emphasized words.
+Some terms may have defining text at more than one place.
+In that case, the
+.Xr less 1
+interactive commands
+.Ic t
+and
+.Ic T
+can be used to move to the next and to the previous place providing
+information about the term last searched for with
+.Ic :t .
 .It Ev MANPATH
 The standard search path used by
 .Nm
