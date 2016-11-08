@@ -2235,7 +2235,9 @@ termp_tag_pre(DECL_ARGS)
 
 	if (n->child != NULL &&
 	    n->child->type == ROFFT_TEXT &&
-	    n->prev == NULL &&
+	    (n->prev == NULL ||
+	     (n->prev->type == ROFFT_TEXT &&
+	      strcmp(n->prev->string, "|") == 0)) &&
 	    (n->parent->tok == MDOC_It ||
 	     (n->parent->tok == MDOC_Xo &&
 	      n->parent->parent->prev == NULL &&
