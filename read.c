@@ -425,11 +425,17 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 				i += 2;
 				/* Comment, skip to end of line */
 				for (; i < blk.sz; ++i) {
-					if ('\n' == blk.buf[i]) {
-						++i;
-						++lnn;
-						break;
-					}
+					if (blk.buf[i] != '\n')
+						continue;
+					if (blk.buf[i - 1] == ' ' ||
+					    blk.buf[i - 1] == '\t')
+						mandoc_msg(
+						    MANDOCERR_SPACE_EOL,
+						    curp, curp->line,
+						    pos, NULL);
+					++i;
+					++lnn;
+					break;
 				}
 
 				/* Backout trailing whitespaces */
