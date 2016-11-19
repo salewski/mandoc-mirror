@@ -47,6 +47,7 @@ LD_OHASH=
 STATIC="-static"
 
 BUILD_CGI=0
+INSTALL_LIBMANDOC=0
 
 HAVE_DIRENT_NAMLEN=
 HAVE_EFTYPE=
@@ -429,7 +430,8 @@ exec > Makefile.local
 BUILD_TARGETS=
 [ ${BUILD_CGI} -gt 0 ] && BUILD_TARGETS="cgi-build"
 INSTALL_TARGETS=
-[ ${BUILD_CGI} -gt 0 ] && INSTALL_TARGETS="cgi-install"
+[ ${INSTALL_LIBMANDOC} -gt 0 ] && INSTALL_TARGETS="lib-install"
+[ ${BUILD_CGI} -gt 0 ] && INSTALL_TARGETS="${INSTALL_TARGETS} cgi-install"
 
 cat << __HEREDOC__
 BUILD_TARGETS	= ${BUILD_TARGETS}

@@ -83,8 +83,6 @@ OSNAME="OpenBSD 6.0"
 PREFIX="/usr/local"
 BINDIR="${PREFIX}/bin"
 SBINDIR="${PREFIX}/sbin"
-INCLUDEDIR="${PREFIX}/include/mandoc"
-LIBDIR="${PREFIX}/lib/mandoc"
 MANDIR="${PREFIX}/man"
 
 # Some distributions may want to avoid naming conflicts
@@ -171,6 +169,21 @@ INSTALL_DATA="${INSTALL} -m 0444"
 
 PREFIX="/usr/local"
 HOMEBREWDIR="${PREFIX}/Cellar"
+
+# --- user settings for the mandoc(3) library --------------------------
+
+# By default, libmandoc.a is not installed.  It is almost never needed
+# because there is almost no non-mandoc software out there using this
+# library.  The one notable exception is NetBSD apropos(1).
+# So, when building for the NetBSD base system - but not for NetBSD
+# ports nor for pkgsrc! - you may want the following:
+
+INSTALL_LIBMANDOC=1
+
+# The following settings are only used when INSTALL_LIBMANDOC is set.
+
+INCLUDEDIR="${PREFIX}/include/mandoc"
+LIBDIR="${PREFIX}/lib/mandoc"
 
 # --- user settings related to man.cgi ---------------------------------
 

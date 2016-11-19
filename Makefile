@@ -369,10 +369,7 @@ clean:
 base-install: base-build
 	mkdir -p $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(SBINDIR)
-	mkdir -p $(DESTDIR)$(LIBDIR)
-	mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
-	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	mkdir -p $(DESTDIR)$(MANDIR)/man5
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
 	mkdir -p $(DESTDIR)$(MANDIR)/man8
@@ -383,17 +380,12 @@ base-install: base-build
 	ln -f $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_WHATIS)
 	ln -f $(DESTDIR)$(BINDIR)/mandoc \
 		$(DESTDIR)$(SBINDIR)/$(BINM_MAKEWHATIS)
-	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
-	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h roff.h \
-		$(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) soelim.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_SOELIM).1
 	$(INSTALL_MAN) man.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_MAN).1
 	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1
 	ln -f $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1 \
 		$(DESTDIR)$(MANDIR)/man1/$(BINM_WHATIS).1
-	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
-		mansearch.3 mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) man.conf.5 $(DESTDIR)$(MANDIR)/man5/${MANM_MANCONF}.5
 	$(INSTALL_MAN) mandoc.db.5 $(DESTDIR)$(MANDIR)/man5
 	$(INSTALL_MAN) man.7 $(DESTDIR)$(MANDIR)/man7/${MANM_MAN}.7
@@ -404,6 +396,16 @@ base-install: base-build
 	$(INSTALL_MAN) mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_MAN) makewhatis.8 \
 		$(DESTDIR)$(MANDIR)/man8/$(BINM_MAKEWHATIS).8
+
+lib-install: base-build
+	mkdir -p $(DESTDIR)$(LIBDIR)
+	mkdir -p $(DESTDIR)$(INCLUDEDIR)
+	mkdir -p $(DESTDIR)$(MANDIR)/man3
+	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
+	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h roff.h \
+		$(DESTDIR)$(INCLUDEDIR)
+	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
+		mansearch.3 mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
 
 cgi-install: cgi-build
 	mkdir -p $(DESTDIR)$(CGIBINDIR)
