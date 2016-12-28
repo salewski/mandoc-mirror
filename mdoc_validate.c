@@ -103,6 +103,7 @@ static	void	 post_sh_authors(POST_ARGS);
 static	void	 post_sm(POST_ARGS);
 static	void	 post_st(POST_ARGS);
 static	void	 post_std(POST_ARGS);
+static	void	 post_xr(POST_ARGS);
 
 static	v_post mdoc_valids[MDOC_MAX] = {
 	NULL,		/* Ap */
@@ -145,7 +146,7 @@ static	v_post mdoc_valids[MDOC_MAX] = {
 	post_st,	/* St */
 	NULL,		/* Va */
 	NULL,		/* Vt */
-	NULL,		/* Xr */
+	post_xr,	/* Xr */
 	NULL,		/* %A */
 	post_hyph,	/* %B */ /* FIXME: can be used outside Rs/Re. */
 	NULL,		/* %D */
@@ -1807,6 +1808,21 @@ post_sh_head(POST_ARGS)
 }
 
 static void
+post_xr(POST_ARGS)
+{
+	struct roff_node *n, *nch;
+
+	n = mdoc->last;
+	nch = n->child;
+	if (nch->next == NULL) {
+		mandoc_vmsg(MANDOCERR_XR_NOSEC, mdoc->parse,
+		    n->line, n->pos, "Xr %s", nch->string);
+		return;
+	}
+	assert(nch->next == n->last);
+}
+
+static void
 post_ignpar(POST_ARGS)
 {
 	struct roff_node *np;
@@ -2002,7 +2018,7 @@ post_dt(POST_ARGS)
 			}
 	}
 
-	/* Mandatory second argument: section. */
+	/* Mandatory second argument: section. */
 
 	if (nn != NULL)
 		nn = nn->next;
