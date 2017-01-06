@@ -96,6 +96,12 @@ This overrides any earlier
 and
 .Fl l
 options.
+.It Fl h
+Display only the SYNOPSIS lines of the requested manual pages.
+Implies
+.Fl a
+and
+.Fl c .
 .It Fl I Cm os Ns = Ns Ar name
 Override the default operating system
 .Ar name
@@ -106,12 +112,6 @@ and for the
 .Xr man 7
 .Ic \&TH
 macro.
-.It Fl h
-Display only the SYNOPSIS lines of the requested manual pages.
-Implies
-.Fl a
-and
-.Fl c .
 .It Fl K Ar encoding
 Specify the input encoding.
 The supported
