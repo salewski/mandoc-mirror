@@ -297,7 +297,8 @@ mdoc_node_validate(struct roff_man *mdoc)
 	mdoc->next = ROFF_NEXT_SIBLING;
 	switch (n->type) {
 	case ROFFT_TEXT:
-		if (n->sec != SEC_SYNOPSIS || n->parent->tok != MDOC_Fd)
+		if (n->sec != SEC_SYNOPSIS ||
+		    (n->parent->tok != MDOC_Cd && n->parent->tok != MDOC_Fd))
 			check_text(mdoc, n->line, n->pos, n->string);
 		break;
 	case ROFFT_EQN:
