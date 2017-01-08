@@ -662,7 +662,7 @@ buffmt_includes(struct html *h, const char *name)
 	while (NULL != (p = strchr(pp, '%'))) {
 		bufncat(h, pp, (size_t)(p - pp));
 		switch (*(p + 1)) {
-		case'I':
+		case 'I':
 			bufcat(h, name);
 			break;
 		default:
