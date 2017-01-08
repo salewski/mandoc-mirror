@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008-2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2014, 2015, 2016 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2014, 2015, 2016, 2017 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1121,15 +1121,15 @@ mdoc_bd_pre(MDOC_ARGS)
 	bufcat_su(h, "margin-left", &su);
 	PAIR_STYLE_INIT(&tag[0], h);
 
-	if (DISP_unfilled != n->norm->Bd.type &&
-	    DISP_literal != n->norm->Bd.type) {
-		PAIR_CLASS_INIT(&tag[1], "display");
-		print_otag(h, TAG_DIV, 2, tag);
-		return 1;
-	}
+	PAIR_CLASS_INIT(&tag[1], "display");
+	print_otag(h, TAG_DIV, 2, tag);
 
-	PAIR_CLASS_INIT(&tag[1], "lit display");
-	print_otag(h, TAG_PRE, 2, tag);
+	if (n->norm->Bd.type != DISP_unfilled &&
+	    n->norm->Bd.type != DISP_literal)
+		return 1;
+
+	PAIR_CLASS_INIT(&tag[0], "lit");
+	print_otag(h, TAG_PRE, 1, tag);
 
 	/* This can be recursive: save & set our literal state. */
 
