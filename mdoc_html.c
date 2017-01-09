@@ -1849,7 +1849,7 @@ mdoc_no_pre(MDOC_ARGS)
 	struct htmlpair	tag;
 
 	PAIR_CLASS_INIT(&tag, "none");
-	print_otag(h, TAG_CODE, 1, &tag);
+	print_otag(h, TAG_SPAN, 1, &tag);
 	return 1;
 }
 
