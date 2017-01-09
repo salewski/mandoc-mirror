@@ -435,3 +435,4 @@ void		  mparse_result(struct mparse *,
 const char	 *mparse_getkeep(const struct mparse *);
 const char	 *mparse_strerror(enum mandocerr);
 const char	 *mparse_strlevel(enum mandoclevel);
+void		  mparse_updaterc(struct mparse *, enum mandoclevel *);
