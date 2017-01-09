@@ -317,6 +317,7 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 	const char	*save_file;
 	char		*cp;
 	size_t		 pos; /* byte number in the ln buffer */
+	size_t		 j;  /* auxiliary byte number in the blk buffer */
 	enum rofferr	 rr;
 	int		 of;
 	int		 lnn; /* line number in the real file */
@@ -422,6 +423,7 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 			}
 
 			if ('"' == blk.buf[i + 1] || '#' == blk.buf[i + 1]) {
+				j = i;
 				i += 2;
 				/* Comment, skip to end of line */
 				for (; i < blk.sz; ++i) {
@@ -432,7 +434,7 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 						mandoc_msg(
 						    MANDOCERR_SPACE_EOL,
 						    curp, curp->line,
-						    pos, NULL);
+						    pos + i-1 - j, NULL);
 					++i;
 					++lnn;
 					break;
