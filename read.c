@@ -873,6 +873,13 @@ mparse_result(struct mparse *curp, struct roff_man **man,
 }
 
 void
+mparse_updaterc(struct mparse *curp, enum mandoclevel *rc)
+{
+	if (curp->file_status > *rc)
+		*rc = curp->file_status;
+}
+
+void
 mandoc_vmsg(enum mandocerr t, struct mparse *m,
 		int ln, int pos, const char *fmt, ...)
 {
