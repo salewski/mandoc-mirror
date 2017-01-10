@@ -1059,10 +1059,7 @@ roff_word_alloc(struct roff_man *man, int line, int pos, const char *word)
 	n = roff_node_alloc(man, line, pos, ROFFT_TEXT, TOKEN_NONE);
 	n->string = roff_strdup(man->roff, word);
 	roff_node_append(man, n);
-	if (man->macroset == MACROSET_MDOC)
-		n->flags |= NODE_VALID | NODE_ENDED;
-	else
-		n->flags |= NODE_VALID;
+	n->flags |= NODE_VALID | NODE_ENDED;
 	man->next = ROFF_NEXT_SIBLING;
 }
 
@@ -1147,10 +1144,7 @@ roff_addtbl(struct roff_man *man, const struct tbl_span *tbl)
 	n = roff_node_alloc(man, tbl->line, 0, ROFFT_TBL, TOKEN_NONE);
 	n->span = tbl;
 	roff_node_append(man, n);
-	if (man->macroset == MACROSET_MDOC)
-		n->flags |= NODE_VALID | NODE_ENDED;
-	else
-		n->flags |= NODE_VALID;
+	n->flags |= NODE_VALID | NODE_ENDED;
 	man->next = ROFF_NEXT_SIBLING;
 }
 
