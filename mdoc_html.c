@@ -377,6 +377,9 @@ print_mdoc_node(MDOC_ARGS)
 	int		 child;
 	struct tag	*t;
 
+	if (n->flags & NODE_NOPRT)
+		return;
+
 	child = 1;
 	t = h->tags.head;
 	n->flags &= ~MDOC_ENDED;

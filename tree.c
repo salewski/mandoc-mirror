@@ -168,6 +168,10 @@ print_mdoc(const struct roff_node *n, int indent)
 			putchar(')');
 		if (MDOC_EOS & n->flags)
 			putchar('.');
+		if (NODE_NOSRC & n->flags)
+			printf(" NOSRC");
+		if (NODE_NOPRT & n->flags)
+			printf(" NOPRT");
 		putchar('\n');
 	}
 

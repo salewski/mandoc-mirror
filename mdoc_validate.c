@@ -945,12 +945,15 @@ post_defaults(POST_ARGS)
 	case MDOC_Ar:
 		mdoc->next = ROFF_NEXT_CHILD;
 		roff_word_alloc(mdoc, nn->line, nn->pos, "file");
+		mdoc->last->flags |= NODE_NOSRC;
 		roff_word_alloc(mdoc, nn->line, nn->pos, "...");
+		mdoc->last->flags |= NODE_NOSRC;
 		break;
 	case MDOC_Pa:
 	case MDOC_Mt:
 		mdoc->next = ROFF_NEXT_CHILD;
 		roff_word_alloc(mdoc, nn->line, nn->pos, "~");
+		mdoc->last->flags |= NODE_NOSRC;
 		break;
 	default:
 		abort();
@@ -1941,6 +1944,8 @@ post_dd(POST_ARGS)
 	char		 *datestr;
 
 	n = mdoc->last;
+	n->flags |= NODE_NOPRT;
+
 	if (mdoc->meta.date != NULL) {
 		mandoc_msg(MANDOCERR_PROLOG_REP, mdoc->parse,
 		    n->line, n->pos, "Dd");
@@ -1958,7 +1963,7 @@ post_dd(POST_ARGS)
 	if (n->child == NULL || n->child->string[0] == '\0') {
 		mdoc->meta.date = mdoc->quick ? mandoc_strdup("") :
 		    mandoc_normdate(mdoc->parse, NULL, n->line, n->pos);
-		goto out;
+		return;
 	}
 
 	datestr = NULL;
@@ -1970,8 +1975,6 @@ post_dd(POST_ARGS)
 		    datestr, n->line, n->pos);
 		free(datestr);
 	}
-out:
-	roff_node_delete(mdoc, n);
 }
 
 static void
@@ -1982,10 +1985,12 @@ post_dt(POST_ARGS)
 	char		 *p;
 
 	n = mdoc->last;
+	n->flags |= NODE_NOPRT;
+
 	if (mdoc->flags & MDOC_PBODY) {
 		mandoc_msg(MANDOCERR_DT_LATE, mdoc->parse,
 		    n->line, n->pos, "Dt");
-		goto out;
+		return;
 	}
 
 	if (mdoc->meta.title != NULL)
@@ -2037,7 +2042,7 @@ post_dt(POST_ARGS)
 		    mdoc->parse, n->line, n->pos,
 		    "Dt %s", mdoc->meta.title);
 		mdoc->meta.vol = mandoc_strdup("LOCAL");
-		goto out;  /* msec and arch remain NULL. */
+		return;  /* msec and arch remain NULL. */
 	}
 
 	mdoc->meta.msec = mandoc_strdup(nn->string);
@@ -2055,7 +2060,7 @@ post_dt(POST_ARGS)
 	/* Optional third argument: architecture. */
 
 	if ((nn = nn->next) == NULL)
-		goto out;
+		return;
 
 	for (p = nn->string; *p != '\0'; p++)
 		*p = tolower((unsigned char)*p);
@@ -2066,9 +2071,6 @@ post_dt(POST_ARGS)
 	if ((nn = nn->next) != NULL)
 		mandoc_vmsg(MANDOCERR_ARG_EXCESS, mdoc->parse,
 		    nn->line, nn->pos, "Dt ... %s", nn->string);
-
-out:
-	roff_node_delete(mdoc, n);
 }
 
 static void
@@ -2096,6 +2098,8 @@ post_os(POST_ARGS)
 	struct roff_node *n;
 
 	n = mdoc->last;
+	n->flags |= NODE_NOPRT;
+
 	if (mdoc->meta.os != NULL)
 		mandoc_msg(MANDOCERR_PROLOG_REP, mdoc->parse,
 		    n->line, n->pos, "Os");
@@ -2116,11 +2120,11 @@ post_os(POST_ARGS)
 	mdoc->meta.os = NULL;
 	deroff(&mdoc->meta.os, n);
 	if (mdoc->meta.os)
-		goto out;
+		return;
 
 	if (mdoc->defos) {
 		mdoc->meta.os = mandoc_strdup(mdoc->defos);
-		goto out;
+		return;
 	}
 
 #ifdef OSNAME
@@ -2137,9 +2141,6 @@ post_os(POST_ARGS)
 	}
 	mdoc->meta.os = mandoc_strdup(defbuf);
 #endif /*!OSNAME*/
-
-out:
-	roff_node_delete(mdoc, n);
 }
 
 /*
