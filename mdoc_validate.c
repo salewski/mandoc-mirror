@@ -317,9 +317,9 @@ mdoc_node_validate(struct roff_man *mdoc)
 		 */
 
 		if (n->child != NULL)
-			n->child->flags &= ~MDOC_DELIMC;
+			n->child->flags &= ~NODE_DELIMC;
 		if (n->last != NULL)
-			n->last->flags &= ~MDOC_DELIMO;
+			n->last->flags &= ~NODE_DELIMO;
 
 		/* Call the macro's postprocessor. */
 
@@ -1555,7 +1555,7 @@ static void
 post_ns(POST_ARGS)
 {
 
-	if (mdoc->last->flags & MDOC_LINE)
+	if (mdoc->last->flags & NODE_LINE)
 		mandoc_msg(MANDOCERR_NS_SKIP, mdoc->parse,
 		    mdoc->last->line, mdoc->last->pos, NULL);
 }

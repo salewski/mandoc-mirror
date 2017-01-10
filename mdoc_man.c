@@ -582,13 +582,13 @@ print_node(DECL_ARGS)
 	 * Break the line if we were parsed subsequent the current node.
 	 * This makes the page structure be more consistent.
 	 */
-	if (MMAN_spc & outflags && MDOC_LINE & n->flags)
+	if (MMAN_spc & outflags && NODE_LINE & n->flags)
 		outflags |= MMAN_nl;
 
 	act = NULL;
 	cond = 0;
 	do_sub = 1;
-	n->flags &= ~MDOC_ENDED;
+	n->flags &= ~NODE_ENDED;
 
 	if (n->type == ROFFT_TEXT) {
 		/*
@@ -601,10 +601,10 @@ print_node(DECL_ARGS)
 			printf("\\&");
 			outflags &= ~MMAN_spc;
 		}
-		if (outflags & MMAN_Sm && ! (n->flags & MDOC_DELIMC))
+		if (outflags & MMAN_Sm && ! (n->flags & NODE_DELIMC))
 			outflags |= MMAN_spc_force;
 		print_word(n->string);
-		if (outflags & MMAN_Sm && ! (n->flags & MDOC_DELIMO))
+		if (outflags & MMAN_Sm && ! (n->flags & NODE_DELIMO))
 			outflags |= MMAN_spc;
 	} else {
 		/*
@@ -630,14 +630,14 @@ print_node(DECL_ARGS)
 	/*
 	 * Lastly, conditionally run the post-node handler.
 	 */
-	if (MDOC_ENDED & n->flags)
+	if (NODE_ENDED & n->flags)
 		return;
 
 	if (cond && act->post)
 		(*act->post)(meta, n);
 
 	if (ENDBODY_NOT != n->end)
-		n->body->flags |= MDOC_ENDED;
+		n->body->flags |= NODE_ENDED;
 
 	if (ENDBODY_NOSPACE == n->end)
 		outflags &= ~(MMAN_spc | MMAN_nl);
@@ -808,7 +808,7 @@ static void
 pre_syn(const struct roff_node *n)
 {
 
-	if (NULL == n->prev || ! (MDOC_SYNPRETTY & n->flags))
+	if (NULL == n->prev || ! (NODE_SYNPRETTY & n->flags))
 		return;
 
 	if (n->prev->tok == n->tok &&
@@ -1176,7 +1176,7 @@ pre_fa(DECL_ARGS)
 
 	while (NULL != n) {
 		font_push('I');
-		if (am_Fa || MDOC_SYNPRETTY & n->flags)
+		if (am_Fa || NODE_SYNPRETTY & n->flags)
 			outflags |= MMAN_nbrword;
 		print_node(meta, n);
 		font_pop();
@@ -1230,7 +1230,7 @@ post_fl(DECL_ARGS)
 	if (!(n->child != NULL ||
 	    n->next == NULL ||
 	    n->next->type == ROFFT_TEXT ||
-	    n->next->flags & MDOC_LINE))
+	    n->next->flags & NODE_LINE))
 		outflags &= ~MMAN_spc;
 }
 
@@ -1244,7 +1244,7 @@ pre_fn(DECL_ARGS)
 	if (NULL == n)
 		return 0;
 
-	if (MDOC_SYNPRETTY & n->flags)
+	if (NODE_SYNPRETTY & n->flags)
 		print_block(".HP 4n", MMAN_nl);
 
 	font_push('B');
@@ -1265,7 +1265,7 @@ post_fn(DECL_ARGS)
 {
 
 	print_word(")");
-	if (MDOC_SYNPRETTY & n->flags) {
+	if (NODE_SYNPRETTY & n->flags) {
 		print_word(";");
 		outflags |= MMAN_PP;
 	}
@@ -1282,7 +1282,7 @@ pre_fo(DECL_ARGS)
 	case ROFFT_HEAD:
 		if (n->child == NULL)
 			return 0;
-		if (MDOC_SYNPRETTY & n->flags)
+		if (NODE_SYNPRETTY & n->flags)
 			print_block(".HP 4n", MMAN_nl);
 		font_push('B');
 		break;
@@ -1327,7 +1327,7 @@ static int
 pre_in(DECL_ARGS)
 {
 
-	if (MDOC_SYNPRETTY & n->flags) {
+	if (NODE_SYNPRETTY & n->flags) {
 		pre_syn(n);
 		font_push('B');
 		print_word("#include <");
@@ -1344,7 +1344,7 @@ static void
 post_in(DECL_ARGS)
 {
 
-	if (MDOC_SYNPRETTY & n->flags) {
+	if (NODE_SYNPRETTY & n->flags) {
 		outflags &= ~MMAN_spc;
 		print_word(">");
 		font_pop();
@@ -1619,7 +1619,7 @@ static void
 post_pf(DECL_ARGS)
 {
 
-	if ( ! (n->next == NULL || n->next->flags & MDOC_LINE))
+	if ( ! (n->next == NULL || n->next->flags & NODE_LINE))
 		outflags &= ~MMAN_spc;
 }
 
@@ -1751,7 +1751,7 @@ static int
 pre_vt(DECL_ARGS)
 {
 
-	if (MDOC_SYNPRETTY & n->flags) {
+	if (NODE_SYNPRETTY & n->flags) {
 		switch (n->type) {
 		case ROFFT_BLOCK:
 			pre_syn(n);
@@ -1770,7 +1770,7 @@ static void
 post_vt(DECL_ARGS)
 {
 
-	if (n->flags & MDOC_SYNPRETTY && n->type != ROFFT_BODY)
+	if (n->flags & NODE_SYNPRETTY && n->type != ROFFT_BODY)
 		return;
 	font_pop();
 }

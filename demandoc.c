@@ -239,7 +239,7 @@ pmdoc(const struct roff_node *p, int *line, int *col, int list)
 {
 
 	for ( ; p; p = p->next) {
-		if (MDOC_LINE & p->flags)
+		if (NODE_LINE & p->flags)
 			pline(p->line, line, col, list);
 		if (ROFFT_TEXT == p->type)
 			pstring(p->string, p->pos, col, list);
@@ -253,7 +253,7 @@ pman(const struct roff_node *p, int *line, int *col, int list)
 {
 
 	for ( ; p; p = p->next) {
-		if (MAN_LINE & p->flags)
+		if (NODE_LINE & p->flags)
 			pline(p->line, line, col, list);
 		if (ROFFT_TEXT == p->type)
 			pstring(p->string, p->pos, col, list);

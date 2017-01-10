@@ -286,7 +286,7 @@ static void
 synopsis_pre(struct html *h, const struct roff_node *n)
 {
 
-	if (NULL == n->prev || ! (MDOC_SYNPRETTY & n->flags))
+	if (NULL == n->prev || ! (NODE_SYNPRETTY & n->flags))
 		return;
 
 	if (n->prev->tok == n->tok &&
@@ -382,7 +382,7 @@ print_mdoc_node(MDOC_ARGS)
 
 	child = 1;
 	t = h->tags.head;
-	n->flags &= ~MDOC_ENDED;
+	n->flags &= ~NODE_ENDED;
 
 	switch (n->type) {
 	case ROFFT_TEXT:
@@ -393,17 +393,17 @@ print_mdoc_node(MDOC_ARGS)
 		 * Make sure that if we're in a literal mode already
 		 * (i.e., within a <PRE>) don't print the newline.
 		 */
-		if (' ' == *n->string && MDOC_LINE & n->flags)
+		if (' ' == *n->string && NODE_LINE & n->flags)
 			if ( ! (HTML_LITERAL & h->flags))
 				print_otag(h, TAG_BR, 0, NULL);
-		if (MDOC_DELIMC & n->flags)
+		if (NODE_DELIMC & n->flags)
 			h->flags |= HTML_NOSPACE;
 		print_text(h, n->string);
-		if (MDOC_DELIMO & n->flags)
+		if (NODE_DELIMO & n->flags)
 			h->flags |= HTML_NOSPACE;
 		return;
 	case ROFFT_EQN:
-		if (n->flags & MDOC_LINE)
+		if (n->flags & NODE_LINE)
 			putchar('\n');
 		print_eqn(h, n->eqn);
 		break;
@@ -431,7 +431,7 @@ print_mdoc_node(MDOC_ARGS)
 		break;
 	}
 
-	if (h->flags & HTML_KEEP && n->flags & MDOC_LINE) {
+	if (h->flags & HTML_KEEP && n->flags & NODE_LINE) {
 		h->flags &= ~HTML_KEEP;
 		h->flags |= HTML_PREKEEP;
 	}
@@ -445,11 +445,11 @@ print_mdoc_node(MDOC_ARGS)
 	case ROFFT_EQN:
 		break;
 	default:
-		if ( ! mdocs[n->tok].post || n->flags & MDOC_ENDED)
+		if ( ! mdocs[n->tok].post || n->flags & NODE_ENDED)
 			break;
 		(*mdocs[n->tok].post)(meta, n, h);
 		if (n->end != ENDBODY_NOT)
-			n->body->flags |= MDOC_ENDED;
+			n->body->flags |= NODE_ENDED;
 		if (n->end == ENDBODY_NOSPACE)
 			h->flags |= HTML_NOSPACE;
 		break;
@@ -608,7 +608,7 @@ mdoc_fl_pre(MDOC_ARGS)
 	if (!(n->child == NULL &&
 	    (n->next == NULL ||
 	     n->next->type == ROFFT_TEXT ||
-	     n->next->flags & MDOC_LINE)))
+	     n->next->flags & NODE_LINE)))
 		h->flags |= HTML_NOSPACE;
 
 	return 1;
@@ -714,7 +714,7 @@ static int
 mdoc_ns_pre(MDOC_ARGS)
 {
 
-	if ( ! (MDOC_LINE & n->flags))
+	if ( ! (NODE_LINE & n->flags))
 		h->flags |= HTML_NOSPACE;
 	return 1;
 }
@@ -1161,7 +1161,7 @@ mdoc_bd_pre(MDOC_ARGS)
 			break;
 		}
 		if (h->flags & HTML_NONEWLINE ||
-		    (nn->next && ! (nn->next->flags & MDOC_LINE)))
+		    (nn->next && ! (nn->next->flags & NODE_LINE)))
 			continue;
 		else if (nn->next)
 			print_text(h, "\n");
@@ -1400,7 +1400,7 @@ mdoc_fn_pre(MDOC_ARGS)
 	const char	*sp, *ep;
 	int		 sz, i, pretty;
 
-	pretty = MDOC_SYNPRETTY & n->flags;
+	pretty = NODE_SYNPRETTY & n->flags;
 	synopsis_pre(h, n);
 
 	/* Split apart into type and name. */
@@ -1430,7 +1430,7 @@ mdoc_fn_pre(MDOC_ARGS)
 	 */
 
 #if 0
-	if (MDOC_SYNPRETTY & n->flags) {
+	if (NODE_SYNPRETTY & n->flags) {
 		nbuf[0] = '\0';
 		html_idcat(nbuf, sp, BUFSIZ);
 		PAIR_ID_INIT(&tag[1], nbuf);
@@ -1459,7 +1459,7 @@ mdoc_fn_pre(MDOC_ARGS)
 
 	for (n = n->child->next; n; n = n->next) {
 		i = 1;
-		if (MDOC_SYNPRETTY & n->flags)
+		if (NODE_SYNPRETTY & n->flags)
 			i = 2;
 		t = print_otag(h, TAG_I, i, tag);
 		print_text(h, n->string);
@@ -1649,7 +1649,7 @@ mdoc_in_pre(MDOC_ARGS)
 	 * of no children.
 	 */
 
-	if (MDOC_SYNPRETTY & n->flags && MDOC_LINE & n->flags)
+	if (NODE_SYNPRETTY & n->flags && NODE_LINE & n->flags)
 		print_text(h, "#include");
 
 	print_text(h, "<");
@@ -1826,7 +1826,7 @@ static void
 mdoc_pf_post(MDOC_ARGS)
 {
 
-	if ( ! (n->next == NULL || n->next->flags & MDOC_LINE))
+	if ( ! (n->next == NULL || n->next->flags & NODE_LINE))
 		h->flags |= HTML_NOSPACE;
 }
 
@@ -1897,7 +1897,7 @@ mdoc_lb_pre(MDOC_ARGS)
 {
 	struct htmlpair	tag;
 
-	if (SEC_LIBRARY == n->sec && MDOC_LINE & n->flags && n->prev)
+	if (SEC_LIBRARY == n->sec && NODE_LINE & n->flags && n->prev)
 		print_otag(h, TAG_BR, 0, NULL);
 
 	PAIR_CLASS_INIT(&tag, "lib");

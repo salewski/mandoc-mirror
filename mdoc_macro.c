@@ -216,7 +216,7 @@ mdoc_endparse(struct roff_man *mdoc)
 
 	/* Scan for open explicit scopes. */
 
-	n = mdoc->last->flags & MDOC_VALID ?
+	n = mdoc->last->flags & NODE_VALID ?
 	    mdoc->last->parent : mdoc->last;
 
 	for ( ; n; n = n->parent)
@@ -264,16 +264,16 @@ static void
 rew_last(struct roff_man *mdoc, const struct roff_node *to)
 {
 
-	if (to->flags & MDOC_VALID)
+	if (to->flags & NODE_VALID)
 		return;
 
 	while (mdoc->last != to) {
 		mdoc_state(mdoc, mdoc->last);
-		mdoc->last->flags |= MDOC_VALID | MDOC_ENDED;
+		mdoc->last->flags |= NODE_VALID | NODE_ENDED;
 		mdoc->last = mdoc->last->parent;
 	}
 	mdoc_state(mdoc, mdoc->last);
-	mdoc->last->flags |= MDOC_VALID | MDOC_ENDED;
+	mdoc->last->flags |= NODE_VALID | NODE_ENDED;
 	mdoc->next = ROFF_NEXT_SIBLING;
 }
 
@@ -298,7 +298,7 @@ rew_pending(struct roff_man *mdoc, const struct roff_node *n)
 			default:
 				return;
 			}
-			if ( ! (n->flags & MDOC_BROKEN))
+			if ( ! (n->flags & NODE_BROKEN))
 				return;
 		} else
 			n = mdoc->last;
@@ -309,7 +309,7 @@ rew_pending(struct roff_man *mdoc, const struct roff_node *n)
 
 			if (n->type == ROFFT_BLOCK ||
 			    n->type == ROFFT_HEAD) {
-				if (n->flags & MDOC_ENDED)
+				if (n->flags & NODE_ENDED)
 					break;
 				else
 					return;
@@ -390,18 +390,18 @@ find_pending(struct roff_man *mdoc, int tok, int line, int ppos,
 
 	irc = 0;
 	for (n = mdoc->last; n != NULL && n != target; n = n->parent) {
-		if (n->flags & MDOC_ENDED) {
-			if ( ! (n->flags & MDOC_VALID))
-				n->flags |= MDOC_BROKEN;
+		if (n->flags & NODE_ENDED) {
+			if ( ! (n->flags & NODE_VALID))
+				n->flags |= NODE_BROKEN;
 			continue;
 		}
 		if (n->type == ROFFT_BLOCK &&
 		    mdoc_macros[n->tok].flags & MDOC_EXPLICIT) {
 			irc = 1;
-			n->flags = MDOC_BROKEN;
+			n->flags = NODE_BROKEN;
 			if (target->type == ROFFT_HEAD)
-				target->flags = MDOC_ENDED;
-			else if ( ! (target->flags & MDOC_ENDED)) {
+				target->flags = NODE_ENDED;
+			else if ( ! (target->flags & NODE_ENDED)) {
 				mandoc_vmsg(MANDOCERR_BLK_NEST,
 				    mdoc->parse, line, ppos,
 				    "%s breaks %s", mdoc_macronames[tok],
@@ -444,11 +444,11 @@ dword(struct roff_man *mdoc, int line, int col, const char *p,
 	 */
 
 	if (d == DELIM_OPEN)
-		mdoc->last->flags |= MDOC_DELIMO;
+		mdoc->last->flags |= NODE_DELIMO;
 	else if (d == DELIM_CLOSE &&
 	    ! (mdoc->flags & MDOC_NODELIMC) &&
 	    mdoc->last->parent->tok != MDOC_Fd)
-		mdoc->last->flags |= MDOC_DELIMC;
+		mdoc->last->flags |= NODE_DELIMC;
 	mdoc->flags &= ~MDOC_NODELIMC;
 }
 
@@ -481,7 +481,7 @@ append_delims(struct roff_man *mdoc, int line, int *pos, char *buf)
 		 */
 
 		if (mandoc_eos(p, strlen(p)))
-			mdoc->last->flags |= MDOC_EOS;
+			mdoc->last->flags |= NODE_EOS;
 	}
 }
 
@@ -554,7 +554,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 	atok = rew_alt(tok);
 	body = NULL;
 	for (n = mdoc->last; n; n = n->parent) {
-		if (n->flags & MDOC_ENDED || n->tok != atok ||
+		if (n->flags & NODE_ENDED || n->tok != atok ||
 		    n->type != ROFFT_BODY || n->end != ENDBODY_NOT)
 			continue;
 		body = n;
@@ -568,9 +568,9 @@ blk_exp_close(MACRO_PROT_ARGS)
 
 	endbody = itblk = later = NULL;
 	for (n = mdoc->last; n; n = n->parent) {
-		if (n->flags & MDOC_ENDED) {
-			if ( ! (n->flags & MDOC_VALID))
-				n->flags |= MDOC_BROKEN;
+		if (n->flags & NODE_ENDED) {
+			if ( ! (n->flags & NODE_VALID))
+				n->flags |= NODE_BROKEN;
 			continue;
 		}
 
@@ -620,7 +620,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 			    atok, body, ENDBODY_SPACE);
 
 			if (tok == MDOC_El)
-				itblk->flags |= MDOC_ENDED | MDOC_BROKEN;
+				itblk->flags |= NODE_ENDED | NODE_BROKEN;
 
 			/*
 			 * If a block closing macro taking arguments
@@ -642,7 +642,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 
 		/* Breaking an open sub block. */
 
-		n->flags |= MDOC_BROKEN;
+		n->flags |= NODE_BROKEN;
 		if (later == NULL)
 			later = n;
 	}
@@ -706,11 +706,11 @@ blk_exp_close(MACRO_PROT_ARGS)
 	}
 
 	if (n != NULL) {
-		if (ntok != TOKEN_NONE && n->flags & MDOC_BROKEN) {
+		if (ntok != TOKEN_NONE && n->flags & NODE_BROKEN) {
 			target = n;
 			do
 				target = target->parent;
-			while ( ! (target->flags & MDOC_ENDED));
+			while ( ! (target->flags & NODE_ENDED));
 			pending = find_pending(mdoc, ntok, line, ppos,
 			    target);
 		} else
@@ -769,7 +769,7 @@ in_line(MACRO_PROT_ARGS)
 
 		if (ac == ARGS_EOLN) {
 			if (d == DELIM_OPEN)
-				mdoc->last->flags &= ~MDOC_DELIMO;
+				mdoc->last->flags &= ~NODE_DELIMO;
 			break;
 		}
 
@@ -863,7 +863,7 @@ in_line(MACRO_PROT_ARGS)
 		 */
 
 		if (firstarg && d == DELIM_CLOSE && !nc)
-			mdoc->last->flags &= ~MDOC_DELIMC;
+			mdoc->last->flags &= ~NODE_DELIMC;
 		firstarg = 0;
 
 		/*
@@ -926,9 +926,9 @@ blk_full(MACRO_PROT_ARGS)
 
 		blk = NULL;
 		for (n = mdoc->last; n != NULL; n = n->parent) {
-			if (n->flags & MDOC_ENDED) {
-				if ( ! (n->flags & MDOC_VALID))
-					n->flags |= MDOC_BROKEN;
+			if (n->flags & NODE_ENDED) {
+				if ( ! (n->flags & NODE_VALID))
+					n->flags |= NODE_BROKEN;
 				continue;
 			}
 			if (n->type != ROFFT_BLOCK)
@@ -1129,7 +1129,7 @@ blk_full(MACRO_PROT_ARGS)
 			break;
 	}
 
-	if (blk->flags & MDOC_VALID)
+	if (blk->flags & NODE_VALID)
 		return;
 	if (head == NULL)
 		head = roff_head_alloc(mdoc, line, ppos, tok);
@@ -1464,7 +1464,7 @@ phrase_ta(MACRO_PROT_ARGS)
 
 	body = NULL;
 	for (n = mdoc->last; n != NULL; n = n->parent) {
-		if (n->flags & MDOC_ENDED)
+		if (n->flags & NODE_ENDED)
 			continue;
 		if (n->tok == MDOC_It && n->type == ROFFT_BODY)
 			body = n;

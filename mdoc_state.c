@@ -249,7 +249,7 @@ state_sh(STATE_ARGS)
 	if (n->type != ROFFT_HEAD)
 		return;
 
-	if ( ! (n->flags & MDOC_VALID)) {
+	if ( ! (n->flags & NODE_VALID)) {
 		secname = NULL;
 		deroff(&secname, n);
 
