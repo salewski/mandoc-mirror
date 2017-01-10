@@ -239,13 +239,13 @@ static	const struct mdoc_handler mdocs[MDOC_MAX] = {
 	{ NULL, 0, 0 },  /* Ac */
 	{ NULL, 0, 0 },  /* Ao */
 	{ NULL, 0, 0 },  /* Aq */
-	{ NULL, TYPE_At, 0 },  /* At */
+	{ NULL, TYPE_At, NODE_NOSRC },  /* At */
 	{ NULL, 0, 0 },  /* Bc */
 	{ NULL, 0, 0 },  /* Bf */
 	{ NULL, 0, 0 },  /* Bo */
 	{ NULL, 0, 0 },  /* Bq */
 	{ NULL, TYPE_Bsx, NODE_NOSRC },  /* Bsx */
-	{ NULL, TYPE_Bx, 0 },  /* Bx */
+	{ NULL, TYPE_Bx, NODE_NOSRC },  /* Bx */
 	{ NULL, 0, 0 },  /* Db */
 	{ NULL, 0, 0 },  /* Dc */
 	{ NULL, 0, 0 },  /* Do */

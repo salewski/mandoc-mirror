@@ -71,7 +71,6 @@ static	void		  mdoc_bk_post(MDOC_ARGS);
 static	int		  mdoc_bk_pre(MDOC_ARGS);
 static	int		  mdoc_bl_pre(MDOC_ARGS);
 static	int		  mdoc_bt_pre(MDOC_ARGS);
-static	int		  mdoc_bx_pre(MDOC_ARGS);
 static	int		  mdoc_cd_pre(MDOC_ARGS);
 static	int		  mdoc_d1_pre(MDOC_ARGS);
 static	int		  mdoc_dv_pre(MDOC_ARGS);
@@ -183,7 +182,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_quote_pre, mdoc_quote_post}, /* Bo */
 	{mdoc_quote_pre, mdoc_quote_post}, /* Bq */
 	{mdoc_xx_pre, NULL}, /* Bsx */
-	{mdoc_bx_pre, NULL}, /* Bx */
+	{mdoc_xx_pre, NULL}, /* Bx */
 	{mdoc_skip_pre, NULL}, /* Db */
 	{NULL, NULL}, /* Dc */
 	{mdoc_quote_pre, mdoc_quote_post}, /* Do */
@@ -737,33 +736,6 @@ mdoc_xx_pre(MDOC_ARGS)
 	PAIR_CLASS_INIT(&tag, "unix");
 	print_otag(h, TAG_SPAN, 1, &tag);
 	return 1;
-}
-
-static int
-mdoc_bx_pre(MDOC_ARGS)
-{
-	struct htmlpair	 tag;
-
-	PAIR_CLASS_INIT(&tag, "unix");
-	print_otag(h, TAG_SPAN, 1, &tag);
-
-	if (NULL != (n = n->child)) {
-		print_text(h, n->string);
-		h->flags |= HTML_NOSPACE;
-		print_text(h, "BSD");
-	} else {
-		print_text(h, "BSD");
-		return 0;
-	}
-
-	if (NULL != (n = n->next)) {
-		h->flags |= HTML_NOSPACE;
-		print_text(h, "-");
-		h->flags |= HTML_NOSPACE;
-		print_text(h, n->string);
-	}
-
-	return 0;
 }
 
 static int
