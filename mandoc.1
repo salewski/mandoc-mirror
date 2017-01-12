@@ -498,7 +498,15 @@ Use
 to show a human readable representation of the syntax tree.
 It is useful for debugging the source code of manual pages.
 The exact format is subject to change, so don't write parsers for it.
-Each output line shows one syntax tree node.
+.Pp
+The first paragraph shows meta data found in the
+.Xr mdoc 7
+prologue, on the
+.Xr man 7
+.Ic \&TH
+line, or the fallbacks used.
+.Pp
+In the tree dump, each output line shows one syntax tree node.
 Child nodes are indented with respect to their parent node.
 The columns are:
 .Pp
