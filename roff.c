@@ -1223,16 +1223,12 @@ deroff(char **dest, const struct roff_node *n)
 		return;
 	}
 
-	/* Skip leading whitespace and escape sequences. */
+	/* Skip leading whitespace. */
 
-	cp = n->string;
-	while (*cp != '\0') {
-		if ('\\' == *cp) {
+	for (cp = n->string; *cp != '\0'; cp++) {
+		if (cp[0] == '\\' && strchr(" %&0^|~", cp[1]) != NULL)
 			cp++;
-			mandoc_escape((const char **)&cp, NULL, NULL);
-		} else if (isspace((unsigned char)*cp))
-			cp++;
-		else
+		else if ( ! isspace((unsigned char)*cp))
 			break;
 	}
 
