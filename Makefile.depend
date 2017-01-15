@@ -17,7 +17,7 @@ compat_strlcpy.o: compat_strlcpy.c config.h
 compat_strsep.o: compat_strsep.c config.h
 compat_strtonum.o: compat_strtonum.c config.h
 compat_vasprintf.o: compat_vasprintf.c config.h
-dba.o: dba.c config.h mandoc_aux.h mansearch.h dba_write.h dba_array.h dba.h
+dba.o: dba.c config.h mandoc_aux.h mandoc_ohash.h compat_ohash.h mansearch.h dba_write.h dba_array.h dba.h
 dba_array.o: dba_array.c mandoc_aux.h dba_write.h dba_array.h
 dba_read.o: dba_read.c mandoc_aux.h mansearch.h dba_array.h dba.h dbm.h
 dba_write.o: dba_write.c config.h dba_write.h
