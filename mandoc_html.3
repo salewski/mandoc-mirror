@@ -1,6 +1,6 @@
 .\"	$Id$
 .\"
-.\" Copyright (c) 2014 Ingo Schwarze <schwarze@openbsd.org>
+.\" Copyright (c) 2014, 2017 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -146,6 +146,26 @@ attribute.
 Print a
 .Cm href
 attribute.
+This attribute letter can optionally be followed by a modifier letter.
+If followed by
+.Cm R ,
+it formats the link as a local one by prefixing a
+.Sq #
+character.
+If followed by
+.Cm I ,
+it interpretes the argument as a header file name
+and generates a link using the
+.Xr mandoc 1
+.Fl O Cm includes
+option.
+If followed by
+.Cm M ,
+it takes two arguments instead of one, a manual page name and
+section, and formats them as a link to a manual page using the
+.Xr mandoc 1
+.Fl O Cm man
+option.
 .It Cm i
 Print an
 .Cm id
@@ -235,8 +255,6 @@ The first is the style name, the second its value.
 .Pp
 .Fn print_otag
 uses the private function
-.Fn print_attr
-which in turn uses the private function
 .Fn print_encode
 to take care of HTML encoding.
 If required by the element type, it remembers in
@@ -268,28 +286,6 @@ in an HTML font selection element using the
 and
 .Fn print_tagq
 functions.
-.Pp
-The functions
-.Fn bufinit ,
-.Fn bufcat* ,
-and
-.Fn buffmt*
-do not directly produce output but buffer text in the
-.Fa buf
-member of
-.Fa h .
-They are not used internally by
-.Pa html.c
-but intended for use by the language-specific formatters
-to ease preparation of strings for the
-.Fa p
-argument of
-.Fn print_otag
-and for the
-.Fa word
-argument of
-.Fn print_text .
-Consequently, these functions do not do any HTML encoding.
 .Pp
 The functions
 .Fn html_strlen ,

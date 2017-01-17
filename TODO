@@ -33,15 +33,6 @@ Obviously, as the issues have not been solved yet, these annotations
 are mere guesses, and some may be wrong.
 
 ************************************************************************
-* crashes
-************************************************************************
-
-- The abort() in bufcat(), html.c, can be triggered via buffmt_includes()
-  by running -Thtml -Oincludes on a file containing a long .In argument.
-  Fixing this will probably require reworking the whole bufcat() concept.
-  loc **  exist *  algo *  size **  imp **
-
-************************************************************************
 * missing features
 ************************************************************************
 

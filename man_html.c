@@ -172,14 +172,13 @@ html_man(void *arg, const struct roff_man *man)
 static void
 print_man_head(MAN_ARGS)
 {
+	char	*cp;
 
 	print_gen_head(h);
-	assert(man->title);
-	assert(man->msec);
-	bufinit(h);
-	bufcat_fmt(h, "%s(%s)", man->title, man->msec);
+	mandoc_asprintf(&cp, "%s(%s)", man->title, man->msec);
 	print_otag(h, TAG_TITLE, "");
-	print_text(h, h->buf);
+	print_text(h, cp);
+	free(cp);
 }
 
 static void

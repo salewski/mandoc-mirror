@@ -101,8 +101,6 @@ struct	html {
 	char		 *base_man; /* base for manpage href */
 	char		 *base_includes; /* base for include href */
 	char		 *style; /* style-sheet URI */
-	char		  buf[BUFSIZ]; /* see bufcat and friends */
-	size_t		  buflen;
 	struct tag	 *metaf; /* current open font scope */
 	enum htmlfont	  metal; /* last used font */
 	enum htmlfont	  metac; /* current font mode */
@@ -124,18 +122,5 @@ void		  print_tblclose(struct html *);
 void		  print_tbl(struct html *, const struct tbl_span *);
 void		  print_eqn(struct html *, const struct eqn *);
 void		  print_paragraph(struct html *);
-
-void		  bufcat_fmt(struct html *, const char *, ...)
-			__attribute__((__format__ (printf, 2, 3)));
-void		  bufcat(struct html *, const char *);
-void		  bufcat_id(struct html *, const char *);
-void		  bufcat_style(struct html *,
-			const char *, const char *);
-void		  bufcat_su(struct html *, const char *,
-			const struct roffsu *);
-void		  bufinit(struct html *);
-void		  buffmt_man(struct html *,
-			const char *, const char *);
-void		  buffmt_includes(struct html *, const char *);
 
 int		  html_strlen(const char *);
