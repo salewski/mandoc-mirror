@@ -166,7 +166,6 @@ html_man(void *arg, const struct roff_man *man)
 
 	print_man_nodelist(&man->meta, man->first, &mh, h);
 	print_tagq(h, t);
-	putchar('\n');
 }
 
 static void

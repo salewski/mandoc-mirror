@@ -318,7 +318,6 @@ html_mdoc(void *arg, const struct roff_man *mdoc)
 	print_mdoc_nodelist(&mdoc->meta, mdoc->first->child, h);
 	mdoc_root_post(&mdoc->meta, mdoc->first->child, h);
 	print_tagq(h, t);
-	putchar('\n');
 }
 
 static void
