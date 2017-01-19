@@ -7,6 +7,10 @@
 
 html {		max-width: 100ex; }
 body {		font-family: Helvetica,Arial,sans-serif; }
+table {		width: 100%;
+		margin-top: 0ex;
+		margin-bottom: 0ex; }
+td {		vertical-align: top; }
 
 /* Search form and search results. */
 
@@ -20,28 +24,33 @@ div.results {	margin-top: 1em;
 		margin-left: 2em;
 		font-size: smaller; }
 
+/* Header and footer lines. */
+
+table.head {	border-bottom: 1px dotted #808080;
+		margin-bottom: 1em;
+		font-size: smaller; }
+td.head-vol {	text-align: center; }
+td.head-rtitle {
+		text-align: right; }
+
+table.foot {	border-top: 1px dotted #808080;
+		margin-top: 1em;
+		font-size: smaller; }
+td.foot-date {	width: 50%; }
+td.foot-os {	width: 50%;
+		text-align: right; }
+
 
 h1		{ margin-bottom: 1ex; font-size: 110% } 
 div.section > h1 { margin-left: -4ex; } /* Section header (Sh, SH). */
 h2		{ margin-bottom: 1ex; font-size: 105%; margin-left: -2ex; } /* Sub-section header (Ss, SS). */
-table		{ width: 100%; margin-top: 0ex; margin-bottom: 0ex; } /* All tables. */
-td		{ vertical-align: top; } /* All table cells. */
+
 p		{ } /* Paragraph: Pp, Lp. */
 blockquote	{ margin-left: 5ex; margin-top: 0ex; margin-bottom: 0ex; } /* D1. */
 div.section	{ margin-bottom: 2ex; margin-left: 5ex; } /* Sections (Sh, SH). */
 div.subsection	{ } /* Sub-sections (Ss, SS). */
 table.synopsis	{ } /* SYNOPSIS section table. */
 div.spacer	{ margin: 1em 0; }
-
-/* Preamble structure. */
-
-table.foot	{ font-size: smaller; margin-top: 1em; border-top: 1px dotted #dddddd; } /* Document footer. */
-td.foot-date	{ width: 50%; } /* Document footer: date. */
-td.foot-os	{ width: 50%; } /* Document footer: OS/source. */
-table.head	{ font-size: smaller; margin-bottom: 1em; border-bottom: 1px dotted #dddddd; } /* Document header. */
-td.head-ltitle	{ width: 10%; } /* Document header: left-title. */
-td.head-vol	{ width: 80%; } /* Document header: volume. */
-td.head-rtitle	{ width: 10%; } /* Document header: right-title. */
 
 /* General font modes. */
 
