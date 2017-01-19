@@ -48,6 +48,7 @@ struct	htmlmdoc {
 	void		(*post)(MDOC_ARGS);
 };
 
+static	char		 *make_id(const struct roff_node *);
 static	void		  print_mdoc_head(MDOC_ARGS);
 static	void		  print_mdoc_node(MDOC_ARGS);
 static	void		  print_mdoc_nodelist(MDOC_ARGS);
@@ -492,7 +493,7 @@ mdoc_root_pre(MDOC_ARGS)
 	return 1;
 }
 
-char *
+static char *
 make_id(const struct roff_node *n)
 {
 	const struct roff_node	*nch;
@@ -635,11 +636,11 @@ mdoc_xr_pre(MDOC_ARGS)
 		return 0;
 
 	if (h->base_man)
-		print_otag(h, TAG_A, "chM", "link-man",
+		print_otag(h, TAG_A, "chM", "Xr",
 		    n->child->string, n->child->next == NULL ?
 		    NULL : n->child->next->string);
 	else
-		print_otag(h, TAG_A, "c", "link-man");
+		print_otag(h, TAG_A, "c", "Xr");
 
 	n = n->child;
 	print_text(h, n->string);
@@ -862,12 +863,11 @@ mdoc_sx_pre(MDOC_ARGS)
 {
 	char	*id;
 
-	print_otag(h, TAG_I, "c", "link-sec");
 	if ((id = make_id(n)) != NULL) {
-		print_otag(h, TAG_A, "chR", "link-sec", id);
+		print_otag(h, TAG_A, "chR", "Sx", id);
 		free(id);
 	} else
-		print_otag(h, TAG_A, "c", "link-sec");
+		print_otag(h, TAG_A, "c", "Sx");
 
 	return 1;
 }

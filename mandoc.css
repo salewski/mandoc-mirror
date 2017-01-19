@@ -53,6 +53,8 @@ h2.Ss {		margin-top: 2ex;
 		margin-left: -2ex;
 		font-size: 105%; }
 div.Pp {	margin: 1ex 0ex; }
+a.Sx { }
+a.Xr { }
 
 
 blockquote	{ margin-left: 5ex; margin-top: 0ex; margin-bottom: 0ex; } /* D1. */
@@ -91,7 +93,6 @@ b.fname		{ font-style: normal; } /* Function name (Fa, Fn, Rv). */
 i.ftype		{ font-weight: normal; } /* Function types (Ft, Fn). */
 b.includes	{ font-style: normal; } /* Header includes (In). */
 span.lib	{ } /* Library (Lb). */
-i.link-sec	{ font-weight: normal; } /* Section links (Sx). */
 b.macro		{ font-style: normal; } /* Macro-ish thing (Fd). */
 b.name		{ font-style: normal; } /* Name of utility (Nm). */
 span.opt	{ } /* Options (Op, Oo/Oc). */
@@ -117,9 +118,7 @@ b.var		{ font-style: normal; } /* Variables (Rv). */
 a.link-ext	{ } /* Off-site link (Lk). */
 a.link-includes	{ } /* Include-file link (In). */
 a.link-mail	{ } /* Mailto links (Mt). */
-a.link-man	{ } /* Manual links (Xr). */
 a.link-ref	{ } /* Reference section links (%Q). */
-a.link-sec	{ } /* Section links (Sx). */
 
 /* Formatting for lists.  See mdoc(7). */
 
