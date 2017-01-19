@@ -148,24 +148,22 @@ html_man(void *arg, const struct roff_man *man)
 {
 	struct mhtml	 mh;
 	struct html	*h;
-	struct tag	*t, *tt;
+	struct tag	*t;
 
 	memset(&mh, 0, sizeof(mh));
 	h = (struct html *)arg;
 
-	if ( ! (HTML_FRAGMENT & h->oflags)) {
+	if ((h->oflags & HTML_FRAGMENT) == 0) {
 		print_gen_decls(h);
-		t = print_otag(h, TAG_HTML, "");
-		tt = print_otag(h, TAG_HEAD, "");
+		print_otag(h, TAG_HTML, "");
+		t = print_otag(h, TAG_HEAD, "");
 		print_man_head(&man->meta, man->first, &mh, h);
-		print_tagq(h, tt);
+		print_tagq(h, t);
 		print_otag(h, TAG_BODY, "");
-		print_otag(h, TAG_DIV, "c", "mandoc");
-	} else
-		t = print_otag(h, TAG_DIV, "c", "mandoc");
+	}
 
 	print_man_nodelist(&man->meta, man->first, &mh, h);
-	print_tagq(h, t);
+	print_tagq(h, NULL);
 }
 
 static void

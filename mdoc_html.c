@@ -299,25 +299,23 @@ void
 html_mdoc(void *arg, const struct roff_man *mdoc)
 {
 	struct html	*h;
-	struct tag	*t, *tt;
+	struct tag	*t;
 
 	h = (struct html *)arg;
 
-	if ( ! (HTML_FRAGMENT & h->oflags)) {
+	if ((h->oflags & HTML_FRAGMENT) == 0) {
 		print_gen_decls(h);
-		t = print_otag(h, TAG_HTML, "");
-		tt = print_otag(h, TAG_HEAD, "");
+		print_otag(h, TAG_HTML, "");
+		t = print_otag(h, TAG_HEAD, "");
 		print_mdoc_head(&mdoc->meta, mdoc->first->child, h);
-		print_tagq(h, tt);
+		print_tagq(h, t);
 		print_otag(h, TAG_BODY, "");
-		print_otag(h, TAG_DIV, "c", "mandoc");
-	} else
-		t = print_otag(h, TAG_DIV, "c", "mandoc");
+	}
 
 	mdoc_root_pre(&mdoc->meta, mdoc->first->child, h);
 	print_mdoc_nodelist(&mdoc->meta, mdoc->first->child, h);
 	mdoc_root_post(&mdoc->meta, mdoc->first->child, h);
-	print_tagq(h, t);
+	print_tagq(h, NULL);
 }
 
 static void
