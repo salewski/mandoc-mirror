@@ -215,8 +215,6 @@ print_man_node(MAN_ARGS)
 		print_text(h, n->string);
 		return;
 	case ROFFT_EQN:
-		if (n->flags & NODE_LINE)
-			putchar('\n');
 		print_eqn(h, n->eqn);
 		break;
 	case ROFFT_TBL:

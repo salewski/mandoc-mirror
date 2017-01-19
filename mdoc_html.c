@@ -384,8 +384,6 @@ print_mdoc_node(MDOC_ARGS)
 			h->flags |= HTML_NOSPACE;
 		return;
 	case ROFFT_EQN:
-		if (n->flags & NODE_LINE)
-			putchar('\n');
 		print_eqn(h, n->eqn);
 		break;
 	case ROFFT_TBL:
