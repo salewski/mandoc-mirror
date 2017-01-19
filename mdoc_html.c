@@ -846,14 +846,10 @@ mdoc_d1_pre(MDOC_ARGS)
 	if (n->type != ROFFT_BLOCK)
 		return 1;
 
-	print_otag(h, TAG_BLOCKQUOTE, "svtvb", 0, 0);
+	print_otag(h, TAG_DIV, "c", "D1");
 
-	/* BLOCKQUOTE needs a block body. */
-
-	print_otag(h, TAG_DIV, "c", "display");
-
-	if (MDOC_Dl == n->tok)
-		print_otag(h, TAG_CODE, "c", "lit");
+	if (n->tok == MDOC_Dl)
+		print_otag(h, TAG_CODE, "c", "Li");
 
 	return 1;
 }
@@ -909,15 +905,15 @@ mdoc_bd_pre(MDOC_ARGS)
 		offs = -1;
 
 	if (offs == -1)
-		print_otag(h, TAG_DIV, "cswl", "display", n->norm->Bd.offs);
+		print_otag(h, TAG_DIV, "cswl", "Bd", n->norm->Bd.offs);
 	else
-		print_otag(h, TAG_DIV, "cshl", "display", offs);
+		print_otag(h, TAG_DIV, "cshl", "Bd", offs);
 
 	if (n->norm->Bd.type != DISP_unfilled &&
 	    n->norm->Bd.type != DISP_literal)
 		return 1;
 
-	print_otag(h, TAG_PRE, "c", "lit");
+	print_otag(h, TAG_PRE, "c", "Li");
 
 	/* This can be recursive: save & set our literal state. */
 
@@ -1414,7 +1410,7 @@ mdoc_bf_pre(MDOC_ARGS)
 	else if (FONT_Sy == n->norm->Bf.font)
 		cattr = "symb";
 	else if (FONT_Li == n->norm->Bf.font)
-		cattr = "lit";
+		cattr = "Li";
 	else
 		cattr = "none";
 
@@ -1473,7 +1469,7 @@ mdoc_no_pre(MDOC_ARGS)
 static int
 mdoc_li_pre(MDOC_ARGS)
 {
-	print_otag(h, TAG_CODE, "c", "lit");
+	print_otag(h, TAG_CODE, "c", "Li");
 	return 1;
 }
 
@@ -1656,7 +1652,7 @@ mdoc_quote_pre(MDOC_ARGS)
 	case MDOC_Ql:
 		print_text(h, "\\(oq");
 		h->flags |= HTML_NOSPACE;
-		print_otag(h, TAG_CODE, "c", "lit");
+		print_otag(h, TAG_CODE, "c", "Li");
 		break;
 	case MDOC_So:
 	case MDOC_Sq:

@@ -56,8 +56,18 @@ div.Pp {	margin: 1ex 0ex; }
 a.Sx { }
 a.Xr { }
 
+/* Displays and lists. */
 
-blockquote	{ margin-left: 5ex; margin-top: 0ex; margin-bottom: 0ex; } /* D1. */
+div.Bd { }
+div.D1 {	margin-left: 5ex; }
+
+/* Fonts. */
+
+.Li {		font-style: normal;
+		font-weight: normal;
+		font-family: monospace; }
+
+
 table.synopsis	{ } /* SYNOPSIS section table. */
 
 /* General font modes. */
@@ -67,11 +77,9 @@ i		{ } /* Italic: BI, IB, I, (implicit). */
 b		{ } /* Bold: SB, BI, IB, BR, RB, B, (implicit). */
 .symb		{ font-style: normal; font-weight: bold; } /* Symbolic: Sy, Ms, Bf -symbolic. */
 small		{ } /* Small: SB, SM. */
-.lit		{ font-style: normal; font-weight: normal; font-family: monospace; } /* Literal: Dl, Li, Ql, Bf -literal, Bl -literal, Bl -unfilled. */
 
 /* Block modes. */
 
-.display	{ } /* Top of all Bd, D1, Dl. */
 .list		{ } /* Top of all Bl. */
 
 /* Context-specific modes. */
