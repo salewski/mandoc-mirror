@@ -182,7 +182,7 @@ print_gen_head(struct html *h)
 	print_endline(h);
 	print_text(h, "table.head td { width: 33%; }");
 	print_endline(h);
-	print_text(h, "div.spacer { margin: 1em 0; }");
+	print_text(h, "div.Pp { margin: 1ex 0ex; }");
 	print_tagq(h, t);
 
 	if (h->style)
@@ -769,7 +769,7 @@ print_paragraph(struct html *h)
 {
 	struct tag	*t;
 
-	t = print_otag(h, TAG_DIV, "c", "spacer");
+	t = print_otag(h, TAG_DIV, "c", "Pp");
 	print_tagq(h, t);
 }
 

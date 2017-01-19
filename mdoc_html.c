@@ -313,7 +313,9 @@ html_mdoc(void *arg, const struct roff_man *mdoc)
 	}
 
 	mdoc_root_pre(&mdoc->meta, mdoc->first->child, h);
+	t = print_otag(h, TAG_DIV, "c", "manual-text");
 	print_mdoc_nodelist(&mdoc->meta, mdoc->first->child, h);
+	print_tagq(h, t);
 	mdoc_root_post(&mdoc->meta, mdoc->first->child, h);
 	print_tagq(h, NULL);
 }
@@ -519,7 +521,6 @@ mdoc_sh_pre(MDOC_ARGS)
 
 	switch (n->type) {
 	case ROFFT_BLOCK:
-		print_otag(h, TAG_DIV, "c", "section");
 		return 1;
 	case ROFFT_BODY:
 		if (n->sec == SEC_AUTHORS)
@@ -530,10 +531,10 @@ mdoc_sh_pre(MDOC_ARGS)
 	}
 
 	if ((id = make_id(n)) != NULL) {
-		print_otag(h, TAG_H1, "i", id);
+		print_otag(h, TAG_H1, "ci", "Sh", id);
 		free(id);
 	} else
-		print_otag(h, TAG_H1, "");
+		print_otag(h, TAG_H1, "c", "Sh");
 
 	return 1;
 }
@@ -543,17 +544,14 @@ mdoc_ss_pre(MDOC_ARGS)
 {
 	char	*id;
 
-	if (n->type == ROFFT_BLOCK) {
-		print_otag(h, TAG_DIV, "c", "subsection");
-		return 1;
-	} else if (n->type == ROFFT_BODY)
+	if (n->type != ROFFT_HEAD)
 		return 1;
 
 	if ((id = make_id(n)) != NULL) {
-		print_otag(h, TAG_H2, "i", id);
+		print_otag(h, TAG_H2, "ci", "Ss", id);
 		free(id);
 	} else
-		print_otag(h, TAG_H2, "");
+		print_otag(h, TAG_H2, "c", "Ss");
 
 	return 1;
 }
