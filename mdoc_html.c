@@ -1487,7 +1487,7 @@ mdoc_rs_pre(MDOC_ARGS)
 	if (n->prev && SEC_SEE_ALSO == n->sec)
 		print_paragraph(h);
 
-	print_otag(h, TAG_SPAN, "c", "ref");
+	print_otag(h, TAG_SPAN, "c", "Rs");
 	return 1;
 }
 
@@ -1532,64 +1532,58 @@ mdoc__x_pre(MDOC_ARGS)
 
 	switch (n->tok) {
 	case MDOC__A:
-		cattr = "ref-auth";
+		cattr = "RsA";
 		if (n->prev && MDOC__A == n->prev->tok)
 			if (NULL == n->next || MDOC__A != n->next->tok)
 				print_text(h, "and");
 		break;
 	case MDOC__B:
-		cattr = "ref-book";
 		t = TAG_I;
+		cattr = "RsB";
 		break;
 	case MDOC__C:
-		cattr = "ref-city";
+		cattr = "RsC";
 		break;
 	case MDOC__D:
-		cattr = "ref-date";
+		cattr = "RsD";
 		break;
 	case MDOC__I:
-		cattr = "ref-issue";
 		t = TAG_I;
+		cattr = "RsI";
 		break;
 	case MDOC__J:
-		cattr = "ref-jrnl";
 		t = TAG_I;
+		cattr = "RsJ";
 		break;
 	case MDOC__N:
-		cattr = "ref-num";
+		cattr = "RsN";
 		break;
 	case MDOC__O:
-		cattr = "ref-opt";
+		cattr = "RsO";
 		break;
 	case MDOC__P:
-		cattr = "ref-page";
+		cattr = "RsP";
 		break;
 	case MDOC__Q:
-		cattr = "ref-corp";
+		cattr = "RsQ";
 		break;
 	case MDOC__R:
-		cattr = "ref-rep";
+		cattr = "RsR";
 		break;
 	case MDOC__T:
-		cattr = "ref-title";
+		cattr = "RsT";
 		break;
 	case MDOC__U:
-		cattr = "link-ref";
-		break;
+		print_otag(h, TAG_A, "ch", "RsU", n->child->string);
+		return 1;
 	case MDOC__V:
-		cattr = "ref-vol";
+		cattr = "RsV";
 		break;
 	default:
 		abort();
 	}
 
-	if (MDOC__U != n->tok) {
-		print_otag(h, t, "c", cattr);
-		return 1;
-	}
-
-	print_otag(h, TAG_A, "ch", cattr, n->child->string);
-
+	print_otag(h, t, "c", cattr);
 	return 1;
 }
 
