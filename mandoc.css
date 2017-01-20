@@ -61,6 +61,41 @@ a.Xr { }
 div.Bd { }
 div.D1 {	margin-left: 5ex; }
 
+ul.Bl-bullet {	list-style-type: disc;
+		padding-left: 1em; }
+li.It-bullet { }
+ul.Bl-dash {	list-style-type: none;
+		padding-left: 0em; }
+li.It-dash:before {
+		content: "\2014  "; }
+ul.Bl-item {	list-style-type: none;
+		padding-left: 0em; }
+li.It-item { }
+
+ol.Bl-enum {	padding-left: 2em; }
+li.It-enum { }
+
+dl.Bl-diag { }
+dt.It-diag { }
+dd.It-diag { }
+b.It-diag {	font-style: normal; }
+dl.Bl-hang { }
+dt.It-hang { }
+dd.It-hang { }
+dl.Bl-inset { }
+dt.It-inset { }
+dd.It-inset { }
+dl.Bl-ohang { }
+dt.It-ohang { }
+dd.It-ohang {	margin-left: 0ex; }
+dl.Bl-tag { }
+dt.It-tag { }
+dd.It-tag { }
+
+table.Bl-column { }
+tr.It-column { }
+td.It-column { }
+
 /* Fonts. */
 
 .Li {		font-style: normal;
@@ -78,10 +113,6 @@ b		{ } /* Bold: SB, BI, IB, BR, RB, B, (implicit). */
 .symb		{ font-style: normal; font-weight: bold; } /* Symbolic: Sy, Ms, Bf -symbolic. */
 small		{ } /* Small: SB, SM. */
 
-/* Block modes. */
-
-.list		{ } /* Top of all Bl. */
-
 /* Context-specific modes. */
 
 i.addr		{ font-weight: normal; } /* Address (Ad). */
@@ -91,7 +122,6 @@ b.cmd		{ font-style: normal; } /* Command (Cm). */
 b.config	{ font-style: normal; } /* Config statement (Cd). */
 span.define	{ } /* Defines (Dv). */
 span.desc	{ } /* Nd.  After em-dash. */
-b.diag		{ font-style: normal; } /* Diagnostic (Bl -diag). */
 span.env	{ } /* Environment variables (Ev). */
 span.errno	{ } /* Error string (Er). */
 i.farg		{ font-weight: normal; } /* Function argument (Fa, Fn). */
@@ -127,47 +157,6 @@ a.link-ext	{ } /* Off-site link (Lk). */
 a.link-includes	{ } /* Include-file link (In). */
 a.link-mail	{ } /* Mailto links (Mt). */
 a.link-ref	{ } /* Reference section links (%Q). */
-
-/* Formatting for lists.  See mdoc(7). */
-
-dl.list-diag	{ }
-dt.list-diag	{ }
-dd.list-diag	{ }
-
-dl.list-hang	{ }
-dt.list-hang	{ }
-dd.list-hang	{ }
-
-dl.list-inset	{ }
-dt.list-inset	{ }
-dd.list-inset	{ }
-
-dl.list-ohang	{ }
-dt.list-ohang	{ }
-dd.list-ohang	{ margin-left: 0ex; }
-
-dl.list-tag	{ }
-dt.list-tag	{ }
-dd.list-tag	{ }
-
-table.list-col	{ }
-tr.list-col	{ }
-td.list-col	{ }
-
-ul.list-bul	{ list-style-type: disc; padding-left: 1em; }
-li.list-bul	{ }
-
-ul.list-dash	{ list-style-type: none; padding-left: 0em; }
-li.list-dash:before { content: "\2014  "; }
-
-ul.list-hyph	{ list-style-type: none; padding-left: 0em; }
-li.list-hyph:before { content: "\2013  "; }
-
-ul.list-item	{ list-style-type: none; padding-left: 0em; }
-li.list-item	{ }
-
-ol.list-enum	{ padding-left: 2em; }
-li.list-enum	{ }
 
 /* Equation modes.  See eqn(7). */
 
