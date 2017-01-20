@@ -517,7 +517,7 @@ man_OP_pre(MAN_ARGS)
 
 	print_text(h, "[");
 	h->flags |= HTML_NOSPACE;
-	tt = print_otag(h, TAG_SPAN, "c", "opt");
+	tt = print_otag(h, TAG_SPAN, "c", "Op");
 
 	if (NULL != (n = n->child)) {
 		print_otag(h, TAG_B, "");
@@ -603,7 +603,7 @@ man_UR_pre(MAN_ARGS)
 	assert(n->type == ROFFT_HEAD);
 	if (n->child != NULL) {
 		assert(n->child->type == ROFFT_TEXT);
-		print_otag(h, TAG_A, "ch", "link-ext", n->child->string);
+		print_otag(h, TAG_A, "ch", "Lk", n->child->string);
 	}
 
 	assert(n->next->type == ROFFT_BODY);

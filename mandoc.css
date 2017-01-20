@@ -112,14 +112,53 @@ span.RsT {	text-decoration: underline; }
 a.RsU { }
 span.RsV { }
 
+/* Semantic markup for command line utilities. */
+
+table.Nm { }
+b.Nm {		font-style: normal; }
+b.Fl {		font-style: normal; }
+b.Cm {		font-style: normal; }
+i.Ar {		font-weight: normal; }
+span.Op { }
+b.Ic {		font-style: normal; }
+code.Ev {	font-style: normal;
+		font-weight: normal;
+		font-family: monospace; }
+i.Pa {		font-weight: normal; }
+
+/* Semantic markup for function libraries. */
+
+span.Lb { }
+b.In {		font-style: normal; }
+a.In { }
+b.Fd {		font-style: normal; }
+i.Ft {		font-weight: normal; }
+b.Fn {		font-style: normal; }
+i.Fa {		font-weight: normal; }
+i.Vt {		font-weight: normal; }
+i.Va {		font-weight: normal; }
+code.Dv {	font-style: normal;
+		font-weight: normal;
+		font-family: monospace; }
+code.Er {	font-style: normal;
+		font-weight: normal;
+		font-family: monospace; }
+
+/* Various semantic markup. */
+
+span.An { }
+a.Lk { }
+a.Mt { }
+b.Cd {		font-style: normal; }
+i.Ad {		font-weight: normal; }
+b.Ms {		font-style: normal; }
+
 /* Fonts. */
 
 .Li {		font-style: normal;
 		font-weight: normal;
 		font-family: monospace; }
 
-
-table.synopsis	{ } /* SYNOPSIS section table. */
 
 /* General font modes. */
 
@@ -131,33 +170,10 @@ small		{ } /* Small: SB, SM. */
 
 /* Context-specific modes. */
 
-i.addr		{ font-weight: normal; } /* Address (Ad). */
-i.arg		{ font-weight: normal; } /* Command argument (Ar). */
-span.author	{ } /* Author name (An). */
-b.cmd		{ font-style: normal; } /* Command (Cm). */
-b.config	{ font-style: normal; } /* Config statement (Cd). */
-span.define	{ } /* Defines (Dv). */
 span.desc	{ } /* Nd.  After em-dash. */
-span.env	{ } /* Environment variables (Ev). */
-span.errno	{ } /* Error string (Er). */
-i.farg		{ font-weight: normal; } /* Function argument (Fa, Fn). */
-i.file		{ font-weight: normal; } /* File (Pa). */
-b.flag		{ font-style: normal; } /* Flag (Fl, Cm). */
-b.fname		{ font-style: normal; } /* Function name (Fa, Fn, Rv). */
-i.ftype		{ font-weight: normal; } /* Function types (Ft, Fn). */
-b.includes	{ font-style: normal; } /* Header includes (In). */
-span.lib	{ } /* Library (Lb). */
-b.macro		{ font-style: normal; } /* Macro-ish thing (Fd). */
-b.name		{ font-style: normal; } /* Name of utility (Nm). */
-span.opt	{ } /* Options (Op, Oo/Oc). */
-span.type	{ font-style: italic; font-weight: normal; } /* Variable types (Vt). */
 span.unix	{ } /* Unices (Ux, Ox, Nx, Fx, Bx, Bsx, Dx). */
 b.utility	{ font-style: normal; } /* Name of utility (Ex). */
 b.var		{ font-style: normal; } /* Variables (Rv). */
-
-a.link-ext	{ } /* Off-site link (Lk). */
-a.link-includes	{ } /* Include-file link (In). */
-a.link-mail	{ } /* Mailto links (Mt). */
 
 /* Equation modes.  See eqn(7). */
 
