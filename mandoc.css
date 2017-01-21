@@ -20,7 +20,7 @@ fieldset {	border: thin solid silver;
 input[name=expr] {
 		width: 25%; }
 
-div.results {	margin-top: 1em;
+table.results {	margin-top: 1em;
 		margin-left: 2em;
 		font-size: smaller; }
 
@@ -32,6 +32,7 @@ table.head {	border-bottom: 1px dotted #808080;
 td.head-vol {	text-align: center; }
 td.head-rtitle {
 		text-align: right; }
+span.Nd { }
 
 table.foot {	border-top: 1px dotted #808080;
 		margin-top: 1em;
@@ -112,6 +113,9 @@ span.RsT {	text-decoration: underline; }
 a.RsU { }
 span.RsV { }
 
+span.eqn { }
+table.tbl { }
+
 /* Semantic markup for command line utilities. */
 
 table.Nm { }
@@ -152,33 +156,16 @@ a.Mt { }
 b.Cd {		font-style: normal; }
 i.Ad {		font-weight: normal; }
 b.Ms {		font-style: normal; }
+a.Ux { }
 
-/* Fonts. */
+/* Physical markup. */
 
+.No {		font-style: normal;
+		font-weight: normal; }
+.Em {		font-style: italic;
+		font-weight: normal; }
+.Sy {		font-style: normal;
+		font-weight: bold; }
 .Li {		font-style: normal;
 		font-weight: normal;
 		font-family: monospace; }
-
-
-/* General font modes. */
-
-i		{ } /* Italic: BI, IB, I, (implicit). */
-.emph		{ font-style: italic; font-weight: normal; } /* Emphasis: Em, Bl -emphasis. */
-b		{ } /* Bold: SB, BI, IB, BR, RB, B, (implicit). */
-.symb		{ font-style: normal; font-weight: bold; } /* Symbolic: Sy, Ms, Bf -symbolic. */
-small		{ } /* Small: SB, SM. */
-
-/* Context-specific modes. */
-
-span.desc	{ } /* Nd.  After em-dash. */
-span.unix	{ } /* Unices (Ux, Ox, Nx, Fx, Bx, Bsx, Dx). */
-b.utility	{ font-style: normal; } /* Name of utility (Ex). */
-b.var		{ font-style: normal; } /* Variables (Rv). */
-
-/* Equation modes.  See eqn(7). */
-
-span.eqn	{ }
-
-/* Table modes.  See tbl(7). */
-
-table.tbl	{ }

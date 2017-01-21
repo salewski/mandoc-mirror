@@ -455,16 +455,16 @@ man_IP_pre(MAN_ARGS)
 	const struct roff_node	*nn;
 
 	if (n->type == ROFFT_BODY) {
-		print_otag(h, TAG_DD, "");
+		print_otag(h, TAG_DD, "c", "It-tag");
 		return 1;
 	} else if (n->type != ROFFT_HEAD) {
-		print_otag(h, TAG_DL, "");
+		print_otag(h, TAG_DL, "c", "Bl-tag");
 		return 1;
 	}
 
 	/* FIXME: width specification. */
 
-	print_otag(h, TAG_DT, "");
+	print_otag(h, TAG_DT, "c", "It-tag");
 
 	/* For IP, only print the first header element. */
 
