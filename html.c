@@ -177,10 +177,6 @@ print_gen_head(struct html *h)
 	print_endline(h);
 	print_text(h, "td.head-vol { text-align: center; }");
 	print_endline(h);
-	print_text(h, "table.foot td { width: 50%; }");
-	print_endline(h);
-	print_text(h, "table.head td { width: 33%; }");
-	print_endline(h);
 	print_text(h, "div.Pp { margin: 1ex 0ex; }");
 	print_tagq(h, t);
 

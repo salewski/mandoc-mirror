@@ -7,8 +7,7 @@
 
 html {		max-width: 100ex; }
 body {		font-family: Helvetica,Arial,sans-serif; }
-table {		width: 100%;
-		margin-top: 0em;
+table {		margin-top: 0em;
 		margin-bottom: 0em; }
 td {		vertical-align: top; }
 ul, ol, dl {	margin-top: 0em;
@@ -29,7 +28,8 @@ table.results {	margin-top: 1em;
 
 /* Header and footer lines. */
 
-table.head {	border-bottom: 1px dotted #808080;
+table.head {	width: 100%;
+		border-bottom: 1px dotted #808080;
 		margin-bottom: 1em;
 		font-size: smaller; }
 td.head-vol {	text-align: center; }
@@ -37,12 +37,11 @@ td.head-rtitle {
 		text-align: right; }
 span.Nd { }
 
-table.foot {	border-top: 1px dotted #808080;
+table.foot {	width: 100%;
+		border-top: 1px dotted #808080;
 		margin-top: 1em;
 		font-size: smaller; }
-td.foot-date {	width: 50%; }
-td.foot-os {	width: 50%;
-		text-align: right; }
+td.foot-os {	text-align: right; }
 
 /* Sections and paragraphs. */
 
