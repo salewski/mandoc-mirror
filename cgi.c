@@ -799,6 +799,7 @@ resp_format(const struct req *req, const char *file)
 
 	memset(&conf, 0, sizeof(conf));
 	conf.fragment = 1;
+	conf.style = mandoc_strdup(CSS_DIR "/mandoc.css");
 	usepath = strcmp(req->q.manpath, req->p[0]);
 	mandoc_asprintf(&conf.man, "/%s%s%%N.%%S",
 	    usepath ? req->q.manpath : "", usepath ? "/" : "");
@@ -826,6 +827,7 @@ resp_format(const struct req *req, const char *file)
 	mparse_free(mp);
 	mchars_free();
 	free(conf.man);
+	free(conf.style);
 }
 
 static void

@@ -408,12 +408,6 @@ are mere guesses, and some may be wrong.
 
 --- HTML issues --------------------------------------------------------
 
-- <dl><dt><dd> formatting is ugly
-  hints are easy to find on the web, e.g.
-  http://stackoverflow.com/questions/1713048/
-  see also matthew@  Fri, 18 Jul 2014 19:25:12 -0700
-  loc *  exist *  algo **  size *  imp ***
-
 - In -man -Thtml, .nf does not preserve indentation.
   It should either convert blanks to &nbsp;
   or use <pre> rather than <div> (like .Bd -literal does).

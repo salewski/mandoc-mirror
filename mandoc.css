@@ -91,9 +91,18 @@ dd.It-inset { }
 dl.Bl-ohang { }
 dt.It-ohang { }
 dd.It-ohang {	margin-left: 0ex; }
-dl.Bl-tag { }
-dt.It-tag { }
-dd.It-tag { }
+dl.Bl-tag {	margin-left: 8ex; }
+dt.It-tag {	float: left;
+		clear: both;
+		margin-top: 0ex;
+		margin-left: -8ex;
+		padding-right: 2ex;
+		vertical-align: top; }
+dd.It-tag {	width: 100%;
+		margin-top: 0ex;
+		margin-left: 0ex;
+		vertical-align: top;
+		overflow: auto; }
 
 table.Bl-column { }
 tr.It-column { }

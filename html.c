@@ -566,8 +566,11 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 			SCALE_VS_INIT(su, i);
 			break;
 		case 'w':
+		case 'W':
 			s = va_arg(ap, char *);
 			a2width(s, su);
+			if (fmt[-1] == 'W')
+				su->scale *= -1.0;
 			break;
 		default:
 			abort();
