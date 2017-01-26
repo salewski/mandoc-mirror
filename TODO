@@ -412,6 +412,9 @@ are mere guesses, and some may be wrong.
 
 - jsg on icb, Nov 3, 2014:
   try to guess Xr in man(7) for hyperlinking
+  and render them with <a class="Xr" href=...>
+  https://github.com/Debian/debiman/issues/15
+  loc *  exist *  algo **  size **  imp **
 
 - The tables used to render the three-part page headers actually force
   the width of the <body> to the max-width given for <html>.
