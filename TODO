@@ -193,10 +193,6 @@ are mere guesses, and some may be wrong.
   uqs@  Thu, 2 Jun 2011 11:33:35 +0200
   loc *  exist **  algo ***  size *  imp **
 
---- missing man features -----------------------------------------------
-
-- -T[x]html doesn't stipulate non-collapsing spaces in literal mode
-
 --- missing tbl features -----------------------------------------------
 
 - horizontal lines in the layout still consume data cells
@@ -407,11 +403,6 @@ are mere guesses, and some may be wrong.
   loc *  exist **  algo **  size *  imp **
 
 --- HTML issues --------------------------------------------------------
-
-- In -man -Thtml, .nf does not preserve indentation.
-  It should either convert blanks to &nbsp;
-  or use <pre> rather than <div> (like .Bd -literal does).
-  Reported by afresh1@  12 Apr 2016 14:35:45 -0700
 
 - .Bf at the beginning of a paragraph inserts a bogus 1ex horizontal
   space, see for example random(3).  Introduced in

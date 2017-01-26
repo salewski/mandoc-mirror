@@ -127,5 +127,6 @@ void		  print_tblclose(struct html *);
 void		  print_tbl(struct html *, const struct tbl_span *);
 void		  print_eqn(struct html *, const struct eqn *);
 void		  print_paragraph(struct html *);
+void		  print_endline(struct html *);
 
 int		  html_strlen(const char *);

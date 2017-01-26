@@ -114,7 +114,6 @@ static	const char	*const roffscales[SCALE_MAX] = {
 
 static	void	 a2width(const char *, struct roffsu *);
 static	void	 print_byte(struct html *, char);
-static	void	 print_endline(struct html *);
 static	void	 print_endword(struct html *);
 static	void	 print_indent(struct html *);
 static	void	 print_word(struct html *, const char *);
@@ -812,7 +811,7 @@ print_byte(struct html *h, char c)
  * If something was printed on the current output line, end it.
  * Not to be called right after print_indent().
  */
-static void
+void
 print_endline(struct html *h)
 {
 	if (h->col == 0)
