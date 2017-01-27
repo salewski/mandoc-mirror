@@ -1216,13 +1216,15 @@ mpages_merge(struct dba *dba, struct mparse *mp)
 		if (mpage->desc == NULL)
 			mpage->desc = mandoc_strdup(mpage->mlinks->name);
 
-		if (warnings && !use_all)
-			for (mlink = mpage->mlinks; mlink;
-			     mlink = mlink->next)
+		for (mlink = mpage->mlinks;
+		     mlink != NULL;
+		     mlink = mlink->next) {
+			putkey(mpage, mlink->name, NAME_FILE);
+			if (warnings && !use_all)
 				mlink_check(mpage, mlink);
+		}
 
 		dbadd(dba, mpage);
-		mlink = mpage->mlinks;
 
 nextpage:
 		ohash_delete(&strings);
