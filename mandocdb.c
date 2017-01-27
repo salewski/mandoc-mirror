@@ -1270,6 +1270,12 @@ mpages_merge(struct mparse *mp)
 			parse_mdoc(mpage, &man->meta, man->first);
 		else
 			parse_man(mpage, &man->meta, man->first);
+		if (mpage->desc == NULL) {
+			mpage->desc = mandoc_strdup(mlink->name);
+			if (warnings)
+				say(mlink->file, "No one-line description, "
+				    "using filename \"%s\"", mlink->name);
+		}
 
 		putkey(mpage, mpage->sec, TYPE_sec);
 		if (*mpage->arch != '\0')
@@ -1284,9 +1290,6 @@ mpages_merge(struct mparse *mp)
 			    any : mlink->arch, TYPE_arch);
 			putkey(mpage, mlink->name, NAME_FILE);
 		}
-
-		if (mpage->desc == NULL)
-			mpage->desc = mandoc_strdup(mpage->mlinks->name);
 
 		if (warnings && !use_all)
 			for (mlink = mpage->mlinks; mlink;
@@ -1449,7 +1452,8 @@ parse_cat(struct mpage *mpage, int fd)
 			/* Skip to next word. */ ;
 	} else {
 		if (warnings)
-			say(mlink->file, "No dash in title line");
+			say(mlink->file, "No dash in title line, "
+			    "reusing \"%s\" as one-line description", title);
 		p = title;
 	}
 
