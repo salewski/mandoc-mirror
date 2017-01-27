@@ -872,6 +872,20 @@ filescan(const char *file)
 	}
 
 	/*
+	 * In test mode or when the original name is absolute
+	 * but outside our tree, guess the base directory.
+	 */
+
+	if (op == OP_TEST || (start == buf && *start == '/')) {
+		if (strncmp(buf, "man/", 4) == 0)
+			start = buf + 4;
+		else if ((start = strstr(buf, "/man/")) != NULL)
+			start += 5;
+		else
+			start = buf;
+	}
+
+	/*
 	 * First try to guess our directory structure.
 	 * If we find a separator, try to look for man* or cat*.
 	 * If we find one of these and what's underneath is a directory,
