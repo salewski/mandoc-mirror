@@ -123,6 +123,7 @@ main(int argc, char *argv[])
 	struct manpage	*res, *resp;
 	char		*conf_file, *defpaths;
 	const char	*sec;
+	const char	*thisarg;
 	size_t		 i, sz;
 	int		 prio, best_prio;
 	enum outmode	 outmode;
@@ -247,9 +248,14 @@ main(int argc, char *argv[])
 			break;
 		case 'O':
 			search.outkey = optarg;
-			while (optarg != NULL)
-				manconf_output(&conf.output,
-				    strsep(&optarg, ","));
+			while (optarg != NULL) {
+				thisarg = optarg;
+				if (manconf_output(&conf.output,
+				    strsep(&optarg, ","), 0) == 0)
+					continue;
+				warnx("-O %s: Bad argument", thisarg);
+				return (int)MANDOCLEVEL_BADARG;
+			}
 			break;
 		case 'S':
 			search.arch = optarg;

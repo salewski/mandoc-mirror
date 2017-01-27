@@ -44,5 +44,5 @@ struct	manconf {
 
 
 void	 manconf_parse(struct manconf *, const char *, char *, char *);
-void	 manconf_output(struct manoutput *, const char *);
+int	 manconf_output(struct manoutput *, const char *, int);
 void	 manconf_free(struct manconf *);

@@ -259,10 +259,6 @@ are mere guesses, and some may be wrong.
   even for apropos title line output; req by bapt@
   loc *  exist *  algo *  size *  imp ***
 
-- Does makewhatis(8) detect missing NAME sections, missing names,
-  and missing descriptions in all the file formats?
-  loc *  exist *  algo *  size *  imp ***
-
 - clean up escape sequence handling, creating three classes:
   (1) fully implemented, or parsed and ignored without loss of content
   (2) unimplemented, potentially causing loss of content
@@ -517,9 +513,6 @@ are mere guesses, and some may be wrong.
   probably cannot be on by default in -Tlint because it needs
   to access the manpath and mandoc.db(3) after parsing.
   asked for by jmc@ Fri, 4 Dec 2015 22:39:40 +0000
-
-- Report errors in -O suboption parsing.
-  loc *  exist *  algo *  size *  imp **
 
 - warn when .Sh or .Ss contain other macros
   Steffen Nurpmeso, savannah.gnu.org/bugs/index.php?45034
