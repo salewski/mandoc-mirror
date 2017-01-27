@@ -259,11 +259,6 @@ are mere guesses, and some may be wrong.
   even for apropos title line output; req by bapt@
   loc *  exist *  algo *  size *  imp ***
 
-- makewhatis(8) for preformatted pages:
-  parse the section number from the header line
-  and compare to the section number from the directory name
-  loc *  exist *  algo *  size *  imp **
-
 - Does makewhatis(8) detect missing NAME sections, missing names,
   and missing descriptions in all the file formats?
   loc *  exist *  algo *  size *  imp ***
