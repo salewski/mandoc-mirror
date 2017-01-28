@@ -177,6 +177,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"blank line in fill mode, using .sp",
 	"tab in filled text",
 	"whitespace at end of input line",
+	"new sentence, new line",
 	"bad comment style",
 	"invalid escape sequence",
 	"undefined string, using \"\"",

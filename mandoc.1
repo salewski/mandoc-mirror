@@ -1357,6 +1357,10 @@ it is hard to predict which tab stop position the tab will advance to.
 Whitespace at the end of input lines is almost never semantically
 significant \(em but in the odd case where it might be, it is
 extremely confusing when reviewing and maintaining documents.
+.It Sy "new sentence, new line"
+.Pq mdoc
+A new sentence starts in the middle of a text line.
+Start it on a new input line to help formatters produce correct spacing.
 .It Sy "bad comment style"
 .Pq roff
 Comment lines start with a dot, a backslash, and a double-quote character.
