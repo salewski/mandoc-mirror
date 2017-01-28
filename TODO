@@ -518,14 +518,6 @@ are mere guesses, and some may be wrong.
   Steffen Nurpmeso, savannah.gnu.org/bugs/index.php?45034
   loc *  exist *  algo *  size *  imp **
 
-- check that MANDOCERR_BADTAB is thrown in the right cases,
-  i.e. when finding a literal tab character in fill mode,
-  and possibly change the wording of the warning message
-  to refer to fill mode, not literal mode
-  See the mail from Werner LEMBERG on the groff list,
-  Fri, 14 Feb 2014 18:54:42 +0100 (CET)
-  loc *  exist **  algo **  size *  imp **
-
 - warn about attempts to call non-callable macros
   Steffen Nurpmeso  Tue, 11 Nov 2014 22:55:16 +0100
   Note that formatting is inconsistent in groff.
