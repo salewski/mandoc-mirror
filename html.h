@@ -78,10 +78,6 @@ struct	tag {
 	enum htmltag	  tag;
 };
 
-struct tagq {
-	struct tag	 *head;
-};
-
 struct	html {
 	int		  flags;
 #define	HTML_NOSPACE	 (1 << 0) /* suppress next space */
@@ -100,7 +96,7 @@ struct	html {
 	size_t		  col; /* current output byte position */
 	size_t		  bufcol; /* current buf byte position */
 	char		  buf[80]; /* output buffer */
-	struct tagq	  tags; /* stack of open tags */
+	struct tag	 *tag; /* last open tag */
 	struct rofftbl	  tbl; /* current table */
 	struct tag	 *tblt; /* current open table scope */
 	char		 *base_man; /* base for manpage href */

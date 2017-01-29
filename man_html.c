@@ -197,7 +197,7 @@ print_man_node(MAN_ARGS)
 	struct tag	*t;
 
 	child = 1;
-	t = h->tags.head;
+	t = h->tag;
 	if (t == mh->nofill)
 		t = t->next;
 
@@ -240,7 +240,7 @@ print_man_node(MAN_ARGS)
 		 */
 		if (h->tblt) {
 			print_tblclose(h);
-			t = h->tags.head;
+			t = h->tag;
 		}
 		if (mans[n->tok].pre)
 			child = (*mans[n->tok].pre)(man, n, mh, h);

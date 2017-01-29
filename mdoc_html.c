@@ -349,7 +349,7 @@ print_mdoc_node(MDOC_ARGS)
 		return;
 
 	child = 1;
-	t = h->tags.head;
+	t = h->tag;
 	n->flags &= ~NODE_ENDED;
 
 	switch (n->type) {
@@ -389,7 +389,7 @@ print_mdoc_node(MDOC_ARGS)
 		 */
 		if (h->tblt != NULL) {
 			print_tblclose(h);
-			t = h->tags.head;
+			t = h->tag;
 		}
 		assert(h->tblt == NULL);
 		if (mdocs[n->tok].pre && (n->end == ENDBODY_NOT || n->child))

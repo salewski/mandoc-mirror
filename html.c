@@ -132,7 +132,7 @@ html_alloc(const struct manoutput *outopts)
 
 	h = mandoc_calloc(1, sizeof(struct html));
 
-	h->tags.head = NULL;
+	h->tag = NULL;
 	h->style = outopts->style;
 	h->base_man = outopts->man;
 	h->base_includes = outopts->includes;
@@ -150,8 +150,8 @@ html_free(void *p)
 
 	h = (struct html *)p;
 
-	while ((tag = h->tags.head) != NULL) {
-		h->tags.head = tag->next;
+	while ((tag = h->tag) != NULL) {
+		h->tag = tag->next;
 		free(tag);
 	}
 
@@ -455,13 +455,13 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 
 	tflags = htmltags[tag].flags;
 
-	/* Push this tags onto the stack of open scopes. */
+	/* Push this tag onto the stack of open scopes. */
 
 	if ((tflags & HTML_NOSTACK) == 0) {
 		t = mandoc_malloc(sizeof(struct tag));
 		t->tag = tag;
-		t->next = h->tags.head;
-		h->tags.head = t;
+		t->next = h->tag;
+		h->tag = t;
 	} else
 		t = NULL;
 
@@ -699,7 +699,7 @@ print_ctag(struct html *h, struct tag *tag)
 	if (tflags & HTML_NLAFTER)
 		print_endline(h);
 
-	h->tags.head = tag->next;
+	h->tag = tag->next;
 	free(tag);
 }
 
@@ -760,7 +760,7 @@ print_tagq(struct html *h, const struct tag *until)
 {
 	struct tag	*tag;
 
-	while ((tag = h->tags.head) != NULL) {
+	while ((tag = h->tag) != NULL) {
 		print_ctag(h, tag);
 		if (until && tag == until)
 			return;
@@ -772,7 +772,7 @@ print_stagq(struct html *h, const struct tag *suntil)
 {
 	struct tag	*tag;
 
-	while ((tag = h->tags.head) != NULL) {
+	while ((tag = h->tag) != NULL) {
 		if (suntil && tag == suntil)
 			return;
 		print_ctag(h, tag);
