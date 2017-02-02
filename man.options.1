@@ -42,11 +42,11 @@
 .de Bx43
 .Bx 4.3 Pq June 1986 \\$1
 ..
-.de Bx44N1
-.Bx 4.3 Net/1 Pq March 3, 1989 \\$1
-..
-.de g102
-.No groff-1.02 Pq after March 1989, before June 1991 \\$1
+.\" option was present in groff-1.01 as contained in 4.3BSD-Net/2
+.\" and no mention of it could be found in the ChangeLog,
+.\" so it's probably older than groff-0.4, where the log started
+.de g04
+.No probably before groff-0.4 Pq before July 14, 1990 \\$1
 ..
 .de Eaton
 .No Eaton Pq before July 7, 1993; 1990/91? \\$1
@@ -146,7 +146,7 @@ ASCII output mode
 .At7
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .It Fl B
 use specified browser
 .br
@@ -156,7 +156,7 @@ use specified browser
 print a backtrace with each warning or error message
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 .Bq obsolete hardware
 report whether the phototypesetter is busy
@@ -193,7 +193,7 @@ alternate configuration file
 enable compatibility mode
 .br
 .Nm groff :
-.Bx44N1
+.No before groff-0.5 Pq before August 3, 1990
 .It Fl c
 do not use a pager
 .br
@@ -275,7 +275,7 @@ display all files added to
 define a user-defined string
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 print debugging information
 .br
@@ -310,7 +310,7 @@ interpret arguments as file names
 inhibit all error messages
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 select output encoding
 .br
@@ -324,7 +324,7 @@ preprocess with
 .At7
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 adjust text to left and right margins
 .br
@@ -347,7 +347,7 @@ use alternate font directory
 .Bx 4.2 Pq September 1983
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 preformat only, do not display
 .br
@@ -377,7 +377,7 @@ mode
 set the default font family
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 force formatting even if cat page is newer
 .br
@@ -437,7 +437,7 @@ output to a DASI 300 terminal in 12-pitch mode
 read hyphenation patterns from the given file
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 produce HTML output
 .br
@@ -452,7 +452,7 @@ use program to render HTML files as text
 print a help message and exit
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .br
 .Nm man :
 .Eaton ;
@@ -510,7 +510,7 @@ read standard input after the input files are exhausted
 .At7
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 ignore case when matching manual page names
 .br
@@ -580,7 +580,7 @@ display on a Tektronix 4014 terminal
 pass argument to the spooler
 .br
 .Nm groff :
-.Bx44N1
+.No groff-0.6 Pq Sep 14, 1990
 .Pp
 use alternate
 .Xr locale 1
@@ -603,7 +603,7 @@ specified in the environment
 spool the output
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 interpret arguments as file names
 .br
@@ -657,7 +657,7 @@ override manual page search path
 prepend to macro file search path
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 do not show the context of the match
 .br
@@ -670,7 +670,7 @@ specify input macro language
 .At7
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .br
 .Nm mandoc :
 .Ox 4.8 Pq April 6, 2009
@@ -711,7 +711,7 @@ do not allow newlines between
 delimiters
 .br
 .Nm groff :
-.Bx44N1
+.No groff-1.01 Pq Feb 21, 1991
 .It Fl n
 specify a page number for the first page
 .br
@@ -719,7 +719,7 @@ specify a page number for the first page
 .At7
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 .Xr nroff 1
 output mode
@@ -766,7 +766,7 @@ select pages by numbers
 .At7
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 force use of non-localized manual pages
 .br
@@ -781,7 +781,7 @@ optimize index for speed and disk space
 pass argument to postprocessor
 .br
 .Nm groff :
-.Bx44N1
+.No groff-0.6 Pq Sep 14, 1990
 .Pp
 use specified pager
 .br
@@ -798,7 +798,7 @@ preprocess with
 .Xr pic 1
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 use the given list of preprocessors
 .br
@@ -875,7 +875,7 @@ postprocess with
 .Xr refer 1
 .br
 .Nm groff :
-.g102
+.No groff-1.02 Pq June 2, 1991
 .Pp
 recode to the specified encoding
 .br
@@ -888,7 +888,7 @@ set number register
 .At7
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 scan for and remove junk files
 .br
@@ -948,7 +948,7 @@ preprocess with
 .Xr soelim 1
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 silent mode, do not echo commands
 .br
@@ -975,10 +975,9 @@ restrict section
 .No man-db Pq Nov 16, 2003 ,
 .Ox 5.6 Pq April 18, 2014 ;
 .No illumos
-.Pp
+.br
 .Nm mandoc :
 .Ox 5.7 Pq August 27, 2014
-.br
 .Pp
 do not look for stray cats
 .br
@@ -1023,7 +1022,7 @@ select terminal output format
 .Ox 5.7 Pq August 27, 2014
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .br
 .Nm mandoc :
 .Ox 4.8 Pq April 6, 2009
@@ -1062,7 +1061,7 @@ preprocess with
 .Xr tbl 7
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 check manual pages in the hierarchy
 .br
@@ -1104,7 +1103,7 @@ remove files from
 print the pipeline on stdout instead of executing it
 .br
 .Nm groff :
-.Bx44N1
+.No groff-0.6 Pq Sep 2, 1990
 .Pp
 print version information
 .br
@@ -1114,7 +1113,7 @@ print version information
 print version number
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .Pp
 verbose mode
 .br
@@ -1141,7 +1140,7 @@ produce output on the Versatec printer
 disable the named warning
 .br
 .Nm groff :
-.Bx44N1
+.No groff-0.5 Pq August 14, 1990
 .Pp
 list pathnames without additional information
 .br
@@ -1176,7 +1175,7 @@ list pathnames
 enable the named warning
 .br
 .Nm groff :
-.Bx44N1
+.No groff-0.5 Pq August 14, 1990
 .Pp
 only create the
 .Xr whatis 1
@@ -1227,7 +1226,7 @@ use the non-compacted version of the macros
 do not run preprocessors
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .br
 .Nm man :
 .No man-db-2.2a5 Pq Nov 10, 1994
@@ -1237,7 +1236,7 @@ suppress formatted output from
 print only error messages
 .br
 .Nm groff :
-.Bx44N1
+.g04
 .It Fl 7
 ASCII output mode
 .br
@@ -1247,7 +1246,7 @@ ASCII output mode
 print a help message and exit
 .br
 .Nm groff :
-.g102
+.g04
 .br
 .Nm man , manpath :
 .Eaton ;
@@ -1310,6 +1309,10 @@ the OpenBSD CVS repository
 the NetBSD CVS repository
 .It
 the GNU roff (groff) git repository
+.It
+the 4.3BSD-Net/2 groff CHANGES file (Oct 1990 to March 1991)
+.It
+the 4.3BSD-Net/2 groff ChangeLog file (July 1990 to March 1991)
 .It
 the man-db CVS and git repositories (since April 2001)
 .It
