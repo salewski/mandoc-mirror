@@ -837,6 +837,7 @@ mparse_reset(struct mparse *curp)
 
 	free(curp->sodest);
 	curp->sodest = NULL;
+	curp->gzip = 0;
 }
 
 void
