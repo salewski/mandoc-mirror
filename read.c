@@ -50,8 +50,8 @@
 #define	REPARSE_LIMIT	1000
 
 struct	mparse {
-	struct roff_man	 *man; /* man parser */
 	struct roff	 *roff; /* roff parser (!NULL) */
+	struct roff_man	 *man; /* man parser */
 	char		 *sodest; /* filename pointed to by .so */
 	const char	 *file; /* filename of current input file */
 	struct buf	 *primary; /* buffer currently being parsed */
@@ -836,13 +836,15 @@ mparse_reset(struct mparse *curp)
 {
 	roff_reset(curp->roff);
 	roff_man_reset(curp->man);
+
+	free(curp->sodest);
+	curp->sodest = NULL;
+
 	if (curp->secondary)
 		curp->secondary->sz = 0;
 
 	curp->file_status = MANDOCLEVEL_OK;
-
-	free(curp->sodest);
-	curp->sodest = NULL;
+	curp->gzip = 0;
 }
 
 void
@@ -850,8 +852,7 @@ mparse_free(struct mparse *curp)
 {
 
 	roff_man_free(curp->man);
-	if (curp->roff)
-		roff_free(curp->roff);
+	roff_free(curp->roff);
 	if (curp->secondary)
 		free(curp->secondary->buf);
 
