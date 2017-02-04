@@ -258,6 +258,7 @@ terminal_mdoc(void *arg, const struct roff_man *mdoc)
 {
 	struct roff_node	*n;
 	struct termp		*p;
+	size_t			 save_defindent;
 
 	p = (struct termp *)arg;
 	p->overstep = 0;
@@ -278,6 +279,7 @@ terminal_mdoc(void *arg, const struct roff_man *mdoc)
 			n = n->next;
 		}
 	} else {
+		save_defindent = p->defindent;
 		if (p->defindent == 0)
 			p->defindent = 5;
 		term_begin(p, print_mdoc_head, print_mdoc_foot,
@@ -290,6 +292,7 @@ terminal_mdoc(void *arg, const struct roff_man *mdoc)
 			print_mdoc_nodelist(p, NULL, &mdoc->meta, n);
 		}
 		term_end(p);
+		p->defindent = save_defindent;
 	}
 }
 
