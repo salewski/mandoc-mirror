@@ -212,6 +212,13 @@ WWWPREFIX="/var/www"
 HTDOCDIR="${WWWPREFIX}/htdocs"
 CGIBINDIR="${WWWPREFIX}/cgi-bin"
 
+# --- user settings related to catman ----------------------------------
+
+# By default, building mandocd(8) and catman(8) is disabled.
+# To enable it, use the following line.
+
+BUILD_CATMAN=1
+
 # --- settings that rarely need to be touched --------------------------
 
 # Do not set these variables unless you really need to.

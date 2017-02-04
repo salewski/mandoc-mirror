@@ -47,6 +47,7 @@ LD_OHASH=
 STATIC="-static"
 
 BUILD_CGI=0
+BUILD_CATMAN=0
 INSTALL_LIBMANDOC=0
 
 HAVE_DIRENT_NAMLEN=
@@ -428,10 +429,14 @@ exec > Makefile.local
 [ -z "${INSTALL_DATA}"    ] && INSTALL_DATA="${INSTALL} -m 0444"
 
 BUILD_TARGETS=
-[ ${BUILD_CGI} -gt 0 ] && BUILD_TARGETS="cgi-build"
+[ ${BUILD_CGI} -gt 0 ] && BUILD_TARGETS="man.cgi"
+[ ${BUILD_CATMAN} -gt 0 ] && \
+	BUILD_TARGETS="${BUILD_TARGETS} mandocd catman"
 INSTALL_TARGETS=
 [ ${INSTALL_LIBMANDOC} -gt 0 ] && INSTALL_TARGETS="lib-install"
 [ ${BUILD_CGI} -gt 0 ] && INSTALL_TARGETS="${INSTALL_TARGETS} cgi-install"
+[ ${BUILD_CATMAN} -gt 0 ] && \
+	INSTALL_TARGETS="${INSTALL_TARGETS} catman-install"
 
 cat << __HEREDOC__
 BUILD_TARGETS	= ${BUILD_TARGETS}

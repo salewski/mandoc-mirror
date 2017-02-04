@@ -1,0 +1,213 @@
+/*	$Id$ */
+/*
+ * Copyright (c) 2017 Michael Stapelberg <stapelberg@debian.org>
+ * Copyright (c) 2017 Ingo Schwarze <schwarze@openbsd.org>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+#include "config.h"
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+
+#if HAVE_ERR
+#include <err.h>
+#endif
+#include <fcntl.h>
+#if HAVE_FTS
+#include <fts.h>
+#else
+#include "compat_fts.h"
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+int	 process_manpage(int, int, const char *);
+int	 process_tree(int, int);
+void	 run_mandocd(int, const char *) __attribute__((noreturn));
+ssize_t	 sock_fd_write(int, int, int, int);
+void	 usage(void) __attribute__((noreturn));
+
+
+void
+run_mandocd(int sockfd, const char *outtype)
+{
+	char	 sockfdstr[10];
+
+	if (snprintf(sockfdstr, sizeof(sockfdstr), "%d", sockfd) == -1)
+		err(1, "snprintf");
+	execlp("mandocd", "mandocd", "-T", outtype, sockfdstr, NULL);
+	err(1, "exec");
+}
+
+ssize_t
+sock_fd_write(int fd, int fd0, int fd1, int fd2)
+{
+	struct msghdr	 msg;
+	struct iovec	 iov;
+	union {
+		struct cmsghdr	 cmsghdr;
+		char		 control[CMSG_SPACE(3 * sizeof(int))];
+	} cmsgu;
+	struct cmsghdr	*cmsg;
+	int		*walk;
+	unsigned char	 dummy[1] = {'\0'};
+
+	iov.iov_base = dummy;
+	iov.iov_len = sizeof(dummy);
+
+	msg.msg_name = NULL;
+	msg.msg_namelen = 0;
+	msg.msg_iov = &iov;
+	msg.msg_iovlen = 1;
+
+	msg.msg_control = cmsgu.control;
+	msg.msg_controllen = sizeof(cmsgu.control);
+
+	cmsg = CMSG_FIRSTHDR(&msg);
+	cmsg->cmsg_len = CMSG_LEN(3 * sizeof(int));
+	cmsg->cmsg_level = SOL_SOCKET;
+	cmsg->cmsg_type = SCM_RIGHTS;
+
+	walk = (int *)CMSG_DATA(cmsg);
+	*(walk++) = fd0;
+	*(walk++) = fd1;
+	*(walk++) = fd2;
+
+	return sendmsg(fd, &msg, 0);
+}
+
+int
+process_manpage(int srv_fd, int dstdir_fd, const char *path)
+{
+	int	 in_fd, out_fd;
+
+	if ((in_fd = open(path, O_RDONLY)) == -1) {
+		warn("open(%s)", path);
+		return -1;
+	}
+
+	if ((out_fd = openat(dstdir_fd, path,
+	    O_WRONLY | O_NOFOLLOW | O_CREAT | O_TRUNC,
+	    S_IRUSR | S_IWUSR | S_IRGRP | S_IRWXO)) == -1) {
+		warn("openat(%s)", path);
+		close(in_fd);
+		return -1;
+	}
+
+	if (sock_fd_write(srv_fd, in_fd, out_fd, STDERR_FILENO) < 0) {
+		warn("sendmsg");
+		return -1;
+	}
+
+	close(in_fd);
+	close(out_fd);
+	return 0;
+}
+
+int
+process_tree(int srv_fd, int dstdir_fd)
+{
+	FTS		*ftsp;
+	FTSENT		*entry;
+	const char	*argv[2];
+	const char	*path;
+
+	argv[0] = ".";
+	argv[1] = (char *)NULL;
+
+	if ((ftsp = fts_open((char * const *)argv,
+	    FTS_PHYSICAL | FTS_NOCHDIR, NULL)) == NULL) {
+		warn("fts_open");
+		return -1;
+	}
+
+	while ((entry = fts_read(ftsp)) != NULL) {
+		path = entry->fts_path + 2;
+		switch (entry->fts_info) {
+		case FTS_F:
+			process_manpage(srv_fd, dstdir_fd, path);
+			break;
+		case FTS_D:
+		case FTS_DP:
+			break;
+		default:
+			warnx("%s: not a regular file", path);
+			break;
+		}
+	}
+
+	fts_close(ftsp);
+	return 0;
+}
+
+int
+main(int argc, char **argv)
+{
+	const char	*outtype;
+	int		 srv_fds[2];
+	int		 dstdir_fd;
+	int		 opt;
+	pid_t		 pid;
+
+	outtype = "ascii";
+	while ((opt = getopt(argc, argv, "T:")) != -1) {
+		switch (opt) {
+		case 'T':
+			outtype = optarg;
+			break;
+		default:
+			usage();
+		}
+	}
+
+	if (argc > 0) {
+		argc -= optind;
+		argv += optind;
+	}
+	if (argc != 2)
+		usage();
+
+	if (socketpair(AF_LOCAL, SOCK_STREAM, AF_UNSPEC, srv_fds) == -1)
+		err(1, "socketpair");
+
+	pid = fork();
+	switch (pid) {
+	case -1:
+		err(1, "fork");
+	case 0:
+		close(srv_fds[0]);
+		run_mandocd(srv_fds[1], outtype);
+	default:
+		break;
+	}
+	close(srv_fds[1]);
+
+	if ((dstdir_fd = open(argv[1], O_RDONLY | O_DIRECTORY)) == -1)
+		err(1, "open(%s)", argv[1]);
+
+	if (chdir(argv[0]) == -1)
+		err(1, "chdir(%s)", argv[0]);
+
+	return process_tree(srv_fds[0], dstdir_fd) == -1 ? 1 : 0;
+}
+
+void
+usage(void)
+{
+	fprintf(stderr, "usage: catman [-T output] srcdir dstdir\n");
+	exit(1);
+}

@@ -49,6 +49,7 @@ TESTSRCS	 = test-be32toh.c \
 		   test-wchar.c
 
 SRCS		 = att.c \
+		   catman.c \
 		   cgi.c \
 		   chars.c \
 		   compat_err.c \
@@ -89,6 +90,7 @@ SRCS		 = att.c \
 		   mandoc.c \
 		   mandoc_aux.c \
 		   mandoc_ohash.c \
+		   mandocd.c \
 		   mandocdb.c \
 		   manpage.c \
 		   manpath.c \
@@ -280,6 +282,12 @@ CGI_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   cgi.o \
 		   out.o
 
+MANDOCD_OBJS	 = $(MANDOC_HTML_OBJS) \
+		   $(MANDOC_TERM_OBJS) \
+		   mandocd.o \
+		   out.o \
+		   tag.o
+
 MANPAGE_OBJS	 = $(DBM_OBJS) \
 		   manpage.o \
 		   manpath.o
@@ -334,11 +342,7 @@ include Makefile.local
 
 # === DEPENDENCY HANDLING ==============================================
 
-all: base-build $(BUILD_TARGETS) Makefile.local
-
-base-build: mandoc demandoc soelim
-
-cgi-build: man.cgi
+all: mandoc demandoc soelim $(BUILD_TARGETS) Makefile.local
 
 install: base-install $(INSTALL_TARGETS)
 
@@ -360,13 +364,14 @@ clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS) $(COMPAT_OBJS)
 	rm -f mandoc $(MAIN_OBJS)
 	rm -f man.cgi $(CGI_OBJS)
+	rm -f mandocd catman $(MANDOCD_OBJS)
 	rm -f manpage $(MANPAGE_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f soelim $(SOELIM_OBJS)
 	rm -f $(WWW_MANS) $(WWW_OBJS)
 	rm -rf *.dSYM
 
-base-install: base-build
+base-install: mandoc demandoc soelim
 	mkdir -p $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(SBINDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
@@ -397,7 +402,7 @@ base-install: base-build
 	$(INSTALL_MAN) makewhatis.8 \
 		$(DESTDIR)$(MANDIR)/man8/$(BINM_MAKEWHATIS).8
 
-lib-install: base-build
+lib-install: libmandoc.a
 	mkdir -p $(DESTDIR)$(LIBDIR)
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
@@ -407,11 +412,15 @@ lib-install: base-build
 	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
 		mansearch.3 mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
 
-cgi-install: cgi-build
+cgi-install: man.cgi
 	mkdir -p $(DESTDIR)$(CGIBINDIR)
 	mkdir -p $(DESTDIR)$(HTDOCDIR)
 	$(INSTALL_PROGRAM) man.cgi $(DESTDIR)$(CGIBINDIR)
 	$(INSTALL_DATA) mandoc.css $(DESTDIR)$(HTDOCDIR)
+
+catman-install: mandocd catman
+	mkdir -p $(DESTDIR)$(SBINDIR)
+	$(INSTALL_PROGRAM) mandocd catman $(DESTDIR)$(SBINDIR)
 
 Makefile.local config.h: configure ${TESTSRCS}
 	@echo "$@ is out of date; please run ./configure"
@@ -428,6 +437,12 @@ manpage: $(MANPAGE_OBJS) libmandoc.a
 
 man.cgi: $(CGI_OBJS) libmandoc.a
 	$(CC) $(STATIC) -o $@ $(LDFLAGS) $(CGI_OBJS) libmandoc.a $(LDADD)
+
+mandocd: $(MANDOCD_OBJS) libmandoc.a
+	$(CC) -o $@ $(LDFLAGS) $(MANDOCD_OBJS) libmandoc.a $(LDADD)
+
+catman: catman.o
+	$(CC) -o $@ $(LDFLAGS) catman.o
 
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
 	$(CC) -o $@ $(LDFLAGS) $(DEMANDOC_OBJS) libmandoc.a $(LDADD)
