@@ -148,6 +148,7 @@ DISTFILES	 = INSTALL \
 		   man.cgi.8 \
 		   man.conf.5 \
 		   man.h \
+		   man.options.1 \
 		   manconf.h \
 		   mandoc.1 \
 		   mandoc.3 \
