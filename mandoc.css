@@ -108,7 +108,8 @@ table.Bl-column { }
 tr.It-column { }
 td.It-column {	margin-top: 1em; }
 
-span.Rs	{ }
+cite.Rs {	font-style: normal;
+		font-weight: normal; }
 span.RsA { }
 i.RsB {		font-weight: normal; }
 span.RsC { }

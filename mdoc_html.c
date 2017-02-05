@@ -1512,7 +1512,7 @@ mdoc_rs_pre(MDOC_ARGS)
 	if (n->prev && SEC_SEE_ALSO == n->sec)
 		print_paragraph(h);
 
-	print_otag(h, TAG_SPAN, "c", "Rs");
+	print_otag(h, TAG_CITE, "c", "Rs");
 	return 1;
 }
 
