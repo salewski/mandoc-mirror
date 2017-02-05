@@ -500,12 +500,6 @@ are mere guesses, and some may be wrong.
   we want three blank lines, not two as in mandoc.
   loc **  exist **  algo **  size *  imp **
 
-- Header lines of excessive length:
-  Port OpenBSD man_term.c rev. 1.25 to mdoc_term.c
-  and document it in mdoc(7) and man(7) COMPATIBILITY
-  found while talking to Chris Bennett
-  loc *  exist *  algo *  size *  imp *
-
 - Sequences of multiple man(7) paragraphs (.PP, .IP) interspersed
   with .ps and .nf/.fi produce execessive blank lines, see libJudy
   and graphics/dcmtk.  The parser reorg may help with this.
@@ -539,9 +533,6 @@ are mere guesses, and some may be wrong.
   all over mdoc_macro.c and all subtly different.
   loc **  exist **  algo **  size **  imp **
 
-- warn about "new sentence, new line"
-  loc **  exist **  algo ***  size *  imp **
-
 - mandoc_special does not really check the escape sequence,
   but just the overall format
   loc **  exist **  algo ***  size **  imp **
@@ -560,13 +551,6 @@ are mere guesses, and some may be wrong.
 ************************************************************************
 * documentation issues
 ************************************************************************
-
-- mention hyphenation rules:
-  breaking at letter-letter in text mode (not macro args)
-  proper hyphenation is unimplemented
-
-- talk about spacing around delimiters
-  to jmc@, kristaps@  Sat, 23 Apr 2011 17:41:27 +0200
 
 - mark macros as: page structure domain, manual domain, general text domain
   is this useful?
@@ -587,13 +571,7 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 
 - improve hashing mechanism for macros (quite important: performance)
 
-- improve hashing mechanism for characters (not as important)
-
 - the PDF file is HUGE: this can be reduced by using relative offsets
-
-- instead of re-initialising the roff predefined-strings set before each
-  parse, create a read-only version the first time and copy it
-  loc *  exist **  algo **  size *  imp **
 
 ************************************************************************
 * structural issues
@@ -629,9 +607,6 @@ Several areas can be cleaned up to make mandoc even faster.  These are
    output through libz.
  - Sandbox (see OpenSSH).
  - Enable caching support via HTTP 304 and If-Modified-Since.
- - Allow for cgi.h to be overridden by CGI environment variables.
-   Otherwise, binary distributions will inherit the compile-time
-   behaviour, which is not optimal.
  - Have Mac OSX systems automatically disable -static compilation of the
    CGI: -static isn't supported.
 
