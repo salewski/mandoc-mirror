@@ -50,6 +50,7 @@ html_tbl_strlen(const char *p, void *arg)
 static void
 html_tblopen(struct html *h, const struct tbl_span *sp)
 {
+	struct tag	*t;
 	int		 ic;
 
 	if (h->tbl.cols == NULL) {
@@ -61,10 +62,10 @@ html_tblopen(struct html *h, const struct tbl_span *sp)
 	assert(NULL == h->tblt);
 	h->tblt = print_otag(h, TAG_TABLE, "c", "tbl");
 
+	t = print_otag(h, TAG_COLGROUP, "");
 	for (ic = 0; ic < sp->opts->cols; ic++)
 		print_otag(h, TAG_COL, "shw", h->tbl.cols[ic].width);
-
-	print_otag(h, TAG_TBODY, "");
+	print_tagq(h, t);
 }
 
 void
