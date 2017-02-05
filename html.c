@@ -76,6 +76,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"dt",		HTML_NLAROUND},
 	{"dd",		HTML_NLAROUND | HTML_INDENT},
 	{"pre",		HTML_NLALL | HTML_NOINDENT},
+	{"var",		0},
 	{"cite",	0},
 	{"b",		0},
 	{"i",		0},

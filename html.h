@@ -41,6 +41,7 @@ enum	htmltag {
 	TAG_DT,
 	TAG_DD,
 	TAG_PRE,
+	TAG_VAR,
 	TAG_CITE,
 	TAG_B,
 	TAG_I,
