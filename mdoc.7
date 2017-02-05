@@ -3064,6 +3064,8 @@ For many macros, when the leading arguments are opening delimiters,
 these delimiters are put before the macro scope,
 and when the trailing arguments are closing delimiters,
 these delimiters are put after the macro scope.
+Spacing is suppressed after opening delimiters
+and before closing delimiters.
 For example,
 .Pp
 .D1 Pf \. \&Aq "( [ word ] ) ."
@@ -3120,7 +3122,7 @@ renders as:
 .D1 Fl a ( b | c \*(Ba d ) e
 .Pp
 This applies to both opening and closing delimiters,
-and also to the middle delimiter:
+and also to the middle delimiter, which does not suppress spacing:
 .Pp
 .Bl -tag -width Ds -offset indent -compact
 .It \&|
