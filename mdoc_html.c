@@ -1469,7 +1469,7 @@ mdoc_bf_pre(MDOC_ARGS)
 	else if (FONT_Li == n->norm->Bf.font)
 		cattr = "Li";
 	else
-		cattr = "none";
+		cattr = "No";
 
 	/*
 	 * We want this to be inline-formatted, but needs to be div to
