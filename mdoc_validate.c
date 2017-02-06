@@ -1013,6 +1013,16 @@ post_nm(POST_ARGS)
 	    (mdoc->lastsec == SEC_NAME && n->child == NULL))
 		mandoc_msg(MANDOCERR_NM_NONAME, mdoc->parse,
 		    n->line, n->pos, "Nm");
+
+	if ((n->type != ROFFT_ELEM && n->type != ROFFT_HEAD) ||
+	    (n->child != NULL && n->child->type == ROFFT_TEXT) ||
+	    mdoc->meta.name == NULL)
+		return;
+
+	mdoc->next = ROFF_NEXT_CHILD;
+	roff_word_alloc(mdoc, n->line, n->pos, mdoc->meta.name);
+	mdoc->last->flags |= NODE_NOSRC;
+	mdoc->last = n;
 }
 
 static void

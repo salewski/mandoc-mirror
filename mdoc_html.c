@@ -582,8 +582,6 @@ mdoc_nm_pre(MDOC_ARGS)
 		/* FALLTHROUGH */
 	case ROFFT_ELEM:
 		print_otag(h, TAG_B, "c", "Nm");
-		if (n->child == NULL && meta->name != NULL)
-			print_text(h, meta->name);
 		return 1;
 	case ROFFT_BODY:
 		print_otag(h, TAG_TD, "");
