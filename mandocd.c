@@ -114,6 +114,7 @@ main(int argc, char *argv[])
 	struct manoutput	 options;
 	struct mparse		*parser;
 	void			*formatter;
+	const char		*defos;
 	const char		*errstr;
 	int			 clientfd;
 	int			 old_stdin;
@@ -123,9 +124,18 @@ main(int argc, char *argv[])
 	int			 state, opt;
 	enum outt		 outtype;
 
+	defos = NULL;
 	outtype = OUTT_ASCII;
-	while ((opt = getopt(argc, argv, "T:")) != -1) {
+	while ((opt = getopt(argc, argv, "I:T:")) != -1) {
 		switch (opt) {
+		case 'I':
+			if (strncmp(optarg, "os=", 3) == 0)
+				defos = optarg + 3;
+			else {
+				warnx("-I %s: Bad argument", optarg);
+				usage();
+			}
+			break;
 		case 'T':
 			if (strcmp(optarg, "ascii") == 0)
 				outtype = OUTT_ASCII;
@@ -157,7 +167,7 @@ main(int argc, char *argv[])
 
 	mchars_alloc();
 	parser = mparse_alloc(MPARSE_SO | MPARSE_UTF8 | MPARSE_LATIN1,
-	    MANDOCLEVEL_BADARG, NULL, NULL);
+	    MANDOCLEVEL_BADARG, NULL, defos);
 
 	memset(&options, 0, sizeof(options));
 	switch (outtype) {
@@ -266,6 +276,6 @@ process(struct mparse *parser, enum outt outtype, void *formatter)
 void
 usage(void)
 {
-	fprintf(stderr, "usage: mandocd [-T output] socket_fd\n");
+	fprintf(stderr, "usage: mandocd [-I os=name] [-T output] socket_fd\n");
 	exit(1);
 }

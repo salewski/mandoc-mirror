@@ -24,6 +24,7 @@
 #if HAVE_ERR
 #include <err.h>
 #endif
+#include <errno.h>
 #include <fcntl.h>
 #if HAVE_FTS
 #include <fts.h>
@@ -37,19 +38,24 @@
 
 int	 process_manpage(int, int, const char *);
 int	 process_tree(int, int);
-void	 run_mandocd(int, const char *) __attribute__((noreturn));
+void	 run_mandocd(int, const char *, const char *)
+		__attribute__((noreturn));
 ssize_t	 sock_fd_write(int, int, int, int);
 void	 usage(void) __attribute__((noreturn));
 
 
 void
-run_mandocd(int sockfd, const char *outtype)
+run_mandocd(int sockfd, const char *outtype, const char* defos)
 {
 	char	 sockfdstr[10];
 
 	if (snprintf(sockfdstr, sizeof(sockfdstr), "%d", sockfd) == -1)
 		err(1, "snprintf");
-	execlp("mandocd", "mandocd", "-T", outtype, sockfdstr, NULL);
+	if (defos == NULL)
+		execlp("mandocd", "mandocd", "-T", outtype, sockfdstr, NULL);
+	else
+		execlp("mandocd", "mandocd", "-T", outtype,
+		    "-I", defos, sockfdstr, NULL);
 	err(1, "exec");
 }
 
@@ -94,27 +100,30 @@ int
 process_manpage(int srv_fd, int dstdir_fd, const char *path)
 {
 	int	 in_fd, out_fd;
+	int	 irc;
 
 	if ((in_fd = open(path, O_RDONLY)) == -1) {
 		warn("open(%s)", path);
-		return -1;
+		return 0;
 	}
 
 	if ((out_fd = openat(dstdir_fd, path,
 	    O_WRONLY | O_NOFOLLOW | O_CREAT | O_TRUNC,
-	    S_IRUSR | S_IWUSR | S_IRGRP | S_IRWXO)) == -1) {
+	    S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1) {
 		warn("openat(%s)", path);
 		close(in_fd);
-		return -1;
+		return 0;
 	}
 
-	if (sock_fd_write(srv_fd, in_fd, out_fd, STDERR_FILENO) < 0) {
-		warn("sendmsg");
-		return -1;
-	}
+	irc = sock_fd_write(srv_fd, in_fd, out_fd, STDERR_FILENO);
 
 	close(in_fd);
 	close(out_fd);
+
+	if (irc < 0) {
+		warn("sendmsg");
+		return -1;
+	}
 	return 0;
 }
 
@@ -139,9 +148,20 @@ process_tree(int srv_fd, int dstdir_fd)
 		path = entry->fts_path + 2;
 		switch (entry->fts_info) {
 		case FTS_F:
-			process_manpage(srv_fd, dstdir_fd, path);
+			if (process_manpage(srv_fd, dstdir_fd, path) == -1) {
+				fts_close(ftsp);
+				return -1;
+			}
 			break;
 		case FTS_D:
+			if (*path != '\0' &&
+			    mkdirat(dstdir_fd, path, S_IRWXU | S_IRGRP |
+			      S_IXGRP | S_IROTH | S_IXOTH) == -1 &&
+			    errno != EEXIST) {
+				warn("mkdirat(%s)", path);
+				(void)fts_set(ftsp, entry, FTS_SKIP);
+			}
+			break;
 		case FTS_DP:
 			break;
 		default:
@@ -157,15 +177,19 @@ process_tree(int srv_fd, int dstdir_fd)
 int
 main(int argc, char **argv)
 {
-	const char	*outtype;
+	const char	*defos, *outtype;
 	int		 srv_fds[2];
 	int		 dstdir_fd;
 	int		 opt;
 	pid_t		 pid;
 
+	defos = NULL;
 	outtype = "ascii";
-	while ((opt = getopt(argc, argv, "T:")) != -1) {
+	while ((opt = getopt(argc, argv, "I:T:")) != -1) {
 		switch (opt) {
+		case 'I':
+			defos = optarg;
+			break;
 		case 'T':
 			outtype = optarg;
 			break;
@@ -190,7 +214,7 @@ main(int argc, char **argv)
 		err(1, "fork");
 	case 0:
 		close(srv_fds[0]);
-		run_mandocd(srv_fds[1], outtype);
+		run_mandocd(srv_fds[1], outtype, defos);
 	default:
 		break;
 	}
@@ -208,6 +232,7 @@ main(int argc, char **argv)
 void
 usage(void)
 {
-	fprintf(stderr, "usage: catman [-T output] srcdir dstdir\n");
+	fprintf(stderr, "usage: catman [-I os=name] [-T output] "
+	    "srcdir dstdir\n");
 	exit(1);
 }
