@@ -130,6 +130,7 @@ DISTFILES	 = INSTALL \
 		   NEWS \
 		   TODO \
 		   apropos.1 \
+		   catman.8 \
 		   cgi.h.example \
 		   compat_fts.h \
 		   compat_ohash.h \
@@ -172,6 +173,7 @@ DISTFILES	 = INSTALL \
 		   mandoc_html.3 \
 		   mandoc_malloc.3 \
 		   mandoc_ohash.h \
+		   mandocd.8 \
 		   mansearch.3 \
 		   mansearch.h \
 		   mchars_alloc.3 \
@@ -307,6 +309,7 @@ WWW_MANS	 = apropos.1.html \
 		   man.1.html \
 		   mandoc.1.html \
 		   soelim.1.html \
+		   man.cgi.3.html \
 		   mandoc.3.html \
 		   mandoc_escape.3.html \
 		   mandoc_headers.3.html \
@@ -320,11 +323,12 @@ WWW_MANS	 = apropos.1.html \
 		   eqn.7.html \
 		   man.7.html \
 		   mandoc_char.7.html \
+		   mandocd.8.html \
 		   mdoc.7.html \
 		   roff.7.html \
 		   tbl.7.html \
+		   catman.8.html \
 		   makewhatis.8.html \
-		   man.cgi.3.html \
 		   man.cgi.8.html \
 		   man.h.html \
 		   manconf.h.html \
@@ -421,7 +425,9 @@ cgi-install: man.cgi
 
 catman-install: mandocd catman
 	mkdir -p $(DESTDIR)$(SBINDIR)
+	mkdir -p $(DESTDIR)$(MANDIR)/man8
 	$(INSTALL_PROGRAM) mandocd catman $(DESTDIR)$(SBINDIR)
+	$(INSTALL_MAN) mandocd.8 catman.8 $(DESTDIR)$(MANDIR)/man8
 
 Makefile.local config.h: configure ${TESTSRCS}
 	@echo "$@ is out of date; please run ./configure"
