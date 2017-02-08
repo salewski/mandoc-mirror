@@ -17,6 +17,10 @@
  */
 #include "config.h"
 
+#if HAVE_CMSG_XPG42
+#define _XPG4_2
+#endif
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>

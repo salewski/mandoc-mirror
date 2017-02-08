@@ -20,6 +20,7 @@ VERSION = 1.14.1
 # === LIST OF FILES ====================================================
 
 TESTSRCS	 = test-be32toh.c \
+		   test-cmsg.c \
 		   test-dirent-namlen.c \
 		   test-EFTYPE.c \
 		   test-err.c \
@@ -34,6 +35,7 @@ TESTSRCS	 = test-be32toh.c \
 		   test-PATH_MAX.c \
 		   test-pledge.c \
 		   test-progname.c \
+		   test-recvmsg.c \
 		   test-reallocarray.c \
 		   test-rewb-bsd.c \
 		   test-rewb-sysv.c \

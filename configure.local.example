@@ -140,6 +140,12 @@ CFLAGS="${CFLAGS} -I/usr/local/include"
 
 LD_NANOSLEEP="-lrt"
 
+# Some platforms may need an additional linker flag for recvmsg(2).
+# If none is needed or it is -lsocket, it is autodetected.
+# Otherwise, set the following variable.
+
+LD_RECVMSG="-lsocket"
+
 # Some platforms might need additional linker flags to link against
 # libmandoc that are not autodetected, though no such cases are
 # currently known.
