@@ -222,6 +222,8 @@ CGIBINDIR="${WWWPREFIX}/cgi-bin"
 
 # By default, building mandocd(8) and catman(8) is disabled.
 # To enable it, use the following line.
+# It does not work on SunOS 5.10 because there is no mkdirat(2)
+# nor on SunOS 5.9 which also lacks CMSG_LEN(3) and CMSG_SPACE(3).
 
 BUILD_CATMAN=1
 
