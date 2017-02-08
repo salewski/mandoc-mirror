@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 int	 process_manpage(int, int, const char *);
@@ -62,6 +63,7 @@ run_mandocd(int sockfd, const char *outtype, const char* defos)
 ssize_t
 sock_fd_write(int fd, int fd0, int fd1, int fd2)
 {
+	const struct timespec timeout = { 0, 10000000 };  /* 0.01 s */
 	struct msghdr	 msg;
 	struct iovec	 iov;
 	union {
@@ -70,6 +72,7 @@ sock_fd_write(int fd, int fd0, int fd1, int fd2)
 	} cmsgu;
 	struct cmsghdr	*cmsg;
 	int		*walk;
+	ssize_t		 sz;
 	unsigned char	 dummy[1] = {'\0'};
 
 	iov.iov_base = dummy;
@@ -93,7 +96,21 @@ sock_fd_write(int fd, int fd0, int fd1, int fd2)
 	*(walk++) = fd1;
 	*(walk++) = fd2;
 
-	return sendmsg(fd, &msg, 0);
+	/*
+	 * It appears that on some systems, sendmsg(3)
+	 * may return EAGAIN even in blocking mode.
+	 * Seen for example on Oracle Solaris 11.2.
+	 * The sleeping time was chosen by experimentation,
+	 * to neither cause more than a handful of retries
+	 * in normal operation nor unnecessary delays.
+	 */
+	for (;;) {
+		if ((sz = sendmsg(fd, &msg, 0)) != -1 ||
+		    errno != EAGAIN)
+			break;
+		nanosleep(&timeout, NULL);
+	}
+	return sz;
 }
 
 int
