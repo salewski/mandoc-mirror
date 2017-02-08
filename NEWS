@@ -2,7 +2,7 @@ $Id$
 
 This file lists the most important changes in the mdocml.bsd.lv distribution.
 
-Changes in version 1.14.1, released on XXX, 2017
+Changes in version 1.14.1, released on February XXX, 2017
 
     --- MAJOR NEW FEATURES ---
  * apropos(1): Reimplement complete semantic search functionality
@@ -16,6 +16,8 @@ Changes in version 1.14.1, released on XXX, 2017
    and better line breaks.  Improve various HTML elements,
    and trim several useless ones.
  * New catman(8) utility, still somewhat experimental.
+ * Now includes a portable version of the OpenBSD mandoc regression
+   suite, see regress/regress.pl.1 for details.
     --- REMOVED FUNCTIONALITY ---
  * Operating systems that don't provide mmap(3) are no longer supported.
  * Drop support for manpath(1).  Even if your system has manpath(1),

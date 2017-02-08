@@ -1,7 +1,7 @@
 # $Id$
 #
 # Copyright (c) 2010, 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
-# Copyright (c) 2011, 2013-2016 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2011, 2013-2017 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-VERSION = 1.14.0
+VERSION = 1.14.1
 
 # === LIST OF FILES ====================================================
 
@@ -481,8 +481,12 @@ mdocml.sha256: mdocml.tar.gz
 	sha256 mdocml.tar.gz > $@
 
 mdocml.tar.gz: $(DISTFILES)
+	ls regress/*/*/*.mandoc_* && exit 1 || true
 	mkdir -p .dist/mdocml-$(VERSION)/
 	$(INSTALL) -m 0644 $(DISTFILES) .dist/mdocml-$(VERSION)
+	cp -pR regress .dist/mdocml-$(VERSION)
+	find .dist/mdocml-$(VERSION)/regress \
+	    -type d -name CVS -print0 | xargs -0 rm -rf
 	chmod 755 .dist/mdocml-$(VERSION)/configure
 	( cd .dist/ && tar zcf ../$@ mdocml-$(VERSION) )
 	rm -rf .dist/
