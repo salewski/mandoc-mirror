@@ -219,7 +219,7 @@ are mere guesses, and some may be wrong.
 - support mdoc(7) and man(7) macros inside tbl(7) code;
   probably requires the parser reorg and letting tbl(7)
   use roff_node such that macro sets can mix;
-  informed by bapt@ that FreeBSD needs this.
+  informed by bapt@ that FreeBSD needs this: 3 Jan 2015 23:32:23 +0100
   loc ***  exist **  algo ***  size **  imp ***
 
 - look at the POSIX manuals in the books/man-pages-posix port,
