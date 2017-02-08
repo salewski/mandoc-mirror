@@ -24,6 +24,10 @@ use strict;
 # nor for piping it into the Perl program.
 use IPC::Open3 qw(open3);
 
+# Define this at one place such that it can easily be changed
+# if diff(1) does not support the -a option.
+my @diff = qw(diff -au);
+
 # --- utility functions ------------------------------------------------
 
 sub usage ($) {
@@ -227,7 +231,7 @@ for my $testname (@regress_testnames) {
 		print "@mandoc -T ascii $i\n" if $targets{verbose};
 		sysout $o, @mandoc, qw(-T ascii), $i
 		    and fail $subdir, $testname, 'ascii:mandoc';
-		system qw(diff -au), $w, $o
+		system @diff, $w, $o
 		    and fail $subdir, $testname, 'ascii:diff';
 	}
 	my $m = "$subdir/$testname.in_man";
@@ -241,7 +245,7 @@ for my $testname (@regress_testnames) {
 		print "@mandoc -man -T ascii $m\n" if $targets{verbose};
 		sysout $mo, @mandoc, qw(-man -T ascii -O mdoc), $m
 		    and fail $subdir, $testname, 'man:mandoc';
-		system qw(diff -au), $w, $mo
+		system @diff, $w, $mo
 		    and fail $subdir, $testname, 'man:diff';
 	}
 	if ($targets{clean}) {
@@ -266,7 +270,7 @@ for my $testname (@utf8_testnames) {
 		print "@mandoc -T utf8 $i\n" if $targets{verbose};
 		sysout $o, @mandoc, qw(-T utf8), $i
 		    and fail $subdir, $testname, 'utf8:mandoc';
-		system qw(diff -au), $w, $o
+		system @diff, $w, $o
 		    and fail $subdir, $testname, 'utf8:diff';
 	}
 	if ($targets{clean}) {
@@ -287,7 +291,7 @@ for my $testname (@html_testnames) {
 		print "@mandoc -T html $i\n" if $targets{verbose};
 		syshtml $o, @mandoc, qw(-T html), $i
 		    and fail $subdir, $testname, 'html:mandoc';
-		system qw(diff -au), $w, $o
+		system @diff, $w, $o
 		    and fail $subdir, $testname, 'html:diff';
 	}
 	if ($targets{clean}) {
@@ -308,7 +312,7 @@ for my $testname (@lint_testnames) {
 		print "@mandoc -T lint $i\n" if $targets{verbose};
 		syslint $o, @mandoc, qw(-T lint), $i
 		    and fail $subdir, $testname, 'lint:mandoc';
-		system qw(diff -au), $w, $o
+		system @diff, $w, $o
 		    and fail $subdir, $testname, 'lint:diff';
 	}
 	if ($targets{clean}) {
