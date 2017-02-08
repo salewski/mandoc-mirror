@@ -448,8 +448,8 @@ man.cgi: $(CGI_OBJS) libmandoc.a
 mandocd: $(MANDOCD_OBJS) libmandoc.a
 	$(CC) -o $@ $(LDFLAGS) $(MANDOCD_OBJS) libmandoc.a $(LDADD)
 
-catman: catman.o
-	$(CC) -o $@ $(LDFLAGS) catman.o
+catman: catman.o libmandoc.a
+	$(CC) -o $@ $(LDFLAGS) catman.o libmandoc.a $(LDADD)
 
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
 	$(CC) -o $@ $(LDFLAGS) $(DEMANDOC_OBJS) libmandoc.a $(LDADD)
