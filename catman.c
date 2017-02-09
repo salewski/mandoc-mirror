@@ -61,10 +61,11 @@ run_mandocd(int sockfd, const char *outtype, const char* defos)
 	if (snprintf(sockfdstr, sizeof(sockfdstr), "%d", sockfd) == -1)
 		err(1, "snprintf");
 	if (defos == NULL)
-		execlp("mandocd", "mandocd", "-T", outtype, sockfdstr, NULL);
+		execlp("mandocd", "mandocd", "-T", outtype,
+		    sockfdstr, (char *)NULL);
 	else
 		execlp("mandocd", "mandocd", "-T", outtype,
-		    "-I", defos, sockfdstr, NULL);
+		    "-I", defos, sockfdstr, (char *)NULL);
 	err(1, "exec");
 }
 
