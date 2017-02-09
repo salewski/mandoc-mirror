@@ -41,6 +41,10 @@
 #include <time.h>
 #include <unistd.h>
 
+#ifndef O_DIRECTORY
+#define O_DIRECTORY 0
+#endif
+
 int	 process_manpage(int, int, const char *);
 int	 process_tree(int, int);
 void	 run_mandocd(int, const char *, const char *)
