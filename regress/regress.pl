@@ -142,7 +142,7 @@ sub parse_makefile ($) {
 		my $var = $1;
 		my $opt = $2;
 		my $val = $3;
-		$val =~ s/\${(\w+)}/$vars{$1}/;
+		$val =~ s/\$\{(\w+)\}/$vars{$1}/;
 		$val = "$vars{$var} $val" if $opt eq '+';
 		$vars{$var} = $val
 		    unless $opt eq '?' && defined $vars{$var};
