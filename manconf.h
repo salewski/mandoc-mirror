@@ -35,6 +35,7 @@ struct	manoutput {
 	int	  fragment;
 	int	  mdoc;
 	int	  synopsisonly;
+	int	  noval;
 };
 
 struct	manconf {

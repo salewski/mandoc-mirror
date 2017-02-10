@@ -538,12 +538,25 @@ A closing parenthesis if the node is a closing delimiter.
 .It
 A full stop if the node ends a sentence.
 .It
+BROKEN if the node is a block broken by another block.
+.It
 NOSRC if the node is not in the input file,
 but automatically generated from macros.
 .It
 NOPRT if the node is not supposed to generate output
 for any output format.
 .El
+.El
+.Pp
+The following
+.Fl O
+argument is accepted:
+.Bl -tag -width Ds
+.It Cm noval
+Skip validation and show the unvalidated syntax tree.
+This can help to find out whether a given behaviour is caused by
+the parser or by the validator.
+Meta data is not available in this case.
 .El
 .Sh ENVIRONMENT
 .Bl -tag -width MANPAGER

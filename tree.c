@@ -192,6 +192,8 @@ print_mdoc(const struct roff_node *n, int indent)
 			putchar(')');
 		if (NODE_EOS & n->flags)
 			putchar('.');
+		if (NODE_BROKEN & n->flags)
+			printf(" BROKEN");
 		if (NODE_NOSRC & n->flags)
 			printf(" NOSRC");
 		if (NODE_NOPRT & n->flags)
