@@ -575,15 +575,23 @@ blk_exp_close(MACRO_PROT_ARGS)
 		}
 
 		/*
-		 * Mismatching end macros can never break anything,
-		 * SYNOPSIS name blocks can never be broken,
+		 * Mismatching end macros can never break anything
 		 * and we only care about the breaking of BLOCKs.
 		 */
 
-		if (body == NULL ||
-		    n->tok == MDOC_Nm ||
-		    n->type != ROFFT_BLOCK)
+		if (body == NULL || n->type != ROFFT_BLOCK)
 			continue;
+
+		/*
+		 * SYNOPSIS name blocks can not be broken themselves,
+		 * but they do get broken together with a broken child.
+		 */
+
+		if (n->tok == MDOC_Nm) {
+			if (later != NULL)
+				n->flags |= NODE_BROKEN | NODE_ENDED;
+			continue;
+		}
 
 		if (n->tok == MDOC_It) {
 			itblk = n;
@@ -987,7 +995,7 @@ blk_full(MACRO_PROT_ARGS)
 
 			/* Close out prior implicit scopes. */
 
-			rew_last(mdoc, n);
+			rew_pending(mdoc, n);
 		}
 
 		/* Skip items outside lists. */

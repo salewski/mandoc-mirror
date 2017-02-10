@@ -52,6 +52,8 @@ Changes in version 1.14.1, released on February XXX, 2017
    for macro sequences like .Bl .Bl .It Bo .El .It.
  * mdoc(7): Fix syntax tree corruption leading to NULL dereference
    caused by .Ta following a nested .Bl -column breaking another block.
+ * mdoc(7): Fix syntax tree corruption sometimes leading to NULL
+   dereference caused by indirectly broken .Nm blocks in the SYNOPSIS.
  * mdoc(7) -Thtml: Fix a NULL dereference for .Bl -column with 0 columns.
  * mdoc(7): Fix NULL dereference if the only child of the head
    of the first .Sh was an empty in-line macro.
