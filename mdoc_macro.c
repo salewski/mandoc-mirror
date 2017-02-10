@@ -398,9 +398,9 @@ find_pending(struct roff_man *mdoc, int tok, int line, int ppos,
 		if (n->type == ROFFT_BLOCK &&
 		    mdoc_macros[n->tok].flags & MDOC_EXPLICIT) {
 			irc = 1;
-			n->flags = NODE_BROKEN;
+			n->flags |= NODE_BROKEN;
 			if (target->type == ROFFT_HEAD)
-				target->flags = NODE_ENDED;
+				target->flags |= NODE_ENDED;
 			else if ( ! (target->flags & NODE_ENDED)) {
 				mandoc_vmsg(MANDOCERR_BLK_NEST,
 				    mdoc->parse, line, ppos,
@@ -714,15 +714,16 @@ blk_exp_close(MACRO_PROT_ARGS)
 	}
 
 	if (n != NULL) {
+		pending = 0;
 		if (ntok != TOKEN_NONE && n->flags & NODE_BROKEN) {
 			target = n;
 			do
 				target = target->parent;
 			while ( ! (target->flags & NODE_ENDED));
-			pending = find_pending(mdoc, ntok, line, ppos,
-			    target);
-		} else
-			pending = 0;
+			if ( ! (target->flags & NODE_VALID))
+				pending = find_pending(mdoc, ntok,
+				    line, ppos, target);
+		}
 		if ( ! pending)
 			rew_pending(mdoc, n);
 	}
