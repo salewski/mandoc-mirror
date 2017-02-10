@@ -763,7 +763,8 @@ parse(struct curparse *curp, int fd, const char *file)
 	if (man == NULL)
 		return;
 	if (man->macroset == MACROSET_MDOC) {
-		mdoc_validate(man);
+		if (curp->outtype != OUTT_TREE || !curp->outopts->noval)
+			mdoc_validate(man);
 		switch (curp->outtype) {
 		case OUTT_HTML:
 			html_mdoc(curp->outdata, man);
@@ -786,7 +787,8 @@ parse(struct curparse *curp, int fd, const char *file)
 		}
 	}
 	if (man->macroset == MACROSET_MAN) {
-		man_validate(man);
+		if (curp->outtype != OUTT_TREE || !curp->outopts->noval)
+			man_validate(man);
 		switch (curp->outtype) {
 		case OUTT_HTML:
 			html_man(curp->outdata, man);
