@@ -49,6 +49,8 @@ Changes in version 1.14.1, released on February XXX, 2017
  * man(1): Fix NULL dereference when the first of multiple pages
    shown was preformatted.
  * mdoc(7): Fix syntax tree corruption leading to NULL dereference
+   caused by partial implicit macros inside .Bl -column table cells.
+ * mdoc(7): Fix syntax tree corruption leading to NULL dereference
    for macro sequences like .Bl .Bl .It Bo .El .It.
  * mdoc(7): Fix syntax tree corruption leading to NULL dereference
    caused by .Ta following a nested .Bl -column breaking another block.

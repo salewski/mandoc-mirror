@@ -400,6 +400,9 @@ find_pending(struct roff_man *mdoc, int tok, int line, int ppos,
 	struct roff_node	*n;
 	int			 irc;
 
+	if (target->flags & NODE_VALID)
+		return 0;
+
 	irc = 0;
 	for (n = mdoc->last; n != NULL && n != target; n = n->parent) {
 		if (n->flags & NODE_ENDED)
@@ -733,9 +736,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 			do
 				target = target->parent;
 			while ( ! (target->flags & NODE_ENDED));
-			if ( ! (target->flags & NODE_VALID))
-				pending = find_pending(mdoc, ntok,
-				    line, ppos, target);
+			pending = find_pending(mdoc, ntok, line, ppos, target);
 		}
 		if ( ! pending)
 			rew_pending(mdoc, n);
