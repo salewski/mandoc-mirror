@@ -647,10 +647,16 @@ blk_exp_close(MACRO_PROT_ARGS)
 			break;
 		}
 
-		/* Explicit blocks close out description lines. */
+		/*
+		 * Explicit blocks close out description lines, but
+		 * even those can get broken together with a child.
+		 */
 
 		if (n->tok == MDOC_Nd) {
-			rew_last(mdoc, n);
+			if (later != NULL)
+				n->flags |= NODE_BROKEN | NODE_ENDED;
+			else
+				rew_last(mdoc, n);
 			continue;
 		}
 
