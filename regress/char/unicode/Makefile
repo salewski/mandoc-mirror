@@ -6,7 +6,7 @@ SKIP_ASCII 	 = man mdoc
 # input and nogroff exhibit implementation dependent differences
 # among wcwidth(3) on different systems
 #UTF8_TARGETS	 = ${REGRESS_TARGETS}
-UTF8_TARGETS	 = ascii invalid latin1 latin1diff man mdoc named namediff
+UTF8_TARGETS	 = ascii invalid man mdoc namediff
 HTML_TARGETS	 = ascii invalid latin1 latin1diff named namediff nogroff
 LINT_TARGETS	 = input invalid
 
