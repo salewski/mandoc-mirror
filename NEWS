@@ -61,6 +61,8 @@ Changes in version 1.14.1, released on February XXX, 2017
    block-end macro calling another block-end macro.
  * mdoc(7): Fix NULL dereference if the only child of the head
    of the first .Sh was an empty in-line macro.
+ * eqn(7): Fix NULL dereference in the terminal formatter
+   for empty matrices and empty square roots.
  * mdoc(7): Fix an assertion failure for a .Bd without a type that
    breaks another block.
  * mdoc(7): Fix an assertion failure caused by .Bl -column without .It
