@@ -428,8 +428,10 @@ cgi-install: man.cgi
 catman-install: mandocd catman
 	mkdir -p $(DESTDIR)$(SBINDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man8
-	$(INSTALL_PROGRAM) mandocd catman $(DESTDIR)$(SBINDIR)
-	$(INSTALL_MAN) mandocd.8 catman.8 $(DESTDIR)$(MANDIR)/man8
+	$(INSTALL_PROGRAM) mandocd $(DESTDIR)$(SBINDIR)
+	$(INSTALL_PROGRAM) catman $(DESTDIR)$(SBINDIR)/$(BINM_CATMAN)
+	$(INSTALL_MAN) mandocd.8 $(DESTDIR)$(MANDIR)/man8
+	$(INSTALL_MAN) catman.8 $(DESTDIR)$(MANDIR)/man8/$(BINM_CATMAN).8
 
 Makefile.local config.h: configure ${TESTSRCS}
 	@echo "$@ is out of date; please run ./configure"

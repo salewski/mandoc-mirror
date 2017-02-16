@@ -258,7 +258,7 @@ main(int argc, char **argv)
 void
 usage(void)
 {
-	fprintf(stderr, "usage: catman [-I os=name] [-T output] "
-	    "srcdir dstdir\n");
+	fprintf(stderr, "usage: %s [-I os=name] [-T output] "
+	    "srcdir dstdir\n", BINM_CATMAN);
 	exit(1);
 }
