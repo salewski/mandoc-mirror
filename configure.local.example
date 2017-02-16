@@ -97,7 +97,7 @@ MANM_MANCONF="mandoc.conf"	# default is "man.conf"
 # It is possible to set only one or a few of these variables,
 # there is no need to copy the whole block.
 
-MANM_MAN="mandoc_man"		# default is "catman"
+MANM_MAN="mandoc_man"		# default is "man"
 MANM_MDOC="mandoc_mdoc"		# default is "mdoc"
 MANM_ROFF="mandoc_roff"		# default is "roff"
 MANM_EQN="mandoc_eqn"		# default is "eqn"
@@ -230,7 +230,7 @@ BUILD_CATMAN=1
 # Install catman(8) with a different name.
 # See BINM_MAN above for details of how this works.
 
-BINM_CATMAN=mcatman		# default is "man"
+BINM_CATMAN=mcatman		# default is "catman"
 
 # --- settings that rarely need to be touched --------------------------
 
