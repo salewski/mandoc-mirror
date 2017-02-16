@@ -639,9 +639,6 @@ print_node(DECL_ARGS)
 
 	if (ENDBODY_NOT != n->end)
 		n->body->flags |= NODE_ENDED;
-
-	if (ENDBODY_NOSPACE == n->end)
-		outflags &= ~(MMAN_spc | MMAN_nl);
 }
 
 static int

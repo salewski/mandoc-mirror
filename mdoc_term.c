@@ -395,14 +395,6 @@ print_mdoc_node(DECL_ARGS)
 		 */
 		if (ENDBODY_NOT != n->end)
 			n->body->flags |= NODE_ENDED;
-
-		/*
-		 * End of line terminating an implicit block
-		 * while an explicit block is still open.
-		 * Continue the explicit block without spacing.
-		 */
-		if (ENDBODY_NOSPACE == n->end)
-			p->flags |= TERMP_NOSPACE;
 		break;
 	}
 

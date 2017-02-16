@@ -417,8 +417,6 @@ print_mdoc_node(MDOC_ARGS)
 		(*mdocs[n->tok].post)(meta, n, h);
 		if (n->end != ENDBODY_NOT)
 			n->body->flags |= NODE_ENDED;
-		if (n->end == ENDBODY_NOSPACE)
-			h->flags |= HTML_NOSPACE;
 		break;
 	}
 }

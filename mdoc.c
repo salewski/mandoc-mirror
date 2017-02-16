@@ -136,7 +136,7 @@ mdoc_tail_alloc(struct roff_man *mdoc, int line, int pos, int tok)
 
 struct roff_node *
 mdoc_endbody_alloc(struct roff_man *mdoc, int line, int pos, int tok,
-		struct roff_node *body, enum mdoc_endbody end)
+		struct roff_node *body)
 {
 	struct roff_node *p;
 
@@ -145,7 +145,7 @@ mdoc_endbody_alloc(struct roff_man *mdoc, int line, int pos, int tok,
 	p = roff_node_alloc(mdoc, line, pos, ROFFT_BODY, tok);
 	p->body = body;
 	p->norm = body->norm;
-	p->end = end;
+	p->end = ENDBODY_SPACE;
 	roff_node_append(mdoc, p);
 	mdoc->next = ROFF_NEXT_SIBLING;
 	return p;

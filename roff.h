@@ -75,8 +75,7 @@ enum	roff_next {
  */
 enum	mdoc_endbody {
 	ENDBODY_NOT = 0,
-	ENDBODY_SPACE,	/* Is broken: append a space. */
-	ENDBODY_NOSPACE	/* Is broken: don't append a space. */
+	ENDBODY_SPACE	/* Is broken: append a space. */
 };
 
 struct	roff_node {
