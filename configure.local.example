@@ -1,6 +1,6 @@
 # $Id$
 #
-# Copyright (c) 2014, 2015, 2016 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2014, 2015, 2016, 2017 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -118,6 +118,15 @@ BINM_APROPOS=mapropos		# default is "apropos"
 BINM_WHATIS=mwhatis		# default is "whatis"
 BINM_MAKEWHATIS=mandocdb	# default is "makewhatis"
 BINM_SOELIM=msoelim		# default is "soelim"
+
+# Some distributions do not want hardlinks
+# between installed binary programs.
+# Set the following variable to use symbolic links instead.
+# It is also used for links between manual pages.
+# It is only used by the install* targets.
+# When using this, DESTDIR must be empty or an absolute path.
+
+LN="ln -sf"			# default is "ln -f"
 
 # Before falling back to the bundled version of the ohash(3) hashing
 # library, autoconfiguration tries the following linker flag to
