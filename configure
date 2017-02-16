@@ -2,7 +2,7 @@
 #
 # $Id$
 #
-# Copyright (c) 2014, 2015, 2016 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2014, 2015, 2016, 2017 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -111,6 +111,7 @@ INSTALL_PROGRAM=
 INSTALL_LIB=
 INSTALL_MAN=
 INSTALL_DATA=
+LN="ln -f"
 
 # --- manual settings from configure.local -----------------------------
 
@@ -518,6 +519,7 @@ INSTALL_PROGRAM	= ${INSTALL_PROGRAM}
 INSTALL_LIB	= ${INSTALL_LIB}
 INSTALL_MAN	= ${INSTALL_MAN}
 INSTALL_DATA	= ${INSTALL_DATA}
+LN		= ${LN}
 __HEREDOC__
 
 [ ${BUILD_DB} -gt 0 ] && \
