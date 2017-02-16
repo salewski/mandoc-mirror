@@ -606,6 +606,7 @@ termp_ll_pre(DECL_ARGS)
 static int
 termp_it_pre(DECL_ARGS)
 {
+	struct roffsu		su;
 	char			buf[24];
 	const struct roff_node *bl, *nn;
 	size_t			ncols, dcol;
@@ -683,9 +684,12 @@ termp_it_pre(DECL_ARGS)
 
 		for (i = 0, nn = n->prev;
 		    nn->prev && i < (int)ncols;
-		    nn = nn->prev, i++)
-			offset += dcol + a2width(p,
-			    bl->norm->Bl.cols[i]);
+		    nn = nn->prev, i++) {
+			SCALE_HS_INIT(&su,
+			    term_strlen(p, bl->norm->Bl.cols[i]));
+			su.scale /= term_strlen(p, "0");
+			offset += term_hspan(p, &su) / 24 + dcol;
+		}
 
 		/*
 		 * When exceeding the declared number of columns, leave
@@ -700,7 +704,9 @@ termp_it_pre(DECL_ARGS)
 		 * Use the declared column widths, extended as explained
 		 * in the preceding paragraph.
 		 */
-		width = a2width(p, bl->norm->Bl.cols[i]) + dcol;
+		SCALE_HS_INIT(&su, term_strlen(p, bl->norm->Bl.cols[i]));
+		su.scale /= term_strlen(p, "0");
+		width = term_hspan(p, &su) / 24 + dcol;
 		break;
 	default:
 		if (NULL == bl->norm->Bl.width)

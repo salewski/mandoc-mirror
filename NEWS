@@ -65,6 +65,8 @@ Changes in version 1.14.1, released on February XXX, 2017
    for empty matrices and empty square roots.
  * mdoc(7): Fix an assertion failure for a .Bd without a type that
    breaks another block.
+ * mdoc(7): Fix an assertion failure that happened for some .Bl -column
+   lists containing a column width of "-4n", "-3n", or "-2n".
  * mdoc(7): Fix an assertion failure caused by .Bl -column without .It
    but containing eqn(7) or tbl(7) code.
  * roff(7): Fix an assertion failure caused by \z\[u00FF] with -Tps/-Tpdf.
