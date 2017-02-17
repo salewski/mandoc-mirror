@@ -1226,15 +1226,22 @@ deroff(char **dest, const struct roff_node *n)
 	/* Skip leading whitespace. */
 
 	for (cp = n->string; *cp != '\0'; cp++) {
-		if (cp[0] == '\\' && strchr(" %&0^|~", cp[1]) != NULL)
+		if (cp[0] == '\\' && cp[1] != '\0' &&
+		    strchr(" %&0^|~", cp[1]) != NULL)
 			cp++;
 		else if ( ! isspace((unsigned char)*cp))
 			break;
 	}
 
+	/* Skip trailing backslash. */
+
+	sz = strlen(cp);
+	if (cp[sz - 1] == '\\')
+		sz--;
+
 	/* Skip trailing whitespace. */
 
-	for (sz = strlen(cp); sz; sz--)
+	for (; sz; sz--)
 		if ( ! isspace((unsigned char)cp[sz-1]))
 			break;
 
@@ -3358,7 +3365,8 @@ roff_strdup(const struct roff *r, const char *p)
 	ssz = 0;
 
 	while ('\0' != *p) {
-		if ('\\' != *p && r->xtab && r->xtab[(int)*p].p) {
+		assert((unsigned int)*p < 128);
+		if ('\\' != *p && r->xtab && r->xtab[(unsigned int)*p].p) {
 			sz = r->xtab[(int)*p].sz;
 			res = mandoc_realloc(res, ssz + sz + 1);
 			memcpy(res + ssz, r->xtab[(int)*p].p, sz);
