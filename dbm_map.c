@@ -175,7 +175,7 @@ dbm_getint(int32_t offset)
 int32_t
 dbm_addr(const void *p)
 {
-	return htobe32((char *)p - dbm_base);
+	return htobe32((const char *)p - dbm_base);
 }
 
 int
