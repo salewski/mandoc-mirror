@@ -43,7 +43,7 @@ void		 mandoc_msg(enum mandocerr, struct mparse *,
 			int, int, const char *);
 void		 mandoc_vmsg(enum mandocerr, struct mparse *,
 			int, int, const char *, ...)
-			__attribute__((__format__ (printf, 5, 6)));
+			__attribute__((__format__ (__printf__, 5, 6)));
 char		*mandoc_getarg(struct mparse *, char **, int, int *);
 char		*mandoc_normdate(struct mparse *, char *, int, int);
 int		 mandoc_eos(const char *, size_t);

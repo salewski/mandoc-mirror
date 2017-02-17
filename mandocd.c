@@ -49,7 +49,7 @@ enum	outt {
 
 static	void	  process(struct mparse *, enum outt, void *);
 static	int	  read_fds(int, int *);
-static	void	  usage(void) __attribute__((noreturn));
+static	void	  usage(void) __attribute__((__noreturn__));
 
 
 #define NUM_FDS 3

@@ -48,9 +48,9 @@
 int	 process_manpage(int, int, const char *);
 int	 process_tree(int, int);
 void	 run_mandocd(int, const char *, const char *)
-		__attribute__((noreturn));
+		__attribute__((__noreturn__));
 ssize_t	 sock_fd_write(int, int, int, int);
-void	 usage(void) __attribute__((noreturn));
+void	 usage(void) __attribute__((__noreturn__));
 
 
 void

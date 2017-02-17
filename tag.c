@@ -38,7 +38,7 @@ struct tag_entry {
 	char	 s[];
 };
 
-static	void	 tag_signal(int) __attribute__((noreturn));
+static	void	 tag_signal(int) __attribute__((__noreturn__));
 
 static struct ohash	 tag_data;
 static struct tag_files	 tag_files;

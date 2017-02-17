@@ -104,7 +104,7 @@ static	void		  ps_pclose(struct termp *);
 static	void		  ps_plast(struct termp *);
 static	void		  ps_pletter(struct termp *, int);
 static	void		  ps_printf(struct termp *, const char *, ...)
-				__attribute__((__format__ (printf, 2, 3)));
+				__attribute__((__format__ (__printf__, 2, 3)));
 static	void		  ps_putchar(struct termp *, char);
 static	void		  ps_setfont(struct termp *, enum termfont);
 static	void		  ps_setwidth(struct termp *, int, int);
