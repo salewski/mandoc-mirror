@@ -589,7 +589,7 @@ treescan(void)
 	const char	*argv[2];
 
 	argv[0] = ".";
-	argv[1] = (char *)NULL;
+	argv[1] = NULL;
 
 	f = fts_open((char * const *)argv, FTS_PHYSICAL | FTS_NOCHDIR,
 	    fts_compare);
