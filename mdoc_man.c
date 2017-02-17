@@ -717,8 +717,7 @@ pre__t(DECL_ARGS)
 
 	if (n->parent && MDOC_Rs == n->parent->tok &&
 	    n->parent->norm->Rs.quote_T) {
-		print_word("");
-		putchar('\"');
+		print_word("\\(lq");
 		outflags &= ~MMAN_spc;
 	} else
 		font_push('I');
@@ -732,8 +731,7 @@ post__t(DECL_ARGS)
 	if (n->parent && MDOC_Rs == n->parent->tok &&
 	    n->parent->norm->Rs.quote_T) {
 		outflags &= ~MMAN_spc;
-		print_word("");
-		putchar('\"');
+		print_word("\\(rq");
 	} else
 		font_pop();
 	post_percent(meta, n);
