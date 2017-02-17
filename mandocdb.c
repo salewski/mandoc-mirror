@@ -194,7 +194,7 @@ static	void	 putmdockey(const struct mpage *,
 			const struct roff_node *, uint64_t, int);
 static	int	 render_string(char **, size_t *);
 static	void	 say(const char *, const char *, ...)
-			__attribute__((__format__ (printf, 2, 3)));
+			__attribute__((__format__ (__printf__, 2, 3)));
 static	int	 set_basedir(const char *, int);
 static	int	 treescan(void);
 static	size_t	 utf8(unsigned int, char [7]);
@@ -625,7 +625,7 @@ treescan(void)
 	const char	*argv[2];
 
 	argv[0] = ".";
-	argv[1] = (char *)NULL;
+	argv[1] = NULL;
 
 	f = fts_open((char * const *)argv, FTS_PHYSICAL | FTS_NOCHDIR,
 	    fts_compare);

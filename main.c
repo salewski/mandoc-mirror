@@ -102,7 +102,7 @@ static	void		  parse(struct curparse *, int, const char *);
 static	void		  passthrough(const char *, int, int);
 static	pid_t		  spawn_pager(struct tag_files *);
 static	int		  toptions(struct curparse *, char *);
-static	void		  usage(enum argmode) __attribute__((noreturn));
+static	void		  usage(enum argmode) __attribute__((__noreturn__));
 static	int		  woptions(struct curparse *, char *);
 
 static	const int sec_prios[] = {1, 4, 5, 8, 6, 3, 7, 2, 9};
