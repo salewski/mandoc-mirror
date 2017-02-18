@@ -385,10 +385,6 @@ are mere guesses, and some may be wrong.
   and triggers a line break; found in audio/normalize-mp3(1)
   loc **  exist *  algo **  size *  imp **
 
-- rendering of double quotes in -Tascii is ugly in both groff and mandoc
-  to improve, both would have to be changed
-  Carsten Kunze  Fri, 12 Dec 2014 14:27:56 +0100
-
 - formatting /usr/local/man/man1/latex2man.1 with groff and mandoc
   reveals lots of bugs both in groff and mandoc...
   reported by bentley@  Wed, 22 May 2013 23:49:30 -0600
@@ -490,6 +486,7 @@ are mere guesses, and some may be wrong.
   The same applies to .Bl -column column widths;
   reported again by Nicolas Joly Thu, 1 Mar 2012 13:41:26 +0100 via wiz@ 5 Mar
   reported again by Franco Fichtner Fri, 27 Sep 2013 21:02:28 +0200
+  reported again by Bruce Evans Fri, 17 Feb 2017 21:22:44 +0100 via bapt@
   loc ***  exist ***  algo ***  size **  imp ***
   An easy partial fix would be to just skip the first word if it starts
   with a dot, including any following white space, when measuring.
