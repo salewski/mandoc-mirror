@@ -63,14 +63,8 @@ static FTSENT	*fts_sort(FTS *, FTSENT *, int);
 static unsigned short	 fts_stat(FTS *, FTSENT *);
 
 #define	ISDOT(a)	(a[0] == '.' && (!a[1] || (a[1] == '.' && !a[2])))
-#ifndef	O_DIRECTORY
-#define	O_DIRECTORY	0
-#endif
 #ifndef	O_CLOEXEC
 #define	O_CLOEXEC	0
-#endif
-#ifndef	PATH_MAX
-#define	PATH_MAX	4096
 #endif
 
 #define	CLR(opt)	(sp->fts_options &= ~(opt))

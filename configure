@@ -67,6 +67,7 @@ HAVE_ISBLANK=
 HAVE_MKDTEMP=
 HAVE_NANOSLEEP=
 HAVE_NTOHL=
+HAVE_O_DIRECTORY=
 HAVE_OHASH=
 HAVE_PATH_MAX=
 HAVE_PLEDGE=
@@ -221,6 +222,7 @@ runtest getsubopt	GETSUBOPT	|| true
 runtest isblank		ISBLANK		|| true
 runtest mkdtemp		MKDTEMP		|| true
 runtest ntohl		NTOHL		|| true
+runtest O_DIRECTORY	O_DIRECTORY	|| true
 runtest PATH_MAX	PATH_MAX	|| true
 runtest pledge		PLEDGE		|| true
 runtest sandbox_init	SANDBOX_INIT	|| true
@@ -358,6 +360,7 @@ echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 [ -n "${UTF8_LOCALE}" ] && echo "#define UTF8_LOCALE \"${UTF8_LOCALE}\""
 [ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""
 [ ${HAVE_EFTYPE} -eq 0 ] && echo "#define EFTYPE EINVAL"
+[ ${HAVE_O_DIRECTORY} -eq 0 ] && echo "#define O_DIRECTORY 0"
 [ ${HAVE_PATH_MAX} -eq 0 ] && echo "#define PATH_MAX 4096"
 if [ ${HAVE_ENDIAN} -eq 0 -a ${HAVE_SYS_ENDIAN} -eq 0 ]; then
 	echo "#define be32toh ntohl"

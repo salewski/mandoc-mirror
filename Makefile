@@ -31,6 +31,7 @@ TESTSRCS	 = test-be32toh.c \
 		   test-mkdtemp.c \
 		   test-nanosleep.c \
 		   test-ntohl.c \
+		   test-O_DIRECTORY.c \
 		   test-ohash.c \
 		   test-PATH_MAX.c \
 		   test-pledge.c \
