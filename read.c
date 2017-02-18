@@ -30,7 +30,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -603,11 +602,10 @@ static int
 read_whole_file(struct mparse *curp, const char *file, int fd,
 		struct buf *fb, int *with_mmap)
 {
+	struct stat	 st;
 	gzFile		 gz;
 	size_t		 off;
 	ssize_t		 ssz;
-
-	struct stat	 st;
 
 	if (fstat(fd, &st) == -1)
 		err((int)MANDOCLEVEL_SYSERR, "%s", file);
