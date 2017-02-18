@@ -59,7 +59,7 @@ int		 man_parseln(struct roff_man *, int, char *, int);
 void		 man_endparse(struct roff_man *);
 
 int		 preconv_cue(const struct buf *, size_t);
-int		 preconv_encode(struct buf *, size_t *,
+int		 preconv_encode(const struct buf *, size_t *,
 			struct buf *, size_t *, int *);
 
 void		 roff_free(struct roff *);
