@@ -399,13 +399,13 @@ base-install: mandoc demandoc soelim
 	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1
 	$(LN) $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1 \
 		$(DESTDIR)$(MANDIR)/man1/$(BINM_WHATIS).1
-	$(INSTALL_MAN) man.conf.5 $(DESTDIR)$(MANDIR)/man5/${MANM_MANCONF}.5
+	$(INSTALL_MAN) man.conf.5 $(DESTDIR)$(MANDIR)/man5/$(MANM_MANCONF).5
 	$(INSTALL_MAN) mandoc.db.5 $(DESTDIR)$(MANDIR)/man5
-	$(INSTALL_MAN) man.7 $(DESTDIR)$(MANDIR)/man7/${MANM_MAN}.7
-	$(INSTALL_MAN) mdoc.7 $(DESTDIR)$(MANDIR)/man7/${MANM_MDOC}.7
-	$(INSTALL_MAN) roff.7 $(DESTDIR)$(MANDIR)/man7/${MANM_ROFF}.7
-	$(INSTALL_MAN) eqn.7 $(DESTDIR)$(MANDIR)/man7/${MANM_EQN}.7
-	$(INSTALL_MAN) tbl.7 $(DESTDIR)$(MANDIR)/man7/${MANM_TBL}.7
+	$(INSTALL_MAN) man.7 $(DESTDIR)$(MANDIR)/man7/$(MANM_MAN).7
+	$(INSTALL_MAN) mdoc.7 $(DESTDIR)$(MANDIR)/man7/$(MANM_MDOC).7
+	$(INSTALL_MAN) roff.7 $(DESTDIR)$(MANDIR)/man7/$(MANM_ROFF).7
+	$(INSTALL_MAN) eqn.7 $(DESTDIR)$(MANDIR)/man7/$(MANM_EQN).7
+	$(INSTALL_MAN) tbl.7 $(DESTDIR)$(MANDIR)/man7/$(MANM_TBL).7
 	$(INSTALL_MAN) mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_MAN) makewhatis.8 \
 		$(DESTDIR)$(MANDIR)/man8/$(BINM_MAKEWHATIS).8
@@ -434,7 +434,50 @@ catman-install: mandocd catman
 	$(INSTALL_MAN) mandocd.8 $(DESTDIR)$(MANDIR)/man8
 	$(INSTALL_MAN) catman.8 $(DESTDIR)$(MANDIR)/man8/$(BINM_CATMAN).8
 
-Makefile.local config.h: configure ${TESTSRCS}
+uninstall:
+	rm -f $(DESTDIR)$(BINDIR)/mandoc
+	rm -f $(DESTDIR)$(BINDIR)/demandoc
+	rm -f $(DESTDIR)$(BINDIR)/$(BINM_SOELIM)
+	rm -f $(DESTDIR)$(BINDIR)/$(BINM_MAN)
+	rm -f $(DESTDIR)$(BINDIR)/$(BINM_APROPOS)
+	rm -f $(DESTDIR)$(BINDIR)/$(BINM_WHATIS)
+	rm -f $(DESTDIR)$(SBINDIR)/$(BINM_MAKEWHATIS)
+	rm -f $(DESTDIR)$(MANDIR)/man1/mandoc.1
+	rm -f $(DESTDIR)$(MANDIR)/man1/demandoc.1
+	rm -f $(DESTDIR)$(MANDIR)/man1/$(BINM_SOELIM).1
+	rm -f $(DESTDIR)$(MANDIR)/man1/$(BINM_MAN).1
+	rm -f $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1
+	rm -f $(DESTDIR)$(MANDIR)/man1/$(BINM_WHATIS).1
+	rm -f $(DESTDIR)$(MANDIR)/man5/$(MANM_MANCONF).5
+	rm -f $(DESTDIR)$(MANDIR)/man5/mandoc.db.5
+	rm -f $(DESTDIR)$(MANDIR)/man7/$(MANM_MAN).7
+	rm -f $(DESTDIR)$(MANDIR)/man7/$(MANM_MDOC).7
+	rm -f $(DESTDIR)$(MANDIR)/man7/$(MANM_ROFF).7
+	rm -f $(DESTDIR)$(MANDIR)/man7/$(MANM_EQN).7
+	rm -f $(DESTDIR)$(MANDIR)/man7/$(MANM_TBL).7
+	rm -f $(DESTDIR)$(MANDIR)/man7/mandoc_char.7
+	rm -f $(DESTDIR)$(MANDIR)/man8/$(BINM_MAKEWHATIS).8
+	rm -f $(DESTDIR)$(CGIBINDIR)/man.cgi
+	rm -f $(DESTDIR)$(HTDOCDIR)/mandoc.css
+	rm -f $(DESTDIR)$(SBINDIR)/mandocd
+	rm -f $(DESTDIR)$(SBINDIR)/$(BINM_CATMAN)
+	rm -f $(DESTDIR)$(MANDIR)/man8/mandocd.8
+	rm -f $(DESTDIR)$(MANDIR)/man8/$(BINM_CATMAN).8
+	rm -f $(DESTDIR)$(LIBDIR)/libmandoc.a
+	rm -f $(DESTDIR)$(MANDIR)/man3/mandoc.3
+	rm -f $(DESTDIR)$(MANDIR)/man3/mandoc_escape.3
+	rm -f $(DESTDIR)$(MANDIR)/man3/mandoc_malloc.3
+	rm -f $(DESTDIR)$(MANDIR)/man3/mansearch.3
+	rm -f $(DESTDIR)$(MANDIR)/man3/mchars_alloc.3
+	rm -f $(DESTDIR)$(MANDIR)/man3/tbl.3
+	rm -f $(DESTDIR)$(INCLUDEDIR)/man.h
+	rm -f $(DESTDIR)$(INCLUDEDIR)/mandoc.h
+	rm -f $(DESTDIR)$(INCLUDEDIR)/mandoc_aux.h
+	rm -f $(DESTDIR)$(INCLUDEDIR)/mdoc.h
+	rm -f $(DESTDIR)$(INCLUDEDIR)/roff.h
+	rmdir $(DESTDIR)$(INCLUDEDIR)
+
+Makefile.local config.h: configure $(TESTSRCS)
 	@echo "$@ is out of date; please run ./configure"
 	@exit 1
 
