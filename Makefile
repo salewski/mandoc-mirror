@@ -477,6 +477,12 @@ uninstall:
 	rm -f $(DESTDIR)$(INCLUDEDIR)/roff.h
 	rmdir $(DESTDIR)$(INCLUDEDIR)
 
+regress: all
+	cd regress && ./regress.pl
+
+regress-clean:
+	cd regress && ./regress.pl . clean
+
 Makefile.local config.h: configure $(TESTSRCS)
 	@echo "$@ is out of date; please run ./configure"
 	@exit 1
@@ -522,6 +528,28 @@ depend: config.h
 		s|\\\n||g; s|  +| |g; s| $$||mg; print;' \
 		Makefile.depend > Makefile.tmp
 	mv Makefile.tmp Makefile.depend
+
+regress-distclean:
+	@find regress \
+		-name '.#*' -o \
+		-name '*.orig' -o \
+		-name '*.rej' -o \
+		-name '*.core' \
+		-exec rm -i {} \;
+
+regress-distcheck:
+	@find regress ! -type d ! -type f
+	@find regress -type f \
+		! -path '*/CVS/*' \
+		! -name Makefile \
+		! -name Makefile.inc \
+		! -name '*.in' \
+		! -name '*.out_ascii' \
+		! -name '*.out_utf8' \
+		! -name '*.out_html' \
+		! -name '*.out_lint' \
+		! -path regress/regress.pl \
+		! -path regress/regress.pl.1
 
 dist: mdocml.sha256
 
