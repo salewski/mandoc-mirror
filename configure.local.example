@@ -174,13 +174,6 @@ INSTALL_DATA="${INSTALL} -m 0444"
 
 # --- user settings related to database support ------------------------
 
-# By default, building makewhatis(8) and apropos(1) is enabled.
-# To disable it, for example to avoid the dependency on SQLite3,
-# use the following line.  It that case, the remaining settings
-# in this section are irrelevant.
-
-BUILD_DB=0
-
 # Autoconfiguration tries the following linker flags to find the
 # SQLite3 library installed on your system.  If none of these work,
 # set the following variable to specify the required linker flags.
@@ -222,7 +215,6 @@ HOMEBREWDIR="${PREFIX}/Cellar"
 
 # By default, building man.cgi(8) is disabled.  To enable it, copy
 # cgi.h.example to cgi.h, edit it, and use the following line.
-# Obviously, this requires that BUILD_DB is enabled, too.
 
 BUILD_CGI=1
 
@@ -299,6 +291,5 @@ HAVE_STRTONUM=0
 HAVE_VASPRINTF=0
 HAVE_WCHAR=0
 
-HAVE_SQLITE3=0
 HAVE_SQLITE3_ERRSTR=0
 HAVE_OHASH=0

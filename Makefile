@@ -248,20 +248,17 @@ MANDOC_TERM_OBJS = eqn_term.o \
 		   term_ps.o \
 		   tbl_term.o
 
-BASE_OBJS	 = $(MANDOC_HTML_OBJS) \
+MAIN_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   $(MANDOC_MAN_OBJS) \
 		   $(MANDOC_TERM_OBJS) \
 		   main.o \
+		   mandocdb.o \
 		   manpath.o \
+		   mansearch.o \
+		   mansearch_const.o \
 		   out.o \
 		   tag.o \
 		   tree.o
-
-MAIN_OBJS	 = $(BASE_OBJS)
-
-DB_OBJS		 = mandocdb.o \
-		   mansearch.o \
-		   mansearch_const.o
 
 CGI_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   cgi.o \
@@ -341,7 +338,7 @@ distclean: clean
 
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS) $(COMPAT_OBJS)
-	rm -f mandoc $(BASE_OBJS) $(DB_OBJS)
+	rm -f mandoc $(MAIN_OBJS)
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f manpage $(MANPAGE_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
