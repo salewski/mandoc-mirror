@@ -282,6 +282,7 @@ WWW_MANS	 = apropos.1.html \
 		   man.1.html \
 		   mandoc.1.html \
 		   soelim.1.html \
+		   man.cgi.3.html \
 		   mandoc.3.html \
 		   mandoc_escape.3.html \
 		   mandoc_headers.3.html \
@@ -299,7 +300,6 @@ WWW_MANS	 = apropos.1.html \
 		   roff.7.html \
 		   tbl.7.html \
 		   makewhatis.8.html \
-		   man.cgi.3.html \
 		   man.cgi.8.html \
 		   man.h.html \
 		   manconf.h.html \
@@ -437,6 +437,12 @@ uninstall:
 	rm -f $(DESTDIR)$(INCLUDEDIR)/roff.h
 	rmdir $(DESTDIR)$(INCLUDEDIR)
 
+regress: all
+	cd regress && ./regress.pl
+
+regress-clean:
+	cd regress && ./regress.pl . clean
+
 Makefile.local config.h: configure $(TESTSRCS)
 	@echo "$@ is out of date; please run ./configure"
 	@exit 1
@@ -477,14 +483,40 @@ depend: config.h
 		Makefile.depend > Makefile.tmp
 	mv Makefile.tmp Makefile.depend
 
+regress-distclean:
+	@find regress \
+		-name '.#*' -o \
+		-name '*.orig' -o \
+		-name '*.rej' -o \
+		-name '*.core' \
+		-exec rm -i {} \;
+
+regress-distcheck:
+	@find regress ! -type d ! -type f
+	@find regress -type f \
+		! -path '*/CVS/*' \
+		! -name Makefile \
+		! -name Makefile.inc \
+		! -name '*.in' \
+		! -name '*.out_ascii' \
+		! -name '*.out_utf8' \
+		! -name '*.out_html' \
+		! -name '*.out_lint' \
+		! -path regress/regress.pl \
+		! -path regress/regress.pl.1
+
 dist: mdocml.sha256
 
 mdocml.sha256: mdocml.tar.gz
 	sha256 mdocml.tar.gz > $@
 
 mdocml.tar.gz: $(DISTFILES)
+	ls regress/*/*/*.mandoc_* && exit 1 || true
 	mkdir -p .dist/mdocml-$(VERSION)/
 	$(INSTALL) -m 0644 $(DISTFILES) .dist/mdocml-$(VERSION)
+	cp -pR regress .dist/mdocml-$(VERSION)
+	find .dist/mdocml-$(VERSION)/regress \
+	    -type d -name CVS -print0 | xargs -0 rm -rf
 	chmod 755 .dist/mdocml-$(VERSION)/configure
 	( cd .dist/ && tar zcf ../$@ mdocml-$(VERSION) )
 	rm -rf .dist/
