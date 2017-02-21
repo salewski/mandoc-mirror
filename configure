@@ -483,8 +483,8 @@ if [ ${BUILD_DB} -eq 0 -a ${BUILD_CGI} -gt 0 ]; then
 	BUILD_CGI=0
 fi
 
-BUILD_TARGETS="base-build"
-[ ${BUILD_CGI} -gt 0 ] && BUILD_TARGETS="${BUILD_TARGETS} cgi-build"
+BUILD_TARGETS=""
+[ ${BUILD_CGI} -gt 0 ] && BUILD_TARGETS="${BUILD_TARGETS} man.cgi"
 INSTALL_TARGETS="base-install"
 [ ${BUILD_DB}  -gt 0 ] && INSTALL_TARGETS="${INSTALL_TARGETS} db-install"
 [ ${BUILD_CGI} -gt 0 ] && INSTALL_TARGETS="${INSTALL_TARGETS} cgi-install"

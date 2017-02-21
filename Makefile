@@ -15,7 +15,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-VERSION = 1.13.4
+VERSION = 1.13.5
 
 # === LIST OF FILES ====================================================
 
@@ -321,11 +321,7 @@ include Makefile.local
 
 # === DEPENDENCY HANDLING ==============================================
 
-all: base-build $(BUILD_TARGETS) Makefile.local
-
-base-build: mandoc demandoc soelim
-
-cgi-build: man.cgi
+all: mandoc demandoc soelim $(BUILD_TARGETS) Makefile.local
 
 install: base-install $(INSTALL_TARGETS)
 
@@ -353,7 +349,7 @@ clean:
 	rm -f $(WWW_MANS) $(WWW_OBJS)
 	rm -rf *.dSYM
 
-base-install: base-build
+base-install: mandoc demandoc soelim
 	mkdir -p $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(LIBDIR)
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
@@ -380,7 +376,7 @@ base-install: base-build
 	$(INSTALL_MAN) tbl.7 $(DESTDIR)$(MANDIR)/man7/$(MANM_TBL).7
 	$(INSTALL_MAN) mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
 
-db-install: base-build
+db-install: mandoc demandoc soelim
 	mkdir -p $(DESTDIR)$(BINDIR)
 	mkdir -p $(DESTDIR)$(SBINDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
@@ -399,7 +395,7 @@ db-install: base-build
 	$(INSTALL_MAN) makewhatis.8 \
 		$(DESTDIR)$(MANDIR)/man8/$(BINM_MAKEWHATIS).8
 
-cgi-install: cgi-build
+cgi-install: man.cgi
 	mkdir -p $(DESTDIR)$(CGIBINDIR)
 	mkdir -p $(DESTDIR)$(HTDOCDIR)
 	$(INSTALL_PROGRAM) man.cgi $(DESTDIR)$(CGIBINDIR)
