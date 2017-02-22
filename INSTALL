@@ -1,5 +1,12 @@
 $Id$
 
+************************************************************************
+* This is a backward compatibility release.
+* Unless you need compatibility with the old SQLite3-based mandoc.db(5)
+* database format, please use the mandoc-1.14.1 release instead:
+* http://mdocml.bsd.lv/snapshots/mdocml-1.14.1.tar.gz
+************************************************************************
+
 About mdocml, the portable mandoc distribution
 ----------------------------------------------
 The mandoc manpage compiler toolset is a suite of tools compiling
