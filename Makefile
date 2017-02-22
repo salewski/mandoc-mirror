@@ -397,8 +397,7 @@ base-install: mandoc demandoc soelim
 	$(INSTALL_MAN) soelim.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_SOELIM).1
 	$(INSTALL_MAN) man.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_MAN).1
 	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1
-	$(LN) $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1 \
-		$(DESTDIR)$(MANDIR)/man1/$(BINM_WHATIS).1
+	cd $(DESTDIR)$(MANDIR)/man1 && $(LN) $(BINM_APROPOS).1 $(BINM_WHATIS).1
 	$(INSTALL_MAN) man.conf.5 $(DESTDIR)$(MANDIR)/man5/$(MANM_MANCONF).5
 	$(INSTALL_MAN) mandoc.db.5 $(DESTDIR)$(MANDIR)/man5
 	$(INSTALL_MAN) man.7 $(DESTDIR)$(MANDIR)/man7/$(MANM_MAN).7
