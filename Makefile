@@ -385,8 +385,7 @@ db-install: mandoc demandoc soelim
 	$(LN) $(DESTDIR)$(BINDIR)/mandoc \
 		$(DESTDIR)$(SBINDIR)/$(BINM_MAKEWHATIS)
 	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1
-	$(LN) $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1 \
-		$(DESTDIR)$(MANDIR)/man1/$(BINM_WHATIS).1
+	cd $(DESTDIR)$(MANDIR)/man1 && $(LN) $(BINM_APROPOS).1 $(BINM_WHATIS).1
 	$(INSTALL_MAN) mansearch.3 $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) mandoc.db.5 $(DESTDIR)$(MANDIR)/man5
 	$(INSTALL_MAN) makewhatis.8 \
