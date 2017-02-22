@@ -978,6 +978,22 @@ main(void)
 	const char	*querystring;
 	int		 i;
 
+#if HAVE_PLEDGE
+	/*
+	 * The "rpath" pledge could be revoked after mparse_readfd()
+	 * if the file desciptor to "/footer.html" would be opened
+	 * up front, but it's probably not worth the complication
+	 * of the code it would cause: it would require scattering
+	 * pledge() calls in multiple low-level resp_*() functions.
+	 */
+
+	if (pledge("stdio rpath", NULL) == -1) {
+		warn("pledge");
+		pg_error_internal();
+		return EXIT_FAILURE;
+	}
+#endif
+
 	/* Poor man's ReDoS mitigation. */
 
 	itimer.it_value.tv_sec = 2;
