@@ -149,7 +149,7 @@ main(int argc, char *argv[])
 		return mandocdb(argc, argv);
 
 #if HAVE_PLEDGE
-	if (pledge("stdio rpath tmppath tty proc exec flock", NULL) == -1)
+	if (pledge("stdio rpath tmppath tty proc exec", NULL) == -1)
 		err((int)MANDOCLEVEL_SYSERR, "pledge");
 #endif
 
@@ -312,7 +312,7 @@ main(int argc, char *argv[])
 
 #if HAVE_PLEDGE
 	if (!use_pager)
-		if (pledge("stdio rpath flock", NULL) == -1)
+		if (pledge("stdio rpath", NULL) == -1)
 			err((int)MANDOCLEVEL_SYSERR, "pledge");
 #endif
 
