@@ -751,6 +751,7 @@ mdoc_it_pre(MDOC_ARGS)
 		case ROFFT_HEAD:
 			if (h->style != NULL && !bl->norm->Bl.comp &&
 			    (n->parent->prev == NULL ||
+			     n->parent->prev->body == NULL ||
 			     n->parent->prev->body->child != NULL)) {
 				t = print_otag(h, TAG_DT, "csWl",
 				    cattr, bl->norm->Bl.width);
