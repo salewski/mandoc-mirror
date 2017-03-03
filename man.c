@@ -203,7 +203,7 @@ man_pmacro(struct roff_man *man, int ln, char *buf, int offs)
 
 	/* Jump to the next non-whitespace word. */
 
-	while (buf[offs] && buf[offs] == ' ')
+	while (buf[offs] == ' ')
 		offs++;
 
 	/*

@@ -666,7 +666,7 @@ mdoc_it_pre(MDOC_ARGS)
 	enum mdoc_list		 type;
 
 	bl = n->parent;
-	while (bl != NULL && bl->tok != MDOC_Bl)
+	while (bl->tok != MDOC_Bl)
 		bl = bl->parent;
 	type = bl->norm->Bl.type;
 

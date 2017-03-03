@@ -1608,7 +1608,7 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 			return ROFF_IGN;
 		while (buf->buf[pos] != '\0' && buf->buf[pos] != ' ')
 			pos++;
-		while (buf->buf[pos] != '\0' && buf->buf[pos] == ' ')
+		while (buf->buf[pos] == ' ')
 			pos++;
 		return tbl_read(r->tbl, ln, buf->buf, pos);
 	}

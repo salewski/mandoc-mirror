@@ -382,7 +382,7 @@ mdoc_pmacro(struct roff_man *mdoc, int ln, char *buf, int offs)
 
 	/* Jump to the next non-whitespace word. */
 
-	while (buf[offs] && ' ' == buf[offs])
+	while (buf[offs] == ' ')
 		offs++;
 
 	/*
