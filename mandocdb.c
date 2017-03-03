@@ -1211,7 +1211,7 @@ mpages_merge(struct dba *dba, struct mparse *mp)
 		} else if (man != NULL && man->macroset == MACROSET_MAN) {
 			man_validate(man);
 			if (*man->meta.msec != '\0' ||
-			    *man->meta.msec != '\0') {
+			    *man->meta.title != '\0') {
 				mpage->form = FORM_SRC;
 				mpage->sec = mandoc_strdup(man->meta.msec);
 				mpage->arch = mandoc_strdup(mlink->arch);
