@@ -660,6 +660,7 @@ exprterm(const struct mansearch *search, int argc, char *argv[], int *argi)
 	 * If needed, request regular expression handling.
 	 */
 
+	cs = 1;
 	if (search->argmode == ARG_WORD) {
 		e->bits = TYPE_Nm;
 		e->match.type = DBM_REGEX;
