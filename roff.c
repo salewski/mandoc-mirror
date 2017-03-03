@@ -1236,7 +1236,7 @@ deroff(char **dest, const struct roff_node *n)
 	/* Skip trailing backslash. */
 
 	sz = strlen(cp);
-	if (cp[sz - 1] == '\\')
+	if (sz > 0 && cp[sz - 1] == '\\')
 		sz--;
 
 	/* Skip trailing whitespace. */
