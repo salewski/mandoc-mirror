@@ -273,12 +273,6 @@ are mere guesses, and some may be wrong.
 - kettenis wants base roff, ms, and me  Fri, 1 Jan 2010 22:13:15 +0100 (CET)
   loc **  exist **  algo **  size ***  imp *
 
-- Vsevolod Stakhov (FreeBSD) needs either a markdown output formatter
-  for mandoc -mdoc or a markdown to mdoc converter because they
-  have to maintain manuals needed both in markdown and mdoc format.
-  Look at the libsoldout (markdown -> whatever)
-  loc *  exist *  algo *  size **  imp **
-
 --- compatibility checks -----------------------------------------------
 
 - is .Bk implemented correctly in modern groff?

@@ -67,6 +67,7 @@ enum	outt {
 	OUTT_TREE,	/* -Ttree */
 	OUTT_MAN,	/* -Tman */
 	OUTT_HTML,	/* -Thtml */
+	OUTT_MARKDOWN,	/* -Tmarkdown */
 	OUTT_LINT,	/* -Tlint */
 	OUTT_PS,	/* -Tps */
 	OUTT_PDF	/* -Tpdf */
@@ -766,6 +767,9 @@ parse(struct curparse *curp, int fd, const char *file)
 		case OUTT_PS:
 			terminal_mdoc(curp->outdata, man);
 			break;
+		case OUTT_MARKDOWN:
+			markdown_mdoc(curp->outdata, man);
+			break;
 		default:
 			break;
 		}
@@ -950,6 +954,8 @@ toptions(struct curparse *curp, char *arg)
 		curp->outtype = OUTT_MAN;
 	else if (0 == strcmp(arg, "html"))
 		curp->outtype = OUTT_HTML;
+	else if (0 == strcmp(arg, "markdown"))
+		curp->outtype = OUTT_MARKDOWN;
 	else if (0 == strcmp(arg, "utf8"))
 		curp->outtype = OUTT_UTF8;
 	else if (0 == strcmp(arg, "locale"))

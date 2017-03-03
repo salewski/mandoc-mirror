@@ -104,6 +104,7 @@ SRCS		 = att.c \
 		   mdoc_html.c \
 		   mdoc_macro.c \
 		   mdoc_man.c \
+		   mdoc_markdown.c \
 		   mdoc_state.c \
 		   mdoc_term.c \
 		   mdoc_validate.c \
@@ -252,8 +253,6 @@ MANDOC_HTML_OBJS = eqn_html.o \
 		   mdoc_html.o \
 		   tbl_html.o
 
-MANDOC_MAN_OBJS  = mdoc_man.o
-
 MANDOC_TERM_OBJS = eqn_term.o \
 		   man_term.o \
 		   mdoc_term.o \
@@ -279,6 +278,8 @@ MAIN_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   $(DBA_OBJS) \
 		   main.o \
 		   manpath.o \
+		   mdoc_man.o \
+		   mdoc_markdown.o \
 		   out.o \
 		   tag.o \
 		   tree.o
