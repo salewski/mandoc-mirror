@@ -389,11 +389,11 @@ base-install: mandoc demandoc soelim
 	mkdir -p $(DESTDIR)$(MANDIR)/man8
 	$(INSTALL_PROGRAM) mandoc demandoc $(DESTDIR)$(BINDIR)
 	$(INSTALL_PROGRAM) soelim $(DESTDIR)$(BINDIR)/$(BINM_SOELIM)
-	$(LN) $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_MAN)
-	$(LN) $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_APROPOS)
-	$(LN) $(DESTDIR)$(BINDIR)/mandoc $(DESTDIR)$(BINDIR)/$(BINM_WHATIS)
-	$(LN) $(DESTDIR)$(BINDIR)/mandoc \
-		$(DESTDIR)$(SBINDIR)/$(BINM_MAKEWHATIS)
+	cd $(DESTDIR)$(BINDIR) && $(LN) mandoc $(BINM_MAN)
+	cd $(DESTDIR)$(BINDIR) && $(LN) mandoc $(BINM_APROPOS)
+	cd $(DESTDIR)$(BINDIR) && $(LN) mandoc $(BINM_WHATIS)
+	cd $(DESTDIR)$(SBINDIR) && \
+		$(LN) ${BIN_FROM_SBIN}/mandoc $(BINM_MAKEWHATIS)
 	$(INSTALL_MAN) mandoc.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL_MAN) soelim.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_SOELIM).1
 	$(INSTALL_MAN) man.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_MAN).1
@@ -475,7 +475,7 @@ uninstall:
 	rm -f $(DESTDIR)$(INCLUDEDIR)/mandoc_aux.h
 	rm -f $(DESTDIR)$(INCLUDEDIR)/mdoc.h
 	rm -f $(DESTDIR)$(INCLUDEDIR)/roff.h
-	rmdir $(DESTDIR)$(INCLUDEDIR)
+	[ ! -e $(DESTDIR)$(INCLUDEDIR) ] || rmdir $(DESTDIR)$(INCLUDEDIR)
 
 regress: all
 	cd regress && ./regress.pl

@@ -85,6 +85,13 @@ BINDIR="${PREFIX}/bin"
 SBINDIR="${PREFIX}/sbin"
 MANDIR="${PREFIX}/man"
 
+# If BINDIR and SBINDIR are not subdirectories of the same parent
+# directory or if the basename(1) of BINDIR differs from "bin",
+# the relative path from SBINDIR to BINDIR is also needed.
+# The default is:
+
+BIN_FROM_SBIN="../bin"
+
 # Some distributions may want to avoid naming conflicts
 # with the configuration files of other man(1) implementations.
 # This changes the name of the installed section 5 manual page as well.
