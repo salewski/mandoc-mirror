@@ -87,6 +87,13 @@ INCLUDEDIR="${PREFIX}/include/mandoc"
 LIBDIR="${PREFIX}/lib/mandoc"
 MANDIR="${PREFIX}/man"
 
+# If BINDIR and SBINDIR are not subdirectories of the same parent
+# directory or if the basename(1) of BINDIR differs from "bin",
+# the relative path from SBINDIR to BINDIR is also needed.
+# The default is:
+
+BIN_FROM_SBIN="../bin"
+
 # The man(1) utility needs to know where the manuals reside.
 # We know of two ways to tell it: via manpath(1) or man.conf(5).
 # The latter is used by OpenBSD and NetBSD, the former by most
