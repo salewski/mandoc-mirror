@@ -715,8 +715,7 @@ static int
 pre__t(DECL_ARGS)
 {
 
-	if (n->parent && MDOC_Rs == n->parent->tok &&
-	    n->parent->norm->Rs.quote_T) {
+	if (n->parent->tok == MDOC_Rs && n->parent->norm->Rs.quote_T) {
 		print_word("\\(lq");
 		outflags &= ~MMAN_spc;
 	} else
@@ -728,8 +727,7 @@ static void
 post__t(DECL_ARGS)
 {
 
-	if (n->parent && MDOC_Rs == n->parent->tok &&
-	    n->parent->norm->Rs.quote_T) {
+	if (n->parent->tok  == MDOC_Rs && n->parent->norm->Rs.quote_T) {
 		outflags &= ~MMAN_spc;
 		print_word("\\(rq");
 	} else
