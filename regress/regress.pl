@@ -113,15 +113,16 @@ for (@ARGV) {
 		$displaylevel = int;
 		next;
 	}
-	/^(all|ascii|utf8|man|html|lint|clean|verbose)$/
+	/^(all|ascii|utf8|man|html|markdown|lint|clean|verbose)$/
 	    or usage "$_: invalid modifier";
 	$targets{$_} = 1;
 }
 $targets{all} = 1
     unless $targets{ascii} || $targets{utf8} || $targets{man} ||
-      $targets{html} || $targets{lint} || $targets{clean};
+      $targets{html} || $targets{markdown} ||
+      $targets{lint} || $targets{clean};
 $targets{ascii} = $targets{utf8} = $targets{man} = $targets{html} =
-    $targets{lint} = 1 if $targets{all};
+    $targets{markdown} = $targets{lint} = 1 if $targets{all};
 $displaylevel = 3 if $targets{verbose};
 
 
@@ -160,7 +161,8 @@ if ($subdir eq '.') {
 
 my @mandoc = '../mandoc';
 my @subdir_names;
-my (@regress_testnames, @utf8_testnames, @html_testnames, @lint_testnames);
+my (@regress_testnames, @utf8_testnames, @lint_testnames);
+my (@html_testnames, @markdown_testnames);
 my (%skip_ascii, %skip_man);
 
 push @mandoc, split ' ', $vars{MOPTS} if $vars{MOPTS};
@@ -184,6 +186,10 @@ if (defined $vars{UTF8_TARGETS}) {
 if (defined $vars{HTML_TARGETS}) {
 	@html_testnames = split ' ', $vars{HTML_TARGETS};
 	delete $vars{HTML_TARGETS};
+}
+if (defined $vars{MARKDOWN_TARGETS}) {
+	@markdown_testnames = split ' ', $vars{MARKDOWN_TARGETS};
+	delete $vars{MARKDOWN_TARGETS};
 }
 if (defined $vars{LINT_TARGETS}) {
 	@lint_testnames = split ' ', $vars{LINT_TARGETS};
@@ -300,6 +306,27 @@ for my $testname (@html_testnames) {
 	}
 }
 
+my $count_markdown = 0;
+for my $testname (@markdown_testnames) {
+	next if $onlytest && $testname ne $onlytest;
+	my $i = "$subdir/$testname.in";
+	my $o = "$subdir/$testname.mandoc_markdown";
+	my $w = "$subdir/$testname.out_markdown";
+	if ($targets{markdown}) {
+		$count_markdown++;
+		$count_total++;
+		print "@mandoc -T markdown $i\n" if $targets{verbose};
+		sysout $o, @mandoc, qw(-T markdown), $i
+		    and fail $subdir, $testname, 'markdown:mandoc';
+		system @diff, $w, $o
+		    and fail $subdir, $testname, 'markdown:diff';
+	}
+	if ($targets{clean}) {
+		print "rm $o\n" if $targets{verbose};
+		unlink $o;
+	}
+}
+
 my $count_lint = 0;
 for my $testname (@lint_testnames) {
 	next if $onlytest && $testname ne $onlytest;
@@ -334,6 +361,7 @@ print " $count_ascii ascii" if $count_ascii;
 print " $count_man man" if $count_man;
 print " $count_utf8 utf8" if $count_utf8;
 print " $count_html html" if $count_html;
+print " $count_markdown markdown" if $count_markdown;
 print " $count_lint lint" if $count_lint;
 
 if (@failures) {
