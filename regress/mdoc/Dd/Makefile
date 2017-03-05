@@ -2,6 +2,7 @@
 
 REGRESS_TARGETS	 = badarg dupe late long manarg noarg order
 LINT_TARGETS	 = badarg dupe late long manarg noarg order
+MARKDOWN_TARGETS = badarg dupe late long manarg order
 
 # If groff finds exactly three arguments, it assumes they are month,
 # day and year without further checking.  If there are no arguments,

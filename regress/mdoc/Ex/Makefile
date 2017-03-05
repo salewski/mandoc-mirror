@@ -2,6 +2,7 @@
 
 REGRESS_TARGETS	 = args noname nostd
 LINT_TARGETS	 = noname nostd
+MARKDOWN_TARGETS = args noname nostd
 
 # groff-1.22.2 defect:
 # - .Ex without -std produces no output

@@ -4,6 +4,8 @@ REGRESS_TARGETS	 = badsec case dupe fourargs late
 REGRESS_TARGETS	+= missing noarg nobody nosec order
 LINT_TARGETS	 = badsec case dupe fourargs late
 LINT_TARGETS	+= missing noarg nobody nosec order
+MARKDOWN_TARGETS  = case dupe fourargs late
+MARKDOWN_TARGETS += missing noarg nobody nosec order
 
 SKIP_GROFF	 = badsec nobody
 SKIP_ASCII	 = badsec

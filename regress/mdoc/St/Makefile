@@ -2,6 +2,7 @@
 
 REGRESS_TARGETS	 = badargs call
 LINT_TARGETS	 = badargs call
+MARKDOWN_TARGETS = badargs call
 
 # groff-1.22.3 defect:
 # - If the first argument of .St is the name of another macro,

@@ -2,6 +2,7 @@
 
 REGRESS_TARGETS	= brokenbreaker twice tail two notopen
 LINT_TARGETS	= brokenbreaker twice tail two notopen
+MARKDOWN_TARGETS = brokenbreaker twice two notopen
 
 # It's hard to keep stuff together in next-line scope.
 

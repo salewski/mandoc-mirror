@@ -2,5 +2,6 @@
 
 REGRESS_TARGETS	= invalid
 LINT_TARGETS	= invalid
+MARKDOWN_TARGETS = invalid
 
 .include <bsd.regress.mk>

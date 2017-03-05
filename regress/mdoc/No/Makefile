@@ -2,5 +2,6 @@
 
 REGRESS_TARGETS = punct spacing
 LINT_TARGETS	= punct
+MARKDOWN_TARGETS = punct spacing
 
 .include <bsd.regress.mk>

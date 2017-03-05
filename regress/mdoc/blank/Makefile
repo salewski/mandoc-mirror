@@ -2,6 +2,7 @@
 
 REGRESS_TARGETS = line comment list
 LINT_TARGETS	= line comment list
+MARKDOWN_TARGETS = comment list
 
 SKIP_TMAN = list
 

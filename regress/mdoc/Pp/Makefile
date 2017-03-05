@@ -2,5 +2,6 @@
 
 REGRESS_TARGETS	 = arg
 LINT_TARGETS	 = arg
+MARKDOWN_TARGETS = arg
 
 .include <bsd.regress.mk>
