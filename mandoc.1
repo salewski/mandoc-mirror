@@ -908,6 +908,14 @@ The
 .Ic \&Nd
 macro lacks the required argument.
 The title line of the manual will end after the dash.
+.It Sy "description line outside NAME section"
+.Pq mdoc
+An
+.Ic \&Nd
+macro appears outside the NAME section.
+The arguments are printed anyway and the following text is used for
+.Xr apropos 1 ,
+but none of that behaviour is portable.
 .It Sy "sections out of conventional order"
 .Pq mdoc
 A standard section occurs after another section it usually precedes.

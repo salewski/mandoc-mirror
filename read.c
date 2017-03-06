@@ -113,6 +113,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"bad NAME section content",
 	"missing comma before name",
 	"missing description line, using \"\"",
+	"description line outside NAME section",
 	"sections out of conventional order",
 	"duplicate section title",
 	"unexpected section",

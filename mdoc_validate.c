@@ -1035,6 +1035,10 @@ post_nd(POST_ARGS)
 	if (n->type != ROFFT_BODY)
 		return;
 
+	if (n->sec != SEC_NAME)
+		mandoc_msg(MANDOCERR_ND_LATE, mdoc->parse,
+		    n->line, n->pos, "Nd");
+
 	if (n->child == NULL)
 		mandoc_msg(MANDOCERR_ND_EMPTY, mdoc->parse,
 		    n->line, n->pos, "Nd");

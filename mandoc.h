@@ -71,6 +71,7 @@ enum	mandocerr {
 	MANDOCERR_NAMESEC_BAD, /* bad NAME section content: macro */
 	MANDOCERR_NAMESEC_PUNCT, /* missing comma before name: Nm name */
 	MANDOCERR_ND_EMPTY, /* missing description line, using "" */
+	MANDOCERR_ND_LATE, /* description line outside NAME section */
 	MANDOCERR_SEC_ORDER, /* sections out of conventional order: Sh title */
 	MANDOCERR_SEC_REP, /* duplicate section title: Sh title */
 	MANDOCERR_SEC_MSEC, /* unexpected section: Sh title for ... only */
