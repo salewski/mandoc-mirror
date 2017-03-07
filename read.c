@@ -66,7 +66,7 @@ struct	mparse {
 
 static	void	  choose_parser(struct mparse *);
 static	void	  resize_buf(struct buf *, size_t);
-static	void	  mparse_buf_r(struct mparse *, struct buf, size_t, int);
+static	int	  mparse_buf_r(struct mparse *, struct buf, size_t, int);
 static	int	  read_whole_file(struct mparse *, const char *, int,
 				struct buf *, int *);
 static	void	  mparse_end(struct mparse *);
@@ -310,7 +310,7 @@ choose_parser(struct mparse *curp)
  * macros, inline equations, and input line traps)
  * and indirectly (for .so file inclusion).
  */
-static void
+static int
 mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 {
 	const struct tbl_span	*span;
@@ -511,13 +511,16 @@ rerun:
 
 		switch (rr) {
 		case ROFF_REPARSE:
-			if (REPARSE_LIMIT >= ++curp->reparse_count)
-				mparse_buf_r(curp, ln, of, 0);
-			else
+			if (++curp->reparse_count > REPARSE_LIMIT)
 				mandoc_msg(MANDOCERR_ROFFLOOP, curp,
 				    curp->line, pos, NULL);
-			pos = 0;
-			continue;
+			else if (mparse_buf_r(curp, ln, of, 0) == 1 ||
+			    start == 1) {
+				pos = 0;
+				continue;
+			}
+			free(ln.buf);
+			return 0;
 		case ROFF_APPEND:
 			pos = strlen(ln.buf);
 			continue;
@@ -531,7 +534,7 @@ rerun:
 			    (i >= blk.sz || blk.buf[i] == '\0')) {
 				curp->sodest = mandoc_strdup(ln.buf + of);
 				free(ln.buf);
-				return;
+				return 1;
 			}
 			/*
 			 * We remove `so' clauses from our lookaside
@@ -597,6 +600,7 @@ rerun:
 	}
 
 	free(ln.buf);
+	return 1;
 }
 
 static int
