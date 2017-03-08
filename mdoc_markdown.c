@@ -535,7 +535,7 @@ md_word(const char *s)
 			bs = escflags & ESC_HYP && !code_blocks;
 			break;
 		case ')':
-			bs = escflags & ESC_PAR && !code_blocks;
+			bs = escflags & (ESC_NUM | ESC_PAR) && !code_blocks;
 			break;
 		case '*':
 		case '[':
