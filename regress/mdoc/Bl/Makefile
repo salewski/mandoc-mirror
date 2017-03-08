@@ -14,7 +14,7 @@ LINT_TARGETS	+= empty noIt emptyhead emptytag emptyitem
 LINT_TARGETS	+= bareIt bareTa break breakingIt broken
 
 MARKDOWN_TARGETS  = item inset diag ohang bullet dash enum hang tag
-MARKDOWN_TARGETS += extend nested offset secstart
+MARKDOWN_TARGETS += column colNoIt extend nested offset secstart
 MARKDOWN_TARGETS += notype multitype badargs
 MARKDOWN_TARGETS += empty noIt emptyhead emptytag emptyitem multitag
 MARKDOWN_TARGETS += bareIt bareTa unclosed breakingIt breakingTa broken
