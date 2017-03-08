@@ -5,4 +5,9 @@ LINT_TARGETS	 = badarg broken
 
 SKIP_TMAN ?= badarg
 
+# mandoc -T markdown output of .Bk is quite ugly,
+# so refrain from testing it for now
+
+SKIP_MARKDOWN ?= ALL
+
 .include <bsd.regress.mk>

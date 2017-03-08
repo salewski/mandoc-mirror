@@ -2,7 +2,11 @@
 
 REGRESS_TARGETS	 = badarg dupe late long manarg noarg order
 LINT_TARGETS	 = badarg dupe late long manarg noarg order
-MARKDOWN_TARGETS = badarg dupe late long manarg order
+
+# noarg output contains the date when the file is formatted
+
+SKIP_ASCII	?= noarg
+SKIP_MARKDOWN	?= noarg
 
 # If groff finds exactly three arguments, it assumes they are month,
 # day and year without further checking.  If there are no arguments,
@@ -11,7 +15,6 @@ MARKDOWN_TARGETS = badarg dupe late long manarg order
 # That is not at all sane behaviour, we are not going to imitate it.
 
 SKIP_GROFF	 = badarg long manarg noarg
-SKIP_ASCII	 = noarg
 
 # Autodetection fails for late .Dd, so specify -mdoc explicitly.
 

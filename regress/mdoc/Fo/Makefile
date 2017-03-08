@@ -3,8 +3,6 @@
 REGRESS_TARGETS	 = basic break eos font noarg nohead
 REGRESS_TARGETS += obsolete punct section warn
 LINT_TARGETS	 = noarg nohead obsolete warn
-MARKDOWN_TARGETS  = basic break eos font noarg nohead
-MARKDOWN_TARGETS += obsolete punct section warn
 
 # groff-1.22.3 defects:
 # - .Fo without an argument prints unbalanced parentheses

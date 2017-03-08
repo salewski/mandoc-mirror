@@ -3,4 +3,8 @@
 REGRESS_TARGETS	= args
 LINT_TARGETS	= args
 
+# mandoc -T markdown ignores .Db
+
+SKIP_MARKDOWN ?= ALL
+
 .include <bsd.regress.mk>

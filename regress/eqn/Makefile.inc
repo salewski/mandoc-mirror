@@ -4,6 +4,7 @@ EQN = /usr/local/bin/eqn
 
 SKIP_GROFF ?= ${REGRESS_TARGETS}
 SKIP_TMAN ?= ALL
+SKIP_MARKDOWN ?= ALL
 
 
 # OpenBSD only: maintainer targets and custom extraction

@@ -2,6 +2,7 @@
 
 REGRESS_TARGETS	 = broken hyph noarg par
 LINT_TARGETS	 = broken noarg
-MARKDOWN_TARGETS = hyph noarg par
+
+SKIP_MARKDOWN	?= broken
 
 .include <bsd.regress.mk>

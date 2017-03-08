@@ -13,12 +13,6 @@ LINT_TARGETS	 = column notype badargs tag
 LINT_TARGETS	+= empty noIt emptyhead emptytag emptyitem
 LINT_TARGETS	+= bareIt bareTa break breakingIt broken
 
-MARKDOWN_TARGETS  = item inset diag ohang bullet dash enum hang tag
-MARKDOWN_TARGETS += column colNoIt extend nested offset secstart
-MARKDOWN_TARGETS += notype multitype badargs
-MARKDOWN_TARGETS += empty noIt emptyhead emptytag emptyitem multitag
-MARKDOWN_TARGETS += bareIt bareTa unclosed breakingIt breakingTa broken
-
 # groff-mandoc differences:
 # - groff allows enclosures to span Ta, mandoc does not
 
@@ -45,5 +39,9 @@ SKIP_TMAN += tag
 # Empty heads are still mishandled by -Tman.
 
 SKIP_TMAN += emptyhead emptytag
+
+# mandoc -T markdown still has issues with badly nested lists
+
+SKIP_MARKDOWN ?= break
 
 .include <bsd.regress.mk>

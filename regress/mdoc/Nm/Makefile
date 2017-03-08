@@ -6,9 +6,6 @@ REGRESS_TARGETS	+= font long par parns punct
 
 LINT_TARGETS	 = badNAME badNAMEuse break broken
 
-MARKDOWN_TARGETS  = break broken empty
-MARKDOWN_TARGETS += font long par parns punct
-
 # groff-1.22.3/mandoc differences:
 # - When the head of an Nm block in the SYNOPSIS is broken by an
 #   explicit block end macro on the same line, formatting differs,
@@ -23,5 +20,7 @@ SKIP_TMAN	 = broken par parns
 # remaining content in the document gets lost.
 
 SKIP_GROFF	+= break
+
+SKIP_MARKDOWN	?= badNAME badNAMEuse emptyNAME emptyNAMEuse
 
 .include <bsd.regress.mk>

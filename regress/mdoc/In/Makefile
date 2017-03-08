@@ -2,6 +2,5 @@
 
 REGRESS_TARGETS	 = break eos font noarg
 LINT_TARGETS	 = noarg
-MARKDOWN_TARGETS = break eos font noarg
 
 .include <bsd.regress.mk>

@@ -163,7 +163,7 @@ my @mandoc = '../mandoc';
 my @subdir_names;
 my (@regress_testnames, @utf8_testnames, @lint_testnames);
 my (@html_testnames, @markdown_testnames);
-my (%skip_ascii, %skip_man);
+my (%skip_ascii, %skip_man, %skip_markdown);
 
 push @mandoc, split ' ', $vars{MOPTS} if $vars{MOPTS};
 delete $vars{MOPTS};
@@ -206,12 +206,17 @@ if (defined $vars{SKIP_TMAN}) {
 	$skip_man{$_} = 1 for split ' ', $vars{SKIP_TMAN};
 	delete $vars{SKIP_TMAN};
 }
+if (defined $vars{SKIP_MARKDOWN}) {
+	$skip_markdown{$_} = 1 for split ' ', $vars{SKIP_MARKDOWN};
+	delete $vars{SKIP_MARKDOWN};
+}
 if (keys %vars) {
 	my @vars = keys %vars;
 	die "unknown var(s) @vars";
 }
 map { $skip_ascii{$_} = 1; } @regress_testnames if $skip_ascii{ALL};
 map { $skip_man{$_} = 1; } @regress_testnames if $skip_man{ALL};
+map { $skip_markdown{$_} = 1; } @regress_testnames if $skip_markdown{ALL};
 
 # --- run targets ------------------------------------------------------
 
@@ -307,12 +312,12 @@ for my $testname (@html_testnames) {
 }
 
 my $count_markdown = 0;
-for my $testname (@markdown_testnames) {
+for my $testname (@regress_testnames) {
 	next if $onlytest && $testname ne $onlytest;
 	my $i = "$subdir/$testname.in";
 	my $o = "$subdir/$testname.mandoc_markdown";
 	my $w = "$subdir/$testname.out_markdown";
-	if ($targets{markdown}) {
+	if ($targets{markdown} && !$skip_markdown{$testname}) {
 		$count_markdown++;
 		$count_total++;
 		print "@mandoc -T markdown $i\n" if $targets{verbose};

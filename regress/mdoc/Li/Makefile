@@ -2,6 +2,5 @@
 
 REGRESS_TARGETS = punct font
 LINT_TARGETS	= punct
-MARKDOWN_TARGETS = punct font
 
 .include <bsd.regress.mk>

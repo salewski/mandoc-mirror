@@ -2,6 +2,5 @@
 
 REGRESS_TARGETS	= position punct
 LINT_TARGETS	= position
-MARKDOWN_TARGETS = position punct
 
 .include <bsd.regress.mk>
