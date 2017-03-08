@@ -465,6 +465,16 @@ input to the
 format conforming to
 .Lk http://daringfireball.net/projects/markdown/syntax.text\
  "John Gruber's 2004 specification" .
+The output also almost conforms to the
+.Lk http://commonmark.org/ CommonMark
+specification.
+.Pp
+The character set used for the markdown output is ASCII.
+Non-ASCII characters are encoded as HTML entities.
+Since that is not possible in literal font contexts, because these
+are rendered as code spans and code blocks in the markdown output,
+non-ASCII characters are transliterated to ASCII approximations in
+these contexts.
 .Pp
 Markdown is a very weak markup language, so all semantic markup is
 lost, and even part of the presentational markup may be lost.
