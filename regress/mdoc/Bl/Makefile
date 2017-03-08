@@ -13,10 +13,11 @@ LINT_TARGETS	 = column notype badargs tag
 LINT_TARGETS	+= empty noIt emptyhead emptytag emptyitem
 LINT_TARGETS	+= bareIt bareTa break breakingIt broken
 
-MARKDOWN_TARGETS  = item inset diag ohang bullet dash enum
-MARKDOWN_TARGETS += notype multitype
-MARKDOWN_TARGETS += empty emptyitem
-MARKDOWN_TARGETS += bareIt bareTa unclosed breakingTa
+MARKDOWN_TARGETS  = item inset diag ohang bullet dash enum hang tag
+MARKDOWN_TARGETS += extend nested offset secstart
+MARKDOWN_TARGETS += notype multitype badargs
+MARKDOWN_TARGETS += empty noIt emptyhead emptytag emptyitem multitag
+MARKDOWN_TARGETS += bareIt bareTa unclosed breakingIt breakingTa broken
 
 # groff-mandoc differences:
 # - groff allows enclosures to span Ta, mandoc does not

@@ -6,6 +6,10 @@ REGRESS_TARGETS	+= break broken unclosed
 
 LINT_TARGETS	 = beforeNAME blank nested badargs break broken unclosed
 
+MARKDOWN_TARGETS  = beforeNAME blank centered nested spacing
+MARKDOWN_TARGETS += badargs empty offset-empty offset-neg
+MARKDOWN_TARGETS += break broken unclosed
+
 SKIP_TMAN	 = beforeNAME centered
 
 # groff-1.22.3 defects:
