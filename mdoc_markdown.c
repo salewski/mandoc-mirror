@@ -1178,7 +1178,9 @@ md_pre_It(struct roff_node *n)
 			break;
 		case LIST_enum:
 			md_preword();
-			printf("%d.\t", ++bln->norm->Bl.count);
+			if (bln->norm->Bl.count < 99)
+				bln->norm->Bl.count++;
+			printf("%d.\t", bln->norm->Bl.count);
 			escflags &= ~ESC_FON;
 			break;
 		case LIST_column:
