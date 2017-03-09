@@ -3092,6 +3092,8 @@ roff_userdef(ROFF_ARGS)
 		else if (++expand_count > EXPAND_LIMIT) {
 			mandoc_msg(MANDOCERR_ROFFLOOP, r->parse,
 			    ln, (int)(cp - n1), NULL);
+			free(buf->buf);
+			buf->buf = n1;
 			return ROFF_IGN;
 		}
 
