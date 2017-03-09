@@ -3,6 +3,7 @@
 TBL = /usr/local/bin/tbl
 
 SKIP_TMAN ?= ALL
+SKIP_MARKDOWN ?= ALL
 
 
 # OpenBSD only: maintainer targets

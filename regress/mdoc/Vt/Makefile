@@ -2,6 +2,5 @@
 
 REGRESS_TARGETS = noarg spacing font child
 LINT_TARGETS	= noarg
-MARKDOWN_TARGETS = noarg spacing font child
 
 .include <bsd.regress.mk>

@@ -2,7 +2,6 @@
 
 REGRESS_TARGETS	= noarg badarg scope spacing-No spacing-Op twoarg
 LINT_TARGETS	= badarg twoarg
-MARKDOWN_TARGETS = noarg badarg scope spacing-No spacing-Op twoarg
 
 SKIP_TMAN ?= scope
 

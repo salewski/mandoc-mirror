@@ -2,7 +2,6 @@
 
 REGRESS_TARGETS	 = dupe late long missing
 LINT_TARGETS	 = dupe late missing
-MARKDOWN_TARGETS = dupe late long missing
 
 SKIP_GROFF	 = long
 
