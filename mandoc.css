@@ -14,6 +14,11 @@ ul, ol, dl {	margin-top: 0em;
 		margin-bottom: 0em; }
 li, dt {	margin-top: 1em; }
 
+a.selflink {	border-bottom: thin dotted;
+		color: inherit;
+		font: inherit;
+		text-decoration: inherit; }
+
 /* Search form and search results. */
 
 fieldset {	border: thin solid silver;
