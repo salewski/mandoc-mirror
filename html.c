@@ -534,18 +534,25 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 		print_byte(h, '=');
 		print_byte(h, '"');
 		switch (*fmt) {
-		case 'M':
-			print_href(h, arg1, arg2, 1);
-			fmt++;
-			break;
 		case 'I':
 			print_href(h, arg1, NULL, 0);
 			fmt++;
 			break;
+		case 'M':
+			print_href(h, arg1, arg2, 1);
+			fmt++;
+			break;
 		case 'R':
 			print_byte(h, '#');
+			print_encode(h, arg1, NULL, 1);
 			fmt++;
-			/* FALLTHROUGH */
+			break;
+		case 'T':
+			print_encode(h, arg1, NULL, 1);
+			print_word(h, "\" title=\"");
+			print_encode(h, arg1, NULL, 1);
+			fmt++;
+			break;
 		default:
 			print_encode(h, arg1, NULL, 1);
 			break;
