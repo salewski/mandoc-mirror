@@ -628,7 +628,8 @@ mdoc_nm_pre(MDOC_ARGS)
 		len = html_strlen(meta->name);
 
 	t = print_otag(h, TAG_COLGROUP, "");
-	print_otag(h, TAG_COL, "shw", len);
+	/* Increase width to make even bold text fit. */
+	print_otag(h, TAG_COL, "shw", len + 2);
 	print_otag(h, TAG_COL, "");
 	print_tagq(h, t);
 	print_otag(h, TAG_TR, "");
