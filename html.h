@@ -112,6 +112,7 @@ struct	html {
 };
 
 
+struct	roff_node;
 struct	tbl_span;
 struct	eqn;
 
@@ -127,4 +128,5 @@ void		  print_eqn(struct html *, const struct eqn *);
 void		  print_paragraph(struct html *);
 void		  print_endline(struct html *);
 
+char		 *html_make_id(const struct roff_node *);
 int		  html_strlen(const char *);

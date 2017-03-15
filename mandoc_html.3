@@ -48,6 +48,14 @@
 .Fa "struct html *h"
 .Fa "const char *word"
 .Fc
+.Ft char *
+.Fo html_make_id
+.Fa "const struct roff_node *n"
+.Fc
+.Ft int
+.Fo html_strlen
+.Fa "const char *cp"
+.Fc
 .Sh DESCRIPTION
 The mandoc HTML formatter is not a formal library.
 However, as it is compiled into more than one program, in particular
@@ -306,8 +314,27 @@ and
 .Fn print_tagq
 functions.
 .Pp
+The function
+.Fn html_make_id
+takes a node containing one or more text children
+and returns a newly allocated string containing the concatenation
+of the child strings, with blanks replaced by underscores.
+If the node
+.Fa n
+contains any non-text child node,
+.Fn html_make_id
+returns
+.Dv NULL
+instead.
+The caller is responsible for freeing the returned string.
+.Pp
+The function
+.Fn html_strlen
+counts the number of characters in
+.Fa cp .
+It is used as a crude estimate of the width needed to display a string.
+.Pp
 The functions
-.Fn html_strlen ,
 .Fn print_eqn ,
 .Fn print_tbl ,
 and
