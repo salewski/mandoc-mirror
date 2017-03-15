@@ -126,12 +126,30 @@ contains a search query in short format or when
 is empty and a
 .Ev QUERY_STRING
 is provided.
-It changes into the manpath and calls
+If possible, requests using
+.Ev QUERY_STRING
+are redirected to URIs using
+.Ev PATH_INFO
+by calling
+.Fn pg_redirect .
+Otherwise, it changes into the manpath and calls
 .Xr mansearch 3 .
 Depending on the result, it calls either
 .Fn pg_noresult
 or
 .Fn pg_searchres .
+.It Ft void Fn pg_redirect "const struct req *req" "const char *name"
+This function is special in so far as it does not print an HTML page,
+but only an HTTP 303 response with a Location: of the form:
+.Sm off
+.No http://
+.Ar host Ns /
+.Op Ar scriptname Ns /
+.Op Ar manpath Ns /
+.Op Ar arch Ns /
+.Fa name
+.Op Pf . Ar sec
+.Sm on
 .It Ft void Fn pg_noresult "const struct req *req" "const char *msg"
 This function calls
 .Fn resp_begin_html ,
