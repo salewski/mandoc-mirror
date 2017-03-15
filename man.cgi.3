@@ -1,6 +1,6 @@
 .\"	$Id$
 .\"
-.\" Copyright (c) 2016 Ingo Schwarze <schwarze@openbsd.org>
+.\" Copyright (c) 2016, 2017 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -237,13 +237,18 @@ and
 are used.
 The highest level result generators are:
 .Bl -tag -width 1n
-.It Ft void Fn resp_begin_html "int code" "const char *msg"
+.It Ft void Fn resp_begin_html "int code" "const char *msg" "const char *file"
 This generator calls
 .Fn resp_begin_http
 to print the HTTP headers, then prints the HTML header up to the
 opening tag of the <body> element, then copies the file
 .Pa header.html
 to the output, if it exists and is readable.
+If
+.Fa file
+is not
+.Dv NULL ,
+it is used for the <title> element.
 .It Ft void Fn resp_searchform "const struct req *req" "enum focus focus"
 This generator prints a search form, filling it with data
 from the provided request object.
