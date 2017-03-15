@@ -653,9 +653,12 @@ pg_searchres(const struct req *req, struct manpage *r, size_t sz)
 		for (i = 0; i < sz; i++) {
 			printf("  <tr>\n"
 			       "    <td>"
-			       "<a class=\"Xr\" href=\"/%s%s%s/%s\">",
-			    scriptname, *scriptname == '\0' ? "" : "/",
-			    req->q.manpath, r[i].file);
+			       "<a class=\"Xr\" href=\"/");
+			if (*scriptname != '\0')
+				printf("%s/", scriptname);
+			if (strcmp(req->q.manpath, req->p[0]))
+				printf("%s/", req->q.manpath);
+			printf("%s\">", r[i].file);
 			html_print(r[i].names);
 			printf("</a></td>\n"
 			       "    <td><span class=\"Nd\">");
