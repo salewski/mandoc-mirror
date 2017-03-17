@@ -440,7 +440,8 @@ man_SH_pre(MAN_ARGS)
 	if (n->type == ROFFT_HEAD) {
 		id = html_make_id(n);
 		print_otag(h, TAG_H1, "cTi", "Sh", id);
-		print_otag(h, TAG_A, "chR", "selflink", id);
+		if (id != NULL)
+			print_otag(h, TAG_A, "chR", "selflink", id);
 		free(id);
 	}
 	return 1;
@@ -509,7 +510,8 @@ man_SS_pre(MAN_ARGS)
 	if (n->type == ROFFT_HEAD) {
 		id = html_make_id(n);
 		print_otag(h, TAG_H2, "cTi", "Ss", id);
-		print_otag(h, TAG_A, "chR", "selflink", id);
+		if (id != NULL)
+			print_otag(h, TAG_A, "chR", "selflink", id);
 		free(id);
 	}
 	return 1;

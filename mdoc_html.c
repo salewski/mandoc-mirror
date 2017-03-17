@@ -501,7 +501,8 @@ mdoc_sh_pre(MDOC_ARGS)
 	case ROFFT_HEAD:
 		id = html_make_id(n);
 		print_otag(h, TAG_H1, "cTi", "Sh", id);
-		print_otag(h, TAG_A, "chR", "selflink", id);
+		if (id != NULL)
+			print_otag(h, TAG_A, "chR", "selflink", id);
 		free(id);
 		break;
 	case ROFFT_BODY:
@@ -524,7 +525,8 @@ mdoc_ss_pre(MDOC_ARGS)
 
 	id = html_make_id(n);
 	print_otag(h, TAG_H2, "cTi", "Ss", id);
-	print_otag(h, TAG_A, "chR", "selflink", id);
+	if (id != NULL)
+		print_otag(h, TAG_A, "chR", "selflink", id);
 	free(id);
 	return 1;
 }
