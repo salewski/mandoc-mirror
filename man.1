@@ -3,7 +3,7 @@
 .\" Copyright (c) 1989, 1990, 1993
 .\"	The Regents of the University of California.  All rights reserved.
 .\" Copyright (c) 2003, 2007, 2008, 2014 Jason McIntyre <jmc@openbsd.org>
-.\" Copyright (c) 2010, 2011, 2014, 2015 Ingo Schwarze <schwarze@openbsd.org>
+.\" Copyright (c) 2010, 2011, 2014-2017 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions
@@ -234,6 +234,10 @@ System maintenance and operation commands.
 .It 9
 Kernel internals.
 .El
+.Pp
+If not specified and a match is found in more than one section,
+the first match is selected from the following list:
+1, 8, 6, 2, 3, 5, 7, 4, 9, 3p.
 .It Fl T Ar output
 Select the output format.
 The default is
