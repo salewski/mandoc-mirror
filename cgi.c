@@ -839,7 +839,8 @@ resp_format(const struct req *req, const char *file)
 	conf.fragment = 1;
 	conf.style = mandoc_strdup(CSS_DIR "/mandoc.css");
 	usepath = strcmp(req->q.manpath, req->p[0]);
-	mandoc_asprintf(&conf.man, "/%s%s%%N.%%S",
+	mandoc_asprintf(&conf.man, "/%s%s%s%s%%N.%%S",
+	    scriptname, *scriptname == '\0' ? "" : "/",
 	    usepath ? req->q.manpath : "", usepath ? "/" : "");
 
 	mparse_result(mp, &man, NULL);
