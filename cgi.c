@@ -554,8 +554,8 @@ pg_error_internal(void)
 static void
 pg_redirect(const struct req *req, const char *name)
 {
-	printf("Status: 303 See Other\r\n");
-	printf("Location: http://%s/", HTTP_HOST);
+	printf("Status: 303 See Other\r\n"
+	    "Location: /");
 	if (*scriptname != '\0')
 		printf("%s/", scriptname);
 	if (strcmp(req->q.manpath, req->p[0]))
@@ -591,14 +591,15 @@ pg_searchres(const struct req *req, struct manpage *r, size_t sz)
 		 * If we have just one result, then jump there now
 		 * without any delay.
 		 */
-		printf("Status: 303 See Other\r\n");
-		printf("Location: http://%s/%s%s%s/%s",
-		    HTTP_HOST, scriptname,
-		    *scriptname == '\0' ? "" : "/",
-		    req->q.manpath, r[0].file);
-		printf("\r\n"
-		     "Content-Type: text/html; charset=utf-8\r\n"
-		     "\r\n");
+		printf("Status: 303 See Other\r\n"
+		    "Location: /");
+		if (*scriptname != '\0')
+			printf("%s/", scriptname);
+		if (strcmp(req->q.manpath, req->p[0]))
+			printf("%s/", req->q.manpath);
+		printf("%s\r\n"
+		    "Content-Type: text/html; charset=utf-8\r\n\r\n",
+		    r[0].file);
 		return;
 	}
 
