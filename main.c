@@ -93,7 +93,7 @@ static	void		  fs_search(const struct mansearch *,
 				const struct manpaths *, int, char**,
 				struct manpage **, size_t *);
 static	int		  koptions(int *, char *);
-static	int		  moptions(int *, char *);
+static	void		  moptions(int *, char *);
 static	void		  mmsg(enum mandocerr, enum mandoclevel,
 				const char *, int, int, const char *);
 static	void		  outdata_alloc(struct curparse *);
@@ -442,8 +442,8 @@ main(int argc, char *argv[])
 	}
 #endif
 
-	if (search.argmode == ARG_FILE && ! moptions(&options, auxpaths))
-		return (int)MANDOCLEVEL_BADARG;
+	if (search.argmode == ARG_FILE)
+		moptions(&options, auxpaths);
 
 	mchars_alloc();
 	curp.mp = mparse_alloc(options, curp.wlevel, mmsg, defos);
@@ -919,24 +919,16 @@ koptions(int *options, char *arg)
 	return 1;
 }
 
-static int
+static void
 moptions(int *options, char *arg)
 {
 
 	if (arg == NULL)
-		/* nothing to do */;
-	else if (0 == strcmp(arg, "doc"))
+		return;
+	if (strcmp(arg, "doc") == 0)
 		*options |= MPARSE_MDOC;
-	else if (0 == strcmp(arg, "andoc"))
-		/* nothing to do */;
-	else if (0 == strcmp(arg, "an"))
+	else if (strcmp(arg, "an") == 0)
 		*options |= MPARSE_MAN;
-	else {
-		warnx("-m %s: Bad argument", arg);
-		return 0;
-	}
-
-	return 1;
 }
 
 static int
