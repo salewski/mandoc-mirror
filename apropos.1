@@ -96,20 +96,10 @@ in manual page names only.
 The search is case insensitive and matches whole words only.
 In this mode, macro keys, comparison operators, and logical operators
 are not available.
-This overrides any earlier
-.Fl k
-and
-.Fl l
-options.
 .It Fl k
 Support the full
 .Ar expression
 syntax.
-This overrides any earlier
-.Fl f
-and
-.Fl l
-options.
 It is the default for
 .Nm .
 .It Fl M Ar path
@@ -147,6 +137,9 @@ The options
 .Fl chlw
 are also supported and are documented in
 .Xr man 1 .
+The options
+.Fl fkl
+are mutually exclusive and override each other.
 .Pp
 An
 .Ar expression
