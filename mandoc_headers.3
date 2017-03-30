@@ -198,9 +198,10 @@ or
 .El
 .Ss Parser internals
 The following headers require inclusion of a parser interface header
-before they can be included.  All parser interface headers should
-precede all parser internal headers.  When any parser internal headers
-are included, the same file should not include any formatter headers.
+before they can be included.
+All parser interface headers should precede all parser internal headers.
+When any parser internal headers are included, the same file should
+not include any formatter headers.
 .Bl -tag -width Ds
 .It Qq Pa libmandoc.h
 Requires
@@ -506,8 +507,7 @@ Provides
 .Vt struct manpage ,
 .Vt struct mansearch ,
 and the functions
-.Fn mansearch_setup ,
-.Fn mansearch ,
+.Fn mansearch
 and
 .Fn mansearch_free .
 .Pp
