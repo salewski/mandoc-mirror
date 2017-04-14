@@ -1474,8 +1474,8 @@ pre_lk(DECL_ARGS)
 			print_word(descr->string);
 			descr = descr->next;
 		}
-		print_word(":");
 		font_pop();
+		print_word(":");
 	}
 
 	font_push('B');

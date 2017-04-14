@@ -2003,9 +2003,9 @@ termp_lk_pre(DECL_ARGS)
 			term_word(p, descr->string);
 			descr = descr->next;
 		}
+		term_fontpop(p);
 		p->flags |= TERMP_NOSPACE;
 		term_word(p, ":");
-		term_fontpop(p);
 	}
 
 	term_fontpush(p, TERMFONT_BOLD);
