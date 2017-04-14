@@ -1993,6 +1993,7 @@ static int
 termp_lk_pre(DECL_ARGS)
 {
 	const struct roff_node *link, *descr;
+	int display;
 
 	if (NULL == (link = n->child))
 		return 0;
@@ -2008,9 +2009,18 @@ termp_lk_pre(DECL_ARGS)
 		term_word(p, ":");
 	}
 
+	display = term_strlen(p, link->string) >= 26;
+	if (display) {
+		term_newln(p);
+		p->offset += term_len(p, p->defindent + 1);
+	}
+
 	term_fontpush(p, TERMFONT_BOLD);
 	term_word(p, link->string);
 	term_fontpop(p);
+
+	if (display)
+		term_newln(p);
 
 	return 0;
 }
