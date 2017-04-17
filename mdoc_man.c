@@ -44,6 +44,7 @@ static	int	  cond_body(DECL_ARGS);
 static	int	  cond_head(DECL_ARGS);
 static  void	  font_push(char);
 static	void	  font_pop(void);
+static	int	  man_strlen(const char *);
 static	void	  mid_it(void);
 static	void	  post__t(DECL_ARGS);
 static	void	  post_aq(DECL_ARGS);
@@ -274,6 +275,49 @@ static	struct {
 }	fontqueue;
 
 
+static int
+man_strlen(const char *cp)
+{
+	size_t	 rsz;
+	int	 skip, sz;
+
+	sz = 0;
+	skip = 0;
+	for (;;) {
+		rsz = strcspn(cp, "\\");
+		if (rsz) {
+			cp += rsz;
+			if (skip) {
+				skip = 0;
+				rsz--;
+			}
+			sz += rsz;
+		}
+		if ('\0' == *cp)
+			break;
+		cp++;
+		switch (mandoc_escape(&cp, NULL, NULL)) {
+		case ESCAPE_ERROR:
+			return sz;
+		case ESCAPE_UNICODE:
+		case ESCAPE_NUMBERED:
+		case ESCAPE_SPECIAL:
+		case ESCAPE_OVERSTRIKE:
+			if (skip)
+				skip = 0;
+			else
+				sz++;
+			break;
+		case ESCAPE_SKIPCHAR:
+			skip = 1;
+			break;
+		default:
+			break;
+		}
+	}
+	return sz;
+}
+
 static void
 font_push(char newfont)
 {
@@ -447,7 +491,7 @@ print_offs(const char *v, int keywords)
 			return;
 		}
 	} else
-		sz = strlen(v);
+		sz = man_strlen(v);
 
 	/*
 	 * We are inside an enclosing list.
@@ -485,13 +529,13 @@ print_width(const struct mdoc_bl *bl, const struct roff_node *child)
 			numeric = 0;
 		}
 	} else
-		sz = strlen(bl->width);
+		sz = man_strlen(bl->width);
 
 	/* XXX Rough estimation, might have multiple parts. */
 	if (bl->type == LIST_enum)
 		chsz = (bl->count > 8) + 1;
 	else if (child != NULL && child->type == ROFFT_TEXT)
-		chsz = strlen(child->string);
+		chsz = man_strlen(child->string);
 	else
 		chsz = 0;
 
@@ -1464,6 +1508,7 @@ static int
 pre_lk(DECL_ARGS)
 {
 	const struct roff_node *link, *descr;
+	int display;
 
 	if ((link = n->child) == NULL)
 		return 0;
@@ -1480,6 +1525,12 @@ pre_lk(DECL_ARGS)
 	}
 
 	/* Link target. */
+	display = man_strlen(link->string) >= 26;
+	if (display) {
+		print_line(".RS", MMAN_Bk_susp);
+		print_word("6n");
+		outflags |= MMAN_nl;
+	}
 	font_push('B');
 	print_word(link->string);
 	font_pop();
@@ -1489,6 +1540,8 @@ pre_lk(DECL_ARGS)
 		print_word(descr->string);
 		descr = descr->next;
 	}
+	if (display)
+		print_line(".RE", MMAN_nl);
 	return 0;
 }
 
@@ -1526,7 +1579,7 @@ pre_nm(DECL_ARGS)
 		if (NULL == n->parent->prev)
 			outflags |= MMAN_sp;
 		print_block(".HP", 0);
-		printf(" %zun", strlen(name) + 1);
+		printf(" %dn", man_strlen(name) + 1);
 		outflags |= MMAN_nl;
 	}
 	font_push('B');
