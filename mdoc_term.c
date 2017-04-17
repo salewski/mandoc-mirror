@@ -1995,12 +1995,13 @@ termp_lk_pre(DECL_ARGS)
 	const struct roff_node *link, *descr;
 	int display;
 
-	if (NULL == (link = n->child))
+	if ((link = n->child) == NULL)
 		return 0;
 
-	if (NULL != (descr = link->next)) {
+	/* Link text. */
+	if ((descr = link->next) != NULL && !(descr->flags & NODE_DELIMC)) {
 		term_fontpush(p, TERMFONT_UNDER);
-		while (NULL != descr) {
+		while (descr != NULL && !(descr->flags & NODE_DELIMC)) {
 			term_word(p, descr->string);
 			descr = descr->next;
 		}
@@ -2009,19 +2010,24 @@ termp_lk_pre(DECL_ARGS)
 		term_word(p, ":");
 	}
 
+	/* Link target. */
 	display = term_strlen(p, link->string) >= 26;
 	if (display) {
 		term_newln(p);
 		p->offset += term_len(p, p->defindent + 1);
 	}
-
 	term_fontpush(p, TERMFONT_BOLD);
 	term_word(p, link->string);
 	term_fontpop(p);
 
+	/* Trailing punctuation. */
+	while (descr != NULL) {
+		p->flags |= TERMP_NOSPACE;
+		term_word(p, descr->string);
+		descr = descr->next;
+	}
 	if (display)
 		term_newln(p);
-
 	return 0;
 }
 

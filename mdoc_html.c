@@ -1346,19 +1346,25 @@ mdoc_sp_pre(MDOC_ARGS)
 static int
 mdoc_lk_pre(MDOC_ARGS)
 {
-	if (NULL == (n = n->child))
+	struct tag	*t;
+
+	if ((n = n->child) == NULL)
 		return 0;
 
-	assert(n->type == ROFFT_TEXT);
-
-	print_otag(h, TAG_A, "cTh", "Lk", n->string);
-
-	if (NULL == n->next)
+	/* Link target and link text. */
+	t = print_otag(h, TAG_A, "cTh", "Lk", n->string);
+	if (n->next == NULL || n->next->flags & NODE_DELIMC)
 		print_text(h, n->string);
-
-	for (n = n->next; n; n = n->next)
+	for (n = n->next; n != NULL && !(n->flags & NODE_DELIMC); n = n->next)
 		print_text(h, n->string);
+	print_tagq(h, t);
 
+	/* Trailing punctuation. */
+	while (n != NULL) {
+		h->flags |= HTML_NOSPACE;
+		print_text(h, n->string);
+		n = n->next;
+	}
 	return 0;
 }
 

@@ -1304,18 +1304,29 @@ md_pre_Lk(struct roff_node *n)
 	if ((link = n->child) == NULL)
 		return 0;
 
-	descr = link->next == NULL ? link : link->next;
+	/* Link text. */
+	descr = link->next;
+	if (descr == NULL || descr->flags & NODE_DELIMC)
+		descr = link;  /* no text */
 	md_rawword("[");
 	outflags &= ~MD_spc;
 	do {
 		md_word(descr->string);
-		descr = link->next == NULL ? NULL : descr->next;
-	} while (descr != NULL);
+		descr = descr->next;
+	} while (descr != NULL && !(descr->flags & NODE_DELIMC));
 	outflags &= ~MD_spc;
+
+	/* Link target. */
 	md_rawword("](");
 	md_uri(link->string);
 	outflags &= ~MD_spc;
 	md_rawword(")");
+
+	/* Trailing punctuation. */
+	while (descr != NULL) {
+		md_word(descr->string);
+		descr = descr->next;
+	}
 	return 0;
 }
 

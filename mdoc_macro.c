@@ -903,8 +903,10 @@ in_line(MACRO_PROT_ARGS)
 		}
 	}
 
-	if (scope)
+	if (scope && tok != MDOC_Lk) {
 		rew_elem(mdoc, tok);
+		scope = 0;
+	}
 
 	/*
 	 * If no elements have been collected and we're allowed to have
@@ -924,6 +926,8 @@ in_line(MACRO_PROT_ARGS)
 	}
 	if (nl)
 		append_delims(mdoc, line, pos, buf);
+	if (scope)
+		rew_elem(mdoc, tok);
 }
 
 static void
