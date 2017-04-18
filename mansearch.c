@@ -672,6 +672,12 @@ exprterm(const struct mansearch *search, int argc, char *argv[], int *argi)
 		return e;
 	}
 
+	if (strcmp("-i", argv[*argi]) == 0 && *argi + 1 < argc) {
+		cs = 0;
+		++*argi;
+	} else
+		cs = 1;
+
 	e = mandoc_calloc(1, sizeof(*e));
 	e->type = EXPR_TERM;
 	e->bits = 0;
@@ -690,7 +696,6 @@ exprterm(const struct mansearch *search, int argc, char *argv[], int *argi)
 	 * If needed, request regular expression handling.
 	 */
 
-	cs = 1;
 	if (search->argmode == ARG_WORD) {
 		e->bits = TYPE_Nm;
 		e->match.type = DBM_REGEX;
