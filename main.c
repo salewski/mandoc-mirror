@@ -193,8 +193,12 @@ main(int argc, char *argv[])
 	show_usage = 0;
 	outmode = OUTMODE_DEF;
 
-	while (-1 != (c = getopt(argc, argv,
-			"aC:cfhI:iK:klM:m:O:S:s:T:VW:w"))) {
+	while ((c = getopt(argc, argv,
+	    "aC:cfhI:iK:klM:m:O:S:s:T:VW:w")) != -1) {
+		if (c == 'i' && search.argmode == ARG_EXPR) {
+			optind--;
+			break;
+		}
 		switch (c) {
 		case 'a':
 			outmode = OUTMODE_ALL;
