@@ -516,6 +516,8 @@ buildoutput(size_t im, struct dbm_page *page)
 		output = mandoc_malloc(sz);
 		i = 0;
 		lstcat(output, &i, input, " # ");
+		output[i++] = '\0';
+		assert(i == sz);
 		return output;
 	}
 
