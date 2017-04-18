@@ -56,7 +56,6 @@ enum	outmode {
 	OUTMODE_FLN,
 	OUTMODE_LST,
 	OUTMODE_ALL,
-	OUTMODE_INT,
 	OUTMODE_ONE
 };
 
@@ -224,9 +223,6 @@ main(int argc, char *argv[])
 				return (int)MANDOCLEVEL_BADARG;
 			}
 			defos = mandoc_strdup(optarg + 3);
-			break;
-		case 'i':
-			outmode = OUTMODE_INT;
 			break;
 		case 'K':
 			if ( ! koptions(&options, optarg))
