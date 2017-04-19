@@ -1073,7 +1073,8 @@ main(void)
 
 	if (*path != '\0') {
 		parse_path_info(&req, path);
-		if (req.q.manpath == NULL || access(path, F_OK) == -1)
+		if (req.q.manpath == NULL || req.q.sec == NULL ||
+		    *req.q.query == '\0' || access(path, F_OK) == -1)
 			path = "";
 	} else if ((querystring = getenv("QUERY_STRING")) != NULL)
 		parse_query_string(&req, querystring);
