@@ -35,21 +35,6 @@
 #include "roff_int.h"
 #include "libman.h"
 
-const	char *const __man_macronames[MAN_MAX] = {
-	"br",		"TH",		"SH",		"SS",
-	"TP",		"LP",		"PP",		"P",
-	"IP",		"HP",		"SM",		"SB",
-	"BI",		"IB",		"BR",		"RB",
-	"R",		"B",		"I",		"IR",
-	"RI",		"sp",		"nf",
-	"fi",		"RE",		"RS",		"DT",
-	"UC",		"PD",		"AT",		"in",
-	"ft",		"OP",		"EX",		"EE",
-	"UR",		"UE",		"ll"
-	};
-
-const	char * const *man_macronames = __man_macronames;
-
 static	void		 man_descope(struct roff_man *, int, int);
 static	int		 man_ptext(struct roff_man *, int, char *, int);
 static	int		 man_pmacro(struct roff_man *, int, char *, int);
@@ -275,8 +260,8 @@ man_breakscope(struct roff_man *man, int tok)
 
 		mandoc_vmsg(MANDOCERR_BLK_LINE, man->parse,
 		    n->line, n->pos, "%s breaks %s",
-		    tok == TOKEN_NONE ? "TS" : man_macronames[tok],
-		    man_macronames[n->tok]);
+		    tok == TOKEN_NONE ? "TS" : roff_name[tok],
+		    roff_name[n->tok]);
 
 		roff_node_delete(man, n);
 		man->flags &= ~MAN_ELINE;
@@ -317,8 +302,8 @@ man_breakscope(struct roff_man *man, int tok)
 
 		mandoc_vmsg(MANDOCERR_BLK_LINE, man->parse,
 		    n->line, n->pos, "%s breaks %s",
-		    tok == TOKEN_NONE ? "TS" : man_macronames[tok],
-		    man_macronames[n->tok]);
+		    tok == TOKEN_NONE ? "TS" : roff_name[tok],
+		    roff_name[n->tok]);
 
 		roff_node_delete(man, n);
 		man->flags &= ~MAN_BLINE;

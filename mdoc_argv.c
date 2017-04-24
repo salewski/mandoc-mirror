@@ -144,8 +144,7 @@ static	const enum mdocargt args_Bl[] = {
 	MDOC_ARG_MAX
 };
 
-static	const struct mdocarg mdocargs[MDOC_MAX] = {
-	{ ARGSFL_DELIM, NULL }, /* Ap */
+static	const struct mdocarg __mdocargs[MDOC_MAX - MDOC_Dd] = {
 	{ ARGSFL_NONE, NULL }, /* Dd */
 	{ ARGSFL_NONE, NULL }, /* Dt */
 	{ ARGSFL_NONE, NULL }, /* Os */
@@ -161,6 +160,7 @@ static	const struct mdocarg mdocargs[MDOC_MAX] = {
 	{ ARGSFL_NONE, NULL }, /* It */
 	{ ARGSFL_DELIM, NULL }, /* Ad */
 	{ ARGSFL_DELIM, args_An }, /* An */
+	{ ARGSFL_DELIM, NULL }, /* Ap */
 	{ ARGSFL_DELIM, NULL }, /* Ar */
 	{ ARGSFL_DELIM, NULL }, /* Cd */
 	{ ARGSFL_DELIM, NULL }, /* Cm */
@@ -269,6 +269,7 @@ static	const struct mdocarg mdocargs[MDOC_MAX] = {
 	{ ARGSFL_NONE, NULL }, /* Ta */
 	{ ARGSFL_NONE, NULL }, /* ll */
 };
+static	const struct mdocarg *const mdocargs = __mdocargs - MDOC_Dd;
 
 
 /*
@@ -277,7 +278,7 @@ static	const struct mdocarg mdocargs[MDOC_MAX] = {
  * Some flags take no argument, some one, some multiple.
  */
 void
-mdoc_argv(struct roff_man *mdoc, int line, int tok,
+mdoc_argv(struct roff_man *mdoc, int line, enum roff_tok tok,
 	struct mdoc_arg **reta, int *pos, char *buf)
 {
 	struct mdoc_argv	  tmpv;
@@ -291,6 +292,7 @@ mdoc_argv(struct roff_man *mdoc, int line, int tok,
 
 	/* Which flags does this macro support? */
 
+	assert(tok >= MDOC_Dd && tok < MDOC_MAX);
 	argtable = mdocargs[tok].argvs;
 	if (argtable == NULL)
 		return;
@@ -415,7 +417,7 @@ argn_free(struct mdoc_arg *p, int iarg)
 
 enum margserr
 mdoc_args(struct roff_man *mdoc, int line, int *pos,
-	char *buf, int tok, char **v)
+	char *buf, enum roff_tok tok, char **v)
 {
 	struct roff_node *n;
 	char		 *v_local;

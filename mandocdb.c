@@ -183,8 +183,7 @@ static	struct ohash	 names; /* table of all names */
 static	struct ohash	 strings; /* table of all strings */
 static	uint64_t	 name_mask;
 
-static	const struct mdoc_handler mdocs[MDOC_MAX] = {
-	{ NULL, 0, 0 },  /* Ap */
+static	const struct mdoc_handler __mdocs[MDOC_MAX - MDOC_Dd] = {
 	{ NULL, 0, NODE_NOPRT },  /* Dd */
 	{ NULL, 0, NODE_NOPRT },  /* Dt */
 	{ NULL, 0, NODE_NOPRT },  /* Os */
@@ -200,6 +199,7 @@ static	const struct mdoc_handler mdocs[MDOC_MAX] = {
 	{ NULL, 0, 0 },  /* It */
 	{ NULL, 0, 0 },  /* Ad */
 	{ NULL, TYPE_An, 0 },  /* An */
+	{ NULL, 0, 0 },  /* Ap */
 	{ NULL, TYPE_Ar, 0 },  /* Ar */
 	{ NULL, TYPE_Cd, 0 },  /* Cd */
 	{ NULL, TYPE_Cm, 0 },  /* Cm */
@@ -308,6 +308,7 @@ static	const struct mdoc_handler mdocs[MDOC_MAX] = {
 	{ NULL, 0, 0 },  /* Ta */
 	{ NULL, 0, 0 },  /* ll */
 };
+static	const struct mdoc_handler *const mdocs = __mdocs - MDOC_Dd;
 
 
 int
@@ -1545,9 +1546,8 @@ parse_mdoc(struct mpage *mpage, const struct roff_meta *meta,
 	const struct roff_node *n)
 {
 
-	assert(NULL != n);
-	for (n = n->child; NULL != n; n = n->next) {
-		if (n->flags & mdocs[n->tok].taboo)
+	for (n = n->child; n != NULL; n = n->next) {
+		if (n->tok == TOKEN_NONE || n->flags & mdocs[n->tok].taboo)
 			continue;
 		switch (n->type) {
 		case ROFFT_ELEM:
@@ -1555,15 +1555,14 @@ parse_mdoc(struct mpage *mpage, const struct roff_meta *meta,
 		case ROFFT_HEAD:
 		case ROFFT_BODY:
 		case ROFFT_TAIL:
-			if (NULL != mdocs[n->tok].fp)
-			       if (0 == (*mdocs[n->tok].fp)(mpage, meta, n))
-				       break;
+			if (mdocs[n->tok].fp != NULL &&
+			    (*mdocs[n->tok].fp)(mpage, meta, n) == 0)
+				break;
 			if (mdocs[n->tok].mask)
 				putmdockey(mpage, n->child,
 				    mdocs[n->tok].mask, mdocs[n->tok].taboo);
 			break;
 		default:
-			assert(n->type != ROFFT_ROOT);
 			continue;
 		}
 		if (NULL != n->child)

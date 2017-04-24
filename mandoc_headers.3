@@ -118,10 +118,13 @@ Provides
 .Vt enum roff_macroset ,
 .Vt enum roff_next ,
 .Vt enum roff_sec ,
+.Vt enum roff_tok ,
 .Vt enum roff_type ,
 .Vt struct roff_man ,
 .Vt struct roff_meta ,
 .Vt struct roff_node ,
+the constant array
+.Va roff_name
 and the function
 .Fn deroff .
 .Pp
@@ -272,6 +275,10 @@ from
 as opaque types for function prototypes.
 .It Qq Pa libmdoc.h
 Requires
+.Qq Pa roff.h
+for
+.Vt enum roff_tok
+and
 .Qq Pa mdoc.h
 for
 .Vt enum mdoc_*
@@ -304,6 +311,10 @@ When this header is included, the same file should not include
 or
 .Pa libroff.h .
 .It Qq Pa libman.h
+Requires
+.Qq Pa roff.h
+for
+.Vt enum roff_tok .
 Provides
 .Vt struct man_macro
 and some functions internal to the

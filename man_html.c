@@ -71,8 +71,7 @@ static	int		  man_in_pre(MAN_ARGS);
 static	void		  man_root_post(MAN_ARGS);
 static	void		  man_root_pre(MAN_ARGS);
 
-static	const struct htmlman mans[MAN_MAX] = {
-	{ man_br_pre, NULL }, /* br */
+static	const struct htmlman __mans[MAN_MAX - MAN_TH] = {
 	{ NULL, NULL }, /* TH */
 	{ man_SH_pre, NULL }, /* SH */
 	{ man_SS_pre, NULL }, /* SS */
@@ -93,6 +92,7 @@ static	const struct htmlman mans[MAN_MAX] = {
 	{ man_I_pre, NULL }, /* I */
 	{ man_alt_pre, NULL }, /* IR */
 	{ man_alt_pre, NULL }, /* RI */
+	{ man_br_pre, NULL }, /* br */
 	{ man_br_pre, NULL }, /* sp */
 	{ NULL, NULL }, /* nf */
 	{ NULL, NULL }, /* fi */
@@ -111,6 +111,7 @@ static	const struct htmlman mans[MAN_MAX] = {
 	{ NULL, NULL }, /* UE */
 	{ man_ign_pre, NULL }, /* ll */
 };
+static	const struct htmlman *const mans = __mans - MAN_TH;
 
 
 /*

@@ -119,8 +119,7 @@ static	void	  print_width(const struct mdoc_bl *,
 static	void	  print_count(int *);
 static	void	  print_node(DECL_ARGS);
 
-static	const struct manact manacts[MDOC_MAX + 1] = {
-	{ NULL, pre_ap, NULL, NULL, NULL }, /* Ap */
+static	const struct manact __manacts[MDOC_MAX - MDOC_Dd] = {
 	{ NULL, NULL, NULL, NULL, NULL }, /* Dd */
 	{ NULL, NULL, NULL, NULL, NULL }, /* Dt */
 	{ NULL, NULL, NULL, NULL, NULL }, /* Os */
@@ -136,6 +135,7 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 	{ NULL, pre_it, post_it, NULL, NULL }, /* It */
 	{ NULL, pre_em, post_font, NULL, NULL }, /* Ad */
 	{ NULL, pre_an, NULL, NULL, NULL }, /* An */
+	{ NULL, pre_ap, NULL, NULL, NULL }, /* Ap */
 	{ NULL, pre_em, post_font, NULL, NULL }, /* Ar */
 	{ NULL, pre_sy, post_font, NULL, NULL }, /* Cd */
 	{ NULL, pre_sy, post_font, NULL, NULL }, /* Cm */
@@ -243,8 +243,8 @@ static	const struct manact manacts[MDOC_MAX + 1] = {
 	{ NULL, NULL, post_percent, NULL, NULL }, /* %U */
 	{ NULL, NULL, NULL, NULL, NULL }, /* Ta */
 	{ NULL, pre_ll, post_sp, NULL, NULL }, /* ll */
-	{ NULL, NULL, NULL, NULL, NULL }, /* ROOT */
 };
+static	const struct manact *const manacts = __manacts - MDOC_Dd;
 
 static	int		outflags;
 #define	MMAN_spc	(1 << 0)  /* blank character before next word */

@@ -118,8 +118,7 @@ static	int		  mdoc_vt_pre(MDOC_ARGS);
 static	int		  mdoc_xr_pre(MDOC_ARGS);
 static	int		  mdoc_xx_pre(MDOC_ARGS);
 
-static	const struct htmlmdoc mdocs[MDOC_MAX] = {
-	{mdoc_ap_pre, NULL}, /* Ap */
+static	const struct htmlmdoc __mdocs[MDOC_MAX - MDOC_Dd] = {
 	{NULL, NULL}, /* Dd */
 	{NULL, NULL}, /* Dt */
 	{NULL, NULL}, /* Os */
@@ -135,6 +134,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{mdoc_it_pre, NULL}, /* It */
 	{mdoc_ad_pre, NULL}, /* Ad */
 	{mdoc_an_pre, NULL}, /* An */
+	{mdoc_ap_pre, NULL}, /* Ap */
 	{mdoc_ar_pre, NULL}, /* Ar */
 	{mdoc_cd_pre, NULL}, /* Cd */
 	{mdoc_cm_pre, NULL}, /* Cm */
@@ -243,6 +243,7 @@ static	const struct htmlmdoc mdocs[MDOC_MAX] = {
 	{NULL, NULL}, /* Ta */
 	{mdoc_skip_pre, NULL}, /* ll */
 };
+static	const struct htmlmdoc *const mdocs = __mdocs - MDOC_Dd;
 
 
 /*
@@ -393,7 +394,9 @@ print_mdoc_node(MDOC_ARGS)
 			t = h->tag;
 		}
 		assert(h->tblt == NULL);
-		if (mdocs[n->tok].pre && (n->end == ENDBODY_NOT || n->child))
+		assert(n->tok >= MDOC_Dd && n->tok < MDOC_MAX);
+		if (mdocs[n->tok].pre != NULL &&
+		    (n->end == ENDBODY_NOT || n->child != NULL))
 			child = (*mdocs[n->tok].pre)(meta, n, h);
 		break;
 	}
@@ -412,7 +415,7 @@ print_mdoc_node(MDOC_ARGS)
 	case ROFFT_EQN:
 		break;
 	default:
-		if ( ! mdocs[n->tok].post || n->flags & NODE_ENDED)
+		if (mdocs[n->tok].post == NULL || n->flags & NODE_ENDED)
 			break;
 		(*mdocs[n->tok].post)(meta, n, h);
 		if (n->end != ENDBODY_NOT)
