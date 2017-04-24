@@ -95,7 +95,6 @@ SRCS		 = att.c \
 		   mandoc_ohash.c \
 		   mandocd.c \
 		   mandocdb.c \
-		   manpage.c \
 		   manpath.c \
 		   mansearch.c \
 		   mdoc.c \
@@ -295,10 +294,6 @@ MANDOCD_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   out.o \
 		   tag.o
 
-MANPAGE_OBJS	 = $(DBM_OBJS) \
-		   manpage.o \
-		   manpath.o
-
 DEMANDOC_OBJS	 = demandoc.o
 
 SOELIM_OBJS	 = soelim.o \
@@ -374,7 +369,6 @@ clean:
 	rm -f mandoc $(MAIN_OBJS)
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f mandocd catman $(MANDOCD_OBJS)
-	rm -f manpage $(MANPAGE_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f soelim $(SOELIM_OBJS)
 	rm -f $(WWW_MANS) $(WWW_OBJS)
@@ -492,9 +486,6 @@ libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 
 mandoc: $(MAIN_OBJS) libmandoc.a
 	$(CC) -o $@ $(LDFLAGS) $(MAIN_OBJS) libmandoc.a $(LDADD)
-
-manpage: $(MANPAGE_OBJS) libmandoc.a
-	$(CC) -o $@ $(LDFLAGS) $(MANPAGE_OBJS) libmandoc.a $(LDADD)
 
 man.cgi: $(CGI_OBJS) libmandoc.a
 	$(CC) $(STATIC) -o $@ $(LDFLAGS) $(CGI_OBJS) libmandoc.a $(LDADD)
