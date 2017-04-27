@@ -607,3 +607,10 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 
 - use uname(1) to set doc-default-operating-system at install time
   tobimensch  Mon, 1 Dec 2014 00:25:07 +0100
+
+- apostrophe (39), circumflex (94), grave (96), tilde (126)
+  in manuals: \(aq, \(ha, \`, \(ti
+  Re: [Groff] ASCII Minus Sign in man Pages.
+  bentley@ 26 Apr 2017 10:02:06 -0600
+  Do we need to fix existing manuals?
+  Do we need to fix the definition of the mdoc(7) language?
