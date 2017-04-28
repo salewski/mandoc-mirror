@@ -2015,6 +2015,9 @@ post_ignpar(POST_ARGS)
 	struct roff_node *np;
 
 	switch (mdoc->last->type) {
+	case ROFFT_BLOCK:
+		post_prevpar(mdoc);
+		return;
 	case ROFFT_HEAD:
 		post_hyph(mdoc);
 		return;
