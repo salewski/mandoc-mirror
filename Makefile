@@ -85,7 +85,6 @@ SRCS		 = att.c \
 		   lib.c \
 		   main.c \
 		   man.c \
-		   man_hash.c \
 		   man_html.c \
 		   man_macro.c \
 		   man_term.c \
@@ -99,7 +98,6 @@ SRCS		 = att.c \
 		   mansearch.c \
 		   mdoc.c \
 		   mdoc_argv.c \
-		   mdoc_hash.c \
 		   mdoc_html.c \
 		   mdoc_macro.c \
 		   mdoc_man.c \
@@ -198,7 +196,6 @@ DISTFILES	 = INSTALL \
 		   $(TESTSRCS)
 
 LIBMAN_OBJS	 = man.o \
-		   man_hash.o \
 		   man_macro.o \
 		   man_validate.o
 
@@ -206,7 +203,6 @@ LIBMDOC_OBJS	 = att.o \
 		   lib.o \
 		   mdoc.o \
 		   mdoc_argv.o \
-		   mdoc_hash.o \
 		   mdoc_macro.o \
 		   mdoc_state.o \
 		   mdoc_validate.o \

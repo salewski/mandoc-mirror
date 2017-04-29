@@ -60,9 +60,19 @@ Requires
 .In sys/types.h
 for
 .Vt size_t .
+.Pp
 Provides the utility functions documented in
 .Xr mandoc_malloc 3 .
 .It Qq Pa mandoc_ohash.h
+Requires
+.In stddef.h
+for
+.Vt ptrdiff_t
+and
+.In stdint.h
+for
+.Vt uint32_t .
+.Pp
 Includes
 .In ohash.h
 and provides
@@ -113,6 +123,11 @@ from
 .Pa roff.h
 as an opaque type for function prototypes.
 .It Qq Pa roff.h
+Requires
+.Qq Pa mandoc_ohash.h
+for
+.Vt struct ohash .
+.Pp
 Provides
 .Vt enum mdoc_endbody ,
 .Vt enum roff_macroset ,
@@ -125,8 +140,12 @@ Provides
 .Vt struct roff_node ,
 the constant array
 .Va roff_name
-and the function
-.Fn deroff .
+and the functions
+.Fn deroff ,
+.Fn roffhash_alloc ,
+.Fn roffhash_find ,
+and
+.Fn roffhash_free .
 .Pp
 Uses pointers to the types
 .Vt struct mdoc_arg
@@ -315,6 +334,7 @@ Requires
 .Qq Pa roff.h
 for
 .Vt enum roff_tok .
+.Pp
 Provides
 .Vt struct man_macro
 and some functions internal to the
@@ -443,10 +463,7 @@ or
 Requires
 .In sys/types.h
 for
-.Vt size_t ,
-.In stdio.h
-for
-.Dv BUFSIZ ,
+.Vt size_t
 and
 .Qq Pa out.h
 for

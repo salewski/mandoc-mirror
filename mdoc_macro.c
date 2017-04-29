@@ -247,7 +247,7 @@ lookup(struct roff_man *mdoc, int from, int line, int ppos, const char *p)
 		return TOKEN_NONE;
 	}
 	if (from == TOKEN_NONE || mdoc_macros[from].flags & MDOC_PARSED) {
-		res = mdoc_hash_find(p);
+		res = roffhash_find(mdoc->mdocmac, p, 0);
 		if (res != TOKEN_NONE) {
 			if (mdoc_macros[res].flags & MDOC_CALLABLE)
 				return res;

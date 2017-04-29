@@ -58,7 +58,7 @@ static	void	 check_argv(struct roff_man *,
 static	void	 check_args(struct roff_man *, struct roff_node *);
 static	int	 child_an(const struct roff_node *);
 static	size_t		macro2len(enum roff_tok);
-static	void	 rewrite_macro2len(char **);
+static	void	 rewrite_macro2len(struct roff_man *, char **);
 
 static	void	 post_an(POST_ARGS);
 static	void	 post_an_norm(POST_ARGS);
@@ -451,7 +451,7 @@ post_bl_norm(POST_ARGS)
 				    mdoc->parse, argv->line,
 				    argv->pos, "Bl -width %s",
 				    argv->value[0]);
-			rewrite_macro2len(argv->value);
+			rewrite_macro2len(mdoc, argv->value);
 			n->norm->Bl.width = argv->value[0];
 			break;
 		case MDOC_Offset:
@@ -466,7 +466,7 @@ post_bl_norm(POST_ARGS)
 				    mdoc->parse, argv->line,
 				    argv->pos, "Bl -offset %s",
 				    argv->value[0]);
-			rewrite_macro2len(argv->value);
+			rewrite_macro2len(mdoc, argv->value);
 			n->norm->Bl.offs = argv->value[0];
 			break;
 		default:
@@ -593,7 +593,7 @@ post_bd(POST_ARGS)
 				    mdoc->parse, argv->line,
 				    argv->pos, "Bd -offset %s",
 				    argv->value[0]);
-			rewrite_macro2len(argv->value);
+			rewrite_macro2len(mdoc, argv->value);
 			n->norm->Bd.offs = argv->value[0];
 			break;
 		case MDOC_Compact:
@@ -1338,8 +1338,8 @@ post_bl_block(POST_ARGS)
  * If the argument of -offset or -width is a macro,
  * replace it with the associated default width.
  */
-void
-rewrite_macro2len(char **arg)
+static void
+rewrite_macro2len(struct roff_man *mdoc, char **arg)
 {
 	size_t		  width;
 	enum roff_tok	  tok;
@@ -1348,7 +1348,7 @@ rewrite_macro2len(char **arg)
 		return;
 	else if ( ! strcmp(*arg, "Ds"))
 		width = 6;
-	else if ((tok = mdoc_hash_find(*arg)) == TOKEN_NONE)
+	else if ((tok = roffhash_find(mdoc->mdocmac, *arg, 0)) == TOKEN_NONE)
 		return;
 	else
 		width = macro2len(tok);
