@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011, 2014, 2015 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011, 2014, 2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -197,9 +197,12 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp,
 	 */
 
 	if (nxcol && totalwidth) {
-		xwidth = totalwidth - xwidth - 3*maxcol -
+		xwidth += 3*maxcol +
 		    (opts->opts & (TBL_OPT_BOX | TBL_OPT_DBOX) ?
 		     2 : !!opts->lvert + !!opts->rvert);
+		if (xwidth >= totalwidth)
+			return;
+		xwidth = totalwidth - xwidth;
 
 		/*
 		 * Emulate a bug in GNU tbl width calculation that
