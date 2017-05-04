@@ -457,9 +457,7 @@ pre_sp(DECL_ARGS)
 		}
 	}
 
-	if (n->tok == ROFF_br)
-		len = 0;
-	else if (n->child == NULL)
+	if (n->child == NULL)
 		len = 1;
 	else {
 		if ( ! a2roffsu(n->child->string, &su, SCALE_VS))
@@ -987,13 +985,7 @@ print_man_node(DECL_ARGS)
 	}
 
 	if (n->tok < ROFF_MAX) {
-		switch (n->tok) {
-		case ROFF_br:
-			pre_sp(p, mt, n, meta);
-			break;
-		default:
-			abort();
-		}
+		roff_term_pre(p, n);
 		return;
 	}
 

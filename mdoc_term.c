@@ -365,13 +365,7 @@ print_mdoc_node(DECL_ARGS)
 		break;
 	default:
 		if (n->tok < ROFF_MAX) {
-			switch (n->tok) {
-			case ROFF_br:
-				termp_sp_pre(p, &npair, meta, n);
-				break;
-			default:
-				abort();
-			}
+			roff_term_pre(p, n);
 			break;
 		}
 		assert(n->tok >= MDOC_Dd && n->tok < MDOC_MAX);

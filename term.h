@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011-2015 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011-2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -38,7 +38,10 @@ enum	termfont {
 
 #define	TERM_MAXMARGIN	  100000 /* FIXME */
 
+struct	eqn;
 struct	roff_meta;
+struct	roff_node;
+struct	tbl_span;
 struct	termp;
 
 typedef void	(*term_margin)(struct termp *, const struct roff_meta *);
@@ -106,10 +109,9 @@ struct	termp {
 };
 
 
-struct	tbl_span;
-struct	eqn;
-
 const char	 *ascii_uc2str(int);
+
+void		  roff_term_pre(struct termp *, const struct roff_node *);
 
 void		  term_eqn(struct termp *, const struct eqn *);
 void		  term_tbl(struct termp *, const struct tbl_span *);

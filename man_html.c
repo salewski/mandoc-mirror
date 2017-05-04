@@ -65,11 +65,11 @@ static	int		  man_SM_pre(MAN_ARGS);
 static	int		  man_SS_pre(MAN_ARGS);
 static	int		  man_UR_pre(MAN_ARGS);
 static	int		  man_alt_pre(MAN_ARGS);
-static	int		  man_br_pre(MAN_ARGS);
 static	int		  man_ign_pre(MAN_ARGS);
 static	int		  man_in_pre(MAN_ARGS);
 static	void		  man_root_post(MAN_ARGS);
 static	void		  man_root_pre(MAN_ARGS);
+static	int		  man_sp_pre(MAN_ARGS);
 
 static	const struct htmlman __mans[MAN_MAX - MAN_TH] = {
 	{ NULL, NULL }, /* TH */
@@ -92,7 +92,7 @@ static	const struct htmlman __mans[MAN_MAX - MAN_TH] = {
 	{ man_I_pre, NULL }, /* I */
 	{ man_alt_pre, NULL }, /* IR */
 	{ man_alt_pre, NULL }, /* RI */
-	{ man_br_pre, NULL }, /* sp */
+	{ man_sp_pre, NULL }, /* sp */
 	{ NULL, NULL }, /* nf */
 	{ NULL, NULL }, /* fi */
 	{ NULL, NULL }, /* RE */
@@ -305,13 +305,7 @@ print_man_node(MAN_ARGS)
 
 		t = h->tag;
 		if (n->tok < ROFF_MAX) {
-			switch(n->tok) {
-			case ROFF_br:
-				man_br_pre(man, n, h);
-				break;
-			default:
-				abort();
-			}
+			roff_html_pre(h, n);
 			break;
 		}
 
@@ -423,18 +417,14 @@ man_root_post(MAN_ARGS)
 
 
 static int
-man_br_pre(MAN_ARGS)
+man_sp_pre(MAN_ARGS)
 {
 	struct roffsu	 su;
 
 	SCALE_VS_INIT(&su, 1);
-
-	if (MAN_sp == n->tok) {
-		if (NULL != (n = n->child))
-			if ( ! a2roffsu(n->string, &su, SCALE_VS))
-				su.scale = 1.0;
-	} else
-		su.scale = 0.0;
+	if (NULL != (n = n->child))
+		if ( ! a2roffsu(n->string, &su, SCALE_VS))
+			su.scale = 1.0;
 
 	print_otag(h, TAG_DIV, "suh", &su);
 

@@ -437,6 +437,7 @@ Provides
 .Vt enum termtype ,
 .Vt struct termp_tbl ,
 .Vt struct termp ,
+.Fn roff_term_pre ,
 and many terminal formatting functions.
 .Pp
 Uses the opaque type
@@ -451,6 +452,8 @@ from
 .Pa mandoc.h
 and
 .Vt struct roff_meta
+and
+.Vt struct roff_node
 from
 .Pa roff.h
 as opaque types for function prototypes.
@@ -479,7 +482,20 @@ Provides
 .Vt struct tagq ,
 .Vt struct htmlpair ,
 .Vt struct html ,
+.Fn roff_html_pre ,
 and many HTML formatting functions.
+.Pp
+Uses
+.Vt struct tbl_span
+and
+.Vt struct eqn
+from
+.Pa mandoc.h
+and
+.Vt struct roff_node
+from
+.Pa roff.h
+as opaque types for function prototypes.
 .Pp
 When this header is included, the same file should not include
 .Pa term.h

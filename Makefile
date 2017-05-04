@@ -110,6 +110,8 @@ SRCS		 = att.c \
 		   preconv.c \
 		   read.c \
 		   roff.c \
+		   roff_html.c \
+		   roff_term.c \
 		   soelim.c \
 		   st.c \
 		   tag.c \
@@ -246,11 +248,13 @@ MANDOC_HTML_OBJS = eqn_html.o \
 		   html.o \
 		   man_html.o \
 		   mdoc_html.o \
+		   roff_html.o \
 		   tbl_html.o
 
 MANDOC_TERM_OBJS = eqn_term.o \
 		   man_term.o \
 		   mdoc_term.o \
+		   roff_term.o \
 		   term.o \
 		   term_ascii.o \
 		   term_ps.o \

@@ -394,13 +394,7 @@ print_mdoc_node(MDOC_ARGS)
 		}
 		assert(h->tblt == NULL);
 		if (n->tok < ROFF_MAX) {
-			switch(n->tok) {
-			case ROFF_br:
-				mdoc_sp_pre(meta, n, h);
-				break;
-			default:
-				abort();
-			}
+			roff_html_pre(h, n);
 			break;
 		}
 		assert(n->tok >= MDOC_Dd && n->tok < MDOC_MAX);
@@ -1337,16 +1331,12 @@ mdoc_sp_pre(MDOC_ARGS)
 	struct roffsu	 su;
 
 	SCALE_VS_INIT(&su, 1);
-
-	if (MDOC_sp == n->tok) {
-		if (NULL != (n = n->child)) {
-			if ( ! a2roffsu(n->string, &su, SCALE_VS))
-				su.scale = 1.0;
-			else if (su.scale < 0.0)
-				su.scale = 0.0;
-		}
-	} else
-		su.scale = 0.0;
+	if (NULL != (n = n->child)) {
+		if ( ! a2roffsu(n->string, &su, SCALE_VS))
+			su.scale = 1.0;
+		else if (su.scale < 0.0)
+			su.scale = 0.0;
+	}
 
 	print_otag(h, TAG_DIV, "suh", &su);
 

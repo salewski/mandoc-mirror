@@ -116,6 +116,8 @@ struct	roff_node;
 struct	tbl_span;
 struct	eqn;
 
+void		  roff_html_pre(struct html *, const struct roff_node *);
+
 void		  print_gen_decls(struct html *);
 void		  print_gen_head(struct html *);
 struct tag	 *print_otag(struct html *, enum htmltag, const char *, ...);
