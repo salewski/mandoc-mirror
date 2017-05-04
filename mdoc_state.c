@@ -16,6 +16,7 @@
  */
 #include <sys/types.h>
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -154,7 +155,6 @@ static	const state_handler __state_handlers[MDOC_MAX - MDOC_Dd] = {
 	NULL,		/* En */
 	NULL,		/* Dx */
 	NULL,		/* %Q */
-	NULL,		/* br */
 	NULL,		/* sp */
 	NULL,		/* %U */
 	NULL,		/* Ta */
@@ -168,9 +168,10 @@ mdoc_state(struct roff_man *mdoc, struct roff_node *n)
 {
 	state_handler handler;
 
-	if (n->tok == TOKEN_NONE)
+	if (n->tok == TOKEN_NONE || n->tok < ROFF_MAX)
 		return;
 
+	assert(n->tok >= MDOC_Dd && n->tok < MDOC_MAX);
 	if ( ! (mdoc_macros[n->tok].flags & MDOC_PROLOGUE))
 		mdoc->flags |= MDOC_PBODY;
 

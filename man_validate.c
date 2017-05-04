@@ -75,7 +75,6 @@ static	const v_check __man_valids[MAN_MAX - MAN_TH] = {
 	NULL,       /* I */
 	NULL,       /* IR */
 	NULL,       /* RI */
-	post_vs,    /* br */
 	post_vs,    /* sp */
 	NULL,       /* nf */
 	NULL,       /* fi */
@@ -126,6 +125,17 @@ man_node_validate(struct roff_man *man)
 	case ROFFT_TBL:
 		break;
 	default:
+		if (n->tok < ROFF_MAX) {
+			switch (n->tok) {
+			case ROFF_br:
+				post_vs(man, n);
+				break;
+			default:
+				abort();
+			}
+			break;
+		}
+		assert(n->tok >= MAN_TH && n->tok < MAN_MAX);
 		cp = man_valids + n->tok;
 		if (*cp)
 			(*cp)(man, n);

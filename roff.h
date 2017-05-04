@@ -66,7 +66,9 @@ enum	roff_type {
 };
 
 enum	roff_tok {
-	ROFF_ab = 0,
+	ROFF_br = 0,
+	ROFF_MAX,
+	ROFF_ab,
 	ROFF_ad,
 	ROFF_af,
 	ROFF_aln,
@@ -86,7 +88,6 @@ enum	roff_tok {
 	ROFF_boxa,
 	ROFF_bp,
 	ROFF_BP,
-	/* MAN_br, MDOC_br */
 	ROFF_break,
 	ROFF_breakchar,
 	ROFF_brnl,
@@ -428,7 +429,6 @@ enum	roff_tok {
 	MDOC_En,
 	MDOC_Dx,
 	MDOC__Q,
-	MDOC_br,
 	MDOC_sp,
 	MDOC__U,
 	MDOC_Ta,
@@ -454,7 +454,6 @@ enum	roff_tok {
 	MAN_I,
 	MAN_IR,
 	MAN_RI,
-	MAN_br,
 	MAN_sp,
 	MAN_nf,
 	MAN_fi,
