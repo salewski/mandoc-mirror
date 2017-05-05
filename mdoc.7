@@ -476,7 +476,6 @@ in the alphabetical
 .It Sx \&Ap Ta apostrophe without surrounding whitespace (no arguments)
 .It Sx \&Sm Ta switch horizontal spacing mode: Op Cm on | off
 .It Sx \&Bk , \&Ek Ta keep block: Fl words
-.It Sx \&br Ta force output line break in text mode (no arguments)
 .It Sx \&sp Ta force vertical space: Op Ar height
 .El
 .Ss Semantic markup for command line utilities:
@@ -2736,14 +2735,6 @@ Examples:
 .Dl \&.Xr mandoc 1
 .Dl \&.Xr mandoc 1 \&;
 .Dl \&.Xr mandoc 1 \&Ns s behaviour
-.Ss \&br
-Emits a line-break.
-This macro should not be used; it is implemented for compatibility with
-historical manuals.
-.Pp
-Consider using
-.Sx \&Pp
-in the event of natural paragraph breaks.
 .Ss \&sp
 Emits vertical space.
 This macro should not be used; it is implemented for compatibility with
@@ -3043,7 +3034,6 @@ then the macro accepts an arbitrary number of arguments.
 .It Sx \&Va  Ta    Yes      Ta    Yes      Ta    n
 .It Sx \&Vt  Ta    Yes      Ta    Yes      Ta    >0
 .It Sx \&Xr  Ta    Yes      Ta    Yes      Ta    2
-.It Sx \&br  Ta    \&No     Ta    \&No     Ta    0
 .It Sx \&sp  Ta    \&No     Ta    \&No     Ta    1
 .El
 .Ss Delimiters
