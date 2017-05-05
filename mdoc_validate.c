@@ -230,7 +230,6 @@ static	const v_post __mdoc_valids[MDOC_MAX - MDOC_Dd] = {
 	post_par,	/* sp */
 	NULL,		/* %U */
 	NULL,		/* Ta */
-	NULL,		/* ll */
 };
 static	const v_post *const mdoc_valids = __mdoc_valids - MDOC_Dd;
 

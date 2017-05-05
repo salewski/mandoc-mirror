@@ -68,6 +68,7 @@ enum	roff_type {
 enum	roff_tok {
 	ROFF_br = 0,
 	ROFF_ft,
+	ROFF_ll,
 	ROFF_MAX,
 	ROFF_ab,
 	ROFF_ad,
@@ -196,7 +197,6 @@ enum	roff_tok {
 	ROFF_lg,
 	ROFF_lhang,
 	ROFF_linetabs,
-	/* MAN_ll, MDOC_ll */
 	ROFF_lnr,
 	ROFF_lnrf,
 	ROFF_lpfx,
@@ -432,7 +432,6 @@ enum	roff_tok {
 	MDOC_sp,
 	MDOC__U,
 	MDOC_Ta,
-	MDOC_ll,
 	MDOC_MAX,
 	MAN_TH,
 	MAN_SH,
@@ -469,7 +468,6 @@ enum	roff_tok {
 	MAN_EE,
 	MAN_UR,
 	MAN_UE,
-	MAN_ll,
 	MAN_MAX
 };
 

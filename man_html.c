@@ -107,7 +107,6 @@ static	const struct htmlman __mans[MAN_MAX - MAN_TH] = {
 	{ NULL, NULL }, /* EE */
 	{ man_UR_pre, NULL }, /* UR */
 	{ NULL, NULL }, /* UE */
-	{ man_ign_pre, NULL }, /* ll */
 };
 static	const struct htmlman *const mans = __mans - MAN_TH;
 

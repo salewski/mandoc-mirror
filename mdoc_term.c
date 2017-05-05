@@ -106,7 +106,6 @@ static	int	  termp_ft_pre(DECL_ARGS);
 static	int	  termp_in_pre(DECL_ARGS);
 static	int	  termp_it_pre(DECL_ARGS);
 static	int	  termp_li_pre(DECL_ARGS);
-static	int	  termp_ll_pre(DECL_ARGS);
 static	int	  termp_lk_pre(DECL_ARGS);
 static	int	  termp_nd_pre(DECL_ARGS);
 static	int	  termp_nm_pre(DECL_ARGS);
@@ -247,7 +246,6 @@ static	const struct termact __termacts[MDOC_MAX - MDOC_Dd] = {
 	{ termp_sp_pre, NULL }, /* sp */
 	{ NULL, termp____post }, /* %U */
 	{ NULL, NULL }, /* Ta */
-	{ termp_ll_pre, NULL }, /* ll */
 };
 static	const struct termact *const termacts = __termacts - MDOC_Dd;
 
@@ -366,8 +364,7 @@ print_mdoc_node(DECL_ARGS)
 	default:
 		if (n->tok < ROFF_MAX) {
 			roff_term_pre(p, n);
-			chld = 0;
-			break;
+			return;
 		}
 		assert(n->tok >= MDOC_Dd && n->tok < MDOC_MAX);
 		if (termacts[n->tok].pre != NULL &&
@@ -391,9 +388,7 @@ print_mdoc_node(DECL_ARGS)
 	case ROFFT_EQN:
 		break;
 	default:
-		if (n->tok < ROFF_MAX ||
-		    termacts[n->tok].post == NULL ||
-		    n->flags & NODE_ENDED)
+		if (termacts[n->tok].post == NULL || n->flags & NODE_ENDED)
 			break;
 		(void)(*termacts[n->tok].post)(p, &npair, meta, n);
 
@@ -410,10 +405,8 @@ print_mdoc_node(DECL_ARGS)
 	if (NODE_EOS & n->flags)
 		p->flags |= TERMP_SENTENCE;
 
-	if (MDOC_ll != n->tok) {
-		p->offset = offset;
-		p->rmargin = rmargin;
-	}
+	p->offset = offset;
+	p->rmargin = rmargin;
 }
 
 static void
@@ -603,14 +596,6 @@ print_bvspace(struct termp *p,
 	term_vspace(p);
 }
 
-
-static int
-termp_ll_pre(DECL_ARGS)
-{
-
-	term_setwidth(p, n->child != NULL ? n->child->string : NULL);
-	return 0;
-}
 
 static int
 termp_it_pre(DECL_ARGS)

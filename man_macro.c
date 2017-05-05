@@ -76,7 +76,6 @@ const	struct man_macro __man_macros[MAN_MAX - MAN_TH] = {
 	{ in_line_eoln, MAN_BSCOPE }, /* EE */
 	{ blk_exp, MAN_BSCOPE }, /* UR */
 	{ blk_close, MAN_BSCOPE }, /* UE */
-	{ in_line_eoln, 0 }, /* ll */
 };
 const	struct man_macro *const man_macros = __man_macros - MAN_TH;
 

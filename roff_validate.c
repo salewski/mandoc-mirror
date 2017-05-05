@@ -33,6 +33,7 @@ static	void	  roff_valid_ft(ROFF_VALID_ARGS);
 static	const roff_valid_fp roff_valids[ROFF_MAX] = {
 	NULL,  /* br */
 	roff_valid_ft,  /* ft */
+	NULL,  /* ll */
 };
 
 

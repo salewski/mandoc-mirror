@@ -305,7 +305,6 @@ static	const struct mdoc_handler __mdocs[MDOC_MAX - MDOC_Dd] = {
 	{ NULL, 0, 0 },  /* sp */
 	{ NULL, 0, 0 },  /* %U */
 	{ NULL, 0, 0 },  /* Ta */
-	{ NULL, 0, 0 },  /* ll */
 };
 static	const struct mdoc_handler *const mdocs = __mdocs - MDOC_Dd;
 

@@ -211,7 +211,7 @@ static	enum rofferr	 roff_userdef(ROFF_ARGS);
 #define	ROFFNUM_WHITE	(1 << 1)  /* Skip whitespace in roff_evalnum(). */
 
 const char *__roff_name[MAN_MAX + 1] = {
-	"br",		"ft",		NULL,
+	"br",		"ft",		"ll",		NULL,
 	"ab",		"ad",		"af",		"aln",
 	"als",		"am",		"am1",		"ami",
 	"ami1",		"as",		"as1",		"asciify",
@@ -302,7 +302,7 @@ const char *__roff_name[MAN_MAX + 1] = {
 	"Lk",		"Mt",		"Brq",		"Bro",
 	"Brc",		"%C",		"Es",		"En",
 	"Dx",		"%Q",		"sp",
-	"%U",		"Ta",		"ll",		NULL,
+	"%U",		"Ta",		NULL,
 	"TH",		"SH",		"SS",		"TP",
 	"LP",		"PP",		"P",		"IP",
 	"HP",		"SM",		"SB",		"BI",
@@ -312,13 +312,14 @@ const char *__roff_name[MAN_MAX + 1] = {
 	"RE",		"RS",		"DT",		"UC",
 	"PD",		"AT",		"in",
 	"OP",		"EX",		"EE",		"UR",
-	"UE",		"ll",		NULL
+	"UE",		NULL
 };
 const	char *const *roff_name = __roff_name;
 
 static	struct roffmac	 roffs[TOKEN_NONE] = {
 	{ roff_br, NULL, NULL, 0 },  /* br */
 	{ roff_onearg, NULL, NULL, 0 },  /* ft */
+	{ roff_onearg, NULL, NULL, 0 },  /* ll */
 	{ NULL, NULL, NULL, 0 },  /* ROFF_MAX */
 	{ roff_unsupp, NULL, NULL, 0 },  /* ab */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* ad */

@@ -200,7 +200,6 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX - MDOC_Dd] = {
 	{ in_line_eoln, 0 }, /* sp */
 	{ in_line_eoln, 0 }, /* %U */
 	{ phrase_ta, MDOC_CALLABLE | MDOC_PARSED | MDOC_JOIN }, /* Ta */
-	{ in_line_eoln, MDOC_PROLOGUE }, /* ll */
 };
 const	struct mdoc_macro *const mdoc_macros = __mdoc_macros - MDOC_Dd;
 
@@ -250,7 +249,7 @@ lookup(struct roff_man *mdoc, int from, int line, int ppos, const char *p)
 		if (res != TOKEN_NONE) {
 			if (mdoc_macros[res].flags & MDOC_CALLABLE)
 				return res;
-			if (res != MDOC_sp && res != MDOC_ll)
+			if (res != MDOC_sp)
 				mandoc_msg(MANDOCERR_MACRO_CALL,
 				    mdoc->parse, line, ppos, p);
 		}

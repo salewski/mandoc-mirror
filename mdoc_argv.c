@@ -266,7 +266,6 @@ static	const struct mdocarg __mdocargs[MDOC_MAX - MDOC_Dd] = {
 	{ ARGSFL_NONE, NULL }, /* sp */
 	{ ARGSFL_NONE, NULL }, /* %U */
 	{ ARGSFL_NONE, NULL }, /* Ta */
-	{ ARGSFL_NONE, NULL }, /* ll */
 };
 static	const struct mdocarg *const mdocargs = __mdocargs - MDOC_Dd;
 

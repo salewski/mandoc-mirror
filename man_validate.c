@@ -89,7 +89,6 @@ static	const v_check __man_valids[MAN_MAX - MAN_TH] = {
 	NULL,       /* EE */
 	post_UR,    /* UR */
 	NULL,       /* UE */
-	NULL,       /* ll */
 };
 static	const v_check *man_valids = __man_valids - MAN_TH;
 

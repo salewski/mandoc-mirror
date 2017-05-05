@@ -240,7 +240,6 @@ static	const struct htmlmdoc __mdocs[MDOC_MAX - MDOC_Dd] = {
 	{mdoc_sp_pre, NULL}, /* sp */
 	{mdoc__x_pre, mdoc__x_post}, /* %U */
 	{NULL, NULL}, /* Ta */
-	{mdoc_skip_pre, NULL}, /* ll */
 };
 static	const struct htmlmdoc *const mdocs = __mdocs - MDOC_Dd;
 
