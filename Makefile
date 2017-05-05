@@ -112,6 +112,7 @@ SRCS		 = att.c \
 		   roff.c \
 		   roff_html.c \
 		   roff_term.c \
+		   roff_validate.c \
 		   soelim.c \
 		   st.c \
 		   tag.c \
@@ -212,6 +213,7 @@ LIBMDOC_OBJS	 = att.o \
 
 LIBROFF_OBJS	 = eqn.o \
 		   roff.o \
+		   roff_validate.o \
 		   tbl.o \
 		   tbl_data.o \
 		   tbl_layout.o \

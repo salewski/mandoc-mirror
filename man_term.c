@@ -80,7 +80,6 @@ static	int		  pre_SS(DECL_ARGS);
 static	int		  pre_TP(DECL_ARGS);
 static	int		  pre_UR(DECL_ARGS);
 static	int		  pre_alternate(DECL_ARGS);
-static	int		  pre_ft(DECL_ARGS);
 static	int		  pre_ign(DECL_ARGS);
 static	int		  pre_in(DECL_ARGS);
 static	int		  pre_literal(DECL_ARGS);
@@ -126,7 +125,6 @@ static	const struct termact __termacts[MAN_MAX - MAN_TH] = {
 	{ pre_PD, NULL, MAN_NOTEXT }, /* PD */
 	{ pre_ign, NULL, 0 }, /* AT */
 	{ pre_in, NULL, MAN_NOTEXT }, /* in */
-	{ pre_ft, NULL, MAN_NOTEXT }, /* ft */
 	{ pre_OP, NULL, 0 }, /* OP */
 	{ pre_literal, NULL, 0 }, /* EX */
 	{ pre_literal, NULL, 0 }, /* EE */
@@ -358,41 +356,6 @@ pre_OP(DECL_ARGS)
 	term_fontrepl(p, TERMFONT_NONE);
 	p->flags |= TERMP_NOSPACE;
 	term_word(p, "]");
-	return 0;
-}
-
-static int
-pre_ft(DECL_ARGS)
-{
-	const char	*cp;
-
-	if (NULL == n->child) {
-		term_fontlast(p);
-		return 0;
-	}
-
-	cp = n->child->string;
-	switch (*cp) {
-	case '4':
-	case '3':
-	case 'B':
-		term_fontrepl(p, TERMFONT_BOLD);
-		break;
-	case '2':
-	case 'I':
-		term_fontrepl(p, TERMFONT_UNDER);
-		break;
-	case 'P':
-		term_fontlast(p);
-		break;
-	case '1':
-	case 'C':
-	case 'R':
-		term_fontrepl(p, TERMFONT_NONE);
-		break;
-	default:
-		break;
-	}
 	return 0;
 }
 

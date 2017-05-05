@@ -395,6 +395,7 @@ print_mdoc_node(MDOC_ARGS)
 		assert(h->tblt == NULL);
 		if (n->tok < ROFF_MAX) {
 			roff_html_pre(h, n);
+			child = 0;
 			break;
 		}
 		assert(n->tok >= MDOC_Dd && n->tok < MDOC_MAX);

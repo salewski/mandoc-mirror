@@ -323,7 +323,10 @@ md_node(struct roff_node *n)
 	} else if (n->tok < ROFF_MAX) {
 		switch (n->tok) {
 		case ROFF_br:
-			md_pre_br(n);
+			process_children = md_pre_br(n);
+			break;
+		case ROFF_ft:
+			process_children = 0;
 			break;
 		default:
 			abort();

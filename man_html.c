@@ -102,7 +102,6 @@ static	const struct htmlman __mans[MAN_MAX - MAN_TH] = {
 	{ man_ign_pre, NULL }, /* PD */
 	{ man_ign_pre, NULL }, /* AT */
 	{ man_in_pre, NULL }, /* in */
-	{ man_ign_pre, NULL }, /* ft */
 	{ man_OP_pre, NULL }, /* OP */
 	{ NULL, NULL }, /* EX */
 	{ NULL, NULL }, /* EE */

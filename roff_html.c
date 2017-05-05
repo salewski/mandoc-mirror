@@ -17,6 +17,7 @@
 #include <sys/types.h>
 
 #include <assert.h>
+#include <stddef.h>
 
 #include "roff.h"
 #include "out.h"
@@ -30,6 +31,7 @@ static	void	  roff_html_pre_br(ROFF_HTML_ARGS);
 
 static	const roff_html_pre_fp roff_html_pre_acts[ROFF_MAX] = {
 	roff_html_pre_br,  /* br */
+	NULL,  /* ft */
 };
 
 
@@ -37,7 +39,8 @@ void
 roff_html_pre(struct html *h, const struct roff_node *n)
 {
 	assert(n->tok < ROFF_MAX);
-	(*roff_html_pre_acts[n->tok])(h, n);
+	if (roff_html_pre_acts[n->tok] != NULL)
+		(*roff_html_pre_acts[n->tok])(h, n);
 }
 
 static void

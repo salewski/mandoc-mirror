@@ -57,6 +57,9 @@ out.o: out.c config.h mandoc_aux.h mandoc.h out.h
 preconv.o: preconv.c config.h mandoc.h libmandoc.h
 read.o: read.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h man.h libmandoc.h roff_int.h
 roff.o: roff.c config.h mandoc.h mandoc_aux.h mandoc_ohash.h compat_ohash.h roff.h libmandoc.h roff_int.h libroff.h predefs.in
+roff_html.o: roff_html.c roff.h out.h html.h
+roff_term.o: roff_term.c roff.h out.h term.h
+roff_validate.o: roff_validate.c mandoc.h roff.h libmandoc.h roff_int.h
 soelim.o: soelim.c config.h compat_stringlist.h
 st.o: st.c config.h roff.h mdoc.h libmdoc.h st.in
 tag.o: tag.c config.h mandoc_aux.h mandoc_ohash.h compat_ohash.h tag.h

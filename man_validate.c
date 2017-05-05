@@ -48,7 +48,6 @@ static	void	  check_text(CHKARGS);
 static	void	  post_AT(CHKARGS);
 static	void	  post_IP(CHKARGS);
 static	void	  post_vs(CHKARGS);
-static	void	  post_ft(CHKARGS);
 static	void	  post_OP(CHKARGS);
 static	void	  post_TH(CHKARGS);
 static	void	  post_UC(CHKARGS);
@@ -85,7 +84,6 @@ static	const v_check __man_valids[MAN_MAX - MAN_TH] = {
 	NULL,       /* PD */
 	post_AT,    /* AT */
 	NULL,       /* in */
-	post_ft,    /* ft */
 	post_OP,    /* OP */
 	NULL,       /* EX */
 	NULL,       /* EE */
@@ -131,7 +129,8 @@ man_node_validate(struct roff_man *man)
 				post_vs(man, n);
 				break;
 			default:
-				abort();
+				roff_validate(man);
+				break;
 			}
 			break;
 		}
@@ -209,47 +208,6 @@ post_UR(CHKARGS)
 		mandoc_vmsg(MANDOCERR_UR_NOHEAD, man->parse,
 		    n->line, n->pos, "UR");
 	check_part(man, n);
-}
-
-static void
-post_ft(CHKARGS)
-{
-	char	*cp;
-	int	 ok;
-
-	if (n->child == NULL)
-		return;
-
-	ok = 0;
-	cp = n->child->string;
-	switch (*cp) {
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case 'I':
-	case 'P':
-	case 'R':
-		if ('\0' == cp[1])
-			ok = 1;
-		break;
-	case 'B':
-		if ('\0' == cp[1] || ('I' == cp[1] && '\0' == cp[2]))
-			ok = 1;
-		break;
-	case 'C':
-		if ('W' == cp[1] && '\0' == cp[2])
-			ok = 1;
-		break;
-	default:
-		break;
-	}
-
-	if (0 == ok) {
-		mandoc_vmsg(MANDOCERR_FT_BAD, man->parse,
-		    n->line, n->pos, "ft %s", cp);
-		*cp = '\0';
-	}
 }
 
 static void

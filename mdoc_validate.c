@@ -332,7 +332,8 @@ mdoc_node_validate(struct roff_man *mdoc)
 				post_par(mdoc);
 				break;
 			default:
-				abort();
+				roff_validate(mdoc);
+				break;
 			}
 			break;
 		}

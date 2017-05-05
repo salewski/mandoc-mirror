@@ -366,6 +366,7 @@ print_mdoc_node(DECL_ARGS)
 	default:
 		if (n->tok < ROFF_MAX) {
 			roff_term_pre(p, n);
+			chld = 0;
 			break;
 		}
 		assert(n->tok >= MDOC_Dd && n->tok < MDOC_MAX);
