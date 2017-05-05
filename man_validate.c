@@ -74,7 +74,6 @@ static	const v_check __man_valids[MAN_MAX - MAN_TH] = {
 	NULL,       /* I */
 	NULL,       /* IR */
 	NULL,       /* RI */
-	post_vs,    /* sp */
 	NULL,       /* nf */
 	NULL,       /* fi */
 	NULL,       /* RE */
@@ -125,6 +124,7 @@ man_node_validate(struct roff_man *man)
 		if (n->tok < ROFF_MAX) {
 			switch (n->tok) {
 			case ROFF_br:
+			case ROFF_sp:
 				post_vs(man, n);
 				break;
 			default:
@@ -445,6 +445,9 @@ post_vs(CHKARGS)
 	switch (n->parent->tok) {
 	case MAN_SH:
 	case MAN_SS:
+	case MAN_PP:
+	case MAN_LP:
+	case MAN_P:
 		mandoc_vmsg(MANDOCERR_PAR_SKIP, man->parse, n->line, n->pos,
 		    "%s after %s", roff_name[n->tok],
 		    roff_name[n->parent->tok]);

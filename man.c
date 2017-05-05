@@ -97,7 +97,7 @@ man_ptext(struct roff_man *man, int line, char *buf, int offs)
 		/* Allocate a blank entry. */
 		if (man->last->tok != MAN_SH &&
 		    man->last->tok != MAN_SS) {
-			roff_elem_alloc(man, line, offs, MAN_sp);
+			roff_elem_alloc(man, line, offs, ROFF_sp);
 			man->next = ROFF_NEXT_SIBLING;
 		}
 		return 1;

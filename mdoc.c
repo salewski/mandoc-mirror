@@ -253,7 +253,7 @@ mdoc_ptext(struct roff_man *mdoc, int line, char *buf, int offs)
 		 * blank lines aren't allowed, but enough manuals assume this
 		 * behaviour that we want to work around it.
 		 */
-		roff_elem_alloc(mdoc, line, offs, MDOC_sp);
+		roff_elem_alloc(mdoc, line, offs, ROFF_sp);
 		mdoc->last->flags |= NODE_VALID | NODE_ENDED;
 		mdoc->next = ROFF_NEXT_SIBLING;
 		return 1;

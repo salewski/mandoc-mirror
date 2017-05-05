@@ -61,7 +61,6 @@ const	struct man_macro __man_macros[MAN_MAX - MAN_TH] = {
 	{ in_line_eoln, MAN_SCOPED | MAN_JOIN }, /* I */
 	{ in_line_eoln, 0 }, /* IR */
 	{ in_line_eoln, 0 }, /* RI */
-	{ in_line_eoln, MAN_NSCOPED }, /* sp */
 	{ in_line_eoln, MAN_NSCOPED }, /* nf */
 	{ in_line_eoln, MAN_NSCOPED }, /* fi */
 	{ blk_close, MAN_BSCOPE }, /* RE */
@@ -331,8 +330,7 @@ in_line_eoln(MACRO_PROT_ARGS)
 			    roff_name[tok], buf + *pos);
 			break;
 		}
-		if (buf[*pos] != '\0' && man->last != n &&
-		    (tok == MAN_PD || tok == MAN_sp)) {
+		if (buf[*pos] != '\0' && man->last != n && tok == MAN_PD) {
 			mandoc_vmsg(MANDOCERR_ARG_EXCESS,
 			    man->parse, line, *pos, "%s ... %s",
 			    roff_name[tok], buf + *pos);
