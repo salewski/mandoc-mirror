@@ -348,8 +348,12 @@ See also
 and
 .Sx \&IR .
 .Ss \&DT
-Has no effect.
-Included for compatibility.
+Restore the default tabulator positions.
+They are at intervals of 0.5 inches.
+This has no effect unless the tabulator positions were changed with the
+.Xr roff 7
+.Ic \&ta
+request.
 .Ss \&EE
 This is a non-standard GNU extension, included only for compatibility.
 In

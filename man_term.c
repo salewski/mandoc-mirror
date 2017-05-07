@@ -68,6 +68,7 @@ static	void		  print_bvspace(struct termp *,
 				const struct roff_node *, int);
 
 static	int		  pre_B(DECL_ARGS);
+static	int		  pre_DT(DECL_ARGS);
 static	int		  pre_HP(DECL_ARGS);
 static	int		  pre_I(DECL_ARGS);
 static	int		  pre_IP(DECL_ARGS);
@@ -117,7 +118,7 @@ static	const struct termact __termacts[MAN_MAX - MAN_TH] = {
 	{ pre_literal, NULL, 0 }, /* fi */
 	{ NULL, NULL, 0 }, /* RE */
 	{ pre_RS, post_RS, 0 }, /* RS */
-	{ pre_ign, NULL, 0 }, /* DT */
+	{ pre_DT, NULL, 0 }, /* DT */
 	{ pre_ign, NULL, MAN_NOTEXT }, /* UC */
 	{ pre_PD, NULL, MAN_NOTEXT }, /* PD */
 	{ pre_ign, NULL, 0 }, /* AT */
@@ -388,6 +389,15 @@ pre_in(DECL_ARGS)
 	if (p->offset > SHRT_MAX)
 		p->offset = term_len(p, p->defindent);
 
+	return 0;
+}
+
+static int
+pre_DT(DECL_ARGS)
+{
+	term_tab_set(p, NULL);
+	term_tab_set(p, "T");
+	term_tab_set(p, ".5i");
 	return 0;
 }
 
