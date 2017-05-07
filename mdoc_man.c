@@ -112,6 +112,7 @@ static	void	  pre_sp(DECL_ARGS);
 static	int	  pre_sect(DECL_ARGS);
 static	int	  pre_sy(DECL_ARGS);
 static	void	  pre_syn(const struct roff_node *);
+static	void	  pre_ta(DECL_ARGS);
 static	int	  pre_vt(DECL_ARGS);
 static	int	  pre_xr(DECL_ARGS);
 static	void	  print_word(const char *);
@@ -128,6 +129,7 @@ static	const void_fp roff_manacts[ROFF_MAX] = {
 	pre_ft,
 	pre_ll,
 	pre_sp,
+	pre_ta,
 };
 
 static	const struct manact __manacts[MDOC_MAX - MDOC_Dd] = {
@@ -443,7 +445,6 @@ static void
 print_line(const char *s, int newflags)
 {
 
-	outflags &= ~MMAN_br;
 	outflags |= MMAN_nl;
 	print_word(s);
 	outflags |= newflags;
@@ -1713,6 +1714,15 @@ pre_sy(DECL_ARGS)
 
 	font_push('B');
 	return 1;
+}
+
+static void
+pre_ta(DECL_ARGS)
+{
+	print_line(".ta", 0);
+	for (n = n->child; n != NULL; n = n->next)
+		print_word(n->string);
+	outflags |= MMAN_nl;
 }
 
 static int

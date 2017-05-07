@@ -142,7 +142,9 @@ terminal_man(void *arg, const struct roff_man *man)
 	p = (struct termp *)arg;
 	p->overstep = 0;
 	p->rmargin = p->maxrmargin = p->defrmargin;
-	p->tabwidth = term_len(p, 5);
+	term_tab_set(p, NULL);
+	term_tab_set(p, "T");
+	term_tab_set(p, ".5i");
 
 	memset(&mt, 0, sizeof(struct mtermp));
 	mt.lmargin[mt.lmargincur] = term_len(p, p->defindent);

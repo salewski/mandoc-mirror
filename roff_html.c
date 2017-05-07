@@ -36,6 +36,7 @@ static	const roff_html_pre_fp roff_html_pre_acts[ROFF_MAX] = {
 	NULL,  /* ft */
 	NULL,  /* ll */
 	roff_html_pre_sp,  /* sp */
+	NULL,  /* ta */
 };
 
 

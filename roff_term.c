@@ -31,12 +31,14 @@ static	void	  roff_term_pre_br(ROFF_TERM_ARGS);
 static	void	  roff_term_pre_ft(ROFF_TERM_ARGS);
 static	void	  roff_term_pre_ll(ROFF_TERM_ARGS);
 static	void	  roff_term_pre_sp(ROFF_TERM_ARGS);
+static	void	  roff_term_pre_ta(ROFF_TERM_ARGS);
 
 static	const roff_term_pre_fp roff_term_pre_acts[ROFF_MAX] = {
 	roff_term_pre_br,  /* br */
 	roff_term_pre_ft,  /* ft */
 	roff_term_pre_ll,  /* ft */
-	roff_term_pre_sp,  /* br */
+	roff_term_pre_sp,  /* sp */
+	roff_term_pre_ta,  /* ta */
 };
 
 
@@ -110,4 +112,12 @@ roff_term_pre_sp(ROFF_TERM_ARGS)
 			term_vspace(p);
 
 	roff_term_pre_br(p, n);
+}
+
+static void
+roff_term_pre_ta(ROFF_TERM_ARGS)
+{
+	term_tab_set(p, NULL);
+	for (n = n->child; n != NULL; n = n->next)
+		term_tab_set(p, n->string);
 }

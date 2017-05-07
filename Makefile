@@ -125,6 +125,7 @@ SRCS		 = att.c \
 		   term.c \
 		   term_ascii.c \
 		   term_ps.c \
+		   term_tab.c \
 		   tree.c
 
 DISTFILES	 = INSTALL \
@@ -260,6 +261,7 @@ MANDOC_TERM_OBJS = eqn_term.o \
 		   term.o \
 		   term_ascii.o \
 		   term_ps.o \
+		   term_tab.o \
 		   tbl_term.o
 
 DBM_OBJS	 = dbm.o \

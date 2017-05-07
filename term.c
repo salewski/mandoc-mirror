@@ -141,8 +141,8 @@ term_flushln(struct termp *p)
 		 * subsequent tabs into a single huge set of spaces.
 		 */
 		ntab = 0;
-		while (i < p->col && '\t' == p->buf[i]) {
-			vend = (vis / p->tabwidth + 1) * p->tabwidth;
+		while (i < p->col && p->buf[i] == '\t') {
+			vend = term_tab_next(vis);
 			vbl += vend - vis;
 			vis = vend;
 			ntab++;
@@ -192,17 +192,20 @@ term_flushln(struct termp *p)
 			vend -= vis;
 			(*p->endline)(p);
 			p->viscol = 0;
-			if (TERMP_BRIND & p->flags) {
-				vbl = p->rmargin;
-				vend += p->rmargin;
-				vend -= p->offset;
+
+			/* Use pending tabs on the new line. */
+
+			vbl = 0;
+			while (ntab--)
+				vbl = term_tab_next(vbl);
+
+			/* Re-establish indentation. */
+
+			if (p->flags & TERMP_BRIND) {
+				vbl += p->rmargin;
+				vend += p->rmargin - p->offset;
 			} else
-				vbl = p->offset;
-
-			/* use pending tabs on the new line */
-
-			if (0 < ntab)
-				vbl += ntab * p->tabwidth;
+				vbl += p->offset;
 
 			/*
 			 * Remove the p->overstep width.

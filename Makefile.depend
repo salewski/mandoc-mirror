@@ -72,4 +72,5 @@ tbl_term.o: tbl_term.c config.h mandoc.h out.h term.h
 term.o: term.c config.h mandoc.h mandoc_aux.h out.h term.h main.h
 term_ascii.o: term_ascii.c config.h mandoc.h mandoc_aux.h out.h term.h manconf.h main.h
 term_ps.o: term_ps.c config.h mandoc_aux.h out.h term.h manconf.h main.h
+term_tab.o: term_tab.c mandoc_aux.h out.h term.h
 tree.o: tree.c config.h mandoc.h roff.h mdoc.h man.h main.h

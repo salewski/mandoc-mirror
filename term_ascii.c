@@ -68,7 +68,6 @@ ascii_init(enum termenc enc, const struct manoutput *outopts)
 	p = mandoc_calloc(1, sizeof(struct termp));
 
 	p->line = 1;
-	p->tabwidth = 5;
 	p->defrmargin = p->lastrmargin = 78;
 	p->fontq = mandoc_reallocarray(NULL,
 	     (p->fontsz = 8), sizeof(enum termfont));
