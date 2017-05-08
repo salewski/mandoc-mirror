@@ -1009,7 +1009,7 @@ roff_addtbl(struct roff_man *man, const struct tbl_span *tbl)
 	struct roff_node	*n;
 
 	if (man->macroset == MACROSET_MAN)
-		man_breakscope(man, TOKEN_NONE);
+		man_breakscope(man, ROFF_TS);
 	n = roff_node_alloc(man, tbl->line, 0, ROFFT_TBL, TOKEN_NONE);
 	n->span = tbl;
 	roff_node_append(man, n);
@@ -2778,6 +2778,10 @@ roff_onearg(ROFF_ARGS)
 	struct roff_node	*n;
 	char			*cp;
 
+	if (r->man->flags & (MAN_BLINE | MAN_ELINE) &&
+	    (tok == ROFF_sp || tok == ROFF_ti))
+		man_breakscope(r->man, tok);
+
 	roff_elem_alloc(r->man, ln, ppos, tok);
 	n = r->man->last;
 
@@ -2826,6 +2830,8 @@ roff_manyarg(ROFF_ARGS)
 static enum rofferr
 roff_br(ROFF_ARGS)
 {
+	if (r->man->flags & (MAN_BLINE | MAN_ELINE))
+		man_breakscope(r->man, ROFF_br);
 	roff_elem_alloc(r->man, ln, ppos, ROFF_br);
 	if (buf->buf[pos] != '\0')
 		mandoc_vmsg(MANDOCERR_ARG_SKIP, r->parse, ln, pos,
