@@ -36,6 +36,7 @@ static	const roff_valid_fp roff_valids[ROFF_MAX] = {
 	NULL,  /* ll */
 	NULL,  /* sp */
 	NULL,  /* ta */
+	NULL,  /* ti */
 };
 
 

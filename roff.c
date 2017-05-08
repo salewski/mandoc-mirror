@@ -213,7 +213,7 @@ static	enum rofferr	 roff_userdef(ROFF_ARGS);
 
 const char *__roff_name[MAN_MAX + 1] = {
 	"br",		"ft",		"ll",		"sp",
-	"ta",		NULL,
+	"ta",		"ti",		NULL,
 	"ab",		"ad",		"af",		"aln",
 	"als",		"am",		"am1",		"ami",
 	"ami1",		"as",		"as1",		"asciify",
@@ -264,7 +264,7 @@ const char *__roff_name[MAN_MAX + 1] = {
 	"spacewidth",	"special",	"spreadwarn",	"ss",
 	"sty",		"substring",	"sv",		"sy",
 	"T&",		"tc",		"TE",
-	"TH",		"ti",		"tkf",		"tl",
+	"TH",		"tkf",		"tl",
 	"tm",		"tm1",		"tmc",		"tr",
 	"track",	"transchar",	"trf",		"trimat",
 	"trin",		"trnt",		"troff",	"TS",
@@ -324,6 +324,7 @@ static	struct roffmac	 roffs[TOKEN_NONE] = {
 	{ roff_onearg, NULL, NULL, 0 },  /* ll */
 	{ roff_onearg, NULL, NULL, 0 },  /* sp */
 	{ roff_manyarg, NULL, NULL, 0 },  /* ta */
+	{ roff_onearg, NULL, NULL, 0 },  /* ti */
 	{ NULL, NULL, NULL, 0 },  /* ROFF_MAX */
 	{ roff_unsupp, NULL, NULL, 0 },  /* ab */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* ad */
@@ -525,7 +526,6 @@ static	struct roffmac	 roffs[TOKEN_NONE] = {
 	{ roff_unsupp, NULL, NULL, 0 },  /* tc */
 	{ roff_TE, NULL, NULL, 0 },  /* TE */
 	{ roff_TH, NULL, NULL, 0 },  /* TH */
-	{ roff_unsupp, NULL, NULL, 0 },  /* ti */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* tkf */
 	{ roff_unsupp, NULL, NULL, 0 },  /* tl */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* tm */
