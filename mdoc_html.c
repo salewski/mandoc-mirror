@@ -359,9 +359,9 @@ print_mdoc_node(MDOC_ARGS)
 		 * Make sure that if we're in a literal mode already
 		 * (i.e., within a <PRE>) don't print the newline.
 		 */
-		if (' ' == *n->string && NODE_LINE & n->flags)
-			if ( ! (HTML_LITERAL & h->flags))
-				print_otag(h, TAG_BR, "");
+		if (*n->string == ' ' && n->flags & NODE_LINE &&
+		    (h->flags & (HTML_LITERAL | HTML_NONEWLINE)) == 0)
+			print_otag(h, TAG_BR, "");
 		if (NODE_DELIMC & n->flags)
 			h->flags |= HTML_NOSPACE;
 		print_text(h, n->string);

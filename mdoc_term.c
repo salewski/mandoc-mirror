@@ -342,7 +342,8 @@ print_mdoc_node(DECL_ARGS)
 
 	switch (n->type) {
 	case ROFFT_TEXT:
-		if (' ' == *n->string && NODE_LINE & n->flags)
+		if (*n->string == ' ' && n->flags & NODE_LINE &&
+		    (p->flags & TERMP_NONEWLINE) == 0)
 			term_newln(p);
 		if (NODE_DELIMC & n->flags)
 			p->flags |= TERMP_NOSPACE;

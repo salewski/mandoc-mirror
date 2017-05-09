@@ -873,10 +873,11 @@ print_man_node(DECL_ARGS)
 		 * If we have a space as the first character, break
 		 * before printing the line's data.
 		 */
-		if ('\0' == *n->string) {
+		if (*n->string == '\0') {
 			term_vspace(p);
 			return;
-		} else if (' ' == *n->string && NODE_LINE & n->flags)
+		} else if (*n->string == ' ' && n->flags & NODE_LINE &&
+		    (p->flags & TERMP_NONEWLINE) == 0)
 			term_newln(p);
 
 		term_word(p, n->string);

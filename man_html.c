@@ -251,7 +251,8 @@ print_man_node(MAN_ARGS)
 	case ROFFT_TEXT:
 		if (fillmode(h, want_fillmode) == MAN_fi &&
 		    want_fillmode == MAN_fi &&
-		    n->flags & NODE_LINE && *n->string == ' ')
+		    n->flags & NODE_LINE && *n->string == ' ' &&
+		    (h->flags & HTML_NONEWLINE) == 0)
 			print_otag(h, TAG_BR, "");
 		if (*n->string != '\0')
 			break;
