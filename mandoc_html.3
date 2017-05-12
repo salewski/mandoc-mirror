@@ -204,7 +204,7 @@ Instead, the rest of the format string consists of pairs of
 argument type letters and style name letters.
 .El
 .Pp
-Argument type letters each require on argument as follows:
+Argument type letters each require one argument as follows:
 .Bl -tag -width 1n -offset indent
 .It Cm h
 Requires one
@@ -233,10 +233,18 @@ width specifier.
 If the argument is
 .Dv NULL ,
 nothing is printed for this pair.
-.It Cm W
-Similar to
-.Cm w ,
-but makes the width negative by multiplying it with \(mi1.
+.Pp
+The
+.Cm w
+argument type letter can optionally be followed by one or two
+modifier letters.
+The modifier
+.Cm +
+increases the width by 10% to make even bold text fit
+and adds two units for padding between columns.
+The modifier
+.Cm \-
+makes the width negative by multiplying it with \-1.
 .El
 .Pp
 Style name letters decide what to do with the preceding argument:

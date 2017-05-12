@@ -609,15 +609,21 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 			SCALE_VS_INIT(su, i);
 			break;
 		case 'w':
-		case 'W':
 			if ((arg2 = va_arg(ap, char *)) == NULL)
 				break;
 			su = &mysu;
 			a2width(arg2, su);
-			/* Increase width to make even bold text fit. */
-			su->scale *= 1.1;
-			if (fmt[-1] == 'W')
+			if (*fmt == '+') {
+				/* Increase to make even bold text fit. */
+				su->scale *= 1.15;
+				/* Add padding. */
+				su->scale += 3.0;
+				fmt++;
+			}
+			if (*fmt == '-') {
 				su->scale *= -1.0;
+				fmt++;
+			}
 			break;
 		default:
 			abort();
