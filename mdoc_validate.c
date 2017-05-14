@@ -1879,7 +1879,7 @@ post_sh_see_also(POST_ARGS)
 			if (isalpha((const unsigned char)*name))
 				return;
 		lastpunct = n->string;
-		if (n->next == NULL)
+		if (n->next == NULL || n->next->tok == MDOC_Rs)
 			mandoc_vmsg(MANDOCERR_XR_PUNCT, mdoc->parse,
 			    n->line, n->pos, "%s after %s(%s)",
 			    lastpunct, lastname, lastsec);
