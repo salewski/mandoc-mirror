@@ -615,7 +615,7 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 			a2width(arg2, su);
 			if (*fmt == '+') {
 				/* Increase to make even bold text fit. */
-				su->scale *= 1.15;
+				su->scale *= 1.2;
 				/* Add padding. */
 				su->scale += 3.0;
 				fmt++;
