@@ -28,7 +28,7 @@
  */
 enum	mandoclevel {
 	MANDOCLEVEL_OK = 0,
-	MANDOCLEVEL_RESERVED,
+	MANDOCLEVEL_STYLE, /* style suggestions */
 	MANDOCLEVEL_WARNING, /* warnings: syntax, whitespace, etc. */
 	MANDOCLEVEL_ERROR, /* input has been thrown away */
 	MANDOCLEVEL_UNSUPP, /* input needs unimplemented features */
@@ -43,6 +43,8 @@ enum	mandoclevel {
  */
 enum	mandocerr {
 	MANDOCERR_OK,
+
+	MANDOCERR_STYLE, /* ===== start of style suggestions ===== */
 
 	MANDOCERR_WARNING, /* ===== start of warnings ===== */
 

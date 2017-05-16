@@ -75,7 +75,7 @@ static	void	  mparse_parse_buffer(struct mparse *, struct buf,
 
 static	const enum mandocerr	mandoclimits[MANDOCLEVEL_MAX] = {
 	MANDOCERR_OK,
-	MANDOCERR_WARNING,
+	MANDOCERR_STYLE,
 	MANDOCERR_WARNING,
 	MANDOCERR_ERROR,
 	MANDOCERR_UNSUPP,
@@ -86,6 +86,7 @@ static	const enum mandocerr	mandoclimits[MANDOCLEVEL_MAX] = {
 static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"ok",
 
+	"generic style suggestion",
 	"generic warning",
 
 	/* related to the prologue */
@@ -241,7 +242,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 static	const char * const	mandoclevels[MANDOCLEVEL_MAX] = {
 	"SUCCESS",
-	"RESERVED",
+	"STYLE",
 	"WARNING",
 	"ERROR",
 	"UNSUPP",

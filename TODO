@@ -61,18 +61,6 @@ are mere guesses, and some may be wrong.
   reported by brad@  Sat, 15 Jan 2011 15:45:23 -0500
   loc ***  exist ***  algo ***  size **  imp *
 
-- .ta (tab settings)
-  #1 most important issue naddy@ Mon, 16 Feb 2015 20:59:17 +0100
-  ircbug(1) gnats(1) reported by brad@  Sat, 15 Jan 2011 15:50:51 -0500
-  also Tcl_NewStringObj(3) via wiz@  Wed, 5 Mar 2014 22:27:43 +0100
-  also posix2time(3) Carsten Kunze  Mon, 1 Dec 2014 13:03:10 +0100
-  loc **  exist ***  algo **  size **  imp ***
-
-- .ti (temporary indent)
-  found by naddy@ in xloadimage(1) [devel/libvstr] vstr(3)
-  found by bentley@ in nmh(1)  Mon, 23 Apr 2012 13:38:28 -0600
-  loc **  exist **  algo **  size *  imp ** (parser reorg helps a lot)
-
 - .while and .shift
   found by jca@ in ratpoison(1)  Sun, 30 Jun 2013 12:01:09 +0200
   loc *  exist **  algo **  size **  imp **
@@ -559,8 +547,6 @@ are mere guesses, and some may be wrong.
   from kristaps@  Sat, 09 Aug 2014 13:51:36 +0200
 
 Several areas can be cleaned up to make mandoc even faster.  These are
-
-- improve hashing mechanism for macros (quite important: performance)
 
 - the PDF file is HUGE: this can be reduced by using relative offsets
 
