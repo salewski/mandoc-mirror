@@ -155,7 +155,8 @@ mansearch(const struct mansearch *search,
 		chdir_status = 1;
 
 		if (dbm_open(MANDOC_DB) == -1) {
-			warn("%s/%s", paths->paths[i], MANDOC_DB);
+			if (errno != ENOENT)
+				warn("%s/%s", paths->paths[i], MANDOC_DB);
 			continue;
 		}
 
