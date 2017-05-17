@@ -639,8 +639,7 @@ output mode implies
 .Sh EXAMPLES
 To page manuals to the terminal:
 .Pp
-.Dl $ mandoc \-W all,stop mandoc.1 2\*(Gt&1 | less
-.Dl $ mandoc mandoc.1 mdoc.3 mdoc.7 | less
+.Dl $ mandoc -l mandoc.1 man.1 apropos.1 makewhatis.8
 .Pp
 To produce HTML manuals with
 .Pa mandoc.css
