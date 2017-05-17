@@ -74,6 +74,8 @@ and
 .Sm on
 in that directory.
 Existing databases are replaced.
+If a directory contains no manual pages, no database is created in that
+directory.
 If
 .Ar dir
 is not provided,
@@ -130,6 +132,7 @@ Remove
 .Ar
 from the database in
 .Ar dir .
+If that causes the database to become empty, also delete the database file.
 .El
 .Pp
 If fatal parse errors are encountered while parsing, the offending file
