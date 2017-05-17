@@ -585,9 +585,6 @@ mdoc_nd_pre(MDOC_ARGS)
 static int
 mdoc_nm_pre(MDOC_ARGS)
 {
-	struct tag	*t;
-	int		 len;
-
 	switch (n->type) {
 	case ROFFT_HEAD:
 		print_otag(h, TAG_TD, "");
@@ -601,22 +598,8 @@ mdoc_nm_pre(MDOC_ARGS)
 	default:
 		break;
 	}
-
 	synopsis_pre(h, n);
 	print_otag(h, TAG_TABLE, "c", "Nm");
-
-	for (len = 0, n = n->head->child; n; n = n->next)
-		if (n->type == ROFFT_TEXT)
-			len += html_strlen(n->string);
-
-	if (len == 0 && meta->name != NULL)
-		len = html_strlen(meta->name);
-
-	t = print_otag(h, TAG_COLGROUP, "");
-	/* Increase width to make even bold text fit. */
-	print_otag(h, TAG_COL, "shw", len + 2);
-	print_otag(h, TAG_COL, "");
-	print_tagq(h, t);
 	print_otag(h, TAG_TR, "");
 	return 1;
 }
