@@ -87,6 +87,9 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"ok",
 
 	"generic style suggestion",
+
+	"useless macro",
+
 	"generic warning",
 
 	/* related to the prologue */

@@ -742,6 +742,18 @@ are hidden unless their level, or a lower level, is requested using a
 option or
 .Fl T Cm lint
 output mode.
+.Ss Style messages
+.Bl -ohang
+.It Sy "useless macro"
+.Pq mdoc
+A
+.Ic \&Bt ,
+.Ic \&Tn ,
+or
+.Ic \Ud
+macro was found.
+Simply delete it, it serves no useful purpose.
+.El
 .Ss Warnings related to the document prologue
 .Bl -ohang
 .It Sy "missing manual title, using UNTITLED"

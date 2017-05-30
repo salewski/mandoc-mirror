@@ -46,6 +46,8 @@ enum	mandocerr {
 
 	MANDOCERR_STYLE, /* ===== start of style suggestions ===== */
 
+	MANDOCERR_MACRO_USELESS, /* useless macro: macro */
+
 	MANDOCERR_WARNING, /* ===== start of warnings ===== */
 
 	/* related to the prologue */

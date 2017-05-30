@@ -341,8 +341,8 @@ for my $testname (@lint_testnames) {
 	if ($targets{lint}) {
 		$count_lint++;
 		$count_total++;
-		print "@mandoc -T lint $i\n" if $targets{verbose};
-		syslint $o, @mandoc, qw(-T lint), $i
+		print "@mandoc -T lint -W all $i\n" if $targets{verbose};
+		syslint $o, @mandoc, qw(-T lint -W all), $i
 		    and fail $subdir, $testname, 'lint:mandoc';
 		system @diff, $w, $o
 		    and fail $subdir, $testname, 'lint:diff';
