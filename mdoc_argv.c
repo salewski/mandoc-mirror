@@ -555,14 +555,14 @@ args(struct roff_man *mdoc, int line, int *pos,
 			if ( ! (mdoc->flags & MDOC_PHRASE))
 				mandoc_msg(MANDOCERR_ARG_QUOTE,
 				    mdoc->parse, line, *pos, NULL);
-			return ARGS_QWORD;
+			return ARGS_WORD;
 		}
 
 		mdoc->flags &= ~MDOC_PHRASELIT;
 		buf[(*pos)++] = '\0';
 
 		if ('\0' == buf[*pos])
-			return ARGS_QWORD;
+			return ARGS_WORD;
 
 		while (' ' == buf[*pos])
 			(*pos)++;
@@ -571,7 +571,7 @@ args(struct roff_man *mdoc, int line, int *pos,
 			mandoc_msg(MANDOCERR_SPACE_EOL, mdoc->parse,
 			    line, *pos, NULL);
 
-		return ARGS_QWORD;
+		return ARGS_WORD;
 	}
 
 	p = &buf[*pos];

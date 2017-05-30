@@ -76,7 +76,8 @@ const	struct mdoc_macro __mdoc_macros[MDOC_MAX - MDOC_Dd] = {
 	{ blk_full, MDOC_PARSED | MDOC_JOIN }, /* It */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ad */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED | MDOC_JOIN }, /* An */
-	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED | MDOC_JOIN }, /* Ap */
+	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED |
+			MDOC_IGNDELIM | MDOC_JOIN }, /* Ap */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ar */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED | MDOC_JOIN }, /* Cd */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Cm */
@@ -712,8 +713,7 @@ blk_exp_close(MACRO_PROT_ARGS)
 		if (ac == ARGS_PUNCT || ac == ARGS_EOLN)
 			break;
 
-		ntok = ac == ARGS_QWORD ? TOKEN_NONE :
-		    lookup(mdoc, tok, line, lastarg, p);
+		ntok = lookup(mdoc, tok, line, lastarg, p);
 
 		if (ntok == TOKEN_NONE) {
 			dword(mdoc, line, lastarg, p, DELIM_MAX,
@@ -809,7 +809,7 @@ in_line(MACRO_PROT_ARGS)
 			break;
 		}
 
-		ntok = (ac == ARGS_QWORD || (tok == MDOC_Fn && !cnt)) ?
+		ntok = (tok == MDOC_Fn && !cnt) ?
 		    TOKEN_NONE : lookup(mdoc, tok, line, la, p);
 
 		/*
@@ -838,14 +838,11 @@ in_line(MACRO_PROT_ARGS)
 		}
 
 		/*
-		 * Non-quote-enclosed punctuation.  Set up our scope, if
-		 * a word; rewind the scope, if a delimiter; then append
-		 * the word.
+		 * Handle punctuation.  Set up our scope, if a word;
+		 * rewind the scope, if a delimiter; then append the word.
 		 */
 
-		d = ac == ARGS_QWORD ? DELIM_NONE : mdoc_isdelim(p);
-
-		if (DELIM_NONE != d) {
+		if ((d = mdoc_isdelim(p)) != DELIM_NONE) {
 			/*
 			 * If we encounter closing punctuation, no word
 			 * has been emitted, no scope is open, and we're
@@ -865,11 +862,12 @@ in_line(MACRO_PROT_ARGS)
 			 * Close out our scope, if one is open, before
 			 * any punctuation.
 			 */
-			if (scope)
+			if (scope && tok != MDOC_Lk) {
 				rew_elem(mdoc, tok);
-			scope = 0;
-			if (tok == MDOC_Fn)
-				mayopen = 0;
+				scope = 0;
+				if (tok == MDOC_Fn)
+					mayopen = 0;
+			}
 		} else if (mayopen && !scope) {
 			mdoc_elem_alloc(mdoc, line, ppos, tok, arg);
 			scope = 1;
@@ -1115,7 +1113,6 @@ blk_full(MACRO_PROT_ARGS)
 
 		if (head == NULL &&
 		    ac != ARGS_PHRASE &&
-		    ac != ARGS_QWORD &&
 		    mdoc_isdelim(p) == DELIM_OPEN) {
 			dword(mdoc, line, la, p, DELIM_OPEN, 0);
 			continue;
@@ -1212,8 +1209,7 @@ blk_part_imp(MACRO_PROT_ARGS)
 		if (ac == ARGS_EOLN || ac == ARGS_PUNCT)
 			break;
 
-		if (body == NULL && ac != ARGS_QWORD &&
-		    mdoc_isdelim(p) == DELIM_OPEN) {
+		if (body == NULL && mdoc_isdelim(p) == DELIM_OPEN) {
 			dword(mdoc, line, la, p, DELIM_OPEN, 0);
 			continue;
 		}
@@ -1269,8 +1265,7 @@ blk_part_exp(MACRO_PROT_ARGS)
 
 		/* Flush out leading punctuation. */
 
-		if (head == NULL && ac != ARGS_QWORD &&
-		    mdoc_isdelim(p) == DELIM_OPEN) {
+		if (head == NULL && mdoc_isdelim(p) == DELIM_OPEN) {
 			dword(mdoc, line, la, p, DELIM_OPEN, 0);
 			continue;
 		}
@@ -1369,7 +1364,7 @@ in_line_argn(MACRO_PROT_ARGS)
 			state = -2;
 		}
 
-		ntok = (ac == ARGS_QWORD || (tok == MDOC_Pf && state == 0)) ?
+		ntok = (tok == MDOC_Pf && state == 0) ?
 		    TOKEN_NONE : lookup(mdoc, tok, line, la, p);
 
 		if (ntok != TOKEN_NONE) {
@@ -1381,8 +1376,7 @@ in_line_argn(MACRO_PROT_ARGS)
 			break;
 		}
 
-		if (ac == ARGS_QWORD ||
-		    mdoc_macros[tok].flags & MDOC_IGNDELIM ||
+		if (mdoc_macros[tok].flags & MDOC_IGNDELIM ||
 		    mdoc_isdelim(p) == DELIM_NONE) {
 			if (state == -1) {
 				mdoc_elem_alloc(mdoc, line, ppos, tok, arg);
