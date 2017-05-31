@@ -53,6 +53,7 @@ typedef	void	(*v_post)(POST_ARGS);
 
 static	int	 build_list(struct roff_man *, int);
 static	void	 check_text(struct roff_man *, int, int, char *);
+static	void	 check_bsd(struct roff_man *, int, int, char *);
 static	void	 check_argv(struct roff_man *,
 			struct roff_node *, struct mdoc_argv *);
 static	void	 check_args(struct roff_man *, struct roff_node *);
@@ -302,6 +303,10 @@ mdoc_node_validate(struct roff_man *mdoc)
 		if (n->sec != SEC_SYNOPSIS ||
 		    (n->parent->tok != MDOC_Cd && n->parent->tok != MDOC_Fd))
 			check_text(mdoc, n->line, n->pos, n->string);
+		if (n->parent->tok == MDOC_Sh ||
+		    n->parent->tok == MDOC_Ss ||
+		    n->parent->tok == MDOC_It)
+			check_bsd(mdoc, n->line, n->pos, n->string);
 		break;
 	case ROFFT_EQN:
 	case ROFFT_TBL:
@@ -381,6 +386,25 @@ check_text(struct roff_man *mdoc, int ln, int pos, char *p)
 	for (cp = p; NULL != (p = strchr(p, '\t')); p++)
 		mandoc_msg(MANDOCERR_FI_TAB, mdoc->parse,
 		    ln, pos + (int)(p - cp), NULL);
+}
+
+static void
+check_bsd(struct roff_man *mdoc, int ln, int pos, char *p)
+{
+	const char	*cp;
+
+	if ((cp = strstr(p, "OpenBSD")) != NULL)
+		mandoc_msg(MANDOCERR_BX, mdoc->parse,
+		    ln, pos + (cp - p), "Ox");
+	if ((cp = strstr(p, "NetBSD")) != NULL)
+		mandoc_msg(MANDOCERR_BX, mdoc->parse,
+		    ln, pos + (cp - p), "Nx");
+	if ((cp = strstr(p, "FreeBSD")) != NULL)
+		mandoc_msg(MANDOCERR_BX, mdoc->parse,
+		    ln, pos + (cp - p), "Fx");
+	if ((cp = strstr(p, "DragonFly")) != NULL)
+		mandoc_msg(MANDOCERR_BX, mdoc->parse,
+		    ln, pos + (cp - p), "Dx");
 }
 
 static void
@@ -2276,11 +2300,19 @@ static void
 post_bx(POST_ARGS)
 {
 	struct roff_node	*n, *nch;
+	const char		*macro;
 
 	n = mdoc->last;
 	nch = n->child;
 
 	if (nch != NULL) {
+		macro = !strcmp(nch->string, "Open") ? "Ox" :
+		    !strcmp(nch->string, "Net") ? "Nx" :
+		    !strcmp(nch->string, "Free") ? "Fx" :
+		    !strcmp(nch->string, "DragonFly") ? "Dx" : NULL;
+		if (macro != NULL)
+			mandoc_msg(MANDOCERR_BX, mdoc->parse,
+			    n->line, n->pos, macro);
 		mdoc->last = nch;
 		nch = nch->next;
 		mdoc->next = ROFF_NEXT_SIBLING;

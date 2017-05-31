@@ -47,6 +47,7 @@ enum	mandocerr {
 	MANDOCERR_STYLE, /* ===== start of style suggestions ===== */
 
 	MANDOCERR_MACRO_USELESS, /* useless macro: macro */
+	MANDOCERR_BX, /* consider using OS macro: macro */
 
 	MANDOCERR_WARNING, /* ===== start of warnings ===== */
 
