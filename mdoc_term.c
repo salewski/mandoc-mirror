@@ -407,7 +407,8 @@ print_mdoc_node(DECL_ARGS)
 	if (NODE_EOS & n->flags)
 		p->flags |= TERMP_SENTENCE;
 
-	p->offset = offset;
+	if (n->type != ROFFT_TEXT)
+		p->offset = offset;
 	p->rmargin = rmargin;
 }
 

@@ -175,7 +175,7 @@ mandoc_escape(const char **end, const char **start, int *sz)
 				++*end;
 			return ESCAPE_ERROR;
 		}
-		gly = ESCAPE_IGNORE;
+		gly = (*start)[-1] == 'h' ? ESCAPE_HORIZ : ESCAPE_IGNORE;
 		term = **start;
 		*start = ++*end;
 		break;

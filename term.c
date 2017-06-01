@@ -400,6 +400,7 @@ term_fontpop(struct termp *p)
 void
 term_word(struct termp *p, const char *word)
 {
+	struct roffsu	 su;
 	const char	 nbrsp[2] = { ASCII_NBRSP, 0 };
 	const char	*seq, *cp;
 	int		 sz, uc;
@@ -487,6 +488,27 @@ term_word(struct termp *p, const char *word)
 				p->flags &= ~TERMP_BACKAFTER;
 			else if (*word == '\0')
 				p->flags |= (TERMP_NOSPACE | TERMP_NONEWLINE);
+			continue;
+		case ESCAPE_HORIZ:
+			if (a2roffsu(seq, &su, SCALE_EM) == 0)
+				continue;
+			uc = term_hspan(p, &su) / 24;
+			if (uc > 0)
+				while (uc-- > 0)
+					bufferc(p, ASCII_NBRSP);
+			else if (p->col > (size_t)(-uc))
+				p->col += uc;
+			else {
+				uc += p->col;
+				p->col = 0;
+				if (p->offset > (size_t)(-uc)) {
+					p->ti += uc;
+					p->offset += uc;
+				} else {
+					p->ti -= p->offset;
+					p->offset = 0;
+				}
+			}
 			continue;
 		case ESCAPE_SKIPCHAR:
 			p->flags |= TERMP_BACKAFTER;
