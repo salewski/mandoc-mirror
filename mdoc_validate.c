@@ -1076,6 +1076,7 @@ static void
 post_nd(POST_ARGS)
 {
 	struct roff_node	*n;
+	size_t			 sz;
 
 	n = mdoc->last;
 
@@ -1089,6 +1090,11 @@ post_nd(POST_ARGS)
 	if (n->child == NULL)
 		mandoc_msg(MANDOCERR_ND_EMPTY, mdoc->parse,
 		    n->line, n->pos, "Nd");
+	else if (n->last->type == ROFFT_TEXT &&
+	    (sz = strlen(n->last->string)) != 0 &&
+	    n->last->string[sz - 1] == '.')
+		mandoc_msg(MANDOCERR_ND_DOT, mdoc->parse,
+		    n->last->line, n->last->pos + sz - 1, NULL);
 
 	post_hyph(mdoc);
 }
