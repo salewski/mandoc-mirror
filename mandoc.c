@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008-2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011-2015 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011-2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -175,7 +175,17 @@ mandoc_escape(const char **end, const char **start, int *sz)
 				++*end;
 			return ESCAPE_ERROR;
 		}
-		gly = (*start)[-1] == 'h' ? ESCAPE_HORIZ : ESCAPE_IGNORE;
+		switch ((*start)[-1]) {
+		case 'h':
+			gly = ESCAPE_HORIZ;
+			break;
+		case 'l':
+			gly = ESCAPE_HLINE;
+			break;
+		default:
+			gly = ESCAPE_IGNORE;
+			break;
+		}
 		term = **start;
 		*start = ++*end;
 		break;

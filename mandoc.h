@@ -412,6 +412,7 @@ enum	mandoc_esc {
 	ESCAPE_UNICODE, /* a unicode codepoint */
 	ESCAPE_NOSPACE, /* suppress space if the last on a line */
 	ESCAPE_HORIZ, /* horizontal movement */
+	ESCAPE_HLINE, /* horizontal line drawing */
 	ESCAPE_SKIPCHAR, /* skip the next character */
 	ESCAPE_OVERSTRIKE /* overstrike all chars in the argument */
 };
