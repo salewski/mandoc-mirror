@@ -89,14 +89,15 @@ man_ptext(struct roff_man *man, int line, char *buf, int offs)
 		/* Skip leading whitespace. */ ;
 
 	/*
-	 * Blank lines are ignored right after headings
-	 * but add a single vertical space elsewhere.
+	 * Blank lines are ignored in next line scope and right
+	 * after headings but add a single vertical space elsewhere.
 	 */
 
 	if (buf[i] == '\0') {
-		man_breakscope(man, ROFF_sp);
-		/* Allocate a blank entry. */
-		if (man->last->tok != MAN_SH &&
+		if (man->flags & (MAN_ELINE | MAN_BLINE))
+			mandoc_msg(MANDOCERR_BLK_BLANK, man->parse,
+			    line, 0, NULL);
+		else if (man->last->tok != MAN_SH &&
 		    man->last->tok != MAN_SS) {
 			roff_elem_alloc(man, line, offs, ROFF_sp);
 			man->next = ROFF_NEXT_SIBLING;

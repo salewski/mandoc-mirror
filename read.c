@@ -139,6 +139,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"fill mode already enabled, skipping",
 	"fill mode already disabled, skipping",
 	"line scope broken",
+	"skipping blank line in line scope",
 
 	/* related to missing macro arguments */
 	"skipping empty request",

@@ -10,6 +10,7 @@ LINT_TARGETS	= broken broken_eline noarg
 # - If .HP breaks .SS, a line is broken after the next input line.
 # - If .RS/RE/nf/fi breaks .SS, the next input line becomes bold.
 # - .UR does not break .SS.
+# - blank line in .SS next-line scope causes a blank line
 
 SKIP_GROFF	= broken broken_eline noarg
 
