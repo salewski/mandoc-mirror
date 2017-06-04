@@ -808,8 +808,11 @@ This is a Heirloom extension and currently unsupported.
 Set a trap within a diversion.
 Currently unsupported.
 .It Ic \&ec Op Ar char
-Change the escape character.
-Currently unsupported.
+Enable the escape mechanism and change the escape character.
+The
+.Ar char
+argument defaults to the backslash
+.Pq Sq \e .
 .It Ic \&ecr
 Restore the escape character.
 Currently unsupported.
@@ -839,7 +842,6 @@ See
 .Ic \&EQ .
 .It Ic \&eo
 Disable the escape mechanism completely.
-Currently unsupported.
 .It Ic \&EP
 End a picture started by
 .Ic \&BP .
