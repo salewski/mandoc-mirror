@@ -141,7 +141,6 @@ terminal_man(void *arg, const struct roff_man *man)
 	size_t			 save_defindent;
 
 	p = (struct termp *)arg;
-	p->overstep = 0;
 	p->rmargin = p->maxrmargin = p->defrmargin;
 	term_tab_set(p, NULL);
 	term_tab_set(p, "T");

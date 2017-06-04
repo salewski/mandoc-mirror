@@ -259,7 +259,6 @@ terminal_mdoc(void *arg, const struct roff_man *mdoc)
 	size_t			 save_defindent;
 
 	p = (struct termp *)arg;
-	p->overstep = 0;
 	p->rmargin = p->maxrmargin = p->defrmargin;
 	term_tab_set(p, NULL);
 	term_tab_set(p, "T");
@@ -765,33 +764,15 @@ termp_it_pre(DECL_ARGS)
 	case LIST_bullet:
 	case LIST_dash:
 	case LIST_hyphen:
-		/*
-		 * Weird special case.
-		 * Some very narrow lists actually hang.
-		 */
-		if (width <= (int)term_len(p, 2))
-			p->flags |= TERMP_HANG;
-		if (n->type != ROFFT_HEAD)
-			break;
-		p->flags |= TERMP_NOBREAK;
-		p->trailspace = 1;
+		if (n->type == ROFFT_HEAD) {
+			p->flags |= TERMP_NOBREAK | TERMP_HANG;
+			p->trailspace = 1;
+		} else if (width <= (int)term_len(p, 2))
+			p->flags |= TERMP_NOPAD;
 		break;
 	case LIST_hang:
 		if (n->type != ROFFT_HEAD)
 			break;
-
-		/*
-		 * This is ugly.  If `-hang' is specified and the body
-		 * is a `Bl' or `Bd', then we want basically to nullify
-		 * the "overstep" effect in term_flushln() and treat
-		 * this as a `-ohang' list instead.
-		 */
-		if (NULL != n->next &&
-		    NULL != n->next->child &&
-		    (MDOC_Bl == n->next->child->tok ||
-		     MDOC_Bd == n->next->child->tok))
-			break;
-
 		p->flags |= TERMP_NOBREAK | TERMP_BRIND | TERMP_HANG;
 		p->trailspace = 1;
 		break;
@@ -803,7 +784,7 @@ termp_it_pre(DECL_ARGS)
 		p->trailspace = 2;
 
 		if (NULL == n->next || NULL == n->next->child)
-			p->flags |= TERMP_DANGLE;
+			p->flags |= TERMP_HANG;
 		break;
 	case LIST_column:
 		if (n->type == ROFFT_HEAD)
@@ -837,23 +818,11 @@ termp_it_pre(DECL_ARGS)
 	p->offset += offset;
 
 	switch (type) {
-	case LIST_hang:
-		/*
-		 * Same stipulation as above, regarding `-hang'.  We
-		 * don't want to recalculate rmargin and offsets when
-		 * using `Bd' or `Bl' within `-hang' overstep lists.
-		 */
-		if (n->type == ROFFT_HEAD &&
-		    NULL != n->next &&
-		    NULL != n->next->child &&
-		    (MDOC_Bl == n->next->child->tok ||
-		     MDOC_Bd == n->next->child->tok))
-			break;
-		/* FALLTHROUGH */
 	case LIST_bullet:
 	case LIST_dash:
 	case LIST_enum:
 	case LIST_hyphen:
+	case LIST_hang:
 	case LIST_tag:
 		if (n->type == ROFFT_HEAD)
 			p->rmargin = p->offset + width;
@@ -920,6 +889,7 @@ termp_it_pre(DECL_ARGS)
 	case LIST_column:
 		if (n->type == ROFFT_HEAD)
 			return 0;
+		p->minbl = 0;
 		break;
 	default:
 		break;
@@ -960,8 +930,7 @@ termp_it_post(DECL_ARGS)
 	 * has munged them in the meanwhile.
 	 */
 
-	p->flags &= ~(TERMP_NOBREAK | TERMP_BRTRSP | TERMP_BRIND |
-			TERMP_DANGLE | TERMP_HANG);
+	p->flags &= ~(TERMP_NOBREAK | TERMP_BRTRSP | TERMP_BRIND | TERMP_HANG);
 	p->trailspace = 0;
 }
 
@@ -1381,6 +1350,7 @@ termp_fn_pre(DECL_ARGS)
 	if (pretty) {
 		term_flushln(p);
 		p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND | TERMP_HANG);
+		p->flags |= TERMP_NOPAD;
 		p->offset = p->rmargin;
 		p->rmargin = rmargin;
 	}
@@ -1859,6 +1829,7 @@ termp_fo_pre(DECL_ARGS)
 			term_flushln(p);
 			p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND |
 					TERMP_HANG);
+			p->flags |= TERMP_NOPAD;
 			p->offset = p->rmargin;
 			p->rmargin = rmargin;
 		}
