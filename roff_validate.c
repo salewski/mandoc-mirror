@@ -1,4 +1,4 @@
-/*	$OpenBSD: roff_html.c,v 1.1 2017/05/04 22:07:44 schwarze Exp $ */
+/*	$Id$ */
 /*
  * Copyright (c) 2010, 2017 Ingo Schwarze <schwarze@openbsd.org>
  *
@@ -34,6 +34,7 @@ static	const roff_valid_fp roff_valids[ROFF_MAX] = {
 	NULL,  /* br */
 	roff_valid_ft,  /* ft */
 	NULL,  /* ll */
+	NULL,  /* mc */
 	NULL,  /* sp */
 	NULL,  /* ta */
 	NULL,  /* ti */

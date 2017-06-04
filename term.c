@@ -36,6 +36,7 @@ static	void		 adjbuf(struct termp *p, size_t);
 static	void		 bufferc(struct termp *, char);
 static	void		 encode(struct termp *, const char *, size_t);
 static	void		 encode1(struct termp *, int);
+static	void		 endline(struct termp *);
 
 
 void
@@ -169,10 +170,10 @@ term_flushln(struct termp *p)
 		 * Find out whether we would exceed the right margin.
 		 * If so, break to the next line.
 		 */
-		if (vend > bp && 0 == jhy && vis > 0) {
+		if (vend > bp && 0 == jhy && vis > 0 &&
+		    (p->flags & TERMP_BRNEVER) == 0) {
 			vend -= vis;
-			(*p->endline)(p);
-			p->viscol = 0;
+			endline(p);
 
 			/* Use pending tabs on the new line. */
 
@@ -243,31 +244,37 @@ term_flushln(struct termp *p)
 		vis = 0;
 
 	p->col = 0;
+	p->minbl = p->trailspace;
 	p->flags &= ~(TERMP_BACKAFTER | TERMP_BACKBEFORE | TERMP_NOPAD);
-
-	if ( ! (TERMP_NOBREAK & p->flags)) {
-		p->viscol = 0;
-		p->minbl = 0;
-		(*p->endline)(p);
-		return;
-	}
-
-	if (TERMP_HANG & p->flags) {
-		p->minbl = p->trailspace;
-		return;
-	}
 
 	/* Trailing whitespace is significant in some columns. */
 	if (vis && vbl && (TERMP_BRTRSP & p->flags))
 		vis += vbl;
 
 	/* If the column was overrun, break the line. */
-	if (maxvis < vis + p->trailspace * (*p->width)(p, ' ')) {
-		(*p->endline)(p);
-		p->viscol = 0;
-		p->minbl = 0;
-	} else
-		p->minbl = p->trailspace;
+	if ((p->flags & TERMP_NOBREAK) == 0 ||
+	    ((p->flags & TERMP_HANG) == 0 &&
+	     vis + p->trailspace * (*p->width)(p, ' ') > maxvis))
+		endline(p);
+}
+
+static void
+endline(struct termp *p)
+{
+	if ((p->flags & (TERMP_NEWMC | TERMP_ENDMC)) == TERMP_ENDMC) {
+		p->mc = NULL;
+		p->flags &= ~TERMP_ENDMC;
+	}
+	if (p->mc != NULL) {
+		if (p->viscol && p->maxrmargin >= p->viscol)
+			(*p->advance)(p, p->maxrmargin - p->viscol + 1);
+		p->flags |= TERMP_NOBUF | TERMP_NOSPACE;
+		term_word(p, p->mc);
+		p->flags &= ~(TERMP_NOBUF | TERMP_NEWMC);
+	}
+	p->viscol = 0;
+	p->minbl = 0;
+	(*p->endline)(p);
 }
 
 /*
@@ -296,6 +303,7 @@ term_vspace(struct termp *p)
 
 	term_newln(p);
 	p->viscol = 0;
+	p->minbl = 0;
 	if (0 < p->skipvsp)
 		p->skipvsp--;
 	else
@@ -370,24 +378,24 @@ term_word(struct termp *p, const char *word)
 	size_t		 csz, lsz, ssz;
 	enum mandoc_esc	 esc;
 
-	if ( ! (TERMP_NOSPACE & p->flags)) {
-		if ( ! (TERMP_KEEP & p->flags)) {
-			bufferc(p, ' ');
-			if (TERMP_SENTENCE & p->flags)
+	if ((p->flags & TERMP_NOBUF) == 0) {
+		if ((p->flags & TERMP_NOSPACE) == 0) {
+			if ((p->flags & TERMP_KEEP) == 0) {
 				bufferc(p, ' ');
-		} else
-			bufferc(p, ASCII_NBRSP);
+				if (p->flags & TERMP_SENTENCE)
+					bufferc(p, ' ');
+			} else
+				bufferc(p, ASCII_NBRSP);
+		}
+		if (p->flags & TERMP_PREKEEP)
+			p->flags |= TERMP_KEEP;
+		if (p->flags & TERMP_NONOSPACE)
+			p->flags |= TERMP_NOSPACE;
+		else
+			p->flags &= ~TERMP_NOSPACE;
+		p->flags &= ~(TERMP_SENTENCE | TERMP_NONEWLINE);
+		p->skipvsp = 0;
 	}
-	if (TERMP_PREKEEP & p->flags)
-		p->flags |= TERMP_KEEP;
-
-	if ( ! (p->flags & TERMP_NONOSPACE))
-		p->flags &= ~TERMP_NOSPACE;
-	else
-		p->flags |= TERMP_NOSPACE;
-
-	p->flags &= ~(TERMP_SENTENCE | TERMP_NONEWLINE);
-	p->skipvsp = 0;
 
 	while ('\0' != *word) {
 		if ('\\' != *word) {
@@ -590,10 +598,12 @@ adjbuf(struct termp *p, size_t sz)
 static void
 bufferc(struct termp *p, char c)
 {
-
+	if (p->flags & TERMP_NOBUF) {
+		(*p->letter)(p, c);
+		return;
+	}
 	if (p->col + 1 >= p->maxcols)
 		adjbuf(p, p->col + 1);
-
 	p->buf[p->col++] = c;
 }
 
@@ -606,6 +616,11 @@ static void
 encode1(struct termp *p, int c)
 {
 	enum termfont	  f;
+
+	if (p->flags & TERMP_NOBUF) {
+		(*p->letter)(p, c);
+		return;
+	}
 
 	if (p->col + 7 >= p->maxcols)
 		adjbuf(p, p->col + 7);
@@ -642,6 +657,12 @@ static void
 encode(struct termp *p, const char *word, size_t sz)
 {
 	size_t		  i;
+
+	if (p->flags & TERMP_NOBUF) {
+		for (i = 0; i < sz; i++)
+			(*p->letter)(p, word[i]);
+		return;
+	}
 
 	if (p->col + 2 + (sz * 5) >= p->maxcols)
 		adjbuf(p, p->col + 2 + (sz * 5));
