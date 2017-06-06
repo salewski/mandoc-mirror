@@ -67,6 +67,7 @@ enum	roff_type {
 
 enum	roff_tok {
 	ROFF_br = 0,
+	ROFF_ce,
 	ROFF_ft,
 	ROFF_ll,
 	ROFF_mc,
@@ -101,7 +102,6 @@ enum	roff_tok {
 	ROFF_brpnl,
 	ROFF_c2,
 	ROFF_cc,
-	ROFF_ce,
 	ROFF_cf,
 	ROFF_cflags,
 	ROFF_ch,

@@ -29,10 +29,12 @@
 typedef	void	(*roff_html_pre_fp)(ROFF_HTML_ARGS);
 
 static	void	  roff_html_pre_br(ROFF_HTML_ARGS);
+static	void	  roff_html_pre_ce(ROFF_HTML_ARGS);
 static	void	  roff_html_pre_sp(ROFF_HTML_ARGS);
 
 static	const roff_html_pre_fp roff_html_pre_acts[ROFF_MAX] = {
 	roff_html_pre_br,  /* br */
+	roff_html_pre_ce,  /* ce */
 	NULL,  /* ft */
 	NULL,  /* ll */
 	NULL,  /* mc */
@@ -53,8 +55,25 @@ roff_html_pre(struct html *h, const struct roff_node *n)
 static void
 roff_html_pre_br(ROFF_HTML_ARGS)
 {
-	print_otag(h, TAG_DIV, "");
+	struct tag	*t;
+
+	t = print_otag(h, TAG_DIV, "");
 	print_text(h, "\\~");  /* So the div isn't empty. */
+	print_tagq(h, t);
+}
+
+static void
+roff_html_pre_ce(ROFF_HTML_ARGS)
+{
+	for (n = n->child->next; n != NULL; n = n->next) {
+		if (n->type == ROFFT_TEXT) {
+			if (n->flags & NODE_LINE)
+				roff_html_pre_br(h, n);
+			print_text(h, n->string);
+		} else
+			roff_html_pre(h, n);
+	}
+	roff_html_pre_br(h, n);
 }
 
 static void

@@ -126,6 +126,7 @@ static	void	  print_node(DECL_ARGS);
 
 static	const void_fp roff_manacts[ROFF_MAX] = {
 	pre_br,
+	pre_onearg,
 	pre_ft,
 	pre_onearg,
 	pre_onearg,
@@ -1582,6 +1583,9 @@ pre_onearg(DECL_ARGS)
 	if (n->child != NULL)
 		print_word(n->child->string);
 	outflags |= MMAN_nl;
+	if (n->tok == ROFF_ce)
+		for (n = n->child->next; n != NULL; n = n->next)
+			print_node(meta, n);
 }
 
 static int
