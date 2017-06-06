@@ -527,7 +527,10 @@ Trailing characters are ignored.
 Center the next
 .Ar N
 input lines without filling.
-Currently ignored.
+.Ar N
+defaults to 1.
+An argument of 0 or less ends centering.
+Currently, high level macros abort certering.
 .It Ic \&cf Ar filename
 Output the contents of a file.
 Ignored because insecure.
