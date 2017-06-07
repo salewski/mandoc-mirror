@@ -309,6 +309,7 @@ enum	roff_tok {
 	ROFF_writem,
 	ROFF_xflag,
 	ROFF_cblock,
+	ROFF_RENAMED,
 	ROFF_USERDEF,
 	TOKEN_NONE,
 	MDOC_Dd,

@@ -530,7 +530,7 @@ input lines without filling.
 .Ar N
 defaults to 1.
 An argument of 0 or less ends centering.
-Currently, high level macros abort certering.
+Currently, high level macros abort centering.
 .It Ic \&cf Ar filename
 Output the contents of a file.
 Ignored because insecure.
@@ -1482,7 +1482,16 @@ Currently ignored.
 Remove a request, macro or string.
 .It Ic \&rn Ar oldname newname
 Rename a request, macro, diversion, or string.
-Currently unsupported.
+In
+.Xr mandoc 1 ,
+user-defined macros,
+.Xr mdoc 7
+and
+.Xr man 7
+macros, and user-defined strings can be renamed, but renaming of
+predefined strings and of
+.Nm
+requests is not supported, and diversions are not implemented at all.
 .It Ic \&rnn Ar oldname newname
 Rename a number register.
 Currently unsupported.
