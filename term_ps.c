@@ -538,12 +538,15 @@ pspdf_alloc(const struct manoutput *outopts)
 	size_t		 marginx, marginy, lineheight;
 	const char	*pp;
 
-	p = mandoc_calloc(1, sizeof(struct termp));
+	p = mandoc_calloc(1, sizeof(*p));
+	p->tcol = p->tcols = mandoc_calloc(1, sizeof(*p->tcol));
+	p->maxtcol = 1;
+
 	p->enc = TERMENC_ASCII;
 	p->fontq = mandoc_reallocarray(NULL,
-	    (p->fontsz = 8), sizeof(enum termfont));
+	    (p->fontsz = 8), sizeof(*p->fontq));
 	p->fontq[0] = p->fontl = TERMFONT_NONE;
-	p->ps = mandoc_calloc(1, sizeof(struct termp_ps));
+	p->ps = mandoc_calloc(1, sizeof(*p->ps));
 
 	p->advance = ps_advance;
 	p->begin = ps_begin;
@@ -1220,7 +1223,7 @@ ps_endline(struct termp *p)
 
 	ps_closepage(p);
 
-	p->offset -= p->ti;
+	p->tcol->offset -= p->ti;
 	p->ti = 0;
 }
 

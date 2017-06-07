@@ -80,21 +80,21 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 		tp->tbl.slen = term_tbl_strlen;
 		tp->tbl.arg = tp;
 
-		tblcalc(&tp->tbl, sp, tp->rmargin - tp->offset);
+		tblcalc(&tp->tbl, sp, tp->tcol->rmargin - tp->tcol->offset);
 
 		/* Center the table as a whole. */
 
-		offset = tp->offset;
+		offset = tp->tcol->offset;
 		if (sp->opts->opts & TBL_OPT_CENTRE) {
 			tsz = sp->opts->opts & (TBL_OPT_BOX | TBL_OPT_DBOX)
 			    ? 2 : !!sp->opts->lvert + !!sp->opts->rvert;
 			for (ic = 0; ic < sp->opts->cols; ic++)
 				tsz += tp->tbl.cols[ic].width + 3;
 			tsz -= 3;
-			if (offset + tsz > tp->rmargin)
+			if (offset + tsz > tp->tcol->rmargin)
 				tsz -= 1;
-			tp->offset = (offset + tp->rmargin > tsz) ?
-			    (offset + tp->rmargin - tsz) / 2 : 0;
+			tp->tcol->offset = offset + tp->tcol->rmargin > tsz ?
+			    (offset + tp->tcol->rmargin - tsz) / 2 : 0;
 		}
 
 		/* Horizontal frame at the start of boxed tables. */
@@ -193,7 +193,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 		assert(tp->tbl.cols);
 		free(tp->tbl.cols);
 		tp->tbl.cols = NULL;
-		tp->offset = offset;
+		tp->tcol->offset = offset;
 	}
 	tp->flags &= ~(TERMP_NONOSPACE | TERMP_BRNEVER);
 }

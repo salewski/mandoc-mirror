@@ -65,12 +65,14 @@ ascii_init(enum termenc enc, const struct manoutput *outopts)
 #endif
 	struct termp	*p;
 
-	p = mandoc_calloc(1, sizeof(struct termp));
+	p = mandoc_calloc(1, sizeof(*p));
+	p->tcol = p->tcols = mandoc_calloc(1, sizeof(*p->tcol));
+	p->maxtcol = 1;
 
 	p->line = 1;
 	p->defrmargin = p->lastrmargin = 78;
 	p->fontq = mandoc_reallocarray(NULL,
-	     (p->fontsz = 8), sizeof(enum termfont));
+	     (p->fontsz = 8), sizeof(*p->fontq));
 	p->fontq[0] = p->fontl = TERMFONT_NONE;
 
 	p->begin = ascii_begin;
@@ -148,7 +150,7 @@ ascii_setwidth(struct termp *p, int iop, int width)
 {
 
 	width /= 24;
-	p->rmargin = p->defrmargin;
+	p->tcol->rmargin = p->defrmargin;
 	if (iop > 0)
 		p->defrmargin += width;
 	else if (iop == 0)
@@ -157,8 +159,8 @@ ascii_setwidth(struct termp *p, int iop, int width)
 		p->defrmargin -= width;
 	else
 		p->defrmargin = 0;
-	p->lastrmargin = p->rmargin;
-	p->rmargin = p->maxrmargin = p->defrmargin;
+	p->lastrmargin = p->tcol->rmargin;
+	p->tcol->rmargin = p->maxrmargin = p->defrmargin;
 }
 
 void
@@ -215,7 +217,7 @@ ascii_endline(struct termp *p)
 {
 
 	p->line++;
-	p->offset -= p->ti;
+	p->tcol->offset -= p->ti;
 	p->ti = 0;
 	putchar('\n');
 }
@@ -371,7 +373,7 @@ locale_endline(struct termp *p)
 {
 
 	p->line++;
-	p->offset -= p->ti;
+	p->tcol->offset -= p->ti;
 	p->ti = 0;
 	putwchar(L'\n');
 }
