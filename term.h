@@ -62,7 +62,8 @@ struct	termp {
 	size_t		  maxrmargin;	/* Max right margin. */
 	size_t		  maxcols;	/* Max size of buf. */
 	size_t		  offset;	/* Margin offest. */
-	size_t		  col;		/* Bytes in buf. */
+	size_t		  col;		/* Byte position in buf. */
+	size_t		  lastcol;	/* Bytes in buf. */
 	size_t		  viscol;	/* Chars on current line. */
 	size_t		  trailspace;	/* See termp_flushln(). */
 	size_t		  minbl;	/* Minimum blanks before next field. */
