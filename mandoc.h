@@ -48,6 +48,8 @@ enum	mandocerr {
 
 	MANDOCERR_MACRO_USELESS, /* useless macro: macro */
 	MANDOCERR_BX, /* consider using OS macro: macro */
+	MANDOCERR_ER_ORDER, /* errnos out of order: Er ... */
+	MANDOCERR_ER_REP, /* duplicate errno: Er ... */
 	MANDOCERR_ND_DOT, /* description line ends with a full stop */
 
 	MANDOCERR_WARNING, /* ===== start of warnings ===== */

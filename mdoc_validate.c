@@ -1479,6 +1479,8 @@ post_bl(POST_ARGS)
 	struct roff_node	*nparent, *nprev; /* of the Bl block */
 	struct roff_node	*nblock, *nbody;  /* of the Bl */
 	struct roff_node	*nchild, *nnext;  /* of the Bl body */
+	const char		*prev_Er;
+	int			 order;
 
 	nbody = mdoc->last;
 	switch (nbody->type) {
@@ -1578,6 +1580,34 @@ post_bl(POST_ARGS)
 			nprev->next = nchild;
 
 		nchild = nnext;
+	}
+
+	if (mdoc->meta.os_e != MDOC_OS_NETBSD)
+		return;
+
+	prev_Er = NULL;
+	for (nchild = nbody->child; nchild != NULL; nchild = nchild->next) {
+		if (nchild->tok != MDOC_It)
+			continue;
+		if ((nnext = nchild->head->child) == NULL)
+			continue;
+		if (nnext->type == ROFFT_BLOCK)
+			nnext = nnext->body->child;
+		if (nnext == NULL || nnext->tok != MDOC_Er)
+			continue;
+		nnext = nnext->child;
+		if (prev_Er != NULL) {
+			order = strcmp(prev_Er, nnext->string);
+			if (order > 0)
+				mandoc_vmsg(MANDOCERR_ER_ORDER,
+				    mdoc->parse, nnext->line, nnext->pos,
+				    "Er %s %s", prev_Er, nnext->string);
+			else if (order == 0)
+				mandoc_vmsg(MANDOCERR_ER_REP,
+				    mdoc->parse, nnext->line, nnext->pos,
+				    "Er %s", prev_Er);
+		}
+		prev_Er = nnext->string;
 	}
 }
 
@@ -2385,11 +2415,11 @@ post_os(POST_ARGS)
 	mdoc->meta.os = NULL;
 	deroff(&mdoc->meta.os, n);
 	if (mdoc->meta.os)
-		return;
+		goto out;
 
 	if (mdoc->defos) {
 		mdoc->meta.os = mandoc_strdup(mdoc->defos);
-		return;
+		goto out;
 	}
 
 #ifdef OSNAME
@@ -2406,6 +2436,10 @@ post_os(POST_ARGS)
 	}
 	mdoc->meta.os = mandoc_strdup(defbuf);
 #endif /*!OSNAME*/
+
+out:	mdoc->meta.os_e = strstr(mdoc->meta.os, "OpenBSD") != NULL ?
+	    MDOC_OS_OPENBSD : strstr(mdoc->meta.os, "NetBSD") != NULL ?
+	    MDOC_OS_NETBSD : MDOC_OS_OTHER;
 }
 
 enum roff_sec

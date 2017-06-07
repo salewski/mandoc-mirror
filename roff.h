@@ -26,6 +26,12 @@ enum	roff_macroset {
 	MACROSET_MAN
 };
 
+enum	mdoc_os {
+	MDOC_OS_OTHER = 0,
+	MDOC_OS_NETBSD,
+	MDOC_OS_OPENBSD
+};
+
 enum	roff_sec {
 	SEC_NONE = 0,
 	SEC_NAME,
@@ -528,6 +534,7 @@ struct	roff_meta {
 	char		 *name;    /* Leading manual name. */
 	char		 *date;    /* Normalized date. */
 	int		  hasbody; /* Document is not empty. */
+	enum mdoc_os	  os_e;    /* Operating system. */
 };
 
 struct	roff_man {
