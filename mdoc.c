@@ -278,7 +278,7 @@ mdoc_ptext(struct roff_man *mdoc, int line, char *buf, int offs)
 	for (c = buf + offs; c != NULL; c = strchr(c + 1, '.')) {
 		if (c - buf < offs + 2)
 			continue;
-		if (end - c < 4)
+		if (end - c < 3)
 			break;
 		if (isalpha((unsigned char)c[-2]) &&
 		    isalpha((unsigned char)c[-1]) &&
