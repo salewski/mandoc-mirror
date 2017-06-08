@@ -177,6 +177,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"unknown AT&T UNIX version",
 	"comma in function argument",
 	"parenthesis in function name",
+	"unknown library name",
 	"invalid content in Rs block",
 	"invalid Boolean argument",
 	"unknown font, skipping request",

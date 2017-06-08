@@ -1,1 +1,3 @@
 mandoc: badargs.in:9:2: WARNING: skipping empty macro: Lb
+mandoc: badargs.in:8:5: WARNING: unknown library name: Lb murks
+mandoc: badargs.in:10:5: WARNING: unknown library name: Lb mylib

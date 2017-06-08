@@ -794,6 +794,9 @@ post_lb(POST_ARGS)
 		return;
 	}
 
+	mandoc_vmsg(MANDOCERR_LB_BAD, mdoc->parse, n->child->line,
+	    n->child->pos, "Lb %s", n->child->string);
+
 	roff_word_alloc(mdoc, n->line, n->pos, "library");
 	mdoc->last->flags = NODE_NOSRC;
 	roff_word_alloc(mdoc, n->line, n->pos, "\\(Lq");
