@@ -114,6 +114,7 @@ tbl_free(struct tbl_node *tbl)
 		while (rp->first != NULL) {
 			cp = rp->first;
 			rp->first = cp->next;
+			free(cp->wstr);
 			free(cp);
 		}
 		free(rp);

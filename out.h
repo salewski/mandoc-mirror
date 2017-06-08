@@ -41,14 +41,16 @@ struct	roffsu {
 	double		  scale;
 };
 
+typedef	size_t	(*tbl_sulen)(const struct roffsu *, void *);
 typedef	size_t	(*tbl_strlen)(const char *, void *);
 typedef	size_t	(*tbl_len)(size_t, void *);
 
 struct	rofftbl {
+	tbl_sulen	 sulen; /* calculate scaling unit length */
 	tbl_strlen	 slen; /* calculate string length */
 	tbl_len		 len; /* produce width of empty space */
 	struct roffcol	*cols; /* master column specifiers */
-	void		*arg; /* passed to slen and len */
+	void		*arg; /* passed to sulen, slen, and len */
 };
 
 #define	SCALE_VS_INIT(p, v) \
