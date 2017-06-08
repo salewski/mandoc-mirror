@@ -40,10 +40,10 @@ static	void	tblcalc_number(struct rofftbl *, struct roffcol *,
  * Parse the *src string and store a scaling unit into *dst.
  * If the string doesn't specify the unit, use the default.
  * If no default is specified, fail.
- * Return 2 on complete success, 1 when a conversion was done,
- * but there was trailing garbage, and 0 on total failure.
+ * Return a pointer to the byte after the last byte used,
+ * or NULL on total failure.
  */
-int
+const char *
 a2roffsu(const char *src, struct roffsu *dst, enum roffscale def)
 {
 	char		*endptr;
@@ -51,7 +51,7 @@ a2roffsu(const char *src, struct roffsu *dst, enum roffscale def)
 	dst->unit = def == SCALE_MAX ? SCALE_BU : def;
 	dst->scale = strtod(src, &endptr);
 	if (endptr == src)
-		return 0;
+		return NULL;
 
 	switch (*endptr++) {
 	case 'c':
@@ -89,12 +89,11 @@ a2roffsu(const char *src, struct roffsu *dst, enum roffscale def)
 		/* FALLTHROUGH */
 	default:
 		if (SCALE_MAX == def)
-			return 0;
+			return NULL;
 		dst->unit = def;
 		break;
 	}
-
-	return *endptr == '\0' ? 2 : 1;
+	return endptr;
 }
 
 /*

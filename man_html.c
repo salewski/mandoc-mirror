@@ -358,13 +358,9 @@ fillmode(struct html *h, int want)
 static int
 a2width(const struct roff_node *n, struct roffsu *su)
 {
-
 	if (n->type != ROFFT_TEXT)
 		return 0;
-	if (a2roffsu(n->string, su, SCALE_EN))
-		return 1;
-
-	return 0;
+	return a2roffsu(n->string, su, SCALE_EN) != NULL;
 }
 
 static void

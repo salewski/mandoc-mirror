@@ -950,7 +950,10 @@ print_word(struct html *h, const char *cp)
 static void
 a2width(const char *p, struct roffsu *su)
 {
-	if (a2roffsu(p, su, SCALE_MAX) < 2) {
+	const char	*end;
+
+	end = a2roffsu(p, su, SCALE_MAX);
+	if (end == NULL || *end != '\0') {
 		su->unit = SCALE_EN;
 		su->scale = html_strlen(p);
 	} else if (su->scale < 0.0)

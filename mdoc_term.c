@@ -533,8 +533,10 @@ static int
 a2width(const struct termp *p, const char *v)
 {
 	struct roffsu	 su;
+	const char	*end;
 
-	if (a2roffsu(v, &su, SCALE_MAX) < 2) {
+	end = a2roffsu(v, &su, SCALE_MAX);
+	if (end == NULL || *end != '\0') {
 		SCALE_HS_INIT(&su, term_strlen(p, v));
 		su.scale /= term_strlen(p, "0");
 	}

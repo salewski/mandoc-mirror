@@ -476,6 +476,7 @@ print_offs(const char *v, int keywords)
 {
 	char		  buf[24];
 	struct roffsu	  su;
+	const char	 *end;
 	int		  sz;
 
 	print_line(".RS", MMAN_Bk_susp);
@@ -487,8 +488,11 @@ print_offs(const char *v, int keywords)
 		sz = 6;
 	else if (keywords && !strcmp(v, "indent-two"))
 		sz = 12;
-	else if (a2roffsu(v, &su, SCALE_EN) > 1) {
-		if (SCALE_EN == su.unit)
+	else {
+		end = a2roffsu(v, &su, SCALE_EN);
+		if (end == NULL || *end != '\0')
+			sz = man_strlen(v);
+		else if (SCALE_EN == su.unit)
 			sz = su.scale;
 		else {
 			/*
@@ -502,8 +506,7 @@ print_offs(const char *v, int keywords)
 			outflags |= MMAN_nl;
 			return;
 		}
-	} else
-		sz = man_strlen(v);
+	}
 
 	/*
 	 * We are inside an enclosing list.
@@ -525,6 +528,7 @@ print_width(const struct mdoc_bl *bl, const struct roff_node *child)
 {
 	char		  buf[24];
 	struct roffsu	  su;
+	const char	 *end;
 	int		  numeric, remain, sz, chsz;
 
 	numeric = 1;
@@ -533,15 +537,17 @@ print_width(const struct mdoc_bl *bl, const struct roff_node *child)
 	/* Convert the width into a number (of characters). */
 	if (bl->width == NULL)
 		sz = (bl->type == LIST_hang) ? 6 : 0;
-	else if (a2roffsu(bl->width, &su, SCALE_MAX) > 1) {
-		if (SCALE_EN == su.unit)
+	else {
+		end = a2roffsu(bl->width, &su, SCALE_MAX);
+		if (end == NULL || *end != '\0')
+			sz = man_strlen(bl->width);
+		else if (SCALE_EN == su.unit)
 			sz = su.scale;
 		else {
 			sz = 0;
 			numeric = 0;
 		}
-	} else
-		sz = man_strlen(bl->width);
+	}
 
 	/* XXX Rough estimation, might have multiple parts. */
 	if (bl->type == LIST_enum)

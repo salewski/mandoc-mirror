@@ -83,7 +83,7 @@ roff_html_pre_sp(ROFF_HTML_ARGS)
 
 	SCALE_VS_INIT(&su, 1);
 	if ((n = n->child) != NULL) {
-		if (a2roffsu(n->string, &su, SCALE_VS) == 0)
+		if (a2roffsu(n->string, &su, SCALE_VS) == NULL)
 			su.scale = 1.0;
 		else if (su.scale < 0.0)
 			su.scale = 0.0;

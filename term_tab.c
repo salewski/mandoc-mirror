@@ -68,7 +68,7 @@ term_tab_set(const struct termp *p, const char *arg)
 		arg++;
 	} else
 		add = 0;
-	if (a2roffsu(arg, &su, SCALE_EM) == 0)
+	if (a2roffsu(arg, &su, SCALE_EM) == NULL)
 		return;
 
 	/* Select the list, and extend it if it is full. */

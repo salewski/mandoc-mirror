@@ -1,6 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2014, 2017 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -63,6 +64,6 @@ struct	rofftbl {
 
 struct	tbl_span;
 
-int		  a2roffsu(const char *, struct roffsu *, enum roffscale);
+const char	 *a2roffsu(const char *, struct roffsu *, enum roffscale);
 void		  tblcalc(struct rofftbl *tbl,
 			const struct tbl_span *, size_t);
