@@ -767,6 +767,10 @@ roff_reset(struct roff *r)
 	r->format = r->options & (MPARSE_MDOC | MPARSE_MAN);
 	r->control = '\0';
 	r->escape = '\\';
+	roffce_lines = 0;
+	roffce_node = NULL;
+	roffit_lines = 0;
+	roffit_macro = NULL;
 }
 
 void
