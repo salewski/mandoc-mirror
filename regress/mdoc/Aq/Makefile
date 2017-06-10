@@ -2,5 +2,6 @@
 
 REGRESS_TARGETS	= author empty
 UTF8_TARGETS	= author empty
+LINT_TARGETS	= empty
 
 .include <bsd.regress.mk>

@@ -798,6 +798,11 @@ number.
 Do not use punctuation at the end of an
 .Ic \&Nd
 block.
+.It Sy "no blank before trailing delimiter"
+The last argument of a macro that supports trailing delimiter
+arguments is longer than one byte and ends with a trailing delimiter.
+Consider inserting a blank such that the delimiter becomes a separate
+argument, thus moving it out of the scope of the macro.
 .El
 .Ss Warnings related to the document prologue
 .Bl -ohang

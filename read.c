@@ -93,6 +93,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"errnos out of order",
 	"duplicate errno",
 	"description line ends with a full stop",
+	"no blank before trailing delimiter",
 
 	"generic warning",
 
