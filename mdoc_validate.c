@@ -2580,7 +2580,7 @@ out:	mdoc->meta.os_e = strstr(mdoc->meta.os, "OpenBSD") != NULL ?
 			return;
 	if ((n = n->child) == NULL)
 		return;
-	if (strcmp(n->string, "$" "Mdocdate")) {
+	if (strncmp(n->string, "$" "Mdocdate", 9)) {
 		if (mdoc->meta.os_e == MDOC_OS_OPENBSD)
 			mandoc_vmsg(MANDOCERR_MDOCDATE_MISSING,
 			    mdoc->parse, n->line, n->pos,
