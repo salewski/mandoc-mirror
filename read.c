@@ -94,6 +94,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"duplicate errno",
 	"description line ends with a full stop",
 	"no blank before trailing delimiter",
+	"function name without markup",
 
 	"generic warning",
 

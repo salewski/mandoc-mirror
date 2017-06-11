@@ -52,6 +52,7 @@ enum	mandocerr {
 	MANDOCERR_ER_REP, /* duplicate errno: Er ... */
 	MANDOCERR_ND_DOT, /* description line ends with a full stop */
 	MANDOCERR_DELIM, /* no blank before trailing delimiter: macro ... */
+	MANDOCERR_FUNC, /* function name without markup: name() */
 
 	MANDOCERR_WARNING, /* ===== start of warnings ===== */
 
