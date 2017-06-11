@@ -88,6 +88,9 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	"generic style suggestion",
 
+	"Mdocdate found",
+	"Mdocdate missing",
+	"legacy man(7) date format",
 	"useless macro",
 	"consider using OS macro",
 	"errnos out of order",

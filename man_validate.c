@@ -167,7 +167,7 @@ check_root(CHKARGS)
 		man->meta.title = mandoc_strdup("");
 		man->meta.msec = mandoc_strdup("");
 		man->meta.date = man->quick ? mandoc_strdup("") :
-		    mandoc_normdate(man->parse, NULL, n->line, n->pos);
+		    mandoc_normdate(man, NULL, n->line, n->pos);
 	}
 }
 
@@ -323,8 +323,7 @@ post_TH(CHKARGS)
 	if (n && n->string && '\0' != n->string[0]) {
 		man->meta.date = man->quick ?
 		    mandoc_strdup(n->string) :
-		    mandoc_normdate(man->parse, n->string,
-			n->line, n->pos);
+		    mandoc_normdate(man, n->string, n->line, n->pos);
 	} else {
 		man->meta.date = mandoc_strdup("");
 		mandoc_msg(MANDOCERR_DATE_MISSING, man->parse,
