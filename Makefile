@@ -38,6 +38,7 @@ TESTSRCS	 = test-be32toh.c \
 		   test-progname.c \
 		   test-recvmsg.c \
 		   test-reallocarray.c \
+		   test-recallocarray.c \
 		   test-rewb-bsd.c \
 		   test-rewb-sysv.c \
 		   test-sandbox_init.c \
@@ -64,6 +65,7 @@ SRCS		 = att.c \
 		   compat_ohash.c \
 		   compat_progname.c \
 		   compat_reallocarray.c \
+		   compat_recallocarray.c \
 		   compat_strcasestr.c \
 		   compat_stringlist.c \
 		   compat_strlcat.c \
@@ -240,6 +242,7 @@ COMPAT_OBJS	 = compat_err.o \
 		   compat_ohash.o \
 		   compat_progname.o \
 		   compat_reallocarray.o \
+		   compat_recallocarray.o \
 		   compat_strcasestr.o \
 		   compat_strlcat.o \
 		   compat_strlcpy.o \
