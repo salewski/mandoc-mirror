@@ -68,4 +68,4 @@ struct	tbl_span;
 
 const char	 *a2roffsu(const char *, struct roffsu *, enum roffscale);
 void		  tblcalc(struct rofftbl *tbl,
-			const struct tbl_span *, size_t);
+			const struct tbl_span *, size_t, size_t);

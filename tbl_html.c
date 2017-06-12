@@ -83,7 +83,7 @@ html_tblopen(struct html *h, const struct tbl_span *sp)
 		h->tbl.len = html_tbl_len;
 		h->tbl.slen = html_tbl_strlen;
 		h->tbl.sulen = html_tbl_sulen;
-		tblcalc(&h->tbl, sp, 0);
+		tblcalc(&h->tbl, sp, 0, 0);
 	}
 
 	assert(NULL == h->tblt);

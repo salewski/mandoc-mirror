@@ -87,7 +87,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 		tp->tbl.sulen = term_tbl_sulen;
 		tp->tbl.arg = tp;
 
-		tblcalc(&tp->tbl, sp, tp->tcol->rmargin - tp->tcol->offset);
+		tblcalc(&tp->tbl, sp, tp->tcol->offset, tp->tcol->rmargin);
 
 		/* Center the table as a whole. */
 
