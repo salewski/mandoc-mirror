@@ -242,6 +242,8 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 					cp = cp->next;
 				} else
 					vert = 0;
+				if (sp->opts->opts & TBL_OPT_ALLBOX)
+					vert = 1;
 				if (vert == 0)
 					continue;
 
@@ -300,7 +302,9 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 		free(tp->tbl.cols);
 		tp->tbl.cols = NULL;
 		tp->tcol->offset = offset;
-	}
+	} else if (horiz == 0 && sp->opts->opts & TBL_OPT_ALLBOX)
+		tbl_hrule(tp, sp, 1);
+
 	tp->flags &= ~TERMP_NONOSPACE;
 }
 
@@ -336,6 +340,8 @@ tbl_hrule(struct termp *tp, const struct tbl_span *sp, int kind)
 				vert = c2->vert;
 			c2 = c2->next;
 		}
+		if (sp->opts->opts & TBL_OPT_ALLBOX && !vert)
+			vert = 1;
 		if (vert)
 			tbl_char(tp, cross, vert);
 		if (vert < 2)
