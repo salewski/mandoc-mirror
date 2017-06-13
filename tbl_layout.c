@@ -298,6 +298,8 @@ tbl_layout(struct tbl_node *tbl, int ln, const char *p, int pos)
 				    tbl->parse, ln, pos, NULL);
 				cell_alloc(tbl, tbl->first_row,
 				    TBL_CELL_LEFT);
+				if (tbl->opts.lvert < tbl->first_row->vert)
+					tbl->opts.lvert = tbl->first_row->vert;
 				return;
 			}
 
