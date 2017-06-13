@@ -235,6 +235,10 @@ blk_close(MACRO_PROT_ARGS)
 		ntok = man->last->tok;
 		man_unscope(man, nn);
 
+		if (tok == MAN_RE && nn->head->aux > 0)
+			roff_setreg(man->roff, "an-margin",
+			    nn->head->aux, '-');
+
 		/* Move a trailing paragraph behind the block. */
 
 		if (ntok == MAN_LP || ntok == MAN_PP || ntok == MAN_P) {
@@ -256,8 +260,17 @@ blk_exp(MACRO_PROT_ARGS)
 	head = roff_head_alloc(man, line, ppos, tok);
 
 	la = *pos;
-	if (man_args(man, line, pos, buf, &p))
+	if (man_args(man, line, pos, buf, &p)) {
 		roff_word_alloc(man, line, la, p);
+		if (tok == MAN_RS) {
+			if (roff_getreg(man->roff, "an-margin") == 0)
+				roff_setreg(man->roff, "an-margin",
+				    7 * 24, '=');
+			if ((head->aux = strtod(p, NULL) * 24.0) > 0)
+				roff_setreg(man->roff, "an-margin",
+				    head->aux, '+');
+		}
+	}
 
 	if (buf[*pos] != '\0')
 		mandoc_vmsg(MANDOCERR_ARG_EXCESS, man->parse, line,
