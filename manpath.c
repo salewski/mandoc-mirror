@@ -299,7 +299,7 @@ manconf_output(struct manoutput *conf, const char *cp, int fromfile)
 			mandoc_asprintf(&oldval, "%zu", conf->width);
 			break;
 		}
-		conf->width = strtonum(cp, 58, 1000, &errstr);
+		conf->width = strtonum(cp, 1, 1000, &errstr);
 		if (errstr == NULL)
 			return 0;
 		warnx("-O width=%s is %s", cp, errstr);
