@@ -219,29 +219,44 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 			dp = sp->first;
 			spans = 0;
 			for (ic = 0; ic < sp->opts->cols; ic++) {
-				if (spans == 0) {
-					tp->tcol++;
-					if (dp != NULL) {
-						spans = dp->spans;
-						dp = dp->next;
-					}
-					if (tp->tcol->col < tp->tcol->lastcol)
-						term_flushln(tp);
-					if (tp->tcol->col < tp->tcol->lastcol)
-						more = 1;
-					if (tp->tcol + 1 ==
-					    tp->tcols + tp->lasttcol)
-						continue;
-				} else
-					spans--;
 
-				/* Vertical frames between data cells. */
+				/* Advance to next layout cell. */
 
 				if (cp != NULL) {
 					vert = cp->vert;
 					cp = cp->next;
 				} else
 					vert = 0;
+
+				/* Skip later cells in a span. */
+
+				if (spans) {
+					spans--;
+					continue;
+				}
+
+				/* Advance to next data cell. */
+
+				if (dp != NULL) {
+					spans = dp->spans;
+					dp = dp->next;
+				}
+
+				/* Print one line of text in the cell. */
+
+				tp->tcol++;
+				if (tp->tcol->col < tp->tcol->lastcol)
+					term_flushln(tp);
+				if (tp->tcol->col < tp->tcol->lastcol)
+					more = 1;
+
+				/*
+				 * Vertical frames between data cells,
+				 * but not after the last column.
+				 */
+
+				if (tp->tcol + 1 == tp->tcols + tp->lasttcol)
+					continue;
 				if (vert == 0 &&
 				    sp->opts->opts & TBL_OPT_ALLBOX)
 					vert = 1;
