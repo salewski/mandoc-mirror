@@ -1548,10 +1548,11 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 
 	/* Tables ignore most macros. */
 
-	if (r->tbl != NULL && (t == TOKEN_NONE || t == ROFF_TS)) {
+	if (r->tbl != NULL && (t == TOKEN_NONE || t == ROFF_TS ||
+	    t == ROFF_br || t == ROFF_ce || t == ROFF_sp)) {
 		mandoc_msg(MANDOCERR_TBLMACRO, r->parse,
 		    ln, pos, buf->buf + spos);
-		if (t == ROFF_TS)
+		if (t != TOKEN_NONE)
 			return ROFF_IGN;
 		while (buf->buf[pos] != '\0' && buf->buf[pos] != ' ')
 			pos++;
