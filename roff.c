@@ -223,8 +223,8 @@ static	enum rofferr	 roff_userdef(ROFF_ARGS);
 
 const char *__roff_name[MAN_MAX + 1] = {
 	"br",		"ce",		"ft",		"ll",
-	"mc",		"rj",		"sp",		"ta",
-	"ti",		NULL,
+	"mc",		"po",		"rj",		"sp",
+	"ta",		"ti",		NULL,
 	"ab",		"ad",		"af",		"aln",
 	"als",		"am",		"am1",		"ami",
 	"ami1",		"as",		"as1",		"asciify",
@@ -265,7 +265,7 @@ const char *__roff_name[MAN_MAX + 1] = {
 	"open",		"opena",	"os",		"output",
 	"padj",		"papersize",	"pc",		"pev",
 	"pi",		"PI",		"pl",		"pm",
-	"pn",		"pnr",		"po",		"ps",
+	"pn",		"pnr",		"ps",
 	"psbb",		"pshape",	"pso",		"ptr",
 	"pvs",		"rchar",	"rd",		"recursionlimit",
 	"return",	"rfschar",	"rhang",
@@ -335,6 +335,7 @@ static	struct roffmac	 roffs[TOKEN_NONE] = {
 	{ roff_onearg, NULL, NULL, 0 },  /* ft */
 	{ roff_onearg, NULL, NULL, 0 },  /* ll */
 	{ roff_onearg, NULL, NULL, 0 },  /* mc */
+	{ roff_onearg, NULL, NULL, 0 },  /* po */
 	{ roff_onearg, NULL, NULL, 0 },  /* rj */
 	{ roff_onearg, NULL, NULL, 0 },  /* sp */
 	{ roff_manyarg, NULL, NULL, 0 },  /* ta */
@@ -500,7 +501,6 @@ static	struct roffmac	 roffs[TOKEN_NONE] = {
 	{ roff_line_ignore, NULL, NULL, 0 },  /* pm */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* pn */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* pnr */
-	{ roff_line_ignore, NULL, NULL, 0 },  /* po */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* ps */
 	{ roff_unsupp, NULL, NULL, 0 },  /* psbb */
 	{ roff_unsupp, NULL, NULL, 0 },  /* pshape */

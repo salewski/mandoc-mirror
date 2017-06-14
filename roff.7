@@ -1441,8 +1441,15 @@ Currently ignored.
 Print all number registers on standard error output.
 Currently ignored.
 .It Ic \&po Op Oo Cm + Ns | Ns Cm - Oc Ns Ar offset
-Set horizontal page offset.
-Currently ignored.
+Set a horizontal page offset.
+If no argument is specified, the page offset is reverted to its
+previous value.
+If a sign is specified, the new page offset is calculated relative
+to the current one; otherwise, it is absolute.
+The argument follows the syntax of
+.Sx Scaling Widths
+and the default scaling unit is
+.Cm m .
 .It Ic \&ps Op Oo Cm + Ns | Ns Cm - Oc Ns size
 Change point size.
 Currently ignored.

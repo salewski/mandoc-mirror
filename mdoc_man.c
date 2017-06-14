@@ -130,6 +130,7 @@ static	const void_fp roff_manacts[ROFF_MAX] = {
 	pre_ft,		/* ft */
 	pre_onearg,	/* ll */
 	pre_onearg,	/* mc */
+	pre_onearg,	/* po */
 	pre_onearg,	/* rj */
 	pre_sp,		/* sp */
 	pre_ta,		/* ta */
