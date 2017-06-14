@@ -526,9 +526,14 @@ term_word(struct termp *p, const char *word)
 				p->flags |= (TERMP_NOSPACE | TERMP_NONEWLINE);
 			continue;
 		case ESCAPE_HORIZ:
+			if (*seq == '|') {
+				seq++;
+				uc = -p->col;
+			} else
+				uc = 0;
 			if (a2roffsu(seq, &su, SCALE_EM) == NULL)
 				continue;
-			uc = term_hen(p, &su);
+			uc += term_hen(p, &su);
 			if (uc > 0)
 				while (uc-- > 0)
 					bufferc(p, ASCII_NBRSP);
