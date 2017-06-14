@@ -96,6 +96,8 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	case ',':
 	case '/':
 		return ESCAPE_IGNORE;
+	case 'p':
+		return ESCAPE_BREAK;
 
 	/*
 	 * The \z escape is supposed to output the following

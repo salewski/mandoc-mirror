@@ -116,6 +116,7 @@ term_flushln(struct termp *p)
 	size_t		 jhy;	/* last hyph before overflow w/r/t j */
 	size_t		 maxvis; /* output position of visible boundary */
 	int		 ntab;	/* number of tabs to prepend */
+	int		 breakline; /* after this word */
 
 	vbl = (p->flags & TERMP_NOPAD) || p->tcol->offset < p->viscol ?
 	    0 : p->tcol->offset - p->viscol;
@@ -155,7 +156,13 @@ term_flushln(struct termp *p)
 		 */
 
 		jhy = 0;
+		breakline = 0;
 		for (j = p->tcol->col; j < p->tcol->lastcol; j++) {
+			if (p->tcol->buf[j] == '\n') {
+				if ((p->flags & TERMP_BRIND) == 0)
+					breakline = 1;
+				continue;
+			}
 			if (p->tcol->buf[j] == ' ' || p->tcol->buf[j] == '\t')
 				break;
 
@@ -221,6 +228,8 @@ term_flushln(struct termp *p)
 		for ( ; p->tcol->col < p->tcol->lastcol; p->tcol->col++) {
 			if (vend > bp && jhy > 0 && p->tcol->col > jhy)
 				break;
+			if (p->tcol->buf[p->tcol->col] == '\n')
+				continue;
 			if (p->tcol->buf[p->tcol->col] == '\t')
 				break;
 			if (p->tcol->buf[p->tcol->col] == ' ') {
@@ -260,6 +269,26 @@ term_flushln(struct termp *p)
 				    p->tcol->buf[p->tcol->col]);
 		}
 		vis = vend;
+
+		if (breakline == 0)
+			continue;
+
+		/* Explicitly requested output line break. */
+
+		if (p->flags & TERMP_MULTICOL)
+			return;
+
+		endline(p);
+		breakline = 0;
+		vis = vend = 0;
+
+		/* Re-establish indentation. */
+
+		vbl = p->tcol->offset;
+		maxvis = p->tcol->rmargin > vbl ?
+		    p->tcol->rmargin - vbl : 0;
+		bp = !(p->flags & TERMP_NOBREAK) ? maxvis :
+		    p->maxrmargin > vbl ?  p->maxrmargin - vbl : 0;
 	}
 
 	/*
@@ -486,6 +515,9 @@ term_word(struct termp *p, const char *word)
 			continue;
 		case ESCAPE_FONTPREV:
 			term_fontlast(p);
+			continue;
+		case ESCAPE_BREAK:
+			bufferc(p, '\n');
 			continue;
 		case ESCAPE_NOSPACE:
 			if (p->flags & TERMP_BACKAFTER)
