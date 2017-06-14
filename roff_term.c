@@ -205,7 +205,7 @@ roff_term_pre_ti(ROFF_TERM_ARGS)
 
 	if (a2roffsu(cp, &su, SCALE_EM) == NULL)
 		return;
-	len = term_hspan(p, &su) / 24;
+	len = term_hen(p, &su);
 
 	if (sign == 0) {
 		p->ti = len - p->tcol->offset;

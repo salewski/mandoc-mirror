@@ -140,6 +140,7 @@ void		  term_end(struct termp *);
 
 void		  term_setwidth(struct termp *, const char *);
 int		  term_hspan(const struct termp *, const struct roffsu *);
+int		  term_hen(const struct termp *, const struct roffsu *);
 int		  term_vspan(const struct termp *, const struct roffsu *);
 size_t		  term_strlen(const struct termp *, const char *);
 size_t		  term_len(const struct termp *, size_t);

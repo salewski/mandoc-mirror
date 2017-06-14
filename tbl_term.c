@@ -47,7 +47,7 @@ static	void	tbl_word(struct termp *, const struct tbl_dat *);
 static size_t
 term_tbl_sulen(const struct roffsu *su, void *arg)
 {
-	return term_hspan((const struct termp *)arg, su) / 24;
+	return term_hen((const struct termp *)arg, su);
 }
 
 static size_t

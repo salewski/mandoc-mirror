@@ -528,7 +528,7 @@ term_word(struct termp *p, const char *word)
 		case ESCAPE_HORIZ:
 			if (a2roffsu(seq, &su, SCALE_EM) == NULL)
 				continue;
-			uc = term_hspan(p, &su) / 24;
+			uc = term_hen(p, &su);
 			if (uc > 0)
 				while (uc-- > 0)
 					bufferc(p, ASCII_NBRSP);
@@ -549,7 +549,7 @@ term_word(struct termp *p, const char *word)
 		case ESCAPE_HLINE:
 			if ((seq = a2roffsu(seq, &su, SCALE_EM)) == NULL)
 				continue;
-			uc = term_hspan(p, &su) / 24;
+			uc = term_hen(p, &su);
 			if (uc <= 0) {
 				if (p->tcol->rmargin <= p->tcol->offset)
 					continue;
@@ -966,11 +966,25 @@ term_vspan(const struct termp *p, const struct roffsu *su)
 }
 
 /*
- * Convert a scaling width to basic units, rounding down.
+ * Convert a scaling width to basic units, rounding towards 0.
  */
 int
 term_hspan(const struct termp *p, const struct roffsu *su)
 {
 
 	return (*p->hspan)(p, su);
+}
+
+/*
+ * Convert a scaling width to basic units, rounding to closest.
+ */
+int
+term_hen(const struct termp *p, const struct roffsu *su)
+{
+	int bu;
+
+	if ((bu = (*p->hspan)(p, su)) >= 0)
+		return (bu + 11) / 24;
+	else
+		return -((-bu + 11) / 24);
 }

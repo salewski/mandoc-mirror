@@ -540,7 +540,7 @@ a2width(const struct termp *p, const char *v)
 		SCALE_HS_INIT(&su, term_strlen(p, v));
 		su.scale /= term_strlen(p, "0");
 	}
-	return term_hspan(p, &su) / 24;
+	return term_hen(p, &su);
 }
 
 /*
@@ -686,7 +686,7 @@ termp_it_pre(DECL_ARGS)
 			SCALE_HS_INIT(&su,
 			    term_strlen(p, bl->norm->Bl.cols[i]));
 			su.scale /= term_strlen(p, "0");
-			offset += term_hspan(p, &su) / 24 + dcol;
+			offset += term_hen(p, &su) + dcol;
 		}
 
 		/*
@@ -704,7 +704,7 @@ termp_it_pre(DECL_ARGS)
 		 */
 		SCALE_HS_INIT(&su, term_strlen(p, bl->norm->Bl.cols[i]));
 		su.scale /= term_strlen(p, "0");
-		width = term_hspan(p, &su) / 24 + dcol;
+		width = term_hen(p, &su) + dcol;
 		break;
 	default:
 		if (NULL == bl->norm->Bl.width)
