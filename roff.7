@@ -1045,8 +1045,6 @@ If the first character of
 is
 .Sq c
 .Pq character available ,
-.Sq d
-.Pq string defined ,
 .Sq e
 .Pq even page ,
 .Sq t
@@ -1055,6 +1053,15 @@ or
 .Sq v
 .Pq vroff mode ,
 it evaluates to false.
+.It
+If the first character of
+.Ar condition
+is
+.Sq d ,
+it evaluates to true if the rest of
+.Ar condition
+is the name of an existing user defined macro or string;
+otherwise, it evaluates to false.
 .It
 If the first character of
 .Ar condition
