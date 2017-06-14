@@ -146,6 +146,7 @@ static	void		 roffnode_cleanscope(struct roff *);
 static	void		 roffnode_pop(struct roff *);
 static	void		 roffnode_push(struct roff *, enum roff_tok,
 				const char *, int, int);
+static	enum rofferr	 roff_als(ROFF_ARGS);
 static	enum rofferr	 roff_block(ROFF_ARGS);
 static	enum rofferr	 roff_block_text(ROFF_ARGS);
 static	enum rofferr	 roff_block_sub(ROFF_ARGS);
@@ -343,7 +344,7 @@ static	struct roffmac	 roffs[TOKEN_NONE] = {
 	{ roff_line_ignore, NULL, NULL, 0 },  /* ad */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* af */
 	{ roff_unsupp, NULL, NULL, 0 },  /* aln */
-	{ roff_unsupp, NULL, NULL, 0 },  /* als */
+	{ roff_als, NULL, NULL, 0 },  /* als */
 	{ roff_block, roff_block_text, roff_block_sub, 0 },  /* am */
 	{ roff_block, roff_block_text, roff_block_sub, 0 },  /* am1 */
 	{ roff_block, roff_block_text, roff_block_sub, 0 },  /* ami */
@@ -1779,8 +1780,10 @@ roff_block(ROFF_ARGS)
 	 * appended from roff_block_text() in multiline mode.
 	 */
 
-	if (tok == ROFF_de || tok == ROFF_dei)
+	if (tok == ROFF_de || tok == ROFF_dei) {
 		roff_setstrn(&r->strtab, name, namesz, "", 0, 0);
+		roff_setstrn(&r->rentab, name, namesz, NULL, 0, 0);
+	}
 
 	if (*cp == '\0')
 		return ROFF_IGN;
@@ -2249,6 +2252,7 @@ roff_ds(ROFF_ARGS)
 	/* The rest is the value. */
 	roff_setstrn(&r->strtab, name, namesz, string, strlen(string),
 	    ROFF_as == tok);
+	roff_setstrn(&r->rentab, name, namesz, NULL, 0, 0);
 	return ROFF_IGN;
 }
 
@@ -2660,6 +2664,7 @@ roff_rm(ROFF_ARGS)
 		name = cp;
 		namesz = roff_getname(r, &cp, ln, (int)(cp - buf->buf));
 		roff_setstrn(&r->strtab, name, namesz, NULL, 0, 0);
+		roff_setstrn(&r->rentab, name, namesz, NULL, 0, 0);
 		if (name[namesz] == '\\')
 			break;
 	}
@@ -2958,6 +2963,32 @@ roff_manyarg(ROFF_ARGS)
 }
 
 static enum rofferr
+roff_als(ROFF_ARGS)
+{
+	char		*oldn, *newn, *end, *value;
+	size_t		 oldsz, newsz, valsz;
+
+	newn = oldn = buf->buf + pos;
+	if (*newn == '\0')
+		return ROFF_IGN;
+
+	newsz = roff_getname(r, &oldn, ln, pos);
+	if (newn[newsz] == '\\' || *oldn == '\0')
+		return ROFF_IGN;
+
+	end = oldn;
+	oldsz = roff_getname(r, &end, ln, oldn - buf->buf);
+	if (oldsz == 0)
+		return ROFF_IGN;
+
+	valsz = mandoc_asprintf(&value, ".%.*s \\$*\n", (int)oldsz, oldn);
+	roff_setstrn(&r->strtab, newn, newsz, value, valsz, 0);
+	roff_setstrn(&r->rentab, newn, newsz, NULL, 0, 0);
+	free(value);
+	return ROFF_IGN;
+}
+
+static enum rofferr
 roff_br(ROFF_ARGS)
 {
 	if (r->man->flags & (MAN_BLINE | MAN_ELINE))
@@ -3162,7 +3193,7 @@ roff_so(ROFF_ARGS)
 static enum rofferr
 roff_userdef(ROFF_ARGS)
 {
-	const char	 *arg[9], *ap;
+	const char	 *arg[16], *ap;
 	char		 *cp, *n1, *n2;
 	int		  expand_count, i, ib, ie;
 	size_t		  asz, rsz;
@@ -3174,7 +3205,7 @@ roff_userdef(ROFF_ARGS)
 
 	r->argc = 0;
 	cp = buf->buf + pos;
-	for (i = 0; i < 9; i++) {
+	for (i = 0; i < 16; i++) {
 		if (*cp == '\0')
 			arg[i] = "";
 		else {
