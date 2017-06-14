@@ -222,8 +222,8 @@ static	enum rofferr	 roff_userdef(ROFF_ARGS);
 
 const char *__roff_name[MAN_MAX + 1] = {
 	"br",		"ce",		"ft",		"ll",
-	"mc",		"sp",		"ta",		"ti",
-	NULL,
+	"mc",		"rj",		"sp",		"ta",
+	"ti",		NULL,
 	"ab",		"ad",		"af",		"aln",
 	"als",		"am",		"am1",		"ami",
 	"ami1",		"as",		"as1",		"asciify",
@@ -267,7 +267,7 @@ const char *__roff_name[MAN_MAX + 1] = {
 	"pn",		"pnr",		"po",		"ps",
 	"psbb",		"pshape",	"pso",		"ptr",
 	"pvs",		"rchar",	"rd",		"recursionlimit",
-	"return",	"rfschar",	"rhang",	"rj",
+	"return",	"rfschar",	"rhang",
 	"rm",		"rn",		"rnn",		"rr",
 	"rs",		"rt",		"schar",	"sentchar",
 	"shc",		"shift",	"sizes",	"so",
@@ -334,6 +334,7 @@ static	struct roffmac	 roffs[TOKEN_NONE] = {
 	{ roff_onearg, NULL, NULL, 0 },  /* ft */
 	{ roff_onearg, NULL, NULL, 0 },  /* ll */
 	{ roff_onearg, NULL, NULL, 0 },  /* mc */
+	{ roff_onearg, NULL, NULL, 0 },  /* rj */
 	{ roff_onearg, NULL, NULL, 0 },  /* sp */
 	{ roff_manyarg, NULL, NULL, 0 },  /* ta */
 	{ roff_onearg, NULL, NULL, 0 },  /* ti */
@@ -511,7 +512,6 @@ static	struct roffmac	 roffs[TOKEN_NONE] = {
 	{ roff_unsupp, NULL, NULL, 0 },  /* return */
 	{ roff_unsupp, NULL, NULL, 0 },  /* rfschar */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* rhang */
-	{ roff_line_ignore, NULL, NULL, 0 },  /* rj */
 	{ roff_rm, NULL, NULL, 0 },  /* rm */
 	{ roff_rn, NULL, NULL, 0 },  /* rn */
 	{ roff_unsupp, NULL, NULL, 0 },  /* rnn */
@@ -1549,7 +1549,7 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 	/* Tables ignore most macros. */
 
 	if (r->tbl != NULL && (t == TOKEN_NONE || t == ROFF_TS ||
-	    t == ROFF_br || t == ROFF_ce || t == ROFF_sp)) {
+	    t == ROFF_br || t == ROFF_ce || t == ROFF_rj || t == ROFF_sp)) {
 		mandoc_msg(MANDOCERR_TBLMACRO, r->parse,
 		    ln, pos, buf->buf + spos);
 		if (t != TOKEN_NONE)
@@ -2880,7 +2880,7 @@ roff_onearg(ROFF_ARGS)
 	    (tok == ROFF_sp || tok == ROFF_ti))
 		man_breakscope(r->man, tok);
 
-	if (tok == ROFF_ce && roffce_node != NULL) {
+	if (roffce_node != NULL && (tok == ROFF_ce || tok == ROFF_rj)) {
 		r->man->last = roffce_node;
 		r->man->next = ROFF_NEXT_SIBLING;
 	}
@@ -2901,8 +2901,8 @@ roff_onearg(ROFF_ARGS)
 		roff_word_alloc(r->man, ln, pos, buf->buf + pos);
 	}
 
-	if (tok == ROFF_ce) {
-		if (r->man->last->tok == ROFF_ce) {
+	if (tok == ROFF_ce || tok == ROFF_rj) {
+		if (r->man->last->type == ROFFT_ELEM) {
 			roff_word_alloc(r->man, ln, pos, "1");
 			r->man->last->flags |= NODE_NOSRC;
 		}
