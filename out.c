@@ -85,10 +85,8 @@ a2roffsu(const char *src, struct roffsu *dst, enum roffscale def)
 	case 'v':
 		dst->unit = SCALE_VS;
 		break;
-	case '\0':
-		endptr--;
-		/* FALLTHROUGH */
 	default:
+		endptr--;
 		if (SCALE_MAX == def)
 			return NULL;
 		dst->unit = def;
