@@ -157,7 +157,8 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp,
 			tblcalc_data(tbl, col, opts, dp,
 			    dp->block == 0 ? 0 :
 			    dp->layout->width ? dp->layout->width :
-			    rmargin ? rmargin / (sp->opts->cols + 1) : 0);
+			    rmargin ? (rmargin + sp->opts->cols / 2)
+			    / (sp->opts->cols + 1) : 0);
 		}
 	}
 
