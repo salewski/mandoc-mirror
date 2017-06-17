@@ -47,11 +47,12 @@ static	void	  check_text(CHKARGS);
 
 static	void	  post_AT(CHKARGS);
 static	void	  post_IP(CHKARGS);
-static	void	  post_vs(CHKARGS);
 static	void	  post_OP(CHKARGS);
 static	void	  post_TH(CHKARGS);
 static	void	  post_UC(CHKARGS);
 static	void	  post_UR(CHKARGS);
+static	void	  post_in(CHKARGS);
+static	void	  post_vs(CHKARGS);
 
 static	const v_check __man_valids[MAN_MAX - MAN_TH] = {
 	post_TH,    /* TH */
@@ -82,7 +83,7 @@ static	const v_check __man_valids[MAN_MAX - MAN_TH] = {
 	post_UC,    /* UC */
 	NULL,       /* PD */
 	post_AT,    /* AT */
-	NULL,       /* in */
+	post_in,    /* in */
 	post_OP,    /* OP */
 	NULL,       /* EX */
 	NULL,       /* EE */
@@ -432,6 +433,22 @@ post_AT(CHKARGS)
 
 	free(man->meta.os);
 	man->meta.os = mandoc_strdup(p);
+}
+
+static void
+post_in(CHKARGS)
+{
+	char	*s;
+
+	if (n->parent->tok != MAN_TP ||
+	    n->parent->type != ROFFT_HEAD ||
+	    n->child == NULL ||
+	    *n->child->string == '+' ||
+	    *n->child->string == '-')
+		return;
+	mandoc_asprintf(&s, "+%s", n->child->string);
+	free(n->child->string);
+	n->child->string = s;
 }
 
 static void
