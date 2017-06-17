@@ -146,6 +146,7 @@ size_t		  term_strlen(const struct termp *, const char *);
 size_t		  term_len(const struct termp *, size_t);
 
 void		  term_tab_set(const struct termp *, const char *);
+void		  term_tab_iset(size_t);
 size_t		  term_tab_next(size_t);
 
 void		  term_fontpush(struct termp *, enum termfont);
