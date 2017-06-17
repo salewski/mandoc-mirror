@@ -141,6 +141,9 @@ terminal_man(void *arg, const struct roff_man *man)
 	size_t			 save_defindent;
 
 	p = (struct termp *)arg;
+	save_defindent = p->defindent;
+	if (p->synopsisonly == 0 && p->defindent == 0)
+		p->defindent = 7;
 	p->tcol->rmargin = p->maxrmargin = p->defrmargin;
 	term_tab_set(p, NULL);
 	term_tab_set(p, "T");
@@ -167,16 +170,13 @@ terminal_man(void *arg, const struct roff_man *man)
 			n = n->next;
 		}
 	} else {
-		save_defindent = p->defindent;
-		if (p->defindent == 0)
-			p->defindent = 7;
 		term_begin(p, print_man_head, print_man_foot, &man->meta);
 		p->flags |= TERMP_NOSPACE;
 		if (n != NULL)
 			print_man_nodelist(p, &mt, n, &man->meta);
 		term_end(p);
-		p->defindent = save_defindent;
 	}
+	p->defindent = save_defindent;
 }
 
 /*
