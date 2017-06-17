@@ -1196,8 +1196,12 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 		}
 		if (cp != NULL &&
 		    isalnum((unsigned char)*cp) == 0 &&
-		    strchr(cp, '$') != NULL)
+		    strchr(cp, '$') != NULL) {
+			if (r->man->meta.rcsids & (1 << os_e))
+				mandoc_msg(MANDOCERR_RCS_REP, r->parse,
+				    ln, stesc + 1 - buf->buf, stesc + 1);
 			r->man->meta.rcsids |= 1 << os_e;
+		}
 
 		/* Handle trailing whitespace. */
 
