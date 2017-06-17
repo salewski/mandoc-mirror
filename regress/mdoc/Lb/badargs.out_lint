@@ -4,3 +4,4 @@ mandoc: badargs.in:8:10: STYLE: no blank before trailing delimiter: Lb murks.
 mandoc: badargs.in:8:5: WARNING: unknown library name: Lb murks.
 mandoc: badargs.in:10:18: STYLE: no blank before trailing delimiter: Lb ... another.
 mandoc: badargs.in:10:5: WARNING: unknown library name: Lb mylib
+mandoc: badargs.in: STYLE: RCS id missing

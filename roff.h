@@ -534,6 +534,7 @@ struct	roff_meta {
 	char		 *name;    /* Leading manual name. */
 	char		 *date;    /* Normalized date. */
 	int		  hasbody; /* Document is not empty. */
+	int		  rcsids;  /* Bits indexed by enum mdoc_os. */
 	enum mdoc_os	  os_e;    /* Operating system. */
 };
 

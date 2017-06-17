@@ -49,6 +49,7 @@ enum	mandocerr {
 	MANDOCERR_MDOCDATE, /* Mdocdate found: Dd ... */
 	MANDOCERR_MDOCDATE_MISSING, /* Mdocdate missing: Dd ... */
 	MANDOCERR_DATE_LEGACY, /* legacy man(7) date format: Dd ... */
+	MANDOCERR_RCS_MISSING, /* RCS id missing */
 	MANDOCERR_MACRO_USELESS, /* useless macro: macro */
 	MANDOCERR_BX, /* consider using OS macro: macro */
 	MANDOCERR_ER_ORDER, /* errnos out of order: Er ... */

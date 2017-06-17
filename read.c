@@ -91,6 +91,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"Mdocdate found",
 	"Mdocdate missing",
 	"legacy man(7) date format",
+	"RCS id missing",
 	"useless macro",
 	"consider using OS macro",
 	"errnos out of order",

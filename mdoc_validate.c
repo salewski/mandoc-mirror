@@ -1806,7 +1806,10 @@ post_root(POST_ARGS)
 		mandoc_msg(MANDOCERR_OS_MISSING,
 		    mdoc->parse, 0, 0, NULL);
 		mdoc->meta.os = mandoc_strdup("");
-	}
+	} else if (mdoc->meta.os_e &&
+	    (mdoc->meta.rcsids & (1 << mdoc->meta.os_e)) == 0)
+		mandoc_msg(MANDOCERR_RCS_MISSING,
+		    mdoc->parse, 0, 0, NULL);
 
 	/* Check that we begin with a proper `Sh'. */
 
