@@ -872,7 +872,10 @@ print_man_node(DECL_ARGS)
 		 * before printing the line's data.
 		 */
 		if (*n->string == '\0') {
-			term_vspace(p);
+			if (p->flags & TERMP_NONEWLINE)
+				term_newln(p);
+			else
+				term_vspace(p);
 			return;
 		} else if (*n->string == ' ' && n->flags & NODE_LINE &&
 		    (p->flags & TERMP_NONEWLINE) == 0)
