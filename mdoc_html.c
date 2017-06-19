@@ -1322,12 +1322,16 @@ mdoc_lk_pre(MDOC_ARGS)
 	punct = punct->next;
 
 	/* Link target and link text. */
+	descr = link->next;
+	if (descr == punct)
+		descr = link;  /* no text */
 	t = print_otag(h, TAG_A, "cTh", "Lk", link->string);
-	for (descr = link->next; descr != punct; descr = descr->next) {
+	do {
 		if (descr->flags & (NODE_DELIMC | NODE_DELIMO))
 			h->flags |= HTML_NOSPACE;
 		print_text(h, descr->string);
-	}
+		descr = descr->next;
+	} while (descr != punct);
 	print_tagq(h, t);
 
 	/* Trailing punctuation. */
