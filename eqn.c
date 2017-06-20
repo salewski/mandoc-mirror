@@ -725,39 +725,39 @@ next_tok:
 
 this_tok:
 	switch (tok) {
-	case (EQN_TOK_UNDEF):
+	case EQN_TOK_UNDEF:
 		eqn_undef(ep);
 		break;
-	case (EQN_TOK_NDEFINE):
-	case (EQN_TOK_DEFINE):
+	case EQN_TOK_NDEFINE:
+	case EQN_TOK_DEFINE:
 		eqn_def(ep);
 		break;
-	case (EQN_TOK_TDEFINE):
+	case EQN_TOK_TDEFINE:
 		if (eqn_nextrawtok(ep, NULL) == NULL ||
 		    eqn_next(ep, ep->data[(int)ep->cur], NULL, 0) == NULL)
 			mandoc_msg(MANDOCERR_REQ_EMPTY, ep->parse,
 			    ep->eqn.ln, ep->eqn.pos, "tdefine");
 		break;
-	case (EQN_TOK_DELIM):
+	case EQN_TOK_DELIM:
 		eqn_delim(ep);
 		break;
-	case (EQN_TOK_GFONT):
+	case EQN_TOK_GFONT:
 		if (eqn_nextrawtok(ep, NULL) == NULL)
 			mandoc_msg(MANDOCERR_REQ_EMPTY, ep->parse,
 			    ep->eqn.ln, ep->eqn.pos, eqn_toks[tok]);
 		break;
-	case (EQN_TOK_MARK):
-	case (EQN_TOK_LINEUP):
+	case EQN_TOK_MARK:
+	case EQN_TOK_LINEUP:
 		/* Ignore these. */
 		break;
-	case (EQN_TOK_DYAD):
-	case (EQN_TOK_VEC):
-	case (EQN_TOK_UNDER):
-	case (EQN_TOK_BAR):
-	case (EQN_TOK_TILDE):
-	case (EQN_TOK_HAT):
-	case (EQN_TOK_DOT):
-	case (EQN_TOK_DOTDOT):
+	case EQN_TOK_DYAD:
+	case EQN_TOK_VEC:
+	case EQN_TOK_UNDER:
+	case EQN_TOK_BAR:
+	case EQN_TOK_TILDE:
+	case EQN_TOK_HAT:
+	case EQN_TOK_DOT:
+	case EQN_TOK_DOTDOT:
 		if (parent->last == NULL) {
 			mandoc_msg(MANDOCERR_EQN_NOBOX, ep->parse,
 			    ep->eqn.ln, ep->eqn.pos, eqn_toks[tok]);
@@ -769,28 +769,28 @@ this_tok:
 		parent->type = EQN_LISTONE;
 		parent->expectargs = 1;
 		switch (tok) {
-		case (EQN_TOK_DOTDOT):
+		case EQN_TOK_DOTDOT:
 			strlcpy(sym, "\\[ad]", sizeof(sym));
 			break;
-		case (EQN_TOK_VEC):
+		case EQN_TOK_VEC:
 			strlcpy(sym, "\\[->]", sizeof(sym));
 			break;
-		case (EQN_TOK_DYAD):
+		case EQN_TOK_DYAD:
 			strlcpy(sym, "\\[<>]", sizeof(sym));
 			break;
-		case (EQN_TOK_TILDE):
+		case EQN_TOK_TILDE:
 			strlcpy(sym, "\\[a~]", sizeof(sym));
 			break;
-		case (EQN_TOK_UNDER):
+		case EQN_TOK_UNDER:
 			strlcpy(sym, "\\[ul]", sizeof(sym));
 			break;
-		case (EQN_TOK_BAR):
+		case EQN_TOK_BAR:
 			strlcpy(sym, "\\[rl]", sizeof(sym));
 			break;
-		case (EQN_TOK_DOT):
+		case EQN_TOK_DOT:
 			strlcpy(sym, "\\[a.]", sizeof(sym));
 			break;
-		case (EQN_TOK_HAT):
+		case EQN_TOK_HAT:
 			strlcpy(sym, "\\[ha]", sizeof(sym));
 			break;
 		default:
@@ -798,16 +798,16 @@ this_tok:
 		}
 
 		switch (tok) {
-		case (EQN_TOK_DOTDOT):
-		case (EQN_TOK_VEC):
-		case (EQN_TOK_DYAD):
-		case (EQN_TOK_TILDE):
-		case (EQN_TOK_BAR):
-		case (EQN_TOK_DOT):
-		case (EQN_TOK_HAT):
+		case EQN_TOK_DOTDOT:
+		case EQN_TOK_VEC:
+		case EQN_TOK_DYAD:
+		case EQN_TOK_TILDE:
+		case EQN_TOK_BAR:
+		case EQN_TOK_DOT:
+		case EQN_TOK_HAT:
 			parent->top = mandoc_strdup(sym);
 			break;
-		case (EQN_TOK_UNDER):
+		case EQN_TOK_UNDER:
 			parent->bottom = mandoc_strdup(sym);
 			break;
 		default:
@@ -815,10 +815,10 @@ this_tok:
 		}
 		parent = parent->parent;
 		break;
-	case (EQN_TOK_FWD):
-	case (EQN_TOK_BACK):
-	case (EQN_TOK_DOWN):
-	case (EQN_TOK_UP):
+	case EQN_TOK_FWD:
+	case EQN_TOK_BACK:
+	case EQN_TOK_DOWN:
+	case EQN_TOK_UP:
 		subtok = eqn_tok_parse(ep, NULL);
 		if (subtok != EQN_TOK__MAX) {
 			mandoc_msg(MANDOCERR_REQ_EMPTY, ep->parse,
@@ -827,10 +827,10 @@ this_tok:
 			goto this_tok;
 		}
 		break;
-	case (EQN_TOK_FAT):
-	case (EQN_TOK_ROMAN):
-	case (EQN_TOK_ITALIC):
-	case (EQN_TOK_BOLD):
+	case EQN_TOK_FAT:
+	case EQN_TOK_ROMAN:
+	case EQN_TOK_ITALIC:
+	case EQN_TOK_BOLD:
 		while (parent->args == parent->expectargs)
 			parent = parent->parent;
 		/*
@@ -842,24 +842,24 @@ this_tok:
 		parent->type = EQN_LISTONE;
 		parent->expectargs = 1;
 		switch (tok) {
-		case (EQN_TOK_FAT):
+		case EQN_TOK_FAT:
 			parent->font = EQNFONT_FAT;
 			break;
-		case (EQN_TOK_ROMAN):
+		case EQN_TOK_ROMAN:
 			parent->font = EQNFONT_ROMAN;
 			break;
-		case (EQN_TOK_ITALIC):
+		case EQN_TOK_ITALIC:
 			parent->font = EQNFONT_ITALIC;
 			break;
-		case (EQN_TOK_BOLD):
+		case EQN_TOK_BOLD:
 			parent->font = EQNFONT_BOLD;
 			break;
 		default:
 			abort();
 		}
 		break;
-	case (EQN_TOK_SIZE):
-	case (EQN_TOK_GSIZE):
+	case EQN_TOK_SIZE:
+	case EQN_TOK_GSIZE:
 		/* Accept two values: integral size and a single. */
 		if (NULL == (start = eqn_nexttok(ep, &sz))) {
 			mandoc_msg(MANDOCERR_REQ_EMPTY, ep->parse,
@@ -881,10 +881,10 @@ this_tok:
 		parent->expectargs = 1;
 		parent->size = size;
 		break;
-	case (EQN_TOK_FROM):
-	case (EQN_TOK_TO):
-	case (EQN_TOK_SUB):
-	case (EQN_TOK_SUP):
+	case EQN_TOK_FROM:
+	case EQN_TOK_TO:
+	case EQN_TOK_SUB:
+	case EQN_TOK_SUP:
 		/*
 		 * We have a left-right-associative expression.
 		 * Repivot under a positional node, open a child scope
@@ -909,16 +909,16 @@ this_tok:
 			break;
 		}
 		switch (tok) {
-		case (EQN_TOK_FROM):
+		case EQN_TOK_FROM:
 			pos = EQNPOS_FROM;
 			break;
-		case (EQN_TOK_TO):
+		case EQN_TOK_TO:
 			pos = EQNPOS_TO;
 			break;
-		case (EQN_TOK_SUP):
+		case EQN_TOK_SUP:
 			pos = EQNPOS_SUP;
 			break;
-		case (EQN_TOK_SUB):
+		case EQN_TOK_SUB:
 			pos = EQNPOS_SUB;
 			break;
 		default:
@@ -926,7 +926,7 @@ this_tok:
 		}
 		parent = eqn_box_makebinary(ep, pos, parent);
 		break;
-	case (EQN_TOK_SQRT):
+	case EQN_TOK_SQRT:
 		while (parent->args == parent->expectargs)
 			parent = parent->parent;
 		/*
@@ -939,7 +939,7 @@ this_tok:
 		parent->pos = EQNPOS_SQRT;
 		parent->expectargs = 1;
 		break;
-	case (EQN_TOK_OVER):
+	case EQN_TOK_OVER:
 		/*
 		 * We have a right-left-associative fraction.
 		 * Close out anything that's currently open, then
@@ -956,8 +956,8 @@ this_tok:
 			parent = parent->parent;
 		parent = eqn_box_makebinary(ep, EQNPOS_OVER, parent);
 		break;
-	case (EQN_TOK_RIGHT):
-	case (EQN_TOK_BRACE_CLOSE):
+	case EQN_TOK_RIGHT:
+	case EQN_TOK_BRACE_CLOSE:
 		/*
 		 * Close out the existing brace.
 		 * FIXME: this is a shitty sentinel: we should really
@@ -1001,8 +1001,8 @@ this_tok:
 		    parent->args == parent->expectargs)
 			parent = parent->parent;
 		break;
-	case (EQN_TOK_BRACE_OPEN):
-	case (EQN_TOK_LEFT):
+	case EQN_TOK_BRACE_OPEN:
+	case EQN_TOK_LEFT:
 		/*
 		 * If we already have something in the stack and we're
 		 * in an expression, then rewind til we're not any more
@@ -1029,20 +1029,20 @@ this_tok:
 				parent->left = mandoc_strndup(start, sz);
 		}
 		break;
-	case (EQN_TOK_PILE):
-	case (EQN_TOK_LPILE):
-	case (EQN_TOK_RPILE):
-	case (EQN_TOK_CPILE):
-	case (EQN_TOK_CCOL):
-	case (EQN_TOK_LCOL):
-	case (EQN_TOK_RCOL):
+	case EQN_TOK_PILE:
+	case EQN_TOK_LPILE:
+	case EQN_TOK_RPILE:
+	case EQN_TOK_CPILE:
+	case EQN_TOK_CCOL:
+	case EQN_TOK_LCOL:
+	case EQN_TOK_RCOL:
 		while (parent->args == parent->expectargs)
 			parent = parent->parent;
 		parent = eqn_box_alloc(ep, parent);
 		parent->type = EQN_PILE;
 		parent->expectargs = 1;
 		break;
-	case (EQN_TOK_ABOVE):
+	case EQN_TOK_ABOVE:
 		for (cur = parent; cur != NULL; cur = cur->parent)
 			if (cur->type == EQN_PILE)
 				break;
@@ -1054,14 +1054,14 @@ this_tok:
 		parent = eqn_box_alloc(ep, cur);
 		parent->type = EQN_LIST;
 		break;
-	case (EQN_TOK_MATRIX):
+	case EQN_TOK_MATRIX:
 		while (parent->args == parent->expectargs)
 			parent = parent->parent;
 		parent = eqn_box_alloc(ep, parent);
 		parent->type = EQN_MATRIX;
 		parent->expectargs = 1;
 		break;
-	case (EQN_TOK_EOF):
+	case EQN_TOK_EOF:
 		/*
 		 * End of file!
 		 * TODO: make sure we're not in an open subexpression.

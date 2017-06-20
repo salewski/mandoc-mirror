@@ -140,16 +140,16 @@ html_putchar(char c)
 {
 
 	switch (c) {
-	case ('"'):
+	case '"':
 		printf("&quot;");
 		break;
-	case ('&'):
+	case '&':
 		printf("&amp;");
 		break;
-	case ('>'):
+	case '>':
 		printf("&gt;");
 		break;
-	case ('<'):
+	case '<':
 		printf("&lt;");
 		break;
 	default:
