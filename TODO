@@ -240,6 +240,13 @@ are mere guesses, and some may be wrong.
   see User's Guide (Second Edition) page 5 section 15.
   loc **  exist **  algo **  size **  imp **
 
+- GNU eqn converts some operators to special characters, for example,
+  input HYPHEN-MINUS becomes output \(mi, unless it is part of a
+  quoted word.  mandoc(1) only does this when the operator is
+  surrounded by blanks, not when it is part of an unquoted word.
+  Also, check whether there are more such cases (e.g., +?).
+  reported by bentley@  20 Jun 2017 02:04:29 -0600
+
 --- missing misc features ----------------------------------------------
 
 - italic correction (\/) in PostScript mode
