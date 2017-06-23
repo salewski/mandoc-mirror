@@ -87,6 +87,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"math",	HTML_NLALL | HTML_INDENT},
 	{"mrow",	0},
 	{"mi",		0},
+	{"mn",		0},
 	{"mo",		0},
 	{"msup",	0},
 	{"msub",	0},

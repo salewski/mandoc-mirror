@@ -51,6 +51,7 @@ enum	htmltag {
 	TAG_MATH,
 	TAG_MROW,
 	TAG_MI,
+	TAG_MN,
 	TAG_MO,
 	TAG_MSUP,
 	TAG_MSUB,
