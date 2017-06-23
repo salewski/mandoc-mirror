@@ -1,6 +1,6 @@
 $Id$
 
-This file lists the most important changes in the mdocml.bsd.lv distribution.
+This file lists the most important changes in the mandoc.bsd.lv distribution.
 
 Changes in version 1.14.1, released on February 21, 2017
 
@@ -274,11 +274,11 @@ Changes in version 1.13.3, released on March 13, 2015
  * New -Wunsupp message level.
     --- POTENTIONALLY SECURITY RELEVANT BUGFIXES ---
  * Fix a potential write buffer overrun on incomplete string conditionals.
-   http://mdocml.bsd.lv/cgi-bin/cvsweb/roff.c#rev1.241
+   http://mandoc.bsd.lv/cgi-bin/cvsweb/roff.c#rev1.241
  * Fix a potential write buffer overrun on backslash at EOF in a conditional.
-   http://mdocml.bsd.lv/cgi-bin/cvsweb/roff.c#rev1.247
+   http://mandoc.bsd.lv/cgi-bin/cvsweb/roff.c#rev1.247
  * Fix a use after free sometimes hit when validation deletes a block.
-   http://mdocml.bsd.lv/cgi-bin/cvsweb/mdoc_macro.c#rev1.180
+   http://mandoc.bsd.lv/cgi-bin/cvsweb/mdoc_macro.c#rev1.180
     --- MAJOR FUNCTIONALLY RELEVANT BUGFIXES ---
  * Let man(1) show manuals for the current architecture by default,
    and support the MACHINE environment variable.
@@ -889,4 +889,4 @@ Changes in version 1.9.15, released on February 18, 2010
  * and column lengths handled correctly.
 
 For older releases, see the ChangeLog files
-in http://mdocml.bsd.lv/snapshots/ .
+in http://mandoc.bsd.lv/snapshots/ .

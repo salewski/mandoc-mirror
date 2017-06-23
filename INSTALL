@@ -1,15 +1,17 @@
 $Id$
 
-About mdocml, the portable mandoc distribution
-----------------------------------------------
-The mandoc manpage compiler toolset is a suite of tools compiling
-mdoc(7), the roff(7) macro language of choice for BSD manual pages,
-and man(7), the predominant historical language for UNIX manuals.
+About the portable mandoc distribution
+--------------------------------------
+The mandoc manpage compiler toolset (formerly called "mdocml")
+is a suite of tools compiling mdoc(7), the roff(7) macro language
+of choice for BSD manual pages, and man(7), the predominant
+historical language for UNIX manuals.
+
 It includes a man(1) manual viewer and additional tools.
-For general information, see <http://mdocml.bsd.lv/>.
+For general information, see <http://mandoc.bsd.lv/>.
 
 In case you have questions or want to provide feedback, read
-<http://mdocml.bsd.lv/contact.html>.  Consider subscribing to the
+<http://mandoc.bsd.lv/contact.html>.  Consider subscribing to the
 discuss@ mailing list mentioned on that page.  If you intend to
 help with the development of mandoc, consider subscribing to the
 tech@ mailing list, too.
@@ -25,7 +27,7 @@ Before manually installing mandoc on your system, please check
 whether the newest version of mandoc is already installed by default
 or available via a binary package or a ports system.  A list of the
 latest bundled and ported versions of mandoc for various operating
-systems is maintained at <http://mdocml.bsd.lv/ports.html>.
+systems is maintained at <http://mandoc.bsd.lv/ports.html>.
 
 Regarding how packages and ports are maintained for your operating
 system, please consult your operating system documentation.
