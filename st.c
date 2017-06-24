@@ -20,6 +20,7 @@
 
 #include <string.h>
 
+#include "mandoc.h"
 #include "roff.h"
 #include "mdoc.h"
 #include "libmdoc.h"

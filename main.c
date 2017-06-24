@@ -74,11 +74,13 @@ enum	outt {
 
 struct	curparse {
 	struct mparse	 *mp;
-	enum mandoclevel  wlevel;	/* ignore messages below this */
-	int		  wstop;	/* stop after a file with a warning */
-	enum outt	  outtype;	/* which output to use */
-	void		 *outdata;	/* data for output */
 	struct manoutput *outopts;	/* output options */
+	void		 *outdata;	/* data for output */
+	char		 *os_s;		/* operating system for display */
+	int		  wstop;	/* stop after a file with a warning */
+	enum mandocerr	  mmin;		/* ignore messages below this */
+	enum mandoc_os	  os_e;		/* check base system conventions */
+	enum outt	  outtype;	/* which output to use */
 };
 
 
@@ -119,7 +121,7 @@ main(int argc, char *argv[])
 	struct manpage	*res, *resp;
 	const char	*progname, *sec, *thisarg;
 	char		*conf_file, *defpaths, *auxpaths;
-	char		*defos, *oarg;
+	char		*oarg;
 	unsigned char	*uc;
 	size_t		 i, sz;
 	int		 prio, best_prio;
@@ -183,10 +185,9 @@ main(int argc, char *argv[])
 
 	memset(&curp, 0, sizeof(struct curparse));
 	curp.outtype = OUTT_LOCALE;
-	curp.wlevel  = MANDOCLEVEL_BADARG;
+	curp.mmin = MANDOCERR_MAX;
 	curp.outopts = &conf.output;
 	options = MPARSE_SO | MPARSE_UTF8 | MPARSE_LATIN1;
-	defos = NULL;
 
 	use_pager = 1;
 	tag_files = NULL;
@@ -222,11 +223,11 @@ main(int argc, char *argv[])
 				warnx("-I %s: Bad argument", optarg);
 				return (int)MANDOCLEVEL_BADARG;
 			}
-			if (defos) {
+			if (curp.os_s != NULL) {
 				warnx("-I %s: Duplicate argument", optarg);
 				return (int)MANDOCLEVEL_BADARG;
 			}
-			defos = mandoc_strdup(optarg + 3);
+			curp.os_s = mandoc_strdup(optarg + 3);
 			break;
 		case 'K':
 			if ( ! koptions(&options, optarg))
@@ -446,7 +447,8 @@ main(int argc, char *argv[])
 		moptions(&options, auxpaths);
 
 	mchars_alloc();
-	curp.mp = mparse_alloc(options, curp.wlevel, mmsg, defos);
+	curp.mp = mparse_alloc(options, curp.mmin, mmsg,
+	    curp.os_e, curp.os_s);
 
 	/*
 	 * Conditionally start up the lookaside buffer before parsing.
@@ -524,7 +526,7 @@ out:
 		mansearch_free(res, sz);
 	}
 
-	free(defos);
+	free(curp.os_s);
 
 	/*
 	 * When using a pager, finish writing both temporary files,
@@ -937,7 +939,7 @@ toptions(struct curparse *curp, char *arg)
 		curp->outtype = OUTT_ASCII;
 	else if (0 == strcmp(arg, "lint")) {
 		curp->outtype = OUTT_LINT;
-		curp->wlevel  = MANDOCLEVEL_STYLE;
+		curp->mmin = MANDOCERR_BASE;
 	} else if (0 == strcmp(arg, "tree"))
 		curp->outtype = OUTT_TREE;
 	else if (0 == strcmp(arg, "man"))
@@ -966,16 +968,19 @@ static int
 woptions(struct curparse *curp, char *arg)
 {
 	char		*v, *o;
-	const char	*toks[8];
+	const char	*toks[11];
 
 	toks[0] = "stop";
 	toks[1] = "all";
-	toks[2] = "style";
-	toks[3] = "warning";
-	toks[4] = "error";
-	toks[5] = "unsupp";
-	toks[6] = "fatal";
-	toks[7] = NULL;
+	toks[2] = "base";
+	toks[3] = "style";
+	toks[4] = "warning";
+	toks[5] = "error";
+	toks[6] = "unsupp";
+	toks[7] = "fatal";
+	toks[8] = "openbsd";
+	toks[9] = "netbsd";
+	toks[10] = NULL;
 
 	while (*arg) {
 		o = arg;
@@ -985,19 +990,30 @@ woptions(struct curparse *curp, char *arg)
 			break;
 		case 1:
 		case 2:
-			curp->wlevel = MANDOCLEVEL_STYLE;
+			curp->mmin = MANDOCERR_BASE;
 			break;
 		case 3:
-			curp->wlevel = MANDOCLEVEL_WARNING;
+			curp->mmin = MANDOCERR_STYLE;
 			break;
 		case 4:
-			curp->wlevel = MANDOCLEVEL_ERROR;
+			curp->mmin = MANDOCERR_WARNING;
 			break;
 		case 5:
-			curp->wlevel = MANDOCLEVEL_UNSUPP;
+			curp->mmin = MANDOCERR_ERROR;
 			break;
 		case 6:
-			curp->wlevel = MANDOCLEVEL_BADARG;
+			curp->mmin = MANDOCERR_UNSUPP;
+			break;
+		case 7:
+			curp->mmin = MANDOCERR_MAX;
+			break;
+		case 8:
+			curp->mmin = MANDOCERR_BASE;
+			curp->os_e = MANDOC_OS_OPENBSD;
+			break;
+		case 9:
+			curp->mmin = MANDOCERR_BASE;
+			curp->os_e = MANDOC_OS_NETBSD;
 			break;
 		default:
 			warnx("-W %s: Bad argument", o);
@@ -1019,9 +1035,10 @@ mmsg(enum mandocerr t, enum mandoclevel lvl,
 	if (line)
 		fprintf(stderr, "%d:%d:", line, col + 1);
 
-	fprintf(stderr, " %s", mparse_strlevel(lvl));
+	fprintf(stderr, " %s",
+	    t < MANDOCERR_STYLE ? "BASE" : mparse_strlevel(lvl));
 
-	if (NULL != (mparse_msg = mparse_strerror(t)))
+	if ((mparse_msg = mparse_strerror(t)) != NULL)
 		fprintf(stderr, ": %s", mparse_msg);
 
 	if (msg)

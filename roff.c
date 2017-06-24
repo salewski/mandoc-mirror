@@ -819,14 +819,14 @@ roff_man_free(struct roff_man *man)
 
 struct roff_man *
 roff_man_alloc(struct roff *roff, struct mparse *parse,
-	const char *defos, int quick)
+	const char *os_s, int quick)
 {
 	struct roff_man *man;
 
 	man = mandoc_calloc(1, sizeof(*man));
 	man->parse = parse;
 	man->roff = roff;
-	man->defos = defos;
+	man->os_s = os_s;
 	man->quick = quick;
 	roff_man_alloc1(man);
 	roff->man = man;
@@ -1138,7 +1138,7 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 	size_t		 maxl;  /* expected length of the escape name */
 	size_t		 naml;	/* actual length of the escape name */
 	enum mandoc_esc	 esc;	/* type of the escape sequence */
-	enum mdoc_os	 os_e;	/* kind of RCS id seen */
+	enum mandoc_os	 os_e;	/* kind of RCS id seen */
 	int		 inaml;	/* length returned from mandoc_escape() */
 	int		 expand_count;	/* to avoid infinite loops */
 	int		 npos;	/* position in numeric expression */
@@ -1161,10 +1161,10 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 		/* Comment found, look for RCS id. */
 
 		if ((cp = strstr(stesc, "$" "OpenBSD")) != NULL) {
-			os_e = MDOC_OS_OPENBSD;
+			os_e = MANDOC_OS_OPENBSD;
 			cp += 8;
 		} else if ((cp = strstr(stesc, "$" "NetBSD")) != NULL) {
-			os_e = MDOC_OS_NETBSD;
+			os_e = MANDOC_OS_NETBSD;
 			cp += 7;
 		}
 		if (cp != NULL &&

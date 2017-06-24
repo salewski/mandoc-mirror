@@ -26,12 +26,6 @@ enum	roff_macroset {
 	MACROSET_MAN
 };
 
-enum	mdoc_os {
-	MDOC_OS_OTHER = 0,
-	MDOC_OS_NETBSD,
-	MDOC_OS_OPENBSD
-};
-
 enum	roff_sec {
 	SEC_NONE = 0,
 	SEC_NAME,
@@ -534,8 +528,8 @@ struct	roff_meta {
 	char		 *name;    /* Leading manual name. */
 	char		 *date;    /* Normalized date. */
 	int		  hasbody; /* Document is not empty. */
-	int		  rcsids;  /* Bits indexed by enum mdoc_os. */
-	enum mdoc_os	  os_e;    /* Operating system. */
+	int		  rcsids;  /* Bits indexed by enum mandoc_os. */
+	enum mandoc_os	  os_e;    /* Operating system. */
 };
 
 struct	roff_man {
@@ -544,7 +538,7 @@ struct	roff_man {
 	struct roff	 *roff;    /* Roff parser state data. */
 	struct ohash	 *mdocmac; /* Mdoc macro lookup table. */
 	struct ohash	 *manmac;  /* Man macro lookup table. */
-	const char	 *defos;   /* Default operating system. */
+	const char	 *os_s;    /* Default operating system. */
 	struct roff_node *first;   /* The first node parsed. */
 	struct roff_node *last;    /* The last node parsed. */
 	struct roff_node *last_es; /* The most recent Es node. */

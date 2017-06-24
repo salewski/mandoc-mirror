@@ -87,6 +87,7 @@ Provides
 .Vt enum mandoc_esc ,
 .Vt enum mandocerr ,
 .Vt enum mandoclevel ,
+.Vt enum mandoc_os ,
 .Vt enum tbl_cellt ,
 .Vt enum tbl_datt ,
 .Vt enum tbl_spant ,
@@ -126,7 +127,11 @@ as an opaque type for function prototypes.
 Requires
 .Qq Pa mandoc_ohash.h
 for
-.Vt struct ohash .
+.Vt struct ohash
+and
+.Qq Pa mandoc.h
+for
+.Vt enum mandoc_os .
 .Pp
 Provides
 .Vt enum mdoc_endbody ,

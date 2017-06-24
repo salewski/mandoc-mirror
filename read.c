@@ -53,10 +53,10 @@ struct	mparse {
 	const char	 *file; /* filename of current input file */
 	struct buf	 *primary; /* buffer currently being parsed */
 	struct buf	 *secondary; /* preprocessed copy of input */
-	const char	 *defos; /* default operating system */
+	const char	 *os_s; /* default operating system */
 	mandocmsg	  mmsg; /* warning/error message handler */
 	enum mandoclevel  file_status; /* status of current parse */
-	enum mandoclevel  wlevel; /* ignore messages below this */
+	enum mandocerr	  mmin; /* ignore messages below this */
 	int		  options; /* parser options */
 	int		  gzip; /* current input file is gzipped */
 	int		  filenc; /* encoding of the current file */
@@ -86,12 +86,15 @@ static	const enum mandocerr	mandoclimits[MANDOCLEVEL_MAX] = {
 static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"ok",
 
-	"generic style suggestion",
+	"base system convention",
 
 	"Mdocdate found",
 	"Mdocdate missing",
-	"legacy man(7) date format",
 	"RCS id missing",
+
+	"generic style suggestion",
+
+	"legacy man(7) date format",
 	"duplicate RCS id",
 	"useless macro",
 	"consider using OS macro",
@@ -755,20 +758,20 @@ mparse_open(struct mparse *curp, const char *file)
 }
 
 struct mparse *
-mparse_alloc(int options, enum mandoclevel wlevel, mandocmsg mmsg,
-    const char *defos)
+mparse_alloc(int options, enum mandocerr mmin, mandocmsg mmsg,
+    enum mandoc_os os_e, const char *os_s)
 {
 	struct mparse	*curp;
 
 	curp = mandoc_calloc(1, sizeof(struct mparse));
 
 	curp->options = options;
-	curp->wlevel = wlevel;
+	curp->mmin = mmin;
 	curp->mmsg = mmsg;
-	curp->defos = defos;
+	curp->os_s = os_s;
 
 	curp->roff = roff_alloc(curp, options);
-	curp->man = roff_man_alloc( curp->roff, curp, curp->defos,
+	curp->man = roff_man_alloc(curp->roff, curp, curp->os_s,
 		curp->options & MPARSE_QUICK ? 1 : 0);
 	if (curp->options & MPARSE_MDOC) {
 		curp->man->macroset = MACROSET_MDOC;
@@ -780,6 +783,7 @@ mparse_alloc(int options, enum mandoclevel wlevel, mandocmsg mmsg,
 			curp->man->manmac = roffhash_alloc(MAN_TH, MAN_MAX);
 	}
 	curp->man->first->tok = TOKEN_NONE;
+	curp->man->meta.os_e = os_e;
 	return curp;
 }
 
@@ -855,12 +859,12 @@ mandoc_msg(enum mandocerr er, struct mparse *m,
 {
 	enum mandoclevel level;
 
+	if (er < m->mmin && er != MANDOCERR_FILE)
+		return;
+
 	level = MANDOCLEVEL_UNSUPP;
 	while (er < mandoclimits[level])
 		level--;
-
-	if (level < m->wlevel && er != MANDOCERR_FILE)
-		return;
 
 	if (m->mmsg)
 		(*m->mmsg)(er, level, m->file, ln, col, msg);
