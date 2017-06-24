@@ -90,6 +90,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	"Mdocdate found",
 	"Mdocdate missing",
+	"operating system explicitly specified",
 	"RCS id missing",
 
 	"generic style suggestion",

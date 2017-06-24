@@ -2584,6 +2584,13 @@ out:
 	 * the operating system earlier.
 	 */
 
+	if (n->child != NULL)
+		mandoc_vmsg(MANDOCERR_OS_ARG, mdoc->parse,
+		    n->child->line, n->child->pos,
+		    "Os %s (%s)", n->child->string,
+		    mdoc->meta.os_e == MANDOC_OS_OPENBSD ?
+		    "OpenBSD" : "NetBSD");
+
 	while (n->tok != MDOC_Dd)
 		if ((n = n->prev) == NULL)
 			return;

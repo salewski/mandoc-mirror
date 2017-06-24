@@ -48,6 +48,7 @@ enum	mandocerr {
 
 	MANDOCERR_MDOCDATE, /* Mdocdate found: Dd ... */
 	MANDOCERR_MDOCDATE_MISSING, /* Mdocdate missing: Dd ... */
+	MANDOCERR_OS_ARG,  /* operating system explicitly specified: Os ... */
 	MANDOCERR_RCS_MISSING, /* RCS id missing */
 
 	MANDOCERR_STYLE, /* ===== start of style suggestions ===== */
