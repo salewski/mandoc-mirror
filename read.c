@@ -98,6 +98,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	"legacy man(7) date format",
 	"duplicate RCS id",
+	"typo in section name",
 	"useless macro",
 	"consider using OS macro",
 	"errnos out of order",

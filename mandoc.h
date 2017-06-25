@@ -56,6 +56,7 @@ enum	mandocerr {
 
 	MANDOCERR_DATE_LEGACY, /* legacy man(7) date format: Dd ... */
 	MANDOCERR_RCS_REP, /* duplicate RCS id: ... */
+	MANDOCERR_SEC_TYPO,  /* typo in section name: Sh ... */
 	MANDOCERR_MACRO_USELESS, /* useless macro: macro */
 	MANDOCERR_BX, /* consider using OS macro: macro */
 	MANDOCERR_ER_ORDER, /* errnos out of order: Er ... */
