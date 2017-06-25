@@ -89,6 +89,8 @@ static	const v_check __man_valids[MAN_MAX - MAN_TH] = {
 	NULL,       /* EE */
 	post_UR,    /* UR */
 	NULL,       /* UE */
+	post_UR,    /* MT */
+	NULL,       /* ME */
 };
 static	const v_check *man_valids = __man_valids - MAN_TH;
 
@@ -212,7 +214,7 @@ post_UR(CHKARGS)
 
 	if (n->type == ROFFT_HEAD && n->child == NULL)
 		mandoc_vmsg(MANDOCERR_UR_NOHEAD, man->parse,
-		    n->line, n->pos, "UR");
+		    n->line, n->pos, roff_name[n->tok]);
 	check_part(man, n);
 }
 

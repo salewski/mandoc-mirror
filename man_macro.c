@@ -75,6 +75,8 @@ const	struct man_macro __man_macros[MAN_MAX - MAN_TH] = {
 	{ in_line_eoln, MAN_BSCOPE }, /* EE */
 	{ blk_exp, MAN_BSCOPE }, /* UR */
 	{ blk_close, MAN_BSCOPE }, /* UE */
+	{ blk_exp, MAN_BSCOPE }, /* MT */
+	{ blk_close, MAN_BSCOPE }, /* ME */
 };
 const	struct man_macro *const man_macros = __man_macros - MAN_TH;
 
@@ -216,6 +218,9 @@ blk_close(MACRO_PROT_ARGS)
 		break;
 	case MAN_UE:
 		ntok = MAN_UR;
+		break;
+	case MAN_ME:
+		ntok = MAN_MT;
 		break;
 	default:
 		abort();

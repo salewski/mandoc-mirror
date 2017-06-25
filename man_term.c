@@ -128,6 +128,8 @@ static	const struct termact __termacts[MAN_MAX - MAN_TH] = {
 	{ pre_literal, NULL, 0 }, /* EE */
 	{ pre_UR, post_UR, 0 }, /* UR */
 	{ NULL, NULL, 0 }, /* UE */
+	{ pre_UR, post_UR, 0 }, /* MT */
+	{ NULL, NULL, 0 }, /* ME */
 };
 static	const struct termact *termacts = __termacts - MAN_TH;
 
