@@ -1,4 +1,4 @@
-/*	$Id$
+/*	$Id$ */
 /*
  * Copyright (c) 2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2014, 2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
@@ -722,7 +722,7 @@ static enum rofferr
 eqn_parse(struct eqn_node *ep, struct eqn_box *parent)
 {
 	char		 sym[64];
-	struct eqn_box	*cur, *nbox;
+	struct eqn_box	*cur, *nbox, *split;
 	const char	*cp, *cpn, *start;
 	char		*p;
 	size_t		 sz;
@@ -1118,6 +1118,7 @@ this_tok:
 				break;
 			cpn = p - 1;
 			ccln = CCL_LET;
+			split = NULL;
 			for (;;) {
 				/* Advance to next character. */
 				cp = cpn++;
@@ -1149,13 +1150,13 @@ this_tok:
 					parent->last = cur->prev;
 					parent->args--;
 					/* Set up a list instead. */
-					nbox = eqn_box_alloc(ep, parent);
-					nbox->type = EQN_LIST;
+					split = eqn_box_alloc(ep, parent);
+					split->type = EQN_LIST;
 					/* Insert the word into the list. */
-					nbox->first = nbox->last = cur;
-					cur->parent = nbox;
+					split->first = split->last = cur;
+					cur->parent = split;
 					cur->prev = NULL;
-					parent = nbox;
+					parent = split;
 				}
 				/* Append a new text box. */
 				nbox = eqn_box_alloc(ep, parent);
@@ -1172,6 +1173,8 @@ this_tok:
 				cpn = p - 1;
 				ccln = CCL_LET;
 			}
+			if (split != NULL)
+				parent = split->parent;
 			break;
 		}
 		/*
