@@ -20,6 +20,7 @@
 #include <sys/types.h>
 
 #include <ctype.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -357,6 +358,7 @@ cell_alloc(struct tbl_node *tbl, struct tbl_row *rp, enum tbl_cellt pos)
 	struct tbl_cell	*p, *pp;
 
 	p = mandoc_calloc(1, sizeof(*p));
+	p->spacing = SIZE_MAX;
 	p->pos = pos;
 
 	if ((pp = rp->last) != NULL) {

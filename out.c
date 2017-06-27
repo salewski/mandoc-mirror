@@ -20,6 +20,7 @@
 #include <sys/types.h>
 
 #include <assert.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -140,8 +141,8 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp,
 			if (1 < spans)
 				continue;
 			icol = dp->layout->col;
-			if (maxcol < icol)
-				maxcol = icol;
+			while (maxcol < icol)
+				tbl->cols[++maxcol].spacing = SIZE_MAX;
 			col = tbl->cols + icol;
 			col->flags |= dp->layout->flags;
 			if (dp->layout->flags & TBL_CELL_WIGN)
@@ -154,6 +155,10 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp,
 				    (*tbl->sulen)(&su, tbl->arg);
 			if (col->width < dp->layout->width)
 				col->width = dp->layout->width;
+			if (dp->layout->spacing != SIZE_MAX &&
+			    (col->spacing == SIZE_MAX ||
+			     col->spacing < dp->layout->spacing))
+				col->spacing = dp->layout->spacing;
 			tblcalc_data(tbl, col, opts, dp,
 			    dp->block == 0 ? 0 :
 			    dp->layout->width ? dp->layout->width :
@@ -172,6 +177,8 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp,
 	ewidth = xwidth = 0;
 	for (icol = 0; icol <= maxcol; icol++) {
 		col = tbl->cols + icol;
+		if (col->spacing == SIZE_MAX || icol == maxcol)
+			col->spacing = 3;
 		if (col->flags & TBL_CELL_EQUAL) {
 			necol++;
 			if (ewidth < col->width)

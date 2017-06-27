@@ -33,6 +33,7 @@ enum	roffscale {
 struct	roffcol {
 	size_t		 width; /* width of cell */
 	size_t		 decimal; /* decimal position in cell */
+	size_t		 spacing; /* spacing after the column */
 	int		 flags; /* layout flags, see tbl_cell */
 };
 
