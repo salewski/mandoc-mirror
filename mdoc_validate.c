@@ -1983,10 +1983,13 @@ post_hyph(POST_ARGS)
 static void
 post_ns(POST_ARGS)
 {
+	struct roff_node	*n;
 
-	if (mdoc->last->flags & NODE_LINE)
+	n = mdoc->last;
+	if (n->flags & NODE_LINE ||
+	    (n->next != NULL && n->next->flags & NODE_DELIMC))
 		mandoc_msg(MANDOCERR_NS_SKIP, mdoc->parse,
-		    mdoc->last->line, mdoc->last->pos, NULL);
+		    n->line, n->pos, NULL);
 }
 
 static void
