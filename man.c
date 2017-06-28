@@ -282,8 +282,10 @@ man_breakscope(struct roff_man *man, int tok)
 	if (man->flags & MAN_ELINE && (tok < MAN_TH ||
 	    ! (man_macros[tok].flags & MAN_NSCOPED))) {
 		n = man->last;
-		assert(n->type != ROFFT_TEXT);
-		if (man_macros[n->tok].flags & MAN_NSCOPED)
+		if (n->type == ROFFT_TEXT)
+			n = n->parent;
+		if (n->tok < MAN_TH ||
+		    man_macros[n->tok].flags & MAN_NSCOPED)
 			n = n->parent;
 
 		mandoc_vmsg(MANDOCERR_BLK_LINE, man->parse,
@@ -319,7 +321,8 @@ man_breakscope(struct roff_man *man, int tok)
 		n = man->last;
 		if (n->type == ROFFT_TEXT)
 			n = n->parent;
-		if ( ! (man_macros[n->tok].flags & MAN_BSCOPE))
+		if (n->tok < MAN_TH ||
+		    (man_macros[n->tok].flags & MAN_BSCOPE) == 0)
 			n = n->parent;
 
 		assert(n->type == ROFFT_HEAD);
