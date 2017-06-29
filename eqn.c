@@ -683,7 +683,7 @@ eqn_parse(struct eqn_node *ep, struct eqn_box *parent)
 	if (ep->data == NULL)
 		return ROFF_IGN;
 
-	ep->start = ep->end = ep->data;
+	ep->start = ep->end = ep->data + strspn(ep->data, " ^~");
 
 next_tok:
 	tok = eqn_next(ep, MODE_TOK);
