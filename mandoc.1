@@ -1218,6 +1218,12 @@ list block contains text or macros before the first
 .Ic \&It
 macro.
 The offending children are moved before the beginning of the list.
+.It Sy "first macro on line"
+Inside a
+.Ic \&Bl Fl column
+list, a
+.Ic \&Ta
+macro occurs as the first macro on a line, which is not portable.
 .It Sy "fill mode already enabled, skipping"
 .Pq man
 A
@@ -1363,6 +1369,17 @@ list, an
 .Ic \&It
 block is empty.
 An empty list item is shown.
+.It Sy "missing argument, using next line"
+.Pq mdoc
+An
+.Ic \&It
+macro in a
+.Ic \&Bd Fl column
+list has no arguments.
+While
+.Nm
+uses the text or macros of the following line, if any, for the cell,
+other formatters may misformat the list.
 .It Sy "missing font type, using \efR"
 .Pq mdoc
 A

@@ -1460,15 +1460,30 @@ post_it(POST_ARGS)
 
 		assert(nit->head->child == NULL);
 
-		i = 0;
-		for (nch = nit->child; nch != NULL; nch = nch->next)
-			if (nch->type == ROFFT_BODY)
-				i++;
+		if (nit->head->next->child == NULL &&
+		    nit->head->next->next == NULL) {
+			mandoc_msg(MANDOCERR_MACRO_EMPTY, mdoc->parse,
+			    nit->line, nit->pos, "It");
+			roff_node_delete(mdoc, nit);
+			break;
+		}
 
+		i = 0;
+		for (nch = nit->child; nch != NULL; nch = nch->next) {
+			if (nch->type != ROFFT_BODY)
+				continue;
+			if (i++ && nch->flags & NODE_LINE)
+				mandoc_msg(MANDOCERR_TA_LINE, mdoc->parse,
+				    nch->line, nch->pos, "Ta");
+		}
 		if (i < cols || i > cols + 1)
 			mandoc_vmsg(MANDOCERR_BL_COL,
 			    mdoc->parse, nit->line, nit->pos,
 			    "%d columns, %d cells", cols, i);
+		else if (nit->head->next->child != NULL &&
+		    nit->head->next->child->line > nit->line)
+			mandoc_msg(MANDOCERR_IT_NOARG, mdoc->parse,
+			    nit->line, nit->pos, "Bl -column It");
 		break;
 	default:
 		abort();

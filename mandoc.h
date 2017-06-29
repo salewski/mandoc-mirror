@@ -109,6 +109,7 @@ enum	mandocerr {
 	MANDOCERR_BLK_NEST, /* blocks badly nested: macro ... */
 	MANDOCERR_BD_NEST, /* nested displays are not portable: macro ... */
 	MANDOCERR_BL_MOVE, /* moving content out of list: macro */
+	MANDOCERR_TA_LINE, /* first macro on line: Ta */
 	MANDOCERR_FI_SKIP, /* fill mode already enabled, skipping: fi */
 	MANDOCERR_NF_SKIP, /* fill mode already disabled, skipping: nf */
 	MANDOCERR_BLK_LINE, /* line scope broken: macro breaks macro */
@@ -127,6 +128,7 @@ enum	mandocerr {
 	MANDOCERR_FO_NOHEAD, /* missing function name, using "": Fo */
 	MANDOCERR_IT_NOHEAD, /* empty head in list item: Bl -type It */
 	MANDOCERR_IT_NOBODY, /* empty list item: Bl -type It */
+	MANDOCERR_IT_NOARG, /* missing argument, using next line: Bl -c It */
 	MANDOCERR_BF_NOFONT, /* missing font type, using \fR: Bf */
 	MANDOCERR_BF_BADFONT, /* unknown font type, using \fR: Bf font */
 	MANDOCERR_PF_SKIP, /* nothing follows prefix: Pf arg */
