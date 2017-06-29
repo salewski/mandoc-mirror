@@ -1850,10 +1850,10 @@ The tab cell delimiter may only be used within the
 .Sx \&It
 line itself; on following lines, only the
 .Sx \&Ta
-macro can be used to delimit cells, and
+macro can be used to delimit cells, and portability requires that
 .Sx \&Ta
-is only recognised as a macro when called by other macros,
-not as the first macro on a line.
+is called by other macros: some parsers do not recognize it when
+it appears as the first macro on a line.
 .Pp
 Note that quoted strings may span tab-delimited cells on an
 .Sx \&It
