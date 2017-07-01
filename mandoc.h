@@ -51,6 +51,7 @@ enum	mandocerr {
 	MANDOCERR_ARCH_BAD,  /* unknown architecture: Dt ... arch */
 	MANDOCERR_OS_ARG,  /* operating system explicitly specified: Os ... */
 	MANDOCERR_RCS_MISSING, /* RCS id missing */
+	MANDOCERR_XR_BAD,  /* referenced manual not found: Xr name sec */
 
 	MANDOCERR_STYLE, /* ===== start of style suggestions ===== */
 

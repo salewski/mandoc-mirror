@@ -62,6 +62,11 @@ UTF8_LOCALE=en_US.UTF-8
 
 MANPATH_DEFAULT="/usr/share/man:/usr/X11R6/man:/usr/local/man"
 
+# Validation of cross references with mandoc -Tlint only looks
+# for manual pages in the following directories:
+
+MANPATH_BASE="/usr/share/man:/usr/X11R6/man"
+
 # In manual pages written in the mdoc(7) language, the operating system
 # version is displayed in the page footer line.  If an operating system
 # is specified as an argument to the .Os macro, that is always used.

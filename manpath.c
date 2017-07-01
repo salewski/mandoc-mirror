@@ -1,4 +1,4 @@
-/*	$Id$	*/
+/*	$Id$ */
 /*
  * Copyright (c) 2011, 2014, 2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
@@ -89,6 +89,13 @@ manconf_parse(struct manconf *conf, const char *file,
 
 	/* MANPATH overrides man.conf(5) completely. */
 	manpath_parseline(&conf->manpath, defp, 0);
+}
+
+void
+manpath_base(struct manpaths *dirs)
+{
+	char path_base[] = MANPATH_BASE;
+	manpath_parseline(dirs, path_base, 0);
 }
 
 /*

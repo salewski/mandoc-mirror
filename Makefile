@@ -94,6 +94,7 @@ SRCS		 = att.c \
 		   mandoc.c \
 		   mandoc_aux.c \
 		   mandoc_ohash.c \
+		   mandoc_xr.c \
 		   mandocd.c \
 		   mandocdb.c \
 		   manpath.c \
@@ -180,6 +181,7 @@ DISTFILES	 = INSTALL \
 		   mandoc_html.3 \
 		   mandoc_malloc.3 \
 		   mandoc_ohash.h \
+		   mandoc_xr.h \
 		   mandocd.8 \
 		   mansearch.3 \
 		   mansearch.h \
@@ -229,6 +231,7 @@ LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 		   mandoc.o \
 		   mandoc_aux.o \
 		   mandoc_ohash.o \
+		   mandoc_xr.o \
 		   msec.o \
 		   preconv.o \
 		   read.o

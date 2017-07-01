@@ -93,6 +93,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"unknown architecture",
 	"operating system explicitly specified",
 	"RCS id missing",
+	"referenced manual not found",
 
 	"generic style suggestion",
 

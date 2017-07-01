@@ -33,6 +33,7 @@
 
 #include "mandoc_aux.h"
 #include "mandoc.h"
+#include "mandoc_xr.h"
 #include "roff.h"
 #include "mdoc.h"
 #include "libmandoc.h"
@@ -2336,8 +2337,11 @@ post_xr(POST_ARGS)
 	if (nch->next == NULL) {
 		mandoc_vmsg(MANDOCERR_XR_NOSEC, mdoc->parse,
 		    n->line, n->pos, "Xr %s", nch->string);
-	} else
+	} else {
 		assert(nch->next == n->last);
+		mandoc_xr_add(nch->next->string, nch->string,
+		    nch->line, nch->pos);
+	}
 	post_delim(mdoc);
 }
 

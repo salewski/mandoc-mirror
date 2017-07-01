@@ -35,6 +35,7 @@ echo "config.log: writing..."
 
 SOURCEDIR=`dirname "$0"`
 
+MANPATH_BASE="/usr/share/man:/usr/X11R6/man"
 MANPATH_DEFAULT="/usr/share/man:/usr/X11R6/man:/usr/local/man"
 OSNAME=
 UTF8_LOCALE=
@@ -359,6 +360,7 @@ __HEREDOC__
 
 echo
 echo "#define MAN_CONF_FILE \"/etc/${MANM_MANCONF}\""
+echo "#define MANPATH_BASE \"${MANPATH_BASE}\""
 echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
 [ -n "${UTF8_LOCALE}" ] && echo "#define UTF8_LOCALE \"${UTF8_LOCALE}\""

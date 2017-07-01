@@ -123,6 +123,15 @@ Uses the type
 from
 .Pa roff.h
 as an opaque type for function prototypes.
+.It Qq Pa mandoc_xr.h
+Provides
+.Vt struct mandoc_xr
+and the functions
+.Fn mandoc_xr_reset ,
+.Fn mandoc_xr_add ,
+.Fn mandoc_xr_get ,
+and
+.Fn mandoc_xr_free .
 .It Qq Pa roff.h
 Requires
 .Qq Pa mandoc_ohash.h
@@ -540,8 +549,9 @@ Provides
 and the functions
 .Fn manconf_parse ,
 .Fn manconf_output ,
+.Fn manconf_free ,
 and
-.Fn manconf_free .
+.Fn manpath_base .
 .It Qq Pa mansearch.h
 Requires
 .In sys/types.h
