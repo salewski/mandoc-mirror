@@ -663,14 +663,23 @@ fs_lookup(const struct manpaths *paths, size_t ipath,
 	if (globres == 0)
 		file = mandoc_strdup(*globinfo.gl_pathv);
 	globfree(&globinfo);
-	if (globres != 0)
+	if (globres == 0)
+		goto found;
+	if (res != NULL || ipath + 1 != paths->sz)
 		return 0;
+
+	mandoc_asprintf(&file, "%s.%s", name, sec);
+	globres = access(file, R_OK);
+	free(file);
+	return globres != -1;
 
 found:
 	warnx("outdated mandoc.db lacks %s(%s) entry, run %s %s",
 	    name, sec, BINM_MAKEWHATIS, paths->paths[ipath]);
-	if (res == NULL)
+	if (res == NULL) {
+		free(file);
 		return 1;
+	}
 	*res = mandoc_reallocarray(*res, ++*ressz, sizeof(struct manpage));
 	page = *res + (*ressz - 1);
 	page->file = file;
