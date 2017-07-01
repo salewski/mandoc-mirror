@@ -92,7 +92,7 @@ static	int		  fs_lookup(const struct manpaths *,
 				size_t ipath, const char *,
 				const char *, const char *,
 				struct manpage **, size_t *);
-static	void		  fs_search(const struct mansearch *,
+static	int		  fs_search(const struct mansearch *,
 				const struct manpaths *, int, char**,
 				struct manpage **, size_t *);
 static	int		  koptions(int *, char *);
@@ -669,6 +669,8 @@ fs_lookup(const struct manpaths *paths, size_t ipath,
 found:
 	warnx("outdated mandoc.db lacks %s(%s) entry, run %s %s",
 	    name, sec, BINM_MAKEWHATIS, paths->paths[ipath]);
+	if (res == NULL)
+		return 1;
 	*res = mandoc_reallocarray(*res, ++*ressz, sizeof(struct manpage));
 	page = *res + (*ressz - 1);
 	page->file = file;
@@ -681,7 +683,7 @@ found:
 	return 1;
 }
 
-static void
+static int
 fs_search(const struct mansearch *cfg, const struct manpaths *paths,
 	int argc, char **argv, struct manpage **res, size_t *ressz)
 {
@@ -693,7 +695,8 @@ fs_search(const struct mansearch *cfg, const struct manpaths *paths,
 
 	assert(cfg->argmode == ARG_NAME);
 
-	*res = NULL;
+	if (res != NULL)
+		*res = NULL;
 	*ressz = lastsz = 0;
 	while (argc) {
 		for (ipath = 0; ipath < paths->sz; ipath++) {
@@ -701,19 +704,20 @@ fs_search(const struct mansearch *cfg, const struct manpaths *paths,
 				if (fs_lookup(paths, ipath, cfg->sec,
 				    cfg->arch, *argv, res, ressz) &&
 				    cfg->firstmatch)
-					return;
+					return 1;
 			} else for (isec = 0; isec < nsec; isec++)
 				if (fs_lookup(paths, ipath, sections[isec],
 				    cfg->arch, *argv, res, ressz) &&
 				    cfg->firstmatch)
-					return;
+					return 1;
 		}
-		if (*ressz == lastsz)
+		if (res != NULL && *ressz == lastsz)
 			warnx("No entry for %s in the manual.", *argv);
 		lastsz = *ressz;
 		argv++;
 		argc--;
 	}
+	return 0;
 }
 
 static void
@@ -826,6 +830,8 @@ check_xr(const char *file)
 		search.argmode = ARG_NAME;
 		search.firstmatch = 1;
 		if (mansearch(&search, &paths, 1, &xr->name, NULL, &sz))
+			continue;
+		if (fs_search(&search, &paths, 1, &xr->name, NULL, &sz))
 			continue;
 		mandoc_asprintf(&cp, "Xr %s %s", xr->name, xr->sec);
 		mmsg(MANDOCERR_XR_BAD, MANDOCLEVEL_STYLE,
