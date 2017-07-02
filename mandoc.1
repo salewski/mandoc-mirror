@@ -1097,6 +1097,24 @@ The same standard section title occurs more than once.
 .Pq mdoc
 A standard section header occurs in a section of the manual
 where it normally isn't useful.
+.It Sy "cross reference to self"
+.Pq mdoc
+An
+.Ic \&Xr
+macro refers to a name and section matching the section of the present
+manual page and a name mentioned in an
+.Ic \&Nm
+macro in the NAME or SYNOPSIS section, or in an
+.Ic \&Fn
+or
+.Ic \&Fo
+macro in the SYNOPSIS.
+Consider using
+.Ic \&Nm
+or
+.Ic \&Fn
+instead of
+.Ic \&Xr .
 .It Sy "unusual Xr order"
 .Pq mdoc
 In the SEE ALSO section, an

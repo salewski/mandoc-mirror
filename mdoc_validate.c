@@ -1104,6 +1104,8 @@ post_fname(POST_ARGS)
 	if ( ! (cp[0] == '\0' || (cp[0] == '(' && cp[1] == '*')))
 		mandoc_msg(MANDOCERR_FN_PAREN, mdoc->parse,
 		    n->line, n->pos + pos, n->string);
+	if (n->sec == SEC_SYNOPSIS && mdoc->meta.msec != NULL)
+		mandoc_xr_add(mdoc->meta.msec, n->string, -1, -1);
 }
 
 static void
@@ -1168,6 +1170,11 @@ post_nm(POST_ARGS)
 	struct roff_node	*n;
 
 	n = mdoc->last;
+
+	if ((n->sec == SEC_NAME || n->sec == SEC_SYNOPSIS) &&
+	    n->child != NULL && n->child->type == ROFFT_TEXT &&
+	    mdoc->meta.msec != NULL)
+		mandoc_xr_add(mdoc->meta.msec, n->child->string, -1, -1);
 
 	if (n->last != NULL &&
 	    (n->last->tok == MDOC_Pp ||
@@ -2339,8 +2346,11 @@ post_xr(POST_ARGS)
 		    n->line, n->pos, "Xr %s", nch->string);
 	} else {
 		assert(nch->next == n->last);
-		mandoc_xr_add(nch->next->string, nch->string,
-		    nch->line, nch->pos);
+		if(mandoc_xr_add(nch->next->string, nch->string,
+		    nch->line, nch->pos))
+			mandoc_vmsg(MANDOCERR_XR_SELF, mdoc->parse,
+			    nch->line, nch->pos, "Xr %s %s",
+			    nch->string, nch->next->string);
 	}
 	post_delim(mdoc);
 }

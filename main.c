@@ -763,8 +763,7 @@ parse(struct curparse *curp, int fd, const char *file)
 
 	if (man == NULL)
 		return;
-	if (curp->mmin < MANDOCERR_STYLE)
-		mandoc_xr_reset();
+	mandoc_xr_reset();
 	if (man->macroset == MACROSET_MDOC) {
 		if (curp->outtype != OUTT_TREE || !curp->outopts->noval)
 			mdoc_validate(man);
@@ -816,7 +815,8 @@ parse(struct curparse *curp, int fd, const char *file)
 			break;
 		}
 	}
-	check_xr(file);
+	if (curp->mmin < MANDOCERR_STYLE)
+		check_xr(file);
 	mparse_updaterc(curp->mp, &rc);
 }
 
@@ -833,6 +833,8 @@ check_xr(const char *file)
 		manpath_base(&paths);
 
 	for (xr = mandoc_xr_get(); xr != NULL; xr = xr->next) {
+		if (xr->line == -1)
+			continue;
 		search.arch = NULL;
 		search.sec = xr->sec;
 		search.outkey = NULL;
