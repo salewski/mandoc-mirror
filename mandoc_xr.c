@@ -81,6 +81,7 @@ mandoc_xr_add(const char *sec, const char *name, int line, int pos)
 	xr->name = xr->hashkey + ssz;
 	xr->line = line;
 	xr->pos = pos;
+	xr->count = 1;
 	memcpy(xr->sec, sec, ssz);
 	memcpy(xr->name, name, nsz);
 
@@ -97,6 +98,7 @@ mandoc_xr_add(const char *sec, const char *name, int line, int pos)
 		return 0;
 	}
 
+	oxr->count++;
 	ret = (oxr->line == -1) ^ (xr->line == -1);
 	if (xr->line == -1)
 		oxr->line = -1;

@@ -844,7 +844,11 @@ check_xr(const char *file)
 			continue;
 		if (fs_search(&search, &paths, 1, &xr->name, NULL, &sz))
 			continue;
-		mandoc_asprintf(&cp, "Xr %s %s", xr->name, xr->sec);
+		if (xr->count == 1)
+			mandoc_asprintf(&cp, "Xr %s %s", xr->name, xr->sec);
+		else
+			mandoc_asprintf(&cp, "Xr %s %s (%d times)",
+			    xr->name, xr->sec, xr->count);
 		mmsg(MANDOCERR_XR_BAD, MANDOCLEVEL_STYLE,
 		    file, xr->line, xr->pos + 1, cp);
 		free(cp);

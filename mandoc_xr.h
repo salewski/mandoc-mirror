@@ -21,6 +21,7 @@ struct	mandoc_xr {
 	char		 *name;
 	int		  line;  /* Or -1 for this page's own names. */
 	int		  pos;
+	int		  count;
 	char		  hashkey[];
 };
 
