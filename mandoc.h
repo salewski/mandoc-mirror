@@ -76,6 +76,7 @@ enum	mandocerr {
 	MANDOCERR_MSEC_BAD, /* unknown manual section: Dt ... section */
 	MANDOCERR_DATE_MISSING, /* missing date, using today's date */
 	MANDOCERR_DATE_BAD, /* cannot parse date, using it verbatim: date */
+	MANDOCERR_DATE_FUTURE, /* date in the future, using it anyway: date */
 	MANDOCERR_OS_MISSING, /* missing Os macro, using "" */
 	MANDOCERR_PROLOG_REP, /* duplicate prologue macro: macro */
 	MANDOCERR_PROLOG_LATE, /* late prologue macro: macro */

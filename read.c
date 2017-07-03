@@ -118,6 +118,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"unknown manual section",
 	"missing date, using today's date",
 	"cannot parse date, using it verbatim",
+	"date in the future, using it anyway",
 	"missing Os macro, using \"\"",
 	"duplicate prologue macro",
 	"late prologue macro",
