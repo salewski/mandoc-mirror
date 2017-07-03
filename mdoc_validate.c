@@ -78,6 +78,7 @@ static	void	 post_defaults(POST_ARGS);
 static	void	 post_display(POST_ARGS);
 static	void	 post_dd(POST_ARGS);
 static	void	 post_delim(POST_ARGS);
+static	void	 post_delim_nb(POST_ARGS);
 static	void	 post_dt(POST_ARGS);
 static	void	 post_en(POST_ARGS);
 static	void	 post_es(POST_ARGS);
@@ -109,6 +110,7 @@ static	void	 post_sh_authors(POST_ARGS);
 static	void	 post_sm(POST_ARGS);
 static	void	 post_st(POST_ARGS);
 static	void	 post_std(POST_ARGS);
+static	void	 post_sx(POST_ARGS);
 static	void	 post_useless(POST_ARGS);
 static	void	 post_xr(POST_ARGS);
 static	void	 post_xx(POST_ARGS);
@@ -127,33 +129,33 @@ static	const v_post __mdoc_valids[MDOC_MAX - MDOC_Dd] = {
 	post_bl,	/* Bl */
 	NULL,		/* El */
 	post_it,	/* It */
-	post_delim,	/* Ad */
+	post_delim_nb,	/* Ad */
 	post_an,	/* An */
 	NULL,		/* Ap */
 	post_defaults,	/* Ar */
 	NULL,		/* Cd */
-	post_delim,	/* Cm */
-	post_delim,	/* Dv */
-	post_delim,	/* Er */
-	post_delim,	/* Ev */
+	post_delim_nb,	/* Cm */
+	post_delim_nb,	/* Dv */
+	post_delim_nb,	/* Er */
+	post_delim_nb,	/* Ev */
 	post_ex,	/* Ex */
 	post_fa,	/* Fa */
 	NULL,		/* Fd */
-	post_delim,	/* Fl */
+	post_delim_nb,	/* Fl */
 	post_fn,	/* Fn */
-	post_delim,	/* Ft */
-	post_delim,	/* Ic */
-	post_delim,	/* In */
+	post_delim_nb,	/* Ft */
+	post_delim_nb,	/* Ic */
+	post_delim_nb,	/* In */
 	post_defaults,	/* Li */
 	post_nd,	/* Nd */
 	post_nm,	/* Nm */
-	post_delim,	/* Op */
+	post_delim_nb,	/* Op */
 	post_obsolete,	/* Ot */
 	post_defaults,	/* Pa */
 	post_rv,	/* Rv */
 	post_st,	/* St */
-	post_delim,	/* Va */
-	post_delim,	/* Vt */
+	post_delim_nb,	/* Va */
+	post_delim_nb,	/* Vt */
 	post_xr,	/* Xr */
 	NULL,		/* %A */
 	post_hyph,	/* %B */ /* FIXME: can be used outside Rs/Re. */
@@ -167,12 +169,12 @@ static	const v_post __mdoc_valids[MDOC_MAX - MDOC_Dd] = {
 	post_hyph,	/* %T */ /* FIXME: can be used outside Rs/Re. */
 	NULL,		/* %V */
 	NULL,		/* Ac */
-	post_delim,	/* Ao */
-	post_delim,	/* Aq */
+	post_delim_nb,	/* Ao */
+	post_delim_nb,	/* Aq */
 	post_at,	/* At */
 	NULL,		/* Bc */
 	post_bf,	/* Bf */
-	post_delim,	/* Bo */
+	post_delim_nb,	/* Bo */
 	NULL,		/* Bq */
 	post_xx,	/* Bsx */
 	post_bx,	/* Bx */
@@ -182,37 +184,37 @@ static	const v_post __mdoc_valids[MDOC_MAX - MDOC_Dd] = {
 	NULL,		/* Dq */
 	NULL,		/* Ec */
 	NULL,		/* Ef */
-	post_delim,	/* Em */
+	post_delim_nb,	/* Em */
 	NULL,		/* Eo */
 	post_xx,	/* Fx */
-	post_delim,	/* Ms */
+	post_delim_nb,	/* Ms */
 	NULL,		/* No */
 	post_ns,	/* Ns */
 	post_xx,	/* Nx */
 	post_xx,	/* Ox */
 	NULL,		/* Pc */
 	NULL,		/* Pf */
-	post_delim,	/* Po */
-	post_delim,	/* Pq */
+	post_delim_nb,	/* Po */
+	post_delim_nb,	/* Pq */
 	NULL,		/* Qc */
-	post_delim,	/* Ql */
-	post_delim,	/* Qo */
-	post_delim,	/* Qq */
+	post_delim_nb,	/* Ql */
+	post_delim_nb,	/* Qo */
+	post_delim_nb,	/* Qq */
 	NULL,		/* Re */
 	post_rs,	/* Rs */
 	NULL,		/* Sc */
-	post_delim,	/* So */
-	post_delim,	/* Sq */
+	post_delim_nb,	/* So */
+	post_delim_nb,	/* Sq */
 	post_sm,	/* Sm */
-	post_hyph,	/* Sx */
-	post_delim,	/* Sy */
+	post_sx,	/* Sx */
+	post_delim_nb,	/* Sy */
 	post_useless,	/* Tn */
 	post_xx,	/* Ux */
 	NULL,		/* Xc */
 	NULL,		/* Xo */
 	post_fo,	/* Fo */
 	NULL,		/* Fc */
-	post_delim,	/* Oo */
+	post_delim_nb,	/* Oo */
 	NULL,		/* Oc */
 	post_bk,	/* Bk */
 	NULL,		/* Ek */
@@ -222,10 +224,10 @@ static	const v_post __mdoc_valids[MDOC_MAX - MDOC_Dd] = {
 	post_eoln,	/* Ud */
 	post_lb,	/* Lb */
 	post_par,	/* Lp */
-	post_delim,	/* Lk */
+	post_delim_nb,	/* Lk */
 	post_defaults,	/* Mt */
-	post_delim,	/* Brq */
-	post_delim,	/* Bro */
+	post_delim_nb,	/* Brq */
+	post_delim_nb,	/* Bro */
 	NULL,		/* Brc */
 	NULL,		/* %C */
 	post_es,	/* Es */
@@ -431,6 +433,34 @@ static void
 post_delim(POST_ARGS)
 {
 	const struct roff_node	*nch;
+	const char		*lc;
+	enum mdelim		 delim;
+	enum roff_tok		 tok;
+
+	tok = mdoc->last->tok;
+	nch = mdoc->last->last;
+	if (nch == NULL || nch->type != ROFFT_TEXT)
+		return;
+	lc = strchr(nch->string, '\0') - 1;
+	if (lc < nch->string)
+		return;
+	delim = mdoc_isdelim(lc);
+	if (delim == DELIM_NONE || delim == DELIM_OPEN)
+		return;
+	if (*lc == ')' && (tok == MDOC_Nd || tok == MDOC_Sh ||
+	    tok == MDOC_Ss || tok == MDOC_Fo))
+		return;
+
+	mandoc_vmsg(MANDOCERR_DELIM, mdoc->parse,
+	    nch->line, nch->pos + (lc - nch->string),
+	    "%s%s %s", roff_name[tok],
+	    nch == mdoc->last->child ? "" : " ...", nch->string);
+}
+
+static void
+post_delim_nb(POST_ARGS)
+{
+	const struct roff_node	*nch;
 	const char		*lc, *cp;
 	int			 nw;
 	enum mdelim		 delim;
@@ -516,7 +546,7 @@ post_delim(POST_ARGS)
 		}
 	}
 
-	mandoc_vmsg(MANDOCERR_DELIM, mdoc->parse,
+	mandoc_vmsg(MANDOCERR_DELIM_NB, mdoc->parse,
 	    nch->line, nch->pos + (lc - nch->string),
 	    "%s%s %s", roff_name[tok],
 	    nch == mdoc->last->child ? "" : " ...", nch->string);
@@ -897,7 +927,7 @@ post_lb(POST_ARGS)
 	struct roff_node	*n;
 	const char		*p;
 
-	post_delim(mdoc);
+	post_delim_nb(mdoc);
 
 	n = mdoc->last;
 	assert(n->child->type == ROFFT_TEXT);
@@ -967,6 +997,8 @@ static void
 post_std(POST_ARGS)
 {
 	struct roff_node *n;
+
+	post_delim(mdoc);
 
 	n = mdoc->last;
 	if (n->args && n->args->argc == 1)
@@ -1137,7 +1169,8 @@ post_fo(POST_ARGS)
 		    "Fo ... %s", n->child->next->string);
 		while (n->child != n->last)
 			roff_node_delete(mdoc, n->last);
-	}
+	} else
+		post_delim(mdoc);
 
 	post_fname(mdoc);
 }
@@ -1161,7 +1194,7 @@ post_fa(POST_ARGS)
 			break;
 		}
 	}
-	post_delim(mdoc);
+	post_delim_nb(mdoc);
 }
 
 static void
@@ -1189,11 +1222,18 @@ post_nm(POST_ARGS)
 		mandoc_msg(MANDOCERR_NM_NONAME, mdoc->parse,
 		    n->line, n->pos, "Nm");
 
-	if (n->type == ROFFT_ELEM)
+	switch (n->type) {
+	case ROFFT_ELEM:
+		post_delim_nb(mdoc);
+		break;
+	case ROFFT_HEAD:
 		post_delim(mdoc);
+		break;
+	default:
+		return;
+	}
 
-	if ((n->type != ROFFT_ELEM && n->type != ROFFT_HEAD) ||
-	    (n->child != NULL && n->child->type == ROFFT_TEXT) ||
+	if ((n->child != NULL && n->child->type == ROFFT_TEXT) ||
 	    mdoc->meta.name == NULL)
 		return;
 
@@ -1207,7 +1247,6 @@ static void
 post_nd(POST_ARGS)
 {
 	struct roff_node	*n;
-	size_t			 sz;
 
 	n = mdoc->last;
 
@@ -1221,11 +1260,8 @@ post_nd(POST_ARGS)
 	if (n->child == NULL)
 		mandoc_msg(MANDOCERR_ND_EMPTY, mdoc->parse,
 		    n->line, n->pos, "Nd");
-	else if (n->last->type == ROFFT_TEXT &&
-	    (sz = strlen(n->last->string)) != 0 &&
-	    n->last->string[sz - 1] == '.')
-		mandoc_msg(MANDOCERR_ND_DOT, mdoc->parse,
-		    n->last->line, n->last->pos + sz - 1, NULL);
+	else
+		post_delim(mdoc);
 
 	post_hyph(mdoc);
 }
@@ -1283,7 +1319,7 @@ post_defaults(POST_ARGS)
 	struct roff_node *nn;
 
 	if (mdoc->last->child != NULL) {
-		post_delim(mdoc);
+		post_delim_nb(mdoc);
 		return;
 	}
 
@@ -1358,7 +1394,7 @@ post_an(POST_ARGS)
 			mandoc_msg(MANDOCERR_MACRO_EMPTY, mdoc->parse,
 			    np->line, np->pos, "An");
 		else
-			post_delim(mdoc);
+			post_delim_nb(mdoc);
 	} else if (nch != NULL)
 		mandoc_vmsg(MANDOCERR_ARG_EXCESS, mdoc->parse,
 		    nch->line, nch->pos, "An ... %s", nch->string);
@@ -1387,7 +1423,7 @@ post_xx(POST_ARGS)
 	struct roff_node	*n;
 	const char		*os;
 
-	post_delim(mdoc);
+	post_delim_nb(mdoc);
 
 	n = mdoc->last;
 	switch (n->tok) {
@@ -2016,6 +2052,13 @@ post_ns(POST_ARGS)
 }
 
 static void
+post_sx(POST_ARGS)
+{
+	post_delim(mdoc);
+	post_hyph(mdoc);
+}
+
+static void
 post_sh(POST_ARGS)
 {
 
@@ -2352,7 +2395,7 @@ post_xr(POST_ARGS)
 			    nch->line, nch->pos, "Xr %s %s",
 			    nch->string, nch->next->string);
 	}
-	post_delim(mdoc);
+	post_delim_nb(mdoc);
 }
 
 static void
@@ -2365,6 +2408,7 @@ post_ignpar(POST_ARGS)
 		post_prevpar(mdoc);
 		return;
 	case ROFFT_HEAD:
+		post_delim(mdoc);
 		post_hyph(mdoc);
 		return;
 	case ROFFT_BODY:
@@ -2601,7 +2645,7 @@ post_bx(POST_ARGS)
 	struct roff_node	*n, *nch;
 	const char		*macro;
 
-	post_delim(mdoc);
+	post_delim_nb(mdoc);
 
 	n = mdoc->last;
 	nch = n->child;
@@ -2666,6 +2710,8 @@ post_os(POST_ARGS)
 	else if (mdoc->flags & MDOC_PBODY)
 		mandoc_msg(MANDOCERR_PROLOG_LATE, mdoc->parse,
 		    n->line, n->pos, "Os");
+
+	post_delim(mdoc);
 
 	/*
 	 * Set the operating system by way of the `Os' macro.

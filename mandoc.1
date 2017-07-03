@@ -905,11 +905,15 @@ list contains two consecutive
 entries describing the same
 .Ic \&Er
 number.
-.It Sy "description line ends with a full stop"
+.It Sy "trailing delimiter"
 .Pq mdoc
-Do not use punctuation at the end of an
-.Ic \&Nd
-block.
+The last argument of an
+.Ic \&Ex , \&Fo , \&Nd , \&Nm , \&Os , \&Sh , \&Ss , \&St ,
+or
+.Ic \&Sx
+macro ends with a trailing delimiter.
+This is usually bad style and often indicates typos.
+Most likely, the delimiter can be removed.
 .It Sy "no blank before trailing delimiter"
 .Pq mdoc
 The last argument of a macro that supports trailing delimiter
