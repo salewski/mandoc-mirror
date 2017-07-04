@@ -1,6 +1,7 @@
-.Dd June 25, 2017
+.\" $OpenBSD: font.in,v 1.2 2017/07/04 14:53:23 schwarze Exp $
+.Dd $Mdocdate$
 .Dt DEFINE-FONT 1
-.Os OpenBSD
+.Os
 .Sh NAME
 .Nm define-font
 .Nd font selection takes place after define resolution

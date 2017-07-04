@@ -1,6 +1,7 @@
-.Dd June 9, 2017
+.\" $OpenBSD: punct.in,v 1.6 2017/07/04 14:53:25 schwarze Exp $
+.Dd $Mdocdate$
 .Dt NO-PUNCT 1
-.Os OpenBSD
+.Os
 .Sh NAME
 .Nm No-punct
 .Nd punctuation after the normal macro

@@ -240,7 +240,7 @@ for my $testname (@regress_testnames) {
 		$count_ascii++;
 		$count_total++;
 		print "@mandoc -T ascii $i\n" if $targets{verbose};
-		sysout $o, @mandoc, qw(-T ascii), $i
+		sysout $o, @mandoc, qw(-I os=OpenBSD -T ascii), $i
 		    and fail $subdir, $testname, 'ascii:mandoc';
 		system @diff, $w, $o
 		    and fail $subdir, $testname, 'ascii:diff';
@@ -251,10 +251,10 @@ for my $testname (@regress_testnames) {
 		$count_man++;
 		$count_total++;
 		print "@mandoc -T man $i\n" if $targets{verbose};
-		sysout $m, @mandoc, qw(-T man), $i
+		sysout $m, @mandoc, qw(-I os=OpenBSD -T man), $i
 		    and fail $subdir, $testname, 'man:man';
 		print "@mandoc -man -T ascii $m\n" if $targets{verbose};
-		sysout $mo, @mandoc, qw(-man -T ascii -O mdoc), $m
+		sysout $mo, @mandoc, qw(-man -I os=OpenBSD -T ascii -O mdoc), $m
 		    and fail $subdir, $testname, 'man:mandoc';
 		system @diff, $w, $mo
 		    and fail $subdir, $testname, 'man:diff';
@@ -279,7 +279,7 @@ for my $testname (@utf8_testnames) {
 		$count_utf8++;
 		$count_total++;
 		print "@mandoc -T utf8 $i\n" if $targets{verbose};
-		sysout $o, @mandoc, qw(-T utf8), $i
+		sysout $o, @mandoc, qw(-I os=OpenBSD -T utf8), $i
 		    and fail $subdir, $testname, 'utf8:mandoc';
 		system @diff, $w, $o
 		    and fail $subdir, $testname, 'utf8:diff';
@@ -321,7 +321,7 @@ for my $testname (@regress_testnames) {
 		$count_markdown++;
 		$count_total++;
 		print "@mandoc -T markdown $i\n" if $targets{verbose};
-		sysout $o, @mandoc, qw(-T markdown), $i
+		sysout $o, @mandoc, qw(-I os=OpenBSD -T markdown), $i
 		    and fail $subdir, $testname, 'markdown:mandoc';
 		system @diff, $w, $o
 		    and fail $subdir, $testname, 'markdown:diff';
@@ -342,7 +342,7 @@ for my $testname (@lint_testnames) {
 		$count_lint++;
 		$count_total++;
 		print "@mandoc -T lint -W all $i\n" if $targets{verbose};
-		syslint $o, @mandoc, qw(-T lint -W all), $i
+		syslint $o, @mandoc, qw(-I os=OpenBSD -T lint -W all), $i
 		    and fail $subdir, $testname, 'lint:mandoc';
 		system @diff, $w, $o
 		    and fail $subdir, $testname, 'lint:diff';

@@ -1,6 +1,7 @@
-.Dd December 8, 2016
+.\" $OpenBSD: trailing-mdoc.in,v 1.2 2017/07/04 14:53:23 schwarze Exp $
+.Dd $Mdocdate$
 .Dt SPACE-TRAILING-MDOC 1
-.Os OpenBSD
+.Os
 .Sh NAME
 .Nm space-trailing-mdoc
 .Nd trailing spaces on input lines

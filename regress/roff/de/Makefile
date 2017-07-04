@@ -31,10 +31,10 @@ ascii-diff-opt: TH.mandoc_ascii_opt Dd.mandoc_ascii_opt
 	@${DIFF} ${.CURDIR}/Dd.out_ascii_opt Dd.mandoc_ascii_opt
 
 TH.mandoc_ascii_opt: TH.in
-	@${MANDOC} -Tascii -man ${.ALLSRC} > ${.TARGET}
+	@${MANDOC} -Ios=OpenBSD -Tascii -man ${.ALLSRC} > ${.TARGET}
 
 Dd.mandoc_ascii_opt: Dd.in
-	@${MANDOC} -Tascii -mdoc ${.ALLSRC} > ${.TARGET}
+	@${MANDOC} -Ios=OpenBSD -Tascii -mdoc ${.ALLSRC} > ${.TARGET}
 
 ascii-clean-opt:
 	@rm -f TH.mandoc_ascii_opt Dd.mandoc_ascii_opt
