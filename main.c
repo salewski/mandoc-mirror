@@ -1089,8 +1089,7 @@ mmsg(enum mandocerr t, enum mandoclevel lvl,
 	if (line)
 		fprintf(stderr, "%d:%d:", line, col + 1);
 
-	fprintf(stderr, " %s",
-	    t < MANDOCERR_STYLE ? "BASE" : mparse_strlevel(lvl));
+	fprintf(stderr, " %s", mparse_strlevel(lvl));
 
 	if ((mparse_msg = mparse_strerror(t)) != NULL)
 		fprintf(stderr, ": %s", mparse_msg);
