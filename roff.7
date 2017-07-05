@@ -180,7 +180,7 @@ single-character
 two-character
 .Sq \e*(XX ,
 and N-character
-.Sq \e*[N] .
+.Sq \e* Ns Bq N .
 .Pp
 Examples:
 .Bl -tag -width Ds -offset indent -compact
@@ -1854,7 +1854,7 @@ instead.
 .Sx Special Characters
 with two-letter names, see
 .Xr mandoc_char 7 .
-.Ss \e*[ Ns Ar name ]
+.Ss \e* Ns Bq Ar name
 Interpolate the string with the
 .Ar name ;
 see
@@ -1874,7 +1874,7 @@ Special character
 .Ss \e/
 Right italic correction (groff extension); ignored by
 .Xr mandoc 1 .
-.Ss \e[ Ns Ar name ]
+.Ss \e Ns Bq Ar name
 .Sx Special Characters
 with names of arbitrary length, see
 .Xr mandoc_char 7 .
@@ -1930,14 +1930,14 @@ Move down by half a line; ignored by
 .Xr mandoc 1 .
 .Ss \ee
 Backslash special character.
-.Ss \eF[ Ns Ar name ]
+.Ss \eF Ns Bq Ar name
 Switch font family (groff extension); ignored by
 .Xr mandoc 1 .
 For short names, there are variants
 .No \eF Ns Ar c
 and
 .No \eF( Ns Ar cc .
-.Ss \ef[ Ns Ar name ]
+.Ss \ef Ns Bq Ar name
 Switch to the font
 .Ar name ,
 see
@@ -1946,7 +1946,7 @@ For short names, there are variants
 .No \ef Ns Ar c
 and
 .No \ef( Ns Ar cc .
-.Ss \eg[ Ns Ar name ]
+.Ss \eg Ns Bq Ar name
 Interpolate the format of a number register; ignored by
 .Xr mandoc 1 .
 For short names, there are variants
@@ -1963,7 +1963,7 @@ indentation.
 Otherwise, it is relative to the current position.
 The default scaling unit is
 .Cm m .
-.Ss \ek[ Ns Ar name ]
+.Ss \ek Ns Bq Ar name
 Mark horizontal input place in register; ignored by
 .Xr mandoc 1 .
 For short names, there are variants
@@ -1978,14 +1978,14 @@ Draw a horizontal line of
 .Ar width
 using the glyph
 .Ar c .
-.Ss \eM[ Ns Ar name ]
+.Ss \eM Ns Bq Ar name
 Set fill (background) color (groff extension); ignored by
 .Xr mandoc 1 .
 For short names, there are variants
 .No \eM Ns Ar c
 and
 .No \eM( Ns Ar cc .
-.Ss \em[ Ns Ar name ]
+.Ss \em Ns Bq Ar name
 Set glyph drawing color (groff extension); ignored by
 .Xr mandoc 1 .
 For short names, there are variants
@@ -1996,7 +1996,7 @@ and
 Character
 .Ar number
 on the current font.
-.Ss \en[ Ns Ar name ]
+.Ss \en Ns Bq Ar name
 Interpolate the number register
 .Ar name .
 For short names, there are variants
@@ -2023,9 +2023,9 @@ Change point size; ignored by
 Alternative forms
 .No \es Ns Oo +|- Oc Ns Ar n ,
 .No \es Ns Oo +|- Oc Ns \(aq Ns Ar number Ns \(aq ,
-.No \es Ns [ Oo +|- Oc Ns Ar number ] ,
+.No \es Ns Bq Oo +|- Oc Ns Ar number ,
 and
-.No \es Ns Oo +|- Oc Ns [ Ar number Ns ]
+.No \es Ns Oo +|- Oc Ns Bq Ar number
 are also parsed and ignored.
 .Ss \et
 Horizontal tab; ignored by
@@ -2033,7 +2033,7 @@ Horizontal tab; ignored by
 .Ss \eu
 Move up by half a line; ignored by
 .Xr mandoc 1 .
-.Ss \eV[ Ns Ar name ]
+.Ss \eV Ns Bq Ar name
 Interpolate an environment variable; ignored by
 .Xr mandoc 1 .
 For short names, there are variants
@@ -2060,7 +2060,7 @@ as device control function; ignored in nroff mode and by
 .Ss \ex\(aq Ns Ar number Ns \(aq
 Extra line space function; ignored by
 .Xr mandoc 1 .
-.Ss \eY[ Ns Ar name ]
+.Ss \eY Ns Bq Ar name
 Output a string as a device control function; ignored in nroff mode and by
 .Xr mandoc 1 .
 For short names, there are variants
