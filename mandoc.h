@@ -338,7 +338,6 @@ enum	eqn_boxt {
 	EQN_TEXT, /* text (number, variable, whatever) */
 	EQN_SUBEXPR, /* nested `eqn' subexpression */
 	EQN_LIST, /* list (braces, etc.) */
-	EQN_LISTONE, /* singleton list */
 	EQN_PILE, /* vertical pile */
 	EQN_MATRIX /* pile of piles */
 };

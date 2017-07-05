@@ -316,7 +316,6 @@ print_box(const struct eqn_box *ep, int indent)
 	case EQN_ROOT:
 		t = "eqn-root";
 		break;
-	case EQN_LISTONE:
 	case EQN_LIST:
 		t = "eqn-list";
 		break;
