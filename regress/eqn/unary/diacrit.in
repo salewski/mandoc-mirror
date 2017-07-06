@@ -1,4 +1,4 @@
-.\" $OpenBSD: diacrit.in,v 1.2 2017/07/04 14:53:23 schwarze Exp $
+.\" $OpenBSD: diacrit.in,v 1.3 2017/07/06 00:08:52 schwarze Exp $
 .Dd $Mdocdate$
 .Dt UNARY-DIACRIT 1
 .Os
@@ -10,5 +10,6 @@ initial text
 .EQ
 x dot x dotdot x hat x tilde x vec x dyad
 { x + y } bar { x + y } under
+x tilde hat
 .EN
 final text

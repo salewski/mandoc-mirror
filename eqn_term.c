@@ -113,15 +113,6 @@ eqn_box(struct termp *p, const struct eqn_box *bp)
 
 	if (bp->font != EQNFONT_NONE)
 		term_fontpop(p);
-	if ((bp->type == EQN_LIST && bp->expectargs > 1) ||
-	    (bp->type == EQN_PILE && (bp->prev || bp->next)) ||
-	    (bp->parent != NULL && bp->parent->pos == EQNPOS_SQRT)) {
-		p->flags |= TERMP_NOSPACE;
-		term_word(p, bp->right != NULL ? bp->right : ")");
-		if (bp->parent->type == EQN_SUBEXPR && bp->next != NULL)
-			p->flags |= TERMP_NOSPACE;
-	}
-
 	if (bp->top != NULL) {
 		p->flags |= TERMP_NOSPACE;
 		term_word(p, bp->top);
@@ -129,5 +120,13 @@ eqn_box(struct termp *p, const struct eqn_box *bp)
 	if (bp->bottom != NULL) {
 		p->flags |= TERMP_NOSPACE;
 		term_word(p, "_");
+	}
+	if ((bp->type == EQN_LIST && bp->expectargs > 1) ||
+	    (bp->type == EQN_PILE && (bp->prev || bp->next)) ||
+	    (bp->parent != NULL && bp->parent->pos == EQNPOS_SQRT)) {
+		p->flags |= TERMP_NOSPACE;
+		term_word(p, bp->right != NULL ? bp->right : ")");
+		if (bp->parent->type == EQN_SUBEXPR && bp->next != NULL)
+			p->flags |= TERMP_NOSPACE;
 	}
 }

@@ -1,4 +1,4 @@
-.\" $OpenBSD: bold.in,v 1.2 2017/07/04 14:53:23 schwarze Exp $
+.\" $OpenBSD: bold.in,v 1.3 2017/07/06 00:08:52 schwarze Exp $
 .Dd $Mdocdate$
 .Dt UNARY-BOLD 1
 .Os
@@ -8,6 +8,6 @@
 .Sh DESCRIPTION
 initial text
 .EQ
-bold { sin "sin" }
+bold { sin "sin" } "text" bold x hat
 .EN
 final text

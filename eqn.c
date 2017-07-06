@@ -819,6 +819,8 @@ next_tok:
 			ep->gsize = size;
 			break;
 		}
+		while (parent->args == parent->expectargs)
+			parent = parent->parent;
 		parent = eqn_box_alloc(ep, parent);
 		parent->type = EQN_LIST;
 		parent->expectargs = 1;
@@ -840,13 +842,25 @@ next_tok:
 			cur->type = EQN_TEXT;
 			cur->text = mandoc_strdup("");
 		}
-		/* Handle the "subsup" and "fromto" positions. */
-		if (EQN_TOK_SUP == tok && parent->pos == EQNPOS_SUB) {
+		while (parent->expectargs == 1 && parent->args == 1)
+			parent = parent->parent;
+		if (tok == EQN_TOK_FROM || tok == EQN_TOK_TO)  {
+			for (cur = parent; cur != NULL; cur = cur->parent)
+				if (cur->pos == EQNPOS_SUB ||
+				    cur->pos == EQNPOS_SUP ||
+				    cur->pos == EQNPOS_SUBSUP ||
+				    cur->pos == EQNPOS_SQRT ||
+				    cur->pos == EQNPOS_OVER)
+					break;
+			if (cur != NULL)
+				parent = cur->parent;
+		}
+		if (tok == EQN_TOK_SUP && parent->pos == EQNPOS_SUB) {
 			parent->expectargs = 3;
 			parent->pos = EQNPOS_SUBSUP;
 			break;
 		}
-		if (EQN_TOK_TO == tok && parent->pos == EQNPOS_FROM) {
+		if (tok == EQN_TOK_TO && parent->pos == EQNPOS_FROM) {
 			parent->expectargs = 3;
 			parent->pos = EQNPOS_FROMTO;
 			break;
@@ -895,6 +909,8 @@ next_tok:
 			cur->type = EQN_TEXT;
 			cur->text = mandoc_strdup("");
 		}
+		while (parent->args == parent->expectargs)
+			parent = parent->parent;
 		while (EQN_SUBEXPR == parent->type)
 			parent = parent->parent;
 		parent = eqn_box_makebinary(ep, EQNPOS_OVER, parent);
@@ -1099,13 +1115,6 @@ next_tok:
 				parent = split->parent;
 			break;
 		}
-		/*
-		 * Post-process list status.
-		 */
-		while (parent->type == EQN_LIST &&
-		    parent->expectargs == 1 &&
-		    parent->args == 1)
-			parent = parent->parent;
 		break;
 	default:
 		abort();
