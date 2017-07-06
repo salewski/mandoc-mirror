@@ -98,31 +98,34 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"generic style suggestion",
 
 	"legacy man(7) date format",
+	"lower case character in document title",
 	"duplicate RCS id",
 	"typo in section name",
+	"unterminated quoted argument",
 	"useless macro",
 	"consider using OS macro",
 	"errnos out of order",
 	"duplicate errno",
 	"trailing delimiter",
 	"no blank before trailing delimiter",
+	"fill mode already enabled, skipping",
+	"fill mode already disabled, skipping",
 	"function name without markup",
+	"whitespace at end of input line",
+	"bad comment style",
 
 	"generic warning",
 
 	/* related to the prologue */
 	"missing manual title, using UNTITLED",
 	"missing manual title, using \"\"",
-	"lower case character in document title",
 	"missing manual section, using \"\"",
 	"unknown manual section",
 	"missing date, using today's date",
 	"cannot parse date, using it verbatim",
 	"date in the future, using it anyway",
 	"missing Os macro, using \"\"",
-	"duplicate prologue macro",
 	"late prologue macro",
-	"skipping late title macro",
 	"prologue macros out of order",
 
 	/* related to document structure */
@@ -155,8 +158,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"nested displays are not portable",
 	"moving content out of list",
 	"first macro on line",
-	"fill mode already enabled, skipping",
-	"fill mode already disabled, skipping",
 	"line scope broken",
 	"skipping blank line in line scope",
 
@@ -185,7 +186,6 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"missing eqn box, using \"\"",
 
 	/* related to bad macro arguments */
-	"unterminated quoted argument",
 	"duplicate argument",
 	"skipping duplicate argument",
 	"skipping duplicate display type",
@@ -204,9 +204,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	/* related to plain text */
 	"blank line in fill mode, using .sp",
 	"tab in filled text",
-	"whitespace at end of input line",
 	"new sentence, new line",
-	"bad comment style",
 	"invalid escape sequence",
 	"undefined string, using \"\"",
 
@@ -232,6 +230,8 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 
 	/* related to document structure and macros */
 	NULL,
+	"duplicate prologue macro",
+	"skipping late title macro",
 	"input stack limit exceeded, infinite loop?",
 	"skipping bad character",
 	"skipping unknown macro",
