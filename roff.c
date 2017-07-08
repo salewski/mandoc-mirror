@@ -2934,7 +2934,8 @@ roff_onearg(ROFF_ARGS)
 	int			 npos;
 
 	if (r->man->flags & (MAN_BLINE | MAN_ELINE) &&
-	    (tok == ROFF_sp || tok == ROFF_ti))
+	    (tok == ROFF_ce || tok == ROFF_rj || tok == ROFF_sp ||
+	     tok == ROFF_ti))
 		man_breakscope(r->man, tok);
 
 	if (roffce_node != NULL && (tok == ROFF_ce || tok == ROFF_rj)) {
