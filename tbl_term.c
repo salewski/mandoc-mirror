@@ -170,7 +170,8 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 			if (dp == NULL)
 				continue;
 			spans = dp->spans;
-			dp = dp->next;
+			if (ic || sp->layout->first->pos != TBL_CELL_SPAN)
+				dp = dp->next;
 		}
 
 		/* Set up a column for a right vertical frame. */
@@ -204,7 +205,8 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 			if (dp == NULL)
 				continue;
 			spans = dp->spans;
-			dp = dp->next;
+			if (cp->pos != TBL_CELL_SPAN)
+				dp = dp->next;
 		}
 		break;
 	}
@@ -304,7 +306,9 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 				}
 				if (dp != NULL) {
 					spans = dp->spans;
-					dp = dp->next;
+					if (ic || sp->layout->first->pos
+					    != TBL_CELL_SPAN)
+						dp = dp->next;
 				}
 
 				/*
@@ -514,14 +518,11 @@ tbl_data(struct termp *tp, const struct tbl_opts *opts,
 		break;
 	}
 
-	if (dp == NULL) {
-		tbl_char(tp, ASCII_NBRSP, col->width);
+	if (dp == NULL)
 		return;
-	}
 
 	switch (dp->pos) {
 	case TBL_DATA_NONE:
-		tbl_char(tp, ASCII_NBRSP, col->width);
 		return;
 	case TBL_DATA_HORIZ:
 	case TBL_DATA_NHORIZ:
@@ -546,7 +547,7 @@ tbl_data(struct termp *tp, const struct tbl_opts *opts,
 		tbl_number(tp, opts, dp, col);
 		break;
 	case TBL_CELL_DOWN:
-		tbl_char(tp, ASCII_NBRSP, col->width);
+	case TBL_CELL_SPAN:
 		break;
 	default:
 		abort();
