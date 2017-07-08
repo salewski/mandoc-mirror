@@ -202,7 +202,7 @@ print_mdoc(const struct roff_node *n, int indent)
 	}
 
 	if (n->eqn)
-		print_box(n->eqn->root->first, indent + 4);
+		print_box(n->eqn->first, indent + 4);
 	if (n->child)
 		print_mdoc(n->child, indent +
 		    (n->type == ROFFT_BLOCK ? 2 : 4));
@@ -287,7 +287,7 @@ print_man(const struct roff_node *n, int indent)
 	}
 
 	if (n->eqn)
-		print_box(n->eqn->root->first, indent + 4);
+		print_box(n->eqn->first, indent + 4);
 	if (n->child)
 		print_man(n->child, indent +
 		    (n->type == ROFFT_BLOCK ? 2 : 4));

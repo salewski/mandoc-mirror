@@ -38,9 +38,8 @@ struct	tbl_node {
 };
 
 struct	eqn_node {
-	struct eqn	  eqn;    /* syntax tree of this equation */
 	struct mparse	 *parse;  /* main parser, for error reporting */
-	struct eqn_node  *next;   /* singly linked list of equations */
+	struct roff_node *node;   /* syntax tree of this equation */
 	struct eqn_def	 *defs;   /* array of definitions */
 	char		 *data;   /* source code of this equation */
 	char		 *start;  /* first byte of the current token */
@@ -73,8 +72,9 @@ void		 tbl_data(struct tbl_node *, int, const char *, int);
 int		 tbl_cdata(struct tbl_node *, int, const char *, int);
 const struct tbl_span	*tbl_span(struct tbl_node *);
 int		 tbl_end(struct tbl_node **);
-struct eqn_node	*eqn_alloc(int, int, struct mparse *);
-enum rofferr	 eqn_end(struct eqn_node **);
+struct eqn_node	*eqn_alloc(struct mparse *);
+void		 eqn_box_free(struct eqn_box *);
 void		 eqn_free(struct eqn_node *);
-enum rofferr	 eqn_read(struct eqn_node **, int,
-			const char *, int, int *);
+void		 eqn_parse(struct eqn_node *);
+void		 eqn_read(struct eqn_node *, const char *);
+void		 eqn_reset(struct eqn_node *);

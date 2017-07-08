@@ -101,7 +101,6 @@ Provides
 .Vt struct tbl_dat ,
 .Vt struct tbl_span ,
 .Vt struct eqn_box ,
-.Vt struct eqn ,
 the function prototype typedef
 .Fn mandocmsg ,
 the function
@@ -267,8 +266,6 @@ from
 for function prototypes.
 Uses the types
 .Vt struct tbl_span
-and
-.Vt struct eqn
 from
 .Pa mandoc.h
 and
@@ -292,8 +289,6 @@ because the latter two are needed by
 .Qq Pa roff.c .
 .Pp
 Uses the types
-.Vt struct eqn
-and
 .Vt struct tbl_span
 from
 .Pa mandoc.h ,
@@ -378,7 +373,7 @@ for
 for
 .Vt struct tbl_*
 and
-.Vt struct eqn ,
+.Vt struct eqn_box ,
 and
 .Qq Pa libmandoc.h
 for
@@ -462,7 +457,7 @@ from
 Uses
 .Vt struct tbl_span
 and
-.Vt struct eqn
+.Vt struct eqn_box
 from
 .Pa mandoc.h
 and
@@ -503,7 +498,7 @@ and many HTML formatting functions.
 Uses
 .Vt struct tbl_span
 and
-.Vt struct eqn
+.Vt struct eqn_box
 from
 .Pa mandoc.h
 and

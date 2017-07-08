@@ -40,10 +40,10 @@ static void	eqn_box(struct termp *, const struct eqn_box *);
 
 
 void
-term_eqn(struct termp *p, const struct eqn *ep)
+term_eqn(struct termp *p, const struct eqn_box *bp)
 {
 
-	eqn_box(p, ep->root);
+	eqn_box(p, bp);
 	p->flags &= ~TERMP_NOSPACE;
 }
 

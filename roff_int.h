@@ -25,7 +25,6 @@ void		  roff_elem_alloc(struct roff_man *, int, int, int);
 struct roff_node *roff_block_alloc(struct roff_man *, int, int, int);
 struct roff_node *roff_head_alloc(struct roff_man *, int, int, int);
 struct roff_node *roff_body_alloc(struct roff_man *, int, int, int);
-void		  roff_addeqn(struct roff_man *, const struct eqn *);
 void		  roff_addtbl(struct roff_man *, const struct tbl_span *);
 void		  roff_node_unlink(struct roff_man *, struct roff_node *);
 void		  roff_node_free(struct roff_node *);

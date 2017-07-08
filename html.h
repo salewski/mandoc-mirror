@@ -115,7 +115,7 @@ struct	html {
 
 struct	roff_node;
 struct	tbl_span;
-struct	eqn;
+struct	eqn_box;
 
 void		  roff_html_pre(struct html *, const struct roff_node *);
 
@@ -127,7 +127,7 @@ void		  print_stagq(struct html *, const struct tag *);
 void		  print_text(struct html *, const char *);
 void		  print_tblclose(struct html *);
 void		  print_tbl(struct html *, const struct tbl_span *);
-void		  print_eqn(struct html *, const struct eqn *);
+void		  print_eqn(struct html *, const struct eqn_box *);
 void		  print_paragraph(struct html *);
 void		  print_endline(struct html *);
 

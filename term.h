@@ -36,7 +36,7 @@ enum	termfont {
 	TERMFONT__MAX
 };
 
-struct	eqn;
+struct	eqn_box;
 struct	roff_meta;
 struct	roff_node;
 struct	tbl_span;
@@ -126,7 +126,7 @@ const char	 *ascii_uc2str(int);
 
 void		  roff_term_pre(struct termp *, const struct roff_node *);
 
-void		  term_eqn(struct termp *, const struct eqn *);
+void		  term_eqn(struct termp *, const struct eqn_box *);
 void		  term_tbl(struct termp *, const struct tbl_span *);
 void		  term_free(struct termp *);
 void		  term_setcol(struct termp *, size_t);

@@ -227,14 +227,14 @@ out:
 }
 
 void
-print_eqn(struct html *p, const struct eqn *ep)
+print_eqn(struct html *p, const struct eqn_box *bp)
 {
 	struct tag	*t;
 
 	t = print_otag(p, TAG_MATH, "c", "eqn");
 
 	p->flags |= HTML_NONOSPACE;
-	eqn_box(p, ep->root);
+	eqn_box(p, bp);
 	p->flags &= ~HTML_NONOSPACE;
 
 	print_tagq(p, t);

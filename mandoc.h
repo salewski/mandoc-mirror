@@ -402,17 +402,6 @@ struct	eqn_box {
 };
 
 /*
- * An equation consists of a tree of expressions starting at a given
- * line and position.
- */
-struct	eqn {
-	char		 *name; /* identifier (or NULL) */
-	struct eqn_box	 *root; /* root mathematical expression */
-	int		  ln; /* invocation line */
-	int		  pos; /* invocation position */
-};
-
-/*
  * Parse options.
  */
 #define	MPARSE_MDOC	1  /* assume -mdoc */

@@ -499,7 +499,7 @@ struct	roff_node {
 	union mdoc_data	 *norm;    /* Normalized arguments. */
 	char		 *string;  /* TEXT */
 	const struct tbl_span *span; /* TBL */
-	const struct eqn *eqn;	   /* EQN */
+	struct eqn_box	 *eqn;     /* EQN */
 	int		  line;    /* Input file line number. */
 	int		  pos;     /* Input file column number. */
 	int		  flags;

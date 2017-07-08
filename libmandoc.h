@@ -24,7 +24,6 @@ enum	rofferr {
 	ROFF_SO, /* include another file */
 	ROFF_IGN, /* ignore current line */
 	ROFF_TBL, /* a table row was successfully parsed */
-	ROFF_EQN /* an equation was successfully parsed */
 };
 
 struct	buf {
@@ -35,7 +34,6 @@ struct	buf {
 
 struct	mparse;
 struct	tbl_span;
-struct	eqn;
 struct	roff;
 struct	roff_man;
 
@@ -77,4 +75,3 @@ int		 roff_getcontrol(const struct roff *,
 int		 roff_getformat(const struct roff *);
 
 const struct tbl_span	*roff_span(const struct roff *);
-const struct eqn	*roff_eqn(const struct roff *);
