@@ -153,6 +153,7 @@ static	void		 roffnode_cleanscope(struct roff *);
 static	void		 roffnode_pop(struct roff *);
 static	void		 roffnode_push(struct roff *, enum roff_tok,
 				const char *, int, int);
+static	void		 roff_addtbl(struct roff_man *, struct tbl_node *);
 static	enum rofferr	 roff_als(ROFF_ARGS);
 static	enum rofferr	 roff_block(ROFF_ARGS);
 static	enum rofferr	 roff_block_text(ROFF_ARGS);
@@ -979,18 +980,21 @@ roff_body_alloc(struct roff_man *man, int line, int pos, int tok)
 	return n;
 }
 
-void
-roff_addtbl(struct roff_man *man, const struct tbl_span *tbl)
+static void
+roff_addtbl(struct roff_man *man, struct tbl_node *tbl)
 {
 	struct roff_node	*n;
+	const struct tbl_span	*span;
 
 	if (man->macroset == MACROSET_MAN)
 		man_breakscope(man, ROFF_TS);
-	n = roff_node_alloc(man, tbl->line, 0, ROFFT_TBL, TOKEN_NONE);
-	n->span = tbl;
-	roff_node_append(man, n);
-	n->flags |= NODE_VALID | NODE_ENDED;
-	man->next = ROFF_NEXT_SIBLING;
+	while ((span = tbl_span(tbl)) != NULL) {
+		n = roff_node_alloc(man, tbl->line, 0, ROFFT_TBL, TOKEN_NONE);
+		n->span = span;
+		roff_node_append(man, n);
+		n->flags |= NODE_VALID | NODE_ENDED;
+		man->next = ROFF_NEXT_SIBLING;
+	}
 }
 
 void
@@ -1501,8 +1505,11 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 		eqn_read(r->eqn, buf->buf + ppos);
 		return ROFF_IGN;
 	}
-	if (r->tbl != NULL && ( ! ctl || buf->buf[pos] == '\0'))
-		return tbl_read(r->tbl, ln, buf->buf, ppos);
+	if (r->tbl != NULL && (ctl == 0 || buf->buf[pos] == '\0')) {
+		tbl_read(r->tbl, ln, buf->buf, ppos);
+		roff_addtbl(r->man, r->tbl);
+		return ROFF_IGN;
+	}
 	if ( ! ctl)
 		return roff_parsetext(r, buf, pos, offs);
 
@@ -1543,7 +1550,9 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 			pos++;
 		while (buf->buf[pos] == ' ')
 			pos++;
-		return tbl_read(r->tbl, ln, buf->buf, pos);
+		tbl_read(r->tbl, ln, buf->buf, pos);
+		roff_addtbl(r->man, r->tbl);
+		return ROFF_IGN;
 	}
 
 	/* For now, let high level macros abort .ce mode. */
@@ -1572,23 +1581,23 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 void
 roff_endparse(struct roff *r)
 {
-
-	if (r->last)
+	if (r->last != NULL)
 		mandoc_msg(MANDOCERR_BLK_NOEND, r->parse,
 		    r->last->line, r->last->col,
 		    roff_name[r->last->tok]);
 
-	if (r->eqn) {
+	if (r->eqn != NULL) {
 		mandoc_msg(MANDOCERR_BLK_NOEND, r->parse,
 		    r->eqn->node->line, r->eqn->node->pos, "EQ");
 		eqn_parse(r->eqn);
 		r->eqn = NULL;
 	}
 
-	if (r->tbl) {
+	if (r->tbl != NULL) {
 		mandoc_msg(MANDOCERR_BLK_NOEND, r->parse,
 		    r->tbl->line, r->tbl->pos, "TS");
-		tbl_end(&r->tbl);
+		tbl_end(r->tbl);
+		r->tbl = NULL;
 	}
 }
 
@@ -2770,16 +2779,19 @@ roff_Dd(ROFF_ARGS)
 static enum rofferr
 roff_TE(ROFF_ARGS)
 {
-
-	if (NULL == r->tbl)
+	if (r->tbl == NULL) {
 		mandoc_msg(MANDOCERR_BLK_NOTOPEN, r->parse,
 		    ln, ppos, "TE");
-	else if ( ! tbl_end(&r->tbl)) {
+		return ROFF_IGN;
+	}
+	if (tbl_end(r->tbl) == 0) {
+		r->tbl = NULL;
 		free(buf->buf);
 		buf->buf = mandoc_strdup(".sp");
 		buf->sz = 4;
 		return ROFF_REPARSE;
 	}
+	r->tbl = NULL;
 	return ROFF_IGN;
 }
 
@@ -2907,22 +2919,17 @@ roff_EN(ROFF_ARGS)
 static enum rofferr
 roff_TS(ROFF_ARGS)
 {
-	struct tbl_node	*tbl;
-
-	if (r->tbl) {
+	if (r->tbl != NULL) {
 		mandoc_msg(MANDOCERR_BLK_BROKEN, r->parse,
 		    ln, ppos, "TS breaks TS");
-		tbl_end(&r->tbl);
+		tbl_end(r->tbl);
 	}
-
-	tbl = tbl_alloc(ppos, ln, r->parse);
-
+	r->tbl = tbl_alloc(ppos, ln, r->parse);
 	if (r->last_tbl)
-		r->last_tbl->next = tbl;
+		r->last_tbl->next = r->tbl;
 	else
-		r->first_tbl = r->last_tbl = tbl;
-
-	r->tbl = r->last_tbl = tbl;
+		r->first_tbl = r->tbl;
+	r->last_tbl = r->tbl;
 	return ROFF_IGN;
 }
 
@@ -3600,13 +3607,6 @@ roff_freestr(struct roffkv *r)
 }
 
 /* --- accessors and utility functions ------------------------------------ */
-
-const struct tbl_span *
-roff_span(const struct roff *r)
-{
-
-	return r->tbl ? tbl_span(r->tbl) : NULL;
-}
 
 /*
  * Duplicate an input string, making the appropriate character

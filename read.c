@@ -42,7 +42,6 @@
 #include "mdoc.h"
 #include "man.h"
 #include "libmandoc.h"
-#include "roff_int.h"
 
 #define	REPARSE_LIMIT	1000
 
@@ -343,7 +342,6 @@ choose_parser(struct mparse *curp)
 static int
 mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 {
-	const struct tbl_span	*span;
 	struct buf	 ln;
 	const char	*save_file;
 	char		*cp;
@@ -534,18 +532,7 @@ rerun:
 		if (curp->man->macroset == MACROSET_NONE)
 			choose_parser(curp);
 
-		/*
-		 * Lastly, push down into the parsers themselves.
-		 * If libroff returns ROFF_TBL, then add it to the
-		 * currently open parse.  Since we only get here if
-		 * there does exist data (see tbl_data.c), we're
-		 * guaranteed that something's been allocated.
-		 */
-
-		if (rr == ROFF_TBL)
-			while ((span = roff_span(curp->roff)) != NULL)
-				roff_addtbl(curp->man, span);
-		else if ((curp->man->macroset == MACROSET_MDOC ?
+		if ((curp->man->macroset == MACROSET_MDOC ?
 		    mdoc_parseln(curp->man, curp->line, ln.buf, of) :
 		    man_parseln(curp->man, curp->line, ln.buf, of)) == 2)
 				break;

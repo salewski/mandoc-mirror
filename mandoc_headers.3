@@ -264,15 +264,11 @@ and
 from
 .Pa roff.c
 for function prototypes.
-Uses the types
-.Vt struct tbl_span
-from
-.Pa mandoc.h
-and
+Uses the type
 .Vt struct roff_man
 from
 .Pa roff.h
-as opaque types for function prototypes.
+as an opaque type for function prototypes.
 .It Qq Pa roff_int.h
 Requires
 .Qq Pa roff.h
@@ -289,14 +285,11 @@ because the latter two are needed by
 .Qq Pa roff.c .
 .Pp
 Uses the types
-.Vt struct tbl_span
-from
-.Pa mandoc.h ,
 .Vt struct roff_man
 and
 .Vt struct roff_node
 from
-.Pa roff.h ,
+.Pa roff.h
 and
 .Vt struct mdoc_arg
 from
@@ -368,16 +361,13 @@ or
 Requires
 .In sys/types.h
 for
-.Vt size_t ,
+.Vt size_t
+and
 .Qq Pa mandoc.h
 for
 .Vt struct tbl_*
 and
-.Vt struct eqn_box ,
-and
-.Qq Pa libmandoc.h
-for
-.Vt enum rofferr .
+.Vt struct eqn_box .
 .Pp
 Provides
 .Vt enum tbl_part ,
