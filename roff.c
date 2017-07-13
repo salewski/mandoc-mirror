@@ -2879,6 +2879,8 @@ roff_EQ(ROFF_ARGS)
 {
 	struct roff_node	*n;
 
+	if (r->man->macroset == MACROSET_MAN)
+		man_breakscope(r->man, ROFF_EQ);
 	n = roff_node_alloc(r->man, ln, ppos, ROFFT_EQN, TOKEN_NONE);
 	if (ln > r->man->last->line)
 		n->flags |= NODE_LINE;
