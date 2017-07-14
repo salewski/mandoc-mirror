@@ -231,6 +231,9 @@ print_eqn(struct html *p, const struct eqn_box *bp)
 {
 	struct tag	*t;
 
+	if (bp->first == NULL)
+		return;
+
 	t = print_otag(p, TAG_MATH, "c", "eqn");
 
 	p->flags |= HTML_NONOSPACE;
