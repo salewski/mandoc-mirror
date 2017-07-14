@@ -624,8 +624,13 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 			su = va_arg(ap, struct roffsu *);
 			break;
 		case 'w':
-			if ((arg2 = va_arg(ap, char *)) == NULL)
+			if ((arg2 = va_arg(ap, char *)) == NULL) {
+				if (*fmt == '+')
+					fmt++;
+				if (*fmt == '-')
+					fmt++;
 				break;
+			}
 			su = &mysu;
 			a2width(arg2, su);
 			if (*fmt == '+') {
