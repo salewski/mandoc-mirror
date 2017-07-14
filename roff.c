@@ -1559,7 +1559,8 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 	/* For now, let high level macros abort .ce mode. */
 
 	if (ctl && roffce_node != NULL &&
-	    (t == TOKEN_NONE || t == ROFF_EQ || t == ROFF_TS)) {
+	    (t == TOKEN_NONE || t == ROFF_Dd || t == ROFF_EQ ||
+	     t == ROFF_TH || t == ROFF_TS)) {
 		r->man->last = roffce_node;
 		r->man->next = ROFF_NEXT_SIBLING;
 		roffce_lines = 0;
