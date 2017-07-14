@@ -1041,7 +1041,7 @@ next_tok:
 				/* No boundary after last character. */
 				if (*cpn == '\0')
 					break;
-				if (ccln == ccl)
+				if (ccln == ccl && *cp != ',' && *cpn != ',')
 					continue;
 				/* Boundary found, split the text. */
 				if (parent->args == parent->expectargs) {
