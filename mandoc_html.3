@@ -219,11 +219,6 @@ argument, used as a style value.
 Requires one
 .Vt struct roffsu *
 argument, used as a length.
-.It Cm v
-Requires one
-.Vt int
-argument, interpreted as a vertical length in units of
-.Dv SCALE_VS .
 .It Cm w
 Requires one
 .Vt char *
@@ -249,10 +244,6 @@ makes the width negative by multiplying it with \-1.
 .Pp
 Style name letters decide what to do with the preceding argument:
 .Bl -tag -width 1n -offset indent
-.It Cm b
-Set
-.Cm margin-bottom
-to the given length.
 .It Cm h
 Set
 .Cm height
@@ -264,10 +255,6 @@ to the given length.
 .It Cm l
 Set
 .Cm margin-left
-to the given length.
-.It Cm t
-Set
-.Cm margin-top
 to the given length.
 .It Cm w
 Set
