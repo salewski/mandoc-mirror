@@ -247,6 +247,9 @@ are mere guesses, and some may be wrong.
   Also, check whether there are more such cases (e.g., +?).
   reported by bentley@  20 Jun 2017 02:04:29 -0600
 
+- Primes, opprime, and '
+  bentley@  Thu, 13 Jul 2017 23:14:20 -0600
+
 --- missing misc features ----------------------------------------------
 
 - italic correction (\/) in PostScript mode
@@ -365,6 +368,12 @@ are mere guesses, and some may be wrong.
 - global variables in the SYNOPSIS of section 3 pages
   .Vt vs .Vt/.Va vs .Ft/.Va vs .Ft/.Fa ...
   from kristaps@  Tue, 08 Jun 2010 11:13:32 +0200
+
+- implicit whitespace around inline equations
+  example code:  where '$times$' denotes matrix multiplication
+  must not have an HTML line break, nor a blank, before <math>
+  partial solution: html.c {"math", HTML_NLINSIDE | HTML_INDENT},
+  bentley@  Thu, 13 Jul 2017 19:00:59 -0600
 
 - in enclosures, mandoc sometimes fancies a bogus end of sentence
   reminded by jmc@  Thu, 23 Sep 2010 18:13:39 +0059
