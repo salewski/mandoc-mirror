@@ -1127,13 +1127,13 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 	size_t		 maxl;  /* expected length of the escape name */
 	size_t		 naml;	/* actual length of the escape name */
 	enum mandoc_esc	 esc;	/* type of the escape sequence */
-	enum mandoc_os	 os_e;	/* kind of RCS id seen */
 	int		 inaml;	/* length returned from mandoc_escape() */
 	int		 expand_count;	/* to avoid infinite loops */
 	int		 npos;	/* position in numeric expression */
 	int		 arg_complete; /* argument not interrupted by eol */
 	int		 done;	/* no more input available */
 	int		 deftype; /* type of definition to paste */
+	int		 rcsid;	/* kind of RCS id seen */
 	char		 term;	/* character terminating the escape */
 
 	/* Search forward for comments. */
@@ -1149,20 +1149,21 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 
 		/* Comment found, look for RCS id. */
 
+		rcsid = 0;
 		if ((cp = strstr(stesc, "$" "OpenBSD")) != NULL) {
-			os_e = MANDOC_OS_OPENBSD;
+			rcsid = 1 << MANDOC_OS_OPENBSD;
 			cp += 8;
 		} else if ((cp = strstr(stesc, "$" "NetBSD")) != NULL) {
-			os_e = MANDOC_OS_NETBSD;
+			rcsid = 1 << MANDOC_OS_NETBSD;
 			cp += 7;
 		}
 		if (cp != NULL &&
 		    isalnum((unsigned char)*cp) == 0 &&
 		    strchr(cp, '$') != NULL) {
-			if (r->man->meta.rcsids & (1 << os_e))
+			if (r->man->meta.rcsids & rcsid)
 				mandoc_msg(MANDOCERR_RCS_REP, r->parse,
 				    ln, stesc + 1 - buf->buf, stesc + 1);
-			r->man->meta.rcsids |= 1 << os_e;
+			r->man->meta.rcsids |= rcsid;
 		}
 
 		/* Handle trailing whitespace. */
