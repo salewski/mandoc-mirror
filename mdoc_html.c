@@ -732,7 +732,7 @@ mdoc_it_pre(MDOC_ARGS)
 				print_otag(h, TAG_B, "c", cattr);
 			break;
 		case ROFFT_BODY:
-			print_otag(h, TAG_DD, "csw+l", cattr,
+			print_otag(h, TAG_DD, "csw*+l", cattr,
 			    bl->norm->Bl.width);
 			break;
 		default:
@@ -746,7 +746,7 @@ mdoc_it_pre(MDOC_ARGS)
 			    (n->parent->prev == NULL ||
 			     n->parent->prev->body == NULL ||
 			     n->parent->prev->body->child != NULL)) {
-				t = print_otag(h, TAG_DT, "csw+-l",
+				t = print_otag(h, TAG_DT, "csw*+-l",
 				    cattr, bl->norm->Bl.width);
 				print_text(h, "\\ ");
 				print_tagq(h, t);
@@ -754,7 +754,7 @@ mdoc_it_pre(MDOC_ARGS)
 				print_text(h, "\\ ");
 				print_tagq(h, t);
 			}
-			print_otag(h, TAG_DT, "csw+-l", cattr,
+			print_otag(h, TAG_DT, "csw*+-l", cattr,
 			    bl->norm->Bl.width);
 			break;
 		case ROFFT_BODY:
@@ -860,7 +860,7 @@ mdoc_bl_pre(MDOC_ARGS)
 	case LIST_tag:
 		if (bl->offs)
 			print_otag(h, TAG_DIV, "cswl", "Bl-tag", bl->offs);
-		print_otag(h, TAG_DL, "csw+l", bl->comp ?
+		print_otag(h, TAG_DL, "csw*+l", bl->comp ?
 		    "Bl-tag Bl-compact" : "Bl-tag", bl->width);
 		return 1;
 	case LIST_column:
