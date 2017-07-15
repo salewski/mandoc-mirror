@@ -2130,7 +2130,7 @@ dbwrite(struct dba *dba)
 
 	dba_array_start(dba->pages);
 	if (dba_array_next(dba->pages) == NULL) {
-		if (unlink(MANDOC_DB) == -1)
+		if (unlink(MANDOC_DB) == -1 && errno != ENOENT)
 			say(MANDOC_DB, "&unlink");
 		return;
 	}
