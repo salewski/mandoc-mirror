@@ -732,7 +732,7 @@ mdoc_it_pre(MDOC_ARGS)
 				print_otag(h, TAG_B, "c", cattr);
 			break;
 		case ROFFT_BODY:
-			print_otag(h, TAG_DD, "cswl", cattr,
+			print_otag(h, TAG_DD, "csw+l", cattr,
 			    bl->norm->Bl.width);
 			break;
 		default:
