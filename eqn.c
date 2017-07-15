@@ -717,7 +717,7 @@ next_tok:
 			parent->bottom = mandoc_strdup("\\[ul]");
 			break;
 		case EQN_TOK_BAR:
-			parent->top = mandoc_strdup("\\[rl]");
+			parent->top = mandoc_strdup("\\[rn]");
 			break;
 		case EQN_TOK_DOT:
 			parent->top = mandoc_strdup("\\[a.]");
