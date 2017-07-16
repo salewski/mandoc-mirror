@@ -1,4 +1,4 @@
-.\" $OpenBSD: inset.in,v 1.5 2017/07/04 14:53:24 schwarze Exp $
+.\" $OpenBSD: inset.in,v 1.6 2017/07/16 17:53:29 schwarze Exp $
 .Dd $Mdocdate$
 .Dt BL-INSET 1
 .Os
@@ -39,7 +39,7 @@ x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x
 x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x
 .El
 .\" Trailing white space in the head.
-.Bl -inset
+.Bl -inset -width 10n
 .It "a"
 b
 .It "a "

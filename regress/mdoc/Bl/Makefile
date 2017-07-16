@@ -10,7 +10,7 @@ REGRESS_TARGETS += bareIt bareTa unclosed break breakingIt breakingTa broken
 
 UTF8_TARGETS	 = dash
 
-LINT_TARGETS	 = column column_nogroff notype badargs tag
+LINT_TARGETS	 = inset diag column column_nogroff notype badargs tag
 LINT_TARGETS	+= empty noIt emptyhead emptytag emptyitem
 LINT_TARGETS	+= bareIt bareTa break breakingIt broken
 
