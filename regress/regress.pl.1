@@ -23,7 +23,7 @@
 .Sh SYNOPSIS
 .Nm ./regress.pl
 .Oo
-.Ar directory Ns Op Pf : Ar test
+.Ar directory Ns Op Pf / Ar test
 .Op Ar modifier ...
 .Oc
 .Sh DESCRIPTION
@@ -32,29 +32,18 @@ The
 steering script allows running the
 .Xr mandoc 1
 regression suite on arbitrary operating systems,
-even though the suite was designed for OpenBSD only.
+even though the suite was originally designed for OpenBSD only.
 .Pp
 When run without an argument,
 .Nm
 runs the complete regression suite.
 .Pp
-When run with one argument, that argument can be:
-.Bl -enum
-.It
-A single dot to run the complete suite.
-.It
-One of the top level directories, for example
-.Pa mdoc ,
-to run the test suite for a complete language or feature group.
-.It
-A subdirectory, for example
-.Pa man/IP ,
-to run the tests for a specific macro or an individual feature.
-.It
-A subdirectory with a test name appended with a colon, for example
-.Pa char/unicode : Ns Pa named ,
-to run the tests for one particular input file.
-.El
+The first argument is a Perl regular expression to match test names,
+automatically anchored at the beginning of the names.
+Test names are names of test input files without the file name extension
+.Pa .in ,
+for example
+.Pa char/unicode/named .
 .Pp
 Any additional arguments modify the way the tests are run.
 The default is
@@ -96,35 +85,6 @@ output mode.
 .It Cm verbose
 Display approximate indications of what is being done.
 .El
-.Pp
-The amount of summary lines shown can be modified by giving an
-argument consisting of a single digit:
-.Bl -tag -width verbose
-.It Cm 3
-Show all summary lines for all directories entered.
-Even without
-.Cm verbose ,
-this generates more than hundred lines of output when running the
-complete regression suite.
-.It Cm 2
-This is the default.
-It shows the summary lines for the
-.Ar directory
-given on the command line and its immediate children.
-Except for
-.Pa mdoc ,
-the output usually fits on one screen.
-.It Cm 1
-Only show a single summary line for the whole run.
-.It Cm 0
-Do not show any summary lines.
-No output means success.
-Success or failure can also be seen from the exit status.
-.El
-.Pp
-All failed tests are always reported, even when the
-.Cm 0
-modifier is given.
 .Sh EXIT STATUS
 .Ex -std
 .Sh EXAMPLES
@@ -140,15 +100,9 @@ Complete check, but keep the tree clean:
 .Pp
 .Dl ./regress.pl \&. all clean
 .Pp
-Test all of
-.Pa mdoc ,
-but don't print the usual 65 lines of output:
-.Pp
-.Dl ./regress.pl mdoc 1
-.Pp
 Investigate a specific failure:
 .Pp
-.Dl ./regress.pl mdoc/Bd:broken man verbose
+.Dl ./regress.pl mdoc/Bd/broken man verbose
 .Sh HISTORY
 The
 .Nm

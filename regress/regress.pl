@@ -36,12 +36,17 @@ sub usage ($) {
 	exit 1;
 }
 
+# Modifier arguments provided on the command line,
+# inspected by the main program and by the utility functions.
+my %targets;
+
 # Run a command and send STDOUT and STDERR to a file.
 # 1st argument: path to the output file
 # 2nd argument: command name
 # The remaining arguments are passed to the command.
 sub sysout ($@) {
 	my $outfile = shift;
+	print "@_\n" if $targets{verbose};
 	local *OUT_FH;
 	open OUT_FH, '>', $outfile or die "$outfile: $!";
 	my $pid = open3 undef, ">&OUT_FH", undef, @_;
@@ -53,6 +58,7 @@ sub sysout ($@) {
 # Simlar, but filter the output as needed for the lint test.
 sub syslint ($@) {
 	my $outfile = shift;
+	print "@_\n" if $targets{verbose};
 	open my $outfd, '>', $outfile or die "$outfile: $!";
 	my $infd;
 	my $pid = open3 undef, $infd, undef, @_;
@@ -69,6 +75,7 @@ sub syslint ($@) {
 # Simlar, but filter the output as needed for the html test.
 sub syshtml ($@) {
 	my $outfile = shift;
+	print "@_\n" if $targets{verbose};
 	open my $outfd, '>', $outfile or die "$outfile: $!";
 	my $infd;
 	my $pid = open3 undef, $infd, undef, @_;
@@ -97,7 +104,7 @@ sub syshtml ($@) {
 }
 
 my @failures;
-sub fail ($$$) {
+sub fail ($$) {
 	warn "FAILED: @_\n";
 	push @failures, [@_];
 }
@@ -105,14 +112,8 @@ sub fail ($$$) {
 
 # --- process command line arguments -----------------------------------
 
-my ($subdir, $onlytest) = split ':', (shift // '.');
-my $displaylevel = 2;
-my %targets;
+my $onlytest = shift // '';
 for (@ARGV) {
-	if (/^[0123]$/) {
-		$displaylevel = int;
-		next;
-	}
 	/^(all|ascii|utf8|man|html|markdown|lint|clean|verbose)$/
 	    or usage "$_: invalid modifier";
 	$targets{$_} = 1;
@@ -123,14 +124,12 @@ $targets{all} = 1
       $targets{lint} || $targets{clean};
 $targets{ascii} = $targets{utf8} = $targets{man} = $targets{html} =
     $targets{markdown} = $targets{lint} = 1 if $targets{all};
-$displaylevel = 3 if $targets{verbose};
 
 
 # --- parse Makefiles --------------------------------------------------
 
-my %vars = (MOPTS => '');
-sub parse_makefile ($) {
-	my $filename = shift;
+sub parse_makefile ($%) {
+	my ($filename, $vars) = @_;
 	open my $fh, '<', $filename or die "$filename: $!";
 	while (<$fh>) {
 		chomp;
@@ -143,242 +142,293 @@ sub parse_makefile ($) {
 		my $var = $1;
 		my $opt = $2;
 		my $val = $3;
-		$val =~ s/\$\{(\w+)\}/$vars{$1}/;
-		$val = "$vars{$var} $val" if $opt eq '+';
-		$vars{$var} = $val
-		    unless $opt eq '?' && defined $vars{$var};
+		$val =~ s/\$\{(\w+)\}/$vars->{$1}/;
+		$val = "$vars->{$var} $val" if $opt eq '+';
+		$vars->{$var} = $val
+		    unless $opt eq '?' && defined $vars->{$var};
 	}
 	close $fh;
 }
 
-if ($subdir eq '.') {
-	$vars{SUBDIR} = 'roff char mdoc man tbl eqn';
-} else {
-	parse_makefile "$subdir/Makefile";
-	parse_makefile "$subdir/../Makefile.inc"
-	    if -e "$subdir/../Makefile.inc";
-}
-
-my @mandoc = '../mandoc';
-my @subdir_names;
-my (@regress_testnames, @utf8_testnames, @lint_testnames);
-my (@html_testnames, @markdown_testnames);
+my (@regress_tests, @utf8_tests, @lint_tests, @html_tests);
 my (%skip_ascii, %skip_man, %skip_markdown);
-
-push @mandoc, split ' ', $vars{MOPTS} if $vars{MOPTS};
-delete $vars{MOPTS};
-delete $vars{SKIP_GROFF};
-delete $vars{SKIP_GROFF_ASCII};
-delete $vars{TBL};
-delete $vars{EQN};
-if (defined $vars{SUBDIR}) {
-	@subdir_names = split ' ', $vars{SUBDIR};
-	delete $vars{SUBDIR};
-}
-if (defined $vars{REGRESS_TARGETS}) {
-	@regress_testnames = split ' ', $vars{REGRESS_TARGETS};
-	delete $vars{REGRESS_TARGETS};
-}
-if (defined $vars{UTF8_TARGETS}) {
-	@utf8_testnames = split ' ', $vars{UTF8_TARGETS};
-	delete $vars{UTF8_TARGETS};
-}
-if (defined $vars{HTML_TARGETS}) {
-	@html_testnames = split ' ', $vars{HTML_TARGETS};
-	delete $vars{HTML_TARGETS};
-}
-if (defined $vars{MARKDOWN_TARGETS}) {
-	@markdown_testnames = split ' ', $vars{MARKDOWN_TARGETS};
-	delete $vars{MARKDOWN_TARGETS};
-}
-if (defined $vars{LINT_TARGETS}) {
-	@lint_testnames = split ' ', $vars{LINT_TARGETS};
-	delete $vars{LINT_TARGETS};
-}
-if (defined $vars{SKIP_ASCII}) {
-	for (split ' ', $vars{SKIP_ASCII}) {
-		$skip_ascii{$_} = 1;
-		$skip_man{$_} = 1;
+foreach my $module (qw(roff char mdoc man tbl eqn)) {
+	my %modvars;
+	parse_makefile "$module/Makefile", \%modvars;
+	foreach my $subdir (split ' ', $modvars{SUBDIR}) {
+		my %subvars = (MOPTS => '');
+		parse_makefile "$module/$subdir/Makefile", \%subvars;
+		parse_makefile "$module/Makefile.inc", \%subvars;
+		delete $subvars{SKIP_GROFF};
+		delete $subvars{SKIP_GROFF_ASCII};
+		delete $subvars{TBL};
+		delete $subvars{EQN};
+		my @mandoc = ('../mandoc', split ' ', $subvars{MOPTS});
+		delete $subvars{MOPTS};
+		my @regress_testnames;
+		if (defined $subvars{REGRESS_TARGETS}) {
+			push @regress_testnames,
+			    split ' ', $subvars{REGRESS_TARGETS};
+			push @regress_tests, {
+			    NAME => "$module/$subdir/$_",
+			    MANDOC => \@mandoc,
+			} foreach @regress_testnames;
+			delete $subvars{REGRESS_TARGETS};
+		}
+		if (defined $subvars{UTF8_TARGETS}) {
+			push @utf8_tests, {
+			    NAME => "$module/$subdir/$_",
+			    MANDOC => \@mandoc,
+			} foreach split ' ', $subvars{UTF8_TARGETS};
+			delete $subvars{UTF8_TARGETS};
+		}
+		if (defined $subvars{HTML_TARGETS}) {
+			push @html_tests, {
+			    NAME => "$module/$subdir/$_",
+			    MANDOC => \@mandoc,
+			} foreach split ' ', $subvars{HTML_TARGETS};
+			delete $subvars{HTML_TARGETS};
+		}
+		if (defined $subvars{LINT_TARGETS}) {
+			push @lint_tests, {
+			    NAME => "$module/$subdir/$_",
+			    MANDOC => \@mandoc,
+			} foreach split ' ', $subvars{LINT_TARGETS};
+			delete $subvars{LINT_TARGETS};
+		}
+		if (defined $subvars{SKIP_ASCII}) {
+			for (split ' ', $subvars{SKIP_ASCII}) {
+				$skip_ascii{"$module/$subdir/$_"} = 1;
+				$skip_man{"$module/$subdir/$_"} = 1;
+			}
+			delete $subvars{SKIP_ASCII};
+		}
+		if (defined $subvars{SKIP_TMAN}) {
+			$skip_man{"$module/$subdir/$_"} = 1
+			    for split ' ', $subvars{SKIP_TMAN};
+			delete $subvars{SKIP_TMAN};
+		}
+		if (defined $subvars{SKIP_MARKDOWN}) {
+			$skip_markdown{"$module/$subdir/$_"} = 1
+			    for split ' ', $subvars{SKIP_MARKDOWN};
+			delete $subvars{SKIP_MARKDOWN};
+		}
+		if (keys %subvars) {
+			my @vars = keys %subvars;
+			die "unknown var(s) @vars in dir $module/$subdir";
+		}
+		map {
+			$skip_ascii{"$module/$subdir/$_"} = 1;
+		} @regress_testnames if $skip_ascii{"$module/$subdir/ALL"};
+		map {
+			$skip_man{"$module/$subdir/$_"} = 1;
+		} @regress_testnames if $skip_man{"$module/$subdir/ALL"};
+		map {
+			$skip_markdown{"$module/$subdir/$_"} = 1;
+		} @regress_testnames if $skip_markdown{"$module/$subdir/ALL"};
 	}
-	delete $vars{SKIP_ASCII};
+	delete $modvars{SUBDIR};
+	if (keys %modvars) {
+		my @vars = keys %modvars;
+		die "unknown var(s) @vars in module $module";
+	}
 }
-if (defined $vars{SKIP_TMAN}) {
-	$skip_man{$_} = 1 for split ' ', $vars{SKIP_TMAN};
-	delete $vars{SKIP_TMAN};
-}
-if (defined $vars{SKIP_MARKDOWN}) {
-	$skip_markdown{$_} = 1 for split ' ', $vars{SKIP_MARKDOWN};
-	delete $vars{SKIP_MARKDOWN};
-}
-if (keys %vars) {
-	my @vars = keys %vars;
-	die "unknown var(s) @vars";
-}
-map { $skip_ascii{$_} = 1; } @regress_testnames if $skip_ascii{ALL};
-map { $skip_man{$_} = 1; } @regress_testnames if $skip_man{ALL};
-map { $skip_markdown{$_} = 1; } @regress_testnames if $skip_markdown{ALL};
 
 # --- run targets ------------------------------------------------------
 
 my $count_total = 0;
-for my $dirname (@subdir_names) {
-	$count_total++;
-	print "\n" if $targets{verbose};
-	system './regress.pl', "$subdir/$dirname", keys %targets,
-	    ($displaylevel ? $displaylevel - 1 : 0),
-	    and fail $subdir, $dirname, 'subdir';
-}
-
 my $count_ascii = 0;
 my $count_man = 0;
-for my $testname (@regress_testnames) {
-	next if $onlytest && $testname ne $onlytest;
-	my $i = "$subdir/$testname.in";
-	my $o = "$subdir/$testname.mandoc_ascii";
-	my $w = "$subdir/$testname.out_ascii";
-	if ($targets{ascii} && !$skip_ascii{$testname}) {
+my $count_rm = 0;
+if ($targets{ascii} || $targets{man}) {
+	print "Running ascii and man tests ";
+	print "...\n" if $targets{verbose};
+}
+for my $test (@regress_tests) {
+	my $i = "$test->{NAME}.in";
+	my $o = "$test->{NAME}.mandoc_ascii";
+	my $w = "$test->{NAME}.out_ascii";
+	if ($targets{ascii} && !$skip_ascii{$test->{NAME}} &&
+	    $test->{NAME} =~ /^$onlytest/) {
 		$count_ascii++;
 		$count_total++;
-		print "@mandoc -T ascii $i\n" if $targets{verbose};
-		sysout $o, @mandoc, qw(-I os=OpenBSD -T ascii), $i
-		    and fail $subdir, $testname, 'ascii:mandoc';
+		sysout $o, @{$test->{MANDOC}}, qw(-I os=OpenBSD -T ascii), $i
+		    and fail $test->{NAME}, 'ascii:mandoc';
 		system @diff, $w, $o
-		    and fail $subdir, $testname, 'ascii:diff';
+		    and fail $test->{NAME}, 'ascii:diff';
+		print "." unless $targets{verbose};
 	}
-	my $m = "$subdir/$testname.in_man";
-	my $mo = "$subdir/$testname.mandoc_man";
-	if ($targets{man} && !$skip_man{$testname}) {
+	my $m = "$test->{NAME}.in_man";
+	my $mo = "$test->{NAME}.mandoc_man";
+	if ($targets{man} && !$skip_man{$test->{NAME}} &&
+	    $test->{NAME} =~ /^$onlytest/) {
 		$count_man++;
 		$count_total++;
-		print "@mandoc -T man $i\n" if $targets{verbose};
-		sysout $m, @mandoc, qw(-I os=OpenBSD -T man), $i
-		    and fail $subdir, $testname, 'man:man';
-		print "@mandoc -man -T ascii $m\n" if $targets{verbose};
-		sysout $mo, @mandoc, qw(-man -I os=OpenBSD -T ascii -O mdoc), $m
-		    and fail $subdir, $testname, 'man:mandoc';
+		sysout $m, @{$test->{MANDOC}}, qw(-I os=OpenBSD -T man), $i
+		    and fail $test->{NAME}, 'man:man';
+		sysout $mo, @{$test->{MANDOC}},
+		    qw(-man -I os=OpenBSD -T ascii -O mdoc), $m
+		    and fail $test->{NAME}, 'man:mandoc';
 		system @diff, $w, $mo
-		    and fail $subdir, $testname, 'man:diff';
+		    and fail $test->{NAME}, 'man:diff';
+		print "." unless $targets{verbose};
 	}
 	if ($targets{clean}) {
-		print "rm $o\n"
-		    if $targets{verbose} && !$skip_ascii{$testname};
-		unlink $o;
-		print "rm $m $mo\n"
-		    if $targets{verbose} && !$skip_man{$testname};
-		unlink $m, $mo;
+		print "rm $o $m $mo\n" if $targets{verbose};
+		$count_rm += unlink $o, $m, $mo;
 	}
+}
+if ($targets{ascii} || $targets{man}) {
+	print "Number of ascii and man tests:" if $targets{verbose};
+	print " $count_ascii + $count_man tests run.\n";
 }
 
 my $count_utf8 = 0;
-for my $testname (@utf8_testnames) {
-	next if $onlytest && $testname ne $onlytest;
-	my $i = "$subdir/$testname.in";
-	my $o = "$subdir/$testname.mandoc_utf8";
-	my $w = "$subdir/$testname.out_utf8";
-	if ($targets{utf8}) {
+if ($targets{utf8}) {
+	print "Running utf8 tests ";
+	print "...\n" if $targets{verbose};
+}
+for my $test (@utf8_tests) {
+	my $i = "$test->{NAME}.in";
+	my $o = "$test->{NAME}.mandoc_utf8";
+	my $w = "$test->{NAME}.out_utf8";
+	if ($targets{utf8} && $test->{NAME} =~ /^$onlytest/o) {
 		$count_utf8++;
 		$count_total++;
-		print "@mandoc -T utf8 $i\n" if $targets{verbose};
-		sysout $o, @mandoc, qw(-I os=OpenBSD -T utf8), $i
-		    and fail $subdir, $testname, 'utf8:mandoc';
+		sysout $o, @{$test->{MANDOC}}, qw(-I os=OpenBSD -T utf8), $i
+		    and fail $test->{NAME}, 'utf8:mandoc';
 		system @diff, $w, $o
-		    and fail $subdir, $testname, 'utf8:diff';
+		    and fail $test->{NAME}, 'utf8:diff';
+		print "." unless $targets{verbose};
 	}
 	if ($targets{clean}) {
 		print "rm $o\n" if $targets{verbose};
-		unlink $o;
+		$count_rm += unlink $o;
 	}
+}
+if ($targets{utf8}) {
+	print "Number of utf8 tests:" if $targets{verbose};
+	print " $count_utf8 tests run.\n";
 }
 
 my $count_html = 0;
-for my $testname (@html_testnames) {
-	next if $onlytest && $testname ne $onlytest;
-	my $i = "$subdir/$testname.in";
-	my $o = "$subdir/$testname.mandoc_html";
-	my $w = "$subdir/$testname.out_html";
-	if ($targets{html}) {
+if ($targets{html}) {
+	print "Running html tests ";
+	print "...\n" if $targets{verbose};
+}
+for my $test (@html_tests) {
+	my $i = "$test->{NAME}.in";
+	my $o = "$test->{NAME}.mandoc_html";
+	my $w = "$test->{NAME}.out_html";
+	if ($targets{html} && $test->{NAME} =~ /^$onlytest/) {
 		$count_html++;
 		$count_total++;
-		print "@mandoc -T html $i\n" if $targets{verbose};
-		syshtml $o, @mandoc, qw(-T html), $i
-		    and fail $subdir, $testname, 'html:mandoc';
+		syshtml $o, @{$test->{MANDOC}}, qw(-T html), $i
+		    and fail $test->{NAME}, 'html:mandoc';
 		system @diff, $w, $o
-		    and fail $subdir, $testname, 'html:diff';
+		    and fail $test->{NAME}, 'html:diff';
+		print "." unless $targets{verbose};
 	}
 	if ($targets{clean}) {
 		print "rm $o\n" if $targets{verbose};
-		unlink $o;
+		$count_rm += unlink $o;
 	}
+}
+if ($targets{html}) {
+	print "Number of html tests:" if $targets{verbose};
+	print " $count_html tests run.\n";
 }
 
 my $count_markdown = 0;
-for my $testname (@regress_testnames) {
-	next if $onlytest && $testname ne $onlytest;
-	my $i = "$subdir/$testname.in";
-	my $o = "$subdir/$testname.mandoc_markdown";
-	my $w = "$subdir/$testname.out_markdown";
-	if ($targets{markdown} && !$skip_markdown{$testname}) {
+if ($targets{markdown}) {
+	print "Running markdown tests ";
+	print "...\n" if $targets{verbose};
+}
+for my $test (@regress_tests) {
+	my $i = "$test->{NAME}.in";
+	my $o = "$test->{NAME}.mandoc_markdown";
+	my $w = "$test->{NAME}.out_markdown";
+	if ($targets{markdown} && !$skip_markdown{$test->{NAME}} &&
+	    $test->{NAME} =~ /^$onlytest/) {
 		$count_markdown++;
 		$count_total++;
-		print "@mandoc -T markdown $i\n" if $targets{verbose};
-		sysout $o, @mandoc, qw(-I os=OpenBSD -T markdown), $i
-		    and fail $subdir, $testname, 'markdown:mandoc';
+		sysout $o, @{$test->{MANDOC}},
+		    qw(-I os=OpenBSD -T markdown), $i
+		    and fail $test->{NAME}, 'markdown:mandoc';
 		system @diff, $w, $o
-		    and fail $subdir, $testname, 'markdown:diff';
+		    and fail $test->{NAME}, 'markdown:diff';
+		print "." unless $targets{verbose};
 	}
 	if ($targets{clean}) {
 		print "rm $o\n" if $targets{verbose};
-		unlink $o;
+		$count_rm += unlink $o;
 	}
+}
+if ($targets{markdown}) {
+	print "Number of markdown tests:" if $targets{verbose};
+	print " $count_markdown tests run.\n";
 }
 
 my $count_lint = 0;
-for my $testname (@lint_testnames) {
-	next if $onlytest && $testname ne $onlytest;
-	my $i = "$subdir/$testname.in";
-	my $o = "$subdir/$testname.mandoc_lint";
-	my $w = "$subdir/$testname.out_lint";
-	if ($targets{lint}) {
+if ($targets{lint}) {
+	print "Running lint tests ";
+	print "...\n" if $targets{verbose};
+}
+for my $test (@lint_tests) {
+	my $i = "$test->{NAME}.in";
+	my $o = "$test->{NAME}.mandoc_lint";
+	my $w = "$test->{NAME}.out_lint";
+	if ($targets{lint} && $test->{NAME} =~ /^$onlytest/) {
 		$count_lint++;
 		$count_total++;
-		print "@mandoc -T lint -W all $i\n" if $targets{verbose};
-		syslint $o, @mandoc, qw(-I os=OpenBSD -T lint -W all), $i
-		    and fail $subdir, $testname, 'lint:mandoc';
+		syslint $o, @{$test->{MANDOC}},
+		    qw(-I os=OpenBSD -T lint -W all), $i
+		    and fail $test->{NAME}, 'lint:mandoc';
 		system @diff, $w, $o
-		    and fail $subdir, $testname, 'lint:diff';
+		    and fail $test->{NAME}, 'lint:diff';
+		print "." unless $targets{verbose};
 	}
 	if ($targets{clean}) {
 		print "rm $o\n" if $targets{verbose};
-		unlink $o;
+		$count_rm += unlink $o;
 	}
 }
-
-exit 0 unless $displaylevel or @failures;
-
-print "\n" if $targets{verbose};
-if ($onlytest) {
-	print "test $subdir:$onlytest finished";
-} else {
-	print "testsuite $subdir finished";
+if ($targets{lint}) {
+	print "Number of lint tests:" if $targets{verbose};
+	print " $count_lint tests run.\n";
 }
-print ' ', (scalar @subdir_names), ' subdirectories' if @subdir_names;
-print " $count_ascii ascii" if $count_ascii;
-print " $count_man man" if $count_man;
-print " $count_utf8 utf8" if $count_utf8;
-print " $count_html html" if $count_html;
-print " $count_markdown markdown" if $count_markdown;
-print " $count_lint lint" if $count_lint;
+
+# --- final report -----------------------------------------------------
 
 if (@failures) {
-	print " (FAIL)\n\nSOME TESTS FAILED:\n\n";
+	print "\nNUMBER OF FAILED TESTS: ", scalar @failures,
+	    " (of $count_total tests run.)\n";
 	print "@$_\n" for @failures;
 	print "\n";
 	exit 1;
-} elsif ($count_total == 1) {
-	print " (OK)\n";
+}
+print "\n" if $targets{verbose};
+if ($count_total == 1) {
+	print "Test succeeded.\n";
 } elsif ($count_total) {
-	print " (all $count_total tests OK)\n";
+	print "All $count_total tests OK:";
+	print " $count_ascii ascii" if $count_ascii;
+	print " $count_man man" if $count_man;
+	print " $count_utf8 utf8" if $count_utf8;
+	print " $count_html html" if $count_html;
+	print " $count_markdown markdown" if $count_markdown;
+	print " $count_lint lint" if $count_lint;
+	print "\n";
 } else {
-	print " (no tests run)\n";
+	print "No tests were run.\n";
 } 
+if ($targets{clean}) {
+	if ($count_rm) {
+		print "Deleted $count_rm test output files.\n";
+		print "The tree is now clean.\n";
+	} else {
+		print "No test output files were found.\n";
+		print "The tree was already clean.\n";
+	}
+}
 exit 0;
