@@ -65,20 +65,9 @@ are mere guesses, and some may be wrong.
   found by jca@ in ratpoison(1)  Sun, 30 Jun 2013 12:01:09 +0200
   loc *  exist **  algo **  size **  imp **
 
-- \h horizontal move
-  #2 most important issue naddy@  Mon, 16 Feb 2015 20:59:17 +0100
-  found in cclive(1) nasm(1) bogofilter(1) asciidoc/DocBook output
-  bentley@ on discuss@  Sat, 21 Sep 2013 22:29:34 -0600
-  naddy@  Thu, 4 Dec 2014 16:26:41 +0100
-  loc **  exist **  algo **  size *  imp *** (parser reorg helps a lot)
-
 - \n+ and \n- numerical register increment and decrement
   found by bentley@ in sbcl(1)  Mon, 9 Dec 2013 18:36:57 -0700
   loc *  exist *  algo *  size *  imp **
-
-- \n(.$ macro argument count number register; ocserv(8) by autogen
-  found by sthen@  Thu, 19 Feb 2015 22:03:01 +0000
-  loc *  exist **  algo *  size *  imp **
 
 - \w'' improve width measurements
   would not be very useful without an expression parser, see below
@@ -182,22 +171,6 @@ are mere guesses, and some may be wrong.
   loc *  exist **  algo ***  size *  imp **
 
 --- missing tbl features -----------------------------------------------
-
-- horizontal lines in the layout still consume data cells
-  and can be mixed with actual data on the same table line
-  synaptics(4) found by tedu@  Mon, 17 Aug 2015 21:17:42 -0400
-  loc **  exist **  algo **  size **  imp ***
-
-- break long text into lines inside cells
-  net/lftp(1) from jirib via bentley@ Sep 13, 2016
-
-- layout l1 for a column of max text width 3 reduces the following
-  inter-column spacing for groff, but not for mandoc
-  net/lftp(1) from jirib via bentley@ Sep 13, 2016
-
-- the "w" layout option is ignored
-  synaptics(4) found by tedu@  Mon, 17 Aug 2015 21:17:42 -0400
-  loc *  exist *  algo *  size *  imp **
 
 - the "s" layout column specifier is used for placement of data
   into columns, but ignored during column width calculations
@@ -437,9 +410,6 @@ are mere guesses, and some may be wrong.
   Steffen Nurpmeso  Sat, 08 Nov 2014 13:34:59 +0100
   loc *  exist **  algo **  size *  imp **
 
-- .Lk formatting for long links with line breaks
-  Franco Fichtner  8 Oct 2013 00:33:42 +0200
-
 - In .Bl -enum -width 0n, groff continues one the same line after
   the number, mandoc breaks the line.
   mail to kristaps@  Mon, 20 Jul 2009 02:21:39 +0200
@@ -511,11 +481,6 @@ are mere guesses, and some may be wrong.
 * warning issues
 ************************************************************************
 
-- provide a way in mandoc(1) to warn about broken .Xr links;
-  probably cannot be on by default in -Tlint because it needs
-  to access the manpath and mandoc.db(3) after parsing.
-  asked for by jmc@ Fri, 4 Dec 2015 22:39:40 +0000
-
 - warn when .Sh or .Ss contain other macros
   Steffen Nurpmeso, savannah.gnu.org/bugs/index.php?45034
   loc *  exist *  algo *  size *  imp **
@@ -531,13 +496,6 @@ are mere guesses, and some may be wrong.
 - mandoc_special does not really check the escape sequence,
   but just the overall format
   loc **  exist **  algo ***  size **  imp **
-
-- integrate mdoclint into mandoc ("end-of-line whitespace" thread)
-  from jmc@  Mon, 13 Jul 2009 17:12:09 +0100
-  from kristaps@  Mon, 13 Jul 2009 18:34:53 +0200
-  from jmc@  Mon, 13 Jul 2009 17:45:37 +0059
-  from kristaps@  Mon, 13 Jul 2009 19:02:03 +0200
-  (mostly done, check what remains)
 
 - -Tlint parser errors and warnings to stdout
   to tech@mdocml, naddy@  Wed, 28 Sep 2011 11:21:46 +0200
@@ -583,11 +541,6 @@ Several areas can be cleaned up to make mandoc even faster.  These are
 
 - Find better ways to prevent endless loops
   in roff(7) macro and string expansion.
-
-- Finish cleanup of date handling.
-  Decide which formats should be recognized where.
-  Update both mdoc(7) and man(7) documentation.
-  Triggered by  Tim van der Molen  Tue, 22 Feb 2011 20:30:45 +0100
 
 - struct mparse refactoring
   Steffen Nurpmeso  Thu, 04 Sep 2014 12:50:00 +0200
