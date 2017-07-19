@@ -24,6 +24,7 @@ Changes in version 1.14.2, released on July XXX, 2017
    alias for the -Thtml output mode for more than two years.
     --- MINOR NEW FEATURES ---
  * mdoc(7): Various .Lk formatting improvements.
+ * mdoc(7) -Thtml: Better CSS for .Bl lists.
  * man(7): Implement the .MT/.ME block macro (mailto hyperlink).
  * man(7): Implement the .DT macro (restore default tab positions).
  * man(7): Improved support for manuals generated with reStructuredText
@@ -46,6 +47,8 @@ Changes in version 1.14.2, released on July XXX, 2017
    and also several additional character escape sequences.
  * roff(7): Implement the 'd' conditional (macro or string defined).
  * man.cgi(8) now uses pledge(2), too.
+ * regress.pl(1): simpler user interface, better summary output,
+   simpler code, and no more recursion.
     --- THANKS TO ---
  * Anthony Bentley (OpenBSD) for the implementation of .MT/.ME,
    reports of many bugs and missing features, and suggestions
@@ -64,15 +67,16 @@ Changes in version 1.14.2, released on July XXX, 2017
  * Reyk Floeter (OpenBSD) and Vsevolod Stakhov (FreeBSD) for
    suggesting a markdown output mode.
  * Thomas Guettler for suggesting -Thtml internal hyperlinks.
- * Anton Lindqvist (OpenBSD) and Jan Stary for multiple bug reports.
- * Martin Natano, Theo de Raadt, T. J. Townsend (all OpenBSD),
+ * Anton Lindqvist and TJ Townsend (both OpenBSD) and Jan Stary
+   for multiple bug reports.
+ * Martin Natano and Theo de Raadt (both OpenBSD),
    Leah Neukirchen (Void Linux), Andreas Voegele, Gabriel Guzman,
    Gonzalo Tornaria, Markus Waldeck, and Raf Czlonka for bug reports.
- * Antoine Jacoutot (OpenBSD) and Michael Stapelberg (Debian)
-   for suggesting feature improvements.
+ * Antoine Jacoutot (OpenBSD), Michael Stapelberg (Debian),
+   and Steffen Nurpmeso for suggesting feature improvements.
  * Dag-Erling Smoergrav (FreeBSD) and Yuri Pankov (Illumos)
    for inspiring new warning messages.
- * Ted Unangst (OpenBSD) for providing quite a few useful ideas.
+ * Ted Unangst and Marc Espie (OpenBSD) for providing useful ideas.
  * Carsten Kunze (Heirloom roff) for help keeping mandoc and groff
    compatible and for committing some of my patches to groff.
 
