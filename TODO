@@ -505,6 +505,9 @@ are mere guesses, and some may be wrong.
 * documentation issues
 ************************************************************************
 
+- dashes, hyphens, and minus signs in manual pages
+  jmc@ Fri, 28 Mar 2014 07:19:27 +0000
+
 - mark macros as: page structure domain, manual domain, general text domain
   is this useful?
 
@@ -539,8 +542,13 @@ Several areas can be cleaned up to make mandoc even faster.  These are
   same-line from different-line input.  That plainly doesn't work
   with user-defined macros, leading to random breakage.
 
+- Is it possible to further simplify ENDBODY_SPACE?
+
 - Find better ways to prevent endless loops
   in roff(7) macro and string expansion.
+
+- make buffers for parsing functions const
+  christos@ via wiz@  Fri, 18 Dec 2015 17:10:01 +0100
 
 - struct mparse refactoring
   Steffen Nurpmeso  Thu, 04 Sep 2014 12:50:00 +0200
