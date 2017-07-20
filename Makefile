@@ -15,7 +15,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-VERSION = 1.14.1
+VERSION = 1.14.2
 
 # === LIST OF FILES ====================================================
 
@@ -347,9 +347,6 @@ WWW_MANS	 = apropos.1.html \
 		   mdoc.h.html \
 		   roff.h.html
 
-WWW_OBJS	 = mdocml.tar.gz \
-		   mdocml.sha256
-
 # === USER CONFIGURATION ===============================================
 
 include Makefile.local
@@ -360,7 +357,7 @@ all: mandoc demandoc soelim $(BUILD_TARGETS) Makefile.local
 
 install: base-install $(INSTALL_TARGETS)
 
-www: $(WWW_OBJS) $(WWW_MANS)
+www: $(WWW_MANS)
 
 $(WWW_MANS): mandoc
 
@@ -378,10 +375,10 @@ clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS) $(COMPAT_OBJS)
 	rm -f mandoc $(MAIN_OBJS)
 	rm -f man.cgi $(CGI_OBJS)
-	rm -f mandocd catman $(MANDOCD_OBJS)
+	rm -f mandocd catman catman.o $(MANDOCD_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f soelim $(SOELIM_OBJS)
-	rm -f $(WWW_MANS) $(WWW_OBJS)
+	rm -f $(WWW_MANS) mdocml.tar.gz mdocml.sha256
 	rm -rf *.dSYM
 
 base-install: mandoc demandoc soelim
@@ -515,13 +512,7 @@ soelim: $(SOELIM_OBJS)
 # --- maintainer targets ---
 
 www-install: www
-	mkdir -p $(HTDOCDIR)/snapshots
 	$(INSTALL_DATA) $(WWW_MANS) mandoc.css $(HTDOCDIR)
-	$(INSTALL_DATA) $(WWW_OBJS) $(HTDOCDIR)/snapshots
-	$(INSTALL_DATA) mdocml.tar.gz \
-		$(HTDOCDIR)/snapshots/mdocml-$(VERSION).tar.gz
-	$(INSTALL_DATA) mdocml.sha256 \
-		$(HTDOCDIR)/snapshots/mdocml-$(VERSION).sha256
 
 depend: config.h
 	mkdep -f Makefile.depend $(CFLAGS) $(SRCS)
@@ -548,6 +539,7 @@ regress-distcheck:
 		! -name '*.out_ascii' \
 		! -name '*.out_utf8' \
 		! -name '*.out_html' \
+		! -name '*.out_markdown' \
 		! -name '*.out_lint' \
 		! -path regress/regress.pl \
 		! -path regress/regress.pl.1
