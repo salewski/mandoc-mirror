@@ -506,11 +506,6 @@ are mere guesses, and some may be wrong.
 * performance issues
 ************************************************************************
 
-- Why are we using MAP_SHARED, not MAP_PRIVATE for mmap(2)?
-  from kristaps@  Sat, 09 Aug 2014 13:51:36 +0200
-
-Several areas can be cleaned up to make mandoc even faster.  These are
-
 - the PDF file is HUGE: this can be reduced by using relative offsets
 
 ************************************************************************
