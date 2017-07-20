@@ -111,6 +111,7 @@ static	const int sec_prios[] = {1, 4, 5, 8, 6, 3, 7, 2, 9};
 static	char		  help_arg[] = "help";
 static	char		 *help_argv[] = {help_arg, NULL};
 static	enum mandoclevel  rc;
+static	FILE		 *mmsg_stream;
 
 
 int
@@ -190,6 +191,7 @@ main(int argc, char *argv[])
 	curp.mmin = MANDOCERR_MAX;
 	curp.outopts = &conf.output;
 	options = MPARSE_SO | MPARSE_UTF8 | MPARSE_LATIN1;
+	mmsg_stream = stderr;
 
 	use_pager = 1;
 	tag_files = NULL;
@@ -994,6 +996,7 @@ toptions(struct curparse *curp, char *arg)
 	else if (0 == strcmp(arg, "lint")) {
 		curp->outtype = OUTT_LINT;
 		curp->mmin = MANDOCERR_BASE;
+		mmsg_stream = stdout;
 	} else if (0 == strcmp(arg, "tree"))
 		curp->outtype = OUTT_TREE;
 	else if (0 == strcmp(arg, "man"))
@@ -1083,21 +1086,21 @@ mmsg(enum mandocerr t, enum mandoclevel lvl,
 {
 	const char	*mparse_msg;
 
-	fprintf(stderr, "%s: %s:", getprogname(),
+	fprintf(mmsg_stream, "%s: %s:", getprogname(),
 	    file == NULL ? "<stdin>" : file);
 
 	if (line)
-		fprintf(stderr, "%d:%d:", line, col + 1);
+		fprintf(mmsg_stream, "%d:%d:", line, col + 1);
 
-	fprintf(stderr, " %s", mparse_strlevel(lvl));
+	fprintf(mmsg_stream, " %s", mparse_strlevel(lvl));
 
 	if ((mparse_msg = mparse_strerror(t)) != NULL)
-		fprintf(stderr, ": %s", mparse_msg);
+		fprintf(mmsg_stream, ": %s", mparse_msg);
 
 	if (msg)
-		fprintf(stderr, ": %s", msg);
+		fprintf(mmsg_stream, ": %s", msg);
 
-	fputc('\n', stderr);
+	fputc('\n', mmsg_stream);
 }
 
 static pid_t

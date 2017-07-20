@@ -238,7 +238,9 @@ See
 .It Fl T Cm lint
 Parse only: produce no output.
 Implies
-.Fl W Cm all .
+.Fl W Cm all
+and redirects parser messages, which usually appear
+on standard error output, to standard output.
 .It Fl T Cm locale
 Encode output using the current locale.
 This is the default.

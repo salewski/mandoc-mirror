@@ -436,11 +436,6 @@ are mere guesses, and some may be wrong.
   Probably, this should be fixed somewhere in termp_it_pre(), not sure.
   loc *  exist **  algo **  size *  imp **
 
-- In .Bl -tag, if a tag exceeds the right margin and must be continued
-  on the next line, it must be indented by -width, not width+1;
-  see "rule block|pass" in OpenBSD ifconfig(8).
-  loc *  exist ***  algo **  size *  imp **
-
 - When the -width string contains macros, the macros must be rendered
   before measuring the width, for example
     .Bl -tag -width ".Dv message"
@@ -491,10 +486,6 @@ are mere guesses, and some may be wrong.
 - mandoc_special does not really check the escape sequence,
   but just the overall format
   loc **  exist **  algo ***  size **  imp **
-
-- -Tlint parser errors and warnings to stdout
-  to tech@mdocml, naddy@  Wed, 28 Sep 2011 11:21:46 +0200
-  wait!  kristaps@  Sun, 02 Oct 2011 17:12:52 +0200
 
 ************************************************************************
 * documentation issues
