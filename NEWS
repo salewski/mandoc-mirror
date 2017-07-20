@@ -23,6 +23,8 @@ Changes in version 1.14.2, released on July XXX, 2017
  * Delete the -Txhtml command line option.  It has been an obsolete
    alias for the -Thtml output mode for more than two years.
     --- MINOR NEW FEATURES ---
+ * -Tlint now puts parser messages on stdout instead of stderr,
+   making commands like "man -l -Tlint *.1" useful.
  * mdoc(7): Various .Lk formatting improvements.
  * mdoc(7) -Thtml: Better CSS for .Bl lists.
  * man(7): Implement the .MT/.ME block macro (mailto hyperlink).
