@@ -1423,6 +1423,7 @@ post_xx(POST_ARGS)
 {
 	struct roff_node	*n;
 	const char		*os;
+	char			*v;
 
 	post_delim_nb(mdoc);
 
@@ -1439,6 +1440,20 @@ post_xx(POST_ARGS)
 		break;
 	case MDOC_Nx:
 		os = "NetBSD";
+		if (n->child == NULL)
+			break;
+		v = n->child->string;
+		if ((v[0] != '0' && v[0] != '1') || v[1] != '.' ||
+		    v[2] < '0' || v[2] > '9' ||
+		    v[3] < 'a' || v[3] > 'z' || v[4] != '\0')
+			break;
+		n->child->flags |= NODE_NOPRT;
+		mdoc->next = ROFF_NEXT_CHILD;
+		roff_word_alloc(mdoc, n->child->line, n->child->pos, v);
+		v = mdoc->last->string;
+		v[3] = toupper((unsigned char)v[3]);
+		mdoc->last->flags |= NODE_NOSRC;
+		mdoc->last = n;
 		break;
 	case MDOC_Ox:
 		os = "OpenBSD";
