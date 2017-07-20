@@ -378,7 +378,7 @@ clean:
 	rm -f mandocd catman catman.o $(MANDOCD_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f soelim $(SOELIM_OBJS)
-	rm -f $(WWW_MANS) mdocml.tar.gz mdocml.sha256
+	rm -f $(WWW_MANS) mandoc.tar.gz mandoc.sha256
 	rm -rf *.dSYM
 
 base-install: mandoc demandoc soelim
@@ -544,20 +544,20 @@ regress-distcheck:
 		! -path regress/regress.pl \
 		! -path regress/regress.pl.1
 
-dist: mdocml.sha256
+dist: mandoc.sha256
 
-mdocml.sha256: mdocml.tar.gz
-	sha256 mdocml.tar.gz > $@
+mandoc.sha256: mandoc.tar.gz
+	sha256 mandoc.tar.gz > $@
 
-mdocml.tar.gz: $(DISTFILES)
+mandoc.tar.gz: $(DISTFILES)
 	ls regress/*/*/*.mandoc_* && exit 1 || true
-	mkdir -p .dist/mdocml-$(VERSION)/
-	$(INSTALL) -m 0644 $(DISTFILES) .dist/mdocml-$(VERSION)
-	cp -pR regress .dist/mdocml-$(VERSION)
-	find .dist/mdocml-$(VERSION)/regress \
+	mkdir -p .dist/mandoc-$(VERSION)/
+	$(INSTALL) -m 0644 $(DISTFILES) .dist/mandoc-$(VERSION)
+	cp -pR regress .dist/mandoc-$(VERSION)
+	find .dist/mandoc-$(VERSION)/regress \
 	    -type d -name CVS -print0 | xargs -0 rm -rf
-	chmod 755 .dist/mdocml-$(VERSION)/configure
-	( cd .dist/ && tar zcf ../$@ mdocml-$(VERSION) )
+	chmod 755 .dist/mandoc-$(VERSION)/configure
+	( cd .dist/ && tar zcf ../$@ mandoc-$(VERSION) )
 	rm -rf .dist/
 
 # === SUFFIX RULES =====================================================
