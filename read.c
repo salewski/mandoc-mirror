@@ -24,9 +24,6 @@
 
 #include <assert.h>
 #include <ctype.h>
-#if HAVE_ERR
-#include <err.h>
-#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -560,8 +557,11 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 	size_t		 off;
 	ssize_t		 ssz;
 
-	if (fstat(fd, &st) == -1)
-		err((int)MANDOCLEVEL_SYSERR, "%s", file);
+	if (fstat(fd, &st) == -1) {
+		mandoc_vmsg(MANDOCERR_FILE, curp, 0, 0,
+		    "fstat: %s", strerror(errno));
+		return 0;
+	}
 
 	/*
 	 * If we're a regular file, try just reading in the whole entry
@@ -583,8 +583,11 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 	}
 
 	if (curp->gzip) {
-		if ((gz = gzdopen(fd, "rb")) == NULL)
-			err((int)MANDOCLEVEL_SYSERR, "%s", file);
+		if ((gz = gzdopen(fd, "rb")) == NULL) {
+			mandoc_vmsg(MANDOCERR_FILE, curp, 0, 0,
+			    "gzdopen: %s", strerror(errno));
+			return 0;
+		}
 	} else
 		gz = NULL;
 
@@ -613,8 +616,11 @@ read_whole_file(struct mparse *curp, const char *file, int fd,
 			fb->sz = off;
 			return 1;
 		}
-		if (ssz == -1)
-			err((int)MANDOCLEVEL_SYSERR, "%s", file);
+		if (ssz == -1) {
+			mandoc_vmsg(MANDOCERR_FILE, curp, 0, 0,
+			    "read: %s", strerror(errno));
+			break;
+		}
 		off += (size_t)ssz;
 	}
 
