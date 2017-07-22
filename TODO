@@ -471,9 +471,19 @@ are mere guesses, and some may be wrong.
 * warning issues
 ************************************************************************
 
+- style message about macros inside .Bd -literal and .Dl, in particular
+  font changing macros like .Cm, .Ar, .Fa (from the mdoclint TODO)
+
+- style message about NULL without .Dv (from the mdoclint TODO)
+
+- style message about error constants without .Er (from the mdoclint TODO)
+
 - warn when .Sh or .Ss contain other macros
   Steffen Nurpmeso, savannah.gnu.org/bugs/index.php?45034
   loc *  exist *  algo *  size *  imp **
+
+- style message about violations of the convention
+  .An name Aq Mt localpart@domain in AUTHORS
 
 - warn about attempts to call non-callable macros
   Steffen Nurpmeso  Tue, 11 Nov 2014 22:55:16 +0100
@@ -482,6 +492,9 @@ are mere guesses, and some may be wrong.
   Relatively hard because the relevant code is scattered
   all over mdoc_macro.c and all subtly different.
   loc **  exist **  algo **  size **  imp **
+
+- style message about suspicious uses of - vs. \- vs. \(mi
+  e.g. -1 is likely wrong (from the mdoclint TODO)
 
 - mandoc_special does not really check the escape sequence,
   but just the overall format
