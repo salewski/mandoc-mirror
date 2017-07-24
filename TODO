@@ -474,6 +474,10 @@ are mere guesses, and some may be wrong.
 - style message about macros inside .Bd -literal and .Dl, in particular
   font changing macros like .Cm, .Ar, .Fa (from the mdoclint TODO)
 
+- style message about mismatches between the section number in the
+  file name (if it is known) and the section number in .Dt
+  (from the mdoclint TODO)
+
 - style message about NULL without .Dv (from the mdoclint TODO)
 
 - style message about error constants without .Er (from the mdoclint TODO)
@@ -483,7 +487,7 @@ are mere guesses, and some may be wrong.
   loc *  exist *  algo *  size *  imp **
 
 - style message about violations of the convention
-  .An name Aq Mt localpart@domain in AUTHORS
+  .An name Aq Mt localpart@domain in AUTHORS (from the mdoclint TODO)
 
 - warn about attempts to call non-callable macros
   Steffen Nurpmeso  Tue, 11 Nov 2014 22:55:16 +0100
@@ -495,6 +499,11 @@ are mere guesses, and some may be wrong.
 
 - style message about suspicious uses of - vs. \- vs. \(mi
   e.g. -1 is likely wrong (from the mdoclint TODO)
+
+- warn about punctuation - e.g. ',' and ';' - at the beginning
+  of a text line, if it is likely intended to follow the preceding
+  output without intervening whitespace, in particular after a
+  macro line (from the mdoclint TODO)
 
 - mandoc_special does not really check the escape sequence,
   but just the overall format
