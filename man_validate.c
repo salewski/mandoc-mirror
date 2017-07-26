@@ -211,9 +211,8 @@ post_OP(CHKARGS)
 static void
 post_UR(CHKARGS)
 {
-
 	if (n->type == ROFFT_HEAD && n->child == NULL)
-		mandoc_vmsg(MANDOCERR_UR_NOHEAD, man->parse,
+		mandoc_msg(MANDOCERR_UR_NOHEAD, man->parse,
 		    n->line, n->pos, roff_name[n->tok]);
 	check_part(man, n);
 }
