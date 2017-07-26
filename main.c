@@ -478,7 +478,7 @@ main(int argc, char *argv[])
 				parse(&curp, fd, *argv);
 			else if (resp->form == FORM_SRC) {
 				/* For .so only; ignore failure. */
-				chdir(conf.manpath.paths[resp->ipath]);
+				(void)chdir(conf.manpath.paths[resp->ipath]);
 				parse(&curp, fd, resp->file);
 			} else
 				passthrough(resp->file, fd,
