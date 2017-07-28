@@ -2,7 +2,7 @@ $Id$
 
 This file lists the most important changes in the mandoc.bsd.lv distribution.
 
-Changes in version 1.14.2, released on July XXX, 2017
+Changes in version 1.14.2, released on July 28, 2017
 
     --- MAJOR NEW FEATURES ---
  * New mdoc(7) -Tmarkdown output mode.
@@ -57,6 +57,7 @@ Changes in version 1.14.2, released on July XXX, 2017
    for a number of feature and documentation improvements.
  * Sebastien Marie (OpenBSD) for two source code patches and
    for some useful discussions.
+ * Florian Obser (OpenBSD) for a bugfix patch and a bug report.
  * Jonathan Gray (OpenBSD) for several bug reports from afl(1)
    and several more from static analysis tools.
  * Theo Buehler (OpenBSD) for several bug reports, most from afl(1).
@@ -64,21 +65,26 @@ Changes in version 1.14.2, released on July XXX, 2017
    wide variety of topics, lots of continuous testing, a number of
    bug reports, and some suggestions for messages and documentation.
  * Thomas Klausner (NetBSD) for lots of help while migrating
-   mdoclint(1) functionality to mandoc -Tlint, and for suggesting
-   several useful new messages.
+   mdoclint(1) functionality to mandoc -Tlint, for suggesting
+   several useful new messages, and for release testing.
  * Reyk Floeter (OpenBSD) and Vsevolod Stakhov (FreeBSD) for
    suggesting a markdown output mode.
  * Thomas Guettler for suggesting -Thtml internal hyperlinks.
+ * Yuri Pankov (Illumos) for inspiring new warning messages and
+   for extensive release testing.
  * Anton Lindqvist and TJ Townsend (both OpenBSD) and Jan Stary
    for multiple bug reports.
- * Martin Natano and Theo de Raadt (both OpenBSD),
-   Leah Neukirchen (Void Linux), Andreas Voegele, Gabriel Guzman,
-   Gonzalo Tornaria, Markus Waldeck, and Raf Czlonka for bug reports.
- * Antoine Jacoutot (OpenBSD), Michael Stapelberg (Debian),
-   and Steffen Nurpmeso for suggesting feature improvements.
- * Dag-Erling Smoergrav (FreeBSD) and Yuri Pankov (Illumos)
-   for inspiring new warning messages.
+ * Leah Neukirchen (Void Linux) for bug reports and release testing.
+ * Michael Stapelberg (Debian) for suggesting feature improvements
+   and for release testing.
+ * Martin Natano and Theo de Raadt (both OpenBSD), Andreas Voegele,
+   Gabriel Guzman, Gonzalo Tornaria, Markus Waldeck, and Raf Czlonka
+   for bug reports.
+ * Antoine Jacoutot (OpenBSD) and Steffen Nurpmeso for suggesting
+   feature improvements.
+ * Dag-Erling Smoergrav (FreeBSD) for inspiring new warning messages.
  * Ted Unangst and Marc Espie (OpenBSD) for providing useful ideas.
+ * Svyatoslav Mishyn (Crux Linux) for release testing.
  * Carsten Kunze (Heirloom roff) for help keeping mandoc and groff
    compatible and for committing some of my patches to groff.
 

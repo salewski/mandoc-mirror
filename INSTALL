@@ -18,7 +18,7 @@ tech@ mailing list, too.
 
 Enjoy using the mandoc toolset!
 
-Ingo Schwarze, Karlsruhe, February 2017
+Ingo Schwarze, Karlsruhe, July 2017
 
 
 Installation
@@ -37,7 +37,7 @@ To install mandoc manually, the following steps are needed:
 run the command "echo BUILD_CGI=1 >> configure.local".
 Then run "cp cgi.h.example cgi.h" and edit cgi.h as desired.
 
-2. If you also want to build the new catman(8) utility, run the
+2. If you also want to build the catman(8) utility, run the
 command "echo BUILD_CATMAN=1 >> configure.local".  Note that it
 is unlikely to be a drop-in replacement providing the same
 functionality as your system's "catman", if your operating
@@ -77,7 +77,7 @@ command like "make DESTDIR=... install".  Read the *-install targets
 in the "Makefile" to understand how DESTDIR is used.
 
 9. Run the command "sudo makewhatis" to build mandoc.db(5) databases
-in all the directory trees configured in step 6.  Whenever installing
+in all the directory trees configured in step 3.  Whenever installing
 new manual pages, re-run makewhatis(8) to update the databases, or
 apropos(1) will not find the new pages.
 
