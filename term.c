@@ -129,7 +129,7 @@ term_flushln(struct termp *p)
 	    p->maxrmargin - p->viscol - vbl : 0;
 	vis = vend = 0;
 
-	if ((p->flags && TERMP_MULTICOL) == 0)
+	if ((p->flags & TERMP_MULTICOL) == 0)
 		p->tcol->col = 0;
 	while (p->tcol->col < p->tcol->lastcol) {
 
