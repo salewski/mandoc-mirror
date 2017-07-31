@@ -49,6 +49,9 @@ html_tbl_strlen(const char *p, void *arg)
 static size_t
 html_tbl_sulen(const struct roffsu *su, void *arg)
 {
+	if (su->scale < 0.0)
+		return 0;
+
 	switch (su->unit) {
 	case SCALE_FS:  /* 2^16 basic units */
 		return su->scale * 65536.0 / 24.0;

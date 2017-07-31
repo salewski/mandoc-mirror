@@ -51,7 +51,10 @@ static	void	tbl_word(struct termp *, const struct tbl_dat *);
 static size_t
 term_tbl_sulen(const struct roffsu *su, void *arg)
 {
-	return term_hen((const struct termp *)arg, su);
+	int	 i;
+
+	i = term_hen((const struct termp *)arg, su);
+	return i > 0 ? i : 0;
 }
 
 static size_t
