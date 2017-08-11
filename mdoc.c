@@ -297,8 +297,8 @@ mdoc_ptext(struct roff_man *mdoc, int line, char *buf, int offs)
 		if (end - c < 3)
 			break;
 		if (c[1] != ' ' ||
-		    isalpha((unsigned char)c[-2]) == 0 ||
-		    isalpha((unsigned char)c[-1]) == 0 ||
+		    isalnum((unsigned char)c[-2]) == 0 ||
+		    isalnum((unsigned char)c[-1]) == 0 ||
 		    (c[-2] == 'n' && c[-1] == 'c') ||
 		    (c[-2] == 'v' && c[-1] == 's'))
 			continue;
