@@ -313,6 +313,16 @@ default man configuration file
 See
 .Xr mandoc 1
 for details.
+.Sh EXAMPLES
+Format a page for pasting extracts into an email message \(em
+avoid printing any UTF-8 characters, reduce the width to ease
+quoting in replies, and remove markup:
+.Pp
+.Dl $ man -T ascii -O width=65 pledge | col -b
+.Pp
+Read a typeset page in a PDF viewer:
+.Pp
+.Dl $ MANPAGER=mupdf man -T pdf lpd
 .Sh SEE ALSO
 .Xr apropos 1 ,
 .Xr col 1 ,
