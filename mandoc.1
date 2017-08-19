@@ -315,6 +315,20 @@ and seven for
 .Xr man 7 .
 Increasing this is not recommended; it may result in degraded formatting,
 for example overfull lines or ugly line breaks.
+.It Cm mdoc
+Format
+.Xr man 7
+input files in
+.Xr mdoc 7
+output style.
+Specifically, this suppresses the two additional blank lines near the
+top and the bottom of each page, and it implies
+.Fl O Cm indent Ns =5 .
+One useful application is for checking that
+.Fl T Cm man
+output formats in the same way as the
+.Xr mdoc 7
+source it was generated from.
 .It Cm width Ns = Ns Ar width
 The output width is set to
 .Ar width .
