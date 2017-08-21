@@ -484,6 +484,17 @@ main(int argc, char *argv[])
 				passthrough(resp->file, fd,
 				    conf.output.synopsisonly);
 
+			if (ferror(stdout)) {
+				if (tag_files != NULL) {
+					warn("%s", tag_files->ofn);
+					tag_unlink();
+					tag_files = NULL;
+				} else
+					warn("stdout");
+				rc = MANDOCLEVEL_SYSERR;
+				break;
+			}
+
 			if (argc > 1 && curp.outtype <= OUTT_UTF8) {
 				if (curp.outdata == NULL)
 					outdata_alloc(&curp);
