@@ -188,6 +188,16 @@ mansearch(const struct mansearch *search,
 			mpage = *res + cur;
 			mandoc_asprintf(&mpage->file, "%s/%s",
 			    paths->paths[i], page->file + 1);
+			if (access(chdir_status ? page->file + 1 :
+			    mpage->file, R_OK) == -1) {
+				warn("%s", mpage->file);
+				warnx("outdated mandoc.db contains "
+				    "bogus %s entry, run makewhatis %s", 
+				    page->file + 1, paths->paths[i]);
+				free(mpage->file);
+				free(rp);
+				continue;
+			}
 			mpage->names = buildnames(page);
 			mpage->output = buildoutput(outkey, page);
 			mpage->ipath = i;
