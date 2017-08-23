@@ -34,7 +34,7 @@ elif [ "X$1" = "X-u" ]; then
   ROFF="groff -ket -ww -Tutf8 -P -c"
   MOPT="-Werror -Tutf8 $MOPT"
 else
-  ROFF="groff -et -ww -Tascii -P -c"
+  ROFF="groff -et -ww -mtty-char -Tascii -P -c"
   MOPT="-Werror -Tascii $MOPT"
 fi
 
