@@ -90,8 +90,14 @@ eqn_box(struct termp *p, const struct eqn_box *bp)
 	if (bp->font != EQNFONT_NONE)
 		term_fontpush(p, fontmap[(int)bp->font]);
 
-	if (bp->text != NULL)
+	if (bp->text != NULL) {
+		if (strchr("!\"'),.:;?]}", *bp->text) != NULL)
+			p->flags |= TERMP_NOSPACE;
 		term_word(p, bp->text);
+		if (*bp->text != '\0' && strchr("\"'([{",
+		    bp->text[strlen(bp->text) - 1]) != NULL)
+			p->flags |= TERMP_NOSPACE;
+	}
 
 	/* Special box types. */
 
