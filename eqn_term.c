@@ -52,6 +52,7 @@ static void
 eqn_box(struct termp *p, const struct eqn_box *bp)
 {
 	const struct eqn_box *child;
+	const char *cp;
 	int delim;
 
 	/* Delimiters around this box? */
@@ -94,8 +95,9 @@ eqn_box(struct termp *p, const struct eqn_box *bp)
 		if (strchr("!\"'),.:;?]}", *bp->text) != NULL)
 			p->flags |= TERMP_NOSPACE;
 		term_word(p, bp->text);
-		if (*bp->text != '\0' && strchr("\"'([{",
-		    bp->text[strlen(bp->text) - 1]) != NULL)
+		if ((cp = strchr(bp->text, '\0')) > bp->text &&
+		    ((cp[-1] == '-' && bp->prev == NULL) ||
+		     strchr("\"'([{", cp[-1]) != NULL))
 			p->flags |= TERMP_NOSPACE;
 	}
 
