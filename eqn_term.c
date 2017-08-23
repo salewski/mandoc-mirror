@@ -96,8 +96,10 @@ eqn_box(struct termp *p, const struct eqn_box *bp)
 			p->flags |= TERMP_NOSPACE;
 		term_word(p, bp->text);
 		if ((cp = strchr(bp->text, '\0')) > bp->text &&
-		    ((cp[-1] == '-' && bp->prev == NULL) ||
-		     strchr("\"'([{", cp[-1]) != NULL))
+		    (strchr("\"'([{", cp[-1]) != NULL ||
+		     (bp->prev == NULL && (cp[-1] == '-' ||
+		      (cp >= bp->text + 5 &&
+		       strcmp(cp - 5, "\\[mi]") == 0)))))
 			p->flags |= TERMP_NOSPACE;
 	}
 
