@@ -2119,7 +2119,7 @@ dbprune(struct dba *dba)
 static void
 dbwrite(struct dba *dba)
 {
-	char		 tfn[32];
+	char		 tfn[33];
 	int		 status;
 	pid_t		 child;
 
@@ -2193,26 +2193,9 @@ dbwrite(struct dba *dba)
 	}
 
 out:
+	unlink(tfn);
 	*strrchr(tfn, '/') = '\0';
-	switch (child = fork()) {
-	case -1:
-		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("", "&fork rm");
-		return;
-	case 0:
-		execlp("rm", "rm", "-rf", tfn, (char *)NULL);
-		say("", "&exec rm");
-		exit((int)MANDOCLEVEL_SYSERR);
-	default:
-		break;
-	}
-	if (waitpid(child, &status, 0) == -1) {
-		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("", "&wait rm");
-	} else if (WIFSIGNALED(status) || WEXITSTATUS(status)) {
-		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("", "%s: Cannot remove temporary directory", tfn);
-	}
+	rmdir(tfn);
 }
 
 static int
