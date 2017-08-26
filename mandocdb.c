@@ -19,8 +19,8 @@
 #include "config.h"
 
 #include <sys/types.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -319,7 +319,7 @@ mandocdb(int argc, char *argv[])
 	int		  ch, i;
 
 #if HAVE_PLEDGE
-	if (pledge("stdio rpath wpath cpath fattr flock proc exec", NULL) == -1) {
+	if (pledge("stdio rpath wpath cpath", NULL) == -1) {
 		warn("pledge");
 		return (int)MANDOCLEVEL_SYSERR;
 	}
@@ -440,15 +440,6 @@ mandocdb(int argc, char *argv[])
 			 * The existing database is usable.  Process
 			 * all files specified on the command-line.
 			 */
-#if HAVE_PLEDGE
-			if (!nodb) {
-				if (pledge("stdio rpath wpath cpath fattr flock", NULL) == -1) {
-					warn("pledge");
-					exitcode = (int)MANDOCLEVEL_SYSERR;
-					goto out;
-				}
-			}
-#endif
 			use_all = 1;
 			for (i = 0; i < argc; i++)
 				filescan(argv[i]);
@@ -2119,9 +2110,10 @@ dbprune(struct dba *dba)
 static void
 dbwrite(struct dba *dba)
 {
-	char		 tfn[33];
-	int		 status;
-	pid_t		 child;
+	struct stat	 sb1, sb2;
+	char		 tfn[33], *cp1, *cp2;
+	off_t		 i;
+	int		 fd1, fd2;
 
 	/*
 	 * Do not write empty databases, and delete existing ones
@@ -2160,39 +2152,59 @@ dbwrite(struct dba *dba)
 		say("", "&%s", tfn);
 		return;
 	}
-
+	cp1 = cp2 = NULL;
+	fd1 = fd2 = -1;
 	(void)strlcat(tfn, "/" MANDOC_DB, sizeof(tfn));
 	if (dba_write(tfn, dba) == -1) {
-		exitcode = (int)MANDOCLEVEL_SYSERR;
 		say(tfn, "&dba_write");
-		goto out;
+		goto err;
 	}
+	if ((fd1 = open(MANDOC_DB, O_RDONLY, 0)) == -1) {
+		say(MANDOC_DB, "&open");
+		goto err;
+	}
+	if ((fd2 = open(tfn, O_RDONLY, 0)) == -1) {
+		say(tfn, "&open");
+		goto err;
+	}
+	if (fstat(fd1, &sb1) == -1) {
+		say(MANDOC_DB, "&fstat");
+		goto err;
+	}
+	if (fstat(fd2, &sb2) == -1) {
+		say(tfn, "&fstat");
+		goto err;
+	}
+	if (sb1.st_size != sb2.st_size)
+		goto err;
+	if ((cp1 = mmap(NULL, sb1.st_size, PROT_READ, MAP_PRIVATE,
+	    fd1, 0)) == NULL) {
+		say(MANDOC_DB, "&mmap");
+		goto err;
+	}
+	if ((cp2 = mmap(NULL, sb2.st_size, PROT_READ, MAP_PRIVATE,
+	    fd2, 0)) == NULL) {
+		say(tfn, "&mmap");
+		goto err;
+	}
+	for (i = 0; i < sb1.st_size; i++)
+		if (cp1[i] != cp2[i])
+			goto err;
+	goto out;
 
-	switch (child = fork()) {
-	case -1:
-		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("", "&fork cmp");
-		return;
-	case 0:
-		execlp("cmp", "cmp", "-s", tfn, MANDOC_DB, (char *)NULL);
-		say("", "&exec cmp");
-		exit(0);
-	default:
-		break;
-	}
-	if (waitpid(child, &status, 0) == -1) {
-		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("", "&wait cmp");
-	} else if (WIFSIGNALED(status)) {
-		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say("", "cmp died from signal %d", WTERMSIG(status));
-	} else if (WEXITSTATUS(status)) {
-		exitcode = (int)MANDOCLEVEL_SYSERR;
-		say(MANDOC_DB,
-		    "Data changed, but cannot replace database");
-	}
+err:
+	exitcode = (int)MANDOCLEVEL_SYSERR;
+	say(MANDOC_DB, "Data changed, but cannot replace database");
 
 out:
+	if (cp1 != NULL)
+		munmap(cp1, sb1.st_size);
+	if (cp2 != NULL)
+		munmap(cp2, sb2.st_size);
+	if (fd1 != -1)
+		close(fd1);
+	if (fd2 != -1)
+		close(fd2);
 	unlink(tfn);
 	*strrchr(tfn, '/') = '\0';
 	rmdir(tfn);
