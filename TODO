@@ -375,6 +375,10 @@ are mere guesses, and some may be wrong.
 
 --- HTML issues --------------------------------------------------------
 
+- format ".IP *" etc. as <ul> rather than <dl>
+  https://github.com/Debian/debiman/issues/67
+  loc ** exist ** algo ** size * imp ***
+
 - .Bf at the beginning of a paragraph inserts a bogus 1ex horizontal
   space, see for example random(3).  Introduced in
   http://mdocml.bsd.lv/cgi-bin/cvsweb/mdoc_html.c.diff?r1=1.91&r2=1.92
