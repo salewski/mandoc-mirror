@@ -250,6 +250,8 @@ html_make_id(const struct roff_node *n)
 
 	buf = NULL;
 	deroff(&buf, n);
+	if (buf == NULL)
+		return NULL;
 
 	/* http://www.w3.org/TR/html5/dom.html#the-id-attribute */
 
