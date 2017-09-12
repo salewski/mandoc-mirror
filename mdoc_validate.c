@@ -1914,7 +1914,10 @@ post_root(POST_ARGS)
 			arch++;
 		if (*arch == NULL) {
 			n = mdoc->first->child;
-			while (n->tok != MDOC_Dt)
+			while (n->tok != MDOC_Dt ||
+			    n->child == NULL ||
+			    n->child->next == NULL ||
+			    n->child->next->next == NULL)
 				n = n->next;
 			n = n->child->next->next;
 			mandoc_vmsg(MANDOCERR_ARCH_BAD,
