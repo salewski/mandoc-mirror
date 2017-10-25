@@ -742,8 +742,6 @@ ps_closepage(struct termp *p)
 	ps_printf(p, "%s", p->ps->psmarg);
 
 	if (TERMTYPE_PS != p->type) {
-		ps_printf(p, "ET\n");
-
 		len = p->ps->pdfbytes - p->ps->pdflastpg;
 		base = p->ps->pages * 4 + p->ps->pdfbody;
 
