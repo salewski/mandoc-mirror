@@ -596,8 +596,8 @@ pspdf_alloc(const struct manoutput *outopts)
 
 	/* Remember millimetres -> AFM units. */
 
-	pagex = PNT2AFM(p, ((double)pagex * 2.834));
-	pagey = PNT2AFM(p, ((double)pagey * 2.834));
+	pagex = PNT2AFM(p, ((double)pagex * 72.0 / 25.4));
+	pagey = PNT2AFM(p, ((double)pagey * 72.0 / 25.4));
 
 	/* Margins are 1/9 the page x and y. */
 
