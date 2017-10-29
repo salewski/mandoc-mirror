@@ -77,6 +77,7 @@ struct	termp_ps {
 	size_t		  lineheight;	/* line height (AFM units) */
 	size_t		  top;		/* body top (AFM units) */
 	size_t		  bottom;	/* body bottom (AFM units) */
+	const char	 *medianame;	/* for DocumentMedia and PageSize */
 	size_t		  height;	/* page height (AFM units */
 	size_t		  width;	/* page width (AFM units) */
 	size_t		  lastwidth;	/* page width before last ll */
@@ -559,6 +560,7 @@ pspdf_alloc(const struct manoutput *outopts)
 
 	/* Default to US letter (millimetres). */
 
+	p->ps->medianame = "Letter";
 	pagex = 216;
 	pagey = 279;
 
@@ -570,20 +572,26 @@ pspdf_alloc(const struct manoutput *outopts)
 	 */
 
 	pp = outopts->paper;
-	if (pp && strcasecmp(pp, "letter")) {
-		if (0 == strcasecmp(pp, "a3")) {
+	if (pp != NULL && strcasecmp(pp, "letter") != 0) {
+		if (strcasecmp(pp, "a3") == 0) {
+			p->ps->medianame = "A3";
 			pagex = 297;
 			pagey = 420;
-		} else if (0 == strcasecmp(pp, "a4")) {
+		} else if (strcasecmp(pp, "a4") == 0) {
+			p->ps->medianame = "A4";
 			pagex = 210;
 			pagey = 297;
-		} else if (0 == strcasecmp(pp, "a5")) {
+		} else if (strcasecmp(pp, "a5") == 0) {
+			p->ps->medianame = "A5";
 			pagex = 148;
 			pagey = 210;
-		} else if (0 == strcasecmp(pp, "legal")) {
+		} else if (strcasecmp(pp, "legal") == 0) {
+			p->ps->medianame = "Legal";
 			pagex = 216;
 			pagey = 356;
-		} else if (2 != sscanf(pp, "%ux%u", &pagex, &pagey))
+		} else if (sscanf(pp, "%ux%u", &pagex, &pagey) == 2)
+			p->ps->medianame = "CustomSize";
+		else
 			warnx("%s: Unknown paper", pp);
 	}
 
@@ -846,6 +854,7 @@ ps_end(struct termp *p)
 static void
 ps_begin(struct termp *p)
 {
+	size_t		 width, height;
 	int		 i;
 
 	/*
@@ -887,21 +896,29 @@ ps_begin(struct termp *p)
 	 */
 
 	if (TERMTYPE_PS == p->type) {
+		width = AFM2PNT(p, p->ps->width);
+		height = AFM2PNT(p, p->ps->height);
+
 		ps_printf(p, "%%!PS-Adobe-3.0\n");
 		ps_printf(p, "%%%%DocumentData: Clean7Bit\n");
 		ps_printf(p, "%%%%Orientation: Portrait\n");
 		ps_printf(p, "%%%%Pages: (atend)\n");
 		ps_printf(p, "%%%%PageOrder: Ascend\n");
-		ps_printf(p, "%%%%DocumentMedia: "
-		    "Default %zu %zu 0 () ()\n",
-		    (size_t)AFM2PNT(p, p->ps->width),
-		    (size_t)AFM2PNT(p, p->ps->height));
+		ps_printf(p, "%%%%DocumentMedia: man-%s %zu %zu 0 () ()\n",
+		    p->ps->medianame, width, height);
 		ps_printf(p, "%%%%DocumentNeededResources: font");
 
 		for (i = 0; i < (int)TERMFONT__MAX; i++)
 			ps_printf(p, " %s", fonts[i].name);
 
 		ps_printf(p, "\n%%%%EndComments\n");
+		ps_printf(p, "%%%%BeginSetup\n");
+		ps_printf(p, "%%%%BeginFeature: *PageSize %s\n",
+		    p->ps->medianame);
+		ps_printf(p, "<</PageSize [%zu %zu]>>setpagedevice\n",
+		    width, height);
+		ps_printf(p, "%%%%EndFeature\n");
+		ps_printf(p, "%%%%EndSetup\n");
 	} else {
 		ps_printf(p, "%%PDF-1.1\n");
 		pdf_obj(p, 1);
