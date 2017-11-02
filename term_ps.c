@@ -2,6 +2,7 @@
 /*
  * Copyright (c) 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2014, 2015, 2016, 2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2017 Marc Espie <espie@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -66,6 +67,7 @@ struct	termp_ps {
 	size_t		  pscol;	/* visible column (AFM units) */
 	size_t		  pscolnext;	/* used for overstrike */
 	size_t		  psrow;	/* visible row (AFM units) */
+	size_t		  lastrow;	/* psrow of the previous word */
 	char		 *psmarg;	/* margin buf */
 	size_t		  psmargsz;	/* margin buf size */
 	size_t		  psmargcur;	/* cur index in margin buf */
@@ -741,7 +743,7 @@ ps_closepage(struct termp *p)
 
 	/*
 	 * Close out a page that we've already flushed to output.  In
-	 * PostScript, we simply note that the page must be showed.  In
+	 * PostScript, we simply note that the page must be shown.  In
 	 * PDF, we must now create the Length, Resource, and Page node
 	 * for the page contents.
 	 */
@@ -872,6 +874,7 @@ ps_begin(struct termp *p)
 	p->ps->flags = PS_MARGINS;
 	p->ps->pscol = p->ps->left;
 	p->ps->psrow = p->ps->header;
+	p->ps->lastrow = 0; /* impossible row */
 
 	ps_setfont(p, TERMFONT_NONE);
 
@@ -911,7 +914,22 @@ ps_begin(struct termp *p)
 		for (i = 0; i < (int)TERMFONT__MAX; i++)
 			ps_printf(p, " %s", fonts[i].name);
 
-		ps_printf(p, "\n%%%%EndComments\n");
+		ps_printf(p, "\n%%%%DocumentSuppliedResources: "
+		    "procset MandocProcs 1.0 0\n");
+		ps_printf(p, "%%%%EndComments\n");
+		ps_printf(p, "%%%%BeginProlog\n");
+		ps_printf(p, "%%%%BeginResource: procset MandocProcs "
+		    "10170 10170\n");
+		/* The font size is effectively hard-coded for now. */
+		ps_printf(p, "/fs %zu def\n", p->ps->scale);
+		for (i = 0; i < (int)TERMFONT__MAX; i++)
+			ps_printf(p, "/f%d { /%s fs selectfont } def\n",
+			    i, fonts[i].name);
+		ps_printf(p, "/s { 3 1 roll moveto show } bind def\n");
+		ps_printf(p, "/c { exch currentpoint exch pop "
+		    "moveto show } bind def\n");
+		ps_printf(p, "%%%%EndResource\n");
+		ps_printf(p, "%%%%EndProlog\n");
 		ps_printf(p, "%%%%BeginSetup\n");
 		ps_printf(p, "%%%%BeginFeature: *PageSize %s\n",
 		    p->ps->medianame);
@@ -958,9 +976,7 @@ ps_pletter(struct termp *p, int c)
 		if (TERMTYPE_PS == p->type) {
 			ps_printf(p, "%%%%Page: %zu %zu\n",
 			    p->ps->pages + 1, p->ps->pages + 1);
-			ps_printf(p, "/%s %zu selectfont\n",
-			    fonts[(int)p->ps->lastf].name,
-			    p->ps->scale);
+			ps_printf(p, "f%d\n", (int)p->ps->lastf);
 		} else {
 			pdf_obj(p, p->ps->pdfbody +
 			    p->ps->pages * 4);
@@ -985,10 +1001,13 @@ ps_pletter(struct termp *p, int c)
 			ps_printf(p, "%.3f %.3f Td\n(",
 			    AFM2PNT(p, p->ps->pscol),
 			    AFM2PNT(p, p->ps->psrow));
-		} else
-			ps_printf(p, "%.3f %.3f moveto\n(",
-			    AFM2PNT(p, p->ps->pscol),
-			    AFM2PNT(p, p->ps->psrow));
+		} else {
+			ps_printf(p, "%.3f", AFM2PNT(p, p->ps->pscol));
+			if (p->ps->psrow != p->ps->lastrow)
+				ps_printf(p, " %.3f",
+				    AFM2PNT(p, p->ps->psrow));
+			ps_printf(p, "(");
+		}
 		p->ps->flags |= PS_INLINE;
 	}
 
@@ -1036,10 +1055,14 @@ ps_pclose(struct termp *p)
 	if ( ! (PS_INLINE & p->ps->flags))
 		return;
 
-	if (TERMTYPE_PS != p->type) {
+	if (TERMTYPE_PS != p->type)
 		ps_printf(p, ") Tj\nET\n");
-	} else
-		ps_printf(p, ") show\n");
+	else if (p->ps->psrow == p->ps->lastrow)
+		ps_printf(p, ")c\n");
+	else {
+		ps_printf(p, ")s\n");
+		p->ps->lastrow = p->ps->psrow;
+	}
 
 	p->ps->flags &= ~PS_INLINE;
 }
@@ -1258,8 +1281,7 @@ ps_setfont(struct termp *p, enum termfont f)
 		return;
 
 	if (TERMTYPE_PS == p->type)
-		ps_printf(p, "/%s %zu selectfont\n",
-		    fonts[(int)f].name, p->ps->scale);
+		ps_printf(p, "f%d\n", (int)f);
 	else
 		ps_printf(p, "/F%d %zu Tf\n",
 		    (int)f, p->ps->scale);
