@@ -1547,7 +1547,6 @@ static int
 pre_lk(DECL_ARGS)
 {
 	const struct roff_node *link, *descr, *punct;
-	int display;
 
 	if ((link = n->child) == NULL)
 		return 0;
@@ -1570,12 +1569,6 @@ pre_lk(DECL_ARGS)
 	}
 
 	/* Link target. */
-	display = man_strlen(link->string) >= 26;
-	if (display) {
-		print_line(".RS", MMAN_Bk_susp);
-		print_word("6n");
-		outflags |= MMAN_nl;
-	}
 	font_push('B');
 	print_word(link->string);
 	font_pop();
@@ -1585,8 +1578,6 @@ pre_lk(DECL_ARGS)
 		print_word(punct->string);
 		punct = punct->next;
 	}
-	if (display)
-		print_line(".RE", MMAN_nl);
 	return 0;
 }
 
