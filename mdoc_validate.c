@@ -169,12 +169,12 @@ static	const v_post __mdoc_valids[MDOC_MAX - MDOC_Dd] = {
 	post_hyph,	/* %T */ /* FIXME: can be used outside Rs/Re. */
 	NULL,		/* %V */
 	NULL,		/* Ac */
-	post_delim_nb,	/* Ao */
+	NULL,		/* Ao */
 	post_delim_nb,	/* Aq */
 	post_at,	/* At */
 	NULL,		/* Bc */
 	post_bf,	/* Bf */
-	post_delim_nb,	/* Bo */
+	NULL,		/* Bo */
 	NULL,		/* Bq */
 	post_xx,	/* Bsx */
 	post_bx,	/* Bx */
@@ -194,16 +194,16 @@ static	const v_post __mdoc_valids[MDOC_MAX - MDOC_Dd] = {
 	post_xx,	/* Ox */
 	NULL,		/* Pc */
 	NULL,		/* Pf */
-	post_delim_nb,	/* Po */
+	NULL,		/* Po */
 	post_delim_nb,	/* Pq */
 	NULL,		/* Qc */
 	post_delim_nb,	/* Ql */
-	post_delim_nb,	/* Qo */
+	NULL,		/* Qo */
 	post_delim_nb,	/* Qq */
 	NULL,		/* Re */
 	post_rs,	/* Rs */
 	NULL,		/* Sc */
-	post_delim_nb,	/* So */
+	NULL,		/* So */
 	post_delim_nb,	/* Sq */
 	post_sm,	/* Sm */
 	post_sx,	/* Sx */
@@ -214,7 +214,7 @@ static	const v_post __mdoc_valids[MDOC_MAX - MDOC_Dd] = {
 	NULL,		/* Xo */
 	post_fo,	/* Fo */
 	NULL,		/* Fc */
-	post_delim_nb,	/* Oo */
+	NULL,		/* Oo */
 	NULL,		/* Oc */
 	post_bk,	/* Bk */
 	NULL,		/* Ek */
@@ -227,7 +227,7 @@ static	const v_post __mdoc_valids[MDOC_MAX - MDOC_Dd] = {
 	post_delim_nb,	/* Lk */
 	post_defaults,	/* Mt */
 	post_delim_nb,	/* Brq */
-	post_delim_nb,	/* Bro */
+	NULL,		/* Bro */
 	NULL,		/* Brc */
 	NULL,		/* %C */
 	post_es,	/* Es */
@@ -530,8 +530,7 @@ post_delim_nb(POST_ARGS)
 
 	/* At least three alphabetic words with a sentence ending. */
 	if (strchr("!.:?", *lc) != NULL && (tok == MDOC_Em ||
-	    tok == MDOC_Li || tok == MDOC_Po || tok == MDOC_Pq ||
-	    tok == MDOC_Sy)) {
+	    tok == MDOC_Li || tok == MDOC_Pq || tok == MDOC_Sy)) {
 		nw = 0;
 		for (cp = lc - 1; cp >= nch->string; cp--) {
 			if (*cp == ' ') {
