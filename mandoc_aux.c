@@ -111,8 +111,8 @@ mandoc_strndup(const char *ptr, size_t sz)
 {
 	char	*p;
 
-	p = mandoc_malloc(sz + 1);
-	memcpy(p, ptr, sz);
-	p[(int)sz] = '\0';
+	p = strndup(ptr, sz);
+	if (p == NULL)
+		err((int)MANDOCLEVEL_SYSERR, NULL);
 	return p;
 }
