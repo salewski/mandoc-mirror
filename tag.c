@@ -213,6 +213,9 @@ tag_write(void)
 	ohash_delete(&tag_data);
 	if (stream != NULL)
 		fclose(stream);
+	else
+		close(tag_files.tfd);
+	tag_files.tfd = -1;
 }
 
 void

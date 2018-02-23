@@ -1184,7 +1184,7 @@ spawn_pager(struct tag_files *tag_files)
 	if (dup2(tag_files->ofd, STDOUT_FILENO) == -1)
 		err((int)MANDOCLEVEL_SYSERR, "pager stdout");
 	close(tag_files->ofd);
-	close(tag_files->tfd);
+	assert(tag_files->tfd == -1);
 
 	/* Do not start the pager before controlling the terminal. */
 
