@@ -46,6 +46,7 @@ TESTSRCS	 = test-be32toh.c \
 		   test-stringlist.c \
 		   test-strlcat.c \
 		   test-strlcpy.c \
+		   test-strndup.c \
 		   test-strptime.c \
 		   test-strsep.c \
 		   test-strtonum.c \
@@ -70,6 +71,7 @@ SRCS		 = att.c \
 		   compat_stringlist.c \
 		   compat_strlcat.c \
 		   compat_strlcpy.c \
+		   compat_strndup.c \
 		   compat_strsep.c \
 		   compat_strtonum.c \
 		   compat_vasprintf.c \
@@ -249,6 +251,7 @@ COMPAT_OBJS	 = compat_err.o \
 		   compat_strcasestr.o \
 		   compat_strlcat.o \
 		   compat_strlcpy.o \
+		   compat_strndup.o \
 		   compat_strsep.o \
 		   compat_strtonum.o \
 		   compat_vasprintf.o

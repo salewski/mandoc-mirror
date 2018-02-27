@@ -83,6 +83,7 @@ HAVE_STRCASESTR=
 HAVE_STRINGLIST=
 HAVE_STRLCAT=
 HAVE_STRLCPY=
+HAVE_STRNDUP=
 HAVE_STRPTIME=
 HAVE_STRSEP=
 HAVE_STRTONUM=
@@ -238,6 +239,7 @@ runtest strcasestr	STRCASESTR	|| true
 runtest stringlist	STRINGLIST	|| true
 runtest strlcat		STRLCAT		|| true
 runtest strlcpy		STRLCPY		|| true
+runtest strndup		STRNDUP		|| true
 runtest strptime	STRPTIME	|| true
 runtest strsep		STRSEP		|| true
 runtest strtonum	STRTONUM	|| true
@@ -353,7 +355,8 @@ __HEREDOC__
 
 [ ${HAVE_GETLINE} -eq 0 -o \
   ${HAVE_REALLOCARRAY} -eq 0 -o ${HAVE_RECALLOCARRAY} -eq 0 -o \
-  ${HAVE_STRLCAT} -eq 0 -o ${HAVE_STRLCPY} -eq 0 ] \
+  ${HAVE_STRLCAT} -eq 0 -o ${HAVE_STRLCPY} -eq 0 -o \
+  ${HAVE_STRNDUP} -eq 0 ] \
 	&& echo "#include <sys/types.h>"
 [ ${HAVE_VASPRINTF} -eq 0 ] && echo "#include <stdarg.h>"
 [ ${HAVE_GETLINE} -eq 0 ] && echo "#include <stdio.h>"
@@ -396,6 +399,7 @@ cat << __HEREDOC__
 #define HAVE_STRINGLIST ${HAVE_STRINGLIST}
 #define HAVE_STRLCAT ${HAVE_STRLCAT}
 #define HAVE_STRLCPY ${HAVE_STRLCPY}
+#define HAVE_STRNDUP ${HAVE_STRNDUP}
 #define HAVE_STRPTIME ${HAVE_STRPTIME}
 #define HAVE_STRSEP ${HAVE_STRSEP}
 #define HAVE_STRTONUM ${HAVE_STRTONUM}
@@ -451,6 +455,9 @@ fi
 
 [ ${HAVE_STRLCPY} -eq 0 ] && \
 	echo "extern	size_t	  strlcpy(char *, const char *, size_t);"
+
+[ ${HAVE_STRNDUP} -eq 0 ] && \
+	echo "extern	char	 *strndup(const char *, size_t);"
 
 [ ${HAVE_STRSEP} -eq 0 ] && \
 	echo "extern	char	 *strsep(char **, const char *);"
