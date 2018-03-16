@@ -106,6 +106,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"no blank before trailing delimiter",
 	"fill mode already enabled, skipping",
 	"fill mode already disabled, skipping",
+	"verbatim \"--\", maybe consider using \\(em",
 	"function name without markup",
 	"whitespace at end of input line",
 	"bad comment style",
