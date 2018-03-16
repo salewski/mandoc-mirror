@@ -412,8 +412,9 @@ check_text_em(struct roff_man *mdoc, int ln, int pos, char *p)
 	/* Look for em-dashes wrongly encoded as "--". */
 
 	for (cp = p; *cp != '\0'; cp++) {
-		if (*cp != '-' || *++cp != '-')
+		if (cp[0] != '-' || cp[1] != '-')
 			continue;
+		cp++;
 
 		/* Skip input sequences of more than two '-'. */
 
