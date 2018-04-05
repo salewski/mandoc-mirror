@@ -1408,7 +1408,7 @@ pre_it(DECL_ARGS)
 			if (bln->norm->Bl.type == LIST_diag)
 				print_line(".B \"", 0);
 			else
-				print_line(".R \"", 0);
+				print_line(".BR \\& \"", 0);
 			outflags &= ~MMAN_spc;
 			return 1;
 		case LIST_bullet:
