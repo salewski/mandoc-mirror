@@ -202,8 +202,8 @@ static	const struct manact __manacts[MDOC_MAX - MDOC_Dd] = {
 	{ NULL, pre_bk, post_bk, NULL, NULL }, /* Bx */
 	{ NULL, pre_skip, NULL, NULL, NULL }, /* Db */
 	{ NULL, NULL, NULL, NULL, NULL }, /* Dc */
-	{ cond_body, pre_enc, post_enc, "\\(Lq", "\\(Rq" }, /* Do */
-	{ cond_body, pre_enc, post_enc, "\\(Lq", "\\(Rq" }, /* Dq */
+	{ cond_body, pre_enc, post_enc, "\\(lq", "\\(rq" }, /* Do */
+	{ cond_body, pre_enc, post_enc, "\\(lq", "\\(rq" }, /* Dq */
 	{ NULL, NULL, NULL, NULL, NULL }, /* Ec */
 	{ NULL, NULL, NULL, NULL, NULL }, /* Ef */
 	{ NULL, pre_em, post_font, NULL, NULL }, /* Em */
