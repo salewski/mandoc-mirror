@@ -1004,10 +1004,10 @@ post_lb(POST_ARGS)
 
 	roff_word_alloc(mdoc, n->line, n->pos, "library");
 	mdoc->last->flags = NODE_NOSRC;
-	roff_word_alloc(mdoc, n->line, n->pos, "\\(Lq");
+	roff_word_alloc(mdoc, n->line, n->pos, "\\(lq");
 	mdoc->last->flags = NODE_DELIMO | NODE_NOSRC;
 	mdoc->last = mdoc->last->next;
-	roff_word_alloc(mdoc, n->line, n->pos, "\\(Rq");
+	roff_word_alloc(mdoc, n->line, n->pos, "\\(rq");
 	mdoc->last->flags = NODE_DELIMC | NODE_NOSRC;
 	mdoc->last = n;
 }
