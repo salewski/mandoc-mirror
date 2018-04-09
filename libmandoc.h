@@ -66,7 +66,7 @@ void		 roff_man_reset(struct roff_man *);
 enum rofferr	 roff_parseln(struct roff *, int, struct buf *, int *);
 void		 roff_endparse(struct roff *);
 void		 roff_setreg(struct roff *, const char *, int, char sign);
-int		 roff_getreg(const struct roff *, const char *);
+int		 roff_getreg(struct roff *, const char *);
 char		*roff_strdup(const struct roff *, const char *);
 int		 roff_getcontrol(const struct roff *,
 			const char *, int *);
