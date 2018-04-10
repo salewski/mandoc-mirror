@@ -52,10 +52,6 @@ are mere guesses, and some may be wrong.
   found by naddy@ in xloadimage(1)
   loc **  exist ***  algo *  size *  imp *
 
-- .nr third argument (auto-increment step size, requires \n+)
-  found by bentley@ in sbcl(1)  Mon, 9 Dec 2013 18:36:57 -0700
-  loc *  exist *  algo *  size *  imp **
-
 - .ns (no-space mode) occurs in xine-config(1)
   when implementing this, also let .TH set it
   reported by brad@  Sat, 15 Jan 2011 15:45:23 -0500
@@ -64,10 +60,6 @@ are mere guesses, and some may be wrong.
 - .while and .shift
   found by jca@ in ratpoison(1)  Sun, 30 Jun 2013 12:01:09 +0200
   loc *  exist **  algo **  size **  imp **
-
-- \n+ and \n- numerical register increment and decrement
-  found by bentley@ in sbcl(1)  Mon, 9 Dec 2013 18:36:57 -0700
-  loc *  exist *  algo *  size *  imp **
 
 - \w'' improve width measurements
   would not be very useful without an expression parser, see below
