@@ -61,6 +61,7 @@ enum	roff_type {
 	ROFFT_TAIL,
 	ROFFT_ELEM,
 	ROFFT_TEXT,
+	ROFFT_COMMENT,
 	ROFFT_TBL,
 	ROFFT_EQN
 };

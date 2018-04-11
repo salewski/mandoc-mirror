@@ -762,7 +762,7 @@ roff_alloc(struct mparse *parse, int options)
 
 	r = mandoc_calloc(1, sizeof(struct roff));
 	r->parse = parse;
-	r->reqtab = roffhash_alloc(0, ROFF_USERDEF);
+	r->reqtab = roffhash_alloc(0, ROFF_RENAMED);
 	r->options = options;
 	r->format = options & (MPARSE_MDOC | MPARSE_MAN);
 	r->rstackpos = -1;
@@ -1122,8 +1122,10 @@ static enum rofferr
 roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 {
 	char		 ubuf[24]; /* buffer to print the number */
+	struct roff_node *n;	/* used for header comments */
 	const char	*start;	/* start of the string to process */
 	char		*stesc;	/* start of an escape sequence ('\\') */
+	char		*ep;	/* end of comment string */
 	const char	*stnam;	/* start of the name, after "[(*" */
 	const char	*cp;	/* end of the name, e.g. before ']' */
 	const char	*res;	/* the string to be substituted */
@@ -1173,14 +1175,35 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 
 		/* Handle trailing whitespace. */
 
-		cp = strchr(stesc--, '\0') - 1;
-		if (*cp == '\n') {
+		ep = strchr(stesc--, '\0') - 1;
+		if (*ep == '\n') {
 			done = 1;
-			cp--;
+			ep--;
 		}
-		if (*cp == ' ' || *cp == '\t')
+		if (*ep == ' ' || *ep == '\t')
 			mandoc_msg(MANDOCERR_SPACE_EOL, r->parse,
-			    ln, cp - buf->buf, NULL);
+			    ln, ep - buf->buf, NULL);
+
+		/*
+		 * Save comments preceding the title macro
+		 * in the syntax tree.
+		 */
+
+		if (r->format == 0) {
+			while (*ep == ' ' || *ep == '\t')
+				ep--;
+			ep[1] = '\0';
+			n = roff_node_alloc(r->man,
+			    ln, stesc + 1 - buf->buf,
+			    ROFFT_COMMENT, TOKEN_NONE);
+			n->string = mandoc_strdup(stesc + 2);
+			roff_node_append(r->man, n);
+			n->flags |= NODE_VALID | NODE_ENDED;
+			r->man->next = ROFF_NEXT_SIBLING;
+		}
+
+		/* Discard comments. */
+
 		while (stesc > start && stesc[-1] == ' ')
 			stesc--;
 		*stesc = '\0';

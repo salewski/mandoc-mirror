@@ -262,6 +262,8 @@ print_man_node(MAN_ARGS)
 			break;
 		print_paragraph(h);
 		return;
+	case ROFFT_COMMENT:
+		return;
 	default:
 		break;
 	}

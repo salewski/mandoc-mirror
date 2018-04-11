@@ -320,6 +320,7 @@ mdoc_node_validate(struct roff_man *mdoc)
 		    (np->tok == MDOC_Sh || np->tok == MDOC_Ss)))
 			check_toptext(mdoc, n->line, n->pos, n->string);
 		break;
+	case ROFFT_COMMENT:
 	case ROFFT_EQN:
 	case ROFFT_TBL:
 		break;
@@ -1988,8 +1989,10 @@ post_root(POST_ARGS)
 	/* Check that we begin with a proper `Sh'. */
 
 	n = mdoc->first->child;
-	while (n != NULL && n->tok >= MDOC_Dd &&
-	    mdoc_macros[n->tok].flags & MDOC_PROLOGUE)
+	while (n != NULL &&
+	    (n->type == ROFFT_COMMENT ||
+	     (n->tok >= MDOC_Dd &&
+	      mdoc_macros[n->tok].flags & MDOC_PROLOGUE)))
 		n = n->next;
 
 	if (n == NULL)

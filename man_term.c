@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008-2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010-2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2015, 2017, 2018 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -675,7 +675,8 @@ pre_SS(DECL_ARGS)
 			n = n->prev;
 		} while (n != NULL && n->tok >= MAN_TH &&
 		    termacts[n->tok].flags & MAN_NOTEXT);
-		if (n == NULL || (n->tok == MAN_SS && n->body->child == NULL))
+		if (n == NULL || n->type == ROFFT_COMMENT ||
+		    (n->tok == MAN_SS && n->body->child == NULL))
 			break;
 
 		for (i = 0; i < mt->pardist; i++)
@@ -737,7 +738,8 @@ pre_SH(DECL_ARGS)
 			n = n->prev;
 		} while (n != NULL && n->tok >= MAN_TH &&
 		    termacts[n->tok].flags & MAN_NOTEXT);
-		if (n == NULL || (n->tok == MAN_SH && n->body->child == NULL))
+		if (n == NULL || n->type == ROFFT_COMMENT ||
+		    (n->tok == MAN_SH && n->body->child == NULL))
 			break;
 
 		for (i = 0; i < mt->pardist; i++)
@@ -885,7 +887,8 @@ print_man_node(DECL_ARGS)
 
 		term_word(p, n->string);
 		goto out;
-
+	case ROFFT_COMMENT:
+		return;
 	case ROFFT_EQN:
 		if ( ! (n->flags & NODE_LINE))
 			p->flags |= TERMP_NOSPACE;

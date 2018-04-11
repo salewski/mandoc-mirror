@@ -344,7 +344,7 @@ print_mdoc_node(MDOC_ARGS)
 	int		 child;
 	struct tag	*t;
 
-	if (n->flags & NODE_NOPRT)
+	if (n->type == ROFFT_COMMENT || n->flags & NODE_NOPRT)
 		return;
 
 	child = 1;

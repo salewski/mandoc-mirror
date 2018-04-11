@@ -294,7 +294,7 @@ md_node(struct roff_node *n)
 	const struct md_act	*act;
 	int			 cond, process_children;
 
-	if (n->flags & NODE_NOPRT)
+	if (n->type == ROFFT_COMMENT || n->flags & NODE_NOPRT)
 		return;
 
 	if (outflags & MD_nonl)
