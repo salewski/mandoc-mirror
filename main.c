@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008-2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010-2012, 2014-2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2012, 2014-2018 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2010 Joerg Sonnenberger <joerg@netbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,9 @@
 #include "config.h"
 
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <sys/param.h>	/* MACHINE */
+#include <sys/termios.h>
 #include <sys/wait.h>
 
 #include <assert.h>
@@ -120,6 +122,7 @@ main(int argc, char *argv[])
 	struct manconf	 conf;
 	struct mansearch search;
 	struct curparse	 curp;
+	struct winsize	 ws;
 	struct tag_files *tag_files;
 	struct manpage	*res, *resp;
 	const char	*progname, *sec, *thisarg;
@@ -315,6 +318,15 @@ main(int argc, char *argv[])
 	    outmode == OUTMODE_LST ||
 	    !isatty(STDOUT_FILENO))
 		use_pager = 0;
+
+	if (use_pager &&
+	    (conf.output.width == 0 || conf.output.indent == 0) &&
+	    ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) != -1) {
+		if (conf.output.width == 0 && ws.ws_col < 79)
+			conf.output.width = ws.ws_col - 1;
+		if (conf.output.indent == 0 && ws.ws_col < 66)
+			conf.output.indent = 3;
+	}
 
 #if HAVE_PLEDGE
 	if (!use_pager)
