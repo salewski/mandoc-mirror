@@ -1,6 +1,6 @@
 .\"	$Id$
 .\"
-.\" Copyright (c) 2014, 2017 Ingo Schwarze <schwarze@openbsd.org>
+.\" Copyright (c) 2014, 2017, 2018 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -24,6 +24,8 @@
 .In "html.h"
 .Ft void
 .Fn print_gen_decls "struct html *h"
+.Ft void
+.Fn print_gen_comment "struct html *h" "struct roff_node *n"
 .Ft void
 .Fn print_gen_head "struct html *h"
 .Ft struct tag *
@@ -107,6 +109,18 @@ prints the opening
 and
 .Aq Pf \&! Ic DOCTYPE
 declarations required for the current document type.
+.Pp
+The function
+.Fn print_gen_comment
+prints the leading comments, usually containing a Copyright notice
+and license, as an HTML comment.
+It is intended to be called right after opening the
+.Aq Ic HTML
+element.
+Pass the first
+.Dv ROFFT_COMMENT
+node in
+.Fa n .
 .Pp
 The function
 .Fn print_gen_head

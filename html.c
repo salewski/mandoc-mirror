@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008-2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011-2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011-2015, 2017, 2018 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -768,6 +768,32 @@ print_gen_decls(struct html *h)
 {
 	print_word(h, "<!DOCTYPE html>");
 	print_endline(h);
+}
+
+void
+print_gen_comment(struct html *h, struct roff_node *n)
+{
+	int	 wantblank;
+
+	print_word(h, "<!-- This is an automatically generated file."
+	    "  Do not edit.");
+	h->indent = 1;
+	wantblank = 0;
+	while (n != NULL && n->type == ROFFT_COMMENT) {
+		if (strstr(n->string, "-->") == NULL &&
+		    (wantblank || *n->string != '\0')) {
+			print_endline(h);
+			print_indent(h);
+			print_word(h, n->string);
+			wantblank = *n->string != '\0';
+		}
+		n = n->next;
+	}
+	if (wantblank)
+		print_endline(h);
+	print_word(h, " -->");
+	print_endline(h);
+	h->indent = 0;
 }
 
 void
