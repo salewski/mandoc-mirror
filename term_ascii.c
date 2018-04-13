@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2014, 2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2014, 2015, 2017, 2018 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,11 +21,13 @@
 
 #include <assert.h>
 #if HAVE_WCHAR
+#include <langinfo.h>
 #include <locale.h>
 #endif
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #if HAVE_WCHAR
 #include <wchar.h>
@@ -100,7 +102,17 @@ ascii_init(enum termenc enc, const struct manoutput *outopts)
 		v = TERMENC_LOCALE == enc ?
 		    setlocale(LC_CTYPE, "") :
 		    setlocale(LC_CTYPE, UTF8_LOCALE);
-		if (NULL != v && MB_CUR_MAX > 1) {
+
+		/*
+		 * We only support UTF-8,
+		 * so revert to ASCII for anything else.
+		 */
+
+		if (v != NULL &&
+		    strcmp(nl_langinfo(CODESET), "UTF-8") != 0)
+			v = setlocale(LC_CTYPE, "C");
+
+		if (v != NULL && MB_CUR_MAX > 1) {
 			p->enc = enc;
 			p->advance = locale_advance;
 			p->endline = locale_endline;
