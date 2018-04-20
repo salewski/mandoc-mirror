@@ -363,9 +363,11 @@ are mere guesses, and some may be wrong.
 
 --- HTML issues --------------------------------------------------------
 
-- duplicate names generate duplicate href="#..." attributes
+- duplicate names generate duplicate href="#..." anchor attributes
   possibly use "#..._<N>" suffixes?
   Jakub Klinkovsky <j dot l dot k at gmx dot com> 3 Oct 2017 21:23:36 +0200
+  see also the thread: gre(4): Rename duplicate sections
+  up to 20 Apr 2018 15:27:33 +0200
 
 - format ".IP *" etc. as <ul> rather than <dl>
   https://github.com/Debian/debiman/issues/67
@@ -466,6 +468,9 @@ are mere guesses, and some may be wrong.
 ************************************************************************
 * warning issues
 ************************************************************************
+
+- warn about duplicate .Sh/.Ss heads
+  gre(4): Rename duplicate sections 20 Apr 2018 15:27:33 +0200
 
 - style message about macros inside .Bd -literal and .Dl, in particular
   font changing macros like .Cm, .Ar, .Fa (from the mdoclint TODO)
