@@ -79,6 +79,12 @@ are mere guesses, and some may be wrong.
   Found by naddy@ in devel/cutils cobfusc(1)  Mon, 16 Feb 2015 19:10:52 +0100
   loc ***  exist ***  algo ***  size **  imp *
 
+- check for missing roff escape sequences, implement those that are
+  trivial even if not usually appearing in manual pages, gracefully
+  ignore the non-trivial ones, document what they are supposed to do
+  and what mandoc does instead
+  loc *  exist **  algo *  size *  imp *
+
 --- missing mdoc features ----------------------------------------------
 
 - .Bl -column .Xo support is missing
@@ -158,6 +164,15 @@ are mere guesses, and some may be wrong.
   uqs@  Thu, 2 Jun 2011 11:33:35 +0200
   loc *  exist **  algo ***  size *  imp **
 
+--- missing man features -----------------------------------------------
+
+- groff_www(7) .MTO and .URL
+  These macros were used by the GNU grep(1) man page.
+  We should probably *not* add them to mandoc.
+  Just mentioning this here to keep track of the abuse.
+  Laura Morales <lauretas at mail dot com> 20 Apr 2018 07:33:02 +0200
+  loc **  exist *  algo *  size **  imp *
+
 --- missing tbl features -----------------------------------------------
 
 - the "s" layout column specifier is used for placement of data
@@ -207,6 +222,7 @@ are mere guesses, and some may be wrong.
   surrounded by blanks, not when it is part of an unquoted word.
   Also, check whether there are more such cases (e.g., +?).
   reported by bentley@  20 Jun 2017 02:04:29 -0600
+  loc *  exist **  algo **  size *  imp *
 
 - Primes, opprime, and '
   bentley@  Thu, 13 Jul 2017 23:14:20 -0600
@@ -363,11 +379,25 @@ are mere guesses, and some may be wrong.
 
 --- HTML issues --------------------------------------------------------
 
+- replace "li.It-dash:before" with "ul.Bl-dash > li:before"
+  and get rid of the class="It-dash" in the <li>,
+  and similarly for other blocks
+  John Gardner <gardnerjohng at gmail dot com> 23 Apr 2018 13:17:16 +1000
+  loc **  exist **  algo *  size **  imp **
+
 - duplicate names generate duplicate href="#..." anchor attributes
   possibly use "#..._<N>" suffixes?
   Jakub Klinkovsky <j dot l dot k at gmx dot com> 3 Oct 2017 21:23:36 +0200
   see also the thread: gre(4): Rename duplicate sections
   up to 20 Apr 2018 15:27:33 +0200
+  loc *  exist *  algo *  size *  imp ***
+
+- wrap Sh and Ss content into <div>
+  Laura Morales <lauretas at mail dot com> 21 Apr 2018 18:10:48 +0200
+  (Evaluate whether this is really useful and has no adverse
+   side effects before implementing; if it is possible,
+   it does seem cleaner.)
+  loc **  exist **  algo *  size *  imp ***
 
 - format ".IP *" etc. as <ul> rather than <dl>
   https://github.com/Debian/debiman/issues/67
@@ -471,6 +501,7 @@ are mere guesses, and some may be wrong.
 
 - warn about duplicate .Sh/.Ss heads
   gre(4): Rename duplicate sections 20 Apr 2018 15:27:33 +0200
+  loc *  exist *  algo *  size *  imp **
 
 - style message about macros inside .Bd -literal and .Dl, in particular
   font changing macros like .Cm, .Ar, .Fa (from the mdoclint TODO)
@@ -571,6 +602,16 @@ are mere guesses, and some may be wrong.
 ************************************************************************
 * to improve in the groff_mdoc(7) macros
 ************************************************************************
+
+- .Cd # arch1, arch2 in section 4 pages:
+  find better way to indicate multiple architectures, maybe:
+  allow .Dt vgafb 4 "macppc sparc64"
+  already shown as "Device Drivers Manual (macppc sparc64)"
+  for apropos, make that "vgafb(4) - macppc # sparc64" instead of "- all"
+  groff can be made to show multiple arches, too, but it is
+  tedious to do the string parsing in roff code...
+  jmc@ 23 Apr 2018 07:24:52 +0100 [man for vgafb(4)...]
+  loc **  exist **  algo *  size *  imp ***
 
 - use uname(1) to set doc-default-operating-system at install time
   tobimensch  Mon, 1 Dec 2014 00:25:07 +0100
