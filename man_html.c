@@ -431,7 +431,7 @@ man_SH_pre(MAN_ARGS)
 		id = html_make_id(n);
 		print_otag(h, TAG_H1, "cTi", "Sh", id);
 		if (id != NULL)
-			print_otag(h, TAG_A, "chR", "selflink", id);
+			print_otag(h, TAG_A, "chR", "permalink", id);
 		free(id);
 	}
 	return 1;
@@ -501,7 +501,7 @@ man_SS_pre(MAN_ARGS)
 		id = html_make_id(n);
 		print_otag(h, TAG_H2, "cTi", "Ss", id);
 		if (id != NULL)
-			print_otag(h, TAG_A, "chR", "selflink", id);
+			print_otag(h, TAG_A, "chR", "permalink", id);
 		free(id);
 	}
 	return 1;
