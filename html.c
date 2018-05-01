@@ -168,9 +168,14 @@ print_gen_head(struct html *h)
 	struct tag	*t;
 
 	print_otag(h, TAG_META, "?", "charset", "utf-8");
+	if (h->style != NULL) {
+		print_otag(h, TAG_LINK, "?h??", "rel", "stylesheet",
+		    h->style, "type", "text/css", "media", "all");
+		return;
+	}
 
 	/*
-	 * Print a default style-sheet.
+	 * Print a minimal embedded style sheet.
 	 */
 
 	t = print_otag(h, TAG_STYLE, "");
@@ -182,10 +187,6 @@ print_gen_head(struct html *h)
 	print_endline(h);
 	print_text(h, "div.Pp { margin: 1ex 0ex; }");
 	print_tagq(h, t);
-
-	if (h->style)
-		print_otag(h, TAG_LINK, "?h??", "rel", "stylesheet",
-		    h->style, "type", "text/css", "media", "all");
 }
 
 static void
