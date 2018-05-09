@@ -23,6 +23,7 @@ enum	htmltag {
 	TAG_META,
 	TAG_TITLE,
 	TAG_DIV,
+	TAG_IDIV,
 	TAG_H1,
 	TAG_H2,
 	TAG_SPAN,

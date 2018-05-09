@@ -59,6 +59,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"meta",	HTML_NOSTACK | HTML_AUTOCLOSE | HTML_NLALL},
 	{"title",	HTML_NLAROUND},
 	{"div",		HTML_NLAROUND},
+	{"div",		0},
 	{"h1",		HTML_NLAROUND},
 	{"h2",		HTML_NLAROUND},
 	{"span",	0},
@@ -186,6 +187,8 @@ print_gen_head(struct html *h)
 	print_text(h, "td.head-vol { text-align: center; }");
 	print_endline(h);
 	print_text(h, "div.Pp { margin: 1ex 0ex; }");
+	print_endline(h);
+	print_text(h, "div.Nd, div.Bf, div.Op { display: inline; }");
 	print_endline(h);
 	print_text(h, "dl.Bl-diag ");
 	print_byte(h, '>');
