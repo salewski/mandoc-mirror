@@ -321,7 +321,8 @@ main(int argc, char *argv[])
 
 	if (use_pager &&
 	    (conf.output.width == 0 || conf.output.indent == 0) &&
-	    ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) != -1) {
+	    ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) != -1 &&
+	    ws.ws_col > 1) {
 		if (conf.output.width == 0 && ws.ws_col < 79)
 			conf.output.width = ws.ws_col - 1;
 		if (conf.output.indent == 0 && ws.ws_col < 66)
