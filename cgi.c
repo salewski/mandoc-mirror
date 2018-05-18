@@ -356,6 +356,8 @@ resp_begin_html(int code, const char *msg, const char *file)
 	       "<html>\n"
 	       "<head>\n"
 	       "  <meta charset=\"UTF-8\"/>\n"
+	       "  <meta name=\"viewport\""
+		      " content=\"width=device-width, initial-scale=1.0\">\n"
 	       "  <link rel=\"stylesheet\" href=\"%s/mandoc.css\""
 	       " type=\"text/css\" media=\"all\">\n"
 	       "  <title>",
