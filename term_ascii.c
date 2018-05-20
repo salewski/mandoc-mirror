@@ -133,6 +133,8 @@ ascii_init(enum termenc enc, const struct manoutput *outopts)
 	if (outopts->synopsisonly)
 		p->synopsisonly = 1;
 
+	assert(p->defindent < UINT16_MAX);
+	assert(p->defrmargin < UINT16_MAX);
 	return p;
 }
 
@@ -171,6 +173,8 @@ ascii_setwidth(struct termp *p, int iop, int width)
 		p->defrmargin -= width;
 	else
 		p->defrmargin = 0;
+	if (p->defrmargin > 1000)
+		p->defrmargin = 1000;
 	p->lastrmargin = p->tcol->rmargin;
 	p->tcol->rmargin = p->maxrmargin = p->defrmargin;
 }
@@ -239,6 +243,7 @@ ascii_advance(struct termp *p, size_t len)
 {
 	size_t		i;
 
+	assert(len < UINT16_MAX);
 	for (i = 0; i < len; i++)
 		putchar(' ');
 }
@@ -376,6 +381,7 @@ locale_advance(struct termp *p, size_t len)
 {
 	size_t		i;
 
+	assert(len < UINT16_MAX);
 	for (i = 0; i < len; i++)
 		putwchar(L' ');
 }
