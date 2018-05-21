@@ -171,7 +171,8 @@ code.Ic {	font-style: normal;
 code.Ev {	font-style: normal;
 		font-weight: normal;
 		font-family: monospace; }
-i.Pa {		font-weight: normal; }
+span.Pa {	font-style: italic;
+		font-weight: normal; }
 
 /* Semantic markup for function libraries. */
 

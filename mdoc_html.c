@@ -979,7 +979,7 @@ mdoc_bd_pre(MDOC_ARGS)
 static int
 mdoc_pa_pre(MDOC_ARGS)
 {
-	print_otag(h, TAG_I, "cT", "Pa");
+	print_otag(h, TAG_SPAN, "cT", "Pa");
 	return 1;
 }
 
