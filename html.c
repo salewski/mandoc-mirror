@@ -190,7 +190,7 @@ print_gen_head(struct html *h)
 	print_endline(h);
 	print_text(h, "div.Nd, div.Bf, div.Op { display: inline; }");
 	print_endline(h);
-	print_text(h, "span.Pa { font-style: italic; }");
+	print_text(h, "span.Pa, span.Ad { font-style: italic; }");
 	print_endline(h);
 	print_text(h, "dl.Bl-diag ");
 	print_byte(h, '>');

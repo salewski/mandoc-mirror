@@ -210,7 +210,8 @@ a.Mt { }
 code.Cd {	font-style: normal;
 		font-weight: bold;
 		font-family: inherit; }
-i.Ad {		font-weight: normal; }
+span.Ad {	font-style: italic;
+		font-weight: normal; }
 b.Ms {		font-style: normal; }
 span.St { }
 a.Ux { }

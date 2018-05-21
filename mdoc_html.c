@@ -986,7 +986,7 @@ mdoc_pa_pre(MDOC_ARGS)
 static int
 mdoc_ad_pre(MDOC_ARGS)
 {
-	print_otag(h, TAG_I, "c", "Ad");
+	print_otag(h, TAG_SPAN, "c", "Ad");
 	return 1;
 }
 
