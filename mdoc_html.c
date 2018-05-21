@@ -1463,7 +1463,7 @@ mdoc_ms_pre(MDOC_ARGS)
 
 	if ((id = cond_id(n)) != NULL)
 		print_otag(h, TAG_A, "chR", "permalink", id);
-	print_otag(h, TAG_B, "cTi", "Ms", id);
+	print_otag(h, TAG_SPAN, "cTi", "Ms", id);
 	free(id);
 	return 1;
 }

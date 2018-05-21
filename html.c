@@ -192,6 +192,8 @@ print_gen_head(struct html *h)
 	print_endline(h);
 	print_text(h, "span.Pa, span.Ad { font-style: italic; }");
 	print_endline(h);
+	print_text(h, "span.Ms { font-weight: bold; }");
+	print_endline(h);
 	print_text(h, "dl.Bl-diag ");
 	print_byte(h, '>');
 	print_text(h, " dt { font-weight: bold; }");
