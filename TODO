@@ -379,12 +379,9 @@ are mere guesses, and some may be wrong.
 
 --- HTML issues --------------------------------------------------------
 
-- duplicate names generate duplicate href="#..." anchor attributes
-  possibly use "#..._<N>" suffixes?
-  Jakub Klinkovsky <j dot l dot k at gmx dot com> 3 Oct 2017 21:23:36 +0200
-  see also the thread: gre(4): Rename duplicate sections
-  up to 20 Apr 2018 15:27:33 +0200
-  loc *  exist *  algo *  size *  imp ***
+- @media queries to reduce indentation on low-res displays
+  some mails in the Viewport for man.openbsd.org thread
+  e.g. Adam Thompson 24 May 2018 15:09:00 -0500
 
 - wrap Sh and Ss content into <div>
   Laura Morales <lauretas at mail dot com> 21 Apr 2018 18:10:48 +0200

@@ -428,11 +428,10 @@ man_SH_pre(MAN_ARGS)
 	char	*id;
 
 	if (n->type == ROFFT_HEAD) {
-		id = html_make_id(n);
+		id = html_make_id(n, 1);
 		print_otag(h, TAG_H1, "cTi", "Sh", id);
 		if (id != NULL)
 			print_otag(h, TAG_A, "chR", "permalink", id);
-		free(id);
 	}
 	return 1;
 }
@@ -498,11 +497,10 @@ man_SS_pre(MAN_ARGS)
 	char	*id;
 
 	if (n->type == ROFFT_HEAD) {
-		id = html_make_id(n);
+		id = html_make_id(n, 1);
 		print_otag(h, TAG_H2, "cTi", "Ss", id);
 		if (id != NULL)
 			print_otag(h, TAG_A, "chR", "permalink", id);
-		free(id);
 	}
 	return 1;
 }

@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -29,6 +30,7 @@
 #include <unistd.h>
 
 #include "mandoc_aux.h"
+#include "mandoc_ohash.h"
 #include "mandoc.h"
 #include "roff.h"
 #include "out.h"
@@ -117,6 +119,9 @@ static	const char	*const roffscales[SCALE_MAX] = {
 	"ex", /* SCALE_FS */
 };
 
+/* Avoid duplicate HTML id= attributes. */
+static	struct ohash	 id_unique;
+
 static	void	 a2width(const char *, struct roffsu *);
 static	void	 print_byte(struct html *, char);
 static	void	 print_endword(struct html *);
@@ -144,6 +149,8 @@ html_alloc(const struct manoutput *outopts)
 	if (outopts->fragment)
 		h->oflags |= HTML_FRAGMENT;
 
+	mandoc_ohash_init(&id_unique, 4, 0);
+
 	return h;
 }
 
@@ -152,15 +159,22 @@ html_free(void *p)
 {
 	struct tag	*tag;
 	struct html	*h;
+	char		*cp;
+	unsigned int	 slot;
 
 	h = (struct html *)p;
-
 	while ((tag = h->tag) != NULL) {
 		h->tag = tag->next;
 		free(tag);
 	}
-
 	free(h);
+
+	cp = ohash_first(&id_unique, &slot);
+	while (cp != NULL) {
+		free(cp);
+		cp = ohash_next(&id_unique, &slot);
+	}
+	ohash_delete(&id_unique);
 }
 
 void
@@ -257,10 +271,12 @@ print_metaf(struct html *h, enum mandoc_esc deco)
 }
 
 char *
-html_make_id(const struct roff_node *n)
+html_make_id(const struct roff_node *n, int unique)
 {
 	const struct roff_node	*nch;
-	char			*buf, *cp;
+	char			*buf, *bufs, *cp;
+	unsigned int		 slot;
+	int			 suffix;
 
 	for (nch = n->child; nch != NULL; nch = nch->next)
 		if (nch->type != ROFFT_TEXT)
@@ -277,6 +293,30 @@ html_make_id(const struct roff_node *n)
 		if (*cp == ' ')
 			*cp = '_';
 
+	if (unique == 0)
+		return buf;
+
+	/* Avoid duplicate HTML id= attributes. */
+
+	bufs = NULL;
+	suffix = 1;
+	slot = ohash_qlookup(&id_unique, buf);
+	cp = ohash_find(&id_unique, slot);
+	if (cp != NULL) {
+		while (cp != NULL) {
+			free(bufs);
+			if (++suffix > 127) {
+				free(buf);
+				return NULL;
+			}
+			mandoc_asprintf(&bufs, "%s_%d", buf, suffix);
+			slot = ohash_qlookup(&id_unique, bufs);
+			cp = ohash_find(&id_unique, slot);
+		}
+		free(buf);
+		buf = bufs;
+	}
+	ohash_insert(&id_unique, slot, buf);
 	return buf;
 }
 
