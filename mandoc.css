@@ -229,3 +229,17 @@ a.Ux { }
 .Li {		font-style: normal;
 		font-weight: normal;
 		font-family: monospace; }
+
+/* Overrides to avoid excessive margins on small devices. */
+
+@media (max-width: 37.5em) {
+div.manual-text {
+		margin-left: 0.5em; }
+h1.Sh, h2.Ss {	margin-left: 0em; }
+div.D1 {	margin-left: 2em; }
+dl.Bl-hang > dd {
+		margin-left: 2em; }
+dl.Bl-tag {	margin-left: 2em; }
+dl.Bl-tag > dt {
+		margin-left: -2em; }
+}
