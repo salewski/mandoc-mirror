@@ -287,10 +287,16 @@ html_make_id(const struct roff_node *n, int unique)
 	if (buf == NULL)
 		return NULL;
 
-	/* http://www.w3.org/TR/html5/dom.html#the-id-attribute */
+	/*
+	 * In ID attributes, only use ASCII characters that are
+	 * permitted in URL-fragment strings according to the
+	 * explicit list at:
+	 * https://url.spec.whatwg.org/#url-fragment-string
+	 */
 
 	for (cp = buf; *cp != '\0'; cp++)
-		if (*cp == ' ')
+		if (isalnum((unsigned char)*cp) == 0 &&
+		    strchr("!$&'()*+,-./:;=?@_~", *cp) == NULL)
 			*cp = '_';
 
 	if (unique == 0)
