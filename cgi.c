@@ -400,7 +400,7 @@ resp_searchform(const struct req *req, enum focus focus)
 
 	/* Write query input box. */
 
-	printf("    <input type=\"text\" name=\"query\" value=\"");
+	printf("    <input type=\"search\" name=\"query\" value=\"");
 	if (req->q.query != NULL)
 		html_print(req->q.query);
 	printf( "\" size=\"40\"");
@@ -436,7 +436,7 @@ resp_searchform(const struct req *req, enum focus focus)
 		printf(" selected=\"selected\"");
 	puts(">All Architectures</option>");
 	for (i = 0; i < arch_MAX; i++) {
-		printf("      <option value=\"%s\"", arch_names[i]);
+		printf("      <option");
 		if (NULL != req->q.arch &&
 		    0 == strcmp(arch_names[i], req->q.arch))
 			printf(" selected=\"selected\"");
@@ -449,12 +449,10 @@ resp_searchform(const struct req *req, enum focus focus)
 	if (req->psz > 1) {
 		puts("    <select name=\"manpath\">");
 		for (i = 0; i < (int)req->psz; i++) {
-			printf("      <option ");
+			printf("      <option");
 			if (strcmp(req->q.manpath, req->p[i]) == 0)
-				printf("selected=\"selected\" ");
-			printf("value=\"");
-			html_print(req->p[i]);
-			printf("\">");
+				printf(" selected=\"selected\"");
+			printf(">");
 			html_print(req->p[i]);
 			puts("</option>");
 		}
