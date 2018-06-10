@@ -711,9 +711,6 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 		/* Second letter: style name. */
 
 		switch (*fmt++) {
-		case 'h':
-			attr = "height";
-			break;
 		case 'i':
 			attr = "text-indent";
 			break;
