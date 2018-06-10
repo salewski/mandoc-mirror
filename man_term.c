@@ -1032,6 +1032,18 @@ print_man_foot(struct termp *p, const struct roff_meta *meta)
 
 	term_word(p, title);
 	term_flushln(p);
+
+	/*
+	 * Reset the terminal state for more output after the footer:
+	 * Some output modes, in particular PostScript and PDF, print
+	 * the header and the footer into a buffer such that it can be
+	 * reused for multiple output pages, then go on to format the
+	 * main text.
+	 */
+
+        p->tcol->offset = 0;
+        p->flags = 0;
+
 	free(title);
 }
 
