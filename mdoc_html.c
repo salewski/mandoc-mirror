@@ -750,39 +750,19 @@ static int
 mdoc_bl_pre(MDOC_ARGS)
 {
 	char		 cattr[28];
-	struct tag	*t;
 	struct mdoc_bl	*bl;
-	size_t		 i;
 	enum htmltag	 elemtype;
-
-	bl = &n->norm->Bl;
 
 	switch (n->type) {
 	case ROFFT_BODY:
 		return 1;
-
 	case ROFFT_HEAD:
-		if (bl->type != LIST_column || bl->ncols == 0)
-			return 0;
-
-		/*
-		 * For each column, print out the <COL> tag with our
-		 * suggested width.  The last column gets min-width, as
-		 * in terminal mode it auto-sizes to the width of the
-		 * screen and we want to preserve that behaviour.
-		 */
-
-		t = print_otag(h, TAG_COLGROUP, "");
-		for (i = 0; i < bl->ncols - 1; i++)
-			print_otag(h, TAG_COL, "sw+w", bl->cols[i]);
-		print_otag(h, TAG_COL, "swW", bl->cols[i]);
-		print_tagq(h, t);
 		return 0;
-
 	default:
 		break;
 	}
 
+	bl = &n->norm->Bl;
 	switch (bl->type) {
 	case LIST_bullet:
 		elemtype = TAG_UL;

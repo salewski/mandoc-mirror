@@ -31,8 +31,6 @@ enum	htmltag {
 	TAG_BR,
 	TAG_A,
 	TAG_TABLE,
-	TAG_COLGROUP,
-	TAG_COL,
 	TAG_TR,
 	TAG_TD,
 	TAG_LI,
