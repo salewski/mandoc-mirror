@@ -132,4 +132,3 @@ void		  print_paragraph(struct html *);
 void		  print_endline(struct html *);
 
 char		 *html_make_id(const struct roff_node *, int);
-int		  html_strlen(const char *);

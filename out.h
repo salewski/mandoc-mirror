@@ -54,11 +54,6 @@ struct	rofftbl {
 	void		*arg; /* passed to sulen, slen, and len */
 };
 
-#define	SCALE_VS_INIT(p, v) \
-	do { (p)->unit = SCALE_VS; \
-	     (p)->scale = (v); } \
-	while (/* CONSTCOND */ 0)
-
 #define	SCALE_HS_INIT(p, v) \
 	do { (p)->unit = SCALE_EN; \
 	     (p)->scale = (v); } \

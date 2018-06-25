@@ -212,35 +212,10 @@ Print a
 .Cm style
 attribute.
 If present, it must be the last format letter.
-In contrast to the other format letters, this one does not yet
-print the value and does not take an argument.
-Instead, the rest of the format string consists of pairs of
-argument type letters and style name letters.
-.El
-.Pp
-Argument type letters each require one argument as follows:
-.Bl -tag -width 1n -offset indent
-.It Cm s
-Requires one
-.Vt char *
-argument, used as a style value.
-.It Cm u
-Requires one
-.Vt struct roffsu *
-argument, used as a length.
-.El
-.Pp
-Style name letters decide what to do with the preceding argument:
-.Bl -tag -width 1n -offset indent
-.It Cm \&?
-The special pair
-.Cm s?
-requires two
-.Vt char *
+It requires two
+.Va char *
 arguments.
-The first is the style name, the second its value.
-The style name must not be
-.Dv NULL .
+The first is the name of the style property, the second its value.
 .El
 .Pp
 .Fn print_otag
