@@ -557,24 +557,13 @@ man_IP_pre(MAN_ARGS)
 static int
 man_HP_pre(MAN_ARGS)
 {
-	struct roffsu	 sum, sui;
-	const struct roff_node *np;
-
 	if (n->type == ROFFT_HEAD)
 		return 0;
-	else if (n->type != ROFFT_BLOCK)
-		return 1;
 
-	np = n->head->child;
-
-	if (np == NULL || !a2width(np, &sum))
-		SCALE_HS_INIT(&sum, INDENT);
-
-	sui.unit = sum.unit;
-	sui.scale = -sum.scale;
-
-	print_bvspace(h, n);
-	print_otag(h, TAG_DIV, "csului", "Pp", &sum, &sui);
+	if (n->type == ROFFT_BLOCK) {
+		print_bvspace(h, n);
+		print_otag(h, TAG_DIV, "c", "HP");
+	}
 	return 1;
 }
 
