@@ -553,13 +553,13 @@ struct tag *
 print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 {
 	va_list		 ap;
-	struct roffsu	 mysu, *su;
+	struct roffsu	*su;
 	char		 numbuf[16];
 	struct tag	*t;
 	const char	*attr;
 	char		*arg1, *arg2;
 	double		 v;
-	int		 i, have_style, tflags;
+	int		 have_style, tflags;
 
 	tflags = htmltags[tag].flags;
 
@@ -675,11 +675,6 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 		/* First letter: input argument type. */
 
 		switch (*fmt++) {
-		case 'h':
-			i = va_arg(ap, int);
-			su = &mysu;
-			SCALE_HS_INIT(su, i);
-			break;
 		case 's':
 			arg1 = va_arg(ap, char *);
 			break;
@@ -695,9 +690,6 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 		switch (*fmt++) {
 		case 'h':
 			attr = "height";
-			break;
-		case 'l':
-			attr = "margin-left";
 			break;
 		case '?':
 			attr = arg1;

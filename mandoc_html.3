@@ -220,11 +220,6 @@ argument type letters and style name letters.
 .Pp
 Argument type letters each require one argument as follows:
 .Bl -tag -width 1n -offset indent
-.It Cm h
-Requires one
-.Vt int
-argument, interpreted as a horizontal length in units of
-.Dv SCALE_EN .
 .It Cm s
 Requires one
 .Vt char *
@@ -237,10 +232,6 @@ argument, used as a length.
 .Pp
 Style name letters decide what to do with the preceding argument:
 .Bl -tag -width 1n -offset indent
-.It Cm l
-Set
-.Cm margin-left
-to the given length.
 .It Cm \&?
 The special pair
 .Cm s?
