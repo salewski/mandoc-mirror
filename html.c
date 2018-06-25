@@ -120,7 +120,6 @@ static	const char	*const roffscales[SCALE_MAX] = {
 /* Avoid duplicate HTML id= attributes. */
 static	struct ohash	 id_unique;
 
-static	void	 a2width(const char *, struct roffsu *);
 static	void	 print_byte(struct html *, char);
 static	void	 print_endword(struct html *);
 static	void	 print_indent(struct html *);
@@ -687,21 +686,6 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 		case 'u':
 			su = va_arg(ap, struct roffsu *);
 			break;
-		case 'w':
-			if ((arg2 = va_arg(ap, char *)) != NULL) {
-				su = &mysu;
-				a2width(arg2, su);
-			}
-			if (*fmt == '+') {
-				if (su != NULL) {
-					/* Make even bold text fit. */
-					su->scale *= 1.2;
-					/* Add padding. */
-					su->scale += 3.0;
-				}
-				fmt++;
-			}
-			break;
 		default:
 			abort();
 		}
@@ -714,12 +698,6 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 			break;
 		case 'l':
 			attr = "margin-left";
-			break;
-		case 'w':
-			attr = "width";
-			break;
-		case 'W':
-			attr = "min-width";
 			break;
 		case '?':
 			attr = arg1;
@@ -1034,22 +1012,4 @@ print_word(struct html *h, const char *cp)
 {
 	while (*cp != '\0')
 		print_byte(h, *cp++);
-}
-
-/*
- * Calculate the scaling unit passed in a `-width' argument.  This uses
- * either a native scaling unit (e.g., 1i, 2m) or the string length of
- * the value.
- */
-static void
-a2width(const char *p, struct roffsu *su)
-{
-	const char	*end;
-
-	end = a2roffsu(p, su, SCALE_MAX);
-	if (end == NULL || *end != '\0') {
-		su->unit = SCALE_EN;
-		su->scale = html_strlen(p);
-	} else if (su->scale < 0.0)
-		su->scale = 0.0;
 }

@@ -233,22 +233,6 @@ argument, used as a style value.
 Requires one
 .Vt struct roffsu *
 argument, used as a length.
-.It Cm w
-Requires one
-.Vt char *
-argument, interpreted as an
-.Xr mdoc 7 Ns -style
-width specifier.
-If the argument is
-.Dv NULL ,
-nothing is printed for this pair.
-.Pp
-The
-.Cm w
-argument type letter can optionally be followed by the modifier
-.Cm +
-which increases the width by 20% to make even bold text fit
-and adds three units for padding between columns.
 .El
 .Pp
 Style name letters decide what to do with the preceding argument:
@@ -256,14 +240,6 @@ Style name letters decide what to do with the preceding argument:
 .It Cm l
 Set
 .Cm margin-left
-to the given length.
-.It Cm w
-Set
-.Cm width
-to the given length.
-.It Cm W
-Set
-.Cm min-width
 to the given length.
 .It Cm \&?
 The special pair
