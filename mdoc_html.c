@@ -1416,7 +1416,7 @@ mdoc_bf_pre(MDOC_ARGS)
 		cattr = "Bf No";
 
 	/* Cannot use TAG_SPAN because it may contain blocks. */
-	print_otag(h, TAG_DIV, "cshl", cattr, 1);
+	print_otag(h, TAG_DIV, "c", cattr);
 	return 1;
 }
 
