@@ -1,4 +1,4 @@
-/*	$OpenBSD: html.c,v 1.101 2018/05/29 02:10:05 schwarze Exp $ */
+/*	$Id$ */
 /*
  * Copyright (c) 2008-2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2011-2015, 2017, 2018 Ingo Schwarze <schwarze@openbsd.org>
@@ -713,9 +713,6 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 		switch (*fmt++) {
 		case 'h':
 			attr = "height";
-			break;
-		case 'i':
-			attr = "text-indent";
 			break;
 		case 'l':
 			attr = "margin-left";
