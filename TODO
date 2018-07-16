@@ -180,6 +180,10 @@ are mere guesses, and some may be wrong.
   synaptics(4) found by tedu@  Mon, 17 Aug 2015 21:17:42 -0400
   loc *  exist **  algo ***  size *  imp **
 
+- vertical centering in cells vertically spanned with ^
+  pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
+  loc *  exist ***  algo ***  size **  imp *
+
 - support mdoc(7) and man(7) macros inside tbl(7) code;
   probably requires the parser reorg and letting tbl(7)
   use roff_node such that macro sets can mix;
@@ -197,6 +201,18 @@ are mere guesses, and some may be wrong.
   in tbl(7) -Tutf-8 output
   suggested by bentley@  Tue, 14 Oct 2014 04:10:55 -0600
   loc *  exist **  algo *  size *  imp **
+
+- implement horizontal and vertical alignment in HTNL output
+  pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
+  loc *  exist *  algo *  size *  imp ***
+
+- implement cell spanning in HTML output
+  pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
+  loc *  exist *  algo **  size **  imp **
+
+- implement table borders in HTML output
+  pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
+  loc *  exist *  algo **  size **  imp **
 
 --- missing eqn features -----------------------------------------------
 
@@ -228,6 +244,8 @@ are mere guesses, and some may be wrong.
   bentley@  Thu, 13 Jul 2017 23:14:20 -0600
 
 --- missing misc features ----------------------------------------------
+
+- man -ks 1,8 route; kn@ Jul 13, 2018 orally
 
 - italic correction (\/) in PostScript mode
   Werner LEMBERG on groff at gnu dot org  Sun, 10 Nov 2013 12:47:46
