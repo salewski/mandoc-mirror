@@ -35,8 +35,6 @@
 
 /* FIXME: have PD set the default vspace width. */
 
-#define	INDENT		  5
-
 #define	MAN_ARGS	  const struct roff_meta *man, \
 			  const struct roff_node *n, \
 			  struct html *h

@@ -34,8 +34,6 @@
 #include "html.h"
 #include "main.h"
 
-#define	INDENT		 5
-
 #define	MDOC_ARGS	  const struct roff_meta *meta, \
 			  struct roff_node *n, \
 			  struct html *h
