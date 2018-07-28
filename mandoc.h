@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2010, 2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010-2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2018 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -56,6 +56,7 @@ enum	mandocerr {
 	MANDOCERR_STYLE, /* ===== start of style suggestions ===== */
 
 	MANDOCERR_DATE_LEGACY, /* legacy man(7) date format: Dd ... */
+	MANDOCERR_DATE_NORM, /* normalizing date format to: ... */
 	MANDOCERR_TITLE_CASE, /* lower case character in document title */
 	MANDOCERR_RCS_REP, /* duplicate RCS id: ... */
 	MANDOCERR_SEC_TYPO,  /* possible typo in section name: Sh ... */
