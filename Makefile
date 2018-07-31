@@ -1,7 +1,7 @@
 # $Id$
 #
 # Copyright (c) 2010, 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
-# Copyright (c) 2011, 2013-2017 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2011, 2013-2018 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,7 +15,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-VERSION = 1.14.3
+VERSION = 1.14.4
 
 # === LIST OF FILES ====================================================
 
@@ -30,6 +30,7 @@ TESTSRCS	 = test-be32toh.c \
 		   test-isblank.c \
 		   test-mkdtemp.c \
 		   test-nanosleep.c \
+		   test-noop.c \
 		   test-ntohl.c \
 		   test-O_DIRECTORY.c \
 		   test-ohash.c \
@@ -547,12 +548,12 @@ regress-distcheck:
 		! -path regress/regress.pl \
 		! -path regress/regress.pl.1
 
-dist: mandoc.sha256
+dist: mandoc-$(VERSION).sha256
 
-mandoc.sha256: mandoc.tar.gz
-	sha256 mandoc.tar.gz > $@
+mandoc-$(VERSION).sha256: mandoc-$(VERSION).tar.gz
+	sha256 mandoc-$(VERSION).tar.gz > $@
 
-mandoc.tar.gz: $(DISTFILES)
+mandoc-$(VERSION).tar.gz: $(DISTFILES)
 	ls regress/*/*/*.mandoc_* && exit 1 || true
 	mkdir -p .dist/mandoc-$(VERSION)/
 	$(INSTALL) -m 0644 $(DISTFILES) .dist/mandoc-$(VERSION)

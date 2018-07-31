@@ -54,8 +54,6 @@ generates.  If anything looks wrong or different from what you
 wish, read the file "configure.local.example", create and edit
 a file "configure.local", and re-run "./configure" until the
 result seems right to you.
-On Solaris 10 and earlier, you may have to run "ksh ./configure"
-because the native /bin/sh lacks some POSIX features.
 
 5. Run "make".
 Any POSIX-compatible make, in particular both BSD make and GNU make,

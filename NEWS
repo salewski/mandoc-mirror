@@ -29,6 +29,8 @@ Changes in version 1.14.4, released on August XXX, 2018
    all links in-line, even long ones.
  * roff(7) \n+ and \n- numerical register auto-increment and -decrement
  * roff(7) .nr optional third argument (auto-increment step size)
+ * Autodetect in ./configure whether the compiler can use -W and -static,
+   allowing to build on Solaris 10 and 11 without any configure.local.
     --- RELIABILITY BUGFIXES ---
  * Only activate UTF-8 output when the user really selected UTF-8,
    not some other multibyte character encoding.
