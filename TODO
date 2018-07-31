@@ -542,6 +542,10 @@ are mere guesses, and some may be wrong.
   but just the overall format
   loc **  exist **  algo ***  size **  imp **
 
+- makewhatis -p complains about language subdirectories:
+  /usr/local/man//ru: Unknown directory part
+
+
 ************************************************************************
 * documentation issues
 ************************************************************************
