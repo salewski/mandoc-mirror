@@ -18,7 +18,7 @@ tech@ mailing list, too.
 
 Enjoy using the mandoc toolset!
 
-Ingo Schwarze, Karlsruhe, July 2017
+Ingo Schwarze, Karlsruhe, August 2018
 
 
 Installation
@@ -83,12 +83,14 @@ apropos(1) will not find the new pages.
 
 10. To set up a man.cgi(8) server, read its manual page.
 
-Note that some man(7) pages may contain low-level roff(7) markup
-that mandoc does not yet understand.  On some BSD systems using
-mandoc, third-party software is vetted on whether it may be formatted
-with mandoc.  If not, groff(1) is pulled in as a dependency and
-used to install a pre-formatted "catpage" instead of directly as
-manual page source.
+Note that a very small number of man(7) pages contain low-level
+roff(7) markup that mandoc does not yet understand.  On some BSD
+systems using mandoc, third-party software is vetted on whether it
+may be formatted with mandoc.  If not, groff(1) is pulled in as a
+dependency and used to install pre-formatted "catpages" instead of
+manual page sources.  This mechanism is used much less frequently
+than in the past.  On OpenBSD, only 25 out of about 10000 ports
+still require formatting with groff(1).
 
 
 Understanding mandoc dependencies
