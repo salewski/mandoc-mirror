@@ -2845,6 +2845,7 @@ roff_TE(ROFF_ARGS)
 		free(buf->buf);
 		buf->buf = mandoc_strdup(".sp");
 		buf->sz = 4;
+		*offs = 0;
 		return ROFF_REPARSE;
 	}
 	r->tbl = NULL;
@@ -3364,6 +3365,7 @@ roff_userdef(ROFF_ARGS)
 			    ln, (int)(cp - n1), NULL);
 			free(buf->buf);
 			buf->buf = n1;
+			*offs = 0;
 			return ROFF_IGN;
 		}
 
@@ -3458,6 +3460,7 @@ roff_renamed(ROFF_ARGS)
 	    buf->buf[pos] == '\0' ? "" : " ", buf->buf + pos) + 1;
 	free(buf->buf);
 	buf->buf = nbuf;
+	*offs = 0;
 	return ROFF_CONT;
 }
 

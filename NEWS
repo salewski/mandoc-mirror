@@ -35,6 +35,8 @@ Changes in version 1.14.4, released on August XXX, 2018
  * Only activate UTF-8 output when the user really selected UTF-8,
    not some other multibyte character encoding.
  * Prevent excessive .ll arguments from generating infinite output.
+ * Fix out of bounds accesses to parse buffers that could happen when
+   using renamed or user defined macros after roff(7) conditionals.
  * Avoid an assertion failure in certain .Bl -column lists.
  * Avoid a NULL pointer access on deroff() failure after '.SS ""'.
  * Fix a segfault that could be triggered by two invalid .Dt macros.
@@ -60,7 +62,7 @@ Changes in version 1.14.4, released on August XXX, 2018
  * Thomas Klausner (NetBSD) for suggesting two new style messages,
    one new feature, and for two bug reports.
  * Leah Neukirchen (Void Linux) for suggesting a new style message,
-   four bug reports, and release testing.
+   five bug reports, and release testing.
  * Anthony Bentley (OpenBSD) for reporting multiple bugs and missing
    features.
  * Paul Irofti (OpenBSD) and Nate Bargmann for suggesting new features.
