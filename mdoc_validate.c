@@ -440,7 +440,7 @@ check_text_em(struct roff_man *mdoc, int ln, int pos, char *p)
 		     np->string != '\0' &&
 		     isalpha((unsigned char)np->string[
 		       strlen(np->string) - 1])) ||
-		    (cp[2] != '\0' ?
+		    (cp[1] != '\0' && cp[2] != '\0' ?
 		     isalpha((unsigned char)cp[2]) :
 		     nn != NULL &&
 		     nn->type == ROFFT_TEXT &&

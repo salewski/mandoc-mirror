@@ -59,8 +59,8 @@ Changes in version 1.14.4, released on August XXX, 2018
    on diagnostic messages and on the documentation.
  * Thomas Klausner (NetBSD) for suggesting two new style messages,
    one new feature, and for two bug reports.
- * Leah Neukirchen (Void Linux) for suggesting a new style message
-   and for two bug reports.
+ * Leah Neukirchen (Void Linux) for suggesting a new style message,
+   four bug reports, and release testing.
  * Anthony Bentley (OpenBSD) for reporting multiple bugs and missing
    features.
  * Paul Irofti (OpenBSD) and Nate Bargmann for suggesting new features.
