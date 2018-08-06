@@ -38,6 +38,18 @@ are mere guesses, and some may be wrong.
 
 --- missing roff features ----------------------------------------------
 
+- .nop prints its arguments as text,
+  see groff(7) for an example
+
+- .ft CB selects constant-width bold font
+  see groff_out(7) for examples
+
+- \*(.T prints the device being used,
+  see groff_char(7) for an example
+
+- \[charNN], \[charNNN] prints a single-byte codepoint
+  see groff_char(7) for examples
+
 - .ad (adjust margins)
   .ad l -- adjust left margin only (flush left)
   .ad r -- adjust right margin only (flush right)
@@ -162,8 +174,18 @@ are mere guesses, and some may be wrong.
 
 --- missing man features -----------------------------------------------
 
+- .SY and .YS,
+  used by many groff manual pages
+
+- preserve punctuation following .ME,
+  see ditroff(7) for an example
+
+- .TQ tagged paragraph continuation,
+  see groff_diff(7) for examples
+
 - groff_www(7) .MTO and .URL
   These macros were used by the GNU grep(1) man page.
+  The groff_www(7) manual page itself uses them, too.
   We should probably *not* add them to mandoc.
   Just mentioning this here to keep track of the abuse.
   Laura Morales <lauretas at mail dot com> 20 Apr 2018 07:33:02 +0200
@@ -179,6 +201,9 @@ are mere guesses, and some may be wrong.
 - vertical centering in cells vertically spanned with ^
   pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
   loc *  exist ***  algo ***  size **  imp *
+
+- support .ds requests inside tbl(7) code,
+  see tbl(1) for an example
 
 - support mdoc(7) and man(7) macros inside tbl(7) code;
   probably requires the parser reorg and letting tbl(7)
@@ -315,6 +340,9 @@ are mere guesses, and some may be wrong.
 ************************************************************************
 * formatting issues: ugly output
 ************************************************************************
+
+- .UR can nest inside .TP,
+  see roff(7) for examples
 
 - revisit empty in-line macros
   look at the difference between "Em x Em ." and "Sq x Em ."
