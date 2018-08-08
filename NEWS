@@ -2,7 +2,7 @@ $Id$
 
 This file lists the most important changes in the mandoc.bsd.lv distribution.
 
-Changes in version 1.14.4, released on August XXX, 2018
+Changes in version 1.14.4, released on August 8, 2018
 
     --- MAJOR NEW FEATURES ---
  * In ASCII output, render mathematical symbols and greek letters
@@ -59,15 +59,16 @@ Changes in version 1.14.4, released on August XXX, 2018
  * Colin Watson (man-db) for feedback on man-db semantics.
  * Jason McIntyre (OpenBSD) for lots of feedback and suggestions
    on diagnostic messages and on the documentation.
- * Thomas Klausner (NetBSD) for suggesting two new style messages,
-   one new feature, and for two bug reports.
+ * Thomas Klausner (NetBSD) for suggesting two new style messages
+   and one new feature, for two bug reports, and for release testing.
  * Leah Neukirchen (Void Linux) for suggesting a new style message,
    five bug reports, and release testing.
  * Anthony Bentley (OpenBSD) for reporting multiple bugs and missing
    features.
  * Paul Irofti (OpenBSD) and Nate Bargmann for suggesting new features.
- * Christian Weisgerber, Jonathan Gray, Stuart Henderson, Ted Unangst
-   (OpenBSD), Takeshi Nakayama (NetBSD), Michael Stapelberg (Debian),
+ * Michael Stapelberg (Debian) for bug reports and release testing.
+ * Christian Weisgerber, Jonathan Gray, Stuart Henderson,
+   Ted Unangst (OpenBSD), Takeshi Nakayama (NetBSD),
    Anton Lazarov, Jakub Klinkovsky, Jan Stary, Jesper Wallin,
    Will Backmam, and Wolfgang Mueller for bug reports.
  * Sevan Janiyan (NetBSD) for additions to lib.in.
@@ -76,6 +77,7 @@ Changes in version 1.14.4, released on August XXX, 2018
    for documentation improvements.
  * Laura Morales and Raf Czlonka for questions resulting in better
    documentation.
+ * Yuri Pankov (illumos) for release testing.
 
 Changes in version 1.14.3, released on August 5, 2017
 
