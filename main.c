@@ -790,8 +790,14 @@ fs_search(const struct mansearch *cfg, const struct manpaths *paths,
 					return 1;
 		}
 		if (res != NULL && *ressz == lastsz &&
-		    strchr(*argv, '/') == NULL)
-			warnx("No entry for %s in the manual.", *argv);
+		    strchr(*argv, '/') == NULL) {
+			if (cfg->sec == NULL)
+				warnx("No entry for %s in the manual.",
+				    *argv);
+			else
+				warnx("No entry for %s in section %s "
+				    "of the manual.", *argv, cfg->sec);
+		}
 		lastsz = *ressz;
 		argv++;
 		argc--;
