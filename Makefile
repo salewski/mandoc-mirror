@@ -320,6 +320,7 @@ SOELIM_OBJS	 = soelim.o \
 WWW_MANS	 = apropos.1.html \
 		   demandoc.1.html \
 		   man.1.html \
+		   man.options.1.html \
 		   mandoc.1.html \
 		   soelim.1.html \
 		   man.cgi.3.html \
@@ -336,14 +337,15 @@ WWW_MANS	 = apropos.1.html \
 		   eqn.7.html \
 		   man.7.html \
 		   mandoc_char.7.html \
-		   mandocd.8.html \
 		   mdoc.7.html \
 		   roff.7.html \
 		   tbl.7.html \
 		   catman.8.html \
 		   makewhatis.8.html \
 		   man.cgi.8.html \
-		   man.h.html \
+		   mandocd.8.html
+
+WWW_INCS	 = man.h.html \
 		   manconf.h.html \
 		   mandoc.h.html \
 		   mandoc_aux.h.html \
@@ -361,9 +363,9 @@ all: mandoc demandoc soelim $(BUILD_TARGETS) Makefile.local
 
 install: base-install $(INSTALL_TARGETS)
 
-www: $(WWW_MANS)
+www: $(WWW_MANS) $(WWW_INCS)
 
-$(WWW_MANS): mandoc
+$(WWW_MANS) $(WWW_INCS): mandoc
 
 .PHONY: base-install cgi-install install www-install
 .PHONY: clean distclean depend
@@ -382,7 +384,7 @@ clean:
 	rm -f mandocd catman catman.o $(MANDOCD_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f soelim $(SOELIM_OBJS)
-	rm -f $(WWW_MANS) mandoc.tar.gz mandoc.sha256
+	rm -f $(WWW_MANS) $(WWW_INCS) mandoc*.tar.gz mandoc*.sha256
 	rm -rf *.dSYM
 
 base-install: mandoc demandoc soelim
@@ -516,7 +518,9 @@ soelim: $(SOELIM_OBJS)
 # --- maintainer targets ---
 
 www-install: www
-	$(INSTALL_DATA) $(WWW_MANS) mandoc.css $(HTDOCDIR)
+	$(INSTALL_DATA) mandoc.css $(HTDOCDIR)
+	$(INSTALL_DATA) $(WWW_MANS) $(HTDOCDIR)/man
+	$(INSTALL_DATA) $(WWW_INCS) $(HTDOCDIR)/includes
 
 depend: config.h
 	mkdep -f Makefile.depend $(CFLAGS) $(SRCS)
@@ -573,5 +577,6 @@ mandoc-$(VERSION).tar.gz: $(DISTFILES)
 	highlight -I $< > $@
 
 .1.1.html .3.3.html .5.5.html .7.7.html .8.8.html: mandoc
-	./mandoc -Thtml -Wall,stop \
-		-Ostyle=mandoc.css,man=%N.%S.html,includes=%I.html $< > $@
+	./mandoc -Thtml -O \
+	style=/mandoc.css,man=/man/%N.%S.html,includes=/includes/%I.html \
+	$< > $@
