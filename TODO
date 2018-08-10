@@ -38,9 +38,6 @@ are mere guesses, and some may be wrong.
 
 --- missing roff features ----------------------------------------------
 
-- .nop prints its arguments as text,
-  see groff(7) for an example
-
 - .ft CB selects constant-width bold font
   see groff_out(7) for examples
 
