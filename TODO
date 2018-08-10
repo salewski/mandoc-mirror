@@ -40,9 +40,10 @@ are mere guesses, and some may be wrong.
 
 - \*(.T prints the device being used,
   see groff_char(7) for an example
-
-- \[charNN], \[charNNN] prints a single-byte codepoint
-  see groff_char(7) for examples
+  This is slightly hard because -Tlocale only decides to use ascii or
+  utf8 when initializing the formatter, so the information is not
+  yet available to the preprocessor at the parsing stage.
+  loc **  exist **  algo *  size *  imp *
 
 - .ad (adjust margins)
   .ad l -- adjust left margin only (flush left)
