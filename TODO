@@ -38,9 +38,6 @@ are mere guesses, and some may be wrong.
 
 --- missing roff features ----------------------------------------------
 
-- .ft CB selects constant-width bold font
-  see groff_out(7) for examples
-
 - \*(.T prints the device being used,
   see groff_char(7) for an example
 
