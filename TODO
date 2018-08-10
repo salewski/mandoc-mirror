@@ -523,6 +523,15 @@ are mere guesses, and some may be wrong.
 * warning issues
 ************************************************************************
 
+- When a man(1) command returns no result and there was an -S
+  argument, check the -S argument against the list of valid
+  architectures and say "Unknown architecture AAA" rather than
+  "No entry for NNN in the manual" if there is no match.
+  Requires moving the lists of valid architectures out of
+  mdoc_validate.c such that they can be used by main.c.
+  Discussed with jmc@ 10 Aug 2018 19:20:12 +0100.
+  loc **  exist *  algo *  size *  imp **
+
 - warn about duplicate .Sh/.Ss heads
   gre(4): Rename duplicate sections 20 Apr 2018 15:27:33 +0200
   loc *  exist *  algo *  size *  imp **
