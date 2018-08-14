@@ -289,6 +289,8 @@ print_man(const struct roff_node *n, int indent)
 		if (NODE_LINE & n->flags)
 			putchar('*');
 		printf("%d:%d", n->line, n->pos + 1);
+		if (NODE_DELIMC & n->flags)
+			putchar(')');
 		if (NODE_EOS & n->flags)
 			putchar('.');
 		putchar('\n');

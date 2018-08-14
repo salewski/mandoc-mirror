@@ -884,6 +884,8 @@ print_man_node(DECL_ARGS)
 		} else if (*n->string == ' ' && n->flags & NODE_LINE &&
 		    (p->flags & TERMP_NONEWLINE) == 0)
 			term_newln(p);
+		else if (n->flags & NODE_DELIMC)
+			p->flags |= TERMP_NOSPACE;
 
 		term_word(p, n->string);
 		goto out;

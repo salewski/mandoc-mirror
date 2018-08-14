@@ -172,9 +172,6 @@ are mere guesses, and some may be wrong.
 - .SY and .YS,
   used by many groff manual pages
 
-- preserve punctuation following .ME,
-  see ditroff(7) for an example
-
 - .TQ tagged paragraph continuation,
   see groff_diff(7) for examples
 
