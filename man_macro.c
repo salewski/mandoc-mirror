@@ -256,7 +256,7 @@ blk_close(MACRO_PROT_ARGS)
 
 	if (ctok == MAN_LP || ctok == MAN_PP || ctok == MAN_P) {
 		*pos = strlen(buf);
-		blk_imp(man, ctok, line, ppos, pos, buf);
+		blk_imp(man, ctok, cline, cpos, pos, buf);
 	}
 }
 
