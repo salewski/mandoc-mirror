@@ -18,7 +18,7 @@
 #include <stdlib.h>
 
 /*
- * NetBSD declares this function in the wrong header.
+ * NetBSD declared this function in the wrong header before August 2018.
  * No harm is done by allowing that, too:
  * The only file using it, main.c, also includes unistd.h, anyway.
  */
