@@ -15,10 +15,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if defined(__linux__) || defined(__MINT__)
-#define _GNU_SOURCE /* wcwidth() */
-#endif
-
 #include <locale.h>
 #include <stdio.h>
 #include <wchar.h>

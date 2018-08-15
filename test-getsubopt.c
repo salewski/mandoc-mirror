@@ -15,11 +15,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if defined(__linux__) || defined(__MINT__)
-#define _GNU_SOURCE /* getsubopt() */
-#endif
-
 #include <stdlib.h>
+
+/*
+ * NetBSD declares this function in the wrong header.
+ * No harm is done by allowing that, too:
+ * The only file using it, main.c, also includes unistd.h, anyway.
+ */
+#include <unistd.h>
 
 int
 main(void)
