@@ -54,7 +54,7 @@ static	void	  post_UR(CHKARGS);
 static	void	  post_in(CHKARGS);
 static	void	  post_vs(CHKARGS);
 
-static	const v_check __man_valids[MAN_MAX - MAN_TH] = {
+static	const v_check man_valids[MAN_MAX - MAN_TH] = {
 	post_TH,    /* TH */
 	NULL,       /* SH */
 	NULL,       /* SS */
@@ -92,7 +92,6 @@ static	const v_check __man_valids[MAN_MAX - MAN_TH] = {
 	post_UR,    /* MT */
 	NULL,       /* ME */
 };
-static	const v_check *man_valids = __man_valids - MAN_TH;
 
 
 void
@@ -138,7 +137,7 @@ man_node_validate(struct roff_man *man)
 			break;
 		}
 		assert(n->tok >= MAN_TH && n->tok < MAN_MAX);
-		cp = man_valids + n->tok;
+		cp = man_valids + (n->tok - MAN_TH);
 		if (*cp)
 			(*cp)(man, n);
 		if (man->last == n)
