@@ -38,13 +38,6 @@ are mere guesses, and some may be wrong.
 
 --- missing roff features ----------------------------------------------
 
-- \*(.T prints the device being used,
-  see groff_char(7) for an example
-  This is slightly hard because -Tlocale only decides to use ascii or
-  utf8 when initializing the formatter, so the information is not
-  yet available to the preprocessor at the parsing stage.
-  loc **  exist **  algo *  size *  imp *
-
 - .ad (adjust margins)
   .ad l -- adjust left margin only (flush left)
   .ad r -- adjust right margin only (flush right)

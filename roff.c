@@ -1367,6 +1367,19 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 			if (arg_complete) {
 				deftype = ROFFDEF_USER | ROFFDEF_PRE;
 				res = roff_getstrn(r, stnam, naml, &deftype);
+
+				/*
+				 * If not overriden, let \*(.T
+				 * through to the formatters.
+				 */
+
+				if (res == NULL && naml == 2 &&
+				    stnam[0] == '.' && stnam[1] == 'T') {
+					roff_setstrn(&r->strtab,
+					    ".T", 2, NULL, 0, 0);
+					stesc--;
+					continue;
+				}
 			}
 			break;
 		case 'B':

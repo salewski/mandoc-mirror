@@ -139,6 +139,13 @@ mandoc_escape(const char **end, const char **start, int *sz)
 			break;
 		}
 		break;
+	case '*':
+		if (strncmp(*start, "(.T", 3) != 0)
+			abort();
+		gly = ESCAPE_DEVICE;
+		*start = ++*end;
+		*sz = 2;
+		break;
 
 	/*
 	 * These escapes are of the form \X'Y', where 'X' is the trigger

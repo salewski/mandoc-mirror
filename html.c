@@ -433,6 +433,9 @@ print_encode(struct html *h, const char *p, const char *pend, int norecurse)
 			if (c <= 0)
 				continue;
 			break;
+		case ESCAPE_DEVICE:
+			print_word(h, "html");
+			continue;
 		case ESCAPE_BREAK:
 			breakline = 1;
 			continue;
