@@ -438,6 +438,7 @@ enum	roff_tok {
 	MAN_SH,
 	MAN_SS,
 	MAN_TP,
+	MAN_TQ,
 	MAN_LP,
 	MAN_PP,
 	MAN_P,

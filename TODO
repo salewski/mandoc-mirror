@@ -165,9 +165,6 @@ are mere guesses, and some may be wrong.
 - .SY and .YS,
   used by many groff manual pages
 
-- .TQ tagged paragraph continuation,
-  see groff_diff(7) for examples
-
 - groff_www(7) .MTO and .URL
   These macros were used by the GNU grep(1) man page.
   The groff_www(7) manual page itself uses them, too.

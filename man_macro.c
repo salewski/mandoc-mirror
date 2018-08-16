@@ -45,6 +45,7 @@ const	struct man_macro __man_macros[MAN_MAX - MAN_TH] = {
 	{ blk_imp, MAN_BSCOPE | MAN_SCOPED }, /* SH */
 	{ blk_imp, MAN_BSCOPE | MAN_SCOPED }, /* SS */
 	{ blk_imp, MAN_BSCOPE | MAN_SCOPED }, /* TP */
+	{ blk_imp, MAN_BSCOPE | MAN_SCOPED }, /* TQ */
 	{ blk_imp, MAN_BSCOPE }, /* LP */
 	{ blk_imp, MAN_BSCOPE }, /* PP */
 	{ blk_imp, MAN_BSCOPE }, /* P */
@@ -327,7 +328,7 @@ blk_imp(MACRO_PROT_ARGS)
 	 */
 
 	if (man_macros[tok].flags & MAN_SCOPED &&
-	    (tok == MAN_TP || n == man->last)) {
+	    (tok == MAN_TP || tok == MAN_TQ || n == man->last)) {
 		man->flags |= MAN_BLINE;
 		return;
 	}

@@ -59,6 +59,7 @@ static	const v_check man_valids[MAN_MAX - MAN_TH] = {
 	NULL,       /* SH */
 	NULL,       /* SS */
 	NULL,       /* TP */
+	NULL,       /* TQ */
 	check_par,  /* LP */
 	check_par,  /* PP */
 	check_par,  /* P */
