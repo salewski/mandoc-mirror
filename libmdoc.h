@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2013, 2014, 2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2013,2014,2015,2017,2018 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -59,10 +59,8 @@ enum	mdelim {
 	DELIM_MAX
 };
 
-extern	const struct mdoc_macro *const mdoc_macros;
+const struct mdoc_macro *mdoc_macro(enum roff_tok);
 
-
-void		  mdoc_macro(MACRO_PROT_ARGS);
 void		  mdoc_elem_alloc(struct roff_man *, int, int,
 			enum roff_tok, struct mdoc_arg *);
 struct roff_node *mdoc_block_alloc(struct roff_man *, int, int,

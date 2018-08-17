@@ -42,7 +42,7 @@
 #define	MIN(a,b)	((/*CONSTCOND*/(a)<(b))?(a):(b))
 #endif
 
-struct	htmlmdoc {
+struct	mdoc_html_act {
 	int		(*pre)(MDOC_ARGS);
 	void		(*post)(MDOC_ARGS);
 };
@@ -119,7 +119,7 @@ static	int		  mdoc_vt_pre(MDOC_ARGS);
 static	int		  mdoc_xr_pre(MDOC_ARGS);
 static	int		  mdoc_xx_pre(MDOC_ARGS);
 
-static	const struct htmlmdoc __mdocs[MDOC_MAX - MDOC_Dd] = {
+static const struct mdoc_html_act mdoc_html_acts[MDOC_MAX - MDOC_Dd] = {
 	{NULL, NULL}, /* Dd */
 	{NULL, NULL}, /* Dt */
 	{NULL, NULL}, /* Os */
@@ -241,7 +241,6 @@ static	const struct htmlmdoc __mdocs[MDOC_MAX - MDOC_Dd] = {
 	{mdoc__x_pre, mdoc__x_post}, /* %U */
 	{NULL, NULL}, /* Ta */
 };
-static	const struct htmlmdoc *const mdocs = __mdocs - MDOC_Dd;
 
 
 /*
@@ -402,9 +401,10 @@ print_mdoc_node(MDOC_ARGS)
 			break;
 		}
 		assert(n->tok >= MDOC_Dd && n->tok < MDOC_MAX);
-		if (mdocs[n->tok].pre != NULL &&
+		if (mdoc_html_acts[n->tok - MDOC_Dd].pre != NULL &&
 		    (n->end == ENDBODY_NOT || n->child != NULL))
-			child = (*mdocs[n->tok].pre)(meta, n, h);
+			child = (*mdoc_html_acts[n->tok - MDOC_Dd].pre)(meta,
+			    n, h);
 		break;
 	}
 
@@ -423,10 +423,10 @@ print_mdoc_node(MDOC_ARGS)
 		break;
 	default:
 		if (n->tok < ROFF_MAX ||
-		    mdocs[n->tok].post == NULL ||
+		    mdoc_html_acts[n->tok - MDOC_Dd].post == NULL ||
 		    n->flags & NODE_ENDED)
 			break;
-		(*mdocs[n->tok].post)(meta, n, h);
+		(*mdoc_html_acts[n->tok - MDOC_Dd].post)(meta, n, h);
 		if (n->end != ENDBODY_NOT)
 			n->body->flags |= NODE_ENDED;
 		break;

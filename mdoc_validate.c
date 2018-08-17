@@ -1990,7 +1990,7 @@ post_root(POST_ARGS)
 	while (n != NULL &&
 	    (n->type == ROFFT_COMMENT ||
 	     (n->tok >= MDOC_Dd &&
-	      mdoc_macros[n->tok].flags & MDOC_PROLOGUE)))
+	      mdoc_macro(n->tok)->flags & MDOC_PROLOGUE)))
 		n = n->next;
 
 	if (n == NULL)

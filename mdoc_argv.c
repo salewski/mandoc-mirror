@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2012, 2014-2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2012, 2014-2018 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -144,7 +144,7 @@ static	const enum mdocargt args_Bl[] = {
 	MDOC_ARG_MAX
 };
 
-static	const struct mdocarg __mdocargs[MDOC_MAX - MDOC_Dd] = {
+static	const struct mdocarg mdocargs[MDOC_MAX - MDOC_Dd] = {
 	{ ARGSFL_NONE, NULL }, /* Dd */
 	{ ARGSFL_NONE, NULL }, /* Dt */
 	{ ARGSFL_NONE, NULL }, /* Os */
@@ -266,7 +266,6 @@ static	const struct mdocarg __mdocargs[MDOC_MAX - MDOC_Dd] = {
 	{ ARGSFL_NONE, NULL }, /* %U */
 	{ ARGSFL_NONE, NULL }, /* Ta */
 };
-static	const struct mdocarg *const mdocargs = __mdocargs - MDOC_Dd;
 
 
 /*
@@ -290,7 +289,7 @@ mdoc_argv(struct roff_man *mdoc, int line, enum roff_tok tok,
 	/* Which flags does this macro support? */
 
 	assert(tok >= MDOC_Dd && tok < MDOC_MAX);
-	argtable = mdocargs[tok].argvs;
+	argtable = mdocargs[tok - MDOC_Dd].argvs;
 	if (argtable == NULL)
 		return;
 
@@ -368,7 +367,7 @@ mdoc_argv(struct roff_man *mdoc, int line, enum roff_tok tok,
 		/* Prepare for parsing the next flag. */
 
 		*pos = ipos;
-		argtable = mdocargs[tok].argvs;
+		argtable = mdocargs[tok - MDOC_Dd].argvs;
 	}
 }
 
@@ -422,7 +421,7 @@ mdoc_args(struct roff_man *mdoc, int line, int *pos,
 
 	if (v == NULL)
 		v = &v_local;
-	fl = tok == TOKEN_NONE ? ARGSFL_NONE : mdocargs[tok].flags;
+	fl = tok == TOKEN_NONE ? ARGSFL_NONE : mdocargs[tok - MDOC_Dd].flags;
 
 	/*
 	 * We know that we're in an `It', so it's reasonable to expect

@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2013, 2014, 2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2013,2014,2015,2017,2018 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2011 Joerg Sonnenberger <joerg@netbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -238,8 +238,8 @@ man_pmacro(struct roff_man *man, int ln, char *buf, int offs)
 
 	/* Call to handler... */
 
-	assert(man_macros[tok].fp);
-	(*man_macros[tok].fp)(man, tok, ln, ppos, &offs, buf);
+	assert(man_macro(tok)->fp != NULL);
+	(*man_macro(tok)->fp)(man, tok, ln, ppos, &offs, buf);
 
 	/* In quick mode (for mandocdb), abort after the NAME section. */
 
@@ -257,7 +257,7 @@ man_pmacro(struct roff_man *man, int ln, char *buf, int offs)
 	 */
 
 	if ( ! bline || man->flags & MAN_ELINE ||
-	    man_macros[tok].flags & MAN_NSCOPED)
+	    man_macro(tok)->flags & MAN_NSCOPED)
 		return 1;
 
 	assert(man->flags & MAN_BLINE);
@@ -280,12 +280,12 @@ man_breakscope(struct roff_man *man, int tok)
 	 */
 
 	if (man->flags & MAN_ELINE && (tok < MAN_TH ||
-	    ! (man_macros[tok].flags & MAN_NSCOPED))) {
+	    (man_macro(tok)->flags & MAN_NSCOPED) == 0)) {
 		n = man->last;
 		if (n->type == ROFFT_TEXT)
 			n = n->parent;
 		if (n->tok < MAN_TH ||
-		    man_macros[n->tok].flags & MAN_NSCOPED)
+		    man_macro(n->tok)->flags & MAN_NSCOPED)
 			n = n->parent;
 
 		mandoc_vmsg(MANDOCERR_BLK_LINE, man->parse,
@@ -317,18 +317,18 @@ man_breakscope(struct roff_man *man, int tok)
 	 */
 
 	if (man->flags & MAN_BLINE && (tok < MAN_TH ||
-	    man_macros[tok].flags & MAN_BSCOPE)) {
+	    man_macro(tok)->flags & MAN_BSCOPE)) {
 		n = man->last;
 		if (n->type == ROFFT_TEXT)
 			n = n->parent;
 		if (n->tok < MAN_TH ||
-		    (man_macros[n->tok].flags & MAN_BSCOPE) == 0)
+		    (man_macro(n->tok)->flags & MAN_BSCOPE) == 0)
 			n = n->parent;
 
 		assert(n->type == ROFFT_HEAD);
 		n = n->parent;
 		assert(n->type == ROFFT_BLOCK);
-		assert(man_macros[n->tok].flags & MAN_SCOPED);
+		assert(man_macro(n->tok)->flags & MAN_SCOPED);
 
 		mandoc_vmsg(MANDOCERR_BLK_LINE, man->parse,
 		    n->line, n->pos, "%s breaks %s",
