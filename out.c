@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011, 2014, 2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011,2014,2015,2017,2018 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -320,7 +320,7 @@ tblcalc_number(struct rofftbl *tbl, struct roffcol *col,
 		const struct tbl_opts *opts, const struct tbl_dat *dp)
 {
 	int		 i;
-	size_t		 sz, psz, ssz, d;
+	size_t		 sz, ssz, d;
 	const char	*str;
 	char		*cp;
 	char		 buf[2];
@@ -342,17 +342,15 @@ tblcalc_number(struct rofftbl *tbl, struct roffcol *col,
 	buf[0] = opts->decimal;
 	buf[1] = '\0';
 
-	psz = (*tbl->slen)(buf, tbl->arg);
-
 	if (NULL != (cp = strrchr(str, opts->decimal))) {
 		buf[1] = '\0';
 		for (ssz = 0, i = 0; cp != &str[i]; i++) {
 			buf[0] = str[i];
 			ssz += (*tbl->slen)(buf, tbl->arg);
 		}
-		d = ssz + psz;
+		d = ssz;
 	} else
-		d = sz + psz;
+		d = sz;
 
 	/* Adjust the settings for this column. */
 

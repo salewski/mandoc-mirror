@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2009, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011,2012,2014,2015,2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011-2018 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -621,7 +621,7 @@ tbl_number(struct termp *tp, const struct tbl_opts *opts,
 {
 	char		*cp;
 	char		 buf[2];
-	size_t		 sz, psz, ssz, d, padl;
+	size_t		 sz, ssz, d, padl;
 	int		 i;
 
 	/*
@@ -636,16 +636,14 @@ tbl_number(struct termp *tp, const struct tbl_opts *opts,
 	buf[0] = opts->decimal;
 	buf[1] = '\0';
 
-	psz = term_strlen(tp, buf);
-
 	if ((cp = strrchr(dp->string, opts->decimal)) != NULL) {
 		for (ssz = 0, i = 0; cp != &dp->string[i]; i++) {
 			buf[0] = dp->string[i];
 			ssz += term_strlen(tp, buf);
 		}
-		d = ssz + psz;
+		d = ssz;
 	} else
-		d = sz + psz;
+		d = sz;
 
 	if (col->decimal > d && col->width > sz) {
 		padl = col->decimal - d;
