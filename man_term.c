@@ -872,7 +872,7 @@ pre_SY(DECL_ARGS)
 	}
 
 	nn = n->parent->head->child;
-	len = nn == NULL ? 0 : term_strlen(p, nn->string) + 1;
+	len = nn == NULL ? 1 : term_strlen(p, nn->string) + 1;
 
 	switch (n->type) {
 	case ROFFT_HEAD:
