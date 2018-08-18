@@ -861,7 +861,8 @@ pre_SY(DECL_ARGS)
 
 	switch (n->type) {
 	case ROFFT_BLOCK:
-		print_bvspace(p, n, mt->pardist);
+		if (n->prev == NULL || n->prev->tok != MAN_SY)
+			print_bvspace(p, n, mt->pardist);
 		return 1;
 	case ROFFT_HEAD:
 	case ROFFT_BODY:
