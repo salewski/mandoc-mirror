@@ -1214,7 +1214,8 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 
 		/* Discard normal comments. */
 
-		while (stesc > start && stesc[-1] == ' ')
+		while (stesc > start && stesc[-1] == ' ' &&
+		    (stesc == start + 1 || stesc[-2] != '\\'))
 			stesc--;
 		*stesc = '\0';
 		break;
