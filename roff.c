@@ -1205,7 +1205,14 @@ roff_res(struct roff *r, struct buf *buf, int ln, int pos)
 			r->man->next = ROFF_NEXT_SIBLING;
 		}
 
-		/* Discard comments. */
+		/* Line continuation with comment. */
+
+		if (stesc[1] == '#') {
+			*stesc = '\0';
+			return ROFF_APPEND;
+		}
+
+		/* Discard normal comments. */
 
 		while (stesc > start && stesc[-1] == ' ')
 			stesc--;
