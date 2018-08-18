@@ -346,7 +346,7 @@ pre_OP(DECL_ARGS)
 {
 
 	term_word(p, "[");
-	p->flags |= TERMP_NOSPACE;
+	p->flags |= TERMP_KEEP | TERMP_NOSPACE;
 
 	if (NULL != (n = n->child)) {
 		term_fontrepl(p, TERMFONT_BOLD);
@@ -358,6 +358,7 @@ pre_OP(DECL_ARGS)
 	}
 
 	term_fontrepl(p, TERMFONT_NONE);
+	p->flags &= ~TERMP_KEEP;
 	p->flags |= TERMP_NOSPACE;
 	term_word(p, "]");
 	return 0;
