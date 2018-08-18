@@ -335,7 +335,8 @@ const char *__roff_name[MAN_MAX + 1] = {
 	"nf",		"fi",
 	"RE",		"RS",		"DT",		"UC",
 	"PD",		"AT",		"in",
-	"OP",		"EX",		"EE",		"UR",
+	"SY",		"YS",		"OP",
+	"EX",		"EE",		"UR",
 	"UE",		"MT",		"ME",		NULL
 };
 const	char *const *roff_name = __roff_name;

@@ -71,6 +71,8 @@ static const struct man_macro man_macros[MAN_MAX - MAN_TH] = {
 	{ in_line_eoln, MAN_NSCOPED }, /* PD */
 	{ in_line_eoln, 0 }, /* AT */
 	{ in_line_eoln, MAN_NSCOPED }, /* in */
+	{ blk_exp, MAN_BSCOPE }, /* SY */
+	{ blk_close, MAN_BSCOPE }, /* YS */
 	{ in_line_eoln, 0 }, /* OP */
 	{ in_line_eoln, MAN_BSCOPE }, /* EX */
 	{ in_line_eoln, MAN_BSCOPE }, /* EE */
@@ -222,6 +224,9 @@ blk_close(MACRO_PROT_ARGS)
 			    line, ppos, "RE %d", target);
 			return;
 		}
+		break;
+	case MAN_YS:
+		ntok = MAN_SY;
 		break;
 	case MAN_UE:
 		ntok = MAN_UR;

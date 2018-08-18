@@ -78,6 +78,7 @@ static	int		  pre_PP(DECL_ARGS);
 static	int		  pre_RS(DECL_ARGS);
 static	int		  pre_SH(DECL_ARGS);
 static	int		  pre_SS(DECL_ARGS);
+static	int		  pre_SY(DECL_ARGS);
 static	int		  pre_TP(DECL_ARGS);
 static	int		  pre_UR(DECL_ARGS);
 static	int		  pre_alternate(DECL_ARGS);
@@ -90,6 +91,7 @@ static	void		  post_HP(DECL_ARGS);
 static	void		  post_RS(DECL_ARGS);
 static	void		  post_SH(DECL_ARGS);
 static	void		  post_SS(DECL_ARGS);
+static	void		  post_SY(DECL_ARGS);
 static	void		  post_TP(DECL_ARGS);
 static	void		  post_UR(DECL_ARGS);
 
@@ -124,6 +126,8 @@ static const struct man_term_act man_term_acts[MAN_MAX - MAN_TH] = {
 	{ pre_PD, NULL, MAN_NOTEXT }, /* PD */
 	{ pre_ign, NULL, 0 }, /* AT */
 	{ pre_in, NULL, MAN_NOTEXT }, /* in */
+	{ pre_SY, post_SY, 0 }, /* SY */
+	{ NULL, NULL, 0 }, /* YS */
 	{ pre_OP, NULL, 0 }, /* OP */
 	{ pre_literal, NULL, 0 }, /* EX */
 	{ pre_literal, NULL, 0 }, /* EE */
@@ -846,6 +850,62 @@ post_RS(DECL_ARGS)
 
 	if (--mt->lmarginsz < MAXMARGINS)
 		mt->lmargincur = mt->lmarginsz;
+}
+
+static int
+pre_SY(DECL_ARGS)
+{
+	const struct roff_node	*nn;
+	int			 len;
+
+	switch (n->type) {
+	case ROFFT_BLOCK:
+		print_bvspace(p, n, mt->pardist);
+		return 1;
+	case ROFFT_HEAD:
+	case ROFFT_BODY:
+		break;
+	default:
+		abort();
+	}
+
+	nn = n->parent->head->child;
+	len = nn == NULL ? 0 : term_strlen(p, nn->string) + 1;
+
+	switch (n->type) {
+	case ROFFT_HEAD:
+		p->tcol->offset = mt->offset;
+		p->tcol->rmargin = mt->offset + len;
+		p->flags |= TERMP_NOBREAK;
+		term_fontrepl(p, TERMFONT_BOLD);
+		break;
+	case ROFFT_BODY:
+		mt->lmargin[mt->lmargincur] = len;
+		p->tcol->offset = mt->offset + len;
+		p->tcol->rmargin = p->maxrmargin;
+		p->flags |= TERMP_NOSPACE;
+		break;
+	default:
+		abort();
+	}
+	return 1;
+}
+
+static void
+post_SY(DECL_ARGS)
+{
+	switch (n->type) {
+	case ROFFT_HEAD:
+		term_flushln(p);
+		p->flags &= ~TERMP_NOBREAK;
+		break;
+	case ROFFT_BODY:
+		term_newln(p);
+		p->tcol->offset = mt->offset;
+		break;
+	default:
+		break;
+	}
 }
 
 static int
