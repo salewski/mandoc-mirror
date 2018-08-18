@@ -262,6 +262,8 @@ blk_close(MACRO_PROT_ARGS)
 	if (buf[*pos] != '\0') {
 		roff_word_alloc(man, line, ppos, buf + *pos);
 		man->last->flags |= NODE_DELIMC;
+		if (mandoc_eos(man->last->string, strlen(man->last->string)))
+			man->last->flags |= NODE_EOS;
 	}
 
 	/* Move a trailing paragraph behind the block. */
