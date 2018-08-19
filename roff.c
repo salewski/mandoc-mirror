@@ -2168,9 +2168,10 @@ out:
 static int
 roff_evalcond(struct roff *r, int ln, char *v, int *pos)
 {
-	char	*cp, *name;
-	size_t	 sz;
-	int	 deftype, number, savepos, istrue, wanttrue;
+	const char	*start, *end;
+	char		*cp, *name;
+	size_t		 sz;
+	int		 deftype, len, number, savepos, istrue, wanttrue;
 
 	if ('!' == v[*pos]) {
 		wanttrue = 0;
@@ -2185,12 +2186,50 @@ roff_evalcond(struct roff *r, int ln, char *v, int *pos)
 	case 'o':
 		(*pos)++;
 		return wanttrue;
-	case 'c':
 	case 'e':
 	case 't':
 	case 'v':
 		(*pos)++;
 		return !wanttrue;
+	case 'c':
+		do {
+			(*pos)++;
+		} while (v[*pos] == ' ');
+
+		/*
+		 * Quirk for groff compatibility:
+		 * The horizontal tab is neither available nor unavailable.
+		 */
+
+		if (v[*pos] == '\t') {
+			(*pos)++;
+			return 0;
+		}
+
+		/* Printable ASCII characters are available. */
+
+		if (v[*pos] != '\\') {
+			(*pos)++;
+			return wanttrue;
+		}
+
+		end = v + ++*pos;
+		switch (mandoc_escape(&end, &start, &len)) {
+		case ESCAPE_SPECIAL:
+			istrue = mchars_spec2cp(start, len) != -1;
+			break;
+		case ESCAPE_UNICODE:
+			istrue = 1;
+			break;
+		case ESCAPE_NUMBERED:
+			istrue = mchars_num2char(start, len) != -1;
+			break;
+		default:
+			istrue = !wanttrue;
+			break;
+		}
+		*pos = end - v;
+		return istrue == wanttrue;
 	case 'd':
 	case 'r':
 		cp = v + *pos + 1;

@@ -1005,13 +1005,13 @@ is
 or
 .Sq o
 .Pq odd page ,
-it evaluates to true.
+it evaluates to true, and the
+.Ar body
+starts with the next character.
 .It
 If the first character of
 .Ar condition
 is
-.Sq c
-.Pq character available ,
 .Sq e
 .Pq even page ,
 .Sq t
@@ -1019,7 +1019,20 @@ is
 or
 .Sq v
 .Pq vroff mode ,
-it evaluates to false.
+it evaluates to false, and the
+.Ar body
+starts with the next character.
+.It
+If the first character of
+.Ar condition
+is
+.Sq c
+.Pq character available ,
+it evaluates to true if the following character is an ASCII character
+or a valid character escape sequence, or to false otherwise.
+The
+.Ar body
+starts with the character following that next character.
 .It
 If the first character of
 .Ar condition

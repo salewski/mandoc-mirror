@@ -181,9 +181,6 @@ are mere guesses, and some may be wrong.
   pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
   loc *  exist ***  algo ***  size **  imp *
 
-- support .ds requests inside tbl(7) code,
-  see tbl(1) for an example
-
 - support mdoc(7) and man(7) macros inside tbl(7) code;
   probably requires the parser reorg and letting tbl(7)
   use roff_node such that macro sets can mix;
@@ -319,9 +316,6 @@ are mere guesses, and some may be wrong.
 ************************************************************************
 * formatting issues: ugly output
 ************************************************************************
-
-- .UR can nest inside .TP,
-  see roff(7) for examples
 
 - revisit empty in-line macros
   look at the difference between "Em x Em ." and "Sq x Em ."
