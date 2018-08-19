@@ -50,6 +50,7 @@ static struct ln lines[] = {
 	{ "|",			"",		0	},
 	{ "^",			"",		0	},
 	{ "&",			"",		0	},
+	{ ")",			"",		0	},
 	{ "%",			"",		0	},
 	{ ":",			ascii_break,	0	},
 	/* XXX The following three do not really belong here. */
