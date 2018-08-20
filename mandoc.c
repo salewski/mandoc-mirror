@@ -302,8 +302,8 @@ mandoc_escape(const char **end, const char **start, int *sz)
 
 	switch (gly) {
 	case ESCAPE_FONT:
-		if (2 == *sz) {
-			if ('C' == **start) {
+		if (*sz == 2) {
+			if (**start == 'C') {
 				/*
 				 * Treat constant-width font modes
 				 * just like regular font modes.
@@ -311,12 +311,15 @@ mandoc_escape(const char **end, const char **start, int *sz)
 				(*start)++;
 				(*sz)--;
 			} else {
-				if ('B' == (*start)[0] && 'I' == (*start)[1])
+				if ((*start)[0] == 'B' && (*start)[1] == 'I')
 					gly = ESCAPE_FONTBI;
 				break;
 			}
-		} else if (1 != *sz)
+		} else if (*sz != 1) {
+			if (*sz == 0)
+				gly = ESCAPE_FONTPREV;
 			break;
+		}
 
 		switch (**start) {
 		case '3':
