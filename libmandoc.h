@@ -28,8 +28,9 @@ enum	rofferr {
 };
 
 struct	buf {
-	char	*buf;
-	size_t	 sz;
+	char		*buf;
+	size_t		 sz;
+	struct buf	*next;
 };
 
 

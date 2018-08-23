@@ -22,13 +22,11 @@
 .Nm mandoc ,
 .Nm deroff ,
 .Nm mandocmsg ,
-.Nm man_mparse ,
 .Nm man_validate ,
 .Nm mdoc_validate ,
 .Nm mparse_alloc ,
+.Nm mparse_copy ,
 .Nm mparse_free ,
-.Nm mparse_getkeep ,
-.Nm mparse_keep ,
 .Nm mparse_open ,
 .Nm mparse_readfd ,
 .Nm mparse_reset ,
@@ -65,13 +63,9 @@
 .Fo mparse_free
 .Fa "struct mparse *parse"
 .Fc
-.Ft const char *
-.Fo mparse_getkeep
-.Fa "const struct mparse *parse"
-.Fc
 .Ft void
-.Fo mparse_keep
-.Fa "struct mparse *parse"
+.Fo mparse_copy
+.Fa "const struct mparse *parse"
 .Fc
 .Ft int
 .Fo mparse_open
@@ -126,10 +120,6 @@
 .In mandoc.h
 .In man.h
 .Vt extern const char * const * man_macronames;
-.Ft "const struct mparse *"
-.Fo man_mparse
-.Fa "const struct roff_man *man"
-.Fc
 .Ft void
 .Fo man_validate
 .Fa "struct roff_man *man"
@@ -250,12 +240,6 @@ When it is no longer needed, the pointer returned from
 .Fn deroff
 can be passed to
 .Xr free 3 .
-.It Fn man_mparse
-Get the parser used for the current output.
-Declared in
-.In man.h ,
-implemented in
-.Pa man.c .
 .It Fn man_validate
 Validate the
 .Dv MACROSET_MAN
@@ -361,19 +345,9 @@ Declared in
 .In mandoc.h ,
 implemented in
 .Pa read.c .
-.It Fn mparse_getkeep
-Acquire the keep buffer.
-Must follow a call of
-.Fn mparse_keep .
-Declared in
-.In mandoc.h ,
-implemented in
-.Pa read.c .
-.It Fn mparse_keep
-Instruct the parser to retain a copy of its parsed input.
-This can be acquired with subsequent
-.Fn mparse_getkeep
-calls.
+.It Fn mparse_copy
+Dump a copy of the input to the standard output; used for
+.Fl man T Ns Cm man .
 Declared in
 .In mandoc.h ,
 implemented in

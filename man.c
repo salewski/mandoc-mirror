@@ -339,14 +339,6 @@ man_breakscope(struct roff_man *man, int tok)
 	}
 }
 
-const struct mparse *
-man_mparse(const struct roff_man *man)
-{
-
-	assert(man && man->parse);
-	return man->parse;
-}
-
 void
 man_state(struct roff_man *man, struct roff_node *n)
 {

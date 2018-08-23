@@ -486,12 +486,6 @@ main(int argc, char *argv[])
 	curp.mp = mparse_alloc(options, curp.mmin, mmsg,
 	    curp.os_e, curp.os_s);
 
-	/*
-	 * Conditionally start up the lookaside buffer before parsing.
-	 */
-	if (OUTT_MAN == curp.outtype)
-		mparse_keep(curp.mp);
-
 	if (argc < 1) {
 		if (use_pager)
 			tag_files = tag_init();
@@ -878,7 +872,7 @@ parse(struct curparse *curp, int fd, const char *file)
 			tree_man(curp->outdata, man);
 			break;
 		case OUTT_MAN:
-			man_man(curp->outdata, man);
+			mparse_copy(curp->mp);
 			break;
 		case OUTT_PDF:
 		case OUTT_ASCII:

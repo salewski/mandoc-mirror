@@ -18,5 +18,4 @@
 
 struct	roff_man;
 
-const struct mparse	*man_mparse(const struct roff_man *);
 void			 man_validate(struct roff_man *);

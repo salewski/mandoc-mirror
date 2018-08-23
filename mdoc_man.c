@@ -600,19 +600,6 @@ print_count(int *count)
 }
 
 void
-man_man(void *arg, const struct roff_man *man)
-{
-
-	/*
-	 * Dump the keep buffer.
-	 * We're guaranteed by now that this exists (is non-NULL).
-	 * Flush stdout afterward, just in case.
-	 */
-	fputs(mparse_getkeep(man_mparse(man)), stdout);
-	fflush(stdout);
-}
-
-void
 man_mdoc(void *arg, const struct roff_man *mdoc)
 {
 	struct roff_node *n;

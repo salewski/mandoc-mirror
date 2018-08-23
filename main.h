@@ -35,7 +35,6 @@ void		  tree_mdoc(void *, const struct roff_man *);
 void		  tree_man(void *, const struct roff_man *);
 
 void		  man_mdoc(void *, const struct roff_man *);
-void		  man_man(void *, const struct roff_man *);
 
 void		 *locale_alloc(const struct manoutput *);
 void		 *utf8_alloc(const struct manoutput *);
