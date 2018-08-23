@@ -1472,8 +1472,8 @@ Currently ignored.
 Set the maximum stack depth for recursive macros.
 This is a Heirloom extension and currently ignored.
 .It Ic \&return Op Ar twice
-Exit a macro and return to the caller.
-Currently unsupported.
+Exit the presently executed macro and return to the caller.
+The argument is currently ignored.
 .It Ic \&rfschar Ar font glyph ...
 Remove font-specific fallback glyph definitions.
 Currently unsupported.
@@ -1522,8 +1522,11 @@ This is a Heirloom extension and currently ignored.
 Change the soft hyphen character.
 Currently ignored.
 .It Ic \&shift Op Ar number
-Shift macro arguments.
-Currently unsupported.
+Shift macro arguments
+.Ar number
+times, by default once: \e\e$i becomes what \e\e$i+number was.
+Also decrement \en(.$ by
+.Ar number .
 .It Ic \&sizes Ar size ...
 Define permissible point sizes.
 This is a groff extension and currently ignored.

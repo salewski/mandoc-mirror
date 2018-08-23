@@ -1,4 +1,4 @@
-.\" $OpenBSD: infinite.in,v 1.3 2017/07/04 14:53:27 schwarze Exp $
+.\" $OpenBSD: infinite.in,v 1.4 2018/08/23 14:16:12 schwarze Exp $
 .Dd $Mdocdate$
 .Dt DE-INFINITE 1
 .Os
@@ -10,8 +10,8 @@ initial text
 .de mym
 .Op \\$1 \\$2
 ..
-.mym $1 \$1
-.mym \$1 nothing
+.mym $1 \$1 end
+.mym \$1 middle end
 middle text
 .de mym
 .mym
