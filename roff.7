@@ -1202,7 +1202,7 @@ While evaluating the
 the unit suffixes described below
 .Sx Scaling Widths
 are ignored.
-.It Ic \&it Ar expression macro
+.It Ic \&itc Ar expression macro
 Set an input line trap, not counting lines ending with \ec.
 Currently unsupported.
 .It Ic \&IX Ar class keystring
@@ -1715,8 +1715,12 @@ This is a Heirloom extension and currently ignored.
 Set a page location trap.
 Currently unsupported.
 .It Ic \&while Ar condition body
-Repeated execution while a condition is true.
-Currently unsupported.
+Repeated execution while a
+.Ar condition
+is true, with syntax similar to
+.Ic \&if .
+Currently implemented with two restrictions: cannot nest,
+and each loop must start and end in the same scope.
 .It Ic \&write Oo \(dq Oc Ns Ar string
 Write to an open file.
 Ignored because insecure.
@@ -2149,10 +2153,6 @@ macro control character does not suppress output line breaks.
 .It
 Diversions are not implemented,
 and support for traps is very incomplete.
-.It
-While recursion is supported,
-.Sx \&while
-loops are not.
 .El
 .Pp
 The special semantics of the

@@ -16,16 +16,27 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-enum	rofferr {
-	ROFF_CONT, /* continue processing line */
-	ROFF_RERUN, /* re-run roff interpreter with offset */
-	ROFF_APPEND, /* re-run main parser, appending next line */
-	ROFF_REPARSE, /* re-run main parser on the result */
-	ROFF_USERCALL, /* dto., calling a user-defined macro */
-	ROFF_USERRET, /* abort parsing of user-defined macro */
-	ROFF_SO, /* include another file */
-	ROFF_IGN, /* ignore current line */
-};
+/*
+ * Return codes passed from the roff parser to the main parser.
+ */
+
+/* Main instruction: what to do with the returned line. */
+#define	ROFF_IGN	0x000	/* Don't do anything with it. */
+#define	ROFF_CONT	0x001	/* Give it to the high-level parser. */
+#define	ROFF_RERUN	0x002	/* Re-run the roff parser with an offset. */
+#define	ROFF_REPARSE	0x004	/* Recursively run the main parser on it. */
+#define	ROFF_SO		0x008	/* Include the named file. */
+#define	ROFF_MASK	0x00f	/* Only one of these bits should be set. */
+
+/* Options for further parsing, to be OR'ed with the above. */
+#define	ROFF_APPEND	0x010	/* Append the next line to this one. */
+#define	ROFF_USERCALL	0x020	/* Start execution of a new macro. */
+#define	ROFF_USERRET	0x040	/* Abort execution of the current macro. */
+#define	ROFF_WHILE	0x100	/* Start a new .while loop. */
+#define	ROFF_LOOPCONT	0x200	/* Iterate the current .while loop. */
+#define	ROFF_LOOPEXIT	0x400	/* Exit the current .while loop. */
+#define	ROFF_LOOPMASK	0xf00
+
 
 struct	buf {
 	char		*buf;
@@ -66,7 +77,7 @@ void		 roff_man_free(struct roff_man *);
 struct roff_man	*roff_man_alloc(struct roff *, struct mparse *,
 			const char *, int);
 void		 roff_man_reset(struct roff_man *);
-enum rofferr	 roff_parseln(struct roff *, int, struct buf *, int *);
+int		 roff_parseln(struct roff *, int, struct buf *, int *);
 void		 roff_userret(struct roff *);
 void		 roff_endparse(struct roff *);
 void		 roff_setreg(struct roff *, const char *, int, char sign);

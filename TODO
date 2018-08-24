@@ -57,10 +57,6 @@ are mere guesses, and some may be wrong.
   reported by brad@  Sat, 15 Jan 2011 15:45:23 -0500
   loc ***  exist ***  algo ***  size **  imp *
 
-- .while
-  found by jca@ in ratpoison(1)  Sun, 30 Jun 2013 12:01:09 +0200
-  loc *  exist **  algo **  size **  imp **
-
 - \w'' improve width measurements
   would not be very useful without an expression parser, see below
   needed for Tcl_NewStringObj(3) via wiz@  Wed, 5 Mar 2014 22:27:43 +0100

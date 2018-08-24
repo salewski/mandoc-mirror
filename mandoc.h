@@ -228,6 +228,10 @@ enum	mandocerr {
 	MANDOCERR_TOOLARGE, /* input too large */
 	MANDOCERR_CHAR_UNSUPP, /* unsupported control character: number */
 	MANDOCERR_REQ_UNSUPP, /* unsupported roff request: request */
+	MANDOCERR_WHILE_NEST, /* nested .while loops */
+	MANDOCERR_WHILE_OUTOF, /* end of scope with open .while loop */
+	MANDOCERR_WHILE_INTO, /* end of .while loop in inner scope */
+	MANDOCERR_WHILE_FAIL, /* cannot continue this .while loop */
 	MANDOCERR_TBLOPT_EQN, /* eqn delim option in tbl: arg */
 	MANDOCERR_TBLLAYOUT_MOD, /* unsupported tbl layout modifier: m */
 	MANDOCERR_TBLMACRO, /* ignoring macro in table: macro */
