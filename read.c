@@ -198,6 +198,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"unknown library name",
 	"invalid content in Rs block",
 	"invalid Boolean argument",
+	"argument contains two font escapes",
 	"unknown font, skipping request",
 	"odd number of characters in request",
 
@@ -252,6 +253,7 @@ static	const char * const	mandocerrs[MANDOCERR_MAX] = {
 	"skipping display without arguments",
 	"missing list type, using -item",
 	"argument is not numeric, using 1",
+	"argument is not a character",
 	"missing manual name, using \"\"",
 	"uname(3) system call failed, using UNKNOWN",
 	"unknown standard specifier",

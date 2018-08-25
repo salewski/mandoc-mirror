@@ -1606,6 +1606,12 @@ or
 .Cm off .
 The invalid argument is moved out of the macro, which leaves the macro
 empty, causing it to toggle the spacing mode.
+.It Sy "argument contains two font escapes"
+.Pq roff
+The second argument of a
+.Ic char
+request contains more than one font escape sequence.
+A wrong font may remain active after using the character.
 .It Sy "unknown font, skipping request"
 .Pq man , tbl
 A
@@ -1959,6 +1965,13 @@ macro fails to specify the list type.
 The argument of a
 .Ic \&ce
 request is not a number.
+.It Sy "argument is not a character"
+.Pq roff
+The first argument of a
+.Ic char
+request is neither a single ASCII character
+nor a single character escape sequence.
+The request is ignored including all its arguments.
 .It Sy "missing manual name, using \(dq\(dq"
 .Pq mdoc
 The first call to

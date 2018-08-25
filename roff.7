@@ -507,9 +507,16 @@ This is a groff extension and currently ignored.
 .It Ic \&ch Ar macroname Op Ar dist
 Change a trap location.
 Currently ignored.
-.It Ic \&char Ar glyphname Op Ar string
-Define a new glyph.
-Currently unsupported.
+.It Ic \&char Ar glyph Op Ar string
+Define or redefine the ASCII character or character escape sequence
+.Ar glyph
+to be rendered as
+.Ar string ,
+which can be empty.
+Only partially supported in
+.Xr mandoc 1 ;
+may interact incorrectly with
+.Ic \&tr .
 .It Ic \&chop Ar stringname
 Remove the last character from a macro, string, or diversion.
 Currently unsupported.
