@@ -985,7 +985,7 @@ print_man_node(DECL_ARGS)
 	}
 
 	act = man_term_act(n->tok);
-	if ((act->flags & MAN_NOTEXT) == 0)
+	if ((act->flags & MAN_NOTEXT) == 0 && n->tok != MAN_SM)
 		term_fontrepl(p, TERMFONT_NONE);
 
 	c = 1;
@@ -997,7 +997,7 @@ print_man_node(DECL_ARGS)
 
 	if (act->post != NULL)
 		(*act->post)(p, mt, n, meta);
-	if ((act->flags & MAN_NOTEXT) == 0)
+	if ((act->flags & MAN_NOTEXT) == 0 && n->tok != MAN_SM)
 		term_fontrepl(p, TERMFONT_NONE);
 
 out:

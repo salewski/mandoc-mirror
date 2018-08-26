@@ -41,45 +41,45 @@ static	int		 man_args(struct roff_man *, int,
 static	void		 rew_scope(struct roff_man *, enum roff_tok);
 
 static const struct man_macro man_macros[MAN_MAX - MAN_TH] = {
-	{ in_line_eoln, MAN_BSCOPE }, /* TH */
-	{ blk_imp, MAN_BSCOPE | MAN_SCOPED }, /* SH */
-	{ blk_imp, MAN_BSCOPE | MAN_SCOPED }, /* SS */
-	{ blk_imp, MAN_BSCOPE | MAN_SCOPED }, /* TP */
-	{ blk_imp, MAN_BSCOPE | MAN_SCOPED }, /* TQ */
-	{ blk_imp, MAN_BSCOPE }, /* LP */
-	{ blk_imp, MAN_BSCOPE }, /* PP */
-	{ blk_imp, MAN_BSCOPE }, /* P */
-	{ blk_imp, MAN_BSCOPE }, /* IP */
-	{ blk_imp, MAN_BSCOPE }, /* HP */
-	{ in_line_eoln, MAN_SCOPED | MAN_JOIN }, /* SM */
-	{ in_line_eoln, MAN_SCOPED | MAN_JOIN }, /* SB */
+	{ in_line_eoln, MAN_XSCOPE }, /* TH */
+	{ blk_imp, MAN_XSCOPE | MAN_BSCOPED }, /* SH */
+	{ blk_imp, MAN_XSCOPE | MAN_BSCOPED }, /* SS */
+	{ blk_imp, MAN_XSCOPE | MAN_BSCOPED }, /* TP */
+	{ blk_imp, MAN_XSCOPE | MAN_BSCOPED }, /* TQ */
+	{ blk_imp, MAN_XSCOPE }, /* LP */
+	{ blk_imp, MAN_XSCOPE }, /* PP */
+	{ blk_imp, MAN_XSCOPE }, /* P */
+	{ blk_imp, MAN_XSCOPE }, /* IP */
+	{ blk_imp, MAN_XSCOPE }, /* HP */
+	{ in_line_eoln, MAN_NSCOPED | MAN_ESCOPED | MAN_JOIN }, /* SM */
+	{ in_line_eoln, MAN_NSCOPED | MAN_ESCOPED | MAN_JOIN }, /* SB */
 	{ in_line_eoln, 0 }, /* BI */
 	{ in_line_eoln, 0 }, /* IB */
 	{ in_line_eoln, 0 }, /* BR */
 	{ in_line_eoln, 0 }, /* RB */
-	{ in_line_eoln, MAN_SCOPED | MAN_JOIN }, /* R */
-	{ in_line_eoln, MAN_SCOPED | MAN_JOIN }, /* B */
-	{ in_line_eoln, MAN_SCOPED | MAN_JOIN }, /* I */
+	{ in_line_eoln, MAN_NSCOPED | MAN_ESCOPED | MAN_JOIN }, /* R */
+	{ in_line_eoln, MAN_NSCOPED | MAN_ESCOPED | MAN_JOIN }, /* B */
+	{ in_line_eoln, MAN_NSCOPED | MAN_ESCOPED | MAN_JOIN }, /* I */
 	{ in_line_eoln, 0 }, /* IR */
 	{ in_line_eoln, 0 }, /* RI */
 	{ in_line_eoln, MAN_NSCOPED }, /* nf */
 	{ in_line_eoln, MAN_NSCOPED }, /* fi */
-	{ blk_close, MAN_BSCOPE }, /* RE */
-	{ blk_exp, MAN_BSCOPE }, /* RS */
+	{ blk_close, MAN_XSCOPE }, /* RE */
+	{ blk_exp, MAN_XSCOPE }, /* RS */
 	{ in_line_eoln, 0 }, /* DT */
 	{ in_line_eoln, 0 }, /* UC */
 	{ in_line_eoln, MAN_NSCOPED }, /* PD */
 	{ in_line_eoln, 0 }, /* AT */
 	{ in_line_eoln, MAN_NSCOPED }, /* in */
-	{ blk_imp, MAN_BSCOPE }, /* SY */
-	{ blk_close, MAN_BSCOPE }, /* YS */
+	{ blk_imp, MAN_XSCOPE }, /* SY */
+	{ blk_close, MAN_XSCOPE }, /* YS */
 	{ in_line_eoln, 0 }, /* OP */
-	{ in_line_eoln, MAN_BSCOPE }, /* EX */
-	{ in_line_eoln, MAN_BSCOPE }, /* EE */
-	{ blk_exp, MAN_BSCOPE }, /* UR */
-	{ blk_close, MAN_BSCOPE }, /* UE */
-	{ blk_exp, MAN_BSCOPE }, /* MT */
-	{ blk_close, MAN_BSCOPE }, /* ME */
+	{ in_line_eoln, MAN_XSCOPE }, /* EX */
+	{ in_line_eoln, MAN_XSCOPE }, /* EE */
+	{ blk_exp, MAN_XSCOPE }, /* UR */
+	{ blk_close, MAN_XSCOPE }, /* UE */
+	{ blk_exp, MAN_XSCOPE }, /* MT */
+	{ blk_close, MAN_XSCOPE }, /* ME */
 };
 
 
@@ -103,7 +103,8 @@ man_unscope(struct roff_man *man, const struct roff_node *to)
 
 		if (to == NULL && ! (n->flags & NODE_VALID)) {
 			if (man->flags & (MAN_BLINE | MAN_ELINE) &&
-			    man_macro(n->tok)->flags & MAN_SCOPED) {
+			    man_macro(n->tok)->flags &
+			     (MAN_BSCOPED | MAN_NSCOPED)) {
 				mandoc_vmsg(MANDOCERR_BLK_LINE,
 				    man->parse, n->line, n->pos,
 				    "EOF breaks %s", roff_name[n->tok]);
@@ -351,10 +352,10 @@ blk_imp(MACRO_PROT_ARGS)
 	/*
 	 * For macros having optional next-line scope,
 	 * keep the head open if there were no arguments.
-	 * For `TP', always keep the head open.
+	 * For `TP' and `TQ', always keep the head open.
 	 */
 
-	if (man_macro(tok)->flags & MAN_SCOPED &&
+	if (man_macro(tok)->flags & MAN_BSCOPED &&
 	    (tok == MAN_TP || tok == MAN_TQ || n == man->last)) {
 		man->flags |= MAN_BLINE;
 		return;
@@ -409,13 +410,12 @@ in_line_eoln(MACRO_PROT_ARGS)
 		man->last->flags |= NODE_EOS;
 
 	/*
-	 * If no arguments are specified and this is MAN_SCOPED (i.e.,
+	 * If no arguments are specified and this is MAN_ESCOPED (i.e.,
 	 * next-line scoped), then set our mode to indicate that we're
 	 * waiting for terms to load into our context.
 	 */
 
-	if (n == man->last && man_macro(tok)->flags & MAN_SCOPED) {
-		assert((man_macro(tok)->flags & MAN_NSCOPED) == 0);
+	if (n == man->last && man_macro(tok)->flags & MAN_ESCOPED) {
 		man->flags |= MAN_ELINE;
 		return;
 	}
@@ -430,6 +430,11 @@ in_line_eoln(MACRO_PROT_ARGS)
 		if (man->last == n)
 			break;
 	}
+
+	/* Rewind next-line scoped ancestors, if any. */
+
+	if (man_macro(tok)->flags & MAN_ESCOPED)
+		man_descope(man, line, ppos, NULL);
 }
 
 void
