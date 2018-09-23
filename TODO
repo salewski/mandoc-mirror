@@ -209,6 +209,9 @@ are mere guesses, and some may be wrong.
 
 --- missing eqn features -----------------------------------------------
 
+- Use a Unicode character for sqrt() in eqn output?
+  Suggested by an attendee during EuroBSDCon 2018.
+
 - In a matrix, break the output line after each matrix line.
   Found in the discussion at CDBUG 2015.
   Suggested by Avi Weinstock.
@@ -389,6 +392,17 @@ are mere guesses, and some may be wrong.
   loc *  exist **  algo **  size *  imp **
 
 --- HTML issues --------------------------------------------------------
+
+- table of content at the top of HTML (and perhaps ps/pdf) pages
+  only if there are at least two (or three?) non-standard sections
+  only if the new option -O toc is given
+  suggested by an attendee during EuroBSDCon 2018
+
+- support -O man with two arguments, typically using the first for
+  a local tree (like the release pages on mandoc.bsd.lv) and the
+  second for a remote tree (e.g. man.openbsd.org).
+  Probable syntax: -O man=first;second
+  Suggested by kristaps@ during EuroBSDCon 2018.
 
 - wrap Sh and Ss content into <div>
   Laura Morales <lauretas at mail dot com> 21 Apr 2018 18:10:48 +0200
