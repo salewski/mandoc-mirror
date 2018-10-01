@@ -69,6 +69,7 @@ enum	focus {
 static	void		 html_print(const char *);
 static	void		 html_putchar(char);
 static	int		 http_decode(char *);
+static	void		 http_encode(const char *p);
 static	void		 parse_manpath_conf(struct req *);
 static	void		 parse_path_info(struct req *req, const char *path);
 static	void		 parse_query_string(struct req *, const char *);
@@ -90,6 +91,7 @@ static	void		 resp_format(const struct req *, const char *);
 static	void		 resp_searchform(const struct req *, enum focus);
 static	void		 resp_show(const struct req *, const char *);
 static	void		 set_query_attr(char **, char **);
+static	int		 validate_arch(const char *);
 static	int		 validate_filename(const char *);
 static	int		 validate_manpath(const struct req *, const char *);
 static	int		 validate_urifrag(const char *);
@@ -316,6 +318,18 @@ http_decode(char *p)
 }
 
 static void
+http_encode(const char *p)
+{
+	for (; *p != '\0'; p++) {
+		if (isalnum((unsigned char)*p) == 0 &&
+		    strchr("-._~", *p) == NULL)
+			printf("%%%02.2X", (unsigned char)*p);
+		else
+			putchar(*p);
+	}
+}
+
+static void
 resp_begin_http(int code, const char *msg)
 {
 
@@ -490,6 +504,18 @@ validate_manpath(const struct req *req, const char* manpath)
 }
 
 static int
+validate_arch(const char *arch)
+{
+	int	 i;
+
+	for (i = 0; i < arch_MAX; i++)
+		if (strcmp(arch, arch_names[i]) == 0)
+			return 1;
+
+	return 0;
+}
+
+static int
 validate_filename(const char *file)
 {
 
@@ -562,9 +588,11 @@ pg_redirect(const struct req *req, const char *name)
 		printf("%s/", req->q.manpath);
 	if (req->q.arch != NULL)
 		printf("%s/", req->q.arch);
-	printf("%s", name);
-	if (req->q.sec != NULL)
-		printf(".%s", req->q.sec);
+	http_encode(name);
+	if (req->q.sec != NULL) {
+		putchar('.');
+		http_encode(req->q.sec);
+	}
 	printf("\r\nContent-Type: text/html; charset=utf-8\r\n\r\n");
 }
 
@@ -1089,7 +1117,7 @@ main(void)
 		return EXIT_FAILURE;
 	}
 
-	if ( ! (NULL == req.q.arch || validate_urifrag(req.q.arch))) {
+	if (req.q.arch != NULL && validate_arch(req.q.arch) == 0) {
 		pg_error_badrequest(
 		    "You specified an invalid architecture.");
 		return EXIT_FAILURE;
