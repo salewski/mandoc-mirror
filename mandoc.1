@@ -345,7 +345,7 @@ Instances of
 are replaced with the include filename.
 The default is not to present a
 hyperlink.
-.It Cm man Ns = Ns Ar fmt
+.It Cm man Ns = Ns Ar fmt Ns Op ; Ns Ar fmt
 The string
 .Ar fmt ,
 for example,
@@ -361,6 +361,10 @@ are replaced with the linked manual's name and section, respectively.
 If no section is included, section 1 is assumed.
 The default is not to
 present a hyperlink.
+If two formats are given and a file
+.Ar %N.%S
+exists in the current directory, the first format is used;
+otherwise, the second format is used.
 .It Cm style Ns = Ns Ar style.css
 The file
 .Ar style.css

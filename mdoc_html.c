@@ -611,7 +611,7 @@ mdoc_xr_pre(MDOC_ARGS)
 	if (NULL == n->child)
 		return 0;
 
-	if (h->base_man)
+	if (h->base_man1)
 		print_otag(h, TAG_A, "cThM", "Xr",
 		    n->child->string, n->child->next == NULL ?
 		    NULL : n->child->next->string);

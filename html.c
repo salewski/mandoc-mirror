@@ -18,6 +18,7 @@
 #include "config.h"
 
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -128,7 +129,10 @@ html_alloc(const struct manoutput *outopts)
 
 	h->tag = NULL;
 	h->style = outopts->style;
-	h->base_man = outopts->man;
+	if ((h->base_man1 = outopts->man) == NULL)
+		h->base_man2 = NULL;
+	else if ((h->base_man2 = strchr(h->base_man1, ';')) != NULL)
+		*h->base_man2++ = '\0';
 	h->base_includes = outopts->includes;
 	if (outopts->fragment)
 		h->oflags |= HTML_FRAGMENT;
@@ -467,9 +471,21 @@ print_encode(struct html *h, const char *p, const char *pend, int norecurse)
 static void
 print_href(struct html *h, const char *name, const char *sec, int man)
 {
+	struct stat	 sb;
 	const char	*p, *pp;
+	char		*filename;
 
-	pp = man ? h->base_man : h->base_includes;
+	if (man) {
+		pp = h->base_man1;
+		if (h->base_man2 != NULL) {
+			mandoc_asprintf(&filename, "%s.%s", name, sec);
+			if (stat(filename, &sb) == -1)
+				pp = h->base_man2;
+			free(filename);
+		}
+	} else
+		pp = h->base_includes;
+
 	while ((p = strchr(pp, '%')) != NULL) {
 		print_encode(h, pp, p, 1);
 		if (man && p[1] == 'S') {

@@ -101,7 +101,8 @@ struct	html {
 	struct tag	 *tag; /* last open tag */
 	struct rofftbl	  tbl; /* current table */
 	struct tag	 *tblt; /* current open table scope */
-	char		 *base_man; /* base for manpage href */
+	char		 *base_man1; /* bases for manpage href */
+	char		 *base_man2;
 	char		 *base_includes; /* base for include href */
 	char		 *style; /* style-sheet URI */
 	struct tag	 *metaf; /* current open font scope */

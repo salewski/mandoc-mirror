@@ -395,12 +395,6 @@ are mere guesses, and some may be wrong.
   only if the new option -O toc is given
   suggested by Adam Kalisz during EuroBSDCon 2018
 
-- support -O man with two arguments, typically using the first for
-  a local tree (like the release pages on mandoc.bsd.lv) and the
-  second for a remote tree (e.g. man.openbsd.org).
-  Probable syntax: -O man=first;second
-  Suggested by kristaps@ during EuroBSDCon 2018.
-
 - wrap Sh and Ss content into <div>
   Laura Morales <lauretas at mail dot com> 21 Apr 2018 18:10:48 +0200
   (Evaluate whether this is really useful and has no adverse
