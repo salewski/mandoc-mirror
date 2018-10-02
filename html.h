@@ -93,6 +93,7 @@ struct	html {
 #define	HTML_SPLIT	 (1 << 8) /* break line before .An */
 #define	HTML_NONEWLINE	 (1 << 9) /* No line break in nofill mode. */
 #define	HTML_BUFFER	 (1 << 10) /* Collect a word to see if it fits. */
+#define	HTML_TOCDONE	 (1 << 11) /* The TOC was already written. */
 	size_t		  indent; /* current output indentation level */
 	int		  noindent; /* indent disabled by <pre> */
 	size_t		  col; /* current output byte position */
@@ -110,6 +111,7 @@ struct	html {
 	enum htmlfont	  metac; /* current font mode */
 	int		  oflags; /* output options */
 #define	HTML_FRAGMENT	 (1 << 0) /* don't emit HTML/HEAD/BODY */
+#define	HTML_TOC	 (1 << 1) /* emit a table of contents */
 };
 
 

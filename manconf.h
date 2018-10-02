@@ -34,8 +34,9 @@ struct	manoutput {
 	size_t	  width;
 	int	  fragment;
 	int	  mdoc;
-	int	  synopsisonly;
 	int	  noval;
+	int	  synopsisonly;
+	int	  toc;
 };
 
 struct	manconf {

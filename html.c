@@ -136,6 +136,8 @@ html_alloc(const struct manoutput *outopts)
 	h->base_includes = outopts->includes;
 	if (outopts->fragment)
 		h->oflags |= HTML_FRAGMENT;
+	if (outopts->toc)
+		h->oflags |= HTML_TOC;
 
 	mandoc_ohash_init(&id_unique, 4, 0);
 
