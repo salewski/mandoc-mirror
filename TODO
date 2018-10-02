@@ -209,9 +209,6 @@ are mere guesses, and some may be wrong.
 
 --- missing eqn features -----------------------------------------------
 
-- Use a Unicode character for sqrt() in eqn output?
-  Suggested by an attendee during EuroBSDCon 2018.
-
 - In a matrix, break the output line after each matrix line.
   Found in the discussion at CDBUG 2015.
   Suggested by Avi Weinstock.
@@ -396,7 +393,7 @@ are mere guesses, and some may be wrong.
 - table of content at the top of HTML (and perhaps ps/pdf) pages
   only if there are at least two (or three?) non-standard sections
   only if the new option -O toc is given
-  suggested by an attendee during EuroBSDCon 2018
+  suggested by Adam Kalisz during EuroBSDCon 2018
 
 - support -O man with two arguments, typically using the first for
   a local tree (like the release pages on mandoc.bsd.lv) and the

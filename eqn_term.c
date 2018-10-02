@@ -106,7 +106,7 @@ eqn_box(struct termp *p, const struct eqn_box *bp)
 	/* Special box types. */
 
 	if (bp->pos == EQNPOS_SQRT) {
-		term_word(p, "sqrt");
+		term_word(p, "\\(sr");
 		if (bp->first != NULL) {
 			p->flags |= TERMP_NOSPACE;
 			eqn_box(p, bp->first);
