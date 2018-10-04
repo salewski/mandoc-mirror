@@ -541,11 +541,13 @@ mdoc_sh_pre(MDOC_ARGS)
 			    subn = subn->next) {
 				if (subn->tok != MDOC_Ss)
 					continue;
+				id = html_make_id(subn->head, 0);
+				if (id == NULL)
+					continue;
 				if (tsub == NULL)
 					print_otag(h, TAG_UL,
 					    "c", "Bl-compact");
 				tsub = print_otag(h, TAG_LI, "");
-				id = html_make_id(subn->head, 0);
 				print_otag(h, TAG_A, "hR", id);
 				free(id);
 				print_mdoc_nodelist(meta,
