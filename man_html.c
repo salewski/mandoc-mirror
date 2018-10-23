@@ -264,7 +264,7 @@ print_man_node(MAN_ARGS)
 		    n->flags & NODE_LINE && *n->string == ' ' &&
 		    (h->flags & HTML_NONEWLINE) == 0)
 			print_otag(h, TAG_BR, "");
-		if (*n->string != '\0')
+		if (want_fillmode == MAN_nf || *n->string != '\0')
 			break;
 		print_paragraph(h);
 		return;
@@ -338,8 +338,11 @@ print_man_node(MAN_ARGS)
 	print_stagq(h, t);
 
 	if (fillmode(h, 0) == MAN_nf &&
-	    n->next != NULL && n->next->flags & NODE_LINE)
+	    n->next != NULL && n->next->flags & NODE_LINE) {
+		/* In .nf = <pre>, print even empty lines. */
+		h->col++;
 		print_endline(h);
+	}
 }
 
 /*
