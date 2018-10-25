@@ -397,6 +397,12 @@ are mere guesses, and some may be wrong.
    it does seem cleaner.)
   loc **  exist **  algo *  size *  imp ***
 
+- .IP wants vertical spacing before itself;
+  currently, it is formatted like .Bl -compact.
+  Fixing this requires getting rid of the "float"
+  in the CSS for .Bl-tag first.
+  Reminded by Pali Rohar 25 Oct 2018 10:10:35 +0200.
+
 - format ".IP *" etc. as <ul> rather than <dl>
   https://github.com/Debian/debiman/issues/67
   loc ** exist ** algo ** size * imp ***
