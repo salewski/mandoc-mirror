@@ -228,6 +228,9 @@ print_metaf(struct html *h, enum mandoc_esc deco)
 	case ESCAPE_FONTBI:
 		font = HTMLFONT_BI;
 		break;
+	case ESCAPE_FONTCW:
+		font = HTMLFONT_CW;
+		break;
 	case ESCAPE_FONT:
 	case ESCAPE_FONTROMAN:
 		font = HTMLFONT_NONE;
@@ -254,6 +257,9 @@ print_metaf(struct html *h, enum mandoc_esc deco)
 	case HTMLFONT_BI:
 		h->metaf = print_otag(h, TAG_B, "");
 		print_otag(h, TAG_I, "");
+		break;
+	case HTMLFONT_CW:
+		h->metaf = print_otag(h, TAG_SPAN, "c", "Li");
 		break;
 	default:
 		break;
@@ -408,6 +414,7 @@ print_encode(struct html *h, const char *p, const char *pend, int norecurse)
 		case ESCAPE_FONTBOLD:
 		case ESCAPE_FONTITALIC:
 		case ESCAPE_FONTBI:
+		case ESCAPE_FONTCW:
 		case ESCAPE_FONTROMAN:
 			if (0 == norecurse)
 				print_metaf(h, esc);
@@ -737,6 +744,9 @@ print_text(struct html *h, const char *word)
 	case HTMLFONT_BI:
 		h->metaf = print_otag(h, TAG_B, "");
 		print_otag(h, TAG_I, "");
+		break;
+	case HTMLFONT_CW:
+		h->metaf = print_otag(h, TAG_SPAN, "c", "Li");
 		break;
 	default:
 		print_indent(h);

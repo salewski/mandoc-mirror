@@ -600,6 +600,7 @@ md_word(const char *s)
 				nextfont = "***";
 				break;
 			case ESCAPE_FONT:
+			case ESCAPE_FONTCW:
 			case ESCAPE_FONTROMAN:
 				nextfont = "";
 				break;

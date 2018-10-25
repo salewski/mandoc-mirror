@@ -304,8 +304,13 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	case ESCAPE_FONT:
 		if (*sz == 2) {
 			if (**start == 'C') {
+				if ((*start)[1] == 'W' ||
+				    (*start)[1] == 'R') {
+					gly = ESCAPE_FONTCW;
+					break;
+				}
 				/*
-				 * Treat constant-width font modes
+				 * Treat other constant-width font modes
 				 * just like regular font modes.
 				 */
 				(*start)++;
