@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2013-2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2013-2018 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -774,8 +774,9 @@ exprterm(const struct mansearch *search, int argc, char *argv[], int *argi)
 		cs = 0;
 	} else if ((val = strpbrk(argv[*argi], "=~")) == NULL) {
 		e->bits = TYPE_Nm | TYPE_Nd;
-		e->match.type = DBM_SUB;
-		e->match.str = argv[*argi];
+		e->match.type = DBM_REGEX;
+		val = argv[*argi];
+		cs = 0;
 	} else {
 		if (val == argv[*argi])
 			e->bits = TYPE_Nm | TYPE_Nd;
