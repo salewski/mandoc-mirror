@@ -405,7 +405,6 @@ main(int argc, char *argv[])
 				res[sz].names = NULL;
 				res[sz].output = NULL;
 				res[sz].ipath = SIZE_MAX;
-				res[sz].bits = 0;
 				res[sz].sec = 10;
 				res[sz].form = FORM_SRC;
 				sz++;
@@ -754,7 +753,6 @@ found:
 	page->names = NULL;
 	page->output = NULL;
 	page->ipath = ipath;
-	page->bits = NAME_FILE & NAME_MASK;
 	page->sec = (*sec >= '1' && *sec <= '9') ? *sec - '1' + 1 : 10;
 	page->form = form;
 	return 1;

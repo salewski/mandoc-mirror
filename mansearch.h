@@ -93,7 +93,6 @@ struct	manpage {
 	char		*names; /* a list of names with sections */
 	char		*output; /* user-defined additional output */
 	size_t		 ipath; /* number of the manpath */
-	uint64_t	 bits; /* name type mask */
 	int		 sec; /* section number, 10 means invalid */
 	enum form	 form;
 };
