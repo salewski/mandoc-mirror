@@ -290,6 +290,18 @@ One useful application is for checking that
 output formats in the same way as the
 .Xr mdoc 7
 source it was generated from.
+.It Cm tag Ns Op = Ns Ar term
+If the formatted manual page is opened in a pager,
+go to the definition of the
+.Ar term
+rather than showing the manual page from the beginning.
+If no
+.Ar term
+is specified, reuse the first command line argument that is not a
+.Ar section
+number.
+This is useful when it is the name of a manual page,
+in particular the name of a library function.
 .It Cm width Ns = Ns Ar width
 The output width is set to
 .Ar width

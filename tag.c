@@ -18,6 +18,9 @@
 
 #include <sys/types.h>
 
+#if HAVE_ERR
+#include <err.h>
+#endif
 #include <limits.h>
 #include <signal.h>
 #include <stddef.h>
@@ -216,6 +219,11 @@ tag_write(void)
 
 	if (tag_files.tfd <= 0)
 		return;
+	if (tag_files.tagname != NULL && ohash_find(&tag_data,
+            ohash_qlookup(&tag_data, tag_files.tagname)) == NULL) {
+		warnx("%s: no such tag", tag_files.tagname);
+		tag_files.tagname = NULL;
+	}
 	stream = fdopen(tag_files.tfd, "w");
 	entry = ohash_first(&tag_data, &slot);
 	while (entry != NULL) {

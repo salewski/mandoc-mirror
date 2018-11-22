@@ -18,6 +18,7 @@
 struct	tag_files {
 	char	 ofn[20];
 	char	 tfn[20];
+	char	*tagname;
 	int	 ofd;
 	int	 tfd;
 	pid_t	 tcpgid;
