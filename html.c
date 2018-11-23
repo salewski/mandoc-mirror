@@ -416,8 +416,11 @@ print_encode(struct html *h, const char *p, const char *pend, int norecurse)
 		case ESCAPE_FONTBI:
 		case ESCAPE_FONTCW:
 		case ESCAPE_FONTROMAN:
-			if (0 == norecurse)
+			if (0 == norecurse) {
+				h->flags |= HTML_NOSPACE;
 				print_metaf(h, esc);
+				h->flags &= ~HTML_NOSPACE;
+			}
 			continue;
 		case ESCAPE_SKIPCHAR:
 			h->flags |= HTML_SKIPCHAR;
