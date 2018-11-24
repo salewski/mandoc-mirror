@@ -195,10 +195,6 @@ are mere guesses, and some may be wrong.
   suggested by bentley@  Tue, 14 Oct 2014 04:10:55 -0600
   loc *  exist **  algo *  size *  imp **
 
-- implement horizontal and vertical alignment in HTML output
-  pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
-  loc *  exist *  algo *  size *  imp ***
-
 - implement cell spanning in HTML output
   pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
   loc *  exist *  algo **  size **  imp **
