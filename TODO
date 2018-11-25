@@ -168,6 +168,10 @@ are mere guesses, and some may be wrong.
 
 --- missing tbl features -----------------------------------------------
 
+- vertically spanning cells by \^ in the data section
+  pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
+  loc *  exist *  algo *  size *  imp ***
+
 - the "s" layout column specifier is used for placement of data
   into columns, but ignored during column width calculations
   synaptics(4) found by tedu@  Mon, 17 Aug 2015 21:17:42 -0400
@@ -194,10 +198,6 @@ are mere guesses, and some may be wrong.
   in tbl(7) -Tutf-8 output
   suggested by bentley@  Tue, 14 Oct 2014 04:10:55 -0600
   loc *  exist **  algo *  size *  imp **
-
-- implement cell spanning in HTML output
-  pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
-  loc *  exist *  algo **  size **  imp **
 
 - implement table borders in HTML output
   pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200

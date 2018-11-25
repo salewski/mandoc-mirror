@@ -320,7 +320,8 @@ struct	tbl_dat {
 	struct tbl_cell	 *layout; /* layout cell */
 	struct tbl_dat	 *next;
 	char		 *string; /* data (NULL if not TBL_DATA_DATA) */
-	int		  spans; /* how many spans follow */
+	int		  hspans; /* how many horizontal spans follow */
+	int		  vspans; /* how many vertical spans follow */
 	int		  block; /* T{ text block T} */
 	enum tbl_datt	  pos;
 };

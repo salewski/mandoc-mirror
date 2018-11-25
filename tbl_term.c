@@ -77,7 +77,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	const struct tbl_dat	*dp;
 	static size_t		 offset;
 	size_t			 coloff, tsz;
-	int			 ic, horiz, spans, vert, more;
+	int			 ic, horiz, hspans, vert, more;
 	char			 fc;
 
 	/* Inhibit printing of spaces: we do padding ourselves. */
@@ -157,9 +157,9 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 		/* Set up the data columns. */
 
 		dp = sp->first;
-		spans = 0;
+		hspans = 0;
 		for (ic = 0; ic < sp->opts->cols; ic++) {
-			if (spans == 0) {
+			if (hspans == 0) {
 				tp->tcol++;
 				tp->tcol->offset = coloff;
 			}
@@ -167,13 +167,13 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 			tp->tcol->rmargin = coloff;
 			if (ic + 1 < sp->opts->cols)
 				coloff += tp->tbl.cols[ic].spacing;
-			if (spans) {
-				spans--;
+			if (hspans) {
+				hspans--;
 				continue;
 			}
 			if (dp == NULL)
 				continue;
-			spans = dp->spans;
+			hspans = dp->hspans;
 			if (ic || sp->layout->first->pos != TBL_CELL_SPAN)
 				dp = dp->next;
 		}
@@ -193,14 +193,14 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 		tp->tcol = tp->tcols;
 		cp = cpn = sp->layout->first;
 		dp = sp->first;
-		spans = 0;
+		hspans = 0;
 		for (ic = 0; ic < sp->opts->cols; ic++) {
 			if (cpn != NULL) {
 				cp = cpn;
 				cpn = cpn->next;
 			}
-			if (spans) {
-				spans--;
+			if (hspans) {
+				hspans--;
 				continue;
 			}
 			tp->tcol++;
@@ -208,7 +208,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 			tbl_data(tp, sp->opts, cp, dp, tp->tbl.cols + ic);
 			if (dp == NULL)
 				continue;
-			spans = dp->spans;
+			hspans = dp->hspans;
 			if (cp->pos != TBL_CELL_SPAN)
 				dp = dp->next;
 		}
@@ -249,7 +249,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 			cpp = sp->prev == NULL ? NULL :
 			    sp->prev->layout->first;
 			dp = sp->first;
-			spans = 0;
+			hspans = 0;
 			for (ic = 0; ic < sp->opts->cols; ic++) {
 
 				/*
@@ -304,12 +304,12 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 				 * and advance to next data cell.
 				 */
 
-				if (spans) {
-					spans--;
+				if (hspans) {
+					hspans--;
 					continue;
 				}
 				if (dp != NULL) {
-					spans = dp->spans;
+					hspans = dp->hspans;
 					if (ic || sp->layout->first->pos
 					    != TBL_CELL_SPAN)
 						dp = dp->next;
@@ -592,14 +592,14 @@ tbl_literal(struct termp *tp, const struct tbl_dat *dp,
 		const struct roffcol *col)
 {
 	size_t		 len, padl, padr, width;
-	int		 ic, spans;
+	int		 ic, hspans;
 
 	assert(dp->string);
 	len = term_strlen(tp, dp->string);
 	width = col->width;
 	ic = dp->layout->col;
-	spans = dp->spans;
-	while (spans--)
+	hspans = dp->hspans;
+	while (hspans--)
 		width += tp->tbl.cols[++ic].width + 3;
 
 	padr = width > len ? width - len : 0;

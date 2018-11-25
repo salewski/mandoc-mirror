@@ -101,10 +101,10 @@ print_tblclose(struct html *h)
 void
 print_tbl(struct html *h, const struct tbl_span *sp)
 {
-	const struct tbl_dat *dp;
-	struct tag	*tt;
-	const char	*halign, *valign;
-	int		 ic;
+	const struct tbl_dat	*dp;
+	struct tag		*tt;
+	const char		*hspans, *vspans, *halign, *valign;
+	char			 hbuf[4], vbuf[4];
 
 	/* Inhibit printing of spaces: we do padding ourselves. */
 
@@ -124,13 +124,31 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 		print_otag(h, TAG_TD, "?", "colspan", "0");
 		break;
 	default:
-		dp = sp->first;
-		for (ic = 0; ic < sp->opts->cols; ic++) {
+		for (dp = sp->first; dp != NULL; dp = dp->next) {
 			print_stagq(h, tt);
-			if (dp == NULL || dp->layout->col > ic) {
-				print_otag(h, TAG_TD, "");
+			switch (dp->layout->pos) {
+			case TBL_CELL_SPAN:
+			case TBL_CELL_DOWN:
 				continue;
+			default:
+				break;
 			}
+
+			/* Determine the attribute values. */
+
+			if (dp->hspans > 0) {
+				(void)snprintf(hbuf, sizeof(hbuf),
+				    "%d", dp->hspans + 1);
+				hspans = hbuf;
+			} else
+				hspans = NULL;
+			if (dp->vspans > 0) {
+				(void)snprintf(vbuf, sizeof(vbuf),
+				    "%d", dp->vspans + 1);
+				vspans = vbuf;
+			} else
+				vspans = NULL;
+
 			switch (dp->layout->pos) {
 			case TBL_CELL_CENTRE:
 				halign = "center";
@@ -149,22 +167,27 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 				valign = "bottom";
 			else
 				valign = NULL;
+
+			/* Print the element and the attributes. */
+
 			if (halign == NULL && valign == NULL)
-				print_otag(h, TAG_TD, "");
+				print_otag(h, TAG_TD, "??",
+				    "colspan", hspans, "rowspan", vspans);
 			else if (halign == NULL)
-				print_otag(h, TAG_TD, "s",
+				print_otag(h, TAG_TD, "??s",
+				    "colspan", hspans, "rowspan", vspans,
 				    "vertical-align", valign);
 			else if (valign == NULL)
-				print_otag(h, TAG_TD, "s",
+				print_otag(h, TAG_TD, "??s",
+				    "colspan", hspans, "rowspan", vspans,
 				    "text-align", halign);
 			else
-				print_otag(h, TAG_TD, "ss",
+				print_otag(h, TAG_TD, "??ss",
+				    "colspan", hspans, "rowspan", vspans,
 				    "vertical-align", valign,
 				    "text-align", halign);
-			if (dp->layout->pos != TBL_CELL_DOWN)
-				if (dp->string != NULL)
-					print_text(h, dp->string);
-			dp = dp->next;
+			if (dp->string != NULL)
+				print_text(h, dp->string);
 		}
 		break;
 	}
