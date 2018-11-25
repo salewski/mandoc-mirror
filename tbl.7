@@ -1,7 +1,7 @@
 .\"	$Id$
 .\"
 .\" Copyright (c) 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
-.\" Copyright (c) 2014, 2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
+.\" Copyright (c) 2014, 2015, 2017, 2018 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -147,9 +147,9 @@ The combined cell as a whole consumes only one cell
 of the corresponding data line.
 .It Cm a
 Left-justify a string and pad with one space.
-.It Cm ^
+.It Cm \(ha
 Vertically span rows from the last
-.Pf non- Cm ^
+.Pf non- Cm \(ha
 layout cell.
 It is an error to invoke a vertical span on the first layout line.
 Unlike a horizontal span, a vertical span consumes a data cell
@@ -231,7 +231,13 @@ Each data line consists of one or more data cells, delimited by
 .Cm tab
 characters.
 .Pp
-If a data cells contains only the single character
+If a data cell contains only the two bytes
+.Ql \e\(ha ,
+the cell above spans to this row, as if the layout specification
+of this cell were
+.Cm \(ha .
+.Pp
+If a data cell contains only the single character
 .Ql _
 or
 .Ql = ,
@@ -332,8 +338,8 @@ Spans and skipping width calculations:
 \&.TS
 box tab(:);
 lz  s | rt
-lt| cb| ^
-^ | rz  s.
+lt| cb| \(ha
+\(ha | rz  s.
 left:r
 l:center:
 :right
