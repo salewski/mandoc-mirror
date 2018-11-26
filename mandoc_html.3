@@ -216,6 +216,14 @@ It requires two
 .Va char *
 arguments.
 The first is the name of the style property, the second its value.
+The name must not be
+.Dv NULL .
+The
+.Cm s
+.Ar fmt
+letter can be repeated, each repetition requiring an additional pair of
+.Va char *
+arguments.
 .El
 .Pp
 .Fn print_otag

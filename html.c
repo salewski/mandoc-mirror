@@ -523,7 +523,7 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 	struct tag	*t;
 	const char	*attr;
 	char		*arg1, *arg2;
-	int		 tflags;
+	int		 style_written, tflags;
 
 	tflags = htmltags[tag].flags;
 
@@ -563,7 +563,7 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 
 	va_start(ap, fmt);
 
-	while (*fmt != '\0') {
+	while (*fmt != '\0' && *fmt != 's') {
 
 		/* Parse attributes and arguments. */
 
@@ -578,10 +578,6 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 			break;
 		case 'i':
 			attr = "id";
-			break;
-		case 's':
-			attr = "style";
-			arg2 = va_arg(ap, char *);
 			break;
 		case '?':
 			attr = arg1;
@@ -622,19 +618,32 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 			fmt++;
 			break;
 		default:
-			if (arg2 == NULL)
-				print_encode(h, arg1, NULL, 1);
-			else {
-				print_word(h, arg1);
-				print_byte(h, ':');
-				print_byte(h, ' ');
-				print_word(h, arg2);
-				print_byte(h, ';');
-			}
+			print_encode(h, arg1, NULL, 1);
 			break;
 		}
 		print_byte(h, '"');
 	}
+
+	style_written = 0;
+	while (*fmt++ == 's') {
+		arg1 = va_arg(ap, char *);
+		arg2 = va_arg(ap, char *);
+		if (arg2 == NULL)
+			continue;
+		print_byte(h, ' ');
+		if (style_written == 0) {
+			print_word(h, "style=\"");
+			style_written = 1;
+		}
+		print_word(h, arg1);
+		print_byte(h, ':');
+		print_byte(h, ' ');
+		print_word(h, arg2);
+		print_byte(h, ';');
+	}
+	if (style_written)
+		print_byte(h, '"');
+
 	va_end(ap);
 
 	/* Accommodate for "well-formed" singleton escaping. */
