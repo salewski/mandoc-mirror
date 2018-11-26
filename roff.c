@@ -2107,7 +2107,10 @@ roff_cond_sub(ROFF_ARGS)
 	if (ep[0] == '\\' && ep[1] == '}')
 		rr = 0;
 
-	/* Always check for the closing delimiter `\}'. */
+	/*
+	 * The closing delimiter `\}' rewinds the conditional scope
+	 * but is otherwise ignored when interpreting the line.
+	 */
 
 	while ((ep = strchr(ep, '\\')) != NULL) {
 		switch (ep[1]) {
@@ -2150,15 +2153,34 @@ roff_cond_text(ROFF_ARGS)
 	if (roffnode_cleanscope(r))
 		irc |= endloop;
 
+	/*
+	 * If `\}' occurs on a text line with neither preceding
+	 * nor following characters, drop the line completely.
+	 */
+
 	ep = buf->buf + pos;
+	if (strcmp(ep, "\\}") == 0)
+		rr = 0;
+
+	/*
+	 * The closing delimiter `\}' rewinds the conditional scope
+	 * but is otherwise ignored when interpreting the line.
+	 */
+
 	while ((ep = strchr(ep, '\\')) != NULL) {
-		if (*(++ep) == '}') {
-			*ep = '&';
-			if (roff_ccond(r, ln, ep - buf->buf - 1))
+		switch (ep[1]) {
+		case '}':
+			memmove(ep, ep + 2, strlen(ep + 2) + 1);
+			if (roff_ccond(r, ln, ep - buf->buf))
 				irc |= endloop;
-		}
-		if (*ep != '\0')
+			break;
+		case '\0':
 			++ep;
+			break;
+		default:
+			ep += 2;
+			break;
+		}
 	}
 	if (rr)
 		irc |= ROFF_CONT;
