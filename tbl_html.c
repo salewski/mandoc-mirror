@@ -175,22 +175,10 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 
 			/* Print the element and the attributes. */
 
-			if (halign == NULL && valign == NULL)
-				print_otag(h, TAG_TD, "??",
-				    "colspan", hspans, "rowspan", vspans);
-			else if (halign == NULL)
-				print_otag(h, TAG_TD, "??s",
-				    "colspan", hspans, "rowspan", vspans,
-				    "vertical-align", valign);
-			else if (valign == NULL)
-				print_otag(h, TAG_TD, "??s",
-				    "colspan", hspans, "rowspan", vspans,
-				    "text-align", halign);
-			else
-				print_otag(h, TAG_TD, "??ss",
-				    "colspan", hspans, "rowspan", vspans,
-				    "vertical-align", valign,
-				    "text-align", halign);
+			print_otag(h, TAG_TD, "??ss",
+			    "colspan", hspans, "rowspan", vspans,
+			    "vertical-align", valign,
+			    "text-align", halign);
 			if (dp->string != NULL)
 				print_text(h, dp->string);
 		}
