@@ -190,15 +190,6 @@ are mere guesses, and some may be wrong.
 - look what Joerg Schilling manual pages use
   Thu, 19 Mar 2015 18:31:48 +0100
 
-- use Unicode U+2500 to U+256C for table borders
-  in tbl(7) -Tutf-8 output
-  suggested by bentley@  Tue, 14 Oct 2014 04:10:55 -0600
-  loc *  exist **  algo *  size *  imp **
-
-- implement table borders in HTML output
-  pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
-  loc *  exist *  algo **  size **  imp **
-
 --- missing eqn features -----------------------------------------------
 
 - In a matrix, break the output line after each matrix line.
