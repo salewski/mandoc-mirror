@@ -437,11 +437,14 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 				 * but not after the last column.
 				 */
 
-				if (fc == 0 && ((uvert == 0 && dvert == 0 &&
-				     (cp->next == NULL ||
+				if (fc == 0 &&
+				    ((uvert == 0 && dvert == 0 &&
+				      cp != NULL && (cp->next == NULL ||
 				      !IS_HORIZ(cp->next))) ||
-				    tp->tcol + 1 == tp->tcols + tp->lasttcol)) {
-					cp = cp->next;
+				     tp->tcol + 1 ==
+				      tp->tcols + tp->lasttcol)) {
+					if (cp != NULL)
+						cp = cp->next;
 					continue;
 				}
 
