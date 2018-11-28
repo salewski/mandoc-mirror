@@ -90,7 +90,7 @@ ascii_init(enum termenc enc, const struct manoutput *outopts)
 	p->width = ascii_width;
 
 #if HAVE_WCHAR
-	if (TERMENC_ASCII != enc) {
+	if (enc != TERMENC_ASCII) {
 
 		/*
 		 * Do not change any of this to LC_ALL.  It might break
@@ -99,7 +99,7 @@ ascii_init(enum termenc enc, const struct manoutput *outopts)
 		 * worst case, it might even cause buffer overflows.
 		 */
 
-		v = TERMENC_LOCALE == enc ?
+		v = enc == TERMENC_LOCALE ?
 		    setlocale(LC_CTYPE, "") :
 		    setlocale(LC_CTYPE, UTF8_LOCALE);
 
@@ -113,7 +113,7 @@ ascii_init(enum termenc enc, const struct manoutput *outopts)
 			v = setlocale(LC_CTYPE, "C");
 
 		if (v != NULL && MB_CUR_MAX > 1) {
-			p->enc = enc;
+			p->enc = TERMENC_UTF8;
 			p->advance = locale_advance;
 			p->endline = locale_endline;
 			p->letter = locale_letter;
