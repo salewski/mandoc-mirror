@@ -168,11 +168,6 @@ are mere guesses, and some may be wrong.
 
 --- missing tbl features -----------------------------------------------
 
-- the "s" layout column specifier is used for placement of data
-  into columns, but ignored during column width calculations
-  synaptics(4) found by tedu@  Mon, 17 Aug 2015 21:17:42 -0400
-  loc *  exist **  algo ***  size *  imp **
-
 - vertical centering in cells vertically spanned with ^
   pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
   loc *  exist ***  algo ***  size **  imp *
