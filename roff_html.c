@@ -58,11 +58,7 @@ roff_html_pre(struct html *h, const struct roff_node *n)
 static void
 roff_html_pre_br(ROFF_HTML_ARGS)
 {
-	struct tag	*t;
-
-	t = print_otag(h, TAG_DIV, "");
-	print_text(h, "\\~");  /* So the div isn't empty. */
-	print_tagq(h, t);
+	print_otag(h, TAG_BR, "");
 }
 
 static void
