@@ -63,6 +63,7 @@ static	int		  man_SM_pre(MAN_ARGS);
 static	int		  man_SS_pre(MAN_ARGS);
 static	int		  man_SY_pre(MAN_ARGS);
 static	int		  man_UR_pre(MAN_ARGS);
+static	int		  man_abort_pre(MAN_ARGS);
 static	int		  man_alt_pre(MAN_ARGS);
 static	int		  man_ign_pre(MAN_ARGS);
 static	int		  man_in_pre(MAN_ARGS);
@@ -77,9 +78,9 @@ static	const struct man_html_act man_html_acts[MAN_MAX - MAN_TH] = {
 	{ man_SS_pre, NULL }, /* SS */
 	{ man_IP_pre, NULL }, /* TP */
 	{ man_IP_pre, NULL }, /* TQ */
-	{ man_PP_pre, NULL }, /* LP */
+	{ man_abort_pre, NULL }, /* LP */
 	{ man_PP_pre, NULL }, /* PP */
-	{ man_PP_pre, NULL }, /* P */
+	{ man_abort_pre, NULL }, /* P */
 	{ man_IP_pre, NULL }, /* IP */
 	{ man_HP_pre, NULL }, /* HP */
 	{ man_SM_pre, NULL }, /* SM */
@@ -234,10 +235,8 @@ print_man_node(MAN_ARGS)
 			want_fillmode = MAN_fi;
 			/* FALLTHROUGH */
 		case MAN_PP:  /* These have no head.		*/
-		case MAN_LP:  /* They will simply		*/
-		case MAN_P:   /* reopen .nf in the body.	*/
-		case MAN_RS:
-		case MAN_UR:
+		case MAN_RS:  /* They will simply		*/
+		case MAN_UR:  /* reopen .nf in the body.        */
 		case MAN_MT:
 			fillmode(h, MAN_fi);
 			break;
@@ -671,4 +670,10 @@ man_UR_pre(MAN_ARGS)
 	print_man_nodelist(man, n->child, h);
 
 	return 0;
+}
+
+static int
+man_abort_pre(MAN_ARGS)
+{
+	abort();
 }

@@ -40,6 +40,7 @@
 
 typedef	void	(*v_check)(CHKARGS);
 
+static	void	  check_abort(CHKARGS);
 static	void	  check_par(CHKARGS);
 static	void	  check_part(CHKARGS);
 static	void	  check_root(CHKARGS);
@@ -60,9 +61,9 @@ static	const v_check man_valids[MAN_MAX - MAN_TH] = {
 	NULL,       /* SS */
 	NULL,       /* TP */
 	NULL,       /* TQ */
-	check_par,  /* LP */
+	check_abort,/* LP */
 	check_par,  /* PP */
-	check_par,  /* P */
+	check_abort,/* P */
 	post_IP,    /* IP */
 	NULL,       /* HP */
 	NULL,       /* SM */
@@ -97,13 +98,33 @@ static	const v_check man_valids[MAN_MAX - MAN_TH] = {
 };
 
 
+/* Validate the subtree rooted at man->last. */
 void
 man_node_validate(struct roff_man *man)
 {
 	struct roff_node *n;
 	const v_check	 *cp;
 
+	/*
+	 * Translate obsolete macros such that later code
+	 * does not need to look for them.
+	 */
+
 	n = man->last;
+	switch (n->tok) {
+	case MAN_LP:
+	case MAN_P:
+		n->tok = MAN_PP;
+		break;
+	default:
+		break;
+	}
+
+	/*
+	 * Iterate over all children, recursing into each one
+	 * in turn, depth-first.
+	 */
+
 	man->last = man->last->child;
 	while (man->last != NULL) {
 		man_node_validate(man);
@@ -112,6 +133,8 @@ man_node_validate(struct roff_man *man)
 		else
 			man->last = man->last->next;
 	}
+
+	/* Finally validate the macro itself. */
 
 	man->last = n;
 	man->next = ROFF_NEXT_SIBLING;
@@ -180,6 +203,12 @@ check_root(CHKARGS)
 		mandoc_msg(MANDOCERR_RCS_MISSING, man->parse, 0, 0,
 		    man->meta.os_e == MANDOC_OS_OPENBSD ?
 		    "(OpenBSD)" : "(NetBSD)");
+}
+
+static void
+check_abort(CHKARGS)
+{
+	abort();
 }
 
 static void
@@ -477,8 +506,6 @@ post_vs(CHKARGS)
 	case MAN_SH:
 	case MAN_SS:
 	case MAN_PP:
-	case MAN_LP:
-	case MAN_P:
 		mandoc_vmsg(MANDOCERR_PAR_SKIP, man->parse, n->line, n->pos,
 		    "%s after %s", roff_name[n->tok],
 		    roff_name[n->parent->tok]);

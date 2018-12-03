@@ -62,6 +62,7 @@ static	int		  mdoc_root_pre(const struct roff_meta *,
 
 static	void		  mdoc__x_post(MDOC_ARGS);
 static	int		  mdoc__x_pre(MDOC_ARGS);
+static	int		  mdoc_abort_pre(MDOC_ARGS);
 static	int		  mdoc_ad_pre(MDOC_ARGS);
 static	int		  mdoc_an_pre(MDOC_ARGS);
 static	int		  mdoc_ap_pre(MDOC_ARGS);
@@ -154,7 +155,7 @@ static const struct mdoc_html_act mdoc_html_acts[MDOC_MAX - MDOC_Dd] = {
 	{mdoc_nd_pre, NULL}, /* Nd */
 	{mdoc_nm_pre, NULL}, /* Nm */
 	{mdoc_quote_pre, mdoc_quote_post}, /* Op */
-	{mdoc_ft_pre, NULL}, /* Ot */
+	{mdoc_abort_pre, NULL}, /* Ot */
 	{mdoc_pa_pre, NULL}, /* Pa */
 	{mdoc_ex_pre, NULL}, /* Rv */
 	{mdoc_st_pre, NULL}, /* St */
@@ -227,7 +228,7 @@ static const struct mdoc_html_act mdoc_html_acts[MDOC_MAX - MDOC_Dd] = {
 	{mdoc_em_pre, NULL}, /* Fr */
 	{NULL, NULL}, /* Ud */
 	{mdoc_lb_pre, NULL}, /* Lb */
-	{mdoc_pp_pre, NULL}, /* Lp */
+	{mdoc_abort_pre, NULL}, /* Lp */
 	{mdoc_lk_pre, NULL}, /* Lk */
 	{mdoc_mt_pre, NULL}, /* Mt */
 	{mdoc_quote_pre, mdoc_quote_post}, /* Brq */
@@ -968,7 +969,6 @@ mdoc_bd_pre(MDOC_ARGS)
 		case MDOC_Bl:
 		case MDOC_D1:
 		case MDOC_Dl:
-		case MDOC_Lp:
 		case MDOC_Pp:
 			continue;
 		default:
@@ -1807,4 +1807,10 @@ mdoc_eo_post(MDOC_ARGS)
 		h->flags |= HTML_NOSPACE;
 	else if ( ! tail)
 		h->flags &= ~HTML_NOSPACE;
+}
+
+static int
+mdoc_abort_pre(MDOC_ARGS)
+{
+	abort();
 }
