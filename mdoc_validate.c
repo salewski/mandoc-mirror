@@ -370,15 +370,7 @@ mdoc_node_validate(struct roff_man *mdoc)
 		/* Call the macro's postprocessor. */
 
 		if (n->tok < ROFF_MAX) {
-			switch(n->tok) {
-			case ROFF_br:
-			case ROFF_sp:
-				post_par(mdoc);
-				break;
-			default:
-				roff_validate(mdoc);
-				break;
-			}
+			roff_validate(mdoc);
 			break;
 		}
 
@@ -956,7 +948,7 @@ build_list(struct roff_man *mdoc, int tok)
 	for (ic = 1;; ic++) {
 		roff_elem_alloc(mdoc, n->line, n->pos, tok);
 		mdoc->last->flags |= NODE_NOSRC;
-		mdoc_node_relink(mdoc, n);
+		roff_node_relink(mdoc, n);
 		n = mdoc->last = mdoc->last->parent;
 		mdoc->next = ROFF_NEXT_SIBLING;
 		if (n->next == NULL)
@@ -1297,7 +1289,7 @@ post_nm(POST_ARGS)
 		mandoc_xr_add(mdoc->meta.msec, n->child->string, -1, -1);
 
 	if (n->last != NULL && n->last->tok == MDOC_Pp)
-		mdoc_node_relink(mdoc, n->last);
+		roff_node_relink(mdoc, n->last);
 
 	if (mdoc->meta.name == NULL)
 		deroff(&mdoc->meta.name, n);
@@ -1376,7 +1368,7 @@ post_display(POST_ARGS)
 				    mdoc->parse, n->line, n->pos, "Bd");
 				mdoc->next = ROFF_NEXT_SIBLING;
 				while (n->body->child != NULL)
-					mdoc_node_relink(mdoc,
+					roff_node_relink(mdoc,
 					    n->body->child);
 				roff_node_delete(mdoc, n);
 				break;
@@ -1659,7 +1651,7 @@ post_bl_block(POST_ARGS)
 				mandoc_msg(MANDOCERR_PAR_MOVE,
 				    mdoc->parse, nc->line, nc->pos,
 				    roff_name[nc->tok]);
-				mdoc_node_relink(mdoc, nc);
+				roff_node_relink(mdoc, nc);
 			} else if (n->norm->Bl.comp == 0 &&
 			    n->norm->Bl.type != LIST_column) {
 				mandoc_vmsg(MANDOCERR_PAR_SKIP,
@@ -1819,7 +1811,7 @@ post_bl(POST_ARGS)
 			roff_body_alloc(mdoc, nchild->line,
 			    nchild->pos, MDOC_It);
 			while (nchild->tok != MDOC_It) {
-				mdoc_node_relink(mdoc, nchild);
+				roff_node_relink(mdoc, nchild);
 				if ((nchild = nnext) == NULL)
 					break;
 				nnext = nchild->next;
@@ -1938,7 +1930,7 @@ post_sm(POST_ARGS)
 	mandoc_vmsg(MANDOCERR_SM_BAD,
 	    mdoc->parse, nch->line, nch->pos,
 	    "%s %s", roff_name[mdoc->last->tok], nch->string);
-	mdoc_node_relink(mdoc, nch);
+	roff_node_relink(mdoc, nch);
 	return;
 }
 
@@ -2522,7 +2514,8 @@ post_ignpar(POST_ARGS)
 	}
 
 	if ((np = mdoc->last->child) != NULL)
-		if (np->tok == MDOC_Pp) {
+		if (np->tok == MDOC_Pp ||
+		    np->tok == ROFF_br || np->tok == ROFF_sp) {
 			mandoc_vmsg(MANDOCERR_PAR_SKIP,
 			    mdoc->parse, np->line, np->pos,
 			    "%s after %s", roff_name[np->tok],
@@ -2531,7 +2524,7 @@ post_ignpar(POST_ARGS)
 		}
 
 	if ((np = mdoc->last->last) != NULL)
-		if (np->tok == MDOC_Pp) {
+		if (np->tok == MDOC_Pp || np->tok == ROFF_br) {
 			mandoc_vmsg(MANDOCERR_PAR_SKIP, mdoc->parse,
 			    np->line, np->pos, "%s at the end of %s",
 			    roff_name[np->tok],
@@ -2576,33 +2569,13 @@ post_par(POST_ARGS)
 {
 	struct roff_node *np;
 
-	np = mdoc->last;
-	if (np->tok != ROFF_br && np->tok != ROFF_sp)
-		post_prevpar(mdoc);
+	post_prevpar(mdoc);
 
-	if (np->tok == ROFF_sp) {
-		if (np->child != NULL && np->child->next != NULL)
-			mandoc_vmsg(MANDOCERR_ARG_EXCESS, mdoc->parse,
-			    np->child->next->line, np->child->next->pos,
-			    "sp ... %s", np->child->next->string);
-	} else if (np->child != NULL)
+	np = mdoc->last;
+	if (np->child != NULL)
 		mandoc_vmsg(MANDOCERR_ARG_SKIP,
 		    mdoc->parse, np->line, np->pos, "%s %s",
 		    roff_name[np->tok], np->child->string);
-
-	if ((np = mdoc->last->prev) == NULL) {
-		np = mdoc->last->parent;
-		if (np->tok != MDOC_Sh && np->tok != MDOC_Ss)
-			return;
-	} else if (np->tok != MDOC_Pp &&
-	    (mdoc->last->tok != ROFF_br ||
-	     (np->tok != ROFF_sp && np->tok != ROFF_br)))
-		return;
-
-	mandoc_vmsg(MANDOCERR_PAR_SKIP, mdoc->parse,
-	    mdoc->last->line, mdoc->last->pos, "%s after %s",
-	    roff_name[mdoc->last->tok], roff_name[np->tok]);
-	roff_node_delete(mdoc, mdoc->last);
 }
 
 static void

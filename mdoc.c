@@ -155,15 +155,6 @@ mdoc_elem_alloc(struct roff_man *mdoc, int line, int pos,
 	mdoc->next = ROFF_NEXT_CHILD;
 }
 
-void
-mdoc_node_relink(struct roff_man *mdoc, struct roff_node *p)
-{
-
-	roff_node_unlink(mdoc, p);
-	p->prev = p->next = NULL;
-	roff_node_append(mdoc, p);
-}
-
 /*
  * Parse free-form text, that is, a line that does not begin with the
  * control character.

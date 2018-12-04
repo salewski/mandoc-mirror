@@ -1067,6 +1067,14 @@ roff_node_unlink(struct roff_man *man, struct roff_node *n)
 }
 
 void
+roff_node_relink(struct roff_man *man, struct roff_node *n)
+{
+	roff_node_unlink(man, n);
+	n->prev = n->next = NULL;
+	roff_node_append(man, n);
+}
+
+void
 roff_node_free(struct roff_node *n)
 {
 

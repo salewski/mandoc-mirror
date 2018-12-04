@@ -1243,7 +1243,7 @@ blk_part_imp(MACRO_PROT_ARGS)
 	for (n = body->child; n && n->next; n = n->next)
 		/* Do nothing. */ ;
 	if (n && n->tok == MDOC_Ns)
-		mdoc_node_relink(mdoc, n);
+		roff_node_relink(mdoc, n);
 }
 
 static void
