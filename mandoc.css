@@ -19,7 +19,7 @@ table {		margin-top: 0em;
  * but not for table, resulting in inconsistent border styling. */
 tbody {		border-color: inherit; }
 tr {		border-color: inherit; }
-td {		vertical-align: middle;
+td {		vertical-align: top;
 		padding-left: 0.2em;
 		padding-right: 0.2em;
 		border-color: inherit; }
@@ -164,7 +164,7 @@ td.foot-os {	text-align: right; }
 .RsV { }
 
 .eqn { }
-.tbl { }
+.tbl td {	vertical-align: middle; }
 
 .HP {		margin-left: 3.8em;
 		text-indent: -3.8em; }
