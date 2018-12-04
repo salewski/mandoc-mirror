@@ -67,6 +67,14 @@ roff_valid_br(ROFF_VALID_ARGS)
 		mandoc_vmsg(MANDOCERR_ARG_SKIP, man->parse,
 		    n->line, n->pos, "br %s", n->child->string);
 
+	if (n->next != NULL && n->next->type == ROFFT_TEXT &&
+	    *n->next->string == ' ') {
+		mandoc_msg(MANDOCERR_PAR_SKIP, man->parse, n->line, n->pos,
+		    "br before text line with leading blank");
+		roff_node_delete(man, n);
+		return;
+	}
+
 	if ((np = n->prev) == NULL)
 		return;
 
