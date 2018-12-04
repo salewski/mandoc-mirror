@@ -357,7 +357,6 @@ static int
 print_encode(struct html *h, const char *p, const char *pend, int norecurse)
 {
 	char		 numbuf[16];
-	struct tag	*t;
 	const char	*seq;
 	size_t		 sz;
 	int		 c, len, breakline, nospace;
@@ -383,9 +382,7 @@ print_encode(struct html *h, const char *p, const char *pend, int norecurse)
 
 		if (breakline &&
 		    (p >= pend || *p == ' ' || *p == ASCII_NBRSP)) {
-			t = print_otag(h, TAG_DIV, "");
-			print_text(h, "\\~");
-			print_tagq(h, t);
+			print_otag(h, TAG_BR, "");
 			breakline = 0;
 			while (p < pend && (*p == ' ' || *p == ASCII_NBRSP))
 				p++;
