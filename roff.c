@@ -28,10 +28,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mandoc.h"
 #include "mandoc_aux.h"
 #include "mandoc_ohash.h"
+#include "mandoc.h"
 #include "roff.h"
+#include "tbl.h"
 #include "libmandoc.h"
 #include "roff_int.h"
 #include "libroff.h"

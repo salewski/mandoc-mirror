@@ -28,6 +28,7 @@
 
 #include "mandoc_aux.h"
 #include "mandoc.h"
+#include "tbl.h"
 #include "out.h"
 
 struct	tbl_colgroup {

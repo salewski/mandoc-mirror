@@ -30,6 +30,7 @@
 #include "mandoc_aux.h"
 #include "mandoc.h"
 #include "roff.h"
+#include "tbl.h"
 #include "libmandoc.h"
 #include "libroff.h"
 

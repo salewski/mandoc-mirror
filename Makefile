@@ -202,6 +202,7 @@ DISTFILES	 = INSTALL \
 		   tag.h \
 		   tbl.3 \
 		   tbl.7 \
+		   tbl.h \
 		   term.h \
 		   $(SRCS) \
 		   $(TESTSRCS)
@@ -351,7 +352,8 @@ WWW_INCS	 = man.h.html \
 		   mandoc_aux.h.html \
 		   mansearch.h.html \
 		   mdoc.h.html \
-		   roff.h.html
+		   roff.h.html \
+		   tbl.h.html
 
 # === USER CONFIGURATION ===============================================
 
@@ -422,7 +424,7 @@ lib-install: libmandoc.a
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
-	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h roff.h \
+	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h roff.h tbl.h \
 		$(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
 		mansearch.3 mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
@@ -482,6 +484,7 @@ uninstall:
 	rm -f $(DESTDIR)$(INCLUDEDIR)/mandoc_aux.h
 	rm -f $(DESTDIR)$(INCLUDEDIR)/mdoc.h
 	rm -f $(DESTDIR)$(INCLUDEDIR)/roff.h
+	rm -f $(DESTDIR)$(INCLUDEDIR)/tbl.h
 	[ ! -e $(DESTDIR)$(INCLUDEDIR) ] || rmdir $(DESTDIR)$(INCLUDEDIR)
 
 regress: all

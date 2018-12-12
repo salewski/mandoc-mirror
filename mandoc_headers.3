@@ -25,13 +25,13 @@ separate from each other:
 .Pp
 .Bl -dash -offset indent -compact
 .It
+.Xr roff 7
+parser
+.It
 .Xr mdoc 7
 parser
 .It
 .Xr man 7
-parser
-.It
-.Xr roff 7
 parser
 .It
 .Xr tbl 7
@@ -45,6 +45,8 @@ terminal formatters
 HTML formatters
 .It
 search tools
+.It
+main programs
 .El
 .Pp
 Note that mere usage of an opaque struct type does
@@ -56,14 +58,18 @@ any other mandoc header.
 These headers should be included before any other mandoc headers.
 .Bl -tag -width Ds
 .It Qq Pa mandoc_aux.h
+Memory allocation utility functions; can be used everywhere.
+.Pp
 Requires
 .In sys/types.h
 for
 .Vt size_t .
 .Pp
-Provides the utility functions documented in
+Provides the functions documented in
 .Xr mandoc_malloc 3 .
 .It Qq Pa mandoc_ohash.h
+Hashing utility functions; can be used everywhere.
+.Pp
 Requires
 .In stddef.h
 for
@@ -78,6 +84,9 @@ Includes
 and provides
 .Fn mandoc_ohash_init .
 .It Qq Pa mandoc.h
+Error handling utilities and top level parser interface;
+can be used everywhere.
+.Pp
 Requires
 .In sys/types.h
 for
@@ -88,18 +97,10 @@ Provides
 .Vt enum mandocerr ,
 .Vt enum mandoclevel ,
 .Vt enum mandoc_os ,
-.Vt enum tbl_cellt ,
-.Vt enum tbl_datt ,
-.Vt enum tbl_spant ,
 .Vt enum eqn_boxt ,
 .Vt enum eqn_fontt ,
 .Vt enum eqn_pilet ,
 .Vt enum eqn_post ,
-.Vt struct tbl_opts ,
-.Vt struct tbl_cell ,
-.Vt struct tbl_row ,
-.Vt struct tbl_dat ,
-.Vt struct tbl_span ,
 .Vt struct eqn_box ,
 the function prototype typedef
 .Fn mandocmsg ,
@@ -122,7 +123,30 @@ Uses the type
 from
 .Pa roff.h
 as an opaque type for function prototypes.
+.It Qq Pa tbl.h
+Data structures for the
+.Xr tbl 7
+parse tree; can be used everywhere.
+.Pp
+Requires
+.In sys/types.h
+for
+.Vt size_t .
+.Pp
+Provides
+.Vt enum tbl_cellt ,
+.Vt enum tbl_datt ,
+.Vt enum tbl_spant ,
+.Vt struct tbl_opts ,
+.Vt struct tbl_cell ,
+.Vt struct tbl_row ,
+.Vt struct tbl_dat ,
+and
+.Vt struct tbl_span .
 .It Qq Pa mandoc_xr.h
+Cross reference validation; intended for use in the main program
+and in parsers, but not in formatters.
+.Pp
 Provides
 .Vt struct mandoc_xr
 and the functions

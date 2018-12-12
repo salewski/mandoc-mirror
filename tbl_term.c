@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "mandoc.h"
+#include "tbl.h"
 #include "out.h"
 #include "term.h"
 
