@@ -167,6 +167,9 @@ and the functions
 and
 .Fn mandoc_xr_free .
 .It Qq Pa roff.h
+Common data types for all syntax trees and related functions;
+can be used everywhere.
+.Pp
 Requires
 .Qq Pa mandoc_ohash.h
 for
@@ -189,10 +192,7 @@ Provides
 the constant array
 .Va roff_name
 and the functions
-.Fn deroff ,
-.Fn roffhash_alloc ,
-.Fn roffhash_find ,
-.Fn roffhash_free ,
+.Fn deroff
 and
 .Fn roff_validate .
 .Pp
@@ -300,14 +300,24 @@ from
 .Pa roff.h
 as an opaque type for function prototypes.
 .It Qq Pa roff_int.h
+Parser internals shared by multiple parsers.
+Can be used in all parsers, but not in main programs or formatters.
+.Pp
 Requires
 .Qq Pa roff.h
 for
-.Vt enum roff_type .
+.Vt enum roff_type
+and
+.Vt enum roff_tok .
 .Pp
 Provides functions named
 .Fn roff_*
-to handle roff nodes and the two special functions
+to handle roff nodes,
+.Fn roffhash_alloc ,
+.Fn roffhash_find ,
+and
+.Fn roffhash_free ,
+and the two special functions
 .Fn man_breakscope
 and
 .Fn mdoc_argv_free

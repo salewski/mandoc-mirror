@@ -14,6 +14,8 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ * Common data types for all syntax trees and related functions.
  */
 
 struct	ohash;
@@ -577,7 +579,4 @@ extern	const char *const *roff_name;
 
 
 void		 deroff(char **, const struct roff_node *);
-struct ohash	*roffhash_alloc(enum roff_tok, enum roff_tok);
-enum roff_tok	 roffhash_find(struct ohash *, const char *, size_t);
-void		 roffhash_free(struct ohash *);
 void		 roff_validate(struct roff_man *);

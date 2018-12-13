@@ -39,6 +39,7 @@
 #include "mdoc.h"
 #include "man.h"
 #include "libmandoc.h"
+#include "roff_int.h"
 
 #define	REPARSE_LIMIT	1000
 
