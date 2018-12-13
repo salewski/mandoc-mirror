@@ -32,6 +32,7 @@
 #include "mandoc_ohash.h"
 #include "mandoc.h"
 #include "roff.h"
+#include "mandoc_parse.h"
 #include "libmandoc.h"
 #include "roff_int.h"
 #include "tbl_parse.h"

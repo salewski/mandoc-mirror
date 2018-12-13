@@ -36,7 +36,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "mandoc.h"
 #include "mandoc_aux.h"
 #include "mandoc_ohash.h"
 #include "manconf.h"

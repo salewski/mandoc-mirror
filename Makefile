@@ -185,6 +185,7 @@ DISTFILES	 = INSTALL \
 		   mandoc_html.3 \
 		   mandoc_malloc.3 \
 		   mandoc_ohash.h \
+		   mandoc_parse.h \
 		   mandoc_xr.h \
 		   mandocd.8 \
 		   mansearch.3 \
@@ -353,6 +354,7 @@ WWW_INCS	 = eqn.h.html \
 		   manconf.h.html \
 		   mandoc.h.html \
 		   mandoc_aux.h.html \
+		   mandoc_parse.h.html \
 		   mansearch.h.html \
 		   mdoc.h.html \
 		   roff.h.html \
@@ -427,8 +429,8 @@ lib-install: libmandoc.a
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
-	$(INSTALL_LIB) eqn.h man.h mandoc.h mandoc_aux.h mdoc.h roff.h tbl.h \
-		$(DESTDIR)$(INCLUDEDIR)
+	$(INSTALL_LIB) eqn.h man.h mandoc.h mandoc_aux.h mandoc_parse.h \
+		mdoc.h roff.h tbl.h $(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
 		mansearch.3 mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
 
@@ -486,6 +488,7 @@ uninstall:
 	rm -f $(DESTDIR)$(INCLUDEDIR)/man.h
 	rm -f $(DESTDIR)$(INCLUDEDIR)/mandoc.h
 	rm -f $(DESTDIR)$(INCLUDEDIR)/mandoc_aux.h
+	rm -f $(DESTDIR)$(INCLUDEDIR)/mandoc_parse.h
 	rm -f $(DESTDIR)$(INCLUDEDIR)/mdoc.h
 	rm -f $(DESTDIR)$(INCLUDEDIR)/roff.h
 	rm -f $(DESTDIR)$(INCLUDEDIR)/tbl.h

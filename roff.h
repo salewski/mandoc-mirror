@@ -492,6 +492,12 @@ enum	mdoc_endbody {
 	ENDBODY_SPACE	/* Is broken: append a space. */
 };
 
+enum	mandoc_os {
+	MANDOC_OS_OTHER = 0,
+	MANDOC_OS_NETBSD,
+	MANDOC_OS_OPENBSD
+};
+
 struct	roff_node {
 	struct roff_node *parent;  /* Parent AST node. */
 	struct roff_node *child;   /* First child AST node. */

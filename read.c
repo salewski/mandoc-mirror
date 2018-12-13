@@ -38,6 +38,7 @@
 #include "roff.h"
 #include "mdoc.h"
 #include "man.h"
+#include "mandoc_parse.h"
 #include "libmandoc.h"
 #include "roff_int.h"
 

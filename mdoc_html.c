@@ -27,7 +27,6 @@
 #include <unistd.h>
 
 #include "mandoc_aux.h"
-#include "mandoc.h"
 #include "roff.h"
 #include "mdoc.h"
 #include "out.h"

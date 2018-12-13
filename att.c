@@ -19,7 +19,6 @@
 #include <sys/types.h>
 #include <string.h>
 
-#include "mandoc.h"
 #include "roff.h"
 #include "libmdoc.h"
 

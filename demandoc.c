@@ -29,6 +29,7 @@
 #include "roff.h"
 #include "man.h"
 #include "mdoc.h"
+#include "mandoc_parse.h"
 
 static	void	 pline(int, int *, int *, int);
 static	void	 pman(const struct roff_node *, int *, int *, int);

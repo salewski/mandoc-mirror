@@ -20,7 +20,6 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "mandoc.h"
 #include "roff.h"
 #include "out.h"
 #include "html.h"

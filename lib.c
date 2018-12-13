@@ -17,12 +17,9 @@
 #include "config.h"
 
 #include <sys/types.h>
-
 #include <string.h>
 
-#include "mandoc.h"
 #include "roff.h"
-#include "mdoc.h"
 #include "libmdoc.h"
 
 #define LINE(x, y) \

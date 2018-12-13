@@ -22,7 +22,10 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "mandoc.h"
+#include "roff.h"
+#include "mandoc_parse.h"
 #include "libmandoc.h"
 
 int

@@ -52,6 +52,7 @@
 #include "roff.h"
 #include "mdoc.h"
 #include "man.h"
+#include "mandoc_parse.h"
 #include "manconf.h"
 #include "mansearch.h"
 #include "dba_array.h"

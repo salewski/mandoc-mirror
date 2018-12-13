@@ -49,6 +49,7 @@
 #include "roff.h"
 #include "mdoc.h"
 #include "man.h"
+#include "mandoc_parse.h"
 #include "tag.h"
 #include "main.h"
 #include "manconf.h"
