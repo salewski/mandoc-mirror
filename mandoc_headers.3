@@ -97,11 +97,6 @@ Provides
 .Vt enum mandocerr ,
 .Vt enum mandoclevel ,
 .Vt enum mandoc_os ,
-.Vt enum eqn_boxt ,
-.Vt enum eqn_fontt ,
-.Vt enum eqn_pilet ,
-.Vt enum eqn_post ,
-.Vt struct eqn_box ,
 the function prototype typedef
 .Fn mandocmsg ,
 the function
@@ -143,6 +138,22 @@ Provides
 .Vt struct tbl_dat ,
 and
 .Vt struct tbl_span .
+.It Qq Pa eqn.h
+Data structures for the
+.Xr eqn 7
+parse tree; can be used everywhere.
+.Pp
+Requires
+.In sys/types.h
+for
+.Vt size_t .
+.Pp
+Provides
+.Vt enum eqn_boxt ,
+.Vt enum eqn_fontt ,
+.Vt enum eqn_post ,
+and
+.Vt struct eqn_box .
 .It Qq Pa mandoc_xr.h
 Cross reference validation; intended for use in the main program
 and in parsers, but not in formatters.
@@ -388,6 +399,7 @@ Provides
 .Vt struct eqn_node
 and the functions
 .Fn eqn_alloc ,
+.Fn eqn_box_new ,
 .Fn eqn_box_free ,
 .Fn eqn_free ,
 .Fn eqn_parse ,

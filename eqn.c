@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2014, 2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2014, 2015, 2017, 2018 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,6 +30,7 @@
 #include "mandoc_aux.h"
 #include "mandoc.h"
 #include "roff.h"
+#include "eqn.h"
 #include "libmandoc.h"
 #include "eqn_parse.h"
 
@@ -491,6 +492,16 @@ eqn_box_free(struct eqn_box *bp)
 	free(bp);
 }
 
+struct eqn_box *
+eqn_box_new(void)
+{
+	struct eqn_box	*bp;
+
+	bp = mandoc_calloc(1, sizeof(*bp));
+	bp->expectargs = UINT_MAX;
+	return bp;
+}
+
 /*
  * Allocate a box as the last child of the parent node.
  */
@@ -499,10 +510,9 @@ eqn_box_alloc(struct eqn_node *ep, struct eqn_box *parent)
 {
 	struct eqn_box	*bp;
 
-	bp = mandoc_calloc(1, sizeof(struct eqn_box));
+	bp = eqn_box_new();
 	bp->parent = parent;
 	bp->parent->args++;
-	bp->expectargs = UINT_MAX;
 	bp->font = bp->parent->font;
 	bp->size = ep->gsize;
 

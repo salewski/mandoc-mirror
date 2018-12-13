@@ -30,6 +30,7 @@
 #include "mdoc.h"
 #include "man.h"
 #include "tbl.h"
+#include "eqn.h"
 #include "main.h"
 
 static	void	print_box(const struct eqn_box *, int);

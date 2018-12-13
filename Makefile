@@ -155,6 +155,7 @@ DISTFILES	 = INSTALL \
 		   dbm_map.h \
 		   demandoc.1 \
 		   eqn.7 \
+		   eqn.h \
 		   eqn_parse.h \
 		   gmdiff \
 		   html.h \
@@ -348,7 +349,8 @@ WWW_MANS	 = apropos.1.html \
 		   man.cgi.8.html \
 		   mandocd.8.html
 
-WWW_INCS	 = man.h.html \
+WWW_INCS	 = eqn.h.html \
+		   man.h.html \
 		   manconf.h.html \
 		   mandoc.h.html \
 		   mandoc_aux.h.html \
@@ -426,7 +428,7 @@ lib-install: libmandoc.a
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
-	$(INSTALL_LIB) man.h mandoc.h mandoc_aux.h mdoc.h roff.h tbl.h \
+	$(INSTALL_LIB) eqn.h man.h mandoc.h mandoc_aux.h mdoc.h roff.h tbl.h \
 		$(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
 		mansearch.3 mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
@@ -481,6 +483,7 @@ uninstall:
 	rm -f $(DESTDIR)$(MANDIR)/man3/mansearch.3
 	rm -f $(DESTDIR)$(MANDIR)/man3/mchars_alloc.3
 	rm -f $(DESTDIR)$(MANDIR)/man3/tbl.3
+	rm -f $(DESTDIR)$(INCLUDEDIR)/eqn.h
 	rm -f $(DESTDIR)$(INCLUDEDIR)/man.h
 	rm -f $(DESTDIR)$(INCLUDEDIR)/mandoc.h
 	rm -f $(DESTDIR)$(INCLUDEDIR)/mandoc_aux.h
