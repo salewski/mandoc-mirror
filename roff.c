@@ -32,10 +32,10 @@
 #include "mandoc_ohash.h"
 #include "mandoc.h"
 #include "roff.h"
-#include "tbl.h"
 #include "libmandoc.h"
 #include "roff_int.h"
 #include "libroff.h"
+#include "tbl_parse.h"
 
 /* Maximum number of string expansions per line, to break infinite loops. */
 #define	EXPAND_LIMIT	1000
@@ -168,7 +168,7 @@ static	int		 roffnode_cleanscope(struct roff *);
 static	int		 roffnode_pop(struct roff *);
 static	void		 roffnode_push(struct roff *, enum roff_tok,
 				const char *, int, int);
-static	void		 roff_addtbl(struct roff_man *, struct tbl_node *);
+static	void		 roff_addtbl(struct roff_man *, int, struct tbl_node *);
 static	int		 roff_als(ROFF_ARGS);
 static	int		 roff_block(ROFF_ARGS);
 static	int		 roff_block_text(ROFF_ARGS);
@@ -718,13 +718,9 @@ roffnode_push(struct roff *r, enum roff_tok tok, const char *name,
 static void
 roff_free1(struct roff *r)
 {
-	struct tbl_node	*tbl;
 	int		 i;
 
-	while (NULL != (tbl = r->first_tbl)) {
-		r->first_tbl = tbl->next;
-		tbl_free(tbl);
-	}
+	tbl_free(r->first_tbl);
 	r->first_tbl = r->last_tbl = r->tbl = NULL;
 
 	if (r->last_eqn != NULL)
@@ -1014,15 +1010,15 @@ roff_body_alloc(struct roff_man *man, int line, int pos, int tok)
 }
 
 static void
-roff_addtbl(struct roff_man *man, struct tbl_node *tbl)
+roff_addtbl(struct roff_man *man, int line, struct tbl_node *tbl)
 {
 	struct roff_node	*n;
-	const struct tbl_span	*span;
+	struct tbl_span		*span;
 
 	if (man->macroset == MACROSET_MAN)
 		man_breakscope(man, ROFF_TS);
 	while ((span = tbl_span(tbl)) != NULL) {
-		n = roff_node_alloc(man, tbl->line, 0, ROFFT_TBL, TOKEN_NONE);
+		n = roff_node_alloc(man, line, 0, ROFFT_TBL, TOKEN_NONE);
 		n->span = span;
 		roff_node_append(man, n);
 		n->flags |= NODE_VALID | NODE_ENDED;
@@ -1660,7 +1656,7 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 	}
 	if (r->tbl != NULL && (ctl == 0 || buf->buf[pos] == '\0')) {
 		tbl_read(r->tbl, ln, buf->buf, ppos);
-		roff_addtbl(r->man, r->tbl);
+		roff_addtbl(r->man, ln, r->tbl);
 		return e;
 	}
 	if ( ! ctl)
@@ -1704,7 +1700,7 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 		while (buf->buf[pos] == ' ')
 			pos++;
 		tbl_read(r->tbl, ln, buf->buf, pos);
-		roff_addtbl(r->man, r->tbl);
+		roff_addtbl(r->man, ln, r->tbl);
 		return ROFF_IGN;
 	}
 
@@ -1767,9 +1763,7 @@ roff_endparse(struct roff *r)
 	}
 
 	if (r->tbl != NULL) {
-		mandoc_msg(MANDOCERR_BLK_NOEND, r->parse,
-		    r->tbl->line, r->tbl->pos, "TS");
-		tbl_end(r->tbl);
+		tbl_end(r->tbl, 1);
 		r->tbl = NULL;
 	}
 }
@@ -3060,7 +3054,7 @@ roff_TE(ROFF_ARGS)
 		    ln, ppos, "TE");
 		return ROFF_IGN;
 	}
-	if (tbl_end(r->tbl) == 0) {
+	if (tbl_end(r->tbl, 0) == 0) {
 		r->tbl = NULL;
 		free(buf->buf);
 		buf->buf = mandoc_strdup(".sp");
@@ -3201,12 +3195,10 @@ roff_TS(ROFF_ARGS)
 	if (r->tbl != NULL) {
 		mandoc_msg(MANDOCERR_BLK_BROKEN, r->parse,
 		    ln, ppos, "TS breaks TS");
-		tbl_end(r->tbl);
+		tbl_end(r->tbl, 0);
 	}
-	r->tbl = tbl_alloc(ppos, ln, r->parse);
-	if (r->last_tbl)
-		r->last_tbl->next = r->tbl;
-	else
+	r->tbl = tbl_alloc(ppos, ln, r->parse, r->last_tbl);
+	if (r->last_tbl == NULL)
 		r->first_tbl = r->tbl;
 	r->last_tbl = r->tbl;
 	return ROFF_IGN;

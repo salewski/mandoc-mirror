@@ -27,7 +27,7 @@
 #include "mandoc.h"
 #include "tbl.h"
 #include "libmandoc.h"
-#include "libroff.h"
+#include "tbl_int.h"
 
 #define	KEY_DPOINT	0
 #define	KEY_DELIM	1

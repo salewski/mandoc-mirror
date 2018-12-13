@@ -203,6 +203,8 @@ DISTFILES	 = INSTALL \
 		   tbl.3 \
 		   tbl.7 \
 		   tbl.h \
+		   tbl_int.h \
+		   tbl_parse.h \
 		   term.h \
 		   $(SRCS) \
 		   $(TESTSRCS)

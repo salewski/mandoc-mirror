@@ -29,7 +29,7 @@
 #include "mandoc.h"
 #include "tbl.h"
 #include "libmandoc.h"
-#include "libroff.h"
+#include "tbl_int.h"
 
 struct	tbl_phrase {
 	char		 name;

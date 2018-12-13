@@ -502,7 +502,7 @@ struct	roff_node {
 	struct mdoc_arg	 *args;    /* BLOCK/ELEM */
 	union mdoc_data	 *norm;    /* Normalized arguments. */
 	char		 *string;  /* TEXT */
-	const struct tbl_span *span; /* TBL */
+	struct tbl_span	 *span;    /* TBL */
 	struct eqn_box	 *eqn;     /* EQN */
 	int		  line;    /* Input file line number. */
 	int		  pos;     /* Input file column number. */

@@ -257,7 +257,7 @@ or
 .Pa libroff.h .
 .El
 .Ss Parser internals
-The following headers require inclusion of a parser interface header
+Most of the following headers require inclusion of a parser interface header
 before they can be included.
 All parser interface headers should precede all parser internal headers.
 When any parser internal headers are included, the same file should
@@ -388,20 +388,14 @@ for
 and
 .Qq Pa mandoc.h
 for
-.Vt struct tbl_*
-and
 .Vt struct eqn_box .
 .Pp
 Provides
-.Vt enum tbl_part ,
-.Vt struct tbl_node ,
 .Vt struct eqn_def ,
 .Vt struct eqn_node ,
 and many functions internal to the
-.Xr tbl 7
-and
 .Xr eqn 7
-parsers.
+parser.
 .Pp
 Uses the opaque type
 .Vt struct mparse
@@ -414,6 +408,65 @@ When this header is included, the same file should not include
 .Pa libman.h ,
 or
 .Pa libmdoc.h .
+.It Qq Pa tbl_parse.h
+External interface of the
+.Xr tbl 7
+parser, for use in the
+.Xr roff 7
+and
+.Xr tbl 7
+parsers only.
+.Pp
+Provides the functions documented in
+.Xr tbl 3 .
+.Pp
+Uses the opaque type
+.Vt struct mparse
+from
+.Pa read.c .
+Uses the types
+.Vt struct tbl_span
+from
+.Pa tbl.h
+and
+.Vt struct tbl_node
+from
+.Pa tbl_int.h
+as opaque types for function prototypes.
+.Pp
+When this header is included, the same file should not include
+internals of a different parser.
+.It Qq Pa tbl_int.h
+Internal interfaces of the
+.Xr tbl 7
+parser, for use inside the
+.Xr tbl 7
+parser only.
+.Pp
+Requires
+.Qq Pa tbl.h
+for
+.Vt struct tbl_opts .
+.Pp
+Provides
+.Vt enum tbl_part ,
+.Vt struct tbl_node ,
+and the functions
+.Fn tbl_option ,
+.Fn tbl_layout ,
+.Fn tbl_data ,
+.Fn tbl_cdata ,
+and
+.Fn tbl_reset .
+.Pp
+Uses a pointer to the opaque type
+.Vt struct mparse
+from
+.Pa read.c
+as an opaque struct member.
+.Pp
+When this header is included, the same file should not include
+interfaces of different parsers.
 .El
 .Ss Formatter interface
 These headers should be included after any parser interface headers.

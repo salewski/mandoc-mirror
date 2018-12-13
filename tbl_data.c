@@ -29,7 +29,7 @@
 #include "mandoc.h"
 #include "tbl.h"
 #include "libmandoc.h"
-#include "libroff.h"
+#include "tbl_int.h"
 
 static	void		 getdata(struct tbl_node *, struct tbl_span *,
 				int, const char *, int *);
