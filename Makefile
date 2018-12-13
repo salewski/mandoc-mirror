@@ -199,7 +199,6 @@ DISTFILES	 = INSTALL \
 		   roff.h \
 		   roff_int.h \
 		   soelim.1 \
-		   st.in \
 		   tag.h \
 		   tbl.3 \
 		   tbl.7 \
