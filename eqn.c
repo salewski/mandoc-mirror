@@ -30,9 +30,8 @@
 #include "mandoc_aux.h"
 #include "mandoc.h"
 #include "roff.h"
-#include "tbl.h"
 #include "libmandoc.h"
-#include "libroff.h"
+#include "eqn_parse.h"
 
 #define	EQN_NEST_MAX	 128 /* maximum nesting of defines */
 #define	STRNEQ(p1, sz1, p2, sz2) \
@@ -285,6 +284,13 @@ enum	parse_mode {
 	MODE_TOK
 };
 
+struct	eqn_def {
+	char		 *key;
+	size_t		  keysz;
+	char		 *val;
+	size_t		  valsz;
+};
+
 static	struct eqn_box	*eqn_box_alloc(struct eqn_node *, struct eqn_box *);
 static	struct eqn_box	*eqn_box_makebinary(struct eqn_node *,
 				struct eqn_box *);
@@ -469,6 +475,8 @@ eqn_next(struct eqn_node *ep, enum parse_mode mode)
 void
 eqn_box_free(struct eqn_box *bp)
 {
+	if (bp == NULL)
+		return;
 
 	if (bp->first)
 		eqn_box_free(bp->first);
@@ -1092,6 +1100,9 @@ void
 eqn_free(struct eqn_node *p)
 {
 	int		 i;
+
+	if (p == NULL)
+		return;
 
 	for (i = 0; i < (int)p->defsz; i++) {
 		free(p->defs[i].key);

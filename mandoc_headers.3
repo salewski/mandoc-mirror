@@ -231,9 +231,7 @@ from
 as an opaque type for function prototypes.
 .Pp
 When this header is included, the same file should not include
-.Pa libman.h
-or
-.Pa libroff.h .
+internals of different parsers.
 .It Qq Pa man.h
 Provides the functions
 .Fn man_*
@@ -252,9 +250,7 @@ from
 as an opaque type for function prototypes.
 .Pp
 When this header is included, the same file should not include
-.Pa libmdoc.h
-or
-.Pa libroff.h .
+internals of different parsers.
 .El
 .Ss Parser internals
 Most of the following headers require inclusion of a parser interface header
@@ -351,10 +347,7 @@ from
 as opaque types for function prototypes.
 .Pp
 When this header is included, the same file should not include
-.Pa man.h ,
-.Pa libman.h ,
-or
-.Pa libroff.h .
+interfaces of different parsers.
 .It Qq Pa libman.h
 Requires
 .Qq Pa roff.h
@@ -376,38 +369,54 @@ from
 as opaque types for function prototypes.
 .Pp
 When this header is included, the same file should not include
-.Pa mdoc.h ,
-.Pa libmdoc.h ,
-or
-.Pa libroff.h .
-.It Qq Pa libroff.h
+interfaces of different parsers.
+.It Qq Pa eqn_parse.h
+External interface of the
+.Xr eqn 7
+parser, for use in the
+.Xr roff 7
+and
+.Xr eqn 7
+parsers only.
+.Pp
 Requires
 .In sys/types.h
 for
-.Vt size_t
-and
-.Qq Pa mandoc.h
-for
-.Vt struct eqn_box .
+.Vt size_t .
 .Pp
 Provides
-.Vt struct eqn_def ,
-.Vt struct eqn_node ,
-and many functions internal to the
-.Xr eqn 7
-parser.
+.Vt struct eqn_node
+and the functions
+.Fn eqn_alloc ,
+.Fn eqn_box_free ,
+.Fn eqn_free ,
+.Fn eqn_parse ,
+.Fn eqn_read ,
+and
+.Fn eqn_reset .
 .Pp
 Uses the opaque type
 .Vt struct mparse
 from
-.Pa read.c .
+.Pa read.c
+for function prototypes.
+Uses the type
+.Vt struct eqn_box
+from
+.Pa mandoc.h
+as an opaque type for function prototypes.
+Uses the types
+.Vt struct roff_node
+from
+.Pa roff.h
+and
+.Vt struct eqn_def
+from
+.Pa eqn.c
+as opaque struct members.
 .Pp
 When this header is included, the same file should not include
-.Pa man.h ,
-.Pa mdoc.h ,
-.Pa libman.h ,
-or
-.Pa libmdoc.h .
+internals of different parsers.
 .It Qq Pa tbl_parse.h
 External interface of the
 .Xr tbl 7
@@ -435,7 +444,7 @@ from
 as opaque types for function prototypes.
 .Pp
 When this header is included, the same file should not include
-internals of a different parser.
+internals of different parsers.
 .It Qq Pa tbl_int.h
 Internal interfaces of the
 .Xr tbl 7

@@ -155,13 +155,13 @@ DISTFILES	 = INSTALL \
 		   dbm_map.h \
 		   demandoc.1 \
 		   eqn.7 \
+		   eqn_parse.h \
 		   gmdiff \
 		   html.h \
 		   lib.in \
 		   libman.h \
 		   libmandoc.h \
 		   libmdoc.h \
-		   libroff.h \
 		   main.h \
 		   makewhatis.8 \
 		   man.1 \

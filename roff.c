@@ -34,8 +34,8 @@
 #include "roff.h"
 #include "libmandoc.h"
 #include "roff_int.h"
-#include "libroff.h"
 #include "tbl_parse.h"
+#include "eqn_parse.h"
 
 /* Maximum number of string expansions per line, to break infinite loops. */
 #define	EXPAND_LIMIT	1000
@@ -723,8 +723,7 @@ roff_free1(struct roff *r)
 	tbl_free(r->first_tbl);
 	r->first_tbl = r->last_tbl = r->tbl = NULL;
 
-	if (r->last_eqn != NULL)
-		eqn_free(r->last_eqn);
+	eqn_free(r->last_eqn);
 	r->last_eqn = r->eqn = NULL;
 
 	while (r->mstackpos >= 0)
@@ -1079,8 +1078,7 @@ roff_node_free(struct roff_node *n)
 		mdoc_argv_free(n->args);
 	if (n->type == ROFFT_BLOCK || n->type == ROFFT_ELEM)
 		free(n->norm);
-	if (n->eqn != NULL)
-		eqn_box_free(n->eqn);
+	eqn_box_free(n->eqn);
 	free(n->string);
 	free(n);
 }
