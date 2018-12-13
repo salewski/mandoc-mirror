@@ -171,10 +171,6 @@ Common data types for all syntax trees and related functions;
 can be used everywhere.
 .Pp
 Requires
-.Qq Pa mandoc_ohash.h
-for
-.Vt struct ohash
-and
 .Qq Pa mandoc.h
 for
 .Vt enum mandoc_os .
@@ -197,6 +193,10 @@ and
 .Fn roff_validate .
 .Pp
 Uses pointers to the types
+.Vt struct ohash
+from
+.Pa mandoc_ohash.h
+and
 .Vt struct mdoc_arg
 and
 .Vt union mdoc_data
@@ -341,11 +341,7 @@ Requires
 for
 .Vt enum roff_tok
 and
-.Qq Pa mdoc.h
-for
-.Vt enum mdoc_*
-and
-.Vt struct mdoc_* .
+.Vt enum roff_sec .
 .Pp
 Provides
 .Vt enum margserr ,
@@ -355,16 +351,16 @@ and many functions internal to the
 .Xr mdoc 7
 parser.
 .Pp
-Uses the opaque type
-.Vt struct mparse
-from
-.Pa read.c .
 Uses the types
 .Vt struct roff_man
 and
 .Vt struct roff_node
 from
 .Pa roff.h
+and
+.Vt struct mdoc_arg
+from
+.Pa mdoc.h
 as opaque types for function prototypes.
 .Pp
 When this header is included, the same file should not include
