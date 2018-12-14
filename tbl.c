@@ -88,7 +88,7 @@ tbl_read(struct tbl_node *tbl, int ln, const char *p, int pos)
 }
 
 struct tbl_node *
-tbl_alloc(int pos, int line, struct mparse *parse, struct tbl_node *last_tbl)
+tbl_alloc(int pos, int line, struct tbl_node *last_tbl)
 {
 	struct tbl_node	*tbl;
 
@@ -97,7 +97,6 @@ tbl_alloc(int pos, int line, struct mparse *parse, struct tbl_node *last_tbl)
 		last_tbl->next = tbl;
 	tbl->line = line;
 	tbl->pos = pos;
-	tbl->parse = parse;
 	tbl->part = TBL_PART_OPTS;
 	tbl->opts.tab = '\t';
 	tbl->opts.decimal = '.';

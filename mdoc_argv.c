@@ -572,7 +572,7 @@ args(struct roff_man *mdoc, int line, int *pos,
 	}
 
 	p = &buf[*pos];
-	*v = mandoc_getarg(mdoc->parse, &p, line, pos);
+	*v = mandoc_getarg(&p, line, pos);
 
 	/*
 	 * After parsing the last word in this phrase,

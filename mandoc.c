@@ -401,7 +401,7 @@ mandoc_escape(const char **end, const char **start, int *sz)
  * or to the NUL byte terminating the argument line.
  */
 char *
-mandoc_getarg(struct mparse *parse, char **cpp, int ln, int *pos)
+mandoc_getarg(char **cpp, int ln, int *pos)
 {
 	char	 *start, *cp;
 	int	  quoted, pairs, white;

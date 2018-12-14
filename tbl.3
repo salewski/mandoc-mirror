@@ -33,7 +33,6 @@
 .Fo tbl_alloc
 .Fa "int pos"
 .Fa "int line"
-.Fa "struct mparse *parse"
 .Fc
 .Ft void
 .Fo tbl_read
@@ -103,12 +102,6 @@ members may be
 but if there is a span, the function
 .Fn tbl_layout
 guarantees that these pointers are not
-.Dv NULL .
-The function
-.Fn tbl_alloc
-guarantees that the
-.Fa parse
-member is not
 .Dv NULL .
 .It Vt struct tbl_opts
 This structure describes the options of one table.

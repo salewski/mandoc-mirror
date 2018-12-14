@@ -19,11 +19,10 @@
  * For use in the roff(7) and tbl(7) parsers only.
  */
 
-struct mparse;
 struct tbl_node;
 struct tbl_span;
 
-struct tbl_node	*tbl_alloc(int, int, struct mparse *, struct tbl_node *);
+struct tbl_node	*tbl_alloc(int, int, struct tbl_node *);
 int		 tbl_end(struct tbl_node *, int);
 void		 tbl_free(struct tbl_node *);
 void		 tbl_read(struct tbl_node *, int, const char *, int);

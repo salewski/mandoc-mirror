@@ -45,11 +45,10 @@ struct	buf {
 };
 
 
-struct	mparse;
 struct	roff;
 struct	roff_man;
 
-char		*mandoc_getarg(struct mparse *, char **, int, int *);
+char		*mandoc_getarg(char **, int, int *);
 char		*mandoc_normdate(struct roff_man *, char *, int, int);
 int		 mandoc_eos(const char *, size_t);
 int		 mandoc_strntoi(const char *, size_t, int);
@@ -66,11 +65,10 @@ int		 preconv_encode(const struct buf *, size_t *,
 			struct buf *, size_t *, int *);
 
 void		 roff_free(struct roff *);
-struct roff	*roff_alloc(struct mparse *, int);
+struct roff	*roff_alloc(int);
 void		 roff_reset(struct roff *);
 void		 roff_man_free(struct roff_man *);
-struct roff_man	*roff_man_alloc(struct roff *, struct mparse *,
-			const char *, int);
+struct roff_man	*roff_man_alloc(struct roff *, const char *, int);
 void		 roff_man_reset(struct roff_man *);
 int		 roff_parseln(struct roff *, int, struct buf *, int *);
 void		 roff_userret(struct roff *);

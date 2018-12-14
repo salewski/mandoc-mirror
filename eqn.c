@@ -303,12 +303,11 @@ static	void		 eqn_undef(struct eqn_node *);
 
 
 struct eqn_node *
-eqn_alloc(struct mparse *parse)
+eqn_alloc(void)
 {
 	struct eqn_node *ep;
 
 	ep = mandoc_calloc(1, sizeof(*ep));
-	ep->parse = parse;
 	ep->gsize = EQN_DEFSIZE;
 	return ep;
 }

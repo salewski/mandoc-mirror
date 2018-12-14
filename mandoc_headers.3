@@ -192,7 +192,7 @@ and
 for
 .Vt enum mandoc_os .
 .Pp
-Uses to opaque type
+Uses the opaque type
 .Vt struct mparse
 from
 .Pa read.c
@@ -260,11 +260,6 @@ Provides the functions
 described in
 .Xr mandoc 3 .
 .Pp
-Uses the opaque type
-.Vt struct mparse
-from
-.Pa read.c
-for function prototypes.
 Uses the type
 .Vt struct roff_man
 from
@@ -296,11 +291,7 @@ Provides
 utility functions needed by multiple parsers,
 and the top-level functions to call the parsers.
 .Pp
-Uses the opaque types
-.Vt struct mparse
-from
-.Pa read.c
-and
+Uses the opaque type
 .Vt struct roff
 from
 .Pa roff.c
@@ -424,11 +415,6 @@ and the functions
 and
 .Fn eqn_reset .
 .Pp
-Uses the opaque type
-.Vt struct mparse
-from
-.Pa read.c
-for function prototypes.
 Uses the type
 .Vt struct eqn_box
 from
@@ -458,10 +444,6 @@ parsers only.
 Provides the functions documented in
 .Xr tbl 3 .
 .Pp
-Uses the opaque type
-.Vt struct mparse
-from
-.Pa read.c .
 Uses the types
 .Vt struct tbl_span
 from
@@ -496,12 +478,6 @@ and the functions
 .Fn tbl_cdata ,
 and
 .Fn tbl_reset .
-.Pp
-Uses a pointer to the opaque type
-.Vt struct mparse
-from
-.Pa read.c
-as an opaque struct member.
 .Pp
 When this header is included, the same file should not include
 interfaces of different parsers.

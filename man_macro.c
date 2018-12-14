@@ -456,6 +456,6 @@ man_args(struct roff_man *man, int line, int *pos, char *buf, char **v)
 	if ('\0' == *start)
 		return 0;
 
-	*v = mandoc_getarg(man->parse, v, line, pos);
+	*v = mandoc_getarg(v, line, pos);
 	return 1;
 }

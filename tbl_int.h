@@ -28,7 +28,6 @@ enum	tbl_part {
 
 struct	tbl_node {
 	struct tbl_opts	  opts;		/* Options for the whole table. */
-	struct mparse	 *parse;	/* For error reporting. */
 	struct tbl_node	 *next;		/* Next table. */
 	struct tbl_row	 *first_row;	/* First layout row. */
 	struct tbl_row	 *last_row;	/* Last layout row. */

@@ -548,7 +548,6 @@ struct	roff_meta {
 
 struct	roff_man {
 	struct roff_meta  meta;    /* Document meta-data. */
-	struct mparse	 *parse;   /* Parse pointer. */
 	struct roff	 *roff;    /* Roff parser state data. */
 	struct ohash	 *mdocmac; /* Mdoc macro lookup table. */
 	struct ohash	 *manmac;  /* Man macro lookup table. */
