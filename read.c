@@ -579,19 +579,6 @@ mparse_parse_buffer(struct mparse *curp, struct buf blk, const char *file)
 		mandoc_msg_setinfilename(svfile);
 }
 
-enum mandoclevel
-mparse_readmem(struct mparse *curp, void *buf, size_t len,
-		const char *file)
-{
-	struct buf blk;
-
-	blk.buf = buf;
-	blk.sz = len;
-
-	mparse_parse_buffer(curp, blk, file);
-	return mandoc_msg_getrc();
-}
-
 /*
  * Read the whole file into memory and call the parsers.
  * Called recursively when an .so request is encountered.

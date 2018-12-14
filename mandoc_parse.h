@@ -38,8 +38,6 @@ void		  mparse_copy(const struct mparse *);
 void		  mparse_free(struct mparse *);
 int		  mparse_open(struct mparse *, const char *);
 void		  mparse_readfd(struct mparse *, int, const char *);
-enum mandoclevel  mparse_readmem(struct mparse *, void *, size_t,
-			const char *);
 void		  mparse_reset(struct mparse *);
 void		  mparse_result(struct mparse *,
 			struct roff_man **, char **);
