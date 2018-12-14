@@ -861,7 +861,7 @@ resp_format(const struct req *req, const char *file)
 
 	mchars_alloc();
 	mp = mparse_alloc(MPARSE_SO | MPARSE_UTF8 | MPARSE_LATIN1,
-	    MANDOCERR_MAX, NULL, MANDOC_OS_OTHER, req->q.manpath);
+	    MANDOC_OS_OTHER, req->q.manpath);
 	mparse_readfd(mp, fd, file);
 	close(fd);
 

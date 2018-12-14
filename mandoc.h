@@ -265,11 +265,19 @@ enum	mandoc_esc {
 	ESCAPE_OVERSTRIKE /* overstrike all chars in the argument */
 };
 
-typedef	void	(*mandocmsg)(enum mandocerr, enum mandoclevel,
-			const char *, int, int, const char *);
-
 
 enum mandoc_esc	  mandoc_escape(const char **, const char **, int *);
+void		  mandoc_msg_setoutfile(FILE *);
+const char	 *mandoc_msg_getinfilename(void);
+void		  mandoc_msg_setinfilename(const char *);
+enum mandocerr	  mandoc_msg_getmin(void);
+void		  mandoc_msg_setmin(enum mandocerr);
+enum mandoclevel  mandoc_msg_getrc(void);
+void		  mandoc_msg_setrc(enum mandoclevel);
+void		  mandoc_msg(enum mandocerr, void *, int, int, const char *);
+void		  mandoc_vmsg(enum mandocerr, void *, int, int,
+			const char *, ...)
+			__attribute__((__format__ (__printf__, 5, 6)));
 void		  mchars_alloc(void);
 void		  mchars_free(void);
 int		  mchars_num2char(const char *, size_t);

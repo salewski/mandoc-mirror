@@ -96,6 +96,7 @@ SRCS		 = att.c \
 		   man_validate.c \
 		   mandoc.c \
 		   mandoc_aux.c \
+		   mandoc_msg.c \
 		   mandoc_ohash.c \
 		   mandoc_xr.c \
 		   mandocd.c \
@@ -237,6 +238,7 @@ LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 		   chars.o \
 		   mandoc.o \
 		   mandoc_aux.o \
+		   mandoc_msg.o \
 		   mandoc_ohash.o \
 		   mandoc_xr.o \
 		   msec.o \

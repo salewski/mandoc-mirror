@@ -172,7 +172,7 @@ main(int argc, char *argv[])
 
 	mchars_alloc();
 	parser = mparse_alloc(MPARSE_SO | MPARSE_UTF8 | MPARSE_LATIN1,
-	    MANDOCERR_MAX, NULL, MANDOC_OS_OTHER, defos);
+	    MANDOC_OS_OTHER, defos);
 
 	memset(&options, 0, sizeof(options));
 	switch (outtype) {

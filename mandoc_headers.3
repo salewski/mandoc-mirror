@@ -90,18 +90,23 @@ can be used everywhere.
 Requires
 .In sys/types.h
 for
-.Vt size_t .
+.Vt size_t
+and
+.In stdio.h
+for
+.Vt FILE .
 .Pp
 Provides
 .Vt enum mandoc_esc ,
 .Vt enum mandocerr ,
 .Vt enum mandoclevel ,
-the function prototype typedef
-.Fn mandocmsg ,
 the function
 .Xr mandoc_escape 3 ,
-and the functions described in
-.Xr mchars_alloc 3 .
+the functions described in
+.Xr mchars_alloc 3 ,
+and the
+.Fn mandoc_msg*
+functions.
 .It Qq Pa roff.h
 Common data types for all syntax trees and related functions;
 can be used everywhere.

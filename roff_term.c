@@ -17,7 +17,7 @@
 #include <sys/types.h>
 
 #include <assert.h>
-#include <stddef.h>
+#include <stdio.h>
 
 #include "mandoc.h"
 #include "roff.h"

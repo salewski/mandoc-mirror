@@ -49,11 +49,6 @@ struct	mparse;
 struct	roff;
 struct	roff_man;
 
-void		 mandoc_msg(enum mandocerr, struct mparse *,
-			int, int, const char *);
-void		 mandoc_vmsg(enum mandocerr, struct mparse *,
-			int, int, const char *, ...)
-			__attribute__((__format__ (__printf__, 5, 6)));
 char		*mandoc_getarg(struct mparse *, char **, int, int *);
 char		*mandoc_normdate(struct roff_man *, char *, int, int);
 int		 mandoc_eos(const char *, size_t);

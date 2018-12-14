@@ -79,8 +79,7 @@ main(int argc, char *argv[])
 	argv += optind;
 
 	mchars_alloc();
-	mp = mparse_alloc(MPARSE_SO, MANDOCERR_MAX, NULL,
-	    MANDOC_OS_OTHER, NULL);
+	mp = mparse_alloc(MPARSE_SO, MANDOC_OS_OTHER, NULL);
 	assert(mp);
 
 	if (argc < 1)
