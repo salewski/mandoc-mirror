@@ -889,7 +889,6 @@ check_xr(void)
 	static struct manpaths	 paths;
 	struct mansearch	 search;
 	struct mandoc_xr	*xr;
-	char			*cp;
 	size_t			 sz;
 
 	if (paths.sz == 0)
@@ -908,12 +907,12 @@ check_xr(void)
 		if (fs_search(&search, &paths, 1, &xr->name, NULL, &sz))
 			continue;
 		if (xr->count == 1)
-			mandoc_asprintf(&cp, "Xr %s %s", xr->name, xr->sec);
+			mandoc_msg(MANDOCERR_XR_BAD, xr->line,
+			    xr->pos + 1, "Xr %s %s", xr->name, xr->sec);
 		else
-			mandoc_asprintf(&cp, "Xr %s %s (%d times)",
+			mandoc_msg(MANDOCERR_XR_BAD, xr->line,
+			    xr->pos + 1, "Xr %s %s (%d times)",
 			    xr->name, xr->sec, xr->count);
-		mandoc_msg(MANDOCERR_XR_BAD, NULL, xr->line, xr->pos + 1, cp);
-		free(cp);
 	}
 }
 

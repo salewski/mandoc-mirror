@@ -227,8 +227,7 @@ mdoc_ptext(struct roff_man *mdoc, int line, char *buf, int offs)
 	*end = '\0';
 
 	if (ws)
-		mandoc_msg(MANDOCERR_SPACE_EOL, mdoc->parse,
-		    line, (int)(ws-buf), NULL);
+		mandoc_msg(MANDOCERR_SPACE_EOL, line, (int)(ws - buf), NULL);
 
 	/*
 	 * Blank lines are allowed in no-fill mode
@@ -252,8 +251,7 @@ mdoc_ptext(struct roff_man *mdoc, int line, char *buf, int offs)
 		default:
 			break;
 		}
-		mandoc_msg(MANDOCERR_FI_BLANK, mdoc->parse,
-		    line, (int)(c - buf), NULL);
+		mandoc_msg(MANDOCERR_FI_BLANK, line, (int)(c - buf), NULL);
 		roff_elem_alloc(mdoc, line, offs, ROFF_sp);
 		mdoc->last->flags |= NODE_VALID | NODE_ENDED;
 		mdoc->next = ROFF_NEXT_SIBLING;
@@ -293,8 +291,7 @@ mdoc_ptext(struct roff_man *mdoc, int line, char *buf, int offs)
 		if (*c == ' ')
 			c++;
 		if (isupper((unsigned char)(*c)))
-			mandoc_msg(MANDOCERR_EOS, mdoc->parse,
-			    line, (int)(c - buf), NULL);
+			mandoc_msg(MANDOCERR_EOS, line, (int)(c - buf), NULL);
 	}
 
 	return 1;
@@ -322,8 +319,7 @@ mdoc_pmacro(struct roff_man *mdoc, int ln, char *buf, int offs)
 	if (sz == 2 || sz == 3)
 		tok = roffhash_find(mdoc->mdocmac, buf + sv, sz);
 	if (tok == TOKEN_NONE) {
-		mandoc_msg(MANDOCERR_MACRO, mdoc->parse,
-		    ln, sv, buf + sv - 1);
+		mandoc_msg(MANDOCERR_MACRO, ln, sv, "%s", buf + sv - 1);
 		return 1;
 	}
 
@@ -353,8 +349,7 @@ mdoc_pmacro(struct roff_man *mdoc, int ln, char *buf, int offs)
 	 */
 
 	if ('\0' == buf[offs] && ' ' == buf[offs - 1])
-		mandoc_msg(MANDOCERR_SPACE_EOL, mdoc->parse,
-		    ln, offs - 1, NULL);
+		mandoc_msg(MANDOCERR_SPACE_EOL, ln, offs - 1, NULL);
 
 	/*
 	 * If an initial macro or a list invocation, divert directly

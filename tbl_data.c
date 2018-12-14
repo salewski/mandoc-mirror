@@ -77,8 +77,8 @@ getdata(struct tbl_node *tbl, struct tbl_span *dp,
 			cp->col = dp->layout->last->col + 1;
 			dp->layout->last = cp;
 		} else {
-			mandoc_msg(MANDOCERR_TBLDATA_EXTRA, tbl->parse,
-			    ln, sv, p + sv);
+			mandoc_msg(MANDOCERR_TBLDATA_EXTRA,
+			    ln, sv, "%s", p + sv);
 			while (p[*pos] != '\0')
 				(*pos)++;
 			return;
@@ -171,7 +171,7 @@ getdata(struct tbl_node *tbl, struct tbl_span *dp,
 	    dat->layout->pos == TBL_CELL_DOWN) &&
 	    dat->pos == TBL_DATA_DATA && *dat->string != '\0')
 		mandoc_msg(MANDOCERR_TBLDATA_SPAN,
-		    tbl->parse, ln, sv, dat->string);
+		    ln, sv, "%s", dat->string);
 }
 
 void
@@ -210,8 +210,8 @@ tbl_cdata(struct tbl_node *tbl, int ln, const char *p, int pos)
 		dat->string = mandoc_strdup(p + pos);
 
 	if (dat->layout->pos == TBL_CELL_DOWN)
-		mandoc_msg(MANDOCERR_TBLDATA_SPAN, tbl->parse,
-		    ln, pos, dat->string);
+		mandoc_msg(MANDOCERR_TBLDATA_SPAN,
+		    ln, pos, "%s", dat->string);
 }
 
 static struct tbl_span *
