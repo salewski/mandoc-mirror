@@ -325,6 +325,7 @@ man_strlen(const char *cp)
 		case ESCAPE_UNICODE:
 		case ESCAPE_NUMBERED:
 		case ESCAPE_SPECIAL:
+		case ESCAPE_UNDEF:
 		case ESCAPE_OVERSTRIKE:
 			if (skip)
 				skip = 0;

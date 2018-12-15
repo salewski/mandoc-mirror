@@ -3,5 +3,6 @@
 REGRESS_TARGETS = nocombine utf8only combine
 SKIP_ASCII = utf8only combine
 UTF8_TARGETS = nocombine utf8only combine
+LINT_TARGETS = nocombine
 
 .include <bsd.regress.mk>

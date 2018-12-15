@@ -167,6 +167,7 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"tab in filled text",
 	"new sentence, new line",
 	"invalid escape sequence",
+	"undefined escape, printing literally",
 	"undefined string, using \"\"",
 
 	/* related to tables */
@@ -228,6 +229,7 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"unsupported feature",
 	"input too large",
 	"unsupported control character",
+	"unsupported escape sequence",
 	"unsupported roff request",
 	"nested .while loops",
 	"end of scope with open .while loop",

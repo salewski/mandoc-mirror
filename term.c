@@ -477,9 +477,6 @@ term_word(struct termp *p, const char *word)
 
 		word++;
 		esc = mandoc_escape(&word, &seq, &sz);
-		if (ESCAPE_ERROR == esc)
-			continue;
-
 		switch (esc) {
 		case ESCAPE_UNICODE:
 			uc = mchars_num2uc(seq + 1, sz - 1);
@@ -500,6 +497,9 @@ term_word(struct termp *p, const char *word)
 					encode1(p, uc);
 			}
 			continue;
+		case ESCAPE_UNDEF:
+			uc = *seq;
+			break;
 		case ESCAPE_FONTBOLD:
 			term_fontrepl(p, TERMFONT_BOLD);
 			continue;
@@ -586,6 +586,9 @@ term_word(struct termp *p, const char *word)
 					break;
 				case ESCAPE_SPECIAL:
 					uc = mchars_spec2cp(cp, sz);
+					break;
+				case ESCAPE_UNDEF:
+					uc = *seq;
 					break;
 				default:
 					uc = -1;
@@ -845,12 +848,8 @@ term_strlen(const struct termp *p, const char *cp)
 		switch (*cp) {
 		case '\\':
 			cp++;
-			esc = mandoc_escape(&cp, &seq, &ssz);
-			if (ESCAPE_ERROR == esc)
-				continue;
-
 			rhs = NULL;
-
+			esc = mandoc_escape(&cp, &seq, &ssz);
 			switch (esc) {
 			case ESCAPE_UNICODE:
 				uc = mchars_num2uc(seq + 1, ssz - 1);
@@ -871,6 +870,9 @@ term_strlen(const struct termp *p, const char *cp)
 						sz += cond_width(p, uc, &skip);
 				}
 				continue;
+			case ESCAPE_UNDEF:
+				uc = *seq;
+				break;
 			case ESCAPE_DEVICE:
 				if (p->type == TERMTYPE_PDF) {
 					rhs = "pdf";

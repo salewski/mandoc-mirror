@@ -589,6 +589,9 @@ md_word(const char *s)
 			case ESCAPE_SPECIAL:
 				uc = mchars_spec2cp(seq, sz);
 				break;
+			case ESCAPE_UNDEF:
+				uc = *seq;
+				break;
 			case ESCAPE_DEVICE:
 				md_rawword("markdown");
 				continue;
