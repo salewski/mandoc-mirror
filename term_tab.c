@@ -1,4 +1,4 @@
-/*	$OpenBSD: term.c,v 1.119 2017/01/08 18:08:44 schwarze Exp $ */
+/*	$Id$ */
 /*
  * Copyright (c) 2017 Ingo Schwarze <schwarze@openbsd.org>
  *
