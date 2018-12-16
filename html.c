@@ -117,7 +117,6 @@ static	void	 print_ctag(struct html *, struct tag *);
 static	int	 print_escape(struct html *, char);
 static	int	 print_encode(struct html *, const char *, const char *, int);
 static	void	 print_href(struct html *, const char *, const char *, int);
-static	void	 print_metaf(struct html *, enum mandoc_esc);
 
 
 void *
@@ -210,7 +209,7 @@ print_gen_head(struct html *h)
 	print_tagq(h, t);
 }
 
-static void
+void
 print_metaf(struct html *h, enum mandoc_esc deco)
 {
 	enum htmlfont	 font;
@@ -236,7 +235,7 @@ print_metaf(struct html *h, enum mandoc_esc deco)
 		font = HTMLFONT_NONE;
 		break;
 	default:
-		abort();
+		return;
 	}
 
 	if (h->metaf) {

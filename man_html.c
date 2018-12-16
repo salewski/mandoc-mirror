@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "mandoc_aux.h"
+#include "mandoc.h"
 #include "roff.h"
 #include "man.h"
 #include "out.h"

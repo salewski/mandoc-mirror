@@ -125,6 +125,7 @@ void		  roff_html_pre(struct html *, const struct roff_node *);
 void		  print_gen_comment(struct html *, struct roff_node *);
 void		  print_gen_decls(struct html *);
 void		  print_gen_head(struct html *);
+void		  print_metaf(struct html *, enum mandoc_esc);
 struct tag	 *print_otag(struct html *, enum htmltag, const char *, ...);
 void		  print_tagq(struct html *, const struct tag *);
 void		  print_stagq(struct html *, const struct tag *);

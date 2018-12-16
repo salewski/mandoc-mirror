@@ -104,30 +104,8 @@ roff_valid_ft(ROFF_VALID_ARGS)
 	}
 
 	cp = n->child->string;
-	switch (*cp) {
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case 'I':
-	case 'P':
-	case 'R':
-		if (cp[1] == '\0')
-			return;
-		break;
-	case 'B':
-		if (cp[1] == '\0' || (cp[1] == 'I' && cp[2] == '\0'))
-			return;
-		break;
-	case 'C':
-		if (cp[1] != '\0' && cp[2] == '\0' &&
-		    strchr("BIRW", cp[1]) != NULL)
-			return;
-		break;
-	default:
-		break;
-	}
-
+	if (mandoc_font(cp, (int)strlen(cp)) != ESCAPE_ERROR)
+		return;
 	mandoc_msg(MANDOCERR_FT_BAD, n->line, n->pos, "ft %s", cp);
 	roff_node_delete(man, n);
 }

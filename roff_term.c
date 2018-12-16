@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "mandoc.h"
 #include "roff.h"
@@ -113,25 +114,22 @@ roff_term_pre_ft(ROFF_TERM_ARGS)
 {
 	const char	*cp;
 
-	if (*(cp = n->child->string) == 'C')
-		cp++;
-
-	switch (*cp) {
-	case '4':
-	case '3':
-	case 'B':
+	cp = n->child->string;
+	switch (mandoc_font(cp, (int)strlen(cp))) {
+	case ESCAPE_FONTBOLD:
 		term_fontrepl(p, TERMFONT_BOLD);
 		break;
-	case '2':
-	case 'I':
+	case ESCAPE_FONTITALIC:
 		term_fontrepl(p, TERMFONT_UNDER);
 		break;
-	case 'P':
+	case ESCAPE_FONTBI:
+		term_fontrepl(p, TERMFONT_BI);
+		break;
+	case ESCAPE_FONTPREV:
 		term_fontlast(p);
 		break;
-	case '1':
-	case 'C':
-	case 'R':
+	case ESCAPE_FONTROMAN:
+	case ESCAPE_FONTCW:
 		term_fontrepl(p, TERMFONT_NONE);
 		break;
 	default:

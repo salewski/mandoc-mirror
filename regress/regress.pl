@@ -79,23 +79,25 @@ sub syshtml ($@) {
 	open my $outfd, '>', $outfile or die "$outfile: $!";
 	my $infd;
 	my $pid = open3 undef, $infd, undef, @_;
-	my $state;
+	my $state = 0;
 	while (<$infd>) {
 		chomp;
 		if (!$state && s/.*<math class="eqn">//) {
-			$state = 1;
+			$state = 'math';
 			next unless length;
+		} elsif (/^BEGINTEST/) {
+			$state = 'other';
 		}
-		$state = 1 if /^BEGINTEST/;
-		if ($state && s/<\/math>.*//) {
+		if ($state eq 'math') {
 			s/^ *//;
-			print $outfd "$_\n" if length;
-			undef $state;
-			next;
+			if (s/<\/math>.*//) {
+				print $outfd "$_\n" if length;
+				$state = 0;
+				next;
+			}
 		}
-		s/^ *//;
 		print $outfd "$_\n" if $state;
-		undef $state if /^ENDTEST/;
+		$state = 0 if /^ENDTEST/;
 	}
 	close $outfd;
 	close $infd;

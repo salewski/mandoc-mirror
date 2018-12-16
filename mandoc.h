@@ -270,6 +270,7 @@ enum	mandoc_esc {
 };
 
 
+enum mandoc_esc	  mandoc_font(const char *, int sz);
 enum mandoc_esc	  mandoc_escape(const char **, const char **, int *);
 void		  mandoc_msg_setoutfile(FILE *);
 const char	 *mandoc_msg_getinfilename(void);
