@@ -714,13 +714,29 @@ Messages displayed by
 follow this format:
 .Bd -ragged -offset indent
 .Nm :
-.Ar file : Ns Ar line : Ns Ar column : level : message : macro args
+.Ar file : Ns Ar line : Ns Ar column : level : message : macro arguments
 .Pq Ar os
 .Ed
 .Pp
-Line and column numbers start at 1.
+The first three fields identify the
+.Ar file
+name,
+.Ar line
+number, and
+.Ar column
+number of the input file where the message was triggered.
+The line and column numbers start at 1.
 Both are omitted for messages referring to an input file as a whole.
-Macro names and arguments are omitted where meaningless.
+All
+.Ar level
+and
+.Ar message
+strings are explained below.
+The name of the
+.Ar macro
+triggering the message and its
+.Ar arguments
+are omitted where meaningless.
 The
 .Ar os
 operating system specifier is omitted for messages that are relevant
