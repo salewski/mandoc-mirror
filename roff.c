@@ -1588,7 +1588,7 @@ mandoc_getarg(char **cpp, int ln, int *pos)
 			switch (cp[1]) {
 			case 'a':
 			case 't':
-				cp[0] = '\t';
+				cp[-pairs] = '\t';
 				/* FALLTHROUGH */
 			case '\\':
 				pairs++;
