@@ -416,11 +416,8 @@ mdoc_args(struct roff_man *mdoc, int line, int *pos,
 	char *buf, enum roff_tok tok, char **v)
 {
 	struct roff_node *n;
-	char		 *v_local;
 	enum argsflag	  fl;
 
-	if (v == NULL)
-		v = &v_local;
 	fl = tok == TOKEN_NONE ? ARGSFL_NONE : mdocargs[tok - MDOC_Dd].flags;
 
 	/*
@@ -448,6 +445,7 @@ args(struct roff_man *mdoc, int line, int *pos,
 		char *buf, enum argsflag fl, char **v)
 {
 	char		*p;
+	char		*v_local;
 	int		 pairs;
 
 	if (buf[*pos] == '\0') {
@@ -459,6 +457,8 @@ args(struct roff_man *mdoc, int line, int *pos,
 		return ARGS_EOLN;
 	}
 
+	if (v == NULL)
+		v = &v_local;
 	*v = buf + *pos;
 
 	if (fl == ARGSFL_DELIM && args_checkpunct(buf, *pos))
@@ -525,13 +525,12 @@ args(struct roff_man *mdoc, int line, int *pos,
 	 * Whitespace is NOT involved in literal termination.
 	 */
 
-	if (mdoc->flags & MDOC_PHRASELIT || buf[*pos] == '\"') {
-		if ( ! (mdoc->flags & MDOC_PHRASELIT))
+	if (mdoc->flags & MDOC_PHRASELIT ||
+	    (mdoc->flags & MDOC_PHRASE && buf[*pos] == '\"')) {
+		if ((mdoc->flags & MDOC_PHRASELIT) == 0) {
 			*v = &buf[++(*pos)];
-
-		if (mdoc->flags & MDOC_PHRASE)
 			mdoc->flags |= MDOC_PHRASELIT;
-
+		}
 		pairs = 0;
 		for ( ; buf[*pos]; (*pos)++) {
 			/* Move following text left after quoted quotes. */
@@ -572,7 +571,9 @@ args(struct roff_man *mdoc, int line, int *pos,
 	}
 
 	p = &buf[*pos];
-	*v = mandoc_getarg(&p, line, pos);
+	*v = roff_getarg(mdoc->roff, &p, line, pos);
+	if (v == &v_local)
+		free(*v);
 
 	/*
 	 * After parsing the last word in this phrase,
@@ -583,7 +584,7 @@ args(struct roff_man *mdoc, int line, int *pos,
 		mdoc->flags &= ~MDOC_PHRASEQL;
 		mdoc->flags |= MDOC_PHRASEQF;
 	}
-	return ARGS_WORD;
+	return ARGS_ALLOC;
 }
 
 /*
@@ -654,7 +655,9 @@ argv_multi(struct roff_man *mdoc, int line,
 			v->value = mandoc_reallocarray(v->value,
 			    v->sz + MULTI_STEP, sizeof(char *));
 
-		v->value[(int)v->sz] = mandoc_strdup(p);
+		if (ac != ARGS_ALLOC)
+			p = mandoc_strdup(p);
+		v->value[(int)v->sz] = p;
 	}
 }
 
@@ -669,7 +672,10 @@ argv_single(struct roff_man *mdoc, int line,
 	if (ac == ARGS_EOLN)
 		return;
 
+	if (ac != ARGS_ALLOC)
+		p = mandoc_strdup(p);
+
 	v->sz = 1;
 	v->value = mandoc_malloc(sizeof(char *));
-	v->value[0] = mandoc_strdup(p);
+	v->value[0] = p;
 }

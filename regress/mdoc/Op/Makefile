@@ -1,6 +1,6 @@
-# $OpenBSD: Makefile,v 1.3 2014/07/02 11:42:56 schwarze Exp $
+# $OpenBSD: Makefile,v 1.7 2018/12/21 16:58:49 schwarze Exp $
 
-REGRESS_TARGETS	= break broken punct
+REGRESS_TARGETS	= arg break broken punct
 LINT_TARGETS	= break broken punct
 
 SKIP_GROFF	= break

@@ -38,6 +38,7 @@ enum	margserr {
 	ARGS_ERROR,
 	ARGS_EOLN, /* end-of-line */
 	ARGS_WORD, /* normal word */
+	ARGS_ALLOC, /* normal word from roff_getarg() */
 	ARGS_PUNCT, /* series of punctuation */
 	ARGS_PHRASE /* Bl -column phrase */
 };

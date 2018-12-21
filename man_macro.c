@@ -202,22 +202,25 @@ blk_close(MACRO_PROT_ARGS)
 {
 	enum roff_tok		 ctok, ntok;
 	const struct roff_node	*nn;
-	char			*p;
-	int			 cline, cpos, nrew, target;
+	char			*p, *ep;
+	int			 cline, cpos, la, nrew, target;
 
 	nrew = 1;
 	switch (tok) {
 	case MAN_RE:
 		ntok = MAN_RS;
+		la = *pos;
 		if ( ! man_args(man, line, pos, buf, &p))
 			break;
 		for (nn = man->last->parent; nn; nn = nn->parent)
 			if (nn->tok == ntok && nn->type == ROFFT_BLOCK)
 				nrew++;
-		target = strtol(p, &p, 10);
-		if (*p != '\0')
+		target = strtol(p, &ep, 10);
+		if (*ep != '\0')
 			mandoc_msg(MANDOCERR_ARG_EXCESS, line,
-			    (int)(p - buf), "RE ... %s", p);
+			    la + (buf[la] == '"') + (int)(ep - p),
+			    "RE ... %s", ep);
+		free(p);
 		if (target == 0)
 			target = 1;
 		nrew -= target;
@@ -312,6 +315,7 @@ blk_exp(MACRO_PROT_ARGS)
 				roff_setreg(man->roff, "an-margin",
 				    head->aux, '+');
 		}
+		free(p);
 	}
 
 	if (buf[*pos] != '\0')
@@ -348,6 +352,7 @@ blk_imp(MACRO_PROT_ARGS)
 		if ( ! man_args(man, line, pos, buf, &p))
 			break;
 		roff_word_alloc(man, line, la, p);
+		free(p);
 	}
 
 	/*
@@ -397,6 +402,7 @@ in_line_eoln(MACRO_PROT_ARGS)
 			roff_word_append(man, p);
 		else
 			roff_word_alloc(man, line, la, p);
+		free(p);
 	}
 
 	/*
@@ -456,6 +462,6 @@ man_args(struct roff_man *man, int line, int *pos, char *buf, char **v)
 	if ('\0' == *start)
 		return 0;
 
-	*v = mandoc_getarg(v, line, pos);
+	*v = roff_getarg(man->roff, v, line, pos);
 	return 1;
 }

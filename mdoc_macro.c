@@ -49,7 +49,7 @@ static	void		dword(struct roff_man *, int, int, const char *,
 static	int		find_pending(struct roff_man *, enum roff_tok,
 				int, int, struct roff_node *);
 static	int		lookup(struct roff_man *, int, int, int, const char *);
-static	int		macro_or_word(MACRO_PROT_ARGS, int);
+static	int		macro_or_word(MACRO_PROT_ARGS, char *, int);
 static	void		break_intermediate(struct roff_node *,
 				struct roff_node *);
 static	int		parse_rest(struct roff_man *, enum roff_tok,
@@ -474,14 +474,15 @@ append_delims(struct roff_man *mdoc, int line, int *pos, char *buf)
 {
 	char		*p;
 	int		 la;
+	enum margserr	 ac;
 
 	if (buf[*pos] == '\0')
 		return;
 
 	for (;;) {
 		la = *pos;
-		if (mdoc_args(mdoc, line, pos, buf, TOKEN_NONE, &p) ==
-		    ARGS_EOLN)
+		ac = mdoc_args(mdoc, line, pos, buf, TOKEN_NONE, &p);
+		if (ac == ARGS_EOLN)
 			break;
 		dword(mdoc, line, la, p, DELIM_MAX, 1);
 
@@ -499,6 +500,8 @@ append_delims(struct roff_man *mdoc, int line, int *pos, char *buf)
 
 		if (mandoc_eos(p, strlen(p)))
 			mdoc->last->flags |= NODE_EOS;
+		if (ac == ARGS_ALLOC)
+			free(p);
 	}
 }
 
@@ -508,17 +511,13 @@ append_delims(struct roff_man *mdoc, int line, int *pos, char *buf)
  * Otherwise, allocate it and return 0.
  */
 static int
-macro_or_word(MACRO_PROT_ARGS, int parsed)
+macro_or_word(MACRO_PROT_ARGS, char *p, int parsed)
 {
-	char		*p;
 	int		 ntok;
 
-	p = buf + ppos;
-	ntok = TOKEN_NONE;
-	if (*p == '"')
-		p++;
-	else if (parsed && ! (mdoc->flags & MDOC_PHRASELIT))
-		ntok = lookup(mdoc, tok, line, ppos, p);
+	ntok = buf[ppos] == '"' || parsed == 0 ||
+	    mdoc->flags & MDOC_PHRASELIT ? TOKEN_NONE :
+	    lookup(mdoc, tok, line, ppos, p);
 
 	if (ntok == TOKEN_NONE) {
 		dword(mdoc, line, ppos, p, DELIM_MAX, tok == TOKEN_NONE ||
@@ -720,8 +719,12 @@ blk_exp_close(MACRO_PROT_ARGS)
 		if (ntok == TOKEN_NONE) {
 			dword(mdoc, line, lastarg, p, DELIM_MAX,
 			    mdoc_macro(tok)->flags & MDOC_JOIN);
+			if (ac == ARGS_ALLOC)
+				free(p);
 			continue;
 		}
+		if (ac == ARGS_ALLOC)
+			free(p);
 
 		if (n != NULL)
 			rew_last(mdoc, n);
@@ -836,6 +839,8 @@ in_line(MACRO_PROT_ARGS)
 			    line, la, pos, buf);
 			if (nl)
 				append_delims(mdoc, line, pos, buf);
+			if (ac == ARGS_ALLOC)
+				free(p);
 			return;
 		}
 
@@ -878,6 +883,9 @@ in_line(MACRO_PROT_ARGS)
 
 		dword(mdoc, line, la, p, d,
 		    mdoc_macro(tok)->flags & MDOC_JOIN);
+
+		if (ac == ARGS_ALLOC)
+			free(p);
 
 		/*
 		 * If the first argument is a closing delimiter,
@@ -929,7 +937,7 @@ in_line(MACRO_PROT_ARGS)
 static void
 blk_full(MACRO_PROT_ARGS)
 {
-	int		  la, nl, parsed;
+	int		  done, la, nl, parsed;
 	struct mdoc_arg	 *arg;
 	struct roff_node *blk; /* Our own or a broken block. */
 	struct roff_node *head; /* Our own head. */
@@ -1095,11 +1103,15 @@ blk_full(MACRO_PROT_ARGS)
 		if (tok == MDOC_Bd || tok == MDOC_Bk) {
 			mandoc_msg(MANDOCERR_ARG_EXCESS, line, la,
 			    "%s ... %s", roff_name[tok], buf + la);
+			if (ac == ARGS_ALLOC)
+				free(p);
 			break;
 		}
 		if (tok == MDOC_Rs) {
 			mandoc_msg(MANDOCERR_ARG_SKIP,
 			    line, la, "Rs %s", buf + la);
+			if (ac == ARGS_ALLOC)
+				free(p);
 			break;
 		}
 		if (ac == ARGS_PUNCT)
@@ -1114,6 +1126,8 @@ blk_full(MACRO_PROT_ARGS)
 		    ac != ARGS_PHRASE &&
 		    mdoc_isdelim(p) == DELIM_OPEN) {
 			dword(mdoc, line, la, p, DELIM_OPEN, 0);
+			if (ac == ARGS_ALLOC)
+				free(p);
 			continue;
 		}
 
@@ -1145,7 +1159,10 @@ blk_full(MACRO_PROT_ARGS)
 			continue;
 		}
 
-		if (macro_or_word(mdoc, tok, line, la, pos, buf, parsed))
+		done = macro_or_word(mdoc, tok, line, la, pos, buf, p, parsed);
+		if (ac == ARGS_ALLOC)
+			free(p);
+		if (done)
 			break;
 	}
 
@@ -1175,7 +1192,7 @@ out:
 static void
 blk_part_imp(MACRO_PROT_ARGS)
 {
-	int		  la, nl;
+	int		  done, la, nl;
 	enum margserr	  ac;
 	char		 *p;
 	struct roff_node *blk; /* saved block context */
@@ -1210,13 +1227,18 @@ blk_part_imp(MACRO_PROT_ARGS)
 
 		if (body == NULL && mdoc_isdelim(p) == DELIM_OPEN) {
 			dword(mdoc, line, la, p, DELIM_OPEN, 0);
+			if (ac == ARGS_ALLOC)
+				free(p);
 			continue;
 		}
 
 		if (body == NULL)
 			body = roff_body_alloc(mdoc, line, ppos, tok);
 
-		if (macro_or_word(mdoc, tok, line, la, pos, buf, 1))
+		done = macro_or_word(mdoc, tok, line, la, pos, buf, p, 1);
+		if (ac == ARGS_ALLOC)
+			free(p);
+		if (done)
 			break;
 	}
 	if (body == NULL)
@@ -1241,7 +1263,7 @@ blk_part_imp(MACRO_PROT_ARGS)
 static void
 blk_part_exp(MACRO_PROT_ARGS)
 {
-	int		  la, nl;
+	int		  done, la, nl;
 	enum margserr	  ac;
 	struct roff_node *head; /* keep track of head */
 	char		 *p;
@@ -1266,6 +1288,8 @@ blk_part_exp(MACRO_PROT_ARGS)
 
 		if (head == NULL && mdoc_isdelim(p) == DELIM_OPEN) {
 			dword(mdoc, line, la, p, DELIM_OPEN, 0);
+			if (ac == ARGS_ALLOC)
+				free(p);
 			continue;
 		}
 
@@ -1275,11 +1299,17 @@ blk_part_exp(MACRO_PROT_ARGS)
 				dword(mdoc, line, la, p, DELIM_MAX, 0);
 			rew_last(mdoc, head);
 			roff_body_alloc(mdoc, line, ppos, tok);
-			if (tok == MDOC_Eo)
+			if (tok == MDOC_Eo) {
+				if (ac == ARGS_ALLOC)
+					free(p);
 				continue;
+			}
 		}
 
-		if (macro_or_word(mdoc, tok, line, la, pos, buf, 1))
+		done = macro_or_word(mdoc, tok, line, la, pos, buf, p, 1);
+		if (ac == ARGS_ALLOC)
+			free(p);
+		if (done)
 			break;
 	}
 
@@ -1337,10 +1367,12 @@ in_line_argn(MACRO_PROT_ARGS)
 		la = *pos;
 		ac = mdoc_args(mdoc, line, pos, buf, tok, &p);
 
-		if (ac == ARGS_WORD && state == -1 &&
+		if ((ac == ARGS_WORD || ac == ARGS_ALLOC) && state == -1 &&
 		    (mdoc_macro(tok)->flags & MDOC_IGNDELIM) == 0 &&
 		    mdoc_isdelim(p) == DELIM_OPEN) {
 			dword(mdoc, line, la, p, DELIM_OPEN, 0);
+			if (ac == ARGS_ALLOC)
+				free(p);
 			continue;
 		}
 
@@ -1373,6 +1405,8 @@ in_line_argn(MACRO_PROT_ARGS)
 			}
 			(*mdoc_macro(ntok)->fp)(mdoc, ntok,
 			    line, la, pos, buf);
+			if (ac == ARGS_ALLOC)
+				free(p);
 			break;
 		}
 
@@ -1390,6 +1424,9 @@ in_line_argn(MACRO_PROT_ARGS)
 
 		dword(mdoc, line, la, p, DELIM_MAX,
 		    mdoc_macro(tok)->flags & MDOC_JOIN);
+		if (ac == ARGS_ALLOC)
+			free(p);
+		p = mdoc->last->string;
 	}
 
 	if (state == -1) {
@@ -1444,13 +1481,19 @@ static int
 parse_rest(struct roff_man *mdoc, enum roff_tok tok,
     int line, int *pos, char *buf)
 {
-	int		 la;
+	char		*p;
+	int		 done, la;
+	enum margserr	 ac;
 
 	for (;;) {
 		la = *pos;
-		if (mdoc_args(mdoc, line, pos, buf, tok, NULL) == ARGS_EOLN)
+		ac = mdoc_args(mdoc, line, pos, buf, tok, &p);
+		if (ac == ARGS_EOLN)
 			return 0;
-		if (macro_or_word(mdoc, tok, line, la, pos, buf, 1))
+		done = macro_or_word(mdoc, tok, line, la, pos, buf, p, 1);
+		if (ac == ARGS_ALLOC)
+			free(p);
+		if (done)
 			return 1;
 	}
 }

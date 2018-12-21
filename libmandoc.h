@@ -48,7 +48,6 @@ struct	buf {
 struct	roff;
 struct	roff_man;
 
-char		*mandoc_getarg(char **, int, int *);
 char		*mandoc_normdate(struct roff_man *, char *, int, int);
 int		 mandoc_eos(const char *, size_t);
 int		 mandoc_strntoi(const char *, size_t, int);
@@ -76,6 +75,7 @@ void		 roff_endparse(struct roff *);
 void		 roff_setreg(struct roff *, const char *, int, char sign);
 int		 roff_getreg(struct roff *, const char *);
 char		*roff_strdup(const struct roff *, const char *);
+char		*roff_getarg(struct roff *, char **, int, int *);
 int		 roff_getcontrol(const struct roff *,
 			const char *, int *);
 int		 roff_getformat(const struct roff *);
