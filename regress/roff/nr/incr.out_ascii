@@ -14,6 +14,9 @@ DDEESSCCRRIIPPTTIIOONN
 
        Down in negative steps is up: -1 1 3 5
 
+       Go to some other value, then continue incrementing with an unchanged
+       (negative) step size: 40 38 36
+
 
 
 OpenBSD                         April 10, 2018                      NR-INCR(1)

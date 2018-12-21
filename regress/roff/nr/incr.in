@@ -1,4 +1,4 @@
-.\" $OpenBSD: undef.in,v 1.1 2018/04/09 22:26:25 schwarze Exp $
+.\" $OpenBSD: incr.in,v 1.1 2018/04/10 00:52:21 schwarze Exp $
 .TH NR-INCR 1 "April 10, 2018"
 .SH NAME
 nr-incr \- increment a number register by accessing it
@@ -28,3 +28,10 @@ Down in negative steps is up:
 \n-[myr]
 \n-[myr]
 \n-[myr]
+.PP
+.nr myr 42
+Go to some other value,
+then continue incrementing with an unchanged (negative) step size:
+\n+[myr]
+\n+[myr]
+\n+[myr]
