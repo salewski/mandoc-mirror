@@ -534,9 +534,10 @@ mdoc_sh_pre(MDOC_ARGS)
 		for (sn = n; sn != NULL; sn = sn->next) {
 			tsec = print_otag(h, TAG_LI, "");
 			id = html_make_id(sn->head, 0);
-			print_otag(h, TAG_A, "hR", id);
+			tsub = print_otag(h, TAG_A, "hR", id);
 			free(id);
 			print_mdoc_nodelist(meta, sn->head->child, h);
+			print_tagq(h, tsub);
 			tsub = NULL;
 			for (subn = sn->body->child; subn != NULL;
 			    subn = subn->next) {
