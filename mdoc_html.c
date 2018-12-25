@@ -796,7 +796,7 @@ mdoc_it_pre(MDOC_ARGS)
 static int
 mdoc_bl_pre(MDOC_ARGS)
 {
-	char		 cattr[28];
+	char		 cattr[32];
 	struct mdoc_bl	*bl;
 	enum htmltag	 elemtype;
 
