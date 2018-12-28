@@ -256,6 +256,13 @@ where
 is the back-space character number 8.
 Emboldened characters are rendered as
 .Sq c Ns \e[bs] Ns c .
+This markup is typically converted to appropriate terminal sequences by
+the pager or
+.Xr ul 1 .
+To remove the markup, pipe the output to
+.Xr col 1
+.Fl b
+instead.
 .Pp
 The special characters documented in
 .Xr mandoc_char 7
