@@ -47,7 +47,6 @@
 struct	mparse {
 	struct roff	 *roff; /* roff parser (!NULL) */
 	struct roff_man	 *man; /* man parser */
-	char		 *sodest; /* filename pointed to by .so */
 	struct buf	 *primary; /* buffer currently being parsed */
 	struct buf	 *secondary; /* copy of top level input */
 	struct buf	 *loop; /* open .while request line */
@@ -123,15 +122,15 @@ choose_parser(struct mparse *curp)
 	}
 
 	if (format == MPARSE_MDOC) {
-		curp->man->macroset = MACROSET_MDOC;
+		curp->man->meta.macroset = MACROSET_MDOC;
 		if (curp->man->mdocmac == NULL)
 			curp->man->mdocmac = roffhash_alloc(MDOC_Dd, MDOC_MAX);
 	} else {
-		curp->man->macroset = MACROSET_MAN;
+		curp->man->meta.macroset = MACROSET_MAN;
 		if (curp->man->manmac == NULL)
 			curp->man->manmac = roffhash_alloc(MAN_TH, MAN_MAX);
 	}
-	curp->man->first->tok = TOKEN_NONE;
+	curp->man->meta.first->tok = TOKEN_NONE;
 }
 
 /*
@@ -334,9 +333,9 @@ rerun:
 		case ROFF_IGN:
 			break;
 		case ROFF_CONT:
-			if (curp->man->macroset == MACROSET_NONE)
+			if (curp->man->meta.macroset == MACROSET_NONE)
 				choose_parser(curp);
-			if ((curp->man->macroset == MACROSET_MDOC ?
+			if ((curp->man->meta.macroset == MACROSET_MDOC ?
 			     mdoc_parseln(curp->man, curp->line, ln.buf, of) :
 			     man_parseln(curp->man, curp->line, ln.buf, of)
 			    ) == 2)
@@ -365,7 +364,8 @@ rerun:
 		case ROFF_SO:
 			if ( ! (curp->options & MPARSE_SO) &&
 			    (i >= blk.sz || blk.buf[i] == '\0')) {
-				curp->sodest = mandoc_strdup(ln.buf + of);
+				curp->man->meta.sodest =
+				    mandoc_strdup(ln.buf + of);
 				goto out;
 			}
 			if ((fd = mparse_open(curp, ln.buf + of)) != -1) {
@@ -526,9 +526,9 @@ read_whole_file(struct mparse *curp, int fd, struct buf *fb, int *with_mmap)
 static void
 mparse_end(struct mparse *curp)
 {
-	if (curp->man->macroset == MACROSET_NONE)
-		curp->man->macroset = MACROSET_MAN;
-	if (curp->man->macroset == MACROSET_MDOC)
+	if (curp->man->meta.macroset == MACROSET_NONE)
+		curp->man->meta.macroset = MACROSET_MAN;
+	if (curp->man->meta.macroset == MACROSET_MDOC)
 		mdoc_endparse(curp->man);
 	else
 		man_endparse(curp->man);
@@ -651,15 +651,15 @@ mparse_alloc(int options, enum mandoc_os os_e, const char *os_s)
 	curp->man = roff_man_alloc(curp->roff, curp->os_s,
 		curp->options & MPARSE_QUICK ? 1 : 0);
 	if (curp->options & MPARSE_MDOC) {
-		curp->man->macroset = MACROSET_MDOC;
+		curp->man->meta.macroset = MACROSET_MDOC;
 		if (curp->man->mdocmac == NULL)
 			curp->man->mdocmac = roffhash_alloc(MDOC_Dd, MDOC_MAX);
 	} else if (curp->options & MPARSE_MAN) {
-		curp->man->macroset = MACROSET_MAN;
+		curp->man->meta.macroset = MACROSET_MAN;
 		if (curp->man->manmac == NULL)
 			curp->man->manmac = roffhash_alloc(MAN_TH, MAN_MAX);
 	}
-	curp->man->first->tok = TOKEN_NONE;
+	curp->man->meta.first->tok = TOKEN_NONE;
 	curp->man->meta.os_e = os_e;
 	return curp;
 }
@@ -671,8 +671,6 @@ mparse_reset(struct mparse *curp)
 	roff_man_reset(curp->man);
 	free_buf_list(curp->secondary);
 	curp->secondary = NULL;
-	free(curp->sodest);
-	curp->sodest = NULL;
 	curp->gzip = 0;
 }
 
@@ -684,21 +682,19 @@ mparse_free(struct mparse *curp)
 	roff_man_free(curp->man);
 	roff_free(curp->roff);
 	free_buf_list(curp->secondary);
-	free(curp->sodest);
 	free(curp);
 }
 
-void
-mparse_result(struct mparse *curp, struct roff_man **man,
-	char **sodest)
+struct roff_meta *
+mparse_result(struct mparse *curp)
 {
-
-	if (sodest && NULL != (*sodest = curp->sodest)) {
-		*man = NULL;
-		return;
+	if (curp->options & MPARSE_VALIDATE) {
+		if (curp->man->meta.macroset == MACROSET_MDOC)
+			mdoc_validate(curp->man);
+		else
+			man_validate(curp->man);
 	}
-	if (man)
-		*man = curp->man;
+	return &curp->man->meta;
 }
 
 void

@@ -446,7 +446,7 @@ void
 man_endparse(struct roff_man *man)
 {
 
-	man_unscope(man, man->first);
+	man_unscope(man, man->meta.first);
 	man->flags &= ~MAN_LITERAL;
 }
 

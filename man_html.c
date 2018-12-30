@@ -139,7 +139,7 @@ print_bvspace(struct html *h, const struct roff_node *n)
 }
 
 void
-html_man(void *arg, const struct roff_man *man)
+html_man(void *arg, const struct roff_meta *man)
 {
 	struct html		*h;
 	struct roff_node	*n;
@@ -154,16 +154,16 @@ html_man(void *arg, const struct roff_man *man)
 		if (n->type == ROFFT_COMMENT)
 			print_gen_comment(h, n);
 		t = print_otag(h, TAG_HEAD, "");
-		print_man_head(&man->meta, h);
+		print_man_head(man, h);
 		print_tagq(h, t);
 		print_otag(h, TAG_BODY, "");
 	}
 
-	man_root_pre(&man->meta, h);
+	man_root_pre(man, h);
 	t = print_otag(h, TAG_DIV, "c", "manual-text");
-	print_man_nodelist(&man->meta, n, h);
+	print_man_nodelist(man, n, h);
 	print_tagq(h, t);
-	man_root_post(&man->meta, h);
+	man_root_post(man, h);
 	print_tagq(h, NULL);
 }
 

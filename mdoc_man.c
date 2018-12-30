@@ -602,7 +602,7 @@ print_count(int *count)
 }
 
 void
-man_mdoc(void *arg, const struct roff_man *mdoc)
+man_mdoc(void *arg, const struct roff_meta *mdoc)
 {
 	struct roff_node *n;
 
@@ -615,9 +615,8 @@ man_mdoc(void *arg, const struct roff_man *mdoc)
 	}
 
 	printf(".TH \"%s\" \"%s\" \"%s\" \"%s\" \"%s\"\n",
-	    mdoc->meta.title,
-	    (mdoc->meta.msec == NULL ? "" : mdoc->meta.msec),
-	    mdoc->meta.date, mdoc->meta.os, mdoc->meta.vol);
+	    mdoc->title, (mdoc->msec == NULL ? "" : mdoc->msec),
+	    mdoc->date, mdoc->os, mdoc->vol);
 
 	/* Disable hyphenation and if nroff, disable justification. */
 	printf(".nh\n.if n .ad l");
@@ -629,7 +628,7 @@ man_mdoc(void *arg, const struct roff_man *mdoc)
 		*fontqueue.tail = 'R';
 	}
 	for (; n != NULL; n = n->next)
-		print_node(&mdoc->meta, n);
+		print_node(mdoc, n);
 	putchar('\n');
 }
 

@@ -16,6 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+struct	roff_node;
+struct	roff_man;
+
 enum	mdocargt {
 	MDOC_Split, /* -split */
 	MDOC_Nosplit, /* -nospli */

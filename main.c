@@ -308,6 +308,9 @@ main(int argc, char *argv[])
 		}
 	}
 
+	if (curp.outtype != OUTT_TREE || !curp.outopts->noval)
+		options |= MPARSE_VALIDATE;
+
 	if (outmode == OUTMODE_FLN ||
 	    outmode == OUTMODE_LST ||
 	    !isatty(STDOUT_FILENO))
@@ -801,7 +804,7 @@ fs_search(const struct mansearch *cfg, const struct manpaths *paths,
 static void
 parse(struct curparse *curp, int fd, const char *file)
 {
-	struct roff_man	 *man;
+	struct roff_meta *meta;
 
 	/* Begin by parsing the file itself. */
 
@@ -823,49 +826,43 @@ parse(struct curparse *curp, int fd, const char *file)
 	if (curp->outdata == NULL)
 		outdata_alloc(curp);
 
-	mparse_result(curp->mp, &man, NULL);
+	mandoc_xr_reset();
+	meta = mparse_result(curp->mp);
 
 	/* Execute the out device, if it exists. */
 
-	if (man == NULL)
-		return;
-	mandoc_xr_reset();
-	if (man->macroset == MACROSET_MDOC) {
-		if (curp->outtype != OUTT_TREE || !curp->outopts->noval)
-			mdoc_validate(man);
+	if (meta->macroset == MACROSET_MDOC) {
 		switch (curp->outtype) {
 		case OUTT_HTML:
-			html_mdoc(curp->outdata, man);
+			html_mdoc(curp->outdata, meta);
 			break;
 		case OUTT_TREE:
-			tree_mdoc(curp->outdata, man);
+			tree_mdoc(curp->outdata, meta);
 			break;
 		case OUTT_MAN:
-			man_mdoc(curp->outdata, man);
+			man_mdoc(curp->outdata, meta);
 			break;
 		case OUTT_PDF:
 		case OUTT_ASCII:
 		case OUTT_UTF8:
 		case OUTT_LOCALE:
 		case OUTT_PS:
-			terminal_mdoc(curp->outdata, man);
+			terminal_mdoc(curp->outdata, meta);
 			break;
 		case OUTT_MARKDOWN:
-			markdown_mdoc(curp->outdata, man);
+			markdown_mdoc(curp->outdata, meta);
 			break;
 		default:
 			break;
 		}
 	}
-	if (man->macroset == MACROSET_MAN) {
-		if (curp->outtype != OUTT_TREE || !curp->outopts->noval)
-			man_validate(man);
+	if (meta->macroset == MACROSET_MAN) {
 		switch (curp->outtype) {
 		case OUTT_HTML:
-			html_man(curp->outdata, man);
+			html_man(curp->outdata, meta);
 			break;
 		case OUTT_TREE:
-			tree_man(curp->outdata, man);
+			tree_man(curp->outdata, meta);
 			break;
 		case OUTT_MAN:
 			mparse_copy(curp->mp);
@@ -875,7 +872,7 @@ parse(struct curparse *curp, int fd, const char *file)
 		case OUTT_UTF8:
 		case OUTT_LOCALE:
 		case OUTT_PS:
-			terminal_man(curp->outdata, man);
+			terminal_man(curp->outdata, meta);
 			break;
 		default:
 			break;

@@ -115,7 +115,6 @@ Provides
 .Vt enum mandoc_os ,
 .Vt enum mdoc_endbody ,
 .Vt enum roff_macroset ,
-.Vt enum roff_next ,
 .Vt enum roff_sec ,
 .Vt enum roff_tok ,
 .Vt enum roff_type ,
@@ -124,21 +123,25 @@ Provides
 .Vt struct roff_node ,
 the constant array
 .Va roff_name
-and the functions
-.Fn deroff
-and
-.Fn roff_validate .
+and the function
+.Fn deroff .
 .Pp
 Uses pointers to the types
 .Vt struct ohash
 from
-.Pa mandoc_ohash.h
-and
+.Pa mandoc_ohash.h ,
 .Vt struct mdoc_arg
 and
 .Vt union mdoc_data
 from
-.Pa mdoc.h
+.Pa mdoc.h ,
+.Vt struct tbl_span
+from
+.Pa tbl.h ,
+and
+.Vt struct eqn_box
+from
+.Pa eqn.h
 as opaque struct members.
 .It Qq Pa tbl.h
 Data structures for the
@@ -183,10 +186,9 @@ and in the main parser, but not in formatters.
 Requires
 .Pa mandoc.h
 for
-.Vt enum mandocerr ,
-.Vt enum mandoclevel ,
+.Vt enum mandocerr
 and
-.Fn mandocmsg ,
+.Vt enum mandoclevel
 and
 .Pa roff.h
 for
@@ -198,7 +200,7 @@ from
 .Pa read.c
 for function prototypes.
 Uses
-.Vt struct roff_man
+.Vt struct roff_meta
 from
 .Pa roff.h
 as an opaque type for function prototypes.
@@ -246,11 +248,15 @@ and the functions
 described in
 .Xr mandoc 3 .
 .Pp
-Uses the type
-.Vt struct roff_man
+Uses the types
+.Vt struct roff_node
 from
 .Pa roff.h
-as an opaque type for function prototypes.
+and
+.Vt struct roff_man
+from
+.Pa roff_int.h
+as opaque types for function prototypes.
 .Pp
 When this header is included, the same file should not include
 internals of different parsers.
@@ -312,13 +318,17 @@ for
 and
 .Vt enum roff_tok .
 .Pp
-Provides functions named
+Provides
+.Vt enum roff_next ,
+.Vt struct roff_man ,
+functions named
 .Fn roff_*
 to handle roff nodes,
 .Fn roffhash_alloc ,
 .Fn roffhash_find ,
-and
 .Fn roffhash_free ,
+and
+.Fn roff_validate ,
 and the two special functions
 .Fn man_breakscope
 and
@@ -327,11 +337,17 @@ because the latter two are needed by
 .Qq Pa roff.c .
 .Pp
 Uses the types
-.Vt struct roff_man
-and
-.Vt struct roff_node
+.Vt struct ohash
 from
-.Pa roff.h
+.Pa mandoc_ohash.h ,
+.Vt struct roff_node
+and
+.Vt struct roff_meta
+from
+.Pa roff.h ,
+.Vt struct roff
+from
+.Pa roff.c ,
 and
 .Vt struct mdoc_arg
 from
@@ -354,11 +370,12 @@ and many functions internal to the
 parser.
 .Pp
 Uses the types
-.Vt struct roff_man
-and
 .Vt struct roff_node
 from
-.Pa roff.h
+.Pa roff.h ,
+.Vt struct roff_man
+from
+.Pa roff_int.h ,
 and
 .Vt struct mdoc_arg
 from
@@ -380,11 +397,13 @@ and some functions internal to the
 parser.
 .Pp
 Uses the types
-.Vt struct roff_man
-and
 .Vt struct roff_node
 from
 .Pa roff.h
+and
+.Vt struct roff_man
+from
+.Pa roff_int.h
 as opaque types for function prototypes.
 .Pp
 When this header is included, the same file should not include
@@ -610,7 +629,7 @@ functionality mentioned in
 Provides the top level steering functions for all formatters.
 .Pp
 Uses the type
-.Vt struct roff_man
+.Vt struct roff_meta
 from
 .Pa roff.h
 as an opaque type for function prototypes.

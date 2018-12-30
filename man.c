@@ -372,7 +372,7 @@ void
 man_validate(struct roff_man *man)
 {
 
-	man->last = man->first;
+	man->last = man->meta.first;
 	man_node_validate(man);
 	man->flags &= ~MAN_LITERAL;
 }

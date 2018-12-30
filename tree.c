@@ -41,18 +41,18 @@ static	void	print_span(const struct tbl_span *, int);
 
 
 void
-tree_mdoc(void *arg, const struct roff_man *mdoc)
+tree_mdoc(void *arg, const struct roff_meta *mdoc)
 {
-	print_meta(&mdoc->meta);
+	print_meta(mdoc);
 	putchar('\n');
 	print_mdoc(mdoc->first->child, 0);
 }
 
 void
-tree_man(void *arg, const struct roff_man *man)
+tree_man(void *arg, const struct roff_meta *man)
 {
-	print_meta(&man->meta);
-	if (man->meta.hasbody == 0)
+	print_meta(man);
+	if (man->hasbody == 0)
 		puts("body  = empty");
 	putchar('\n');
 	print_man(man->first->child, 0);

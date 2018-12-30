@@ -147,7 +147,7 @@ man_term_act(enum roff_tok tok)
 }
 
 void
-terminal_man(void *arg, const struct roff_man *man)
+terminal_man(void *arg, const struct roff_meta *man)
 {
 	struct termp		*p;
 	struct roff_node	*n;
@@ -176,18 +176,17 @@ terminal_man(void *arg, const struct roff_man *man)
 			    !strcmp(n->child->child->string, "SYNOPSIS")) {
 				if (n->child->next->child != NULL)
 					print_man_nodelist(p, &mt,
-					    n->child->next->child,
-					    &man->meta);
+					    n->child->next->child, man);
 				term_newln(p);
 				break;
 			}
 			n = n->next;
 		}
 	} else {
-		term_begin(p, print_man_head, print_man_foot, &man->meta);
+		term_begin(p, print_man_head, print_man_foot, man);
 		p->flags |= TERMP_NOSPACE;
 		if (n != NULL)
-			print_man_nodelist(p, &mt, n, &man->meta);
+			print_man_nodelist(p, &mt, n, man);
 		term_end(p);
 	}
 	p->defindent = save_defindent;

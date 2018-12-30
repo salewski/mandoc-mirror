@@ -16,6 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+struct	roff_node;
+struct	roff_man;
+struct	mdoc_arg;
+
 #define	MACRO_PROT_ARGS	struct roff_man *mdoc, \
 			enum roff_tok tok, \
 			int line, \

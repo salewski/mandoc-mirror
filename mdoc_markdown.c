@@ -261,21 +261,21 @@ md_act(enum roff_tok tok)
 }
 
 void
-markdown_mdoc(void *arg, const struct roff_man *mdoc)
+markdown_mdoc(void *arg, const struct roff_meta *mdoc)
 {
 	outflags = MD_Sm;
-	md_word(mdoc->meta.title);
-	if (mdoc->meta.msec != NULL) {
+	md_word(mdoc->title);
+	if (mdoc->msec != NULL) {
 		outflags &= ~MD_spc;
 		md_word("(");
-		md_word(mdoc->meta.msec);
+		md_word(mdoc->msec);
 		md_word(")");
 	}
 	md_word("-");
-	md_word(mdoc->meta.vol);
-	if (mdoc->meta.arch != NULL) {
+	md_word(mdoc->vol);
+	if (mdoc->arch != NULL) {
 		md_word("(");
-		md_word(mdoc->meta.arch);
+		md_word(mdoc->arch);
 		md_word(")");
 	}
 	outflags |= MD_sp;
@@ -283,9 +283,9 @@ markdown_mdoc(void *arg, const struct roff_man *mdoc)
 	md_nodelist(mdoc->first->child);
 
 	outflags |= MD_sp;
-	md_word(mdoc->meta.os);
+	md_word(mdoc->os);
 	md_word("-");
-	md_word(mdoc->meta.date);
+	md_word(mdoc->date);
 	putchar('\n');
 }
 

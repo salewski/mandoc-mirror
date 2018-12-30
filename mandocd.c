@@ -244,35 +244,29 @@ main(int argc, char *argv[])
 static void
 process(struct mparse *parser, enum outt outtype, void *formatter)
 {
-	struct roff_man	 *man;
+	struct roff_meta *meta;
 
 	mparse_readfd(parser, STDIN_FILENO, "<unixfd>");
-	mparse_result(parser, &man, NULL);
-
-	if (man == NULL)
-		return;
-
-	if (man->macroset == MACROSET_MDOC) {
-		mdoc_validate(man);
+	meta = mparse_result(parser);
+	if (meta->macroset == MACROSET_MDOC) {
 		switch (outtype) {
 		case OUTT_ASCII:
 		case OUTT_UTF8:
-			terminal_mdoc(formatter, man);
+			terminal_mdoc(formatter, meta);
 			break;
 		case OUTT_HTML:
-			html_mdoc(formatter, man);
+			html_mdoc(formatter, meta);
 			break;
 		}
 	}
-	if (man->macroset == MACROSET_MAN) {
-		man_validate(man);
+	if (meta->macroset == MACROSET_MAN) {
 		switch (outtype) {
 		case OUTT_ASCII:
 		case OUTT_UTF8:
-			terminal_man(formatter, man);
+			terminal_man(formatter, meta);
 			break;
 		case OUTT_HTML:
-			html_man(formatter, man);
+			html_man(formatter, meta);
 			break;
 		}
 	}

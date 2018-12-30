@@ -433,7 +433,7 @@ void
 mdoc_validate(struct roff_man *mdoc)
 {
 
-	mdoc->last = mdoc->first;
+	mdoc->last = mdoc->meta.first;
 	mdoc_node_validate(mdoc);
 	mdoc_state_reset(mdoc);
 }

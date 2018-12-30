@@ -25,6 +25,7 @@
 #include "roff.h"
 #include "mdoc.h"
 #include "libmandoc.h"
+#include "roff_int.h"
 #include "libmdoc.h"
 
 #define STATE_ARGS  struct roff_man *mdoc, struct roff_node *n

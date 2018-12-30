@@ -233,7 +233,7 @@ mdoc_endparse(struct roff_man *mdoc)
 
 	/* Rewind to the first. */
 
-	rew_last(mdoc, mdoc->first);
+	rew_last(mdoc, mdoc->meta.first);
 	mdoc_state_reset(mdoc);
 }
 
