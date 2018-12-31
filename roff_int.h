@@ -39,7 +39,7 @@ struct	roff_man {
 	struct roff_node *last_es; /* The most recent Es node. */
 	int		  quick;   /* Abort parse early. */
 	int		  flags;   /* Parse flags. */
-#define	MDOC_LITERAL	 (1 << 1)  /* In a literal scope. */
+#define	ROFF_NOFILL	 (1 << 1)  /* Fill mode switched off. */
 #define	MDOC_PBODY	 (1 << 2)  /* In the document body. */
 #define	MDOC_NEWLINE	 (1 << 3)  /* First macro/text in a line. */
 #define	MDOC_PHRASE	 (1 << 4)  /* In a Bl -column phrase. */
@@ -54,7 +54,7 @@ struct	roff_man {
 #define	MDOC_PHRASEQF	 (1 << 13) /* Quote first word encountered. */
 #define	MDOC_PHRASEQL	 (1 << 14) /* Quote last word of this phrase. */
 #define	MDOC_PHRASEQN	 (1 << 15) /* Quote first word of the next phrase. */
-#define	MAN_LITERAL	  MDOC_LITERAL
+#define	MDOC_LITERAL	  ROFF_NOFILL
 #define	MAN_NEWLINE	  MDOC_NEWLINE
 	enum roff_sec	  lastsec; /* Last section seen. */
 	enum roff_sec	  lastnamed; /* Last standard section seen. */

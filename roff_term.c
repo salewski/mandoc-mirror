@@ -42,9 +42,11 @@ static	void	  roff_term_pre_ti(ROFF_TERM_ARGS);
 static	const roff_term_pre_fp roff_term_pre_acts[ROFF_MAX] = {
 	roff_term_pre_br,  /* br */
 	roff_term_pre_ce,  /* ce */
+	roff_term_pre_br,  /* fi */
 	roff_term_pre_ft,  /* ft */
 	roff_term_pre_ll,  /* ll */
 	roff_term_pre_mc,  /* mc */
+	roff_term_pre_br,  /* nf */
 	roff_term_pre_po,  /* po */
 	roff_term_pre_ce,  /* rj */
 	roff_term_pre_sp,  /* sp */
@@ -67,7 +69,9 @@ roff_term_pre_br(ROFF_TERM_ARGS)
 	if (p->flags & TERMP_BRIND) {
 		p->tcol->offset = p->tcol->rmargin;
 		p->tcol->rmargin = p->maxrmargin;
+		p->trailspace = 0;
 		p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND);
+		p->flags |= TERMP_NOSPACE;
 	}
 }
 

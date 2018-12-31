@@ -117,8 +117,6 @@ static const struct man_term_act man_term_acts[MAN_MAX - MAN_TH] = {
 	{ pre_I, NULL, 0 }, /* I */
 	{ pre_alternate, NULL, 0 }, /* IR */
 	{ pre_alternate, NULL, 0 }, /* RI */
-	{ pre_literal, NULL, MAN_NOTEXT }, /* nf */
-	{ pre_literal, NULL, MAN_NOTEXT }, /* fi */
 	{ NULL, NULL, 0 }, /* RE */
 	{ pre_RS, post_RS, 0 }, /* RS */
 	{ pre_DT, NULL, 0 }, /* DT */
@@ -247,7 +245,7 @@ pre_literal(DECL_ARGS)
 
 	term_newln(p);
 
-	if (n->tok == MAN_nf || n->tok == MAN_EX)
+	if (n->tok == MAN_EX)
 		mt->fl |= MANT_LITERAL;
 	else
 		mt->fl &= ~MANT_LITERAL;
@@ -983,6 +981,11 @@ print_man_node(DECL_ARGS)
 	default:
 		break;
 	}
+
+	if (n->tok == ROFF_nf)
+		n->tok = MAN_EX;
+	else if (n->tok == ROFF_fi)
+		n->tok = MAN_EE;
 
 	if (n->tok < ROFF_MAX) {
 		roff_term_pre(p, n);

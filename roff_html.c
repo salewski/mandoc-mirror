@@ -38,9 +38,11 @@ static	void	  roff_html_pre_sp(ROFF_HTML_ARGS);
 static	const roff_html_pre_fp roff_html_pre_acts[ROFF_MAX] = {
 	roff_html_pre_br,  /* br */
 	roff_html_pre_ce,  /* ce */
+	roff_html_pre_br,  /* fi */
 	roff_html_pre_ft,  /* ft */
 	NULL,  /* ll */
 	NULL,  /* mc */
+	roff_html_pre_br,  /* nf */
 	NULL,  /* po */
 	roff_html_pre_ce,  /* rj */
 	roff_html_pre_sp,  /* sp */

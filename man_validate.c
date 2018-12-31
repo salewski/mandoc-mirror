@@ -78,8 +78,6 @@ static	const v_check man_valids[MAN_MAX - MAN_TH] = {
 	NULL,       /* I */
 	NULL,       /* IR */
 	NULL,       /* RI */
-	NULL,       /* nf */
-	NULL,       /* fi */
 	NULL,       /* RE */
 	check_part, /* RS */
 	NULL,       /* DT */
@@ -153,6 +151,7 @@ man_validate(struct roff_man *man)
 	default:
 		if (n->tok < ROFF_MAX) {
 			roff_validate(man);
+			man_state(man, n);
 			break;
 		}
 		assert(n->tok >= MAN_TH && n->tok < MAN_MAX);
@@ -207,7 +206,7 @@ check_text(CHKARGS)
 {
 	char		*cp, *p;
 
-	if (MAN_LITERAL & man->flags)
+	if (man->flags & ROFF_NOFILL)
 		return;
 
 	cp = n->string;
