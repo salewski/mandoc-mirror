@@ -39,6 +39,5 @@ struct	man_macro {
 const struct man_macro *man_macro(enum roff_tok);
 
 void		  man_descope(struct roff_man *, int, int, char *);
-void		  man_node_validate(struct roff_man *);
 void		  man_state(struct roff_man *, struct roff_node *);
 void		  man_unscope(struct roff_man *, const struct roff_node *);

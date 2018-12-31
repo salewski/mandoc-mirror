@@ -445,9 +445,7 @@ in_line_eoln(MACRO_PROT_ARGS)
 void
 man_endparse(struct roff_man *man)
 {
-
 	man_unscope(man, man->meta.first);
-	man->flags &= ~MAN_LITERAL;
 }
 
 static int

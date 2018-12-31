@@ -101,7 +101,7 @@ static	const v_check man_valids[MAN_MAX - MAN_TH] = {
 
 /* Validate the subtree rooted at man->last. */
 void
-man_node_validate(struct roff_man *man)
+man_validate(struct roff_man *man)
 {
 	struct roff_node *n;
 	const v_check	 *cp;
@@ -128,7 +128,7 @@ man_node_validate(struct roff_man *man)
 
 	man->last = man->last->child;
 	while (man->last != NULL) {
-		man_node_validate(man);
+		man_validate(man);
 		if (man->last == n)
 			man->last = man->last->child;
 		else

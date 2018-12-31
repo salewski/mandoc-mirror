@@ -688,6 +688,7 @@ mparse_free(struct mparse *curp)
 struct roff_meta *
 mparse_result(struct mparse *curp)
 {
+	roff_state_reset(curp->man);
 	if (curp->options & MPARSE_VALIDATE) {
 		if (curp->man->meta.macroset == MACROSET_MDOC)
 			mdoc_validate(curp->man);

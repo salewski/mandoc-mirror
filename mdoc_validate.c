@@ -288,7 +288,7 @@ static	const char * const secnames[SEC__MAX] = {
 
 /* Validate the subtree rooted at mdoc->last. */
 void
-mdoc_node_validate(struct roff_man *mdoc)
+mdoc_validate(struct roff_man *mdoc)
 {
 	struct roff_node *n, *np;
 	const v_post *p;
@@ -319,7 +319,7 @@ mdoc_node_validate(struct roff_man *mdoc)
 
 	mdoc->last = mdoc->last->child;
 	while (mdoc->last != NULL) {
-		mdoc_node_validate(mdoc);
+		mdoc_validate(mdoc);
 		if (mdoc->last == n)
 			mdoc->last = mdoc->last->child;
 		else

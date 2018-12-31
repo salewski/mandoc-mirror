@@ -80,6 +80,7 @@ struct ohash	 *roffhash_alloc(enum roff_tok, enum roff_tok);
 enum roff_tok	  roffhash_find(struct ohash *, const char *, size_t);
 void		  roffhash_free(struct ohash *);
 
+void		  roff_state_reset(struct roff_man *);
 void		  roff_validate(struct roff_man *);
 
 /*

@@ -367,12 +367,3 @@ man_state(struct roff_man *man, struct roff_node *n)
 	}
 	man->last->flags |= NODE_VALID;
 }
-
-void
-man_validate(struct roff_man *man)
-{
-
-	man->last = man->meta.first;
-	man_node_validate(man);
-	man->flags &= ~MAN_LITERAL;
-}

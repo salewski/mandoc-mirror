@@ -179,14 +179,6 @@ mdoc_state(struct roff_man *mdoc, struct roff_node *n)
 		(*handler)(mdoc, n);
 }
 
-void
-mdoc_state_reset(struct roff_man *mdoc)
-{
-
-	roff_setreg(mdoc->roff, "nS", 0, '=');
-	mdoc->flags = 0;
-}
-
 static void
 state_bd(STATE_ARGS)
 {
