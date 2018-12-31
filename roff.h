@@ -512,14 +512,15 @@ struct	roff_node {
 	int		  flags;
 #define	NODE_VALID	 (1 << 0)  /* Has been validated. */
 #define	NODE_ENDED	 (1 << 1)  /* Gone past body end mark. */
-#define	NODE_EOS	 (1 << 2)  /* At sentence boundary. */
+#define	NODE_BROKEN	 (1 << 2)  /* Must validate parent when ending. */
 #define	NODE_LINE	 (1 << 3)  /* First macro/text on line. */
-#define	NODE_SYNPRETTY	 (1 << 4)  /* SYNOPSIS-style formatting. */
-#define	NODE_BROKEN	 (1 << 5)  /* Must validate parent when ending. */
-#define	NODE_DELIMO	 (1 << 6)
-#define	NODE_DELIMC	 (1 << 7)
-#define	NODE_NOSRC	 (1 << 8)  /* Generated node, not in input file. */
-#define	NODE_NOPRT	 (1 << 9)  /* Shall not print anything. */
+#define	NODE_DELIMO	 (1 << 4)
+#define	NODE_DELIMC	 (1 << 5)
+#define	NODE_EOS	 (1 << 6)  /* At sentence boundary. */
+#define	NODE_SYNPRETTY	 (1 << 7)  /* SYNOPSIS-style formatting. */
+#define	NODE_NOFILL	 (1 << 8)  /* Fill mode switched off. */
+#define	NODE_NOSRC	 (1 << 9)  /* Generated node, not in input file. */
+#define	NODE_NOPRT	 (1 << 10) /* Shall not print anything. */
 	int		  prev_font; /* Before entering this node. */
 	int		  aux;     /* Decoded node data, type-dependent. */
 	enum roff_tok	  tok;     /* Request or macro ID. */

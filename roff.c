@@ -889,6 +889,10 @@ roff_node_alloc(struct roff_man *man, int line, int pos,
 		n->flags |= NODE_SYNPRETTY;
 	else
 		n->flags &= ~NODE_SYNPRETTY;
+	if (man->flags & ROFF_NOFILL)
+		n->flags |= NODE_NOFILL;
+	else
+		n->flags &= ~NODE_NOFILL;
 	if (man->flags & MDOC_NEWLINE)
 		n->flags |= NODE_LINE;
 	man->flags &= ~MDOC_NEWLINE;
