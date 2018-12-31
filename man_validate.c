@@ -153,7 +153,6 @@ man_validate(struct roff_man *man)
 	default:
 		if (n->tok < ROFF_MAX) {
 			roff_validate(man);
-			man_state(man, n);
 			break;
 		}
 		assert(n->tok >= MAN_TH && n->tok < MAN_MAX);
@@ -161,7 +160,7 @@ man_validate(struct roff_man *man)
 		if (*cp)
 			(*cp)(man, n);
 		if (man->last == n)
-			man_state(man, n);
+			n->flags |= NODE_VALID;
 		break;
 	}
 }

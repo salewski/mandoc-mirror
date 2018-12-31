@@ -429,7 +429,7 @@ in_line_eoln(MACRO_PROT_ARGS)
 	/* Rewind our element scope. */
 
 	for ( ; man->last; man->last = man->last->parent) {
-		man_state(man, man->last);
+		man->last->flags |= NODE_VALID;
 		if (man->last == n)
 			break;
 	}

@@ -343,22 +343,3 @@ man_breakscope(struct roff_man *man, int tok)
 		man->flags &= ~MAN_BLINE;
 	}
 }
-
-void
-man_state(struct roff_man *man, struct roff_node *n)
-{
-
-	switch(n->tok) {
-	case ROFF_nf:
-	case MAN_EX:
-		man->flags |= ROFF_NOFILL;
-		break;
-	case ROFF_fi:
-	case MAN_EE:
-		man->flags &= ~ROFF_NOFILL;
-		break;
-	default:
-		break;
-	}
-	man->last->flags |= NODE_VALID;
-}
