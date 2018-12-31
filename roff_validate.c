@@ -94,7 +94,7 @@ roff_valid_br(ROFF_VALID_ARGS)
 static void
 roff_valid_fi(ROFF_VALID_ARGS)
 {
-	if ((man->flags & ROFF_NOFILL) == 0)
+	if ((n->flags & NODE_NOFILL) == 0)
 		mandoc_msg(MANDOCERR_FI_SKIP, n->line, n->pos, "fi");
 }
 

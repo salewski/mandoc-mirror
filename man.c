@@ -351,15 +351,10 @@ man_state(struct roff_man *man, struct roff_node *n)
 	switch(n->tok) {
 	case ROFF_nf:
 	case MAN_EX:
-		if (man->flags & ROFF_NOFILL && (n->flags & NODE_VALID) == 0)
-			mandoc_msg(MANDOCERR_NF_SKIP, n->line, n->pos, "nf");
 		man->flags |= ROFF_NOFILL;
 		break;
 	case ROFF_fi:
 	case MAN_EE:
-		if ( (man->flags & ROFF_NOFILL) == 0 &&
-		     ! (n->flags & NODE_VALID))
-			mandoc_msg(MANDOCERR_FI_SKIP, n->line, n->pos, "fi");
 		man->flags &= ~ROFF_NOFILL;
 		break;
 	default:
