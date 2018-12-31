@@ -228,10 +228,10 @@ state_dl(STATE_ARGS)
 
 	switch (n->type) {
 	case ROFFT_HEAD:
-		mdoc->flags |= MDOC_LITERAL;
+		mdoc->flags |= ROFF_NOFILL;
 		break;
 	case ROFFT_BODY:
-		mdoc->flags &= ~MDOC_LITERAL;
+		mdoc->flags &= ~ROFF_NOFILL;
 		break;
 	default:
 		break;
