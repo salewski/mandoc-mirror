@@ -36,8 +36,6 @@
 #define	MAXMARGINS	  64 /* maximum number of indented scopes */
 
 struct	mtermp {
-	int		  fl;
-#define	MANT_LITERAL	 (1 << 0)
 	int		  lmargin[MAXMARGINS]; /* margins (incl. vis. page) */
 	int		  lmargincur; /* index of current margin */
 	int		  lmarginsz; /* actual number of nested margins */
@@ -242,13 +240,7 @@ pre_I(DECL_ARGS)
 static int
 pre_literal(DECL_ARGS)
 {
-
 	term_newln(p);
-
-	if (n->tok == MAN_EX)
-		mt->fl |= MANT_LITERAL;
-	else
-		mt->fl &= ~MANT_LITERAL;
 
 	/*
 	 * Unlike .IP and .TP, .HP does not have a HEAD.
@@ -262,7 +254,6 @@ pre_literal(DECL_ARGS)
 		p->flags &= ~(TERMP_NOBREAK | TERMP_BRIND);
 		p->flags |= TERMP_NOSPACE;
 	}
-
 	return 0;
 }
 
@@ -287,7 +278,7 @@ pre_alternate(DECL_ARGS)
 {
 	enum termfont		 font[2];
 	struct roff_node	*nn;
-	int			 savelit, i;
+	int			 i;
 
 	switch (n->tok) {
 	case MAN_RB:
@@ -317,14 +308,8 @@ pre_alternate(DECL_ARGS)
 	default:
 		abort();
 	}
-
-	savelit = MANT_LITERAL & mt->fl;
-	mt->fl &= ~MANT_LITERAL;
-
-	for (i = 0, nn = n->child; nn; nn = nn->next, i = 1 - i) {
+	for (i = 0, nn = n->child; nn != NULL; nn = nn->next, i = 1 - i) {
 		term_fontrepl(p, font[i]);
-		if (savelit && NULL == nn->next)
-			mt->fl |= MANT_LITERAL;
 		assert(nn->type == ROFFT_TEXT);
 		term_word(p, nn->string);
 		if (nn->flags & NODE_EOS)
@@ -332,7 +317,6 @@ pre_alternate(DECL_ARGS)
 		if (nn->next)
 			p->flags |= TERMP_NOSPACE;
 	}
-
 	return 0;
 }
 
@@ -435,7 +419,7 @@ pre_HP(DECL_ARGS)
 		return 0;
 	}
 
-	if ( ! (MANT_LITERAL & mt->fl)) {
+	if ((n->flags & NODE_NOFILL) == 0) {
 		p->flags |= TERMP_NOBREAK | TERMP_BRIND;
 		p->trailspace = 2;
 	}
@@ -508,7 +492,7 @@ pre_IP(DECL_ARGS)
 {
 	struct roffsu		 su;
 	const struct roff_node	*nn;
-	int			 len, savelit;
+	int			 len;
 
 	switch (n->type) {
 	case ROFFT_BODY:
@@ -542,16 +526,8 @@ pre_IP(DECL_ARGS)
 	case ROFFT_HEAD:
 		p->tcol->offset = mt->offset;
 		p->tcol->rmargin = mt->offset + len;
-
-		savelit = MANT_LITERAL & mt->fl;
-		mt->fl &= ~MANT_LITERAL;
-
 		if (n->child)
 			print_man_node(p, mt, n->child, meta);
-
-		if (savelit)
-			mt->fl |= MANT_LITERAL;
-
 		return 0;
 	case ROFFT_BODY:
 		p->tcol->offset = mt->offset + len;
@@ -560,14 +536,12 @@ pre_IP(DECL_ARGS)
 	default:
 		break;
 	}
-
 	return 1;
 }
 
 static void
 post_IP(DECL_ARGS)
 {
-
 	switch (n->type) {
 	case ROFFT_HEAD:
 		term_flushln(p);
@@ -589,7 +563,7 @@ pre_TP(DECL_ARGS)
 {
 	struct roffsu		 su;
 	struct roff_node	*nn;
-	int			 len, savelit;
+	int			 len;
 
 	switch (n->type) {
 	case ROFFT_HEAD:
@@ -626,9 +600,6 @@ pre_TP(DECL_ARGS)
 		p->tcol->offset = mt->offset;
 		p->tcol->rmargin = mt->offset + len;
 
-		savelit = MANT_LITERAL & mt->fl;
-		mt->fl &= ~MANT_LITERAL;
-
 		/* Don't print same-line elements. */
 		nn = n->child;
 		while (NULL != nn && 0 == (NODE_LINE & nn->flags))
@@ -638,9 +609,6 @@ pre_TP(DECL_ARGS)
 			print_man_node(p, mt, nn, meta);
 			nn = nn->next;
 		}
-
-		if (savelit)
-			mt->fl |= MANT_LITERAL;
 		return 0;
 	case ROFFT_BODY:
 		p->tcol->offset = mt->offset + len;
@@ -651,14 +619,12 @@ pre_TP(DECL_ARGS)
 	default:
 		break;
 	}
-
 	return 1;
 }
 
 static void
 post_TP(DECL_ARGS)
 {
-
 	switch (n->type) {
 	case ROFFT_HEAD:
 		term_flushln(p);
@@ -679,7 +645,6 @@ pre_SS(DECL_ARGS)
 
 	switch (n->type) {
 	case ROFFT_BLOCK:
-		mt->fl &= ~MANT_LITERAL;
 		mt->lmargin[mt->lmargincur] = term_len(p, p->defindent);
 		mt->offset = term_len(p, p->defindent);
 
@@ -742,7 +707,6 @@ pre_SH(DECL_ARGS)
 
 	switch (n->type) {
 	case ROFFT_BLOCK:
-		mt->fl &= ~MANT_LITERAL;
 		mt->lmargin[mt->lmargincur] = term_len(p, p->defindent);
 		mt->offset = term_len(p, p->defindent);
 
@@ -982,11 +946,6 @@ print_man_node(DECL_ARGS)
 		break;
 	}
 
-	if (n->tok == ROFF_nf)
-		n->tok = MAN_EX;
-	else if (n->tok == ROFF_fi)
-		n->tok = MAN_EE;
-
 	if (n->tok < ROFF_MAX) {
 		roff_term_pre(p, n);
 		return;
@@ -1016,7 +975,7 @@ out:
 	 * -man doesn't have nested macros, we don't need to be
 	 * more specific than this.
 	 */
-	if (mt->fl & MANT_LITERAL &&
+	if (n->flags & NODE_NOFILL &&
 	    ! (p->flags & (TERMP_NOBREAK | TERMP_NONEWLINE)) &&
 	    (n->next == NULL || n->next->flags & NODE_LINE)) {
 		p->flags |= TERMP_BRNEVER | TERMP_NOSPACE;
