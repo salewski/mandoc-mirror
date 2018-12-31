@@ -381,6 +381,11 @@ in_line_eoln(MACRO_PROT_ARGS)
 	roff_elem_alloc(man, line, ppos, tok);
 	n = man->last;
 
+	if (tok == MAN_EX)
+		man->flags |= ROFF_NOFILL;
+	else if (tok == MAN_EE)
+		man->flags &= ~ROFF_NOFILL;
+
 	for (;;) {
 		if (buf[*pos] != '\0' && man->last != n && tok == MAN_PD) {
 			mandoc_msg(MANDOCERR_ARG_EXCESS, line, *pos,
