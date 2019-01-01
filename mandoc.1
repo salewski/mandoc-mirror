@@ -307,8 +307,16 @@ If no
 is specified, reuse the first command line argument that is not a
 .Ar section
 number.
-This is useful when it is the name of a manual page,
-in particular the name of a library function.
+If that argument is in
+.Xr apropos 1
+.Ar key Ns = Ns Ar val
+format, only the
+.Ar val
+is used rather than the argument as a whole.
+This is useful for commands like
+.Ql man -akO tag Ic=ulimit
+to search for a keyword and jump right to its definition
+in the matching manual pages.
 .It Cm width Ns = Ns Ar width
 The output width is set to
 .Ar width
