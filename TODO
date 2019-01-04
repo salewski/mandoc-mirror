@@ -90,13 +90,6 @@ are mere guesses, and some may be wrong.
   from jmc@  Wed, 14 Jul 2010 18:10:32 +0100
   loc *  exist ***  algo ***  size **  imp **
 
-- .Bd -centered implies -filled, not -unfilled, which is not
-  easy to implement; it requires code similar to .ce, which
-  we don't have either.
-  Besides, groff has bug causing text right *before* .Bd -centered
-  to be centered as well.
-  loc ***  exist ***  algo **  size **  imp **  (parser reorg would help)
-
 - .Bd -filled should not be the same as .Bd -ragged, but align both
   the left and right margin.  In groff, it is implemented in terms
   of .ad b, which we don't have either.  Found in cksum(1).
