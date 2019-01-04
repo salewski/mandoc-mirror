@@ -135,12 +135,26 @@ term_flushln(struct termp *p)
 		/*
 		 * Figure out how much text will fit in the field.
 		 * If there is whitespace only, print nothing.
-		 * Otherwise, print the field content.
 		 */
 
 		term_fill(p, &nbr, &vbr, vtarget);
 		if (nbr == 0)
 			break;
+
+		/*
+		 * With the CENTER or RIGHT flag, increase the indentation
+		 * to center the text between the left and right margins
+		 * or to adjust it to the right margin, respectively.
+		 */
+
+		if (vbr < vtarget) {
+			if (p->flags & TERMP_CENTER)
+				vbl += (vtarget - vbr) / 2;
+			else if (p->flags & TERMP_RIGHT)
+				vbl += vtarget - vbr;
+		}
+
+		/* Finally, print the field content. */
 
 		term_field(p, vbl, nbr, vbr, vtarget);
 
