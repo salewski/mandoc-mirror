@@ -833,7 +833,9 @@ pre_SY(DECL_ARGS)
 	case ROFFT_HEAD:
 		p->tcol->offset = mt->offset;
 		p->tcol->rmargin = mt->offset + len;
-		p->flags |= TERMP_NOBREAK;
+		if (n->next->child == NULL ||
+		    (n->next->child->flags & NODE_NOFILL) == 0)
+			p->flags |= TERMP_NOBREAK;
 		term_fontrepl(p, TERMFONT_BOLD);
 		break;
 	case ROFFT_BODY:
