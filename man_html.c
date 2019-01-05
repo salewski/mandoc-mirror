@@ -256,8 +256,8 @@ print_man_node(MAN_ARGS)
 	/* This will automatically close out any font scope. */
 	print_stagq(h, t);
 
-	if (n->flags & NODE_NOFILL &&
-	    (n->next == NULL || n->next->flags & NODE_LINE)) {
+	if (n->flags & NODE_NOFILL && n->tok != MAN_YS &&
+	    (n->next != NULL && n->next->flags & NODE_LINE)) {
 		/* In .nf = <pre>, print even empty lines. */
 		h->col++;
 		print_endline(h);
