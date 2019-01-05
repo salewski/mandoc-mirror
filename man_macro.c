@@ -297,8 +297,10 @@ blk_exp(MACRO_PROT_ARGS)
 	char		*p;
 	int		 la;
 
-	if (tok == MAN_RS)
+	if (tok == MAN_RS) {
 		rew_scope(man, tok);
+		man->flags |= ROFF_NONOFILL;
+	}
 	roff_block_alloc(man, line, ppos, tok);
 	head = roff_head_alloc(man, line, ppos, tok);
 
@@ -322,6 +324,7 @@ blk_exp(MACRO_PROT_ARGS)
 
 	man_unscope(man, head);
 	roff_body_alloc(man, line, ppos, tok);
+	man->flags &= ~ROFF_NONOFILL;
 }
 
 /*
