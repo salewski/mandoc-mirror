@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2013,2014,2015,2017,2018 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2013-2015, 2017-2019 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2011 Joerg Sonnenberger <joerg@netbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -92,9 +92,9 @@ man_descope(struct roff_man *man, int line, int offs, char *start)
 	}
 	if ( ! (man->flags & MAN_BLINE))
 		return;
-	man->flags &= ~MAN_BLINE;
 	man_unscope(man, man->last->parent);
 	roff_body_alloc(man, line, offs, man->last->tok);
+	man->flags &= ~(MAN_BLINE | ROFF_NONOFILL);
 }
 
 static int
@@ -268,9 +268,9 @@ man_pmacro(struct roff_man *man, int ln, char *buf, int offs)
 	    man_macro(tok)->flags & MAN_NSCOPED)
 		return 1;
 
-	man->flags &= ~MAN_BLINE;
 	man_unscope(man, man->last->parent);
 	roff_body_alloc(man, ln, ppos, man->last->tok);
+	man->flags &= ~(MAN_BLINE | ROFF_NONOFILL);
 	return 1;
 }
 
@@ -313,7 +313,7 @@ man_breakscope(struct roff_man *man, int tok)
 		n = man->last;
 		man_unscope(man, n);
 		roff_body_alloc(man, n->line, n->pos, n->tok);
-		man->flags &= ~MAN_BLINE;
+		man->flags &= ~(MAN_BLINE | ROFF_NONOFILL);
 	}
 
 	/*
@@ -340,6 +340,6 @@ man_breakscope(struct roff_man *man, int tok)
 		    "%s breaks %s", roff_name[tok], roff_name[n->tok]);
 
 		roff_node_delete(man, n);
-		man->flags &= ~MAN_BLINE;
+		man->flags &= ~(MAN_BLINE | ROFF_NONOFILL);
 	}
 }

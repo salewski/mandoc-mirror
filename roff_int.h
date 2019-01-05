@@ -1,7 +1,7 @@
 /*	$Id$	*/
 /*
  * Copyright (c) 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2013,2014,2015,2017,2018 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2013-2015, 2017-2019 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -54,6 +54,7 @@ struct	roff_man {
 #define	MDOC_PHRASEQF	 (1 << 13) /* Quote first word encountered. */
 #define	MDOC_PHRASEQL	 (1 << 14) /* Quote last word of this phrase. */
 #define	MDOC_PHRASEQN	 (1 << 15) /* Quote first word of the next phrase. */
+#define	ROFF_NONOFILL	 (1 << 16) /* Temporarily suspend no-fill mode. */
 #define	MAN_NEWLINE	  MDOC_NEWLINE
 	enum roff_sec	  lastsec; /* Last section seen. */
 	enum roff_sec	  lastnamed; /* Last standard section seen. */
