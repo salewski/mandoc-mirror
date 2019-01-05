@@ -265,6 +265,39 @@ print_metaf(struct html *h, enum mandoc_esc deco)
 	}
 }
 
+/*
+ * ROFF_nf switches to no-fill mode, ROFF_fi to fill mode.
+ * TOKEN_NONE does not switch.  The old mode is returned.
+ */
+enum roff_tok
+html_fillmode(struct html *h, enum roff_tok want)
+{
+	struct tag	*t;
+	enum roff_tok	 had;
+
+	for (t = h->tag; t != NULL; t = t->next)
+		if (t->tag == TAG_PRE)
+			break;
+
+	had = t == NULL ? ROFF_fi : ROFF_nf;
+
+	if (want != had) {
+		switch (want) {
+		case ROFF_fi:
+			print_tagq(h, t);
+			break;
+		case ROFF_nf:
+			print_otag(h, TAG_PRE, "");
+			break;
+		case TOKEN_NONE:
+			break;
+		default:
+			abort();
+		}
+	}
+	return had;
+}
+
 char *
 html_make_id(const struct roff_node *n, int unique)
 {
