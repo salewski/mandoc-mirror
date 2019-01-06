@@ -80,6 +80,7 @@ html_tbl_sulen(const struct roffsu *su, void *arg)
 static void
 html_tblopen(struct html *h, const struct tbl_span *sp)
 {
+	html_close_paragraph(h);
 	if (h->tbl.cols == NULL) {
 		h->tbl.len = html_tbl_len;
 		h->tbl.slen = html_tbl_strlen;
