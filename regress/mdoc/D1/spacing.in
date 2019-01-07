@@ -1,4 +1,4 @@
-.\" $OpenBSD: spacing.in,v 1.3 2017/07/04 14:53:24 schwarze Exp $
+.\" $OpenBSD: spacing.in,v 1.4 2019/01/07 06:51:37 schwarze Exp $
 .Dd $Mdocdate$
 .Dt D1-SPACING 1
 .Os
@@ -6,8 +6,15 @@
 .Nm D1-spacing
 .Nd spacing in and around one-line displays
 .Sh DESCRIPTION
-preceding text
+BEGINTEST
+.Pp
+preceding
+paragraph
 .D1 spacing  in  and around one-line displays
 empty display:
 .D1
 following text
+.br
+ENDTEST
+.br
+end of file

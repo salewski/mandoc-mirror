@@ -162,16 +162,22 @@ print_man_node(MAN_ARGS)
 	struct tag	*t;
 	int		 child;
 
+	if (n->type == ROFFT_COMMENT || n->flags & NODE_NOPRT)
+		return;
+
 	html_fillmode(h, n->flags & NODE_NOFILL ? ROFF_nf : ROFF_fi);
 
 	child = 1;
+	t = h->tag;
+	if (t->tag == TAG_P || t->tag == TAG_PRE)
+		t = t->next;
+
 	switch (n->type) {
 	case ROFFT_TEXT:
 		if (*n->string == '\0') {
 			print_endline(h);
 			return;
 		}
-		t = h->tag;
 		if (*n->string == ' ' && n->flags & NODE_LINE &&
 		    (h->flags & HTML_NONEWLINE) == 0)
 			print_endline(h);
@@ -179,10 +185,7 @@ print_man_node(MAN_ARGS)
 			h->flags |= HTML_NOSPACE;
 		print_text(h, n->string);
 		break;
-	case ROFFT_COMMENT:
-		return;
 	case ROFFT_EQN:
-		t = h->tag;
 		print_eqn(h, n->eqn);
 		break;
 	case ROFFT_TBL:
@@ -208,17 +211,15 @@ print_man_node(MAN_ARGS)
 		 * the "meta" table state.  This will be reopened on the
 		 * next table element.
 		 */
-		if (h->tblt != NULL)
+		if (h->tblt != NULL) {
 			print_tblclose(h);
-
-		t = h->tag;
+			t = h->tag;
+		}
 		if (n->tok < ROFF_MAX) {
 			roff_html_pre(h, n);
-			if (n->tok != ROFF_sp)
-				print_stagq(h, t);
+			print_stagq(h, t);
 			return;
 		}
-
 		assert(n->tok >= MAN_TH && n->tok < MAN_MAX);
 		if (man_html_acts[n->tok - MAN_TH].pre != NULL)
 			child = (*man_html_acts[n->tok - MAN_TH].pre)(man,

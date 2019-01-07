@@ -110,8 +110,8 @@ roff_html_pre_sp(ROFF_HTML_ARGS)
 	if (html_fillmode(h, TOKEN_NONE) == ROFF_nf) {
 		h->col++;
 		print_endline(h);
-	} else if (n->parent->tok >= MAN_TH)
+	} else {
+		html_close_paragraph(h);
 		print_otag(h, TAG_P, "c", "Pp");
-	else
-		print_paragraph(h);
+	}
 }

@@ -1,4 +1,4 @@
-.\" $OpenBSD: nf.in,v 1.1 2019/01/04 03:54:50 schwarze Exp $
+.\" $OpenBSD: nf.in,v 1.2 2019/01/07 06:51:37 schwarze Exp $
 .Dd $Mdocdate$
 .Dt BD-NF 1
 .Os
@@ -6,6 +6,7 @@
 .Nm Bd-nf
 .Nd interaction of no-fill blocks and requests
 .Sh DESCRIPTION
+BEGINTEST
 initial
 text
 .nf
@@ -32,3 +33,7 @@ in filled block
 .Ed
 after end
 of filled block
+.br
+ENDTEST
+.br
+end of file

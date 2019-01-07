@@ -133,7 +133,6 @@ void		  print_text(struct html *, const char *);
 void		  print_tblclose(struct html *);
 void		  print_tbl(struct html *, const struct tbl_span *);
 void		  print_eqn(struct html *, const struct eqn_box *);
-void		  print_paragraph(struct html *);
 void		  print_endline(struct html *);
 
 void		  html_close_paragraph(struct html *);

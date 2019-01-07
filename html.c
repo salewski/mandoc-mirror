@@ -272,7 +272,7 @@ html_close_paragraph(struct html *h)
 	struct tag	*t;
 
 	for (t = h->tag; t != NULL; t = t->next) {
-		if (t->tag == TAG_P) {
+		if (t->tag == TAG_P || t->tag == TAG_PRE) {
 			print_tagq(h, t);
 			break;
 		}
@@ -834,30 +834,28 @@ print_tagq(struct html *h, const struct tag *until)
 
 	while ((tag = h->tag) != NULL) {
 		print_ctag(h, tag);
-		if (until && tag == until)
+		if (tag == until)
 			return;
 	}
 }
 
+/*
+ * Close out all open elements up to but excluding suntil.
+ * Note that a paragraph just inside stays open together with it
+ * because paragraphs include subsequent phrasing content.
+ */
 void
 print_stagq(struct html *h, const struct tag *suntil)
 {
 	struct tag	*tag;
 
 	while ((tag = h->tag) != NULL) {
-		if (suntil && tag == suntil)
+		if (tag == suntil ||
+		    (tag->next == suntil &&
+		     (tag->tag == TAG_P || tag->tag == TAG_PRE)))
 			return;
 		print_ctag(h, tag);
 	}
-}
-
-void
-print_paragraph(struct html *h)
-{
-	struct tag	*t;
-
-	t = print_otag(h, TAG_DIV, "c", "Pp");
-	print_tagq(h, t);
 }
 
 
