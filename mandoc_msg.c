@@ -240,7 +240,7 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"ignoring macro in table",
 };
 
-static	FILE		*fileptr = stderr;
+static	FILE		*fileptr = NULL;
 static	const char	*filename = NULL;
 static	enum mandocerr	 min_type = MANDOCERR_MAX;
 static	enum mandoclevel rc = MANDOCLEVEL_OK;
