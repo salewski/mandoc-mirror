@@ -561,7 +561,7 @@ main(int argc, char *argv[])
 			}
 		} else
 			mandoc_msg(MANDOCERR_FILE, 0, 0,
-			    "%s", strerror(errno));
+			    "%s: %s", thisarg, strerror(errno));
 
 		if (curp.wstop && mandoc_msg_getrc() != MANDOCLEVEL_OK)
 			break;
