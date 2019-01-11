@@ -119,7 +119,7 @@ html_man(void *arg, const struct roff_meta *man)
 	if ((h->oflags & HTML_FRAGMENT) == 0) {
 		print_gen_decls(h);
 		print_otag(h, TAG_HTML, "");
-		if (n->type == ROFFT_COMMENT)
+		if (n != NULL && n->type == ROFFT_COMMENT)
 			print_gen_comment(h, n);
 		t = print_otag(h, TAG_HEAD, "");
 		print_man_head(man, h);
