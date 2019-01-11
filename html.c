@@ -657,12 +657,6 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 			print_encode(h, arg1, NULL, 1);
 			fmt++;
 			break;
-		case 'T':
-			print_encode(h, arg1, NULL, 1);
-			print_word(h, "\" title=\"");
-			print_encode(h, arg1, NULL, 1);
-			fmt++;
-			break;
 		default:
 			print_encode(h, arg1, NULL, 1);
 			break;

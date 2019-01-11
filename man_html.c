@@ -299,9 +299,9 @@ man_SH_pre(MAN_ARGS)
 	case ROFFT_HEAD:
 		id = html_make_id(n, 1);
 		if (n->tok == MAN_SH)
-			print_otag(h, TAG_H1, "cTi", "Sh", id);
+			print_otag(h, TAG_H1, "ci", "Sh", id);
 		else
-			print_otag(h, TAG_H2, "cTi", "Ss", id);
+			print_otag(h, TAG_H2, "ci", "Ss", id);
 		if (id != NULL)
 			print_otag(h, TAG_A, "chR", "permalink", id);
 		break;
@@ -513,7 +513,7 @@ man_SY_pre(MAN_ARGS)
 		break;
 	case ROFFT_HEAD:
 		print_otag(h, TAG_TD, "");
-		print_otag(h, TAG_CODE, "cT", "Nm");
+		print_otag(h, TAG_CODE, "c", "Nm");
 		break;
 	case ROFFT_BODY:
 		print_otag(h, TAG_TD, "");
@@ -535,10 +535,10 @@ man_UR_pre(MAN_ARGS)
 		assert(n->child->type == ROFFT_TEXT);
 		if (n->tok == MAN_MT) {
 			mandoc_asprintf(&cp, "mailto:%s", n->child->string);
-			print_otag(h, TAG_A, "cTh", "Mt", cp);
+			print_otag(h, TAG_A, "ch", "Mt", cp);
 			free(cp);
 		} else
-			print_otag(h, TAG_A, "cTh", "Lk", n->child->string);
+			print_otag(h, TAG_A, "ch", "Lk", n->child->string);
 	}
 
 	assert(n->next->type == ROFFT_BODY);
