@@ -374,8 +374,9 @@ term_field(struct termp *p, size_t vbl, size_t nbr, size_t vbr, size_t vtarget)
 			continue;
 		case ' ':
 		case ASCII_NBRSP:
-			vbl++;
-			vis++;
+			dv = (*p->width)(p, ' ');
+			vbl += dv;
+			vis += dv;
 			continue;
 		default:
 			break;
