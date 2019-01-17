@@ -62,19 +62,6 @@ are mere guesses, and some may be wrong.
   needed for Tcl_NewStringObj(3) via wiz@  Wed, 5 Mar 2014 22:27:43 +0100
   loc **  exist ***  algo ***  size *  imp ***
 
-- \\ in high-level macro arguments
-  Currently, \\ is expanded in two situations:
-  1) macro and string definition (roff.c setstrn())
-  2) macro argument parsing (mandoc.c mandoc_getarg())
-  For user defined macros, the second happens in time because of ROFF_REPARSE.
-  But for standard high-level macros, it only happens after entering the
-  high level parsers, which is too late because the code doesn't get
-  back to roff.c roff_res() from that point.  Because this requires
-  distinguishing requests, user-defined macros and standard macros
-  on the roff_res() level, it is hard to solve without the parser reorg.
-  Found by naddy@ in devel/cutils cobfusc(1)  Mon, 16 Feb 2015 19:10:52 +0100
-  loc ***  exist ***  algo ***  size **  imp *
-
 --- missing mdoc features ----------------------------------------------
 
 - .Bl -column .Xo support is missing
@@ -166,7 +153,7 @@ are mere guesses, and some may be wrong.
   loc ***  exist **  algo ***  size **  imp ***
 
 - look at the POSIX manuals in the books/man-pages-posix port,
-  they use some unsupported tbl(7) features.
+  they use some unsupported tbl(7) features, mostly macros in tbl(7).
   loc *  exist **  algo **  size **  imp ***
 
 - look what Joerg Schilling manual pages use
@@ -362,12 +349,6 @@ are mere guesses, and some may be wrong.
    it does seem cleaner.)
   loc **  exist **  algo *  size *  imp ***
 
-- .IP wants vertical spacing before itself;
-  currently, it is formatted like .Bl -compact.
-  Fixing this requires getting rid of the "float"
-  in the CSS for .Bl-tag first.
-  Reminded by Pali Rohar 25 Oct 2018 10:10:35 +0200.
-
 - format multiple subsequent .IP as a single list
   rather than opening a new list for each item
   Pali Rohar 25 Nov 2018 14:34:26 +0100
@@ -513,9 +494,6 @@ are mere guesses, and some may be wrong.
   all over mdoc_macro.c and all subtly different.
   loc **  exist **  algo **  size **  imp **
 
-- style message about suspicious uses of - vs. \- vs. \(mi
-  e.g. -1 is likely wrong (from the mdoclint TODO)
-
 - warn about punctuation - e.g. ',' and ';' - at the beginning
   of a text line, if it is likely intended to follow the preceding
   output without intervening whitespace, in particular after a
@@ -528,9 +506,6 @@ are mere guesses, and some may be wrong.
 ************************************************************************
 * documentation issues
 ************************************************************************
-
-- dashes, hyphens, and minus signs in manual pages
-  jmc@ Fri, 28 Mar 2014 07:19:27 +0000
 
 - mark macros as: page structure domain, manual domain, general text domain
   is this useful?
@@ -580,8 +555,6 @@ are mere guesses, and some may be wrong.
    output through libz.
  - Privilege separation (see OpenSSH).
  - Enable caching support via HTTP 304 and If-Modified-Since.
- - Have Mac OSX systems automatically disable -static compilation of the
-   CGI: -static isn't supported.
 
 ************************************************************************
 * to improve in the groff_mdoc(7) macros
