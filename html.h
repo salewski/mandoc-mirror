@@ -79,6 +79,8 @@ enum	htmlfont {
 
 struct	tag {
 	struct tag	 *next;
+	int		  refcnt;
+	int		  closed;
 	enum htmltag	  tag;
 };
 

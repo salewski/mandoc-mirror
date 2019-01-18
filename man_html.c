@@ -168,10 +168,6 @@ print_man_node(MAN_ARGS)
 	html_fillmode(h, n->flags & NODE_NOFILL ? ROFF_nf : ROFF_fi);
 
 	child = 1;
-	t = h->tag;
-	if (t->tag == TAG_P || t->tag == TAG_PRE)
-		t = t->next;
-
 	switch (n->type) {
 	case ROFFT_TEXT:
 		if (*n->string == '\0') {
@@ -183,9 +179,13 @@ print_man_node(MAN_ARGS)
 			print_endline(h);
 		else if (n->flags & NODE_DELIMC)
 			h->flags |= HTML_NOSPACE;
+		t = h->tag;
+		t->refcnt++;
 		print_text(h, n->string);
 		break;
 	case ROFFT_EQN:
+		t = h->tag;
+		t->refcnt++;
 		print_eqn(h, n->eqn);
 		break;
 	case ROFFT_TBL:
@@ -211,12 +211,13 @@ print_man_node(MAN_ARGS)
 		 * the "meta" table state.  This will be reopened on the
 		 * next table element.
 		 */
-		if (h->tblt != NULL) {
+		if (h->tblt != NULL)
 			print_tblclose(h);
-			t = h->tag;
-		}
+		t = h->tag;
+		t->refcnt++;
 		if (n->tok < ROFF_MAX) {
 			roff_html_pre(h, n);
+			t->refcnt--;
 			print_stagq(h, t);
 			return;
 		}
@@ -231,6 +232,7 @@ print_man_node(MAN_ARGS)
 		print_man_nodelist(man, n->child, h);
 
 	/* This will automatically close out any font scope. */
+	t->refcnt--;
 	print_stagq(h, t);
 
 	if (n->flags & NODE_NOFILL && n->tok != MAN_YS &&
