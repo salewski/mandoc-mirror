@@ -1178,7 +1178,7 @@ parse_path_info(struct req *req, const char *path)
 	}
 
 	/* Optional section. */
-	if (strncmp(path, "man", 3) == 0) {
+	if (strncmp(path, "man", 3) == 0 || strncmp(path, "cat", 3) == 0) {
 		path += 3;
 		end = strchr(path, '/');
 		free(req->q.sec);
