@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2009, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011-2018 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011-2019 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -163,6 +163,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	const struct tbl_cell	*cp, *cpn, *cpp, *cps;
 	const struct tbl_dat	*dp;
 	static size_t		 offset;
+	size_t		 	 save_offset;
 	size_t			 coloff, tsz;
 	int			 hspans, ic, more;
 	int			 dvert, fc, horiz, line, uvert;
@@ -170,6 +171,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	/* Inhibit printing of spaces: we do padding ourselves. */
 
 	tp->flags |= TERMP_NOSPACE | TERMP_NONOSPACE;
+	save_offset = tp->tcol->offset;
 
 	/*
 	 * The first time we're invoked for a given table block,
@@ -211,8 +213,9 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 				tsz += tp->tbl.cols[sp->opts->cols - 1].width;
 			if (offset + tsz > tp->tcol->rmargin)
 				tsz -= 1;
-			tp->tcol->offset = offset + tp->tcol->rmargin > tsz ?
+			offset = offset + tp->tcol->rmargin > tsz ?
 			    (offset + tp->tcol->rmargin - tsz) / 2 : 0;
+			tp->tcol->offset = offset;
 		}
 
 		/* Horizontal frame at the start of boxed tables. */
@@ -227,6 +230,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	/* Set up the columns. */
 
 	tp->flags |= TERMP_MULTICOL;
+	tp->tcol->offset = offset;
 	horiz = 0;
 	switch (sp->pos) {
 	case TBL_SPAN_HORIZ:
@@ -567,12 +571,12 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 		assert(tp->tbl.cols);
 		free(tp->tbl.cols);
 		tp->tbl.cols = NULL;
-		tp->tcol->offset = offset;
 	} else if (horiz == 0 && sp->opts->opts & TBL_OPT_ALLBOX &&
 	    (sp->next == NULL || sp->next->pos == TBL_SPAN_DATA ||
 	     sp->next->next != NULL))
 		tbl_hrule(tp, sp, sp->next, TBL_OPT_ALLBOX);
 
+	tp->tcol->offset = save_offset;
 	tp->flags &= ~TERMP_NONOSPACE;
 }
 
