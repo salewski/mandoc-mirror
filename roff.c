@@ -3865,6 +3865,10 @@ roff_renamed(ROFF_ARGS)
 	return ROFF_CONT;
 }
 
+/*
+ * Measure the length in bytes of the roff identifier at *cpp
+ * and advance the pointer to the next word.
+ */
 static size_t
 roff_getname(struct roff *r, char **cpp, int ln, int pos)
 {
@@ -3872,22 +3876,20 @@ roff_getname(struct roff *r, char **cpp, int ln, int pos)
 	size_t	  namesz;
 
 	name = *cpp;
-	if ('\0' == *name)
+	if (*name == '\0')
 		return 0;
 
-	/* Read until end of name and terminate it with NUL. */
+	/* Advance cp to the byte after the end of the name. */
+
 	for (cp = name; 1; cp++) {
-		if ('\0' == *cp || ' ' == *cp) {
-			namesz = cp - name;
-			break;
-		}
-		if ('\\' != *cp)
-			continue;
 		namesz = cp - name;
-		if ('{' == cp[1] || '}' == cp[1])
+		if (*cp == '\0' || *cp == ' ')
 			break;
-		cp++;
-		if ('\\' == *cp)
+		if (*cp != '\\')
+			continue;
+		if (cp[1] == '{' || cp[1] == '}')
+			break;
+		if (*++cp == '\\')
 			continue;
 		mandoc_msg(MANDOCERR_NAMESC, ln, pos,
 		    "%.*s", (int)(cp - name + 1), name);
@@ -3896,7 +3898,8 @@ roff_getname(struct roff *r, char **cpp, int ln, int pos)
 	}
 
 	/* Read past spaces. */
-	while (' ' == *cp)
+
+	while (*cp == ' ')
 		cp++;
 
 	*cpp = cp;
