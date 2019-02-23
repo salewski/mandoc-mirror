@@ -267,6 +267,17 @@ instead.
 The special characters documented in
 .Xr mandoc_char 7
 are rendered best-effort in an ASCII equivalent.
+In particular, opening and closing
+.Sq single quotes
+are represented as characters number 0x60 and 0x27, respectively,
+which agrees with all ASCII standards from 1965 to the latest
+revision (2012) and which matches the traditional way in which
+.Xr roff 7
+formatters represent single quotes in ASCII output.
+This correct ASCII rendering may look strange with modern
+Unicode-compatible fonts because contrary to ASCII, Unicode uses
+the code point U+0060 for the grave accent only, never for an opening
+quote.
 .Pp
 The following
 .Fl O
