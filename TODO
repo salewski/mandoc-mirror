@@ -349,11 +349,6 @@ are mere guesses, and some may be wrong.
    it does seem cleaner.)
   loc **  exist **  algo *  size *  imp ***
 
-- format multiple subsequent .IP as a single list
-  rather than opening a new list for each item
-  Pali Rohar 25 Nov 2018 14:34:26 +0100
-  loc *  exist **  algo *  size *  imp ***
-
 - format ".IP *" etc. as <ul> rather than <dl>
   https://github.com/Debian/debiman/issues/67
   reminded by Pali Rohar 25 Nov 2018 14:34:26 +0100

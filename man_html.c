@@ -233,7 +233,25 @@ print_man_node(MAN_ARGS)
 
 	/* This will automatically close out any font scope. */
 	t->refcnt--;
-	print_stagq(h, t);
+	if (n->type == ROFFT_BLOCK &&
+	    (n->tok == MAN_IP || n->tok == MAN_TP || n->tok == MAN_TQ)) {
+		t = h->tag;
+		while (t->tag != TAG_DL)
+			t = t->next;
+		/*
+		 * Close the list if no further item of the same type
+		 * follows; otherwise, close the item only.
+		 */
+		if (n->next == NULL ||
+		    (n->tok == MAN_IP && n->next->tok != MAN_IP) ||
+		    (n->tok != MAN_IP &&
+		     n->next->tok != MAN_TP && n->next->tok != MAN_TQ)) {
+			print_tagq(h, t);
+			t = NULL;
+		}
+	}
+	if (t != NULL)
+		print_stagq(h, t);
 
 	if (n->flags & NODE_NOFILL && n->tok != MAN_YS &&
 	    (n->next != NULL && n->next->flags & NODE_LINE)) {
@@ -399,7 +417,15 @@ man_IP_pre(MAN_ARGS)
 	switch (n->type) {
 	case ROFFT_BLOCK:
 		html_close_paragraph(h);
-		print_otag(h, TAG_DL, "c", "Bl-tag");
+		/*
+		 * Open a new list unless there is an immediately
+		 * preceding item of the same type.
+		 */
+		if (n->prev == NULL ||
+		    (n->tok == MAN_IP && n->prev->tok != MAN_IP) ||
+		    (n->tok != MAN_IP &&
+		     n->prev->tok != MAN_TP && n->prev->tok != MAN_TQ))
+			print_otag(h, TAG_DL, "c", "Bl-tag");
 		return 1;
 	case ROFFT_HEAD:
 		print_otag(h, TAG_DT, "");
