@@ -342,13 +342,6 @@ are mere guesses, and some may be wrong.
 
 --- HTML issues --------------------------------------------------------
 
-- wrap Sh and Ss content into <div>
-  Laura Morales <lauretas at mail dot com> 21 Apr 2018 18:10:48 +0200
-  (Evaluate whether this is really useful and has no adverse
-   side effects before implementing; if it is possible,
-   it does seem cleaner.)
-  loc **  exist **  algo *  size *  imp ***
-
 - format ".IP *" etc. as <ul> rather than <dl>
   https://github.com/Debian/debiman/issues/67
   reminded by Pali Rohar 25 Nov 2018 14:34:26 +0100
