@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2017 Michael Stapelberg <stapelberg@debian.org>
- * Copyright (c) 2017 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2017, 2019 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -213,6 +213,8 @@ main(int argc, char *argv[])
 
 		process(parser, outtype, formatter);
 		mparse_reset(parser);
+		if (outtype == OUTT_HTML)
+			html_reset(formatter);
 
 		fflush(stdout);
 		fflush(stderr);

@@ -835,6 +835,8 @@ parse(struct curparse *curp, int fd, const char *file)
 
 	if (curp->outdata == NULL)
 		outdata_alloc(curp);
+	else if (curp->outtype == OUTT_HTML)
+		html_reset(curp);
 
 	mandoc_xr_reset();
 	meta = mparse_result(curp->mp);
