@@ -79,7 +79,8 @@ main(int argc, char *argv[])
 	argv += optind;
 
 	mchars_alloc();
-	mp = mparse_alloc(MPARSE_SO | MPARSE_VALIDATE, MANDOC_OS_OTHER, NULL);
+	mp = mparse_alloc(MPARSE_SO | MPARSE_UTF8 | MPARSE_LATIN1 |
+	    MPARSE_VALIDATE, MANDOC_OS_OTHER, NULL);
 	assert(mp);
 
 	if (argc < 1)

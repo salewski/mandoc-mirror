@@ -171,8 +171,8 @@ main(int argc, char *argv[])
 		errx(1, "file descriptor %s %s", argv[1], errstr);
 
 	mchars_alloc();
-	parser = mparse_alloc(MPARSE_SO | MPARSE_UTF8 | MPARSE_LATIN1,
-	    MANDOC_OS_OTHER, defos);
+	parser = mparse_alloc(MPARSE_SO | MPARSE_UTF8 | MPARSE_LATIN1 |
+	    MPARSE_VALIDATE, MANDOC_OS_OTHER, defos);
 
 	memset(&options, 0, sizeof(options));
 	switch (outtype) {
