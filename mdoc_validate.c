@@ -1581,7 +1581,7 @@ post_it(POST_ARGS)
 			mandoc_msg(MANDOCERR_BL_COL, nit->line, nit->pos,
 			    "%d columns, %d cells", cols, i);
 		else if (nit->head->next->child != NULL &&
-		    nit->head->next->child->line > nit->line)
+		    nit->head->next->child->flags & NODE_LINE)
 			mandoc_msg(MANDOCERR_IT_NOARG,
 			    nit->line, nit->pos, "Bl -column It");
 		break;

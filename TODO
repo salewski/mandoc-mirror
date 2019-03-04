@@ -523,10 +523,6 @@ are mere guesses, and some may be wrong.
   Found by Aaron M. Ucko in the GNU Hurd via Bdale Garbee,
   https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=829624
 
-- We use the input line number at several places to distinguish
-  same-line from different-line input.  That plainly doesn't work
-  with user-defined macros, leading to random breakage.
-
 - Is it possible to further simplify ENDBODY_SPACE?
 
 - Find better ways to prevent endless loops
