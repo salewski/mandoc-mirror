@@ -1,7 +1,7 @@
 # $Id$
 #
 # Copyright (c) 2010, 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
-# Copyright (c) 2011, 2013-2018 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2011, 2013-2019 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -54,7 +54,8 @@ TESTSRCS	 = test-be32toh.c \
 		   test-vasprintf.c \
 		   test-wchar.c
 
-SRCS		 = att.c \
+SRCS		 = arch.c \
+		   att.c \
 		   catman.c \
 		   cgi.c \
 		   chars.c \
@@ -235,6 +236,7 @@ LIBROFF_OBJS	 = eqn.o \
 LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 		   $(LIBMDOC_OBJS) \
 		   $(LIBROFF_OBJS) \
+		   arch.o \
 		   chars.o \
 		   mandoc.o \
 		   mandoc_aux.o \

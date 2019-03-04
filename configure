@@ -2,7 +2,7 @@
 #
 # $Id$
 #
-# Copyright (c) 2014,2015,2016,2017,2018 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2014-2019 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +37,7 @@ SOURCEDIR=`dirname "$0"`
 
 MANPATH_BASE="/usr/share/man:/usr/X11R6/man"
 MANPATH_DEFAULT="/usr/share/man:/usr/X11R6/man:/usr/local/man"
+OSENUM=
 OSNAME=
 UTF8_LOCALE=
 
@@ -218,6 +219,26 @@ get_locale() {
 	echo 1>&3
 	return 0;
 }
+
+# --- operating system -------------------------------------------------
+
+if [ -n "${OSENUM}" ]; then
+	echo "OSENUM specified manually: ${OSENUM}" 1>&2
+	echo "OSENUM specified manually: ${OSENUM}" 1>&3
+else
+	OSDETECT=$(uname)
+	if [ "X${OSDETECT}" = "XNetBSD" ]; then
+		OSENUM=MANDOC_OS_NETBSD
+	elif [ "X${OSDETECT}" = "XOpenBSD" ]; then
+		OSENUM=MANDOC_OS_OPENBSD
+	else
+		OSENUM=MANDOC_OS_OTHER
+	fi
+	echo "tested operating system: ${OSDETECT} -> OSENUM=${OSENUM}" 1>&2
+	echo "tested operating system: ${OSDETECT} -> OSENUM=${OSENUM}" 1>&3
+	unset OSDETECT
+fi
+echo 1>&3
 
 # --- compiler options -------------------------------------------------
 
@@ -419,6 +440,7 @@ echo
 echo "#define MAN_CONF_FILE \"/etc/${MANM_MANCONF}\""
 echo "#define MANPATH_BASE \"${MANPATH_BASE}\""
 echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
+echo "#define OSENUM ${OSENUM}"
 [ -n "${OSNAME}" ] && echo "#define OSNAME \"${OSNAME}\""
 [ -n "${UTF8_LOCALE}" ] && echo "#define UTF8_LOCALE \"${UTF8_LOCALE}\""
 [ -n "${HOMEBREWDIR}" ] && echo "#define HOMEBREWDIR \"${HOMEBREWDIR}\""

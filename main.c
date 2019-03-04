@@ -797,7 +797,11 @@ fs_search(const struct mansearch *cfg, const struct manpaths *paths,
 		}
 		if (res != NULL && *ressz == lastsz &&
 		    strchr(*argv, '/') == NULL) {
-			if (cfg->sec == NULL)
+			if (cfg->arch != NULL &&
+			    arch_valid(cfg->arch, OSENUM) == 0)
+				warnx("Unknown architecture \"%s\".",
+				    cfg->arch);
+			else if (cfg->sec == NULL)
 				warnx("No entry for %s in the manual.",
 				    *argv);
 			else
