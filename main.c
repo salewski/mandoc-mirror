@@ -21,7 +21,6 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>	/* MACHINE */
-#include <sys/termios.h>
 #include <sys/wait.h>
 
 #include <assert.h>
@@ -40,6 +39,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <termios.h>
 #include <time.h>
 #include <unistd.h>
 
