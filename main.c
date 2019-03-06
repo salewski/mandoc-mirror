@@ -1161,7 +1161,9 @@ spawn_pager(struct tag_files *tag_files)
 	char		*argv[MAX_PAGER_ARGS];
 	const char	*pager;
 	char		*cp;
+#if HAVE_LESS_T
 	size_t		 cmdlen;
+#endif
 	int		 argc, use_ofn;
 	pid_t		 pager_pid;
 
@@ -1193,6 +1195,7 @@ spawn_pager(struct tag_files *tag_files)
 	/* For less(1), use the tag file. */
 
 	use_ofn = 1;
+#if HAVE_LESS_T
 	if ((cmdlen = strlen(argv[0])) >= 4) {
 		cp = argv[0] + cmdlen - 4;
 		if (strcmp(cp, "less") == 0) {
@@ -1205,6 +1208,7 @@ spawn_pager(struct tag_files *tag_files)
 			}
 		}
 	}
+#endif
 	if (use_ofn)
 		argv[argc++] = tag_files->ofn;
 	argv[argc] = NULL;
