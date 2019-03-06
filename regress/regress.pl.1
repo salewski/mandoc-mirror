@@ -145,3 +145,21 @@ The
 subdirectory of the regression suite is not included.
 It uses a Makefile structure that differs vastly from the
 rest of the suite.
+.Sh BUGS
+On Oracle Solaris 11,
+.Xr diff 1
+does not support the
+.Fl a
+option.
+Delete that option from the following line in this script:
+.Pp
+.Dl my @diff = qw(diff -au);
+.Pp
+The C library function
+.Xr wcwidth 3
+is known to be buggy on Solaris, which may cause failures in the
+regression suite, usually because output lines containing affected
+Unicode characters wrap too early.
+.Pp
+The regression suite does not work at all on Solaris 10 or earlier
+because the Perl interpreter provided with those systems is too old.
