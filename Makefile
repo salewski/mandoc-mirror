@@ -15,7 +15,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-VERSION = 1.14.4
+VERSION = 1.14.5
 
 # === LIST OF FILES ====================================================
 
@@ -37,9 +37,9 @@ TESTSRCS	 = test-be32toh.c \
 		   test-PATH_MAX.c \
 		   test-pledge.c \
 		   test-progname.c \
-		   test-recvmsg.c \
 		   test-reallocarray.c \
 		   test-recallocarray.c \
+		   test-recvmsg.c \
 		   test-rewb-bsd.c \
 		   test-rewb-sysv.c \
 		   test-sandbox_init.c \
@@ -354,6 +354,7 @@ WWW_MANS	 = apropos.1.html \
 		   mandocd.8.html
 
 WWW_INCS	 = eqn.h.html \
+		   html.h.html \
 		   man.h.html \
 		   manconf.h.html \
 		   mandoc.h.html \
@@ -362,7 +363,9 @@ WWW_INCS	 = eqn.h.html \
 		   mansearch.h.html \
 		   mdoc.h.html \
 		   roff.h.html \
-		   tbl.h.html
+		   tbl.h.html \
+		   tbl_int.h.html \
+		   tbl_parse.h.html
 
 # === USER CONFIGURATION ===============================================
 
@@ -591,6 +594,6 @@ mandoc-$(VERSION).tar.gz: $(DISTFILES)
 	highlight -I $< > $@
 
 .1.1.html .3.3.html .5.5.html .7.7.html .8.8.html: mandoc
-	./mandoc -Thtml -O \
-	style=/mandoc.css,man=/man/%N.%S.html,includes=/includes/%I.html \
-	$< > $@
+	mandoc -Thtml -Wwarning,stop \
+		-O 'style=/mandoc.css,man=/man/%N.%S.html;https://man.openbsd.org/%N.%S,includes=/includes/%I.html' \
+		$< > $@
