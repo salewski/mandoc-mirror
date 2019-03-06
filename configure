@@ -227,7 +227,7 @@ if [ -n "${OSENUM}" ]; then
 	echo "OSENUM specified manually: ${OSENUM}" 1>&2
 	echo "OSENUM specified manually: ${OSENUM}" 1>&3
 else
-	OSDETECT=$(uname)
+	OSDETECT=`uname`
 	if [ "X${OSDETECT}" = "XNetBSD" ]; then
 		OSENUM=MANDOC_OS_NETBSD
 	elif [ "X${OSDETECT}" = "XOpenBSD" ]; then
