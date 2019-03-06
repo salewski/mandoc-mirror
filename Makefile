@@ -585,6 +585,10 @@ mandoc-$(VERSION).tar.gz: $(DISTFILES)
 	( cd .dist/ && tar zcf ../$@ mandoc-$(VERSION) )
 	rm -rf .dist/
 
+dist-install: dist
+	$(INSTALL_DATA) mandoc-$(VERSION).tar.gz mandoc-$(VERSION).sha256 \
+	    $(HTDOCDIR)/snapshots
+
 # === SUFFIX RULES =====================================================
 
 .SUFFIXES:	 .1       .3       .5       .7       .8       .h
