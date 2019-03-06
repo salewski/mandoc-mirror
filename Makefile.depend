@@ -1,3 +1,4 @@
+arch.o: arch.c config.h roff.h
 att.o: att.c config.h roff.h libmdoc.h
 catman.o: catman.c config.h compat_fts.h
 cgi.o: cgi.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h man.h mandoc_parse.h main.h manconf.h mansearch.h cgi.h
