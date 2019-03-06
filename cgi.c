@@ -324,7 +324,7 @@ http_encode(const char *p)
 	for (; *p != '\0'; p++) {
 		if (isalnum((unsigned char)*p) == 0 &&
 		    strchr("-._~", *p) == NULL)
-			printf("%%%02.2X", (unsigned char)*p);
+			printf("%%%2.2X", (unsigned char)*p);
 		else
 			putchar(*p);
 	}
