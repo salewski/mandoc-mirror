@@ -27,6 +27,7 @@ use IPC::Open3 qw(open3);
 # Define this at one place such that it can easily be changed
 # if diff(1) does not support the -a option.
 my @diff = qw(diff -au);
+system @diff, '/dev/null', '/dev/null' and @diff = qw(diff -u);
 
 # --- utility functions ------------------------------------------------
 
