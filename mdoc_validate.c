@@ -64,7 +64,7 @@ static	size_t		macro2len(enum roff_tok);
 static	void	 rewrite_macro2len(struct roff_man *, char **);
 static	int	 similar(const char *, const char *);
 
-static __dead void post_abort(POST_ARGS);
+static	void	 post_abort(POST_ARGS) __attribute__((__noreturn__));
 static	void	 post_an(POST_ARGS);
 static	void	 post_an_norm(POST_ARGS);
 static	void	 post_at(POST_ARGS);
@@ -497,7 +497,7 @@ check_toptext(struct roff_man *mdoc, int ln, int pos, const char *p)
 	}
 }
 
-static __dead void
+static void
 post_abort(POST_ARGS)
 {
 	abort();
