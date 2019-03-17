@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "mandoc.h"
+#include "roff.h"
 #include "eqn.h"
 #include "out.h"
 #include "html.h"

@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "mandoc.h"
+#include "roff.h"
 #include "tbl.h"
 #include "out.h"
 #include "html.h"
