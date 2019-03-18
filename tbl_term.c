@@ -629,7 +629,8 @@ tbl_hrule(struct termp *tp, const struct tbl_span *spp,
 
 		lw = cpp == NULL || cpn == NULL ||
 		    (cpn->pos != TBL_CELL_DOWN &&
-		     (dpn == NULL || strcmp(dpn->string, "\\^") != 0))
+		     (dpn == NULL || dpn->string == NULL ||
+		      strcmp(dpn->string, "\\^") != 0))
 		    ? hw : 0;
 		tbl_direct_border(tp, BHORIZ * lw,
 		    col->width + col->spacing / 2);
@@ -675,7 +676,8 @@ tbl_hrule(struct termp *tp, const struct tbl_span *spp,
 
 		rw = cpp == NULL || cpn == NULL ||
 		    (cpn->pos != TBL_CELL_DOWN &&
-		     (dpn == NULL || strcmp(dpn->string, "\\^") != 0))
+		     (dpn == NULL || dpn->string == NULL ||
+		      strcmp(dpn->string, "\\^") != 0))
 		    ? hw : 0;
 
 		/* The line crossing at the end of this column. */
