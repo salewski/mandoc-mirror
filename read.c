@@ -255,6 +255,8 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 		/* XXX Ugly hack to mark the end of the input. */
 
 		if (i == blk.sz || blk.buf[i] == '\0') {
+			if (pos + 2 > ln.sz)
+				resize_buf(&ln, 256);
 			ln.buf[pos++] = '\n';
 			ln.buf[pos] = '\0';
 		}
