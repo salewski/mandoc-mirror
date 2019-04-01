@@ -196,6 +196,30 @@ are mere guesses, and some may be wrong.
 
 --- missing misc features ----------------------------------------------
 
+- man 3am readline
+  does not work because man(1) only accepts digit + one letter,
+  otherwise explicit -s is currently required
+  https://github.com/void-linux/void-packages/issues/9868
+  loc *  exist *  algo *  size *  imp ***
+
+- man 3 readline may show readline(3m)
+  because in manpage_compare, "3" and "3am" compare equal
+  https://github.com/void-linux/void-packages/issues/9868
+  probably requires putting string version of section into struct manpage
+  loc *  exist **  algo *  size *  imp ***
+
+- restore flags for result ordering, but only for man(1), not for apropos(1)
+  such that man 3 syslog show syslog.3 not klogctl.3
+  and such that man 3p acosl shows acosl.3p not acos.3p
+  https://github.com/void-linux/void-packages/issues/9868
+  loc *  exist **  algo *  size *  imp ***
+
+- dead .so links should be entered into the database to avoid:
+  man -M. lvm-config
+  man: outdated mandoc.db lacks lvm-config(8) entry, run makewhatis /co/void-man
+  https://github.com/void-linux/void-packages/issues/9868
+  loc *  exist **  algo *  size *  imp **
+
 - man -ks 1,8 route; kn@ Jul 13, 2018 orally
 
 - italic correction (\/) in PostScript mode
