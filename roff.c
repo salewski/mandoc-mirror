@@ -3841,6 +3841,11 @@ roff_userdef(ROFF_ARGS)
 	char		 *arg, *ap, *dst, *src;
 	size_t		  sz;
 
+	/* If the macro is empty, ignore it altogether. */
+
+	if (*r->current_string == '\0')
+		return ROFF_IGN;
+
 	/* Initialize a new macro stack context. */
 
 	if (++r->mstackpos == r->mstacksz) {
@@ -3888,7 +3893,7 @@ roff_userdef(ROFF_ARGS)
 	buf->sz = strlen(buf->buf) + 1;
 	*offs = 0;
 
-	return buf->sz > 1 && buf->buf[buf->sz - 2] == '\n' ?
+	return buf->buf[buf->sz - 2] == '\n' ?
 	    ROFF_REPARSE | ROFF_USERCALL : ROFF_IGN | ROFF_APPEND;
 }
 
