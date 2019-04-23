@@ -596,6 +596,13 @@ block.
 Book or journal page number of an
 .Ic \&Rs
 block.
+Conventionally, the argument starts with
+.Ql p.\&
+for a single page or
+.Ql pp.\&
+for a range of pages, for example:
+.Pp
+.Dl .%P pp. 42\e(en47
 .It Ic \&%Q Ar name
 Institutional author (school, government, etc.) of an
 .Ic \&Rs
@@ -2969,7 +2976,7 @@ exclamation mark
 Note that even a period preceded by a backslash
 .Pq Sq \e.\&
 gets this special handling; use
-.Sq \e&.
+.Sq \e&.\&
 to prevent that.
 .Pp
 Many in-line macros interrupt their scope when they encounter
