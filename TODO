@@ -62,6 +62,27 @@ are mere guesses, and some may be wrong.
   needed for Tcl_NewStringObj(3) via wiz@  Wed, 5 Mar 2014 22:27:43 +0100
   loc **  exist ***  algo ***  size *  imp ***
 
+- .als only works for macros in mandoc, not for user-defined strings.
+  Also, the "val" field in struct roffkv would have to be replaced
+  with a pointer to a reference-counted wrapper, and an alias
+  would have to point to the same wrapper as the original.
+  .als to undefined does nothing; the alias is not created.
+  .rm'ing the original leaves the alias to point to the old value.
+  .de .als .de changes both, but
+  .de .als .rm .de only changes the new value, not the alias.
+  Found in groffer(1) version 1.19
+  Jan Stary 20 Apr 2019 20:16:54 +0200
+  loc *  exist **  algo **  size **  imp *
+
+- roff string condition comparisons fail when vars contain quotes:
+  .ds s '
+  .if '\*s'' \&...
+  hard to fix because of the basic architecture (string replacement
+  happens before roff(7) syntax parsing)
+  Found in groffer(1) version 1.19
+  Jan Stary 20 Apr 2019 20:16:54 +0200
+  loc *  exist ***  algo ***  size **  imp *
+
 --- missing mdoc features ----------------------------------------------
 
 - .Bl -column .Xo support is missing
