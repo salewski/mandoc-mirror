@@ -1699,9 +1699,12 @@ The meaning of blank input lines is only well-defined in non-fill mode:
 In fill mode, line breaks of text input lines are not supposed to be
 significant.
 However, for compatibility with groff, blank lines in fill mode
-are replaced with
+are formatted like
 .Ic \&sp
 requests.
+To request a paragraph break, use
+.Ic \&Pp
+instead of a blank line.
 .It Sy "tab in filled text"
 .Pq mdoc , man
 The meaning of tab characters is only well-defined in non-fill mode:
