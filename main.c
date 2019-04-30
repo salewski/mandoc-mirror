@@ -411,6 +411,7 @@ main(int argc, char *argv[])
 				res[sz].file = mandoc_strdup(argv[c]);
 				res[sz].names = NULL;
 				res[sz].output = NULL;
+				res[sz].bits = 0;
 				res[sz].ipath = SIZE_MAX;
 				res[sz].sec = 10;
 				res[sz].form = FORM_SRC;
@@ -761,6 +762,7 @@ found:
 	page->file = file;
 	page->names = NULL;
 	page->output = NULL;
+	page->bits = NAME_FILE & NAME_MASK;
 	page->ipath = ipath;
 	page->sec = (*sec >= '1' && *sec <= '9') ? *sec - '1' + 1 : 10;
 	page->form = form;
