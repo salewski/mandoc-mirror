@@ -203,9 +203,9 @@ print_man_node(MAN_ARGS)
 		 * Close out scope of font prior to opening a macro
 		 * scope.
 		 */
-		if (HTMLFONT_NONE != h->metac) {
+		if (h->metac != ESCAPE_FONTROMAN) {
 			h->metal = h->metac;
-			h->metac = HTMLFONT_NONE;
+			h->metac = ESCAPE_FONTROMAN;
 		}
 
 		/*

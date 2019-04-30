@@ -94,7 +94,7 @@ roff_html_pre_ft(ROFF_HTML_ARGS)
 	const char	*cp;
 
 	cp = n->child->string;
-	print_metaf(h, mandoc_font(cp, (int)strlen(cp)));
+	html_setfont(h, mandoc_font(cp, (int)strlen(cp)));
 }
 
 static void
