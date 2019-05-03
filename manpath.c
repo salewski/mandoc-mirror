@@ -332,8 +332,7 @@ manconf_output(struct manoutput *conf, const char *cp, int fromfile)
 		conf->toc = 1;
 		return 0;
 	default:
-		if (fromfile)
-			warnx("-O %s: Bad argument", cp);
+		warnx("-O %s: Bad argument", cp);
 		return -1;
 	}
 	if (fromfile == 0)

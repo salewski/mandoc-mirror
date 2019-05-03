@@ -300,12 +300,9 @@ main(int argc, char *argv[])
 			search.outkey = oarg;
 		else {
 			while (oarg != NULL) {
-				thisarg = oarg;
 				if (manconf_output(&conf.output,
-				    strsep(&oarg, ","), 0) == 0)
-					continue;
-				warnx("-O %s: Bad argument", thisarg);
-				return (int)MANDOCLEVEL_BADARG;
+				    strsep(&oarg, ","), 0) == -1)
+					return (int)MANDOCLEVEL_BADARG;
 			}
 		}
 	}
