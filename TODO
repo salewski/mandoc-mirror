@@ -217,12 +217,6 @@ are mere guesses, and some may be wrong.
 
 --- missing misc features ----------------------------------------------
 
-- dead .so links should be entered into the database to avoid:
-  man -M. lvm-config
-  man: outdated mandoc.db lacks lvm-config(8) entry, run makewhatis /co/void-man
-  https://github.com/void-linux/void-packages/issues/9868
-  loc *  exist **  algo *  size *  imp **
-
 - man -ks 1,8 route; kn@ Jul 13, 2018 orally
 
 - italic correction (\/) in PostScript mode
