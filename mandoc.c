@@ -541,10 +541,10 @@ mandoc_normdate(struct roff_man *man, char *in, int ln, int pos)
 
 	/* No date specified: use today's date. */
 
-	if (in == NULL || *in == '\0' || strcmp(in, "$" "Mdocdate$") == 0) {
+	if (in == NULL || *in == '\0')
 		mandoc_msg(MANDOCERR_DATE_MISSING, ln, pos, NULL);
+	if (in == NULL || *in == '\0' || strcmp(in, "$" "Mdocdate$") == 0)
 		return time2a(time(NULL));
-	}
 
 	/* Valid mdoc(7) date format. */
 
