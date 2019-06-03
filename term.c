@@ -281,6 +281,8 @@ term_fill(struct termp *p, size_t *nbr, size_t *vbr, size_t vtarget)
 			case ASCII_BREAK:
 				vn = vis;
 				break;
+			default:
+				abort();
 			}
 			/* Can break at the end of a word. */
 			if (breakline || vn > vtarget)
