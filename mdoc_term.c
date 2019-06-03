@@ -352,6 +352,7 @@ print_mdoc_node(DECL_ARGS)
 	 * produce output.  Note that some pre-handlers do so.
 	 */
 
+	act = NULL;
 	switch (n->type) {
 	case ROFFT_TEXT:
 		if (n->flags & NODE_LINE) {
