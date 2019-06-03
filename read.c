@@ -157,7 +157,7 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 	ln.sz = 256;
 	ln.buf = mandoc_malloc(ln.sz);
 	ln.next = NULL;
-	firstln = loop = NULL;
+	firstln = lastln = loop = NULL;
 	lnn = curp->line;
 	pos = 0;
 	inloop = 0;
