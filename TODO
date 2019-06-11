@@ -285,6 +285,9 @@ are mere guesses, and some may be wrong.
   https://github.com/schmonz/ikiwiki/compare/mandoc
   Amitai Schlair  Mon, 19 May 2014 14:05:53 -0400
 
+- check compatibility with
+  https://git.sr.ht/~sircmpwn/scdoc
+
 - check features of the Slackware man.conf(5) format
   Carsten Kunze  Wed, 11 Mar 2015 17:57:24 +0100
 

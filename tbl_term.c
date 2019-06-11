@@ -622,8 +622,12 @@ tbl_hrule(struct termp *tp, const struct tbl_span *spp,
 		    (spp == NULL || cpn == NULL ||
 		     cpn->pos != TBL_CELL_DOWN ? BRIGHT * hw : 0), 1);
 
+	col = tp->tbl.cols;
 	for (;;) {
-		col = tp->tbl.cols + cp->col;
+		if (cp == NULL)
+			col++;
+		else
+			col = tp->tbl.cols + cp->col;
 
 		/* Print the horizontal line inside this column. */
 
@@ -649,7 +653,8 @@ tbl_hrule(struct termp *tp, const struct tbl_span *spp,
 					uw = 1;
 			}
 			cpp = cpp->next;
-		}
+		} else if (spp != NULL && opts & TBL_OPT_ALLBOX)
+			uw = 1;
 		if (cp != NULL)
 			cp = cp->next;
 		if (cpn != NULL) {
@@ -661,8 +666,9 @@ tbl_hrule(struct termp *tp, const struct tbl_span *spp,
 			cpn = cpn->next;
 			while (dpn != NULL && dpn->layout != cpn)
 				dpn = dpn->next;
-		}
-		if (cpp == NULL && cp == NULL && cpn == NULL)
+		} else if (spn != NULL && opts & TBL_OPT_ALLBOX)
+			dw = 1;
+		if (col + 1 == tp->tbl.cols + sp->opts->cols)
 			break;
 
 		/* Vertical lines do not cross spanned cells. */
