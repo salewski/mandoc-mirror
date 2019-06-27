@@ -146,7 +146,7 @@ terminal_man(void *arg, const struct roff_meta *man)
 {
 	struct mtermp		 mt;
 	struct termp		*p;
-	struct roff_node	*n;
+	struct roff_node	*n, *nc, *nn;
 	size_t			 save_defindent;
 
 	p = (struct termp *)arg;
@@ -165,18 +165,23 @@ terminal_man(void *arg, const struct roff_meta *man)
 
 	n = man->first->child;
 	if (p->synopsisonly) {
-		while (n != NULL) {
-			if (n->tok == MAN_SH &&
-			    n->child->child->type == ROFFT_TEXT &&
-			    !strcmp(n->child->child->string, "SYNOPSIS")) {
-				if (n->child->next->child != NULL)
-					print_man_nodelist(p, &mt,
-					    n->child->next->child, man);
-				term_newln(p);
+		for (nn = NULL; n != NULL; n = n->next) {
+			if (n->tok != MAN_SH)
+				continue;
+			nc = n->child->child;
+			if (nc->type != ROFFT_TEXT)
+				continue;
+			if (strcmp(nc->string, "SYNOPSIS") == 0)
 				break;
-			}
-			n = n->next;
+			if (nn == NULL && strcmp(nc->string, "NAME") == 0)
+				nn = n;
 		}
+		if (n == NULL)
+			n = nn;
+		p->flags |= TERMP_NOSPACE;
+		if (n != NULL && (n = n->child->next->child) != NULL)
+			print_man_nodelist(p, &mt, n, man);
+		term_newln(p);
 	} else {
 		term_begin(p, print_man_head, print_man_foot, man);
 		p->flags |= TERMP_NOSPACE;
