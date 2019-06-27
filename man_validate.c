@@ -185,8 +185,7 @@ check_root(CHKARGS)
 
 		man->meta.title = mandoc_strdup("");
 		man->meta.msec = mandoc_strdup("");
-		man->meta.date = man->quick ? mandoc_strdup("") :
-		    mandoc_normdate(man, NULL, n->line, n->pos);
+		man->meta.date = mandoc_normdate(man, NULL, n->line, n->pos);
 	}
 
 	if (man->meta.os_e &&
@@ -369,8 +368,8 @@ post_TH(CHKARGS)
 	/* ->TITLE<- MSEC DATE OS VOL */
 
 	n = n->child;
-	if (n && n->string) {
-		for (p = n->string; '\0' != *p; p++) {
+	if (n != NULL && n->string != NULL) {
+		for (p = n->string; *p != '\0'; p++) {
 			/* Only warn about this once... */
 			if (isalpha((unsigned char)*p) &&
 			    ! isupper((unsigned char)*p)) {
@@ -388,9 +387,9 @@ post_TH(CHKARGS)
 
 	/* TITLE ->MSEC<- DATE OS VOL */
 
-	if (n)
+	if (n != NULL)
 		n = n->next;
-	if (n && n->string)
+	if (n != NULL && n->string != NULL)
 		man->meta.msec = mandoc_strdup(n->string);
 	else {
 		man->meta.msec = mandoc_strdup("");
@@ -400,17 +399,16 @@ post_TH(CHKARGS)
 
 	/* TITLE MSEC ->DATE<- OS VOL */
 
-	if (n)
+	if (n != NULL)
 		n = n->next;
-	if (n && n->string && '\0' != n->string[0]) {
-		man->meta.date = man->quick ?
-		    mandoc_strdup(n->string) :
-		    mandoc_normdate(man, n->string, n->line, n->pos);
-	} else {
+	if (n != NULL && n->string != NULL && n->string[0] != '\0')
+		man->meta.date = mandoc_normdate(man,
+		    n->string, n->line, n->pos);
+	else {
 		man->meta.date = mandoc_strdup("");
 		mandoc_msg(MANDOCERR_DATE_MISSING,
-		    n ? n->line : nb->line,
-		    n ? n->pos : nb->pos, "TH");
+		    n == NULL ? nb->line : n->line,
+		    n == NULL ? nb->pos : n->pos, "TH");
 	}
 
 	/* TITLE MSEC DATE ->OS<- VOL */

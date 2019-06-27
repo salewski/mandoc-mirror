@@ -1903,8 +1903,7 @@ post_root(POST_ARGS)
 	/* Add missing prologue data. */
 
 	if (mdoc->meta.date == NULL)
-		mdoc->meta.date = mdoc->quick ? mandoc_strdup("") :
-		    mandoc_normdate(mdoc, NULL, 0, 0);
+		mdoc->meta.date = mandoc_normdate(mdoc, NULL, 0, 0);
 
 	if (mdoc->meta.title == NULL) {
 		mandoc_msg(MANDOCERR_DT_NOTITLE, 0, 0, "EOF");
@@ -2519,21 +2518,10 @@ post_dd(POST_ARGS)
 		mandoc_msg(MANDOCERR_PROLOG_ORDER,
 		    n->line, n->pos, "Dd after Os");
 
-	if (n->child == NULL || n->child->string[0] == '\0') {
-		mdoc->meta.date = mdoc->quick ? mandoc_strdup("") :
-		    mandoc_normdate(mdoc, NULL, n->line, n->pos);
-		return;
-	}
-
 	datestr = NULL;
 	deroff(&datestr, n);
-	if (mdoc->quick)
-		mdoc->meta.date = datestr;
-	else {
-		mdoc->meta.date = mandoc_normdate(mdoc,
-		    datestr, n->line, n->pos);
-		free(datestr);
-	}
+	mdoc->meta.date = mandoc_normdate(mdoc, datestr, n->line, n->pos);
+	free(datestr);
 }
 
 static void
