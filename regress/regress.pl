@@ -424,7 +424,7 @@ if ($count_total == 1) {
 	print "\n";
 } else {
 	print "No tests were run.\n";
-} 
+}
 if ($targets{clean}) {
 	if ($count_rm) {
 		print "Deleted $count_rm test output files.\n";

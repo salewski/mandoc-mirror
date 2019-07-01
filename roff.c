@@ -783,7 +783,7 @@ roff_reset(struct roff *r)
 void
 roff_free(struct roff *r)
 {
-	int	 	 i;
+	int		 i;
 
 	roff_free1(r);
 	for (i = 0; i < r->mstacksz; i++)
@@ -1590,7 +1590,7 @@ char *
 roff_getarg(struct roff *r, char **cpp, int ln, int *pos)
 {
 	struct buf	 buf;
-	char	 	*cp, *start;
+	char		*cp, *start;
 	int		 newesc, pairs, quoted, white;
 
 	/* Quoting can only start with a new word. */

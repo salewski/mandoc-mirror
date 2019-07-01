@@ -529,7 +529,7 @@ fi
 	echo "extern	char	 *mkdtemp(char *);"
 
 if [ ${HAVE_PROGNAME} -eq 0 ]; then
-	echo "extern 	const char *getprogname(void);"
+	echo "extern	const char *getprogname(void);"
 	echo "extern	void	  setprogname(const char *);"
 fi
 

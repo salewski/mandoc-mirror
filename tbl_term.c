@@ -164,7 +164,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	const struct tbl_cell	*cp, *cpn, *cpp, *cps;
 	const struct tbl_dat	*dp;
 	static size_t		 offset;
-	size_t		 	 save_offset;
+	size_t			 save_offset;
 	size_t			 coloff, tsz;
 	int			 hspans, ic, more;
 	int			 dvert, fc, horiz, lhori, rhori, uvert;

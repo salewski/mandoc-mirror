@@ -315,7 +315,7 @@ pre_alternate(DECL_ARGS)
 		assert(nn->type == ROFFT_TEXT);
 		term_word(p, nn->string);
 		if (nn->flags & NODE_EOS)
-                	p->flags |= TERMP_SENTENCE;
+			p->flags |= TERMP_SENTENCE;
 		if (nn->next != NULL)
 			p->flags |= TERMP_NOSPACE;
 	}

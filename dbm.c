@@ -233,7 +233,7 @@ static struct dbm_res
 page_bytitle(enum iter arg_iter, const struct dbm_match *arg_match)
 {
 	static const struct dbm_match	*match;
-	static const char		*cp;	
+	static const char		*cp;
 	static int32_t			 ip;
 	struct dbm_res			 res = {-1, 0};
 
@@ -315,7 +315,7 @@ page_byarch(const struct dbm_match *arg_match)
 	static const struct dbm_match	*match;
 	struct dbm_res			 res = {-1, 0};
 	static int32_t			 ip;
-	const char			*cp;	
+	const char			*cp;
 
 	/* Initialize for a new iteration. */
 

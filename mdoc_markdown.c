@@ -1290,7 +1290,7 @@ md_post_It(struct roff_node *n)
 		while ((n = n->prev) != NULL && n->type != ROFFT_HEAD)
 			i++;
 
-		/* 
+		/*
 		 * If a width was specified for this column,
 		 * subtract what printed, and
 		 * add the same spacing as in mdoc_term.c.
