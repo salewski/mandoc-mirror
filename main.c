@@ -504,7 +504,8 @@ main(int argc, char *argv[])
 	if (argc < 1) {
 		if (use_pager) {
 			tag_files = tag_init();
-			tag_files->tagname = conf.output.tag;
+			if (tag_files != NULL)
+				tag_files->tagname = conf.output.tag;
 		}
 		thisarg = "<stdin>";
 		mandoc_msg_setinfilename(thisarg);
@@ -542,7 +543,8 @@ main(int argc, char *argv[])
 			if (use_pager) {
 				use_pager = 0;
 				tag_files = tag_init();
-				tag_files->tagname = conf.output.tag;
+				if (tag_files != NULL)
+					tag_files->tagname = conf.output.tag;
 			}
 
 			mandoc_msg_setinfilename(thisarg);
