@@ -46,7 +46,7 @@ mandoc_ohash.o: mandoc_ohash.c mandoc_aux.h mandoc_ohash.h compat_ohash.h
 mandoc_xr.o: mandoc_xr.c mandoc_aux.h mandoc_ohash.h compat_ohash.h mandoc_xr.h
 mandocd.o: mandocd.c config.h mandoc.h roff.h mdoc.h man.h mandoc_parse.h main.h manconf.h
 mandocdb.o: mandocdb.c config.h compat_fts.h mandoc_aux.h mandoc_ohash.h compat_ohash.h mandoc.h roff.h mdoc.h man.h mandoc_parse.h manconf.h mansearch.h dba_array.h dba.h
-manpath.o: manpath.c config.h mandoc_aux.h manconf.h
+manpath.o: manpath.c config.h mandoc_aux.h mandoc.h manconf.h
 mansearch.o: mansearch.c config.h mandoc_aux.h mandoc_ohash.h compat_ohash.h manconf.h mansearch.h dbm.h
 mdoc.o: mdoc.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h libmandoc.h roff_int.h libmdoc.h
 mdoc_argv.o: mdoc_argv.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h libmandoc.h roff_int.h libmdoc.h
@@ -67,7 +67,7 @@ roff_term.o: roff_term.c mandoc.h roff.h out.h term.h
 roff_validate.o: roff_validate.c mandoc.h roff.h libmandoc.h roff_int.h
 soelim.o: soelim.c config.h compat_stringlist.h
 st.o: st.c config.h mandoc.h roff.h libmdoc.h
-tag.o: tag.c config.h mandoc_aux.h mandoc_ohash.h compat_ohash.h tag.h
+tag.o: tag.c config.h mandoc_aux.h mandoc_ohash.h compat_ohash.h mandoc.h tag.h
 tbl.o: tbl.c config.h mandoc_aux.h mandoc.h tbl.h libmandoc.h tbl_parse.h tbl_int.h
 tbl_data.o: tbl_data.c config.h mandoc_aux.h mandoc.h tbl.h libmandoc.h tbl_int.h
 tbl_html.o: tbl_html.c config.h mandoc.h roff.h tbl.h out.h html.h
