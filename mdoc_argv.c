@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2012, 2014-2018 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2012, 2014-2019 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -454,6 +454,7 @@ args(struct roff_man *mdoc, int line, int *pos,
 			mandoc_msg(MANDOCERR_ARG_QUOTE, line, *pos, NULL);
 			mdoc->flags &= ~MDOC_PHRASELIT;
 		}
+		mdoc->flags &= ~MDOC_PHRASEQL;
 		return ARGS_EOLN;
 	}
 
