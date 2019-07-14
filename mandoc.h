@@ -309,6 +309,7 @@ enum mandoclevel  mandoc_msg_getrc(void);
 void		  mandoc_msg_setrc(enum mandoclevel);
 void		  mandoc_msg(enum mandocerr, int, int, const char *, ...)
 			__attribute__((__format__ (__printf__, 4, 5)));
+void		  mandoc_msg_summary(void);
 void		  mchars_alloc(void);
 void		  mchars_free(void);
 int		  mchars_num2char(const char *, size_t);

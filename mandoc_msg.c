@@ -355,3 +355,12 @@ mandoc_msg(enum mandocerr t, int line, int col, const char *fmt, ...)
 	}
 	fputc('\n', fileptr);
 }
+
+void
+mandoc_msg_summary(void)
+{
+	if (fileptr != NULL && rc != MANDOCLEVEL_OK)
+		fprintf(fileptr,
+		    "%s: see above the output for %s messages\n",
+		    getprogname(), level_name[rc]);
+}
