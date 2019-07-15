@@ -727,7 +727,8 @@ out:
 			signum = WSTOPSIG(status);
 		}
 		tag_unlink();
-	} else if (curp.outtype != OUTT_LINT)
+	} else if (curp.outtype != OUTT_LINT &&
+	    (search.argmode == ARG_FILE || sz > 0))
 		mandoc_msg_summary();
 
 	return (int)mandoc_msg_getrc();
