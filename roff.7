@@ -315,12 +315,18 @@ delimiters
 The proper spacing is also intelligently preserved if a sentence ends at
 the boundary of a macro line.
 .Pp
+If an input line happens to end with a period, exclamation or question
+mark that isn't the end of a sentence, append a zero-width space
+.Pq Sq \e& .
+.Pp
 Examples:
 .Bd -literal -offset indent -compact
 Do not end sentences mid-line like this.  Instead,
 end a sentence like this.
 A macro would end like this:
 \&.Xr mandoc 1 \&.
+An abbreviation at the end of an input line needs escaping, e.g.\e&
+like this.
 .Ed
 .Sh REQUEST SYNTAX
 A request or macro line consists of:

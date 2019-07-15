@@ -3005,6 +3005,13 @@ in the same way as a plain
 .Sq \&|
 character.
 Using this predefined string is not recommended in new manuals.
+.Pp
+Appending a zero-width space
+.Pq Sq \e&
+to the end of an input line is also useful to prevent the interpretation
+of a trailing period, exclamation or question mark as the end of a
+sentence, for example when an abbreviation happens to occur
+at the end of a text or macro input line.
 .Ss Font handling
 In
 .Nm
