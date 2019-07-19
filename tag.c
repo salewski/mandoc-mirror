@@ -225,6 +225,7 @@ tag_write(void)
 	struct tag_entry	*entry;
 	size_t			 i;
 	unsigned int		 slot;
+	int			 empty;
 
 	if (tag_files.tfd <= 0)
 		return;
@@ -235,12 +236,16 @@ tag_write(void)
 	}
 	if ((stream = fdopen(tag_files.tfd, "w")) == NULL)
 		mandoc_msg(MANDOCERR_FDOPEN, 0, 0, "%s", strerror(errno));
+	empty = 1;
 	entry = ohash_first(&tag_data, &slot);
 	while (entry != NULL) {
-		if (stream != NULL && entry->prio >= 0)
-			for (i = 0; i < entry->nlines; i++)
+		if (stream != NULL && entry->prio >= 0) {
+			for (i = 0; i < entry->nlines; i++) {
 				fprintf(stream, "%s %s %zu\n",
 				    entry->s, tag_files.ofn, entry->lines[i]);
+				empty = 0;
+			}
+		}
 		free(entry->lines);
 		free(entry);
 		entry = ohash_next(&tag_data, &slot);
@@ -251,6 +256,10 @@ tag_write(void)
 	else
 		close(tag_files.tfd);
 	tag_files.tfd = -1;
+	if (empty) {
+		unlink(tag_files.tfn);
+		*tag_files.tfn = '\0';
+	}
 }
 
 void

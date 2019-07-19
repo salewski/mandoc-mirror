@@ -1194,7 +1194,7 @@ spawn_pager(struct tag_files *tag_files)
 
 	use_ofn = 1;
 #if HAVE_LESS_T
-	if ((cmdlen = strlen(argv[0])) >= 4) {
+	if (*tag_files->tfn != '\0' && (cmdlen = strlen(argv[0])) >= 4) {
 		cp = argv[0] + cmdlen - 4;
 		if (strcmp(cp, "less") == 0) {
 			argv[argc++] = mandoc_strdup("-T");
