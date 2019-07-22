@@ -37,7 +37,7 @@ main.o: main.c config.h mandoc_aux.h mandoc.h mandoc_xr.h roff.h mdoc.h man.h ma
 man.o: man.c config.h mandoc_aux.h mandoc.h roff.h man.h libmandoc.h roff_int.h libman.h
 man_html.o: man_html.c config.h mandoc_aux.h mandoc.h roff.h man.h out.h html.h main.h
 man_macro.o: man_macro.c config.h mandoc.h roff.h man.h libmandoc.h roff_int.h libman.h
-man_term.o: man_term.c config.h mandoc_aux.h roff.h man.h out.h term.h main.h
+man_term.o: man_term.c config.h mandoc_aux.h mandoc.h roff.h man.h out.h term.h tag.h main.h
 man_validate.o: man_validate.c config.h mandoc_aux.h mandoc.h roff.h man.h libmandoc.h roff_int.h libman.h
 mandoc.o: mandoc.c config.h mandoc_aux.h mandoc.h roff.h libmandoc.h roff_int.h
 mandoc_aux.o: mandoc_aux.c config.h mandoc.h mandoc_aux.h

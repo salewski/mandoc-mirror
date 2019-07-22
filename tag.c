@@ -151,11 +151,11 @@ tag_put(const char *s, int prio, size_t line)
 		s += 2;
 
 	/*
-	 * Skip whitespace and whatever follows it,
+	 * Skip whitespace and escapes and whatever follows,
 	 * and if there is any, downgrade the priority.
 	 */
 
-	len = strcspn(s, " \t");
+	len = strcspn(s, " \t\\");
 	if (len == 0)
 		return;
 

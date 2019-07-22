@@ -27,10 +27,12 @@
 #include <string.h>
 
 #include "mandoc_aux.h"
+#include "mandoc.h"
 #include "roff.h"
 #include "man.h"
 #include "out.h"
 #include "term.h"
+#include "tag.h"
 #include "main.h"
 
 #define	MAXMARGINS	  64 /* maximum number of indented scopes */
@@ -91,6 +93,8 @@ static	void		  post_SH(DECL_ARGS);
 static	void		  post_SY(DECL_ARGS);
 static	void		  post_TP(DECL_ARGS);
 static	void		  post_UR(DECL_ARGS);
+
+static	void		  tag_man(struct termp *, struct roff_node *);
 
 static const struct man_term_act man_term_acts[MAN_MAX - MAN_TH] = {
 	{ NULL, NULL, 0 }, /* TH */
@@ -534,8 +538,10 @@ pre_IP(DECL_ARGS)
 	case ROFFT_HEAD:
 		p->tcol->offset = mt->offset;
 		p->tcol->rmargin = mt->offset + len;
-		if (n->child != NULL)
+		if (n->child != NULL) {
 			print_man_node(p, mt, n->child, meta);
+			tag_man(p, n->child);
+		}
 		return 0;
 	case ROFFT_BODY:
 		p->tcol->offset = mt->offset + len;
@@ -1147,4 +1153,61 @@ print_man_head(struct termp *p, const struct roff_meta *meta)
 		term_vspace(p);
 	}
 	free(title);
+}
+
+/*
+ * Skip leading whitespace, dashes, backslashes, and font escapes,
+ * then create a tag if the first following byte is a letter.
+ * Priority is high unless whitespace is present.
+ */
+static void
+tag_man(struct termp *p, struct roff_node *n)
+{
+	const char	*cp, *arg;
+	int		 prio, sz;
+
+	assert(n->type == ROFFT_TEXT);
+	cp = n->string;
+	prio = 1;
+	for (;;) {
+		switch (*cp) {
+		case ' ':
+		case '\t':
+			prio = INT_MAX;
+			/* FALLTHROUGH */
+		case '-':
+			cp++;
+			break;
+		case '\\':
+			cp++;
+			switch (mandoc_escape(&cp, &arg, &sz)) {
+			case ESCAPE_FONT:
+			case ESCAPE_FONTROMAN:
+			case ESCAPE_FONTITALIC:
+			case ESCAPE_FONTBOLD:
+			case ESCAPE_FONTPREV:
+			case ESCAPE_FONTBI:
+				break;
+			case ESCAPE_SPECIAL:
+				if (sz != 1)
+					return;
+				switch (*arg) {
+				case '&':
+				case '-':
+				case 'e':
+					break;
+				default:
+					return;
+				}
+				break;
+			default:
+				return;
+			}
+			break;
+		default:
+			if (isalpha((unsigned char)*cp))
+				tag_put(cp, prio, p->line);
+			return;
+		}
+	}
 }
