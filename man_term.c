@@ -621,6 +621,18 @@ pre_TP(DECL_ARGS)
 		while (nn != NULL && (nn->flags & NODE_LINE) == 0)
 			nn = nn->next;
 
+		if (nn == NULL)
+			return 0;
+
+		if (nn->type == ROFFT_TEXT)
+			tag_man(p, nn);
+		else if (nn->child != NULL &&
+		    nn->child->type == ROFFT_TEXT &&
+		    (nn->tok == MAN_B || nn->tok == MAN_BI ||
+		     nn->tok == MAN_BR || nn->tok == MAN_I ||
+		     nn->tok == MAN_IB || nn->tok == MAN_IR))
+			tag_man(p, nn->child);
+
 		while (nn != NULL) {
 			print_man_node(p, mt, nn, meta);
 			nn = nn->next;
