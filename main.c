@@ -78,7 +78,9 @@ enum	outt {
 };
 
 struct	outstate {
+	struct tag_files *tag_files;	/* Tagging state variables. */
 	void		 *outdata;	/* data for output */
+	int		  use_pager;
 	int		  wstop;	/* stop after a file with a warning */
 	enum outt	  outtype;	/* which output to use */
 };
@@ -117,7 +119,6 @@ main(int argc, char *argv[])
 	struct mansearch search;	/* Search options. */
 	struct manpage	*res, *resp;	/* Search results. */
 	struct mparse	*mp;		/* Opaque parser object. */
-	struct tag_files *tag_files;	/* Tagging state variables. */
 	const char	*conf_file;	/* -C: alternate config file. */
 	const char	*os_s;		/* -I: Operating system for display. */
 	const char	*progname, *sec, *thisarg;
@@ -130,7 +131,6 @@ main(int argc, char *argv[])
 	size_t		 i, ssz;
 	int		 options;	/* Parser options. */
 	int		 show_usage;	/* Invalid argument: give up. */
-	int		 use_pager;	/* According to command line. */
 	int		 prio, best_prio;
 	int		 fd, startdir;
 	int		 c;
@@ -195,10 +195,10 @@ main(int argc, char *argv[])
 	/* Formatter options. */
 
 	memset(&outst, 0, sizeof(outst));
+	outst.tag_files = NULL;
 	outst.outtype = OUTT_LOCALE;
+	outst.use_pager = 1;
 
-	use_pager = 1;
-	tag_files = NULL;
 	show_usage = 0;
 	outmode = OUTMODE_DEF;
 
@@ -216,14 +216,14 @@ main(int argc, char *argv[])
 			conf_file = optarg;
 			break;
 		case 'c':
-			use_pager = 0;
+			outst.use_pager = 0;
 			break;
 		case 'f':
 			search.argmode = ARG_WORD;
 			break;
 		case 'h':
 			conf.output.synopsisonly = 1;
-			use_pager = 0;
+			outst.use_pager = 0;
 			outmode = OUTMODE_ALL;
 			break;
 		case 'I':
@@ -324,7 +324,7 @@ main(int argc, char *argv[])
 		switch (search.argmode) {
 		case ARG_FILE:
 			outmode = OUTMODE_ALL;
-			use_pager = 0;
+			outst.use_pager = 0;
 			break;
 		case ARG_NAME:
 			outmode = OUTMODE_ONE;
@@ -353,9 +353,9 @@ main(int argc, char *argv[])
 	if (outmode == OUTMODE_FLN ||
 	    outmode == OUTMODE_LST ||
 	    !isatty(STDOUT_FILENO))
-		use_pager = 0;
+		outst.use_pager = 0;
 
-	if (use_pager &&
+	if (outst.use_pager &&
 	    (conf.output.width == 0 || conf.output.indent == 0) &&
 	    ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) != -1 &&
 	    ws.ws_col > 1) {
@@ -366,7 +366,7 @@ main(int argc, char *argv[])
 	}
 
 #if HAVE_PLEDGE
-	if (use_pager == 0) {
+	if (outst.use_pager == 0) {
 		if (pledge("stdio rpath", NULL) == -1) {
 			mandoc_msg(MANDOCERR_PLEDGE, 0, 0,
 			    "%s", strerror(errno));
@@ -533,7 +533,7 @@ main(int argc, char *argv[])
 	/* mandoc(1) */
 
 #if HAVE_PLEDGE
-	if (use_pager) {
+	if (outst.use_pager) {
 		if (pledge("stdio rpath tmppath tty proc exec", NULL) == -1) {
 			mandoc_msg(MANDOCERR_PLEDGE, 0, 0,
 			    "%s", strerror(errno));
@@ -559,11 +559,8 @@ main(int argc, char *argv[])
 	mp = mparse_alloc(options, os_e, os_s);
 
 	if (argc < 1) {
-		if (use_pager) {
-			tag_files = tag_init();
-			if (tag_files != NULL)
-				tag_files->tagname = conf.output.tag;
-		}
+		if (outst.use_pager)
+			outst.tag_files = tag_init(conf.output.tag);
 		thisarg = "<stdin>";
 		mandoc_msg_setinfilename(thisarg);
 		parse(mp, STDIN_FILENO, thisarg, &outst, &conf.output);
@@ -598,11 +595,9 @@ main(int argc, char *argv[])
 		mandoc_msg_setinfilename(thisarg);
 		fd = mparse_open(mp, thisarg);
 		if (fd != -1) {
-			if (use_pager) {
-				use_pager = 0;
-				tag_files = tag_init();
-				if (tag_files != NULL)
-					tag_files->tagname = conf.output.tag;
+			if (outst.use_pager) {
+				outst.use_pager = 0;
+				outst.tag_files = tag_init(conf.output.tag);
 			}
 
 			if (resp == NULL || resp->form == FORM_SRC)
@@ -611,12 +606,12 @@ main(int argc, char *argv[])
 				passthrough(fd, conf.output.synopsisonly);
 
 			if (ferror(stdout)) {
-				if (tag_files != NULL) {
+				if (outst.tag_files != NULL) {
 					mandoc_msg(MANDOCERR_WRITE, 0, 0,
-					    "%s: %s", tag_files->ofn,
+					    "%s: %s", outst.tag_files->ofn,
 					    strerror(errno));
 					tag_unlink();
-					tag_files = NULL;
+					outst.tag_files = NULL;
 				} else
 					mandoc_msg(MANDOCERR_WRITE, 0, 0,
 					    "%s", strerror(errno));
@@ -677,10 +672,10 @@ out:
 		mansearch_free(res, sz);
 	}
 
-	if (tag_files != NULL) {
+	if (outst.tag_files != NULL) {
 		fclose(stdout);
 		tag_write();
-		run_pager(tag_files);
+		run_pager(outst.tag_files);
 		tag_unlink();
 	} else if (outst.outtype != OUTT_LINT &&
 	    (search.argmode == ARG_FILE || sz > 0))

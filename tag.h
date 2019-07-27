@@ -1,6 +1,6 @@
 /*      $Id$    */
 /*
- * Copyright (c) 2015 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2015, 2018, 2019 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,7 +26,7 @@ struct	tag_files {
 };
 
 
-struct tag_files *tag_init(void);
+struct tag_files *tag_init(char *);
 void	 tag_put(const char *, int, size_t);
 void	 tag_write(void);
 void	 tag_unlink(void);
