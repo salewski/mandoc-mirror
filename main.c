@@ -544,22 +544,6 @@ main(int argc, char *argv[])
 		break;
 	}
 
-#if HAVE_PLEDGE
-	if (outst.use_pager) {
-		if (pledge("stdio rpath tmppath tty proc exec", NULL) == -1) {
-			mandoc_msg(MANDOCERR_PLEDGE, 0, 0,
-			    "%s", strerror(errno));
-			return mandoc_msg_getrc();
-		}
-	} else {
-		if (pledge("stdio rpath", NULL) == -1) {
-			mandoc_msg(MANDOCERR_PLEDGE, 0, 0,
-			    "%s", strerror(errno));
-			return mandoc_msg_getrc();
-		}
-	}
-#endif
-
 	if (search.argmode == ARG_FILE && auxpaths != NULL) {
 		if (strcmp(auxpaths, "doc") == 0)
 			options |= MPARSE_MDOC;
