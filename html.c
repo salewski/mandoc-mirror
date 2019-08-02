@@ -203,23 +203,18 @@ print_gen_head(struct html *h)
 	print_endline(h);
 	print_text(h, "td.head-vol { text-align: center; }");
 	print_endline(h);
-	print_text(h, "div.Pp { margin: 1ex 0ex; }");
+	print_text(h, ".Nd, .Bf, .Op { display: inline; }");
 	print_endline(h);
-	print_text(h, "div.Nd, div.Bf, div.Op { display: inline; }");
+	print_text(h, ".Pa, .Ad { font-style: italic; }");
 	print_endline(h);
-	print_text(h, "span.Pa, span.Ad { font-style: italic; }");
+	print_text(h, ".Ms { font-weight: bold; }");
 	print_endline(h);
-	print_text(h, "span.Ms { font-weight: bold; }");
-	print_endline(h);
-	print_text(h, "dl.Bl-diag ");
+	print_text(h, ".Bl-diag ");
 	print_byte(h, '>');
 	print_text(h, " dt { font-weight: bold; }");
 	print_endline(h);
-	print_text(h, "code.Nm, code.Fl, code.Cm, code.Ic, "
-	    "code.In, code.Fd, code.Fn,");
-	print_endline(h);
-	print_text(h, "code.Cd { font-weight: bold; "
-	    "font-family: inherit; }");
+	print_text(h, "code.Nm, .Fl, .Cm, .Ic, code.In, .Fd, .Fn, .Cd "
+	    "{ font-weight: bold; font-family: inherit; }");
 	print_tagq(h, t);
 }
 
