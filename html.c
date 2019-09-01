@@ -65,7 +65,6 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"title",	HTML_NLAROUND},
 	{"body",	HTML_NLALL},
 	{"div",		HTML_NLAROUND},
-	{"div",		0},
 	{"section",	HTML_NLALL},
 	{"table",	HTML_NLALL | HTML_INDENT},
 	{"tr",		HTML_NLALL | HTML_INDENT},

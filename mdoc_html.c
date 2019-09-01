@@ -1700,7 +1700,7 @@ mdoc_quote_pre(MDOC_ARGS)
 		/*
 		 * Give up on semantic markup for now.
 		 * We cannot use TAG_SPAN because .Oo may contain blocks.
-		 * We cannot use TAG_IDIV because we might be in a
+		 * We cannot use TAG_DIV because we might be in a
 		 * phrasing context (like .Dl or .Pp); we cannot
 		 * close out a .Pp at this point either because
 		 * that would break the line.
