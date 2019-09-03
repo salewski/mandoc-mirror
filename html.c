@@ -271,21 +271,18 @@ print_metaf(struct html *h)
 void
 html_close_paragraph(struct html *h)
 {
-	struct tag	*t;
+	struct tag	*this, *next;
+	int		 flags;
 
-	for (t = h->tag; t != NULL && t->closed == 0; t = t->next) {
-		switch(t->tag) {
-		case TAG_P:
-		case TAG_PRE:
-			print_tagq(h, t);
+	this = h->tag;
+	for (;;) {
+		next = this->next;
+		flags = htmltags[this->tag].flags;
+		if (flags & (HTML_INPHRASE | HTML_TOPHRASE))
+			print_ctag(h, this);
+		if ((flags & HTML_INPHRASE) == 0)
 			break;
-		case TAG_A:
-			print_tagq(h, t);
-			continue;
-		default:
-			continue;
-		}
-		break;
+		this = next;
 	}
 }
 
