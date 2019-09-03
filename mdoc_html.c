@@ -653,7 +653,6 @@ mdoc_nd_pre(MDOC_ARGS)
 {
 	switch (n->type) {
 	case ROFFT_BLOCK:
-		html_close_paragraph(h);
 		return 1;
 	case ROFFT_HEAD:
 		return 0;
@@ -663,8 +662,7 @@ mdoc_nd_pre(MDOC_ARGS)
 		abort();
 	}
 	print_text(h, "\\(em");
-	/* Cannot use TAG_SPAN because it may contain blocks. */
-	print_otag(h, TAG_DIV, "c", "Nd");
+	print_otag(h, TAG_SPAN, "c", "Nd");
 	return 1;
 }
 
