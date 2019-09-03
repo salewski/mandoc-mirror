@@ -86,8 +86,12 @@ sub syshtml ($@) {
 		if (!$state && s/.*<math class="eqn">//) {
 			$state = 'math';
 			next unless length;
-		} elsif (/^BEGINTEST/) {
+		} elsif (/BEGINTEST/) {
 			$state = 'other';
+			next;
+		} elsif (/ENDTEST/) {
+			$state = 0;
+			next;
 		}
 		if ($state eq 'math') {
 			s/^ *//;
@@ -98,7 +102,6 @@ sub syshtml ($@) {
 			}
 		}
 		print $outfd "$_\n" if $state;
-		$state = 0 if /^ENDTEST/;
 	}
 	close $outfd;
 	close $infd;
