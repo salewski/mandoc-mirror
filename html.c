@@ -968,15 +968,12 @@ print_indent(struct html *h)
 {
 	size_t	 i;
 
-	if (h->col)
+	if (h->col || h->noindent)
 		return;
 
-	if (h->noindent == 0) {
-		h->col = h->indent * 2;
-		for (i = 0; i < h->col; i++)
-			putchar(' ');
-	}
-	h->flags &= ~HTML_NOSPACE;
+	h->col = h->indent * 2;
+	for (i = 0; i < h->col; i++)
+		putchar(' ');
 }
 
 /*
