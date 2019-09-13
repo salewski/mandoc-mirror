@@ -1186,11 +1186,17 @@ post_fname(POST_ARGS)
 	size_t			 pos;
 
 	n = mdoc->last->child;
-	pos = strcspn(n->string, "()");
-	cp = n->string + pos;
-	if ( ! (cp[0] == '\0' || (cp[0] == '(' && cp[1] == '*')))
-		mandoc_msg(MANDOCERR_FN_PAREN, n->line, n->pos + pos,
-		    "%s", n->string);
+	cp = n->string;
+	if (*cp == '(') {
+		if (cp[strlen(cp + 1)] == ')')
+			return;
+		pos = 0;
+	} else {
+		pos = strcspn(cp, "()");
+		if (cp[pos] == '\0')
+			return;
+	}
+	mandoc_msg(MANDOCERR_FN_PAREN, n->line, n->pos + pos, "%s", cp);
 }
 
 static void
