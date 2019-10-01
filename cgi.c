@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2014, 2015, 2016, 2017, 2018 Ingo Schwarze <schwarze@usta.de>
+ * Copyright (c) 2014-2019 Ingo Schwarze <schwarze@usta.de>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -77,7 +77,8 @@ static	void		 parse_query_string(struct req *, const char *);
 static	void		 pg_error_badrequest(const char *);
 static	void		 pg_error_internal(void);
 static	void		 pg_index(const struct req *);
-static	void		 pg_noresult(const struct req *, const char *);
+static	void		 pg_noresult(const struct req *, int, const char *,
+				const char *);
 static	void		 pg_redirect(const struct req *, const char *);
 static	void		 pg_search(const struct req *);
 static	void		 pg_searchres(const struct req *,
@@ -546,12 +547,13 @@ pg_index(const struct req *req)
 }
 
 static void
-pg_noresult(const struct req *req, const char *msg)
+pg_noresult(const struct req *req, int code, const char *http_msg,
+    const char *user_msg)
 {
-	resp_begin_html(200, NULL, NULL);
+	resp_begin_html(code, http_msg, NULL);
 	resp_searchform(req, FOCUS_QUERY);
 	puts("<p>");
-	puts(msg);
+	puts(user_msg);
 	puts("</p>");
 	resp_end_html();
 }
@@ -1016,9 +1018,10 @@ pg_search(const struct req *req)
 	if (req->isquery && req->q.equal && argc == 1)
 		pg_redirect(req, argv[0]);
 	else if (mansearch(&search, &paths, argc, argv, &res, &ressz) == 0)
-		pg_noresult(req, "You entered an invalid query.");
+		pg_noresult(req, 400, "Bad Request",
+		    "You entered an invalid query.");
 	else if (ressz == 0)
-		pg_noresult(req, "No results found.");
+		pg_noresult(req, 404, "Not Found", "No results found.");
 	else
 		pg_searchres(req, res, ressz);
 
