@@ -29,6 +29,7 @@
 #define	MPARSE_UTF8	(1 << 4)  /* accept UTF-8 input */
 #define	MPARSE_LATIN1	(1 << 5)  /* accept ISO-LATIN-1 input */
 #define	MPARSE_VALIDATE	(1 << 6)  /* call validation functions */
+#define	MPARSE_COMMENT	(1 << 7)  /* save comments in the tree */
 
 
 struct	roff_meta;

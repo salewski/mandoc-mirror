@@ -771,6 +771,7 @@ void
 roff_reset(struct roff *r)
 {
 	roff_free1(r);
+	r->options |= MPARSE_COMMENT;
 	r->format = r->options & (MPARSE_MDOC | MPARSE_MAN);
 	r->control = '\0';
 	r->escape = '\\';
@@ -800,7 +801,7 @@ roff_alloc(int options)
 
 	r = mandoc_calloc(1, sizeof(struct roff));
 	r->reqtab = roffhash_alloc(0, ROFF_RENAMED);
-	r->options = options;
+	r->options = options | MPARSE_COMMENT;
 	r->format = options & (MPARSE_MDOC | MPARSE_MAN);
 	r->mstackpos = -1;
 	r->rstackpos = -1;
@@ -1246,7 +1247,7 @@ roff_expand(struct roff *r, struct buf *buf, int ln, int pos, char newesc)
 		 * in the syntax tree.
 		 */
 
-		if (newesc != ASCII_ESC && r->format == 0) {
+		if (newesc != ASCII_ESC && r->options & MPARSE_COMMENT) {
 			while (*ep == ' ' || *ep == '\t')
 				ep--;
 			ep[1] = '\0';
@@ -1815,8 +1816,10 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 		roff_addtbl(r->man, ln, r->tbl);
 		return e;
 	}
-	if ( ! ctl)
+	if ( ! ctl) {
+		r->options &= ~MPARSE_COMMENT;
 		return roff_parsetext(r, buf, pos, offs) | e;
+	}
 
 	/* Skip empty request lines. */
 
@@ -1839,6 +1842,7 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 
 	/* No scope is open.  This is a new request or macro. */
 
+	r->options &= ~MPARSE_COMMENT;
 	spos = pos;
 	t = roff_parse(r, buf->buf, &pos, ln, ppos);
 
