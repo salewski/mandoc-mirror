@@ -33,6 +33,14 @@ Obviously, as the issues have not been solved yet, these annotations
 are mere guesses, and some may be wrong.
 
 ************************************************************************
+* crashes
+************************************************************************
+
+- .ce .if n .B two crashes because "return (*roffs[t].sub)" bypasses
+  the "high level macros abort .ce" safeguard in roff_parseln()
+  reported by espie@ in textproc/fstrcmp
+
+************************************************************************
 * missing features
 ************************************************************************
 
@@ -385,6 +393,11 @@ are mere guesses, and some may be wrong.
   and render them with <a class="Xr" href=...>
   https://github.com/Debian/debiman/issues/15
   loc *  exist *  algo **  size **  imp **
+
+- space characters can end up in href= attributes, for example coming
+  from the first .Xr argument (where they make no sense, but still);
+  does this affect other characters, other source macros...?
+  Jackson Pauls  29 Aug 2017 16:56:27 +0100
 
 - The tables used to render the three-part page headers actually force
   the width of the <body> to the max-width given for <html>.
