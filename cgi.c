@@ -340,6 +340,8 @@ resp_begin_http(int code, const char *msg)
 
 	printf("Content-Type: text/html; charset=utf-8\r\n"
 	     "Cache-Control: no-cache\r\n"
+	     "Content-Security-Policy: default-src 'none'; "
+	     "style-src 'self' 'unsafe-inline'\r\n"
 	     "Pragma: no-cache\r\n"
 	     "\r\n");
 
