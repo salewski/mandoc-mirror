@@ -1719,9 +1719,11 @@ mdoc_quote_pre(MDOC_ARGS)
 		break;
 	case MDOC_Do:
 	case MDOC_Dq:
+		print_text(h, "\\(lq");
+		break;
 	case MDOC_Qo:
 	case MDOC_Qq:
-		print_text(h, "\\(lq");
+		print_text(h, "\"");
 		break;
 	case MDOC_Po:
 	case MDOC_Pq:
@@ -1777,11 +1779,13 @@ mdoc_quote_post(MDOC_ARGS)
 		else
 			print_text(h, n->norm->Es->child->next->string);
 		break;
-	case MDOC_Qo:
-	case MDOC_Qq:
 	case MDOC_Do:
 	case MDOC_Dq:
 		print_text(h, "\\(rq");
+		break;
+	case MDOC_Qo:
+	case MDOC_Qq:
+		print_text(h, "\"");
 		break;
 	case MDOC_Po:
 	case MDOC_Pq:
