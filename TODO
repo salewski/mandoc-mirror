@@ -93,6 +93,10 @@ are mere guesses, and some may be wrong.
 
 --- missing mdoc features ----------------------------------------------
 
+- .Sh and .Ss should be parsed and partially callable, see groff_mdoc(7)
+  reed at reedmedia dot net Sat, 21 Dec 2019 17:13:07 -0600
+  loc **  exist **  algo **  size **  imp *
+
 - .Bl -column .Xo support is missing
   ultimate goal:
   restore .Xr and .Dv to
@@ -579,6 +583,10 @@ are mere guesses, and some may be wrong.
 ************************************************************************
 * to improve in the groff_mdoc(7) macros
 ************************************************************************
+
+- delete OS release verification from .Dx, .Fx, .Nx, .Ox etc.
+  https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=629161
+  also Branden Robinson 18 Dec 2019 00:59:52 +1100
 
 - .Cd # arch1, arch2 in section 4 pages:
   find better way to indicate multiple architectures, maybe:
