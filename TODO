@@ -588,6 +588,11 @@ are mere guesses, and some may be wrong.
   https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=629161
   also Branden Robinson 18 Dec 2019 00:59:52 +1100
 
+- Can the distinction between .Vt and .Va be made stricter,
+  recommending .Vt extern char * Ns Va optarg ; ?
+  What about the block macro properties of .Vt in the SYNOPSIS?
+  zeurkous 25 Dec 2019 08:48:36 +0100
+
 - .Cd # arch1, arch2 in section 4 pages:
   find better way to indicate multiple architectures, maybe:
   allow .Dt vgafb 4 "macppc sparc64"
