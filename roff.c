@@ -2294,12 +2294,24 @@ roff_cond_sub(ROFF_ARGS)
 		}
 	}
 
+	t = roff_parse(r, buf->buf, &pos, ln, ppos);
+
+	/* For now, let high level macros abort .ce mode. */
+
+	if (roffce_node != NULL &&
+	    (t == TOKEN_NONE || t == ROFF_Dd || t == ROFF_EQ ||
+             t == ROFF_TH || t == ROFF_TS)) {
+		r->man->last = roffce_node;
+		r->man->next = ROFF_NEXT_SIBLING;
+		roffce_lines = 0;
+		roffce_node = NULL;
+	}
+
 	/*
 	 * Fully handle known macros when they are structurally
 	 * required or when the conditional evaluated to true.
 	 */
 
-	t = roff_parse(r, buf->buf, &pos, ln, ppos);
 	if (t == ROFF_break) {
 		if (irc & ROFF_LOOPMASK)
 			irc = ROFF_IGN | ROFF_LOOPEXIT;
