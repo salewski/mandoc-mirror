@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2014, 2015, 2017, 2018 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2014,2015,2017,2018,2020 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -399,6 +399,14 @@ eqn_next(struct eqn_node *ep, enum parse_mode mode)
 		case '"':
 			quoted = 1;
 			break;
+		case ' ':
+		case '\t':
+		case '~':
+		case '^':
+			if (quoted)
+				break;
+			ep->start++;
+			continue;
 		default:
 			break;
 		}
@@ -669,7 +677,7 @@ eqn_parse(struct eqn_node *ep)
 	if (ep->data == NULL)
 		return;
 
-	ep->start = ep->end = ep->data + strspn(ep->data, " ^~");
+	ep->start = ep->end = ep->data;
 
 next_tok:
 	tok = eqn_next(ep, MODE_TOK);
