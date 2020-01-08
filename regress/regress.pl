@@ -165,10 +165,9 @@ foreach my $module (qw(roff char mdoc man tbl eqn)) {
 		my %subvars = (MOPTS => '');
 		parse_makefile "$module/$subdir/Makefile", \%subvars;
 		parse_makefile "$module/Makefile.inc", \%subvars;
+		delete $subvars{GOPTS};
 		delete $subvars{SKIP_GROFF};
 		delete $subvars{SKIP_GROFF_ASCII};
-		delete $subvars{TBL};
-		delete $subvars{EQN};
 		my @mandoc = ('../mandoc', split ' ', $subvars{MOPTS});
 		delete $subvars{MOPTS};
 		my @regress_testnames;
