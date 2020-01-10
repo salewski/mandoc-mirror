@@ -411,7 +411,8 @@ resp_searchform(const struct req *req, enum focus focus)
 {
 	int		 i;
 
-	printf("<form action=\"/%s\" method=\"get\" autocomplete=\"off\">\n"
+	printf("<form action=\"/%s\" method=\"get\" "
+	       "autocomplete=\"off\" autocapitalize=\"none\">\n"
 	       "  <fieldset>\n"
 	       "    <legend>Manual Page Search Parameters</legend>\n",
 	       scriptname);
