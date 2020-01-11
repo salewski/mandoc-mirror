@@ -21,6 +21,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -73,6 +74,7 @@ getdata(struct tbl_node *tbl, struct tbl_span *dp,
 		if (dp->layout->last->col + 1 < dp->opts->cols) {
 			cp = mandoc_calloc(1, sizeof(*cp));
 			cp->pos = TBL_CELL_LEFT;
+			cp->spacing = SIZE_MAX;
 			dp->layout->last->next = cp;
 			cp->col = dp->layout->last->col + 1;
 			dp->layout->last = cp;
