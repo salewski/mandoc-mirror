@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2009, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011-2019 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011-2020 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -267,11 +267,11 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 				hspans--;
 				continue;
 			}
-			if (dp == NULL)
-				continue;
-			hspans = dp->hspans;
-			if (ic || sp->layout->first->pos != TBL_CELL_SPAN)
+			if (dp != NULL &&
+			    (ic || sp->layout->first->pos != TBL_CELL_SPAN)) {
+				hspans = dp->hspans;
 				dp = dp->next;
+			}
 		}
 
 		/* Set up a column for a right vertical frame. */
@@ -302,11 +302,11 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 			tp->tcol++;
 			tp->col = 0;
 			tbl_data(tp, sp->opts, cp, dp, tp->tbl.cols + ic);
-			if (dp == NULL)
-				continue;
-			hspans = dp->hspans;
-			if (cp->pos != TBL_CELL_SPAN)
+			if (dp != NULL &&
+			    (ic || sp->layout->first->pos != TBL_CELL_SPAN)) {
+				hspans = dp->hspans;
 				dp = dp->next;
+			}
 		}
 		break;
 	}
@@ -425,11 +425,10 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 					cp = cp->next;
 					continue;
 				}
-				if (dp != NULL) {
+				if (dp != NULL && (ic ||
+				    sp->layout->first->pos != TBL_CELL_SPAN)) {
 					hspans = dp->hspans;
-					if (ic || sp->layout->first->pos
-					    != TBL_CELL_SPAN)
-						dp = dp->next;
+					dp = dp->next;
 				}
 
 				/*
