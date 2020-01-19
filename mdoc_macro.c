@@ -61,7 +61,7 @@ static	void		rew_pending(struct roff_man *,
 				const struct roff_node *);
 
 static const struct mdoc_macro mdoc_macros[MDOC_MAX - MDOC_Dd] = {
-	{ in_line_eoln, MDOC_PROLOGUE }, /* Dd */
+	{ in_line_eoln, MDOC_PROLOGUE | MDOC_JOIN }, /* Dd */
 	{ in_line_eoln, MDOC_PROLOGUE }, /* Dt */
 	{ in_line_eoln, MDOC_PROLOGUE }, /* Os */
 	{ blk_full, MDOC_PARSED | MDOC_JOIN }, /* Sh */

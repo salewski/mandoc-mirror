@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010, 2012-2018 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010, 2012-2020 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -185,7 +185,7 @@ check_root(CHKARGS)
 
 		man->meta.title = mandoc_strdup("");
 		man->meta.msec = mandoc_strdup("");
-		man->meta.date = mandoc_normdate(man, NULL, n->line, n->pos);
+		man->meta.date = mandoc_normdate(NULL, NULL);
 	}
 
 	if (man->meta.os_e &&
@@ -401,15 +401,10 @@ post_TH(CHKARGS)
 
 	if (n != NULL)
 		n = n->next;
-	if (n != NULL && n->string != NULL && n->string[0] != '\0')
-		man->meta.date = mandoc_normdate(man,
-		    n->string, n->line, n->pos);
-	else {
+	if (man->quick && n != NULL)
 		man->meta.date = mandoc_strdup("");
-		mandoc_msg(MANDOCERR_DATE_MISSING,
-		    n == NULL ? nb->line : n->line,
-		    n == NULL ? nb->pos : n->pos, "TH");
-	}
+	else
+		man->meta.date = mandoc_normdate(n, nb);
 
 	/* TITLE MSEC DATE ->OS<- VOL */
 
