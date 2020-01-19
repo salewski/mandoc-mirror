@@ -33,14 +33,6 @@ Obviously, as the issues have not been solved yet, these annotations
 are mere guesses, and some may be wrong.
 
 ************************************************************************
-* crashes
-************************************************************************
-
-- .ce .if n .B two crashes because "return (*roffs[t].sub)" bypasses
-  the "high level macros abort .ce" safeguard in roff_parseln()
-  reported by espie@ in textproc/fstrcmp
-
-************************************************************************
 * missing features
 ************************************************************************
 
