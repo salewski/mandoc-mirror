@@ -157,6 +157,7 @@ static	const state_handler state_handlers[MDOC_MAX - MDOC_Dd] = {
 	NULL,		/* %Q */
 	NULL,		/* %U */
 	NULL,		/* Ta */
+	NULL,		/* Tg */
 };
 
 

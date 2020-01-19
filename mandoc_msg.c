@@ -223,6 +223,7 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"excessive shift",
 	"NOT IMPLEMENTED: .so with absolute path or \"..\"",
 	".so request failed",
+	"skipping tag containing whitespace",
 	"skipping all arguments",
 	"skipping excess arguments",
 	"divide by zero",

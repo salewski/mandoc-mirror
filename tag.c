@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2015, 2016, 2018, 2019 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2015,2016,2018,2019,2020 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -196,12 +196,13 @@ tag_put(const char *s, int prio, size_t line)
 
 		/* A better entry is already present, ignore the new one. */
 
-		if (entry->prio > 0 && entry->prio < prio)
+		if (entry->prio != -1 && entry->prio < prio)
 			return;
 
 		/* The existing entry is worse, clear it. */
 
-		if (entry->prio < 1 || entry->prio > prio)
+		if (entry->prio == -1 || entry->prio == 0 ||
+		    entry->prio > prio)
 			entry->nlines = 0;
 	}
 
@@ -241,7 +242,7 @@ tag_write(void)
 	empty = 1;
 	entry = ohash_first(&tag_data, &slot);
 	while (entry != NULL) {
-		if (stream != NULL && entry->prio >= 0) {
+		if (stream != NULL && entry->prio != -1) {
 			for (i = 0; i < entry->nlines; i++) {
 				fprintf(stream, "%s %s %zu\n",
 				    entry->s, tag_files.ofn, entry->lines[i]);

@@ -88,6 +88,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"span",	HTML_INPHRASE | HTML_TOPHRASE},
 	{"var",		HTML_INPHRASE | HTML_TOPHRASE},
 	{"br",		HTML_INPHRASE | HTML_NOSTACK | HTML_NLALL},
+	{"mark",	HTML_INPHRASE | HTML_NOSTACK },
 	{"math",	HTML_INPHRASE | HTML_NLALL | HTML_INDENT},
 	{"mrow",	0},
 	{"mi",		0},
