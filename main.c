@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <glob.h>
+#include <limits.h>
 #if HAVE_SANDBOX_INIT
 #include <sandbox.h>
 #endif

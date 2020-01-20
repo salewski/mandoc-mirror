@@ -636,7 +636,11 @@ or
 Requires
 .In sys/types.h
 for
-.Vt size_t .
+.Vt size_t
+and
+.In limits.h
+for
+.Dv INT_MAX .
 .Pp
 Provides an interface to generate
 .Xr ctags 1

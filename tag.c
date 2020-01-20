@@ -18,6 +18,7 @@
 
 #include <sys/types.h>
 
+#include <assert.h>
 #include <errno.h>
 #include <limits.h>
 #include <signal.h>
@@ -146,6 +147,7 @@ tag_put(const char *s, int prio, size_t line)
 	size_t			 len;
 	unsigned int		 slot;
 
+	assert(prio <= TAG_FALLBACK);
 	if (tag_files.tfd <= 0)
 		return;
 
@@ -162,8 +164,8 @@ tag_put(const char *s, int prio, size_t line)
 		return;
 
 	se = s + len;
-	if (*se != '\0')
-		prio = INT_MAX;
+	if (*se != '\0' && prio < TAG_WEAK)
+		prio = TAG_WEAK;
 
 	slot = ohash_qlookupi(&tag_data, s, &se);
 	entry = ohash_find(&tag_data, slot);
@@ -183,26 +185,25 @@ tag_put(const char *s, int prio, size_t line)
 
 		/*
 		 * Lower priority numbers take precedence,
-		 * but 0 is special.
-		 * A tag with priority 0 is only used
+		 * but TAG_FALLBACK is special.
+		 * A tag with priority TAG_FALLBACK is only used
 		 * if the tag occurs exactly once.
 		 */
 
-		if (prio == 0) {
-			if (entry->prio == 0)
-				entry->prio = -1;
+		if (prio == TAG_FALLBACK) {
+			if (entry->prio == TAG_FALLBACK)
+				entry->prio = TAG_DELETE;
 			return;
 		}
 
 		/* A better entry is already present, ignore the new one. */
 
-		if (entry->prio != -1 && entry->prio < prio)
+		if (entry->prio < prio)
 			return;
 
 		/* The existing entry is worse, clear it. */
 
-		if (entry->prio == -1 || entry->prio == 0 ||
-		    entry->prio > prio)
+		if (entry->prio > prio)
 			entry->nlines = 0;
 	}
 
@@ -242,7 +243,7 @@ tag_write(void)
 	empty = 1;
 	entry = ohash_first(&tag_data, &slot);
 	while (entry != NULL) {
-		if (stream != NULL && entry->prio != -1) {
+		if (stream != NULL && entry->prio < TAG_DELETE) {
 			for (i = 0; i < entry->nlines; i++) {
 				fprintf(stream, "%s %s %zu\n",
 				    entry->s, tag_files.ofn, entry->lines[i]);
