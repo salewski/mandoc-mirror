@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008-2012 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010-2012, 2014-2019 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2012, 2014-2020 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2010 Joerg Sonnenberger <joerg@netbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -326,7 +326,8 @@ main(int argc, char *argv[])
 
 	/* Postprocess options. */
 
-	if (outmode == OUTMODE_DEF) {
+	switch (outmode) {
+	case OUTMODE_DEF:
 		switch (search.argmode) {
 		case ARG_FILE:
 			outmode = OUTMODE_ALL;
@@ -339,6 +340,16 @@ main(int argc, char *argv[])
 			outmode = OUTMODE_LST;
 			break;
 		}
+		break;
+	case OUTMODE_FLN:
+		if (search.argmode == ARG_FILE)
+			outmode = OUTMODE_ALL;
+		break;
+	case OUTMODE_ALL:
+		break;
+	case OUTMODE_LST:
+	case OUTMODE_ONE:
+		abort();
 	}
 
 	if (oarg != NULL) {
