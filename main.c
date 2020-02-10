@@ -448,8 +448,20 @@ main(int argc, char *argv[])
 	/* man(1): Resolve each name individually. */
 
 	if (search.argmode == ARG_NAME) {
-		if (argc < 1)
-			usage(ARG_NAME);
+		if (argc < 1) {
+			if (outmode != OUTMODE_FLN)
+				usage(ARG_NAME);
+			if (conf.manpath.sz == 0) {
+				warnx("The manpath is empty.");
+				mandoc_msg_setrc(MANDOCLEVEL_BADARG);
+			} else {
+				for (i = 0; i + 1 < conf.manpath.sz; i++)
+					printf("%s:", conf.manpath.paths[i]);
+				printf("%s\n", conf.manpath.paths[i]);
+			}
+			manconf_free(&conf);
+			return (int)mandoc_msg_getrc();
+		}
 		for (res = NULL, ressz = 0; argc > 0; argc--, argv++) {
 			(void)mansearch(&search, &conf.manpath,
 			    1, argv, &resn, &resnsz);
