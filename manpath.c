@@ -163,7 +163,7 @@ manconf_free(struct manconf *conf)
 static void
 manconf_file(struct manconf *conf, const char *file)
 {
-	const char *const toks[] = { "manpath", "output", "_whatdb" };
+	const char *const toks[] = { "manpath", "output" };
 	char manpath_default[] = MANPATH_DEFAULT;
 
 	FILE		*stream;
@@ -200,13 +200,6 @@ manconf_file(struct manconf *conf, const char *file)
 		}
 
 		switch (tok) {
-		case 2:  /* _whatdb */
-			while (ep > cp && ep[-1] != '/')
-				ep--;
-			if (ep == cp)
-				continue;
-			*ep = '\0';
-			/* FALLTHROUGH */
 		case 0:  /* manpath */
 			manpath_add(&conf->manpath, cp, '\0');
 			*manpath_default = '\0';
