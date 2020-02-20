@@ -1,6 +1,6 @@
 /*	$Id$ */
 /*
- * Copyright (c) 2011-2019 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011-2020 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -583,9 +583,9 @@ print_width(const struct mdoc_bl *bl, const struct roff_node *child)
 
 	/* Set up the current list. */
 	if (chsz > sz && bl->type != LIST_tag)
-		print_block(".HP", 0);
+		print_block(".HP", MMAN_spc);
 	else {
-		print_block(".TP", 0);
+		print_block(".TP", MMAN_spc);
 		remain = sz + 2;
 	}
 	if (numeric) {
