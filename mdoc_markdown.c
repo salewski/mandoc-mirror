@@ -226,7 +226,7 @@ static	const struct md_act md_acts[MDOC_MAX - MDOC_Dd] = {
 	{ NULL, NULL, md_post_pc, NULL, NULL }, /* %Q */
 	{ NULL, md_pre_Lk, md_post_pc, NULL, NULL }, /* %U */
 	{ NULL, NULL, NULL, NULL, NULL }, /* Ta */
-	{ NULL, NULL, NULL, NULL, NULL }, /* Tg */
+	{ NULL, md_pre_skip, NULL, NULL, NULL }, /* Tg */
 };
 static const struct md_act *md_act(enum roff_tok);
 
