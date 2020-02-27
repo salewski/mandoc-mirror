@@ -731,7 +731,7 @@ mdoc_tg_pre(MDOC_ARGS)
 	char	*id;
 
 	if ((id = html_make_id(n, 1)) != NULL)
-		print_otag(h, TAG_MARK, "i", id);
+		print_tagq(h, print_otag(h, TAG_MARK, "i", id));
 	return 0;
 }
 

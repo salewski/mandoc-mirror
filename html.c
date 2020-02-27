@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2008-2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011-2015, 2017-2019 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011-2015, 2017-2020 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -88,7 +88,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"span",	HTML_INPHRASE | HTML_TOPHRASE},
 	{"var",		HTML_INPHRASE | HTML_TOPHRASE},
 	{"br",		HTML_INPHRASE | HTML_NOSTACK | HTML_NLALL},
-	{"mark",	HTML_INPHRASE | HTML_NOSTACK },
+	{"mark",	HTML_INPHRASE },
 	{"math",	HTML_INPHRASE | HTML_NLALL | HTML_INDENT},
 	{"mrow",	0},
 	{"mi",		0},
