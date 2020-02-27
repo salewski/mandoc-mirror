@@ -117,7 +117,6 @@ static	int	  termp_pp_pre(DECL_ARGS);
 static	int	  termp_ss_pre(DECL_ARGS);
 static	int	  termp_sy_pre(DECL_ARGS);
 static	int	  termp_tag_pre(DECL_ARGS);
-static	int	  termp_tg_pre(DECL_ARGS);
 static	int	  termp_under_pre(DECL_ARGS);
 static	int	  termp_vt_pre(DECL_ARGS);
 static	int	  termp_xr_pre(DECL_ARGS);
@@ -244,7 +243,7 @@ static const struct mdoc_term_act mdoc_term_acts[MDOC_MAX - MDOC_Dd] = {
 	{ NULL, termp____post }, /* %Q */
 	{ NULL, termp____post }, /* %U */
 	{ NULL, NULL }, /* Ta */
-	{ termp_tg_pre, NULL }, /* Tg */
+	{ termp_skip_pre, NULL }, /* Tg */
 };
 
 static	int	 fn_prio = TAG_STRONG;
@@ -340,6 +339,10 @@ print_mdoc_node(DECL_ARGS)
 
 	memset(&npair, 0, sizeof(struct termpair));
 	npair.ppair = pair;
+
+	if (n->flags & NODE_ID)
+		tag_put(n->string == NULL ? n->child->string : n->string,
+		    TAG_MANUAL, p->line);
 
 	/*
 	 * Keeps only work until the end of a line.  If a keep was
@@ -2063,13 +2066,6 @@ termp_tag_pre(DECL_ARGS)
 	      n->parent->parent->parent->tok == MDOC_It)))
 		tag_put(n->child->string, TAG_STRONG, p->line);
 	return 1;
-}
-
-static int
-termp_tg_pre(DECL_ARGS)
-{
-	tag_put(n->child->string, TAG_MANUAL, p->line);
-	return 0;
 }
 
 static int

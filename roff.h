@@ -522,6 +522,8 @@ struct	roff_node {
 #define	NODE_NOFILL	 (1 << 8)  /* Fill mode switched off. */
 #define	NODE_NOSRC	 (1 << 9)  /* Generated node, not in input file. */
 #define	NODE_NOPRT	 (1 << 10) /* Shall not print anything. */
+#define	NODE_ID		 (1 << 11) /* Target for deep linking. */
+#define	NODE_HREF	 (1 << 12) /* Link to another place in this page. */
 	int		  prev_font; /* Before entering this node. */
 	int		  aux;     /* Decoded node data, type-dependent. */
 	enum roff_tok	  tok;     /* Request or macro ID. */

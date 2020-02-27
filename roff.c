@@ -1173,7 +1173,7 @@ deroff(char **dest, const struct roff_node *n)
 	char	*cp;
 	size_t	 sz;
 
-	if (n->type != ROFFT_TEXT) {
+	if (n->string == NULL) {
 		for (n = n->child; n != NULL; n = n->next)
 			deroff(dest, n);
 		return;
