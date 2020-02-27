@@ -64,7 +64,7 @@ static	void		  print_man_head(struct termp *,
 static	void		  print_man_foot(struct termp *,
 				const struct roff_meta *);
 static	void		  print_bvspace(struct termp *,
-				const struct roff_node *, int);
+				struct roff_node *, int);
 
 static	int		  pre_B(DECL_ARGS);
 static	int		  pre_DT(DECL_ARGS);
@@ -205,19 +205,20 @@ terminal_man(void *arg, const struct roff_meta *man)
  * first, print it.
  */
 static void
-print_bvspace(struct termp *p, const struct roff_node *n, int pardist)
+print_bvspace(struct termp *p, struct roff_node *n, int pardist)
 {
-	int	 i;
+	struct roff_node	*nch;
+	int			 i;
 
 	term_newln(p);
 
-	if (n->body != NULL && n->body->child != NULL)
-		if (n->body->child->type == ROFFT_TBL)
-			return;
+	if (n->body != NULL &&
+	    (nch = roff_node_child(n->body)) != NULL &&
+	    nch->type == ROFFT_TBL)
+		return;
 
-	if (n->parent->type == ROFFT_ROOT || n->parent->tok != MAN_RS)
-		if (n->prev == NULL)
-			return;
+	if (n->parent->tok != MAN_RS && roff_node_prev(n) == NULL)
+		return;
 
 	for (i = 0; i < pardist; i++)
 		term_vspace(p);
@@ -683,12 +684,8 @@ pre_SS(DECL_ARGS)
 		 * and after an empty subsection.
 		 */
 
-		do {
-			n = n->prev;
-		} while (n != NULL && n->tok >= MAN_TH &&
-		    man_term_act(n->tok)->flags & MAN_NOTEXT);
-		if (n == NULL || n->type == ROFFT_COMMENT ||
-		    (n->tok == MAN_SS && n->body->child == NULL))
+		if ((n = roff_node_prev(n)) == NULL ||
+		    (n->tok == MAN_SS && roff_node_child(n->body) == NULL))
 			break;
 
 		for (i = 0; i < mt->pardist; i++)
@@ -728,12 +725,8 @@ pre_SH(DECL_ARGS)
 		 * and after an empty section.
 		 */
 
-		do {
-			n = n->prev;
-		} while (n != NULL && n->tok >= MAN_TH &&
-		    man_term_act(n->tok)->flags & MAN_NOTEXT);
-		if (n == NULL || n->type == ROFFT_COMMENT ||
-		    (n->tok == MAN_SH && n->body->child == NULL))
+		if ((n = roff_node_prev(n)) == NULL ||
+		    (n->tok == MAN_SH && roff_node_child(n->body) == NULL))
 			break;
 
 		for (i = 0; i < mt->pardist; i++)
@@ -839,7 +832,7 @@ pre_SY(DECL_ARGS)
 
 	switch (n->type) {
 	case ROFFT_BLOCK:
-		if (n->prev == NULL || n->prev->tok != MAN_SY)
+		if ((nn = roff_node_prev(n)) == NULL || nn->tok != MAN_SY)
 			print_bvspace(p, n, mt->pardist);
 		return 1;
 	case ROFFT_HEAD:

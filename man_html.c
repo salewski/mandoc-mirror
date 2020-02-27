@@ -34,7 +34,7 @@
 #include "main.h"
 
 #define	MAN_ARGS	  const struct roff_meta *man, \
-			  const struct roff_node *n, \
+			  struct roff_node *n, \
 			  struct html *h
 
 struct	man_html_act {
@@ -244,7 +244,7 @@ print_man_node(MAN_ARGS)
 		 * Close the list if no further item of the same type
 		 * follows; otherwise, close the item only.
 		 */
-		if (list_continues(n, n->next) == '\0') {
+		if (list_continues(n, roff_node_next(n)) == '\0') {
 			print_tagq(h, t);
 			t = NULL;
 		}
@@ -445,15 +445,17 @@ list_continues(const struct roff_node *n1, const struct roff_node *n2)
 static int
 man_IP_pre(MAN_ARGS)
 {
-	const struct roff_node	*nn;
+	struct roff_node	*nn;
 	const char		*list_class;
 	enum htmltag		 list_elem, body_elem;
 	char			 list_type;
 
 	nn = n->type == ROFFT_BLOCK ? n : n->parent;
-	if ((list_type = list_continues(nn->prev, nn)) == '\0') {
+	list_type = list_continues(roff_node_prev(nn), nn);
+	if (list_type == '\0') {
 		/* Start a new list. */
-		if ((list_type = list_continues(nn, nn->next)) == '\0')
+		list_type = list_continues(nn, roff_node_next(nn));
+		if (list_type == '\0')
 			list_type = ' ';
 		switch (list_type) {
 		case ' ':

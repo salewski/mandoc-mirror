@@ -1,7 +1,7 @@
-# $OpenBSD: Makefile,v 1.13 2015/02/16 11:39:34 schwarze Exp $
+# $OpenBSD: Makefile,v 1.17 2020/02/27 01:25:58 schwarze Exp $
 
 REGRESS_TARGETS	 = basic break eos font noarg nohead
-REGRESS_TARGETS += obsolete punct section warn
+REGRESS_TARGETS += obsolete punct section transp warn
 LINT_TARGETS	 = noarg nohead obsolete punct warn
 
 # groff-1.22.3 defects:

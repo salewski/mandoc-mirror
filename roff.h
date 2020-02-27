@@ -549,5 +549,9 @@ struct	roff_meta {
 extern	const char *const *roff_name;
 
 
-int		 arch_valid(const char *, enum mandoc_os);
-void		 deroff(char **, const struct roff_node *);
+int		  arch_valid(const char *, enum mandoc_os);
+void		  deroff(char **, const struct roff_node *);
+struct roff_node *roff_node_child(struct roff_node *);
+struct roff_node *roff_node_next(struct roff_node *);
+struct roff_node *roff_node_prev(struct roff_node *);
+int		  roff_node_transparent(struct roff_node *);
