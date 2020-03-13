@@ -678,11 +678,13 @@ mparse_alloc(int options, enum mandoc_os os_e, const char *os_s)
 void
 mparse_reset(struct mparse *curp)
 {
+	tag_free();
 	roff_reset(curp->roff);
 	roff_man_reset(curp->man);
 	free_buf_list(curp->secondary);
 	curp->secondary = NULL;
 	curp->gzip = 0;
+	tag_alloc();
 }
 
 void

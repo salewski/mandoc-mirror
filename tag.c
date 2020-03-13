@@ -59,6 +59,8 @@ tag_free(void)
 	struct tag_entry	*entry;
 	unsigned int		 slot;
 
+	if (tag_data.info.free == NULL)
+		return;
 	entry = ohash_first(&tag_data, &slot);
 	while (entry != NULL) {
 		free(entry->nodes);
@@ -66,6 +68,7 @@ tag_free(void)
 		entry = ohash_next(&tag_data, &slot);
 	}
 	ohash_delete(&tag_data);
+	tag_data.info.free = NULL;
 }
 
 /*
