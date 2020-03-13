@@ -401,6 +401,7 @@ clean:
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f soelim $(SOELIM_OBJS)
 	rm -f $(WWW_MANS) $(WWW_INCS) mandoc*.tar.gz mandoc*.sha256
+	rm -f Makefile.tmp1 Makefile.tmp2
 	rm -rf *.dSYM
 
 base-install: mandoc demandoc soelim
@@ -545,11 +546,13 @@ www-install: www
 	$(INSTALL_DATA) $(WWW_INCS) $(HTDOCDIR)/includes
 
 depend: config.h
-	mkdep -f Makefile.depend $(CFLAGS) $(SRCS)
+	./configure -depend
+	mkdep -f Makefile.tmp1 $(CFLAGS) $(SRCS)
 	perl -e 'undef $$/; $$_ = <>; s|/usr/include/\S+||g; \
 		s|\\\n||g; s|  +| |g; s| $$||mg; print;' \
-		Makefile.depend > Makefile.tmp
-	mv Makefile.tmp Makefile.depend
+		Makefile.tmp1 > Makefile.tmp2
+	rm Makefile.tmp1
+	mv Makefile.tmp2 Makefile.depend
 
 regress-distclean:
 	@find regress \

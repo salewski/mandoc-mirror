@@ -2,7 +2,7 @@
 #
 # $Id$
 #
-# Copyright (c) 2014-2019 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2014-2020 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -327,7 +327,13 @@ if [ ${HAVE_ENDIAN} -eq 0 -a \
 	exit 1
 fi
 
-if ismanual fts FTS ${HAVE_FTS}; then
+if [ "$1" == "-depend" ]; then
+	HAVE_FTS=0
+	HAVE_FTS_COMPARE_CONST=0
+	echo "tested fts: HAVE_FTS=0 (for make depend)" 1>&2
+	echo "tested fts: HAVE_FTS=0 (for make depend)" 1>&3
+	echo 1>&3
+elif ismanual fts FTS ${HAVE_FTS}; then
 	HAVE_FTS_COMPARE_CONST=0
 elif runtest fts FTS_COMPARE_CONST -DFTS_COMPARE_CONST; then
 	HAVE_FTS=1
@@ -406,7 +412,12 @@ if [ ${BUILD_CATMAN} -gt 0 ]; then
 fi
 
 # --- ohash ---
-if ismanual ohash OHASH "${HAVE_OHASH}"; then
+if [ "$1" == "-depend" ]; then
+	HAVE_OHASH=0
+	echo "tested ohash: HAVE_OHASH=0 (for make depend)" 1>&2
+	echo "tested ohash: HAVE_OHASH=0 (for make depend)" 1>&3
+	echo 1>&3
+elif ismanual ohash OHASH "${HAVE_OHASH}"; then
 	:
 elif [ -n "${LD_OHASH}" ]; then
 	runtest ohash OHASH "${LD_OHASH}" || true
