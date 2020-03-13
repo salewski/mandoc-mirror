@@ -53,10 +53,14 @@
 .Ft char *
 .Fo html_make_id
 .Fa "const struct roff_node *n"
+.Fa "int unique"
 .Fc
-.Ft int
-.Fo html_strlen
-.Fa "const char *cp"
+.Ft struct tag *
+.Fo print_otag_id
+.Fa "struct html *h"
+.Fa "enum htmltag tag"
+.Fa "const char *cattr"
+.Fa "struct roff_node *n"
 .Fc
 .Sh DESCRIPTION
 The mandoc HTML formatter is not a formal library.
@@ -257,23 +261,77 @@ functions.
 .Pp
 The function
 .Fn html_make_id
-takes a node containing one or more text children
-and returns a newly allocated string containing the concatenation
-of the child strings, with blanks replaced by underscores.
-If the node
+allocates a string to be used for the
+.Cm id
+attribute of an HTML element and/or as a segment identifier for a URI in an
+.Aq Ic A
+element.
+If
 .Fa n
-contains any non-text child node,
-.Fn html_make_id
-returns
+contains a
+.Fa string
+attribute, it is used; otherwise, child nodes are used.
+If
+.Fa n
+is an
+.Ic \&Sh ,
+.Ic \&Ss ,
+.Ic \&Sx ,
+.Ic SH ,
+or
+.Ic SS
+node, the resulting string is the concatenation of the child strings;
+for other node types, only the first child is used.
+Bytes not permitted in URI-fragment strings are replaced by underscores.
+If any of the children to be used is not a text node,
+no string is generated and
 .Dv NULL
-instead.
-The caller is responsible for freeing the returned string.
+is returned instead.
+If the
+.Fa unique
+argument is non-zero, deduplication is performed by appending an
+underscore and a decimal integer, if necessary.
 .Pp
 The function
-.Fn html_strlen
-counts the number of characters in
-.Fa cp .
-It is used as a crude estimate of the width needed to display a string.
+.Fn print_otag_id
+opens a
+.Fa tag
+element of class
+.Fa cattr
+for the node
+.Fa n .
+If the flag
+.Dv NODE_ID
+is set in
+.Fa n ,
+it attempts to generate an
+.Cm id
+attribute with
+.Fn html_make_id .
+If an
+.Cm id
+attribute is written,
+.Fn print_otag_id
+also adds an
+.Aq Ic A
+element of class
+.Qq permalink :
+outside if
+.Fa n
+generates a phrasing element, or inside otherwise.
+This function is a wrapper around
+.Fn html_make_id
+and
+.Fn print_otag ,
+fixing the
+.Fa unique
+argument to 1 and the
+.Fa fmt
+arguments to
+.Qq chR
+and
+.Qq ci ,
+respectively.
 .Pp
 The functions
 .Fn print_eqn ,
@@ -281,6 +339,49 @@ The functions
 and
 .Fn print_tblclose
 are not yet documented.
+.Sh RETURN VALUES
+The functions
+.Fn print_otag
+and
+.Fn print_otag_id
+return a pointer to a new element on the stack of HTML elements.
+When
+.Fn print_otag_id
+opens two elements, a pointer to the outer one is returned.
+The memory pointed to is owned by the library and is automatically
+.Xr free 3 Ns d
+when
+.Fn print_tagq
+is called on it or when
+.Fn print_stagq
+is called on a parent element.
+.Pp
+The function
+.Fn html_make_id
+returns a newly allocated string or
+.Dv NULL
+if
+.Fa n
+lacks text data to create the attribute from.
+If the
+.Fa unique
+argument is 0, the caller is responsible for
+.Xr free 3 Ns ing
+the returned string after using it.
+If the
+.Fa unique
+argument is non-zero, the
+.Va id_unique
+ohash table is used for de-duplication and owns the returned string.
+In this case, it will be freed automatically by
+.Fn html_reset
+or
+.Fn html_free .
+.Pp
+In case of
+.Xr malloc 3
+failure, these functions do not return but call
+.Xr err 3 .
 .Sh FILES
 .Bl -tag -width mandoc_aux.c -compact
 .It Pa main.h

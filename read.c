@@ -1,7 +1,7 @@
-/*	$Id$ */
+/* $Id$ */
 /*
- * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2010-2019 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2010, 2012 Joerg Sonnenberger <joerg@netbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -15,6 +15,12 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ * Top-level functions of the mandoc(3) parser:
+ * Parser and input encoding selection, decompression,
+ * handling of input bytes, characters, lines, and files,
+ * handling of roff(7) loops and file inclusion,
+ * and steering of the various parsers.
  */
 #include "config.h"
 
@@ -36,6 +42,7 @@
 #include "mandoc_aux.h"
 #include "mandoc.h"
 #include "roff.h"
+#include "tag.h"
 #include "mdoc.h"
 #include "man.h"
 #include "mandoc_parse.h"
@@ -664,6 +671,7 @@ mparse_alloc(int options, enum mandoc_os os_e, const char *os_s)
 	}
 	curp->man->meta.first->tok = TOKEN_NONE;
 	curp->man->meta.os_e = os_e;
+	tag_alloc();
 	return curp;
 }
 
@@ -680,6 +688,7 @@ mparse_reset(struct mparse *curp)
 void
 mparse_free(struct mparse *curp)
 {
+	tag_free();
 	roffhash_free(curp->man->mdocmac);
 	roffhash_free(curp->man->manmac);
 	roff_man_free(curp->man);

@@ -1,7 +1,7 @@
 # $Id$
 #
+# Copyright (c) 2011, 2013-2020 Ingo Schwarze <schwarze@openbsd.org>
 # Copyright (c) 2010, 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
-# Copyright (c) 2011, 2013-2019 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -134,6 +134,7 @@ SRCS		 = arch.c \
 		   term_ascii.c \
 		   term_ps.c \
 		   term_tab.c \
+		   term_tag.c \
 		   tree.c
 
 DISTFILES	 = INSTALL \
@@ -209,6 +210,7 @@ DISTFILES	 = INSTALL \
 		   tbl_int.h \
 		   tbl_parse.h \
 		   term.h \
+		   term_tag.h \
 		   $(SRCS) \
 		   $(TESTSRCS)
 
@@ -245,7 +247,8 @@ LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 		   mandoc_xr.o \
 		   msec.o \
 		   preconv.o \
-		   read.o
+		   read.o \
+		   tag.o
 
 COMPAT_OBJS	 = compat_err.o \
 		   compat_fts.o \
@@ -280,6 +283,7 @@ MANDOC_TERM_OBJS = eqn_term.o \
 		   term_ascii.o \
 		   term_ps.o \
 		   term_tab.o \
+		   term_tag.o \
 		   tbl_term.o
 
 DBM_OBJS	 = dbm.o \
@@ -302,7 +306,6 @@ MAIN_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   mdoc_man.o \
 		   mdoc_markdown.o \
 		   out.o \
-		   tag.o \
 		   tree.o
 
 CGI_OBJS	 = $(MANDOC_HTML_OBJS) \
@@ -313,8 +316,7 @@ CGI_OBJS	 = $(MANDOC_HTML_OBJS) \
 MANDOCD_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   $(MANDOC_TERM_OBJS) \
 		   mandocd.o \
-		   out.o \
-		   tag.o
+		   out.o
 
 DEMANDOC_OBJS	 = demandoc.o
 
@@ -393,7 +395,7 @@ distclean: clean
 
 clean:
 	rm -f libmandoc.a $(LIBMANDOC_OBJS) $(COMPAT_OBJS)
-	rm -f mandoc $(MAIN_OBJS)
+	rm -f mandoc man $(MAIN_OBJS)
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f mandocd catman catman.o $(MANDOCD_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
@@ -501,7 +503,7 @@ uninstall:
 	rm -f $(DESTDIR)$(INCLUDEDIR)/tbl.h
 	[ ! -e $(DESTDIR)$(INCLUDEDIR) ] || rmdir $(DESTDIR)$(INCLUDEDIR)
 
-regress: all
+regress: all man
 	cd regress && ./regress.pl
 
 regress-clean:
@@ -516,6 +518,9 @@ libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
 
 mandoc: $(MAIN_OBJS) libmandoc.a
 	$(CC) -o $@ $(LDFLAGS) $(MAIN_OBJS) libmandoc.a $(LDADD)
+
+man: mandoc
+	$(LN) mandoc man
 
 man.cgi: $(CGI_OBJS) libmandoc.a
 	$(CC) $(STATIC) -o $@ $(LDFLAGS) $(CGI_OBJS) libmandoc.a $(LDADD)
