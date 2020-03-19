@@ -609,6 +609,8 @@ main(int argc, char *argv[])
 		(void)fchdir(startdir);
 		close(startdir);
 	}
+	if (outst.outtype <= OUTT_UTF8)
+		term_tag_finish();
 	if (outst.outdata != NULL) {
 		switch (outst.outtype) {
 		case OUTT_HTML:
@@ -617,7 +619,6 @@ main(int argc, char *argv[])
 		case OUTT_UTF8:
 		case OUTT_LOCALE:
 		case OUTT_ASCII:
-			term_tag_finish();
 			ascii_free(outst.outdata);
 			break;
 		case OUTT_PDF:
