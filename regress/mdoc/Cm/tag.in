@@ -1,4 +1,4 @@
-.\" $OpenBSD: tag.in,v 1.1 2020/03/13 00:31:05 schwarze Exp $
+.\" $OpenBSD: tag.in,v 1.2 2020/03/21 00:20:38 schwarze Exp $
 .Dd $Mdocdate$
 .Dt CM-TAG 1
 .Os
@@ -8,11 +8,17 @@
 .Sh DESCRIPTION
 BEGINTEST
 .Bl -tag -width Ds
-.It Cm one | two
+.It Cm one | \&two
 text
 .It Xo
 .Cm three
 .Xc
+text
+.It Cm -hyphen
+text
+.It Cm \-minus\-sign
+text
+.It Cm \ebackslash
 text
 .El
 .Tg
