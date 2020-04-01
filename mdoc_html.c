@@ -569,7 +569,6 @@ mdoc_sh_pre(MDOC_ARGS)
 		print_otag(h, TAG_SECTION, "c", "Sh");
 		break;
 	case ROFFT_HEAD:
-		n->flags |= NODE_ID;
 		print_otag_id(h, TAG_H1, "Sh", n);
 		break;
 	case ROFFT_BODY:
@@ -591,7 +590,6 @@ mdoc_ss_pre(MDOC_ARGS)
 		print_otag(h, TAG_SECTION, "c", "Ss");
 		break;
 	case ROFFT_HEAD:
-		n->flags |= NODE_ID;
 		print_otag_id(h, TAG_H2, "Ss", n);
 		break;
 	case ROFFT_BODY:
