@@ -2164,10 +2164,11 @@ post_rs(POST_ARGS)
 static void
 post_hyph(POST_ARGS)
 {
-	struct roff_node	*nch;
+	struct roff_node	*n, *nch;
 	char			*cp;
 
-	for (nch = mdoc->last->child; nch != NULL; nch = nch->next) {
+	n = mdoc->last;
+	for (nch = n->child; nch != NULL; nch = nch->next) {
 		if (nch->type != ROFFT_TEXT)
 			continue;
 		cp = nch->string;
@@ -2176,8 +2177,11 @@ post_hyph(POST_ARGS)
 		while (*(++cp) != '\0')
 			if (*cp == '-' &&
 			    isalpha((unsigned char)cp[-1]) &&
-			    isalpha((unsigned char)cp[1]))
+			    isalpha((unsigned char)cp[1])) {
+				if (n->string == NULL && n->flags & NODE_ID)
+					n->string = mandoc_strdup(nch->string);
 				*cp = ASCII_HYPH;
+			}
 	}
 }
 
