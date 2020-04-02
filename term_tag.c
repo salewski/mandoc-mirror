@@ -45,7 +45,7 @@ static struct tag_files tag_files;
  * but for simplicity, create it anyway.
  */
 struct tag_files *
-term_tag_init(char *tagname)
+term_tag_init(void)
 {
 	struct sigaction	 sa;
 	int			 ofd;	/* In /tmp/, dup(2)ed to stdout. */
@@ -54,7 +54,6 @@ term_tag_init(char *tagname)
 	ofd = tfd = -1;
 	tag_files.tfs = NULL;
 	tag_files.tcpgid = -1;
-	tag_files.tagname = tagname;
 
 	/* Clean up when dying from a signal. */
 
@@ -119,7 +118,6 @@ fail:
 		close(tag_files.ofd);
 		tag_files.ofd = -1;
 	}
-	tag_files.tagname = NULL;
 	return NULL;
 }
 
@@ -141,27 +139,29 @@ term_tag_write(struct roff_node *n, size_t line)
 	    len, cp, tag_files.ofn, line);
 }
 
-void
-term_tag_finish(void)
+/*
+ * Close both output files and restore the original standard output
+ * to the terminal.  In the unlikely case that the latter fails,
+ * trying to start a pager would be useless, so report the failure
+ * to the main program.
+ */
+int
+term_tag_close(void)
 {
-	if (tag_files.tfs == NULL)
-		return;
-	fclose(tag_files.tfs);
-	tag_files.tfs = NULL;
-	switch (tag_check(tag_files.tagname)) {
-	case TAG_EMPTY:
-		unlink(tag_files.tfn);
-		*tag_files.tfn = '\0';
-		/* FALLTHROUGH */
-	case TAG_MISS:
-		if (tag_files.tagname == NULL)
-			break;
-		mandoc_msg(MANDOCERR_TAG, 0, 0, "%s", tag_files.tagname);
-		tag_files.tagname = NULL;
-		break;
-	case TAG_OK:
-		break;
+	int irc = 0;
+
+	if (tag_files.tfs != NULL) {
+		fclose(tag_files.tfs);
+		tag_files.tfs = NULL;
 	}
+	if (tag_files.ofd != -1) {
+		fflush(stdout);
+		if ((irc = dup2(tag_files.ofd, STDOUT_FILENO)) == -1)
+			mandoc_msg(MANDOCERR_DUP, 0, 0, "%s", strerror(errno));
+		close(tag_files.ofd);
+		tag_files.ofd = -1;
+	}
+	return irc;
 }
 
 void
@@ -170,11 +170,11 @@ term_tag_unlink(void)
 	pid_t	 tc_pgid;
 
 	if (tag_files.tcpgid != -1) {
-		tc_pgid = tcgetpgrp(tag_files.ofd);
+		tc_pgid = tcgetpgrp(STDOUT_FILENO);
 		if (tc_pgid == tag_files.pager_pid ||
 		    tc_pgid == getpgid(0) ||
 		    getpgid(tc_pgid) == -1)
-			(void)tcsetpgrp(tag_files.ofd, tag_files.tcpgid);
+			(void)tcsetpgrp(STDOUT_FILENO, tag_files.tcpgid);
 	}
 	if (*tag_files.ofn != '\0') {
 		unlink(tag_files.ofn);
@@ -183,10 +183,6 @@ term_tag_unlink(void)
 	if (*tag_files.tfn != '\0') {
 		unlink(tag_files.tfn);
 		*tag_files.tfn = '\0';
-	}
-	if (tag_files.tfs != NULL) {
-		fclose(tag_files.tfs);
-		tag_files.tfs = NULL;
 	}
 }
 

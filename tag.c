@@ -176,16 +176,8 @@ tag_put(const char *s, int prio, struct roff_node *n)
 	}
 }
 
-enum tag_result
-tag_check(const char *test_tag)
+int
+tag_exists(const char *tag)
 {
-	unsigned int slot;
-
-	if (ohash_first(&tag_data, &slot) == NULL)
-		return TAG_EMPTY;
-	else if (test_tag != NULL && ohash_find(&tag_data,
-	    ohash_qlookup(&tag_data, test_tag)) == NULL)
-		return TAG_MISS;
-	else
-		return TAG_OK;
+	return ohash_find(&tag_data, ohash_qlookup(&tag_data, tag)) != NULL;
 }

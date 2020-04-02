@@ -54,6 +54,7 @@
 #include "mdoc.h"
 #include "man.h"
 #include "mandoc_parse.h"
+#include "tag.h"
 #include "term_tag.h"
 #include "main.h"
 #include "manconf.h"
@@ -107,8 +108,8 @@ static	void		  parse(struct mparse *, int, const char *,
 static	void		  passthrough(int, int);
 static	void		  process_onefile(struct mparse *, struct manpage *,
 				int, struct outstate *, struct manconf *);
-static	void		  run_pager(struct tag_files *);
-static	pid_t		  spawn_pager(struct tag_files *);
+static	void		  run_pager(struct tag_files *, char *);
+static	pid_t		  spawn_pager(struct tag_files *, char *);
 static	void		  usage(enum argmode) __attribute__((__noreturn__));
 static	int		  woptions(char *, enum mandoc_os *, int *);
 
@@ -609,7 +610,10 @@ main(int argc, char *argv[])
 		(void)fchdir(startdir);
 		close(startdir);
 	}
-	term_tag_finish();
+	if (conf.output.tag != NULL && conf.output.tag_found == 0) {
+		mandoc_msg(MANDOCERR_TAG, 0, 0, "%s", conf.output.tag);
+		conf.output.tag = NULL;
+	}
 	if (outst.outdata != NULL) {
 		switch (outst.outtype) {
 		case OUTT_HTML:
@@ -638,8 +642,8 @@ out:
 		manconf_free(&conf);
 
 	if (outst.tag_files != NULL) {
-		fclose(stdout);
-		run_pager(outst.tag_files);
+		if (term_tag_close() != -1)
+			run_pager(outst.tag_files, conf.output.tag);
 		term_tag_unlink();
 	} else if (outst.had_output && outst.outtype != OUTT_LINT)
 		mandoc_msg_summary();
@@ -833,7 +837,7 @@ process_onefile(struct mparse *mp, struct manpage *resp, int startdir,
 
 	if (outst->use_pager) {
 		outst->use_pager = 0;
-		outst->tag_files = term_tag_init(conf->output.tag);
+		outst->tag_files = term_tag_init();
 	}
 	if (outst->had_output && outst->outtype <= OUTT_UTF8) {
 		if (outst->outdata == NULL)
@@ -947,6 +951,9 @@ parse(struct mparse *mp, int fd, const char *file,
 			break;
 		}
 	}
+	if (outconf->tag != NULL && outconf->tag_found == 0 &&
+	    tag_exists(outconf->tag))
+		outconf->tag_found = 1;
 	if (mandoc_msg_getmin() < MANDOCERR_STYLE)
 		check_xr();
 }
@@ -1137,7 +1144,7 @@ woptions(char *arg, enum mandoc_os *os_e, int *wstop)
  * then fork the pager and wait for the user to close it.
  */
 static void
-run_pager(struct tag_files *tag_files)
+run_pager(struct tag_files *tag_files, char *tag_target)
 {
 	int	 signum, status;
 	pid_t	 man_pgid, tc_pgid;
@@ -1152,10 +1159,10 @@ run_pager(struct tag_files *tag_files)
 	for (;;) {
 		/* Stop here until moved to the foreground. */
 
-		tc_pgid = tcgetpgrp(tag_files->ofd);
+		tc_pgid = tcgetpgrp(STDOUT_FILENO);
 		if (tc_pgid != man_pgid) {
 			if (tc_pgid == pager_pid) {
-				(void)tcsetpgrp(tag_files->ofd, man_pgid);
+				(void)tcsetpgrp(STDOUT_FILENO, man_pgid);
 				if (signum == SIGTTIN)
 					continue;
 			} else
@@ -1167,10 +1174,10 @@ run_pager(struct tag_files *tag_files)
 		/* Once in the foreground, activate the pager. */
 
 		if (pager_pid) {
-			(void)tcsetpgrp(tag_files->ofd, pager_pid);
+			(void)tcsetpgrp(STDOUT_FILENO, pager_pid);
 			kill(pager_pid, SIGCONT);
 		} else
-			pager_pid = spawn_pager(tag_files);
+			pager_pid = spawn_pager(tag_files, tag_target);
 
 		/* Wait for the pager to stop or exit. */
 
@@ -1191,7 +1198,7 @@ run_pager(struct tag_files *tag_files)
 }
 
 static pid_t
-spawn_pager(struct tag_files *tag_files)
+spawn_pager(struct tag_files *tag_files, char *tag_target)
 {
 	const struct timespec timeout = { 0, 100000000 };  /* 0.1s */
 #define MAX_PAGER_ARGS 16
@@ -1203,6 +1210,9 @@ spawn_pager(struct tag_files *tag_files)
 #endif
 	int		 argc, use_ofn;
 	pid_t		 pager_pid;
+
+	assert(tag_files->ofd == -1);
+	assert(tag_files->tfs == NULL);
 
 	pager = getenv("MANPAGER");
 	if (pager == NULL || *pager == '\0')
@@ -1238,9 +1248,9 @@ spawn_pager(struct tag_files *tag_files)
 		if (strcmp(cp, "less") == 0) {
 			argv[argc++] = mandoc_strdup("-T");
 			argv[argc++] = tag_files->tfn;
-			if (tag_files->tagname != NULL) {
+			if (tag_target != NULL) {
 				argv[argc++] = mandoc_strdup("-t");
-				argv[argc++] = tag_files->tagname;
+				argv[argc++] = tag_target;
 				use_ofn = 0;
 			}
 		}
@@ -1258,7 +1268,7 @@ spawn_pager(struct tag_files *tag_files)
 		break;
 	default:
 		(void)setpgid(pager_pid, 0);
-		(void)tcsetpgrp(tag_files->ofd, pager_pid);
+		(void)tcsetpgrp(STDOUT_FILENO, pager_pid);
 #if HAVE_PLEDGE
 		if (pledge("stdio rpath tmppath tty proc", NULL) == -1) {
 			mandoc_msg(MANDOCERR_PLEDGE, 0, 0,
@@ -1270,16 +1280,10 @@ spawn_pager(struct tag_files *tag_files)
 		return pager_pid;
 	}
 
-	/* The child process becomes the pager. */
-
-	if (dup2(tag_files->ofd, STDOUT_FILENO) == -1) {
-		mandoc_msg(MANDOCERR_DUP, 0, 0, "%s", strerror(errno));
-		_exit(mandoc_msg_getrc());
-	}
-	close(tag_files->ofd);
-	assert(tag_files->tfs == NULL);
-
-	/* Do not start the pager before controlling the terminal. */
+	/*
+	 * The child process becomes the pager.
+	 * Do not start it before controlling the terminal.
+	 */
 
 	while (tcgetpgrp(STDOUT_FILENO) != getpid())
 		nanosleep(&timeout, NULL);
