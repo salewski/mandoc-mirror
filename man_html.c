@@ -327,7 +327,6 @@ man_SH_pre(MAN_ARGS)
 		print_otag(h, TAG_SECTION, "c", class);
 		break;
 	case ROFFT_HEAD:
-		n->flags |= NODE_ID;
 		print_otag_id(h, tag, class, n);
 		break;
 	case ROFFT_BODY:

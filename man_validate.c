@@ -311,9 +311,32 @@ static void
 post_SH(CHKARGS)
 {
 	struct roff_node	*nc;
+	char			*cp, *tag;
 
-	if (n->type != ROFFT_BODY || (nc = n->child) == NULL)
+	nc = n->child;
+	switch (n->type) {
+	case ROFFT_HEAD:
+		tag = NULL;
+		deroff(&tag, n);
+		if (tag != NULL) {
+			for (cp = tag; *cp != '\0'; cp++)
+				if (*cp == ' ')
+					*cp = '_';
+			if (nc != NULL && nc->type == ROFFT_TEXT &&
+			    strcmp(nc->string, tag) == 0)
+				tag_put(NULL, TAG_WEAK, n);
+			else
+				tag_put(tag, TAG_FALLBACK, n);
+			free(tag);
+		}
 		return;
+	case ROFFT_BODY:
+		if (nc != NULL)
+			break;
+		return;
+	default:
+		return;
+	}
 
 	if (nc->tok == MAN_PP && nc->body->child != NULL) {
 		while (nc->body->last != NULL) {
