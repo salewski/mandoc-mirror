@@ -1123,7 +1123,13 @@ roff_node_transparent(struct roff_node *n)
 		return 0;
 	if (n->type == ROFFT_COMMENT || n->flags & NODE_NOPRT)
 		return 1;
-	switch (n->tok) {
+	return roff_tok_transparent(n->tok);
+}
+
+int
+roff_tok_transparent(enum roff_tok tok)
+{
+	switch (tok) {
 	case ROFF_ft:
 	case ROFF_ll:
 	case ROFF_mc:
