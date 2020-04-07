@@ -207,8 +207,11 @@ print_mdoc(const struct roff_node *n, int indent)
 			if (n->string != NULL)
 				printf("=%s", n->string);
 		}
-		if (n->flags & NODE_HREF)
+		if (n->flags & NODE_HREF) {
 			printf(" HREF");
+			if (n->string != NULL && (n->flags & NODE_ID) == 0)
+				printf("=%s", n->string);
+		}
 		if (n->flags & NODE_BROKEN)
 			printf(" BROKEN");
 		if (n->flags & NODE_NOFILL)

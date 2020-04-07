@@ -779,18 +779,20 @@ print_otag_id(struct html *h, enum htmltag elemtype, const char *cattr,
 {
 	struct roff_node *nch;
 	struct tag	*ret, *t;
-	const char	*id;
+	char		*id, *href;
 
 	ret = NULL;
-	id = NULL;
+	id = href = NULL;
 	if (n->flags & NODE_ID)
 		id = html_make_id(n, 1);
-	if (id != NULL && htmltags[elemtype].flags & HTML_INPHRASE)
-		ret = print_otag(h, TAG_A, "chR", "permalink", id);
+	if (n->flags & NODE_HREF)
+		href = id == NULL ? html_make_id(n, 0) : id;
+	if (href != NULL && htmltags[elemtype].flags & HTML_INPHRASE)
+		ret = print_otag(h, TAG_A, "chR", "permalink", href);
 	t = print_otag(h, elemtype, "ci", cattr, id);
 	if (ret == NULL) {
 		ret = t;
-		if (id != NULL && (nch = n->child) != NULL) {
+		if (href != NULL && (nch = n->child) != NULL) {
 			/* man(7) is safe, it tags phrasing content only. */
 			if (n->tok > MDOC_MAX ||
 			    htmltags[elemtype].flags & HTML_TOPHRASE)
@@ -799,9 +801,11 @@ print_otag_id(struct html *h, enum htmltag elemtype, const char *cattr,
 				while (nch != NULL && nch->type == ROFFT_TEXT)
 					nch = nch->next;
 			if (nch == NULL)
-				print_otag(h, TAG_A, "chR", "permalink", id);
+				print_otag(h, TAG_A, "chR", "permalink", href);
 		}
 	}
+	if (id == NULL)
+		free(href);
 	return ret;
 }
 

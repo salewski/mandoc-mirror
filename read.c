@@ -708,6 +708,7 @@ mparse_result(struct mparse *curp)
 			mdoc_validate(curp->man);
 		else
 			man_validate(curp->man);
+		tag_postprocess(curp->man->meta.first);
 	}
 	return &curp->man->meta;
 }
