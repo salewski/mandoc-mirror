@@ -2212,8 +2212,8 @@ post_hyph(POST_ARGS)
 			if (*cp == '-' &&
 			    isalpha((unsigned char)cp[-1]) &&
 			    isalpha((unsigned char)cp[1])) {
-				if (n->string == NULL && n->flags & NODE_ID)
-					n->string = mandoc_strdup(nch->string);
+				if (n->tag == NULL && n->flags & NODE_ID)
+					n->tag = mandoc_strdup(nch->string);
 				*cp = ASCII_HYPH;
 			}
 	}

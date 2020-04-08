@@ -344,8 +344,8 @@ html_make_id(const struct roff_node *n, int unique)
 	unsigned int		 slot;
 	int			 suffix;
 
-	if (n->string != NULL)
-		buf = mandoc_strdup(n->string);
+	if (n->tag != NULL)
+		buf = mandoc_strdup(n->tag);
 	else {
 		switch (n->tok) {
 		case MDOC_Sh:

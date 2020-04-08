@@ -36,6 +36,7 @@
 #include "eqn.h"
 #include "main.h"
 
+static	void	print_attr(const struct roff_node *);
 static	void	print_box(const struct eqn_box *, int);
 static	void	print_cellt(enum tbl_cellt);
 static	void	print_man(const struct roff_node *, int);
@@ -191,38 +192,8 @@ print_mdoc(const struct roff_node *n, int indent)
 			if (argv[i].sz > 0)
 				printf(" ]");
 		}
-
-		putchar(' ');
-		if (n->flags & NODE_DELIMO)
-			putchar('(');
-		if (n->flags & NODE_LINE)
-			putchar('*');
-		printf("%d:%d", n->line, n->pos + 1);
-		if (n->flags & NODE_DELIMC)
-			putchar(')');
-		if (n->flags & NODE_EOS)
-			putchar('.');
-		if (n->flags & NODE_ID) {
-			printf(" ID");
-			if (n->string != NULL)
-				printf("=%s", n->string);
-		}
-		if (n->flags & NODE_HREF) {
-			printf(" HREF");
-			if (n->string != NULL && (n->flags & NODE_ID) == 0)
-				printf("=%s", n->string);
-		}
-		if (n->flags & NODE_BROKEN)
-			printf(" BROKEN");
-		if (n->flags & NODE_NOFILL)
-			printf(" NOFILL");
-		if (n->flags & NODE_NOSRC)
-			printf(" NOSRC");
-		if (n->flags & NODE_NOPRT)
-			printf(" NOPRT");
-		putchar('\n');
+		print_attr(n);
 	}
-
 	if (n->eqn)
 		print_box(n->eqn->first, indent + 4);
 	if (n->child)
@@ -303,24 +274,9 @@ print_man(const struct roff_node *n, int indent)
 	} else {
 		for (i = 0; i < indent; i++)
 			putchar(' ');
-		printf("%s (%s) ", p, t);
-		if (n->flags & NODE_LINE)
-			putchar('*');
-		printf("%d:%d", n->line, n->pos + 1);
-		if (n->flags & NODE_DELIMC)
-			putchar(')');
-		if (n->flags & NODE_EOS)
-			putchar('.');
-		if (n->flags & NODE_ID) {
-			printf(" ID");
-			if (n->string != NULL)
-				printf("=%s", n->string);
-		}
-		if (n->flags & NODE_NOFILL)
-			printf(" NOFILL");
-		putchar('\n');
+		printf("%s (%s)", p, t);
+		print_attr(n);
 	}
-
 	if (n->eqn)
 		print_box(n->eqn->first, indent + 4);
 	if (n->child)
@@ -328,6 +284,40 @@ print_man(const struct roff_node *n, int indent)
 		    (n->type == ROFFT_BLOCK ? 2 : 4));
 	if (n->next)
 		print_man(n->next, indent);
+}
+
+static void
+print_attr(const struct roff_node *n)
+{
+	putchar(' ');
+	if (n->flags & NODE_DELIMO)
+		putchar('(');
+	if (n->flags & NODE_LINE)
+		putchar('*');
+	printf("%d:%d", n->line, n->pos + 1);
+	if (n->flags & NODE_DELIMC)
+		putchar(')');
+	if (n->flags & NODE_EOS)
+		putchar('.');
+	if (n->flags & NODE_ID) {
+		printf(" ID");
+		if (n->flags & NODE_HREF)
+			printf("=HREF");
+	} else if (n->flags & NODE_HREF)
+		printf(" HREF");
+	else if (n->tag != NULL)
+		printf(" STRAYTAG");
+	if (n->tag != NULL)
+		printf("=%s", n->tag);
+	if (n->flags & NODE_BROKEN)
+		printf(" BROKEN");
+	if (n->flags & NODE_NOFILL)
+		printf(" NOFILL");
+	if (n->flags & NODE_NOSRC)
+		printf(" NOSRC");
+	if (n->flags & NODE_NOPRT)
+		printf(" NOPRT");
+	putchar('\n');
 }
 
 static void

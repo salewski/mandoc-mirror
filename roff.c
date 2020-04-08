@@ -1103,6 +1103,7 @@ roff_node_free(struct roff_node *n)
 		free(n->norm);
 	eqn_box_free(n->eqn);
 	free(n->string);
+	free(n->tag);
 	free(n);
 }
 

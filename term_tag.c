@@ -129,9 +129,7 @@ term_tag_write(struct roff_node *n, size_t line)
 
 	if (tag_files.tfs == NULL)
 		return;
-	if (n->string == NULL)
-		n = n->child;
-	cp = n->string;
+	cp = n->tag == NULL ? n->child->string : n->tag;
 	if (cp[0] == '\\' && (cp[1] == '&' || cp[1] == 'e'))
 		cp += 2;
 	len = strcspn(cp, " \t\\");
