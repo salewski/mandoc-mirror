@@ -21,7 +21,11 @@
 .Nm mandoc_html
 .Nd internals of the mandoc HTML formatter
 .Sh SYNOPSIS
-.In "html.h"
+.In sys/types.h
+.Fd #include """mandoc.h"""
+.Fd #include """roff.h"""
+.Fd #include """out.h"""
+.Fd #include """html.h"""
 .Ft void
 .Fn print_gen_decls "struct html *h"
 .Ft void
@@ -46,9 +50,27 @@
 .Fa "const struct tag *suntil"
 .Fc
 .Ft void
+.Fn html_close_paragraph "struct html *h"
+.Ft enum roff_tok
+.Fo html_fillmode
+.Fa "struct html *h"
+.Fa "enum roff_tok tok"
+.Fc
+.Ft int
+.Fo html_setfont
+.Fa "struct html *h"
+.Fa "enum mandoc_esc font"
+.Fc
+.Ft void
 .Fo print_text
 .Fa "struct html *h"
 .Fa "const char *word"
+.Fc
+.Ft void
+.Fo print_tagged_text
+.Fa "struct html *h"
+.Fa "const char *word"
+.Fa "struct roff_node *n"
 .Fc
 .Ft char *
 .Fo html_make_id
@@ -62,6 +84,8 @@
 .Fa "const char *cattr"
 .Fa "struct roff_node *n"
 .Fc
+.Ft void
+.Fn print_endline "struct html *h"
 .Sh DESCRIPTION
 The mandoc HTML formatter is not a formal library.
 However, as it is compiled into more than one program, in particular
@@ -100,7 +124,7 @@ These structures are declared in
 Internal state of the HTML formatter.
 .It Vt struct tag
 One entry for the LIFO stack of HTML elements.
-Members are
+Members include
 .Fa "enum htmltag tag"
 and
 .Fa "struct tag *next" .
@@ -109,10 +133,8 @@ and
 The function
 .Fn print_gen_decls
 prints the opening
-.Ao Pf \&? Ic xml ? Ac
-and
 .Aq Pf \&! Ic DOCTYPE
-declarations required for the current document type.
+declaration.
 .Pp
 The function
 .Fn print_gen_comment
@@ -206,23 +228,6 @@ This format letter requires two
 arguments, the attribute name and the value.
 The name must not be
 .Dv NULL .
-.It Cm s
-Print a
-.Cm style
-attribute.
-If present, it must be the last format letter.
-It requires two
-.Va char *
-arguments.
-The first is the name of the style property, the second its value.
-The name must not be
-.Dv NULL .
-The
-.Cm s
-.Ar fmt
-letter can be repeated, each repetition requiring an additional pair of
-.Va char *
-arguments.
 .El
 .Pp
 .Fn print_otag
@@ -239,6 +244,59 @@ is used to close out all open elements up to and including
 .Fn print_stagq
 is a variant to close out all open elements up to but excluding
 .Fa suntil .
+The function
+.Fn html_close_paragraph
+closes all open elements that establish phrasing context,
+thus returning to the innermost flow context.
+.Pp
+The function
+.Fn html_fillmode
+switches to fill mode if
+.Fa want
+is
+.Dv ROFF_fi
+or to no-fill mode if
+.Fa want
+is
+.Dv ROFF_nf .
+Switching from fill mode to no-fill mode closes the current paragraph
+and opens a
+.Aq Ic PRE
+element.
+Switching in the opposite direction closes the
+.Aq Ic PRE
+element, but does not open a new paragraph.
+If
+.Fa want
+matches the mode that is already active, no elements are closed nor opened.
+If
+.Fa want
+is
+.Dv TOKEN_NONE ,
+the mode remains as it is.
+.Pp
+The function
+.Fn html_setfont
+selects the
+.Fa font ,
+which can be
+.Dv ESCAPE_FONTROMAN ,
+.Dv ESCAPE_FONTBOLD ,
+.Dv ESCAPE_FONTITALIC ,
+.Dv ESCAPE_FONTBI ,
+or
+.Dv ESCAPE_FONTCW ,
+for future text output and internally remembers
+the font that was active before the change.
+If the
+.Fa font
+argument is
+.Dv ESCAPE_FONTPREV ,
+the current and the previous font are exchanged.
+This function only changes the internal state of the
+.Fa h
+object; no HTML elements are written yet.
+Subsequent text output will write font elements when needed.
 .Pp
 The function
 .Fn print_text
@@ -260,6 +318,23 @@ and
 functions.
 .Pp
 The function
+.Fn print_tagged_text
+is a variant of
+.Fn print_text
+that wraps
+.Fa word
+in an
+.Aq Ic A
+element of class
+.Qq permalink
+if
+.Fa n
+is not
+.Dv NULL
+and yields a segment identifier when passed to
+.Fn html_make_id .
+.Pp
+The function
 .Fn html_make_id
 allocates a string to be used for the
 .Cm id
@@ -269,7 +344,7 @@ element.
 If
 .Fa n
 contains a
-.Fa string
+.Fa tag
 attribute, it is used; otherwise, child nodes are used.
 If
 .Fa n
@@ -308,17 +383,19 @@ it attempts to generate an
 .Cm id
 attribute with
 .Fn html_make_id .
-If an
-.Cm id
-attribute is written,
-.Fn print_otag_id
-also adds an
+If the flag
+.Dv NODE_HREF
+is set in
+.Fa n ,
+an
 .Aq Ic A
 element of class
-.Qq permalink :
+.Qq permalink
+is added:
 outside if
 .Fa n
-generates a phrasing element, or inside otherwise.
+generates an element that can only occur in phrasing context,
+or inside otherwise.
 This function is a wrapper around
 .Fn html_make_id
 and
@@ -332,6 +409,15 @@ arguments to
 and
 .Qq ci ,
 respectively.
+.Pp
+The function
+.Fn print_endline
+makes sure subsequent output starts on a new HTML output line.
+If nothing was printed on the current output line yet, it has no effect.
+Otherwise, it appends any buffered text to the current output line,
+ends the line, and updates the internal state of the
+.Fa h
+object.
 .Pp
 The functions
 .Fn print_eqn ,
@@ -355,6 +441,14 @@ when
 is called on it or when
 .Fn print_stagq
 is called on a parent element.
+.Pp
+The function
+.Fn html_fillmode
+returns
+.Dv ROFF_fi
+if fill mode was active before the call or
+.Dv ROFF_nf
+otherwise.
 .Pp
 The function
 .Fn html_make_id
@@ -404,6 +498,17 @@ HTML formatter
 .It Pa eqn_html.c
 .Xr eqn 7
 HTML formatter
+.It Pa roff_html.c
+.Xr roff 7
+HTML formatter, handling requests like
+.Ic br ,
+.Ic ce ,
+.Ic fi ,
+.Ic ft ,
+.Ic nf ,
+.Ic rj ,
+and
+.Ic sp .
 .It Pa out.h
 declarations of data types and private functions
 for shared use by all mandoc formatters,
