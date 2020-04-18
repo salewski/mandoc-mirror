@@ -1,4 +1,4 @@
-.\" $OpenBSD: arg.in,v 1.5 2020/04/06 09:55:50 schwarze Exp $
+.\" $OpenBSD: arg.in,v 1.6 2020/04/18 20:28:46 schwarze Exp $
 .Dd $Mdocdate$
 .Dt PP-ARG 1
 .Os
@@ -6,6 +6,8 @@
 .Nm Pp-arg
 .Nd paragraph macro with arguments
 .Sh DESCRIPTION
+BEGINTEST
+.Pp
 line 1
 .Tg first
 .Pp drop this
@@ -17,3 +19,5 @@ line 4
 .Tg last
 .Pp
 final text
+.Pp
+ENDTEST

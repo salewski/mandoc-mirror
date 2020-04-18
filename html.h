@@ -127,6 +127,8 @@ struct tag	 *print_otag_id(struct html *, enum htmltag, const char *,
 			struct roff_node *);
 void		  print_tagq(struct html *, const struct tag *);
 void		  print_stagq(struct html *, const struct tag *);
+void		  print_tagged_text(struct html *, const char *,
+			struct roff_node *);
 void		  print_text(struct html *, const char *);
 void		  print_tblclose(struct html *);
 void		  print_tbl(struct html *, const struct tbl_span *);

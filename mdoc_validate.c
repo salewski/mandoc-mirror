@@ -37,11 +37,11 @@
 #include "mandoc.h"
 #include "mandoc_xr.h"
 #include "roff.h"
-#include "tag.h"
 #include "mdoc.h"
 #include "libmandoc.h"
 #include "roff_int.h"
 #include "libmdoc.h"
+#include "tag.h"
 
 /* FIXME: .Bl -diag can't have non-text children in HEAD. */
 

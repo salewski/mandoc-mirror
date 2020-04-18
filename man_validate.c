@@ -34,11 +34,11 @@
 #include "mandoc_aux.h"
 #include "mandoc.h"
 #include "roff.h"
-#include "tag.h"
 #include "man.h"
 #include "libmandoc.h"
 #include "roff_int.h"
 #include "libman.h"
+#include "tag.h"
 
 #define	CHKARGS	  struct roff_man *man, struct roff_node *n
 

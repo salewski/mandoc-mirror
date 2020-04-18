@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2010-2019 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2020 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2010, 2012 Joerg Sonnenberger <joerg@netbsd.org>
  *
@@ -42,12 +42,12 @@
 #include "mandoc_aux.h"
 #include "mandoc.h"
 #include "roff.h"
-#include "tag.h"
 #include "mdoc.h"
 #include "man.h"
 #include "mandoc_parse.h"
 #include "libmandoc.h"
 #include "roff_int.h"
+#include "tag.h"
 
 #define	REPARSE_LIMIT	1000
 
@@ -708,7 +708,7 @@ mparse_result(struct mparse *curp)
 			mdoc_validate(curp->man);
 		else
 			man_validate(curp->man);
-		tag_postprocess(curp->man->meta.first);
+		tag_postprocess(curp->man, curp->man->meta.first);
 	}
 	return &curp->man->meta;
 }

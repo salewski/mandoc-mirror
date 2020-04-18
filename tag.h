@@ -31,5 +31,5 @@
 void		 tag_alloc(void);
 int		 tag_exists(const char *);
 void		 tag_put(const char *, int, struct roff_node *);
-void		 tag_postprocess(struct roff_node *);
+void		 tag_postprocess(struct roff_man *, struct roff_node *);
 void		 tag_free(void);

@@ -31,6 +31,7 @@
 
 #include "mandoc.h"
 #include "roff.h"
+#include "roff_int.h"
 #include "tag.h"
 #include "term_tag.h"
 

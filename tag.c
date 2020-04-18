@@ -32,6 +32,7 @@
 #include "mandoc_ohash.h"
 #include "roff.h"
 #include "mdoc.h"
+#include "roff_int.h"
 #include "tag.h"
 
 struct tag_entry {
@@ -258,13 +259,37 @@ tag_move_id(struct roff_node *n)
  * to the beginning of the respective paragraphs.
  */
 void
-tag_postprocess(struct roff_node *n)
+tag_postprocess(struct roff_man *man, struct roff_node *n)
 {
+	struct roff_node	*nn;
+	char			*cp;
+
 	if (n->flags & NODE_ID) {
 		switch (n->tok) {
+		case MDOC_Pp:
+			nn = n->next;
+			if (nn == NULL || nn->type != ROFFT_TEXT ||
+			    *nn->string == '\0' || *nn->string == ' ')
+				break;
+			/* Use the first few letters for the permalink. */
+			cp = nn->string;
+			while (cp != NULL && cp - nn->string < 5)
+				cp = strchr(cp + 1, ' ');
+			if (cp != NULL && cp[1] != '\0') {
+				/* Split a longer text node. */
+				man->last = nn;
+				man->next = ROFF_NEXT_SIBLING;
+				roff_word_alloc(man, nn->line,
+				    nn->pos + (cp - nn->string), cp + 1);
+				man->last->flags = nn->flags;
+				*cp = '\0';
+			}
+			assert(nn->tag == NULL);
+			nn->tag = mandoc_strdup(n->tag);
+			nn->flags |= NODE_HREF;
+			break;
 		case MDOC_Bd:
 		case MDOC_Bl:
-		case MDOC_Pp:
 			/* XXX No permalink for now. */
 			break;
 		default:
@@ -281,5 +306,5 @@ tag_postprocess(struct roff_node *n)
 		}
 	}
 	for (n = n->child; n != NULL; n = n->next)
-		tag_postprocess(n);
+		tag_postprocess(man, n);
 }
