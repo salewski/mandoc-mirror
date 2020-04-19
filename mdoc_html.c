@@ -695,8 +695,10 @@ mdoc_tg_pre(MDOC_ARGS)
 {
 	char	*id;
 
-	if ((id = html_make_id(n, 1)) != NULL)
+	if ((id = html_make_id(n, 1)) != NULL) {
 		print_tagq(h, print_otag(h, TAG_MARK, "i", id));
+		free(id);
+	}
 	return 0;
 }
 
@@ -1211,6 +1213,8 @@ mdoc_skip_pre(MDOC_ARGS)
 static int
 mdoc_pp_pre(MDOC_ARGS)
 {
+	char	*id;
+
 	if (n->flags & NODE_NOFILL) {
 		print_endline(h);
 		if (n->flags & NODE_ID)
@@ -1221,8 +1225,9 @@ mdoc_pp_pre(MDOC_ARGS)
 		}
 	} else {
 		html_close_paragraph(h);
-		print_otag(h, TAG_P, "ci", "Pp",
-		    n->flags & NODE_ID ? html_make_id(n, 1) : NULL);
+		id = n->flags & NODE_ID ? html_make_id(n, 1) : NULL;
+		print_otag(h, TAG_P, "ci", "Pp", id);
+		free(id);
 	}
 	return 0;
 }

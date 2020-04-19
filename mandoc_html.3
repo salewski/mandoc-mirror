@@ -366,6 +366,18 @@ If the
 .Fa unique
 argument is non-zero, deduplication is performed by appending an
 underscore and a decimal integer, if necessary.
+If the
+.Fa unique
+argument is 1, this is assumed to be the first call for this tag
+at this location, typically for use by
+.Dv NODE_ID ,
+so the integer is incremented before use.
+If the
+.Fa unique
+argument is 2, this is ssumed to be the second call for this tag
+at this location, typically for use by
+.Dv NODE_HREF ,
+so the existing integer, if any, is used without incrementing it.
 .Pp
 The function
 .Fn print_otag_id
@@ -400,9 +412,9 @@ This function is a wrapper around
 .Fn html_make_id
 and
 .Fn print_otag ,
-fixing the
+automatically chosing the
 .Fa unique
-argument to 1 and the
+argument appropriately and setting the
 .Fa fmt
 arguments to
 .Qq chR
@@ -457,20 +469,9 @@ returns a newly allocated string or
 if
 .Fa n
 lacks text data to create the attribute from.
-If the
-.Fa unique
-argument is 0, the caller is responsible for
+The caller is responsible for
 .Xr free 3 Ns ing
 the returned string after using it.
-If the
-.Fa unique
-argument is non-zero, the
-.Va id_unique
-ohash table is used for de-duplication and owns the returned string.
-In this case, it will be freed automatically by
-.Fn html_reset
-or
-.Fn html_free .
 .Pp
 In case of
 .Xr malloc 3
