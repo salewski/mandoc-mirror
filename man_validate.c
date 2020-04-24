@@ -510,9 +510,14 @@ post_TH(CHKARGS)
 
 	if (n != NULL)
 		n = n->next;
-	if (n != NULL && n->string != NULL)
+	if (n != NULL && n->string != NULL) {
 		man->meta.msec = mandoc_strdup(n->string);
-	else {
+		if (man->filesec != '\0' &&
+		    man->filesec != *n->string &&
+		    *n->string >= '1' && *n->string <= '9')
+			mandoc_msg(MANDOCERR_MSEC_FILE, n->line, n->pos,
+			    "*.%c vs TH ... %c", man->filesec, *n->string);
+	} else {
 		man->meta.msec = mandoc_strdup("");
 		mandoc_msg(MANDOCERR_MSEC_MISSING,
 		    nb->line, nb->pos, "TH %s", man->meta.title);

@@ -2765,8 +2765,14 @@ post_dt(POST_ARGS)
 		mandoc_msg(MANDOCERR_MSEC_BAD,
 		    nn->line, nn->pos, "Dt ... %s", nn->string);
 		mdoc->meta.vol = mandoc_strdup(nn->string);
-	} else
+	} else {
 		mdoc->meta.vol = mandoc_strdup(cp);
+		if (mdoc->filesec != '\0' &&
+		    mdoc->filesec != *nn->string &&
+		    *nn->string >= '1' && *nn->string <= '9')
+			mandoc_msg(MANDOCERR_MSEC_FILE, nn->line, nn->pos,
+			    "*.%c vs Dt ... %c", mdoc->filesec, *nn->string);
+	}
 
 	/* Optional third argument: architecture. */
 

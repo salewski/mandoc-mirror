@@ -84,6 +84,7 @@ enum	mandocerr {
 	MANDOCERR_TH_NOTITLE, /* missing manual title, using "": [macro] */
 	MANDOCERR_MSEC_MISSING, /* missing manual section, using "": macro */
 	MANDOCERR_MSEC_BAD, /* unknown manual section: Dt ... section */
+	MANDOCERR_MSEC_FILE, /* filename/section mismatch: ... */
 	MANDOCERR_DATE_MISSING, /* missing date, using "": [macro] */
 	MANDOCERR_DATE_BAD, /* cannot parse date, using it verbatim: date */
 	MANDOCERR_DATE_FUTURE, /* date in the future, using it anyway: date */

@@ -554,7 +554,7 @@ mparse_readfd(struct mparse *curp, int fd, const char *filename)
 
 	struct buf	 blk;
 	struct buf	*save_primary;
-	const char	*save_filename;
+	const char	*save_filename, *cp;
 	size_t		 offset;
 	int		 save_filenc, save_lineno;
 	int		 with_mmap;
@@ -562,7 +562,13 @@ mparse_readfd(struct mparse *curp, int fd, const char *filename)
 	if (recursion_depth > 64) {
 		mandoc_msg(MANDOCERR_ROFFLOOP, curp->line, 0, NULL);
 		return;
-	}
+	} else if (recursion_depth == 0 &&
+	    (cp = strrchr(filename, '.')) != NULL &&
+            cp[1] >= '1' && cp[1] <= '9')
+                curp->man->filesec = cp[1];
+        else
+                curp->man->filesec = '\0';
+
 	if (read_whole_file(curp, fd, &blk, &with_mmap) == -1)
 		return;
 
