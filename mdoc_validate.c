@@ -92,6 +92,7 @@ static	void	 post_es(POST_ARGS);
 static	void	 post_eoln(POST_ARGS);
 static	void	 post_ex(POST_ARGS);
 static	void	 post_fa(POST_ARGS);
+static	void	 post_fl(POST_ARGS);
 static	void	 post_fn(POST_ARGS);
 static	void	 post_fname(POST_ARGS);
 static	void	 post_fo(POST_ARGS);
@@ -150,7 +151,7 @@ static	const v_post mdoc_valids[MDOC_MAX - MDOC_Dd] = {
 	post_ex,	/* Ex */
 	post_fa,	/* Fa */
 	NULL,		/* Fd */
-	post_tag,	/* Fl */
+	post_fl,	/* Fl */
 	post_fn,	/* Fn */
 	post_delim_nb,	/* Ft */
 	post_tag,	/* Ic */
@@ -1625,6 +1626,29 @@ post_es(POST_ARGS)
 {
 	post_obsolete(mdoc);
 	mdoc->last_es = mdoc->last;
+}
+
+static void
+post_fl(POST_ARGS)
+{
+	struct roff_node	*n;
+	char			*cp;
+
+	/*
+	 * Transform ".Fl Fl long" to ".Fl \-long",
+	 * resulting for example in better HTML output.
+	 */
+
+	n = mdoc->last;
+	if (n->prev != NULL && n->prev->tok == MDOC_Fl &&
+	    n->prev->child == NULL && n->child != NULL &&
+	    (n->flags & NODE_LINE) == 0) {
+		mandoc_asprintf(&cp, "\\-%s", n->child->string);
+		free(n->child->string);
+		n->child->string = cp;
+		roff_node_delete(mdoc, n->prev);
+	}
+	post_tag(mdoc);
 }
 
 static void
