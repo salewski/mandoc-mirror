@@ -7,7 +7,7 @@ int dummy;
 #else
 
 /*	$Id$	*/
-/*	$OpenBSD: fts.c,v 1.56 2016/09/21 04:38:56 guenther Exp $	*/
+/*	$OpenBSD: fts.c,v 1.59 2019/06/28 13:32:41 deraadt Exp $	*/
 
 /*-
  * Copyright (c) 1990, 1993, 1994
@@ -575,14 +575,14 @@ fts_sort(FTS *sp, FTSENT *head, int nitems)
 	if (nitems > sp->fts_nitems) {
 		struct _ftsent **a;
 
-		sp->fts_nitems = nitems + 40;
 		if ((a = reallocarray(sp->fts_array,
-		    sp->fts_nitems, sizeof(FTSENT *))) == NULL) {
+		    nitems + 40, sizeof(FTSENT *))) == NULL) {
 			free(sp->fts_array);
 			sp->fts_array = NULL;
 			sp->fts_nitems = 0;
 			return (head);
 		}
+		sp->fts_nitems = nitems + 40;
 		sp->fts_array = a;
 	}
 	for (ap = sp->fts_array, p = head; p; p = p->fts_link)
@@ -651,13 +651,14 @@ fts_palloc(FTS *sp, size_t more)
 		errno = ENAMETOOLONG;
 		return (1);
 	}
-	sp->fts_pathlen += more;
-	p = realloc(sp->fts_path, sp->fts_pathlen);
+	p = recallocarray(sp->fts_path, sp->fts_pathlen,
+	    sp->fts_pathlen + more, 1);
 	if (p == NULL) {
 		free(sp->fts_path);
 		sp->fts_path = NULL;
 		return (1);
 	}
+	sp->fts_pathlen += more;
 	sp->fts_path = p;
 	return (0);
 }
