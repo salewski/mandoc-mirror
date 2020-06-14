@@ -17,7 +17,7 @@
  */
 #include "config.h"
 
-#if HAVE_CMSG_XPG42
+#if NEED_XPG4_2
 #define _XPG4_2
 #endif
 
