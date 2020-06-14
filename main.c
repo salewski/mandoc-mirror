@@ -896,7 +896,7 @@ parse(struct mparse *mp, int fd, const char *file,
 	if (outst->outdata == NULL)
 		outdata_alloc(outst, outconf);
 	else if (outst->outtype == OUTT_HTML)
-		html_reset(outst);
+		html_reset(outst->outdata);
 
 	mandoc_xr_reset();
 	meta = mparse_result(mp);
