@@ -1,11 +1,3 @@
-#include "config.h"
-
-#if HAVE_ERR
-
-int dummy;
-
-#else
-
 /* $Id$ */
 /*
  * Copyright (c) 1993
@@ -35,6 +27,7 @@ int dummy;
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+#include "config.h"
 
 #include <errno.h>
 #include <stdarg.h>
@@ -108,5 +101,3 @@ warnx(const char *fmt, ...)
 	va_end(ap);
 	fputc('\n', stderr);
 }
-
-#endif

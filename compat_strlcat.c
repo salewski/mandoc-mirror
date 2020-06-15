@@ -1,11 +1,4 @@
-#include "config.h"
-
-#if HAVE_STRLCAT
-
-int dummy;
-
-#else
-
+/*	$Id$	*/
 /*	$OpenBSD: strlcat.c,v 1.13 2005/08/08 08:05:37 espie Exp $	*/
 
 /*
@@ -23,6 +16,7 @@ int dummy;
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include "config.h"
 
 #include <sys/types.h>
 #include <string.h>
@@ -61,5 +55,3 @@ strlcat(char *dst, const char *src, size_t siz)
 
 	return(dlen + (s - src));	/* count does not include NUL */
 }
-
-#endif

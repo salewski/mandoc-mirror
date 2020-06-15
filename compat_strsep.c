@@ -1,13 +1,5 @@
-#include "config.h"
-
-#if HAVE_STRSEP
-
-int dummy;
-
-#else
-
 /*	$Id$	*/
-/*	$OpenBSD: strsep.c,v 1.7 2014/02/05 20:42:32 stsp Exp $	*/
+/*	$OpenBSD: strsep.c,v 1.8 2015/08/31 02:53:57 guenther Exp $	*/
 
 /*-
  * Copyright (c) 1990, 1993
@@ -37,6 +29,7 @@ int dummy;
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+#include "config.h"
 
 /*
  * Get next token from string *stringp, where tokens are possibly-empty
@@ -75,5 +68,3 @@ strsep(char **stringp, const char *delim)
 	}
 	/* NOTREACHED */
 }
-
-#endif

@@ -1,11 +1,3 @@
-#include "config.h"
-
-#if HAVE_STRNDUP
-
-int dummy;
-
-#else
-
 /* $Id$ */
 /* OpenBSD: strndup.c,v 1.2 2015/08/31 02:53:57 guenther Exp */
 /*
@@ -23,6 +15,7 @@ int dummy;
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include "config.h"
 
 #include <sys/types.h>
 
@@ -46,5 +39,3 @@ strndup(const char *str, size_t maxlen)
 
 	return copy;
 }
-
-#endif

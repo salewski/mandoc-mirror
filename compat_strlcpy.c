@@ -1,11 +1,4 @@
-#include "config.h"
-
-#if HAVE_STRLCPY
-
-int dummy;
-
-#else
-
+/*	$Id$	*/
 /*	$OpenBSD: strlcpy.c,v 1.11 2006/05/05 15:27:38 millert Exp $	*/
 
 /*
@@ -23,6 +16,7 @@ int dummy;
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include "config.h"
 
 #include <sys/types.h>
 #include <string.h>
@@ -57,5 +51,3 @@ strlcpy(char *dst, const char *src, size_t siz)
 
 	return(s - src - 1);	/* count does not include NUL */
 }
-
-#endif

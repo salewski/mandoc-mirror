@@ -1,12 +1,4 @@
-#include "config.h"
-
-#if HAVE_PROGNAME
-
-int dummy;
-
-#else
-
-/*	$Id$	*/
+/* $Id$ */
 /*
  * Copyright (c) 2015 Ingo Schwarze <schwarze@openbsd.org>
  *
@@ -22,21 +14,18 @@ int dummy;
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include "config.h"
 
 static const char *progname;
 
 void
 setprogname(const char *name)
 {
-
 	progname = name;
 }
 
 const char *
 getprogname(void)
 {
-
 	return progname;
 }
-
-#endif

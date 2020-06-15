@@ -250,7 +250,7 @@ LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 		   read.o \
 		   tag.o
 
-COMPAT_OBJS	 = compat_err.o \
+ALL_COBJS	 = compat_err.o \
 		   compat_fts.o \
 		   compat_getline.o \
 		   compat_getsubopt.o \
@@ -320,13 +320,6 @@ MANDOCD_OBJS	 = $(MANDOC_HTML_OBJS) \
 
 DEMANDOC_OBJS	 = demandoc.o
 
-SOELIM_OBJS	 = soelim.o \
-		   compat_err.o \
-		   compat_getline.o \
-		   compat_progname.o \
-		   compat_reallocarray.o \
-		   compat_stringlist.o
-
 WWW_MANS	 = apropos.1.html \
 		   demandoc.1.html \
 		   man.1.html \
@@ -394,12 +387,12 @@ distclean: clean
 	rm -f Makefile.local config.h config.h.old config.log config.log.old
 
 clean:
-	rm -f libmandoc.a $(LIBMANDOC_OBJS) $(COMPAT_OBJS)
+	rm -f libmandoc.a $(LIBMANDOC_OBJS) $(ALL_COBJS)
 	rm -f mandoc man $(MAIN_OBJS)
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f mandocd catman catman.o $(MANDOCD_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
-	rm -f soelim $(SOELIM_OBJS)
+	rm -f soelim soelim.o
 	rm -f $(WWW_MANS) $(WWW_INCS) mandoc*.tar.gz mandoc*.sha256
 	rm -f Makefile.tmp1 Makefile.tmp2
 	rm -rf *.dSYM
@@ -514,8 +507,8 @@ Makefile.local config.h: configure $(TESTSRCS)
 	@echo "$@ is out of date; please run ./configure"
 	@exit 1
 
-libmandoc.a: $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
-	ar rs $@ $(COMPAT_OBJS) $(LIBMANDOC_OBJS)
+libmandoc.a: $(MANDOC_COBJS) $(LIBMANDOC_OBJS)
+	ar rs $@ $(MANDOC_COBJS) $(LIBMANDOC_OBJS)
 
 mandoc: $(MAIN_OBJS) libmandoc.a
 	$(CC) -o $@ $(LDFLAGS) $(MAIN_OBJS) libmandoc.a $(LDADD)
@@ -535,8 +528,8 @@ catman: catman.o libmandoc.a
 demandoc: $(DEMANDOC_OBJS) libmandoc.a
 	$(CC) -o $@ $(LDFLAGS) $(DEMANDOC_OBJS) libmandoc.a $(LDADD)
 
-soelim: $(SOELIM_OBJS)
-	$(CC) -o $@ $(LDFLAGS) $(SOELIM_OBJS)
+soelim: $(SOELIM_COBJS) soelim.o
+	$(CC) -o $@ $(LDFLAGS) $(SOELIM_COBJS) soelim.o
 
 # --- maintainer targets ---
 

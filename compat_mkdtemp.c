@@ -1,12 +1,4 @@
-#include "config.h"
-
-#if HAVE_MKDTEMP
-
-int dummy;
-
-#else
-
-/*	$Id$	*/
+/* $Id$ */
 /*
  * Copyright (c) 2015 Ingo Schwarze <schwarze@openbsd.org>
  *
@@ -25,6 +17,7 @@ int dummy;
  * The algorithm of this function is inspired by OpenBSD mkdtemp(3)
  * by Theo de Raadt and Todd Miller, but the code differs.
  */
+#include "config.h"
 
 #include <sys/stat.h>
 #include <errno.h>
@@ -57,5 +50,3 @@ mkdtemp(char *path)
 	errno = EEXIST;
 	return NULL;
 }
-
-#endif

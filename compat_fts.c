@@ -1,11 +1,3 @@
-#include "config.h"
-
-#if HAVE_FTS
-
-int dummy;
-
-#else
-
 /*	$Id$	*/
 /*	$OpenBSD: fts.c,v 1.59 2019/06/28 13:32:41 deraadt Exp $	*/
 
@@ -37,6 +29,7 @@ int dummy;
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+#include "config.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -701,5 +694,3 @@ fts_maxarglen(char * const *argv)
 			max = len;
 	return (max + 1);
 }
-
-#endif
