@@ -261,6 +261,7 @@ ALL_COBJS	 = compat_err.o \
 		   compat_reallocarray.o \
 		   compat_recallocarray.o \
 		   compat_strcasestr.o \
+		   compat_stringlist.o \
 		   compat_strlcat.o \
 		   compat_strlcpy.o \
 		   compat_strndup.o \
