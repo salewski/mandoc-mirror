@@ -83,6 +83,20 @@ are mere guesses, and some may be wrong.
   Jan Stary 20 Apr 2019 20:16:54 +0200
   loc *  exist ***  algo ***  size **  imp *
 
+- mandoc replaces all ASCII control characters except tab and line feed
+  with '?' during input.  It would be better to replace them with
+  Unicode escapes in preconv_encode() or somewhere in the vicinity,
+  such that the already existing better replacement strings show
+  up in the output.  Emulating groff is not desirable: groff replaces
+  0x00, 0x0b, and 0x0d to 0x1f with the empty string (bad because
+  that's easy to overlook for the document author), 0x01 with '.'
+  (very confusing), and passes through 0x02 to 0x08, 0x0c, and 0x7f
+  raw (bad because that is insecure output).  Remember that 0x07 may
+  need special handling because it is sometimes used for certain
+  delimiters, so it may need handling *after* roff.c rather than before.
+  reminded by John Gardner 16 Jun 2020 14:26:28 +1000
+  loc **  exist **  algo **  size **  imp *
+
 --- missing mdoc features ----------------------------------------------
 
 - .Sh and .Ss should be parsed and partially callable, see groff_mdoc(7)
