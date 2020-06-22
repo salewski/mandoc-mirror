@@ -19,7 +19,8 @@ VERSION = 1.14.5
 
 # === LIST OF FILES ====================================================
 
-TESTSRCS	 = test-be32toh.c \
+TESTSRCS	 = test-attribute.c \
+		   test-be32toh.c \
 		   test-cmsg.c \
 		   test-dirent-namlen.c \
 		   test-EFTYPE.c \

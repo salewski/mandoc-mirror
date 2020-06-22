@@ -288,6 +288,7 @@ CFLAGS="-g"
 # and will be regarded as failed) or 1 (test will not be run and will
 # be regarded as successful).
 
+HAVE_ATTRIBUTE=0
 HAVE_DIRENT_NAMLEN=0
 HAVE_ENDIAN=0
 HAVE_EFTYPE=0
