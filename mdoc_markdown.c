@@ -16,6 +16,8 @@
  *
  * Markdown formatter for mdoc(7) used by mandoc(1).
  */
+#include "config.h"
+
 #include <sys/types.h>
 
 #include <assert.h>

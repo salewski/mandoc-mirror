@@ -1,4 +1,4 @@
-/*	$Id$ */
+/* $Id$ */
 /*
  * Copyright (c) 2010, 2017, 2018, 2020 Ingo Schwarze <schwarze@openbsd.org>
  *
@@ -14,6 +14,8 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include "config.h"
+
 #include <sys/types.h>
 
 #include <assert.h>

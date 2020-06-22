@@ -1,4 +1,4 @@
-/*	$Id$ */
+/* $Id$ */
 /*
  * Copyright (c) 2016 Ingo Schwarze <schwarze@openbsd.org>
  *
@@ -19,6 +19,8 @@
  * The interface is defined in "dba.h".
  * This file is seperate from dba.c because this also uses "dbm.h".
  */
+#include "config.h"
+
 #include <regex.h>
 #include <stdint.h>
 #include <stdlib.h>
