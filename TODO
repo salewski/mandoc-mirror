@@ -95,6 +95,10 @@ are mere guesses, and some may be wrong.
   need special handling because it is sometimes used for certain
   delimiters, so it may need handling *after* roff.c rather than before.
   reminded by John Gardner 16 Jun 2020 14:26:28 +1000
+  Actually, more ASCII control characters than just 0x07 may need
+  later handling because they can for example be used in macro names.
+  So they may need handling after roff(7) processing.
+  pointed out by John Gardner 23 Jun 2020 18:28:08 +1000
   loc **  exist **  algo **  size **  imp *
 
 --- missing mdoc features ----------------------------------------------
