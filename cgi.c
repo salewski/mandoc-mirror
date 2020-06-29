@@ -122,10 +122,11 @@ static	const char *const sec_names[] = {
 static	const int sec_MAX = sizeof(sec_names) / sizeof(char *);
 
 static	const char *const arch_names[] = {
-    "amd64",       "alpha",       "armv7",	"arm64",
-    "hppa",        "i386",        "landisk",
-    "loongson",    "luna88k",     "macppc",      "mips64",
-    "octeon",      "sgi",         "socppc",      "sparc64",
+    "amd64",       "alpha",       "armv7",       "arm64",
+    "hppa",        "i386",        "landisk",     "loongson",
+    "luna88k",     "macppc",      "mips64",      "octeon",
+    "powerpc64",   "sgi",         "socppc",      "sparc64",
+
     "amiga",       "arc",         "armish",      "arm32",
     "atari",       "aviion",      "beagle",      "cats",
     "hppa64",      "hp300",
