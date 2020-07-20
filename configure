@@ -119,6 +119,7 @@ BINM_MAKEWHATIS="makewhatis"
 BINM_MAN="man"
 BINM_SOELIM="soelim"
 BINM_WHATIS="whatis"
+BINM_PAGER=
 MANM_MAN="man"
 MANM_MANCONF="man.conf"
 MANM_MDOC="mdoc"
@@ -343,18 +344,34 @@ else
 	runtest fts FTS || true
 fi
 
+# --- pager ---
+manual=
+if [ -n "${BINM_PAGER}" ]; then
+	manual=" (manual)"
+elif less test-noop.c 1>/dev/null 2>&3; then
+	BINM_PAGER=less
+	echo "tested less: yes" 1>&2
+	echo "tested less: yes" 1>&3
+else
+	BINM_PAGER=more
+	echo "tested less: no" 1>&2
+	echo "tested less: no" 1>&3
+fi
+echo "selected BINM_PAGER=${BINM_PAGER}${manual}" 1>&2
+echo "selected BINM_PAGER=${BINM_PAGER}${manual}" 1>&3
+
 # --- tagging support in the pager ---
-if ismanual "less -T" LESS_T ${HAVE_LESS_T}; then
+if ismanual "${BINM_PAGER} -T" LESS_T ${HAVE_LESS_T}; then
 	:
-elif less -ET /dev/null test-noop.c 1>/dev/null 2>&3; then
+elif ${BINM_PAGER} -T /dev/null test-noop.c 1>/dev/null 2>&3; then
 	HAVE_LESS_T=1
-	echo "tested less -T: yes" 1>&2
-	echo "tested less -T: yes" 1>&3
+	echo "tested ${BINM_PAGER} -T: yes" 1>&2
+	echo "tested ${BINM_PAGER} -T: yes" 1>&3
 	echo 1>&3
 else
 	HAVE_LESS_T=0
-	echo "tested less -T: no" 1>&2
-	echo "tested less -T: no" 1>&3
+	echo "tested ${BINM_PAGER} -T: no" 1>&2
+	echo "tested ${BINM_PAGER} -T: no" 1>&3
 	echo 1>&3
 fi
 
@@ -493,6 +510,7 @@ cat << __HEREDOC__
 #define BINM_MAN "${BINM_MAN}"
 #define BINM_SOELIM "${BINM_SOELIM}"
 #define BINM_WHATIS "${BINM_WHATIS}"
+#define BINM_PAGER "${BINM_PAGER}"
 
 __HEREDOC__
 

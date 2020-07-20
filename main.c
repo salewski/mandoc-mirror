@@ -1218,7 +1218,7 @@ spawn_pager(struct outstate *outst, char *tag_target)
 	if (pager == NULL || *pager == '\0')
 		pager = getenv("PAGER");
 	if (pager == NULL || *pager == '\0')
-		pager = "more -s";
+		pager = BINM_PAGER;
 	cp = mandoc_strdup(pager);
 
 	/*

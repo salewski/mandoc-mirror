@@ -151,6 +151,14 @@ BINM_WHATIS=mwhatis		# default is "whatis"
 BINM_MAKEWHATIS=mandocdb	# default is "makewhatis"
 BINM_SOELIM=msoelim		# default is "soelim"
 
+# If less(1) is available, it is used as the default manual pager.
+# Otherwise, more(1) is used: its existence is required by POSIX.
+# It is possible to force using a different default pager, either
+# by giving the name of a program found in the PATH, or by giving
+# an absolute path.
+
+BINM_PAGER=pg			# default is "less" or "more"
+
 # Some distributions do not want hardlinks
 # between installed binary programs.
 # Set the following variable to use symbolic links instead.
