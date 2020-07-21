@@ -267,12 +267,13 @@ for my $test (@regress_tests) {
 	    $test->{NAME} =~ /^$onlytest/) {
 		$count_tag++;
 		$count_total++;
-		local $ENV{MANPAGER} = "./copyless $test->{NAME}";
 		my @cmd = (qw(../man -l), @{$test->{MOPTS}},
-		    qw(-I os=OpenBSD -T ascii), $i);
+		    qw(-I os=OpenBSD -T ascii -O),
+		    "outfilename=$o,tagfilename=$to", "$i");
 		print "@cmd\n" if $targets{verbose};
 		system @cmd
 		    and fail $test->{NAME}, 'tag:man';
+		system qw(sed -i), 's/ .*\// /', $to;
 		system @diff, $tw, $to
 		    and fail $test->{NAME}, 'tag:diff';
 		print "." unless $targets{verbose};
