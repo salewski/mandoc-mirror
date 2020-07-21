@@ -224,7 +224,8 @@ manconf_output(struct manoutput *conf, const char *cp, int fromfile)
 {
 	const char *const toks[] = {
 	    "includes", "man", "paper", "style", "indent", "width",
-	    "tag", "fragment", "mdoc", "noval", "toc"
+	    "tag", "outfilename", "tagfilename",
+	    "fragment", "mdoc", "noval", "toc"
 	};
 	const size_t ntoks = sizeof(toks) / sizeof(toks[0]);
 
@@ -245,11 +246,11 @@ manconf_output(struct manoutput *conf, const char *cp, int fromfile)
 		}
 	}
 
-	if (tok < 6 && *cp == '\0') {
+	if (tok < 8 && *cp == '\0') {
 		mandoc_msg(MANDOCERR_BADVAL_MISS, 0, 0, "-O %s=?", toks[tok]);
 		return -1;
 	}
-	if (tok > 6 && tok < ntoks && *cp != '\0') {
+	if (tok > 8 && tok < ntoks && *cp != '\0') {
 		mandoc_msg(MANDOCERR_BADVAL, 0, 0, "-O %s=%s", toks[tok], cp);
 		return -1;
 	}
@@ -313,15 +314,29 @@ manconf_output(struct manoutput *conf, const char *cp, int fromfile)
 		conf->tag = mandoc_strdup(cp);
 		return 0;
 	case 7:
-		conf->fragment = 1;
+		if (conf->outfilename != NULL) {
+			oldval = mandoc_strdup(conf->outfilename);
+			break;
+		}
+		conf->outfilename = mandoc_strdup(cp);
 		return 0;
 	case 8:
-		conf->mdoc = 1;
+		if (conf->tagfilename != NULL) {
+			oldval = mandoc_strdup(conf->tagfilename);
+			break;
+		}
+		conf->tagfilename = mandoc_strdup(cp);
 		return 0;
 	case 9:
-		conf->noval = 1;
+		conf->fragment = 1;
 		return 0;
 	case 10:
+		conf->mdoc = 1;
+		return 0;
+	case 11:
+		conf->noval = 1;
+		return 0;
+	case 12:
 		conf->toc = 1;
 		return 0;
 	default:

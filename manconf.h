@@ -31,9 +31,11 @@ struct	manpaths {
 struct	manoutput {
 	char	 *includes;
 	char	 *man;
+	char	 *outfilename;
 	char	 *paper;
 	char	 *style;
 	char	 *tag;
+	char	 *tagfilename;
 	size_t	  indent;
 	size_t	  width;
 	int	  fragment;
