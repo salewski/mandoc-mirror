@@ -2362,7 +2362,9 @@ roff_cond_checkend(ROFF_ARGS)
 	while ((ep = strchr(ep, '\\')) != NULL) {
 		switch (ep[1]) {
 		case '}':
-			if (rr)
+			if (ep[2] == '\0')
+				ep[0] = '\0';
+			else if (rr)
 				ep[1] = '&';
 			else
 				memmove(ep, ep + 2, strlen(ep + 2) + 1);
