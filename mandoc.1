@@ -423,10 +423,17 @@ MANPAGER='lynx -force_html' man -T html -O tag=MANPAGER man
 MANPAGER='w3m -T text/html' man -T html -O tag=toc mandoc
 .Ed
 .Pp
-This argument does not work with
+Consequently, for HTML output, this argument does not work with
 .Xr more 1
 or
 .Xr less 1 .
+For example,
+.Ql MANPAGER=less man -T html -O tag=toc mandoc
+does not work because
+.Xr less 1
+does not support
+.Ic file://
+URIs.
 .It Cm toc
 If an input file contains at least two non-standard sections,
 print a table of contents near the beginning of the output.
