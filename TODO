@@ -99,6 +99,7 @@ are mere guesses, and some may be wrong.
   later handling because they can for example be used in macro names.
   So they may need handling after roff(7) processing.
   pointed out by John Gardner 23 Jun 2020 18:28:08 +1000
+  more info from John Gardner 29 Jun 2020 19:54:04 +1000
   loc **  exist **  algo **  size **  imp *
 
 --- missing mdoc features ----------------------------------------------
