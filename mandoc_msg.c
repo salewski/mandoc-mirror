@@ -190,6 +190,7 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"empty tbl layout",
 	"invalid character in tbl layout",
 	"unmatched parenthesis in tbl layout",
+	"ignoring excessive spacing in tbl layout",
 	"tbl without any data cells",
 	"ignoring data in spanned tbl cell",
 	"ignoring extra tbl data cells",

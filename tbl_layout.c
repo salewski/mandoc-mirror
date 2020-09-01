@@ -65,6 +65,7 @@ mods(struct tbl_node *tbl, struct tbl_cell *cp,
 		int ln, const char *p, int *pos)
 {
 	char		*endptr;
+	unsigned long	 spacing;
 	size_t		 sz;
 
 mod:
@@ -93,7 +94,11 @@ mod:
 	/* Parse numerical spacing from modifier string. */
 
 	if (isdigit((unsigned char)p[*pos])) {
-		cp->spacing = strtoull(p + *pos, &endptr, 10);
+		if ((spacing = strtoul(p + *pos, &endptr, 10)) > 9)
+			mandoc_msg(MANDOCERR_TBLLAYOUT_SPC, ln, *pos,
+			    "%lu", spacing);
+		else
+			cp->spacing = spacing;
 		*pos = endptr - p;
 		goto mod;
 	}

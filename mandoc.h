@@ -189,6 +189,7 @@ enum	mandocerr {
 	MANDOCERR_TBLLAYOUT_NONE, /* empty tbl layout */
 	MANDOCERR_TBLLAYOUT_CHAR, /* invalid character in tbl layout: char */
 	MANDOCERR_TBLLAYOUT_PAR, /* unmatched parenthesis in tbl layout */
+	MANDOCERR_TBLLAYOUT_SPC, /* ignoring excessive spacing in tbl layout */
 	MANDOCERR_TBLDATA_NONE, /* tbl without any data cells */
 	MANDOCERR_TBLDATA_SPAN, /* ignoring data in spanned tbl cell: data */
 	MANDOCERR_TBLDATA_EXTRA, /* ignoring extra tbl data cells: data */
