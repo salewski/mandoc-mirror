@@ -210,6 +210,7 @@ roff_term_pre_ti(ROFF_TERM_ARGS)
 {
 	struct roffsu	 su;
 	const char	*cp;
+	const size_t	 maxoff = 72;
 	int		 len, sign;
 
 	roff_term_pre_br(p, n);
@@ -230,17 +231,26 @@ roff_term_pre_ti(ROFF_TERM_ARGS)
 		return;
 	len = term_hen(p, &su);
 
-	if (sign == 0) {
+	switch (sign) {
+	case 1:
+		if (p->tcol->offset + len <= maxoff)
+			p->ti = len;
+		else if (p->tcol->offset < maxoff)
+			p->ti = maxoff - p->tcol->offset;
+		else
+			p->ti = 0;
+		break;
+	case -1:
+		if ((size_t)len < p->tcol->offset)
+			p->ti = -len;
+		else
+			p->ti = -p->tcol->offset;
+		break;
+	default:
+		if ((size_t)len > maxoff)
+			len = maxoff;
 		p->ti = len - p->tcol->offset;
-		p->tcol->offset = len;
-	} else if (sign == 1) {
-		p->ti = len;
-		p->tcol->offset += len;
-	} else if ((size_t)len < p->tcol->offset) {
-		p->ti = -len;
-		p->tcol->offset -= len;
-	} else {
-		p->ti = -p->tcol->offset;
-		p->tcol->offset = 0;
+		break;
 	}
+	p->tcol->offset += p->ti;
 }
