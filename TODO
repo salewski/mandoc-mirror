@@ -33,6 +33,21 @@ Obviously, as the issues have not been solved yet, these annotations
 are mere guesses, and some may be wrong.
 
 ************************************************************************
+* assertion failures
+************************************************************************
+
+- .if n .ce in the middle of .TS data
+  afl case f1/id:000103,sig:06,src:009024+009105,op:splice,rep:2 (jes@)
+  While roff_parseln() prevents .ce and similar requests in the middle
+  of a tbl, the guard is no longer effective when the .ce is wrapped
+  in a roff block, for example a conditional.  The resulting assertion
+  has never been seen in any real-world manual page.
+  This is too dangerous to fix before release because it requires
+  reorganizing the very delicate internals of roff_parseln(),
+  which risks causing more severe bugs.
+  loc * exist *** algo *** size * imp *
+
+************************************************************************
 * missing features
 ************************************************************************
 
