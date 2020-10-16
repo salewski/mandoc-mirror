@@ -169,7 +169,12 @@ print_man_node(MAN_ARGS)
 	if (n->type == ROFFT_COMMENT || n->flags & NODE_NOPRT)
 		return;
 
-	html_fillmode(h, n->flags & NODE_NOFILL ? ROFF_nf : ROFF_fi);
+	if ((n->flags & NODE_NOFILL) == 0)
+		html_fillmode(h, ROFF_fi);
+	else if (html_fillmode(h, ROFF_nf) == ROFF_nf &&
+	    n->tok != ROFF_fi && n->flags & NODE_LINE &&
+	    (n->prev == NULL || n->prev->tok != MAN_YS))
+		print_endline(h);
 
 	child = 1;
 	switch (n->type) {
@@ -253,13 +258,6 @@ print_man_node(MAN_ARGS)
 	}
 	if (t != NULL)
 		print_stagq(h, t);
-
-	if (n->flags & NODE_NOFILL && n->tok != MAN_YS &&
-	    (n->next != NULL && n->next->flags & NODE_LINE)) {
-		/* In .nf = <pre>, print even empty lines. */
-		h->col++;
-		print_endline(h);
-	}
 }
 
 static void

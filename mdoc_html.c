@@ -349,12 +349,11 @@ print_mdoc_node(MDOC_ARGS)
 	if (n->type == ROFFT_COMMENT || n->flags & NODE_NOPRT)
 		return;
 
-	if (n->flags & NODE_NOFILL) {
-		html_fillmode(h, ROFF_nf);
-		if (n->flags & NODE_LINE)
-			print_endline(h);
-	} else
+	if ((n->flags & NODE_NOFILL) == 0)
 		html_fillmode(h, ROFF_fi);
+	else if (html_fillmode(h, ROFF_nf) == ROFF_nf &&
+	    n->tok != ROFF_fi && n->flags & NODE_LINE)
+		print_endline(h);
 
 	child = 1;
 	n->flags &= ~NODE_ENDED;
