@@ -1,4 +1,4 @@
-.\" $OpenBSD: dotT.in,v 1.2 2019/01/07 06:51:37 schwarze Exp $
+.\" $OpenBSD: dotT.in,v 1.3 2020/10/24 22:52:34 schwarze Exp $
 .Dd $Mdocdate$
 .Dt STRING-DOTT 1
 .Os
@@ -9,9 +9,11 @@
 BEGINTEST
 .Pp
 We are using the \*(.T device.
+It can also be written as the \*[.T] device.
 .Pp
 .ds .T name
 The device \*(.T can be overridden.
+Both escape forms work for the \*[.T].
 .nf
 ENDTEST
 .br
