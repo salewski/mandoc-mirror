@@ -190,17 +190,6 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 
 		tblcalc(&tp->tbl, sp, tp->tcol->offset, tp->tcol->rmargin);
 
-		/* Tables leak .ta settings to subsequent text. */
-
-		term_tab_set(tp, NULL);
-		coloff = sp->opts->opts & (TBL_OPT_BOX | TBL_OPT_DBOX) ||
-		    sp->opts->lvert;
-		for (ic = 0; ic < sp->opts->cols; ic++) {
-			coloff += tp->tbl.cols[ic].width;
-			term_tab_iset(coloff);
-			coloff += tp->tbl.cols[ic].spacing;
-		}
-
 		/* Center the table as a whole. */
 
 		offset = tp->tcol->offset;
