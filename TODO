@@ -522,6 +522,10 @@ are mere guesses, and some may be wrong.
 * warning issues
 ************************************************************************
 
+- shorten/simplify error messages for usage errors
+  To: deraadt@ 25 Oct 2020 23:37:01 +0100
+  loc **  exist *  algo *  size **  imp ***
+
 - warn about duplicate .Sh/.Ss heads
   gre(4): Rename duplicate sections 20 Apr 2018 15:27:33 +0200
   loc *  exist *  algo *  size *  imp **
