@@ -2617,7 +2617,7 @@ post_section(POST_ARGS)
 			if ((nch = n->child) != NULL &&
 			    nch->type == ROFFT_TEXT &&
 			    strcmp(nch->string, tag) == 0)
-				tag_put(NULL, TAG_WEAK, n);
+				tag_put(NULL, TAG_STRONG, n);
 			else
 				tag_put(tag, TAG_FALLBACK, n);
 			free(tag);

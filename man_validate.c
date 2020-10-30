@@ -324,7 +324,7 @@ post_SH(CHKARGS)
 					*cp = '_';
 			if (nc != NULL && nc->type == ROFFT_TEXT &&
 			    strcmp(nc->string, tag) == 0)
-				tag_put(NULL, TAG_WEAK, n);
+				tag_put(NULL, TAG_STRONG, n);
 			else
 				tag_put(tag, TAG_FALLBACK, n);
 			free(tag);
