@@ -117,6 +117,10 @@ are mere guesses, and some may be wrong.
   more info from John Gardner 29 Jun 2020 19:54:04 +1000
   loc **  exist **  algo **  size **  imp *
 
+- many missing features used in old groff_char(7),
+  some can possibly be supported
+  kamil at netbsd 12 Nov 2020 17:27:09 +0100 + reply
+
 --- missing mdoc features ----------------------------------------------
 
 - .Sh and .Ss should be parsed and partially callable, see groff_mdoc(7)
