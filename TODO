@@ -195,6 +195,12 @@ are mere guesses, and some may be wrong.
 
 --- missing man features -----------------------------------------------
 
+- MANWIDTH
+  Markus Waldeck <waldeck at gmx dot de> 9 Jun 2015 05:49:56 +0200
+  Laura Morales <lauretas at mail dot com> 26 Apr 2018 08:15:55 +0200
+  Kamil Rytarowski <kamil at netbsd> 13 Nov 2020 00:19:36 +0100
+  loc *  exist *  algo *  size *  imp *
+
 - groff_www(7) .MTO and .URL
   These macros were used by the GNU grep(1) man page.
   The groff_www(7) manual page itself uses them, too.
