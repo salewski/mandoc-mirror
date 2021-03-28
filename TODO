@@ -199,6 +199,7 @@ are mere guesses, and some may be wrong.
   Markus Waldeck <waldeck at gmx dot de> 9 Jun 2015 05:49:56 +0200
   Laura Morales <lauretas at mail dot com> 26 Apr 2018 08:15:55 +0200
   Kamil Rytarowski <kamil at netbsd> 13 Nov 2020 00:19:36 +0100
+  patch from Kamil 13 Nov 2020 22:37:07 +0100
   loc *  exist *  algo *  size *  imp *
 
 - groff_www(7) .MTO and .URL
@@ -422,9 +423,13 @@ are mere guesses, and some may be wrong.
     add a new <</Type /Font>> block to the PDF files with /BaseFont /Courier
     and change the /Name from /F0 to the new font (/F5 (?)).
   re-reported by tb@ Mon, 16 Mar 2015 16:47:21 +0100
-  loc *  exist **  algo **  size *  imp **
+  loc **  exist **  algo **  size *  imp **
 
 --- HTML issues --------------------------------------------------------
+
+- .Bd -unfilled should not use monospaced font
+  anton@  4 Mar 2021 08:19:35 +0100
+  loc **  exist *  algo *  size *  imp **
 
 - get rid of the last handful of style= attributes such that
   Content-Security-Policy: can be enabled without unsafe-inline
