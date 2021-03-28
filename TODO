@@ -576,6 +576,10 @@ are mere guesses, and some may be wrong.
   output without intervening whitespace, in particular after a
   macro line (from the mdoclint TODO)
 
+- report double .TH in man(7) as an ERROR and let the first win
+  kristaps@  28 Mar 2021 13:30:41 +0200
+  loc *  exist *  algo *  size *  imp *
+
 - makewhatis -p complains about language subdirectories:
   /usr/local/man//ru: Unknown directory part
 
