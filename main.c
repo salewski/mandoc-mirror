@@ -846,6 +846,7 @@ process_onefile(struct mparse *mp, struct manpage *resp, int startdir,
 	if (outst->use_pager) {
 		outst->use_pager = 0;
 		outst->tag_files = term_tag_init(conf->output.outfilename,
+		    outst->outtype == OUTT_HTML ? ".html" : "",
 		    conf->output.tagfilename);
 #if HAVE_PLEDGE
 		if ((conf->output.outfilename != NULL ||

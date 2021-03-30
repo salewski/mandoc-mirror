@@ -47,7 +47,8 @@ static struct tag_files tag_files;
  * but for simplicity, create it anyway.
  */
 struct tag_files *
-term_tag_init(const char *outfilename, const char *tagfilename)
+term_tag_init(const char *outfilename, const char *suffix,
+    const char *tagfilename)
 {
 	struct sigaction	 sa;
 	int			 ofd;	/* In /tmp/, dup(2)ed to stdout. */
@@ -85,9 +86,9 @@ term_tag_init(const char *outfilename, const char *tagfilename)
 	/* Create both temporary output files. */
 
 	if (outfilename == NULL) {
-		(void)strlcpy(tag_files.ofn, "/tmp/man.XXXXXXXXXX",
-		    sizeof(tag_files.ofn));
-		if ((ofd = mkstemp(tag_files.ofn)) == -1) {
+		(void)snprintf(tag_files.ofn, sizeof(tag_files.ofn),
+		    "/tmp/man.XXXXXXXXXX%s", suffix);
+		if ((ofd = mkstemps(tag_files.ofn, strlen(suffix))) == -1) {
 			mandoc_msg(MANDOCERR_MKSTEMP, 0, 0,
 			    "%s: %s", tag_files.ofn, strerror(errno));
 			goto fail;

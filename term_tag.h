@@ -28,7 +28,7 @@ struct	tag_files {
 };
 
 
-struct tag_files	*term_tag_init(const char *, const char *);
+struct tag_files	*term_tag_init(const char *, const char *, const char *);
 void			 term_tag_write(struct roff_node *, size_t);
 int			 term_tag_close(void);
 void			 term_tag_unlink(void);
