@@ -121,6 +121,10 @@ are mere guesses, and some may be wrong.
   some can possibly be supported
   kamil at netbsd 12 Nov 2020 17:27:09 +0100 + reply
 
+- \s with arbitrary arg delimiters as already supported for other escapes
+  found following jmc@'s mail 28 Apr 2021 18:31:41 +0100
+  loc *  exist *  algo *  size *  imp *
+
 --- missing mdoc features ----------------------------------------------
 
 - .Sh and .Ss should be parsed and partially callable, see groff_mdoc(7)
