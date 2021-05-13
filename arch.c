@@ -26,7 +26,7 @@ arch_valid(const char *arch, enum mandoc_os os)
 	const char *openbsd_arch[] = {
 		"alpha", "amd64", "arm64", "armv7", "hppa", "i386",
 		"landisk", "loongson", "luna88k", "macppc", "mips64",
-		"octeon", "powerpc64", "sgi", "sparc64", NULL
+		"octeon", "powerpc64", "riscv64", "sparc64", NULL
 	};
 	const char *netbsd_arch[] = {
 		"acorn26", "acorn32", "algor", "alpha", "amiga",
