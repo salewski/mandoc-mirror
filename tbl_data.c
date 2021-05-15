@@ -244,10 +244,11 @@ tbl_data(struct tbl_node *tbl, int ln, const char *p, int pos)
 	struct tbl_cell	*cp;
 	struct tbl_span	*sp;
 
-	rp = (sp = tbl->last_span) == NULL ? tbl->first_row :
-	    sp->pos == TBL_SPAN_DATA && sp->layout->next != NULL ?
-	    sp->layout->next : sp->layout;
-
+	for (sp = tbl->last_span; sp != NULL; sp = sp->prev)
+		if (sp->pos == TBL_SPAN_DATA)
+			break;
+	rp = sp == NULL ? tbl->first_row :
+	    sp->layout->next == NULL ? sp->layout : sp->layout->next;
 	assert(rp != NULL);
 
 	if (p[1] == '\0') {
