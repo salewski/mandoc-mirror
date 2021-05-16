@@ -140,6 +140,7 @@ html_alloc(const struct manoutput *outopts)
 	h = mandoc_calloc(1, sizeof(struct html));
 
 	h->tag = NULL;
+	h->metac = h->metal = ESCAPE_FONTROMAN;
 	h->style = outopts->style;
 	if ((h->base_man1 = outopts->man) == NULL)
 		h->base_man2 = NULL;
