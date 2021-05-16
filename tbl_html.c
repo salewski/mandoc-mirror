@@ -247,6 +247,8 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 				html_setfont(h, ESCAPE_FONTBOLD);
 			else if (dp->layout->flags & TBL_CELL_ITALIC)
 				html_setfont(h, ESCAPE_FONTITALIC);
+			if (dp->layout->pos == TBL_CELL_LONG)
+				print_text(h, "\\[u2003]");  /* em space */
 			print_text(h, dp->string);
 			html_setfont(h, save_font);
 		}
