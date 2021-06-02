@@ -55,7 +55,6 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"unknown architecture",
 	"operating system explicitly specified",
 	"RCS id missing",
-	"referenced manual not found",
 
 	"generic style suggestion",
 
@@ -69,6 +68,7 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"consider using OS macro",
 	"errnos out of order",
 	"duplicate errno",
+	"referenced manual not found",
 	"trailing delimiter",
 	"no blank before trailing delimiter",
 	"fill mode already enabled, skipping",

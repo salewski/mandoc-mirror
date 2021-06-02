@@ -54,7 +54,6 @@ enum	mandocerr {
 	MANDOCERR_ARCH_BAD,  /* unknown architecture: Dt ... arch */
 	MANDOCERR_OS_ARG,  /* operating system explicitly specified: Os ... */
 	MANDOCERR_RCS_MISSING, /* RCS id missing */
-	MANDOCERR_XR_BAD,  /* referenced manual not found: Xr name sec */
 
 	MANDOCERR_STYLE, /* ===== start of style suggestions ===== */
 
@@ -68,6 +67,7 @@ enum	mandocerr {
 	MANDOCERR_BX, /* consider using OS macro: macro */
 	MANDOCERR_ER_ORDER, /* errnos out of order: Er ... */
 	MANDOCERR_ER_REP, /* duplicate errno: Er ... */
+	MANDOCERR_XR_BAD,  /* referenced manual not found: Xr name sec */
 	MANDOCERR_DELIM, /* trailing delimiter: macro ... */
 	MANDOCERR_DELIM_NB, /* no blank before trailing delimiter: macro ... */
 	MANDOCERR_FI_SKIP, /* fill mode already enabled, skipping: fi */
