@@ -196,6 +196,8 @@ print_gen_head(struct html *h)
 	struct tag	*t;
 
 	print_otag(h, TAG_META, "?", "charset", "utf-8");
+	print_otag(h, TAG_META, "??", "name", "viewport",
+	    "content", "width=device-width, initial-scale=1.0");
 	if (h->style != NULL) {
 		print_otag(h, TAG_LINK, "?h??", "rel", "stylesheet",
 		    h->style, "type", "text/css", "media", "all");
