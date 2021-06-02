@@ -464,6 +464,12 @@ are mere guesses, and some may be wrong.
   http://undeadly.org/cgi?action=article&sid=20140925064244&pid=1
   loc *  exist *  algo **  size *  imp ***
 
+- implement the tbl(7) layout "n" specifier for HTML output,
+  probably by manual alignment, inserting adequate numbers of
+  digit-width spaces, similar to tbl_term.c, tbl_number()
+  Oliver Corff 16 May 2021 20:29:00 +0200
+  loc **  exist **  algo **  size *  imp **
+
 - generate <img> tags in HTML
   idea from florian@  Tue, 7 Apr 2015 00:26:28 +0000
   may be possible to implement with .Lk img://something.png alt_text
