@@ -154,6 +154,7 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 	struct buf	*firstln, *lastln, *thisln, *loop;
 	char		*cp;
 	size_t		 pos; /* byte number in the ln buffer */
+	size_t		 spos; /* at the start of the current line parse */
 	int		 line_result, result;
 	int		 of;
 	int		 lnn; /* line number in the real file */
@@ -180,6 +181,7 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 			    curp->filenc & MPARSE_LATIN1)
 				curp->filenc = preconv_cue(&blk, i);
 		}
+		spos = pos;
 
 		while (i < blk.sz && (start || blk.buf[i] != '\0')) {
 
@@ -279,7 +281,8 @@ mparse_buf_r(struct mparse *curp, struct buf blk, size_t i, int start)
 
 		of = 0;
 rerun:
-		line_result = roff_parseln(curp->roff, curp->line, &ln, &of);
+		line_result = roff_parseln(curp->roff, curp->line,
+		    &ln, &of, start && spos == 0 ? pos : 0);
 
 		/* Process options. */
 

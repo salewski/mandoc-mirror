@@ -72,6 +72,7 @@ enum	mandocerr {
 	MANDOCERR_DELIM_NB, /* no blank before trailing delimiter: macro ... */
 	MANDOCERR_FI_SKIP, /* fill mode already enabled, skipping: fi */
 	MANDOCERR_NF_SKIP, /* fill mode already disabled, skipping: nf */
+	MANDOCERR_TEXT_LONG, /* input text line longer than 80 bytes */
 	MANDOCERR_DASHDASH, /* verbatim "--", maybe consider using \(em */
 	MANDOCERR_FUNC, /* function name without markup: name() */
 	MANDOCERR_SPACE_EOL, /* whitespace at end of input line */

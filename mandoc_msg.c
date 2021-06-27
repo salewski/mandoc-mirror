@@ -73,6 +73,7 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"no blank before trailing delimiter",
 	"fill mode already enabled, skipping",
 	"fill mode already disabled, skipping",
+	"input text line longer than 80 bytes",
 	"verbatim \"--\", maybe consider using \\(em",
 	"function name without markup",
 	"whitespace at end of input line",

@@ -73,7 +73,7 @@ void		 roff_reset(struct roff *);
 void		 roff_man_free(struct roff_man *);
 struct roff_man	*roff_man_alloc(struct roff *, const char *, int);
 void		 roff_man_reset(struct roff_man *);
-int		 roff_parseln(struct roff *, int, struct buf *, int *);
+int		 roff_parseln(struct roff *, int, struct buf *, int *, size_t);
 void		 roff_userret(struct roff *);
 void		 roff_endparse(struct roff *);
 void		 roff_setreg(struct roff *, const char *, int, char);

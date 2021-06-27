@@ -1823,7 +1823,7 @@ roff_parsetext(struct roff *r, struct buf *buf, int pos, int *offs)
 }
 
 int
-roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
+roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs, size_t len)
 {
 	enum roff_tok	 t;
 	int		 e;
@@ -1833,6 +1833,14 @@ roff_parseln(struct roff *r, int ln, struct buf *buf, int *offs)
 	int		 ctl;	/* macro line (boolean) */
 
 	ppos = pos = *offs;
+
+	if (len > 80 && r->tbl == NULL && r->eqn == NULL &&
+	    (r->man->flags & ROFF_NOFILL) == 0 &&
+	    strchr(" .\\", buf->buf[pos]) == NULL &&
+	    buf->buf[pos] != r->control &&
+	    strcspn(buf->buf, " ") < 80)
+		mandoc_msg(MANDOCERR_TEXT_LONG, ln, (int)len - 1,
+		    "%.20s...", buf->buf + pos);
 
 	/* Handle in-line equation delimiters. */
 
