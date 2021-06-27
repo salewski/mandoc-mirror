@@ -454,6 +454,11 @@ are mere guesses, and some may be wrong.
   anton@  4 Mar 2021 08:19:35 +0100
   loc **  exist *  algo *  size *  imp **
 
+- HTML formatting of .nf should avoid <br/>
+  and not close and re-open <pre> on .P
+  my mail to ports@ 27 Jun 2021 16:09:20 +0200
+  loc **  exist **  algo *  size *  imp **
+
 - get rid of the last handful of style= attributes such that
   Content-Security-Policy: can be enabled without unsafe-inline
   suggested by bentley@  Nov 10, 2019 at 06:02:49AM -0700
