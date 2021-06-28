@@ -1021,10 +1021,6 @@ print_man_foot(struct termp *p, const struct roff_meta *meta)
 	 */
 
 	if ( ! p->mdocstyle) {
-		if (meta->hasbody) {
-			term_vspace(p);
-			term_vspace(p);
-		}
 		mandoc_asprintf(&title, "%s(%s)",
 		    meta->title, meta->msec);
 	} else if (meta->os != NULL) {
@@ -1143,9 +1139,5 @@ print_man_head(struct termp *p, const struct roff_meta *meta)
 	 */
 
 	term_vspace(p);
-	if ( ! p->mdocstyle) {
-		term_vspace(p);
-		term_vspace(p);
-	}
 	free(title);
 }
