@@ -1,6 +1,6 @@
 /* $OpenBSD: mandoc_msg.c,v 1.8 2020/01/19 17:59:01 schwarze Exp $ */
 /*
- * Copyright (c) 2014-2020 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2014-2021 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -245,6 +245,8 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"eqn delim option in tbl",
 	"unsupported tbl layout modifier",
 	"ignoring macro in table",
+	"skipping tbl in -Tman mode",
+	"skipping eqn in -Tman mode",
 
 	/* bad command line arguments */
 	NULL,

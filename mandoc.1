@@ -2314,6 +2314,26 @@ or
 macro or of an undefined macro.
 The macro is ignored, and its arguments are handled
 as if they were a text line.
+.It Sy "skipping tbl in -Tman mode"
+.Pq mdoc , tbl
+An input file contains the
+.Ic \&TS
+macro.
+This message is only generated in
+.Fl T Cm man
+output mode, where
+.Xr tbl 7
+input is not supported.
+.It Sy "skipping eqn in -Tman mode"
+.Pq mdoc , eqn
+An input file contains the
+.Ic \&EQ
+macro.
+This message is only generated in
+.Fl T Cm man
+output mode, where
+.Xr eqn 7
+input is not supported.
 .El
 .Ss Bad command line arguments
 .Bl -ohang
