@@ -164,7 +164,7 @@ static	const v_post mdoc_valids[MDOC_MAX - MDOC_Dd] = {
 	post_defaults,	/* Pa */
 	post_rv,	/* Rv */
 	post_st,	/* St */
-	post_delim_nb,	/* Va */
+	post_tag,	/* Va */
 	post_delim_nb,	/* Vt */
 	post_xr,	/* Xr */
 	NULL,		/* %A */
