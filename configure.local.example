@@ -209,14 +209,28 @@ INSTALL_LIB="${INSTALL} -m 0444"
 INSTALL_MAN="${INSTALL} -m 0444"
 INSTALL_DATA="${INSTALL} -m 0444"
 
-# When using the "homebrew" package manager on Mac OS X, the actual
-# manuals are located in a so-called "cellar" and only symlinked
-# into the manual trees.  To allow mandoc to follow such symlinks,
-# you have to specify the physical location of the cellar as returned
-# by realpath(3), for example:
+# By default, makewhatis(8) can only read from the paths passed on the
+# command line or configured in man.conf(5).
+# But some package managers on some operating systems store manual pages
+# in separate "cellar" or "store" directories and only symlink them
+# into the manual trees.
+# To support one or more such package managers, give makewhatis(8)
+# read access to the cellars and stores on your system, in the form
+# of a colon-separated path:
 
+# Homebrow package manager on Mac OS X:
 PREFIX="/usr/local"
-HOMEBREWDIR="${PREFIX}/Cellar"
+READ_ALLOWED_PATH="${PREFIX}/Cellar"
+
+# Nix package manager and/or NixOS Linux distribution:
+READ_ALLOWED_PATH="/nix/store"
+
+# GNU Guix package manager and/or GNU Guix Linux distribution:
+READ_ALLOWED_PATH="/gnu/store"
+
+# If multiple package managers are used concurrently:
+PREFIX="/usr/local"
+READ_ALLOWED_PATH="/nix/store:${PREFIX}/Cellar"
 
 # --- user settings for the mandoc(3) library --------------------------
 

@@ -165,6 +165,9 @@ static	void	 putkey(const struct mpage *, char *, uint64_t);
 static	void	 putkeys(const struct mpage *, char *, size_t, uint64_t);
 static	void	 putmdockey(const struct mpage *,
 			const struct roff_node *, uint64_t, int);
+#ifdef READ_ALLOWED_PATH
+static	int	 read_allowed(const char *);
+#endif
 static	int	 render_string(char **, size_t *);
 static	void	 say(const char *, const char *, ...)
 			__attribute__((__format__ (__printf__, 2, 3)));
@@ -612,8 +615,8 @@ treescan(void)
 				continue;
 			}
 			if (strncmp(buf, basedir, basedir_len) != 0
-#ifdef HOMEBREWDIR
-			    && strncmp(buf, HOMEBREWDIR, strlen(HOMEBREWDIR))
+#ifdef READ_ALLOWED_PATH
+			    && !read_allowed(buf)
 #endif
 			) {
 				if (warnings) say("",
@@ -823,8 +826,8 @@ filescan(const char *infile)
 		start = usefile;
 	else if (strncmp(usefile, basedir, basedir_len) == 0)
 		start = usefile + basedir_len;
-#ifdef HOMEBREWDIR
-	else if (strncmp(usefile, HOMEBREWDIR, strlen(HOMEBREWDIR)) == 0)
+#ifdef READ_ALLOWED_PATH
+	else if (read_allowed(usefile))
 		start = usefile;
 #endif
 	else {
@@ -2380,6 +2383,25 @@ set_basedir(const char *targetdir, int report_baddir)
 	}
 	return 1;
 }
+
+#ifdef READ_ALLOWED_PATH
+static int
+read_allowed(const char *candidate)
+{
+	const char	*cp;
+	size_t		 len;
+
+	for (cp = READ_ALLOWED_PATH;; cp += len) {
+		while (*cp == ':')
+			cp++;
+		if (*cp == '\0')
+			return 0;
+		len = strcspn(cp, ":");
+		if (strncmp(candidate, cp, len) == 0)
+			return 1;
+	}
+}
+#endif
 
 static void
 say(const char *file, const char *format, ...)
