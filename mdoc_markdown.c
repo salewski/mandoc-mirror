@@ -603,16 +603,18 @@ md_word(const char *s)
 				md_rawword("markdown");
 				continue;
 			case ESCAPE_FONTBOLD:
+			case ESCAPE_FONTCB:
 				nextfont = "**";
 				break;
 			case ESCAPE_FONTITALIC:
+			case ESCAPE_FONTCI:
 				nextfont = "*";
 				break;
 			case ESCAPE_FONTBI:
 				nextfont = "***";
 				break;
 			case ESCAPE_FONT:
-			case ESCAPE_FONTCW:
+			case ESCAPE_FONTCR:
 			case ESCAPE_FONTROMAN:
 				nextfont = "";
 				break;

@@ -239,7 +239,9 @@ check_tag(struct roff_node *n, struct roff_node *nt)
 			case ESCAPE_FONTITALIC:
 			case ESCAPE_FONTBI:
 			case ESCAPE_FONTROMAN:
-			case ESCAPE_FONTCW:
+			case ESCAPE_FONTCR:
+			case ESCAPE_FONTCB:
+			case ESCAPE_FONTCI:
 			case ESCAPE_FONTPREV:
 			case ESCAPE_IGNORE:
 				break;

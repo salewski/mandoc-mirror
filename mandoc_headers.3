@@ -1,6 +1,6 @@
 .\"	$Id$
 .\"
-.\" Copyright (c) 2014-2020 Ingo Schwarze <schwarze@openbsd.org>
+.\" Copyright (c) 2014-2021 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -167,7 +167,11 @@ parse tree; can be used everywhere.
 Requires
 .In sys/types.h
 for
-.Vt size_t .
+.Vt size_t
+and
+.Qq Pa mandoc.h
+for
+.Vt enum mandoc_esc .
 .Pp
 Provides
 .Vt enum tbl_cellt ,

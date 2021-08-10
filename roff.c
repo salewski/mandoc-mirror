@@ -3667,7 +3667,9 @@ roff_char(ROFF_ARGS)
 		case ESCAPE_FONTITALIC:
 		case ESCAPE_FONTBOLD:
 		case ESCAPE_FONTBI:
-		case ESCAPE_FONTCW:
+		case ESCAPE_FONTCR:
+		case ESCAPE_FONTCB:
+		case ESCAPE_FONTCI:
 		case ESCAPE_FONTPREV:
 			font++;
 			break;

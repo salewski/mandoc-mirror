@@ -589,16 +589,18 @@ term_word(struct termp *p, const char *word)
 			uc = *seq;
 			break;
 		case ESCAPE_FONTBOLD:
+		case ESCAPE_FONTCB:
 			term_fontrepl(p, TERMFONT_BOLD);
 			continue;
 		case ESCAPE_FONTITALIC:
+		case ESCAPE_FONTCI:
 			term_fontrepl(p, TERMFONT_UNDER);
 			continue;
 		case ESCAPE_FONTBI:
 			term_fontrepl(p, TERMFONT_BI);
 			continue;
 		case ESCAPE_FONT:
-		case ESCAPE_FONTCW:
+		case ESCAPE_FONTCR:
 		case ESCAPE_FONTROMAN:
 			term_fontrepl(p, TERMFONT_NONE);
 			continue;

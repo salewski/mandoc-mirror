@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
  * Copyright (c) 2009, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011-2020 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011-2021 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -923,10 +923,24 @@ tbl_word(struct termp *tp, const struct tbl_dat *dp)
 	int		 prev_font;
 
 	prev_font = tp->fonti;
-	if (dp->layout->flags & TBL_CELL_BOLD)
-		term_fontpush(tp, TERMFONT_BOLD);
-	else if (dp->layout->flags & TBL_CELL_ITALIC)
-		term_fontpush(tp, TERMFONT_UNDER);
+	switch (dp->layout->font) {
+		case ESCAPE_FONTBI:
+			term_fontpush(tp, TERMFONT_BI);
+			break;
+		case ESCAPE_FONTBOLD:
+		case ESCAPE_FONTCB:
+			term_fontpush(tp, TERMFONT_BOLD);
+			break;
+		case ESCAPE_FONTITALIC:
+		case ESCAPE_FONTCI:
+			term_fontpush(tp, TERMFONT_UNDER);
+			break;
+		case ESCAPE_FONTROMAN:
+		case ESCAPE_FONTCR:
+			break;
+		default:
+			abort();
+	}
 
 	term_word(tp, dp->string);
 

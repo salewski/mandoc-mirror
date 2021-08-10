@@ -1,7 +1,7 @@
 /* $Id$ */
 /*
- * Copyright (c) 2011-2015, 2017-2020 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2008-2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2011-2015, 2017-2021 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -240,8 +240,10 @@ html_setfont(struct html *h, enum mandoc_esc font)
 	case ESCAPE_FONTITALIC:
 	case ESCAPE_FONTBOLD:
 	case ESCAPE_FONTBI:
-	case ESCAPE_FONTCW:
 	case ESCAPE_FONTROMAN:
+	case ESCAPE_FONTCR:
+	case ESCAPE_FONTCB:
+	case ESCAPE_FONTCI:
 		break;
 	case ESCAPE_FONT:
 		font = ESCAPE_FONTROMAN;
@@ -272,8 +274,16 @@ print_metaf(struct html *h)
 		h->metaf = print_otag(h, TAG_B, "");
 		print_otag(h, TAG_I, "");
 		break;
-	case ESCAPE_FONTCW:
+	case ESCAPE_FONTCR:
 		h->metaf = print_otag(h, TAG_SPAN, "c", "Li");
+		break;
+	case ESCAPE_FONTCB:
+		h->metaf = print_otag(h, TAG_SPAN, "c", "Li");
+		print_otag(h, TAG_B, "");
+		break;
+	case ESCAPE_FONTCI:
+		h->metaf = print_otag(h, TAG_SPAN, "c", "Li");
+		print_otag(h, TAG_I, "");
 		break;
 	default:
 		break;
@@ -503,8 +513,10 @@ print_encode(struct html *h, const char *p, const char *pend, int norecurse)
 		case ESCAPE_FONTBOLD:
 		case ESCAPE_FONTITALIC:
 		case ESCAPE_FONTBI:
-		case ESCAPE_FONTCW:
 		case ESCAPE_FONTROMAN:
+		case ESCAPE_FONTCR:
+		case ESCAPE_FONTCB:
+		case ESCAPE_FONTCI:
 			if (0 == norecurse) {
 				h->flags |= HTML_NOSPACE;
 				if (html_setfont(h, esc))

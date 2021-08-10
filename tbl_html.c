@@ -243,10 +243,7 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 		    "border-right-style", rborder);
 		if (dp->string != NULL) {
 			save_font = h->metac;
-			if (dp->layout->flags & TBL_CELL_BOLD)
-				html_setfont(h, ESCAPE_FONTBOLD);
-			else if (dp->layout->flags & TBL_CELL_ITALIC)
-				html_setfont(h, ESCAPE_FONTITALIC);
+			html_setfont(h, dp->layout->font);
 			if (dp->layout->pos == TBL_CELL_LONG)
 				print_text(h, "\\[u2003]");  /* em space */
 			print_text(h, dp->string);

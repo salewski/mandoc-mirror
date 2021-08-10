@@ -291,7 +291,9 @@ enum	mandoc_esc {
 	ESCAPE_FONTITALIC, /* italic font mode */
 	ESCAPE_FONTBI, /* bold italic font mode */
 	ESCAPE_FONTROMAN, /* roman font mode */
-	ESCAPE_FONTCW, /* constant width font mode */
+	ESCAPE_FONTCR, /* constant width font mode */
+	ESCAPE_FONTCB, /* constant width bold font mode */
+	ESCAPE_FONTCI, /* constant width italic font mode */
 	ESCAPE_FONTPREV, /* previous font mode */
 	ESCAPE_NUMBERED, /* a numbered glyph */
 	ESCAPE_UNICODE, /* a unicode codepoint */

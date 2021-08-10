@@ -112,9 +112,11 @@ roff_term_pre_ft(ROFF_TERM_ARGS)
 	cp = n->child->string;
 	switch (mandoc_font(cp, (int)strlen(cp))) {
 	case ESCAPE_FONTBOLD:
+	case ESCAPE_FONTCB:
 		term_fontrepl(p, TERMFONT_BOLD);
 		break;
 	case ESCAPE_FONTITALIC:
+	case ESCAPE_FONTCI:
 		term_fontrepl(p, TERMFONT_UNDER);
 		break;
 	case ESCAPE_FONTBI:
@@ -124,7 +126,7 @@ roff_term_pre_ft(ROFF_TERM_ARGS)
 		term_fontlast(p);
 		break;
 	case ESCAPE_FONTROMAN:
-	case ESCAPE_FONTCW:
+	case ESCAPE_FONTCR:
 		term_fontrepl(p, TERMFONT_NONE);
 		break;
 	default:
