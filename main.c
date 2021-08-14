@@ -968,6 +968,9 @@ parse(struct mparse *mp, int fd, const char *file,
 		case OUTT_PS:
 			terminal_man(outst->outdata, meta);
 			break;
+		case OUTT_MARKDOWN:
+			mandoc_msg(MANDOCERR_MAN_TMARKDOWN, 0, 0, NULL);
+			break;
 		default:
 			break;
 		}

@@ -257,6 +257,7 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"bad option value",
 	"duplicate option value",
 	"no such tag",
+	"-Tmarkdown unsupported for man(7) input",
 
 	/* system errors */
 	NULL,

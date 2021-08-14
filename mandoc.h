@@ -257,6 +257,7 @@ enum	mandocerr {
 	MANDOCERR_BADVAL_BAD, /* bad argument value */
 	MANDOCERR_BADVAL_DUPE, /* duplicate argument value */
 	MANDOCERR_TAG, /* no such tag */
+	MANDOCERR_MAN_TMARKDOWN, /* -Tmarkdown unsupported for man(7) input */
 
 	MANDOCERR_SYSERR, /* ===== start of system errors ===== */
 

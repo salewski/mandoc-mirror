@@ -2371,6 +2371,14 @@ The
 .Fl O Cm tag
 option was specified but the tag was not found in any of the displayed
 manual pages.
+.It Sy "\-Tmarkdown unsupported for man(7) input"
+.Pq man
+The
+.Fl T Cm markdown
+option was specified but an input file uses the
+.Xr man 7
+language.
+No output is produced for that input file.
 .El
 .Sh SEE ALSO
 .Xr apropos 1 ,
