@@ -629,6 +629,8 @@ treescan(void)
 					say(path, "&stat");
 				continue;
 			}
+			if ((ff->fts_statp->st_mode & S_IFMT) != S_IFREG)
+				continue;
 			/* FALLTHROUGH */
 
 		/*
