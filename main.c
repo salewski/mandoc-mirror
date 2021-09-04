@@ -132,7 +132,7 @@ main(int argc, char *argv[])
 	struct mparse	*mp;		/* Opaque parser object. */
 	const char	*conf_file;	/* -C: alternate config file. */
 	const char	*os_s;		/* -I: Operating system for display. */
-	const char	*progname, *sec;
+	const char	*progname, *sec, *ep;
 	char		*defpaths;	/* -M: override manpaths. */
 	char		*auxpaths;	/* -m: additional manpaths. */
 	char		*oarg;		/* -O: output option string. */
@@ -536,11 +536,16 @@ main(int argc, char *argv[])
 					sec++; /* Prefer without suffix. */
 				if (*sec != '/')
 					prio += 10; /* Wrong dir name. */
-				if (search.sec != NULL &&
-				    (strlen(sec) <= ssz  + 3 ||
-				     strcmp(sec + strlen(sec) - ssz,
-				      search.sec) != 0))
-					prio += 20; /* Wrong file ext. */
+				if (search.sec != NULL) {
+					ep = strchr(sec, '\0');
+					if (ep - sec > 3 &&
+					    strncmp(ep - 3, ".gz", 3) == 0)
+						ep -= 3;
+					if ((size_t)(ep - sec) < ssz + 3 ||
+					    strncmp(ep - ssz, search.sec,
+					     ssz) != 0)      /* Wrong file */
+						prio += 20;  /* extension. */
+				}
 				if (prio >= best_prio)
 					continue;
 				best_prio = prio;
