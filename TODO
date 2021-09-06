@@ -228,6 +228,10 @@ are mere guesses, and some may be wrong.
 
 --- missing tbl features -----------------------------------------------
 
+- fully support the "nospaces" option;
+  Oliver Corff mentioned usefulness 20 Jun 2021 09:41:06 +0200
+  loc *  exist *  algo *  size *  imp *
+
 - vertical centering in cells vertically spanned with ^
   pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
   loc *  exist ***  algo ***  size **  imp *
@@ -282,8 +286,14 @@ are mere guesses, and some may be wrong.
 
 --- missing misc features ----------------------------------------------
 
+- let makewhatis(8) follow symbolic links to dirs below READ_ALLOWED_PATH
+  this may be feasible using fts_set(FTS_FOLLOW)
+  mail to sternenseemann 19 Aug 2021 19:11:50 +0200
+  loc *  exist **  algo **  size *  imp **
+
 - -T man does not handle eqn(7) and tbl(7)
   Stephen Gregoratto 16 Feb 2020 01:28:07 +1100
+  also https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=901636
   loc **  exist **  algo **  size ***  imp **
 
 - man -ks 1,8 route; kn@ Jul 13, 2018 orally
@@ -456,7 +466,7 @@ are mere guesses, and some may be wrong.
 
 - HTML formatting of .nf should avoid <br/>
   and not close and re-open <pre> on .P
-  Reuben ua Brig  27 Jun 2021 17:26:29 +1000
+  my mail to ports@ 27 Jun 2021 16:09:20 +0200
   loc **  exist **  algo *  size *  imp **
 
 - get rid of the last handful of style= attributes such that
