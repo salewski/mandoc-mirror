@@ -47,15 +47,15 @@ getdata(struct tbl_node *tbl, struct tbl_span *dp,
 	struct tbl_cell	*cp;
 	struct tbl_span	*pdp;
 	const char	*ccp;
-	int		 sv;
+	int		 startpos, endpos;
 
 	/*
 	 * Determine the length of the string in the cell
 	 * and advance the parse point to the end of the cell.
 	 */
 
-	sv = *pos;
-	ccp = p + sv;
+	startpos = *pos;
+	ccp = p + startpos;
 	while (*ccp != '\0' && *ccp != tbl->opts.tab)
 		if (*ccp++ == '\\')
 			mandoc_escape(&ccp, NULL, NULL);
@@ -85,7 +85,7 @@ getdata(struct tbl_node *tbl, struct tbl_span *dp,
 			dp->layout->last = cp;
 		} else {
 			mandoc_msg(MANDOCERR_TBLDATA_EXTRA,
-			    ln, sv, "%s", p + sv);
+			    ln, startpos, "%s", p + startpos);
 			while (p[*pos] != '\0')
 				(*pos)++;
 			return;
@@ -110,7 +110,8 @@ getdata(struct tbl_node *tbl, struct tbl_span *dp,
 	 */
 
 	if (cp->pos == TBL_CELL_DOWN ||
-	    (*pos - sv == 2 && p[sv] == '\\' && p[sv + 1] == '^')) {
+	    (*pos - startpos == 2 &&
+	     p[startpos] == '\\' && p[startpos + 1] == '^')) {
 		pdp = dp;
 		while ((pdp = pdp->prev) != NULL) {
 			pdat = pdp->first;
@@ -152,12 +153,20 @@ getdata(struct tbl_node *tbl, struct tbl_span *dp,
 	 * until a standalone `T}', are included in our cell.
 	 */
 
-	if (*pos - sv == 2 && p[sv] == 'T' && p[sv + 1] == '{') {
+	if (*pos - startpos == 2 &&
+	    p[startpos] == 'T' && p[startpos + 1] == '{') {
 		tbl->part = TBL_PART_CDATA;
 		return;
 	}
 
-	dat->string = mandoc_strndup(p + sv, *pos - sv);
+	endpos = *pos;
+	if (dp->opts->opts & TBL_OPT_NOSPACE) {
+		while (p[startpos] == ' ')
+			startpos++;
+		while (endpos > startpos && p[endpos - 1] == ' ')
+			endpos--;
+	}
+	dat->string = mandoc_strndup(p + startpos, endpos - startpos);
 
 	if (p[*pos] != '\0')
 		(*pos)++;
@@ -178,7 +187,7 @@ getdata(struct tbl_node *tbl, struct tbl_span *dp,
 	    dat->layout->pos == TBL_CELL_DOWN) &&
 	    dat->pos == TBL_DATA_DATA && *dat->string != '\0')
 		mandoc_msg(MANDOCERR_TBLDATA_SPAN,
-		    ln, sv, "%s", dat->string);
+		    ln, startpos, "%s", dat->string);
 }
 
 void
