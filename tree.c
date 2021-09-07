@@ -472,6 +472,8 @@ print_span(const struct tbl_span *sp, int indent)
 				printf("%d", cp->col);
 				print_cellt(dp->layout->pos);
 				switch (cp->font) {
+				case ESCAPE_FONTROMAN:
+					break;
 				case ESCAPE_FONTBOLD:
 					putchar('b');
 					break;
