@@ -115,10 +115,13 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 	const struct tbl_dat	*dp;
 	const struct tbl_cell	*cp;
 	const struct tbl_span	*psp;
+	const struct roffcol	*col;
 	struct tag		*tt;
 	const char		*hspans, *vspans, *halign, *valign;
 	const char		*bborder, *lborder, *rborder;
+	const char		*ccp;
 	char			 hbuf[4], vbuf[4];
+	size_t			 sz;
 	enum mandoc_esc		 save_font;
 	int			 i;
 
@@ -252,6 +255,27 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 			if (dp->layout->pos == TBL_CELL_LONG)
 				print_text(h, "\\[u2003]");  /* em space */
 			print_text(h, dp->string);
+			if (dp->layout->pos == TBL_CELL_NUMBER) {
+				col = h->tbl.cols + dp->layout->col;
+				if (col->decimal < col->nwidth) {
+					if ((ccp = strrchr(dp->string,
+					    sp->opts->decimal)) == NULL) {
+						/* Punctuation space. */
+						print_text(h, "\\[u2008]");
+						ccp = strchr(dp->string, '\0');
+					} else
+						ccp++;
+					sz = col->nwidth - col->decimal;
+					while (--sz > 0) {
+						if (*ccp == '\0')
+							/* Figure space. */
+							print_text(h,
+							    "\\[u2007]");
+						else
+							ccp++;
+					}
+				}
+			}
 			html_setfont(h, save_font);
 		}
 	}
