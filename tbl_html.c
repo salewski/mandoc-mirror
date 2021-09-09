@@ -241,7 +241,12 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 		    "vertical-align", valign,
 		    "text-align", halign,
 		    "border-right-style", rborder);
-		if (dp->string != NULL) {
+		if (dp->layout->pos == TBL_CELL_HORIZ ||
+		    dp->layout->pos == TBL_CELL_DHORIZ ||
+		    dp->pos == TBL_DATA_HORIZ ||
+		    dp->pos == TBL_DATA_DHORIZ)
+			print_otag(h, TAG_HR, "");
+		else if (dp->string != NULL) {
 			save_font = h->metac;
 			html_setfont(h, dp->layout->font);
 			if (dp->layout->pos == TBL_CELL_LONG)

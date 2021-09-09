@@ -51,6 +51,7 @@ enum	htmltag {
 	TAG_SPAN,
 	TAG_VAR,
 	TAG_BR,
+	TAG_HR,
 	TAG_MARK,
 	TAG_MATH,
 	TAG_MROW,
