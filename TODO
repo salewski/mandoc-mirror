@@ -58,6 +58,16 @@ are mere guesses, and some may be wrong.
   feature of not explicitly specifying the last table column.
   loc **  exist *  algo **  size *  imp ***
 
+- eqn(7) delimiters cause conditional lines to misbehave
+  nabijaczleweli 8 Sep 2021 15:24:48 +0200
+  loc *  exist ***  algo ***  size *  imp *
+
+- roff.c, roff_expand() should not remove blanks before comments
+  to Oliver Corff, Sep 7, 2021
+  loc *  exist *  algo *  size *  imp *
+  but watch out for regressions in the high-level parsers
+  maybe it should not even remove comments? - consider T{\"
+
 
 ************************************************************************
 * missing features
@@ -227,10 +237,6 @@ are mere guesses, and some may be wrong.
   loc **  exist *  algo *  size **  imp *
 
 --- missing tbl features -----------------------------------------------
-
-- fully support the "nospaces" option;
-  Oliver Corff mentioned usefulness 20 Jun 2021 09:41:06 +0200
-  loc *  exist *  algo *  size *  imp *
 
 - vertical centering in cells vertically spanned with ^
   pali dot rohar at gmail dot com 16 Jul 2018 13:03:35 +0200
@@ -459,6 +465,8 @@ are mere guesses, and some may be wrong.
 
 - make the HTML scaffolding customozable with -O skip=...
   mail to Oliver Corff  3 Jun 2021 17:28:02 +0200
+  more feedback from Oliver  3 Jun 2021 18:27:56 +0200
+  more feedback from Oliver  3 Jun 2021 23:37:18 +0200
 
 - .Bd -unfilled should not use monospaced font
   anton@  4 Mar 2021 08:19:35 +0100
@@ -497,12 +505,6 @@ are mere guesses, and some may be wrong.
   Observed by an Anonymous Coward on undeadly.org:
   http://undeadly.org/cgi?action=article&sid=20140925064244&pid=1
   loc *  exist *  algo **  size *  imp ***
-
-- implement the tbl(7) layout "n" specifier for HTML output,
-  probably by manual alignment, inserting adequate numbers of
-  digit-width spaces, similar to tbl_term.c, tbl_number()
-  Oliver Corff 16 May 2021 20:29:00 +0200
-  loc **  exist **  algo **  size *  imp **
 
 - generate <img> tags in HTML
   idea from florian@  Tue, 7 Apr 2015 00:26:28 +0000
