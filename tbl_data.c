@@ -147,17 +147,7 @@ getdata(struct tbl_node *tbl, struct tbl_span *dp,
 		dp->last->next = dat;
 	dp->last = dat;
 
-	/*
-	 * Check for a continued-data scope opening.  This consists of a
-	 * trailing `T{' at the end of the line.  Subsequent lines,
-	 * until a standalone `T}', are included in our cell.
-	 */
-
-	if (*pos - startpos == 2 &&
-	    p[startpos] == 'T' && p[startpos + 1] == '{') {
-		tbl->part = TBL_PART_CDATA;
-		return;
-	}
+	/* Strip leading and trailing spaces, if requested. */
 
 	endpos = *pos;
 	if (dp->opts->opts & TBL_OPT_NOSPACE) {
@@ -166,6 +156,19 @@ getdata(struct tbl_node *tbl, struct tbl_span *dp,
 		while (endpos > startpos && p[endpos - 1] == ' ')
 			endpos--;
 	}
+
+	/*
+	 * Check for a continued-data scope opening.  This consists of a
+	 * trailing `T{' at the end of the line.  Subsequent lines,
+	 * until a standalone `T}', are included in our cell.
+	 */
+
+	if (endpos - startpos == 2 &&
+	    p[startpos] == 'T' && p[startpos + 1] == '{') {
+		tbl->part = TBL_PART_CDATA;
+		return;
+	}
+
 	dat->string = mandoc_strndup(p + startpos, endpos - startpos);
 
 	if (p[*pos] != '\0')
