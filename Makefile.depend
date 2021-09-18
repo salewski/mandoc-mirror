@@ -58,7 +58,7 @@ mdoc_state.o: mdoc_state.c config.h mandoc.h roff.h mdoc.h libmandoc.h roff_int.
 mdoc_term.o: mdoc_term.c config.h mandoc_aux.h roff.h mdoc.h out.h term.h term_tag.h main.h
 mdoc_validate.o: mdoc_validate.c config.h mandoc_aux.h mandoc.h mandoc_xr.h roff.h mdoc.h libmandoc.h roff_int.h libmdoc.h tag.h
 msec.o: msec.c config.h mandoc.h libmandoc.h msec.in
-out.o: out.c config.h mandoc_aux.h tbl.h out.h
+out.o: out.c config.h mandoc_aux.h mandoc.h tbl.h out.h
 preconv.o: preconv.c config.h mandoc.h roff.h mandoc_parse.h libmandoc.h
 read.o: read.c config.h mandoc_aux.h mandoc.h roff.h mdoc.h man.h mandoc_parse.h libmandoc.h roff_int.h tag.h
 roff.o: roff.c config.h mandoc_aux.h mandoc_ohash.h compat_ohash.h mandoc.h roff.h mandoc_parse.h libmandoc.h roff_int.h tbl_parse.h eqn_parse.h predefs.in
