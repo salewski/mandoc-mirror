@@ -2,7 +2,7 @@
 #
 # $Id$
 #
-# Copyright (c) 2017, 2018, 2019, 2020 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2017,2018,2019,2020,2021 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -261,6 +261,7 @@ for my $test (@regress_tests) {
 	my $o = "$test->{NAME}.mandoc_ascii";
 	my $w = "$test->{NAME}.out_ascii";
 	my $to = "$test->{NAME}.mandoc_tag";
+	my $tos = "$test->{NAME}.mandoc_tag_s";
 	my $tw = "$test->{NAME}.out_tag";
 	my $diff_ascii;
 	if ($targets{tag} && $tag_tests{$test->{NAME}} &&
@@ -273,8 +274,8 @@ for my $test (@regress_tests) {
 		print "@cmd\n" if $targets{verbose};
 		system @cmd
 		    and fail $test->{NAME}, 'tag:man';
-		system qw(sed -i), 's/ .*\// /', $to;
-		system @diff, $tw, $to
+		system "sed 's: .*/: :' $to > $tos";
+		system @diff, $tw, $tos
 		    and fail $test->{NAME}, 'tag:diff';
 		print "." unless $targets{verbose};
 		$diff_ascii = $targets{ascii};
@@ -309,8 +310,8 @@ for my $test (@regress_tests) {
 		print "." unless $targets{verbose};
 	}
 	if ($targets{clean}) {
-		print "rm $o $to $m $mo\n" if $targets{verbose};
-		$count_rm += unlink $o, $to, $m, $mo;
+		print "rm $o $to $tos $m $mo\n" if $targets{verbose};
+		$count_rm += unlink $o, $to, $tos, $m, $mo;
 	}
 }
 if ($targets{ascii} || $targets{tag} || $targets{man}) {
