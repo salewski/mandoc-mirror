@@ -96,7 +96,7 @@ OSENUM=MANDOC_OS_OTHER
 # If you do not want uname(3) to be called but instead want a fixed
 # string to be used, use the following line:
 
-OSNAME="OpenBSD 6.5"
+OSNAME="OpenBSD 7.0"
 
 # The following installation directories are used.
 # It is possible to set only one or a few of these variables,
