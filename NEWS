@@ -65,8 +65,9 @@ Changes in version 1.14.6, released on September XXX, 2021
    because that test was too fragile; just use "cc" by default
  * configure: various simplifications and improved robustness
  * configure: only compile compat_*.c implementations that are needed
- * configure: provide a feature test for __attribute__(())
+ * configure: provide feature tests for __attribute__(()) and mkstemps(3)
  * compat_*: sync with upstreams for security, functionality, and style
+ * in regress.pl, avoid the non-portable options sed(1) -i and echo(1) -n
  * in the regression suite, avoid file names that differ only by case
     --- MINOR FUNCTIONAL IMPROVEMENTS ---
  * man(1) -h: for pages lacking a SYNOPSIS, show the NAME section
