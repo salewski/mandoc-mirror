@@ -2,7 +2,7 @@
 #
 # $Id$
 #
-# Copyright (c) 2014-2020 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2014-2021 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -68,6 +68,7 @@ HAVE_GETSUBOPT=
 HAVE_ISBLANK=
 HAVE_LESS_T=
 HAVE_MKDTEMP=
+HAVE_MKSTEMPS=
 HAVE_NANOSLEEP=
 HAVE_NTOHL=
 HAVE_O_DIRECTORY=
@@ -307,6 +308,7 @@ runtest getline		GETLINE		|| true
 runtest getsubopt	GETSUBOPT	"" -D_GNU_SOURCE || true
 runtest isblank		ISBLANK		|| true
 runtest mkdtemp		MKDTEMP		|| true
+runtest mkstemps	MKSTEMPS	|| true
 runtest nanosleep	NANOSLEEP	"${LD_NANOSLEEP}" "-lrt" || true
 runtest ntohl		NTOHL		|| true
 runtest O_DIRECTORY	O_DIRECTORY	|| true
@@ -483,6 +485,7 @@ cat << __HEREDOC__
 #define HAVE_ISBLANK ${HAVE_ISBLANK}
 #define HAVE_LESS_T ${HAVE_LESS_T}
 #define HAVE_MKDTEMP ${HAVE_MKDTEMP}
+#define HAVE_MKSTEMPS ${HAVE_MKSTEMPS}
 #define HAVE_NTOHL ${HAVE_NTOHL}
 #define HAVE_PLEDGE ${HAVE_PLEDGE}
 #define HAVE_PROGNAME ${HAVE_PROGNAME}
@@ -542,6 +545,10 @@ fi
 if [ ${HAVE_MKDTEMP} -eq 0 ]; then
 	echo "extern	char	 *mkdtemp(char *);"
 	MANDOC_COBJS="${MANDOC_COBJS} compat_mkdtemp.o"
+fi
+if [ ${HAVE_MKSTEMPS} -eq 0 ]; then
+	echo "extern	int	  mkstemps(char *, int);"
+	MANDOC_COBJS="${MANDOC_COBJS} compat_mkstemps.o"
 fi
 if [ ${HAVE_OHASH} -eq 0 ]; then
 	MANDOC_COBJS="${MANDOC_COBJS} compat_ohash.o"

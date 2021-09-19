@@ -9,6 +9,7 @@ compat_getline.o: compat_getline.c config.h
 compat_getsubopt.o: compat_getsubopt.c config.h
 compat_isblank.o: compat_isblank.c config.h
 compat_mkdtemp.o: compat_mkdtemp.c config.h
+compat_mkstemps.o: compat_mkstemps.c config.h
 compat_ohash.o: compat_ohash.c config.h compat_ohash.h
 compat_progname.o: compat_progname.c config.h
 compat_reallocarray.o: compat_reallocarray.c config.h

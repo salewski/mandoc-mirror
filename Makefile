@@ -1,6 +1,6 @@
 # $Id$
 #
-# Copyright (c) 2011, 2013-2020 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2011, 2013-2021 Ingo Schwarze <schwarze@openbsd.org>
 # Copyright (c) 2010, 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -30,6 +30,7 @@ TESTSRCS	 = test-attribute.c \
 		   test-getsubopt.c \
 		   test-isblank.c \
 		   test-mkdtemp.c \
+		   test-mkstemps.c \
 		   test-nanosleep.c \
 		   test-noop.c \
 		   test-ntohl.c \
@@ -66,6 +67,7 @@ SRCS		 = arch.c \
 		   compat_getsubopt.c \
 		   compat_isblank.c \
 		   compat_mkdtemp.c \
+		   compat_mkstemps.c \
 		   compat_ohash.c \
 		   compat_progname.c \
 		   compat_reallocarray.c \
@@ -257,6 +259,7 @@ ALL_COBJS	 = compat_err.o \
 		   compat_getsubopt.o \
 		   compat_isblank.o \
 		   compat_mkdtemp.o \
+		   compat_mkstemps.o \
 		   compat_ohash.o \
 		   compat_progname.o \
 		   compat_reallocarray.o \
