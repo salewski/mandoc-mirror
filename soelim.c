@@ -104,16 +104,16 @@ soelim_file(FILE *f, int flag)
 		}
 
 		walk = line + 3;
-		if (!isspace(*walk) && ((flag & C_OPTION) == 0)) {
+		if (!isspace((unsigned char)*walk) && (flag & C_OPTION) == 0) {
 			printf("%s", line);
 			continue;
 		}
 
-		while (isspace(*walk))
+		while (isspace((unsigned char)*walk))
 			walk++;
 
 		cp = walk;
-		while (*cp != '\0' && !isspace(*cp))
+		while (*cp != '\0' && !isspace((unsigned char)*cp))
 			cp++;
 		*cp = 0;
 		if (cp < line + linelen)
