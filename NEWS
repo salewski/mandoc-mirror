@@ -151,7 +151,7 @@ Changes in version 1.14.6, released on September XXX, 2021
  * Jonathan Gray (OpenBSD) for a patch and for bug reports
  * Otto Moerbeek (OpenBSD) and Alexander Gromnitsky for a patch
  * Armin Besirovic for a contribution to mandoc.css
- * Jason McIntyre (OpenBSD) for a manual page patch, suggesting a new feature,
+ * Jason McIntyre (OpenBSD) for manual page patches, suggesting a new feature,
    checking many patches, and useful discussions
  * Martin Vahlensieck for a manual page patch and reporting a code style issue
  * Frederic Cambus and Ian Sutton (OpenBSD) for a manual page patch
