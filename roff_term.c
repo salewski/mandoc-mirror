@@ -181,7 +181,7 @@ roff_term_pre_po(ROFF_TERM_ARGS)
 
 	/* Truncate to the range [-offset, 60], remember, and apply it. */
 	pouse = po >= 60 ? 60 :
-	    po < -(int)p->tcol->offset ? -p->tcol->offset : po;
+	    po < -(int)p->tcol->offset ? -(int)p->tcol->offset : po;
 	p->tcol->offset += pouse;
 }
 
