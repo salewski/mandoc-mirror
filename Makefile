@@ -513,7 +513,7 @@ Makefile.local config.h: configure $(TESTSRCS)
 	@exit 1
 
 libmandoc.a: $(MANDOC_COBJS) $(LIBMANDOC_OBJS)
-	ar rs $@ $(MANDOC_COBJS) $(LIBMANDOC_OBJS)
+	$(AR) rs $@ $(MANDOC_COBJS) $(LIBMANDOC_OBJS)
 
 mandoc: $(MAIN_OBJS) libmandoc.a
 	$(CC) -o $@ $(LDFLAGS) $(MAIN_OBJS) libmandoc.a $(LDADD)

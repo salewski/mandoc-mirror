@@ -1,6 +1,6 @@
 # $Id$
 #
-# Copyright (c) 2014-2019 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2014-2021 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -35,6 +35,11 @@ CC=gcc
 
 # IBM AIX may need:
 CC=xlc
+
+# By default, "ar" is used as the library archive builder, but it
+# can be overridden.  For example, NixOS may not have ar(1) in the
+# PATH, but may want to specify an absolute path instead.
+AR=ar
 
 # For -Tutf8 and -Tlocale operation, mandoc(1) requires <locale.h>
 # providing setlocale(3) and <wchar.h> providing wcwidth(3) and
