@@ -373,7 +373,7 @@ include Makefile.local
 
 # === DEPENDENCY HANDLING ==============================================
 
-all: mandoc demandoc soelim $(BUILD_TARGETS) Makefile.local
+all: mandoc man demandoc soelim $(BUILD_TARGETS) Makefile.local
 
 install: base-install $(INSTALL_TARGETS)
 
@@ -502,7 +502,7 @@ uninstall:
 	rm -f $(DESTDIR)$(INCLUDEDIR)/tbl.h
 	[ ! -e $(DESTDIR)$(INCLUDEDIR) ] || rmdir $(DESTDIR)$(INCLUDEDIR)
 
-regress: all man
+regress: all
 	cd regress && ./regress.pl
 
 regress-clean:
