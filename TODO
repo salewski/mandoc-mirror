@@ -292,6 +292,11 @@ are mere guesses, and some may be wrong.
 
 --- missing misc features ----------------------------------------------
 
+- conisder whether man(1) fallback code in main.c/fs_*() can find files
+  like man3c/fopen.3c (illumos, Solaris) and man3p/fopen.3p (POSIX)
+  discussed with Robert Mustacchi 21 Sep 2021 10:39:40 -0700
+  loc *  exist *  algo **  size *  imp **
+
 - let makewhatis(8) follow symbolic links to dirs below READ_ALLOWED_PATH
   this may be feasible using fts_set(FTS_FOLLOW)
   mail to sternenseemann 19 Aug 2021 19:11:50 +0200
