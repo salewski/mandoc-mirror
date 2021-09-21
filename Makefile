@@ -603,7 +603,7 @@ dist-install: dist
 .h.h.html:
 	highlight -I $< > $@
 
-.1.1.html .3.3.html .5.5.html .7.7.html .8.8.html: mandoc
-	mandoc -Thtml -Wwarning,stop \
+.1.1.html .3.3.html .5.5.html .7.7.html .8.8.html:
+	./mandoc -Thtml -Wwarning,stop \
 		-O 'style=/mandoc.css,man=/man/%N.%S.html;https://man.openbsd.org/%N.%S,includes=/includes/%I.html' \
 		$< > $@
