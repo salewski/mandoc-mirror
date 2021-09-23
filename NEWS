@@ -146,7 +146,8 @@ Changes in version 1.14.6, released on September XXX, 2021
    reports, for useful discussions, and for checking patches
  * Anton Lindqvist (OpenBSD) for two patches and a bug report
  * Marc Espie (OpenBSD) for a patch, many bug reports, and useful discussions
- * Lukas Epple (NixOS) for a patch, bug reports, and for checking patches
+ * Lukas Epple (NixOS) for a patch, bug reports, suggesting a minor
+   portability feature, checking patches, and extensive release testing
  * Abel Romero Perez for a patch, a bug report, and suggesting a new feature
  * nabijaczleweli for a patch and for suggesting feature improvements
  * Jonathan Gray (OpenBSD) for a patch and for bug reports
@@ -159,11 +160,14 @@ Changes in version 1.14.6, released on September XXX, 2021
  * Jan Schreiber for many bug reports found with afl(1)
  * G. Branden Robinson (GNU troff) for several bug reports, feature
    suggestions, and for checking many groff patches
- * Michael Stapelberg (Debian), Ian Ropers, Lorenzo Beretta, and Oliver Corff
-   for several bug reports and feature suggestions
+ * Michael Stapelberg (Debian) for several bug reports and feature
+   suggestions, and for extensive release testing
+ * Ian Ropers, Lorenzo Beretta, and Oliver Corff for several bug reports
+   and feature suggestions
  * Stephen Gregoratto for several bug reports
  * Theo de Raadt (OpenBSD) for two bug reports, checking a patch,
    and a useful discussion
+ * Thomas Klausner (NetBSD) for two bug reports and for release testing
  * Andreas Kahari and Jason A. Donenfeld for two bug reports
  * Soeren Tempel (Alpine Linux) for a bug report, suggesting a feature
    improvement, and checking two patches
@@ -172,16 +176,17 @@ Changes in version 1.14.6, released on September XXX, 2021
  * Todd Miller (OpenBSD) for a bug report, checking a patch,
    and a useful discussion
  * Andrew Fresh, Brian Callahan, Christian Weisgerber, Paul de Weerd (OpenBSD),
-   Havard Eidnes, Jason Thorpe, Thomas Klausner (NetBSD),
-   Yuri Pankov (FreeBSD), Bjarni Ingi Gislason, Chris Bennett,
-   Edgar Pettijohn, Eldred Habert, Jamie Landeg-Jones, Kazuo KUROI,
-   and Wynn Wolf Arbor for a bug report
+   Havard Eidnes, Jason Thorpe (NetBSD), Yuri Pankov (FreeBSD),
+   Bjarni Ingi Gislason, Chris Bennett, Edgar Pettijohn, Eldred Habert,
+   Jamie Landeg-Jones, Kazuo KUROI, and Wynn Wolf Arbor for a bug report
  * Theo Buehler (OpenBSD) for suggesting two feature impovements
    and for checking a patch
+ * Leah Neukirchen (Void Linux) for suggesting a feature impovement
+   and for release testing
  * Colin Watson (Debian) for suggesting a feature impovement
    and for checking groff patches
- * Matej Cepl (SUSE Linux), Leah Neukirchen (Void Linux), Matthew Martin,
-   Steffen Nurpmeso, and Tim Baumgard for suggesting a feature impovement
+ * Matej Cepl (SUSE Linux), Matthew Martin, Steffen Nurpmeso,
+   and Tim Baumgard for suggesting a feature impovement
  * Christos Zoulas (NetBSD) for a report regarding portability
  * Daniel Dickman (OpenBSD) for suggesting a portability improvement
  * Werner Lemberg (GNU troff) and Douglas McIlroy
@@ -190,6 +195,8 @@ Changes in version 1.14.6, released on September XXX, 2021
    for an additional regression test
  * Michal Nowak for reporting several code style issues
  * TJ Townsend (OpenBSD) for help with CSS
+ * Sevan Janiyan (NetBSD) and Robert Mustacchi (Illumos) 
+   for extensive release testing
  * Job Snijders, Kinichiro INOGUCHI, and Martijn van Duren (OpenBSD)
    for checking patches
  * Bertrand Garrigues and Ralph Corderoy (GNU troff) for checking groff patches
