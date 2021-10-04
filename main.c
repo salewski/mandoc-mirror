@@ -1286,6 +1286,7 @@ spawn_pager(struct outstate *outst, char *tag_target)
 	char		*argv[MAX_PAGER_ARGS];
 	const char	*pager;
 	char		*cp;
+	size_t		 wordlen;
 #if HAVE_LESS_T
 	size_t		 cmdlen;
 #endif
@@ -1300,7 +1301,6 @@ spawn_pager(struct outstate *outst, char *tag_target)
 		pager = getenv("PAGER");
 	if (pager == NULL || *pager == '\0')
 		pager = BINM_PAGER;
-	cp = mandoc_strdup(pager);
 
 	/*
 	 * Parse the pager command into words.
@@ -1308,16 +1308,12 @@ spawn_pager(struct outstate *outst, char *tag_target)
 	 */
 
 	argc = 0;
-	while (argc + 5 < MAX_PAGER_ARGS) {
-		argv[argc++] = cp;
-		cp = strchr(cp, ' ');
-		if (cp == NULL)
-			break;
-		*cp++ = '\0';
-		while (*cp == ' ')
-			cp++;
-		if (*cp == '\0')
-			break;
+	while (*pager != '\0' && argc + 5 < MAX_PAGER_ARGS) {
+		wordlen = strcspn(pager, " ");
+		argv[argc++] = mandoc_strndup(pager, wordlen);
+		pager += wordlen;
+		while (*pager == ' ')
+			pager++;
 	}
 
 	/* For less(1), use the tag file. */
@@ -1329,10 +1325,10 @@ spawn_pager(struct outstate *outst, char *tag_target)
 		cp = argv[0] + cmdlen - 4;
 		if (strcmp(cp, "less") == 0) {
 			argv[argc++] = mandoc_strdup("-T");
-			argv[argc++] = outst->tag_files->tfn;
+			argv[argc++] = mandoc_strdup(outst->tag_files->tfn);
 			if (tag_target != NULL) {
 				argv[argc++] = mandoc_strdup("-t");
-				argv[argc++] = tag_target;
+				argv[argc++] = mandoc_strdup(tag_target);
 				use_ofn = 0;
 			}
 		}
@@ -1343,7 +1339,7 @@ spawn_pager(struct outstate *outst, char *tag_target)
 			mandoc_asprintf(&argv[argc], "file://%s#%s",
 			    outst->tag_files->ofn, tag_target);
 		else
-			argv[argc] = outst->tag_files->ofn;
+			argv[argc] = mandoc_strdup(outst->tag_files->ofn);
 		argc++;
 	}
 	argv[argc] = NULL;
@@ -1355,6 +1351,8 @@ spawn_pager(struct outstate *outst, char *tag_target)
 	case 0:
 		break;
 	default:
+		while (argc > 0)
+			free(argv[--argc]);
 		(void)setpgid(pager_pid, 0);
 		(void)tcsetpgrp(STDOUT_FILENO, pager_pid);
 #if HAVE_PLEDGE
