@@ -516,6 +516,9 @@ main(int argc, char *argv[])
 				memcpy(res + ressz, resn,
 				    sizeof(*resn) * resnsz);
 				ressz += resnsz;
+				free(resn);
+				resn = NULL;
+				resnsz = 0;
 				continue;
 			}
 
@@ -554,6 +557,10 @@ main(int argc, char *argv[])
 			res = mandoc_reallocarray(res, ressz + 1,
 			    sizeof(*res));
 			memcpy(res + ressz++, resn + ib, sizeof(*resn));
+			memset(resn + ib, 0, sizeof(*resn));
+			mansearch_free(resn, resnsz);
+			resn = NULL;
+			resnsz = 0;
 		}
 
 	/* apropos(1), whatis(1): Process the full search expression. */
