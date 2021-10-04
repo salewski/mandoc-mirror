@@ -35,6 +35,7 @@ struct	roff_man {
 	struct ohash	 *mdocmac; /* Mdoc macro lookup table. */
 	struct ohash	 *manmac;  /* Man macro lookup table. */
 	const char	 *os_s;    /* Default operating system. */
+	char	 	 *os_r;    /* Operating system name at run time. */
 	struct roff_node *last;    /* The last node parsed. */
 	struct roff_node *last_es; /* The most recent Es node. */
 	int		  quick;   /* Abort parse early. */
