@@ -1,7 +1,7 @@
 /* $Id$ */
 /*
+ * Copyright (c) 2010-2021 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2010-2020 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -58,6 +58,7 @@ term_setcol(struct termp *p, size_t maxtcol)
 void
 term_free(struct termp *p)
 {
+	term_tab_free();
 	for (p->tcol = p->tcols; p->tcol < p->tcols + p->maxtcol; p->tcol++)
 		free(p->tcol->buf);
 	free(p->tcols);
