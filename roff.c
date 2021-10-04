@@ -3949,9 +3949,7 @@ roff_userdef(ROFF_ARGS)
 		r->mstacksz += 8;
 	}
 	ctx = r->mstack + r->mstackpos;
-	ctx->argsz = 0;
 	ctx->argc = 0;
-	ctx->argv = NULL;
 
 	/*
 	 * Collect pointers to macro argument strings,
