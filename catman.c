@@ -62,7 +62,7 @@ run_mandocd(int sockfd, const char *outtype, const char* defos)
 	else
 		execlp("mandocd", "mandocd", "-T", outtype,
 		    "-I", defos, sockfdstr, (char *)NULL);
-	err(1, "exec");
+	err(1, "exec(mandocd)");
 }
 
 ssize_t
