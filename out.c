@@ -247,13 +247,13 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp_first,
 				done = 1;
 				break;
 			} else
-				(*gp)->wanted -= width;
+				g->wanted -= width;
 		}
 		if (done) {
 			*gp = g->next;
 			free(g);
 		} else
-			gp = &(*gp)->next;
+			gp = &g->next;
 	}
 
 	colwidth = mandoc_reallocarray(NULL, maxcol + 1, sizeof(*colwidth));
@@ -326,7 +326,7 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp_first,
 				*gp = g->next;
 				free(g);
 			} else
-				gp = &(*gp)->next;
+				gp = &g->next;
 		}
 	}
 	free(colwidth);
@@ -553,7 +553,5 @@ tblcalc_number(struct rofftbl *tbl, struct roffcol *col,
 		col->nwidth = totsz;
 	if (col->nwidth > col->width)
 		col->width = col->nwidth;
-	fprintf(stderr, "N=%zu D=%zu I=%zu T=%zu %s\n",
-	    col->nwidth, col->decimal, intsz, totsz, dp->string);
 	return totsz;
 }
