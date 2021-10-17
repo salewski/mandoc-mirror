@@ -149,7 +149,6 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp_first,
 		 * to data cells in the data section.
 		 */
 
-		gp = &first_group;
 		for (dp = sp->first; dp != NULL; dp = dp->next) {
 			icol = dp->layout->col;
 			while (maxcol < icol + dp->hspans)
@@ -190,16 +189,16 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp_first,
 				continue;
 
 			/*
-			 * Build an ordered, singly linked list
+			 * Build a singly linked list
 			 * of all groups of columns joined by spans,
 			 * recording the minimum width for each group.
 			 */
 
-			while (*gp != NULL && ((*gp)->startcol < icol ||
-			    (*gp)->endcol < icol + dp->hspans))
+			gp = &first_group;
+			while (*gp != NULL && ((*gp)->startcol != icol ||
+			    (*gp)->endcol != icol + dp->hspans))
 				gp = &(*gp)->next;
-			if (*gp == NULL || (*gp)->startcol > icol ||
-                            (*gp)->endcol > icol + dp->hspans) {
+			if (*gp == NULL) {
 				g = mandoc_malloc(sizeof(*g));
 				g->next = *gp;
 				g->wanted = width;
@@ -554,5 +553,7 @@ tblcalc_number(struct rofftbl *tbl, struct roffcol *col,
 		col->nwidth = totsz;
 	if (col->nwidth > col->width)
 		col->width = col->nwidth;
+	fprintf(stderr, "N=%zu D=%zu I=%zu T=%zu %s\n",
+	    col->nwidth, col->decimal, intsz, totsz, dp->string);
 	return totsz;
 }
