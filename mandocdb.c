@@ -532,6 +532,9 @@ out:
 	mpages_free();
 	ohash_delete(&mpages);
 	ohash_delete(&mlinks);
+#if DEBUG_MEMORY
+	mandoc_d_finish();
+#endif
 	return exitcode;
 usage:
 	progname = getprogname();
@@ -2251,11 +2254,11 @@ dbwrite(struct dba *dba)
 		say(tfn, "&dba_write");
 		goto err;
 	}
-	if ((fd1 = open(MANDOC_DB, O_RDONLY, 0)) == -1) {
+	if ((fd1 = open(MANDOC_DB, O_RDONLY)) == -1) {
 		say(MANDOC_DB, "&open");
 		goto err;
 	}
-	if ((fd2 = open(tfn, O_RDONLY, 0)) == -1) {
+	if ((fd2 = open(tfn, O_RDONLY)) == -1) {
 		say(tfn, "&open");
 		goto err;
 	}

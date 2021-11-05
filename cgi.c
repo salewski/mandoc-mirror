@@ -879,7 +879,7 @@ resp_format(const struct req *req, const char *file)
 	int		 fd;
 	int		 usepath;
 
-	if (-1 == (fd = open(file, O_RDONLY, 0))) {
+	if (-1 == (fd = open(file, O_RDONLY))) {
 		puts("<p>You specified an invalid manual file.</p>");
 		return;
 	}
