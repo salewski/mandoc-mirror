@@ -1,4 +1,4 @@
-/*	$Id$ */
+/* $Id$ */
 /*
  * Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2014,2015,2017,2018,2021 Ingo Schwarze <schwarze@openbsd.org>
@@ -247,7 +247,9 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 		if (dp->layout->pos == TBL_CELL_HORIZ ||
 		    dp->layout->pos == TBL_CELL_DHORIZ ||
 		    dp->pos == TBL_DATA_HORIZ ||
-		    dp->pos == TBL_DATA_DHORIZ)
+		    dp->pos == TBL_DATA_NHORIZ ||
+		    dp->pos == TBL_DATA_DHORIZ ||
+		    dp->pos == TBL_DATA_NDHORIZ)
 			print_otag(h, TAG_HR, "");
 		else if (dp->string != NULL) {
 			save_font = h->metac;
