@@ -493,6 +493,10 @@ are mere guesses, and some may be wrong.
   my mail to ports@ 27 Jun 2021 16:09:20 +0200
   loc **  exist **  algo *  size *  imp **
 
+- tbl(7) HTML output does not implement column width specifications
+  reported by Ted Bullock 11 Jan 2022 16:00:44 -0700
+  loc *  exist *  algo ?  size ?  imp *
+
 - get rid of the last handful of style= attributes such that
   Content-Security-Policy: can be enabled without unsafe-inline
   suggested by bentley@  Nov 10, 2019 at 06:02:49AM -0700
