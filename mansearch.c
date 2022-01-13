@@ -1,4 +1,4 @@
-/*	$Id$ */
+/* $Id$ */
 /*
  * Copyright (c) 2012 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2013-2018 Ingo Schwarze <schwarze@openbsd.org>
@@ -220,7 +220,7 @@ mansearch(const struct mansearch *search,
 		if (cur && search->firstmatch)
 			break;
 	}
-	if (res != NULL)
+	if (res != NULL && cur > 1)
 		qsort(*res, cur, sizeof(struct manpage), manpage_compare);
 	if (chdir_status && getcwd_status && chdir(buf) == -1)
 		warn("%s", buf);
