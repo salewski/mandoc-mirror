@@ -313,6 +313,11 @@ are mere guesses, and some may be wrong.
   weerd@ 28 Sep 2021 12:44:07 +0200
   loc **  exist *  algo *  size *  imp ***
 
+- handle Unicode letters in tags in both HTML and terminal output
+  thread "section headers with diacritics" starting with
+  Mario Blaettermann 24 Mar 2022 18:13:23 +0100
+  loc **  exist *  algo *  size *  imp **
+
 - -T man does not handle eqn(7) and tbl(7)
   Stephen Gregoratto 16 Feb 2020 01:28:07 +1100
   also https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=901636
