@@ -820,8 +820,11 @@ tbl_literal(struct termp *tp, const struct tbl_dat *dp,
 	width = col->width;
 	ic = dp->layout->col;
 	hspans = dp->hspans;
-	while (hspans--)
-		width += tp->tbl.cols[++ic].width + 3;
+	while (hspans--) {
+		width += tp->tbl.cols[ic].spacing;
+		ic++;
+		width += tp->tbl.cols[ic].width;
+	}
 
 	padr = width > len ? width - len : 0;
 	padl = 0;
