@@ -1,7 +1,7 @@
-/*	$Id$ */
+/* $Id$ */
 /*
+ * Copyright (c) 2011-2015, 2017-2022 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2008-2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011-2015, 2017-2021 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -114,7 +114,7 @@ mandoc_escape(const char **end, const char **start, int *sz)
 	 * it only makes a difference in copy mode.
 	 */
 
-	if (**end == 'E')
+	while (**end == 'E')
 		++*end;
 
 	/*

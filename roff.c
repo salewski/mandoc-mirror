@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2010-2015, 2017-2021 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2015, 2017-2022 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2008-2012, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -1401,7 +1401,7 @@ roff_expand(struct roff *r, struct buf *buf, int ln, int pos, char newesc)
 
 		term = '\0';
 		cp = stesc + 1;
-		if (*cp == 'E')
+		while (*cp == 'E')
 			cp++;
 		esct = cp;
 		switch (*esct) {
