@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2011-2020 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011-2021 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2016 Ed Maste <emaste@freebsd.org>
  *
@@ -533,7 +533,7 @@ out:
 	ohash_delete(&mpages);
 	ohash_delete(&mlinks);
 #if DEBUG_MEMORY
-	mandoc_d_finish();
+	mandoc_dbg_finish();
 #endif
 	return exitcode;
 usage:

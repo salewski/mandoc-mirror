@@ -26,6 +26,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if DEBUG_MEMORY
+#include "mandoc_dbg.h"
+#endif
 #include "mandoc.h"
 #include "roff.h"
 #include "man.h"
@@ -393,6 +396,11 @@ in_line_eoln(MACRO_PROT_ARGS)
 		man->flags |= ROFF_NOFILL;
 	else if (tok == MAN_EE)
 		man->flags &= ~ROFF_NOFILL;
+
+#if DEBUG_MEMORY
+	if (tok == MAN_TH)
+		mandoc_dbg_name(buf);
+#endif
 
 	for (;;) {
 		if (buf[*pos] != '\0' && man->last != n && tok == MAN_PD) {

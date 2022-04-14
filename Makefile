@@ -1,6 +1,6 @@
 # $Id$
 #
-# Copyright (c) 2011, 2013-2021 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2011, 2013-2022 Ingo Schwarze <schwarze@openbsd.org>
 # Copyright (c) 2010, 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -100,6 +100,7 @@ SRCS		 = arch.c \
 		   man_validate.c \
 		   mandoc.c \
 		   mandoc_aux.c \
+		   mandoc_dbg.c \
 		   mandoc_msg.c \
 		   mandoc_ohash.c \
 		   mandoc_xr.c \
@@ -186,6 +187,8 @@ DISTFILES	 = INSTALL \
 		   mandoc.h \
 		   mandoc_aux.h \
 		   mandoc_char.7 \
+		   mandoc_dbg.h \
+		   mandoc_dbg_init.3 \
 		   mandoc_escape.3 \
 		   mandoc_headers.3 \
 		   mandoc_html.3 \
@@ -241,6 +244,7 @@ LIBROFF_OBJS	 = eqn.o \
 LIBMANDOC_OBJS	 = $(LIBMAN_OBJS) \
 		   $(LIBMDOC_OBJS) \
 		   $(LIBROFF_OBJS) \
+		   $(DEBUG_OBJS) \
 		   arch.o \
 		   chars.o \
 		   mandoc.o \
@@ -333,6 +337,7 @@ WWW_MANS	 = apropos.1.html \
 		   soelim.1.html \
 		   man.cgi.3.html \
 		   mandoc.3.html \
+		   mandoc_dbg_init.3.html \
 		   mandoc_escape.3.html \
 		   mandoc_headers.3.html \
 		   mandoc_html.3.html \

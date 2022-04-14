@@ -1,7 +1,7 @@
-/*	$Id$ */
+/* $Id$ */
 /*
- * Copyright (c) 2009, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2011-2021 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2009, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,6 +25,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if DEBUG_MEMORY
+#include "mandoc_dbg.h"
+#endif
 #include "mandoc.h"
 #include "tbl.h"
 #include "out.h"

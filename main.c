@@ -149,11 +149,14 @@ main(int argc, char *argv[])
 	enum mandoc_os	 os_e;		/* Check base system conventions. */
 	enum outmode	 outmode;	/* According to command line. */
 
+#if DEBUG_MEMORY
+	mandoc_dbg_init(argc, argv);
+#endif
 #if HAVE_PROGNAME
 	progname = getprogname();
 #else
 	if (argc < 1)
-		progname = mandoc_strdup("mandoc");
+		progname = "mandoc";
 	else if ((progname = strrchr(argv[0], '/')) == NULL)
 		progname = argv[0];
 	else
@@ -671,6 +674,9 @@ out:
 	} else if (outst.had_output && outst.outtype != OUTT_LINT)
 		mandoc_msg_summary();
 
+#if DEBUG_MEMORY
+	mandoc_dbg_finish();
+#endif
 	return (int)mandoc_msg_getrc();
 }
 

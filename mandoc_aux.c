@@ -1,7 +1,7 @@
-/*	$Id$ */
+/* $Id$ */
 /*
+ * Copyright (c) 2014, 2015, 2017, 2018 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2009, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2014, 2015, 2017 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#define DEBUG_NODEF 1
 #include "mandoc.h"
 #include "mandoc_aux.h"
 

@@ -1,6 +1,6 @@
 # $Id$
 #
-# Copyright (c) 2014-2021 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2014-2022 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -311,6 +311,12 @@ BINM_CATMAN=mcatman		# default is "catman"
 # unchanged, and nothing will be added.
 
 CFLAGS="-g"
+
+# Hunt for memory leaks.
+# Do not use for production builds.
+# See mandoc_dbg_init(3) for more information.
+
+DEBUG_MEMORY=1
 
 # In rare cases, it may be required to skip individual automatic tests.
 # Each of the following variables can be set to 0 (test will not be run
