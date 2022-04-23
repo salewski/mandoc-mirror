@@ -1,6 +1,7 @@
 /* $Id$ */
 /*
- * Copyright (c) 2014,2015,2017,2018,2021 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2014, 2015, 2017, 2018, 2021, 2022
+ *               Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -137,7 +138,7 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 	 */
 
 	if (sp->pos != TBL_SPAN_DATA)
-		return;
+		goto out;
 
 	/* Inhibit printing of spaces: we do padding ourselves. */
 
@@ -289,6 +290,7 @@ print_tbl(struct html *h, const struct tbl_span *sp)
 
 	h->flags &= ~HTML_NONOSPACE;
 
+out:
 	if (sp->next == NULL) {
 		assert(h->tbl.cols);
 		free(h->tbl.cols);
