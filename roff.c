@@ -2433,9 +2433,11 @@ roff_cond_sub(ROFF_ARGS)
 			}
 		}
 	} else if (t != TOKEN_NONE &&
-	    (rr || roffs[t].flags & ROFFMAC_STRUCT))
+	    (rr || roffs[t].flags & ROFFMAC_STRUCT)) {
 		irc |= (*roffs[t].proc)(r, t, buf, ln, ppos, pos, offs);
-	else
+		if (irc & ROFF_WHILE)
+			irc &= ~(ROFF_LOOPCONT | ROFF_LOOPEXIT);
+	} else
 		irc |= rr ? ROFF_CONT : ROFF_IGN;
 	return irc;
 }
