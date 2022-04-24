@@ -3870,8 +3870,9 @@ static int
 roff_shift(ROFF_ARGS)
 {
 	struct mctx	*ctx;
-	int		 levels, i;
+	int		 argpos, levels, i;
 
+	argpos = pos;
 	levels = 1;
 	if (buf->buf[pos] != '\0' &&
 	    roff_evalnum(r, ln, buf->buf, &pos, &levels, 0) == 0) {
@@ -3886,8 +3887,12 @@ roff_shift(ROFF_ARGS)
 	ctx = r->mstack + r->mstackpos;
 	if (levels > ctx->argc) {
 		mandoc_msg(MANDOCERR_SHIFT,
-		    ln, pos, "%d, but max is %d", levels, ctx->argc);
+		    ln, argpos, "%d, but max is %d", levels, ctx->argc);
 		levels = ctx->argc;
+	}
+	if (levels < 0) {
+		mandoc_msg(MANDOCERR_ARG_NEG, ln, argpos, "shift %d", levels);
+		levels = 0;
 	}
 	if (levels == 0)
 		return ROFF_IGN;
