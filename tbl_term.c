@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2011-2021 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011-2022 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2009, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -293,6 +293,7 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 			}
 			tp->tcol++;
 			tp->col = 0;
+			tp->flags &= ~(TERMP_BACKAFTER | TERMP_BACKBEFORE);
 			tbl_data(tp, sp->opts, cp, dp, tp->tbl.cols + ic);
 			if (dp != NULL &&
 			    (ic || sp->layout->first->pos != TBL_CELL_SPAN)) {
