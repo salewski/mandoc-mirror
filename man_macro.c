@@ -68,10 +68,10 @@ static const struct man_macro man_macros[MAN_MAX - MAN_TH] = {
 	{ in_line_eoln, 0 }, /* RI */
 	{ blk_close, MAN_XSCOPE }, /* RE */
 	{ blk_exp, MAN_XSCOPE }, /* RS */
-	{ in_line_eoln, 0 }, /* DT */
-	{ in_line_eoln, 0 }, /* UC */
+	{ in_line_eoln, MAN_NSCOPED }, /* DT */
+	{ in_line_eoln, MAN_NSCOPED }, /* UC */
 	{ in_line_eoln, MAN_NSCOPED }, /* PD */
-	{ in_line_eoln, 0 }, /* AT */
+	{ in_line_eoln, MAN_NSCOPED }, /* AT */
 	{ in_line_eoln, MAN_NSCOPED }, /* in */
 	{ blk_imp, MAN_XSCOPE }, /* SY */
 	{ blk_close, MAN_XSCOPE }, /* YS */
