@@ -628,6 +628,10 @@ term_word(struct termp *p, const char *word)
 				encode(p, "utf8", 4);
 			continue;
 		case ESCAPE_HORIZ:
+			if (p->flags & TERMP_BACKAFTER) {
+				p->flags &= ~TERMP_BACKAFTER;
+				continue;
+			}
 			if (*seq == '|') {
 				seq++;
 				uc = -p->col;
@@ -636,12 +640,22 @@ term_word(struct termp *p, const char *word)
 			if (a2roffsu(seq, &su, SCALE_EM) == NULL)
 				continue;
 			uc += term_hen(p, &su);
-			if (uc > 0) {
+			if (uc >= 0) {
 				while (uc > 0) {
-					bufferc(p, ASCII_NBRSP);
 					uc -= term_len(p, 1);
+					if (p->flags & TERMP_BACKBEFORE)
+						p->flags &= ~TERMP_BACKBEFORE;
+					else
+						bufferc(p, ASCII_NBRSP);
 				}
-			} else if (p->col > (size_t)(-uc)) {
+				continue;
+			}
+			if (p->flags & TERMP_BACKBEFORE) {
+				p->flags &= ~TERMP_BACKBEFORE;
+				assert(p->col > 0);
+				p->col--;
+			}
+			if (p->col >= (size_t)(-uc)) {
 				p->col += uc;
 			} else {
 				uc += p->col;
