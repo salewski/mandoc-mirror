@@ -1754,6 +1754,15 @@ request or a
 layout modifier has an unknown
 .Ar font
 argument.
+.It Sy "ignoring distance argument"
+.Pq roff
+In addition to the margin character, an
+.Ic \&mc
+request has a second argument supposed to represent a distance, but the
+.Nm
+implementation of
+.Ic \&mc
+always ignores the second argument.
 .It Sy "odd number of characters in request"
 .Pq roff
 A
@@ -2124,6 +2133,13 @@ The first argument of a
 request is neither a single ASCII character
 nor a single character escape sequence.
 The request is ignored including all its arguments.
+.It Sy "skipping unusable escape sequence"
+.Pq roff
+The first argument of an
+.Ic mc
+request is neither a single ASCII character
+nor a single character escape sequence.
+All arguments are ignored and printing of a margin character is disabled.
 .It Sy "missing manual name, using \(dq\(dq"
 .Pq mdoc
 The first call to

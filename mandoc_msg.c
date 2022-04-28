@@ -166,6 +166,7 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"invalid Boolean argument",
 	"argument contains two font escapes",
 	"unknown font, skipping request",
+	"ignoring distance argument",
 	"odd number of characters in request",
 
 	/* related to plain text */
@@ -222,6 +223,7 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"missing list type, using -item",
 	"argument is not numeric, using 1",
 	"argument is not a character",
+	"skipping unusable escape sequence",
 	"missing manual name, using \"\"",
 	"uname(3) system call failed, using UNKNOWN",
 	"unknown standard specifier",
