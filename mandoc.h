@@ -285,11 +285,12 @@ enum	mandocerr {
 };
 
 enum	mandoc_esc {
-	ESCAPE_ERROR = 0, /* bail! unparsable escape */
-	ESCAPE_UNSUPP, /* unsupported escape; ignore it */
-	ESCAPE_IGNORE, /* escape to be ignored */
-	ESCAPE_UNDEF, /* undefined escape; print literal character */
-	ESCAPE_SPECIAL, /* a regular special character */
+	ESCAPE_EXPAND = 0, /* interpolation and iterative call needed */
+	ESCAPE_ERROR, /* non-fatal error: unparsable escape */
+	ESCAPE_UNSUPP, /* unsupported escape: warn and ignore */
+	ESCAPE_IGNORE, /* valid escape to be ignored */
+	ESCAPE_UNDEF, /* undefined escape: print literal character */
+	ESCAPE_SPECIAL, /* special character escape */
 	ESCAPE_FONT, /* a generic font mode */
 	ESCAPE_FONTBOLD, /* bold font mode */
 	ESCAPE_FONTITALIC, /* italic font mode */

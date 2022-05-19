@@ -122,6 +122,7 @@ SRCS		 = arch.c \
 		   preconv.c \
 		   read.c \
 		   roff.c \
+		   roff_escape.c \
 		   roff_html.c \
 		   roff_term.c \
 		   roff_validate.c \
@@ -235,6 +236,7 @@ LIBMDOC_OBJS	 = att.o \
 
 LIBROFF_OBJS	 = eqn.o \
 		   roff.o \
+		   roff_escape.o \
 		   roff_validate.o \
 		   tbl.o \
 		   tbl_data.o \
