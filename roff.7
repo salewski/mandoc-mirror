@@ -1,7 +1,7 @@
-.\"	$Id$
+.\" $Id$
 .\"
+.\" Copyright (c) 2010-2019, 2022 Ingo Schwarze <schwarze@openbsd.org>
 .\" Copyright (c) 2010, 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
-.\" Copyright (c) 2010-2019 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -2166,8 +2166,8 @@ Break the output line at the end of the current word.
 Set number register; ignored by
 .Xr mandoc 1 .
 .It Ic \er
-Move up by one line; ignored by
-.Xr mandoc 1 .
+Reverse line feed: move up by one output line.
+Currently unsupported.
 .It Ic \eS\(aq Ns Ar number Ns Ic \(aq
 Slant output; ignored by
 .Xr mandoc 1 .
