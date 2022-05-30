@@ -157,13 +157,13 @@ roff_escape(const char *buf, const int ln, const int aesc,
 
 	case '$':
 	case '*':
+	case 'V':
 	case 'n':
 		rval = ESCAPE_EXPAND;
 		break;
 	case 'F':
 	case 'M':
 	case 'O':
-	case 'V':
 	case 'Y':
 	case 'g':
 	case 'k':

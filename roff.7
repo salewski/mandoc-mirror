@@ -2188,12 +2188,16 @@ Horizontal tab; ignored by
 Move up by half a line; ignored by
 .Xr mandoc 1 .
 .It Ic \eV[ Ns Ar name Ns Ic \&]
-Interpolate an environment variable; ignored by
-.Xr mandoc 1 .
+Interpolate an environment variable.
 For short names, there are variants
 .Ic \eV Ns Ar c
 and
 .Ic \eV( Ns Ar cc .
+This escape sequence is intentionally unsupported;
+.Xr mandoc 1
+prints the string
+.Dq Pf $ Brq Ar name
+instead of inspecting the environment.
 .It Ic \ev\(aq Ns Ar number Ns Ic \(aq
 Vertical motion; ignored by
 .Xr mandoc 1 .
