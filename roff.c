@@ -1535,6 +1535,8 @@ roff_expand(struct roff *r, struct buf *buf, int ln, int pos, char ec)
 			roff_expand_patch(buf, iendarg, "}", iend);
 			roff_expand_patch(buf, iesc, "${", iarg);
 			continue;
+		case 'g':
+			break;
 		case 'n':
 			if (iendarg > iarg)
 				(void)snprintf(ubuf, sizeof(ubuf), "%d",
