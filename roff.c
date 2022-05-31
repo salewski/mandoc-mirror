@@ -1520,6 +1520,11 @@ roff_expand(struct roff *r, struct buf *buf, int ln, int pos, char ec)
 					*dst++ = '"';
 			}
 			continue;
+		case 'A':
+			ubuf[0] = iendarg > iarg ? '1' : '0';
+			ubuf[1] = '\0';
+			res = ubuf;
+			break;
 		case 'B':
 			npos = 0;
 			ubuf[0] = iendarg > iarg && iend > iendarg &&
