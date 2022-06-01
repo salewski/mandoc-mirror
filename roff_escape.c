@@ -124,6 +124,9 @@ roff_escape(const char *buf, const int ln, const int aesc,
 		rval = ESCAPE_IGNORE;
 		goto out;
 
+	case '\0':
+		iendarg = --iend;
+		/* FALLTHROUGH */
 	case '\\':
 	default:
 		iarg--;
