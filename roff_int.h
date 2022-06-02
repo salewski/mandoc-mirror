@@ -83,7 +83,7 @@ enum roff_tok	  roffhash_find(struct ohash *, const char *, size_t);
 void		  roffhash_free(struct ohash *);
 
 enum mandoc_esc	  roff_escape(const char *, const int, const int,
-			int *, int *, int *, int *);
+			int *, int *, int *, int *, int *);
 void		  roff_state_reset(struct roff_man *);
 void		  roff_validate(struct roff_man *);
 

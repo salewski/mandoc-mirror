@@ -1410,8 +1410,8 @@ roff_expand(struct roff *r, struct buf *buf, int ln, int pos, char ec)
 		 * it to backslashes and translate backslashes to \e.
 		 */
 
-		if (roff_escape(buf->buf, ln, pos,
-		    &iesc, &iarg, &iendarg, &iend) != ESCAPE_EXPAND) {
+		if (roff_escape(buf->buf, ln, pos, &iesc, &inam,
+		    &iarg, &iendarg, &iend) != ESCAPE_EXPAND) {
 			while (pos < iend) {
 				if (buf->buf[pos] == ec) {
 					buf->buf[pos] = '\\';
@@ -1427,15 +1427,6 @@ roff_expand(struct roff *r, struct buf *buf, int ln, int pos, char ec)
 			}
 			continue;
 		}
-
-		/*
-		 * Treat "\E" just like "\";
-		 * it only makes a difference in copy mode.
-		 */
-
-		inam = iesc + 1;
-		while (buf->buf[inam] == 'E')
-			inam++;
 
 		/* Handle expansion. */
 
