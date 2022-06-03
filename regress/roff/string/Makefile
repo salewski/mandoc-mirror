@@ -1,4 +1,9 @@
-# $OpenBSD: Makefile,v 1.6 2014/07/06 19:08:57 schwarze Exp $
+# $OpenBSD: Makefile,v 1.10 2022/06/03 11:50:25 schwarze Exp $
+#
+# This directory is intended for tests of string *expansion*,
+# in particular testing the behaviour of the \* escape sequence.
+# Tests of string *definitions* are better placed in the roff/ds
+# directory.
 
 REGRESS_TARGETS	 = dotT escape infinite name std undef zerolength
 LINT_TARGETS	 = name std undef
