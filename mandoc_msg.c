@@ -236,6 +236,11 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"skipping excess arguments",
 	"divide by zero",
 
+	/* related to escape sequences */
+	"incomplete escape sequence",
+	"invalid special character",
+	"unknown special character",
+
 	"unsupported feature",
 	"input too large",
 	"unsupported control character",

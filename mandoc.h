@@ -235,6 +235,11 @@ enum	mandocerr {
 	MANDOCERR_ARG_EXCESS, /* skipping excess arguments: macro ... args */
 	MANDOCERR_DIVZERO, /* divide by zero */
 
+	/* related to escape sequences */
+	MANDOCERR_ESC_INCOMPLETE, /* incomplete escape sequence: esc */
+	MANDOCERR_ESC_BADCHAR, /* invalid special character: esc */
+	MANDOCERR_ESC_UNKCHAR, /* unknown special character: esc */
+
 	MANDOCERR_UNSUPP, /* ===== start of unsupported features ===== */
 
 	MANDOCERR_TOOLARGE, /* input too large */
