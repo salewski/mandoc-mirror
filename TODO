@@ -459,6 +459,10 @@ are mere guesses, and some may be wrong.
   reminded by jmc@  Thu, 23 Sep 2010 18:13:39 +0059
   loc *  exist **  algo ***  size *  imp ***
 
+- the man(7) single-font macros (e.g. .B) use .itc,
+  so ".B foo\c" followed by "bar" prints "bar" in bold
+  gbranden@ Sun, 5 Jun 2022 18:08:46 -0500
+
 - a line starting with "\fB something" counts as starting with whitespace
   and triggers a line break; found in audio/normalize-mp3(1)
   This will become easier once escape sequences are represented
@@ -483,6 +487,9 @@ are mere guesses, and some may be wrong.
   loc **  exist **  algo **  size *  imp **
 
 --- HTML issues --------------------------------------------------------
+
+- .Nm without an argument and .Bx cause premature </pre>
+  Nab Sun, 5 Jun 2022 18:30:09 +0200
 
 - .Aq Mt could set and reset "white-space: nowrap";
   Check whether other enclosure macros could profit from similar handling,
@@ -593,6 +600,10 @@ are mere guesses, and some may be wrong.
   reported again by Nicolas Joly Thu, 1 Mar 2012 13:41:26 +0100 via wiz@ 5 Mar
   reported again by Franco Fichtner Fri, 27 Sep 2013 21:02:28 +0200
   reported again by Bruce Evans Fri, 17 Feb 2017 21:22:44 +0100 via bapt@
+  https://reviews.freebsd.org/D35245
+  even groff_mdoc(7) uses this: Nab Sun, 5 Jun 2022 22:16:37 +0200
+  When implementing this, try to avoid breaking existing manuals,
+  or at least fix them: Jan Stary Sun, 5 Jun 2022 22:48:05 +0200
   loc ***  exist ***  algo ***  size **  imp ***
   An easy partial fix would be to just skip the first word if it starts
   with a dot, including any following white space, when measuring.
