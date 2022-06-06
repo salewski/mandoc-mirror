@@ -206,10 +206,6 @@ roff_escape(const char *buf, const int ln, const int aesc,
 		term = '\b';
 		break;
 	case 'C':
-		if (buf[iarg] != '\'') {
-			rval = ESCAPE_ERROR;
-			goto out;
-		}
 		rval = ESCAPE_SPECIAL;
 		term = '\b';
 		break;
@@ -391,6 +387,11 @@ roff_escape(const char *buf, const int ln, const int aesc,
 		break;
 
 	case ESCAPE_SPECIAL:
+		if (argl == 0) {
+			err = MANDOCERR_ESC_BADCHAR;
+			rval = ESCAPE_ERROR;
+			break;
+		}
 
 		/*
 		 * The file chars.c only provides one common list of
