@@ -3740,7 +3740,6 @@ roff_tr(ROFF_ARGS)
 {
 	const char	*p, *first, *second;
 	size_t		 fsz, ssz;
-	enum mandoc_esc	 esc;
 
 	p = buf->buf + pos;
 
@@ -3754,23 +3753,15 @@ roff_tr(ROFF_ARGS)
 
 		first = p++;
 		if (*first == '\\') {
-			esc = mandoc_escape(&p, NULL, NULL);
-			if (esc == ESCAPE_ERROR) {
-				mandoc_msg(MANDOCERR_ESC_BAD, ln,
-				    (int)(p - buf->buf), "%s", first);
+			if (mandoc_escape(&p, NULL, NULL) == ESCAPE_ERROR)
 				return ROFF_IGN;
-			}
 			fsz = (size_t)(p - first);
 		}
 
 		second = p++;
 		if (*second == '\\') {
-			esc = mandoc_escape(&p, NULL, NULL);
-			if (esc == ESCAPE_ERROR) {
-				mandoc_msg(MANDOCERR_ESC_BAD, ln,
-				    (int)(p - buf->buf), "%s", second);
+			if (mandoc_escape(&p, NULL, NULL) == ESCAPE_ERROR)
 				return ROFF_IGN;
-			}
 			ssz = (size_t)(p - second);
 		} else if (*second == '\0') {
 			mandoc_msg(MANDOCERR_TR_ODD, ln,
