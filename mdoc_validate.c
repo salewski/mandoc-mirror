@@ -1113,7 +1113,8 @@ post_tg(POST_ARGS)
 	/* Find the next node. */
 	n = mdoc->last;
 	for (nn = n; nn != NULL; nn = nn->parent) {
-		if (nn->next != NULL) {
+		if (nn->type != ROFFT_HEAD && nn->type != ROFFT_BODY &&
+		    nn->type != ROFFT_TAIL && nn->next != NULL) {
 			nn = nn->next;
 			break;
 		}
