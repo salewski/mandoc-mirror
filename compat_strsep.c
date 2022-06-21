@@ -31,6 +31,8 @@
  */
 #include "config.h"
 
+#include <stddef.h>
+
 /*
  * Get next token from string *stringp, where tokens are possibly-empty
  * strings separated by characters from delim.  
