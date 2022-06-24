@@ -69,6 +69,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"body",	HTML_NLALL},
 	{"div",		HTML_NLAROUND},
 	{"section",	HTML_NLALL},
+	{"nav",		HTML_NLALL},
 	{"table",	HTML_NLALL | HTML_INDENT},
 	{"tr",		HTML_NLALL | HTML_INDENT},
 	{"td",		HTML_NLAROUND},
@@ -707,6 +708,9 @@ print_otag(struct html *h, enum htmltag tag, const char *fmt, ...)
 			break;
 		case 'i':
 			attr = "id";
+			break;
+		case 'r':
+			attr = "role";
 			break;
 		case '?':
 			attr = arg1;

@@ -515,7 +515,7 @@ static int
 mdoc_sh_pre(MDOC_ARGS)
 {
 	struct roff_node	*sn, *subn;
-	struct tag		*t, *tsec, *tsub;
+	struct tag		*t, *tnav, *tsec, *tsub;
 	char			*id;
 	int			 sc;
 
@@ -536,6 +536,7 @@ mdoc_sh_pre(MDOC_ARGS)
 					break;
 		if (sc < 2)
 			break;
+		tnav = print_otag(h, TAG_NAV, "r", "doc-toc");
 		t = print_otag(h, TAG_H1, "c", "Sh");
 		print_text(h, "TABLE OF CONTENTS");
 		print_tagq(h, t);
@@ -567,7 +568,7 @@ mdoc_sh_pre(MDOC_ARGS)
 			}
 			print_tagq(h, tsec);
 		}
-		print_tagq(h, t);
+		print_tagq(h, tnav);
 		print_otag(h, TAG_SECTION, "c", "Sh");
 		break;
 	case ROFFT_HEAD:
