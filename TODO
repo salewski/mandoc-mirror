@@ -505,9 +505,11 @@ are mere guesses, and some may be wrong.
   anton@  4 Mar 2021 08:19:35 +0100
   loc **  exist *  algo *  size *  imp **
 
-- HTML formatting of .nf should avoid <br/>
+- HTML formatting of .nf should avoid <br/>,
+  even when input lines start with whitespace,
   and not close and re-open <pre> on .P
   my mail to ports@ 27 Jun 2021 16:09:20 +0200
+  reported again by Mohamed Akram 25 Jun 2022 16:28:18 +0000
   loc **  exist **  algo *  size *  imp **
 
 - tbl(7) HTML output does not implement column width specifications
