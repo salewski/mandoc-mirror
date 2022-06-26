@@ -364,7 +364,7 @@ static struct ln lines[] = {
 	{ "de",			"<degree>",	0x00b0	},
 	{ "%0",			"<permille>",	0x2030	},
 	{ "fm",			"\'",		0x2032	},
-	{ "sd",			"''",		0x2033	},
+	{ "sd",			"\"",		0x2033	},
 	{ "mc",			"<micro>",	0x00b5	},
 	{ "Of",			"_\ba",		0x00aa	},
 	{ "Om",			"_\bo",		0x00ba	},
