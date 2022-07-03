@@ -132,7 +132,7 @@ html_man(void *arg, const struct roff_meta *man)
 	}
 
 	man_root_pre(man, h);
-	t = print_otag(h, TAG_DIV, "c", "manual-text");
+	t = print_otag(h, TAG_MAIN, "c", "manual-text");
 	print_man_nodelist(man, n, h);
 	print_tagq(h, t);
 	man_root_post(man, h);

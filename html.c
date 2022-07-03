@@ -2,6 +2,7 @@
 /*
  * Copyright (c) 2008-2011, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2011-2015, 2017-2021 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2022 Anna Vyalkova <cyber@sysrq.in>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -67,6 +68,7 @@ static	const struct htmldata htmltags[TAG_MAX] = {
 	{"style",	HTML_NLALL | HTML_INDENT},
 	{"title",	HTML_NLAROUND},
 	{"body",	HTML_NLALL},
+	{"main",	HTML_NLALL},
 	{"div",		HTML_NLAROUND},
 	{"section",	HTML_NLALL},
 	{"nav",		HTML_NLALL},

@@ -27,6 +27,7 @@ enum	htmltag {
 	TAG_STYLE,
 	TAG_TITLE,
 	TAG_BODY,
+	TAG_MAIN,
 	TAG_DIV,
 	TAG_SECTION,
 	TAG_NAV,

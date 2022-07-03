@@ -302,7 +302,7 @@ html_mdoc(void *arg, const struct roff_meta *mdoc)
 	}
 
 	mdoc_root_pre(mdoc, h);
-	t = print_otag(h, TAG_DIV, "c", "manual-text");
+	t = print_otag(h, TAG_MAIN, "c", "manual-text");
 	print_mdoc_nodelist(mdoc, n, h);
 	print_tagq(h, t);
 	mdoc_root_post(mdoc, h);
