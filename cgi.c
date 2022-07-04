@@ -2,6 +2,7 @@
 /*
  * Copyright (c) 2014-2019, 2021 Ingo Schwarze <schwarze@usta.de>
  * Copyright (c) 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2022 Anna Vyalkova <cyber@sysrq.in>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -431,7 +432,8 @@ resp_searchform(const struct req *req, enum focus focus)
 {
 	int		 i;
 
-	printf("<form action=\"/%s\" method=\"get\" "
+	printf("<header>\n"
+	       "<form role=\"search\" action=\"/%s\" method=\"get\" "
 	       "autocomplete=\"off\" autocapitalize=\"none\">\n"
 	       "  <fieldset>\n"
 	       "    <legend>Manual Page Search Parameters</legend>\n",
@@ -457,7 +459,7 @@ resp_searchform(const struct req *req, enum focus focus)
 
 	/* Write section selector. */
 
-	puts("    <select name=\"sec\">");
+	puts("    <select name=\"sec\" aria-label=\"manual section\">");
 	for (i = 0; i < sec_MAX; i++) {
 		printf("      <option value=\"%s\"", sec_numbers[i]);
 		if (NULL != req->q.sec &&
@@ -469,7 +471,7 @@ resp_searchform(const struct req *req, enum focus focus)
 
 	/* Write architecture selector. */
 
-	printf(	"    <select name=\"arch\">\n"
+	printf(	"    <select name=\"arch\" aria-label=\"CPU architecture\">\n"
 		"      <option value=\"default\"");
 	if (NULL == req->q.arch)
 		printf(" selected=\"selected\"");
@@ -499,7 +501,8 @@ resp_searchform(const struct req *req, enum focus focus)
 	}
 
 	puts("  </fieldset>\n"
-	     "</form>");
+	     "</form>\n"
+	     "</header>");
 }
 
 static int
@@ -557,13 +560,17 @@ pg_index(const struct req *req)
 
 	resp_begin_html(200, NULL, NULL);
 	resp_searchform(req, FOCUS_QUERY);
-	printf("<p>\n"
+	printf("<main>\n"
+	       "<p role=\"doc-notice\" aria-label=\"usage\">\n"
 	       "This web interface is documented in the\n"
-	       "<a class=\"Xr\" href=\"/%s%sman.cgi.8\">man.cgi(8)</a>\n"
+	       "<a class=\"Xr\" href=\"/%s%sman.cgi.8\""
+	       " aria-label=\"man dot CGI, section 8\">man.cgi(8)</a>\n"
 	       "manual, and the\n"
-	       "<a class=\"Xr\" href=\"/%s%sapropos.1\">apropos(1)</a>\n"
+	       "<a class=\"Xr\" href=\"/%s%sapropos.1\""
+	       " aria-label=\"apropos, section 1\">apropos(1)</a>\n"
 	       "manual explains the query syntax.\n"
-	       "</p>\n",
+	       "</p>\n"
+	       "</main>\n",
 	       scriptname, *scriptname == '\0' ? "" : "/",
 	       scriptname, *scriptname == '\0' ? "" : "/");
 	resp_end_html();
@@ -575,9 +582,11 @@ pg_noresult(const struct req *req, int code, const char *http_msg,
 {
 	resp_begin_html(code, http_msg, NULL);
 	resp_searchform(req, FOCUS_QUERY);
-	puts("<p>");
+	puts("<main>");
+	puts("<p role=\"doc-notice\" aria-label=\"no result\">");
 	puts(user_msg);
 	puts("</p>");
+	puts("</main>");
 	resp_end_html();
 }
 
@@ -586,12 +595,14 @@ pg_error_badrequest(const char *msg)
 {
 
 	resp_begin_html(400, "Bad Request", NULL);
-	puts("<h1>Bad Request</h1>\n"
-	     "<p>\n");
+	puts("<main>\n"
+	     "<h1>Bad Request</h1>\n"
+	     "<p role=\"doc-notice\" aria-label=\"Bad Request\">");
 	puts(msg);
 	printf("Try again from the\n"
 	       "<a href=\"/%s\">main page</a>.\n"
-	       "</p>", scriptname);
+	       "</p>\n"
+	       "</main>", scriptname);
 	resp_end_html();
 }
 
@@ -599,7 +610,7 @@ static void
 pg_error_internal(void)
 {
 	resp_begin_html(500, "Internal Server Error", NULL);
-	puts("<p>Internal Server Error</p>");
+	puts("<main><p role=\"doc-notice\">Internal Server Error</p></main>");
 	resp_end_html();
 }
 
@@ -704,6 +715,7 @@ pg_searchres(const struct req *req, struct manpage *r, size_t sz)
 	    req->q.equal || sz == 1 ? FOCUS_NONE : FOCUS_QUERY);
 
 	if (sz > 1) {
+		puts("<nav>");
 		puts("<table class=\"results\">");
 		for (i = 0; i < sz; i++) {
 			printf("  <tr>\n"
@@ -722,6 +734,7 @@ pg_searchres(const struct req *req, struct manpage *r, size_t sz)
 			     "  </tr>");
 		}
 		puts("</table>");
+		puts("</nav>");
 	}
 
 	if (req->q.equal || sz == 1) {
@@ -743,7 +756,9 @@ resp_catman(const struct req *req, const char *file)
 	int		 italic, bold;
 
 	if ((f = fopen(file, "r")) == NULL) {
-		puts("<p>You specified an invalid manual file.</p>");
+		puts("<p role=\"doc-notice\">\n"
+		     "  You specified an invalid manual file.\n"
+		     "</p>");
 		return;
 	}
 
@@ -880,7 +895,9 @@ resp_format(const struct req *req, const char *file)
 	int		 usepath;
 
 	if (-1 == (fd = open(file, O_RDONLY))) {
-		puts("<p>You specified an invalid manual file.</p>");
+		puts("<p role=\"doc-notice\">\n"
+		     "  You specified an invalid manual file.\n"
+		     "</p>");
 		return;
 	}
 
