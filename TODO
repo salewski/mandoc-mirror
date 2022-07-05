@@ -538,13 +538,6 @@ are mere guesses, and some may be wrong.
   does this affect other characters, other source macros...?
   Jackson Pauls  29 Aug 2017 16:56:27 +0100
 
-- The tables used to render the three-part page headers actually force
-  the width of the <body> to the max-width given for <html>.
-  Not yet sure how to fix that...
-  Observed by an Anonymous Coward on undeadly.org:
-  http://undeadly.org/cgi?action=article&sid=20140925064244&pid=1
-  loc *  exist *  algo **  size *  imp ***
-
 - generate <img> tags in HTML
   idea from florian@  Tue, 7 Apr 2015 00:26:28 +0000
   may be possible to implement with .Lk img://something.png alt_text
