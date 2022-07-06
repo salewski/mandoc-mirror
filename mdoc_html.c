@@ -637,7 +637,7 @@ mdoc_nd_pre(MDOC_ARGS)
 		abort();
 	}
 	print_text(h, "\\(em");
-	print_otag(h, TAG_SPAN, "c", "Nd");
+	print_otag(h, TAG_SPAN, "cr", "Nd", "doc-subtitle");
 	return 1;
 }
 
