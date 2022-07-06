@@ -444,13 +444,14 @@ resp_searchform(const struct req *req, enum focus focus)
 
 	/* Write query input box. */
 
-	printf("    <input type=\"search\" name=\"query\" value=\"");
+	printf("    <label>Search query:\n"
+	       "      <input type=\"search\" name=\"query\" value=\"");
 	if (req->q.query != NULL)
 		html_print(req->q.query);
-	printf( "\" size=\"40\"");
+	printf("\" size=\"40\"");
 	if (focus == FOCUS_QUERY)
 		printf(" autofocus");
-	puts(">");
+	puts(">\n    </label>");
 
 	/* Write submission buttons. */
 
@@ -491,7 +492,8 @@ resp_searchform(const struct req *req, enum focus focus)
 	/* Write manpath selector. */
 
 	if (req->psz > 1) {
-		puts("    <select name=\"manpath\">");
+		puts("    <select name=\"manpath\""
+		     " aria-label=\"Manual path\">");
 		for (i = 0; i < (int)req->psz; i++) {
 			printf("      <option");
 			if (strcmp(req->q.manpath, req->p[i]) == 0)
