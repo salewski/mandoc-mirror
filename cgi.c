@@ -462,7 +462,7 @@ resp_searchform(const struct req *req, enum focus focus)
 
 	/* Write section selector. */
 
-	puts("    <select name=\"sec\" aria-label=\"manual section\">");
+	puts("    <select name=\"sec\" aria-label=\"Manual section\">");
 	for (i = 0; i < sec_MAX; i++) {
 		printf("      <option value=\"%s\"", sec_numbers[i]);
 		if (NULL != req->q.sec &&
@@ -564,7 +564,7 @@ pg_index(const struct req *req)
 	resp_searchform(req, FOCUS_QUERY);
 	printf("</header>\n"
 	       "<main>\n"
-	       "<p role=\"doc-notice\" aria-label=\"usage\">\n"
+	       "<p role=\"doc-notice\" aria-label=\"Usage\">\n"
 	       "This web interface is documented in the\n"
 	       "<a class=\"Xr\" href=\"/%s%sman.cgi.8\""
 	       " aria-label=\"man dot CGI, section 8\">man.cgi(8)</a>\n"
@@ -588,7 +588,7 @@ pg_noresult(const struct req *req, int code, const char *http_msg,
 	resp_searchform(req, FOCUS_QUERY);
 	puts("</header>");
 	puts("<main>");
-	puts("<p role=\"doc-notice\" aria-label=\"no result\">");
+	puts("<p role=\"doc-notice\" aria-label=\"No result\">");
 	puts(user_msg);
 	puts("</p>");
 	puts("</main>");

@@ -271,7 +271,7 @@ man_root_pre(const struct roff_meta *man, struct html *h)
 	mandoc_asprintf(&title, "%s(%s)", man->title, man->msec);
 
 	t = print_otag(h, TAG_DIV, "cr?", "head", "doc-pageheader",
-	    "aria-label", "manual header line");
+	    "aria-label", "Manual header line");
 
 	print_otag(h, TAG_SPAN, "c", "head-ltitle");
 	print_text(h, title);
@@ -294,7 +294,7 @@ man_root_post(const struct roff_meta *man, struct html *h)
 	struct tag	*t;
 
 	t = print_otag(h, TAG_DIV, "cr?", "foot", "doc-pagefooter",
-	    "aria-label", "manual footer line");
+	    "aria-label", "Manual footer line");
 
 	print_otag(h, TAG_SPAN, "c", "foot-left");
 	print_stagq(h, t);
