@@ -316,10 +316,10 @@ man_SH_pre(MAN_ARGS)
 	enum htmltag	 tag;
 
 	if (n->tok == MAN_SH) {
-		tag = TAG_H1;
+		tag = TAG_H2;
 		class = "Sh";
 	} else {
-		tag = TAG_H2;
+		tag = TAG_H3;
 		class = "Ss";
 	}
 	switch (n->type) {
