@@ -381,11 +381,13 @@ or any character not contained in the
 .Nm
 reports an internal server error and exits without doing anything.
 .It Pa /man/header.html
-An optional file containing static HTML code to be inserted right
-after opening the <BODY> element.
+An optional file containing static HTML code to be wrapped in
+a <HEADER> element and inserted right after opening the <BODY> element.
+For example, it can contain an <H1> element
+specifying the name of the website.
 .It Pa /man/footer.html
-An optional file containing static HTML code to be inserted right
-before closing the <BODY> element.
+An optional file containing static HTML code to be wrapped in
+a <FOOTER> element and inserted right before closing the <BODY> element.
 .It Pa /man/OpenBSD-current/man1/mandoc.1
 An example
 .Xr mdoc 7
