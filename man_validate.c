@@ -373,13 +373,11 @@ post_UR(CHKARGS)
 	if (n->type == ROFFT_HEAD && n->child == NULL)
 		mandoc_msg(MANDOCERR_UR_NOHEAD, n->line, n->pos,
 		    "%s", roff_name[n->tok]);
-	check_part(man, n);
 }
 
 static void
 check_part(CHKARGS)
 {
-
 	if (n->type == ROFFT_BODY && n->child == NULL)
 		mandoc_msg(MANDOCERR_BLK_EMPTY, n->line, n->pos,
 		    "%s", roff_name[n->tok]);
