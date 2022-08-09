@@ -500,6 +500,9 @@ are mere guesses, and some may be wrong.
   mail to Oliver Corff  3 Jun 2021 17:28:02 +0200
   more feedback from Oliver  3 Jun 2021 18:27:56 +0200
   more feedback from Oliver  3 Jun 2021 23:37:18 +0200
+  would also be useful for
+  https://github.com/gbdev/rgbds-www/blob/master/
+  maintainer/support/man_postproc.awk
 
 - .Bd -unfilled should not use monospaced font
   anton@  4 Mar 2021 08:19:35 +0100
@@ -515,6 +518,11 @@ are mere guesses, and some may be wrong.
 - tbl(7) HTML output does not implement column width specifications
   reported by Ted Bullock 11 Jan 2022 16:00:44 -0700
   loc *  exist *  algo ?  size ?  imp *
+
+- link from flags in the SYNOPSIS to their descriptions
+  https://github.com/gbdev/rgbds-www/blob/master/
+  maintainer/support/man_postproc.awk
+  loc *  exist *  algo **  size *  imp *
 
 - get rid of the last handful of style= attributes such that
   Content-Security-Policy: can be enabled without unsafe-inline
