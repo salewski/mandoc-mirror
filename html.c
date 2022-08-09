@@ -403,10 +403,13 @@ html_make_id(const struct roff_node *n, int unique)
 	 * In addition, reserve '~' for ordinal suffixes.
 	 */
 
-	for (cp = buf; *cp != '\0'; cp++)
-		if (isalnum((unsigned char)*cp) == 0 &&
+	for (cp = buf; *cp != '\0'; cp++) {
+		if (*cp == ASCII_HYPH)
+			*cp = '-';
+		else if (isalnum((unsigned char)*cp) == 0 &&
 		    strchr("!$&'()*+,-./:;=?@_", *cp) == NULL)
 			*cp = '_';
+	}
 
 	if (unique == 0)
 		return buf;
