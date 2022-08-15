@@ -517,7 +517,7 @@ pre_IP(DECL_ARGS)
 		p->trailspace = 1;
 		break;
 	case ROFFT_BODY:
-		p->flags |= TERMP_NOSPACE;
+		p->flags |= TERMP_NOSPACE | TERMP_NONEWLINE;
 		break;
 	default:
 		abort();
@@ -591,7 +591,7 @@ pre_TP(DECL_ARGS)
 		p->trailspace = 1;
 		break;
 	case ROFFT_BODY:
-		p->flags |= TERMP_NOSPACE;
+		p->flags |= TERMP_NOSPACE | TERMP_NONEWLINE;
 		break;
 	default:
 		abort();
@@ -900,6 +900,19 @@ print_man_node(DECL_ARGS)
 	const struct man_term_act *act;
 	int c;
 
+	/*
+	 * In no-fill mode, break the output line at the beginning
+	 * of new input lines except after \c, and nowhere else.
+	 */
+
+	if (n->flags & NODE_NOFILL) {
+		if (n->flags & NODE_LINE &&
+		    (p->flags & TERMP_NONEWLINE) == 0)
+			term_newln(p);
+		p->flags |= TERMP_BRNEVER;
+	} else
+		p->flags &= ~TERMP_BRNEVER;
+
 	if (n->flags & NODE_ID)
 		term_tag_write(n, p->line);
 
@@ -964,28 +977,11 @@ print_man_node(DECL_ARGS)
 		term_fontrepl(p, TERMFONT_NONE);
 
 out:
-	/*
-	 * If we're in a literal context, make sure that words
-	 * together on the same line stay together.  This is a
-	 * POST-printing call, so we check the NEXT word.  Since
-	 * -man doesn't have nested macros, we don't need to be
-	 * more specific than this.
-	 */
-	if (n->flags & NODE_NOFILL &&
-	    ! (p->flags & (TERMP_NOBREAK | TERMP_NONEWLINE)) &&
-	    (n->next == NULL || n->next->flags & NODE_LINE)) {
-		p->flags |= TERMP_BRNEVER | TERMP_NOSPACE;
-		p->tcol->taboff = 0;
-		if (n->string != NULL && *n->string != '\0')
-			term_flushln(p);
-		else
-			term_newln(p);
-		p->flags &= ~TERMP_BRNEVER;
-		if (p->tcol->rmargin < p->maxrmargin &&
-		    n->parent->tok == MAN_HP) {
-			p->tcol->offset = p->tcol->rmargin;
-			p->tcol->rmargin = p->maxrmargin;
-		}
+	if (n->parent->tok == MAN_HP && n->parent->type == ROFFT_BODY &&
+	    n->prev == NULL && n->flags & NODE_NOFILL) {
+		term_newln(p);
+		p->tcol->offset = p->tcol->rmargin;
+		p->tcol->rmargin = p->maxrmargin;
 	}
 	if (n->flags & NODE_EOS)
 		p->flags |= TERMP_SENTENCE;
