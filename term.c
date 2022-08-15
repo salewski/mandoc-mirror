@@ -157,6 +157,7 @@ term_flushln(struct termp *p)
 		/* Finally, print the field content. */
 
 		term_field(p, vbl, nbr);
+		p->tcol->taboff += vbr + (*p->width)(p, ' ');
 
 		/*
 		 * If there is no text left in the field, exit the loop.
@@ -309,7 +310,9 @@ term_fill(struct termp *p, size_t *nbr, size_t *vbr, size_t vtarget)
 		default:
 			switch (p->tcol->buf[ic]) {
 			case '\t':
+				vis += p->tcol->taboff;
 				vis = term_tab_next(vis);
+				vis -= p->tcol->taboff;
 				break;
 			case ASCII_NBRSP:  /* Non-breakable space. */
 				p->tcol->buf[ic] = ' ';
@@ -348,8 +351,8 @@ term_field(struct termp *p, size_t vbl, size_t nbr)
 {
 	size_t	 ic;	/* Character position in the input buffer. */
 	size_t	 vis;	/* Visual position of the current character. */
+	size_t	 vt;	/* Visual position including tab offset. */
 	size_t	 dv;	/* Visual width of the current character. */
-	size_t	 vn;	/* Visual position of the next character. */
 
 	vis = 0;
 	for (ic = p->tcol->col; ic < nbr; ic++) {
@@ -364,13 +367,13 @@ term_field(struct termp *p, size_t vbl, size_t nbr)
 		case ASCII_BREAK:
 			continue;
 		case '\t':
-			vn = term_tab_next(vis);
-			vbl += vn - vis;
-			vis = vn;
-			continue;
 		case ' ':
 		case ASCII_NBRSP:
-			dv = (*p->width)(p, ' ');
+			if (p->tcol->buf[ic] == '\t') {
+				vt = p->tcol->taboff + vis;
+				dv = term_tab_next(vt) - vt;
+			} else
+				dv = (*p->width)(p, ' ');
 			vbl += dv;
 			vis += dv;
 			continue;
@@ -432,7 +435,7 @@ endline(struct termp *p)
 void
 term_newln(struct termp *p)
 {
-
+	p->tcol->taboff = 0;
 	p->flags |= TERMP_NOSPACE;
 	if (p->tcol->lastcol || p->viscol)
 		term_flushln(p);

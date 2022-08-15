@@ -56,6 +56,7 @@ struct	termp_col {
 	size_t		  col;		/* Byte in buf to be written. */
 	size_t		  rmargin;	/* Current right margin. */
 	size_t		  offset;	/* Current left margin. */
+	size_t		  taboff;	/* Offset for literal tabs. */
 };
 
 struct	termp {

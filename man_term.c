@@ -975,6 +975,7 @@ out:
 	    ! (p->flags & (TERMP_NOBREAK | TERMP_NONEWLINE)) &&
 	    (n->next == NULL || n->next->flags & NODE_LINE)) {
 		p->flags |= TERMP_BRNEVER | TERMP_NOSPACE;
+		p->tcol->taboff = 0;
 		if (n->string != NULL && *n->string != '\0')
 			term_flushln(p);
 		else
