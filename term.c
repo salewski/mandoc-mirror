@@ -208,7 +208,6 @@ term_flushln(struct termp *p)
 			return;
 
 		endline(p);
-		p->viscol = 0;
 
 		/*
 		 * Normally, start the next line at the same indentation
@@ -314,6 +313,8 @@ term_fill(struct termp *p, size_t *nbr, size_t *vbr, size_t vtarget)
 				vis = term_tab_next(vis);
 				vis -= p->tcol->taboff;
 				break;
+			case ASCII_NBRZW:  /* Non-breakable zero-width. */
+				break;
 			case ASCII_NBRSP:  /* Non-breakable space. */
 				p->tcol->buf[ic] = ' ';
 				/* FALLTHROUGH */
@@ -365,6 +366,7 @@ term_field(struct termp *p, size_t vbl, size_t nbr)
 		switch (p->tcol->buf[ic]) {
 		case '\n':
 		case ASCII_BREAK:
+		case ASCII_NBRZW:
 			continue;
 		case '\t':
 		case ' ':
@@ -571,18 +573,23 @@ term_word(struct termp *p, const char *word)
 			break;
 		case ESCAPE_NUMBERED:
 			uc = mchars_num2char(seq, sz);
-			if (uc < 0)
-				continue;
-			break;
+			if (uc >= 0)
+				break;
+			bufferc(p, ASCII_NBRZW);
+			continue;
 		case ESCAPE_SPECIAL:
 			if (p->enc == TERMENC_ASCII) {
 				cp = mchars_spec2str(seq, sz, &ssz);
 				if (cp != NULL)
 					encode(p, cp, ssz);
+				else
+					bufferc(p, ASCII_NBRZW);
 			} else {
 				uc = mchars_spec2cp(seq, sz);
 				if (uc > 0)
 					encode1(p, uc);
+				else
+					bufferc(p, ASCII_NBRZW);
 			}
 			continue;
 		case ESCAPE_UNDEF:
@@ -743,6 +750,9 @@ term_word(struct termp *p, const char *word)
 				p->tcol->lastcol -= 2;
 			if (p->col > p->tcol->lastcol)
 				p->col = p->tcol->lastcol;
+			continue;
+		case ESCAPE_IGNORE:
+			bufferc(p, ASCII_NBRZW);
 			continue;
 		default:
 			continue;
@@ -935,8 +945,8 @@ term_strlen(const struct termp *p, const char *cp)
 	int		 ssz, skip, uc;
 	const char	*seq, *rhs;
 	enum mandoc_esc	 esc;
-	static const char rej[] = { '\\', ASCII_NBRSP, ASCII_HYPH,
-			ASCII_BREAK, '\0' };
+	static const char rej[] = { '\\', ASCII_NBRSP, ASCII_NBRZW,
+		ASCII_BREAK, ASCII_HYPH, '\0' };
 
 	/*
 	 * Account for escaped sequences within string length

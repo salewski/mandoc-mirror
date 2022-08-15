@@ -196,7 +196,7 @@ terminal_sepline(void *arg)
 static size_t
 ascii_width(const struct termp *p, int c)
 {
-	return c != ASCII_BREAK;
+	return c != ASCII_BREAK && c != ASCII_NBRZW;
 }
 
 void
