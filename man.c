@@ -76,16 +76,7 @@ man_hasc(char *start)
 void
 man_descope(struct roff_man *man, int line, int offs, char *start)
 {
-	/* Trailing \c keeps next-line scope open. */
-
-	if (start != NULL && man_hasc(start) != NULL)
-		return;
-
-	/*
-	 * Co-ordinate what happens with having a next-line scope open:
-	 * first close out the element scopes (if applicable),
-	 * then close out the block scope (also if applicable).
-	 */
+	/* First close out all next-line element scopes, if any. */
 
 	if (man->flags & MAN_ELINE) {
 		while (man->last->parent->type != ROFFT_ROOT &&
@@ -93,6 +84,14 @@ man_descope(struct roff_man *man, int line, int offs, char *start)
 			man_unscope(man, man->last->parent);
 		man->flags &= ~MAN_ELINE;
 	}
+
+	/* Trailing \c keeps next-line block scope open. */
+
+	if (start != NULL && man_hasc(start) != NULL)
+		return;
+
+	/* Close out the next-line block scope, if there is one. */
+
 	if ( ! (man->flags & MAN_BLINE))
 		return;
 	man_unscope(man, man->last->parent);
