@@ -910,8 +910,11 @@ print_man_node(DECL_ARGS)
 		    (p->flags & TERMP_NONEWLINE) == 0)
 			term_newln(p);
 		p->flags |= TERMP_BRNEVER;
-	} else
+	} else {
+		if (n->flags & NODE_LINE)
+			term_tab_ref(p);
 		p->flags &= ~TERMP_BRNEVER;
+	}
 
 	if (n->flags & NODE_ID)
 		term_tag_write(n, p->line);

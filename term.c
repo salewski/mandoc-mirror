@@ -157,7 +157,11 @@ term_flushln(struct termp *p)
 		/* Finally, print the field content. */
 
 		term_field(p, vbl, nbr);
-		p->tcol->taboff += vbr + (*p->width)(p, ' ');
+		if (vbr < vtarget)
+			p->tcol->taboff += vbr;
+		else
+			p->tcol->taboff += vtarget;
+		p->tcol->taboff += (*p->width)(p, ' ');
 
 		/*
 		 * If there is no text left in the field, exit the loop.
@@ -177,7 +181,9 @@ term_flushln(struct termp *p)
 					vbr += (*p->width)(p, ' ');
 				continue;
 			case '\n':
+			case ASCII_NBRZW:
 			case ASCII_BREAK:
+			case ASCII_TABREF:
 				continue;
 			default:
 				break;
@@ -258,9 +264,11 @@ term_fill(struct termp *p, size_t *nbr, size_t *vbr, size_t vtarget)
 	size_t	 vn;        /* Visual position of the next character. */
 	int	 breakline; /* Break at the end of this word. */
 	int	 graph;     /* Last character was non-blank. */
+	int	 taboff;    /* Temporary offset for literal tabs. */
 
 	*nbr = *vbr = vis = 0;
 	breakline = graph = 0;
+	taboff = p->tcol->taboff;
 	for (ic = p->tcol->col; ic < p->tcol->lastcol; ic++) {
 		switch (p->tcol->buf[ic]) {
 		case '\b':  /* Escape \o (overstrike) or backspace markup. */
@@ -306,12 +314,19 @@ term_fill(struct termp *p, size_t *nbr, size_t *vbr, size_t vtarget)
 			*vbr = vis;
 			continue;
 
+		case ASCII_TABREF:
+			taboff = -vis - (*p->width)(p, ' ');
+			continue;
+
 		default:
 			switch (p->tcol->buf[ic]) {
 			case '\t':
-				vis += p->tcol->taboff;
+				if (taboff < 0 && (size_t)-taboff > vis)
+					vis = 0;
+				else
+					vis += taboff;
 				vis = term_tab_next(vis);
-				vis -= p->tcol->taboff;
+				vis -= taboff;
 				break;
 			case ASCII_NBRZW:  /* Non-breakable zero-width. */
 				break;
@@ -354,8 +369,10 @@ term_field(struct termp *p, size_t vbl, size_t nbr)
 	size_t	 vis;	/* Visual position of the current character. */
 	size_t	 vt;	/* Visual position including tab offset. */
 	size_t	 dv;	/* Visual width of the current character. */
+	int	 taboff; /* Temporary offset for literal tabs. */
 
 	vis = 0;
+	taboff = p->tcol->taboff;
 	for (ic = p->tcol->col; ic < nbr; ic++) {
 
 		/*
@@ -368,11 +385,17 @@ term_field(struct termp *p, size_t vbl, size_t nbr)
 		case ASCII_BREAK:
 		case ASCII_NBRZW:
 			continue;
+		case ASCII_TABREF:
+			taboff = -vis - (*p->width)(p, ' ');
+			continue;
 		case '\t':
 		case ' ':
 		case ASCII_NBRSP:
 			if (p->tcol->buf[ic] == '\t') {
-				vt = p->tcol->taboff + vis;
+				if (taboff < 0 && (size_t)-taboff > vis)
+					vt = 0;
+				else
+					vt = vis + taboff;
 				dv = term_tab_next(vt) - vt;
 			} else
 				dv = (*p->width)(p, ' ');
@@ -437,10 +460,10 @@ endline(struct termp *p)
 void
 term_newln(struct termp *p)
 {
-	p->tcol->taboff = 0;
 	p->flags |= TERMP_NOSPACE;
 	if (p->tcol->lastcol || p->viscol)
 		term_flushln(p);
+	p->tcol->taboff = 0;
 }
 
 /*
@@ -801,6 +824,14 @@ bufferc(struct termp *p, char c)
 		p->tcol->lastcol = p->col;
 }
 
+void
+term_tab_ref(struct termp *p)
+{
+	if (p->tcol->lastcol && p->tcol->lastcol <= p->col &&
+	    (p->flags & TERMP_NOBUF) == 0)
+		bufferc(p, ASCII_TABREF);
+}
+
 /*
  * See encode().
  * Do this for a single (probably unicode) value.
@@ -946,7 +977,7 @@ term_strlen(const struct termp *p, const char *cp)
 	const char	*seq, *rhs;
 	enum mandoc_esc	 esc;
 	static const char rej[] = { '\\', ASCII_NBRSP, ASCII_NBRZW,
-		ASCII_BREAK, ASCII_HYPH, '\0' };
+		ASCII_BREAK, ASCII_HYPH, ASCII_TABREF, '\0' };
 
 	/*
 	 * Account for escaped sequences within string length
