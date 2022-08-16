@@ -23,6 +23,8 @@
 #define ASCII_NBRZW	 30  /* non-breaking zero-width space */
 #define ASCII_BREAK	 29  /* breakable zero-width space */
 #define ASCII_HYPH	 28  /* breakable hyphen */
+#define ASCII_ESC	 27  /* escape sequence from copy-in processing */
+#define ASCII_TABREF	 26  /* reset tab reference position */
 
 /*
  * Status level.  This refers to both internal status (i.e., whilst
