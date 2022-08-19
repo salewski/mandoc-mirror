@@ -1,4 +1,4 @@
-.\" $OpenBSD: break.in,v 1.5 2017/07/04 14:53:26 schwarze Exp $
+.\" $OpenBSD: break.in,v 1.6 2022/08/19 12:49:36 schwarze Exp $
 .Dd $Mdocdate$
 .Dt RS-BREAK 1
 .Os
@@ -20,7 +20,7 @@ reference after a blank line:
 .%N 42
 .Re
 .Sh SEE Em ALSO
-reference after a blank line:
+reference on the same line:
 .Rs
 .%A author
 .%J journal
