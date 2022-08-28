@@ -549,15 +549,11 @@ term_tbl(struct termp *tp, const struct tbl_span *sp)
 	tp->flags &= ~TERMP_MULTICOL;
 	tp->tcol->rmargin = tp->maxrmargin;
 	if (sp->next == NULL) {
-		if (sp->opts->opts & (TBL_OPT_DBOX | TBL_OPT_BOX)) {
+		if (sp->opts->opts & (TBL_OPT_DBOX | TBL_OPT_BOX))
 			tbl_hrule(tp, sp, sp, NULL, TBL_OPT_BOX);
-			tp->skipvsp = 1;
-		}
 		if (tp->enc == TERMENC_ASCII &&
-		    sp->opts->opts & TBL_OPT_DBOX) {
+		    sp->opts->opts & TBL_OPT_DBOX)
 			tbl_hrule(tp, sp, sp, NULL, TBL_OPT_DBOX);
-			tp->skipvsp = 2;
-		}
 		assert(tp->tbl.cols);
 		free(tp->tbl.cols);
 		tp->tbl.cols = NULL;
