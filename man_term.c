@@ -951,7 +951,7 @@ print_man_node(DECL_ARGS)
 		return;
 	case ROFFT_TBL:
 		if (p->tbl.cols == NULL)
-			term_vspace(p);
+			term_newln(p);
 		term_tbl(p, n->span);
 		return;
 	default:
