@@ -765,7 +765,7 @@ Messages displayed by
 follow this format:
 .Bd -ragged -offset indent
 .Nm :
-.Ar file : Ns Ar line : Ns Ar column : level : message : macro arguments
+.Ar file : Ns Ar line : Ns Ar column : level : message : macro argument ...
 .Pq Ar os
 .Ed
 .Pp
@@ -785,9 +785,7 @@ and
 strings are explained below.
 The name of the
 .Ar macro
-triggering the message and its
-.Ar arguments
-are omitted where meaningless.
+triggering the message and its arguments are omitted where meaningless.
 The
 .Ar os
 operating system specifier is omitted for messages that are relevant
