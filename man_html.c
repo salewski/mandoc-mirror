@@ -60,7 +60,6 @@ static	int		  man_SH_pre(MAN_ARGS);
 static	int		  man_SM_pre(MAN_ARGS);
 static	int		  man_SY_pre(MAN_ARGS);
 static	int		  man_UR_pre(MAN_ARGS);
-static	int		  man_abort_pre(MAN_ARGS);
 static	int		  man_alt_pre(MAN_ARGS);
 static	int		  man_ign_pre(MAN_ARGS);
 static	int		  man_in_pre(MAN_ARGS);
@@ -75,9 +74,9 @@ static	const struct man_html_act man_html_acts[MAN_MAX - MAN_TH] = {
 	{ man_SH_pre, NULL }, /* SS */
 	{ man_IP_pre, NULL }, /* TP */
 	{ man_IP_pre, NULL }, /* TQ */
-	{ man_abort_pre, NULL }, /* LP */
+	{ man_PP_pre, NULL }, /* LP */
 	{ man_PP_pre, NULL }, /* PP */
-	{ man_abort_pre, NULL }, /* P */
+	{ man_PP_pre, NULL }, /* P */
 	{ man_IP_pre, NULL }, /* IP */
 	{ man_PP_pre, NULL }, /* HP */
 	{ man_SM_pre, NULL }, /* SM */
@@ -406,7 +405,7 @@ man_PP_pre(MAN_ARGS)
 		if (n->child != NULL &&
 		    (n->child->flags & NODE_NOFILL) == 0)
 			print_otag(h, TAG_P, "c",
-			    n->tok == MAN_PP ? "Pp" : "Pp HP");
+			    n->tok == MAN_HP ? "Pp HP" : "Pp");
 		break;
 	default:
 		abort();
@@ -634,10 +633,4 @@ man_UR_pre(MAN_ARGS)
 
 	print_man_nodelist(man, n->child, h);
 	return 0;
-}
-
-static int
-man_abort_pre(MAN_ARGS)
-{
-	abort();
 }
