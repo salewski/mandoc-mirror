@@ -17,7 +17,7 @@
  * Function to read the mandoc database from disk into RAM,
  * such that data can be added or removed.
  * The interface is defined in "dba.h".
- * This file is seperate from dba.c because this also uses "dbm.h".
+ * This file is separate from dba.c because this also uses "dbm.h".
  */
 #include "config.h"
 

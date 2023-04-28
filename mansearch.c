@@ -491,7 +491,7 @@ lstlen(const char *cp, size_t sep)
 
 /*
  * Print the NUL-terminated list of NUL-terminated strings
- * into the buffer, seperating strings with sep.
+ * into the buffer, separating strings with sep.
  */
 static void
 lstcat(char *buf, size_t *i, const char *cp, const char *sep)

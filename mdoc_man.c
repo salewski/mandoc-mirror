@@ -1,4 +1,4 @@
-/*	$Id$ */
+/* $Id$ */
 /*
  * Copyright (c) 2011-2021 Ingo Schwarze <schwarze@openbsd.org>
  *
@@ -1518,7 +1518,7 @@ mid_it(void)
 	    Bl_stack[Bl_stack_len - 1]);
 	print_word(buf);
 
-	/* Remeber to close out this .RS block later. */
+	/* Remember to close out this .RS block later. */
 	Bl_stack_post[Bl_stack_len - 1] = 1;
 }
 

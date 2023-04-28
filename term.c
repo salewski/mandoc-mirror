@@ -194,7 +194,7 @@ term_flushln(struct termp *p)
 			break;
 
 		/*
-		 * At the location of an automtic line break, input
+		 * At the location of an automatic line break, input
 		 * space characters are consumed by the line break.
 		 */
 

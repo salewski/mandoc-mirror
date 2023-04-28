@@ -356,7 +356,7 @@ eqn_def_find(struct eqn_node *ep)
 /*
  * Parse a token from the input text.  The modes are:
  * MODE_QUOTED: Use *ep->start as the delimiter; the token ends
- *   before its next occurence.  Do not interpret the token in any
+ *   before its next occurrence.  Do not interpret the token in any
  *   way and return EQN_TOK_QUOTED.  All other modes behave like
  *   MODE_QUOTED when *ep->start is '"'.
  * MODE_NOSUB: If *ep->start is a curly brace, the token ends after it;
