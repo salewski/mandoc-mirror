@@ -154,6 +154,11 @@ are mere guesses, and some may be wrong.
 
 --- missing mdoc features ----------------------------------------------
 
+- support mixed case for section names
+  also, first section is not "NAME" should not appear more than once per page
+  Alejandro Colomar 28 Apr 2023 16:57:49 +0200
+  loc * exist * algo * size * imp ***
+
 - .Sh and .Ss should be parsed and partially callable, see groff_mdoc(7)
   reed at reedmedia dot net Sat, 21 Dec 2019 17:13:07 -0600
   loc **  exist **  algo **  size **  imp *
@@ -296,6 +301,10 @@ are mere guesses, and some may be wrong.
   bentley@  Thu, 13 Jul 2017 23:14:20 -0600
 
 --- missing misc features ----------------------------------------------
+
+- use the default volume headers for sections with suffixes
+  certainly affects man(7); possibly mdoc(7)?; and also groff(1)
+  Alejandro Colomar 21 Aug 2022
 
 - conisder whether man(1) fallback code in main.c/fs_*() can find files
   like man3c/fopen.3c (illumos, Solaris) and man3p/fopen.3p (POSIX)
@@ -636,6 +645,11 @@ are mere guesses, and some may be wrong.
 - shorten/simplify error messages for usage errors
   To: deraadt@ 25 Oct 2020 23:37:01 +0100
   loc **  exist *  algo *  size **  imp ***
+
+- warn about output lines exceeding 80 characters
+  Alejandro Colomar Aug 22, 2022
+  not trivial because -T lint does not call any formatter
+  loc ***  exist *  algo **  size **  imp **
 
 - warn about duplicate .Sh/.Ss heads
   gre(4): Rename duplicate sections 20 Apr 2018 15:27:33 +0200
