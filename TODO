@@ -68,6 +68,14 @@ are mere guesses, and some may be wrong.
   but watch out for regressions in the high-level parsers
   maybe it should not even remove comments? - consider T{\"
 
+- In the body of conditional requests, escape sequence expansion
+  must not be performed if the condition is false.  This implies
+  the first part of a request line must be expanded before
+  request parsing (like it is now), but expansion in the second
+  part must be delayed.
+  to Nab 8 Aug 2023 20:05:32 +0200 Subject: if/ie d condition always true
+  loc **  exist ***  algo ***  size **  imp *
+
 - tag.c, tag_put() should not put ASCII_HYPH into the tag file,
   which happens when the tag contains "-" on the input side
   weerd@ 28 Sep 2021 12:44:07 +0200
@@ -629,6 +637,10 @@ are mere guesses, and some may be wrong.
 - Sequences of multiple man(7) paragraphs (.PP, .IP) interspersed
   with .ps and .nf/.fi produce execessive blank lines, see libJudy
   and graphics/dcmtk.  The parser reorg may help with this.
+
+- The man(7) .UR macro produces UTF-8 angle brackets in -Tutf8 output mode
+  with groff, but ASCII <> with mandoc
+  Alejandro Colomar Mon, 7 Aug 2023 17:13:29 +0200 Subject: hostname
 
 - trailing whitespace must be ignored even when followed by a font escape,
   see for example
