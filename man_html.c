@@ -433,10 +433,12 @@ list_continues(const struct roff_node *n1, const struct roff_node *n2)
 	s2 = n2 == NULL ? "" : n2->string;
 	c1 = strcmp(s1, "*") == 0 ? '*' :
 	     strcmp(s1, "\\-") == 0 ? '-' :
-	     strcmp(s1, "\\(bu") == 0 ? 'b' : ' ';
+	     strcmp(s1, "\\(bu") == 0 ? 'b' :
+	     strcmp(s1, "\\[bu]") == 0 ? 'b' : ' ';
 	c2 = strcmp(s2, "*") == 0 ? '*' :
 	     strcmp(s2, "\\-") == 0 ? '-' :
-	     strcmp(s2, "\\(bu") == 0 ? 'b' : ' ';
+	     strcmp(s2, "\\(bu") == 0 ? 'b' :
+	     strcmp(s2, "\\[bu]") == 0 ? 'b' : ' ';
 	return c1 != c2 ? '\0' : c1 == 'b' ? '*' : c1;
 }
 
