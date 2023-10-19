@@ -239,6 +239,9 @@ are mere guesses, and some may be wrong.
 
 --- missing man features -----------------------------------------------
 
+- groff_man(7) .MR
+  loc **  exist *  algo *  size *  imp ***
+
 - MANWIDTH
   Markus Waldeck <waldeck at gmx dot de> 9 Jun 2015 05:49:56 +0200
   Laura Morales <lauretas at mail dot com> 26 Apr 2018 08:15:55 +0200
@@ -504,6 +507,10 @@ are mere guesses, and some may be wrong.
   loc **  exist **  algo **  size *  imp **
 
 --- HTML issues --------------------------------------------------------
+
+- support the idiom .TP .IP .TP for multi-paragraph list item bodies
+  to: Alejandro Colomar Thu, 19 Oct 2023 16:45:21 +0200
+  loc **  exist **  algo **  size **  imp **
 
 - .Nm without an argument and .Bx cause premature </pre>
   Nab Sun, 5 Jun 2022 18:30:09 +0200
