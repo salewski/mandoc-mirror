@@ -111,6 +111,7 @@ BIN_FROM_SBIN=
 INCLUDEDIR=
 LIBDIR=
 MANDIR=
+MISCDIR=
 READ_ALLOWED_PATH=
 
 WWWPREFIX="/var/www"
@@ -620,6 +621,7 @@ exec > Makefile.local
 [ -z "${INCLUDEDIR}"      ] && INCLUDEDIR="${PREFIX}/include/mandoc"
 [ -z "${LIBDIR}"          ] && LIBDIR="${PREFIX}/lib/mandoc"
 [ -z "${MANDIR}"          ] && MANDIR="${PREFIX}/man"
+[ -z "${MISCDIR}"         ] && MISCDIR="${PREFIX}/share/misc"
 
 [ -z "${HTDOCDIR}"        ] && HTDOCDIR="${WWWPREFIX}/htdocs"
 [ -z "${CGIBINDIR}"       ] && CGIBINDIR="${WWWPREFIX}/cgi-bin"
@@ -658,6 +660,7 @@ BIN_FROM_SBIN	= ${BIN_FROM_SBIN}
 INCLUDEDIR	= ${INCLUDEDIR}
 LIBDIR		= ${LIBDIR}
 MANDIR		= ${MANDIR}
+MISCDIR		= ${MISCDIR}
 WWWPREFIX	= ${WWWPREFIX}
 HTDOCDIR	= ${HTDOCDIR}
 CGIBINDIR	= ${CGIBINDIR}

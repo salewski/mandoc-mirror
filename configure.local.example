@@ -108,11 +108,15 @@ OSNAME="OpenBSD 7.0"
 # there is no need to copy the whole block.
 # Even if you set PREFIX to something else, the other variables
 # pick it up without copying them all over.
+# MISCDIR is only used for installing the file mandoc.css.
+# That is important because users of "mandoc -T html" often need it
+# even if they are not using man.cgi(8), see mandoc(1) for details.
 
 PREFIX="/usr/local"
 BINDIR="${PREFIX}/bin"
 SBINDIR="${PREFIX}/sbin"
 MANDIR="${PREFIX}/man"
+MISCDIR="${PREFIX}/share/misc"
 
 # If BINDIR and SBINDIR are not subdirectories of the same parent
 # directory or if the basename(1) of BINDIR differs from "bin",

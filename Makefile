@@ -416,6 +416,7 @@ base-install: mandoc demandoc soelim
 	mkdir -p $(DESTDIR)$(MANDIR)/man5
 	mkdir -p $(DESTDIR)$(MANDIR)/man7
 	mkdir -p $(DESTDIR)$(MANDIR)/man8
+	mkdir -p $(DESTDIR)$(MISCDIR)
 	$(INSTALL_PROGRAM) mandoc demandoc $(DESTDIR)$(BINDIR)
 	$(INSTALL_PROGRAM) soelim $(DESTDIR)$(BINDIR)/$(BINM_SOELIM)
 	cd $(DESTDIR)$(BINDIR) && $(LN) mandoc $(BINM_MAN)
@@ -438,6 +439,7 @@ base-install: mandoc demandoc soelim
 	$(INSTALL_MAN) mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
 	$(INSTALL_MAN) makewhatis.8 \
 		$(DESTDIR)$(MANDIR)/man8/$(BINM_MAKEWHATIS).8
+	$(INSTALL_DATA) mandoc.css $(DESTDIR)$(MISCDIR)
 
 lib-install: libmandoc.a
 	mkdir -p $(DESTDIR)$(LIBDIR)
