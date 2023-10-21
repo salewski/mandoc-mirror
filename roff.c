@@ -1387,7 +1387,7 @@ roff_expand(struct roff *r, struct buf *buf, int ln, int pos, char ec)
 		 */
 
 		if (buf->buf[pos] != ec) {
-			if (ec != ASCII_ESC && buf->buf[pos] == '\\') {
+			if (buf->buf[pos] == '\\') {
 				roff_expand_patch(buf, pos, "\\e", pos + 1);
 				pos++;
 			}
@@ -1632,12 +1632,7 @@ roff_getarg(struct roff *r, char **cpp, int ln, int *pos)
 				cp++;
 				break;
 			case '\\':
-				/*
-				 * Signal to roff_expand() that an escape
-				 * sequence resulted from copy-in processing
-				 * and needs to be checked or interpolated.
-				 */
-				cp[-pairs] = ASCII_ESC;
+				cp[-pairs] = '\\';
 				newesc = 1;
 				pairs++;
 				cp++;
@@ -1694,7 +1689,7 @@ roff_getarg(struct roff *r, char **cpp, int ln, int *pos)
 	buf.buf = start;
 	buf.sz = strlen(start) + 1;
 	buf.next = NULL;
-	if (roff_expand(r, &buf, ln, 0, ASCII_ESC) & ROFF_IGN) {
+	if (roff_expand(r, &buf, ln, 0, '\\') & ROFF_IGN) {
 		free(buf.buf);
 		buf.buf = mandoc_strdup("");
 	}
