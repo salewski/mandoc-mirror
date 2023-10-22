@@ -1689,7 +1689,7 @@ roff_getarg(struct roff *r, char **cpp, int ln, int *pos)
 	buf.buf = start;
 	buf.sz = strlen(start) + 1;
 	buf.next = NULL;
-	if (roff_expand(r, &buf, ln, 0, '\\') & ROFF_IGN) {
+	if (roff_expand(r, &buf, ln, 0, '\\') == ROFF_IGN) {
 		free(buf.buf);
 		buf.buf = mandoc_strdup("");
 	}
