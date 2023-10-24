@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2013-2015,2017-2020,2022 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2013-15,2017-20,2022-23 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2008-2012, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -53,6 +53,7 @@ static	char		  list_continues(const struct roff_node *,
 static	int		  man_B_pre(MAN_ARGS);
 static	int		  man_IP_pre(MAN_ARGS);
 static	int		  man_I_pre(MAN_ARGS);
+static	int		  man_MR_pre(MAN_ARGS);
 static	int		  man_OP_pre(MAN_ARGS);
 static	int		  man_PP_pre(MAN_ARGS);
 static	int		  man_RS_pre(MAN_ARGS);
@@ -106,6 +107,7 @@ static	const struct man_html_act man_html_acts[MAN_MAX - MAN_TH] = {
 	{ NULL, NULL }, /* UE */
 	{ man_UR_pre, NULL }, /* MT */
 	{ NULL, NULL }, /* ME */
+	{ man_MR_pre, NULL }, /* MR */
 };
 
 
@@ -514,6 +516,52 @@ man_IP_pre(MAN_ARGS)
 		break;
 	default:
 		abort();
+	}
+	return 0;
+}
+
+static int
+man_MR_pre(MAN_ARGS)
+{
+	struct tag	*t;
+	const char	*name, *section, *suffix;
+	char		*label;
+
+	html_setfont(h, ESCAPE_FONTROMAN);
+	name = section = suffix = label = NULL;
+	if (n->child != NULL) {
+		name = n->child->string;
+		if (n->child->next != NULL) {
+			section = n->child->next->string;
+			mandoc_asprintf(&label,
+			    "%s, section %s", name, section);
+			if (n->child->next->next != NULL)
+				suffix = n->child->next->next->string;
+		}
+	}
+
+	if (name != NULL && section != NULL && h->base_man1 != NULL)
+		t = print_otag(h, TAG_A, "chM?", "Xr",
+		    name, section, "aria-label", label);
+	else
+		t = print_otag(h, TAG_A, "c?", "Xr", "aria-label", label);
+
+	free(label);
+	if (name != NULL) {
+		print_text(h, name);
+		h->flags |= HTML_NOSPACE;
+	}
+	print_text(h, "(");
+	h->flags |= HTML_NOSPACE;
+	if (section != NULL) {
+		print_text(h, section);
+		h->flags |= HTML_NOSPACE;
+	}
+	print_text(h, ")");
+	print_tagq(h, t);
+	if (suffix != NULL) {
+		h->flags |= HTML_NOSPACE;
+		print_text(h, suffix);
 	}
 	return 0;
 }

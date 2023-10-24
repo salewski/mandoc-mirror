@@ -239,9 +239,6 @@ are mere guesses, and some may be wrong.
 
 --- missing man features -----------------------------------------------
 
-- groff_man(7) .MR
-  loc **  exist *  algo *  size *  imp ***
-
 - MANWIDTH
   Markus Waldeck <waldeck at gmx dot de> 9 Jun 2015 05:49:56 +0200
   Laura Morales <lauretas at mail dot com> 26 Apr 2018 08:15:55 +0200

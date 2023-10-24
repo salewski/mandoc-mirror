@@ -476,6 +476,7 @@ enum	roff_tok {
 	MAN_UE,
 	MAN_MT,
 	MAN_ME,
+	MAN_MR,
 	MAN_MAX		/* End of man(7) macros. */
 };
 

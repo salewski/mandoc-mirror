@@ -82,6 +82,7 @@ static const struct man_macro man_macros[MAN_MAX - MAN_TH] = {
 	{ blk_close, MAN_XSCOPE }, /* UE */
 	{ blk_exp, MAN_XSCOPE }, /* MT */
 	{ blk_close, MAN_XSCOPE }, /* ME */
+	{ in_line_eoln, 0 }, /* MR */
 };
 
 
