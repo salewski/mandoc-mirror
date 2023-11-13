@@ -662,6 +662,9 @@ are mere guesses, and some may be wrong.
   To: deraadt@ 25 Oct 2020 23:37:01 +0100
   loc **  exist *  algo *  size **  imp ***
 
+- warn about \\ and \. in interpretation mode
+  gbranden@, groff issue #62776, 10 Nov 2023 01:57:32 -0500
+
 - warn about output lines exceeding 80 characters
   Alejandro Colomar Aug 22, 2022
   not trivial because -T lint does not call any formatter
