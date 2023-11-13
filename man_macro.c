@@ -317,7 +317,7 @@ blk_exp(MACRO_PROT_ARGS)
 		if (tok == MAN_RS) {
 			if (roff_getreg(man->roff, "an-margin") == 0)
 				roff_setreg(man->roff, "an-margin",
-				    7 * 24, '=');
+				    5 * 24, '=');
 			if ((head->aux = strtod(p, NULL) * 24.0) > 0)
 				roff_setreg(man->roff, "an-margin",
 				    head->aux, '+');

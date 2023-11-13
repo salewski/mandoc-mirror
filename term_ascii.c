@@ -72,6 +72,7 @@ ascii_init(enum termenc enc, const struct manoutput *outopts)
 	p->maxtcol = 1;
 
 	p->line = 1;
+	p->defindent = 5;
 	p->defrmargin = p->lastrmargin = 78;
 	p->fontq = mandoc_reallocarray(NULL,
 	     (p->fontsz = 8), sizeof(*p->fontq));
@@ -122,10 +123,8 @@ ascii_init(enum termenc enc, const struct manoutput *outopts)
 	}
 #endif
 
-	if (outopts->mdoc) {
+	if (outopts->mdoc)
 		p->mdocstyle = 1;
-		p->defindent = 5;
-	}
 	if (outopts->indent)
 		p->defindent = outopts->indent;
 	if (outopts->width)
