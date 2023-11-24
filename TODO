@@ -314,7 +314,7 @@ are mere guesses, and some may be wrong.
   certainly affects man(7); possibly mdoc(7)?; and also groff(1)
   Alejandro Colomar 21 Aug 2022
 
-- conisder whether man(1) fallback code in main.c/fs_*() can find files
+- consider whether man(1) fallback code in main.c/fs_*() can find files
   like man3c/fopen.3c (illumos, Solaris) and man3p/fopen.3p (POSIX)
   discussed with Robert Mustacchi 21 Sep 2021 10:39:40 -0700
   loc *  exist *  algo **  size *  imp **
@@ -357,6 +357,10 @@ are mere guesses, and some may be wrong.
       see textproc/mgdiff(1) for nice examples
   (3) undefined, just output the character -> perhaps WARNING
   loc ***  exist **  algo **  size **  imp *** (parser reorg helps)
+
+- man.conf(5) alias aliasname dirname or just -Mb -Mx -Mp
+  mail to jmc@ Mar 23, 2015 03:53:14PM +0100
+  loc *  exist *  algo *  size *  imp **
 
 - kettenis wants base roff, ms, and me  Fri, 1 Jan 2010 22:13:15 +0100 (CET)
   loc **  exist **  algo **  size ***  imp *
