@@ -76,11 +76,6 @@ are mere guesses, and some may be wrong.
   to Nab 8 Aug 2023 20:05:32 +0200 Subject: if/ie d condition always true
   loc **  exist ***  algo ***  size **  imp *
 
-- tag.c, tag_put() should not put ASCII_HYPH into the tag file,
-  which happens when the tag contains "-" on the input side
-  weerd@ 28 Sep 2021 12:44:07 +0200
-  loc *  exist *  algo *  size *  imp ***
-
 
 ************************************************************************
 * missing features
@@ -323,12 +318,6 @@ are mere guesses, and some may be wrong.
   this may be feasible using fts_set(FTS_FOLLOW)
   mail to sternenseemann 19 Aug 2021 19:11:50 +0200
   loc *  exist **  algo **  size *  imp **
-
-- tag.c, tag_put() and callers like man_validate.c, check_tag()
-  should not mistake "\-" as a word-ending escape sequence but
-  instead translate it to plain "-" in the tag name
-  weerd@ 28 Sep 2021 12:44:07 +0200
-  loc **  exist *  algo *  size *  imp ***
 
 - handle Unicode letters in tags in both HTML and terminal output
   thread "section headers with diacritics" starting with
