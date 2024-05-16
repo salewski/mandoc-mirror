@@ -467,13 +467,12 @@ roff_escape(const char *buf, const int ln, const int aesc,
 		/*
 		 * Unicode escapes are defined in groff as \[u0000]
 		 * to \[u10FFFF], where the contained value must be
-		 * a valid Unicode codepoint.  Here, however, only
-		 * check the length and range.
+		 * a valid Unicode codepoint.
 		 */
 
 		if (buf[iarg] != 'u' || argl < 5 || argl > 7)
 			break;
-		if (argl == 7 &&
+		if (argl == 7 &&  /* beyond the Unicode range */
 		    (buf[iarg + 1] != '1' || buf[iarg + 2] != '0')) {
 			err = MANDOCERR_ESC_BADCHAR;
 			break;
@@ -482,8 +481,9 @@ roff_escape(const char *buf, const int ln, const int aesc,
 			err = MANDOCERR_ESC_BADCHAR;
 			break;
 		}
-		if (argl == 5 && buf[iarg + 1] == 'D' &&
-		    strchr("89ABCDEF", buf[iarg + 2]) != NULL) {
+		if (argl == 5 &&  /* UTF-16 surrogate */
+		    toupper((unsigned char)buf[iarg + 1]) == 'D' &&
+		    strchr("89ABCDEFabcdef", buf[iarg + 2]) != NULL) {
 			err = MANDOCERR_ESC_BADCHAR;
 			break;
 		}
