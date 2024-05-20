@@ -439,7 +439,7 @@ in the alphabetical
 .Bl -column "Brq, Bro, Brc" description
 .It Ic \&Dd Ta document date: Cm $\&Mdocdate$ | Ar month day , year
 .It Ic \&Dt Ta document title: Ar TITLE section Op Ar arch
-.It Ic \&Os Ta operating system version: Op Ar system Op Ar version
+.It Ic \&Os Ta operating system footer: Op Ar footer text
 .It Ic \&Nm Ta document name (one argument)
 .It Ic \&Nd Ta document description (one line)
 .El
@@ -2074,31 +2074,28 @@ Examples:
 See also
 .Ic \&Oo .
 .Tg Os
-.It Ic \&Os Op Ar system Op Ar version
-Operating system version for display in the page footer.
-This is the mandatory third macro of
-any
+.It Ic \&Os Op Ar footer text
+The mandatory third macro of every
 .Nm
 file.
+Usually, do not specify any arguments,
+in particular not the operating system name and/or version.
 .Pp
-The optional
-.Ar system
-parameter specifies the relevant operating system or environment.
-It is suggested to leave it unspecified, in which case
+If no argument is given,
 .Xr mandoc 1
-uses its
+prints its
 .Fl Ios
-argument or, if that isn't specified either,
+argument in the page footer, or
 .Fa sysname
 and
 .Fa release
 as returned by
-.Xr uname 3 .
+.Xr uname 3
+by default.
 .Pp
-Examples:
-.Dl \&.Os
-.Dl \&.Os KTH/CSC/TCS
-.Dl \&.Os BSD 4.3
+Manual pages that are part of a portable software project can override
+the default by giving the project name and version number as arguments,
+but leaving it blank is never a bad choice.
 .Pp
 See also
 .Ic \&Dd
