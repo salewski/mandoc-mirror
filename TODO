@@ -582,7 +582,17 @@ are mere guesses, and some may be wrong.
   Steffen Nurpmeso  Sat, 08 Nov 2014 13:34:59 +0100
   loc *  exist **  algo **  size *  imp **
 
-- In .Bl -enum -width 0n, groff continues one the same line after
+- Multiple issues with .In below SYNOPSIS; groff behaviour is:
+  text line + .In -> no line break before #include
+  called .In -> no line break before angle bracket
+  .In + .In -> second one gets #include, too
+  two arguments -> line break before second
+  child macro -> line break before child
+  .In + text line -> line break before the text line
+  Evan Silberman  Fri, 20 Sep 2024 16:48:19 -0700
+  loc **  exist **  algo *  size *  imp *
+
+- In .Bl -enum -width 0n, groff continues on the same line after
   the number, mandoc breaks the line.
   mail to kristaps@  Mon, 20 Jul 2009 02:21:39 +0200
   loc *  exist **  algo **  size *  imp **
