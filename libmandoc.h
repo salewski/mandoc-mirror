@@ -78,6 +78,7 @@ void		 roff_userret(struct roff *);
 void		 roff_endparse(struct roff *);
 void		 roff_setreg(struct roff *, const char *, int, char);
 int		 roff_getreg(struct roff *, const char *);
+int		 roff_evalnum(int, const char *, int *, int *, char, int);
 char		*roff_strdup(const struct roff *, const char *);
 char		*roff_getarg(struct roff *, char **, int, int *);
 int		 roff_getcontrol(const struct roff *,
