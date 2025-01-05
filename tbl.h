@@ -51,7 +51,6 @@ enum	tbl_cellt {
  */
 struct	tbl_cell {
 	struct tbl_cell	 *next;     /* Layout cell to the right. */
-	char		 *wstr;     /* Min width represented as a string. */
 	size_t		  width;    /* Minimum column width. */
 	size_t		  spacing;  /* To the right of the column. */
 	int		  vert;     /* Width of subsequent vertical line. */

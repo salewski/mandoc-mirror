@@ -117,7 +117,6 @@ void
 tblcalc(struct rofftbl *tbl, const struct tbl_span *sp_first,
     size_t offset, size_t rmargin)
 {
-	struct roffsu		 su;
 	const struct tbl_opts	*opts;
 	const struct tbl_span	*sp;
 	const struct tbl_dat	*dp;
@@ -159,13 +158,6 @@ tblcalc(struct rofftbl *tbl, const struct tbl_span *sp_first,
 				continue;
 
 			/* Handle explicit width specifications. */
-
-			if (dp->layout->wstr != NULL &&
-			    dp->layout->width == 0 &&
-			    a2roffsu(dp->layout->wstr, &su, SCALE_EN)
-			    != NULL)
-				dp->layout->width =
-				    (*tbl->sulen)(&su, tbl->arg);
 			if (col->width < dp->layout->width)
 				col->width = dp->layout->width;
 			if (dp->layout->spacing != SIZE_MAX &&
