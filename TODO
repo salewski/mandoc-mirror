@@ -483,6 +483,10 @@ are mere guesses, and some may be wrong.
   reveals lots of bugs both in groff and mandoc...
   reported by bentley@  Wed, 22 May 2013 23:49:30 -0600
 
+- Make an underlined blank an underscore rather than a blank in both
+  groff and mandoc terminal output (likely tricky, needs investigation)
+  job@  21 Jan 2025 18:03:52 +0000
+
 --- PostScript and PDF issues ------------------------------------------
 
 - PDF output doesn't use a monospaced font for .Bd -literal
