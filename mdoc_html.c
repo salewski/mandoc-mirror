@@ -1555,7 +1555,13 @@ mdoc__x_pre(MDOC_ARGS)
 		cattr = "RsR";
 		break;
 	case MDOC__T:
-		cattr = "RsT";
+		if (n->parent != NULL && n->parent->tok == MDOC_Rs &&
+		    n->parent->norm->Rs.quote_T) {
+			print_text(h, "\\(lq");
+			h->flags |= HTML_NOSPACE;
+			cattr = "RsT";
+		} else
+			cattr = "RsB";
 		break;
 	case MDOC__U:
 		print_otag(h, TAG_A, "ch", "RsU", arg);
@@ -1576,14 +1582,23 @@ mdoc__x_post(MDOC_ARGS)
 {
 	struct roff_node *nn;
 
-	if (n->tok == MDOC__A &&
-	    (nn = roff_node_next(n)) != NULL && nn->tok == MDOC__A &&
-	    ((nn = roff_node_next(nn)) == NULL || nn->tok != MDOC__A) &&
-	    ((nn = roff_node_prev(n)) == NULL || nn->tok != MDOC__A))
-		return;
-
-	/* TODO: %U */
-
+	switch (n->tok) {
+	case MDOC__A:
+		if ((nn = roff_node_next(n)) != NULL && nn->tok == MDOC__A &&
+		    ((nn = roff_node_next(nn)) == NULL || nn->tok != MDOC__A) &&
+		    ((nn = roff_node_prev(n)) == NULL || nn->tok != MDOC__A))
+			return;
+		break;
+	case MDOC__T:
+		if (n->parent != NULL && n->parent->tok == MDOC_Rs &&
+		    n->parent->norm->Rs.quote_T) {
+			h->flags |= HTML_NOSPACE;
+			print_text(h, "\\(rq");
+		}
+		break;
+	default:
+		break;
+	}
 	if (n->parent == NULL || n->parent->tok != MDOC_Rs)
 		return;
 
