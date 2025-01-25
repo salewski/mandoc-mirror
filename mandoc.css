@@ -179,7 +179,8 @@ h3.Ss {		margin-top: 1.2em;
 .RsP { }
 .RsQ { }
 .RsR { }
-.RsT { }
+.RsT {		font-style: normal;
+		font-weight: normal; }
 .RsU { }
 .RsV { }
 
