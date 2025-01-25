@@ -1456,7 +1456,7 @@ mdoc_rs_pre(MDOC_ARGS)
 	case ROFFT_BODY:
 		if (n->sec == SEC_SEE_ALSO)
 			print_otag(h, TAG_P, "c", "Pp");
-		print_otag(h, TAG_CITE, "c", "Rs");
+		print_otag(h, TAG_SPAN, "c", "Rs");
 		break;
 	default:
 		abort();
@@ -1510,7 +1510,7 @@ mdoc__x_pre(MDOC_ARGS)
 			print_text(h, "and");
 		break;
 	case MDOC__B:
-		t = TAG_I;
+		t = TAG_CITE;
 		cattr = "RsB";
 		break;
 	case MDOC__C:
@@ -1555,6 +1555,7 @@ mdoc__x_pre(MDOC_ARGS)
 		cattr = "RsR";
 		break;
 	case MDOC__T:
+		t = TAG_CITE;
 		if (n->parent != NULL && n->parent->tok == MDOC_Rs &&
 		    n->parent->norm->Rs.quote_T) {
 			print_text(h, "\\(lq");
