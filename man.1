@@ -1,4 +1,4 @@
-.\"	$Id$
+.\" $Id$
 .\"
 .\" Copyright (c) 1989, 1990, 1993
 .\"	The Regents of the University of California.  All rights reserved.
@@ -58,7 +58,19 @@ a specific category
 .Pq Ar section
 or
 machine architecture
-.Pq Ar subsection .
+.Pq Ar subsection ,
+or searched for with
+.Fl k
+using
+.Xr apropos 1
+search expressions.
+The default pager,
+.Xr less 1 ,
+supports the command
+.Ic :t
+to jump to definitions of specific terms (see
+.Dv MANPAGER ,
+below).
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
@@ -345,6 +357,26 @@ See
 .Xr mandoc 1
 for details.
 .Sh EXAMPLES
+Show all manual pages that mention the
+.Ev PWD
+environment variable:
+.Pp
+.Dl $ man -ak Ev=PWD
+.Pp
+Show the
+.Xr ksh 1
+manual and jump to the place where the
+.Ic pwd
+builtin command is described:
+.Pp
+.Dl $ man -O tag=pwd ksh
+.Pp
+Equivalently, use the command
+.Ql man ksh ,
+then type
+.Ql :tpwd
+and press the return key.
+.Pp
 Format a page for pasting extracts into an email message \(em
 avoid printing any UTF-8 characters, reduce the width to ease
 quoting in replies, and remove markup:
