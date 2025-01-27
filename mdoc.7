@@ -2297,13 +2297,14 @@ Close single-quoted context opened by
 Begin a new section.
 For a list of conventional manual sections, see
 .Sx MANUAL STRUCTURE .
-These sections should be used unless it's absolutely necessary that
-custom sections be used.
+Use the conventional sections where applicable.
+For unusually long and complicated manual pages,
+adding custom sections is occasionally useful.
 .Pp
-Section names should be unique so that they may be keyed by
-.Ic \&Sx .
-Although this macro is parsed, it should not consist of child node or it
-may not be linked with
+Avoid using macros inside the
+.Ar TITLE LINE
+and keep that line unique within the manual page,
+such that it can be pointed to with
 .Ic \&Sx .
 .Pp
 See also
@@ -2353,10 +2354,10 @@ the conventional sections described in
 .Sx MANUAL STRUCTURE
 rarely have subsections.
 .Pp
-Sub-section names should be unique so that they may be keyed by
-.Ic \&Sx .
-Although this macro is parsed, it should not consist of child node or it
-may not be linked with
+Avoid using macros inside the
+.Ar Title line
+and keep that line unique within the manual page,
+such that it can be pointed to with
 .Ic \&Sx .
 .Pp
 See also
