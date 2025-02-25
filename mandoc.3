@@ -143,6 +143,37 @@ or invoke
 .Fn mparse_reset
 and go back to step 2 to parse new files.
 .El
+.Pp
+The design goals of the
+.Nm mandoc
+library are limited to providing the functionality required by the
+.Xr mandoc 1
+program.
+Consequently, the functions documented in the present manual page
+do not aim for API stability.
+Any third-party program using them typically requires adjustments after every
+.Nm mandoc
+release.
+Linking such a program requires
+.Fl lz
+because
+.Fn mparse_readfd
+calls
+.Xr gzdopen 3 ,
+.Xr gzread 3 ,
+.Xr gzerror 3 ,
+and
+.Xr gzclose 3 .
+For
+.Xr mandoc 1
+itself, the
+.Pa ./configure
+script automatically adds
+.Fl lz
+to the
+.Ev LDADD
+.Xr make 1
+variable.
 .Sh REFERENCE
 This section documents the functions, types, and variables available
 via
