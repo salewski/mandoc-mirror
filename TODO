@@ -234,6 +234,11 @@ are mere guesses, and some may be wrong.
 
 --- missing man features -----------------------------------------------
 
+- When calling less(1), specify -P to print "name(sec) lines ..."
+  in the bottom line instead of "/tmp/man..."
+  Jan Engelhardt (SuSE) via Matej Cepl 06 Apr 2025 14:42:52 +0200
+  loc *  exist *  algo *  size *  imp **
+
 - MANWIDTH
   Markus Waldeck <waldeck at gmx dot de> 9 Jun 2015 05:49:56 +0200
   Laura Morales <lauretas at mail dot com> 26 Apr 2018 08:15:55 +0200
