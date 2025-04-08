@@ -2470,7 +2470,8 @@ roff_getnum(const char *v, int *pos, int *res, char unit, int skipspace)
 		myres *= 240.0;
 		break;
 	case 'c':
-		myres *= 240.0 / 2.54;
+		myres *= 24000.0;
+		myres /= 254.0;
 		break;
 	case 'v':
 	case 'P':
@@ -2481,12 +2482,14 @@ roff_getnum(const char *v, int *pos, int *res, char unit, int skipspace)
 		myres *= 24.0;
 		break;
 	case 'p':
-		myres *= 40.0 / 12.0;
+		myres *= 40.0;
+		myres /= 12.0;
 		break;
 	case 'u':
 		break;
 	case 'M':
-		myres *= 24.0 / 100.0;
+		myres *= 24.0;
+		myres /= 100.0;
 		break;
 	default:
 		break;
