@@ -460,7 +460,8 @@ in the alphabetical
 .Op Fl compact
 .It Ic \&D1 Ta indented display (one line)
 .It Ic \&Dl Ta indented literal display (one line)
-.It Ic \&Ql Ta in-line literal display: Ql text
+.It Ic \&Ql Ta normal in-line literal display: Ql text
+.It Ic \&Li Ta unquoted in-line literal display: Li text
 .It Ic \&Bl , \&El Ta list block:
 .Fl Ar type
 .Op Fl width Ar val
@@ -1270,9 +1271,9 @@ and
 .Ic \&Os .
 .Tg Dl
 .It Ic \&Dl Ar line
-One-line indented display.
-This is formatted as literal text and is useful for commands and
-invocations.
+One-line indented literal display.
+This is formatted using a constant-width font
+and is useful for commands and invocations.
 It is followed by a newline.
 .Pp
 Examples:
@@ -1882,12 +1883,20 @@ Examples:
 .Dl \&.Lb libmandoc
 .Tg Li
 .It Ic \&Li Ar word ...
-Request a typewriter (literal) font.
-Deprecated because on terminal output devices, this is usually
-indistinguishable from normal text.
-For literal displays, use
-.Ic \&Ql Pq in-line ,
-.Ic \&Dl Pq single line ,
+Unquoted in-line literal display, always set in a constant-width font.
+In most cases, use
+.Ic \&Ql
+instead because on terminal output devices,
+.Ic \&Li
+is usually indistinguishable from normal text.
+This macro is only useful when enclosing the argument in quotes
+is explicitly not desired, for example because it already stands out
+due to being wrapped in another macro, e.g. in an
+.Ic \&It
+head.
+.Pp
+For longer literal displays, use
+.Ic \&Dl Pq single line
 or
 .Ic \&Bd Fl literal Pq multi-line
 instead.
@@ -2200,15 +2209,17 @@ Close quoted context opened by
 .Ic \&Qo .
 .Tg Ql
 .It Ic \&Ql Ar line
-In-line literal display.
+Normal in-line literal display, always set in constant-width font and
+additionally enclosed in quotes by many formatters in many cases.
 This can be used for complete command invocations and for multi-word
 code examples when an indented display is not desired.
 .Pp
 See also
-.Ic \&Dl
-and
+.Ic \&Dl ,
 .Ic \&Bd
-.Fl literal .
+.Fl literal ,
+and
+.Ic \&Li .
 .It Ic \&Qo Ar block
 Multi-line version of
 .Ic \&Qq .
