@@ -3078,6 +3078,6 @@ macro2len(enum roff_tok macro)
 		return 10;
 	default:
 		break;
-	};
+	}
 	return 0;
 }
