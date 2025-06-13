@@ -92,7 +92,7 @@ static const struct mdoc_macro mdoc_macros[MDOC_MAX - MDOC_Dd] = {
 	{ in_line_eoln, 0 }, /* Fd */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Fl */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Fn */
-	{ in_line, MDOC_CALLABLE | MDOC_PARSED }, /* Ft */
+	{ in_line, MDOC_CALLABLE | MDOC_PARSED | MDOC_JOIN }, /* Ft */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED | MDOC_JOIN }, /* Ic */
 	{ in_line_argn, MDOC_CALLABLE | MDOC_PARSED }, /* In */
 	{ in_line, MDOC_CALLABLE | MDOC_PARSED | MDOC_JOIN }, /* Li */
