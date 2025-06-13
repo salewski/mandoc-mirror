@@ -448,8 +448,7 @@ dword(struct roff_man *mdoc, int line, int col, const char *p,
 	if (d == DELIM_MAX)
 		d = mdoc_isdelim(p);
 
-	if (may_append &&
-	    ! (mdoc->flags & (MDOC_SYNOPSIS | MDOC_KEEP | MDOC_SMOFF)) &&
+	if (may_append && ! (mdoc->flags & (MDOC_KEEP | MDOC_SMOFF)) &&
 	    d == DELIM_NONE && mdoc->last->type == ROFFT_TEXT &&
 	    mdoc_isdelim(mdoc->last->string) == DELIM_NONE) {
 		roff_word_append(mdoc, p);
