@@ -292,6 +292,14 @@ markdown_mdoc(void *arg, const struct roff_meta *mdoc)
 	md_word(mdoc->os);
 	md_word("-");
 	md_word(mdoc->date);
+	md_word("-");
+	md_word(mdoc->title);
+	if (mdoc->msec != NULL) {
+		outflags &= ~MD_spc;
+		md_word("(");
+		md_word(mdoc->msec);
+		md_word(")");
+	}
 	putchar('\n');
 }
 
