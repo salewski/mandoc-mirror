@@ -303,7 +303,7 @@ for my $test (@regress_tests) {
 		    qw(-I os=OpenBSD -T man), $i
 		    and fail $test->{NAME}, 'man:man';
 		sysout $mo, '../mandoc', @{$test->{MOPTS}},
-		    qw(-man -I os=OpenBSD -T ascii -O mdoc), $m
+		    qw(-man -I os=OpenBSD -T ascii), $m
 		    and fail $test->{NAME}, 'man:mandoc';
 		system @diff, $w, $mo
 		    and fail $test->{NAME}, 'man:diff';
