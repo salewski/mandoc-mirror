@@ -75,7 +75,6 @@ struct	termp {
 	size_t		  trailspace;	/* See term_flushln(). */
 	size_t		  minbl;	/* Minimum blanks before next field. */
 	int		  synopsisonly; /* Print the synopsis only. */
-	int		  mdocstyle;	/* Imitate mdoc(7) output. */
 	int		  ti;		/* Temporary indent for one line. */
 	int		  skipvsp;	/* Vertical space to skip. */
 	int		  flags;

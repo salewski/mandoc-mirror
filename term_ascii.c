@@ -123,8 +123,6 @@ ascii_init(enum termenc enc, const struct manoutput *outopts)
 	}
 #endif
 
-	if (outopts->mdoc)
-		p->mdocstyle = 1;
 	if (outopts->indent)
 		p->defindent = outopts->indent;
 	if (outopts->width)
