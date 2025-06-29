@@ -102,6 +102,20 @@ to exit before the iteration over input files is even started:
 .Bl -tag -width Ds -offset indent
 .It unknown option \-\- Ar option
 An invalid option was passed on the command line.
+.It missing arguments: srcdir and dstdir
+No argument was provided.
+Both
+.Ar srcdir
+and
+.Ar dstdir
+are mandatory.
+.It missing argument: dstdir
+Only one argument was provided.
+The second argument,
+.Ar dstdir ,
+is mandatory, too.
+.It too many arguments: Ar third argument
+Three or more arguments were provided, but only two are supported.
 .It Sy socketpair : Ar reason
 The sockets needed for communication with
 .Xr mandocd 8
@@ -180,7 +194,7 @@ The function
 .Xr fts_read 3
 reported a non-fatal error with respect to
 .Ar filename .
-.It Ar filname : No not a regular file
+.It file Ar filename : No not a regular file
 For example, it might be a symbolic link or a device file.
 .It Sy open Ar filename No for reading : Ar reason
 A file below

@@ -224,7 +224,7 @@ process_tree(int srv_fd, int dstdir_fd)
 			badfiles++;
 			break;
 		default:
-			warnx("%s: not a regular file", path);
+			warnx("file %s: not a regular file", path);
 			fflush(stderr);
 			badfiles++;
 			break;
@@ -275,8 +275,20 @@ main(int argc, char **argv)
 		argc -= optind;
 		argv += optind;
 	}
-	if (argc != 2)
+	if (argc != 2) {
+		switch (argc) {
+		case 0:
+			warnx("missing arguments: srcdir and dstdir");
+			break;
+		case 1:
+			warnx("missing argument: dstdir");
+			break;
+		default:
+			warnx("too many arguments: %s", argv[2]);
+			break;
+		}
 		usage();
+	}
 
 	if (socketpair(AF_LOCAL, SOCK_STREAM, AF_UNSPEC, srv_fds) == -1)
 		err(1, "socketpair");
