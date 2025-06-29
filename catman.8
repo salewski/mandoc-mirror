@@ -1,6 +1,6 @@
-.\"	$Id$
+.\" $Id$
 .\"
-.\" Copyright (c) 2017 Ingo Schwarze <schwarze@openbsd.org>
+.\" Copyright (c) 2017, 2025 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -71,6 +71,9 @@ output mode, the
 .Cm fragment
 output option is implied.
 Other output options are not supported.
+.It Fl v
+Verbose mode; see
+.Sx DIAGNOSTICS .
 .El
 .Sh IMPLEMENTATION NOTES
 Since this version avoids
@@ -213,6 +216,21 @@ after the end of the iteration:
 .It skipped Ar number No directories due to errors
 .It skipped Ar number No files due to errors
 .It processing aborted due to fatal error
+.El
+.Pp
+If the
+.Fl v
+flag is specified, the following summary message also appears:
+.Pp
+.Bl -tag -width Ds -offset indent -compact
+.It processed Ar nfiles No files in Ar ndirs No directories
+A file is counted if it could be opened for reading and the
+corresponding output file could be opened for writing;
+this does not necessarily mean that it is a useful manual page.
+A directory is counted if it could be opened for reading and the
+corresponding output directory existed or could be created;
+this does not necessarily mean that any files could be
+processed inside.
 .El
 .Sh SEE ALSO
 .Xr mandoc 1 ,

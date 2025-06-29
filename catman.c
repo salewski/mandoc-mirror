@@ -1,7 +1,7 @@
-/*	$Id$ */
+/* $Id$ */
 /*
+ * Copyright (c) 2017, 2025 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2017 Michael Stapelberg <stapelberg@debian.org>
- * Copyright (c) 2017 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -40,6 +40,8 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+
+int		verbose_flag = 0;
 
 int	 process_manpage(int, int, const char *);
 int	 process_tree(int, int);
@@ -234,6 +236,9 @@ process_tree(int srv_fd, int dstdir_fd)
 		warn("FATAL: fts_read");
 
 	fts_close(ftsp);
+	if (verbose_flag)
+		warnx("processed %d files in %d directories",
+		    goodfiles, gooddirs);
 	if (baddirs > 0)
 		warnx("skipped %d %s due to errors", baddirs,
 		    baddirs == 1 ? "directory" : "directories");
@@ -258,13 +263,16 @@ main(int argc, char **argv)
 
 	defos = NULL;
 	outtype = "ascii";
-	while ((opt = getopt(argc, argv, "I:T:")) != -1) {
+	while ((opt = getopt(argc, argv, "I:T:v")) != -1) {
 		switch (opt) {
 		case 'I':
 			defos = optarg;
 			break;
 		case 'T':
 			outtype = optarg;
+			break;
+		case 'v':
+			verbose_flag = 1;
 			break;
 		default:
 			usage();
