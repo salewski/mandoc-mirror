@@ -87,33 +87,119 @@ implementations.
 .Sh EXIT STATUS
 .Ex -std
 .Pp
-Possible errors include:
-.Bl -bullet
-.It
-missing, invalid, or excessive command line arguments
-.It
-failure to change the current working directory to
-.Ar srcdir
-.It
-failure to open
-.Ar dstdir
-.It
-communication failure with
-.Xr mandocd 8
-.It
-resource exhaustion, for example file descriptor, process table,
-or memory exhaustion
-.El
-.Pp
-Except for memory exhaustion and similar system-level failures,
-failures while trying to open, read, parse, or format individual
-manual pages, to save individual formatted files to the file system,
-or even to create directories do not cause
+Failures while trying to open individual manual pages for reading,
+to save individual formatted files to the file system,
+or even to read or create subdirectories do not cause
 .Nm
 to return an error exit status.
 In such cases,
 .Nm
-will simply continue with the next file or subdirectory.
+simply continues with the next file or subdirectory.
+.Sh DIAGNOSTICS
+Some fatal errors cause
+.Nm
+to exit before the iteration over input files is even started:
+.Bl -tag -width Ds -offset indent
+.It unknown option \-\- Ar option
+An invalid option was passed on the command line.
+.It Sy socketpair : Ar reason
+The sockets needed for communication with
+.Xr mandocd 8
+could not be created, for example due to file descriptor or memory exhaustion.
+.It Sy fork : Ar reason
+The new process needed to run
+.Xr mandocd 8
+could not be created, for example due to process table exhaustion
+or system resource limits.
+.It Sy exec Ns Po Sy mandocd Pc : Ar reason
+The
+.Xr mandocd 8
+child program could not be started, for example because it is not in the
+.Ev PATH
+or has no execute permission.
+.It Sy open No destination Ar dstdir : reason
+The
+.Ar dstdir
+could not be opened for reading, for example because it does not exist,
+it is not a directory, or permission is denied.
+.It Sy chdir No to source Ar srcdir : reason
+The current working directory could not be changed to
+.Ar srcdir ,
+for example because it does not exist, it is not a directory,
+or permission is denied.
+.It Sy fts_open : Ar reason
+Starting the iteration was attempted, but failed.
+.El
+.Pp
+Some fatal errors cause the iteration over input files to be aborted
+prematurely:
+.Bl -tag -width Ds -offset indent
+.It FATAL: Sy fts_read : Ar reason
+A call to
+.Xr fts_read 3
+returned
+.Dv NULL ,
+meaning that the iteration failed before being complete.
+.It FATAL: Sy sendmsg : Ar reason
+The file descriptors needed to process one of the manual pages
+could not be sent to
+.Xr mandocd 8 ,
+for example because
+.Xr mandocd 8
+could not be started or died unexpectedly.
+.El
+.Pp
+Some non-fatal errors cause a single subdirectory to be skipped.
+The iteration is not aborted but continues with the next subdirectory,
+and the exit status is unaffected:
+.Bl -tag -width Ds -offset indent
+.It directory Ar subdirectory No unreadable : Ar reason
+A directory below
+.Ar srcdir
+could not be read and is skipped.
+.It directory Ar subdirectory No causes cycle
+A directory below
+.Ar srcdir
+is skipped because it would cause cyclic processing.
+.It Sy mkdirat Ar subdirectory : reason
+A required directory below
+.Ar dstdir
+does not exist and could not be created.
+The corresponding subdirectory below
+.Ar srcdir
+is skipped.
+.El
+.Pp
+Some non-fatal errors cause a single source file to be skipped.
+The iteration is not aborted but continues with the next file,
+and the exit status is unaffected:
+.Pp
+.Bl -tag -width Ds -offset indent
+.It file Ar filename : reason
+The function
+.Xr fts_read 3
+reported a non-fatal error with respect to
+.Ar filename .
+.It Ar filname : No not a regular file
+For example, it might be a symbolic link or a device file.
+.It Sy open Ar filename No for reading : Ar reason
+A file below
+.Ar srcdir
+could not be read, for example due to permission problems.
+.It Sy openat Ar filename No for writing : Ar reason
+A file below
+.Ar dstdir
+could not be created or truncated, for example due to permission problems.
+.El
+.Pp
+If errors occur, the applicable summary messages appear
+after the end of the iteration:
+.Pp
+.Bl -tag -width Ds -offset indent -compact
+.It skipped Ar number No directories due to errors
+.It skipped Ar number No files due to errors
+.It processing aborted due to fatal error
+.El
 .Sh SEE ALSO
 .Xr mandoc 1 ,
 .Xr mandocd 8
