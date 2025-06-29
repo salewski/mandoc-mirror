@@ -53,8 +53,14 @@ void
 run_mandocd(int sockfd, const char *outtype, const char* defos)
 {
 	char	 sockfdstr[10];
+	int	 len;
 
-	if (snprintf(sockfdstr, sizeof(sockfdstr), "%d", sockfd) == -1)
+	len = snprintf(sockfdstr, sizeof(sockfdstr), "%d", sockfd);
+	if (len >= (int)sizeof(sockfdstr)) {
+		errno = EOVERFLOW;
+		len = -1;
+	}
+	if (len < 0)
 		err(1, "snprintf");
 	if (defos == NULL)
 		execlp("mandocd", "mandocd", "-T", outtype,
@@ -109,10 +115,11 @@ sock_fd_write(int fd, int fd0, int fd1, int fd2)
 	 * to neither cause more than a handful of retries
 	 * in normal operation nor unnecessary delays.
 	 */
-	for (;;) {
-		if ((sz = sendmsg(fd, &msg, 0)) != -1 ||
-		    errno != EAGAIN)
+	while ((sz = sendmsg(fd, &msg, 0)) == -1) {
+		if (errno != EAGAIN) {
+			warn("FATAL: sendmsg");
 			break;
+		}
 		nanosleep(&timeout, NULL);
 	}
 	return sz;
@@ -125,14 +132,16 @@ process_manpage(int srv_fd, int dstdir_fd, const char *path)
 	int	 irc;
 
 	if ((in_fd = open(path, O_RDONLY)) == -1) {
-		warn("open(%s)", path);
+		warn("open %s for reading", path);
+		fflush(stderr);
 		return 0;
 	}
 
 	if ((out_fd = openat(dstdir_fd, path,
 	    O_WRONLY | O_NOFOLLOW | O_CREAT | O_TRUNC,
 	    S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1) {
-		warn("openat(%s)", path);
+		warn("openat %s for writing", path);
+		fflush(stderr);
 		close(in_fd);
 		return 0;
 	}
@@ -142,11 +151,7 @@ process_manpage(int srv_fd, int dstdir_fd, const char *path)
 	close(in_fd);
 	close(out_fd);
 
-	if (irc < 0) {
-		warn("sendmsg");
-		return -1;
-	}
-	return 0;
+	return irc;
 }
 
 int
@@ -156,6 +161,8 @@ process_tree(int srv_fd, int dstdir_fd)
 	FTSENT		*entry;
 	const char	*argv[2];
 	const char	*path;
+	int		 fatal;
+	int		 gooddirs, baddirs, goodfiles, badfiles;
 
 	argv[0] = ".";
 	argv[1] = (char *)NULL;
@@ -166,13 +173,22 @@ process_tree(int srv_fd, int dstdir_fd)
 		return -1;
 	}
 
-	while ((entry = fts_read(ftsp)) != NULL) {
+	fatal = 0;
+	gooddirs = baddirs = goodfiles = badfiles = 0;
+	while (fatal == 0 && (entry = fts_read(ftsp)) != NULL) {
 		path = entry->fts_path + 2;
 		switch (entry->fts_info) {
 		case FTS_F:
-			if (process_manpage(srv_fd, dstdir_fd, path) == -1) {
-				fts_close(ftsp);
-				return -1;
+			switch (process_manpage(srv_fd, dstdir_fd, path)) {
+			case -1:
+				fatal = errno;
+				break;
+			case 0:
+				badfiles++;
+				break;
+			default:
+				goodfiles++;
+				break;
 			}
 			break;
 		case FTS_D:
@@ -180,19 +196,54 @@ process_tree(int srv_fd, int dstdir_fd)
 			    mkdirat(dstdir_fd, path, S_IRWXU | S_IRGRP |
 			      S_IXGRP | S_IROTH | S_IXOTH) == -1 &&
 			    errno != EEXIST) {
-				warn("mkdirat(%s)", path);
+				warn("mkdirat %s", path);
+				fflush(stderr);
 				(void)fts_set(ftsp, entry, FTS_SKIP);
-			}
+				baddirs++;
+			} else
+				gooddirs++;
 			break;
 		case FTS_DP:
 			break;
+		case FTS_DNR:
+			warnx("directory %s unreadable: %s",
+			    path, strerror(entry->fts_errno));
+			fflush(stderr);
+			baddirs++;
+			break;
+		case FTS_DC:
+			warnx("directory %s causes cycle", path);
+			fflush(stderr);
+			baddirs++;
+			break;
+		case FTS_ERR:
+		case FTS_NS:
+			warnx("file %s: %s",
+			    path, strerror(entry->fts_errno));
+			fflush(stderr);
+			badfiles++;
+			break;
 		default:
 			warnx("%s: not a regular file", path);
+			fflush(stderr);
+			badfiles++;
 			break;
 		}
 	}
+	if (fatal == 0 && (fatal = errno) != 0)
+		warn("FATAL: fts_read");
 
 	fts_close(ftsp);
+	if (baddirs > 0)
+		warnx("skipped %d %s due to errors", baddirs,
+		    baddirs == 1 ? "directory" : "directories");
+	if (badfiles > 0)
+		warnx("skipped %d %s due to errors", badfiles,
+		    badfiles == 1 ? "file" : "files");
+	if (fatal != 0) {
+		warnx("processing aborted due to fatal error, "
+		    "results are probably incomplete");
+	}
 	return 0;
 }
 
@@ -243,10 +294,10 @@ main(int argc, char **argv)
 	close(srv_fds[1]);
 
 	if ((dstdir_fd = open(argv[1], O_RDONLY | O_DIRECTORY)) == -1)
-		err(1, "open(%s)", argv[1]);
+		err(1, "open destination %s", argv[1]);
 
 	if (chdir(argv[0]) == -1)
-		err(1, "chdir(%s)", argv[0]);
+		err(1, "chdir to source %s", argv[0]);
 
 	return process_tree(srv_fds[0], dstdir_fd) == -1 ? 1 : 0;
 }
