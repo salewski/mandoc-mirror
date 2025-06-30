@@ -29,6 +29,7 @@
 #endif
 #include <errno.h>
 #include <limits.h>
+#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -132,6 +133,7 @@ read_fds(int clientfd, int *fds)
 int
 main(int argc, char *argv[])
 {
+	struct sigaction	 sa;
 	struct manoutput	 options;
 	struct mparse		*parser;
 	void			*formatter;
@@ -182,13 +184,25 @@ main(int argc, char *argv[])
 		argc -= optind;
 		argv += optind;
 	}
-	if (argc != 1)
+	if (argc != 1) {
+		if (argc == 0)
+			warnx("missing argument: socket_fd");
+		else
+			warnx("too many arguments: %s", argv[1]);
 		usage();
+	}
 
 	errstr = NULL;
 	clientfd = strtonum(argv[0], 3, INT_MAX, &errstr);
 	if (errstr)
-		errx(1, "file descriptor %s %s", argv[1], errstr);
+		errx(1, "file descriptor %s is %s", argv[0], errstr);
+
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_handler = SIG_IGN;
+	if (sigfillset(&sa.sa_mask) == -1)
+		err(1, "sigfillset");
+	if (sigaction(SIGPIPE, &sa, NULL) == -1)
+		err(1, "sigaction(SIGPIPE)");
 
 	mchars_alloc();
 	parser = mparse_alloc(MPARSE_SO | MPARSE_UTF8 | MPARSE_LATIN1 |
