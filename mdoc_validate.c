@@ -1714,7 +1714,7 @@ post_xx(POST_ARGS)
 		os = "OpenBSD";
 		break;
 	case MDOC_Ux:
-		os = "UNIX";
+		os = "Unix";
 		break;
 	default:
 		abort();
