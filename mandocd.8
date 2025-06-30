@@ -78,7 +78,7 @@ or
 input, the second one for formatted output, and the third one
 for error output.
 .Pp
-After accepting a each message,
+After accepting each message,
 .Nm
 replies with a one-byte message of its own,
 such that the parent process can keep track of how many messages
@@ -144,9 +144,10 @@ missing, invalid, or excessive
 .Xr exec 3
 arguments
 .It
+communication failure with the parent, for example failure in
 .Xr recvmsg 2
-failure, for example due to
-.Er EMSGSIZE
+or
+.Xr send 2
 .It
 missing or unexpected control data, in particular a
 .Fa cmsg_level
