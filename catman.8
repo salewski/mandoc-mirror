@@ -154,7 +154,8 @@ The current working directory could not be changed to
 for example because it does not exist, it is not a directory,
 or permission is denied.
 .It Sy fts_open : Ar reason
-Starting the iteration was attempted, but failed.
+Starting the iteration was attempted but failed,
+for example due to memory exhaustion.
 .El
 .Pp
 Some fatal errors cause the iteration over input files to be aborted
@@ -182,6 +183,12 @@ could not be sent to
 for example because
 .Xr mandocd 8
 could not be started or died unexpectedly.
+.It FATAL: Sy recv : Ar reason
+Trying to read a reply message from
+.Xr mandocd 8
+failed, most likely because
+.Xr mandocd 8
+unexpectedly died or closed the socket.
 .It FATAL: signal Ar SIGNAME
 This message appears if
 .Nm
