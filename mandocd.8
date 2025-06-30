@@ -1,6 +1,6 @@
-.\"	$Id$
+.\" $Id$
 .\"
-.\" Copyright (c) 2017 Ingo Schwarze <schwarze@openbsd.org>
+.\" Copyright (c) 2017, 2025 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -78,6 +78,19 @@ or
 input, the second one for formatted output, and the third one
 for error output.
 .Pp
+After accepting a each message,
+.Nm
+replies with a one-byte message of its own,
+such that the parent process can keep track of how many messages
+.Nm
+has already accepted and how many file descriptors
+consequently are still in flight, such that the parent process
+can limit the number of file descriptors in flight at any given time
+in order to prevent
+.Er EMFILE
+failure of
+.Xr sendmsg 2 .
+.Pp
 The options are as follows:
 .Bl -tag -width Ds
 .It Fl I Cm os Ns = Ns Ar name
@@ -112,7 +125,7 @@ Other output options are not supported.
 After exhausting one input file descriptor, all three file descriptors
 are closed before reading the next dummy byte and control message.
 .Pp
-When a zero-byte message is read, when the
+When a zero-byte message or a misformatted message is read, when the
 .Ar socket_fd
 is closed by the parent process,
 or when an error occurs,

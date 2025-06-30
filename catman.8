@@ -72,7 +72,16 @@ output mode, the
 output option is implied.
 Other output options are not supported.
 .It Fl v
-Verbose mode; see
+Verbose mode, printing additional information to standard error output.
+Specifying this once prints a summary about the number of files
+and directories processed at the end of the iteration.
+Specifying it twice additionally prints debugging information
+about the backchannel from
+.Xr mandocd 8
+to
+.Nm
+that is used to limit the number of files in flight at any given time.
+For details, see
 .Sx DIAGNOSTICS .
 .El
 .Sh IMPLEMENTATION NOTES
@@ -208,7 +217,6 @@ is skipped.
 Some non-fatal errors cause a single source file to be skipped.
 The iteration is not aborted but continues with the next file,
 and the exit status is unaffected:
-.Pp
 .Bl -tag -width Ds -offset indent
 .It file Ar filename : reason
 The function
@@ -239,8 +247,7 @@ after the end of the iteration:
 If the
 .Fl v
 flag is specified, the following summary message also appears:
-.Pp
-.Bl -tag -width Ds -offset indent -compact
+.Bl -tag -width Ds -offset indent
 .It processed Ar nfiles No files in Ar ndirs No directories
 A file is counted if it could be opened for reading and the
 corresponding output file could be opened for writing;
@@ -249,6 +256,39 @@ A directory is counted if it could be opened for reading and the
 corresponding output directory existed or could be created;
 this does not necessarily mean that any files could be
 processed inside.
+.El
+.Pp
+If the
+.Fl v
+flag is specified twice, the following messages also appear:
+.Bl -tag -width Ds -offset indent
+.It allowing up to Ar number No files in flight
+This is printed at the beginning of the iteration,
+showing the maximum number of files that
+.Nm
+allows to be in flight at any given time.
+.It files in flight: Ar old No \- Ar decrement No = Ar new
+This message is printed when
+.Nm
+learns about
+.Xr mandocd 8
+accepting more than one file at the same time.
+The three numbers printed are the old number of files in flight,
+the amount this number is being reduced, and the resulting
+new number of files in flight.
+.It waiting for Ar number No files in flight
+This message is printed at the end of the iteration, after
+.Nm
+has submitted all files to
+.Xr mandocd 8
+that it intends to.
+THe message informs about the number of files still in flight
+at this point.
+The
+.Nm
+program then waits until
+.Xr mandocd 8
+has accepted them all or until an error occurs.
 .El
 .Sh SEE ALSO
 .Xr mandoc 1 ,

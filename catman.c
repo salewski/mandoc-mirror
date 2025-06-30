@@ -25,6 +25,7 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 
+#include <assert.h>
 #if HAVE_ERR
 #include <err.h>
 #endif
@@ -169,12 +170,16 @@ process_manpage(int srv_fd, int dstdir_fd, const char *path)
 int
 process_tree(int srv_fd, int dstdir_fd)
 {
+	const struct timespec timeout = { 0, 10000000 };  /* 0.01 s */
+	const int	 max_inflight = 16;
+
 	FTS		*ftsp;
 	FTSENT		*entry;
 	const char	*argv[2];
 	const char	*path;
-	int		 fatal;
+	int		 inflight, irc, decr, fatal;
 	int		 gooddirs, baddirs, goodfiles, badfiles;
+	char		 dummy[1];
 
 	argv[0] = ".";
 	argv[1] = (char *)NULL;
@@ -185,10 +190,43 @@ process_tree(int srv_fd, int dstdir_fd)
 		return -1;
 	}
 
-	fatal = 0;
-	gooddirs = baddirs = goodfiles = badfiles = 0;
+	if (verbose_flag >= 2) {
+		warnx("allowing up to %d files in flight", max_inflight);
+		fflush(stderr);
+	}
+	inflight = fatal = gooddirs = baddirs = goodfiles = badfiles = 0;
 	while (fatal == 0 && got_signal == 0 &&
 	    (entry = fts_read(ftsp)) != NULL) {
+		if (inflight >= max_inflight) {
+			while (recv(srv_fd, dummy, sizeof(dummy), 0) == -1) {
+				if (errno != EAGAIN) {
+					warn("FATAL: recv");
+					fatal = errno;
+					break;
+				}
+				nanosleep(&timeout, NULL);
+			}
+			if (fatal != 0)
+				break;
+			decr = 1;
+			while ((irc = recv(srv_fd, dummy, sizeof(dummy),
+			    MSG_DONTWAIT)) > 0)
+				decr++;
+			assert(inflight >= decr);
+			if (verbose_flag >= 2 && decr > 1) {
+				warnx("files in flight: %d - %d = %d",
+				    inflight, decr, inflight - decr);
+				fflush(stderr);
+			}
+			inflight -= decr;
+			if (irc == 0)
+				errno = ECONNRESET;
+			if (errno != EAGAIN) {
+				warn("FATAL: recv");
+				fatal = errno;
+				break;
+			}
+		}
 		path = entry->fts_path + 2;
 		switch (entry->fts_info) {
 		case FTS_F:
@@ -201,6 +239,7 @@ process_tree(int srv_fd, int dstdir_fd)
 				break;
 			default:
 				goodfiles++;
+				inflight++;
 				break;
 			}
 			break;
@@ -255,11 +294,29 @@ process_tree(int srv_fd, int dstdir_fd)
 			warnx("FATAL: signal SIG%s", sys_signame[got_signal]);
 			break;
 		}
+		inflight = -1;
 		fatal = 1;
 	} else if (fatal == 0 && (fatal = errno) != 0)
 		warn("FATAL: fts_read");
 
 	fts_close(ftsp);
+	if (verbose_flag >= 2 && inflight > 0) {
+		warnx("waiting for %d files in flight", inflight);
+		fflush(stderr);
+	}
+	while (inflight > 0) {
+		irc = recv(srv_fd, dummy, sizeof(dummy), 0);
+		if (irc > 0)
+			inflight--;
+		else if (irc == -1 && errno == EAGAIN)
+			nanosleep(&timeout, NULL);
+		else {
+			if (irc == 0)
+				errno = ECONNRESET;
+			warn("recv");
+			inflight = -1;
+		}
+	}
 	if (verbose_flag)
 		warnx("processed %d files in %d directories",
 		    goodfiles, gooddirs);
@@ -272,8 +329,9 @@ process_tree(int srv_fd, int dstdir_fd)
 	if (fatal != 0) {
 		warnx("processing aborted due to fatal error, "
 		    "results are probably incomplete");
+		inflight = -1;
 	}
-	return 0;
+	return inflight;
 }
 
 int
@@ -297,7 +355,7 @@ main(int argc, char **argv)
 			outtype = optarg;
 			break;
 		case 'v':
-			verbose_flag = 1;
+			verbose_flag += 1;
 			break;
 		default:
 			usage();

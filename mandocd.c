@@ -1,7 +1,7 @@
 /* $Id$ */
 /*
+ * Copyright (c) 2017-2019, 2022, 2025 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2017 Michael Stapelberg <stapelberg@debian.org>
- * Copyright (c) 2017, 2019, 2021 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -27,11 +27,13 @@
 #if HAVE_ERR
 #include <err.h>
 #endif
+#include <errno.h>
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "mandoc.h"
@@ -61,6 +63,7 @@ static	void	  usage(void) __attribute__((__noreturn__));
 static int
 read_fds(int clientfd, int *fds)
 {
+	const struct timespec timeout = { 0, 10000000 };  /* 0.01 s */
 	struct msghdr	 msg;
 	struct iovec	 iov[1];
 	unsigned char	 dummy[1];
@@ -96,6 +99,15 @@ read_fds(int clientfd, int *fds)
 		return 0;
 	default:
 		break;
+	}
+
+	*dummy = '\0';
+	while (send(clientfd, dummy, sizeof(dummy), 0) == -1) {
+		if (errno != EAGAIN) {
+			warn("send");
+			return -1;
+		}
+		nanosleep(&timeout, NULL);
 	}
 
 	if ((cmsg = CMSG_FIRSTHDR(&msg)) == NULL) {
