@@ -219,8 +219,10 @@ process_tree(int srv_fd, int dstdir_fd)
 				fflush(stderr);
 			}
 			inflight -= decr;
-			if (irc == 0)
+			if (irc == 0) {
 				errno = ECONNRESET;
+				inflight = -1;
+			}
 			if (errno != EAGAIN) {
 				warn("FATAL: recv");
 				fatal = errno;
