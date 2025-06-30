@@ -35,6 +35,8 @@
 #else
 #include "compat_fts.h"
 #endif
+#include <signal.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,14 +44,22 @@
 #include <unistd.h>
 
 int		verbose_flag = 0;
+sig_atomic_t	got_signal = 0;
 
 int	 process_manpage(int, int, const char *);
 int	 process_tree(int, int);
 void	 run_mandocd(int, const char *, const char *)
 		__attribute__((__noreturn__));
+void	 signal_handler(int);
 ssize_t	 sock_fd_write(int, int, int, int);
 void	 usage(void) __attribute__((__noreturn__));
 
+
+void
+signal_handler(int signum)
+{
+	got_signal = signum;
+}
 
 void
 run_mandocd(int sockfd, const char *outtype, const char* defos)
@@ -177,7 +187,8 @@ process_tree(int srv_fd, int dstdir_fd)
 
 	fatal = 0;
 	gooddirs = baddirs = goodfiles = badfiles = 0;
-	while (fatal == 0 && (entry = fts_read(ftsp)) != NULL) {
+	while (fatal == 0 && got_signal == 0 &&
+	    (entry = fts_read(ftsp)) != NULL) {
 		path = entry->fts_path + 2;
 		switch (entry->fts_info) {
 		case FTS_F:
@@ -232,7 +243,20 @@ process_tree(int srv_fd, int dstdir_fd)
 			break;
 		}
 	}
-	if (fatal == 0 && (fatal = errno) != 0)
+	if (got_signal != 0) {
+		switch (got_signal) {
+		case SIGCHLD:
+			warnx("FATAL: mandocd child died: got SIGCHLD");
+			break;
+		case SIGPIPE:
+			warnx("FATAL: mandocd child died: got SIGPIPE");
+			break;
+		default:
+			warnx("FATAL: signal SIG%s", sys_signame[got_signal]);
+			break;
+		}
+		fatal = 1;
+	} else if (fatal == 0 && (fatal = errno) != 0)
 		warn("FATAL: fts_read");
 
 	fts_close(ftsp);
@@ -255,6 +279,7 @@ process_tree(int srv_fd, int dstdir_fd)
 int
 main(int argc, char **argv)
 {
+	struct sigaction sa;
 	const char	*defos, *outtype;
 	int		 srv_fds[2];
 	int		 dstdir_fd;
@@ -297,6 +322,22 @@ main(int argc, char **argv)
 		}
 		usage();
 	}
+
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_handler = &signal_handler;
+	sa.sa_flags = SA_NOCLDWAIT;
+	if (sigfillset(&sa.sa_mask) == -1)
+		err(1, "sigfillset");
+	if (sigaction(SIGHUP, &sa, NULL) == -1)
+		err(1, "sigaction(SIGHUP)");
+	if (sigaction(SIGINT, &sa, NULL) == -1)
+		err(1, "sigaction(SIGINT)");
+	if (sigaction(SIGPIPE, &sa, NULL) == -1)
+		err(1, "sigaction(SIGPIPE)");
+	if (sigaction(SIGTERM, &sa, NULL) == -1)
+		err(1, "sigaction(SIGTERM)");
+	if (sigaction(SIGCHLD, &sa, NULL) == -1)
+		err(1, "sigaction(SIGCHLD)");
 
 	if (socketpair(AF_LOCAL, SOCK_STREAM, AF_UNSPEC, srv_fds) == -1)
 		err(1, "socketpair");

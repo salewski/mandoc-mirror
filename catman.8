@@ -157,6 +157,15 @@ A call to
 returned
 .Dv NULL ,
 meaning that the iteration failed before being complete.
+.It FATAL: mandocd child died: got Ar SIGNAME
+This message appears if
+.Nm
+gets the
+.Dv SIGCHLD
+or
+.Dv SIGPIPE
+signal, most likely due to a fatal bug in
+.Xr mandocd 8 .
 .It FATAL: Sy sendmsg : Ar reason
 The file descriptors needed to process one of the manual pages
 could not be sent to
@@ -164,6 +173,15 @@ could not be sent to
 for example because
 .Xr mandocd 8
 could not be started or died unexpectedly.
+.It FATAL: signal Ar SIGNAME
+This message appears if
+.Nm
+gets a
+.Dv SIGHUP ,
+.Dv SIGINT ,
+or
+.Dv SIGTERM
+signal, for example because the user deliberately killed it.
 .El
 .Pp
 Some non-fatal errors cause a single subdirectory to be skipped.
