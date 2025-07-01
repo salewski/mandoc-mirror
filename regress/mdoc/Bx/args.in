@@ -1,4 +1,4 @@
-.\" $OpenBSD: args.in,v 1.5 2017/07/04 14:53:24 schwarze Exp $
+.\" $OpenBSD: args.in,v 1.6 2025/07/01 19:31:52 schwarze Exp $
 .Dd $Mdocdate$
 .Dt BX-ARGS 1
 .Os
@@ -23,5 +23,12 @@ two standard arguments:
 .Pp
 more arguments:
 .Bx 4.3 tahoe and "Em" some additional words
+.Pp
+second argument is unusual:
+.Bx 4.3 Net/1
+.Bx 4.3 net/2
+.Bx 4.4 Lite1
+.Bx 4.4 lite2
+.Bx 4.4 sccs
 .Pp
 end of test document
