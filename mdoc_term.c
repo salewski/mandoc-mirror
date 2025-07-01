@@ -1893,9 +1893,7 @@ termp_lk_pre(DECL_ARGS)
 	}
 
 	/* Link target. */
-	term_fontpush(p, TERMFONT_BOLD);
 	term_word(p, link->string);
-	term_fontpop(p);
 
 	/* Trailing punctuation. */
 	while (punct != NULL) {

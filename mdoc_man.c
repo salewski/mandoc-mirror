@@ -1616,9 +1616,7 @@ pre_lk(DECL_ARGS)
 	}
 
 	/* Link target. */
-	font_push('B');
 	print_word(link->string);
-	font_pop();
 
 	/* Trailing punctuation. */
 	while (punct != NULL) {
