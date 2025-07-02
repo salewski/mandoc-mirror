@@ -494,6 +494,7 @@ print_offs(const char *v, int keywords)
 	const char	 *end;
 	int		  sz;
 
+	outflags &= ~MMAN_PP;
 	print_line(".RS", MMAN_Bk_susp);
 
 	/* Convert v into a number (of characters). */
