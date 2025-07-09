@@ -1108,17 +1108,21 @@ but leaving out the backslash might not be portable.
 .Ss Warnings related to the document prologue
 .Bl -ohang
 .It Sy "missing manual title, using UNTITLED"
-.Pq mdoc
+.Pq mdoc , man
 A
 .Ic \&Dt
-macro has no arguments, or there is no
+or
+.Ic \&TH
+macro has no arguments, its first argument is an empty string, or there is no
 .Ic \&Dt
-macro before the first non-prologue macro.
+macro before the first non-prologue
+.Xr mdoc 7
+macro.
 .It Sy "missing manual title, using \(dq\(dq"
 .Pq man
-There is no
+An input document does not contain any
 .Ic \&TH
-macro, or it has no arguments.
+macro.
 .It Sy "missing manual section, using \(dq\(dq"
 .Pq mdoc , man
 A
