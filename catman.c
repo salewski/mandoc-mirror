@@ -414,8 +414,15 @@ main(int argc, char **argv)
 	}
 	close(srv_fds[1]);
 
-	if ((dstdir_fd = open(argv[1], O_RDONLY | O_DIRECTORY)) == -1)
-		err(1, "open destination %s", argv[1]);
+	if ((dstdir_fd = open(argv[1], O_RDONLY | O_DIRECTORY)) == -1) {
+		if (errno != ENOENT)
+			err(1, "open destination %s", argv[1]);
+		if (mkdir(argv[1], S_IRWXU |
+		    S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == -1) 
+			err(1, "mkdir destination %s", argv[1]);
+		if ((dstdir_fd = open(argv[1], O_RDONLY | O_DIRECTORY)) == -1)
+			err(1, "open destination %s", argv[1]);
+	}
 
 	if (chdir(argv[0]) == -1)
 		err(1, "chdir to source %s", argv[0]);

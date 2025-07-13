@@ -37,9 +37,9 @@ and
 format and formats all of them, storing the formatted versions in
 the same relative paths below
 .Ar dstdir .
-Subdirectories of
+Unless they already exist,
 .Ar dstdir
-are created as needed.
+itself and any required subdirectories are created.
 Existing files are not explicitly deleted, but possibly overwritten.
 .Pp
 The options are as follows:
@@ -143,11 +143,16 @@ The
 child program could not be started, for example because it is not in the
 .Ev PATH
 or has no execute permission.
+.It Sy mkdir No destination Ar dstdir : reason
+The
+.Ar dstdir
+does not exist and could not be created, for example because
+the parent directory does not exist or permission is denied.
 .It Sy open No destination Ar dstdir : reason
 The
 .Ar dstdir
-could not be opened for reading, for example because it does not exist,
-it is not a directory, or permission is denied.
+could not be opened for reading, for example because
+it is not a directory or permission is denied.
 .It Sy chdir No to source Ar srcdir : reason
 The current working directory could not be changed to
 .Ar srcdir ,
