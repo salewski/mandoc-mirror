@@ -95,7 +95,7 @@ struct	termp_ps {
 
 static	int		  ps_hspan(const struct termp *,
 				const struct roffsu *);
-static	size_t		  ps_width(const struct termp *, int);
+static	size_t		  ps_getwidth(const struct termp *, int);
 static	void		  ps_advance(struct termp *, size_t);
 static	void		  ps_begin(struct termp *);
 static	void		  ps_closepage(struct termp *);
@@ -549,7 +549,7 @@ pspdf_alloc(const struct manoutput *outopts, enum termtype type)
 	p->hspan = ps_hspan;
 	p->letter = ps_letter;
 	p->setwidth = ps_setwidth;
-	p->width = ps_width;
+	p->getwidth = ps_getwidth;
 
 	/* Default to US letter (millimetres). */
 
@@ -1282,7 +1282,7 @@ ps_setfont(struct termp *p, enum termfont f)
 }
 
 static size_t
-ps_width(const struct termp *p, int c)
+ps_getwidth(const struct termp *p, int c)
 {
 
 	if (c <= 32 || c - 32 >= MAXCHAR)
