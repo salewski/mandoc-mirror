@@ -2733,7 +2733,7 @@ post_dd(POST_ARGS)
 		mandoc_msg(MANDOCERR_PROLOG_ORDER,
 		    n->line, n->pos, "Dd after Os");
 
-	if (mdoc->quick && n != NULL)
+	if (mdoc->quick)
 		mdoc->meta.date = mandoc_strdup("");
 	else
 		mdoc->meta.date = mandoc_normdate(n->child, n);
