@@ -2798,8 +2798,7 @@ post_dt(POST_ARGS)
 	if (nn == NULL) {
 		mandoc_msg(MANDOCERR_MSEC_MISSING, n->line, n->pos,
 		    "Dt %s", mdoc->meta.title);
-		mdoc->meta.vol = mandoc_strdup("LOCAL");
-		return;  /* msec and arch remain NULL. */
+		return;  /* msec, vol, and arch remain NULL. */
 	}
 
 	mdoc->meta.msec = mandoc_strdup(nn->string);
@@ -2810,7 +2809,6 @@ post_dt(POST_ARGS)
 	if (cp == NULL) {
 		mandoc_msg(MANDOCERR_MSEC_BAD,
 		    nn->line, nn->pos, "Dt ... %s", nn->string);
-		mdoc->meta.vol = mandoc_strdup(nn->string);
 	} else {
 		mdoc->meta.vol = mandoc_strdup(cp);
 		if (mdoc->filesec != '\0' &&
