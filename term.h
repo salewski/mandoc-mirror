@@ -103,6 +103,7 @@ struct	termp {
 	enum termfont	 *fontq;	/* Symmetric fonts. */
 	int		  fontsz;	/* Allocated size of font stack */
 	int		  fonti;	/* Index of font stack. */
+	int		  fontibi;	/* Map font I to BI. */
 	term_margin	  headf;	/* invoked to print head */
 	term_margin	  footf;	/* invoked to print foot */
 	void		(*letter)(struct termp *, int);

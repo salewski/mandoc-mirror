@@ -1279,6 +1279,7 @@ termp_sh_pre(DECL_ARGS)
 			term_vspace(p);
 		break;
 	case ROFFT_HEAD:
+		p->fontibi = 1;
 		return termp_bold_pre(p, pair, meta, n);
 	case ROFFT_BODY:
 		p->tcol->offset = term_len(p, p->defindent);
@@ -1299,6 +1300,7 @@ termp_sh_post(DECL_ARGS)
 {
 	switch (n->type) {
 	case ROFFT_HEAD:
+		p->fontibi = 0;
 		term_newln(p);
 		break;
 	case ROFFT_BODY:
@@ -1515,6 +1517,7 @@ termp_ss_pre(DECL_ARGS)
 		break;
 	case ROFFT_HEAD:
 		p->tcol->offset = term_len(p, p->defindent) / 2 + 1;
+		p->fontibi = 1;
 		return termp_bold_pre(p, pair, meta, n);
 	case ROFFT_BODY:
 		p->tcol->offset = term_len(p, p->defindent);
@@ -1531,8 +1534,16 @@ termp_ss_pre(DECL_ARGS)
 static void
 termp_ss_post(DECL_ARGS)
 {
-	if (n->type == ROFFT_HEAD || n->type == ROFFT_BODY)
+	switch (n->type) {
+	case ROFFT_HEAD:
+		p->fontibi = 0;
+		/* FALLTHROUGH */
+	case ROFFT_BODY:
 		term_newln(p);
+		break;
+	default:
+		break;
+	}
 }
 
 static int
