@@ -1069,7 +1069,7 @@ term_strlen(const struct termp *p, const char *cp)
 				skip = 1;
 				continue;
 			case ESCAPE_OVERSTRIKE:
-				this_sz = 0;
+				max_sz = 0;
 				rhs = seq + ssz;
 				while (seq < rhs) {
 					if (*seq == '\\') {
