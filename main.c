@@ -514,7 +514,8 @@ main(int argc, char *argv[])
 
 			best_prio = 40;
 			for (ib = i = 0; i < resnsz; i++) {
-				sec = resn[i].file;
+				sec = resn[i].file +
+				    strlen(conf.manpath.paths[resn[i].ipath]);
 				sec += strcspn(sec, "123456789");
 				if (sec[0] == '\0')
 					continue; /* No section at all. */
