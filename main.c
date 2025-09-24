@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2010-2012, 2014-2021 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2012,2014-2021,2025 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2008-2012 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2010 Joerg Sonnenberger <joerg@netbsd.org>
  *
@@ -604,6 +604,8 @@ main(int argc, char *argv[])
 	mp = mparse_alloc(options, os_e, os_s);
 
 	for (i = 0; i < ressz; i++) {
+		if (i > 0)
+			mparse_reset(mp);
 		process_onefile(mp, res + i, &outst, &conf);
 		if (outst.wstop && mandoc_msg_getrc() != MANDOCLEVEL_OK)
 			break;
@@ -924,17 +926,11 @@ parse(struct mparse *mp, int fd, const char *file,
     struct outstate *outst, struct manconf *conf)
 {
 	static struct manpaths	 basepaths;
-	static int		 previous;
 	struct roff_meta	*meta;
 
 	assert(fd >= 0);
 	if (file == NULL)
 		file = "<stdin>";
-
-	if (previous)
-		mparse_reset(mp);
-	else
-		previous = 1;
 
 	mparse_readfd(mp, fd, file);
 	if (fd != STDIN_FILENO)
