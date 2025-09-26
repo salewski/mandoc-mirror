@@ -1222,6 +1222,8 @@ ps_endline(struct termp *p)
 
 	ps_plast(p);
 	ps_pclose(p);
+	p->viscol = 0;
+	p->minbl = 0;
 
 	/*
 	 * If we're in the margin, don't try to recalculate our current
@@ -1235,8 +1237,6 @@ ps_endline(struct termp *p)
 	/* Left-justify. */
 
 	p->ps->pscol = p->ps->left;
-	p->viscol = 0;
-	p->minbl = 0;
 
 	/* If we haven't printed anything, return. */
 
