@@ -44,4 +44,3 @@ void		 tbl_option(struct tbl_node *, int, const char *, int *);
 void		 tbl_layout(struct tbl_node *, int, const char *, int);
 void		 tbl_data(struct tbl_node *, int, const char *, int);
 void		 tbl_cdata(struct tbl_node *, int, const char *, int);
-void		 tbl_reset(struct tbl_node *);
