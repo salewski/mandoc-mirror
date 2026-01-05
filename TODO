@@ -474,6 +474,13 @@ are mere guesses, and some may be wrong.
   reminded by jmc@  Thu, 23 Sep 2010 18:13:39 +0059
   loc *  exist **  algo ***  size *  imp ***
 
+- rewrite mandoc_eos() to make some special chars eos-tranparent:
+  '"', ''', ')', ']', '*', '\[dg]', '\[dd]', '\[rq]', '\[cq]'
+  gbranden@  23 Aug 2025 17:21:14 -0500
+  When doing this, also check the transparency behaviour
+  of quoting macros including .Pq .Pc .Dq .Dc.
+  loc *  exist *  algo *  size *  imp *
+
 - the man(7) single-font macros (e.g. .B) use .itc,
   so ".B foo\c" followed by "bar" prints "bar" in bold
   gbranden@ Sun, 5 Jun 2022 18:08:46 -0500
@@ -729,6 +736,10 @@ are mere guesses, and some may be wrong.
 - report double .TH in man(7) as an ERROR and let the first win
   kristaps@  28 Mar 2021 13:30:41 +0200
   loc *  exist *  algo *  size *  imp *
+
+- warnings wishlist from the Linux man-pages maintainer
+  To: Alejandro Colomar <alx@kernel.org> 22 Aug 2025 18:29:35 +0200
+  loc **  exist **  algo **  size **  imp **
 
 - makewhatis -p complains about language subdirectories:
   /usr/local/man//ru: Unknown directory part
