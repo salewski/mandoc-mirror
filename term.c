@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2010-2022, 2025 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2022, 2025, 2026 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2008, 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -949,18 +949,14 @@ term_setwidth(struct termp *p, const char *wstr)
 
 	iop = 0;
 	width = 0;
-	if (NULL != wstr) {
-		switch (*wstr) {
-		case '+':
-			iop = 1;
-			wstr++;
-			break;
-		case '-':
-			iop = -1;
-			wstr++;
-			break;
-		default:
-			break;
+	if (wstr != NULL) {
+		if (*wstr == '+' || *wstr == '-') {
+			for (iop = 1;; wstr++) {
+				if (*wstr == '-')
+					iop = -iop;
+				else if (*wstr != '+')
+					break;
+			}
 		}
 		if (a2roffsu(wstr, &su, SCALE_MAX) != NULL)
 			width = term_hspan(p, &su);

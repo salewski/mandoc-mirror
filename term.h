@@ -111,7 +111,7 @@ struct	termp {
 	void		(*end)(struct termp *);
 	void		(*endline)(struct termp *);
 	void		(*advance)(struct termp *, size_t);
-	void		(*setwidth)(struct termp *, int, int);
+	void		(*setwidth)(struct termp *, int, size_t);
 	size_t		(*getwidth)(const struct termp *, int);
 	int		(*hspan)(const struct termp *,
 				const struct roffsu *);
