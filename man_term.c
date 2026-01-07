@@ -1,6 +1,7 @@
 /* $Id$ */
 /*
- * Copyright (c) 2010-2020,2022-23,2025 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2020, 2022-23, 2025, 2026
+ *               Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2008-2012 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -1040,6 +1041,7 @@ print_man_foot(struct termp *p, const struct roff_meta *meta)
 	/* Bottom left corner: operating system. */
 
 	p->tcol->offset = 0;
+	p->maxrmargin = p->defrmargin;
 	p->tcol->rmargin = p->maxrmargin > datelen ?
 	    (p->maxrmargin + term_len(p, 1) - datelen) / 2 : 0;
 	p->trailspace = 1;

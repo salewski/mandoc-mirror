@@ -1,6 +1,7 @@
 /* $Id$ */
 /*
- * Copyright (c) 2014-2017, 2020, 2025 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2014-2017, 2020, 2025, 2026
+ *               Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  * Copyright (c) 2017 Marc Espie <espie@openbsd.org>
  *
@@ -618,7 +619,7 @@ pspdf_alloc(const struct manoutput *outopts, enum termtype type)
 	p->ps->left = marginx;
 	p->ps->lineheight = lineheight;
 
-	p->defrmargin = pagex - (marginx * 2);
+	p->maxrmargin = p->defrmargin = pagex - (marginx * 2);
 	return p;
 }
 
