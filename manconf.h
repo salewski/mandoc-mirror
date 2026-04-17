@@ -1,6 +1,7 @@
 /* $OpenBSD: manconf.h,v 1.7 2018/11/22 11:30:15 schwarze Exp $ */
 /*
- * Copyright (c) 2011,2015,2017,2018,2020 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011, 2015, 2017, 2018, 2020, 2026
+ *               Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -49,6 +50,7 @@ struct	manoutput {
 struct	manconf {
 	struct manoutput	  output;
 	struct manpaths		  manpath;
+	struct manpaths		  basepath;
 };
 
 
@@ -56,3 +58,4 @@ void	 manconf_parse(struct manconf *, const char *, char *, char *);
 int	 manconf_output(struct manoutput *, const char *, int);
 void	 manconf_free(struct manconf *);
 void	 manpath_base(struct manpaths *);
+int	 manpath_unveil(struct manpaths *, int);

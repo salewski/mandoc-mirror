@@ -1,6 +1,7 @@
 /* $Id$ */
 /*
- * Copyright (c) 2011,2014,2015,2017-2021 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2011, 2014, 2015, 2017-2021, 2026
+ *               Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2011 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -26,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "mandoc_aux.h"
 #include "mandoc.h"
@@ -85,6 +87,40 @@ manpath_base(struct manpaths *dirs)
 	manpath_parseline(dirs, path_base, '\0');
 }
 
+int
+manpath_unveil(struct manpaths *dirs, int writeable)
+{
+	char	*file;
+	size_t	 i;
+	int	 len;
+
+	for (i = 0; i < dirs->sz; i++) {
+		if (unveil(dirs->paths[i], "r") == -1) {
+			mandoc_msg(MANDOCERR_UNVEIL, 0, 0, "%s: %s",
+			    dirs->paths[i], strerror(errno));
+			return -1;
+		}
+		if (writeable == 0)
+			continue;
+		len = mandoc_asprintf(&file, "%s/mandoc.db~", dirs->paths[i]);
+		if (unveil(file, "rwc") == -1) {
+			mandoc_msg(MANDOCERR_UNVEIL, 0, 0, "%s: %s",
+			    file, strerror(errno));
+			free(file);
+			return -1;
+		}
+		file[len - 1] = '\0';
+		if (unveil(file, "rwc") == -1) {
+			mandoc_msg(MANDOCERR_UNVEIL, 0, 0, "%s: %s",
+			    file, strerror(errno));
+			free(file);
+			return -1;
+		}
+		free(file);
+	}
+	return 0;
+}
+
 /*
  * Parse a FULL pathname from a colon-separated list of arrays.
  */
@@ -128,9 +164,13 @@ manpath_add(struct manpaths *dirs, const char *dir, char option)
 	return;
 
 fail:
-	if (option != '\0')
-		mandoc_msg(MANDOCERR_BADARG_BAD, 0, 0,
-		    "-%c %s: %s", option, dir, strerror(errno));
+	if (option == '\0')
+		return;
+	if (option == 'm' && (strcmp(dir, "andoc") == 0 ||
+	    strcmp(dir, "an") == 0 || strcmp(dir, "doc") == 0))
+		return;
+	mandoc_msg(MANDOCERR_BADARG_BAD, 0, 0, "-%c %s: %s",
+	    option, dir, strerror(errno));
 }
 
 void

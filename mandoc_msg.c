@@ -283,8 +283,10 @@ static	const char *const type_message[MANDOCERR_MAX] = {
 	"gzdopen",
 	"mkstemp",
 	"open",
+	"PATH",
 	"pledge",
 	"read",
+	"unveil",
 	"wait",
 	"write",
 };
