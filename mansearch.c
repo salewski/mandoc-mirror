@@ -86,7 +86,6 @@ mansearch(const struct mansearch *search,
 		int argc, char *argv[],
 		struct manpage **res, size_t *sz)
 {
-	char		 buf[PATH_MAX];
 	struct dbm_res	*rp;
 	struct expr	*e;
 	struct dbm_page	*page;
@@ -94,7 +93,7 @@ mansearch(const struct mansearch *search,
 	struct ohash	*htab;
 	size_t		 cur, i, maxres, outkey;
 	unsigned int	 slot;
-	int		 argi, chdir_status, getcwd_status, im;
+	int		 argi, im;
 
 	argi = 0;
 	if ((e = exprcomp(search, argc, argv, &argi)) == NULL) {
@@ -116,20 +115,6 @@ mansearch(const struct mansearch *search,
 			}
 
 	/*
-	 * Remember the original working directory, if possible.
-	 * This will be needed if the second or a later directory
-	 * is given as a relative path.
-	 * Do not error out if the current directory is not
-	 * searchable: Maybe it won't be needed after all.
-	 */
-
-	if (getcwd(buf, PATH_MAX) == NULL) {
-		getcwd_status = 0;
-		(void)strlcpy(buf, strerror(errno), sizeof(buf));
-	} else
-		getcwd_status = 1;
-
-	/*
 	 * Loop over the directories (containing databases) for us to
 	 * search.
 	 * Don't let missing/bad databases/directories phase us.
@@ -137,23 +122,11 @@ mansearch(const struct mansearch *search,
 	 * scan it for our match expression.
 	 */
 
-	chdir_status = 0;
 	for (i = 0; i < paths->sz; i++) {
-		if (chdir_status && paths->paths[i][0] != '/') {
-			if ( ! getcwd_status) {
-				warnx("%s: getcwd: %s", paths->paths[i], buf);
-				continue;
-			} else if (chdir(buf) == -1) {
-				warn("%s", buf);
-				continue;
-			}
-		}
 		if (chdir(paths->paths[i]) == -1) {
 			warn("%s", paths->paths[i]);
 			continue;
 		}
-		chdir_status = 1;
-
 		if (dbm_open(MANDOC_DB) == -1) {
 			if (errno != ENOENT)
 				warn("%s/%s", paths->paths[i], MANDOC_DB);
@@ -187,8 +160,7 @@ mansearch(const struct mansearch *search,
 			mpage = *res + cur;
 			mandoc_asprintf(&mpage->file, "%s/%s",
 			    paths->paths[i], page->file + 1);
-			if (access(chdir_status ? page->file + 1 :
-			    mpage->file, R_OK) == -1) {
+			if (access(page->file + 1, R_OK) == -1) {
 				warn("%s", mpage->file);
 				warnx("outdated mandoc.db contains "
 				    "bogus %s entry, run makewhatis %s",
@@ -222,8 +194,6 @@ mansearch(const struct mansearch *search,
 	}
 	if (res != NULL && cur > 1)
 		qsort(*res, cur, sizeof(struct manpage), manpage_compare);
-	if (chdir_status && getcwd_status && chdir(buf) == -1)
-		warn("%s", buf);
 	exprfree(e);
 	*sz = cur;
 	return res != NULL || cur;
