@@ -264,6 +264,13 @@ roff_escape(const char *buf, const int ln, const int aesc,
 		iendarg = iend = iarg;
 	}
 
+	/* Mandatory argument is missing. */
+
+	if (buf[iarg] == '\0' && (term != '\0' || maxl != INT_MAX)) {
+		err = MANDOCERR_ESC_INCOMPLETE;
+		goto out;
+	}
+
 	/* Decide how to end the argument. */
 
 	escterm = 0;
