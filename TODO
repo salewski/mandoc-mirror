@@ -524,6 +524,12 @@ are mere guesses, and some may be wrong.
   reported by Jan Stary 20 May 2024 10:19:01 +0200
   loc *  exist *  algo **  size *  imp **
 
+- PostScript and PDF glyph repertoire limited to 94 glyphs
+  G. Branden Robinson  Sun, Aug 09, 2026 03:18:31AM -0500
+
+- PDF internal and external hyperlinking and navigation pane
+  G. Branden Robinson  Sun, Aug 09, 2026 03:18:31AM -0500
+
 --- HTML issues --------------------------------------------------------
 
 - support the idiom .TP .IP .TP for multi-paragraph list item bodies
