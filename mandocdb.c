@@ -37,9 +37,6 @@
 #include "compat_fts.h"
 #endif
 #include <limits.h>
-#if HAVE_SANDBOX_INIT
-#include <sandbox.h>
-#endif
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -331,13 +328,6 @@ mandocdb(int argc, char *argv[])
 #if HAVE_PLEDGE
 	if (pledge("stdio rpath wpath cpath", NULL) == -1) {
 		warn("pledge");
-		return (int)MANDOCLEVEL_SYSERR;
-	}
-#endif
-
-#if HAVE_SANDBOX_INIT
-	if (sandbox_init(kSBXProfileNoInternet, SANDBOX_NAMED, NULL) == -1) {
-		warnx("sandbox_init");
 		return (int)MANDOCLEVEL_SYSERR;
 	}
 #endif
