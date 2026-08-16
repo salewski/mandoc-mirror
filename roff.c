@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Copyright (c) 2010-2015, 2017-2025 Ingo Schwarze <schwarze@openbsd.org>
+ * Copyright (c) 2010-2015, 2017-2026 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2008-2012, 2014 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -244,6 +244,7 @@ static	void		 roff_setstrn(struct roffkv **, const char *,
 				size_t, const char *, size_t, int);
 static	int		 roff_shift(ROFF_ARGS);
 static	int		 roff_so(ROFF_ARGS);
+static	int		 roff_stringup(ROFF_ARGS);
 static	int		 roff_tr(ROFF_ARGS);
 static	int		 roff_Dd(ROFF_ARGS);
 static	int		 roff_TE(ROFF_ARGS);
@@ -309,6 +310,7 @@ const char *__roff_name[MAN_MAX + 1] = {
 	"rs",		"rt",		"schar",	"sentchar",
 	"shc",		"shift",	"sizes",	"so",
 	"spacewidth",	"special",	"spreadwarn",	"ss",
+	"stringdown",	"stringup",
 	"sty",		"substring",	"sv",		"sy",
 	"T&",		"tc",		"TE",
 	"TH",		"tkf",		"tl",
@@ -569,6 +571,8 @@ static	struct roffmac	 roffs[TOKEN_NONE] = {
 	{ roff_line_ignore, NULL, NULL, 0 },  /* special */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* spreadwarn */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* ss */
+	{ roff_stringup, NULL, NULL, 0 },  /* stringdown */
+	{ roff_stringup, NULL, NULL, 0 },  /* stringup */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* sty */
 	{ roff_unsupp, NULL, NULL, 0 },  /* substring */
 	{ roff_line_ignore, NULL, NULL, 0 },  /* sv */
@@ -3943,6 +3947,33 @@ roff_so(ROFF_ARGS)
 
 	*offs = pos;
 	return ROFF_SO;
+}
+
+static int
+roff_stringup(ROFF_ARGS)
+{
+	const char	*name;
+	char		*cp;
+	size_t		 namesz;
+	int		 deftype;
+
+	cp = buf->buf + pos;
+	name = cp;
+	namesz = roff_getname(&cp, ln, pos);
+	if (*cp != '\0')
+		mandoc_msg(MANDOCERR_ARG_EXCESS, ln, (int)(cp - buf->buf),
+		    "%s ... %s", roff_name[tok], cp);
+	deftype = ROFFDEF_USER;
+	if ((cp = (char *)roff_getstrn(r, name, namesz, &deftype)) != NULL) {
+		while (*cp != '\0') {
+			if (tok == ROFF_stringup)
+				*cp = toupper(*cp);
+			else
+				*cp = tolower(*cp);
+			cp++;
+		}
+	}
+	return ROFF_IGN;
 }
 
 /* --- user defined strings and macros ------------------------------------ */

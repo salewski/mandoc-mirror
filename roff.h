@@ -273,6 +273,8 @@ enum	roff_tok {
 	ROFF_special,
 	ROFF_spreadwarn,
 	ROFF_ss,
+	ROFF_stringdown,
+	ROFF_stringup,
 	ROFF_sty,
 	ROFF_substring,
 	ROFF_sv,
