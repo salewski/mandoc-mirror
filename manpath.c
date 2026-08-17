@@ -41,7 +41,7 @@ static	void	 manpath_parseline(struct manpaths *, char *, char);
 void
 manconf_parse(struct manconf *conf, const char *file, char *pend, char *pbeg)
 {
-	const char	*penv;
+	const char	*penv, *cp;
 	size_t		 len;
 	int		 use_path_from_file = 1;
 
@@ -60,10 +60,10 @@ manconf_parse(struct manconf *conf, const char *file, char *pend, char *pbeg)
 	} else if (*penv == ':') {
 		/* Prepend man.conf(5) to MANPATH. */
 		pend = mandoc_strdup(penv + 1);
-	} else if ((pend = strstr(penv, "::")) != NULL) {
+	} else if ((cp = strstr(penv, "::")) != NULL) {
 		/* Insert man.conf(5) into MANPATH. */
-		pbeg = mandoc_strndup(penv, pend - penv);
-		pend = mandoc_strdup(pend + 2);
+		pbeg = mandoc_strndup(penv, cp - penv);
+		pend = mandoc_strdup(cp + 2);
 	} else {
 		len = strlen(penv);
 		pbeg = mandoc_strdup(penv);
