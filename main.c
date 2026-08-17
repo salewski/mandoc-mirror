@@ -405,6 +405,7 @@ main(int argc, char *argv[])
 	    unveil_pager(&outst) == -1)
 		return mandoc_msg_getrc();
 
+#if HAVE_UNVEIL
 	/*
 	 * Restrict file system access.  If using mandoc.db(5),
 	 * allow reading from all user-specified manpaths.
@@ -447,10 +448,12 @@ main(int argc, char *argv[])
 			return mandoc_msg_getrc();
 		}
 	}
+#endif
 
 	/* Set up output files, including temporary ones. */
 
 	if (outst.use_pager) {
+#if HAVE_UNVEIL
 		if (conf.output.outfilename == NULL ||
 		    conf.output.tagfilename == NULL) {
 			if (unveil("/tmp", "rwc") == -1) {
@@ -473,6 +476,7 @@ main(int argc, char *argv[])
 				return mandoc_msg_getrc();
 			}
 		}
+#endif
 		outst.tag_files = term_tag_init(conf.output.outfilename,
 		    outst.outtype == OUTT_HTML ? ".html" : "",
 		    conf.output.tagfilename);
@@ -487,6 +491,12 @@ main(int argc, char *argv[])
 		c = pledge("stdio rpath cpath tty proc exec", NULL);
 	if (c == -1) {
 		mandoc_msg(MANDOCERR_PLEDGE, 0, 0, "%s", strerror(errno));
+		return mandoc_msg_getrc();
+	}
+#elif HAVE_UNVEIL
+	if (unveil(NULL, NULL) == -1) {
+		mandoc_msg(MANDOCERR_UNVEIL, 0, 0, "NULL: %s",
+		    strerror(errno));
 		return mandoc_msg_getrc();
 	}
 #endif
@@ -1347,11 +1357,13 @@ unveil_pager(struct outstate *outst)
 		    "pager \"%s\" not found in PATH", outst->argv[0]);
 		return -1;
 	}
+#if HAVE_UNVEIL
 	if (unveil(outst->argv[0], "x") == -1) {
 		mandoc_msg(MANDOCERR_UNVEIL, 0, 0, "%s: %s",
 		    outst->argv[0], strerror(errno));
 		return -1;
 	}
+#endif
 	return 0;
 }
 

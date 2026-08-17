@@ -93,6 +93,7 @@ manpath_base(struct manpaths *dirs)
 	manpath_parseline(dirs, path_base, '\0');
 }
 
+#if HAVE_UNVEIL
 int
 manpath_unveil(struct manpaths *dirs, int writeable)
 {
@@ -126,6 +127,7 @@ manpath_unveil(struct manpaths *dirs, int writeable)
 	}
 	return 0;
 }
+#endif
 
 /*
  * Parse a FULL pathname from a colon-separated list of arrays.

@@ -92,6 +92,7 @@ HAVE_STRPTIME=
 HAVE_STRSEP=
 HAVE_STRTONUM=
 HAVE_SYS_ENDIAN=
+HAVE_UNVEIL=
 HAVE_VASPRINTF=
 HAVE_WCHAR=
 
@@ -331,6 +332,7 @@ runtest strndup		STRNDUP		|| true
 runtest strptime	STRPTIME	"" -D_GNU_SOURCE || true
 runtest strsep		STRSEP		|| true
 runtest strtonum	STRTONUM	"" -D_OPENBSD_SOURCE || true
+runtest unveil		UNVEIL		|| true
 runtest vasprintf	VASPRINTF	"" -D_GNU_SOURCE || true
 
 # --- fts ---
@@ -509,6 +511,7 @@ cat << __HEREDOC__
 #define HAVE_STRSEP ${HAVE_STRSEP}
 #define HAVE_STRTONUM ${HAVE_STRTONUM}
 #define HAVE_SYS_ENDIAN ${HAVE_SYS_ENDIAN}
+#define HAVE_UNVEIL ${HAVE_UNVEIL}
 #define HAVE_VASPRINTF ${HAVE_VASPRINTF}
 #define HAVE_WCHAR ${HAVE_WCHAR}
 #define HAVE_OHASH ${HAVE_OHASH}

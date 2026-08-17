@@ -52,6 +52,7 @@ TESTSRCS	 = test-attribute.c \
 		   test-strptime.c \
 		   test-strsep.c \
 		   test-strtonum.c \
+		   test-unveil.c \
 		   test-vasprintf.c \
 		   test-wchar.c
 

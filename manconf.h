@@ -58,4 +58,6 @@ void	 manconf_parse(struct manconf *, const char *, char *, char *);
 int	 manconf_output(struct manoutput *, const char *, int);
 void	 manconf_free(struct manconf *);
 void	 manpath_base(struct manpaths *);
+#if HAVE_UNVEIL
 int	 manpath_unveil(struct manpaths *, int);
+#endif
