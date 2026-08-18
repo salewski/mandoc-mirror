@@ -44,6 +44,7 @@ TESTSRCS	 = test-attribute.c \
 		   test-recvmsg.c \
 		   test-rewb-bsd.c \
 		   test-rewb-sysv.c \
+		   test-sandbox_init.c \
 		   test-strcasestr.c \
 		   test-stringlist.c \
 		   test-strlcat.c \

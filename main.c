@@ -37,6 +37,9 @@
 #include <glob.h>
 #include <limits.h>
 #include <paths.h>
+#if HAVE_SANDBOX_INIT
+#include <sandbox.h>
+#endif
 #include <signal.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -170,6 +173,11 @@ main(int argc, char *argv[])
 	if (strncmp(progname, "mandocdb", 8) == 0 ||
 	    strcmp(progname, BINM_MAKEWHATIS) == 0)
 		return mandocdb(argc, argv);
+
+#if HAVE_SANDBOX_INIT
+	if (sandbox_init(kSBXProfileNoInternet, SANDBOX_NAMED, NULL) == -1)
+		errx((int)MANDOCLEVEL_SYSERR, "sandbox_init");
+#endif
 
 	/* Search options. */
 
