@@ -23,7 +23,7 @@ struct tbl_node;
 struct tbl_span;
 
 struct tbl_node	*tbl_alloc(int, int, struct tbl_node *);
-int		 tbl_end(struct tbl_node *, int);
+int		 tbl_end(struct tbl_node *, int, int);
 void		 tbl_free(struct tbl_node *);
 void		 tbl_read(struct tbl_node *, int, const char *, int);
 void		 tbl_restart(int, int, struct tbl_node *);

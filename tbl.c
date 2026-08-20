@@ -1,7 +1,7 @@
 /*	$Id$ */
 /*
+ * Copyright (c) 2011,2015,2017,2018,2026 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2009, 2010, 2011 Kristaps Dzonsons <kristaps@bsd.lv>
- * Copyright (c) 2011, 2015 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -162,10 +162,12 @@ tbl_span(struct tbl_node *tbl)
 }
 
 int
-tbl_end(struct tbl_node *tbl, int still_open)
+tbl_end(struct tbl_node *tbl, int space_allowed, int still_open)
 {
 	struct tbl_span *sp;
 
+	if (space_allowed == 0)
+		tbl->opts.opts &= ~TBL_OPT_VSPACE;
 	if (still_open)
 		mandoc_msg(MANDOCERR_BLK_NOEND, tbl->line, tbl->pos, "TS");
 	else if (tbl->part == TBL_PART_CDATA)
