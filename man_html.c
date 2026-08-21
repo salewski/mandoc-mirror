@@ -185,7 +185,7 @@ print_man_node(MAN_ARGS)
 			return;
 		}
 		if (*n->string == ' ' && n->flags & NODE_LINE &&
-		    (h->flags & HTML_NONEWLINE) == 0)
+		    (h->flags & HTML_NONEWLINE) == 0 && h->noindent == 0)
 			print_otag(h, TAG_BR, "");
 		else if (n->flags & NODE_DELIMC)
 			h->flags |= HTML_NOSPACE;
