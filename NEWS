@@ -141,7 +141,8 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * Baptiste Daroussin, Eric van Gyzen, Mark Johnson, Stefan Esser,
    Trond Endrestol, and Wolfram Schneider (FreeBSD), Lennart Jablonka
    and Luca Del Re (Alpine Linux), Robert Kirkman (Termux), Eldred Habert,
-   Josiah Frentsos, Mohamed Akram, and Ted Bullock for one bug report each
+   Jan Schreiber, Josiah Frentsos, Mohamed Akram, and Ted Bullock
+   for one bug report each
  * Jason McIntyre (OpenBSD) for minor documentation and CSS improvements
  * Alexander Ziaee (FreeBSD) for a code style suggestion and
    for two minor documentation improvements
