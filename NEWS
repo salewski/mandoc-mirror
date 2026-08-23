@@ -2,6 +2,156 @@ $Id$
 
 This file lists the most important changes in the mandoc.bsd.lv distribution.
 
+Changes in the upcoming version 1.15.1, to be released in 2026
+
+    --- MAJOR NEW FEATURES ---
+ * man(1): use unveil(2) if provided by the operating system
+ * mdoc(7): support .Lb libname [...] in the SYNOPSIS section
+ * man(7): implement .MR (reference manual page), a groff-1.23 extension
+    --- MAJOR INCOMPATIBLE CHANGE FOR GROFF-1.23 COMPATIBILITY ---
+ * man(7)/tbl(7): stop unconditionally emitting vertical space before .TS
+    --- MINOR NEW FEATURES ---
+ * mdoc(7): support .St -isoC-2023 = ISO/IEC 9899:2024 ("ISO C23") (sic!)
+ * mdoc(7): support .St -p1003.1-2024 = IEEE Std 1003.1-2024 ("POSIX.1")
+ * mdoc(7) -T html: emit hyperlinks to rfc-editor.org for .%R RFC <number>
+ * tbl(7): support numerical expressions in column width modifiers
+ * roff(7): support decimal fractions in the number parser
+ * roff(7): rudimentary implementation of \A (name syntax check)
+ * roff(7): implement \(.l, but intentionally set it to the constant 78n
+ * roff(7): implement \V, but intentionally do not inspect the environment
+ * roff(7): implement .stringup and .stringdown introduced in groff-1.23
+ * catman(8): new command line option -v (verbose mode)
+    --- HTML ACCESSIBILITY IMPROVEMENTS ---
+ * man.cgi(8): use <header>, <nav>, <footer>, and role & aria-label attributes
+ * use flexbox CSS instead of the archaic <table> for headers and footers
+ * use the <main> element, which has has the ARIA role "main" by default
+ * use <h2> for .Sh/.SH and <h3> for .Ss/.SS, freeing <h1> for header.html
+ * mdoc(7) .Nd: use the ARIA role "doc-subtitle"
+ * mdoc(7) .Xr: print aria-label attributes on <a> elements
+ * -O toc: print <nav role="doc-toc"> elements where appropriate
+ * make sure <meta charset="utf-8"> is within the first 1024 bytes
+    --- MINOR FEATURE REMOVALS ---
+ * man(1): without -l, never interpret "name" command line arguments as
+   absolute or relative path names, not even for arguments that contain
+   a slash and that do not resolve to a page name; this was a quirk
+   that even the maintainer of the man-db package dislikes
+ * man(7): stop supporting the obsolete -O mdoc command line option,
+   which no longer provided any functionality
+    --- RELIABILITY BUGFIXES ---
+ * mdoc(7) .Tg: avoid segfault triggered by .Tg inside some blocks
+ * mdoc(7) .Tg: avoid assert(3) on a node both implicitly and implicitly tagged
+ * man(7): do not fail an assertion on sequences of multiple macros
+   with next line scopes without arguments, like .SH .I .I .BI
+ * tbl(7): fix an endless loop caused by certain expanding columns
+ * tbl(7): do not read uninitialized memory and produce near-infinite output
+   when the last data row of a table contains nothing but a horizontal line
+ * tbl(7): do not fail an assertion on \z near the end of a table cell
+ * tbl(7): do not fail an assertion if ".if 1 .ce" occurs in a table
+ * eqn(7): prevent an infinite loop caused by recursive "define"
+ * roff(7): avoid a read buffer overrun if an escape sequence that requires
+   an argument occurs at the end of an input line and the argument is missing
+ * roff(7): do not segfault on .shift with a negative argument
+ * roff(7): do not segfault on some macro args ending in double backslashes
+ * roff(7): do not fail an assertion on \o inside .mc
+ * roff(7): do not fail assertions on some lines containing two .while requests
+ * roff(7): do not fail an assertion on expanding escapes starting with \EE
+ * roff(7): do not fail an assertion on \zX\h'-N' at the beginning of a line
+ * roff(7): do not fail assertions for certain nested escape sequences
+    --- PORTABILITY IMPROVEMENTS ---
+ * configure: scaffolding to build without unveil(2) when unavailable
+ * add missing <stddef.h> in strsep(3) compatibilty implementation
+    --- MINOR FUNCTIONAL IMPROVEMENTS FOR GROFF-1.23 COMPATIBILITY ---
+ * mdoc(7): change the footer line to always show NAME(SECTION) on the
+   right hand side, for compatibility with groff-1.23 and with man(7)
+ * mdoc(7) .Lk: set the URI in roman rather than in bold font
+ * mdoc(7) .Ux: change rendering of this deprecated macro from "UNIX" to "Unix"
+ * mdoc(7) .Dt: if the second argument (the section number) is invalid,
+   print "LOCAL" for the volume title, just like when the argument is missing
+ * man(7): reduce global indentation to 5n to match mdoc(7) rendering
+ * man(7) .TH: if the first argument is empty, use the
+   fixed string "UNTITLED" instead, just like in mdoc(7) does
+ * man(7): ignore .br before the first .SH
+ * man(7): for the purpose of vertical spacing, ignore .RS before a paragraph
+ * tbl(7): separate a vertical line on the left side of a table by horizontal
+   whitespace of 1n from the content of the leftmost column
+ * roff(7): ignore various new requests that are irrelevant in manuals
+ * terminal formatter: use bold italic for italic font esc in a section header
+    --- OTHER MINOR FUNCTIONAL IMPROVEMENTS ---
+ * man(7): warn about blank input lines just like in mdoc(7)
+ * man(7) -T html: avoid <br/> inside <pre>, which caused ugly formatting
+ * roff(7): support some practically relevant escape sequences in \w arguments
+ * roff(7): more precise -W error messages about invalid escape sequences
+ * terminal formatter: internally calculate many widths in BU rather than EN,
+   to make rounding for horizontal spacing more compatible with groff
+ * makewhatis(8): make ordering in mandoc.db(5) deterministic even in
+   the presence of pages with the same name distinguised only by case
+ * -T man: do not print .PP before .RS, it has unreliable, surprising semantics
+ * catman(8): create the destination directory if it does not exist
+ * catman(8), mandocd(8): improve error reporting in various respects
+ * catman(8): implement signal handling to allow premature clean shutdowns
+    --- MINOR BUGFIXES ---
+ * man.conf(5): always read the config file, even with -M or $MANPATH
+ * $MANPATH: correctly pass this variable to the pager in the environment,
+   rather than clobbering it with strtok(3)
+ * man(1): when formatting two compressed manual pages in a row,
+   not only decompress the first one, but also the second one
+ * apropos(1): let UTF-8 command line arguments work as expected
+   if the database was built with makewhatis(8) -T utf8
+ * mdoc(7) .%T: use the same font styles in HTML as in terminal output
+ * mdoc(7) -T html: use <cite> only for the title, not the for complete block
+ * man(7): delete bogus warnings about empty .MT and .UR blocks
+ * man(7): \c at EOL does not extend next-line scope of single-font macros
+ * translate ASCII_HYPH and \- to plain '-' when writing tag files
+ * tbl(7): stop skipping vertical space after boxed tables
+ * tbl(7): calculate correct widths of spanned columns with custom spacing
+ * roff(7): do not leak 64 bytes of memory when calling a user-defined macro
+ * roff(7): parse escape sequences left-to-right rather than right-to-left,
+   to correctly handle multiple self-modifying expansions on one line
+ * roff(7) -T ps, pdf: reduce horizontal movement of \h to the correct amount
+ * roff(7): support arbitrary argument delimiters for \C (special characters)
+ * roff(7): reset .ll (line length) before the page footer, like in groff
+ * roff(7): groff rules for argument delimiters in escapes taking number args
+ * roff(7): support escapes as argument delimiters in escape sequences
+ * roff(7): put some escape sequences into the correct parsing classes
+ * -T html: in segment identifiers, do not turn hyphens into underscores
+ * mandocd(8): report progress to catman(8), to prevent "Too many open files"
+    --- THANKS TO ---
+ * Theo Buehler (OpenBSD) for ten bug reports from afl(1), and for
+   suggesting three new features and one documentation improvement
+ * Anna Vyalkova for several patches and suggestions improving accessibility
+ * Theo de Raadt (OpenBSD) for initial patches and lots of help with using
+   unveil(2), for a bug report, and for requesting the deletion of a quirk
+ * Job Snijders (OpenBSD) for help with using unveil(2) and for a small patch
+ * Michael Stapelberg (Debian) for a source code patch and three bug reports
+ * Jonathan Gray (OpenBSD) for a small patch, two bug reports,
+   and several minor documentation improvements
+ * Thomas Klausner (NetBSD) and Simon Branch for one small patch each
+ * G. Branden Robinson (GNU roff) for suggesting a minor new feature, a few bug
+   fixes, two minor functional improvements, and a documentation improvement
+ * Alejandro Colomar (Linux man-pages project)
+   for three bug reports and five suggestions
+ * Evan Silberman for a bug report, a documentation patch, and a suggestion
+ * Paul Eggert (tz db) for suggesting a feature and a documentation improvement
+ * Colin Watson (man-db) for a discussion on the deletion of a quirk in man(1)
+ * Jan Stary for two bug reports and a documentation improvement
+ * Anton Lindqvist and Paul de Weerd (OpenBSD) for two bug reports each
+ * Xose Vazquez Perez (Fedora) for a portability bug report
+   and for suggesting three code style improvements
+ * Omar Polo (OpenBSD) for a portability bug report
+ * Baptiste Daroussin, Eric van Gyzen, Mark Johnson, Stefan Esser,
+   Trond Endrestol, and Wolfram Schneider (FreeBSD), Lennart Jablonka
+   and Luca Del Re (Alpine Linux), Robert Kirkman (Termux), Eldred Habert,
+   Josiah Frentsos, Mohamed Akram, and Ted Bullock for one bug report each
+ * Jason McIntyre (OpenBSD) for minor documentation and CSS improvements
+ * Alexander Ziaee (FreeBSD) for a code style suggestion and
+   for two minor documentation improvements
+ * Klemens Nanni (OpenBSD), Nick Briggs (FreeBSD),
+   Anders Damsgaard, James K. Lowden, and Paul A. Patience
+   for one minor documentation improvement each
+ * Paul Tagliamonte for some spelling fixes in source code comments
+ * Alexander Bluhm (OpenBSD) for access to an arm64 machine for debugging
+ * validator.w3.org for an improvement of generated HTML code
+
 Changes in version 1.14.6, released on September 23, 2021
 
     --- MAJOR NEW FEATURES ---
