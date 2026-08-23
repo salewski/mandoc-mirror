@@ -469,10 +469,6 @@ are mere guesses, and some may be wrong.
   of quoting macros including .Pq .Pc .Dq .Dc.
   loc *  exist *  algo *  size *  imp *
 
-- the man(7) single-font macros (e.g. .B) use .itc,
-  so ".B foo\c" followed by "bar" prints "bar" in bold
-  gbranden@ Sun, 5 Jun 2022 18:08:46 -0500
-
 - a line starting with "\fB something" counts as starting with whitespace
   and triggers a line break; found in audio/normalize-mp3(1)
   This will become easier once escape sequences are represented
