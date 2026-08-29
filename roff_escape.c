@@ -268,6 +268,8 @@ roff_escape(const char *buf, const int ln, const int aesc,
 
 	if (buf[iarg] == '\0' && (term != '\0' || maxl != INT_MAX)) {
 		err = MANDOCERR_ESC_INCOMPLETE;
+		if (rval == ESCAPE_SPECIAL)
+			rval = ESCAPE_ERROR;
 		goto out;
 	}
 
