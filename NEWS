@@ -133,16 +133,20 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * Evan Silberman for a bug report, a documentation patch, and a suggestion
  * Paul Eggert (tz db) for suggesting a feature and a documentation improvement
  * Colin Watson (man-db) for a discussion on the deletion of a quirk in man(1)
+ * Anton Lindqvist (OpenBSD) for three bug reports
  * Jan Stary for two bug reports and a documentation improvement
- * Anton Lindqvist and Paul de Weerd (OpenBSD) for two bug reports each
+ * Paul de Weerd (OpenBSD) for two bug reports
+ * Alexander Bluhm (OpenBSD) for a report and
+   for access to an arm64 machine for debugging
  * Xose Vazquez Perez (Fedora) for a portability bug report
    and for suggesting three code style improvements
  * Omar Polo (OpenBSD) for a portability bug report
  * Baptiste Daroussin, Eric van Gyzen, Mark Johnson, Stefan Esser,
-   Trond Endrestol, and Wolfram Schneider (FreeBSD), Lennart Jablonka
-   and Luca Del Re (Alpine Linux), Robert Kirkman (Termux), Eldred Habert,
-   Jan Schreiber, Josiah Frentsos, Mohamed Akram, and Ted Bullock
-   for one bug report each
+   Trond Endrestol, and Wolfram Schneider (FreeBSD),
+   Lennart Jablonka, Luca Del Re, and Paul Bredbury (Alpine Linux),
+   Robert Kirkman (Termux), Eldred Habert, Jan Schreiber, Josiah Frentsos,
+   Mohamed Akram, and Ted Bullock for one bug report each
+ * Soeren Tempel (Alpine Linux) for a useful discussion
  * Jason McIntyre (OpenBSD) for minor documentation and CSS improvements
  * Alexander Ziaee (FreeBSD) for a code style suggestion and
    for two minor documentation improvements
@@ -150,7 +154,6 @@ Changes in the upcoming version 1.15.1, to be released in 2026
    Anders Damsgaard, James K. Lowden, and Paul A. Patience
    for one minor documentation improvement each
  * Paul Tagliamonte for some spelling fixes in source code comments
- * Alexander Bluhm (OpenBSD) for access to an arm64 machine for debugging
  * validator.w3.org for an improvement of generated HTML code
 
 Changes in version 1.14.6, released on September 23, 2021
