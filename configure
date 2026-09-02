@@ -2,7 +2,7 @@
 #
 # $Id$
 #
-# Copyright (c) 2014-2021 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2014-2021, 2026 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -55,7 +55,10 @@ STATIC=
 
 BUILD_CGI=0
 BUILD_CATMAN=0
-INSTALL_LIBMANDOC=0
+INSTALL_LIBMANDOC_A=0
+INSTALL_LIBMANDOC_H=0
+INSTALL_LIBMANDOC_MAN=0
+INSTALL_LIBMANDOC_SO=0
 
 HAVE_ATTRIBUTE=
 HAVE_CMSG=
@@ -639,10 +642,21 @@ BUILD_TARGETS=
 [ ${BUILD_CATMAN} -gt 0 ] && \
 	BUILD_TARGETS="${BUILD_TARGETS} mandocd catman"
 INSTALL_TARGETS=
-[ ${INSTALL_LIBMANDOC} -gt 0 ] && INSTALL_TARGETS="lib-install"
+[ ${INSTALL_LIBMANDOC_A} -gt 0 ] && INSTALL_TARGETS="liba-install"
+[ ${INSTALL_LIBMANDOC_H} -gt 0 ] && \
+	INSTALL_TARGETS="${INSTALL_TARGETS} libh-install"
+[ ${INSTALL_LIBMANDOC_MAN} -gt 0 ] && \
+	INSTALL_TARGETS="${INSTALL_TARGETS} libman-install"
 [ ${BUILD_CGI} -gt 0 ] && INSTALL_TARGETS="${INSTALL_TARGETS} cgi-install"
 [ ${BUILD_CATMAN} -gt 0 ] && \
 	INSTALL_TARGETS="${INSTALL_TARGETS} catman-install"
+
+LIBMANDOC_DEPS="libmandoc.a"
+if [ ${INSTALL_LIBMANDOC_SO} -gt 0 ]; then
+	INSTALL_TARGETS="${INSTALL_TARGETS} libso-install"
+	LIBMANDOC_DEPS="libmandoc.so"
+	CFLAGS="${CFLAGS} -fPIC"
+fi
 
 cat << __HEREDOC__
 BUILD_TARGETS	= ${BUILD_TARGETS}
@@ -652,6 +666,7 @@ CC		= ${CC}
 CFLAGS		= ${CFLAGS}
 LDADD		= ${LDADD}
 LDFLAGS		= ${LDFLAGS}
+LIBMANDOC_DEPS	= ${LIBMANDOC_DEPS}
 DEBUG_OBJS	= ${DEBUG_OBJS}
 MANDOC_COBJS	= ${MANDOC_COBJS}
 SOELIM_COBJS	= ${SOELIM_COBJS}

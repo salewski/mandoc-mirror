@@ -1,6 +1,6 @@
 # $Id$
 #
-# Copyright (c) 2014-2022 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2014-2022,2026 Ingo Schwarze <schwarze@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -243,15 +243,47 @@ READ_ALLOWED_PATH="/nix/store:${PREFIX}/Cellar"
 
 # --- user settings for the mandoc(3) library --------------------------
 
-# By default, libmandoc.a is not installed.  It is almost never needed
+# By default, libmandoc is not installed.  It is almost never needed
 # because there is almost no non-mandoc software out there using this
-# library.  The one notable exception is NetBSD apropos(1).
+# library.  The one notable exception is NetBSD apropos(1), which
+# links statically against libmandoc.
 # So, when building for the NetBSD base system - but not for NetBSD
 # ports nor for pkgsrc! - you may want the following:
 
-INSTALL_LIBMANDOC=1
+INSTALL_LIBMANDOC_A=1
 
-# The following settings are only used when INSTALL_LIBMANDOC is set.
+# If you intend to support compilation of software not contained
+# in the mandoc toolkit that links against libmandoc, the header
+# files declaring the internal API functions also need to be
+# installed, and installing the documentation of these internal
+# functions may be useful.
+# Be aware, though, that the internal API documention is not as
+# diligently maintained as the user-facing mandoc documentation,
+# and updating it may occasionally be forgotten when internal
+# functions are changed.
+
+INSTALL_LIBMANDOC_H=1
+INSTALL_LIBMANDOC_MAN=1
+
+# Systems having unusually tight mass storage constraints where saving
+# disk space on the order of some hundred kilobytes to a few megabytes
+# matters, a libmandoc shared object can be built and installed.
+# It will automatically be linked from the programs.
+# This mandoc build system is intentionally not providing library
+# versioning for libmandoc.  The internal API changes so often that in
+# general, every mandoc release implies a libmandoc major version bump,
+# libmandoc.so can only be used with programs from the same mandoc
+# release, and external programs using libmandoc must be recompiled
+# after every mandoc release.
+# Alpine Linux is among the few systems that may want the following:
+
+INSTALL_LIBMANDOC_SO=1
+
+# Each of the above INSTALL_LIBMANDOC_* variables can be used alone,
+# and none of them are mutually exclusive.
+
+# The following settings are only used when the respective
+# INSTALL_LIBMANDOC_* variables are enabled:
 
 INCLUDEDIR="${PREFIX}/include/mandoc"
 LIBDIR="${PREFIX}/lib/mandoc"

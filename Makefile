@@ -1,6 +1,6 @@
 # $Id$
 #
-# Copyright (c) 2011, 2013-2022 Ingo Schwarze <schwarze@openbsd.org>
+# Copyright (c) 2011, 2013-2022, 2026 Ingo Schwarze <schwarze@openbsd.org>
 # Copyright (c) 2010, 2011, 2012 Kristaps Dzonsons <kristaps@bsd.lv>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -400,7 +400,7 @@ distclean: clean
 	rm -f Makefile.local config.h config.h.old config.log config.log.old
 
 clean:
-	rm -f libmandoc.a $(LIBMANDOC_OBJS) $(ALL_COBJS)
+	rm -f libmandoc.a libmandoc.so $(LIBMANDOC_OBJS) $(ALL_COBJS)
 	rm -f mandoc man $(MAIN_OBJS)
 	rm -f man.cgi $(CGI_OBJS)
 	rm -f mandocd catman catman.o $(MANDOCD_OBJS)
@@ -442,15 +442,23 @@ base-install: mandoc demandoc soelim
 		$(DESTDIR)$(MANDIR)/man8/$(BINM_MAKEWHATIS).8
 	$(INSTALL_DATA) mandoc.css $(DESTDIR)$(MISCDIR)
 
-lib-install: libmandoc.a
+liba-install: libmandoc.a
 	mkdir -p $(DESTDIR)$(LIBDIR)
-	mkdir -p $(DESTDIR)$(INCLUDEDIR)
-	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_LIB) libmandoc.a $(DESTDIR)$(LIBDIR)
+
+libh-install:
+	mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL_LIB) eqn.h man.h mandoc.h mandoc_aux.h mandoc_parse.h \
 		mdoc.h roff.h tbl.h $(DESTDIR)$(INCLUDEDIR)
+
+libman-install:
+	mkdir -p $(DESTDIR)$(MANDIR)/man3
 	$(INSTALL_MAN) mandoc.3 mandoc_escape.3 mandoc_malloc.3 \
 		mansearch.3 mchars_alloc.3 tbl.3 $(DESTDIR)$(MANDIR)/man3
+
+libso-install: libmandoc.so
+	mkdir -p $(DESTDIR)$(LIBDIR)
+	$(INSTALL_LIB) libmandoc.so $(DESTDIR)$(LIBDIR)
 
 cgi-install: man.cgi
 	mkdir -p $(DESTDIR)$(CGIBINDIR)
@@ -496,6 +504,7 @@ uninstall:
 	rm -f $(DESTDIR)$(MANDIR)/man8/mandocd.8
 	rm -f $(DESTDIR)$(MANDIR)/man8/$(BINM_CATMAN).8
 	rm -f $(DESTDIR)$(LIBDIR)/libmandoc.a
+	rm -f $(DESTDIR)$(LIBDIR)/libmandoc.so
 	rm -f $(DESTDIR)$(MANDIR)/man3/mandoc.3
 	rm -f $(DESTDIR)$(MANDIR)/man3/mandoc_escape.3
 	rm -f $(DESTDIR)$(MANDIR)/man3/mandoc_malloc.3
@@ -525,8 +534,12 @@ Makefile.local config.h: configure $(TESTSRCS)
 libmandoc.a: $(MANDOC_COBJS) $(LIBMANDOC_OBJS)
 	$(AR) rs $@ $(MANDOC_COBJS) $(LIBMANDOC_OBJS)
 
-mandoc: $(MAIN_OBJS) libmandoc.a
-	$(CC) -o $@ $(LDFLAGS) $(MAIN_OBJS) libmandoc.a $(LDADD)
+libmandoc.so: $(MANDOC_COBJS) $(LIBMANDOC_OBJS)
+	$(CC) -o $@ $(LDFLAGS) -shared \
+		$(MANDOC_COBJS) $(LIBMANDOC_OBJS) $(LDADD)
+
+mandoc: $(MAIN_OBJS) $(LIBMANDOC_DEPS)
+	$(CC) -o $@ $(LDFLAGS) $(MAIN_OBJS) -L. -lmandoc $(LDADD)
 
 man: mandoc
 	$(LN) mandoc man
@@ -534,14 +547,14 @@ man: mandoc
 man.cgi: $(CGI_OBJS) libmandoc.a
 	$(CC) $(STATIC) -o $@ $(LDFLAGS) $(CGI_OBJS) libmandoc.a $(LDADD)
 
-mandocd: $(MANDOCD_OBJS) libmandoc.a
-	$(CC) -o $@ $(LDFLAGS) $(MANDOCD_OBJS) libmandoc.a $(LDADD)
+mandocd: $(MANDOCD_OBJS) $(LIBMANDOC_DEPS)
+	$(CC) -o $@ $(LDFLAGS) $(MANDOCD_OBJS) -L. -lmandoc $(LDADD)
 
-catman: catman.o libmandoc.a
-	$(CC) -o $@ $(LDFLAGS) catman.o libmandoc.a $(LDADD)
+catman: catman.o $(LIBMANDOC_DEPS)
+	$(CC) -o $@ $(LDFLAGS) catman.o -L. -lmandoc $(LDADD)
 
-demandoc: $(DEMANDOC_OBJS) libmandoc.a
-	$(CC) -o $@ $(LDFLAGS) $(DEMANDOC_OBJS) libmandoc.a $(LDADD)
+demandoc: $(DEMANDOC_OBJS) $(LIBMANDOC_DEPS)
+	$(CC) -o $@ $(LDFLAGS) $(DEMANDOC_OBJS) -L. -lmandoc $(LDADD)
 
 soelim: $(SOELIM_COBJS) soelim.o
 	$(CC) -o $@ $(LDFLAGS) $(SOELIM_COBJS) soelim.o

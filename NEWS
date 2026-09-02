@@ -59,6 +59,7 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * roff(7): do not fail assertions for certain nested escape sequences
     --- PORTABILITY IMPROVEMENTS ---
  * configure: scaffolding to build without unveil(2) when unavailable
+ * support optionally building, installing, and using a libmandoc.so library
  * add missing <stddef.h> in strsep(3) compatibilty implementation
     --- MINOR FUNCTIONAL IMPROVEMENTS FOR GROFF-1.23 COMPATIBILITY ---
  * mdoc(7): change the footer line to always show NAME(SECTION) on the
@@ -125,6 +126,7 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * Michael Stapelberg (Debian) for a source code patch and three bug reports
  * Jonathan Gray (OpenBSD) for a small patch, two bug reports,
    and several minor documentation improvements
+ * Natanael Copa (Alpine Linux) for a portability patch
  * Thomas Klausner (NetBSD) and Simon Branch for one small patch each
  * G. Branden Robinson (GNU roff) for suggesting a minor new feature, a few bug
    fixes, two minor functional improvements, and a documentation improvement
@@ -136,7 +138,7 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * Anton Lindqvist (OpenBSD) for three bug reports
  * Jan Stary for two bug reports and a documentation improvement
  * Paul de Weerd (OpenBSD) for two bug reports
- * Alexander Bluhm (OpenBSD) for a report and
+ * Alexander Bluhm (OpenBSD) for a bug report and
    for access to an arm64 machine for debugging
  * Xose Vazquez Perez (Fedora) for a portability bug report
    and for suggesting three code style improvements
@@ -146,7 +148,7 @@ Changes in the upcoming version 1.15.1, to be released in 2026
    Lennart Jablonka, Luca Del Re, and Paul Bredbury (Alpine Linux),
    Robert Kirkman (Termux), Eldred Habert, Jan Schreiber, Josiah Frentsos,
    Mohamed Akram, and Ted Bullock for one bug report each
- * Soeren Tempel (Alpine Linux) for a useful discussion
+ * Soeren Tempel (Alpine Linux) for useful discussions
  * Jason McIntyre (OpenBSD) for minor documentation and CSS improvements
  * Alexander Ziaee (FreeBSD) for a code style suggestion and
    for two minor documentation improvements
