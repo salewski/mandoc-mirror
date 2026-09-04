@@ -272,7 +272,11 @@ tbl_data(struct tbl_node *tbl, int ln, const char *p, int pos)
 	    sp->layout->next == NULL ? sp->layout : sp->layout->next;
 	assert(rp != NULL);
 
-	if (p[1] == '\0') {
+	/*
+	 * Empty text lines generate empty spans,
+	 * but empty request lines are completely ignored.
+	 */
+	if (p[0] != '\0' && p[1] == '\0') {
 		switch (p[0]) {
 		case '.':
 			/*
