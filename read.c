@@ -544,11 +544,11 @@ mparse_end(struct mparse *curp)
 {
 	if (curp->man->meta.macroset == MACROSET_NONE)
 		curp->man->meta.macroset = MACROSET_MAN;
+	roff_endparse(curp->roff);
 	if (curp->man->meta.macroset == MACROSET_MDOC)
 		mdoc_endparse(curp->man);
 	else
 		man_endparse(curp->man);
-	roff_endparse(curp->roff);
 }
 
 /*
