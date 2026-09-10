@@ -2010,9 +2010,9 @@ post_bl(POST_ARGS)
 		roff_body_alloc(mdoc, nchild->line, nchild->pos, MDOC_It);
 		while (nchild->tok != MDOC_It) {
 			roff_node_relink(mdoc, nchild);
-			if (nnext == NULL)
-				break;
 			nchild = nnext;
+			if (nchild == NULL)
+				break;
 			nnext = nchild->next;
 			mdoc->next = ROFF_NEXT_SIBLING;
 		}
