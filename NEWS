@@ -38,6 +38,7 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * man(7): stop supporting the obsolete -O mdoc command line option,
    which no longer provided any functionality
     --- RELIABILITY BUGFIXES ---
+ * mdoc(7) .Bl -column: avoid NULL pointer access with .EQ without .It
  * mdoc(7) .Tg: avoid segfault triggered by .Tg inside some blocks
  * mdoc(7) .Tg: avoid assert(3) on a node both implicitly and implicitly tagged
  * man(7): do not fail an assertion on sequences of multiple macros
@@ -45,6 +46,7 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * tbl(7): fix an endless loop caused by certain expanding columns
  * tbl(7): do not read uninitialized memory and produce near-infinite output
    when the last data row of a table contains nothing but a horizontal line
+ * tbl(7): do not read one byte past the end of an empty data line 
  * tbl(7): do not fail an assertion on \z near the end of a table cell
  * tbl(7): do not fail an assertion if ".if 1 .ce" occurs in a table
  * eqn(7): prevent an infinite loop caused by recursive "define"
@@ -126,6 +128,7 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * Michael Stapelberg (Debian) for a source code patch and three bug reports
  * Jonathan Gray (OpenBSD) for a small patch, two bug reports,
    and several minor documentation improvements
+ * Hippolyte d'Oncieu de la Batie (EPITA) for two bug fix patches
  * Natanael Copa (Alpine Linux) for a portability patch
  * Thomas Klausner (NetBSD) and Simon Branch for one small patch each
  * G. Branden Robinson (GNU roff) for suggesting a minor new feature, a few bug
@@ -148,6 +151,7 @@ Changes in the upcoming version 1.15.1, to be released in 2026
    Lennart Jablonka, Luca Del Re, and Paul Bredbury (Alpine Linux),
    Robert Kirkman (Termux), Eldred Habert, Jan Schreiber, Josiah Frentsos,
    Mohamed Akram, and Ted Bullock for one bug report each
+ * Marc Espie (OpenBSD) for supervising a small fuzzing and auditing project
  * Soeren Tempel (Alpine Linux) for useful discussions
  * Jason McIntyre (OpenBSD) for minor documentation and CSS improvements
  * Alexander Ziaee (FreeBSD) for a code style suggestion and
