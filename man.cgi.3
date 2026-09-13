@@ -1,6 +1,6 @@
-.\"	$Id$
+.\" $Id$
 .\"
-.\" Copyright (c) 2016, 2017 Ingo Schwarze <schwarze@openbsd.org>
+.\" Copyright (c) 2016, 2017, 2026 Ingo Schwarze <schwarze@openbsd.org>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -46,11 +46,24 @@ program and a few parser routines.
 The main program
 .Bl -dash -compact
 .It
+limits system call and file system access using the
+.Xr pledge 2
+and
+.Xr unveil 2
+system calls;
+.It
 limits execution time;
 .It
 changes to
 .Dv MAN_DIR ,
 the data directory containing all the manual trees;
+.It
+opens the files
+.Pa head.html ,
+.Pa header.html ,
+and
+.Pa footer.html ,
+if available;
 .It
 calls
 .Fn parse_manpath_conf ;
@@ -110,14 +123,11 @@ This page generator is used when
 contains the complete path to a manual page including manpath,
 section directory, optional architecture subdirectory, manual name
 and section number suffix.
-It validates the manpath, changes into it, validate the filename,
+It validates the manpath, restricts file system access to the manpath using
+.Xr unveil 2 ,
+changes into the manpath, validates the filename,
 and then calls
-.Fn resp_begin_html ,
-.Fn resp_searchform ,
-.Fn resp_show ,
-and
-.Fn resp_end_html
-in that order.
+.Fn resp_show .
 .It Ft void Fn pg_search "const struct req *req"
 This page generator is used when
 .Ev PATH_INFO
@@ -126,13 +136,18 @@ contains a search query in short format or when
 is empty and a
 .Ev QUERY_STRING
 is provided.
+It restricts file system access to the manpath using
+.Xr unveil 2 ,
+changes into the manpath, and splits the
+.Ev QUERY_STRING
+into words.
 If possible, requests using
 .Ev QUERY_STRING
 are redirected to URIs using
 .Ev PATH_INFO
 by calling
 .Fn pg_redirect .
-Otherwise, it changes into the manpath and calls
+Otherwise, it calls
 .Xr mansearch 3 .
 Depending on the result, it calls either
 .Fn pg_noresult
@@ -150,12 +165,13 @@ but only an HTTP 303 response with a Location: of the form:
 .Fa name
 .Op Pf . Ar sec
 .Sm on
-.It Ft void Fn pg_noresult "const struct req *req" "const char *msg"
+.It Ft void Fn pg_noresult "const struct req *req" "int code" \
+ "const char *http_msg" "const char *user_msg"
 This function calls
 .Fn resp_begin_html ,
 .Fn resp_searchform ,
 prints the
-.Fa msg
+.Fa user_msg
 passed to it, and calls
 .Fn resp_end_html .
 .It Ft void Fn pg_searchres "const struct req *req" "struct manpage *r"\
@@ -165,27 +181,33 @@ If
 .Ev QUERY_STRING
 was used and there is exactly one result,
 it writes an HTTP redirect to that result.
+Otherwise, if
+.Xr apropos 1
+mode was used and there is more than one result,
+it relinquishes access to the file system using
+.Xr pledge 2 .
+Finally, if there is exactly one result, it only calls
+.Fn resp_show
+on that result.
 Otherwise, it writes an HTML result page beginning with
 .Fn resp_begin_html
 and
-.Fn resp_searchform .
-If there is more than one result, it writes a list of links
-to all the results.
-If it was a
+.Fn resp_searchform ,
+followed by a list of links to all the results.
+In
 .Xr man 1
-rather than an
-.Xr apropos 1
-query or if there is only one single result, it calls
-.Fn resp_show .
-Finally, it calls
-.Fn resp_end_html .
+mode,
+.Fn resp_show
+is called on the best match, after the list.
 .It Ft void Fn pg_index "const struct req *req"
 This page generator is used when
 .Ev PATH_INFO
 and
 .Ev QUERY_STRING
 are both empty.
-It calls
+It relinquishes file system access using
+.Xr pledge 2 ,
+calls
 .Fn resp_begin_html
 and
 .Fn resp_searchform ,
@@ -193,9 +215,12 @@ writes links to help pages, and calls
 .Fn resp_end_html .
 .It Ft void Fn pg_error_badrequest "const char *msg"
 This page generator is used when
-.Fn main
+.Fn main ,
+.Fn parse_path_info ,
+.Fn pg_show ,
+.Fn resp_catman ,
 or
-.Fn pg_show
+.Fn resp_format
 detect an invalid URI.
 It calls
 .Fn resp_begin_html ,
@@ -209,9 +234,8 @@ detected in the
 .Pa manpath.conf
 configuration file, in
 .Xr mandoc.db 5
-databases, in the
-.Xr mandoc 3
-parser, in file system permissions, or when setting up timeouts.
+databases, in file system permissions, during system calls,
+or when setting up timeouts.
 It calls
 .Fn resp_begin_html ,
 prints
@@ -240,8 +264,10 @@ The highest level result generators are:
 .It Ft void Fn resp_begin_html "int code" "const char *msg" "const char *file"
 This generator calls
 .Fn resp_begin_http
-to print the HTTP headers, then prints the HTML header up to the
-opening tag of the <body> element, then copies the file
+to print the HTTP headers, then prints the HTML header
+including the optional file
+.Pa head.html ,
+then opens the <body> element and copies the file
 .Pa header.html
 to the output, if it exists and is readable.
 If
@@ -257,7 +283,8 @@ If the
 argument is
 .Dv FOCUS_QUERY ,
 it sets the document's autofocus to the query input box.
-.It Ft void Fn resp_show "const struct req *req" "const char *file"
+.It Ft void Fn resp_show "const struct req *req" "const char *file" \
+ "int html_begun"
 This wrapper dispatches to either
 .Fn resp_catman
 or
@@ -269,15 +296,40 @@ starts with
 or
 .Pa man ,
 respectively.
-.It Ft void Fn resp_catman "const struct req *req" "const char *file"
-This generator translates a preformatted, backspace-encoded manual
-page to HTML and prints it to the output.
-.It Ft void Fn resp_format "const struct req *req" "const char *file"
-This generator formats a manual page on the standard output,
-using the functions documented in
+.It Ft void Fn resp_catman "const struct req *req" "const char *file" \
+ "int html_begun"
+This generator opens the specified preformatted, backspace-encoded manual page
+.Fa file ,
+relinquishes file system access using
+.Xr pledge 2 ,
+calls
+.Fn resp_begin_html
+and
+.Fn resp_searchform
+if
+.Fa html_begun
+is zero, then translates the page to HTML and prints it to the output,
+and finally calls
+.Fn resp_end_html .
+.It Ft void Fn resp_format "const struct req *req" "const char *file" \
+ "int html_begun"
+This generator opens the specified manual page source
+.Fa file ,
+parses it using the functions documented in
 .Xr mchars_alloc 3
 and
-.Xr mandoc 3 .
+.Xr mandoc 3 ,
+relinquishes file system access using
+.Xr pledge 2 ,
+calls
+.Fn resp_begin_html
+and
+.Fn resp_searchform
+if
+.Fa html_begun
+is zero, then formats the page on the standard output,
+and finally calls
+.Fn resp_end_html .
 .It Ft void Fn resp_end_html void
 This generator copies the file
 .Pa footer.html
@@ -291,10 +343,10 @@ These functions take a string and return 1 if it is valid, or 0 otherwise.
 Checks that the string only contains alphanumeric ASCII characters,
 dashes, dots, slashes, and underscores.
 .It Ft int Fn validate_manpath "const struct req *req" "const char* manpath"
-Checks that the string is either
-.Qq mandoc
-or one of the manpaths configured in
+Checks that the string is one of the manpaths configured in
 .Pa manpath.conf .
+.It Ft int Fn validate_arch "const char *arch"
+Checks that the string matches one of the compiled-in architecture names.
 .It Ft int Fn validate_filename "const char *file"
 Checks that the string starts with
 .Qq man
