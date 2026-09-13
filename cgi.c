@@ -140,6 +140,7 @@ static	const char *const arch_names[] = {
 };
 static	const int arch_MAX = sizeof(arch_names) / sizeof(char *);
 
+static	int head_fd = -1;
 static	int header_fd = -1;
 static	int footer_fd = -1;
 
@@ -416,11 +417,10 @@ resp_begin_html(int code, const char *msg, const char *file)
 			printf("(%.*s)", secsz, sec);
 		fputs(" - ", stdout);
 	}
-	printf("%s</title>\n"
-	       "</head>\n"
-	       "<body>\n",
-	       CUSTOMIZE_TITLE);
-
+	printf("%s</title>\n", CUSTOMIZE_TITLE);
+	(void)resp_copy(NULL, &head_fd);
+	puts("</head>\n"
+	     "<body>");
 	return resp_copy("header", &header_fd);
 }
 
@@ -1250,8 +1250,9 @@ main(void)
 		return EXIT_FAILURE;
 	}
 
-	/* These two files are optional. */
+	/* These three files are optional. */
 
+	head_fd = open("head.html", O_RDONLY);
 	header_fd = open("header.html", O_RDONLY);
 	footer_fd = open("footer.html", O_RDONLY);
 

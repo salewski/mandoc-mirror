@@ -199,6 +199,7 @@ It needs to have at least one component; the root directory cannot be used
 for this purpose.
 The files
 .Pa manpath.conf ,
+.Pa head.html ,
 .Pa header.html ,
 and
 .Pa footer.html
@@ -380,6 +381,11 @@ or any character not contained in the
 .Sx Restricted character set ,
 .Nm
 reports an internal server error and exits without doing anything.
+.It Pa /man/head.html
+An optional file containing static HTML code to be inserted right before
+closing the <HEAD> element.
+For example, it can contain additional <META> tags
+or <LINK>s to additional resources.
 .It Pa /man/header.html
 An optional file containing static HTML code to be wrapped in
 a <HEADER> element and inserted right after opening the <BODY> element.
