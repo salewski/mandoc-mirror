@@ -61,6 +61,7 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * roff(7): do not fail assertions for certain nested escape sequences
     --- PORTABILITY IMPROVEMENTS ---
  * configure: scaffolding to build without unveil(2) when unavailable
+ * configure: support TEST_EXECUTION=0 for use in cross compilation
  * support optionally building, installing, and using a libmandoc.so library
  * add missing <stddef.h> in strsep(3) compatibilty implementation
     --- MINOR FUNCTIONAL IMPROVEMENTS FOR GROFF-1.23 COMPATIBILITY ---

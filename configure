@@ -41,6 +41,7 @@ DEBUG_MEMORY=0
 OSENUM=
 OSNAME=
 UTF8_LOCALE=
+TEST_EXECUTION=1
 
 AR=ar
 CC=cc
@@ -191,10 +192,31 @@ __HEREDOC__
 		return 1
 	fi
 
-	if ./test-${1} 1>&3 2>&3; then
+	if [ ${TEST_EXECUTION} -eq 0 ]; then
+		echo "tested ${n}: yes (compilation only)" 1>&2
+		echo "running ${n} is disabled (manual)" 1>&3
+		echo "result of compiling ${n}: yes" 1>&3
+		echo 1>&3
+		_enable=1
+	elif ./test-${1} 1>&3 2>&3; then
 		echo "tested ${n}: yes" 1>&2
 		echo "result of running ${n}: yes" 1>&3
 		echo 1>&3
+		_enable=1
+	else
+		echo "tested ${n}: no (execution failed)" 1>&2
+		echo "result of ${n}: execution failed with exit status $?" 1>&3
+		echo "result of running ${n}: no" 1>&3
+		echo 1>&3
+		_enable=0
+	fi
+	rm "test-${1}"
+
+	if [ ${_enable} -eq 0 ]; then
+		unset _enable
+		return 1
+	else
+		unset _enable
 		eval HAVE_${2}=1
 		[ "${3}" = "-D_GNU_SOURCE" ] && NEED_GNU_SOURCE=1
 		[ "${3}" = "-D_OPENBSD_SOURCE" ] && NEED_OPENBSD_SOURCE=1
@@ -202,15 +224,7 @@ __HEREDOC__
 		[ "${3}" = "-lrt" ] && LD_NANOSLEEP="-lrt"
 		[ "${3}" = "-lsocket" ] && LD_RECVMSG="-lsocket"
 		[ "${3}" = "-lutil" ] && LD_OHASH="-lutil"
-		rm "test-${1}"
 		return 0
-	else
-		echo "tested ${n}: no (execution failed)" 1>&2
-		echo "result of ${n}: execution failed with exit status $?" 1>&3
-		echo "result of running ${n}: no" 1>&3
-		echo 1>&3
-		rm "test-${1}"
-		return 1
 	fi
 }
 

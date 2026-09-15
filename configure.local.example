@@ -209,6 +209,18 @@ LDADD="-lm"
 
 LDFLAGS="-Wl,-z,relro"
 
+# Some systems use cross-compilation for some target platforms.
+# In this case, while the ./configure script can still compile and link
+# test-*.c programs, it cannot test execution of the resulting binaries.
+# If the following variable is set to 0, ./configure treats success
+# of the compiling and linking stage as success of the whole test,
+# without testing execution.
+# Setting this variable to 0 is not recommended because it makes
+# the ./configure script more fragile, potentially treating tests as
+# successful even though the tested feature may not work at runtime.
+
+TEST_EXECUTION=0		# default is "1"
+
 # It is possible to change the utility program used for installation
 # and the modes files are installed with.  The defaults are:
 
