@@ -113,6 +113,7 @@ PREFIX="/usr/local"
 BINDIR=
 SBINDIR=
 BIN_FROM_SBIN=
+ETCDIR="/etc"
 INCLUDEDIR=
 LIBDIR=
 MANDIR=
@@ -481,7 +482,7 @@ __HEREDOC__
 [ ${HAVE_GETLINE} -eq 0 ] && echo "#include <stdio.h>"
 
 echo
-echo "#define MAN_CONF_FILE \"/etc/${MANM_MANCONF}\""
+echo "#define MAN_CONF_FILE \"${ETCDIR}/${MANM_MANCONF}\""
 echo "#define MANPATH_BASE \"${MANPATH_BASE}\""
 echo "#define MANPATH_DEFAULT \"${MANPATH_DEFAULT}\""
 if [ ${DEBUG_MEMORY} -ne 0 ]; then
@@ -689,6 +690,7 @@ PREFIX		= ${PREFIX}
 BINDIR		= ${BINDIR}
 SBINDIR		= ${SBINDIR}
 BIN_FROM_SBIN	= ${BIN_FROM_SBIN}
+ETCDIR		= ${ETCDIR}
 INCLUDEDIR	= ${INCLUDEDIR}
 LIBDIR		= ${LIBDIR}
 MANDIR		= ${MANDIR}

@@ -62,6 +62,7 @@ Changes in the upcoming version 1.15.1, to be released in 2026
     --- PORTABILITY IMPROVEMENTS ---
  * configure: scaffolding to build without unveil(2) when unavailable
  * configure: support TEST_EXECUTION=0 for use in cross compilation
+ * man.conf(5): make ETCDIR configurable, for systems unable to access /etc
  * support optionally building, installing, and using a libmandoc.so library
  * add missing <stddef.h> in strsep(3) compatibilty implementation
     --- MINOR FUNCTIONAL IMPROVEMENTS FOR GROFF-1.23 COMPATIBILITY ---
@@ -156,6 +157,7 @@ Changes in the upcoming version 1.15.1, to be released in 2026
    Lennart Jablonka, Luca Del Re, and Paul Bredbury (Alpine Linux),
    Robert Kirkman (Termux), Eldred Habert, Jan Schreiber, Josiah Frentsos,
    Mohamed Akram, and Ted Bullock for one bug report each
+ * Joshua Kahn (Termux) for a portability suggestion
  * Marc Espie (OpenBSD) for supervising a small fuzzing and auditing project
  * Soeren Tempel (Alpine Linux) for useful discussions
  * Jason McIntyre (OpenBSD) for minor documentation and CSS improvements

@@ -108,6 +108,8 @@ OSNAME="OpenBSD 7.0"
 # there is no need to copy the whole block.
 # Even if you set PREFIX to something else, the other variables
 # pick it up without copying them all over.
+# ETCDIR should not normally be changed, but a few system that lack
+# access to their own root directory (like Termux) may need it.
 # MISCDIR is only used for installing the file mandoc.css.
 # That is important because users of "mandoc -T html" often need it
 # even if they are not using man.cgi(8), see mandoc(1) for details.
@@ -115,6 +117,7 @@ OSNAME="OpenBSD 7.0"
 PREFIX="/usr/local"
 BINDIR="${PREFIX}/bin"
 SBINDIR="${PREFIX}/sbin"
+ETCDIR="/etc"
 MANDIR="${PREFIX}/man"
 MISCDIR="${PREFIX}/share/misc"
 
