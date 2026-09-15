@@ -89,6 +89,8 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * makewhatis(8): make ordering in mandoc.db(5) deterministic even in
    the presence of pages with the same name distinguised only by case
  * -T man: do not print .PP before .RS, it has unreliable, surprising semantics
+ * man.cgi(8): allow serving from gzipped manual page files, even though
+   doing this is not recommended, wasting CPU time to save little disk space
  * catman(8): create the destination directory if it does not exist
  * catman(8), mandocd(8): improve error reporting in various respects
  * catman(8): implement signal handling to allow premature clean shutdowns
@@ -129,6 +131,8 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * Jonathan Gray (OpenBSD) for a small patch, two bug reports,
    and several minor documentation improvements
  * Hippolyte d'Oncieu de la Batie (EPITA) for two bug fix patches
+ * classabbyamp (Void Linux) for two man.cgi(8) patches
+ * Duncan Overbruck (Void Linux) for a man.cgi(8) patch
  * Natanael Copa (Alpine Linux) for a portability patch
  * Thomas Klausner (NetBSD) and Simon Branch for one small patch each
  * G. Branden Robinson (GNU roff) for suggesting a minor new feature, a few bug
