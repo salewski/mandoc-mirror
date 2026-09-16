@@ -31,15 +31,18 @@
 # By default, "cc" is used as the C compiler, but it can be overridden.
 # For example, the system compiler in SunOS 5.9 may not provide <stdint.h>,
 # which may require this line:
-CC=gcc
+
+CC=gcc				# default is "cc"
 
 # IBM AIX may need:
+
 CC=xlc
 
 # By default, "ar" is used as the library archive builder, but it
 # can be overridden.  For example, NixOS may not have ar(1) in the
 # PATH, but may want to specify an absolute path instead.
-AR=ar
+
+AR=ar				# default is "ar"
 
 # For -Tutf8 and -Tlocale operation, mandoc(1) requires <locale.h>
 # providing setlocale(3) and <wchar.h> providing wcwidth(3) and
@@ -54,7 +57,7 @@ AR=ar
 # If your C library does not treat wchar_t as UCS-4, the UTF-8 output
 # mode will print garbage.
 
-HAVE_WCHAR=1
+HAVE_WCHAR=1			# default is autodetect
 
 # The following line disables multi-byte support.
 # The output modes -Tutf8 and -Tlocale will be the same as -Tascii.
@@ -66,7 +69,7 @@ HAVE_WCHAR=0
 # fails or selects an undesirable locale, you can manually choose
 # the locale for -Tutf8 mode:
 
-UTF8_LOCALE=en_US.UTF-8
+UTF8_LOCALE=en_US.UTF-8		# default is autodetect
 
 # When man(1) or apropos(1) is called without -m and -M options,
 # MANPATH is not set in the environment, and man.conf(5) is not
@@ -76,7 +79,7 @@ UTF8_LOCALE=en_US.UTF-8
 MANPATH_DEFAULT="/usr/share/man:/usr/X11R6/man:/usr/local/man"
 
 # Validation of cross references with mandoc -Tlint only looks
-# for manual pages in the following directories:
+# for manual pages in the following directories by default:
 
 MANPATH_BASE="/usr/share/man:/usr/X11R6/man"
 
@@ -87,7 +90,7 @@ MANPATH_BASE="/usr/share/man:/usr/X11R6/man"
 # the operating system using uname(1).  If that fails or is not
 # desired, either of the following lines can be used:
 
-OSENUM=MANDOC_OS_NETBSD
+OSENUM=MANDOC_OS_NETBSD		# default is autodetect
 OSENUM=MANDOC_OS_OPENBSD
 OSENUM=MANDOC_OS_OTHER
 
@@ -101,14 +104,14 @@ OSENUM=MANDOC_OS_OTHER
 # If you do not want uname(3) to be called but instead want a fixed
 # string to be used, use the following line:
 
-OSNAME="OpenBSD 7.0"
+OSNAME="OpenBSD 8.0"		# default is runtime detection
 
-# The following installation directories are used.
+# The following installation directories are used by default.
 # It is possible to set only one or a few of these variables,
 # there is no need to copy the whole block.
 # Even if you set PREFIX to something else, the other variables
 # pick it up without copying them all over.
-# ETCDIR should not normally be changed, but a few system that lack
+# ETCDIR should not normally be changed, but a few systems that lack
 # access to their own root directory (like Termux) may need it.
 # MISCDIR is only used for installing the file mandoc.css.
 # That is important because users of "mandoc -T html" often need it
@@ -186,31 +189,31 @@ LN="ln -sf"			# default is "ln -f"
 # your system but it needs different linker flags, set the following
 # variable to specify the required linker flags.
 
-LD_OHASH="-lutil"
+LD_OHASH="-lutil"		# default is autodetect
 
 # Some platforms may need an additional linker flag for nanosleep(2).
 # If none is needed or it is -lrt, it is autodetected.
 # Otherwise, set the following variable.
 
-LD_NANOSLEEP="-lrt"
+LD_NANOSLEEP="-lrt"		# default is autodetect
 
 # Some platforms may need an additional linker flag for recvmsg(2).
 # If none is needed or it is -lsocket, it is autodetected.
 # Otherwise, set the following variable.
 
-LD_RECVMSG="-lsocket"
+LD_RECVMSG="-lsocket"		# default is autodetect
 
 # Some platforms might need additional linker flags to link against
 # libmandoc that are not autodetected, though no such cases are
 # currently known.
 
-LDADD="-lm"
+LDADD="-lm"			# default is empty
 
 # Some systems may want to set additional linker flags for all the
 # binaries, not only for those using libmandoc, for example for
 # hardening options.
 
-LDFLAGS="-Wl,-z,relro"
+LDFLAGS="-Wl,-z,relro"		# default is empty
 
 # Some systems use cross-compilation for some target platforms.
 # In this case, while the ./configure script can still compile and link
@@ -265,7 +268,7 @@ READ_ALLOWED_PATH="/nix/store:${PREFIX}/Cellar"
 # So, when building for the NetBSD base system - but not for NetBSD
 # ports nor for pkgsrc! - you may want the following:
 
-INSTALL_LIBMANDOC_A=1
+INSTALL_LIBMANDOC_A=1		# default is "0"
 
 # If you intend to support compilation of software not contained
 # in the mandoc toolkit that links against libmandoc, the header
@@ -277,8 +280,8 @@ INSTALL_LIBMANDOC_A=1
 # and updating it may occasionally be forgotten when internal
 # functions are changed.
 
-INSTALL_LIBMANDOC_H=1
-INSTALL_LIBMANDOC_MAN=1
+INSTALL_LIBMANDOC_H=1		# default is "0"
+INSTALL_LIBMANDOC_MAN=1		# default is "0"
 
 # Systems having unusually tight mass storage constraints where saving
 # disk space on the order of some hundred kilobytes to a few megabytes
@@ -292,7 +295,7 @@ INSTALL_LIBMANDOC_MAN=1
 # after every mandoc release.
 # Alpine Linux is among the few systems that may want the following:
 
-INSTALL_LIBMANDOC_SO=1
+INSTALL_LIBMANDOC_SO=1		# default is "0"
 
 # Each of the above INSTALL_LIBMANDOC_* variables can be used alone,
 # and none of them are mutually exclusive.
@@ -308,7 +311,7 @@ LIBDIR="${PREFIX}/lib/mandoc"
 # By default, building man.cgi(8) is disabled.  To enable it, copy
 # cgi.h.example to cgi.h, edit it, and use the following line.
 
-BUILD_CGI=1
+BUILD_CGI=1			# default is "0"
 
 # The remaining settings in this section are only relevant if BUILD_CGI
 # is enabled.  Otherwise, they have no effect either way.
@@ -317,7 +320,7 @@ BUILD_CGI=1
 # the -static option.  If automatic detection fails, you can force
 # static linking of man.cgi(8).
 
-STATIC="-static"
+STATIC="-static"		# default is autodetect
 
 # Some systems may require -pthread for static linking:
 
@@ -345,7 +348,7 @@ CGIBINDIR="${WWWPREFIX}/cgi-bin"
 # It may not work on old releases of Mac OS X either.  For example,
 # Mac OS X 10.4 Tiger provides neither mkdirat(2) nor openat(2).
 
-BUILD_CATMAN=1
+BUILD_CATMAN=1			# default is "0"
 
 # Install catman(8) with a different name.
 # See BINM_MAN above for details of how this works.
@@ -367,7 +370,7 @@ CFLAGS="-g"
 # Do not use for production builds.
 # See mandoc_dbg_init(3) for more information.
 
-DEBUG_MEMORY=1
+DEBUG_MEMORY=1			# default is "0"
 
 # In rare cases, it may be required to skip individual automatic tests.
 # Each of the following variables can be set to 0 (test will not be run
