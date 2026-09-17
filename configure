@@ -718,4 +718,69 @@ __HEREDOC__
 echo "file Makefile.local: written" 1>&2
 echo "file Makefile.local: written" 1>&3
 
+# --- write config.sed ---
+
+exec > config.sed
+
+if [ "X${BINM_APROPOS}" != "Xapropos" ]; then
+	echo "s#Dl \\\$ apropos #Dl \\\$ ${BINM_APROPOS} #"
+	echo "s#Li \\\$ apropos #Li \\\$ ${BINM_APROPOS} #"
+	echo "s#Nm apropos#Nm ${BINM_APROPOS}#"
+	echo "s#Xr apropos 1#Xr ${BINM_APROPOS} 1#"
+fi
+if [ "X${BINM_CATMAN}" != "Xcatman" ]; then
+	echo "s#Nm catman#Nm ${BINM_CATMAN}#"
+	echo "s#Xr catman 8#Xr ${BINM_CATMAN} 8#"
+fi
+if [ "X${BINM_MAKEWHATIS}" != "Xmakewhatis" ]; then
+	echo "s#Nm makewhatis#Nm ${BINM_MAKEWHATIS}#"
+	echo "s#Xr makewhatis 8#Xr ${BINM_MAKEWHATIS} 8#"
+fi
+if [ "X${BINM_MAN}" != "Xman" ]; then
+	echo "s#Dl \\\$ man #Dl \\\$ ${BINM_MAN} #"
+	echo "s# man -T # ${BINM_MAN} -T #"
+	echo "s#Ex -std man\$#Ex -std ${BINM_MAN}#"
+	echo "s#Ql man #Ql ${BINM_MAN} #"
+	echo "s#Xr man 1#Xr ${BINM_MAN} 1#"
+fi
+if [ "X${BINM_SOELIM}" != "Xsoelim" ]; then
+	echo "s#Nm soelim#Nm ${BINM_SOELIM}#"
+fi
+if [ "X${BINM_WHATIS}" != "Xwhatis" ]; then
+	echo "s#Nm whatis#Nm ${BINM_WHATIS}#"
+	echo "s#Xr whatis 1#Xr ${BINM_WHATIS} 1#"
+fi
+if [ "X${MANM_EQN}" != "Xeqn" ]; then
+	echo "s#Nm eqn#Nm ${MANM_EQN}#"
+	echo "s#Xr eqn 7#Xr ${MANM_EQN} 7#"
+fi
+if [ "X${MANM_MAN}" != "Xman" ]; then
+	echo "s#Xr man 7#Xr ${MANM_MAN} 7#"
+fi
+if [ "X${MANM_MANCONF}" != "Xman.conf" ]; then
+	echo "s#Nm man\\.conf#Nm ${MANM_MANCONF}#"
+	echo "s#Xr man\\.conf 5#Xr ${MANM_MANCONF} 5#"
+fi
+if [ "X${ETCDIR}/${MANM_MANCONF}" != "X/etc/man.conf" ]; then
+	echo "s#/etc/man\\.conf#${ETCDIR}/${MANM_MANCONF}#"
+fi
+if [ "X${MANM_MDOC}" != "Xmdoc" ]; then
+	echo "s#Nm mdoc#Nm ${MANM_MDOC}#"
+	echo "s#Xr mdoc 7#Xr ${MANM_MDOC} 7#"
+fi
+if [ "X${MANM_ROFF}" != "Xroff" ]; then
+	echo "s#Nm roff#Nm ${MANM_ROFF}#"
+	echo "s#Xr roff 7#Xr ${MANM_ROFF} 7#"
+fi
+if [ "X${MANM_TBL}" != "Xtbl" ]; then
+	echo "s#Nm tbl#Nm ${MANM_TBL}#"
+	echo "s#Xr tbl 7#Xr ${MANM_TBL} 7#"
+fi
+if [ "X${MISCDIR}" != "X/usr/share/misc" ]; then
+	echo "s#/usr/share/misc/#${MISCDIR}/#"
+fi
+
+echo "file config.sed: written" 1>&2
+echo "file config.sed: written" 1>&3
+
 exit 0

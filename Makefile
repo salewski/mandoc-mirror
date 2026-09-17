@@ -332,6 +332,23 @@ MANDOCD_OBJS	 = $(MANDOC_HTML_OBJS) \
 
 DEMANDOC_OBJS	 = demandoc.o
 
+EDIT_MANS	 = apropos.1.edited \
+		   demandoc.1.edited \
+		   man.1.edited \
+		   mandoc.1.edited \
+		   soelim.1.edited \
+		   man.conf.5.edited \
+		   mandoc.db.5.edited \
+		   eqn.7.edited \
+		   man.7.edited \
+		   mandoc_char.7.edited \
+		   mdoc.7.edited \
+		   roff.7.edited \
+		   tbl.7.edited \
+		   catman.8.edited \
+		   makewhatis.8.edited \
+		   mandocd.8.edited
+
 WWW_MANS	 = apropos.1.html \
 		   demandoc.1.html \
 		   man.1.html \
@@ -381,11 +398,13 @@ include Makefile.local
 
 # === DEPENDENCY HANDLING ==============================================
 
-all: mandoc man demandoc soelim $(BUILD_TARGETS) Makefile.local
+all: mandoc man demandoc soelim $(BUILD_TARGETS) ${EDIT_MANS} Makefile.local
 
 install: base-install $(INSTALL_TARGETS)
 
 www: $(WWW_MANS) $(WWW_INCS)
+
+${EDIT_MANS}: config.sed
 
 $(WWW_MANS) $(WWW_INCS): mandoc
 
@@ -406,6 +425,7 @@ clean:
 	rm -f mandocd catman catman.o $(MANDOCD_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
 	rm -f soelim soelim.o
+	rm -f ${EDIT_MANS}
 	rm -f $(WWW_MANS) $(WWW_INCS) mandoc*.tar.gz mandoc*.sha256
 	rm -f Makefile.tmp1 Makefile.tmp2
 	rm -rf *.dSYM
@@ -425,20 +445,25 @@ base-install: mandoc demandoc soelim
 	cd $(DESTDIR)$(BINDIR) && $(LN) mandoc $(BINM_WHATIS)
 	cd $(DESTDIR)$(SBINDIR) && \
 		$(LN) ${BIN_FROM_SBIN}/mandoc $(BINM_MAKEWHATIS)
-	$(INSTALL_MAN) mandoc.1 demandoc.1 $(DESTDIR)$(MANDIR)/man1
-	$(INSTALL_MAN) soelim.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_SOELIM).1
-	$(INSTALL_MAN) man.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_MAN).1
-	$(INSTALL_MAN) apropos.1 $(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1
+	$(INSTALL_MAN) mandoc.1.edited $(DESTDIR)$(MANDIR)/man1/mandoc.1
+	$(INSTALL_MAN) demandoc.1.edited $(DESTDIR)$(MANDIR)/man1/demandoc.1
+	$(INSTALL_MAN) soelim.1.edited \
+		$(DESTDIR)$(MANDIR)/man1/$(BINM_SOELIM).1
+	$(INSTALL_MAN) man.1.edited  $(DESTDIR)$(MANDIR)/man1/$(BINM_MAN).1
+	$(INSTALL_MAN) apropos.1.edited \
+		$(DESTDIR)$(MANDIR)/man1/$(BINM_APROPOS).1
 	cd $(DESTDIR)$(MANDIR)/man1 && $(LN) $(BINM_APROPOS).1 $(BINM_WHATIS).1
-	$(INSTALL_MAN) man.conf.5 $(DESTDIR)$(MANDIR)/man5/$(MANM_MANCONF).5
-	$(INSTALL_MAN) mandoc.db.5 $(DESTDIR)$(MANDIR)/man5
-	$(INSTALL_MAN) man.7 $(DESTDIR)$(MANDIR)/man7/$(MANM_MAN).7
-	$(INSTALL_MAN) mdoc.7 $(DESTDIR)$(MANDIR)/man7/$(MANM_MDOC).7
-	$(INSTALL_MAN) roff.7 $(DESTDIR)$(MANDIR)/man7/$(MANM_ROFF).7
-	$(INSTALL_MAN) eqn.7 $(DESTDIR)$(MANDIR)/man7/$(MANM_EQN).7
-	$(INSTALL_MAN) tbl.7 $(DESTDIR)$(MANDIR)/man7/$(MANM_TBL).7
-	$(INSTALL_MAN) mandoc_char.7 $(DESTDIR)$(MANDIR)/man7
-	$(INSTALL_MAN) makewhatis.8 \
+	$(INSTALL_MAN) man.conf.5.edited \
+		$(DESTDIR)$(MANDIR)/man5/$(MANM_MANCONF).5
+	$(INSTALL_MAN) mandoc.db.5.edited $(DESTDIR)$(MANDIR)/man5/mandoc.db.5
+	$(INSTALL_MAN) man.7.edited $(DESTDIR)$(MANDIR)/man7/$(MANM_MAN).7
+	$(INSTALL_MAN) mdoc.7.edited $(DESTDIR)$(MANDIR)/man7/$(MANM_MDOC).7
+	$(INSTALL_MAN) roff.7.edited $(DESTDIR)$(MANDIR)/man7/$(MANM_ROFF).7
+	$(INSTALL_MAN) eqn.7.edited $(DESTDIR)$(MANDIR)/man7/$(MANM_EQN).7
+	$(INSTALL_MAN) tbl.7.edited $(DESTDIR)$(MANDIR)/man7/$(MANM_TBL).7
+	$(INSTALL_MAN) mandoc_char.7.edited \
+		$(DESTDIR)$(MANDIR)/man7/mandoc_char.7
+	$(INSTALL_MAN) makewhatis.8.edited \
 		$(DESTDIR)$(MANDIR)/man8/$(BINM_MAKEWHATIS).8
 	$(INSTALL_DATA) mandoc.css $(DESTDIR)$(MISCDIR)
 
@@ -471,8 +496,8 @@ catman-install: mandocd catman
 	mkdir -p $(DESTDIR)$(MANDIR)/man8
 	$(INSTALL_PROGRAM) mandocd $(DESTDIR)$(SBINDIR)
 	$(INSTALL_PROGRAM) catman $(DESTDIR)$(SBINDIR)/$(BINM_CATMAN)
-	$(INSTALL_MAN) mandocd.8 $(DESTDIR)$(MANDIR)/man8
-	$(INSTALL_MAN) catman.8 $(DESTDIR)$(MANDIR)/man8/$(BINM_CATMAN).8
+	$(INSTALL_MAN) mandocd.8.edited $(DESTDIR)$(MANDIR)/man8/mandocd.8
+	$(INSTALL_MAN) catman.8.edited $(DESTDIR)$(MANDIR)/man8/$(BINM_CATMAN).8
 
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/mandoc
@@ -527,7 +552,7 @@ regress: all
 regress-clean:
 	cd regress && ./regress.pl . clean
 
-Makefile.local config.h: configure $(TESTSRCS)
+Makefile.local config.h config.sed: configure $(TESTSRCS)
 	@echo "$@ is out of date; please run ./configure"
 	@exit 1
 
@@ -558,6 +583,12 @@ demandoc: $(DEMANDOC_OBJS) $(LIBMANDOC_DEPS)
 
 soelim: $(SOELIM_COBJS) soelim.o
 	$(CC) -o $@ $(LDFLAGS) $(SOELIM_COBJS) soelim.o
+
+man.1.edited: man.1 config.sed
+	sed -f config.sed -e "s#Nm man#Nm ${BINM_MAN}#" man.1 > $@
+
+man.7.edited: man.7 config.sed
+	sed -f config.sed -e "s#Nm man#Nm ${MANM_MAN}#" man.7 > $@
 
 # --- maintainer targets ---
 
@@ -620,8 +651,9 @@ dist-install: dist
 
 # === SUFFIX RULES =====================================================
 
-.SUFFIXES:	 .1       .3       .5       .7       .8       .h
-.SUFFIXES:	 .1.html  .3.html  .5.html  .7.html  .8.html  .h.html
+.SUFFIXES: .1        .3        .5        .7        .8        .h
+.SUFFIXES: .1.html   .3.html   .5.html   .7.html   .8.html   .h.html
+.SUFFIXES: .1.edited           .5.edited .7.edited .8.edited
 
 .h.h.html:
 	highlight -I $< > $@
@@ -630,3 +662,6 @@ dist-install: dist
 	./mandoc -Thtml -Wwarning,stop \
 		-O 'style=/mandoc.css,man=/man/%N.%S.html;https://man.openbsd.org/%N.%S,includes=/includes/%I.html' \
 		$< > $@
+
+.1.1.edited .5.5.edited .7.7.edited .8.8.edited:
+	sed -f config.sed $< > $@

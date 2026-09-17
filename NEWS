@@ -60,6 +60,8 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * roff(7): do not fail an assertion on \zX\h'-N' at the beginning of a line
  * roff(7): do not fail assertions for certain nested escape sequences
     --- PORTABILITY IMPROVEMENTS ---
+ * on systems that rename or relocate programs or manuals, patch the
+   manuals before installation such that they use the correct names
  * configure: scaffolding to build without unveil(2) when unavailable
  * configure: support TEST_EXECUTION=0 for use in cross compilation
  * man.conf(5): make ETCDIR configurable, for systems unable to access /etc
