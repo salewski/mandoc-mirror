@@ -31,9 +31,9 @@ The
 utility assumes that all files below
 .Ar srcdir
 are manual pages in
-.Xr mdoc 7
+.Xr  mdoc 7
 and
-.Xr man 7
+.Xr  man 7
 format and formats all of them, storing the formatted versions in
 the same relative paths below
 .Ar dstdir .
@@ -48,10 +48,10 @@ The options are as follows:
 Override the default operating system
 .Ar name
 for the
-.Xr mdoc 7
+.Xr  mdoc 7
 .Ic \&Os
 and for the
-.Xr man 7
+.Xr  man 7
 .Ic TH
 macro.
 .It Fl T Ar output
@@ -94,7 +94,7 @@ overhead and uses the much faster
 parsers and formatters rather than
 .Sy groff ,
 it may be about one order of magnitude faster than other
-.Nm
+.Nm  catman
 implementations.
 .Sh EXIT STATUS
 .Ex -std
@@ -307,7 +307,7 @@ has accepted them all or until an error occurs.
 .Xr mandocd 8
 .Sh HISTORY
 A
-.Nm
+.Nm  catman
 utility first appeared in
 .Fx 1.0 .
 Other, incompatible implementations appeared in
@@ -321,7 +321,7 @@ toolkit.
 .Sh AUTHORS
 .An -nosplit
 The first
-.Nm
+.Nm  catman
 implementation was a short shell script by
 .An Christoph Robitschko
 in July 1993.
@@ -354,7 +354,7 @@ Option and argument handling and directory iteration was added by
 .An Ingo Schwarze Aq Mt schwarze@openbsd.org .
 .Sh CAVEATS
 All versions of
-.Nm
+.Nm  catman
 are incompatible with each other because each caters to the needs
 of a specific operating system, for example regarding directory
 structures and file naming conventions.
