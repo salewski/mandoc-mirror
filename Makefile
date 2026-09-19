@@ -147,6 +147,7 @@ DISTFILES	 = INSTALL \
 		   LICENSE \
 		   Makefile \
 		   Makefile.depend \
+		   Makefile.local \
 		   NEWS \
 		   TODO \
 		   apropos.1 \
@@ -398,7 +399,7 @@ include Makefile.local
 
 # === DEPENDENCY HANDLING ==============================================
 
-all: mandoc man demandoc soelim $(BUILD_TARGETS) ${EDIT_MANS} Makefile.local
+all: mandoc man demandoc soelim $(BUILD_TARGETS) ${EDIT_MANS}
 
 install: base-install $(INSTALL_TARGETS)
 
@@ -409,14 +410,18 @@ ${EDIT_MANS}: config.sed
 $(WWW_MANS) $(WWW_INCS): mandoc
 
 .PHONY: base-install cgi-install install www-install
-.PHONY: clean distclean depend
+.PHONY: ChangeLog clean distclean depend
 
 include Makefile.depend
 
 # === TARGETS CONTAINING SHELL COMMANDS ================================
 
 distclean: clean
-	rm -f Makefile.local config.h config.h.old config.log config.log.old
+	rm -f Makefile.local
+	touch Makefile.local
+	rm -f config.h config.h.old
+	rm -f config.log config.log.old
+	rm -f config.sed
 
 clean:
 	rm -f libmandoc.a libmandoc.so $(LIBMANDOC_OBJS) $(ALL_COBJS)
@@ -597,6 +602,11 @@ www-install: www
 	$(INSTALL_DATA) $(WWW_MANS) $(HTDOCDIR)/man
 	$(INSTALL_DATA) $(WWW_INCS) $(HTDOCDIR)/includes
 
+ChangeLog:
+	mv ChangeLog ChangeLog.bak
+	cvs2cl -T --summary --stdout --utc | sed 's/;  commitid:.*//' > $@
+	diff -u ChangeLog.bak ChangeLog | less
+
 depend: config.h
 	./configure -depend
 	mkdep -f Makefile.tmp1 $(CFLAGS) $(SRCS)
@@ -626,6 +636,7 @@ regress-distcheck:
 		! -name '*.out_html' \
 		! -name '*.out_markdown' \
 		! -name '*.out_lint' \
+		! -name '*.out_tag' \
 		! -path regress/regress.pl \
 		! -path regress/regress.pl.1
 
