@@ -147,7 +147,6 @@ DISTFILES	 = INSTALL \
 		   LICENSE \
 		   Makefile \
 		   Makefile.depend \
-		   Makefile.local \
 		   NEWS \
 		   TODO \
 		   apropos.1 \
@@ -331,7 +330,20 @@ MANDOCD_OBJS	 = $(MANDOC_HTML_OBJS) \
 		   mandocd.o \
 		   out.o
 
+CATMAN_OBJS	 = catman.o
+
 DEMANDOC_OBJS	 = demandoc.o
+
+SOELIM_OBJS	 = soelim.o
+
+ALL_OBJS	 = ${LIBMANDOC_OBJS} \
+		   ${ALL_COBJS} \
+		   ${MAIN_OBJS} \
+		   cgi.o \
+		   mandocd.o \
+		   catman.o \
+		   demandoc.o \
+		   soelim.o
 
 EDIT_MANS	 = apropos.1.edited \
 		   demandoc.1.edited \
@@ -395,7 +407,7 @@ WWW_INCS	 = eqn.h.html \
 
 # === USER CONFIGURATION ===============================================
 
-include Makefile.local
+-include Makefile.local
 
 # === DEPENDENCY HANDLING ==============================================
 
@@ -404,6 +416,8 @@ all: mandoc man demandoc soelim $(BUILD_TARGETS) ${EDIT_MANS}
 install: base-install $(INSTALL_TARGETS)
 
 www: $(WWW_MANS) $(WWW_INCS)
+
+$(ALL_OBJS): Makefile.local config.h
 
 ${EDIT_MANS}: config.sed
 
@@ -418,7 +432,6 @@ include Makefile.depend
 
 distclean: clean
 	rm -f Makefile.local
-	touch Makefile.local
 	rm -f config.h config.h.old
 	rm -f config.log config.log.old
 	rm -f config.sed
@@ -427,9 +440,10 @@ clean:
 	rm -f libmandoc.a libmandoc.so $(LIBMANDOC_OBJS) $(ALL_COBJS)
 	rm -f mandoc man $(MAIN_OBJS)
 	rm -f man.cgi $(CGI_OBJS)
-	rm -f mandocd catman catman.o $(MANDOCD_OBJS)
+	rm -f mandocd $(MANDOCD_OBJS)
+	rm -f catman $(CATMAN_OBJS)
 	rm -f demandoc $(DEMANDOC_OBJS)
-	rm -f soelim soelim.o
+	rm -f soelim $(SOELIM_OBJS)
 	rm -f ${EDIT_MANS}
 	rm -f $(WWW_MANS) $(WWW_INCS) mandoc*.tar.gz mandoc*.sha256
 	rm -f Makefile.tmp1 Makefile.tmp2
@@ -580,14 +594,14 @@ man.cgi: $(CGI_OBJS) libmandoc.a
 mandocd: $(MANDOCD_OBJS) $(LIBMANDOC_DEPS)
 	$(CC) -o $@ $(LDFLAGS) $(MANDOCD_OBJS) -L. -lmandoc $(LDADD)
 
-catman: catman.o $(LIBMANDOC_DEPS)
-	$(CC) -o $@ $(LDFLAGS) catman.o -L. -lmandoc $(LDADD)
+catman: $(CATMAN_OBJS) $(LIBMANDOC_DEPS)
+	$(CC) -o $@ $(LDFLAGS) $(CATMAN_OBJS) -L. -lmandoc $(LDADD)
 
 demandoc: $(DEMANDOC_OBJS) $(LIBMANDOC_DEPS)
 	$(CC) -o $@ $(LDFLAGS) $(DEMANDOC_OBJS) -L. -lmandoc $(LDADD)
 
-soelim: $(SOELIM_COBJS) soelim.o
-	$(CC) -o $@ $(LDFLAGS) $(SOELIM_COBJS) soelim.o
+soelim: $(SOELIM_OBJS) $(SOELIM_COBJS)
+	$(CC) -o $@ $(LDFLAGS) $(SOELIM_OBJS) $(SOELIM_COBJS)
 
 man.1.edited: man.1 config.sed
 	sed -f config.sed -e "s#Nm man#Nm ${BINM_MAN}#" man.1 > $@
