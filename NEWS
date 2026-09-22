@@ -151,6 +151,8 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * Paul de Weerd (OpenBSD) for two bug reports
  * Alexander Bluhm (OpenBSD) for a bug report and
    for access to an arm64 machine for debugging
+ * Alexander Ziaee (FreeBSD) for a portability bug report,
+   a code style suggestion, and three documentation improvements
  * Xose Vazquez Perez (Fedora) for a portability bug report
    and for suggesting three code style improvements
  * Omar Polo (OpenBSD) for a portability bug report
@@ -163,8 +165,6 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * Marc Espie (OpenBSD) for supervising a small fuzzing and auditing project
  * Soeren Tempel (Alpine Linux) for useful discussions
  * Jason McIntyre (OpenBSD) for minor documentation and CSS improvements
- * Alexander Ziaee (FreeBSD) for a code style suggestion and
-   for two minor documentation improvements
  * Klemens Nanni (OpenBSD), Nick Briggs (FreeBSD),
    Anders Damsgaard, James K. Lowden, and Paul A. Patience
    for one minor documentation improvement each
@@ -356,7 +356,8 @@ Changes in version 1.14.6, released on September 23, 2021
    and for checking groff patches
  * Matej Cepl (SUSE Linux), Matthew Martin, Steffen Nurpmeso,
    and Tim Baumgard for suggesting a feature impovement
- * Christos Zoulas (NetBSD) for a report regarding portability
+ * Lexi Winter (FreeBSD) and Christos Zoulas (NetBSD)
+   for one report regarding portability each
  * Daniel Dickman (OpenBSD) for suggesting a portability improvement
  * Werner Lemberg (GNU troff) and Douglas McIlroy
    for reporting bugs in manual pages
