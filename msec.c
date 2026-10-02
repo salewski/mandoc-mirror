@@ -1,5 +1,6 @@
-/*	$Id$ */
+/* $Id$ */
 /*
+ * Copyright (c) 2026 Ingo Schwarze <schwarze@openbsd.org>
  * Copyright (c) 2009 Kristaps Dzonsons <kristaps@bsd.lv>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -27,8 +28,26 @@
 #define LINE(x, y) \
 	if (0 == strcmp(p, x)) return(y);
 
+static const char	*a2msec_internal(const char *);
+
+
 const char *
-mandoc_a2msec(const char *p)
+mandoc_a2msec(const char *sec_full)
+{
+	const char	*vol_title;
+	char		 sec_short[2];
+
+	vol_title = a2msec_internal(sec_full);
+	if (vol_title == NULL) {
+		sec_short[0] = sec_full[0];
+		sec_short[1] = '\0';
+		vol_title = a2msec_internal(sec_short);
+	}
+	return vol_title;
+}
+
+static const char *
+a2msec_internal(const char *p)
 {
 
 #include "msec.in"
