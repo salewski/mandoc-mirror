@@ -403,6 +403,9 @@ are mere guesses, and some may be wrong.
 - look at http://www.snake.net/software/troffcvt/  (troff to HTML)
   mentioned by Oliver Corff  22 Jan 2021 01:36:49 +0100
 
+- look at https://github.com/faelys/libsoldout/blob/trunk/mkd2man.c
+  mentioned by Svyatoslav Mishyn  17 Nov 2015 11:12:03 +0200
+
 
 ************************************************************************
 * formatting issues: ugly output
@@ -668,6 +671,12 @@ are mere guesses, and some may be wrong.
     operate in batch mode
   in dig(1).
   loc **  exist **  algo **  size *  imp **
+
+- In mandoc(1), a tbl(7) right after .ti cause the indentation to take
+  effect not only for the table, but also for the entire paragraph
+  after the table.  In groff-1.25.0rc2, the tbl(1) code emits .ce
+  and consequently cancels .ti, never letting it take effect.
+  https://savannah.gnu.org/bugs/index.php?item_id=68696
 
 ************************************************************************
 * warning issues
