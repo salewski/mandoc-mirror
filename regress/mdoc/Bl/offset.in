@@ -1,4 +1,4 @@
-.\" $OpenBSD: offset.in,v 1.5 2017/07/04 14:53:24 schwarze Exp $
+.\" $OpenBSD: offset.in,v 1.6 2026/10/03 14:20:33 schwarze Exp $
 .Dd $Mdocdate$
 .Dt BL-OFFSET 1
 .Os
@@ -29,6 +29,10 @@ Bl item offset 4n
 .Bl -item -offset mystring
 .It
 Bl item offset mystring
+.El
+.Bl -item -offset ".No s"
+.It
+Bl item offset with macro
 .El
 .Bl -item -offset Ds
 .It
