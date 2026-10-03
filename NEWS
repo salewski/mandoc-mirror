@@ -135,6 +135,7 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * Jonathan Gray (OpenBSD) for a small patch, two bug reports,
    and several minor documentation improvements
  * Hippolyte d'Oncieu de la Batie (EPITA) for two bug fix patches
+ * Eric van Gyzen (FreeBSD) for a source code patch
  * classabbyamp (Void Linux) for two man.cgi(8) patches
  * Duncan Overbruck (Void Linux) for a man.cgi(8) patch
  * Natanael Copa (Alpine Linux) for a portability patch
@@ -156,10 +157,10 @@ Changes in the upcoming version 1.15.1, to be released in 2026
  * Xose Vazquez Perez (Fedora) for a portability bug report
    and for suggesting three code style improvements
  * Omar Polo (OpenBSD) for a portability bug report
- * Baptiste Daroussin, Eric van Gyzen, Mark Johnson, Stefan Esser,
-   Trond Endrestol, and Wolfram Schneider (FreeBSD),
-   Lennart Jablonka, Luca Del Re, and Paul Bredbury (Alpine Linux),
-   Robert Kirkman (Termux), Eldred Habert, Jan Schreiber, Josiah Frentsos,
+ * Baptiste Daroussin, Mark Johnson, Stefan Esser, Trond Endrestol, and
+   Wolfram Schneider (FreeBSD), Lennart Jablonka, Luca Del Re, and
+   Paul Bredbury (Alpine Linux), Robert Kirkman (Termux), Eldred Habert,
+   Franco Fichtner, Jan Schreiber, Joel Dahn, Josiah Frentsos,
    Mohamed Akram, and Ted Bullock for one bug report each
  * Joshua Kahn (Termux) for a portability suggestion
  * Marc Espie (OpenBSD) for supervising a small fuzzing and auditing project

@@ -197,6 +197,27 @@ are mere guesses, and some may be wrong.
   is not safe, e.g. `.Bl -column .It Pf a b .' gives "ab."
   but should give "ab ."
 
+- If a .Bl -column argument starts with a dot and a macro name,
+  groff(1) sets the argument in a .box, executing the macro,
+  and measures the width of the box.
+  reported via wiz@ 5 Mar 2012 00:33:34 +0100 by Nicolas Joly 1 Mar
+  reported again via bapt@ 17 Feb 2017 21:22:44 +0100 by Bruce Evans 
+  loc ***  exist ***  algo ***  size **  imp ***
+  An easy partial fix would be to use the partial fix
+  from mdoc_validate.c rewrite_macro2len() 3 Oct 2026
+  loc *  exist *  algo *  size *  imp ***
+
+- If a .Bl -width argument starts with a dot and a macro name,
+  groff(1) sets the argument in a .box, executing the macro,
+  and measures the width of the box.
+  reported by Franco Fichtner Fri, 27 Sep 2013 21:02:28 +0200
+  reported again by nabijaczleweli 5 Jun 2022 18:16:35 +0200
+  even groff_mdoc(7) uses this: Nab Sun, 5 Jun 2022 22:16:37 +0200
+  When implementing this, try to avoid breaking existing manuals,
+  or at least fix them: Jan Stary Sun, 5 Jun 2022 22:48:05 +0200
+  partially fixed in mdoc_validate.c rewrite_macro2len() 3 Oct 2026
+  loc ***  exist ***  algo ***  size **  imp *
+
 - prohibit `Nm' from having non-text HEAD children
   (e.g., NetBSD mDNSShared/dns-sd.1)
   (mdoc_html.c and mdoc_term.c `Nm' handlers can be slightly simplified)
@@ -632,24 +653,6 @@ are mere guesses, and some may be wrong.
   reported by Nicolas Joly  Sat, 17 Nov 2012 11:49:54 +0100
   Probably, this should be fixed somewhere in termp_it_pre(), not sure.
   loc *  exist **  algo **  size *  imp **
-
-- When the -width string contains macros, the macros must be rendered
-  before measuring the width, for example
-    .Bl -tag -width ".Dv message"
-  in magic(5), located in src/usr.bin/file, is the same
-  as -width 7n, not -width 11n.
-  The same applies to .Bl -column column widths;
-  reported again by Nicolas Joly Thu, 1 Mar 2012 13:41:26 +0100 via wiz@ 5 Mar
-  reported again by Franco Fichtner Fri, 27 Sep 2013 21:02:28 +0200
-  reported again by Bruce Evans Fri, 17 Feb 2017 21:22:44 +0100 via bapt@
-  https://reviews.freebsd.org/D35245
-  even groff_mdoc(7) uses this: Nab Sun, 5 Jun 2022 22:16:37 +0200
-  When implementing this, try to avoid breaking existing manuals,
-  or at least fix them: Jan Stary Sun, 5 Jun 2022 22:48:05 +0200
-  loc ***  exist ***  algo ***  size **  imp ***
-  An easy partial fix would be to just skip the first word if it starts
-  with a dot, including any following white space, when measuring.
-  loc *  exist *  algo *  size *  imp ***
 
 - The \& zero-width character counts as output.
   That is, when it is alone on a line between two .Pp,
