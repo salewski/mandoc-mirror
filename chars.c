@@ -49,7 +49,7 @@ static struct ln lines[] = {
 	{ " ",			ascii_nbrsp,	0x00a0	},
 	{ "~",			ascii_nbrsp,	0x00a0	},
 	{ "0",			ascii_nbrsp,	0x00a0	},
-	{ ":",			ascii_break,	0	},
+	{ ":",			ascii_break,	0x200b	},
 
 	/* Lines. */
 	{ "ba",			"|",		0x007c	},
