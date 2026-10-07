@@ -617,7 +617,9 @@ term_word(struct termp *p, const char *word)
 			bufferc(p, ASCII_NBRZW);
 			continue;
 		case ESCAPE_SPECIAL:
-			if (p->enc == TERMENC_ASCII) {
+			if (*seq == ':' && sz == 1)
+				bufferc(p, ASCII_BREAK);
+			else if (p->enc == TERMENC_ASCII) {
 				cp = mchars_spec2str(seq, sz, &ssz);
 				if (cp != NULL)
 					encode(p, cp, ssz);
