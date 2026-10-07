@@ -726,7 +726,7 @@ term_word(struct termp *p, const char *word)
 				lsz = p->tcol->rmargin - p->tcol->offset;
 			} else
 				lsz = bu;
-			if (*cp == seq[-1])
+			if (cp == seq + sz)
 				uc = -1;
 			else if (*cp == '\\') {
 				seq = cp + 1;
